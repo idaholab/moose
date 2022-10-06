@@ -227,6 +227,7 @@ public:
   //////////////////////////////// Nodal stuff ///////////////////////////////////////////
 
   bool isNodal() const override { return _is_nodal; }
+  bool hasDoFsOnNodes() const override { return _continuity != DISCONTINUOUS; }
   const Node * const & node() const { return _node; }
   const dof_id_type & nodalDofIndex() const { return _nodal_dof_index; }
   bool isNodalDefined() const { return _has_dof_indices; }
