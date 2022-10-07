@@ -1,0 +1,10 @@
+[Tests]
+    issues = '#22327'
+    [./test]
+        type = 'Exodiff'
+        input = 'vector_ad_neumann_bc.i'
+        exodiff = 'vector_ad_neumann_bc_out.e'
+        requirement = 'We shall be able to produce the expected result using ADIntegratedBC'
+        design = 'ADVectorFunctionNeumannBC.md'
+    [../]
+[]
