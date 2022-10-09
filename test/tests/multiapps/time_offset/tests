@@ -7,5 +7,16 @@
     issues = '#12755'
     requirement = "The system shall support a time offset between the parent and a subapp when using the Multiapp system."
     design = "TransientMultiApp.md"
+
+    # An offset between the two times is deliberately introduced, triggering the synchronization check warning
+    allow_warnings = true
+  []
+  [warning]
+    type = RunException
+    input = parent.i
+    expect_err = 'The target time \(time a multiapp must reach at the end of the time step\) is desynchronized between this app and subapp 0'
+    issues = '#22338'
+    requirement = "The system shall issue a warning if the parent app and the child app time become de-synchronized, except when using sub-cycling or resetting mechanisms which naturally handle or create desynchronization"
+    design = "TransientMultiApp.md"
   []
 []

@@ -217,6 +217,25 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
           (ex->getTime() >= ex->endTime()))
         continue;
 
+      // Examine global time synchronization
+      if (!_sub_cycling && !_reset_happened)
+      {
+        // The multi-app general offset is substracted to go into local time.
+        if (std::abs(target_time - _app.getGlobalTimeOffset() - ex->getTime() - dt) >
+            ex->timestepTol())
+          mooseDoOnce(mooseWarning(
+              "The target time (time a multiapp must reach at the end of the time step) "
+              "is desynchronized between this app and subapp ",
+              i,
+              ".\n If this is desired: use the 'global_time_offset' multiapp parameter to "
+              "declare a constant offset\n"
+              "If the apps should (eventually) be synchronized in time, please either: \n"
+              "  - match the 'start_time' in the main app and the multiapp, in the Executioner "
+              "block\n"
+              "  - set 'sub_cycling' to true in the multiapp parameters\n"
+              "This message will only print once for all apps and all time steps."));
+      }
+
       if (_sub_cycling)
       {
         Real time_old = ex->getTime() + app_time_offset;
@@ -431,7 +450,8 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
                 if (ex->lastSolveConverged())
                 {
                   catch_up_time += catch_up_dt;
-                  if (std::abs(catch_up_time - dt) < (1 + std::abs(ex->getTime())) * ex->timestepTol())
+                  if (std::abs(catch_up_time - dt) <
+                      (1 + std::abs(ex->getTime())) * ex->timestepTol())
                   {
                     problem.outputStep(EXEC_FORCED);
                     caught_up = true;
