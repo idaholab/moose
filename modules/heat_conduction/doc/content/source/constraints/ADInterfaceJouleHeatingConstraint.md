@@ -9,8 +9,8 @@ The heat source is then added to the temperature field variable  in a coupled el
 This class is intended to be used in conjunction with [ModularGapConductanceConstraint](ModularGapConductanceConstraint.md) and [GapFluxModelPressureDependentConduction](GapFluxModelPressureDependentConduction.md), which enforce the closed gap interface requirement by checking for a postive normal pressure.
 As such, the `ADInterfaceJouleHeatingConstraint` takes as a required argument the name of the Lagrange Multiplier variable used in the electrical contact.
 
-!alert note title=Closed Gap Interface Assumed by this Class
-The `ADInterfaceJouleHeatingConstraint` class should only be employed in simulations when the user is certain that electric potential flux is nonzero only when the interface gap is closed. This class may also be used in simulations with an open gap at the interface, so long as the electric potential flux across that gap is zero while the interface gap is open.
+!alert note title=Employ Consistency in Primary and Secondary Designations
+Consistency in the selection of the primary boundary and secondary boundary among the electrical, thermal, and interface Joule Heating mortar contact input file compoments is recommended.
 
 The heat source is calculated as a function of the electric potential change across the interface, as determined from the associated Lagrange multiplier $\lambda_{\phi}$,
 \begin{equation}
@@ -37,8 +37,8 @@ In base SI units this Lagrange multiplier variable has the units $\left[ \frac{A
 where $J$ is the current density, $\sigma$ is the electrical conductivity, and $E$ is the electric field.
 
 
-!alert note title=Employ Consistency in Primary and Secondary Designations
-Consistency in the selection of the primary boundary and secondary boundary among the electrical, thermal, and interface Joule Heating mortar contact input file compoments is recommended.
+!alert note title=Closed Gap Interface Assumed by this Class
+The `ADInterfaceJouleHeatingConstraint` class should only be employed in simulations when the user is certain that the current-density-like electric potential contact Lagrange multiplier variable is nonzero only when the interface gap is closed. The `ADInterfaceJouleHeatingConstraint` class may also be used in simulations with an open gap at the interface, so long as the electric potential contact Lagrange multiplier variable across that gap is zero while the interface gap is open.
 
 With the total interface Joule heating source determined, the fraction of the heat source applied to each block at the interface is determined as
 \begin{equation}

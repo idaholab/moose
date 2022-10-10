@@ -39,7 +39,7 @@
       cli_args = "Mesh/allow_renumbering=false"
       detail = " that, when the blocks at the interface have different material properties, is "
                "different in each material while the Joule heating source into each block is "
-               "equivalent from the common electric potential flux across the interface."
+               "equivalent from the common electric potential drop across the interface."
     []
     [constraint_joule_heating_dual_material]
       type = CSVDiff
