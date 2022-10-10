@@ -51,8 +51,8 @@ public:
   DisplacedSystem & nlSys(unsigned int sys_num = 0);
   DisplacedSystem & auxSys() { return *_displaced_aux; }
 
-  virtual const SystemBase & systemBaseNonlinear(unsigned int sys_num) const override;
-  virtual SystemBase & systemBaseNonlinear(unsigned int sys_num) override;
+  virtual const SystemBase & systemBaseNonlinear(unsigned int sys_num = 0) const override;
+  virtual SystemBase & systemBaseNonlinear(unsigned int sys_num = 0) override;
 
   virtual const SystemBase & systemBaseAuxiliary() const override { return *_displaced_aux; }
   virtual SystemBase & systemBaseAuxiliary() override { return *_displaced_aux; }
@@ -293,8 +293,8 @@ public:
   virtual void prepareFaceShapes(unsigned int var, THREAD_ID tid) override;
   virtual void prepareNeighborShapes(unsigned int var, THREAD_ID tid) override;
 
-  Assembly & assembly(THREAD_ID tid, unsigned int nl_sys_num) override;
-  const Assembly & assembly(THREAD_ID tid, unsigned int nl_sys_num) const override;
+  Assembly & assembly(THREAD_ID tid, unsigned int nl_sys_num = 0) override;
+  const Assembly & assembly(THREAD_ID tid, unsigned int nl_sys_num = 0) const override;
 
   // Geom Search /////
   virtual void updateGeomSearch(
@@ -336,7 +336,7 @@ public:
 
   LineSearch * getLineSearch() override;
 
-  const CouplingMatrix * couplingMatrix(unsigned int nl_sys_num) const override;
+  const CouplingMatrix * couplingMatrix(unsigned int nl_sys_num = 0) const override;
 
   bool haveDisplaced() const override final { return true; }
 

@@ -173,7 +173,7 @@ public:
   // DEPRECATED METHOD
   void setCouplingMatrix(CouplingMatrix * cm, unsigned int nl_sys = 0);
 
-  const CouplingMatrix * couplingMatrix(unsigned int nl_sys) const override;
+  const CouplingMatrix * couplingMatrix(unsigned int nl_sys = 0) const override;
 
   /// Set custom coupling matrix for variables requiring nonlocal contribution
   void setNonlocalCouplingMatrix();
@@ -329,8 +329,8 @@ public:
     return _uo_jacobian_moose_vars[tid];
   }
 
-  Assembly & assembly(THREAD_ID tid, unsigned int nl_sys_num) override;
-  const Assembly & assembly(THREAD_ID tid, unsigned int nl_sys_num) const override;
+  Assembly & assembly(THREAD_ID tid, unsigned int nl_sys_num = 0) override;
+  const Assembly & assembly(THREAD_ID tid, unsigned int nl_sys_num = 0) const override;
 
   /**
    * Returns a list of all the variables in the problem (both from the NL and Aux systems.
@@ -598,13 +598,13 @@ public:
   NonlinearSystemBase & currentNonlinearSystem();
   const NonlinearSystemBase & currentNonlinearSystem() const;
 
-  virtual const SystemBase & systemBaseNonlinear(unsigned int sys_num) const override;
-  virtual SystemBase & systemBaseNonlinear(unsigned int sys_num) override;
+  virtual const SystemBase & systemBaseNonlinear(unsigned int sys_num = 0) const override;
+  virtual SystemBase & systemBaseNonlinear(unsigned int sys_num = 0) override;
 
   virtual const SystemBase & systemBaseAuxiliary() const override;
   virtual SystemBase & systemBaseAuxiliary() override;
 
-  virtual NonlinearSystem & getNonlinearSystem(unsigned int sys_num);
+  virtual NonlinearSystem & getNonlinearSystem(unsigned int sys_num = 0);
 
   /**
    * Canonical method for adding a non-linear variable

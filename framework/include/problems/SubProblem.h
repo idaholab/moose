@@ -283,14 +283,14 @@ public:
    */
   virtual void clearActiveElementalMooseVariables(THREAD_ID tid);
 
-  virtual Assembly & assembly(THREAD_ID tid, unsigned int nl_sys_num) = 0;
-  virtual const Assembly & assembly(THREAD_ID tid, unsigned int nl_sys_num) const = 0;
+  virtual Assembly & assembly(THREAD_ID tid, unsigned int nl_sys_num = 0) = 0;
+  virtual const Assembly & assembly(THREAD_ID tid, unsigned int nl_sys_num = 0) const = 0;
 
   /**
    * Return the nonlinear system object as a base class reference given the system number
    */
-  virtual const SystemBase & systemBaseNonlinear(unsigned int sys_num) const = 0;
-  virtual SystemBase & systemBaseNonlinear(unsigned int sys_num) = 0;
+  virtual const SystemBase & systemBaseNonlinear(unsigned int sys_num = 0) const = 0;
+  virtual SystemBase & systemBaseNonlinear(unsigned int sys_num = 0) = 0;
   /**
    * Return the auxiliary system object as a base class reference
    */
@@ -708,7 +708,7 @@ public:
   /**
    * The coupling matrix defining what blocks exist in the preconditioning matrix
    */
-  virtual const CouplingMatrix * couplingMatrix(unsigned int nl_sys_num) const = 0;
+  virtual const CouplingMatrix * couplingMatrix(unsigned int nl_sys_num = 0) const = 0;
 
 private:
   /**
