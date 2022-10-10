@@ -37,8 +37,8 @@ P_out = 4.923e6 # Pa
   compute_power = true
   P_out = ${P_out}
 # Change the defaults
-  implicit = true
-  segregated = false
+  implicit = false
+  segregated = true
   staggered_pressure = false
   monolithic_thermal = false
   # P_tol = 1e-11
