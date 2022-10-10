@@ -162,6 +162,11 @@ ModularGapConductanceConstraint::setGapGeometryParameters(
       gap_geometry_type = GapGeometry::SPHERE;
   }
 
+  if (params.isParamValid("cylinder_axis_point_1") != params.isParamValid("cylinder_axis_point_2"))
+    paramError(
+        "cylinder_axis_point_1",
+        "Either specify both `cylinder_axis_point_1` and `cylinder_axis_point_2` or neither.");
+
   // Check consistency of geometry information
   // Inform the user of needed input according to gap geometry (if not PLATE)
   if (gap_geometry_type == GapGeometry::PLATE)
