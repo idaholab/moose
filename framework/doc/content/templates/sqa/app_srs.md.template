@@ -9,6 +9,21 @@ This document serves as an addendum to [framework_srs.md] and captures informati
 !alert-end!
 !template-end!
 
+!template! item key=system-context
+The {{app}} application is command-line driven. Like [!ac](MOOSE), this is typical for a
+high-performance software that is designed to run across several nodes of a cluster system. As such,
+all usage of the software is through any standard terminal program generally available on all
+supported operating systems. Similarly, for the purpose of interacting through the software, there is
+only a single user, "the user", which interacts with the software through the command-line. {{app}}
+does not maintain any back-end database or interact with any system daemons. It is an executable,
+which may be launched from the command line and writes out various result files as it runs.
+
+!media media/sqa/usage_diagram_uml.svg
+       id=app_usage_diagram
+       caption=Usage of {{app}} and other [!ac](MOOSE)-based applications.
+       style=width:50%;
+!template-end!
+
 !template! item key=system-functions
 Since {{app}} is a command-line driven application, all functionality provided in
 the software is operated through the use of standard UNIX command line flags and the

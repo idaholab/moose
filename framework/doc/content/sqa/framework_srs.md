@@ -213,7 +213,7 @@ teams follow the [!ac](NQA-1) standards.
 !template! item key=packaging
 !! packaging-begin
 No special requirements are needed for packaging or shipping any media containing [!ac](MOOSE) source code. However,
-some [!ac](MOOSE)-based applications maybe be export controlled in which case all export control restrictions must
+some [!ac](MOOSE)-based applications may be export-controlled, in which case all export control restrictions must
 be adhered to when packaging and shipping media.
 !! packaging-finish
 !template-end!

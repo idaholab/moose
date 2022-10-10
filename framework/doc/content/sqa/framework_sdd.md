@@ -180,14 +180,14 @@ every simulation configuration that the framework is capable of running.
 !syntax complete subsystems=False actions=False objects=False
 
 The MooseApp is the top-level object used to hold all of the other objects in a simulation. In a
-normal simulation a single MooseApp object is created and "run()". This object uses it's Factory
+normal simulation a single MooseApp object is created and "run()". This object uses its Factory
 objects to build user defined objects which are stored in a series of Warehouse objects and
 executed. The Finite Element data is stored in the Systems and Assembly object while the domain
 information (the Mesh) is stored in the Mesh object. A series of threaded loops are used to run
 parallel calculations on the objects created and stored within the warehouses.
 
-MOOSE's pluggable systems are documented on the mooseframework.org wiki. Each of these systems has
-set of defined polymorphic interfaces and are designed to accomplish a specific task within the
+MOOSE's pluggable systems are documented on https://mooseframework.inl.gov. Each of these systems
+has a set of defined polymorphic interfaces and are designed to accomplish a specific task within the
 simulation. The design of these systems is fluid and is managed through agile methods and ticket
 request system on the Github.org website.
 !! system-structure-finish
