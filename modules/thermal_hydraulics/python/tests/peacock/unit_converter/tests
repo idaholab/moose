@@ -4,6 +4,7 @@
     input = test_UnitConverterPlugin.py
     separate = True
     display_required = True
+    required_python_packages = PyQt5
   [../]
 
   [./unit_conversion]
