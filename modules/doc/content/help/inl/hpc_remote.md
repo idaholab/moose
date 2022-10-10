@@ -77,7 +77,7 @@ Log in using your HPC id and password, +not+ your RSA token or PIN.
 
 Create your SSH public/private key and install it on GitLab. Instructions for doing so can be found
 on GitLab itself at:
-[https://hpcgitlab.hpc.inl.gov/help/ssh/README](https://hpcgitlab.hpc.inl.gov/help/ssh/README)
+[https://hpcgitlab.hpc.inl.gov/help/user/ssh.md](https://hpcgitlab.hpc.inl.gov/help/user/ssh.md)
 
 ## Request Access
 
