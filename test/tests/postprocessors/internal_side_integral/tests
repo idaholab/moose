@@ -1,0 +1,12 @@
+[Tests]
+  [fe_test]
+    type = 'Exodiff'
+    input = 'internal_side_integral_test.i'
+    exodiff = 'out.e'
+
+    issues = '#20191'
+    design = 'InternalSideIntegralVariablePostprocessor.md'
+    requirement = 'The system shall support computing the integral of a variable quantity over '
+                  'internal sides on the mesh.'
+  []
+[]
