@@ -50,7 +50,7 @@ ifeq ($(METHOD),$(filter $(METHOD), dbg devel))
     $(error It does not make sense to profile with the $(METHOD) method due to assertions. Please unset GPERF_DIR)
 else
     libmesh_CXXFLAGS += -DHAVE_GPERFTOOLS -I$(GPERF_DIR)/include
-    libmesh_LDFLAGS := -L$(GPERF_DIR)/lib -Wl,-rpath,$(GPERF_DIR)/lib -ltcmalloc_and_profiler $(libmesh_LDFLAGS)
+    libmesh_LDFLAGS := -L$(GPERF_DIR)/lib -Wl,-rpath,$(GPERF_DIR)/lib -ltcmalloc_and_profiler $(LDFLAGS) $(libmesh_LDFLAGS)
 endif
 endif
 
