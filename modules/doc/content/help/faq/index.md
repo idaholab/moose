@@ -1,5 +1,6 @@
 # Frequently Asked Questions
 
+- [Why doesn't my solve converge?](application_usage/failed_solves.md)
 - [I don't like Conda. Are there alternatives?](faq_conda_alternatives.md)
 - [Conda commands are not working...](help/troubleshooting.md#condaissues)
 - [I can't build my application or moose.](help/troubleshooting.md#buildissues)
@@ -10,10 +11,3 @@
 - [How do I build my own PETSc?](faq/faq_build_petsc.md)
 - [Where is the stiffness matrix?](help/faq/what_is_fem.md)
 - [How do I execute MOOSE in parallel?](getting_started/examples_and_tutorials/tutorial01_app_development/step07_parallel.md optional=True)
-
-
-### Mailing lists:
-
-- [MOOSE Discussion forum](https://github.com/idaholab/moose/discussions) - Technical Q&A (moderate traffic)
-- [moose-announce@googlegroups.com](https://groups.google.com/forum/#!forum/moose-announce) - Announcements (very light traffic)
-- You can also browse our [old technical Q&A mailing list](https://groups.google.com/forum/#!forum/moose-users).

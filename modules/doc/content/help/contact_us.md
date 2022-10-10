@@ -3,7 +3,7 @@
 ## Help
 
 Please use the [MOOSE Discussion forum](https://github.com/idaholab/moose/discussions) for all
-questions and inquires.
+questions and inquiries.
 
 ## Announcements
 

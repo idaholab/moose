@@ -55,6 +55,7 @@ Extensions:
                 A-to-Z Index: help/a-to-z.md
             Help:
                 Frequently Asked Questions: help/faq/index.md
+                Troubleshooting: help/troubleshooting.md
                 Help Forum: https://github.com/idaholab/moose/discussions
                 Contact Us: help/contact_us.md
             Gallery: /gallery.md
