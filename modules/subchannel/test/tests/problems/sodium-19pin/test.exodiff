@@ -4,19 +4,11 @@ NODAL VARIABLES
 	DP relative 1e-2
 	P relative 1e-2
 	S relative 1e-2
-<<<<<<< HEAD
-	SumWij relative 2.0
-	T relative 2e-2
-	h relative 2e-2
-	mdot relative 3e-1
-	mu relative 2e-2
-=======
 	SumWij relative 1.1
 	T relative 1e-2
 	h relative 1e-2
 	mdot relative 1e-2
 	mu relative 1e-2
->>>>>>> 5da7287 (Fixed implicit segragated calculation of DP for metal solver Ref #67)
 	q_prime relative 1e-2
 	rho relative 1e-2
 	w_perim relative 1e-2
