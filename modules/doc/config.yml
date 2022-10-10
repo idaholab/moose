@@ -57,11 +57,6 @@ Extensions:
                 Frequently Asked Questions: help/faq/index.md
                 Help Forum: https://github.com/idaholab/moose/discussions
                 Contact Us: help/contact_us.md
-            Status:
-                Software Quality: /sqa/index.md
-                Testing Status: https://civet.inl.gov/repo/1/
-                Test Timing: https://mooseframework.org/docs/timing/
-                Code Coverage: http://mooseframework.org/docs/coverage/framework/
             Gallery: /gallery.md
             News: newsletter/index.md
             Citing: citing.md
