@@ -15,6 +15,8 @@
 #include "DisplacedProblem.h"
 #include "MultiApp.h"
 #include "MooseMesh.h"
+#include "UserObject.h"
+#include <optional>
 
 #include "libmesh/parallel_algebra.h"
 #include "libmesh/mesh_tools.h"
