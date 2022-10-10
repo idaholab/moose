@@ -103,6 +103,7 @@ MooseTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_
     registerSyntax("ConvDiffMetaAction", "ConvectionDiffusion");
     registerSyntaxTask("AddAuxVariableAction", "MoreAuxVariables/*", "add_aux_variable");
     registerSyntaxTask("AddLotsOfAuxVariablesAction", "LotsOfAuxVariables/*", "add_variable");
+    registerSyntax("DumpTestAction", "DumpTest/*");
     registerSyntax("ApplyCoupledVariablesTestAction", "ApplyInputParametersTest");
     registerSyntax("AddLotsOfDiffusion", "Testing/LotsOfDiffusion/*");
     registerSyntax("TestGetActionsAction", "TestGetActions");
