@@ -18,6 +18,10 @@ P_out = 2.0e5 # Pa
     hwire = 0.3048
     spacer_z = '0.0'
     spacer_k = '0.0'
+    z_blockage = '0.60325 0.67945'
+    index_blockage = '0 1 2 3 4 5'
+    reduction_blockage = '1 1 1 1 1 1'
+    k_blockage = '0 0 0 0 0 0 '
   []
 []
 
