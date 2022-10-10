@@ -35,10 +35,15 @@ HFEMTrialJump::HFEMTrialJump(const InputParameters & parameters)
 Real
 HFEMTrialJump::computeQpResidual(Moose::DGResidualType type)
 {
+  // Use normal vector at qp 0 to make solution depend on geometry
+  // (well, geometry and quadrature rule, with curved boundaries...)
+  // rather than element numbering
+  const Real sign = (_normals[0] > Point()) ? 1 : -1;
+
   switch (type)
   {
     case Moose::Element:
-      return _test[_i][_qp] * (_interior_neighbor[_qp] - _interior[_qp]);
+      return sign*_test[_i][_qp] * (_interior_neighbor[_qp] - _interior[_qp]);
       break;
 
     case Moose::Neighbor:
@@ -54,16 +59,18 @@ HFEMTrialJump::computeQpOffDiagJacobian(Moose::DGJacobianType type, unsigned int
   if (jvar != _interior_id)
     return 0;
 
+  const Real sign = (_normals[0] > Point()) ? 1 : -1;
+
   switch (type)
   {
     case Moose::ElementElement:
-      return -_test[_i][_qp] * _phi_interior[_j][_qp];
+      return -sign*_test[_i][_qp] * _phi_interior[_j][_qp];
 
     case Moose::NeighborElement:
       return 0;
 
     case Moose::ElementNeighbor:
-      return _test[_i][_qp] * _phi_interior_neighbor[_j][_qp];
+      return sign*_test[_i][_qp] * _phi_interior_neighbor[_j][_qp];
 
     case Moose::NeighborNeighbor:
       return 0;
