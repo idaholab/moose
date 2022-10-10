@@ -52,6 +52,7 @@
       input = 'transient_main.i'
       csvdiff = 'app_begin_transfer_begin.csv app_begin_transfer_begin_sub0_csv.csv'
       cli_args = 'Transfers/left_from_sub/execute_on=timestep_begin Transfers/right_to_sub/execute_on=timestep_begin Outputs/file_base=app_begin_transfer_begin'
+      allow_warnings = true
       detail = 'with the sub-app and the postprocessor transfers executed at the beginning of each time step,'
     []
     [app_begin_transfers_end]

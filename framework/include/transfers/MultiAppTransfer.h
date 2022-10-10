@@ -195,7 +195,8 @@ protected:
    * see StochasticToolsTransfer for an example.
    */
   void checkMultiAppExecuteOn();
-
+  void checkPostProcessorExecuteOn(std::string to_check);
+  void checkAgainstPPExec(std::string to_check, FEProblemBase & problem);
   /**
    * Helper for checking a problem for a variable.
    *
@@ -204,6 +205,7 @@ protected:
    * @param param_name (optional) The input file parameter name for throwing paramError, if not
    *                   provided a mooseError is thrown.
    */
+
   void checkVariable(const FEProblemBase & fe_problem,
                      const VariableName & var_name,
                      const std::string & param_name = "") const;

@@ -24,6 +24,7 @@ public:
 
   MultiAppVectorPostprocessorTransfer(const InputParameters & parameters);
 
+  virtual void initialSetup() override;
   virtual void execute() override;
 
 protected:

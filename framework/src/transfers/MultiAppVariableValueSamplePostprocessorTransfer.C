@@ -153,6 +153,7 @@ MultiAppVariableValueSamplePostprocessorTransfer::initialSetup()
 
   setupPostprocessorCommunication();
   cacheElemToPostprocessorData();
+  checkPostProcessorExecuteOn(_postprocessor_name);
 }
 
 void

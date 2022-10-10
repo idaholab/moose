@@ -173,6 +173,63 @@ MultiAppTransfer::checkMultiAppExecuteOn()
 }
 
 void
+MultiAppTransfer::checkPostProcessorExecuteOn(std::string to_check)
+{
+  const auto multi_app = hasFromMultiApp() ? getFromMultiApp() : getToMultiApp();
+
+  // check subapps
+  for (unsigned int i = 0; i < multi_app->numGlobalApps(); i++)
+  {
+    // If we do not have this app, we skip
+    if (!multi_app->hasLocalApp(i))
+      continue;
+    FEProblemBase & sub_problem = multi_app->appProblemBase(i);
+    checkAgainstPPExec(to_check, sub_problem);
+  }
+
+  // check main app
+  FEProblemBase & master_problem = multi_app->problemBase();
+  checkAgainstPPExec(to_check, master_problem);
+}
+
+void
+MultiAppTransfer::checkAgainstPPExec(std::string to_check, FEProblemBase & problem)
+{
+  // It's possible that the Transfer is going to/from a pp/vpp in a subapp. Therefore, if it doesn't
+  // have the pp/vpp name in this apps problem, return, as this behavior is checked in the subapp
+  // portion of checkPostProcessorExecuteOn.
+  if (!problem.hasUserObject(to_check))
+    return;
+
+  const ExecFlagEnum & object_execute_on = problem.getUserObjectBase(to_check).getExecuteOnEnum();
+  std::optional<ExecFlagEnum> transfer_execute_on =
+      _pars.isParamSetByUser("execute_on") && _pars.isParamValid("execute_on")
+          ? std::optional<ExecFlagEnum>(_pars.get<ExecFlagEnum>("execute_on"))
+          : std::nullopt;
+
+  /* If:
+      1. The pp/vpp does NOT execute on transfer (meaning they match)
+      2. The transfer HAS an execute_on param set
+    Then we check for whether or not the pp/vpp contains a matching execute_on value to the transfer
+  */
+  if (!object_execute_on.contains(EXEC_TRANSFER) && transfer_execute_on)
+  {
+    for (auto eo : transfer_execute_on.value())
+    {
+      // if the problem has a matching execute_on time to the transfer, it is valid, and we are done
+      // here.
+      if (object_execute_on.contains(eo))
+        return;
+      else
+        mooseWarning("The execute_on parameter set in the Transfer should not be different than "
+                     "the execute_on "
+                     "parameter set in the Postprocessor(s)/VectorPostprocessor(s) that are "
+                     "specified for use in the Transfer.");
+    }
+  }
+}
+
+void
 MultiAppTransfer::variableIntegrityCheck(const AuxVariableName & var_name) const
 {
   bool variable_found = false;

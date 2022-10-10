@@ -52,6 +52,13 @@ MultiAppVectorPostprocessorTransfer::MultiAppVectorPostprocessorTransfer(
 }
 
 void
+MultiAppVectorPostprocessorTransfer::initialSetup()
+{
+  checkPostProcessorExecuteOn(_sub_pp_name);
+  checkPostProcessorExecuteOn(_master_vpp_name);
+}
+
+void
 MultiAppVectorPostprocessorTransfer::executeToMultiapp()
 {
   const VectorPostprocessorValue & vpp =

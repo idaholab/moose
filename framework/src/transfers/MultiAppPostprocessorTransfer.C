@@ -61,10 +61,16 @@ MultiAppPostprocessorTransfer::MultiAppPostprocessorTransfer(const InputParamete
 }
 
 void
+MultiAppPostprocessorTransfer::initialSetup()
+{
+  checkPostProcessorExecuteOn(_to_pp_name);
+  checkPostProcessorExecuteOn(_from_pp_name);
+}
+
+void
 MultiAppPostprocessorTransfer::execute()
 {
   TIME_SECTION("MultiAppPostprocessorTransfer::execute()", 5, "Transferring a postprocessor");
-
   switch (_current_direction)
   {
     case BETWEEN_MULTIAPP:
