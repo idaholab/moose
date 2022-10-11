@@ -17,13 +17,13 @@
 /**
  * This class enforces a periodic boundary condition between a microscale and macroscale field.
  * Target example for the Diffusion equation with isotropic, unitary diffusivity. Coupling is
- * made between a scalar macro-gradient variable and the temperature/concentration fieild within
+ * made between a scalar macro-gradient variable and the temperature/concentration field within
  * the periodic domain. Primary and secondary surfaces are on opposing sides of the domain. Only
  * the macro to micro coupling terms are handled here. The micro-micro coupling terms are
  * handled using the PenaltyEqualValueConstraint applied to the same primary/secondary pair.
  *
- * The applied macroscale conjugate gradient is applied as kappa_aux vector as an auxillary
- * scalar. The computed macroscale gradient is equal to this value for isotropic-unitary
+ * The applied macroscale conjugate gradient is applied as `kappa_aux` vector as an auxillary
+ * scalar. The computed macroscale gradient `kappa` is equal to this value for isotropic-unitary
  * diffusivity. The volume integral of the gradient of the primary field will be equal to these
  * imposed values.
  */
