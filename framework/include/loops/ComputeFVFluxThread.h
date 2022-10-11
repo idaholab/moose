@@ -224,6 +224,10 @@ ThreadedFaceLoop<RangeType>::operator()(const RangeType & range, bool bypass_thr
     {
       throw MooseException("We caught a libMesh error");
     }
+    catch (MetaPhysicL::LogicError & e)
+    {
+      moose::translateMetaPhysicLError(e);
+    }
   }
   catch (MooseException & e)
   {

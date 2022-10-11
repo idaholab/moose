@@ -151,11 +151,6 @@ public:
   virtual bool keepGoing() { return true; }
 
 protected:
-  /**
-   * emit a relatively clear error message when we catch a MetaPhysicL logic error
-   */
-  void translateMetaPhysicLError(const MetaPhysicL::LogicError & e);
-
   MooseMesh & _mesh;
   THREAD_ID _tid;
 
@@ -196,19 +191,6 @@ ThreadedElementLoopBase<RangeType>::ThreadedElementLoopBase(ThreadedElementLoopB
 template <typename RangeType>
 ThreadedElementLoopBase<RangeType>::~ThreadedElementLoopBase()
 {
-}
-
-template <typename RangeType>
-void
-ThreadedElementLoopBase<RangeType>::translateMetaPhysicLError(const MetaPhysicL::LogicError &)
-{
-  mooseError(
-      "We caught a MetaPhysicL error in while performing element loops. This is potentially "
-      "due to AD not having a sufficiently large derivative container size. To increase the AD "
-      "container size, you can run configure in the MOOSE root directory with the "
-      "'--with-derivative-size=<n>' option and then recompile. Other causes of MetaPhysicL logic "
-      "errors include evaluating functions where they are not defined or differentiable like sqrt "
-      "(which gets called for vector norm functions) or log with arguments <= 0");
 }
 
 template <typename RangeType>
@@ -298,7 +280,7 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
     }
     catch (MetaPhysicL::LogicError & e)
     {
-      translateMetaPhysicLError(e);
+      moose::translateMetaPhysicLError(e);
     }
   }
   catch (MooseException & e)

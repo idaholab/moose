@@ -154,10 +154,11 @@ FVInterfaceKernel::setupData(const FaceInfo & fi)
   constexpr auto ft_both = FaceInfo::VarFaceNeighbors::BOTH;
   constexpr auto ft_elem = FaceInfo::VarFaceNeighbors::ELEM;
   constexpr auto ft_neigh = FaceInfo::VarFaceNeighbors::NEIGHBOR;
-  mooseAssert(((ft1 == ft_both) && (ft2 == ft_both)) ||
-                  (_elem_is_one && (ft1 == ft_elem) && (ft2 == ft_neigh)) ||
-                  (!_elem_is_one && (ft1 == ft_neigh) && (ft2 == ft_elem)),
-              "Face type was not recognized. Check that the specified boundaries are interfaces.");
+  mooseAssert(
+      (_elem_is_one && (ft1 == ft_elem || ft1 == ft_both) && (ft2 == ft_neigh || ft2 == ft_both)) ||
+          (!_elem_is_one && (ft1 == ft_neigh || ft1 == ft_both) &&
+           (ft2 == ft_elem || ft2 == ft_both)),
+      "Face type was not recognized. Check that the specified boundaries are interfaces.");
 #endif
 }
 

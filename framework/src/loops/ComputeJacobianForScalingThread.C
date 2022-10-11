@@ -71,7 +71,7 @@ ComputeJacobianForScalingThread::operator()(const ConstElemRange & range,
     }
     catch (MetaPhysicL::LogicError & e)
     {
-      translateMetaPhysicLError(e);
+      moose::translateMetaPhysicLError(e);
     }
   }
   catch (MooseException & e)
