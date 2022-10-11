@@ -52,14 +52,10 @@ public:
   virtual void computeJacobian() override;
 
 protected:
-
   /**
    * Method for computing the scalar part of residual at quadrature points
    */
-  virtual Real computeScalarQpResidual()
-  {
-    return 0;
-  }
+  virtual Real computeScalarQpResidual() { return 0; }
 
   /**
    * Method for computing the scalar variable part of Jacobian
@@ -70,30 +66,29 @@ protected:
    * Method for computing the scalar variable part of Jacobian at
    * quadrature points
    */
-  virtual Real computeScalarQpJacobian()
-  {
-    return 0;
-  }
+  virtual Real computeScalarQpJacobian() { return 0; }
 
   /**
    * Method for computing an off-diagonal jacobian component d-_kappa-residual / d-jvar
    */
-  void computeScalarOffDiagJacobian(const Moose::MortarType mortar_type, const unsigned int jvar_num);
+  void computeScalarOffDiagJacobian(const Moose::MortarType mortar_type,
+                                    const unsigned int jvar_num);
 
   /**
    * Method for computing an off-diagonal jacobian component at quadrature points.
    */
-  virtual Real computeScalarQpOffDiagJacobian(const Moose::MortarType /*mortar_type*/, 
+  virtual Real computeScalarQpOffDiagJacobian(const Moose::MortarType /*mortar_type*/,
                                               const unsigned int /*jvar_num*/)
   {
     return 0;
   }
 
   void computeOffDiagJacobianScalar(unsigned int) override final;
-    /**
+  /**
    * Method for computing an off-diagonal jacobian component d-_var-residual / d-scalar
    */
-  void computeOffDiagJacobianScalar(const Moose::MortarType mortar_type, const unsigned int svar_num);
+  void computeOffDiagJacobianScalar(const Moose::MortarType mortar_type,
+                                    const unsigned int svar_num);
 
   /**
    * For coupling scalar variables
@@ -112,10 +107,7 @@ protected:
   /**
    * Method for computing an off-diagonal jacobian component at quadrature points.
    */
-  virtual Real computeScalarQpOffDiagJacobianScalar(const unsigned int /*svar_num*/)
-  {
-    return 0;
-  }
+  virtual Real computeScalarQpOffDiagJacobianScalar(const unsigned int /*svar_num*/) { return 0; }
 
   /**
    * Put necessary evaluations depending on qp but independent of test functions here

@@ -1,4 +1,3 @@
-
 [Mesh]
   [left_block]
     type = GeneratedMeshGenerator
@@ -51,51 +50,51 @@
     new_block_name = 'primary_top'
   []
 
-  [./corner_node]
+  [corner_node]
     type = ExtraNodesetGenerator
     new_boundary = 'pinned_node'
     nodes = '0'
     input = top
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./kappa_x]
+  []
+  [kappa_x]
     order = FIRST
     family = SCALAR
-  [../]
-  [./kappa_y]
+  []
+  [kappa_y]
     order = FIRST
     family = SCALAR
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./kappa_aux]
+  [kappa_aux]
     order = SECOND
     family = SCALAR
-  [../]
+  []
 []
 
 [AuxScalarKernels]
-  [./kappa]
+  [kappa]
     type = FunctionScalarAux
     variable = kappa_aux
     function = '1 3'
     execute_on = initial #timestep_end
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff1]
+  [diff1]
     type = Diffusion
     variable = u
     block = 1
-  [../]
+  []
 []
 
 [Problem]
@@ -104,12 +103,12 @@
 []
 
 [BCs]
-  [./fix_right]
+  [fix_right]
     type = DirichletBC
     variable = u
     boundary = pinned_node
     value = 0
-  [../]
+  []
 []
 
 [Constraints]
@@ -207,8 +206,8 @@
   type = Steady
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
   petsc_options_value = 'lu superlu_dist'
- # petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -mat_view -vec_view'
- # petsc_options_value = 'lu superlu_dist ::ascii_matlab ::ascii_matlab'
+  # petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -mat_view -vec_view'
+  # petsc_options_value = 'lu superlu_dist ::ascii_matlab ::ascii_matlab'
   solve_type = NEWTON
 []
 

@@ -16,8 +16,7 @@ setTestPeriodicSoleParam(const InputParameters & params_in)
 {
   // Reset the scalar_variable parameter to a relevant name for this physics
   InputParameters & ret = const_cast<InputParameters &>(params_in);
-  ret.set<VariableName>("scalar_variable") = {
-      params_in.get<VariableName>("kappa")};
+  ret.set<VariableName>("scalar_variable") = {params_in.get<VariableName>("kappa")};
   return ret;
 }
 }
@@ -81,7 +80,7 @@ TestPeriodicSole::computeQpResidual(const Moose::MortarType mortar_type)
 
   RealVectorValue dx(_phys_points_primary[_qp] - _phys_points_secondary[_qp]);
   Real k1, k2;
-  // ONLY the component for this constraint will contribute here; 
+  // ONLY the component for this constraint will contribute here;
   // other one is handled in the other constraint
   if (_alpha == 0)
   {
@@ -142,7 +141,7 @@ TestPeriodicSole::computeScalarQpResidual()
   r += dx(_alpha) * (_pen_scale * _tau_s) * (kappa_vec * dx);
   r -= dx(_alpha) * (kappa_aux_vec * _normals[_qp]);
 
-  return r ;
+  return r;
 }
 
 Real
@@ -158,9 +157,10 @@ TestPeriodicSole::computeScalarQpJacobian()
 }
 
 Real
-TestPeriodicSole::computeQpOffDiagJacobianScalar(const Moose::MortarType mortar_type, const unsigned int svar_num)
+TestPeriodicSole::computeQpOffDiagJacobianScalar(const Moose::MortarType mortar_type,
+                                                 const unsigned int svar_num)
 {
-  // ONLY the component for this constraint will contribute here; 
+  // ONLY the component for this constraint will contribute here;
   // other one is handled in the other constraint
   if (svar_num != _kappa_var)
     return 0;
@@ -187,7 +187,8 @@ TestPeriodicSole::computeQpOffDiagJacobianScalar(const Moose::MortarType mortar_
 }
 
 Real
-TestPeriodicSole::computeScalarQpOffDiagJacobian(const Moose::MortarType mortar_type, const unsigned int jvar_num)
+TestPeriodicSole::computeScalarQpOffDiagJacobian(const Moose::MortarType mortar_type,
+                                                 const unsigned int jvar_num)
 {
   // Test if jvar is the ID of the primary variables and not some other random variable
   switch (mortar_type)

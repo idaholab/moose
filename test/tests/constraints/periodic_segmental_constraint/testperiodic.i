@@ -1,4 +1,3 @@
-
 [Mesh]
   [left_block]
     type = GeneratedMeshGenerator
@@ -51,47 +50,47 @@
     new_block_name = 'primary_top'
   []
 
-  [./corner_node]
+  [corner_node]
     type = ExtraNodesetGenerator
     new_boundary = 'pinned_node'
     nodes = '0'
     input = top
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
-  [./kappa]
+  []
+  [kappa]
     order = SECOND
     family = SCALAR
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./kappa_aux]
+  [kappa_aux]
     order = SECOND
     family = SCALAR
-  [../]
+  []
 []
 
 [AuxScalarKernels]
-  [./kappa]
+  [kappa]
     type = FunctionScalarAux
     variable = kappa_aux
-    function = '1 3'
+    function = '1 1'
     execute_on = initial #timestep_end
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff1]
+  [diff1]
     type = Diffusion
     variable = u
     block = 1
-  [../]
+  []
 []
 
 [Problem]
@@ -100,12 +99,12 @@
 []
 
 [BCs]
-  [./fix_right]
+  [fix_right]
     type = DirichletBC
     variable = u
     boundary = pinned_node
     value = 0
-  [../]
+  []
 []
 
 [Constraints]
@@ -117,10 +116,10 @@
     secondary_subdomain = 'secondary_left'
     secondary_variable = u
     correct_edge_dropping = true
-    penalty_value = 1.e3
+    penalty_value = 1.e2
   []
   [periodiclr]
-    type = TestPeriodic
+    type = PenaltyPeriodicSegmentalConstraint
     primary_boundary = '11'
     secondary_boundary = '13'
     primary_subdomain = 'primary_right'
@@ -130,7 +129,7 @@
     coupled_scalar = kappa
     kappa_aux = kappa_aux
     correct_edge_dropping = true
-    pen_scale = 1.e3
+    pen_scale = 1.e2
   []
   [mortarbt]
     type = PenaltyEqualValueConstraint
@@ -140,10 +139,10 @@
     secondary_subdomain = 'secondary_bottom'
     secondary_variable = u
     correct_edge_dropping = true
-    penalty_value = 1.e3
+    penalty_value = 1.e2
   []
   [periodicbt]
-    type = TestPeriodic
+    type = PenaltyPeriodicSegmentalConstraint
     primary_boundary = '12'
     secondary_boundary = '10'
     primary_subdomain = 'primary_top'
@@ -153,24 +152,15 @@
     coupled_scalar = kappa
     kappa_aux = kappa_aux
     correct_edge_dropping = true
-    pen_scale = 1.e3
-  []
-[]
-
-[Preconditioning]
-  [smp]
-    full = true
-    type = SMP
+    pen_scale = 1.e2
   []
 []
 
 [Executioner]
   type = Steady
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
-  petsc_options_value = 'lu superlu_dist'
- # petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -mat_view -vec_view'
- # petsc_options_value = 'lu superlu_dist ::ascii_matlab ::ascii_matlab'
-  solve_type = NEWTON
+  solve_type = 'PJFNK'
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
 []
 
 [Outputs]

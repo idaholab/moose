@@ -21,24 +21,23 @@ MortarScalarBase::validParams()
   InputParameters params = MortarConstraint::validParams();
   // This parameter can get renamed in derived class to a more relevant variable name
   params.addParam<VariableName>("scalar_variable", "Primary coupled scalar variable");
-  // This name is fixed and required to be equal to the previous parameter; need to add error checks...
+  // This name is fixed and required to be equal to the previous parameter; need to add error
+  // checks...
   params.addCoupledVar("coupled_scalar", "Repeat name of scalar variable to ensure dependency");
   return params;
 }
 
 MortarScalarBase::MortarScalarBase(const InputParameters & parameters)
   : MortarConstraint(parameters),
-    _use_scalar(isParamValid("scalar_variable")
-             ? true : false),
+    _use_scalar(isParamValid("scalar_variable") ? true : false),
     _kappa_dummy(),
-    _kappa_var_ptr(_use_scalar
-        ? &_sys.getScalarVariable(_tid, parameters.get<VariableName>("scalar_variable"))
-        : nullptr),
+    _kappa_var_ptr(
+        _use_scalar ? &_sys.getScalarVariable(_tid, parameters.get<VariableName>("scalar_variable"))
+                    : nullptr),
     _kappa_var(_use_scalar ? _kappa_var_ptr->number() : 0),
     _k_order(_use_scalar ? _kappa_var_ptr->order() : 0),
-    _kappa(_use_scalar
-        ? (_is_implicit ? _kappa_var_ptr->sln() : _kappa_var_ptr->slnOld())
-        : _kappa_dummy)
+    _kappa(_use_scalar ? (_is_implicit ? _kappa_var_ptr->sln() : _kappa_var_ptr->slnOld())
+                       : _kappa_dummy)
 {
   // add some error checks here
 }
@@ -56,14 +55,13 @@ MortarScalarBase::computeResidual()
       initScalarQpResidual();
       for (_h = 0; _h < _k_order; _h++)
       {
-        scalar_residuals[_h] +=
-            _JxW_msm[_qp] * _coord[_qp] * computeScalarQpResidual();
+        scalar_residuals[_h] += _JxW_msm[_qp] * _coord[_qp] * computeScalarQpResidual();
       }
     }
     _assembly.processResiduals(scalar_residuals,
-                              _kappa_var_ptr->dofIndices(),
-                              _vector_tags,
-                              _kappa_var_ptr->scalingFactor());
+                               _kappa_var_ptr->dofIndices(),
+                               _vector_tags,
+                               _kappa_var_ptr->scalingFactor());
   }
 }
 
@@ -76,29 +74,29 @@ MortarScalarBase::computeJacobian()
   if (_use_scalar)
   {
     // Get the list of coupled scalar vars and compute their off-diag jacobians
-    const auto & coupled_scalar_vars = getCoupledMooseScalarVars();  
-    
+    const auto & coupled_scalar_vars = getCoupledMooseScalarVars();
+
     // Handle ALL d-_var-residual / d-scalar columns like computeOffDiagJacobianScalar
     if (_compute_primal_residuals)
     {
-        // Do: dvar / dscalar_var, only want to process only nl-variables (not aux ones)
-        for (const auto & jvariable : coupled_scalar_vars)
+      // Do: dvar / dscalar_var, only want to process only nl-variables (not aux ones)
+      for (const auto & jvariable : coupled_scalar_vars)
+      {
+        if (_sys.hasScalarVariable(jvariable->name()))
         {
-          if (_sys.hasScalarVariable(jvariable->name()))
-          {
-            // Compute the jacobian for the secondary interior primal dofs
-            computeOffDiagJacobianScalar(Moose::MortarType::Secondary, jvariable->number());
-            // Compute the jacobian for the primary interior primal dofs.
-            computeOffDiagJacobianScalar(Moose::MortarType::Primary, jvariable->number());
-          }
+          // Compute the jacobian for the secondary interior primal dofs
+          computeOffDiagJacobianScalar(Moose::MortarType::Secondary, jvariable->number());
+          // Compute the jacobian for the primary interior primal dofs.
+          computeOffDiagJacobianScalar(Moose::MortarType::Primary, jvariable->number());
         }
+      }
     }
     if (_compute_lm_residuals)
-        // Do: dvar / dscalar_var, only want to process only nl-variables (not aux ones)
-        for (const auto & jvariable : coupled_scalar_vars)
-          if (_sys.hasScalarVariable(jvariable->name()))
-            // Compute the jacobian for the lower dimensional LM dofs (if we even have an LM variable)
-            computeOffDiagJacobianScalar(Moose::MortarType::Lower, jvariable->number());
+      // Do: dvar / dscalar_var, only want to process only nl-variables (not aux ones)
+      for (const auto & jvariable : coupled_scalar_vars)
+        if (_sys.hasScalarVariable(jvariable->name()))
+          // Compute the jacobian for the lower dimensional LM dofs (if we even have an LM variable)
+          computeOffDiagJacobianScalar(Moose::MortarType::Lower, jvariable->number());
 
     // Handle ALL d-_kappa-residual / d-_var and d-_kappa-residual / d-jvar columns
     auto & ce = _assembly.scalarFieldCouplingEntries();
@@ -124,8 +122,8 @@ MortarScalarBase::computeJacobian()
         // Compute the jacobian for the lower dimensional LM dofs (if we even have an LM variable)
         computeScalarOffDiagJacobian(Moose::MortarType::Lower, jvar_num);
     }
-    
-    // Do: d-_kappa-residual / d-_kappa and d-_kappa-residual / d-jvar, 
+
+    // Do: d-_kappa-residual / d-_kappa and d-_kappa-residual / d-jvar,
     // only want to process only nl-variables (not aux ones)
     for (const auto & jvariable : coupled_scalar_vars)
     {
@@ -206,10 +204,12 @@ MortarScalarBase::computeScalarOffDiagJacobian(Moose::MortarType mortar_type, un
   }
 
   for (const auto & matrix_tag : _matrix_tags)
-    _assembly.cacheJacobianBlock(
-        _local_ke, _kappa_var_ptr->dofIndices(), dof_indices, _kappa_var_ptr->scalingFactor(), matrix_tag);
+    _assembly.cacheJacobianBlock(_local_ke,
+                                 _kappa_var_ptr->dofIndices(),
+                                 dof_indices,
+                                 _kappa_var_ptr->scalingFactor(),
+                                 matrix_tag);
 }
-
 
 void
 MortarScalarBase::computeOffDiagJacobianScalar(Moose::MortarType mortar_type, unsigned int svar_num)
@@ -262,11 +262,8 @@ MortarScalarBase::computeOffDiagJacobianScalar(Moose::MortarType mortar_type, un
   }
 
   for (const auto & matrix_tag : _matrix_tags)
-    _assembly.cacheJacobianBlock(_local_ke,
-                                 dof_indices,
-                                 svar.dofIndices(),
-                                 scaling_factor,
-                                 matrix_tag);
+    _assembly.cacheJacobianBlock(
+        _local_ke, dof_indices, svar.dofIndices(), scaling_factor, matrix_tag);
 }
 
 void
@@ -282,7 +279,8 @@ MortarScalarBase::computeScalarOffDiagJacobianScalar(const unsigned int svar_num
     initScalarQpJacobian(svar_num);
     for (_h = 0; _h < _k_order; _h++)
       for (_l = 0; _l < s_order; _l++)
-        _local_ke(_h, _l) += _JxW_msm[_qp] * _coord[_qp] * computeScalarQpOffDiagJacobianScalar(svar_num);
+        _local_ke(_h, _l) +=
+            _JxW_msm[_qp] * _coord[_qp] * computeScalarQpOffDiagJacobianScalar(svar_num);
   }
 
   for (const auto & matrix_tag : _matrix_tags)
