@@ -1,0 +1,16 @@
+[Tests]
+  issues = '#1476'
+  design = 'source/constraints/PenaltyPeriodicSegmentalConstraint.md'
+  [./test]
+    type = 'Exodiff'
+    input = 'penalty_periodic_simple2d.i'
+    exodiff = 'penalty_periodic_simple2d_out.e'
+    requirement = "The system shall include assemble primary/secondary mortar constraints coupled to scalar variables."
+  [../]
+  [./test]
+    type = 'Exodiff'
+    input = 'periodic_simple2d.i'
+    exodiff = 'periodic_simple2d_out.e'
+    requirement = "The system shall include assemble lower variable mortar constraints coupled to scalar variables."
+  [../]
+[]

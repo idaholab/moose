@@ -20,7 +20,7 @@
  * made between a scalar macro-gradient variable and the temperature/concentration field within
  * the periodic domain. Primary and secondary surfaces are on opposing sides of the domain. Only
  * the macro to micro coupling terms are handled here. The micro-micro coupling terms are
- * handled using the PenaltyEqualValueConstraint applied to the same primary/secondary pair.
+ * handled using the EqualValueConstraint applied to the same primary/secondary pair.
  *
  * The applied macroscale conjugate gradient is applied as `kappa_aux` vector as an auxillary
  * scalar. The computed macroscale gradient `kappa` is equal to this value for isotropic-unitary
@@ -28,17 +28,13 @@
  * imposed values.
  */
 
-class PenaltyPeriodicSegmentalConstraint : public DerivativeMaterialInterface<MortarScalarBase>
+class PeriodicSegmentalConstraint : public DerivativeMaterialInterface<MortarScalarBase>
 {
 public:
   static InputParameters validParams();
-  PenaltyPeriodicSegmentalConstraint(const InputParameters & parameters);
+  PeriodicSegmentalConstraint(const InputParameters & parameters);
 
 protected:
-  virtual void precalculateResidual() override;
-  virtual void precalculateJacobian() override;
-  virtual void initScalarQpResidual() override;
-
   /**
    * Method for computing the residual at quadrature points
    */
@@ -69,17 +65,6 @@ protected:
                                               const unsigned int jvar) override;
 
 protected:
-  /// the temperature jump in global and interface coordinates;
-  /// TM-analogy: _displacement_jump_global, _interface_displacement_jump
-  ///@{
-  Real _temp_jump_global;
-  ///@}
-
-  /// The stability parameter for the method
-  ///@{
-  Real _tau_s;
-  ///@}
-
   /// The controlled scalar variable ID
   const unsigned int _kappa_aux_var;
 
@@ -88,7 +73,4 @@ protected:
 
   /// The controlled scalar variable
   const VariableValue & _kappa_aux;
-
-  /// Input property from user as the value of the penalty parameter
-  const Real _pen_scale;
 };

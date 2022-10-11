@@ -12,7 +12,7 @@
 namespace
 {
 const InputParameters &
-setScalarParam(const InputParameters & params_in)
+setPenaltyPeriodicSegParam(const InputParameters & params_in)
 {
   // Reset the scalar_variable parameter to a relevant name for this physics
   InputParameters & ret = const_cast<InputParameters &>(params_in);
@@ -33,22 +33,23 @@ PenaltyPeriodicSegmentalConstraint::validParams()
       "(no Lagrange multipliers needed). Must be used alongside PenaltyEqualValueConstraint.");
   params.addRequiredParam<VariableName>("kappa", "Primary coupled scalar variable");
   params.addRequiredCoupledVar("kappa_aux", "Controlled scalar averaging variable");
-  params.addParam<Real>("pen_scale", 1.0, "Increase or decrease the penalty");
+  params.addParam<Real>(
+      "penalty_value",
+      1.0,
+      "Penalty value used to impose a generalized force capturing the mortar constraint equation");
 
   return params;
 }
 
 PenaltyPeriodicSegmentalConstraint::PenaltyPeriodicSegmentalConstraint(
     const InputParameters & parameters)
-  : DerivativeMaterialInterface<MortarScalarBase>(setScalarParam(parameters)),
+  : DerivativeMaterialInterface<MortarScalarBase>(setPenaltyPeriodicSegParam(parameters)),
     _temp_jump_global(),
     _tau_s(),
     _kappa_aux_var(coupledScalar("kappa_aux")),
     _ka_order(getScalarVar("kappa_aux", 0)->order()),
     _kappa_aux(coupledScalarValue("kappa_aux")),
-    _current_elem_volume(_assembly.elemVolume()),
-    _current_side_volume(_assembly.sideElemVolume()),
-    _pen_scale(getParam<Real>("pen_scale"))
+    _pen_scale(getParam<Real>("penalty_value"))
 {
 }
 
@@ -63,8 +64,8 @@ PenaltyPeriodicSegmentalConstraint::precalculateJacobian()
 {
   precalculateStability();
 }
-void
 // Compute the temperature jump for current quadrature point
+void
 PenaltyPeriodicSegmentalConstraint::initScalarQpResidual()
 {
   precalculateMaterial();
@@ -78,11 +79,7 @@ PenaltyPeriodicSegmentalConstraint::computeQpResidual(const Moose::MortarType mo
 
   RealVectorValue dx(_phys_points_primary[_qp] - _phys_points_secondary[_qp]);
   RealVectorValue kappa_vec(_kappa[0], _kappa[1], 0);
-  Real r = (_pen_scale * _tau_s) * (kappa_vec * dx);
-  // Real r = (_pen_scale * pencoef / h_elem) * ((_phys_points_secondary[_qp](0) -
-  // _phys_points_primary[_qp](0))*_kappa[0]
-  //               + (_phys_points_secondary[_qp](1) - _phys_points_primary[_qp](1))*_kappa[1]
-  //               + (_phys_points_secondary[_qp](2) - _phys_points_primary[_qp](2))*_kappa[2]);
+  Real r = _tau_s * (kappa_vec * dx);
 
   switch (mortar_type)
   {
@@ -108,7 +105,7 @@ PenaltyPeriodicSegmentalConstraint::computeScalarQpResidual()
 {
 
   /// Stability/penalty term for residual of scalar variable
-  Real r = (_pen_scale * _tau_s) * _temp_jump_global;
+  Real r = _tau_s * _temp_jump_global;
   RealVectorValue dx(_phys_points_primary[_qp] - _phys_points_secondary[_qp]);
 
   r *= -dx(_h);
@@ -116,7 +113,7 @@ PenaltyPeriodicSegmentalConstraint::computeScalarQpResidual()
   RealVectorValue kappa_vec(_kappa[0], _kappa[1], 0);
   RealVectorValue kappa_aux_vec(_kappa_aux[0], _kappa_aux[1], 0);
 
-  r += dx(_h) * (_pen_scale * _tau_s) * (kappa_vec * dx);
+  r += dx(_h) * _tau_s * (kappa_vec * dx);
   r -= dx(_h) * (kappa_aux_vec * _normals[_qp]);
 
   return r;
@@ -129,7 +126,7 @@ PenaltyPeriodicSegmentalConstraint::computeScalarQpJacobian()
   /// Stability/penalty term for Jacobian of scalar variable
   RealVectorValue dx(_phys_points_primary[_qp] - _phys_points_secondary[_qp]);
 
-  Real jac = dx(_h) * (_pen_scale * _tau_s) * dx(_l);
+  Real jac = dx(_h) * _tau_s * dx(_l);
 
   return jac;
 }
@@ -144,7 +141,7 @@ PenaltyPeriodicSegmentalConstraint::computeQpOffDiagJacobianScalar(
   /// Stability/penalty term for Jacobian
 
   RealVectorValue dx(_phys_points_primary[_qp] - _phys_points_secondary[_qp]);
-  Real jac = (_pen_scale * _tau_s);
+  Real jac = _tau_s;
 
   switch (mortar_type)
   {
@@ -183,7 +180,7 @@ PenaltyPeriodicSegmentalConstraint::computeScalarQpOffDiagJacobian(
 
   /// Stability/penalty term for Jacobian
   RealVectorValue dx(_phys_points_primary[_qp] - _phys_points_secondary[_qp]);
-  Real jac = (_pen_scale * _tau_s);
+  Real jac = _tau_s;
 
   switch (mortar_type)
   {
@@ -207,13 +204,9 @@ PenaltyPeriodicSegmentalConstraint::computeScalarQpOffDiagJacobian(
 void
 PenaltyPeriodicSegmentalConstraint::precalculateStability()
 {
-  // const unsigned int elem_b_order = _secondary_var.order();
-  // double h_elem =
-  //     _current_elem_volume / _current_side_volume * 1. / Utility::pow<2>(elem_b_order);
-  // h_elem = 10.0;
-  const double h_elem = 1.0;
+  // Example showing how the penalty could be loaded from some function
 
-  _tau_s = (pencoef / h_elem);
+  _tau_s = _pen_scale;
 }
 
 // Compute temperature jump and flux average/jump
