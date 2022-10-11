@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "TestPeriodic.h"
+#include "PenaltyPeriodicSegmentalConstraint.h"
 
 namespace
 {
@@ -16,18 +16,21 @@ setScalarParam(const InputParameters & params_in)
 {
   // Reset the scalar_variable parameter to a relevant name for this physics
   InputParameters & ret = const_cast<InputParameters &>(params_in);
-  ret.set<VariableName>("scalar_variable") = {
-      params_in.get<VariableName>("kappa")};
+  ret.set<VariableName>("scalar_variable") = {params_in.get<VariableName>("kappa")};
   return ret;
 }
 }
 
-registerMooseObject("MooseTestApp", TestPeriodic);
+registerMooseObject("MooseApp", PenaltyPeriodicSegmentalConstraint);
 
 InputParameters
-TestPeriodic::validParams()
+PenaltyPeriodicSegmentalConstraint::validParams()
 {
   InputParameters params = MortarScalarBase::validParams();
+  params.addClassDescription(
+      "PenaltyPeriodicSegmentalConstraint enforces macro-micro periodic conditions between "
+      "secondary and primary sides of a mortar interface using a penalty approach "
+      "(no Lagrange multipliers needed). Must be used alongside PenaltyEqualValueConstraint.");
   params.addRequiredParam<VariableName>("kappa", "Primary coupled scalar variable");
   params.addRequiredCoupledVar("kappa_aux", "Controlled scalar averaging variable");
   params.addParam<Real>("pen_scale", 1.0, "Increase or decrease the penalty");
@@ -35,7 +38,8 @@ TestPeriodic::validParams()
   return params;
 }
 
-TestPeriodic::TestPeriodic(const InputParameters & parameters)
+PenaltyPeriodicSegmentalConstraint::PenaltyPeriodicSegmentalConstraint(
+    const InputParameters & parameters)
   : DerivativeMaterialInterface<MortarScalarBase>(setScalarParam(parameters)),
     _temp_jump_global(),
     _tau_s(),
@@ -50,24 +54,24 @@ TestPeriodic::TestPeriodic(const InputParameters & parameters)
 
 // Compute the stability parameters to use for all quadrature points
 void
-TestPeriodic::precalculateResidual()
+PenaltyPeriodicSegmentalConstraint::precalculateResidual()
 {
   precalculateStability();
 }
 void
-TestPeriodic::precalculateJacobian()
+PenaltyPeriodicSegmentalConstraint::precalculateJacobian()
 {
   precalculateStability();
 }
 void
 // Compute the temperature jump for current quadrature point
-TestPeriodic::initScalarQpResidual()
+PenaltyPeriodicSegmentalConstraint::initScalarQpResidual()
 {
   precalculateMaterial();
 }
 
 Real
-TestPeriodic::computeQpResidual(const Moose::MortarType mortar_type)
+PenaltyPeriodicSegmentalConstraint::computeQpResidual(const Moose::MortarType mortar_type)
 {
 
   /// Compute penalty parameter times x-jump times average heat flux
@@ -100,7 +104,7 @@ TestPeriodic::computeQpResidual(const Moose::MortarType mortar_type)
 }
 
 Real
-TestPeriodic::computeScalarQpResidual()
+PenaltyPeriodicSegmentalConstraint::computeScalarQpResidual()
 {
 
   /// Stability/penalty term for residual of scalar variable
@@ -115,11 +119,11 @@ TestPeriodic::computeScalarQpResidual()
   r += dx(_h) * (_pen_scale * _tau_s) * (kappa_vec * dx);
   r -= dx(_h) * (kappa_aux_vec * _normals[_qp]);
 
-  return r ;
+  return r;
 }
 
 Real
-TestPeriodic::computeScalarQpJacobian()
+PenaltyPeriodicSegmentalConstraint::computeScalarQpJacobian()
 {
 
   /// Stability/penalty term for Jacobian of scalar variable
@@ -131,7 +135,8 @@ TestPeriodic::computeScalarQpJacobian()
 }
 
 Real
-TestPeriodic::computeQpOffDiagJacobianScalar(const Moose::MortarType mortar_type, const unsigned int svar_num)
+PenaltyPeriodicSegmentalConstraint::computeQpOffDiagJacobianScalar(
+    const Moose::MortarType mortar_type, const unsigned int svar_num)
 {
   if (svar_num != _kappa_var)
     return 0;
@@ -158,7 +163,8 @@ TestPeriodic::computeQpOffDiagJacobianScalar(const Moose::MortarType mortar_type
 }
 
 Real
-TestPeriodic::computeScalarQpOffDiagJacobian(const Moose::MortarType mortar_type, const unsigned int jvar_num)
+PenaltyPeriodicSegmentalConstraint::computeScalarQpOffDiagJacobian(
+    const Moose::MortarType mortar_type, const unsigned int jvar_num)
 {
   // Test if jvar is the ID of the primary variables and not some other random variable
   switch (mortar_type)
@@ -199,7 +205,7 @@ TestPeriodic::computeScalarQpOffDiagJacobian(const Moose::MortarType mortar_type
 }
 
 void
-TestPeriodic::precalculateStability()
+PenaltyPeriodicSegmentalConstraint::precalculateStability()
 {
   // const unsigned int elem_b_order = _secondary_var.order();
   // double h_elem =
@@ -212,7 +218,7 @@ TestPeriodic::precalculateStability()
 
 // Compute temperature jump and flux average/jump
 void
-TestPeriodic::precalculateMaterial()
+PenaltyPeriodicSegmentalConstraint::precalculateMaterial()
 {
   _temp_jump_global = (_u_primary[_qp] - _u_secondary[_qp]);
 }

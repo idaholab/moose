@@ -73,8 +73,7 @@ MortarConstraintBase::validParams()
       "compute_primal_residuals", true, "Whether to compute residuals for the primal variable.");
   params.addParam<bool>(
       "compute_lm_residuals", true, "Whether to compute Lagrange Multiplier residuals");
-  params.addParam<bool>(
-      "compute_scalar_residuals", true, "Whether to compute scalar residuals");
+  params.addParam<bool>("compute_scalar_residuals", true, "Whether to compute scalar residuals");
   params.addParam<MooseEnum>(
       "quadrature",
       MooseEnum("DEFAULT FIRST SECOND THIRD FOURTH", "DEFAULT"),

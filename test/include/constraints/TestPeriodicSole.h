@@ -30,7 +30,6 @@ public:
   TestPeriodicSole(const InputParameters & parameters);
 
 protected:
-
   virtual void precalculateResidual() override;
   virtual void precalculateJacobian() override;
   virtual void initScalarQpResidual() override;
@@ -74,7 +73,6 @@ protected:
    * Method for computing an off-diagonal jacobian component at quadrature points.
    */
   virtual Real computeScalarQpOffDiagJacobianScalar(const unsigned int svar_num) override;
-
 
   // Compute T jump and heat flux average/jump
   void precalculateMaterial();
