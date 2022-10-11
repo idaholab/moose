@@ -457,9 +457,11 @@ Parser::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node * 
   if (iters.first == iters.second)
   {
     _errmsg += hit::errormsg(n,
-                             "section '",
+                             "section '[",
                              curr_identifier,
-                             "' does not have an associated \"Action\".\nDid you misspell it?") +
+                             "]' does not have an associated \"Action\".\n Common causes:\n"
+                             "- you misspelled the Action/section name\n"
+                             "- the app you are running does not support this Action/syntax") +
                "\n";
     return;
   }
