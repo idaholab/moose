@@ -1,6 +1,5 @@
 # Frequently Asked Questions
 
-- [Why doesn't my solve converge?](application_usage/failed_solves.md)
 - [I don't like Conda. Are there alternatives?](faq_conda_alternatives.md)
 - [Conda commands are not working...](help/troubleshooting.md#condaissues)
 - [I can't build my application or moose.](help/troubleshooting.md#buildissues)

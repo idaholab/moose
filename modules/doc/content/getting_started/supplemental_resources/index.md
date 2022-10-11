@@ -1,4 +1,4 @@
-# Learning Resources
+# Supplemental Resources
 
 This following pages provide some fundamentals that may be needed to use or
 develop MOOSE and/or MOOSE-based applications:

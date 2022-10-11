@@ -41,7 +41,7 @@ Extensions:
                 Installing MOOSE: getting_started/installation/index.md
                 Creating an Application: getting_started/new_users.md
                 Tutorials: getting_started/examples_and_tutorials/index.md
-                Learning Resources: getting_started/learning_resources/index.md
+                Supplemental Resources: getting_started/supplemental_resources/index.md
             Documentation:
                 Application Usage: application_usage/index.md
                 Application Development: application_development/index.md
