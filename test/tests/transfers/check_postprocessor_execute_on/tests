@@ -1,49 +1,44 @@
 [Tests]
-	issues = '#20969'
-	design = 'Transfers/index.md'
-
-	[pp_transfer]
-	requirement = "The system shall warn the user when setting a different execute_on parameter in a MultiAppPostprocessorTransfer between "
-	 	[to_multiapp]
-	      type = 'RunException'
-	      input = 'parent.i'
-	      expect_err = "The execute_on parameter set in the Transfer should not be different"
-	      detail = "the Transfer and the to_postprocessor specified inside of the Transfer."
-	 	[]
-	 	[from_multiapp]
-	      type = 'RunException'
-	      input = 'parent_from_multiapp.i'
-	      expect_err = "The execute_on parameter set in the Transfer should not be different"
-	      detail = "the Transfer and the from_postprocessor specified inside of the Transfer."
-	    []
-	[]
-	[vector_pp_transfer]
-	requirement = "The system shall warn the user when setting a different execute_on parameter in a MultiAppVectorPostprocessorTransfer between the Transfer and the VectorPostprocessor specified inside of the Transfer, going "
-		[to_app_vpp]
-		    type = 'RunException'
-		    input = 'vectorpp_parent.i'
-	        expect_err = "The execute_on parameter set in the Transfer should not be different"
-	        cli_args = 'Transfers/send/execute_on=timestep_end VectorPostprocessors/sample_points/execute_on=timestep_begin'
-	        detail = "to the MultiApp."
-		[]
-		[from_app_vpp]
-		    type = 'RunException'
-		    input = 'vectorpp_parent.i'
-	        expect_err = "The execute_on parameter set in the Transfer should not be different"
-	        cli_args = 'Transfers/receive/execute_on=timestep_end VectorPostprocessors/receive_values/execute_on=timestep_begin'
-	        detail = "from the MultiApp."
-		[]
-    []
-    [interpolation]
+  issues = '#20969'
+  design = 'Transfers/index.md'
+  requirement = "The system shall warn the user if the execution schedules are different between the transfer and the postprocessor(s) specified inside of the transfer."
+  [pp_transfer]
+  	
+ 	[to_multiapp]
       type = 'RunException'
-      input = 'interpol_parent.i'
-      expect_err = "The execute_on parameter set in the Transfer should not be different"
-      requirement = "The system shall warn the user when setting a different execute_on parameter in a MultiAppPostprocessorInterpolationTransfer between the Transfer and the Postprocessor specified inside of the Transfer."
-    []
-    [sample]
+      input = 'parent.i'
+      expect_err = "None of the execute_on parameters set in the Transfer match" 
+ 	[]
+ 	[from_multiapp]
       type = 'RunException'
-      input = 'varsample_parent.i'
-      expect_err = "The execute_on parameter set in the Transfer should not be different"
-      requirement = "The system shall warn the user when setting a different execute_on parameter in a MultiAppVariableValueSamplePostprocessorTransfer between the Transfer and the Postprocessor specified inside of the Transfer."
+      input = 'parent_from_multiapp.i'
+      expect_err = "None of the execute_on parameters set in the Transfer match"
+  	[]
+  []
+  [vector_pp_transfer]
+    [to_app_vpp]
+        type = 'RunException'
+        input = 'vectorpp_parent.i'
+        expect_err = "None of the execute_on parameters set in the Transfer match"
+        cli_args = 'Transfers/send/execute_on=timestep_end VectorPostprocessors/sample_points/execute_on=timestep_begin'
+        detail = "to the MultiApp."
     []
+    [from_app_vpp]
+        type = 'RunException'
+        input = 'vectorpp_parent.i'
+          expect_err = "None of the execute_on parameters set in the Transfer match"
+          cli_args = 'Transfers/receive/execute_on=timestep_end VectorPostprocessors/receive_values/execute_on=timestep_begin'
+          detail = "from the MultiApp."
+    []
+  []
+  [interpolation]
+    type = 'RunException'
+    input = 'interpol_parent.i'
+    expect_err = "None of the execute_on parameters set in the Transfer match"
+  []
+  [sample]
+    type = 'RunException'
+    input = 'varsample_parent.i'
+    expect_err = "None of the execute_on parameters set in the Transfer match"
+  []
 []

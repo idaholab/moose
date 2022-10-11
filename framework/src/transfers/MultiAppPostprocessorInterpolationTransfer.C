@@ -73,12 +73,14 @@ MultiAppPostprocessorInterpolationTransfer::MultiAppPostprocessorInterpolationTr
 }
 
 void
+MultiAppPostprocessorInterpolationTransfer::initialSetup()
+{
+  MultiAppTransfer::initialSetup();
+  checkPostProcessorExecuteOn(_postprocessor);
+}
+void
 MultiAppPostprocessorInterpolationTransfer::execute()
 {
-  // MultiAppPostprocessorInterpolationTransfer will crash upon creating an initialSetup() for it.
-  // As such, we do the execute_on check in execute() instead.
-  checkPostProcessorExecuteOn(_postprocessor);
-
   TIME_SECTION("MultiAppPostprocessorInterpolationTransfer::execute()",
                5,
                "Transferring/interpolating postprocessors");
