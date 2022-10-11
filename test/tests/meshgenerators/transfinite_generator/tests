@@ -44,7 +44,16 @@
       exodiff = 'discrete_generator_in.e'
       recover = false
 
-      detail = 'Sides can be provided as discrete points.'
+      detail = 'Sides can be provided as discrete points,'
+    []
+    [parsed]
+      type = 'Exodiff'
+      input = 'parsed_generator.i'
+      cli_args = '--mesh-only'
+      exodiff = 'parsed_generator_in.e'
+      recover = false
+
+      detail = 'or symbolic expressions.'
     []
   []
 []
