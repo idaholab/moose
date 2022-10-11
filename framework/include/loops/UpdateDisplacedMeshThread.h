@@ -46,11 +46,11 @@ protected:
   // Solution vectors with expanded ghosting, for ReplicatedMesh or
   // for DistributedMesh cases where the standard algebraic ghosting
   // doesn't reach as far as the geometric ghosting
-  std::map<System *,
+  std::map<unsigned int,
            std::pair<const NumericVector<Number> *, std::shared_ptr<NumericVector<Number>>>>
       _sys_to_nonghost_and_ghost_soln;
 
 private:
-  std::map<System *, std::pair<std::vector<unsigned int>, std::vector<unsigned int>>>
+  std::map<unsigned int, std::pair<std::vector<unsigned int>, std::vector<unsigned int>>>
       _sys_to_var_num_and_direction;
 };
