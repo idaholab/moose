@@ -21,6 +21,11 @@
 #include <tuple>
 #include <type_traits>
 
+namespace MetaPhysicL
+{
+class LogicError;
+}
+
 // this function allows streaming tuples to ostreams
 template <size_t n, typename... T>
 void
@@ -242,6 +247,12 @@ mooseDeprecatedStream(S & oss, bool expired, Args &&... args)
  */
 
 } // namespace internal
+
+/**
+ * emit a relatively clear error message when we catch a MetaPhysicL logic error
+ */
+void translateMetaPhysicLError(const MetaPhysicL::LogicError &);
+
 } // namespace moose
 
 /// Emit an error message with the given stringified, concatenated args and

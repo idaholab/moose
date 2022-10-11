@@ -89,4 +89,17 @@ mooseStreamAll(std::ostringstream &)
 }
 
 } // namespace internal
+
+void
+translateMetaPhysicLError(const MetaPhysicL::LogicError &)
+{
+  mooseError(
+      "We caught a MetaPhysicL error in while performing element or face loops. This is "
+      "potentially due to AD not having a sufficiently large derivative container size. To "
+      "increase the AD container size, you can run configure in the MOOSE root directory with the "
+      "'--with-derivative-size=<n>' option and then recompile. Other causes of MetaPhysicL logic "
+      "errors include evaluating functions where they are not defined or differentiable like sqrt "
+      "(which gets called for vector norm functions) or log with arguments <= 0");
+}
+
 } // namespace moose
