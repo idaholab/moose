@@ -33,6 +33,13 @@
       recover = false
       detail = 'blocks and assigning the new boundary even if the input mesh is not prepared.'
     []
+    [delete_interior_parents]
+      type = 'Exodiff'
+      input = 'delete_interior_parents.i'
+      exodiff = 'delete_interior_parents_out.e'
+      recover = false
+      detail = 'blocks and properly removing lower dimensional elements with a deleted element as their interior parent.'
+    []
     [missing_block]
       type = RunException
       input = block_deletion_test1.i
