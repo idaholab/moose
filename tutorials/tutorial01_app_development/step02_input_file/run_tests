@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import sys, os
 
 MOOSE_DIR = os.path.abspath(os.environ.get('MOOSE_DIR', os.path.join(os.path.dirname(__file__), '..', 'moose')))
