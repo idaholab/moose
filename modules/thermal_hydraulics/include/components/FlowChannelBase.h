@@ -42,7 +42,6 @@ public:
   /// Map of pipe type to enum
   static const std::map<std::string, EPipeType> _pipe_type_to_enum;
 
-  virtual void buildMesh() override;
   virtual void addVariables() override;
   virtual void addMooseObjects() override;
 
@@ -93,9 +92,6 @@ public:
    * Creates the area function if needed and then stores the name
    */
   virtual FunctionName createAreaFunctionAndGetName();
-
-  unsigned int getNodesetID() const;
-  const BoundaryName & getNodesetName() const;
 
   /**
    * Gets heat transfer geometry
@@ -172,8 +168,6 @@ protected:
 
   virtual std::shared_ptr<ClosuresBase> buildClosures();
 
-  virtual void buildMeshNodes();
-
   /**
    * Adds objects which are common for single- and two-phase flow
    */
@@ -213,11 +207,6 @@ protected:
   const Real & _PoD;
   /// True if user provides PoD
   bool _has_PoD;
-
-  /// Nodeset id for all flow channel nodes
-  BoundaryID _nodeset_id;
-  /// Nodeset name for all flow channel nodes
-  BoundaryName _nodeset_name;
 
   /// True if there is one or more sources specified by wall temperature
   bool _temperature_mode;
