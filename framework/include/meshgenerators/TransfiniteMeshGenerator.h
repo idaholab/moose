@@ -51,7 +51,7 @@ protected:
 
   /// function parser object describing the combinatorial geometry
   SymFunctionPtr _parsed_func;
-  
+
   // This is the main routine for constructing edges according to the user input
   std::vector<Point> getEdge(const Point & P1,
                              const Point & P2,
@@ -73,13 +73,13 @@ protected:
                     const Point & P2,
                     const Real & dist,
                     const Point & outward) const;
-  
+
   std::vector<Point> getParsedEdge(const Point & P1,
-                    const Point & P2, 
-                    const unsigned int & np, 
+                    const Point & P2,
+                    const unsigned int & np,
                     const std::string & parameter,
                     const Real & bias);
-  
+
   // The following routines are necessary for the paramterization of opposite edges
   // To assure we have the same parameterization on opposite edges we need to map it to
   //  a reference interval, i.e. [0, 1]
@@ -91,13 +91,13 @@ protected:
                         const Real & b) const;
   // For a circle the paramterization is based on radians and we need to compute
   //  the angles spanned between 2 end vertices
-  Real getPolarAngle(const Point & P) const;          
+  Real getPolarAngle(const Point & P) const;
   Real getEdgeLength(const Point & P1,
-                     const Point & P2) const; 
-  std::vector<Real> getParametrization(const Real & edge_length,  
-                          const unsigned int & np, 
+                     const Point & P2) const;
+  std::vector<Real> getParametrization(const Real & edge_length,
+                          const unsigned int & np,
                           const Real & bias) const;
-  
+
   usingFunctionParserUtilsMembers(false);
-  
+
 };

@@ -90,13 +90,13 @@ TransfiniteMeshGenerator::TransfiniteMeshGenerator(const InputParameters & param
     _right_parameter(getParam<std::string>("right_parameter")),
     _bias_x(getParam<Real>("bias_x")),
     _bias_y(getParam<Real>("bias_y"))
-{  
-   //initialize parsed function 
+{
+   //initialize parsed function
     _parsed_func = std::make_shared<SymFunction>();
    setParserFeatureFlags(_parsed_func);
    _parsed_func->AddConstant("pi", libMesh::pi);
    _func_params.resize(1);
-  
+
 }
 std::unique_ptr<MeshBase>
 TransfiniteMeshGenerator::generate()
@@ -135,15 +135,6 @@ TransfiniteMeshGenerator::generate()
   edge_left = getEdge(V00, V01, _ny, _left_type, _left_parameter,outward_vec[2], _bias_y);
   edge_right = getEdge(V10, V11, _ny, _right_type, _right_parameter,outward_vec[3], _bias_y);
 
-  std::vector<Point> edge_test;    // parametrized via nx
-  edge_test=getParsedEdge(V01,V11,_nx,_top_parameter, _bias_x);
-  
-  for  (unsigned int i=0; i<_nx; i++)
-  {
-  std::cout<<"Points "<<edge_test[i]<< std::endl;
-  }
-
-  
   // Use for the parametrization on edge pairs, currently generated on the fly
   // on the [0,1] interval
   Real rx_coord, sy_coord;
@@ -218,26 +209,25 @@ TransfiniteMeshGenerator::generate()
 }
 
 std::vector<Point>
-TransfiniteMeshGenerator::getParsedEdge(const Point & P1, const Point & P2, 
+TransfiniteMeshGenerator::getParsedEdge(const Point & P1, const Point & P2,
             const unsigned int & np, const std::string & parameter, const Real & bias)
-{ 
+{
   std::vector<Point> edge;
   std::vector<Real> param_vec;
   param_vec=getParametrization(1.0, np, 1.0);
   Real x_coord, y_coord, r_param;
-  
+
   std::vector<std::string> param_coords;
   //std::vector<Real> yvec;
   MooseUtils::tokenize(parameter, param_coords, 1, "&&");
 
-  
+
   for (unsigned int iter=0; iter<np; iter++)
   { r_param=param_vec[iter];
-  _parsed_func->Parse(param_coords[0], "x");
+  _parsed_func->Parse(param_coords[0], "r");
   x_coord=_parsed_func->Eval(&r_param);
-  _parsed_func->Parse(param_coords[1], "x");
+  _parsed_func->Parse(param_coords[1], "r");
   y_coord=_parsed_func->Eval(&r_param);
-  std::cout<<"Eval at iter "<<iter<<" r is "<<r_param<<" x is "<<x_coord<< " y is "<<y_coord<<std::endl;
   edge.push_back(Point(x_coord, y_coord, 0.0));
 
   }
@@ -319,7 +309,7 @@ Real
 TransfiniteMeshGenerator::getEdgeLength(const Point & P1, const Point & P2) const
 {
   Point temp = P1 - P2;
-  Real edge_len = temp.norm(); 
+  Real edge_len = temp.norm();
 
   return edge_len;
 }
