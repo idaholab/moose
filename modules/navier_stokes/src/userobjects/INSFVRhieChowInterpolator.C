@@ -348,6 +348,8 @@ INSFVRhieChowInterpolator::execute()
   if (_sys.number() != _u->sys().number())
     return;
 
+  TIME_SECTION("execute", 1, "Computing Rhie-Chow coefficients");
+
   // A lot of RC data gathering leverages the automatic differentiation system, e.g. for linear
   // operators we pull out the 'a' coefficients by querying the ADReal residual derivatives member
   // at the element or neighbor dof locations. Consequently we need to enable derivative
