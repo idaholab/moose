@@ -26,7 +26,19 @@
     input = 'oriented_subdomain_bounding_box_generator.i'
     exodiff = 'oriented_subdomain_bounding_box_generator_out.e'
     requirement = 'The system shall include the ability to assign subdomain identifiers for elements within an arbitrarily oriented bounding box.'
-    design = 'meshgenerators/SubdomainBoundingBoxGenerator.md'
+    design = 'meshgenerators/OrientedSubdomainBoundingBoxGenerator.md'
+    issues = '#11640'
+    mesh_mode = 'REPLICATED'
+    recover = false
+  [../]
+
+  [./oriented_subdomain_bounding_box_generator_test_outside]
+    type = 'Exodiff'
+    input = 'oriented_subdomain_bounding_box_generator.i'
+    cli_args = 'Mesh/subdomains/location=OUTSIDE Outputs/file_base=outside'
+    exodiff = 'outside.e'
+    requirement = 'The system shall include the ability to assign subdomain identifiers for elements outside an arbitrarily oriented bounding box.'
+    design = 'meshgenerators/OrientedSubdomainBoundingBoxGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false
