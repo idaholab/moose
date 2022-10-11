@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import time
 import numpy as np
 np.set_printoptions(precision=16, linewidth=np.inf)
