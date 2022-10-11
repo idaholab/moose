@@ -31,10 +31,10 @@ ActiveLearningGaussianProcess::validParams()
   params.addParam<bool>(
       "standardize_data", true, "Standardize (center and scale) training data (y values)");
   MooseEnum tuning_type("tao adam none", "none");
-  params.addParam<MooseEnum>(
+  params.addRequiredParam<MooseEnum>(
       "tuning_algorithm", tuning_type, "Hyper parameter optimizaton algorithm");
   params.addParam<unsigned int>("iter_adam", 1000, "Tolerance value for Adam optimization");
-  params.addParam<unsigned int>("batch_size", 0, "The batch size for Adam optimization");
+  params.addParam<unsigned int>("batch_size", "The batch size for Adam optimization");
   params.addParam<Real>("learning_rate_adam", 0.001, "The learning rate for Adam optimization");
   params.addParam<std::string>(
       "tao_options", "", "Command line options for PETSc/TAO hyperparameter optimization");
@@ -60,28 +60,14 @@ ActiveLearningGaussianProcess::ActiveLearningGaussianProcess(const InputParamete
         getParam<std::string>("tao_options"),
         getParam<bool>("show_optimization_details"),
         getParam<unsigned int>("iter_adam"),
-        getParam<unsigned int>("batch_size"),
+        isParamValid("batch_size") ? getParam<unsigned int>("batch_size") : 0,
         getParam<Real>("learning_rate_adam")))
 {
-
-// Error Checking
-//   if (_do_tuning && _tuning_algorithm == "none")
-//     paramError("tuning_algorithm",
-//                "No tuning algorithm is selected for the hyper parameter optimization!");
-
-//   if (isParamValid("batch_size") && _tuning_algorithm == "tao")
-//     mooseError("Mini-batch sampling is not compatible with the TAO optimization library. Please "
-//                "use Adam optimization.");
-
-//   if (!isParamValid("batch_size") && _tuning_algorithm == "adam")
-//     paramError("batch_size", "Adam requires the batch size to be specified.");
-
-//   if (isParamValid("batch_size"))
-//     if (_sampler.getNumberOfRows() < _batch_size)
-//       paramError("batch_size", "Batch size cannot be greater than the training data set size.");
+  if (isParamValid("batch_size") && _optimization_opts.opt_type == "tao")
+    mooseError("Mini-batch sampling is not compatible with the TAO optimization library. Please "
+               "use Adam optimization.");
 
   std::vector<std::string> tune_parameters(getParam<std::vector<std::string>>("tune_parameters"));
-
   std::vector<Real> bounds;
   _gp_handler.initialize(
       getCovarianceFunctionByName(parameters.get<UserObjectName>("covariance_function")),
@@ -93,10 +79,13 @@ ActiveLearningGaussianProcess::ActiveLearningGaussianProcess(const InputParamete
 void 
 ActiveLearningGaussianProcess::reTrain(const std::vector<std::vector<Real>> & inputs, const std::vector<Real> & outputs) const
 {
+  
+  // Addtional error check for each re-train call of the GP surrogate
+  if (isParamValid("batch_size"))
+    if (outputs.size() < _optimization_opts.batch_size)
+      paramError("batch_size", "Batch size cannot be greater than the training data set size.");
 
-  // RealEigenMatrix _training_params;
   RealEigenMatrix _training_data;
-
   _training_params.setZero(outputs.size(), inputs.size());
   _training_data.setZero(outputs.size(), 1);
 

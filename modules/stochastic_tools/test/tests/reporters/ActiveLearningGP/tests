@@ -5,28 +5,53 @@
     requirement = 'The system shall be be able to perform Monte Carlo sampling with active learning with'
     [SingleProc_SingleRow_Ufunction]
       type = 'JSONDiff'
-      input = Main.i
+      input = Main_adam.i
       allow_test_objects = true
       jsondiff = 'SingleProcSingleRow_Ufunction.json'
       detail = 'a single row in the sampler with single processor using the U learning function;'
     []
     [MultipleProc_MultipleRow_Ufunction]
       type = 'JSONDiff'
-      input = Main.i
+      input = Main_adam.i
       allow_test_objects = true
       jsondiff = 'MultipleProcMultipleRow_Ufunction.json'
       max_parallel = 3
       min_parallel = 3
-      cli_args = "Samplers/mc/num_rows=2 Outputs/file_base='MultipleProcMultipleRow_Ufunction'"
+      cli_args = "Samplers/mc/num_batch=2 Outputs/file_base='MultipleProcMultipleRow_Ufunction'"
       detail = 'multiple rows in the sampler with multiple processors that are not equal to the rows using the U learning function;'
     []
     [COV_squared_exp]
       type = 'JSONDiff'
-      input = Main.i
+      input = Main_adam.i
       allow_test_objects = true
       jsondiff = 'COV_squared_exp.json'
       cli_args = "Reporters/conditional/learning_function='COV' Reporters/conditional/learning_function_threshold=0.025 Outputs/file_base='COV_squared_exp'"
       detail = 'a single row in the sampler with single processor using the COV learning function with GP using the squared exponential kernel;'
+    []
+    [SingleProc_SingleRow_Ufunction_tao]
+      type = 'JSONDiff'
+      input = Main_tao.i
+      allow_test_objects = true
+      jsondiff = 'SingleProcSingleRow_Ufunction_tao.json'
+      detail = 'a single row in the sampler with single processor using the COV learning function with GP using the squared exponential kernel and TAO optimization;'
+    []
+  []
+
+  [errors]
+    requirement = 'The system shall throw an error when '
+    [batch_with_tao]
+      type = RunException
+      input = Main_tao.i
+      cli_args = "Trainers/GP_al_trainer/batch_size=5"
+      detail = 'mini-batching is requested with the TAO optimization library. '
+      expect_err = "Mini-batch sampling is not compatible with the TAO optimization library. Please use Adam optimization."
+    []
+    [adam_wrong_batch_size]
+      type = RunException
+      input = Main_adam.i
+      cli_args = "Trainers/GP_al_trainer/batch_size=500"
+      detail = 'the batch size is greater than the training data set size for Adam optimization. '
+      expect_err = "Batch size cannot be greater than the training data set size."
     []
   []
 []

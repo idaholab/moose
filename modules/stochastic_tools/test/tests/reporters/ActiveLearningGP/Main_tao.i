@@ -22,7 +22,7 @@
 [Samplers]
   [mc]
     type = ActiveLearningMonteCarloSampler
-    num_rows = 1
+    num_batch = 1
     distributions = 'k_dist q_dist Tinf_dist'
     flag_sample = 'conditional/flag_sample'
     seed = 5
@@ -85,9 +85,10 @@
     standardize_params = 'true'
     standardize_data = 'true'
     tune_parameters = 'signal_variance length_factor'
-    tuning_algorithm = 'adam'
-    iter_adam = 1000
-    learning_rate_adam = 0.005
+    tao_options = '-tao_bncg_type ssml_bfgs'
+    tuning_min = ' 1e-9 1e-9'
+    tuning_max = ' 1e16  1e16'
+    tuning_algorithm = 'tao'
     # show_optimization_details = true
   []
 []
@@ -115,7 +116,7 @@
 
 [Outputs]
   # perf_graph = true
-  file_base = 'SingleProcSingleRow_Ufunction'
+  file_base = 'SingleProcSingleRow_Ufunction_tao'
   [out]
     type = JSON
     execute_system_information_on = none

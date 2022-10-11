@@ -17,7 +17,7 @@ ActiveLearningMonteCarloSampler::validParams()
 {
   InputParameters params = Sampler::validParams();
   params.addClassDescription("Monte Carlo Sampler.");
-  params.addRequiredParam<dof_id_type>("num_rows", "The number of rows per matrix to generate.");
+  params.addRequiredParam<dof_id_type>("num_batch", "The number of full model evaluations in the batch.");
   params.addRequiredParam<std::vector<DistributionName>>(
       "distributions",
       "The distribution names to be sampled, the number of distributions provided defines the "
@@ -40,10 +40,10 @@ ActiveLearningMonteCarloSampler::ActiveLearningMonteCarloSampler(const InputPara
 {
   for (const DistributionName & name : _distribution_names)
     _distributions.push_back(&getDistributionByName(name));
-  setNumberOfRows(getParam<dof_id_type>("num_rows"));
+  setNumberOfRows(getParam<dof_id_type>("num_batch"));
   setNumberOfCols(_distributions.size());
-  _inputs_sto.resize(getParam<dof_id_type>("num_rows"));
-  _inputs_gp_fails.resize(getParam<dof_id_type>("num_rows"));
+  _inputs_sto.resize(getParam<dof_id_type>("num_batch"));
+  _inputs_gp_fails.resize(getParam<dof_id_type>("num_batch"));
   for (unsigned int i = 0; i < _inputs_sto.size(); ++i)
   {
     _inputs_sto[i].resize(_distributions.size());
@@ -52,7 +52,7 @@ ActiveLearningMonteCarloSampler::ActiveLearningMonteCarloSampler(const InputPara
   _check_step = 0;
   setNumberOfRandomSeeds(_num_random_seeds);
   _track_gp_fails = 0;
-  _allowed_gp_fails = getParam<dof_id_type>("num_rows");
+  _allowed_gp_fails = getParam<dof_id_type>("num_batch");
 }
 
 Real
@@ -60,7 +60,7 @@ ActiveLearningMonteCarloSampler::computeSample(dof_id_type row_index, dof_id_typ
 {
   if (col_index == 0 && _step > 0 && _check_step != _step)
     {
-      for (dof_id_type i = 0; i < getParam<dof_id_type>("num_rows"); ++i)
+      for (dof_id_type i = 0; i < getParam<dof_id_type>("num_batch"); ++i)
       {
         if (_flag_sample[i] == true)
         {
