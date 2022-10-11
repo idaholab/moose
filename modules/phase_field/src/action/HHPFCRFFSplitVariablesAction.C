@@ -64,19 +64,20 @@ HHPFCRFFSplitVariablesAction::act()
     // Create real L variable
     std::string real_name = L_name + "_real";
 
-    auto params = MooseVariableBase::validParams();
+    const auto type = "MooseVariable";
+    auto params = _factory.getValidParams(type);
     params.set<MooseEnum>("order") = getParam<MooseEnum>("order");
     params.set<MooseEnum>("family") = getParam<MooseEnum>("family");
     params.set<std::vector<Real>>("scaling") = {getParam<Real>("scaling")};
 
-    _problem->addVariable("MooseVariableFEReal", real_name, params);
+    _problem->addVariable(type, real_name, params);
 
     if (l > 0)
     {
       // Create imaginary L variable IF l > 0
       std::string imag_name = L_name + "_imag";
 
-      _problem->addVariable("MooseVariableFEReal", imag_name, params);
+      _problem->addVariable(type, imag_name, params);
     }
   }
 }

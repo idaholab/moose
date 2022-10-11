@@ -2604,7 +2604,7 @@ FEProblemBase::addConstraint(const std::string & c_name,
 
   auto determine_var_param_name = [&parameters, this]()
   {
-    if (parameters.isParamRequired("variable"))
+    if (parameters.isParamValid("variable"))
       return "variable";
     else
     {

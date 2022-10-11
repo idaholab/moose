@@ -79,7 +79,8 @@ MaterialDerivativeTestAction::act()
   // finite element type
   const std::string order = _second ? "SECOND" : "FIRST";
   const std::string family("LAGRANGE");
-  auto params = MooseVariableBase::validParams();
+  const auto type = "MooseVariable";
+  auto params = _factory.getValidParams(type);
   params.set<MooseEnum>("order") = order;
   params.set<MooseEnum>("family") = family;
 
@@ -92,13 +93,13 @@ MaterialDerivativeTestAction::act()
       switch (_prop_type)
       {
         case PropTypeEnum::REAL:
-          _problem->addVariable("MooseVariableFEReal", "var_" + derivative.first, params);
+          _problem->addVariable(type, "var_" + derivative.first, params);
           break;
 
         case PropTypeEnum::RANKTWOTENSOR:
           for (unsigned int i = 0; i < 3; ++i)
             for (unsigned int j = 0; j < 3; ++j)
-              _problem->addVariable("MooseVariableFEReal",
+              _problem->addVariable(type,
                                     "var_" + derivative.first + '_' + Moose::stringify(i) + '_' +
                                         Moose::stringify(j),
                                     params);
@@ -109,7 +110,7 @@ MaterialDerivativeTestAction::act()
             for (unsigned int j = 0; j < 3; ++j)
               for (unsigned int k = 0; k < 3; ++k)
                 for (unsigned int l = 0; l < 3; ++l)
-                  _problem->addVariable("MooseVariableFEReal",
+                  _problem->addVariable(type,
                                         "var_" + derivative.first + '_' + Moose::stringify(i) +
                                             '_' + Moose::stringify(j) + '_' + Moose::stringify(k) +
                                             '_' + Moose::stringify(l),
