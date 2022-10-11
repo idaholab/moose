@@ -8,7 +8,7 @@
     ymax = 1.0
     nx = 2
     ny = 2
-    elem_type = QUAD4
+    elem_type = QUAD9
   []
   [left_block_sidesets]
     type = RenameBoundaryGenerator
@@ -60,13 +60,18 @@
 
 [Variables]
   [u]
-    order = FIRST
+    order = SECOND
     family = LAGRANGE
   []
   [kappa]
     order = SECOND
     family = SCALAR
   []
+  [./lm]
+    order = FIRST
+    family = LAGRANGE
+    block = 'secondary_left secondary_bottom'
+  [../]
 []
 
 [AuxVariables]
@@ -109,17 +114,17 @@
 
 [Constraints]
   [mortarlr]
-    type = PenaltyEqualValueConstraint
+    type = EqualValueConstraint
     primary_boundary = '11'
     secondary_boundary = '13'
     primary_subdomain = 'primary_right'
     secondary_subdomain = 'secondary_left'
     secondary_variable = u
+    variable = lm
     correct_edge_dropping = true
-    penalty_value = 1.e2
   []
   [periodiclr]
-    type = PenaltyPeriodicSegmentalConstraint
+    type = PeriodicSegmentalConstraint
     primary_boundary = '11'
     secondary_boundary = '13'
     primary_subdomain = 'primary_right'
@@ -128,21 +133,21 @@
     kappa = kappa
     coupled_scalar = kappa
     kappa_aux = kappa_aux
+    variable = lm
     correct_edge_dropping = true
-    pen_scale = 1.e2
   []
   [mortarbt]
-    type = PenaltyEqualValueConstraint
+    type = EqualValueConstraint
     primary_boundary = '12'
     secondary_boundary = '10'
     primary_subdomain = 'primary_top'
     secondary_subdomain = 'secondary_bottom'
     secondary_variable = u
+    variable = lm
     correct_edge_dropping = true
-    penalty_value = 1.e2
   []
   [periodicbt]
-    type = PenaltyPeriodicSegmentalConstraint
+    type = PeriodicSegmentalConstraint
     primary_boundary = '12'
     secondary_boundary = '10'
     primary_subdomain = 'primary_top'
@@ -151,16 +156,23 @@
     kappa = kappa
     coupled_scalar = kappa
     kappa_aux = kappa_aux
+    variable = lm
     correct_edge_dropping = true
-    pen_scale = 1.e2
+  []
+[]
+
+[Preconditioning]
+  [smp]
+    full = true
+    type = SMP
   []
 []
 
 [Executioner]
   type = Steady
-  solve_type = 'PJFNK'
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
+  petsc_options_value = 'lu superlu_dist'
+  solve_type = NEWTON
 []
 
 [Outputs]
