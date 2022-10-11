@@ -15,11 +15,12 @@
 #include "MooseApp.h"
 #include "MooseVariableFE.h"
 #include "MooseArray.h"
-#include "SystemBase.h"
 #include "Assembly.h"
 #include "MooseObjectName.h"
 #include "RelationshipManager.h"
 #include "MooseUtils.h"
+#include "DisplacedSystem.h"
+#include "NonlinearSystemBase.h"
 
 #include "libmesh/equation_systems.h"
 #include "libmesh/system.h"
@@ -1132,3 +1133,18 @@ SubProblem::getCoordSystem(SubdomainID sid) const
 {
   return mesh().getCoordSystem(sid);
 }
+
+template MooseVariableFEBase &
+SubProblem::getVariableHelper(THREAD_ID tid,
+                              const std::string & var_name,
+                              Moose::VarKindType expected_var_type,
+                              Moose::VarFieldType expected_var_field_type,
+                              const std::vector<std::shared_ptr<NonlinearSystemBase>> & nls,
+                              const SystemBase & aux) const;
+template MooseVariableFEBase &
+SubProblem::getVariableHelper(THREAD_ID tid,
+                              const std::string & var_name,
+                              Moose::VarKindType expected_var_type,
+                              Moose::VarFieldType expected_var_field_type,
+                              const std::vector<std::unique_ptr<DisplacedSystem>> & nls,
+                              const SystemBase & aux) const;

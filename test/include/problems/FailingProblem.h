@@ -21,7 +21,7 @@ public:
   static InputParameters validParams();
 
   FailingProblem(const InputParameters & params);
-  virtual bool converged(unsigned int = 0);
+  virtual bool converged();
 
 protected:
   std::vector<unsigned int> _fail_steps;

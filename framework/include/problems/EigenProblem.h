@@ -35,7 +35,7 @@ public:
 
   virtual void init() override;
 
-  virtual bool converged(unsigned int nl_sys_num = 0) override;
+  virtual bool nlConverged(unsigned int nl_sys_num) override;
 
   unsigned int getNEigenPairsRequired() const { return _n_eigen_pairs_required; }
   void setNEigenPairsRequired(unsigned int n_eigen_pairs)
@@ -141,7 +141,8 @@ public:
                          TagID tagA,
                          TagID tagB);
 
-  virtual void computeJacobianBlocks(std::vector<JacobianBlock *> & blocks) override;
+  virtual void computeJacobianBlocks(std::vector<JacobianBlock *> & blocks,
+                                     unsigned int nl_sys_num = 0) override;
 
   /**
    * Form a vector for all kernels and BCs with a given tag
@@ -241,6 +242,9 @@ private:
   void adjustEigenVector(const Real value, bool scaling);
 
 #endif
+
+  using FEProblemBase::_nl;
+
 protected:
   unsigned int _n_eigen_pairs_required;
   bool _generalized_eigenvalue_problem;

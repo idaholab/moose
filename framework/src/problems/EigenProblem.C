@@ -218,9 +218,11 @@ EigenProblem::computeMatricesTags(
 }
 
 void
-EigenProblem::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
+EigenProblem::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks,
+                                    const unsigned int nl_sys_num)
 {
   TIME_SECTION("computeJacobianBlocks", 3);
+  setCurrentNonlinearSystem(nl_sys_num);
 
   if (_displaced_problem)
     _aux->compute(EXEC_PRE_DISPLACE);
@@ -618,7 +620,7 @@ EigenProblem::init()
 }
 
 bool
-EigenProblem::converged(unsigned int)
+EigenProblem::nlConverged(unsigned int)
 {
   return _nl_eigen->converged();
 }

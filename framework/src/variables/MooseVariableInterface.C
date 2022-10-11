@@ -16,6 +16,7 @@
 #include "MooseVariableFV.h"
 #include "Problem.h"
 #include "SubProblem.h"
+#include "SystemBase.h"
 
 template <typename T>
 MooseVariableInterface<T>::MooseVariableInterface(const MooseObject * moose_object,

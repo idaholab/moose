@@ -71,7 +71,7 @@ public:
   void bumpAllQRuleOrder(Order order, SubdomainID block);
 
   virtual void init() override;
-  virtual bool converged(unsigned int nl_sys_num = 0) override;
+  virtual bool nlConverged(unsigned int nl_sys_num) override;
 
   /**
    * Allocate vectors and save old solutions into them.

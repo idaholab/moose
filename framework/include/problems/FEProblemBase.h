@@ -450,7 +450,7 @@ public:
    */
   virtual void checkExceptionAndStopSolve(bool print_message = true);
 
-  virtual bool converged(unsigned int nl_sys_num = 0) override;
+  virtual bool nlConverged(unsigned int nl_sys_num) override;
   virtual unsigned int nNonlinearIterations(unsigned int nl_sys_num = 0) const override;
   virtual unsigned int nLinearIterations(unsigned int nl_sys_num = 0) const override;
   virtual Real finalNonlinearResidual(unsigned int nl_sys_num = 0) const override;
@@ -1146,7 +1146,8 @@ public:
    * Form a residual with default tags (nontime, time, residual).
    */
   virtual void computeResidual(const NumericVector<Number> & soln,
-                               NumericVector<Number> & residual);
+                               NumericVector<Number> & residual,
+                               unsigned int nl_sys_num = 0);
 
   /**
    * Form a residual and Jacobian with default tags
@@ -1189,7 +1190,9 @@ public:
   /**
    * Form a Jacobian matrix with the default tag (system).
    */
-  virtual void computeJacobian(const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian);
+  virtual void computeJacobian(const NumericVector<Number> & soln,
+                               SparseMatrix<Number> & jacobian,
+                               unsigned int nl_sys_num = 0);
 
   /**
    * Form a Jacobian matrix for a given tag.
@@ -1218,7 +1221,8 @@ public:
    *
    * @param blocks The blocks to fill in (JacobianBlock is defined in ComputeJacobianBlocksThread)
    */
-  virtual void computeJacobianBlocks(std::vector<JacobianBlock *> & blocks);
+  virtual void computeJacobianBlocks(std::vector<JacobianBlock *> & blocks,
+                                     unsigned int nl_sys_num = 0);
 
   /**
    * Really not a good idea to use this.

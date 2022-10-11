@@ -84,7 +84,18 @@ public:
 
   virtual bool checkNonlocalCouplingRequirement() { return _requires_nonlocal_coupling; }
 
-  virtual bool converged(unsigned int nl_sys_num = 0) = 0;
+  /**
+   * @return whether the given \p nl_sys_num is converged
+   */
+  virtual bool nlConverged(unsigned int nl_sys_num) = 0;
+
+  /**
+   * Eventually we want to convert this virtual over to taking a nonlinear system number argument.
+   * We will have to first convert apps to use nlConverged, and then once that is done, we can
+   * change this signature. Then we can go through the apps again and convert back to this changed
+   * API
+   */
+  virtual bool converged() { return nlConverged(0); }
 
   virtual void onTimestepBegin() = 0;
   virtual void onTimestepEnd() = 0;

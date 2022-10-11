@@ -5444,7 +5444,7 @@ FEProblemBase::checkExceptionAndStopSolve(bool print_message)
 }
 
 bool
-FEProblemBase::converged(const unsigned int nl_sys_num)
+FEProblemBase::nlConverged(const unsigned int nl_sys_num)
 {
   if (_solve)
     return _nl[nl_sys_num]->converged();
@@ -5652,7 +5652,7 @@ FEProblemBase::computeResidualL2Norm()
 }
 
 void
-FEProblemBase::computeResidualSys(NonlinearImplicitSystem & /*sys*/,
+FEProblemBase::computeResidualSys(NonlinearImplicitSystem & sys,
                                   const NumericVector<Number> & soln,
                                   NumericVector<Number> & residual)
 {
@@ -5660,7 +5660,7 @@ FEProblemBase::computeResidualSys(NonlinearImplicitSystem & /*sys*/,
 
   ADReal::do_derivatives = false;
 
-  computeResidual(soln, residual);
+  computeResidual(soln, residual, sys.number());
 
   ADReal::do_derivatives = true;
 }
@@ -5676,8 +5676,11 @@ FEProblemBase::computeResidual(NonlinearImplicitSystem & sys,
 }
 
 void
-FEProblemBase::computeResidual(const NumericVector<Number> & soln, NumericVector<Number> & residual)
+FEProblemBase::computeResidual(const NumericVector<Number> & soln,
+                               NumericVector<Number> & residual,
+                               const unsigned int nl_sys_num)
 {
+  setCurrentNonlinearSystem(nl_sys_num);
   const auto & residual_vector_tags = getVectorTags(Moose::VECTOR_TAG_RESIDUAL);
 
   _fe_vector_tags.clear();
@@ -6069,8 +6072,12 @@ FEProblemBase::computeJacobianTag(const NumericVector<Number> & soln,
 }
 
 void
-FEProblemBase::computeJacobian(const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian)
+FEProblemBase::computeJacobian(const NumericVector<Number> & soln,
+                               SparseMatrix<Number> & jacobian,
+                               const unsigned int nl_sys_num)
 {
+  setCurrentNonlinearSystem(nl_sys_num);
+
   _fe_matrix_tags.clear();
 
   auto & tags = getMatrixTags();
@@ -6188,9 +6195,11 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
 }
 
 void
-FEProblemBase::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
+FEProblemBase::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks,
+                                     const unsigned int nl_sys_num)
 {
   TIME_SECTION("computeTransientImplicitJacobian", 2);
+  setCurrentNonlinearSystem(nl_sys_num);
 
   if (_displaced_problem)
   {

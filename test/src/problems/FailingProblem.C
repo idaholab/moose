@@ -28,7 +28,7 @@ FailingProblem::FailingProblem(const InputParameters & params)
 }
 
 bool
-FailingProblem::converged(const unsigned int nl_sys_num)
+FailingProblem::converged()
 {
   if (_fail_steps.size() > 0)
   {
@@ -39,5 +39,5 @@ FailingProblem::converged(const unsigned int nl_sys_num)
     }
   }
 
-  return FEProblemBase::converged(nl_sys_num);
+  return FEProblemBase::converged();
 }

@@ -92,11 +92,12 @@ ReferenceResidualProblem::ReferenceResidualProblem(const InputParameters & param
   }
   else if (params.isParamValid("reference_vector"))
   {
-    if (_nl.size() > 1)
+    if (numNonlinearSystems() > 1)
       paramError(
           "nl_sys_names",
           "reference residual problem does not currently support multiple nonlinear systems");
-    _reference_vector = &_nl[0]->getVector(getVectorTagID(getParam<TagName>("reference_vector")));
+    _reference_vector =
+        &getNonlinearSystemBase(0).getVector(getVectorTagID(getParam<TagName>("reference_vector")));
   }
   else
     mooseInfo("Neither the `reference_residual_variables` nor `reference_vector` parameter is "

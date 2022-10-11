@@ -125,6 +125,8 @@ ComputeNodalKernelJacobiansThread::onNode(ConstNodeRange::const_iterator & node_
       if (_num_cached == 20) // Cache 20 nodes worth before adding into the residual
       {
         _num_cached = 0;
+        // vectors are thread-safe, but matrices are not yet
+        Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
         _fe_problem.assembly(_tid, _fe_problem.currentNonlinearSystem().number())
             .addCachedJacobian();
       }
