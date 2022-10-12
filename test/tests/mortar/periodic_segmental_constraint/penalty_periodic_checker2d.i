@@ -6,8 +6,8 @@
     xmax = 1.0
     ymin = -1.0
     ymax = 1.0
-    nx = 2
-    ny = 2
+    nx = 16
+    ny = 16
     elem_type = QUAD4
   []
   [left_block_sidesets]
@@ -21,9 +21,30 @@
     input = left_block_sidesets
     subdomain_id = 1
   []
+  [./lowrig]
+    type = SubdomainBoundingBoxGenerator
+    input = 'left_block_id'
+    block_id = 2
+    bottom_left = '0 -1 0'
+    top_right = '1 0 0'
+  [../]
+  [./upplef]
+    type = SubdomainBoundingBoxGenerator
+    input = 'lowrig'
+    block_id = 3
+    bottom_left = '-1 0 0'
+    top_right = '0 1 0'
+  [../]
+  [./upprig]
+    type = SubdomainBoundingBoxGenerator
+    input = 'upplef'
+    block_id = 4
+    bottom_left = '0 0 0'
+    top_right = '1 1 0'
+  [../]
   [left]
     type = LowerDBlockFromSidesetGenerator
-    input = left_block_id
+    input = upprig
     sidesets = '13'
     new_block_id = '10003'
     new_block_name = 'secondary_left'
@@ -63,12 +84,8 @@
     order = FIRST
     family = LAGRANGE
   []
-  [kappa_x]
-    order = FIRST
-    family = SCALAR
-  []
-  [kappa_y]
-    order = FIRST
+  [kappa]
+    order = SECOND
     family = SCALAR
   []
 []
@@ -104,7 +121,7 @@
     variable = flux_x
     diffusion_variable = u
     component = x
-    block = 1
+    block = '1 2 3 4'
   [../]
   [./flux_y]
     type = DiffusionFluxAux
@@ -112,7 +129,7 @@
     variable = flux_y
     diffusion_variable = u
     component = y
-    block = 1
+    block = '1 2 3 4'
   [../]
 []
 
@@ -120,7 +137,13 @@
   [diff1]
     type = Diffusion
     variable = u
-    block = 1
+    block = '1 4'
+  []
+  [diff2]
+    type = MatDiffusion
+    variable = u
+    block = '2 3'
+    diffusivity = conductivity
   []
 []
 
@@ -129,7 +152,13 @@
     type = GenericConstantMaterial
     prop_names = 'conductivity'
     prop_values = 1.0
-    block = 1
+    block = '1 4'
+  []
+  [k2]
+    type = GenericConstantMaterial
+    prop_names = 'conductivity'
+    prop_values = 10.0
+    block = '2 3'
   []
 []
 
@@ -156,37 +185,20 @@
     secondary_subdomain = 'secondary_left'
     secondary_variable = u
     correct_edge_dropping = true
-    penalty_value = 1.e3
+    penalty_value = 1.e2
   []
-  [periodiclrx]
-    type = TestPeriodicSole
+  [periodiclr]
+    type = PenaltyPeriodicSegmentalConstraint
     primary_boundary = '11'
     secondary_boundary = '13'
     primary_subdomain = 'primary_right'
     secondary_subdomain = 'secondary_left'
     secondary_variable = u
-    kappa = kappa_x
-    coupled_scalar = kappa_x
+    kappa = kappa
+    coupled_scalar = kappa
     kappa_aux = kappa_aux
-    component = 0
-    kappa_other = kappa_y
     correct_edge_dropping = true
-    pen_scale = 1.e3
-  []
-  [periodiclry]
-    type = TestPeriodicSole
-    primary_boundary = '11'
-    secondary_boundary = '13'
-    primary_subdomain = 'primary_right'
-    secondary_subdomain = 'secondary_left'
-    secondary_variable = u
-    kappa = kappa_y
-    coupled_scalar = kappa_y
-    kappa_aux = kappa_aux
-    component = 1
-    kappa_other = kappa_x
-    correct_edge_dropping = true
-    pen_scale = 1.e3
+    penalty_value = 1.e2
   []
   [mortarbt]
     type = PenaltyEqualValueConstraint
@@ -196,38 +208,20 @@
     secondary_subdomain = 'secondary_bottom'
     secondary_variable = u
     correct_edge_dropping = true
-    penalty_value = 1.e3
+    penalty_value = 1.e2
   []
-  [periodicbtx]
-    type = TestPeriodicSole
+  [periodicbt]
+    type = PenaltyPeriodicSegmentalConstraint
     primary_boundary = '12'
     secondary_boundary = '10'
     primary_subdomain = 'primary_top'
     secondary_subdomain = 'secondary_bottom'
     secondary_variable = u
-    kappa = kappa_x
-    coupled_scalar = kappa_x
+    kappa = kappa
+    coupled_scalar = kappa
     kappa_aux = kappa_aux
-    component = 0
-    kappa_other = kappa_y
     correct_edge_dropping = true
-    pen_scale = 1.e3
-  []
-  [periodicbty]
-    type = TestPeriodicSole
-    primary_boundary = '12'
-    secondary_boundary = '10'
-    primary_subdomain = 'primary_top'
-    secondary_subdomain = 'secondary_bottom'
-    secondary_variable = u
-    kappa = kappa_y
-    coupled_scalar = kappa_y
-    kappa_aux = kappa_aux
-    component = 1
-    kappa_other = kappa_x
-    correct_edge_dropping = true
-    compute_scalar_residuals = true
-    pen_scale = 1.e3
+    penalty_value = 1.e2
   []
 []
 
@@ -242,8 +236,6 @@
   type = Steady
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
   petsc_options_value = 'lu superlu_dist'
-  # petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -mat_view -vec_view'
-  # petsc_options_value = 'lu superlu_dist ::ascii_matlab ::ascii_matlab'
   solve_type = NEWTON
 []
 
