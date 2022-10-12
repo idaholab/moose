@@ -43,4 +43,3 @@ protected:
 private:
   void setDerivatives(ADReal & prop, Real dprop_dT, const ADReal & ad_T);
 };
-
