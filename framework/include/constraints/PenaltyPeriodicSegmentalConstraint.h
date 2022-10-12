@@ -54,6 +54,12 @@ protected:
    */
   virtual Real computeScalarQpResidual() override;
 
+  /**
+   * Method for computing the scalar variable part of Jacobian at
+   * quadrature points
+   */
+  virtual Real computeScalarQpJacobian() override;
+
   // using MortarScalarBase::computeOffDiagJacobianScalar;
 
   /**
@@ -67,6 +73,11 @@ protected:
    */
   virtual Real computeScalarQpOffDiagJacobian(Moose::MortarType mortar_type,
                                               const unsigned int jvar) override;
+
+  // Compute concentration jump
+  void precalculateMaterial();
+  // Compute penalty parameter
+  void precalculateStability();
 
 protected:
   /// the temperature jump in global and interface coordinates;
