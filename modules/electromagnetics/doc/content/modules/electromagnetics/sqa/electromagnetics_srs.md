@@ -1,4 +1,4 @@
-!template load file=sqa/app_srs.md.template app=Electromagnetics category=electromagnetics
+!template load file=sqa/module_srs.md.template module=Electromagnetics category=electromagnetics
 
 !template! item key=system-purpose
 !! system-purpose-begin

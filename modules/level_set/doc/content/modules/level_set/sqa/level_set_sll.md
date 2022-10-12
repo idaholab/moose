@@ -1,1 +1,1 @@
-!template load file=sqa/app_sll.md.template category=level_set app=Level Set
+!template load file=sqa/module_sll.md.template category=level_set module=Level Set

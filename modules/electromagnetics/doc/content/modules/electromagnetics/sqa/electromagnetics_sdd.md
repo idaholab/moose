@@ -1,4 +1,4 @@
-!template load file=sqa/app_sdd.md.template app=Electromagnetics category=electromagnetics
+!template load file=sqa/module_sdd.md.template module=Electromagnetics category=electromagnetics
 
 !template! item key=introduction
 The [!ac](MOOSE) Electromagnetics Module (EMM) is based on the [!ac](MOOSE) framework, thus it inherits

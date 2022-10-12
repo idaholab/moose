@@ -1,1 +1,1 @@
-!template load file=sqa/app_stp.md.template category=xfem app=Xfem
+!template load file=sqa/module_stp.md.template category=xfem module=Xfem

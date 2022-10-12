@@ -1,4 +1,4 @@
-!template load file=sqa/app_rtm.md.template app=Electromagnetics category=electromagnetics stp_filename=electromagnetics_stp.md
+!template load file=sqa/module_rtm.md.template module=Electromagnetics category=electromagnetics stp_filename=electromagnetics_stp.md
 
 !template! item key=system-purpose
 !include electromagnetics_srs.md start=system-purpose-begin end=system-purpose-finish

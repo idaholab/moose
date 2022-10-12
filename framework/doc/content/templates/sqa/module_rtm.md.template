@@ -1,0 +1,53 @@
+!template load file=rtm.md.template project={{module}}
+
+!template! item key=pre-intro
+!alert! note
+This document serves as an addendum to [framework_rtm.md] and captures information for
+[!ac](RTM) specific to the {{module}} module.
+
+!sqa dependencies suffix=rtm category={{category}}
+!alert-end!
+!template-end!
+
+!template item key=minimum_requirements
+!include sqa/minimum_requirements.md
+
+!template item key=assumptions-and-dependencies
+The {{module}} module is developed using MOOSE and can itself be based on various MOOSE modules,
+as such the [!ac](RTM) for the {{module}} module is dependent upon the files listed at the beginning of
+this document.
+
+!template! item key=pre-test
+Ideally all testing should be performed on a clean test machine following
+one of the supported configurations setup by the test system engineer. Testing
+may be performed on local workstations and cluster systems containing supported
+operating systems.
+
+The repository should be clean prior to building and testing. When using "git"
+this can be done by doing a force clean in the main repository and each one
+of the submodules:
+
+```
+git clean -xfd
+git submodule foreach 'git clean -xfd'
+```
+
+All tests must pass in accordance with the type of test being performed. This list
+can be found in the [Software Test Plan](sqa/{{stp_filename}}).
+!template-end!
+
+!template! item key=functional-requirements
+!sqa requirements link=True collections=FUNCTIONAL category={{category}}
+!template-end!
+
+!template! item key=usability-requirements
+!sqa requirements link=True collections=USABILITY category={{category}}
+!template-end!
+
+!template! item key=performance-requirements
+!sqa requirements link=True collections=PERFORMANCE category={{category}}
+!template-end!
+
+!template! item key=system-interfaces-requirements
+!sqa requirements link=True collections=SYSTEM category={{category}}
+!template-end!

@@ -1,1 +1,1 @@
-!template load file=sqa/app_vvr.md.template category=tensor_mechanics app=Tensor Mechanics
+!template load file=sqa/module_vvr.md.template category=tensor_mechanics module=Tensor Mechanics

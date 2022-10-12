@@ -1,39 +1,39 @@
-!template load file=srs.md.template project={{app}}
+!template load file=srs.md.template project={{module}}
 
 !template! item key=pre-intro
 !alert! note
 This document serves as an addendum to [framework_srs.md] and captures information for
-[!ac](SRS) specific to the {{app}} application.
+[!ac](SRS) specific to the {{module}} module.
 
 !sqa dependencies suffix=srs category={{category}}
 !alert-end!
 !template-end!
 
 !template! item key=system-context
-The {{app}} application is command-line driven. Like [!ac](MOOSE), this is typical for a
+The {{module}} module is command-line driven. Like [!ac](MOOSE), this is typical for a
 high-performance software that is designed to run across several nodes of a cluster system. As such,
 all usage of the software is through any standard terminal program generally available on all
 supported operating systems. Similarly, for the purpose of interacting through the software, there is
-only a single user, "the user", which interacts with the software through the command-line. {{app}}
-does not maintain any back-end database or interact with any system daemons. It is an executable,
+only a single user, "the user", which interacts with the software through the command-line. The {{module}}
+module does not maintain any back-end database or interact with any system daemons. It is an executable,
 which may be launched from the command line and writes out various result files as it runs.
 
 !media media/sqa/usage_diagram_uml.svg
-       id=app_usage_diagram
-       caption=Usage of {{app}} and other [!ac](MOOSE)-based applications.
+       id=module_usage_diagram
+       caption=Usage of the {{module}} module and other [!ac](MOOSE)-based applications.
        style=width:50%;
 !template-end!
 
 !template! item key=system-functions
-Since {{app}} is a command-line driven application, all functionality provided in
+Since the {{module}} module is a command-line driven application, all functionality provided in
 the software is operated through the use of standard UNIX command line flags and the
-extendable MOOSE input file. {{app}} is completely extendable so individual design
+extendable MOOSE input file. The {{module}} module is completely extendable so individual design
 pages should be consulted for specific behaviors of each user-defined object.
 !template-end!
 
 !template item key=assumptions-and-dependencies-intro
-The {{app}} application is developed using MOOSE and is based on various modules, as such
-the [!ac](SRS) for {{app}} is dependent upon the files listed at the beginning of this
+The {{module}} module is developed using MOOSE and can itself be based on various MOOSE modules, as such
+the [!ac](SRS) for the {{module}} module is dependent upon the files listed at the beginning of this
 document. Any further assumptions or dependencies are outlined in the remainder of this
 section.
 
@@ -59,9 +59,9 @@ section.
 !sqa requirements link=False collections=SYSTEM category={{category}}
 
 !template! item key=human-system-integration
-The {{app}} application is command line driven and conforms to all standard terminal
+The {{module}} module is command line driven and conforms to all standard terminal
 behaviors. Specific human system interaction accommodations shall be a function of the
-end-user's terminal. MOOSE (and therefore {{app}}) does support optional coloring
+end-user's terminal. MOOSE (and therefore the {{module}} module) does support optional coloring
 within the terminal's ability to display color, which may be disabled.
 !template-end!
 
@@ -75,8 +75,9 @@ within the terminal's ability to display color, which may be disabled.
 - The software maintainers will entertain all proposed changes to the system in a timely manner
   (within two business days).
 - The core software in its entirety will be made available under the terms of a designated software
-  license. These license terms are outlined in the LICENSE file alongside the {{app}} application
-  source code.
+  license. These license terms are outlined in the LICENSE file alongside the {{module}} module
+  source code. As a MOOSE physics module, the license for the {{module}} module is identical to that
+  of the framework - that is, the [!ac](LGPL) version 2.1 license.
 
 !template-end!
 
@@ -84,15 +85,15 @@ within the terminal's ability to display color, which may be disabled.
 !include sqa/framework_srs.md start=system-modes-begin end=system-modes-finish
 
 !template item key=physical-characteristics
-The {{app}} application is software only with no associated physical media. See [#system-requirements]
-for a description of the minimum required hardware necessary for running the {{app}} application.
+The {{module}} module is software only with no associated physical media. See [#system-requirements]
+for a description of the minimum required hardware necessary for running the {{module}} module.
 
 !template item key=environmental-conditions
 !include sqa/framework_srs.md start=environmental-conditions-begin end=environmental-conditions-finish
 
 !template! item key=system-security
-[!ac](MOOSE)-based applications such as {{app}} have no requirements or special needs
-related to system-security. The software is designed to run completely in user-space with
+[!ac](MOOSE)-based applications such as the {{module}} module have no requirements or special needs
+related to system security. The software is designed to run completely in user-space with
 no elevated privileges required nor recommended.
 !template-end!
 
@@ -100,7 +101,7 @@ no elevated privileges required nor recommended.
 [!ac](MOOSE)-based development follows various agile methods. The system is continuously
 built and deployed in a piecemeal fashion since objects within the system are more or less
 independent. Every new object requires a test, which in turn requires an associated
-requirement and design description. The {{app}} development team follows the [!ac](NQA-1)
+requirement and design description. The {{module}} module development team follows the [!ac](NQA-1)
 standards.
 !template-end!
 
