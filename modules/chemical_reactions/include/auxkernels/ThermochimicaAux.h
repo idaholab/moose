@@ -1,17 +1,11 @@
-/*************************************************/
-/*           DO NOT MODIFY THIS HEADER           */
-/*                                               */
-/*                     BISON                     */
-/*                                               */
-/*    (c) 2015 Battelle Energy Alliance, LLC     */
-/*            ALL RIGHTS RESERVED                */
-/*                                               */
-/*   Prepared by Battelle Energy Alliance, LLC   */
-/*     Under Contract No. DE-AC07-05ID14517      */
-/*     With the U. S. Department of Energy       */
-/*                                               */
-/*     See COPYRIGHT for full restrictions       */
-/*************************************************/
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
 
@@ -24,23 +18,19 @@ public:
   static InputParameters validParams();
   ThermochimicaAux(const InputParameters & parameters);
 
-  virtual ~ThermochimicaAux() {}
-
 protected:
   virtual Real computeValue();
 
-  unsigned int _n_phases;
+  const std::size_t _n_phases;
   std::vector<VariableValue *> _ph;
-  const bool _phases_coupled;
   std::vector<std::string> _ph_name;
 
-  unsigned int _n_species;
+  const std::size_t _n_species;
   std::vector<VariableValue *> _sp;
-  const bool _species_coupled;
   std::vector<std::string> _sp_phase_name;
   std::vector<std::string> _sp_species_name;
 
-  const bool _output_element_potential;
+  const std::size_t _n_elements;
   std::vector<VariableValue *> _el_pot;
 
 private:

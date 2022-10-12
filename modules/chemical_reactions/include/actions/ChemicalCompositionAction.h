@@ -1,17 +1,11 @@
-/*************************************************/
-/*           DO NOT MODIFY THIS HEADER           */
-/*                                               */
-/*                     BISON                     */
-/*                                               */
-/*    (c) 2015 Battelle Energy Alliance, LLC     */
-/*            ALL RIGHTS RESERVED                */
-/*                                               */
-/*   Prepared by Battelle Energy Alliance, LLC   */
-/*     Under Contract No. DE-AC07-05ID14517      */
-/*     With the U. S. Department of Energy       */
-/*                                               */
-/*     See COPYRIGHT for full restrictions       */
-/*************************************************/
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
 
@@ -30,13 +24,13 @@ protected:
 
   /// Element names
   std::vector<std::string> _elements;
+
   /// Varaible type
-  const std::string _var_type;
-  /// The file name with initial values stored in a CSV format
-  const FileName & _inital_values_file_name;
+  const enum class VarType { Nonlinear, Aux } _var_type;
+
   /// Initial conditions for each element: [element name] => initial condition value
   std::map<std::string, Real> _initial_conditions;
-  FileName _thermoFile;
+
   std::string _tunit;
   std::string _punit;
   std::string _munit;

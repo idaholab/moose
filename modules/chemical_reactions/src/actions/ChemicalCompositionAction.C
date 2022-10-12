@@ -1,31 +1,29 @@
-/*************************************************/
-/*           DO NOT MODIFY THIS HEADER           */
-/*                                               */
-/*                     BISON                     */
-/*                                               */
-/*    (c) 2015 Battelle Energy Alliance, LLC     */
-/*            ALL RIGHTS RESERVED                */
-/*                                               */
-/*   Prepared by Battelle Energy Alliance, LLC   */
-/*     Under Contract No. DE-AC07-05ID14517      */
-/*     With the U. S. Department of Energy       */
-/*                                               */
-/*     See COPYRIGHT for full restrictions       */
-/*************************************************/
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ChemicalCompositionAction.h"
 #include "FEProblemBase.h"
 #include "MooseMesh.h"
 #include "MooseObjectAction.h"
 #include "NonlinearSystemBase.h"
-#include "Thermochimica.h"
 #include "libmesh/string_to_enum.h"
 
-registerMooseAction("BisonApp", ChemicalCompositionAction, "add_variable");
-registerMooseAction("BisonApp", ChemicalCompositionAction, "add_aux_variable");
-registerMooseAction("BisonApp", ChemicalCompositionAction, "add_ic");
-registerMooseAction("BisonApp", ChemicalCompositionAction, "add_user_object");
-registerMooseAction("BisonApp", ChemicalCompositionAction, "add_aux_kernel");
+#ifdef THERMOCHIMICA_ENABLED
+#include "Thermochimica-cxx.h"
+#include "checkUnits.h"
+
+registerMooseAction("ChemicalReactionsApp", ChemicalCompositionAction, "add_variable");
+registerMooseAction("ChemicalReactionsApp", ChemicalCompositionAction, "add_aux_variable");
+registerMooseAction("ChemicalReactionsApp", ChemicalCompositionAction, "add_ic");
+registerMooseAction("ChemicalReactionsApp", ChemicalCompositionAction, "add_user_object");
+registerMooseAction("ChemicalReactionsApp", ChemicalCompositionAction, "add_aux_kernel");
+#endif
 
 InputParameters
 ChemicalCompositionAction::validParams()
@@ -34,10 +32,10 @@ ChemicalCompositionAction::validParams()
   params.addClassDescription("Sets up the thermodynamic model and variables for the "
                              "thermochemistry using Thermochimica.");
   params.addParam<std::vector<std::string>>("elements", "List of chemical elements");
-  params.addParam<FileName>("initial_values", "none", "The CSV file name with initial conditions.");
-  params.addParam<std::string>(
-      "var_type", "aux", "Variable type to be generated, aux (default) or base.");
-  params.addParam<FileName>("thermofile", "none", "Thermodynamics model file");
+  params.addParam<FileName>("initial_values", "The CSV file name with initial conditions.");
+  MooseEnum varType("BASE AUX", "AUX");
+  params.addParam<MooseEnum>("var_type", varType, "Variable type to be generated");
+  params.addParam<FileName>("thermofile", "Thermodynamics model file");
   params.addParam<std::string>("tunit", "K", "Temperature Unit");
   params.addParam<std::string>("punit", "atm", "Pressure Unit");
   params.addParam<std::string>("munit", "moles", "Mass Unit");
@@ -53,9 +51,7 @@ ChemicalCompositionAction::validParams()
 ChemicalCompositionAction::ChemicalCompositionAction(InputParameters params)
   : Action(params),
     _elements(getParam<std::vector<std::string>>("elements")),
-    _var_type(getParam<std::string>("var_type")),
-    _inital_values_file_name(getParam<FileName>("initial_values")),
-    _thermoFile(getParam<FileName>("thermofile")),
+    _var_type(getParam<MooseEnum>("var_type").getEnum<VarType>()),
     _tunit(getParam<std::string>("tunit")),
     _punit(getParam<std::string>("punit")),
     _munit(getParam<std::string>("munit")),
@@ -73,43 +69,42 @@ void
 ChemicalCompositionAction::act()
 {
 #ifdef THERMOCHIMICA_ENABLED
-  if (_current_task == "add_variable" && _var_type == "base")
+  if (_current_task == "add_variable" && _var_type == VarType::Nonlinear)
   {
-    for (unsigned int i = 0; i < _elements.size(); i++)
+    for (const auto i : index_range(_elements))
     {
-      std::string var_name = _elements[i];
-
+      const auto & var_name = _elements[i];
       const bool second = _problem->mesh().hasSecondOrderElements();
-      _problem->addVariable(var_name,
-                            FEType(Utility::string_to_enum<Order>(second ? "SECOND" : "FIRST"),
-                                   Utility::string_to_enum<FEFamily>("LAGRANGE")),
-                            1.0);
 
-      //      _problem->addVariable(var_name, FEType(FIRST, LAGRANGE),1.0);
-    }
-
-    for (unsigned int i = 0; i < _phases.size(); i++)
-    {
-      std::string var_name = _phases[i];
-
-      const bool second = _problem->mesh().hasSecondOrderElements();
       _problem->addVariable(var_name,
                             FEType(Utility::string_to_enum<Order>(second ? "SECOND" : "FIRST"),
                                    Utility::string_to_enum<FEFamily>("LAGRANGE")),
                             1.0);
     }
-    for (unsigned int i = 0; i < _species.size(); i++)
-    {
-      std::string var_name = _species[i];
 
+    for (const auto i : index_range(_phases))
+    {
+      const auto & var_name = _phases[i];
       const bool second = _problem->mesh().hasSecondOrderElements();
+
+      _problem->addVariable(var_name,
+                            FEType(Utility::string_to_enum<Order>(second ? "SECOND" : "FIRST"),
+                                   Utility::string_to_enum<FEFamily>("LAGRANGE")),
+                            1.0);
+    }
+
+    for (const auto i : index_range(_species))
+    {
+      const auto & var_name = _species[i];
+      const bool second = _problem->mesh().hasSecondOrderElements();
+
       _problem->addVariable(var_name,
                             FEType(Utility::string_to_enum<Order>(second ? "SECOND" : "FIRST"),
                                    Utility::string_to_enum<FEFamily>("LAGRANGE")),
                             1.0);
     }
   }
-  else if (_current_task == "add_aux_variable" && _var_type == "aux")
+  else if (_current_task == "add_aux_variable" && _var_type == VarType::Aux)
   {
     std::string aux_var_type = "MooseVariable";
     auto params = _factory.getValidParams(aux_var_type);
@@ -137,7 +132,7 @@ ChemicalCompositionAction::act()
       _problem->addAuxVariable(aux_var_type, var_name, params);
     }
   }
-  else if (_current_task == "add_ic" && _inital_values_file_name != "none")
+  else if (_current_task == "add_ic" && isParamValid("initial_values"))
   {
     readCSV();
     for (auto it : _initial_conditions)
@@ -154,20 +149,20 @@ ChemicalCompositionAction::act()
     //
     // Initiate Chemistry Model
     //
-    if (_thermoFile != "none")
+    if (isParamValid("thermofile"))
     {
+      const auto & thermo_file = getParam<FileName>("thermofile");
+
       char cThermoFileName[120];
       int idbg = 0;
-      Thermochimica::ConvertToFortran(cThermoFileName, sizeof cThermoFileName, _thermoFile.c_str());
+      Thermochimica::ConvertToFortran(cThermoFileName, sizeof cThermoFileName, thermo_file.c_str());
       FORTRAN_CALL(Thermochimica::setthermofilename)(cThermoFileName);
-      //    Moose::out << "CUO initialize " << _thermoFile << "\n";
+
       // Read in thermodynamics model, only once
       FORTRAN_CALL(Thermochimica::ssparsecsdatafile)();
       FORTRAN_CALL(Thermochimica::checkinfothermo)(&idbg);
       if (idbg != 0)
-      {
-        mooseError("Thermochimica data file cannot be parsed.");
-      }
+        paramError("thermofile", "Thermochimica data file cannot be parsed.");
 
       Thermochimica::checkTemperature(_tunit);
       Thermochimica::checkPressure(_punit);
@@ -185,8 +180,7 @@ ChemicalCompositionAction::act()
       FORTRAN_CALL(Thermochimica::setunitmass)(cMFtn);
     }
   }
-
-  else if (_current_task == "add_aux_kernel" && _var_type == "aux")
+  else if (_current_task == "add_aux_kernel" && _var_type == VarType::Aux)
   {
     InputParameters params = _factory.getValidParams("SelfAux");
     params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
@@ -216,11 +210,10 @@ ChemicalCompositionAction::act()
 void
 ChemicalCompositionAction::readCSV()
 {
-  std::ifstream file(_inital_values_file_name.c_str());
+  const auto & filename = getParam<FileName>("initial_values");
+  std::ifstream file(filename.c_str());
   if (!file.good())
-    mooseError("In ChemicalCompositionAction ",
-               _name,
-               ": Error opening file '" + _inital_values_file_name + "'.");
+    paramError("initial_values", "Error opening file '", filename, "'.");
 
   unsigned int n_lines = 0;
   std::string line;
