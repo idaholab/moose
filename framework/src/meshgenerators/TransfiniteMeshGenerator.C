@@ -62,12 +62,13 @@ TransfiniteMeshGenerator::validParams()
   //params.addParam<FunctionName>("top_function",
   //                            "Function expression encoding a paramterization of an edge");
   params.addClassDescription(
-      "Creates a quad mesh given a set of corner vertices and edge types."
-      "The edge type is assumed line by default, if a curvilinear edge is desired"
-      "the user needs to provide either a set of points, via the DISCRETE option, or "
-      "a paramterization via the PARSED option, arc circles can be computed with the flag CIRCARC."
-      "Opposite edges may have different distributions of points prescribed via a bias as long as the"
-      "number of points is identical.");
+      "Creates a QUAD4 mesh given a set of corner vertices and edge types. "
+      "The edge type can be either LINE, CIRCARC, DISCRETE or PARSED, with LINE as the default option. "
+      "For the non-default options the user needs to specify additional parameters via the edge_parameter option "
+      "as follows: for CIRCARC the deviation of the midpoint from an arccircle, for DISCRETE a set of points, or "
+      "a paramterization via the PARSED option. Opposite edges may have different distributions s long as the "
+      "number of points is identical. Along oppsite edges a different point distribution can be prescribed "
+      "via the options bias_x or bias_y for opssiong edges.");
 
   return params;
 }
@@ -218,19 +219,16 @@ TransfiniteMeshGenerator::getParsedEdge(const Point & P1, const Point & P2,
   Real x_coord, y_coord, r_param;
 
   std::vector<std::string> param_coords;
-  //std::vector<Real> yvec;
   MooseUtils::tokenize(parameter, param_coords, 1, "&&");
 
-
   for (unsigned int iter=0; iter<np; iter++)
-  { r_param=param_vec[iter];
-  _parsed_func->Parse(param_coords[0], "r");
-  x_coord=_parsed_func->Eval(&r_param);
-  _parsed_func->Parse(param_coords[1], "r");
-  y_coord=_parsed_func->Eval(&r_param);
-  edge.push_back(Point(x_coord, y_coord, 0.0));
-
-  }
+      { r_param=param_vec[iter];
+        _parsed_func->Parse(param_coords[0], "r");
+        x_coord=_parsed_func->Eval(&r_param);
+        _parsed_func->Parse(param_coords[1], "r");
+        y_coord=_parsed_func->Eval(&r_param);
+        edge.push_back(Point(x_coord, y_coord, 0.0));
+      }
   return edge;
 }
 
