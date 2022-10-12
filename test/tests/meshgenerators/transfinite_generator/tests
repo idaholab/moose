@@ -55,5 +55,14 @@
 
       detail = 'or symbolic expressions.'
     []
+    [parsed_annular]
+      type = 'Exodiff'
+      input = 'parsed_annular_generator.i'
+      cli_args = '--mesh-only'
+      exodiff = 'parsed_annular_generator_in.e'
+      recover = false
+
+      detail = 'Also, PARSED can be used for polar coordinates parametrizations.'
+    []
   []
 []

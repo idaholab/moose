@@ -30,11 +30,12 @@ TransfiniteMeshGenerator::validParams()
 
   params.addRequiredParam<std::vector<Point>>("corners", "The x,y,z positions of the nodes");
   // Define edge types
+
+  params.addRequiredParam<MooseEnum>("bottom", edge_type, "type of the bottom (y) boundary");
+  params.addRequiredParam<MooseEnum>("top", edge_type, "type of the top (y) boundary");
   params.addRequiredParam<MooseEnum>("left", edge_type, "type of the left (x) boundary");
   params.addRequiredParam<MooseEnum>("right", edge_type, "type of the right (x) boundary");
 
-  params.addRequiredParam<MooseEnum>("top", edge_type, "type of the top (y) boundary");
-  params.addRequiredParam<MooseEnum>("bottom", edge_type, "type of the bottom (y) boundary");
   // We need to know the number of points on opposite sides, and if no other parameter is available
   // we shall assume them to be equally distributed
   params.addRequiredParam<unsigned int>("nx",
@@ -43,9 +44,9 @@ TransfiniteMeshGenerator::validParams()
                                         "Number of Nodes on vertical edges, including corners");
 
   // each edge has a different paramter according to its type
-  params.addParam<std::string>("left_parameter", "", "Left side support parameter");
-  params.addParam<std::string>("top_parameter", "", "Top side support parameter");
   params.addParam<std::string>("bottom_parameter", "", "Bottom side support parameter");
+  params.addParam<std::string>("top_parameter", "", "Top side support parameter");
+  params.addParam<std::string>("left_parameter", "", "Left side support parameter");
   params.addParam<std::string>("right_parameter", "", "Right side support parameter");
 
   params.addRangeCheckedParam<Real>(
@@ -79,15 +80,13 @@ TransfiniteMeshGenerator::TransfiniteMeshGenerator(const InputParameters & param
     _corners(getParam<std::vector<Point>>("corners")),
     _nx(getParam<unsigned int>("nx")),
     _ny(getParam<unsigned int>("ny")),
-    _left_type(getParam<MooseEnum>(
-        "left")), // the types will have asserts and defaults such as equidistant lines
-    _right_type(getParam<MooseEnum>("right")),
-    _top_type(getParam<MooseEnum>("top")),
     _bottom_type(getParam<MooseEnum>("bottom")),
-    _left_parameter(getParam<std::string>(
-        "left_parameter")), // so far we intend to allow different parameter types
-    _top_parameter(getParam<std::string>("top_parameter")),
+    _top_type(getParam<MooseEnum>("top")),
+    _left_type(getParam<MooseEnum>("left")),
+    _right_type(getParam<MooseEnum>("right")),
     _bottom_parameter(getParam<std::string>("bottom_parameter")),
+    _top_parameter(getParam<std::string>("top_parameter")),
+    _left_parameter(getParam<std::string>("left_parameter")),
     _right_parameter(getParam<std::string>("right_parameter")),
     _bias_x(getParam<Real>("bias_x")),
     _bias_y(getParam<Real>("bias_y"))
@@ -97,7 +96,7 @@ TransfiniteMeshGenerator::TransfiniteMeshGenerator(const InputParameters & param
    setParserFeatureFlags(_parsed_func);
    _parsed_func->AddConstant("pi", libMesh::pi);
    _func_params.resize(1);
-
+   //No asserts in here, but we output Moose errors as we check consistencies
 }
 std::unique_ptr<MeshBase>
 TransfiniteMeshGenerator::generate()
@@ -108,7 +107,7 @@ TransfiniteMeshGenerator::generate()
   mesh->set_spatial_dimension(2);
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
 
-  // explicitly assign corners since they will be used extensively
+  // explicitly assign corners since they will be used extensively and the ordering may be confusing
   const Point V00 = _corners[0];
   const Point V10 = _corners[1];
   const Point V11 = _corners[2];
@@ -131,10 +130,10 @@ TransfiniteMeshGenerator::generate()
   std::vector<Point> edge_left;   // parametrized via ny
   std::vector<Point> edge_right;  // parametrized via ny
 
-  edge_bottom = getEdge(V00, V10, _nx, _bottom_type, _bottom_parameter, outward_vec[0], _bias_x);
-  edge_top = getEdge(V01, V11, _nx, _top_type, _top_parameter,outward_vec[1], _bias_x);
-  edge_left = getEdge(V00, V01, _ny, _left_type, _left_parameter,outward_vec[2], _bias_y);
-  edge_right = getEdge(V10, V11, _ny, _right_type, _right_parameter,outward_vec[3], _bias_y);
+  edge_bottom = getEdge (V00, V10, _nx, _bottom_type, _bottom_parameter, outward_vec[0], _bias_x);
+  edge_top = getEdge (V01, V11, _nx, _top_type, _top_parameter,outward_vec[1], _bias_x);
+  edge_left = getEdge (V00, V01, _ny, _left_type, _left_parameter,outward_vec[2], _bias_y);
+  edge_right = getEdge (V10, V11, _ny, _right_type, _right_parameter,outward_vec[3], _bias_y);
 
   // Use for the parametrization on edge pairs, currently generated on the fly
   // on the [0,1] interval
@@ -146,6 +145,7 @@ TransfiniteMeshGenerator::generate()
   unsigned el_id = 0;
   Point newPt;
   Real r1_basis, r2_basis, s1_basis, s2_basis;
+
   for (unsigned idx = 0; idx < _nx; idx++)
   { // need more asserts here and possibly use the FP standards in MOOSE
     rx_coord = double(idx) / double(_nx - 1);
@@ -209,29 +209,6 @@ TransfiniteMeshGenerator::generate()
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
 
-std::vector<Point>
-TransfiniteMeshGenerator::getParsedEdge(const Point & P1, const Point & P2,
-            const unsigned int & np, const std::string & parameter, const Real & bias)
-{
-  std::vector<Point> edge;
-  std::vector<Real> param_vec;
-  param_vec=getParametrization(1.0, np, 1.0);
-  Real x_coord, y_coord, r_param;
-
-  std::vector<std::string> param_coords;
-  MooseUtils::tokenize(parameter, param_coords, 1, "&&");
-
-  for (unsigned int iter=0; iter<np; iter++)
-      { r_param=param_vec[iter];
-        _parsed_func->Parse(param_coords[0], "r");
-        x_coord=_parsed_func->Eval(&r_param);
-        _parsed_func->Parse(param_coords[1], "r");
-        y_coord=_parsed_func->Eval(&r_param);
-        edge.push_back(Point(x_coord, y_coord, 0.0));
-      }
-  return edge;
-}
-
 
 std::vector<Point>
 TransfiniteMeshGenerator::getEdge(const Point & P1,
@@ -246,22 +223,112 @@ TransfiniteMeshGenerator::getEdge(const Point & P1,
   std::vector<Real> param_vec;
   Real edge_length=(P2-P1).norm();
   param_vec=getParametrization(edge_length, np, bias);
-  Real rx;
 
   switch (type)
   {
     case 1:
-      for (unsigned iter = 0; iter < np; iter++)
+      edge = getLineEdge(P1, P2, np, param_vec);
+      break;
+    case 2:
+      edge = getCircarcEdge(P1, P2, np, parameter, outward);
+      break;
+    case 3:
+       edge = getDiscreteEdge(P1, P2, np, parameter);
+      break;
+    case 4:
+      edge = getParsedEdge(P1, P2, np, parameter);
+      break;
+  }
+  return edge;
+}
+
+
+std::vector<Point>
+TransfiniteMeshGenerator::getLineEdge(const Point & P1, const Point & P2,
+            const unsigned int & np, const std::vector<Real> & param_vec)
+{
+  std::vector<Point> edge;
+  Real rx;
+
+  for (unsigned iter = 0; iter < np; iter++)
       {
         rx=param_vec[iter];
         Point newPt = P1 * (1.0 - rx) + P2 * rx;
         edge.push_back(newPt);
       };
-      break;
-    case 2:
-      for (unsigned iter = 0; iter < np; iter++)
+
+  return edge;
+}
+
+std::vector<Point>
+TransfiniteMeshGenerator::getParsedEdge(const Point & P1, const Point & P2,
+            const unsigned int & np, const std::string & parameter)
+{
+  std::vector<Point> edge;
+  //std::vector<Real> param_vec;
+  //param_vec=getParametrization(1.0, np, 1.0);
+  Real x_coord, y_coord, r_param;
+
+  std::vector<std::string> param_coords;
+  MooseUtils::tokenize(parameter, param_coords, 1, "&&");
+
+  for (unsigned int iter=0; iter<np; iter++)
+      { //r_param=param_vec[iter];
+        r_param=double(iter)/double(np-1);
+        _parsed_func->Parse(param_coords[0], "r");
+        x_coord=_parsed_func->Eval(&r_param);
+        _parsed_func->Parse(param_coords[1], "r");
+        y_coord=_parsed_func->Eval(&r_param);
+        edge.push_back(Point(x_coord, y_coord, 0.0));
+      }
+
+  if ((edge[0]-P1).norm()>1e-14) mooseError("The parametrization does not fit the first vertex on the edge.");
+  if ((edge[np-1]-P2).norm()>1e-14) mooseError("The parametrization does not fit the end vertex on the edge.");
+
+  return edge;
+}
+
+std::vector<Point>
+TransfiniteMeshGenerator::getDiscreteEdge(const Point & P1, const Point & P2,
+            const unsigned int & np, const std::string & parameter)
+{
+  std::vector<Point> edge;
+
+  std::vector<std::string> string_points;
+  MooseUtils::tokenize(parameter, string_points, 1, "\n");
+  if (string_points.size() != np)
+    mooseError("DISCRETE: the number of discrete points does not match the number of points on opposite edge.");
+  for (unsigned iter = 0; iter < string_points.size(); iter++)
       {
-        Real height = MooseUtils::convert<Real>(parameter, true);
+        std::vector<Real> point_vals;
+        MooseUtils::tokenizeAndConvert(string_points[iter], point_vals, " ");
+        edge.push_back(Point(point_vals[0], point_vals[1], point_vals[2]));
+      }
+
+  if ((edge[0]-P1).norm()>1e-14) mooseError("The first discrete point does not fit the corresponding edge vertex."
+          "Note: discrete points need to replicate the edge corners.");
+  if ((edge[np-1]-P2).norm()>1e-14) mooseError("The last discrete point does not fit the corresponding edge vertex."
+          "Note: discrete points need to replicate the edge corners.");
+
+  return edge;
+}
+
+std::vector<Point>
+TransfiniteMeshGenerator::getCircarcEdge(const Point & P1,
+                                  const Point & P2,
+                                  const unsigned int & np,
+                                  const std::string & parameter,
+                                  const Point & outward)
+{
+  std::vector<Point> edge;
+  //std::vector<Real> param_vec;
+  //Real edge_length=(P2-P1).norm();
+  //param_vec=getParametrization(edge_length, np, bias);
+  Real rx;
+  Real height = MooseUtils::convert<Real>(parameter, true);
+
+  for (unsigned iter = 0; iter < np; iter++)
+      {
         rx = double(iter) / double(np - 1);
         Point P3 = computeMidPoint(P1, P2, height, outward);
         Real rad = computeRadius(P1, P2, P3);
@@ -283,23 +350,6 @@ TransfiniteMeshGenerator::getEdge(const Point & P1,
         Real y = P0(1) + rad * std::sin(interval);
         edge.push_back(Point(x, y, 0.0));
       };
-      break;
-    case 3:
-    {
-      std::vector<std::string> string_points;
-      MooseUtils::tokenize(parameter, string_points, 1, "\n");
-      for (unsigned iter = 0; iter < string_points.size(); iter++)
-      {
-        std::vector<Real> point_vals;
-        MooseUtils::tokenizeAndConvert(string_points[iter], point_vals, " ");
-        edge.push_back(Point(point_vals[0], point_vals[1], point_vals[2]));
-      }
-    }
-    break;
-    case 4:
-      edge=getParsedEdge(P1,P2,np,parameter, bias);
-      break;
-  }
   return edge;
 }
 
@@ -318,7 +368,7 @@ TransfiniteMeshGenerator::getPolarAngle(const Point & Px) const
   Real x = Px(0);
   Real y = Px(1);
   // define quadrants
-  const bool q1 = (x > 0 && y > 0);
+  //const bool q1 = (x > 0 && y > 0); no need to use it
   const bool q2 = (x < 0 && y > 0);
   const bool q3 = (x < 0 && y < 0);
   const bool q4 = (x > 0 && y < 0);

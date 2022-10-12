@@ -33,21 +33,23 @@ protected:
   const std::vector<Point> & _corners;
   const unsigned int _nx;
   const unsigned int _ny;
-  const Real _bias_x;
-  const Real _bias_y;
 
   // We allow different types
+  const MooseEnum _bottom_type;
+  const MooseEnum _top_type;
   const MooseEnum _left_type;
   const MooseEnum _right_type;
-  const MooseEnum _top_type;
-  const MooseEnum _bottom_type;
+
 
   // So far the intention is to read in paramters a strings and
   // typecast them after parsing and checking the edge type
-  const std::string _left_parameter;
-  const std::string _top_parameter;
   const std::string _bottom_parameter;
+  const std::string _top_parameter;
+  const std::string _left_parameter;
   const std::string _right_parameter;
+
+  const Real _bias_x;
+  const Real _bias_y;
 
   /// function parser object describing the combinatorial geometry
   SymFunctionPtr _parsed_func;
@@ -61,6 +63,27 @@ protected:
                              const Point & outward,
                              const Real & bias);
 
+  std::vector<Point> getParsedEdge(const Point & P1,
+                    const Point & P2,
+                    const unsigned int & np,
+                    const std::string & parameter);
+
+  std::vector<Point> getCircarcEdge(const Point & P1,
+                    const Point & P2,
+                    const unsigned int & np,
+                    const std::string & parameter,
+                    const Point & outward);
+
+  std::vector<Point> getDiscreteEdge(const Point & P1,
+                    const Point & P2,
+                    const unsigned int & np,
+                    const std::string & parameter);
+
+  std::vector<Point> getLineEdge(const Point & P1,
+                    const Point & P2,
+                    const unsigned int & np,
+                    const std::vector<Real> & param_vec);
+
   // The following 3 routines are needed for generating arc circles given the user input
   // The input is expected to be the distance from a stright line at the middle of an edge
   Real computeRadius(const Point & P1,
@@ -73,12 +96,6 @@ protected:
                     const Point & P2,
                     const Real & dist,
                     const Point & outward) const;
-
-  std::vector<Point> getParsedEdge(const Point & P1,
-                    const Point & P2,
-                    const unsigned int & np,
-                    const std::string & parameter,
-                    const Real & bias);
 
   // The following routines are necessary for the paramterization of opposite edges
   // To assure we have the same parameterization on opposite edges we need to map it to
