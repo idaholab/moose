@@ -56,7 +56,7 @@ ADReal
 FreundlichPenaltyInterface::computeQpResidual(Moose::DGResidualType type)
 {
   ADReal r = 0;
-  ADReal ln_trans_conc = ln_trans_conc = _d1[_qp] - _d2[_qp] * _temperature[_qp];
+  ADReal ln_trans_conc = _d1[_qp] - _d2[_qp] * _temperature[_qp];
   ADReal subresidual = 0;
   switch (type)
   {
