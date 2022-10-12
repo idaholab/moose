@@ -1,16 +1,34 @@
 [Tests]
   issues = '#1476'
   design = 'source/constraints/PenaltyPeriodicSegmentalConstraint.md'
-  [./test]
+  [./penalty_periodic_simple2d]
     type = 'Exodiff'
     input = 'penalty_periodic_simple2d.i'
     exodiff = 'penalty_periodic_simple2d_out.e'
     requirement = "The system shall include assemble primary/secondary mortar constraints coupled to scalar variables."
   [../]
-  [./test]
+  [./periodic_simple2d]
     type = 'Exodiff'
     input = 'periodic_simple2d.i'
     exodiff = 'periodic_simple2d_out.e'
     requirement = "The system shall include assemble lower variable mortar constraints coupled to scalar variables."
+  [../]
+  [./penalty_periodic_checker2d]
+    type = 'CSVDiff'
+    input = 'penalty_periodic_checker2d.i'
+    csvdiff = 'penalty_periodic_checker2d_out.csv'
+    requirement = "Nonuniform conductivity is handled across mortar surface."
+  [../]
+  [./periodic_checker2d]
+    type = 'CSVDiff'
+    input = 'periodic_checker2d.i'
+    csvdiff = 'periodic_checker2d_out.csv'
+    requirement = "Nonuniform conductivity is handled across mortar surface with Lagrange multipliers."
+  [../]
+  [./testperiodicsole]
+    type = 'CSVDiff'
+    input = 'testperiodicsole.i'
+    csvdiff = 'testperiodicsole_out.csv'
+    requirement = "Assembly is correct for segregated coupled scalar variables in mortar constraint."
   [../]
 []

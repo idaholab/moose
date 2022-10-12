@@ -83,10 +83,7 @@ PenaltyPeriodicSegmentalConstraint::computeQpResidual(const Moose::MortarType mo
 
   switch (mortar_type)
   {
-    // comment
     case Moose::MortarType::Secondary:
-      // if (_i == 0)
-      //   std::cout << "r-second" << r << std::endl;
       r *= _test_secondary[_i][_qp];
       break;
     case Moose::MortarType::Primary:

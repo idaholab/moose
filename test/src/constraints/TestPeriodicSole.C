@@ -97,10 +97,7 @@ TestPeriodicSole::computeQpResidual(const Moose::MortarType mortar_type)
 
   switch (mortar_type)
   {
-    // comment
     case Moose::MortarType::Secondary:
-      // if (_i == 0)
-      //   std::cout << "r-second" << r << std::endl;
       r *= _test_secondary[_i][_qp];
       break;
     case Moose::MortarType::Primary:
