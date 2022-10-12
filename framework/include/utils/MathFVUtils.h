@@ -175,6 +175,14 @@ enum class InterpMethod
   QUICK
 };
 
+/*
+ * Converts from the interpolation method to the interpolation enum.
+ * This routine is here in lieu of using a MooseEnum for InterpMethod
+ * @param interp_method the name of the interpolation method
+ * @return the interpolation method
+ */
+InterpMethod selectInterpolationMethod(std::string interp_method);
+
 /**
  * Produce the interpolation coefficients in the equation:
  *

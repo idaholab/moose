@@ -32,7 +32,7 @@ NSFVHeatFluxBC::validParams()
 
   params.addCoupledVar(NS::porosity, "porosity");
   params.addParam<PostprocessorName>("average_porosity",
-                                     "postprocessor that provides domain-averaged proosity");
+                                     "postprocessor that provides domain-averaged porosity");
   params.addParam<PostprocessorName>(
       "average_k_fluid", "postprocessor that provides domain-averaged fluid thermal conductivity");
   params.addParam<PostprocessorName>(

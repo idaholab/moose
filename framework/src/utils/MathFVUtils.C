@@ -84,6 +84,33 @@ onBoundary(const std::set<SubdomainID> & subs, const FaceInfo & fi)
   }
 }
 
+InterpMethod
+selectInterpolationMethod(std::string interp_method)
+{
+  if (interp_method == "average")
+    return Moose::FV::InterpMethod::Average;
+  else if (interp_method == "harmonic")
+    return Moose::FV::InterpMethod::HarmonicAverage;
+  else if (interp_method == "skewness-corrected")
+    return Moose::FV::InterpMethod::SkewCorrectedAverage;
+  else if (interp_method == "upwind")
+    return Moose::FV::InterpMethod::Upwind;
+  else if (interp_method == "rc")
+    return Moose::FV::InterpMethod::RhieChow;
+  else if (interp_method == "vanLeer")
+    return Moose::FV::InterpMethod::VanLeer;
+  else if (interp_method == "min_mod")
+    return Moose::FV::InterpMethod::MinMod;
+  else if (interp_method == "sou")
+    return Moose::FV::InterpMethod::SOU;
+  else if (interp_method == "quick")
+    return Moose::FV::InterpMethod::QUICK;
+  else
+    mooseError("Interpolation method ",
+               interp_method,
+               " is not currently an option in Moose::FV::selectInterpolationMethod");
+}
+
 template ADReal gradUDotNormal(
     const ADReal &, const ADReal &, const FaceInfo &, const MooseVariableFV<Real> &, bool);
 template ADReal
