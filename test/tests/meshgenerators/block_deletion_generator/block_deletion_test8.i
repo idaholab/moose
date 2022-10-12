@@ -1,5 +1,5 @@
 [Mesh]
-  [./gmg]
+  [gmg]
     type = GeneratedMeshGenerator
     dim = 2
     nx = 5
@@ -10,50 +10,50 @@
     ymax = 5
   []
 
-  [./SubdomainBoundingBox1]
+  [SubdomainBoundingBox1]
     type = SubdomainBoundingBoxGenerator
     input = gmg
     block_id = 1
     bottom_left = '0 0 0'
     top_right = '4 4 1'
-  [../]
-  [./interior_nodeset]
-    type = GenerateBoundingBoxNodeSet
+  []
+  [interior_nodeset]
+    type = BoundingBoxNodeSetGenerator
     input = SubdomainBoundingBox1
     new_boundary = interior_ns
     bottom_left = '2 2 0'
     top_right = '3 3 1'
-  [../]
-  [./ed0]
+  []
+  [ed0]
     type = BlockDeletionGenerator
     block = 1
     input = interior_nodeset
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./dt]
+  [dt]
     type = TimeDerivative
     variable = u
-  [../]
-  [./diff]
+  []
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./top]
+  [top]
     type = DirichletBC
     variable = u
     boundary = bottom
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
