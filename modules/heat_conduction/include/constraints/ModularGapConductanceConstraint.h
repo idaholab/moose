@@ -66,9 +66,10 @@ private:
   virtual void setGapGeometryParameters(const InputParameters & params,
                                         const Moose::CoordinateSystemType coord_sys,
                                         unsigned int axisymmetric_radial_coord,
-                                        GapGeometry & gap_geometry_type,
-                                        Point & p1,
-                                        Point & p2);
+                                        GapGeometry & gap_geometry_type);
+
+  /// Automatically set up axis/center for 2D cartesian problems with cylindrical/spherical gap geometry
+  void deduceGeometryParameters();
 
   /// Gap width to pass into flux models
   ADReal _gap_width;
