@@ -31,6 +31,23 @@ extendable MOOSE input file. The {{module}} module is completely extendable so i
 pages should be consulted for specific behaviors of each user-defined object.
 !template-end!
 
+!template! item key=user-characteristics
+Like [!ac](MOOSE), there are three kinds of users working on the {{module}} module:
+
+- +{{module}} module Developers+: These are the core developers of the {{module}} module.
+  They are responsible for following and enforcing the software development standards of the module,
+  as well as designing, implementing, and maintaining the software.
+- +Developers+: A scientist or engineering that uses the {{module}} module alongside [!ac](MOOSE)
+  to build their own application. This user will typically have a background in modeling or simulation
+  techniques (and perhaps numerical analysis) but may only have a limited skillset when it comes to
+  code development using the C++ language. This is the primary focus group of the module. In many cases,
+  these developers will be encouraged to contribute module-appropriate code back to the {{module}}
+  module, or to [!ac](MOOSE) itself.
+- +Analysts+: These are users that will run the code and perform analysis on the simulations they perform.
+  These users may interact with developers of the system requesting new features and reporting bugs
+  found and will typically make heavy use of the input file format.
+!template-end!
+
 !template item key=assumptions-and-dependencies-intro
 The {{module}} module is developed using MOOSE and can itself be based on various MOOSE modules, as such
 the [!ac](SRS) for the {{module}} module is dependent upon the files listed at the beginning of this
@@ -97,12 +114,30 @@ related to system security. The software is designed to run completely in user-s
 no elevated privileges required nor recommended.
 !template-end!
 
+!template! item key=information-management
+The core framework and all modules in their entirety will be made publicly available on an appropriate
+repository hosting site. Day-to-day backups and security services will be provided by the hosting service.
+More information about MOOSE backups of the public repository on [!ac](INL)-hosted services can be found
+on the following page: [sqa/github_backup.md]
+!template-end!
+
+!template! item key=policies-and-regulations
+!include framework_srs.md start=policies-and-regulations-begin end=policies-and-regulations-finish
+!template-end!
+
 !template! item key=system-life-cycle
 [!ac](MOOSE)-based development follows various agile methods. The system is continuously
 built and deployed in a piecemeal fashion since objects within the system are more or less
 independent. Every new object requires a test, which in turn requires an associated
 requirement and design description. The {{module}} module development team follows the [!ac](NQA-1)
 standards.
+!template-end!
+
+!template! item key=packaging
+No special requirements are needed for packaging or shipping any media containing [!ac](MOOSE) and
+{{module}} module source code. However, some [!ac](MOOSE)-based applications that use the
+{{module}} module may be export-controlled, in which case all export control restrictions must
+be adhered to when packaging and shipping media.
 !template-end!
 
 !template item key=verification
