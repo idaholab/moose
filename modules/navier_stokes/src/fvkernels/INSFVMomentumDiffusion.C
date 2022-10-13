@@ -23,12 +23,20 @@ INSFVMomentumDiffusion::validParams()
   params.addRequiredParam<MooseFunctorName>(NS::mu, "The viscosity");
   params.addClassDescription(
       "Implements the Laplace form of the viscous stress in the Navier-Stokes equation.");
+
+  MooseEnum coeff_interp_method("average harmonic", "harmonic");
+  params.addParam<MooseEnum>("mu_interp_method",
+                             coeff_interp_method,
+                             "Switch that can select face interpolation method for the viscosity.");
+
   params.set<unsigned short>("ghost_layers") = 2;
   return params;
 }
 
 INSFVMomentumDiffusion::INSFVMomentumDiffusion(const InputParameters & params)
-  : INSFVFluxKernel(params), _mu(getFunctor<ADReal>(NS::mu))
+  : INSFVFluxKernel(params),
+    _mu(getFunctor<ADReal>(NS::mu)),
+    _mu_interp_method(Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("mu_interp_method")))
 {
   if ((_var.faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage) &&
       (_tid == 0))
@@ -38,9 +46,10 @@ INSFVMomentumDiffusion::INSFVMomentumDiffusion(const InputParameters & params)
 ADReal
 INSFVMomentumDiffusion::computeStrongResidual()
 {
-  const auto face = Moose::FV::makeCDFace(*_face_info, faceArgSubdomains());
   const auto dudn = gradUDotNormal();
-  const auto face_mu = _mu(face);
+  ADReal face_mu;
+  Moose::FV::interpolate(
+      _mu_interp_method, face_mu, _mu(elemFromFace()), _mu(neighborFromFace()), *_face_info, true);
 
   if (_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
       _face_type == FaceInfo::VarFaceNeighbors::BOTH)

@@ -28,7 +28,10 @@ FVDiffusion::validParams()
 }
 
 FVDiffusion::FVDiffusion(const InputParameters & params)
-  : FVFluxKernel(params), _coeff(getFunctor<ADReal>("coeff"))
+  : FVFluxKernel(params),
+    _coeff(getFunctor<ADReal>("coeff")),
+    _coeff_interp_method(
+        Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("coeff_interp_method")))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError(
@@ -37,13 +40,6 @@ FVDiffusion::FVDiffusion(const InputParameters & params)
       "'--with-ad-indexing-type=global'. Note that global indexing is now the default "
       "configuration for AD indexing type.");
 #endif
-
-  const auto & interp_method = getParam<MooseEnum>("coeff_interp_method");
-  if (interp_method == "average")
-    _coeff_interp_method = Moose::FV::InterpMethod::Average;
-  else if (interp_method == "harmonic")
-    _coeff_interp_method = Moose::FV::InterpMethod::HarmonicAverage;
-
   if ((_var.faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage) &&
       (_tid == 0))
     adjustRMGhostLayers(std::max((unsigned short)(3), _pars.get<unsigned short>("ghost_layers")));

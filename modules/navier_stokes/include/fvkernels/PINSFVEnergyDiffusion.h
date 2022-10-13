@@ -10,6 +10,7 @@
 #pragma once
 
 #include "FVFluxKernel.h"
+#include "MathFVUtils.h"
 
 /**
  * A flux kernel for diffusing energy in porous media across cell faces, using a scalar
@@ -30,4 +31,6 @@ protected:
   const Moose::Functor<ADReal> & _eps;
   /// whether the diffusivity should be multiplied by porosity
   const bool _porosity_factored_in;
+  /// which interpolation method for the diffusivity on faces
+  const Moose::FV::InterpMethod _k_interp_method;
 };
