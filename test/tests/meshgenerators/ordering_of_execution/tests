@@ -1,0 +1,17 @@
+[Tests]
+  issues = '#13814'
+  design = Mesh/index.md
+
+  [order]
+    requirement = "The system shall support the modification of the mesh "
+
+    [depend_order]
+      type = 'Exodiff'
+      input = 'modifier_depend_order.i'
+      exodiff = 'modifier_depend_order_out.e'
+      mesh_mode = 'replicated'
+
+      detail = "without restriction to the order of the supplied inputs with"
+    []
+  []
+[]

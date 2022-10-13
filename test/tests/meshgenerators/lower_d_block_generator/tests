@@ -1,23 +1,49 @@
 [Tests]
   design = 'meshgenerators/LowerDBlockFromSidesetGenerator.md'
   issues = '#11640'
-  [./mesh]
+  [mesh]
     requirement = 'The system shall be able to create different subdomains'
-    [./ids]
+    [ids]
       type = 'Exodiff'
       input = 'ids.i'
       exodiff = 'ids_out.e'
       mesh_mode = 'REPLICATED'
       recover = false
       detail = 'using boundary ids.'
-    [../]
-    [./names]
+    []
+    [names]
       type = 'Exodiff'
       input = 'names.i'
       exodiff = 'names_out.e'
       detail = 'using boundary names.'
       mesh_mode = 'REPLICATED'
       recover = false
-    [../]
-  [../]
+    []
+  []
+
+  [lower]
+    requirement = "The system shall support the creation of lower dimensional elements on an "
+                  "existing sideset for"
+    issues = '#13814'
+    design = Mesh/index.md
+
+    [first_order]
+      type = Exodiff
+      exodiff = 'lower_d_out.e'
+      input = 'lower_d.i'
+      mesh_mode = REPLICATED
+
+      detail = "first-order and"
+    []
+    [second_order]
+      type = Exodiff
+      exodiff = 'lower_d_second_order_out.e'
+      input = 'lower_d.i'
+      mesh_mode = REPLICATED
+      cli_args = 'Mesh/second_order=true Outputs/file_base=lower_d_second_order_out '
+                 'GlobalParams/order=SECOND Mesh/gen/nx=5 Mesh/gen/ny=5'
+
+      detail = "second-order elements."
+    []
+  []
 []

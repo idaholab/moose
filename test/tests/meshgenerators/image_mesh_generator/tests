@@ -1,5 +1,5 @@
 [Tests]
-  [./image_mesh_generator_test]
+  [image_mesh_generator_test]
     type = 'Exodiff'
     input = 'image_mesh_generator.i'
     cli_args = '--mesh-only'
@@ -9,5 +9,31 @@
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false
-  [../]
+  []
+
+  [image]
+    requirement = "The system shall support creating subdomains from"
+    issues = '#13814'
+    design = Mesh/index.md
+  
+    [2d]
+      # Test ability to read in a single 20x20 image and assign subdomain ids based on image
+      type = Exodiff
+      input = image_2d.i
+      exodiff = image_2d_out.e
+      vtk = true
+      method = '!DBG' # This test is slow in debug b/c of calls to libMesh::MeshTools::libmesh_assert_valid_dof_ids
+
+      detail = "2D and"
+    []
+    [3d]
+      # Test ability to read in a single 20x20x20 stack of images and assign subdomain ids based on image
+      type = Exodiff
+      input = image_3d.i
+      exodiff = image_3d_out.e
+      vtk = true
+
+      detail = "3D images."
+    []
+  []
 []
