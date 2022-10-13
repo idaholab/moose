@@ -66,8 +66,6 @@ SideSetsFromBoundingBoxGenerator::SideSetsFromBoundingBoxGenerator(
     _input(getMesh("input")),
     _location(parameters.get<MooseEnum>("location")),
     _block_id(parameters.get<SubdomainID>("block_id")),
-    _boundaries_old(),
-    _boundary_new(),
     _bounding_box(MooseUtils::buildBoundingBox(parameters.get<RealVectorValue>("bottom_left"),
                                                parameters.get<RealVectorValue>("top_right"))),
     _boundary_id_overlap(parameters.get<bool>("boundary_id_overlap"))
@@ -77,15 +75,14 @@ SideSetsFromBoundingBoxGenerator::SideSetsFromBoundingBoxGenerator(
   else if (parameters.isParamSetByUser("boundary_id_old"))
     _boundaries_old = parameters.get<std::vector<BoundaryName>>("boundary_id_old");
   else
-    mooseError(
-        "Either boundaries_old or boundary_id_old(deprecated) must be specified in the test.");
+    mooseError("Either boundaries_old or boundary_id_old (deprecated) must be specified.");
 
   if (parameters.isParamSetByUser("boundary_new"))
     _boundary_new = parameters.get<BoundaryName>("boundary_new");
   else if (parameters.isParamSetByUser("boundary_id_new"))
     _boundary_new = parameters.get<BoundaryName>("boundary_id_new");
   else
-    mooseError("Either boundary_new or boundary_id_new(deprecated) must be specified in the test.");
+    mooseError("Either boundary_new or boundary_id_new (deprecated) must be specified.");
 }
 
 std::unique_ptr<MeshBase>
@@ -117,7 +114,7 @@ SideSetsFromBoundingBoxGenerator::generate()
 
   // If the new boundary id/name is not valid, make it instead
   if (boundary_id_new == Moose::INVALID_BOUNDARY_ID)
-    boundary_id_new = cast_int<boundary_id_type>(*(boundary_info.get_boundary_ids().rbegin()) + 1);
+    boundary_id_new = MooseMeshUtils::getNextFreeBoundaryID(*mesh);
 
   if (!_boundary_id_overlap)
   {
