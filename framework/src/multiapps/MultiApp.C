@@ -124,7 +124,7 @@ MultiApp::validParams()
   params.addParam<Real>("global_time_offset",
                         0,
                         "The time offset relative to the parent application for the purpose of "
-                        "starting a subapp at different time from the parent application. The "
+                        "starting a subapp at a different time from the parent application. The "
                         "global time will be ahead by the offset specified here.");
   params.addParam<Real>("reset_time",
                         std::numeric_limits<Real>::max(),
