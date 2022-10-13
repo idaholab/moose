@@ -113,18 +113,18 @@ PINSFVRhieChowInterpolator::pinsfvSetup()
 }
 
 void
-PINSFVRhieChowInterpolator::execute()
+PINSFVRhieChowInterpolator::residualSetup()
 {
-  // We have to do this right before execution because user objects are initialized before
+  // We cant do this on initialSetup because user objects are initialized before
   // functions are, so the porosity function is not available for interpolation-reconstruction
-  // on initialSetup(). However, on execution on INITIAL, everything should be initialized
+  // on initialSetup().
   if (!_pinsfv_setup_done)
   {
     pinsfvSetup();
     _pinsfv_setup_done = true;
   }
 
-  INSFVRhieChowInterpolator::execute();
+  INSFVRhieChowInterpolator::residualSetup();
 }
 
 bool

@@ -44,11 +44,9 @@ INSFVRhieChowInterpolator::validParams()
   params += BlockRestrictable::validParams();
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
   exec_enum.addAvailableFlags(EXEC_PRE_KERNELS);
-  exec_enum = {EXEC_INITIAL, EXEC_PRE_KERNELS};
+  exec_enum = {EXEC_PRE_KERNELS};
   params.suppressParameter<ExecFlagEnum>("execute_on");
 
-  // Avoid running interpolator after user objects consumers
-  params.set<bool>("force_preaux") = true;
   // Avoid uninitialized residual objects
   params.suppressParameter<bool>("force_preic");
 

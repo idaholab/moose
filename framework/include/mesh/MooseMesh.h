@@ -448,6 +448,16 @@ public:
   std::unordered_set<dof_id_type> getBoundaryActiveNeighborElemIds(BoundaryID bid) const;
 
   /**
+   * Returns whether a boundary (given by its id) is crossing through a group of blocks,
+   * by which we mean that elements on both sides of the boundary are in those blocks
+   * @param bid the id of the boundary of interest
+   * @param blk_group the group of blocks potentially traversed
+   * @return whether the boundary crosses between the subdomains in the group
+   */
+  bool isBoundaryInternalToSubdomains(BoundaryID bid,
+                                      const std::set<SubdomainID> & blk_group) const;
+
+  /**
    * Returns a read-only reference to the set of subdomains currently
    * present in the Mesh.
    */

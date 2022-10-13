@@ -83,11 +83,31 @@ VolumetricFlowRate::VolumetricFlowRate(const InputParameters & parameters)
 void
 VolumetricFlowRate::initialSetup()
 {
-  // We must make sure the A coefficients in the Rhie Chow interpolator are present on
-  // both sides of the boundaries so that interpolation coefficients may be computed
-  if (_rc_uo)
+  if (_rc_uo && _rc_uo->velocityInterpolationMethod() == Moose::FV::InterpMethod::RhieChow)
+  {
+    // We must make sure the A coefficients in the Rhie Chow interpolator are present on
+    // both sides of the boundaries so that interpolation coefficients may be computed
     for (const auto bid : boundaryIDs())
       const_cast<INSFVRhieChowInterpolator *>(_rc_uo)->ghostADataOnBoundary(bid);
+
+    // On INITIAL, we cannot compute Rhie Chow coefficients on internal surfaces because
+    // - the time integrator is not ready to compute time derivatives
+    // - the setup routine is called too early for porosity functions to be initialized
+    // We must check that the boundaries requested are all external
+    if (getExecuteOnEnum().contains(EXEC_INITIAL))
+      for (const auto bid : boundaryIDs())
+      {
+        if (_mesh.isBoundaryInternalToSubdomains(bid, _rc_uo->blockIDs()))
+          paramError(
+              "execute_on",
+              "Boundary '",
+              _mesh.getBoundaryName(bid),
+              "' (id=",
+              bid,
+              ") has been detected to be internal to the flow domain.\n"
+              "Volumetric flow rates cannot be computed on internal flow boundaries on INITIAL");
+      }
+  }
 }
 
 void
