@@ -129,6 +129,16 @@ PBSodiumFluidProperties::cv_from_p_T(Real pressure, Real temperature) const
 Real
 PBSodiumFluidProperties::cp_from_p_T(Real /*pressure*/, Real temperature) const
 {
+  if (temperature < 388.15)
+  {
+    temperature = 388.15;
+    _console << "Warning - minimum temperature in cp caluclation bounded to 388.15 K \n";
+  }
+  if (temperature > 1148.15)
+  {
+    temperature = 1148.15;
+    _console << "Warning - maximum temperature bounded in cp calculation to 1148.15 \n";
+  }
   temperature = temperature_correction(temperature);
   Real A28 = 7.3898e5;
   Real A29 = 3.154e5;
@@ -181,6 +191,18 @@ PBSodiumFluidProperties::mu_from_rho_T(Real /*rho*/, Real temperature) const
 Real
 PBSodiumFluidProperties::k_from_p_T(Real /*pressure*/, Real temperature) const
 {
+  if (temperature < 388.15)
+  {
+    temperature = 388.15;
+    _console << "Warning - minimum temperature in thermal conductivity caluclation bounded to "
+                "388.15 K \n";
+  }
+  if (temperature > 1148.15)
+  {
+    temperature = 1148.15;
+    _console << "Warning - maximum temperature bounded in thermal conductivity calculation to "
+                "1148.15 \n";
+  }
   Real A48 = 1.1045e2;
   Real A49 = -6.5112e-2;
   Real A50 = 1.5430e-5;

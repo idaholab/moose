@@ -1662,9 +1662,9 @@ SubChannel1PhaseProblem::computeh(int iblock)
           if (iz == first_node)
           {
             PetscScalar value_vec_ct =
-                -2.0 * alpha * (*_mdot_soln)(node_in)*_WijPrime(i_gap, cross_index);
-            value_vec_ct += alpha * (*_mdot_soln)(node_in_j)*_WijPrime(i_gap, cross_index);
-            value_vec_ct += alpha * (*_mdot_soln)(node_in_i)*_WijPrime(i_gap, cross_index);
+                -2.0 * alpha * (*_h_soln)(node_in)*_WijPrime(i_gap, cross_index);
+            value_vec_ct += alpha * (*_h_soln)(node_in_j)*_WijPrime(i_gap, cross_index);
+            value_vec_ct += alpha * (*_h_soln)(node_in_i)*_WijPrime(i_gap, cross_index);
             PetscInt row_vec_ct = i_ch + _n_channels * iz_ind;
             VecSetValues(_hc_cross_derivative_rhs, 1, &row_vec_ct, &value_vec_ct, ADD_VALUES);
           }
@@ -3153,14 +3153,19 @@ SubChannel1PhaseProblem::externalSolve()
   _Wij_old = _Wij;
   auto power_in = 0.0;
   auto power_out = 0.0;
+  auto mass_flow_in = 0.0;
+  auto mass_flow_out = 0.0;
   for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
   {
     auto * node_in = _subchannel_mesh.getChannelNode(i_ch, 0);
     auto * node_out = _subchannel_mesh.getChannelNode(i_ch, _n_cells);
     power_in += (*_mdot_soln)(node_in) * (*_h_soln)(node_in);
     power_out += (*_mdot_soln)(node_out) * (*_h_soln)(node_out);
+    mass_flow_in += (*_mdot_soln)(node_in);
+    mass_flow_out += (*_mdot_soln)(node_out);
   }
   _console << "Power added to coolant is: " << power_out - power_in << " Watt" << std::endl;
+  _console << "Mass balance is: " << mass_flow_out - mass_flow_in << " Kg/sec" << std::endl;
   if (_pin_mesh_exist)
   {
     _console << "Commencing calculation of Pin surface temperature \n";
