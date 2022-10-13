@@ -41,11 +41,11 @@ CoupledBEEquilibriumSub::CoupledBEEquilibriumSub(const InputParameters & paramet
     _sto_v(getParam<std::vector<Real>>("sto_v")),
     _gamma_u(coupledValue("gamma_u")),
     _gamma_u_old(coupledValueOld("gamma_u")),
-    _gamma_v(isCoupled("gamma_v")
+    _gamma_v(coupledComponents("gamma_v") > 1 || isCoupled("gamma_v")
                  ? coupledValues("gamma_v") // have value
                  : std::vector<const VariableValue *>(coupledComponents("v"),
                                                       &coupledValue("gamma_v"))), // default
-    _gamma_v_old(isCoupled("gamma_v")
+    _gamma_v_old(coupledComponents("gamma_v") > 1 || isCoupled("gamma_v")
                      ? coupledValuesOld("gamma_v") // have value
                      : std::vector<const VariableValue *>(coupledComponents("v"),
                                                           &coupledValue("gamma_v"))), // default
@@ -61,15 +61,16 @@ CoupledBEEquilibriumSub::CoupledBEEquilibriumSub(const InputParameters & paramet
 
   // Check that the correct number of coupled values have been provided
   if (_sto_v.size() != n)
-    mooseError("The number of stoichiometric coefficients in sto_v is not equal to the number of "
+    paramError("sto_v",
+               "The number of stoichiometric coefficients in sto_v is not equal to the number of "
                "coupled species in ",
                _name);
 
-  if (isCoupled("gamma_v"))
-    if (coupledComponents("gamma_v") != n)
-      mooseError("The number of activity coefficients in gamma_v is not equal to the number of "
-                 "coupled species in ",
-                 _name);
+  if (_gamma_v.size() != n)
+    paramError("gamma_v",
+               "The number of activity coefficients in gamma_v is not equal to the number of "
+               "coupled species in ",
+               _name);
 }
 
 Real
