@@ -1,0 +1,10 @@
+[Tests]
+  [single_coupled]
+    type = RunException
+    input = 'single_coupled.i'
+    expect_err = 'Supply only one variable.'
+    issues = '#22389'
+    design = 'syntax/Variables/index.md'
+    requirement = 'The system shall emit an error if only one coupled variable is expected but more were supplied.'
+  []
+[]

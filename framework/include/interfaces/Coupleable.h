@@ -178,7 +178,7 @@ protected:
    * @see Kernel::_u
    */
   virtual const VariableValue & coupledValue(const std::string & var_name,
-                                             unsigned int comp = 0) const;
+                                             unsigned int comp = libMesh::invalid_uint) const;
 
   /**
    * Returns the values for all of a coupled variable's components
