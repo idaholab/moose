@@ -40,7 +40,6 @@ protected:
   const MooseEnum _left_type;
   const MooseEnum _right_type;
 
-
   // So far the intention is to read in paramters a strings and
   // typecast them after parsing and checking the edge type
   const std::string _bottom_parameter;
@@ -64,57 +63,46 @@ protected:
                              const Real & bias);
 
   std::vector<Point> getParsedEdge(const Point & P1,
-                    const Point & P2,
-                    const unsigned int & np,
-                    const std::string & parameter);
+                                   const Point & P2,
+                                   const unsigned int & np,
+                                   const std::string & parameter);
 
   std::vector<Point> getCircarcEdge(const Point & P1,
-                    const Point & P2,
-                    const unsigned int & np,
-                    const std::string & parameter,
-                    const Point & outward);
+                                    const Point & P2,
+                                    const unsigned int & np,
+                                    const std::string & parameter,
+                                    const Point & outward);
 
   std::vector<Point> getDiscreteEdge(const Point & P1,
-                    const Point & P2,
-                    const unsigned int & np,
-                    const std::string & parameter);
+                                     const Point & P2,
+                                     const unsigned int & np,
+                                     const std::string & parameter);
 
   std::vector<Point> getLineEdge(const Point & P1,
-                    const Point & P2,
-                    const unsigned int & np,
-                    const std::vector<Real> & param_vec);
+                                 const Point & P2,
+                                 const unsigned int & np,
+                                 const std::vector<Real> & param_vec);
 
   // The following 3 routines are needed for generating arc circles given the user input
   // The input is expected to be the distance from a stright line at the middle of an edge
-  Real computeRadius(const Point & P1,
-                    const Point & P2,
-                    const Point & P3) const;
-  Point computeOrigin(const Point & P1,
-                    const Point & P2,
-                    const Point & P3) const;
+  Real computeRadius(const Point & P1, const Point & P2, const Point & P3) const;
+  Point computeOrigin(const Point & P1, const Point & P2, const Point & P3) const;
   Point computeMidPoint(const Point & P1,
-                    const Point & P2,
-                    const Real & dist,
-                    const Point & outward) const;
+                        const Point & P2,
+                        const Real & dist,
+                        const Point & outward) const;
 
   // The following routines are necessary for the paramterization of opposite edges
   // To assure we have the same parameterization on opposite edges we need to map it to
   //  a reference interval, i.e. [0, 1]
-  Real getMapToReference(const Real & x,
-                        const Real & a,
-                        const Real & b) const;
-  Real getMapFromReference(const Real & x,
-                        const Real & a,
-                        const Real & b) const;
+  Real getMapToReference(const Real & x, const Real & a, const Real & b) const;
+  Real getMapFromReference(const Real & x, const Real & a, const Real & b) const;
   // For a circle the paramterization is based on radians and we need to compute
   //  the angles spanned between 2 end vertices
   Real getPolarAngle(const Point & P) const;
-  Real getEdgeLength(const Point & P1,
-                     const Point & P2) const;
-  std::vector<Real> getParametrization(const Real & edge_length,
-                          const unsigned int & np,
-                          const Real & bias) const;
+  Real getEdgeLength(const Point & P1, const Point & P2) const;
+  std::vector<Real>
+  getParametrization(const Real & edge_length, const unsigned int & np, const Real & bias) const;
 
   usingFunctionParserUtilsMembers(false);
-
 };
