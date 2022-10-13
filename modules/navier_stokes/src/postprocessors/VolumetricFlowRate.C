@@ -97,7 +97,7 @@ VolumetricFlowRate::initialSetup()
     if (getExecuteOnEnum().contains(EXEC_INITIAL))
       for (const auto bid : boundaryIDs())
       {
-        if (_mesh.isBoundaryInternalToSubdomains(bid, _rc_uo->blockIDs()))
+        if (!_mesh.isBoundaryFullyExternalToSubdomains(bid, _rc_uo->blockIDs()))
           paramError(
               "execute_on",
               "Boundary '",

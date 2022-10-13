@@ -2228,9 +2228,7 @@ NSFVAction::addBoundaryPostprocessors()
       const std::string pp_type = "AreaPostprocessor";
       InputParameters params = _factory.getValidParams(pp_type);
       params.set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
-      // Get execution before Rhie Chow user object on INITIAL
       params.set<ExecFlagEnum>("execute_on") = EXEC_INITIAL;
-      params.set<bool>("force_preaux") = true;
 
       _problem->addPostprocessor(pp_type, "area_pp_" + _inlet_boundaries[bc_ind], params);
     }

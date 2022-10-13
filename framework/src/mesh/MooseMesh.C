@@ -1055,12 +1055,11 @@ MooseMesh::getBoundaryActiveNeighborElemIds(BoundaryID bid) const
 }
 
 bool
-MooseMesh::isBoundaryInternalToSubdomains(BoundaryID bid,
-                                          const std::set<SubdomainID> & blk_group) const
+MooseMesh::isBoundaryFullyExternalToSubdomains(BoundaryID bid,
+                                               const std::set<SubdomainID> & blk_group) const
 {
   mooseAssert(_bnd_elem_range, "Boundary element range is not initialized");
-  const bool all_blocks =
-      std::find(blk_group.begin(), blk_group.end(), Moose::ANY_BLOCK_ID) != blk_group.end();
+  const bool all_blocks = blk_group.find(Moose::ANY_BLOCK_ID) != blk_group.end();
 
   // Loop over all side elements of the mesh, select those on the boundary
   for (const auto & bnd_elem : *_bnd_elem_range)
@@ -1069,8 +1068,7 @@ MooseMesh::isBoundaryInternalToSubdomains(BoundaryID bid,
     if (elem_bid == bid)
     {
       // If an element is internal to the group of subdomain, check the neighbor
-      if (all_blocks || std::find(blk_group.begin(), blk_group.end(), elem_ptr->subdomain_id()) !=
-                            blk_group.end())
+      if (all_blocks || blk_group.find(elem_ptr->subdomain_id()) != blk_group.end())
       {
         const auto * const neighbor = elem_ptr->neighbor_ptr(elem_side);
 
@@ -1083,13 +1081,12 @@ MooseMesh::isBoundaryInternalToSubdomains(BoundaryID bid,
           continue;
         // If the neighbor is also in the group of subdomain,
         // then the boundary cuts the subdomains
-        if (all_blocks || std::find(blk_group.begin(), blk_group.end(), neighbor->subdomain_id()) !=
-                              blk_group.end())
-          return true;
+        if (all_blocks || blk_group.find(neighbor->subdomain_id()) != blk_group.end())
+          return false;
       }
     }
   }
-  return false;
+  return true;
 }
 
 void

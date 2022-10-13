@@ -150,6 +150,7 @@
       expect_err = 'Volumetric flow rates cannot be computed on internal flow boundaries on INITIAL'
       cli_args = 'Postprocessors/mid1_mass/execute_on=initial'
       detail = 'a volumetric flow rate is requested at the initialization of the simulation on a boundary internal to the flow domain when using finite volume and Rhie Chow interpolation, as this is not supported'
+      ad_indexing_type = 'global'
     []
   []
 []
