@@ -47,6 +47,12 @@ protected:
   TriSubChannelMesh & _tri_sch_mesh;
   Real _outer_channels;
 
+  // Extra objects for heat conduction, which is important in sodium
+  Mat _hc_axial_heat_conduction_mat;
+  Vec _hc_axial_heat_conduction_rhs;
+  Mat _hc_radial_heat_conduction_mat;
+  Vec _hc_radial_heat_conduction_rhs;
+
 public:
   static InputParameters validParams();
 };
