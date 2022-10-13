@@ -2,16 +2,17 @@
   issues = '#1476'
   design = 'source/constraints/PenaltyPeriodicSegmentalConstraint.md'
   [./penalty_periodic_simple2d]
-    type = 'Exodiff'
+    type = 'CSVDiff'
     input = 'penalty_periodic_simple2d.i'
-    exodiff = 'penalty_periodic_simple2d_out.e'
+    csvdiff = 'penalty_periodic_simple2d_out.csv'
     requirement = "The system shall include assemble primary/secondary mortar constraints coupled to scalar variables."
   [../]
   [./periodic_simple2d]
-    type = 'Exodiff'
+    type = 'CSVDiff'
     input = 'periodic_simple2d.i'
-    exodiff = 'periodic_simple2d_out.e'
+    csvdiff = 'periodic_simple2d_out.csv'
     requirement = "The system shall include assemble lower variable mortar constraints coupled to scalar variables."
+    min_ad_size = 100
   [../]
   [./penalty_periodic_checker2d]
     type = 'CSVDiff'
