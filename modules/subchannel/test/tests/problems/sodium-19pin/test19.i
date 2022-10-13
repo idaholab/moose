@@ -97,7 +97,7 @@ P_out = 2.0e5 # Pa
    [q_prime_IC]
     type = TriPowerIC
     variable = q_prime
-    power = 5.000e5 # W
+    power = 1000 # W
     filename = "pin_power_profile19.txt"
   []
 
