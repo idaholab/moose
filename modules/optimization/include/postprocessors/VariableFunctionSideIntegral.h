@@ -11,8 +11,6 @@
 
 #include "FunctionSideIntegral.h"
 
-class Function;
-
 /**
  * This postprocessor computes the inner product of a function and variable over a sideset
  */

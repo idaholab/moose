@@ -12,7 +12,8 @@
 #include "ElementIntegralPostprocessor.h"
 
 /**
- * Integrates a function over elements
+ * This postprocessor computes the inner product of a
+ * function and variable over a block of elements
  */
 class VariableFunctionElementIntegral : public ElementIntegralPostprocessor
 {
@@ -29,6 +30,4 @@ protected:
 
   /// Holds the solution at current quadrature points
   const VariableValue & _u;
-
-  const Real & _scale_factor;
 };

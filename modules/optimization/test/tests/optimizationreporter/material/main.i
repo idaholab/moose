@@ -31,16 +31,6 @@
 [Executioner]
   type = Optimize
   tao_solver = taoblmvm
-  # FINITE DIFFERENCE OPTIONS
-  # petsc_options_iname='-tao_max_it -tao_fd_gradient -tao_fd_delta -tao_gatol'
-  # petsc_options_value='1000 true 0.00001 0.0001'
-  #-------------
-  # petsc_options_iname = '-tao_gatol'
-  # petsc_options_value = '1e-4'
-  # petsc_options_iname = '-tao_fd_gradient -tao_fd_delta -tao_gatol'
-  # petsc_options_value = 'true 0.0001 1e-4'
-  # petsc_options_iname='-tao_max_it -tao_fd_test -tao_test_gradient -tao_fd_gradient -tao_fd_delta -tao_gatol'
-  # petsc_options_value='1            true         true               false            0.00001       0.0001'
   petsc_options_iname = '-tao_gatol'
   petsc_options_value = '0.0001'
   verbose = true
@@ -52,65 +42,62 @@
     input_files = forward.i
     execute_on = "FORWARD"
     clone_parent_mesh = true
-    ignore_solve_not_converge = true #false
   []
   [adjoint]
     type = OptimizeFullSolveMultiApp
     input_files = adjoint.i
     execute_on = "ADJOINT"
     clone_parent_mesh = true
-    ignore_solve_not_converge = false
   []
 []
 
 [Transfers]
-  [fromForward]
-    type = MultiAppReporterTransfer
-    from_multi_app = forward
-    from_reporters = 'data_pt/temperature data_pt/temperature'
-    to_reporters = 'OptimizationReporter/simulation_values receiver/measured'
-  []
-  [toAdjoint]
-    type = MultiAppReporterTransfer
-    to_multi_app = adjoint
-    from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord OptimizationReporter/misfit_values'
-    to_reporters = 'misfit/measurement_xcoord misfit/measurement_ycoord misfit/measurement_zcoord misfit/misfit_values'
-  []
   [toForward_measument]
     type = MultiAppReporterTransfer
     to_multi_app = forward
     from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord'
     to_reporters = 'measure_data/measurement_xcoord measure_data/measurement_ycoord measure_data/measurement_zcoord'
   []
-
-  [toforward]
+  [toForward]
     type = OptimizationParameterTransfer
     to_multi_app = forward
     value_names = 'p1'
     parameters = 'Postprocessors/p1/value'
     to_control = parameterReceiver
   []
-  [fromforwardMesh]
+  [fromForward_mesh]
     type = MultiAppCopyTransfer
     from_multi_app = forward
     source_variable = 'temperature'
     variable = 'temperature_forward'
   []
+  [fromForward]
+    type = MultiAppReporterTransfer
+    from_multi_app = forward
+    from_reporters = 'data_pt/temperature'
+    to_reporters = 'OptimizationReporter/simulation_values'
+  []
 
-  [toAdjointMesh]
+  [toAdjoint]
+    type = MultiAppReporterTransfer
+    to_multi_app = adjoint
+    from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord OptimizationReporter/misfit_values'
+    to_reporters = 'misfit/measurement_xcoord misfit/measurement_ycoord misfit/measurement_zcoord misfit/misfit_values'
+  []
+  [toAdjoint_mesh]
     type = MultiAppCopyTransfer
     to_multi_app = adjoint
     source_variable = 'temperature_forward'
     variable = 'temperature_forward'
   []
-  [toAdjointParameter]
+  [toAdjoint_parameter]
     type = OptimizationParameterTransfer
     to_multi_app = adjoint
     value_names = 'p1'
     parameters = 'Postprocessors/p1/value'
     to_control = parameterReceiver
   []
-  [fromadjoint]
+  [fromAdjoint]
     type = MultiAppReporterTransfer
     from_multi_app = adjoint
     from_reporters = 'adjoint_grad/adjoint_grad'
@@ -118,19 +105,6 @@
   []
 []
 
-[Reporters]
-  [receiver]
-    type = ConstantReporter
-    real_vector_names = measured
-    real_vector_values = '0'
-  []
-  [optInfo]
-    type = OptimizationInfo
-    items = 'current_iterate'
-  []
-[]
-
 [Outputs]
-  console = true
   csv = true
 []

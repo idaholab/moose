@@ -39,7 +39,7 @@ Given the large parameter space, we resort to the adjoint method for gradient co
 \end{equation}
 where $\partial f/\partial\mathbf{p}$ accounts for the regularization in [eq:objective] and $\mathbf{\lambda}$ is the adjoint variable solved for from the adjoint equation
 \begin{equation}\label{eq:adjoint}
-\left(\frac{\partial\mathcal{R}}{\partial\mathbf{u}}\right)^\top \mathbf{\lambda}= \left(\frac{\partial f}{\partial\mathbf{u}}\right)^\top ,
+\left(\frac{\partial\mathcal{R}}{\partial\mathbf{u}}\right)^\top \mathbf{\lambda}= -\left(\frac{\partial f}{\partial\mathbf{u}}\right)^\top ,
 \end{equation}
 where $\left(\partial\mathcal{R}/\partial\mathbf{u}\right)^\top$ is the adjoint of the Jacobian from the residual vector of the forward problem, $\mathcal{R}$, and $\left(\partial f/\partial\mathbf{u}\right)^\top$ is a body force like term that accounts for the misfit between the computed and experimental data.  Thus, the solution to [eq:adjoint] has the same complexity as the solution to the forward problem.
 
@@ -74,8 +74,8 @@ The alternative that we will use is the adjoint method which scales independentl
 	&\lambda^\top= \frac{\partial f}{\partial \mathbf{u}}\left(\frac{\partial \mathcal{R}}{\partial \mathbf{u}}\right)^{-1}  \\
 	&\rightarrow \lambda^\top \left(\frac{\partial \mathcal{R}}{\partial \mathbf{u}}\right)= -\frac{\partial f}{\partial \mathbf{u}}\left[\left(\frac{\partial \mathcal{R}}{\partial \mathbf{u}}\right)^{-1} \left(\frac{\partial \mathcal{R}}{\partial \mathbf{u}}\right)\right] \\
 	&\rightarrow \lambda^\top \left(\frac{\partial \mathcal{R}}{\partial \mathbf{u}}\right)= -\frac{\partial f}{\partial \mathbf{u}} \\
-	&\rightarrow \left[\lambda^\top \left(\frac{\partial \mathcal{R}}{\partial \mathbf{u}}\right)\right]^\top= -\left[\frac{\partial f}{\partial \mathbf{u}}\right]^\top \\
-	&\rightarrow \left(\frac{\partial \mathcal{R}}{\partial \mathbf{u}}\right)^\top \lambda = -\left[\frac{\partial f}{\partial \mathbf{u}}\right]^\top \\
+	&\rightarrow \left[\lambda^\top \left(\frac{\partial \mathcal{R}}{\partial \mathbf{u}}\right)\right]^\top= -\left(\frac{\partial f}{\partial \mathbf{u}}\right)^\top \\
+	&\rightarrow \left(\frac{\partial \mathcal{R}}{\partial \mathbf{u}}\right)^\top \lambda = -\left(\frac{\partial f}{\partial \mathbf{u}}\right)^\top \\
 \end{aligned}
 \end{equation}
 where each step of the derivation has been included as a reminder of how [eq:adjoint] is obtained.  The next [section](#sec:adjoint) uses an alternative approach to determine the adjoint equation based on Lagrange multipliers [!citet](walsh2013source).
@@ -353,7 +353,7 @@ where $\nabla\phi\hat{T}=\nabla T$ was used in the last line.  The gradient term
     &=  \int\nabla\lambda^{\top} \cdot \frac{\partial \kappa}{{\partial\mathbf{p}}}\cdot\nabla T~\text{d}\Omega,
 \end{aligned}
 \end{equation}
-where  $\hat{\lambda}^{\top}\cdot\nabla\phi^{\top}=\left[\nabla\phi\cdot\hat{\lambda}\right]^{\top}=\left[\nabla\lambda\right]^{\top}=\nabla\lambda^{\top}$ is used in the last line.  Computing the integral in [eq:kappaLambda] requires an inner product of the gradients of the adjoint and forward variables. This is much simpler to compute in MOOSE than the integral in [eq:kappa] which requires the multiplication of nodal variables with elemental shape function gradients.  Material inversion is a nonlinear optimization problem since $T$ shows up in the derivative, making the derivative dependent on the solution to the forward problem.  The derivative given in [eq:kappaLambda] is used in this example](materialInv_ConstK.md) where the thermal conductivity of a block is found.
+where  $\hat{\lambda}^{\top}\cdot\nabla\phi^{\top}=\left[\nabla\phi\cdot\hat{\lambda}\right]^{\top}=\left[\nabla\lambda\right]^{\top}=\nabla\lambda^{\top}$ is used in the last line.  Computing the integral in [eq:kappaLambda] requires an inner product of the gradients of the adjoint and forward variables. This is much simpler to compute in MOOSE than the integral in [eq:kappa] which requires the multiplication of nodal variables with elemental shape function gradients.  Material inversion is a nonlinear optimization problem since $T$ shows up in the derivative, making the derivative dependent on the solution to the forward problem.  The derivative given in [eq:kappaLambda] is used in this [example](materialInv_ConstK.md) where the thermal conductivity of a block is found.
 
 This same procedure is used to a temperature dependent thermal conductivity given by
 \begin{equation}

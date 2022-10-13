@@ -10,21 +10,23 @@
 #pragma once
 
 #include "ElementIntegralPostprocessor.h"
-
-class DiffusionVariableIntegral : public ElementIntegralPostprocessor
+/**
+ * This postprocessor computes the gradient for material inversion by taking the inner product of
+ gradients of the forward and adjoint variables with material gradient
+ */
+class MaterialGradientIntegral : public ElementIntegralPostprocessor
 {
 public:
   static InputParameters validParams();
 
-  DiffusionVariableIntegral(const InputParameters & parameters);
+  MaterialGradientIntegral(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpIntegral() override;
-  ///@{ Derivative of materwith with respect to parameter being optimized
+  /// Derivative of matererial with with respect to parameter being optimized
   const MaterialProperty<Real> & _dMdP;
-  ///@}
-  /// Holds variable1 gradient at the current quadrature points
+  /// Holds gradient of adjoint soln variable at the current quadrature points
   const VariableGradient & _grad_u;
-  /// Holds variable2 gradient at the current quadrature points
+  /// Holds gradient of forward soln variable at the current quadrature points
   const VariableGradient & _grad_v;
 };

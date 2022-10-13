@@ -1,10 +1,4 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 10
-  ny = 10
-  xmax = 2
-  ymax = 2
 []
 
 [Variables]
@@ -20,41 +14,6 @@
     type = ADMatHeatSource
     material_property = volumetric_heat
     variable = temperature
-  []
-[]
-
-[AuxVariables]
-  [grad_Tx]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [grad_Ty]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [grad_Tz]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-[]
-[AuxKernels]
-  [grad_Tx]
-    type = VariableGradientComponent
-    component = x
-    variable = grad_Tx
-    gradient_variable = temperature
-  []
-  [grad_Ty]
-    type = VariableGradientComponent
-    component = y
-    variable = grad_Ty
-    gradient_variable = temperature
-  []
-  [grad_Tz]
-    type = VariableGradientComponent
-    component = z
-    variable = grad_Tz
-    gradient_variable = temperature
   []
 []
 
@@ -118,7 +77,7 @@
 
 [Executioner]
   type = Steady
-  solve_type = PJFNK
+  solve_type = NEWTON
   nl_abs_tol = 1e-8
   nl_rel_tol = 1e-8
   petsc_options_iname = '-ksp_type -pc_type -pc_factor_mat_solver_package'

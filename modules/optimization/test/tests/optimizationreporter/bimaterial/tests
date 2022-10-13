@@ -1,6 +1,6 @@
 [Tests]
   issues = '#21885'
-  design = 'DiffusionVariableIntegral.md'
+  design = 'MaterialGradientIntegral.md'
   [taoblmvm]
     type = CSVDiff
     max_threads = 1

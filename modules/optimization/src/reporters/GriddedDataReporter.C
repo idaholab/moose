@@ -18,7 +18,8 @@ GriddedDataReporter::validParams()
 {
   InputParameters params = GeneralReporter::validParams();
   params.addClassDescription("Reporter to hold griddedData parameter values and a grid containing "
-                             "their spatial and temporal coordinates");
+                             "their spatial and temporal coordinates.  Reporter also contains "
+                             "variables needed for using the griddedData data structure.");
   params.addRequiredParam<FileName>(
       "data_file",
       "File holding data for use with PiecewiseMultiInterpolation. Format: any empty line and any "

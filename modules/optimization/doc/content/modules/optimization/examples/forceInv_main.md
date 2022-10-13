@@ -1,11 +1,11 @@
-# Force Inversion Example
+# Force Inversion Examples
 
 In a force inversion problem, we use inverse optimization to match the primary
 variable (e.g. displacement or temperature) by parameterizing gradients of the
-primary variables (e.g. force or heat flux).  The theory behind force inversion is given on this [page](theory/InvOptTheory.md). 
+primary variables (e.g. force or heat flux).  The theory behind force inversion is given in this [section](theory/InvOptTheory.md#sec:forceInv) on the theory page.
 Force inversion is a linear optimization or
-linear programming problem because the parameters are not dependent on the solution.
-Examples for the following force inversion problems are given on the below pages for steady state 
+linear programming problem where the parameters being controlled are not dependent on the solution, see [!eqref](theory/InvOptTheory.md#eq:bodyLoads).
+Examples for the following force inversion problems are given on the below pages for steady state
 heat conduction:
 
 - [Example 1: Point Loads](forceInv_pointLoads.md)
