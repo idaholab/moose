@@ -181,7 +181,7 @@ enum class InterpMethod
  * @param interp_method the name of the interpolation method
  * @return the interpolation method
  */
-InterpMethod selectInterpolationMethod(std::string interp_method);
+InterpMethod selectInterpolationMethod(const std::string & interp_method);
 
 /**
  * Produce the interpolation coefficients in the equation:

@@ -71,7 +71,7 @@ private:
   ExecFlagEnum _empty_execute_enum;
 
 protected:
-  /// Execute settings for this oejct.
+  /// Execute settings for this object.
   const ExecFlagEnum & _execute_enum;
 
   /// Reference to FEProblemBase

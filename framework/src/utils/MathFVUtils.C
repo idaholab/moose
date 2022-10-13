@@ -85,7 +85,7 @@ onBoundary(const std::set<SubdomainID> & subs, const FaceInfo & fi)
 }
 
 InterpMethod
-selectInterpolationMethod(std::string interp_method)
+selectInterpolationMethod(const std::string & interp_method)
 {
   if (interp_method == "average")
     return Moose::FV::InterpMethod::Average;
