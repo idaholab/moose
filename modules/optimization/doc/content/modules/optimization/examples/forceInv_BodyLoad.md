@@ -1,4 +1,4 @@
-# Force Inversion Example: Dirichlet Boundary Condition
+# Force Inversion Example: Distributed Body Load
 
 ## Background
 
@@ -9,12 +9,12 @@ The MOOSE optimization module provides a flexible framework for solving inverse 
 - [Example 1: Point Loads](forceInv_pointLoads.md)
 - [Example 2: Neumann Boundary Condition](forceInv_NeumannBC.md)
 - [Example 3: Distributed Body Load](forceInv_BodyLoad.md)
+- [debuggingHelp.md]
 
-# Example: Dirichlet Boundary Condition id=sec:DirichletBC
+# Example: Distributed Body Load id=sec:bodyLoad
 
 ## Main-App Optimization Executioner
 
 ## Forward Problem Sub-App
 
 ## Adjoint Problem Sub-App
-

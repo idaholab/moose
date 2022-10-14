@@ -8,6 +8,8 @@ linear programming problem where the parameters being controlled are not depende
 Examples for the following force inversion problems are given on the below pages for steady state
 heat conduction:
 
+- [Theory](theory/InvOptTheory.md)
 - [Example 1: Point Loads](forceInv_pointLoads.md)
 - [Example 2: Neumann Boundary Condition](forceInv_NeumannBC.md)
 - [Example 3: Distributed Body Load](forceInv_BodyLoad.md)
+- [debuggingHelp.md]

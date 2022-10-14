@@ -8,6 +8,7 @@ The MOOSE optimization module provides a flexible framework for solving inverse 
 - [Examples overview](examples/index.md)
 - [Example 1: Convective Boundary Conditions](materialInv_ConvectiveBC.md)
 - [Example 2: Constant Thermal Conductivity](materialInv_ConstK.md)
+- [debuggingHelp.md]
 
 # Example: Constant Thermal Conductivity id=sec:ConstMaterialInversion
 

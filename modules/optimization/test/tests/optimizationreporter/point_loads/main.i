@@ -1,3 +1,6 @@
+# DO NOT CHANGE THIS TEST
+# this test is documented as an example in forceInv_pointLoads.md
+# if this test is changed, the figures will need to be updated.
 [StochasticTools]
 []
 
@@ -5,21 +8,19 @@
   type = OptimizationReporter
   parameter_names = 'parameter_results'
   num_values = '3'
-  measurement_points = '0.3 0.3 0
-            0.4 1.0 0
-            0.8 0.5 0
-            0.8 0.6 0'
-  measurement_values = '100 204 320 216'
+  measurement_points = '0.5 0.28 0
+                        0.5 0.6 0
+                        0.5 0.8 0
+                        0.5 1.1 0'
+  measurement_values = '293 304 315 320'
 []
 
-# Page 146 of PetSc/Tao manual - start with Newton Linesearch
-# Look at default values including the preconditioner
 [Executioner]
   type = Optimize
-  tao_solver = taobncg
-  petsc_options_iname = '-tao_gatol -tao_max_it'
-  petsc_options_value = '1e-1 50'
-  verbose = false
+  tao_solver=taonls
+  petsc_options_iname='-tao_gttol -tao_max_it -tao_nls_pc_type -tao_nls_ksp_type'
+  petsc_options_value='1e-5 10 none cg'
+  verbose = true
 []
 
 [MultiApps]
@@ -33,59 +34,50 @@
     input_files = adjoint.i
     execute_on = "ADJOINT"
   []
-  # the forward problem has homogeneous boundary conditions so it can be reused here.
   [homogeneousForward]
     type = OptimizeFullSolveMultiApp
-    input_files = forward.i
+    input_files = forward_homogeneous.i
     execute_on = "HOMOGENEOUS_FORWARD"
   []
 []
 
 [Transfers]
-  #these are usually the same for all input files.
-  [fromForward]
-    type = MultiAppReporterTransfer
-    from_multi_app = forward
-    from_reporters = 'data_pt/temperature data_pt/temperature'
-    to_reporters = 'OptimizationReporter/simulation_values receiver/measured'
-  []
-  [toAdjoint]
-    type = MultiAppReporterTransfer
-    to_multi_app = adjoint
-    from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord OptimizationReporter/misfit_values'
-    to_reporters = 'misfit/measurement_xcoord misfit/measurement_ycoord misfit/measurement_zcoord misfit/misfit_values'
-  []
+  # FORWARD tranfers
   [toForward_measument]
     type = MultiAppReporterTransfer
     to_multi_app = forward
     from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord'
     to_reporters = 'measure_data/measurement_xcoord measure_data/measurement_ycoord measure_data/measurement_zcoord'
   []
-  #these are different,
-  # - to forward depends on the parameter being changed
-  # - from adjoint depends on the gradient being computed from the adjoint
-  #NOTE:  the adjoint variable we are transferring is actually the gradient
   [toForward]
     type = MultiAppReporterTransfer
     to_multi_app = forward
     from_reporters = 'OptimizationReporter/parameter_results'
     to_reporters = 'point_source/value'
   []
+  [fromForward]
+    type = MultiAppReporterTransfer
+    from_multi_app = forward
+    from_reporters = 'data_pt/temperature'
+    to_reporters = 'OptimizationReporter/simulation_values'
+  []
+
+  # ADJOINT tranfers
+  #NOTE:  the adjoint variable we are transferring is actually the gradient
+  [toAdjoint]
+    type = MultiAppReporterTransfer
+    to_multi_app = adjoint
+    from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord OptimizationReporter/misfit_values'
+    to_reporters = 'misfit/measurement_xcoord misfit/measurement_ycoord misfit/measurement_zcoord misfit/misfit_values'
+  []
   [fromAdjoint]
     type = MultiAppReporterTransfer
     from_multi_app = adjoint
-    from_reporters = 'data_pt/temperature'
+    from_reporters = 'gradient/adjoint'
     to_reporters = 'OptimizationReporter/adjoint'
   []
 
   # HESSIAN transfers.  Same as forward.
-  [fromHomoForward]
-    type = MultiAppReporterTransfer
-    multi_app = homogeneousForward
-    direction = from_multiapp
-    from_reporters = 'data_pt/temperature data_pt/temperature'
-    to_reporters = 'OptimizationReporter/simulation_values receiver/measured'
-  []
   [toHomoForward_measument]
     type = MultiAppReporterTransfer
     multi_app = homogeneousForward
@@ -100,23 +92,23 @@
     from_reporters = 'OptimizationReporter/parameter_results'
     to_reporters = 'point_source/value'
   []
+  [fromHomoForward]
+    type = MultiAppReporterTransfer
+    multi_app = homogeneousForward
+    direction = from_multiapp
+    from_reporters = 'data_pt/temperature'
+    to_reporters = 'OptimizationReporter/simulation_values'
+  []
 []
 
 [Reporters]
-  [receiver]
-    type = ConstantReporter
-    real_vector_names = measured
-    real_vector_values = '0 0 0 0'
-  []
   [optInfo]
     type = OptimizationInfo
-    #items = 'current_iterate'
-    #execute_on=timestep_end
   []
 []
 
 [Outputs]
   console = true
   csv = true
-  json = true
+  json = false
 []

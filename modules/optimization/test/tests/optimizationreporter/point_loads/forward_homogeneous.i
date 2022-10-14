@@ -40,25 +40,25 @@
     type = DirichletBC
     variable = temperature
     boundary = left
-    value = 300
+    value = 0
   []
   [right]
     type = DirichletBC
     variable = temperature
     boundary = right
-    value = 300
+    value = 0
   []
   [bottom]
     type = DirichletBC
     variable = temperature
     boundary = bottom
-    value = 300
+    value = 0
   []
   [top]
     type = DirichletBC
     variable = temperature
     boundary = top
-    value = 300
+    value = 0
   []
 []
 
@@ -89,14 +89,6 @@
              -1000 120 500'
     execute_on = LINEAR
   []
-  [vertical]
-    type = LineValueSampler
-    variable = 'temperature'
-    start_point = '0.5 0 0'
-    end_point = '0.5 1.4 0'
-    num_points = 21
-    sort_by = y
-  []
 #-----every forward problem should have these two
   [data_pt]
     type = VppPointValueSampler
@@ -117,5 +109,5 @@
   json = false
   console = false
   exodus = false
-  file_base = 'forward'
+  file_base = 'forward_homo'
 []

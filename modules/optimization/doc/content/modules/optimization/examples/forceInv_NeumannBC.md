@@ -9,6 +9,7 @@ The MOOSE optimization module provides a flexible framework for solving inverse 
 - [Example 1: Point Loads](forceInv_pointLoads.md)
 - [Example 2: Neumann Boundary Condition](forceInv_NeumannBC.md)
 - [Example 3: Distributed Body Load](forceInv_BodyLoad.md)
+- [debuggingHelp.md]
 
 # Example: Neumann Boundary Condition id=sec:NeumannBC
 
