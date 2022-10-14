@@ -60,20 +60,20 @@ protected:
                              const MooseEnum & type,
                              const std::string & parameter,
                              const Point & outward,
-                             const Real & bias);
+                             const std::vector<Real> & param_vec);
 
   std::vector<Point> getParsedEdge(const Point & P1,
                                    const Point & P2,
                                    const unsigned int & np,
                                    const std::string & parameter,
-                                   std::vector<Real> & param_vec);
+                                   const std::vector<Real> & param_vec);
 
   std::vector<Point> getCircarcEdge(const Point & P1,
                                     const Point & P2,
                                     const unsigned int & np,
                                     const std::string & parameter,
                                     const Point & outward,
-                                    std::vector<Real> & param_vec);
+                                    const std::vector<Real> & param_vec);
 
   std::vector<Point> getDiscreteEdge(const Point & P1,
                                      const Point & P2,
@@ -83,7 +83,7 @@ protected:
   std::vector<Point> getLineEdge(const Point & P1,
                                  const Point & P2,
                                  const unsigned int & np,
-                                 std::vector<Real> & param_vec);
+                                 const std::vector<Real> & param_vec);
 
   // The following 3 routines are needed for generating arc circles given the user input
   // The input is expected to be the distance from a stright line at the middle of an edge
@@ -94,11 +94,10 @@ protected:
                         const Real & dist,
                         const Point & outward) const;
 
-  // The following routines are necessary for the paramterization of opposite edges
+  // The following routine is necessary for the paramterization of opposite edges
   // To assure we have the same parameterization on opposite edges we need to map it to
-  //  a reference interval, i.e. [0, 1]
-  Real getMapToReference(const Real & x, const Real & a, const Real & b) const;
-  Real getMapFromReference(const Real & x, const Real & a, const Real & b) const;
+  //  a reference interval, i.e. [0, 1], and refer back and forth as needed
+
   Real getMapInterval(
       const Real & xab, const Real & a, const Real & b, const Real & c, const Real & d) const;
 
@@ -106,7 +105,6 @@ protected:
   //  the angles spanned between 2 end vertices
   Real getPolarAngle(const Point & P) const;
 
-  // Real getEdgeLength(const Point & P1, const Point & P2) const;
   std::vector<Real>
   getPointsDistribution(const Real & edge_length, const unsigned int & np, const Real & bias) const;
 
