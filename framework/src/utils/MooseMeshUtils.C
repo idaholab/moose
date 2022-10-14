@@ -321,6 +321,15 @@ getNextFreeSubdomainID(MeshBase & input_mesh)
   }
 }
 
+BoundaryID
+getNextFreeBoundaryID(MeshBase & input_mesh)
+{
+  auto boundary_ids = input_mesh.get_boundary_info().get_boundary_ids();
+  if (boundary_ids.empty())
+    return 0;
+  return (*boundary_ids.rbegin() + 1);
+}
+
 bool
 hasSubdomainID(MeshBase & input_mesh, const SubdomainID & id)
 {
