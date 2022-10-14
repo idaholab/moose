@@ -4,7 +4,7 @@
 
 ## Overview
 
-This class provides a hyperelastic Neo-Hookean stress update with J2 plasticity.
+This class provides a hyperelastic Neo-Hookean stress update with J2 plasticity [!cite](simo2006computational), [!cite](borden2016phase).
 
 Following a multiplicative decomposition of the deformation gradient
 \begin{equation}
