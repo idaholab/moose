@@ -64,9 +64,7 @@ void mooseSetToZero<RankTwoTensor>(RankTwoTensor & v);
  */
 template <>
 void mooseSetToZero<ADRankTwoTensor>(ADRankTwoTensor & v);
-
-template <typename T>
-T transpose(const T & v);
+}
 
 /**
  * RankTwoTensorTempl is designed to handle the Stress or Strain Tensor for a fully anisotropic

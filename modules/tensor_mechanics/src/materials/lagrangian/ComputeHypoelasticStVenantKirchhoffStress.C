@@ -69,7 +69,7 @@ ComputeHypoelasticStVenantKirchhoffStress::computeQpSmallStress()
     const RankFourTensor dFddL = _inv_df[_qp].inverse().times<i, k, l, j>(F);
     _small_jacobian[_qp] =
         C +
-        (dFddL.singleProductJ(MathUtils::transpose(C0.tripleProductJkl(F, F, F) * dL)) +
+        (dFddL.singleProductJ((C0.tripleProductJkl(F, F, F) * dL).transpose()) +
          dFddL.singleProductJ(C0.tripleProductIkl(F, F, F) * dL).transposeIj() +
          FF * C0.singleProductL(F * dL).transposeKl() * dFddL +
          FF * C0.singleProductK(dL.transpose() * F) * dFddL) /
