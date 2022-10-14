@@ -40,6 +40,7 @@ P_out = 155e+5 # Pa
   CT = 0.0
   P_tol = 1e-6
   T_tol = 1e-6
+  implicit = false
   compute_density = true
   compute_viscosity = true
   compute_power = true

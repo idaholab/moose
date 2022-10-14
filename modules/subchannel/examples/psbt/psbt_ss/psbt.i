@@ -58,7 +58,7 @@ P_out = 4.923e6 # Pa
   [q_prime_IC]
     type = QuadPowerIC
     variable = q_prime
-    power = 1e6 # W
+    power = 0.0 # W
     filename = "power_profile.txt"
   []
 
