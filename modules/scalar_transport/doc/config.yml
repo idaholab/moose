@@ -1,7 +1,6 @@
 Content:
     - framework/doc/content
     - modules/scalar_transport/doc/content
-
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
 Extensions:
@@ -19,4 +18,11 @@ Extensions:
         shortcuts: !include framework/doc/globals.yml
     MooseDocs.extensions.acronym:
         acronyms: !include framework/doc/acronyms.yml
-    MooseDocs.extensions.sqa: disable
+    MooseDocs.extensions.sqa:
+        active: true
+        categories:
+            framework: !include ${MOOSE_DIR}/framework/doc/sqa_framework.yml
+            scalar_transport: !include ${ROOT_DIR}/modules/scalar_transport/doc/sqa_scalar_transport.yml
+        reports: !include ${ROOT_DIR}/modules/scalar_transport/doc/sqa_reports.yml
+    MooseDocs.extensions.template:
+        active: true
