@@ -52,7 +52,7 @@ protected:
   virtual void computeProperties() override;
   virtual void computeQpProperties() override;
   /// Calculate the strains based on the spatial velocity gradient
-  virtual void computeQpIncrementalStrains(const RankTwoTensor & L);
+  virtual void computeQpIncrementalStrains(const RankTwoTensor & dL);
   /// Subtract the eigenstrain increment to subtract from the total strain
   virtual void subtractQpEigenstrainIncrement(RankTwoTensor & strain);
   /// Calculate the unstabilized deformation gradient at the quadrature point
@@ -87,6 +87,9 @@ protected:
 
   /// Strain increment
   MaterialProperty<RankTwoTensor> & _strain_increment;
+
+  /// Vorticity increment
+  MaterialProperty<RankTwoTensor> & _vorticity_increment;
 
   /// The unstabilized deformation gradient
   MaterialProperty<RankTwoTensor> & _F_ust;
