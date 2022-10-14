@@ -32,4 +32,25 @@
                   'result as its hyperelastic counterpart.'
     design = 'source/materials/lagrangian/ComputeHypoelasticStVenantKirchhoffStress.md'
   []
+  [elastoplastic_linear_hardening]
+    type = CSVDiff
+    input = hyperelastic_J2_plastic.i
+    cli_args = 'Materials/flow_stress/function=320+688*effective_plastic_strain '
+               'Outputs/file_base=hyperelastic_J2_plastic_linear_hardening_out'
+    csvdiff = 'hyperelastic_J2_plastic_linear_hardening_out.csv'
+    abs_zero = 1e-9
+    requirement = 'Stress matches exact analytic solution for elastoplasticity with linear hardening'
+    design = 'source/materials/lagrangian/ComputeSimoHughesJ2PlasticityStress.md'
+  []
+  [elastoplastic_powerlaw_hardening]
+    type = CSVDiff
+    input = hyperelastic_J2_plastic.i
+    cli_args = "Materials/flow_stress/function='320*(1+effective_plastic_strain/1e-3)^(1/5)' "
+               "Outputs/file_base=hyperelastic_J2_plastic_powerlaw_hardening_out"
+    csvdiff = 'hyperelastic_J2_plastic_powerlaw_hardening_out.csv'
+    abs_zero = 1e-9
+    requirement = 'Stress matches exact analytic solution for elastoplasticity with power-law '
+                  'hardening'
+    design = 'source/materials/lagrangian/ComputeSimoHughesJ2PlasticityStress.md'
+  []
 []

@@ -82,6 +82,15 @@
       cli_args = "-r 1 FVBCs/inactive='free-slip-u free-slip-v' Outputs/file_base='diverging_INSFV_quad_xy_noslip'"
       ad_indexing_type = 'global'
     []
+    [initial]
+      type = CSVDiff
+      input = conservation_INSFV.i
+      csvdiff = diverging_INSFV_initial.csv
+      abs_zero = 1e-8
+      detail = 'at the very beginning of the simulation, with the initialized velocities'
+      cli_args = "Variables/temperature/initial_condition=290 Postprocessors/inlet_mass_variable/execute_on=initial Postprocessors/inlet_mass_constant/execute_on=initial Postprocessors/inlet_mass_matprop/execute_on=initial Postprocessors/outlet_mass/execute_on=INITIAL Outputs/file_base=diverging_INSFV_initial"
+      ad_indexing_type = 'global'
+    []
   []
   [pinsfv_straight]
     type = CSVDiff
@@ -128,6 +137,19 @@
       abs_zero = 1e-8
       detail = 'and with no-slip boundary conditions, for which momentum and energy will be dissipated at the wall.'
       cli_args = "FVBCs/inactive='free-slip-u free-slip-v' Outputs/file_base='diverging_PINSFV_quad_xy_noslip'"
+      ad_indexing_type = 'global'
+    []
+  []
+
+  [errors]
+    issues = '#18817'
+    requirement = 'The system shall report an error if'
+    [initial_interior]
+      type = RunException
+      input = conservation_INSFV.i
+      expect_err = 'Volumetric flow rates cannot be computed on internal flow boundaries on INITIAL'
+      cli_args = 'Postprocessors/mid1_mass/execute_on=initial'
+      detail = 'a volumetric flow rate is requested at the initialization of the simulation on a boundary internal to the flow domain when using finite volume and Rhie Chow interpolation, as this is not supported'
       ad_indexing_type = 'global'
     []
   []

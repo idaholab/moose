@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "MathFVUtils.h"
 #include "INSFVFluxKernel.h"
 #include "INSFVMomentumResidualObject.h"
 
@@ -22,13 +23,16 @@ public:
 
 protected:
   /**
-   * Routine to compute this object's strong residual (e.g. not multipled by area). This routine
+   * Routine to compute this object's strong residual (e.g. not multiplied by area). This routine
    * should also populate the _ae and _an coefficients
    */
   virtual ADReal computeStrongResidual();
 
   /// The dynamic viscosity
   const Moose::Functor<ADReal> & _mu;
+
+  /// The face interpolation method for the viscosity
+  const Moose::FV::InterpMethod _mu_interp_method;
 
   /// The a coefficient for the element
   ADReal _ae = 0;

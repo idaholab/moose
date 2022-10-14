@@ -665,4 +665,40 @@ protected:
       const unsigned int intervals,
       const singleBdryLayerParams inner_boundary_layer_params = {0.0, 0.0, 0, 1.0},
       const singleBdryLayerParams outer_boundary_layer_params = {0.0, 0.0, 0, 1.0}) const;
+
+  /**
+   * Add InputParameters which are used by ring and sector IDs
+   * @param params  InputParameters to be modified with the added params
+   */
+  static void addRingAndSectorIDParams(InputParameters & params);
+
+  /**
+   * assign sector extra ids to polygon mesh
+   * @param mesh input mesh where sector extra ids are assigned
+   * @param id_name sector extra ID name
+   * @param num_side number of polygon sides
+   * @param num_sectors_per_side number of sections of each side of the polygon
+   */
+  void setSectorExtraIDs(MeshBase & mesh,
+                         const std::string id_name,
+                         const unsigned int num_sides,
+                         const std::vector<unsigned int> num_sectors_per_side);
+
+  /**
+   * assign ring extra ids to polygon mesh
+   * @param mesh  input mesh where ring extra ids are assigned
+   * @param id_name ring extra id name
+   * @param num_sides number of polygon sides
+   * @param num_sectors_per_side number of sectors of each side of the polygon
+   * @param ring_intervals number of rings in each circle
+   * @param ring_wise_id whether ring ids are assigned to each ring or to each block
+   * @param quad_center_elements whether center elements are quad or triangular
+   */
+  void setRingExtraIDs(MeshBase & mesh,
+                       const std::string id_name,
+                       const unsigned int num_sides,
+                       const std::vector<unsigned int> num_sectors_per_side,
+                       const std::vector<unsigned int> ring_intervals,
+                       const bool ring_wise_id,
+                       const bool quad_center_elements);
 };
