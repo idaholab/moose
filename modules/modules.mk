@@ -34,6 +34,7 @@ ifeq ($(ALL_MODULES),yes)
         RDG                         := yes
         REACTOR                     := yes
         RICHARDS                    := yes
+	SCALAR_TRANSPORT            := yes
         SOLID_PROPERTIES            := yes
         STOCHASTIC_TOOLS            := yes
         TENSOR_MECHANICS            := yes
@@ -94,8 +95,20 @@ ifeq ($(XFEM),yes)
         TENSOR_MECHANICS            := yes
 endif
 
+ifeq ($(SCALAR_TRANSPORT),yes)
+	CHEMICAL_REACTIONS          := yes
+	NAVIER_STOKES               := yes
+	THERMAL_HYDRAULICS	    := yes
+        FLUID_PROPERTIES            := yes
+        HEAT_CONDUCTION             := yes
+        RDG                         := yes
+        RAY_TRACING                 := yes
+        SOLID_PROPERTIES            := yes
+        MISC                        := yes
+endif
+
 # The master list of all moose modules
-MODULE_NAMES := "chemical_reactions contact electromagnetics external_petsc_solver fluid_properties fsi functional_expansion_tools geochemistry heat_conduction level_set misc navier_stokes peridynamics phase_field porous_flow ray_tracing rdg reactor richards solid_properties stochastic_tools tensor_mechanics thermal_hydraulics xfem"
+MODULE_NAMES := "chemical_reactions contact electromagnetics external_petsc_solver fluid_properties fsi functional_expansion_tools geochemistry heat_conduction level_set misc navier_stokes peridynamics phase_field porous_flow ray_tracing rdg reactor richards scalar_transport solid_properties stochastic_tools tensor_mechanics thermal_hydraulics xfem"
 
 ################################################################################
 ########################## MODULE REGISTRATION #################################
@@ -285,6 +298,14 @@ ifeq ($(THERMAL_HYDRAULICS),yes)
   APPLICATION_NAME   := thermal_hydraulics
   DEPEND_MODULES     := navier_stokes fluid_properties heat_conduction rdg ray_tracing solid_properties misc
   SUFFIX             := th
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
+ifeq ($(SCALAR_TRANSPORT),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/scalar_transport
+  APPLICATION_NAME   := scalar_transport
+  DEPEND_MODULES     := chemical_reactions navier_stokes thermal_hydraulics fluid_properties heat_conduction rdg ray_tracing solid_properties misc
+  SUFFIX             := st
   include $(FRAMEWORK_DIR)/app.mk
 endif
 

@@ -21,6 +21,7 @@ Content:
     - modules/rdg/doc/content
     - modules/reactor/doc/content
     - modules/richards/doc/content
+    - modules/scalar_transport/doc/content
     - modules/solid_properties/doc/content
     - modules/stochastic_tools/doc/content
     - modules/tensor_mechanics/doc/content
