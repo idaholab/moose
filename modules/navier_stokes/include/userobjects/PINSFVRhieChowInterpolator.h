@@ -64,10 +64,14 @@ protected:
 
 private:
   /**
-   * called during the first \p residualSetup and upon \p meshChanged, this method performs the
-   * interpolations and reconstructions of porosity
+   * called during the first \p execute and upon \p meshChanged, this method performs the
+   * interpolations and reconstructions of porosity.
+   * Cannot be called in initialSetup because UOs are initialized before Functions
    */
   void pinsfvSetup();
+
+  /// Whether the setup has been done
+  bool _pinsfv_setup_done;
 };
 
 inline const Moose::FunctorBase<ADReal> &

@@ -47,6 +47,9 @@ INSFVRhieChowInterpolator::validParams()
   exec_enum = {EXEC_PRE_KERNELS};
   params.suppressParameter<ExecFlagEnum>("execute_on");
 
+  // Avoid uninitialized residual objects
+  params.suppressParameter<bool>("force_preic");
+
   MooseEnum velocity_interp_method("average rc", "rc");
   params.addParam<MooseEnum>(
       "velocity_interp_method",
@@ -263,6 +266,8 @@ INSFVRhieChowInterpolator::fillARead()
 void
 INSFVRhieChowInterpolator::initialSetup()
 {
+  insfvSetup();
+
   if (_velocity_interp_method == Moose::FV::InterpMethod::Average)
     return;
   for (const auto var_num : _var_numbers)
@@ -309,22 +314,13 @@ INSFVRhieChowInterpolator::insfvSetup()
 }
 
 void
-INSFVRhieChowInterpolator::residualSetup()
-{
-  if (!_initial_setup_done)
-    insfvSetup();
-
-  _initial_setup_done = true;
-}
-
-void
 INSFVRhieChowInterpolator::meshChanged()
 {
   insfvSetup();
 
   // If the mesh has been modified:
   // - the boundary elements may have changed
-  // - some elements may been refined
+  // - some elements may have been refined
   _elements_to_push_pull.clear();
   _a.clear();
 }
