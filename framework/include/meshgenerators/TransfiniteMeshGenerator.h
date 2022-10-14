@@ -65,13 +65,15 @@ protected:
   std::vector<Point> getParsedEdge(const Point & P1,
                                    const Point & P2,
                                    const unsigned int & np,
-                                   const std::string & parameter);
+                                   const std::string & parameter,
+                                   std::vector<Real> & param_vec);
 
   std::vector<Point> getCircarcEdge(const Point & P1,
                                     const Point & P2,
                                     const unsigned int & np,
                                     const std::string & parameter,
-                                    const Point & outward);
+                                    const Point & outward,
+                                    std::vector<Real> & param_vec);
 
   std::vector<Point> getDiscreteEdge(const Point & P1,
                                      const Point & P2,
@@ -81,7 +83,7 @@ protected:
   std::vector<Point> getLineEdge(const Point & P1,
                                  const Point & P2,
                                  const unsigned int & np,
-                                 const std::vector<Real> & param_vec);
+                                 std::vector<Real> & param_vec);
 
   // The following 3 routines are needed for generating arc circles given the user input
   // The input is expected to be the distance from a stright line at the middle of an edge
@@ -97,12 +99,16 @@ protected:
   //  a reference interval, i.e. [0, 1]
   Real getMapToReference(const Real & x, const Real & a, const Real & b) const;
   Real getMapFromReference(const Real & x, const Real & a, const Real & b) const;
+  Real getMapInterval(const Real & xab, const Real & a, const Real & b,
+                      const Real & c, const Real & d) const;
+
   // For a circle the paramterization is based on radians and we need to compute
   //  the angles spanned between 2 end vertices
   Real getPolarAngle(const Point & P) const;
-  Real getEdgeLength(const Point & P1, const Point & P2) const;
+
+  //Real getEdgeLength(const Point & P1, const Point & P2) const;
   std::vector<Real>
-  getParametrization(const Real & edge_length, const unsigned int & np, const Real & bias) const;
+  getPointsDistribution(const Real & edge_length, const unsigned int & np, const Real & bias) const;
 
   usingFunctionParserUtilsMembers(false);
 };
