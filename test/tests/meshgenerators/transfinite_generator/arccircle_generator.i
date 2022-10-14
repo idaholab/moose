@@ -5,12 +5,12 @@
               10.0 -1.0 0.0
               11.0 5.0 0
               4.0 4.0 0'
-    nx = 12
+    nx = 10
     ny = 6
-    top = LINE
-    bottom = CIRCARC
-    right = LINE
-    left = LINE
+    top_type = LINE
+    bottom_type = CIRCARC
+    right_type = LINE
+    left_type = LINE
     bottom_parameter = '-1.23'
   []
 []

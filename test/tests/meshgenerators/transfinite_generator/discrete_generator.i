@@ -7,10 +7,10 @@
               4.0 4.0 0'
     nx = 8
     ny = 5
-    left = DISCRETE
-    right = LINE
-    top = CIRCARC
-    bottom = LINE
+    left_type = DISCRETE
+    right_type = LINE
+    top_type = CIRCARC
+    bottom_type = LINE
     left_parameter = '-1.0 -1.0 0
                       0.0 0.0 0.0
                      0.75 0.75 0.0

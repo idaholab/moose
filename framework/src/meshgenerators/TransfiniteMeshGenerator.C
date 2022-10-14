@@ -31,10 +31,10 @@ TransfiniteMeshGenerator::validParams()
   params.addRequiredParam<std::vector<Point>>("corners", "The x,y,z positions of the nodes");
   // Define edge types
 
-  params.addRequiredParam<MooseEnum>("bottom", edge_type, "type of the bottom (y) boundary");
-  params.addRequiredParam<MooseEnum>("top", edge_type, "type of the top (y) boundary");
-  params.addRequiredParam<MooseEnum>("left", edge_type, "type of the left (x) boundary");
-  params.addRequiredParam<MooseEnum>("right", edge_type, "type of the right (x) boundary");
+  params.addRequiredParam<MooseEnum>("bottom_type", edge_type, "type of the bottom (y) boundary");
+  params.addRequiredParam<MooseEnum>("top_type", edge_type, "type of the top (y) boundary");
+  params.addRequiredParam<MooseEnum>("left_type", edge_type, "type of the left (x) boundary");
+  params.addRequiredParam<MooseEnum>("right_type", edge_type, "type of the right (x) boundary");
 
   // We need to know the number of points on opposite sides, and if no other parameter is available
   // we shall assume them to be equally distributed
@@ -84,10 +84,10 @@ TransfiniteMeshGenerator::TransfiniteMeshGenerator(const InputParameters & param
     _corners(getParam<std::vector<Point>>("corners")),
     _nx(getParam<unsigned int>("nx")),
     _ny(getParam<unsigned int>("ny")),
-    _bottom_type(getParam<MooseEnum>("bottom")),
-    _top_type(getParam<MooseEnum>("top")),
-    _left_type(getParam<MooseEnum>("left")),
-    _right_type(getParam<MooseEnum>("right")),
+    _bottom_type(getParam<MooseEnum>("bottom_type")),
+    _top_type(getParam<MooseEnum>("top_type")),
+    _left_type(getParam<MooseEnum>("left_type")),
+    _right_type(getParam<MooseEnum>("right_type")),
     _bottom_parameter(getParam<std::string>("bottom_parameter")),
     _top_parameter(getParam<std::string>("top_parameter")),
     _left_parameter(getParam<std::string>("left_parameter")),
@@ -223,7 +223,7 @@ TransfiniteMeshGenerator::getEdge(const Point & P1,
 {
   std::vector<Point> edge;
   std::vector<Real> param_vec;
-  //we take [0,1] as the reference interval
+  // we take [0,1] as the reference interval
   Real edge_length = 1.0;
   param_vec = getPointsDistribution(edge_length, np, bias);
 
@@ -278,7 +278,8 @@ TransfiniteMeshGenerator::getParsedEdge(const Point & P1,
   MooseUtils::tokenize(parameter, param_coords, 1, "&&");
 
   for (unsigned int iter = 0; iter < np; iter++)
-  { r_param=param_vec[iter];
+  {
+    r_param = param_vec[iter];
     _parsed_func->Parse(param_coords[0], "r");
     x_coord = _parsed_func->Eval(&r_param);
     _parsed_func->Parse(param_coords[1], "r");
@@ -404,18 +405,18 @@ TransfiniteMeshGenerator::getMapFromReference(const Real & x, const Real & a, co
 }
 
 Real
-TransfiniteMeshGenerator::getMapInterval(const Real & xab, const Real & a, const Real & b,
-                                        const Real & c, const Real & d) const
+TransfiniteMeshGenerator::getMapInterval(
+    const Real & xab, const Real & a, const Real & b, const Real & c, const Real & d) const
 {
-  Real xcd = c + (d - c)/(b - a) * (xab- a);
+  Real xcd = c + (d - c) / (b - a) * (xab - a);
 
   return xcd;
 }
 
 std::vector<Real>
 TransfiniteMeshGenerator::getPointsDistribution(const Real & edge_length,
-                                             const unsigned int & np,
-                                             const Real & bias) const
+                                                const unsigned int & np,
+                                                const Real & bias) const
 {
   std::vector<Real> param_vec;
   Real rx = 0.0;
@@ -434,11 +435,11 @@ TransfiniteMeshGenerator::getPointsDistribution(const Real & edge_length,
   }
   else
   {
-    const Real interval=edge_length/double(np-1);
+    const Real interval = edge_length / double(np - 1);
     Real rx = 0.0;
     for (unsigned iter = 0; iter < np; iter++)
     {
-      rx = getMapToReference(double(iter)*interval, 0, edge_length);
+      rx = getMapToReference(double(iter) * interval, 0, edge_length);
       param_vec.push_back(rx);
     }
   }
