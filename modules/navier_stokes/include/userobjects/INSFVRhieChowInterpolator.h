@@ -57,8 +57,8 @@ public:
 
   /**
    * Retrieve a face velocity
-   * @param m The velocity interpolation method. This is either RhieChow or Average. RhieChow is
-   * recommended as it avoids checkboards in the pressure field
+   * @param m The velocity interpolation method. This is either Rhie-Chow or Average. Rhie-Chow is
+   * recommended as it avoids checkerboards in the pressure field
    * @param fi The face that we wish to retrieve the velocity for
    * @param tid The thread ID
    * @return The face velocity
@@ -66,12 +66,14 @@ public:
   VectorValue<ADReal>
   getVelocity(Moose::FV::InterpMethod m, const FaceInfo & fi, THREAD_ID tid) const;
 
+  /// Return the interpolation method used for velocity
+  Moose::FV::InterpMethod velocityInterpolationMethod() const { return _velocity_interp_method; }
+
   void initialSetup() override;
-  void residualSetup() override;
   void meshChanged() override;
 
   void initialize() override final;
-  void execute() override final;
+  void execute() override;
   void finalize() override final;
 
   /**
@@ -154,11 +156,6 @@ protected:
   /// The z-component of 'a'
   VectorComponentFunctor<ADReal> _az;
   ///@}
-
-  /// Whether we have performed our initial setup. Ordinarily we would do this in initialSetup but
-  /// there are wonky things that happen in other objects initialSetup that affect us, like how
-  /// Exodus output gathers all elements to 0 on distributed mesh
-  bool _initial_setup_done = false;
 
 private:
   /**

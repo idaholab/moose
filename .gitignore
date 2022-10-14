@@ -5,9 +5,14 @@
 *.o
 *.a
 *-opt
+*-optimized
 *-dbg
+*-debug
 *-oprof
+*-oprofile
+*-pro
 *-prof
+*-profiling
 *-devel
 *.e
 *.nav

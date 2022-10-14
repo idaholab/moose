@@ -96,7 +96,6 @@ GreaterThanLessThanPostprocessor::execute()
   }
   else
     mooseError("Invalid comparator ", _comparator);
-
 }
 
 PostprocessorValue
