@@ -406,7 +406,7 @@ NonlinearEigenSystem::checkIntegrity()
       // EigenArrayDirichletBC
       auto aeigen_nbc = std::dynamic_pointer_cast<EigenArrayDirichletBC>(nodal_bc);
       // If it is a Dirichlet boundary condition, then value has to be zero
-      if (nbc && nbc->getParam<Real>("value"))
+      if (nbc && nbc->variable().eigen() && nbc->getParam<Real>("value"))
         mooseError(
             "Can't set an inhomogeneous Dirichlet boundary condition for eigenvalue problems.");
       // If it is an array Dirichlet boundary condition, all values should be zero
