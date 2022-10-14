@@ -107,8 +107,7 @@ underlying systems:
 - The current system based on the [StressDivergenceTensors](/StressDivergenceTensors.md) and related kernels.
 - A newer system based on the [TotalLagrangianStressDivergence](/TotalLagrangianStressDivergence.md) and [UpdatedLagrangianStressDivergence](/UpdatedLagrangianStressDivergence.md) kernels.
 
-The current system suffers from convergence issues caused by
-non-exact Jacobians when not used with the Automatic Differentiation variants of the kernels and underlying materials. 
+The current system may suffer from convergence issues caused by non-exact Jacobians for large deformations problems when not used with the Automatic Differentiation variants of the kernels and underlying materials. 
 The newer system (referred to in the documentation as the *Lagrangian* kernels) has exact Jacobians and also includes:
 
 - A [common interface](tensor_mechanics/LagrangianKernelTheory.md) for running small or large deformation problems that simplifies how input files are setup and makes it easier to switch between different kinematic and material models.
