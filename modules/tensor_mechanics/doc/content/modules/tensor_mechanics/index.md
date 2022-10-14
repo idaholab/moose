@@ -99,10 +99,6 @@ introductory theory pages on the various models:
 !col-end!
 !row-end!
 
-The TensorMechanics module is being developed by users at national laboratories
-and universities around the world. Learn how to get in touch with the developers
-on the [help/contact_us.md optional=True] page.
-
 ## New Mechanics Kernels
 
 The Tensor Mechanics module currently has two, partially interoperable 
@@ -111,10 +107,9 @@ underlying systems:
 - The current system based on the [StressDivergenceTensors](/StressDivergenceTensors.md) and related kernels.
 - A newer system based on the [TotalLagrangianStressDivergence](/TotalLagrangianStressDivergence.md) and [UpdatedLagrangianStressDivergence](/UpdatedLagrangianStressDivergence.md) kernels.
 
-The current system is fully compatible with the entirety of the Tensor Mechanics and MOOSE ecosystems.  However, it suffers from convergence issues caused by
-non-exact Jacobians when not used with the Automatic Differentiation variants of the kernels and underlying materials.
-
-The newer system (referred to in the documentation as the *Lagrangian* kernels) has exact Jacobians, but is a work in progress.  Currently, it supports
+The current system suffers from convergence issues caused by
+non-exact Jacobians when not used with the Automatic Differentiation variants of the kernels and underlying materials. 
+The newer system (referred to in the documentation as the *Lagrangian* kernels) has exact Jacobians and also includes:
 
 - A [common interface](tensor_mechanics/LagrangianKernelTheory.md) for running small or large deformation problems that simplifies how input files are setup and makes it easier to switch between different kinematic and material models.
 - An [improved material system](tensor_mechanics/NewMaterialSystem.md), that provides multiple options for implementing new materials models.  The new material system can also automatically convert a small deformation material model to large deformation kinematics by integrating a user-select objective stress rate.
@@ -125,12 +120,10 @@ The newer system (referred to in the documentation as the *Lagrangian* kernels) 
 The newer kernels are compatible with the existing MOOSE materials via the [ComputeLagrangianWrappedStress](/ComputeLagrangianWrappedStress.md) object.  This object maps the output from the existing MOOSE material system into the format expected
 by the Lagrangian kernels.
 
-However, it does not currently support:
+The Lagrangian kernels are feature-complete with the original kernels -- all simulations using the original kernels should be able to be converted to use the 
+Lagrangian kernels.  However, users should be aware that modules that couple to `"stress"` for the Cauchy stress using the original kernels should now either couple to `"cauchy_stress"` or `"pk1_stress"`, as appropriate, in the Lagrangian kernels.
 
-- Cylindrical or spherical coordinates.
-- Full interoperability with the other MOOSE modules.  Specifically, modules that couple to `"stress"` as a material property will need to be updated to couple to `"cauchy_stress"` or `"pk1_stress"` as appropriate.
-
-The future goal for the new system is full interoperability with the rest of the module.  Currently, users should consider using the new system
+Users should consider using the new system
 for problems where numerical convergence is critical -- for example problems with large material or geometric nonlinearities -- or 
 for problems where the stress update provided by the constitutive model is very expensive, as the new kernels will achieve convergence
 in many fewer nonlinear iterations, when compared to the older system.
@@ -139,6 +132,10 @@ Both the new and old systems are accessible through the [TensorMechanics/MasterA
 setting up and running models.
 
 ## Developing New Tensor Mechanics Code
+
+The TensorMechanics module is being developed by users at national laboratories
+and universities around the world. Learn how to get in touch with the developers
+on the [help/contact_us.md optional=True] page.
 
 Consider becoming a developer yourself.
 The tensor mechanics module uses code syntax based on tensor forms. This approach
