@@ -1408,3 +1408,108 @@ PolygonMeshGeneratorBase::biasTermsCalculator(
                 outer_boundary_layer_params.fraction)));
   return biased_terms;
 }
+
+void
+PolygonMeshGeneratorBase::addRingAndSectorIDParams(InputParameters & params)
+{
+  params.addParam<std::string>("sector_id_name",
+                               "Name of integer (reporting) ID for sector regions to use the "
+                               "reporting ID for azimuthal sector regions of ring geometry block.");
+  params.addParam<std::string>("ring_id_name",
+                               "Name of integer (reporting) ID for ring regions to use the "
+                               "reporting ID for annular regions of ring geometry block.");
+  MooseEnum ring_id_option("block_wise ring_wise", "block_wise");
+  params.addParam<MooseEnum>(
+      "ring_id_assign_type", ring_id_option, "Type of ring ID assignment: block_wise or ring_wise");
+  params.addParamNamesToGroup("sector_id_name ring_id_name ring_id_assign_type", "Ring/Sector IDs");
+}
+
+void
+PolygonMeshGeneratorBase::setSectorExtraIDs(MeshBase & mesh,
+                                            const std::string id_name,
+                                            const unsigned int num_sides,
+                                            const std::vector<unsigned int> num_sectors_per_side)
+{
+  const auto extra_id_index = mesh.add_elem_integer(id_name);
+  // vector to store sector ids for each element
+  auto elem_it = mesh.elements_begin();
+  unsigned int id = 1;
+  // starting element id of the current sector
+  for (unsigned int is = 0; is < num_sides; ++is)
+  {
+    // number of elements in the current sector
+    unsigned int nelem_sector =
+        mesh.n_elem() * num_sectors_per_side[is] /
+        (accumulate(num_sectors_per_side.begin(), num_sectors_per_side.end(), 0));
+    // assign sector ids to mesh
+    for (unsigned i = 0; i < nelem_sector; ++i, ++elem_it)
+      (*elem_it)->set_extra_integer(extra_id_index, id);
+    // update sector id
+    ++id;
+  }
+}
+
+void
+PolygonMeshGeneratorBase::setRingExtraIDs(MeshBase & mesh,
+                                          const std::string id_name,
+                                          const unsigned int num_sides,
+                                          const std::vector<unsigned int> num_sectors_per_side,
+                                          const std::vector<unsigned int> ring_intervals,
+                                          const bool ring_wise_id,
+                                          const bool quad_center_elements)
+{
+  // this function assumes that elements are ordered by rings (inner) then by sectors (outer
+  // ordering)
+  const auto extra_id_index = mesh.add_elem_integer(id_name);
+  auto elem_it = mesh.elements_begin();
+  for (unsigned int is = 0; is < num_sides; ++is)
+  {
+    // number of elements in the current sector
+    unsigned int nelem = mesh.n_elem() * num_sectors_per_side[is] /
+                         (accumulate(num_sectors_per_side.begin(), num_sectors_per_side.end(), 0));
+    if (!ring_wise_id)
+    {
+      for (unsigned int ir : index_range(ring_intervals))
+      {
+        // number of elements in the current ring and sector
+        unsigned int nelem_annular_ring = num_sectors_per_side[is] * ring_intervals[ir];
+        // if _quad_center_elements is true, the number of elements in center ring are
+        // _num_sectors_per_side[is] * _num_sectors_per_side[is] / 4
+        if (quad_center_elements && ir == 0)
+          nelem_annular_ring = num_sectors_per_side[is] * (ring_intervals[ir] - 1) +
+                               num_sectors_per_side[is] * num_sectors_per_side[is] / 4;
+        // assign ring id
+        for (unsigned i = 0; i < nelem_annular_ring; ++i, ++elem_it)
+          (*elem_it)->set_extra_integer(extra_id_index, ir + 1);
+        // update number of elements in background region of current side.
+        nelem -= nelem_annular_ring;
+      }
+    }
+    else
+    {
+      unsigned int ir = 0;
+      for (unsigned int ir0 : index_range(ring_intervals))
+      {
+        for (unsigned int ir1 = 0; ir1 < ring_intervals[ir0]; ++ir1)
+        {
+          // number of elements in the current ring and sector
+          unsigned int nelem_annular_ring = num_sectors_per_side[is];
+          // if _quad_center_elements is true, the number of elements in center ring are
+          // _num_sectors_per_side[is] * _num_sectors_per_side[is] / 4
+          if (quad_center_elements && ir == 0)
+            nelem_annular_ring = num_sectors_per_side[is] * num_sectors_per_side[is] / 4;
+          // assign ring id
+          for (unsigned i = 0; i < nelem_annular_ring; ++i, ++elem_it)
+            (*elem_it)->set_extra_integer(extra_id_index, ir + 1);
+          // update ring id
+          ++ir;
+          // update number of elements in background region of current side.
+          nelem -= nelem_annular_ring;
+        }
+      }
+    }
+    // assign ring id of 0 to the background region
+    for (unsigned i = 0; i < nelem; ++i, ++elem_it)
+      (*elem_it)->set_extra_integer(extra_id_index, 0);
+  }
+}

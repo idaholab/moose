@@ -26,6 +26,11 @@ PINSFVEnergyDiffusion::validParams()
       false,
       "Whether the diffusivity should be multiplied by porosity, or whether the provided "
       "diffusivity is an effective diffusivity taking porosity effects into account");
+  MooseEnum coeff_interp_method("average harmonic", "harmonic");
+  params.addParam<MooseEnum>(
+      "kappa_interp_method",
+      coeff_interp_method,
+      "Switch that can select face interpolation method for the thermal conductivity.");
 
   params.set<unsigned short>("ghost_layers") = 2;
   return params;
@@ -35,7 +40,9 @@ PINSFVEnergyDiffusion::PINSFVEnergyDiffusion(const InputParameters & params)
   : FVFluxKernel(params),
     _k(getFunctor<ADReal>(NS::k)),
     _eps(getFunctor<ADReal>(NS::porosity)),
-    _porosity_factored_in(getParam<bool>("effective_diffusivity"))
+    _porosity_factored_in(getParam<bool>("effective_diffusivity")),
+    _k_interp_method(
+        Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("kappa_interp_method")))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("PINSFV is not supported by local AD indexing. In order to use PINSFV, please run "
@@ -56,19 +63,15 @@ PINSFVEnergyDiffusion::computeQpResidual()
   const auto face_neighbor = neighborFromFace();
 
   if (!_porosity_factored_in)
-    Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
+    Moose::FV::interpolate(_k_interp_method,
                            k_eps_face,
                            _k(face_elem) * _eps(face_elem),
                            _k(face_neighbor) * _eps(face_neighbor),
                            *_face_info,
                            true);
   else
-    Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
-                           k_eps_face,
-                           _k(face_elem),
-                           _k(face_neighbor),
-                           *_face_info,
-                           true);
+    Moose::FV::interpolate(
+        _k_interp_method, k_eps_face, _k(face_elem), _k(face_neighbor), *_face_info, true);
 
   // Compute the temperature gradient dotted with the surface normal
   auto dTdn = gradUDotNormal();
