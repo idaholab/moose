@@ -69,19 +69,6 @@ template <typename T>
 T transpose(const T & v);
 
 /**
- * Helper function template specialization to transpose a second order tensor
- */
-template <>
-RankTwoTensor transpose<RankTwoTensor>(const RankTwoTensor & v);
-
-/**
- * Helper function template specialization to transpose a second order tensor
- */
-template <>
-ADRankTwoTensor transpose<ADRankTwoTensor>(const ADRankTwoTensor & v);
-}
-
-/**
  * RankTwoTensorTempl is designed to handle the Stress or Strain Tensor for a fully anisotropic
  * material. It is designed to allow for maximum clarity of the mathematics and ease of use.
  * Original class authors: A. M. Jokisaari, O. Heinonen, M. R. Tonks
