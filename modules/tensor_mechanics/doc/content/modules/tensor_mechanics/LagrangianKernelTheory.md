@@ -126,13 +126,8 @@ The [TensorMechanics/MasterAction](/Modules/TensorMechanics/Master/index.md)
 can be used to easily coordinate the
 values of this flag and the `use_displaced_mesh` flag.
 
-## Limitations and Future Development of the New Kernel System
+## Coupling to the Lagrangian kernels 
 
-The goal is to eventually make the new kernel system compatible with
-all of Tensor Mechanics as well as the rest of MOOSE.
-However, right now the new kernels have some major limitations:
-
-- The new kernels only support axisymmetric cylindrical and centrosymmetric spherical coordinate systems using the total Lagrangian formulation. 
-- The new kernels are not fully compatible with other MOOSE modules.  In  particular, modules expecting to couple to the `stress` material property, which represented the Cauchy stress in the old material system, should now couple to `cauchy_stress` or `pk1_stress` instead.
-
-We expect to resolve these limitations as users switch to the new kernels.
+Modules expecting to couple to the `stress` material property, 
+which represented the Cauchy stress in the old material system, 
+should now couple to `cauchy_stress` or `pk1_stress` instead.
