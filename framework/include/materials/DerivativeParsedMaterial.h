@@ -26,6 +26,9 @@ public:
   DerivativeParsedMaterialTempl(const InputParameters & parameters);
 
   usingDerivativeParsedMaterialHelperMembers(is_ad);
+
+protected:
+  virtual void resetQpProperties() override {}
 };
 
 typedef DerivativeParsedMaterialTempl<false> DerivativeParsedMaterial;

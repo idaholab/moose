@@ -113,6 +113,16 @@ protected:
                                         const GenericReal<is_ad> & scalar) = 0;
 
   /**
+   * This method is called before taking a step in the return mapping algorithm. A typical use case
+   * is to accumulate the exact algorithmic tangent during return mapping.
+   */
+  virtual void preStep(const GenericReal<is_ad> & /*scalar_old*/,
+                       const GenericReal<is_ad> & /*residual*/,
+                       const GenericReal<is_ad> & /*jacobian*/)
+  {
+  }
+
+  /**
    * Finalize internal state variables for a model for a given iteration.
    * @param scalar                 Inelastic strain increment magnitude being solved for
    */
