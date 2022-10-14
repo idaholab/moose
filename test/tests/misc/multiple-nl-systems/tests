@@ -1,0 +1,19 @@
+[Tests]
+  design = 'Problem/index.md'
+  issues = '#8780'
+  [coupled_system]
+    requirement = 'The software shall be able to solve a system of equations in which one variable depends on another by'
+    [segregated]
+      type = Exodiff
+      input = test.i
+      exodiff = test_out.e
+      detail = 'segregating the solves; first the independent variable is solved for, and second the dependent variable is solved for using the solution of the first'
+    []
+    [monolithic]
+      type = Exodiff
+      input = fully-coupled.i
+      exodiff = fully-coupled_out.e
+      detail = 'solving the equations monolothically; both the independent and dependent variable equations are solved in a single large system'
+    []
+  []
+[]

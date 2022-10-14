@@ -402,7 +402,7 @@ public:
                                     std::vector<std::shared_ptr<NonlinearSystemBase>> & nl);
 
   virtual void init() override;
-  virtual void solve(const NonlinearSystemName & nl_sys_name = "nl0");
+  virtual void solve(unsigned int nl_sys_num = 0);
 
   ///@{
   /**
@@ -1986,6 +1986,11 @@ public:
   void reinitFVFace(THREAD_ID tid, const FaceInfo & fi);
 
   unsigned int currentNlSysNum() const override;
+
+  /**
+   * @return the nonlinear system number corresponding to the provided \p nl_sys_name
+   */
+  unsigned int nlSysNum(const NonlinearSystemName & nl_sys_name) const;
 
 protected:
   /// Create extra tagged vectors and matrices

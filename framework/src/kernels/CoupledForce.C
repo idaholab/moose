@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CoupledForce.h"
+#include "MooseVariableFE.h"
+#include "SystemBase.h"
 
 registerMooseObject("MooseApp", CoupledForce);
 registerMooseObject("MooseApp", ADCoupledForce);
@@ -32,9 +34,11 @@ CoupledForceTempl<is_ad>::CoupledForceTempl(const InputParameters & parameters)
   : GenericKernel<is_ad>(parameters),
     _v_var(coupled("v")),
     _v(this->template coupledGenericValue<is_ad>("v")),
-    _coef(this->template getParam<Real>("coef"))
+    _coef(this->template getParam<Real>("coef")),
+    _in_our_sys(this->isCoupled("v") &&
+                _var.sys().number() == this->getFieldVar("v", 0)->sys().number())
 {
-  if (_var.number() == _v_var)
+  if (_var.number() == _v_var && _in_our_sys)
     mooseError("Coupled variable 'v' needs to be different from 'variable' with CoupledForce / "
                "ADCoupledForce, consider using the CoefReaction kernel or something similar");
 }
@@ -56,7 +60,7 @@ CoupledForceTempl<is_ad>::computeQpOffDiagJacobian(unsigned int jvar)
   mooseAssert(!is_ad,
               "In ADCoupledForce, computeQpJacobian should not be called. Check computeJacobian "
               "implementation.");
-  if (jvar == _v_var)
+  if (jvar == _v_var && _in_our_sys)
     return -_coef * _phi[_j][_qp] * _test[_i][_qp];
   return 0.0;
 }

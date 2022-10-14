@@ -5329,15 +5329,22 @@ FEProblemBase::init()
   _initialized = true;
 }
 
-void
-FEProblemBase::solve(const NonlinearSystemName & nl_sys_name)
+unsigned int
+FEProblemBase::nlSysNum(const NonlinearSystemName & nl_sys_name) const
 {
-  TIME_SECTION("solve", 1, "Solving", false);
-
   std::istringstream ss(nl_sys_name);
   unsigned int nl_sys_num;
   if (!(ss >> nl_sys_num) || !ss.eof())
     nl_sys_num = libmesh_map_find(_nl_sys_name_to_num, nl_sys_name);
+
+  return nl_sys_num;
+}
+
+void
+FEProblemBase::solve(const unsigned int nl_sys_num)
+{
+  TIME_SECTION("solve", 1, "Solving", false);
+
   setCurrentNonlinearSystem(nl_sys_num);
 
   // This prevents stale dof indices from lingering around and possibly leading to invalid reads and
@@ -6050,11 +6057,11 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
 }
 
 void
-FEProblemBase::computeJacobianSys(NonlinearImplicitSystem & /*sys*/,
+FEProblemBase::computeJacobianSys(NonlinearImplicitSystem & sys,
                                   const NumericVector<Number> & soln,
                                   SparseMatrix<Number> & jacobian)
 {
-  computeJacobian(soln, jacobian);
+  computeJacobian(soln, jacobian, sys.number());
 }
 
 void

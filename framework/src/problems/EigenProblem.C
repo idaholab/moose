@@ -505,7 +505,7 @@ EigenProblem::doFreeNonlinearPowerIterations(unsigned int free_power_iterations)
 }
 
 void
-EigenProblem::solve(const NonlinearSystemName & nl_sys_name)
+EigenProblem::solve(const unsigned int nl_sys_num)
 {
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
   // Master has the default database
@@ -513,11 +513,7 @@ EigenProblem::solve(const NonlinearSystemName & nl_sys_name)
     PetscOptionsPush(_petsc_option_data_base);
 #endif
 
-  std::istringstream ss(nl_sys_name);
-  unsigned int nl_sys_num;
-  if (!(ss >> nl_sys_num) || !ss.eof())
-    nl_sys_num = libmesh_map_find(_nl_sys_name_to_num, nl_sys_name);
-  _current_nl_sys = _nl[nl_sys_num].get();
+  setCurrentNonlinearSystem(nl_sys_num);
 
   if (_solve)
   {

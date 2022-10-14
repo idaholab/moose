@@ -130,7 +130,7 @@ DumpObjectsProblem::dumpVariableHelper(const std::string & system,
 }
 
 void
-DumpObjectsProblem::solve(const NonlinearSystemName &)
+DumpObjectsProblem::solve(unsigned int)
 {
   dumpGeneratedSyntax(getParam<std::string>("dump_path"));
 }

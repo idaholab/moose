@@ -27,7 +27,7 @@ public:
   /**
    * Solve is implemented to providing syncing to/from the "transfer" mesh.
    */
-  virtual void solve(const NonlinearSystemName & nl_sys_name) override final;
+  virtual void solve(unsigned int nl_sys_num = 0) override final;
 
   /**
    * New interface for solving an External problem. "solve()" is finalized here to provide

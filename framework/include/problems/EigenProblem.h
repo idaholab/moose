@@ -31,7 +31,7 @@ public:
   }
 
 #ifdef LIBMESH_HAVE_SLEPC
-  virtual void solve(const NonlinearSystemName & nl_sys_name) override;
+  virtual void solve(unsigned int nl_sys_num = 0) override;
 
   virtual void init() override;
 

@@ -37,6 +37,9 @@ private:
   const GenericVariableValue<is_ad> & _v;
   /// Multiplier for the coupled force term
   Real _coef;
+
+  /// Whether the coupled variable is in our nonlinear system
+  const bool _in_our_sys;
 };
 
 typedef CoupledForceTempl<false> CoupledForce;
