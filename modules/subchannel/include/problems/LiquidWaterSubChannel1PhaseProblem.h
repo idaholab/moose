@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SubChannel1PhaseProblem.h"
+#include "QuadSubChannelMesh.h"
 
 class LiquidWaterSubChannel1PhaseProblem;
 
@@ -14,6 +15,8 @@ public:
 
 protected:
   virtual double computeFrictionFactor(double Re) override;
+  virtual double computeFrictionFactor(double Re, int i_ch) override;
+  QuadSubChannelMesh & _subchannel_mesh;
 
 public:
   static InputParameters validParams();

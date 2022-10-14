@@ -18,9 +18,10 @@ protected:
    * for each subchannel.
    * Upgraded Cheng-Todreas Correlation (2018).
    */
-  virtual double computeFrictionFactor(double Re, int i_ch, Real S, Real w_perim, Real Dh_i);
-  /// computeFrictionFactor(double Re) is currently not used for sodium coolant
+  double computeFrictionFactor(double Re, int i_ch, Real S, Real w_perim, Real Dh_i);
+  // computeFrictionFactor(double Re, int i_ch) is currently not used for sodium coolant
   virtual double computeFrictionFactor(double Re) override;
+  virtual double computeFrictionFactor(double Re, int i_ch) override;
   /// Function that computes the heat flux added by the duct
   virtual Real computeAddedHeatDuct(unsigned int i_ch, unsigned int iz);
   /// computeDP(int iz) is defined/overridden in order to use the friction factor for sodium
@@ -52,6 +53,7 @@ protected:
   Vec _hc_axial_heat_conduction_rhs;
   Mat _hc_radial_heat_conduction_mat;
   Vec _hc_radial_heat_conduction_rhs;
+  Vec _hc_sweep_enthalpy_rhs;
 
 public:
   static InputParameters validParams();

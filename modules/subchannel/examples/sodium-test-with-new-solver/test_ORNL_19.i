@@ -4,14 +4,14 @@ A13 = -0.21390
 A14 = -1.1046e-5
 rho = ${fparse A12 + A13 * T_in + A14 * T_in * T_in}
 flow_area = 0.0004980799633447909 #m2
-vol_flow = 3.47E-03 #3.47E-03
+vol_flow = 0.1E-03 #3.47E-03
 mass_flux_in = ${fparse rho *  vol_flow / flow_area}
 P_out = 2.0e5 # Pa 
 [TriSubChannelMesh]
   [subchannel]
     type = TriSubChannelMeshGenerator
     nrings = 3
-    n_cells = 10
+    n_cells = 40
     flat_to_flat = 3.41e-2
     heated_length = 0.5334
     unheated_length_entry = 0.4064
@@ -74,7 +74,7 @@ P_out = 2.0e5 # Pa
   P_tol = 1.0e-6
   T_tol = 1.0e-6
   implicit = true
-  segregated = true
+  segregated = false
   staggered_pressure = false
   monolithic_thermal = false
   verbose_multiapps = true

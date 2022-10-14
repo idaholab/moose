@@ -187,12 +187,23 @@ QuadSubChannelMeshGenerator::QuadSubChannelMeshGenerator(const InputParameters &
                        (ix == 0 && iy == _ny - 1) || (ix == _nx - 1 && iy == _ny - 1);
       bool is_edge = (ix == 0 || iy == 0 || ix == _nx - 1 || iy == _ny - 1);
 
-      if (is_corner)
-        _subch_type[i_ch] = EChannelType::CORNER;
-      else if (is_edge)
-        _subch_type[i_ch] = EChannelType::EDGE;
-      else
+      if (_n_channels == 2)
+      {
         _subch_type[i_ch] = EChannelType::CENTER;
+      }
+      else if (_n_channels == 4)
+      {
+        _subch_type[i_ch] = EChannelType::CORNER;
+      }
+      else
+      {
+        if (is_corner)
+          _subch_type[i_ch] = EChannelType::CORNER;
+        else if (is_edge)
+          _subch_type[i_ch] = EChannelType::EDGE;
+        else
+          _subch_type[i_ch] = EChannelType::CENTER;
+      }
     }
   }
 

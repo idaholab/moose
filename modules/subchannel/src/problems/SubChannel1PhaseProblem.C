@@ -78,6 +78,9 @@ SubChannel1PhaseProblem::validParams()
   params.addRequiredParam<bool>(
       "compute_power",
       "Flag that informs whether we solve the Enthalpy/Temperature equations or not");
+  params.addParam<bool>("default_friction_model",
+                        true,
+                        "Boolean to define which friction model to use (Only for quad use)");
   params.addRequiredParam<Real>("P_out", "Outlet Pressure [Pa]");
   params.addRequiredParam<UserObjectName>("fp", "Fluid properties user object name");
   return params;
@@ -114,6 +117,7 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _segregated_bool(getParam<bool>("segregated")),
     _monolithic_thermal_bool(getParam<bool>("monolithic_thermal")),
     _verbose_subchannel(getParam<bool>("verbose_subchannel")),
+    _default_friction_model(getParam<bool>("default_friction_model")),
     _fp(nullptr),
     _Tpin_soln(nullptr),
     _q_prime_duct_soln(nullptr),
@@ -808,7 +812,11 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         }
         turbulent_term *= _CT;
         auto Re = (((*_mdot_soln)(node_in) / S) * Dh_i / mu_in);
-        auto fi = computeFrictionFactor(Re);
+        auto fi = 0.0;
+        if (_default_friction_model)
+          fi = computeFrictionFactor(Re);
+        else
+          fi = computeFrictionFactor(Re, i_ch);
         auto ki = k_grid[i_ch][iz - 1];
         auto friction_term = (fi * dz / Dh_i + ki) * 0.5 *
                              (std::pow((*_mdot_soln)(node_out), 2.0)) /
@@ -1062,7 +1070,11 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         PetscScalar mdot_interp = computeInterpolatedValue(
             (*_mdot_soln)(node_out), (*_mdot_soln)(node_in), "central_difference", Pe);
         auto Re = ((mdot_interp / S_interp) * Dh_i / mu_interp);
-        auto fi = computeFrictionFactor(Re);
+        auto fi = 0.0;
+        if (_default_friction_model)
+          fi = computeFrictionFactor(Re);
+        else
+          fi = computeFrictionFactor(Re, i_ch);
         auto ki = computeInterpolatedValue(
             k_grid[i_ch][iz], k_grid[i_ch][iz - 1], "central_difference", Pe);
         auto coef = (fi * dz / Dh_i + ki) * 0.5 * std::abs((*_mdot_soln)(node_out)) /
