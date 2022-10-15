@@ -2,7 +2,6 @@
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
-  large_kinematics = true
 []
 
 [Variables]
@@ -28,20 +27,20 @@
   [disp_x]
     type = RandomIC
     variable = disp_x
-    min = -0.1
-    max = 0.1
+    min = -0.01
+    max = 0.01
   []
   [disp_y]
     type = RandomIC
     variable = disp_y
-    min = -0.1
-    max = 0.1
+    min = -0.01
+    max = 0.01
   []
   [disp_z]
     type = RandomIC
     variable = disp_z
-    min = -0.1
-    max = 0.1
+    min = -0.01
+    max = 0.01
   []
 []
 
@@ -149,15 +148,15 @@
 
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
+  automatic_scaling = true
 
   l_max_its = 2
   l_tol = 1e-14
-  nl_max_its = 3
   nl_rel_tol = 1e-8
   nl_abs_tol = 1e-10
 
   start_time = 0.0
   dt = 1.0
   dtmin = 1.0
-  end_time = 1.0
+  end_time = 2.0
 []
