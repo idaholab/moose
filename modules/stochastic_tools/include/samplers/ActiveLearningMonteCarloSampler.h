@@ -46,13 +46,13 @@ private:
 
   /// Storage for previously accepted samples by the decision reporter system
   std::vector<std::vector<Real>> _inputs_sto;
-  
+
   /// Track GP fails
   unsigned int _track_gp_fails;
-  
+
   /// Store the user-specified GP fails
   unsigned int _allowed_gp_fails;
-  
+
   /// Store the input params for which the GP fails
   std::vector<std::vector<Real>> _inputs_gp_fails;
 };

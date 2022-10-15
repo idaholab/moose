@@ -37,21 +37,22 @@ ActiveLearningGPDecision::validParams()
   return params;
 }
 
-ActiveLearningGPDecision::ActiveLearningGPDecision(
-    const InputParameters & parameters)
+ActiveLearningGPDecision::ActiveLearningGPDecision(const InputParameters & parameters)
   : ActiveLearningReporterTempl<Real>(parameters),
-  SurrogateModelInterface(this),
-  _step(getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")->timeStep()),
-  _learning_function(getParam<MooseEnum>("learning_function")),
-  _learning_function_threshold(getParam<Real>("learning_function_threshold")),
-  _learning_function_parameter(isParamValid("learning_function_parameter") ? &getParam<Real>("learning_function_parameter") : nullptr),
-  _al_gp(&getUserObject<ActiveLearningGaussianProcess>("al_gp")),
-  _sampler(getSampler("sampler")),
-  _flag_sample(declareValue<std::vector<bool>>("flag_sample")),
-  _n_train(getParam<int>("n_train")),
-  _inputs(declareValue<std::vector<std::vector<Real>>>("inputs")),
-  _gp_mean(declareValue<std::vector<Real>>("gp_mean")),
-  _gp_std(declareValue<std::vector<Real>>("gp_std"))
+    SurrogateModelInterface(this),
+    _step(getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")->timeStep()),
+    _learning_function(getParam<MooseEnum>("learning_function")),
+    _learning_function_threshold(getParam<Real>("learning_function_threshold")),
+    _learning_function_parameter(isParamValid("learning_function_parameter")
+                                     ? &getParam<Real>("learning_function_parameter")
+                                     : nullptr),
+    _al_gp(&getUserObject<ActiveLearningGaussianProcess>("al_gp")),
+    _sampler(getSampler("sampler")),
+    _flag_sample(declareValue<std::vector<bool>>("flag_sample")),
+    _n_train(getParam<int>("n_train")),
+    _inputs(declareValue<std::vector<std::vector<Real>>>("inputs")),
+    _gp_mean(declareValue<std::vector<Real>>("gp_mean")),
+    _gp_std(declareValue<std::vector<Real>>("gp_std"))
 {
   _inputs_sto.resize(_sampler.getNumberOfCols());
   _flag_sample.resize(_sampler.getNumberOfRows());
@@ -74,13 +75,12 @@ ActiveLearningGPDecision::ActiveLearningGPDecision(
   _allowed_gp_fails = _sampler.getNumberOfRows();
   _communicator.split(
       _sampler.getNumberOfLocalRows() > 0 ? 1 : MPI_UNDEFINED, processor_id(), _local_comm);
-  
+
   if (_learning_function == "Ufunction")
   {
     if (!isParamValid("learning_function_parameter"))
       ::mooseError("The Ufunction requires the model failure threshold to be specified.");
   }
-
 }
 
 bool
@@ -89,12 +89,12 @@ ActiveLearningGPDecision::learningFunction(const Real & gp_mean,
                                            const MooseEnum & function_name,
                                            const Real & parameter,
                                            const Real & threshold)
-{ 
+{
   bool result = 0;
   Real f_val;
   if (function_name == "Ufunction")
   {
-    f_val = std::abs(gp_mean-parameter) / gp_std;
+    f_val = std::abs(gp_mean - parameter) / gp_std;
     if (f_val > threshold)
       result = 1;
   }
@@ -111,9 +111,9 @@ ActiveLearningGPDecision::learningFunction(const Real & gp_mean,
 
 bool
 ActiveLearningGPDecision::needSample(const std::vector<Real> & row,
-                                              dof_id_type local_ind,
-                                              dof_id_type,
-                                              Real & val)
+                                     dof_id_type local_ind,
+                                     dof_id_type,
+                                     Real & val)
 {
   _gp_sto.resize(2);
   _output_comm.resize(1);
@@ -145,17 +145,22 @@ ActiveLearningGPDecision::needSample(const std::vector<Real> & row,
     {
       if (local_ind == 0)
         _al_gp->reTrain(_inputs_sto, _outputs_sto);
-      
+
       // Setting up variables and making decisions
-        // @{
+      // @{
       _gp_sto[0] = getSurrogateModel<GaussianProcess>("gp_evaluator").evaluate(row, _gp_sto[1]);
       val = _gp_sto[0];
-      bool lf_indicator = learningFunction(_gp_mean[local_ind], _gp_std[local_ind], _learning_function, *_learning_function_parameter, _learning_function_threshold);
+      bool lf_indicator = learningFunction(_gp_mean[local_ind],
+                                           _gp_std[local_ind],
+                                           _learning_function,
+                                           *_learning_function_parameter,
+                                           _learning_function_threshold);
       if (lf_indicator)
       {
         val = _gp_sto[0];
         _decision[local_ind] = false;
-      } else
+      }
+      else
       {
         ++_track_gp_fails;
         _flag_sample[local_ind] = true;
@@ -171,9 +176,8 @@ ActiveLearningGPDecision::needSample(const std::vector<Real> & row,
         _gp_mean[ss] = _gp_mean_comm[ss];
         _gp_std[ss] = _gp_std_comm[ss];
       }
-        // @}
+      // @}
       // Finished setting up variables and making decisions
-
     }
     // Start tracking the GP failures until a user-specified batch size is met
     if (_track_gp_fails >= _allowed_gp_fails)
@@ -181,7 +185,8 @@ ActiveLearningGPDecision::needSample(const std::vector<Real> & row,
       for (unsigned int i = 0; i < _flag_sample.size(); ++i)
         _decision[i] = true;
     }
-  } else // Training data generation and GP training completed. Active learning starts.
+  }
+  else // Training data generation and GP training completed. Active learning starts.
   {
     // If the number of GP fails greater than user-specified batch size, retrain GP
     if (_track_gp_fails >= _allowed_gp_fails)
@@ -197,16 +202,21 @@ ActiveLearningGPDecision::needSample(const std::vector<Real> & row,
     }
 
     // Setting up variables and making decisions
-      // @{
+    // @{
     _gp_sto[0] = getSurrogateModel<GaussianProcess>("gp_evaluator").evaluate(row, _gp_sto[1]);
-    bool lf_indicator = learningFunction(_gp_mean[local_ind], _gp_std[local_ind], _learning_function, *_learning_function_parameter, _learning_function_threshold);
+    bool lf_indicator = learningFunction(_gp_mean[local_ind],
+                                         _gp_std[local_ind],
+                                         _learning_function,
+                                         *_learning_function_parameter,
+                                         _learning_function_threshold);
     if (_flag_sample[local_ind] == true)
       _flag_sample[local_ind] = false;
     if (lf_indicator)
     {
       val = _gp_sto[0];
       _decision[local_ind] = false;
-    } else
+    }
+    else
     {
       ++_track_gp_fails;
       _flag_sample[local_ind] = true;
@@ -222,7 +232,7 @@ ActiveLearningGPDecision::needSample(const std::vector<Real> & row,
       _gp_mean[ss] = _gp_mean_comm[ss];
       _gp_std[ss] = _gp_std_comm[ss];
     }
-      // @}
+    // @}
     // Finished setting up variables and making decisions
 
     // Start re-tracking the GP failures until a user-specified batch size is met

@@ -14,14 +14,14 @@
 #include "GaussianProcess.h"
 #include "SurrogateModelInterface.h"
 
-class ActiveLearningGPDecision : public ActiveLearningReporterTempl<Real>, public SurrogateModelInterface
+class ActiveLearningGPDecision : public ActiveLearningReporterTempl<Real>,
+                                 public SurrogateModelInterface
 {
 public:
   static InputParameters validParams();
   ActiveLearningGPDecision(const InputParameters & parameters);
 
 protected:
-
   /**
    * This evaluates the inputted function to determine whether a multiapp solve is
    * necessary/allowed, otherwise it replaces the "transferred" quantity with a
@@ -33,7 +33,6 @@ protected:
                           Real & val) override;
 
 private:
-
   /**
    * This evaluates the active learning acquisition function and returns bool
    * that indicates whether a full model evaluation is required or not.
@@ -43,7 +42,7 @@ private:
                         const MooseEnum & function_name,
                         const Real & parameter,
                         const Real & threshold);
-  
+
   /// Track the current step of the main App
   const int & _step;
 
@@ -61,16 +60,16 @@ private:
 
   /// The Monte Carlo sampler
   Sampler & _sampler;
-  
+
   /// Flag samples when the GP fails
   std::vector<bool> & _flag_sample;
- 
+
   /// Number of initial training points for GP
   const int _n_train;
 
   /// Store the inputs vector
   std::vector<std::vector<Real>> & _inputs;
- 
+
   /// Broadcast the GP mean prediciton to JSON
   std::vector<Real> & _gp_mean;
 
@@ -85,16 +84,16 @@ private:
 
   /// Store all the input vectors in the batch from the previous step
   std::vector<std::vector<Real>> _inputs_prev;
- 
+
   /// GP pass/fail decision
   std::vector<bool> _decision;
 
   /// Track GP fails
   unsigned int _track_gp_fails;
-  
+
   /// Store the user-specified GP fails
   unsigned int _allowed_gp_fails;
-  
+
   /// For parallelization
   libMesh::Parallel::Communicator _local_comm;
 

@@ -116,7 +116,7 @@
 
 [Outputs]
   # perf_graph = true
-  file_base = 'SingleProcSingleRow_Ufunction_tao'
+  file_base = 'Ufunction_tao'
   [out]
     type = JSON
     execute_system_information_on = none

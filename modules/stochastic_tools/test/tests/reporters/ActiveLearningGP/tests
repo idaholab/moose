@@ -32,7 +32,7 @@
       type = 'JSONDiff'
       input = Main_tao.i
       allow_test_objects = true
-      jsondiff = 'SingleProcSingleRow_Ufunction_tao.json'
+      jsondiff = 'Ufunction_tao.json'
       detail = 'a single row in the sampler with single processor using the COV learning function with GP using the squared exponential kernel and TAO optimization;'
     []
   []

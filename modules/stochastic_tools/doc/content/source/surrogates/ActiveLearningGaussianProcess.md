@@ -1,6 +1,6 @@
 # Active learning Gaussian Process
 
-!syntax description /Surrogates/ActiveLearningGaussianProcess
+!syntax description /Trainers/ActiveLearningGaussianProcess
 
 ## Description
 
@@ -25,8 +25,8 @@ Just like the `GaussianProcessTrainer` class, the GP model during active learnin
 Please refer to [ActiveLearningGPDecision](ActiveLearningGPDecision.md) on a detailed description on
 using active learning.
 
-!syntax parameters /Surrogates/ActiveLearningGaussianProcess
+!syntax parameters /Trainers/ActiveLearningGaussianProcess
 
-!syntax inputs /Surrogates/ActiveLearningGaussianProcess
+!syntax inputs /Trainers/ActiveLearningGaussianProcess
 
-!syntax children /Surrogates/ActiveLearningGaussianProcess
+!syntax children /Trainers/ActiveLearningGaussianProcess

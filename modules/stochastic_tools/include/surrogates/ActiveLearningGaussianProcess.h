@@ -28,7 +28,9 @@
 
 #include "GaussianProcessHandler.h"
 
-class ActiveLearningGaussianProcess : public SurrogateTrainerBase, public CovarianceInterface, public SurrogateModelInterface
+class ActiveLearningGaussianProcess : public SurrogateTrainerBase,
+                                      public CovarianceInterface,
+                                      public SurrogateModelInterface
 {
 public:
   static InputParameters validParams();
@@ -36,16 +38,16 @@ public:
 
   virtual void initialize() final{};
   virtual void execute() final{};
-  virtual void reTrain(const std::vector<std::vector<Real>> & inputs, const std::vector<Real> & outputs) const final;
+  virtual void reTrain(const std::vector<std::vector<Real>> & inputs,
+                       const std::vector<Real> & outputs) const final;
 
   StochasticTools::GaussianProcessHandler & gpHandler() { return _gp_handler; }
   const StochasticTools::GaussianProcessHandler & getGPHandler() const { return _gp_handler; }
 
 private:
-
   /// Name for the meta data associated with training
   const std::string _model_meta_data_name;
-  
+
   /// The GP handler
   StochasticTools::GaussianProcessHandler & _gp_handler;
 

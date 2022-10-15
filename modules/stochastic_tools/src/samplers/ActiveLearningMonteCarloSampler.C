@@ -17,12 +17,14 @@ ActiveLearningMonteCarloSampler::validParams()
 {
   InputParameters params = Sampler::validParams();
   params.addClassDescription("Monte Carlo Sampler.");
-  params.addRequiredParam<dof_id_type>("num_batch", "The number of full model evaluations in the batch.");
+  params.addRequiredParam<dof_id_type>("num_batch",
+                                       "The number of full model evaluations in the batch.");
   params.addRequiredParam<std::vector<DistributionName>>(
       "distributions",
       "The distribution names to be sampled, the number of distributions provided defines the "
       "number of columns per matrix.");
-  params.addRequiredParam<ReporterName>("flag_sample", "Flag samples if the surrogate prediction was inadequate.");
+  params.addRequiredParam<ReporterName>("flag_sample",
+                                        "Flag samples if the surrogate prediction was inadequate.");
   params.addParam<unsigned int>(
       "num_random_seeds",
       100000,
@@ -59,22 +61,23 @@ Real
 ActiveLearningMonteCarloSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
 {
   if (col_index == 0 && _step > 0 && _check_step != _step)
+  {
+    for (dof_id_type i = 0; i < getParam<dof_id_type>("num_batch"); ++i)
     {
-      for (dof_id_type i = 0; i < getParam<dof_id_type>("num_batch"); ++i)
+      if (_flag_sample[i] == true)
       {
-        if (_flag_sample[i] == true)
-        {
-          _inputs_gp_fails[_track_gp_fails] = _inputs_sto[_track_gp_fails];
-          ++_track_gp_fails;
-        }
-        for (dof_id_type j = 0; j < _distributions.size(); ++j)
-            _inputs_sto[i][j] = _distributions[j]->quantile(getRand(_step));
+        _inputs_gp_fails[_track_gp_fails] = _inputs_sto[_track_gp_fails];
+        ++_track_gp_fails;
       }
-    } else if (_step == 0)
-    {
       for (dof_id_type j = 0; j < _distributions.size(); ++j)
-        _inputs_sto[row_index][j] = _distributions[j]->quantile(getRand(_step));
+        _inputs_sto[i][j] = _distributions[j]->quantile(getRand(_step));
     }
+  }
+  else if (_step == 0)
+  {
+    for (dof_id_type j = 0; j < _distributions.size(); ++j)
+      _inputs_sto[row_index][j] = _distributions[j]->quantile(getRand(_step));
+  }
   _check_step = _step;
   if (_track_gp_fails >= _allowed_gp_fails)
   {

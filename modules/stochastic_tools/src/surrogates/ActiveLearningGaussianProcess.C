@@ -76,10 +76,11 @@ ActiveLearningGaussianProcess::ActiveLearningGaussianProcess(const InputParamete
       bounds);
 }
 
-void 
-ActiveLearningGaussianProcess::reTrain(const std::vector<std::vector<Real>> & inputs, const std::vector<Real> & outputs) const
+void
+ActiveLearningGaussianProcess::reTrain(const std::vector<std::vector<Real>> & inputs,
+                                       const std::vector<Real> & outputs) const
 {
-  
+
   // Addtional error check for each re-train call of the GP surrogate
   if (isParamValid("batch_size"))
     if (outputs.size() < _optimization_opts.batch_size)
@@ -93,7 +94,7 @@ ActiveLearningGaussianProcess::reTrain(const std::vector<std::vector<Real>> & in
   {
     _training_data(i, 0) = outputs[i];
     for (unsigned int j = 0; j < inputs.size(); ++j)
-      _training_params(i,j) = inputs[j][i];
+      _training_params(i, j) = inputs[j][i];
   }
 
   // Standardize (center and scale) training params
