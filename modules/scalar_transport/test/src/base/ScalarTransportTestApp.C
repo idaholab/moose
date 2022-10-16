@@ -19,7 +19,8 @@ ScalarTransportTestApp::validParams()
   return params;
 }
 
-ScalarTransportTestApp::ScalarTransportTestApp(InputParameters parameters) : MooseApp(parameters)
+ScalarTransportTestApp::ScalarTransportTestApp(InputParameters parameters)
+  : ScalarTransportApp(parameters)
 {
   ScalarTransportTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
@@ -41,7 +42,7 @@ ScalarTransportTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s,
 void
 ScalarTransportTestApp::registerApps()
 {
-  registerApp(ScalarTransportApp);
+  ScalarTransportApp::registerApps();
   registerApp(ScalarTransportTestApp);
 }
 

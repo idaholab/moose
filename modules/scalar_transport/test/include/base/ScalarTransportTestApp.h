@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "MooseApp.h"
+#include "ScalarTransportApp.h"
 
-class ScalarTransportTestApp : public MooseApp
+class ScalarTransportTestApp : public ScalarTransportApp
 {
 public:
   static InputParameters validParams();
