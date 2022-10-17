@@ -222,11 +222,21 @@ projectQPoints3d(const Elem * const msm_elem,
         x1 += Moose::fe_lagrange_2D_shape(sub_element_type(), FIRST, n, xi) *
               primal_elem->point(sub_elem_node_indices[n]);
       auto u = x1 - x0;
+
       VectorValue<Dual2> F(u(1) * normal(2) - u(2) * normal(1),
                            u(2) * normal(0) - u(0) * normal(2),
                            u(0) * normal(1) - u(1) * normal(0));
 
-      if (MetaPhysicL::raw_value(F).norm() < 1e-12)
+      Real projection_tolerance(1e-10);
+
+      // Normalize tolerance with quantities involved in the projection.
+      // Absolute projection tolerance is loosened for displacements larger than those on the order
+      // of one. Tightening the tolerance for displacements of smaller orders causes this tolerance
+      // to not be reached in a number of tests.
+      if (!u.is_zero() && u.norm().value() > 1.0)
+        projection_tolerance *= u.norm().value();
+
+      if (MetaPhysicL::raw_value(F).norm() < projection_tolerance)
         break;
 
       RealEigenMatrix J(3, 2);
@@ -253,22 +263,18 @@ projectQPoints3d(const Elem * const msm_elem,
       if (primal_elem->type() == TRI3 || primal_elem->type() == TRI6)
       {
         if (qp_back(0) < 0 || qp_back(1) < 0 || qp_back(0) + qp_back(1) > 1)
-        {
           mooseException("Quadrature point: ", qp_back, " out of bounds, truncating.");
-        }
       }
       else if (primal_elem->type() == QUAD4 || primal_elem->type() == QUAD8 ||
                primal_elem->type() == QUAD9)
       {
         if (qp_back(0) < -1 || qp_back(0) > 1 || qp_back(1) < -1 || qp_back(1) > 1)
-        {
           mooseException("Quadrature point: ", qp_back, " out of bounds, truncating");
-        }
       }
     }
     else
     {
-      mooseError("Newton iteration for mortar quadrature mapping msm_elem: ",
+      mooseError("Newton iteration for mortar quadrature mapping msm element: ",
                  msm_elem->id(),
                  " to elem: ",
                  primal_elem->id(),
