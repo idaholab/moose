@@ -1937,16 +1937,25 @@ protected:
    */
   void modifyFaceWeightsDueToXFEM(const Elem * elem, unsigned int side = 0);
 
+  /**
+   * compute gradient of phi possibly with derivative information with respect to nonlinear
+   * displacement variables
+   */
   template <typename OutputType>
   void computeGradPhiAD(const Elem * elem,
                         unsigned int n_qp,
                         ADTemplateVariablePhiGradient<OutputType> & grad_phi,
                         FEGenericBase<OutputType> * fe);
+
+  /**
+   * resize any objects that contribute to automatic differentiation-related mapping calculations
+   */
   void resizeADMappingObjects(unsigned int n_qp, unsigned int dim);
-  void computeAffineMapAD(const Elem * elem,
-                          const std::vector<Real> & qw,
-                          unsigned int n_qp,
-                          FEBase * fe);
+
+  /**
+   * compute the finite element reference-physical mapping quantities (such as JxW) with possible
+   * dependence on nonlinear displacement variables at a single quadrature point
+   */
   void
   computeSinglePointMapAD(const Elem * elem, const std::vector<Real> & qw, unsigned p, FEBase * fe);
 
