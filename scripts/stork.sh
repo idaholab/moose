@@ -55,6 +55,7 @@ srcnamelow=$(echo "$srcname" | perl -pe "${regex}"'tr/[A-Z]/[a-z]/')
 srcnameup=$(echo "$srcname" | perl -pe "${regex}"'tr/[a-z]/[A-Z]/')
 dstnamelow=$(echo "$dstname" | perl -pe "${regex}"'tr/[A-Z]/[a-z]/')
 dstnameup=$(echo "$dstname" | perl -pe "${regex}"'tr/[a-z]/[A-Z]/')
+dstnamespace=$(echo "$dstname" | sed 's/\([^[:blank:]]\)\([A-Z]\)/\1 \2/g')
 dir="$dstnamelow"
 if [[ -z $MOOSE_DIR ]]; then
     MOOSE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/.."
@@ -159,8 +160,11 @@ if [[ "$kind" == "module" ]]; then
     echo "      b. Add the new module to the registerAll function (alphabetical)"
     echo "    4. Modify the moose/modules/doc/config.yml file"
     echo "       a. Add the module to the content listing (alphabetical)"
-    echo "    5. Ensure that the remaining required SQA documentation is set up for the new module"
-    echo "       by contacting a member of the MOOSE development team."
+    echo "    5. Initialize module SQA (reach out to the MOOSE development team with questions)"
+    echo "       a. Navigate to moose/modules/$dstnamelow/doc"
+    echo "       b. Run './moosedocs.py init sqa --module '$dstnamespace' --category $dstnamelow'"
+    echo "       c. Add new module to SQA extension categories in modules/doc/config.yml (alphabetical)"
+    echo "       d. Add new module to Applications and Requirements sections of modules/doc/sqa_reports.yml (alphabetical)"
     echo "    6. Ensure that no stork files hang around before committing"
     echo "    7. Ensure that proper testing is performed for per-module tests (e.g. parallel, recover testing)"
     echo ""
