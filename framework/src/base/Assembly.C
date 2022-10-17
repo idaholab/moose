@@ -791,7 +791,10 @@ Assembly::reinitFE(const Elem * elem)
     if (_displaced)
     {
       const auto & qw = _current_qrule->get_weights();
-      if (elem->has_affine_map() && !_subproblem.currentlyComputingJacobian())
+      // We allow this affine map optimization when not computing a Jacobian. The moment a
+      // displacement is perturbed, then the element is no longer affine, so we do not allow the
+      // affine map optimization when computing the Jacobian
+      if (elem->has_affine_map() && !ADReal::do_derivatives)
         computeAffineMapAD(elem, qw, n_qp, *_holder_fe_helper[dim]);
       else
         for (unsigned int qp = 0; qp != n_qp; qp++)
@@ -2171,7 +2174,10 @@ Assembly::computeADFace(const Elem & elem, const unsigned int side)
       computeFaceMap(elem, side, qw);
       const std::vector<Real> dummy_qw(n_qp, 1.);
 
-      if (elem.has_affine_map() && !_subproblem.currentlyComputingJacobian())
+      // We allow this affine map optimization when not computing a Jacobian. The moment a
+      // displacement is perturbed, then the element is no longer affine, so we do not allow the
+      // affine map optimization when computing the Jacobian
+      if (elem.has_affine_map() && !ADReal::do_derivatives)
         computeAffineMapAD(&elem, dummy_qw, n_qp, *_holder_fe_face_helper[dim]);
       else
         for (unsigned int qp = 0; qp != n_qp; qp++)
