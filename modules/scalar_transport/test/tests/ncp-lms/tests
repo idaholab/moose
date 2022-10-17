@@ -1,0 +1,64 @@
+[Tests]
+  design = 'LowerBoundNodalKernel.md'
+  issues = '#13192'
+  [lm_ncp]
+    input = ncp-lm.i
+    type = Exodiff
+    exodiff = ncp-lm_out.e
+    requirement = 'The system shall be able to solve a positively constrained system of ODEs using NCP and have a non-singular matrix'
+    absent_out = '[1-9]+[0-9]* of 22 singular values'
+    expect_out = '0 of 22 singular values'
+    custom_cmp = nodal.cmp
+  []
+  [diagonal_lm_ncp_nodal_enforcement]
+    input = diagonal-ncp-lm-nodal-enforcement.i
+    type = Exodiff
+    exodiff = diagonal-ncp-lm-nodal-enforcement_out.e
+    requirement = 'The system shall be able to solve a positively constrained PDE using nodal NCP, have diagonal components for the LM variable because of PSPG-type stabilization, and have a non-singular matrix'
+    absent_out = '[1-9]+[0-9]* of 32 singular values'
+    expect_out = '0 of 32 singular values'
+    cli_args = 'nx=10 num_steps=5 -pc_type svd -pc_svd_monitor'
+    custom_cmp = nodal.cmp
+    ad_indexing_type = global
+  []
+  [diagonal_lm_ncp_nodal_amg]
+    input = diagonal-ncp-lm-nodal-enforcement.i
+    type = Exodiff
+    exodiff = diagonal-ncp-lm-nodal-enforcement-amg.e
+    cli_args = 'Outputs/file_base=diagonal-ncp-lm-nodal-enforcement-amg -pc_type hypre -pc_hypre_type boomeramg'
+    requirement = 'Nodal enforcement of the positivity constraint shall be solvable using algebraic multi-grid'
+    custom_cmp = nodal.cmp
+    ad_indexing_type = global
+  []
+  [interpolated_lm_ncp_nodal_constraint_enforcement]
+    input = interpolated-ncp-lm-nodal-enforcement.i
+    type = Exodiff
+    exodiff = interpolated-ncp-lm-nodal-enforcement_out.e
+    requirement = 'The system shall be able to solve a positively constrained PDE using nodal NCP and have a non-singular matrix'
+    absent_out = '[1-9]+[0-9]* of 32 singular values'
+    expect_out = '0 of 32 singular values'
+    cli_args = 'nx=10 num_steps=5 -pc_type svd -pc_svd_monitor'
+    custom_cmp = nodal.cmp
+  []
+  [interpolated_lm_ncp_nodal_constraint_enforcement_nodal_forces]
+    input = interpolated-ncp-lm-nodal-enforcement-nodal-forces.i
+    type = Exodiff
+    exodiff = interpolated-ncp-lm-nodal-enforcement-nodal-forces_out.e
+    requirement = 'The system shall be able to solve a positively constrained PDE using nodal NCP, and nodal application of resultant forces, and have a non-singular matrix'
+    absent_out = '[1-9]+[0-9]* of 22 singular values'
+    expect_out = '0 of 22 singular values'
+    cli_args = 'nx=10 num_steps=5 -pc_type svd -pc_svd_monitor'
+    custom_cmp = nodal.cmp
+  []
+  [diagonal_lm_ncp_nodal_constraint_enforcement_nodal_forces]
+    input = diagonal-ncp-lm-nodal-enforcement-nodal-forces.i
+    type = Exodiff
+    exodiff = diagonal-ncp-lm-nodal-enforcement-nodal-forces_out.e
+    requirement = 'The system shall be able to solve a positively constrained PDE using nodal NCP and nodal application of resultant forces, have diagonal components because of PSPG-type stabilization, and and have a non-singular matrix'
+    absent_out = '[1-9]+[0-9]* of 42 singular values'
+    expect_out = '0 of 42 singular values'
+    cli_args = 'nx=10 num_steps=5 -pc_type svd -pc_svd_monitor'
+    # custom_cmp = nodal.cmp
+    ad_indexing_type = global
+  []
+[]
