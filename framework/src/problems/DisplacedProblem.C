@@ -146,15 +146,19 @@ DisplacedProblem::init()
     for (const auto nl_sys_num : index_range(_displaced_nl))
       _assembly[tid][nl_sys_num]->init(_mproblem.couplingMatrix(nl_sys_num));
 
-    std::vector<unsigned> disp_numbers;
-    for (const auto & disp_string : _displacements)
-    {
-      const auto & disp_variable = getVariable(tid, disp_string);
-      if (disp_variable.kind() == Moose::VarKindType::VAR_NONLINEAR)
-        disp_numbers.push_back(disp_variable.number());
-    }
     for (const auto nl_sys_num : index_range(_displaced_nl))
-      _assembly[tid][nl_sys_num]->assignDisplacements(std::move(disp_numbers));
+    {
+      std::vector<std::pair<unsigned int, unsigned short>> disp_numbers_and_directions;
+      for (const auto direction : index_range(_displacements))
+      {
+        const auto & disp_string = _displacements[direction];
+        const auto & disp_variable = getVariable(tid, disp_string);
+        if (disp_variable.sys().number() == nl_sys_num)
+          disp_numbers_and_directions.push_back(
+              std::make_pair(disp_variable.number(), cast_int<unsigned short>(direction)));
+      }
+      _assembly[tid][nl_sys_num]->assignDisplacements(std::move(disp_numbers_and_directions));
+    }
   }
 
   for (auto & nl : _displaced_nl)

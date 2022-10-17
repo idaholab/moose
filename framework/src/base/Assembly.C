@@ -997,11 +997,10 @@ Assembly::computeAffineMapAD(const Elem * elem,
         mooseAssert(elem_nodes[i], "The node is null!");
         const Node & node = *elem_nodes[i];
         VectorValue<DualReal> elem_point = node;
-        unsigned dimension = 0;
         if (computingJacobian())
-          for (const auto & disp_num : _displacements)
+          for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
             if (node.n_dofs(sys_num, disp_num))
-              Moose::derivInsert(elem_point(dimension++).derivatives(),
+              Moose::derivInsert(elem_point(direction).derivatives(),
 #ifdef MOOSE_GLOBAL_AD_INDEXING
                                  node.dof_number(sys_num, disp_num, 0)
 #else
@@ -1116,11 +1115,10 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
         libmesh_assert(elem_nodes[i]);
         const Node & node = *elem_nodes[i];
         libMesh::VectorValue<DualReal> elem_point = node;
-        unsigned dimension = 0;
         if (computingJacobian())
-          for (const auto & disp_num : _displacements)
+          for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
             if (node.n_dofs(sys_num, disp_num))
-              Moose::derivInsert(elem_point(dimension++).derivatives(),
+              Moose::derivInsert(elem_point(direction).derivatives(),
 #ifdef MOOSE_GLOBAL_AD_INDEXING
                                  node.dof_number(sys_num, disp_num, 0)
 #else
@@ -1173,10 +1171,9 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
         libmesh_assert(elem_nodes[i]);
         const Node & node = *elem_nodes[i];
         libMesh::VectorValue<DualReal> elem_point = node;
-        unsigned dimension = 0;
         if (computingJacobian())
-          for (const auto & disp_num : _displacements)
-            Moose::derivInsert(elem_point(dimension++).derivatives(),
+          for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
+            Moose::derivInsert(elem_point(direction).derivatives(),
 #ifdef MOOSE_GLOBAL_AD_INDEXING
                                node.dof_number(sys_num, disp_num, 0)
 #else
@@ -1256,10 +1253,9 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
         libmesh_assert(elem_nodes[i]);
         const Node & node = *elem_nodes[i];
         libMesh::VectorValue<DualReal> elem_point = node;
-        unsigned dimension = 0;
         if (computingJacobian())
-          for (const auto & disp_num : _displacements)
-            Moose::derivInsert(elem_point(dimension++).derivatives(),
+          for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
+            Moose::derivInsert(elem_point(direction).derivatives(),
 #ifdef MOOSE_GLOBAL_AD_INDEXING
                                node.dof_number(sys_num, disp_num, 0)
 #else
@@ -1446,10 +1442,9 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
         auto element_node_number = elem.local_side_node(side, 0);
 #endif
 
-        unsigned dimension = 0;
         if (computingJacobian())
-          for (const auto & disp_num : _displacements)
-            Moose::derivInsert(side_point(dimension++).derivatives(),
+          for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
+            Moose::derivInsert(side_point(direction).derivatives(),
 #ifdef MOOSE_GLOBAL_AD_INDEXING
                                node.dof_number(sys_num, disp_num, 0)
 #else
@@ -1500,10 +1495,9 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
         auto element_node_number = elem.local_side_node(side, i);
 #endif
 
-        unsigned dimension = 0;
         if (computingJacobian())
-          for (const auto & disp_num : _displacements)
-            Moose::derivInsert(side_point(dimension++).derivatives(),
+          for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
+            Moose::derivInsert(side_point(direction).derivatives(),
 #ifdef MOOSE_GLOBAL_AD_INDEXING
                                node.dof_number(sys_num, disp_num, 0)
 #else
@@ -1576,10 +1570,9 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
         auto element_node_number = elem.local_side_node(side, i);
 #endif
 
-        unsigned dimension = 0;
         if (computingJacobian())
-          for (const auto & disp_num : _displacements)
-            Moose::derivInsert(side_point(dimension++).derivatives(),
+          for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
+            Moose::derivInsert(side_point(direction).derivatives(),
 #ifdef MOOSE_GLOBAL_AD_INDEXING
                                node.dof_number(sys_num, disp_num, 0)
 #else

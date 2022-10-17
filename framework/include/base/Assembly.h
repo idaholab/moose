@@ -1562,7 +1562,11 @@ public:
    */
   void setXFEM(std::shared_ptr<XFEMInterface> xfem) { _xfem = xfem; }
 
-  void assignDisplacements(std::vector<unsigned> && disp_numbers) { _displacements = disp_numbers; }
+  /**
+   * Assign the displacement numbers and directions
+   */
+  void assignDisplacements(
+      std::vector<std::pair<unsigned int, unsigned short>> && disp_numbers_and_directions);
 
   /**
    * Helper function for assembling residual contriubutions on local
@@ -2653,7 +2657,10 @@ protected:
   MooseArray<Real> _curvatures;
   MooseArray<DualReal> _ad_curvatures;
 
-  std::vector<unsigned> _displacements;
+  /**
+   * Container of displacement numbers and directions
+   */
+  std::vector<std::pair<unsigned int, unsigned short>> _disp_numbers_and_directions;
 
   mutable bool _calculate_xyz;
   mutable bool _calculate_face_xyz;
@@ -2916,4 +2923,11 @@ Assembly::neighborLowerDElemVolume() const
 {
   _need_neighbor_lower_d_elem_volume = true;
   return _current_neighbor_lower_d_elem_volume;
+}
+
+inline void
+Assembly::assignDisplacements(
+    std::vector<std::pair<unsigned int, unsigned short>> && disp_numbers_and_directions)
+{
+  _disp_numbers_and_directions = std::move(disp_numbers_and_directions);
 }
