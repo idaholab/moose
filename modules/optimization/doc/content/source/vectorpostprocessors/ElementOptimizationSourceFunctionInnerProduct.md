@@ -4,12 +4,12 @@
 
 ## Overview
 
-This vectorpostprocessor computes inner product of a variable with the derivative of a `OptimizationFunction` like [VectorNearestPointFunction.md]. For steady-state problems, the inner product is defined as:
+This vectorpostprocessor computes inner product of a variable with the derivative of an `OptimizationFunction` like [VectorNearestPointFunction.md]. For steady-state problems, the inner product is defined as:
 
 !equation
 V_i = \left(u,\frac{df}{dp_i}\right) = \int_{\Omega}u(\vec{r})\left.\frac{df(\vec{r},\vec{p})}{dp_i}\right|_{\vec{p}=\vec{p}_0}d\vec{r},
 
-which uses a quadrature rule to perform the integration. $u$ is the variable specified by [!param](/VectorPostprocessors/ElementOptimizationSourceFunctionInnerProduct/variable), and $f(\vec{r}, \vec{p})$ is the `OptimizationFunction` specified by [!param](/VectorPostprocessors/ElementOptimizationSourceFunctionInnerProduct/function), $\vec{p}$ is the vector of parameters that is defined in the function, and $\vec{p}_0$ is the current values of the parameters in the function. For transent problems:
+which uses a quadrature rule to perform the integration. $u$ is the variable specified by [!param](/VectorPostprocessors/ElementOptimizationSourceFunctionInnerProduct/variable), and $f(\vec{r}, \vec{p})$ is the `OptimizationFunction` specified by [!param](/VectorPostprocessors/ElementOptimizationSourceFunctionInnerProduct/function), $\vec{p}$ is the vector of parameters that is defined in the function, and $\vec{p}_0$ is the current values of the parameters in the function. For transient problems:
 
 !equation
 V_i = \left(u,\frac{df}{dp_i}\right) = \int_{t_0}^{t_N}\int_{\Omega}u(\vec{r},t)\left.\frac{df(\vec{r},t,\vec{p})}{dp_i}\right|_{\vec{p}=\vec{p}_0}d\vec{r}dt,

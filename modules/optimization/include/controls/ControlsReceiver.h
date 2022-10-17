@@ -23,6 +23,6 @@ public:
   ControlsReceiver(const InputParameters & parameters);
 
 protected:
-  // this is a copy of SamplerReciever with a new Friend
+  // this is a copy of SamplerReceiver with a new Friend
   friend class OptimizationParameterTransfer;
 };

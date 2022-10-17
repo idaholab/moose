@@ -42,6 +42,8 @@ protected:
   typedef MooseUtils::SemidynamicVector<Real, 4> GridPoint;
   typedef MooseUtils::SemidynamicVector<ADReal, 4> ADGridPoint;
   typedef MooseUtils::SemidynamicVector<unsigned int, 4> GridIndex;
+
+  /// get grid value at grid index
   Real evaluateFcn(const GridIndex & ijk) const;
 
   /// convert cartesian+time coordinates into grid coordinates

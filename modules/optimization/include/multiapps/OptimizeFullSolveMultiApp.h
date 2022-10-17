@@ -9,7 +9,6 @@
 
 #pragma once
 
-// fixme lynn this is included because MultiApp probably needs it
 #include "libmesh/numeric_vector.h"
 
 // MOOSE includes

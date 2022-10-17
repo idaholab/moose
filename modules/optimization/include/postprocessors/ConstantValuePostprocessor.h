@@ -11,9 +11,6 @@
 
 #include "GeneralPostprocessor.h"
 
-class ConstantValuePostprocessor;
-class Function;
-
 /**
  * This postprocessor displays a constant value, could be a parameter in a function.
  */

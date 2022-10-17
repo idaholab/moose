@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #pragma once
 
 #include "SolveObject.h"
@@ -10,6 +19,9 @@
 
 class OptimizationReporter;
 
+/**
+ * solveObject to interface with Petsc Tao
+ */
 class OptimizeSolve : public SolveObject
 {
 public:
@@ -18,9 +30,11 @@ public:
 
   virtual bool solve() override;
 
-  const OptimizationReporter & getOptimizationReporter() const { return *_form_function; }
+  const OptimizationReporter & getOptimizationReporter() const { return *_obj_function; }
 
-  // fixme lynn I wish this were all a struct
+  /**
+   * Record tao data for output by a reporter
+   */
   void getTaoSolutionStatus(std::vector<int> & tot_iters,
                             std::vector<double> & gnorm,
                             std::vector<int> & obj_iters,
@@ -51,8 +65,8 @@ protected:
   /// List of execute flags for when to solve the system
   const ExecFlagEnum & _solve_on;
 
-  /// Form function defining objective, gradient, and hessian
-  OptimizationReporter * _form_function = nullptr;
+  /// objective function defining objective, gradient, and hessian
+  OptimizationReporter * _obj_function = nullptr;
 
   /// Tao optimization object
   Tao _tao;

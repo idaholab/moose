@@ -13,6 +13,9 @@
 #include "DiracKernel.h"
 #include "ReporterInterface.h"
 
+/**
+ * Apply a point load defined by vectors.
+ */
 class VectorPointSource : public DiracKernel, public ReporterInterface
 {
 public:

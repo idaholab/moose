@@ -34,7 +34,7 @@ public:
   void setInitialCondition(libMesh::PetscVector<Number> & param);
 
   /**
-   * Function to over-ride misfit values with the simulated values from the matrix free hessian
+   * Function to override misfit values with the simulated values from the matrix free hessian
    * forward solve
    */
   void setMisfitToSimulatedValues();
@@ -43,6 +43,10 @@ public:
    * Functions to get and check bounds
    */
   bool hasBounds() const { return _upper_bounds.size() > 0 && _lower_bounds.size() > 0; }
+
+  /**
+   * Upper and lower bounds for each parameter being controlled
+   */
   const std::vector<Real> & getUpperBounds() const { return _upper_bounds; };
   const std::vector<Real> & getLowerBounds() const { return _lower_bounds; };
   /**

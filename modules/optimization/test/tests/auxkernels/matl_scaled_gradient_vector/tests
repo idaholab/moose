@@ -6,6 +6,6 @@
     input = gradientVector.i
     csvdiff = gradientVector_out_results_0001.csv
     requirement = "The system shall be able to compute a vector auxvariable given by scaling a "
-                  "variables gradient by a material property"
+                  "variable's gradient by a material property"
   []
 []

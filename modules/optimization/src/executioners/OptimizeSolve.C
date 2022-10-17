@@ -52,13 +52,13 @@ OptimizeSolve::solve()
   // Initial solve
   _inner_solve->solve();
 
-  // Grab form function
+  // Grab objectivefunction
   if (!_problem.hasUserObject("OptimizationReporter"))
-    mooseError("No form function object found.");
-  _form_function = &_problem.getUserObject<OptimizationReporter>("OptimizationReporter");
+    mooseError("No OptimizationReporter object found.");
+  _obj_function = &_problem.getUserObject<OptimizationReporter>("OptimizationReporter");
 
   // Initialize solution and matrix
-  _form_function->setInitialCondition(*_parameters.get());
+  _obj_function->setInitialCondition(*_parameters.get());
   _ndof = _parameters->size();
   bool solveInfo = (taoSolve() == 0);
   return solveInfo;
@@ -318,7 +318,7 @@ OptimizeSolve::variableBoundsWrapper(Tao tao, Vec /*xl*/, Vec /*xu*/, void * ctx
 Real
 OptimizeSolve::objectiveFunction()
 {
-  _form_function->updateParameters(*_parameters.get());
+  _obj_function->updateParameters(*_parameters.get());
 
   _problem.execute(OptimizationAppTypes::EXEC_FORWARD);
 
@@ -330,13 +330,13 @@ OptimizeSolve::objectiveFunction()
 
   _obj_iterate++;
 
-  return _form_function->computeObjective();
+  return _obj_function->computeObjective();
 }
 
 void
 OptimizeSolve::gradientFunction(libMesh::PetscVector<Number> & gradient)
 {
-  _form_function->updateParameters(*_parameters.get());
+  _obj_function->updateParameters(*_parameters.get());
 
   _problem.execute(OptimizationAppTypes::EXEC_ADJOINT);
   _problem.restoreMultiApps(OptimizationAppTypes::EXEC_ADJOINT);
@@ -346,7 +346,7 @@ OptimizeSolve::gradientFunction(libMesh::PetscVector<Number> & gradient)
     _inner_solve->solve();
 
   _grad_iterate++;
-  _form_function->computeGradient(gradient);
+  _obj_function->computeGradient(gradient);
 }
 
 PetscErrorCode
@@ -359,7 +359,7 @@ OptimizeSolve::applyHessian(libMesh::PetscVector<Number> & s, libMesh::PetscVect
       !_problem.hasMultiApps(OptimizationAppTypes::EXEC_HOMOGENEOUS_FORWARD))
     mooseError("Hessian based optimization algorithms require a sub-app with:\n"
                "   execute_on = HOMOGENEOUS_FORWARD");
-  _form_function->updateParameters(s);
+  _obj_function->updateParameters(s);
 
   _problem.execute(OptimizationAppTypes::EXEC_HOMOGENEOUS_FORWARD);
   _problem.restoreMultiApps(OptimizationAppTypes::EXEC_HOMOGENEOUS_FORWARD);
@@ -368,7 +368,7 @@ OptimizeSolve::applyHessian(libMesh::PetscVector<Number> & s, libMesh::PetscVect
   if (_solve_on.contains(OptimizationAppTypes::EXEC_HOMOGENEOUS_FORWARD))
     _inner_solve->solve();
 
-  _form_function->setMisfitToSimulatedValues();
+  _obj_function->setMisfitToSimulatedValues();
 
   _problem.execute(OptimizationAppTypes::EXEC_ADJOINT);
   _problem.restoreMultiApps(OptimizationAppTypes::EXEC_ADJOINT);
@@ -377,7 +377,7 @@ OptimizeSolve::applyHessian(libMesh::PetscVector<Number> & s, libMesh::PetscVect
   if (_solve_on.contains(OptimizationAppTypes::EXEC_ADJOINT))
     _inner_solve->solve();
 
-  _form_function->computeGradient(Hs);
+  _obj_function->computeGradient(Hs);
   _hess_iterate++;
   return 0;
 }
@@ -386,12 +386,12 @@ PetscErrorCode
 OptimizeSolve::variableBounds(Tao tao)
 {
   // get bounds
-  if (!_form_function->hasBounds())
+  if (!_obj_function->hasBounds())
     return 0;
-  const std::vector<Real> & upper_bounds = _form_function->getUpperBounds();
-  const std::vector<Real> & lower_bounds = _form_function->getLowerBounds();
+  const std::vector<Real> & upper_bounds = _obj_function->getUpperBounds();
+  const std::vector<Real> & lower_bounds = _obj_function->getLowerBounds();
 
-  unsigned int sz = _form_function->getNumParams();
+  unsigned int sz = _obj_function->getNumParams();
 
   libMesh::PetscVector<Number> xl(_my_comm, sz);
   libMesh::PetscVector<Number> xu(_my_comm, sz);

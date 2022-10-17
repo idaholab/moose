@@ -27,12 +27,12 @@ public:
 
 protected:
   /**
-   * Builds _coord_mapping object with coordinates from inputted vectors
+   * Builds _coord_mapping object with coordinates from input vectors
    */
   void buildCoordinateMapping() const;
 
   /**
-   * With an inputted time and point, gets the closest point and two closest times in
+   * With an input time and point, gets the closest point and two closest times in
    * _coord_mapping. See ::value on how the return value is used.
    */
   std::array<std::pair<Real, std::size_t>, 2> findNearestPoint(Real t, const Point & p) const;

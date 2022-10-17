@@ -2,7 +2,7 @@
   issues = '#22208'
   design = 'MaterialScaledGradientVector.md'
   requirement = "The system shall solve for the value of a constant heat source with a temperature dependent "
-                "thermal condutivity using a"
+                "thermal conductivity, to match a target temperature profile, using a"
   [BFGS]
     detail = " limited memory BFGS algorithm"
     type = CSVDiff
