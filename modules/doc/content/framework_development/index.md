@@ -20,7 +20,11 @@ For development of MOOSE-based applications see [Application Development](applic
 
 ## Documentation
 
-[Doxygen](http://www.mooseframework.org/docs/doxygen/moose/classes.html)
+[MOOSE Doxygen](http://www.mooseframework.org/docs/doxygen/moose/classes.html)
+
+[libMesh Doxygen](https://mooseframework.org/docs/doxygen/libmesh/classes.html)
+
+[TIMPI Doxygen](https://mooseframework.org/docs/doxygen/timpi/classes.html)
 
 [Source Code Documentation](source/index.md exact=True)
 
@@ -49,6 +53,10 @@ For development of MOOSE-based applications see [Application Development](applic
 [Utils](utils/index.md) - Basic utilities used throughout the framework
 
 [System Integrity Checking](sanity_checking.md) - Parsing and system integrity checks
+
+## Developer Tools
+
+[Development Tools](help/development/index.md) - Tools that can be helpful for development, like IDEs with MOOSE support
 
 ## Internal Systems
 
