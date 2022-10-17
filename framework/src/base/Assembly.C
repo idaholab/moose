@@ -791,8 +791,11 @@ Assembly::reinitFE(const Elem * elem)
     if (_displaced)
     {
       const auto & qw = _current_qrule->get_weights();
-      for (unsigned int qp = 0; qp != n_qp; qp++)
-        computeSinglePointMapAD(elem, qw, qp, *_holder_fe_helper[dim]);
+      if (elem->has_affine_map() && !_subproblem.currentlyComputingJacobian())
+        computeAffineMapAD(elem, qw, n_qp, *_holder_fe_helper[dim]);
+      else
+        for (unsigned int qp = 0; qp != n_qp; qp++)
+          computeSinglePointMapAD(elem, qw, qp, *_holder_fe_helper[dim]);
     }
     else
       for (unsigned qp = 0; qp < n_qp; ++qp)
@@ -2168,8 +2171,11 @@ Assembly::computeADFace(const Elem & elem, const unsigned int side)
       computeFaceMap(elem, side, qw);
       const std::vector<Real> dummy_qw(n_qp, 1.);
 
-      for (unsigned int qp = 0; qp != n_qp; qp++)
-        computeSinglePointMapAD(&elem, dummy_qw, qp, *_holder_fe_face_helper[dim]);
+      if (elem.has_affine_map() && !_subproblem.currentlyComputingJacobian())
+        computeAffineMapAD(&elem, dummy_qw, n_qp, *_holder_fe_face_helper[dim]);
+      else
+        for (unsigned int qp = 0; qp != n_qp; qp++)
+          computeSinglePointMapAD(&elem, dummy_qw, qp, *_holder_fe_face_helper[dim]);
     }
     else
       for (unsigned qp = 0; qp < n_qp; ++qp)
