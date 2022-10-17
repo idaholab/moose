@@ -11,6 +11,10 @@
 
 #include "ADIntegratedBC.h"
 
+/**
+ * Models loss due to unary recombination, e.g. 2A -> B where A represents the variable this
+ * boundary condition is applied to
+ */
 class UnaryRecombinationBC : public ADIntegratedBC
 {
 public:
@@ -21,5 +25,6 @@ public:
 protected:
   ADReal computeQpResidual() override;
 
+  /// recombination rate coefficient
   const Real & _Kr;
 };

@@ -11,6 +11,10 @@
 
 #include "ADIntegratedBC.h"
 
+/**
+ * Models creation of the variable at boundaries due to dissociation of a coupled variable, e.g. B
+ * -> A
+ */
 class DissociationFluxBC : public ADIntegratedBC
 {
 public:
@@ -21,7 +25,10 @@ public:
 protected:
   ADReal computeQpResidual() override;
 
+  /// The coupled variable that is dissociating to form the variable this
+  /// boundary condition is applied to
   const ADVariableValue & _v;
 
+  /// The dissociation rate coefficient
   const Real & _Kd;
 };

@@ -11,6 +11,10 @@
 
 #include "ADIntegratedBC.h"
 
+/**
+ * Models loss due to binary recombination, e.g. A + B -> C where A represents the variable this
+ * boundary condition is applied to
+ */
 class BinaryRecombinationBC : public ADIntegratedBC
 {
 public:
@@ -21,7 +25,10 @@ public:
 protected:
   ADReal computeQpResidual() override;
 
+  /// The concentration of B, e.g. the concentration of the other specie recombining with the
+  /// variable this boundary condition is applied to
   const ADVariableValue & _v;
 
+  /// recombination rate coefficient
   const Real & _Kr;
 };

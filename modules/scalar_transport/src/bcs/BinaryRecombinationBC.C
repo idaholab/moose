@@ -15,6 +15,8 @@ InputParameters
 BinaryRecombinationBC::validParams()
 {
   auto params = ADIntegratedBC::validParams();
+  params.addClassDescription("Models recombination of the variable with a coupled specie at "
+                             "boundaries, resulting in loss");
   params.addRequiredCoupledVar("v", "The other mobile variable that takes part in recombination");
   params.addParam<Real>("Kr", 1, "The recombination coefficient");
   return params;

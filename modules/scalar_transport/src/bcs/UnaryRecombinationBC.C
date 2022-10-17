@@ -16,6 +16,8 @@ UnaryRecombinationBC::validParams()
 {
   auto params = ADIntegratedBC::validParams();
   params.addParam<Real>("Kr", 1, "The recombination coefficient");
+  params.addClassDescription(
+      "Models recombination of the variable with itself at boundaries, resulting in loss");
   return params;
 }
 
