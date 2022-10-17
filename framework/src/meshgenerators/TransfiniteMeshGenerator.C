@@ -100,8 +100,10 @@ TransfiniteMeshGenerator::TransfiniteMeshGenerator(const InputParameters & param
   setParserFeatureFlags(_parsed_func);
   _parsed_func->AddConstant("pi", libMesh::pi);
   _func_params.resize(1);
-  
-  mooseAssert((_nx > 1) && (_ny > 1), "A minimum of 2 points is needed on each edge. Note the user needs to consider edge vertices as well.");
+
+  mooseAssert((_nx > 1) && (_ny > 1),
+              "A minimum of 2 points is needed on each edge. Note the user needs to consider edge "
+              "vertices as well.");
 }
 std::unique_ptr<MeshBase>
 TransfiniteMeshGenerator::generate()
@@ -134,7 +136,6 @@ TransfiniteMeshGenerator::generate()
   std::vector<Point> edge_left;   // parametrized via ny
   std::vector<Point> edge_right;  // parametrized via ny
 
-
   std::vector<Real> param_x_dir;
   std::vector<Real> param_y_dir;
   // we take [0,1] as the reference interval and we need to set the biases upfront
@@ -142,12 +143,14 @@ TransfiniteMeshGenerator::generate()
   param_x_dir = getPointsDistribution(edge_length, _nx, _bias_x);
   param_y_dir = getPointsDistribution(edge_length, _ny, _bias_y);
 
-  edge_bottom = getEdge(V00, V10, _nx, _bottom_type, _bottom_parameter, outward_vec[0],param_x_dir);
+  edge_bottom =
+      getEdge(V00, V10, _nx, _bottom_type, _bottom_parameter, outward_vec[0], param_x_dir);
   edge_top = getEdge(V01, V11, _nx, _top_type, _top_parameter, outward_vec[1], param_x_dir);
   edge_left = getEdge(V00, V01, _ny, _left_type, _left_parameter, outward_vec[2], param_y_dir);
-  edge_right = getEdge(V10, V11, _ny, _right_type, _right_parameter, outward_vec[3],param_y_dir );
+  edge_right = getEdge(V10, V11, _ny, _right_type, _right_parameter, outward_vec[3], param_y_dir);
 
-  // Used for the parametrization on edge pairs, provided by the point distribution according to biases
+  // Used for the parametrization on edge pairs, provided by the point distribution according to
+  // biases
   Real rx_coord, sy_coord;
 
   std::vector<Node *> nodes(total_nodes); // can be done using .reserve as well
@@ -256,12 +259,12 @@ TransfiniteMeshGenerator::getLineEdge(const Point & P1,
                                       const std::vector<Real> & param_vec)
 {
   std::vector<Point> edge;
-  
-  for (auto rx: param_vec)
-    {
+
+  for (auto rx : param_vec)
+  {
     Point newPt = P1 * (1.0 - rx) + P2 * rx;
     edge.push_back(newPt);
-    };
+  };
 
   return edge;
 }
@@ -279,7 +282,7 @@ TransfiniteMeshGenerator::getParsedEdge(const Point & P1,
   std::vector<std::string> param_coords;
   MooseUtils::tokenize(parameter, param_coords, 1, "&&");
 
-  for (auto rx:param_vec)
+  for (auto rx : param_vec)
   {
     _parsed_func->Parse(param_coords[0], "r");
     x_coord = _parsed_func->Eval(&rx);
@@ -288,8 +291,10 @@ TransfiniteMeshGenerator::getParsedEdge(const Point & P1,
     edge.push_back(Point(x_coord, y_coord, 0.0));
   }
 
-  mooseAssert((edge[0] - P1).norm() > 1e-14, "The parametrization does not fit the first vertex on the edge.");
-  mooseAssert((edge[np - 1] - P2).norm() > 1e-14, "The parametrization does not fit the end vertex on the edge.");
+  mooseAssert((edge[0] - P1).norm() > 1e-14,
+              "The parametrization does not fit the first vertex on the edge.");
+  mooseAssert((edge[np - 1] - P2).norm() > 1e-14,
+              "The parametrization does not fit the end vertex on the edge.");
 
   return edge;
 }
@@ -314,10 +319,12 @@ TransfiniteMeshGenerator::getDiscreteEdge(const Point & P1,
     edge.push_back(Point(point_vals[0], point_vals[1], point_vals[2]));
   }
 
-  mooseAssert((edge[0] - P1).norm() > 1e-14,"The first discrete point does not fit the corresponding edge vertex."
-               "Note: discrete points need to replicate the edge corners.");
-  mooseAssert((edge[np - 1] - P2).norm() > 1e-14,"The last discrete point does not fit the corresponding edge vertex."
-               "Note: discrete points need to replicate the edge corners.");
+  mooseAssert((edge[0] - P1).norm() > 1e-14,
+              "The first discrete point does not fit the corresponding edge vertex."
+              "Note: discrete points need to replicate the edge corners.");
+  mooseAssert((edge[np - 1] - P2).norm() > 1e-14,
+              "The last discrete point does not fit the corresponding edge vertex."
+              "Note: discrete points need to replicate the edge corners.");
 
   return edge;
 }
@@ -330,7 +337,7 @@ TransfiniteMeshGenerator::getCircarcEdge(const Point & P1,
                                          const Point & outward,
                                          const std::vector<Real> & param_vec)
 {
-  std::vector<Point> edge; //output, to be returned variable
+  std::vector<Point> edge; // output, to be returned variable
   Real height = MooseUtils::convert<Real>(parameter, true);
 
   Point P3 = computeMidPoint(P1, P2, height, outward);
@@ -346,12 +353,13 @@ TransfiniteMeshGenerator::getCircarcEdge(const Point & P1,
   // The case when the edge spans quadrants 1 and 4 requires special treament
   // to periodically switch we compute the angle that needs added to one edge
   // to identify the entire edge span
-  mooseAssert(x0.norm()>0.0 && x1.norm()>0.0, "The point provided cannot generate an arc circle on the edge specified" );
+  mooseAssert(x0.norm() > 0.0 && x1.norm() > 0.0,
+              "The point provided cannot generate an arc circle on the edge specified");
   Real arclength = std::acos((x0 * x1) / x0.norm() / x1.norm());
   if (std::abs(b - a) > M_PI)
     b = a + arclength;
 
-  for (auto rx: param_vec)
+  for (auto rx : param_vec)
   {
     Real interval = getMapInterval(rx, 0.0, 1.0, a, b);
     Real x = P0(0) + rad * std::cos(interval);
@@ -371,7 +379,8 @@ TransfiniteMeshGenerator::getPolarAngle(const Point & Px) const
   const bool q3 = (x < 0 && y < 0);
   const bool q4 = (x > 0 && y < 0);
 
-  mooseAssert(std::abs(x) > 0.0, "The point provided cannot generate an arc circle on the edge specified." );
+  mooseAssert(std::abs(x) > 0.0,
+              "The point provided cannot generate an arc circle on the edge specified.");
   Real angle = std::atan(std::abs(y) / std::abs(x));
   // compute angles via the inverse tangent
   // however the quadrants do not provide sufficient info
@@ -389,9 +398,10 @@ TransfiniteMeshGenerator::getPolarAngle(const Point & Px) const
 Real
 TransfiniteMeshGenerator::getMapInterval(
     const Real & xab, const Real & a, const Real & b, const Real & c, const Real & d) const
-//this routine maps a point x\in[a, b] to the corresponding point in the interval [c, d]
+// this routine maps a point x\in[a, b] to the corresponding point in the interval [c, d]
 {
-  mooseAssert(std::abs(b-a)>0.0, "The input interval [a, b] is empty, check that a and b are not identical." );
+  mooseAssert(std::abs(b - a) > 0.0,
+              "The input interval [a, b] is empty, check that a and b are not identical.");
   Real xcd = c + (d - c) / (b - a) * (xab - a);
 
   return xcd;
@@ -423,7 +433,7 @@ TransfiniteMeshGenerator::getPointsDistribution(const Real & edge_length,
     Real rx = 0.0;
     for (unsigned int iter = 0; iter < np; iter++)
     {
-      rx =  getMapInterval(Real(iter) * interval, 0.0, edge_length, 0.0, 1.0);
+      rx = getMapInterval(Real(iter) * interval, 0.0, edge_length, 0.0, 1.0);
       param_vec.push_back(rx);
     }
   }
@@ -464,9 +474,9 @@ TransfiniteMeshGenerator::computeOrigin(const Point & P1, const Point & P2, cons
   const Real b1 = (2 * P3(0) - 2 * P2(0));
   const Real b2 = (2 * P3(1) - 2 * P2(1));
   const Real B = P3(1) * P3(1) - P2(0) * P2(0) + P3(0) * P3(0) - P2(1) * P2(1);
-  mooseAssert(std:: abs(b2) > 0.0 && std::abs(a1) > 0.0 && std::abs(a1 * b2 - a2 * b1) >0.0,
-   "The point provided cannot generate an arc circle on the edge specified."
-   "The origin of the corresponding circle cannot be computed." );
+  mooseAssert(std::abs(b2) > 0.0 && std::abs(a1) > 0.0 && std::abs(a1 * b2 - a2 * b1) > 0.0,
+              "The point provided cannot generate an arc circle on the edge specified."
+              "The origin of the corresponding circle cannot be computed.");
 
   const Real y0 = (a1 * b2) * (B / b2 - A * b1 / (a1 * b2)) / (a1 * b2 - a2 * b1);
   const Real x0 = (A - y0 * a2) / a1;
