@@ -40,6 +40,10 @@ FEProblem::FEProblem(const InputParameters & parameters)
     _nl_sys.push_back(std::dynamic_pointer_cast<NonlinearSystem>(nl));
   }
 
+  // backwards compatibility for AD for objects that depend on initializing derivatives during
+  // construction
+  setCurrentNonlinearSystem(0);
+
   _aux = std::make_shared<AuxiliarySystem>(*this, "aux0");
 
   newAssemblyArray(_nl);

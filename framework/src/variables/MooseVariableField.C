@@ -70,6 +70,9 @@ MooseVariableField<OutputType>::computeSolution(const Elem * const elem,
   if (computing_dot)
     dof_values_dot.reserve(dof_indices.size());
 
+  const bool do_derivatives =
+      ADReal::do_derivatives && _sys.number() == _subproblem.currentNlSysNum();
+
   // It's not safe to use solutionState(0) because it returns the libMesh System solution member
   // which is wrong during things like finite difference Jacobian evaluation, e.g. when PETSc
   // perturbs the solution vector we feed these perturbations into the current_local_solution
@@ -78,7 +81,7 @@ MooseVariableField<OutputType>::computeSolution(const Elem * const elem,
   for (const auto dof_index : dof_indices)
   {
     dof_values.push_back(ADReal(global_soln(dof_index)));
-    if (ADReal::do_derivatives && _var_kind == Moose::VAR_NONLINEAR)
+    if (do_derivatives)
       Moose::derivInsert(dof_values.back().derivatives(), dof_index, 1.);
     if (computing_dot)
     {

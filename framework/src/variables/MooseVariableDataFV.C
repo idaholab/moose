@@ -725,12 +725,15 @@ MooseVariableDataFV<OutputType>::computeAD(const unsigned int num_dofs, const un
   if (_need_ad_u_dotdot)
     assignForAllQps(_ad_zero, _ad_u_dotdot, nqp);
 
+  const bool do_derivatives =
+      ADReal::do_derivatives && _sys.number() == _subproblem.currentNlSysNum();
+
   for (unsigned int i = 0; i < num_dofs; i++)
   {
     _ad_dof_values[i] = (*_sys.currentSolution())(_dof_indices[i]);
 
     // NOTE!  You have to do this AFTER setting the value!
-    if (_var.kind() == Moose::VAR_NONLINEAR && ADReal::do_derivatives)
+    if (do_derivatives)
 #ifdef MOOSE_GLOBAL_AD_INDEXING
       Moose::derivInsert(_ad_dof_values[i].derivatives(), _dof_indices[i], 1.);
 #else
@@ -927,10 +930,13 @@ MooseVariableDataFV<OutputType>::fetchADDoFValues()
   auto ad_offset = _var_num * _sys.getMaxVarNDofsPerNode();
 #endif
 
+  const bool do_derivatives =
+      ADReal::do_derivatives && _sys.number() == _subproblem.currentNlSysNum();
+
   for (decltype(n) i = 0; i < n; ++i)
   {
     _ad_dof_values[i] = _vector_tags_dof_u[_solution_tag][i];
-    if (_var.kind() == Moose::VAR_NONLINEAR)
+    if (do_derivatives)
 #ifdef MOOSE_GLOBAL_AD_INDEXING
       Moose::derivInsert(_ad_dof_values[i].derivatives(), _dof_indices[i], 1.);
 #else

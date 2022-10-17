@@ -981,6 +981,8 @@ Assembly::computeAffineMapAD(const Elem * elem,
   computeSinglePointMapAD(elem, qw, 0, fe);
 
   const auto sys_num = _sys.number();
+  const bool do_derivatives =
+      ADReal::do_derivatives && _sys.number() == _subproblem.currentNlSysNum();
 
   for (unsigned int p = 1; p < n_qp; p++)
   {
@@ -997,7 +999,7 @@ Assembly::computeAffineMapAD(const Elem * elem,
         mooseAssert(elem_nodes[i], "The node is null!");
         const Node & node = *elem_nodes[i];
         VectorValue<DualReal> elem_point = node;
-        if (computingJacobian())
+        if (do_derivatives)
           for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
             if (node.n_dofs(sys_num, disp_num))
               Moose::derivInsert(elem_point(direction).derivatives(),
@@ -1091,6 +1093,8 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
   const auto & dphideta_map = fe->get_fe_map().get_dphideta_map();
   const auto & dphidzeta_map = fe->get_fe_map().get_dphidzeta_map();
   const auto sys_num = _sys.number();
+  const bool do_derivatives =
+      ADReal::do_derivatives && _sys.number() == _subproblem.currentNlSysNum();
 
   switch (dim)
   {
@@ -1115,7 +1119,7 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
         libmesh_assert(elem_nodes[i]);
         const Node & node = *elem_nodes[i];
         libMesh::VectorValue<DualReal> elem_point = node;
-        if (computingJacobian())
+        if (do_derivatives)
           for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
             if (node.n_dofs(sys_num, disp_num))
               Moose::derivInsert(elem_point(direction).derivatives(),
@@ -1171,7 +1175,7 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
         libmesh_assert(elem_nodes[i]);
         const Node & node = *elem_nodes[i];
         libMesh::VectorValue<DualReal> elem_point = node;
-        if (computingJacobian())
+        if (do_derivatives)
           for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
             Moose::derivInsert(elem_point(direction).derivatives(),
 #ifdef MOOSE_GLOBAL_AD_INDEXING
@@ -1253,7 +1257,7 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
         libmesh_assert(elem_nodes[i]);
         const Node & node = *elem_nodes[i];
         libMesh::VectorValue<DualReal> elem_point = node;
-        if (computingJacobian())
+        if (do_derivatives)
           for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
             Moose::derivInsert(elem_point(direction).derivatives(),
 #ifdef MOOSE_GLOBAL_AD_INDEXING
@@ -1410,9 +1414,8 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
   std::vector<std::vector<Real>> const * d2psidxi2_map = nullptr;
   std::vector<std::vector<Real>> const * d2psidxideta_map = nullptr;
   std::vector<std::vector<Real>> const * d2psideta2_map = nullptr;
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   const auto sys_num = _sys.number();
-#endif
+  const bool do_derivatives = ADReal::do_derivatives && sys_num == _subproblem.currentNlSysNum();
 
   if (_calculate_curvatures)
   {
@@ -1442,7 +1445,7 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
         auto element_node_number = elem.local_side_node(side, 0);
 #endif
 
-        if (computingJacobian())
+        if (do_derivatives)
           for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
             Moose::derivInsert(side_point(direction).derivatives(),
 #ifdef MOOSE_GLOBAL_AD_INDEXING
@@ -1495,7 +1498,7 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
         auto element_node_number = elem.local_side_node(side, i);
 #endif
 
-        if (computingJacobian())
+        if (do_derivatives)
           for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
             Moose::derivInsert(side_point(direction).derivatives(),
 #ifdef MOOSE_GLOBAL_AD_INDEXING
@@ -1570,7 +1573,7 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
         auto element_node_number = elem.local_side_node(side, i);
 #endif
 
-        if (computingJacobian())
+        if (do_derivatives)
           for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
             Moose::derivInsert(side_point(direction).derivatives(),
 #ifdef MOOSE_GLOBAL_AD_INDEXING
