@@ -362,48 +362,6 @@ protected:
   void checkMutuallyExclusiveParameters(const std::vector<std::string> & params,
                                         bool need_one_specified = true) const;
 
-  /**
-   * Checks that an rDG parameter was provided
-   *
-   * @param[in] param   parameter name
-   */
-  void checkRDGRequiredParameter(const std::string & param) const;
-
-  /**
-   * Checks that a 1-phase parameter was provided
-   *
-   * @param[in] param   parameter name
-   */
-  void check1PhaseRequiredParameter(const std::string & param) const;
-
-  /**
-   * Checks that a 2-phase parameter was provided
-   *
-   * @param[in] param   parameter name
-   */
-  void check2PhaseRequiredParameter(const std::string & param) const;
-
-  /**
-   * Checks that a 7-equation (2-phase plus phase interaction) parameter was provided
-   *
-   * @param[in] param   parameter name
-   */
-  void check7EqnRequiredParameter(const std::string & param) const;
-
-  /**
-   * Checks that a 7-equation (2-phase plus phase interaction) + NCG parameter was provided
-   *
-   * @param[in] param   parameter name
-   */
-  void check7EqnNCGRequiredParameter(const std::string & param) const;
-
-  /**
-   * Logs an error for the model type not being implemented for the component
-   *
-   * @param[in] model   model type
-   */
-  void logModelNotImplementedError(const THM::FlowModelID & model) const;
-
   /// Pointer to a parent component (used in composed components)
   Component * _parent;
 

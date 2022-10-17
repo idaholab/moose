@@ -21,6 +21,8 @@ HeatConductionModel::validParams()
   InputParameters params = MooseObject::validParams();
   params.addPrivateParam<THMProblem *>("_thm_problem");
   params.addPrivateParam<HeatStructureBase *>("_hs");
+  params.addRequiredParam<Real>("scaling_factor_temperature",
+                                "Scaling factor for solid temperature variable.");
   params.registerBase("THM:heat_conduction_model");
   return params;
 }
@@ -47,7 +49,7 @@ void
 HeatConductionModel::addVariables()
 {
   const auto & subdomain_names = _hs.getSubdomainNames();
-  const Real & scaling_factor = _sim.getParam<Real>("scaling_factor_temperature");
+  const Real & scaling_factor = getParam<Real>("scaling_factor_temperature");
 
   _sim.addSimVariable(true, TEMPERATURE, _fe_type, subdomain_names, scaling_factor);
 }
