@@ -152,11 +152,13 @@ NonlinearEigenSystem::postAddResidualObject(ResidualObject & object)
   // If it is an eigen kernel, mark its variable as eigen
   if (vtags.find(_Bx_tag) != vtags.end() || mtags.find(_B_tag) != mtags.end())
   {
+    // Note: the object may be on the displaced system
+    auto sys = object.parameters().get<SystemBase *>("_sys");
     auto vname = object.variable().name();
     if (hasScalarVariable(vname))
-      getScalarVariable(0, vname).eigen(true);
+      sys->getScalarVariable(0, vname).eigen(true);
     else
-      getVariable(0, vname).eigen(true);
+      sys->getVariable(0, vname).eigen(true);
   }
 
   // If this is not an eigen kernel
@@ -406,7 +408,7 @@ NonlinearEigenSystem::checkIntegrity()
       // EigenArrayDirichletBC
       auto aeigen_nbc = std::dynamic_pointer_cast<EigenArrayDirichletBC>(nodal_bc);
       // If it is a Dirichlet boundary condition, then value has to be zero
-      if (nbc && nbc->getParam<Real>("value"))
+      if (nbc && nbc->variable().eigen() && nbc->getParam<Real>("value"))
         mooseError(
             "Can't set an inhomogeneous Dirichlet boundary condition for eigenvalue problems.");
       // If it is an array Dirichlet boundary condition, all values should be zero
