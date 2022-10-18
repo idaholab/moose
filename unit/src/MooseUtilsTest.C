@@ -504,6 +504,8 @@ TEST(MooseUtils, isZero)
   EXPECT_TRUE(MooseUtils::isZero(ADRealVectorValue(0)));
   EXPECT_TRUE(MooseUtils::isZero(RealTensorValue(0)));
   EXPECT_TRUE(MooseUtils::isZero(ADRealTensorValue(0)));
+  EXPECT_TRUE(MooseUtils::isZero(std::vector<Real>(1, 0)));
+  EXPECT_TRUE(MooseUtils::isZero(std::array<Real, 1>{{0}}));
 
   EXPECT_TRUE(!MooseUtils::isZero(Real(1)));
   EXPECT_TRUE(!MooseUtils::isZero(ADReal(1)));
@@ -511,4 +513,6 @@ TEST(MooseUtils, isZero)
   EXPECT_TRUE(!MooseUtils::isZero(ADRealVectorValue(1)));
   EXPECT_TRUE(!MooseUtils::isZero(RealTensorValue(1)));
   EXPECT_TRUE(!MooseUtils::isZero(ADRealTensorValue(1)));
+  EXPECT_TRUE(!MooseUtils::isZero(std::vector<Real>(1, 1)));
+  EXPECT_TRUE(!MooseUtils::isZero(std::array<Real, 1>{{1}}));
 }

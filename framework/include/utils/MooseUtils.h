@@ -544,16 +544,44 @@ relativeFuzzyLessThan(const T & var1,
       tol * (std::abs(MetaPhysicL::raw_value(var1)) + std::abs(MetaPhysicL::raw_value(var2)))));
 }
 
+// taken from https://stackoverflow.com/a/257382
+template <typename T>
+class Has_size
+{
+  using Yes = char;
+  struct No
+  {
+    char x[2];
+  };
+
+  template <typename C>
+  static Yes test(decltype(&C::size));
+  template <typename C>
+  static No test(...);
+
+public:
+  static constexpr bool value = sizeof(test<T>(0)) == sizeof(Yes);
+};
+
 /**
  * @param value The quantity to test for zero-ness
- * @param tolerance The tolerance for testing zero-ness. The default is 1e-18
- * @return whether the value is (close enough to) zero
+ * @param tolerance The tolerance for testing zero-ness. The default is 1e-18 for double precision
+ * configurations of libMesh/MOOSE
+ * @return whether the L_infty norm of the value is (close enough to) zero
  */
 template <typename T>
 bool
 isZero(const T & value, const Real tolerance = TOLERANCE * TOLERANCE * TOLERANCE)
 {
-  if constexpr (libMesh::TensorTools::TensorTraits<T>::rank == 0)
+  if constexpr (Has_size<T>::value)
+  {
+    for (const auto & element : value)
+      if (!isZero(element, tolerance))
+        return false;
+
+    return true;
+  }
+  else if constexpr (libMesh::TensorTools::TensorTraits<T>::rank == 0)
     return MooseUtils::absoluteFuzzyEqual(MetaPhysicL::raw_value(value), 0, tolerance);
   else if constexpr (libMesh::TensorTools::TensorTraits<T>::rank == 1)
   {
