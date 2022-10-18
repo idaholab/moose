@@ -71,12 +71,10 @@ protected:
                                     const Point & outward,
                                     const std::vector<Real> & param_vec);
 
-  std::vector<Point> getDiscreteEdge(const unsigned int & np,
-                                     const std::string & parameter);
+  std::vector<Point> getDiscreteEdge(const unsigned int & np, const std::string & parameter);
 
-  std::vector<Point> getLineEdge(const Point & P1,
-                                 const Point & P2,
-                                 const std::vector<Real> & param_vec);
+  std::vector<Point>
+  getLineEdge(const Point & P1, const Point & P2, const std::vector<Real> & param_vec);
 
   // The following 3 routines are needed for generating arc circles given the user input
   // The input is expected to be the distance from a stright line at the middle of an edge
