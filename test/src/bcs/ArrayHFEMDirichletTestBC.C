@@ -53,11 +53,9 @@ ArrayHFEMDirichletTestBC::computeLowerDQpJacobian(Moose::ConstraintJacobianType 
   {
     case Moose::LowerPrimary:
       return transform().diagonal() * (_test_lambda[_i][_qp] * _phi[_j][_qp]);
-      break;
 
     case Moose::PrimaryLower:
       return transform().diagonal() * (_phi_lambda[_j][_qp] * _test[_i][_qp]);
-      break;
 
     case Moose::LowerLower:
       if (_for_pjfnk)
