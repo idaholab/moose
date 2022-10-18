@@ -1002,7 +1002,7 @@ const std::unordered_map<boundary_id_type, std::unordered_set<dof_id_type>> &
 MooseMesh::getBoundariesToElems() const
 {
   mooseDeprecated("MooseMesh::getBoundariesToElems is deprecated, "
-                  "use MooseMesh::getBoundariesToActiveLocalElemIds");
+                  "use MooseMesh::getBoundariesToActiveSemiLocalElemIds");
   return getBoundariesToActiveSemiLocalElemIds();
 }
 
