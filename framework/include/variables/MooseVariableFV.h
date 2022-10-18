@@ -469,12 +469,12 @@ public:
 
   void setActiveTags(const std::set<TagID> & vtags) override;
 
-protected:
   /**
    * @return whether \p fi is an internal face for this variable
    */
   bool isInternalFace(const FaceInfo & fi) const;
 
+protected:
   /**
    * @return whether \p fi is a Dirichlet boundary face for this variable
    */

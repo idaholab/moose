@@ -1,6 +1,6 @@
 [Tests]
   design = '/Materials/index.md'
-  [./bnd_coupling_vol]
+  [bnd_coupling_vol]
     type = 'Exodiff'
     input = 'bnd_coupling_vol.i'
     exodiff = 'bnd_coupling_vol_out.e'
@@ -8,24 +8,24 @@
     max_parallel = 1
     issues = '#3141'
     requirement = 'The system shall provide material properties in boundary restricted objects acting on nodal variables.'
-  [../]
+  []
 
-  [./elem_aux_bc_on_bnd]
+  [elem_aux_bc_on_bnd]
     type = 'Exodiff'
     input = 'elem_aux_bc_on_bnd.i'
     exodiff = 'elem_aux_bc_on_bnd_out.e'
     issues = '#3586'
     requirement = 'The system shall provide material properties in boundary restricted objects acting on elemental variables.'
-  [../]
+  []
 
-  [./fv_material_quadrature]
+  [fv_material_quadrature]
     type = 'Exodiff'
     input = 'fv_material_quadrature.i'
     exodiff = 'fv_material_quadrature_out.e'
     issues = '#15194'
     requirement = 'The system shall provide location dependent boundary material property evaluations with finite volume variables.'
     ad_indexing_type = 'global'
-  [../]
+  []
 
   [ad_piecewise_linear]
     type = 'Exodiff'

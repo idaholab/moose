@@ -48,15 +48,27 @@ FVDiffusion::FVDiffusion(const InputParameters & params)
 ADReal
 FVDiffusion::computeQpResidual()
 {
-  auto dudn = gradUDotNormal();
+  using namespace Moose::FV;
 
+  auto dudn = gradUDotNormal();
   ADReal coeff;
-  interpolate(_coeff_interp_method,
-              coeff,
-              _coeff(elemFromFace()),
-              _coeff(neighborFromFace()),
-              *_face_info,
-              true);
+
+  // If we are on internal faces, we interpolate the diffusivity as usual
+  if (_var.isInternalFace(*_face_info))
+    interpolate(_coeff_interp_method,
+                coeff,
+                _coeff(elemFromFace()),
+                _coeff(neighborFromFace()),
+                *_face_info,
+                true);
+  // Else we use linear inter/extrapolation using regular face args or single-sided
+  // face arguments
+  else
+  {
+    const auto face =
+        makeFace(*_face_info, LimiterType::CentralDifference, true, faceArgSubdomains());
+    coeff = _coeff(face);
+  }
 
   return -1 * coeff * dudn;
 }

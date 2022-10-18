@@ -723,8 +723,6 @@ MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi, const bool correct_s
   mooseError("MooseVariableFV::adGradSln only supported for global AD indexing");
 #endif
 
-  bool internal_face = isInternalFace(fi);
-
   bool var_defined_on_elem = fi.varDefinedOnElem(this->name());
   const Elem * const elem = &fi.elem();
   const Elem * const neighbor = fi.neighborPtr();
@@ -734,19 +732,26 @@ MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi, const bool correct_s
   const ADReal side_two_value =
       var_defined_on_elem ? getNeighborValue(neighbor, fi) : getElemValue(neighbor);
 
-  const Real delta = internal_face ? std::abs(fi.dCN() * fi.normal())
-                                   : fi.cellCenterToFaceDistance(var_defined_on_elem);
-
-  auto face_grad = ((side_two_value - side_one_value) / delta);
+  const auto delta =
+      isInternalFace(fi) ? fi.dCNMag() : (fi.faceCentroid() - fi.elemCentroid()).norm();
+  auto face_grad = ((side_two_value - side_one_value) / delta) * fi.eCN();
 
   // We only need nonorthogonal correctors in 2+ dimensions
   if (_mesh.dimension() > 1)
   {
+    // We are using an over-relaxed approach for the non-orthogonal correction, this will
+    // increase the importance of the central difference term as the non-orthogonality angle
+    // increases. Also, based on the PhD dissertation of Hrvoje Jasak (Imperial College, 1996), this
+    // approach seems to be more robust when it comes to highly nonorthogonal grids
+    const Real product = std::abs(fi.eCN() * fi.normal());
+    face_grad /= std::pow(product, 2);
+
     const auto & interpolated_gradient = uncorrectedAdGradSln(fi, correct_skewness);
-    face_grad += interpolated_gradient * (fi.normal() - fi.dCN() / delta);
+    face_grad += interpolated_gradient -
+                 (interpolated_gradient * fi.eCN()) * fi.eCN() / std::pow(product, 2);
   }
 
-  return face_grad * fi.normal();
+  return face_grad;
 }
 
 template <typename OutputType>
