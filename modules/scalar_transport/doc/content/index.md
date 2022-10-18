@@ -1,3 +1,1 @@
-!config navigation breadcrumbs=False scrollspy=False
-
-# ScalarTransportApp
+[modules/scalar_transport/index.md]
