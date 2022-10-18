@@ -21,8 +21,4 @@ public:
   static InputParameters validParams();
 
   PolygonConcentricCircleMeshGenerator(const InputParameters & parameters);
-
-protected:
-  /// Metadata of the maximum radius of ring regions
-  Real & _max_radius_meta;
 };

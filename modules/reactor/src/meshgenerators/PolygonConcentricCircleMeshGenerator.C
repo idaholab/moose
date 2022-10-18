@@ -33,12 +33,9 @@ PolygonConcentricCircleMeshGenerator::validParams()
 
 PolygonConcentricCircleMeshGenerator::PolygonConcentricCircleMeshGenerator(
     const InputParameters & parameters)
-  : PolygonConcentricCircleMeshGeneratorBase(parameters),
-    _max_radius_meta(declareMeshProperty<Real>("max_radius_meta", 0.0))
+  : PolygonConcentricCircleMeshGeneratorBase(parameters)
 {
   _is_general_polygon = true;
-  if (_has_rings)
-    _max_radius_meta = _ring_radii.back();
   if (_quad_center_elements && (_num_sectors_per_side.front() != _num_sectors_per_side.back()))
     paramError("quad_center_elements",
                "This parameter must be false if different side sector numbers are set.");

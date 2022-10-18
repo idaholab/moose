@@ -127,4 +127,6 @@ protected:
   std::vector<Real> & _azimuthal_angle_meta;
   /// MeshMetaData: whether this produced mesh is a control drum
   bool & _is_control_drum_meta;
+  /// Metadata of the maximum radius of ring regions
+  Real & _max_radius_meta;
 };

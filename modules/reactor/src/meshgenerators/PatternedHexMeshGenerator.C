@@ -96,13 +96,17 @@ PatternedHexMeshGenerator::validParams()
       "create_interface_boundaries", true, "Whether the interface boundary sidesets are created.");
   params.addParam<std::string>("external_boundary_name",
                                "Optional customized external boundary name.");
+  params.addParam<bool>("deform_non_circular_region",
+                        true,
+                        "Whether the non-circular region (outside the rings) can be deformed.");
   params.addParamNamesToGroup("background_block_id background_block_name duct_block_ids "
                               "duct_block_names external_boundary_id external_boundary_name",
                               "Customized Subdomain/Boundary");
   params.addParamNamesToGroup(
       "generate_control_drum_positions_file assign_control_drum_id position_file", "Control Drum");
-  params.addParamNamesToGroup("background_intervals duct_intervals uniform_mesh_on_sides",
-                              "Mesh Density");
+  params.addParamNamesToGroup(
+      "background_intervals duct_intervals uniform_mesh_on_sides deform_non_circular_region",
+      "Mesh Density");
   params.addClassDescription(
       "This PatternedHexMeshGenerator source code assembles hexagonal meshes into a hexagonal grid "
       "and optionally forces the outer boundary to be hexagonal and/or adds a duct.");
@@ -144,6 +148,7 @@ PatternedHexMeshGenerator::PatternedHexMeshGenerator(const InputParameters & par
     _create_interface_boundaries(getParam<bool>("create_interface_boundaries")),
     _hexagon_size_style(
         getParam<MooseEnum>("hexagon_size_style").template getEnum<PolygonSizeStyle>()),
+    _deform_non_circular_region(getParam<bool>("deform_non_circular_region")),
     _pattern_pitch_meta(declareMeshProperty("pattern_pitch_meta", 0.0)),
     _input_pitch_meta(declareMeshProperty("input_pitch_meta", 0.0)),
     _is_control_drum_meta(declareMeshProperty<bool>("is_control_drum_meta", false)),
@@ -392,15 +397,17 @@ PatternedHexMeshGenerator::generate()
       extra_dist_shift = extra_dist_shift_0 - extra_dist.front();
       for (Real & d : extra_dist)
         d += extra_dist_shift;
-      y_min = max_radius_global; // Currently use this, ideally this should be the max of the outer
-                                 // layer radii;
+      y_min = _deform_non_circular_region
+                  ? max_radius_global // Currently use this, ideally this should be the max of the
+                                      // outer layer radii
+                  : (pitch_array.front() / std::sqrt(3.0));
       y_max_0 = pitch_array.front() / std::sqrt(3.0) + extra_dist.front();
       y_max_n = y_max_0 - extra_dist_shift;
       if (y_max_n <= y_min)
         mooseError("In PatternedHexMeshGenerator ",
                    _name,
-                   ": the assembly is cut off so much that the internal circular structure is "
-                   "compromised.");
+                   ": the assembly is cut off so much that the internal structure that should not "
+                   "be altered is compromised.");
     }
   }
 
