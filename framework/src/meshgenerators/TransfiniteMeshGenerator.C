@@ -341,17 +341,17 @@ TransfiniteMeshGenerator::getCircarcEdge(const Point & P1,
 {
   std::vector<Point> edge; // output, to be returned variable
   std::vector<Real> param_coords;
-  //MooseUtils::tokenize(parameter, param_coords, 1, "&&");
+  // MooseUtils::tokenize(parameter, param_coords, 1, "&&");
   MooseUtils::tokenizeAndConvert(parameter, param_coords, "&&");
   Point P3;
-  if (param_coords.size()==1)
-     {
-     P3 = computeMidPoint(P1, P2, param_coords[0], outward);
-     }
-    else
-    {
-      P3 = Point(param_coords[0], param_coords[1], param_coords[2]);
-    }
+  if (param_coords.size() == 1)
+  {
+    P3 = computeMidPoint(P1, P2, param_coords[0], outward);
+  }
+  else
+  {
+    P3 = Point(param_coords[0], param_coords[1], param_coords[2]);
+  }
 
   Real rad = computeRadius(P1, P2, P3);
   Point P0 = computeOrigin(P1, P2, P3);
