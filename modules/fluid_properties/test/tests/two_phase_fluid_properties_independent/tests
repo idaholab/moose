@@ -22,6 +22,8 @@
       Outputs/csv=false"
     allow_test_objects = true
     threading = '!pthreads'
+    # this test modifies the checkpoint file causing recovery of 'test' to fail
+    recover = false
   []
   [error:error_on_unimplemented]
     type = 'RunException'

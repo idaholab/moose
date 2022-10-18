@@ -747,6 +747,9 @@ FEProblemBase::initialSetup()
       adaptivity().uniformRefineWithProjection();
     }
   }
+  else if (_mesh.uniformRefineLevel() > 0 && !_app.isUltimateMaster() && !_app.masterMesh())
+    mooseError(
+        "Doing extra refinements when recovering is NOT supported for sub-apps of a MultiApp");
 
   unsigned int n_threads = libMesh::n_threads();
 
