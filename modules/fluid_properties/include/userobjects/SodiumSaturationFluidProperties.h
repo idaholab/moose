@@ -25,21 +25,6 @@ public:
 
   virtual std::string fluidName() const override;
 
-  virtual Real p_from_v_e(Real v, Real e) const override;
-  virtual void p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Real & dp_de) const override;
-  virtual void p_from_v_e(const DualReal & v,
-                          const DualReal & e,
-                          DualReal & p,
-                          DualReal & dp_dv,
-                          DualReal & dp_de) const override;
-  virtual Real T_from_v_e(Real v, Real e) const override;
-  virtual void T_from_v_e(Real v, Real e, Real & T, Real & dT_dv, Real & dT_de) const override;
-  virtual void T_from_v_e(const DualReal & v,
-                          const DualReal & e,
-                          DualReal & T,
-                          DualReal & dT_dv,
-                          DualReal & dT_de) const override;
-
   virtual Real rho_from_p_T(Real p, Real T) const override;
 
   virtual void
@@ -54,6 +39,9 @@ public:
   virtual DualReal v_from_p_T(const DualReal & p, const DualReal & T) const override;
   virtual void v_from_p_T(Real p, Real T, Real & v, Real & dv_dp, Real & dv_dT) const override;
 
+  virtual Real p_from_v_e(Real v, Real e) const override;
+  virtual Real T_from_v_e(Real v, Real e) const override;
+  
   virtual Real h_from_p_T(Real p, Real T) const override;
   virtual void h_from_p_T(Real p, Real T, Real & h, Real & dh_dp, Real & dh_dT) const override;
 

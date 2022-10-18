@@ -63,24 +63,11 @@ SodiumSaturationFluidProperties::rho_from_p_T(const DualReal & pressure,
   drho_dT = -0.21390 - 1.1046e-5 * 2 * temperature;
 }
 
-DualReal
-SodiumSaturationFluidProperties::v_from_p_T(const DualReal & /* pressure */,
-                                            const DualReal & temperature) const
-{
-  return 1.0 / (1.00423e3 - 0.21390 * temperature - 1.1046e-5 * temperature * temperature);
-}
-
-DualReal
-SodiumSaturationFluidProperties::T_from_v_e(const DualReal & v,
-                                            const DualReal & e) const ///////////
-{
-  return 0.798843+std::sqrt(0.798843e2 - 4*(-1.1046e-5*0)))/2*(-1.1046e-5);
-}
-
 Real
-SodiumSaturationFluidProperties::v_from_p_T(Real /* pressure */, Real temperature) const
+SodiumSaturationFluidProperties::v_from_p_T(const Real pressure,
+                                            const Real temperature) const
 {
-  return 1.0 / (1.00423e3 - 0.21390 * temperature - 1.1046e-5 * temperature * temperature);
+  return 1.0 / rho_from_p_T(pressure, temperature);
 }
 
 void
@@ -92,6 +79,25 @@ SodiumSaturationFluidProperties::v_from_p_T(
 
   Real drho_dT = -0.21390 - 1.1046e-5 * 2 * temperature;
   dv_dT = -v * v * drho_dT;
+}
+
+Real
+SodiumSaturationFluidProperties::p_from_v_e(const Real v,
+                                            const Real e) const
+{
+  Real temperature = T_from_v_e(v, e);
+  // h does not depend on pressure
+  return (h_from_p_T(1e5, temperature) - e) / v;
+}
+
+Real
+SodiumSaturationFluidProperties::T_from_v_e(const Real v,
+                                            const Real /* e */) const
+{
+  // From inversion of second order polynomial form of rho(T)
+  mooseAssert(0.2139 * 0.2139 + 4 * 1.1046e5 * (1.00423e3 - 1 / v) > 0,
+              "Specific volume out of bounds");
+  return (0.2139 - std::sqrt(0.2139 * 0.2139 + 4 * 1.1046e-5 * (1.00423e3 - 1 / v))) / (2 * -1.1046e-5);
 }
 
 Real
@@ -109,22 +115,6 @@ SodiumSaturationFluidProperties::h_from_p_T(
   h = h_from_p_T(pressure, temperature);
   dh_dp = 0.0;
   dh_dT = cp_from_p_T(pressure, temperature);
-}
-
-DualReal
-SodiumSaturationFluidProperties::P_from_v_e(const DualReal & v,
-                                            const DualReal & e) const ////////////
-{
-  DualReal temperature = T_from_v_e(v, e);
-  // h does not depend on pressure
-  return (e - h_from_p_T(0, temperature)) / v;
-}
-
-DualReal
-SodiumSaturationFluidProperties::P_from_v_e(const DualReal & v,
-                                            const DualReal & e) const /////////////
-{
-  return rho_from_p_T;
 }
 
 Real
