@@ -29,9 +29,6 @@ CoupledForceLM::CoupledForceLM(const InputParameters & parameters)
     _v(adCoupledValue("v")),
     _coef(getParam<Real>("coef"))
 {
-  if (_var.number() == _v_var)
-    mooseError("Coupled variable 'v' needs to be different from 'variable' with CoupledForce, "
-               "consider using Reaction or somethig similar");
 }
 
 ADReal

@@ -32,7 +32,7 @@ LMKernel::validParams()
 
 LMKernel::LMKernel(const InputParameters & parameters)
   : ADKernelValue(parameters),
-    _lm_var(*this->getVar("lm_variable", 0)),
+    _lm_var(*getVar("lm_variable", 0)),
     _lm(adCoupledValue("lm_variable")),
     _lm_test(_lm_var.phi()),
     _lm_sign(getParam<Real>("lm_sign"))

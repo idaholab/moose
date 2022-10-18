@@ -66,4 +66,5 @@ protected:
   using ADKernelTempl<T>::prepareMatrixTag;
   using ADKernelTempl<T>::_test;
   using ADKernelTempl<T>::_residuals;
+  using ADKernelTempl<T>::getVar;
 };

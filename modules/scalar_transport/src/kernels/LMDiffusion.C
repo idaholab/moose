@@ -15,7 +15,8 @@ InputParameters
 LMDiffusion::validParams()
 {
   InputParameters params = Kernel::validParams();
-  params.addRequiredCoupledVar("v", "The coupled variable from which to pull the Laplacian");
+  params.addRequiredCoupledVar("primal_variable",
+                               "The coupled primal variable from which to pull the Laplacian");
   params.addParam<Real>("lm_sign", 1, "The sign of the lagrange multiplier in the primal equation");
   params.addParam<Real>("diffusivity", 1, "The value of the diffusivity");
   params.addClassDescription(
@@ -25,21 +26,25 @@ LMDiffusion::validParams()
 
 LMDiffusion::LMDiffusion(const InputParameters & parameters)
   : Kernel(parameters),
-    _v_var(coupled("v")),
-    _second_v(coupledSecond("v")),
-    _second_v_phi(getVar("v", 0)->secondPhi()),
+    _primal_var(coupled("primal_variable")),
+    _second_primal(coupledSecond("primal_variable")),
+    _second_primal_phi(getVar("primal_variable", 0)->secondPhi()),
     _lm_sign(getParam<Real>("lm_sign")),
     _diffusivity(getParam<Real>("diffusivity"))
 {
-  if (_var.number() == _v_var)
-    mooseError("Coupled variable 'v' needs to be different from 'variable' with "
-               "LMDiffusion");
+  if (_var.number() == _primal_var)
+    paramError(
+        "primal_variable",
+        "Coupled variable 'primal_variable' needs to be different from 'variable' with "
+        "LMDiffusion. It is expected in general that 'variable' should be a Lagrange multiplier "
+        "variable, and that 'primal_variable' be the primal variable on which the Lagrange "
+        "multiplier is acting");
 }
 
 Real
 LMDiffusion::computeQpResidual()
 {
-  return _lm_sign * _test[_i][_qp] * -_diffusivity * _second_v[_qp].tr();
+  return _lm_sign * _test[_i][_qp] * -_diffusivity * _second_primal[_qp].tr();
 }
 
 Real
@@ -51,8 +56,8 @@ LMDiffusion::computeQpJacobian()
 Real
 LMDiffusion::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if (jvar == _v_var)
-    return _lm_sign * _test[_i][_qp] * -_diffusivity * _second_v_phi[_j][_qp].tr();
+  if (jvar == _primal_var)
+    return _lm_sign * _test[_i][_qp] * -_diffusivity * _second_primal_phi[_j][_qp].tr();
 
   return 0;
 }

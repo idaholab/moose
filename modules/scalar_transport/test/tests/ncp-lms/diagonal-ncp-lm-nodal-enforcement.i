@@ -100,7 +100,7 @@ dt=1
   [diff_lm]
     type = LMDiffusion
     variable = lm
-    v = u
+    primal_variable = u
     extra_vector_tags = 'diffusion'
   []
   [ffn]
