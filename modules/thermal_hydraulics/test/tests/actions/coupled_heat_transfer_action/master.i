@@ -9,6 +9,7 @@
   ymax = 1
   ny = 10
   parallel_type = replicated
+  coord_type = RZ
 []
 
 [Variables]
@@ -66,10 +67,6 @@
     n_elems = 10
     skip_coordinate_collapsing = true
   []
-[]
-
-[Problem]
-  coord_type = RZ
 []
 
 [Executioner]

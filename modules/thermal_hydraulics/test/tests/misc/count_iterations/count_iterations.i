@@ -8,6 +8,8 @@
   dim = 2
   nx = 10
   ny = 10
+  coord_type = RZ
+  rz_coord_axis = X
 []
 
 [Variables]
@@ -39,12 +41,6 @@
     boundary = right
     value = 1
   []
-[]
-
-[Problem]
-  type = FEProblem
-  coord_type = RZ
-  rz_coord_axis = X
 []
 
 [Executioner]
