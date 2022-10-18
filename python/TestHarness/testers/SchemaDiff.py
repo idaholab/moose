@@ -16,10 +16,11 @@ class SchemaDiff(RunApp):
     def validParams():
         params = RunApp.validParams()
         params.addParam('schemadiff',   [], "A list of XML or JSON files to compare.")
-        params.addParam('gold_dir',      'gold', "The directory where the \"golden standard\" files reside relative to the TEST_DIR: (default: ./gold/). This only needs to be set if the gold file is in a non-standard location.")
+        params.addParam('gold_dir',      'gold', "The directory where the \"gold standard\" files (the expected output to compare against) reside relative to the TEST_DIR: (default: ./gold/). This only needs to be set if the gold file is in a non-standard location.")
         params.addParam('gold_file',      None, "Specify the file in the gold_dir that the output should be compared against. This only needs to be set if the gold file uses a different file name than the output file.")
-        params.addParam('ignored_items',  [], "Items in the schema that the differ to ignore. These can be keys or values, i.e. for \"foo\": \"bar\", either foo or bar can be chosen to be selected. Note that entering a value located inside a list will skip the whole list.")
-        params.addParam('rel_err',       5.5e-6, "Relative error value allowed in comparisons. If rel_err value is set to 0, it will work on the absolute difference between the values")
+        params.addParam('ignored_items',  [], "Items in the schema that the differ will ignore. These can be keys or values, i.e. for \"foo\": \"bar\", either foo or bar can be chosen to be selected. Note that entering a value located inside a list will skip the whole list.")
+        params.addParam('rel_err',       5.5e-6, "Relative error value allowed in comparisons. If rel_err value is set to 0, it will work on the absolute difference between the values.")
+        params.addParam('abs_zero',      1e-10, "Absolute zero cutoff used in diff comparisons. Every value smaller than this threshold will be ignored."),
         return params
 
     def __init__(self, name, params):
@@ -34,6 +35,7 @@ class SchemaDiff(RunApp):
     def prepare(self, options):
         if self.specs['delete_output_before_running'] == True:
             util.deleteFilesAndFolders(self.getTestDir(), self.specs['schemadiff'])
+
     def processResults(self, moose_dir, options, output):
         output += self.testFileOutput(moose_dir, options, output)
         self.testExitCodes(moose_dir, options, output)
@@ -49,7 +51,6 @@ class SchemaDiff(RunApp):
 
         # Loop over every file
         for file in specs['schemadiff']:
-
             gold_file = specs['gold_file'] if specs['gold_file'] else file
             if not os.path.exists(os.path.join(self.getTestDir(), specs['gold_dir'], gold_file)):
                 output += "File Not Found: " + os.path.join(self.getTestDir(), specs['gold_dir'], file)
@@ -82,8 +83,8 @@ class SchemaDiff(RunApp):
                     output += "Schema Files of Different Types: \nTest: " + test +"\nGold: " + gold
                     self.setStatus(self.fail, 'INVALID SCHEMA(S) PROVIDED')
                     break
-                # Get the results of the diff
-                diff = self.do_deepdiff(gold_dict[0], test_dict[0], specs['rel_err'], specs['ignored_items'])
+                # Perform the diff.
+                diff = self.do_deepdiff(gold_dict[0], test_dict[0], specs['rel_err'], specs['abs_zero'], specs['ignored_items'])
                 if diff:
                     output += "Schema difference detected.\nFile 1: " + gold + "\nFile 2: " + test + "\nErrors:\n"
                     output += diff
@@ -101,20 +102,24 @@ class SchemaDiff(RunApp):
         with open(filepath,"r") as f:
             return json.loads(f.read())
 
-    def do_deepdiff(self,orig, comp, rel_err, exclude_values:list=None):
+    def do_deepdiff(self,orig, comp, rel_err, abs_zero, exclude_values:list=None):
         import deepdiff
         from deepdiff.operator import BaseOperator
         class testcompare(BaseOperator):
-            def __init__(self, rel_err,types,regex_paths=None):
+            def __init__(self, rel_err,abs_zero,types,regex_paths=None):
                 self.rel_err = rel_err
+                self.abs_zero = abs_zero
                 #next two members are necessary for deepdiff constructor to work
                 self.regex_paths = regex_paths
                 self.types = types
+
             def give_up_diffing(self,level, diff_instance):
                 try:
                     if level.t1 != level.t2:
                         x = float(level.t1)
                         y = float(level.t2)
+                        if x < self.abs_zero or y < self.abs_zero:
+                            return True
                         if self.rel_err == 0 or y == 0:
                             if abs(x-y) > self.rel_err:
                                 return False
@@ -133,6 +138,8 @@ class SchemaDiff(RunApp):
                             x = float(split1[i])
                             y = float(split2[i])
                             if x != y:
+                                if x < self.abs_zero or y < self.abs_zero:
+                                    return True
                                 if self.rel_err == 0 or y == 0:
                                     if abs(x-y) > self.rel_err:
                                         return False
@@ -153,7 +160,7 @@ class SchemaDiff(RunApp):
                     for path in search2["matched_paths"]:
                         to_exclude.append(path)
 
-        return deepdiff.DeepDiff(orig,comp,exclude_paths=to_exclude,custom_operators=[testcompare(types=[str,float],rel_err=rel_err)]).pretty()
+        return deepdiff.DeepDiff(orig,comp,exclude_paths=to_exclude,custom_operators=[testcompare(types=[str,float],rel_err=rel_err,abs_zero=abs_zero)]).pretty()
 
     def load_file(self, path1):
         try:
@@ -163,7 +170,3 @@ class SchemaDiff(RunApp):
                 return (self.import_json(path1),2)
             except:
                 return False
-
-
-
-

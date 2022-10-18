@@ -25,6 +25,7 @@
       jsondiff = main_vector_out.json
       abs_zero = 1e-5
       detail = "time dependence with accumulative reporter;"
+      abs_zero = 1e-5
     []
     [action]
       type = JSONDiff

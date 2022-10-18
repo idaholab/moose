@@ -15,11 +15,12 @@ class XMLDiff(SchemaDiff):
     def validParams():
         params = SchemaDiff.validParams()
         params.addRequiredParam('xmldiff',   [], "A list of XML files to compare.")
-
+        params.addParam('ignored_attributes',  [], "Deprecated. Items in the JSON that the differ will ignore. This is functionally identical to ignored_items inside of SchemaDiff.")
         return params
 
     def __init__(self, name, params):
         params['schemadiff'] = params['xmldiff']
+        params['ignored_items'] = params['ignored_attributes']
         SchemaDiff.__init__(self, name, params)
 
     def prepare(self, options):
