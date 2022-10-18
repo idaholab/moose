@@ -9,6 +9,7 @@
 
 #include "NavierStokesMethods.h"
 #include "MooseError.h"
+#include "libmesh/vector_value.h"
 
 namespace NS
 {
@@ -94,5 +95,15 @@ findUStar(const ADReal & mu, const ADReal & rho, const ADReal & u, const Real di
                  " wall distance: ",
                  dist,
                  ")");
+}
+
+ADReal
+computeSpeed(const ADRealVectorValue & velocity)
+{
+  // if the velocity is zero, then the norm function call fails because AD tries to calculate the
+  // derivatives which causes a divide by zero - because d/dx(sqrt(f(x))) = 1/2/sqrt(f(x))*df/dx.
+  // So add a bit of noise (hitchiker's guide to the galaxy's meaning of life number) to avoid this
+  // failure mode.
+  return isZero(velocity) ? 1e-42 : velocity.norm();
 }
 }

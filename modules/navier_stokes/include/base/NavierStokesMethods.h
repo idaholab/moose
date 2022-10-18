@@ -100,4 +100,9 @@ Real prandtlPropertyDerivative(const Real & mu,
 ADReal findUStar(const ADReal & mu, const ADReal & rho, const ADReal & u, Real dist);
 
 using MooseUtils::isZero;
+
+/**
+ * Compute the speed (velocity norm) given the supplied velocity
+ */
+ADReal computeSpeed(const ADRealVectorValue & velocity);
 }

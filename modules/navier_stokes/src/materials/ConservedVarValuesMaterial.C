@@ -61,18 +61,6 @@ ConservedVarValuesMaterial::ConservedVarValuesMaterial(const InputParameters & p
 {
 }
 
-ADReal
-ConservedVarValuesMaterial::computeSpeed() const
-{
-  // if the velocity is zero, then the norm function call fails because AD tries to calculate the
-  // derivatives which causes a divide by zero - because d/dx(sqrt(f(x))) = 1/2/sqrt(f(x))*df/dx.
-  // So add a bit of noise to avoid this failure mode.
-  if (NS::isZero(_velocity[_qp]))
-    return 1e-42;
-
-  return _velocity[_qp].norm();
-}
-
 void
 ConservedVarValuesMaterial::computeQpProperties()
 {
@@ -82,7 +70,7 @@ ConservedVarValuesMaterial::computeQpProperties()
   _total_energy_density[_qp] = _var_total_energy_density[_qp];
 
   _velocity[_qp] = _mass_flux[_qp] / _rho[_qp];
-  _speed[_qp] = computeSpeed();
+  _speed[_qp] = NS::computeSpeed(_velocity[_qp]);
   _vel_x[_qp] = _velocity[_qp](0);
   _vel_y[_qp] = _velocity[_qp](1);
   _vel_z[_qp] = _velocity[_qp](2);
