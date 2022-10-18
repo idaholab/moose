@@ -62,27 +62,20 @@ protected:
                              const Point & outward,
                              const std::vector<Real> & param_vec);
 
-  std::vector<Point> getParsedEdge(const Point & P1,
-                                   const Point & P2,
-                                   const unsigned int & np,
-                                   const std::string & parameter,
+  std::vector<Point> getParsedEdge(const std::string & parameter,
                                    const std::vector<Real> & param_vec);
 
   std::vector<Point> getCircarcEdge(const Point & P1,
                                     const Point & P2,
-                                    const unsigned int & np,
                                     const std::string & parameter,
                                     const Point & outward,
                                     const std::vector<Real> & param_vec);
 
-  std::vector<Point> getDiscreteEdge(const Point & P1,
-                                     const Point & P2,
-                                     const unsigned int & np,
+  std::vector<Point> getDiscreteEdge(const unsigned int & np,
                                      const std::string & parameter);
 
   std::vector<Point> getLineEdge(const Point & P1,
                                  const Point & P2,
-                                 const unsigned int & np,
                                  const std::vector<Real> & param_vec);
 
   // The following 3 routines are needed for generating arc circles given the user input

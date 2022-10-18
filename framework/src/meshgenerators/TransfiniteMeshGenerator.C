@@ -237,25 +237,46 @@ TransfiniteMeshGenerator::getEdge(const Point & P1,
   switch (type)
   {
     case 1:
-      edge = getLineEdge(P1, P2, np, param_vec);
+      edge = getLineEdge(P1, P2, param_vec);
+      mooseAssert(!MooseUtils::relativeFuzzyEqual((edge[0] - P1).norm(), 0.0),
+              "The line does not fit the first vertex on the edge.");
+      mooseAssert(!MooseUtils::relativeFuzzyEqual((edge[np - 1] - P2).norm(), 0.0),
+              "The line does not fit the end vertex on the edge.");
       break;
     case 2:
-      edge = getCircarcEdge(P1, P2, np, parameter, outward, param_vec);
+      edge = getCircarcEdge(P1, P2, parameter, outward, param_vec);
+      mooseAssert(!MooseUtils::relativeFuzzyEqual((edge[0] - P1).norm(), 0.0),
+              "No arccircle parametrization can be found to fit the first vertex on the edge.");
+      mooseAssert(!MooseUtils::relativeFuzzyEqual((edge[np - 1] - P2).norm(), 0.0),
+              "No arccircle parametrization can be found to fit the end vertex on the edge.");
+
       break;
     case 3:
-      edge = getDiscreteEdge(P1, P2, np, parameter);
+      edge = getDiscreteEdge(np, parameter);
+      mooseAssert(!MooseUtils::relativeFuzzyEqual((edge[0] - P1).norm(), 0.0),
+              "The first discrete point does not fit the corresponding edge vertex."
+              "Note: discrete points need to replicate the edge corners.");
+      mooseAssert(!MooseUtils::relativeFuzzyEqual((edge[np - 1] - P2).norm(), 0.0),
+              "The last discrete point does not fit the corresponding edge vertex."
+              "Note: discrete points need to replicate the edge corners.");
       break;
     case 4:
-      edge = getParsedEdge(P1, P2, np, parameter, param_vec);
+      edge = getParsedEdge(parameter, param_vec);
+      mooseAssert(!MooseUtils::relativeFuzzyEqual((edge[0] - P1).norm(), 0.0),
+              "The parametrization does not fit the first vertex on the edge.");
+      mooseAssert(!MooseUtils::relativeFuzzyEqual((edge[np - 1] - P2).norm(), 0.0),
+              "The parametrization does not fit the end vertex on the edge.");
       break;
   }
+   if (edge.size() != np)
+    mooseError("The generated edge does not match the number of points on the"
+               "opposite edge.");
   return edge;
 }
 
 std::vector<Point>
 TransfiniteMeshGenerator::getLineEdge(const Point & P1,
                                       const Point & P2,
-                                      const unsigned int & np,
                                       const std::vector<Real> & param_vec)
 {
   std::vector<Point> edge;
@@ -270,10 +291,7 @@ TransfiniteMeshGenerator::getLineEdge(const Point & P1,
 }
 
 std::vector<Point>
-TransfiniteMeshGenerator::getParsedEdge(const Point & P1,
-                                        const Point & P2,
-                                        const unsigned int & np,
-                                        const std::string & parameter,
+TransfiniteMeshGenerator::getParsedEdge(const std::string & parameter,
                                         const std::vector<Real> & param_vec)
 {
   std::vector<Point> edge;
@@ -291,18 +309,11 @@ TransfiniteMeshGenerator::getParsedEdge(const Point & P1,
     edge.push_back(Point(x_coord, y_coord, 0.0));
   }
 
-  mooseAssert(!MooseUtils::relativeFuzzyEqual((edge[0] - P1).norm(), 0.0),
-              "The parametrization does not fit the first vertex on the edge.");
-  mooseAssert(!MooseUtils::relativeFuzzyEqual((edge[np - 1] - P2).norm(), 0.0),
-              "The parametrization does not fit the end vertex on the edge.");
-
   return edge;
 }
 
 std::vector<Point>
-TransfiniteMeshGenerator::getDiscreteEdge(const Point & P1,
-                                          const Point & P2,
-                                          const unsigned int & np,
+TransfiniteMeshGenerator::getDiscreteEdge(const unsigned int & np,
                                           const std::string & parameter)
 {
   std::vector<Point> edge;
@@ -310,7 +321,7 @@ TransfiniteMeshGenerator::getDiscreteEdge(const Point & P1,
   std::vector<std::string> string_points;
   MooseUtils::tokenize(parameter, string_points, 1, "\n");
   if (string_points.size() != np)
-    mooseError("DISCRETE: the number of discrete points does not match the number of points on "
+    mooseError("DISCRETE: the number of discrete points does not match the number of points on the"
                "opposite edge.");
   for (unsigned int iter = 0; iter < string_points.size(); iter++)
   {
@@ -319,19 +330,12 @@ TransfiniteMeshGenerator::getDiscreteEdge(const Point & P1,
     edge.push_back(Point(point_vals[0], point_vals[1], point_vals[2]));
   }
 
-  mooseAssert(!MooseUtil::relativeFuzzyEqual((edge[0] - P1).norm(), 0.0),
-              "The first discrete point does not fit the corresponding edge vertex."
-              "Note: discrete points need to replicate the edge corners.");
-  mooseAssert(!MooseUtils::relativeFuzzyEqual((edge[np - 1] - P2).norm(), 0.0),
-              "The last discrete point does not fit the corresponding edge vertex."
-              "Note: discrete points need to replicate the edge corners.");
   return edge;
 }
 
 std::vector<Point>
 TransfiniteMeshGenerator::getCircarcEdge(const Point & P1,
                                          const Point & P2,
-                                         const unsigned int & np,
                                          const std::string & parameter,
                                          const Point & outward,
                                          const std::vector<Real> & param_vec)
@@ -366,10 +370,6 @@ TransfiniteMeshGenerator::getCircarcEdge(const Point & P1,
     edge.push_back(Point(x, y, 0.0));
   };
 
-  mooseAssert(!MooseUtils::relativeFuzzyEqual((edge[0] - P1).norm(), 0.0),
-              "No arccircle parametrization can be found to fit the first vertex on the edge.");
-  mooseAssert(!MooseUtils::relativeFuzzyEqual((edge[np - 1] - P2).norm(), 0.0),
-              "No arccircle parametrization can be found to fit the end vertex on the edge.");
   return edge;
 }
 
