@@ -101,10 +101,10 @@ public:
                   DualReal & dT_de) const override;
 
   /**
-   * Temperature and its derivatives from pressure and spesific enthalpy
+   * Temperature from pressure and specific enthalpy
    *
-   * @param[in] h       specific enthalpy (J/kg)
    * @param[in] p       pressure (Pa)
+   * @param[in] h       specific enthalpy (J/kg)
    * @param[out] T       temperature (K)
    */
   virtual Real T_from_p_h(Real p, Real h) const override;

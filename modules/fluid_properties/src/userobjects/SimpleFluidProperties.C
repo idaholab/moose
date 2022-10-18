@@ -348,11 +348,11 @@ SimpleFluidProperties::e_from_p_rho(Real p, Real rho) const
 void
 SimpleFluidProperties::e_from_p_rho(Real p, Real rho, Real & e, Real & de_dp, Real & de_drho) const
 {
-  // get temerature and dirivitives
+  // get temperature and derivatives
   Real T, dT_dp, dT_drho;
   T_from_p_rho(p, rho, T, dT_dp, dT_drho);
 
-  // get energy and dirivitives
+  // get energy and derivatives
   Real de_dT;
   e_from_p_T(p, T, e, de_dp, de_dT);
   de_drho = de_dT * dT_drho + de_dp * 0;

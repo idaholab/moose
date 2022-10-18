@@ -116,7 +116,7 @@ SodiumSaturationFluidProperties::P_from_v_e(const DualReal & v,
                                             const DualReal & e) const ////////////
 {
   DualReal temperature = T_from_v_e(v, e);
-  // h does not depend on presure
+  // h does not depend on pressure
   return (e - h_from_p_T(0, temperature)) / v;
 }
 

@@ -46,10 +46,10 @@ public:
                           DualReal & dp_de) const override;
 
   /**
-   * Temperature and its derivatives from pressure and spesific enthalpy
+   * Temperature and its derivatives from pressure and specific enthalpy
    *
    * @param[in] h       specific enthalpy (J/kg)
-   * @param[out] rho       density (kg/m$^3$)
+   * @param[out] rho    density (kg/m$^3$)
    * @param[out] T       temperature (K)
    */
   virtual Real T_from_p_rho(Real p, Real rho) const;
@@ -79,11 +79,11 @@ public:
                           DualReal & dT_de) const override;
 
   /**
-   * Temperature and its derivatives from pressure and spesific enthalpy
+   * Temperature and its derivatives from pressure and specific enthalpy
    *
    * @param[in] h       specific enthalpy (J/kg)
    * @param[in] p       pressure (Pa)
-   * @param[out] T       temperature (K)
+   * @param[out] T      temperature (K)
    */
   virtual Real T_from_p_h(Real p, Real h) const override;
 
@@ -242,13 +242,10 @@ public:
   virtual void e_from_p_T(Real p, Real T, Real & e, Real & de_dp, Real & de_dT) const override;
 
   /**
-   * Pressure and its derivatives from specific volume and specific internal energy
+   * Specific energy from pressure and density
    *
-   * @param[in] v        specific volume (m$^3$/kg)
-   * @param[in] e        specific internal energy (J/kg)
-   * @param[out] p       pressure (Pa)
-   * @param[out] dp_dv   derivative of pressure w.r.t. specific volume
-   * @param[out] dp_de   derivative of pressure w.r.t. specific internal energy
+   * @param[in] p            pressure (Pa)
+   * @param[in] rho        density (kg/m3)
    */
   virtual Real e_from_p_rho(Real p, Real rho) const override;
 
