@@ -12,6 +12,16 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
+#include "ChemicalReactionsApp.h"
+#include "NavierStokesApp.h"
+#include "ThermalHydraulicsApp.h"
+#include "FluidPropertiesApp.h"
+#include "HeatConductionApp.h"
+#include "RdgApp.h"
+#include "RayTracingApp.h"
+#include "SolidPropertiesApp.h"
+#include "MiscApp.h"
+
 InputParameters
 ScalarTransportApp::validParams()
 {
@@ -29,11 +39,20 @@ ScalarTransportApp::ScalarTransportApp(InputParameters parameters) : MooseApp(pa
 ScalarTransportApp::~ScalarTransportApp() {}
 
 void
-ScalarTransportApp::registerAll(Factory & f, ActionFactory & af, Syntax & /*s*/)
+ScalarTransportApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
-  /* ModulesApp::registerAll(f, af, s); */
   Registry::registerObjectsTo(f, {"ScalarTransportApp"});
   Registry::registerActionsTo(af, {"ScalarTransportApp"});
+
+  ChemicalReactionsApp::registerAll(f, af, s);
+  NavierStokesApp::registerAll(f, af, s);
+  ThermalHydraulicsApp::registerAll(f, af, s);
+  FluidPropertiesApp::registerAll(f, af, s);
+  HeatConductionApp::registerAll(f, af, s);
+  RdgApp::registerAll(f, af, s);
+  RayTracingApp::registerAll(f, af, s);
+  SolidPropertiesApp::registerAll(f, af, s);
+  MiscApp::registerAll(f, af, s);
 
   /* register custom execute flags, action syntax, etc. here */
 }
