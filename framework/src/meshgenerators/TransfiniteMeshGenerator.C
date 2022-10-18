@@ -43,7 +43,7 @@ TransfiniteMeshGenerator::validParams()
   params.addRequiredParam<unsigned int>("ny",
                                         "Number of Nodes on vertical edges, including corners");
 
-  // each edge has a different paramter according to its type
+  // each edge has a different parameter according to its type
   params.addParam<std::string>("bottom_parameter", "", "Bottom side support parameter");
   params.addParam<std::string>("top_parameter", "", "Top side support parameter");
   params.addParam<std::string>("left_parameter", "", "Left side support parameter");
@@ -60,8 +60,6 @@ TransfiniteMeshGenerator::validParams()
       "bias_y>=1.0 & bias_y<=2",
       "The amount by which to grow (or shrink) the cells in the y-direction.");
 
-  // params.addParam<FunctionName>("top_function",
-  //                            "Function expression encoding a paramterization of an edge");
   params.addClassDescription("Creates a QUAD4 mesh given a set of corner vertices and edge types. "
                              "The edge type can be either LINE, CIRCARC, DISCRETE or PARSED, with "
                              "LINE as the default option. "
@@ -74,6 +72,10 @@ TransfiniteMeshGenerator::validParams()
                              "number of points is identical. Along oppsite edges a different point "
                              "distribution can be prescribed "
                              "via the options bias_x or bias_y for opssiong edges.");
+
+  params.addParamNamesToGroup("bottom_type left_type top_type right_type", "Edge types");
+  params.addParamNamesToGroup("bottom_parameter left_parameter top_parameter right_parameter", "Edge parameter");
+  params.addParamNamesToGroup("nx ny bias_x bias_y", "Number and distribution of points");
 
   return params;
 }
