@@ -106,6 +106,9 @@ TEST_F(FlinakFluidPropertiesTest, specificInternalEnergy)
 
   ABS_TEST(_fp->e_from_p_T(p, T), 1607858.289032661588863, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_fp->e_from_p_T, p, T, REL_TOL_DERIVATIVE);
+
+  ABS_TEST(
+      _fp->e_from_p_rho(p, _fp->rho_from_p_T(p, T)), 1607858.289032661588863, REL_TOL_SAVED_VALUE);
 }
 
 /**
@@ -133,10 +136,14 @@ TEST_F(FlinakFluidPropertiesTest, temperature)
   const Real T = 800.0;
   const Real p = 3.0 * 101325;
   const Real e = _fp->e_from_p_T(p, T);
+  const Real h = _fp->h_from_p_T(p, T);
   const Real v = 1. / _fp->rho_from_p_T(p, T);
 
   REL_TEST(_fp->T_from_v_e(v, e), T, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_fp->T_from_v_e, v, e, REL_TOL_DERIVATIVE);
+
+  REL_TEST(_fp->T_from_p_rho(p, 1. / v), T, REL_TOL_SAVED_VALUE);
+  REL_TEST(_fp->T_from_p_h(p, h), T, REL_TOL_SAVED_VALUE);
 }
 
 /**

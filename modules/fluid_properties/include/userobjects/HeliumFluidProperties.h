@@ -105,7 +105,7 @@ public:
    *
    * @param[in] p       pressure (Pa)
    * @param[in] h       specific enthalpy (J/kg)
-   * @param[out] T       temperature (K)
+   * @param[out] T      temperature (K)
    */
   virtual Real T_from_p_h(Real p, Real h) const override;
 
