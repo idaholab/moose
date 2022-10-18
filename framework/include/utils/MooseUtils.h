@@ -16,12 +16,13 @@
 #include "MooseError.h"
 #include "MooseADWrapper.h"
 #include "Moose.h"
-#include "DualReal.h"
+#include "ADReal.h"
 #include "ExecutablePath.h"
 
 #include "libmesh/compare_types.h"
 #include "libmesh/bounding_box.h"
 #include "libmesh/int_range.h"
+#include "libmesh/tensor_tools.h"
 #include "metaphysicl/raw_type.h"
 #include "metaphysicl/metaphysicl_version.h"
 #include "metaphysicl/dualnumber_decl.h"
@@ -541,6 +542,36 @@ relativeFuzzyLessThan(const T & var1,
       var1,
       var2,
       tol * (std::abs(MetaPhysicL::raw_value(var1)) + std::abs(MetaPhysicL::raw_value(var2)))));
+}
+
+/**
+ * @param value The quantity to test for zero-ness
+ * @param tolerance The tolerance for testing zero-ness. The default is 1e-18
+ * @return whether the value is (close enough to) zero
+ */
+template <typename T>
+bool
+isZero(const T & value, const Real tolerance = TOLERANCE * TOLERANCE * TOLERANCE)
+{
+  if constexpr (libMesh::TensorTools::TensorTraits<T>::rank == 0)
+    return MooseUtils::absoluteFuzzyEqual(MetaPhysicL::raw_value(value), 0, tolerance);
+  else if constexpr (libMesh::TensorTools::TensorTraits<T>::rank == 1)
+  {
+    for (const auto i : make_range(Moose::dim))
+      if (!MooseUtils::absoluteFuzzyEqual(MetaPhysicL::raw_value(value(i)), 0, tolerance))
+        return false;
+
+    return true;
+  }
+  else if constexpr (libMesh::TensorTools::TensorTraits<T>::rank == 2)
+  {
+    for (const auto i : make_range(Moose::dim))
+      for (const auto j : make_range(Moose::dim))
+        if (!MooseUtils::absoluteFuzzyEqual(MetaPhysicL::raw_value(value(i, j)), 0, tolerance))
+          return false;
+
+    return true;
+  }
 }
 
 /**

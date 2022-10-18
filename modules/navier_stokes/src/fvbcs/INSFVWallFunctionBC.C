@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "INSFVWallFunctionBC.h"
-#include "INSFVMethods.h"
+#include "NavierStokesMethods.h"
 #include "NS.h"
 
 registerMooseObject("NavierStokesApp", INSFVWallFunctionBC);
@@ -70,7 +70,7 @@ INSFVWallFunctionBC::computeStrongResidual()
 
   // Compute the friction velocity and the wall shear stress
   const auto rho = _rho(makeElemArg(&elem));
-  ADReal u_star = findUStar(_mu(makeElemArg(&elem)), rho, parallel_speed, dist.value());
+  ADReal u_star = NS::findUStar(_mu(makeElemArg(&elem)), rho, parallel_speed, dist.value());
   ADReal tau = u_star * u_star * rho;
   _a *= tau;
 

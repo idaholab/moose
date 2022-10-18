@@ -10,6 +10,7 @@
 // Navier-Stokes includes
 #include "PorousMixedVarMaterial.h"
 #include "NS.h"
+#include "NavierStokesMethods.h"
 
 // FluidProperties includes
 #include "SinglePhaseFluidProperties.h"
@@ -171,9 +172,7 @@ PorousMixedVarMaterial::computeQpProperties()
   // if the velocity is zero, then the norm function call fails because AD tries to calculate the
   // derivatives which causes a divide by zero - because d/dx(sqrt(f(x))) = 1/2/sqrt(f(x))*df/dx.
   // So add a bit of noise to avoid this failure mode.
-  if ((MooseUtils::absoluteFuzzyEqual(_velocity[_qp](0), 0)) &&
-      (MooseUtils::absoluteFuzzyEqual(_velocity[_qp](1), 0)) &&
-      (MooseUtils::absoluteFuzzyEqual(_velocity[_qp](2), 0)))
+  if (NS::isZero(_velocity[_qp]))
     _speed[_qp] = 1e-42;
   else
     _speed[_qp] = _velocity[_qp].norm();

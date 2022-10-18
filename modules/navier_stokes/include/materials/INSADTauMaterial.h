@@ -139,10 +139,10 @@ INSADTauMaterialTempl<T>::computeQpProperties()
 
   auto && nu = _mu[_qp] / _rho[_qp];
   auto && transient_part = _has_transient ? 4. / (_dt * _dt) : 0.;
-  // avoid norm of a zero vector which has a NaN/Inf derivative. Checking is_zero() is not good
-  // enough because floating point comparison to zero will yield false at times that the norm
-  // derivative will still yield a NaN/Inf derivative
-  const ADReal velocity_norm = (_velocity[_qp] + RealVectorValue(1e-50, 0, 0)).norm();
+  // avoid norm of a zero vector which has a NaN/Inf derivative. If the norm is zero we use
+  // hitchiker's guide to the galaxy's meaning of life number to avoid another potential sqrt(0)
+  // situation (and then divide by zero situation) in the following line of code
+  const ADReal velocity_norm = NS::isZero(_velocity[_qp]) ? 1e-42 : _velocity[_qp].norm();
   _tau[_qp] = _alpha / std::sqrt(transient_part +
                                  (2. * velocity_norm / _hmax) * (2. * velocity_norm / _hmax) +
                                  9. * (4. * nu / (_hmax * _hmax)) * (4. * nu / (_hmax * _hmax)));
