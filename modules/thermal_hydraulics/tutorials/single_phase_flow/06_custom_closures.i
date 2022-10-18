@@ -222,6 +222,7 @@ ht_blocks = 'core_chan hx/pri hx/sec'
       materials = 'steel'
       names = '0'
       inner_radius = ${fparse hx_dia_inner / 2.}
+      offset_mesh_by_inner_radius = true
     []
 
     [ht_sec]
