@@ -291,9 +291,9 @@ TransfiniteMeshGenerator::getParsedEdge(const Point & P1,
     edge.push_back(Point(x_coord, y_coord, 0.0));
   }
 
-  mooseAssert(!MooseUtils::relativeFuzzyEqual((edge[0] - P1).norm() , 0.0),
+  mooseAssert(!MooseUtils::relativeFuzzyEqual((edge[0] - P1).norm(), 0.0),
               "The parametrization does not fit the first vertex on the edge.");
-  mooseAssert(!MooseUtils::relativeFuzzyEqual((edge[np-1] - P2).norm() , 0.0),
+  mooseAssert(!MooseUtils::relativeFuzzyEqual((edge[np - 1] - P2).norm(), 0.0),
               "The parametrization does not fit the end vertex on the edge.");
 
   return edge;
@@ -319,10 +319,10 @@ TransfiniteMeshGenerator::getDiscreteEdge(const Point & P1,
     edge.push_back(Point(point_vals[0], point_vals[1], point_vals[2]));
   }
 
-  mooseAssert(!MooseUtil::relativeFuzzyEqual((edge[0] - P1).norm() , 0.0),
+  mooseAssert(!MooseUtil::relativeFuzzyEqual((edge[0] - P1).norm(), 0.0),
               "The first discrete point does not fit the corresponding edge vertex."
               "Note: discrete points need to replicate the edge corners.");
-  mooseAssert(!MooseUtils::relativeFuzzyEqual((edge[np-1] - P2).norm() , 0.0),
+  mooseAssert(!MooseUtils::relativeFuzzyEqual((edge[np - 1] - P2).norm(), 0.0),
               "The last discrete point does not fit the corresponding edge vertex."
               "Note: discrete points need to replicate the edge corners.");
   return edge;
@@ -366,9 +366,9 @@ TransfiniteMeshGenerator::getCircarcEdge(const Point & P1,
     edge.push_back(Point(x, y, 0.0));
   };
 
-  mooseAssert(!MooseUtils::relativeFuzzyEqual((edge[0] - P1).norm() , 0.0),
+  mooseAssert(!MooseUtils::relativeFuzzyEqual((edge[0] - P1).norm(), 0.0),
               "No arccircle parametrization can be found to fit the first vertex on the edge.");
-  mooseAssert(!MooseUtils::relativeFuzzyEqual((edge[np-1] - P2).norm() , 0.0),
+  mooseAssert(!MooseUtils::relativeFuzzyEqual((edge[np - 1] - P2).norm(), 0.0),
               "No arccircle parametrization can be found to fit the end vertex on the edge.");
   return edge;
 }
@@ -461,7 +461,7 @@ TransfiniteMeshGenerator::computeOrigin(const Point & P1, const Point & P2, cons
 {
   // define interim quantities
   Real a1, a2, A;
-  if (MooseUtils::absoluteFuzzyGreaterThan(std::abs(P2(0) - P1(0)), 0.0)  ||
+  if (MooseUtils::absoluteFuzzyGreaterThan(std::abs(P2(0) - P1(0)), 0.0) ||
       MooseUtils::absoluteFuzzyGreaterThan(std::abs(P2(1) - P1(1)), 0.0))
   {
     a1 = (2 * P3(0) - 2 * P1(0));
