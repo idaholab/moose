@@ -544,7 +544,11 @@ relativeFuzzyLessThan(const T & var1,
       tol * (std::abs(MetaPhysicL::raw_value(var1)) + std::abs(MetaPhysicL::raw_value(var2)))));
 }
 
-// taken from https://stackoverflow.com/a/257382
+/**
+ * Taken from https://stackoverflow.com/a/257382
+ * Evaluating constexpr (Has_size<T>::value) in a templated method over class T will
+ * return whether T is a standard container or a singleton
+ */
 template <typename T>
 class Has_size
 {
