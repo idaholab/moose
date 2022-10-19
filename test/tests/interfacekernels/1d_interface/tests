@@ -1,5 +1,5 @@
 [Tests]
-  [./interface_diffusion]
+  [interface_diffusion]
     type = 'Exodiff'
     input = 'coupled_value_coupled_flux.i'
     exodiff = 'coupled_value_coupled_flux_out.e'
@@ -7,18 +7,27 @@
                   " and shall work with boundary restricted materials with stateful properties."
     issues = '#11258 #869'
     design = 'InterfaceKernels/index.md'
-  [../]
-  [./interface_diffusion_penalty]
-    type = 'Exodiff'
-    input = 'coupled_value_coupled_flux.i'
-    cli_args = "InterfaceKernels/active='penalty_interface' BCs/active='left right' Outputs/file_base=coupled_value_coupled_flux_penalty_out"
-    exodiff = 'coupled_value_coupled_flux_penalty_out.e'
-    issues = '#11765'
+  []
+  [interface_diffusion_penalty]
     requirement = "The interface diffusion penalty method should reproduce the analytic solution"
-    prereq = 'interface_diffusion'
     design = 'InterfaceKernels/index.md'
-  [../]
-  [./interface_diffusion_penalty_with_jump_material]
+    issues = '#11765'
+    [hand-coded]
+      type = 'Exodiff'
+      input = 'coupled_value_coupled_flux.i'
+      cli_args = "InterfaceKernels/active='penalty_interface' BCs/active='left right' Outputs/file_base=coupled_value_coupled_flux_penalty_out"
+      exodiff = 'coupled_value_coupled_flux_penalty_out.e'
+      prereq = 'interface_diffusion'
+      detail = 'using a hand-coded Jacobian'
+    []
+    [ad]
+      type = 'Exodiff'
+      input = 'ad-coupled-value-coupled-flux.i'
+      exodiff = 'ad-coupled-value-coupled-flux_out.e'
+      detail = 'using a Jacobian computed via automatic differentiation'
+    []
+  []
+  [interface_diffusion_penalty_with_jump_material]
     type = 'Exodiff'
     input = 'coupled_value_coupled_flux_with_jump_material.i'
     exodiff = 'coupled_value_coupled_flux_with_jump_material_out.e'
@@ -26,11 +35,11 @@
     issues = '#12066'
     requirement = "The InterfaceKernel system shall use with interface material in 1D."
     prereq = 'interface_diffusion'
-  [../]
+  []
   # This test ensures that shape functions for the NEIGHBORING variable are used in test_neighbor
   # and phi_neighbor; this is relevant when _var and _neighbor_var use a different space of shape
   # functions
-  [./mixed_shapes_test]
+  [mixed_shapes_test]
     type = 'Exodiff'
     input = 'mixed_shapes.i'
     exodiff = 'mixed_shapes_out.e'
@@ -38,8 +47,8 @@
     requirement = "The system shall support the evaluation of neighboring quantities on "
                    "elements containing different shape functions."
     design = 'InterfaceKernels/index.md'
-  [../]
-  [./jacobian_test]
+  []
+  [jacobian_test]
     type = AnalyzeJacobian
     input = coupled_value_coupled_flux.i
     expect_out = '\nNo errors detected. :-\)\n'
@@ -49,8 +58,8 @@
     issues = '#13232'
     requirement = "The system shall produce correct Jacobians for coupled flux on an interface."
     design = 'InterfaceKernels/index.md'
-  [../]
-  [./mixed_shapes_jacobian_test]
+  []
+  [mixed_shapes_jacobian_test]
     type = AnalyzeJacobian
     input = mixed_shapes.i
     expect_out = '\nNo errors detected. :-\)\n'
@@ -61,9 +70,9 @@
     requirement = "The system shall support produce correct Jacobians when "
                    "evaluating neighboring quantities on elements containing different shape functions."
     design = 'InterfaceKernels/index.md'
-  [../]
+  []
 
-  [./single_variable_jacobian_test]
+  [single_variable_jacobian_test]
     type = AnalyzeJacobian
     input = single_variable_coupled_flux.i
     expect_out = '\nNo errors detected. :-\)\n'
@@ -72,9 +81,9 @@
     issues = '#13232'
     requirement = "The system shall produce correct Jacobians for single variable coupled flux on an interface."
     design = 'InterfaceKernels/index.md'
-  [../]
+  []
 
-  [./ik_save_in]
+  [ik_save_in]
     type = Exodiff
     input = 'ik_save_in_test.i'
     exodiff = 'ik_save_in_test_out.e'
@@ -82,8 +91,8 @@
     requirement = "Save-in shall record the correct residuals and Jacobians representing the interface kernel. "
                   "This applies the DirichletBC to side a (block 0) of the interface."
     design = 'InterfaceKernels/index.md'
-  [../]
-  [./ik_save_in_other_side]
+  []
+  [ik_save_in_other_side]
     type = Exodiff
     input = 'ik_save_in_test.i'
     exodiff = 'ik_save_in_other_side_out.e'
@@ -92,17 +101,17 @@
     requirement = "Save-in shall record the correct residuals and Jacobians representing the interface kernel. "
                   "This applies the DirichletBC to side b (block 1) of the interface."
     design = 'InterfaceKernels/index.md'
-  [../]
+  []
 
-  [./reaction_1D_steady_CSVDiff]
+  [reaction_1D_steady_CSVDiff]
     type = CSVDiff
     input = 'reaction_1D_steady.i'
     csvdiff = 'reaction_1D_steady_out.csv'
     issues = '#13365'
     requirement = "The interface reaction kernel should reproduce the analytic solution"
     design = 'InterfaceReaction.md'
-  [../]
-  [./reaction_1D_steady_ExoDiff]
+  []
+  [reaction_1D_steady_ExoDiff]
     type = Exodiff
     input = 'reaction_1D_steady.i'
     exodiff = 'reaction_1D_steady_out.e'
@@ -114,17 +123,17 @@
     should_execute = false
     delete_output_before_running = false
     prereq = 'reaction_1D_steady_CSVDiff'
-  [../]
+  []
 
-  [./reaction_1D_transient]
+  [reaction_1D_transient]
     type = Exodiff
     input = 'reaction_1D_transient.i'
     exodiff = 'reaction_1D_transient_out.e'
     issues = '#13365'
     requirement = "The solution should be discontinued at the interface due to the reaction taking place"
     design = 'InterfaceReaction.md'
-  [../]
-  [./reaction_1D_transient_Jac]
+  []
+  [reaction_1D_transient_Jac]
     type = PetscJacobianTester
     input = 'reaction_1D_transient.i'
     cli_args = 'Outputs/exodus=false Executioner/num_steps=3'
@@ -134,7 +143,7 @@
     issues = '#13365'
     requirement = "The Jacobian from InterfaceReaction shall be perfect"
     design = 'InterfaceReaction.md'
-  [../]
+  []
 
   [sort_interface_materials]
     type = Exodiff

@@ -9,24 +9,30 @@
 
 #pragma once
 
-#include "InterfaceKernel.h"
+#include "GenericInterfaceKernel.h"
 
 /**
- * DG kernel for interfacing diffusion between two variables on adjacent blocks
+ * interface kernel for interfacing diffusion between two variables on adjacent blocks
  */
-class PenaltyInterfaceDiffusion : public InterfaceKernel
+template <bool is_ad>
+class PenaltyInterfaceDiffusionTempl : public GenericInterfaceKernel<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PenaltyInterfaceDiffusion(const InputParameters & parameters);
+  PenaltyInterfaceDiffusionTempl(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual(Moose::DGResidualType type) override;
-  virtual Real computeQpJacobian(Moose::DGJacobianType type) override;
+  GenericReal<is_ad> computeQpResidual(Moose::DGResidualType type) override;
+  Real computeQpJacobian(Moose::DGJacobianType type) override;
 
   const Real _penalty;
 
   std::string _jump_prop_name;
-  const MaterialProperty<Real> * const _jump;
+  const GenericMaterialProperty<Real, is_ad> * const _jump;
+
+  usingGenericInterfaceKernelMembers;
 };
+
+typedef PenaltyInterfaceDiffusionTempl<false> PenaltyInterfaceDiffusion;
+typedef PenaltyInterfaceDiffusionTempl<true> ADPenaltyInterfaceDiffusion;
