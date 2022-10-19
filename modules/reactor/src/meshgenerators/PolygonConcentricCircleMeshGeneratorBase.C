@@ -348,7 +348,8 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
     _pattern_pitch_meta(declareMeshProperty<Real>("pattern_pitch_meta", 0.0)),
     _azimuthal_angle_meta(
         declareMeshProperty<std::vector<Real>>("azimuthal_angle_meta", std::vector<Real>())),
-    _is_control_drum_meta(declareMeshProperty<bool>("is_control_drum_meta", false))
+    _is_control_drum_meta(declareMeshProperty<bool>("is_control_drum_meta", false)),
+    _max_radius_meta(declareMeshProperty<Real>("max_radius_meta", 0.0))
 {
   // This error message is only reserved for future derived classes. Neither of the current derived
   // classes will trigger this error.
@@ -641,6 +642,7 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
       paramError("ring_radii",
                  "Elements of this parameter must be smaller than polygon apothem (after volume "
                  "preserve correction if applicable).");
+    _max_radius_meta = ring_radii_corr.back();
   }
   // build the first slice of the polygon.
   auto mesh0 = buildSimpleSlice(ring_radii_corr,
