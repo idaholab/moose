@@ -1,6 +1,6 @@
 [Tests]
   issues = '#21903'
-  design = 'meshgenerators/TransfiniteGenerator.md'
+  design = 'meshgenerators/TransfiniteMeshGenerator.md'
 
   [generate]
     requirement = 'The system shall support the ability to create a mesh element-wise by specifying '
