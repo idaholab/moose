@@ -1,6 +1,6 @@
 [Tests]
   design = 'LowerBoundNodalKernel.md'
-  issues = '#13192'
+  issues = '#22443'
   [lm_ncp]
     input = ncp-lm.i
     type = Exodiff
