@@ -73,8 +73,9 @@ TransfiniteMeshGenerator::validParams()
                              "distribution can be prescribed "
                              "via the options bias_x or bias_y for opssiong edges.");
 
-  params.addParamNamesToGroup("bottom_type left_type top_type right_type", "Edge types");
-  params.addParamNamesToGroup("bottom_parameter left_parameter top_parameter right_parameter", "Edge parameter");
+  params.addParamNamesToGroup("bottom_type left_type top_type right_type", "Edge type");
+  params.addParamNamesToGroup("bottom_parameter left_parameter top_parameter right_parameter",
+                              "Edge");
   params.addParamNamesToGroup("nx ny bias_x bias_y", "Number and distribution of points");
 
   return params;
