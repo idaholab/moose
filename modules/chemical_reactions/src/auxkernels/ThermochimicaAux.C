@@ -47,7 +47,11 @@ ThermochimicaAux::ThermochimicaAux(const InputParameters & parameters)
     _sp_species_name(_n_species),
     _n_elements(coupledComponents("element_potentials")),
     _el_pot(_n_elements),
+#ifdef THERMOCHIMICA_ENABLED
     _thermo_nodal_data_uo(&getUserObject<ThermochimicaNodalData>("thermo_nodal_data_uo"))
+#else
+    _thermo_nodal_data_uo(nullptr)
+#endif
 {
 #ifndef THERMOCHIMICA_ENABLED
   mooseError("Thermochimica disabled");

@@ -12,8 +12,6 @@
 // MOOSE includes
 #include "NodalUserObject.h"
 
-#ifdef THERMOCHIMICA_ENABLED
-
 class ThermochimicaNodalData : public NodalUserObject
 {
 public:
@@ -74,5 +72,3 @@ protected:
   std::vector<std::string> _element_potentials;
   ///@}
 };
-
-#endif
