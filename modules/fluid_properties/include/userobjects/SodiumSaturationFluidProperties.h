@@ -40,7 +40,7 @@ public:
 
   virtual Real p_from_v_e(Real v, Real e) const override;
   virtual Real T_from_v_e(Real v, Real e) const override;
-  
+
   virtual Real h_from_p_T(Real p, Real T) const override;
   virtual void h_from_p_T(Real p, Real T, Real & h, Real & dh_dp, Real & dh_dT) const override;
 

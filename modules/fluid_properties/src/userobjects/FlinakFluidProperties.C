@@ -151,7 +151,7 @@ FlinakFluidProperties::T_from_p_h(Real /* p */, Real h) const
 Real
 FlinakFluidProperties::T_from_p_rho(Real p, Real rho) const
 {
-  Real temperature = (-p * _drho_dp + rho - _c0) / _drho_dT;
+  Real temperature = (rho - (p - _p_atm) * _drho_dp - _c0) / _drho_dT;
   return temperature;
 }
 

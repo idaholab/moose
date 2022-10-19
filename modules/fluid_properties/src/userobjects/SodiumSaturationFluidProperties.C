@@ -64,8 +64,7 @@ SodiumSaturationFluidProperties::rho_from_p_T(const DualReal & pressure,
 }
 
 Real
-SodiumSaturationFluidProperties::v_from_p_T(const Real pressure,
-                                            const Real temperature) const
+SodiumSaturationFluidProperties::v_from_p_T(const Real pressure, const Real temperature) const
 {
   return 1.0 / rho_from_p_T(pressure, temperature);
 }
@@ -82,8 +81,7 @@ SodiumSaturationFluidProperties::v_from_p_T(
 }
 
 Real
-SodiumSaturationFluidProperties::p_from_v_e(const Real v,
-                                            const Real e) const
+SodiumSaturationFluidProperties::p_from_v_e(const Real v, const Real e) const
 {
   Real temperature = T_from_v_e(v, e);
   // h does not depend on pressure
@@ -91,13 +89,13 @@ SodiumSaturationFluidProperties::p_from_v_e(const Real v,
 }
 
 Real
-SodiumSaturationFluidProperties::T_from_v_e(const Real v,
-                                            const Real /* e */) const
+SodiumSaturationFluidProperties::T_from_v_e(const Real v, const Real /* e */) const
 {
   // From inversion of second order polynomial form of rho(T)
   mooseAssert(0.2139 * 0.2139 + 4 * 1.1046e5 * (1.00423e3 - 1 / v) > 0,
               "Specific volume out of bounds");
-  return (0.2139 - std::sqrt(0.2139 * 0.2139 + 4 * 1.1046e-5 * (1.00423e3 - 1 / v))) / (2 * -1.1046e-5);
+  return (0.2139 - std::sqrt(0.2139 * 0.2139 + 4 * 1.1046e-5 * (1.00423e3 - 1 / v))) /
+         (2 * -1.1046e-5);
 }
 
 Real
