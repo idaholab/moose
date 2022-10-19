@@ -240,35 +240,38 @@ TransfiniteMeshGenerator::getEdge(const Point & P1,
   switch (type)
   {
     case 1:
-      edge = getLineEdge(P1, P2, param_vec);
-      mooseAssert(!MooseUtils::relativeFuzzyEqual((edge[0] - P1).norm(), 0.0),
+      {edge = getLineEdge(P1, P2, param_vec);
+      mooseAssert(MooseUtils::absoluteFuzzyEqual((edge[0] - P1).norm(), 0.0),
                   "The line does not fit the first vertex on the edge.");
-      mooseAssert(!MooseUtils::relativeFuzzyEqual((edge[np - 1] - P2).norm(), 0.0),
+      mooseAssert(MooseUtils::absoluteFuzzyEqual((edge[np - 1] - P2).norm(), 0.0),
                   "The line does not fit the end vertex on the edge.");
+      }
       break;
     case 2:
-      edge = getCircarcEdge(P1, P2, parameter, outward, param_vec);
-      mooseAssert(!MooseUtils::relativeFuzzyEqual((edge[0] - P1).norm(), 0.0),
+      {edge = getCircarcEdge(P1, P2, parameter, outward, param_vec);
+      mooseAssert(MooseUtils::absoluteFuzzyEqual((edge[0] - P1).norm(), 0.0),
                   "No arccircle parametrization can be found to fit the first vertex on the edge.");
-      mooseAssert(!MooseUtils::relativeFuzzyEqual((edge[np - 1] - P2).norm(), 0.0),
+      mooseAssert(MooseUtils::absoluteFuzzyEqual((edge[np - 1] - P2).norm(), 0.0),
                   "No arccircle parametrization can be found to fit the end vertex on the edge.");
-
+      }
       break;
     case 3:
-      edge = getDiscreteEdge(np, parameter);
-      mooseAssert(!MooseUtils::relativeFuzzyEqual((edge[0] - P1).norm(), 0.0),
+      {edge = getDiscreteEdge(np, parameter);
+      mooseAssert(MooseUtils::absoluteFuzzyEqual((edge[0] - P1).norm(), 0.0),
                   "The first discrete point does not fit the corresponding edge vertex."
                   "Note: discrete points need to replicate the edge corners.");
-      mooseAssert(!MooseUtils::relativeFuzzyEqual((edge[np - 1] - P2).norm(), 0.0),
+      mooseAssert(MooseUtils::absoluteFuzzyEqual((edge[np - 1] - P2).norm(), 0.0),
                   "The last discrete point does not fit the corresponding edge vertex."
                   "Note: discrete points need to replicate the edge corners.");
+      }
       break;
     case 4:
-      edge = getParsedEdge(parameter, param_vec);
-      mooseAssert(!MooseUtils::relativeFuzzyEqual((edge[0] - P1).norm(), 0.0),
+      {edge = getParsedEdge(parameter, param_vec);
+      mooseAssert(MooseUtils::absoluteFuzzyEqual((edge[0] - P1).norm(), 0.0),
                   "The parametrization does not fit the first vertex on the edge.");
-      mooseAssert(!MooseUtils::relativeFuzzyEqual((edge[np - 1] - P2).norm(), 0.0),
+      mooseAssert(MooseUtils::absoluteFuzzyEqual((edge[np - 1] - P2).norm(), 0.0),
                   "The parametrization does not fit the end vertex on the edge.");
+      }
       break;
   }
   if (edge.size() != np)
