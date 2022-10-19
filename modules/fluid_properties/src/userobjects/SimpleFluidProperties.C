@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SimpleFluidProperties.h"
+#include "NewtonInversion.h"
 
 registerMooseObject("FluidPropertiesApp", SimpleFluidProperties);
 
@@ -282,21 +283,27 @@ Real
 SimpleFluidProperties::T_from_p_rho(Real p, Real rho) const
 {
   mooseAssert(rho > 0, "Density should be positive");
-  return (std::log(rho / _density0) - _bulk_modulus / p) / -_thermal_expansion;
+  return (std::log(rho / _density0) - p / _bulk_modulus) / -_thermal_expansion;
 }
 
 void
 SimpleFluidProperties::T_from_p_rho(Real p, Real rho, Real & T, Real & dT_dp, Real & dT_drho) const
 {
   T = T_from_p_rho(p, rho);
-  dT_dp = 0;
+  dT_dp = 1 / (_thermal_expansion * _bulk_modulus);
   dT_drho = 1 / (-_thermal_expansion * rho);
 }
 
 Real
-SimpleFluidProperties::T_from_p_h(Real /*p*/, Real h) const
+SimpleFluidProperties::T_from_p_h(Real p, Real h) const
 {
-  return h / _cp;
+  // Likely a better guess than user-selected
+  Real T_initial = h / _cp;
+
+  // exponential dependence in rho and linear dependence in e makes it challenging
+  auto lambda = [&](Real p, Real current_T, Real & new_rho, Real & dh_dp, Real & dh_dT)
+  { h_from_p_T(p, current_T, new_rho, dh_dp, dh_dT); };
+  return FluidPropertiesUtils::NewtonSolve(p, h, T_initial, _tolerance, lambda);
 }
 
 Real
@@ -355,7 +362,8 @@ SimpleFluidProperties::e_from_p_rho(Real p, Real rho, Real & e, Real & de_dp, Re
   // get energy and derivatives
   Real de_dT;
   e_from_p_T(p, T, e, de_dp, de_dT);
-  de_drho = de_dT * dT_drho + de_dp * 0;
+  de_dp = de_dT * dT_dp + de_dp;
+  de_drho = de_dT * dT_drho + de_dp * dT_dp;
 }
 
 Real SimpleFluidProperties::mu_from_p_T(Real /*pressure*/, Real /*temperature*/) const
