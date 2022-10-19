@@ -899,6 +899,11 @@ public:
    */
   void setActiveScalarVariableCoupleableVectorTags(const std::set<TagID> & vtags, THREAD_ID tid);
 
+  /**
+   * @return the type of variables this system holds, e.g. nonlinear or auxiliary
+   */
+  Moose::VarKindType varKind() const { return _var_kind; }
+
 protected:
   /**
    * Internal getter for solution owned by libMesh.
