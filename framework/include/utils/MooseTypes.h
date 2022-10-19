@@ -959,6 +959,9 @@ DerivativeStringClass(ReporterValueName);
 /// Name of an Executor.  Used for inputs to Executors
 DerivativeStringClass(ExecutorName);
 
+/// ParsedFunction/ParsedMaterial etc. FParser expression
+DerivativeStringClass(ParsedFunctionExpression);
+
 namespace Moose
 {
 extern const TagName SOLUTION_TAG;
