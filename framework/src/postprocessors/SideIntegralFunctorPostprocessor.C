@@ -85,15 +85,14 @@ SideIntegralFunctorPostprocessorTempl<is_ad>::computeFaceInfoIntegral(const Face
   }
   else
   {
-    if (_partial_integral)
-      return 0;
-    else
+    if (!_partial_integral)
       paramError("boundary",
                  "Functor " + _functor.functorName() + " (or prefactor " +
                      _prefactor.functorName() + ") is not defined on block " +
                      std::to_string(_current_elem->subdomain_id()) +
                      ". Is the functor defined along the whole sideset? "
                      "Are the sidesets in 'boundary' all oriented correctly?");
+    return 0;
   }
 }
 

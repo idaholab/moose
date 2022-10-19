@@ -734,10 +734,7 @@ AdvancedExtruderGenerator::generate()
             break;
           }
           default:
-          {
             libmesh_not_implemented();
-            break;
-          }
         }
 
         new_elem->set_id(elem->id() + (current_layer * orig_elem));

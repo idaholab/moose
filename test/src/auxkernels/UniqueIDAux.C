@@ -30,6 +30,7 @@ UniqueIDAux::computeValue()
     return _current_node->unique_id();
   else
     return _current_elem->unique_id();
-#endif
+#else
   return 0;
+#endif
 }
