@@ -747,9 +747,17 @@ FEProblemBase::initialSetup()
       adaptivity().uniformRefineWithProjection();
     }
   }
-  else if (_mesh.uniformRefineLevel() > 0 && !_app.isUltimateMaster() && !_app.masterMesh())
-    mooseError(
-        "Doing extra refinements when recovering is NOT supported for sub-apps of a MultiApp");
+  else
+  {
+    // When we use an Exodus mesh file to restart variables with input syntax
+    // Variables/*/initial_from_file_var in a sub-application, MOOSE will not perform the uniform
+    // refinement for the sub-applications during recover. If the input syntax relies on the
+    // checkpoint file instead of the Exodus file in the future, this error can be removed.
+    if (_mesh.uniformRefineLevel() > 0 && _app.getExodusFileRestart())
+      if (!_app.isUltimateMaster() && !_app.masterMesh())
+        mooseError("Doing extra refinements when recovering is NOT supported for sub-apps of a "
+                   "MultiApp with Exodus restart");
+  }
 
   unsigned int n_threads = libMesh::n_threads();
 
