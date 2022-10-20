@@ -16,12 +16,13 @@
 #include "MooseError.h"
 #include "MooseADWrapper.h"
 #include "Moose.h"
-#include "DualReal.h"
+#include "ADReal.h"
 #include "ExecutablePath.h"
 
 #include "libmesh/compare_types.h"
 #include "libmesh/bounding_box.h"
 #include "libmesh/int_range.h"
+#include "libmesh/tensor_tools.h"
 #include "metaphysicl/raw_type.h"
 #include "metaphysicl/metaphysicl_version.h"
 #include "metaphysicl/dualnumber_decl.h"
@@ -541,6 +542,68 @@ relativeFuzzyLessThan(const T & var1,
       var1,
       var2,
       tol * (std::abs(MetaPhysicL::raw_value(var1)) + std::abs(MetaPhysicL::raw_value(var2)))));
+}
+
+/**
+ * Taken from https://stackoverflow.com/a/257382
+ * Evaluating constexpr (Has_size<T>::value) in a templated method over class T will
+ * return whether T is a standard container or a singleton
+ */
+template <typename T>
+class Has_size
+{
+  using Yes = char;
+  struct No
+  {
+    char x[2];
+  };
+
+  template <typename C>
+  static Yes test(decltype(&C::size));
+  template <typename C>
+  static No test(...);
+
+public:
+  static constexpr bool value = sizeof(test<T>(0)) == sizeof(Yes);
+};
+
+/**
+ * @param value The quantity to test for zero-ness
+ * @param tolerance The tolerance for testing zero-ness. The default is 1e-18 for double precision
+ * configurations of libMesh/MOOSE
+ * @return whether the L_infty norm of the value is (close enough to) zero
+ */
+template <typename T>
+bool
+isZero(const T & value, const Real tolerance = TOLERANCE * TOLERANCE * TOLERANCE)
+{
+  if constexpr (Has_size<T>::value)
+  {
+    for (const auto & element : value)
+      if (!isZero(element, tolerance))
+        return false;
+
+    return true;
+  }
+  else if constexpr (libMesh::TensorTools::TensorTraits<T>::rank == 0)
+    return MooseUtils::absoluteFuzzyEqual(MetaPhysicL::raw_value(value), 0, tolerance);
+  else if constexpr (libMesh::TensorTools::TensorTraits<T>::rank == 1)
+  {
+    for (const auto i : make_range(Moose::dim))
+      if (!MooseUtils::absoluteFuzzyEqual(MetaPhysicL::raw_value(value(i)), 0, tolerance))
+        return false;
+
+    return true;
+  }
+  else if constexpr (libMesh::TensorTools::TensorTraits<T>::rank == 2)
+  {
+    for (const auto i : make_range(Moose::dim))
+      for (const auto j : make_range(Moose::dim))
+        if (!MooseUtils::absoluteFuzzyEqual(MetaPhysicL::raw_value(value(i, j)), 0, tolerance))
+          return false;
+
+    return true;
+  }
 }
 
 /**

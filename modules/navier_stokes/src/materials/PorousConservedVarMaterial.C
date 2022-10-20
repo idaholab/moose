@@ -10,6 +10,7 @@
 // Navier-Stokes includes
 #include "PorousConservedVarMaterial.h"
 #include "NS.h"
+#include "NavierStokesMethods.h"
 
 // FluidProperties includes
 #include "SinglePhaseFluidProperties.h"
@@ -88,20 +89,6 @@ PorousConservedVarMaterial::PorousConservedVarMaterial(const InputParameters & p
 {
 }
 
-ADReal
-PorousConservedVarMaterial::computeSpeed() const
-{
-  // if the velocity is zero, then the norm function call fails because AD tries to calculate the
-  // derivatives which causes a divide by zero - because d/dx(sqrt(f(x))) = 1/2/sqrt(f(x))*df/dx.
-  // So add a bit of noise to avoid this failure mode.
-  if ((MooseUtils::absoluteFuzzyEqual(_velocity[_qp](0), 0)) &&
-      (MooseUtils::absoluteFuzzyEqual(_velocity[_qp](1), 0)) &&
-      (MooseUtils::absoluteFuzzyEqual(_velocity[_qp](2), 0)))
-    return 1e-42;
-
-  return _velocity[_qp].norm();
-}
-
 void
 PorousConservedVarMaterial::computeQpProperties()
 {
@@ -127,7 +114,7 @@ PorousConservedVarMaterial::computeQpProperties()
                          _var_rho_wd[_qp] / (_rho[_qp] * _rho[_qp]) * _var_grad_rho[_qp];
 
   _velocity[_qp] = _superficial_velocity[_qp] / _epsilon[_qp];
-  _speed[_qp] = computeSpeed();
+  _speed[_qp] = NS::computeSpeed(_velocity[_qp]);
   _vel_x[_qp] = _velocity[_qp](0);
   _vel_y[_qp] = _velocity[_qp](1);
   _vel_z[_qp] = _velocity[_qp](2);

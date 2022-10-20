@@ -93,34 +93,34 @@ GeneralFluidProps::computeQpProperties()
   static constexpr Real small_number = 1e-8;
 
   _Pr[_qp] = fp::prandtl(_cp[_qp], _mu[_qp], std::max(_k[_qp], small_number));
-  _dPr_dp[_qp] = prandtlPropertyDerivative(MetaPhysicL::raw_value(_mu[_qp]),
-                                           MetaPhysicL::raw_value(_cp[_qp]),
-                                           MetaPhysicL::raw_value(_k[_qp]),
-                                           _dmu_dp[_qp],
-                                           _dcp_dp[_qp],
-                                           _dk_dp[_qp]);
-  _dPr_dT[_qp] = prandtlPropertyDerivative(MetaPhysicL::raw_value(_mu[_qp]),
-                                           MetaPhysicL::raw_value(_cp[_qp]),
-                                           MetaPhysicL::raw_value(_k[_qp]),
-                                           _dmu_dT[_qp],
-                                           _dcp_dT[_qp],
-                                           _dk_dT[_qp]);
+  _dPr_dp[_qp] = NS::prandtlPropertyDerivative(MetaPhysicL::raw_value(_mu[_qp]),
+                                               MetaPhysicL::raw_value(_cp[_qp]),
+                                               MetaPhysicL::raw_value(_k[_qp]),
+                                               _dmu_dp[_qp],
+                                               _dcp_dp[_qp],
+                                               _dk_dp[_qp]);
+  _dPr_dT[_qp] = NS::prandtlPropertyDerivative(MetaPhysicL::raw_value(_mu[_qp]),
+                                               MetaPhysicL::raw_value(_cp[_qp]),
+                                               MetaPhysicL::raw_value(_k[_qp]),
+                                               _dmu_dT[_qp],
+                                               _dcp_dT[_qp],
+                                               _dk_dT[_qp]);
 
   // (pore / particle) Reynolds number based on superficial velocity and
   // characteristic length. Only call Reynolds() one time to compute all three so that
   // we don't redundantly check that viscosity is not too close to zero.
   _Re[_qp] = std::max(
       fp::reynolds(_rho[_qp], _eps[_qp] * _speed[_qp], _d, std::max(_mu[_qp], small_number)), 1.0);
-  _dRe_dp[_qp] = reynoldsPropertyDerivative(MetaPhysicL::raw_value(_Re[_qp]),
-                                            MetaPhysicL::raw_value(_rho[_qp]),
-                                            MetaPhysicL::raw_value(_mu[_qp]),
-                                            _drho_dp[_qp],
-                                            _dmu_dp[_qp]);
-  _dRe_dT[_qp] = reynoldsPropertyDerivative(MetaPhysicL::raw_value(_Re[_qp]),
-                                            MetaPhysicL::raw_value(_rho[_qp]),
-                                            MetaPhysicL::raw_value(_mu[_qp]),
-                                            _drho_dT[_qp],
-                                            _dmu_dT[_qp]);
+  _dRe_dp[_qp] = NS::reynoldsPropertyDerivative(MetaPhysicL::raw_value(_Re[_qp]),
+                                                MetaPhysicL::raw_value(_rho[_qp]),
+                                                MetaPhysicL::raw_value(_mu[_qp]),
+                                                _drho_dp[_qp],
+                                                _dmu_dp[_qp]);
+  _dRe_dT[_qp] = NS::reynoldsPropertyDerivative(MetaPhysicL::raw_value(_Re[_qp]),
+                                                MetaPhysicL::raw_value(_rho[_qp]),
+                                                MetaPhysicL::raw_value(_mu[_qp]),
+                                                _drho_dT[_qp],
+                                                _dmu_dT[_qp]);
 
   // (hydraulic) Reynolds number
   _Re_h[_qp] = _Re[_qp] / std::max(1 - _eps[_qp], small_number);
