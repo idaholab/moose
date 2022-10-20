@@ -1,16 +1,20 @@
-T_in = 588.5
+T_in = 714.3
+A12 = 1.00423e3
+A13 = -0.21390
+A14 = -1.1046e-5
+rho = ${fparse A12 + A13 * T_in + A14 * T_in * T_in}
 flow_area = 0.0004980799633447909 #m2
-# [1e+6 kg/m^2-hour] turns into kg/m^2-sec
-mass_flux_in = ${fparse 55*3.78541/10/60/flow_area}
-P_out = 2.0e5 # Pa
+vol_flow = 3.41E-03 #3.47E-03
+mass_flux_in = ${fparse rho *  vol_flow / flow_area}
+P_out = 2.0e5 # Pa 
 [TriSubChannelMesh]
   [subchannel]
     type = TriSubChannelMeshGenerator
     nrings = 3
-    n_cells = 50
+    n_cells = 42
     flat_to_flat = 3.41e-2
     heated_length = 0.5334
-    unheated_length_entry = 0.4064
+    unheated_length_entry = 0.4572
     unheated_length_exit = 0.0762
     rod_diameter = 5.84e-3
     pitch = 7.26e-3
@@ -18,10 +22,10 @@ P_out = 2.0e5 # Pa
     hwire = 0.3048
     spacer_z = '0.0'
     spacer_k = '0.0'
-    z_blockage = '0.60325 0.67945'
+    z_blockage = '0.8382 0.84455'
     index_blockage = '0 1 2 3 4 5'
-    reduction_blockage = '1 1 1 1 1 1'
-    k_blockage = '0 0 0 0 0 0 '
+    reduction_blockage = '0.07 0.07 0.07 0.07 0.07 0.07'
+    k_blockage = '1 1 1 1 1 1 '
   []
 []
 
@@ -71,14 +75,10 @@ P_out = 2.0e5 # Pa
   compute_density = true
   compute_viscosity = true
   compute_power = true
-  P_tol = 1.0e-4
-  T_tol = 1.0e-4
+  P_tol = 1.0e-7
+  T_tol = 1.0e-3
   implicit = true
   segregated = false
-  staggered_pressure = false
-  monolithic_thermal = false
-  verbose_multiapps = true
-  verbose_subchannel = false
 []
 
 [ICs]
@@ -95,7 +95,7 @@ P_out = 2.0e5 # Pa
    [q_prime_IC]
     type = TriPowerIC
     variable = q_prime
-    power = 30000
+    power = 332500.0 #W
     filename = "pin_power_profile_19.txt"
   []
 
@@ -190,7 +190,7 @@ P_out = 2.0e5 # Pa
 [MultiApps]
   [viz]
     type = FullSolveMultiApp
-    input_files = "3d_ORNL_19.i"
+    input_files = "FFM-detailed.i"
     execute_on = "timestep_end"
   []
 []

@@ -123,6 +123,7 @@ P_out = 4.923e6 # Pa
     type = MassFlowRateAux
     variable = mdot
     boundary = inlet
+    index_blockage = ' 0 '
     area = S
     mass_flux = ${mass_flux_in}
     execute_on = 'timestep_begin'

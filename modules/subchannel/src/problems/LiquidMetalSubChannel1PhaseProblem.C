@@ -31,6 +31,7 @@ LiquidMetalSubChannel1PhaseProblem::LiquidMetalSubChannel1PhaseProblem(
   createPetscMatrix(
       _hc_radial_heat_conduction_mat, _block_size * _n_channels, _block_size * _n_channels);
   createPetscVector(_hc_radial_heat_conduction_rhs, _block_size * _n_channels);
+  createPetscMatrix(_hc_sweep_enthalpy_mat, _block_size * _n_channels, _block_size * _n_channels);
   createPetscVector(_hc_sweep_enthalpy_rhs, _block_size * _n_channels);
 }
 
@@ -1042,6 +1043,8 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
                                                      (*_h_soln)(node_in_j) - (*_h_soln)(node_in_i));
           counter++;
 
+          // compute the radial heat conduction through the gaps
+
           // compute the radial heat conduction through gaps
           auto subch_type_i = _subchannel_mesh.getSubchannelType(ii_ch);
           auto subch_type_j = _subchannel_mesh.getSubchannelType(jj_ch);
@@ -1129,6 +1132,7 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
     MatZeroEntries(_hc_cross_derivative_mat);
     MatZeroEntries(_hc_axial_heat_conduction_mat);
     MatZeroEntries(_hc_radial_heat_conduction_mat);
+    MatZeroEntries(_hc_sweep_enthalpy_mat);
 
     VecZeroEntries(_hc_time_derivative_rhs);
     VecZeroEntries(_hc_advective_derivative_rhs);
@@ -1548,10 +1552,24 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
           auto sweep_hin = (*_h_soln)(node_sin);
           auto sweep_hout = (*_h_soln)(node_in);
           sweep_enthalpy = (wsweep_in * sweep_hin - wsweep_out * sweep_hout);
+
+          if (iz == first_node)
+          {
+            PetscInt row_sh = i_ch + _n_channels * iz_ind;
+            PetscScalar value_hs = -sweep_enthalpy;
+            VecSetValues(_hc_sweep_enthalpy_rhs, 1, &row_sh, &value_hs, ADD_VALUES);
+          }
+          else
+          {
+            PetscInt row_sh = i_ch + _n_channels * (iz_ind - 1);
+            PetscInt col_sh = i_ch + _n_channels * (iz_ind - 1);
+            MatSetValues(_hc_sweep_enthalpy_mat, 1, &row_sh, 1, &col_sh, &wsweep_out, ADD_VALUES);
+            PetscInt col_sh_l = sweep_in + _n_channels * (iz_ind - 1);
+            PetscScalar neg_sweep_in = -1.0 * wsweep_in;
+            MatSetValues(
+                _hc_sweep_enthalpy_mat, 1, &row_sh, 1, &col_sh_l, &(neg_sweep_in), ADD_VALUES);
+          }
         }
-        sweep_enthalpy = 0.0;
-        PetscInt row_vec_ht = i_ch + _n_channels * iz_ind;
-        VecSetValues(_hc_sweep_enthalpy_rhs, 1, &row_vec_ht, &sweep_enthalpy, ADD_VALUES);
 
         /// Add heat enthalpy from pin
         PetscScalar added_enthalpy;
@@ -1560,6 +1578,7 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
           added_enthalpy = computeAddedHeatPin(i_ch, iz);
         else
           added_enthalpy = 0.0;
+        PetscInt row_vec_ht = i_ch + _n_channels * iz_ind;
         VecSetValues(_hc_added_heat_rhs, 1, &row_vec_ht, &added_enthalpy, ADD_VALUES);
       }
     }
@@ -1574,6 +1593,8 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
     MatAssemblyEnd(_hc_axial_heat_conduction_mat, MAT_FINAL_ASSEMBLY);
     MatAssemblyBegin(_hc_radial_heat_conduction_mat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(_hc_radial_heat_conduction_mat, MAT_FINAL_ASSEMBLY);
+    MatAssemblyBegin(_hc_sweep_enthalpy_mat, MAT_FINAL_ASSEMBLY);
+    MatAssemblyEnd(_hc_sweep_enthalpy_mat, MAT_FINAL_ASSEMBLY);
     MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
     // Matrix
@@ -1605,6 +1626,9 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
     MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
     MatAXPY(_hc_sys_h_mat, 1.0, _hc_radial_heat_conduction_mat, DIFFERENT_NONZERO_PATTERN);
+    MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
+    MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
+    MatAXPY(_hc_sys_h_mat, 1.0, _hc_sweep_enthalpy_mat, DIFFERENT_NONZERO_PATTERN);
     // #endif
     MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
@@ -1674,10 +1698,10 @@ LiquidMetalSubChannel1PhaseProblem::externalSolve()
   if (_segregated_bool)
     P_it_max = 2 * _n_blocks;
   else
-    P_it_max = 100;
+    P_it_max = 300;
 
   if ((_n_blocks == 1) && (_segregated_bool))
-    P_it_max = 1;
+    P_it_max = 5;
   if (!_segregated_bool)
   {
     initializeSolution();
@@ -1880,4 +1904,17 @@ LiquidMetalSubChannel1PhaseProblem::externalSolve()
   }
   _console << "Power added to coolant is: " << power_out - power_in << " Watt" << std::endl;
   _console << "Mass balance is: " << mass_flow_out - mass_flow_in << " Kg/sec" << std::endl;
+  _console << " ============================ " << std::endl;
+  _console << " Temperature at channel 36 : "
+           << (*_T_soln)(_subchannel_mesh.getChannelNode(36, _n_cells)) << std::endl;
+  _console << " Temperature at channel 20 : "
+           << (*_T_soln)(_subchannel_mesh.getChannelNode(20, _n_cells)) << std::endl;
+  _console << " Temperature at channel 10 : "
+           << (*_T_soln)(_subchannel_mesh.getChannelNode(10, _n_cells)) << std::endl;
+  _console << " Temperature at channel 4  : "
+           << (*_T_soln)(_subchannel_mesh.getChannelNode(4, _n_cells)) << std::endl;
+  _console << " Temperature at channel 1  : "
+           << (*_T_soln)(_subchannel_mesh.getChannelNode(1, _n_cells)) << std::endl;
+  _console << " Temperature at channel 14 : "
+           << (*_T_soln)(_subchannel_mesh.getChannelNode(14, _n_cells)) << std::endl;
 }

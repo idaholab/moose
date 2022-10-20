@@ -3063,7 +3063,7 @@ SubChannel1PhaseProblem::externalSolve()
     P_it_max = 100;
 
   if ((_n_blocks == 1) && (_segregated_bool))
-    P_it_max = 1;
+    P_it_max = 5;
   if (!_segregated_bool)
   {
     initializeSolution();
