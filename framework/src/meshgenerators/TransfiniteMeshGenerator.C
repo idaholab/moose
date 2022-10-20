@@ -179,10 +179,9 @@ TransfiniteMeshGenerator::generate()
       newPt = r2_basis * edge_right[idy] + r1_basis * edge_left[idy] + s1_basis * edge_bottom[idx] +
               s2_basis * edge_top[idx] - r1_basis * s1_basis * V00 - r1_basis * s2_basis * V01 -
               r2_basis * s1_basis * V10 - r2_basis * s2_basis * V11;
-              
+
       nodes[node_id] = mesh->add_point(newPt, node_id);
       node_id++;
-
     }
   }
 
