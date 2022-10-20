@@ -28,11 +28,9 @@ HFEMDiffusion::computeQpResidual(Moose::DGResidualType type)
   {
     case Moose::Element:
       return -_lambda[_qp] * _test[_i][_qp];
-      break;
 
     case Moose::Neighbor:
       return _lambda[_qp] * _test_neighbor[_i][_qp];
-      break;
   }
   return 0;
 }
@@ -52,19 +50,15 @@ HFEMDiffusion::computeLowerDQpJacobian(Moose::ConstraintJacobianType type)
   {
     case Moose::LowerPrimary:
       return -_test_lambda[_i][_qp] * _phi[_j][_qp];
-      break;
 
     case Moose::LowerSecondary:
       return _test_lambda[_i][_qp] * _phi_neighbor[_j][_qp];
-      break;
 
     case Moose::PrimaryLower:
       return -_phi_lambda[_j][_qp] * _test[_i][_qp];
-      break;
 
     case Moose::SecondaryLower:
       return _phi_lambda[_j][_qp] * _test_neighbor[_i][_qp];
-      break;
 
     default:
       break;

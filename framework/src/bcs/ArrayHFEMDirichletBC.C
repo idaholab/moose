@@ -72,11 +72,9 @@ ArrayHFEMDirichletBC::computeLowerDQpJacobian(Moose::ConstraintJacobianType type
   {
     case Moose::LowerPrimary:
       return RealEigenVector::Constant(_count, _test_lambda[_i][_qp] * _phi[_j][_qp]);
-      break;
 
     case Moose::PrimaryLower:
       return RealEigenVector::Constant(_count, _phi_lambda[_j][_qp] * _test[_i][_qp]);
-      break;
 
     default:
       break;
