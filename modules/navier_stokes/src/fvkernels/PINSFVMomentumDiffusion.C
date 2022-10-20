@@ -60,7 +60,10 @@ PINSFVMomentumDiffusion::computeStrongResidual()
   // Compute the diffusion driven by the velocity gradient
   // Interpolate viscosity divided by porosity on the face
   ADReal mu_face;
-  interpolate(Moose::FV::InterpMethod::Average, mu_face, mu_elem, mu_neighbor, *_face_info, true);
+  if (onBoundary(*_face_info))
+    mu_face = _mu(singleSidedFaceArg());
+  else
+    interpolate(Moose::FV::InterpMethod::Average, mu_face, mu_elem, mu_neighbor, *_face_info, true);
 
   // Compute face superficial velocity gradient
   auto dudn =
@@ -96,8 +99,16 @@ PINSFVMomentumDiffusion::computeStrongResidual()
 
   // Interpolate to get the face value
   ADReal coeff_face;
-  interpolate(
-      Moose::FV::InterpMethod::Average, coeff_face, coeff_elem, coeff_neighbor, *_face_info, true);
+  if (onBoundary(*_face_info))
+    coeff_face = coeff_elem;
+  else
+    interpolate(Moose::FV::InterpMethod::Average,
+                coeff_face,
+                coeff_elem,
+                coeff_neighbor,
+                *_face_info,
+                true);
+
   residual -= coeff_face * grad_eps_face * _normal;
 
   return -residual;

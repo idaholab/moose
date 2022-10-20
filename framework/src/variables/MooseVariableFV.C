@@ -740,7 +740,7 @@ MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi, const bool correct_s
   if (_mesh.dimension() > 1)
   {
     // We are using an orthogonal approach for the non-orthogonal correction, for more information
-    // see the Hrvoje Jasak's PhD Thesis (Imperial College, 1996)
+    // see Hrvoje Jasak's PhD Thesis (Imperial College, 1996)
     const auto & interpolated_gradient = uncorrectedAdGradSln(fi, correct_skewness);
     face_grad += interpolated_gradient - (interpolated_gradient * fi.eCN()) * fi.eCN();
   }
@@ -815,7 +815,7 @@ MooseVariableFV<OutputType>::evaluate(const SingleSidedFaceArg & face,
   mooseAssert(fi, "The face information must be non-null");
   if (isExtrapolatedBoundaryFace(*fi).first)
   {
-    bool linear_extrapolation = true;
+    bool linear_extrapolation = _two_term_boundary_expansion;
     if (face.limiter_type == Moose::FV::LimiterType::Upwind && face.elem_is_upwind)
       linear_extrapolation = false;
 

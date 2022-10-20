@@ -69,6 +69,5 @@ FVDiffusion::computeQpResidual()
         makeFace(*_face_info, LimiterType::CentralDifference, true, faceArgSubdomains());
     coeff = _coeff(face);
   }
-
   return -1 * coeff * dudn;
 }

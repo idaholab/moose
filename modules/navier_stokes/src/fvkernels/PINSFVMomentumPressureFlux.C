@@ -38,8 +38,7 @@ PINSFVMomentumPressureFlux::PINSFVMomentumPressureFlux(const InputParameters & p
   : FVFluxKernel(params),
     INSFVMomentumResidualObject(*this),
     _eps(getFunctor<ADReal>(NS::porosity)),
-    _p_elem(adCoupledValue(NS::pressure)),
-    _p_neighbor(adCoupledNeighborValue(NS::pressure)),
+    _p_var(dynamic_cast<const MooseVariableFVReal *>(getFieldVar(NS::pressure, 0))),
     _index(getParam<MooseEnum>("momentum_component"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
@@ -50,6 +49,9 @@ PINSFVMomentumPressureFlux::PINSFVMomentumPressureFlux(const InputParameters & p
   if (!dynamic_cast<PINSFVSuperficialVelocityVariable *>(&_var))
     mooseError("PINSFVMomentumPressureFlux may only be used with a superficial velocity, "
                "of variable type PINSFVSuperficialVelocityVariable.");
+
+  if (!_p_var)
+    paramError(NS::pressure, "p must be a finite volume variable");
 }
 
 ADReal
@@ -60,22 +62,24 @@ PINSFVMomentumPressureFlux::computeQpResidual()
   const auto & face_type = _face_info->faceType(_var.name());
   const bool use_elem = (face_type == FaceInfo::VarFaceNeighbors::ELEM) ||
                         (face_type == FaceInfo::VarFaceNeighbors::BOTH);
+
   const auto * const elem_ptr = use_elem ? &_face_info->elem() : _face_info->neighborPtr();
-  const auto * neighbor_ptr = use_elem ? _face_info->neighborPtr() : &_face_info->elem();
+  const auto & elem = makeElemArg(elem_ptr);
 
-  // At an external boundary, use the element where porosity is defined
-  if (!neighbor_ptr)
-    neighbor_ptr = elem_ptr;
-  // At a block restriction boundary for porosity, use porosity where it's defined
-  else if (face_type == FaceInfo::VarFaceNeighbors::ELEM)
-    neighbor_ptr = elem_ptr;
+  if (onBoundary(*_face_info))
+    eps_p_interface = _eps(elem) * (*_p_var)(singleSidedFaceArg());
+  else
+  {
+    const auto * neighbor_ptr = use_elem ? _face_info->neighborPtr() : &_face_info->elem();
+    const auto & neighbor = makeElemArg(neighbor_ptr);
 
-  // This could be simplified if eps * P was a functor, or if we returned eps(face) * P(face)
-  Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
-                         eps_p_interface,
-                         _eps(makeElemArg(elem_ptr)) * _p_elem[_qp],
-                         _eps(makeElemArg(neighbor_ptr)) * _p_neighbor[_qp],
-                         *_face_info,
-                         true);
+    Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
+                           eps_p_interface,
+                           _eps(elem) * (*_p_var)(elem),
+                           _eps(neighbor) * (*_p_var)(neighbor),
+                           *_face_info,
+                           true);
+  }
+
   return eps_p_interface * _normal(_index);
 }

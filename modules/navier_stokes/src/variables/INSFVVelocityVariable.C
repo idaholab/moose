@@ -77,7 +77,6 @@ INSFVVelocityVariable::getExtrapolatedBoundaryFaceValue(const FaceInfo & fi,
     const Elem * const elem = std::get<0>(tup);
     const Point vector_to_face = std::get<2>(tup) ? (fi.faceCentroid() - fi.elemCentroid())
                                                   : (fi.faceCentroid() - fi.neighborCentroid());
-
     boundary_value = uncorrectedAdGradSln(fi) * vector_to_face + getElemValue(elem);
   }
   else
