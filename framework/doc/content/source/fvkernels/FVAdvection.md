@@ -35,9 +35,9 @@ computed at the same time as the residual and need not be defined separately.
 
 Advection problems, with a constant advecting velocity, should have two types of boundary conditions: inflow and outflow.
 The inflow boundary conditions may be specified as a constant boundary value with a [FVDirichletBC.md] (with caveats, see
-documentation) or as a constant flux with [FVAdvectionFunctionBC.md].
+documentation)
 
-!listing fvkernels/mms/advection.i block=FVBCs
+!listing fvkernels/mms/advective-outflow/advection-diffusion.i block=FVBCs
 
 The outflow boundary conditions may be specified with a [FVConstantScalarOutflowBC.md].
 
