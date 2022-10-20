@@ -9,7 +9,7 @@ The NCRC client allows authorized users to search, install, and upgrade NCRC bin
 The NCRC client is available via INL's public Conda channel repository.
 
 !alert note
-The client must be installed into the base Conda environment.
+The ncrc client must be installed and used while in the `base` Conda environment. The only exception to this, is when one performs an update (described later).
 
 INL Conda Repository:
 
@@ -78,7 +78,7 @@ ncrc-griffin              2021_10_02         build_0  ncrc-applications
 
 ##### Install an NCRC application
 
-Installing an NCRC application requires authentication. If you have sufficient privileges the package installation will commence:
+Installing an NCRC application requires authentication. If you have sufficient privileges, the package installation will commence:
 
 ```bash
 $> conda activate base
@@ -92,7 +92,7 @@ Installing bison...
 
 ##### Install a specific NCRC application version
 
-Don't want to use the latest? For whatever the reason, you can install a specific version of an available NCRC application in the following way:
+Don't want to use the latest version? For whatever the reason, you can install a specific version of an available NCRC application in the following way:
 
 ```bash
 $> conda activate base
@@ -116,9 +116,9 @@ Username: johndoe
 PIN+TOKEN:
 ```
 
-##### Uninstalling NCRC application
+##### Uninstalling an NCRC application
 
-The NCRC script being a wrapper tool, is unable to perform such a function. The user must deactivate the environment
+The NCRC script, being a wrapper tool, is unable to perform such a function. The user must deactivate the environment
 and remove that environment using the appropriate conda commands instead. The following is an error scenario instructing
 the user how to achieve the task:
 
@@ -137,7 +137,7 @@ by deactivating the application environment and then remove it:
 Once your NCRC application is installed, you have access to use said binary and/or view the documentation.
 
 !alert note
-Where applicable, you only need to activate the environment once. Each example below assume the environment has not yet been activated.
+Where applicable, you only need to activate the environment once. Each example below assumes the environment has not yet been activated.
 
 ##### Running Tests
 
@@ -168,9 +168,9 @@ Ran 1606 tests in 274.6 seconds. Average test time 0.7 seconds, maximum test tim
 
 ##### Some Applications contain more than tests
 
-Some applications have different inputs that can be copied and executed. Each application can use whatever naming convention
-they wish, so listing all possibilities is impossible. However, any runnable input directory will have a file called `testroot`
-residing in it. The following *crazy* command will return those possibilities (using Bison as an example):
+Some applications have different inputs that can be copied and executed using the `--copy-inputs` flag. Each application can use whatever naming convention
+they wish for these input categories, so listing all possibilities is impossible. However, any runnable input directory will have a file called `testroot`
+residing in it, in which the test categories are listed. The following piped command sequence will return those possibilities (using Bison as an example):
 
 ```bash
 $> conda activate bison
@@ -199,8 +199,8 @@ $ (bison) > mpiexec -n 8 bison-opt -i my_input.i
 
 ##### View Documentation
 
-Documentation exists as part of the binary installation process. You can access documentation by instructing your favorite web browser to open the index.html file.
-We have made finding the location of this file via an environment variable, prefix with the NCRC application name:
+Documentation exists as part of the binary installation process. You can access documentation by instructing your favorite web browser to open the `index.html` file.
+We have made finding the location of this file easier via an environment variable, prefixed with the NCRC application name:
 
 ```bash
 $> conda activate bison
