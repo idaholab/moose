@@ -679,20 +679,23 @@ FEProblemBase::initialSetup()
       _restart_io->useAsciiExtension();
   }
 
-  if ((_app.isRestarting() || _app.isRecovering()) && (_app.isUltimateMaster() || _force_restart))
+  if (_app.isRestarting() || _app.isRecovering())
   {
-    TIME_SECTION("restartFromFile", 3, "Restarting From File");
+    if (_app.isUltimateMaster() || _force_restart)
+    {
+      TIME_SECTION("restartFromFile", 3, "Restarting From File");
 
-    _restart_io->readRestartableDataHeader(true);
-    _restart_io->restartEquationSystemsObject();
+      _restart_io->readRestartableDataHeader(true);
+      _restart_io->restartEquationSystemsObject();
 
-    /**
-     * TODO: Move the RestartableDataIO call to reload data here. Only a few tests fail when doing
-     * this now. Material Properties aren't sized properly at this point and fail across the board,
-     * there are a few other misc tests that fail too.
-     *
-     * _restart_io->readRestartableData();
-     */
+      /**
+       * TODO: Move the RestartableDataIO call to reload data here. Only a few tests fail when doing
+       * this now. Material Properties aren't sized properly at this point and fail across the
+       * board, there are a few other misc tests that fail too.
+       *
+       * _restart_io->readRestartableData();
+       */
+    }
   }
   else
   {
@@ -746,17 +749,6 @@ FEProblemBase::initialSetup()
 
       adaptivity().uniformRefineWithProjection();
     }
-  }
-  else
-  {
-    // When we use an Exodus mesh file to restart variables with input syntax
-    // Variables/*/initial_from_file_var in a sub-application, MOOSE will not perform the uniform
-    // refinement for the sub-applications during recover. If the input syntax relies on the
-    // checkpoint file instead of the Exodus file in the future, this error can be removed.
-    if (_mesh.uniformRefineLevel() > 0 && _app.getExodusFileRestart())
-      if (!_app.isUltimateMaster() && !_app.masterMesh())
-        mooseError("Doing extra refinements when recovering is NOT supported for sub-apps of a "
-                   "MultiApp with Exodus restart");
   }
 
   unsigned int n_threads = libMesh::n_threads();
