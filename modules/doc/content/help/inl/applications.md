@@ -65,7 +65,7 @@ Grizzly models the degradation due to normal operating conditions of nuclear pow
 !col small=12 medium=8 large=8
 MARMOT is a mesoscale fuel performance code. As such, it can predict the evolution of the microstructure and material properties of fuels and claddings due to stress, temperature, and irradiation damage. MARMOT can, therefore, supply microstructure-based materials models to other applications that work at a larger scale, such as BISON which works at an engineering scale. MARMOT solves equations involving solid mechanics and heat conduction using the finite element method.
 
-!col small=12 medium=4 large=4
+!col small=8 medium=4 large=4
 !media application_logos/marmot_description.png style=width:100%;
 !row-end!
 
@@ -80,7 +80,7 @@ MARMOT is a mesoscale fuel performance code. As such, it can predict the evoluti
 !col small=12 medium=8 large=8
 Pronghorn is a multi-dimensional, coarse-mesh, thermal-hydraulics code for advanced reactors and is particularly well-suited to model gas-cooled pebble bed and prismatic reactors. It serves the intermediate fidelity realm situated between detailed computational fluid dynamics analysis and lumped system models.
 
-!col small=12 medium=4 large=4
+!col small=8 medium=4 large=4
 !row-end!
 
 ## RELAP-7
@@ -94,7 +94,7 @@ Pronghorn is a multi-dimensional, coarse-mesh, thermal-hydraulics code for advan
 !col small=12 medium=8 large=8
 RELAP-7 is a two-phase thermal systems code based on MOOSE's thermal hydraulics module. RELAP-7 provides two-phase components suitable for LWRs provides closures for two-phase water from TRACE.
 
-!col small=12 medium=4 large=4
+!col small=8 medium=4 large=4
 !media application_logos/relap-7_description.png style=width:100%;
 !row-end!
 
@@ -111,6 +111,6 @@ RELAP-7 is a two-phase thermal systems code based on MOOSE's thermal hydraulics 
 !col small=12 medium=8 large=8
 Sockeye is a heat pipe analysis application geared towards heat pipes of interest in heat-pipe-cooled microreactors. Sockeye provides various transient heat pipe modeling capabilities, including a 1D, two-phase flow model and a 2D effective thermal conductivity model based on heat conduction, which leverages analytic expressions of operational limits.
 
-!col small=12 medium=4 large=4
+!col small=8 medium=4 large=4
 !media application_logos/sockeye_description.png style=width:100%;
 !row-end!

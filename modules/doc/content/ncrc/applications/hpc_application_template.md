@@ -1,4 +1,4 @@
-# {{ApplicationName}} binary Access with INL-HPC
+# {{ApplicationName}} Binary Access with INL-HPC
 
 The following information is provided for those with "HPC Binary Access" for an application and
 aims to get you up and running.
