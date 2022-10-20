@@ -47,10 +47,7 @@ PenaltyInterfaceDiffusionTempl<is_ad>::computeQpResidual(Moose::DGResidualType t
   GenericReal<is_ad> jump_value = 0;
 
   if (_jump != nullptr)
-  {
     jump_value = (*_jump)[_qp];
-    mooseAssert(jump_value == _u[_qp] - _neighbor_value[_qp], "");
-  }
   else
     jump_value = _u[_qp] - _neighbor_value[_qp];
 

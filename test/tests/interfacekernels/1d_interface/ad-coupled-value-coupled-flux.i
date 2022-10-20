@@ -52,6 +52,25 @@
     neighbor_var = v
     boundary = primary0_interface
     penalty = 1e6
+    jump_prop_name = "jump"
+  []
+[]
+
+[Materials]
+  [bulk]
+    type = ADPiecewiseByBlockFunctorMaterial
+    prop_name = 'functor_var_mat_prop'
+    subdomain_to_prop_value = '0 u 1 v'
+  []
+  [bulk_traditional]
+    type = ScalarPropFromFunctorProp
+    functor = 'functor_var_mat_prop'
+    prop = 'var_mat_prop'
+  []
+  [jump]
+    type = PropertyJumpInterfaceMaterial
+    property = var_mat_prop
+    boundary = primary0_interface
   []
 []
 
