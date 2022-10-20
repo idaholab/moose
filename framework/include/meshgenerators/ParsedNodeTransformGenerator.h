@@ -17,22 +17,22 @@
 /*
  * A mesh generator that applies an arbitrary transformation to the nodal coordinates of a mesh
  */
-class ComputeNodePosition : public MeshGenerator, public FunctionParserUtils<false>
+class ParsedNodeTransformGenerator : public MeshGenerator, public FunctionParserUtils<false>
 {
 public:
   static InputParameters validParams();
 
-  ComputeNodePosition(const InputParameters & parameters);
+  ParsedNodeTransformGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
-  /// function parameter names
+  /// names of each component function parameter
   static const std::string _func_name[];
 
   /// the input mesh
   std::unique_ptr<MeshBase> & _input;
 
   /// the node position functions
-  std::array<SymFunctionPtr, 3> _function;
+  std::array<SymFunctionPtr, 3> _functions;
 };

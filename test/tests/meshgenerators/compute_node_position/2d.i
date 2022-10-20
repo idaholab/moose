@@ -10,7 +10,7 @@
     ymax = 8
   []
   [node_pos]
-    type = ComputeNodePosition
+    type = ParsedNodeTransformGenerator
     input = gen
     x_function = 'if(x < 1 | y < 2, x, x + (y-2)*0.2)'
     y_function = 'if(x < 2 | y < 1, y, y + (y-1)*(x-2) * 0.1)'

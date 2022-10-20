@@ -12,7 +12,7 @@
     zmax = 3
   []
   [node_pos]
-    type = ComputeNodePosition
+    type = ParsedNodeTransformGenerator
     input = gen
     x_function = 'x*cos(z) + y*sin(z)'
     y_function = '-x*sin(z) + y*cos(z)'
