@@ -26,7 +26,7 @@ $ (base) ~> mamba activate {{ApplicationLower}}
 $ ({{ApplicationLower}}) ~>
 ```
 
-With {{ApplicationName}} activated (denoted by the prompt header), `{{binary}}-opt` becomes available within your PATH. This mackes `{{binary}}-opt` available for execution from any directory.
+With {{ApplicationName}} activated (denoted by the prompt header), `{{binary}}-opt` becomes available within your PATH. This makes `{{binary}}-opt` available for execution from any directory.
 
 ```bash
 $ ({{ApplicationLower}}) ~> {{binary}}-opt --help
