@@ -146,3 +146,21 @@ TEST_F(SodiumSaturationFluidPropertiesTest, specificEnthalpy)
   ABS_TEST(_fp->h_from_p_T(p, T2), 1218897.6776327428, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_fp->h_from_p_T, p, T2, REL_TOL_DERIVATIVE);
 }
+
+/**
+ * Test that the pressure can be computed from the specific volume & energy
+ */
+TEST_F(SodiumSaturationFluidPropertiesTest, PTFromVE)
+{
+  // Starting pressure and temperature
+  const Real T = 800.0;
+  const Real p = 101325;
+
+  // Obtain specific volume and specific energy
+  const Real v = _fp->v_from_p_T(p, T);
+  const Real e = _fp->e_from_p_T(p, T);
+
+  // Verify that the conversion back succeeds
+  ABS_TEST(_fp->T_from_v_e(v, e), T, TOLERANCE);
+  ABS_TEST(_fp->p_from_v_e(v, e), p, 1e-6);
+}

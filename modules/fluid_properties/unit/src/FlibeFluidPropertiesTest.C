@@ -33,9 +33,10 @@ TEST_F(FlibeFluidPropertiesTest, thermalConductivity)
   const Real p = 2.0 * 101325;
   const Real e = _fp->e_from_p_T(p, T);
   const Real v = 1. / _fp->rho_from_p_T(p, T);
+  const Real k = 1.030000000000000027e+00;
 
-  REL_TEST(_fp->k_from_v_e(v, e), 1.030000000000000027e+00, REL_TOL_SAVED_VALUE);
-  REL_TEST(_fp->k_from_p_T(p, T), 1.030000000000000027e+00, REL_TOL_SAVED_VALUE);
+  REL_TEST(_fp->k_from_v_e(v, e), k, REL_TOL_SAVED_VALUE);
+  REL_TEST(_fp->k_from_p_T(p, T), k, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_fp->k_from_p_T, p, T, REL_TOL_DERIVATIVE);
 }
 
@@ -48,9 +49,10 @@ TEST_F(FlibeFluidPropertiesTest, viscosity)
   const Real p = 2.0 * 101325;
   const Real e = _fp->e_from_p_T(p, T);
   const Real v = 1. / _fp->rho_from_p_T(p, T);
+  const Real mu = 1.267440888533459542e-02;
 
-  REL_TEST(_fp->mu_from_v_e(v, e), 1.267440888533459542e-02, REL_TOL_SAVED_VALUE);
-  REL_TEST(_fp->mu_from_p_T(p, T), 1.267440888533459542e-02, REL_TOL_SAVED_VALUE);
+  REL_TEST(_fp->mu_from_v_e(v, e), mu, REL_TOL_SAVED_VALUE);
+  REL_TEST(_fp->mu_from_p_T(p, T), mu, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_fp->mu_from_p_T, p, T, REL_TOL_DERIVATIVE);
 }
 
@@ -63,9 +65,10 @@ TEST_F(FlibeFluidPropertiesTest, isobaricSpecificHeat)
   const Real p = 2.0 * 101325;
   const Real e = _fp->e_from_p_T(p, T);
   const Real v = 1. / _fp->rho_from_p_T(p, T);
+  const Real cp = 2416.;
 
-  REL_TEST(_fp->cp_from_v_e(v, e), 2416.0, REL_TOL_SAVED_VALUE);
-  REL_TEST(_fp->cp_from_p_T(p, T), 2416.0, REL_TOL_SAVED_VALUE);
+  REL_TEST(_fp->cp_from_v_e(v, e), cp, REL_TOL_SAVED_VALUE);
+  REL_TEST(_fp->cp_from_p_T(p, T), cp, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_fp->cp_from_p_T, p, T, REL_TOL_DERIVATIVE);
   DERIV_TEST(_fp->cp_from_v_e, v, e, REL_TOL_DERIVATIVE);
 }
@@ -103,9 +106,12 @@ TEST_F(FlibeFluidPropertiesTest, specificInternalEnergy)
 {
   const Real T = 800.0;
   const Real p = 2.0 * 101325;
+  const Real e = 1.9326997921944547e+06;
 
-  ABS_TEST(_fp->e_from_p_T(p, T), 1.9326997921944547e+06, REL_TOL_SAVED_VALUE);
+  ABS_TEST(_fp->e_from_p_T(p, T), e, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_fp->e_from_p_T, p, T, REL_TOL_DERIVATIVE);
+
+  ABS_TEST(_fp->e_from_p_rho(p, _fp->rho_from_p_T(p, T)), e, REL_TOL_SAVED_VALUE);
 }
 
 /**
@@ -132,10 +138,14 @@ TEST_F(FlibeFluidPropertiesTest, temperature)
   const Real T = 800.0;
   const Real p = 2.0 * 101325;
   const Real e = _fp->e_from_p_T(p, T);
+  const Real h = _fp->h_from_p_T(p, T);
   const Real v = 1. / _fp->rho_from_p_T(p, T);
 
   REL_TEST(_fp->T_from_v_e(v, e), T, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_fp->T_from_v_e, v, e, REL_TOL_DERIVATIVE);
+
+  REL_TEST(_fp->T_from_p_rho(p, 1. / v), T, REL_TOL_SAVED_VALUE);
+  REL_TEST(_fp->T_from_p_h(p, h), T, REL_TOL_SAVED_VALUE);
 }
 
 /**
