@@ -11,6 +11,8 @@
 
 // Moose includes
 #include "MooseUtils.h"
+#include "libmesh/vector_value.h"
+#include "libmesh/tensor_value.h"
 
 TEST(MooseUtils, camelCaseToUnderscore)
 {
@@ -492,4 +494,25 @@ TEST(MooseUtils, SemidynamicVectorInit)
   MooseUtils::SemidynamicVector<Custom, 100, true> test2(100);
   for (auto & i : test2)
     EXPECT_EQ(i._data, 333);
+}
+
+TEST(MooseUtils, isZero)
+{
+  EXPECT_TRUE(MooseUtils::isZero(Real(0)));
+  EXPECT_TRUE(MooseUtils::isZero(ADReal(0)));
+  EXPECT_TRUE(MooseUtils::isZero(RealVectorValue(0)));
+  EXPECT_TRUE(MooseUtils::isZero(ADRealVectorValue(0)));
+  EXPECT_TRUE(MooseUtils::isZero(RealTensorValue(0)));
+  EXPECT_TRUE(MooseUtils::isZero(ADRealTensorValue(0)));
+  EXPECT_TRUE(MooseUtils::isZero(std::vector<Real>(1, 0)));
+  EXPECT_TRUE(MooseUtils::isZero(std::array<Real, 1>{{0}}));
+
+  EXPECT_TRUE(!MooseUtils::isZero(Real(1)));
+  EXPECT_TRUE(!MooseUtils::isZero(ADReal(1)));
+  EXPECT_TRUE(!MooseUtils::isZero(RealVectorValue(1)));
+  EXPECT_TRUE(!MooseUtils::isZero(ADRealVectorValue(1)));
+  EXPECT_TRUE(!MooseUtils::isZero(RealTensorValue(1)));
+  EXPECT_TRUE(!MooseUtils::isZero(ADRealTensorValue(1)));
+  EXPECT_TRUE(!MooseUtils::isZero(std::vector<Real>(1, 1)));
+  EXPECT_TRUE(!MooseUtils::isZero(std::array<Real, 1>{{1}}));
 }
