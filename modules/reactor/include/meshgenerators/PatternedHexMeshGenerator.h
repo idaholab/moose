@@ -38,7 +38,6 @@ protected:
   const bool _generate_core_metadata;
   /// Number of radial intervals in the background region
   const unsigned int _background_intervals;
-
   /// Whether the hexagonal pattern has external duct(s)
   const bool _has_assembly_duct;
   /// Size parameter(s) of duct(s)
@@ -67,6 +66,8 @@ protected:
   const bool _create_interface_boundaries;
   /// Style of the polygon size parameter
   const PolygonSizeStyle _hexagon_size_style;
+  /// Whether the non-circular region (outside the rings) can be deformed
+  const bool _deform_non_circular_region;
   /// Pitch size of the input assembly mesh
   Real _pattern_pitch;
   /// MeshMetaData of the assembly pitch size
