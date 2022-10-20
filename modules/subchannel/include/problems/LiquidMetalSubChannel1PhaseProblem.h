@@ -53,6 +53,7 @@ protected:
   Vec _hc_axial_heat_conduction_rhs;
   Mat _hc_radial_heat_conduction_mat;
   Vec _hc_radial_heat_conduction_rhs;
+  Mat _hc_sweep_enthalpy_mat;
   Vec _hc_sweep_enthalpy_rhs;
 
 public:
