@@ -180,6 +180,12 @@ HeliumFluidProperties::T_from_v_e(
 }
 
 Real
+HeliumFluidProperties::T_from_p_h(Real /* p */, Real h) const
+{
+  return h / _cp;
+}
+
+Real
 HeliumFluidProperties::c_from_v_e(Real v, Real e) const
 {
   Real p = p_from_v_e(v, e);
