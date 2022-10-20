@@ -68,6 +68,7 @@ TEST_F(SimpleFluidPropertiesTest, properties)
       tol);
   ABS_TEST(_fp->k_from_v_e(v, e), thermal_cond, tol);
   ABS_TEST(_fp->s_from_v_e(v, e), entropy, tol);
+  ABS_TEST(_fp->s_from_h_p(_fp->h_from_p_T(p, T), p), entropy, tol);
   ABS_TEST(_fp->T_from_v_e(v, e), T, tol);
   ABS_TEST(_fp->T_from_p_h(p, _fp->h_from_p_T(p, T)), T, tol);
   ABS_TEST(_fp->T_from_p_rho(p, 1. / v), T, tol);
@@ -103,6 +104,7 @@ TEST_F(SimpleFluidPropertiesTest, properties)
       tol);
   ABS_TEST(_fp->k_from_v_e(v, e), thermal_cond, tol);
   ABS_TEST(_fp->s_from_v_e(v, e), entropy, tol);
+  ABS_TEST(_fp->s_from_h_p(_fp->h_from_p_T(p, T), p), entropy, tol);
   ABS_TEST(_fp->T_from_v_e(v, e), T, tol);
   ABS_TEST(_fp->T_from_p_h(p, _fp->h_from_p_T(p, T)), T, tol);
   ABS_TEST(_fp->T_from_p_rho(p, 1. / v), T, tol);

@@ -33,9 +33,10 @@ TEST_F(FlinakFluidPropertiesTest, thermalConductivity)
   const Real p = 3.0 * 101325;
   const Real e = _fp->e_from_p_T(p, T);
   const Real v = 1. / _fp->rho_from_p_T(p, T);
+  const Real k = 0.83;
 
-  REL_TEST(_fp->k_from_v_e(v, e), 0.83, REL_TOL_SAVED_VALUE);
-  REL_TEST(_fp->k_from_p_T(p, T), 0.83, REL_TOL_SAVED_VALUE);
+  REL_TEST(_fp->k_from_v_e(v, e), k, REL_TOL_SAVED_VALUE);
+  REL_TEST(_fp->k_from_p_T(p, T), k, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_fp->k_from_p_T, p, T, REL_TOL_DERIVATIVE);
 }
 
@@ -48,9 +49,10 @@ TEST_F(FlinakFluidPropertiesTest, viscosity)
   const Real p = 3.0 * 101325;
   const Real e = _fp->e_from_p_T(p, T);
   const Real v = 1. / _fp->rho_from_p_T(p, T);
+  const Real mu = 0.0073420946394096;
 
-  REL_TEST(_fp->mu_from_v_e(v, e), 0.0073420946394096, REL_TOL_SAVED_VALUE);
-  REL_TEST(_fp->mu_from_p_T(p, T), 0.0073420946394096, REL_TOL_SAVED_VALUE);
+  REL_TEST(_fp->mu_from_v_e(v, e), mu, REL_TOL_SAVED_VALUE);
+  REL_TEST(_fp->mu_from_p_T(p, T), mu, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_fp->mu_from_p_T, p, T, REL_TOL_DERIVATIVE);
 }
 
@@ -63,9 +65,10 @@ TEST_F(FlinakFluidPropertiesTest, isobaricSpecificHeat)
   const Real p = 3.0 * 101325;
   const Real e = _fp->e_from_p_T(p, T);
   const Real v = 1. / _fp->rho_from_p_T(p, T);
+  const Real cp = 2010.;
 
-  REL_TEST(_fp->cp_from_v_e(v, e), 2010.0, REL_TOL_SAVED_VALUE);
-  REL_TEST(_fp->cp_from_p_T(p, T), 2010.0, REL_TOL_SAVED_VALUE);
+  REL_TEST(_fp->cp_from_v_e(v, e), cp, REL_TOL_SAVED_VALUE);
+  REL_TEST(_fp->cp_from_p_T(p, T), cp, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_fp->cp_from_p_T, p, T, REL_TOL_DERIVATIVE);
   DERIV_TEST(_fp->cp_from_v_e, v, e, REL_TOL_DERIVATIVE);
 }
@@ -103,12 +106,13 @@ TEST_F(FlinakFluidPropertiesTest, specificInternalEnergy)
 {
   const Real T = 800.0;
   const Real p = 3.0 * 101325;
+  const Real e = 1607858.289032661588863;
 
-  ABS_TEST(_fp->e_from_p_T(p, T), 1607858.289032661588863, REL_TOL_SAVED_VALUE);
+  ABS_TEST(_fp->e_from_p_T(p, T), e, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_fp->e_from_p_T, p, T, REL_TOL_DERIVATIVE);
 
   ABS_TEST(
-      _fp->e_from_p_rho(p, _fp->rho_from_p_T(p, T)), 1607858.289032661588863, REL_TOL_SAVED_VALUE);
+      _fp->e_from_p_rho(p, _fp->rho_from_p_T(p, T)), e, REL_TOL_SAVED_VALUE);
 }
 
 /**
