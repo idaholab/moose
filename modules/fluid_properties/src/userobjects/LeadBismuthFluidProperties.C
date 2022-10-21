@@ -15,8 +15,8 @@ InputParameters
 LeadBismuthFluidProperties::validParams()
 {
   InputParameters params = SinglePhaseFluidProperties::validParams();
-  params.addParam<Real>("T_mo", 398, "Melting Point of LeadBismuth (K)");
-  params.addClassDescription("Fluid properties for LeadBismuth 2LiF-BeF2");
+  params.addParam<Real>("T_mo", 398, "Melting Point of Lead Bismuth (K)");
+  params.addClassDescription("Fluid properties for Lead Bismuth eutectic 2LiF-BeF2");
 
   return params;
 }
