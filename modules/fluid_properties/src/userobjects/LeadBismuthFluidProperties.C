@@ -41,7 +41,8 @@ LeadBismuthFluidProperties::molarMass() const
 Real
 LeadBismuthFluidProperties::bulk_modulus_from_p_T(Real /*p*/, Real T) const
 {
-  return (38.02 - 1.296e-2 * T + 1.32e-6 * T * T) * MathUtils::pow(10, 9);
+  // Isentropic bulk modulus
+  return (38.02 - 1.296e-2 * T + 1.32e-6 * T * T) * 1e9;
 }
 
 Real
@@ -113,24 +114,34 @@ LeadBismuthFluidProperties::cp_from_v_e(
 Real
 LeadBismuthFluidProperties::cv_from_v_e(Real v, Real e) const
 {
-  return cp_from_v_e(v, e);
+  Real p = p_from_v_e(v, e);
+  Real T = T_from_v_e(v, e);
+  return cv_from_p_T(p, T);
 }
 
 void
 LeadBismuthFluidProperties::cv_from_v_e(
     Real v, Real e, Real & cv, Real & dcv_dv, Real & dcv_de) const
 {
-  Real cp, dcp_dv, dcp_de;
-  cp_from_v_e(v, e, cp, dcp_dv, dcp_de);
-  cv = cv_from_v_e(v, e);
-  dcv_dv = dcp_dv;
-  dcv_de = dcp_de;
+  Real p, dp_dv, dp_de;
+  p_from_v_e(v, e, p, dp_dv, dp_de);
+  Real T, dT_dv, dT_de;
+  T_from_v_e(v, e, T, dT_dv, dT_de);
+  Real dcv_dp, dcv_dT;
+  cv_from_p_T(p, T, cv, dcv_dp, dcv_dT);
+  dcv_dv = dcv_dp * dp_dv + dcv_dT * dT_dv;
+  dcv_de = dcv_dp * dp_de + dcv_dT * dT_de;
 }
 
 Real
 LeadBismuthFluidProperties::cv_from_p_T(Real p, Real T) const
 {
-  return cp_from_p_T(p, T);
+  Real rho, drho_dT, drho_dp;
+  rho_from_p_T(p, T, rho, drho_dp, drho_dT);
+  Real alpha = -drho_dT / rho;
+  Real bulk_modulus = bulk_modulus_from_p_T(p, T);
+  Real cp = cp_from_p_T(p, T);
+  return cp / (1 + alpha * alpha * bulk_modulus * T / rho / cp);
 }
 
 void
@@ -140,8 +151,22 @@ LeadBismuthFluidProperties::cv_from_p_T(
   Real cp, dcp_dp, dcp_dT;
   cp_from_p_T(p, T, cp, dcp_dp, dcp_dT);
   cv = cv_from_p_T(p, T);
-  dcv_dp = dcp_dp;
-  dcv_dT = dcp_dT;
+
+  Real rho, drho_dT, drho_dp;
+  rho_from_p_T(p, T, rho, drho_dp, drho_dT);
+  Real alpha = -drho_dT / rho;
+  Real alpha_2 = alpha * alpha, alpha_3 = alpha * alpha * alpha;
+  Real dalpha_dT = drho_dT * drho_dT / rho / rho;
+  Real bulk = bulk_modulus_from_p_T(p, T);
+  Real dbulk_dT = (-1.296e-2 + 2 * 1.32e-6 * T) * 1e9;
+  Real denominator = (1 + alpha * alpha * bulk * T / rho / cp);
+  // no pressure dependence in alpha, T, bulk modulus, cp or rho
+  dcv_dp = 0;
+  dcv_dT = dcp_dT / denominator -
+           cp / denominator / denominator *
+               (2 * alpha * dalpha_dT * bulk * T / rho / cp + alpha_2 * dbulk_dT * T / rho / cp +
+                alpha_2 * bulk / rho / cp + alpha_3 * bulk * T / rho / cp -
+                dcp_dT * alpha_2 * bulk * T / rho / cp / cp);
 }
 
 Real
@@ -275,7 +300,7 @@ LeadBismuthFluidProperties::e_from_p_T(Real p, Real T, Real & e, Real & de_dp, R
   Real dh_dp, dv_dp, dh_dT, dv_dT, v, h;
   h_from_p_T(p, T, h, dh_dp, dh_dT);
   v_from_p_T(p, T, v, dv_dp, dv_dT);
-  e = h_from_p_T(v, e);
+  e = e_from_p_T(p, T);
   de_dp = dh_dp - v - dv_dp * p;
   de_dT = dh_dT - dv_dT * p;
 }
@@ -291,7 +316,7 @@ LeadBismuthFluidProperties::e_from_p_rho(
     Real pressure, Real rho, Real & e, Real & de_dp, Real & de_drho) const
 {
   Real T, dT_dp, dT_drho;
-  T_from_p_rho(p, rho, T, dT_dp, dT_drho);
+  T_from_p_rho(pressure, rho, T, dT_dp, dT_drho);
   Real de_dp_T, de_dT;
   e_from_p_T(pressure, T, e, de_dp_T, de_dT);
   de_dp = de_dp_T * 1 + de_dT * dT_dp;

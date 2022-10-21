@@ -41,7 +41,8 @@ LeadFluidProperties::molarMass() const
 Real
 LeadFluidProperties::bulk_modulus_from_p_T(Real /*p*/, Real T) const
 {
-  return (43.50 - 1.552e-2 * T + 1.622e-6 * T * T) * 10e8;
+  // Isentropic bulk modulus, eq 2.42 from Handbook
+  return (43.50 - 1.552e-2 * T + 1.622e-6 * T * T) * 1e9;
 }
 
 Real
@@ -66,10 +67,11 @@ LeadFluidProperties::p_from_v_e(Real v, Real e) const
 }
 
 void
-LeadFluidProperties::p_from_v_e(Real v, Real e, Real & /*p*/, Real & dp_dv, Real & dp_de) const
+LeadFluidProperties::p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Real & dp_de) const
 {
   Real h, dh_dv, dh_de;
   h_from_v_e(v, e, h, dh_dv, dh_de);
+  p = p_from_v_e(v, e);
   dp_dv = (v * dh_dv - h + e) / v / v;
   dp_de = (dh_de - 1) / v;
 }
@@ -304,23 +306,33 @@ LeadFluidProperties::cp_from_v_e(Real v, Real e, Real & cp, Real & dcp_dv, Real 
 Real
 LeadFluidProperties::cv_from_v_e(Real v, Real e) const
 {
-  return cp_from_v_e(v, e);
+  Real p = p_from_v_e(v, e);
+  Real T = T_from_v_e(v, e);
+  return cv_from_p_T(p, T);
 }
 
 void
 LeadFluidProperties::cv_from_v_e(Real v, Real e, Real & cv, Real & dcv_dv, Real & dcv_de) const
 {
-  Real cp, dcp_dv, dcp_de;
-  cp_from_v_e(v, e, cp, dcp_dv, dcp_de);
-  cv = cv_from_v_e(v, e);
-  dcv_dv = dcp_dv;
-  dcv_de = dcp_de;
+  Real p, dp_dv, dp_de;
+  p_from_v_e(v, e, p, dp_dv, dp_de);
+  Real T, dT_dv, dT_de;
+  T_from_v_e(v, e, T, dT_dv, dT_de);
+  Real dcv_dp, dcv_dT;
+  cv_from_p_T(p, T, cv, dcv_dp, dcv_dT);
+  dcv_dv = dcv_dp * dp_dv + dcv_dT * dT_dv;
+  dcv_de = dcv_dp * dp_de + dcv_dT * dT_de;
 }
 
 Real
 LeadFluidProperties::cv_from_p_T(Real p, Real T) const
 {
-  return cp_from_p_T(p, T);
+  Real rho, drho_dT, drho_dp;
+  rho_from_p_T(p, T, rho, drho_dp, drho_dT);
+  Real alpha = -drho_dT / rho;
+  Real bulk_modulus = bulk_modulus_from_p_T(p, T);
+  Real cp = cp_from_p_T(p, T);
+  return cp / (1 + alpha * alpha * bulk_modulus * T / rho / cp);
 }
 
 void
@@ -328,9 +340,23 @@ LeadFluidProperties::cv_from_p_T(Real p, Real T, Real & cv, Real & dcv_dp, Real 
 {
   Real cp, dcp_dp, dcp_dT;
   cp_from_p_T(p, T, cp, dcp_dp, dcp_dT);
-  cv = cp;
-  dcv_dp = dcp_dp;
-  dcv_dT = dcp_dT;
+  cv = cv_from_p_T(p, T);
+
+  Real rho, drho_dT, drho_dp;
+  rho_from_p_T(p, T, rho, drho_dp, drho_dT);
+  Real alpha = -drho_dT / rho;
+  Real alpha_2 = alpha * alpha, alpha_3 = alpha * alpha * alpha;
+  Real dalpha_dT = drho_dT * drho_dT / rho / rho;
+  Real bulk = bulk_modulus_from_p_T(p, T);
+  Real dbulk_dT = (-1.552e-2 + 2 * 1.622e-6 * T) * 1e9;
+  Real denominator = (1 + alpha * alpha * bulk * T / rho / cp);
+  // no pressure dependence in alpha, T, bulk modulus, cp or rho
+  dcv_dp = 0;
+  dcv_dT = dcp_dT / denominator -
+           cp / denominator / denominator *
+               (2 * alpha * dalpha_dT * bulk * T / rho / cp + alpha_2 * dbulk_dT * T / rho / cp +
+                alpha_2 * bulk / rho / cp + alpha_3 * bulk * T / rho / cp -
+                dcp_dT * alpha_2 * bulk * T / rho / cp / cp);
 }
 
 Real

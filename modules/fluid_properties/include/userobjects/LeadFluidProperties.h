@@ -96,7 +96,7 @@ public:
   void mu_from_p_T(Real p, Real T, Real & mu, Real & dmu_drho, Real & dmu_dT) const override;
 
   /**
-   * Bulk Modulus from pressure and temperature
+   * Isentropic bulk modulus from pressure and temperature
    *
    * @param p   pressure (Pa)
    * @param T   temperature (K)
