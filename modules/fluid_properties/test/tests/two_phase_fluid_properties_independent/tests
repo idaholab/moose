@@ -23,7 +23,7 @@
     allow_test_objects = true
     threading = '!pthreads'
     # this test modifies the checkpoint file causing recovery of 'test' to fail
-    recover = false
+    prereq = test
   []
   [error:error_on_unimplemented]
     type = 'RunException'
