@@ -16,7 +16,6 @@ velocity_interp_method='rc'
     nx = 20
     ny = 4
     nz = 4
-    elem_type = TET4
   []
 []
 
@@ -172,11 +171,62 @@ velocity_interp_method='rc'
   []
 []
 
+[Preconditioning]
+  active = 'smp'
+  [smp]
+    type = SMP
+    full = true
+    petsc_options_iname = '-pc_type -pc_factor_mat_solver_type -pc_factor_shift_type'
+    petsc_options_value = 'lu       mumps                      NONZERO'
+  []
+  [fsp]
+    type = FSP
+    topsplit = 'nuv'
+    [nuv]
+      splitting = 'momentum_and_all mass'
+      splitting_type = schur
+      schur_type = full
+      #schur_pre = S
+      #petsc_options = '-dm_view'
+      petsc_options_iname = '-pc_fieldsplit_schur_fact_type -pc_fieldsplit_schur_precondition'
+      petsc_options_value = 'full selfp'
+    []
+    [momentum_and_all]
+      vars = 'u v w'
+      # petsc_options = '-ksp_monitor'
+      petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -sub_ksp_type'
+      petsc_options_value = ' preonly  asm      jacobi          preonly'
+      # lu        157
+      # jacobi    81
+      # bjacobi   90
+      # sor       91
+      # eisenstat 89
+      # icc (not parallel)
+      # ilu      179
+      # asm       81
+      # gasm      97
+      # ksp      419
+      # cholesky  no CV
+
+      # petsc_options_iname = '-ksp_type -pc_type -ksp_gmres_restart -pc_factor_mat_solver_package'
+      # petsc_options_value = 'preonly lu       30                 strumpack'
+      # strumpack lu solve: 117s / 115s preonly?
+      # asm lu strumpack 190s
+    []
+    [mass]
+      vars = 'pressure'
+      #petsc_options = '-pc_svd_monitor'
+      # petsc_options = '-ksp_monitor'
+      petsc_options_iname = '-ksp_type -pc_type -pc_hypre_type'
+      petsc_options_value = ' preonly   hypre  boomeramg'
+      #full = true
+    []
+  []
+[]
+
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type -pc_factor_shift_type'
-  petsc_options_value = 'lu       mumps                      NONZERO'
   line_search = 'none'
   nl_rel_tol = 1e-12
 []
