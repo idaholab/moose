@@ -8,4 +8,4 @@
 ## Development tools utilities
 
 - [Debugging Jacobian entries](development/analyze_jacobian.md)
-- [Python tools](python/index.md)
+- [Python tools](https://mooseframework.inl.gov/python/index.html)

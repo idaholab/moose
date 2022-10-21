@@ -4,7 +4,7 @@ These documentation pages are meant to be used by developers who are developing 
 
 ## Documentation
 
-[Modules](modules/index.md) - Physics and numerics modules to include in your application
+[Modules](https://mooseframework.inl.gov/modules/index.html) - Physics and numerics modules to include in your application
 
 [Syntax](syntax/index.md) - MOOSE syntax documentation
 
@@ -28,7 +28,7 @@ These documentation pages are meant to be used by developers who are developing 
 
 [Utils](utils/index.md) - General utilities used throughout the Framework and applications
 
-[Python Tools](python/index.md) - Python tools to support development, verification, and others
+[Python Tools](https://mooseframework.inl.gov/python/index.html) - Python tools to support development, verification, and others
 
 ## Development workflow
 
