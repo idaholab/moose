@@ -4,7 +4,7 @@
 
   [extract_block]
     requirement = 'The system shall have the capability of creating a new mesh given '
-                  'one or more subdomains within an existing mesh.'
+                  'one or more subdomains within an existing mesh'
 
     [simple_two_dimensional_test]
       type = 'Exodiff'
@@ -14,7 +14,7 @@
       cli_args = '--mesh-only'
       mesh_mode = 'replicated'
 
-      detail = 'tests wheather the simplest case - a one block, single element, 2d mesh of a square - can be handled'
+      detail = 'in the simplest case - a one block, single element, 2d mesh of a square,'
     []
 
     [two_dimensional_test]
@@ -25,7 +25,7 @@
       cli_args = '--mesh-only'
       mesh_mode = 'replicated'
 
-      detail = 'tests whether several 2D blocks may be extracted from a 2D mesh'
+      detail = 'with 2D blocks to be extracted from a 2D mesh'
     []
 
     [three_dimensional_test]  
@@ -36,7 +36,7 @@
       cli_args = '--mesh-only'
       mesh_mode = 'replicated'
 
-      detail = 'tests whether multiple subdomains/blocks can be incorporated into a new mesh in 3D'
+      detail = 'with multiple subdomains/blocks which can be incorporated into a new mesh in 3D'
     []
 
     [lower_dimensional_test]
@@ -47,7 +47,7 @@
       cli_args = '--mesh-only'
       mesh_mode = 'replicated'
 
-      detail = 'tests whether a lower dimension block (1D) may be extracted from a 2D mesh'
+      detail = 'with a lower dimension block (1D) to be extracted from a 2D mesh'
     []
   []
 []

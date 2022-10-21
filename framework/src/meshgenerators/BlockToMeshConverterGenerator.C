@@ -20,9 +20,9 @@ BlockToMeshConverterGenerator::validParams()
   InputParameters params = MeshGenerator::validParams();
 
   params.addClassDescription(
-      "Converts a block (subdomain) from a mesh into a stand-alone mesh with one block in it.");
+      "Converts one or more blocks (subdomains) from a mesh into a stand-alone mesh with a "
+      "single block in it.");
 
-  // list params
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addRequiredParam<std::vector<SubdomainName>>(
       "target_blocks",
