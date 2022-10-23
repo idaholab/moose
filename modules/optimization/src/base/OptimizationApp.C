@@ -8,8 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "OptimizationApp.h"
-#include "HeatConductionApp.h"
-#include "StochasticToolsApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
@@ -47,8 +45,15 @@ OptimizationApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
   registerMooseObjectTask("add_optimization_reporter", OptimizationReporter, false);
   addTaskDependency("add_optimization_reporter", "add_reporter");
 
-  HeatConductionApp::registerAll(f, af, syntax);
-  StochasticToolsApp::registerAll(f, af, syntax);
+  // <<<<<<< Updated upstream
+  //   HeatConductionApp::registerAll(f, af, syntax);
+  //   StochasticToolsApp::registerAll(f, af, syntax);
+  // =======
+  // General Optimization action
+  registerTask("auto_create_mesh", false);
+  registerTask("auto_create_problem", false);
+  registerSyntaxTask("OptimizationAction", "Optimization", "auto_create_mesh");
+  registerSyntaxTask("OptimizationAction", "Optimization", "auto_create_problem");
 }
 
 void

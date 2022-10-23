@@ -1,7 +1,7 @@
 # DO NOT CHANGE THIS TEST
 # this test is documented as an example in forceInv_pointLoads.md
 # if this test is changed, the figures will need to be updated.
-[StochasticTools]
+[Optimization]
 []
 
 [OptimizationReporter]

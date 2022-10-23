@@ -3,7 +3,7 @@
 # two parsed functions.  The scale of the linear and constant functions
 # are being parameterized.
 
-[StochasticTools]
+[Optimization]
 []
 
 [Mesh]

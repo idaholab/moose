@@ -9,18 +9,17 @@
 
 #pragma once
 
-#include "MooseApp.h"
+#include "MooseObjectAction.h"
 
-class OptimizationApp : public MooseApp
+/**
+ * Helper for performing common tasks for optimization simulations
+ *
+ * 1. Setup Mesh, Problem
+ */
+class OptimizationAction : public Action
 {
 public:
   static InputParameters validParams();
-
-  OptimizationApp(InputParameters parameters);
-  virtual ~OptimizationApp();
-
-  static void registerApps();
-  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
-  static void registerObjects(Factory & factory);
-  static void associateSyntax(Syntax & syntax, ActionFactory & action_factory);
+  OptimizationAction(const InputParameters & params);
+  virtual void act() override;
 };

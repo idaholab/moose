@@ -5,7 +5,7 @@
 # The adjoint computed in grad.i is used to compute the gradient for the gradient based LMVM solver in TAO
 # PETSc-TAO optimisation is used to perform this inversion
 #
-[StochasticTools]
+[Optimization]
 []
 [Mesh]
   [gmg]
