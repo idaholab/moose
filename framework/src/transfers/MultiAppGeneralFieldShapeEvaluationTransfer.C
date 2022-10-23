@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MultiAppGeneralFieldMeshFunctionTransfer.h"
+#include "MultiAppGeneralFieldShapeEvaluationTransfer.h"
 
 // MOOSE includes
 #include "DisplacedProblem.h"
@@ -27,26 +27,26 @@
 #include "timpi/communicator.h"
 #include "timpi/parallel_sync.h"
 
-registerMooseObject("MooseApp", MultiAppGeneralFieldMeshFunctionTransfer);
+registerMooseObject("MooseApp", MultiAppGeneralFieldShapeEvaluationTransfer);
 
 InputParameters
-MultiAppGeneralFieldMeshFunctionTransfer::validParams()
+MultiAppGeneralFieldShapeEvaluationTransfer::validParams()
 {
   InputParameters params = MultiAppGeneralFieldTransfer::validParams();
   params.addClassDescription(
-      "Transfers field data at the MultiApp position using solution the finite element function "
-      "from the master application, via a 'libMesh::MeshFunction' object.");
+      "Transfers field data at the MultiApp position using the finite (element) shape functions "
+      "from the origin application.");
   return params;
 }
 
-MultiAppGeneralFieldMeshFunctionTransfer::MultiAppGeneralFieldMeshFunctionTransfer(
+MultiAppGeneralFieldShapeEvaluationTransfer::MultiAppGeneralFieldShapeEvaluationTransfer(
     const InputParameters & parameters)
   : MultiAppGeneralFieldTransfer(parameters), _error_on_miss(getParam<bool>("error_on_miss"))
 {
 }
 
 void
-MultiAppGeneralFieldMeshFunctionTransfer::prepareEvaluationOfInterpValues(
+MultiAppGeneralFieldShapeEvaluationTransfer::prepareEvaluationOfInterpValues(
     const VariableName & var_name)
 {
   _local_bboxes.clear();
@@ -57,10 +57,10 @@ MultiAppGeneralFieldMeshFunctionTransfer::prepareEvaluationOfInterpValues(
 }
 
 void
-MultiAppGeneralFieldMeshFunctionTransfer::buildMeshFunctions(
+MultiAppGeneralFieldShapeEvaluationTransfer::buildMeshFunctions(
     const VariableName & var_name, std::vector<std::shared_ptr<MeshFunction>> & local_meshfuns)
 {
-  // Construct a local mesh for each problem
+  // Construct a local mesh function for each origin problem
   for (unsigned int i_from = 0; i_from < _from_problems.size(); ++i_from)
   {
     FEProblemBase & from_problem = *_from_problems[i_from];
@@ -80,7 +80,7 @@ MultiAppGeneralFieldMeshFunctionTransfer::buildMeshFunctions(
 }
 
 void
-MultiAppGeneralFieldMeshFunctionTransfer::evaluateInterpValues(
+MultiAppGeneralFieldShapeEvaluationTransfer::evaluateInterpValues(
     const std::vector<Point> & incoming_points, std::vector<std::pair<Real, Real>> & outgoing_vals)
 {
   evaluateInterpValuesWithMeshFunctions(
@@ -88,7 +88,7 @@ MultiAppGeneralFieldMeshFunctionTransfer::evaluateInterpValues(
 }
 
 void
-MultiAppGeneralFieldMeshFunctionTransfer::evaluateInterpValuesWithMeshFunctions(
+MultiAppGeneralFieldShapeEvaluationTransfer::evaluateInterpValuesWithMeshFunctions(
     const std::vector<BoundingBox> & local_bboxes,
     const std::vector<std::shared_ptr<MeshFunction>> & local_meshfuns,
     const std::vector<Point> & incoming_points,
@@ -106,7 +106,7 @@ MultiAppGeneralFieldMeshFunctionTransfer::evaluateInterpValuesWithMeshFunctions(
     {
       if (local_bboxes[i_from].contains_point(pt))
       {
-        // Use mesh funciton to compute interpolation values
+        // Use mesh function to compute interpolation values
         auto val = (*local_meshfuns[i_from])(pt - _from_positions[i_from]);
         // Assign value
         outgoing_vals[i_pt].first = val;

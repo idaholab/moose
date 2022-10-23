@@ -3,10 +3,13 @@
   dim = 2
   nx = 10
   ny = 10
+  elem_type = QUAD9
 []
 
 [Variables]
   [u]
+    order = SECOND
+    family = HIERARCHIC
   []
 []
 
@@ -36,7 +39,7 @@
   [from_sub]
   []
   [elemental_from_sub]
-    order = CONSTANT
+    order = FIRST
     family = MONOMIAL
   []
 []
@@ -71,7 +74,7 @@
     source_variable = u
     direction = to_multiapp
     variable = transferred_u
-    type = MultiAppGeneralFieldMeshFunctionTransfer
+    type = MultiAppGeneralFieldShapeEvaluationTransfer
     multi_app = sub
   []
 
@@ -79,7 +82,7 @@
     source_variable = u
     direction = to_multiapp
     variable = elemental_transferred_u
-    type = MultiAppGeneralFieldMeshFunctionTransfer
+    type = MultiAppGeneralFieldShapeEvaluationTransfer
     multi_app = sub
   []
 
@@ -87,7 +90,7 @@
     source_variable = sub_u
     direction = from_multiapp
     variable = from_sub
-    type = MultiAppGeneralFieldMeshFunctionTransfer
+    type = MultiAppGeneralFieldShapeEvaluationTransfer
     multi_app = sub
   []
 
@@ -95,7 +98,7 @@
     source_variable = sub_u
     direction = from_multiapp
     variable = elemental_from_sub
-    type = MultiAppGeneralFieldMeshFunctionTransfer
+    type = MultiAppGeneralFieldShapeEvaluationTransfer
     multi_app = sub
   []
 []

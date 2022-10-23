@@ -20,12 +20,12 @@
  * 2) Support vector vars and regular vars
  * 3) Support higher order FEM
  */
-class MultiAppGeneralFieldMeshFunctionTransfer : public MultiAppGeneralFieldTransfer
+class MultiAppGeneralFieldShapeEvaluationTransfer : public MultiAppGeneralFieldTransfer
 {
 public:
   static InputParameters validParams();
 
-  MultiAppGeneralFieldMeshFunctionTransfer(const InputParameters & parameters);
+  MultiAppGeneralFieldShapeEvaluationTransfer(const InputParameters & parameters);
 
 protected:
   virtual void prepareEvaluationOfInterpValues(const VariableName & var_name) override;
@@ -35,13 +35,19 @@ protected:
 
 private:
   /*
-   * Build mesh functions
+   * Build mesh functions local to the domain
+   * @param[in] var_name the variable to build the mesh functions for
+   * @param[out] the mesh functions
    */
   void buildMeshFunctions(const VariableName & var_name,
-                          std::vector<std::shared_ptr<MeshFunction>> & local_meshfuns);
+                             std::vector<std::shared_ptr<MeshFunction>> & local_meshfuns);
 
   /*
    * Evaluate interpolation values for incoming points
+   * @param[in] bounding boxes to restrict the evaluation domain
+   * @param[in] the mesh functions to use for evaluation
+   * @param[in] the points to evaluate the variable shape functions at
+   * @param[out] the values of the variables
    */
   void evaluateInterpValuesWithMeshFunctions(
       const std::vector<BoundingBox> & local_bboxes,
@@ -57,7 +63,7 @@ private:
    */
   std::vector<BoundingBox> _local_bboxes;
   /*
-   * Local mesh funcitons
+   * Local mesh functions
    */
   std::vector<std::shared_ptr<MeshFunction>> _local_meshfuns;
 };
