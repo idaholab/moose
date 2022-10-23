@@ -1389,6 +1389,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       setscalar(ExecFlagEnum, ExecFlagEnum);
       setscalar(ReporterName, string);
       setscalar(ReporterValueName, string);
+      setscalar(ParsedFunctionExpression, string);
 
       // vector types
       setvector(bool, bool);
