@@ -45,10 +45,6 @@ OptimizationApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
   registerMooseObjectTask("add_optimization_reporter", OptimizationReporter, false);
   addTaskDependency("add_optimization_reporter", "add_reporter");
 
-  // <<<<<<< Updated upstream
-  //   HeatConductionApp::registerAll(f, af, syntax);
-  //   StochasticToolsApp::registerAll(f, af, syntax);
-  // =======
   // General Optimization action
   registerTask("auto_create_mesh", false);
   registerTask("auto_create_problem", false);
