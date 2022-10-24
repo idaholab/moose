@@ -29,13 +29,11 @@ InputParameters
 MultiAppGeneralFieldTransfer::validParams()
 {
   InputParameters params = MultiAppConservativeTransfer::validParams();
-  params.addParam<Real>("bbox_tol", 0.1, "How much want to relax bounding boxes");
+  params.addRangeCheckedParam<Real>("bbox_factor",
+                                    0.1,
+                                    "bbox_factor>-1",
+                                    "Factor to inflate or deflate the source app bounding boxes");
 
-  params.addParam<std::vector<SubdomainName>>(
-      "to_blocks", "The blocks we are transferring to (if not specified, whole domain is used).");
-  params.addParam<std::vector<SubdomainName>>(
-      "from_blocks",
-      "The blocks we are transferring from (if not specified, whole domain is used).");
   params.addParam<std::vector<BoundaryName>>(
       "from_boundaries",
       "The boundary we are transferring from (if not specified, whole domain is used).");
@@ -61,7 +59,7 @@ MultiAppGeneralFieldTransfer::validParams()
 MultiAppGeneralFieldTransfer::MultiAppGeneralFieldTransfer(const InputParameters & parameters)
   : MultiAppConservativeTransfer(parameters),
     _error_on_miss(getParam<bool>("error_on_miss")),
-    _bbox_tol(getParam<Real>("bbox_tol")),
+    _bbox_factor(getParam<Real>("bbox_factor")),
     _greedy_search(getParam<bool>("greedy_search"))
 {
   if (_to_var_names.size() == _from_var_names.size())
@@ -108,8 +106,8 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
       continue;
 
     auto width = box.second - box.first;
-    box.second += width * _bbox_tol;
-    box.first -= width * _bbox_tol;
+    box.second += width * (_bbox_factor - 1);
+    box.first -= width * (_bbox_factor - 1);
   }
 
   // Figure out how many "from" domains each processor owns.

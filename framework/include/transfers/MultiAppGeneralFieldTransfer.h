@@ -120,7 +120,7 @@ private:
   bool _error_on_miss;
 
   /// How much we should relax bounding boxes
-  Real _bbox_tol;
+  Real _bbox_factor;
 
   /// Whether or not a greedy strategy will be used
   /// If true, all the partitions will be checked for a given
