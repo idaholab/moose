@@ -2,8 +2,8 @@
   [gen]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 2
-    ny = 2
+    nx = 5
+    ny = 5
   []
   [block1]
     input = gen
@@ -14,52 +14,42 @@
   []
 []
 
-[Variables]
-  [./u]
-  [../]
-[]
-
 [AuxVariables]
-  [./transferred_u]
-  [../]
-  [./elemental_transferred_u]
-    order = CONSTANT
+  [sent_nodal]
+    [InitialCondition]
+      type = FunctionIC
+      function = '1 + 2*x*x + 3*y*y*y'
+    []
+  []
+  [received_nodal]
+    initial_condition = -1
+  []
+  [sent_elem]
     family = MONOMIAL
-  [../]
-[]
-
-[Kernels]
-  [./diff]
-    type = Diffusion
-    variable = u
-  [../]
-[]
-
-[BCs]
-  [./left]
-    type = DirichletBC
-    variable = u
-    boundary = left
-    value = 3
-  [../]
-  [./right]
-    type = DirichletBC
-    variable = u
-    boundary = right
-    value = 4
-  [../]
+    order = CONSTANT
+    [InitialCondition]
+      type = FunctionIC
+      function = '2 + 2*x*x + 3*y*y*y'
+    []
+  []
+  [received_elem]
+    family = MONOMIAL
+    order = CONSTANT
+    initial_condition = -1
+  []
 []
 
 [Executioner]
   type = Transient
   num_steps = 1
-  dt = 1
-  solve_type = PJFNK
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
+[]
+
+[Problem]
+  solve = false
 []
 
 [Outputs]
   exodus = true
-  execute_on = 'final'
+  hide = 'sent_nodal sent_elem'
+  execute_on = 'TIMESTEP_END'
 []
