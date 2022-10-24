@@ -10,8 +10,8 @@ This class implements a weak form corresponding to
 \int_{\Omega} \psi_i K_r u^2 d\Omega
 \end{equation}
 
-where $K_r$ is the recombination coefficient specified with the `Kr` parameter and
-$u$ corresponds to the `variable` parameter.
+where $K_r$ is the recombination coefficient specified with [!param](/BCs/UnaryRecombinationBC/Kr)
+and $u$ corresponds to [!param](/BCs/UnaryRecombinationBC/variable).
 
 !syntax parameters /BCs/UnaryRecombinationBC
 

@@ -34,7 +34,7 @@ ifeq ($(ALL_MODULES),yes)
         RDG                         := yes
         REACTOR                     := yes
         RICHARDS                    := yes
-	SCALAR_TRANSPORT            := yes
+        SCALAR_TRANSPORT            := yes
         SOLID_PROPERTIES            := yes
         STOCHASTIC_TOOLS            := yes
         TENSOR_MECHANICS            := yes
@@ -96,9 +96,9 @@ ifeq ($(XFEM),yes)
 endif
 
 ifeq ($(SCALAR_TRANSPORT),yes)
-	CHEMICAL_REACTIONS          := yes
-	NAVIER_STOKES               := yes
-	THERMAL_HYDRAULICS	    := yes
+        CHEMICAL_REACTIONS          := yes
+        NAVIER_STOKES               := yes
+        THERMAL_HYDRAULICS          := yes
         FLUID_PROPERTIES            := yes
         HEAT_CONDUCTION             := yes
         RDG                         := yes
