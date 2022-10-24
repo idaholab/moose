@@ -38,10 +38,10 @@ MultiAppGeneralFieldTransfer::validParams()
       "from_blocks",
       "The blocks we are transferring from (if not specified, whole domain is used).");
   params.addParam<std::vector<BoundaryName>>(
-      "from_boundary",
+      "from_boundaries",
       "The boundary we are transferring from (if not specified, whole domain is used).");
   params.addParam<std::vector<BoundaryName>>(
-      "to_boundary",
+      "to_boundaries",
       "The boundary we are transferring to (if not specified, whole domain is used).");
   params.addParam<bool>(
       "greedy_search",
@@ -57,6 +57,8 @@ MultiAppGeneralFieldTransfer::validParams()
       "error_on_miss",
       false,
       "Whether or not to error in the case that a target point is not found in the source domain.");
+  params.addParamNamesToGroup("to_blocks from_blocks to_boundaries from_boundaries",
+                              "Transfer spatial restriction");
   return params;
 }
 
@@ -279,10 +281,10 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const VariableName & var_nam
     }
 
     std::set<BoundaryID> _to_boundaries;
-    if (isParamValid("to_boundary"))
+    if (isParamValid("to_boundaries"))
     {
       // User input block names
-      auto & boundary_names = getParam<std::vector<BoundaryName>>("to_boundary");
+      auto & boundary_names = getParam<std::vector<BoundaryName>>("to_boundaries");
       std::vector<BoundaryID> boundary_ids = to_moose_mesh->getBoundaryIDs(boundary_names);
       // Store these ids
       _to_boundaries.insert(boundary_ids.begin(), boundary_ids.end());
@@ -688,10 +690,10 @@ MultiAppGeneralFieldTransfer::getRestrictedFromBoundingBoxes()
     }
 
     std::set<BoundaryID> boundaries;
-    if (isParamValid("from_boundary"))
+    if (isParamValid("from_boundaries"))
     {
       // User input block names
-      auto & boundary_names = getParam<std::vector<BoundaryName>>("from_boundary");
+      auto & boundary_names = getParam<std::vector<BoundaryName>>("from_boundaries");
       std::vector<BoundaryID> boundary_ids = from_mesh->getBoundaryIDs(boundary_names);
       // Store these ids
       boundaries.insert(boundary_ids.begin(), boundary_ids.end());
