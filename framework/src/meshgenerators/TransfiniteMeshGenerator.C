@@ -404,7 +404,7 @@ TransfiniteMeshGenerator::getCircarcEdge(const Point & P1,
     Real interval = getMapInterval(rx, 0.0, 1.0, a, b);
     Real x = P0(0) + rad * std::cos(interval);
     Real y = P0(1) + rad * std::sin(interval);
-    edge[it]=Point(x, y, 0.0);
+    edge[it] = Point(x, y, 0.0);
     it++;
   };
 
