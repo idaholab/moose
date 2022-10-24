@@ -97,42 +97,38 @@
 
 [Transfers]
   [to_sub]
-    source_variable = u
-    direction = to_multiapp
-    variable = transferred_u
     type = MultiAppGeneralFieldNearestNodeTransfer
-    multi_app = sub
+    source_variable = u
+    variable = transferred_u
+    to_multi_app = sub
     from_blocks = '1'
     to_blocks = '1'
     greedy_search = true
   []
 
   [elemental_to_sub]
-    source_variable = u
-    direction = to_multiapp
-    variable = elemental_transferred_u
     type = MultiAppGeneralFieldNearestNodeTransfer
-    multi_app = sub
+    source_variable = u
+    variable = elemental_transferred_u
+    to_multi_app = sub
     from_blocks = '1'
     to_blocks = '1'
   []
 
   [from_sub]
-    source_variable = sub_u
-    direction = from_multiapp
-    variable = from_sub
     type = MultiAppGeneralFieldNearestNodeTransfer
-    multi_app = sub
+    source_variable = sub_u
+    variable = from_sub
+    from_multi_app = sub
     from_blocks = '1'
     to_blocks = '1'
   []
 
   [elemental_from_sub]
-    source_variable = sub_u
-    direction = from_multiapp
-    variable = elemental_from_sub
     type = MultiAppGeneralFieldNearestNodeTransfer
-    multi_app = sub
+    source_variable = sub_u
+    variable = elemental_from_sub
+    from_multi_app = sub
     from_blocks = '1'
     to_blocks = '1'
   []
