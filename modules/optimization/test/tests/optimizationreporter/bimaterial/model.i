@@ -35,14 +35,14 @@
 []
 
 [Kernels]
-  [conduction]
+  [heat_conduction]
     type = MatDiffusion
-    diffusivity = diffusivity
     variable = temperature
+    diffusivity = diffusivity
   []
   [heat_source]
-    type = ADMatHeatSource
-    material_property = volumetric_heat
+    type = BodyForce
+    value = 100
     variable = temperature
   []
 []
@@ -119,11 +119,6 @@
     block = 'bottom'
     prop_names = diffusivity
     prop_values = diffusivity_bottom_function
-  []
-  [volumetric_heat]
-    type = ADGenericFunctionMaterial
-    prop_names = 'volumetric_heat'
-    prop_values = 100
   []
 []
 

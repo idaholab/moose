@@ -1,7 +1,7 @@
 # Optimization System
 
 Any input file in [MOOSE] needs to include a [Mesh](Mesh/index.md),
-and [Variables](syntax/Variables/index.md) block.  However, the [optimize](Optimize.md) executioner on the optimization main app uses [PETSc TAO](https://www.mcs.anl.gov/petsc/documentation/taosolvertable.html) to solve an optimization problem and does not solve a normal [MOOSE] finite element based nonlinear system of equations.  So the [OptimizationAction](Optimization/index.md) builds a minimal model to satisfy these requirements.
+and [Variables](syntax/Variables/index.md) block.  However, the [optimize](Optimize.md) executioner on the optimization main app uses [PETSc TAO](https://www.mcs.anl.gov/petsc/documentation/taosolvertable.html) to solve an optimization problem and does not solve a normal [MOOSE] finite element based nonlinear system of equations.  So the [Optimization](Optimization/index.md) builds a minimal model to satisfy these requirements.
 
 !listing test/tests/optimizationreporter/point_loads/main.i block=Optimization
 

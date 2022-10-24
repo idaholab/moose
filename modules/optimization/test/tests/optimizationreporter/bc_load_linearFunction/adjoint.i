@@ -2,21 +2,22 @@
 []
 
 [Variables]
-  [temperature]
+  [adjoint_T]
   []
 []
 
 [Kernels]
   [heat_conduction]
-    type = HeatConduction
-    variable = temperature
+    type = MatDiffusion
+    variable = adjoint_T
+    diffusivity = thermal_conductivity
   []
 []
 
 [DiracKernels]
   [pt]
     type = ReporterPointSource
-    variable = temperature
+    variable = adjoint_T
     x_coord_name = misfit/measurement_xcoord
     y_coord_name = misfit/measurement_ycoord
     z_coord_name = misfit/measurement_zcoord
@@ -33,25 +34,25 @@
 [BCs]
   [left]
     type = NeumannBC
-    variable = temperature
+    variable = adjoint_T
     boundary = left
     value = 0
   []
   [right]
     type = NeumannBC
-    variable = temperature
+    variable = adjoint_T
     boundary = right
     value = 0
   []
   [bottom]
     type = DirichletBC
-    variable = temperature
+    variable = adjoint_T
     boundary = bottom
     value = 0
   []
   [top]
     type = DirichletBC
-    variable = temperature
+    variable = adjoint_T
     boundary = top
     value = 0
   []
@@ -91,13 +92,13 @@
     type = VariableFunctionSideIntegral
     boundary = left
     function = left_constant_deriv_a
-    variable = temperature
+    variable = adjoint_T
   []
   [adjoint_bc_1]
     type = VariableFunctionSideIntegral
     boundary = left
     function = left_linear_deriv_b
-    variable = temperature
+    variable = adjoint_T
   []
 []
 

@@ -50,6 +50,8 @@ OptimizationApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
   registerTask("auto_create_problem", false);
   registerSyntaxTask("OptimizationAction", "Optimization", "auto_create_mesh");
   registerSyntaxTask("OptimizationAction", "Optimization", "auto_create_problem");
+  addTaskDependency("setup_mesh", "auto_create_mesh");
+  addTaskDependency("create_problem", "auto_create_problem");
 }
 
 void

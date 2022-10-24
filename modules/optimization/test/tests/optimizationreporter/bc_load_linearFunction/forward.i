@@ -8,8 +8,9 @@
 
 [Kernels]
   [heat_conduction]
-    type = HeatConduction
+    type = MatDiffusion
     variable = temperature
+    diffusivity = thermal_conductivity
   []
 []
 

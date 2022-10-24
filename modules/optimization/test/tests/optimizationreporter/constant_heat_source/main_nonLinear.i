@@ -107,7 +107,5 @@
 []
 
 [Outputs]
-  # console = true
   csv = true
-  # exodus = true
 []

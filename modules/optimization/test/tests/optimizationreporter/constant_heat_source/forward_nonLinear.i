@@ -15,13 +15,13 @@
 
 [Kernels]
   [heat_conduction]
-    type = ADHeatConduction
-    thermal_conductivity = 'thermal_conductivity'
+    type = MatDiffusion
     variable = T
+    diffusivity = thermal_conductivity
   []
   [heat_source]
-    type = ADMatHeatSource
-    material_property = 'volumetric_heat'
+    type = BodyForce
+    function = volumetric_heat_func
     variable = T
   []
 []
@@ -64,16 +64,10 @@
 
 [Materials]
   [steel]
-    type = ADParsedMaterial
+    type = ParsedMaterial
     f_name = 'thermal_conductivity'
     function = '.01*T'
     args = 'T'
-    #outputs = exodus
-  []
-  [volumetric_heat]
-    type = ADGenericFunctionMaterial
-    prop_names = 'volumetric_heat'
-    prop_values = 'volumetric_heat_func'
   []
 []
 
@@ -102,4 +96,6 @@
 []
 
 [Outputs]
+  console = false
+  file_base = 'forward_nl'
 []

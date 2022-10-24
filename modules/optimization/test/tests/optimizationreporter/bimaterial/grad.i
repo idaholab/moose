@@ -25,7 +25,7 @@
 []
 
 [Variables]
-  [temperature]
+  [adjoint_T]
   []
 []
 
@@ -33,7 +33,7 @@
   [conduction]
     type = MatDiffusion
     diffusivity = diffusivity
-    variable = temperature
+    variable = adjoint_T
   []
 []
 
@@ -46,7 +46,7 @@
 [DiracKernels]
   [pt]
     type = ReporterPointSource
-    variable = temperature
+    variable = adjoint_T
     x_coord_name = misfit/measurement_xcoord
     y_coord_name = misfit/measurement_ycoord
     z_coord_name = misfit/measurement_zcoord
@@ -57,15 +57,13 @@
 [BCs]
   [bottom]
     type = DirichletBC
-    variable = temperature
+    variable = adjoint_T
     boundary = bottom
     value = 0
   []
 []
 
 [AuxVariables]
-  [forwardAdjoint]
-  []
   [temperature_forward]
   []
   [grad_Tx]
@@ -103,19 +101,19 @@
     type = VariableGradientComponent
     component = x
     variable = grad_Tx
-    gradient_variable = temperature
+    gradient_variable = adjoint_T
   []
   [grad_Ty]
     type = VariableGradientComponent
     component = y
     variable = grad_Ty
-    gradient_variable = temperature
+    gradient_variable = adjoint_T
   []
   [grad_Tz]
     type = VariableGradientComponent
     component = z
     variable = grad_Tz
-    gradient_variable = temperature
+    gradient_variable = adjoint_T
   []
   [grad_Tfx]
     type = VariableGradientComponent
@@ -142,12 +140,6 @@
     variable = gradient
     args = 'grad_Tx grad_Ty grad_Tz grad_Tfx grad_Tfy grad_Tfz'
     function = '-grad_Tx*grad_Tfx-grad_Ty*grad_Tfy-grad_Tz*grad_Tfz'
-  []
-  [forwardAdjoint] # I am not sure why do we need this?
-    type = ParsedAux
-    variable = forwardAdjoint
-    args = 'temperature_forward temperature'
-    function = 'temperature_forward*temperature'
   []
 []
 

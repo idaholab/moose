@@ -19,8 +19,9 @@
 
 [Kernels]
   [heat_conduction]
-    type = ADHeatConduction
+    type = MatDiffusion
     variable = adjoint_T
+    diffusivity = thermal_conductivity
   []
 []
 
@@ -70,16 +71,11 @@
 
 [Materials]
   [steel]
-    type = ADParsedMaterial
+    type = ParsedMaterial
     f_name = 'thermal_conductivity'
     function = '.01*T'
     args = 'T'
-    #outputs = exodus
   []
-[]
-
-[Problem] #do we need this
-  type = FEProblem
 []
 
 [Executioner]
@@ -117,7 +113,6 @@
 []
 
 [Outputs]
-  # console = true
-  # exodus = true
+  console = false
   file_base = 'adjoint_nl'
 []

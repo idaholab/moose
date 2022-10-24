@@ -14,12 +14,13 @@
 
 [Kernels]
   [heat_conduction]
-    type = ADHeatConduction
+    type = MatDiffusion
     variable = temperature
+    diffusivity = thermal_conductivity
   []
   [heat_source]
-    type = ADMatHeatSource
-    material_property = volumetric_heat
+    type = BodyForce
+    function = volumetric_heat_func
     variable = temperature
   []
 []
@@ -54,7 +55,6 @@
 [Functions]
   [volumetric_heat_func]
     type = ParsedFunction
-    # value = 100*cos(2*pi/2*(x+1))
     value = q
     vars = 'q'
     vals = 'valueFromControl'
@@ -63,14 +63,9 @@
 
 [Materials]
   [steel]
-    type = ADGenericConstantMaterial
+    type = GenericConstantMaterial
     prop_names = thermal_conductivity
     prop_values = 5
-  []
-  [volumetric_heat]
-    type = ADGenericFunctionMaterial
-    prop_names = 'volumetric_heat'
-    prop_values = 'volumetric_heat_func'
   []
 []
 
@@ -99,8 +94,6 @@
 []
 
 [Outputs]
-  # console = true
-  # exodus = true
-  # csv = true
+  console = false
   file_base = 'forward'
 []

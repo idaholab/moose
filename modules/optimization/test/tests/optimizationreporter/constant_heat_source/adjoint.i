@@ -14,8 +14,9 @@
 
 [Kernels]
   [heat_conduction]
-    type = ADHeatConduction
+    type = MatDiffusion
     variable = adjoint_T
+    diffusivity = thermal_conductivity
   []
 []
 
@@ -65,14 +66,10 @@
 
 [Materials]
   [steel]
-    type = ADGenericConstantMaterial
+    type = GenericConstantMaterial
     prop_names = thermal_conductivity
     prop_values = 5
   []
-[]
-
-[Problem] #do we need this
-  type = FEProblem
 []
 
 [Executioner]
@@ -110,7 +107,6 @@
 []
 
 [Outputs]
-  # console = true
-  # exodus = true
+  console = false
   file_base = 'adjoint'
 []

@@ -35,7 +35,7 @@ Optimization problems are solved using the [MultiApps](MultiApps/index.md) syste
          id=fig:main_app
          caption=Main application optimization input for point load parameterization shown in [figSetup]
 
-The main application runs the optimization executioner and transfers data from the optimization executioner back and forth to the sub-apps that are running the "forward" and "adjoint" simulations.  Since no mesh or physics kernels are required on the main-app, we use the `[StochasticTools]` action to set up all of the nullkernels, empty mesh, etc. needed to get a MOOSE simulation to run.  
+The main application runs the optimization executioner and transfers data from the optimization executioner back and forth to the sub-apps that are running the "forward" and "adjoint" simulations.  Since no mesh or physics kernels are required on the main-app, we use the [Optimization](Optimization/index.md) action to set up all of the nullkernels, empty mesh, etc. needed to get a MOOSE simulation to run.  
 
 The [Optimize](Optimize.md) executioner block in [executionerBlock] , provides an interface with the [PETSc TAO](https://www.mcs.anl.gov/petsc/documentation/taosolvertable.html) optimization library. The optimization algorithm is selected with [!param](/Executioner/Optimize/tao_solver) with specific solver options set with `petsc_options`.  In this example the Hessian based Newton linesearch algorithm is selected with `taonls`.
 

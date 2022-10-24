@@ -38,8 +38,9 @@
 
 [Kernels]
   [heat_conduction]
-    type = ADHeatConduction
+    type = MatDiffusion
     variable = adjoint
+    diffusivity = thermal_conductivity
   []
 []
 
@@ -92,7 +93,7 @@
 
 [Materials]
   [steel]
-    type = ADGenericConstantMaterial
+    type = GenericConstantMaterial
     prop_names = thermal_conductivity
     prop_values = 5
   []

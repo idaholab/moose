@@ -7,12 +7,13 @@
 []
 [Kernels]
   [heat_conduction]
-    type = HeatConduction
+    type = MatDiffusion
     variable = temperature
+    diffusivity = thermal_conductivity
   []
   [heat_source]
-    type = ADMatHeatSource
-    material_property = volumetric_heat
+    type = BodyForce
+    value = 1000
     variable = temperature
   []
 []
@@ -51,11 +52,6 @@
     vars = 'alpha'
     vals = 'p1'
   []
-  [heat_source]
-    type = ParsedFunction
-    # value = 100*cos(2*pi/2*(x+1))
-    value = 1000
-  []
 []
 
 [Materials]
@@ -63,11 +59,6 @@
     type = GenericFunctionMaterial
     prop_names = 'thermal_conductivity'
     prop_values = 'thermo_conduct'
-  []
-  [volumetric_heat]
-    type = ADGenericFunctionMaterial
-    prop_names = 'volumetric_heat'
-    prop_values = 'heat_source'
   []
 []
 

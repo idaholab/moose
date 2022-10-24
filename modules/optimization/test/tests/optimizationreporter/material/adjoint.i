@@ -7,8 +7,9 @@
 []
 [Kernels]
   [heat_conduction]
-    type = HeatConduction
+    type = MatDiffusion
     variable = adjointVar
+    diffusivity = thermal_conductivity
   []
 []
 
@@ -66,10 +67,6 @@
     value = alpha
     vars = 'alpha'
     vals = 'p1'
-  []
-  [heat_source]
-    type = ParsedFunction
-    value = 1000
   []
 []
 
