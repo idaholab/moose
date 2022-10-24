@@ -33,7 +33,6 @@ MultiAppGeneralFieldTransfer::validParams()
 
   params.addParam<std::vector<SubdomainName>>(
       "to_blocks", "The blocks we are transferring to (if not specified, whole domain is used).");
-
   params.addParam<std::vector<SubdomainName>>(
       "from_blocks",
       "The blocks we are transferring from (if not specified, whole domain is used).");
@@ -43,16 +42,13 @@ MultiAppGeneralFieldTransfer::validParams()
   params.addParam<std::vector<BoundaryName>>(
       "to_boundaries",
       "The boundary we are transferring to (if not specified, whole domain is used).");
+
   params.addParam<bool>(
       "greedy_search",
       false,
       "Whether or not to send a point to all the domains. If true, all the processors will be "
       "checked for a given point."
       "The code will be slow if this flag is on but it will give a better solution.");
-  params.addParam<unsigned int>("num_nearest_points",
-                                1,
-                                "Number of nearest source (from) points will be chosen to "
-                                "construct a value for the target point.");
   params.addParam<bool>(
       "error_on_miss",
       false,
@@ -66,8 +62,7 @@ MultiAppGeneralFieldTransfer::MultiAppGeneralFieldTransfer(const InputParameters
   : MultiAppConservativeTransfer(parameters),
     _error_on_miss(getParam<bool>("error_on_miss")),
     _bbox_tol(getParam<Real>("bbox_tol")),
-    _greedy_search(getParam<bool>("greedy_search")),
-    _num_nearest_points(getParam<unsigned int>("num_nearest_points"))
+    _greedy_search(getParam<bool>("greedy_search"))
 {
   if (_to_var_names.size() == _from_var_names.size())
     _var_size = _to_var_names.size();
@@ -78,15 +73,11 @@ MultiAppGeneralFieldTransfer::MultiAppGeneralFieldTransfer(const InputParameters
 void
 MultiAppGeneralFieldTransfer::execute()
 {
-  _console << "Beginning GeneralFieldTransfer " << name() << std::endl;
-
   getAppInfo();
 
   // loop over the vector of variables and make the transfer one by one
   for (unsigned int i = 0; i < _var_size; ++i)
     transferVariable(i);
-
-  _console << "Finished GeneralFieldTransfer " << name() << std::endl;
 
   postExecute();
 }

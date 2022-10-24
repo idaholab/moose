@@ -58,5 +58,6 @@ private:
 
   std::vector<std::vector<Real>> _local_values;
 
+  /// Number of points to consider
   unsigned int _num_nearest_points;
 };

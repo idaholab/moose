@@ -127,9 +127,6 @@ private:
   /// outgoing point
   bool _greedy_search;
 
-  /// Number of nearest points are chosen
-  unsigned int _num_nearest_points;
-
   /// Number of froms per processor
   std::vector<unsigned int> _froms_per_proc;
 

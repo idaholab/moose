@@ -196,7 +196,7 @@ MultiAppGeneralFieldNearestNodeTransfer::evaluateInterpValuesNearestNode(
           val_sum += local_values[i_from][index];
           dist_sum += (local_points[i_from][index] - pt).norm();
         }
-        // Use mesh funciton to compute interpolation values
+        // Use mesh function to compute interpolation values
         // Assign value
         outgoing_vals[i_pt] = {val_sum / return_index.size(), dist_sum / return_dist_sqr.size()};
       }
