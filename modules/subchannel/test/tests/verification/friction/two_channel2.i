@@ -42,6 +42,7 @@ P_out = 155e+5 # Pa
   compute_viscosity = true
   compute_power = true
   P_out = ${P_out}
+  default_friction_model = false
 []
 
 [ICs]
@@ -132,27 +133,27 @@ P_out = 155e+5 # Pa
 
 [Outputs]
   exodus = true
-  # [Temp_Out_MATRIX]
-  #   type = QuadSubChannelNormalSliceValues
-  #   variable = T
-  #   execute_on = final
-  #   file_base = "Temp_Out.txt"
-  #   height = 10.0
-  # []
-  # [mdot_Out_MATRIX]
-  #   type = QuadSubChannelNormalSliceValues
-  #   variable = mdot
-  #   execute_on = final
-  #   file_base = "mdot_Out.txt"
-  #   height = 10.0
-  # []
-  # [mdot_In_MATRIX]
-  #   type = QuadSubChannelNormalSliceValues
-  #   variable = mdot
-  #   execute_on = final
-  #   file_base = "mdot_In.txt"
-  #   height = 0.0
-  # []
+  [Temp_Out_MATRIX]
+    type = QuadSubChannelNormalSliceValues
+    variable = T
+    execute_on = final
+    file_base = "Temp_Out.txt"
+    height = 10.0
+  []
+  [mdot_Out_MATRIX]
+    type = QuadSubChannelNormalSliceValues
+    variable = mdot
+    execute_on = final
+    file_base = "mdot_Out.txt"
+    height = 10.0
+  []
+  [mdot_In_MATRIX]
+    type = QuadSubChannelNormalSliceValues
+    variable = mdot
+    execute_on = final
+    file_base = "mdot_In.txt"
+    height = 0.0
+  []
 []
 
 [Executioner]

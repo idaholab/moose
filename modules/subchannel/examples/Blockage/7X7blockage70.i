@@ -1,6 +1,9 @@
 T_in = 302.594
 mass_flux_in = 1730.0950134985335
 P_out = 101325  # Pa
+# Creer et. al 1976
+# Blockage is modeled with area reduction and form loss coefficient distributed on the
+# affected subchannels
 
 [QuadSubChannelMesh]
   [sub_channel]
@@ -16,7 +19,7 @@ P_out = 101325  # Pa
     z_blockage = '0.60325 0.67945'
     index_blockage = '18 19 20 21 26 27 28 29 34 35 36 37 42 43 44 45'
     reduction_blockage = '0.83 0.65 0.65 0.83 0.65 0.30 0.30 0.65 0.65 0.30 0.30 0.65 0.83 0.65 0.65 0.83'
-    k_blockage = '0.0 0.0 0.0 0.0 0.0 1.1 1.1 0.0 0.0 1.1 1.1 0.0 0.0 0.0 0.0 0.0'
+    k_blockage = '0.0 0.0 0.0 0.0 0.0 1.12 1.12 0.0 0.0 1.12 1.12 0.0 0.0 0.0 0.0 0.0'
     spacer_z = '0.4064 1.4224'
     spacer_k = '1.14 1.14'
   []

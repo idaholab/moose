@@ -1,36 +1,33 @@
 # M. H. Fontana et al 1973, 1976
-# This input file models a partial block at the center of the assembly
-# The affected subchannels get an area reduction and a form loss coefficient
-T_in = 714.261
+# This input file models a block at the inlet of the assembly
+# using aux kernel BlockedMassFlowRateAux. The affected subchannels get a mass flow BC that is
+# hard-coded to be very low
+T_in = 589.15
 A12 = 1.00423e3
 A13 = -0.21390
 A14 = -1.1046e-5
 rho = ${fparse A12 + A13 * T_in + A14 * T_in * T_in}
 Total_surface_area = 0.000467906 #m2
-Blocked_surface_area = 0.0 #m2
+Blocked_surface_area = ${fparse 8.63577e-06 * 13}
 Flow_area = ${fparse Total_surface_area - Blocked_surface_area}
-vol_flow = 3.41E-03 #m3/s
+vol_flow = 3.41E-03
 mass_flux_in = ${fparse rho *  vol_flow / Flow_area}
 P_out = 2.0e5 # Pa
 [TriSubChannelMesh]
   [subchannel]
     type = TriSubChannelMeshGenerator
     nrings = 3
-    n_cells = 37
+    n_cells = 36
     flat_to_flat = 3.41e-2
     heated_length = 0.5334
-    unheated_length_entry = 0.3048
-    unheated_length_exit = 0.0762
+    unheated_length_entry = 0.0762
+    unheated_length_exit = 0.3048
     rod_diameter = 5.84e-3
     pitch = 7.26e-3
     dwire = 1.42e-3
     hwire = 0.3048
     spacer_z = '0.0'
     spacer_k = '0.0'
-    z_blockage = '0.6858 0.69215'
-    index_blockage = '0 1 2 3 4 5'
-    reduction_blockage = '0.1 0.1 0.1 0.1 0.1 0.1'
-    k_blockage = '1 1 1 1 1 1 '
   []
 []
 
@@ -79,8 +76,8 @@ P_out = 2.0e5 # Pa
   compute_density = true
   compute_viscosity = true
   compute_power = true
-  P_tol = 1.0e-3
-  T_tol = 1.0e-3
+  P_tol = 1.0e-5
+  T_tol = 1.0e-4
   implicit = true
   segregated = false
 []
@@ -99,7 +96,7 @@ P_out = 2.0e5 # Pa
    [q_prime_IC]
     type = TriPowerIC
     variable = q_prime
-    power = 332500.0 #W
+    power = 162153.6 #W
     filename = "pin_power_profile_19.txt"
   []
 
@@ -168,9 +165,10 @@ P_out = 2.0e5 # Pa
     execute_on = 'timestep_begin'
   []
   [mdot_in_bc]
-    type = MassFlowRateAux
+    type = BlockedMassFlowRateAux
     variable = mdot
     boundary = inlet
+    index_blockage = '0 1 2 3 4 5 11 22 21 10 20 19 9'
     area = S
     mass_flux = ${mass_flux_in}
     execute_on = 'timestep_begin'
@@ -180,6 +178,16 @@ P_out = 2.0e5 # Pa
 [Outputs]
   exodus = true
 []
+
+# [Postprocessors]
+#   [T]
+#     type = TriSubChannelPointValue
+#     variable = T
+#     index = 0
+#     execute_on = 'initial timestep_end'
+#     height = 0.5
+#   []
+# []
 
 [Executioner]
   type = Steady
@@ -194,7 +202,7 @@ P_out = 2.0e5 # Pa
 [MultiApps]
   [viz]
     type = FullSolveMultiApp
-    input_files = "FFM-3Adetailed.i"
+    input_files = "FFM-2Bdetailed.i"
     execute_on = "timestep_end"
   []
 []

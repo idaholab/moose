@@ -1,20 +1,30 @@
-T_in = 302.594
-mass_flux_in = 1730.0950134985335
-P_out = 101325  # Pa
+T_in = 359.15
+# [1e+6 kg/m^2-hour] turns into kg/m^2-sec
+mass_flux_in = ${fparse 1e+6 * 17.00 / 3600.}
+P_out = 4.923e6 # Pa
 
 [QuadSubChannelMesh]
   [sub_channel]
     type = QuadSubChannelMeshGenerator
-    nx = 8
-    ny = 8
-    n_cells = 40
-    pitch = 0.0136906
-    Kij = 0.5
-    rod_diameter = 0.0099568
-    gap = 0.0036957
-    heated_length = 1.4478
+    nx = 6
+    ny = 6
+    n_cells = 3
+    pitch = 0.0126
+    rod_diameter = 0.00950
+    gap = 0.00095 # the half gap between sub-channel assemblies
+    heated_length = 1.0
     spacer_z = '0.0'
     spacer_k = '0.0'
+  []
+
+  [fuel_pins]
+    type = QuadPinMeshGenerator
+    input = sub_channel
+    nx = 6
+    ny = 6
+    n_cells = 3
+    pitch = 0.0126
+    heated_length = 1.0
   []
 []
 
@@ -75,11 +85,7 @@ P_out = 101325  # Pa
   compute_viscosity = true
   compute_power = true
   P_out = ${P_out}
-  implicit = true
-  segregated = false
-  staggered_pressure = false
-  monolithic_thermal = false
-  interpolation_scheme = central_difference
+  default_friction_model = false
 []
 
 [ICs]
@@ -96,8 +102,8 @@ P_out = 101325  # Pa
   [q_prime_IC]
     type = QuadPowerIC
     variable = q_prime
-    power = 0.0 # W
-    filename = "power_profile.txt"
+    power = 1.0e6 # W
+    filename = "power_profile.txt" #type in name of file that describes radial power profile
   []
 
   [T_ic]
@@ -173,22 +179,8 @@ P_out = 101325  # Pa
     type = QuadSubChannelNormalSliceValues
     variable = T
     execute_on = final
-    file_base = "Temp_Out.txt"
-    height = 1.4478
-  []
-  [mdot_Out_MATRIX]
-    type = QuadSubChannelNormalSliceValues
-    variable = mdot
-    execute_on = final
-    file_base = "mdot_Out.txt"
-    height = 1.4478
-  []
-  [mdot_In_MATRIX]
-    type = QuadSubChannelNormalSliceValues
-    variable = mdot
-    execute_on = final
-    file_base = "mdot_In.txt"
-    height = 0.0
+    file_base = "Temp_Out_Explicit.txt"
+    height = 1.0
   []
 []
 
@@ -196,22 +188,4 @@ P_out = 101325  # Pa
   type = Steady
   nl_rel_tol = 0.9
   l_tol = 0.9
-[]
-
-
-[MultiApps]
-  [viz]
-    type = FullSolveMultiApp
-    input_files = "detailedMesh.i"
-    execute_on = "final"
-  []
-[]
-
-[Transfers]
-  ###### Transfers to the detailedMesh at the end of the coupled simulations
-  [subchannel_transfer]
-    type = MultiAppDetailedSolutionTransfer
-    to_multi_app = viz
-    variable = 'mdot SumWij P DP h T rho mu S'
-  []
 []

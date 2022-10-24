@@ -24,7 +24,7 @@ LiquidMetalSubChannel1PhaseProblem::LiquidMetalSubChannel1PhaseProblem(
       _outer_channels += 1.0;
   }
 
-  // Initializing heat conduciton system
+  // Initializing heat conduction system
   createPetscMatrix(
       _hc_axial_heat_conduction_mat, _block_size * _n_channels, _block_size * _n_channels);
   createPetscVector(_hc_axial_heat_conduction_rhs, _block_size * _n_channels);
@@ -1669,15 +1669,6 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
         for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
         {
           auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-          if (xx[iz_ind * _n_channels + i_ch] < 0)
-          {
-            _console << "Wij = : " << _Wij << "\n";
-            mooseError(name(),
-                       " : Calculation of negative Enthalpy h_out = : ",
-                       xx[iz_ind * _n_channels + i_ch],
-                       " Axial Level= : ",
-                       iz);
-          }
           _h_soln->set(node_out, xx[iz_ind * _n_channels + i_ch]);
         }
       }
@@ -1891,30 +1882,25 @@ LiquidMetalSubChannel1PhaseProblem::externalSolve()
 
   auto power_in = 0.0;
   auto power_out = 0.0;
+  auto Total_surface_area = 0.0;
   auto mass_flow_in = 0.0;
   auto mass_flow_out = 0.0;
   for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
   {
     auto * node_in = _subchannel_mesh.getChannelNode(i_ch, 0);
     auto * node_out = _subchannel_mesh.getChannelNode(i_ch, _n_cells);
+    Total_surface_area += (*_S_flow_soln)(node_in);
     power_in += (*_mdot_soln)(node_in) * (*_h_soln)(node_in);
     power_out += (*_mdot_soln)(node_out) * (*_h_soln)(node_out);
     mass_flow_in += (*_mdot_soln)(node_in);
     mass_flow_out += (*_mdot_soln)(node_out);
   }
+
+  auto h_bulk_out = power_out / mass_flow_out;
+  auto T_bulk_out = _fp->T_from_p_h(_P_out, h_bulk_out);
+
+  _console << "Bulk sodium temperature at the bundle outlet :" << T_bulk_out << std::endl;
   _console << "Power added to coolant is: " << power_out - power_in << " Watt" << std::endl;
   _console << "Mass balance is: " << mass_flow_out - mass_flow_in << " Kg/sec" << std::endl;
   _console << " ============================ " << std::endl;
-  _console << " Temperature at channel 36 : "
-           << (*_T_soln)(_subchannel_mesh.getChannelNode(36, _n_cells)) << std::endl;
-  _console << " Temperature at channel 20 : "
-           << (*_T_soln)(_subchannel_mesh.getChannelNode(20, _n_cells)) << std::endl;
-  _console << " Temperature at channel 10 : "
-           << (*_T_soln)(_subchannel_mesh.getChannelNode(10, _n_cells)) << std::endl;
-  _console << " Temperature at channel 4  : "
-           << (*_T_soln)(_subchannel_mesh.getChannelNode(4, _n_cells)) << std::endl;
-  _console << " Temperature at channel 1  : "
-           << (*_T_soln)(_subchannel_mesh.getChannelNode(1, _n_cells)) << std::endl;
-  _console << " Temperature at channel 14 : "
-           << (*_T_soln)(_subchannel_mesh.getChannelNode(14, _n_cells)) << std::endl;
 }

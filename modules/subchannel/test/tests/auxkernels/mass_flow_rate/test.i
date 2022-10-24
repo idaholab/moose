@@ -1,42 +1,43 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 1
-[]
-
-[AuxVariables]
-  [S]
+    type = GeneratedMesh
+    dim = 1
   []
 
-  [mdot]
+  [AuxVariables]
+    [S]
+    []
+
+    [mdot]
+    []
   []
-[]
 
-[ICs]
-  [S_IC]
-    type = ConstantIC
-    variable = S
-    value = 0.5
+  [ICs]
+    [S_IC]
+      type = ConstantIC
+      variable = S
+      value = 0.5
+    []
   []
-[]
 
-[AuxKernels]
-  [mdot_ak]
-    type = MassFlowRateAux
-    variable = mdot
-    area = S
-    mass_flux = 4722
-    execute_on = 'initial'
+  [AuxKernels]
+    [mdot_ak]
+      type = MassFlowRateAux
+      variable = mdot
+      area = S
+      mass_flux = 4722
+      execute_on = 'initial'
+    []
   []
-[]
 
-[Problem]
-  solve = false
-[]
+  [Problem]
+    solve = false
+  []
 
-[Executioner]
-  type = Steady
-[]
+  [Executioner]
+    type = Steady
+  []
 
-[Outputs]
-  exodus = true
-[]
+  [Outputs]
+    exodus = true
+  []
+

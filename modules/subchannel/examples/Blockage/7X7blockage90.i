@@ -1,6 +1,9 @@
 T_in = 302.594
 mass_flux_in = 1730.0950134985335
 P_out = 101325  # Pa
+# Creer et. al 1976
+# Blockage is modeled with area reduction and form loss coefficient distributed on the
+# affected subchannels
 
 [QuadSubChannelMesh]
   [sub_channel]

@@ -134,6 +134,9 @@ public:
    */
   virtual const std::vector<Node *> getDuctNodes() const override { return _duct_nodes; }
 
+  /// x,y coordinates of the subchannels
+  std::vector<std::vector<Real>> _subchannel_position;
+
 protected:
   /// number of rings of fuel rods
   unsigned int _n_rings;
@@ -173,8 +176,6 @@ protected:
   std::vector<std::vector<Real>> _sign_id_crossflow_map;
   /// gap size
   std::vector<Real> _gij_map;
-  /// x,y coordinates of the subchannels
-  std::vector<std::vector<Real>> _subchannel_position;
   /// x,y coordinates of the fuel rods
   std::vector<Point> _rod_position;
   /// fuel rods that are belonging to each ring

@@ -7,4 +7,12 @@
     valgrind = NONE
     recover = false
   []
+  [friction2]
+    type = Exodiff
+    input = two_channel2.i
+    exodiff = two_channel2_out.e
+    method = '!DBG'
+    valgrind = NONE
+    recover = false
+  []
 []

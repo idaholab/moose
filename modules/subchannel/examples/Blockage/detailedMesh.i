@@ -7,7 +7,7 @@
     gap = 0.0036957
     heated_length = 1.4478
   []
-  
+
   [Mesh]
     [subchannel]
       type = DetailedQuadSubChannelMeshGenerator
@@ -17,7 +17,7 @@
     #   input = subchannel
     # []
   []
-  
+
   [AuxVariables]
     [mdot]
     []
@@ -44,18 +44,18 @@
     [q_prime]
     []
   []
-  
+
   [Problem]
     type = NoSolveProblem
   []
-  
+
   [Outputs]
     exodus = true
   []
-  
+
   [Executioner]
     type = Steady
     nl_rel_tol = 0.9
     l_tol = 0.9
   []
-  
+

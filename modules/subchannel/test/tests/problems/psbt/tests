@@ -10,6 +10,17 @@
     abs_zero = 5e-6
     max_threads = 1
   []
+  [psbt_explicit_friction2]
+    type = Exodiff
+    input = psbt_f2.i
+    exodiff = psbt_f2_out.e
+    custom_cmp = 'test.exodiff'
+    method = '!DBG'
+    valgrind = NONE
+    recover = false
+    abs_zero = 5e-6
+    max_threads = 1
+  []
   [psbt_implicit]
     type = Exodiff
     input = psbt_implicit.i

@@ -18,6 +18,7 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
 
 TriSubChannelMesh::TriSubChannelMesh(const TriSubChannelMesh & other_mesh)
   : SubChannelMesh(other_mesh),
+    _subchannel_position(other_mesh._subchannel_position),
     _n_rings(other_mesh._n_rings),
     _n_channels(other_mesh._n_channels),
     _flat_to_flat(other_mesh._flat_to_flat),
@@ -32,7 +33,6 @@ TriSubChannelMesh::TriSubChannelMesh(const TriSubChannelMesh & other_mesh)
     _chan_to_gap_map(other_mesh._chan_to_gap_map),
     _sign_id_crossflow_map(other_mesh._sign_id_crossflow_map),
     _gij_map(other_mesh._gij_map),
-    _subchannel_position(other_mesh._subchannel_position),
     _rod_position(other_mesh._rod_position),
     _rods_in_rings(other_mesh._rods_in_rings),
     _subchannel_to_rod_map(other_mesh._subchannel_to_rod_map),

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "TriSubChannelBaseIC.h"
+#include "SubChannelMesh.h"
 
 class TriSubChannelMesh;
 
