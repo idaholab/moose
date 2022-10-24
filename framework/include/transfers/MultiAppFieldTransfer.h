@@ -50,11 +50,11 @@ protected:
   /// Virtual function defining variables to transfer to
   virtual std::vector<AuxVariableName> getToVarNames() const = 0;
 
-private:
+protected:
   /// Whether block restriction is active
   const bool _has_block_restrictions;
   /// Subdomain IDs of the blocks to transfer from
-  std::vector<SubdomainID> _from_blocks;
+  std::set<SubdomainID> _from_blocks;
   /// Subdomain IDs of the blocks to transfer to
-  std::vector<SubdomainID> _to_blocks;
+  std::set<SubdomainID> _to_blocks;
 };

@@ -33,9 +33,10 @@ MultiAppFieldTransfer::validParams()
 
   // Block restrictions
   params.addParam<std::vector<SubdomainName>>(
-      "from_blocks", "Subdomain restriction of the part of the field(s) to transfer from");
+      "from_blocks",
+      "Subdomain restriction to transfer from (defaults to all the origin app domain)");
   params.addParam<std::vector<SubdomainName>>(
-      "to_blocks", "Subdomain restriction of the part of the field(s) to transfer to");
+      "to_blocks", "Subdomain restriction to transfer to, (defaults to all the target app domain)");
 
   return params;
 }
@@ -105,7 +106,10 @@ MultiAppFieldTransfer::initialSetup()
         paramError("from_blocks", "The block '", b, "' was not found in the mesh");
 
     if (from_block_names.size())
-      _from_blocks = from_problem->mesh().getSubdomainIDs(from_block_names);
+    {
+      const auto block_vec = from_problem->mesh().getSubdomainIDs(from_block_names);
+      _from_blocks = std::set<SubdomainID>(block_vec.begin(), block_vec.end());
+    }
     else
       _from_blocks = {Moose::ANY_BLOCK_ID};
 
@@ -115,25 +119,12 @@ MultiAppFieldTransfer::initialSetup()
         paramError("to_blocks", "The block '", b, "' was not found in the mesh");
 
     if (to_block_names.size())
-      _to_blocks = to_problem->mesh().getSubdomainIDs(to_block_names);
+    {
+      const auto block_vec = to_problem->mesh().getSubdomainIDs(to_block_names);
+      _to_blocks = std::set<SubdomainID>(block_vec.begin(), block_vec.end());
+    }
     else
       _to_blocks = {Moose::ANY_BLOCK_ID};
-
-    // Forbid block restriction on nodal variables as currently not supported
-    if (from_block_names.size())
-      for (auto & from_var : getFromVarNames())
-        if (from_problem
-                ->getVariable(
-                    0, from_var, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY)
-                .hasDoFsOnNodes())
-          paramError("from_blocks", "Block restriction is not implemented for nodal variables");
-    if (to_block_names.size())
-      for (auto & to_var : getToVarNames())
-        if (to_problem
-                ->getVariable(
-                    0, to_var, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY)
-                .hasDoFsOnNodes())
-          paramError("to_blocks", "Block restriction is not implemented for nodal variables");
   }
 }
 

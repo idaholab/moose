@@ -39,6 +39,48 @@ MultiAppCopyTransfer::MultiAppCopyTransfer(const InputParameters & parameters)
 }
 
 void
+MultiAppCopyTransfer::initialSetup()
+{
+  MultiAppFieldTransfer::initialSetup();
+
+  const FEProblemBase * from_problem;
+  const FEProblemBase * to_problem;
+
+  if (_current_direction == FROM_MULTIAPP)
+  {
+    // Subdomain and variable type information is shared on all subapps
+    from_problem = &getFromMultiApp()->appProblemBase(0);
+    to_problem = &getFromMultiApp()->problemBase();
+  }
+  else if (_current_direction == TO_MULTIAPP)
+  {
+    from_problem = &getToMultiApp()->problemBase();
+    to_problem = &getToMultiApp()->appProblemBase(0);
+  }
+  else
+  {
+    from_problem = &getFromMultiApp()->appProblemBase(0);
+    to_problem = &getToMultiApp()->appProblemBase(0);
+  }
+
+  // Forbid block restriction on nodal variables as currently not supported
+  if (_from_blocks.size())
+    for (auto & from_var : getFromVarNames())
+      if (from_problem
+              ->getVariable(
+                  0, from_var, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY)
+              .hasDoFsOnNodes())
+        paramError("from_blocks", "Block restriction is not implemented for nodal variables");
+  if (_to_blocks.size())
+    for (auto & to_var : getToVarNames())
+      if (to_problem
+              ->getVariable(
+                  0, to_var, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY)
+              .hasDoFsOnNodes())
+        paramError("to_blocks", "Block restriction is not implemented for nodal variables");
+}
+
+void
 MultiAppCopyTransfer::execute()
 {
   TIME_SECTION("MultiAppCopyTransfer::execute()", 5, "Copies variables");

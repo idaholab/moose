@@ -41,6 +41,10 @@ MultiAppShapeEvaluationTransfer::validParams()
       "Transfers field data at the MultiApp position using solution the finite element function "
       "from the main/parent application, via a 'libMesh::MeshFunction' object.");
 
+  // Block restriction not implemented
+  params.suppressParameter<std::vector<SubdomainName>>("from_blocks");
+  params.suppressParameter<std::vector<SubdomainName>>("to_blocks");
+
   params.addParam<bool>(
       "error_on_miss",
       false,

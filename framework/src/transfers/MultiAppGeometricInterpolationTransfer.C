@@ -66,6 +66,11 @@ MultiAppGeometricInterpolationTransfer::validParams()
                         1e-10,
                         "If the distance between two points is smaller than distance_tol, two "
                         "points will be considered as identical");
+
+  // Block restriction not implemented
+  params.suppressParameter<std::vector<SubdomainName>>("from_blocks");
+  params.suppressParameter<std::vector<SubdomainName>>("to_blocks");
+
   return params;
 }
 
