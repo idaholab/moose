@@ -438,10 +438,18 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   //   _mesh.getMesh().remove_ghosting_functor(_mesh.getMesh().default_ghosting());
 
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
-  // Master app should hold the default database to handle system petsc options
+  // Main app should hold the default database to handle system petsc options
   if (!_app.isUltimateMaster())
     PetscOptionsCreate(&_petsc_option_data_base);
 #endif
+}
+
+const MooseMesh &
+FEProblemBase::mesh(bool use_displaced) const
+{
+  mooseAssert(!use_displaced || _displaced_problem,
+              "Displaced mesh was requested but displaced problem does not exist");
+  return (use_displaced ? _displaced_problem->mesh() : mesh());
 }
 
 void

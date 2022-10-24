@@ -46,6 +46,11 @@ public:
   virtual EquationSystems & es() override { return _eq; }
   virtual MooseMesh & mesh() override { return _mesh; }
   virtual const MooseMesh & mesh() const override { return _mesh; }
+  const MooseMesh & mesh(bool libmesh_dbg_var(use_displaced)) const override
+  {
+    mooseAssert(use_displaced, "An undisplaced mesh was queried from the displaced problem");
+    return mesh();
+  }
   MooseMesh & refMesh();
 
   DisplacedSystem & nlSys(unsigned int sys_num = 0);

@@ -75,7 +75,7 @@ MultiAppGeneralFieldNearestNodeTransfer::buildKDTrees(
   for (unsigned int i_from = 0; i_from < _from_problems.size(); ++i_from)
   {
     FEProblemBase & from_problem = *_from_problems[i_from];
-    auto & from_mesh = from_problem.mesh();
+    auto & from_mesh = from_problem.mesh(_displaced_source_mesh);
     MooseVariableFEBase & from_var = from_problem.getVariable(
         0, var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
 

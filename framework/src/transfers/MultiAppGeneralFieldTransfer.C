@@ -496,7 +496,7 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
     System * to_sys = find_sys(es, var_name);
 
     // libMesh mesh
-    MeshBase & to_mesh = _to_meshes[problem_id]->getMesh();
+    const MeshBase & to_mesh = _to_problems[problem_id]->mesh(_displaced_target_mesh).getMesh();
     auto var_num = to_sys->variable_number(var_name);
     auto sys_num = to_sys->number();
 
@@ -531,7 +531,7 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
       {
         auto dof_object_id = val_pair.first;
 
-        DofObject * dof_object = nullptr;
+        const DofObject * dof_object = nullptr;
         if (is_nodal)
           dof_object = to_mesh.node_ptr(dof_object_id);
         else
@@ -665,7 +665,7 @@ MultiAppGeneralFieldTransfer::getRestrictedFromBoundingBoxes()
     Point min(max_r, max_r, max_r);
     Point max(min_r, min_r, min_r);
     bool at_least_one = false;
-    const auto & from_mesh = _from_meshes[j];
+    const auto & from_mesh = _from_problems[j]->mesh(_displaced_source_mesh);
 
     std::set<SubdomainID> subdomains;
     if (isParamValid("from_blocks"))
@@ -673,7 +673,7 @@ MultiAppGeneralFieldTransfer::getRestrictedFromBoundingBoxes()
       // User input block names
       auto & blocks = getParam<std::vector<SubdomainName>>("from_blocks");
       // Subdomain ids
-      std::vector<SubdomainID> ids = from_mesh->getSubdomainIDs(blocks);
+      std::vector<SubdomainID> ids = from_mesh.getSubdomainIDs(blocks);
       // Store these ids
       subdomains.insert(ids.begin(), ids.end());
     }
@@ -683,20 +683,20 @@ MultiAppGeneralFieldTransfer::getRestrictedFromBoundingBoxes()
     {
       // User input block names
       auto & boundary_names = getParam<std::vector<BoundaryName>>("from_boundaries");
-      std::vector<BoundaryID> boundary_ids = from_mesh->getBoundaryIDs(boundary_names);
+      std::vector<BoundaryID> boundary_ids = from_mesh.getBoundaryIDs(boundary_names);
       // Store these ids
       boundaries.insert(boundary_ids.begin(), boundary_ids.end());
     }
 
-    for (auto & elem : as_range(from_mesh->getMesh().local_elements_begin(),
-                                from_mesh->getMesh().local_elements_end()))
+    for (auto & elem : as_range(from_mesh.getMesh().local_elements_begin(),
+                                from_mesh.getMesh().local_elements_end()))
     {
       if (!subdomains.empty() && !hasBlocks(subdomains, elem))
         continue;
 
       for (auto & node : elem->node_ref_range())
       {
-        if (!boundaries.empty() && !hasBoundaries(boundaries, *from_mesh, &node))
+        if (!boundaries.empty() && !hasBoundaries(boundaries, from_mesh, &node))
           continue;
 
         at_least_one = true;

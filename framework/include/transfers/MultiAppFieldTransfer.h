@@ -50,7 +50,11 @@ protected:
   /// Virtual function defining variables to transfer to
   virtual std::vector<AuxVariableName> getToVarNames() const = 0;
 
-protected:
+  /// Returns the Problem's equation system, displaced or not
+  /// Be careful! If you transfer TO a displaced system you will likely need a synchronization
+  /// So most transfers reach the non-displaced system directly
+  EquationSystems & getEquationSystem(FEProblemBase & problem, bool use_displaced) const;
+
   /// Whether block restriction is active
   const bool _has_block_restrictions;
   /// Subdomain IDs of the blocks to transfer from
