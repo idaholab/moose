@@ -1,36 +1,25 @@
-# M. H. Fontana et al 1973, 1976
-# This input file models a partial block at the center of the assembly
-# The affected subchannels get an area reduction and a form loss coefficient
-T_in = 714.261
-A12 = 1.00423e3
-A13 = -0.21390
-A14 = -1.1046e-5
-rho = ${fparse A12 + A13 * T_in + A14 * T_in * T_in}
-Total_surface_area = 0.000467906 #m2
-Blocked_surface_area = 0.0 #m2
-Flow_area = ${fparse Total_surface_area - Blocked_surface_area}
-vol_flow = 3.41E-03 #m3/s
-mass_flux_in = ${fparse rho *  vol_flow / Flow_area}
+# M. Fontana, et All,
+# “Temperature distribution in the duct wall and at the exit of a 19-rod simulated lmfbr fuel assembly (ffm bundle 2a),
+# ”Nuclear Technology, vol. 24, no. 2, pp. 176–200, 1974.
+T_in = 588.5
+flow_area = 0.0004980799633447909 #m2
+mass_flux_in = ${fparse 55*3.78541/10/60/flow_area}
 P_out = 2.0e5 # Pa
 [TriSubChannelMesh]
   [subchannel]
     type = TriSubChannelMeshGenerator
     nrings = 3
-    n_cells = 37
+    n_cells = 40
     flat_to_flat = 3.41e-2
     heated_length = 0.5334
-    unheated_length_entry = 0.3048
+    unheated_length_entry = 0.4064
     unheated_length_exit = 0.0762
     rod_diameter = 5.84e-3
     pitch = 7.26e-3
     dwire = 1.42e-3
     hwire = 0.3048
-    spacer_z = '0.0'
-    spacer_k = '0.0'
-    z_blockage = '0.6858 0.69215'
-    index_blockage = '0 1 2 3 4 5'
-    reduction_blockage = '0.1 0.1 0.1 0.1 0.1 0.1'
-    k_blockage = '1 1 1 1 1 1 '
+    spacer_z = '0'
+    spacer_k = '0'
   []
 []
 
@@ -76,13 +65,18 @@ P_out = 2.0e5 # Pa
   beta = 0.006
   P_out = 2.0e5
   CT = 2.6
+  # enforce_uniform_pressure = false
   compute_density = true
   compute_viscosity = true
   compute_power = true
-  P_tol = 1.0e-3
-  T_tol = 1.0e-3
+  P_tol = 1.0e-4
+  T_tol = 1.0e-4
   implicit = true
   segregated = false
+  staggered_pressure = false
+  monolithic_thermal = false
+  verbose_multiapps = true
+  verbose_subchannel = false
 []
 
 [ICs]
@@ -99,7 +93,7 @@ P_out = 2.0e5 # Pa
    [q_prime_IC]
     type = TriPowerIC
     variable = q_prime
-    power = 332500.0 #W
+    power = ${fparse 16975/(0.5334+0.4046+0.0762)} # W/m
     filename = "pin_power_profile_19.txt"
   []
 
@@ -194,7 +188,7 @@ P_out = 2.0e5 # Pa
 [MultiApps]
   [viz]
     type = FullSolveMultiApp
-    input_files = "FFM-3Adetailed.i"
+    input_files = "3d_ORNL_19.i"
     execute_on = "timestep_end"
   []
 []
