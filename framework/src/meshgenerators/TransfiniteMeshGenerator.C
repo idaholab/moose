@@ -138,9 +138,16 @@ TransfiniteMeshGenerator::generate()
   std::vector<Point> edge_top;    // parametrized via nx
   std::vector<Point> edge_left;   // parametrized via ny
   std::vector<Point> edge_right;  // parametrized via ny
+  edge_bottom.resize(_nx);
+  edge_top.resize(_nx);
+  edge_left.resize(_ny);
+  edge_right.resize(_ny);
+
 
   std::vector<Real> param_x_dir;
   std::vector<Real> param_y_dir;
+  param_x_dir.resize(_nx);
+  param_y_dir.resize(_ny);
   // we take [0,1] as the reference interval and we need to set the biases upfront
   Real edge_length = 1.0;
   param_x_dir = getPointsDistribution(edge_length, _nx, _bias_x);
@@ -290,13 +297,14 @@ TransfiniteMeshGenerator::getLineEdge(const Point & P1,
                                       const std::vector<Real> & param_vec)
 {
   std::vector<Point> edge;
+  edge.resize(param_vec.size());
+  auto it = 0;
 
   for (auto rx : param_vec)
   {
-    Point newPt = P1 * (1.0 - rx) + P2 * rx;
-    edge.push_back(newPt);
+    edge[it] = P1 * (1.0 - rx) + P2 * rx;
+    it++;
   };
-
   return edge;
 }
 
@@ -306,17 +314,20 @@ TransfiniteMeshGenerator::getParsedEdge(const std::string & parameter,
 {
   std::vector<Point> edge;
   Real x_coord, y_coord;
+  edge.resize(param_vec.size());
 
   std::vector<std::string> param_coords;
   MooseUtils::tokenize(parameter, param_coords, 1, "&&");
 
+  auto it = 0;
   for (auto rx : param_vec)
   {
     _parsed_func->Parse(param_coords[0], "r");
     x_coord = _parsed_func->Eval(&rx);
     _parsed_func->Parse(param_coords[1], "r");
     y_coord = _parsed_func->Eval(&rx);
-    edge.push_back(Point(x_coord, y_coord, 0.0));
+    edge[it] = Point(x_coord, y_coord, 0.0);
+    it++;
   }
 
   return edge;
@@ -332,11 +343,15 @@ TransfiniteMeshGenerator::getDiscreteEdge(const unsigned int & np, const std::st
   if (string_points.size() != np)
     mooseError("DISCRETE: the number of discrete points does not match the number of points on the"
                "opposite edge.");
+
+  edge.resize(np);  
+  auto it = 0;      
   for (unsigned int iter = 0; iter < string_points.size(); iter++)
   {
     std::vector<Real> point_vals;
     MooseUtils::tokenizeAndConvert(string_points[iter], point_vals, " ");
-    edge.push_back(Point(point_vals[0], point_vals[1], point_vals[2]));
+    edge[it] = Point(point_vals[0], point_vals[1], point_vals[2]);
+    it++;
   }
 
   return edge;
@@ -350,8 +365,9 @@ TransfiniteMeshGenerator::getCircarcEdge(const Point & P1,
                                          const std::vector<Real> & param_vec)
 {
   std::vector<Point> edge; // output, to be returned variable
+  edge.resize(param_vec.size());
+
   std::vector<Real> param_coords;
-  // MooseUtils::tokenize(parameter, param_coords, 1, "&&");
   MooseUtils::tokenizeAndConvert(parameter, param_coords, "&&");
   Point P3;
   if (param_coords.size() == 1)
@@ -377,16 +393,19 @@ TransfiniteMeshGenerator::getCircarcEdge(const Point & P1,
   // to identify the entire edge span
   mooseAssert(x0.norm() > 0.0 && x1.norm() > 0.0,
               "The point provided cannot generate an arc circle on the edge specified");
+              
   Real arclength = std::acos((x0 * x1) / x0.norm() / x1.norm());
   if (MooseUtils::absoluteFuzzyGreaterThan(std::abs(b - a), M_PI))
     b = a + arclength;
 
+  auto it = 0;
   for (auto rx : param_vec)
   {
     Real interval = getMapInterval(rx, 0.0, 1.0, a, b);
     Real x = P0(0) + rad * std::cos(interval);
     Real y = P0(1) + rad * std::sin(interval);
-    edge.push_back(Point(x, y, 0.0));
+    edge[it]=Point(x, y, 0.0);
+    it++;
   };
 
   return edge;
