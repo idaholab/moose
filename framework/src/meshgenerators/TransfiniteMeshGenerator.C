@@ -143,7 +143,6 @@ TransfiniteMeshGenerator::generate()
   edge_left.resize(_ny);
   edge_right.resize(_ny);
 
-
   std::vector<Real> param_x_dir;
   std::vector<Real> param_y_dir;
   param_x_dir.resize(_nx);
@@ -344,8 +343,8 @@ TransfiniteMeshGenerator::getDiscreteEdge(const unsigned int & np, const std::st
     mooseError("DISCRETE: the number of discrete points does not match the number of points on the"
                "opposite edge.");
 
-  edge.resize(np);  
-  auto it = 0;      
+  edge.resize(np);
+  auto it = 0;
   for (unsigned int iter = 0; iter < string_points.size(); iter++)
   {
     std::vector<Real> point_vals;
@@ -393,7 +392,7 @@ TransfiniteMeshGenerator::getCircarcEdge(const Point & P1,
   // to identify the entire edge span
   mooseAssert(x0.norm() > 0.0 && x1.norm() > 0.0,
               "The point provided cannot generate an arc circle on the edge specified");
-              
+
   Real arclength = std::acos((x0 * x1) / x0.norm() / x1.norm());
   if (MooseUtils::absoluteFuzzyGreaterThan(std::abs(b - a), M_PI))
     b = a + arclength;
