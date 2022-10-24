@@ -1,18 +1,47 @@
 [Tests]
   issues = '#16427 #16429'
-  design = 'transfers/MultiAppGeneralFieldTransfer.md'
+  design = 'transfers/MultiAppGeneralFieldShapeEvaluationTransfer.md'
 
-  [./tosub]
-    type = 'Exodiff'
-    input = 'tosub.i'
-    exodiff = 'tosub_out.e tosub_out_sub0.e tosub_out_sub1.e tosub_out_sub2.e'
-    requirement = "The system shall support general field transfer"
-  [../]
+  [2d_overlay]
+    requirement = "The system shall be able to transfer variables by evaluating shape functions in the origin problem"
+    [same_var_type]
+      type = 'Exodiff'
+      input = 'main.i'
+      exodiff = 'main_out.e main_out_sub0_out.e main_out_sub1_out.e main_out_sub2_out.e'
+      detail = "for variables of the same type,"
+    []
 
-  [./tosub_projection]
-    type = 'Exodiff'
-    input = 'tosub_projections.i'
-    exodiff = 'tosub_projections_out.e tosub_projections_out_sub0.e tosub_projections_out_sub1.e tosub_projections_out_sub2.e'
-    requirement = "The system shall support general field transfer with arbitrary variable types"
-  [../]
+    [projection_needed_receiving]
+      type = 'Exodiff'
+      input = 'main.i'
+      exodiff = 'projection_receive.e projection_receive_sub0_out.e projection_receive_sub1_out.e projection_receive_sub2_out.e'
+      # Set various types of finite element families to the received variables in both apps
+      cli_args = "Outputs/file_base=projection_receive Mesh/second_order=true
+                  AuxVariables/from_sub/order=SECOND AuxVariables/from_sub_elem/order=SECOND
+                  MultiApps/sub/cli_args='Mesh/second_order=true;AuxVariables/from_main/order=SECOND;AuxVariables/from_main_elem/order=FIRST'"
+      detail = "for variables of arbitrary types,"
+    []
+
+    [projection_needed_sending]
+      type = 'Exodiff'
+      input = 'main.i'
+      exodiff = 'projection_send.e projection_send_sub0_out.e projection_send_sub1_out.e projection_send_sub2_out.e'
+      # Set various types of finite element families to the transfered variables in both apps
+      cli_args = "Outputs/file_base=projection_send Mesh/second_order=true
+                  AuxVariables/to_sub/order=SECOND AuxVariables/to_sub_elem/order=SECOND
+                  MultiApps/sub/cli_args='Mesh/second_order=true;AuxVariables/to_main/order=FIRST;AuxVariables/to_main_elem/order=SECOND'"
+      detail = "for variables of arbitrary types,"
+    []
+
+    [multiple_variables_each_transfer]
+      type = Exodiff
+      input = main.i
+      exodiff = 'main_out.e main_out_sub0_out.e main_out_sub1_out.e main_out_sub2_out.e'
+      # Only use one transfer block for each direction
+      cli_args = "Transfers/active='from_sub to_sub'
+                  Transfers/from_sub/source_variable='to_main to_main_elem' Transfers/from_sub/variable='from_sub from_sub_elem'
+                  Transfers/to_sub/source_variable='to_sub to_sub_elem' Transfers/to_sub/variable='from_main from_main_elem'"
+      detail = "when specifying multiple variables in a single transfer"
+    []
+  []
 []
