@@ -37,8 +37,8 @@ P_out = 4.923e6 # Pa
   compute_power = true
   P_out = ${P_out}
 # Change the defaults
-  implicit = false
-  segregated = true
+  implicit = true
+  segregated = false
   staggered_pressure = false
   monolithic_thermal = false
   # P_tol = 1e-11
@@ -120,10 +120,10 @@ P_out = 4.923e6 # Pa
     execute_on = 'timestep_begin'
   []
   [mdot_in_bc]
-    type = MassFlowRateAux
+    type = BlockedMassFlowRateAux
     variable = mdot
     boundary = inlet
-    index_blockage = ' 0 '
+    # index_blockage = ' 0 '
     area = S
     mass_flux = ${mass_flux_in}
     execute_on = 'timestep_begin'

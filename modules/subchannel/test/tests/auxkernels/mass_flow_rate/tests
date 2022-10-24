@@ -1,4 +1,10 @@
 [Tests]
+  [blockedtest]
+    type = Exodiff
+    input = 'blocked_test.i'
+    exodiff = 'blocked_test_out.e'
+    recover = false
+  []
   [test]
     type = Exodiff
     input = 'test.i'
