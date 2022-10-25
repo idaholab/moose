@@ -71,14 +71,16 @@ d_t=1
     boundary = left
   []
   [hh_left]
-    type = UnaryRecombinationBC
+    type = BinaryRecombinationBC
     variable = h
+    v = h
     Kr = ${Krhh}
     boundary = left
   []
   [tt_left]
-    type = UnaryRecombinationBC
+    type = BinaryRecombinationBC
     variable = t
+    v = t
     Kr = ${Krtt}
     boundary = left
   []
@@ -125,14 +127,16 @@ d_t=1
     boundary = right
   []
   [hh_right]
-    type = UnaryRecombinationBC
+    type = BinaryRecombinationBC
     variable = h
+    v = h
     Kr = ${Krhh}
     boundary = right
   []
   [tt_right]
-    type = UnaryRecombinationBC
+    type = BinaryRecombinationBC
     variable = t
+    v = t
     Kr = ${Krtt}
     boundary = right
   []

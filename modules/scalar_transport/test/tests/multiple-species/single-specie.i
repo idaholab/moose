@@ -38,8 +38,9 @@ l=1
 
 [BCs]
   [tt_recombination]
-    type = UnaryRecombinationBC
+    type = BinaryRecombinationBC
     variable = t
+    v = t
     Kr = ${Krtt}
     boundary = 'left right'
   []

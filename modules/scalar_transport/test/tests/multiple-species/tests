@@ -1,5 +1,5 @@
 [Tests]
-  design = 'DissociationFluxBC.md UnaryRecombinationBC.md BinaryRecombinationBC.md'
+  design = 'DissociationFluxBC.md BinaryRecombinationBC.md'
   issues = '#22442'
   [exo]
     type = Exodiff
