@@ -18,5 +18,6 @@
     'shape functions and quadrature points in the simulation. This test checks the '
     'size of zero objects when using second-order elements and second order-variables.'
     design = 'PhiZero.md'
+    prereq = 'phi_zero_linear'
   [../]
 []

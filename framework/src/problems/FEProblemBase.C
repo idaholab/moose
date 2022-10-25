@@ -595,6 +595,9 @@ FEProblemBase::initialSetup()
 
   SubProblem::initialSetup();
 
+  mooseAssert(_app.isRecovering() + _app.isRestarting() + bool(_app.getExReaderForRestart()) <= 1,
+              "Checkpoint recovery and restart and exodus restart are all mutually exclusive.");
+
   if (_skip_exception_check)
     mooseWarning("MOOSE may fail to catch an exception when the \"skip_exception_check\" parameter "
                  "is used. If you receive a terse MPI error during execution, remove this "
@@ -679,20 +682,23 @@ FEProblemBase::initialSetup()
       _restart_io->useAsciiExtension();
   }
 
-  if ((_app.isRestarting() || _app.isRecovering()) && (_app.isUltimateMaster() || _force_restart))
+  if (_app.isRestarting() || _app.isRecovering())
   {
-    TIME_SECTION("restartFromFile", 3, "Restarting From File");
+    if (_app.isUltimateMaster() || _force_restart)
+    {
+      TIME_SECTION("restartFromFile", 3, "Restarting From File");
 
-    _restart_io->readRestartableDataHeader(true);
-    _restart_io->restartEquationSystemsObject();
+      _restart_io->readRestartableDataHeader(true);
+      _restart_io->restartEquationSystemsObject();
 
-    /**
-     * TODO: Move the RestartableDataIO call to reload data here. Only a few tests fail when doing
-     * this now. Material Properties aren't sized properly at this point and fail across the board,
-     * there are a few other misc tests that fail too.
-     *
-     * _restart_io->readRestartableData();
-     */
+      /**
+       * TODO: Move the RestartableDataIO call to reload data here. Only a few tests fail when doing
+       * this now. Material Properties aren't sized properly at this point and fail across the
+       * board, there are a few other misc tests that fail too.
+       *
+       * _restart_io->readRestartableData();
+       */
+    }
   }
   else
   {
