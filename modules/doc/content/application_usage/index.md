@@ -10,10 +10,11 @@ These documentation pages aid in running MOOSE-based applications.  For developm
 
 [Peacock](peacock.md) - Graphical user interface and results visualization
 
-[Tracked Apps](tracked_apps.md) - A list of applications being developped
+[Tracked Apps](tracked_apps.md) - A list of applications being developed
 
 [Troubleshooting Failed Solves](failed_solves.md)
 
 [Restart and Recovery](restart_recover.md)
 
+[Hypre/BoomerAMG Preconditioning](hypre.md) - In-depth discussion of using Hypre's algebraic multigrid preconditioner: BoomerAMG
 
