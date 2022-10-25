@@ -1,1 +1,85 @@
+BootStrap: oras
+# Any Rocky-8 image which supplies a development stack with MPI available
+From: mooseharbor.hpc.inl.gov/hpc-base/rocky-8-x86_64:latest
 
+%environment
+    # Set Environment for MPICH
+    export MPICH_DIR=/opt/mpi/mpich-3.4.3
+    export LD_LIBRARY_PATH=${MPICH_DIR}/lib:${LD_LIBRARY_PATH}
+    export MANPATH=${MPICH_DIR}/share/man:${MANPATH}
+    export PATH=${MPICH_DIR}/bin:${PATH}
+    export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77
+
+    # Fix locale warnings
+    export LC_ALL=C
+
+%post
+    # Prepare a temp directory
+    export TEMP_LOC=`mktemp -d /tmp/rocky_singularity.XXXXX`
+
+    # Additional Installs
+    dnf install -y python3-pyyaml python3-devel python39 cmake diffutils bison flex libtirpc \
+                   libtirpc-devel zlib-devel rsync patch patchutils
+
+    # EPEL repository
+    yum -y install epel-release
+    yum -y install glpk-devel patchelf
+
+    # Make python default to python3
+    alternatives --set python /usr/bin/python3
+
+    # Swap OpenMPI for MPICH
+    rm -rf ${OPENMPI_DIR:-/opt/mpi/openmpi-4.1.4}
+    export MPICH_DIR=/opt/mpi/mpich-3.4.3
+    export LD_LIBRARY_PATH=${MPICH_DIR}/lib:${LD_LIBRARY_PATH}
+    export MANPATH=${MPICH_DIR}/share/man:${MANPATH}
+    export PATH=${MPICH_DIR}/bin:${PATH}
+    export CC=mpicc CXX=mpicxx FC=mpif90 F90=mpif90 F77=mpif77
+
+    # Allow a custom initialization routine if the following files exist at /
+    touch ${SINGULARITY_ROOTFS}/none
+    cat <<'EOF' >> ${SINGULARITY_ROOTFS}/.singularity.d/env/90-environment.sh
+# If discovered, use these files as initialization routines
+if [ -f /init_env ]; then
+  file="/init_env"
+else
+  file="/none"
+fi
+action="${0##*/}"
+case "${action}" in
+shell)
+    if [ "${SINGULARITY_SHELL:-}" = "/bin/bash" ]; then
+        set -- --noprofile --rcfile $file
+    elif test -z "${SINGULARITY_SHELL:-}"; then
+        export SINGULARITY_SHELL=/bin/bash
+        set -- --noprofile --rcfile $file
+    fi
+    ;;
+exec)
+    export BASH_ENV="$file"
+    set -- /bin/bash --noprofile --rcfile $file -c "$*"
+    ;;
+run)
+    set -- /bin/bash --noprofile --rcfile $file
+esac
+EOF
+
+    # Create a pretty prompt (ensure last item sourced)
+    cat <<'EOF' > ${SINGULARITY_ROOTFS}/.singularity.d/env/99-zzz_prompt.sh
+PS1="\[\033[1;34m\][`basename ${APPTAINER_NAME:-$SINGULARITY_NAME} .sif`]\[\033[1;32m\][\w]\[\033[0m\]> "
+EOF
+
+    # We need git lfs
+    mkdir ${TEMP_LOC}/gitlfs
+    cd ${TEMP_LOC}/gitlfs
+    curl -L -O https://github.com/git-lfs/git-lfs/releases/download/v3.0.2/git-lfs-linux-amd64-v3.0.2.tar.gz
+    tar -xf git-lfs-linux-amd64-v3.0.2.tar.gz
+    ./install.sh
+
+    # Clean Up
+    rm -rf ${TEMP_LOC}
+
+    # Remove any keys somehow populated in root's home
+    rm -rf /root/.ssh
+    # Verify that root keys/configs/etc no longer exists
+    if [ -d /root/.ssh ]; then exit 1; fi
