@@ -14,20 +14,24 @@ There are three different places Transfers can read information and deposit info
 
 A few of the most-used Transfers:
 
-- MeshFunction: Interpolate a field from one domain to another
+- ShapeEvaluation: Interpolate a field from one domain to another
 - NearestNode: Move field data by matching nodes/centroids
 - Postprocessor: Move PP data from one app to another
 - UserObject: Evaluate a "spatial" UO in one app at the other app's nodes/centroids and deposit the information in an AuxiliaryVariable field
 
 Most important: by having MOOSE move data and fill fields... apps don't need to know or care where the data came from or how it got there!
 
+!alert note
+'GeneralField' transfers are a more efficient and more general implementation of their corresponding field transfers. They should be preferred over
+their non-'GeneralField' counterparts.
+
 !---
 
-## MultiAppShapeEvaluationTransfer
+## MultiAppGeneralFieldShapeEvaluationTransfer
 
 !row!
 !col! width=80%
-Called "MeshFunction" because it makes a field (Solution or Aux) into a spatial "function" that can be evaluated anywhere within the domain.  This is then used to sample that field at the nodes/centroids of the *receiving* app's mesh in order to populate an Auxiliary Variable field.
+Called "ShapeEvaluation" because it evaluates a field (Solution or Aux) at the desired transferred location: the nodes/centroids of the *receiving* app's mesh in order to populate an Auxiliary Variable field.
 
 Required parameters:
 
@@ -69,7 +73,7 @@ Can be made to "conserve" a Postprocessor quantity.
 
 !---
 
-## MultiAppNearestNodeTransfer
+## MultiAppGeneralFieldNearestNodeTransfer
 
 Sometimes interpolation is too costly, or doesn't make sense.  For instance, a "2D" calculation in the x,y plane that represents an "infinite" volume in the z direction may need to be coupled to 3D calculations that cover that same space.  In that case, all nodes/elements within the same x,y "column" should receive the same value when transferring from the 2D calculation to the 3D calculation.
 
@@ -113,7 +117,7 @@ To explore the NearestNodeTransfer we will create a situation where a 2D, 1x1 sq
 
 Often it's not "fields" that need to be moved - but spatially homogenized values.  For instance, if a 1D simulation representing fluid flow through a pipe is going through a 3D domain which is generating heat - then it may be advantageous to integrate the heat generated around the pipe within the 3D domain and transfer that to the pipe simulation.
 
-This situation is handled straighforwardly by UserObject Transfers.  Remember that Postprocessors are a specialization of UserObjects: they only compute a single value.  UserObjects themselves can then be thought of as Postprocessors that can compute much more than a single value.  Within MOOSE there is a special designation for UserObjects that hold data with some spatial correlation: they are "Spatial UserObjects"... and they have the ability to be evaluated at any point in space (and sometimes time!).
+This situation is handled straightforwardly by UserObject Transfers.  Remember that Postprocessors are a specialization of UserObjects: they only compute a single value.  UserObjects themselves can then be thought of as Postprocessors that can compute much more than a single value.  Within MOOSE there is a special designation for UserObjects that hold data with some spatial correlation: they are "Spatial UserObjects"... and they have the ability to be evaluated at any point in space (and sometimes time!).
 
 Some Spatial UserObjects that could be useful to Transfer:
 
