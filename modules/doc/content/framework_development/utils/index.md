@@ -9,3 +9,5 @@ These objects are documented here.
 [InputParameters.md]
 
 [MathUtils.md]
+
+[MooseUtils namespace](/MooseUtils.md)
