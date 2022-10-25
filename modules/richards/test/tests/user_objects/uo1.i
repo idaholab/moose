@@ -690,10 +690,10 @@
 []
 
 [Variables]
-  [./pressure]
+  [./pressure_pp]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [./InitialCondition_pp]
       type = FunctionIC
       function = initial_pressure
     [../]

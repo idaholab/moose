@@ -160,12 +160,12 @@
 []
 
 [Postprocessors]
-  [./x]
+  [./x_pp]
     type = ScalarVariable
     variable = x
     execute_on = 'initial timestep_end'
   [../]
-  [./y]
+  [./y_pp]
     type = ScalarVariable
     variable = y
     execute_on = 'initial timestep_end'

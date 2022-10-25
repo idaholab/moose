@@ -40,7 +40,7 @@
   [./soln]
     type = SolutionUserObject
     mesh = discontinuous_value_solution_uo_p1.e
-    system_variables = 'discontinuous_variable continuous_variable'
+    #system_variables = 'discontinuous_variable continuous_variable'
   [../]
 []
 

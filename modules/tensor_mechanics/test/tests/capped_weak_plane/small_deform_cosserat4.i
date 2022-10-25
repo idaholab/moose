@@ -659,12 +659,12 @@
 []
 
 [Postprocessors]
-  [./wc_x]
+  [./wc_x_pp]
     type = PointValue
     point = '0 0 0'
     variable = wc_x
   [../]
-  [./wc_y]
+  [./wc_y_pp]
     type = PointValue
     point = '0 0 0'
     variable = wc_y

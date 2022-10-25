@@ -120,7 +120,7 @@
     # with N points, where N is the number of subapps
     # 1 pp is specified on the subapp side
     to_postprocessors_to_be_preserved = 'to_nearest_point'
-    from_postprocessors_to_be_preserved = 'sink'
+    from_postprocessors_to_be_preserved = 'sink_pp'
   []
 []
 

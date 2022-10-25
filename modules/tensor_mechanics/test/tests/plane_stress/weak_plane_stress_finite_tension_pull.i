@@ -43,7 +43,7 @@
     variable = 'stress_xx'
     elementid = 0
   []
-  [strain_zz]
+  [strain_zz_pp]
     type = ElementalVariableValue
     variable = 'strain_zz'
     elementid = 0

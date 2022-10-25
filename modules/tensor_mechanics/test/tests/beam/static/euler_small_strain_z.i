@@ -204,12 +204,12 @@
 []
 
 [Postprocessors]
-  [./disp_x]
+  [./disp_x_pp]
     type = PointValue
     point = '4.0 0.0 0.0'
     variable = disp_x
   [../]
-  [./disp_y]
+  [./disp_y_pp]
     type = PointValue
     point = '4.0 0.0 0.0'
     variable = disp_z

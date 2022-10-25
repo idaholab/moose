@@ -97,12 +97,12 @@
 []
 
 [Postprocessors]
-  [./h+]
+  [./h+_pp]
     type = ElementIntegralVariablePostprocessor
     variable = h+
     execute_on = 'initial timestep_end'
   [../]
-  [./hco3-]
+  [./hco3-_pp]
     type = ElementIntegralVariablePostprocessor
     variable = hco3-
     execute_on = 'initial timestep_end'

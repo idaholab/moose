@@ -355,7 +355,7 @@
     variable = h
     execute_on = 'initial timestep_end'
   []
-  [pliq]
+  [pliq_pp]
     type = ElementAverageValue
     variable = pliq
     execute_on = 'initial timestep_end'

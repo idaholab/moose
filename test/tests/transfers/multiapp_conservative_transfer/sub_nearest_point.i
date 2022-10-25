@@ -58,7 +58,7 @@
 []
 
 [Postprocessors]
-  [sink]
+  [sink_pp]
     type = ElementIntegralVariablePostprocessor
     block = 1
     variable = sink

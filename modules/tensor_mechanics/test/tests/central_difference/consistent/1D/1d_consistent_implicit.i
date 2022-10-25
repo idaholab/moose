@@ -116,7 +116,7 @@
 []
 
 [Postprocessors]
-  [./disp_x]
+  [./disp_x_pp]
     type = NodalVariableValue
     nodeid = 1
     variable = disp_x

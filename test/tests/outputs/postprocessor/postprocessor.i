@@ -67,7 +67,7 @@
 []
 
 [Postprocessors]
-  [./num_vars]
+  [./u_pp]
     type = NumVars
     system = 'ALL'
     outputs = 'exodus2 console'

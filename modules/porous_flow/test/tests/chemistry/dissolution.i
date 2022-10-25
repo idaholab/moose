@@ -177,7 +177,7 @@
 []
 
 [Postprocessors]
-  [a]
+  [a_pp]
     type = PointValue
     point = '0 0 0'
     variable = a

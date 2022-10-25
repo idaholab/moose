@@ -97,7 +97,7 @@
 []
 
 [Postprocessors]
-  [./F_sum]
+  [./F_sum_pp]
     type = ElementAverageValue
     variable = F_sum
   [../]
@@ -105,7 +105,7 @@
     type = ElementAverageValue
     variable = Fc
   [../]
-  [./dF_sum]
+  [./dF_sum_pp]
     type = ElementAverageValue
     variable = dF_sum
   [../]
@@ -113,7 +113,7 @@
     type = ElementAverageValue
     variable = dFc
   [../]
-  [./d2F_sum]
+  [./d2F_sum_pp]
     type = ElementAverageValue
     variable = d2F_sum
   [../]

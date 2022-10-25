@@ -38,7 +38,7 @@
 []
 
 [Postprocessors]
-  [u]
+  [u_pp]
     type = PointValue
     variable = u
     point = '0 0 0'

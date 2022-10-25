@@ -361,10 +361,10 @@
 []
 
 [Variables]
-  [./pwater]
+  [./pwater_pp]
     order = FIRST
     family = LAGRANGE
-    [./InitialCondition]
+    [./InitialCondition_pp]
       type = FunctionIC
       function = initial_pwater
     [../]

@@ -177,7 +177,7 @@
     type = ElementAverageValue
     variable = strain_yy
   [../]
-  [./disp_y]
+  [./disp_y_pp]
     type = NodalSum
     variable = disp_y
     boundary = top

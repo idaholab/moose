@@ -1192,8 +1192,23 @@ FEProblemBase::initialSetup()
 
   // Perform Reporter get/declare check
   _reporter_data.check();
+  checkDuplicatePostprocessorVariableNames();
 
   setCurrentExecuteOnFlag(EXEC_NONE);
+}
+
+void
+FEProblemBase::checkDuplicatePostprocessorVariableNames()
+{
+  for (auto pp : _reporter_data.getPostprocessorNames())
+  {
+    if (hasScalarVariable(pp))
+      mooseError("Postprocessor \"" + pp +
+                 "\" has the same name as a scalar variable in the system.");
+    for (auto nl : _nl)
+      if (nl->hasVariable(pp))
+        mooseError("Postprocessor \"" + pp + "\" has the same name as a variable in the system.");
+  }
 }
 
 void

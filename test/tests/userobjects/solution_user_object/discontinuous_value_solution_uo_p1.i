@@ -72,6 +72,13 @@
   [../]
 []
 
+[Postprocessors]
+  [./u_pp]
+    type = ElementIntegralVariablePostprocessor
+    variable = u
+  [../]
+[]
+
 [Executioner]
   type = Steady
 

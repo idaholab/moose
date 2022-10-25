@@ -92,7 +92,7 @@
     function = exact_fn
   [../]
 
-  [./x]
+  [./x_pp]
     type = ScalarVariable
     variable = x
   [../]

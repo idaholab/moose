@@ -276,7 +276,7 @@
 []
 
 [Postprocessors]
-  [pgas]
+  [pgas_pp]
     type = PointValue
     point = '25.25 0 0'
     variable = pgas
@@ -288,7 +288,7 @@
     variable = saturation_gas
     outputs = time
   []
-  [zi]
+  [zi_pp]
     type = PointValue
     point = '25.25 0 0'
     variable = zi

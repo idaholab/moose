@@ -339,12 +339,12 @@
     variable = pressure_water
     execute_on = 'initial timestep_end'
   []
-  [pgas]
+  [pgas_pp]
     type = ElementIntegralVariablePostprocessor
     variable = pressure_gas
     execute_on = 'initial timestep_end'
   []
-  [xnacl]
+  [xnacl_pp]
     type = ElementIntegralVariablePostprocessor
     variable = xnacl
     execute_on = 'initial timestep_end'

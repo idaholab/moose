@@ -144,12 +144,12 @@
 []
 
 [Postprocessors]
-  [./disp_x]
+  [./disp_x_pp]
     type = NodalVariableValue
     nodeid = 5
     variable = disp_x
   [../]
-  [./disp_y]
+  [./disp_y_pp]
     type = NodalVariableValue
     nodeid = 5
     variable = disp_y

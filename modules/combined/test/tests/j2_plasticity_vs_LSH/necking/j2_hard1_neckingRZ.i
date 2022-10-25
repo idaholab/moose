@@ -182,7 +182,7 @@
     type = ElementAverageValue
     variable = strain_zz
   [../]
-  [./disp_z]
+  [./disp_z_pp]
     type = NodalSum
     variable = disp_z
     boundary = top

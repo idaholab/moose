@@ -181,7 +181,7 @@
     variable = saved_z
     boundary = 201
   [../]
-  [./disp_z]
+  [./disp_z_pp]
     type = NodalExtremeValue
     variable = disp_z
     boundary = 201

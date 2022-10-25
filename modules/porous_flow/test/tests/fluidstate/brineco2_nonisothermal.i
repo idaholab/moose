@@ -365,7 +365,7 @@
     type = ElementIntegralVariablePostprocessor
     variable = pressure_water
   []
-  [pgas]
+  [pgas_pp]
     type = ElementIntegralVariablePostprocessor
     variable = pressure_gas
   []

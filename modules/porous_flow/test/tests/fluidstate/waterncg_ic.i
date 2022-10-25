@@ -159,7 +159,7 @@
     variable = saturation_water
     execute_on = 'initial timestep_end'
   []
-  [z]
+  [z_pp]
     type = ElementIntegralVariablePostprocessor
     variable = z
     execute_on = 'initial timestep_end'

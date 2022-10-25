@@ -231,7 +231,7 @@
     variable = normal_lm
     subdomain = 'secondary_lower'
   []
-  [normal_lm]
+  [normal_lm_pp]
     type = ElementAverageValue
     variable = normal_lm
     block = 'secondary_lower'

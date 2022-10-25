@@ -240,7 +240,7 @@
 []
 
 [Postprocessors]
-  [pgas]
+  [pgas_pp]
     type = PointValue
     point = '4 0 0'
     variable = pgas
@@ -250,7 +250,7 @@
     point = '4 0 0'
     variable = saturation_gas
   []
-  [zi]
+  [zi_pp]
     type = PointValue
     point = '4 0 0'
     variable = zi
@@ -269,7 +269,7 @@
     point = '4 0 0'
     variable = y0
   []
-  [xnacl]
+  [xnacl_pp]
     type = PointValue
     point = '4 0 0'
     variable = xnacl

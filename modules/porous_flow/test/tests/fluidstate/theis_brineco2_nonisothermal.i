@@ -252,7 +252,7 @@
 []
 
 [Postprocessors]
-  [pgas]
+  [pgas_pp]
     type = PointValue
     point =  '2 0 0'
     variable = pgas
@@ -262,12 +262,12 @@
     point =  '2 0 0'
     variable = saturation_gas
   []
-  [zi]
+  [zi_pp]
     type = PointValue
     point = '2 0 0'
     variable = zi
   []
-  [temperature]
+  [temperature_pp]
     type = PointValue
     point = '2 0 0'
     variable = temperature

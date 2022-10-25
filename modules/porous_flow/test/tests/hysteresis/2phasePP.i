@@ -164,12 +164,12 @@
     point = '0 0 0'
     variable = sat1
   []
-  [pp0]
+  [pp0_pp]
     type = PointValue
     point = '0 0 0'
     variable = pp0
   []
-  [pp1]
+  [pp1_pp]
     type = PointValue
     point = '0 0 0'
     variable = pp1

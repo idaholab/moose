@@ -96,7 +96,7 @@
     execute_on = 'initial timestep_end'
   [../]
 
-  [./x]
+  [./x_pp]
     type = ScalarVariable
     variable = x
     execute_on = 'initial timestep_end'

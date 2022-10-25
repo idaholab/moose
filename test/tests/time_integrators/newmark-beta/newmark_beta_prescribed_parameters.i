@@ -80,7 +80,7 @@
     type = ElementAverageSecondTimeDerivative
     variable = u
   []
-  [u]
+  [u_pp]
     type = ElementAverageValue
     variable = u
   []

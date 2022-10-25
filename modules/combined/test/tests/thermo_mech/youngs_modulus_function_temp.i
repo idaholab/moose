@@ -177,7 +177,7 @@
     variable = stress_xx
   [../]
 
-  [./temp]
+  [./temp_pp]
     type = AverageNodalVariableValue
     variable = temp
   [../]

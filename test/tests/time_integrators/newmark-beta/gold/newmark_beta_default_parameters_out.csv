@@ -1,4 +1,4 @@
-time,u,udot,udotdot
+time,u_pp,udot,udotdot
 0,0,0,0
 0.1,0,0,0
 0.2,0.0025,0.05,1

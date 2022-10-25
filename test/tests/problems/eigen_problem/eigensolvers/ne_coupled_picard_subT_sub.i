@@ -88,7 +88,7 @@
 []
 
 [Postprocessors]
-  [./power]
+  [./power_pp]
     type = ElementIntegralVariablePostprocessor
     variable = power
     execute_on = timestep_end

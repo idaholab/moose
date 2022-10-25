@@ -197,7 +197,7 @@
 []
 
 [Postprocessors]
-  [disp_x]
+  [disp_x_pp]
     type = PointValue
     point = '0.5 0.0 0.0'
     variable = disp_z

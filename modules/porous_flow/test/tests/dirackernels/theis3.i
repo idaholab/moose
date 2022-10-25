@@ -189,12 +189,12 @@
 []
 
 [Postprocessors]
-  [ppwater]
+  [ppwater_pp]
     type = PointValue
     point =  '4 0 0'
     variable = ppwater
   []
-  [sgas]
+  [sgas_pp]
     type = PointValue
     point = '4 0 0'
     variable = sgas

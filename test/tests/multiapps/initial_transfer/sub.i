@@ -16,14 +16,14 @@
 [Variables][dummy][][]
 
 [Postprocessors]
-  [scaled]
+  [scaled_pp]
     type = ScalePostprocessor
     value = receiver
     scaling_factor = 2
     # Note: during subapp initial setup, parent postprocessor has not been transferred
     execute_on = 'initial timestep_end'
   []
-  [receiver]
+  [receiver_pp]
     type = Receiver
     default = 0
   []

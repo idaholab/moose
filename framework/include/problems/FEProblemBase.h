@@ -338,6 +338,7 @@ public:
   virtual std::vector<VariableName> getVariableNames();
 
   void initialSetup() override;
+  void checkDuplicatePostprocessorVariableNames();
   void timestepSetup() override;
   void customSetup(const ExecFlagType & exec_type) override;
   void residualSetup() override;

@@ -71,15 +71,15 @@
 []
 
 [Postprocessors]
-  [./u1]
+  [./u1_pp]
     type = ElementIntegralVariablePostprocessor
     variable = u1
   [../]
-  [./u2]
+  [./u2_pp]
     type = ElementIntegralVariablePostprocessor
     variable = u2
   [../]
-  [./u3]
+  [./u3_pp]
     type = ElementIntegralVariablePostprocessor
     variable = u3
   [../]

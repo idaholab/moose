@@ -69,7 +69,7 @@
 []
 
 [Postprocessors]
-  [./f]
+  [./f_pp]
     type = ScalarVariable
     variable = f
     execute_on = 'initial timestep_end'
