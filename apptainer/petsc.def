@@ -1,0 +1,62 @@
+BootStrap: <PROTOCOL>
+From: <LOCATION>
+
+%files
+    # NOTE: Do not include paths to MOOSE based repositories.
+    #       Too many repos are including broken symlinks, which
+    #       apptainer cannot work around. Therefor the repo must
+    #       be cloned during %post.
+
+    # Populate SSH Keys if necessary
+    <KEY>
+
+%environment
+    # PETSc
+    export PETSC_DIR=/usr/local/petsc
+    export PETSC_ARCH=arch-moose
+
+%post
+    # By default, lets not print every command
+    set +x
+
+    # Apply SSH Key to GIT command
+    if [ -n "<KEY>" ]; then
+        export GIT_SSH_COMMAND="ssh -i $(echo '<KEY>' | cut -d\  -f2) -o StrictHostKeyChecking=no"
+    fi
+
+    # Prepare a temp directory
+    export TEMP_LOC=`mktemp -d /tmp/_apptainer.XXXXX`
+    mkdir -p ${TEMP_LOC}/tmp
+    cd ${TEMP_LOC} || exit 1
+
+    # Fetch repository, submodule petsc
+    git clone <CIVET_HEAD_SSH_URL>
+    cd $(basename <CIVET_HEAD_SSH_URL> .git)
+    git checkout <CIVET_HEAD_REF>
+    git submodule update --init petsc
+
+    # Build PETSc
+    umask 022
+    export PETSC_PREFIX=/usr/local/petsc
+    cd scripts
+    echo -e "JOBS: $MOOSE_JOBS"
+    ./update_and_rebuild_petsc.sh
+
+    # Test PETSc
+    cd ../petsc
+    make SLEPC_DIR=/usr/local/petsc PETSC_DIR=/usr/local/petsc PETSC_ARCH="" check
+
+    # Fix possibly bad permissions
+    chmod -R o=u-w,g=u-w /usr/local/petsc
+
+    # Clean Up
+    # Remove any keys somehow populated in root's home
+    rm -rf /root/.ssh
+    # Verify that root keys/configs/etc no longer exists
+    if [ -d /root/.ssh ]; then exit 1; fi
+
+    # Erase Key: <'KEY'> (if set)
+    if [ -n "<KEY>" ]; then
+        rm -f "$(echo '<KEY>' | cut -d\  -f2)"
+    fi
+    rm -rf ${TEMP_LOC}
