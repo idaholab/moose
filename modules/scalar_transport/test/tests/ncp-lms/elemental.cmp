@@ -1,9 +1,0 @@
-COORDINATES absolute 1.e-6
-
-TIME STEPS relative 1.e-6 floor 0.0
-
-NODAL VARIABLES relative 1.e-6 floor 2.e-15
-	u
-
-ELEMENT VARIABLES relative 1.e-6 floor 2.e-15
-	lm

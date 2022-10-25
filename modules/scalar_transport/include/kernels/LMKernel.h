@@ -11,6 +11,11 @@
 
 #include "ADKernelValue.h"
 
+/**
+ * Base class for use when adding Pressure-Stabilized Petrov-Galerkin type stabilization (e.g. a
+ * diagonal) to Lagrange multiplier constraints. This class will add its residual to both the primal
+ * equation and the Lagrange multiplier constraint equation
+ */
 class LMKernel : public ADKernelValue
 {
 public:
@@ -22,9 +27,18 @@ protected:
   void computeResidual() override;
   void computeResidualsForJacobian() override;
 
+  /// The Lagrange multiplier variable
   MooseVariable & _lm_var;
+
+  /// The values of the Lagrange multiplier variable at quadrature points
   const ADVariableValue & _lm;
+
+  /// The values of the Lagrange multiplier test functions at quadrature points
   const VariableTestValue & _lm_test;
+
+  /// The sign (either +1 or -1) applied to this object's residual when adding
+  /// to the Lagrange multiplier constraint equation. The sign should be chosen
+  /// such that the diagonals for the LM block of the matrix are positive
   const Real _lm_sign;
 
 private:

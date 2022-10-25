@@ -1,49 +1,5 @@
 # Summary of constraint enforcement techniques
 
-## interpolated-ncp-lm.i
-
-- Second order primal, first order LM
-- Constraint applied through Kernel
-- Resultant constraint source applied through Kernel
-- No PSPG-type stabilization for LM variable
-- Not solveable with `-pc_type hypre -pc_hypre_type boomeramg`
-- Local oscillations in LM near discontinuity front
-
-+----------------+----------------+----------------+
-| time           | active_lm      | violations     |
-+----------------+----------------+----------------+
-|   0.000000e+00 |   0.000000e+00 |   0.000000e+00 |
-|   1.000000e+00 |   0.000000e+00 |   0.000000e+00 |
-|   2.000000e+00 |   1.500000e+01 |   7.000000e+00 |
-|   3.000000e+00 |   2.500000e+01 |   1.700000e+01 |
-|   4.000000e+00 |   3.500000e+01 |   2.700000e+01 |
-|   5.000000e+00 |   4.300000e+01 |   2.800000e+01 |
-|   6.000000e+00 |   5.000000e+01 |   2.600000e+01 |
-|   7.000000e+00 |   5.300000e+01 |   2.500000e+01 |
-|   8.000000e+00 |   5.800000e+01 |   2.800000e+01 |
-|   9.000000e+00 |   6.000000e+01 |   2.800000e+01 |
-|   1.000000e+01 |   6.100000e+01 |   2.000000e+01 |
-+----------------+----------------+----------------+
-
-EDIT 02-20-2021 (cticenhour)
-Submodule update results in this postprocessor result. Diffs from
-old solve are very close to machine precision (floor adjusted to compensate):
-+----------------+----------------+----------------+
-| time           | active_lm      | violations     |
-+----------------+----------------+----------------+
-|   0.000000e+00 |   0.000000e+00 |   0.000000e+00 |
-|   1.000000e+00 |   0.000000e+00 |   0.000000e+00 |
-|   2.000000e+00 |   1.000000e+00 |   0.000000e+00 |
-|   3.000000e+00 |   2.000000e+00 |   0.000000e+00 |
-|   4.000000e+00 |   3.000000e+00 |   0.000000e+00 |
-|   5.000000e+00 |   3.000000e+00 |   0.000000e+00 |
-|   6.000000e+00 |   4.000000e+00 |   0.000000e+00 |
-|   7.000000e+00 |   5.000000e+00 |   0.000000e+00 |
-|   8.000000e+00 |   5.000000e+00 |   0.000000e+00 |
-|   9.000000e+00 |   5.000000e+00 |   0.000000e+00 |
-|   1.000000e+01 |   5.000000e+00 |   0.000000e+00 |
-+----------------+----------------+----------------+
-
 ## interpolated-ncp-lm-nodal-enforcement.i
 
 - Second order primal, first order LM
@@ -93,31 +49,6 @@ Postprocessor Values:
 |   8.000000e+00 |   4.900000e+01 |   0.000000e+00 |
 |   9.000000e+00 |   5.100000e+01 |   0.000000e+00 |
 |   1.000000e+01 |   5.300000e+01 |   0.000000e+00 |
-+----------------+----------------+----------------+
-
-## diagonal-ncp-lm.i
-
-- Second order primal, first order LM
-- Constraint applied through Kernel
-- Resultant constraint source applied through Kernel
-- Includes PSPG-type stabilization for LM variable
-- Not solveable with `-pc_type hypre -pc_hypre_type boomeramg`
-- Local oscillations in LM near discontinuity front
-
-+----------------+----------------+----------------+
-| time           | active_lm      | violations     |
-+----------------+----------------+----------------+
-|   0.000000e+00 |   0.000000e+00 |   0.000000e+00 |
-|   1.000000e+00 |   3.000000e+00 |   0.000000e+00 |
-|   2.000000e+00 |   1.300000e+01 |   1.500000e+01 |
-|   3.000000e+00 |   2.200000e+01 |   1.900000e+01 |
-|   4.000000e+00 |   3.100000e+01 |   3.100000e+01 |
-|   5.000000e+00 |   4.000000e+01 |   3.700000e+01 |
-|   6.000000e+00 |   4.600000e+01 |   4.500000e+01 |
-|   7.000000e+00 |   5.100000e+01 |   4.700000e+01 |
-|   8.000000e+00 |   5.500000e+01 |   5.300000e+01 |
-|   9.000000e+00 |   5.700000e+01 |   4.500000e+01 |
-|   1.000000e+01 |   5.800000e+01 |   5.800000e+01 |
 +----------------+----------------+----------------+
 
 ## diagonal-ncp-lm-nodal-enforcement.i

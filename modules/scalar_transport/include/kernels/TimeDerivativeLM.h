@@ -11,6 +11,9 @@
 
 #include "LMTimeKernel.h"
 
+/**
+ * Adds a time derivative term to a Lagrange multiplier constrained primal equation
+ */
 class TimeDerivativeLM : public LMTimeKernel
 {
 public:

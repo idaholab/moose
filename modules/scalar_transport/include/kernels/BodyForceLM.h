@@ -11,6 +11,9 @@
 
 #include "LMKernel.h"
 
+/**
+ * Imposes a body force onto a Lagrange multiplier constrained primal equation
+ */
 class BodyForceLM : public LMKernel
 {
 public:

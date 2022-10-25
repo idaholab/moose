@@ -4,7 +4,7 @@ num_steps=${l}
 dt=1
 
 [GlobalParams]
-  lm_sign = -1
+  lm_sign_positive = false
 []
 
 [Problem]
@@ -115,13 +115,6 @@ dt=1
     variable = u
     lm_variable = lm
     function = '-1'
-    extra_vector_tags = 'rest'
-  []
-  [lm_coupled_force]
-    type = CoupledForceLM
-    variable = u
-    v = lm
-    lm_variable = lm
     extra_vector_tags = 'rest'
   []
 []

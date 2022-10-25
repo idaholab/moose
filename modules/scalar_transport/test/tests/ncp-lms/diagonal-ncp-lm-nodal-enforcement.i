@@ -4,7 +4,7 @@ num_steps=${l}
 dt=1
 
 [GlobalParams]
-  lm_sign = -1
+  lm_sign_positive = false
 []
 
 [Problem]

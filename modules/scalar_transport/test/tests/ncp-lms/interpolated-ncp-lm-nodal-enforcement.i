@@ -72,9 +72,6 @@ nx=100
   []
 []
 
-[NodalKernels]
-[]
-
 [Preconditioning]
   [smp]
     type = SMP

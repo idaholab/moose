@@ -17,7 +17,12 @@ LMDiffusion::validParams()
   InputParameters params = Kernel::validParams();
   params.addRequiredCoupledVar("primal_variable",
                                "The coupled primal variable from which to pull the Laplacian");
-  params.addParam<Real>("lm_sign", 1, "The sign of the lagrange multiplier in the primal equation");
+  params.addParam<bool>(
+      "lm_sign_positive",
+      true,
+      "Whether to use a positive sign when adding this object's residual to the Lagrange "
+      "multiplier constraint equation. Positive or negative sign should be chosen such that the "
+      "diagonals for the LM block of the matrix are positive");
   params.addParam<Real>("diffusivity", 1, "The value of the diffusivity");
   params.addClassDescription(
       "Adds a diffusion term to a Lagrange multiplier constrained primal equation");
@@ -29,7 +34,7 @@ LMDiffusion::LMDiffusion(const InputParameters & parameters)
     _primal_var(coupled("primal_variable")),
     _second_primal(coupledSecond("primal_variable")),
     _second_primal_phi(getVar("primal_variable", 0)->secondPhi()),
-    _lm_sign(getParam<Real>("lm_sign")),
+    _lm_sign(getParam<bool>("lm_sign_positive") ? 1. : -1),
     _diffusivity(getParam<Real>("diffusivity"))
 {
   if (_var.number() == _primal_var)

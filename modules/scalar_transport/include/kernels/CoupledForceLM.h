@@ -11,6 +11,9 @@
 
 #include "LMKernel.h"
 
+/**
+ * Adds a coupled force term to a Lagrange multiplier constrained primal equation
+ */
 class CoupledForceLM : public LMKernel
 {
 public:
@@ -21,7 +24,10 @@ public:
 protected:
   ADReal precomputeQpResidual() override;
 
+  /// The number of the coupled variable
   const unsigned int _v_var;
+  /// The current quadrature point values of the coupled variable
   const ADVariableValue & _v;
+  /// An optional coefficient multiplying the coupled force
   const Real _coef;
 };

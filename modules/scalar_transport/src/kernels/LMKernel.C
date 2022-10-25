@@ -22,10 +22,11 @@ LMKernel::validParams()
 {
   auto params = ADKernelValue::validParams();
   params.addRequiredCoupledVar("lm_variable", "The lagrange multiplier variable");
-  params.addParam<Real>(
-      "lm_sign",
-      1.,
-      "The sign to use in adding to the LM residual. This sign should be selected so that the "
+  params.addParam<bool>(
+      "lm_sign_positive",
+      true,
+      "Whether to use a positive sign when adding this object's residual to the Lagrange "
+      "multiplier constraint equation. Positive or negative sign should be chosen such that the "
       "diagonals for the LM block of the matrix are positive");
   return params;
 }
@@ -35,7 +36,7 @@ LMKernel::LMKernel(const InputParameters & parameters)
     _lm_var(*getVar("lm_variable", 0)),
     _lm(adCoupledValue("lm_variable")),
     _lm_test(_lm_var.phi()),
-    _lm_sign(getParam<Real>("lm_sign"))
+    _lm_sign(getParam<bool>("lm_sign_positive") ? 1. : -1)
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("LMKernel requires global AD indexing");
