@@ -10,7 +10,11 @@ documentation clear for users.
 
 ## Overview
 
-!! Replace these lines with information regarding the MultiAppGeneralFieldNearestNodeTransfer object.
+!alert warning
+If [!param](/Transfers/MultiAppGeneralFieldNearestNodeTransfer/num_nearest_points) is more than 1, the results
+will differ in parallel if the target locations are near the parallel process boundaries
+on the origin app mesh. Use the [!param](/Debug/SetupDebugAction/output_process_domains) parameter to examine
+process boundaries on Exodus/Nemesis output.
 
 ## Example Input File Syntax
 
