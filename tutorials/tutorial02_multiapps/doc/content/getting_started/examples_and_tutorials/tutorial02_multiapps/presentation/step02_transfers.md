@@ -4,7 +4,7 @@
 
 ## Transfers Overview
 
-Transfers are how you move information up and down the MultiApp hierachy
+Transfers are how you move information up and down the MultiApp hierarchy
 
 There are three different places Transfers can read information and deposit information:
 
@@ -23,7 +23,7 @@ Most important: by having MOOSE move data and fill fields... apps don't need to 
 
 !---
 
-## MultiAppMeshFunctionTransfer
+## MultiAppShapeEvaluationTransfer
 
 !row!
 !col! width=80%
@@ -31,8 +31,7 @@ Called "MeshFunction" because it makes a field (Solution or Aux) into a spatial 
 
 Required parameters:
 
-- `direction`: Like all Transfers, this is either `to_multiapp` or `from_multiapp`
-- `multi_app`: Which MultiApp to interact with
+- `from_multi_app` and `to_multi_app`: Which MultiApp to interact with
 - `source_variable`: The variable to read from
 - `variable`: The Auxiliary variable to write to
 
@@ -48,7 +47,7 @@ Can be made to "conserve" a Postprocessor quantity.
 
 !---
 
-## Master Input file
+## Main Input file
 
 !listing step02_transfers/01_parent_meshfunction.i
          caption=01_parent_meshfunction.i
@@ -130,7 +129,7 @@ Some Spatial UserObjects that could be useful to Transfer:
 !listing step02_transfers/03_parent_uot.i
          caption=03_parent_uot.i
 
-This example is similar to the last one - except we've made the master domain 3D as well.  The idea is to integrate the field from the master in the vicinity of the sub-apps and transfer that to each sub-app.  In the reverse, the sub-app field is averaged in layers going up the column and those average values are transferred back to the Master.
+This example is similar to the last one - except we've made the parent app domain 3D as well.  The idea is to integrate the field from the parent app in the vicinity of the sub-apps and transfer that to each sub-app.  In the reverse, the sub-app field is averaged in layers going up the column and those average values are transferred back to the parent app.
 
 !---
 
@@ -138,9 +137,9 @@ This example is similar to the last one - except we've made the master domain 3D
 
 !row!
 !col! width=80%
-When the sub-app domain represents an infinitesimally small portion of the Master's domain - a different type of Transfer is needed.  For instance, if the Master domain is 1m x 1m and the sub-app domains are 1nm x 1nm, then there is no point in trying to "interpolate" a field from the Master domain.  Effectively, the sub-apps lie at *points* inside the master domain.
+When the sub-app domain represents an infinitesimally small portion of the parent app's domain - a different type of Transfer is needed.  For instance, if the parent app domain is 1m x 1m and the sub-app domains are 1nm x 1nm, then there is no point in trying to "interpolate" a field from the parent app domain.  Effectively, the sub-apps lie at *points* inside the parent app domain.
 
-The final class of Transfers, those moving scalar values, play a role here.  "Sampling" Transfers such as `VariableValueSampleTansfer` will automatically evaluate a single value from the Master domain at the sub-app position and move it to the sub-app.  In the reverse direction, Postprocessor Transfers move homogenized values from the sub-apps to the Master app.
+The final class of Transfers, those moving scalar values, play a role here.  "Sampling" Transfers such as `VariableValueSampleTansfer` will automatically evaluate a single value from the parent app domain at the sub-app position and move it to the sub-app.  In the reverse direction, Postprocessor Transfers move homogenized values from the sub-apps to the parent app.
 
 !col-end!
 
@@ -157,4 +156,4 @@ The final class of Transfers, those moving scalar values, play a role here.  "Sa
 !listing step02_transfers/04_parent_multiscale.i
          caption=04_parent_multiscale.i
 
-Here a `VariableValueSampleTransfer` is used to get values from the Master domain to the sub-apps.  In the reverse a `PostprocessorInterpolationTransfer` works to take values computed in the micro-simulations and then interpolate between them to create a smooth field.
+Here a `VariableValueSampleTransfer` is used to get values from the parent app domain to the sub-apps.  In the reverse a `PostprocessorInterpolationTransfer` works to take values computed in the micro-simulations and then interpolate between them to create a smooth field.
