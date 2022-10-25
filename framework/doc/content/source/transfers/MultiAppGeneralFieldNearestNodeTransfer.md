@@ -28,7 +28,7 @@ same distance. This can affect repeatability of results.
 ## Example Input File Syntax
 
 In this example, a `MultiAppGeneralFieldNearestNodeTransfer` is used to transfer a variable `to_sub` from
-block '1' in the main app to block '1' in the child app, filling the variable `from_main`.
+block '1' in the main app to block '1' in the child app `sub`, filling the variable `from_main`.
 
 !listing test/tests/transfers/general_field/nearest_node/subdomain/main.i block=Transfers/to_sub
 
