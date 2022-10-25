@@ -447,12 +447,17 @@ public:
   bool getDistributedMeshOnCommandLine() const { return _distributed_mesh_on_command_line; }
 
   /**
-   * Whether or not this is a "recover" calculation.
+   * Whether or not this is a "recover" calculation. More specifically whether this simulation has
+   * been recovered with something like the \p --recover command line argument. Note that this will
+   * never return true when \p isRestarting is true
    */
   bool isRecovering() const;
 
   /**
-   * Whether or not this is a "restart" calculation.
+   * Whether or not this is a "restart" calculation. More specifically whether this has been
+   * restarted using the \p Problem/restart_file_base parameter. Note that this will only return
+   * true when doing \emph checkpoint restart. This will be false if doing \emph exodus restart.
+   * Finally this will never return true when \p isRecovering is true
    */
   bool isRestarting() const;
 

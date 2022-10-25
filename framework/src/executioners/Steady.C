@@ -44,12 +44,6 @@ Steady::Steady(const InputParameters & parameters)
 void
 Steady::init()
 {
-  if (_app.isRecovering())
-  {
-    _console << "\nCannot recover steady solves!\nExiting...\n" << std::endl;
-    return;
-  }
-
   checkIntegrity();
   _problem.execute(EXEC_PRE_MULTIAPP_SETUP);
   _problem.initialSetup();
@@ -59,7 +53,10 @@ void
 Steady::execute()
 {
   if (_app.isRecovering())
+  {
+    _console << "\nCannot recover steady solves!\nExiting...\n" << std::endl;
     return;
+  }
 
   _time_step = 0;
   _time = _time_step;
