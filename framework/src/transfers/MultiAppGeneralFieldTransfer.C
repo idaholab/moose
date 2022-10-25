@@ -53,6 +53,7 @@ MultiAppGeneralFieldTransfer::validParams()
       "Whether or not to error in the case that a target point is not found in the source domain.");
   params.addParamNamesToGroup("to_blocks from_blocks to_boundaries from_boundaries",
                               "Transfer spatial restriction");
+  params.addParamNamesToGroup("greedy_search error_on_miss", "Search algorithm");
   return params;
 }
 
@@ -90,7 +91,7 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
   _bboxes.clear();
   _bboxes = getRestrictedFromBoundingBoxes();
 
-  // Expand bounding boxes. Some right points might be excluded
+  // Expand bounding boxes. Some desired points might be excluded
   // without an expansion
   for (auto & box : _bboxes)
   {
@@ -110,7 +111,6 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
   }
 
   // Figure out how many "from" domains each processor owns.
-  // Clean up _froms_per_proc
   _froms_per_proc.clear();
   _froms_per_proc = getFromsPerProc();
 
