@@ -1,29 +1,31 @@
 [Tests]
   issues = '#21885'
+  [adjoint_grad]
   design = 'MaterialGradientIntegral.md'
   requirement = 'The system shall be able to perform gradient based material'
                 ' parameter inversion for a single material property using'
-  [adjoint_grad_explicit]
-    type = CSVDiff
-    max_threads = 1
-    rel_err = 0.01
-    abs_zero = 0.01
-    input = main.i
-    cli_args = "MultiApps/adjoint/input_files=adjoint_explicit.i"
-    csvdiff = main_out_OptimizationReporter_0001.csv
-    detail = ' explicitly defined auxVariable gradient of forward problem temperature field.'
-    # steady solve
-    recover = false
-  []
-  [adjoint_grad]
-    type = CSVDiff
-    max_threads = 1
-    rel_err = 0.01
-    abs_zero = 0.01
-    input = main.i
-    csvdiff = main_out_OptimizationReporter_0001.csv
-    detail = ' MaterialGradientIntegral to multiply gradients of the adjoint and forward variables.'
-    # steady solve
-    recover = false
+    [auxVariables]
+      type = CSVDiff
+      max_threads = 1
+      rel_err = 0.01
+      abs_zero = 0.01
+      input = main.i
+      cli_args = "MultiApps/adjoint/input_files=adjoint_explicit.i"
+      csvdiff = main_out_OptimizationReporter_0001.csv
+      detail = ' explicitly defined auxVariable gradient of forward problem temperature field.'
+      # steady solve
+      recover = false
+    []
+    [postprocessor]
+      type = CSVDiff
+      max_threads = 1
+      rel_err = 0.01
+      abs_zero = 0.01
+      input = main.i
+      csvdiff = main_out_OptimizationReporter_0001.csv
+      detail = ' MaterialGradientIntegral to multiply gradients of the adjoint and forward variables.'
+      # steady solve
+      recover = false
+    []
   []
 []
