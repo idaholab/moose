@@ -34,14 +34,14 @@ MultiAppGeneralFieldShapeEvaluationTransfer::validParams()
 {
   InputParameters params = MultiAppGeneralFieldTransfer::validParams();
   params.addClassDescription(
-      "Transfers field data at the MultiApp position using the finite element/volume shape "
+      "Transfers field data at the MultiApp position using the finite element shape "
       "functions from the origin application.");
   return params;
 }
 
 MultiAppGeneralFieldShapeEvaluationTransfer::MultiAppGeneralFieldShapeEvaluationTransfer(
     const InputParameters & parameters)
-  : MultiAppGeneralFieldTransfer(parameters), _error_on_miss(getParam<bool>("error_on_miss"))
+  : MultiAppGeneralFieldTransfer(parameters)
 {
 }
 

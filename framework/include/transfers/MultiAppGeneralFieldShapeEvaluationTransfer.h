@@ -55,9 +55,6 @@ private:
       const std::vector<Point> & incoming_points,
       std::vector<std::pair<Real, Real>> & outgoing_vals);
 
-  /// Error out when some points can not be located
-  bool _error_on_miss;
-
   /*
    * Bounding boxes
    */
