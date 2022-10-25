@@ -40,7 +40,7 @@ private:
    * @param[out] the mesh functions
    */
   void buildMeshFunctions(const VariableName & var_name,
-                             std::vector<std::shared_ptr<MeshFunction>> & local_meshfuns);
+                          std::vector<std::shared_ptr<MeshFunction>> & local_meshfuns);
 
   /*
    * Evaluate interpolation values for incoming points

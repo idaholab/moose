@@ -34,8 +34,8 @@ MultiAppGeneralFieldNearestNodeTransfer::validParams()
 {
   InputParameters params = MultiAppGeneralFieldTransfer::validParams();
   params.addClassDescription(
-      "Transfers field data at the MultiApp position using solution the finite element function "
-      "from the master application, via a 'libMesh::MeshFunction' object.");
+      "Transfers field data at the MultiApp position by finding the value at the nearest neighbor "
+      "in the origin application.");
   params.addParam<unsigned int>("num_nearest_points",
                                 1,
                                 "Number of nearest source (from) points will be chosen to "

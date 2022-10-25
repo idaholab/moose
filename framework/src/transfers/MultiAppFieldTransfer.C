@@ -10,6 +10,7 @@
 // MOOSE includes
 #include "MultiAppFieldTransfer.h"
 #include "FEProblemBase.h"
+#include "DisplacedProblem.h"
 #include "MooseVariableFEBase.h"
 #include "MooseMesh.h"
 #include "SystemBase.h"
@@ -157,7 +158,7 @@ MultiAppFieldTransfer::transfer(FEProblemBase & to_problem, FEProblemBase & from
 {
   // Perform error checking
   if (getToVarNames().size() != getFromVarNames().size())
-    mooseError("Number of variables transfered must be same in both systems.");
+    mooseError("Number of variables transferred must be same in both systems.");
   for (auto & to_var : getToVarNames())
     checkVariable(to_problem, to_var);
   for (auto & from_var : getFromVarNames())
@@ -243,4 +244,17 @@ MultiAppFieldTransfer::transfer(FEProblemBase & to_problem, FEProblemBase & from
     to_solution.close();
     to_var.sys().update();
   }
+}
+
+EquationSystems &
+MultiAppFieldTransfer::getEquationSystem(const FEProblemBase & problem, bool use_displaced) const
+{
+  if (use_displaced)
+  {
+    if (!problem.getDisplacedProblem())
+      mooseError("No displaced problem to provide a displaced equation system");
+    return problem.getDisplacedProblem()->es();
+  }
+  else
+    return problem.es();
 }

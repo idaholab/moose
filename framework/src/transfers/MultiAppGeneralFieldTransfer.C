@@ -30,8 +30,8 @@ MultiAppGeneralFieldTransfer::validParams()
 {
   InputParameters params = MultiAppConservativeTransfer::validParams();
   params.addRangeCheckedParam<Real>("bbox_factor",
-                                    0.1,
-                                    "bbox_factor>-1",
+                                    1,
+                                    "bbox_factor>0",
                                     "Factor to inflate or deflate the source app bounding boxes");
 
   params.addParam<std::vector<BoundaryName>>(
@@ -88,7 +88,6 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
   // Get the bounding boxes for the "from" domains.
   // Clean up _bboxes
   _bboxes.clear();
-  //_bboxes = getFromBoundingBoxes();
   _bboxes = getRestrictedFromBoundingBoxes();
 
   // Expand bounding boxes. Some right points might be excluded
@@ -239,20 +238,19 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const VariableName & var_nam
   for (unsigned int i_to = 0; i_to < _to_problems.size(); ++i_to)
   {
     // libMesh EquationSystems
-    auto & es = _to_problems[i_to]->es();
+    auto & es = getEquationSystem(*_to_problems[i_to], _displaced_target_mesh);
     // libMesh system that has this variable
     // Assume var name is unique in an equation system
     System * to_sys = find_sys(es, var_name);
     auto sys_num = to_sys->number();
     auto var_num = to_sys->variable_number(var_name);
-    // libMesh MeshBase
-    auto & to_mesh = to_sys->get_mesh();
-    auto & fe_type = to_sys->variable_type(var_num);
     // FEM type info
+    auto & fe_type = to_sys->variable_type(var_num);
     bool is_nodal = fe_type.family == LAGRANGE;
 
     // Moose mesh
-    MooseMesh * to_moose_mesh = &_to_problems[i_to]->mesh();
+    const auto & to_moose_mesh = _to_problems[i_to]->mesh(_displaced_target_mesh);
+    const auto & to_mesh = to_moose_mesh.getMesh();
 
     std::set<SubdomainID> _to_blocks;
 
@@ -264,7 +262,7 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const VariableName & var_nam
       // User input block names
       auto & blocks = getParam<std::vector<SubdomainName>>("to_blocks");
       // Subdomain ids
-      std::vector<SubdomainID> ids = to_moose_mesh->getSubdomainIDs(blocks);
+      std::vector<SubdomainID> ids = to_moose_mesh.getSubdomainIDs(blocks);
       // Store these ids
       _to_blocks.insert(ids.begin(), ids.end());
     }
@@ -274,7 +272,7 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const VariableName & var_nam
     {
       // User input block names
       auto & boundary_names = getParam<std::vector<BoundaryName>>("to_boundaries");
-      std::vector<BoundaryID> boundary_ids = to_moose_mesh->getBoundaryIDs(boundary_names);
+      std::vector<BoundaryID> boundary_ids = to_moose_mesh.getBoundaryIDs(boundary_names);
       // Store these ids
       _to_boundaries.insert(boundary_ids.begin(), boundary_ids.end());
     }
@@ -293,13 +291,13 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const VariableName & var_nam
                                 GeneralFieldTransfer::NullAction<Number>>
           request_gather(*to_sys, f, &g, nullsetter, varvec);
 
-      const MeshBase::element_iterator to_begin =
-          _to_blocks.empty() ? to_mesh.active_local_elements_begin()
-                             : to_mesh.active_local_subdomain_set_elements_begin(_to_blocks);
+      const auto & to_begin = _to_blocks.empty()
+                                  ? to_mesh.active_local_elements_begin()
+                                  : to_mesh.active_local_subdomain_set_elements_begin(_to_blocks);
 
-      const MeshBase::element_iterator to_end =
-          _to_blocks.empty() ? to_mesh.active_local_elements_end()
-                             : to_mesh.active_local_subdomain_set_elements_end(_to_blocks);
+      const auto & to_end = _to_blocks.empty()
+                                ? to_mesh.active_local_elements_end()
+                                : to_mesh.active_local_subdomain_set_elements_end(_to_blocks);
 
       ConstElemRange to_elem_range(to_begin, to_end);
 
@@ -327,10 +325,10 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const VariableName & var_nam
 
         // Skip if it is a block restricted transfer and current node does not have
         // specified blocks
-        if (!_to_blocks.empty() && !hasBlocks(_to_blocks, *to_moose_mesh, node))
+        if (!_to_blocks.empty() && !hasBlocks(_to_blocks, to_moose_mesh, node))
           continue;
 
-        if (!_to_boundaries.empty() && !hasBoundaries(_to_boundaries, *to_moose_mesh, node))
+        if (!_to_boundaries.empty() && !hasBoundaries(_to_boundaries, to_moose_mesh, node))
           continue;
 
         // Cache point information
@@ -404,14 +402,11 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
     const std::pair<unsigned int, dof_id_type> dofobject(problem_id, dof_object_id);
 
     // libMesh EquationSystems
-    auto & es = _to_problems[problem_id]->es();
+    auto & es = getEquationSystem(*_to_problems[problem_id], _displaced_target_mesh);
     // libMesh system
     System * to_sys = find_sys(es, var_name);
 
-    // libMesh mesh
-    // MeshBase & to_mesh = _to_meshes[problem_id]->getMesh();
     auto var_num = to_sys->variable_number(var_name);
-    // auto sys_num = to_sys->number();
     auto & fe_type = to_sys->variable_type(var_num);
     bool is_nodal = fe_type.family == LAGRANGE;
 
@@ -446,7 +441,7 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
 
       auto & dofobject_to_val = dofobject_to_valsvec[problem_id];
 
-      // Check if we visited this dof object ealier
+      // Check if we visited this dof object earlier
       auto values_ptr = dofobject_to_val.find(dof_object_id);
       // We did not visit this
       if (values_ptr == dofobject_to_val.end())
@@ -490,7 +485,7 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
     auto & dofobject_to_val = dofobject_to_valsvec[problem_id];
 
     // libMesh EquationSystems
-    auto & es = _to_problems[problem_id]->es();
+    auto & es = getEquationSystem(*_to_problems[problem_id], _displaced_target_mesh);
 
     // libMesh system
     System * to_sys = find_sys(es, var_name);
