@@ -7,6 +7,6 @@ The following pages provide examples on how to use the optimization module to so
 - [debuggingHelp.md]
 
 All of the examples in this section are parameterizing force loads or material properties for steady state
-heat conduction in a solid, as described in this [section](theory/InvOptTheory.md#sec:adjoint) from the optimization theory page and this [page](/heat_conduction/index.md) from the heat conduction MOOSE module.
+heat conduction in a solid, as described in this [section](theory/InvOptTheory.md#sec:adjoint) from the optimization theory page and in the theory section of the heat conduction MOOSE module.
 
 Regardless of which type of inversion problem you are trying to solve, it is recommended that you start with the [Example 1: Point Loads](forceInv_pointLoads.md).  This example contains the best documentation on all of the MOOSE objects needed to solve an optimization and most importantly, this is the simplest optimization problem.  When setting up your own optimization problems, you will likely run into problems and the [debuggingHelp.md] page will help with the Tao executioner options and output that can help locate the problem.

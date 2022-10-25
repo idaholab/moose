@@ -19,16 +19,16 @@ is fit to experimental data.  This is a nonlinear optimization problem but is li
 
 The main input file containing the optimization reporter, executioner and transfers is shown in [main].  The adjoint problem will need the simulation temperature from the forward problem to evaluate [!eqref](theory/InvOptTheory.md#eq:convectiveBC) for the convective BC.  This requires us to transfer the forward simulation temperature field into an AuxVariable on the main app and then transfer it to the adjoint-app.  For these reasons, we only define the mesh on the main-app and clone it to the forward and adjoint sub-apps when they are created in the `[MultiApps]` block by setting `clone_parent_mesh=true`. The main app also has an `AuxVariable` for the forward problem temperature field to be transferred into.
 
-!listing test/tests/optimizationreporter/bc_convective/main.i id=main
+!listing modules/combined/test/tests/invOpt_bc_convective/main.i id=main
 
 ## Forward Problem Sub-App
 
-The forward input file containing the solution to the PDE of interest is shown in [forward].  The optimization executioner is controlling the `coefficient` in [ConvectiveFluxFunction.md] boundary condition.  The coefficient is controlled by transferring data from the main-app into a chain of objects on the forward-app.  The main-app first transfers the convection coefficient into a `[ConstantValuePostprocessor]` on the forward-app, which is then transferred into a function that can finally be transferred into the `ConvectiveFluxFunction`.
+The forward input file containing the solution to the PDE of interest is shown in [forward].  The optimization executioner is controlling the `coefficient` in `[ConvectiveFluxFunction]` boundary condition.  The coefficient is controlled by transferring data from the main-app into a chain of objects on the forward-app.  The main-app first transfers the convection coefficient into a `[ConstantValuePostprocessor]` on the forward-app, which is then transferred into a function that can finally be transferred into the `ConvectiveFluxFunction` BC.
 
-!listing test/tests/optimizationreporter/bc_convective/forward.i id=forward
+!listing modules/combined/test/tests/invOpt_bc_convective/forward.i id=forward
 
 ## Adjoint Problem Sub-App
 
 The adjoint input file shown in [adjoint] computes the adjoint of the forward PDE.  The adjoint problem uses a `Controls` block to allow the main app to transfer the material property used in the forward problem to the adjoint problem.  The temperature field computed in the forward problem was transferred back to the main app and is finally transferred from the main app into the adjoint problem using a `MultiAppCopyTransfer`.  The gradient given by [!eqref](theory/InvOptTheory.md#eq:convectiveBC) is computed on the left boundary using the  [SideIntegralVariablePostprocessor.md] postprocessor.
 
-!listing test/tests/optimizationreporter/bc_convective/adjoint.i id=adjoint
+!listing modules/combined/test/tests/invOpt_bc_convective/adjoint.i id=adjoint
