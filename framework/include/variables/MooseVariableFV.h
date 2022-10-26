@@ -472,7 +472,7 @@ public:
   /**
    * @return whether \p fi is an internal face for this variable
    */
-  bool isInternalFace(const FaceInfo & fi) const;
+  bool isInternalFace(const FaceInfo & fi) const override;
 
 protected:
   /**

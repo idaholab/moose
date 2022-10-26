@@ -53,6 +53,7 @@ public:
   virtual ~PiecewiseByBlockLambdaFunctor() = default;
 
   std::pair<bool, const Elem *> isExtrapolatedBoundaryFace(const FaceInfo & fi) const override;
+  bool isInternalFace(const FaceInfo & fi) const override;
 
   bool hasBlocks(const SubdomainID & id) const override;
 
@@ -189,6 +190,19 @@ PiecewiseByBlockLambdaFunctor<T>::isExtrapolatedBoundaryFace(const FaceInfo & fi
 
 template <typename T>
 bool
+PiecewiseByBlockLambdaFunctor<T>::isInternalFace(const FaceInfo & fi) const
+{
+  if (!fi.neighborPtr())
+    return false;
+
+  const bool defined_on_elem = _elem_functor.count(fi.elem().subdomain_id());
+  const bool defined_on_neighbor = _elem_functor.count(fi.neighbor().subdomain_id());
+
+  return (defined_on_elem && defined_on_neighbor);
+}
+
+template <typename T>
+bool
 PiecewiseByBlockLambdaFunctor<T>::hasBlocks(const SubdomainID & id) const
 {
   // If any of the maps has a functor for that block, it has the block
@@ -262,14 +276,14 @@ PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::FaceArg & face,
   using namespace Moose::FV;
   mooseAssert(state == 0, "Only current time state supported.");
 
-  if (face.fi->boundaryIDs().size())
+  if (isInternalFace(*face.fi))
   {
-    Moose::SingleSidedFaceArg ssfa = {
-        face.fi, face.limiter_type, face.elem_is_upwind, face.correct_skewness, face.elem_sub_id};
-    return this->evaluate(ssfa, 0);
+    return interpolate(*this, face);
   }
 
-  return interpolate(*this, face);
+  Moose::SingleSidedFaceArg ssfa = {
+      face.fi, face.limiter_type, face.elem_is_upwind, face.correct_skewness, face.elem_sub_id};
+  return this->evaluate(ssfa, 0);
 }
 
 template <typename T>
