@@ -1,1 +1,1 @@
-!template load file=sqa/app_srs.md.template app=Ray Tracing category=ray_tracing
+!template load file=sqa/module_srs.md.template module=Ray Tracing category=ray_tracing

@@ -1,1 +1,1 @@
-!template load file=sqa/app_far.md.template category=stochastic_tools app=Stochastic Tools
+!template load file=sqa/module_far.md.template category=stochastic_tools module=Stochastic Tools

@@ -1,1 +1,1 @@
-!template load file=sqa/app_srs.md.template category=reactor app=Reactor
+!template load file=sqa/module_srs.md.template category=reactor module=Reactor

@@ -1,1 +1,1 @@
-!template load file=sqa/app_far.md.template category=fluid_properties app=Fluid Properties
+!template load file=sqa/module_far.md.template category=fluid_properties module=Fluid Properties
