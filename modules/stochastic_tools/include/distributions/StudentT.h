@@ -12,7 +12,7 @@
 #include "Distribution.h"
 
 /**
- * A class used to generate a normal distribution
+ * A class used to generate a Student's t distribution
  */
 class StudentT : public Distribution
 {

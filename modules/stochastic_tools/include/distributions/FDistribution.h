@@ -12,7 +12,7 @@
 #include "Distribution.h"
 
 /**
- * A class used to generate a normal distribution
+ * A class used to generate am F-distribution
  */
 class FDistribution : public Distribution
 {

@@ -34,7 +34,7 @@ public:
   /**
    * Lower incomplete beta function.
    * Non-boost implementation from:
-   * https://codeplea.com/incomplete-beta-function-c
+   * Section 6.4 of https://www.cec.uchile.cl/cinetica/pcordero/MC_libros/NumericalRecipesinC.pdf
    */
   static Real incompleteBeta(const Real & a, const Real & b, const Real & x);
   /**

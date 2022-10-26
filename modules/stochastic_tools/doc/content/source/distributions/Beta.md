@@ -15,7 +15,7 @@ F(x;\alpha,\beta) = I_x(\alpha,\beta),
 !equation id=eq:beta_q
 F^{-1}(p; \alpha,\beta) = I_x^{-1}(\alpha, \beta, p),
 
-where $\alpha,\beta > 0$ and $0\leq x,p \leq 1$. $\Beta(a,b)$ is the beta function defined in [eq:beta_fun], $I_x(a,b)$ is the regularized incomplete beta function defined in [eq:ibeta], and $I_x^{-1}(a, b, p)$ is the inverse of the incomplete beta function. Each of these quantities are either computed using an external boost package (if available) or a custom iterative procedure. The boost versions are slightly slower but obtain machine precision, while the custom algorithms obtain about $10^{-14}$ accuracy.
+where $\alpha,\beta > 0$ and $0\leq x,p \leq 1$. $\Beta(a,b)$ is the beta function defined in [eq:beta_fun], $I_x(a,b)$ is the regularized incomplete beta function defined in [eq:ibeta], and $I_x^{-1}(a, b, p)$ is the inverse of the incomplete beta function. Each of these quantities are either computed using an external boost package (if available) or a custom iterative procedure [!citep](teukolsky1992numerical). The boost versions are slightly slower but obtain machine precision, while the custom algorithms obtain about $10^{-14}$ accuracy.
 
 !equation id=eq:beta_fun
 \Beta(a,b) = \frac{\Gamma(a)\Gamma(b)}{\Gamma(a+b)} = \int_0^1 x^{a-1}(1-x)^{b-1}dx
