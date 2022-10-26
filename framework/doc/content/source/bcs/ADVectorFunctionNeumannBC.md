@@ -4,8 +4,8 @@
 
 ## Description
 
-`ADVectorFunctionNeumannBC` is the extension of [`FunctionNuemannBC`](bcs/NuemannBC) to
-Lagrange vector variables and is used for
+`ADVectorFunctionNeumannBC` is similar to [`ADFunctionNeumannBC`](bcs/ADFunctionNeumannBC) for
+vector variables and is used for
 imposing flux boundary conditions on systems of
 partial differential equations (PDEs). This
 class is appropriate to use for PDEs of the form
@@ -21,12 +21,12 @@ where $\Omega \subset \mathbb{R}^n$ is the domain, and $\partial
 \Omega = \partial \Omega_D \cup \partial \Omega_N$ is its boundary. In
 this case, a `ADVectorFunctionNeumannBC` object is used to impose the condition (3)
 on the subset of the boundary denoted by $\partial \Omega_N$. In this case,
-$\vec{h}$ is supplied through the `Function` parameters `function_x`, `function_y`, and
-`function_z`. If any of those parameters are not supplied by the user, they
+$\vec{h}$ is supplied through the [`Function`](Functions/index.md) parameters [!param](BCs/ADVectorFunctionNeumanBC/function_x), [!param](BCs/ADVectorFunctionNeumanBC/function_y), and
+[!param](BCs/ADVectorFunctionNeumanBC/function_z). If any of those parameters are not supplied by the user, they
 take a default value of $0$. The user must define one
 or more sidesets corresponding to the boundary subset $\partial \Omega_N$.
 
-Note that this BC computes its Jacobian using automatic differentiation
+Note that this BC computes its Jacobian using the automatic differentiation system.
 
 !syntax parameters /BCs/ADVectorFunctionNeumannBC
 

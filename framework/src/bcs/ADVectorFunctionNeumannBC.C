@@ -22,7 +22,7 @@ ADVectorFunctionNeumannBC::validParams()
   params.addParam<FunctionName>("function_z", 0, "The function for the z component");
   params.addClassDescription(
       "Imposes the integrated boundary condition "
-      "$\\frac{\\partial \\vec{u}}{\\partial n} &= \\vec{h}$, "
+      "$\\frac{\\partial \\vec{u}}{\\partial n} = \\vec{h}$, "
       "where $\\vec{h}$ is a (possibly) time and space-dependent MOOSE Function.");
   return params;
 }

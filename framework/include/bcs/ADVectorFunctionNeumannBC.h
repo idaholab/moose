@@ -13,7 +13,8 @@
 
 /**
  *  Boundary condition of a Neumann style whose value is computed by a
- *  user-defined function for LAGRANGE_VEC variables.
+ *  user-defined function for vector variables and whose Jacobian is computed
+ *  by the automatic differentiation system.
  */
 class ADVectorFunctionNeumannBC : public ADVectorIntegratedBC
 {
