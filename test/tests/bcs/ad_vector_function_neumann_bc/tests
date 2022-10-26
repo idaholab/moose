@@ -4,7 +4,13 @@
         type = 'Exodiff'
         input = 'vector_ad_neumann_bc.i'
         exodiff = 'vector_ad_neumann_bc_out.e'
-        requirement = 'We shall be able to produce the expected result using ADIntegratedBC'
+        requirement = 'The system shall support Neumann type boundary conditions defined by a function for vector variables'
         design = 'ADVectorFunctionNeumannBC.md'
     [../]
+    [./test-jac]
+        type = 'PetscJacobianTester'
+        input = 'vector_ad_neumann_bc.i'
+        run_sim = False
+        detail = 'using automatic differentiation and shall be able to produce the exact Jacobian.'
+      [../]
 []
