@@ -230,19 +230,7 @@ FlowModelSinglePhase::addMooseObjects()
 {
   FlowModel::addCommonMooseObjects();
 
-  ExecFlagEnum execute_on(MooseUtils::getDefaultExecFlagEnum());
-  execute_on = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
-
-  // numerical flux user object
-  {
-    const std::string class_name = "ADNumericalFlux3EqnHLLC";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<UserObjectName>("fluid_properties") = _fp_name;
-    params.set<MooseEnum>("emit_on_nan") = "none";
-    params.set<ExecFlagEnum>("execute_on") = execute_on;
-    _sim.addUserObject(class_name, _numerical_flux_name, params);
-  }
-
+  addNumericalFluxUserObject();
   addRDGMooseObjects();
 
   {
@@ -461,6 +449,17 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<std::vector<VariableName>>("A") = {AREA};
     _sim.addAuxKernel(class_name, genName(_comp_name, "H_auxkernel"), params);
   }
+}
+
+void
+FlowModelSinglePhase::addNumericalFluxUserObject()
+{
+  const std::string class_name = "ADNumericalFlux3EqnHLLC";
+  InputParameters params = _factory.getValidParams(class_name);
+  params.set<UserObjectName>("fluid_properties") = _fp_name;
+  params.set<MooseEnum>("emit_on_nan") = "none";
+  params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_LINEAR, EXEC_NONLINEAR};
+  _sim.addUserObject(class_name, _numerical_flux_name, params);
 }
 
 void

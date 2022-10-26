@@ -38,6 +38,12 @@ public:
   virtual unsigned int getNumberOfRegions() const override { return 4; }
 
 protected:
+  /**
+   * Computes the flow area that is used in the numerical flux
+   */
+  virtual ADReal computeFlowArea(const std::vector<ADReal> & U1,
+                                 const std::vector<ADReal> & U2) const;
+
   /// fluid properties user object
   const SinglePhaseFluidProperties & _fp;
 

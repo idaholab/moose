@@ -10,6 +10,8 @@
 #include "ConstantDensityThermalSolidPropertiesMaterial.h"
 #include "ThermalSolidProperties.h"
 
+#include "metaphysicl/raw_type.h"
+
 registerMooseObject("SolidPropertiesApp", ConstantDensityThermalSolidPropertiesMaterial);
 registerMooseObject("SolidPropertiesApp", ADConstantDensityThermalSolidPropertiesMaterial);
 
@@ -33,7 +35,7 @@ ConstantDensityThermalSolidPropertiesMaterialTempl<
   : ThermalSolidPropertiesMaterialTempl<is_ad>(parameters),
 
     _T_ref(this->template getParam<Real>("T_ref")),
-    _rho_constant(_sp.rho_from_T(_T_ref))
+    _rho_constant(MetaPhysicL::raw_value(_sp.rho_from_T(GenericReal<is_ad>(_T_ref))))
 {
 }
 
