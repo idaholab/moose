@@ -12,6 +12,7 @@
   stoichiometric_ionic_str_using_Cl_only = true # for comparison with GWB
   mol_cutoff = 1E-5
   abs_tol = 1E-15
+  precision = 7
 []
 
 [UserObjects]
@@ -24,4 +25,3 @@
     piecewise_linear_interpolation = true # for comparison with GWB
   []
 []
-
