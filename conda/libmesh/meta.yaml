@@ -2,7 +2,7 @@
 # REMEMBER TO UPDATE the .yaml files for the following packages:
 #   template/
 #   moose/
-{% set build = 1 %}
+{% set build = 2 %}
 {% set strbuild = "build_" + build|string %}
 {% set version = "2022.10.05" %}
 {% set vtk_friendly_version = "9.1" %}
