@@ -48,6 +48,7 @@
 /modules/phase_field @dschwen
 /modules/ray_tracing @loganharbour
 /modules/rdg @joshuahansel @lindsayad
+/modules/scalar_transport @lindsayad
 /modules/solid_properties @joshuahansel
 /modules/stochastic_tools @zachmprince
 /modules/tensor_mechanics @bwspenc @dschwen @jiangwen84

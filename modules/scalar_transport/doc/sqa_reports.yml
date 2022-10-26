@@ -1,0 +1,30 @@
+Applications:
+    scalar_transport:
+        exe_directory: ${MOOSE_DIR}/modules/scalar_transport
+        content_directory: ${MOOSE_DIR}/modules/scalar_transport/doc/content
+        unregister:
+            - ${MOOSE_DIR}/framework/doc/unregister.yml
+        remove:
+            - ${MOOSE_DIR}/framework/doc/remove.yml
+        log_default: WARNING
+        show_warning: false
+
+Documents:
+    software_requirements_specification: sqa/scalar_transport_srs.md
+    software_design_description: sqa/scalar_transport_sdd.md
+    software_test_plan: sqa/scalar_transport_stp.md
+    requirements_traceablity_matrix: sqa/scalar_transport_rtm.md
+    verification_validation_report: sqa/scalar_transport_vvr.md
+    failure_analysis_report: sqa/scalar_transport_far.md
+    software_library_list: sqa/scalar_transport_sll.md
+    communication_and_contact_information: sqa/framework_cci.md
+    software_coding_standards: sqa/framework_scs.md
+    log_default: WARNING
+    show_warning: false
+
+Requirements:
+    scalar_transport:
+        directories:
+            - ${MOOSE_DIR}/modules/scalar_transport/test
+        log_default: WARNING
+        show_warning: false
