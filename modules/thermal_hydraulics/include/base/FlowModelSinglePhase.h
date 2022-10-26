@@ -25,6 +25,7 @@ public:
   virtual void addMooseObjects() override;
 
 protected:
+  virtual void addNumericalFluxUserObject();
   void addRDGMooseObjects();
 
   /// Slope reconstruction type for rDG
