@@ -21,8 +21,8 @@ where $\Omega \subset \mathbb{R}^n$ is the domain, and $\partial
 \Omega = \partial \Omega_D \cup \partial \Omega_N$ is its boundary. In
 this case, a `ADVectorFunctionNeumannBC` object is used to impose the condition (3)
 on the subset of the boundary denoted by $\partial \Omega_N$. In this case,
-$\vec{h}$ is supplied through the [`Function`](Functions/index.md) parameters [!param](BCs/ADVectorFunctionNeumanBC/function_x), [!param](BCs/ADVectorFunctionNeumanBC/function_y), and
-[!param](BCs/ADVectorFunctionNeumanBC/function_z). If any of those parameters are not supplied by the user, they
+$\vec{h}$ is supplied through the [`Function`](Functions/index.md) parameters [!param](BCs/ADVectorFunctionNeumannBC/function_x), [!param](BCs/ADVectorFunctionNeumannBC/function_y), and
+[!param](BCs/ADVectorFunctionNeumannBC/function_z). If any of those parameters are not supplied by the user, they
 take a default value of $0$. The user must define one
 or more sidesets corresponding to the boundary subset $\partial \Omega_N$.
 
