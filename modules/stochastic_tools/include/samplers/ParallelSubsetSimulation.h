@@ -31,12 +31,20 @@ public:
   /// Access the subset probability
   const Real & getSubsetProbability() const;
 
+  /**
+   * Returns true if the adaptive sampling is completed
+   */
+  virtual bool isAdaptiveSamplingCompleted() const override { return _is_sampling_completed; }
+
 protected:
   virtual void sampleSetUp(const Sampler::SampleMode mode) override;
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
 
   /// Number of samples per subset
   const unsigned int & _num_samplessub;
+
+  /// Number of subsets
+  const unsigned int & _num_subsets;
 
   /// Absolute value of the model result. Use this when failure is defined as a non-exceedance rather than an exceedance.
   const bool & _use_absolute_value;
@@ -67,6 +75,9 @@ protected:
 
   /// Storage for distribution objects to be utilized
   std::vector<Distribution const *> _distributions;
+
+  /// True if the sampling is completed
+  bool _is_sampling_completed;
 
 private:
   /// Storage for the previously accepted sample inputs across all the subsets
