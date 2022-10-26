@@ -13,6 +13,7 @@ import json, os
 
 class SchemaDiff(RunApp):
     @staticmethod
+
     def validParams():
         params = RunApp.validParams()
         params.addParam('schemadiff',   [], "A list of XML or JSON files to compare.")
@@ -26,11 +27,9 @@ class SchemaDiff(RunApp):
     def __init__(self, name, params):
         RunApp.__init__(self, name, params)
         if self.specs['required_python_packages'] is None:
-            self.specs['required_python_packages'] = 'deepdiff xmltodict'
+            self.specs['required_python_packages'] = 'deepdiff'
         elif 'deepdiff' not in self.specs['required_python_packages']:
             self.specs['required_python_packages'] += ' deepdiff'
-        elif 'xmltodict' not in self.specs['required_python_packages']:
-            self.specs['required_python_packages'] += ' xmltodict'
 
     def prepare(self, options):
         if self.specs['delete_output_before_running'] == True:
@@ -39,7 +38,6 @@ class SchemaDiff(RunApp):
     def processResults(self, moose_dir, options, output):
         output += self.testFileOutput(moose_dir, options, output)
         self.testExitCodes(moose_dir, options, output)
-        # Skip
         specs = self.specs
 
         if self.isFail() or specs['skip_checks']:
@@ -66,8 +64,9 @@ class SchemaDiff(RunApp):
                 # far as Paraview is concerned.
                 specs['ignored_items'].append('header_type')
 
-                gold_dict = self.load_file(gold)
-                test_dict = self.load_file(test)
+                gold_dict = self.try_load(gold)
+                test_dict = self.try_load(test)
+
                 if not gold_dict:
                     output += "Gold Schema File Invalid: "+gold+"\n"
                     self.setStatus(self.fail, 'INVALID SCHEMA(S) PROVIDED')
@@ -78,6 +77,7 @@ class SchemaDiff(RunApp):
                 #Break after testing both to provide both errors in the log if both are applicable
                 if not test_dict or not gold_dict:
                     break
+
                 #Output err and break if gold and test filetypes are different
                 if gold_dict[1] != test_dict[1]:
                     output += "Schema Files of Different Types: \nTest: " + test +"\nGold: " + gold
@@ -90,13 +90,26 @@ class SchemaDiff(RunApp):
                     output += diff
                     self.setStatus(self.diff, 'SCHEMADIFF')
                     break
-
         return output
+
+    #Many xml files in MOOSE don't actually store their data as a proper array, but as a giant string.
+    #This should fix the giant strings as lists split by whitespace, in-place in the dict.
+    def fix_xml_arrays(self, data):
+        for k, v in data.copy().items():
+            if isinstance(v, dict):
+                data[k] = self.fix_xml_arrays(v)
+            elif isinstance(v, list):
+                data[k] = [self.fix_xml_arrays(i) for i in v]
+            elif k == '#text':
+                del data[k]
+                data[k] = v.split()
+        return data
 
     def import_xml(self,filepath):
         import xmltodict
         with open(filepath,"r") as f:
-            return xmltodict.parse(f.read())
+            xml = xmltodict.parse(f.read())
+            return self.fix_xml_arrays(xml)
 
     def import_json(self,filepath):
         with open(filepath,"r") as f:
@@ -118,7 +131,8 @@ class SchemaDiff(RunApp):
                     if level.t1 != level.t2:
                         x = float(level.t1)
                         y = float(level.t2)
-                        if x < self.abs_zero or y < self.abs_zero:
+
+                        if x < self.abs_zero and y < self.abs_zero:
                             return True
                         if self.rel_err == 0 or y == 0:
                             if abs(x-y) > self.rel_err:
@@ -126,7 +140,10 @@ class SchemaDiff(RunApp):
                         elif abs(x-y)/y > self.rel_err:
                             return False
                     return True #if the two items are the same, you can stop evaluating them.
-                except ValueError: #try comparing them iteratively if the schema value acts as a pseudo-list.
+
+                #Often in XML data is not stored correctly as a list/array, and are instead big strings. This should be fixed with "fix_XML_arrays",
+                #but here we do the logic to diff the long string in case it sneaks in, or if for some reason, someone made a JSON like this.
+                except ValueError:
                     try:
                         split1 = level.t1.split(" ")
                         split2 = level.t2.split(" ")
@@ -138,7 +155,7 @@ class SchemaDiff(RunApp):
                             x = float(split1[i])
                             y = float(split2[i])
                             if x != y:
-                                if x < self.abs_zero or y < self.abs_zero:
+                                if x < self.abs_zero and y < self.abs_zero:
                                     return True
                                 if self.rel_err == 0 or y == 0:
                                     if abs(x-y) > self.rel_err:
@@ -162,11 +179,14 @@ class SchemaDiff(RunApp):
 
         return deepdiff.DeepDiff(orig,comp,exclude_paths=to_exclude,custom_operators=[testcompare(types=[str,float],rel_err=rel_err,abs_zero=abs_zero)]).pretty()
 
-    def load_file(self, path1):
+
+
+    #this is how we call the load_file in the derived classes
+    #all python functions are virtual, so there is no templating, but some self shenanigans required
+    def try_load(self, path1):
         try:
-            return (self.import_xml(path1), 1)
+            return self.load_file(path1)
         except:
-            try:
-                return (self.import_json(path1),2)
-            except:
-                return False
+            return False
+
+

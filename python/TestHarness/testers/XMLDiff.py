@@ -22,6 +22,8 @@ class XMLDiff(SchemaDiff):
         params['schemadiff'] = params['xmldiff']
         params['ignored_items'] = params['ignored_attributes']
         SchemaDiff.__init__(self, name, params)
+        if 'xmltodict' not in self.specs['required_python_packages']:
+            self.specs['required_python_packages'] += ' xmltodict'
 
     def prepare(self, options):
         if self.specs['delete_output_before_running'] == True:
@@ -29,3 +31,6 @@ class XMLDiff(SchemaDiff):
 
     def processResults(self, moose_dir, options, output):
         return SchemaDiff.processResults(self, moose_dir, options, output)
+
+    def load_file(self, path1):
+        return (self.import_xml(path1), 1)
