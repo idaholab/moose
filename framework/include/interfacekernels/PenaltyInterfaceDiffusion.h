@@ -12,7 +12,7 @@
 #include "GenericInterfaceKernel.h"
 
 /**
- * interface kernel for interfacing diffusion between two variables on adjacent blocks
+ * Interface kernel for interfacing diffusion between two variables on adjacent blocks
  */
 template <bool is_ad>
 class PenaltyInterfaceDiffusionTempl : public GenericInterfaceKernel<is_ad>

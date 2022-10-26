@@ -73,10 +73,10 @@ public:
    */
   template <typename T>
   const MaterialProperty<T> & getNeighborMaterialProperty(const std::string & name);
-  // PWH
+
   template <typename T>
   const ADMaterialProperty<T> & getNeighborADMaterialProperty(const std::string & name);
-  // end PWH
+
   template <typename T>
   const MaterialProperty<T> & getNeighborMaterialPropertyOld(const std::string & name);
   template <typename T>
@@ -89,10 +89,10 @@ public:
    */
   template <typename T>
   const MaterialProperty<T> & getNeighborMaterialPropertyByName(const std::string & prop_name);
-  // PWH
+
   template <typename T>
   const ADMaterialProperty<T> & getNeighborADMaterialPropertyByName(const std::string & name);
-  // end PWH
+
   ///@}
 
   using MaterialBase::getZeroMaterialProperty;
@@ -253,7 +253,6 @@ InterfaceMaterial::getNeighborMaterialPropertyByName(const std::string & prop_na
   registerPropName(prop_name, true, MaterialPropState::CURRENT);
   return TwoMaterialPropertyInterface::getNeighborMaterialPropertyByName<T>(prop_name);
 }
-// PWH
 template <typename T>
 const ADMaterialProperty<T> &
 InterfaceMaterial::getNeighborADMaterialProperty(const std::string & name)
@@ -280,7 +279,6 @@ InterfaceMaterial::getNeighborADMaterialPropertyByName(const std::string & prop_
   registerPropName(prop_name, true, MaterialPropState::CURRENT);
   return TwoMaterialPropertyInterface::getNeighborADMaterialPropertyByName<T>(prop_name);
 }
-// end PWH
 template <typename T>
 const MaterialProperty<T> &
 InterfaceMaterial::getNeighborMaterialPropertyOld(const std::string & name)
