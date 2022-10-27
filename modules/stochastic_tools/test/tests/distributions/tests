@@ -2,7 +2,9 @@
   issues = '#12688'
   [distributions]
     requirement = 'The system shall provide distribution function including'
-    design = 'Uniform.md Weibull.md Normal.md TruncatedNormal.md JohnsonSB.md Logistic.md'
+    design = 'Uniform.md Weibull.md Normal.md TruncatedNormal.md '
+             'Gamma.md Beta.md FDistribution.md StudentT.md '
+             'JohnsonSB.md Logistic.md'
     issues = '#12720'
 
     [uniform]
@@ -102,6 +104,38 @@
       detail = 'lognormal,'
     []
 
+    [gamma]
+      type = CSVDiff
+      input = gamma.i
+      csvdiff = 'gamma_out.csv'
+      allow_test_objects = true
+
+      detail = 'gamma,'
+    []
+    [beta]
+      type = CSVDiff
+      input = beta.i
+      csvdiff = 'beta_out.csv'
+      allow_test_objects = true
+
+      detail = 'beta,'
+    []
+    [fdist]
+      type = CSVDiff
+      input = fdist.i
+      csvdiff = 'fdist_out.csv'
+      allow_test_objects = true
+
+      detail = 'F,'
+    []
+    [studentt]
+      type = CSVDiff
+      input = studentt.i
+      csvdiff = 'studentt_out.csv'
+      allow_test_objects = true
+
+      detail = 'student t,'
+    []
 
     [johnsonsb]
       type = CSVDiff
