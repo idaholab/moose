@@ -10,8 +10,8 @@
 #include "ChemicalCompositionAction.h"
 #include "FEProblemBase.h"
 #include "MooseMesh.h"
-#include "MooseObjectAction.h"
-#include "NonlinearSystemBase.h"
+#include "MooseUtils.h"
+
 #include "libmesh/string_to_enum.h"
 
 #ifdef THERMOCHIMICA_ENABLED
@@ -36,9 +36,16 @@ ChemicalCompositionAction::validParams()
   MooseEnum varType("BASE AUX", "AUX");
   params.addParam<MooseEnum>("var_type", varType, "Variable type to be generated");
   params.addParam<FileName>("thermofile", "Thermodynamics model file");
-  params.addParam<std::string>("tunit", "K", "Temperature Unit");
-  params.addParam<std::string>("punit", "atm", "Pressure Unit");
-  params.addParam<std::string>("munit", "moles", "Mass Unit");
+
+  MooseEnum tUnit("K C F R", "K");
+  params.addParam<MooseEnum>("tunit", tUnit, "Temperature Unit");
+  MooseEnum pUnit("atm psi bar Pa kPa", "atm");
+  params.addParam<MooseEnum>("punit", pUnit, "Pressure Unit");
+  MooseEnum mUnit(
+      "mole_fraction atom_fraction atoms moles gram-atoms mass_fraction kilograms grams pounds",
+      "moles");
+  params.addParam<MooseEnum>("munit", mUnit, "Mass Unit");
+
   params.addParam<std::vector<std::string>>("output_phases", "List of phases to be output");
   params.addParam<std::vector<std::string>>(
       "output_species", "List species for which concentration in the phases is needed");
@@ -48,18 +55,18 @@ ChemicalCompositionAction::validParams()
   return params;
 }
 
-ChemicalCompositionAction::ChemicalCompositionAction(InputParameters params)
+ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & params)
   : Action(params),
     _elements(getParam<std::vector<std::string>>("elements")),
     _var_type(getParam<MooseEnum>("var_type").getEnum<VarType>()),
-    _tunit(getParam<std::string>("tunit")),
-    _punit(getParam<std::string>("punit")),
-    _munit(getParam<std::string>("munit")),
+    _tunit(getParam<MooseEnum>("tunit")),
+    _punit(getParam<MooseEnum>("punit")),
+    _munit(getParam<MooseEnum>("munit")),
     _phases(getParam<std::vector<std::string>>("output_phases")),
     _species(getParam<std::vector<std::string>>("output_species")),
     _element_potentials(getParam<std::vector<std::string>>("element_potentials"))
-
 {
+  std::replace(_munit.begin(), _munit.end(), '_', ' ');
 #ifndef THERMOCHIMICA_ENABLED
   mooseError("Thermochimica disabled");
 #endif
@@ -69,136 +76,139 @@ void
 ChemicalCompositionAction::act()
 {
 #ifdef THERMOCHIMICA_ENABLED
+  //
+  // Add nonlinear Variables
+  //
   if (_current_task == "add_variable" && _var_type == VarType::Nonlinear)
   {
-    for (const auto i : index_range(_elements))
-    {
-      const auto & var_name = _elements[i];
-      const bool second = _problem->mesh().hasSecondOrderElements();
+    const std::string var_type = "MooseVariable";
+    auto params = _factory.getValidParams(var_type);
+    const bool second = _problem->mesh().hasSecondOrderElements();
+    params.set<MooseEnum>("order") = second ? "SECOND" : "FIRST";
+    params.set<MooseEnum>("family") = "LAGRANGE";
 
-      _problem->addVariable(var_name,
-                            FEType(Utility::string_to_enum<Order>(second ? "SECOND" : "FIRST"),
-                                   Utility::string_to_enum<FEFamily>("LAGRANGE")),
-                            1.0);
-    }
+    for (const auto i : index_range(_elements))
+      _problem->addVariable(var_type, _elements[i], params);
 
     for (const auto i : index_range(_phases))
-    {
-      const auto & var_name = _phases[i];
-      const bool second = _problem->mesh().hasSecondOrderElements();
-
-      _problem->addVariable(var_name,
-                            FEType(Utility::string_to_enum<Order>(second ? "SECOND" : "FIRST"),
-                                   Utility::string_to_enum<FEFamily>("LAGRANGE")),
-                            1.0);
-    }
+      _problem->addVariable(var_type, _phases[i], params);
 
     for (const auto i : index_range(_species))
-    {
-      const auto & var_name = _species[i];
-      const bool second = _problem->mesh().hasSecondOrderElements();
-
-      _problem->addVariable(var_name,
-                            FEType(Utility::string_to_enum<Order>(second ? "SECOND" : "FIRST"),
-                                   Utility::string_to_enum<FEFamily>("LAGRANGE")),
-                            1.0);
-    }
+      _problem->addVariable(var_type, _species[i], params);
   }
-  else if (_current_task == "add_aux_variable" && _var_type == VarType::Aux)
+
+  //
+  // Add AuxVariables
+  //
+  if (_current_task == "add_aux_variable" && _var_type == VarType::Aux)
   {
-    std::string aux_var_type = "MooseVariable";
+    const std::string aux_var_type = "MooseVariable";
     auto params = _factory.getValidParams(aux_var_type);
-    params.set<MooseEnum>("order") = "FIRST";
+    const bool second = _problem->mesh().hasSecondOrderElements();
+    params.set<MooseEnum>("order") = second ? "SECOND" : "FIRST";
     params.set<MooseEnum>("family") = "LAGRANGE";
-    for (unsigned int i = 0; i < _elements.size(); i++)
-    {
-      std::string var_name = _elements[i];
-      _problem->addAuxVariable(aux_var_type, var_name, params);
-    }
 
-    for (unsigned int i = 0; i < _phases.size(); i++)
-    {
-      std::string var_name = _phases[i];
-      _problem->addAuxVariable(aux_var_type, var_name, params);
-    }
-    for (unsigned int j = 0; j < _species.size(); j++)
-    {
-      std::string var_name = _species[j];
-      _problem->addAuxVariable(aux_var_type, var_name, params);
-    }
-    for (unsigned int i = 0; i < _element_potentials.size(); i++)
-    {
-      std::string var_name = _element_potentials[i];
-      _problem->addAuxVariable(aux_var_type, var_name, params);
-    }
+    for (const auto i : index_range(_elements))
+      _problem->addAuxVariable(aux_var_type, _elements[i], params);
+
+    for (const auto i : index_range(_phases))
+      _problem->addAuxVariable(aux_var_type, _phases[i], params);
+
+    for (const auto i : index_range(_species))
+      _problem->addAuxVariable(aux_var_type, _species[i], params);
+
+    for (const auto i : index_range(_element_potentials))
+      _problem->addAuxVariable(aux_var_type, _element_potentials[i], params);
   }
-  else if (_current_task == "add_ic" && isParamValid("initial_values"))
+
+  //
+  // Set up initial conditions from a file
+  //
+  if (_current_task == "add_ic" && isParamValid("initial_values"))
   {
     readCSV();
     for (auto it : _initial_conditions)
     {
-      std::string class_name = "ConstantIC";
-      InputParameters params = _factory.getValidParams(class_name);
+      const std::string class_name = "ConstantIC";
+      auto params = _factory.getValidParams(class_name);
       params.set<VariableName>("variable") = it.first;
       params.set<Real>("value") = it.second;
       _problem->addInitialCondition(class_name, it.first + "_ic", params);
     }
   }
-  else if (_current_task == "add_user_object")
+
+  //
+  // Initiate Chemistry Model
+  //
+  if (_current_task == "add_user_object")
   {
-    //
-    // Initiate Chemistry Model
-    //
+    // initialize database in Thermochimica
     if (isParamValid("thermofile"))
     {
-      const auto & thermo_file = getParam<FileName>("thermofile");
-
+      const auto thermo_file = getParam<FileName>("thermofile");
+      mooseInfo("thermo_file = ", thermo_file);
       char cThermoFileName[120];
+
+      if (thermo_file.size() > sizeof(cThermoFileName))
+        paramError("thermofile",
+                   "Path exceeds thermiochimica's maximal permisible length of ",
+                   sizeof(cThermoFileName),
+                   " with ",
+                   thermo_file.size(),
+                   " characters: ",
+                   thermo_file);
+
       int idbg = 0;
-      Thermochimica::ConvertToFortran(cThermoFileName, sizeof cThermoFileName, thermo_file.c_str());
-      FORTRAN_CALL(Thermochimica::setthermofilename)(cThermoFileName);
+      Thermochimica::ConvertToFortran(
+          cThermoFileName, sizeof(cThermoFileName), thermo_file.c_str());
+      FORTRAN_CALL(Thermochimica::setthermofilenamebison)(cThermoFileName);
 
       // Read in thermodynamics model, only once
       FORTRAN_CALL(Thermochimica::ssparsecsdatafile)();
       FORTRAN_CALL(Thermochimica::checkinfothermo)(&idbg);
       if (idbg != 0)
-        paramError("thermofile", "Thermochimica data file cannot be parsed.");
+        paramError("thermofile", "Thermochimica data file cannot be parsed. ", idbg);
 
       Thermochimica::checkTemperature(_tunit);
       Thermochimica::checkPressure(_punit);
       Thermochimica::checkMass(_munit);
 
       // Translate string to fortran string
-      char cTFtn[15];
-      Thermochimica::ConvertToFortran(cTFtn, sizeof cTFtn, _tunit.c_str());
-      char cPFtn[15];
-      Thermochimica::ConvertToFortran(cPFtn, sizeof cPFtn, _punit.c_str());
-      char cMFtn[15];
-      Thermochimica::ConvertToFortran(cMFtn, sizeof cMFtn, _munit.c_str());
-      FORTRAN_CALL(Thermochimica::setunittemperature)(cTFtn);
-      FORTRAN_CALL(Thermochimica::setunitpressure)(cPFtn);
-      FORTRAN_CALL(Thermochimica::setunitmass)(cMFtn);
+      char ubuf[15];
+      Thermochimica::ConvertToFortran(ubuf, sizeof(ubuf), _tunit.c_str());
+      FORTRAN_CALL(Thermochimica::setunittemperature)(ubuf);
+      Thermochimica::ConvertToFortran(ubuf, sizeof(ubuf), _punit.c_str());
+      FORTRAN_CALL(Thermochimica::setunitpressure)(ubuf);
+      Thermochimica::ConvertToFortran(ubuf, sizeof(ubuf), _munit.c_str());
+      FORTRAN_CALL(Thermochimica::setunitmass)(ubuf);
     }
   }
-  else if (_current_task == "add_aux_kernel" && _var_type == VarType::Aux)
+
+  //
+  // do we need those?!
+  //
+  if (_current_task == "add_aux_kernel" && _var_type == VarType::Aux)
   {
-    InputParameters params = _factory.getValidParams("SelfAux");
+    auto params = _factory.getValidParams("SelfAux");
     params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
-    for (unsigned int i = 0; i < _phases.size(); i++)
+
+    for (const auto i : index_range(_phases))
     {
-      std::string ker_name = _phases[i];
+      const std::string ker_name = _phases[i];
       params.set<AuxVariableName>("variable") = ker_name;
       _problem->addAuxKernel("SelfAux", ker_name, params);
     }
-    for (unsigned int j = 0; j < _species.size(); j++)
+
+    for (const auto i : index_range(_species))
     {
-      std::string ker_name = _species[j];
+      const std::string ker_name = _species[i];
       params.set<AuxVariableName>("variable") = ker_name;
       _problem->addAuxKernel("SelfAux", ker_name, params);
     }
-    for (unsigned int i = 0; i < _element_potentials.size(); i++)
+
+    for (const auto i : index_range(_element_potentials))
     {
-      std::string ker_name = _element_potentials[i];
+      const std::string ker_name = _element_potentials[i];
       params.set<AuxVariableName>("variable") = ker_name;
       _problem->addAuxKernel("SelfAux", ker_name, params);
     }

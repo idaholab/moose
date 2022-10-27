@@ -18,6 +18,24 @@
 registerMooseObject("ChemicalReactionsApp", ThermochimicaNodalData);
 #endif
 
+namespace
+{
+void
+ConvertToFortran(volatile char * fstring, std::size_t fstring_len, const char * cstring)
+{
+  std::size_t inlen = std::strlen(cstring);
+  std::size_t cpylen = std::min(inlen, fstring_len);
+
+  if (inlen > fstring_len)
+  {
+    Moose::out << "ConvertToFortran " << inlen << " " << fstring_len << "\n";
+  }
+
+  std::copy(cstring, cstring + cpylen, fstring);
+  std::fill(fstring + cpylen, fstring + fstring_len, ' ');
+}
+} // namespace
+
 InputParameters
 ThermochimicaNodalData::validParams()
 {
@@ -127,7 +145,8 @@ ThermochimicaNodalData::execute()
   // Calculate thermochemical equilibrium
   FORTRAN_CALL(Thermochimica::thermochimica)();
 
-  // if (_current_node->id() == 50) {
+  // if (_current_node->id() == 1)
+  // {
   //   int iPrint = 2;
   //   FORTRAN_CALL(Thermochimica::setprintresultsmode)(&iPrint);
   //   FORTRAN_CALL(Thermochimica::printresults)();
@@ -140,15 +159,8 @@ ThermochimicaNodalData::execute()
   FORTRAN_CALL(Thermochimica::checkinfothermo)(&idbg);
   if (idbg != 0)
   {
-    Moose::out << "thermochimica error " << idbg << "\n";
     FORTRAN_CALL(Thermochimica::printstate)();
-    // Moose::out << Temperature << "\n";
-    // for (unsigned int i = 0; i < _el.size(); i++)
-    // {
-    //   iElement = Thermochimica::atomicNumber(_el_name[i]);
-    //   dMol = (*_el[i])[_qp];
-    //   Moose::out << iElement << " " << dMol << "\n";
-    // }
+    mooseError("Yhermochimica error ", idbg);
   }
   else
   {
@@ -158,8 +170,8 @@ ThermochimicaNodalData::execute()
     for (const auto i : make_range(_n_phases))
     {
       char cPhaseName[20];
-      int lcPhaseName = sizeof cPhaseName;
-      Thermochimica::ConvertToFortran(cPhaseName, lcPhaseName, _ph_name[i].c_str());
+      int lcPhaseName = sizeof(cPhaseName);
+      ConvertToFortran(cPhaseName, lcPhaseName, _ph_name[i].c_str());
       int index = 0;
       FORTRAN_CALL(Thermochimica::getphaseindex)(cPhaseName, &lcPhaseName, &index, &idbg);
       // Convert from 1-based (fortran) to 0-based (c++) indexing
@@ -173,25 +185,29 @@ ThermochimicaNodalData::execute()
     for (const auto i : make_range(_n_species))
     {
       char cPhaseName[25];
-      int lcPhaseName = sizeof cPhaseName;
-      Thermochimica::ConvertToFortran(cPhaseName, lcPhaseName, _sp_phase_name[i].c_str());
+      int lcPhaseName = sizeof(cPhaseName);
+      ConvertToFortran(cPhaseName, lcPhaseName, _sp_phase_name[i].c_str());
       char cSpeciesName[25];
-      int lcSpeciesName = sizeof cSpeciesName;
-      Thermochimica::ConvertToFortran(cSpeciesName, lcSpeciesName, _sp_species_name[i].c_str());
+      int lcSpeciesName = sizeof(cSpeciesName);
+      ConvertToFortran(cSpeciesName, lcSpeciesName, _sp_species_name[i].c_str());
       FORTRAN_CALL(Thermochimica::getoutputmolspeciesphase)
-      (cPhaseName, &lcPhaseName, cSpeciesName, &lcSpeciesName, &d._species_fractions[i], &idbg);
+      (cPhaseName,
+       &lcPhaseName,
+       cSpeciesName,
+       &lcSpeciesName,
+       &d._species_fractions[i],
+       &idbg,
+       30,
+       30);
       if (idbg == 1)
         d._species_fractions[i] = 0;
       else if (idbg != 0)
-      {
-        Moose::out << "getoutputmolspeciesphase: " << _sp_phase_name[i] << " "
-                   << _sp_species_name[i] << " " << idbg << "\n";
-      }
-      else
-      {
-        // Moose::out << _ph_name[i].c_str() << " ZR: " << _zr_conc_phase[_current_node->id()][i] <<
-        // "\n";
-      }
+        mooseError("Failed to get phase speciation for phase '",
+                   _sp_phase_name[i],
+                   "' and species '",
+                   _sp_species_name[i],
+                   "'. Thermiochimica returned ",
+                   idbg);
     }
 
     if (_output_element_potential)
@@ -201,7 +217,7 @@ ThermochimicaNodalData::execute()
       {
         char cElName[3];
         d._element_potential_for_output[i] = 0.0;
-        Thermochimica::ConvertToFortran(cElName, sizeof cElName, _element_potentials[i].c_str());
+        ConvertToFortran(cElName, sizeof(cElName), _element_potentials[i].c_str());
 
         FORTRAN_CALL(Thermochimica::getoutputchempot)
         (cElName, &d._element_potential_for_output[i], &idbg);
@@ -217,18 +233,6 @@ ThermochimicaNodalData::execute()
 #endif
 }
 
-void
-ThermochimicaNodalData::finalize()
-{
-}
-
-void
-ThermochimicaNodalData::threadJoin(const UserObject &)
-{
-}
-
-// Function to get re-initialization data from Thermochimica and save it in member
-// variables of this UserObject
 void
 ThermochimicaNodalData::reinitDataMooseFromTc()
 {
@@ -284,7 +288,6 @@ ThermochimicaNodalData::reinitDataMooseFromTc()
 #endif
 }
 
-// Function to load re-initialization data saved in this UserObject back into Thermochimica
 void
 ThermochimicaNodalData::reinitDataMooseToTc()
 {
@@ -301,6 +304,7 @@ ThermochimicaNodalData::reinitDataMooseToTc()
     auto & d = it->second;
     if (d._reinit_available)
     {
+      FORTRAN_CALL(Thermochimica::resetreinit)();
       FORTRAN_CALL(Thermochimica::reinitdatatcfrommoose)
       (&d._elements,
        &d._species,

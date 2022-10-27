@@ -1,0 +1,23 @@
+[Tests]
+  [MoRu]
+    type = Exodiff
+    input = MoRu.i
+    exodiff = MoRu_out.e
+    design = ChemicalCompositionAction.md
+    issues = '#1671'
+    requirement = 'The system shall be able to set up a nodal thermochemistry solve using an action'
+    max_threads = 1
+  []
+
+  [MoRu_reinit]
+    type = Exodiff
+    input = MoRu.i
+    exodiff = MoRu_out.e
+    design = ThermochimicaNodalData.md
+    issues = '#1671'
+    requirement = 'The system shall be able to use reinitialization to speed up a thermochimica solve'
+    cli_args = 'UserObjects/data/reinit_requested=true'
+    max_threads = 1
+    rel_err = 1e-4 # reinit improves the results
+  []
+[]

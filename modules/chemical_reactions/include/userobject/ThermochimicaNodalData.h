@@ -18,14 +18,21 @@ public:
   static InputParameters validParams();
   ThermochimicaNodalData(const InputParameters & parameters);
 
-  // Standard UserObject functions
   virtual void initialize() override;
   virtual void execute() override;
-  virtual void finalize() override;
-  virtual void threadJoin(const UserObject & y) override;
+  virtual void finalize() override {}
+  virtual void threadJoin(const UserObject &) override {}
 
-  // Thermochimica reinit functions
+  /**
+   * Function to get re-initialization data from Thermochimica and save
+   * it in member variables of this UserObject.
+   */
   void reinitDataMooseFromTc();
+
+  /**
+   * Function to load re-initialization data saved in this UserObject
+   * back into Thermochimica.
+   */
   void reinitDataMooseToTc();
 
   struct Data
@@ -64,7 +71,7 @@ protected:
   std::vector<std::string> _sp_phase_name;
   std::vector<std::string> _sp_species_name;
 
-  /// Nodal data
+  /// Nodal data (TODO: investigate writing directly to AuxVariables)
   std::unordered_map<dof_id_type, Data> _data;
 
   ///@{ Element chemical potential output

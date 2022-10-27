@@ -15,7 +15,7 @@ class ChemicalCompositionAction : public Action
 {
 public:
   static InputParameters validParams();
-  ChemicalCompositionAction(InputParameters params);
+  ChemicalCompositionAction(const InputParameters & params);
 
   virtual void act();
 
