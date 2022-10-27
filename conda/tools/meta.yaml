@@ -3,7 +3,7 @@
 #   template/ (must contain any python major.minor version this
 #              package is building. Usually the latest version.)
 {% set build = 0 %}
-{% set version = "2022.07.18" %}
+{% set version = "2022.10.27" %}
 
 package:
   name: moose-tools
@@ -41,10 +41,12 @@ requirements:
     - openssl
     - setuptools
     - graphviz
+    - clang-tools 12.0.1
 
 test:
   commands:
     - dot -V
+    - git clang-format -h
   imports:
     - numpy
     - matplotlib
