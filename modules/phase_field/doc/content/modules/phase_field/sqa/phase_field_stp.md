@@ -1,1 +1,1 @@
-!template load file=sqa/app_stp.md.template category=phase_field app=Phase Field
+!template load file=sqa/module_stp.md.template category=phase_field module=Phase Field

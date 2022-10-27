@@ -1,0 +1,30 @@
+Applications:
+    {{category}}:
+        exe_directory: ${MOOSE_DIR}/modules/{{category}}
+        content_directory: ${MOOSE_DIR}/modules/{{category}}/doc/content
+        unregister:
+            - ${MOOSE_DIR}/framework/doc/unregister.yml
+        remove:
+            - ${MOOSE_DIR}/framework/doc/remove.yml
+        log_default: WARNING
+        show_warning: false
+
+Documents:
+    software_requirements_specification: sqa/{{category}}_srs.md
+    software_design_description: sqa/{{category}}_sdd.md
+    software_test_plan: sqa/{{category}}_stp.md
+    requirements_traceablity_matrix: sqa/{{category}}_rtm.md
+    verification_validation_report: sqa/{{category}}_vvr.md
+    failure_analysis_report: sqa/{{category}}_far.md
+    software_library_list: sqa/{{category}}_sll.md
+    communication_and_contact_information: sqa/framework_cci.md
+    software_coding_standards: sqa/framework_scs.md
+    log_default: WARNING
+    show_warning: false
+
+Requirements:
+    {{category}}:
+        directories:
+            - ${MOOSE_DIR}/modules/{{category}}/test
+        log_default: WARNING
+        show_warning: false

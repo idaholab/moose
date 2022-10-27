@@ -1,1 +1,1 @@
-!template load file=sqa/app_vvr.md.template app=Electromagnetics category=electromagnetics
+!template load file=sqa/module_vvr.md.template module=Electromagnetics category=electromagnetics

@@ -1,0 +1,144 @@
+!template load file=srs.md.template project={{module}}
+
+!template! item key=pre-intro
+!alert! note
+This document serves as an addendum to [framework_srs.md] and captures information for
+[!ac](SRS) specific to the {{module}} module.
+
+!sqa dependencies suffix=srs category={{category}}
+!alert-end!
+!template-end!
+
+!template! item key=system-context
+The {{module}} module is command-line driven. Like [!ac](MOOSE), this is typical for a
+high-performance software that is designed to run across several nodes of a cluster system. As such,
+all usage of the software is through any standard terminal program generally available on all
+supported operating systems. Similarly, for the purpose of interacting through the software, there is
+only a single user, "the user", which interacts with the software through the command-line. The {{module}}
+module does not maintain any back-end database or interact with any system daemons. It is an executable,
+which may be launched from the command line and writes out various result files as it runs.
+
+!media media/sqa/usage_diagram_uml.svg
+       id=module_usage_diagram
+       caption=Usage of the {{module}} module and other [!ac](MOOSE)-based applications.
+       style=width:50%;
+!template-end!
+
+!template! item key=system-functions
+Since the {{module}} module is a command-line driven application, all functionality provided in
+the software is operated through the use of standard UNIX command line flags and the
+extendable MOOSE input file. The {{module}} module is completely extendable so individual design
+pages should be consulted for specific behaviors of each user-defined object.
+!template-end!
+
+!template! item key=user-characteristics
+Like [!ac](MOOSE), there are three kinds of users working on the {{module}} module:
+
+- +{{module}} module Developers+: These are the core developers of the {{module}} module.
+  They are responsible for following and enforcing the software development standards of the module,
+  as well as designing, implementing, and maintaining the software.
+- +Developers+: A scientist or engineering that uses the {{module}} module alongside [!ac](MOOSE)
+  to build their own application. This user will typically have a background in modeling or simulation
+  techniques (and perhaps numerical analysis) but may only have a limited skillset when it comes to
+  code development using the C++ language. This is the primary focus group of the module. In many cases,
+  these developers will be encouraged to contribute module-appropriate code back to the {{module}}
+  module, or to [!ac](MOOSE) itself.
+- +Analysts+: These are users that will run the code and perform analysis on the simulations they perform.
+  These users may interact with developers of the system requesting new features and reporting bugs
+  found and will typically make heavy use of the input file format.
+!template-end!
+
+!template item key=assumptions-and-dependencies-intro
+The {{module}} module is developed using MOOSE and can itself be based on various MOOSE modules, as such
+the [!ac](SRS) for the {{module}} module is dependent upon the files listed at the beginning of this
+document. Any further assumptions or dependencies are outlined in the remainder of this
+section.
+
+!template item key=definitions
+!include sqa/framework_srs.md start=definitions-begin end=definitions-finish
+
+!template item key=acronyms
+!acronym list
+
+!template item key=minimum-requirements
+!include sqa/framework_srs.md start=minimum-requirements-begin end=minimum-requirements-finish
+
+!template item key=functional-requirements
+!sqa requirements link=False collections=FUNCTIONAL category={{category}}
+
+!template item key=usability-requirements
+!sqa requirements link=False collections=USABILITY category={{category}}
+
+!template item key=performance-requirements
+!sqa requirements link=False collections=PERFORMANCE category={{category}}
+
+!template item key=system-interfaces-requirements
+!sqa requirements link=False collections=SYSTEM category={{category}}
+
+!template! item key=human-system-integration
+The {{module}} module is command line driven and conforms to all standard terminal
+behaviors. Specific human system interaction accommodations shall be a function of the
+end-user's terminal. MOOSE (and therefore the {{module}} module) does support optional coloring
+within the terminal's ability to display color, which may be disabled.
+!template-end!
+
+!template! item key=maintainability
+
+- The latest working version (defined as the version that passes all tests in the current regression
+  test suite) shall be publicly available at all times through the repository host provider.
+- Flaws identified in the system shall be reported and tracked in a ticket or issue based system. The
+  technical lead will determine the severity and priority of all reported issues and assign resources
+  at his or her discretion to resolve identified issues.
+- The software maintainers will entertain all proposed changes to the system in a timely manner
+  (within two business days).
+- The core software in its entirety will be made available under the terms of a designated software
+  license. These license terms are outlined in the LICENSE file alongside the {{module}} module
+  source code. As a MOOSE physics module, the license for the {{module}} module is identical to that
+  of the framework - that is, the [!ac](LGPL) version 2.1 license.
+
+!template-end!
+
+!template item key=system-modes
+!include sqa/framework_srs.md start=system-modes-begin end=system-modes-finish
+
+!template item key=physical-characteristics
+The {{module}} module is software only with no associated physical media. See [#system-requirements]
+for a description of the minimum required hardware necessary for running the {{module}} module.
+
+!template item key=environmental-conditions
+!include sqa/framework_srs.md start=environmental-conditions-begin end=environmental-conditions-finish
+
+!template! item key=system-security
+[!ac](MOOSE)-based applications such as the {{module}} module have no requirements or special needs
+related to system security. The software is designed to run completely in user-space with
+no elevated privileges required nor recommended.
+!template-end!
+
+!template! item key=information-management
+The core framework and all modules in their entirety will be made publicly available on an appropriate
+repository hosting site. Day-to-day backups and security services will be provided by the hosting service.
+More information about MOOSE backups of the public repository on [!ac](INL)-hosted services can be found
+on the following page: [sqa/github_backup.md]
+!template-end!
+
+!template! item key=policies-and-regulations
+!include framework_srs.md start=policies-and-regulations-begin end=policies-and-regulations-finish
+!template-end!
+
+!template! item key=system-life-cycle
+[!ac](MOOSE)-based development follows various agile methods. The system is continuously
+built and deployed in a piecemeal fashion since objects within the system are more or less
+independent. Every new object requires a test, which in turn requires an associated
+requirement and design description. The {{module}} module development team follows the [!ac](NQA-1)
+standards.
+!template-end!
+
+!template! item key=packaging
+No special requirements are needed for packaging or shipping any media containing [!ac](MOOSE) and
+{{module}} module source code. However, some [!ac](MOOSE)-based applications that use the
+{{module}} module may be export-controlled, in which case all export control restrictions must
+be adhered to when packaging and shipping media.
+!template-end!
+
+!template item key=verification
+!include sqa/framework_srs.md start=verification-begin end=verification-finish

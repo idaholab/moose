@@ -3,14 +3,14 @@
 ## Introduction id=introduction
 
 !template field key=introduction required=False
-The [!ac](SRS) for {{app}} describes the system functional and non-functional requirements that
+The [!ac](FAR) for {{app}} describes the system functional and non-functional requirements that
 describe the expected interactions that the software shall provide.
 
 ## Dependencies id=dependencies
 
 !template field key=dependencies-intro required=False
 The {{app}} application is developed using MOOSE and is based on various modules, as such
-the [!ac](SRS) for {{app}} is dependent upon the following documents.
+the [!ac](FAR) for {{app}} is dependent upon the following documents.
 
 !template! field key=dependencies required=False
 !sqa dependencies suffix=far category={{category}}

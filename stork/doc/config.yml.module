@@ -11,12 +11,13 @@ Extensions:
         home: /modules/stork
     MooseDocs.extensions.appsyntax:
         executable: ${MOOSE_DIR}/modules/stork
-        remove: !include framework/doc/remove.yml
+        remove: !include ${MOOSE_DIR}/framework/doc/remove.yml
         includes:
             - framework/include
             - modules/stork/include
     MooseDocs.extensions.common:
-        shortcuts: !include framework/doc/globals.yml
+        shortcuts: !include ${MOOSE_DIR}/framework/doc/globals.yml
     MooseDocs.extensions.acronym:
-        acronyms: !include framework/doc/acronyms.yml
-    MooseDocs.extensions.sqa: disable
+        acronyms: !include ${MOOSE_DIR}/framework/doc/acronyms.yml
+    MooseDocs.extensions.sqa:
+        active: False

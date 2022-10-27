@@ -1,1 +1,1 @@
-!template load file=sqa/app_vvr.md.template category=contact app=Contact
+!template load file=sqa/module_vvr.md.template category=contact module=Contact

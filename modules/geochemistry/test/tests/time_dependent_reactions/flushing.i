@@ -44,7 +44,7 @@
   ramp_max_ionic_strength_initial = 0 # max_ionic_strength in such a simple problem does not need ramping
   stoichiometric_ionic_str_using_Cl_only = true
   execute_console_output_on = '' # only CSV output for this test
-  abs_tol = 1E-13
+  abs_tol = 1E-12
 []
 
 [Executioner]

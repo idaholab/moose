@@ -1,1 +1,1 @@
-!template load file=sqa/app_stp.md.template category=navier_stokes app=Navier Stokes
+!template load file=sqa/module_stp.md.template category=navier_stokes module=Navier Stokes
