@@ -23,7 +23,7 @@ YAML_FILE = os.path.relpath(os.path.join(MOOSE_DIR, "scripts", "module_hash.yaml
 COMMIT = 'FIXME'
 
 # The following represent the current hashes for COMMIT
-HASH_TABLE = {'mpi'       : 'd385d66',
+HASH_TABLE = {'mpich'     : 'd385d66',
               'petsc'     : '662b9e2',
               'libmesh'   : 'c095106',
               'moose'     : 'cd87adc'}
