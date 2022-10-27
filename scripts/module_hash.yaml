@@ -1,7 +1,7 @@
 # Add paths relative to repository root that should be taken into account when generating a hash
 packages:
-  mpi:
-    - apptainer/mpi.def
+  mpich:
+    - apptainer/mpich.def
     - conda/mpich/meta.yaml
     - conda/mpich/conda_build_config.yaml
   petsc:
@@ -24,7 +24,7 @@ packages:
     - conda/moose/conda_build_config.yaml
 # Add top level items above, in order of dependency (mpi <-- petsc <-- libmesh, etc)
 zip_keys:
-  - mpi
+  - mpich
   - petsc
   - libmesh
   - moose
