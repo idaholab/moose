@@ -1,6 +1,6 @@
 # Remote Access to INL-HPC
 
-The following instructions are designed to users with access to [!ac](INL) [!ac](HPC) computing
+The following instructions are designed for users with access to [!ac](INL) [!ac](HPC) computing
 resources and operating from a machine outside of [!ac](INL).
 
 ## SSH Config id=ssh-config
@@ -21,7 +21,7 @@ Host hpclogin hpclogin.inl.gov
   DynamicForward 5555
 
 ## Forwarding
-Host sawtooth1 sawtooth2 falcon1 falcon2 lemhi1 lemhi2 rod moosebuild.hpc.inl.gov hpcgitlab.hpc.inl.gov hpcsc.hpc.inl.gov
+Host sawtooth1 sawtooth2 lemhi1 lemhi2 rod moosebuild.hpc.inl.gov hpcgitlab.hpc.inl.gov
   ProxyJump hpclogin
 ```
 
