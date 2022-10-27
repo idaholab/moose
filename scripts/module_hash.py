@@ -19,6 +19,7 @@ import argparse
 import hashlib
 import subprocess
 import yaml
+import platform
 from jinja2 import Environment, DictLoader
 
 MOOSE_DIR = os.environ.get('MOOSE_DIR',
@@ -176,7 +177,7 @@ def main():
         for i in range(ENTITIES.index(args.library), len(ENTITIES)):
             if ENTITIES[i] != args.library:
                 tmp_hash = hashlib.md5(''.join(hash_group[ENTITIES[i]]).encode('utf-8')).hexdigest()[:7]
-                print(f'moose-{ENTITIES[i]}/{ENTITIES[i]}:{tmp_hash}')
+                print(f'moose-{ENTITIES[i]}/{ENTITIES[i]}-{platform.machine()}:{tmp_hash}')
     else:
         if args.tag:
             try:
