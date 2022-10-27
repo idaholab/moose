@@ -25,7 +25,7 @@
     num_batch = 1
     distributions = 'k_dist q_dist Tinf_dist'
     flag_sample = 'conditional/flag_sample'
-    seed = 5
+    seed = 12
     execute_on = PRE_MULTIAPP_SETUP
   []
 []
@@ -104,7 +104,7 @@
   [covar]
     type= SquaredExponentialCovariance
     signal_variance = 1.0
-    noise_variance = 1e-4
+    noise_variance = 1e-3
     length_factor = '1.0 1.0 1.0'
   []
 []

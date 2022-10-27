@@ -33,6 +33,8 @@
       input = Main_tao.i
       allow_test_objects = true
       jsondiff = 'Ufunction_tao.json'
+      rel_err = 1e-3
+      abs_zero = 1e-3
       detail = 'a single row in the sampler with single processor using the COV learning function with GP using the squared exponential kernel and TAO optimization;'
     []
   []

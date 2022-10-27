@@ -43,6 +43,28 @@ private:
                         const Real & parameter,
                         const Real & threshold);
 
+  /**
+   * This sets up data for re-training the GP.
+   */
+  void setupData(const std::vector<Real> & output_comm,
+                 const std::vector<std::vector<Real>> & inputs_prev);
+
+  /**
+   * This makes decisions whether to call the full model or not based on
+   * GP prediction and uncertainty.
+   */
+  Real facilitateDecision(const std::vector<Real> & row,
+                          dof_id_type local_ind,
+                          Real & val,
+                          const bool & retrain);
+
+  /**
+   * This transmits GP outputs to file.
+   */
+  void transmitOutput(const DenseMatrix<Real> & inputs_comm,
+                      const std::vector<Real> & gp_mean_comm,
+                      const std::vector<Real> & gp_std_comm);
+
   /// Track the current step of the main App
   const int & _step;
 
