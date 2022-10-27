@@ -97,6 +97,11 @@ public:
   std::set<ReporterName> getReporterNames() const;
 
   /**
+   * Return a list of all postprocessor names
+   */
+  std::set<std::string> getPostprocessorNames() const;
+
+  /**
    * Method for returning read only references to Reporter values.
    * @tparam T The Reporter value C++ type.
    * @param reporter_name The name of the reporter value, which includes the object name and the

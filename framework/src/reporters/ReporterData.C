@@ -42,6 +42,16 @@ ReporterData::getReporterNames() const
   return output;
 }
 
+std::set<std::string>
+ReporterData::getPostprocessorNames() const
+{
+  std::set<std::string> output;
+  for (const auto & name_context_pair : _context_ptrs)
+    if (name_context_pair.first.isPostprocessor())
+      output.insert(name_context_pair.first.getObjectName());
+  return output;
+}
+
 const ReporterContextBase &
 ReporterData::getReporterContextBase(const ReporterName & reporter_name) const
 {
