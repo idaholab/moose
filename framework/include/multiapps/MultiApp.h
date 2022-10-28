@@ -505,13 +505,17 @@ protected:
   const Real _global_time_offset;
 
   /// The time at which to reset apps
-  Real _reset_time;
+  //    Real _reset_time;
+  std::vector<Real> _reset_time;
+
 
   /// The apps to be reset
   std::vector<unsigned int> _reset_apps;
 
   /// Whether or not apps have been reset
-  bool _reset_happened;
+    std::vector<bool> _reset_happened;
+//  bool  _reset_happened;
+
 
   /// The time at which to move apps
   Real _move_time;

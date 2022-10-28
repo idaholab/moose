@@ -126,8 +126,8 @@ MultiApp::validParams()
                         "The time offset relative to the parent application for the purpose of "
                         "starting a subapp at a different time from the parent application. The "
                         "global time will be ahead by the offset specified here.");
-  params.addParam<Real>("reset_time",
-                        std::numeric_limits<Real>::max(),
+    params.addParam<std::vector<Real>>("reset_time",
+//                        std::numeric_limits<Real>::max(),
                         "The time at which to reset Apps given by the 'reset_apps' parameter.  "
                         "Resetting an App means that it is destroyed and recreated, possibly "
                         "modeling the insertion of 'new' material for that app.");
@@ -236,7 +236,7 @@ MultiApp::MultiApp(const InputParameters & parameters)
     _min_procs_per_app(getParam<unsigned int>("min_procs_per_app")),
     _output_in_position(getParam<bool>("output_in_position")),
     _global_time_offset(getParam<Real>("global_time_offset")),
-    _reset_time(getParam<Real>("reset_time")),
+    _reset_time(getParam<std::vector<Real>>("reset_time")),
     _reset_apps(getParam<std::vector<unsigned int>>("reset_apps")),
     _reset_happened(false),
     _move_time(getParam<Real>("move_time")),
@@ -259,8 +259,8 @@ MultiApp::MultiApp(const InputParameters & parameters)
     paramError("cli_args",
                "'cli_args' and 'cli_args_files' cannot be specified simultaneously in MultiApp ");
 
-  if ((_reset_apps.size() > 0 && _reset_time == std::numeric_limits<Real>::max()) ||
-      (_reset_apps.size() == 0 && _reset_time < std::numeric_limits<Real>::max()))
+  if ((_reset_apps.size() > 0 && _reset_time[0] == std::numeric_limits<Real>::max()) ||
+      (_reset_apps.size() == 0 && _reset_time[0] < std::numeric_limits<Real>::max()))
     mooseError("reset_time and reset_apps may only be specified together");
 }
 
@@ -285,6 +285,7 @@ MultiApp::init(unsigned int num_apps, const LocalRankConfig & config)
     _backups.emplace_back(std::make_shared<Backup>());
 
   _has_bounding_box.resize(_my_num_apps, false);
+  _reset_happened.resize(_reset_time.size(), false);
   _bounding_box.resize(_my_num_apps);
 
   if ((_cli_args.size() > 1) && (_total_num_apps != _cli_args.size()))
@@ -516,20 +517,23 @@ MultiApp::fillPositions()
 void
 MultiApp::preTransfer(Real /*dt*/, Real target_time)
 {
+   // Sort the 'reset_time' list in increasing order
   // First, see if any Apps need to be Reset
-  if (!_reset_happened && target_time + 1e-14 >= _reset_time)
-  {
-    _reset_happened = true;
-    for (auto & app : _reset_apps)
-      resetApp(app);
 
-    // If we reset an application, then we delete the old objects, including the coordinate
-    // transformation classes. Consequently we need to reset the coordinate transformation classes
-    // in the associated transfer classes
-    for (auto * const transfer : _associated_transfers)
-      transfer->getAppInfo();
-  }
-
+     for (unsigned int i=0; i<_reset_time.size();i++){
+        if (!_reset_happened[i] && (target_time + 1e-14 >= _reset_time[i]))
+       {
+        _reset_happened[i] = true;
+        if (_reset_apps.size() > 0){
+          for (auto & app : _reset_apps)
+           resetApp(app);          
+        } else { // If "reset_apps" not specified default action is to reset for all associated sub-apps
+               for (auto app=0; app < _my_num_apps; ++app)
+                 resetApp(app);               
+        }
+        break;
+       }
+     }
   // Now move any apps that should be moved
   if (_use_positions && !_move_happened && target_time + 1e-14 >= _move_time)
   {
