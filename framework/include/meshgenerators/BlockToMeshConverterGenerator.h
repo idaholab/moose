@@ -27,5 +27,6 @@ protected:
   /// Mesh that comes from another generator
   std::unique_ptr<MeshBase> & _input;
 
+  /// Blocks to extract to form a mesh
   const std::vector<SubdomainName> _target_blocks;
 };

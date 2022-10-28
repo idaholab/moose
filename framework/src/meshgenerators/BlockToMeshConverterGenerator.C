@@ -45,35 +45,34 @@ BlockToMeshConverterGenerator::generate()
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 
   if (!mesh->is_replicated())
-    mooseError("BlockToMeshConverterGenerator is not implemented for distributed meshes.");
+    mooseError("This generator does not support distributed meshes.");
 
   auto new_mesh = buildMeshBaseObject();
 
-  std::vector<subdomain_id_type> target_block_ids =
-      MooseMeshUtils::getSubdomainIDs((*mesh), _target_blocks);
+  const auto target_block_ids = MooseMeshUtils::getSubdomainIDs((*mesh), _target_blocks);
 
   // Check that the block ids/names exist in the mesh
   std::set<SubdomainID> mesh_blocks;
   mesh->subdomain_ids(mesh_blocks);
 
-  for (std::size_t i = 0; i < target_block_ids.size(); ++i)
+  for (const auto i : index_range(target_block_ids))
     if (target_block_ids[i] == Moose::INVALID_BLOCK_ID || !mesh_blocks.count(target_block_ids[i]))
     {
       paramError("target_blocks",
                  "The target_block '",
-                 getParam<std::vector<SubdomainName>>("target_blocks")[i],
+                 _target_blocks[i],
                  "' was not found within the mesh.");
     }
 
   // know which nodes have already been inserted, by tracking the old mesh's node's ids'
   std::unordered_map<dof_id_type, dof_id_type> old_new_node_map;
 
-  for (subdomain_id_type target_block_id : target_block_ids)
+  for (const auto target_block_id : target_block_ids)
   {
 
     for (auto elem : mesh->active_subdomain_elements_ptr_range(target_block_id))
     {
-      // make a deep copy so that mutiple meshs' destructors don't segfault at program termination
+      // make a deep copy so that mutiple meshes' destructors don't segfault at program termination
       auto copy = elem->build(elem->type());
 
       // index of node in the copy element must be managed manually as there is no intelligent
@@ -83,7 +82,7 @@ BlockToMeshConverterGenerator::generate()
       // correctly assign new copies of nodes, loop over nodes
       for (dof_id_type i : elem->node_index_range())
       {
-        auto & n = *elem->node_ptr(i);
+        auto & n = elem->node_ref(i);
 
         if (old_new_node_map.count(n.id()))
         {
@@ -98,19 +97,15 @@ BlockToMeshConverterGenerator::generate()
           // add them both to the element and the mesh
 
           // Nodes' IDs are their indexes in the nodes' respective mesh
-          // If we set them as invalid they are automatically re-assigned
-          // to be the last element in the mesh's node array
-          std::unique_ptr<Node> node_copy = Node::build(elem->point(i), Node::invalid_id);
-
-          // Add to mesh. This method call will automatically re-assign the id; so must call this
-          // first
-          new_mesh->add_node(node_copy.get());
+          // If we set them as invalid they are automatically assigned
+          // Add to mesh, auto-assigning a new id.
+          Node * node = new_mesh->add_point(elem->point(i));
 
           // Add to element copy (manually)
-          copy->set_node(copy_n_index++) = node_copy.get();
+          copy->set_node(copy_n_index++) = node;
 
           // remember the (old) ID
-          old_new_node_map[n.id()] = node_copy.release()->id();
+          old_new_node_map[n.id()] = node->id();
         }
       }
 
@@ -119,7 +114,6 @@ BlockToMeshConverterGenerator::generate()
       new_mesh->add_elem(copy.release());
     }
   }
-  new_mesh->prepare_for_use();
 
   return dynamic_pointer_cast<MeshBase>(new_mesh);
 }

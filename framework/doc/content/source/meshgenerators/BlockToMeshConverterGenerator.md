@@ -4,8 +4,8 @@
 
 ## Overview
 
-The `BlockToMeshConverterGenerator` is for moving one (or more) blocks from a mesh to form a new mesh object.
-This does not erase/delete the blocks from the original mesh. The new mesh has only one block (named 0). 
+The `BlockToMeshConverterGenerator` moves one (or more) blocks from a mesh to form a new mesh object.
+This does not erase/delete the blocks from the original mesh. The new mesh has only one block (unnamed with ID 0)
 
 !alert note
 No sidesets are preserved in or added to the new mesh
@@ -13,7 +13,7 @@ No sidesets are preserved in or added to the new mesh
 
 ## Visual Example
 
-In the input below, we use the `BlockToMeshConverterGenerator` to extract six selected blocks from the input 3D mesh in the first figure.
+In the input below, six selected blocks are extracted from the input 3D mesh in the first figure.
 The final mesh is shown in the second figure.
 
 !listing test/tests/meshgenerators/block_to_mesh_converter_generator/conv_multiblock.i
