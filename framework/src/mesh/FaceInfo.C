@@ -72,9 +72,6 @@ FaceInfo::computeCoefficients(const ElemInfo * const neighbor_info)
   _d_cn_mag = _d_cn.norm();
   _e_cn = _d_cn / _d_cn_mag;
 
-  _delta_c = cellCenterToFaceCenterVector(true) * _normal;
-  _delta_n = -cellCenterToFaceCenterVector(false) * _normal;
-
   Point r_intersection =
       _elem_info->centroid() +
       (((_face_centroid - _elem_info->centroid()) * _normal) / (_e_cn * _normal)) * _e_cn;
@@ -92,8 +89,6 @@ FaceInfo::computeCoefficients()
   _d_cn = _face_centroid - _elem_info->centroid();
   _d_cn_mag = _d_cn.norm();
   _e_cn = _d_cn / _d_cn_mag;
-
-  _delta_c = cellCenterToFaceCenterVector(true) * _normal;
 
   // For interpolation coefficients
   _gc = 1.0;
@@ -114,47 +109,9 @@ FaceInfo::varDefinedOnElem(const std::string & var_name) const
 {
   auto it = _face_types_by_var.find(var_name);
   if (it == _face_types_by_var.end())
-    mooseError("Variable ", var_name, " not found in variable to VarFaceNeighbors map");
+    mooseAssert(it != _face_types_by_var.end(),
+                "Variable " + var_name + " not found in variable to VarFaceNeighbors map");
 
   const VarFaceNeighbors & ft = faceType(var_name);
   return (ft == FaceInfo::VarFaceNeighbors::BOTH || ft == FaceInfo::VarFaceNeighbors::ELEM);
-}
-
-bool
-FaceInfo::varDefinedOnNeighbor(const std::string & var_name) const
-{
-  auto it = _face_types_by_var.find(var_name);
-  if (it == _face_types_by_var.end())
-    mooseError("Variable ", var_name, " not found in variable to VarFaceNeighbors map");
-
-  const VarFaceNeighbors & ft = faceType(var_name);
-  return (ft == FaceInfo::VarFaceNeighbors::BOTH || ft == FaceInfo::VarFaceNeighbors::ELEM);
-}
-
-const Point
-FaceInfo::cellCenterToFaceCenterVector(const bool elem_side) const
-{
-  if (elem_side)
-    return _face_centroid - _elem_info->centroid();
-  else
-  {
-    mooseAssert(_neighbor_info,
-                "The neighbor info does not exist so the vector to the face cannot be returned "
-                "from the neighbor side!");
-    return _face_centroid - _neighbor_info->centroid();
-  }
-}
-
-Real
-FaceInfo::cellCenterToFaceDistance(const bool elem_side) const
-{
-  if (elem_side)
-    return _delta_c;
-  else
-  {
-    mooseAssert(_neighbor_info,
-                "The neighbor info does not exist so the vector to the face cannot be returned "
-                "from the neighbor side!");
-    return _delta_n;
-  }
 }

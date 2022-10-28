@@ -27,8 +27,7 @@ class ElemInfo
 public:
   /// Constructor using a real element from libmesh
   ElemInfo(const Elem * const elem);
-
-  ElemInfo();
+  ElemInfo() : _elem(nullptr) {}
 
   const Elem * elem() const { return _elem; }
   Real volume() const { return _volume; }

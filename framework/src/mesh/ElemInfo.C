@@ -15,5 +15,3 @@ ElemInfo::ElemInfo(const Elem * const elem)
   : _elem(elem), _volume(_elem->volume()), _centroid(_elem->vertex_average())
 {
 }
-
-ElemInfo::ElemInfo() : _elem(nullptr) {}

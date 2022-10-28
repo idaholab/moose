@@ -36,11 +36,16 @@ FVDiffusionFunctionBC::FVDiffusionFunctionBC(const InputParameters & parameters)
 ADReal
 FVDiffusionFunctionBC::computeQpResidual()
 {
-  auto u_ghost = _exact_solution.value(_t, _face_info->faceCentroid());
+  auto u_ghost =
+      _exact_solution.value(_t, 2. * _face_info->faceCentroid() - _face_info->elemCentroid());
 
   auto dudn = Moose::FV::gradUDotNormal(_u[_qp], u_ghost, *_face_info, _var);
 
-  auto k = _coeff_function.value(_t, _face_info->faceCentroid());
+  auto coeff_ghost =
+      _coeff_function.value(_t, 2. * _face_info->faceCentroid() - _face_info->elemCentroid());
+
+  ADReal k;
+  interpolate(Moose::FV::InterpMethod::Average, k, _coeff[_qp], coeff_ghost, *_face_info, true);
 
   return -1 * k * dudn;
 }

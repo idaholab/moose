@@ -180,13 +180,11 @@ public:
    */
   void computeCoefficients();
 
+  /**
+   * Evaluates if a variable is defined on the elem side of the face
+   * @param var_name The name of the variable
+   */
   bool varDefinedOnElem(const std::string & var_name) const;
-
-  bool varDefinedOnNeighbor(const std::string & var_name) const;
-
-  const Point cellCenterToFaceCenterVector(const bool elem_side = true) const;
-
-  Real cellCenterToFaceDistance(const bool elem_side = true) const;
 
 private:
   /// the elem and neighbor elems
@@ -209,10 +207,6 @@ private:
   /// the distance vector between neighbor and element centroids
   Point _d_cn;
   Point _e_cn;
-
-  /// The distances between the face and the cell/neighbor centers
-  Real _delta_c;
-  Real _delta_n;
 
   /// the distance norm between neighbor and element centroids
   Real _d_cn_mag;
