@@ -14,7 +14,8 @@
 [Problem]
 kernel_coverage_check = false
 material_coverage_check = false
-skip_nl_system_check = false
+skip_nl_system_check = true
+solve = false
 []
 
 
@@ -26,12 +27,6 @@ skip_nl_system_check = false
   []
 []
 
-[Variables]
-[dummy]
-
-[]
-[]
-
 [Materials]
 []
 
@@ -40,6 +35,7 @@ skip_nl_system_check = false
   solve_type = 'NEWTON'
   # Run for 100+ timesteps to reach stey state.
 
+  num_steps = 1
   dt = 1e-2
   end_time = 1
   dtmin = 1.0e-7
@@ -91,6 +87,7 @@ skip_nl_system_check = false
 
 [Transfers]
   [push_indicator]
+    # type = MultiAppNearestNodeTransfer
     type = MultiAppShapeEvaluationTransfer
     # Transfer from the sub-app from this app
     from_multi_app =  solid_domain
