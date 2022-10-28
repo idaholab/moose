@@ -30,6 +30,9 @@ public:
 
   virtual void act() override;
 
+  using Action::addRelationshipManagers;
+  virtual void addRelationshipManagers(Moose::RelationshipManagerType input_rm_type) override;
+
 protected:
   /// Enum used to select the type of integral to be performed
   enum INTEGRAL
