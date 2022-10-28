@@ -10,11 +10,9 @@
     recover = false
   []
   [refinement]
-    type = 'Exodiff'
-    input = 'abtr_tri.i'
-    exodiff = 'abtr_tri_refine.e'
-    cli_args = 'Mesh/tmg/desired_area=50
-                --mesh-only "abtr_tri_refine.e"'
+    type = 'CSVDiff'
+    input = 'abtr_tri_refine.i'
+    csvdiff = 'abtr_tri_refine.csv'
     requirement ='The system shall generate a triangulation with area refinement.'
     recover = false
   []
