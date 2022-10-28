@@ -41,6 +41,16 @@ gamma = 0.5
     []
     initial_condition = 1.0
   []
+  [contains_point]
+    order = CONSTANT
+    family = MONOMIAL
+    [AuxKernel]
+      type = ContainsPointAux
+      point = '.104 .356 0'
+      execute_on = 'initial timestep_end'
+      use_displaced_mesh = true
+    []
+  []
 []
 
 [Modules/TensorMechanics/DynamicMaster]
