@@ -13,7 +13,7 @@
 #include "PerfGraphInterface.h"
 
 /**
- * All Distributions should inherit from this class
+ * All Likelihoods should inherit from this class
  */
 class Likelihood : public MooseObject, public PerfGraphInterface
 {
