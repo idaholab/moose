@@ -972,6 +972,9 @@ DerivativeStringClass(FunctionName);
 /// This type is used for objects that expect Moose Distribution objects
 DerivativeStringClass(DistributionName);
 
+/// This type is used for objects that expect Moose Likelihood objects
+DerivativeStringClass(LikelihoodName);
+
 /// This type is used for objects that expect Moose Sampler objects
 DerivativeStringClass(SamplerName);
 

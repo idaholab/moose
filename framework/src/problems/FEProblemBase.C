@@ -37,6 +37,7 @@
 #include "Function.h"
 #include "NonlinearSystem.h"
 #include "Distribution.h"
+#include "Likelihood.h"
 #include "Sampler.h"
 #include "PetscSupport.h"
 #include "RandomInterface.h"
@@ -2374,6 +2375,29 @@ FEProblemBase::getDistribution(const std::string & name)
       .queryInto(objs);
   if (objs.empty())
     mooseError("Unable to find Distribution with name '" + name + "'");
+  return *(objs[0]);
+}
+
+void
+FEProblemBase::addLikelihood(const std::string & type,
+                               const std::string & name,
+                               InputParameters & parameters)
+{
+  parameters.set<std::string>("type") = type;
+  addObject<Likelihood>(type, name, parameters, /* threaded = */ false);
+}
+
+Likelihood &
+FEProblemBase::getLikelihood(const std::string & name)
+{
+  std::vector<Likelihood *> objs;
+  theWarehouse()
+      .query()
+      .condition<AttribSystem>("Likelihood")
+      .condition<AttribName>(name)
+      .queryInto(objs);
+  if (objs.empty())
+    mooseError("Unable to find Likelihood with name '" + name + "'");
   return *(objs[0]);
 }
 
