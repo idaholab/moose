@@ -72,6 +72,7 @@ class InterfaceUserObject;
 class GeneralUserObject;
 class Function;
 class Distribution;
+class Likelihood;
 class Sampler;
 class KernelBase;
 class IntegratedBCBase;
@@ -584,6 +585,13 @@ public:
   virtual void
   addDistribution(const std::string & type, const std::string & name, InputParameters & parameters);
   virtual Distribution & getDistribution(const std::string & name);
+
+  /**
+   * The following functions will enable MOOSE to have the capability to import likelihoods
+   */
+  virtual void
+  addLikelihood(const std::string & type, const std::string & name, InputParameters & parameters);
+  virtual Likelihood & getLikelihood(const std::string & name);
 
   /**
    * The following functions will enable MOOSE to have the capability to import Samplers
