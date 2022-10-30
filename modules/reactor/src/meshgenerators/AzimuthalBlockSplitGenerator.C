@@ -90,9 +90,9 @@ AzimuthalBlockSplitGenerator::generate()
       paramError("old_blocks",
                  "This parameter contains blocks that do not exist in the input mesh.");
 
-  if (std::find(_old_block_ids.begin(), _old_block_ids.end(), mesh.elem_ref(0).subdomain_id()) !=
-          _old_block_ids.end() &&
-      mesh.elem_ref(0).n_vertices() == 4)
+  if (std::find(_old_block_ids.begin(),
+                _old_block_ids.end(),
+                getMeshProperty<bool>("quad_center_block_id", _input_name)) != _old_block_ids.end())
     paramError("old_blocks",
                "This parameter contains a block that involves center quad elements, the nodes of "
                "which should not be moved to match the given angles.");
