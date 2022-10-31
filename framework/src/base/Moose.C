@@ -24,18 +24,18 @@
 
 #include <unistd.h>
 
-const ExecFlagType EXEC_NONE = registerExecFlag("NONE");
-const ExecFlagType EXEC_INITIAL = registerExecFlag("INITIAL");
-const ExecFlagType EXEC_LINEAR = registerExecFlag("LINEAR");
-const ExecFlagType EXEC_NONLINEAR = registerExecFlag("NONLINEAR");
-const ExecFlagType EXEC_TIMESTEP_END = registerExecFlag("TIMESTEP_END");
-const ExecFlagType EXEC_TIMESTEP_BEGIN = registerExecFlag("TIMESTEP_BEGIN");
-const ExecFlagType EXEC_FINAL = registerExecFlag("FINAL");
+const ExecFlagType EXEC_NONE = registerDefaultExecFlag("NONE");
+const ExecFlagType EXEC_INITIAL = registerDefaultExecFlag("INITIAL");
+const ExecFlagType EXEC_LINEAR = registerDefaultExecFlag("LINEAR");
+const ExecFlagType EXEC_NONLINEAR = registerDefaultExecFlag("NONLINEAR");
+const ExecFlagType EXEC_TIMESTEP_END = registerDefaultExecFlag("TIMESTEP_END");
+const ExecFlagType EXEC_TIMESTEP_BEGIN = registerDefaultExecFlag("TIMESTEP_BEGIN");
+const ExecFlagType EXEC_FINAL = registerDefaultExecFlag("FINAL");
 const ExecFlagType EXEC_FORCED = registerExecFlag("FORCED");
 const ExecFlagType EXEC_FAILED = registerExecFlag("FAILED");
-const ExecFlagType EXEC_CUSTOM = registerExecFlag("CUSTOM");
+const ExecFlagType EXEC_CUSTOM = registerDefaultExecFlag("CUSTOM");
 const ExecFlagType EXEC_SUBDOMAIN = registerExecFlag("SUBDOMAIN");
-const ExecFlagType EXEC_ALWAYS = registerExecFlag("ALWAYS");
+const ExecFlagType EXEC_ALWAYS = registerDefaultExecFlag("ALWAYS");
 const ExecFlagType EXEC_PRE_DISPLACE = registerExecFlag("PRE_DISPLACE");
 const ExecFlagType EXEC_SAME_AS_MULTIAPP = registerExecFlag("SAME_AS_MULTIAPP");
 const ExecFlagType EXEC_PRE_MULTIAPP_SETUP = registerExecFlag("PRE_MULTIAPP_SETUP");
