@@ -349,7 +349,9 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
     _azimuthal_angle_meta(
         declareMeshProperty<std::vector<Real>>("azimuthal_angle_meta", std::vector<Real>())),
     _is_control_drum_meta(declareMeshProperty<bool>("is_control_drum_meta", false)),
-    _max_radius_meta(declareMeshProperty<Real>("max_radius_meta", 0.0))
+    _max_radius_meta(declareMeshProperty<Real>("max_radius_meta", 0.0)),
+    _quad_center_block_id(declareMeshProperty<subdomain_id_type>(
+        "quad_center_block_id", libMesh::Elem::invalid_subdomain_id))
 {
   // This error message is only reserved for future derived classes. Neither of the current derived
   // classes will trigger this error.
@@ -570,6 +572,9 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
   if (!_quad_center_elements && _center_quad_factor)
     paramError("center_quad_factor",
                "this parameter is only applicable if quad_center_elements is set true.");
+  if (_quad_center_elements)
+    _quad_center_block_id =
+        _ring_block_ids.empty() ? _background_block_ids.front() : _ring_block_ids.front();
 }
 
 std::unique_ptr<MeshBase>

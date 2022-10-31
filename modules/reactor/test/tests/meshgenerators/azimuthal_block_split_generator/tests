@@ -11,6 +11,21 @@
       recover = false
       detail = '(without the external block) based on the given angle range.'
     []
+    [block_id_in_quad]
+      type = 'Exodiff'
+      input = 'azi_block_id_mod.i'
+      exodiff = 'azi_block_id_mod_id_in_quad.e'
+      cli_args = 'Mesh/cd/quad_center_elements="true"
+                  Mesh/cd/num_sectors_per_side="4 4 4 4 4 4"
+                  Mesh/cd/ring_block_ids="10 10 20"
+                  Mesh/cd/ring_block_names="center center cd_ring"
+                  Mesh/cd_azi_define/old_blocks=20
+                  Mesh/cd_azi_define/new_block_ids=200
+                  Mesh/cd_azi_define/new_block_names="cd_ring_new"
+                  --mesh-only "azi_block_id_mod_id_in_quad.e"'
+      recover = false
+      detail = '(without the external block) in a mesh with center quad elements based on the given angle range.'
+    []
     [block_id_ext]
       type = 'Exodiff'
       input = 'azi_block_id_mod.i'
@@ -63,6 +78,21 @@
                   --mesh-only "azi_block_id_mod_err.e"'
       expect_err = 'This parameter contains blocks that do not exist in the input mesh.'
       detail = "if old_blocks contains blocks that do not exist in the input mesh."
+    []
+    [error_mod_center_quad_elements]
+      type = 'RunException'
+      input = 'azi_block_id_mod.i'
+      cli_args = 'Mesh/cd/quad_center_elements="true"
+                  Mesh/cd/num_sectors_per_side="4 4 4 4 4 4"
+                  Mesh/cd/ring_block_ids="10 10 20"
+                  Mesh/cd/ring_block_names="center center cd_ring"
+                  Mesh/cd_azi_define/old_blocks="10 20"
+                  Mesh/cd_azi_define/new_block_ids="100 200"
+                  Mesh/cd_azi_define/new_block_names="center_new cd_ring_new"
+                  --mesh-only "azi_block_id_mod_err.e"'
+      expect_err = 'This parameter contains a block that involves center quad elements, azimuthal splitting is currently not supported in this case.'
+      detail = "if the list of blocks whose nodes should be moved contains a block with center quad elements."
+      allow_warnings = false
     []
     [err_overlapped_circular_regions]
       type = 'RunException'

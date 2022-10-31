@@ -129,4 +129,6 @@ protected:
   bool & _is_control_drum_meta;
   /// Metadata of the maximum radius of ring regions
   Real & _max_radius_meta;
+  /// MeshMetaData: ID of the cental quad elements block if it exists
+  subdomain_id_type & _quad_center_block_id;
 };

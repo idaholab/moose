@@ -90,6 +90,14 @@ AzimuthalBlockSplitGenerator::generate()
       paramError("old_blocks",
                  "This parameter contains blocks that do not exist in the input mesh.");
 
+  if (std::find(_old_block_ids.begin(),
+                _old_block_ids.end(),
+                getMeshProperty<bool>("quad_center_block_id", _input_name)) != _old_block_ids.end())
+    paramError(
+        "old_blocks",
+        "This parameter contains a block that involves center quad elements, azimuthal splitting "
+        "is currently not supported in this case.");
+
   MeshTools::Modification::rotate(mesh, 90.0, 0.0, 0.0);
   _azimuthal_angle_meta = azimuthalAnglesCollector(mesh, -180.0, 180.0, ANGLE_DEGREE);
   // So that this class works for both derived classes of PolygonMeshGeneratorBase
@@ -196,22 +204,33 @@ AzimuthalBlockSplitGenerator::generate()
 
   // Determine which nodes are involved in the elements that are intercepted by the starting/ending
   // angles
+  Real max_quad_elem_rad(0.0);
+  if (mesh.elem_ref(0).n_vertices() == 4)
+    for (dof_id_type i = 0;
+         i < (_num_sectors_per_side_meta[0] / 2 + 1) * (_num_sectors_per_side_meta[0] / 2 + 1);
+         i++)
+      max_quad_elem_rad =
+          max_quad_elem_rad < mesh.node_ref(i).norm() ? mesh.node_ref(i).norm() : max_quad_elem_rad;
   for (const auto & node_ptr : as_range(mesh.nodes_begin(), mesh.nodes_end()))
   {
     const Node & node = *node_ptr;
     Real node_azi = atan2(node(1), node(0)) * 180.0 / M_PI;
     Real node_rad = std::sqrt(node(0) * node(0) + node(1) * node(1));
-    if (node_rad > rad_tol && (std::abs(node_azi - azi_to_mod_start) < azi_tol ||
-                               std::abs(std::abs(node_azi - azi_to_mod_start) - 360.0) < azi_tol))
+    if (node_rad > max_quad_elem_rad + rad_tol &&
+        (std::abs(node_azi - azi_to_mod_start) < azi_tol ||
+         std::abs(std::abs(node_azi - azi_to_mod_start) - 360.0) < azi_tol))
       node_id_mod_start.push_back(std::make_pair(node_rad, node.id()));
-    if (node_rad > rad_tol && (std::abs(node_azi - azi_to_keep_start) < azi_tol ||
-                               std::abs(std::abs(node_azi - azi_to_keep_start) - 360.0) < azi_tol))
+    if (node_rad > max_quad_elem_rad + rad_tol &&
+        (std::abs(node_azi - azi_to_keep_start) < azi_tol ||
+         std::abs(std::abs(node_azi - azi_to_keep_start) - 360.0) < azi_tol))
       node_id_keep_start.push_back(std::make_pair(node_rad, node.id()));
-    if (node_rad > rad_tol && (std::abs(node_azi - azi_to_mod_end) < azi_tol ||
-                               std::abs(std::abs(node_azi - azi_to_mod_end) - 360.0) < azi_tol))
+    if (node_rad > max_quad_elem_rad + rad_tol &&
+        (std::abs(node_azi - azi_to_mod_end) < azi_tol ||
+         std::abs(std::abs(node_azi - azi_to_mod_end) - 360.0) < azi_tol))
       node_id_mod_end.push_back(std::make_pair(node_rad, node.id()));
-    if (node_rad > rad_tol && (std::abs(node_azi - azi_to_keep_end) < azi_tol ||
-                               std::abs(std::abs(node_azi - azi_to_keep_end) - 360.0) < azi_tol))
+    if (node_rad > max_quad_elem_rad + rad_tol &&
+        (std::abs(node_azi - azi_to_keep_end) < azi_tol ||
+         std::abs(std::abs(node_azi - azi_to_keep_end) - 360.0) < azi_tol))
       node_id_keep_end.push_back(std::make_pair(node_rad, node.id()));
   }
   // Sort the involved nodes using radius as the key; this facilitates the determination of circular
