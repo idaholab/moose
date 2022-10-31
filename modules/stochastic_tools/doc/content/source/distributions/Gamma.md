@@ -15,7 +15,7 @@ F(x; \alpha, \beta) = \Gamma(\alpha, \beta x),
 !equation id=eq:gamma_q
 F^{-1}(p; \alpha, \beta) = \frac{\Gamma^{-1}(\alpha, p)}{\beta},
 
-where $x,\alpha,\beta > 0$ and $0\leq p \leq 1$. $\Gamma(a)$ is the gamma function defined by [eq:gamma_fun], $\Gamma(a, x)$ is the lower incomplete gamma function defined by [eq:igamma], and $\Gamma^{-1}(a, p)$ is the inverse of the incomplete gamma function. $\Gamma$ and $\Gamma^{-1}$ are either computed using an external boost package (if available) or a custom iterative procedure. The boost versions are slightly slower but obtain machine precision, while the custom algorithms obtain about $10^{-14}$ accuracy.
+where $x,\alpha,\beta > 0$ and $0\leq p \leq 1$. $\Gamma(a)$ is the gamma function defined by [eq:gamma_fun], $\Gamma(a, x)$ is the lower incomplete gamma function defined by [eq:igamma], and $\Gamma^{-1}(a, p)$ is the inverse of the incomplete gamma function. $\Gamma$ and $\Gamma^{-1}$ are computed using a custom iterative procedure, which obtains an accuracy of about $10^{-14}$.
 
 !equation id=eq:gamma_fun
 \Gamma(a) = \int_0^\infty x^{a-1}e^{-x}dx
