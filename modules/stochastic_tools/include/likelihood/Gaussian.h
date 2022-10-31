@@ -21,16 +21,22 @@ public:
 
   Gaussian(const InputParameters & parameters);
 
-  virtual Real densityFunction(const std::vector<Real> & x) const override;
+  virtual Real densityFunction() const override;
+  virtual Real massFunction() const override;
 
-  static Real densityFunction(const std::vector<Real> & x, const Real & noise);
+  static Real densityFunction(const std::vector<Real> & exp, const std::vector<Real> & model, const Real & noise, const bool & log_likelihood);
 
 protected:
+  /// return log-likelihood or likelihood
+  const bool & _log_likelihood;
+
+  /// model prediction values
+  const std::vector<Real> & _model_pred;
+
+  /// Noise value
+  const Real & _noise;
 
   /// Experimental data values
   std::vector<Real> _exp_values;
-
-  /// Noise value
-  Real _noise;
   
 };
