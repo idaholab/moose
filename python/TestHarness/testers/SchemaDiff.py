@@ -9,7 +9,7 @@
 
 from RunApp import RunApp
 from TestHarness import util
-import json, os
+import os
 
 class SchemaDiff(RunApp):
     @staticmethod
@@ -67,53 +67,28 @@ class SchemaDiff(RunApp):
                 gold_dict = self.try_load(gold)
                 test_dict = self.try_load(test)
 
-                if not gold_dict:
-                    output += "Gold Schema File Invalid: "+gold+"\n"
-                    self.setStatus(self.fail, 'INVALID SCHEMA(S) PROVIDED')
-                if not test_dict:
-                    output += "Test Schema File Invalid: " + test +"\n"
-                    self.setStatus(self.fail, 'INVALID SCHEMA(S) PROVIDED')
+                if isinstance(gold_dict, Exception):
+                    output += "Gold Schema File Failed To Load: "+gold+"\n"
+                    output += "Gold Schema Exception: " + str(gold_dict) + "\n"
+                    self.setStatus(self.fail, 'LOAD FAILED')
+
+                if isinstance(test_dict, Exception):
+                    output += "Test Schema File Failed To Load: "+test+"\n"
+                    output += "Test Schema Exception: " + str(test_dict) + "\n"
+                    self.setStatus(self.fail, 'LOAD FAILED')
 
                 #Break after testing both to provide both errors in the log if both are applicable
-                if not test_dict or not gold_dict:
+                if isinstance(test_dict, Exception) or isinstance(gold_dict, Exception):
                     break
 
-                #Output err and break if gold and test filetypes are different
-                if gold_dict[1] != test_dict[1]:
-                    output += "Schema Files of Different Types: \nTest: " + test +"\nGold: " + gold
-                    self.setStatus(self.fail, 'INVALID SCHEMA(S) PROVIDED')
-                    break
                 # Perform the diff.
-                diff = self.do_deepdiff(gold_dict[0], test_dict[0], specs['rel_err'], specs['abs_zero'], specs['ignored_items'])
+                diff = self.do_deepdiff(gold_dict, test_dict, specs['rel_err'], specs['abs_zero'], specs['ignored_items'])
                 if diff:
                     output += "Schema difference detected.\nFile 1: " + gold + "\nFile 2: " + test + "\nErrors:\n"
                     output += diff
                     self.setStatus(self.diff, 'SCHEMADIFF')
                     break
         return output
-
-    #Many xml files in MOOSE don't actually store their data as a proper array, but as a giant string.
-    #This should fix the giant strings as lists split by whitespace, in-place in the dict.
-    def fix_xml_arrays(self, data):
-        for k, v in data.copy().items():
-            if isinstance(v, dict):
-                data[k] = self.fix_xml_arrays(v)
-            elif isinstance(v, list):
-                data[k] = [self.fix_xml_arrays(i) for i in v]
-            elif k == '#text':
-                del data[k]
-                data[k] = v.split()
-        return data
-
-    def import_xml(self,filepath):
-        import xmltodict
-        with open(filepath,"r") as f:
-            xml = xmltodict.parse(f.read())
-            return self.fix_xml_arrays(xml)
-
-    def import_json(self,filepath):
-        with open(filepath,"r") as f:
-            return json.loads(f.read())
 
     def do_deepdiff(self,orig, comp, rel_err, abs_zero, exclude_values:list=None):
         import deepdiff
@@ -179,14 +154,12 @@ class SchemaDiff(RunApp):
 
         return deepdiff.DeepDiff(orig,comp,exclude_paths=to_exclude,custom_operators=[testcompare(types=[str,float],rel_err=rel_err,abs_zero=abs_zero)]).pretty()
 
-
-
-    #this is how we call the load_file in the derived classes
+    #this is how we call the load_file in the derived classes, and also check for exceptions in the load
     #all python functions are virtual, so there is no templating, but some self shenanigans required
     def try_load(self, path1):
         try:
             return self.load_file(path1)
-        except:
-            return False
+        except Exception as e:
+            return e
 
 

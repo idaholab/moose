@@ -15,6 +15,5 @@ class TestHarnessTester(TestHarnessTestCase):
         output = self.runExceptionTests('-i', 'schemadiff')
         self.assertRegex(output.decode('utf-8'), r'test_harness\.schema_jsondiff.*?FAILED \(SCHEMADIFF\)')
         self.assertRegex(output.decode('utf-8'), r'test_harness\.schema_xmldiff.*?FAILED \(SCHEMADIFF\)')
-        self.assertRegex(output.decode('utf-8'), r'test_harness\.schema_mismatch.*?FAILED \(INVALID SCHEMA\(S\) PROVIDED\)')
-        self.assertRegex(output.decode('utf-8'), r'test_harness\.schema_invalid.*?FAILED \(INVALID SCHEMA\(S\) PROVIDED\)')
-        self.assertRegex(output.decode('utf-8'), r'test_harness\.schema_invalid_xml.*?FAILED \(INVALID SCHEMA\(S\) PROVIDED\)')
+        self.assertRegex(output.decode('utf-8'), r'test_harness\.schema_invalid_json.*?FAILED \(LOAD FAILED\)')
+        self.assertRegex(output.decode('utf-8'), r'test_harness\.schema_invalid_xml.*?FAILED \(LOAD FAILED\)')

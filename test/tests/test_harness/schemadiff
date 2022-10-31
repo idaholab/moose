@@ -9,13 +9,7 @@
     input = schemadiff.i
     jsondiff = schemadiff_out.json
   []
-  [schema_mismatch]
-    type = JSONDiff
-    input = schemadiff.i
-    jsondiff = schemadiff_out.json
-    gold_file = schema_out.xml
-  []
-  [schema_invalid]
+  [schema_invalid_json]
     type = JSONDiff
     input = schemadiff.i
     jsondiff = schemadiff_out.json
