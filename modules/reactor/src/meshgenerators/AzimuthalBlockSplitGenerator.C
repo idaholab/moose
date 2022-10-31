@@ -93,9 +93,10 @@ AzimuthalBlockSplitGenerator::generate()
   if (std::find(_old_block_ids.begin(),
                 _old_block_ids.end(),
                 getMeshProperty<bool>("quad_center_block_id", _input_name)) != _old_block_ids.end())
-    paramError("old_blocks",
-               "This parameter contains a block that involves center quad elements, the nodes of "
-               "which should not be moved to match the given angles.");
+    paramError(
+        "old_blocks",
+        "This parameter contains a block that involves center quad elements, azimuthal splitting "
+        "is currently not supported in this case.");
 
   MeshTools::Modification::rotate(mesh, 90.0, 0.0, 0.0);
   _azimuthal_angle_meta = azimuthalAnglesCollector(mesh, -180.0, 180.0, ANGLE_DEGREE);

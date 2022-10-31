@@ -90,7 +90,7 @@
                   Mesh/cd_azi_define/new_block_ids="100 200"
                   Mesh/cd_azi_define/new_block_names="center_new cd_ring_new"
                   --mesh-only "azi_block_id_mod_err.e"'
-      expect_err = 'This parameter contains a block that involves center quad elements, the nodes of which should not be moved to match the given angles.'
+      expect_err = 'This parameter contains a block that involves center quad elements, azimuthal splitting is currently not supported in this case.'
       detail = "if the list of blocks whose nodes should be moved contains a block with center quad elements."
       allow_warnings = false
     []
