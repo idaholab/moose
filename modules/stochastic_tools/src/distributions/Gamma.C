@@ -11,11 +11,6 @@
 #include "math.h"
 #include "libmesh/utility.h"
 
-// For quickly computing quantile and cdf
-#ifdef LIBMESH_HAVE_EXTERNAL_BOOST
-#include <boost/math/special_functions/gamma.hpp>
-#endif
-
 registerMooseObject("StochasticToolsApp", Gamma);
 
 InputParameters
@@ -80,11 +75,6 @@ Gamma::quantile(const Real & p) const
 Real
 Gamma::incompleteGamma(const Real & a, const Real & x)
 {
-#ifdef LIBMESH_HAVE_EXTERNAL_BOOST
-  // Using boost library (if available)
-  // https://www.boost.org/doc/libs/1_46_1/libs/math/doc/sf_and_dist/html/math_toolkit/special/sf_gamma/igamma.html
-  return boost::math::gamma_p(a, x);
-#else
   const Real tol = 1e-14;
   const unsigned int max_iter = 1e6;
   const Real coef = std::pow(x, a) * std::exp(-x) / std::tgamma(a + 1.0);
@@ -102,17 +92,11 @@ Gamma::incompleteGamma(const Real & a, const Real & x)
 
   mooseAssert(false, "Could not compute incomplete gamma function.");
   return coef * val;
-#endif
 }
 
 Real
 Gamma::incompleteGammaInv(const Real & a, const Real & p)
 {
-#ifdef LIBMESH_HAVE_EXTERNAL_BOOST
-  // Using boost library (if available)
-  // https://www.boost.org/doc/libs/1_46_1/libs/math/doc/sf_and_dist/html/math_toolkit/special/sf_gamma/igamma_inv.html
-  return boost::math::gamma_p_inv(a, p);
-#else
   Real x = a > 1.0 ? a : std::pow(p * std::tgamma(a + 1.0), 1.0 / a);
   const Real scale = std::tgamma(a);
   const Real tol = 1e-14;
@@ -130,5 +114,4 @@ Gamma::incompleteGammaInv(const Real & a, const Real & p)
 
   mooseAssert(false, "Could not find inverse of incomplete gamma function.");
   return x;
-#endif
 }
