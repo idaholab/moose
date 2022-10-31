@@ -87,23 +87,14 @@ public:
   /// doubled in length.  The tip of this new vector is the neighbor centroid.
   /// This is important for FV dirichlet BCs.
   const Point & elemCentroid() const { return _elem_info->centroid(); }
-  const Point & neighborCentroid() const
-  {
-    mooseAssert(_neighbor_info,
-                "The neighbor is not defined on this faceInfo! A possible explanation is that the "
-                "face is a (physical/processor) boundary face.");
-    return _neighbor_info->centroid();
-  }
+  const Point & neighborCentroid() const;
   ///@}
 
   ///@{
   /// Returns the elem and neighbor subdomain IDs. If no neighbor element exists, then
   /// an invalid ID is returned for the neighbor subdomain ID.
   SubdomainID elemSubdomainID() const { return _elem_info->subdomain_id(); }
-  SubdomainID neighborSubdomainID() const
-  {
-    return _neighbor_info ? _neighbor_info->subdomain_id() : Moose::INVALID_BLOCK_ID;
-  }
+  SubdomainID neighborSubdomainID() const;
   ///@}
 
   ///@{
@@ -127,13 +118,7 @@ public:
   Real elemVolume() const { return _elem_info->volume(); }
 
   /// Return the neighbor volume
-  Real neighborVolume() const
-  {
-    mooseAssert(_neighbor_info,
-                "The neighbor is not defined on this faceInfo! A possible explanation is that the "
-                "face is a (physical/processor) boundary face.");
-    return _neighbor_info->volume();
-  }
+  Real neighborVolume() const;
 
   /// Return the geometric weighting factor
   Real gC() const { return _gc; }
@@ -237,4 +222,28 @@ FaceInfo::faceType(const std::string & var_name) const
   if (it == _face_types_by_var.end())
     mooseError("Variable ", var_name, " not found in variable to VarFaceNeighbors map");
   return it->second;
+}
+
+inline const Point &
+FaceInfo::neighborCentroid() const
+{
+  mooseAssert(_neighbor_info,
+              "The neighbor is not defined on this faceInfo! A possible explanation is that the "
+              "face is a (physical/processor) boundary face.");
+  return _neighbor_info->centroid();
+}
+
+inline SubdomainID
+FaceInfo::neighborSubdomainID() const
+{
+  return _neighbor_info ? _neighbor_info->subdomain_id() : Moose::INVALID_BLOCK_ID;
+}
+
+inline Real
+FaceInfo::neighborVolume() const
+{
+  mooseAssert(_neighbor_info,
+              "The neighbor is not defined on this faceInfo! A possible explanation is that the "
+              "face is a (physical/processor) boundary face.");
+  return _neighbor_info->volume();
 }

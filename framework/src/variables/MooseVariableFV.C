@@ -690,7 +690,7 @@ MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi,
   mooseError("MooseVariableFV::uncorrectedAdGradSln only supported for global AD indexing");
 #endif
 
-  bool var_defined_on_elem = fi.varDefinedOnElem(this->name());
+  const bool var_defined_on_elem = fi.varDefinedOnElem(this->name());
   const Elem * const elem_one = var_defined_on_elem ? &fi.elem() : fi.neighborPtr();
   const Elem * const elem_two = var_defined_on_elem ? fi.neighborPtr() : &fi.elem();
 
@@ -718,7 +718,7 @@ MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi, const bool correct_s
   mooseError("MooseVariableFV::adGradSln only supported for global AD indexing");
 #endif
 
-  bool var_defined_on_elem = fi.varDefinedOnElem(this->name());
+  const bool var_defined_on_elem = fi.varDefinedOnElem(this->name());
   const Elem * const elem = &fi.elem();
   const Elem * const neighbor = fi.neighborPtr();
 
@@ -732,6 +732,10 @@ MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi, const bool correct_s
 
   const auto delta =
       isInternalFace(fi) ? fi.dCNMag() : (fi.faceCentroid() - fi.elemCentroid()).norm();
+
+  // This is the component of the gradient which is parallel to the line connecting
+  // the cell centers. Therefore, we can use our second order, central difference
+  // scheme to approximate it.
   auto face_grad = ((side_two_value - side_one_value) / delta) * fi.eCN();
 
   // We only need nonorthogonal correctors in 2+ dimensions
@@ -797,8 +801,13 @@ MooseVariableFV<OutputType>::evaluate(const FaceArg & face,
     return Moose::FV::interpolate(*this, face);
   else
   {
-    Moose::SingleSidedFaceArg ssfa = {
-        face.fi, face.limiter_type, face.elem_is_upwind, face.correct_skewness, face.elem_sub_id};
+    const bool var_defined_on_elem = face.fi->varDefinedOnElem(this->name());
+    Moose::SingleSidedFaceArg ssfa = {fi,
+                                      face.limiter_type,
+                                      face.elem_is_upwind,
+                                      face.correct_skewness,
+                                      var_defined_on_elem ? face.elem_sub_id
+                                                          : face.neighbor_sub_id};
     return this->evaluate(ssfa, 0);
   }
 }

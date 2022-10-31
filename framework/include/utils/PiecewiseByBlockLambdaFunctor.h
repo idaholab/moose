@@ -277,12 +277,14 @@ PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::FaceArg & face,
   mooseAssert(state == 0, "Only current time state supported.");
 
   if (isInternalFace(*face.fi))
-  {
     return interpolate(*this, face);
-  }
 
-  Moose::SingleSidedFaceArg ssfa = {
-      face.fi, face.limiter_type, face.elem_is_upwind, face.correct_skewness, face.elem_sub_id};
+  Moose::SingleSidedFaceArg ssfa = {face.fi,
+                                    face.limiter_type,
+                                    face.elem_is_upwind,
+                                    face.correct_skewness,
+                                    hasBlocks(face.elem_sub_id) ? face.elem_sub_id
+                                                                : face.neighbor_sub_id};
   return this->evaluate(ssfa, 0);
 }
 

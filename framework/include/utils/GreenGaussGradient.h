@@ -257,6 +257,9 @@ greenGaussGradient(const FaceArg & face_arg,
     const auto & value_elem = functor(elem_arg);
     const auto & value_neighbor = functor(neighbor_arg);
 
+    // This is the component of the gradient which is parallel to the line connecting
+    // the cell centers. Therefore, we can use our second order, central difference
+    // scheme to approximate it.
     VectorValue<T> face_gradient = (value_neighbor - value_elem) / fi.dCNMag() * fi.eCN();
 
     // We only need nonorthogonal correctors in 2+ dimensions
