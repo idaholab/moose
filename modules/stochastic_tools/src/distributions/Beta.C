@@ -11,11 +11,6 @@
 #include "math.h"
 #include "libmesh/utility.h"
 
-// For quickly computing quantile and cdf
-#ifdef LIBMESH_HAVE_EXTERNAL_BOOST
-#include <boost/math/special_functions/beta.hpp>
-#endif
-
 registerMooseObject("StochasticToolsApp", Beta);
 
 InputParameters
@@ -80,23 +75,12 @@ Beta::quantile(const Real & p) const
 Real
 Beta::betaFunction(const Real & a, const Real & b)
 {
-#ifdef LIBMESH_HAVE_EXTERNAL_BOOST
-  // Using boost library (if available)
-  // https://www.boost.org/doc/libs/1_50_0/libs/math/doc/sf_and_dist/html/math_toolkit/special/sf_beta/beta_function.html
-  return boost::math::beta(a, b);
-#else
   return std::tgamma(a) * std::tgamma(b) / std::tgamma(a + b);
-#endif
 }
 
 Real
 Beta::incompleteBeta(const Real & a, const Real & b, const Real & x)
 {
-#ifdef LIBMESH_HAVE_EXTERNAL_BOOST
-  // Using boost library (if available)
-  // https://www.boost.org/doc/libs/1_50_0/libs/math/doc/sf_and_dist/html/math_toolkit/special/sf_beta/ibeta_function.html
-  return boost::math::ibeta(a, b, x);
-#else
   if (x > ((a + 1.0) / (a + b + 2.0)))
     return 1.0 - incompleteBeta(b, a, 1.0 - x);
 
@@ -134,17 +118,11 @@ Beta::incompleteBeta(const Real & a, const Real & b, const Real & x)
 
   mooseAssert(false, "Could not compute incomplete beta function.");
   return coef * (fn - 1.0);
-#endif
 }
 
 Real
 Beta::incompleteBetaInv(const Real & a, const Real & b, const Real & p)
 {
-#ifdef LIBMESH_HAVE_EXTERNAL_BOOST
-  // Using boost library (if available)
-  // https://www.boost.org/doc/libs/1_40_0/libs/math/doc/sf_and_dist/html/math_toolkit/special/sf_beta/ibeta_inv_function.html
-  return boost::math::ibeta_inv(a, b, p);
-#else
   if (a < b)
     return 1.0 - incompleteBetaInv(b, a, 1.0 - p);
 
@@ -184,5 +162,4 @@ Beta::incompleteBetaInv(const Real & a, const Real & b, const Real & p)
 
   mooseAssert(false, "Could not find inverse of incomplete gamma function.");
   return x;
-#endif
 }
