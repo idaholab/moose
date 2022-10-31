@@ -24,10 +24,10 @@ public:
   /**
    * Compute the probability density function at vector x (continuous case)
    */
-  virtual Real densityFunction(const std::vector<Real> & x) const = 0;
+  virtual Real densityFunction() const = 0;
 
   /**
    * Compute the probability mass function at vector x (discrete case)
    */
-  virtual Real massFunction(const std::vector<Real> & x) const = 0;
+  virtual Real massFunction() const = 0;
 };
