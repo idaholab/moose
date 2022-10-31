@@ -39,7 +39,7 @@ ComputeFullJacobianThread::~ComputeFullJacobianThread() {}
 void
 ComputeFullJacobianThread::computeJacobian()
 {
-  auto & ce = _fe_problem.couplingEntries(_tid);
+  auto & ce = _fe_problem.couplingEntries(_tid, _nl.number());
   for (const auto & it : ce)
   {
     MooseVariableFieldBase & ivariable = *(it.first);

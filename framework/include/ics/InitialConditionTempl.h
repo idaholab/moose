@@ -111,17 +111,18 @@ protected:
   FEProblemBase & _fe_problem;
   THREAD_ID _tid;
 
-  Assembly & _assembly;
-
   /// Time
   Real & _t;
-
-  /// The coordinate system type for this problem, references the value in Assembly
-  const Moose::CoordinateSystemType & _coord_sys;
 
   /// The variable that this initial condition is acting upon.
   MooseVariableField<T> & _var;
   MooseVariableFE<T> * _fe_var;
+
+  /// the finite element/volume assembly object
+  Assembly & _assembly;
+
+  /// The coordinate system type for this problem, references the value in Assembly
+  const Moose::CoordinateSystemType & _coord_sys;
 
   /// The current element we are on will retrieving values at specific points in the domain. Note
   /// that this _IS_ valid even for nodes shared among several elements.

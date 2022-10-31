@@ -1,0 +1,40 @@
+[Tests]
+  design = 'Problem/index.md'
+  issues = '#8780'
+  [coupled_system]
+    requirement = 'The software shall be able to solve a system of equations in which one variable depends on another by'
+    [segregated]
+      type = Exodiff
+      input = test.i
+      exodiff = test_out.e
+      detail = 'segregating the solves; first the independent variable is solved for, and second the dependent variable is solved for using the solution of the first'
+    []
+    [monolithic]
+      type = Exodiff
+      input = fully-coupled.i
+      exodiff = fully-coupled_out.e
+      detail = 'solving the equations monolothically; both the independent and dependent variable equations are solved in a single large system'
+    []
+  []
+  [AD]
+    requirement = 'The system shall be able to perform a segregated solve using AD objects and'
+    [residuals]
+      type = Exodiff
+      input = ad-test.i
+      exodiff = ad-test_out.e
+      detail = 'match the results of a segregated solve using hand-coded Jacobian objects'
+    []
+    [jacobian]
+      type = PetscJacobianTester
+      run_sim = True
+      input = ad-test.i
+      detail = 'show a perfect Jacobian for both solves'
+    []
+  []
+  [hand-jac]
+    type = PetscJacobianTester
+    run_sim = True
+    input = test.i
+    requirement = 'The system shall be able to perform a segregated solve using objects with hand-coded Jacobians and show perfect Jacobians for those objects.'
+  []
+[]

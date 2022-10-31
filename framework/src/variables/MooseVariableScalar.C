@@ -318,6 +318,8 @@ MooseVariableScalar::computeAD(bool
 {
 #endif
   auto n_dofs = _dof_indices.size();
+  const bool do_derivatives =
+      ADReal::do_derivatives && _sys.number() == _subproblem.currentNlSysNum();
 
   if (_need_ad_u)
   {
@@ -325,10 +327,11 @@ MooseVariableScalar::computeAD(bool
     for (MooseIndex(n_dofs) i = 0; i < n_dofs; ++i)
     {
       _ad_u[i] = _u[i];
+      if (do_derivatives)
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-      Moose::derivInsert(_ad_u[i].derivatives(), _dof_indices[i], 1.);
+        Moose::derivInsert(_ad_u[i].derivatives(), _dof_indices[i], 1.);
 #else
-      Moose::derivInsert(_ad_u[i].derivatives(), ad_offset + i, 1.);
+        Moose::derivInsert(_ad_u[i].derivatives(), ad_offset + i, 1.);
 #endif
     }
   }
@@ -339,10 +342,11 @@ MooseVariableScalar::computeAD(bool
     for (MooseIndex(n_dofs) i = 0; i < n_dofs; ++i)
     {
       _ad_u_dot[i] = _u_dot[i];
+      if (do_derivatives)
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-      Moose::derivInsert(_ad_u_dot[i].derivatives(), _dof_indices[i], _du_dot_du[i]);
+        Moose::derivInsert(_ad_u_dot[i].derivatives(), _dof_indices[i], _du_dot_du[i]);
 #else
-      Moose::derivInsert(_ad_u_dot[i].derivatives(), ad_offset + i, _du_dot_du[i]);
+        Moose::derivInsert(_ad_u_dot[i].derivatives(), ad_offset + i, _du_dot_du[i]);
 #endif
     }
   }

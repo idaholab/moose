@@ -256,7 +256,9 @@ XFEM::updateHeal()
 }
 
 bool
-XFEM::update(Real time, NonlinearSystemBase & nl, AuxiliarySystem & aux)
+XFEM::update(Real time,
+             const std::vector<std::shared_ptr<NonlinearSystemBase>> & nl,
+             AuxiliarySystem & aux)
 {
   if (_moose_mesh->isDistributedMesh())
     mooseError("Use of XFEM with distributed mesh is not yet supported");
@@ -299,18 +301,22 @@ XFEM::update(Real time, NonlinearSystemBase & nl, AuxiliarySystem & aux)
 }
 
 void
-XFEM::initSolution(NonlinearSystemBase & nl, AuxiliarySystem & aux)
+XFEM::initSolution(const std::vector<std::shared_ptr<NonlinearSystemBase>> & nls,
+                   AuxiliarySystem & aux)
 {
-  nl.serializeSolution();
+  if (nls.size() != 1)
+    mooseError("XFEM does not currently support multiple nonlinear systems");
+
+  nls[0]->serializeSolution();
   aux.serializeSolution();
-  NumericVector<Number> & current_solution = *nl.system().current_local_solution;
-  NumericVector<Number> & old_solution = nl.solutionOld();
-  NumericVector<Number> & older_solution = nl.solutionOlder();
+  NumericVector<Number> & current_solution = *nls[0]->system().current_local_solution;
+  NumericVector<Number> & old_solution = nls[0]->solutionOld();
+  NumericVector<Number> & older_solution = nls[0]->solutionOlder();
   NumericVector<Number> & current_aux_solution = *aux.system().current_local_solution;
   NumericVector<Number> & old_aux_solution = aux.solutionOld();
   NumericVector<Number> & older_aux_solution = aux.solutionOlder();
 
-  setSolution(nl, _cached_solution, current_solution, old_solution, older_solution);
+  setSolution(*nls[0], _cached_solution, current_solution, old_solution, older_solution);
   setSolution(
       aux, _cached_aux_solution, current_aux_solution, old_aux_solution, older_aux_solution);
 
@@ -1090,8 +1096,12 @@ XFEM::healMesh()
 }
 
 bool
-XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
+XFEM::cutMeshWithEFA(const std::vector<std::shared_ptr<NonlinearSystemBase>> & nls,
+                     AuxiliarySystem & aux)
 {
+  if (nls.size() != 1)
+    mooseError("XFEM does not currently support multiple nonlinear systems");
+
   std::map<unsigned int, Node *> efa_id_to_new_node;
   std::map<unsigned int, Node *> efa_id_to_new_node2;
   std::map<unsigned int, Elem *> efa_id_to_new_elem;
@@ -1130,14 +1140,14 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
   // Prepare to cache solution on DOFs modified by XFEM
   if (mesh_changed)
   {
-    nl.serializeSolution();
+    nls[0]->serializeSolution();
     aux.serializeSolution();
     if (_debug_output_level > 1)
       _console << "\n";
   }
-  NumericVector<Number> & current_solution = *nl.system().current_local_solution;
-  NumericVector<Number> & old_solution = nl.solutionOld();
-  NumericVector<Number> & older_solution = nl.solutionOlder();
+  NumericVector<Number> & current_solution = *nls[0]->system().current_local_solution;
+  NumericVector<Number> & old_solution = nls[0]->solutionOld();
+  NumericVector<Number> & older_solution = nls[0]->solutionOlder();
   NumericVector<Number> & current_aux_solution = *aux.system().current_local_solution;
   NumericVector<Number> & old_aux_solution = aux.solutionOld();
   NumericVector<Number> & older_aux_solution = aux.solutionOlder();
@@ -1246,7 +1256,7 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
         {
           storeSolutionForNode(libmesh_node,
                                solution_node,
-                               nl,
+                               *nls[0],
                                _cached_solution,
                                current_solution,
                                old_solution,
@@ -1413,7 +1423,7 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
       // Store solution for all elements affected by XFEM
       storeSolutionForElement(libmesh_elem,
                               parent_elem,
-                              nl,
+                              *nls[0],
                               _cached_solution,
                               current_solution,
                               old_solution,

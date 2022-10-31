@@ -313,10 +313,13 @@ NonlinearSystemBase::initialSetup()
         auto & mortar_functors =
             displaced ? _displaced_mortar_functors : _undisplaced_mortar_functors;
 
-        mortar_functors.emplace(
-            primary_secondary_boundary_pair,
-            ComputeMortarFunctor(
-                mortar_constraints, mortar_generation_object, subproblem, _fe_problem, displaced));
+        mortar_functors.emplace(primary_secondary_boundary_pair,
+                                ComputeMortarFunctor(mortar_constraints,
+                                                     mortar_generation_object,
+                                                     subproblem,
+                                                     _fe_problem,
+                                                     displaced,
+                                                     subproblem.assembly(0, number())));
       }
     };
 
@@ -736,7 +739,6 @@ NonlinearSystemBase::zeroVectorForResidual(const std::string & vector_name)
 void
 NonlinearSystemBase::computeResidualTag(NumericVector<Number> & residual, TagID tag_id)
 {
-
   _nl_vector_tags.clear();
   _nl_vector_tags.insert(tag_id);
   _nl_vector_tags.insert(residualVectorTag());
@@ -761,6 +763,7 @@ NonlinearSystemBase::computeResidualTags(const std::set<TagID> & tags)
 {
   TIME_SECTION("nl::computeResidualTags", 5);
 
+  _fe_problem.setCurrentNonlinearSystem(number());
   _fe_problem.setCurrentlyComputingResidual(true);
 
   bool required_residual = tags.find(residualVectorTag()) == tags.end() ? false : true;
@@ -1912,7 +1915,7 @@ NonlinearSystemBase::computeNodalBCsResidualAndJacobian()
   PARALLEL_CATCH;
 
   // Set the cached NodalBCBase values in the Jacobian matrix
-  _fe_problem.assembly(0).setCachedJacobian();
+  _fe_problem.assembly(0, number()).setCachedJacobian();
 }
 
 void
@@ -2179,26 +2182,27 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
                     nfc->overwriteSecondaryJacobian() ? 1. : nfc->variable().scalingFactor();
 
                 // Cache the jacobian block for the secondary side
-                _fe_problem.assembly(0).cacheJacobianBlock(
-                    nfc->_Kee, secondary_dofs, nfc->_connected_dof_indices, scaling_factor);
+                _fe_problem.assembly(0, number())
+                    .cacheJacobianBlock(
+                        nfc->_Kee, secondary_dofs, nfc->_connected_dof_indices, scaling_factor);
 
                 // Cache Ken, Kne, Knn
                 if (nfc->addCouplingEntriesToJacobian())
                 {
                   // Make sure we use a proper scaling factor (e.g. don't use an interior scaling
                   // factor when we're overwriting secondary stuff)
-                  _fe_problem.assembly(0).cacheJacobianBlock(
-                      nfc->_Ken,
-                      secondary_dofs,
-                      nfc->primaryVariable().dofIndicesNeighbor(),
-                      scaling_factor);
+                  _fe_problem.assembly(0, number())
+                      .cacheJacobianBlock(nfc->_Ken,
+                                          secondary_dofs,
+                                          nfc->primaryVariable().dofIndicesNeighbor(),
+                                          scaling_factor);
 
                   // Use _connected_dof_indices to get all the correct columns
-                  _fe_problem.assembly(0).cacheJacobianBlock(
-                      nfc->_Kne,
-                      nfc->primaryVariable().dofIndicesNeighbor(),
-                      nfc->_connected_dof_indices,
-                      nfc->variable().scalingFactor());
+                  _fe_problem.assembly(0, number())
+                      .cacheJacobianBlock(nfc->_Kne,
+                                          nfc->primaryVariable().dofIndicesNeighbor(),
+                                          nfc->_connected_dof_indices,
+                                          nfc->variable().scalingFactor());
 
                   // We've handled Ken and Kne, finally handle Knn
                   _fe_problem.cacheJacobianNeighbor(0);
@@ -2227,22 +2231,25 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
                   nfc->computeOffDiagJacobian(jvar->number());
 
                   // Cache the jacobian block for the secondary side
-                  _fe_problem.assembly(0).cacheJacobianBlock(
-                      nfc->_Kee, secondary_dofs, nfc->_connected_dof_indices, scaling_factor);
+                  _fe_problem.assembly(0, number())
+                      .cacheJacobianBlock(
+                          nfc->_Kee, secondary_dofs, nfc->_connected_dof_indices, scaling_factor);
 
                   // Cache Ken, Kne, Knn
                   if (nfc->addCouplingEntriesToJacobian())
                   {
                     // Make sure we use a proper scaling factor (e.g. don't use an interior scaling
                     // factor when we're overwriting secondary stuff)
-                    _fe_problem.assembly(0).cacheJacobianBlock(
-                        nfc->_Ken, secondary_dofs, jvar->dofIndicesNeighbor(), scaling_factor);
+                    _fe_problem.assembly(0, number())
+                        .cacheJacobianBlock(
+                            nfc->_Ken, secondary_dofs, jvar->dofIndicesNeighbor(), scaling_factor);
 
                     // Use _connected_dof_indices to get all the correct columns
-                    _fe_problem.assembly(0).cacheJacobianBlock(nfc->_Kne,
-                                                               nfc->variable().dofIndicesNeighbor(),
-                                                               nfc->_connected_dof_indices,
-                                                               nfc->variable().scalingFactor());
+                    _fe_problem.assembly(0, number())
+                        .cacheJacobianBlock(nfc->_Kne,
+                                            nfc->variable().dofIndicesNeighbor(),
+                                            nfc->_connected_dof_indices,
+                                            nfc->variable().scalingFactor());
 
                     // We've handled Ken and Kne, finally handle Knn
                     _fe_problem.cacheJacobianNeighbor(0);
@@ -2409,17 +2416,18 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
                 std::vector<dof_id_type> secondary_dofs(1, nec->variable().nodalDofIndex());
 
                 // Cache the jacobian block for the secondary side
-                _fe_problem.assembly(0).cacheJacobianBlock(nec->_Kee,
-                                                           secondary_dofs,
-                                                           nec->_connected_dof_indices,
-                                                           nec->variable().scalingFactor());
+                _fe_problem.assembly(0, number())
+                    .cacheJacobianBlock(nec->_Kee,
+                                        secondary_dofs,
+                                        nec->_connected_dof_indices,
+                                        nec->variable().scalingFactor());
 
                 // Cache the jacobian block for the primary side
-                _fe_problem.assembly(0).cacheJacobianBlock(
-                    nec->_Kne,
-                    nec->primaryVariable().dofIndicesNeighbor(),
-                    nec->_connected_dof_indices,
-                    nec->variable().scalingFactor());
+                _fe_problem.assembly(0, number())
+                    .cacheJacobianBlock(nec->_Kne,
+                                        nec->primaryVariable().dofIndicesNeighbor(),
+                                        nec->_connected_dof_indices,
+                                        nec->variable().scalingFactor());
 
                 _fe_problem.cacheJacobian(0);
                 _fe_problem.cacheJacobianNeighbor(0);
@@ -2447,16 +2455,18 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
                   nec->computeOffDiagJacobian(jvar->number());
 
                   // Cache the jacobian block for the secondary side
-                  _fe_problem.assembly(0).cacheJacobianBlock(nec->_Kee,
-                                                             secondary_dofs,
-                                                             nec->_connected_dof_indices,
-                                                             nec->variable().scalingFactor());
+                  _fe_problem.assembly(0, number())
+                      .cacheJacobianBlock(nec->_Kee,
+                                          secondary_dofs,
+                                          nec->_connected_dof_indices,
+                                          nec->variable().scalingFactor());
 
                   // Cache the jacobian block for the primary side
-                  _fe_problem.assembly(0).cacheJacobianBlock(nec->_Kne,
-                                                             nec->variable().dofIndicesNeighbor(),
-                                                             nec->_connected_dof_indices,
-                                                             nec->variable().scalingFactor());
+                  _fe_problem.assembly(0, number())
+                      .cacheJacobianBlock(nec->_Kne,
+                                          nec->variable().dofIndicesNeighbor(),
+                                          nec->_connected_dof_indices,
+                                          nec->variable().scalingFactor());
 
                   _fe_problem.cacheJacobian(0);
                   _fe_problem.cacheJacobianNeighbor(0);
@@ -2559,6 +2569,8 @@ NonlinearSystemBase::jacobianSetup()
 void
 NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
 {
+  _fe_problem.setCurrentNonlinearSystem(number());
+
   // Make matrix ready to use
   activeAllMatrixTags();
 
@@ -2619,7 +2631,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
       unsigned int n_threads = libMesh::n_threads();
       for (unsigned int i = 0; i < n_threads;
            i++) // Add any cached jacobians that might be hanging around
-        _fe_problem.assembly(i).addCachedJacobian();
+        _fe_problem.assembly(i, number()).addCachedJacobian();
     }
 
     if (_fe_problem.haveFV())
@@ -2678,7 +2690,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
           unsigned int n_threads = libMesh::n_threads();
           for (unsigned int i = 0; i < n_threads;
                i++) // Add any cached jacobians that might be hanging around
-            _fe_problem.assembly(i).addCachedJacobian();
+            _fe_problem.assembly(i, number()).addCachedJacobian();
         }
       }
       break;
@@ -2703,7 +2715,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
           unsigned int n_threads = libMesh::n_threads();
           for (unsigned int i = 0; i < n_threads;
                i++) // Add any cached jacobians that might be hanging around
-            _fe_problem.assembly(i).addCachedJacobian();
+            _fe_problem.assembly(i, number()).addCachedJacobian();
         }
       }
       break;
@@ -2848,7 +2860,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
     } // end loop over boundary nodes
 
     // Set the cached NodalBCBase values in the Jacobian matrix
-    _fe_problem.assembly(0).setCachedJacobian();
+    _fe_problem.assembly(0, number()).setCachedJacobian();
   }
   PARALLEL_CATCH;
 
@@ -3761,7 +3773,8 @@ NonlinearSystemBase::computeScaling()
   // Now set the scaling factors for the variables
   applyScalingFactors(flattened_inverse_scaling_factors);
   if (auto displaced_problem = _fe_problem.getDisplacedProblem().get())
-    displaced_problem->systemBaseNonlinear().applyScalingFactors(flattened_inverse_scaling_factors);
+    displaced_problem->systemBaseNonlinear(number()).applyScalingFactors(
+        flattened_inverse_scaling_factors);
 
   _auto_scaling_initd = true;
 }
@@ -3809,6 +3822,6 @@ NonlinearSystemBase::assembleScalingVector()
 
   if (auto * displaced_problem = _fe_problem.getDisplacedProblem().get())
     // copy into the corresponding displaced system vector because they should be the exact same
-    displaced_problem->systemBaseNonlinear().getVector("scaling_factors") = scaling_vector;
+    displaced_problem->systemBaseNonlinear(number()).getVector("scaling_factors") = scaling_vector;
 }
 #endif

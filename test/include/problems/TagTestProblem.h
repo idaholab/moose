@@ -23,9 +23,11 @@ public:
   TagTestProblem(const InputParameters & params);
 
   virtual void computeResidual(const NumericVector<Number> & soln,
-                               NumericVector<Number> & residual) override;
+                               NumericVector<Number> & residual,
+                               unsigned int nl_sys_num = 0) override;
   virtual void computeJacobian(const NumericVector<Number> & soln,
-                               SparseMatrix<Number> & jacobian) override;
+                               SparseMatrix<Number> & jacobian,
+                               unsigned int nl_sys_num = 0) override;
 
 protected:
   std::set<std::string> vtags;

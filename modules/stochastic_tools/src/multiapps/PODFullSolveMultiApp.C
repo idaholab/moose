@@ -124,6 +124,7 @@ PODFullSolveMultiApp::computeResidual()
     for (auto & tag_name : trainer_tags)
       tags_to_compute.insert(problem.getVectorTagID(tag_name));
 
+    problem.setCurrentNonlinearSystem(0);
     problem.computeResidualTags(tags_to_compute);
   }
 }

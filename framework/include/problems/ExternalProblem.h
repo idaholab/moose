@@ -27,13 +27,7 @@ public:
   /**
    * Solve is implemented to providing syncing to/from the "transfer" mesh.
    */
-  virtual void solve() override final;
-
-  /**
-   * External problems should provide an override for converged, not inherit the default from
-   * FEProblem that provides a reasonable implementation.
-   */
-  virtual bool converged() override = 0;
+  virtual void solve(unsigned int nl_sys_num = 0) override final;
 
   /**
    * New interface for solving an External problem. "solve()" is finalized here to provide

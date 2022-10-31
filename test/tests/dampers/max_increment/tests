@@ -19,7 +19,7 @@
   [bad_key]
     type = RunException
     input = max_increment_damper_test.i
-    expect_err = "Key 'u v' not found in VariableWarehouse container '_regular_vars_by_name'"
+    expect_err = "Unknown variable 'u v'. It does not exist in the nonlinear system\(s\) or auxiliary system"
     requirement = 'The system shall give an informative error if user code requests a variable from the warehouse with a bad key.'
     cli_args = "Dampers/max_inc_damp/variable='u v'"
   []

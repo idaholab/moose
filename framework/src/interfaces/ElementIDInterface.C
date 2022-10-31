@@ -77,7 +77,7 @@ ElementIDInterface::getElementID(const std::string & id_parameter_name, unsigned
 
   auto tid = _obj_parameters.get<THREAD_ID>("_tid");
 
-  auto & assembly = _subproblem.assembly(tid);
+  auto & assembly = _subproblem.assembly(tid, 0);
 
   return assembly.extraElemID(id);
 }
@@ -92,7 +92,7 @@ ElementIDInterface::getElementIDNeighbor(const std::string & id_parameter_name,
 
   auto tid = _obj_parameters.get<THREAD_ID>("_tid");
 
-  auto & assembly = _subproblem.assembly(tid);
+  auto & assembly = _subproblem.assembly(tid, 0);
 
   return assembly.extraElemIDNeighbor(id);
 }
@@ -106,7 +106,7 @@ ElementIDInterface::getElementIDByName(const std::string & id_name) const
 
   auto tid = _obj_parameters.get<THREAD_ID>("_tid");
 
-  auto & assembly = _subproblem.assembly(tid);
+  auto & assembly = _subproblem.assembly(tid, 0);
 
   return assembly.extraElemID(id);
 }
@@ -120,7 +120,7 @@ ElementIDInterface::getElementIDNeighborByName(const std::string & id_name) cons
 
   auto tid = _obj_parameters.get<THREAD_ID>("_tid");
 
-  auto & assembly = _subproblem.assembly(tid);
+  auto & assembly = _subproblem.assembly(tid, 0);
 
   return assembly.extraElemIDNeighbor(id);
 }

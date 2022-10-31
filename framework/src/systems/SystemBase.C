@@ -385,9 +385,9 @@ SystemBase::prepareFace(THREAD_ID tid, bool resize_data)
     if (resize_data)
       for (const auto var_ptr : newly_prepared_vars)
       {
-        _subproblem.assembly(tid).prepareVariable(var_ptr);
+        _subproblem.assembly(tid, number()).prepareVariable(var_ptr);
         if (_subproblem.checkNonlocalCouplingRequirement())
-          _subproblem.assembly(tid).prepareVariableNonlocal(var_ptr);
+          _subproblem.assembly(tid, number()).prepareVariableNonlocal(var_ptr);
       }
   }
 }

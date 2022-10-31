@@ -25,7 +25,7 @@
 ComputeJacobianThread::ComputeJacobianThread(FEProblemBase & fe_problem,
                                              const std::set<TagID> & tags)
   : ThreadedElementLoop<ConstElemRange>(fe_problem),
-    _nl(fe_problem.getNonlinearSystemBase()),
+    _nl(fe_problem.currentNonlinearSystem()),
     _num_cached(0),
     _integrated_bcs(_nl.getIntegratedBCWarehouse()),
     _dg_kernels(_nl.getDGKernelWarehouse()),

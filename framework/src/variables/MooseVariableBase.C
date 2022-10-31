@@ -64,6 +64,10 @@ MooseVariableBase::validParams()
                         false,
                         "True to make this variable a array variable regardless of number of "
                         "components. If 'components' > 1, this will automatically be set to true.");
+  params.addParam<NonlinearSystemName>("nl_sys",
+                                       "nl0",
+                                       "If this variable is a nonlinear variable, this is the "
+                                       "nonlinear system to which it should be added.");
   params.addParamNamesToGroup("scaling eigen", "Advanced");
 
   params.addParam<bool>("use_dual", false, "True to use dual basis for Lagrange multipliers");
@@ -93,7 +97,8 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
     _var_kind(getParam<Moose::VarKindType>("_var_kind")),
     _subproblem(_sys.subproblem()),
     _variable(_sys.system().variable(_var_num)),
-    _assembly(_subproblem.assembly(getParam<THREAD_ID>("_tid"))),
+    _assembly(_subproblem.assembly(getParam<THREAD_ID>("_tid"),
+                                   _var_kind == Moose::VAR_NONLINEAR ? _sys.number() : 0)),
     _dof_map(_sys.dofMap()),
     _mesh(_subproblem.mesh()),
     _tid(getParam<THREAD_ID>("tid")),

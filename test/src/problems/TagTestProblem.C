@@ -46,8 +46,10 @@ TagTestProblem::TagTestProblem(const InputParameters & params) : FEProblem(param
 
 void
 TagTestProblem::computeResidual(const NumericVector<Number> & soln,
-                                NumericVector<Number> & residual)
+                                NumericVector<Number> & residual,
+                                const unsigned int nl_sys_num)
 {
+  setCurrentNonlinearSystem(nl_sys_num);
   _fe_vector_tags.clear();
 
   for (auto & vtag : vtags)
@@ -59,20 +61,28 @@ TagTestProblem::computeResidual(const NumericVector<Number> & soln,
     else
       mooseError("Tag ", vtag, " does not exist");
 
-  _nl->setSolution(soln);
+  getNonlinearSystemBase(nl_sys_num).setSolution(soln);
 
-  if (_fe_vector_tags.find(_nl->residualVectorTag()) != _fe_vector_tags.end())
-    _nl->associateVectorToTag(residual, _nl->residualVectorTag());
+  if (_fe_vector_tags.find(getNonlinearSystemBase(nl_sys_num).residualVectorTag()) !=
+      _fe_vector_tags.end())
+    getNonlinearSystemBase(nl_sys_num)
+        .associateVectorToTag(residual, getNonlinearSystemBase(nl_sys_num).residualVectorTag());
 
   computeResidualTags(_fe_vector_tags);
 
-  if (_fe_vector_tags.find(_nl->residualVectorTag()) != _fe_vector_tags.end())
-    _nl->disassociateVectorFromTag(residual, _nl->residualVectorTag());
+  if (_fe_vector_tags.find(getNonlinearSystemBase(nl_sys_num).residualVectorTag()) !=
+      _fe_vector_tags.end())
+    getNonlinearSystemBase(nl_sys_num)
+        .disassociateVectorFromTag(residual,
+                                   getNonlinearSystemBase(nl_sys_num).residualVectorTag());
 }
 
 void
-TagTestProblem::computeJacobian(const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian)
+TagTestProblem::computeJacobian(const NumericVector<Number> & soln,
+                                SparseMatrix<Number> & jacobian,
+                                const unsigned int nl_sys_num)
 {
+  setCurrentNonlinearSystem(nl_sys_num);
   _fe_matrix_tags.clear();
 
   for (auto & mtag : mtags)
@@ -84,13 +94,14 @@ TagTestProblem::computeJacobian(const NumericVector<Number> & soln, SparseMatrix
     else
       mooseError("Tag ", mtag, " does not exist");
 
-  _nl->setSolution(soln);
+  getNonlinearSystemBase(nl_sys_num).setSolution(soln);
 
   if (_fe_matrix_tags.size() > 0)
-    _nl->associateMatrixToTag(jacobian, *_fe_matrix_tags.begin());
+    getNonlinearSystemBase(nl_sys_num).associateMatrixToTag(jacobian, *_fe_matrix_tags.begin());
 
   computeJacobianTags(_fe_matrix_tags);
 
   if (_fe_matrix_tags.size() > 0)
-    _nl->disassociateMatrixFromTag(jacobian, *_fe_matrix_tags.begin());
+    getNonlinearSystemBase(nl_sys_num)
+        .disassociateMatrixFromTag(jacobian, *_fe_matrix_tags.begin());
 }

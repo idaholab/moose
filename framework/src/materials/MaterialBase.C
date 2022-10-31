@@ -95,7 +95,7 @@ MaterialBase::MaterialBase(const InputParameters & parameters)
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _tid(parameters.get<THREAD_ID>("_tid")),
-    _assembly(_subproblem.assembly(_tid)),
+    _assembly(_subproblem.assembly(_tid, 0)),
     _qp(std::numeric_limits<unsigned int>::max()),
     _coord(_assembly.coordTransformation()),
     _normals(_assembly.normals()),

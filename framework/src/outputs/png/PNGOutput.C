@@ -55,7 +55,7 @@ PNGOutput::PNGOutput(const InputParameters & parameters)
     _color(parameters.get<MooseEnum>("color")),
     _transparent_background(getParam<bool>("transparent_background")),
     _transparency(getParam<Real>("transparency")),
-    _use_aux(false),
+    _nl_sys_num(libMesh::invalid_uint),
     _variable(getParam<VariableName>("variable")),
     _max(getParam<Real>("max")),
     _min(getParam<Real>("min")),
@@ -75,16 +75,24 @@ PNGOutput::makeMeshFunc()
   if (processor_id() != 0)
     mooseInfo("PNGOutput is not currently scalable.");
 
+  bool var_found = false;
   if (_problem_ptr->getAuxiliarySystem().hasVariable(_variable))
   {
     variable_number = _problem_ptr->getAuxiliarySystem().getVariable(0, _variable).number();
-    _use_aux = true;
+    var_found = true;
   }
 
-  else if (_problem_ptr->getNonlinearSystem().hasVariable(_variable))
-    variable_number = _problem_ptr->getNonlinearSystem().getVariable(0, _variable).number();
-
   else
+    for (const auto nl_sys_num : make_range(_problem_ptr->numNonlinearSystems()))
+      if (_problem_ptr->getNonlinearSystem(nl_sys_num).hasVariable(_variable))
+      {
+        variable_number =
+            _problem_ptr->getNonlinearSystem(nl_sys_num).getVariable(0, _variable).number();
+        _nl_sys_num = nl_sys_num;
+        var_found = true;
+      }
+
+  if (!var_found)
     paramError("variable", "This doesn't exist.");
 
   const std::vector<unsigned int> var_nums = {variable_number};
@@ -97,18 +105,18 @@ PNGOutput::makeMeshFunc()
   calculateRescalingValues();
 
   // Set up the mesh_function
-  if (_use_aux)
+  if (_nl_sys_num == libMesh::invalid_uint)
     _mesh_function =
         std::make_unique<MeshFunction>(*_es_ptr,
                                        _problem_ptr->getAuxiliarySystem().serializedSolution(),
                                        _problem_ptr->getAuxiliarySystem().dofMap(),
                                        var_nums);
   else
-    _mesh_function =
-        std::make_unique<MeshFunction>(*_es_ptr,
-                                       _problem_ptr->getNonlinearSystem().serializedSolution(),
-                                       _problem_ptr->getNonlinearSystem().dofMap(),
-                                       var_nums);
+    _mesh_function = std::make_unique<MeshFunction>(
+        *_es_ptr,
+        _problem_ptr->getNonlinearSystem(_nl_sys_num).serializedSolution(),
+        _problem_ptr->getNonlinearSystem(_nl_sys_num).dofMap(),
+        var_nums);
   _mesh_function->init();
 
   // Need to enable out of mesh with the given control color scaled in reverse
@@ -124,10 +132,10 @@ PNGOutput::calculateRescalingValues()
   // If the max value wasn't specified in the input file, find it from the system.
   if (!_pars.isParamSetByUser("max"))
   {
-    if (_use_aux)
+    if (_nl_sys_num == libMesh::invalid_uint)
       _scaling_max = _problem_ptr->getAuxiliarySystem().serializedSolution().max();
     else
-      _scaling_max = _problem_ptr->getNonlinearSystem().serializedSolution().max();
+      _scaling_max = _problem_ptr->getNonlinearSystem(_nl_sys_num).serializedSolution().max();
   }
   else
     _scaling_max = _max;
@@ -135,10 +143,10 @@ PNGOutput::calculateRescalingValues()
   // If the min value wasn't specified in the input file, find it from the system.
   if (!_pars.isParamSetByUser("min"))
   {
-    if (_use_aux)
+    if (_nl_sys_num == libMesh::invalid_uint)
       _scaling_min = _problem_ptr->getAuxiliarySystem().serializedSolution().min();
     else
-      _scaling_min = _problem_ptr->getNonlinearSystem().serializedSolution().min();
+      _scaling_min = _problem_ptr->getNonlinearSystem(_nl_sys_num).serializedSolution().min();
   }
   else
     _scaling_min = _min;

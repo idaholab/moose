@@ -53,7 +53,7 @@ ResidualObject::ResidualObject(const InputParameters & parameters, bool is_nodal
     _fe_problem(*parameters.get<FEProblemBase *>("_fe_problem_base")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
-    _assembly(_subproblem.assembly(_tid)),
+    _assembly(_subproblem.assembly(_tid, _sys.number())),
     _mesh(_subproblem.mesh())
 {
 }

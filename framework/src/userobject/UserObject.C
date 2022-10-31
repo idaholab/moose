@@ -73,7 +73,7 @@ UserObject::UserObject(const InputParameters & parameters)
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _tid(parameters.get<THREAD_ID>("_tid")),
-    _assembly(_subproblem.assembly(_tid)),
+    _assembly(_subproblem.assembly(_tid, 0)),
     _coord_sys(_assembly.coordSystem()),
     _duplicate_initial_execution(getParam<bool>("allow_duplicate_execution_on_initial"))
 {

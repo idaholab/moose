@@ -63,7 +63,7 @@
   [bad_bc_var_test]
     type = 'RunException'
     input = 'bad_bc_var_test.i'
-    expect_err = "No nonlinear variable named foo found. Did you specify an auxiliary variable when you meant to specify a nonlinear variable"
+    expect_err = "Unknown variable 'foo'. It does not exist in the nonlinear system\(s\) or auxiliary system"
 
     requirement = 'The system shall report an error when a non-existent nonlinear variable name is used by a MooseObject.'
     issues = '#11227'
@@ -99,7 +99,7 @@
   [bad_kernel_var_test]
     type = 'RunException'
     input = 'bad_kernel_var_test.i'
-    expect_err = "Unknown variable foo"
+    expect_err = "Unknown variable 'foo'"
 
     requirement = 'The system shall report an error message when a Kernel object attempts to access a non-existent variable.'
     issues = '#11227'
@@ -536,12 +536,19 @@
     issues = '#1405'
   []
 
-  [missing_var_in_kernel_test]
+  [missing_required_param_in_kernel_test]
     type = 'RunException'
-    input = 'missing_var_in_kernel_test.i'
-    expect_err = "missing required parameter 'Kernels/diff/variable'"
-
+    input = 'missing_required_parameter_moose_obj_test.i'
+    expect_err = "missing required parameter 'Kernels/diff/tensor_coeff'"
     requirement = 'The system shall report an error when a required parameter is not supplied in a MooseObject.'
+    issues = '#1405'
+  []
+
+  [missing_var_parameter_test]
+    type = 'RunException'
+    input = 'missing_var_parameter_test.i'
+    expect_err = "Did you forget to set 'variable'"
+    requirement = 'The system shall report an error when the variable parameter is missing from a residual object'
     issues = '#1405'
   []
 
@@ -981,8 +988,7 @@
   [constraint_with_aux_var]
     type = 'RunException'
     input = 'constraint_with_aux_var.i'
-    expect_err = "Cannot add Constraint for variable v, it is not a nonlinear variable"
-
+    expect_err = "No nonlinear variable named v found. Did you specify an auxiliary variable when you meant to specify a nonlinear variable"
     requirement = 'The system shall report an error when a constraint attempts to use an auxiliary variable.'
     issues = '#11039'
   []
@@ -1026,8 +1032,7 @@
   [kernel_with_empty_var]
     type = 'RunException'
     input = 'kernel_with_empty_var.i'
-    expect_err = 'Error constructing object \'rea\' while retrieving value for \'variable\' parameter! Did you set variable = \'\' \(empty string\) by accident'
-
+    expect_err = "Error constructing object \'rea\' while retrieving value for \'variable\' parameter! Did you forget to set 'variable' or set it to \'\' \(empty string\) by accident"
     requirement = 'The system shall report an error when a Kernel attempts to retrieve an empty string variable.'
     issues = '#11039'
   []

@@ -349,7 +349,7 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::reinitVariables(const FaceInfo
   // to conditionally do some FE-specific reinit here if we have any active FE
   // variables.  However, we still want to keep/do FV-style quadrature.
   // Figure out how to do all this some day.
-  _fe_problem.assembly(_tid).reinitFVFace(fi);
+  _fe_problem.reinitFVFace(_tid, fi);
 
   // TODO: for FE variables, this is handled via setting needed vars through
   // fe problem API which passes the value on to the system class.  Then

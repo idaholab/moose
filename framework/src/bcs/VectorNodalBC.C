@@ -66,7 +66,8 @@ VectorNodalBC::computeJacobian()
   for (auto tag : _matrix_tags)
     if (_sys.hasMatrix(tag))
       for (std::size_t i = 0; i < cached_rows.size(); ++i)
-        _fe_problem.assembly(0).cacheJacobian(cached_rows[i], cached_rows[i], cached_val(i), tag);
+        _fe_problem.assembly(0, _sys.number())
+            .cacheJacobian(cached_rows[i], cached_rows[i], cached_val(i), tag);
 }
 
 void
@@ -88,7 +89,8 @@ VectorNodalBC::computeOffDiagJacobian(const unsigned int jvar_num)
     for (auto tag : _matrix_tags)
       if (_sys.hasMatrix(tag))
         for (std::size_t i = 0; i < cached_rows.size(); ++i)
-          _fe_problem.assembly(0).cacheJacobian(cached_rows[i], cached_col, cached_val, tag);
+          _fe_problem.assembly(0, _sys.number())
+              .cacheJacobian(cached_rows[i], cached_col, cached_val, tag);
   }
 }
 

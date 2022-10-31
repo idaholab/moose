@@ -78,12 +78,14 @@ protected:
   SystemBase & _sys;
   THREAD_ID _tid;
 
-  Assembly & _assembly;
   /// Time
   Real & _t;
 
   /// Scalar variable this initial condition works on
   MooseVariableScalar & _var;
+
+  /// The finite element/volume assembly object
+  Assembly & _assembly;
 
   unsigned int _i;
 

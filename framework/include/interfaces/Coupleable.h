@@ -1209,6 +1209,9 @@ protected:
   // Reference to FEProblemBase
   FEProblemBase & _c_fe_problem;
 
+  /// Pointer to the system object if the moose object this is an interface for has one
+  const SystemBase * const _c_sys;
+
   /// Coupled vars whose values we provide
   std::unordered_map<std::string, std::vector<MooseVariableFieldBase *>> _coupled_vars;
 

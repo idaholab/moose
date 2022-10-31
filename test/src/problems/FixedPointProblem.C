@@ -32,18 +32,23 @@ FixedPointProblem::FixedPointProblem(const InputParameters & params)
     _tag_id(addVectorTag(_tag_previous,
                          _tagged_vector_for_partial_residual ? Moose::VECTOR_TAG_RESIDUAL
                                                              : Moose::VECTOR_TAG_SOLUTION)),
-    _tagged_vector(_nl->addVector(_tag_id, false, GHOSTED))
+    _tagged_vector(getNonlinearSystemBase(0).addVector(_tag_id, false, GHOSTED))
 {
+  if (numNonlinearSystems() != 1)
+    mooseError("This test problem only works with one nonlinear system");
 }
 
 void
 FixedPointProblem::computeResidual(const NumericVector<Number> & soln,
-                                   NumericVector<Number> & residual)
+                                   NumericVector<Number> & residual,
+                                   const unsigned int nl_sys_num)
 {
+  setCurrentNonlinearSystem(nl_sys_num);
+
   if (_tagged_vector_for_partial_residual)
   {
     // excluding the previous tag evaluation
-    _nl->disassociateVectorFromTag(_tagged_vector, _tag_id);
+    getNonlinearSystemBase(nl_sys_num).disassociateVectorFromTag(_tagged_vector, _tag_id);
 
     const auto & residual_vector_tags = getVectorTags(Moose::VECTOR_TAG_RESIDUAL);
 
@@ -57,7 +62,7 @@ FixedPointProblem::computeResidual(const NumericVector<Number> & soln,
 
     residual += _tagged_vector;
 
-    _nl->associateVectorToTag(_tagged_vector, _tag_id);
+    getNonlinearSystemBase(nl_sys_num).associateVectorToTag(_tagged_vector, _tag_id);
   }
   else
     FEProblem::computeResidual(soln, residual);
@@ -78,5 +83,5 @@ FixedPointProblem::copySolution()
   // copy current solution to the tagged vector only when the tagged vector is for
   // storing the solution of previous fixed point iteration
   if (!_tagged_vector_for_partial_residual)
-    _tagged_vector = _nl->solution();
+    _tagged_vector = getNonlinearSystemBase(0).solution();
 }

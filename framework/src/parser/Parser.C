@@ -1377,6 +1377,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       setscalar(ExtraElementIDName, string);
       setscalar(PostprocessorName, PostprocessorName);
       setscalar(ExecutorName, string);
+      setscalar(NonlinearSystemName, string);
 
       // Moose Compound Scalars
       setscalar(RealVectorValue, RealVectorValue);
@@ -1443,6 +1444,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       setvector(ReporterName, string);
       setvector(ReporterValueName, string);
       setvector(ExecutorName, string);
+      setvector(NonlinearSystemName, string);
 
       // map types
       setmap(string, Real);
@@ -1488,6 +1490,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       setvectorvector(MaterialName);
       setvectorvector(DistributionName);
       setvectorvector(SamplerName);
+      setvectorvector(TagName);
 
       // Triple indexed types
       setvectorvectorvector(Real);
