@@ -1,0 +1,72 @@
+[Tests]
+  design = 'meshgenerators/BlockToMeshConverterGenerator.md'
+  issues = '#20880'
+
+  [extract_block]
+    requirement = 'The system shall have the capability of creating a new mesh given '
+                  'one or more subdomains within an existing mesh, with'
+
+    [simple_two_dimensional_test]
+      type = 'Exodiff'
+      input = 'conv_simple_2dblock.i'
+      exodiff = 'conv_simple_2dblock_in.e'
+      recover = false
+      cli_args = '--mesh-only'
+      mesh_mode = 'replicated'
+
+      detail = 'a one block, single element, 2d mesh of a square,'
+    []
+
+    [two_dimensional_test]
+      type = 'Exodiff'
+      input = 'conv_2dblock.i'
+      exodiff = 'conv_2dblock_in.e'
+      recover = false
+      cli_args = '--mesh-only'
+      mesh_mode = 'replicated'
+
+      detail = '2D blocks to be extracted from a 2D mesh'
+    []
+
+    [three_dimensional_test]  
+      type = 'Exodiff'
+      input = 'conv_multiblock.i'
+      exodiff = 'conv_multiblock_in.e'
+      recover = false
+      cli_args = '--mesh-only'
+      mesh_mode = 'replicated'
+
+      detail = 'multiple subdomains/blocks which can be incorporated into a new mesh in 3D'
+    []
+
+    [lower_dimensional_test]
+      type = 'Exodiff'
+      input = 'conv_lowerDblock.i'
+      exodiff = 'conv_lowerDblock_in.e'
+      recover = false
+      cli_args = '--mesh-only'
+      mesh_mode = 'replicated'
+
+      detail = 'a lower dimension block (1D) to be extracted from a 2D mesh'
+    []
+  []
+
+  [errors]
+    requirement = 'The system shall return an error if the following unsupported features are present:'
+    [distributed]
+      type = RunException
+      input = conv_multiblock.i
+      mesh_mode = 'distributed'
+      expect_err = 'This generator does not support distributed meshes.'
+      detail = 'the mesh is distributed in parallel'
+    []
+    [refined]
+      type = RunException
+      input = conv_multiblock.i
+      cli_args = "Mesh/inactive='' Mesh/blockToMesh/input=refine"
+      expect_err = 'Refined blocks are not supported by this generator.'
+      detail = 'the block to extract is uniformly refined'
+      mesh_mode = 'replicated'
+    []
+  []
+[]
