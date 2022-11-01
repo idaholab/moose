@@ -111,7 +111,7 @@
 []
 
 [Postprocessors]
-  # integrate the volume of domain since original objects set 
+  # integrate the volume of domain since original objects set
   # int(phi)=V0, rather than int(phi-V0)=0
   [./pp]
     type = FunctionElementIntegral

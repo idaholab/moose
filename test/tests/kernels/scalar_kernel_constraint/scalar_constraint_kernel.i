@@ -75,8 +75,8 @@
   [../]
 []
 
-# This seems to be needed so that the scalar variable is 
-# 'detected' and added to the system. Otherwise this message: 
+# This seems to be needed so that the scalar variable is
+# 'detected' and added to the system. Otherwise this message:
 # *** ERROR ***
 # Variable 'scalar_variable' does not exist in this system
 [ScalarKernels]
@@ -120,7 +120,7 @@
 []
 
 [Postprocessors]
-  # integrate the volume of domain since original objects set 
+  # integrate the volume of domain since original objects set
   # int(phi)=V0, rather than int(phi-V0)=0
   [./pp]
     type = FunctionElementIntegral
