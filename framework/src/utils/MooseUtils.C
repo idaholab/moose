@@ -19,6 +19,7 @@
 #include "Registry.h"
 #include "MortarConstraintBase.h"
 #include "MortarNodalAuxKernel.h"
+#include "ExecFlagRegistry.h"
 
 #include "libmesh/utility.h"
 #include "libmesh/elem.h"
@@ -976,17 +977,7 @@ toLower(const std::string & name)
 ExecFlagEnum
 getDefaultExecFlagEnum()
 {
-  ExecFlagEnum exec_enum = ExecFlagEnum();
-  exec_enum.addAvailableFlags(EXEC_NONE,
-                              EXEC_INITIAL,
-                              EXEC_LINEAR,
-                              EXEC_NONLINEAR,
-                              EXEC_TIMESTEP_END,
-                              EXEC_TIMESTEP_BEGIN,
-                              EXEC_FINAL,
-                              EXEC_CUSTOM,
-                              EXEC_ALWAYS);
-  return exec_enum;
+  return moose::internal::getExecFlagRegistry().getDefaultFlags();
 }
 
 int

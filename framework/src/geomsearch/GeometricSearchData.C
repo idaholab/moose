@@ -276,7 +276,7 @@ GeometricSearchData::generateQuadratureNodes(unsigned int secondary_id,
   else
     _quadrature_boundaries.insert(secondary_id);
 
-  const MooseArray<Point> & points_face = _subproblem.assembly(0).qPointsFace();
+  const MooseArray<Point> & points_face = _subproblem.assembly(0, 0).qPointsFace();
 
   ConstBndElemRange & range = *_mesh.getBoundaryElementRange();
   for (const auto & belem : range)
@@ -292,7 +292,7 @@ GeometricSearchData::generateQuadratureNodes(unsigned int secondary_id,
         // All we should need to do here is reinit the underlying libMesh::FE object because that
         // will get us the correct points for the current element and side
         _subproblem.setCurrentSubdomainID(elem, 0);
-        _subproblem.assembly(0).reinit(elem, side);
+        _subproblem.assembly(0, 0).reinit(elem, side);
 
         for (unsigned int qp = 0; qp < points_face.size(); qp++)
           _mesh.addQuadratureNode(elem, side, qp, qsecondary_id, points_face[qp]);
@@ -311,7 +311,7 @@ GeometricSearchData::addElementPairLocator(const unsigned int & interface_id,
 void
 GeometricSearchData::updateQuadratureNodes(unsigned int secondary_id)
 {
-  const MooseArray<Point> & points_face = _subproblem.assembly(0).qPointsFace();
+  const MooseArray<Point> & points_face = _subproblem.assembly(0, 0).qPointsFace();
 
   ConstBndElemRange & range = *_mesh.getBoundaryElementRange();
   for (const auto & belem : range)
@@ -327,7 +327,7 @@ GeometricSearchData::updateQuadratureNodes(unsigned int secondary_id)
         // All we should need to do here is reinit the underlying libMesh::FE object because that
         // will get us the correct points for the current element and side
         _subproblem.setCurrentSubdomainID(elem, 0);
-        _subproblem.assembly(0).reinit(elem, side);
+        _subproblem.assembly(0, 0).reinit(elem, side);
 
         for (unsigned int qp = 0; qp < points_face.size(); qp++)
           (*_mesh.getQuadratureNode(elem, side, qp)) = points_face[qp];

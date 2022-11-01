@@ -5,9 +5,6 @@ The [general cluster instructions](hpc_install_moose.md) may also be used, but t
 instructions will save some steps. There are multiple options for installing / using
 MOOSE and MOOSE applications.
 
-!alert note
-Falcon is planned to be decommissioned March 31 2022.
-
 !alert warning
 Do not mix installation workflows. Do not install `libMesh` or `PETSc` directly unless
 you know what you are doing.

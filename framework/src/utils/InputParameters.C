@@ -1164,3 +1164,34 @@ InputParameters::errorPrefix(const std::string & param) const
     prefix = inputLocation(param) + ": (" + paramFullpath(param) + ")";
   return prefix;
 }
+
+std::string
+InputParameters::varName(const std::string & var_param_name,
+                         const std::string & moose_object_with_var_param_name) const
+{
+  // Try the scalar version first
+  std::string variable_name = getMooseType(var_param_name);
+  if (variable_name == "")
+  {
+    auto vec = getVecMooseType(var_param_name);
+
+    // Catch the (very unlikely) case where a user specifies
+    // variable = '' (the empty string)
+    // in their input file. This could happen if e.g. something goes
+    // wrong with dollar bracket expression expansion.
+    if (vec.empty())
+      mooseError("Error constructing object '",
+                 moose_object_with_var_param_name,
+                 "' while retrieving value for '",
+                 var_param_name,
+                 "' parameter! Did you forget to set '",
+                 var_param_name,
+                 "' or set it to '' (empty string) by accident?");
+
+    // When using vector variables, we are only going to use the first one in the list at the
+    // interface level...
+    variable_name = vec[0];
+  }
+
+  return variable_name;
+}

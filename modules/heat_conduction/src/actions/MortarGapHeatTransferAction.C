@@ -189,10 +189,11 @@ MortarGapHeatTransferAction::addMortarVariable()
   const std::string & temperature = getParam<std::vector<VariableName>>("temperature")[0];
   std::string action_name = MooseUtils::shortName(name());
 
-  mooseAssert(_problem->systemBaseNonlinear().hasVariable(temperature),
-              "Temperature variable is missing");
+  if (!_problem->hasVariable(temperature))
+    mooseError("Temperature variable is missing");
 
-  const auto primal_type = _problem->systemBaseNonlinear().system().variable_type(temperature);
+  const auto primal_type =
+      _problem->getVariable(0, temperature, Moose::VarKindType::VAR_NONLINEAR).feType();
   const int lm_order = primal_type.order.get_order();
 
   if (primal_type.family != LAGRANGE)

@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CoupledForce.h"
+#include "MooseVariableFE.h"
+#include "SystemBase.h"
 
 registerMooseObject("MooseApp", CoupledForce);
 registerMooseObject("MooseApp", ADCoupledForce);
@@ -35,7 +37,8 @@ CoupledForceTempl<is_ad>::CoupledForceTempl(const InputParameters & parameters)
     _coef(this->template getParam<Real>("coef"))
 {
   if (_var.number() == _v_var)
-    mooseError("Coupled variable 'v' needs to be different from 'variable' with CoupledForce / "
+    paramError("v",
+               "Coupled variable 'v' needs to be different from 'variable' with CoupledForce / "
                "ADCoupledForce, consider using the CoefReaction kernel or something similar");
 }
 

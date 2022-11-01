@@ -45,6 +45,7 @@ bool
 FixedPoint::solve()
 {
   // evaluate kernels on previous solution
+  _fp_problem.setCurrentNonlinearSystem(_nl.number());
   _fp_problem.computeFullResidual(*_nl.currentSolution(), _nl.RHS());
   Real initial_residual_norm = _nl.RHS().l2_norm();
   Real residual_norm = initial_residual_norm;

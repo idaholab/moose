@@ -904,3 +904,13 @@ DomainIntegralAction::calcNumCrackFrontPoints()
     mooseError("Must define either 'boundary' or 'crack_front_points'");
   return num_points;
 }
+
+void
+DomainIntegralAction::addRelationshipManagers(Moose::RelationshipManagerType input_rm_type)
+{
+  if (_integrals.count(INTERACTION_INTEGRAL_T) != 0)
+  {
+    InputParameters params = _factory.getValidParams("CrackFrontDefinition");
+    addRelationshipManagers(input_rm_type, params);
+  }
+}

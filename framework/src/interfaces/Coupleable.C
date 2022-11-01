@@ -15,12 +15,14 @@
 #include "MooseVariableFE.h"
 #include "InputParameters.h"
 #include "MooseObject.h"
+#include "SystemBase.h"
 
 Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv)
   : _c_parameters(moose_object->parameters()),
     _c_name(_c_parameters.get<std::string>("_object_name")),
     _c_type(_c_parameters.get<std::string>("_type")),
     _c_fe_problem(*_c_parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
+    _c_sys(_c_parameters.isParamValid("_sys") ? _c_parameters.get<SystemBase *>("_sys") : nullptr),
     _new_to_deprecated_coupled_vars(_c_parameters.getNewToDeprecatedVarMap()),
     _c_nodal(nodal),
     _c_is_implicit(_c_parameters.have_parameter<bool>("implicit")
@@ -405,15 +407,17 @@ Coupleable::coupled(const std::string & var_name, unsigned int comp) const
   }
   checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
 
-  switch (var->kind())
-  {
-    case Moose::VAR_NONLINEAR:
-      return var->number();
-    case Moose::VAR_AUXILIARY:
-      return std::numeric_limits<unsigned int>::max() - var->number();
-    default:
-      mooseError(_c_name, ": Unknown variable kind. Corrupted binary?");
-  }
+  if (var->kind() == Moose::VAR_NONLINEAR &&
+      // are we not an object that feeds into the nonlinear system?
+      (!_c_sys || _c_sys->varKind() != Moose::VAR_NONLINEAR ||
+       // are we an object that impacts the nonlinear system and this variable is within our
+       // nonlinear system?
+       var->sys().number() == _c_sys->number()))
+    return var->number();
+  else
+    // Avoid registering coupling to variables outside of our system (e.g. avoid potentially
+    // creating bad Jacobians)
+    return std::numeric_limits<unsigned int>::max() - var->number();
 }
 
 template <>

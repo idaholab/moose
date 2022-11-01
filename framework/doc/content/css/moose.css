@@ -4,6 +4,7 @@
     --dark-blue: rgba(0, 44, 78, 1.0);
     --gray: rgba(117, 117, 117, 1.0);
     /* darkmode */
+    --darkmode-navigator: rgba(26, 26, 26, 1.0);
     --darkmode-back: rgba(35, 35, 35, 1.0);
     --darkmode-card: rgba(20, 20, 20, 1.0);
     --darkmode-image-card: rgba(10, 10, 10, 1.0);
@@ -18,7 +19,7 @@
 main {
     line-height: 1.5;
     color: rgba(0,0,0,1.0);
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 300;
 }
 
@@ -610,7 +611,7 @@ footer.page-footer {
 }
 
 .container{
-    width:70%;
+    width:80%;
     max-width: 1280px;
 }
 
@@ -1009,6 +1010,16 @@ div.moose-mega-menu-content{
  body, table, li.list-group-item, .navbar, ol.breadcrumb, div.row, .well, .form-control {
    background: var(--darkmode-back);
    color: var(--darkmode-fore);
+ }
+
+ .dropdown-content, .dropdown-content li > a, .dropdown-content li > span {
+  background-color: var(--darkmode-navigator);
+  color: var(--darkmode-fore);
+ }
+
+ .dropdown-content li > a:hover {
+  background-color: var(--darker-highlight);
+  color: var(--darkmode-fore);
  }
 
  /* Google Custom Search (CSE) */

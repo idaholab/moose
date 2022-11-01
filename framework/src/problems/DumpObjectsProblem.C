@@ -31,9 +31,9 @@ DumpObjectsProblem::validParams()
 DumpObjectsProblem::DumpObjectsProblem(const InputParameters & parameters)
   : FEProblemBase(parameters), _nl_sys(std::make_shared<DumpObjectsNonlinearSystem>(*this, "nl0"))
 {
-  _nl = _nl_sys;
+  _nl[0] = _nl_sys;
   _aux = std::make_shared<AuxiliarySystem>(*this, "aux0");
-  newAssemblyArray(*_nl_sys);
+  newAssemblyArray(_nl);
 
   // Create extra vectors and matrices if any
   createTagVectors();
@@ -130,7 +130,7 @@ DumpObjectsProblem::dumpVariableHelper(const std::string & system,
 }
 
 void
-DumpObjectsProblem::solve()
+DumpObjectsProblem::solve(unsigned int)
 {
   dumpGeneratedSyntax(getParam<std::string>("dump_path"));
 }

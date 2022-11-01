@@ -33,9 +33,10 @@ ScalarInitialCondition::ScalarInitialCondition(const InputParameters & parameter
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
-    _assembly(_fe_problem.assembly(_tid)),
     _t(_fe_problem.time()),
-    _var(_sys.getScalarVariable(_tid, getParam<VariableName>("variable")))
+    _var(_sys.getScalarVariable(_tid, getParam<VariableName>("variable"))),
+    _assembly(
+        _fe_problem.assembly(_tid, _var.kind() == Moose::VAR_NONLINEAR ? _var.sys().number() : 0))
 {
   _supplied_vars.insert(getParam<VariableName>("variable"));
 

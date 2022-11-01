@@ -189,12 +189,13 @@ protected:
   /// The SubProblem
   SubProblem & _subproblem;
 
+  /// the system object
+  SystemBase & _sys;
+
   /// The Assembly object
   Assembly & _assembly;
 
 private:
-  SystemBase & _sys;
-
   MooseVariableFV<Real> & _var1;
   MooseVariableFV<Real> & _var2;
 

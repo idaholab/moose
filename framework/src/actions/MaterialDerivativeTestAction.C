@@ -14,6 +14,7 @@
 #include "FEProblemBase.h"
 #include "MoosePreconditioner.h"
 #include "NonlinearSystemBase.h"
+#include "MooseVariableBase.h"
 
 #include "libmesh/fe.h"
 #include "libmesh/string_to_enum.h"
@@ -76,8 +77,12 @@ void
 MaterialDerivativeTestAction::act()
 {
   // finite element type
-  auto fetype = FEType(Utility::string_to_enum<Order>(_second ? "SECOND" : "FIRST"),
-                       Utility::string_to_enum<FEFamily>("LAGRANGE"));
+  const std::string order = _second ? "SECOND" : "FIRST";
+  const std::string family("LAGRANGE");
+  const auto type = "MooseVariable";
+  auto params = _factory.getValidParams(type);
+  params.set<MooseEnum>("order") = order;
+  params.set<MooseEnum>("family") = family;
 
   // build higher order derivatives
   for (const auto & derivative : _derivatives)
@@ -88,17 +93,16 @@ MaterialDerivativeTestAction::act()
       switch (_prop_type)
       {
         case PropTypeEnum::REAL:
-          _problem->addVariable("var_" + derivative.first, fetype, 1.0, nullptr);
+          _problem->addVariable(type, "var_" + derivative.first, params);
           break;
 
         case PropTypeEnum::RANKTWOTENSOR:
           for (unsigned int i = 0; i < 3; ++i)
             for (unsigned int j = 0; j < 3; ++j)
-              _problem->addVariable("var_" + derivative.first + '_' + Moose::stringify(i) + '_' +
+              _problem->addVariable(type,
+                                    "var_" + derivative.first + '_' + Moose::stringify(i) + '_' +
                                         Moose::stringify(j),
-                                    fetype,
-                                    1.0,
-                                    nullptr);
+                                    params);
           break;
 
         case PropTypeEnum::RANKFOURTENSOR:
@@ -106,12 +110,11 @@ MaterialDerivativeTestAction::act()
             for (unsigned int j = 0; j < 3; ++j)
               for (unsigned int k = 0; k < 3; ++k)
                 for (unsigned int l = 0; l < 3; ++l)
-                  _problem->addVariable("var_" + derivative.first + '_' + Moose::stringify(i) +
+                  _problem->addVariable(type,
+                                        "var_" + derivative.first + '_' + Moose::stringify(i) +
                                             '_' + Moose::stringify(j) + '_' + Moose::stringify(k) +
                                             '_' + Moose::stringify(l),
-                                        fetype,
-                                        1.0,
-                                        nullptr);
+                                        params);
           break;
 
         default:

@@ -22,7 +22,8 @@ public:
   FixedPointProblem(const InputParameters & params);
 
   virtual void computeResidual(const NumericVector<Number> & soln,
-                               NumericVector<Number> & residual) override;
+                               NumericVector<Number> & residual,
+                               unsigned int nl_sys_num = 0) override;
   virtual void computeFullResidual(const NumericVector<Number> & soln,
                                    NumericVector<Number> & residual);
 

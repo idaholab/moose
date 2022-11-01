@@ -513,7 +513,7 @@ MooseVariableFV<OutputType>::getElemValue(const Elem * const elem) const
 
   ADReal value = (*_solution)(index);
 
-  if (ADReal::do_derivatives && _var_kind == Moose::VAR_NONLINEAR)
+  if (ADReal::do_derivatives && _sys.number() == _subproblem.currentNlSysNum())
     Moose::derivInsert(value.derivatives(), index, 1.);
 
   return value;
@@ -904,7 +904,7 @@ MooseVariableFV<Real>::evaluateDot(const ElemArg & elem_arg,
   if (_var_kind == Moose::VAR_NONLINEAR)
   {
     ADReal dot = (*_solution)(dof_index);
-    if (ADReal::do_derivatives)
+    if (ADReal::do_derivatives && _sys.number() == _subproblem.currentNlSysNum())
       Moose::derivInsert(dot.derivatives(), dof_index, 1.);
     _time_integrator->computeADTimeDerivatives(dot, dof_index, _ad_real_dummy);
     return dot;

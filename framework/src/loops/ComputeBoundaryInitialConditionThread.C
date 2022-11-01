@@ -35,7 +35,8 @@ ComputeBoundaryInitialConditionThread::onNode(ConstBndNodeRange::const_iterator 
   Node * node = bnode->_node;
   BoundaryID boundary_id = bnode->_bnd_id;
 
-  _fe_problem.assembly(_tid).reinit(node);
+  for (const auto nl_sys_num : make_range(_fe_problem.numNonlinearSystems()))
+    _fe_problem.assembly(_tid, nl_sys_num).reinit(node);
 
   const InitialConditionWarehouse & warehouse = _fe_problem.getInitialConditionWarehouse();
 

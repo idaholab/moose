@@ -97,8 +97,8 @@ FVInterfaceKernel::FVInterfaceKernel(const InputParameters & parameters)
     FunctorInterface(this),
     _tid(getParam<THREAD_ID>("_tid")),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
-    _assembly(_subproblem.assembly(_tid)),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
+    _assembly(_subproblem.assembly(_tid, _sys.number())),
     _var1(_sys.getFVVariable<Real>(_tid, getParam<NonlinearVariableName>("variable1"))),
     _var2(_sys.getFVVariable<Real>(_tid,
                                    isParamValid("variable2")

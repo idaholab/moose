@@ -69,7 +69,7 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
   : _sys(sys),
     _subproblem(_sys.subproblem()),
     _displaced(dynamic_cast<DisplacedSystem *>(&sys) ? true : false),
-    _nonlocal_cm(_subproblem.nonlocalCouplingMatrix()),
+    _nonlocal_cm(_subproblem.nonlocalCouplingMatrix(_sys.number())),
     _computing_jacobian(_subproblem.currentlyComputingJacobian()),
     _computing_residual_and_jacobian(_subproblem.currentlyComputingResidualAndJacobian()),
     _dof_map(_sys.dofMap()),
@@ -967,75 +967,6 @@ Assembly::resizeADMappingObjects(unsigned int n_qp, unsigned int dim)
 }
 
 void
-Assembly::computeAffineMapAD(const Elem * elem,
-                             const std::vector<Real> & qw,
-                             unsigned int n_qp,
-                             FEBase * fe)
-{
-  computeSinglePointMapAD(elem, qw, 0, fe);
-
-  const auto sys_num = _sys.number();
-
-  for (unsigned int p = 1; p < n_qp; p++)
-  {
-    // Compute xyz at all other quadrature points. Note that this map method call is only really
-    // referring to the volumetric element...face quadrature points are calculated in computeFaceMap
-    if (_calculate_xyz)
-    {
-      auto num_shapes = fe->n_shape_functions();
-      const auto & elem_nodes = elem->get_nodes();
-      const auto & phi_map = fe->get_fe_map().get_phi_map();
-      _ad_q_points[p].zero();
-      for (decltype(num_shapes) i = 0; i < num_shapes; ++i)
-      {
-        mooseAssert(elem_nodes[i], "The node is null!");
-        const Node & node = *elem_nodes[i];
-        VectorValue<DualReal> elem_point = node;
-        unsigned dimension = 0;
-        if (computingJacobian())
-          for (const auto & disp_num : _displacements)
-            if (node.n_dofs(sys_num, disp_num))
-              Moose::derivInsert(elem_point(dimension++).derivatives(),
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-                                 node.dof_number(sys_num, disp_num, 0)
-#else
-                                 disp_num * _sys.getMaxVarNDofsPerElem() + i
-#endif
-                                     ,
-                                 1.);
-
-        _ad_q_points[p].add_scaled(elem_point, phi_map[i][p]);
-      }
-    }
-
-    // Now copy over other map data for each extra quadrature point
-
-    _ad_dxyzdxi_map[p] = _ad_dxyzdxi_map[0];
-    _ad_dxidx_map[p] = _ad_dxidx_map[0];
-    _ad_dxidy_map[p] = _ad_dxidy_map[0];
-    _ad_dxidz_map[p] = _ad_dxidz_map[0];
-
-    if (elem->dim() > 1)
-    {
-      _ad_dxyzdeta_map[p] = _ad_dxyzdeta_map[0];
-      _ad_detadx_map[p] = _ad_detadx_map[0];
-      _ad_detady_map[p] = _ad_detady_map[0];
-      _ad_detadz_map[p] = _ad_detadz_map[0];
-
-      if (elem->dim() > 2)
-      {
-        _ad_dxyzdzeta_map[p] = _ad_dxyzdzeta_map[0];
-        _ad_dzetadx_map[p] = _ad_dzetadx_map[0];
-        _ad_dzetady_map[p] = _ad_dzetady_map[0];
-        _ad_dzetadz_map[p] = _ad_dzetadz_map[0];
-      }
-    }
-    _ad_jac[p] = _ad_jac[0];
-    _ad_JxW[p] = _ad_JxW[0] / qw[0] * qw[p];
-  }
-}
-
-void
 Assembly::computeSinglePointMapAD(const Elem * elem,
                                   const std::vector<Real> & qw,
                                   unsigned p,
@@ -1086,6 +1017,8 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
   const auto & dphideta_map = fe->get_fe_map().get_dphideta_map();
   const auto & dphidzeta_map = fe->get_fe_map().get_dphidzeta_map();
   const auto sys_num = _sys.number();
+  const bool do_derivatives =
+      ADReal::do_derivatives && _sys.number() == _subproblem.currentNlSysNum();
 
   switch (dim)
   {
@@ -1110,11 +1043,10 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
         libmesh_assert(elem_nodes[i]);
         const Node & node = *elem_nodes[i];
         libMesh::VectorValue<DualReal> elem_point = node;
-        unsigned dimension = 0;
-        if (computingJacobian())
-          for (const auto & disp_num : _displacements)
+        if (do_derivatives)
+          for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
             if (node.n_dofs(sys_num, disp_num))
-              Moose::derivInsert(elem_point(dimension++).derivatives(),
+              Moose::derivInsert(elem_point(direction).derivatives(),
 #ifdef MOOSE_GLOBAL_AD_INDEXING
                                  node.dof_number(sys_num, disp_num, 0)
 #else
@@ -1167,10 +1099,9 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
         libmesh_assert(elem_nodes[i]);
         const Node & node = *elem_nodes[i];
         libMesh::VectorValue<DualReal> elem_point = node;
-        unsigned dimension = 0;
-        if (computingJacobian())
-          for (const auto & disp_num : _displacements)
-            Moose::derivInsert(elem_point(dimension++).derivatives(),
+        if (do_derivatives)
+          for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
+            Moose::derivInsert(elem_point(direction).derivatives(),
 #ifdef MOOSE_GLOBAL_AD_INDEXING
                                node.dof_number(sys_num, disp_num, 0)
 #else
@@ -1250,10 +1181,9 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
         libmesh_assert(elem_nodes[i]);
         const Node & node = *elem_nodes[i];
         libMesh::VectorValue<DualReal> elem_point = node;
-        unsigned dimension = 0;
-        if (computingJacobian())
-          for (const auto & disp_num : _displacements)
-            Moose::derivInsert(elem_point(dimension++).derivatives(),
+        if (do_derivatives)
+          for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
+            Moose::derivInsert(elem_point(direction).derivatives(),
 #ifdef MOOSE_GLOBAL_AD_INDEXING
                                node.dof_number(sys_num, disp_num, 0)
 #else
@@ -1408,9 +1338,8 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
   std::vector<std::vector<Real>> const * d2psidxi2_map = nullptr;
   std::vector<std::vector<Real>> const * d2psidxideta_map = nullptr;
   std::vector<std::vector<Real>> const * d2psideta2_map = nullptr;
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   const auto sys_num = _sys.number();
-#endif
+  const bool do_derivatives = ADReal::do_derivatives && sys_num == _subproblem.currentNlSysNum();
 
   if (_calculate_curvatures)
   {
@@ -1440,10 +1369,9 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
         auto element_node_number = elem.local_side_node(side, 0);
 #endif
 
-        unsigned dimension = 0;
-        if (computingJacobian())
-          for (const auto & disp_num : _displacements)
-            Moose::derivInsert(side_point(dimension++).derivatives(),
+        if (do_derivatives)
+          for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
+            Moose::derivInsert(side_point(direction).derivatives(),
 #ifdef MOOSE_GLOBAL_AD_INDEXING
                                node.dof_number(sys_num, disp_num, 0)
 #else
@@ -1494,10 +1422,9 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
         auto element_node_number = elem.local_side_node(side, i);
 #endif
 
-        unsigned dimension = 0;
-        if (computingJacobian())
-          for (const auto & disp_num : _displacements)
-            Moose::derivInsert(side_point(dimension++).derivatives(),
+        if (do_derivatives)
+          for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
+            Moose::derivInsert(side_point(direction).derivatives(),
 #ifdef MOOSE_GLOBAL_AD_INDEXING
                                node.dof_number(sys_num, disp_num, 0)
 #else
@@ -1570,10 +1497,9 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
         auto element_node_number = elem.local_side_node(side, i);
 #endif
 
-        unsigned dimension = 0;
-        if (computingJacobian())
-          for (const auto & disp_num : _displacements)
-            Moose::derivInsert(side_point(dimension++).derivatives(),
+        if (do_derivatives)
+          for (const auto & [disp_num, direction] : _disp_numbers_and_directions)
+            Moose::derivInsert(side_point(direction).derivatives(),
 #ifdef MOOSE_GLOBAL_AD_INDEXING
                                node.dof_number(sys_num, disp_num, 0)
 #else
