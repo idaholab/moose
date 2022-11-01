@@ -1988,7 +1988,10 @@ DMSetUp_Moose(DM dm)
 
 #undef __FUNCT__
 #define __FUNCT__ "DMSetFromOptions_Moose"
-#if !PETSC_VERSION_LESS_THAN(3, 7, 0)
+#if !PETSC_VERSION_LESS_THAN(3, 18, 0)
+PetscErrorCode
+DMSetFromOptions_Moose(DM dm, PetscOptionItems * /*options*/) // >= 3.8.0
+#elif !PETSC_VERSION_LESS_THAN(3, 7, 0)
 PetscErrorCode
 DMSetFromOptions_Moose(PetscOptionItems * /*options*/, DM dm) // >= 3.7.0
 #elif !PETSC_RELEASE_LESS_THAN(3, 6, 0)
