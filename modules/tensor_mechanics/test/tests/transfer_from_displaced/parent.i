@@ -17,6 +17,7 @@
   kernel_coverage_check = false
   skip_nl_system_check = true
   solve = false
+  verbose_multiapps = true
 []
 
 
@@ -42,9 +43,8 @@
 [MultiApps]
   [solid_domain]
     type = TransientMultiApp
-    execute_on = "initial timestep_end"
     input_files = child.i
-    execute_on = 'timestep_begin'
+    execute_on = 'initial timestep_begin'
   []
 []
 
@@ -55,7 +55,7 @@
     source_variable = solid_indicator
     variable = indicator
     displaced_source_mesh = true
-    execute_on = 'timestep_begin'
+    execute_on = 'initial timestep_begin'
   []
 []
 
