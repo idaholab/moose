@@ -513,7 +513,7 @@ MooseVariableFV<OutputType>::getElemValue(const Elem * const elem) const
 
   ADReal value = (*_solution)(index);
 
-  if (ADReal::do_derivatives && _sys.number() == _subproblem.currentNlSysNum())
+  if (ADReal::do_derivatives && this->_sys.number() == this->_subproblem.currentNlSysNum())
     Moose::derivInsert(value.derivatives(), index, 1.);
 
   return value;
