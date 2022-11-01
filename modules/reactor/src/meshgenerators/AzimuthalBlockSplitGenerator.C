@@ -92,7 +92,8 @@ AzimuthalBlockSplitGenerator::generate()
 
   if (std::find(_old_block_ids.begin(),
                 _old_block_ids.end(),
-                getMeshProperty<bool>("quad_center_block_id", _input_name)) != _old_block_ids.end())
+                getMeshProperty<subdomain_id_type>("quad_center_block_id", _input_name)) !=
+      _old_block_ids.end())
     paramError(
         "old_blocks",
         "This parameter contains a block that involves center quad elements, azimuthal splitting "
