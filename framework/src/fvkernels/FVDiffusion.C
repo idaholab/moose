@@ -61,8 +61,8 @@ FVDiffusion::computeQpResidual()
                 _coeff(neighborFromFace()),
                 *_face_info,
                 true);
-  // Else we use linear inter/extrapolation using regular face args or single-sided
-  // face arguments
+  // Else we just use the boundary values (which can be various depending on how the diffusion
+  // coefficient is constructed)
   else
   {
     const auto face = singleSidedFaceArg();

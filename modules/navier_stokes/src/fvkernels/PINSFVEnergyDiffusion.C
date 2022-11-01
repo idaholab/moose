@@ -63,7 +63,7 @@ PINSFVEnergyDiffusion::computeQpResidual()
   if (onBoundary(*_face_info))
   {
     const auto ssf = singleSidedFaceArg();
-    k_eps_face = _k(ssf) * _eps(ssf);
+    k_eps_face = _porosity_factored_in ? _k(ssf) : _k(ssf) * _eps(ssf);
   }
   else
   {
