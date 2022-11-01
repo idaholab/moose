@@ -37,6 +37,15 @@
 #include "libmesh/preconditioner.h"
 #include "libmesh/elem_side_builder.h"
 
+// As of 3.18, %D is no longer supported in format strings, but the
+// replacement PetscInt_FMT didn't get added until 3.7.2, and the
+// libMesh shim hasn't hit our submodule yet
+#if PETSC_RELEASE_LESS_THAN(3,8,0)
+# define MOOSE_PETSCINT_FMT "D"
+#else
+# define MOOSE_PETSCINT_FMT PetscInt_FMT
+#endif
+
 struct DM_Moose
 {
   NonlinearSystemBase * _nl;     // nonlinear system context
