@@ -2419,8 +2419,11 @@ DMCreate_Moose(DM dm)
 #if PETSC_RELEASE_LESS_THAN(3, 5, 0)
   ierr = PetscNewLog(dm, DM_Moose, &dmm);
   CHKERRQ(ierr);
-#else
+#elif PETSC_RELEASE_LESS_THAN(3, 18, 0)
   ierr = PetscNewLog(dm, &dmm);
+  CHKERRQ(ierr);
+#else // PetscNewLog was deprecated
+  ierr = PetscNew(&dmm);
   CHKERRQ(ierr);
 #endif
   dm->data = dmm;
