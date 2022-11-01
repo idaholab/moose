@@ -2017,9 +2017,8 @@ DMSetFromOptions_Moose(DM dm) // < 3.6.0
              DMMOOSE);
   if (!dmm->_nl)
     SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONGSTATE, "No Moose system set for DM_Moose");
-  ierr = PetscOptionsBegin(
+  PetscOptionsBegin(
       ((PetscObject)dm)->comm, ((PetscObject)dm)->prefix, "DMMoose options", "DM");
-  CHKERRQ(ierr);
   std::string opt, help;
   PetscInt maxvars = dmm->_nl->system().get_dof_map().n_variables();
   char ** vars;
@@ -2329,8 +2328,7 @@ DMSetFromOptions_Moose(DM dm) // < 3.6.0
                           &dmm->_print_embedding,
                           PETSC_NULL);
   CHKERRQ(ierr);
-  ierr = PetscOptionsEnd();
-  CHKERRQ(ierr);
+  PetscOptionsEnd();
   ierr = DMSetUp_Moose_Pre(dm);
   CHKERRQ(ierr); /* Need some preliminary set up because, strangely enough, DMView() is called in
                     DMSetFromOptions(). */
