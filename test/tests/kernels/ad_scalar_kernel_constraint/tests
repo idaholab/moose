@@ -1,0 +1,34 @@
+[Tests]
+  [./kernel_RJ]
+    type = 'Exodiff'
+    input = 'scalar_constraint_kernel_RJ.i'
+    exodiff = 'scalar_constraint_kernel_RJ_out.e'
+    # This problem only has 4 elements and therefore does not seem to run on > 4 procs.
+    max_parallel = 4
+    design = 'syntax/ScalarKernels/index.md'
+    requirement = 'The system will produce a harmonic function with a prescribed average value; testing scalar constraint with few other classes.'
+    ad_indexing_type = 'global'
+  [../]
+
+  [./kernel_together]
+    type = 'CSVDiff'
+    input = 'scalar_constraint_together.i'
+    csvdiff = 'scalar_constraint_together_out.csv'
+    # This problem only has 4 elements and therefore does not seem to run on > 4 procs.
+    max_parallel = 4
+    design = 'syntax/ScalarKernels/index.md'
+    requirement = 'The system shall solve the constrained Neumann problem using the Lagrange multiplier approach with LU solver.'
+    ad_indexing_type = 'global'
+  [../]
+
+  [./bipass]
+    type = 'CSVDiff'
+    input = 'diffusion_bipass_scalar.i'
+    csvdiff = 'diffusion_bipass_scalar_out.csv'
+    # This problem only has 4 elements and therefore does not seem to run on > 4 procs.
+    max_parallel = 4
+    design = 'syntax/ScalarKernels/index.md'
+    requirement = 'The system shall support the ability to include the scalar wrapper but not actually using a scalar variable.'
+    ad_indexing_type = 'global'
+  [../]
+[]
