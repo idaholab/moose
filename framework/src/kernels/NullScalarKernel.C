@@ -15,11 +15,11 @@ InputParameters
 NullScalarKernel::validParams()
 {
   InputParameters params = ScalarKernel::validParams();
-  params.addClassDescription("Scalar Kernel that sets a zero residual, to avoid error from system missing this variable.");
-  params.addParam<Real>(
-      "jacobian_fill",
-      0.0,
-      "On diagonal Jacobian fill term, potentially needed for preconditioner");
+  params.addClassDescription(
+      "Scalar Kernel that sets a zero residual, to avoid error from system missing this variable.");
+  params.addParam<Real>("jacobian_fill",
+                        0.0,
+                        "On diagonal Jacobian fill term, potentially needed for preconditioner");
   return params;
 }
 
@@ -46,5 +46,5 @@ NullScalarKernel::computeJacobian()
 {
   DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
   for (_i = 0; _i < ke.m(); _i++)
-      ke(_i, _i) += _jacobian_fill;
+    ke(_i, _i) += _jacobian_fill;
 }

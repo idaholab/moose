@@ -20,7 +20,10 @@ DiffusionNoScalar::validParams()
   return params;
 }
 
-DiffusionNoScalar::DiffusionNoScalar(const InputParameters & parameters) : KernelScalarBase(parameters) {}
+DiffusionNoScalar::DiffusionNoScalar(const InputParameters & parameters)
+  : KernelScalarBase(parameters)
+{
+}
 
 Real
 DiffusionNoScalar::computeQpResidual()

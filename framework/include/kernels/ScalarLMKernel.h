@@ -38,7 +38,6 @@ public:
   virtual ~ScalarLMKernel();
 
 protected:
-
   /**
    * Method for computing the residual at quadrature points
    */
