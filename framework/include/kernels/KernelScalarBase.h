@@ -33,7 +33,7 @@ public:
   /**
    * The scalar variable that this kernel operates on.
    */
-  const MooseVariableScalar & scalarVariable() const { return *_kappa_var; }
+  const MooseVariableScalar & scalarVariable() const { return *_kappa_var_ptr; }
 
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
@@ -48,14 +48,10 @@ public:
   void computeOffDiagJacobianScalar(unsigned int jvar) override;
 
 protected:
-
   /**
    * Method for computing the scalar part of residual at quadrature points
    */
-  virtual Real computeScalarQpResidual()
-  {
-    return 0;
-  }
+  virtual Real computeScalarQpResidual() { return 0; }
 
   /**
    * Method for computing the scalar variable part of Jacobian
@@ -66,10 +62,7 @@ protected:
    * Method for computing the scalar variable part of Jacobian at
    * quadrature points
    */
-  virtual Real computeScalarQpJacobian()
-  {
-    return 0;
-  }
+  virtual Real computeScalarQpJacobian() { return 0; }
 
   /**
    * Method for computing an off-diagonal jacobian component d-_kappa-residual / d-jvar
@@ -79,10 +72,7 @@ protected:
   /**
    * Method for computing an off-diagonal jacobian component at quadrature points.
    */
-  virtual Real computeScalarQpOffDiagJacobian(const unsigned int /*jvar*/)
-  {
-    return 0;
-  }
+  virtual Real computeScalarQpOffDiagJacobian(const unsigned int /*jvar*/) { return 0; }
 
   void computeOffDiagJacobianScalarLocal(const unsigned int jvar);
   /**
@@ -93,10 +83,7 @@ protected:
   /**
    * Method for computing an off-diagonal jacobian component at quadrature points.
    */
-  virtual Real computeScalarQpOffDiagJacobianScalar(const unsigned int /*jvar*/)
-  {
-    return 0;
-  }
+  virtual Real computeScalarQpOffDiagJacobianScalar(const unsigned int /*jvar*/) { return 0; }
 
   /**
    * Put necessary evaluations depending on qp but independent of test functions here
@@ -112,9 +99,7 @@ protected:
    * Put necessary evaluations depending on qp but independent of test and shape functions here for
    * off-diagonal Jacobian assembly
    */
-  virtual void initScalarQpOffDiagJacobian(const MooseVariableFEBase &)
-  {
-  }
+  virtual void initScalarQpOffDiagJacobian(const MooseVariableFEBase &) {}
 
   /// Whether to compute scalar contributions
   const bool _use_scalar;
@@ -123,7 +108,13 @@ protected:
   const VariableValue _kappa_dummy;
 
   /// (Pointer to) Scalar variable this kernel operates on
-  MooseVariableScalar * const _kappa_var;
+  const MooseVariableScalar * const _kappa_var_ptr;
+
+  /// The unknown scalar variable ID
+  const unsigned int _kappa_var;
+
+  /// Order of the scalar variable, used in several places
+  const unsigned int _k_order;
 
   /// Reference to the current solution at the current quadrature point
   const VariableValue & _kappa;
