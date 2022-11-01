@@ -37,7 +37,7 @@
 []
 
 [Outputs]
-  exodus = true
+  csv = true
 []
 
 [MultiApps]
