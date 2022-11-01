@@ -1,0 +1,33 @@
+[Tests]
+  [./kernel]
+    type = 'Exodiff'
+    input = 'scalar_constraint_kernel.i'
+    exodiff = 'scalar_constraint_kernel_out.e'
+    # This problem only has 4 elements and therefore does not seem to run on > 4 procs.
+    max_parallel = 4
+    # The true solution and l2_err for this test are nearly zero, so don't use relative differences to compare them.
+    abs_zero = 1e-9
+    design = 'syntax/ScalarKernels/index.md'
+    requirement = 'The system shall solve the constrained Neumann problem using the Lagrange multiplier approach.'
+  [../]
+
+  [./kernel_LU]
+    type = 'CSVDiff'
+    input = 'scalar_constraint_kernel_LU.i'
+    csvdiff = 'scalar_constraint_kernel_LU_out.csv'
+    # This problem only has 4 elements and therefore does not seem to run on > 4 procs.
+    max_parallel = 4
+    design = 'syntax/ScalarKernels/index.md'
+    requirement = 'The system shall solve the constrained Neumann problem using the Lagrange multiplier approach with LU solver.'
+  [../]
+
+  [./bipass]
+    type = 'CSVDiff'
+    input = 'diffusion_bipass_scalar.i'
+    csvdiff = 'diffusion_bipass_scalar_out.csv'
+    # This problem only has 4 elements and therefore does not seem to run on > 4 procs.
+    max_parallel = 4
+    design = 'syntax/ScalarKernels/index.md'
+    requirement = 'The system shall support the ability to include the scalar wrapper but not actually using a scalar variable.'
+  [../]
+[]
