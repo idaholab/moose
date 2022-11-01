@@ -145,7 +145,8 @@ ARG BUILD_MODULES
 ARG MOOSE_METHODS=opt
 RUN ./docker_ci/build_moose.sh ; \
 # Ensure a MOOSE test binary was built
-if [ ! -f $MOOSE_DIR/test/moose_test* ]; then exit 1; fi
+if [ ! -f $MOOSE_DIR/test/moose_test* ]; then exit 1; fi ; \
+git submodule init
 
 #-----------------------------------------------------------------------------#
 # Add needed env vars to /etc/environment
