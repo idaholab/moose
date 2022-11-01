@@ -1492,7 +1492,7 @@ DMView_Moose(DM dm, PetscViewer viewer)
     CHKERRQ(ierr);
     ierr = PetscViewerASCIIPrintf(viewer, "DM Moose with name %s and prefix %s\n", name, prefix);
     CHKERRQ(ierr);
-    ierr = PetscViewerASCIIPrintf(viewer, "variables:", name, prefix);
+    ierr = PetscViewerASCIIPrintf(viewer, "variables:");
     CHKERRQ(ierr);
     for (const auto & vit : *(dmm->_var_ids))
     {
@@ -1549,13 +1549,13 @@ DMView_Moose(DM dm, PetscViewer viewer)
         if ((*dmm->_contact_displaced)[cit.second])
         {
           ierr = PetscViewerASCIIPrintf(
-              viewer, "displaced) ", cit.second.first.c_str(), cit.second.second.c_str());
+              viewer, "displaced) ");
           CHKERRQ(ierr);
         }
         else
         {
           ierr = PetscViewerASCIIPrintf(
-              viewer, "undisplaced) ", cit.second.first.c_str(), cit.second.second.c_str());
+              viewer, "undisplaced) ");
           CHKERRQ(ierr);
         }
       }
@@ -1575,13 +1575,13 @@ DMView_Moose(DM dm, PetscViewer viewer)
         if ((*dmm->_uncontact_displaced)[cit.second])
         {
           ierr = PetscViewerASCIIPrintf(
-              viewer, "displaced) ", cit.second.first.c_str(), cit.second.second.c_str());
+              viewer, "displaced) ");
           CHKERRQ(ierr);
         }
         else
         {
           ierr = PetscViewerASCIIPrintf(
-              viewer, "undisplaced) ", cit.second.first.c_str(), cit.second.second.c_str());
+              viewer, "undisplaced) ");
           CHKERRQ(ierr);
         }
       }
