@@ -1,6 +1,3 @@
-beta = 0.25
-gamma = 0.5
-
 [GlobalParams]
   displacements = 'disp_x disp_y'
 []
@@ -13,8 +10,8 @@ gamma = 0.5
     ymin = 0
     xmax = 0.2
     ymax = 0.5
-    nx = 50
-    ny = 150
+    nx = 5
+    ny = 15
     elem_type = QUAD4
   []
 []
@@ -37,12 +34,10 @@ gamma = 0.5
   []
 []
 
-[Modules/TensorMechanics/DynamicMaster]
+[Modules/TensorMechanics/Master]
   [all]
-    add_variables = true
+    strain = SMALL
     incremental = true
-    strain = FINITE
-    decomposition_method = EigenSolution
   []
 []
 
@@ -56,44 +51,26 @@ gamma = 0.5
   [stress]
     type = ComputeFiniteStrainElasticStress
   []
-  [density]
-    type = GenericConstantMaterial
-    prop_names = 'density'
-    prop_values = '1'
-    use_displaced_mesh = true
-  []
-  [constant_stress]
-    type = GenericConstantRankTwoTensor
-    tensor_values = '100'
-    tensor_name = test_tensor
-  []
 []
 
 [BCs]
-  [hold_x]
-    type = DirichletBC
+  [move_bottom_x]
+    type = FunctionDirichletBC
     boundary = bottom
     variable = disp_x
-    value = 0
+    function = 't'
   []
-  [hold_y]
+  [move_bottom_y]
     type = DirichletBC
     boundary = bottom
     variable = disp_y
-    value = 0
-  []
-  [Pressure]
-    [push_left]
-      boundary = left
-      factor = 100
-    []
+    value = '0'
   []
 []
 
 [Executioner]
   type = Transient
-  end_time = 10
-  dt = 1e-2
+  num_steps = 1
   solve_type = 'NEWTON'
   petsc_options = '-snes_ksp_ew'
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_type -pc_factor_shift_type'
@@ -104,13 +81,4 @@ gamma = 0.5
   nl_abs_tol = 1e-5
   nl_rel_tol = 1e-4
   automatic_scaling = true
-  [TimeIntegrator]
-    type = NewmarkBeta
-    beta = ${beta}
-    gamma = ${gamma}
-  []
-[]
-
-[Outputs]
-  exodus = true
 []

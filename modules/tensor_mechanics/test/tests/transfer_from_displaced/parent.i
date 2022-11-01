@@ -6,11 +6,10 @@
     xmax = 3.0
     ymin = 0.0
     ymax = 1.0
-    nx = 1000
-    ny = 250
+    nx = 100
+    ny = 25
     elem_type = QUAD4
   []
-  allow_renumbering = false
 []
 
 [Problem]
@@ -31,13 +30,14 @@
 
 [Executioner]
   type = Transient
-  solve_type = 'NEWTON'
   num_steps = 1
-  dt = 1e-2
 []
 
 [Outputs]
-  csv = true
+  [out]
+    type = Exodus
+    execute_on = 'timestep_end'
+  []
 []
 
 [MultiApps]
@@ -56,14 +56,5 @@
     variable = indicator
     displaced_source_mesh = true
     execute_on = 'initial timestep_begin'
-  []
-[]
-
-[Postprocessors]
-  [transfer_probe]
-    type = NodalVariableValue
-    variable = indicator
-    nodeid = 89365
-    execute_on = 'timestep_end'
   []
 []

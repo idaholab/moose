@@ -2,11 +2,11 @@
   design = 'Transfers/index.md'
   issues = '#22534'
   [test]
-    type = CSVDiff
-    method = '!devel'
+    type = Exodiff
+    method = '!dbg'
     valgrind = 'none'
     input = parent.i
-    csvdiff = 'parent_out.csv'
+    exodiff = 'parent_out.e'
     requirement = 'The system shall be able to transfer a field from a displaced source domain to a target domain, using shape function evaluations in the source domain.'
   []
 []
