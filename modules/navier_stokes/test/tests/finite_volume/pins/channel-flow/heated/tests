@@ -47,6 +47,18 @@
       valgrind = HEAVY
       cli_args = "Outputs/file_base='rc-heated-effective-action'"
     []
+    [kappa-dirichlet]
+      type = 'Exodiff'
+      input = 2d-rc-heated-effective.i
+      exodiff = rc-heated-effective-dirichlet.e
+      method = "!dbg"
+      abs_zero = 1e-9
+      detail = 'with an effective diffusion coefficient and dirichlet inlet boundary condition for fluid temperature,'
+      ad_indexing_type = 'global'
+      valgrind = HEAVY
+      cli_args = "FVBCs/inactive=inlet-T Outputs/file_base='rc-heated-effective-dirichlet' "
+                 "Mesh/gen/nx=40 Mesh/gen/ny=10"
+    []
   []
   [solid-fluid]
     type = 'Exodiff'
@@ -59,7 +71,8 @@
     ad_indexing_type = 'global'
     valgrind = HEAVY
     design = 'PINSFVEnergyAmbientConvection.md'
-    cli_args = "Variables/inactive='' AuxVariables/inactive='T_solid' FVKernels/inactive='' FVBCs/inactive='' Outputs/file_base='rc-heated-solid-fluid'"
+    cli_args = "Variables/inactive='' AuxVariables/inactive='T_solid' FVKernels/inactive='' "
+               "FVBCs/inactive='' Outputs/file_base='rc-heated-solid-fluid'"
   []
   [solid-fluid-action]
     type = 'Exodiff'
@@ -85,7 +98,10 @@
     ad_indexing_type = 'global'
     valgrind = HEAVY
     design = 'PINSFVEnergyAmbientConvection.md'
-    cli_args = "Variables/inactive='' AuxVariables/inactive='T_solid' FVKernels/inactive='' FVKernels/energy_convection/block='2' FVKernels/solid_energy_convection/block='2' FVKernels/energy_advection/advected_interp_method='upwind' FVBCs/inactive='' Outputs/file_base='rc-heated-solid-fluid-block'"
+    cli_args = "Variables/inactive='' AuxVariables/inactive='T_solid' FVKernels/inactive='' "
+               "FVKernels/energy_convection/block='2' FVKernels/solid_energy_convection/block='2' "
+               "FVKernels/energy_advection/advected_interp_method='upwind' FVBCs/inactive='' "
+               "Outputs/file_base='rc-heated-solid-fluid-block'"
   []
   [solid-fluid-block-action]
     type = 'Exodiff'
@@ -98,7 +114,10 @@
     requirement = 'The system shall be able to solve for fluid energy diffusion, advection and block-restricted convection with the solid phase in a 2D channel using the NSFV action syntax.'
     ad_indexing_type = 'global'
     valgrind = HEAVY
-    cli_args = "Outputs/file_base='rc-heated-solid-fluid-block-action' Modules/NavierStokesFV/ambient_convection_blocks='2' Modules/NavierStokesFV/energy_advection_interpolation='upwind' FVKernels/solid_energy_convection/block='2'"
+    cli_args = "Outputs/file_base='rc-heated-solid-fluid-block-action' "
+               "Modules/NavierStokesFV/ambient_convection_blocks='2' "
+               "Modules/NavierStokesFV/energy_advection_interpolation='upwind' "
+               "FVKernels/solid_energy_convection/block='2'"
   []
   [transient]
     type = 'Exodiff'
