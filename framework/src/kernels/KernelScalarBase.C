@@ -69,8 +69,8 @@ KernelScalarBase::computeResidual()
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     {
       initScalarQpResidual();
-      for (_i = 0; _i < _k_order; _i++)
-        re(_i) += _JxW[_qp] * _coord[_qp] * computeScalarQpResidual();
+      for (_h = 0; _h < _k_order; _h++)
+        re(_h) += _JxW[_qp] * _coord[_qp] * computeScalarQpResidual();
     }
 
     // accumulateTaggedLocalResidual();
@@ -97,9 +97,9 @@ KernelScalarBase::computeScalarJacobian()
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
     initScalarQpJacobian(_kappa_var);
-    for (_i = 0; _i < _k_order; _i++)
-      for (_j = 0; _j < _k_order; _j++)
-        ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeScalarQpJacobian();
+    for (_h = 0; _h < _k_order; _h++)
+      for (_l = 0; _l < _k_order; _l++)
+        ke(_h, _l) += _JxW[_qp] * _coord[_qp] * computeScalarQpJacobian();
   }
 
   // prepareMatrixTagLower(_assembly, ivar, jvar, type_tr);
@@ -170,9 +170,9 @@ KernelScalarBase::computeScalarOffDiagJacobian(const unsigned int jvar_num)
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     {
       initScalarQpOffDiagJacobian(jvar);
-      for (_i = 0; _i < _k_order; _i++)
+      for (_h = 0; _h < _k_order; _h++)
         for (_j = 0; _j < loc_phi.size(); _j++)
-          kne(_i, _j) += _JxW[_qp] * _coord[_qp] * computeScalarQpOffDiagJacobian(jvar_num);
+          kne(_h, _j) += _JxW[_qp] * _coord[_qp] * computeScalarQpOffDiagJacobian(jvar_num);
     }
   }
   else if (jvar.fieldType() == Moose::VarFieldType::VAR_FIELD_ARRAY)
@@ -196,8 +196,8 @@ KernelScalarBase::computeOffDiagJacobianScalarLocal(const unsigned int jvar_num)
   {
     initScalarQpJacobian(jvar_num);
     for (_i = 0; _i < _test.size(); _i++)
-      for (_j = 0; _j < _k_order; _j++)
-        ken(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobianScalar(jvar_num);
+      for (_l = 0; _l < _k_order; _l++)
+        ken(_i, _l) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobianScalar(jvar_num);
   }
 
   // accumulateTaggedLocalMatrix();
@@ -243,9 +243,9 @@ KernelScalarBase::computeScalarOffDiagJacobianScalar(const unsigned int jvar)
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
     initScalarQpJacobian(jvar);
-    for (_i = 0; _i < _k_order; _i++)
-      for (_j = 0; _j < ke.n(); _j++)
-        ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeScalarQpOffDiagJacobianScalar(jvar);
+    for (_h = 0; _h < _k_order; _h++)
+      for (_l = 0; _l < ke.n(); _l++)
+        ke(_h, _l) += _JxW[_qp] * _coord[_qp] * computeScalarQpOffDiagJacobianScalar(jvar);
   }
 
   // accumulateTaggedLocalMatrix();

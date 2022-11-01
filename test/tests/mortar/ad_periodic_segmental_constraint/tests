@@ -1,0 +1,25 @@
+[Tests]
+  issues = '#1476'
+  design = 'source/constraints/PenaltyPeriodicSegmentalConstraint.md'
+  [./penalty_periodic_simple2d]
+    type = 'CSVDiff'
+    input = 'penalty_periodic_simple2d.i'
+    csvdiff = 'penalty_periodic_simple2d_out.csv'
+    requirement = "The system shall include assemble primary/secondary AD mortar constraints coupled to scalar variables."
+    ad_indexing_type = 'global'
+  [../]
+  [./penalty_periodic_checker2d]
+    type = 'CSVDiff'
+    input = 'penalty_periodic_checker2d.i'
+    csvdiff = 'penalty_periodic_checker2d_out.csv'
+    requirement = "Nonuniform conductivity is handled across AD mortar surface."
+    ad_indexing_type = 'global'
+  [../]
+  [./testperiodicsole]
+    type = 'CSVDiff'
+    input = 'testperiodicsole.i'
+    csvdiff = 'testperiodicsole_out.csv'
+    requirement = "Assembly is correct for segregated coupled scalar variables in AD mortar constraint."
+    ad_indexing_type = 'global'
+  [../]
+[]

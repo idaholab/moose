@@ -118,4 +118,8 @@ protected:
 
   /// Reference to the current solution at the current quadrature point
   const VariableValue & _kappa;
+
+  /// Used internally to iterate over each scalar component
+  unsigned int _h;
+  unsigned int _l;
 };
