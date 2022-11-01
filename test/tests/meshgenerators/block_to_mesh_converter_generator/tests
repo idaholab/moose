@@ -50,4 +50,23 @@
       detail = 'a lower dimension block (1D) to be extracted from a 2D mesh'
     []
   []
+
+  [errors]
+    requirement = 'The system shall return an error if the following unsupported features are present:'
+    [distributed]
+      type = RunException
+      input = conv_multiblock.i
+      mesh_mode = 'distributed'
+      expect_err = 'This generator does not support distributed meshes.'
+      detail = 'the mesh is distributed in parallel'
+    []
+    [refined]
+      type = RunException
+      input = conv_multiblock.i
+      cli_args = "Mesh/inactive='' Mesh/blockToMesh/input=refine"
+      expect_err = 'Refined blocks are not supported by this generator.'
+      detail = 'the block to extract is uniformly refined'
+      mesh_mode = 'replicated'
+    []
+  []
 []

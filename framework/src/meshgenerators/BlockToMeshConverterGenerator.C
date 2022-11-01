@@ -72,6 +72,10 @@ BlockToMeshConverterGenerator::generate()
 
     for (auto elem : mesh->active_subdomain_elements_ptr_range(target_block_id))
     {
+      if (elem->level() != 0)
+        mooseError("Refined blocks are not supported by this generator. "
+                   "Can you re-organize mesh generators to refine after converting the block?");
+
       // make a deep copy so that mutiple meshes' destructors don't segfault at program termination
       auto copy = elem->build(elem->type());
 
