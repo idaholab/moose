@@ -1353,7 +1353,7 @@ DMCreateGlobalVector_Moose(DM dm, Vec * x)
     SETERRQ2(((PetscObject)dm)->comm,
              PETSC_ERR_ARG_WRONG,
              "DM of type %s, not of type %s",
-             ((PetscObject)dm)->type,
+             ((PetscObject)dm)->type_name,
              DMMOOSE);
   if (!dmm->_nl)
     SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONGSTATE, "No Moose system set for DM_Moose");
@@ -1413,7 +1413,7 @@ DMCreateMatrix_Moose(DM dm, Mat * A)
     SETERRQ2(((PetscObject)dm)->comm,
              PETSC_ERR_ARG_WRONG,
              "DM of type %s, not of type %s",
-             ((PetscObject)dm)->type,
+             ((PetscObject)dm)->type_name,
              DMMOOSE);
   if (!dmm->_nl)
     SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONGSTATE, "No Moose system set for DM_Moose");
@@ -1617,7 +1617,7 @@ DMMooseGetMeshBlocks_Private(DM dm, std::set<subdomain_id_type> & blocks)
     SETERRQ2(((PetscObject)dm)->comm,
              PETSC_ERR_ARG_WRONG,
              "DM of type %s, not of type %s",
-             ((PetscObject)dm)->type,
+             ((PetscObject)dm)->type_name,
              DMMOOSE);
   if (!dmm->_nl)
     SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONGSTATE, "No Moose system set for DM_Moose");
@@ -1649,7 +1649,7 @@ DMSetUp_Moose_Pre(DM dm)
     SETERRQ2(((PetscObject)dm)->comm,
              PETSC_ERR_ARG_WRONG,
              "DM of type %s, not of type %s",
-             ((PetscObject)dm)->type,
+             ((PetscObject)dm)->type_name,
              DMMOOSE);
   if (!dmm->_nl)
     SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONGSTATE, "No Moose system set for DM_Moose");
@@ -1919,7 +1919,7 @@ DMSetUp_Moose(DM dm)
     SETERRQ2(((PetscObject)dm)->comm,
              PETSC_ERR_ARG_WRONG,
              "DM of type %s, not of type %s",
-             ((PetscObject)dm)->type,
+             ((PetscObject)dm)->type_name,
              DMMOOSE);
   if (!dmm->_nl)
     SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONGSTATE, "No Moose system set for DM_Moose");
@@ -2010,7 +2010,7 @@ DMSetFromOptions_Moose(DM dm) // < 3.6.0
     SETERRQ2(((PetscObject)dm)->comm,
              PETSC_ERR_ARG_WRONG,
              "DM of type %s, not of type %s",
-             ((PetscObject)dm)->type,
+             ((PetscObject)dm)->type_name,
              DMMOOSE);
   if (!dmm->_nl)
     SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONGSTATE, "No Moose system set for DM_Moose");
