@@ -13,6 +13,7 @@
 #include "DisplacedProblem.h"
 #include "MooseMesh.h"
 
+#include "libmesh/mesh_base.h"
 #include "libmesh/numeric_vector.h"
 #include "libmesh/transient_system.h"
 #include "libmesh/explicit_system.h"
@@ -117,6 +118,12 @@ UpdateDisplacedMeshThread::onNode(NodeRange::const_iterator & nd)
                 reference_node.dof_number(sys_num, var_numbers[i], 0));
     }
   }
+}
+
+void
+UpdateDisplacedMeshThread::post()
+{
+  _displaced_problem.mesh().getMesh().clear_point_locator();
 }
 
 void

@@ -34,6 +34,7 @@ public:
   virtual void onNode(NodeRange::const_iterator & nd) override;
 
   void join(const UpdateDisplacedMeshThread & /*y*/);
+  void post() override;
 
 protected:
   void init();
