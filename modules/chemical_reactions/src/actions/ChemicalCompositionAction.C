@@ -146,26 +146,20 @@ ChemicalCompositionAction::act()
     if (isParamValid("thermofile"))
     {
       const auto thermo_file = getParam<FileName>("thermofile");
-      mooseInfo("thermo_file = ", thermo_file);
-      char cThermoFileName[120];
-
-      if (thermo_file.size() > sizeof(cThermoFileName))
+      if (thermo_file.length() > 120)
         paramError("thermofile",
-                   "Path exceeds thermiochimica's maximal permisible length of ",
-                   sizeof(cThermoFileName),
-                   " with ",
-                   thermo_file.size(),
+                   "Path exceeds thermiochimica's maximal permisible length of 120 with ",
+                   thermo_file.length(),
                    " characters: ",
                    thermo_file);
 
-      int idbg = 0;
-      Thermochimica::ConvertToFortran(
-          cThermoFileName, sizeof(cThermoFileName), thermo_file.c_str());
-      FORTRAN_CALL(Thermochimica::setthermofilenamebison)(cThermoFileName);
+      Thermochimica::setThermoFileName(thermo_file.c_str(), thermo_file.length());
 
       // Read in thermodynamics model, only once
-      FORTRAN_CALL(Thermochimica::ssparsecsdatafile)();
-      FORTRAN_CALL(Thermochimica::checkinfothermo)(&idbg);
+      Thermochimica::sSParseCSDataFile();
+
+      int idbg = 0;
+      Thermochimica::checkInfoThermo(&idbg);
       if (idbg != 0)
         paramError("thermofile", "Thermochimica data file cannot be parsed. ", idbg);
 
@@ -173,14 +167,9 @@ ChemicalCompositionAction::act()
       Thermochimica::checkPressure(_punit);
       Thermochimica::checkMass(_munit);
 
-      // Translate string to fortran string
-      char ubuf[15];
-      Thermochimica::ConvertToFortran(ubuf, sizeof(ubuf), _tunit.c_str());
-      FORTRAN_CALL(Thermochimica::setunittemperature)(ubuf);
-      Thermochimica::ConvertToFortran(ubuf, sizeof(ubuf), _punit.c_str());
-      FORTRAN_CALL(Thermochimica::setunitpressure)(ubuf);
-      Thermochimica::ConvertToFortran(ubuf, sizeof(ubuf), _munit.c_str());
-      FORTRAN_CALL(Thermochimica::setunitmass)(ubuf);
+      Thermochimica::setUnitTemperature(_tunit.c_str(), _tunit.length());
+      Thermochimica::setUnitPressure(_punit.c_str(), _punit.length());
+      Thermochimica::setUnitMass(_munit.c_str(), _munit.length());
     }
   }
 
