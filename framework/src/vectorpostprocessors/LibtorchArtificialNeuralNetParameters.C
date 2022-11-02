@@ -73,7 +73,8 @@ LibtorchArtificialNeuralNetParameters::fillParameterValues(
   for (unsigned int param_i : make_range(ann_params.size()))
   {
     auto sizes = ann_params[param_i].value().data().sizes();
-    unsigned int max_size = 1;
+    // Libtorch holds sizes in integers instead of unsigned integers
+    int max_size = 1;
     for (const auto & dim_size : sizes)
       max_size *= dim_size;
 

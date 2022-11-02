@@ -164,7 +164,8 @@ LibtorchArtificialNeuralNetTrainer<Sampler>::setupOptimizer(const LibtorchTraini
   switch (options.optimizer_type)
   {
     case 0:
-      _optimizer = std::make_unique<torch::optim::Adam>(_nn->parameters(), options.learning_rate);
+      _optimizer = std::make_unique<torch::optim::Adam>(
+          _nn->parameters(), torch::optim::AdamOptions(options.learning_rate));
       break;
     case 1:
       _optimizer =
