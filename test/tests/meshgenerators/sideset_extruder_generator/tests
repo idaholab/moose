@@ -6,7 +6,7 @@
     requirement = 'The system shall have the capability of extruding the sideset of a mesh '
                   'in a given direction'
 
-    [control]
+    [check_explicit_subgenerators]
       type = 'Exodiff'
       input = 'external_generators.i'
       exodiff = 'external_generators_in.e'
@@ -14,9 +14,7 @@
       mesh_mode = 'REPLICATED'
       cli_args = '--mesh-only'
       
-      detail = 'SideSetExtruderGenerator is essentially just a wrapper for 4 other generators used in sequence. 
-      The output of the 4 other generators should be identical to SideSetExtruderGenerator, or SideSetExtruderGenerator
-      has changed behavior'
+      detail = 'and the output of the SideSetExtruderGenerator should match the equivalent sequence of mesh generators'
     []
     [square]
       type = 'Exodiff'
@@ -26,7 +24,7 @@
       mesh_mode = 'REPLICATED'
       cli_args = '--mesh-only'
       
-      detail = 'A simple case, extruding the right side of a square out at an upward angle'
+      detail = 'in a simple case, extruding the right side of a square out at an upward angle'
     []
     [cube]
       type = 'Exodiff'
@@ -36,7 +34,7 @@
       mesh_mode = 'REPLICATED'
       cli_args = '--mesh-only'
       
-      detail = 'Extruding the top side of a cube out a side-ways angle'
+      detail = 'when extruding the top side of a cube in a direction not normal to the sideset'
     []
     [multiblock]
       type = 'Exodiff'
@@ -46,7 +44,7 @@
       mesh_mode = 'REPLICATED'
       cli_args = '--mesh-only'
       
-      detail = 'extruding an entangled block in a complicated 3d geomitry'
+      detail = 'extruding an entangled block in a complicated 3d geometry'
     []
   []
 []

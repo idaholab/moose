@@ -2,61 +2,45 @@
 
 !syntax description /Mesh/SideSetExtruderGenerator
 
-## Overview
+The `SideSetExtruderGenerator` differs from the [MeshExtruderGenerator](MeshExtruderGenerator.md) in that the extruded
+block has the same dimensionality as the input mesh.
 
-The SideSetExtruder Generator is for "pulling" mesh in a direction. Given a sideset and a direction(vector), it adds to the mesh. SideSetExtruder differs from [MeshExtruderGenerator](MeshExtruderGenerator.md) in that the extrusion stays in the same dimension as the sideset it is pulling on (MeshExtruderGenerator is for pulling 2 dimensional shapes into 3 dimensions). 
+!alert note
+The `SideSetExtruderGenerator` will not throw any errors if you extrude a mesh through (overlap with) another mesh or
+another part of the mesh. It will throw an error if the extrusion vector would create a mesh with a negative determinant
+(the nested [MeshExtruderGenerator](MeshExtruderGenerator.md) throws the error).
 
-SideSetExtruder will not throw any errors if you extrude a mesh through (collide with) another mesh. It will throw an error if the extrusion vector would create a mesh with a negative determinant (or rather, [MeshExtruderGenerator](MeshExtruderGenerator.md) throws the error). The extrusion vector is applied relative to the sideset given, not from the origin point of the mesh. The extrusion vector must be a 3D vector even if you are only extruding a 2D mesh; in such a case, let the z component be 0 (e.g., `extrusion_vector = '1 0.5 0'`)
-
-The output will have no sidesets, even the sideset you extruded from will be gone. The user is expected to use the other side-set generating generators on the output if sidesets are needed. 
+!alert warning
+The output will have no sidesets, even the sideset which served for extrusion will be removed.
+The user is expected to use the other sideset generating generators on the output if sidesets are needed. 
 
 ## Visual Example
 
-### Input 2D Mesh
+The following 2D mesh has the `right` sideset extruded using a `SideSetExtruderGenerator` with the (1, 0.5, 0) vector.
 
 !media large_media/framework/meshgenerators/sideset_extruder_before.png caption=Before: a square, with sidesets on each side.
 
-### Output of SideSetExtruderGenerator
+!media large_media/framework/meshgenerators/sideset_extruder_after.png caption=After, the right sideset has been extruded.
 
-!media large_media/framework/meshgenerators/sideset_extruder_after.png caption=After, the right sideset has been extruded in the < 1, 0.5, 0> direction.
+## Implementation details
 
-SideSetExtruderGenerator is actually a mere wrapper of 4 other generators: [LowerDBlockFromSidesetGenerator](LowerDBlockFromSidesetGenerator.md), [BlockToMeshConverterGenerator](BlockToMeshConverterGenerator.md), [MeshExtruderGenerator](MeshExtruderGenerator.md), and [StitchedMeshGenerator](StitchedMeshGenerator.md). SideSetExtruderGenerator's output from the example above is exactly equivalent to the output of a recipe like this:
+SideSetExtruderGenerator is actually a mere wrapper of 4 other generators:
 
-```
-[Mesh]
-  [square]
-    type = GeneratedMeshGenerator
-    dim = 2
-  []
-  [lowerDblock]
-    type = LowerDBlockFromSidesetGenerator
-    input = square
-    new_block_name = "extrusions0"
-    sidesets = "right"
-  []
-  [separateMesh]
-    type = BlockToMeshConverterGenerator
-    input = lowerDblock
-    target_blocks = extrusions0
-  []
-  [extrude]
-    type = MeshExtruderGenerator
-    input = separateMesh
-    num_layers = 3
-    extrusion_vector = '1 0.5 0'
-    bottom_sideset = 'new_bottom'
-    top_sideset = 'new_top'
-  []
-  [stitch]
-    type = StitchedMeshGenerator
-    inputs = 'square extrude'
-    stitch_boundaries_pairs = 'right new_bottom'
-  []
-[]
+- a [LowerDBlockFromSidesetGenerator](LowerDBlockFromSidesetGenerator.md) to generate a block from the sideset
+- a [BlockToMeshConverterGenerator](BlockToMeshConverterGenerator.md) to generate a block with the mesh
+- a [MeshExtruderGenerator](MeshExtruderGenerator.md) to extrude the new mesh
+- a [StitchedMeshGenerator](StitchedMeshGenerator.md) to stitch the original mesh and the extruded mesh.
 
-```
 
-If you are needing to tweak the output of SideSetExtruderGenerator, you may be better off manually running these operations instead. SideSetExtruderGenerator uses the defaults of these sub-generators. 
+As such, the `SideSetExtruderGenerator` is exactly equivalent to the output of a recipe similar to the one below.
+If you are needing to tweak the output of `SideSetExtruderGenerator`, it may be preferrable to use these generators
+instead. `SideSetExtruderGenerator` uses the default parameters of these sub-generators. 
+
+!listing test/tests/meshgenerators/sideset_extruder_generator/extrude_square.i
+
+The input above should be equivalent to the input shown below.
+
+!listing test/tests/meshgenerators/sideset_extruder_generator/external_generators.i
 
 !syntax parameters /Mesh/SideSetExtruderGenerator
 
