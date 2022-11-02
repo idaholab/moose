@@ -278,6 +278,7 @@
                   "with the node-to-segment approach with a refined mesh."
     ad_indexing_type = 'global'
     valgrind = 'heavy'
+    method = '!dbg'
   []
   [gap_heat_transfer_sphere3d]
     input = 'gap_heat_transfer_sphere3D.i'
