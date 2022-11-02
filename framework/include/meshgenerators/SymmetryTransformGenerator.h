@@ -12,14 +12,14 @@
 #include "MeshGenerator.h"
 
 /*
- * A mesh generator that applies a linear transformation (rotation, translation) to the mesh
+ * Applies a symmetry transformation to the mesh
  */
-class SymmetryTransformerGenerator : public MeshGenerator
+class SymmetryTransformGenerator : public MeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  SymmetryTransformerGenerator(const InputParameters & parameters);
+  SymmetryTransformGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 
@@ -27,9 +27,12 @@ protected:
   /// the input mesh
   std::unique_ptr<MeshBase> & _input;
 
-  /// the mirror around which to transform the mesh
+  /// A point in the mirror plane from which to transform the mesh
   RealEigenVector _mirror_point_vector;
+
+  /// The normal of the mirror plane from which to transform the mesh
   RealEigenVector _mirror_normal_vector;
 
+  /// The boundaries to stitch together
   std::vector<std::vector<std::string>> _stitch_boundaries_pairs;
 };
