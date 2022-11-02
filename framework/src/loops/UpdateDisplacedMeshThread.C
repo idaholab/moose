@@ -121,12 +121,6 @@ UpdateDisplacedMeshThread::onNode(NodeRange::const_iterator & nd)
 }
 
 void
-UpdateDisplacedMeshThread::post()
-{
-  _displaced_problem.mesh().getMesh().clear_point_locator();
-}
-
-void
 UpdateDisplacedMeshThread::join(const UpdateDisplacedMeshThread & /*y*/)
 {
 }
