@@ -1244,7 +1244,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
 
       if (found)
       {
-        if (p.isPrivate(param_name))
+        if (p.isPrivate(param_name) && !in_global)
           mooseError("The parameter '",
                      full_name,
                      "' is a private parameter and should not be used in an input file.");
