@@ -18,8 +18,8 @@ import sys
 import argparse
 import hashlib
 import subprocess
-import yaml
 import platform
+import yaml
 from jinja2 import Environment, DictLoader
 
 MOOSE_DIR = os.environ.get('MOOSE_DIR',
@@ -54,7 +54,8 @@ def run_subprocess(args, command):
         out = subprocess.check_output(command, encoding='utf-8', stderr=subprocess.DEVNULL)
     # commit was not found in git
     except subprocess.CalledProcessError:
-        tell(args.quiet, f'{"fatal" if args.influential else "warning"}: commit {args.commit} is not a valid git commit')
+        tell(args.quiet, f'{"fatal" if args.influential else "warning"}: commit {args.commit}'
+                          ' is not a valid git commit')
         tell(False, 'arbitrary', 1 if args.influential else 0)
     return out
 
@@ -133,24 +134,26 @@ def read_yamlfile(args, yaml_file):
         tell(args.quiet, f'warning: {message}')
     return _meta
 
-def build_list(args):
-    """ return list of files associated with supplied library """
+def parse_meta(args):
+    """ populate and return dictionary making up the contents involved with generating hashes """
     _dtmp = read_yamlfile(args, f'./{os.path.relpath(YAML_FILE)}')
-    _groups = {}
+    _meta = {}
     for group_entity in ENTITIES:
         if group_entity in _dtmp['packages']:
-            _groups[group_entity] = _groups.get('group_entity', [])
-            if args.tag and group_entity == args.library:
-                for entity in _dtmp['packages'][group_entity]:
-                    if args.tag and entity.find('meta.yaml') == -1:
-                        continue
-                    _groups[group_entity].append(entity)
-            elif not args.tag:
-                for entity in _dtmp['packages'][group_entity]:
-                    _groups[group_entity].append(entity)
-        if group_entity == args.library:
-            break
-    return _groups
+            _meta[group_entity] = _meta.get('group_entity', {'TAG'         : [],
+                                                             'INFLUENTIAL' : [],
+                                                             'HASH'        : []})
+            _hash_list = []
+            _tag = _meta[group_entity]['TAG']
+            _influential = _meta[group_entity]['INFLUENTIAL']
+            _hash = _meta[group_entity]['HASH']
+            for entity in _dtmp['packages'][group_entity]:
+                if entity.find('meta.yaml') != -1:
+                    _tag.append(get_tag(args, entity))
+                _influential.append(entity)
+                _hash_list.append(git_hash(args, entity))
+            _hash.append(get_hash(_hash_list))
+    return _meta
 
 # Disable pylint to support supplemental feature not generally used
 # pylint: disable=import-outside-toplevel
@@ -159,34 +162,38 @@ def get_tag(args, meta_yaml):
     out = read_yamlfile(args, meta_yaml)
     return f'{out["package"]["version"]}_{out["build"]["string"]}'
 
+def get_hash(hash_list):
+    """ return a seven character hash for given list of strings """
+    return hashlib.md5(''.join(hash_list).encode('utf-8')).hexdigest()[:7]
+
+def print_output(args, meta):
+    """ format and print the output based on supplied arguments """
+    formated = []
+    if args.influential:
+        for zip_key in ENTITIES:
+            formated.extend(meta[zip_key]['INFLUENTIAL'])
+            if zip_key == args.library:
+                break
+    elif args.dependencies:
+        for zip_key in ENTITIES:
+            if args.tag:
+                formated.append(f'{zip_key}-{meta[zip_key]["TAG"][0]}')
+            else:
+                formated.append(f'moose-{zip_key}/{zip_key}-'
+                                f'{platform.machine()}:{meta[zip_key]["HASH"][0]}')
+            if zip_key == args.library:
+                break
+    else:
+        formated.append(meta[args.library]["HASH"][0])
+
+    if formated:
+        print('\n'.join(formated))
+
 def main():
     """ print hash for supplied library """
     args = parse_args(sys.argv)
-    hash_group = {}
-    entity_list = []
-    groups = build_list(args)
-    for group in groups.keys():
-        hash_group[group] = hash_group.get(group, [])
-        for an_entity in groups[group]:
-            entity_list.append(os.path.abspath(os.path.join(MOOSE_DIR, an_entity)))
-            hash_group[group].append(git_hash(args, an_entity))
-    if args.influential:
-        print('\n'.join(entity_list))
-    elif args.dependencies:
-        ENTITIES.reverse()
-        for i in range(ENTITIES.index(args.library), len(ENTITIES)):
-            if ENTITIES[i] != args.library:
-                tmp_hash = hashlib.md5(''.join(hash_group[ENTITIES[i]]).encode('utf-8')).hexdigest()[:7]
-                print(f'moose-{ENTITIES[i]}/{ENTITIES[i]}-{platform.machine()}:{tmp_hash}')
-    else:
-        if args.tag:
-            try:
-                print(get_tag(args, os.path.relpath(entity_list[0])))
-            except IndexError:
-                tell(args.quiet, f'warning: {args.library} is not under Conda control.'
-                     f'\nAdd a meta.yaml file to {args.library} in module_hash.yaml')
-        else:
-            print(hashlib.md5(''.join(hash_group[args.library]).encode('utf-8')).hexdigest()[:7])
+    meta = parse_meta(args)
+    print_output(args, meta)
 
 if __name__ == '__main__':
     main()
