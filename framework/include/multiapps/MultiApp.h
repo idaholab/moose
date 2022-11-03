@@ -252,7 +252,6 @@ public:
   /**
    * Get the vector to transfer to for this MultiApp.
    * In general this is the Auxiliary system solution vector.
-   *
    * @param app The global app number you want the transfer vector for.
    * @param var_name The name of the variable you are going to be transferring to.
    * @return The vector to fill.
@@ -504,16 +503,14 @@ protected:
   /// The offset time so the MultiApp local time relative to the global time
   const Real _global_time_offset;
 
-  /// The time at which to reset apps
-  //    Real _reset_time;
-  std::vector<Real> _reset_time;
+  /// The times at which to reset apps
+  std::vector<Real> _reset_times;
 
   /// The apps to be reset
   std::vector<unsigned int> _reset_apps;
 
-  /// Whether or not apps have been reset
+  /// Whether or not apps have been reset at each time
   std::vector<bool> _reset_happened;
-  //  bool  _reset_happened;
 
   /// The time at which to move apps
   Real _move_time;
