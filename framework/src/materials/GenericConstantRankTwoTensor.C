@@ -50,3 +50,6 @@ GenericConstantRankTwoTensorTempl<is_ad>::computeQpProperties()
 {
   _prop[_qp] = _tensor;
 }
+
+template class GenericConstantRankTwoTensorTempl<false>;
+template class GenericConstantRankTwoTensorTempl<true>;
