@@ -25,7 +25,7 @@
     num_batch = 1
     distributions = 'k_dist q_dist Tinf_dist'
     flag_sample = 'conditional/flag_sample'
-    seed = 5
+    seed = 12
     execute_on = PRE_MULTIAPP_SETUP
   []
 []
@@ -34,7 +34,7 @@
   [sub]
     type = SamplerFullSolveMultiApp
     sampler = mc
-    input_files = 'Sub.i'
+    input_files = 'sub.i'
     mode = batch-reset
     should_run_reporter = conditional/need_sample
     execute_on = TIMESTEP_END
@@ -85,9 +85,10 @@
     standardize_params = 'true'
     standardize_data = 'true'
     tune_parameters = 'signal_variance length_factor'
-    tuning_algorithm = 'adam'
-    iter_adam = 1000
-    learning_rate_adam = 0.005
+    tao_options = '-tao_bncg_type ssml_bfgs'
+    tuning_min = ' 1e-9 1e-9'
+    tuning_max = ' 1e16  1e16'
+    tuning_algorithm = 'tao'
     # show_optimization_details = true
   []
 []
@@ -103,7 +104,7 @@
   [covar]
     type= SquaredExponentialCovariance
     signal_variance = 1.0
-    noise_variance = 1e-4
+    noise_variance = 1e-3
     length_factor = '1.0 1.0 1.0'
   []
 []
@@ -115,7 +116,7 @@
 
 [Outputs]
   # perf_graph = true
-  file_base = 'SingleProcSingleRow_Ufunction'
+  file_base = 'ufunction_tao'
   [out]
     type = JSON
     execute_system_information_on = none

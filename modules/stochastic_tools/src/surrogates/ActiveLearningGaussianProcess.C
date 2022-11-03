@@ -34,7 +34,7 @@ ActiveLearningGaussianProcess::validParams()
   params.addRequiredParam<MooseEnum>(
       "tuning_algorithm", tuning_type, "Hyper parameter optimizaton algorithm");
   params.addParam<unsigned int>("iter_adam", 1000, "Tolerance value for Adam optimization");
-  params.addParam<unsigned int>("batch_size", "The batch size for Adam optimization");
+  params.addParam<unsigned int>("batch_size", 0, "The batch size for Adam optimization");
   params.addParam<Real>("learning_rate_adam", 0.001, "The learning rate for Adam optimization");
   params.addParam<std::string>(
       "tao_options", "", "Command line options for PETSc/TAO hyperparameter optimization");
@@ -42,8 +42,10 @@ ActiveLearningGaussianProcess::validParams()
       "show_optimization_details", false, "Switch to show TAO or Adam solver results");
   params.addParam<std::vector<std::string>>("tune_parameters",
                                             "Select hyperparameters to be tuned");
-  params.addParam<std::vector<Real>>("tuning_min", "Minimum allowable tuning value");
-  params.addParam<std::vector<Real>>("tuning_max", "Maximum allowable tuning value");
+  params.addParam<std::vector<Real>>(
+      "tuning_min", std::vector<Real>(), "Minimum allowable tuning value");
+  params.addParam<std::vector<Real>>(
+      "tuning_max", std::vector<Real>(), "Maximum allowable tuning value");
   return params;
 }
 
@@ -60,20 +62,18 @@ ActiveLearningGaussianProcess::ActiveLearningGaussianProcess(const InputParamete
         getParam<std::string>("tao_options"),
         getParam<bool>("show_optimization_details"),
         getParam<unsigned int>("iter_adam"),
-        isParamValid("batch_size") ? getParam<unsigned int>("batch_size") : 0,
+        getParam<unsigned int>("batch_size"),
         getParam<Real>("learning_rate_adam")))
 {
-  if (isParamValid("batch_size") && _optimization_opts.opt_type == "tao")
+  if (getParam<unsigned int>("batch_size") > 0 && _optimization_opts.opt_type == "tao")
     mooseError("Mini-batch sampling is not compatible with the TAO optimization library. Please "
                "use Adam optimization.");
 
-  std::vector<std::string> tune_parameters(getParam<std::vector<std::string>>("tune_parameters"));
-  std::vector<Real> bounds;
   _gp_handler.initialize(
       getCovarianceFunctionByName(parameters.get<UserObjectName>("covariance_function")),
-      tune_parameters,
-      bounds,
-      bounds);
+      getParam<std::vector<std::string>>("tune_parameters"),
+      getParam<std::vector<Real>>("tuning_min"),
+      getParam<std::vector<Real>>("tuning_max"));
 }
 
 void
@@ -82,9 +82,8 @@ ActiveLearningGaussianProcess::reTrain(const std::vector<std::vector<Real>> & in
 {
 
   // Addtional error check for each re-train call of the GP surrogate
-  if (isParamValid("batch_size"))
-    if (outputs.size() < _optimization_opts.batch_size)
-      paramError("batch_size", "Batch size cannot be greater than the training data set size.");
+  if (outputs.size() < _optimization_opts.batch_size)
+    paramError("batch_size", "Batch size cannot be greater than the training data set size.");
 
   RealEigenMatrix _training_data;
   _training_params.setZero(outputs.size(), inputs.size());

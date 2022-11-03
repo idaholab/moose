@@ -46,14 +46,14 @@ private:
   /**
    * This sets up data for re-training the GP.
    */
-  void setupData(const std::vector<Real> & output_comm,
+  void setupData(const std::vector<Real> & output_parallel,
                  const std::vector<std::vector<Real>> & inputs_prev);
 
   /**
    * This makes decisions whether to call the full model or not based on
    * GP prediction and uncertainty.
    */
-  Real facilitateDecision(const std::vector<Real> & row,
+  void facilitateDecision(const std::vector<Real> & row,
                           dof_id_type local_ind,
                           Real & val,
                           const bool & retrain);
@@ -61,9 +61,9 @@ private:
   /**
    * This transmits GP outputs to file.
    */
-  void transmitOutput(const DenseMatrix<Real> & inputs_comm,
-                      const std::vector<Real> & gp_mean_comm,
-                      const std::vector<Real> & gp_std_comm);
+  void transferOutput(const DenseMatrix<Real> & inputs_parallel,
+                      const std::vector<Real> & gp_mean_parallel,
+                      const std::vector<Real> & gp_std_parallel);
 
   /// Track the current step of the main App
   const int & _step;
@@ -78,7 +78,10 @@ private:
   const Real * _learning_function_parameter;
 
   /// The active learning GP trainer that permits re-training
-  const ActiveLearningGaussianProcess * const _al_gp;
+  const ActiveLearningGaussianProcess & _al_gp;
+
+  /// The GP evaluator object that permits re-evaluations
+  const SurrogateModel & _gp_eval;
 
   /// The Monte Carlo sampler
   Sampler & _sampler;
@@ -89,7 +92,7 @@ private:
   /// Number of initial training points for GP
   const int _n_train;
 
-  /// Store the inputs vector
+  /// Storage for the input vectors to be transferred to the output file
   std::vector<std::vector<Real>> & _inputs;
 
   /// Broadcast the GP mean prediciton to JSON
@@ -99,13 +102,13 @@ private:
   std::vector<Real> & _gp_std;
 
   /// Store all the input vectors in the batch
-  std::vector<std::vector<Real>> _inputs_sto;
+  std::vector<std::vector<Real>> _inputs_batch;
 
   /// Store all the outputs in the batch
-  std::vector<Real> _outputs_sto;
+  std::vector<Real> _outputs_batch;
 
   /// Store all the input vectors in the batch from the previous step
-  std::vector<std::vector<Real>> _inputs_prev;
+  std::vector<std::vector<Real>> _inputs_batch_prev;
 
   /// GP pass/fail decision
   std::vector<bool> _decision;
@@ -113,7 +116,7 @@ private:
   /// Track GP fails
   unsigned int _track_gp_fails;
 
-  /// Store the user-specified GP fails
+  /// Store the user-specified number of allowed GP fails
   unsigned int _allowed_gp_fails;
 
   /// For parallelization
@@ -123,11 +126,11 @@ private:
   std::vector<Real> _gp_sto;
 
   /// Facilitate allGather of outputs
-  std::vector<Real> _output_comm;
+  std::vector<Real> _output_parallel;
 
   /// Facilitate allGather of GP mean predictions
-  std::vector<Real> _gp_mean_comm;
+  std::vector<Real> _gp_mean_parallel;
 
   /// Facilitate allGather of GP prediction standard deviations
-  std::vector<Real> _gp_std_comm;
+  std::vector<Real> _gp_std_parallel;
 };

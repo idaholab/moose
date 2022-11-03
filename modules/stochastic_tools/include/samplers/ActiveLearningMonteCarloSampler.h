@@ -28,30 +28,27 @@ protected:
   /// Storage for distribution objects to be utilized
   std::vector<Distribution const *> _distributions;
 
-  /// Distribution names
-  const std::vector<DistributionName> & _distribution_names;
-
   /// Flag samples if the surrogate prediction was inadequate
   const std::vector<bool> & _flag_sample;
-
-  /// Initialize a certain number of random seeds. Change from the default only if you have to.
-  const unsigned int & _num_random_seeds;
 
 private:
   /// Track the current step of the main App
   const int & _step;
 
+  /// The maximum number of GP fails
+  const unsigned int _num_batch;
+
+  /// Store the user-specified GP fails
+  const unsigned int _allowed_gp_fails;
+
   /// Ensure that the sampler proceeds in a sequential fashion
   int _check_step;
-
-  /// Storage for previously accepted samples by the decision reporter system
-  std::vector<std::vector<Real>> _inputs_sto;
 
   /// Track GP fails
   unsigned int _track_gp_fails;
 
-  /// Store the user-specified GP fails
-  unsigned int _allowed_gp_fails;
+  /// Storage for previously accepted samples by the decision reporter system
+  std::vector<std::vector<Real>> _inputs_sto;
 
   /// Store the input params for which the GP fails
   std::vector<std::vector<Real>> _inputs_gp_fails;

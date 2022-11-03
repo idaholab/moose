@@ -64,17 +64,8 @@ GaussianProcessHandler::setupCovarianceMatrix(const RealEigenMatrix & training_p
                                               const RealEigenMatrix & training_data,
                                               const GPOptimizerOptions & opts)
 {
-  unsigned int batch_size;
-  if (opts.batch_size > 0)
-  {
-    _K.resize(opts.batch_size, opts.batch_size);
-    batch_size = opts.batch_size;
-  }
-  else
-  {
-    _K.resize(training_params.rows(), training_params.rows());
-    batch_size = training_params.rows();
-  }
+  const unsigned int batch_size = opts.batch_size > 0 ? opts.batch_size : training_params.rows();
+  _K.resize(batch_size, batch_size);
 
   if (opts.opt_type == "tao")
   {
