@@ -23,6 +23,8 @@ ComputeThermalExpansionEigenstrainBaseTempl<is_ad>::validParams()
   params.addParam<bool>("use_old_temperature",
                         false,
                         "Flag to optionally use the temperature value from the previous timestep.");
+  params.addParam<MaterialPropertyName>("mean_thermal_expansion_coefficient_name",
+                                        "Name of the mean coefficient of thermal expansion.");
   return params;
 }
 
@@ -38,7 +40,12 @@ ComputeThermalExpansionEigenstrainBaseTempl<is_ad>::ComputeThermalExpansionEigen
                            : &this->template declarePropertyDerivative<RankTwoTensor>(
                                  _eigenstrain_name, this->getVar("temperature", 0)->name())),
     _stress_free_temperature(this->coupledValue("stress_free_temperature")),
-    _temperature_prop(this->template coupledGenericValue<is_ad>("temperature"))
+    _temperature_prop(this->template coupledGenericValue<is_ad>("temperature")),
+    _mean_thermal_expansion_coefficient(
+        this->isParamValid("mean_thermal_expansion_coefficient_name")
+            ? &this->template declareProperty<Real>(this->template getParam<MaterialPropertyName>(
+                  "mean_thermal_expansion_coefficient_name"))
+            : nullptr)
 {
   if (_use_old_temperature && !this->_fe_problem.isTransient())
     this->paramError(
@@ -86,10 +93,28 @@ ComputeThermalExpansionEigenstrainBaseTempl<is_ad>::computeQpEigenstrain()
   const auto thermal_strain = computeThermalStrain();
 
   if constexpr (is_ad)
+  {
     _eigenstrain[_qp].addIa(thermal_strain);
+    if (_mean_thermal_expansion_coefficient)
+    {
+      if (_temperature[_qp] == _stress_free_temperature[_qp])
+        (*_mean_thermal_expansion_coefficient)[_qp] = 0.0;
+      else
+        (*_mean_thermal_expansion_coefficient)[_qp] = MetaPhysicL::raw_value(
+            thermal_strain / (_temperature[_qp] - _stress_free_temperature[_qp]));
+    }
+  }
   else
   {
     _eigenstrain[_qp].addIa(thermal_strain.value());
+    if (_mean_thermal_expansion_coefficient)
+    {
+      if (_temperature[_qp].value() == _stress_free_temperature[_qp])
+        (*_mean_thermal_expansion_coefficient)[_qp] = 0.0;
+      else
+        (*_mean_thermal_expansion_coefficient)[_qp] =
+            thermal_strain.value() / (_temperature[_qp].value() - _stress_free_temperature[_qp]);
+    }
     (*_deigenstrain_dT)[_qp].zero();
     if (!_use_old_temperature)
       (*_deigenstrain_dT)[_qp].addIa(thermal_strain.derivatives());
