@@ -22,6 +22,7 @@
 #include "DisplacedProblem.h"
 #include "libmesh/numeric_vector.h"
 #include "libmesh/fe_interface.h"
+#include "libmesh/mesh_base.h"
 
 registerMooseObject("MooseApp", DisplacedProblem);
 
@@ -268,6 +269,8 @@ DisplacedProblem::updateMesh(bool mesh_changing)
                        /*grainsize=*/1);
 
   Threads::parallel_reduce(node_range, udmt);
+  // Displacement of the mesh has invalidated the point locator data (e.g. bounding boxes)
+  _mesh.getMesh().clear_point_locator();
 
   // Update the geometric searches that depend on the displaced mesh. This call can end up running
   // NearestNodeThread::operator() which has a throw inside of it. We need to catch it and make sure
