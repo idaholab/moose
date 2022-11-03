@@ -10,8 +10,8 @@
 #include "SphereMeshGenerator.h"
 #include "CastUniquePointer.h"
 
-// libMesh includes
 #include "libmesh/mesh_generation.h"
+#include "libmesh/string_to_enum.h"
 
 registerMooseObject("MooseApp", SphereMeshGenerator);
 
