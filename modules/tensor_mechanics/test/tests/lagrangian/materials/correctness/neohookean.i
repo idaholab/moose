@@ -85,7 +85,6 @@
     type = ComputeNeoHookeanStress
     lambda = 4000.0
     mu = 6700.0
-    large_kinematics = true
   []
   [compute_strain]
     type = ComputeLagrangianStrain

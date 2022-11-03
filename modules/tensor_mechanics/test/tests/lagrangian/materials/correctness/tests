@@ -22,6 +22,25 @@
     requirement = 'Stress matches exact analytic solution, rest zero'
     design = 'source/materials/lagrangian/ComputeNeoHookeanStress.md'
   []
+  [stvenantkirchhoff_small_deformation]
+    type = CSVDiff
+    issues = '#22588'
+    input = stvenantkirchhoff.i
+    csvdiff = 'stvenantkirchhoff_small_deformation_out.csv'
+    requirement = 'Stress matches exact solution'
+    design = 'source/materials/lagrangian/ComputeStVenantKirchhoffStress.md'
+    cli_args = 'GlobalParams/large_kinematics=false Outputs/file_base=stvenantkirchhoff_small_deformation_out'
+  []
+  [neohookean_small_deformation]
+    type = CSVDiff
+    issues = '#22588'
+    input = neohookean.i
+    csvdiff = 'neohookean_small_deformation_out.csv'
+    abs_zero = 1e-9
+    requirement = 'Stress matches exact analytic solution, rest zero'
+    design = 'source/materials/lagrangian/ComputeNeoHookeanStress.md'
+    cli_args = 'GlobalParams/large_kinematics=false Outputs/file_base=neohookean_small_deformation_out'
+  []
   [stvenantkirchhoff_hypoelastic]
     type = CSVDiff
     input = stvenantkirchhoff.i
