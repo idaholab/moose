@@ -19,8 +19,7 @@ InputParameters
 SphereMeshGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
-  params.addClassDescription(
-      "Generate a 3-D sphere mesh centered on the origin");
+  params.addClassDescription("Generate a 3-D sphere mesh centered on the origin");
   params.addRequiredRangeCheckedParam<Real>("radius", "radius > 0.0", "Sphere radius");
   params.addRequiredRangeCheckedParam<unsigned int>("nr", "nr > 0", "Number of radial elements");
 
@@ -48,7 +47,12 @@ SphereMeshGenerator::generate()
 
   ElemType et = Utility::string_to_enum<ElemType>(_elem_type);
 
-  MeshTools::Generation::build_sphere(static_cast<UnstructuredMesh &>(*mesh), _radius, _nr, et, _n_smooth, false /* dummy value; not used for 3-D meshes */);
+  MeshTools::Generation::build_sphere(static_cast<UnstructuredMesh &>(*mesh),
+                                      _radius,
+                                      _nr,
+                                      et,
+                                      _n_smooth,
+                                      false /* dummy value; not used for 3-D meshes */);
 
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
