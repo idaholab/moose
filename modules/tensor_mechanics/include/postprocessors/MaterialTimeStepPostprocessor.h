@@ -54,6 +54,9 @@ protected:
   /// Tolerance to determine if elements have changed
   const Real _elements_changed_threshold;
 
+  /// Maximum allowed value
+  const Real _max;
+
   /// Current quadrature point
   unsigned int _qp;
 };
