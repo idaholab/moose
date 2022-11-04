@@ -123,37 +123,37 @@
   [mass10]
     type = ParsedFunction
     value = 'vol*por*dens0*exp(pp/bulk)'
-    vars = 'vol por dens0 pp bulk'
+    symbol_names = 'vol por dens0 pp bulk'
     vals = '0.25 0.1 1.1 p10 1.3'
   []
   [rate10]
     type = ParsedFunction
     value = 'fcn*if(pp>0.8,1,if(pp<0.3,0.5,0.2+pp))'
-    vars = 'fcn pp'
+    symbol_names = 'fcn pp'
     vals = '8   p10'
   []
   [mass10_expect]
     type = ParsedFunction
     value = 'mass_prev-rate*area*dt'
-    vars = 'mass_prev rate     area dt'
+    symbol_names = 'mass_prev rate     area dt'
     vals = 'm10_prev  m10_rate 0.5 1E-3'
   []
   [mass11]
     type = ParsedFunction
     value = 'vol*por*dens0*exp(pp/bulk)'
-    vars = 'vol por dens0 pp bulk'
+    symbol_names = 'vol por dens0 pp bulk'
     vals = '0.25 0.1 1.1 p11 1.3'
   []
   [rate11]
     type = ParsedFunction
     value = 'fcn*if(pp>0.8,1,if(pp<0.3,0.5,0.2+pp))'
-    vars = 'fcn pp'
+    symbol_names = 'fcn pp'
     vals = '8   p11'
   []
   [mass11_expect]
     type = ParsedFunction
     value = 'mass_prev-rate*area*dt'
-    vars = 'mass_prev rate     area dt'
+    symbol_names = 'mass_prev rate     area dt'
     vals = 'm11_prev  m11_rate 0.5 1E-3'
   []
 []

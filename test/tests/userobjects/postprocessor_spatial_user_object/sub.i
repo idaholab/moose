@@ -9,7 +9,7 @@
   [./fn]
     type = ParsedFunction
     value = 'if(a < 0.8625, 1, 0)'
-    vars = 'a'
+    symbol_names = 'a'
     vals = 'a_avg'
   [../]
 []

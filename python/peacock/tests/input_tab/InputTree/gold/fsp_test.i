@@ -91,13 +91,13 @@
     [u]
       # PETSc options for this subsolver
       # A prefix will be applied, so just put the options for this subsolver only
-      vars = 'u'
+      symbol_names = 'u'
       petsc_options_iname = '-pc_type -ksp_type'
       petsc_options_value = '     hypre preonly'
     []
     [v]
       # PETSc options for this subsolver
-      vars = 'v'
+      symbol_names = 'v'
       petsc_options_iname = '-pc_type -ksp_type'
       petsc_options_value = '     hypre  preonly'
     []

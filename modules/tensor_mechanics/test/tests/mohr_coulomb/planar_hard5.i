@@ -60,25 +60,25 @@
   [./should_be_zero_fcn]
     type = ParsedFunction
     value = 'if((a<1E-5)&(b<1E-5)&(c<1E-5)&(d<1E-5)&(g<1E-5)&(h<1E-5),0,abs(a)+abs(b)+abs(c)+abs(d)+abs(g)+abs(h))'
-    vars = 'a b c d g h'
+    symbol_names = 'a b c d g h'
     vals = 'f0 f1 f2 f3 f4 f5'
   [../]
   [./coh_analytic]
     type = ParsedFunction
     value = '20-10*exp(-1E6*intnl)'
-    vars = intnl
+    symbol_names = intnl
     vals = internal
   [../]
   [./coh_from_yieldfcns]
     type = ParsedFunction
     value = '(f0+f1-(sxx+syy)*sin(phi))/(-2)/cos(phi)'
-    vars = 'f0 f1 sxx syy phi'
+    symbol_names = 'f0 f1 sxx syy phi'
     vals = 'f0 f1 s_xx s_yy 0.8726646'
   [../]
   [./should_be_zero_coh]
     type = ParsedFunction
     value = 'if(abs(a-b)<1E-6,0,1E6*abs(a-b))'
-    vars = 'a b'
+    symbol_names = 'a b'
     vals = 'Coh_analytic Coh_moose'
   [../]
 []

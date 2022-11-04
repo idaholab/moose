@@ -61,7 +61,7 @@ velocity_interp_method='rc'
   [forcing_u]
     type = ADParsedFunction
     value = '-1.25*pi*rho*sin((1/2)*x*pi)*cos((1/2)*x*pi) + 0.8*cos(x)'
-    vars = 'mu rho'
+    symbol_names = 'mu rho'
     vals = '${mu} ${rho}'
   []
   [exact_p]
@@ -71,7 +71,7 @@ velocity_interp_method='rc'
   [forcing_p]
     type = ParsedFunction
     value = '-1/2*pi*rho*sin((1/2)*x*pi)'
-    vars = 'rho'
+    symbol_names = 'rho'
     vals = '${rho}'
   []
 []

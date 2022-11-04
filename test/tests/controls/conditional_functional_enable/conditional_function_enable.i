@@ -87,7 +87,7 @@ v_growth = 2
 [Functions]
   [./conditional_function]
     type = ParsedFunction
-    vars = 'u_sol'
+    symbol_names = 'u_sol'
     vals = 'u'
     value = 'u_sol >= ${u_threshold}'
   [../]

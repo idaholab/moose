@@ -65,7 +65,7 @@
   [./mass_bal_fcn]
     type = ParsedFunction
     value = abs((mi-lfout-rfout-mf)/2/(mi+mf))
-    vars = 'mi mf lfout rfout'
+    symbol_names = 'mi mf lfout rfout'
     vals = 'mass_init mass_fin left_flux_out right_flux_out'
   [../]
 []

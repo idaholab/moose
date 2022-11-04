@@ -23,7 +23,7 @@
   [./forcing_func]
     type = ParsedFunction
     value = '"alpha*alpha*pi*pi*sin(alpha*pi*x)"'
-    vars = 'alpha'
+    symbol_names = 'alpha'
     vals = '16'
   [../]
 []

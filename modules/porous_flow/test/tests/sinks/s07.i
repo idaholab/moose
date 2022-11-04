@@ -120,37 +120,37 @@
   [mass1_00]
     type = ParsedFunction
     value = 'frac*vol*por*dens0*exp(pp/bulk)*pow(1+pow(-al*pp,1.0/(1-m)),-m)'
-    vars = 'frac  vol  por dens0 pp bulk al m'
+    symbol_names = 'frac  vol  por dens0 pp bulk al m'
     vals = 'f1_00 0.25 0.1 1.1  p00 1.3 1.1 0.5'
   []
   [expected_mass_change1_00]
     type = ParsedFunction
     value = 'frac*fcn*area*dt'
-    vars = 'frac fcn area dt'
+    symbol_names = 'frac fcn area dt'
     vals = 'f1_00 6  0.5  1E-3'
   []
   [mass1_00_expect]
     type = ParsedFunction
     value = 'mass_prev-mass_change'
-    vars = 'mass_prev mass_change'
+    symbol_names = 'mass_prev mass_change'
     vals = 'm1_00_prev  del_m1_00'
   []
   [mass1_01]
     type = ParsedFunction
     value = 'frac*vol*por*dens0*exp(pp/bulk)*pow(1+pow(-al*pp,1.0/(1-m)),-m)'
-    vars = 'frac  vol  por dens0 pp bulk al m'
+    symbol_names = 'frac  vol  por dens0 pp bulk al m'
     vals = 'f1_01 0.25 0.1 1.1  p01 1.3 1.1 0.5'
   []
   [expected_mass_change1_01]
     type = ParsedFunction
     value = 'frac*fcn*area*dt'
-    vars = 'frac fcn area dt'
+    symbol_names = 'frac fcn area dt'
     vals = 'f1_01 6  0.5  1E-3'
   []
   [mass1_01_expect]
     type = ParsedFunction
     value = 'mass_prev-mass_change'
-    vars = 'mass_prev mass_change'
+    symbol_names = 'mass_prev mass_change'
     vals = 'm1_01_prev  del_m1_01'
   []
 []

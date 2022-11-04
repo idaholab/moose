@@ -108,7 +108,7 @@
   [./src_func]
     type = ParsedFunction
     value = 'rhoCp*(-200*x+200)-(0.05*200*t/1.04)'
-    vars = 'rhoCp'
+    symbol_names = 'rhoCp'
     vals = 10
   [../]
   [./neumann_func]

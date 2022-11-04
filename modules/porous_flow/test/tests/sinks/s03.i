@@ -120,55 +120,55 @@
   [mass00]
     type = ParsedFunction
     value = 'vol*por*dens0*exp(pp/bulk)*pow(1+pow(-al*pp,1.0/(1-m)),-m)'
-    vars = 'vol por dens0 pp bulk al m'
+    symbol_names = 'vol por dens0 pp bulk al m'
     vals = '0.25 0.1 1.1 p00 1.3 1.1 0.5'
   []
   [sat00]
     type = ParsedFunction
     value = 'pow(1+pow(-al*pp,1.0/(1-m)),-m)'
-    vars = 'pp al m'
+    symbol_names = 'pp al m'
     vals = 'p00 1.1 0.5'
   []
   [mass01]
     type = ParsedFunction
     value = 'vol*por*dens0*exp(pp/bulk)*pow(1+pow(-al*pp,1.0/(1-m)),-m)'
-    vars = 'vol por dens0 pp bulk al m'
+    symbol_names = 'vol por dens0 pp bulk al m'
     vals = '0.25 0.1 1.1 p01 1.3 1.1 0.5'
   []
   [expected_mass_change00]
     type = ParsedFunction
     value = 'fcn*pow(pow(1+pow(-al*pp,1.0/(1-m)),-m),2)*area*dt'
-    vars = 'fcn perm dens0 pp bulk visc area dt   al  m'
+    symbol_names = 'fcn perm dens0 pp bulk visc area dt   al  m'
     vals = '6   0.2  1.1  p00 1.3  1.1  0.5  1E-3 1.1 0.5'
   []
   [expected_mass_change01]
     type = ParsedFunction
     value = 'fcn*pow(pow(1+pow(-al*pp,1.0/(1-m)),-m),2)*area*dt'
-    vars = 'fcn perm dens0 pp bulk visc area dt   al  m'
+    symbol_names = 'fcn perm dens0 pp bulk visc area dt   al  m'
     vals = '6   0.2  1.1  p01 1.3  1.1  0.5  1E-3 1.1 0.5'
   []
   [mass00_expect]
     type = ParsedFunction
     value = 'mass_prev-mass_change'
-    vars = 'mass_prev mass_change'
+    symbol_names = 'mass_prev mass_change'
     vals = 'm00_prev  del_m00'
   []
   [mass01_expect]
     type = ParsedFunction
     value = 'mass_prev-mass_change'
-    vars = 'mass_prev mass_change'
+    symbol_names = 'mass_prev mass_change'
     vals = 'm01_prev  del_m01'
   []
   [sat01]
     type = ParsedFunction
     value = 'pow(1+pow(-al*pp,1.0/(1-m)),-m)'
-    vars = 'pp al m'
+    symbol_names = 'pp al m'
     vals = 'p01 1.1 0.5'
   []
   [expected_mass_change_rate]
     type = ParsedFunction
     value = 'fcn*pow(pow(1+pow(-al*pp,1.0/(1-m)),-m),2)*area'
-    vars = 'fcn perm dens0 pp bulk visc area dt   al  m'
+    symbol_names = 'fcn perm dens0 pp bulk visc area dt   al  m'
     vals = '6   0.2  1.1  p00 1.3  1.1  0.5  1E-3 1.1 0.5'
   []
 []

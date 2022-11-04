@@ -64,7 +64,7 @@
   [trip_ctrl]
     type = UnitTripControl
     condition = 'a > 0.6'
-    vars = 'a'
+    symbol_names = 'a'
     vals = 'a'
   []
 []

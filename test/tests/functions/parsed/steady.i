@@ -16,13 +16,13 @@
     type = ParsedFunction
     value = a+1
     vals = left_avg
-    vars = a
+    symbol_names = a
   [../]
   [./left_bc]
     type = ParsedFunction
     value = a
     vals = left_avg
-    vars = a
+    symbol_names = a
   [../]
 []
 

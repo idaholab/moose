@@ -47,7 +47,7 @@
   [./tot_effective_viscoplasticity]
     type = ParsedFunction
     vals = 'lps_1_eff_creep_strain lps_3_eff_creep_strain'
-    vars = 'lps_1_eff_creep_strain lps_3_eff_creep_strain'
+    symbol_names = 'lps_1_eff_creep_strain lps_3_eff_creep_strain'
     value = 'lps_1_eff_creep_strain+lps_3_eff_creep_strain'
   [../]
 []

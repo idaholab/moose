@@ -83,7 +83,7 @@
   [threshold_ctrl]
     type = UnitTripControl
     condition = 'T > 347.5'
-    vars = 'T'
+    symbol_names = 'T'
     vals = 'T_inlet_fn:value'
   []
 

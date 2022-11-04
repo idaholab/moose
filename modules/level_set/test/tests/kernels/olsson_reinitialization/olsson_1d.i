@@ -35,7 +35,7 @@
   [../]
   [./phi_exact]
     type = ParsedFunction
-    vars = epsilon
+    symbol_names = epsilon
     vals = 0.05
     value = '1 / (1+exp((x-0.5)/epsilon))'
   [../]

@@ -34,28 +34,28 @@
   [./bc_u]
     type = ParsedFunction
     value = sin(alpha*pi*x)
-    vars = 'alpha'
+    symbol_names = 'alpha'
     vals = '2'
   [../]
 
   [./bc_v]
     type = ParsedFunction
     value = sin(alpha*pi*y)
-    vars = 'alpha'
+    symbol_names = 'alpha'
     vals = '2'
   [../]
 
   [./f_u]
     type = ParsedFunction
     value = alpha*alpha*pi*pi*sin(alpha*pi*x)
-    vars = 'alpha'
+    symbol_names = 'alpha'
     vals = '2'
   [../]
 
   [./f_v]
     type = ParsedFunction
     value = alpha*alpha*pi*pi*sin(alpha*pi*y)
-    vars = 'alpha'
+    symbol_names = 'alpha'
     vals = '2'
   [../]
 []

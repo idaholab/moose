@@ -156,7 +156,7 @@ velocity_interp_method = 'average'
   [exact_rhou]
     type = ParsedFunction
     value = 'rho*sin((1/2)*y*pi)*cos((1/2)*x*pi)'
-    vars = 'rho'
+    symbol_names = 'rho'
     vals = '${rho}'
   []
   [forcing_u]
@@ -166,7 +166,7 @@ velocity_interp_method = 'average'
             '(1/2)*pi*rho*sin((1/4)*x*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi)^2 - '
             'pi*rho*sin((1/2)*x*pi)*sin((1/2)*y*pi)^2*cos((1/2)*x*pi) - '
             '1/4*pi*sin((1/4)*x*pi)*sin((3/2)*y*pi)'
-    vars = 'mu rho'
+    symbol_names = 'mu rho'
     vals = '${mu} ${rho}'
   []
   [exact_v]
@@ -176,7 +176,7 @@ velocity_interp_method = 'average'
   [exact_rhov]
     type = ParsedFunction
     value = 'rho*sin((1/4)*x*pi)*cos((1/2)*y*pi)'
-    vars = 'rho'
+    symbol_names = 'rho'
     vals = '${rho}'
   []
   [forcing_v]
@@ -186,7 +186,7 @@ velocity_interp_method = 'average'
             '1/2*pi*rho*sin((1/4)*x*pi)*sin((1/2)*x*pi)*sin((1/2)*y*pi)*cos((1/2)*y*pi) + '
             '(1/4)*pi*rho*sin((1/2)*y*pi)*cos((1/4)*x*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi) + '
             '(3/2)*pi*cos((1/4)*x*pi)*cos((3/2)*y*pi)'
-    vars = 'mu rho'
+    symbol_names = 'mu rho'
     vals = '${mu} ${rho}'
   []
   [exact_p]
@@ -197,7 +197,7 @@ velocity_interp_method = 'average'
     type = ParsedFunction
     value = '-1/2*pi*rho*sin((1/4)*x*pi)*sin((1/2)*y*pi) - '
             '1/2*pi*rho*sin((1/2)*x*pi)*sin((1/2)*y*pi)'
-    vars = 'rho'
+    symbol_names = 'rho'
     vals = '${rho}'
   []
 []

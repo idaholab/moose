@@ -50,7 +50,7 @@
   [threshold]
     type = UnitTripControl
     condition = 'dt_pp > 3'
-    vars = 'dt_pp'
+    symbol_names = 'dt_pp'
     vals = 'dt_pp'
   []
 

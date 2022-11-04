@@ -27,7 +27,7 @@
     type = ParsedFunction
     #value = alpha*alpha*pi*pi*(y*y*sin(alpha*pi*x*y)+y*y*sin(alpha*pi*x*y))
     value = alpha*alpha*pi*pi*sin(alpha*pi*x)
-    vars = 'alpha'
+    symbol_names = 'alpha'
     vals = '4'
   [../]
 
@@ -39,7 +39,7 @@
 
     value = sin(alpha*pi*x)
     grad_x = alpha*pi*cos(alpha*pi*x)
-    vars = 'alpha'
+    symbol_names = 'alpha'
     vals = '4'
   [../]
 []

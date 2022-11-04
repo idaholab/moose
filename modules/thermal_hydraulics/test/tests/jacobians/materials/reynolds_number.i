@@ -8,19 +8,19 @@
   [rho_mat]
     type = LinearTestMaterial
     name = rho
-    vars = 'beta arhoA'
+    symbol_names = 'beta arhoA'
     slopes = '1.5 0.8'
   []
   [vel_mat]
     type = LinearTestMaterial
     name = vel
-    vars = 'arhoA arhouA'
+    symbol_names = 'arhoA arhouA'
     slopes = '-0.6 -1.1'
   []
   [mu_mat]
     type = LinearTestMaterial
     name = mu
-    vars = 'beta arhoA arhouA arhoEA'
+    symbol_names = 'beta arhoA arhouA arhoEA'
     slopes = '0.7 -2.2 0.4 -0.6'
   []
   [D_h_mat]

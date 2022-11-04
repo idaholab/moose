@@ -38,7 +38,7 @@
   [../]
   [./f]
     type = ParsedFunction
-    vars = f
+    symbol_names = f
     vals = grad_int
     value = f
   [../]

@@ -98,25 +98,25 @@
   [./ic_func_eta]
     type = ParsedFunction
     value = '0.5*(1.0+tanh((x)/delta_eta/sqrt(2.0)))'
-    vars = 'delta_eta'
+    symbol_names = 'delta_eta'
     vals = '0.8034'
   [../]
   [./ic_func_c]
     type = ParsedFunction
     value = '0.2389*(0.5*(1.0+tanh(x/delta/sqrt(2.0))))^3*(6*(0.5*(1.0+tanh(x/delta/sqrt(2.0))))^2-15*(0.5*(1.0+tanh(x/delta/sqrt(2.0))))+10)+0.1339*(1-(0.5*(1.0+tanh(x/delta/sqrt(2.0))))^3*(6*(0.5*(1.0+tanh(x/delta/sqrt(2.0))))^2-15*(0.5*(1.0+tanh(x/delta/sqrt(2.0))))+10))'
-    vars = 'delta'
+    symbol_names = 'delta'
     vals = '0.8034'
   [../]
   [./psi_eq_int]
     type = ParsedFunction
     value = 'volume*psi_alpha'
-    vars = 'volume psi_alpha'
+    symbol_names = 'volume psi_alpha'
     vals = 'volume psi_alpha'
   [../]
   [./gamma]
     type = ParsedFunction
     value = '(psi_int - psi_eq_int) / dy / dz'
-    vars = 'psi_int psi_eq_int dy       dz'
+    symbol_names = 'psi_int psi_eq_int dy       dz'
     vals = 'psi_int psi_eq_int 0.03125  0.03125'
   [../]
 []

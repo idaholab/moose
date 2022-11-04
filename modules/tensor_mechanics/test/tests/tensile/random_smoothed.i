@@ -136,7 +136,7 @@
   [./should_be_zero0_fcn]
     type = ParsedFunction
     value = 'if(a<1E-1,0,a)'
-    vars = 'a'
+    symbol_names = 'a'
     vals = 'raw_f0'
   [../]
 []

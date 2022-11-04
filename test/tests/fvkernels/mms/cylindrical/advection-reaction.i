@@ -67,8 +67,8 @@ a = 1.1
   [forcing]
     type = ParsedFunction
     value = '-a*sin(x)*sin(y) + sin(x)*cos(y) + (x*a*cos(x)*cos(y) + a*sin(x)*cos(y))/x'
-    vars = 'a'
-    vals = '${a}'
+    symbol_names = 'a'
+    symbol_values = '${a}'
   []
 []
 

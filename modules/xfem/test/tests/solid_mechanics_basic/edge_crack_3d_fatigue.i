@@ -55,7 +55,7 @@
   [../]
   [./growth_func_v]
     type = ParsedFunction
-    vars = 'dN'
+    symbol_names = 'dN'
     vals = 'fatigue'
     value = dN
   [../]

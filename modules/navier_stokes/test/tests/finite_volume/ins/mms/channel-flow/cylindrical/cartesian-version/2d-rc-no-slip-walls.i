@@ -168,7 +168,7 @@ rho=1.1
   [forcing_u]
     type = ADParsedFunction
     value = '2*pi^2*mu*sin(x*pi)*cos(y*pi) - 2*pi*rho*sin(x*pi)*sin(y*pi)*cos(1.3*x)*cos(y*pi) + 2*pi*rho*sin(x*pi)*cos(x*pi)*cos(y*pi)^2 + 1.5*cos(1.5*x)*cos(1.6*y)'
-    vars = 'mu rho'
+    symbol_names = 'mu rho'
     vals = '${mu} ${rho}'
   []
   [exact_v]
@@ -178,7 +178,7 @@ rho=1.1
   [forcing_v]
     type = ADParsedFunction
     value = '1.69*mu*cos(1.3*x)*cos(y*pi) + pi^2*mu*cos(1.3*x)*cos(y*pi) - 1.3*rho*sin(1.3*x)*sin(x*pi)*cos(y*pi)^2 - 2*pi*rho*sin(y*pi)*cos(1.3*x)^2*cos(y*pi) + pi*rho*cos(1.3*x)*cos(x*pi)*cos(y*pi)^2 - 1.6*sin(1.5*x)*sin(1.6*y)'
-    vars = 'mu rho'
+    symbol_names = 'mu rho'
     vals = '${mu} ${rho}'
   []
   [exact_p]
@@ -188,7 +188,7 @@ rho=1.1
   [forcing_p]
     type = ParsedFunction
     value = '-pi*rho*sin(y*pi)*cos(1.3*x) + pi*rho*cos(x*pi)*cos(y*pi)'
-    vars = 'rho'
+    symbol_names = 'rho'
     vals = '${rho}'
   []
 []

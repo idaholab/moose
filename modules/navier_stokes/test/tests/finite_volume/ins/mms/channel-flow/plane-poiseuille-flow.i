@@ -153,19 +153,19 @@ two_term_boundary_expansion = true
   [exact_u]
     type = ParsedFunction
     value = '0.5*(1.0 - y^2)/mu'
-    vars = 'mu'
+    symbol_names = 'mu'
     vals = '${mu}'
   []
   [exact_rhou]
     type = ParsedFunction
     value = '0.5*rho*(1.0 - y^2)/mu'
-    vars = 'mu rho'
+    symbol_names = 'mu rho'
     vals = '${mu} ${rho}'
   []
   [forcing_u]
     type = ADParsedFunction
     value = '0'
-    vars = 'mu rho'
+    symbol_names = 'mu rho'
     vals = '${mu} ${rho}'
   []
   [exact_v]
@@ -175,13 +175,13 @@ two_term_boundary_expansion = true
   [exact_rhov]
     type = ParsedFunction
     value = '0'
-    vars = 'mu rho'
+    symbol_names = 'mu rho'
     vals = '${mu} ${rho}'
   []
   [forcing_v]
     type = ADParsedFunction
     value = '0'
-    vars = 'mu rho'
+    symbol_names = 'mu rho'
     vals = '${mu} ${rho}'
   []
   [exact_p]
@@ -191,7 +191,7 @@ two_term_boundary_expansion = true
   [forcing_p]
     type = ParsedFunction
     value = '0'
-    vars = 'rho mu'
+    symbol_names = 'rho mu'
     vals = '${rho} ${mu}'
   []
 []

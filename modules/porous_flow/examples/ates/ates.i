@@ -488,26 +488,26 @@ cap_ver_wet_thermal_cond = ${fparse cap_ver_thermal_cond * 60 * 60 * 24} # J/day
 
   [injection_rate_value]
     type = ParsedFunction
-    vars = true_screen_area
+    symbol_names = true_screen_area
     vals = true_screen_area
     value = '-${inject_fluid_mass}/(true_screen_area * ${inject_time})'
   []
   [production_rate_value]
     type = ParsedFunction
-    vars = true_screen_area
+    symbol_names = true_screen_area
     vals = true_screen_area
     value = '${produce_fluid_mass}/(true_screen_area * ${produce_time})'
   []
 
   [heat_out_in_timestep]
     type = ParsedFunction
-    vars = 'dt heat_out'
+    symbol_names = 'dt heat_out'
     vals = 'dt heat_out_fromBC'
     value = 'dt*heat_out'
   []
   [produced_T_time_integrated]
     type = ParsedFunction
-    vars = 'dt produced_T'
+    symbol_names = 'dt produced_T'
     vals = 'dt produced_T'
     value = 'dt*produced_T / ${produce_time}'
   []

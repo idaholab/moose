@@ -10,7 +10,7 @@
 [Materials]
   [linear_test_material]
     type = LinearTestMaterial
-    vars = 'beta arhoA arhouA arhoEA'
+    symbol_names = 'beta arhoA arhouA arhoEA'
     slopes = '2.5 3.5 4.5 5.5'
     name = test_property
   []

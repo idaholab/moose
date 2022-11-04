@@ -51,7 +51,7 @@
   [./mass_bal_fcn]
     type = ParsedFunction
     value = abs((mi-fout-mf)/2/(mi+mf))
-    vars = 'mi mf fout'
+    symbol_names = 'mi mf fout'
     vals = 'mass_init mass_final flux_out'
   [../]
 

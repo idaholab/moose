@@ -50,13 +50,13 @@ d2 = 10
   [exact]
     type = ParsedFunction
     value = 'if (y < 0.5, 1 + x + 3*y*y*y, (11*d2-3*d1)/ (8*d2) + x + 3*d1/d2*y*y*y)'
-    vars = 'd1 d2'
+    symbol_names = 'd1 d2'
     vals = '${d1} ${d2}'
   []
   [forcing]
     type = ParsedFunction
     value = '-d1*18*y'
-    vars = 'd1'
+    symbol_names = 'd1'
     vals = '${d1}'
   []
 []

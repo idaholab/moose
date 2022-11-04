@@ -86,13 +86,13 @@
   [./vel_x_inlet]
     type = ParsedFunction
     value = 'k*x'
-    vars = 'k'
+    symbol_names = 'k'
     vals = '1'
   [../]
   [./vel_y_inlet]
     type = ParsedFunction
     value = '-k*y'
-    vars = 'k'
+    symbol_names = 'k'
     vals = '1'
   [../]
 []

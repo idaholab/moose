@@ -40,17 +40,17 @@
 [VectorPostprocessors]
   [./face_info_1]
     type = TestFaceInfo
-    vars = 'u'
+    symbol_names = 'u'
   [../]
 
   [./face_info_2]
     type = TestFaceInfo
-    vars = 'v'
+    symbol_names = 'v'
   [../]
 
   [./face_info_3]
     type = TestFaceInfo
-    vars = 'w'
+    symbol_names = 'w'
   [../]
 []
 

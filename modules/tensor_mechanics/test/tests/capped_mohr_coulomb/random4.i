@@ -366,73 +366,73 @@
   [./should_be_zero0_fcn]
     type = ParsedFunction
     value = 'if(a<1E-1,0,a)'
-    vars = 'a'
+    symbol_names = 'a'
     vals = 'raw_f0'
   [../]
   [./should_be_zero1_fcn]
     type = ParsedFunction
     value = 'if(a<1E-1,0,a)'
-    vars = 'a'
+    symbol_names = 'a'
     vals = 'raw_f1'
   [../]
   [./should_be_zero2_fcn]
     type = ParsedFunction
     value = 'if(a<1E-1,0,a)'
-    vars = 'a'
+    symbol_names = 'a'
     vals = 'raw_f2'
   [../]
   [./should_be_zero3_fcn]
     type = ParsedFunction
     value = 'if(a<1E-1,0,a)'
-    vars = 'a'
+    symbol_names = 'a'
     vals = 'raw_f3'
   [../]
   [./should_be_zero4_fcn]
     type = ParsedFunction
     value = 'if(a<1E-1,0,a)'
-    vars = 'a'
+    symbol_names = 'a'
     vals = 'raw_f4'
   [../]
   [./should_be_zero5_fcn]
     type = ParsedFunction
     value = 'if(a<1E-1,0,a)'
-    vars = 'a'
+    symbol_names = 'a'
     vals = 'raw_f5'
   [../]
   [./should_be_zero6_fcn]
     type = ParsedFunction
     value = 'if(a<1E-1,0,a)'
-    vars = 'a'
+    symbol_names = 'a'
     vals = 'raw_f6'
   [../]
   [./should_be_zero7_fcn]
     type = ParsedFunction
     value = 'if(a<1E-1,0,a)'
-    vars = 'a'
+    symbol_names = 'a'
     vals = 'raw_f7'
   [../]
   [./should_be_zero8_fcn]
     type = ParsedFunction
     value = 'if(a<1E-1,0,a)'
-    vars = 'a'
+    symbol_names = 'a'
     vals = 'raw_f8'
   [../]
   [./should_be_zero9_fcn]
     type = ParsedFunction
     value = 'if(a<1E-1,0,a)'
-    vars = 'a'
+    symbol_names = 'a'
     vals = 'raw_f9'
   [../]
   [./should_be_zero10_fcn]
     type = ParsedFunction
     value = 'if(a<1E-1,0,a)'
-    vars = 'a'
+    symbol_names = 'a'
     vals = 'raw_f10'
   [../]
   [./should_be_zero11_fcn]
     type = ParsedFunction
     value = 'if(a<1E-1,0,a)'
-    vars = 'a'
+    symbol_names = 'a'
     vals = 'raw_f11'
   [../]
 []

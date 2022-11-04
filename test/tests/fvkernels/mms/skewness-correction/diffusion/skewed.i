@@ -47,7 +47,7 @@ diff=1.1
   [forcing]
     type = ParsedFunction
     value = '2*diff*sin(x)*cos(y)'
-    vars = 'a diff'
+    symbol_names = 'a diff'
     vals = '${a} ${diff}'
   []
 []

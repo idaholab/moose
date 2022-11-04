@@ -167,7 +167,7 @@
   [injection_rate]
     type = ParsedFunction
     vals = injection_area
-    vars = area
+    symbol_names = area
     value = '-1/area'
   []
   [ppliq_ic]

@@ -57,7 +57,7 @@
     type = ParsedFunction
     value = s
     vals = scalar
-    vars = s
+    symbol_names = s
   [../]
   [./func]
     type = ParsedFunction

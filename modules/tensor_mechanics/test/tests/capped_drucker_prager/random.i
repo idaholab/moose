@@ -154,19 +154,19 @@
   [./shear_should_be_zero_fcn]
     type = ParsedFunction
     value = 'if(a<1E-3,0,a)'
-    vars = 'a'
+    symbol_names = 'a'
     vals = 'shear_max'
   [../]
   [./tensile_should_be_zero_fcn]
     type = ParsedFunction
     value = 'if(a<1E-3,0,a)'
-    vars = 'a'
+    symbol_names = 'a'
     vals = 'tensile_max'
   [../]
   [./compressive_should_be_zero_fcn]
     type = ParsedFunction
     value = 'if(a<1E-3,0,a)'
-    vars = 'a'
+    symbol_names = 'a'
     vals = 'compressive_max'
   [../]
 []

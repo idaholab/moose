@@ -103,19 +103,19 @@
   [./ic_func_eta]
     type = ParsedFunction
     value = 'r:=sqrt(x^2+y^2+z^2);0.5*(1.0-tanh((r-r0)/delta_eta/sqrt(2.0)))'
-    vars = 'delta_eta r0'
+    symbol_names = 'delta_eta r0'
     vals = '0.321     15'
   [../]
   [./ic_func_cv]
     type = ParsedFunction
     value = 'r:=sqrt(x^2+y^2+z^2);eta_an:=0.5*(1.0-tanh((r-r0)/delta/sqrt(2.0)));cvbubinit*eta_an^3*(6*eta_an^2-15*eta_an+10)+cvmatrixinit*(1-eta_an^3*(6*eta_an^2-15*eta_an+10))'
-    vars = 'delta r0  cvbubinit cvmatrixinit'
+    symbol_names = 'delta r0  cvbubinit cvmatrixinit'
     vals = '0.321 15  0.7286    2.25e-11'
   [../]
   [./ic_func_cg]
     type = ParsedFunction
     value = 'r:=sqrt(x^2+y^2+z^2);eta_an:=0.5*(1.0-tanh((r-r0)/delta/sqrt(2.0)));cgbubinit*eta_an^3*(6*eta_an^2-15*eta_an+10)+cgmatrixinit*(1-eta_an^3*(6*eta_an^2-15*eta_an+10))'
-    vars = 'delta r0  cgbubinit cgmatrixinit'
+    symbol_names = 'delta r0  cgbubinit cgmatrixinit'
     vals = '0.321 15  0.2714    1.01e-31'
   [../]
 []

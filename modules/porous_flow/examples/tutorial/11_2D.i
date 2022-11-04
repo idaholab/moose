@@ -442,7 +442,7 @@
 [Functions]
   [constrain_effective_fluid_pressure]
     type = ParsedFunction
-    vars = effective_fluid_pressure_at_wellbore
+    symbol_names = effective_fluid_pressure_at_wellbore
     vals = effective_fluid_pressure_at_wellbore
     value = 'max(effective_fluid_pressure_at_wellbore, 20E6)'
   []

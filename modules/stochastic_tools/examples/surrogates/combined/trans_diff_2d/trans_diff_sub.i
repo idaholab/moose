@@ -2,7 +2,7 @@
   [src_func]
     type = ParsedFunction
     value = "1000*sin(f*t)"
-    vars = 'f'
+    symbol_names = 'f'
     vals = '20'
   []
 []

@@ -136,7 +136,7 @@
 [Functions]
   [./freq2]
     type = ParsedFunction
-    vars = density
+    symbol_names = density
     vals = 2.7e3 #Al kg/m3
     value = '-t*t*density'
   [../]

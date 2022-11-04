@@ -123,7 +123,7 @@
   [./should_be_zero_fcn]
     type = ParsedFunction
     value = 'if(a<1E-3,0,a)'
-    vars = 'a'
+    symbol_names = 'a'
     vals = 'yield_fcn_at_zero'
   [../]
 []

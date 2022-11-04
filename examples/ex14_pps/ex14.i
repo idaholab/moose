@@ -21,7 +21,7 @@
   [exact]
     type = ParsedFunction
     value = sin(alpha*pi*x)
-    vars = alpha
+    symbol_names = alpha
     vals = 16
   []
 

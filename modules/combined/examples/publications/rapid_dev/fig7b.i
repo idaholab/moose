@@ -28,7 +28,7 @@
   [./diff]
     type = ParsedFunction
     value = '${RADIUS}-pos_c'
-    vars = pos_c
+    symbol_names = pos_c
     vals = pos_c
   [../]
 []

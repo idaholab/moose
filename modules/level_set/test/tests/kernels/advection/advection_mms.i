@@ -49,13 +49,13 @@
   [./phi_exact]
     type = ParsedFunction
     value = 'a*sin(pi*x/b)*cos(pi*x)'
-    vars = 'a b'
+    symbol_names = 'a b'
     vals = '2 12'
   [../]
   [./phi_mms]
     type = ParsedFunction
     value = '-2*pi*a*sin(pi*x)*sin(pi*x/b) + 2*pi*a*cos(pi*x)*cos(pi*x/b)/b'
-    vars = 'a b'
+    symbol_names = 'a b'
     vals = '2 12'
   [../]
   [./velocity_func]

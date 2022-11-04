@@ -50,7 +50,7 @@
 [Functions]
   [ana_pp]
     type = ParsedFunction
-    vars = 'g B p0 rho0'
+    symbol_names = 'g B p0 rho0'
     vals = '1 2 -1 1'
     value = '-B*log(exp(-p0/B)+g*rho0*x/B)' # expected pp at base
   []

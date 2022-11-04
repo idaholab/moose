@@ -104,7 +104,7 @@
 [Functions]
   [./cte_func_mean]
     type = ParsedFunction
-    vars = 'tsf tref scale' #stress free temp, reference temp, scale factor
+    symbol_names = 'tsf tref scale' #stress free temp, reference temp, scale factor
     vals = '0.0 0.5  1e-4'
     value = 'scale * (t - tsf) / (t - tref)'
   [../]

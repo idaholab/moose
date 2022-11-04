@@ -61,8 +61,8 @@ a = 1.1
   [forcing]
     type = ParsedFunction
     value = '(x*a*cos(x) + a*sin(x))/x'
-    vars = 'a'
-    vals = '${a}'
+    symbol_names = 'a'
+    symbol_values = '${a}'
   []
 []
 

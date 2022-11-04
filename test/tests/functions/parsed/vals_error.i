@@ -17,7 +17,7 @@
     type = ParsedFunction
     value = dummy2
     vals = invalid
-    vars = dummy2
+    symbol_names = dummy2
   [../]
 []
 

@@ -59,7 +59,7 @@
 [Functions]
   [T_exact]
     type = ParsedFunction
-    vars = 'k    rho  cp  T0  qs'
+    symbol_names = 'k    rho  cp  T0  qs'
     vals = '80.2 7800 450 300 7e5'
     value = 'T0 + '
             'qs/k*(2*sqrt(k/(rho*cp)*t/pi)*exp(-x^2/(4*k/(rho*cp)*(t+1e-50))) - '

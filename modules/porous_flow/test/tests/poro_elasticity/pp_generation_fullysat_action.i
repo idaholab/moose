@@ -150,7 +150,7 @@
   [porosity_analytic]
     type = ParsedFunction
     value = 'biot+(phi0-biot)*exp(pp*(biot-1)/bulk)'
-    vars = 'biot phi0 pp bulk'
+    symbol_names = 'biot phi0 pp bulk'
     vals = '0.3 0.1 p0 2'
   []
 []

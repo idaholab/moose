@@ -87,7 +87,7 @@
   [./mass_fcn]
     type = ParsedFunction
     value = a+b
-    vars = 'a b'
+    symbol_names = 'a b'
     vals = 'mass_rho mass_conc'
   [../]
 []

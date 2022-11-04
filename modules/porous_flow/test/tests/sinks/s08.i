@@ -151,19 +151,19 @@
   [mass1_00]
     type = ParsedFunction
     value = 'fgas*vol*por*dens0gas*exp(pgas/bulkgas)*(1-pow(1+pow(al*(pgas-pwater),1.0/(1-m)),-m))+fwater*vol*por*dens0water*exp(pwater/bulkwater)*(pow(1+pow(al*(pgas-pwater),1.0/(1-m)),-m))'
-    vars = 'vol  por dens0gas pgas    pwater    bulkgas al  m   dens0water bulkwater fgas           fwater'
+    symbol_names = 'vol  por dens0gas pgas    pwater    bulkgas al  m   dens0water bulkwater fgas           fwater'
     vals = '0.25 0.1 1.1      pgas_00 pwater_00 1.3     1.1 0.5 1.5        2.3       frac_ph1_c1_00 frac_ph0_c1_00'
   []
   [expected_mass_change1_00]
     type = ParsedFunction
     value = 'frac*fcn*area*dt*pow(1-pow(1+pow(al*(pgas-pwater),1.0/(1-m)),-m), 2)'
-    vars = 'frac           fcn area dt  pgas    pwater    al m'
+    symbol_names = 'frac           fcn area dt  pgas    pwater    al m'
     vals = 'frac_ph1_c1_00 100 0.5 1E-3 pgas_00 pwater_00 1.1 0.5'
   []
   [mass1_00_expect]
     type = ParsedFunction
     value = 'mass_prev-mass_change'
-    vars = 'mass_prev mass_change'
+    symbol_names = 'mass_prev mass_change'
     vals = 'm1_00_prev  del_m1_00'
   []
 []

@@ -38,14 +38,14 @@
   [./forcing_func]
     type = ParsedFunction
     value = alpha*alpha*pi*pi*sin(alpha*pi*x)
-    vars = 'alpha'
+    symbol_names = 'alpha'
     vals = '4'
   [../]
 
   [./u_func]
     type = ParsedFunction
     value = sin(alpha*pi*x)
-    vars = 'alpha'
+    symbol_names = 'alpha'
     vals = '4'
   [../]
 []

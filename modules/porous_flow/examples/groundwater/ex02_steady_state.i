@@ -89,7 +89,7 @@
   []
   [baseflow_rate]
     type = ParsedFunction
-    vars = 'baseflow_kg dt'
+    symbol_names = 'baseflow_kg dt'
     vals = 'baseflow_kg dt'
     value = 'baseflow_kg / dt * 24.0 * 3600.0 / 400.0'
   []

@@ -34,7 +34,7 @@
     type = ParsedFunction
     value = a
     vals = u_midpoint
-    vars = a
+    symbol_names = a
   [../]
   [./u_mms_func]
     # MMS Forcing function for the u equation.

@@ -170,7 +170,7 @@ offset=0e0
   [forcing_u]
     type = ADParsedFunction
     value = 'pi^2*mu*sin(x*pi)^2*cos(y*pi) - 2*pi*rho*sin(x*pi)^2*sin(y*pi)*cos(x*pi)*cos(y*pi) - pi*sin(x*pi)*cos(1.6*y) + (4*x*pi*rho*sin(x*pi)^3*cos(x*pi)*cos(y*pi)^2 + rho*sin(x*pi)^4*cos(y*pi)^2)/x - (-2*x*pi^2*mu*sin(x*pi)^2*cos(y*pi) + 2*x*pi^2*mu*cos(x*pi)^2*cos(y*pi) + 2*pi*mu*sin(x*pi)*cos(x*pi)*cos(y*pi))/x'
-    vars = 'mu rho'
+    symbol_names = 'mu rho'
     vals = '${mu} ${rho}'
   []
   [exact_v]
@@ -180,7 +180,7 @@ offset=0e0
   [forcing_v]
     type = ADParsedFunction
     value = 'pi^2*mu*cos(x*pi)*cos(y*pi) - 2*pi*rho*sin(y*pi)*cos(x*pi)^2*cos(y*pi) - 1.6*sin(1.6*y)*cos(x*pi) - (-x*pi^2*mu*cos(x*pi)*cos(y*pi) - pi*mu*sin(x*pi)*cos(y*pi))/x + (-x*pi*rho*sin(x*pi)^3*cos(y*pi)^2 + 2*x*pi*rho*sin(x*pi)*cos(x*pi)^2*cos(y*pi)^2 + rho*sin(x*pi)^2*cos(x*pi)*cos(y*pi)^2)/x'
-    vars = 'mu rho'
+    symbol_names = 'mu rho'
     vals = '${mu} ${rho}'
   []
   [exact_p]
@@ -190,7 +190,7 @@ offset=0e0
   [forcing_p]
     type = ParsedFunction
     value = '-pi*rho*sin(y*pi)*cos(x*pi) + (2*x*pi*rho*sin(x*pi)*cos(x*pi)*cos(y*pi) + rho*sin(x*pi)^2*cos(y*pi))/x'
-    vars = 'rho'
+    symbol_names = 'rho'
     vals = '${rho}'
   []
 []
