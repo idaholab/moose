@@ -75,6 +75,13 @@ name = 'finite'
   displacements = 'disp_x disp_y'
 []
 
+[Problem]
+  type = ReferenceResidualProblem
+  reference_vector = 'ref'
+  extra_tag_vectors = 'ref'
+  converge_on = 'disp_x disp_y temp'
+[]
+
 [Variables]
   [disp_x]
     order = ${order}
@@ -109,6 +116,7 @@ name = 'finite'
     block = 'plank block'
     use_automatic_differentiation = true
     strain = FINITE
+    extra_vector_tags = 'ref'
   []
 []
 
@@ -118,6 +126,7 @@ name = 'finite'
     variable = temp
     use_displaced_mesh = true
     block = 'plank block'
+    extra_vector_tags = 'ref'
   []
 []
 
@@ -132,6 +141,7 @@ name = 'finite'
     disp_x = disp_x
     disp_y = disp_y
     use_displaced_mesh = true
+    extra_vector_tags = 'ref' # Not recommended, used for testing
   []
   [normal_x]
     type = NormalMortarMechanicalContact
@@ -144,6 +154,7 @@ name = 'finite'
     component = x
     use_displaced_mesh = true
     compute_lm_residuals = false
+    extra_vector_tags = 'ref' # Not recommended, used for testing
   []
   [normal_y]
     type = NormalMortarMechanicalContact
@@ -156,6 +167,7 @@ name = 'finite'
     component = y
     use_displaced_mesh = true
     compute_lm_residuals = false
+    extra_vector_tags = 'ref' # Not recommended, used for testing
   []
   [thermal_contact]
     type = GapConductanceConstraint
@@ -168,6 +180,7 @@ name = 'finite'
     secondary_boundary = block_left
     secondary_subdomain = frictionless_secondary_subdomain
     displacements = 'disp_x disp_y'
+    extra_vector_tags = 'ref' # Not recommended, used for testing
   []
 []
 
@@ -257,6 +270,7 @@ name = 'finite'
   dtmin = 0.1
   timestep_tolerance = 1e-6
   line_search = 'none'
+  nl_abs_tol = 1e-13
 []
 
 [Postprocessors]

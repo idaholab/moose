@@ -13,6 +13,24 @@
       cli_args = 'name=first_low_k'
       ad_indexing_type = 'global'
     []
+    [first_low_k_rr]
+      type = CSVDiff
+      input = finite_rr.i
+      csvdiff = first_low_k_rr.csv
+      heavy = true
+      detail = 'low conductivity in the gap and first order variables using ReferenceResidualProblem'
+      cli_args = 'name=first_low_k_rr'
+      ad_indexing_type = 'global'
+    []
+    [first_low_k_rr_full]
+      type = CSVDiff
+      input = finite_rr_full.i
+      csvdiff = first_low_k_rr_full.csv
+      heavy = true
+      detail = 'low conductivity in the gap and first order variables using ReferenceResidualProblem with extra_vector_tags in the constraints'
+      cli_args = 'name=first_low_k_rr_full'
+      ad_indexing_type = 'global'
+    []
     [first_high_k]
       type = CSVDiff
       input = finite.i
@@ -54,6 +72,24 @@
       heavy = true
       detail = 'low conductivity in the gap and first order variables'
       cli_args = 'name=first_low_k_action'
+      ad_indexing_type = 'global'
+    []
+    [first_low_k_action_rr]
+      type = CSVDiff
+      input = finite_action_rr.i
+      csvdiff = first_low_k_action_rr.csv
+      heavy = true
+      detail = 'low conductivity in the gap and first order variables using ReferenceResidualProblem'
+      cli_args = 'name=first_low_k_action_rr'
+      ad_indexing_type = 'global'
+    []
+    [first_low_k_action_rr_full]
+      type = CSVDiff
+      input = finite_action_rr_full.i
+      csvdiff = first_low_k_action_rr_full.csv
+      heavy = true
+      detail = 'low conductivity in the gap and first order variables using ReferenceResidualProblem with extra_vector_tags in the constraints'
+      cli_args = 'name=first_low_k_action_rr_full'
       ad_indexing_type = 'global'
     []
     [first_high_k_action]

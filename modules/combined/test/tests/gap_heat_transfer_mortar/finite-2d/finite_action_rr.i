@@ -54,25 +54,17 @@ name = 'finite'
     old_block = '1 2'
     new_block = 'plank block'
   []
-
-  [secondary]
-    input = block_rename
-    type = LowerDBlockFromSidesetGenerator
-    sidesets = 'block_left'
-    new_block_id = '30'
-    new_block_name = 'frictionless_secondary_subdomain'
-  []
-  [primary]
-    input = secondary
-    type = LowerDBlockFromSidesetGenerator
-    sidesets = 'plank_right'
-    new_block_id = '20'
-    new_block_name = 'frictionless_primary_subdomain'
-  []
 []
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
+[]
+
+[Problem]
+  type = ReferenceResidualProblem
+  reference_vector = 'ref'
+  extra_tag_vectors = 'ref'
+  converge_on = 'disp_x disp_y temp'
 []
 
 [Variables]
@@ -91,16 +83,6 @@ name = 'finite'
     block = 'plank block'
     scaling = 1e-1
   []
-  [thermal_lm]
-    order = ${order}
-    block = 'frictionless_secondary_subdomain'
-    scaling = 1e-7
-  []
-  [frictionless_normal_lm]
-    order = FIRST
-    block = 'frictionless_secondary_subdomain'
-    use_dual = true
-  []
 []
 
 [Modules/TensorMechanics/Master]
@@ -109,6 +91,7 @@ name = 'finite'
     block = 'plank block'
     use_automatic_differentiation = true
     strain = FINITE
+    extra_vector_tags = 'ref'
   []
 []
 
@@ -118,56 +101,34 @@ name = 'finite'
     variable = temp
     use_displaced_mesh = true
     block = 'plank block'
+    extra_vector_tags = 'ref'
   []
 []
 
-[Constraints]
-  [weighted_gap_lm]
-    type = ComputeWeightedGapLMMechanicalContact
-    primary_boundary = plank_right
-    secondary_boundary = block_left
-    primary_subdomain = frictionless_primary_subdomain
-    secondary_subdomain = frictionless_secondary_subdomain
-    variable = frictionless_normal_lm
-    disp_x = disp_x
-    disp_y = disp_y
-    use_displaced_mesh = true
+[Contact]
+  [frictionless]
+    primary = plank_right
+    secondary = block_left
+    formulation = mortar
+    c_normal = 1e6
+    use_dual = true
+    lm_order = FIRST
   []
-  [normal_x]
-    type = NormalMortarMechanicalContact
-    primary_boundary = plank_right
-    secondary_boundary = block_left
-    primary_subdomain = frictionless_primary_subdomain
-    secondary_subdomain = frictionless_secondary_subdomain
-    variable = frictionless_normal_lm
-    secondary_variable = disp_x
-    component = x
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-  []
-  [normal_y]
-    type = NormalMortarMechanicalContact
-    primary_boundary = plank_right
-    secondary_boundary = block_left
-    primary_subdomain = frictionless_primary_subdomain
-    secondary_subdomain = frictionless_secondary_subdomain
-    variable = frictionless_normal_lm
-    secondary_variable = disp_y
-    component = y
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-  []
-  [thermal_contact]
-    type = GapConductanceConstraint
-    variable = thermal_lm
-    secondary_variable = temp
-    k = 1
-    use_displaced_mesh = true
-    primary_boundary = plank_right
-    primary_subdomain = frictionless_primary_subdomain
-    secondary_boundary = block_left
-    secondary_subdomain = frictionless_secondary_subdomain
-    displacements = 'disp_x disp_y'
+[]
+
+[MortarGapHeatTransfer]
+  [mortar_heat_transfer]
+   temperature = temp
+   use_displaced_mesh = true
+   gap_flux_options = conduction
+   gap_conductivity = 1
+   boundary = plank_right
+   primary_boundary = plank_right
+   primary_subdomain = frictionless_primary_subdomain
+   secondary_boundary = block_left
+   secondary_subdomain = frictionless_secondary_subdomain
+   thermal_lm_scaling = 1e-7
+   gap_geometry_type = PLATE
   []
 []
 
@@ -257,6 +218,7 @@ name = 'finite'
   dtmin = 0.1
   timestep_tolerance = 1e-6
   line_search = 'none'
+  nl_abs_tol = 1e-13
 []
 
 [Postprocessors]
