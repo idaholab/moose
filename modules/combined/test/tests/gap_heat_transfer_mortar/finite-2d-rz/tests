@@ -42,4 +42,46 @@
       ad_indexing_type = 'global'
     []
   []
+
+  [thermomechanical_mortar_action]
+    requirement = 'The system shall be able to solve axisymmetric thermomechanical contact with finite-strain tensor mechanics and heat conduction physics using the mechanical and thermal contact actions with '
+    [first_low_k_action]
+      type = CSVDiff
+      input = finite_action.i
+      csvdiff = first_low_k_action.csv
+      heavy = true
+      detail = 'low conductivity in the gap and first order variables.'
+      cli_args = 'name=first_low_k_action'
+      ad_indexing_type = 'global'
+    []
+    [first_high_k_action]
+      type = CSVDiff
+      input = finite_action.i
+      csvdiff = first_high_k_action.csv
+      heavy = true
+      detail = 'high conductivity in the gap and first order variables.'
+      cli_args = 'name=first_high_k_action MortarGapHeatTransfer/mortar_heat_transfer/gap_conductivity=100'
+      ad_indexing_type = 'global'
+    []
+    [second_low_k_action]
+      type = CSVDiff
+      input = finite_action.i
+      csvdiff = second_low_k_action.csv
+      heavy = true
+      detail = 'low conductivity in the gap and second order variables.'
+      cli_args = 'name=second_low_k_action Mesh/second_order=true order=SECOND Contact/frictionless/use_dual=false'
+      min_ad_size = '73'
+      ad_indexing_type = 'global'
+    []
+    [second_high_k_action]
+      type = CSVDiff
+      input = finite_action.i
+      csvdiff = second_high_k_action.csv
+      heavy = true
+      detail = 'high conductivity in the gap and second order variables.'
+      cli_args = 'name=second_high_k_action Mesh/second_order=true order=SECOND Contact/frictionless/use_dual=false MortarGapHeatTransfer/mortar_heat_transfer/gap_conductivity=100'
+      min_ad_size = '73'
+      ad_indexing_type = 'global'
+    []
+  []
 []
