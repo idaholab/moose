@@ -37,13 +37,16 @@ MooseParsedVectorFunction::validParams()
 MooseParsedVectorFunction::MooseParsedVectorFunction(const InputParameters & parameters)
   : Function(parameters),
     MooseParsedFunctionBase(parameters),
-    _vector_value(isParamValid("value_x")
-                      ? verifyFunction(std::string("{") + getParam<std::string>("value_x") + "}{" +
-                                       getParam<std::string>("value_y") + "}{" +
-                                       getParam<std::string>("value_z") + "}")
-                      : verifyFunction(std::string("{") + getParam<std::string>("expression_x") +
-                                       "}{" + getParam<std::string>("expression_y") + "}{" +
-                                       getParam<std::string>("expression_z") + "}")),
+    _vector_value(verifyFunction(std::string("{") +
+                                 (isParamValid("value_x") ? getParam<std::string>("value_x")
+                                                          : getParam<std::string>("expression_x")) +
+                                 "}{" +
+                                 (isParamValid("value_y") ? getParam<std::string>("value_y")
+                                                          : getParam<std::string>("expression_y")) +
+                                 "}{" +
+                                 (isParamValid("value_z") ? getParam<std::string>("value_z")
+                                                          : getParam<std::string>("expression_z")) +
+                                 "}")),
     _curl_value(verifyFunction(std::string("{") + getParam<std::string>("curl_x") + "}{" +
                                getParam<std::string>("curl_y") + "}{" +
                                getParam<std::string>("curl_z") + "}"))

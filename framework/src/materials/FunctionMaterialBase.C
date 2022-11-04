@@ -15,6 +15,7 @@ FunctionMaterialBase<is_ad>::validParams()
 {
   InputParameters params = Material::validParams();
   params.addClassDescription("Material providing a functionalized/parsed material property");
+
   params.addDeprecatedParam<std::string>(
       "f_name", "Name of the parsed material property", "f_name is deprecated, use property_name");
   // TODO Make required once deprecation is handled, see #20535
@@ -25,7 +26,8 @@ FunctionMaterialBase<is_ad>::validParams()
 template <bool is_ad>
 FunctionMaterialBase<is_ad>::FunctionMaterialBase(const InputParameters & parameters)
   : DerivativeMaterialInterface<Material>(parameters),
-    _F_name(getParam<std::string>("property_name")),
+    _F_name(isParamValid("f_name") ? getParam<std::string>("f_name")
+                                   : getParam<std::string>("property_name")),
     _prop_F(&declareGenericProperty<Real, is_ad>(_F_name))
 {
   // fetch names and numbers of all coupled variables

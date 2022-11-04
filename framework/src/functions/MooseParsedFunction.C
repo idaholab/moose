@@ -25,7 +25,7 @@ MooseParsedFunctionTempl<T>::validParams()
   InputParameters params = T::validParams();
   params += MooseParsedFunctionBase::validParams();
   params.addDeprecatedCustomTypeParam<std::string>(
-      "function",
+      "value",
       "FunctionExpression",
       "The user defined function.",
       "function is deprecated, use expression instead");
@@ -42,7 +42,9 @@ template <typename T>
 MooseParsedFunctionTempl<T>::MooseParsedFunctionTempl(const InputParameters & parameters)
   : T(parameters),
     MooseParsedFunctionBase(parameters),
-    _value(verifyFunction(this->template getParam<std::string>("expression")))
+    _value(parameters.isParamValid("value")
+               ? verifyFunction(this->template getParam<std::string>("value"))
+               : verifyFunction(this->template getParam<std::string>("expression")))
 {
 }
 
