@@ -44,6 +44,14 @@ MortarGapHeatTransferAction::validParams()
   params += GapFluxModelRadiation::validParams();
   params += GapFluxModelConduction::validParams();
 
+  // Change default to true
+  params.addParam<bool>(
+      "correct_edge_dropping",
+      true,
+      "Whether to enable correct edge dropping treatment for mortar constraints. When disabled "
+      "any Lagrange Multiplier degree of freedom on a secondary element without full primary "
+      "contributions will be set (strongly) to 0.");
+
   params.makeParamNotRequired<SubdomainName>("primary_subdomain");
   params.makeParamNotRequired<SubdomainName>("secondary_subdomain");
   params.makeParamNotRequired<Real>("gap_conductivity");
@@ -223,7 +231,6 @@ MortarGapHeatTransferAction::addConstraints()
   const std::string action_name = MooseUtils::shortName(name());
 
   params.applyParameters(parameters());
-  params.set<bool>("correct_edge_dropping") = true;
   params.set<bool>("use_displaced_mesh") = true;
 
   params.set<BoundaryName>("primary_boundary") = getParam<BoundaryName>("primary_boundary");
