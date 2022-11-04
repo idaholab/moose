@@ -504,7 +504,7 @@
     type = ParsedFunction
     symbol_names = effective_fluid_pressure_at_wellbore
     symbol_values = effective_fluid_pressure_at_wellbore
-    value = 'max(effective_fluid_pressure_at_wellbore, 20E6)'
+    expression = 'max(effective_fluid_pressure_at_wellbore, 20E6)'
   []
 []
 

@@ -148,17 +148,17 @@ velocity_interp_method = 'rc'
 [Functions]
   [exact_u]
     type = ParsedFunction
-    value = 'sin((1/2)*y*pi)*cos((1/2)*x*pi)'
+    expression = 'sin((1/2)*y*pi)*cos((1/2)*x*pi)'
   []
   [exact_rhou]
     type = ParsedFunction
-    value = 'rho*sin((1/2)*y*pi)*cos((1/2)*x*pi)'
+    expression = 'rho*sin((1/2)*y*pi)*cos((1/2)*x*pi)'
     symbol_names = 'rho'
     symbol_values = '${rho}'
   []
   [forcing_u]
     type = ADParsedFunction
-    value = '(1/2)*pi^2*mu*sin((1/2)*y*pi)*cos((1/2)*x*pi) - '
+    expression = '(1/2)*pi^2*mu*sin((1/2)*y*pi)*cos((1/2)*x*pi) - '
             '1/2*pi*rho*sin((1/4)*x*pi)*sin((1/2)*y*pi)^2*cos((1/2)*x*pi) + '
             '(1/2)*pi*rho*sin((1/4)*x*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi)^2 - '
             'pi*rho*sin((1/2)*x*pi)*sin((1/2)*y*pi)^2*cos((1/2)*x*pi) - '
@@ -168,17 +168,17 @@ velocity_interp_method = 'rc'
   []
   [exact_v]
     type = ParsedFunction
-    value = 'sin((1/4)*x*pi)*cos((1/2)*y*pi)'
+    expression = 'sin((1/4)*x*pi)*cos((1/2)*y*pi)'
   []
   [exact_rhov]
     type = ParsedFunction
-    value = 'rho*sin((1/4)*x*pi)*cos((1/2)*y*pi)'
+    expression = 'rho*sin((1/4)*x*pi)*cos((1/2)*y*pi)'
     symbol_names = 'rho'
     symbol_values = '${rho}'
   []
   [forcing_v]
     type = ADParsedFunction
-    value = '(5/16)*pi^2*mu*sin((1/4)*x*pi)*cos((1/2)*y*pi) - '
+    expression = '(5/16)*pi^2*mu*sin((1/4)*x*pi)*cos((1/2)*y*pi) - '
             'pi*rho*sin((1/4)*x*pi)^2*sin((1/2)*y*pi)*cos((1/2)*y*pi) - '
             '1/2*pi*rho*sin((1/4)*x*pi)*sin((1/2)*x*pi)*sin((1/2)*y*pi)*cos((1/2)*y*pi) + '
             '(1/4)*pi*rho*sin((1/2)*y*pi)*cos((1/4)*x*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi) + '
@@ -188,11 +188,11 @@ velocity_interp_method = 'rc'
   []
   [exact_p]
     type = ParsedFunction
-    value = 'sin((3/2)*y*pi)*cos((1/4)*x*pi)'
+    expression = 'sin((3/2)*y*pi)*cos((1/4)*x*pi)'
   []
   [forcing_p]
     type = ParsedFunction
-    value = '-1/2*pi*rho*sin((1/4)*x*pi)*sin((1/2)*y*pi) - '
+    expression = '-1/2*pi*rho*sin((1/4)*x*pi)*sin((1/2)*y*pi) - '
             '1/2*pi*rho*sin((1/2)*x*pi)*sin((1/2)*y*pi)'
     symbol_names = 'rho'
     symbol_values = '${rho}'

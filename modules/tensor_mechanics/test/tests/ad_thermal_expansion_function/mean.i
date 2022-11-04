@@ -83,7 +83,7 @@
     type = ParsedFunction
     symbol_names = 'T T_stress_free T_ref end_strain'
     symbol_values = '2 1.5           1.2   1e-4'
-    value = 'end_strain / (T - T_stress_free - end_strain * (T_stress_free - T_ref))'
+    expression = 'end_strain / (T - T_stress_free - end_strain * (T_stress_free - T_ref))'
   [../]
 []
 

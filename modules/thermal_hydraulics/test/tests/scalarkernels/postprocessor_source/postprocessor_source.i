@@ -45,7 +45,7 @@
 [Functions]
   [fn_source]
     type = ParsedFunction
-    value = 't'
+    expression = 't'
   []
 []
 

@@ -32,7 +32,7 @@
     type = ParsedFunction
     symbol_names = 'ri ro ui uo'
     symbol_values = '0.2 1.0 300 0'
-    value = '( uo * (1/ri-1/x) - ui * (1/ro-1/x)) / (1/ri-1/ro)'
+    expression = '( uo * (1/ri-1/x) - ui * (1/ro-1/x)) / (1/ri-1/ro)'
   [../]
 []
 

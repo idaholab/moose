@@ -13,11 +13,11 @@
 [Functions]
   [./forcing_fnu]
     type = ParsedFunction
-    value = -5.8*(x+y)+x*x*x-x+y*y*y-y
+    expression = -5.8*(x+y)+x*x*x-x+y*y*y-y
   [../]
   [./forcing_fnv]
     type = ParsedFunction
-    value = -4
+    expression = -4
   [../]
 
   [./slnu]
@@ -36,19 +36,19 @@
   #NeumannBC functions
   [./bc_fnut]
     type = ParsedFunction
-    value = 3*y*y-1
+    expression = 3*y*y-1
   [../]
   [./bc_fnub]
     type = ParsedFunction
-    value = -3*y*y+1
+    expression = -3*y*y+1
   [../]
   [./bc_fnul]
     type = ParsedFunction
-    value = -3*x*x+1
+    expression = -3*x*x+1
   [../]
   [./bc_fnur]
     type = ParsedFunction
-    value = 3*x*x-1
+    expression = 3*x*x-1
   [../]
 []
 

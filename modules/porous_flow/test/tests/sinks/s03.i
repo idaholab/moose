@@ -119,55 +119,55 @@
 [Functions]
   [mass00]
     type = ParsedFunction
-    value = 'vol*por*dens0*exp(pp/bulk)*pow(1+pow(-al*pp,1.0/(1-m)),-m)'
+    expression = 'vol*por*dens0*exp(pp/bulk)*pow(1+pow(-al*pp,1.0/(1-m)),-m)'
     symbol_names = 'vol por dens0 pp bulk al m'
     symbol_values = '0.25 0.1 1.1 p00 1.3 1.1 0.5'
   []
   [sat00]
     type = ParsedFunction
-    value = 'pow(1+pow(-al*pp,1.0/(1-m)),-m)'
+    expression = 'pow(1+pow(-al*pp,1.0/(1-m)),-m)'
     symbol_names = 'pp al m'
     symbol_values = 'p00 1.1 0.5'
   []
   [mass01]
     type = ParsedFunction
-    value = 'vol*por*dens0*exp(pp/bulk)*pow(1+pow(-al*pp,1.0/(1-m)),-m)'
+    expression = 'vol*por*dens0*exp(pp/bulk)*pow(1+pow(-al*pp,1.0/(1-m)),-m)'
     symbol_names = 'vol por dens0 pp bulk al m'
     symbol_values = '0.25 0.1 1.1 p01 1.3 1.1 0.5'
   []
   [expected_mass_change00]
     type = ParsedFunction
-    value = 'fcn*pow(pow(1+pow(-al*pp,1.0/(1-m)),-m),2)*area*dt'
+    expression = 'fcn*pow(pow(1+pow(-al*pp,1.0/(1-m)),-m),2)*area*dt'
     symbol_names = 'fcn perm dens0 pp bulk visc area dt   al  m'
     symbol_values = '6   0.2  1.1  p00 1.3  1.1  0.5  1E-3 1.1 0.5'
   []
   [expected_mass_change01]
     type = ParsedFunction
-    value = 'fcn*pow(pow(1+pow(-al*pp,1.0/(1-m)),-m),2)*area*dt'
+    expression = 'fcn*pow(pow(1+pow(-al*pp,1.0/(1-m)),-m),2)*area*dt'
     symbol_names = 'fcn perm dens0 pp bulk visc area dt   al  m'
     symbol_values = '6   0.2  1.1  p01 1.3  1.1  0.5  1E-3 1.1 0.5'
   []
   [mass00_expect]
     type = ParsedFunction
-    value = 'mass_prev-mass_change'
+    expression = 'mass_prev-mass_change'
     symbol_names = 'mass_prev mass_change'
     symbol_values = 'm00_prev  del_m00'
   []
   [mass01_expect]
     type = ParsedFunction
-    value = 'mass_prev-mass_change'
+    expression = 'mass_prev-mass_change'
     symbol_names = 'mass_prev mass_change'
     symbol_values = 'm01_prev  del_m01'
   []
   [sat01]
     type = ParsedFunction
-    value = 'pow(1+pow(-al*pp,1.0/(1-m)),-m)'
+    expression = 'pow(1+pow(-al*pp,1.0/(1-m)),-m)'
     symbol_names = 'pp al m'
     symbol_values = 'p01 1.1 0.5'
   []
   [expected_mass_change_rate]
     type = ParsedFunction
-    value = 'fcn*pow(pow(1+pow(-al*pp,1.0/(1-m)),-m),2)*area'
+    expression = 'fcn*pow(pow(1+pow(-al*pp,1.0/(1-m)),-m),2)*area'
     symbol_names = 'fcn perm dens0 pp bulk visc area dt   al  m'
     symbol_values = '6   0.2  1.1  p00 1.3  1.1  0.5  1E-3 1.1 0.5'
   []

@@ -54,7 +54,7 @@
     type = ParsedFunction
     symbol_names = 'g B p0 rho0'
     symbol_values = '1 2 -1 1'
-    value = '-B*log(exp(-p0/B)+g*rho0*x/B)' # expected pp at base
+    expression = '-B*log(exp(-p0/B)+g*rho0*x/B)' # expected pp at base
   []
 []
 

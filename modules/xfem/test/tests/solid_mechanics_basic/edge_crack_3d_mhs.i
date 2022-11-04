@@ -39,7 +39,7 @@
 [Functions]
   [./growth_func_v]
     type = ParsedFunction
-    value = 0.15
+    expression = 0.15
   [../]
 []
 

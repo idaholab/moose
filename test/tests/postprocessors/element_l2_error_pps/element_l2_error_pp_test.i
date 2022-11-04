@@ -37,16 +37,16 @@
 
   [./forcing_func]
     type = ParsedFunction
-    value = alpha*alpha*pi*pi*sin(alpha*pi*x)
+    expression = alpha*alpha*pi*pi*sin(alpha*pi*x)
     symbol_names = 'alpha'
-    symbol_values = '4'
+    symbol_expressions = '4'
   [../]
 
   [./u_func]
     type = ParsedFunction
-    value = sin(alpha*pi*x)
+    expression = sin(alpha*pi*x)
     symbol_names = 'alpha'
-    symbol_values = '4'
+    symbol_expressions = '4'
   [../]
 []
 

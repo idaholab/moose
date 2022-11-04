@@ -9,7 +9,7 @@
 [Functions]
   [./func1]
     type = ParsedFunction
-    value = 'il:=x-7; ir:=2-x; if(x<1, 1,
+    expression = 'il:=x-7; ir:=2-x; if(x<1, 1,
                                if(x<2, 0.5-0.5*cos(ir*pi),
                                if(x<7, 0,
                                if(x<8, 0.5-0.5*cos(il*pi),
@@ -17,7 +17,7 @@
   [../]
   [./func2]
     type = ParsedFunction
-    value = 'il:=x-1; ir:=5-x; if(x<1, 0,
+    expression = 'il:=x-1; ir:=5-x; if(x<1, 0,
                                if(x<2, 0.5-0.5*cos(il*pi),
                                if(x<4, 1,
                                if(x<5, 0.5-0.5*cos(ir*pi),
@@ -25,7 +25,7 @@
   [../]
   [./func3]
     type = ParsedFunction
-    value = 'il:=x-4; ir:=8-x; if(x<4, 0,
+    expression = 'il:=x-4; ir:=8-x; if(x<4, 0,
                                if(x<5, 0.5-0.5*cos(il*pi),
                                if(x<7, 1,
                                if(x<8, 0.5-0.5*cos(ir*pi),

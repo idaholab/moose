@@ -56,7 +56,7 @@
 [Functions]
   [f]
     type = ParsedFunction
-    value = '1 + x*x + y*y*y'
+    expression = '1 + x*x + y*y*y'
   []
 []
 

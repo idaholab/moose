@@ -20,7 +20,7 @@
   # A ParsedFunction allows us to supply analytic expressions directly in the input file
   [exact]
     type = ParsedFunction
-    value = sin(alpha*pi*x)
+    expression = sin(alpha*pi*x)
     symbol_names = alpha
     symbol_values = 16
   []

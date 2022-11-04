@@ -106,15 +106,15 @@
 [Functions]
   [./src_func]
     type = ParsedFunction
-    value = '10*(-200*x+200)'
+    expression = '10*(-200*x+200)'
   [../]
   [./ls_func]
     type = ParsedFunction
-    value = '1-(x-0.04)-0.2*t'
+    expression = '1-(x-0.04)-0.2*t'
   [../]
   [./neumann_func]
     type = ParsedFunction
-    value = '1.5*200*t'
+    expression = '1.5*200*t'
   [../]
 []
 

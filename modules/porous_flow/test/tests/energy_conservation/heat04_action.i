@@ -137,13 +137,13 @@
     type = ParsedFunction
     symbol_names = 'por0 rte temp rd rhc m0 fhc source'
     symbol_values = '0.5 0.25 t0   5  0.2 1.5 2  1'
-    value = '((1-por0)*exp(rte*temp)*rd*rhc*temp+m0*fhc*temp-source*t)/(source*t)'
+    expression = '((1-por0)*exp(rte*temp)*rd*rhc*temp+m0*fhc*temp-source*t)/(source*t)'
   []
   [err_pp_fcn]
     type = ParsedFunction
     symbol_names = 'por0 rte temp rd rhc m0 fhc source bulk pp fte'
     symbol_values = '0.5 0.25 t0   5  0.2 1.5 2  1      2    p0 0.5'
-    value = '(bulk*(fte*temp-log(1+(por0-1)*exp(rte*temp))+log(por0))-pp)/pp'
+    expression = '(bulk*(fte*temp-log(1+(por0-1)*exp(rte*temp))+log(por0))-pp)/pp'
   []
 []
 

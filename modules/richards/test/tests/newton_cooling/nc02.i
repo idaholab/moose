@@ -62,7 +62,7 @@
   active = 'initial_pressure'
   [./initial_pressure]
     type = ParsedFunction
-    value = 2000000-x*1000000/100
+    expression = 2000000-x*1000000/100
   [../]
 []
 

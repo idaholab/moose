@@ -411,15 +411,15 @@ alpha_fluid = 2e-4 # thermal expansion coefficient of fluid used in INSADBoussin
 [Functions]
   [htc_function]
     type = ParsedFunction
-    value = ${heat_transfer_coefficient}
+    expression = ${heat_transfer_coefficient}
   []
   [ini_p]
     type = ParsedFunction
-    value = '0.010302 * 981 * (10 - y)'
+    expression = '0.010302 * 981 * (10 - y)'
   []
   [heat_source_distribution_function]
     type = ParsedFunction
-    value = '300 * sin(pi * y / 10)'
+    expression = '300 * sin(pi * y / 10)'
   []
 []
 

@@ -23,17 +23,17 @@
 [Functions]
   [sin_fn]
     type = ParsedFunction
-    value = sin(x)
+    expression = sin(x)
   []
   [cos_fn]
     type = ParsedFunction
-    value = cos(x)
+    expression = cos(x)
   []
   [fn]
     type = ParsedFunction
-    value = 's/c'
+    expression = 's/c'
     symbol_names = 's c'
-    symbol_values = 'sin_fn cos_fn'
+    symbol_expressions = 'sin_fn cos_fn'
   []
 []
 

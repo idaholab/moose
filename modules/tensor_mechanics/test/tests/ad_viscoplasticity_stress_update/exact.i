@@ -36,85 +36,85 @@
     type = ParsedFunction
     symbol_names = 'avg_vonmises gtn_gauge_stress'
     symbol_values = 'avg_vonmises gtn_gauge_stress'
-    value = 'avg_vonmises/gtn_gauge_stress'
+    expression = 'avg_vonmises/gtn_gauge_stress'
   [../]
   [./M_gtn]
     type = ParsedFunction
     symbol_names = 'avg_hydro gtn_gauge_stress'
     symbol_values = 'avg_hydro gtn_gauge_stress'
-    value = 'abs(avg_hydro) / gtn_gauge_stress'
+    expression = 'abs(avg_hydro) / gtn_gauge_stress'
   [../]
   [./Q_ten]
     type = ParsedFunction
     symbol_names = 'avg_vonmises ten_gauge_stress'
     symbol_values = 'avg_vonmises ten_gauge_stress'
-    value = 'avg_vonmises/ten_gauge_stress'
+    expression = 'avg_vonmises/ten_gauge_stress'
   [../]
   [./M_ten]
     type = ParsedFunction
     symbol_names = 'avg_hydro ten_gauge_stress'
     symbol_values = 'avg_hydro ten_gauge_stress'
-    value = 'abs(avg_hydro) / ten_gauge_stress'
+    expression = 'abs(avg_hydro) / ten_gauge_stress'
   [../]
   [./Q_five]
     type = ParsedFunction
     symbol_names = 'avg_vonmises five_gauge_stress'
     symbol_values = 'avg_vonmises five_gauge_stress'
-    value = 'avg_vonmises/five_gauge_stress'
+    expression = 'avg_vonmises/five_gauge_stress'
   [../]
   [./M_five]
     type = ParsedFunction
     symbol_names = 'avg_hydro five_gauge_stress'
     symbol_values = 'avg_hydro five_gauge_stress'
-    value = 'abs(avg_hydro) / five_gauge_stress'
+    expression = 'abs(avg_hydro) / five_gauge_stress'
   [../]
   [./Q_three]
     type = ParsedFunction
     symbol_names = 'avg_vonmises three_gauge_stress'
     symbol_values = 'avg_vonmises three_gauge_stress'
-    value = 'avg_vonmises / three_gauge_stress'
+    expression = 'avg_vonmises / three_gauge_stress'
   [../]
   [./M_three]
     type = ParsedFunction
     symbol_names = 'avg_hydro three_gauge_stress'
     symbol_values = 'avg_hydro three_gauge_stress'
-    value = 'abs(avg_hydro) / three_gauge_stress'
+    expression = 'abs(avg_hydro) / three_gauge_stress'
   [../]
   [./Q_two]
     type = ParsedFunction
     symbol_names = 'avg_vonmises two_gauge_stress'
     symbol_values = 'avg_vonmises two_gauge_stress'
-    value = 'avg_vonmises/two_gauge_stress'
+    expression = 'avg_vonmises/two_gauge_stress'
   [../]
   [./M_two]
     type = ParsedFunction
     symbol_names = 'avg_hydro two_gauge_stress'
     symbol_values = 'avg_hydro two_gauge_stress'
-    value = 'abs(avg_hydro) / two_gauge_stress'
+    expression = 'abs(avg_hydro) / two_gauge_stress'
   [../]
   [./Q_onepointfive]
     type = ParsedFunction
     symbol_names = 'avg_vonmises onepointfive_gauge_stress'
     symbol_values = 'avg_vonmises onepointfive_gauge_stress'
-    value = 'avg_vonmises / onepointfive_gauge_stress'
+    expression = 'avg_vonmises / onepointfive_gauge_stress'
   [../]
   [./M_onepointfive]
     type = ParsedFunction
     symbol_names = 'avg_hydro onepointfive_gauge_stress'
     symbol_values = 'avg_hydro onepointfive_gauge_stress'
-    value = 'abs(avg_hydro) / onepointfive_gauge_stress'
+    expression = 'abs(avg_hydro) / onepointfive_gauge_stress'
   [../]
   [./Q_one]
     type = ParsedFunction
     symbol_names = 'avg_vonmises one_gauge_stress'
     symbol_values = 'avg_vonmises one_gauge_stress'
-    value = 'avg_vonmises / one_gauge_stress'
+    expression = 'avg_vonmises / one_gauge_stress'
   [../]
   [./M_one]
     type = ParsedFunction
     symbol_names = 'avg_hydro one_gauge_stress'
     symbol_values = 'avg_hydro one_gauge_stress'
-    value = 'abs(avg_hydro) / one_gauge_stress'
+    expression = 'abs(avg_hydro) / one_gauge_stress'
   [../]
 []
 

@@ -108,7 +108,7 @@
 [Functions]
   [shear_function]
     type = ParsedFunction
-    value = 'timeToDoubleInHours := 10;
+    expression = 'timeToDoubleInHours := 10;
             if(t<=28*60*60, 15.0e6, '
             '15.0e6*(t-28*3600)/3600/timeToDoubleInHours+15.0e6)'
   []

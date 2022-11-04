@@ -100,19 +100,19 @@
     type = ParsedFunction
     symbol_names = 'rhom_soln rhom'
     symbol_values = 'rhom_soln rhom'
-    value = 'abs(rhom_soln - rhom) / rhom_soln'
+    expression = 'abs(rhom_soln - rhom) / rhom_soln'
   []
   [rhoi_diff_fcn]
     type = ParsedFunction
     symbol_names = 'rhoi_soln rhoi'
     symbol_values = 'rhoi_soln rhoi'
-    value = 'abs(rhoi_soln - rhoi) / rhoi_soln'
+    expression = 'abs(rhoi_soln - rhoi) / rhoi_soln'
   []
   [creep_rate_diff_fcn]
     type = ParsedFunction
     symbol_names = 'creep_rate_soln creep_rate'
     symbol_values = 'creep_rate_soln creep_rate'
-    value = 'abs(creep_rate_soln - creep_rate) / creep_rate_soln'
+    expression = 'abs(creep_rate_soln - creep_rate) / creep_rate_soln'
   []
 []
 

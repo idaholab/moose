@@ -52,7 +52,7 @@
 [Functions]
   [./jump_flux_func]
     type = ParsedFunction
-    value = '1'
+    expression = '1'
   [../]
 []
 

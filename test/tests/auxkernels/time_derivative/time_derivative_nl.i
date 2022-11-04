@@ -48,7 +48,7 @@
 [Functions]
   [./gaussian_1d]
     type = ParsedFunction
-    value = exp(-x*x/2.0/1.0/1.0)
+    expression = exp(-x*x/2.0/1.0/1.0)
   [../]
 []
 

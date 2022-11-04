@@ -49,39 +49,39 @@
 [Functions]
   [stress11]
     type = ParsedFunction
-    value = '120.0*t'
+    expression = '120.0*t'
   []
   [stress22]
     type = ParsedFunction
-    value = '65*t'
+    expression = '65*t'
   []
   [strain33]
     type = ParsedFunction
-    value = '8.0e-2*t'
+    expression = '8.0e-2*t'
   []
   [strain23]
     type = ParsedFunction
-    value = '2.0e-2*t'
+    expression = '2.0e-2*t'
   []
   [strain13]
     type = ParsedFunction
-    value = '-7.0e-2*t'
+    expression = '-7.0e-2*t'
   []
   [strain12]
     type = ParsedFunction
-    value = '1.0e-2*t'
+    expression = '1.0e-2*t'
   []
   [strain32]
     type = ParsedFunction
-    value = '1.0e-2*t'
+    expression = '1.0e-2*t'
   []
   [strain31]
     type = ParsedFunction
-    value = '2.0e-2*t'
+    expression = '2.0e-2*t'
   []
   [strain21]
     type = ParsedFunction
-    value = '-1.5e-2*t'
+    expression = '-1.5e-2*t'
   []
   [zero]
     type = ConstantFunction

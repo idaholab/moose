@@ -73,29 +73,29 @@
 [Functions]
   [upper_aquifer_head]
     type = ParsedFunction
-    value = '10 + x / 200'
+    expression = '10 + x / 200'
   []
   [lower_aquifer_head]
     type = ParsedFunction
-    value = '20'
+    expression = '20'
   []
   [insitu_head]
     type = ParsedFunction
     symbol_values = 'lower_aquifer_head upper_aquifer_head'
     symbol_names = 'low up'
-    value = 'if(z <= -90, low, if(z >= -80, up, (up * (z + 90) - low * (z + 80)) / (10.0)))'
+    expression = 'if(z <= -90, low, if(z >= -80, up, (up * (z + 90) - low * (z + 80)) / (10.0)))'
   []
   [insitu_pp]
     type = ParsedFunction
     symbol_values = 'insitu_head'
     symbol_names = 'h'
-    value = '(h - z) * 1E4'
+    expression = '(h - z) * 1E4'
   []
   [l_rate]
     type = ParsedFunction
     symbol_values = 'm3_produced dt'
     symbol_names = 'm3_produced dt'
-    value = '1000 * m3_produced / dt'
+    expression = '1000 * m3_produced / dt'
   []
 []
 

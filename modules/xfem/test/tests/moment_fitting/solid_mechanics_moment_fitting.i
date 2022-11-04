@@ -56,25 +56,25 @@
 [Functions]
   [./right_trac_x]
     type = ParsedFunction
-    value = '-(t*M*y)/I'
+    expression = '-(t*M*y)/I'
     symbol_names = 'M E I'
     symbol_values = '2e4 1e6 0.666666667'
   [../]
   [./bottom_disp_y]
     type = ParsedFunction
-    value = '((t*M)/(2*E*I))*(1-nu*nu)*(x*x-0.25*l*l)'
+    expression = '((t*M)/(2*E*I))*(1-nu*nu)*(x*x-0.25*l*l)'
     symbol_names = 'M E I l nu'
     symbol_values = '2e4 1e6 0.666666667 2.0 0.3'
   [../]
   [./soln_x]
     type = ParsedFunction
-    value = '-(M/(E*I))*(1-nu*nu)*x*y'
+    expression = '-(M/(E*I))*(1-nu*nu)*x*y'
     symbol_names = 'M E I nu'
     symbol_values = '2e4 1e6 0.666666667 0.3'
   [../]
   [./soln_y]
     type = ParsedFunction
-    value = '(M/(2*E*I))*(1-nu*nu)*(x*x-0.25*l*l+(nu/(1-nu))*y*y)'
+    expression = '(M/(2*E*I))*(1-nu*nu)*(x*x-0.25*l*l+(nu/(1-nu))*y*y)'
     symbol_names = 'M E I l nu'
     symbol_values = '2e4 1e6 0.666666667 2.0 0.3'
   [../]

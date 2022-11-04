@@ -37,7 +37,7 @@
 [Functions]
   [source_func]
     type = ParsedFunction
-    value = 'x + y^2'
+    expression = 'x + y^2'
   []
 []
 

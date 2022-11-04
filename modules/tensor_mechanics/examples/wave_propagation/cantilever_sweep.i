@@ -138,7 +138,7 @@
     type = ParsedFunction
     symbol_names = density
     symbol_values = 2.7e3 #Al kg/m3
-    value = '-t*t*density'
+    expression = '-t*t*density'
   [../]
 []
 

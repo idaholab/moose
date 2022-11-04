@@ -120,7 +120,7 @@
     type = ParsedFunction
     symbol_names = 'tsf tref scale' #stress free temp, reference temp, scale factor
     symbol_values = '0.0 0.5  1e-4'
-    value = 'scale * (t - tsf) / (t - tref)'
+    expression = 'scale * (t - tsf) / (t - tref)'
   [../]
   [./cte_func_inst]
     type = PiecewiseLinear

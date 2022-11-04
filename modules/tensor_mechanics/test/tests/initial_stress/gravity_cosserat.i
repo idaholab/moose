@@ -186,11 +186,11 @@
 [Functions]
   [./weight]
     type = ParsedFunction
-    value = '0.5*z' # initial stress that should result from the weight force
+    expression = '0.5*z' # initial stress that should result from the weight force
   [../]
   [./kxx]
     type = ParsedFunction
-    value = '0.4*z' # some arbitrary xx and yy stress that should not affect the result
+    expression = '0.4*z' # some arbitrary xx and yy stress that should not affect the result
   [../]
 []
 

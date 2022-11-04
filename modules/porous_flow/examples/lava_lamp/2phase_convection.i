@@ -285,7 +285,7 @@
     type = ParsedFunction
     symbol_values = 'delta_xco2 dt'
     symbol_names = 'dx dt'
-    value = 'dx/dt'
+    expression = 'dx/dt'
   []
 []
 

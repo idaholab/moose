@@ -27,7 +27,7 @@
     type = ParsedFunction
     symbol_names = 'q L k ui uo'
     symbol_values = '1200 1 12 100 0'
-    value = 'ui + (uo-ui)*x/L + (q/k) * x * (L-x) / 2'
+    expression = 'ui + (uo-ui)*x/L + (q/k) * x * (L-x) / 2'
   [../]
 []
 

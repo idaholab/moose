@@ -15,7 +15,7 @@
 [Functions]
   [./afunc]
     type = ParsedFunction
-    value = x^2
+    expression = x^2
   [../]
 []
 

@@ -32,23 +32,23 @@
 [Functions]
   [k_real]
     type = ParsedFunction
-    value = '2*(1 + x/10)'
+    expression = '2*(1 + x/10)'
   []
   [k_imag]
     type = ParsedFunction
-    value = '(1 + x/10)'
+    expression = '(1 + x/10)'
   []
   [d_func]
     type = ParsedFunction
-    value = '12 * (1 + x/10)^2'
+    expression = '12 * (1 + x/10)^2'
   []
   [h_func]
     type = ParsedFunction
-    value = '4 * (1 + x/10)^2'
+    expression = '4 * (1 + x/10)^2'
   []
   [negative_h_func]
     type = ParsedFunction
-    value = '-4 * (1 + x/10)^2'
+    expression = '-4 * (1 + x/10)^2'
   []
   [RHS_real]
     type = MMSTestFunc

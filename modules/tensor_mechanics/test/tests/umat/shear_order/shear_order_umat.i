@@ -24,7 +24,7 @@
 [Functions]
   [top_pull]
     type = ParsedFunction
-    value = 1.0e-5*t
+    expression = 1.0e-5*t
   []
 []
 

@@ -21,17 +21,17 @@
 
   [./force_fn]
     type = ParsedFunction
-    value = '1-x*x+2*t'
+    expression = '1-x*x+2*t'
   [../]
 
   [./exact_fn]
     type = ParsedFunction
-    value = '(1-x*x)*t'
+    expression = '(1-x*x)*t'
   [../]
 
   [./left_bc]
     type = ParsedFunction
-    value = t
+    expression = t
   [../]
 []
 

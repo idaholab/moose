@@ -21,7 +21,7 @@
 [Functions]
   [./f]
     type = ParsedFunction
-    value = cos(t)
+    expression = cos(t)
   [../]
 []
 

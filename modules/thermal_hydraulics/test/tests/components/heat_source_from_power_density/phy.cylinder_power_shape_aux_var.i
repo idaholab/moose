@@ -5,7 +5,7 @@
 [Functions]
   [HeatFunction]
     type = ParsedFunction
-    value = 1313127093.32191
+    expression = 1313127093.32191
   []
 []
 

@@ -72,7 +72,7 @@
   [./load_x]
     # Defines the force on the grains in the x-direction
     type = ParsedFunction
-    value = 0.005*cos(x*pi/600)
+    expression = 0.005*cos(x*pi/600)
   [../]
   [./load_y]
     # Defines the force on the grains in the y-direction

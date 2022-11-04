@@ -168,7 +168,7 @@
     type = ParsedFunction
     symbol_values = injection_area
     symbol_names = area
-    value = '-1/area'
+    expression = '-1/area'
   []
   [ppliq_ic]
     type = SolutionFunction

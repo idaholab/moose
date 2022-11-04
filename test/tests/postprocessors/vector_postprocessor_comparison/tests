@@ -38,6 +38,8 @@
       cli_args = 'Functions/b_fn/type=ConstantFunction Functions/b_fn/value=2 '
                  'Postprocessors/vpp_comparison/comparison_type=equals Outputs/file_base=equals'
       csvdiff = 'equals.csv'
+      # ParsedFunction uses expression, ConstantFunction value
+      allow_unused = true
 
       detail = "equal."
     []

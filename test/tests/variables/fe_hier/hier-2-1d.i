@@ -10,16 +10,16 @@
 [Functions]
   [./bc_fnl]
     type = ParsedFunction
-    value = -2*x
+    expression = -2*x
   [../]
   [./bc_fnr]
     type = ParsedFunction
-    value = 2*x
+    expression = 2*x
   [../]
 
   [./forcing_fn]
     type = ParsedFunction
-    value = -2+x*x
+    expression = -2+x*x
   [../]
 
   [./solution]

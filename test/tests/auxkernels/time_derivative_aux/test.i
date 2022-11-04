@@ -13,7 +13,7 @@
   # These functions have implemented time derivatives
   [some_function]
     type = ParsedFunction
-    value = t*(x+y)
+    expression = t*(x+y)
   []
   [some_other_function]
     type = PiecewiseLinear

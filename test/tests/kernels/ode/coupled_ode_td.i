@@ -57,7 +57,7 @@
 [Functions]
   [./function_g]
     type = ParsedFunction
-    value = '(1 + t)'
+    expression = '(1 + t)'
   [../]
 []
 

@@ -68,17 +68,17 @@
 [Functions]
   [./vx_function]
     type = ParsedFunction
-    value = '1 + x * x'
+    expression = '1 + x * x'
   [../]
 
   [./forcing]
     type = ParsedFunction
-    value = 'x'
+    expression = 'x'
   [../]
 
   [./analytical]
     type = ParsedFunction
-    value = '(1 + 0.5 * x * x) / (1 + x * x)'
+    expression = '(1 + 0.5 * x * x) / (1 + x * x)'
   [../]
 []
 

@@ -20,32 +20,32 @@
 [Functions]
   [./bc_fnt]
     type = ParsedFunction
-    value = 3*y*y
+    expression = 3*y*y
   [../]
   [./bc_fnb]
     type = ParsedFunction
-    value = -3*y*y
+    expression = -3*y*y
   [../]
   [./bc_fnl]
     type = ParsedFunction
-    value = -3*x*x
+    expression = -3*x*x
   [../]
   [./bc_fnr]
     type = ParsedFunction
-    value = 3*x*x
+    expression = 3*x*x
   [../]
   [./bc_fnk]
     type = ParsedFunction
-    value = -3*z*z
+    expression = -3*z*z
   [../]
   [./bc_fnf]
     type = ParsedFunction
-    value = 3*z*z
+    expression = 3*z*z
   [../]
 
   [./forcing_fn]
     type = ParsedFunction
-    value = -6*x-6*y-6*z+(x*x*x)+(y*y*y)+(z*z*z)
+    expression = -6*x-6*y-6*z+(x*x*x)+(y*y*y)+(z*z*z)
   [../]
 
   [./solution]

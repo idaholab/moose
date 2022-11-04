@@ -40,7 +40,7 @@
 [Functions]
   [./sink_fn]
     type = ParsedFunction
-    value = '-t^3 - 3*t^2'
+    expression = '-t^3 - 3*t^2'
   [../]
 []
 

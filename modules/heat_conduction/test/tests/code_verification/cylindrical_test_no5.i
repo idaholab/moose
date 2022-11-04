@@ -30,13 +30,13 @@
     type = ParsedFunction
     symbol_names = 'q ro beta'
     symbol_values = '1200 1 0.1'
-    value = 'q * (1-beta*x/ro)'
+    expression = 'q * (1-beta*x/ro)'
   [../]
   [./exact]
     type = ParsedFunction
     symbol_names = 'uo q k ro beta'
     symbol_values = '300 1200 1 1 0.1'
-    value = 'uo + (0.25*q*ro^2/k) * ( (1-(x/ro)^2) - (1-(x/ro)^3) * beta * 4/9 )'
+    expression = 'uo + (0.25*q*ro^2/k) * ( (1-(x/ro)^2) - (1-(x/ro)^3) * beta * 4/9 )'
   [../]
 []
 

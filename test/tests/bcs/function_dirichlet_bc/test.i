@@ -24,16 +24,16 @@
 [Functions]
   [./ff_1]
     type = ParsedFunction
-    value = alpha*alpha*pi
+    expression = alpha*alpha*pi
     symbol_names = 'alpha'
-    symbol_values = '16'
+    symbol_expressions = '16'
   [../]
 
   [./ff_2]
     type = ParsedFunction
-    value = pi*sin(alpha*pi*x)
+    expression = pi*sin(alpha*pi*x)
     symbol_names = 'alpha'
-    symbol_values = '16'
+    symbol_expressions = '16'
   [../]
 
   [./forcing_func]
@@ -43,9 +43,9 @@
 
   [./bc_func]
     type = ParsedFunction
-    value = sin(alpha*pi*x)
+    expression = sin(alpha*pi*x)
     symbol_names = 'alpha'
-    symbol_values = '16'
+    symbol_expressions = '16'
   [../]
 []
 

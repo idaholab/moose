@@ -65,7 +65,7 @@ MooseParsedFunctionBase::verifyFunction(const std::string & function_str)
 {
   // Throws an error if quotes are found
   if (function_str.find("\"") != std::string::npos)
-    mooseError("The value in ParsedFunction contains quotes(\") which cannot be properly parsed");
+    mooseError("The expression in ParsedFunction contains quotes which cannot be properly parsed");
 
   // Return the input equation (no error)
   return function_str;

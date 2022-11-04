@@ -31,7 +31,7 @@
 [Functions]
   [cos]
     type = ParsedFunction
-    value = 'cos(0.5)'
+    expression = 'cos(0.5)'
   []
 []
 

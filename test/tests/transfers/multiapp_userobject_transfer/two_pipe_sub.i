@@ -33,7 +33,7 @@
 [Functions]
   [./setvar]
     type = ParsedFunction
-    value = '1 + z * z'
+    expression = '1 + z * z'
   [../]
 []
 

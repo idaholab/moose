@@ -71,7 +71,7 @@
 [Functions]
   [func]
     type = ADParsedFunction
-    value = 'x + t'
+    expression = 'x + t'
   []
 []
 

@@ -64,7 +64,7 @@
 [Functions]
   [dt_fn]
     type = ParsedFunction
-    value = '1 + t'
+    expression = '1 + t'
   []
 []
 

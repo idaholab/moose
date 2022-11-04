@@ -48,15 +48,15 @@
 [Functions]
   [./ic_func_etaa0]
     type = ParsedFunction
-    value = '0.9*0.5*(1.0-tanh((x)/sqrt(2.0)))'
+    expression = '0.9*0.5*(1.0-tanh((x)/sqrt(2.0)))'
   [../]
   [./ic_func_etab0]
     type = ParsedFunction
-    value = '0.9*0.5*(1.0+tanh((x)/sqrt(2.0)))'
+    expression = '0.9*0.5*(1.0+tanh((x)/sqrt(2.0)))'
   [../]
   [./ic_func_w]
     type = ParsedFunction
-    value = 0
+    expression = 0
   [../]
 []
 

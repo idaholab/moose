@@ -12,11 +12,11 @@
 [Functions]
   [./v1_func]
     type = ParsedFunction
-    value = (1-x)/2
+    expression = (1-x)/2
   [../]
   [./v2_func]
     type = ParsedFunction
-    value = (1+x)/2
+    expression = (1+x)/2
   [../]
 []
 

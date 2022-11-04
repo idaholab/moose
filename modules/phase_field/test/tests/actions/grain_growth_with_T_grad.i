@@ -30,7 +30,7 @@
 [Functions]
   [./TGradient]
     type = ParsedFunction
-    value = '450 + 0.1*x'
+    expression = '450 + 0.1*x'
   [../]
 []
 

@@ -26,22 +26,22 @@
 [Functions]
   [./forcing_fn_u]
     type = ParsedFunction
-    value = 3*t*t*((x*x)+(y*y))-(4*t*t*t)
+    expression = 3*t*t*((x*x)+(y*y))-(4*t*t*t)
   [../]
 
   [./forcing_fn_v]
     type = ParsedFunction
-    value = t
+    expression = t
   [../]
 
   # [./exact_fn]
   #   type = ParsedFunction
-  #   value = t*t*t*((x*x)+(y*y))
+  #   expression = t*t*t*((x*x)+(y*y))
   # [../]
 
   # [./exact_fn_v]
   #   type = ParsedFunction
-  #   value = t+1
+  #   expression = t+1
   # [../]
 []
 

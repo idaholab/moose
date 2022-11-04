@@ -83,7 +83,7 @@
   [../]
   [./f_w]
     type = ParsedFunction
-    value = '1.515e-7 * x'
+    expression = '1.515e-7 * x'
   [../]
 []
 

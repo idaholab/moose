@@ -59,15 +59,15 @@
 [Functions]
   [./ic_func_etaa0]
     type = ParsedFunction
-    value = 'r:=sqrt(x^2+y^2);0.5*(1.0-tanh((r-10.0)/sqrt(2.0)))'
+    expression = 'r:=sqrt(x^2+y^2);0.5*(1.0-tanh((r-10.0)/sqrt(2.0)))'
   [../]
   [./ic_func_etab0]
     type = ParsedFunction
-    value = 'r:=sqrt(x^2+y^2);0.5*(1.0+tanh((r-10)/sqrt(2.0)))*0.5*(1.0+tanh((y)/sqrt(2.0)))'
+    expression = 'r:=sqrt(x^2+y^2);0.5*(1.0+tanh((r-10)/sqrt(2.0)))*0.5*(1.0+tanh((y)/sqrt(2.0)))'
   [../]
   [./ic_func_etab1]
     type = ParsedFunction
-    value = 'r:=sqrt(x^2+y^2);0.5*(1.0+tanh((r-10)/sqrt(2.0)))*0.5*(1.0-tanh((y)/sqrt(2.0)))'
+    expression = 'r:=sqrt(x^2+y^2);0.5*(1.0+tanh((r-10)/sqrt(2.0)))*0.5*(1.0-tanh((y)/sqrt(2.0)))'
   [../]
 []
 

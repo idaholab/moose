@@ -16,11 +16,11 @@
   [../]
   [./velocity_y]
     type = ParsedFunction
-    value = 'if(t < 2, 0.00175, 0)'
+    expression = 'if(t < 2, 0.00175, 0)'
   [../]
   [./velocity_z]
     type = ParsedFunction
-    value = 0.00175
+    expression = 0.00175
   [../]
 []
 

@@ -135,7 +135,7 @@
 [Functions]
   [mass_bal_fcn]
     type = ParsedFunction
-    value = abs((a-c+d)/2/(a+c))
+    expression = abs((a-c+d)/2/(a+c))
     symbol_names = 'a c d'
     symbol_values = 'fluid_mass1 fluid_mass0 bh_report'
   []

@@ -37,7 +37,7 @@
 
   [./left_bc]
     type = ParsedFunction
-    value = t
+    expression = t
   [../]
 []
 

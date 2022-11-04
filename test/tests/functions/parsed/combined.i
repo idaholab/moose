@@ -28,11 +28,11 @@
 [Functions]
   [./pp_fn]
     type = ParsedFunction
-    value = '2*(t+1)'
+    expression = '2*(t+1)'
   [../]
   [./cos_fn]
     type = ParsedFunction
-    value = 'cos(pi*x)'
+    expression = 'cos(pi*x)'
   [../]
   [./fn]
     type = ParsedFunction

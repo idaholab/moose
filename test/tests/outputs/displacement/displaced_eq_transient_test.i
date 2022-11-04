@@ -15,12 +15,12 @@
 [Functions]
   [./right_u]
     type = ParsedFunction
-    value = 0.1*t
+    expression = 0.1*t
   [../]
 
   [./fn_v]
     type = ParsedFunction
-    value = (x+1)*y*0.1*t
+    expression = (x+1)*y*0.1*t
   [../]
 []
 

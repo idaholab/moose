@@ -125,11 +125,11 @@
 [Functions]
   [./disp_x_func]
     type = ParsedFunction
-    value = x
+    expression = x
   [../]
   [./disp_y_func]
     type = ParsedFunction
-    value = y
+    expression = y
   [../]
 []
 

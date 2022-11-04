@@ -57,7 +57,7 @@ delta_t_open = 0.1
   []
   [pipe2_open_fn]
     type = ParsedFunction
-    value = '1 - pipe3_phi'
+    expression = '1 - pipe3_phi'
     symbol_names = 'pipe3_phi'
     symbol_values = 'pipe3_open_fn'
   []

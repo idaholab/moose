@@ -273,7 +273,7 @@ user_limiter='upwind'
   []
   [eps]
     type = ParsedFunction
-    value = 'if(x < 2, 1,
+    expression = 'if(x < 2, 1,
              if(x < 4, 1 - .5 / 2 * (x - 2),
              if(x < 6, .5,
              if(x < 8, .5 - .25 / 2 * (x - 6),

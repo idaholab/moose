@@ -152,11 +152,11 @@
 [Functions]
   [./half_weight]
     type = ParsedFunction
-    value = '0.25*z' # half of the initial stress that should result from the weight force
+    expression = '0.25*z' # half of the initial stress that should result from the weight force
   [../]
   [./kxx]
     type = ParsedFunction
-    value = '0.4*z' # some arbitrary xx and yy stress that should not affect the result
+    expression = '0.4*z' # some arbitrary xx and yy stress that should not affect the result
   [../]
 []
 

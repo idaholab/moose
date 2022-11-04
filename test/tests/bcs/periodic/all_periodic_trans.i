@@ -14,36 +14,36 @@
 [Functions]
   [./tr_x]
     type = ParsedFunction
-    value = x
+    expression = x
   [../]
   [./tr_y]
     type = ParsedFunction
-    value = y+10
+    expression = y+10
   [../]
   [./itr_x]
     type = ParsedFunction
-    value = x
+    expression = x
   [../]
   [./itr_y]
     type = ParsedFunction
-    value = y-10
+    expression = y-10
   [../]
 
   [./tr_x2]
     type = ParsedFunction
-    value = x+10
+    expression = x+10
   [../]
   [./tr_y2]
     type = ParsedFunction
-    value = y
+    expression = y
   [../]
   [./itr_x2]
     type = ParsedFunction
-    value = x-10
+    expression = x-10
   [../]
   [./itr_y2]
     type = ParsedFunction
-    value = y
+    expression = y
   [../]
 []
 

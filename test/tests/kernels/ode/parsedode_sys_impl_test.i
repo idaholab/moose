@@ -13,17 +13,17 @@
 [Functions]
   [./f_fn]
     type = ParsedFunction
-    value = -4
+    expression = -4
   [../]
   [./bc_all_fn]
     type = ParsedFunction
-    value = x*x+y*y
+    expression = x*x+y*y
   [../]
 
   # ODEs
   [./exact_x_fn]
     type = ParsedFunction
-    value = (-1/3)*exp(-t)+(4/3)*exp(5*t)
+    expression = (-1/3)*exp(-t)+(4/3)*exp(5*t)
   [../]
 []
 

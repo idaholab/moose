@@ -33,11 +33,11 @@
 [Functions]
   [parsed_block0]
     type = ParsedFunction
-    value = 'x + 2 * y'
+    expression = 'x + 2 * y'
   []
   [parsed_block1] # continuous at the interface
     type = ParsedFunction
-    value = '2 * x + 2 * y - 2'
+    expression = '2 * x + 2 * y - 2'
   []
 []
 

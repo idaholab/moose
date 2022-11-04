@@ -17,7 +17,7 @@
 [Functions]
   [./solution]
     type = ParsedFunction
-    value = (exp(x)-1)/(exp(1)-1)
+    expression = (exp(x)-1)/(exp(1)-1)
   [../]
 []
 

@@ -31,11 +31,11 @@ refine = 1
 [Functions]
   [./horizontal_movement]
     type = ParsedFunction
-    value = 'if(t<1.0,${vx}*t-${offset},${vx}-${offset})'
+    expression = 'if(t<1.0,${vx}*t-${offset},${vx}-${offset})'
   [../]
   [./vertical_movement]
     type = ParsedFunction
-    value = 'if(t<1.0,${offset},${vy}*(t-1.0)+${offset})'
+    expression = 'if(t<1.0,${offset},${vy}*(t-1.0)+${offset})'
   [../]
 []
 

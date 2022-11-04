@@ -24,7 +24,7 @@
   # directly in the input file
   [./bc_func]
     type = ParsedFunction
-    value = sin(alpha*pi*x)
+    expression = sin(alpha*pi*x)
     symbol_names = 'alpha'
     symbol_values = '16'
   [../]

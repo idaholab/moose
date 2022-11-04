@@ -261,11 +261,11 @@ injection_rate = 10 # kg/s
     type = ParsedFunction
     symbol_values = 'dt kg_out'
     symbol_names = 'dt kg_out'
-    value = 'kg_out/dt'
+    expression = 'kg_out/dt'
   []
   [insitu_pp]
     type = ParsedFunction
-    value = '10 - 0.847E-2 * z' # Approximate hydrostatic in MPa
+    expression = '10 - 0.847E-2 * z' # Approximate hydrostatic in MPa
   []
 []
 

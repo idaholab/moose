@@ -91,7 +91,7 @@
     type = ParsedFunction
     symbol_names = 'baseflow_kg dt'
     symbol_values = 'baseflow_kg dt'
-    value = 'baseflow_kg / dt * 24.0 * 3600.0 / 400.0'
+    expression = 'baseflow_kg / dt * 24.0 * 3600.0 / 400.0'
   []
 []
 

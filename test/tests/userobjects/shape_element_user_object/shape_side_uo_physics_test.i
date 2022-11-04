@@ -137,10 +137,10 @@ u_left = 0.5
 [Functions]
   [./ic_u]
     type = ParsedFunction
-    value = '${u_left} * (1 - x)'
+    expression = '${u_left} * (1 - x)'
   [../]
   [./ic_pot]
     type = ParsedFunction
-    value = '1 - x'
+    expression = '1 - x'
   [../]
 []

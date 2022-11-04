@@ -153,7 +153,7 @@
 [Functions]
   [surface_source]
     type = ParsedFunction
-    value = 'Q_t*pi/2.0/3.0 * cos(pi/3.0*z)'
+    expression = 'Q_t*pi/2.0/3.0 * cos(pi/3.0*z)'
     symbol_names = 'Q_t'
     symbol_values = heat_source
   []

@@ -56,11 +56,11 @@
 [Functions]
   [inlet_function]
     type = ParsedFunction
-    value = 2000*sin(0.466*pi*t) # Inlet signal from Fig. 3
+    expression = 2000*sin(0.466*pi*t) # Inlet signal from Fig. 3
   []
   [outlet_function]
     type = ParsedFunction
-    value = 2000*cos(0.466*pi*t) # Outlet signal from Fig. 3
+    expression = 2000*cos(0.466*pi*t) # Outlet signal from Fig. 3
   []
 []
 

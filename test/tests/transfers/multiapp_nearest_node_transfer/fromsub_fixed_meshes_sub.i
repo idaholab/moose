@@ -23,7 +23,7 @@
 [Functions]
   [./disp_fun]
     type = ParsedFunction
-    value = 2*t
+    expression = 2*t
   [../]
 []
 

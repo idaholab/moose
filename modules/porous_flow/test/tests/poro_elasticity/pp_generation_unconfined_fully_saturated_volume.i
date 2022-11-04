@@ -313,19 +313,19 @@
 [Functions]
   [stress_xx_over_strain_fcn]
     type = ParsedFunction
-    value = a/b
+    expression = a/b
     symbol_names = 'a b'
     symbol_values = 'stress_xx zdisp'
   []
   [stress_zz_over_strain_fcn]
     type = ParsedFunction
-    value = a/b
+    expression = a/b
     symbol_names = 'a b'
     symbol_values = 'stress_zz zdisp'
   []
   [p_over_strain_fcn]
     type = ParsedFunction
-    value = a/b
+    expression = a/b
     symbol_names = 'a b'
     symbol_values = 'p0 zdisp'
   []

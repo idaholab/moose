@@ -46,7 +46,7 @@
 [Functions]
   [conditional_function]
     type = ParsedFunction
-    value = 't >= 1.9 & t < 2.1'
+    expression = 't >= 1.9 & t < 2.1'
   []
 []
 

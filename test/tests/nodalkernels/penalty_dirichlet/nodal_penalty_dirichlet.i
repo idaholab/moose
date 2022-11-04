@@ -16,7 +16,7 @@
 [Functions]
   [./forcing_fn]
     type = ParsedFunction
-    value = -2*(x*x+y*y-2)
+    expression = -2*(x*x+y*y-2)
   [../]
 
   [./solution]

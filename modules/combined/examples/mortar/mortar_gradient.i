@@ -45,12 +45,12 @@
   [./init_slope]
     # slope with a concentration spike close to the lower interface
     type = ParsedFunction
-    value = 'if(x>0.4 & x<0.6 & y>0.1 & y<0.3, 3+y, y)'
+    expression = 'if(x>0.4 & x<0.6 & y>0.1 & y<0.3, 3+y, y)'
   [../]
   [./init_flat]
     # no-slope and the same spike
     type = ParsedFunction
-    value = 'if(x>0.4 & x<0.6 & y>0.1 & y<0.3, 3, 0)'
+    expression = 'if(x>0.4 & x<0.6 & y>0.1 & y<0.3, 3, 0)'
   [../]
 []
 

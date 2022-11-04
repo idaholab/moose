@@ -6,7 +6,7 @@
 [Functions]
   [fn-initial_T]
     type = ParsedFunction
-    value = 'baseT + (dT * sin((pi * x) / length))'
+    expression = 'baseT + (dT * sin((pi * x) / length))'
     symbol_names = 'baseT   dT    length'
     symbol_values = '560.0  30.0  3.6576'
   []

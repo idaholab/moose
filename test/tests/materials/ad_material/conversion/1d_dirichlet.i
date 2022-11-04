@@ -42,7 +42,7 @@
 [Functions]
   [sink]
     type = ParsedFunction
-    value = '3*x^3'
+    expression = '3*x^3'
   []
 []
 

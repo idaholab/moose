@@ -7,12 +7,12 @@
 
   [./tr_x]
     type = ParsedFunction
-    value = -x
+    expression = -x
   [../]
 
   [./tr_y]
     type = ParsedFunction
-    value = y
+    expression = y
   [../]
 []
 

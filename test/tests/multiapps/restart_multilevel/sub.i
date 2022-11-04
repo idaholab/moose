@@ -9,11 +9,11 @@
 [Functions]
   [./u_fn]
     type = ParsedFunction
-    value = t*x
+    expression = t*x
   [../]
   [./ffn]
     type = ParsedFunction
-    value = x
+    expression = x
   [../]
 []
 

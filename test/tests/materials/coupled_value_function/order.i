@@ -11,7 +11,7 @@
 [Functions]
   [test]
     type = ParsedFunction
-    value = 't + x^2 + y^3 + sin(5*z)'
+    expression = 't + x^2 + y^3 + sin(5*z)'
   []
 []
 

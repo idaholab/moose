@@ -18,7 +18,7 @@
 
   [K_prime_fn]
     type = ParsedFunction
-    value = 't*(2-x)*x'
+    expression = 't*(2-x)*x'
   []
 []
 

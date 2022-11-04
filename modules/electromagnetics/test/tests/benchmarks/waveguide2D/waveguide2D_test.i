@@ -24,7 +24,7 @@
 [Functions]
   [inc_y]
     type = ParsedFunction
-    value = 'sin(pi * y / 10)'
+    expression = 'sin(pi * y / 10)'
   []
 []
 

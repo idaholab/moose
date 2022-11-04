@@ -52,16 +52,16 @@
 [Functions]
   [./exact_fn]
     type = ParsedFunction
-    value = t
+    expression = t
   [../]
 
   [./a_fn]
     type = ParsedFunction
-    value = t
+    expression = t
   [../]
   [./b_fn]
     type = ParsedFunction
-    value = (4-t)/2
+    expression = (4-t)/2
   [../]
 []
 

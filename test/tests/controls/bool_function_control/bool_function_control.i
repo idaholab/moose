@@ -7,7 +7,7 @@
 [Functions]
   [solve_fn]
     type = ParsedFunction
-    value = 'if(t<0.3, 1, 0)'
+    expression = 'if(t<0.3, 1, 0)'
   []
 []
 

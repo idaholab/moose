@@ -234,25 +234,25 @@ production_rate = 1.0 # kg/s/m
     type = ParsedFunction
     symbol_names = 'kg_Na dt'
     symbol_values = 'kg_Na_produced_this_timestep dt'
-    value = 'kg_Na * 1000 / 22.9898 / dt'
+    expression = 'kg_Na * 1000 / 22.9898 / dt'
   []
   [moles_Cl]
     type = ParsedFunction
     symbol_names = 'kg_Cl dt'
     symbol_values = 'kg_Cl_produced_this_timestep dt'
-    value = 'kg_Cl * 1000 / 35.453 / dt'
+    expression = 'kg_Cl * 1000 / 35.453 / dt'
   []
   [moles_SiO2]
     type = ParsedFunction
     symbol_names = 'kg_SiO2 dt'
     symbol_values = 'kg_SiO2_produced_this_timestep dt'
-    value = 'kg_SiO2 * 1000 / 60.0843 / dt'
+    expression = 'kg_SiO2 * 1000 / 60.0843 / dt'
   []
   [moles_H2O]
     type = ParsedFunction
     symbol_names = 'kg_H2O dt'
     symbol_values = 'kg_H2O_produced_this_timestep dt'
-    value = 'kg_H2O * 1000 / 18.0152 / dt'
+    expression = 'kg_H2O * 1000 / 18.0152 / dt'
   []
 []
 

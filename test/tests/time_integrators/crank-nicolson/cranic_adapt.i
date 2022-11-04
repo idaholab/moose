@@ -21,12 +21,12 @@
   [./forcing_fn]
     type = ParsedFunction
     # dudt = 3*t^2*(x^2 + y^2)
-    value = sin(pi*x)*sin(pi*y)+2*t*pi*pi*sin(pi*x)*sin(pi*y)
+    expression = sin(pi*x)*sin(pi*y)+2*t*pi*pi*sin(pi*x)*sin(pi*y)
   [../]
 
   [./exact_fn]
     type = ParsedFunction
-    value = t*sin(pi*x)*sin(pi*y)
+    expression = t*sin(pi*x)*sin(pi*y)
   [../]
 []
 

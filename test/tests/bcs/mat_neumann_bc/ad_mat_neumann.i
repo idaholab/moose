@@ -28,7 +28,7 @@
 [Functions]
   [./ic_func_phi]
     type = ParsedFunction
-    value = '0.5 * (1 - tanh((x - 5) / 0.8))'
+    expression = '0.5 * (1 - tanh((x - 5) / 0.8))'
   [../]
 []
 

@@ -43,7 +43,7 @@
     type = Exodiff
     input = combined.i
     exodiff = 'combined_out.e'
-    requirement = "The ParsedFunction object shall support the use of functions, scalar values and postprocessor values specified by their names in its expression at the same time."
+    requirement = "The ParsedFunction object shall support the use of functions, scalar expressions and postprocessor expressions specified by their names in its expression at the same time."
     issues = '#12179'
   [../]
 

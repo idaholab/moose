@@ -18,7 +18,7 @@
   # Sampled values will be [0, 1, 2]
   [./b_fn]
     type = ParsedFunction
-    value = 'x'
+    expression = 'x'
   [../]
 []
 

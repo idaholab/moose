@@ -36,11 +36,11 @@
 [Functions]
   [./vertical_movement]
     type = ParsedFunction
-    value = -t
+    expression = -t
   [../]
   [./horizontal_movement]
     type = ParsedFunction
-    value = -0.04*sin(4*t)+0.02
+    expression = -0.04*sin(4*t)+0.02
   [../]
 []
 

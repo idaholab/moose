@@ -142,17 +142,17 @@ rho = 1.1
 [Functions]
   [exact_u]
     type = ParsedFunction
-    value = 'sin(y)*sin(x*pi)'
+    expression = 'sin(y)*sin(x*pi)'
   []
   [exact_rhou]
     type = ParsedFunction
-    value = 'rho*sin(y)*sin(x*pi)'
+    expression = 'rho*sin(y)*sin(x*pi)'
     symbol_names = 'rho'
     symbol_values = '${rho}'
   []
   [forcing_u]
     type = ADParsedFunction
-    value = 'mu*sin(y)*sin(x*pi) - (-x*pi^2*mu*sin(y)*sin(x*pi) + pi*mu*sin(y)*cos(x*pi))/x + '
+    expression = 'mu*sin(y)*sin(x*pi) - (-x*pi^2*mu*sin(y)*sin(x*pi) + pi*mu*sin(y)*cos(x*pi))/x + '
             '(2*x*pi*rho*sin(y)^2*sin(x*pi)*cos(x*pi) + rho*sin(y)^2*sin(x*pi)^2)/x + '
             '(-1/2*x*pi*rho*sin(x)*sin(y)*sin(x*pi)*sin((1/2)*y*pi) + '
             'x*rho*sin(x)*sin(x*pi)*cos(y)*cos((1/2)*y*pi))/x'
@@ -161,17 +161,17 @@ rho = 1.1
   []
   [exact_v]
     type = ParsedFunction
-    value = 'sin(x)*cos((1/2)*y*pi)'
+    expression = 'sin(x)*cos((1/2)*y*pi)'
   []
   [exact_rhov]
     type = ParsedFunction
-    value = 'rho*sin(x)*cos((1/2)*y*pi)'
+    expression = 'rho*sin(x)*cos((1/2)*y*pi)'
     symbol_names = 'rho'
     symbol_values = '${rho}'
   []
   [forcing_v]
     type = ADParsedFunction
-    value = '(1/4)*pi^2*mu*sin(x)*cos((1/2)*y*pi) - pi*rho*sin(x)^2*sin((1/2)*y*pi)*cos((1/2)*y*pi) '
+    expression = '(1/4)*pi^2*mu*sin(x)*cos((1/2)*y*pi) - pi*rho*sin(x)^2*sin((1/2)*y*pi)*cos((1/2)*y*pi) '
             '+ cos(y) - (-x*mu*sin(x)*cos((1/2)*y*pi) + mu*cos(x)*cos((1/2)*y*pi))/x + '
             '(x*pi*rho*sin(x)*sin(y)*cos(x*pi)*cos((1/2)*y*pi) + '
             'x*rho*sin(y)*sin(x*pi)*cos(x)*cos((1/2)*y*pi) + '
@@ -181,11 +181,11 @@ rho = 1.1
   []
   [exact_p]
     type = ParsedFunction
-    value = 'sin(y)'
+    expression = 'sin(y)'
   []
   [forcing_p]
     type = ParsedFunction
-    value = '-1/2*pi*rho*sin(x)*sin((1/2)*y*pi) + (x*pi*rho*sin(y)*cos(x*pi) + '
+    expression = '-1/2*pi*rho*sin(x)*sin((1/2)*y*pi) + (x*pi*rho*sin(y)*cos(x*pi) + '
             'rho*sin(y)*sin(x*pi))/x'
     symbol_names = 'rho'
     symbol_values = '${rho}'

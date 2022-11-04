@@ -62,11 +62,11 @@ a=1
 [Functions]
   [exact]
     type = ParsedFunction
-    value = 'cos(x)'
+    expression = 'cos(x)'
   []
   [forcing]
     type = ParsedFunction
-    value = 'cos(x) - sin(x)'
+    expression = 'cos(x) - sin(x)'
   []
 []
 

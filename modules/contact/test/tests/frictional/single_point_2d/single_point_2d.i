@@ -31,7 +31,7 @@
 [Functions]
   [./horizontal_movement]
     type = ParsedFunction
-    value = t
+    expression = t
   [../]
 []
 

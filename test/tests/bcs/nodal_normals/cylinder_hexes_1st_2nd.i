@@ -6,12 +6,12 @@
 [Functions]
   [./all_bc_fn]
     type = ParsedFunction
-    value = x*x+y*y
+    expression = x*x+y*y
   [../]
 
   [./f_fn]
     type = ParsedFunction
-    value = -4
+    expression = -4
   [../]
 []
 

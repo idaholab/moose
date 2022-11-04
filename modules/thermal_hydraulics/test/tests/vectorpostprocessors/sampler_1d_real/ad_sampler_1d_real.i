@@ -9,7 +9,7 @@
 [Functions]
   [test_fn]
     type = ParsedFunction
-    value = 'x'
+    expression = 'x'
   []
 []
 

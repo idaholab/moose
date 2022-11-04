@@ -13,15 +13,15 @@
 [Functions]
   [waveNumberSquared]
     type = ParsedFunction
-    value = '(2*pi*20e9/3e8)^2'
+    expression = '(2*pi*20e9/3e8)^2'
   []
   [omegaMu]
     type = ParsedFunction
-    value = '2*pi*20e9*4*pi*1e-7'
+    expression = '2*pi*20e9*4*pi*1e-7'
   []
   [beta]
     type = ParsedFunction
-    value = '2*pi*20e9/3e8'
+    expression = '2*pi*20e9/3e8'
   []
   [curr_real]
     type = ParsedVectorFunction

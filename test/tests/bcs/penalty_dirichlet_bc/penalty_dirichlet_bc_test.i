@@ -13,7 +13,7 @@
 [Functions]
   [./forcing_fn]
     type = ParsedFunction
-    value = -2*(x*x+y*y-2)+(1-x*x)*(1-y*y)
+    expression = -2*(x*x+y*y-2)+(1-x*x)*(1-y*y)
   [../]
 
   [./solution]

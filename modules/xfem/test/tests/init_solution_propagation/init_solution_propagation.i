@@ -93,7 +93,7 @@
 [Functions]
   [./dummy]
     type = ParsedFunction
-    value = 'x*x+y*y'
+    expression = 'x*x+y*y'
   [../]
   [./disp_top_y]
     type = PiecewiseLinear

@@ -62,7 +62,7 @@
 [Functions]
   [./func_coef]
     type = ParsedFunction
-    value = 1
+    expression = 1
   [../]
 []
 

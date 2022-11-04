@@ -60,16 +60,16 @@
 [Functions]
   [./eigen_mode]
     type = ParsedFunction
-    value = 'sqrt(2.0 / L) * sin(mode * pi  * x / L)'
+    expression = 'sqrt(2.0 / L) * sin(mode * pi  * x / L)'
     symbol_names = 'L  mode'
-    symbol_values = '10 1'
+    symbol_expressions = '10 1'
   [../]
 
   [./second_harmonic]
     type = ParsedFunction
-    value = 'sqrt(2.0 / L) * sin(mode * pi  * x / L)'
+    expression = 'sqrt(2.0 / L) * sin(mode * pi  * x / L)'
     symbol_names = 'L  mode'
-    symbol_values = '10 2'
+    symbol_expressions = '10 2'
   [../]
 []
 

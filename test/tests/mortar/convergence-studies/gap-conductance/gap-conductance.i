@@ -145,23 +145,23 @@
 [Functions]
   [./forcing_function]
     type = ParsedFunction
-    value = ''
+    expression = ''
   [../]
   [./exact_soln_primal]
     type = ParsedFunction
-    value = ''
+    expression = ''
   [../]
   [exact_soln_lambda]
     type = ParsedFunction
-    value = ''
+    expression = ''
   []
   [mms_secondary]
     type = ParsedFunction
-    value = ''
+    expression = ''
   []
   [mms_primary]
     type = ParsedFunction
-    value = ''
+    expression = ''
   []
 []
 

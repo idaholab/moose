@@ -13,24 +13,24 @@
 [Functions]
   [./bc_fnt]
     type = ParsedFunction
-    value = 1
+    expression = 1
   [../]
   [./bc_fnb]
     type = ParsedFunction
-    value = -1
+    expression = -1
   [../]
   [./bc_fnl]
     type = ParsedFunction
-    value = -1
+    expression = -1
   [../]
   [./bc_fnr]
     type = ParsedFunction
-    value = 1
+    expression = 1
   [../]
 
   [./forcing_fn]
     type = ParsedFunction
-    value = x+y
+    expression = x+y
   [../]
 
   [./solution]

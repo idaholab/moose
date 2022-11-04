@@ -102,37 +102,37 @@
 [Functions]
   [mass10]
     type = ParsedFunction
-    value = 'vol*por*dens0*exp(pp/bulk)*if(pp>=0,1,pow(1+pow(-al*pp,1.0/(1-m)),-m))'
+    expression = 'vol*por*dens0*exp(pp/bulk)*if(pp>=0,1,pow(1+pow(-al*pp,1.0/(1-m)),-m))'
     symbol_names = 'vol por dens0 pp bulk al m'
     symbol_values = '0.25 0.1 1.1 p10 1.3 1.1 0.5'
   []
   [rate10]
     type = ParsedFunction
-    value = 'fcn*if(pp>center,m,if(pp<themin,0,m/c/c/c*(2*(pp-center)+c)*((pp-center)-c)*((pp-center)-c)))'
+    expression = 'fcn*if(pp>center,m,if(pp<themin,0,m/c/c/c*(2*(pp-center)+c)*((pp-center)-c)*((pp-center)-c)))'
     symbol_names = 'm fcn pp  center sd  themin c'
     symbol_values = '2 3   p10 0.9    0.5 0.1   -0.8'
   []
   [mass10_expect]
     type = ParsedFunction
-    value = 'mass_prev-rate*area*dt'
+    expression = 'mass_prev-rate*area*dt'
     symbol_names = 'mass_prev rate     area dt'
     symbol_values = 'm10_prev  m10_rate 0.5 2E-3'
   []
   [mass11]
     type = ParsedFunction
-    value = 'vol*por*dens0*exp(pp/bulk)*if(pp>=0,1,pow(1+pow(-al*pp,1.0/(1-m)),-m))'
+    expression = 'vol*por*dens0*exp(pp/bulk)*if(pp>=0,1,pow(1+pow(-al*pp,1.0/(1-m)),-m))'
     symbol_names = 'vol por dens0 pp bulk al m'
     symbol_values = '0.25 0.1 1.1 p11 1.3 1.1 0.5'
   []
   [rate11]
     type = ParsedFunction
-    value = 'fcn*if(pp>center,m,if(pp<themin,0,m/c/c/c*(2*(pp-center)+c)*((pp-center)-c)*((pp-center)-c)))'
+    expression = 'fcn*if(pp>center,m,if(pp<themin,0,m/c/c/c*(2*(pp-center)+c)*((pp-center)-c)*((pp-center)-c)))'
     symbol_names = 'm fcn pp  center sd  themin c'
     symbol_values = '2 3   p11 0.9    0.5 0.1   -0.8'
   []
   [mass11_expect]
     type = ParsedFunction
-    value = 'mass_prev-rate*area*dt'
+    expression = 'mass_prev-rate*area*dt'
     symbol_names = 'mass_prev rate     area dt'
     symbol_values = 'm11_prev  m11_rate 0.5 2E-3'
   []

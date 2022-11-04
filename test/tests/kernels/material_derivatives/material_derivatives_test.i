@@ -21,11 +21,11 @@
 [Functions]
   [./u_IC_fn]
     type = ParsedFunction
-    value = 'x'
+    expression = 'x'
   [../]
   [./v_IC_fn]
     type = ParsedFunction
-    value = 'sin(x)'
+    expression = 'sin(x)'
   [../]
 []
 

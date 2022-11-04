@@ -261,7 +261,7 @@ hot_temp=310
 [Functions]
   [lid_function]
     type = ParsedFunction
-    value = '4*x*(1-x)'
+    expression = '4*x*(1-x)'
   []
 []
 

@@ -13,24 +13,24 @@
 [Functions]
   [./bc_fnt]
     type = ParsedFunction
-    value = 2*y
+    expression = 2*y
   [../]
   [./bc_fnb]
     type = ParsedFunction
-    value = -2*y
+    expression = -2*y
   [../]
   [./bc_fnl]
     type = ParsedFunction
-    value = -2*x
+    expression = -2*x
   [../]
   [./bc_fnr]
     type = ParsedFunction
-    value = 2*x
+    expression = 2*x
   [../]
 
   [./forcing_fn]
     type = ParsedFunction
-    value = -4+x*x+y*y
+    expression = -4+x*x+y*y
   [../]
 
   [./solution]

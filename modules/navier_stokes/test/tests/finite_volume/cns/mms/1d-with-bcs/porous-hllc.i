@@ -149,45 +149,45 @@ eps=0.9
 [Functions]
 [exact_rho]
   type = ParsedFunction
-  value = '3.48788261470924*cos(x)'
+  expression = '3.48788261470924*cos(x)'
 []
 [forcing_rho]
   type = ParsedFunction
-  value = '-3.83667087618017*eps*sin(1.1*x)'
+  expression = '-3.83667087618017*eps*sin(1.1*x)'
   symbol_names = 'eps'
   symbol_values = '${eps}'
 []
 [exact_rho_ud]
   type = ParsedFunction
-  value = '3.48788261470924*eps*cos(1.1*x)'
+  expression = '3.48788261470924*eps*cos(1.1*x)'
   symbol_names = 'eps'
   symbol_values = '${eps}'
 []
 [forcing_rho_ud]
   type = ParsedFunction
-  value = 'eps*(-(10.6975765229419*cos(1.2*x)/cos(x) - 0.697576522941849*cos(1.1*x)^2/cos(x)^2)*sin(x) + (10.6975765229419*sin(x)*cos(1.2*x)/cos(x)^2 - 1.3951530458837*sin(x)*cos(1.1*x)^2/cos(x)^3 + 1.53466835047207*sin(1.1*x)*cos(1.1*x)/cos(x)^2 - 12.8370918275302*sin(1.2*x)/cos(x))*cos(x)) + 3.48788261470924*eps*sin(x)*cos(1.1*x)^2/cos(x)^2 - 7.67334175236034*eps*sin(1.1*x)*cos(1.1*x)/cos(x)'
+  expression = 'eps*(-(10.6975765229419*cos(1.2*x)/cos(x) - 0.697576522941849*cos(1.1*x)^2/cos(x)^2)*sin(x) + (10.6975765229419*sin(x)*cos(1.2*x)/cos(x)^2 - 1.3951530458837*sin(x)*cos(1.1*x)^2/cos(x)^3 + 1.53466835047207*sin(1.1*x)*cos(1.1*x)/cos(x)^2 - 12.8370918275302*sin(1.2*x)/cos(x))*cos(x)) + 3.48788261470924*eps*sin(x)*cos(1.1*x)^2/cos(x)^2 - 7.67334175236034*eps*sin(1.1*x)*cos(1.1*x)/cos(x)'
   symbol_names = 'eps'
   symbol_values = '${eps}'
 []
 [exact_rho_et]
   type = ParsedFunction
-  value = '26.7439413073546*cos(1.2*x)'
+  expression = '26.7439413073546*cos(1.2*x)'
 []
 [forcing_rho_et]
   type = ParsedFunction
-  value = '1.0*eps*(3.48788261470924*(3.06706896551724*cos(1.2*x)/cos(x) - 0.2*cos(1.1*x)^2/cos(x)^2)*cos(x) + 26.7439413073546*cos(1.2*x))*sin(x)*cos(1.1*x)/cos(x)^2 - 1.1*eps*(3.48788261470924*(3.06706896551724*cos(1.2*x)/cos(x) - 0.2*cos(1.1*x)^2/cos(x)^2)*cos(x) + 26.7439413073546*cos(1.2*x))*sin(1.1*x)/cos(x) + 1.0*eps*(-(10.6975765229419*cos(1.2*x)/cos(x) - 0.697576522941849*cos(1.1*x)^2/cos(x)^2)*sin(x) + (10.6975765229419*sin(x)*cos(1.2*x)/cos(x)^2 - 1.3951530458837*sin(x)*cos(1.1*x)^2/cos(x)^3 + 1.53466835047207*sin(1.1*x)*cos(1.1*x)/cos(x)^2 - 12.8370918275302*sin(1.2*x)/cos(x))*cos(x) - 32.0927295688256*sin(1.2*x))*cos(1.1*x)/cos(x)'
+  expression = '1.0*eps*(3.48788261470924*(3.06706896551724*cos(1.2*x)/cos(x) - 0.2*cos(1.1*x)^2/cos(x)^2)*cos(x) + 26.7439413073546*cos(1.2*x))*sin(x)*cos(1.1*x)/cos(x)^2 - 1.1*eps*(3.48788261470924*(3.06706896551724*cos(1.2*x)/cos(x) - 0.2*cos(1.1*x)^2/cos(x)^2)*cos(x) + 26.7439413073546*cos(1.2*x))*sin(1.1*x)/cos(x) + 1.0*eps*(-(10.6975765229419*cos(1.2*x)/cos(x) - 0.697576522941849*cos(1.1*x)^2/cos(x)^2)*sin(x) + (10.6975765229419*sin(x)*cos(1.2*x)/cos(x)^2 - 1.3951530458837*sin(x)*cos(1.1*x)^2/cos(x)^3 + 1.53466835047207*sin(1.1*x)*cos(1.1*x)/cos(x)^2 - 12.8370918275302*sin(1.2*x)/cos(x))*cos(x) - 32.0927295688256*sin(1.2*x))*cos(1.1*x)/cos(x)'
   symbol_names = 'eps'
   symbol_values = '${eps}'
 []
 [exact_T]
   type = ParsedFunction
-  value = '0.0106975765229418*cos(1.2*x)/cos(x) - 0.000697576522941848*cos(1.1*x)^2/cos(x)^2'
+  expression = '0.0106975765229418*cos(1.2*x)/cos(x) - 0.000697576522941848*cos(1.1*x)^2/cos(x)^2'
   symbol_names = 'eps'
   symbol_values = '${eps}'
 []
 [exact_p]
   type = ParsedFunction
-  value = '3.48788261470924*(3.06706896551724*cos(1.2*x)/cos(x) - 0.2*cos(1.1*x)^2/cos(x)^2)*cos(x)'
+  expression = '3.48788261470924*(3.06706896551724*cos(1.2*x)/cos(x) - 0.2*cos(1.1*x)^2/cos(x)^2)*cos(x)'
   symbol_names = 'eps'
   symbol_values = '${eps}'
 []

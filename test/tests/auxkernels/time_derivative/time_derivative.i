@@ -24,11 +24,11 @@
 [Functions]
   [./f_fn]
     type = ParsedFunction
-    value = t*(x+y)
+    expression = t*(x+y)
   [../]
   [./f_dot_fn]
     type = ParsedFunction
-    value = (x+y)
+    expression = (x+y)
   [../]
 []
 

@@ -15,9 +15,9 @@
 [Functions]
   [./sin_func]
     type = ParsedFunction
-    value = sin(y)
+    expression = sin(y)
     symbol_names = y        # <- This is a bad - you can't specify x, y, z, or t
-    symbol_values = 0
+    symbol_expressions = 0
   [../]
 []
 

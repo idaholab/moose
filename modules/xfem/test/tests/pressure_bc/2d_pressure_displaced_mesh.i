@@ -53,11 +53,11 @@
   [../]
   [./bc_func_tx]
     type = ParsedFunction
-    value = '0.5-(0.5-x)*cos(pi*t/2.0)-x'
+    expression = '0.5-(0.5-x)*cos(pi*t/2.0)-x'
   [../]
   [./bc_func_ty]
     type = ParsedFunction
-    value = '(0.5-x)*sin(pi*t/2.0)+0.5'
+    expression = '(0.5-x)*sin(pi*t/2.0)+0.5'
   [../]
 []
 

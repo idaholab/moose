@@ -63,7 +63,7 @@
     type = ParsedFunction
     symbol_names = 'sd su'
     symbol_values = 's_def s_undef'
-    value = 'sd / su'
+    expression = 'sd / su'
   []
 []
 

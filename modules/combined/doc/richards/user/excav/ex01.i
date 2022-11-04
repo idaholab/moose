@@ -50,7 +50,7 @@
 # mass_bal_fcn calculates the mass balance
   [./mass_bal_fcn]
     type = ParsedFunction
-    value = abs((mi-fout-mf)/2/(mi+mf))
+    expression = abs((mi-fout-mf)/2/(mi+mf))
     symbol_names = 'mi mf fout'
     symbol_values = 'mass_init mass_final flux_out'
   [../]
@@ -58,7 +58,7 @@
 # initial pressure - unimportant in this example
   [./initial_pressure]
     type = ParsedFunction
-    value = -10000*(z-100)
+    expression = -10000*(z-100)
   [../]
 []
 

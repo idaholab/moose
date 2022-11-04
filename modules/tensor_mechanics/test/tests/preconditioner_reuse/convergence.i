@@ -45,19 +45,19 @@
 [Functions]
   [pullx]
     type = ParsedFunction
-    value = '4000 * t'
+    expression = '4000 * t'
   []
   [pully]
     type = ParsedFunction
-    value = '-2000 * t'
+    expression = '-2000 * t'
   []
   [pullz]
     type = ParsedFunction
-    value = '3000 * t'
+    expression = '3000 * t'
   []
   [lambda_function]
     type = ParsedFunction
-    value = '1000.0*(t+1.0)'
+    expression = '1000.0*(t+1.0)'
   []
 []
 

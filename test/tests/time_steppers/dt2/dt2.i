@@ -20,7 +20,7 @@
 
   [./u_func]
     type = ParsedFunction
-    value = 'atan((t-2)*pi)'   # atan((t-t_jump)*pi*slope) - has to match global params above
+    expression = 'atan((t-2)*pi)'   # atan((t-t_jump)*pi*slope) - has to match global params above
 
   [../]
 []

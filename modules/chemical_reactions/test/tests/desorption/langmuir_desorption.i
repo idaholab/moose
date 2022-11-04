@@ -86,7 +86,7 @@
 [Functions]
   [./mass_fcn]
     type = ParsedFunction
-    value = a+b
+    expression = a+b
     symbol_names = 'a b'
     symbol_values = 'mass_rho mass_conc'
   [../]

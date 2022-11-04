@@ -13,7 +13,7 @@
 [Functions]
   [./bc_func]
     type = ParsedFunction
-    value = 0.5*y
+    expression = 0.5*y
   [../]
 []
 

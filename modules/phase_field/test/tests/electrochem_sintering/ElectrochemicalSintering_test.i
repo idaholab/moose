@@ -53,11 +53,11 @@
 [Functions]
   [ic_func_gr0]
     type = ParsedFunction
-    value = '0.5*(1.0-tanh((x)/sqrt(2.0*2.0)))'
+    expression = '0.5*(1.0-tanh((x)/sqrt(2.0*2.0)))'
   []
   [ic_func_gr1]
     type = ParsedFunction
-    value = '0.5*(1.0+tanh((x)/sqrt(2.0*2.0)))'
+    expression = '0.5*(1.0+tanh((x)/sqrt(2.0*2.0)))'
   []
 []
 

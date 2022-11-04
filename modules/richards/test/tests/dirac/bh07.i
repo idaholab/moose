@@ -126,7 +126,7 @@
 [Functions]
   [./initial_pressure]
     type = ParsedFunction
-    value = 1E7
+    expression = 1E7
   [../]
 []
 

@@ -57,19 +57,19 @@
 [Functions]
   [ini_stress_zz]
     type = ParsedFunction
-    value = '(25000 - 0.6*10000)*z' # remember this is effective stress
+    expression = '(25000 - 0.6*10000)*z' # remember this is effective stress
   []
   [cyclic_porepressure]
     type = ParsedFunction
-    value = 'if(t>0,5000 * sin(2 * pi * t / 3600.0 / 24.0),0)'
+    expression = 'if(t>0,5000 * sin(2 * pi * t / 3600.0 / 24.0),0)'
   []
   [cyclic_porepressure_at_depth]
     type = ParsedFunction
-    value = '-10000*z + if(t>0,5000 * sin(2 * pi * t / 3600.0 / 24.0),0)'
+    expression = '-10000*z + if(t>0,5000 * sin(2 * pi * t / 3600.0 / 24.0),0)'
   []
   [neg_cyclic_porepressure]
     type = ParsedFunction
-    value = '-if(t>0,5000 * sin(2 * pi * t / 3600.0 / 24.0),0)'
+    expression = '-if(t>0,5000 * sin(2 * pi * t / 3600.0 / 24.0),0)'
   []
 []
 

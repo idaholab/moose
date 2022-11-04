@@ -27,7 +27,7 @@
 [Functions]
   [./ur]
     type = ParsedFunction
-    value = '-3e-3*x'
+    expression = '-3e-3*x'
   [../]
 []
 

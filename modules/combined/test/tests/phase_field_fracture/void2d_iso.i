@@ -31,15 +31,15 @@
 [Functions]
   [./tfunc]
     type = ParsedFunction
-    value = t
+    expression = t
   [../]
   [./void_prop_func]
     type = ParsedFunction
-    value = 'rad:=0.2;m:=50;r:=sqrt(x^2+y^2);1-exp(-(r/rad)^m)+1e-8'
+    expression = 'rad:=0.2;m:=50;r:=sqrt(x^2+y^2);1-exp(-(r/rad)^m)+1e-8'
   [../]
   [./gb_prop_func]
     type = ParsedFunction
-    value = 'rad:=0.2;thk:=0.05;m:=50;sgnx:=1-exp(-(x/rad)^m);v:=sgnx*exp(-(y/thk)^m);0.005*(1-v)+0.001*v'
+    expression = 'rad:=0.2;thk:=0.05;m:=50;sgnx:=1-exp(-(x/rad)^m);v:=sgnx*exp(-(y/thk)^m);0.005*(1-v)+0.001*v'
   [../]
 []
 

@@ -33,13 +33,13 @@
 [Functions]
   [./phi_exact]
     type = ParsedFunction
-    value = 'a*exp(1/(10*t))*sin(2*pi*x/b) + 1'
+    expression = 'a*exp(1/(10*t))*sin(2*pi*x/b) + 1'
     symbol_names = 'a b'
     symbol_values = '1 8'
   [../]
   [./phi_mms]
     type = ParsedFunction
-    value = '-a*exp(1/(10*t))*sin(2*pi*x/b)/(10*t^2) + 2*pi*a*exp(1/(10*t))*cos(2*pi*x/b)/b'
+    expression = '-a*exp(1/(10*t))*sin(2*pi*x/b)/(10*t^2) + 2*pi*a*exp(1/(10*t))*cos(2*pi*x/b)/b'
     symbol_names = 'a b'
     symbol_values = '1 8'
   [../]

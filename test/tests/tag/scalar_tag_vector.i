@@ -107,7 +107,7 @@
 [Functions]
   [./exact_solution]
     type = ParsedFunction
-    value = exp(t)
+    expression = exp(t)
   [../]
 []
 

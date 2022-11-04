@@ -97,25 +97,25 @@
 [Functions]
   [./ic_func_eta]
     type = ParsedFunction
-    value = '0.5*(1.0+tanh((x)/delta_eta/sqrt(2.0)))'
+    expression = '0.5*(1.0+tanh((x)/delta_eta/sqrt(2.0)))'
     symbol_names = 'delta_eta'
     symbol_values = '0.8034'
   [../]
   [./ic_func_c]
     type = ParsedFunction
-    value = '0.2389*(0.5*(1.0+tanh(x/delta/sqrt(2.0))))^3*(6*(0.5*(1.0+tanh(x/delta/sqrt(2.0))))^2-15*(0.5*(1.0+tanh(x/delta/sqrt(2.0))))+10)+0.1339*(1-(0.5*(1.0+tanh(x/delta/sqrt(2.0))))^3*(6*(0.5*(1.0+tanh(x/delta/sqrt(2.0))))^2-15*(0.5*(1.0+tanh(x/delta/sqrt(2.0))))+10))'
+    expression = '0.2389*(0.5*(1.0+tanh(x/delta/sqrt(2.0))))^3*(6*(0.5*(1.0+tanh(x/delta/sqrt(2.0))))^2-15*(0.5*(1.0+tanh(x/delta/sqrt(2.0))))+10)+0.1339*(1-(0.5*(1.0+tanh(x/delta/sqrt(2.0))))^3*(6*(0.5*(1.0+tanh(x/delta/sqrt(2.0))))^2-15*(0.5*(1.0+tanh(x/delta/sqrt(2.0))))+10))'
     symbol_names = 'delta'
     symbol_values = '0.8034'
   [../]
   [./psi_eq_int]
     type = ParsedFunction
-    value = 'volume*psi_alpha'
+    expression = 'volume*psi_alpha'
     symbol_names = 'volume psi_alpha'
     symbol_values = 'volume psi_alpha'
   [../]
   [./gamma]
     type = ParsedFunction
-    value = '(psi_int - psi_eq_int) / dy / dz'
+    expression = '(psi_int - psi_eq_int) / dy / dz'
     symbol_names = 'psi_int psi_eq_int dy       dz'
     symbol_values = 'psi_int psi_eq_int 0.03125  0.03125'
   [../]

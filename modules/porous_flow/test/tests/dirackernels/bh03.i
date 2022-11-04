@@ -140,13 +140,13 @@
 [Functions]
   [mass_bal_fcn]
     type = ParsedFunction
-    value = abs((a-c+d)/2/(a+c))
+    expression = abs((a-c+d)/2/(a+c))
     symbol_names = 'a c d'
     symbol_values = 'fluid_mass1 fluid_mass0 bh_report'
   []
   [insitu_pp]
     type = ParsedFunction
-    value = '0.5e7*x'  #bh is located at x=2
+    expression = '0.5e7*x'  #bh is located at x=2
   []
 []
 

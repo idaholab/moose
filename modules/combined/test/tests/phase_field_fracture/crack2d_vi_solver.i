@@ -47,7 +47,7 @@
 [Functions]
   [./ic]
     type = ParsedFunction
-    value = 'if(x<0.5 & y < 0.55 & y > 0.45,1, 0)'
+    expression = 'if(x<0.5 & y < 0.55 & y > 0.45,1, 0)'
   [../]
 []
 

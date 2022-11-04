@@ -45,7 +45,7 @@
 [Functions]
   [strain]
     type = ParsedFunction
-    value = 't'
+    expression = 't'
   []
 []
 

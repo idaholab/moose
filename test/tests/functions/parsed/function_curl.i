@@ -26,11 +26,11 @@
   [../]
   [./ffn_x]
     type = ParsedFunction
-    value = 'y'
+    expression = 'y'
   [../]
   [./ffn_y]
     type = ParsedFunction
-    value = '-x'
+    expression = '-x'
   [../]
 []
 

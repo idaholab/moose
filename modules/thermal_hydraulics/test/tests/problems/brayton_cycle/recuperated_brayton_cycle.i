@@ -179,7 +179,7 @@ hs_power = 105750
     type = ParsedFunction
     symbol_names = 'motor_torque turbine_torque'
     symbol_values = 'motor_torque turbine_torque'
-    value = 'turbine_torque > motor_torque'
+    expression = 'turbine_torque > motor_torque'
   []
   [PID_tripped_constant_value]
     type = ConstantFunction
@@ -189,11 +189,11 @@ hs_power = 105750
     type = ParsedFunction
     symbol_values = 'PID_trip_status'
     symbol_names = 'PID_trip_status'
-    value = 'PID_trip_status'
+    expression = 'PID_trip_status'
   []
   [time_fn]
     type = ParsedFunction
-    value = t
+    expression = t
   []
 
   # Shutdown function which ramps down the motor once told by the control logic
@@ -201,13 +201,13 @@ hs_power = 105750
     type = ParsedFunction
     symbol_values = 'PID_trip_status time_trip'
     symbol_names = 'PID_trip_status time_trip'
-    value = 'if(PID_trip_status = 1, max(2.4 - (2.4 * ((t - time_trip) / 35000)),0.0), 1)'
+    expression = 'if(PID_trip_status = 1, max(2.4 - (2.4 * ((t - time_trip) / 35000)),0.0), 1)'
   []
 
   # Generates motor power curve
   [motor_power_fn]
     type = ParsedFunction
-    value = 'torque * speed'
+    expression = 'torque * speed'
     symbol_names = 'torque speed'
     symbol_values = 'motor_torque shaft:omega'
   []
@@ -219,14 +219,14 @@ hs_power = 105750
   # Generates generator torque curve
   [generator_torque_fn]
     type = ParsedFunction
-    value = 'slope * t'
+    expression = 'slope * t'
     symbol_names = 'slope'
     symbol_values = '${generator_torque_per_shaft_speed}'
   []
   # Generates generator power curve
   [generator_power_fn]
     type = ParsedFunction
-    value = 'torque * speed'
+    expression = 'torque * speed'
     symbol_names = 'torque speed'
     symbol_values = 'generator_torque shaft:omega'
   []

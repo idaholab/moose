@@ -13,17 +13,17 @@
 [Functions]
   [./ic]
     type = ParsedFunction
-    value = 0
+    expression = 0
   [../]
 
   [./forcing_fn]
     type = ParsedFunction
-    value = 2*t*((x*x)+(y*y))-(4*t*t)
+    expression = 2*t*((x*x)+(y*y))-(4*t*t)
   [../]
 
   [./exact_fn]
     type = ParsedFunction
-    value = t*t*((x*x)+(y*y))
+    expression = t*t*((x*x)+(y*y))
   [../]
 []
 

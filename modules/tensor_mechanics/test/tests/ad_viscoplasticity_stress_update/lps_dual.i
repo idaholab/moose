@@ -48,7 +48,7 @@
     type = ParsedFunction
     symbol_values = 'lps_1_eff_creep_strain lps_3_eff_creep_strain'
     symbol_names = 'lps_1_eff_creep_strain lps_3_eff_creep_strain'
-    value = 'lps_1_eff_creep_strain+lps_3_eff_creep_strain'
+    expression = 'lps_1_eff_creep_strain+lps_3_eff_creep_strain'
   [../]
 []
 

@@ -66,14 +66,14 @@
   [./Int_energy]
     type = ParsedFunction
     symbol_values = 'total_solute Cleft Cright Fleft Fright volume'
-    value = '((total_solute-Cleft*volume)/(Cright-Cleft))*Fright+(volume-(total_solute-Cleft*volume)/(Cright-Cleft))*Fleft'
+    expression = '((total_solute-Cleft*volume)/(Cright-Cleft))*Fright+(volume-(total_solute-Cleft*volume)/(Cright-Cleft))*Fleft'
     symbol_names = 'total_solute Cleft Cright Fleft Fright volume'
   [../]
   [./Diff]
     type = ParsedFunction
     symbol_values = 'total_free_energy total_no_int'
     symbol_names = 'total_free_energy total_no_int'
-    value = total_free_energy-total_no_int
+    expression = total_free_energy-total_no_int
   [../]
 []
 

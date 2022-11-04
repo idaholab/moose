@@ -159,47 +159,47 @@
 [Functions]
 [exact_rho]
   type = ParsedFunction
-  value = '3.48788261470924*cos(x)'
+  expression = '3.48788261470924*cos(x)'
 []
 [forcing_rho]
   type = ParsedFunction
-  value = '-3.83667087618017*sin(1.1*x)*cos(1.3*x) - 4.53424739912202*sin(1.3*x)*cos(1.1*x)'
+  expression = '-3.83667087618017*sin(1.1*x)*cos(1.3*x) - 4.53424739912202*sin(1.3*x)*cos(1.1*x)'
 []
 [exact_rho_ud]
   type = ParsedFunction
-  value = '3.48788261470924*cos(1.1*x)*cos(1.3*x)'
+  expression = '3.48788261470924*cos(1.1*x)*cos(1.3*x)'
 []
 [forcing_rho_ud]
   type = ParsedFunction
-  value = '(-(10.6975765229419*cos(1.5*x)/cos(x) - 0.697576522941849*cos(1.1*x)^2/cos(x)^2)*sin(x) + (10.6975765229419*sin(x)*cos(1.5*x)/cos(x)^2 - 1.3951530458837*sin(x)*cos(1.1*x)^2/cos(x)^3 + 1.53466835047207*sin(1.1*x)*cos(1.1*x)/cos(x)^2 - 16.0463647844128*sin(1.5*x)/cos(x))*cos(x))*cos(1.3*x) + 3.48788261470924*sin(x)*cos(1.1*x)^2*cos(1.3*x)/cos(x)^2 - 7.67334175236034*sin(1.1*x)*cos(1.1*x)*cos(1.3*x)/cos(x) - 4.53424739912202*sin(1.3*x)*cos(1.1*x)^2/cos(x)'
+  expression = '(-(10.6975765229419*cos(1.5*x)/cos(x) - 0.697576522941849*cos(1.1*x)^2/cos(x)^2)*sin(x) + (10.6975765229419*sin(x)*cos(1.5*x)/cos(x)^2 - 1.3951530458837*sin(x)*cos(1.1*x)^2/cos(x)^3 + 1.53466835047207*sin(1.1*x)*cos(1.1*x)/cos(x)^2 - 16.0463647844128*sin(1.5*x)/cos(x))*cos(x))*cos(1.3*x) + 3.48788261470924*sin(x)*cos(1.1*x)^2*cos(1.3*x)/cos(x)^2 - 7.67334175236034*sin(1.1*x)*cos(1.1*x)*cos(1.3*x)/cos(x) - 4.53424739912202*sin(1.3*x)*cos(1.1*x)^2/cos(x)'
 []
 [exact_rho_et]
   type = ParsedFunction
-  value = '26.7439413073546*cos(1.5*x)'
+  expression = '26.7439413073546*cos(1.5*x)'
 []
 [forcing_rho_et]
   type = ParsedFunction
-  value = '1.0*(3.48788261470924*(3.06706896551724*cos(1.5*x)/cos(x) - 0.2*cos(1.1*x)^2/cos(x)^2)*cos(x) + 26.7439413073546*cos(1.5*x))*sin(x)*cos(1.1*x)*cos(1.3*x)/cos(x)^2 - 1.1*(3.48788261470924*(3.06706896551724*cos(1.5*x)/cos(x) - 0.2*cos(1.1*x)^2/cos(x)^2)*cos(x) + 26.7439413073546*cos(1.5*x))*sin(1.1*x)*cos(1.3*x)/cos(x) - 1.3*(3.48788261470924*(3.06706896551724*cos(1.5*x)/cos(x) - 0.2*cos(1.1*x)^2/cos(x)^2)*cos(x) + 26.7439413073546*cos(1.5*x))*sin(1.3*x)*cos(1.1*x)/cos(x) + 1.0*(-(10.6975765229419*cos(1.5*x)/cos(x) - 0.697576522941849*cos(1.1*x)^2/cos(x)^2)*sin(x) + (10.6975765229419*sin(x)*cos(1.5*x)/cos(x)^2 - 1.3951530458837*sin(x)*cos(1.1*x)^2/cos(x)^3 + 1.53466835047207*sin(1.1*x)*cos(1.1*x)/cos(x)^2 - 16.0463647844128*sin(1.5*x)/cos(x))*cos(x) - 40.1159119610319*sin(1.5*x))*cos(1.1*x)*cos(1.3*x)/cos(x)'
+  expression = '1.0*(3.48788261470924*(3.06706896551724*cos(1.5*x)/cos(x) - 0.2*cos(1.1*x)^2/cos(x)^2)*cos(x) + 26.7439413073546*cos(1.5*x))*sin(x)*cos(1.1*x)*cos(1.3*x)/cos(x)^2 - 1.1*(3.48788261470924*(3.06706896551724*cos(1.5*x)/cos(x) - 0.2*cos(1.1*x)^2/cos(x)^2)*cos(x) + 26.7439413073546*cos(1.5*x))*sin(1.1*x)*cos(1.3*x)/cos(x) - 1.3*(3.48788261470924*(3.06706896551724*cos(1.5*x)/cos(x) - 0.2*cos(1.1*x)^2/cos(x)^2)*cos(x) + 26.7439413073546*cos(1.5*x))*sin(1.3*x)*cos(1.1*x)/cos(x) + 1.0*(-(10.6975765229419*cos(1.5*x)/cos(x) - 0.697576522941849*cos(1.1*x)^2/cos(x)^2)*sin(x) + (10.6975765229419*sin(x)*cos(1.5*x)/cos(x)^2 - 1.3951530458837*sin(x)*cos(1.1*x)^2/cos(x)^3 + 1.53466835047207*sin(1.1*x)*cos(1.1*x)/cos(x)^2 - 16.0463647844128*sin(1.5*x)/cos(x))*cos(x) - 40.1159119610319*sin(1.5*x))*cos(1.1*x)*cos(1.3*x)/cos(x)'
 []
 [exact_T]
   type = ParsedFunction
-  value = '0.0106975765229418*cos(1.5*x)/cos(x) - 0.000697576522941848*cos(1.1*x)^2/cos(x)^2'
+  expression = '0.0106975765229418*cos(1.5*x)/cos(x) - 0.000697576522941848*cos(1.1*x)^2/cos(x)^2'
 []
 [exact_eps_p]
   type = ParsedFunction
-  value = '3.48788261470924*(3.06706896551724*cos(1.5*x)/cos(x) - 0.2*cos(1.1*x)^2/cos(x)^2)*cos(x)*cos(1.3*x)'
+  expression = '3.48788261470924*(3.06706896551724*cos(1.5*x)/cos(x) - 0.2*cos(1.1*x)^2/cos(x)^2)*cos(x)*cos(1.3*x)'
 []
 [exact_p]
   type = ParsedFunction
-  value = '3.48788261470924*(3.06706896551724*cos(1.5*x)/cos(x) - 0.2*cos(1.1*x)^2/cos(x)^2)*cos(x)'
+  expression = '3.48788261470924*(3.06706896551724*cos(1.5*x)/cos(x) - 0.2*cos(1.1*x)^2/cos(x)^2)*cos(x)'
 []
 [exact_sup_vel_x]
   type = ParsedFunction
-  value = '1.0*cos(1.1*x)*cos(1.3*x)/cos(x)'
+  expression = '1.0*cos(1.1*x)*cos(1.3*x)/cos(x)'
 []
 [eps]
   type = ParsedFunction
-  value = 'cos(1.3*x)'
+  expression = 'cos(1.3*x)'
 []
 [exact_superficial_velocity]
   type = ParsedVectorFunction

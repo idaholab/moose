@@ -47,7 +47,7 @@
 
   [matrix]
     type = ParsedFunction
-    value = '1-x-y-z'
+    expression = '1-x-y-z'
   []
 []
 

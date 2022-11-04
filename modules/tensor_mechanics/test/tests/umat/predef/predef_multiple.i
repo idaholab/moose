@@ -20,11 +20,11 @@
 [Functions]
   [top_pull]
     type = ParsedFunction
-    value = -t*10
+    expression = -t*10
   []
   [right_pull]
     type = ParsedFunction
-    value = -t*0.5
+    expression = -t*0.5
   []
 []
 

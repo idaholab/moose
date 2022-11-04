@@ -27,37 +27,37 @@
     type = ParsedFunction
     symbol_names = 'T'
     symbol_values = 'temperature'
-    value = '124.67 - 0.11381 * T + 5.5226e-5 * T^2 - 1.1842e-8 * T^3'
+    expression = '124.67 - 0.11381 * T + 5.5226e-5 * T^2 - 1.1842e-8 * T^3'
   [../]
   [./h]
     type = ParsedFunction
     symbol_names = 'T'
     symbol_values = 'temperature'
-    value = '1.0e3 * (-365.77 + 1.6582 * T - 4.2395e-4 * T^2 + 1.4847e-7 * T^3 + 2992.6 / T)'
+    expression = '1.0e3 * (-365.77 + 1.6582 * T - 4.2395e-4 * T^2 + 1.4847e-7 * T^3 + 2992.6 / T)'
   [../]
   [./cp]
     type = ParsedFunction
     symbol_names = 'T'
     symbol_values = 'temperature'
-    value = '1.0e3 * (1.6582 - 8.4790e-4 * T + 4.4541e-7 * T^2 - 2992.6 / T^2)'
+    expression = '1.0e3 * (1.6582 - 8.4790e-4 * T + 4.4541e-7 * T^2 - 2992.6 / T^2)'
   [../]
   [./rho]
     type = ParsedFunction
     symbol_names = 'T'
     symbol_values = 'temperature'
-    value = '219.0 + 275.32 * (1.0 - T / 2503.7) + 511.58 * (1.0 - T / 2503.7)^(0.5)'
+    expression = '219.0 + 275.32 * (1.0 - T / 2503.7) + 511.58 * (1.0 - T / 2503.7)^(0.5)'
   [../]
   [./drho_dT]
     type = ParsedFunction
     symbol_names = 'T'
     symbol_values = 'temperature'
-    value = '-(2.0 * 275.32 + 511.58 / (1.0 - T / 2503.7)^(0.5)) / 2.0 / 2503.7'
+    expression = '-(2.0 * 275.32 + 511.58 / (1.0 - T / 2503.7)^(0.5)) / 2.0 / 2503.7'
   [../]
   [./drho_dh]
     type = ParsedFunction
     symbol_names = 'drho_dT_exact cp_exact'
     symbol_values = 'drho_dT_exact cp_exact'
-    value = 'drho_dT_exact/cp_exact'
+    expression = 'drho_dT_exact/cp_exact'
   [../]
 []
 

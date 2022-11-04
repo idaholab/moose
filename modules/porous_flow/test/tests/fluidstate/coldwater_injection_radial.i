@@ -65,7 +65,7 @@
     type = ParsedFunction
     symbol_values = injection_area
     symbol_names = area
-    value = '-0.1/area'
+    expression = '-0.1/area'
   []
 []
 

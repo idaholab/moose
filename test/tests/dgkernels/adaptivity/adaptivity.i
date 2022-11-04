@@ -27,12 +27,12 @@
 [Functions]
   [./forcing_fn]
     type = ParsedFunction
-    value = (x*x*x)-6.0*x
+    expression = (x*x*x)-6.0*x
   [../]
 
   [./bc_fn]
     type = ParsedFunction
-    value = (x*x*x)
+    expression = (x*x*x)
   [../]
 []
 

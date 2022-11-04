@@ -128,19 +128,19 @@ p_ambient = 1e5
   []
   [motor_power_fn]
     type = ParsedFunction
-    value = 'torque * speed'
+    expression = 'torque * speed'
     symbol_names = 'torque speed'
     symbol_values = 'motor_torque shaft:omega'
   []
   [generator_torque_fn]
     type = ParsedFunction
-    value = 'slope * t'
+    expression = 'slope * t'
     symbol_names = 'slope'
     symbol_values = '${generator_torque_per_shaft_speed}'
   []
   [generator_power_fn]
     type = ParsedFunction
-    value = 'torque * speed'
+    expression = 'torque * speed'
     symbol_names = 'torque speed'
     symbol_values = 'generator_torque shaft:omega'
   []

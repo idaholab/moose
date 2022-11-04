@@ -55,11 +55,11 @@
 [Functions]
   [pullx]
     type = ParsedFunction
-    value = '50000 * t'
+    expression = '50000 * t'
   []
   [pully]
     type = ParsedFunction
-    value = '-30000 * t'
+    expression = '-30000 * t'
   []
 []
 

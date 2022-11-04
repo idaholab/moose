@@ -26,7 +26,7 @@
     type = ParsedFunction
     symbol_names = 'L beta ki ko ui uo'
     symbol_values = '1 1e-3 5.3 5 300 0'
-    value = 'uo+(ko/beta)* ( (1 + L*beta*(ki+ko)*(ui-uo)*((L-x)/(ko*L)^2) )^0.5  - 1)'
+    expression = 'uo+(ko/beta)* ( (1 + L*beta*(ki+ko)*(ui-uo)*((L-x)/(ko*L)^2) )^0.5  - 1)'
   [../]
 []
 

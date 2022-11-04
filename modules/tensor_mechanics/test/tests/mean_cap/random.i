@@ -120,7 +120,7 @@
 [Functions]
   [./should_be_zero_fcn]
     type = ParsedFunction
-    value = 'if(a<1E-3,0,a)'
+    expression = 'if(a<1E-3,0,a)'
     symbol_names = 'a'
     symbol_values = 'max_yield_fcn'
   [../]
