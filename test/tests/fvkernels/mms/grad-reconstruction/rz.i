@@ -67,7 +67,7 @@ diff=1.1
   type = ParsedFunction
   value = '-a*sin(x)*sin(y) + diff*sin(x)*cos(y) + sin(x)*cos(y) + (x*a*cos(x)*cos(y) + a*sin(x)*cos(y))/x - (-x*diff*sin(x)*cos(y) + diff*cos(x)*cos(y))/x'
   symbol_names = 'a diff'
-  vals = '${a} ${diff}'
+  symbol_values = '${a} ${diff}'
 []
 []
 

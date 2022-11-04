@@ -23,7 +23,7 @@
     type = ParsedFunction
     value = exp(-((x-x0)*(x-x0)+(y-y0)*(y-y0))/2.0/sigma/sigma)
     symbol_names = 'sigma x0 y0'
-    vals = '0.05 0.35 0.25'
+    symbol_values = '0.05 0.35 0.25'
   [../]
 []
 

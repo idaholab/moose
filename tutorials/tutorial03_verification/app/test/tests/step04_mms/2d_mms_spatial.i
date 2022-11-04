@@ -30,7 +30,7 @@
     type = ParsedFunction
     value = 'cp*rho*sin(x*pi)*sin(5*y*pi) + 26*pi^2*k*t*sin(x*pi)*sin(5*y*pi) - shortwave*exp(y*kappa)*sin((1/2)*x*pi)*sin((1/3600)*pi*t/hours)'
     symbol_names = 'rho cp   k     kappa shortwave hours'
-    vals = '150 2000 0.01  40    650       9'
+    symbol_values = '150 2000 0.01  40    650       9'
   []
   [mms_exact]
     type = ParsedFunction

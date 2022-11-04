@@ -31,7 +31,7 @@
     type = ParsedFunction
     value = sin(a*x*y*z*t)
     symbol_names = 'a'
-    vals = '3.141592653589793'
+    symbol_values = '3.141592653589793'
   [../]
 []
 

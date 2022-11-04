@@ -39,14 +39,14 @@
     type = ParsedFunction
     value = alpha*alpha*pi*pi*sin(alpha*pi*x)
     symbol_names = 'alpha'
-    vals = '4'
+    symbol_values = '4'
   [../]
 
   [./u_func]
     type = ParsedFunction
     value = sin(alpha*pi*x)
     symbol_names = 'alpha'
-    vals = '4'
+    symbol_values = '4'
   [../]
 []
 

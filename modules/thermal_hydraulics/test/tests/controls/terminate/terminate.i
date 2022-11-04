@@ -51,7 +51,7 @@
     type = UnitTripControl
     condition = 'dt_pp > 3'
     symbol_names = 'dt_pp'
-    vals = 'dt_pp'
+    symbol_values = 'dt_pp'
   []
 
   [terminate]

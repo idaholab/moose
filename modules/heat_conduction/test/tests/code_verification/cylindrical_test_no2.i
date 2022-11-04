@@ -31,7 +31,7 @@
   [./exact]
     type = ParsedFunction
     symbol_names = 'ri ro beta ki ko ui uo'
-    vals = '0.2 1.0 1e-3 5.3 5 300 0'
+    symbol_values = '0.2 1.0 1e-3 5.3 5 300 0'
     value = 'uo+(ko/beta)* ( ( 1 + beta*(ki+ko)*(ui-uo)*( log(x/ro) / log(ri/ro) )/(ko^2))^0.5 -1 )'
   [../]
 []

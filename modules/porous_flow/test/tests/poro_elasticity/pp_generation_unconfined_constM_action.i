@@ -175,19 +175,19 @@
     type = ParsedFunction
     value = a/b
     symbol_names = 'a b'
-    vals = 'stress_xx zdisp'
+    symbol_values = 'stress_xx zdisp'
   []
   [stress_zz_over_strain_fcn]
     type = ParsedFunction
     value = a/b
     symbol_names = 'a b'
-    vals = 'stress_zz zdisp'
+    symbol_values = 'stress_zz zdisp'
   []
   [p_over_strain_fcn]
     type = ParsedFunction
     value = a/b
     symbol_names = 'a b'
-    vals = 'p0 zdisp'
+    symbol_values = 'p0 zdisp'
   []
 []
 

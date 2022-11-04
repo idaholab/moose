@@ -38,7 +38,7 @@
   [./tempQuadratic]
     type = ParsedFunction
     symbol_names = 'Tc Te'
-    vals = '701 700'
+    symbol_values = '701 700'
     value = '(Te-Tc)/4.0*x*x+(Tc-Te)/2.0*x+Te+3.0*(Tc-Te)/4.0'
   [../]
   [./tempCubic]

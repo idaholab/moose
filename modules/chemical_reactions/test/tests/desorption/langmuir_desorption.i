@@ -88,7 +88,7 @@
     type = ParsedFunction
     value = a+b
     symbol_names = 'a b'
-    vals = 'mass_rho mass_conc'
+    symbol_values = 'mass_rho mass_conc'
   [../]
 []
 

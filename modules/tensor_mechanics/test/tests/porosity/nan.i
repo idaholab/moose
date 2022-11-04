@@ -17,7 +17,7 @@
   [exact]
     type = ParsedFunction
     symbol_names = 'f'
-    vals = 'porosity_old'
+    symbol_values = 'porosity_old'
     value = '(1 - f) * 3e-3 + f'
   []
 []

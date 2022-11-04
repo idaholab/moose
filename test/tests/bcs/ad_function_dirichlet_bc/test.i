@@ -25,14 +25,14 @@
     type = ParsedFunction
     value = alpha*alpha*pi
     symbol_names = 'alpha'
-    vals = '16'
+    symbol_values = '16'
   [../]
 
   [./ff_2]
     type = ParsedFunction
     value = pi*sin(alpha*pi*x)
     symbol_names = 'alpha'
-    vals = '16'
+    symbol_values = '16'
   [../]
 
   [./forcing_func]
@@ -44,7 +44,7 @@
     type = ParsedFunction
     value = sin(alpha*pi*x)
     symbol_names = 'alpha'
-    vals = '16'
+    symbol_values = '16'
   [../]
 []
 

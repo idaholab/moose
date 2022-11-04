@@ -120,7 +120,7 @@
     type = ParsedFunction
     value = 'if(a<1E-3,0,a)'
     symbol_names = 'a'
-    vals = 'max_yield_fcn'
+    symbol_values = 'max_yield_fcn'
   [../]
 []
 

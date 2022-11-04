@@ -17,7 +17,7 @@
     type = ParsedFunction
     value = sin(y)
     symbol_names = y        # <- This is a bad - you can't specify x, y, z, or t
-    vals = 0
+    symbol_values = 0
   [../]
 []
 

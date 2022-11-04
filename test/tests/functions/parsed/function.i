@@ -33,7 +33,7 @@
     type = ParsedFunction
     value = 's/c'
     symbol_names = 's c'
-    vals = 'sin_fn cos_fn'
+    symbol_values = 'sin_fn cos_fn'
   []
 []
 

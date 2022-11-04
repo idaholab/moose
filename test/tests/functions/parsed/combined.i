@@ -36,9 +36,9 @@
   [../]
   [./fn]
     type = ParsedFunction
-    value = 'scalar_value * func / pp'
-    symbol_names = 'scalar_value func   pp'
-    vals = 'sv           cos_fn pp'
+    expression = 'scalar_expression * func / pp'
+    symbol_names = 'scalar_expression func   pp'
+    symbol_values = 'sv           cos_fn pp'
   [../]
 []
 

@@ -148,13 +148,13 @@ rho=1.1
     type = ParsedFunction
     value = 'rho*sin(y)*cos((1/2)*x*pi)'
     symbol_names = 'rho'
-    vals = '${rho}'
+    symbol_values = '${rho}'
   []
   [forcing_u]
     type = ADParsedFunction
     value = 'mu*sin(y)*cos((1/2)*x*pi) + (1/4)*pi^2*mu*sin(y)*cos((1/2)*x*pi) - 1/2*pi*rho*sin(x)*sin(y)*sin((1/2)*y*pi)*cos((1/2)*x*pi) + rho*sin(x)*cos(y)*cos((1/2)*x*pi)*cos((1/2)*y*pi) - pi*rho*sin(y)^2*sin((1/2)*x*pi)*cos((1/2)*x*pi) + sin(y)*cos(x)'
     symbol_names = 'mu rho'
-    vals = '${mu} ${rho}'
+    symbol_values = '${mu} ${rho}'
   []
   [exact_v]
     type = ParsedFunction
@@ -164,13 +164,13 @@ rho=1.1
     type = ParsedFunction
     value = 'rho*sin(x)*cos((1/2)*y*pi)'
     symbol_names = 'rho'
-    vals = '${rho}'
+    symbol_values = '${rho}'
   []
   [forcing_v]
     type = ADParsedFunction
     value = 'mu*sin(x)*cos((1/2)*y*pi) + (1/4)*pi^2*mu*sin(x)*cos((1/2)*y*pi) - pi*rho*sin(x)^2*sin((1/2)*y*pi)*cos((1/2)*y*pi) - 1/2*pi*rho*sin(x)*sin(y)*sin((1/2)*x*pi)*cos((1/2)*y*pi) + rho*sin(y)*cos(x)*cos((1/2)*x*pi)*cos((1/2)*y*pi) + sin(x)*cos(y)'
     symbol_names = 'mu rho'
-    vals = '${mu} ${rho}'
+    symbol_values = '${mu} ${rho}'
   []
   [exact_p]
     type = ParsedFunction
@@ -180,7 +180,7 @@ rho=1.1
     type = ParsedFunction
     value = '-1/2*pi*rho*sin(x)*sin((1/2)*y*pi) - 1/2*pi*rho*sin(y)*sin((1/2)*x*pi)'
     symbol_names = 'rho'
-    vals = '${rho}'
+    symbol_values = '${rho}'
   []
 []
 

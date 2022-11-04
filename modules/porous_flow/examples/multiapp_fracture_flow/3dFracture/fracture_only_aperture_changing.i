@@ -259,7 +259,7 @@ injection_rate = 10 # kg/s
 [Functions]
   [kg_rate]
     type = ParsedFunction
-    vals = 'dt kg_out'
+    symbol_values = 'dt kg_out'
     symbol_names = 'dt kg_out'
     value = 'kg_out/dt'
   []

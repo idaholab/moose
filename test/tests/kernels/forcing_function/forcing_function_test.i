@@ -24,7 +24,7 @@
     type = ParsedFunction
     value = alpha*alpha*pi*pi*sin(alpha*pi*x)
     symbol_names = 'alpha'
-    vals = '16'
+    symbol_values = '16'
   [../]
 []
 

@@ -84,7 +84,7 @@
     type = UnitTripControl
     condition = 'T > 347.5'
     symbol_names = 'T'
-    vals = 'T_inlet_fn:value'
+    symbol_values = 'T_inlet_fn:value'
   []
 
   [set_bool_value]

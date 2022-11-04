@@ -63,14 +63,14 @@
     type = ParsedFunction
     value = 'sqrt(2.0 / L) * sin(mode * pi  * x / L)'
     symbol_names = 'L  mode'
-    vals = '10 1'
+    symbol_values = '10 1'
   [../]
 
   [./contaminated_second_harmonic]
     type = ParsedFunction
     value = 'sqrt(2.0 / L) * sin(mode * pi  * x / L) + a * sqrt(2.0 / L) * sin(pi * x / L)'
     symbol_names = 'L  mode a'
-    vals = '10 2    1'
+    symbol_values = '10 2    1'
   [../]
 []
 

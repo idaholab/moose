@@ -184,13 +184,13 @@ two_term_boundary_expansion=true
     type = ParsedFunction
     value = '0.25*sqrt(2)*(1.0 - 1/2*(-x + y)^2)/mu'
     symbol_names = 'mu'
-    vals = '${mu}'
+    symbol_values = '${mu}'
   []
   [exact_rhou]
     type = ParsedFunction
     value = '0.25*sqrt(2)*rho*(1.0 - 1/2*(-x + y)^2)/mu'
     symbol_names = 'mu rho'
-    vals = '${mu} ${rho}'
+    symbol_values = '${mu} ${rho}'
   []
   [forcing_u]
     type = ADParsedFunction
@@ -200,13 +200,13 @@ two_term_boundary_expansion=true
     type = ParsedFunction
     value = '0.25*sqrt(2)*(1.0 - 1/2*(-x + y)^2)/mu'
     symbol_names = 'mu'
-    vals = '${mu}'
+    symbol_values = '${mu}'
   []
   [exact_rhov]
     type = ParsedFunction
     value = '0.25*sqrt(2)*rho*(1.0 - 1/2*(-x + y)^2)/mu'
     symbol_names = 'mu rho'
-    vals = '${mu} ${rho}'
+    symbol_values = '${mu} ${rho}'
   []
   [forcing_v]
     type = ADParsedFunction

@@ -171,7 +171,7 @@ velocity_interp_method = 'rc'
             '1.25*pi*rho*sin((1/2)*x*pi)*sin((1/2)*y*pi)^2*cos((1/2)*x*pi) - '
             '0.2*pi*sin((1/4)*x*pi)*sin((3/2)*y*pi)'
     symbol_names = 'mu rho'
-    vals = '${mu} ${rho}'
+    symbol_values = '${mu} ${rho}'
   []
   [exact_v]
     type = ParsedFunction
@@ -185,7 +185,7 @@ velocity_interp_method = 'rc'
             '0.3125*pi*rho*sin((1/2)*y*pi)*cos((1/4)*x*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi) + '
             '1.2*pi*cos((1/4)*x*pi)*cos((3/2)*y*pi)'
     symbol_names = 'mu rho'
-    vals = '${mu} ${rho}'
+    symbol_values = '${mu} ${rho}'
   []
   [exact_p]
     type = ParsedFunction
@@ -196,7 +196,7 @@ velocity_interp_method = 'rc'
     value = '-1/2*pi*rho*sin((1/4)*x*pi)*sin((1/2)*y*pi) - '
             '1/2*pi*rho*sin((1/2)*x*pi)*sin((1/2)*y*pi)'
     symbol_names = 'rho'
-    vals = '${rho}'
+    symbol_values = '${rho}'
   []
 []
 

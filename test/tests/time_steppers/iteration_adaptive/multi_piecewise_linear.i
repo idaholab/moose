@@ -29,7 +29,7 @@
     type = ParsedFunction
     value = 'temp_spike1 + temp_spike2'
     symbol_names = 'temp_spike1 temp_spike2'
-    vals = 'temp_spike1 temp_spike2'
+    symbol_values = 'temp_spike1 temp_spike2'
   []
 []
 

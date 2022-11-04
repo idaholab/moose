@@ -8,7 +8,7 @@
     type = ParsedFunction
     value = 'baseT + (dT * sin((pi * x) / length))'
     symbol_names = 'baseT   dT    length'
-    vals = '560.0  30.0  3.6576'
+    symbol_values = '560.0  30.0  3.6576'
   []
 []
 

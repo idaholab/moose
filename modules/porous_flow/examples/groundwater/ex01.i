@@ -81,19 +81,19 @@
   []
   [insitu_head]
     type = ParsedFunction
-    vals = 'lower_aquifer_head upper_aquifer_head'
+    symbol_values = 'lower_aquifer_head upper_aquifer_head'
     symbol_names = 'low up'
     value = 'if(z <= -90, low, if(z >= -80, up, (up * (z + 90) - low * (z + 80)) / (10.0)))'
   []
   [insitu_pp]
     type = ParsedFunction
-    vals = 'insitu_head'
+    symbol_values = 'insitu_head'
     symbol_names = 'h'
     value = '(h - z) * 1E4'
   []
   [l_rate]
     type = ParsedFunction
-    vals = 'm3_produced dt'
+    symbol_values = 'm3_produced dt'
     symbol_names = 'm3_produced dt'
     value = '1000 * m3_produced / dt'
   []

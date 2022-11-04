@@ -15,7 +15,7 @@
     type = ParsedFunction
     value = alpha*alpha*pi*pi*sin(alpha*pi*x)
     symbol_names = 'alpha'
-    vals = '4'
+    symbol_values = '4'
   []
 
   [u_func]
@@ -23,7 +23,7 @@
     value = sin(alpha*pi*x)
     grad_x   = alpha*pi*sin(alpha*pi*x)
     symbol_names = 'alpha'
-    vals = '4'
+    symbol_values = '4'
   []
 []
 

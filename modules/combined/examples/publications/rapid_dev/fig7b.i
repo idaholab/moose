@@ -29,7 +29,7 @@
     type = ParsedFunction
     value = '${RADIUS}-pos_c'
     symbol_names = pos_c
-    vals = pos_c
+    symbol_values = pos_c
   [../]
 []
 

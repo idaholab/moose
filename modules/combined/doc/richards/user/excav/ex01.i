@@ -52,7 +52,7 @@
     type = ParsedFunction
     value = abs((mi-fout-mf)/2/(mi+mf))
     symbol_names = 'mi mf fout'
-    vals = 'mass_init mass_final flux_out'
+    symbol_values = 'mass_init mass_final flux_out'
   [../]
 
 # initial pressure - unimportant in this example

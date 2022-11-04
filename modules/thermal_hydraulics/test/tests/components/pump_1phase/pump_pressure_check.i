@@ -40,7 +40,7 @@ volume = 0.567
     type = ParsedFunction
     value = 'rhoV * g * head / volume'
     symbol_names = 'rhoV g head volume'
-    vals = 'pump:rhoV ${g} ${head} ${volume}'
+    symbol_values = 'pump:rhoV ${g} ${head} ${volume}'
   []
 []
 

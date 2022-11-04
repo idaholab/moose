@@ -55,8 +55,8 @@
 [Functions]
   [./left_bc]
     type = ParsedFunction
-    value = s
-    vals = scalar
+    expression = s
+    symbol_values = scalar
     symbol_names = s
   [../]
   [./func]

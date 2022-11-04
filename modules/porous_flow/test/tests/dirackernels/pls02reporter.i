@@ -222,7 +222,7 @@
     type = ParsedFunction
     value = abs((a-c+d)/2/(a+c))
     symbol_names = 'a c d'
-    vals = 'fluid_mass1 fluid_mass0 pls_report'
+    symbol_values = 'fluid_mass1 fluid_mass0 pls_report'
   []
 []
 

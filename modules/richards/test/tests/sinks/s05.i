@@ -68,7 +68,7 @@
     type = ParsedFunction
     value = abs((mi-lfout-rfout-mf)/2/(mi+mf))
     symbol_names = 'mi mf lfout rfout'
-    vals = 'mass_init mass_fin left_flux_out right_flux_out'
+    symbol_values = 'mass_init mass_fin left_flux_out right_flux_out'
   [../]
 []
 

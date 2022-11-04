@@ -103,14 +103,14 @@ velocity_interp_method = 'average'
     type = ParsedFunction
     value = 'rho*sin((1/2)*x*pi)'
     symbol_names = 'rho'
-    vals = '${rho}'
+    symbol_values = '${rho}'
   []
   [forcing_u]
     type = ADParsedFunction
     value = '(1/4)*pi^2*mu*sin((1/2)*x*pi) + pi*rho*sin((1/2)*x*pi)*cos((1/2)*x*pi) - '
             '1/2*pi*sin((1/2)*x*pi)'
     symbol_names = 'mu rho'
-    vals = '${mu} ${rho}'
+    symbol_values = '${mu} ${rho}'
   []
   [exact_p]
     type = ParsedFunction
@@ -120,7 +120,7 @@ velocity_interp_method = 'average'
     type = ParsedFunction
     value = '(1/2)*pi*rho*cos((1/2)*x*pi)'
     symbol_names = 'rho'
-    vals = '${rho}'
+    symbol_values = '${rho}'
   []
 []
 

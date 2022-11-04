@@ -101,7 +101,7 @@
     type = ParsedFunctionControl
     function = 'a + b + c + d + f'
     symbol_names = 'a b c d f'
-    vals = 'fn pps sv ctrl:value trip:state'
+    symbol_values = 'fn pps sv ctrl:value trip:state'
   []
 []
 

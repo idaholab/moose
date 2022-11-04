@@ -35,13 +35,13 @@
     type = ParsedFunction
     value = 'a*exp(1/(10*t))*sin(2*pi*x/b) + 1'
     symbol_names = 'a b'
-    vals = '1 8'
+    symbol_values = '1 8'
   [../]
   [./phi_mms]
     type = ParsedFunction
     value = '-a*exp(1/(10*t))*sin(2*pi*x/b)/(10*t^2) + 2*pi*a*exp(1/(10*t))*cos(2*pi*x/b)/b'
     symbol_names = 'a b'
-    vals = '1 8'
+    symbol_values = '1 8'
   [../]
   [./velocity_func]
     type = ParsedVectorFunction

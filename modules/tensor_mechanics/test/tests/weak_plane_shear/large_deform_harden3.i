@@ -118,7 +118,7 @@
     type = ParsedFunction
     value = 'if(a<1E-3,0,a)'
     symbol_names = 'a'
-    vals = 'yield_fcn_at_zero'
+    symbol_values = 'yield_fcn_at_zero'
   []
 []
 

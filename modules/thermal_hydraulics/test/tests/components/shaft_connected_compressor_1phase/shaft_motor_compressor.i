@@ -176,13 +176,13 @@ dt = 1.e-3
     type = ParsedFunction
     value = '-(tau_isen+tau_diss)*omega'
     symbol_names = 'tau_isen tau_diss omega'
-    vals = 'compressor:isentropic_torque compressor:dissipation_torque shaft:omega'
+    symbol_values = 'compressor:isentropic_torque compressor:dissipation_torque shaft:omega'
   []
   [energy_conservation_fcn]
     type = ParsedFunction
     value = '(E_change - S_energy * dt) / E_tot'
     symbol_names = 'E_change S_energy dt E_tot'
-    vals = 'E_change S_energy ${dt} E_tot'
+    symbol_values = 'E_change S_energy ${dt} E_tot'
   []
 []
 

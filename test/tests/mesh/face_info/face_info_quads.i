@@ -35,7 +35,7 @@
 [VectorPostprocessors]
   [face_info]
     type = TestFaceInfo
-    symbol_names = 'u v'
+    vars = 'u v'
   []
 []
 

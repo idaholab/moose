@@ -92,14 +92,14 @@
     type = ParsedFunction
     value = 'y*cos(theta) - z * (1 + a)*sin(theta) - y'
     symbol_names = 'a theta'
-    vals = 'stretch angles'
+    symbol_values = 'stretch angles'
   []
 
   [move_z]
     type = ParsedFunction
     value = 'y*sin(theta) + z*(1+a)*cos(theta) - z'
     symbol_names = 'a theta'
-    vals = 'stretch angles'
+    symbol_values = 'stretch angles'
   []
 
   [dts]

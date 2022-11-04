@@ -28,7 +28,7 @@
     #value = alpha*alpha*pi*pi*(y*y*sin(alpha*pi*x*y)+y*y*sin(alpha*pi*x*y))
     value = alpha*alpha*pi*pi*sin(alpha*pi*x)
     symbol_names = 'alpha'
-    vals = '4'
+    symbol_values = '4'
   [../]
 
   [./u_func]
@@ -40,7 +40,7 @@
     value = sin(alpha*pi*x)
     grad_x = alpha*pi*cos(alpha*pi*x)
     symbol_names = 'alpha'
-    vals = '4'
+    symbol_values = '4'
   [../]
 []
 

@@ -32,8 +32,8 @@
   [./v_left_bc]
     # Left-side boundary condition for v equation, v(0,y,t) = u(0.5,y,t). This is accomplished using a PointValue postprocessor, which is what this input file was designed to test.
     type = ParsedFunction
-    value = a
-    vals = u_midpoint
+    expression = a
+    symbol_values = u_midpoint
     symbol_names = a
   [../]
   [./u_mms_func]

@@ -214,13 +214,13 @@
     type = ParsedFunction
     value = 'abs(0.5*(mi-mf)/(mi+mf))'
     symbol_names = 'mi mf'
-    vals = 'mwater_init mwater_fin'
+    symbol_values = 'mwater_init mwater_fin'
   [../]
   [./fcn_error_water]
     type = ParsedFunction
     value = 'abs((-b*log(-(gdens0*xval+(-b*exp(-p0/b)))/b)-p1)/p1)'
     symbol_names = 'b gdens0 p0 xval p1'
-    vals = '1E2 -1 pw_left 1 pw_right'
+    symbol_values = '1E2 -1 pw_left 1 pw_right'
   [../]
 []
 

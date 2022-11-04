@@ -109,7 +109,7 @@
     type = ParsedFunction
     value = 'rhoCp*(-200*x+200)-(0.05*200*t/1.04)'
     symbol_names = 'rhoCp'
-    vals = 10
+    symbol_values = 10
   [../]
   [./neumann_func]
     type = ParsedFunction

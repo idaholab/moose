@@ -15,8 +15,8 @@
 [Functions]
   [./left_bc]
     type = ParsedFunction
-    value = dummy2
-    vals = invalid
+    expression = dummy2
+    symbol_values = invalid
     symbol_names = dummy2
   [../]
 []

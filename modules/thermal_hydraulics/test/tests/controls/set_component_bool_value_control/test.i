@@ -93,7 +93,7 @@
     type = UnitTripControl
     condition = 'val > 1.5'
     symbol_names = 'val'
-    vals = 'trip_fn'
+    symbol_values = 'trip_fn'
   []
 
   [set_comp_value]

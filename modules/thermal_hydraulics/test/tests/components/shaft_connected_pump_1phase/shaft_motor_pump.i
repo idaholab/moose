@@ -92,13 +92,13 @@ dt = 1.e-2
     type = ParsedFunction
     value = '-tau_hyd * omega'
     symbol_names = 'tau_hyd  omega'
-    vals = 'pump:hydraulic_torque shaft:omega'
+    symbol_values = 'pump:hydraulic_torque shaft:omega'
   []
   [energy_conservation_fcn]
     type = ParsedFunction
     value = '(E_change - S_energy * dt) / E_tot'
     symbol_names = 'E_change S_energy dt E_tot'
-    vals = 'E_change S_energy ${dt} E_tot'
+    symbol_values = 'E_change S_energy ${dt} E_tot'
   []
 []
 

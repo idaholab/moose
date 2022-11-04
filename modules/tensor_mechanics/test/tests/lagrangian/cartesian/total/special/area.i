@@ -62,7 +62,7 @@
   [ratio]
     type = ParsedFunction
     symbol_names = 'sd su'
-    vals = 's_def s_undef'
+    symbol_values = 's_def s_undef'
     value = 'sd / su'
   []
 []

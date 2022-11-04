@@ -70,21 +70,21 @@
     type = ParsedFunction
     value = (1+max((-x)*al,0)^(1/(1-m)))^(-m)
     symbol_names = 'al m'
-    vals = '1E-6 0.8'
+    symbol_values = '1E-6 0.8'
   [../]
   [./answer_dSeff1VG]
     type = GradParsedFunction
     direction = '1 0 0'
     value = (1+max((-x)*al,0)^(1/(1-m)))^(-m)
     symbol_names = 'al m'
-    vals = '1E-6 0.8'
+    symbol_values = '1E-6 0.8'
   [../]
   [./answer_d2Seff1VG]
     type = Grad2ParsedFunction
     direction = '1 0 0'
     value = (1+max((-x)*al,0)^(1/(1-m)))^(-m)
     symbol_names = 'al m'
-    vals = '1E-6 0.8'
+    symbol_values = '1E-6 0.8'
   [../]
 
   [./answer_Seff1BW]
@@ -110,55 +110,55 @@
     type = ParsedFunction
     value = (1+exp((-x-shift)/scale))^(-0.5)
     symbol_names = 'shift scale'
-    vals = '-2E6 1E6'
+    symbol_values = '-2E6 1E6'
   [../]
   [./answer_dSeff1RSC]
     type = GradParsedFunction
     direction = '1 0 0'
     value = (1+exp((-x-shift)/scale))^(-0.5)
     symbol_names = 'shift scale'
-    vals = '-2E6 1E6'
+    symbol_values = '-2E6 1E6'
   [../]
   [./answer_d2Seff1RSC]
     type = Grad2ParsedFunction
     direction = '1 0 0'
     value = (1+exp((-x-shift)/scale))^(-0.5)
     symbol_names = 'shift scale'
-    vals = '-2E6 1E6'
+    symbol_values = '-2E6 1E6'
   [../]
 
   [./answer_Seff1VGcut]
     type = ParsedFunction
     value = if(x<pcut,scut+dscut*(x-pcut),(1+max((-x)*al,0)^(1/(1-m)))^(-m))
     symbol_names = 'al m pcut scut dscut'
-    vals = '1E-6 0.8 -1E6 0.574349177498517 1.14869835499703e-06'
+    symbol_values = '1E-6 0.8 -1E6 0.574349177498517 1.14869835499703e-06'
   [../]
   [./answer_dSeff1VGcut]
     type = GradParsedFunction
     direction = '1 0 0'
     value = if(x<pcut,scut+dscut*(x-pcut),(1+max((-x)*al,0)^(1/(1-m)))^(-m))
     symbol_names = 'al m pcut scut dscut'
-    vals = '1E-6 0.8 -1E6 0.574349177498517 1.14869835499703e-06'
+    symbol_values = '1E-6 0.8 -1E6 0.574349177498517 1.14869835499703e-06'
   [../]
   [./answer_d2Seff1VGcut]
     type = Grad2ParsedFunction
     direction = '1 0 0'
     value = if(x<pcut,scut+dscut*(x-pcut),(1+max((-x)*al,0)^(1/(1-m)))^(-m))
     symbol_names = 'al m pcut scut dscut'
-    vals = '1E-6 0.8 -1E6 0.574349177498517 1.14869835499703e-06'
+    symbol_values = '1E-6 0.8 -1E6 0.574349177498517 1.14869835499703e-06'
   [../]
 
   [./answer_Sat]
     type = ParsedFunction
     value = sres+((1-sumsres)*((1+max((-x)*al,0)^(1/(1-m)))^(-m)))
     symbol_names = 'al m sres sumsres'
-    vals = '1E-6 0.8 0.054321 0.054321'
+    symbol_values = '1E-6 0.8 0.054321 0.054321'
   [../]
   [./answer_dSat]
     type = ParsedFunction
     value = 1-sumsres
     symbol_names = 'sumsres'
-    vals = '0.054321'
+    symbol_values = '0.054321'
   [../]
 []
 

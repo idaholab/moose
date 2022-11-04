@@ -338,13 +338,13 @@
   [./excav_sideways]
     type = ParsedFunction
     symbol_names = 'end_t ymin ymax  e_h  closure_dist'
-    vals = '1.0   0    150.0 -3.0 15.0'
+    symbol_values = '1.0   0    150.0 -3.0 15.0'
     value = 'e_h*max(min((min(t/end_t,1)*(ymax-ymin)+ymin-y)/closure_dist,1),0)'
   [../]
   [./excav_downwards]
     type = ParsedFunction
     symbol_names = 'end_t ymin ymax  e_h  closure_dist'
-    vals = '1.0   0    150.0 -3.0 15.0'
+    symbol_values = '1.0   0    150.0 -3.0 15.0'
     value = 'e_h*min(t/end_t,1)*max(min(((ymax-ymin)+ymin-y)/closure_dist,1),0)'
   [../]
 []

@@ -704,25 +704,25 @@
   [ini_pp]
     type = ParsedFunction
     symbol_names = 'bulk p0 g    rho0'
-    vals = '2E3 0.0 1E-5 1E3'
+    symbol_values = '2E3 0.0 1E-5 1E3'
     value = '-bulk*log(exp(-p0/bulk)+g*rho0*z/bulk)'
   []
   [ini_xx]
     type = ParsedFunction
     symbol_names = 'bulk p0 g    rho0 biot'
-    vals = '2E3 0.0 1E-5 1E3  0.7'
+    symbol_values = '2E3 0.0 1E-5 1E3  0.7'
     value = '0.8*(2500*10E-6*z+biot*(-bulk*log(exp(-p0/bulk)+g*rho0*z/bulk)))'
   []
   [ini_zz]
     type = ParsedFunction
     symbol_names = 'bulk p0 g    rho0 biot'
-    vals = '2E3 0.0 1E-5 1E3  0.7'
+    symbol_values = '2E3 0.0 1E-5 1E3  0.7'
     value = '2500*10E-6*z+biot*(-bulk*log(exp(-p0/bulk)+g*rho0*z/bulk))'
   []
   [excav_sideways]
     type = ParsedFunction
     symbol_names = 'end_t ymin ymax  minval maxval slope'
-    vals = '0.5   0    1000.0 1E-9 1 60'
+    symbol_values = '0.5   0    1000.0 1E-9 1 60'
     # excavation face at ymin+(ymax-ymin)*min(t/end_t,1)
     # slope is the distance over which the modulus reduces from maxval to minval
     value = 'if(y<ymin+(ymax-ymin)*min(t/end_t,1),minval,if(y<ymin+(ymax-ymin)*min(t/end_t,1)+slope,minval+(maxval-minval)*(y-(ymin+(ymax-ymin)*min(t/end_t,1)))/slope,maxval))'
@@ -730,13 +730,13 @@
   [density_sideways]
     type = ParsedFunction
     symbol_names = 'end_t ymin ymax  minval maxval'
-    vals = '0.5   0    1000.0 0 2500'
+    symbol_values = '0.5   0    1000.0 0 2500'
     value = 'if(y<ymin+(ymax-ymin)*min(t/end_t,1),minval,maxval)'
   []
   [roof_conductance]
     type = ParsedFunction
     symbol_names = 'end_t ymin ymax   maxval minval'
-    vals = '0.5   0    1000.0 1E7      0'
+    symbol_values = '0.5   0    1000.0 1E7      0'
     value = 'if(y<ymin+(ymax-ymin)*min(t/end_t,1),maxval,minval)'
   []
 []

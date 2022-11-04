@@ -85,13 +85,13 @@ dt = 1.e-3
     type = ParsedFunction
     value = '-(tau_driving+tau_fr)*omega'
     symbol_names = 'tau_driving tau_fr omega'
-    vals = 'turbine:driving_torque turbine:friction_torque shaft:omega'
+    symbol_values = 'turbine:driving_torque turbine:friction_torque shaft:omega'
   []
   [energy_conservation_fcn]
     type = ParsedFunction
     value = '(E_change - S_energy * dt) / E_tot'
     symbol_names = 'E_change S_energy dt E_tot'
-    vals = 'E_change S_energy ${dt} E_tot'
+    symbol_values = 'E_change S_energy ${dt} E_tot'
   []
 []
 

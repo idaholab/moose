@@ -26,7 +26,7 @@
     type = ParsedFunction
     value = sin(alpha*pi*x)
     symbol_names = 'alpha'
-    vals = '16'
+    symbol_values = '16'
   [../]
 
   # This function is an actual compiled function

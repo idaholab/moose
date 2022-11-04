@@ -102,13 +102,13 @@
     type = ParsedFunction
     value = 'r:=sqrt(x^2+y^2+z^2);0.5*(1.0-tanh((r-r0)/delta_eta/sqrt(2.0)))'
     symbol_names = 'delta_eta r0'
-    vals = '6.431     100'
+    symbol_values = '6.431     100'
   [../]
   [./ic_func_c]
     type = ParsedFunction
     value = 'r:=sqrt(x^2+y^2+z^2);eta_an:=0.5*(1.0-tanh((r-r0)/delta/sqrt(2.0)));0.235*eta_an^3*(6*eta_an^2-15*eta_an+10)+0.13*(1-eta_an^3*(6*eta_an^2-15*eta_an+10))'
     symbol_names = 'delta r0'
-    vals = '6.431 100'
+    symbol_values = '6.431 100'
   [../]
 []
 

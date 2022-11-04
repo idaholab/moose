@@ -70,7 +70,7 @@ velocity_interp_method='rc'
     type = ADParsedFunction
     value = '-mu*(1 - 0.5/(exp(30 - 30*x) + 1))*(-1/4*pi^2*cos((1/2)*x*pi)/(1 - 0.5/(exp(30 - 30*x) + 1)) - 15.0*pi*exp(30 - 30*x)*sin((1/2)*x*pi)/((1 - 0.5/(exp(30 - 30*x) + 1))^2*(exp(30 - 30*x) + 1)^2) - 450.0*exp(30 - 30*x)*cos((1/2)*x*pi)/((1 - 0.5/(exp(30 - 30*x) + 1))^2*(exp(30 - 30*x) + 1)^2) + 900.0*exp(60 - 60*x)*cos((1/2)*x*pi)/((1 - 0.5/(exp(30 - 30*x) + 1))^2*(exp(30 - 30*x) + 1)^3) + 450.0*exp(60 - 60*x)*cos((1/2)*x*pi)/((1 - 0.5/(exp(30 - 30*x) + 1))^3*(exp(30 - 30*x) + 1)^4)) + 15.0*mu*(-1/2*pi*sin((1/2)*x*pi)/(1 - 0.5/(exp(30 - 30*x) + 1)) + 15.0*exp(30 - 30*x)*cos((1/2)*x*pi)/((1 - 0.5/(exp(30 - 30*x) + 1))^2*(exp(30 - 30*x) + 1)^2))*exp(30 - 30*x)/(exp(30 - 30*x) + 1)^2 - pi*rho*sin((1/2)*x*pi)*cos((1/2)*x*pi)/(1 - 0.5/(exp(30 - 30*x) + 1)) + 15.0*rho*exp(30 - 30*x)*cos((1/2)*x*pi)^2/((1 - 0.5/(exp(30 - 30*x) + 1))^2*(exp(30 - 30*x) + 1)^2) + (1 - 0.5/(exp(30 - 30*x) + 1))*cos(x)'
     symbol_names = 'mu rho'
-    vals = '${mu} ${rho}'
+    symbol_values = '${mu} ${rho}'
   []
   [exact_p]
     type = ParsedFunction
@@ -80,7 +80,7 @@ velocity_interp_method='rc'
     type = ParsedFunction
     value = '-1/2*pi*rho*sin((1/2)*x*pi)'
     symbol_names = 'rho'
-    vals = '${rho}'
+    symbol_values = '${rho}'
   []
 []
 

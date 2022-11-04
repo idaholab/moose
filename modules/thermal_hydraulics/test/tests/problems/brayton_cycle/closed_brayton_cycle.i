@@ -130,19 +130,19 @@ p_ambient = 1e5
     type = ParsedFunction
     value = 'torque * speed'
     symbol_names = 'torque speed'
-    vals = 'motor_torque shaft:omega'
+    symbol_values = 'motor_torque shaft:omega'
   []
   [generator_torque_fn]
     type = ParsedFunction
     value = 'slope * t'
     symbol_names = 'slope'
-    vals = '${generator_torque_per_shaft_speed}'
+    symbol_values = '${generator_torque_per_shaft_speed}'
   []
   [generator_power_fn]
     type = ParsedFunction
     value = 'torque * speed'
     symbol_names = 'torque speed'
-    vals = 'generator_torque shaft:omega'
+    symbol_values = 'generator_torque shaft:omega'
   []
   [htc_wall_fn]
     type = PiecewiseLinear

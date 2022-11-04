@@ -155,7 +155,7 @@
     type = ParsedFunction
     value = 'Q_t*pi/2.0/3.0 * cos(pi/3.0*z)'
     symbol_names = 'Q_t'
-    vals = heat_source
+    symbol_values = heat_source
   []
 []
 

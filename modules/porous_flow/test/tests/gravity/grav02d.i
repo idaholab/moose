@@ -85,7 +85,7 @@
   [ana_ppwater]
     type = ParsedFunction
     symbol_names = 'g B p0 rho0'
-    vals = '1 2 pp_water_top 1'
+    symbol_values = '1 2 pp_water_top 1'
     value = '-B*log(exp(-p0/B)+g*rho0*x/B)' # expected pp at base
   []
 []

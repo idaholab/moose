@@ -14,14 +14,14 @@
 [Functions]
   [./right_bc]
     type = ParsedFunction
-    value = a+1
-    vals = left_avg
+    expression = a+1
+    symbol_values = left_avg
     symbol_names = a
   [../]
   [./left_bc]
     type = ParsedFunction
-    value = a
-    vals = left_avg
+    expression = a
+    symbol_values = left_avg
     symbol_names = a
   [../]
 []

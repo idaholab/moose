@@ -137,7 +137,7 @@
     type = ParsedFunction
     value = 'if(a<1E-1,0,a)'
     symbol_names = 'a'
-    vals = 'raw_f0'
+    symbol_values = 'raw_f0'
   [../]
 []
 
