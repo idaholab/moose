@@ -59,6 +59,7 @@
     heavy = True
     min_parallel = 2
     ad_mode = 'sparse'
+    min_ad_size = 100
   []
   [p2p1]
     type = PythonUnitTest
@@ -74,6 +75,7 @@
     heavy = True
     min_parallel = 2
     ad_mode = 'sparse'
+    min_ad_size = 100
   []
   [p2p2]
     type = PythonUnitTest
@@ -90,5 +92,6 @@
     heavy = True
     min_parallel = 2
     ad_mode = 'sparse'
+    min_ad_size = 100
   []
 []
