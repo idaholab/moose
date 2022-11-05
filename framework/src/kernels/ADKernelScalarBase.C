@@ -103,8 +103,10 @@ ADKernelScalarBase::computeOffDiagJacobian(const unsigned int jvar_num)
     mooseError("off-diagonal Jacobian assembly not coded for non-default AD");
 #endif
     ADKernel::computeResidualsForJacobian();
+#ifdef MOOSE_SPARSE_AD
     _assembly.processResidualsAndJacobian(
         _residuals, _var.dofIndices(), _vector_tags, _matrix_tags, _var.scalingFactor());
+#endif
   }
   else
   {
