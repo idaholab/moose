@@ -23,5 +23,6 @@
     ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
     heavy = true
+    skip = '#20953'
   []
 []
