@@ -73,7 +73,7 @@
     type = DerivativeParsedMaterial
     f_name  = L
     expression = 'l:=0.1+1*(v+op)^2; if(l<0.01, 0.01, l)'
-    variable_names = 'op v'
+    coupled_variables = 'op v'
     outputs = exodus
     output_properties = 'L dL/dop dL/dv'
     derivative_order = 2
@@ -81,7 +81,7 @@
   [./free_energy]
     type = DerivativeParsedMaterial
     property_name = F
-    variable_names = 'op'
+    coupled_variables = 'op'
     expression = '2*op^2*(1-op)^2 - 0.2*op'
     derivative_order = 2
   [../]

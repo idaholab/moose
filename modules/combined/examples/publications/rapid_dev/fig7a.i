@@ -232,14 +232,14 @@
     type = DerivativeParsedMaterial
     property_name = Fc1
     expression = 'c^2'
-    variable_names = 'c'
+    coupled_variables = 'c'
     derivative_order = 2
   [../]
   [./chemical_free_energy_2]
     type = DerivativeParsedMaterial
     property_name = Fc2
     expression = '(1-c)^2'
-    variable_names = 'c'
+    coupled_variables = 'c'
     derivative_order = 2
   [../]
 

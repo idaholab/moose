@@ -101,7 +101,7 @@
   [./fl]
     type = DerivativeParsedMaterial
     property_name = fl
-    variable_names = 'cl'
+    coupled_variables = 'cl'
     expression = '(0.1-cl)^2'
   [../]
 
@@ -109,7 +109,7 @@
   [./fs]
     type = DerivativeParsedMaterial
     property_name = fs
-    variable_names = 'cs'
+    coupled_variables = 'cs'
     expression = '(0.9-cs)^2'
   [../]
 

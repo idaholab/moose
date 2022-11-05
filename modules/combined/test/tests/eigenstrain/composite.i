@@ -109,13 +109,13 @@
     type = DerivativeParsedMaterial
     expression = 0.02*c^2
     property_name = weight1
-    variable_names = c
+    coupled_variables = c
   [../]
   [./weight2]
     type = DerivativeParsedMaterial
     expression = 0.02*(1-c)^2
     property_name = weight2
-    variable_names = c
+    coupled_variables = c
   [../]
 
   [./eigenstrain]

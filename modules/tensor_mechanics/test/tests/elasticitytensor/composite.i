@@ -245,19 +245,19 @@
     block = 0
     property_name = Fa
     expression = c^2
-    variable_names = c
+    coupled_variables = c
   [../]
   [./Fb]
     type = DerivativeParsedMaterial
     block = 0
     property_name = Fb
     expression = (1-c)^3
-    variable_names = c
+    coupled_variables = c
   [../]
   [./C]
     type = CompositeElasticityTensor
     block = 0
-    variable_names = c
+    args = c
     tensors = 'Ca Cb'
     weights = 'Fa Fb'
   [../]

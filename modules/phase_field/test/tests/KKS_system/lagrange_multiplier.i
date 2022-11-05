@@ -70,13 +70,13 @@
   [f1] # = fd
     type = DerivativeParsedMaterial
     property_name = F1
-    variable_names = 'c1'
+    coupled_variables = 'c1'
     expression = '(0.9-c1)^2'
   []
   [f2] # = fm
     type = DerivativeParsedMaterial
     property_name = F2
-    variable_names = 'c2'
+    coupled_variables = 'c2'
     expression = '(0.1-c2)^2'
   []
 

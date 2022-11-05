@@ -105,7 +105,7 @@
   [./ks]
     type = ParsedMaterial
     property_name = ks
-    variable_names = 'T'
+    coupled_variables = 'T'
     constant_names = 'a b'
     constant_expressions = '-0.0025 157.16'
     expression = 'a*T + b'
@@ -139,7 +139,7 @@
   [./cs_eq]
     type = DerivativeParsedMaterial
     property_name = cs_eq
-    variable_names = 'gr0 gr1 gr2 gr3 T'
+    coupled_variables = 'gr0 gr1 gr2 gr3 T'
     constant_names = 'Ef c_GB kB'
     constant_expressions = '2.69 0.189 8.617343e-5'
     expression = 'bnds:=gr0^2 + gr1^2 + gr2^2 + gr3^2; exp(-Ef/kB/T) + 4.0 * c_GB * (1 - bnds)^2'
@@ -171,7 +171,7 @@
   [./f_bulk]
     type = ParsedMaterial
     property_name = f_bulk
-    variable_names = 'phi gr0 gr1 gr2 gr3'
+    coupled_variables = 'phi gr0 gr1 gr2 gr3'
     material_property_names = 'mu gamma'
     expression = 'mu*(phi^4/4-phi^2/2 + gr0^4/4-gr0^2/2 + gr1^4/4-gr1^2/2
                   + gr2^4/4-gr2^2/2 + gr3^4/4-gr3^2/2
@@ -182,7 +182,7 @@
   [./f_switch]
     type = ParsedMaterial
     property_name = f_switch
-    variable_names = 'w'
+    coupled_variables = 'w'
     material_property_names = 'chi'
     expression = '0.5*w^2*chi'
     outputs = exodus

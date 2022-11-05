@@ -69,7 +69,7 @@
   [./free_energy]
     type = DerivativeParsedMaterial
     property_name = fbulk
-    variable_names = c
+    coupled_variables = c
     constant_names = W
     constant_expressions = 1.0/2^2
     expression = W*(1-c)^2*(1+c)^2

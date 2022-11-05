@@ -117,7 +117,7 @@
     tensors = ' eigenstrain1 eigenstrain2'
     weights = 'weight1 weight2'
     eigenstrain_name = 'eigenstrain'
-    variable_names = c
+    coupled_variables = c
   [../]
   [./weights]
     type = GenericConstantMaterial

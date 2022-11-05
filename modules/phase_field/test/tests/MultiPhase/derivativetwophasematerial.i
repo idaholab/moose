@@ -115,7 +115,7 @@
   [./free_energy_A]
     type = DerivativeParsedMaterial
     property_name = Fa
-    variable_names = 'c'
+    coupled_variables = 'c'
     expression = '(c-0.1)^2*(c-1)^2 + c*0.01'
     derivative_order = 2
     enable_jit = true
@@ -123,7 +123,7 @@
   [./free_energy_B]
     type = DerivativeParsedMaterial
     property_name = Fb
-    variable_names = 'c'
+    coupled_variables = 'c'
     expression = 'c^2*(c-0.9)^2 + (1-c)*0.01'
     derivative_order = 2
     enable_jit = true

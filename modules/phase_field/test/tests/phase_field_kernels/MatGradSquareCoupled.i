@@ -78,14 +78,14 @@
   [./mobility]
     type = DerivativeParsedMaterial
     f_name  = L
-    variable_names = 'eta w'
+    coupled_variables = 'eta w'
     expression = '(1.5-eta)^2+(1.5-w)^2'
     derivative_order = 2
   [../]
   [./free_energy]
     type = DerivativeParsedMaterial
     property_name = F
-    variable_names = 'eta'
+    coupled_variables = 'eta'
     expression = 'eta^2 * (1-eta)^2'
     derivative_order = 2
   [../]

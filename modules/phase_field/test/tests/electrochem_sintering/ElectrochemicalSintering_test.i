@@ -139,7 +139,7 @@
   [ks_cat]
     type = ParsedMaterial
     property_name = ks_cat
-    variable_names = 'T'
+    coupled_variables = 'T'
     constant_names = 'a b Va'
     constant_expressions = '-0.0017 140.44 0.03726'
     expression = '(a*T + b) * Va^2'
@@ -147,7 +147,7 @@
   [ks_an]
     type = ParsedMaterial
     property_name = ks_an
-    variable_names = 'T'
+    coupled_variables = 'T'
     constant_names = 'a b Va'
     constant_expressions = '-0.0017 140.44 0.03726'
     expression = '(a*T + b) * Va^2'
@@ -205,7 +205,7 @@
   [ns_y_min]
     type = DerivativeParsedMaterial
     property_name = ns_y_min
-    variable_names = 'gr0 gr1 T'
+    coupled_variables = 'gr0 gr1 T'
     constant_names = 'Ef_B Ef_GB   kB          Va_Y'
     constant_expressions = '4.37 4.37    8.617343e-5 0.03726'
     derivative_order = 2
@@ -216,7 +216,7 @@
   [ns_o_min]
     type = DerivativeParsedMaterial
     property_name = ns_o_min
-    variable_names = 'gr0 gr1 T'
+    coupled_variables = 'gr0 gr1 T'
     constant_names = 'Ef_B Ef_GB  kB          Va_O'
     constant_expressions = '4.37 4.37   8.617343e-5 0.02484'
     derivative_order = 2
@@ -275,7 +275,7 @@
   [permittivity]
     type = DerivativeParsedMaterial
     property_name = permittivity
-    variable_names = 'phi'
+    coupled_variables = 'phi'
     material_property_names = 'hs hv'
     constant_names = 'eps_rel_solid   eps_void_over_e'
     constant_expressions = '30              5.52e-2' #eps_void_over_e in 1/V/nm

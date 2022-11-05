@@ -163,7 +163,7 @@
   [./etasummat]
     type = ParsedMaterial
     property_name = etasum
-    variable_names = 'eta1 eta2 eta3'
+    coupled_variables = 'eta1 eta2 eta3'
     material_property_names = 'h1 h2 h3'
     expression = 'h1+h2+h3'
   [../]

@@ -277,7 +277,7 @@
   [./fm]
     type = DerivativeParsedMaterial
     property_name = fm
-    variable_names = 'cm'
+    coupled_variables = 'cm'
     expression = '6.55*(cm-0.13)^2'
   [../]
 
@@ -285,7 +285,7 @@
   [./fp]
     type = DerivativeParsedMaterial
     property_name = fp
-    variable_names = 'cp'
+    coupled_variables = 'cp'
     expression = '6.55*(cp-0.235)^2'
   [../]
 
@@ -309,7 +309,7 @@
   [./one_minus_h_eta_explicit]
     type = DerivativeParsedMaterial
     property_name = one_minus_h_explicit
-    variable_names = eta
+    coupled_variables = eta
     expression = 1-eta^3*(6*eta^2-15*eta+10)
     outputs = exodus
   [../]

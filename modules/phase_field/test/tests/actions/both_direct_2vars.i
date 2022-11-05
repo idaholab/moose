@@ -56,7 +56,7 @@
   [./free_energy]
     type = DerivativeParsedMaterial
     property_name = F
-    variable_names = 'eta c'
+    coupled_variables = 'eta c'
     expression = '(1 - eta)*10.0*(c - 0.1)^2 + eta*(8.0*(c - 0.9)^2) + 10.0*eta^2*(1-eta)^2'
   [../]
 []

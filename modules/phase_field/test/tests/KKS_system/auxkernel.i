@@ -79,13 +79,13 @@
   [f1] # = fd
     type = DerivativeParsedMaterial
     property_name = F1
-    variable_names = 'c1'
+    coupled_variables = 'c1'
     expression = '(0.9-c1)^2'
   []
   [f2] # = fm
     type = DerivativeParsedMaterial
     property_name = F2
-    variable_names = 'c2'
+    coupled_variables = 'c2'
     expression = '(0.1-c2)^2'
   []
 
@@ -101,7 +101,7 @@
     material_property_names = 'h1(eta1)'
     expression = '1-h1'
     property_name = h2
-    variable_names = eta1
+    coupled_variables = eta1
   []
 
   # Coefficients for diffusion equation
@@ -110,14 +110,14 @@
     material_property_names = 'D h1(eta1)'
     expression = D*h1
     property_name = Dh1
-    variable_names = eta1
+    coupled_variables = eta1
   []
   [Dh2]
     type = DerivativeParsedMaterial
     material_property_names = 'D h2(eta1)'
     expression = 'D*h2'
     property_name = Dh2
-    variable_names = eta1
+    coupled_variables = eta1
   []
 
   # Barrier functions for each phase

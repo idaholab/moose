@@ -39,7 +39,7 @@
   [./free_energy]
     type = DerivativeParsedMaterial
     property_name = F
-    variable_names = 'cv'
+    coupled_variables = 'cv'
     expression = '(1-cv)^2 * (1+cv)^2'
   [../]
 []

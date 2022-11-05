@@ -68,7 +68,7 @@
   [free_energy]
     type = ADDerivativeParsedMaterial
     property_name = fbulk
-    variable_names = 'w T'
+    coupled_variables = 'w T'
     constant_names = 'alpha gamma T_e pi'
     constant_expressions = '0.9 10 1 4*atan(1)'
     expression = 'm:=alpha/pi * atan(gamma * (T_e - T)); 1/4*w^4 - (1/2 - m/3) * w^3 + (1/4 - m/2) * '

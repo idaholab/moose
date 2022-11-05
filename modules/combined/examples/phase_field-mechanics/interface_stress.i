@@ -44,7 +44,7 @@
     type = DerivativeParsedMaterial
     property_name = ym
     expression = (1-eta)*7+0.5
-    variable_names = eta
+    coupled_variables = eta
   [../]
   [./elasticity]
     type = ComputeVariableIsotropicElasticityTensor

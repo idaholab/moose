@@ -196,7 +196,7 @@
     type = DerivativeParsedMaterial
     block = 0
     expression = 0.005*c^2
-    variable_names = c
+    coupled_variables = c
     outputs = exodus
     output_properties = 'var_dep'
     property_name = var_dep

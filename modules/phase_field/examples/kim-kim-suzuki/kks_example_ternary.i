@@ -129,7 +129,7 @@
   [./fl]
     type = DerivativeParsedMaterial
     property_name = fl
-    variable_names = 'c1l c2l'
+    coupled_variables = 'c1l c2l'
     expression = '(0.1-c1l)^2+(0.05-c2l)^2'
   [../]
 
@@ -137,7 +137,7 @@
   [./fs]
     type = DerivativeParsedMaterial
     property_name = fs
-    variable_names = 'c1s c2s'
+    coupled_variables = 'c1s c2s'
     expression = '(0.8-c1s)^2+(0.1-c2s)^2'
   [../]
 

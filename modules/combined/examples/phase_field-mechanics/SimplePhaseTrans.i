@@ -74,7 +74,7 @@
   [./chemical_free_energy]
     type = DerivativeParsedMaterial
     property_name = Fc
-    variable_names = 'eta'
+    coupled_variables = 'eta'
     constant_names = 'A2 A3 A4'
     constant_expressions = '0.2 -12.6 12.4'
     expression = A2/2*eta^2+A3/3*eta^3+A4/4*eta^4
@@ -95,7 +95,7 @@
   [./var_dependence]
     type = DerivativeParsedMaterial
     expression = eta
-    variable_names = 'eta'
+    coupled_variables = 'eta'
     property_name = var_dep
     enable_jit = true
     derivative_order = 2

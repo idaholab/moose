@@ -185,7 +185,7 @@
   [../]
   #[./ha]
   #  type = DerivativeParsedMaterial
-  #  variable_names = 'eta1 eta2 eta3 eta0'
+  #  coupled_variables = 'eta1 eta2 eta3 eta0'
   #  property_name = ha_parsed
   #  expression = 'eta1^2/(eta1^2+eta2^2+eta3^2+eta0^2)'
   #  derivative_order = 2
@@ -193,7 +193,7 @@
   #[../]
   #[./hb]
   #  type = DerivativeParsedMaterial
-  #  variable_names = 'eta1 eta2 eta3 eta0'
+  #  coupled_variables = 'eta1 eta2 eta3 eta0'
   #  property_name = hb_parsed
   #  expression = '(eta2^2+eta3^2+eta0^2)/(eta1^2+eta2^2+eta3^2+eta0^2)'
   #  derivative_order = 2
@@ -202,7 +202,7 @@
 
   #[./FreeEng]
   #  type = DerivativeParsedMaterial
-  #  variable_names = 'c eta1 eta2 eta3 eta0'
+  #  coupled_variables = 'c eta1 eta2 eta3 eta0'
   #  property_name = F
   #  constant_names = 'c1 c2 s g d e h z'
   #  constant_expressions = '1.0 0.0 1.5 1.5 1.0 1.0 1 1.0'

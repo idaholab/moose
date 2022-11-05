@@ -95,7 +95,7 @@
   [./fm]
     type = DerivativeParsedMaterial
     property_name = fm
-    variable_names = 'cm'
+    coupled_variables = 'cm'
     expression = '(0.1-cm)^2'
   [../]
 
@@ -103,7 +103,7 @@
   [./fd]
     type = DerivativeParsedMaterial
     property_name = fd
-    variable_names = 'cd'
+    coupled_variables = 'cd'
     expression = '(0.9-cd)^2'
   [../]
 

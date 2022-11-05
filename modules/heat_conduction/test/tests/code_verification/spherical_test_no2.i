@@ -67,7 +67,7 @@
   [./thermal_conductivity]
     type = ParsedMaterial
     property_name = 'thermal_conductivity'
-    variable_names = u
+    coupled_variables = u
     expression = '5 + 1e-3 * (u-0)'
   [../]
 []

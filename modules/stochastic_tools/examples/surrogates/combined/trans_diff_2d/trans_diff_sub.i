@@ -54,7 +54,7 @@
   [diff_coeff]
     type = ParsedMaterial
     property_name = diff_coeff
-    variable_names = 'T'
+    coupled_variables = 'T'
     constant_names = 'C'
     constant_expressions = 0.02
     expression = 'C * pow(300/T, 2)'

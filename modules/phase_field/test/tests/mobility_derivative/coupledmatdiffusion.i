@@ -86,14 +86,14 @@
     type = DerivativeParsedMaterial
     property_name = Dc
     expression = '0.01+c^2+d'
-    variable_names = 'c d'
+    coupled_variables = 'c d'
     derivative_order = 1
   [../]
   [./Dd]
     type = DerivativeParsedMaterial
     property_name = Dd
     expression = 'd^2+c+1.5'
-    variable_names = 'c d'
+    coupled_variables = 'c d'
     derivative_order = 1
   [../]
 []

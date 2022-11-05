@@ -105,7 +105,7 @@
   [./ks]
     type = ParsedMaterial
     property_name = ks
-    variable_names = 'T'
+    coupled_variables = 'T'
     constant_names = 'a b'
     constant_expressions = '-0.0025 157.16'
     expression = 'a*T + b'
@@ -139,7 +139,7 @@
   [./cs_eq]
     type = DerivativeParsedMaterial
     property_name = cs_eq
-    variable_names = 'gr0 gr1 gr2 gr3 T'
+    coupled_variables = 'gr0 gr1 gr2 gr3 T'
     constant_names = 'Ef c_GB kB'
     constant_expressions = '2.69 0.189 8.617343e-5'
     expression = 'bnds:=gr0^2 + gr1^2 + gr2^2 + gr3^2; exp(-Ef/kB/T) + 4.0 * c_GB * (1 - bnds)^2'

@@ -144,7 +144,7 @@
     expression = h1+h2
     property_name = hsum
     material_property_names = 'h1 h2'
-    variable_names = 'c'
+    coupled_variables = 'c'
     outputs = exodus
   [../]
 
@@ -169,14 +169,14 @@
   [./free_energy_A]
     type = DerivativeParsedMaterial
     property_name = Fa
-    variable_names = 'c'
+    coupled_variables = 'c'
     expression = '(c-0.1)^2'
     derivative_order = 2
   [../]
   [./free_energy_B]
     type = DerivativeParsedMaterial
     property_name = Fb
-    variable_names = 'c'
+    coupled_variables = 'c'
     expression = '(c-0.9)^2'
     derivative_order = 2
   [../]

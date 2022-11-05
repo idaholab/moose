@@ -298,7 +298,7 @@
   [./fm]
     type = DerivativeParsedMaterial
     property_name = fm
-    variable_names = 'cm'
+    coupled_variables = 'cm'
     expression = '6.55*(cm-0.13)^2'
   [../]
 # Elastic energy of the matrix
@@ -321,7 +321,7 @@
   [./fp]
     type = DerivativeParsedMaterial
     property_name = fp
-    variable_names = 'cp'
+    coupled_variables = 'cp'
     expression = '6.55*(cp-0.235)^2'
   [../]
 

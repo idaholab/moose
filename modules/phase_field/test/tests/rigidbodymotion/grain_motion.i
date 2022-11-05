@@ -91,7 +91,7 @@
   [../]
   [./free_energy]
     type = DerivativeParsedMaterial
-    variable_names = 'c eta'
+    coupled_variables = 'c eta'
     constant_names = 'barr_height  cv_eq'
     constant_expressions = '0.1          1.0e-2'
     expression = 16*barr_height*(c-cv_eq)^2*(1-cv_eq-c)^2+(c-eta)^2

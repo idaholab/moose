@@ -48,7 +48,7 @@
     # simple double well free energy
     type = DerivativeParsedMaterial
     property_name = Fc
-    variable_names = 'c'
+    coupled_variables = 'c'
     constant_names       = 'barr_height  cv_eq'
     constant_expressions = '0.1          0'
     expression = 16*barr_height*c^2*(1-c)^2 # +0.01*(c*plog(c,0.005)+(1-c)*plog(1-c,0.005))
@@ -60,7 +60,7 @@
     # classical nucleation theory in a real simulation.
     type = ParsedMaterial
     property_name = P
-    variable_names = c
+    coupled_variables = c
     expression = c*1e-7
     outputs = exodus
   [../]

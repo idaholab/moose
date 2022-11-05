@@ -251,19 +251,19 @@
     type = DerivativeParsedMaterial
     expression = '0.3*c^2'
     property_name = weight1
-    variable_names = c
+    coupled_variables = c
   [../]
   [./weight2]
     type = DerivativeParsedMaterial
     expression = '0.3*(1-c)^2'
     property_name = weight2
-    variable_names = c
+    coupled_variables = c
   [../]
   [./weight3]
     type = DerivativeParsedMaterial
     expression = '4*(0.5-c)^2'
     property_name = weight3
-    variable_names = c
+    coupled_variables = c
   [../]
 
   [./elasticity_tensor]
@@ -300,7 +300,7 @@
     type = DerivativeParsedMaterial
     property_name = Fc
     expression = '4*c^2*(1-c)^2'
-    variable_names = 'c'
+    coupled_variables = 'c'
     outputs = exodus
     output_properties = Fc
   [../]

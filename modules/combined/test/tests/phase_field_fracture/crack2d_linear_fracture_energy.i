@@ -120,7 +120,7 @@
   [./degradation]
     type = DerivativeParsedMaterial
     property_name = degradation
-    variable_names = 'c'
+    coupled_variables = 'c'
     expression = '(1.0-c)^2*(1.0 - eta) + eta'
     constant_names       = 'eta'
     constant_expressions = '0.0'
@@ -129,7 +129,7 @@
   [./fracture_energy]
     type = DerivativeParsedMaterial
     property_name = fracture_energy
-    variable_names = 'c'
+    coupled_variables = 'c'
     material_property_names = 'gc_prop l'
     expression = '3 * gc_prop / (8 * l) * c'
     derivative_order = 2

@@ -72,7 +72,7 @@
   [../]
   [./prefactor]
     type = DerivativeParsedMaterial
-    variable_names = c
+    coupled_variables = c
     property_name = prefactor
     constant_names       = 'epsilon0 c0'
     constant_expressions = '0.05     0'

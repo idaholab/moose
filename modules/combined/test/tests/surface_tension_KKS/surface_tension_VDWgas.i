@@ -253,7 +253,7 @@
   [./fm]
     type = DerivativeParsedMaterial
     property_name = fm
-    variable_names = 'cvm cgm'
+    coupled_variables = 'cvm cgm'
     material_property_names = 'kvmatrix kgmatrix cvmatrixeq cgmatrixeq'
     expression = '0.5*kvmatrix*(cvm-cvmatrixeq)^2 + 0.5*kgmatrix*(cgm-cgmatrixeq)^2'
   [../]
@@ -276,7 +276,7 @@
   [./fb]
     type = DerivativeParsedMaterial
     property_name = fb
-    variable_names = 'cvb cgb'
+    coupled_variables = 'cvb cgb'
     material_property_names = 'kToverV nQ Va b f0 kpen kgbub kvbub cvbubeq cgbubeq'
     expression = '0.5*kgbub*(cvb-cvbubeq)^2 + 0.5*kvbub*(cgb-cgbubeq)^2'
   [../]

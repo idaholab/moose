@@ -237,7 +237,7 @@
   [./etasummat]
     type = ParsedMaterial
     property_name = etasum
-    variable_names = 'eta1 eta2 eta3'
+    coupled_variables = 'eta1 eta2 eta3'
     material_property_names = 'h1 h2 h3'
     expression = 'h1+h2+h3-1'
     outputs = exodus
@@ -248,7 +248,7 @@
   [./phasemap]
     type = ParsedMaterial
     property_name = phase
-    variable_names = 'eta2 eta3'
+    coupled_variables = 'eta2 eta3'
     expression = 'if(eta3>0.5,1,0)-if(eta2>0.5,1,0)'
     outputs = exodus
   [../]
@@ -348,21 +348,21 @@
     type = DerivativeParsedMaterial
     property_name = Fc1
     expression = '4*c^2'
-    variable_names = 'c'
+    coupled_variables = 'c'
     derivative_order = 2
   [../]
   [./chemical_free_energy_2]
     type = DerivativeParsedMaterial
     property_name = Fc2
     expression = '(c-0.9)^2-0.4'
-    variable_names = 'c'
+    coupled_variables = 'c'
     derivative_order = 2
   [../]
   [./chemical_free_energy_3]
     type = DerivativeParsedMaterial
     property_name = Fc3
     expression = '(c-0.9)^2-0.5'
-    variable_names = 'c'
+    coupled_variables = 'c'
     derivative_order = 2
   [../]
 

@@ -247,7 +247,7 @@
   [./etasummat]
     type = ParsedMaterial
     property_name = etasum
-    variable_names = 'eta1 eta2 eta3'
+    coupled_variables = 'eta1 eta2 eta3'
     material_property_names = 'h1 h2 h3'
     expression = 'h1+h2+h3'
   [../]
@@ -291,19 +291,19 @@
     type = DerivativeParsedMaterial
     property_name = F1
     expression = '(c-1)^2'
-    variable_names = 'c'
+    coupled_variables = 'c'
   [../]
   [./phase_free_energy_2]
     type = DerivativeParsedMaterial
     property_name = F2
     expression = '(c-0.5)^2'
-    variable_names = 'c'
+    coupled_variables = 'c'
   [../]
   [./phase_free_energy_3]
     type = DerivativeParsedMaterial
     property_name = F3
     expression = 'c^2'
-    variable_names = 'c'
+    coupled_variables = 'c'
   [../]
 
   # The DerivativeMultiPhaseMaterial ties the phase free energies together into a global free energy.

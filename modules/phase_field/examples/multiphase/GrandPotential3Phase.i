@@ -190,7 +190,7 @@
   [../]
   [./omegaa]
     type = DerivativeParsedMaterial
-    variable_names = 'w'
+    coupled_variables = 'w'
     property_name = omegaa
     material_property_names = 'Vm ka caeq'
     expression = '-0.5*w^2/Vm^2/ka-w/Vm*caeq'
@@ -198,7 +198,7 @@
   [../]
   [./omegab]
     type = DerivativeParsedMaterial
-    variable_names = 'w'
+    coupled_variables = 'w'
     property_name = omegab
     material_property_names = 'Vm kb cbeq'
     expression = '-0.5*w^2/Vm^2/kb-w/Vm*cbeq'
@@ -206,7 +206,7 @@
   [../]
   [./omegad]
     type = DerivativeParsedMaterial
-    variable_names = 'w'
+    coupled_variables = 'w'
     property_name = omegad
     material_property_names = 'Vm kd cdeq'
     expression = '-0.5*w^2/Vm^2/kd-w/Vm*cdeq'
@@ -214,7 +214,7 @@
   [../]
   [./rhoa]
     type = DerivativeParsedMaterial
-    variable_names = 'w'
+    coupled_variables = 'w'
     property_name = rhoa
     material_property_names = 'Vm ka caeq'
     expression = 'w/Vm^2/ka + caeq/Vm'
@@ -222,7 +222,7 @@
   [../]
   [./rhob]
     type = DerivativeParsedMaterial
-    variable_names = 'w'
+    coupled_variables = 'w'
     property_name = rhob
     material_property_names = 'Vm kb cbeq'
     expression = 'w/Vm^2/kb + cbeq/Vm'
@@ -230,7 +230,7 @@
   [../]
   [./rhod]
     type = DerivativeParsedMaterial
-    variable_names = 'w'
+    coupled_variables = 'w'
     property_name = rhod
     material_property_names = 'Vm kd cdeq'
     expression = 'w/Vm^2/kd + cdeq/Vm'
@@ -259,7 +259,7 @@
     property_name = chi
     material_property_names = 'Vm ha(etaa0,etab0,etad0) ka hb(etaa0,etab0,etad0) kb hd(etaa0,etab0,etad0) kd'
     expression = '(ha/ka + hb/kb + hd/kd) / Vm^2'
-    variable_names = 'etaa0 etab0 etad0'
+    coupled_variables = 'etaa0 etab0 etad0'
     derivative_order = 2
   [../]
 []

@@ -297,7 +297,7 @@
     material_property_names = 'D h1(eta1)'
     expression = D*h1
     property_name = Dh1
-    variable_names = eta1
+    coupled_variables = eta1
     derivative_order = 1
   []
   [Dh2a]
@@ -305,7 +305,7 @@
     material_property_names = 'D h2(eta2)'
     expression = D*h2*10/30
     property_name = Dh2a
-    variable_names = eta2
+    coupled_variables = eta2
     derivative_order = 1
   []
   [Dh2b]
@@ -313,7 +313,7 @@
     material_property_names = 'D h2(eta2)'
     expression = D*h2*4/30
     property_name = Dh2b
-    variable_names = eta2
+    coupled_variables = eta2
     derivative_order = 1
   []
   [Dh2c]
@@ -321,7 +321,7 @@
     material_property_names = 'D h2(eta2)'
     expression = D*h2*16/30
     property_name = Dh2c
-    variable_names = eta2
+    coupled_variables = eta2
     derivative_order = 1
   []
 []

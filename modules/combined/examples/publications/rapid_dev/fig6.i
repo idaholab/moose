@@ -119,19 +119,19 @@
   [./f1]
     type = DerivativeParsedMaterial
     property_name = F1
-    variable_names = 'c1'
+    coupled_variables = 'c1'
     expression = '20*(c1-0.4)^2'
   [../]
   [./f2]
     type = DerivativeParsedMaterial
     property_name = F2
-    variable_names = 'c2 T'
+    coupled_variables = 'c2 T'
     expression = '20*(c2-0.5)^2 + 0.01*T'
   [../]
   [./f3]
     type = DerivativeParsedMaterial
     property_name = F3
-    variable_names = 'c3'
+    coupled_variables = 'c3'
     expression = '20*(c3-0.8)^2'
   [../]
 

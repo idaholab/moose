@@ -64,7 +64,7 @@
   [./mob]
     type = DerivativeParsedMaterial
     property_name = M
-    variable_names = c
+    coupled_variables = c
     expression = '1-0.9*c^2'
     outputs = exodus
     derivative_order = 1

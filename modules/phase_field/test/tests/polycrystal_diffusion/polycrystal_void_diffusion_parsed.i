@@ -70,13 +70,13 @@
   [./hb]
     type = DerivativeParsedMaterial
     property_name = hb
-    variable_names = 'c'
+    coupled_variables = 'c'
     expression = 'c * c * c * (6 * c * c - 15 * c + 10)'
   [../]
   [./hm]
     type = DerivativeParsedMaterial
     property_name = hm
-    variable_names = 'c'
+    coupled_variables = 'c'
     material_property_names = 'hb'
     expression =  '(1-hb)'
   [../]

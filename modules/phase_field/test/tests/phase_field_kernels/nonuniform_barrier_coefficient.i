@@ -52,21 +52,21 @@
   [./h0]
     type = DerivativeParsedMaterial
     property_name = h0
-    variable_names = 'gr0 gr1'
+    coupled_variables = 'gr0 gr1'
     expression = 'gr0^2 / (gr0^2 + gr1^2)'
     derivative_order = 2
   [../]
   [./h1]
     type = DerivativeParsedMaterial
     property_name = h1
-    variable_names = 'gr0 gr1'
+    coupled_variables = 'gr0 gr1'
     expression = 'gr1^2 / (gr0^2 + gr1^2)'
     derivative_order = 2
   [../]
   [./mu]
     type = DerivativeParsedMaterial
     property_name = mu
-    variable_names = 'gr0 gr1'
+    coupled_variables = 'gr0 gr1'
     constant_names = 'mag'
     constant_expressions = '16'
     expression = 'mag * (gr0^2 * gr1^2 + 0.1)'
@@ -75,7 +75,7 @@
   [./kappa]
     type = DerivativeParsedMaterial
     property_name = kappa
-    variable_names = 'gr0 gr1'
+    coupled_variables = 'gr0 gr1'
     material_property_names = 'h0(gr0,gr1) h1(gr0,gr1)'
     constant_names = 'mag0 mag1'
     constant_expressions = '200 100'

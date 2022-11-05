@@ -70,7 +70,7 @@
   [./free_energy]
     type = DerivativeParsedMaterial
     property_name = fbulk
-    variable_names = 'w T'
+    coupled_variables = 'w T'
     constant_names = pi
     constant_expressions = 4*atan(1)
     expression = 'm:=0.9 * atan(10 * (1 - T)) / pi; 1/4*w^4 - (1/2 - m/3) * w^3 + (1/4 - m/2) * w^2'

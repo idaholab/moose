@@ -42,19 +42,19 @@
   [./T_inf]
     type = ParsedMaterial
     property_name = T_inf
-    variable_names = temp
+    coupled_variables = temp
     expression = 'temp + 1'
   [../]
   [./htc]
     type = ParsedMaterial
     property_name = htc
-    variable_names = temp
+    coupled_variables = temp
     expression = 'temp / 100 + 1'
   [../]
   [./dhtc_dT]
     type = ParsedMaterial
     property_name = dhtc_dT
-    variable_names = temp
+    coupled_variables = temp
     expression = '1 / 100'
   [../]
 []

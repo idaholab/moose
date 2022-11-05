@@ -113,7 +113,7 @@
   [./omegab]
     type = DerivativeParsedMaterial
     property_name = omegab
-    variable_names = 'w phi'
+    coupled_variables = 'w phi'
     material_property_names = 'Va kb cb_eq'
     expression = '-0.5*w^2/Va^2/kb - w/Va*cb_eq'
     derivative_order = 2
@@ -121,7 +121,7 @@
   [./omegam]
     type = DerivativeParsedMaterial
     property_name = omegam
-    variable_names = 'w eta0'
+    coupled_variables = 'w eta0'
     material_property_names = 'Va km cm_eq'
     expression = '-0.5*w^2/Va^2/km - w/Va*cm_eq'
     derivative_order = 2
@@ -129,7 +129,7 @@
   [./chi]
     type = DerivativeParsedMaterial
     property_name = chi
-    variable_names = 'w'
+    coupled_variables = 'w'
     material_property_names = 'Va hb hm kb km'
     expression = '(hm/km + hb/kb)/Va^2'
     derivative_order = 2
@@ -138,7 +138,7 @@
   [./rhob]
     type = DerivativeParsedMaterial
     property_name = rhob
-    variable_names = 'w'
+    coupled_variables = 'w'
     material_property_names = 'Va kb cb_eq'
     expression = 'w/Va^2/kb + cb_eq/Va'
     derivative_order = 1
@@ -146,7 +146,7 @@
   [./rhom]
     type = DerivativeParsedMaterial
     property_name = rhom
-    variable_names = 'w eta0'
+    coupled_variables = 'w eta0'
     material_property_names = 'Va km cm_eq(eta0)'
     expression = 'w/Va^2/km + cm_eq/Va'
     derivative_order = 1

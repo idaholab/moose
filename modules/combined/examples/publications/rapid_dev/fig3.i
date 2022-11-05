@@ -59,7 +59,7 @@
     type = DerivativeParsedMaterial
     property_name = F
     expression = 'c^2*(1-c)^2'
-    variable_names = c
+    coupled_variables = c
   [../]
 []
 

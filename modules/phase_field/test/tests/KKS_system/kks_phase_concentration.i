@@ -82,13 +82,13 @@
   [./fa]
     type = DerivativeParsedMaterial
     property_name = Fa
-    variable_names = 'ca'
+    coupled_variables = 'ca'
     expression = 'ca^2'
   [../]
   [./fb]
     type = DerivativeParsedMaterial
     property_name = Fb
-    variable_names = 'cb'
+    coupled_variables = 'cb'
     expression = '(1-cb)^2'
   [../]
 

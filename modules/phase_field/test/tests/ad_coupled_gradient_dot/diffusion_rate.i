@@ -51,7 +51,7 @@ mu = 1
   [parsed]
     type = ADParsedMaterial
     expression = '-2*(1-3*u+2*u*u)'
-    variable_names = 'u'
+    coupled_variables = 'u'
     property_name = 'L'
   []
 []

@@ -112,7 +112,7 @@
     type = DerivativeParsedMaterial
     block = 0
     property_name = mu_prop
-    variable_names = c
+    coupled_variables = c
     expression = 'c'
     derivative_order = 1
   [../]
@@ -120,7 +120,7 @@
     type = DerivativeParsedMaterial
     block = 0
     expression = 'c*(1.0-c)'
-    variable_names = c
+    coupled_variables = c
     property_name = var_dep
     derivative_order = 1
   [../]

@@ -107,14 +107,14 @@
   []
   [strain_dependent_elasticity_tensor]
     type = CompositeElasticityTensor
-    variable_names = 'strain_yy strain_xy'
+    args = 'strain_yy strain_xy'
     tensors = 'base'
     weights = 'prefactor_material'
   []
   [prefactor_material_block]
     type = DerivativeParsedMaterial
     property_name = prefactor_material
-    variable_names = 'strain_yy strain_xy'
+    coupled_variables = 'strain_yy strain_xy'
     expression = '1.0/(1.0 + strain_yy + strain_xy)'
   []
   [stress]

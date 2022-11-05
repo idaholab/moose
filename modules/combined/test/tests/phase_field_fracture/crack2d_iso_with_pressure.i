@@ -120,7 +120,7 @@
   [./degradation]
     type = DerivativeParsedMaterial
     property_name = degradation
-    variable_names = 'c'
+    coupled_variables = 'c'
     expression = '(1.0-c)^2*(1.0 - eta) + eta'
     constant_names       = 'eta'
     constant_expressions = '0.0'
@@ -129,14 +129,14 @@
   [./indicator_function]
     type = DerivativeParsedMaterial
     property_name = indicator_function
-    variable_names = 'c'
+    coupled_variables = 'c'
     expression = 'c'
     derivative_order = 2
   [../]
   [./local_fracture_energy]
     type = DerivativeParsedMaterial
     property_name = local_fracture_energy
-    variable_names = 'c'
+    coupled_variables = 'c'
     material_property_names = 'gc_prop l'
     expression = 'c^2 * gc_prop / 2 / l'
     derivative_order = 2

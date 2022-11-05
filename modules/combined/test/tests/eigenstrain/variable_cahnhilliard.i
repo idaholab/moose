@@ -99,7 +99,7 @@
     type = DerivativeParsedMaterial
     block = 0
     property_name = Fc
-    variable_names = 'c'
+    coupled_variables = 'c'
     constant_names       = 'barr_height  cv_eq'
     constant_expressions = '0.1          1.0e-2'
     expression = 16*barr_height*(c-cv_eq)^2*(1-cv_eq-c)^2
@@ -120,7 +120,7 @@
     type = DerivativeParsedMaterial
     block = 0
     expression = 0.1*c
-    variable_names = c
+    coupled_variables = c
     property_name = var_dep
     enable_jit = true
     derivative_order = 2
