@@ -149,7 +149,7 @@
                '+ BCC_FE) + 1.0*(BCC_CR*BCC_FE*BCC_VA*(500.0 - 1.5*T)*(BCC_CR - BCC_FE) + '
                'BCC_CR*BCC_FE*BCC_VA*(24600.0 - 14.98*T) + BCC_CR*BCC_FE*BCC_VA*(9.15*T - '
                '14000.0)*(BCC_CR - BCC_FE)^2)/(BCC_CR + BCC_FE); G/100000'
-    variable_names = 'BCC_CR'
+    coupled_variables = 'BCC_CR'
     constant_names = 'BCC_VA T eps'
     constant_expressions = '1 1000 0.01'
   []
@@ -215,7 +215,7 @@
                '1811.0 & T < 6000.0,2.2960305e+31*T^(-9.0) - 46.0*T*log(T) + 299.31255*T - '
                '25383.581,0)) + 173333.0))/(10.0*SIGMA_0CR + 10.0*SIGMA_0FE + 4.0*SIGMA_1CR + '
                '4.0*SIGMA_1FE + 16.0*SIGMA_2CR + 16.0*SIGMA_2FE); G/100000'
-    variable_names = 'SIGMA_0CR SIGMA_1CR SIGMA_2CR'
+    coupled_variables = 'SIGMA_0CR SIGMA_1CR SIGMA_2CR'
     constant_names = 'T eps'
     constant_expressions = '1000 0.01'
   []
@@ -345,7 +345,7 @@
     cs = SIGMA_1CR
     as = 4
     F = F_SIGMA
-    variable_names = 'SIGMA_2CR'
+    coupled_variables = 'SIGMA_2CR'
   []
   [chempot2b2c]
     # This kernel ties the remaining two sublattices in the sigma phase together
@@ -355,7 +355,7 @@
     cs = SIGMA_2CR
     as = 16
     F = F_SIGMA
-    variable_names = 'SIGMA_0CR'
+    coupled_variables = 'SIGMA_0CR'
   []
 
   [phaseconcentration]
@@ -383,7 +383,7 @@
     gi_name = g1
     eta_i = eta1
     wi = 0.1
-    variable_names = 'BCC_CR SIGMA_0CR SIGMA_1CR SIGMA_2CR eta2'
+    coupled_variables = 'BCC_CR SIGMA_0CR SIGMA_1CR SIGMA_2CR eta2'
   []
   [ACBulkC1]
     type = SLKKSMultiACBulkC
@@ -406,7 +406,7 @@
     variable = eta1
     h_name = h1
     lambda = lambda
-    variable_names = 'eta2'
+    coupled_variables = 'eta2'
   []
 
   # Kernels for Allen-Cahn equation for eta1
@@ -422,7 +422,7 @@
     gi_name = g2
     eta_i = eta2
     wi = 0.1
-    variable_names = 'BCC_CR SIGMA_0CR SIGMA_1CR SIGMA_2CR eta1'
+    coupled_variables = 'BCC_CR SIGMA_0CR SIGMA_1CR SIGMA_2CR eta1'
   []
   [ACBulkC2]
     type = SLKKSMultiACBulkC
@@ -445,7 +445,7 @@
     variable = eta2
     h_name = h2
     lambda = lambda
-    variable_names = 'eta1'
+    coupled_variables = 'eta1'
   []
 
   # Lagrange-multiplier constraint kernel for lambda

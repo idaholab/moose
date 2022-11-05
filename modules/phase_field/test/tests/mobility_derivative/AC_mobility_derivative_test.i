@@ -31,7 +31,7 @@
   [./op_bulk]
     type = AllenCahn
     variable = op
-    property_name = F
+    f_name = F
     mob_name = L
   [../]
   [./op_interface]
@@ -45,7 +45,7 @@
 [Materials]
   [./consts]
     type = DerivativeParsedMaterial
-    f_name  = L
+    property_name  = L
     expression = 'if(op<0, 0.01, if(op>1, 0.01, 1*op^2*(1-op)^2+0.01))'
     coupled_variables = 'op'
     outputs = exodus

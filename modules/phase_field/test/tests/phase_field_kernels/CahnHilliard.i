@@ -41,7 +41,7 @@
   [./CHSolid]
     type = CahnHilliard
     variable = cv
-    property_name = F
+    f_name = F
     mob_name = M
   [../]
   [./CHInterface]

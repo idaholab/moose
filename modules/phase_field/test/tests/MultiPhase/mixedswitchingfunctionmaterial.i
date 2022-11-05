@@ -35,7 +35,7 @@
   [./eta_bulk]
     type = AllenCahn
     variable = eta
-    property_name = F
+    f_name = F
   [../]
   [./eta_interface]
     type = ACInterface
@@ -73,7 +73,7 @@
 # Total free energy: F = Fa*(1-h) + Fb*h
   [./free_energy]
     type = DerivativeTwoPhaseMaterial
-    property_name = F
+    f_name = F
     fa_name = '0'
     fb_name = '-1'
     eta = eta

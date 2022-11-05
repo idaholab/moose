@@ -17,7 +17,7 @@
         free_energy = F
         mobility = 1.0
         kappa = 20.0
-        variable_names = 'eta'
+        coupled_variables = 'eta'
         solve_type = REVERSE_SPLIT
       [../]
     [../]
@@ -26,7 +26,7 @@
         free_energy = F
         mobility = 1.0
         kappa = 20
-        variable_names = 'c'
+        coupled_variables = 'c'
       [../]
     [../]
   [../]

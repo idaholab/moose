@@ -46,7 +46,7 @@
   [./ACBulk]
     type = AllenCahn
     variable = eta
-    property_name = F
+    f_name = F
   [../]
 
   [./ACInterface]
@@ -54,7 +54,7 @@
     variable = eta
     kappa_name = 1
     variable_L = true
-    variable_names = chi
+    coupled_variables = chi
   [../]
 []
 

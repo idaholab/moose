@@ -119,7 +119,7 @@
   # Diffusivity and mobilities
   [./chiD]
     type = GrandPotentialTensorMaterial
-    property_name = chiD
+    f_name = chiD
     solid_mobility = L
     void_mobility = Lv
     chi = chi
@@ -236,7 +236,7 @@
   [./F_aux]
     type = TotalFreeEnergy
     variable = F_loc
-    property_name = f0
+    f_name = f0
     interfacial_vars = 'phi gr0 gr1 gr2 gr3'
     kappa_names = 'kappa kappa kappa kappa kappa'
   [../]

@@ -20,7 +20,7 @@
 [Modules]
   [./PhaseField]
     [./GrainGrowth]
-      variable_names = T
+      coupled_variables = T
       variable_mobility = true
     [../]
   [../]

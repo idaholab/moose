@@ -20,14 +20,14 @@
         kappa = 2.0
         mobility = 1.0
         variable_mobility = false
-        variable_names = 'eta2'
+        coupled_variables = 'eta2'
       [../]
       [./eta2]
         free_energy = F
         kappa = 2.0
         mobility = 1.0
         variable_mobility = false
-        variable_names = 'eta1'
+        coupled_variables = 'eta1'
       [../]
     [../]
   [../]

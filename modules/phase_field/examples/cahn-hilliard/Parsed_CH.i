@@ -45,7 +45,7 @@
   [./local_energy]
     type = TotalFreeEnergy
     variable = local_energy
-    property_name = fbulk
+    f_name = fbulk
     interfacial_vars = c
     kappa_names = kappa_c
     execute_on = timestep_end

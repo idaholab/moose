@@ -63,7 +63,7 @@
   [./ACBulk]
     type = AllenCahn
     variable = c
-    property_name = F
+    f_name = F
   [../]
 
   [./ACInterface]
@@ -144,7 +144,7 @@
   [../]
   [./fracture_driving_energy]
     type = DerivativeSumMaterial
-    variable_names = c
+    coupled_variables = c
     sum_materials = 'elastic_energy local_fracture_energy'
     derivative_order = 2
     property_name = F

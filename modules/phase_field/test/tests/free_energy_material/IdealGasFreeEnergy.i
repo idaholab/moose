@@ -24,7 +24,7 @@
 [Materials]
   [./free_energy]
     type = IdealGasFreeEnergy
-    property_name = Fgas
+    f_name = Fgas
     m = 134 # Xenon
     omega = 41
     c = c

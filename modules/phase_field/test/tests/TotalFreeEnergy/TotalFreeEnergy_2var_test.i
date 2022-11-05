@@ -54,8 +54,8 @@
   [./gr0bulk]
     type = AllenCahn
     variable = gr0
-    property_name = F
-    variable_names = gr1
+    f_name = F
+    coupled_variables = gr1
   [../]
   [./gr0int]
     type = ACInterface
@@ -69,8 +69,8 @@
   [./gr1bulk]
     type = AllenCahn
     variable = gr1
-    property_name = F
-    variable_names = gr0
+    f_name = F
+    coupled_variables = gr0
   [../]
   [./gr1int]
     type = ACInterface

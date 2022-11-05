@@ -50,7 +50,7 @@
     type = ComputeVariableIsotropicElasticityTensor
     poissons_ratio = 0.45
     youngs_modulus = ym
-    variable_names = eta
+    args = eta
   [../]
 
   [./stress]

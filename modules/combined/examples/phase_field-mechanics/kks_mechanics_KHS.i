@@ -292,8 +292,8 @@
 # Elastic energy of the precipitate
   [./elastic_free_energy_p]
     type = ElasticEnergyMaterial
-    property_name = f_el_mat
-    variable_names = 'eta'
+    f_name = f_el_mat
+    args = 'eta'
     outputs = exodus
   [../]
 
@@ -343,7 +343,7 @@
   [../]
   [./C]
     type = CompositeElasticityTensor
-    variable_names = eta
+    args = eta
     tensors = 'C_matrix               C_ppt'
     weights = 'one_minus_h_explicit   h'
   [../]
@@ -359,7 +359,7 @@
     type = ComputeVariableEigenstrain
     eigen_base = '0.00377 0.00377 0.00377 0 0 0'
     prefactor = h
-    variable_names = eta
+    args = eta
     eigenstrain_name = 'eigenstrain_ppt'
   [../]
 []
@@ -418,7 +418,7 @@
     fa_name  = fm
     fb_name  = fp
     w        = 0.0264
-    variable_names = 'cp cm'
+    args = 'cp cm'
   [../]
   [./ACBulkC]
     type = KKSACBulkC
@@ -430,7 +430,7 @@
   [./ACBulk_el] #This adds df_el/deta for strain interpolation
     type = AllenCahn
     variable = eta
-    property_name = f_el_mat
+    f_name = f_el_mat
   [../]
   [./ACInterface]
     type = ACInterface

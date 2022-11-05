@@ -45,15 +45,15 @@
     type = CahnHilliard
     variable = c
     mob_name = M
-    property_name = F
-    variable_names = d
+    f_name = F
+    coupled_variables = d
   [../]
   [./c_int]
     type = CHInterface
     variable = c
     kappa_name = kappa_c
     mob_name = M
-    variable_names = d
+    coupled_variables = d
   [../]
   [./c_dot]
     type = TimeDerivative
@@ -85,7 +85,7 @@
   [../]
   [./free_energy]
     type = MathEBFreeEnergy
-    property_name = F
+    f_name = F
     c = c
   [../]
   [./d_diff]

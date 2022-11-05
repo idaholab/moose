@@ -46,8 +46,8 @@
     type = AllenCahn
     variable = w
     mob_name = M
-    property_name = fbulk
-    variable_names = 'T'
+    f_name = fbulk
+    coupled_variables = 'T'
   [../]
   [./T_dot]
     type = TimeDerivative

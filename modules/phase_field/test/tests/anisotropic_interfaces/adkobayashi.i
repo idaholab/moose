@@ -46,7 +46,7 @@
     type = ADAllenCahn
     variable = w
     mob_name = M
-    property_name = fbulk
+    f_name = fbulk
   []
   [T_dot]
     type = ADTimeDerivative

@@ -123,8 +123,8 @@
   [./c_res]
     type = CahnHilliard
     variable = c
-    property_name = F
-    variable_names = 'eta1 eta2 eta3'
+    f_name = F
+    coupled_variables = 'eta1 eta2 eta3'
   [../]
   [./time]
     type = TimeDerivative
@@ -148,9 +148,9 @@
   [./ACBulk1]
     type = AllenCahn
     variable = eta1
-    variable_names = 'eta2 eta3 c'
+    coupled_variables = 'eta2 eta3 c'
     mob_name = L1
-    property_name = F
+    f_name = F
   [../]
   [./ACInterface1]
     type = ACMultiInterface
@@ -176,9 +176,9 @@
   [./ACBulk2]
     type = AllenCahn
     variable = eta2
-    variable_names = 'eta1 eta3 c'
+    coupled_variables = 'eta1 eta3 c'
     mob_name = L2
-    property_name = F
+    f_name = F
   [../]
   [./ACInterface2]
     type = ACMultiInterface
@@ -204,9 +204,9 @@
   [./ACBulk3]
     type = AllenCahn
     variable = eta3
-    variable_names = 'eta1 eta2 c'
+    coupled_variables = 'eta1 eta2 c'
     mob_name = L3
-    property_name = F
+    f_name = F
   [../]
   [./ACInterface3]
     type = ACMultiInterface
@@ -247,7 +247,6 @@
   [./etasummat]
     type = ParsedMaterial
     property_name = etasum
-    coupled_variables = 'eta1 eta2 eta3'
     material_property_names = 'h1 h2 h3'
     expression = 'h1+h2+h3'
   [../]
@@ -310,12 +309,12 @@
   # http://mooseframework.org/wiki/PhysicsModules/PhaseField/DevelopingModels/MultiPhaseModels/
   [./free_energy]
     type = DerivativeMultiPhaseMaterial
-    property_name = F
+    f_name = F
     # we use a constant free energy (GeneriConstantmaterial property Fx)
     fi_names = 'F1  F2  F3'
     hi_names = 'h1  h2  h3'
     etas     = 'eta1 eta2 eta3'
-    variable_names = 'c'
+    coupled_variables = 'c'
     W = 1
   [../]
 []

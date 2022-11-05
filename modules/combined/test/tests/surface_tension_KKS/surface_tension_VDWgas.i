@@ -155,8 +155,8 @@
     cb       = cvb
     fa_name  = f_total_matrix
     fb_name  = f_total_bub
-    variable_names_a = 'cgm'
-    variable_names_b = 'cgb'
+    args_a = 'cgm'
+    args_b = 'cgb'
   [../]
   [./ChemPotGas]
     type = KKSPhaseChemicalPotential
@@ -164,8 +164,8 @@
     cb       = cgb
     fa_name  = f_total_matrix
     fb_name  = f_total_bub
-    variable_names_a = 'cvm'
-    variable_names_b = 'cvb'
+    args_a = 'cvm'
+    args_b = 'cvb'
   [../]
 
   #
@@ -177,7 +177,7 @@
     ca       = cgm
     fa_name  = f_total_matrix
     w        = wg
-    variable_names_a   = 'cvm'
+    args_a   = 'cvm'
   [../]
   [./CHBulk_v]
     type = KKSSplitCHCRes
@@ -185,7 +185,7 @@
     ca       = cvm
     fa_name  = f_total_matrix
     w        = wv
-    variable_names_a   = 'cgm'
+    args_a   = 'cgm'
   [../]
 
   [./dcgdt]
@@ -219,7 +219,7 @@
     fa_name  = f_total_matrix
     fb_name  = f_total_bub
     w        = 0.356
-    variable_names = 'cvm cvb cgm cgb'
+    args = 'cvm cvb cgm cgb'
   [../]
   [./ACBulkCv]
     type = KKSACBulkC
@@ -227,7 +227,7 @@
     ca       = cvm
     cb       = cvb
     fa_name  = f_total_matrix
-    variable_names     = 'cgm'
+    args     = 'cgm'
   [../]
   [./ACBulkCg]
     type = KKSACBulkC
@@ -235,7 +235,7 @@
     ca       = cgm
     cb       = cgb
     fa_name  = f_total_matrix
-    variable_names     = 'cvm'
+    args     = 'cvm'
   [../]
   [./ACInterface]
     type = ACInterface
@@ -261,15 +261,15 @@
   [./elastic_free_energy_m]
     type = ElasticEnergyMaterial
     base_name = matrix
-    property_name = fe_m
-    variable_names = ' '
+    f_name = fe_m
+    args = ' '
   [../]
 # Total free energy of the matrix
   [./Total_energy_matrix]
     type = DerivativeSumMaterial
     property_name = f_total_matrix
     sum_materials = 'fm fe_m'
-    variable_names = 'cvm cgm'
+    coupled_variables = 'cvm cgm'
   [../]
 
   # Free energy of the bubble phase
@@ -285,8 +285,8 @@
   [./elastic_free_energy_p]
     type = ElasticEnergyMaterial
     base_name = bub
-    property_name = fe_b
-    variable_names = ' '
+    f_name = fe_b
+    args = ' '
   [../]
 
 # Total free energy of the bubble
@@ -295,7 +295,7 @@
     property_name = f_total_bub
     sum_materials = 'fb fe_b'
     # sum_materials = 'fb'
-    variable_names = 'cvb cgb'
+    coupled_variables = 'cvb cgb'
   [../]
 
   # h(eta)

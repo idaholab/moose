@@ -167,7 +167,7 @@
   # Diffusivity and mobilities
   [chiDy]
     type = GrandPotentialTensorMaterial
-    property_name = chiDy
+    f_name = chiDy
     diffusivity_name = Dvy
     solid_mobility = L
     void_mobility = Lv
@@ -185,7 +185,7 @@
   []
   [chiDo]
     type = GrandPotentialTensorMaterial
-    property_name = chiDo
+    f_name = chiDo
     diffusivity_name = Dvo
     solid_mobility = Lo
     void_mobility = Lvo
@@ -378,7 +378,7 @@
   [potential_void_constants]
     type = MaskedBodyForce
     variable = V
-    variable_names = 'phi'
+    coupled_variables = 'phi'
     mask = void_pre
   []
   [potential_cat_mu]
@@ -408,7 +408,7 @@
     variable = V
     w = wvy
     T = T
-    variable_names = 'phi gr0 gr1'
+    coupled_variables = 'phi gr0 gr1'
     mask = hs
     species_charge = -3
     n_eq = ns_y_min
@@ -418,7 +418,7 @@
     variable = V
     w = wvo
     T = T
-    variable_names = 'phi gr0 gr1'
+    coupled_variables = 'phi gr0 gr1'
     mask = hs
     species_charge = 2
     n_eq = ns_o_min

@@ -34,7 +34,7 @@
   [./eta_bulk]
     type = AllenCahn
     variable = eta
-    property_name = 0
+    f_name = 0
     mob_name = 1
   [../]
   [./eta_interface]

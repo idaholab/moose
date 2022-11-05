@@ -45,7 +45,7 @@
   [./c_res]
     type = SplitCHParsed
     variable = c
-    property_name = F
+    f_name = F
     kappa_name = kappa_c
     w = w
   [../]
@@ -130,7 +130,7 @@
     block = 0
     eigen_base = '1 1 1 0 0 0'
     prefactor = var_dep
-    variable_names = 'c'
+    args = 'c'
     eigenstrain_name = eigenstrain
   [../]
   [./strain]
@@ -141,9 +141,9 @@
   [../]
   [./elastic_free_energy]
     type = ElasticEnergyMaterial
-    property_name = Fe
+    f_name = Fe
     block = 0
-    variable_names = 'c'
+    args = 'c'
     derivative_order = 2
   [../]
   [./free_energy]
@@ -151,7 +151,7 @@
     block = 0
     property_name = F
     sum_materials = 'Fc Fe'
-    variable_names = 'c'
+    coupled_variables = 'c'
     derivative_order = 2
   [../]
 []

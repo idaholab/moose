@@ -173,7 +173,7 @@
     fa_name  = fl
     fb_name  = fs
     w        = 1.0
-    variable_names = 'cl cs'
+    coupled_variables = 'cl cs'
   [../]
   [./ACBulkC]
     type = KKSACBulkC

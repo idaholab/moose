@@ -37,7 +37,7 @@
     type = CahnHilliard
     variable = c
     mob_name = M
-    property_name = F
+    f_name = F
   [../]
   [./CHInterface]
     type = CHInterface
@@ -63,7 +63,7 @@
   [../]
   [./free_energy]
     type = MathEBFreeEnergy
-    property_name = F
+    f_name = F
     c = c
   [../]
 []

@@ -97,7 +97,7 @@
   [./c_res]
     type = SplitCHParsed
     variable = c
-    property_name = F
+    f_name = F
     kappa_name = kappa_c
     w = w
   [../]
@@ -176,7 +176,7 @@
     block = 0
     tensors = 'shear1  shear2  expand3'
     weights = 'weight1 weight2 weight3'
-    variable_names = c
+    args = c
     eigenstrain_name = eigenstrain
   [../]
 
@@ -199,9 +199,9 @@
   # elastic free energies
   [./elastic_free_energy]
     type = ElasticEnergyMaterial
-    property_name = Fe
+    f_name = Fe
     block = 0
-    variable_names = 'c'
+    args = 'c'
     outputs = exodus
     output_properties = Fe
   [../]
@@ -212,7 +212,7 @@
     block = 0
     property_name = F
     sum_materials = 'Fc Fe'
-    variable_names = 'c'
+    coupled_variables = 'c'
   [../]
 []
 

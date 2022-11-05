@@ -142,7 +142,7 @@
     eta_i = eta1
     eta_j = eta2
     eta_k = eta3
-    property_name = h1
+    f_name = h1
   [../]
   # h2(eta1, eta2, eta3)
   [./h2]
@@ -150,7 +150,7 @@
     eta_i = eta2
     eta_j = eta3
     eta_k = eta1
-    property_name = h2
+    f_name = h2
   [../]
   # h3(eta1, eta2, eta3)
   [./h3]
@@ -158,7 +158,7 @@
     eta_i = eta3
     eta_j = eta1
     eta_k = eta2
-    property_name = h3
+    f_name = h3
   [../]
 
   # Coefficients for diffusion equation
@@ -247,7 +247,7 @@
     gi_name   = g1
     eta_i     = eta1
     wi        = 1.0
-    variable_names      = 'c1 c2 c3 eta2 eta3'
+    args      = 'c1 c2 c3 eta2 eta3'
   [../]
   [./ACBulkC1]
     type = KKSMultiACBulkC
@@ -256,7 +256,7 @@
     hj_names  = 'h1 h2 h3'
     cj_names  = 'c1 c2 c3'
     eta_i     = eta1
-    variable_names      = 'eta2 eta3'
+    args      = 'eta2 eta3'
   [../]
   [./ACInterface1]
     type = ACInterface
@@ -283,7 +283,7 @@
     gi_name   = g2
     eta_i     = eta2
     wi        = 1.0
-    variable_names      = 'c1 c2 c3 eta1 eta3'
+    args      = 'c1 c2 c3 eta1 eta3'
   [../]
   [./ACBulkC2]
     type = KKSMultiACBulkC
@@ -292,7 +292,7 @@
     hj_names  = 'h1 h2 h3'
     cj_names  = 'c1 c2 c3'
     eta_i     = eta2
-    variable_names      = 'eta1 eta3'
+    args      = 'eta1 eta3'
   [../]
   [./ACInterface2]
     type = ACInterface
@@ -321,7 +321,7 @@
     eta_i     = eta1
     wi        = 1.0
     mob_name  = 1
-    variable_names      = 'c1 c2 c3 eta2 eta3'
+    args      = 'c1 c2 c3 eta2 eta3'
   [../]
   [./mult_ACBulkC_1]
     type = KKSMultiACBulkC
@@ -330,7 +330,7 @@
     hj_names  = 'h1 h2 h3'
     cj_names  = 'c1 c2 c3'
     eta_i     = eta1
-    variable_names      = 'eta2 eta3'
+    args      = 'eta2 eta3'
     mob_name  = 1
   [../]
   [./mult_CoupledACint_1]
@@ -349,7 +349,7 @@
     eta_i     = eta2
     wi        = 1.0
     mob_name  = 1
-    variable_names      = 'c1 c2 c3 eta1 eta3'
+    args      = 'c1 c2 c3 eta1 eta3'
   [../]
   [./mult_ACBulkC_2]
     type = KKSMultiACBulkC
@@ -358,7 +358,7 @@
     hj_names  = 'h1 h2 h3'
     cj_names  = 'c1 c2 c3'
     eta_i     = eta2
-    variable_names      = 'eta1 eta3'
+    args      = 'eta1 eta3'
     mob_name  = 1
   [../]
   [./mult_CoupledACint_2]
@@ -377,7 +377,7 @@
     eta_i     = eta3
     wi        = 1.0
     mob_name  = 1
-    variable_names      = 'c1 c2 c3 eta1 eta2'
+    args      = 'c1 c2 c3 eta1 eta2'
   [../]
   [./mult_ACBulkC_3]
     type = KKSMultiACBulkC
@@ -386,7 +386,7 @@
     hj_names  = 'h1 h2 h3'
     cj_names  = 'c1 c2 c3'
     eta_i     = eta3
-    variable_names      = 'eta1 eta2'
+    args      = 'eta1 eta2'
     mob_name  = 1
   [../]
   [./mult_CoupledACint_3]

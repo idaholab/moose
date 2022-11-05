@@ -27,7 +27,7 @@
       prop_name = elasticity_tensor
       prop_type = RankFourTensor
       derivative_order = 1
-      variable_names = 'a b'
+      args = 'a b'
     [../]
   [../]
 []
@@ -52,7 +52,7 @@
 
   [./elasticity_tensor]
     type = ComputeVariableIsotropicElasticityTensor
-    variable_names = 'a b'
+    args = 'a b'
     youngs_modulus = youngs_modulus
     poissons_ratio = poissons_ratio
   [../]

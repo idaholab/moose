@@ -162,7 +162,7 @@
     gi_name = g1
     eta_i = eta1
     wi = 0.2
-    variable_names = 'c1 c2 eta2'
+    coupled_variables = 'c1 c2 eta2'
   []
   [ACBulkC1]
     type = KKSMultiACBulkC
@@ -171,7 +171,7 @@
     hj_names = 'h1 h2'
     cj_names = 'c1 c2'
     eta_i = eta1
-    variable_names = 'eta2'
+    coupled_variables = 'eta2'
   []
   [ACInterface1]
     type = ACInterface
@@ -200,7 +200,7 @@
     eta_i = eta1
     wi = 0.2
     mob_name = 1
-    variable_names = 'c1 c2 eta2 '
+    coupled_variables = 'c1 c2 eta2 '
   []
   [mult_ACBulkC_1]
     type = KKSMultiACBulkC
@@ -209,7 +209,7 @@
     hj_names = 'h1 h2'
     cj_names = 'c1 c2'
     eta_i = eta1
-    variable_names = 'eta2 '
+    coupled_variables = 'eta2 '
     mob_name = 1
   []
   [mult_CoupledACint_1]
@@ -228,7 +228,7 @@
     eta_i = eta2
     wi = 0.2
     mob_name = 1
-    variable_names = 'c1 c2 eta1 '
+    coupled_variables = 'c1 c2 eta1 '
   []
   [mult_ACBulkC_2]
     type = KKSMultiACBulkC
@@ -237,7 +237,7 @@
     hj_names = 'h1 h2'
     cj_names = 'c1 c2'
     eta_i = eta2
-    variable_names = 'eta1 '
+    coupled_variables = 'eta1 '
     mob_name = 1
   []
   [mult_CoupledACint_2]

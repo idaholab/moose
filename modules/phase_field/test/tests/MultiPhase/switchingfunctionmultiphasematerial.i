@@ -98,13 +98,13 @@
 #  [./c_res]
 #    type = SplitCHParsed
 #    variable = c
-#    property_name = F
+#    f_name = F
 #    kappa_name = kappa_c
 #    w = w
-#    variable_names = 'eta1 eta2 eta3 eta0'
+#    coupled_variables = 'eta1 eta2 eta3 eta0'
 #  [../]
 #  [./w_res]
-#    # variable_names = 'c'
+#    # coupled_variables = 'c'
 #    type = SplitCHWRes
 #    variable = w
 #    mob_name = M
@@ -112,8 +112,8 @@
 #  [./AC1_bulk]
 #    type = AllenCahn
 #    variable = eta1
-#    property_name = F
-#    variable_names = 'c eta2 eta3 eta0'
+#    f_name = F
+#    coupled_variables = 'c eta2 eta3 eta0'
 #  [../]
 #  [./AC1_int]
 #    type = ACInterface
@@ -127,8 +127,8 @@
 #  [./AC2_bulk]
 #    type = AllenCahn
 #    variable = eta2
-#    property_name = F
-#    variable_names = 'c eta1 eta3 eta0'
+#    f_name = F
+#    coupled_variables = 'c eta1 eta3 eta0'
 #  [../]
 #  [./AC2_int]
 #    type = ACInterface
@@ -141,8 +141,8 @@
 #  [./AC3_bulk]
 #    type = AllenCahn
 #    variable = eta3
-#    property_name = F
-#    variable_names = 'c eta2 eta1 eta0'
+#    f_name = F
+#    coupled_variables = 'c eta2 eta1 eta0'
 #  [../]
 #  [./AC3_int]
 #    type = ACInterface
@@ -155,8 +155,8 @@
 #  [./AC4_bulk]
 #    type = AllenCahn
 #    variable = eta0
-#    property_name = F
-#    variable_names = 'c eta2 eta3 eta1'
+#    f_name = F
+#    coupled_variables = 'c eta2 eta3 eta1'
 #  [../]
 #  [./AC4_int]
 #    type = ACInterface

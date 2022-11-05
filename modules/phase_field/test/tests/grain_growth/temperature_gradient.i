@@ -50,7 +50,7 @@
 [Kernels]
   [./PolycrystalKernel]
     variable_mobility = true
-    variable_names = 'T'
+    coupled_variables = 'T'
   [../]
 []
 

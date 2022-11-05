@@ -92,14 +92,14 @@
   [./gr0_interface]
     type = ACInterface
     variable = gr0
-    variable_names = 'gr1'
+    coupled_variables = 'gr1'
     mob_name = L
     kappa_name = 'kappa'
   [../]
   [./gr0_switching]
     type = ACSwitching
     variable = gr0
-    variable_names = 'gr1'
+    coupled_variables = 'gr1'
     hj_names = 'h0 h1'
     Fj_names = 'E0 E1'
     mob_name = L
@@ -133,14 +133,14 @@
   [./gr1_interface]
     type = ACInterface
     variable = gr1
-    variable_names = 'gr0'
+    coupled_variables = 'gr0'
     mob_name = L
     kappa_name = 'kappa'
   [../]
   [./gr1_switching]
     type = ACSwitching
     variable = gr1
-    variable_names = 'gr0'
+    coupled_variables = 'gr0'
     hj_names = 'h0 h1'
     Fj_names = 'E0 E1'
     mob_name = L

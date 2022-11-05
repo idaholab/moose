@@ -68,9 +68,9 @@
   [./ACBulk1]
     type = AllenCahn
     variable = eta1
-    variable_names = 'eta2 eta3'
+    coupled_variables = 'eta2 eta3'
     mob_name = L1
-    property_name = F
+    f_name = F
   [../]
   [./ACInterface1]
     type = ACMultiInterface
@@ -93,9 +93,9 @@
   [./ACBulk2]
     type = AllenCahn
     variable = eta2
-    variable_names = 'eta1 eta3'
+    coupled_variables = 'eta1 eta3'
     mob_name = L2
-    property_name = F
+    f_name = F
   [../]
   [./ACInterface2]
     type = ACMultiInterface
@@ -118,9 +118,9 @@
   [./ACBulk3]
     type = AllenCahn
     variable = eta3
-    variable_names = 'eta1 eta2'
+    coupled_variables = 'eta1 eta2'
     mob_name = L3
-    property_name = F
+    f_name = F
   [../]
   [./ACInterface3]
     type = ACMultiInterface
@@ -194,7 +194,7 @@
 
   [./free_energy]
     type = DerivativeMultiPhaseMaterial
-    property_name = F
+    f_name = F
     # we use a constant free energy (GeneriConstantmaterial property Fx)
     fi_names = 'Fx  Fx  Fx'
     hi_names = 'h1  h2  h3'

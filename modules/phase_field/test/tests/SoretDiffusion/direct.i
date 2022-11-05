@@ -45,7 +45,7 @@
     type = CahnHilliard
     variable = c
     mob_name = M
-    property_name = F
+    f_name = F
   [../]
   [./c_soret]
     type = SoretDiffusion

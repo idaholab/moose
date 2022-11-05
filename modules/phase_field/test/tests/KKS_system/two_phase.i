@@ -147,7 +147,7 @@
     variable = eta
     fa_name = fm
     fb_name = fd
-    variable_names = 'cm cd'
+    coupled_variables = 'cm cd'
     w = 0.4
   []
   [ACBulkC]

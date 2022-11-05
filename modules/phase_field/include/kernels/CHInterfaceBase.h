@@ -92,7 +92,7 @@ CHInterfaceBase<T>::CHInterfaceBase(const InputParameters & parameters)
 
     // Set coupled variable gradients
     _coupled_grad_vars[i] =
-        isCoupled("args") ? &coupledGradient("args", i) : &coupledGradient("variable_names", i);
+        isCoupled("args") ? &coupledGradient("args", i) : &coupledGradient("coupled_variables", i);
   }
 }
 
@@ -106,8 +106,8 @@ CHInterfaceBase<T>::validParams()
   params.addRequiredParam<MaterialPropertyName>("mob_name", "The mobility used with the kernel");
   params.addDeprecatedCoupledVar("args",
                                  "Vector of variable arguments of the mobility",
-                                 "args is deprecated, use 'variable_names' instead");
-  params.addCoupledVar("variable_names", "Vector of variable arguments of the mobility");
+                                 "args is deprecated, use 'coupled_variables' instead");
+  params.addCoupledVar("coupled_variables", "Vector of variable arguments of the mobility");
   return params;
 }
 

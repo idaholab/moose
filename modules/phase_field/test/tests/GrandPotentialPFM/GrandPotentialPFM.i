@@ -44,8 +44,8 @@
   [./w_dot]
     type = SusceptibilityTimeDerivative
     variable = w
-    property_name = chi
-    variable_names = '' # in this case chi (the susceptibility) is simply a constant
+    f_name = chi
+    coupled_variables = '' # in this case chi (the susceptibility) is simply a constant
   [../]
   [./Diffusion]
     type = MatDiffusion
@@ -57,14 +57,14 @@
     type = CoupledSusceptibilityTimeDerivative
     variable = w
     v = eta
-    property_name = ft
-    variable_names = 'eta'
+    f_name = ft
+    coupled_variables = 'eta'
   [../]
   [./AC_bulk]
     type = AllenCahn
     variable = eta
-    property_name = F
-    variable_names = 'w'
+    f_name = F
+    coupled_variables = 'w'
   [../]
   [./AC_int]
     type = ACInterface
@@ -124,7 +124,7 @@
   [../]
   [./total_GrandPotential]
     type = DerivativeTwoPhaseMaterial
-    variable_names = 'w'
+    coupled_variables = 'w'
     eta = eta
     fa_name = f1
     fb_name = f2

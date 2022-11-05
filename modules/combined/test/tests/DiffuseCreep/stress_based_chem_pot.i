@@ -173,7 +173,7 @@
     block = 0
     property_name = total_potential
     sum_materials = 'mu_prop mech_prop'
-    variable_names = 'c'
+    coupled_variables = 'c'
     derivative_order = 2
   [../]
   [./var_dependence]
@@ -190,7 +190,7 @@
     M_name = mobility_prop
     tensors = diffusivity
     weights = var_dep
-    variable_names = c
+    args = c
   [../]
   [./phase_normal]
     type = PhaseNormalTensor

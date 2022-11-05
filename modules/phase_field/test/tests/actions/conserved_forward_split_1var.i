@@ -47,7 +47,7 @@
   [./local_energy]
     type = TotalFreeEnergy
     variable = local_energy
-    property_name = F
+    f_name = F
     kappa_names = kappa_c
     interfacial_vars = c
   [../]

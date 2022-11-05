@@ -128,7 +128,7 @@
     M_name = mobility_prop
     tensors = diffusivity
     weights = var_dep
-    variable_names = c
+    args = c
   [../]
   [./phase_normal]
     type = PhaseNormalTensor

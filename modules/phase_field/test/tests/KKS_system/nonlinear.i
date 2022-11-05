@@ -159,7 +159,7 @@
     gi_name = g1
     eta_i = eta1
     wi = 0.2
-    variable_names = 'c1 c2 eta2'
+    coupled_variables = 'c1 c2 eta2'
   []
   [ACBulkC1]
     type = KKSMultiACBulkC
@@ -168,7 +168,7 @@
     hj_names = 'h1 h2'
     cj_names = 'c1 c2'
     eta_i = eta1
-    variable_names = 'eta2'
+    coupled_variables = 'eta2'
   []
   [ACInterface1]
     type = ACInterface

@@ -19,7 +19,7 @@
         free_energy = F
         kappa = 2.0
         mobility = M
-        variable_names = 'cv'
+        coupled_variables = 'cv'
       [../]
     [../]
   [../]

@@ -122,7 +122,7 @@
     type = CompositeEigenstrain
     tensors = 'eigen1  eigen2'
     weights = 'weight1 weight2'
-    variable_names = c
+    args = c
     eigenstrain_name = eigenstrain
   [../]
 []

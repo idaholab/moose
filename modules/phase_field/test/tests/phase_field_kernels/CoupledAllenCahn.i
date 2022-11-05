@@ -40,7 +40,7 @@
     type = CoupledAllenCahn
     variable = w
     v = eta
-    property_name = F
+    f_name = F
   [../]
 
   [./W]

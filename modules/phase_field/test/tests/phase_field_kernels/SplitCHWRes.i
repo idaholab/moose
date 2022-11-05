@@ -39,7 +39,7 @@
   [./c1_res]
     type = SplitCHParsed
     variable = c1
-    property_name = F
+    f_name = F
     kappa_name = kappa_c
     w = w1
   [../]
@@ -58,7 +58,7 @@
   [./c2_res]
     type = SplitCHParsed
     variable = c2
-    property_name = F
+    f_name = F
     kappa_name = kappa_c
     w = w2
   [../]

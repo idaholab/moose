@@ -204,7 +204,7 @@
                '1811.0 & T < 6000.0,2.2960305e+31*T^(-9.0) - 46.0*T*log(T) + 299.31255*T - '
                '25383.581,0)) + 173333.0))/(10.0*SIGMA_0CR + 10.0*SIGMA_0FE + 4.0*SIGMA_1CR + '
                '4.0*SIGMA_1FE + 16.0*SIGMA_2CR + 16.0*SIGMA_2FE)'
-    variable_names = 'SIGMA_0CR SIGMA_1CR SIGMA_2CR'
+    coupled_variables = 'SIGMA_0CR SIGMA_1CR SIGMA_2CR'
     constant_names = 'T'
     constant_expressions = '1000'
   []
@@ -279,7 +279,7 @@
                'BCC_CR*BCC_FE*BCC_VA*(24600.0 - 14.98*T) + BCC_CR*BCC_FE*BCC_VA*(9.15*T - '
                '14000.0)*(BCC_CR - BCC_FE)^2)/(BCC_CR + BCC_FE)'
 
-    variable_names = 'cCr'
+    coupled_variables = 'cCr'
     constant_names = 'BCC_VA T'
     constant_expressions = '1 1000'
   []

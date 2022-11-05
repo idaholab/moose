@@ -110,7 +110,7 @@
   [./eigenstrain]
     type = ComputeVariableEigenstrain
     eigen_base = '1'
-    variable_names = c
+    args = c
     prefactor = prefactor
     eigenstrain_name = eigenstrain
   [../]

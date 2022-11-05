@@ -128,8 +128,8 @@
   [./c_res]
     type = CahnHilliard
     variable = c
-    property_name = F
-    variable_names = 'eta1 eta2 eta3'
+    f_name = F
+    args = 'eta1 eta2 eta3'
   [../]
   [./time]
     type = TimeDerivative
@@ -144,9 +144,9 @@
   [./ACBulk1]
     type = AllenCahn
     variable = eta1
-    variable_names = 'eta2 eta3 c'
+    args = 'eta2 eta3 c'
     mob_name = L1
-    property_name = F
+    f_name = F
   [../]
   [./ACInterface1]
     type = ACMultiInterface
@@ -170,9 +170,9 @@
   [./ACBulk2]
     type = AllenCahn
     variable = eta2
-    variable_names = 'eta1 eta3 c'
+    args = 'eta1 eta3 c'
     mob_name = L2
-    property_name = F
+    f_name = F
   [../]
   [./ACInterface2]
     type = ACMultiInterface
@@ -196,9 +196,9 @@
   [./ACBulk3]
     type = AllenCahn
     variable = eta3
-    variable_names = 'eta1 eta2 c'
+    args = 'eta1 eta2 c'
     mob_name = L3
-    property_name = F
+    f_name = F
   [../]
   [./ACInterface3]
     type = ACMultiInterface
@@ -370,23 +370,23 @@
   [./elastic_free_energy_1]
     type = ElasticEnergyMaterial
     base_name = phase1
-    property_name = Fe1
+    f_name = Fe1
     derivative_order = 2
-    variable_names = 'c' # should be empty
+    args = 'c' # should be empty
   [../]
   [./elastic_free_energy_2]
     type = ElasticEnergyMaterial
     base_name = phase2
-    property_name = Fe2
+    f_name = Fe2
     derivative_order = 2
-    variable_names = 'c' # should be empty
+    args = 'c' # should be empty
   [../]
   [./elastic_free_energy_3]
     type = ElasticEnergyMaterial
     base_name = phase3
-    property_name = Fe3
+    f_name = Fe3
     derivative_order = 2
-    variable_names = 'c' # should be empty
+    args = 'c' # should be empty
   [../]
 
   # phase free energies (chemical + elastic)
@@ -394,32 +394,32 @@
     type = DerivativeSumMaterial
     property_name = F1
     sum_materials = 'Fc1 Fe1'
-    variable_names = 'c'
+    coupled_variables = 'c'
     derivative_order = 2
   [../]
   [./phase_free_energy_2]
     type = DerivativeSumMaterial
     property_name = F2
     sum_materials = 'Fc2 Fe2'
-    variable_names = 'c'
+    coupled_variables = 'c'
     derivative_order = 2
   [../]
   [./phase_free_energy_3]
     type = DerivativeSumMaterial
     property_name = F3
     sum_materials = 'Fc3 Fe3'
-    variable_names = 'c'
+    coupled_variables = 'c'
     derivative_order = 2
   [../]
 
   # global free energy
   [./free_energy]
     type = DerivativeMultiPhaseMaterial
-    property_name = F
+    f_name = F
     fi_names = 'F1  F2  F3'
     hi_names = 'h1  h2  h3'
     etas     = 'eta1 eta2 eta3'
-    variable_names = 'c'
+    coupled_variables = 'c'
     W = 3
   [../]
 

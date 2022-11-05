@@ -47,7 +47,7 @@
   [./ACBulk]
     type = ADAllenCahn
     variable = eta
-    property_name = F
+    f_name = F
   [../]
 
   [./ACInterface]
@@ -63,14 +63,14 @@
   [./L]
     type = ADTestDerivativeFunction
     function = F2
-    property_name = L
+    f_name = L
     op = 'eta chi'
   [../]
 
   [./free_energy]
     type = ADTestDerivativeFunction
     function = F1
-    property_name = F
+    f_name = F
     op = 'eta'
   [../]
 []

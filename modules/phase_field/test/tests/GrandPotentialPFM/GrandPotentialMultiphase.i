@@ -88,7 +88,7 @@
     variable = etaa0
     Fj_names  = 'omegaa omegab'
     hj_names  = 'ha     hb'
-    variable_names = 'etab0 etab1 w'
+    coupled_variables = 'etab0 etab1 w'
   [../]
   [./ACa0_int]
     type = ACInterface
@@ -111,7 +111,7 @@
     variable = etab0
     Fj_names  = 'omegaa omegab'
     hj_names  = 'ha     hb'
-    variable_names = 'etaa0 etab1 w'
+    coupled_variables = 'etaa0 etab1 w'
   [../]
   [./ACb0_int]
     type = ACInterface
@@ -134,7 +134,7 @@
     variable = etab1
     Fj_names  = 'omegaa omegab'
     hj_names  = 'ha     hb'
-    variable_names = 'etaa0 etab0 w'
+    coupled_variables = 'etaa0 etab0 w'
   [../]
   [./ACb1_int]
     type = ACInterface
@@ -149,8 +149,8 @@
   [./w_dot]
     type = SusceptibilityTimeDerivative
     variable = w
-    property_name = chi
-    variable_names = '' # in this case chi (the susceptibility) is simply a constant
+    f_name = chi
+    coupled_variables = '' # in this case chi (the susceptibility) is simply a constant
   [../]
   [./Diffusion]
     type = MatDiffusion
@@ -164,7 +164,7 @@
     v = etaa0
     Fj_names = 'rhoa rhob'
     hj_names = 'ha   hb'
-    variable_names = 'etaa0 etab0 etab1'
+    coupled_variables = 'etaa0 etab0 etab1'
   [../]
   [./coupled_etab0dot]
     type = CoupledSwitchingTimeDerivative
@@ -172,7 +172,7 @@
     v = etab0
     Fj_names = 'rhoa rhob'
     hj_names = 'ha   hb'
-    variable_names = 'etaa0 etab0 etab1'
+    coupled_variables = 'etaa0 etab0 etab1'
   [../]
   [./coupled_etab1dot]
     type = CoupledSwitchingTimeDerivative
@@ -180,7 +180,7 @@
     v = etab1
     Fj_names = 'rhoa rhob'
     hj_names = 'ha   hb'
-    variable_names = 'etaa0 etab0 etab1'
+    coupled_variables = 'etaa0 etab0 etab1'
   [../]
 []
 

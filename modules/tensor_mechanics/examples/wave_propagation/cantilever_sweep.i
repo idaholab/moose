@@ -74,7 +74,7 @@
   [disp_mag]
     type = ParsedAux
     variable = disp_mag
-    args = 'disp_x disp_y disp_z'
+    coupled_variables = 'disp_x disp_y disp_z'
     expression = 'sqrt(disp_x^2+disp_y^2+disp_z^2)'
   []
 []

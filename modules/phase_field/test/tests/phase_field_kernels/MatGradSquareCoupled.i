@@ -44,7 +44,7 @@
     type = CoupledAllenCahn
     variable = w
     v = eta
-    property_name = F
+    f_name = F
     mob_name = 1
   [../]
   [./W]
@@ -63,7 +63,7 @@
     variable = eta
     kappa_name = 1
     mob_name = L
-    variable_names = w
+    coupled_variables = w
   [../]
 # MatGradSquareCoupled kernel
   [./nabla_eta]
@@ -77,7 +77,7 @@
 [Materials]
   [./mobility]
     type = DerivativeParsedMaterial
-    f_name  = L
+    property_name  = L
     coupled_variables = 'eta w'
     expression = '(1.5-eta)^2+(1.5-w)^2'
     derivative_order = 2

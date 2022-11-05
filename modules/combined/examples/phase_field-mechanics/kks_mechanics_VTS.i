@@ -305,8 +305,8 @@
   [./elastic_free_energy_m]
     type = ElasticEnergyMaterial
     base_name = matrix
-    property_name = fe_m
-    variable_names = ' '
+    f_name = fe_m
+    args = ' '
     outputs = exodus
   [../]
 # Total free energy of the matrix
@@ -314,7 +314,7 @@
     type = DerivativeSumMaterial
     property_name = f_total_matrix
     sum_materials = 'fm fe_m'
-    variable_names = 'cm'
+    coupled_variables = 'cm'
   [../]
 
   # Free energy of the precipitate phase
@@ -329,8 +329,8 @@
   [./elastic_free_energy_p]
     type = ElasticEnergyMaterial
     base_name = ppt
-    property_name = fe_p
-    variable_names = ' '
+    f_name = fe_p
+    args = ' '
     outputs = exodus
   [../]
 
@@ -339,14 +339,14 @@
     type = DerivativeSumMaterial
     property_name = f_total_ppt
     sum_materials = 'fp fe_p'
-    variable_names = 'cp'
+    coupled_variables = 'cp'
   [../]
 
   # Total elastic energy
     [./Total_elastic_energy]
       type = DerivativeTwoPhaseMaterial
       eta = eta
-      property_name = f_el_mat
+      f_name = f_el_mat
       fa_name = fe_m
       fb_name = fe_p
       outputs = exodus
@@ -478,7 +478,7 @@
     fa_name  = f_total_matrix
     fb_name  = f_total_ppt
     w        = 0.0264
-    variable_names = 'cp cm'
+    args = 'cp cm'
   [../]
   [./ACBulkC]
     type = KKSACBulkC

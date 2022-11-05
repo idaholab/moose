@@ -255,7 +255,7 @@
     fa_name  = fl
     fb_name  = fs
     w        = 1.0
-    variable_names = 'c1l c1s c2l c2s'
+    coupled_variables = 'c1l c1s c2l c2s'
   [../]
   [./ACBulkC1]
     type = KKSACBulkC
@@ -263,7 +263,7 @@
     ca       = c1l
     cb       = c1s
     fa_name  = fl
-    variable_names     = 'c2l'
+    coupled_variables     = 'c2l'
   [../]
   [./ACBulkC2]
     type = KKSACBulkC
@@ -271,7 +271,7 @@
     ca       = c2l
     cb       = c2s
     fa_name  = fl
-    variable_names     = 'c1l'
+    coupled_variables     = 'c1l'
   [../]
   [./ACInterface]
     type = ACInterface

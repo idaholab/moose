@@ -46,16 +46,16 @@
   [./op_bulk]
     type = AllenCahn
     variable = op
-    property_name = F
+    f_name = F
     mob_name = L
-    variable_names = v
+    coupled_variables = v
   [../]
   [./op_interface]
     type = ACInterface
     variable = op
     kappa_name = 1
     mob_name = L
-    variable_names = v
+    coupled_variables = v
   [../]
   [./v_dot]
     type = TimeDerivative
@@ -71,7 +71,7 @@
 [Materials]
   [./consts]
     type = DerivativeParsedMaterial
-    f_name  = L
+    property_name  = L
     expression = 'l:=0.1+1*(v+op)^2; if(l<0.01, 0.01, l)'
     coupled_variables = 'op v'
     outputs = exodus

@@ -64,8 +64,8 @@
   [./ACBulk1]
     type = AllenCahn
     variable = eta1
-    variable_names = 'c eta2'
-    property_name = F
+    coupled_variables = 'c eta2'
+    f_name = F
   [../]
   [./ACInterface1]
     type = ACInterface
@@ -86,8 +86,8 @@
   [./ACBulk2]
     type = AllenCahn
     variable = eta2
-    variable_names = 'c eta1'
-    property_name = F
+    coupled_variables = 'c eta1'
+    f_name = F
   [../]
   [./ACInterface2]
     type = ACInterface
@@ -112,10 +112,10 @@
   [./c_res]
     type = SplitCHParsed
     variable = c
-    property_name = F
+    f_name = F
     kappa_name = kappa_c
     w = w
-    variable_names = 'eta1 eta2'
+    coupled_variables = 'eta1 eta2'
   [../]
   [./w_res]
     type = SplitCHWRes
@@ -188,11 +188,11 @@
 
   [./free_energy]
     type = DerivativeMultiPhaseMaterial
-    property_name = F
+    f_name = F
     fi_names = 'Fa   Fb'
     hi_names = 'h1   h2'
     etas     = 'eta1 eta2'
-    variable_names = 'c'
+    coupled_variables = 'c'
     derivative_order = 2
   [../]
 []

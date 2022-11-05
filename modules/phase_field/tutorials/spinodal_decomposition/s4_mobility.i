@@ -64,7 +64,7 @@
   [./coupled_parsed]
     variable = c
     type = SplitCHParsed
-    property_name = f_loc
+    f_name = f_loc
     kappa_name = kappa_c
     w = w
   [../]

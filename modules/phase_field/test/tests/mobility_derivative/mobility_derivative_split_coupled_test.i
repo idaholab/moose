@@ -44,13 +44,13 @@
     variable = c
     kappa_name = kappa_c
     w = w
-    property_name = F
+    f_name = F
   [../]
   [./wres]
     type = SplitCHWRes
     variable = w
     mob_name = M
-    variable_names = 'c d'
+    coupled_variables = 'c d'
   [../]
   [./time]
     type = CoupledTimeDerivative
@@ -92,7 +92,7 @@
   [../]
   [./free_energy]
     type = MathEBFreeEnergy
-    property_name = F
+    f_name = F
     c = c
   [../]
   [./d_diff]

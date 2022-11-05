@@ -26,7 +26,7 @@
     type = CahnHilliardAniso
     variable = c
     mob_name = M
-    property_name = F
+    f_name = F
   [../]
   [./int]
     type = CHInterfaceAniso
@@ -55,7 +55,7 @@
   [../]
   [./free_energy]
     type = MathEBFreeEnergy
-    property_name = F
+    f_name = F
     c = c
   [../]
 []

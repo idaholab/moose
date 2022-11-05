@@ -74,7 +74,7 @@
   [./RigidBodyMultiKernel]
     # Creates all of the necessary Allen Cahn kernels automatically
     c = c
-    property_name = f_loc
+    f_name = f_loc
     mob_name = L
     kappa_name = kappa_gr
     grain_force = grain_force
@@ -95,10 +95,10 @@
   [./CH_Parsed]
     type = SplitCHParsed
     variable = c
-    property_name = f_loc
+    f_name = f_loc
     w = w
     kappa_name = kappa_c
-    variable_names = 'gr0 gr1 gr2 gr3' # Must be changed as op_num changes. Copy/paste from line 4
+    coupled_variables = 'gr0 gr1 gr2 gr3' # Must be changed as op_num changes. Copy/paste from line 4
   [../]
   [./CH_RBM]
     type = MultiGrainRigidBodyMotion
@@ -125,7 +125,7 @@
   [./energy_density]
     type = TotalFreeEnergy
     variable = free_energy
-    property_name = f_loc
+    f_name = f_loc
     kappa_names = kappa_c
     interfacial_vars = c
   [../]

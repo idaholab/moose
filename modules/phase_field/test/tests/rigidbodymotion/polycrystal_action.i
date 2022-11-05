@@ -34,9 +34,9 @@
   [./c_res]
     type = SplitCHParsed
     variable = c
-    property_name = F
+    f_name = F
     kappa_name = kappa_c
-    variable_names = 'eta0 eta1'
+    coupled_variables = 'eta0 eta1'
     w = w
   [../]
   [./w_res]
@@ -61,7 +61,7 @@
   [./RigidBodyMultiKernel]
     # Creates all of the necessary Allen Cahn kernels automatically
     c = c
-    property_name = F
+    f_name = F
     mob_name = M
     kappa_name = kappa_eta
     grain_force = grain_force

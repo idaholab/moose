@@ -106,7 +106,7 @@
   # Diffusivity and mobilities
   [./chiD]
     type = GrandPotentialTensorMaterial
-    property_name = chiD
+    f_name = chiD
     solid_mobility = L
     void_mobility = Lv
     chi = chi

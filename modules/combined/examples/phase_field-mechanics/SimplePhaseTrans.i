@@ -51,7 +51,7 @@
   [./eta_bulk]
     type = AllenCahn
     variable = eta
-    property_name = F
+    f_name = F
   [../]
   [./eta_interface]
     type = ACInterface
@@ -106,14 +106,14 @@
     eigen_base = '0.1 0.1 0 0 0 0'
     prefactor = var_dep
     #outputs = exodus
-    variable_names = 'eta'
+    args = 'eta'
     eigenstrain_name = eigenstrain
   [../]
 
   [./elastic_free_energy]
     type = ElasticEnergyMaterial
-    property_name = Fe
-    variable_names = 'eta'
+    f_name = Fe
+    args = 'eta'
     derivative_order = 2
   [../]
 
@@ -121,7 +121,7 @@
     type = DerivativeSumMaterial
     property_name = F
     sum_materials = 'Fc Fe'
-    variable_names = 'eta'
+    coupled_variables = 'eta'
     derivative_order = 2
   [../]
 []

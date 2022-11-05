@@ -53,7 +53,7 @@
     type = CahnHilliard
     variable = c
     mob_name = M
-    property_name = F
+    f_name = F
   [../]
   [./int]
     type = CHInterface
@@ -122,7 +122,7 @@
   [../]
   [./elastic_free_energy]
     type = ElasticEnergyMaterial
-    property_name = F
+    f_name = F
     args = 'c'
     derivative_order = 3
   [../]

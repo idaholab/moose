@@ -73,7 +73,7 @@
     variable = eta2
     args = 'eta1 eta3'
     mob_name = L2
-    property_name = F
+    f_name = F
   [../]
   [./ACInterface2]
     type = ACMultiInterface
@@ -98,7 +98,7 @@
     variable = eta3
     args = 'eta1 eta2'
     mob_name = L3
-    property_name = F
+    f_name = F
   [../]
   [./ACInterface3]
     type = ACMultiInterface
@@ -164,7 +164,7 @@
 
   [./free_energy]
     type = DerivativeMultiPhaseMaterial
-    property_name = F
+    f_name = F
     # we use a constant free energy (GeneriConstantmaterial property Fx)
     fi_names = 'Fx  Fx  Fx'
     hi_names = 'h1  h2  h3'

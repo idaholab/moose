@@ -75,7 +75,7 @@
   # Free energy of the matrix
   [./fm]
     type = KKSXeVacSolidMaterial
-    property_name = fm
+    f_name = fm
     cmg = cg
     cmv = cv
     T = 300

@@ -143,8 +143,8 @@ PR=2
   [./c_res]
     type = SplitCHParsed
     variable = c
-    property_name = F
-    variable_names = 'eta1 eta2 eta3'
+    f_name = F
+    args = 'eta1 eta2 eta3'
     kappa_name = kappa_c
     w = w
   [../]
@@ -167,9 +167,9 @@ PR=2
   [./ACBulk1]
     type = AllenCahn
     variable = eta1
-    variable_names = 'eta2 eta3 c'
+    args = 'eta2 eta3 c'
     mob_name = L1
-    property_name = F
+    f_name = F
   [../]
   [./ACInterface1]
     type = ACMultiInterface
@@ -193,9 +193,9 @@ PR=2
   [./ACBulk2]
     type = AllenCahn
     variable = eta2
-    variable_names = 'eta1 eta3 c'
+    args = 'eta1 eta3 c'
     mob_name = L2
-    property_name = F
+    f_name = F
   [../]
   [./ACInterface2]
     type = ACMultiInterface
@@ -219,9 +219,9 @@ PR=2
   [./ACBulk3]
     type = AllenCahn
     variable = eta3
-    variable_names = 'eta1 eta2 c'
+    args = 'eta1 eta2 c'
     mob_name = L3
-    property_name = F
+    f_name = F
   [../]
   [./ACInterface3]
     type = ACMultiInterface
@@ -302,7 +302,7 @@ PR=2
     type = CompositeEigenstrain
     weights = 'h2 h3'
     tensors = 's2 s3'
-    variable_names = 'eta2 eta3'
+    args = 'eta2 eta3'
     eigenstrain_name = eigenstrain
   [../]
 
@@ -357,19 +357,19 @@ PR=2
   # global chemical free energy
   [./chemical_free_energy]
     type = DerivativeMultiPhaseMaterial
-    property_name = Fc
+    f_name = Fc
     fi_names = 'Fc1  Fc2  Fc3'
     hi_names = 'h1  h2  h3'
     etas     = 'eta1 eta2 eta3'
-    variable_names = 'c'
+    coupled_variables = 'c'
     W = 3
   [../]
 
   # global elastic free energy
   [./elastic_free_energy]
     type = ElasticEnergyMaterial
-    property_name = Fe
-    variable_names = 'eta2 eta3'
+    f_name = Fe
+    args = 'eta2 eta3'
     outputs = exodus
     output_properties = Fe
     derivative_order = 2
@@ -391,7 +391,7 @@ PR=2
     type = DerivativeSumMaterial
     property_name = F
     sum_materials = 'Fc Fe Fp'
-    variable_names = 'c eta1 eta2 eta3'
+    coupled_variables = 'c eta1 eta2 eta3'
     derivative_order = 2
   [../]
 []

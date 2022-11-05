@@ -37,7 +37,7 @@
   [./ACBulk]
     type = AllenCahn
     variable = eta
-    property_name = F
+    f_name = F
   [../]
 
   [./ACInterface]

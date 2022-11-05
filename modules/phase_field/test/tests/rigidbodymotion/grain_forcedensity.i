@@ -36,9 +36,9 @@
   [./c_res]
     type = SplitCHParsed
     variable = c
-    property_name = F
+    f_name = F
     kappa_name = kappa_c
-    variable_names = 'eta0 eta1'
+    coupled_variables = 'eta0 eta1'
     w = w
   [../]
   [./w_res]
@@ -78,15 +78,15 @@
     type = ACInterface
     variable = eta0
     mob_name = M
-    #variable_names = c
+    #coupled_variables = c
     kappa_name = kappa_eta
   [../]
   [./acbulk_eta0]
     type = AllenCahn
     variable = eta0
     mob_name = M
-    property_name = F
-    variable_names = 'c eta1'
+    f_name = F
+    coupled_variables = 'c eta1'
   [../]
   [./eta1_dot]
     type = TimeDerivative
@@ -106,15 +106,15 @@
     type = ACInterface
     variable = eta1
     mob_name = M
-    #variable_names = c
+    #coupled_variables = c
     kappa_name = kappa_eta
   [../]
   [./acbulk_eta1]
     type = AllenCahn
     variable = eta1
     mob_name = M
-    property_name = F
-    variable_names = 'c eta0'
+    f_name = F
+    coupled_variables = 'c eta0'
   [../]
 []
 

@@ -48,10 +48,10 @@
   [./c_res]
     type = SplitCHParsed
     variable = c
-    property_name = F
+    f_name = F
     kappa_name = kappa_c
     w = w
-    variable_names = eta
+    coupled_variables = eta
   [../]
   [./w_res]
     type = SplitCHWRes
@@ -91,15 +91,15 @@
     type = ACInterface
     variable = eta
     mob_name = M
-    variable_names = c
+    coupled_variables = c
     kappa_name = kappa_eta
   [../]
   [./acbulk_eta]
     type = AllenCahn
     variable = eta
     mob_name = M
-    property_name = F
-    variable_names = c
+    f_name = F
+    coupled_variables = c
   [../]
 []
 

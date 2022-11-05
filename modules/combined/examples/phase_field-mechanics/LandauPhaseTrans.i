@@ -50,14 +50,14 @@
   [./eta_bulk1]
     type = AllenCahn
     variable = eta1
-    variable_names = 'eta2'
-    property_name = F
+    args = 'eta2'
+    f_name = F
   [../]
   [./eta_bulk2]
     type = AllenCahn
     variable = eta2
-    variable_names = 'eta1'
-    property_name = F
+    args = 'eta1'
+    f_name = F
   [../]
   [./eta_interface1]
     type = ACInterface
@@ -129,7 +129,7 @@
     type = ComputeVariableEigenstrain
     eigen_base = '0.1 -0.1 0 0 0 0'
     prefactor = var_dep1
-    variable_names = 'eta1'
+    args = 'eta1'
     eigenstrain_name = eigenstrain1
   [../]
 
@@ -137,14 +137,14 @@
     type = ComputeVariableEigenstrain
     eigen_base = '-0.1 0.1 0 0 0 0'
     prefactor = var_dep2
-    variable_names = 'eta2'
+    args = 'eta2'
     eigenstrain_name = eigenstrain2
   [../]
 
   [./elastic_free_energy]
     type = ElasticEnergyMaterial
-    property_name = Fe
-    variable_names = 'eta1 eta2'
+    f_name = Fe
+    args = 'eta1 eta2'
     derivative_order = 2
   [../]
 
@@ -152,7 +152,7 @@
     type = DerivativeSumMaterial
     property_name = F
     sum_materials = 'Fc Fe'
-    variable_names = 'eta1 eta2'
+    coupled_variables = 'eta1 eta2'
     derivative_order = 2
   [../]
 []

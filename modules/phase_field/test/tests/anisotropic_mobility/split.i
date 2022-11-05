@@ -27,7 +27,7 @@
     variable = c
     kappa_name = kappa_c
     w = w
-    property_name = F
+    f_name = F
   [../]
   [./wres]
     type = SplitCHWResAniso
@@ -56,7 +56,7 @@
   [../]
   [./free_energy]
     type = MathEBFreeEnergy
-    property_name = F
+    f_name = F
     c = c
   [../]
 []

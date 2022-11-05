@@ -109,8 +109,8 @@ SplitCHWResBase<T>::validParams()
   params.addParam<MaterialPropertyName>("mob_name", "mobtemp", "The mobility used with the kernel");
   params.addDeprecatedCoupledVar("args",
                                  "Vector of variable arguments of the mobility",
-                                 "args is deprecated, use 'variable_names' instead");
-  params.addCoupledVar("variable_names", "Vector of variable arguments of the mobility");
+                                 "args is deprecated, use 'coupled_variables' instead");
+  params.addCoupledVar("coupled_variables", "Vector of variable arguments of the mobility");
   params.addCoupledVar(
       "w", "Coupled chemical potential (if not specified kernel variable will be used)");
   return params;

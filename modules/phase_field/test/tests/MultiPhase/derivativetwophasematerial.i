@@ -52,8 +52,8 @@
   [./ACBulk]
     type = AllenCahn
     variable = eta
-    variable_names = c
-    property_name = F
+    coupled_variables = c
+    f_name = F
   [../]
   [./ACInterface]
     type = ACInterface
@@ -64,10 +64,10 @@
   [./c_res]
     type = SplitCHParsed
     variable = c
-    property_name = F
+    f_name = F
     kappa_name = kappa_c
     w = w
-    variable_names = 'eta'
+    coupled_variables = 'eta'
   [../]
   [./w_res]
     type = SplitCHWRes
@@ -131,10 +131,10 @@
 
   [./free_energy]
     type = DerivativeTwoPhaseMaterial
-    property_name = F
+    f_name = F
     fa_name = Fa
     fb_name = Fb
-    variable_names = 'c'
+    coupled_variables = 'c'
     eta = eta
     derivative_order = 2
     outputs = exodus

@@ -136,7 +136,7 @@
   [../]
   [./fracture_driving_energy]
     type = DerivativeSumMaterial
-    variable_names = c
+    coupled_variables = c
     sum_materials = 'elastic_energy fracture_energy'
     derivative_order = 2
     property_name = F

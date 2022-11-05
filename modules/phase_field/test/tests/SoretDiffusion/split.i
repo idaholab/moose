@@ -41,7 +41,7 @@
     variable = c
     kappa_name = kappa
     w = w
-    property_name = F
+    f_name = F
   [../]
   [./w_res]
     type = SplitCHWRes

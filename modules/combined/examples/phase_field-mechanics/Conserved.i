@@ -56,7 +56,7 @@
   [./c_res]
     type = SplitCHParsed
     variable = c
-    property_name = F
+    f_name = F
     kappa_name = kappa_c
     w = w
   [../]
@@ -148,8 +148,8 @@
     # -0.1 will result in an undersized precipitate
     #  0.1 will result in an oversized precipitate
     expression = 0.1*c
-    variable_names = c
-    property_name = var_dep
+    coupled_variables = c
+    f_name = var_dep
     enable_jit = true
     derivative_order = 2
   [../]
@@ -159,7 +159,7 @@
     eigen_base = '1 1 1 0 0 0'
     prefactor = var_dep
     #outputs = exodus
-    variable_names = 'c'
+    args = 'c'
     eigenstrain_name = eigenstrain
   [../]
   [./strain]
@@ -170,9 +170,9 @@
   [../]
   [./elastic_free_energy]
     type = ElasticEnergyMaterial
-    property_name = Fe
+    f_name = Fe
     block = 0
-    variable_names = 'c'
+    args = 'c'
     derivative_order = 2
   [../]
 
@@ -182,7 +182,7 @@
     block = 0
     property_name = F
     sum_materials = 'Fc Fe'
-    variable_names = 'c'
+    coupled_variables = 'c'
     derivative_order = 2
   [../]
 []

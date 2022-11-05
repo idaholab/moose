@@ -68,7 +68,7 @@
   [./c_res]
     type = SplitCHParsed
     variable = c
-    property_name = F
+    f_name = F
     kappa_name = 1
     w = w
   [../]

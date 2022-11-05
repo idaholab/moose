@@ -94,9 +94,9 @@ CahnHilliardBase<T>::CahnHilliardBase(const InputParameters & parameters)
         this->paramError(
             "args", "The kernel variable should not be specified in the coupled `args` parameter.");
       else
-        this->paramError("variable_names",
+        this->paramError("coupled_variables",
                          "The kernel variable should not be specified in the coupled "
-                         "`variable_names` parameter.");
+                         "`coupled_variables` parameter.");
     }
     _second_derivatives[i + 1] =
         &this->template getMaterialPropertyDerivative<Real>("f_name", _var.name(), iname);
