@@ -14,6 +14,7 @@
 /**
  * This kernel implements the Laplacian operator:
  * $\nabla u \cdot \nabla \phi_i$
+ * It is derived from the kernel scalar wrapper, and ignores the scalar variables.
  */
 class ADDiffusionNoScalar : public ADKernelScalarBase
 {

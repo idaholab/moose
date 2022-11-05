@@ -15,8 +15,9 @@ InputParameters
 ADDiffusionNoScalar::validParams()
 {
   InputParameters params = ADKernelScalarBase::validParams();
-  params.addClassDescription("The Laplacian operator ($-\\nabla \\cdot \\nabla u$), with the weak "
-                             "form of $(\\nabla \\phi_i, \\nabla u_h)$.");
+  params.addClassDescription(
+      "Same as `DiffusionNoScalar` in terms of physics/residual, but the Jacobian "
+      "is computed using forward automatic differentiation.");
   return params;
 }
 

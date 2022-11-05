@@ -11,68 +11,68 @@
 []
 
 [Functions]
-  [./exact_fn]
+  [exact_fn]
     type = ParsedFunction
     value = 'x*x+y*y'
-  [../]
+  []
 
-  [./ffn]
+  [ffn]
     type = ParsedFunction
     value = -4
-  [../]
+  []
 
-  [./bottom_bc_fn]
+  [bottom_bc_fn]
     type = ParsedFunction
     value = -2*y
-  [../]
+  []
 
-  [./right_bc_fn]
+  [right_bc_fn]
     type = ParsedFunction
-    value =  2*x
-  [../]
+    value = 2*x
+  []
 
-  [./top_bc_fn]
+  [top_bc_fn]
     type = ParsedFunction
-    value =  2*y
-  [../]
+    value = 2*y
+  []
 
-  [./left_bc_fn]
+  [left_bc_fn]
     type = ParsedFunction
     value = -2*x
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     family = LAGRANGE
     order = SECOND
-  [../]
-  [./lambda]
+  []
+  [lambda]
     family = SCALAR
     order = FIRST
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./ffnk]
+  [ffnk]
     type = BodyForce
     variable = u
     function = ffn
-  [../]
+  []
 
-  [./sk_lm]
+  [sk_lm]
     type = ScalarLMKernel
     variable = u
     coupled_scalar = lambda
     kappa = lambda
     pp_name = pp
     value = 2.666666666666666
-  [../]
+  []
 []
 
 # This seems to be needed so that the scalar variable is
@@ -80,10 +80,10 @@
 # *** ERROR ***
 # Variable 'scalar_variable' does not exist in this system
 [ScalarKernels]
-  [./null]
+  [null]
     type = NullScalarKernel
     variable = lambda
-  [../]
+  []
 []
 
 # With above block, not needed, and results in Petsc error messages
@@ -93,46 +93,46 @@
 # []
 
 [BCs]
-  [./bottom]
+  [bottom]
     type = FunctionNeumannBC
     variable = u
     boundary = 'bottom'
     function = bottom_bc_fn
-  [../]
-  [./right]
+  []
+  [right]
     type = FunctionNeumannBC
     variable = u
     boundary = 'right'
     function = right_bc_fn
-  [../]
-  [./top]
+  []
+  [top]
     type = FunctionNeumannBC
     variable = u
     boundary = 'top'
     function = top_bc_fn
-  [../]
-  [./left]
+  []
+  [left]
     type = FunctionNeumannBC
     variable = u
     boundary = 'left'
     function = left_bc_fn
-  [../]
+  []
 []
 
 [Postprocessors]
   # integrate the volume of domain since original objects set
   # int(phi)=V0, rather than int(phi-V0)=0
-  [./pp]
+  [pp]
     type = FunctionElementIntegral
     function = 1
     execute_on = initial
-  [../]
-  [./l2_err]
+  []
+  [l2_err]
     type = ElementL2Error
     variable = u
     function = exact_fn
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 # Force LU decomposition, nonlinear iterations, to check Jacobian terms with single factorization
@@ -146,7 +146,7 @@
 []
 
 [Outputs]
-#  exodus = true
+  exodus = true
   csv = true
-  hide = lambda
+  #  hide = lambda
 []

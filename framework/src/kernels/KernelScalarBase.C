@@ -51,29 +51,19 @@ KernelScalarBase::computeResidual()
 
   if (_use_scalar)
   {
-    // prepareVectorTagLower(_assembly, _kappa_var.number());
-
-    // for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-    // {
-    //   initScalarQpResidual();
-    //   for (_i = 0; _i < _kappa_var.order(); _i++)
-    //     _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeScalarQpResidual();
-    // }
-    DenseVector<Number> & re = _assembly.residualBlock(_kappa_var);
-    if (re.size() == 0)
-      return;
-    // Error check...
-    // if (re.size() != _k_order)
-    //   return;
+    std::vector<Real> scalar_residuals(_k_order);
 
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     {
       initScalarQpResidual();
       for (_h = 0; _h < _k_order; _h++)
-        re(_h) += _JxW[_qp] * _coord[_qp] * computeScalarQpResidual();
+        scalar_residuals[_h] += _JxW[_qp] * _coord[_qp] * computeScalarQpResidual();
     }
 
-    // accumulateTaggedLocalResidual();
+    _assembly.processResiduals(scalar_residuals,
+                               _kappa_var_ptr->dofIndices(),
+                               _vector_tags,
+                               _kappa_var_ptr->scalingFactor());
   }
 }
 
@@ -89,33 +79,22 @@ KernelScalarBase::computeJacobian()
 void
 KernelScalarBase::computeScalarJacobian()
 {
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_kappa_var, _kappa_var);
-
-  if (ke.n() == 0 || ke.m() == 0)
-    return;
+  _local_ke.resize(_k_order, _k_order);
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
     initScalarQpJacobian(_kappa_var);
     for (_h = 0; _h < _k_order; _h++)
       for (_l = 0; _l < _k_order; _l++)
-        ke(_h, _l) += _JxW[_qp] * _coord[_qp] * computeScalarQpJacobian();
+        _local_ke(_h, _l) += _JxW[_qp] * _coord[_qp] * computeScalarQpJacobian();
   }
 
-  // prepareMatrixTagLower(_assembly, ivar, jvar, type_tr);
-
-  // if (_local_ke.n() == 0 || _local_ke.m() == 0)
-  //   return;
-
-  // for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-  // {
-  //   initScalarQpJacobian(_kappa_var.number());
-  //   for (_i = 0; _i < test_space.size(); _i++)
-  //     for (_j = 0; _j < loc_phi.size(); _j++)
-  //       _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeScalarQpJacobian(type);
-  // }
-
-  // accumulateTaggedLocalMatrix();
+  for (const auto & matrix_tag : _matrix_tags)
+    _assembly.cacheJacobianBlock(_local_ke,
+                                 _kappa_var_ptr->dofIndices(),
+                                 _kappa_var_ptr->dofIndices(),
+                                 _kappa_var_ptr->scalingFactor(),
+                                 matrix_tag);
 }
 
 void
@@ -157,10 +136,9 @@ KernelScalarBase::computeScalarOffDiagJacobian(const unsigned int jvar_num)
 {
 
   const auto & jvar = getVariable(jvar_num);
-  // prepareMatrixTagLower(_assembly, _kappa_var.number(), jvar_num, type);
-  DenseMatrix<Number> & kne = _assembly.jacobianBlock(_kappa_var, jvar_num);
-  if (kne.n() == 0 || kne.m() == 0)
-    return;
+  // Assumes all coupling variables have same test functions as var/primary/secondary
+  // _local_ke.resize(_k_order, _test.size());
+  _local_ke.resize(_k_order, jvar.phiSize());
 
   if (jvar.fieldType() == Moose::VarFieldType::VAR_FIELD_STANDARD)
   {
@@ -172,7 +150,7 @@ KernelScalarBase::computeScalarOffDiagJacobian(const unsigned int jvar_num)
       initScalarQpOffDiagJacobian(jvar);
       for (_h = 0; _h < _k_order; _h++)
         for (_j = 0; _j < loc_phi.size(); _j++)
-          kne(_h, _j) += _JxW[_qp] * _coord[_qp] * computeScalarQpOffDiagJacobian(jvar_num);
+          _local_ke(_h, _j) += _JxW[_qp] * _coord[_qp] * computeScalarQpOffDiagJacobian(jvar_num);
     }
   }
   else if (jvar.fieldType() == Moose::VarFieldType::VAR_FIELD_ARRAY)
@@ -180,7 +158,12 @@ KernelScalarBase::computeScalarOffDiagJacobian(const unsigned int jvar_num)
   else
     mooseError("Vector variable cannot be coupled into Kernel Scalar currently");
 
-  // accumulateTaggedLocalMatrix();
+  for (const auto & matrix_tag : _matrix_tags)
+    _assembly.cacheJacobianBlock(_local_ke,
+                                 _kappa_var_ptr->dofIndices(),
+                                 jvar.dofIndices(),
+                                 _kappa_var_ptr->scalingFactor(),
+                                 matrix_tag);
 }
 
 void
@@ -188,19 +171,27 @@ KernelScalarBase::computeOffDiagJacobianScalarLocal(const unsigned int jvar_num)
 {
 
   // prepareMatrixTagLower(_assembly, _kappa_var.number(), jvar_num, type);
-  DenseMatrix<Number> & ken = _assembly.jacobianBlock(_var.number(), _kappa_var);
-  if (ken.n() == 0 || ken.m() == 0)
-    return;
+  // DenseMatrix<Number> & ken = _assembly.jacobianBlock(_var.number(), _kappa_var);
+  // if (ken.n() == 0 || ken.m() == 0)
+  //   return;
+  _local_ke.resize(_test.size(), _k_order);
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
     initScalarQpJacobian(jvar_num);
     for (_i = 0; _i < _test.size(); _i++)
       for (_l = 0; _l < _k_order; _l++)
-        ken(_i, _l) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobianScalar(jvar_num);
+        // ken(_i, _l) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobianScalar(jvar_num);
+        _local_ke(_i, _l) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobianScalar(jvar_num);
   }
 
   // accumulateTaggedLocalMatrix();
+  for (const auto & matrix_tag : _matrix_tags)
+    _assembly.cacheJacobianBlock(_local_ke,
+                                 _var.dofIndices(),
+                                 _kappa_var_ptr->dofIndices(),
+                                 _var.scalingFactor(),
+                                 matrix_tag);
 }
 
 void
@@ -232,21 +223,26 @@ KernelScalarBase::computeOffDiagJacobianScalar(const unsigned int jvar_num)
 }
 
 void
-KernelScalarBase::computeScalarOffDiagJacobianScalar(const unsigned int jvar)
+KernelScalarBase::computeScalarOffDiagJacobianScalar(const unsigned int svar_num)
 {
-  // prepareMatrixTagLower(_assembly, _kappa_var.number(), jvar);
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_kappa_var, jvar);
-
-  if (ke.n() == 0 || ke.m() == 0)
-    return;
+  // Get dofs and order of this scalar; at least one will be _kappa_var
+  const auto & svar = _sys.getScalarVariable(_tid, svar_num);
+  const unsigned int s_order = svar.order();
+  _local_ke.resize(_k_order, s_order);
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
-    initScalarQpJacobian(jvar);
+    initScalarQpJacobian(_kappa_var);
     for (_h = 0; _h < _k_order; _h++)
-      for (_l = 0; _l < ke.n(); _l++)
-        ke(_h, _l) += _JxW[_qp] * _coord[_qp] * computeScalarQpOffDiagJacobianScalar(jvar);
+      for (_l = 0; _l < s_order; _l++)
+        _local_ke(_h, _l) +=
+            _JxW[_qp] * _coord[_qp] * computeScalarQpOffDiagJacobianScalar(svar_num);
   }
 
-  // accumulateTaggedLocalMatrix();
+  for (const auto & matrix_tag : _matrix_tags)
+    _assembly.cacheJacobianBlock(_local_ke,
+                                 _kappa_var_ptr->dofIndices(),
+                                 svar.dofIndices(),
+                                 _kappa_var_ptr->scalingFactor(),
+                                 matrix_tag);
 }

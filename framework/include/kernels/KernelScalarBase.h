@@ -67,23 +67,23 @@ protected:
   /**
    * Method for computing an off-diagonal jacobian component d-_kappa-residual / d-jvar
    */
-  void computeScalarOffDiagJacobian(const unsigned int jvar);
+  void computeScalarOffDiagJacobian(const unsigned int jvar_num);
 
   /**
    * Method for computing an off-diagonal jacobian component at quadrature points.
    */
-  virtual Real computeScalarQpOffDiagJacobian(const unsigned int /*jvar*/) { return 0; }
+  virtual Real computeScalarQpOffDiagJacobian(const unsigned int /*jvar_num*/) { return 0; }
 
-  void computeOffDiagJacobianScalarLocal(const unsigned int jvar);
+  void computeOffDiagJacobianScalarLocal(const unsigned int jvar_num);
   /**
    * Method for computing an off-diagonal jacobian component d-_kappa-residual / d-scalar
    */
-  void computeScalarOffDiagJacobianScalar(const unsigned int jvar);
+  void computeScalarOffDiagJacobianScalar(const unsigned int svar_num);
 
   /**
    * Method for computing an off-diagonal jacobian component at quadrature points.
    */
-  virtual Real computeScalarQpOffDiagJacobianScalar(const unsigned int /*jvar*/) { return 0; }
+  virtual Real computeScalarQpOffDiagJacobianScalar(const unsigned int /*svar_num*/) { return 0; }
 
   /**
    * Put necessary evaluations depending on qp but independent of test functions here
@@ -93,7 +93,7 @@ protected:
   /**
    * Put necessary evaluations depending on qp but independent of test and shape functions here
    */
-  virtual void initScalarQpJacobian(const unsigned int /*jvar*/) {}
+  virtual void initScalarQpJacobian(const unsigned int /*jvar_num*/) {}
 
   /**
    * Put necessary evaluations depending on qp but independent of test and shape functions here for

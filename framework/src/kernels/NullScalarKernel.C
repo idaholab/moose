@@ -9,6 +9,9 @@
 
 #include "NullScalarKernel.h"
 
+// MOOSE includes
+#include "Assembly.h"
+
 registerMooseObject("MooseTestApp", NullScalarKernel);
 
 InputParameters
@@ -16,7 +19,7 @@ NullScalarKernel::validParams()
 {
   InputParameters params = ScalarKernel::validParams();
   params.addClassDescription(
-      "Scalar Kernel that sets a zero residual, to avoid error from system missing this variable.");
+      "Scalar kernel that sets a zero residual, to avoid error from system missing this variable.");
   params.addParam<Real>("jacobian_fill",
                         0.0,
                         "On diagonal Jacobian fill term, potentially needed for preconditioner");
