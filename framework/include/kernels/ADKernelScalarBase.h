@@ -13,7 +13,7 @@
 
 /**
  * This ADKernel adds standardized methods for assembling to a primary
- * scalar variable associated with the primary variable of the Kernel
+ * scalar variable associated with the primary variable of the ADKernel
  * object. Essentially, the entire row of the residual and Jacobian
  * associated with this scalar variable will also be assembled here
  * using the loops over volumetric elements.

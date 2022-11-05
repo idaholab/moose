@@ -40,12 +40,12 @@ public:
   /**
    * Computes d-_var-residual / d-jvar as well as d-_kappa-residual / d-jvar
    */
-  virtual void computeOffDiagJacobian(unsigned int jvar) override;
+  virtual void computeOffDiagJacobian(unsigned int jvar_num) override;
   /**
    * Computes jacobian block with respect to a scalar variable
    * @param jvar, the number of the (other) scalar variable
    */
-  void computeOffDiagJacobianScalar(unsigned int jvar) override;
+  void computeOffDiagJacobianScalar(unsigned int svar_num) override;
 
 protected:
   /**
@@ -74,7 +74,7 @@ protected:
    */
   virtual Real computeScalarQpOffDiagJacobian(const unsigned int /*jvar_num*/) { return 0; }
 
-  void computeOffDiagJacobianScalarLocal(const unsigned int jvar_num);
+  void computeOffDiagJacobianScalarLocal(const unsigned int svar_num);
   /**
    * Method for computing an off-diagonal jacobian component d-_kappa-residual / d-scalar
    */

@@ -148,5 +148,5 @@
 [Outputs]
   exodus = true
   csv = true
-  #  hide = lambda
+  hide = lambda
 []
