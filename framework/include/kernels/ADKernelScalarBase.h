@@ -45,7 +45,7 @@ public:
    * Computes jacobian block with respect to a scalar variable
    * @param jvar, the number of the (other) scalar variable
    */
-  void computeOffDiagJacobianScalar(unsigned int jvar) override;
+  void computeOffDiagJacobianScalar(unsigned int /*jvar_num*/) override;
 
   /**
    * Computes residual and jacobian block for field and scalar variables
@@ -53,6 +53,15 @@ public:
   void computeResidualAndJacobian() override;
 
 protected:
+  /**
+   * compute the \p _residuals member for filling the Jacobian. We want to calculate these residuals
+   * up-front when doing loal derivative indexing because we can use those residuals to fill \p
+   * _local_ke for every associated jvariable. We do not want to re-do these calculations for every
+   * jvariable and corresponding \p _local_ke. For global indexing we will simply pass the computed
+   * \p _residuals directly to \p Assembly::processJacobian
+   */
+  virtual void computeResidualsForJacobian();
+
   /**
    * Method for computing the scalar part of residual at quadrature points
    */
@@ -92,5 +101,20 @@ protected:
 
   /// Used internally to iterate over each scalar component
   unsigned int _h;
+  unsigned int _l;
   std::vector<ADReal> _scalar_residuals;
+
+  // private:
+  //   /**
+  //    * Add the Jacobian contribution for the provided variable
+  //    */
+  //   void addScalarJacobian(const MooseVariableScalar & jvariable);
+
+  //   /**
+  //    * compute all the Jacobian entries, but for non-global indexing only add the matrix coupling
+  //    * entries specified by \p coupling_entries
+  //    */
+  //   void computeADScalarJacobian(
+  //       const std::vector<std::pair<MooseVariableScalar *, MooseVariableScalar *>> &
+  //           coupling_entries);
 };

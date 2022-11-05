@@ -29,7 +29,7 @@ setScalarLMKParam(const InputParameters & params_in)
 }
 }
 
-registerMooseObject("MooseTestApp", ScalarLMKernel);
+registerMooseObject("MooseApp", ScalarLMKernel);
 
 InputParameters
 ScalarLMKernel::validParams()

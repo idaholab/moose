@@ -29,7 +29,7 @@ setADScalarLMKParam(const InputParameters & params_in)
 }
 }
 
-registerMooseObject("MooseTestApp", ADScalarLMKernel);
+registerMooseObject("MooseApp", ADScalarLMKernel);
 
 InputParameters
 ADScalarLMKernel::validParams()

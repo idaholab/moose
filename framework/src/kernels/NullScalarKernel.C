@@ -12,7 +12,7 @@
 // MOOSE includes
 #include "Assembly.h"
 
-registerMooseObject("MooseTestApp", NullScalarKernel);
+registerMooseObject("MooseApp", NullScalarKernel);
 
 InputParameters
 NullScalarKernel::validParams()

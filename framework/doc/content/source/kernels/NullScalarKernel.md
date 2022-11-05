@@ -1,6 +1,6 @@
 # NullScalarKernel
 
-!syntax description /Kernels/NullScalarKernel
+!syntax description /ScalarKernels/NullScalarKernel
 
 This kernel can be used as a placeholder if a nonlinear scalar variable was added to the simulation but
 the kernels for that variable have not yet been created / added to the input file. This kernel
@@ -20,8 +20,8 @@ the identity matrix to the Jacobian for the variable it applies to.
 !alert note
 This scalar kernel should mainly be used for creating small tests and while debugging simulations.
 
-!syntax parameters /Kernels/NullScalarKernel
+!syntax parameters /ScalarKernels/NullScalarKernel
 
-!syntax inputs /Kernels/NullScalarKernel
+!syntax inputs /ScalarKernels/NullScalarKernel
 
-!syntax children /Kernels/NullScalarKernel
+!syntax children /ScalarKernels/NullScalarKernel

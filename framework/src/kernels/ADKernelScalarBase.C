@@ -77,6 +77,16 @@ ADKernelScalarBase::computeJacobian()
 #ifndef MOOSE_GLOBAL_AD_INDEXING
     mooseError("Jacobian assembly not coded for non-default AD");
 #endif
+    computeScalarResidualsForJacobian();
+    _assembly.processResidualsAndJacobian(_scalar_residuals,
+                                          _kappa_var_ptr->dofIndices(),
+                                          _vector_tags,
+                                          _matrix_tags,
+                                          _kappa_var_ptr->scalingFactor());
+    // const std::vector<std::pair<MooseVariableScalar *, MooseVariableScalar *>> kvar_kvar_coupling
+    // =
+    //     {std::make_pair(_kappa_var_ptr, _kappa_var_ptr)};
+    // computeADScalarJacobian(kvar_kvar_coupling);
   }
 }
 
@@ -88,6 +98,9 @@ ADKernelScalarBase::computeOffDiagJacobian(const unsigned int jvar_num)
 #ifndef MOOSE_GLOBAL_AD_INDEXING
     mooseError("off-diagonal Jacobian assembly not coded for non-default AD");
 #endif
+    computeResidualsForJacobian();
+    _assembly.processResidualsAndJacobian(
+        _residuals, _var.dofIndices(), _vector_tags, _matrix_tags, _var.scalingFactor());
   }
   else
   {
@@ -96,16 +109,8 @@ ADKernelScalarBase::computeOffDiagJacobian(const unsigned int jvar_num)
 }
 
 void
-ADKernelScalarBase::computeOffDiagJacobianScalar(const unsigned int jvar_num)
+ADKernelScalarBase::computeOffDiagJacobianScalar(const unsigned int /*jvar_num*/)
 {
-  if (_use_scalar)
-  {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-    mooseError("off-diagonal Jacobian assembly not coded for non-default AD");
-#endif
-  }
-  else
-    ADKernel::computeOffDiagJacobianScalar(jvar_num); // d-_var-residual / d-jvar
 }
 
 void
@@ -129,6 +134,29 @@ ADKernelScalarBase::computeResidualAndJacobian()
 }
 
 void
+ADKernelScalarBase::computeResidualsForJacobian()
+{
+  if (_residuals.size() != _test.size())
+    _residuals.resize(_test.size(), 0);
+  for (auto & r : _residuals)
+    r = 0;
+
+  precalculateResidual();
+  if (_use_displaced_mesh)
+    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    {
+      _r = _ad_JxW[_qp];
+      _r *= _ad_coord[_qp];
+      for (_i = 0; _i < _test.size(); _i++)
+        _residuals[_i] += _r * computeQpResidual();
+    }
+  else
+    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+      for (_i = 0; _i < _test.size(); _i++)
+        _residuals[_i] += _JxW[_qp] * _coord[_qp] * computeQpResidual();
+}
+
+void
 ADKernelScalarBase::computeScalarResidualsForJacobian()
 {
   if (_scalar_residuals.size() != _k_order)
@@ -141,3 +169,56 @@ ADKernelScalarBase::computeScalarResidualsForJacobian()
     for (_h = 0; _h < _k_order; _h++)
       _scalar_residuals[_h] += _JxW[_qp] * _coord[_qp] * computeScalarQpResidual();
 }
+
+// void
+// ADKernelScalarBase::computeADScalarJacobian(
+//     const std::vector<std::pair<MooseVariableScalar *, MooseVariableScalar *>> &
+//     coupling_entries)
+// {
+//   computeScalarResidualsForJacobian();
+
+//   auto local_functor =
+//       [&](const std::vector<ADReal> &, const std::vector<dof_id_type> &, const std::set<TagID> &)
+//   {
+//     for (const auto & it : coupling_entries)
+//     {
+//       const MooseVariableScalar & jvariable = *(it.second);
+
+//       if (!jvariable.hasBlocks(_current_elem->subdomain_id()))
+//         continue;
+
+//       // Make sure to get the correct undisplaced/displaced variable
+//       addScalarJacobian(_sys.getScalarVariable(_tid, jvariable.number()));
+//     }
+//   };
+
+//   _assembly.processJacobian(_scalar_residuals,
+//                             dofIndices(),
+//                             _matrix_tags,
+//                             _kappa_var_ptr->scalingFactor(),
+//                             local_functor);
+// }
+
+// void
+// ADKernelScalarBase::addScalarJacobian(const MooseVariableScalar & jvariable)
+// {
+//   unsigned int jvar = jvariable.number();
+
+//   auto ad_offset = Moose::adOffset(jvar, _sys.getMaxVarNDofsPerElem(),
+//   Moose::ElementType::Element);
+
+//   const unsigned int s_order = jvariable.order();
+//   _local_ke.resize(_k_order, s_order);
+
+//   for (_h = 0; _h < _k_order; _h++)
+//     for (_l = 0; _l < s_order; _l++)
+//     {
+// #ifndef MOOSE_SPARSE_AD
+//       mooseAssert(ad_offset + _j < MOOSE_AD_MAX_DOFS_PER_ELEM,
+//                   "Out of bounds access in derivative vector.");
+// #endif
+//       _local_ke(_h, _l) += _scalar_residuals[_h].derivatives()[ad_offset + _l];
+//     }
+
+//   accumulateTaggedLocalMatrix();
+// }
