@@ -77,6 +77,9 @@ ADKernelScalarBase::computeJacobian()
 #ifndef MOOSE_GLOBAL_AD_INDEXING
     mooseError("Jacobian assembly not coded for non-default AD");
 #endif
+#ifndef MOOSE_SPARSE_AD
+    mooseError("Jacobian assembly not coded for non-sparse AD");
+#else
     computeScalarResidualsForJacobian();
     _assembly.processResidualsAndJacobian(_scalar_residuals,
                                           _kappa_var_ptr->dofIndices(),
@@ -87,6 +90,7 @@ ADKernelScalarBase::computeJacobian()
     // =
     //     {std::make_pair(_kappa_var_ptr, _kappa_var_ptr)};
     // computeADScalarJacobian(kvar_kvar_coupling);
+#endif
   }
 }
 
@@ -98,7 +102,7 @@ ADKernelScalarBase::computeOffDiagJacobian(const unsigned int jvar_num)
 #ifndef MOOSE_GLOBAL_AD_INDEXING
     mooseError("off-diagonal Jacobian assembly not coded for non-default AD");
 #endif
-    computeResidualsForJacobian();
+    ADKernel::computeResidualsForJacobian();
     _assembly.processResidualsAndJacobian(
         _residuals, _var.dofIndices(), _vector_tags, _matrix_tags, _var.scalingFactor());
   }
@@ -121,39 +125,18 @@ ADKernelScalarBase::computeResidualAndJacobian()
 
   if (_use_scalar)
   {
+#ifdef MOOSE_SPARSE_AD
     computeScalarResidualsForJacobian();
     _assembly.processResidualsAndJacobian(_scalar_residuals,
                                           _kappa_var_ptr->dofIndices(),
                                           _vector_tags,
                                           _matrix_tags,
                                           _kappa_var_ptr->scalingFactor());
+#endif
   }
 #else
   mooseError("residual and jacobian together only supported for global AD indexing");
 #endif
-}
-
-void
-ADKernelScalarBase::computeResidualsForJacobian()
-{
-  if (_residuals.size() != _test.size())
-    _residuals.resize(_test.size(), 0);
-  for (auto & r : _residuals)
-    r = 0;
-
-  precalculateResidual();
-  if (_use_displaced_mesh)
-    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-    {
-      _r = _ad_JxW[_qp];
-      _r *= _ad_coord[_qp];
-      for (_i = 0; _i < _test.size(); _i++)
-        _residuals[_i] += _r * computeQpResidual();
-    }
-  else
-    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-      for (_i = 0; _i < _test.size(); _i++)
-        _residuals[_i] += _JxW[_qp] * _coord[_qp] * computeQpResidual();
 }
 
 void

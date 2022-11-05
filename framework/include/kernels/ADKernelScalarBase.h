@@ -54,15 +54,6 @@ public:
 
 protected:
   /**
-   * compute the \p _residuals member for filling the Jacobian. We want to calculate these residuals
-   * up-front when doing loal derivative indexing because we can use those residuals to fill \p
-   * _local_ke for every associated jvariable. We do not want to re-do these calculations for every
-   * jvariable and corresponding \p _local_ke. For global indexing we will simply pass the computed
-   * \p _residuals directly to \p Assembly::processJacobian
-   */
-  virtual void computeResidualsForJacobian();
-
-  /**
    * Method for computing the scalar part of residual at quadrature points
    */
   virtual ADReal computeScalarQpResidual() { return 0; }
