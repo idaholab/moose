@@ -15,7 +15,7 @@
     type = ParsedFunction
     expression = alpha*alpha*pi*pi*sin(alpha*pi*x)
     symbol_names = 'alpha'
-    symbol_expressions = '4'
+    symbol_values = '4'
   []
 
   [u_func]

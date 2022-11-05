@@ -56,11 +56,11 @@ a = 1.1
 [Functions]
   [exact]
     type = ParsedFunction
-    value = 'sin(x)'
+    expression = 'sin(x)'
   []
   [forcing]
     type = ParsedFunction
-    value = '(x*a*cos(x) + a*sin(x))/x'
+    expression = '(x*a*cos(x) + a*sin(x))/x'
     symbol_names = 'a'
     symbol_expressions = '${a}'
   []

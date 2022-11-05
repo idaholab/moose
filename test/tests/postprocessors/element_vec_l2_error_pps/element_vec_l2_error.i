@@ -35,28 +35,28 @@
     type = ParsedFunction
     expression = sin(alpha*pi*x)
     symbol_names = 'alpha'
-    symbol_expressions = '2'
+    symbol_values = '2'
   [../]
 
   [./bc_v]
     type = ParsedFunction
     expression = sin(alpha*pi*y)
     symbol_names = 'alpha'
-    symbol_expressions = '2'
+    symbol_values = '2'
   [../]
 
   [./f_u]
     type = ParsedFunction
     expression = alpha*alpha*pi*pi*sin(alpha*pi*x)
     symbol_names = 'alpha'
-    symbol_expressions = '2'
+    symbol_values = '2'
   [../]
 
   [./f_v]
     type = ParsedFunction
     expression = alpha*alpha*pi*pi*sin(alpha*pi*y)
     symbol_names = 'alpha'
-    symbol_expressions = '2'
+    symbol_values = '2'
   [../]
 []
 

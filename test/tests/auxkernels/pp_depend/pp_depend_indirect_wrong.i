@@ -13,7 +13,7 @@
     type = ParsedFunction
     expression = ptime
     symbol_names = ptime
-    symbol_expressions = ptime_pp
+    symbol_values = ptime_pp
   []
 []
 

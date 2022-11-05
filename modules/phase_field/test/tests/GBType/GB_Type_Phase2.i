@@ -227,7 +227,7 @@
   #===================================================== Interpolation functions
   [./hgb] # equal to 1 in grain boundaries, 0 elsewhere in grains.
     type = DerivativeParsedMaterial
-    args = 'bnds'
+    coupled_variables = 'bnds'
     constant_names =       'bnds_middle width tanh_cst_x2'
     constant_expressions = '0.75         0.0596 2.1972245773362196'
     function = '1-0.5*(1.0+tanh(tanh_cst_x2*(bnds-bnds_middle)/width))'
@@ -236,7 +236,7 @@
   [../]
   [./hgb_lagb] # equal to 1 in grain boundaries, 0 elsewhere in grains.
     type = DerivativeParsedMaterial
-    args = 'bnds_LAGB'
+    coupled_variables = 'bnds_LAGB'
     constant_names =       'bnds_middle width tanh_cst_x2'
     constant_expressions = '0.75         0.0596 2.1972245773362196'
     function = '1-0.5*(1.0+tanh(tanh_cst_x2*(bnds_LAGB-bnds_middle)/width))'
@@ -245,7 +245,7 @@
   [../]
   [./hgb_hagb] # equal to 1 in grain boundaries, 0 elsewhere in grains.
     type = DerivativeParsedMaterial
-    args = 'bnds_HAGB'
+    coupled_variables = 'bnds_HAGB'
     constant_names =       'bnds_middle width tanh_cst_x2'
     constant_expressions = '0.75         0.0596 2.1972245773362196'
     function = '1-0.5*(1.0+tanh(tanh_cst_x2*(bnds_HAGB-bnds_middle)/width))'
@@ -265,7 +265,7 @@
   [./Diffusion_coefficient_D]
     type = DerivativeParsedMaterial
     property_name = 'D_Scaling'
-    args = 'bnds'
+    coupled_variables = 'bnds'
     material_property_names = 'Db Dgbh Dgbl hgb_lagb(bnds_LAGB) hgb_hagb(bnds_HAGB) hgb(bnds)'
     function = '(1-hgb)*Db+hgb*hgb_lagb/(hgb_lagb+hgb_hagb)*Dgbl+hgb*hgb_hagb/(hgb_lagb+hgb_hagb)*Dgbh'
     outputs = exodus

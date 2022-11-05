@@ -50,7 +50,7 @@
   [diff]
     type = ParsedMaterial
     property_name = D
-    args = 'vt'
+    coupled_variables = 'vt'
     function = 'vt'
   []
 []

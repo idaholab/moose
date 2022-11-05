@@ -18,13 +18,13 @@
   [rho_material]
     type = LinearTestMaterial
     name = rho
-    symbol_names = 'rhoA'
+    vars = 'rhoA'
     slopes = '2.5'
   []
   [vel_material]
     type = LinearTestMaterial
     name = vel
-    symbol_names = 'rhoA rhouA'
+    vars = 'rhoA rhouA'
     slopes = '3.5 4.5'
   []
   [dir_material]

@@ -103,7 +103,7 @@
     type = ParsedFunction
     expression = '-exp(-${Y2_EXPONENT}*t)/(lambda+${Y2_EXPONENT})'
     symbol_names = 'lambda'
-    symbol_expressions = ${LAMBDA}
+    symbol_values = ${LAMBDA}
   [../]
   [./y2_exact]
     type = ParsedFunction

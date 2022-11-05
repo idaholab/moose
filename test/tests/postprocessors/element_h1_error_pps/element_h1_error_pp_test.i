@@ -28,7 +28,7 @@
     #expression = alpha*alpha*pi*pi*(y*y*sin(alpha*pi*x*y)+y*y*sin(alpha*pi*x*y))
     expression = alpha*alpha*pi*pi*sin(alpha*pi*x)
     symbol_names = 'alpha'
-    symbol_expressions = '4'
+    symbol_values = '4'
   [../]
 
   [./u_func]

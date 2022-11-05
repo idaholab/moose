@@ -10,7 +10,7 @@
 [Materials]
   [linear_test_material]
     type = LinearTestMaterial
-    symbol_names = 'beta arhoA arhouA arhoEA'
+    vars = 'beta arhoA arhouA arhoEA'
     slopes = '2.5 3.5 4.5 5.5'
     name = test_property
   []
@@ -21,6 +21,6 @@
     type = MaterialDerivativeTestKernel
     variable = beta
     material_property = test_property
-    args = 'beta arhoA arhouA arhoEA'
+    coupled_variables = 'beta arhoA arhouA arhoEA'
   []
 []
