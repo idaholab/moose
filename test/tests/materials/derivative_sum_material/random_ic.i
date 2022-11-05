@@ -32,13 +32,13 @@
     type = DerivativeParsedMaterial
     property_name = Fa
     coupled_variables = 'c'
-    function = (c-0.1)^4*(1-0.1-c)^4
+    expression = (c-0.1)^4*(1-0.1-c)^4
   [../]
   [./free_energy2]
     type = DerivativeParsedMaterial
     property_name = Fb
     coupled_variables = 'c'
-    function = -0.25*(c-0.1)^4*(1-0.1-c)^4
+    expression = -0.25*(c-0.1)^4*(1-0.1-c)^4
   [../]
 
   # Fa+Fb+Fb == Fc
@@ -46,7 +46,7 @@
     type = DerivativeParsedMaterial
     property_name = Fc
     coupled_variables = 'c'
-    function = 0.5*(c-0.1)^4*(1-0.1-c)^4
+    expression = 0.5*(c-0.1)^4*(1-0.1-c)^4
     outputs = all
   [../]
   [./dfree_energy3]
@@ -54,7 +54,7 @@
     property_name = dFc
     coupled_variables = 'c'
     material_property_names = 'F:=D[Fc,c]'
-    function = F
+    expression = F
     outputs = all
   [../]
   [./d2free_energy3]
@@ -62,7 +62,7 @@
     property_name = d2Fc
     coupled_variables = 'c'
     material_property_names = 'F:=D[Fc,c,c]'
-    function = F
+    expression = F
     outputs = all
   [../]
 
@@ -77,7 +77,7 @@
     type = DerivativeParsedMaterial
     property_name = dF_sum
     material_property_names = 'F:=D[F_sum,c]'
-    function = F
+    expression = F
     coupled_variables = 'c'
     outputs = all
   [../]
@@ -85,7 +85,7 @@
     type = DerivativeParsedMaterial
     property_name = d2F_sum
     material_property_names = 'F:=D[F_sum,c,c]'
-    function = F
+    expression = F
     coupled_variables = 'c'
     outputs = all
   [../]

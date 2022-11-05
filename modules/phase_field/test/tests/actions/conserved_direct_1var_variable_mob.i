@@ -40,13 +40,13 @@
     type = DerivativeParsedMaterial
     property_name = M
     variable_names = 'cv'
-    function = '0.1 + (1 + cv)/2'
+    expression = '0.1 + (1 + cv)/2'
   [../]
   [./free_energy]
     type = DerivativeParsedMaterial
     property_name = F
     variable_names = 'cv'
-    function = '(1-cv)^2 * (1+cv)^2'
+    expression = '(1-cv)^2 * (1+cv)^2'
   [../]
 []
 

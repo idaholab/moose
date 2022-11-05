@@ -239,7 +239,7 @@
     property_name = etasum
     variable_names = 'eta1 eta2 eta3'
     material_property_names = 'h1 h2 h3'
-    function = 'h1+h2+h3-1'
+    expression = 'h1+h2+h3-1'
     outputs = exodus
   [../]
 
@@ -249,7 +249,7 @@
     type = ParsedMaterial
     property_name = phase
     variable_names = 'eta2 eta3'
-    function = 'if(eta3>0.5,1,0)-if(eta2>0.5,1,0)'
+    expression = 'if(eta3>0.5,1,0)-if(eta2>0.5,1,0)'
     outputs = exodus
   [../]
 
@@ -347,21 +347,21 @@
   [./chemical_free_energy_1]
     type = DerivativeParsedMaterial
     property_name = Fc1
-    function = '4*c^2'
+    expression = '4*c^2'
     variable_names = 'c'
     derivative_order = 2
   [../]
   [./chemical_free_energy_2]
     type = DerivativeParsedMaterial
     property_name = Fc2
-    function = '(c-0.9)^2-0.4'
+    expression = '(c-0.9)^2-0.4'
     variable_names = 'c'
     derivative_order = 2
   [../]
   [./chemical_free_energy_3]
     type = DerivativeParsedMaterial
     property_name = Fc3
-    function = '(c-0.9)^2-0.5'
+    expression = '(c-0.9)^2-0.5'
     variable_names = 'c'
     derivative_order = 2
   [../]

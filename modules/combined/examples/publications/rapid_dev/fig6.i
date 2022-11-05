@@ -120,19 +120,19 @@
     type = DerivativeParsedMaterial
     property_name = F1
     variable_names = 'c1'
-    function = '20*(c1-0.4)^2'
+    expression = '20*(c1-0.4)^2'
   [../]
   [./f2]
     type = DerivativeParsedMaterial
     property_name = F2
     variable_names = 'c2 T'
-    function = '20*(c2-0.5)^2 + 0.01*T'
+    expression = '20*(c2-0.5)^2 + 0.01*T'
   [../]
   [./f3]
     type = DerivativeParsedMaterial
     property_name = F3
     variable_names = 'c3'
-    function = '20*(c3-0.8)^2'
+    expression = '20*(c3-0.8)^2'
   [../]
 
   # Switching functions for each phase
@@ -165,19 +165,19 @@
   [./Dh1]
     type = DerivativeParsedMaterial
     material_property_names = 'D h1'
-    function = D*h1
+    expression = D*h1
     property_name = Dh1
   [../]
   [./Dh2]
     type = DerivativeParsedMaterial
     material_property_names = 'D h2'
-    function = D*h2
+    expression = D*h2
     property_name = Dh2
   [../]
   [./Dh3]
     type = DerivativeParsedMaterial
     material_property_names = 'D h3'
-    function = D*h3
+    expression = D*h3
     property_name = Dh3
   [../]
 

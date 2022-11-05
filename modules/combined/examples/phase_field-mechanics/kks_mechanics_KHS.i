@@ -278,7 +278,7 @@
     type = DerivativeParsedMaterial
     property_name = fm
     variable_names = 'cm'
-    function = '6.55*(cm-0.13)^2'
+    expression = '6.55*(cm-0.13)^2'
   [../]
 
   # Chemical Free energy of the precipitate phase
@@ -286,7 +286,7 @@
     type = DerivativeParsedMaterial
     property_name = fp
     variable_names = 'cp'
-    function = '6.55*(cp-0.235)^2'
+    expression = '6.55*(cp-0.235)^2'
   [../]
 
 # Elastic energy of the precipitate
@@ -310,7 +310,7 @@
     type = DerivativeParsedMaterial
     property_name = one_minus_h_explicit
     variable_names = eta
-    function = 1-eta^3*(6*eta^2-15*eta+10)
+    expression = 1-eta^3*(6*eta^2-15*eta+10)
     outputs = exodus
   [../]
 

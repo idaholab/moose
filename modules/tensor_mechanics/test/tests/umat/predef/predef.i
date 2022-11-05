@@ -103,7 +103,7 @@
     type = DerivativeParsedMaterial
     property_name = prefactor_material
     variable_names = strain_yy
-    function = '1.0/(1.0 + strain_yy)'
+    expression = '1.0/(1.0 + strain_yy)'
   []
   [stress]
     type = ComputeFiniteStrainElasticStress

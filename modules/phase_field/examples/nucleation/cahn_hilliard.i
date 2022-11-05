@@ -51,7 +51,7 @@
     variable_names = 'c'
     constant_names       = 'barr_height  cv_eq'
     constant_expressions = '0.1          0'
-    function = 16*barr_height*c^2*(1-c)^2 # +0.01*(c*plog(c,0.005)+(1-c)*plog(1-c,0.005))
+    expression = 16*barr_height*c^2*(1-c)^2 # +0.01*(c*plog(c,0.005)+(1-c)*plog(1-c,0.005))
     derivative_order = 2
     outputs = exodus
   [../]
@@ -61,7 +61,7 @@
     type = ParsedMaterial
     property_name = P
     variable_names = c
-    function = c*1e-7
+    expression = c*1e-7
     outputs = exodus
   [../]
   [./nucleation]

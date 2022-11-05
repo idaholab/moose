@@ -138,7 +138,7 @@
     block = '1 2'
     property_name = prefactor_material
     variable_names = temp
-    function = '273/(temp)'
+    expression = '273/(temp)'
   []
   [stress]
     type = ComputeFiniteStrainElasticStress

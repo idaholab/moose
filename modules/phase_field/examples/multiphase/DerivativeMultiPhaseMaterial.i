@@ -249,7 +249,7 @@
     property_name = etasum
     variable_names = 'eta1 eta2 eta3'
     material_property_names = 'h1 h2 h3'
-    function = 'h1+h2+h3'
+    expression = 'h1+h2+h3'
   [../]
 
   # The phase contribution factors for each material point are computed using the
@@ -290,19 +290,19 @@
   [./phase_free_energy_1]
     type = DerivativeParsedMaterial
     property_name = F1
-    function = '(c-1)^2'
+    expression = '(c-1)^2'
     variable_names = 'c'
   [../]
   [./phase_free_energy_2]
     type = DerivativeParsedMaterial
     property_name = F2
-    function = '(c-0.5)^2'
+    expression = '(c-0.5)^2'
     variable_names = 'c'
   [../]
   [./phase_free_energy_3]
     type = DerivativeParsedMaterial
     property_name = F3
-    function = 'c^2'
+    expression = 'c^2'
     variable_names = 'c'
   [../]
 

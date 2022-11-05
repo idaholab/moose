@@ -299,7 +299,7 @@
     type = DerivativeParsedMaterial
     property_name = fm
     variable_names = 'cm'
-    function = '6.55*(cm-0.13)^2'
+    expression = '6.55*(cm-0.13)^2'
   [../]
 # Elastic energy of the matrix
   [./elastic_free_energy_m]
@@ -322,7 +322,7 @@
     type = DerivativeParsedMaterial
     property_name = fp
     variable_names = 'cp'
-    function = '6.55*(cp-0.235)^2'
+    expression = '6.55*(cp-0.235)^2'
   [../]
 
 # Elastic energy of the precipitate

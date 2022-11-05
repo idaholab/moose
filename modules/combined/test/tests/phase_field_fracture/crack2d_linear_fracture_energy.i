@@ -95,13 +95,13 @@
     type = ParsedMaterial
     material_property_names = 'gc_prop visco'
     property_name = L
-    function = '1.0/(gc_prop * visco)'
+    expression = '1.0/(gc_prop * visco)'
   [../]
   [./define_kappa]
     type = ParsedMaterial
     material_property_names = 'gc_prop l'
     property_name = kappa_op
-    function = 'gc_prop * l * 3 / 4'
+    expression = 'gc_prop * l * 3 / 4'
   [../]
   [./elasticity_tensor]
     type = ComputeElasticityTensor
@@ -121,7 +121,7 @@
     type = DerivativeParsedMaterial
     property_name = degradation
     variable_names = 'c'
-    function = '(1.0-c)^2*(1.0 - eta) + eta'
+    expression = '(1.0-c)^2*(1.0 - eta) + eta'
     constant_names       = 'eta'
     constant_expressions = '0.0'
     derivative_order = 2
@@ -131,7 +131,7 @@
     property_name = fracture_energy
     variable_names = 'c'
     material_property_names = 'gc_prop l'
-    function = '3 * gc_prop / (8 * l) * c'
+    expression = '3 * gc_prop / (8 * l) * c'
     derivative_order = 2
   [../]
   [./fracture_driving_energy]
@@ -145,7 +145,7 @@
     type = ParsedMaterial
     property_name = barrier
     material_property_names = 'gc_prop l'
-    function = '3 * gc_prop / 16 / l'
+    expression = '3 * gc_prop / 16 / l'
   [../]
 []
 

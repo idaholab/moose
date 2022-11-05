@@ -130,7 +130,7 @@
     type = DerivativeParsedMaterial
     property_name = fl
     variable_names = 'c1l c2l'
-    function = '(0.1-c1l)^2+(0.05-c2l)^2'
+    expression = '(0.1-c1l)^2+(0.05-c2l)^2'
   [../]
 
   # Free energy of the solid
@@ -138,7 +138,7 @@
     type = DerivativeParsedMaterial
     property_name = fs
     variable_names = 'c1s c2s'
-    function = '(0.8-c1s)^2+(0.1-c2s)^2'
+    expression = '(0.8-c1s)^2+(0.1-c2s)^2'
   [../]
 
   # h(eta)

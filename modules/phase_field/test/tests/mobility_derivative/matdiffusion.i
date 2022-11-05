@@ -59,14 +59,14 @@
   [./Dc]
     type = DerivativeParsedMaterial
     property_name = Dc
-    function = '0.01+c^2+d'
+    expression = '0.01+c^2+d'
     variable_names = 'c d'
     derivative_order = 1
   [../]
   [./Dd]
     type = DerivativeParsedMaterial
     property_name = Dd
-    function = 'd^2+c+1.5'
+    expression = 'd^2+c+1.5'
     variable_names = 'c d'
     derivative_order = 1
   [../]

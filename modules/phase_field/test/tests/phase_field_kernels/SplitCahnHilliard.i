@@ -69,7 +69,7 @@
     type = DerivativeParsedMaterial
     property_name = F
     variable_names = 'c'
-    function = '0.25*(1+c)^2*(1-c)^2'
+    expression = '0.25*(1+c)^2*(1-c)^2'
     derivative_order = 2
   [../]
 []

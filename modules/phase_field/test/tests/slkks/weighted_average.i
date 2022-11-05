@@ -33,7 +33,7 @@
      type = ParsedMaterial
      variable_names = eta
      property_name = h
-     function = 'if(eta>0.5,1,0)'
+     expression = 'if(eta>0.5,1,0)'
    []
  []
 

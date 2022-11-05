@@ -105,7 +105,7 @@
     property_name = prefactor
     constant_names       = 'epsilon0 c0'
     constant_expressions = '0.05     0'
-    function = '(c - c0) * epsilon0'
+    expression = '(c - c0) * epsilon0'
   [../]
   [./eigenstrain]
     type = ComputeVariableEigenstrain

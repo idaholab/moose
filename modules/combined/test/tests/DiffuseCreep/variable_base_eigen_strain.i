@@ -111,13 +111,13 @@
     block = 0
     property_name = mu_prop
     variable_names = c
-    function = 'c'
+    expression = 'c'
     derivative_order = 1
   [../]
   [./var_dependence]
     type = DerivativeParsedMaterial
     block = 0
-    function = 'c*(1.0-c)'
+    expression = 'c*(1.0-c)'
     variable_names = c
     property_name = var_dep
     derivative_order = 1
@@ -154,7 +154,7 @@
   [./eigenstrain_prefactor]
     type = DerivativeParsedMaterial
     block = 0
-    function = 'c-0.1'
+    expression = 'c-0.1'
     variable_names = c
     property_name = eigenstrain_prefactor
     derivative_order = 1

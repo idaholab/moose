@@ -83,13 +83,13 @@
     type = DerivativeParsedMaterial
     property_name = Fa
     variable_names = 'ca'
-    function = 'ca^2'
+    expression = 'ca^2'
   [../]
   [./fb]
     type = DerivativeParsedMaterial
     property_name = Fb
     variable_names = 'cb'
-    function = '(1-cb)^2'
+    expression = '(1-cb)^2'
   [../]
 
   # h(eta)

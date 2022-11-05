@@ -63,7 +63,7 @@
     type = DerivativeParsedMaterial
     property_name = L
     variable_names = 'eta chi'
-    function = '0.1 * eta^2 + chi^2'
+    expression = '0.1 * eta^2 + chi^2'
     derivative_order = 2
   [../]
 
@@ -71,7 +71,7 @@
     type = DerivativeParsedMaterial
     property_name = F
     variable_names = 'eta'
-    function = '2 * eta^2 * (1-eta)^2 - 0.2*eta'
+    expression = '2 * eta^2 * (1-eta)^2 - 0.2*eta'
     derivative_order = 2
   [../]
 []

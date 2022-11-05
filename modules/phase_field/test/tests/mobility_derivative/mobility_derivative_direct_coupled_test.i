@@ -80,7 +80,7 @@
     type = DerivativeParsedMaterial
     property_name = M
     variable_names = 'c d'
-    function = if(d>0.001,d,0.001)*if(c<0,0.5,if(c>1,0.5,1-0.5*c^2))
+    expression = if(d>0.001,d,0.001)*if(c<0,0.5,if(c>1,0.5,1-0.5*c^2))
     derivative_order = 2
   [../]
   [./free_energy]

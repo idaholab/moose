@@ -29,7 +29,7 @@
   [./Dc]
     type = DerivativeParsedMaterial
     property_name = Du
-    function = '0.01+u^2'
+    expression = '0.01+u^2'
     coupled_variables = 'u'
     derivative_order = 1
   [../]

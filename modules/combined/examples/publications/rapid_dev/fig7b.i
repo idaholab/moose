@@ -160,7 +160,7 @@
   [./mask]
     type = ParsedMaterial
     property_name = mask
-    function = grad/dt
+    expression = grad/dt
     material_property_names = 'grad dt'
   [../]
   [./grad]
@@ -207,14 +207,14 @@
   [./chemical_free_energy_1]
     type = DerivativeParsedMaterial
     property_name = Fc1
-    function = 'c^2'
+    expression = 'c^2'
     variable_names = 'c'
     derivative_order = 2
   [../]
   [./chemical_free_energy_2]
     type = DerivativeParsedMaterial
     property_name = Fc2
-    function = '(1-c)^2'
+    expression = '(1-c)^2'
     variable_names = 'c'
     derivative_order = 2
   [../]

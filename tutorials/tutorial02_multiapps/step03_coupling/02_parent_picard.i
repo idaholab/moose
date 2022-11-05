@@ -51,7 +51,7 @@
     type = ParsedMaterial
     property_name = D
     coupled_variables = 'vt'
-    function = 'vt'
+    expression = 'vt'
   []
 []
 

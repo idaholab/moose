@@ -153,13 +153,13 @@
     block = 0
     property_name = mu_prop
     variable_names = c
-    function = 'c'
+    expression = 'c'
     derivative_order = 1
   [../]
   [./var_dependence]
     type = DerivativeParsedMaterial
     block = 0
-    function = 'c*(1.0-c)'
+    expression = 'c*(1.0-c)'
     variable_names = c
     property_name = var_dep
     derivative_order = 1
@@ -203,7 +203,7 @@
   [./gb_relax_prefactor]
     type = DerivativeParsedMaterial
     block = 0
-    function = '0.01*(c-0.15)*gb'
+    expression = '0.01*(c-0.15)*gb'
     variable_names = 'c gb'
     property_name = gb_relax_prefactor
     derivative_order = 1

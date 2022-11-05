@@ -244,14 +244,14 @@
     type = DerivativeParsedMaterial
     block = 0
     property_name = Fa
-    function = c^2
+    expression = c^2
     variable_names = c
   [../]
   [./Fb]
     type = DerivativeParsedMaterial
     block = 0
     property_name = Fb
-    function = (1-c)^3
+    expression = (1-c)^3
     variable_names = c
   [../]
   [./C]

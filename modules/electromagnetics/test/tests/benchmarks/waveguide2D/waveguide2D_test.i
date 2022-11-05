@@ -128,7 +128,7 @@
   [kSquared]
     type = ADParsedMaterial
     property_name = kSquared
-    function = '0.4188790204786391^2'
+    expression = '0.4188790204786391^2'
   []
 []
 

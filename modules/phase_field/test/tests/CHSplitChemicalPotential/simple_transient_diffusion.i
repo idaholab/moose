@@ -38,12 +38,12 @@
     type = DerivativeParsedMaterial
     property_name = mu_prop
     variable_names = c
-    function = 'c'
+    expression = 'c'
     derivative_order = 1
   [../]
   [./var_dependence]
     type = DerivativeParsedMaterial
-    function = '0.1'
+    expression = '0.1'
     variable_names = c
     property_name = var_dep
     derivative_order = 1

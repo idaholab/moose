@@ -46,7 +46,7 @@
   [./consts]
     type = DerivativeParsedMaterial
     f_name  = L
-    function = 'if(op<0, 0.01, if(op>1, 0.01, 1*op^2*(1-op)^2+0.01))'
+    expression = 'if(op<0, 0.01, if(op>1, 0.01, 1*op^2*(1-op)^2+0.01))'
     variable_names = 'op'
     outputs = exodus
     output_properties = 'L dL/dop dL/dv'
@@ -56,7 +56,7 @@
     type = DerivativeParsedMaterial
     property_name = F
     variable_names = 'op'
-    function = '2*op^2*(1-op)^2 - 0.2*op'
+    expression = '2*op^2*(1-op)^2 - 0.2*op'
     derivative_order = 2
   [../]
 []

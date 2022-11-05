@@ -65,7 +65,7 @@
     variable_names = 'c1 c2'
     constant_names       = 'T    kB'
     constant_expressions = '400  .000086173324'
-    function = 'c1^2+100*T*kB*(c2-0.5)^3+c1^4*c2^5'
+    expression = 'c1^2+100*T*kB*(c2-0.5)^3+c1^4*c2^5'
     outputs = exodus
   [../]
 []

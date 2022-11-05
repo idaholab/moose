@@ -33,7 +33,7 @@
     type = ADDerivativeParsedMaterial
     property_name = F
     material_property_names = 'time'
-    function = 'if (time < 1.9, 1, log(-1))'
+    expression = 'if (time < 1.9, 1, log(-1))'
     disable_fpoptimizer = true
     evalerror_behavior = nan
   [../]

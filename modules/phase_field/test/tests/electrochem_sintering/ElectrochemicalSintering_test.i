@@ -142,7 +142,7 @@
     variable_names = 'T'
     constant_names = 'a b Va'
     constant_expressions = '-0.0017 140.44 0.03726'
-    function = '(a*T + b) * Va^2'
+    expression = '(a*T + b) * Va^2'
   []
   [ks_an]
     type = ParsedMaterial
@@ -150,19 +150,19 @@
     variable_names = 'T'
     constant_names = 'a b Va'
     constant_expressions = '-0.0017 140.44 0.03726'
-    function = '(a*T + b) * Va^2'
+    expression = '(a*T + b) * Va^2'
   []
   [kv_cat]
     type = ParsedMaterial
     property_name = kv_cat
     material_property_names = 'ks_cat'
-    function = '10*ks_cat'
+    expression = '10*ks_cat'
   []
   [kv_an]
     type = ParsedMaterial
     property_name = kv_an
     material_property_names = 'ks_cat'
-    function = '10*ks_cat'
+    expression = '10*ks_cat'
   []
   # Diffusivity and mobilities
   [chiDy]
@@ -209,7 +209,7 @@
     constant_names = 'Ef_B Ef_GB   kB          Va_Y'
     constant_expressions = '4.37 4.37    8.617343e-5 0.03726'
     derivative_order = 2
-    function = 'bnds:=gr0^2 + gr1^2; Ef:=Ef_B + 4.0 * (Ef_GB - Ef_B) * (1.0 - bnds)^2;
+    expression = 'bnds:=gr0^2 + gr1^2; Ef:=Ef_B + 4.0 * (Ef_GB - Ef_B) * (1.0 - bnds)^2;
               '
                '  exp(-Ef/kB/T) / Va_Y'
   []
@@ -220,7 +220,7 @@
     constant_names = 'Ef_B Ef_GB  kB          Va_O'
     constant_expressions = '4.37 4.37   8.617343e-5 0.02484'
     derivative_order = 2
-    function = 'bnds:=gr0^2 + gr1^2; Ef:=Ef_B + 4.0 * (Ef_GB - Ef_B) * (1.0 - bnds)^2;
+    expression = 'bnds:=gr0^2 + gr1^2; Ef:=Ef_B + 4.0 * (Ef_GB - Ef_B) * (1.0 - bnds)^2;
               '
                '  exp(-Ef/kB/T) / Va_O'
   []
@@ -280,7 +280,7 @@
     constant_names = 'eps_rel_solid   eps_void_over_e'
     constant_expressions = '30              5.52e-2' #eps_void_over_e in 1/V/nm
     derivative_order = 2
-    function = '-hs * eps_rel_solid * eps_void_over_e - hv * eps_void_over_e'
+    expression = '-hs * eps_rel_solid * eps_void_over_e - hv * eps_void_over_e'
   []
   [void_pre]
     type = DerivativeParsedMaterial
@@ -289,7 +289,7 @@
     constant_names = 'Z_cat   Z_an nv_y_min nv_o_min'
     constant_expressions = '-3      2    26.837   40.256'
     derivative_order = 2
-    function = '-hv * (Z_cat * nv_y_min + Z_an * nv_o_min)'
+    expression = '-hv * (Z_cat * nv_y_min + Z_an * nv_o_min)'
   []
   [cat_mu_pre]
     type = DerivativeParsedMaterial
@@ -298,7 +298,7 @@
     constant_names = 'Z_cat'
     constant_expressions = '-3'
     derivative_order = 2
-    function = '-hv * Z_cat / kv_cat'
+    expression = '-hv * Z_cat / kv_cat'
   []
   [an_mu_pre]
     type = DerivativeParsedMaterial
@@ -307,7 +307,7 @@
     constant_names = 'Z_an'
     constant_expressions = '2'
     derivative_order = 2
-    function = '-hv * Z_an / kv_an'
+    expression = '-hv * Z_an / kv_an'
   []
   [cat_V_pre]
     type = DerivativeParsedMaterial
@@ -316,7 +316,7 @@
     constant_names = 'Z_cat   v_scale e '
     constant_expressions = '-3      1       1'
     derivative_order = 2
-    function = 'hv * Z_cat^2 * e * v_scale / kv_cat'
+    expression = 'hv * Z_cat^2 * e * v_scale / kv_cat'
   []
   [an_V_pre]
     type = DerivativeParsedMaterial
@@ -325,7 +325,7 @@
     constant_names = 'Z_an    v_scale e '
     constant_expressions = '2       1       1'
     derivative_order = 2
-    function = 'hv * Z_an^2 * e * v_scale / kv_an'
+    expression = 'hv * Z_an^2 * e * v_scale / kv_an'
   []
 []
 

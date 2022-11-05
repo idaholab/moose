@@ -120,7 +120,7 @@
     property_name = F_BCC_A2
     outputs = exodus
     output_properties = F_BCC_A2
-    function = 'BCC_FE:=1-BCC_CR; G := 8.3145*T*(1.0*if(BCC_CR > 1.0e-15,BCC_CR*log(BCC_CR),0) + '
+    expression = 'BCC_FE:=1-BCC_CR; G := 8.3145*T*(1.0*if(BCC_CR > 1.0e-15,BCC_CR*log(BCC_CR),0) + '
                '1.0*if(BCC_FE > 1.0e-15,BCC_FE*plog(BCC_FE,eps),0) + 3.0*if(BCC_VA > '
                '1.0e-15,BCC_VA*log(BCC_VA),0))/(BCC_CR + BCC_FE) + 8.3145*T*if(T < '
                '548.2*BCC_CR*BCC_FE*BCC_VA*(BCC_CR - BCC_FE) - 932.5*BCC_CR*BCC_FE*BCC_VA + '
@@ -195,7 +195,7 @@
     property_name = F_SIGMA
     outputs = exodus
     output_properties = F_SIGMA
-    function = 'SIGMA_0FE := 1-SIGMA_0CR; SIGMA_1FE := 1-SIGMA_1CR; SIGMA_2FE := 1-SIGMA_2CR; G := '
+    expression = 'SIGMA_0FE := 1-SIGMA_0CR; SIGMA_1FE := 1-SIGMA_1CR; SIGMA_2FE := 1-SIGMA_2CR; G := '
                '8.3145*T*(10.0*if(SIGMA_0CR > 1.0e-15,SIGMA_0CR*plog(SIGMA_0CR,eps),0) + '
                '10.0*if(SIGMA_0FE > 1.0e-15,SIGMA_0FE*plog(SIGMA_0FE,eps),0) + 4.0*if(SIGMA_1CR > '
                '1.0e-15,SIGMA_1CR*plog(SIGMA_1CR,eps),0) + 4.0*if(SIGMA_1FE > '
@@ -295,7 +295,7 @@
   [Dh1]
     type = DerivativeParsedMaterial
     material_property_names = 'D h1(eta1)'
-    function = D*h1
+    expression = D*h1
     property_name = Dh1
     variable_names = eta1
     derivative_order = 1
@@ -303,7 +303,7 @@
   [Dh2a]
     type = DerivativeParsedMaterial
     material_property_names = 'D h2(eta2)'
-    function = D*h2*10/30
+    expression = D*h2*10/30
     property_name = Dh2a
     variable_names = eta2
     derivative_order = 1
@@ -311,7 +311,7 @@
   [Dh2b]
     type = DerivativeParsedMaterial
     material_property_names = 'D h2(eta2)'
-    function = D*h2*4/30
+    expression = D*h2*4/30
     property_name = Dh2b
     variable_names = eta2
     derivative_order = 1
@@ -319,7 +319,7 @@
   [Dh2c]
     type = DerivativeParsedMaterial
     material_property_names = 'D h2(eta2)'
-    function = D*h2*16/30
+    expression = D*h2*16/30
     property_name = Dh2c
     variable_names = eta2
     derivative_order = 1

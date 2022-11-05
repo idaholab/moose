@@ -107,13 +107,13 @@
   [../]
   [./weight1]
     type = DerivativeParsedMaterial
-    function = 0.02*c^2
+    expression = 0.02*c^2
     property_name = weight1
     variable_names = c
   [../]
   [./weight2]
     type = DerivativeParsedMaterial
-    function = 0.02*(1-c)^2
+    expression = 0.02*(1-c)^2
     property_name = weight2
     variable_names = c
   [../]

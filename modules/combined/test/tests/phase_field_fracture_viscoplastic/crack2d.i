@@ -139,13 +139,13 @@
     type = ParsedMaterial
     material_property_names = 'gc_prop visco'
     property_name = L
-    function = '1/(gc_prop * visco)'
+    expression = '1/(gc_prop * visco)'
   [../]
   [./define_kappa]
     type = ParsedMaterial
     material_property_names = 'gc_prop l'
     property_name = kappa_op
-    function = 'gc_prop * l'
+    expression = 'gc_prop * l'
   [../]
   [./viscop_damage]
     type = HyperElasticPhaseFieldIsoDamage

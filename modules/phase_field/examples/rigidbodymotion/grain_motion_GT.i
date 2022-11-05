@@ -98,8 +98,8 @@
     #           +eta2*(1-eta2)*c+eta3*(1-eta3)*c'
     constant_names = 'A B'
     constant_expressions = '450 1.5'
-    variable_names = 'c eta0 eta1 eta2 eta3' #Must be changed as op_num changes. Copy/paste from line 4
-    function = 'A*c^2*(1-c)^2+B*(c^2+6*(1-c)*(eta0^2+eta1^2+eta2^2+eta3^2)
+    coupled_variables = 'c eta0 eta1 eta2 eta3' #Must be changed as op_num changes. Copy/paste from line 4
+    expression = 'A*c^2*(1-c)^2+B*(c^2+6*(1-c)*(eta0^2+eta1^2+eta2^2+eta3^2)
                 -4*(2-c)*(eta0^3+eta1^3+eta2^3+eta3^3)
                 +3*(eta0^2+eta1^2+eta2^2+eta3^2)^2)'
     derivative_order = 2

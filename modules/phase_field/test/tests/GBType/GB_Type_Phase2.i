@@ -230,7 +230,7 @@
     coupled_variables = 'bnds'
     constant_names =       'bnds_middle width tanh_cst_x2'
     constant_expressions = '0.75         0.0596 2.1972245773362196'
-    function = '1-0.5*(1.0+tanh(tanh_cst_x2*(bnds-bnds_middle)/width))'
+    expression = '1-0.5*(1.0+tanh(tanh_cst_x2*(bnds-bnds_middle)/width))'
     property_name = 'hgb'
     outputs = exodus
   [../]
@@ -239,7 +239,7 @@
     coupled_variables = 'bnds_LAGB'
     constant_names =       'bnds_middle width tanh_cst_x2'
     constant_expressions = '0.75         0.0596 2.1972245773362196'
-    function = '1-0.5*(1.0+tanh(tanh_cst_x2*(bnds_LAGB-bnds_middle)/width))'
+    expression = '1-0.5*(1.0+tanh(tanh_cst_x2*(bnds_LAGB-bnds_middle)/width))'
     property_name = 'hgb_lagb'
     outputs = exodus
   [../]
@@ -248,7 +248,7 @@
     coupled_variables = 'bnds_HAGB'
     constant_names =       'bnds_middle width tanh_cst_x2'
     constant_expressions = '0.75         0.0596 2.1972245773362196'
-    function = '1-0.5*(1.0+tanh(tanh_cst_x2*(bnds_HAGB-bnds_middle)/width))'
+    expression = '1-0.5*(1.0+tanh(tanh_cst_x2*(bnds_HAGB-bnds_middle)/width))'
     property_name = 'hgb_hagb'
     outputs = exodus
   [../]
@@ -267,7 +267,7 @@
     property_name = 'D_Scaling'
     coupled_variables = 'bnds'
     material_property_names = 'Db Dgbh Dgbl hgb_lagb(bnds_LAGB) hgb_hagb(bnds_HAGB) hgb(bnds)'
-    function = '(1-hgb)*Db+hgb*hgb_lagb/(hgb_lagb+hgb_hagb)*Dgbl+hgb*hgb_hagb/(hgb_lagb+hgb_hagb)*Dgbh'
+    expression = '(1-hgb)*Db+hgb*hgb_lagb/(hgb_lagb+hgb_hagb)*Dgbl+hgb*hgb_hagb/(hgb_lagb+hgb_hagb)*Dgbh'
     outputs = exodus
     derivative_order = 2
   [../]

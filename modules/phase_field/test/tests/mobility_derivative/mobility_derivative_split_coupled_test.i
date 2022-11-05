@@ -86,7 +86,7 @@
     type = DerivativeParsedMaterial
     property_name = M
     variable_names = 'c d'
-    function = 'if(d>0.001,d,0.001)*(1-0.5*c^2)'
+    expression = 'if(d>0.001,d,0.001)*(1-0.5*c^2)'
     outputs = exodus
     derivative_order = 1
   [../]

@@ -53,7 +53,7 @@
     type = ADDerivativeParsedMaterial
     property_name = Fa
     coupled_variables = 'c'
-    function = 'c^4'
+    expression = 'c^4'
   [../]
   [./sum_a_2]
     type = ADDerivativeSumMaterial
@@ -75,7 +75,7 @@
     type = ADDerivativeParsedMaterial
     property_name = Fb
     coupled_variables = 'c'
-    function = 'c^4'
+    expression = 'c^4'
   [../]
 
   # derivatives declared before being used
@@ -83,7 +83,7 @@
     type = ADDerivativeParsedMaterial
     property_name = Fc
     coupled_variables = 'c'
-    function = 'c^4'
+    expression = 'c^4'
   [../]
   [./sum_c_2]
     type = ADDerivativeSumMaterial
@@ -98,7 +98,7 @@
     type = ADParsedMaterial
     property_name = Fd
     coupled_variables = 'c'
-    function = 'c^4'
+    expression = 'c^4'
   [../]
   [./sum_d_1]
     type = ADDerivativeSumMaterial

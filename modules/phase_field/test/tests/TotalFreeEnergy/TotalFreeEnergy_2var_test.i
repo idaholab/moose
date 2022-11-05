@@ -113,7 +113,7 @@
     type = DerivativeParsedMaterial
     variable_names = 'gr0 gr1'
     material_property_names = 'mu gamma_asymm'
-    function = 'mu*( gr0^4/4.0 - gr0^2/2.0 + gr1^4/4.0 - gr1^2/2.0 + gamma_asymm*gr0^2*gr1^2) + 1.0/4.0'
+    expression = 'mu*( gr0^4/4.0 - gr0^2/2.0 + gr1^4/4.0 - gr1^2/2.0 + gamma_asymm*gr0^2*gr1^2) + 1.0/4.0'
     derivative_order = 2
     enable_jit = true
   [../]

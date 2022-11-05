@@ -95,13 +95,13 @@
     variable_names = 'T'
     constant_names = 'a b'
     constant_expressions = '-0.0025 157.16'
-    function = 'a*T + b'
+    expression = 'a*T + b'
   [../]
   [./kv]
     type = ParsedMaterial
     property_name = kv
     material_property_names = 'ks'
-    function = '10 * ks'
+    expression = '10 * ks'
   [../]
   # Diffusivity and mobilities
   [./chiD]
@@ -128,7 +128,7 @@
     variable_names = 'gr0 gr1 T'
     constant_names = 'Ef Egb kB'
     constant_expressions = '2.69 2.1 8.617343e-5'
-    function = 'bnds:=gr0^2 + gr1^2; cb:=exp(-Ef/kB/T); cgb:=exp(-(Ef-Egb)/kB/T);
+    expression = 'bnds:=gr0^2 + gr1^2; cb:=exp(-Ef/kB/T); cgb:=exp(-(Ef-Egb)/kB/T);
                 cb + 4.0*(cgb-cb)*(1.0 - bnds)^2'
   [../]
   # Everything else
@@ -152,7 +152,7 @@
     material_property_names = 'hs rhos hv rhov'
     constant_names = 'Va'
     constant_expressions = '0.04092'
-    function = 'Va*(hs*rhos + hv*rhov)'
+    expression = 'Va*(hs*rhos + hv*rhov)'
     outputs = exodus
   [../]
 []

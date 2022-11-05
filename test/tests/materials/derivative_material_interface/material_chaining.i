@@ -54,7 +54,7 @@
     type = DerivativeParsedMaterial
     property_name= T1
     coupled_variables = 'eta1'
-    function = '(eta1+1)^4'
+    expression = '(eta1+1)^4'
     derivative_order = 4
   [../]
 
@@ -63,14 +63,14 @@
     type = DerivativeParsedMaterial
     coupled_variables = 'eta1 eta2'
     property_name = F1
-    function = '(1-eta2)^4+(eta1+1)^4'
+    expression = '(1-eta2)^4+(eta1+1)^4'
   [../]
   # in this material we utilize the T1 derivative material property
   [./subs]
     type = DerivativeParsedMaterial
     coupled_variables = 'eta1 eta2'
     property_name = F2
-    function = '(1-eta2)^4+T1'
+    expression = '(1-eta2)^4+T1'
     material_property_names = 'T1(eta1)'
   [../]
 
@@ -81,19 +81,19 @@
   [./diff0]
     type = ParsedMaterial
     property_name = D0
-    function = '(F1-F2)^2'
+    expression = '(F1-F2)^2'
     material_property_names = 'F1 F2'
   [../]
   [./diff1]
     type = ParsedMaterial
     property_name = D1
-    function = '(dF1-dF2)^2'
+    expression = '(dF1-dF2)^2'
     material_property_names = 'dF1:=D[F1,eta1] dF2:=D[F2,eta1]'
   [../]
   [./diff2]
     type = ParsedMaterial
     property_name = D2
-    function = '(d2F1-d2F2)^2'
+    expression = '(d2F1-d2F2)^2'
     material_property_names = 'd2F1:=D[F1,eta1,eta1] d2F2:=D[F2,eta1,eta1]'
   [../]
 
@@ -103,7 +103,7 @@
   [./diff3]
     type = ParsedMaterial
     property_name = E0
-    function = '(dTd1-(4*(eta1+1)^3))^2'
+    expression = '(dTd1-(4*(eta1+1)^3))^2'
     coupled_variables = eta1
     material_property_names = 'dTd1:=D[T1,eta1]'
   [../]

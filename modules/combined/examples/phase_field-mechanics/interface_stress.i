@@ -43,7 +43,7 @@
   [./ym]
     type = DerivativeParsedMaterial
     property_name = ym
-    function = (1-eta)*7+0.5
+    expression = (1-eta)*7+0.5
     variable_names = eta
   [../]
   [./elasticity]

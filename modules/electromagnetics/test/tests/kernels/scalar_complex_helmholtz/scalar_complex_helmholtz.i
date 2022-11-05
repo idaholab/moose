@@ -94,7 +94,7 @@
     type = ADParsedMaterial
     property_name = negative_wave_equation_coefficient_imaginary
     material_property_names = wave_equation_coefficient_imaginary
-    function = '-1 * wave_equation_coefficient_imaginary'
+    expression = '-1 * wave_equation_coefficient_imaginary'
   []
 []
 

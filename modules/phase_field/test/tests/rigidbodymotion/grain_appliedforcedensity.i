@@ -87,7 +87,7 @@
     variable_names = c
     constant_names = 'barr_height  cv_eq'
     constant_expressions = '0.1          1.0e-2'
-    function = 16*barr_height*(c-cv_eq)^2*(1-cv_eq-c)^2
+    expression = 16*barr_height*(c-cv_eq)^2*(1-cv_eq-c)^2
     derivative_order = 2
   [../]
   [./force_density_ext]

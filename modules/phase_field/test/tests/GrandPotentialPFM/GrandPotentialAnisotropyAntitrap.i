@@ -189,28 +189,28 @@
     variable_names = 'w'
     property_name = omegaa
     material_property_names = 'Vm ka caeq'
-    function = '-0.5*w^2/Vm^2/ka-w/Vm*caeq'
+    expression = '-0.5*w^2/Vm^2/ka-w/Vm*caeq'
   [../]
   [./omegab]
     type = DerivativeParsedMaterial
     variable_names = 'w'
     property_name = omegab
     material_property_names = 'Vm kb cbeq'
-    function = '-0.5*w^2/Vm^2/kb-w/Vm*cbeq'
+    expression = '-0.5*w^2/Vm^2/kb-w/Vm*cbeq'
   [../]
   [./rhoa]
     type = DerivativeParsedMaterial
     variable_names = 'w'
     property_name = rhoa
     material_property_names = 'Vm ka caeq'
-    function = 'w/Vm^2/ka + caeq/Vm'
+    expression = 'w/Vm^2/ka + caeq/Vm'
   [../]
   [./rhob]
     type = DerivativeParsedMaterial
     variable_names = 'w'
     property_name = rhob
     material_property_names = 'Vm kb cbeq'
-    function = 'w/Vm^2/kb + cbeq/Vm'
+    expression = 'w/Vm^2/kb + cbeq/Vm'
   [../]
   [./int]
     type = DerivativeParsedMaterial
@@ -219,7 +219,7 @@
     material_property_names = 'rhoa rhob'
     constant_names = 'int_width'
     constant_expressions = '0.8'
-    function = 'int_width*(rhob-rhoa)'
+    expression = 'int_width*(rhob-rhoa)'
   [../]
   [./kappaa]
     type = InterfaceOrientationMultiphaseMaterial
@@ -246,7 +246,7 @@
     type = ParsedMaterial
     property_name = Dchi
     material_property_names = 'D chi'
-    function = 'D*chi'
+    expression = 'D*chi'
   [../]
 []
 

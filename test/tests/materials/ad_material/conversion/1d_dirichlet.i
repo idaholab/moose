@@ -50,7 +50,7 @@
   [ad_coef]
     type = ADParsedMaterial
     property_name = 'ad_coef'
-    function = '0.01 * max(v, 1)'
+    expression = '0.01 * max(v, 1)'
     coupled_variables = 'v'
   []
   [converter_to_regular]

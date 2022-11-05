@@ -157,7 +157,7 @@
     constant_names = 'A B'
     constant_expressions = '450 1.5'
     variable_names = 'c gr0 gr1 gr2 gr3' #Must be changed as op_num changes. Copy/paste from line 4
-    function = 'A*c^2*(1-c)^2+B*(c^2+6*(1-c)*(gr0^2+gr1^2+gr2^2+gr3^2)
+    expression = 'A*c^2*(1-c)^2+B*(c^2+6*(1-c)*(gr0^2+gr1^2+gr2^2+gr3^2)
                 -4*(2-c)*(gr0^3+gr1^3+gr2^3+gr3^3)
                 +3*(gr0^2+gr1^2+gr2^2+gr3^2)^2)'
                                  #Copy/paste from lines 5-6

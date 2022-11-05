@@ -255,7 +255,7 @@
     property_name = fm
     variable_names = 'cvm cgm'
     material_property_names = 'kvmatrix kgmatrix cvmatrixeq cgmatrixeq'
-    function = '0.5*kvmatrix*(cvm-cvmatrixeq)^2 + 0.5*kgmatrix*(cgm-cgmatrixeq)^2'
+    expression = '0.5*kvmatrix*(cvm-cvmatrixeq)^2 + 0.5*kgmatrix*(cgm-cgmatrixeq)^2'
   [../]
 # Elastic energy of the matrix
   [./elastic_free_energy_m]
@@ -278,7 +278,7 @@
     property_name = fb
     variable_names = 'cvb cgb'
     material_property_names = 'kToverV nQ Va b f0 kpen kgbub kvbub cvbubeq cgbubeq'
-    function = '0.5*kgbub*(cvb-cvbubeq)^2 + 0.5*kvbub*(cgb-cgbubeq)^2'
+    expression = '0.5*kgbub*(cvb-cvbubeq)^2 + 0.5*kvbub*(cgb-cgbubeq)^2'
   [../]
 
 # Elastic energy of the bubble
@@ -324,7 +324,7 @@
     material_property_names = 'T'
     constant_names        = 'kB           Efv'
     constant_expressions  = '8.6173324e-5 1.69'
-    function = 'exp(-Efv/(kB*T))'
+    expression = 'exp(-Efv/(kB*T))'
   [../]
   [./cgmatrixeq]
     type = ParsedMaterial
@@ -332,7 +332,7 @@
     material_property_names = 'T'
     constant_names        = 'kB           Efg'
     constant_expressions  = '8.6173324e-5 4.92'
-    function = 'exp(-Efg/(kB*T))'
+    expression = 'exp(-Efg/(kB*T))'
   [../]
   [./kToverV]
     type = ParsedMaterial
@@ -340,7 +340,7 @@
     material_property_names = 'T Va'
     constant_names        = 'k          C44dim' #k in J/K and dimensional C44 in J/m^3
     constant_expressions  = '1.38e-23   63e9'
-    function = 'k*T*1e27/Va/C44dim'
+    expression = 'k*T*1e27/Va/C44dim'
   [../]
   [./nQ]
     type = ParsedMaterial
@@ -348,7 +348,7 @@
     material_property_names = 'T'
     constant_names        = 'k          Pi      M         hbar' #k in J/K, M is Xe atomic mass in kg, hbar in J s
     constant_expressions  = '1.38e-23   3.14159 2.18e-25  1.05459e-34'
-    function = '(M*k*T/2/Pi/hbar^2)^1.5 * 1e-27' #1e-27 converts from #/m^3 to #/nm^3
+    expression = '(M*k*T/2/Pi/hbar^2)^1.5 * 1e-27' #1e-27 converts from #/m^3 to #/nm^3
   [../]
 
   #Mechanical properties

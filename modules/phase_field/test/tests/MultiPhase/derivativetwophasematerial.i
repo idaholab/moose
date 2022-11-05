@@ -116,7 +116,7 @@
     type = DerivativeParsedMaterial
     property_name = Fa
     variable_names = 'c'
-    function = '(c-0.1)^2*(c-1)^2 + c*0.01'
+    expression = '(c-0.1)^2*(c-1)^2 + c*0.01'
     derivative_order = 2
     enable_jit = true
   [../]
@@ -124,7 +124,7 @@
     type = DerivativeParsedMaterial
     property_name = Fb
     variable_names = 'c'
-    function = 'c^2*(c-0.9)^2 + (1-c)*0.01'
+    expression = 'c^2*(c-0.9)^2 + (1-c)*0.01'
     derivative_order = 2
     enable_jit = true
   [../]

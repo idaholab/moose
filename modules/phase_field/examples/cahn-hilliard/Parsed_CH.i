@@ -72,7 +72,7 @@
     variable_names = c
     constant_names = W
     constant_expressions = 1.0/2^2
-    function = W*(1-c)^2*(1+c)^2
+    expression = W*(1-c)^2*(1+c)^2
     enable_jit = true
   [../]
 []

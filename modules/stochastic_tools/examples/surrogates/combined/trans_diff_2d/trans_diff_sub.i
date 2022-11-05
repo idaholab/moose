@@ -57,7 +57,7 @@
     variable_names = 'T'
     constant_names = 'C'
     constant_expressions = 0.02
-    function = 'C * pow(300/T, 2)'
+    expression = 'C * pow(300/T, 2)'
   []
 []
 

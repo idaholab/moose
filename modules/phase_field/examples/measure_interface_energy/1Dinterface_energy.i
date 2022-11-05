@@ -86,7 +86,7 @@
   [./Free_energy]
     type = DerivativeParsedMaterial
     property_name = F
-    function = 'c^2*(c-1)^2'
+    expression = 'c^2*(c-1)^2'
     variable_names = c
     derivative_order = 2
   [../]

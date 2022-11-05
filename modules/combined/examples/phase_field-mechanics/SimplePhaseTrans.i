@@ -77,7 +77,7 @@
     variable_names = 'eta'
     constant_names = 'A2 A3 A4'
     constant_expressions = '0.2 -12.6 12.4'
-    function = A2/2*eta^2+A3/3*eta^3+A4/4*eta^4
+    expression = A2/2*eta^2+A3/3*eta^3+A4/4*eta^4
     enable_jit = true
     derivative_order = 2
   [../]
@@ -94,7 +94,7 @@
 
   [./var_dependence]
     type = DerivativeParsedMaterial
-    function = eta
+    expression = eta
     variable_names = 'eta'
     property_name = var_dep
     enable_jit = true

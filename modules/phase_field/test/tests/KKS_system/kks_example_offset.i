@@ -97,7 +97,7 @@
     type = DerivativeParsedMaterial
     property_name = fm
     variable_names = 'cm'
-    function = '(0.1-cm)^2'
+    expression = '(0.1-cm)^2'
   [../]
 
   # Free energy of the delta phase
@@ -105,7 +105,7 @@
     type = DerivativeParsedMaterial
     property_name = fd
     variable_names = 'cd'
-    function = '(0.9-cd)^2+0.5'
+    expression = '(0.9-cd)^2+0.5'
   [../]
 
   # h(eta)

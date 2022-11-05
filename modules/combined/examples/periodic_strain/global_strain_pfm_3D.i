@@ -269,19 +269,19 @@
 
   [./weight1]
     type = DerivativeParsedMaterial
-    function = '0.3*c^2'
+    expression = '0.3*c^2'
     property_name = weight1
     variable_names = c
   [../]
   [./weight2]
     type = DerivativeParsedMaterial
-    function = '0.3*(1-c)^2'
+    expression = '0.3*(1-c)^2'
     property_name = weight2
     variable_names = c
   [../]
   [./weight3]
     type = DerivativeParsedMaterial
-    function = '4*(0.5-c)^2'
+    expression = '4*(0.5-c)^2'
     property_name = weight3
     variable_names = c
   [../]
@@ -319,7 +319,7 @@
   [./chemical_free_energy]
     type = DerivativeParsedMaterial
     property_name = Fc
-    function = '4*c^2*(1-c)^2'
+    expression = '4*c^2*(1-c)^2'
     variable_names = 'c'
     outputs = exodus
     output_properties = Fc

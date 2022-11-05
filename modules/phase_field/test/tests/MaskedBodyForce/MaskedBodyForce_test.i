@@ -54,7 +54,7 @@
 [Materials]
   [./mask]
     type = ParsedMaterial
-    function = if(c>0.5,0,1)
+    expression = if(c>0.5,0,1)
     property_name = mask
     variable_names = c
   [../]

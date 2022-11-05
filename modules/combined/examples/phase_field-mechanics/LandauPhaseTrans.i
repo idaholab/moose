@@ -93,7 +93,7 @@
     variable_names = 'eta1 eta2'
     constant_names = 'A2 A3 A4'
     constant_expressions = '0.2 -12.6 12.4'
-    function = 'A2/2*(eta1^2+eta2^2) + A3/3*(eta1^3+eta2^3) + A4/4*(eta1^2+eta2^2)^2'
+    expression = 'A2/2*(eta1^2+eta2^2) + A3/3*(eta1^3+eta2^3) + A4/4*(eta1^2+eta2^2)^2'
     enable_jit = true
     derivative_order = 2
   [../]
@@ -112,7 +112,7 @@
     type = DerivativeParsedMaterial
     property_name = var_dep1
     variable_names = 'eta1'
-    function = eta1
+    expression = eta1
     enable_jit = true
     derivative_order = 2
   [../]
@@ -120,7 +120,7 @@
     type = DerivativeParsedMaterial
     property_name = var_dep2
     variable_names = 'eta2'
-    function = eta2
+    expression = eta2
     enable_jit = true
     derivative_order = 2
   [../]

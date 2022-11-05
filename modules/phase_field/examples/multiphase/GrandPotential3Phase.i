@@ -193,7 +193,7 @@
     variable_names = 'w'
     property_name = omegaa
     material_property_names = 'Vm ka caeq'
-    function = '-0.5*w^2/Vm^2/ka-w/Vm*caeq'
+    expression = '-0.5*w^2/Vm^2/ka-w/Vm*caeq'
     derivative_order = 2
   [../]
   [./omegab]
@@ -201,7 +201,7 @@
     variable_names = 'w'
     property_name = omegab
     material_property_names = 'Vm kb cbeq'
-    function = '-0.5*w^2/Vm^2/kb-w/Vm*cbeq'
+    expression = '-0.5*w^2/Vm^2/kb-w/Vm*cbeq'
     derivative_order = 2
   [../]
   [./omegad]
@@ -209,7 +209,7 @@
     variable_names = 'w'
     property_name = omegad
     material_property_names = 'Vm kd cdeq'
-    function = '-0.5*w^2/Vm^2/kd-w/Vm*cdeq'
+    expression = '-0.5*w^2/Vm^2/kd-w/Vm*cdeq'
     derivative_order = 2
   [../]
   [./rhoa]
@@ -217,7 +217,7 @@
     variable_names = 'w'
     property_name = rhoa
     material_property_names = 'Vm ka caeq'
-    function = 'w/Vm^2/ka + caeq/Vm'
+    expression = 'w/Vm^2/ka + caeq/Vm'
     derivative_order = 2
   [../]
   [./rhob]
@@ -225,7 +225,7 @@
     variable_names = 'w'
     property_name = rhob
     material_property_names = 'Vm kb cbeq'
-    function = 'w/Vm^2/kb + cbeq/Vm'
+    expression = 'w/Vm^2/kb + cbeq/Vm'
     derivative_order = 2
   [../]
   [./rhod]
@@ -233,13 +233,13 @@
     variable_names = 'w'
     property_name = rhod
     material_property_names = 'Vm kd cdeq'
-    function = 'w/Vm^2/kd + cdeq/Vm'
+    expression = 'w/Vm^2/kd + cdeq/Vm'
     derivative_order = 2
   [../]
   [./c]
     type = ParsedMaterial
     material_property_names = 'Vm rhoa rhob rhod ha hb hd'
-    function = 'Vm * (ha * rhoa + hb * rhob + hd * rhod)'
+    expression = 'Vm * (ha * rhoa + hb * rhob + hd * rhod)'
     property_name = c
   [../]
   [./const]
@@ -251,14 +251,14 @@
     type = DerivativeParsedMaterial
     property_name = Dchi
     material_property_names = 'D chi'
-    function = 'D*chi'
+    expression = 'D*chi'
     derivative_order = 2
   [../]
   [./chi]
     type = DerivativeParsedMaterial
     property_name = chi
     material_property_names = 'Vm ha(etaa0,etab0,etad0) ka hb(etaa0,etab0,etad0) kb hd(etaa0,etab0,etad0) kd'
-    function = '(ha/ka + hb/kb + hd/kd) / Vm^2'
+    expression = '(ha/ka + hb/kb + hd/kd) / Vm^2'
     variable_names = 'etaa0 etab0 etad0'
     derivative_order = 2
   [../]

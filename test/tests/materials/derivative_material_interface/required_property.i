@@ -16,12 +16,12 @@
 [Materials]
   [prime]
     type = DerivativeParsedMaterial
-    function = Q
+    expression = Q
     property_name = P
   []
   [second]
     type = DerivativeParsedMaterial
-    function = c
+    expression = c
     derivative_order = 1
     coupled_variables = c
     property_name = S

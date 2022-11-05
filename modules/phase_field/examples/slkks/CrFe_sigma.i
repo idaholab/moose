@@ -145,7 +145,7 @@
   [F_SIGMA]
     type = DerivativeParsedMaterial
     property_name = F_SIGMA
-    function = 'SIGMA_0FE := 1-SIGMA_0CR;
+    expression = 'SIGMA_0FE := 1-SIGMA_0CR;
                 SIGMA_1FE := 1-SIGMA_1CR;
                 '
                'SIGMA_2FE := 1-SIGMA_2CR; 8.3145*T*(10.0*if(SIGMA_0CR > '
@@ -213,7 +213,7 @@
   [F_BCC_A2]
     type = DerivativeParsedMaterial
     property_name = F_BCC_A2
-    function = 'BCC_CR:=cCr; BCC_FE:=1-BCC_CR; 8.3145*T*(1.0*if(BCC_CR > '
+    expression = 'BCC_CR:=cCr; BCC_FE:=1-BCC_CR; 8.3145*T*(1.0*if(BCC_CR > '
                '1.0e-15,BCC_CR*log(BCC_CR),0) + 1.0*if(BCC_FE > 1.0e-15,BCC_FE*log(BCC_FE),0) + '
                '3.0*if(BCC_VA > 1.0e-15,BCC_VA*log(BCC_VA),0))/(BCC_CR + BCC_FE) + 8.3145*T*if(T < '
                '548.2*BCC_CR*BCC_FE*BCC_VA*(BCC_CR - BCC_FE) - 932.5*BCC_CR*BCC_FE*BCC_VA + '

@@ -85,14 +85,14 @@
 
   [./liquid_GrandPotential]
     type = DerivativeParsedMaterial
-    function = '-0.5 * w^2/A - cleq * w'
+    expression = '-0.5 * w^2/A - cleq * w'
     variable_names = 'w'
     property_name = f1
     material_property_names = 'cleq A'
   [../]
   [./solid_GrandPotential]
     type = DerivativeParsedMaterial
-    function = '-0.5 * w^2/A - cseq * w'
+    expression = '-0.5 * w^2/A - cseq * w'
     variable_names = 'w'
     property_name = f2
     material_property_names = 'cseq A'
@@ -111,7 +111,7 @@
     variable_names = 'w'
     property_name = cs
     material_property_names = 'A cseq'
-    function = 'w/A + cseq' # since w = A*(c-cseq)
+    expression = 'w/A + cseq' # since w = A*(c-cseq)
     derivative_order = 2
   [../]
   [./cl]
@@ -119,7 +119,7 @@
     variable_names = 'w'
     property_name = cl
     material_property_names = 'A cleq'
-    function = 'w/A + cleq' # since w = A*(c-cleq)
+    expression = 'w/A + cleq' # since w = A*(c-cleq)
     derivative_order = 2
   [../]
   [./total_GrandPotential]
@@ -133,7 +133,7 @@
   [../]
   [./coupled_eta_function]
     type = DerivativeParsedMaterial
-    function = '(cs - cl) * dh'
+    expression = '(cs - cl) * dh'
     variable_names = 'eta w'
     property_name = ft
     material_property_names = 'cs cl dh:=D[h,eta]'
@@ -145,7 +145,7 @@
     type = ParsedMaterial
     property_name = c
     material_property_names = 'dF:=D[F,w]'
-    function = '-dF'
+    expression = '-dF'
     outputs = exodus
   [../]
 []

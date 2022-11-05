@@ -10,7 +10,7 @@
 [Materials]
   [pp]
     type = ParsedMaterial
-    function = 'time^2'
+    expression = 'time^2'
     postprocessor_names = time
     outputs = exodus
   []

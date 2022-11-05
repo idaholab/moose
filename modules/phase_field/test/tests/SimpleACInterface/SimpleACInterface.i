@@ -67,7 +67,7 @@
     block = 0
     property_name = F
     variable_names = 'eta'
-    function = '2 * eta^2 * (1-eta)^2 - 0.2*eta'
+    expression = '2 * eta^2 * (1-eta)^2 - 0.2*eta'
     derivative_order = 2
   [../]
 []

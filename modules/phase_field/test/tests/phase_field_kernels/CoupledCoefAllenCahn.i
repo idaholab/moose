@@ -73,14 +73,14 @@
     type = DerivativeParsedMaterial
     f_name  = L
     variable_names = 'eta w'
-    function = '(1.5-eta)^2+(1.5-w)^2'
+    expression = '(1.5-eta)^2+(1.5-w)^2'
     derivative_order = 2
   [../]
   [./free_energy]
     type = DerivativeParsedMaterial
     property_name = F
     variable_names = 'eta'
-    function = 'eta^2 * (1-eta)^2'
+    expression = 'eta^2 * (1-eta)^2'
     derivative_order = 2
   [../]
 []

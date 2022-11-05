@@ -75,7 +75,7 @@
 [Materials]
   [./mask]
     type = ParsedMaterial
-    function = 'c'
+    expression = 'c'
     property_name = mask
     variable_names = 'c'
   [../]

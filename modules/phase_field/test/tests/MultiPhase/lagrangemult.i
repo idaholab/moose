@@ -173,7 +173,7 @@
     type = DerivativeParsedMaterial
     property_name = Fa
     variable_names = 'c'
-    function = '(c-0.1)^2'
+    expression = '(c-0.1)^2'
     derivative_order = 2
     enable_jit = true
   [../]
@@ -181,7 +181,7 @@
     type = DerivativeParsedMaterial
     property_name = Fb
     variable_names = 'c'
-    function = '(c-0.9)^2'
+    expression = '(c-0.9)^2'
     derivative_order = 2
     enable_jit = true
   [../]

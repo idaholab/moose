@@ -65,7 +65,7 @@
     type = DerivativeParsedMaterial
     property_name = M
     variable_names = c
-    function = '1-0.9*c^2'
+    expression = '1-0.9*c^2'
     outputs = exodus
     derivative_order = 1
   [../]

@@ -25,7 +25,7 @@
   [./consts]
     type = ParsedMaterial
     coupled_variables  = 'eta'
-    function ='(eta-0.5)^2'
+    expression ='(eta-0.5)^2'
     outputs = exodus
   [../]
 []

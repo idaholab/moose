@@ -58,7 +58,7 @@
   [./F]
     type = DerivativeParsedMaterial
     property_name = F
-    function = 'c^2*(1-c)^2'
+    expression = 'c^2*(1-c)^2'
     variable_names = c
   [../]
 []

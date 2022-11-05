@@ -97,7 +97,7 @@
   [./thcond]
     type = ParsedMaterial
     variable_names = 'c'
-    function = 'if(c>0.7,1e-8,4e-8)'
+    expression = 'if(c>0.7,1e-8,4e-8)'
     property_name = thermal_conductivity
     outputs = exodus
   [../]

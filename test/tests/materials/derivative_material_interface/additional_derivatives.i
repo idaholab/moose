@@ -18,7 +18,7 @@
     type = DerivativeParsedMaterial
     property_name = F
     coupled_variables = 'a'
-    function = '(a*b*d*e)^3'
+    expression = '(a*b*d*e)^3'
     material_property_names = 'b d:=c e'
     derivative_order = 2
     additional_derivative_symbols = 'e d'
