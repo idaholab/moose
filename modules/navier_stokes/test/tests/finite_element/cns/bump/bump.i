@@ -144,15 +144,15 @@
   [rhoe]
     variable = rhoe
     type = ParsedAux
-    function = 'rho_et'
-    variable_names = 'rho_et'
+    expression = 'rho_et'
+    coupled_variables = 'rho_et'
     execute_on = 'initial timestep_end'
   []
   [enthalpy]
     variable = enthalpy
     type = ParsedAux
-    function = 'ht'
-    variable_names = 'ht'
+    expression = 'ht'
+    coupled_variables = 'ht'
     execute_on = 'initial timestep_end'
   []
 []

@@ -85,8 +85,8 @@
   []
   [should_be_static]
     type = ParsedAux
-    variable_names = 'mineral a'
-    function = 'a + mineral / 0.1'
+    coupled_variables = 'mineral a'
+    expression = 'a + mineral / 0.1'
     variable = should_be_static
   []
 []

@@ -34,7 +34,7 @@
     type = ParsedAux
     variable = A
     use_xyzt = true
-    function = '2*x+4*${yy}'
+    expression = '2*x+4*${yy}'
     execute_on = 'TIMESTEP_BEGIN'
   []
 []

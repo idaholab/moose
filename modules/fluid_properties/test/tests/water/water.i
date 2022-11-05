@@ -100,8 +100,8 @@
   [../]
   [./v]
     type = ParsedAux
-    variable_names = rho
-    function = 1/rho
+    coupled_variables = rho
+    expression = 1/rho
     variable = v
   [../]
   [./e]

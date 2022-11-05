@@ -79,7 +79,7 @@
     type = ParsedAux
     variable = parsed
     coupled_variables = 'u v'
-    function = '(u-0.5)^3*v'
+    expression = '(u-0.5)^3*v'
   []
 []
 

@@ -49,8 +49,8 @@
   [./diff]
     type = ParsedAux
     variable = diff
-    function = c-ca
-    variable_names = 'c ca'
+    expression = c-ca
+    coupled_variables = 'c ca'
   [../]
 []
 

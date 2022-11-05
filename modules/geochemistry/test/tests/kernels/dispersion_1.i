@@ -62,8 +62,8 @@ por = 2.0 # this is the porosity.  The result should not depend on por in this e
   []
   [should_be_zero]
     type = ParsedAux
-    variable_names = 'expected conc'
-    function = 'expected - conc'
+    coupled_variables = 'expected conc'
+    expression = 'expected - conc'
     variable = should_be_zero
   []
 []

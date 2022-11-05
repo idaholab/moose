@@ -227,8 +227,8 @@
   [./psi_potential]
     variable = psi
     type = ParsedAux
-    variable_names = 'Fglobal w c f_el sigma11 e11'
-    function = 'Fglobal - w*c + f_el - sigma11*e11'
+    coupled_variables = 'Fglobal w c f_el sigma11 e11'
+    expression = 'Fglobal - w*c + f_el - sigma11*e11'
   [../]
 []
 

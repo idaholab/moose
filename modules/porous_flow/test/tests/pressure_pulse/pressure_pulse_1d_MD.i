@@ -120,8 +120,8 @@
 [AuxKernels]
   [pp]
     type = ParsedAux
-    function = '(md-6.9077552789821)*2.0E9'
-    variable_names = 'md'
+    expression = '(md-6.9077552789821)*2.0E9'
+    coupled_variables = 'md'
     variable = pp
   []
 []

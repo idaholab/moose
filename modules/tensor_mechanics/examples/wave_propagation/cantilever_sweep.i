@@ -75,7 +75,7 @@
     type = ParsedAux
     variable = disp_mag
     args = 'disp_x disp_y disp_z'
-    function = 'sqrt(disp_x^2+disp_y^2+disp_z^2)'
+    expression = 'sqrt(disp_x^2+disp_y^2+disp_z^2)'
   []
 []
 

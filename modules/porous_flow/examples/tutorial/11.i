@@ -209,8 +209,8 @@
 [AuxKernels]
   [effective_fluid_pressure]
     type = ParsedAux
-    variable_names = 'pwater pgas swater sgas'
-    function = 'pwater * swater + pgas * sgas'
+    coupled_variables = 'pwater pgas swater sgas'
+    expression = 'pwater * swater + pgas * sgas'
     variable = effective_fluid_pressure
   []
   [swater]

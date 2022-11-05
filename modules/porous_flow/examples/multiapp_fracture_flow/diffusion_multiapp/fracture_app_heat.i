@@ -50,8 +50,8 @@
   [heat_to_matrix]
     type = ParsedAux
     variable = heat_to_matrix
-    variable_names = 'frac_T transferred_matrix_T'
-    function = '0.004 * (frac_T - transferred_matrix_T)'
+    coupled_variables = 'frac_T transferred_matrix_T'
+    expression = '0.004 * (frac_T - transferred_matrix_T)'
   []
 []
 

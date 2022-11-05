@@ -114,8 +114,8 @@
   [pp_change]
     type = ParsedAux
     variable = pp_change
-    variable_names = 'pp ini_pp'
-    function = 'pp - ini_pp'
+    coupled_variables = 'pp ini_pp'
+    expression = 'pp - ini_pp'
   []
 []
 

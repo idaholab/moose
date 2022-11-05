@@ -114,9 +114,9 @@
   []
   [head_change]
     type = ParsedAux
-    variable_names = 'pp insitu_head'
+    coupled_variables = 'pp insitu_head'
     use_xyzt = true
-    function = 'pp / 1E4 + z - insitu_head'
+    expression = 'pp / 1E4 + z - insitu_head'
     variable = head_change
   []
 []

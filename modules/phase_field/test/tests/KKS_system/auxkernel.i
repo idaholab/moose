@@ -36,8 +36,8 @@
   [eta2]
     type = ParsedAux
     variable = eta2
-    function = '1-eta1'
-    variable_names = eta1
+    expression = '1-eta1'
+    coupled_variables = eta1
   []
 []
 

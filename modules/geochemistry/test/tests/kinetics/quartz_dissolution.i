@@ -59,8 +59,8 @@
 [AuxKernels]
   [diss]
     type = ParsedAux
-    variable_names = moles_Quartz
-    function = '83.216414271 - moles_Quartz'
+    coupled_variables = moles_Quartz
+    expression = '83.216414271 - moles_Quartz'
     variable = diss
   []
 []

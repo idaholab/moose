@@ -253,8 +253,8 @@
   [./diff_constraint]
     type = ParsedAux
     variable = diff_constraint
-    function = 'c-v'
-    variable_names = 'c v'
+    expression = 'c-v'
+    coupled_variables = 'c v'
     block = 0
   [../]
 
@@ -266,8 +266,8 @@
   [./diff_periodic]
     type = ParsedAux
     variable = diff_periodic
-    function = 'c-p-slope'
-    variable_names = 'c p slope'
+    expression = 'c-p-slope'
+    coupled_variables = 'c p slope'
     block = 0
   [../]
 
@@ -276,8 +276,8 @@
   [./diff_slope]
     type = ParsedAux
     variable = diff_slope
-    function = 'c-slope'
-    variable_names = 'c slope'
+    expression = 'c-slope'
+    coupled_variables = 'c slope'
     block = 0
   [../]
 []

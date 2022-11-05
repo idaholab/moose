@@ -57,8 +57,8 @@
   []
   [should_be_zero]
     type = ParsedAux
-    variable_names = 'expected conc'
-    function = 'expected - conc'
+    coupled_variables = 'expected conc'
+    expression = 'expected - conc'
     variable = should_be_zero
   []
 []

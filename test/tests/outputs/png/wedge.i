@@ -27,7 +27,7 @@
     type = ParsedAux
     variable = two_u
     coupled_variables = 'u'
-    function = '2*u'
+    expression = '2*u'
   []
 []
 

@@ -34,13 +34,13 @@
   [discretize_to_subapp]
     type = ParsedAux
     variable = from_subapp_check
-    function = 'to_subapp'
+    expression = 'to_subapp'
     coupled_variables = 'to_subapp'
   []
   [subapp_primary_diff]
     type = ParsedAux
     variable = subapp_primary_diff
-    function = 'from_subapp_check - from_subapp'
+    expression = 'from_subapp_check - from_subapp'
     coupled_variables = 'from_subapp_check from_subapp'
   []
 []

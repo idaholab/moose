@@ -162,7 +162,7 @@ gamma = 1.4
     type = ParsedAux
     variable = rho_cp_T_fluid_var
     args = 'rho_var cp_var T_fluid'
-    function = 'rho_var * cp_var * T_fluid'
+    expression = 'rho_var * cp_var * T_fluid'
   []
 []
 
