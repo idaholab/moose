@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#1476'
+  issues = '#22174'
   design = 'source/constraints/PenaltyPeriodicSegmentalConstraint.md'
   [./penalty_periodic_simple2d]
     type = 'CSVDiff'

@@ -1,6 +1,6 @@
 [Tests]
-  issues = '#1476'
-  design = 'source/constraints/PenaltyPeriodicSegmentalConstraint.md'
+  issues = '#22174'
+  design = 'source/constraints/ADPenaltyPeriodicSegmentalConstraint.md'
   [./penalty_periodic_simple2d]
     type = 'CSVDiff'
     input = 'penalty_periodic_simple2d.i'
