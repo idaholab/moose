@@ -12,15 +12,15 @@
 #include "MooseEnum.h"
 
 /**
- * This HexagonMeshTrimmer object takes in a hexagonal assembly or core mesh and perform peripheral
- * and/or center trimming on it.
+ * This CartesianMeshTrimmer object takes in a hexagonal assembly or core mesh and perform
+ * peripheral and/or center trimming on it.
  */
-class HexagonMeshTrimmer : public PolygonMeshTrimmerBase
+class CartesianMeshTrimmer : public PolygonMeshTrimmerBase
 {
 public:
   static InputParameters validParams();
 
-  HexagonMeshTrimmer(const InputParameters & parameters);
+  CartesianMeshTrimmer(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 };

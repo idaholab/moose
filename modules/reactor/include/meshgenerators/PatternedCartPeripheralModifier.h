@@ -14,21 +14,21 @@
 #include "LinearInterpolation.h"
 
 /**
- * This PatternedHexPeripheralModifier object removes the outmost layer of the input mesh and add a
+ * This PatternedCartPeripheralModifier object removes the outmost layer of the input mesh and add a
  * transition layer mesh to facilitate stitching.
  */
-class PatternedHexPeripheralModifier : public PatternedPolygonPeripheralModifierBase
+class PatternedCartPeripheralModifier : public PatternedPolygonPeripheralModifierBase
 {
 public:
   static InputParameters validParams();
 
-  PatternedHexPeripheralModifier(const InputParameters & parameters);
+  PatternedCartPeripheralModifier(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 
 protected:
   /// MeshMetaData: whether the peripheral area of the generated mesh can be trimmed by PolygonMeshTrimmer
-  const bool & _hexagon_peripheral_trimmability;
+  const bool & _square_peripheral_trimmability;
   /// MeshMetaData: whether the generated mesh can be trimmed through its center by PolygonMeshTrimmer
-  bool & _hexagon_center_trimmability;
+  bool & _square_center_trimmability;
 };

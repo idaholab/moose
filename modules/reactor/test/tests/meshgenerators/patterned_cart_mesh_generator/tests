@@ -1,0 +1,205 @@
+[Tests]
+    # design = 'meshgenerators/PatternedHexMeshGenerator.md'
+    # issues = '#18628 #20148 #20514'
+    [square_boundary]
+      type = 'Exodiff'
+      exodiff_opts = '-pedantic'
+      input = 'patterned_2d.i'
+      exodiff = 'patterned_sq.e'
+      cli_args = 'Mesh/pattern/background_block_id=1500
+                  Mesh/pattern/background_block_name="assem_block"
+                  Mesh/pattern/square_size=22
+                  Mesh/pattern/duct_sizes=21
+                  Mesh/pattern/duct_intervals=2
+                  Mesh/pattern/duct_block_ids=2000
+                  Mesh/pattern/duct_block_names="duct_block"
+                  Mesh/pattern/uniform_mesh_on_sides=true
+                  --mesh-only "patterned_sq.e"'
+      requirement ='The system shall stitch square meshes to form a large mesh with square boundary.'
+      recover = false
+    []
+    [square_boundary_no_interface]
+      type = 'Exodiff'
+      exodiff_opts = '-pedantic'
+      input = 'patterned_2d.i'
+      exodiff = 'patterned_sq_no_interface.e'
+      cli_args = 'Mesh/pattern/background_block_id=1500
+                  Mesh/pattern/background_block_name="assem_block"
+                  Mesh/pattern/square_size=22
+                  Mesh/pattern/duct_sizes=21
+                  Mesh/pattern/duct_intervals=2
+                  Mesh/pattern/duct_block_ids=2000
+                  Mesh/pattern/duct_block_names="duct_block"
+                  Mesh/pattern/uniform_mesh_on_sides=true
+                  Mesh/pattern/create_interface_boundaries=false
+                  --mesh-only "patterned_sq_no_interface.e"'
+      requirement ='The system shall stitch square meshes to form a large mesh with square boundary.'
+      recover = false
+    []
+    [square_boundary_no_deform]
+      type = 'Exodiff'
+      exodiff_opts = '-pedantic'
+      input = 'patterned_2d.i'
+      exodiff = 'patterned_sq_no_deform.e'
+      cli_args = 'Mesh/pattern/background_block_id=1500
+                  Mesh/pattern/background_block_name="assem_block"
+                  Mesh/pattern/square_size=21
+                  Mesh/pattern/deform_non_circular_region=false
+                  --mesh-only "patterned_sq_no_deform.e"'
+      requirement ='The system shall stitch square meshes to form a large mesh with square boundary.'
+      recover = false
+    []
+    [none_boundary]
+      type = 'Exodiff'
+      input = 'patterned_2d.i'
+      exodiff = 'patterned_none.e'
+      cli_args = 'Mesh/pattern/pattern_boundary=none --mesh-only "patterned_none.e"'
+      requirement ='The system shall stitch hexagon meshes to form a large mesh without extra boundary.'
+      recover = false
+    []
+    [patterned_pattern]
+        type = 'Exodiff'
+        exodiff_opts = '-pedantic'
+        input = 'patterned_pattern.i'
+        exodiff = 'patterned_pattern.e'
+        cli_args = '--mesh-only "patterned_pattern.e"'
+        requirement ='The system shall stitch square patterned meshes to form a large mesh.'
+        recover = false
+    []
+    [err_input_flat_side_up]
+      type = 'RunException'
+      input = 'patterned_2d.i'
+      cli_args = 'Mesh/pattern/pattern_boundary=none Mesh/square_1/flat_side_up=false --mesh-only "patterned_err.e"'
+      expect_err = "does not have a flat side facing up, which is not supported."
+      requirement ='The system shall throw a reasonable error when generating patterned hexagon mesh if one of the input meshes has a flat side facing up.'
+    []
+    [err_block_name_conflict]
+      type = 'RunException'
+      input = 'patterned_2d.i'
+      cli_args = 'Mesh/pattern/pattern_boundary=none
+                  Mesh/square_2/background_block_ids=30
+                  --mesh-only "patterned_err.e"'
+      expect_err = 'The input meshes contain subdomain name maps with conflicts.'
+      requirement ='The system shall throw an error if the input meshes contain different block ids that share the same block name.'
+    []
+    [err_pattern_unity]
+      type = 'RunException'
+      input = 'patterned_2d.i'
+      cli_args = 'Mesh/pattern/pattern_boundary=none
+                  Mesh/pattern/pattern="0"
+                  --mesh-only "patterned_err.e"'
+      expect_err = 'this parameter must be larger than unity.'
+      requirement ='The system shall throw an error if the layer number of pattern is zero or unity.'
+    []
+    [err_pattern_shape]
+      type = 'RunException'
+      input = 'patterned_2d.i'
+      cli_args = 'Mesh/pattern/pattern_boundary=none
+                  Mesh/pattern/pattern="0 0;0 0 0"
+                  --mesh-only "patterned_err.e"'
+      expect_err = 'The two-dimentional array parameter pattern must have a correct square shape.'
+      requirement ='The system shall throw an error if the pattern does not represent a hexagonal pattern.'
+    []
+    [err_out_of_range_pattern]
+      type = 'RunException'
+      input = 'patterned_2d.i'
+      cli_args = 'Mesh/pattern/pattern_boundary=none
+                  Mesh/pattern/pattern="0 0 0;0 1 0;0 2 0"
+                  --mesh-only "patterned_err.e"'
+      expect_err = 'Elements of this parameter must be smaller than the length of input_name.'
+      requirement ='The system shall throw an error if the pattern includes input mesh indices that exceed number of elements of inputs.'
+    []
+    [err_block_id]
+      type = 'RunException'
+      input = 'patterned_2d.i'
+      cli_args = 'Mesh/pattern/background_intervals=2 Mesh/pattern/duct_block_ids=25
+                  Mesh/pattern/background_block_name="assem_block"
+                  Mesh/pattern/sqaure_size=22 Mesh/pattern/duct_sizes=21 Mesh/pattern/duct_intervals=2
+                  --mesh-only "patterned_err.e"'
+      expect_err = 'This parameter and duct_block_ids must be provided simultaneously.'
+      requirement ='The system shall throw an error if background_block_id and duct_block_ids are not provided simultaneously if the mesh has ducts.'
+    []
+    [err_block_name]
+      type = 'RunException'
+      input = 'patterned_2d.i'
+      cli_args = 'Mesh/pattern/background_intervals=2 Mesh/pattern/duct_block_names="duct1"
+                  Mesh/pattern/sqaure_size=22 Mesh/pattern/duct_sizes=21 Mesh/pattern/duct_intervals=2
+                  --mesh-only "patterned_err.e"'
+      expect_err = 'This parameter and duct_block_names must be provided simultaneously.'
+      requirement ='The system shall throw an error if background_block_name and duct_block_names are not provided simultaneously if the mesh has ducts.'
+    []
+    [err_duct_ids]
+      type = 'RunException'
+      input = 'patterned_2d.i'
+      cli_args = 'Mesh/pattern/background_intervals=2 Mesh/pattern/duct_block_ids=20 Mesh/pattern/background_block_id=15
+                  Mesh/pattern/sqaure_size=22 Mesh/pattern/duct_sizes="21.0 21.5" Mesh/pattern/duct_intervals="2 2"
+                  --mesh-only "patterned_err.e"'
+      expect_err = 'This parameter, if provided, must have a length equal to length of duct_sizes.'
+      requirement ='The system shall throw an error if length of duct_block_ids is not consistent with number of ducts.'
+    []
+    [err_duct_names]
+      type = 'RunException'
+      input = 'patterned_2d.i'
+      cli_args = 'Mesh/pattern/background_intervals=2 Mesh/pattern/duct_block_names="duct1" Mesh/pattern/background_block_name="background"
+                  Mesh/pattern/sqaure_size=22 Mesh/pattern/duct_sizes="21.0 21.5" Mesh/pattern/duct_intervals="2 2"
+                  --mesh-only "patterned_err.e"'
+      expect_err = 'This parameter, if provided, must have a length equal to length of duct_sizes.'
+      requirement ='The system shall throw an error if length of duct_block_names is not consistent with number of ducts.'
+    []
+    [err_non_background]
+      type = 'RunException'
+      input = 'patterned_2d.i'
+      cli_args = 'Mesh/pattern/pattern_boundary=none
+                  Mesh/pattern/background_block_name="background"
+                  --mesh-only "patterned_err.e"'
+      expect_err = 'This parameter and background_block_name must not be set when the pattern_boundary is none.'
+      requirement ='The system shall throw an error if background_block_name or background_block_id are provided when pattern_boundary is none.'
+    []
+    [err_no_square_size]
+      type = 'RunException'
+      input = 'patterned_2d.i'
+      cli_args = 'Mesh/pattern/pattern_boundary=expanded
+                  --mesh-only "patterned_err.e"'
+      expect_err = 'This parameter must be provided when pattern_boundary is expanded.'
+      requirement ='The system shall throw an error if no hexagon size is provided when pattern_boundary is hexagon.'
+    []
+    [err_missing_input_meshes_in_pattern]
+      type = 'RunException'
+      input = 'patterned_2d.i'
+      cli_args = 'Mesh/pattern/pattern="0 0;0 0"
+                  --mesh-only "patterned_err.e"'
+      expect_err = 'All the meshes provided in inputs must be used here.'
+      requirement ='The system shall throw an error if not all the meshes provided in inputs are used in pattern.'
+    []
+    [err_no_appropriate_pitch_meta]
+      type = 'RunException'
+      input = 'patterned_pattern.i'
+      cli_args = 'Mesh/pattern_2/generate_core_metadata=false
+                 --mesh-only "patterned_err.e"'
+      expect_err = 'the unit square input mesh does not contain appropriate meta data required for generating an assembly.'
+      requirement ='The system shall throw an error if no pitch meta data can be obtained from the input mesh.'
+    []
+    [err_no_appropriate_pattern_pitch_meta]
+      type = 'RunException'
+      input = 'patterned_pattern_err.i'
+      cli_args = '--mesh-only "patterned_err.e"'
+      expect_err = 'the unit square input mesh does not contain appropriate meta data required for generating a core mesh.'
+      requirement ='The system shall throw an error if no pattern pitch meta data can be obtained from the input mesh.'
+    []
+    [err_different_pattern_pitch_meta]
+      type = 'RunException'
+      input = 'patterned_pattern_err2.i'
+      cli_args = '--mesh-only "patterned_err.e"'
+      expect_err = 'pattern_pitch metadata values of all input mesh generators must be identical'
+      requirement ='The system shall throw an error if input meshes have different pattern pitch meta data.'
+    []
+    [err_cut_off_input]
+      type = 'RunException'
+      input = 'patterned_2d.i'
+      cli_args = 'Mesh/pattern/square_size=18
+                  Mesh/pattern/deform_non_circular_region=false
+                  --mesh-only "patterned_err.e"'
+      expect_err = 'the assembly is cut off so much that the internal structure that should not be altered is compromised.'
+      requirement ='The system shall throw an error if the input mesh geometry that should not be deformed is cut off.'
+    []
+[]    

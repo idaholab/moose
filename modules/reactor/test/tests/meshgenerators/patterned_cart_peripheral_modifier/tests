@@ -1,0 +1,20 @@
+[Tests]
+  # design = 'meshgenerators/PatternedHexPeripheralModifier.md'
+  # issues = '#20641'
+  [single_square]
+    type = 'Exodiff'
+    input = 'single_square.i'
+    exodiff = 'single_square_in.e'
+    cli_args = '--mesh-only'
+    requirement ='The system shall generate a square assembly mesh then modify the peripheral region to facilitate further stitching.'
+    recover = false
+  []
+  [sq_pattern]
+    type = 'Exodiff'
+    input = 'patterned.i'
+    exodiff = 'patterned_in.e'
+    cli_args = '--mesh-only'
+    requirement ='The system shall generate square assembly meshes with peripheral regions modified in order to stitch them together to form a core mesh.'
+    recover = false
+  []
+[]

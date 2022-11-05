@@ -136,7 +136,10 @@ PeripheralRingMeshGenerator::PeripheralRingMeshGenerator(const InputParameters &
     _input(getMeshByName(_input_name)),
     _hexagon_peripheral_trimmability(
         declareMeshProperty<bool>("hexagon_peripheral_trimmability", false)),
-    _hexagon_center_trimmability(declareMeshProperty<bool>("hexagon_center_trimmability", false))
+    _hexagon_center_trimmability(declareMeshProperty<bool>("hexagon_center_trimmability", false)),
+    _square_peripheral_trimmability(
+        declareMeshProperty<bool>("square_peripheral_trimmability", false)),
+    _square_center_trimmability(declareMeshProperty<bool>("square_center_trimmability", false))
 {
 }
 
@@ -146,6 +149,8 @@ PeripheralRingMeshGenerator::generate()
   if (hasMeshProperty("hexagon_center_trimmability", _input_name))
     _hexagon_center_trimmability =
         getMeshProperty<bool>("hexagon_center_trimmability", _input_name);
+  if (hasMeshProperty("square_center_trimmability", _input_name))
+    _square_center_trimmability = getMeshProperty<bool>("square_center_trimmability", _input_name);
   // Calculate biasing terms
   const auto main_peripheral_bias_terms =
       biasTermsCalculator(_peripheral_radial_bias, _peripheral_layer_num);
