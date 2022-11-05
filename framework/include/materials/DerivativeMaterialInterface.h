@@ -483,7 +483,7 @@ DerivativeMaterialInterface<T>::validateCoupling(const MaterialPropertyName & ba
 
     mooseWarning("Missing coupled variables {",
                  list,
-                 "} (add them to variable_names parameter of ",
+                 "} (add them to coupled_variables parameter of ",
                  this->name(),
                  ")");
   }

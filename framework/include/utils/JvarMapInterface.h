@@ -117,8 +117,8 @@ JvarMapInterfaceBase<T>::validParams()
   auto params = T::validParams();
   params.addDeprecatedCoupledVar("args",
                                  "Vector of nonlinear variable arguments this object depends on",
-                                 "args is deprecated, use 'variable_names' instead");
-  params.addCoupledVar("variable_names",
+                                 "args is deprecated, use 'coupled_variables' instead");
+  params.addCoupledVar("coupled_variables",
                        "Vector of nonlinear variable arguments this object depends on");
 
   return params;
