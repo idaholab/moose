@@ -18,7 +18,7 @@ FunctionMaterialBase<is_ad>::validParams()
 
   params.addDeprecatedParam<std::string>(
       "f_name", "Name of the parsed material property", "f_name is deprecated, use property_name");
-  // TODO Make required once deprecation is handled, see #20535
+  // TODO Make required once deprecation is handled, see #19119
   params.addParam<std::string>("property_name", "F", "Name of the parsed material property");
   return params;
 }

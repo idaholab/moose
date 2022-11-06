@@ -186,7 +186,7 @@ private:
                               const System & system,
                               std::vector<VariableName> & missing);
 
-  // check if the speciified variable name is not the variable this kernel is acting on (always true
+  // check if the specified variable name is not the variable this kernel is acting on (always true
   // for any other type of object)
   bool isNotObjectVariable(const VariableName & name);
 

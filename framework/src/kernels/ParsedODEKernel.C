@@ -29,7 +29,7 @@ ParsedODEKernel::validParams()
       "FunctionExpression",
       "function expression",
       "function is deprecated, use expression instead");
-  // TODO Make required once deprecation is handled, see #20535
+  // TODO Make required once deprecation is handled, see #19119
   params.addCustomTypeParam<std::string>(
       "expression", "FunctionExpression", "Function expression for the ODE residual contribution");
   params.addDeprecatedCoupledVar(

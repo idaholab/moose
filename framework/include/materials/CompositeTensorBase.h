@@ -109,6 +109,7 @@ CompositeTensorBase<T, U>::validParams()
   params.addDeprecatedCoupledVar("args",
                                  "variable dependencies for the prefactor",
                                  "args is deprecated, use 'coupled_variables' instead");
+  // TODO Make required once deprecation is handled, see #19119
   params.addCoupledVar("coupled_variables", "variable dependencies for the prefactor");
 
   return params;

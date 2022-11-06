@@ -28,6 +28,7 @@ DerivativeSumMaterialTempl<is_ad>::validParams()
       "args",
       "Arguments of the free energy functions being summed - use vector coupling",
       "args is deprecated, use coupled_variables instead");
+  // TODO Make required once deprecation is handled, see #19119
   params.addCoupledVar("coupled_variables", "Vector of names of variables being summed");
 
   params.addCoupledVar("displacement_gradients",
@@ -68,7 +69,7 @@ DerivativeSumMaterialTempl<is_ad>::DerivativeSumMaterialTempl(const InputParamet
   if (_num_materials == p.size())
     _prefactor = p;
   else if (p.size() != 0)
-    mooseError("Supply the same nummber of sum materials and prefactors.");
+    mooseError("Supply the same number of sum materials and prefactors.");
 
   // reserve space for summand material properties
   _summand_F.resize(_num_materials);

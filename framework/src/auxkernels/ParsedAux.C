@@ -23,7 +23,7 @@ ParsedAux::validParams()
                                                    "FunctionExpression",
                                                    "Parsed function expression to compute",
                                                    "'function' is deprecated, use 'expression'");
-  // TODO Make required once deprecation is handled, see #20535
+  // TODO Make required once deprecation is handled, see #19119
   params.addCustomTypeParam<std::string>(
       "expression", "FunctionExpression", "Parsed function expression to compute");
   params.addDeprecatedCoupledVar(

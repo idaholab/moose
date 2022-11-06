@@ -56,7 +56,7 @@ ParsedMaterialBase::validParams()
       "FunctionExpression",
       "Parsed function (see FParser) expression for the parsed material",
       "'function' is deprecated, use 'expression' instead");
-  // TODO Make required once deprecation is handled, see #20535
+  // TODO Make required once deprecation is handled, see #19119
   params.addCustomTypeParam<std::string>(
       "expression",
       "FunctionExpression",

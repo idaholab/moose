@@ -51,8 +51,7 @@ protected:
   void computeProperties() override;
 
   /**
-   * Check if we got the right number of components in the 'args' coupled
-   * variable vector.
+   * Check if we got the right number of components in the 'coupled_variables' vector.
    */
   void initialSetup() override;
 
