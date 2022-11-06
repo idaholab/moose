@@ -10,7 +10,7 @@ A `ParsedFunctorMaterial` object takes the function expression as an input param
 the form of a Function Parser expression. Parsed materials (unlike
 `ParsedFunctions`) can couple to nonlinear variables.
 In its configuration block all nonlinear variables the function depends on
-([!param](/Materials/ParsedFunctorMaterial/args)), as well as constants
+([!param](/Materials/ParsedFunctorMaterial/coupled_variables)), as well as constants
 ([!param](/Materials/ParsedFunctorMaterial/constant_names) and
 [!param](/Materials/ParsedFunctorMaterial/constant_expressions)), other functors
 ([!param](/Materials/ParsedFunctorMaterial/functor_names)), and
