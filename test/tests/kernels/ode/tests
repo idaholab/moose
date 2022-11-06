@@ -32,7 +32,7 @@
 
     design = "ParsedODEKernel.md"
     issues = "#726"
-    requirement = "The system shall support solving ODEs specified within the input file through parsed function syntax."
+    requirement = "The system shall support solving ODEs specified within the input file through parsed expression syntax."
   [../]
 
   [./test_parsed_pp]
@@ -42,7 +42,7 @@
 
     design = "ParsedODEKernel.md"
     issues = "#14034"
-    requirement = "The system support coupling of postprocessor values in the parsed function ODE kernel."
+    requirement = "The system support coupling of postprocessor values in the parsed expression ODE kernel."
   [../]
 
   [./test_coupled_ode_td]

@@ -49,7 +49,8 @@ ParsedODEKernel::validParams()
 ParsedODEKernel::ParsedODEKernel(const InputParameters & parameters)
   : ODEKernel(parameters),
     FunctionParserUtils(parameters),
-    _function(getParam<std::string>("function")),
+    _function(isParamValid("function") ? getParam<std::string>("function")
+                                       : getParam<std::string>("expression")),
     _nargs(isCoupledScalar("args")                ? coupledScalarComponents("args")
            : isCoupledScalar("coupled_variables") ? coupledScalarComponents("coupled_variables")
                                                   : 0),

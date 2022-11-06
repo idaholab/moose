@@ -71,7 +71,7 @@
   [../]
   [./ode1]
     type = ParsedODEKernel
-    function = '-3*x - 2*y'
+    expression = '-3*x - 2*y'
     variable = x
     coupled_variables = y
   [../]
@@ -82,7 +82,7 @@
   [../]
   [./ode2]
     type = ParsedODEKernel
-    function = '-4*x - y'
+    expression = '-4*x - y'
     variable = y
     coupled_variables = x
   [../]

@@ -62,7 +62,7 @@ v_growth = 2
   [./u_src]
     type = ParsedODEKernel
     variable = u
-    function = '-${u_growth}'
+    expression = '-${u_growth}'
   [../]
 
   [./v_time]
@@ -73,14 +73,14 @@ v_growth = 2
   [./v_src]
     type = ParsedODEKernel
     variable = v
-    function = '-${v_growth}'
+    expression = '-${v_growth}'
     enable = false
   [../]
   [./v_constraint]
     type = ParsedODEKernel
     variable = v
     coupled_variables = 'u'
-    function = 'v - u'
+    expression = 'v - u'
   [../]
 []
 

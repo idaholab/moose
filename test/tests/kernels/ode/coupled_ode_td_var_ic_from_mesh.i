@@ -28,19 +28,19 @@
   [./src]
     type = ParsedODEKernel
     variable = f
-    function = '-1'
+    expression = '-1'
   [../]
 
   [./f_times_mult_1]
     type = ParsedODEKernel
     variable = f_times_mult
-    function = 'f_times_mult'
+    expression = 'f_times_mult'
   [../]
 
   [./f_times_mult_2]
     type = ParsedODEKernel
     variable = f_times_mult
-    function = '-f * g'
+    expression = '-f * g'
     coupled_variables = 'f g'
   [../]
 []

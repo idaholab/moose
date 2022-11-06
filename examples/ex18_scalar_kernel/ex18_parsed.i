@@ -1,7 +1,7 @@
 #
 # Example 18 modified to use parsed ODE kernels.
 #
-# The ParsedODEKernel takes function expressions in the input file and computes
+# The ParsedODEKernel takes expression expressions in the input file and computes
 # Jacobian entries via automatic differentiation. It allows for rapid development
 # of new models without the need for code recompilation.
 #
@@ -79,9 +79,9 @@
   #
   [./ode1]
     type = ParsedODEKernel
-    function = '-3*x - 2*y'
+    expression = '-3*x - 2*y'
     variable = x
-    args = y
+    coupled_variables = y
   [../]
 
   [./td2]
@@ -95,9 +95,9 @@
   #
   [./ode2]
     type = ParsedODEKernel
-    function = '-4*x - y'
+    expression = '-4*x - y'
     variable = y
-    args = x
+    coupled_variables = x
   [../]
 []
 

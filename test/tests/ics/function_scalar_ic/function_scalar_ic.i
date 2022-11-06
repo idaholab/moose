@@ -40,7 +40,7 @@
   [../]
   [./ode1]
     type = ParsedODEKernel
-    function = '-n'
+    expression = '-n'
     variable = n
   [../]
 []

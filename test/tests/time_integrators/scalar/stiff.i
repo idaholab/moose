@@ -69,7 +69,7 @@
   [./y1_space]
     type = ParsedODEKernel
     variable = y1
-    function = '-(${LAMBDA})*y1 - y2^${Y2_EXPONENT}'
+    expression = '-(${LAMBDA})*y1 - y2^${Y2_EXPONENT}'
     coupled_variables = 'y2'
   [../]
   [./y2_time]
@@ -79,7 +79,7 @@
   [./y2_space]
     type = ParsedODEKernel
     variable = y2
-    function = 'y2'
+    expression = 'y2'
   [../]
 []
 

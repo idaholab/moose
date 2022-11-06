@@ -28,7 +28,7 @@
   [./source_part1]
     type = ParsedODEKernel
     variable = u
-    function = 'u'
+    expression = 'u'
   [../]
   [./source_part2]
     type = PostprocessorSinkScalarKernel
