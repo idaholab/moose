@@ -1,5 +1,12 @@
 !gallery! large=6
 
+!card! gallery/3D_SSB.mp4 title=Charge-discharge cycle of a full solid-state battery
+A complete charge-discharge cycle of a 3D full solid-state battery. The results are generated using EEL developed by the Argonne National Laboratory. The theoretical framework is described in [Hu, T., Messner, M. C., Barai, P., & Barua, B. (2022)](https://doi.org/10.2172/1891097).
+
+!style fontsize=90% fontweight=100
+*Credit:*  Gary Hu (ANL)
+!card-end!
+
 !card! gallery/streamlines_rock.mp4 title=Flow Streamlines in Digital Rock
 Flow streamlines computed with the [Navier-Stokes](modules/navier_stokes/index.md) module, through a digital rock reconstructed with the [Image Reader](source/functions/ImageFunction.md) from a stack of microCT scans (postprocessing done in [Paraview](https://www.paraview.org/)). The framework is described in [Lesueur et al. (2017)](http://doi.org/10.1016/j.gete.2017.08.001).
 
