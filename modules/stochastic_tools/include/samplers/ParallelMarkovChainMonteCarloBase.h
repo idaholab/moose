@@ -23,6 +23,11 @@ public:
 
   ParallelMarkovChainMonteCarloBase(const InputParameters & parameters);
 
+  /**
+   * Return the number of configuration parameters.
+   */
+  dof_id_type getNumberOfConfigParams() const;
+
 protected:
   virtual void sampleSetUp(const Sampler::SampleMode mode) override;
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
@@ -50,6 +55,9 @@ protected:
 
   /// Initialize a certain number of random seeds. Change from the default only if you have to.
   const unsigned int & _num_random_seeds;
+
+  /// Configuration values
+  std::vector<Real> _confg_values;
 
 private:
 

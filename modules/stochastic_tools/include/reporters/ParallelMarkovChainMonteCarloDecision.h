@@ -35,7 +35,7 @@ public:
   /**
    * Resample inputs given weights
    */
-  virtual void resample(const DenseMatrix<Real> & given_inputs, std::vector<std::vector<Real>> resampled_inputs, const std::vector<Real> & weights, const unsigned int & num_resamples) const = 0;
+  virtual std::vector<Real> resample(const DenseMatrix<Real> & given_inputs, const std::vector<Real> & weights) const = 0;
 
 protected:
   /// Reporter value of the seed input values for proposing the next set of samples
