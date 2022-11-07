@@ -76,6 +76,9 @@ StochasticToolsApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax
   addTaskDependency("setup_mesh", "auto_create_mesh");
   addTaskDependency("create_problem", "auto_create_problem");
   addTaskDependency("setup_executioner", "auto_create_executioner");
+
+  registerSyntaxTask("AdaptiveSamplerAction", "Samplers", "add_user_object");
+  registerSyntaxTask("AdaptiveSamplerAction", "Samplers", "add_postprocessor");
 }
 
 void
