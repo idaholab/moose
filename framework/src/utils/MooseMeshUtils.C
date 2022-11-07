@@ -210,7 +210,7 @@ getExtraIDUniqueCombinationMap(const MeshBase & mesh,
   {
     // get set of extra id values;
     std::set<dof_id_type> ids;
-    for (const auto & elem : mesh.active_local_element_ptr_range())
+    for (const auto & elem : mesh.active_element_ptr_range())
     {
       if (block_restricted && block_ids.find(elem->subdomain_id()) == block_ids.end())
         continue;
@@ -220,7 +220,7 @@ getExtraIDUniqueCombinationMap(const MeshBase & mesh,
     mesh.comm().set_union(ids);
     // determine new extra id values;
     std::map<dof_id_type, dof_id_type> parsed_ids;
-    for (auto & elem : mesh.active_local_element_ptr_range())
+    for (auto & elem : mesh.active_element_ptr_range())
     {
       if (block_restricted && block_ids.find(elem->subdomain_id()) == block_ids.end())
         continue;
@@ -234,7 +234,7 @@ getExtraIDUniqueCombinationMap(const MeshBase & mesh,
       MooseMeshUtils::getExtraIDUniqueCombinationMap(mesh, block_ids, extra_ids);
   // parsing extra ids based on ref_parsed_ids
   std::set<std::pair<dof_id_type, dof_id_type>> unique_ids;
-  for (const auto & elem : mesh.active_local_element_ptr_range())
+  for (const auto & elem : mesh.active_element_ptr_range())
   {
     if (block_restricted && block_ids.find(elem->subdomain_id()) == block_ids.end())
       continue;
@@ -245,7 +245,7 @@ getExtraIDUniqueCombinationMap(const MeshBase & mesh,
   }
   mesh.comm().set_union(unique_ids);
   std::map<dof_id_type, dof_id_type> parsed_ids;
-  for (const auto & elem : mesh.active_local_element_ptr_range())
+  for (const auto & elem : mesh.active_element_ptr_range())
   {
     if (block_restricted && block_ids.find(elem->subdomain_id()) == block_ids.end())
       continue;

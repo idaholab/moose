@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/UniqueExtraIDMeshGenerator.md'
-  issues = '#19617'
+  issues = '#19617 #22603'
   [test]
     requirement = 'The system shall be shall support the generation of new extra element ID by parsing the existing extra element IDs'
     [default]
@@ -17,6 +17,14 @@
       exodiff = 'unique_id_rule_out.e'
       cli_args = "Mesh/parse_id/new_id_rule='100 1' Outputs/file_base='unique_id_rule_out'"
       detail = 'with the new id value setting rule option'
+      recover = false
+    []
+
+    [cut]
+      type = 'Exodiff'
+      input = 'unique_id_cut.i'
+      exodiff = 'unique_id_cut_out.e'
+      detail = 'with domain cutting using PlaneDeletionGenerator'
       recover = false
     []
   []
