@@ -12,6 +12,7 @@
 #include "DenseMatrix.h"
 #include "AdaptiveMonteCarloUtils.h"
 #include "StochasticToolsUtils.h"
+#include "MooseRandom.h"
 
 registerMooseObjectAliased("StochasticToolsApp", ParallelMarkovChainMonteCarloDecision, "PMCMCDecision");
 
@@ -63,11 +64,11 @@ ParallelMarkovChainMonteCarloDecision::ParallelMarkovChainMonteCarloDecision(con
   _communicator.split(
       _sampler.getNumberOfLocalRows() > 0 ? 1 : MPI_UNDEFINED, processor_id(), _local_comm);
   
-  _inputs.resize(cols);
-  for (unsigned int i = 0; i < cols; ++i)
-    _inputs[i].resize(rows-1);
+  _inputs.resize(rows-1);
+  for (unsigned int i = 0; i < rows-1; ++i)
+    _inputs[i].resize(cols);
 
-  _output_required.resize(rows)
+  _output_required.resize(rows);
 }
 
 void 
@@ -75,24 +76,43 @@ computeTransitionVector(std::vector<Real> tv, std::vector<const Distribution *> 
 {
   Real sum1 = 0.0;
   Real quant1;
+  dof_id_type num_confg = _pmcmc->getNumberOfConfigParams();
+  std::vector<Real> out1(num_confg);
+  std::vector<Real> out2(num_confg);
+  for (unsigned int j = 0; j < num_confg; ++j)
+    out2[j] = outputs[j + num_confg];
+  dof_id_type count1 = 0;
   for (unsigned int i = 0; i < tv.size()-1; ++i)
   {
     quant1 = 0.0;
     for (unsigned int j = 0; j < priors.size(); ++j)
         quant1 += (std::log(priors[j]->pdf(inputs(i, j))) - std::log(priors[j]->pdf(inputs(tv.size(), j))));
-    for (unsigned int j = 0; j < _sampler.getNumberOfCols(); ++j)
-        quant1 += (likelihoods[j]->function(outputs[i]) - likelihoods[j]->function(outputs[tv.size()]))
+    for (unsigned int j = 0; j < num_confg; ++j)
+        out1[j] = outputs[j + count1];
+    for (unsigned int j = 0; j < _sampler.getNumberOfCols()-1; ++j)
+        quant1 += (likelihoods[j]->function(out1) - likelihoods[j]->function(out2));
     quant1 += std::log(1 / (tv.size()-1));
     tv[i] = quant1;
     sum1 += quant1;
+    count1 += num_confg - 1;
   }
-  tv[tv.size()] = sum1;
+  tv[tv.size()] = 1 - sum1;
+}
+
+std::vector<Real>
+resample(const DenseMatrix<Real> & given_inputs, const std::vector<Real> & weights)
+{
+  Real rnd = MooseRandom::rand();
+  unsigned int req_index = AdaptiveMonteCarloUtils::weightedResample(weights, rnd);
+  std::vector<Real> req_inputs(_sampler.getNumberOfCols());
+  for (unsigned int i = 0; i < _sampler.getNumberOfCols(); ++i)
+    req_inputs[i] = given_inputs(req_index, i);
+  return req_inputs;
 }
 
 void
 ParallelMarkovChainMonteCarloDecision::execute()
 {
-  
   DenseMatrix<Real> data_in(_sampler.getNumberOfRows(), _sampler.getNumberOfCols());
   for (dof_id_type ss = _sampler.getLocalRowBegin(); ss < _sampler.getLocalRowEnd(); ++ss)
   {
@@ -108,6 +128,6 @@ ParallelMarkovChainMonteCarloDecision::execute()
   tpm.resize(_sampler.getNumberOfRows());
   computeTransitionVector(tpm, _priors, _likelihoods);
 
-  resample(data_in, _inputs, tpm, _sampler.getNumberOfRows()-1);
-
+  for (unsigned int i = 0; i < _sampler.getNumberOfRows()-1; ++i)
+     _inputs[i] = resample(data_in, tpm);
 }
