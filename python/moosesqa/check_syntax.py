@@ -110,7 +110,7 @@ def file_is_stub(filename):
     if not content:
         return True
     # Old template method
-    elif '.md.template' in content:
+    elif re.search(r'stubs/.*\.md\.template', content):
         return True
     # Even older comment method
     elif '!! MOOSE Documentation Stub (remove this when content is added)' in content:
