@@ -11,7 +11,7 @@
       method = '!dbg'
       ad_indexing_type = 'global'
       required_python_packages = 'pandas matplotlib'
-      valgrind = HEAVY
+      valgrind = none
     []
     [quads]
       type = PythonUnitTest
@@ -21,7 +21,7 @@
       method = '!dbg'
       ad_indexing_type = 'global'
       required_python_packages = 'pandas matplotlib'
-      valgrind = HEAVY
+      valgrind = none
     []
   []
   [harmonic]
@@ -34,7 +34,7 @@
       method = '!dbg'
       ad_indexing_type = 'global'
       required_python_packages = 'pandas matplotlib'
-      valgrind = HEAVY
+      valgrind = none
     []
     [quads]
       type = PythonUnitTest
@@ -44,7 +44,7 @@
       method = '!dbg'
       ad_indexing_type = 'global'
       required_python_packages = 'pandas matplotlib'
-      valgrind = HEAVY
+      valgrind = none
     []
   []
 []
