@@ -46,7 +46,7 @@ class TestHarmonicQuads(unittest.TestCase):
                  markersize=8,
                  num_fitted_points=3,
                  slope_precision=1)
-        fig.save('quads-average.png')
+        fig.save('quads-harmonic.png')
 
         for _,value in fig.label_to_slope.items():
             self.assertTrue(fuzzyEqual(value, 2.0, .05))
