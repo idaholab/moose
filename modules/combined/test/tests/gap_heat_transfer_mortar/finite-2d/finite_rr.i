@@ -104,7 +104,7 @@ name = 'finite'
     scaling = 1e-7
   []
   [frictionless_normal_lm]
-    order = FIRST
+    order = ${order}
     block = 'frictionless_secondary_subdomain'
     use_dual = true
   []
@@ -263,8 +263,8 @@ name = 'finite'
   type = Transient
   solve_type = 'NEWTON'
   petsc_options = '-snes_converged_reason -ksp_converged_reason'
-  petsc_options_iname = '-pc_type -mat_mffd_err -pc_factor_shift_type -pc_factor_shift_amount -snes_max_it'
-  petsc_options_value = 'lu       1e-5          NONZERO               1e-15                   20'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount -snes_max_it'
+  petsc_options_value = 'lu       NONZERO               1e-15                   20'
   end_time = 13.5
   dt = 0.1
   dtmin = 0.1

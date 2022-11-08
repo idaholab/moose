@@ -35,7 +35,7 @@ ModularGapConductanceConstraint::validParams()
       gap_geometry_type,
       "Gap calculation type. The geometry type is used to compute "
       "gap distances and scale fluxes to ensure energy balance. If AUTO is selected, the gap "
-      "geometry is automatically set via the problem coordinate system.");
+      "geometry is automatically set via the mesh coordinate system.");
   params.addRangeCheckedParam<Real>("max_gap", 1.0e6, "max_gap>=0", "A maximum gap size");
   params.addParam<RealVectorValue>("cylinder_axis_point_1",
                                    "Start point for line defining cylindrical axis");

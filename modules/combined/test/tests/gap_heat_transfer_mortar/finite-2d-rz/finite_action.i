@@ -104,7 +104,6 @@ name = 'finite'
     formulation = mortar
     c_normal = 1e6
     use_dual = true
-    lm_order = FIRST
   []
 []
 
@@ -199,19 +198,12 @@ name = 'finite'
   []
 []
 
-[Preconditioning]
-  [smp]
-    type = SMP
-    full = true
-  []
-[]
-
 [Executioner]
   type = Transient
-  solve_type = 'PJFNK'
+  solve_type = 'NEWTON'
   petsc_options = '-snes_converged_reason -ksp_converged_reason'
-  petsc_options_iname = '-pc_type -mat_mffd_err -pc_factor_shift_type -pc_factor_shift_amount -snes_max_it'
-  petsc_options_value = 'lu       1e-5          NONZERO               1e-15                   20'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount -snes_max_it'
+  petsc_options_value = 'lu       NONZERO               1e-15                   20'
   end_time = 13.5
   dt = 0.1
   dtmin = 0.1
@@ -280,7 +272,6 @@ name = 'finite'
 
 [Outputs]
   file_base = ${name}
-  checkpoint = true
   [comp]
     type = CSV
     show = 'contact avg_temp'
