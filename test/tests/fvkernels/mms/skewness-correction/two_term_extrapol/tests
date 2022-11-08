@@ -9,6 +9,6 @@
     method = '!dbg'
     ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
-    valgrind = HEAVY
+    valgrind = none
   []
 []

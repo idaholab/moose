@@ -8,6 +8,7 @@
     skip_keys = 'number_of_parts part'
     input = 'pss.i'
     jsondiff = 'pss_out.json'
+    valgrind = none
   []
   [pss_errors]
     requirement = 'The system shall throw an error when '
