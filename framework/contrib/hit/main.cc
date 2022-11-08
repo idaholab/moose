@@ -879,7 +879,7 @@ profile(int argc, char ** argv)
   const unsigned int num_iteration = std::stoi(flags.val("n"));
   {
     Timer timer("Parsing input", num_iteration);
-    for (unsigned int i = i; i < num_iteration; ++i)
+    for (unsigned int i = 0; i < num_iteration; ++i)
       volatile auto root = hit::parse(positional[0], input);
   }
 
