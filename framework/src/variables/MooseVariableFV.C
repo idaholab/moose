@@ -497,12 +497,12 @@ MooseVariableFV<OutputType>::getElemValue(const Elem * const elem) const
 #endif
   mooseAssert(elem,
               "The elem shall exist! This typically occurs when the "
-              "user wants to evaluate nonexisting elements (nullptr) at physical boundaryies.");
+              "user wants to evaluate non-existing elements (nullptr) at physical boundaries.");
   mooseAssert(
       this->hasBlocks(elem->subdomain_id()),
-      "The elem shall have the same subdomain as the variable! This typically occurs when the "
+      "The variable should be defined on the element's subdomain! This typically occurs when the "
       "user wants to evaluate the elements right next to the boundary of two variables (block "
-      "boundary). The subdomain which is quarried: " +
+      "boundary). The subdomain which is querried: " +
           Moose::stringify(this->blockIDs()) + " the subdomain of the element " +
           std::to_string(elem->subdomain_id()));
 

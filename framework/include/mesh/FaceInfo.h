@@ -157,13 +157,13 @@ public:
    * Takes the ElemInfo of the neighbor cell and computes interpolation weights
    * together with other quantities used to generate spatial operators.
    */
-  void computeCoefficients(const ElemInfo * const neighbor_info);
+  void computeInternalCoefficients(const ElemInfo * const neighbor_info);
 
   /**
    * Computes the interpolation weights and similar quantities with the assumption
    * that the face is on a boundary.
    */
-  void computeCoefficients();
+  void computeBoundaryCoefficients();
 
   /**
    * Evaluates if a variable is defined on the elem side of the face

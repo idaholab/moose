@@ -127,6 +127,8 @@ VolumetricFlowRate::computeFaceInfoIntegral([[maybe_unused]] const FaceInfo * fi
   const auto vel = MetaPhysicL::raw_value(_rc_uo->getVelocity(_velocity_interp_method, *fi, _tid));
   const bool correct_skewness =
       _advected_interp_method == Moose::FV::InterpMethod::SkewCorrectedAverage;
+
+  // External faces for the advected quantity
   if (!fi->neighborPtr() || !_adv_quant->hasBlocks(fi->neighborPtr()->subdomain_id()))
   {
     const auto ssf = Moose::SingleSidedFaceArg({fi,

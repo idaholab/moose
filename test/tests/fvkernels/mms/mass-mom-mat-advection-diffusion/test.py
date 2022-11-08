@@ -11,7 +11,6 @@ class TestMassMomdAvectionDiffusion(unittest.TestCase):
         fig.save('mmm-advection-diffusion.png')
 
         for _,value in fig.label_to_slope.items():
-            print(value)
             self.assertTrue(fuzzyEqual(value, 2., .05))
 
 if __name__ == '__main__':

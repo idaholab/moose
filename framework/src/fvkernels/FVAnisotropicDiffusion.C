@@ -65,7 +65,7 @@ FVAnisotropicDiffusion::computeQpResidual()
                 _coeff(neighborFromFace()),
                 *_face_info,
                 true);
-  // Else we just use the boundary values (which can be various depending on how the diffusion
+  // Else we just use the boundary values (which depend on how the diffusion
   // coefficient is constructed)
   else
   {

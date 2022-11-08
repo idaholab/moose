@@ -3333,9 +3333,9 @@ MooseMesh::buildFiniteVolumeInfo() const
         // or is remote (so when we are on some sort of mesh boundary), we initiualize the ghost
         // cell and use it to compute the weights corresponding to the faceInfo.
         if (!neighbor || neighbor == remote_elem)
-          fi.computeCoefficients();
+          fi.computeBoundaryCoefficients();
         else
-          fi.computeCoefficients(&_elem_to_elem_info[neighbor]);
+          fi.computeInternalCoefficients(&_elem_to_elem_info[neighbor]);
 
         auto lit = side_map.find(Keytype(&fi.elem(), fi.elemSideID()));
         if (lit != side_map.end())

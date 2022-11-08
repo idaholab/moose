@@ -60,7 +60,7 @@ FaceInfo::FaceInfo(const ElemInfo * elem_info, unsigned int side)
 }
 
 void
-FaceInfo::computeCoefficients(const ElemInfo * const neighbor_info)
+FaceInfo::computeInternalCoefficients(const ElemInfo * const neighbor_info)
 {
   mooseAssert(neighbor_info,
               "We need a neighbor if we want to compute interpolation coefficients!");
@@ -81,7 +81,7 @@ FaceInfo::computeCoefficients(const ElemInfo * const neighbor_info)
 }
 
 void
-FaceInfo::computeCoefficients()
+FaceInfo::computeBoundaryCoefficients()
 {
   mooseAssert(!_neighbor_info, "This functions shall only be called on a boundary!");
 

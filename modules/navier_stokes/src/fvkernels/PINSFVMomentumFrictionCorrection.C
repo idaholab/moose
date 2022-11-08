@@ -109,7 +109,7 @@ PINSFVMomentumFrictionCorrection::gatherRCData(const FaceInfo & fi)
                 *_face_info,
                 true);
   }
-  // If not, we use the extrapllated values of the functors on the face
+  // If not, we use the extrapolated values of the functors on the face
   else
   {
     const auto face = makeFace(*_face_info,

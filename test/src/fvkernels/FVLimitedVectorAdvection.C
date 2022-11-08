@@ -54,10 +54,7 @@ FVLimitedVectorAdvection::computeQpResidual()
   if (_var.isInternalFace(*_face_info))
     phi_f = interpolate(_vector, face)(_index);
   else
-  {
-    const auto face = makeFace(*_face_info, _limiter_type, elem_is_upwind, faceArgSubdomains());
     phi_f = _var(face);
-  }
 
   return _normal * _velocity * phi_f;
 }
