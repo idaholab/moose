@@ -42,6 +42,7 @@
       command = 'therm_soln_compare.py'
       imagediff = 'therm_soln_compare.png'
       required_python_packages = 'pandas matplotlib'
+      valgrind = none
       detail = 'and plotting a comparison of the results.'
     []
   []
