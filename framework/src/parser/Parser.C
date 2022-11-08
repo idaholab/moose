@@ -1241,7 +1241,6 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
           in_global = true;
         }
       }
-
       if (found)
       {
         if (p.isPrivate(param_name) && !in_global)

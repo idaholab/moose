@@ -12,9 +12,17 @@
   
   [test_suppress_ignore]
     type = 'RunException'
-    input = 'suppresscheck.i'
+    input = 'suppress_check.i'
+    cli_args = "Adaptivity/Markers/boundary/use_displaced_mesh=true"
     expect_err = "The parameter 'Adaptivity/Markers/boundary/use_displaced_mesh' is a private parameter and should not be used in an input file."
-
+    mesh_mode = REPLICATED
+    requirement = 'The system shall error if a private / suppressed parameter is set in the input file.'
+  []
+  [test_ignore]
+    type = 'RunApp'
+    input = 'suppress_check.i'
+    mesh_mode = REPLICATED
     requirement = 'The system shall not apply global parameter options onto suppressed parameters.'
   []
+
 []

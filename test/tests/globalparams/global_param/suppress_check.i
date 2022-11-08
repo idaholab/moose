@@ -5,8 +5,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 5
-  ny = 5
+  nx = 1
+  ny = 1
 []
 
 [Variables]
@@ -18,21 +18,6 @@
   [diff]
     type = Diffusion
     variable = u
-  []
-[]
-
-[BCs]
-  [left]
-    type = DirichletBC
-    variable = u
-    boundary = left
-    value = 0
-  []
-  [right]
-    type = DirichletBC
-    variable = u
-    boundary = right
-    value = 1
   []
 []
 
@@ -53,9 +38,6 @@
       next_to = right
       distance = 0.35
       mark = refine
-
-      #suppressed params should still error properly when defined locally in their objects, so we set it true here
-      use_displaced_mesh = true
     []
   []
   initial_marker = boundary
