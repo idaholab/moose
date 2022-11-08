@@ -75,6 +75,7 @@
     command = "./latin_hypercube.py"
     check_files = latin_hypercube.pdf
     required_python_packages = 'pandas numpy matplotlib'
+    valgrind = NONE
 
     requirement = "The system shall include a utility that visually displays results of plotting "
                   "Latin Hypercube test."

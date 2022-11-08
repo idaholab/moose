@@ -8,6 +8,7 @@
     skip_keys = 'number_of_parts part'
     input = 'ais.i'
     jsondiff = 'ais_out.json'
+    valgrind = HEAVY
   []
   [ais_errors]
     requirement = 'The system shall throw an error when '

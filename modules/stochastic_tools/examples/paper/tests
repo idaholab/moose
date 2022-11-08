@@ -10,5 +10,6 @@
     requirement = "The system shall include scripts necessary to demonstrate scaling of stochastic execution methods."
     required_python_packages = 'pandas'
     executable_pattern = 'stochastic_tools*'
+    valgrind = none
   []
 []
