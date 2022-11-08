@@ -2,6 +2,7 @@
 
 This `UserObject` defines a kinetic rate for a kinetic species.  Usually the reaction for a kinetic species $A_{\bar{k}}$ is written:
 \begin{equation}
+\label{gen_kin_react_eqn}
 A_{\bar{k}} \rightleftharpoons \nu_{w\bar{k}}A_{w} + \sum_{i}\nu_{i\bar{k}}A_{i} + \sum_{k}\nu_{k\bar{k}}A_{k} + \sum_{m}\nu_{m\bar{k}}A_{m} + \nu_{p\bar{k}}A_{p} \ ,
 \end{equation}
 with equilibrium constant $K_{\bar{k}}$, and reaction rate $r$.  Further information can be found on the [theory](geochemistry/theory/index.md) page.
@@ -23,7 +24,7 @@ This is a rather complicated equation, and simple examples are given below.  In 
 - $\beta_{\alpha}$ is a dimensionless power.  The denominator of monod form, $(m_{\alpha}^{P_{\alpha}} + K^{P_{\alpha}})^{\beta_{\alpha}}$, may be omitted by simply setting $\beta_{\alpha} = 0$.
 - $K_{\alpha}$ (units: mol.kg$^{-1}$) is a half-saturation constant.
 - $Q$ is the [activity product](geochemistry_nomenclature.md) defined by the kinetic species' reaction in the database file
-- $K$ is the reaction's equilibrium constant defined in the database file.  This may be modified if the `GeochemistryKineticRate` object is used to model biologically-catalysed reactions.  When a microbe catalyses one mole of the reaction, it captures $E_{c}$ Joules of energy (units: J).  This means $K = K_{\mathrm{database}} - E_{c}/(RT\ln 10)$.
+- $K$ is the reaction's equilibrium constant defined in the database file.  This may be modified if the `GeochemistryKineticRate` object is used to model biologically-catalysed reactions.  When a microbe catalyses one mole of the reaction, it captures $E_{c}$ Joules of energy (units: J).  This means $K = K_{\mathrm{database}}\exp( - E_{c}/(RT))$.
 - $\theta$ and $\eta$ are dimensionless exponents.  If $\eta = 0$ then $\left|1 - \left(Q/K\right)^{\theta}\right|^{\eta} = 1$ irrespective of the value of $Q$, $K$ and $\theta$.
 - $E_{a}$ (units: J.mol$^{-1}$) is the activation energy
 - $R=8.314472\,$J.K$^{-1}$.mol$^{-1}$ is the gas constant
@@ -37,6 +38,13 @@ This is a rather complicated equation, and simple examples are given below.  In 
   - `raw`: $D=1$ irrespective of $Q$ and $K$.  This means dissolution will occur if $k>0$, while precipitation will occur if $k<0$.
   - `death`: $D=1$ irrespective of $Q$ and $K$.  This means dissolution will occur if $k>0$, while precipitation will occur if $k<0$.  In addition, no reactants will be consumed or produced by the kinetic reaction: only the mass of the kinetic species will change.  This is used to model the death of microbes in biologically-catalysed scenarios.
   
+
+In addition, there are auxillary inputs that do not impact the rate directly, but impact the resulting products:
+
+- `non_kinetic_biological_catalyst` is a primary or secondary species that may be created or destroyed in addition to the reactants and products in the kinetic reaction [gen_kin_react_eqn].  This is usually a biological species, hence the name "biological catalyst".  An example is the [sulfate reducer](bio_sulfate.md) model.
+- `non_kinetic_biological_efficiency` is the number of moles of the `non_kinetic_biological_catalyst` that are created per mole of [gen_kin_react_eqn] reaction turnover
+- `kinetic_biological_efficiency`: when one mole of the reaction [gen_kin_react_eqn] occurs then `kinetic_biological_efficiency` moles of $A_{\bar{k}}$ is *created*.  Obviously, this defaults to $-1$, but for [biogeochemical](theory/biogeochemistry.md) models, where $A_{\bar{k}}$ represents a microbe population that is catalysing a reaction, a positive value may be appropriate.  Examples are the [sulfate reducer](bio_sulfate.md), the [arsenate reducer](bio_arsenate.md) and the [aquifer zoning](bio_zoning.md) models.
+
 
 !alert note
 Note that more than one `GeochemistryKineticRate` can be prescribed to a single kinetic species.  The sum of all the individual rates defines the overall rate for each species (see Example 6).  Simply supply your [GeochemicalModelDefinition](GeochemicalModelDefinition.md) with a list of all the rates.
@@ -158,6 +166,43 @@ Then set
 - $E_{c} = 0$
 - `direction = both`
 
+## Example 8
+
+Suppose that a microbe is subject to mortality only, and no reaction products are produced:
+\begin{equation}
+r = k \times \mathrm{mass} \mathrm{\ \ \ (with\ no\ reaction\ products)} \ .
+\end{equation}
+Then set
+
+- `intrinsic_rate_constant = k`
+- `multiply_by_mass = true`
+- $\eta = 0$
+- `direction = death`
+
+An example where this is used is the [aquifer zoning](bio_zoning.md) model.
+
+## Example 9
+
+Suppose that a microbe catalyses a reaction at rate
+\begin{equation}
+\label{eqn.microbe,monod}
+r = kM \frac{m_{A}}{(m_{A} + K_{A})^{2}} \left(1 - \left(\frac{Q \exp(45000/RT)}{K} \right)^{1/5} \right) \ .
+\end{equation}
+Here $A$ is a basis or secondary equilibrium species.
+Then set
+
+- `intrinsic_rate_constant = k`
+- `multiply_by_mass = true`
+- `promoting_species_names = A`, `promoting_indices = 1`, `promoting_monod_indices = 2`, `promoting_half_saturation = KA`
+- `theta = 0.2`
+- `eta = 1`
+- `energy_captured = 45000`
+
+If, in addition, the 2 moles of microbe are created per 1 mole of reaction turnover, then
+
+- `kinetic_biological_efficiency = 2`
+
+This is similar to the [sulfate reducer](bio_sulfate.md) model.
 
 
 !syntax parameters /UserObjects/GeochemistryKineticRate

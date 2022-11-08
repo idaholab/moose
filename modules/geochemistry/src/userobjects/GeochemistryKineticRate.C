@@ -27,9 +27,10 @@ GeochemistryKineticRate::validParams()
       "area_quantity > 0.0",
       "The surface area of the kinetic species in m^2 (if multiply_by_mass = false) or the "
       "specific surface area of the kinetic species in m^2/g (if multiply_by_mass = true)");
-  params.addParam<bool>("multiply_by_mass",
-                        false,
-                        "Whether the rate should be multiplied by the kinetic_species mass");
+  params.addParam<bool>(
+      "multiply_by_mass",
+      false,
+      "Whether the rate should be multiplied by the kinetic_species mass (in grams)");
   params.addParam<Real>("kinetic_molal_index",
                         0.0,
                         "The rate is multiplied by kinetic_species_molality^kinetic_molal_index / "
@@ -97,7 +98,7 @@ GeochemistryKineticRate::validParams()
       "kinetic_biological_efficiency",
       -1,
       "This is used when modelling biologically-catalysed reactions, when the biomass is treated "
-      "as a kinetic species, and the reactants and reactant-products are in equilibrium in tne "
+      "as a kinetic species, and the reactants and reactant-products are in equilibrium in the "
       "aqueous solution.  When one mole of reaction is catalysed, the biomass increases by "
       "kinetic_biological_efficiency moles");
   params.addParam<Real>(

@@ -18,6 +18,7 @@ The geochemistry module is designed to interface easily with the porous-flow mod
 
 - [Theory, numerical solution technique and computational aspects](geochemistry/theory/index.md)
 - [Examples](geochemistry/tests_and_examples/index.md)
+- [Simulating biogeochemistry](theory/biogeochemistry.md)
 - [Description of input-file objects](geochemistry/systems.md)
 - [A to Z index of these webpages](geochemistry/contents.md)
 
