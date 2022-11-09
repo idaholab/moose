@@ -5,7 +5,7 @@
 #   libmesh/
 #   template/
 #   moose/
-{% set build = 3 %}
+{% set build = 4 %}
 {% set strbuild = "build_" + build|string %}
 {% set version = "4.0.2" %}
 
@@ -67,12 +67,10 @@ requirements:
     - {{ moose_mesalib }}       # [linux]
     - openssl <3
     - mpi 1.0 mpich
-    - clang-tools
 
 test:
   commands:
     - test -f $PREFIX/etc/conda/activate.d/activate_moose-mpich.sh
-    - git clang-format -h
 
 about:
   home: https://mooseframework.org/
