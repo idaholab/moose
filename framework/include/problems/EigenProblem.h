@@ -282,6 +282,8 @@ protected:
   Real _initial_eigenvalue;
 };
 
+#ifdef LIBMESH_HAVE_SLEPC
+
 inline NonlinearEigenSystem &
 EigenProblem::getNonlinearEigenSystem(const unsigned int nl_sys_num)
 {
@@ -295,3 +297,5 @@ EigenProblem::getCurrentNonlinearEigenSystem()
 {
   return *_nl_eigen;
 }
+
+#endif
