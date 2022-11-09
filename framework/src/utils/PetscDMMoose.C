@@ -667,9 +667,12 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
                 if (!is_on_current_block)
                   continue;
 
-                const dof_id_type index = node->dof_number(dmm->_nl->system().number(), v, 0);
-                if (index >= dofmap.first_dof() && index < dofmap.end_dof())
-                  indices.insert(index);
+                for (const auto nc : make_range(n_comp))
+                {
+                  const dof_id_type index = node->dof_number(dmm->_nl->system().number(), v, nc);
+                  if (index >= dofmap.first_dof() && index < dofmap.end_dof())
+                    indices.insert(index);
+                }
               }
             }
           }
@@ -698,11 +701,15 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
               continue;
 
             const Node * node = bnode->_node;
-            dof_id_type dof = node->dof_number(dmm->_nl->system().number(), v, 0);
+            const unsigned int n_comp = node->n_comp(dmm->_nl->system().number(), v);
+            for (const auto nc : make_range(n_comp))
+            {
+              dof_id_type dof = node->dof_number(dmm->_nl->system().number(), v, nc);
 
-            // might want to use variable_first/last_local_dof instead
-            if (dof >= dofmap.first_dof() && dof < dofmap.end_dof())
-              indices.insert(dof);
+              // might want to use variable_first/last_local_dof instead
+              if (dof >= dofmap.first_dof() && dof < dofmap.end_dof())
+                indices.insert(dof);
+            }
           }
         }
 
@@ -716,11 +723,15 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
             if (dmm->_unside_names->find(boundary_id) == dmm->_unside_names->end())
               continue;
             const Node * node = bnode->_node;
+            const unsigned int n_comp = node->n_comp(dmm->_nl->system().number(), v);
 
-            // might want to use variable_first/last_local_dof instead
-            dof_id_type dof = node->dof_number(dmm->_nl->system().number(), v, 0);
-            if (dof >= dofmap.first_dof() && dof < dofmap.end_dof())
-              unindices.insert(dof);
+            for (const auto nc : make_range(n_comp))
+            {
+              // might want to use variable_first/last_local_dof instead
+              dof_id_type dof = node->dof_number(dmm->_nl->system().number(), v, nc);
+              if (dof >= dofmap.first_dof() && dof < dofmap.end_dof())
+                unindices.insert(dof);
+            }
           }
         }
 
@@ -800,12 +811,16 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
               if (pinfo && pinfo->isCaptured())
               {
                 Node & secondary_node = dmm->_nl->system().get_mesh().node_ref(secondary_node_num);
-                dof_id_type dof = secondary_node.dof_number(dmm->_nl->system().number(), v, 0);
-                // might want to use variable_first/last_local_dof instead
-                if (dof >= dofmap.first_dof() && dof < dofmap.end_dof())
-                  indices.insert(dof);
-                else
-                  cached_indices.insert(dof); // cache nonlocal indices
+                const unsigned int n_comp = secondary_node.n_comp(dmm->_nl->system().number(), v);
+                for (const auto nc : make_range(n_comp))
+                {
+                  dof_id_type dof = secondary_node.dof_number(dmm->_nl->system().number(), v, nc);
+                  // might want to use variable_first/last_local_dof instead
+                  if (dof >= dofmap.first_dof() && dof < dofmap.end_dof())
+                    indices.insert(dof);
+                  else
+                    cached_indices.insert(dof); // cache nonlocal indices
+                }
                 // indices of secondary elements
                 evindices.clear();
 
@@ -904,12 +919,16 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
               if (pinfo && pinfo->isCaptured())
               {
                 Node & secondary_node = dmm->_nl->system().get_mesh().node_ref(secondary_node_num);
-                dof_id_type dof = secondary_node.dof_number(dmm->_nl->system().number(), v, 0);
-                // might want to use variable_first/last_local_dof instead
-                if (dof >= dofmap.first_dof() && dof < dofmap.end_dof())
-                  unindices.insert(dof);
-                else
-                  cached_unindices.insert(dof);
+                const unsigned int n_comp = secondary_node.n_comp(dmm->_nl->system().number(), v);
+                for (const auto nc : make_range(n_comp))
+                {
+                  dof_id_type dof = secondary_node.dof_number(dmm->_nl->system().number(), v, nc);
+                  // might want to use variable_first/last_local_dof instead
+                  if (dof >= dofmap.first_dof() && dof < dofmap.end_dof())
+                    unindices.insert(dof);
+                  else
+                    cached_unindices.insert(dof);
+                }
 
                 // indices for primary element
                 evindices.clear();
