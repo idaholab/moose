@@ -1,13 +1,13 @@
-a=1.1
+a = 1.1
 
 [Mesh]
-  [./gen_mesh]
+  [gen_mesh]
     type = GeneratedMeshGenerator
     dim = 1
     xmin = 2
     xmax = 3
     nx = 2
-  [../]
+  []
 []
 
 [Problem]
@@ -15,22 +15,22 @@ a=1.1
 []
 
 [Variables]
-  [./v]
+  [v]
     family = MONOMIAL
     order = CONSTANT
     fv = true
     initial_condition = 1
-  [../]
+  []
 []
 
 [FVKernels]
   # Flux kernel
-  [./advection]
+  [advection]
     type = FVAdvection
     variable = v
     velocity = '${a} 0 0'
     advected_interp_method = 'average'
-  [../]
+  []
   [body_v]
     type = FVBodyForce
     variable = v
@@ -39,27 +39,31 @@ a=1.1
 []
 
 [FVBCs]
-  [advection]
-    type = FVAdvectionFunctionBC
-    boundary = 'left right'
-    exact_solution = 'exact'
+  [left_u]
+    type = FVFunctionDirichletBC
+    boundary = 'left'
+    function = 'exact'
+    variable = v
+  []
+  [right_u]
+    type = FVConstantScalarOutflowBC
     variable = v
     velocity = '${a} 0 0'
-    advected_interp_method = 'average'
+    boundary = 'right'
   []
 []
 
 [Functions]
-[exact]
-  type = ParsedFunction
-  value = 'sin(x)'
-[]
-[forcing]
-  type = ParsedFunction
-  value = '(x*a*cos(x) + a*sin(x))/x'
-  vars = 'a'
-  vals = '${a}'
-[]
+  [exact]
+    type = ParsedFunction
+    value = 'sin(x)'
+  []
+  [forcing]
+    type = ParsedFunction
+    value = '(x*a*cos(x) + a*sin(x))/x'
+    vars = 'a'
+    vals = '${a}'
+  []
 []
 
 [Executioner]
@@ -71,17 +75,20 @@ a=1.1
 
 [Outputs]
   exodus = true
+  csv = true
 []
 
 [Postprocessors]
-  [./error]
+  [error]
     type = ElementL2Error
     variable = v
     function = exact
-    outputs = 'console'    execute_on = 'timestep_end'
-  [../]
+    outputs = 'console csv'
+    execute_on = 'timestep_end'
+  []
   [h]
     type = AverageElementSize
-    outputs = 'console'    execute_on = 'timestep_end'
+    outputs = 'console csv'
+    execute_on = 'timestep_end'
   []
 []

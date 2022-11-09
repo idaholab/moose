@@ -375,15 +375,9 @@ MooseVariableFV<OutputType>::computeFaceValues(const FaceInfo & fi)
     _neighbor_data->computeValuesFace(fi);
   }
   else if (facetype == FaceInfo::VarFaceNeighbors::ELEM)
-  {
     _element_data->computeValuesFace(fi);
-    _neighbor_data->computeGhostValuesFace(fi, *_element_data);
-  }
   else if (facetype == FaceInfo::VarFaceNeighbors::NEIGHBOR)
-  {
     _neighbor_data->computeValuesFace(fi);
-    _element_data->computeGhostValuesFace(fi, *_neighbor_data);
-  }
   else
     mooseError("robert wrote broken MooseVariableFV code");
 }
@@ -501,6 +495,16 @@ MooseVariableFV<OutputType>::getElemValue(const Elem * const elem) const
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("MooseVariableFV::getElemValue only supported for global AD indexing");
 #endif
+  mooseAssert(elem,
+              "The elem shall exist! This typically occurs when the "
+              "user wants to evaluate non-existing elements (nullptr) at physical boundaries.");
+  mooseAssert(
+      this->hasBlocks(elem->subdomain_id()),
+      "The variable should be defined on the element's subdomain! This typically occurs when the "
+      "user wants to evaluate the elements right next to the boundary of two variables (block "
+      "boundary). The subdomain which is queried: " +
+          Moose::stringify(this->blockIDs()) + " the subdomain of the element " +
+          std::to_string(elem->subdomain_id()));
 
   std::vector<dof_id_type> dof_indices;
   this->_dof_map.dof_indices(elem, dof_indices, _var_num);
@@ -517,27 +521,6 @@ MooseVariableFV<OutputType>::getElemValue(const Elem * const elem) const
     Moose::derivInsert(value.derivatives(), index, 1.);
 
   return value;
-}
-
-template <typename OutputType>
-ADReal
-MooseVariableFV<OutputType>::getNeighborValue(const Elem * const neighbor,
-                                              const FaceInfo & fi,
-                                              const ADReal & elem_value) const
-{
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("MooseVariableFV::getNeighborValue only supported for global AD indexing");
-#endif
-
-  if (neighbor && this->hasBlocks(neighbor->subdomain_id()))
-    return getElemValue(neighbor);
-  else
-    // If we don't have a neighbor, then we're along a boundary
-    // Linear interpolation: face_value = (elem_value + neighbor_value) / 2. Note that weights of
-    // 1/2 are perfectly appropriate here because we can arbitrarily put our ghost cell centroid
-    // anywhere and by convention we locate it such that a line drawn between the ghost cell
-    // centroid and the element centroid is perfectly bisected by the face centroid
-    return 2. * getBoundaryFaceValue(fi) - elem_value;
 }
 
 template <typename OutputType>
@@ -619,7 +602,8 @@ MooseVariableFV<OutputType>::isExtrapolatedBoundaryFace(const FaceInfo & fi) con
 
 template <typename OutputType>
 ADReal
-MooseVariableFV<OutputType>::getExtrapolatedBoundaryFaceValue(const FaceInfo & fi) const
+MooseVariableFV<OutputType>::getExtrapolatedBoundaryFaceValue(const FaceInfo & fi,
+                                                              bool two_term_expansion) const
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError(
@@ -632,7 +616,8 @@ MooseVariableFV<OutputType>::getExtrapolatedBoundaryFaceValue(const FaceInfo & f
   ADReal boundary_value;
   const auto & tup = Moose::FV::determineElemOneAndTwo(fi, *this);
   const Elem * const elem = std::get<0>(tup);
-  if (_two_term_boundary_expansion)
+
+  if (two_term_expansion)
   {
     const Point vector_to_face = std::get<2>(tup) ? (fi.faceCentroid() - fi.elemCentroid())
                                                   : (fi.faceCentroid() - fi.neighborCentroid());
@@ -657,7 +642,7 @@ MooseVariableFV<OutputType>::getBoundaryFaceValue(const FaceInfo & fi) const
   if (isDirichletBoundaryFace(fi))
     return getDirichletBoundaryFaceValue(fi);
   else if (isExtrapolatedBoundaryFace(fi).first)
-    return getExtrapolatedBoundaryFaceValue(fi);
+    return getExtrapolatedBoundaryFaceValue(fi, _two_term_boundary_expansion);
 
   mooseError("Unknown boundary face type!");
 }
@@ -705,10 +690,9 @@ MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi,
   mooseError("MooseVariableFV::uncorrectedAdGradSln only supported for global AD indexing");
 #endif
 
-  auto tup = Moose::FV::determineElemOneAndTwo(fi, *this);
-  const Elem * const elem_one = std::get<0>(tup);
-  const Elem * const elem_two = std::get<1>(tup);
-  const bool elem_one_is_fi_elem = std::get<2>(tup);
+  const bool var_defined_on_elem = this->hasBlocks(fi.elem().subdomain_id());
+  const Elem * const elem_one = var_defined_on_elem ? &fi.elem() : fi.neighborPtr();
+  const Elem * const elem_two = var_defined_on_elem ? fi.neighborPtr() : &fi.elem();
 
   const VectorValue<ADReal> elem_one_grad = adGradSln(elem_one, correct_skewness);
 
@@ -720,7 +704,7 @@ MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi,
     const VectorValue<ADReal> & elem_two_grad = adGradSln(elem_two, correct_skewness);
 
     // Uncorrected gradient value
-    return Moose::FV::linearInterpolation(elem_one_grad, elem_two_grad, fi, elem_one_is_fi_elem);
+    return Moose::FV::linearInterpolation(elem_one_grad, elem_two_grad, fi, var_defined_on_elem);
   }
   else
     return elem_one_grad;
@@ -734,26 +718,34 @@ MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi, const bool correct_s
   mooseError("MooseVariableFV::adGradSln only supported for global AD indexing");
 #endif
 
-  // Use a pointer to choose the right reference
-  auto face_grad = uncorrectedAdGradSln(fi, correct_skewness);
+  const bool var_defined_on_elem = this->hasBlocks(fi.elem().subdomain_id());
+  const Elem * const elem = &fi.elem();
+  const Elem * const neighbor = fi.neighborPtr();
 
-  auto tup = Moose::FV::determineElemOneAndTwo(fi, *this);
-  const Elem * const elem_one = std::get<0>(tup);
-  const Elem * const elem_two = std::get<1>(tup);
-  const bool elem_is_elem_one = std::get<2>(tup);
-  mooseAssert(elem_is_elem_one ? elem_one == &fi.elem() && elem_two == fi.neighborPtr()
-                               : elem_one == fi.neighborPtr() && elem_two == &fi.elem(),
-              "The determineElemOneAndTwo utility got the elem_is_elem_one value wrong.");
+  const bool is_internal_face = isInternalFace(fi);
 
-  const ADReal elem_one_value = getElemValue(elem_one);
-  const ADReal elem_two_value = getNeighborValue(elem_two, fi, elem_one_value);
-  const ADReal & elem_value = elem_is_elem_one ? elem_one_value : elem_two_value;
-  const ADReal & neighbor_value = elem_is_elem_one ? elem_two_value : elem_one_value;
+  const ADReal side_one_value =
+      (!is_internal_face && !var_defined_on_elem) ? getBoundaryFaceValue(fi) : getElemValue(elem);
+  const ADReal side_two_value = (var_defined_on_elem && !is_internal_face)
+                                    ? getBoundaryFaceValue(fi)
+                                    : getElemValue(neighbor);
 
-  // perform the correction. Note that direction is important here because we have a minus sign.
-  // Neighbor has to be neighbor, and elem has to be elem. Hence all the elem_is_elem_one logic
-  // above
-  face_grad += ((neighbor_value - elem_value) / fi.dCNMag() - face_grad * fi.eCN()) * fi.eCN();
+  const auto delta =
+      isInternalFace(fi) ? fi.dCNMag() : (fi.faceCentroid() - fi.elemCentroid()).norm();
+
+  // This is the component of the gradient which is parallel to the line connecting
+  // the cell centers. Therefore, we can use our second order, central difference
+  // scheme to approximate it.
+  auto face_grad = ((side_two_value - side_one_value) / delta) * fi.eCN();
+
+  // We only need nonorthogonal correctors in 2+ dimensions
+  if (_mesh.dimension() > 1)
+  {
+    // We are using an orthogonal approach for the non-orthogonal correction, for more information
+    // see Hrvoje Jasak's PhD Thesis (Imperial College, 1996)
+    const auto & interpolated_gradient = uncorrectedAdGradSln(fi, correct_skewness);
+    face_grad += interpolated_gradient - (interpolated_gradient * fi.eCN()) * fi.eCN();
+  }
 
   return face_grad;
 }
@@ -805,14 +797,18 @@ MooseVariableFV<OutputType>::evaluate(const FaceArg & face,
   mooseAssert(state == 0, "Only current time state supported.");
   const FaceInfo * const fi = face.fi;
   mooseAssert(fi, "The face information must be non-null");
-  if (isExtrapolatedBoundaryFace(*fi).first)
-    return getExtrapolatedBoundaryFaceValue(*fi);
-  else if (isInternalFace(*fi))
+  if (isInternalFace(*fi))
     return Moose::FV::interpolate(*this, face);
   else
   {
-    mooseAssert(isDirichletBoundaryFace(*fi), "We've run out of face types");
-    return getDirichletBoundaryFaceValue(*fi);
+    const bool var_defined_on_elem = this->hasBlocks(fi->elem().subdomain_id());
+    Moose::SingleSidedFaceArg ssfa = {fi,
+                                      face.limiter_type,
+                                      face.elem_is_upwind,
+                                      face.correct_skewness,
+                                      var_defined_on_elem ? face.elem_sub_id
+                                                          : face.neighbor_sub_id};
+    return this->evaluate(ssfa, 0);
   }
 }
 
@@ -825,7 +821,15 @@ MooseVariableFV<OutputType>::evaluate(const SingleSidedFaceArg & face,
   const FaceInfo * const fi = face.fi;
   mooseAssert(fi, "The face information must be non-null");
   if (isExtrapolatedBoundaryFace(*fi).first)
-    return getExtrapolatedBoundaryFaceValue(*fi);
+  {
+    // We do this to ensure that given an upwind scheme we just use the upwind cell value
+    // instead of linear extrapolation
+    bool linear_extrapolation = _two_term_boundary_expansion;
+    if (face.limiter_type == Moose::FV::LimiterType::Upwind && face.elem_is_upwind)
+      linear_extrapolation = false;
+
+    return getExtrapolatedBoundaryFaceValue(*fi, linear_extrapolation);
+  }
   else if (isInternalFace(*fi))
     return getInternalFaceValue(face);
   else
@@ -843,18 +847,7 @@ MooseVariableFV<OutputType>::evaluate(const ElemFromFaceArg & elem_from_face, un
   mooseAssert(requested_elem != remote_elem,
               "If the requested element is remote then I think we've messed up our ghosting");
 
-  if (requested_elem && this->hasBlocks(requested_elem->subdomain_id()))
-    return getElemValue(requested_elem);
-  else
-  {
-    const FaceInfo * const fi = elem_from_face.fi;
-    mooseAssert(fi, "We need a FaceInfo");
-    mooseAssert((requested_elem == &fi->elem()) || (requested_elem == fi->neighborPtr()),
-                "The requested element should match something from the FaceInfo");
-    const Elem * const elem_across =
-        (requested_elem == &fi->elem()) ? fi->neighborPtr() : &fi->elem();
-    return getNeighborValue(requested_elem, *fi, getElemValue(elem_across));
-  }
+  return getElemValue(requested_elem);
 }
 
 template <typename OutputType>

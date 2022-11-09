@@ -57,12 +57,21 @@ FVAnisotropicDiffusion::computeQpResidual()
       *_face_info, _var.faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
 
   ADRealVectorValue coeff;
-  interpolate(_coeff_interp_method,
-              coeff,
-              _coeff(elemFromFace()),
-              _coeff(neighborFromFace()),
-              *_face_info,
-              true);
+  // If we are on internal faces, we interpolate the diffusivity as usual
+  if (_var.isInternalFace(*_face_info))
+    interpolate(_coeff_interp_method,
+                coeff,
+                _coeff(elemFromFace()),
+                _coeff(neighborFromFace()),
+                *_face_info,
+                true);
+  // Else we just use the boundary values (which depend on how the diffusion
+  // coefficient is constructed)
+  else
+  {
+    const auto face = singleSidedFaceArg();
+    coeff = _coeff(face);
+  }
 
   ADReal r = 0;
   for (const auto i : make_range(Moose::dim))

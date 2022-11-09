@@ -22,7 +22,7 @@
     type = Exodiff
     input = fv_euler.i
     exodiff = ssf-caching.e
-    cli_args = "Outputs/file_base=ssf-caching FVBCs/right_vel/use_ssf=true FVBCs/adv_rho/use_ssf=true Materials/euler_material/execute_on='linear nonlinear'"
+    cli_args = "Outputs/file_base=ssf-caching Materials/euler_material/execute_on='linear nonlinear'"
     ad_indexing_type = 'global'
     requirement = 'The system shall support caching of functor evaluations performed with boundary face arguments.'
     issues = '#20470'

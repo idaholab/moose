@@ -132,21 +132,20 @@ VolumetricFlowRate::computeFaceInfoIntegral([[maybe_unused]] const FaceInfo * fi
   if (!fi->neighborPtr() || !_adv_quant->hasBlocks(fi->neighborPtr()->subdomain_id()))
   {
     const auto ssf = Moose::SingleSidedFaceArg({fi,
-                                                Moose::FV::LimiterType::CentralDifference,
-                                                true,
+                                                limiterType(_advected_interp_method),
+                                                MetaPhysicL::raw_value(vel) * fi->normal() > 0,
                                                 correct_skewness,
                                                 _current_elem->subdomain_id()});
     return fi->normal() * MetaPhysicL::raw_value((*_adv_quant)(ssf)) * vel;
   }
-  // Internal faces
   else
   {
     const auto adv_quant_face = MetaPhysicL::raw_value((*_adv_quant)(
         Moose::FV::makeFace(*fi,
                             Moose::FV::limiterType(_advected_interp_method),
                             MetaPhysicL::raw_value(vel) * fi->normal() > 0,
-                            std::make_pair(fi->elemSubdomainID(), fi->neighborSubdomainID()))));
-
+                            std::make_pair(fi->elemSubdomainID(), fi->neighborSubdomainID()),
+                            correct_skewness)));
     return fi->normal() * adv_quant_face * vel;
   }
 

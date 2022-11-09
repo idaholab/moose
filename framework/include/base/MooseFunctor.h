@@ -370,6 +370,11 @@ public:
   }
 
   /**
+   * Returns true if the face is an internal face
+   */
+  virtual bool isInternalFace(const FaceInfo &) const { mooseError("not implemented"); }
+
+  /**
    * Returns true if this functor is a constant
    */
   virtual bool isConstant() const { return false; }

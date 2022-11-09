@@ -3290,7 +3290,6 @@ MooseMesh::buildFiniteVolumeInfo() const
   _elem_side_to_face_info.clear();
 
   _elem_to_elem_info.clear();
-  _elem_to_ghost_info.clear();
 
   // by performing the element ID comparison check in the below loop, we are ensuring that we never
   // double count face contributions. If a face lies along a process boundary, the only process that
@@ -3302,18 +3301,7 @@ MooseMesh::buildFiniteVolumeInfo() const
   // We prepare a map connecting the Elem* and the corresponding ElemInfo
   // for the active elements.
   for (const Elem * elem : as_range(begin, end))
-  {
-    // We fill the vector with the real ElemInfo-s and the corresponding map first
     _elem_to_elem_info.emplace(elem, elem);
-
-    // Then we fill a map with the ElemInfo shells for the ghost elements
-    for (unsigned int side = 0; side < elem->n_sides(); ++side)
-    {
-      const Elem * neighbor = elem->neighbor_ptr(side);
-      if (!neighbor || neighbor == remote_elem)
-        _elem_to_ghost_info.try_emplace(std::make_pair(elem, side));
-    }
-  }
 
   for (const Elem * elem : as_range(begin, end))
   {
@@ -3345,13 +3333,9 @@ MooseMesh::buildFiniteVolumeInfo() const
         // or is remote (so when we are on some sort of mesh boundary), we initiualize the ghost
         // cell and use it to compute the weights corresponding to the faceInfo.
         if (!neighbor || neighbor == remote_elem)
-        {
-          auto & ghost_cell = _elem_to_ghost_info[std::make_pair(elem, side)];
-          ghost_cell.initialize(_elem_to_elem_info[elem], fi);
-          fi.computeCoefficients(&ghost_cell);
-        }
+          fi.computeBoundaryCoefficients();
         else
-          fi.computeCoefficients(&_elem_to_elem_info[neighbor]);
+          fi.computeInternalCoefficients(&_elem_to_elem_info[neighbor]);
 
         auto lit = side_map.find(Keytype(&fi.elem(), fi.elemSideID()));
         if (lit != side_map.end())

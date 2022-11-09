@@ -22,7 +22,7 @@ FaceInfo::FaceInfo(const ElemInfo * elem_info, unsigned int side)
     _processor_id(_elem_info->elem()->processor_id()),
     _id(std::make_pair(_elem_info->elem()->id(), side)),
     _elem_side_id(side),
-    _neighbor_side_id(std::numeric_limits<unsigned int>::max()),
+    _neighbor_side_id(libMesh::invalid_uint),
     _gc(0.5)
 {
   // Compute face-related quantities
@@ -60,16 +60,12 @@ FaceInfo::FaceInfo(const ElemInfo * elem_info, unsigned int side)
 }
 
 void
-FaceInfo::computeCoefficients(const ElemInfo * const neighbor_info)
+FaceInfo::computeInternalCoefficients(const ElemInfo * const neighbor_info)
 {
   mooseAssert(neighbor_info,
               "We need a neighbor if we want to compute interpolation coefficients!");
   _neighbor_info = neighbor_info;
-
-  if (_neighbor_info->isGhost())
-    _neighbor_side_id = libMesh::invalid_uint;
-  else
-    _neighbor_side_id = _neighbor_info->elem()->which_neighbor_am_i(_elem_info->elem());
+  _neighbor_side_id = _neighbor_info->elem()->which_neighbor_am_i(_elem_info->elem());
 
   // Setup quantities used for the approximation of the spatial derivatives
   _d_cn = _neighbor_info->centroid() - _elem_info->centroid();
@@ -82,6 +78,20 @@ FaceInfo::computeCoefficients(const ElemInfo * const neighbor_info)
 
   // For interpolation coefficients
   _gc = (_neighbor_info->centroid() - r_intersection).norm() / _d_cn_mag;
+}
+
+void
+FaceInfo::computeBoundaryCoefficients()
+{
+  mooseAssert(!_neighbor_info, "This functions shall only be called on a boundary!");
+
+  // Setup quantities used for the approximation of the spatial derivatives
+  _d_cn = _face_centroid - _elem_info->centroid();
+  _d_cn_mag = _d_cn.norm();
+  _e_cn = _d_cn / _d_cn_mag;
+
+  // For interpolation coefficients
+  _gc = 1.0;
 }
 
 Point

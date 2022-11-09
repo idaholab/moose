@@ -1383,8 +1383,6 @@ private:
   /// FaceInfo objects accessible from this process
   mutable std::vector<FaceInfo> _all_face_info;
 
-  /// Map storing the ElemInfo-s of the ghost elements
-  mutable std::unordered_map<std::pair<const Elem *, unsigned int>, ElemInfo> _elem_to_ghost_info;
   /// Map connecting elems with their corresponding ElemInfo
   mutable std::unordered_map<const Elem *, ElemInfo> _elem_to_elem_info;
 
