@@ -6,7 +6,3 @@
     elem_type = HEX27
   []
 []
-
-[Outputs]
-  exodus = true
-[]

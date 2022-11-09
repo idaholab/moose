@@ -6,7 +6,3 @@
     n_smooth = 1
   []
 []
-
-[Outputs]
-  exodus = true
-[]

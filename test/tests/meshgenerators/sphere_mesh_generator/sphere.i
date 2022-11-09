@@ -5,7 +5,3 @@
     nr = 2
   []
 []
-
-[Outputs]
-  exodus = true
-[]
