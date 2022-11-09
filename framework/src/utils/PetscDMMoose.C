@@ -1105,6 +1105,10 @@ DMCreateFieldDecomposition_Moose(
       ierr = PetscObjectReference((PetscObject)(dinfo._rembedding));
       CHKERRQ(ierr);
       (*islist)[d] = dinfo._rembedding;
+      PetscInt is_size;
+      ISGetLocalSize(dinfo._rembedding, &is_size);
+      std::cout << "Split '" << std::to_string(d) << "' has local size " << std::to_string(is_size)
+                << " on processor " << dmm->_nl->processor_id() << std::endl;
     }
     if (dmlist)
     {
