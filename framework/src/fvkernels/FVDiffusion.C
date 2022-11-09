@@ -65,9 +65,9 @@ FVDiffusion::computeQpResidual()
   // face arguments
   else
   {
-    const auto face =
-        makeFace(*_face_info, LimiterType::CentralDifference, true, faceArgSubdomains());
+    const auto face = singleSidedFaceArg();
     coeff = _coeff(face);
   }
+
   return -1 * coeff * dudn;
 }

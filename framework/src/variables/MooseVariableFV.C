@@ -495,6 +495,16 @@ MooseVariableFV<OutputType>::getElemValue(const Elem * const elem) const
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("MooseVariableFV::getElemValue only supported for global AD indexing");
 #endif
+  mooseAssert(elem,
+              "The elem shall exist! This typically occurs when the "
+              "user wants to evaluate nonexisting elements (nullptr) at physical boundaryies.");
+  mooseAssert(
+      this->hasBlocks(elem->subdomain_id()),
+      "The elem shall have the same subdomain as the variable! This typically occurs when the "
+      "user wants to evaluate the elements right next to the boundary of two variables (block "
+      "boundary). The subdomain which is quarried: " +
+          Moose::stringify(this->blockIDs()) + " the subdomain of the element " +
+          std::to_string(elem->subdomain_id()));
 
   std::vector<dof_id_type> dof_indices;
   this->_dof_map.dof_indices(elem, dof_indices, _var_num);
@@ -511,21 +521,6 @@ MooseVariableFV<OutputType>::getElemValue(const Elem * const elem) const
     Moose::derivInsert(value.derivatives(), index, 1.);
 
   return value;
-}
-
-template <typename OutputType>
-ADReal
-MooseVariableFV<OutputType>::getNeighborValue(const Elem * const neighbor,
-                                              const FaceInfo & fi) const
-{
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("MooseVariableFV::getNeighborValue only supported for global AD indexing");
-#endif
-
-  if (neighbor && this->hasBlocks(neighbor->subdomain_id()))
-    return getElemValue(neighbor);
-  else
-    return getBoundaryFaceValue(fi);
 }
 
 template <typename OutputType>
@@ -727,10 +722,13 @@ MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi, const bool correct_s
   const Elem * const elem = &fi.elem();
   const Elem * const neighbor = fi.neighborPtr();
 
+  const bool is_internal_face = isInternalFace(fi);
+
   const ADReal side_one_value =
-      var_defined_on_elem ? getElemValue(elem) : getNeighborValue(elem, fi);
-  const ADReal side_two_value =
-      var_defined_on_elem ? getNeighborValue(neighbor, fi) : getElemValue(neighbor);
+      (!is_internal_face && !var_defined_on_elem) ? getBoundaryFaceValue(fi) : getElemValue(elem);
+  const ADReal side_two_value = (var_defined_on_elem && !is_internal_face)
+                                    ? getBoundaryFaceValue(fi)
+                                    : getElemValue(neighbor);
 
   const auto delta =
       isInternalFace(fi) ? fi.dCNMag() : (fi.faceCentroid() - fi.elemCentroid()).norm();
@@ -815,6 +813,8 @@ MooseVariableFV<OutputType>::evaluate(const SingleSidedFaceArg & face,
   mooseAssert(fi, "The face information must be non-null");
   if (isExtrapolatedBoundaryFace(*fi).first)
   {
+    // We do this to ensure that given an upwind scheme we just use the upwind cell value
+    // instead of linear extrapolation
     bool linear_extrapolation = _two_term_boundary_expansion;
     if (face.limiter_type == Moose::FV::LimiterType::Upwind && face.elem_is_upwind)
       linear_extrapolation = false;
@@ -838,17 +838,7 @@ MooseVariableFV<OutputType>::evaluate(const ElemFromFaceArg & elem_from_face, un
   mooseAssert(requested_elem != remote_elem,
               "If the requested element is remote then I think we've messed up our ghosting");
 
-  if (requested_elem && this->hasBlocks(requested_elem->subdomain_id()))
-    return getElemValue(requested_elem);
-  else
-  {
-    const FaceInfo * const fi = elem_from_face.fi;
-    mooseAssert(fi, "We need a FaceInfo");
-    mooseAssert((requested_elem == &fi->elem()) || (requested_elem == fi->neighborPtr()),
-                "The requested element should match something from the FaceInfo");
-
-    return getNeighborValue(requested_elem, *fi);
-  }
+  return getElemValue(requested_elem);
 }
 
 template <typename OutputType>
