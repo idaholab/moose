@@ -176,13 +176,14 @@ def print_output(args, meta):
                 break
     elif args.dependencies:
         for zip_key in ENTITIES:
+            if zip_key == args.library:
+                break
             if args.tag:
                 formated.append(f'{zip_key}-{meta[zip_key]["TAG"][0]}')
             else:
                 formated.append(f'moose-{zip_key}/{zip_key}-'
                                 f'{platform.machine()}:{meta[zip_key]["HASH"][0]}')
-            if zip_key == args.library:
-                break
+        formated.reverse()
     else:
         formated.append(meta[args.library]["HASH"][0])
 
