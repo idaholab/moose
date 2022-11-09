@@ -2025,7 +2025,15 @@ DMSetFromOptions_Moose(DM dm) // < 3.6.0
                      DMMOOSE);
   if (!dmm->_nl)
     SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_ARG_WRONGSTATE, "No Moose system set for DM_Moose");
+// PETSc changed macro definitions in 3.18; the former correct usage
+// is now a compiler error and the new usage is now a compiler
+// warning.
+#if !PETSC_VERSION_LESS_THAN(3, 18, 0)
   PetscOptionsBegin(((PetscObject)dm)->comm, ((PetscObject)dm)->prefix, "DMMoose options", "DM");
+#else
+  ierr = PetscOptionsBegin(
+      ((PetscObject)dm)->comm, ((PetscObject)dm)->prefix, "DMMoose options", "DM");
+#endif
   std::string opt, help;
   PetscInt maxvars = dmm->_nl->system().get_dof_map().n_variables();
   char ** vars;
