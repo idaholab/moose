@@ -171,7 +171,7 @@
     recover = false
   []
   [hex_single_assembly_ducted]
-    requirement = 'The system shall generate a 2D hexagonal homogenized pin mesh that is treated as a single assembly'
+    requirement = 'The system shall generate a 2D hexagonal ducted pin mesh that is treated as a single assembly'
     type = 'Exodiff'
     input = 'pin_only.i'
     cli_args = "Mesh/rmp/geom=Hex
@@ -189,7 +189,7 @@
     recover = false
   []
   [cart_single_assembly_ducted]
-    requirement = 'The system shall generate a 2D hexagonal homogenized pin mesh that is treated as a single assembly'
+    requirement = 'The system shall generate a 2D Cartesian ducted pin mesh that is treated as a single assembly'
     type = 'Exodiff'
     input = 'pin_only.i'
     cli_args = "Mesh/pin1/use_as_assembly=true

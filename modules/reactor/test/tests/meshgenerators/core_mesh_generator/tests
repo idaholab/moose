@@ -82,7 +82,7 @@
     recover = false
   []
   [single_assembly_square_core]
-    requirement = 'The system shall generate a full 3D square core mesh with 3 pin types and 2 assembly types'
+    requirement = 'The system shall generate a full 3D square core mesh with 2 single assembly types'
     type = 'Exodiff'
     input = 'core.i'
     cli_args = "Mesh/inactive='pin3 amg1 amg2'
@@ -103,7 +103,7 @@
     recover = false
   []
   [single_assembly_hex_core_empty]
-    requirement = 'The system shall generate a full 3D square core mesh with 3 pin types and 2 assembly types'
+    requirement = 'The system shall generate a full 3D hexagonal core mesh with 2 single assembly types'
     type = 'Exodiff'
     input = 'core.i'
     cli_args = "Mesh/inactive='pin3 amg1 amg2'

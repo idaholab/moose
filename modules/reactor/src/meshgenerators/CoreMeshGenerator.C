@@ -72,7 +72,8 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
       mooseError("The name of all reactor_params objects should be identical across all pins in "
                  "the input assemblies.\n");
     if (getMeshProperty<bool>("homogenized_assembly", _inputs[i]) != assembly_homogenization)
-      mooseError("All assemblies in the core must be homogenized if assembly homogenization is used\n");
+      mooseError(
+          "All assemblies in the core must be homogenized if assembly homogenization is used\n");
   }
 
   // Initialize ReactorMeshParams object stored in pin input
@@ -195,12 +196,9 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
           auto params = _app.getFactory().getValidParams("SimpleHexagonGenerator");
 
           params.set<Real>("hexagon_size") = getReactorParam<Real>("assembly_pitch") / 2.0;
-          params.set<subdomain_id_type>("block_id") =
-              UINT16_MAX - 1;
+          params.set<subdomain_id_type>("block_id") = UINT16_MAX - 1;
 
-          addMeshSubgenerator("SimpleHexagonGenerator",
-                              std::string(_empty_key),
-                              params);
+          addMeshSubgenerator("SimpleHexagonGenerator", std::string(_empty_key), params);
         }
         else
         {

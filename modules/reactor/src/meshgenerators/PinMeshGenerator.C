@@ -69,12 +69,10 @@ PinMeshGenerator::validParams()
                         "Determines if this is the final step in the geometry construction"
                         " and extrudes the 2D geometry to 3D. If this is true then this mesh "
                         "cannot be used in further mesh building in the Reactor workflow");
-  params.addParam<bool>("homogenized",
-                        false,
-                        "Determines whether homogenized pin mesh should be generated");
-  params.addParam<bool>("use_as_assembly",
-                        false,
-                        "Determines whether pin mesh should be used as an assembly mesh");
+  params.addParam<bool>(
+      "homogenized", false, "Determines whether homogenized pin mesh should be generated");
+  params.addParam<bool>(
+      "use_as_assembly", false, "Determines whether pin mesh should be used as an assembly mesh");
 
   params.addParam<bool>(
       "quad_center_elements", true, "Whether the center elements are quad or triangular.");
@@ -97,13 +95,14 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
   : ReactorGeometryMeshBuilderBase(parameters),
     _pin_type(getParam<subdomain_id_type>("pin_type")),
     _pitch(getParam<Real>("pitch")),
-    _num_sectors(isParamValid("num_sectors") ? getParam<unsigned int>("num_sectors")
-                                             : 0),
+    _num_sectors(isParamValid("num_sectors") ? getParam<unsigned int>("num_sectors") : 0),
     _ring_radii(isParamValid("ring_radii") ? getParam<std::vector<Real>>("ring_radii")
                                            : std::vector<Real>()),
     _duct_halfpitch(isParamValid("duct_halfpitch") ? getParam<std::vector<Real>>("duct_halfpitch")
                                                    : std::vector<Real>()),
-    _intervals(isParamValid("mesh_intervals") ? getParam<std::vector<unsigned int>>("mesh_intervals") : std::vector<unsigned int>{1}),
+    _intervals(isParamValid("mesh_intervals")
+                   ? getParam<std::vector<unsigned int>>("mesh_intervals")
+                   : std::vector<unsigned int>{1}),
     _region_ids(isParamValid("region_ids")
                     ? getParam<std::vector<std::vector<subdomain_id_type>>>("region_ids")
                     : std::vector<std::vector<subdomain_id_type>>()),
@@ -125,7 +124,8 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
   {
     auto assembly_pitch = getReactorParam<Real>("assembly_pitch");
     if (assembly_pitch != _pitch)
-      mooseError("Pitch defined in PinMeshGenerator must match assembly_pitch defined in ReactorMeshParams if use_as_assembly is set to true");
+      mooseError("Pitch defined in PinMeshGenerator must match assembly_pitch defined in "
+                 "ReactorMeshParams if use_as_assembly is set to true");
   }
 
   if (_extrude && _mesh_dimensions != 3)
@@ -137,20 +137,24 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
 
   if (_homogenized)
   {
-    const std::vector<std::string> disallowed_parameters = {"num_sectors", "ring_radii",
-                                                            "duct_halfpitch", "mesh_intervals"};
+    if (_mesh_geometry == "Square")
+      mooseError("Homogenization in PinMeshGenerator is only supported for hexagonal geometries");
+    const std::vector<std::string> disallowed_parameters = {
+        "num_sectors", "ring_radii", "duct_halfpitch", "mesh_intervals"};
     for (const auto & parameter : disallowed_parameters)
       if (isParamValid(parameter))
-      mooseError("Parameter " + parameter + " should not be defined for a homogenized pin mesh");
+        mooseError("Parameter " + parameter + " should not be defined for a homogenized pin mesh");
   }
   else
   {
     if (_num_sectors == 0)
-      mooseError("Number of sectors must be assigned with parameter num_sectors for non-homogenized pins");
+      mooseError(
+          "Number of sectors must be assigned with parameter num_sectors for non-homogenized pins");
     if (_intervals.size() != (_ring_radii.size() + _duct_halfpitch.size() + 1))
-      mooseError("The number of mesh intervals must be equal to the number of annular regions + the "
-                 "number of duct regions + 1"
-                 " for the region between the rings and ducts\n");
+      mooseError(
+          "The number of mesh intervals must be equal to the number of annular regions + the "
+          "number of duct regions + 1"
+          " for the region between the rings and ducts\n");
   }
 
   if (isParamValid("region_ids"))
@@ -190,14 +194,15 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
 
   if (_homogenized)
   {
-    // TODO account for Cartesian pin
     auto params = _app.getFactory().getValidParams("SimpleHexagonGenerator");
 
     params.set<Real>("hexagon_size") = _pitch / 2.0;
     params.set<boundary_id_type>("external_boundary_id") = 20000 + _pin_type;
-    const auto boundary_name = _is_assembly ? "outer_assembly_" + std::to_string(_pin_type) : "outer_pin_" + std::to_string(_pin_type);
+    const auto boundary_name = _is_assembly ? "outer_assembly_" + std::to_string(_pin_type)
+                                            : "outer_pin_" + std::to_string(_pin_type);
     params.set<std::string>("external_boundary_name") = boundary_name;
-    params.set<subdomain_id_type>("block_id") = _quad_center ? pin_block_id_start : pin_block_id_tri;
+    params.set<subdomain_id_type>("block_id") =
+        _quad_center ? pin_block_id_start : pin_block_id_tri;
     params.set<MooseEnum>("element_type") = _quad_center ? "QUAD" : "TRI";
     auto block_name = "RGMB_PIN" + std::to_string(_pin_type) + "_R0";
     if (_quad_center)
@@ -309,7 +314,8 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       params.set<MooseEnum>("polygon_size_style") = "apothem";
       params.set<Real>("polygon_size") = _pitch / 2.0;
       params.set<boundary_id_type>("external_boundary_id") = 20000 + _pin_type;
-      const auto boundary_name = _is_assembly ? "outer_assembly_" + std::to_string(_pin_type) : "outer_pin_" + std::to_string(_pin_type);
+      const auto boundary_name = _is_assembly ? "outer_assembly_" + std::to_string(_pin_type)
+                                              : "outer_pin_" + std::to_string(_pin_type);
       params.set<std::string>("external_boundary_name") = boundary_name;
       bool flat_side_up = (_mesh_geometry == "Square");
       params.set<bool>("flat_side_up") = flat_side_up;
@@ -482,7 +488,9 @@ PinMeshGenerator::generate()
   std::string assembly_type_id_name = "assembly_type_id";
   std::string plane_id_name = "plane_id";
   std::string radial_id_name = "radial_id";
-  const std::string default_block_name = std::string("RGMB_") + (_is_assembly ? std::string("ASSEMBLY_") : std::string("PIN_")) + std::to_string(_pin_type);
+  const std::string default_block_name =
+      std::string("RGMB_") + (_is_assembly ? std::string("ASSEMBLY_") : std::string("PIN_")) +
+      std::to_string(_pin_type);
 
   auto region_id_int = getElemIntegerFromMesh(*(*_build_mesh), region_id_name);
   auto radial_id_int = getElemIntegerFromMesh(*(*_build_mesh), radial_id_name);
