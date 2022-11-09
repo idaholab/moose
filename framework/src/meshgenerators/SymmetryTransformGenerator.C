@@ -10,6 +10,7 @@
 #include "SymmetryTransformGenerator.h"
 #include "CastUniquePointer.h"
 #include "MooseUtils.h"
+#include "libmesh/mesh_modification.h"
 
 registerMooseObject("MooseApp", SymmetryTransformGenerator);
 
@@ -91,6 +92,9 @@ SymmetryTransformGenerator::generate()
     (*node)(1) = location_vec(1);
     (*node)(2) = location_vec(2);
   }
+
+  // Fix flipped orientation from the symmetry
+  MeshTools::Modification::orient_elements(*mesh);
 
   if (_stitch_boundaries_pairs.size() > 0)
   {
