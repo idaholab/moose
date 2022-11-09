@@ -998,6 +998,9 @@ DMCreateFieldDecomposition_Moose(
   DM_Moose * dmm = (DM_Moose *)(dm->data);
 
   PetscFunctionBegin;
+
+  PetscInt split_size_sum = 0;
+
   /* Only called after DMSetUp(). */
   if (!dmm->_splitlocs)
     PetscFunctionReturn(0);
@@ -1107,6 +1110,7 @@ DMCreateFieldDecomposition_Moose(
       (*islist)[d] = dinfo._rembedding;
       PetscInt is_size;
       ISGetLocalSize(dinfo._rembedding, &is_size);
+      split_size_sum += is_size;
       std::cout << "Split '" << std::to_string(d) << "' has local size " << std::to_string(is_size)
                 << " on processor " << dmm->_nl->processor_id() << std::endl;
     }
@@ -1117,6 +1121,15 @@ DMCreateFieldDecomposition_Moose(
       (*dmlist)[d] = dinfo._dm;
     }
   }
+
+  if (islist && libMesh::cast_int<libMesh::numeric_index_type>(split_size_sum) !=
+                    dmm->_nl->nonlinearSolver()->system().get_system_matrix().local_m())
+    mooseError("Local split size sum ",
+               libMesh::cast_int<libMesh::numeric_index_type>(split_size_sum),
+               " and local system matrix size ",
+               dmm->_nl->nonlinearSolver()->system().get_system_matrix().local_m(),
+               " do not match.");
+
   PetscFunctionReturn(0);
 }
 
