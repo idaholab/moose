@@ -103,15 +103,3 @@ FaceInfo::skewnessCorrectionVector() const
 
   return _face_centroid - r_intersection;
 }
-
-bool
-FaceInfo::varDefinedOnElem(const std::string & var_name) const
-{
-  auto it = _face_types_by_var.find(var_name);
-  if (it == _face_types_by_var.end())
-    mooseAssert(it != _face_types_by_var.end(),
-                "Variable " + var_name + " not found in variable to VarFaceNeighbors map");
-
-  const VarFaceNeighbors & ft = faceType(var_name);
-  return (ft == FaceInfo::VarFaceNeighbors::BOTH || ft == FaceInfo::VarFaceNeighbors::ELEM);
-}

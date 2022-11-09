@@ -57,7 +57,7 @@
       ad_indexing_type = 'global'
       valgrind = HEAVY
       cli_args = "FVBCs/inactive=inlet-T Outputs/file_base='rc-heated-effective-dirichlet' "
-                 "Mesh/gen/nx=40 Mesh/gen/ny=10"
+                 "Mesh/gen/nx=6 Mesh/gen/ny=3"
     []
   []
   [solid-fluid]

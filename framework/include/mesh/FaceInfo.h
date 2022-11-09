@@ -165,12 +165,6 @@ public:
    */
   void computeBoundaryCoefficients();
 
-  /**
-   * Evaluates if a variable is defined on the elem side of the face
-   * @param var_name The name of the variable
-   */
-  bool varDefinedOnElem(const std::string & var_name) const;
-
 private:
   /// the elem and neighbor elems
   const ElemInfo * const _elem_info;

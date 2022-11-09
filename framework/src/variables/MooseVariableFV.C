@@ -502,7 +502,7 @@ MooseVariableFV<OutputType>::getElemValue(const Elem * const elem) const
       this->hasBlocks(elem->subdomain_id()),
       "The variable should be defined on the element's subdomain! This typically occurs when the "
       "user wants to evaluate the elements right next to the boundary of two variables (block "
-      "boundary). The subdomain which is querried: " +
+      "boundary). The subdomain which is queried: " +
           Moose::stringify(this->blockIDs()) + " the subdomain of the element " +
           std::to_string(elem->subdomain_id()));
 
@@ -690,7 +690,7 @@ MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi,
   mooseError("MooseVariableFV::uncorrectedAdGradSln only supported for global AD indexing");
 #endif
 
-  const bool var_defined_on_elem = fi.varDefinedOnElem(this->name());
+  const bool var_defined_on_elem = this->hasBlocks(fi.elem().subdomain_id());
   const Elem * const elem_one = var_defined_on_elem ? &fi.elem() : fi.neighborPtr();
   const Elem * const elem_two = var_defined_on_elem ? fi.neighborPtr() : &fi.elem();
 
@@ -718,7 +718,7 @@ MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi, const bool correct_s
   mooseError("MooseVariableFV::adGradSln only supported for global AD indexing");
 #endif
 
-  const bool var_defined_on_elem = fi.varDefinedOnElem(this->name());
+  const bool var_defined_on_elem = this->hasBlocks(fi.elem().subdomain_id());
   const Elem * const elem = &fi.elem();
   const Elem * const neighbor = fi.neighborPtr();
 
@@ -801,7 +801,7 @@ MooseVariableFV<OutputType>::evaluate(const FaceArg & face,
     return Moose::FV::interpolate(*this, face);
   else
   {
-    const bool var_defined_on_elem = face.fi->varDefinedOnElem(this->name());
+    const bool var_defined_on_elem = this->hasBlocks(fi->elem().subdomain_id());
     Moose::SingleSidedFaceArg ssfa = {fi,
                                       face.limiter_type,
                                       face.elem_is_upwind,

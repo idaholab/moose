@@ -330,7 +330,7 @@ FVFluxKernel::gradUDotNormal() const
   const Elem * const elem = &_face_info->elem();
   const Elem * const neighbor = _face_info->neighborPtr();
 
-  bool var_defined_on_elem = _face_info->varDefinedOnElem(_var.name());
+  bool var_defined_on_elem = _var.hasBlocks(_face_info->elem().subdomain_id());
   bool is_internal_face = _var.isInternalFace(*_face_info);
 
   const ADReal side_one_value = (!is_internal_face && !var_defined_on_elem)
