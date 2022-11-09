@@ -125,9 +125,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
   {
     auto assembly_pitch = getReactorParam<Real>("assembly_pitch");
     if (assembly_pitch != _pitch)
-    {
       mooseError("Pitch defined in PinMeshGenerator must match assembly_pitch defined in ReactorMeshParams if use_as_assembly is set to true");
-    }
   }
 
   if (_extrude && _mesh_dimensions != 3)
@@ -415,8 +413,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
 
     // Set metadata to indicate homogenized assemblies to inform CoreMeshGenerator
     // dummy assembly deletion
-    if (_homogenized)
-      declareMeshProperty("homogenized_assembly", true);
+    declareMeshProperty("homogenized_assembly", _homogenized);
   }
 
   if (_extrude && _mesh_dimensions == 3)
@@ -485,7 +482,7 @@ PinMeshGenerator::generate()
   std::string assembly_type_id_name = "assembly_type_id";
   std::string plane_id_name = "plane_id";
   std::string radial_id_name = "radial_id";
-  const std::string default_block_name = "RGMB_PIN" + std::to_string(_pin_type);
+  const std::string default_block_name = std::string("RGMB_") + (_is_assembly ? std::string("ASSEMBLY_") : std::string("PIN_")) + std::to_string(_pin_type);
 
   auto region_id_int = getElemIntegerFromMesh(*(*_build_mesh), region_id_name);
   auto radial_id_int = getElemIntegerFromMesh(*(*_build_mesh), radial_id_name);

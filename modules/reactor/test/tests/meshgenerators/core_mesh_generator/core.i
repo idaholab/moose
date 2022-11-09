@@ -16,12 +16,7 @@
     reactor_params = rmp
     pin_type = 1
     pitch = 1.42063
-    num_sectors = 2
-    ring_radii = '0.2'
-    duct_halfpitch = '0.68'
-    mesh_intervals = '1 1 1'
     region_ids='1 2 5'
-
     quad_center_elements = true
   []
 
@@ -30,24 +25,16 @@
     reactor_params = rmp
     pin_type = 2
     pitch = 1.42063
-    num_sectors = 2
-    mesh_intervals = '2'
     region_ids='2'
-
     quad_center_elements = true
   []
-
 
   [pin3]
     type = PinMeshGenerator
     reactor_params = rmp
     pin_type = 3
     pitch = 1.42063
-    num_sectors = 2
-    ring_radii = '0.3818'
-    mesh_intervals = '1 1'
     region_ids='3 4'
-
     quad_center_elements = true
   []
 

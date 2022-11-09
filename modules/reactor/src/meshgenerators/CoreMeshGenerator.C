@@ -231,7 +231,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
       params.set<std::vector<MeshGeneratorName>>("inputs") = _inputs;
       params.set<std::vector<std::vector<unsigned int>>>("pattern") = _pattern;
       params.set<MooseEnum>("pattern_boundary") = "none";
-      params.set<bool>("generate_core_metadata") = false;
+      params.set<bool>("generate_core_metadata") = !assembly_homogenization;
       params.set<bool>("create_interface_boundaries") = false;
       if (make_empty)
       {
