@@ -52,15 +52,24 @@ PINSFVMomentumDiffusion::computeStrongResidual()
 
   const auto elem_face = elemFromFace();
   const auto neighbor_face = neighborFromFace();
-  const auto mu_elem = _mu(elem_face);
-  const auto mu_neighbor = _mu(neighbor_face);
-  const auto eps_elem = has_elem ? _eps(elem_face) : _eps(neighbor_face);
-  const auto eps_neighbor = has_neighbor ? _eps(neighbor_face) : _eps(elem_face);
 
   // Compute the diffusion driven by the velocity gradient
   // Interpolate viscosity divided by porosity on the face
   ADReal mu_face;
-  interpolate(Moose::FV::InterpMethod::Average, mu_face, mu_elem, mu_neighbor, *_face_info, true);
+
+  const auto mu_elem = has_elem ? _mu(elem_face) : _mu(neighbor_face);
+  const auto eps_elem = has_elem ? _eps(elem_face) : _eps(neighbor_face);
+
+  ADReal mu_neighbor;
+  ADReal eps_neighbor;
+  if (onBoundary(*_face_info))
+    mu_face = _mu(singleSidedFaceArg());
+  else
+  {
+    mu_neighbor = has_elem ? _mu(neighbor_face) : _mu(elem_face);
+    eps_neighbor = has_neighbor ? _eps(neighbor_face) : _eps(elem_face);
+    interpolate(Moose::FV::InterpMethod::Average, mu_face, mu_elem, mu_neighbor, *_face_info, true);
+  }
 
   // Compute face superficial velocity gradient
   auto dudn =
@@ -91,13 +100,22 @@ PINSFVMomentumDiffusion::computeStrongResidual()
           : MetaPhysicL::raw_value(_eps.gradient(
                 makeElemArg(has_elem ? &_face_info->elem() : _face_info->neighborPtr())));
 
-  const auto coeff_elem = mu_elem / eps_elem * _var(elem_face);
-  const auto coeff_neighbor = mu_neighbor / eps_neighbor * _var(neighbor_face);
-
   // Interpolate to get the face value
   ADReal coeff_face;
-  interpolate(
-      Moose::FV::InterpMethod::Average, coeff_face, coeff_elem, coeff_neighbor, *_face_info, true);
+  const auto coeff_elem = mu_elem / eps_elem * _var(elem_face);
+  if (onBoundary(*_face_info))
+    coeff_face = coeff_elem;
+  else
+  {
+    const auto coeff_neighbor = mu_neighbor / eps_neighbor * _var(neighbor_face);
+    interpolate(Moose::FV::InterpMethod::Average,
+                coeff_face,
+                coeff_elem,
+                coeff_neighbor,
+                *_face_info,
+                true);
+  }
+
   residual -= coeff_face * grad_eps_face * _normal;
 
   return -residual;

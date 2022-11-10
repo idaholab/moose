@@ -63,11 +63,6 @@ TestFaceInfo::execute()
     _face_area.push_back(p->faceArea());
     _elem_element_id.push_back(p->elem().id());
     _elem_element_side.push_back(p->elemSideID());
-    // the neighbor element might be a nullptr
-    if (p->neighborPtr())
-      _neighbor_element_id.push_back(p->neighbor().id());
-    else
-      _neighbor_element_id.push_back(-1);
 
     Point normal = p->normal();
     _nx.push_back(normal(0));
@@ -81,10 +76,23 @@ TestFaceInfo::execute()
     _elem_cx.push_back(lc(0));
     _elem_cy.push_back(lc(1));
     _elem_cz.push_back(lc(2));
-    Point rc = p->neighborCentroid();
-    _neighbor_cx.push_back(rc(0));
-    _neighbor_cy.push_back(rc(1));
-    _neighbor_cz.push_back(rc(2));
+    if (p->neighborPtr())
+    {
+      _neighbor_element_id.push_back(p->neighbor().id());
+      _neighbor_element_side.push_back(p->neighborSideID());
+      Point rc = p->neighborCentroid();
+      _neighbor_cx.push_back(rc(0));
+      _neighbor_cy.push_back(rc(1));
+      _neighbor_cz.push_back(rc(2));
+    }
+    else
+    {
+      _neighbor_element_id.push_back(-1);
+      _neighbor_element_side.push_back(-1);
+      _neighbor_cx.push_back(std::numeric_limits<double>::max());
+      _neighbor_cy.push_back(std::numeric_limits<double>::max());
+      _neighbor_cz.push_back(std::numeric_limits<double>::max());
+    }
 
     for (unsigned int l = 0; l < _vars.size(); ++l)
     {

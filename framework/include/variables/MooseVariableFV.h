@@ -436,22 +436,6 @@ public:
   ADReal getElemValue(const Elem * elem) const;
 
   /**
-   * Get the solution value with derivative seeding on the \p neighbor element. If the neighbor
-   * is null or this variable doesn't exist on the neighbor element's subdomain, then we compute a
-   * neighbor value based on any Dirichlet boundary conditions associated with the face information,
-   * or absent that we assume a zero gradient and simply return the \p elem_value
-   * @param neighbor The \p neighbor element that we want to retrieve the solution value for
-   * @param fi The face information object
-   * @param elem_value The solution value on the "element". This value may be used for computing the
-   * neighbor value if the neighbor is null or this variable doesn't exist on the neighbor subdomain
-   * @return The neighbor solution value with derivative seeding according to the associated degree
-   * of freedom
-   */
-  ADReal getNeighborValue(const Elem * const neighbor,
-                          const FaceInfo & fi,
-                          const ADReal & elem_value) const;
-
-  /**
    * Compute or retrieve from cache the solution value on an internal face using linear
    * interpolation.
    * @param fi The face information object
@@ -473,12 +457,12 @@ public:
 
   void setActiveTags(const std::set<TagID> & vtags) override;
 
-protected:
   /**
    * @return whether \p fi is an internal face for this variable
    */
-  bool isInternalFace(const FaceInfo & fi) const;
+  bool isInternalFace(const FaceInfo & fi) const override;
 
+protected:
   /**
    * @return whether \p fi is a Dirichlet boundary face for this variable
    */
@@ -499,7 +483,8 @@ protected:
   /**
    * @return the extrapolated value on the boundary face associated with \p fi
    */
-  virtual ADReal getExtrapolatedBoundaryFaceValue(const FaceInfo & fi) const;
+  virtual ADReal getExtrapolatedBoundaryFaceValue(const FaceInfo & fi,
+                                                  bool two_term_expansion) const;
 
 private:
   using MooseVariableField<OutputType>::evaluate;

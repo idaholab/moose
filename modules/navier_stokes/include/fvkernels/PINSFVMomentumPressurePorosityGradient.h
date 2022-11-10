@@ -21,7 +21,7 @@ protected:
   ADReal computeQpResidual() override;
 
   /// the pressure
-  const VariableValue & _p;
+  const Moose::Functor<ADReal> & _p;
   /// the porosity variable
   const Moose::Functor<ADReal> & _eps;
   /// index x|y|z

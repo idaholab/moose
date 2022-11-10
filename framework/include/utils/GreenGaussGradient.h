@@ -254,22 +254,33 @@ greenGaussGradient(const FaceArg & face_arg,
 
   if (!is_extrapolated)
   {
-    // Compute the gradients in the two cells on both sides of the face
-    const auto & grad_elem =
-        greenGaussGradient(elem_arg, functor, two_term_boundary_expansion, mesh);
-    const auto & grad_neighbor =
-        greenGaussGradient(neighbor_arg, functor, two_term_boundary_expansion, mesh);
-
-    VectorValue<T> face_gradient;
-    Moose::FV::interpolate(
-        Moose::FV::InterpMethod::Average, face_gradient, grad_elem, grad_neighbor, fi, true);
-
-    // Perform orthogonality correction
     const auto & value_elem = functor(elem_arg);
     const auto & value_neighbor = functor(neighbor_arg);
 
-    face_gradient += outer_product(
-        fi.eCN(), (value_neighbor - value_elem) / fi.dCNMag() - face_gradient * fi.eCN());
+    // This is the component of the gradient which is parallel to the line connecting
+    // the cell centers. Therefore, we can use our second order, central difference
+    // scheme to approximate it.
+    VectorValue<T> face_gradient = (value_neighbor - value_elem) / fi.dCNMag() * fi.eCN();
+
+    // We only need nonorthogonal correctors in 2+ dimensions
+    if (mesh.dimension() > 1)
+    {
+      // We are using an orthogonal approach for the non-orthogonal correction, for more information
+      // see Hrvoje Jasak's PhD Thesis (Imperial College, 1996)
+      VectorValue<T> interpolated_gradient;
+
+      // Compute the gradients in the two cells on both sides of the face
+      const auto & grad_elem =
+          greenGaussGradient(elem_arg, functor, two_term_boundary_expansion, mesh);
+      const auto & grad_neighbor =
+          greenGaussGradient(neighbor_arg, functor, two_term_boundary_expansion, mesh);
+
+      Moose::FV::interpolate(
+          Moose::FV::InterpMethod::Average, face_gradient, grad_elem, grad_neighbor, fi, true);
+
+      face_gradient += interpolated_gradient - (interpolated_gradient * fi.eCN()) * fi.eCN();
+    }
+
     return face_gradient;
   }
 

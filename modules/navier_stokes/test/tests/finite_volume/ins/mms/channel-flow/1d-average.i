@@ -107,8 +107,7 @@ velocity_interp_method = 'average'
   []
   [forcing_u]
     type = ADParsedFunction
-    value = '(1/4)*pi^2*mu*sin((1/2)*x*pi) + pi*rho*sin((1/2)*x*pi)*cos((1/2)*x*pi) - '
-            '1/2*pi*sin((1/2)*x*pi)'
+    value = '(1/4)*pi^2*mu*sin((1/2)*x*pi) + pi*rho*sin((1/2)*x*pi)*cos((1/2)*x*pi) - 1/2*pi*sin((1/2)*x*pi)'
     vars = 'mu rho'
     vals = '${mu} ${rho}'
   []
@@ -133,6 +132,7 @@ velocity_interp_method = 'average'
 
 [Outputs]
   csv = true
+  exodus = true
 []
 
 [Postprocessors]

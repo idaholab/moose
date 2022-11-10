@@ -109,31 +109,7 @@ private:
 
   ValueType evaluate(const ElemFromFaceArg & elem_from_face, unsigned int) const override
   {
-    const auto * elem = elem_from_face.elem;
-    if (!elem)
-      elem = &elem_from_face.fi->elem();
-
-    const auto elem_value = (*this)(ElemArg({elem, elem_from_face.correct_skewness}));
-
-    // For the non-boundary elements
-    if (elem_from_face.elem)
-      return elem_value;
-
-    // We must be on a boundary and want to compute a ghost cell value. Let's determine what the
-    // boundary value should be
-    mooseAssert(!elem_from_face.fi->neighborPtr(),
-                "We should be on a boundary face if we got to this logic");
-    const auto boundary_face = SingleSidedFaceArg({elem_from_face.fi,
-                                                   Moose::FV::LimiterType::CentralDifference,
-                                                   true,
-                                                   elem_from_face.correct_skewness,
-                                                   elem_from_face.sub_id});
-    const auto boundary_value = (*this)(boundary_face);
-    // Linear interpolation: face_value = (elem_value + neighbor_value) / 2. Note that weights of
-    // 1/2 are perfectly appropriate here because we can arbitrarily put our ghost cell centroid
-    // anywhere and by convention we locate it such that a line drawn between the ghost cell
-    // centroid and the element centroid is perfectly bisected by the face centroid
-    return 2. * boundary_value - elem_value;
+    return (*this)(ElemArg({elem_from_face.elem, elem_from_face.correct_skewness}));
   }
 
   ValueType evaluate(const FaceArg & face, unsigned int) const override final

@@ -87,6 +87,9 @@ public:
   virtual void mu_from_p_T(Real p, Real T, Real & mu, Real & dmu_dp, Real & dmu_dT) const override;
   virtual Real k_from_p_T(Real p, Real T) const override;
   virtual void k_from_p_T(Real p, Real T, Real & k, Real & dk_dp, Real & dk_dT) const override;
+  virtual Real beta_from_p_T(Real p, Real T) const override;
+  virtual void
+  beta_from_p_T(Real p, Real T, Real & beta, Real & dbeta_dp, Real & dbeta_dT) const override;
 
   virtual Real c2_from_p_rho(Real pressure, Real rho) const;
 
