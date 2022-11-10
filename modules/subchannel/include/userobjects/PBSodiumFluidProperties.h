@@ -1,22 +1,18 @@
-/**********************************************************************/
-/*                 SOFTWARE COPYRIGHT NOTIFICATION                    */
-/*                                                                    */
-/*                              SAM                                   */
-/*             © COPYRIGHT 2017 UChicago Argonne, LLC                 */
-/*                       ALL RIGHTS RESERVED                          */
-/*                                                                    */
-/* This software was produced by UChicago Argonne, LLC under Contract */
-/* No. DE-AC02-06CH11357 with the U. S. Department of Energy.         */
-/*                                                                    */
-/* THIS SOFTWARE DISCLOSES MATERIAL PROTECTED UNDER COPYRIGHT LAW AND */
-/* FURTHER DISSEMINATION IS PROHIBITED WITHOUT PRIOR WRITTEN CONSENT  */
-/* OF ARGONNE NATIONAL LABORATORY.                                    */
-/*                                                                    */
-/* See COPYRIGHT for full details.                                    */
-/**********************************************************************/
+/********************************************************************/
+/*                   DO NOT MODIFY THIS HEADER                      */
+/*          Subchannel: Thermal Hydraulics Reactor Analysis         */
+/*                                                                  */
+/*              (c) 2022 Battelle Energy Alliance, LLC              */
+/*                      ALL RIGHTS RESERVED                         */
+/*                                                                  */
+/*             Prepared by Battelle Energy Alliance, LLC            */
+/*               Under Contract No. DE-AC07-05ID14517               */
+/*               With the U. S. Department of Energy                */
+/*                                                                  */
+/*               See COPYRIGHT for full restrictions                */
+/********************************************************************/
 
-#ifndef PBSODIUMFLUIDPROPERTIES_H
-#define PBSODIUMFLUIDPROPERTIES_H
+#pragma once
 
 #include "SinglePhaseFluidProperties.h"
 
@@ -67,4 +63,3 @@ public:
   static InputParameters validParams();
 };
 
-#endif
