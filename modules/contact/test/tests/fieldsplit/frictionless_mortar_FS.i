@@ -24,6 +24,7 @@ refine = 1
     incremental = true
     add_variables = true
     block = '1 2'
+    use_automatic_differentiation = true
   []
 []
 
@@ -44,6 +45,7 @@ refine = 1
     variable = disp_x
     boundary = 30
     function = horizontal_movement
+    preset = false
   []
   [fix_right_x]
     type = DirichletBC
@@ -62,29 +64,29 @@ refine = 1
     variable = disp_y
     boundary = '30'
     function = vertical_movement
+    preset = false
   []
 []
 
 [Materials]
   [elasticity_tensor_left]
-    type = ComputeIsotropicElasticityTensor
+    type = ADComputeIsotropicElasticityTensor
     block = 1
     youngs_modulus = 1.0e6
     poissons_ratio = 0.3
   []
   [stress_left]
-    type = ComputeFiniteStrainElasticStress
+    type = ADComputeFiniteStrainElasticStress
     block = 1
   []
-
   [elasticity_tensor_right]
-    type = ComputeIsotropicElasticityTensor
+    type = ADComputeIsotropicElasticityTensor
     block = 2
     youngs_modulus = 1.0e6
     poissons_ratio = 0.3
   []
   [stress_right]
-    type = ComputeFiniteStrainElasticStress
+    type = ADComputeFiniteStrainElasticStress
     block = 2
   []
 []
@@ -117,35 +119,23 @@ refine = 1
 [Preconditioning]
   [FSP]
     type = FSP
-    # It is the starting point of splitting
-    topsplit = 'contact_interior' # 'contact_interior' should match the following block name
+    topsplit = 'contact_interior'
     [contact_interior]
-      splitting = 'contact interior'
-      splitting_type = multiplicative
+      splitting = 'interior contact'
+      splitting_type = schur
+      petsc_options = '-snes_ksp_ew'
+      petsc_options_iname = '-ksp_gmres_restart -pc_fieldsplit_schur_fact_type -mat_mffd_err'
+      petsc_options_value = '200                full                           1e-5'
     []
     [interior]
-      type = ContactSplit
       vars = 'disp_x disp_y'
-      uncontact_primary = '20'
-      uncontact_secondary = '10'
-      uncontact_displaced = '30'
-      blocks = '1 2'
-      include_all_contact_nodes = 1
-
       petsc_options_iname = '-ksp_type -pc_type -pc_hypre_type '
-      petsc_options_value = '  preonly hypre  boomeramg'
+      petsc_options_value = 'gmres   hypre  boomeramg'
     []
     [contact]
-      type = ContactSplit
-      vars = 'disp_x disp_y leftright_normal_lm'
-      contact_primary = '20'
-      contact_secondary = '10'
-      contact_displaced = '30'
-      include_all_contact_nodes = 1
-      blocks = '4'
-
+      vars = 'leftright_normal_lm'
       petsc_options_iname = '-ksp_type -pc_sub_type -pc_factor_shift_type'
-      petsc_options_value = '  preonly lu NONZERO'
+      petsc_options_value = 'preonly   lu           NONZERO'
     []
   []
 []
@@ -153,19 +143,13 @@ refine = 1
 [Executioner]
   type = Transient
   solve_type = 'PJFNK'
-  petsc_options_iname = '-ksp_gmres_restart'
-  petsc_options_value = '100'
-
   dt = 0.1
   end_time = 1
   abort_on_solve_fail = true
-
-  l_tol = 1e-8
-  l_max_its = 100
-
-  nl_rel_tol = 1e-8
+  l_max_its = 200
   nl_abs_tol = 1e-8
-  nl_max_its = 10
+  line_search = 'none'
+  nl_max_its = 20
 []
 
 [Outputs]
