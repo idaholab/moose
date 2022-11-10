@@ -56,6 +56,7 @@ TEST_F(StiffenedGasFluidPropertiesTest, testAll)
   REL_TEST(_fp->k_from_v_e(v, e), 0.6, 1e-15);
 
   REL_TEST(_fp->beta_from_p_T(p, T), 3.411222923418045e-3, REL_TOL_SAVED_VALUE);
+  DERIV_TEST(_fp->beta_from_p_T, p, T, REL_TOL_DERIVATIVE);
 
   REL_TEST(_fp->s_from_v_e(v, e), -2.656251807629821e4, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_fp->s_from_v_e, v, e, 1e-5);
