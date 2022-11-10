@@ -902,9 +902,7 @@ DMCreateFieldDecomposition_Moose(
 
   PetscFunctionBegin;
 
-#ifndef NDEBUG
   PetscInt split_size_sum = 0;
-#endif
 
   /* Only called after DMSetUp(). */
   if (!dmm->_splitlocs)
@@ -1013,11 +1011,9 @@ DMCreateFieldDecomposition_Moose(
       ierr = PetscObjectReference((PetscObject)(dinfo._rembedding));
       CHKERRQ(ierr);
       (*islist)[d] = dinfo._rembedding;
-#ifndef NDEBUG
       PetscInt is_size;
       ISGetLocalSize(dinfo._rembedding, &is_size);
       split_size_sum += is_size;
-#endif
     }
     if (dmlist)
     {
@@ -1027,14 +1023,13 @@ DMCreateFieldDecomposition_Moose(
     }
   }
 
-  if (islist)
-    mooseAssert(libMesh::cast_int<libMesh::numeric_index_type>(split_size_sum) ==
-                    dmm->_nl->nonlinearSolver()->system().get_system_matrix().local_m(),
-                "Local split size sum "
-                    << libMesh::cast_int<libMesh::numeric_index_type>(split_size_sum)
-                    << " and local system matrix size "
-                    << dmm->_nl->nonlinearSolver()->system().get_system_matrix().local_m()
-                    << " do not match.");
+  if (islist && libMesh::cast_int<libMesh::numeric_index_type>(split_size_sum) !=
+                    dmm->_nl->nonlinearSolver()->system().get_system_matrix().local_m())
+    mooseError("Local split size sum ",
+               libMesh::cast_int<libMesh::numeric_index_type>(split_size_sum),
+               " and local system matrix size ",
+               dmm->_nl->nonlinearSolver()->system().get_system_matrix().local_m(),
+               " do not match. Did you forget a variable or block in one of your splits?");
 
   PetscFunctionReturn(0);
 }
