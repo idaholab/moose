@@ -10,17 +10,17 @@ P_out = 101325  # Pa
     type = QuadSubChannelMeshGenerator
     nx = 8
     ny = 8
-    n_cells = 35
+    n_cells = 36
     pitch = 0.0136906
     Kij = 0.5
     rod_diameter = 0.0099568
     gap = 0.0036957
-    heated_length = 1.4478
+    heated_length = 1.4224
     z_blockage = '0.60325 0.67945'
     index_blockage = '18 19 20 21 26 27 28 29 34 35 36 37 42 43 44 45'
     reduction_blockage = '0.83 0.65 0.65 0.83 0.65 0.30 0.30 0.65 0.65 0.30 0.30 0.65 0.83 0.65 0.65 0.83'
-    k_blockage = '0.0 0.0 0.0 0.0 0.0 1.12 1.12 0.0 0.0 1.12 1.12 0.0 0.0 0.0 0.0 0.0'
-    spacer_z = '0.4064 1.4224'
+    k_blockage = '0.0 0.0 0.0 0.0 0.0 0.55 0.55 0.0 0.0 0.55 0.55 0.0 0.0 0.0 0.0 0.0'
+    spacer_z = '0.3683 1.3843'
     spacer_k = '1.14 1.14'
   []
 
