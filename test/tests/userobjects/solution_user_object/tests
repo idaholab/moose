@@ -17,4 +17,12 @@
 
     requirement = 'The system shall be capable of reading in field information and producing gradient values from both continuous and discontinuous fields.'
   [../]
+  [test_scalar_warn]
+    type = RunException
+    cli_args = 'UserObjects/soln/mesh=gold/testscalarrename.e UserObjects/soln/system_variables=""'
+    input = 'discontinuous_value_solution_uo_p2.i'
+    expect_err = 'Global variable u matches the name of an existing field variable.'
+    requirement = 'The system shall warn the user if they import an exodus file from a test with a postprocessor and a variable having matching names.'
+    issues = '#15992'
+  []
 []
