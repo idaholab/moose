@@ -10,8 +10,21 @@ Renderer:
     type: MooseDocs.base.MaterializeRenderer
 Extensions:
     MooseDocs.extensions.navigation:
-        name: Subchannel
+        name: SubChannel
         repo: https://hpcgitlab.hpc.inl.gov/idaholab/subchannel
+        menu:
+            Getting Started:
+                Installation: getting_started/installation.md
+                Using SubChannel: getting_started/using_SubChannel.md
+                User Notes: getting_started/user_notes.md
+                SubChannel Theory: getting_started/subchannel_theory.md
+            Documentation:
+                SubChannel-only Syntax: syntax/subchannel_only.md
+                Complete Code Syntax: syntax/index.md
+            V&V:
+                Verification & Validation: v&v/v&v-list.md
+            Tutorial:
+                Tutorial Slides: main/index.md
     MooseDocs.extensions.appsyntax:
         executable: ${ROOT_DIR}
         remove:

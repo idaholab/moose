@@ -10,12 +10,12 @@ P_out = 101325  # Pa
     type = QuadSubChannelMeshGenerator
     nx = 8
     ny = 8
-    n_cells = 40
-    Kij = 0.5
+    n_cells = 90
     pitch = 0.0136906
+    Kij = 0.5
     rod_diameter = 0.0099568
     gap = 0.0036957
-    heated_length = 1.4478
+    heated_length = 1.4224
     z_blockage = '0.60325 0.67945'
     index_blockage = '18 19 20 21 26 27 28 29 34 35 36 37 42 43 44 45'
     reduction_blockage = '0.78 0.55 0.55 0.78 0.55 0.10 0.10 0.55 0.55 0.10 0.10 0.55 0.78 0.55 0.55 0.78'
@@ -54,9 +54,9 @@ P_out = 101325  # Pa
   [T]
     block = sub_channel
   []
-  [Tpin]
-    block = fuel_pins
-  []
+  # [Tpin]
+  #   block = fuel_pins
+  # []
   [rho]
     block = sub_channel
   []
@@ -69,9 +69,9 @@ P_out = 101325  # Pa
   [w_perim]
     block = sub_channel
   []
-  [q_prime]
-    block = fuel_pins
-  []
+  # [q_prime]
+  #   block = fuel_pins
+  # []
 []
 
 [Modules]

@@ -196,9 +196,10 @@ TriSubChannelMeshGenerator::TriSubChannelMeshGenerator(const InputParameters & p
       unsigned int index(0);
       for (const auto & i_ch : _index_blockage)
       {
-        _k_grid[i_ch][i] += (_k_blockage[index] / axial_levels_blocked);
+        _k_grid[i_ch][i] += _k_blockage[index]; //(_k_blockage[index] / axial_levels_blocked);
         index++;
       }
+      // break;
     }
   }
 
