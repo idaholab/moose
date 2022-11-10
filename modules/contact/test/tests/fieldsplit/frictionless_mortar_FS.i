@@ -93,10 +93,9 @@ refine = 1
   [leftright]
     secondary = 10
     primary = 20
-    model = coulomb
+    model = frictionless
     formulation = mortar
-    friction_coefficient = 0.2
-    c_normal = 1e0
+    c_normal = 1e6
   []
 []
 
@@ -138,26 +137,28 @@ refine = 1
     []
     [contact]
       type = ContactSplit
-      vars = 'disp_x disp_y leftright_normal_lm leftright_tangential_lm'
+      vars = 'disp_x disp_y leftright_normal_lm'
       contact_primary = '20'
       contact_secondary = '10'
       contact_displaced = '30'
       include_all_contact_nodes = 1
       blocks = '4'
 
-      petsc_options_iname = '-ksp_type -pc_sub_type -pc_factor_shift_type  -pc_factor_shift_amount'
-      petsc_options_value = '  preonly lu NONZERO 1e-15'
+      petsc_options_iname = '-ksp_type -pc_sub_type -pc_factor_shift_type'
+      petsc_options_value = '  preonly lu NONZERO'
     []
   []
 []
 
 [Executioner]
   type = Transient
-  solve_type = 'NEWTON'
+  solve_type = 'PJFNK'
+  petsc_options_iname = '-ksp_gmres_restart'
+  petsc_options_value = '100'
 
   dt = 0.1
-  dtmin = 1e-4
   end_time = 1
+  abort_on_solve_fail = true
 
   l_tol = 1e-8
   l_max_its = 100
@@ -168,12 +169,5 @@ refine = 1
 []
 
 [Outputs]
-  file_base = frictional_mortar_FS_out
-  [exodus]
-    type = Exodus
-  []
-  [console]
-    type = Console
-    max_rows = 5
-  []
+  exodus = true
 []
