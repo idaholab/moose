@@ -135,6 +135,9 @@ QuadSubChannelMeshGenerator::QuadSubChannelMeshGenerator(const InputParameters &
                ": The number of subchannels cannot be less than 2 in both directions (x and y). "
                "Smallest assembly allowed is either 2X1 or 1X2. ");
 
+  SubChannelMesh::generateZGrid(
+      _unheated_length_entry, _heated_length, _unheated_length_exit, _n_cells, _z_grid);
+
   // Defining the total length from 3 axial sections
   Real L = _unheated_length_entry + _heated_length + _unheated_length_exit;
 
@@ -163,17 +166,16 @@ QuadSubChannelMeshGenerator::QuadSubChannelMeshGenerator(const InputParameters &
   Real dz = L / _n_cells;
   for (unsigned int i = 0; i < _n_cells + 1; i++)
   {
-    // Defining the dz based in the total length and the specified number of axial cells
-    _z_grid.push_back(dz * i);
     if ((dz * i >= _z_blockage.front() && dz * i <= _z_blockage.back()) &&
         axial_levels_blocked != 0)
     {
       unsigned int index(0);
       for (const auto & i_ch : _index_blockage)
       {
-        _k_grid[i_ch][i] += (_k_blockage[index] / axial_levels_blocked);
+        _k_grid[i_ch][i] += _k_blockage[index]; //(_k_blockage[index] / axial_levels_blocked);
         index++;
       }
+      // break;
     }
   }
 

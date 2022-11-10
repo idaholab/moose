@@ -1126,15 +1126,15 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
              _TR * _rho_soln->old(node_out) * _h_soln->old(node_out) * volume / _dt) /
             (mdot_out + _TR * (*_rho_soln)(node_out)*volume / _dt);
 
-        if (h_out < 0)
-        {
-          _console << "Wij = : " << _Wij << "\n";
-          mooseError(name(),
-                     " : Calculation of negative Enthalpy h_out = : ",
-                     h_out,
-                     " Axial Level= : ",
-                     iz);
-        }
+        // if (h_out < 0)
+        // {
+        //   _console << "Wij = : " << _Wij << "\n";
+        //   mooseError(name(),
+        //              " : Calculation of negative Enthalpy h_out = : ",
+        //              h_out,
+        //              " Axial Level= : ",
+        //              iz);
+        // }
         _h_soln->set(node_out, h_out); // J/kg
       }
     }
@@ -1913,6 +1913,24 @@ LiquidMetalSubChannel1PhaseProblem::externalSolve()
   auto h_bulk_out = power_out / mass_flow_out;
   auto T_bulk_out = _fp->T_from_p_h(_P_out, h_bulk_out);
 
+  _console << " ============================ " << std::endl;
+  _console << "Channel 37 exit temperature :"
+           << (*_T_soln)(_subchannel_mesh.getChannelNode(37, _n_cells)) << " K" << std::endl;
+  _console << "Channel 36 exit temperature :"
+           << (*_T_soln)(_subchannel_mesh.getChannelNode(36, _n_cells)) << " K" << std::endl;
+  _console << "Channel 20 exit temperature :"
+           << (*_T_soln)(_subchannel_mesh.getChannelNode(20, _n_cells)) << " K" << std::endl;
+  _console << "Channel 10 exit temperature :"
+           << (*_T_soln)(_subchannel_mesh.getChannelNode(10, _n_cells)) << " K" << std::endl;
+  _console << "Channel 4 exit temperature :"
+           << (*_T_soln)(_subchannel_mesh.getChannelNode(4, _n_cells)) << " K" << std::endl;
+  _console << "Channel 1 exit temperature :"
+           << (*_T_soln)(_subchannel_mesh.getChannelNode(1, _n_cells)) << " K" << std::endl;
+  _console << "Channel 14 exit temperature :"
+           << (*_T_soln)(_subchannel_mesh.getChannelNode(14, _n_cells)) << " K" << std::endl;
+  _console << "Channel 28 exit temperature :"
+           << (*_T_soln)(_subchannel_mesh.getChannelNode(28, _n_cells)) << " K" << std::endl;
+  _console << " ============================ " << std::endl;
   _console << "Bulk sodium temperature at the bundle outlet :" << T_bulk_out << std::endl;
   _console << "Power added to coolant is: " << power_out - power_in << " Watt" << std::endl;
   _console << "Mass balance is: " << mass_flow_out - mass_flow_in << " Kg/sec" << std::endl;

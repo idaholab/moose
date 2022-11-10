@@ -1,11 +1,11 @@
 [GlobalParams]
     nx = 8
     ny = 8
-    n_cells = 35
+    n_cells = 90
     pitch = 0.0136906
     rod_diameter = 0.0099568
     gap = 0.0036957
-    heated_length = 1.4478
+    heated_length = 1.4224
   []
 
   [Mesh]
