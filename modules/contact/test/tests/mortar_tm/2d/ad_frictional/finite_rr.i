@@ -100,7 +100,6 @@ name = 'finite_rr'
     c_normal = 1e5
     c_tangential = 1e5
     friction_coefficient = 0.1
-    use_dual = true
   []
 []
 

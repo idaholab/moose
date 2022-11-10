@@ -102,7 +102,6 @@ name = 'finite'
     secondary = block_left
     formulation = mortar
     c_normal = 1e6
-    use_dual = true
   []
 []
 

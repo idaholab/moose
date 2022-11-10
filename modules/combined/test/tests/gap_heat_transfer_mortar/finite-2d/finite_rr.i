@@ -141,7 +141,6 @@ name = 'finite'
     disp_x = disp_x
     disp_y = disp_y
     use_displaced_mesh = true
-    extra_vector_tags = 'ref'
   []
   [normal_x]
     type = NormalMortarMechanicalContact
@@ -154,7 +153,6 @@ name = 'finite'
     component = x
     use_displaced_mesh = true
     compute_lm_residuals = false
-    extra_vector_tags = 'ref'
   []
   [normal_y]
     type = NormalMortarMechanicalContact
@@ -167,7 +165,6 @@ name = 'finite'
     component = y
     use_displaced_mesh = true
     compute_lm_residuals = false
-    extra_vector_tags = 'ref'
   []
   [thermal_contact]
     type = GapConductanceConstraint
@@ -180,7 +177,6 @@ name = 'finite'
     secondary_boundary = block_left
     secondary_subdomain = frictionless_secondary_subdomain
     displacements = 'disp_x disp_y'
-    extra_vector_tags = 'ref'
   []
 []
 
