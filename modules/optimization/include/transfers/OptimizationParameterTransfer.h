@@ -13,9 +13,15 @@
 #include "ReporterInterface.h"
 
 class ControlsReceiver;
+<<<<<<< HEAD
 /**
  * Copies optimization data to a ControlsReceiver object.
  */
+=======
+    /**
+     * Copies optimization data to a ControlsReceiver object.
+     */
+>>>>>>> f85813ccc5 (addressing new review comments  (#21885))
 class OptimizationParameterTransfer : public MultiAppTransfer, public ReporterInterface
 {
 public:
