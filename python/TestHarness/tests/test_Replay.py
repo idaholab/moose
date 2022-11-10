@@ -9,6 +9,7 @@
 
 import os
 import re
+import subprocess
 import shutil
 
 from TestHarnessTestCase import TestHarnessTestCase
@@ -59,3 +60,10 @@ class TestHarnessTester(TestHarnessTestCase):
 
         if formated_a == formated_b:
             self.fail(f'--show-last-run matched when it should not have')
+
+    def testNoResultsFile(self):
+        """ Verify the TestHarness errors correctly when there is no results file to work with """
+        with self.assertRaises(subprocess.CalledProcessError) as cm:
+            self.runTests('--show-last-run', '--results-file', 'non_existent')
+        e = cm.exception
+        self.assertRegex(e.output.decode('utf-8'), r'A previous run does not exist')
