@@ -2,7 +2,7 @@ E_block = 1e7
 E_plank = 1e7
 elem = QUAD4
 order = FIRST
-name = 'small'
+name = 'finite'
 
 [Mesh]
   patch_size = 80
@@ -10,8 +10,8 @@ name = 'small'
   [plank]
     type = GeneratedMeshGenerator
     dim = 2
-    xmin = 0
-    xmax = 0.6
+    xmin = -0.3
+    xmax = 0.3
     ymin = -10
     ymax = 10
     nx = 2
@@ -28,8 +28,8 @@ name = 'small'
   [block]
     type = GeneratedMeshGenerator
     dim = 2
-    xmin = 0.61
-    xmax = 1.21
+    xmin = 0.31
+    xmax = 0.91
     ymin = 7.7
     ymax = 8.5
     nx = 3
@@ -71,12 +71,15 @@ name = 'small'
   []
 []
 
-[Problem]
-  coord_type = RZ
-[]
-
 [GlobalParams]
   displacements = 'disp_x disp_y'
+[]
+
+[Problem]
+  type = ReferenceResidualProblem
+  reference_vector = 'ref'
+  extra_tag_vectors = 'ref'
+  converge_on = 'disp_x disp_y temp'
 []
 
 [Variables]
@@ -112,6 +115,8 @@ name = 'small'
     generate_output = 'stress_xx stress_yy stress_zz vonmises_stress hydrostatic_stress strain_xx strain_yy strain_zz'
     block = 'plank block'
     use_automatic_differentiation = true
+    strain = FINITE
+    extra_vector_tags = 'ref'
   []
 []
 
@@ -121,6 +126,7 @@ name = 'small'
     variable = temp
     use_displaced_mesh = true
     block = 'plank block'
+    extra_vector_tags = 'ref'
   []
 []
 
@@ -176,27 +182,27 @@ name = 'small'
 
 [BCs]
   [left_temp]
-    type = DirichletBC
+    type = ADDirichletBC
     variable = temp
     boundary = 'plank_left'
     value = 400
   []
 
   [right_temp]
-    type = DirichletBC
+    type = ADDirichletBC
     variable = temp
     boundary = 'block_right'
     value = 300
   []
 
   [left_x]
-    type = DirichletBC
+    type = ADDirichletBC
     variable = disp_x
     boundary = plank_left
     value = 0.0
   []
   [left_y]
-    type = DirichletBC
+    type = ADDirichletBC
     variable = disp_y
     boundary = plank_bottom
     value = 0.0
@@ -231,7 +237,7 @@ name = 'small'
     youngs_modulus = ${E_block}
   []
   [stress]
-    type = ADComputeLinearElasticStress
+    type = ADComputeFiniteStrainElasticStress
     block = 'plank block'
   []
 
@@ -260,6 +266,7 @@ name = 'small'
   dtmin = 0.1
   timestep_tolerance = 1e-6
   line_search = 'none'
+  nl_abs_tol = 1e-13
 []
 
 [Postprocessors]
@@ -330,6 +337,10 @@ name = 'small'
   [out]
     type = CSV
     file_base = '${name}_out'
+  []
+  [dof]
+    type = DOFMap
+    execute_on = 'initial'
   []
 []
 

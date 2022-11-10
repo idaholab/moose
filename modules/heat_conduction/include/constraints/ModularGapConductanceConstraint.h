@@ -13,13 +13,6 @@
 
 class GapFluxModelBase;
 
-enum class GapGeometry
-{
-  PLATE,
-  CYLINDER,
-  SPHERE,
-};
-
 /**
  * This Constraint implements thermal contact using a "gap
  * conductance" model in which the flux is represented by an
@@ -63,6 +56,15 @@ private:
    */
   void computeGapRadii(const ADReal & gap_length);
 
+  /// Gap geometry (user input or internally overwritten)
+  enum class GapGeometry
+  {
+    AUTO,
+    PLATE,
+    CYLINDER,
+    SPHERE,
+  } _gap_geometry_type;
+
   virtual void setGapGeometryParameters(const InputParameters & params,
                                         const Moose::CoordinateSystemType coord_sys,
                                         unsigned int axisymmetric_radial_coord,
@@ -73,9 +75,6 @@ private:
 
   /// Gap width to pass into flux models
   ADReal _gap_width;
-
-  /// Gap geometry (user input or internally overwritten)
-  GapGeometry _gap_geometry_type;
 
   /// Factor to preserve energy balance (due to mismatch in primary/secondary differential surface sizes)
   ADReal _surface_integration_factor;

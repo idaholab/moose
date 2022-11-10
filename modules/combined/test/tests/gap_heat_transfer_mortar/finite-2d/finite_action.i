@@ -2,7 +2,7 @@ E_block = 1e7
 E_plank = 1e7
 elem = QUAD4
 order = FIRST
-name = 'small'
+name = 'finite'
 
 [Mesh]
   patch_size = 80
@@ -10,8 +10,8 @@ name = 'small'
   [plank]
     type = GeneratedMeshGenerator
     dim = 2
-    xmin = 0
-    xmax = 0.6
+    xmin = -0.3
+    xmax = 0.3
     ymin = -10
     ymax = 10
     nx = 2
@@ -28,8 +28,8 @@ name = 'small'
   [block]
     type = GeneratedMeshGenerator
     dim = 2
-    xmin = 0.61
-    xmax = 1.21
+    xmin = 0.31
+    xmax = 0.91
     ymin = 7.7
     ymax = 8.5
     nx = 3
@@ -54,25 +54,6 @@ name = 'small'
     old_block = '1 2'
     new_block = 'plank block'
   []
-
-  [secondary]
-    input = block_rename
-    type = LowerDBlockFromSidesetGenerator
-    sidesets = 'block_left'
-    new_block_id = '30'
-    new_block_name = 'frictionless_secondary_subdomain'
-  []
-  [primary]
-    input = secondary
-    type = LowerDBlockFromSidesetGenerator
-    sidesets = 'plank_right'
-    new_block_id = '20'
-    new_block_name = 'frictionless_primary_subdomain'
-  []
-[]
-
-[Problem]
-  coord_type = RZ
 []
 
 [GlobalParams]
@@ -95,16 +76,6 @@ name = 'small'
     block = 'plank block'
     scaling = 1e-1
   []
-  [thermal_lm]
-    order = ${order}
-    block = 'frictionless_secondary_subdomain'
-    scaling = 1e-7
-  []
-  [frictionless_normal_lm]
-    order = ${order}
-    block = 'frictionless_secondary_subdomain'
-    use_dual = true
-  []
 []
 
 [Modules/TensorMechanics/Master]
@@ -112,6 +83,7 @@ name = 'small'
     generate_output = 'stress_xx stress_yy stress_zz vonmises_stress hydrostatic_stress strain_xx strain_yy strain_zz'
     block = 'plank block'
     use_automatic_differentiation = true
+    strain = FINITE
   []
 []
 
@@ -124,79 +96,54 @@ name = 'small'
   []
 []
 
-[Constraints]
-  [weighted_gap_lm]
-    type = ComputeWeightedGapLMMechanicalContact
-    primary_boundary = plank_right
-    secondary_boundary = block_left
-    primary_subdomain = frictionless_primary_subdomain
-    secondary_subdomain = frictionless_secondary_subdomain
-    variable = frictionless_normal_lm
-    disp_x = disp_x
-    disp_y = disp_y
-    use_displaced_mesh = true
+[Contact]
+  [frictionless]
+    primary = plank_right
+    secondary = block_left
+    formulation = mortar
+    c_normal = 1e6
   []
-  [normal_x]
-    type = NormalMortarMechanicalContact
-    primary_boundary = plank_right
-    secondary_boundary = block_left
-    primary_subdomain = frictionless_primary_subdomain
-    secondary_subdomain = frictionless_secondary_subdomain
-    variable = frictionless_normal_lm
-    secondary_variable = disp_x
-    component = x
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-  []
-  [normal_y]
-    type = NormalMortarMechanicalContact
-    primary_boundary = plank_right
-    secondary_boundary = block_left
-    primary_subdomain = frictionless_primary_subdomain
-    secondary_subdomain = frictionless_secondary_subdomain
-    variable = frictionless_normal_lm
-    secondary_variable = disp_y
-    component = y
-    use_displaced_mesh = true
-    compute_lm_residuals = false
-  []
-  [thermal_contact]
-    type = GapConductanceConstraint
-    variable = thermal_lm
-    secondary_variable = temp
-    k = 1
-    use_displaced_mesh = true
-    primary_boundary = plank_right
-    primary_subdomain = frictionless_primary_subdomain
-    secondary_boundary = block_left
-    secondary_subdomain = frictionless_secondary_subdomain
-    displacements = 'disp_x disp_y'
+[]
+
+[MortarGapHeatTransfer]
+  [mortar_heat_transfer]
+   temperature = temp
+   use_displaced_mesh = true
+   gap_flux_options = conduction
+   gap_conductivity = 1
+   boundary = plank_right
+   primary_boundary = plank_right
+   primary_subdomain = frictionless_primary_subdomain
+   secondary_boundary = block_left
+   secondary_subdomain = frictionless_secondary_subdomain
+   thermal_lm_scaling = 1e-7
+   gap_geometry_type = PLATE
   []
 []
 
 [BCs]
   [left_temp]
-    type = DirichletBC
+    type = ADDirichletBC
     variable = temp
     boundary = 'plank_left'
     value = 400
   []
 
   [right_temp]
-    type = DirichletBC
+    type = ADDirichletBC
     variable = temp
     boundary = 'block_right'
     value = 300
   []
 
   [left_x]
-    type = DirichletBC
+    type = ADDirichletBC
     variable = disp_x
     boundary = plank_left
     value = 0.0
   []
   [left_y]
-    type = DirichletBC
+    type = ADDirichletBC
     variable = disp_y
     boundary = plank_bottom
     value = 0.0
@@ -231,7 +178,7 @@ name = 'small'
     youngs_modulus = ${E_block}
   []
   [stress]
-    type = ADComputeLinearElasticStress
+    type = ADComputeFiniteStrainElasticStress
     block = 'plank block'
   []
 
@@ -330,6 +277,10 @@ name = 'small'
   [out]
     type = CSV
     file_base = '${name}_out'
+  []
+  [dof]
+    type = DOFMap
+    execute_on = 'initial'
   []
 []
 
