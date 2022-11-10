@@ -75,11 +75,6 @@
   tao_solver = taoblmvm #taolmvm#taonm #taolmvm
   petsc_options_iname = '-tao_gatol' # -tao_fd_gradient -tao_fd_delta'
   petsc_options_value = '1e-4' #1e-1 '#true 1e-4'
-
-  #   petsc_options_iname='-tao_max_it -tao_fd_test -tao_test_gradient -tao_fd_gradient -tao_fd_delta -tao_gatol'
-  #   petsc_options_value='1 true true false 1e-6 0.1'
-  #   petsc_options = '-tao_test_gradient_view'
-  verbose = true
 []
 
 [MultiApps]
@@ -102,8 +97,8 @@
   [fromForward]
     type = MultiAppReporterTransfer
     from_multi_app = forward
-    from_reporters = 'data_pt/temperature data_pt/temperature'
-    to_reporters = 'OptimizationReporter/simulation_values receiver/measured'
+    from_reporters = 'data_pt/temperature'
+    to_reporters = 'OptimizationReporter/simulation_values'
   []
   [toAdjoint]
     type = MultiAppReporterTransfer
@@ -160,15 +155,6 @@
     value_names = 'p1'
     parameters = 'Postprocessors/p1/value'
     to_control = adjointReceiver
-  []
-
-[]
-
-[Reporters]
-  [receiver]
-    type = ConstantReporter
-    real_vector_names = measured
-    real_vector_values = '0 0 0 0'
   []
 []
 

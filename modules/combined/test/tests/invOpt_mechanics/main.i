@@ -27,16 +27,6 @@
   petsc_options_iname = '-tao_gttol -tao_max_it -tao_nls_pc_type -tao_nls_ksp_type'
   petsc_options_value = '1e-5 50 none cg'
   verbose = true
-
-  #  type = Optimize
-  #  tao_solver = taolmvm
-  #  petsc_options_iname = '-tao_gatol -tao_grtol'
-  #  petsc_options_value = '1e-6 1e-6'
-  #  verbose = true
-
-  #  petsc_options_iname='-tao_max_it -tao_fd_test -tao_test_gradient -tao_fd_gradient -tao_fd_delta -tao_gatol'
-  #  petsc_options_value='1 true true false 1e-3 0.1'
-  #  petsc_options = '-tao_test_gradient_view'
 []
 
 [MultiApps]

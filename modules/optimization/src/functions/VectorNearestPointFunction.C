@@ -16,7 +16,7 @@ VectorNearestPointFunction::validParams()
 {
   InputParameters params = OptimizationFunction::validParams();
   params.addClassDescription(
-      "Function based on the nearest point to coordinates and values defined by a vector "
+      "Function based on the nearest point to coordinates and values defined by a vector of "
       "values, interpolates linearly in time with transient data.");
   params.addParam<ReporterName>(
       "coord_x",

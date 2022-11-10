@@ -12,9 +12,10 @@
 #include "MultiAppTransfer.h"
 #include "ReporterInterface.h"
 
-// Forward declarations
 class ControlsReceiver;
-
+/**
+ * Copies optimization data to a ControlsReceiver object.
+ */
 class OptimizationParameterTransfer : public MultiAppTransfer, public ReporterInterface
 {
 public:

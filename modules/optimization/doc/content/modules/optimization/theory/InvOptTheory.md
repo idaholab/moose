@@ -6,7 +6,7 @@ This page provides a practical overview of the theory and equations needed to so
 - [Adjoint Equation and Boundary Conditions:](#sec:adjoint) Derivation of the Adjoint equation using Lagrange multipliers and its boundary conditions.
 - [Parameter Derivatives of PDE:](#sec:PDEDerivs) Derivatives of the PDE with respect to the optimization parameters for force and material inversion.  Force inversion examples where PDE constrained optimization is used to parameterize boundary conditions and body loads is provided in this [section](#sec:forceInvExample).  Material inversion examples are provided in this [section](#sec:forceInvExample) where PDE constrained optimization is used to control material properties.
 
-The overall flow of the optimization algorithm implemented in the MOOSE optimization module is shown in [fig:optCycle].  In this example, the internal heat source, $q_v$, is being parameterized to match the simulated and experimental steady state temperature fields, $\widetilde{T}$ and $T$, respectively.  Step one of the optimization cycle consists of adjusting the internal heat source, $q_v$.  In step two, the physics model is solved with the current $q_v$ to obtain a simulated temperature field, $T$.  Step two is often referred to as the forward solve.  In step three, the simulated and experimental temperature fields are compared via the objective function, $f$.  If $f$ is below the user defined threshold, the optimization cycle stops and the best fit parameterization of $q_v$ is found.  If $f$ is above the user defined threshold, the optimization algorithm determines a new $q_v$ and the process is repeated.  In the next section, methods for determining the next iteration of the parameterized value, in this case $q_v$, will be presented.  Problems solved using the optimization module are available on the [Examples page](examples/index.md).
+The overall flow of the optimization algorithm implemented in the MOOSE optimization module is shown in [fig:optCycle].  In this example, the internal heat source, $q_v$, is being parameterized to match the simulated and experimental steady state temperature fields, $T$ and $\widetilde{T}$, respectively.  Step one of the optimization cycle consists of adjusting the internal heat source, $q_v$.  In step two, the physics model is solved with the current $q_v$ to obtain a simulated temperature field, $T$.  Step two is often referred to as the forward solve.  In step three, the simulated and experimental temperature fields are compared via the objective function, $f$.  If $f$ is below the user defined threshold, the optimization cycle stops and the best fit parameterization of $q_v$ is found.  If $f$ is above the user defined threshold, the optimization algorithm determines a new $q_v$ and the process is repeated.  In the next section, methods for determining the next iteration of the parameterized value, in this case $q_v$, will be presented.  Problems solved using the optimization module are available on the [Examples page](examples/index.md).
 
 !media large_media/optimization/fig_optCycle.png
        style=width:80%;margin:auto;padding-top:2.5%;
@@ -25,9 +25,9 @@ where $f(\mathbf{u},\mathbf{p})$ is our objective function which provides a scal
 
 Optimization problems can be solved using either global (gradient-free) or local (gradient-based) approaches [!citet](aster2018parameter). Global approaches require a large number of iterations compared to gradient-based approaches (e.g. conjugate gradient or Newton-type methods), making the latter more suitable to problems with a large parameter space and computationally expensive models.  The [PETSc TAO](https://www.mcs.anl.gov/petsc/documentation/taosolvertable.html) optimization library [!citet](balay2019petsc) is used to solve [eq:optimization].  Optimization libraries like TAO require access to functions for computing the objective ($f$), gradient $\left(\mathrm{d}f/\mathrm{d}\mathbf{p}\right)$ and Hessian $\left(\mathrm{d}^2f/\mathrm{d}\mathbf{p}^2\right)$ or a function to take the action of the Hessian on a vector.  An objective function measuring the misfit or distance between the simulation and experimental data usually has the form
 \begin{equation}\label{eq:objective}
-f(\mathbf{u}, \mathbf{p}) = \frac{1}{2}\sum^N_i \left(u_i - \bar u_i\right)^2 + \frac{\rho}{2}\sum^M_j p_jp_j ,
+f(\mathbf{u}, \mathbf{p}) = \frac{1}{2}\sum^N_i \left(u_i - \tilde u_i\right)^2 + \frac{\rho}{2}\sum^M_j p_jp_j ,
 \end{equation}
-where the first summation over $(i=1..N)$ is an L$_2$ norm or euclidean distance between experimental measurement points, $\mathbf{\bar u}$, and the simulated solution, $\mathbf{u}$.  The second summation over $(j=1..M)$ provides Tikhonov regularization of the design variables, $\mathbf{p}$, for ill-posed problems where $\rho$ controls the amount of regularization.  Other types of regularization may also be used.
+where the first summation over $(i=1..N)$ is an L$_2$ norm or euclidean distance between experimental measurement points, $\mathbf{\tilde  u}$, and the simulated solution, $\mathbf{u}$.  The second summation over $(j=1..M)$ provides Tikhonov regularization of the design variables, $\mathbf{p}$, for ill-posed problems where $\rho$ controls the amount of regularization.  Other types of regularization may also be used.
 
 Gradient-free optimization solvers only require a function to solve for the objective given in [eq:objective].  Solving for the objective only requires solving a forward problem to determine $\mathbf{u}$ and then plugging that into [eq:objective] to determine $f$.  The forward problem is defined as the FEM model of the experiment which the analyst should have already made before attempting to perform optimization.  The parameters that go into the forward problem (e.g. pressure distributions on sidesets or material properties) are adjusted by the optimization solver and the forward problem is recomputed.  This process continues until $f$ is below some user defined threshold. The basic gradient-free solver available in TAO is the simplex or Nelder-Mead method.  Gradient-free optimization solvers are robust and straight-forward to use.  Unfortunately, their computational cost scales exponentially with the number of parameters.  When the forward model is a computationally expensive FEM model, gradient-free approaches quickly become computationally expensive.
 
@@ -35,7 +35,7 @@ Gradient-based optimization algorithms require fewer iterations but require func
 
 Given the large parameter space, we resort to the adjoint method for gradient computation; unlike finite difference approaches, the computational cost of adjoint methods is independent of the number of parameters [!citet](plessix2006review).  In the adjoint method, the gradient, i.e. the total derivative $\mathrm{d}f/\mathrm{d}\mathbf{p}$, is computed as,
 \begin{equation}\label{eq:adjointGrad}
-\frac{\mathrm{d}f}{\mathrm{d}\mathbf{p}} = \frac{\partial f}{\partial\mathbf{p}}+\mathbf{\lambda}\frac{\partial\mathcal{R}}{\partial\mathbf{p}} ,
+\frac{\mathrm{d}f}{\mathrm{d}\mathbf{p}} = \frac{\partial f}{\partial\mathbf{p}}+\mathbf{\lambda}^\top\frac{\partial\mathcal{R}}{\partial\mathbf{p}} ,
 \end{equation}
 where $\partial f/\partial\mathbf{p}$ accounts for the regularization in [eq:objective] and $\mathbf{\lambda}$ is the adjoint variable solved for from the adjoint equation
 \begin{equation}\label{eq:adjoint}
@@ -88,12 +88,12 @@ In this section, we are interested in solving the following PDE-constrained opti
 \begin{equation} \label{eqn:optimization_problem}
 	\begin{aligned}
 	& \min_{\mathbf{p}}
-	& & f\left(T,\mathbf{p}\right) = \frac{1}{2} \sum_{i=1}^{N} \left( T_i - \bar{T}_i \right)^2 , \\
+	& & f\left(T,\mathbf{p}\right) = \frac{1}{2} \sum_{i=1}^{N} \left( T_i - \widetilde {T}_i \right)^2 , \\
 	& \text{subject to}
 	& & \mathcal{R}\left(T,\mathbf{p}\right)=\nabla \cdot \kappa \nabla T + g_b =0, & \text{in}~\Omega , \\
 \end{aligned}
 \end{equation}
-where $f$ is the objective function from [eq:objective] without regularization, $g_b$ is the distributed heat flux, $\bar{T}$ is the experimental temperature being compared to our simulation temperature field at discrete locations, $T_i$.  Other forms for the objective function are possible such as different norms or different types of measurements that may require integration over a line or volume.
+where $f$ is the objective function from [eq:objective] without regularization, $g_b$ is the distributed heat flux, $\widetilde{T}$ is the experimental temperature being compared to our simulation temperature field at discrete locations, $T_i$.  Other forms for the objective function are possible such as different norms or different types of measurements that may require integration over a line or volume.
 
 We also have the following boundary conditions for our PDE,
 \begin{equation} \label{eqn:optimization_bcs}
@@ -112,7 +112,7 @@ where $\boldsymbol{n}$ is the normal vector, $\Gamma_D$ is the Dirichlet boundar
 where $h$ is the heat transfer coefficient and $g_n$ is independent of $T$.
 The objective function can also be expressed in a integral form for the case of $N$ point measurements as follows
 \begin{equation}  \label{eqn:objective_integral}
-	f = \frac{1}{2} \sum_{i=1}^{N} \int \delta(x - x_i) \left( T - \bar{T}_i \right)^2\text{d}\Omega.
+	f = \frac{1}{2} \sum_{i=1}^{N} \int \delta(x - x_i) \left( T - \widetilde{T}_i \right)^2\text{d}\Omega.
 \end{equation}
 
 We take the equivalent, variational approach to derive the adjoint. Thus, the Lagrangian of this problem is
@@ -138,7 +138,7 @@ By substituting the above and [eqn:objective_integral] into [eqn:lagrangian], we
 \begin{equation} \label{eqn:lagrangian_fn}
 \begin{aligned}
 	\mathcal{L}(T, \mathbf{p}, \lambda) =& \mathcal{A}(T, \mathbf{p}, \lambda) +\mathcal{B}(T, \mathbf{p}, \lambda), \\
-	 \mathcal{A}(T, \mathbf{p}, \lambda)=&\frac{1}{2} \sum_{i=1}^{N} \int \delta(x - x_i) \left( T - \bar{T} \right)^2\text{d}\Omega
+	 \mathcal{A}(T, \mathbf{p}, \lambda)=&\frac{1}{2} \sum_{i=1}^{N} \int \delta(x - x_i) \left( T - \widetilde{T} \right)^2\text{d}\Omega
 	 	+ \int \left(  g_b \lambda \right) ~\text{d}\Omega
 	 	+ \int \left(\nabla\cdot \kappa \nabla \lambda\right)T ~\text{d}\Omega,\\
 	 \mathcal{B}(T, \mathbf{p}, \lambda)=&  \int\left[ \lambda \left( \kappa \nabla T \right)\cdot \boldsymbol{n}
@@ -159,8 +159,8 @@ where $\lambda$ is the Lagrange multiplier field known as the adjoint state or c
 where $T_o$ is the prescribed temperature on the Dirichlet boundary, $\Gamma_D$.  The variation of $\mathcal{L}$ with respect to $T$ is then given by $\delta\mathcal{L}=\delta\mathcal{A}+\delta\mathcal{B}$ where the variation of the body terms with respect to $T$ are given by
 \begin{equation}\label{eqn:delta_bodyLagrangian}
 \begin{aligned}
-\delta\mathcal{A}=& \sum_{i=1}^{N} \int \delta(x - x_i) \left( T - \bar{T} \right)\delta T\text{d}\Omega + \int \left(\nabla\cdot \kappa \nabla \lambda \right) \delta T ~\text{d}\Omega\\
-				=&\int \left(\left(\nabla\cdot \kappa \nabla \lambda \right) +  \sum_{i=1}^{N} \delta(x - x_i) \left( T - \bar{T} \right) \right)\delta T ~\text{d}\Omega,
+\delta\mathcal{A}=& \sum_{i=1}^{N} \int \delta(x - x_i) \left( T - \widetilde{T} \right)\delta T\text{d}\Omega + \int \left(\nabla\cdot \kappa \nabla \lambda \right) \delta T ~\text{d}\Omega\\
+				=&\int \left(\left(\nabla\cdot \kappa \nabla \lambda \right) +  \sum_{i=1}^{N} \delta(x - x_i) \left( T - \widetilde{T} \right) \right)\delta T ~\text{d}\Omega,
 \end{aligned}
 \end{equation}
 and the variation of $\mathcal{B}$ with respect to $T$ is given as
@@ -179,7 +179,7 @@ Combining [eqn:delta_bodyLagrangian] and [eqn:delta_bcLagrangian] to get $\delta
 \begin{aligned}
 \delta\mathcal{L}=&\delta\mathcal{A}+\delta\mathcal{B}\\
 =&\int \left(\left(\nabla\cdot \kappa \nabla \lambda \right)
-	+  \sum_{i=1}^{N} \delta(x - x_i) \left( T - \bar{T} \right) \right)\delta T ~\text{d}\Omega\\
+	+  \sum_{i=1}^{N} \delta(x - x_i) \left( T - \widetilde{T} \right) \right)\delta T ~\text{d}\Omega\\
     &+\int_{\Gamma_R}\left(\lambda h -\left(\kappa\nabla\lambda\cdot\boldsymbol{n}\right)\right)\delta T\text{d}\Gamma
     	+\int_{\Gamma_D}\lambda\left(\kappa\nabla\delta T\cdot\boldsymbol{n}\right)~\text{d}\Gamma.
 \end{aligned}
@@ -189,7 +189,7 @@ Stationarity of $\mathcal{L}$ would require $\delta\mathcal{L} = 0$ for all admi
 \begin{equation} \label{eqn:adjoint_problem}
 \boxed{
 \begin{aligned}
-\nabla\cdot \kappa \nabla \lambda +  \sum_{i=1}^{N} \delta (x - x_i)(T - \bar{T}) &=0, ~\text{in}~\Omega,\\
+\nabla\cdot \kappa \nabla \lambda +  \sum_{i=1}^{N} \delta (x - x_i)(T - \widetilde{T}) &=0, ~\text{in}~\Omega,\\
 \lambda  &= 0, ~\text{on}~\Gamma_D, \\
 \kappa \nabla \lambda \cdot \boldsymbol{n} & = \lambda h, ~\text{on}~{\Gamma_R}. \\
 \end{aligned}
@@ -349,7 +349,7 @@ where $\nabla\phi\hat{T}=\nabla T$ was used in the last line.  The gradient term
 
 \begin{equation}\label{eq:kappaLambda}
 \begin{aligned}
-\lambda\frac{\partial \hat{\text{R}}}{\partial\mathbf{p}} &=  \hat{\lambda}^{\top}\cdot\int\nabla\phi^{\top} \cdot \frac{\partial \kappa}{{\partial\mathbf{p}}}\cdot\nabla\phi~\text{d}\Omega \cdot\hat{\text T}\\
+\lambda^\top\frac{\partial \hat{\text{R}}}{\partial\mathbf{p}} &=  \hat{\lambda}^{\top}\cdot\int\nabla\phi^{\top} \cdot \frac{\partial \kappa}{{\partial\mathbf{p}}}\cdot\nabla\phi~\text{d}\Omega \cdot\hat{\text T}\\
     &=  \int\nabla\lambda^{\top} \cdot \frac{\partial \kappa}{{\partial\mathbf{p}}}\cdot\nabla T~\text{d}\Omega,
 \end{aligned}
 \end{equation}

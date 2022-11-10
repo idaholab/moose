@@ -99,7 +99,7 @@ OptimizationReporterTest::execute()
   // // Objective
   std::vector<Real> valuesToSetOnOptRepSim(
       getParam<std::vector<Real>>("values_to_set_simulation_measurements_to"));
-  _optReporter->setSimuilationValuesForTesting(valuesToSetOnOptRepSim);
+  _optReporter->setSimulationValuesForTesting(valuesToSetOnOptRepSim);
   Real expectedObjectiveValue(getParam<Real>("expected_objective_value"));
   Real objectiveValue = _optReporter->computeObjective();
   Real diff = std::abs(expectedObjectiveValue - objectiveValue);

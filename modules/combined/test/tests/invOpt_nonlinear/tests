@@ -1,6 +1,6 @@
 [Tests]
   issues = '#22208'
-  design = 'MaterialScaledGradientVector.md'
+  design = 'LevelSetAdvection.md'
   requirement = "The system shall solve for the value of a constant heat source with a temperature dependent "
                 "thermal conductivity, to match a target temperature profile, using a"
   [BFGS]

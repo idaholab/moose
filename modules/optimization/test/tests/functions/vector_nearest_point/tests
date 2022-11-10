@@ -41,7 +41,7 @@
       input = vector_nearest_point.i
       cli_args = 'Functions/active=errorv AuxKernels/val_aux/function=errorv'
       expect_err = 'Size of value vector \(\d*\) does not match number of coordinates specified \(\d*\).'
-      detail = 'value vector is wrong size;'
+      detail = 'the size of value vector is wrong;'
     []
     [x]
       type = RunException

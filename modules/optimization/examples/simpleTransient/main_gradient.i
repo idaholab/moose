@@ -57,7 +57,19 @@
   verbose = true
 []
 
+[Postprocessors]
+  [./elapsed]
+    type = PerfGraphData
+    section_name = "Root"
+    data_type = total
+  [../]
+[]
+
 [Outputs]
+  [pgraph]
+    type = PerfGraphOutput
+    level = 1
+  []
   [out]
     type = JSON
   []

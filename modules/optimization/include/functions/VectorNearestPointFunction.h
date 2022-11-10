@@ -11,7 +11,10 @@
 
 #include "OptimizationFunction.h"
 #include "ReporterInterface.h"
-
+/**
+ * Function based on the nearest point to coordinates and values defined by a
+ * vector of values, interpolates linearly in time with transient data.
+ */
 class VectorNearestPointFunction : public OptimizationFunction, public ReporterInterface
 {
 public:

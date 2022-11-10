@@ -33,7 +33,16 @@ public:
   const OptimizationReporter & getOptimizationReporter() const { return *_obj_function; }
 
   /**
-   * Record tao data for output by a reporter
+   * Record tao TaoGetSolutionStatus data for output by a reporter
+   * @param tot_iters total solves per iteration
+   * @param gnorm gradient norm per iteration
+   * @param obj_iters number of objective solves per iteration
+   * @param cnorm infeasibility norm per iteration
+   * @param grad_iters gradient solves per iteration
+   * @param xdiff step length per iteration
+   * @param hess_iters Hessian solves per iteration
+   * @param f objective value per iteration
+   * @param tot_solves total solves per iteration
    */
   void getTaoSolutionStatus(std::vector<int> & tot_iters,
                             std::vector<double> & gnorm,
@@ -72,27 +81,38 @@ protected:
   Tao _tao;
 
 private:
+  /// control optimization executioner output
   bool _verbose;
-  /// tao solver info
+
+  ///@{
+  /// count individual solves for output
   int _obj_iterate = 0;
   int _grad_iterate = 0;
   int _hess_iterate = 0;
+  ///@}
+  /// total solves per iteration
   std::vector<int> _total_iterate_vec;
+  /// number of objective solves per iteration
   std::vector<int> _obj_iterate_vec;
+  /// gradient solves per iteration
   std::vector<int> _grad_iterate_vec;
+  /// Hessian solves per iteration
   std::vector<int> _hess_iterate_vec;
+  /// total solves per iteration
   std::vector<int> _function_solve_vec;
+  /// objective value per iteration
   std::vector<double> _f_vec;
+  /// gradient norm per iteration
   std::vector<double> _gnorm_vec;
+  /// infeasibility norm per iteration
   std::vector<double> _cnorm_vec;
+  /// step length per iteration
   std::vector<double> _xdiff_vec;
 
   /// Here is where we call tao and solve
   PetscErrorCode taoSolve();
 
   /// output optimization iteration solve data
-  static PetscErrorCode monitor(Tao tao, void * ctx);
-
   void setTaoSolutionStatus(double f, int its, double gnorm, double cnorm, double xdiff);
 
   ///@{
@@ -103,9 +123,9 @@ private:
   static PetscErrorCode
   objectiveAndGradientFunctionWrapper(Tao tao, Vec x, Real * objective, Vec gradient, void * ctx);
   static PetscErrorCode variableBoundsWrapper(Tao /*tao*/, Vec xl, Vec xu, void * ctx);
+  static PetscErrorCode monitor(Tao tao, void * ctx);
   ///@}
 
-  // fixme lynn these have weird names because Petsc already has macros for TAONTR etc.
   /// Enum of tao solver types
   const enum class TaoSolverEnum {
     NEWTON_TRUST_REGION,

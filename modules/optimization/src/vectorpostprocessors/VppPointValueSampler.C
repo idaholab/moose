@@ -21,13 +21,19 @@ VppPointValueSampler::validParams()
   params.addClassDescription("Sample variables at xyz coordinates defined by reporter.");
 
   params.addParam<std::string>("reporter_name",
-                               "The name of the reporter object name containing positions");
-  params.addParam<std::string>(
-      "x_coord_name", "measurement_xcoord", "name of vpp containing x coordinates.");
-  params.addParam<std::string>(
-      "y_coord_name", "measurement_ycoord", "name of vpp containing y coordinates.");
-  params.addParam<std::string>(
-      "z_coord_name", "measurement_zcoord", "name of vpp containing z coordinates.");
+                               "The name of the reporter object containing positions");
+  params.addParam<std::string>("x_coord_name",
+                               "measurement_xcoord",
+                               "If reporter_name is set: name of x coordinates vector, else name "
+                               "of vpp containing x coordinates.");
+  params.addParam<std::string>("y_coord_name",
+                               "measurement_ycoord",
+                               "If reporter_name is set: name of x coordinates vector, else name "
+                               "of vpp containing x coordinates.");
+  params.addParam<std::string>("z_coord_name",
+                               "measurement_zcoord",
+                               "If reporter_name is set: name of x coordinates vector, else name "
+                               "of vpp containing x coordinates.");
 
   MooseEnum sort_options("x y z id");
   params.set<MooseEnum>("sort_by") = "id";

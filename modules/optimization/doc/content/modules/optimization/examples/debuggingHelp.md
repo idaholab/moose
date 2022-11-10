@@ -1,8 +1,8 @@
 # Debugging Help
 
-Optimization problems are difficult to set-up correctly because each sub-app must be solving and returning the correct data to TAO.  It is easiest to build up the optimization problem by starting with the simplest optimization algorithms and working up in complexity.  By simplest, I mean the algorithm requiring the least number of sub-apps, i.e. gradient free optimization will be much easier to set-up than gradient and Hessian based optimization problems.  
+Optimization problems are difficult to set-up correctly because each sub-app must be solving for and returning the correct data to TAO.  It is easiest to build up the optimization problem by starting with the simplest optimization algorithms and working up in complexity.  By simplest, I mean the algorithm requiring the least number of sub-apps, i.e. gradient free optimization will be much easier to set-up than gradient and Hessian based optimization problems.  
 
-For problems with only a few parameters, the gradient free Nelder Mead ,`taonm`, algorithm will be the easiest to get running.  This will determine if the forward problem is providing the objective function with the correct information.  The next step is to use a gradient based solver like the TAO limited memory variable metric, `taolmvm`, with a gradient provided from finite differencing instead of an adjoint sub-app.  This can help you determine if bounds or better initial guesses on the parameters are needed.  However, finite differences are slow so this should only be used with a few parameters.  An example of a finite difference derivative provided by TAO using the `petsc_options` is shown in the following `[Executioner]` block  
+For problems with only a few parameters, the gradient-free Nelder Mead ,`taonm`, algorithm will be the easiest to get running.  This will determine if the forward problem is providing the objective function with the correct information.  The next step is to use a gradient based solver like the TAO limited memory variable metric, `taolmvm`, with a gradient provided from finite differencing instead of an adjoint sub-app.  This can help you determine if bounds or better initial guesses on the parameters are needed.  However, finite differences are slow so this should only be used with a few parameters.  An example of a finite difference derivative provided by TAO using the `petsc_options` is shown in the following `[Executioner]` block  
 
 ```language=bash
 [Executioner]
@@ -16,7 +16,7 @@ For problems with only a few parameters, the gradient free Nelder Mead ,`taonm`,
 
 The `-tao_fd_delta` size of 1e-8 is problem dependent.  
 
-If everything is going well up to this point, its time to use an adjoint sub-app to compute the gradient.  This requires the formulation of the adjoint and gradient and the translation of all this into a MOOSE input file.  If the optimization algorithm stops converging, then something is probably wrong with the gradient being computed by the adjoint-app.  TAO can check the gradient computed by the adjoint problem with that computed using finite differencing with the following `petsc_options`:
+If everything is going well up to this point, it's time to use an adjoint sub-app to compute the gradient.  This requires the formulation of the adjoint and gradient and the translation of all this into a MOOSE input file.  If the optimization algorithm stops converging, then something is probably wrong with the gradient being computed by the adjoint-app.  TAO can check the gradient computed by the adjoint problem with that computed using finite differencing with the following `petsc_options`:
 
 ```language=bash
 [Executioner]
@@ -29,7 +29,7 @@ If everything is going well up to this point, its time to use an adjoint sub-app
 []
 ```
 
-Only a single iteration is is taken in this executioner block which is enough to see if the gradient is correct but probably not enough for the problem to converge.  In the above executioner block uses the conjugate gradient (`tooabncg`) solver with the line search turned off  (`-tao_ls_type=unit`) to reduce the number of forward and adjoint solves taken during a single optimization iteration.  Output from the gradient test in the executioner block will look like this when the gradient is correct:
+Only a single iteration is taken in this executioner block which is enough to see if the gradient is correct but probably not enough for the problem to converge.  The above executioner block uses the conjugate gradient (`tooabncg`) solver with the line search turned off  (`-tao_ls_type=unit`) to reduce the number of forward and adjoint solves taken during a single optimization iteration.  Output from the gradient test in the executioner block will look like this when the gradient is correct:
 
 ```language=bash
 ||Gfd|| 1.43932, ||G|| = 1.43924, angle cosine = (Gfd'G)/||Gfd||||G|| = 1.

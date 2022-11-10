@@ -1,6 +1,6 @@
 [Tests]
   issues = '#21885'
-  design = 'OptimizationReporter.md'
+  design = 'InvOptTheory.md'
   requirement = "The system shall invert for a mechanical load using a Hessian based optimimization"
   [hessian]
     type = CSVDiff

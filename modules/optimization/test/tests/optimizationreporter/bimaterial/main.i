@@ -120,7 +120,7 @@
     from_reporters = 'OptimizationReporter/diffusivity_values'
     to_reporters = 'vector_pp/diffusivity_values'
   []
-  [toAdjoint] #pas the misfit to the adjoint
+  [toAdjoint] #pass the misfit to the adjoint
     type = MultiAppReporterTransfer
     to_multi_app = adjoint
     from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord OptimizationReporter/misfit_values'

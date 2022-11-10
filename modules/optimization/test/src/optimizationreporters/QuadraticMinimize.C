@@ -45,7 +45,7 @@ QuadraticMinimize::computeObjective()
 }
 
 void
-QuadraticMinimize::computeGradient(libMesh::PetscVector<Number> & gradient)
+QuadraticMinimize::computeGradient(libMesh::PetscVector<Number> & gradient) const
 {
   unsigned int i = 0;
   for (const auto & param : _parameters)

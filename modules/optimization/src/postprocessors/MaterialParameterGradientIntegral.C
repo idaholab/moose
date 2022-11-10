@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MaterialGradientIntegral.h"
+#include "MaterialParameterGradientIntegral.h"
 
-registerMooseObject("OptimizationApp", MaterialGradientIntegral);
+registerMooseObject("OptimizationApp", MaterialParameterGradientIntegral);
 
 InputParameters
-MaterialGradientIntegral::validParams()
+MaterialParameterGradientIntegral::validParams()
 {
   InputParameters params = ElementIntegralPostprocessor::validParams();
   params.addClassDescription(
@@ -26,7 +26,8 @@ MaterialGradientIntegral::validParams()
   return params;
 }
 
-MaterialGradientIntegral::MaterialGradientIntegral(const InputParameters & parameters)
+MaterialParameterGradientIntegral::MaterialParameterGradientIntegral(
+    const InputParameters & parameters)
   : ElementIntegralPostprocessor(parameters),
     _dMdP(getMaterialProperty<Real>("material_derivative")),
     _grad_u(coupledGradient("adjoint_var")),
@@ -35,7 +36,7 @@ MaterialGradientIntegral::MaterialGradientIntegral(const InputParameters & param
 }
 
 Real
-MaterialGradientIntegral::computeQpIntegral()
+MaterialParameterGradientIntegral::computeQpIntegral()
 {
   return -_grad_v[_qp] * _dMdP[_qp] * _grad_u[_qp];
 }

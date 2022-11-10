@@ -14,12 +14,12 @@
  * This postprocessor computes the gradient for material inversion by taking the inner product of
  gradients of the forward and adjoint variables with material gradient
  */
-class MaterialGradientIntegral : public ElementIntegralPostprocessor
+class MaterialParameterGradientIntegral : public ElementIntegralPostprocessor
 {
 public:
   static InputParameters validParams();
 
-  MaterialGradientIntegral(const InputParameters & parameters);
+  MaterialParameterGradientIntegral(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpIntegral() override;

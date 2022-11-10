@@ -16,7 +16,10 @@
 // friends
 #include "OptimizeSolve.h"
 #include "OptimizationReporterTest.h"
-
+/**
+ * Computes objective function, gradient and contains reporters for communicating between
+ * optimizeSolve and subapps
+ */
 class OptimizationReporter : public OptimizationData
 {
 public:
@@ -40,19 +43,16 @@ public:
   void setMisfitToSimulatedValues();
 
   /**
-   * Functions to get and check bounds
+   * Functions to check if bounds are set
    */
   bool hasBounds() const { return _upper_bounds.size() > 0 && _lower_bounds.size() > 0; }
 
   /**
    * Upper and lower bounds for each parameter being controlled
+   * @return vector containing one entry per controllable parameter for each upper/lower bound
    */
   const std::vector<Real> & getUpperBounds() const { return _upper_bounds; };
   const std::vector<Real> & getLowerBounds() const { return _lower_bounds; };
-  /**
-   * Function to compute default bounds when user did not provide bounds
-   */
-  std::vector<Real> computeDefaultBounds(Real val);
 
   /**
    * Function to compute objective.
@@ -64,12 +64,13 @@ public:
    * Function to compute gradient.
    * This is the last call of the gradient routine.
    */
-  virtual void computeGradient(libMesh::PetscVector<Number> & gradient);
+  virtual void computeGradient(libMesh::PetscVector<Number> & gradient) const;
 
   /**
    * Function to get the total number of parameters
+   * @return total number of parameters
    */
-  unsigned int getNumParams() { return _ndof; };
+  unsigned int getNumParams() const { return _ndof; };
 
 protected:
   /// Parameter names
@@ -101,5 +102,5 @@ private:
   friend class OptimizeSolve;
   friend class OptimizationReporterTest;
 
-  void setSimuilationValuesForTesting(std::vector<Real> & data);
+  void setSimulationValuesForTesting(std::vector<Real> & data);
 };

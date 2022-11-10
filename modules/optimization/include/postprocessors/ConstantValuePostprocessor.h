@@ -12,7 +12,7 @@
 #include "GeneralPostprocessor.h"
 
 /**
- * This postprocessor displays a constant value, could be a parameter in a function.
+ * This postprocessor displays a constant value
  */
 class ConstantValuePostprocessor : public GeneralPostprocessor
 {

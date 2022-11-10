@@ -1,6 +1,6 @@
 [Tests]
   issues = '#21885'
-  design = 'MaterialGradientIntegral.md'
+  design = 'MaterialParameterGradientIntegral.md'
   [taoblmvm]
     type = CSVDiff
     max_threads = 1

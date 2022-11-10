@@ -42,7 +42,7 @@
 []
 
 [Transfers]
-  # FORWARD tranfers
+  # FORWARD transfers
   [toForward_measument]
     type = MultiAppReporterTransfer
     to_multi_app = forward
@@ -62,7 +62,7 @@
     to_reporters = 'OptimizationReporter/simulation_values'
   []
 
-  # ADJOINT tranfers
+  # ADJOINT transfers
   #NOTE:  the adjoint variable we are transferring is actually the gradient
   [toAdjoint]
     type = MultiAppReporterTransfer

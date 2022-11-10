@@ -94,7 +94,7 @@
 
 [Postprocessors]
   [pp_adjoint_grad]
-    type = MaterialGradientIntegral
+    type = MaterialParameterGradientIntegral
     adjoint_var = 'adjointVar'
     forward_var = temperature_forward
     material_derivative = thermal_conductivity_deriv

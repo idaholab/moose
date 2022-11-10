@@ -23,10 +23,10 @@ public:
   QuadraticMinimize(const InputParameters & parameters);
 
   virtual Real computeObjective() override;
-  virtual void computeGradient(libMesh::PetscVector<Number> & gradient) override;
+  virtual void computeGradient(libMesh::PetscVector<Number> & gradient) const override;
 
 private:
-  /// Inputted objective function value
+  /// Input objective function value
   const Real & _result;
 
   /// Desired solution to optimization

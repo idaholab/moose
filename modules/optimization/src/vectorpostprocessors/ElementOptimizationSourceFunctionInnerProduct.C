@@ -21,7 +21,7 @@ ElementOptimizationSourceFunctionInnerProduct::validParams()
   params.addParam<Real>(
       "reverse_time_end",
       0.0,
-      "End time used for reversiing the time integration when evaluating function derivative.");
+      "End time used for reversing the time integration when evaluating function derivative.");
   return params;
 }
 

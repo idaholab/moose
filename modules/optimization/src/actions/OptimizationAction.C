@@ -26,11 +26,11 @@ OptimizationAction::validParams()
   params.addParam<bool>(
       "auto_create_mesh",
       true,
-      "Automatically setup the Mesh block for a master application without a simulation.");
+      "Automatically setup the Mesh block for a main application without a simulation.");
   params.addParam<bool>(
       "auto_create_problem",
       true,
-      "Automatically setup the Problem block for a master application without a simulation.");
+      "Automatically setup the Problem block for a main application without a simulation.");
   return params;
 }
 

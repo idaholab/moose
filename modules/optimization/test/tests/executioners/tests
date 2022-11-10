@@ -22,7 +22,7 @@
       input = quadratic_minimize.i
       csvdiff = quadratic_minimize_out_OptimizationReporter_0001.csv
       allow_test_objects = True
-      detail = "using gradient based TAO bounded conjugate gradietn solver; "
+      detail = "using gradient based TAO bounded conjugate gradient solver; "
     []
     [taontr]
       type = CSVDiff

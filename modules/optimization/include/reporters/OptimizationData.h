@@ -10,7 +10,9 @@
 #pragma once
 
 #include "GeneralReporter.h"
-
+/**
+ * Reporter to hold measurement and simulation data for optimization problems
+ */
 class OptimizationData : public GeneralReporter
 {
 public:
@@ -23,22 +25,26 @@ public:
   virtual void finalize() override {}
 
 protected:
+  ///@{
+  /// x,y,z,t and value measurement data
   std::vector<Real> & _measurement_xcoord;
   std::vector<Real> & _measurement_ycoord;
   std::vector<Real> & _measurement_zcoord;
   std::vector<Real> & _measurement_time;
   std::vector<Real> & _measurement_values;
+  ///@}
+  /// simulated values at measurment xyzt
   std::vector<Real> & _simulation_values;
+  /// difference between simulation and measurment values at measurment xyzt
   std::vector<Real> & _misfit_values;
 
-  // fixme lynn
-  // maybe add method to compute misfit
-  // add param names
-  // add param values
 private:
+  /// parse measurement data from csv file
   void readMeasurementsFromFile();
+  /// parse measurement data from input file
   void readMeasurementsFromInput();
-  void setSimuilationValuesForTesting(std::vector<Real> & data);
-
+  /// private method for testing optimizationData with test src
+  void setSimulationValuesForTesting(std::vector<Real> & data);
+  /// variable
   const MooseVariableFieldBase * const _var;
 };

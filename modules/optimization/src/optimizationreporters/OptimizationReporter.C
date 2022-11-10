@@ -100,16 +100,6 @@ OptimizationReporter::updateParameters(const libMesh::PetscVector<Number> & x)
       val = x(n++);
 }
 
-std::vector<Real>
-OptimizationReporter::computeDefaultBounds(Real val)
-{
-  std::vector<Real> vec;
-  vec.resize(_nparam);
-  for (auto i : index_range(vec))
-    vec[i] = val;
-  return vec;
-}
-
 Real
 OptimizationReporter::computeObjective()
 {
@@ -132,7 +122,7 @@ OptimizationReporter::setMisfitToSimulatedValues()
 }
 
 void
-OptimizationReporter::computeGradient(libMesh::PetscVector<Number> & gradient)
+OptimizationReporter::computeGradient(libMesh::PetscVector<Number> & gradient) const
 {
   if (_adjoint_data.size() != _ndof)
     mooseError("Adjoint data is not equal to the total number of parameters.");
@@ -144,7 +134,7 @@ OptimizationReporter::computeGradient(libMesh::PetscVector<Number> & gradient)
 }
 // function only used for test objects
 void
-OptimizationReporter::setSimuilationValuesForTesting(std::vector<Real> & data)
+OptimizationReporter::setSimulationValuesForTesting(std::vector<Real> & data)
 {
   _simulation_values.clear();
   _simulation_values = data;
