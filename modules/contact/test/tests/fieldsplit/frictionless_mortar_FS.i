@@ -126,6 +126,7 @@ refine = 1
       petsc_options = '-snes_ksp_ew'
       petsc_options_iname = '-ksp_gmres_restart -pc_fieldsplit_schur_fact_type -mat_mffd_err'
       petsc_options_value = '200                full                           1e-5'
+      schur_pre = 'Sp'
     []
     [interior]
       vars = 'disp_x disp_y'
@@ -134,8 +135,8 @@ refine = 1
     []
     [contact]
       vars = 'leftright_normal_lm'
-      petsc_options_iname = '-ksp_type -pc_sub_type -pc_factor_shift_type'
-      petsc_options_value = 'preonly   lu           NONZERO'
+      petsc_options_iname = '-ksp_type -pc_type -pc_factor_shift_type -mat_schur_complement_ainv_type'
+      petsc_options_value = 'preonly   lu       NONZERO               blockdiag'
     []
   []
 []
