@@ -91,11 +91,6 @@
     variable = u
     function = exact_fn
   [../]
-
-  [./x]
-    type = ScalarVariable
-    variable = x
-  [../]
 []
 
 [Executioner]
