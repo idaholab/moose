@@ -106,9 +106,6 @@
 #---------------------------------------------------
 
 [Outputs]
-  csv = false
-  json = false
   console = false
-  exodus = false
   file_base = 'forward_homo'
 []

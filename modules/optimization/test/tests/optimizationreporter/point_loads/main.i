@@ -108,7 +108,5 @@
 []
 
 [Outputs]
-  console = true
   csv = true
-  json = false
 []

@@ -106,7 +106,5 @@
 
 [Outputs]
   console = false
-  exodus = false
-  csv = false
   file_base = 'forward'
 []

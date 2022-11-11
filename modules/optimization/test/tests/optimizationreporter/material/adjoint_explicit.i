@@ -191,8 +191,6 @@
 []
 
 [Outputs]
-  # console = false
-  exodus = false
-  csv = false
+  console = false
   file_base = 'adjoint'
 []

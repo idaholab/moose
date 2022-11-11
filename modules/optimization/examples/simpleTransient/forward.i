@@ -98,6 +98,5 @@
 []
 
 [Outputs]
-  exodus = true
   console = false
 []
