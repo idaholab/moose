@@ -739,7 +739,7 @@ MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi, const bool correct_s
   auto face_grad = ((side_two_value - side_one_value) / delta) * fi.eCN();
 
   // We only need nonorthogonal correctors in 2+ dimensions
-  if (_mesh.dimension() > 1)
+  if (this->_mesh.dimension() > 1)
   {
     // We are using an orthogonal approach for the non-orthogonal correction, for more information
     // see Hrvoje Jasak's PhD Thesis (Imperial College, 1996)
