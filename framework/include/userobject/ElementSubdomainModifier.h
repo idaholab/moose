@@ -81,21 +81,11 @@ private:
   // Update the moving and complement moving boundaries (both the underlying sideset and nodeset)
   void updateBoundaryInfo(MooseMesh & mesh, const std::vector<const Elem *> & moved_elems);
 
-  // Helper function to add nodes on a side of an element to a set
-  void recordNodeIdsOnElemSide(const Elem * elem,
-                               const unsigned short int side,
-                               std::set<dof_id_type> & node_ids);
-
   // Remove ghosted element sides
-  void pushBoundarySideInfo(
-      MooseMesh & mesh,
-      std::unordered_map<processor_id_type, std::vector<std::pair<dof_id_type, unsigned int>>> &
-          elems_to_push);
+  void pushBoundarySideInfo(MooseMesh & mesh);
 
   // Remove ghosted boundary nodes
-  void pushBoundaryNodeInfo(
-      MooseMesh & mesh,
-      std::unordered_map<processor_id_type, std::vector<dof_id_type>> & nodes_to_push);
+  void pushBoundaryNodeInfo(MooseMesh & mesh);
 
   // Helper function to build the range of moved elements
   void buildMovedElemsRange();
@@ -141,4 +131,12 @@ private:
 
   /// The Id of the complement moving boundary
   BoundaryID _complement_moving_boundary_id;
+
+  /// save the added/removed ghost sides to sync across processors
+  std::unordered_map<processor_id_type, std::vector<std::pair<dof_id_type, unsigned short int>>>
+      _ghost_sides_to_remove, _ghost_sides_to_add;
+
+  /// save the added/removed ghost nodes to sync across processors
+  std::unordered_map<processor_id_type, std::vector<dof_id_type>> _ghost_nodes_to_remove,
+      _ghost_nodes_to_add;
 };
