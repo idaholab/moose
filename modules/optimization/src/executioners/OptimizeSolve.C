@@ -49,10 +49,11 @@ OptimizeSolve::OptimizeSolve(Executioner & ex)
 bool
 OptimizeSolve::solve()
 {
+  TIME_SECTION("optimizeSolve", 1, "Optimization Solve");
   // Initial solve
   _inner_solve->solve();
 
-  // Grab objectivefunction
+  // Grab objective function
   if (!_problem.hasUserObject("OptimizationReporter"))
     mooseError("No OptimizationReporter object found.");
   _obj_function = &_problem.getUserObject<OptimizationReporter>("OptimizationReporter");
@@ -318,6 +319,7 @@ OptimizeSolve::variableBoundsWrapper(Tao tao, Vec /*xl*/, Vec /*xu*/, void * ctx
 Real
 OptimizeSolve::objectiveFunction()
 {
+  TIME_SECTION("objectiveFunction", 2, "Objective forward solve");
   _obj_function->updateParameters(*_parameters.get());
 
   _problem.execute(OptimizationAppTypes::EXEC_FORWARD);
@@ -336,6 +338,7 @@ OptimizeSolve::objectiveFunction()
 void
 OptimizeSolve::gradientFunction(libMesh::PetscVector<Number> & gradient)
 {
+  TIME_SECTION("gradientFunction", 2, "Gradient adjoint solve");
   _obj_function->updateParameters(*_parameters.get());
 
   _problem.execute(OptimizationAppTypes::EXEC_ADJOINT);
@@ -352,6 +355,7 @@ OptimizeSolve::gradientFunction(libMesh::PetscVector<Number> & gradient)
 PetscErrorCode
 OptimizeSolve::applyHessian(libMesh::PetscVector<Number> & s, libMesh::PetscVector<Number> & Hs)
 {
+  TIME_SECTION("applyHessian", 2, "Hessian forward/adjoint solve");
   // What happens for material inversion when the Hessian
   // is dependent on the parameters? Deal with it later???
   // see notes on how this needs to change for Material inversion
