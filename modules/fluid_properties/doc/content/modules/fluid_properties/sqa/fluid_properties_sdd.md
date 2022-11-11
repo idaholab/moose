@@ -44,7 +44,7 @@ conditions are noted in object documentation where applicable.
 The architecture of the {{module}} module consists of a core and several pluggable systems (both
 inherited from the MOOSE framework). The core of MOOSE consists of a number of key objects responsible
 for setting up and managing the user-defined objects of a finite element simulation. This core set of
-objects has limited extendability and exist for every simulation configuration that the module is
+objects has limited extendability and exists for every simulation configuration that the module is
 capable of running.
 
 !syntax complete subsystems=False actions=False objects=False groups=FluidPropertiesApp
