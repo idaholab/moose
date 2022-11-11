@@ -321,6 +321,7 @@ FlowChannelBase::getHeatTransferVariableNames()
 
     _P_hf_names.push_back(heat_transfer.getHeatedPerimeterName());
     _T_wall_names.push_back(heat_transfer.getWallTemperatureName());
+    _T_wall_mat_names.push_back(heat_transfer.getWallTemperatureMatName());
     _q_wall_names.push_back(heat_transfer.getWallHeatFluxName());
   }
 }
