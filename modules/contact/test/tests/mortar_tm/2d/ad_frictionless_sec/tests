@@ -11,6 +11,7 @@
       input = 'small.i'
       csvdiff = 'small.csv'
       heavy = true
+      valgrind = 'heavy'
       ad_indexing_type = 'global'
     []
     [finite]
@@ -19,6 +20,7 @@
       input = 'finite.i'
       csvdiff = 'finite.csv'
       heavy = true
+      valgrind = 'heavy'
       ad_indexing_type = 'global'
     []
     [finite_scaling]
@@ -29,6 +31,7 @@
                  'name=finite_scaling'
       csvdiff = 'finite_scaling.csv'
       heavy = true
+      valgrind = 'heavy'
       ad_indexing_type = 'global'
     []
     [finite_rr]
@@ -37,6 +40,7 @@
       input = 'finite_rr.i'
       csvdiff = 'finite_rr.csv'
       heavy = true
+      valgrind = 'heavy'
       ad_indexing_type = 'global'
     []
     [small-jac]
@@ -48,6 +52,7 @@
       cli_args = 'Executioner/num_steps=3 -snes_test_err 1e-9'
       run_sim = true
       heavy = true
+      valgrind = 'heavy'
       detail = 'using the small strain formulation and calculate a perfect Jacobian.'
       ad_indexing_type = 'global'
     []
@@ -60,6 +65,7 @@
       cli_args = 'Executioner/num_steps=2 -snes_test_err 1e-9'
       run_sim = true
       heavy = true
+      valgrind = 'heavy'
       detail = 'using the finite strain formulation and calculate a perfect Jacobian.'
       ad_indexing_type = 'global'
     []
