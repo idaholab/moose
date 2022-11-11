@@ -1,31 +1,18 @@
 [Tests]
-  issues = '#21885'
   [adjoint_grad]
-    design = 'MaterialParameterGradientIntegral.md'
+    type = CSVDiff
+    max_threads = 1
+    rel_err = 0.01
+    abs_zero = 0.01
+    input = main.i
+    csvdiff = main_out_OptimizationReporter_0001.csv
+    # steady solve
+    recover = false
+
+    issues = '#21885'
+    design = 'ElementOptimizationDiffusionCoefFunctionInnerProduct.md'
     requirement = 'The system shall be able to perform gradient based material'
-                  ' parameter inversion for a single material property using'
-    [auxVariables]
-      type = CSVDiff
-      max_threads = 1
-      rel_err = 0.01
-      abs_zero = 0.01
-      input = main.i
-      cli_args = "MultiApps/adjoint/input_files=adjoint_explicit.i"
-      csvdiff = main_out_OptimizationReporter_0001.csv
-      detail = ' an explicitly defined gradient of the forward problem temperature field.'
-      # steady solve
-      recover = false
-    []
-    [postprocessor]
-      type = CSVDiff
-      max_threads = 1
-      rel_err = 0.01
-      abs_zero = 0.01
-      input = main.i
-      csvdiff = main_out_OptimizationReporter_0001.csv
-      detail = ' the integral of the product of gradients of the material property and the adjoint and forward variables.'
-      # steady solve
-      recover = false
-    []
+                  ' parameter inversion for a single material property.'
+
   []
 []

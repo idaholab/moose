@@ -2,14 +2,14 @@
 []
 
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 10
-  ny = 20
-  xmax = 1
-  ymax = 2
-  bias_x = 1.0
-  bias_y = 1.0
+  [gmg]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 10
+    ny = 20
+    xmax = 1
+    ymax = 2
+  []
 []
 
 [AuxVariables]
@@ -79,13 +79,13 @@
 
 [MultiApps]
   [forward]
-    type = OptimizeFullSolveMultiApp
+    type = FullSolveMultiApp
     input_files = forward.i
     execute_on = "FORWARD"
     clone_parent_mesh = true
   []
   [adjoint]
-    type = OptimizeFullSolveMultiApp
+    type = FullSolveMultiApp
     input_files = adjoint.i
     execute_on = "ADJOINT"
     clone_parent_mesh = true
@@ -94,40 +94,48 @@
 
 [Transfers]
   #these are usually the same for all input files.
+  [toForward]
+    type = MultiAppReporterTransfer
+    to_multi_app = forward
+    from_reporters = 'OptimizationReporter/measurement_xcoord
+                      OptimizationReporter/measurement_ycoord
+                      OptimizationReporter/measurement_zcoord
+                      OptimizationReporter/measurement_time
+                      OptimizationReporter/measurement_values
+                      OptimizationReporter/p1'
+    to_reporters = 'measure_data/measurement_xcoord
+                    measure_data/measurement_ycoord
+                    measure_data/measurement_zcoord
+                    measure_data/measurement_time
+                    measure_data/measurement_values
+                    params/vals'
+  []
   [fromForward]
     type = MultiAppReporterTransfer
     from_multi_app = forward
-    from_reporters = 'data_pt/temperature'
+    from_reporters = 'measure_data/simulation_values'
     to_reporters = 'OptimizationReporter/simulation_values'
   []
   [toAdjoint]
     type = MultiAppReporterTransfer
     to_multi_app = adjoint
-    from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord OptimizationReporter/misfit_values'
-    to_reporters = 'misfit/measurement_xcoord misfit/measurement_ycoord misfit/measurement_zcoord misfit/misfit_values'
-  []
-  [toForward_measument]
-    type = MultiAppReporterTransfer
-    to_multi_app = forward
-    from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord'
-    to_reporters = 'measure_data/measurement_xcoord measure_data/measurement_ycoord measure_data/measurement_zcoord'
-  []
-
-  #these are different,
-  # - to forward depends on the parameter being changed
-  # - from adjoint depends on the gradient being computed from the adjoint
-  #NOTE:  the adjoint variable we are transferring is actually the gradient
-  [toForward]
-    type = OptimizationParameterTransfer
-    to_multi_app = forward
-    value_names = 'p1'
-    parameters = 'Postprocessors/p1/value'
-    to_control = parameterReceiver
+    from_reporters = 'OptimizationReporter/measurement_xcoord
+                      OptimizationReporter/measurement_ycoord
+                      OptimizationReporter/measurement_zcoord
+                      OptimizationReporter/measurement_time
+                      OptimizationReporter/misfit_values
+                      OptimizationReporter/p1'
+    to_reporters = 'misfit/measurement_xcoord
+                    misfit/measurement_ycoord
+                    misfit/measurement_zcoord
+                    misfit/measurement_time
+                    misfit/misfit_values
+                    params/vals'
   []
   [fromAdjoint]
     type = MultiAppReporterTransfer
     from_multi_app = adjoint
-    from_reporters = 'adjoint_pt/adjoint_pt'
+    from_reporters = 'adjoint_pt/inner_product'
     to_reporters = 'OptimizationReporter/adjoint'
   []
 
@@ -146,15 +154,6 @@
     to_multi_app = adjoint
     source_variable = 'temperature_forward'
     variable = 'temperature_forward'
-  []
-
-  #This is to get the parameter used in the forward problem onto the adjoint problem
-  [toAdjoint_param]
-    type = OptimizationParameterTransfer
-    to_multi_app = adjoint
-    value_names = 'p1'
-    parameters = 'Postprocessors/p1/value'
-    to_control = adjointReceiver
   []
 []
 

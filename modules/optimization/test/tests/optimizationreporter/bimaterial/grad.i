@@ -9,19 +9,6 @@
     ymin = -4
     ymax = 4
   []
-  [bimaterial]
-    type = SubdomainBoundingBoxGenerator
-    input = gmg
-    block_id = 1
-    bottom_left = '-100 -100 -100'
-    top_right = '100 0 100'
-  []
-  [name_blocks]
-    type = RenameBlockGenerator
-    input = bimaterial
-    old_block = '0 1'
-    new_block = 'top bottom'
-  []
 []
 
 [Variables]
@@ -40,6 +27,11 @@
 [Reporters]
   [misfit]
     type = OptimizationData
+  []
+  [data]
+    type = ConstantReporter
+    real_vector_names = 'coordx coordy diffusivity'
+    real_vector_values = '0 0; -2 2; 5 10'
   []
 []
 
@@ -66,155 +58,31 @@
 [AuxVariables]
   [temperature_forward]
   []
-  [grad_Tx]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [grad_Ty]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [grad_Tz]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [grad_Tfx]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [grad_Tfy]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [grad_Tfz]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [gradient]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-[]
-
-[AuxKernels]
-  [grad_Tx]
-    type = VariableGradientComponent
-    component = x
-    variable = grad_Tx
-    gradient_variable = adjoint_T
-  []
-  [grad_Ty]
-    type = VariableGradientComponent
-    component = y
-    variable = grad_Ty
-    gradient_variable = adjoint_T
-  []
-  [grad_Tz]
-    type = VariableGradientComponent
-    component = z
-    variable = grad_Tz
-    gradient_variable = adjoint_T
-  []
-  [grad_Tfx]
-    type = VariableGradientComponent
-    component = x
-    variable = grad_Tfx
-    gradient_variable = temperature_forward
-  []
-  [grad_Tfy]
-    type = VariableGradientComponent
-    component = y
-    variable = grad_Tfy
-    gradient_variable = temperature_forward
-  []
-  [grad_Tfz]
-    type = VariableGradientComponent
-    component = z
-    variable = grad_Tfz
-    gradient_variable = temperature_forward
-  []
-  #we need to include the material derivative, which can be captured when
-  # computing the flux based on the derivative of the material.
-  [gradient]
-    type = ParsedAux
-    variable = gradient
-    args = 'grad_Tx grad_Ty grad_Tz grad_Tfx grad_Tfy grad_Tfz'
-    function = '-grad_Tx*grad_Tfx-grad_Ty*grad_Tfy-grad_Tz*grad_Tfz'
-  []
 []
 
 [Functions]
-  [diffusivity_top_function]
-    type = ParsedFunction
-    value = alpha
-    vars = alpha
-    vals = d_top
-  []
-  [diffusivity_bottom_function]
-    type = ParsedFunction
-    value = alpha
-    vars = alpha
-    vals = d_bot
+  [diffusivity_function]
+    type = VectorNearestPointFunction
+    coord_x = data/coordx
+    coord_y = data/coordy
+    value = data/diffusivity
   []
 []
 
 [Materials] #same material as what was used in the forward model
-  [mat_top]
+  [mat]
     type = GenericFunctionMaterial
-    block = top
     prop_names = diffusivity
-    prop_values = diffusivity_top_function
+    prop_values = diffusivity_function
   []
-  [mat_bottom]
-    type = GenericFunctionMaterial
-    block = bottom
-    prop_names = diffusivity
-    prop_values = diffusivity_bottom_function
-  []
-[]
-
-[Postprocessors]
-  [d_bot]
-    type = VectorPostprocessorComponent
-    index = 0
-    vectorpostprocessor = vector_pp
-    vector_name = diffusivity_values
-    execute_on = 'linear'
-  []
-  [d_top]
-    type = VectorPostprocessorComponent
-    index = 1
-    vectorpostprocessor = vector_pp
-    vector_name = diffusivity_values
-    execute_on = 'linear'
-  []
-  ############
-  # we need to combine the two in one vector.
-  [grad_bottom] #compute the integral of the gradient variable on the bottom block (first parameter)
-    type = ElementIntegralVariablePostprocessor
-    variable = gradient
-    execute_on = 'final'
-    block = bottom
-  []
-  [grad_top] #compute the integral of the gradient variable on the bottom block (second parameter)
-    type = ElementIntegralVariablePostprocessor
-    variable = gradient
-    execute_on = 'final'
-    block = top
-  []
-  ############
 []
 
 [VectorPostprocessors]
-  [vector_pp]
-    type = ConstantVectorPostprocessor
-    vector_names = diffusivity_values
-    value = '1.0 10.0' #we need to set initial values (any values)- these will be over-written
-  []
   [gradvec]
-    type = VectorOfPostprocessors
-    postprocessors = 'grad_bottom grad_top'
-    execute_on = 'final'
+    type = ElementOptimizationDiffusionCoefFunctionInnerProduct
+    variable = adjoint_T
+    forward_variable = temperature_forward
+    function = diffusivity_function
   []
 []
 

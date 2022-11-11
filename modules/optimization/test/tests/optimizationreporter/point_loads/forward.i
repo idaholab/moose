@@ -98,17 +98,12 @@
     num_points = 21
     sort_by = y
   []
-#-----every forward problem should have these two
-  [data_pt]
-    type = VppPointValueSampler
-    variable = temperature
-    reporter_name = measure_data
-  []
 []
 
 [Reporters]
   [measure_data]
     type = OptimizationData
+    variable = temperature
   []
 []
 #---------------------------------------------------

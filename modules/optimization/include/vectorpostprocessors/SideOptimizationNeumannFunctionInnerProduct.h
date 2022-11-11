@@ -9,22 +9,14 @@
 
 #pragma once
 
-#include "GeneralPostprocessor.h"
+#include "SideOptimizationFunctionInnerProduct.h"
 
-/**
- * This postprocessor displays a constant value
- */
-class ConstantValuePostprocessor : public GeneralPostprocessor
+class SideOptimizationNeumannFunctionInnerProduct : public SideOptimizationFunctionInnerProduct
 {
 public:
   static InputParameters validParams();
-
-  ConstantValuePostprocessor(const InputParameters & parameters);
-
-  virtual void initialize() override{};
-  virtual void execute() override{};
-  virtual PostprocessorValue getValue() override;
+  SideOptimizationNeumannFunctionInnerProduct(const InputParameters & parameters);
 
 protected:
-  const Real & _value;
+  virtual Real computeQpInnerProduct() override;
 };

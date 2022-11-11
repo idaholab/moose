@@ -5,6 +5,7 @@
   [temperature]
   []
 []
+
 [Kernels]
   [heat_conduction]
     type = MatDiffusion
@@ -47,10 +48,10 @@
 
 [Functions]
   [thermo_conduct]
-    type = ParsedFunction
-    value = alpha
-    vars = 'alpha'
-    vals = 'p1'
+    type = ParsedOptimizationFunction
+    value = 'alpha'
+    param_vars = 'alpha'
+    param_vector_name = 'params/p1'
   []
 []
 
@@ -62,10 +63,6 @@
   []
 []
 
-[Problem]
-  type = FEProblem
-[]
-
 [Executioner]
   type = Steady
   solve_type = NEWTON
@@ -75,32 +72,15 @@
   petsc_options_value = 'preonly lu       superlu_dist'
 []
 
-[VectorPostprocessors]
-  [data_pt]
-    type = VppPointValueSampler
-    variable = temperature
-    reporter_name = measure_data
-    outputs = none
-  []
-[]
-
 [Reporters]
   [measure_data]
     type = OptimizationData
+    variable = temperature
   []
-[]
-
-[Postprocessors]
-  [p1]
-    type = ConstantValuePostprocessor
-    value = 10
-    execute_on = 'initial linear'
-  []
-[]
-
-[Controls]
-  [parameterReceiver]
-    type = ControlsReceiver
+  [params]
+    type = ConstantReporter
+    real_vector_names = 'p1'
+    real_vector_values = '0' # Dummy value
   []
 []
 

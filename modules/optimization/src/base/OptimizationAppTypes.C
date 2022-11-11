@@ -12,7 +12,7 @@
 
 namespace OptimizationAppTypes
 {
-const ExecFlagType EXEC_FORWARD = registerExecFlag("FORWARD");
-const ExecFlagType EXEC_ADJOINT = registerExecFlag("ADJOINT");
-const ExecFlagType EXEC_HOMOGENEOUS_FORWARD = registerExecFlag("HOMOGENEOUS_FORWARD");
+const ExecFlagType EXEC_FORWARD = registerDefaultExecFlag("FORWARD");
+const ExecFlagType EXEC_ADJOINT = registerDefaultExecFlag("ADJOINT");
+const ExecFlagType EXEC_HOMOGENEOUS_FORWARD = registerDefaultExecFlag("HOMOGENEOUS_FORWARD");
 }

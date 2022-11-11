@@ -5,6 +5,7 @@
   [adjointVar]
   []
 []
+
 [Kernels]
   [heat_conduction]
     type = MatDiffusion
@@ -28,7 +29,13 @@
   [misfit]
     type = OptimizationData
   []
+  [params]
+    type = ConstantReporter
+    real_vector_names = 'p1'
+    real_vector_values = '0' # Dummy value
+  []
 []
+
 [AuxVariables]
   [temperature_forward]
   []
@@ -63,10 +70,10 @@
 
 [Functions]
   [thermo_conduct]
-    type = ParsedFunction
-    value = alpha
-    vars = 'alpha'
-    vals = 'p1'
+    type = ParsedOptimizationFunction
+    value = 'alpha'
+    param_vars = 'alpha'
+    param_vector_name = 'params/p1'
   []
 []
 
@@ -75,11 +82,6 @@
     type = GenericFunctionMaterial
     prop_names = 'thermal_conductivity'
     prop_values = 'thermo_conduct'
-  []
-  [thermalPropDeriv]
-    type = GenericFunctionMaterial
-    prop_names = 'thermal_conductivity_deriv'
-    prop_values = '1'
   []
 []
 
@@ -92,30 +94,12 @@
   petsc_options_value = 'preonly lu       superlu_dist'
 []
 
-[Postprocessors]
-  [pp_adjoint_grad]
-    type = MaterialParameterGradientIntegral
-    adjoint_var = 'adjointVar'
-    forward_var = temperature_forward
-    material_derivative = thermal_conductivity_deriv
-  []
-  [p1]
-    type = ConstantValuePostprocessor
-    value = 10
-    execute_on = 'initial linear'
-  []
-[]
-
-[Controls]
-  [parameterReceiver]
-    type = ControlsReceiver
-  []
-[]
-
 [VectorPostprocessors]
   [adjoint_grad]
-    type = VectorOfPostprocessors
-    postprocessors = 'pp_adjoint_grad'
+    type = ElementOptimizationDiffusionCoefFunctionInnerProduct
+    variable = adjointVar
+    forward_variable = temperature_forward
+    function = thermo_conduct
   []
 []
 

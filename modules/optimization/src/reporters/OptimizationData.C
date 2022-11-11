@@ -84,9 +84,25 @@ OptimizationData::execute()
   // Implementation can be improved using the functionality in PointSamplerBase,
   // but this will require changes in MOOSE to work for reporters.
 
-  const std::size_t nvals = _measurement_xcoord.size();
+  const std::size_t nvals = _measurement_values.size();
   _simulation_values.resize(nvals);
   _misfit_values.resize(nvals);
+
+  std::string msg = "";
+  if (_measurement_xcoord.size() != nvals)
+    msg += "x-coordinate data (" + std::to_string(_measurement_xcoord.size()) + "), ";
+  if (_measurement_xcoord.size() != nvals)
+    msg += "y-coordinate data (" + std::to_string(_measurement_ycoord.size()) + "), ";
+  if (_measurement_zcoord.size() != nvals)
+    msg += "z-coordinate data (" + std::to_string(_measurement_zcoord.size()) + "), ";
+  if (_measurement_time.size() != nvals)
+    msg += "time data (" + std::to_string(_measurement_time.size()) + "), ";
+  if (!msg.empty())
+    mooseError("Number of entries in ",
+               std::string(msg.begin(), msg.end() - 2),
+               " does not match number of entries in value data (",
+               std::to_string(nvals),
+               ").");
 
   const auto & sys = _var->sys().system();
   const auto vnum = _var->number();

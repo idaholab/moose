@@ -10,12 +10,12 @@
 
 [MultiApps]
   [forward]
-    type = OptimizeFullSolveMultiApp
+    type = FullSolveMultiApp
     input_files = forward.i
     execute_on = FORWARD
   []
   [adjoint]
-    type = OptimizeFullSolveMultiApp
+    type = FullSolveMultiApp
     input_files = adjoint.i
     execute_on = ADJOINT
   []

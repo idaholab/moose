@@ -15,17 +15,11 @@
 []
 
 [BCs]
-  [left_constant]
+  [left]
     type = FunctionNeumannBC
     variable = temperature
     boundary = left
-    function = left_constant_function
-  []
-  [left_linear]
-    type = FunctionNeumannBC
-    variable = temperature
-    boundary = left
-    function = left_linear_function
+    function = left_function
   []
   [right]
     type = NeumannBC
@@ -48,17 +42,11 @@
 []
 
 [Functions]
-  [left_constant_function]
-    type = ParsedFunction
-    value = a*1.0
-    vars = 'a'
-    vals = 'p1'
-  []
-  [left_linear_function]
-    type = ParsedFunction
-    value = b*y
-    vars = 'b'
-    vals = 'p2'
+  [left_function]
+    type = ParsedOptimizationFunction
+    value = 'a + b*y'
+    param_vars = 'a b'
+    param_vector_name = 'params/vals'
   []
 []
 
@@ -81,11 +69,6 @@
 []
 
 [VectorPostprocessors]
-  [data_pt]
-    type = VppPointValueSampler
-    variable = temperature
-    reporter_name = measure_data
-  []
   [vertical_1]
     type = LineValueSampler
     variable = 'temperature'
@@ -107,25 +90,12 @@
 [Reporters]
   [measure_data]
     type = OptimizationData
+    variable = temperature
   []
-[]
-
-[Postprocessors]
-  [p1]
-    type = ConstantValuePostprocessor
-    value = 0
-    execute_on = LINEAR
-  []
-  [p2]
-    type = ConstantValuePostprocessor
-    value = 0
-    execute_on = LINEAR
-  []
-[]
-
-[Controls]
-  [parameterReceiver]
-    type = ControlsReceiver
+  [params]
+    type = ConstantReporter
+    real_vector_names = 'vals'
+    real_vector_values = '0 0' # Dummy
   []
 []
 

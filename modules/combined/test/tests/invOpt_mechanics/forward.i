@@ -29,15 +29,24 @@
     value = 0
   []
   [right_fy]
-    type = NeumannBC
+    type = FunctionNeumannBC
     variable = disp_y
     boundary = right
-    value = 2000
+    function = right_fy_func
+  []
+[]
+
+[Functions]
+  [right_fy_func]
+    type = ParsedOptimizationFunction
+    value = 'val'
+    param_vars = 'val'
+    param_vector_name = 'params/right_fy_value'
   []
 []
 
 [Materials]
-  [./elasticity]
+  [elasticity]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 10e3
     poissons_ratio = 0.3
@@ -67,22 +76,17 @@
     points = '5.0 1.0 0'
     sort_by = x
   []
-  [data_pt]
-    type = VppPointValueSampler
-    variable = disp_y
-    reporter_name = measure_data
-  []
 []
 
 [Reporters]
   [measure_data]
     type=OptimizationData
+    variable = disp_y
   []
-[]
-
-[Controls]
-  [parameterReceiver]
-    type = ControlsReceiver
+  [params]
+    type = ConstantReporter
+    real_vector_names = 'right_fy_value'
+    real_vector_values = '0' # Dummy value
   []
 []
 

@@ -54,10 +54,10 @@
 
 [Functions]
   [volumetric_heat_func]
-    type = ParsedFunction
+    type = ParsedOptimizationFunction
     value = q
-    vars = 'q'
-    vals = 'valueFromControl'
+    param_vars = 'q'
+    param_vector_name = 'params/q'
   []
 []
 
@@ -76,18 +76,15 @@
   petsc_options_value = 'preonly lu       superlu_dist'
 []
 
-[VectorPostprocessors]
-  [data_pt]
-    type = VppPointValueSampler
-    variable = temperature
-    reporter_name = measure_data
-    outputs = none
-  []
-[]
-
 [Reporters]
   [measure_data]
     type = OptimizationData
+    variable = temperature
+  []
+  [params]
+    type = ConstantReporter
+    real_vector_names = 'q'
+    real_vector_values = '0' # Dummy value
   []
 []
 

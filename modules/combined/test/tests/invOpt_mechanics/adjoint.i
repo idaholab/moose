@@ -31,20 +31,28 @@
   [misfit]
     type=OptimizationData
   []
+  [params]
+    type = ConstantReporter
+    real_vector_names = 'right_fy_value'
+    real_vector_values = '0' # Dummy value
+  []
 []
 
-[Postprocessors]
-  [adjoint_pt0]
-    type = SideIntegralVariablePostprocessor
-    variable = disp_y
-    boundary = right
+[Functions]
+  [right_fy_func]
+    type = ParsedOptimizationFunction
+    value = 'val'
+    param_vars = 'val'
+    param_vector_name = 'params/right_fy_value'
   []
 []
 
 [VectorPostprocessors]
   [adjoint_pt]
-    type = VectorOfPostprocessors
-    postprocessors = 'adjoint_pt0'
+    type = SideOptimizationNeumannFunctionInnerProduct
+    variable = disp_y
+    function = right_fy_func
+    boundary = right
   []
 []
 
@@ -72,7 +80,7 @@
 []
 
 [Materials]
-  [./elasticity]
+  [elasticity]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 10e3
     poissons_ratio = 0.3

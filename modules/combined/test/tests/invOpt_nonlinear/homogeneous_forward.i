@@ -9,13 +9,14 @@
   petsc_options_value = 'lu'
 []
 
-
 [Mesh]
 []
+
 [Variables]
   [T]
   []
 []
+
 [AuxVariables]
   [forwardT]
   []
@@ -24,7 +25,6 @@
     family = MONOMIAL_VEC
   []
 []
-
 
 [Kernels]
   [heat_conduction]
@@ -44,6 +44,7 @@
     upwinding_type = full  #Full upwinding gives somewhat better results
   []
 []
+
 [AuxKernels]
   [_dDdTgradT]
     type = MaterialScaledGradientVector
@@ -52,6 +53,7 @@
     material_scaling = '_dDdT'
   []
 []
+
 [Materials]
   [LinearizedConductivity]
     type = ADParsedMaterial
@@ -71,22 +73,15 @@
     prop_values = 'volumetric_heat_func'
   []
 []
+
 [Functions]
   [volumetric_heat_func]
-    type = ParsedFunction
+    type = ParsedOptimizationFunction
     value = q
-    vars = 'q'
-    vals = 'heat_source_pp'
+    param_vars = 'q'
+    param_vector_name = 'params/heat_source'
   []
 []
-[Postprocessors]
-  [heat_source_pp]
-    type = ConstantValuePostprocessor
-    value = 0
-    execute_on = 'LINEAR'
-  []
-[]
-
 
 [BCs]
   [left]
@@ -115,23 +110,15 @@
   []
 []
 
-
-[VectorPostprocessors]
-  [data_pt]
-    type = VppPointValueSampler
-    variable = T
-    reporter_name = measurement_locations
-    outputs = none
-  []
-[]
 [Reporters]
   [measurement_locations]
     type = OptimizationData
+    variable = T
   []
-[]
-[Controls]
-  [parameterReceiver]
-    type = ControlsReceiver
+  [params]
+    type = ConstantReporter
+    real_vector_names = 'heat_source'
+    real_vector_values = '0' # Dummy
   []
 []
 

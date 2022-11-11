@@ -1,4 +1,12 @@
 [Mesh]
+  [gmg]
+    type = GeneratedMeshGenerator
+    dim = 2
+    nx = 10
+    ny = 20
+    xmax = 1
+    ymax = 2
+  []
 []
 
 [AuxVariables]
@@ -7,6 +15,7 @@
   [T2]
   []
 []
+
 [AuxKernels]
   [TT]
     type = ParsedAux
@@ -42,6 +51,11 @@
 [Reporters]
   [misfit]
     type = OptimizationData
+  []
+  [params]
+    type = ConstantReporter
+    real_vector_names = 'vals'
+    real_vector_values = '0' # Dummy value
   []
 []
 
@@ -92,36 +106,19 @@
 
 [Functions]
   [function1]
-    type = ParsedFunction
-    value = a*1.0
-    vars = 'a'
-    vals = 'p1'
-  []
-[]
-
-[Postprocessors]
-  [adjoint_pt_0]
-    type = SideIntegralVariablePostprocessor
-    variable = T2
-    boundary = left
-  []
-  [p1]
-    type = ConstantValuePostprocessor
-    value = 1
-    execute_on = LINEAR
+    type = ParsedOptimizationFunction
+    value = 'a'
+    param_vars = 'a'
+    param_vector_name = 'params/vals'
   []
 []
 
 [VectorPostprocessors]
   [adjoint_pt]
-    type = VectorOfPostprocessors
-    postprocessors = 'adjoint_pt_0'
-  []
-[]
-
-[Controls]
-  [adjointReceiver]
-    type = ControlsReceiver
+    type = SideOptimizationNeumannFunctionInnerProduct
+    variable = T2
+    function = function1
+    boundary = left
   []
 []
 

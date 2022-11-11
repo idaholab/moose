@@ -90,17 +90,12 @@
              -1000 120 500'
     execute_on = LINEAR
   []
-#-----every forward problem should have these two
-  [data_pt]
-    type = VppPointValueSampler
-    variable = temperature
-    reporter_name = measure_data
-  []
 []
 
 [Reporters]
   [measure_data]
     type = OptimizationData
+    variable = temperature
   []
 []
 #---------------------------------------------------

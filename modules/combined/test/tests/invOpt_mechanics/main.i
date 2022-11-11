@@ -1,4 +1,4 @@
-[StochasticTools]
+[Optimization]
 []
 
 [Mesh]
@@ -31,20 +31,20 @@
 
 [MultiApps]
   [forward]
-    type = OptimizeFullSolveMultiApp
+    type = FullSolveMultiApp
     input_files = forward.i
     execute_on = "FORWARD"
     clone_parent_mesh = true
   []
   [adjoint]
-    type = OptimizeFullSolveMultiApp
+    type = FullSolveMultiApp
     input_files = adjoint.i
     execute_on = "ADJOINT"
     clone_parent_mesh = true
   []
   # the forward problem has homogeneous boundary conditions so it can be reused here.
   [homogeneousForward]
-    type = OptimizeFullSolveMultiApp
+    type = FullSolveMultiApp
     input_files = forward.i
     execute_on = "HOMOGENEOUS_FORWARD"
     clone_parent_mesh = true
@@ -52,55 +52,71 @@
 []
 
 [Transfers]
-  [toforward]
-    type = OptimizationParameterTransfer
-    to_multi_app = forward
-    value_names = 'fy_right'
-    parameters = 'BCs/right_fy/value'
-    to_control = parameterReceiver
-  []
   [toForward_measument]
     type = MultiAppReporterTransfer
     to_multi_app = forward
-    from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord'
-    to_reporters = 'measure_data/measurement_xcoord measure_data/measurement_ycoord measure_data/measurement_zcoord'
+    from_reporters = 'OptimizationReporter/measurement_xcoord
+                      OptimizationReporter/measurement_ycoord
+                      OptimizationReporter/measurement_zcoord
+                      OptimizationReporter/measurement_time
+                      OptimizationReporter/measurement_values
+                      OptimizationReporter/fy_right'
+    to_reporters = 'measure_data/measurement_xcoord
+                    measure_data/measurement_ycoord
+                    measure_data/measurement_zcoord
+                    measure_data/measurement_time
+                    measure_data/measurement_values
+                    params/right_fy_value'
   []
   [fromforward]
     type = MultiAppReporterTransfer
     from_multi_app = forward
-    from_reporters = 'data_pt/disp_y'
+    from_reporters = 'measure_data/simulation_values'
     to_reporters = 'OptimizationReporter/simulation_values'
   []
   [toAdjoint]
     type = MultiAppReporterTransfer
     to_multi_app = adjoint
-    from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord OptimizationReporter/misfit_values'
-    to_reporters = 'misfit/measurement_xcoord misfit/measurement_ycoord misfit/measurement_zcoord misfit/misfit_values'
+    from_reporters = 'OptimizationReporter/measurement_xcoord
+                      OptimizationReporter/measurement_ycoord
+                      OptimizationReporter/measurement_zcoord
+                      OptimizationReporter/measurement_time
+                      OptimizationReporter/misfit_values
+                      OptimizationReporter/fy_right'
+    to_reporters = 'misfit/measurement_xcoord
+                    misfit/measurement_ycoord
+                    misfit/measurement_zcoord
+                    misfit/measurement_time
+                    misfit/misfit_values
+                    params/right_fy_value'
   []
   [fromAdjoint]
     type = MultiAppReporterTransfer
     from_multi_app = adjoint
-    from_reporters = 'adjoint_pt/adjoint_pt'
+    from_reporters = 'adjoint_pt/inner_product'
     to_reporters = 'OptimizationReporter/adjoint'
   []
 
-  [toHomogeneousForward]
-    type = OptimizationParameterTransfer
-    to_multi_app = homogeneousForward
-    value_names = 'fy_right'
-    parameters = 'BCs/right_fy/value'
-    to_control = parameterReceiver
-  []
   [toHomogeneousForward_measument]
     type = MultiAppReporterTransfer
     to_multi_app = homogeneousForward
-    from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord'
-    to_reporters = 'measure_data/measurement_xcoord measure_data/measurement_ycoord measure_data/measurement_zcoord'
+    from_reporters = 'OptimizationReporter/measurement_xcoord
+                      OptimizationReporter/measurement_ycoord
+                      OptimizationReporter/measurement_zcoord
+                      OptimizationReporter/measurement_time
+                      OptimizationReporter/measurement_values
+                      OptimizationReporter/fy_right'
+    to_reporters = 'measure_data/measurement_xcoord
+                    measure_data/measurement_ycoord
+                    measure_data/measurement_zcoord
+                    measure_data/measurement_time
+                    measure_data/measurement_values
+                    params/right_fy_value'
   []
   [fromHomogeneousForward]
     type = MultiAppReporterTransfer
     from_multi_app = homogeneousForward
-    from_reporters = 'data_pt/disp_y'
+    from_reporters = 'measure_data/simulation_values'
     to_reporters = 'OptimizationReporter/simulation_values'
   []
 []

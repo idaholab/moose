@@ -1,6 +1,6 @@
 [Tests]
   issues = '#21885'
-  design = 'OptimizationMultiAppCommandLineControl.md'
+  design = 'Optimize.md ParsedOptimizationFunction.md SideOptimizationNeumannFunctionInnerProduct.md'
   [iterOutput]
     requirement = "The system shall be able to scale linear and constant functions involved in two separate "
                   "functionNeumannBCs both applied to the same sideset using  two parsed functions.  "

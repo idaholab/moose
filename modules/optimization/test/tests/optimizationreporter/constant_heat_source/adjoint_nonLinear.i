@@ -40,6 +40,11 @@
   [misfit]
     type = OptimizationData
   []
+  [params]
+    type = ConstantReporter
+    real_vector_names = 'q'
+    real_vector_values = '0' # Dummy value
+  []
 []
 
 [BCs]
@@ -88,27 +93,19 @@
 []
 
 [Functions]
-  [volumetric_heat_func_deriv]
-    type = ParsedFunction
-    value = dq
-    vars = 'dq'
-    vals = 1
-  []
-[]
-
-[Postprocessors]
-  # integral of load function gradient w.r.t parameter
-  [heatSourceGradient]
-    type = VariableFunctionElementIntegral
-    function = volumetric_heat_func_deriv
-    variable = adjoint_T
+  [volumetric_heat_func]
+    type = ParsedOptimizationFunction
+    value = q
+    param_vars = 'q'
+    param_vector_name = 'params/q'
   []
 []
 
 [VectorPostprocessors]
   [gradient_vpp]
-    type = VectorOfPostprocessors
-    postprocessors = 'heatSourceGradient'
+    type = ElementOptimizationSourceFunctionInnerProduct
+    variable = adjoint_T
+    function = volumetric_heat_func
   []
 []
 

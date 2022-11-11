@@ -9,6 +9,7 @@
   xmax = 2
   ymax = 2
 []
+
 [AuxVariables]
   [T_forward]
   []
@@ -38,25 +39,14 @@
 
 [MultiApps]
   [forward]
-    type = OptimizeFullSolveMultiApp
+    type = FullSolveMultiApp
     input_files = forward_nonLinear.i
     execute_on = FORWARD
-    reset_app = true
   []
   [adjoint]
-    type = OptimizeFullSolveMultiApp
+    type = FullSolveMultiApp
     input_files = adjoint_nonLinear.i
     execute_on = ADJOINT
-    reset_app = true
-  []
-[]
-
-[Controls]
-  [toforward]
-    type = OptimizationMultiAppCommandLineControl
-    multi_app = forward
-    value_names = 'parameter_results'
-    parameters = 'Functions/volumetric_heat_func/vals'
   []
 []
 
@@ -64,25 +54,45 @@
   [toForward_measument]
     type = MultiAppReporterTransfer
     to_multi_app = forward
-    from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord'
-    to_reporters = 'measure_data/measurement_xcoord measure_data/measurement_ycoord measure_data/measurement_zcoord'
+    from_reporters = 'OptimizationReporter/measurement_xcoord
+                      OptimizationReporter/measurement_ycoord
+                      OptimizationReporter/measurement_zcoord
+                      OptimizationReporter/measurement_time
+                      OptimizationReporter/measurement_values
+                      OptimizationReporter/parameter_results'
+    to_reporters = 'measure_data/measurement_xcoord
+                    measure_data/measurement_ycoord
+                    measure_data/measurement_zcoord
+                    measure_data/measurement_time
+                    measure_data/measurement_values
+                    params/q'
   []
   [toAdjoint]
     type = MultiAppReporterTransfer
     to_multi_app = adjoint
-    from_reporters = 'OptimizationReporter/measurement_xcoord OptimizationReporter/measurement_ycoord OptimizationReporter/measurement_zcoord OptimizationReporter/misfit_values'
-    to_reporters = 'misfit/measurement_xcoord misfit/measurement_ycoord misfit/measurement_zcoord misfit/misfit_values'
+    from_reporters = 'OptimizationReporter/measurement_xcoord
+                      OptimizationReporter/measurement_ycoord
+                      OptimizationReporter/measurement_zcoord
+                      OptimizationReporter/measurement_time
+                      OptimizationReporter/misfit_values
+                      OptimizationReporter/parameter_results'
+    to_reporters = 'misfit/measurement_xcoord
+                    misfit/measurement_ycoord
+                    misfit/measurement_zcoord
+                    misfit/measurement_time
+                    misfit/misfit_values
+                    params/q'
   []
   [fromForward]
     type = MultiAppReporterTransfer
     from_multi_app = forward
-    from_reporters = 'data_pt/T'
+    from_reporters = 'measure_data/simulation_values'
     to_reporters = 'OptimizationReporter/simulation_values'
   []
   [fromadjoint]
     type = MultiAppReporterTransfer
     from_multi_app = adjoint
-    from_reporters = 'gradient_vpp/gradient_vpp'
+    from_reporters = 'gradient_vpp/inner_product'
     to_reporters = 'OptimizationReporter/adjoint'
   []
   #for temperature dependent material

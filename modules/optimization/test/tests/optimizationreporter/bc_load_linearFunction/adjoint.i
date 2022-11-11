@@ -29,6 +29,11 @@
   [misfit]
     type = OptimizationData
   []
+  [params]
+    type = ConstantReporter
+    real_vector_names = 'vals'
+    real_vector_values = '0 0' # Dummy
+  []
 []
 
 [BCs]
@@ -77,40 +82,25 @@
 []
 
 [Functions]
-  [left_constant_deriv_a]
-    type = ParsedFunction
-    value = 1.0
-  []
-  [left_linear_deriv_b]
-    type = ParsedFunction
-    value = y
-  []
-[]
-
-[Postprocessors]
-  [adjoint_bc_0]
-    type = VariableFunctionSideIntegral
-    boundary = left
-    function = left_constant_deriv_a
-    variable = adjoint_T
-  []
-  [adjoint_bc_1]
-    type = VariableFunctionSideIntegral
-    boundary = left
-    function = left_linear_deriv_b
-    variable = adjoint_T
+  [left_function]
+    type = ParsedOptimizationFunction
+    value = 'a + b*y'
+    param_vars = 'a b'
+    param_vector_name = 'params/vals'
   []
 []
 
 [VectorPostprocessors]
   [adjoint_bc]
-    type = VectorOfPostprocessors
-    postprocessors = 'adjoint_bc_0 adjoint_bc_1'
+    type = SideOptimizationNeumannFunctionInnerProduct
+    variable = adjoint_T
+    function = left_function
+    boundary = left
   []
 []
 
 [Outputs]
-  console = false
+  console = true
   exodus = false
   file_base = 'adjoint'
 []

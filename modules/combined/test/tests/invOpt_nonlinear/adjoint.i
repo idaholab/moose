@@ -9,13 +9,14 @@
   petsc_options_value = 'lu'
 []
 
-
 [Mesh]
 []
+
 [Variables]
   [adjointT]
   []
 []
+
 [AuxVariables]
   [forwardT]
   []
@@ -24,7 +25,6 @@
     family = MONOMIAL_VEC
   []
 []
-
 
 [Kernels]
   [heat_conduction]
@@ -38,6 +38,7 @@
     variable = adjointT
   []
 []
+
 [AuxKernels]
   [dDdTgradT]
     type = MaterialScaledGradientVector
@@ -46,6 +47,7 @@
     material_scaling = 'dDdT'
   []
 []
+
 [Materials]
   [LinearizedConductivity]
     type = ADParsedMaterial
@@ -72,12 +74,17 @@
     value_name   = misfit/misfit_values
   []
 []
+
 [Reporters]
   [misfit]
     type = OptimizationData
   []
+  [params]
+    type = ConstantReporter
+    real_vector_names = 'heat_source'
+    real_vector_values = '0' # Dummy
+  []
 []
-
 
 [BCs]
   [left]
@@ -106,29 +113,22 @@
   []
 []
 
-
 [VectorPostprocessors]
   [gradient_vpp]
-    type = VectorOfPostprocessors
-    postprocessors = 'heatSourceGradient'
-  []
-[]
-[Postprocessors]
-  [heatSourceGradient]
-    type = VariableFunctionElementIntegral
-    function = volumetric_heat_func_deriv
+    type = ElementOptimizationSourceFunctionInnerProduct
+    function = volumetric_heat_func
     variable = adjointT
   []
 []
+
 [Functions]
-  [volumetric_heat_func_deriv]
-    type = ParsedFunction
-    value = dq
-    vars = 'dq'
-    vals = 1
+  [volumetric_heat_func]
+    type = ParsedOptimizationFunction
+    value = q
+    param_vars = 'q'
+    param_vector_name = 'params/heat_source'
   []
 []
-
 
 [Outputs]
   console = false

@@ -1,4 +1,4 @@
-[StochasticTools]
+[Optimization]
 []
 
 [Mesh]
@@ -39,25 +39,22 @@
 
 [MultiApps]
   [forward]
-    type = OptimizeFullSolveMultiApp
+    type = FullSolveMultiApp
     input_files = forward.i
     execute_on = FORWARD
     clone_parent_mesh = true
-    reset_app = true
   []
   [homogeneous_forward]
-    type = OptimizeFullSolveMultiApp
+    type = FullSolveMultiApp
     input_files = homogeneous_forward.i
     execute_on = HOMOGENEOUS_FORWARD
     clone_parent_mesh = true
-    reset_app = true
   []
   [adjoint]
-    type = OptimizeFullSolveMultiApp
+    type = FullSolveMultiApp
     input_files = adjoint.i
     execute_on = ADJOINT
     clone_parent_mesh = true
-    reset_app = true
   []
 []
 
@@ -65,27 +62,26 @@
   ## RUN FORWARD SIMULATION WITH CURRENT PARAMETERS AS FORCE,
   ## AND EXTRACT SIMULATED VALUES AT MEASUREMENT POINTS
   ## AS WELL AS TOTAL FIELD VARIABLE FOR NONLINEAR PURPOSES
-  [ParametersToForward]
-    type = OptimizationParameterTransfer
-    to_multi_app = forward
-    value_names = 'heat_source'
-    parameters = 'Postprocessors/heat_source_pp/value'
-    to_control = parameterReceiver #'Functions/volumetric_heat_func/vals'
-  []
   [MeasurementLocationsToForward]
     type = MultiAppReporterTransfer
     to_multi_app = forward
     from_reporters = 'OptimizationReporter/measurement_xcoord
                       OptimizationReporter/measurement_ycoord
-                      OptimizationReporter/measurement_zcoord'
+                      OptimizationReporter/measurement_zcoord
+                      OptimizationReporter/measurement_time
+                      OptimizationReporter/measurement_values
+                      OptimizationReporter/heat_source'
     to_reporters = 'measurement_locations/measurement_xcoord
                     measurement_locations/measurement_ycoord
-                    measurement_locations/measurement_zcoord'
+                    measurement_locations/measurement_zcoord
+                    measurement_locations/measurement_time
+                    measurement_locations/measurement_values
+                    params/heat_source'
   []
   [SimulatedDataFromForward]
     type = MultiAppReporterTransfer
     from_multi_app = forward
-    from_reporters = 'data_pt/forwardT'
+    from_reporters = 'measurement_locations/simulation_values'
     to_reporters = 'OptimizationReporter/simulation_values'
   []
   [CurrentStateFromForwardNonlinear]
@@ -102,27 +98,26 @@
     source_variable = 'forwardT'
     variable = 'forwardT'
   []
-  [ParametersToHomogeneousForward]
-    type = OptimizationParameterTransfer
-    to_multi_app = homogeneous_forward
-    value_names = 'heat_source'
-    parameters = 'Postprocessors/heat_source_pp/value'
-    to_control = parameterReceiver #'Functions/volumetric_heat_func/vals'
-  []
   [MeasurementLocationsToHomogeneousForward]
     type = MultiAppReporterTransfer
     to_multi_app = homogeneous_forward
     from_reporters = 'OptimizationReporter/measurement_xcoord
                       OptimizationReporter/measurement_ycoord
-                      OptimizationReporter/measurement_zcoord'
+                      OptimizationReporter/measurement_zcoord
+                      OptimizationReporter/measurement_time
+                      OptimizationReporter/measurement_values
+                      OptimizationReporter/heat_source'
     to_reporters = 'measurement_locations/measurement_xcoord
                     measurement_locations/measurement_ycoord
-                    measurement_locations/measurement_zcoord'
+                    measurement_locations/measurement_zcoord
+                    measurement_locations/measurement_time
+                    measurement_locations/measurement_values
+                    params/heat_source'
   []
   [SimulatedDataFromHomogeneousForward]
     type = MultiAppReporterTransfer
     from_multi_app = homogeneous_forward
-    from_reporters = 'data_pt/T'
+    from_reporters = 'measurement_locations/simulation_values'
     to_reporters = 'OptimizationReporter/simulation_values'
   []
   ### RUN THE ADJOINT WITH CURRENT NONLINEAR STATE, WITH MISFIT AS EXCITATION,
@@ -139,16 +134,20 @@
     from_reporters = 'OptimizationReporter/measurement_xcoord
                       OptimizationReporter/measurement_ycoord
                       OptimizationReporter/measurement_zcoord
-                      OptimizationReporter/misfit_values'
+                      OptimizationReporter/measurement_time
+                      OptimizationReporter/misfit_values
+                      OptimizationReporter/heat_source'
     to_reporters = 'misfit/measurement_xcoord
                     misfit/measurement_ycoord
                     misfit/measurement_zcoord
-                    misfit/misfit_values'
+                    misfit/measurement_time
+                    misfit/misfit_values
+                    params/heat_source'
   []
   [GradientFromAdjoint]
     type = MultiAppReporterTransfer
     from_multi_app = adjoint
-    from_reporters = 'gradient_vpp/gradient_vpp'
+    from_reporters = 'gradient_vpp/inner_product'
     to_reporters = 'OptimizationReporter/adjoint'
   []
 []
