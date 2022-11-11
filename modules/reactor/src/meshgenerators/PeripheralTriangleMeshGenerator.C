@@ -86,13 +86,13 @@ PeripheralTriangleMeshGenerator::PeripheralTriangleMeshGenerator(const InputPara
     params.set<std::vector<Point>>("points") = outer_polyline;
     params.set<unsigned int>("num_edges_between_points") = 1;
     params.set<bool>("loop") = true;
-    _build_mesh = &addMeshSubgenerator("PolyLineMeshGenerator", "periphery_polyline", params);
+    _build_mesh = &addMeshSubgenerator("PolyLineMeshGenerator", _input_name + "_periphery_polyline", params);
   }
 
   // Generate periphery region
   {
     auto params = _app.getFactory().getValidParams("XYDelaunayGenerator");
-    params.set<MeshGeneratorName>("boundary") = (MeshGeneratorName) "periphery_polyline";
+    params.set<MeshGeneratorName>("boundary") = (MeshGeneratorName) _input_name + "_periphery_polyline";
     params.set<std::vector<MeshGeneratorName>>("holes") =
         std::vector<MeshGeneratorName>{_input_name};
     params.set<unsigned int>("add_nodes_per_boundary_segment") = 0;
