@@ -289,27 +289,16 @@ SolutionUserObject::readExodusII()
     _system->add_variable(var_name, CONSTANT, MONOMIAL);
 
   // Handle scalars
-  std::vector<std::string> _system_scalars;
   if (_scalar_variables.size() > 0)
   {
-    // Iterate over the scalar variables. If we find one matching a nodal variable name, we change
-    // it. Then we add the var, changed or unchanged, to the system.
-    for (std::string var : _scalar_variables)
-    {
-      if (std::any_of(_nodal_variables.begin(),
-                      _nodal_variables.end(),
-                      [var](std::string y) { return var == y; }))
-      {
-        mooseWarning("Global variable " + var +
-                     " matches the name of an existing field variable. The variable will be "
-                     "renamed, but there may be unintended behavior. This is usually caused by a "
-                     "Postprocessor having the same name as a field variable.");
-        var = var + "_global";
-      }
-      _system_scalars.push_back(var);
-    }
-    for (const auto & var_name : _system_scalars)
-      _system->add_variable(var_name, FIRST, SCALAR);
+    // Iterate over the scalar variables. If we find one matching a nodal variable name, we ignore
+    // it, as this value is a postprocessor outputted to the global variables, not a scalar
+    // variable.
+    for (const std::string & var : _scalar_variables)
+      if (!std::any_of(_nodal_variables.begin(),
+                       _nodal_variables.end(),
+                       [var](std::string y) { return var == y; }))
+        _system->add_variable(var, FIRST, SCALAR);
   }
 
   // Initialize the equations systems
@@ -330,7 +319,7 @@ SolutionUserObject::readExodusII()
     for (const auto & var_name : _elemental_variables)
       _system2->add_variable(var_name, CONSTANT, MONOMIAL);
 
-    for (const auto & var_name : _system_scalars)
+    for (const auto & var_name : _scalar_variables)
       _system2->add_variable(var_name, FIRST, SCALAR);
 
     // Initialize
@@ -355,9 +344,9 @@ SolutionUserObject::readExodusII()
     if (_scalar_variables.size() > 0)
     {
       _exodusII_io->copy_scalar_solution(
-          *_system, _system_scalars, _scalar_variables, _exodus_index1 + 1);
+          *_system, _scalar_variables, _scalar_variables, _exodus_index1 + 1);
       _exodusII_io->copy_scalar_solution(
-          *_system2, _system_scalars, _scalar_variables, _exodus_index2 + 1);
+          *_system2, _scalar_variables, _scalar_variables, _exodus_index2 + 1);
     }
 
     // Update the systems
@@ -386,7 +375,7 @@ SolutionUserObject::readExodusII()
 
     if (_scalar_variables.size() > 0)
       _exodusII_io->copy_scalar_solution(
-          *_system, _system_scalars, _scalar_variables, _exodus_time_index);
+          *_system, _scalar_variables, _scalar_variables, _exodus_time_index);
     // Update the equations systems
     _system->update();
     _es->update();
