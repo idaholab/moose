@@ -92,6 +92,9 @@ public:
   /// Set value for max_initial_residual
   void setMaxInitialResidual(Real max_initial_residual);
 
+  /// Get value for max_initial_residual
+  Real getMaxInitialResidual() const;
+
   /// Sets the value of _ramp_max_ionic_strength
   void setRampMaxIonicStrength(unsigned ramp_max_ionic_strength);
 
@@ -142,8 +145,10 @@ private:
    * otherwise evaluate only at the start of the solve process (using, eg, the old molality values)
    */
   bool _evaluate_kin_always;
-  /// the mole_additions for the kinetic species as specified in the argument of solveSystem
-  DenseVector<Real> _input_kin_mole_additions;
+  /// the mole_additions for the basis and kinetic species as specified in the argument of solveSystem
+  DenseVector<Real> _input_mole_additions;
+  /// d(mole_additions)/d(species) as specified in the argument of solveSystem
+  DenseMatrix<Real> _input_dmole_additions;
 
   /**
    * Builds the residual of the algebraic system
@@ -200,12 +205,4 @@ private:
                              Real dt,
                              DenseVector<Real> & mole_additions,
                              DenseMatrix<Real> & dmole_additions);
-
-  /**
-   * Add _input_kin_mole_additions to the kinetic slots of mole_additions.  This is necessary after
-   * every call to egs.setKineticRates, because that method zeroes mole_additions corresponding to
-   * the kinetic_slots, but the user could have specified some overall ("input") kinetic mole
-   * additions to solveSystem
-   */
-  void addKineticInputMoleAdditions(DenseVector<Real> & mole_additions) const;
 };

@@ -723,6 +723,24 @@
       "radius": 6.0,
       "charge": 2.0,
       "molecular weight": 65.38
+    },
+    "Biomass1": {
+      "elements": {},
+      "radius": -1.5,
+      "charge": 0.0,
+      "molecular weight": 1.0
+    },
+    "Biomass2": {
+      "elements": {},
+      "radius": -1.5,
+      "charge": 0.0,
+      "molecular weight": 1.0
+    },
+    "Biomass3": {
+      "elements": {},
+      "radius": -1.5,
+      "charge": 0.0,
+      "molecular weight": 1.0
     }
   },
   "secondary species": {
@@ -11807,6 +11825,39 @@
     }
   },
   "mineral species": {
+    "methanogen": {
+      "species": {
+        "CH3COO-": -1.0,
+        "H2O": -1.0,
+        "CH4(aq)": 1.0,
+        "HCO3-": 1.0
+      },
+      "molar volume": 1,
+      "molecular weight": 1E9,
+      "logk": [2.727, 2.641, 2.699, 2.933, 3.28, 3.788, 4.336, 4.789]
+    },
+    "sulfate_reducer": {
+      "species": {
+        "CH3COO-": -1.0,
+        "SO4--": -1.0,
+        "HCO3-": 2.0,
+        "HS-": 1.0
+      },
+      "molar volume": 1,
+      "molecular weight": 1E3,
+	"logk": [8.502, 8.404, 8.451, 8.657, 9.023, 9.457, 9.917, 10.31]
+    },
+    "Mackinawite": {
+      "species": {
+        "H+": -1.0,
+        "Fe++": 1.0,
+        "HS-": 1.0
+      },
+      "molar volume": 25,
+      "molecular weight": 87.907,
+      "logk": [
+          -3.6, -3.6, -3.6, -3.6, -3.6, -3.6, -3.6, -3.6]
+    },
     "(BaO)2^(SiO2)3(c)": {
       "species": {
         "H+": -4.0,
@@ -24396,6 +24447,32 @@
     }
   },
   "redox couples": {
+    "arsenate_reducer": {
+      "species": {
+        "Lactate-": -1.0,
+        "HAsO4--": -2.0,
+        "H2O": -2.0,
+        "CO3--": 1.0,
+        "CH3COO-": 1.0,
+        "As(OH)4-": 2.0
+      },
+      "charge": 0.0,
+      "radius": -1.5,
+      "molecular weight": 1,
+	"logk": [6.742, 26.75, 49.93, 71.18, 92.42, 109.5, 123.8, 136.1]
+    },
+    "Lactate-": {
+      "species": {
+        "O2(aq)": -3.0,
+        "HCO3-": 3.0,
+        "H+": 2.0
+      },
+      "charge": -1.0,
+      "radius": 4.0,
+      "molecular weight": 89.07,
+      "logk": [
+          231.4, 231.4, 231.4, 231.4, 231.4, 231.4, 231.4, 231.4]
+    },
     "(O-phth)--": {
       "species": {
         "H2O": -5.0,
@@ -24552,16 +24629,7 @@
       "charge": -1.0,
       "radius": 4.5,
       "molecular weight": 59.0445,
-      "logk": [
-        160.6192,
-        146.7487,
-        130.6352,
-        115.8131,
-        100.9856,
-        89.0757,
-        79.0857,
-        70.4395
-      ]
+      "logk": [160.6192, 146.7487, 130.6352, 115.8131, 100.9856, 89.0757, 79.0857, 70.4395]
     },
     "CH4(aq)": {
       "species": {

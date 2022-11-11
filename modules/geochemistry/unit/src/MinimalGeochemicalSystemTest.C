@@ -1638,6 +1638,68 @@ TEST(PertinentGeochemicalSystemTest, redoxCapture)
       mgd_redox.redox_log10K(ch4_slot, 7), -boa * 65.6500 + 10.67105 - 0.25 * (-2.4100), 1E-8);
 }
 
+/// Previous test has shown that redox information is correctly captured for usual cases.  This test concentrates on the strange case that the database has e- expressed in terms of secondary species.  Also, with a redox couple that depends on secondary species, so will not be recorded in redox_stoichiometry
+TEST(PertinentGeochemicalSystemTest, redoxCapture_db_strange)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb_e_strange.json");
+
+  PertinentGeochemicalSystem model_redox(
+      database, {"H2O", "H+", "HCO3-", "O2(aq)", "(O-phth)--"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
+  ModelGeochemicalDatabase mgd_redox = model_redox.modelGeochemicalDatabase();
+
+  EXPECT_EQ(mgd_redox.redox_lhs, "e-");
+
+  EXPECT_EQ(mgd_redox.redox_stoichiometry.m(), (unsigned)1);
+  EXPECT_EQ(mgd_redox.redox_log10K.m(), (unsigned)1);
+
+  // Check the reaction:
+  // e- = H2O + 3O2(aq) + OH- = 2H2O + 3O2(aq) - H+
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(0, 0), 2.0);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(0, 1), -1.0);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(0, 2), 0.0);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(0, 3), 3.0);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(0, 4), 0.0);
+  EXPECT_NEAR(mgd_redox.redox_log10K(0, 0), 22.76135 + 14.9325, 1E-8);
+  EXPECT_NEAR(mgd_redox.redox_log10K(0, 1), 20.7757 + 13.9868, 1E-8);
+  EXPECT_NEAR(mgd_redox.redox_log10K(0, 2), 18.513025 + 13.0199, 1E-8);
+  EXPECT_NEAR(mgd_redox.redox_log10K(0, 3), 16.4658 + 12.2403, 1E-8);
+  EXPECT_NEAR(mgd_redox.redox_log10K(0, 4), 14.473225 + 11.5940, 1E-8);
+  EXPECT_NEAR(mgd_redox.redox_log10K(0, 5), 12.92125 + 11.2191, 1E-8);
+  EXPECT_NEAR(mgd_redox.redox_log10K(0, 6), 11.68165 + 11.0880, 1E-8);
+  EXPECT_NEAR(mgd_redox.redox_log10K(0, 7), 10.67105 + 1001.2844, 1E-8);
+}
+
+/// Test when a redox couple does not depend on the redox oxide, so the redox couple should not be put into redox_stoichiometry
+TEST(PertinentGeochemicalSystemTest, redoxCapture_redox_o_strange)
+{
+  GeochemicalDatabaseReader database("database/moose_testdb_e_strange.json");
+
+  PertinentGeochemicalSystem model_redox(
+      database, {"H2O", "H+", "HCO3-", "O2(aq)", "(O-phth)_0"}, {}, {}, {}, {}, {}, "O2(aq)", "e-");
+  ModelGeochemicalDatabase mgd_redox = model_redox.modelGeochemicalDatabase();
+
+  EXPECT_EQ(mgd_redox.redox_lhs, "e-");
+
+  EXPECT_EQ(mgd_redox.redox_stoichiometry.m(), (unsigned)1);
+  EXPECT_EQ(mgd_redox.redox_log10K.m(), (unsigned)1);
+
+  // Check the reaction:
+  // e- = H2O + 3O2(aq) + OH- = 2H2O + 3O2(aq) - H+
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(0, 0), 2.0);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(0, 1), -1.0);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(0, 2), 0.0);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(0, 3), 3.0);
+  EXPECT_EQ(mgd_redox.redox_stoichiometry(0, 4), 0.0);
+  EXPECT_NEAR(mgd_redox.redox_log10K(0, 0), 22.76135 + 14.9325, 1E-8);
+  EXPECT_NEAR(mgd_redox.redox_log10K(0, 1), 20.7757 + 13.9868, 1E-8);
+  EXPECT_NEAR(mgd_redox.redox_log10K(0, 2), 18.513025 + 13.0199, 1E-8);
+  EXPECT_NEAR(mgd_redox.redox_log10K(0, 3), 16.4658 + 12.2403, 1E-8);
+  EXPECT_NEAR(mgd_redox.redox_log10K(0, 4), 14.473225 + 11.5940, 1E-8);
+  EXPECT_NEAR(mgd_redox.redox_log10K(0, 5), 12.92125 + 11.2191, 1E-8);
+  EXPECT_NEAR(mgd_redox.redox_log10K(0, 6), 11.68165 + 11.0880, 1E-8);
+  EXPECT_NEAR(mgd_redox.redox_log10K(0, 7), 10.67105 + 1001.2844, 1E-8);
+}
+
 /// Test addKineticRate exceptions
 TEST(PertinentGeochemicalSystemTest, addKineticRateExceptions)
 {
@@ -1654,7 +1716,26 @@ TEST(PertinentGeochemicalSystemTest, addKineticRateExceptions)
 
   try
   {
-    KineticRateUserDescription rate("Ca++", 1.0, 2.0, true, {"H2O"}, {3.0}, 4.0, 5.0, 6.0, 7.0);
+    KineticRateUserDescription rate("Ca++",
+                                    1.0,
+                                    2.0,
+                                    true,
+                                    0.0,
+                                    0.0,
+                                    0.0,
+                                    {"H2O"},
+                                    {3.0},
+                                    {0.0},
+                                    {0.0},
+                                    4.0,
+                                    5.0,
+                                    6.0,
+                                    7.0,
+                                    DirectionChoiceEnum::BOTH,
+                                    "H2O",
+                                    0.0,
+                                    -1.0,
+                                    0.0);
     model.addKineticRate(rate);
     FAIL() << "Missing expected exception.";
   }
@@ -1670,8 +1751,26 @@ TEST(PertinentGeochemicalSystemTest, addKineticRateExceptions)
 
   try
   {
-    KineticRateUserDescription rate(
-        "CH4(aq)", 1.0, 2.0, true, {"H2O", "H++"}, {3.0, 1.0}, 4.0, 5.0, 6.0, 7.0);
+    KineticRateUserDescription rate("CH4(aq)",
+                                    1.0,
+                                    2.0,
+                                    true,
+                                    0.0,
+                                    0.0,
+                                    0.0,
+                                    {"H2O", "H++"},
+                                    {3.0, 1.0},
+                                    {0.0, 0.0},
+                                    {0.0, 0.0},
+                                    4.0,
+                                    5.0,
+                                    6.0,
+                                    7.0,
+                                    DirectionChoiceEnum::BOTH,
+                                    "H2O",
+                                    0.0,
+                                    -1.0,
+                                    0.0);
     model.addKineticRate(rate);
     FAIL() << "Missing expected exception.";
   }
@@ -1679,6 +1778,39 @@ TEST(PertinentGeochemicalSystemTest, addKineticRateExceptions)
   {
     std::string msg(e.what());
     ASSERT_TRUE(msg.find("Promoting species H++ must be a basis or a secondary species") !=
+                std::string::npos)
+        << "Failed with unexpected error message: " << msg;
+  }
+
+  try
+  {
+    KineticRateUserDescription rate("CH4(aq)",
+                                    1.0,
+                                    2.0,
+                                    true,
+                                    0.0,
+                                    0.0,
+                                    0.0,
+                                    {},
+                                    {},
+                                    {},
+                                    {},
+                                    4.0,
+                                    5.0,
+                                    6.0,
+                                    7.0,
+                                    DirectionChoiceEnum::BOTH,
+                                    "CH4(aq)",
+                                    0.0,
+                                    -1.0,
+                                    0.0);
+    model.addKineticRate(rate);
+    FAIL() << "Missing expected exception.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(msg.find("Progeny CH4(aq) must be a basis or a secondary species") !=
                 std::string::npos)
         << "Failed with unexpected error message: " << msg;
   }
@@ -1701,12 +1833,22 @@ TEST(PertinentGeochemicalSystemTest, addKineticRate)
                                   1.0,
                                   2.0,
                                   true,
+                                  0.0,
+                                  0.0,
+                                  0.0,
                                   {"H2O", "OH-", "O2(aq)", "CO2(aq)", "CaCO3"},
                                   {3.0, 3.1, 3.2, 3.3, 3.4},
+                                  {1.0, 2.0, 3.0, 4.0, 5.0},
+                                  {1.25, 1.5, 1.75, 2.25, 3.25},
                                   4.0,
                                   5.0,
                                   6.0,
-                                  7.0);
+                                  7.0,
+                                  DirectionChoiceEnum::BOTH,
+                                  "H+",
+                                  2.0,
+                                  -1.0,
+                                  0.0);
   model.addKineticRate(rate);
 
   const ModelGeochemicalDatabase & mgd = model.modelGeochemicalDatabase();
@@ -1717,20 +1859,60 @@ TEST(PertinentGeochemicalSystemTest, addKineticRate)
   EXPECT_EQ(mgd.kin_rate[0].description.area_quantity, 2.0);
   EXPECT_EQ(mgd.kin_rate[0].description.multiply_by_mass, true);
   std::vector<Real> pi_gold(mgd.basis_species_index.size() + mgd.eqm_species_index.size(), 0.0);
+  std::vector<Real> pmi_gold(mgd.basis_species_index.size() + mgd.eqm_species_index.size(), 0.0);
+  std::vector<Real> pmk_gold(mgd.basis_species_index.size() + mgd.eqm_species_index.size(), 0.0);
   EXPECT_EQ(mgd.kin_rate[0].promoting_indices.size(), pi_gold.size());
+  EXPECT_EQ(mgd.kin_rate[0].promoting_monod_indices.size(), pmi_gold.size());
+  EXPECT_EQ(mgd.kin_rate[0].promoting_half_saturation.size(), pmk_gold.size());
   pi_gold[0] = 3.0; // H2O
+  pmi_gold[0] = 1.0;
+  pmk_gold[0] = 1.25;
   pi_gold[5 + mgd.eqm_species_index.at("OH-")] = 3.1;
+  pmi_gold[5 + mgd.eqm_species_index.at("OH-")] = 2.0;
+  pmk_gold[5 + mgd.eqm_species_index.at("OH-")] = 1.5;
   pi_gold[3] = 3.2; // O2(aq)
+  pmi_gold[3] = 3.0;
+  pmk_gold[3] = 1.75;
   pi_gold[5 + mgd.eqm_species_index.at("CO2(aq)")] = 3.3;
+  pmi_gold[5 + mgd.eqm_species_index.at("CO2(aq)")] = 4.0;
+  pmk_gold[5 + mgd.eqm_species_index.at("CO2(aq)")] = 2.25;
   pi_gold[5 + mgd.eqm_species_index.at("CaCO3")] = 3.4;
+  pmi_gold[5 + mgd.eqm_species_index.at("CaCO3")] = 5.0;
+  pmk_gold[5 + mgd.eqm_species_index.at("CaCO3")] = 3.25;
   for (unsigned i = 0; i < pi_gold.size(); ++i)
+  {
     EXPECT_EQ(mgd.kin_rate[0].promoting_indices[i], pi_gold[i]);
+    EXPECT_EQ(mgd.kin_rate[0].promoting_monod_indices[i], pmi_gold[i]);
+    EXPECT_EQ(mgd.kin_rate[0].promoting_half_saturation[i], pmk_gold[i]);
+  }
   EXPECT_EQ(mgd.kin_rate[0].description.theta, 4.0);
   EXPECT_EQ(mgd.kin_rate[0].description.eta, 5.0);
   EXPECT_EQ(mgd.kin_rate[0].description.activation_energy, 6.0);
   EXPECT_EQ(mgd.kin_rate[0].description.one_over_T0, 7.0);
+  EXPECT_EQ(mgd.kin_rate[0].progeny_index, mgd.basis_species_index.at("H+"));
+  EXPECT_EQ(mgd.kin_rate[0].description.progeny, "H+");
+  EXPECT_EQ(mgd.kin_rate[0].description.progeny_efficiency, 2.0);
 
-  KineticRateUserDescription ratec("Calcite", 7.0, 6.0, false, {"H+"}, {-3.0}, 5.0, 4.0, 3.0, 2.0);
+  KineticRateUserDescription ratec("Calcite",
+                                   7.0,
+                                   6.0,
+                                   false,
+                                   0.0,
+                                   0.0,
+                                   0.0,
+                                   {"H+"},
+                                   {-3.0},
+                                   {-1.0},
+                                   {-2.0},
+                                   5.0,
+                                   4.0,
+                                   3.0,
+                                   2.0,
+                                   DirectionChoiceEnum::BOTH,
+                                   "OH-",
+                                   1.125,
+                                   -1.0,
+                                   0.0);
   model.addKineticRate(ratec);
 
   EXPECT_EQ(mgd.kin_rate.size(), (std::size_t)2);
@@ -1740,13 +1922,24 @@ TEST(PertinentGeochemicalSystemTest, addKineticRate)
   EXPECT_EQ(mgd.kin_rate[1].description.multiply_by_mass, false);
   EXPECT_EQ(mgd.kin_rate[1].promoting_indices.size(), pi_gold.size());
   std::fill(pi_gold.begin(), pi_gold.end(), 0.0);
+  std::fill(pmi_gold.begin(), pmi_gold.end(), 0.0);
+  std::fill(pmk_gold.begin(), pmk_gold.end(), 0.0);
   pi_gold[1] = -3.0; // H++
+  pmi_gold[1] = -1.0;
+  pmk_gold[1] = -2.0;
   for (unsigned i = 0; i < pi_gold.size(); ++i)
+  {
     EXPECT_EQ(mgd.kin_rate[1].promoting_indices[i], pi_gold[i]);
+    EXPECT_EQ(mgd.kin_rate[1].promoting_monod_indices[i], pmi_gold[i]);
+    EXPECT_EQ(mgd.kin_rate[1].promoting_half_saturation[i], pmk_gold[i]);
+  }
   EXPECT_EQ(mgd.kin_rate[1].description.theta, 5.0);
   EXPECT_EQ(mgd.kin_rate[1].description.eta, 4.0);
   EXPECT_EQ(mgd.kin_rate[1].description.activation_energy, 3.0);
   EXPECT_EQ(mgd.kin_rate[1].description.one_over_T0, 2.0);
+  EXPECT_EQ(mgd.kin_rate[1].progeny_index, 5 + mgd.eqm_species_index.at("OH-"));
+  EXPECT_EQ(mgd.kin_rate[1].description.progeny, "OH-");
+  EXPECT_EQ(mgd.kin_rate[1].description.progeny_efficiency, 1.125);
 }
 
 /**

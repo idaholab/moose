@@ -2380,7 +2380,7 @@ GeochemicalSystem::updateOldWithCurrent(const DenseVector<Real> & mole_additions
 }
 
 void
-GeochemicalSystem::setKineticRates(Real dt,
+GeochemicalSystem::addKineticRates(Real dt,
                                    DenseVector<Real> & mole_additions,
                                    DenseMatrix<Real> & dmole_additions)
 {
@@ -2390,21 +2390,12 @@ GeochemicalSystem::setKineticRates(Real dt,
   // check sizes
   const unsigned tot = mole_additions.size();
   if (!(tot == _num_kin + _num_basis && dmole_additions.m() == tot && dmole_additions.n() == tot))
-    mooseError("setKineticRates: incorrectly sized additions: ",
+    mooseError("addKineticRates: incorrectly sized additions: ",
                tot,
                " ",
                dmole_additions.m(),
                " ",
                dmole_additions.n());
-
-  // zero the relevant slots
-  for (unsigned kin = 0; kin < _num_kin; ++kin)
-  {
-    const unsigned ind = kin + _num_basis;
-    mole_additions(ind) = 0.0;
-    for (unsigned i = 0; i < tot; ++i)
-      dmole_additions(ind, i) = 0.0;
-  }
 
   // construct eqm_activity for species that we need
   for (unsigned j = 0; j < _num_eqm; ++j)
@@ -2420,6 +2411,8 @@ GeochemicalSystem::setKineticRates(Real dt,
   {
     const unsigned kin = krd.kinetic_species_index;
     GeochemistryKineticRateCalculator::calculateRate(krd.promoting_indices,
+                                                     krd.promoting_monod_indices,
+                                                     krd.promoting_half_saturation,
                                                      krd.description,
                                                      _mgd.basis_species_name,
                                                      _mgd.basis_species_gas,
@@ -2441,10 +2434,76 @@ GeochemicalSystem::setKineticRates(Real dt,
                                                      rate,
                                                      drate_dkin,
                                                      drate_dmol);
+
+    /* the following block of code may be confusing at first sight.
+     * (1) The usual case is that the kinetic reaction is written
+     * kinetic -> basis_species, and direction = BOTH, and kinetic_bio_efficiency = -1
+     * In this case, the following does mole_additions(kinetic_species) += -1 * rate * dt
+     * If rate > 0 then the kinetic species decreases in mass.
+     * The solver will then detect that the kinetic_species has changed, and adjust basis_species
+     * accordingly, viz it will add rate * dt of basis species to the aqueous solution.
+     * (2) The common biologically-catalysed case is the reaction is written
+     * reactants -> products, catalysed by microbe.  In the database file this is written as
+     * microbe -> -reactants + products
+     * The input file will set direction = BOTH, and kinetic_bio_efficiency != -1
+     * Suppose that rate > 0, corresponding to reactants being converted to products.
+     * With kinetic_bio_efficiency = -1) this would correspond to microbe decreasing in mass,
+     * however with kinetic_bio_efficiency > 0, this is not true.
+     * The following block of code sets
+     * mole_additions(microbe) = kinetic_bio_efficiency * rate * dt > 0
+     * that is, the microbe mass is increasing.
+     * However, this means the solver will decrease products and increase reactants,
+     * by kinetic_bio_efficiency * rate * dt because it sees the reaction microbe -> -reactants +
+     * products in the database file.
+     * This is clearly wrong, because we actually want the end result to be that the products have
+     * increased by rate * dt, and the reactants to have decreased by rate * dt.
+     * So, to counter the solver, we add (-1 - kinetic_bio_efficiency) * rate * dt of reactants and
+     * add (1 + kinetic_bio_efficienty) * rate * dt of products.
+     * (3) The other situation is the biological death, where direction = DEATH.
+     * In this case the database file contains microbe -> -reactants + products
+     * However, independent of rate, we don't want to change the molality of reactants or products.
+     * Following the logic of (2), to counter the solver, we add -kinetic_bio_efficiency * rate * dt
+     * of reactants and kinetic_bio_efficiency * rate * dt of products
+     */
     const unsigned ind = kin + _num_basis;
-    mole_additions(ind) -= rate * dt;
-    dmole_additions(ind, ind) -= drate_dkin * dt;
+    mole_additions(ind) += krd.description.kinetic_bio_efficiency * rate * dt;
+    dmole_additions(ind, ind) += krd.description.kinetic_bio_efficiency * drate_dkin * dt;
+    const Real extra_additions = (krd.description.direction == DirectionChoiceEnum::DEATH)
+                                     ? krd.description.kinetic_bio_efficiency
+                                     : krd.description.kinetic_bio_efficiency + 1.0;
     for (unsigned i = 0; i < _num_basis; ++i)
-      dmole_additions(ind, i) -= drate_dmol[i] * dt;
+    {
+      dmole_additions(ind, i) += krd.description.kinetic_bio_efficiency * drate_dmol[i] * dt;
+      const Real stoi_fac = _mgd.kin_stoichiometry(kin, i) * extra_additions * dt;
+      mole_additions(i) += stoi_fac * rate;
+      dmole_additions(i, ind) += stoi_fac * drate_dkin;
+      for (unsigned j = 0; j < _num_basis; ++j)
+        dmole_additions(i, j) += stoi_fac * drate_dmol[j];
+    }
+
+    const Real eff = krd.description.progeny_efficiency;
+    if (eff != 0.0)
+    {
+      const unsigned bio_i = krd.progeny_index;
+      if (bio_i < _num_basis)
+      {
+        mole_additions(bio_i) += eff * rate * dt;
+        dmole_additions(bio_i, ind) += eff * drate_dkin * dt;
+        for (unsigned i = 0; i < _num_basis; ++i)
+          dmole_additions(bio_i, i) += eff * drate_dmol[i] * dt;
+      }
+      else
+      {
+        for (unsigned i = 0; i < _num_basis; ++i)
+        {
+          mole_additions(i) += _mgd.eqm_stoichiometry(bio_i - _num_basis, i) * eff * rate * dt;
+          dmole_additions(i, ind) +=
+              _mgd.eqm_stoichiometry(bio_i - _num_basis, i) * eff * drate_dkin * dt;
+          for (unsigned j = 0; j < _num_basis; ++j)
+            dmole_additions(i, j) +=
+                _mgd.eqm_stoichiometry(bio_i - _num_basis, i) * eff * drate_dmol[j] * dt;
+        }
+      }
+    }
   }
 }
