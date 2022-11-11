@@ -95,9 +95,11 @@ refine = 1
   [leftright]
     secondary = 10
     primary = 20
-    model = frictionless
+    model = coulomb
+    friction_coefficient = 0.2
     formulation = mortar
-    c_normal = 1e6
+    c_normal = 1e5
+    c_tangential = 1e4
   []
 []
 
@@ -134,7 +136,7 @@ refine = 1
       petsc_options_value = 'gmres   hypre  boomeramg'
     []
     [contact]
-      vars = 'leftright_normal_lm'
+      vars = 'leftright_normal_lm leftright_tangential_lm'
     []
   []
 []
@@ -153,16 +155,4 @@ refine = 1
 
 [Outputs]
   exodus = true
-[]
-
-[Postprocessors]
-  [lin]
-    type = NumLinearIterations
-    outputs = 'console'
-  []
-  [cum]
-    type = CumulativeValuePostprocessor
-    postprocessor = 'lin'
-    outputs = 'console'
-  []
 []
