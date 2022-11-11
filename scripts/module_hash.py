@@ -20,6 +20,7 @@ import hashlib
 import subprocess
 import platform
 import yaml
+import json
 from jinja2 import Environment, DictLoader
 
 MOOSE_DIR = os.environ.get('MOOSE_DIR',
@@ -73,6 +74,10 @@ def parse_args(args):
                         'then exit')
     parser.add_argument('-t', '--tag', action='store_true', default=False,
                         help='Mimic Conda and print a <VERSION>_<BUILD> string')
+    parser.add_argument('--json', action='store_true', default=False,
+                        help='Output in JSON format')
+    parser.add_argument('--yaml', action='store_true', default=False,
+                        help='Output in YAML format')
     parser.add_argument('-d', '--dependencies', action='store_true', default=False,
                         help='List dependencies for said library in oras format')
 
@@ -83,6 +88,9 @@ def parse_args(args):
             _supply_default = True
             sys.argv[1] = 'moose'
     args = parser.parse_args()
+    if args.json and args.yaml:
+        print('cannot output both json and yaml simultaneously')
+        sys.exit(1)
     if _supply_default and not args.quiet:
         print('Untracked library, using "moose" as your dependency')
     return args
@@ -141,22 +149,26 @@ def parse_meta(args):
     for group_entity in ENTITIES:
         if group_entity in _dtmp['packages']:
             _meta[group_entity] = _meta.get('group_entity', {'TAG'         : [],
+                                                             'VERSION'     : [],
+                                                             'BUILD'       : [],
                                                              'INFLUENTIAL' : [],
                                                              'HASH'        : []})
             _hash_list = []
             _tag = _meta[group_entity]['TAG']
+            _build = _meta[group_entity]['BUILD']
+            _version = _meta[group_entity]['VERSION']
             _influential = _meta[group_entity]['INFLUENTIAL']
             _hash = _meta[group_entity]['HASH']
             for entity in _dtmp['packages'][group_entity]:
                 if entity.find('meta.yaml') != -1:
                     _tag.append(get_tag(args, entity))
+                    _version.append(_tag[-1:][0].split('_')[0])
+                    _build.append('_'.join(_tag[-1:][0].split('_')[1:]))
                 _influential.append(entity)
                 _hash_list.append(git_hash(args, entity))
             _hash.append(get_hash(_hash_list))
     return _meta
 
-# Disable pylint to support supplemental feature not generally used
-# pylint: disable=import-outside-toplevel
 def get_tag(args, meta_yaml):
     """ read conda-build jinja2 styled template, and return a version_build string """
     out = read_yamlfile(args, meta_yaml)
@@ -169,9 +181,11 @@ def get_hash(hash_list):
 def print_output(args, meta):
     """ format and print the output based on supplied arguments """
     formated = []
+    jq_formated = {}
     if args.influential:
         for zip_key in ENTITIES:
             formated.extend(meta[zip_key]['INFLUENTIAL'])
+            jq_formated[zip_key] = meta[zip_key]['INFLUENTIAL']
             if zip_key == args.library:
                 break
     elif args.dependencies:
@@ -179,18 +193,33 @@ def print_output(args, meta):
             if zip_key == args.library:
                 break
             if args.tag:
-                formated.append(f'{zip_key}-{meta[zip_key]["TAG"][0]}')
+                tag = meta[zip_key]['TAG'][0]
+                formated.append(f'{zip_key}-{tag}')
+                jq_formated[args.library] = jq_formated.get(args.library, [])
+                jq_formated[args.library].append(f'{zip_key}-{tag}')
             else:
-                formated.append(f'moose-{zip_key}/{zip_key}-'
-                                f'{platform.machine()}:{meta[zip_key]["HASH"][0]}')
+                uri = f'moose-{zip_key}/{zip_key}-{platform.machine()}:{meta[zip_key]["HASH"][0]}'
+                formated.append(uri)
+                jq_formated[args.library] = jq_formated.get(args.library, [])
+                jq_formated[args.library].append(uri)
         formated.reverse()
+        jq_formated[args.library].reverse()
     elif args.tag and args.library in ENTITIES:
         formated.append(f'{args.library}-{meta[args.library]["TAG"][0]}')
+        jq_formated[args.library] = {}
+        for _meta_item in ['TAG', 'VERSION', 'BUILD']:
+            jq_formated[args.library][_meta_item] = meta[args.library][_meta_item][0]
     else:
-        formated.append(meta[args.library]["HASH"][0])
-
+        _hash = meta[args.library]['HASH'][0]
+        formated.append(_hash)
+        jq_formated[args.library] = {'HASH' : _hash }
     if formated:
-        print('\n'.join(formated))
+        if args.json:
+            print(json.dumps(jq_formated))
+        elif args.yaml:
+            print(yaml.dump(jq_formated))
+        else:
+            print('\n'.join(formated))
 
 def main():
     """ print hash for supplied library """
