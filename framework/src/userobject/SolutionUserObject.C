@@ -271,35 +271,35 @@ SolutionUserObject::readExodusII()
       if (std::find(all_elemental.begin(), all_elemental.end(), var_name) != all_elemental.end())
         _elemental_variables.push_back(var_name);
       if (std::find(all_scalar.begin(), all_scalar.end(), var_name) != all_scalar.end())
-        _scalar_variables.push_back(var_name);
+        // Check if the scalar matches any field variables, and ignore the var if it does. This
+        // means its a Postprocessor.
+        if (std::find(begin(_nodal_variables), end(_nodal_variables), var_name) ==
+            _nodal_variables.end())
+          _scalar_variables.push_back(var_name);
     }
   }
   else
   {
     _nodal_variables = all_nodal;
     _elemental_variables = all_elemental;
-    _scalar_variables = all_scalar;
+
+    for (std::string var_name : all_scalar)
+      // Check if the scalar matches any field variables, and ignore the var if it does. This means
+      // its a Postprocessor.
+      if (std::find(begin(_nodal_variables), end(_nodal_variables), var_name) ==
+          _nodal_variables.end())
+        _scalar_variables.push_back(var_name);
   }
 
   // Add the variables to the system
-  for (const auto & var_name : _nodal_variables)
+  for (const std::string & var_name : _nodal_variables)
     _system->add_variable(var_name, FIRST);
 
-  for (const auto & var_name : _elemental_variables)
+  for (const std::string & var_name : _elemental_variables)
     _system->add_variable(var_name, CONSTANT, MONOMIAL);
 
-  // Handle scalars
-  if (_scalar_variables.size() > 0)
-  {
-    // Iterate over the scalar variables. If we find one matching a nodal variable name, we ignore
-    // it, as this value is a postprocessor outputted to the global variables, not a scalar
-    // variable.
-    for (const std::string & var : _scalar_variables)
-      if (!std::any_of(_nodal_variables.begin(),
-                       _nodal_variables.end(),
-                       [var](std::string y) { return var == y; }))
-        _system->add_variable(var, FIRST, SCALAR);
-  }
+  for (const std::string & var_name : _scalar_variables)
+    _system->add_variable(var_name, FIRST, SCALAR);
 
   // Initialize the equations systems
   _es->init();
@@ -373,7 +373,7 @@ SolutionUserObject::readExodusII()
     for (const auto & var_name : _elemental_variables)
       _exodusII_io->copy_elemental_solution(*_system, var_name, var_name, _exodus_time_index);
 
-    if (_scalar_variables.size() > 0)
+    if (!_scalar_variables.empty())
       _exodusII_io->copy_scalar_solution(
           *_system, _scalar_variables, _scalar_variables, _exodus_time_index);
     // Update the equations systems

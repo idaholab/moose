@@ -19,7 +19,7 @@
   [../]
   [test_scalar]
     type = RunApp
-    cli_args = 'UserObjects/soln/system_variables=""'
+    cli_args = 'UserObjects/soln/mesh=gold/testscalarrename.e UserObjects/soln/system_variables=""'
     input = 'discontinuous_value_solution_uo_p2.i'
     requirement = 'The system shall ignore postprocessor names that match field variable names when importing an exodus file.'
     issues = '#15992'
