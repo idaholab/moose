@@ -1,5 +1,0 @@
-# Function
-AXIS X
-4 5
-DATA
-1 10

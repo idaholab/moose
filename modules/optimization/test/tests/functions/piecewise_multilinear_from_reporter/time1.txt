@@ -1,5 +1,0 @@
-# Function is independent of space - it just increases linearly with time
-AXIS T
-0 1
-DATA
-0 1
