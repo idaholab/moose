@@ -519,7 +519,7 @@ def getLibtorchVersion(moose_dir):
     return major_version.pop() + '.' + minor_version.pop()
 
 def checkLogicVersionSingle(checks, iversion, package):
-    logic, version = re.search(r'(.*?)(\d\S+)', iversion).groups()
+    logic, version = re.search(r'(.*?)\s*(\d\S+)', iversion).groups()
     if logic == '' or logic == '=':
         if version == checks[package]:
             return True
