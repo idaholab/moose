@@ -5526,8 +5526,8 @@ TEST_F(GeochemicalSystemTest, updateOldWithCurrent)
   }
 }
 
-/// check setKineticRates exceptions
-TEST_F(GeochemicalSystemTest, setKineticRatesExcept)
+/// check addKineticRates exceptions
+TEST_F(GeochemicalSystemTest, addKineticRatesExcept)
 {
   GeochemicalSystem nonconst = _egs_kinetic_calcite;
   DenseVector<Real> mole_additions(5);
@@ -5535,46 +5535,46 @@ TEST_F(GeochemicalSystemTest, setKineticRatesExcept)
   try
   {
     DenseVector<Real> bad(4);
-    nonconst.setKineticRates(1.0, bad, dmole_additions);
+    nonconst.addKineticRates(1.0, bad, dmole_additions);
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    ASSERT_TRUE(msg.find("setKineticRates: incorrectly sized additions: 4 5 5") !=
+    ASSERT_TRUE(msg.find("addKineticRates: incorrectly sized additions: 4 5 5") !=
                 std::string::npos)
         << "Failed with unexpected error message: " << msg;
   }
   try
   {
     DenseMatrix<Real> bad(4, 5);
-    nonconst.setKineticRates(1.0, mole_additions, bad);
+    nonconst.addKineticRates(1.0, mole_additions, bad);
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    ASSERT_TRUE(msg.find("setKineticRates: incorrectly sized additions: 5 4 5") !=
+    ASSERT_TRUE(msg.find("addKineticRates: incorrectly sized additions: 5 4 5") !=
                 std::string::npos)
         << "Failed with unexpected error message: " << msg;
   }
   try
   {
     DenseMatrix<Real> bad(5, 4);
-    nonconst.setKineticRates(1.0, mole_additions, bad);
+    nonconst.addKineticRates(1.0, mole_additions, bad);
     FAIL() << "Missing expected exception.";
   }
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    ASSERT_TRUE(msg.find("setKineticRates: incorrectly sized additions: 5 5 4") !=
+    ASSERT_TRUE(msg.find("addKineticRates: incorrectly sized additions: 5 5 4") !=
                 std::string::npos)
         << "Failed with unexpected error message: " << msg;
   }
 }
 
-/// check setKineticRates: note that this checks rates and derivatives are produced, while GeochemicalKineticRateCalculatorTest tests that the rates and derivatives are numerically correct
-TEST_F(GeochemicalSystemTest, setKineticRates)
+/// check addKineticRates: note that this checks rates and derivatives are produced, while GeochemicalKineticRateCalculatorTest tests that the rates and derivatives are numerically correct
+TEST_F(GeochemicalSystemTest, addKineticRates)
 {
   PertinentGeochemicalSystem mod(_db_calcite,
                                  {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++"},
@@ -5585,10 +5585,46 @@ TEST_F(GeochemicalSystemTest, setKineticRates)
                                  {},
                                  "O2(aq)",
                                  "e-");
-  KineticRateUserDescription rate_ch4(
-      "CH4(aq)", 1.5, 2.0, true, {"OH-", "CaCO3"}, {3.0, 3.1}, 0.8, 2.5, 66.0, 0.003);
-  KineticRateUserDescription rate_cal(
-      "Calcite", 7.0, 6.0, false, {"H+"}, {-3.0}, 2.5, 0.8, 55.0, 0.00315);
+  KineticRateUserDescription rate_ch4("CH4(aq)",
+                                      1.5,
+                                      2.0,
+                                      true,
+                                      1.5,
+                                      0.5,
+                                      0.1,
+                                      {"H+", "HCO3-"},
+                                      {1.3, 1.2},
+                                      {0.3, 0.2},
+                                      {0.1, 0.2},
+                                      0.8,
+                                      2.5,
+                                      66.0,
+                                      0.003,
+                                      DirectionChoiceEnum::BOTH,
+                                      "H2O",
+                                      0.0,
+                                      -1.0,
+                                      0.0);
+  KineticRateUserDescription rate_cal("Calcite",
+                                      7.0,
+                                      6.0,
+                                      false,
+                                      0.0,
+                                      0.0,
+                                      0.0,
+                                      {"H+"},
+                                      {-3.0},
+                                      {0.0},
+                                      {0.0},
+                                      2.5,
+                                      0.8,
+                                      55.0,
+                                      0.00315,
+                                      DirectionChoiceEnum::BOTH,
+                                      "H2O",
+                                      0.0,
+                                      -1.0,
+                                      0.0);
   const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
       GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
       GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
@@ -5625,7 +5661,7 @@ TEST_F(GeochemicalSystemTest, setKineticRates)
                         {1.1, 2.2},
                         ku);
 
-  egs.setKineticRates(1.0, mole_additions, dmole_additions);
+  egs.addKineticRates(1.0, mole_additions, dmole_additions);
   for (unsigned i = 0; i < 7; ++i)
   {
     EXPECT_EQ(mole_additions(i), 0.0);
@@ -5638,7 +5674,7 @@ TEST_F(GeochemicalSystemTest, setKineticRates)
   mgd_kin = mod.modelGeochemicalDatabase();
   egs.setModelGeochemicalDatabase(mgd_kin);
 
-  egs.setKineticRates(1.0, mole_additions, dmole_additions);
+  egs.addKineticRates(1.0, mole_additions, dmole_additions);
   for (unsigned i = 0; i < 6; ++i)
   {
     EXPECT_EQ(mole_additions(i), 0.0);
@@ -5654,7 +5690,9 @@ TEST_F(GeochemicalSystemTest, setKineticRates)
   mod.addKineticRate(rate_ch4);
   mgd_kin = mod.modelGeochemicalDatabase();
   egs.setModelGeochemicalDatabase(mgd_kin);
-  egs.setKineticRates(1.0, mole_additions, dmole_additions);
+  mole_additions.zero();
+  dmole_additions.zero();
+  egs.addKineticRates(1.0, mole_additions, dmole_additions);
   for (unsigned i = 0; i < 6; ++i)
   {
     EXPECT_EQ(mole_additions(i), 0.0);
@@ -5666,7 +5704,9 @@ TEST_F(GeochemicalSystemTest, setKineticRates)
     EXPECT_EQ(dmole_additions(6, j), 2 * ch4deriv[j]);
 
   // check timestep size is OK
-  egs.setKineticRates(0.5, mole_additions, dmole_additions);
+  mole_additions.zero();
+  dmole_additions.zero();
+  egs.addKineticRates(0.5, mole_additions, dmole_additions);
   for (unsigned i = 0; i < 6; ++i)
   {
     EXPECT_EQ(mole_additions(i), 0.0);
@@ -5681,7 +5721,9 @@ TEST_F(GeochemicalSystemTest, setKineticRates)
   mod.addKineticRate(rate_cal);
   mgd_kin = mod.modelGeochemicalDatabase();
   egs.setModelGeochemicalDatabase(mgd_kin);
-  egs.setKineticRates(0.5, mole_additions, dmole_additions);
+  mole_additions.zero();
+  dmole_additions.zero();
+  egs.addKineticRates(0.5, mole_additions, dmole_additions);
   for (unsigned i = 0; i < 5; ++i)
   {
     EXPECT_EQ(mole_additions(i), 0.0);
@@ -5708,7 +5750,9 @@ TEST_F(GeochemicalSystemTest, setKineticRates)
   mod.addKineticRate(rate_cal);
   mgd_kin = mod.modelGeochemicalDatabase();
   egs.setModelGeochemicalDatabase(mgd_kin);
-  egs.setKineticRates(1.0, mole_additions, dmole_additions);
+  mole_additions.zero();
+  dmole_additions.zero();
+  egs.addKineticRates(1.0, mole_additions, dmole_additions);
   for (unsigned i = 0; i < 5; ++i)
   {
     EXPECT_EQ(mole_additions(i), 0.0);
@@ -5722,6 +5766,371 @@ TEST_F(GeochemicalSystemTest, setKineticRates)
     EXPECT_EQ(dmole_additions(5, j), 8 * calcitederiv[j]);
     EXPECT_EQ(dmole_additions(6, j), 2 * ch4deriv[j]);
   }
+}
+
+/// check addKineticRates with kinetic_bio_efficiency
+TEST_F(GeochemicalSystemTest, addKineticRates_bio_eff)
+{
+  PertinentGeochemicalSystem mod(_db_calcite,
+                                 {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++"},
+                                 {},
+                                 {},
+                                 {"Calcite"},
+                                 {"CH4(aq)"},
+                                 {},
+                                 "O2(aq)",
+                                 "e-");
+  KineticRateUserDescription rate_ch4("CH4(aq)",
+                                      1.5,
+                                      2.0,
+                                      true,
+                                      1.5,
+                                      0.5,
+                                      0.1,
+                                      {"H+", "HCO3-"},
+                                      {1.3, 1.2},
+                                      {0.3, 0.2},
+                                      {0.1, 0.2},
+                                      0.8,
+                                      2.5,
+                                      66.0,
+                                      0.003,
+                                      DirectionChoiceEnum::BOTH,
+                                      "H2O",
+                                      0.0,
+                                      -1.0,
+                                      1.0);
+  KineticRateUserDescription rate_ch4_bio("CH4(aq)",
+                                          1.5,
+                                          2.0,
+                                          true,
+                                          1.5,
+                                          0.5,
+                                          0.1,
+                                          {"H+", "HCO3-"},
+                                          {1.3, 1.2},
+                                          {0.3, 0.2},
+                                          {0.1, 0.2},
+                                          0.8,
+                                          2.5,
+                                          66.0,
+                                          0.003,
+                                          DirectionChoiceEnum::BOTH,
+                                          "H2O",
+                                          0.0,
+                                          4.0,
+                                          1.0);
+  KineticRateUserDescription rate_ch4_death("CH4(aq)",
+                                            1.5,
+                                            2.0,
+                                            true,
+                                            1.5,
+                                            0.5,
+                                            0.1,
+                                            {"H+", "HCO3-"},
+                                            {1.3, 1.2},
+                                            {0.3, 0.2},
+                                            {0.1, 0.2},
+                                            0.8,
+                                            2.5,
+                                            66.0,
+                                            0.003,
+                                            DirectionChoiceEnum::DEATH,
+                                            "H2O",
+                                            0.0,
+                                            7.0,
+                                            1.0);
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> ku;
+  ku.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  ku.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  DenseVector<Real> mole_additions(7);
+  DenseMatrix<Real> dmole_additions(7, 7);
+  ModelGeochemicalDatabase mgd_kin = mod.modelGeochemicalDatabase();
+  GeochemicalSystem egs(mgd_kin,
+                        _ac3,
+                        _is3,
+                        _swapper5,
+                        {},
+                        {},
+                        "H+",
+                        {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++"},
+                        {1.75, 3.0, 2.0, 1.0, 1.5},
+                        cu,
+                        cm,
+                        25,
+                        0,
+                        1E-20,
+                        {"Calcite", "CH4(aq)"},
+                        {1.1, 2.2},
+                        ku);
+
+  egs.addKineticRates(1.0, mole_additions, dmole_additions);
+  for (unsigned i = 0; i < 7; ++i)
+  {
+    EXPECT_EQ(mole_additions(i), 0.0);
+    for (unsigned j = 0; j < 7; ++j)
+      EXPECT_EQ(dmole_additions(i, j), 0.0);
+  }
+
+  // add a rate and re-construct the geochemical system
+  mod.addKineticRate(rate_ch4); // this adds to mole_additions(6) (the CH4(aq))
+  mgd_kin = mod.modelGeochemicalDatabase();
+  egs.setModelGeochemicalDatabase(mgd_kin);
+
+  // capture the rate of CH4 with kinetic_bio_efficiency = -1.  This is assumed to be correct
+  egs.addKineticRates(2.0, mole_additions, dmole_additions);
+  for (unsigned i = 0; i < 6; ++i)
+  {
+    EXPECT_EQ(mole_additions(i), 0.0);
+    for (unsigned j = 0; j < 7; ++j)
+      EXPECT_EQ(dmole_additions(i, j), 0.0);
+  }
+  const Real rate_dt = -mole_additions(6);
+  const Real drate_dkin_dt = -dmole_additions(6, 6);
+  std::vector<Real> drate_dmol_dt(6);
+  for (unsigned j = 0; j < 6; ++j)
+    drate_dmol_dt[j] = -dmole_additions(6, j);
+
+  // add a rate that is identical except it has kinetic_bio_efficiency = 4, and re-construct the
+  // geochemical system
+  mod.addKineticRate(rate_ch4_bio);
+  mgd_kin = mod.modelGeochemicalDatabase();
+  egs.setModelGeochemicalDatabase(mgd_kin);
+  mole_additions.zero();
+  dmole_additions.zero();
+  egs.addKineticRates(2.0, mole_additions, dmole_additions);
+  // CH4(aq) = 1*H2O + 1*H+ + 1*HCO3- + -2*O2(aq)
+  const std::vector<Real> stoi = {1, 1, 1, -2, 0, 0};
+  for (unsigned i = 0; i < 6; ++i)
+  {
+    EXPECT_NEAR(mole_additions(i), stoi[i] * (4 + 1) * rate_dt, 1E-8);
+    EXPECT_NEAR(dmole_additions(i, 6), stoi[i] * (4 + 1) * drate_dkin_dt, 1E-8);
+    for (unsigned j = 0; j < 6; ++j)
+      EXPECT_NEAR(dmole_additions(i, j), stoi[i] * (4 + 1) * drate_dmol_dt[j], 1E-8);
+  }
+  EXPECT_NEAR(mole_additions(6), (4 - 1) * rate_dt, 1E-8);
+  EXPECT_NEAR(dmole_additions(6, 6), (4 - 1) * drate_dkin_dt, 1E-8);
+  for (unsigned j = 0; j < 6; ++j)
+    EXPECT_NEAR(dmole_additions(6, j), (4 - 1) * drate_dmol_dt[j], 1E-8);
+
+  // add a rate that is identical except it has kinetic_bio_efficiency = 7 and direction = DEATH,
+  // and re-construct the geochemical system
+  mod.addKineticRate(rate_ch4_death);
+  mgd_kin = mod.modelGeochemicalDatabase();
+  egs.setModelGeochemicalDatabase(mgd_kin);
+  mole_additions.zero();
+  dmole_additions.zero();
+  egs.addKineticRates(2.0, mole_additions, dmole_additions);
+  for (unsigned i = 0; i < 6; ++i)
+  {
+    EXPECT_NEAR(mole_additions(i), stoi[i] * (7 + 4 + 1) * rate_dt, 1E-8);
+    EXPECT_NEAR(dmole_additions(i, 6), stoi[i] * (7 + 4 + 1) * drate_dkin_dt, 1E-8);
+    for (unsigned j = 0; j < 6; ++j)
+      EXPECT_NEAR(dmole_additions(i, j), stoi[i] * (7 + 4 + 1) * drate_dmol_dt[j], 1E-8);
+  }
+  EXPECT_NEAR(mole_additions(6), (7 + 4 - 1) * rate_dt, 1E-8);
+  EXPECT_NEAR(dmole_additions(6, 6), (7 + 4 - 1) * drate_dkin_dt, 1E-8);
+  for (unsigned j = 0; j < 6; ++j)
+    EXPECT_NEAR(dmole_additions(6, j), (7 + 4 - 1) * drate_dmol_dt[j], 1E-8);
+}
+
+/// check addKineticRates with progeny
+TEST_F(GeochemicalSystemTest, addKineticRates_progeny)
+{
+  PertinentGeochemicalSystem mod(_db_calcite,
+                                 {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++"},
+                                 {},
+                                 {},
+                                 {"Calcite"},
+                                 {"CH4(aq)"},
+                                 {},
+                                 "O2(aq)",
+                                 "e-");
+  KineticRateUserDescription rate_ch4("CH4(aq)",
+                                      1.5,
+                                      2.0,
+                                      true,
+                                      1.5,
+                                      0.5,
+                                      0.1,
+                                      {"H+", "HCO3-"},
+                                      {1.3, 1.2},
+                                      {0.3, 0.2},
+                                      {0.1, 0.2},
+                                      0.8,
+                                      2.5,
+                                      66.0,
+                                      0.003,
+                                      DirectionChoiceEnum::BOTH,
+                                      "H2O",
+                                      0.0,
+                                      -1.0,
+                                      0.0);
+  KineticRateUserDescription rate_ch4_progH("CH4(aq)",
+                                            1.5,
+                                            2.0,
+                                            true,
+                                            1.5,
+                                            0.5,
+                                            0.1,
+                                            {"H+", "HCO3-"},
+                                            {1.3, 1.2},
+                                            {0.3, 0.2},
+                                            {0.1, 0.2},
+                                            0.8,
+                                            2.5,
+                                            66.0,
+                                            0.003,
+                                            DirectionChoiceEnum::BOTH,
+                                            "H+",
+                                            2.0,
+                                            -1.0,
+                                            1.0);
+  KineticRateUserDescription rate_ch4_progOH("CH4(aq)",
+                                             1.5,
+                                             2.0,
+                                             true,
+                                             1.5,
+                                             0.5,
+                                             0.1,
+                                             {"H+", "HCO3-"},
+                                             {1.3, 1.2},
+                                             {0.3, 0.2},
+                                             {0.1, 0.2},
+                                             0.8,
+                                             2.5,
+                                             66.0,
+                                             0.003,
+                                             DirectionChoiceEnum::BOTH,
+                                             "OH-",
+                                             22.0,
+                                             -1.0,
+                                             1.0);
+  const std::vector<GeochemicalSystem::ConstraintUserMeaningEnum> cm = {
+      GeochemicalSystem::ConstraintUserMeaningEnum::KG_SOLVENT_WATER,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION,
+      GeochemicalSystem::ConstraintUserMeaningEnum::BULK_COMPOSITION};
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> cu;
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::KG);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  cu.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  std::vector<GeochemistryUnitConverter::GeochemistryUnit> ku;
+  ku.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  ku.push_back(GeochemistryUnitConverter::GeochemistryUnit::MOLES);
+  DenseVector<Real> mole_additions(7);
+  DenseMatrix<Real> dmole_additions(7, 7);
+  ModelGeochemicalDatabase mgd_kin = mod.modelGeochemicalDatabase();
+  GeochemicalSystem egs(mgd_kin,
+                        _ac3,
+                        _is3,
+                        _swapper5,
+                        {},
+                        {},
+                        "H+",
+                        {"H2O", "H+", "HCO3-", "O2(aq)", "Ca++"},
+                        {1.75, 3.0, 2.0, 1.0, 1.5},
+                        cu,
+                        cm,
+                        25,
+                        0,
+                        1E-20,
+                        {"Calcite", "CH4(aq)"},
+                        {1.1, 2.2},
+                        ku);
+
+  egs.addKineticRates(1.0, mole_additions, dmole_additions);
+  for (unsigned i = 0; i < 7; ++i)
+  {
+    EXPECT_EQ(mole_additions(i), 0.0);
+    for (unsigned j = 0; j < 7; ++j)
+      EXPECT_EQ(dmole_additions(i, j), 0.0);
+  }
+
+  // add a rate and re-construct the geochemical system
+  mod.addKineticRate(rate_ch4); // this adds to mole_additions(6) (the CH4(aq))
+  mgd_kin = mod.modelGeochemicalDatabase();
+  egs.setModelGeochemicalDatabase(mgd_kin);
+
+  // capture the rate of CH4 and the derivatives.  These are assumed to be correct
+  egs.addKineticRates(2.0, mole_additions, dmole_additions);
+  for (unsigned i = 0; i < 6; ++i)
+  {
+    EXPECT_EQ(mole_additions(i), 0.0);
+    for (unsigned j = 0; j < 7; ++j)
+      EXPECT_EQ(dmole_additions(i, j), 0.0);
+  }
+  const Real rate_dt = -mole_additions(6);
+  const Real drate_dkin_dt = -dmole_additions(6, 6);
+  std::vector<Real> drate_dmol_dt(6);
+  for (unsigned j = 0; j < 6; ++j)
+    drate_dmol_dt[j] = -dmole_additions(6, j);
+
+  // add a rate and re-construct the geochemical system
+  mod.addKineticRate(rate_ch4_progH); // this adds 2 moles of H as 1 mole of CH4(aq) dissolves
+  mgd_kin = mod.modelGeochemicalDatabase();
+  egs.setModelGeochemicalDatabase(mgd_kin);
+  mole_additions.zero();
+  dmole_additions.zero();
+  egs.addKineticRates(2.0, mole_additions, dmole_additions);
+  EXPECT_NEAR(mole_additions(1), 2 * rate_dt, 1E-8);
+  for (unsigned j = 0; j < 6; ++j)
+    EXPECT_NEAR(dmole_additions(1, j), 2 * drate_dmol_dt[j], 1E-8);
+  EXPECT_NEAR(dmole_additions(1, 6), 2 * drate_dkin_dt, 1E-8);
+  for (unsigned i = 0; i < 6; ++i)
+  {
+    if (i == 1)
+      continue;
+    EXPECT_EQ(mole_additions(i), 0);
+    for (unsigned j = 0; j < 6; ++j)
+      EXPECT_EQ(dmole_additions(i, j), 0);
+  }
+  EXPECT_NEAR(mole_additions(6), -2 * rate_dt, 1E-8);
+  EXPECT_NEAR(dmole_additions(6, 6), -2 * drate_dkin_dt, 1E-8);
+  for (unsigned j = 0; j < 6; ++j)
+    EXPECT_NEAR(dmole_additions(6, j), -2 * drate_dmol_dt[j], 1E-8);
+
+  // add a rate and re-construct the geochemical system
+  mod.addKineticRate(rate_ch4_progOH); // this adds 22 moles of OH-, which is 22 moles of H2O - 22
+                                       // moles of H+, as 1 mole of CH4(aq) dissolves
+  mgd_kin = mod.modelGeochemicalDatabase();
+  egs.setModelGeochemicalDatabase(mgd_kin);
+  mole_additions.zero();
+  dmole_additions.zero();
+  egs.addKineticRates(2.0, mole_additions, dmole_additions);
+  EXPECT_NEAR(mole_additions(0), 22 * rate_dt, 1E-8);
+  for (unsigned j = 0; j < 6; ++j)
+    EXPECT_NEAR(dmole_additions(0, j), 22 * drate_dmol_dt[j], 1E-8);
+  EXPECT_NEAR(dmole_additions(0, 6), 22 * drate_dkin_dt, 1E-8);
+  EXPECT_NEAR(mole_additions(1), (-22 + 2) * rate_dt, 1E-8);
+  for (unsigned j = 0; j < 6; ++j)
+    EXPECT_NEAR(dmole_additions(1, j), (-22 + 2) * drate_dmol_dt[j], 1E-8);
+  EXPECT_NEAR(dmole_additions(1, 6), (-22 + 2) * drate_dkin_dt, 1E-8);
+  for (unsigned i = 2; i < 6; ++i)
+  {
+    EXPECT_EQ(mole_additions(i), 0);
+    for (unsigned j = 0; j < 6; ++j)
+      EXPECT_EQ(dmole_additions(i, j), 0);
+  }
+  EXPECT_NEAR(mole_additions(6), -3 * rate_dt, 1E-8);
+  EXPECT_NEAR(dmole_additions(6, 6), -3 * drate_dkin_dt, 1E-8);
+  for (unsigned j = 0; j < 6; ++j)
+    EXPECT_NEAR(dmole_additions(6, j), -3 * drate_dmol_dt[j], 1E-8);
 }
 
 /// Check getBulkOldInOriginalBasis

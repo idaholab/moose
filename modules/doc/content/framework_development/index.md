@@ -42,6 +42,10 @@ For development of MOOSE-based applications see [Application Development](applic
 
 [Test Timing](http://mooseframework.org/docs/timing/)
 
+## Software Quality Assurance Documents
+
+[sqa/index.md exact=True] - Landing page for the MOOSE (and MOOSE Modules) software quality assurance (SQA) pages
+
 ## Utilities
 
 [/PerfGraph.md] - How to time sections of code in MOOSE

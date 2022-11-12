@@ -175,6 +175,9 @@ ContactAction::validParams()
   params.addCoupledVar("wear_depth",
                        "The name of the mortar auxiliary variable that is used to modify the "
                        "weighted gap definition");
+  params.addParam<std::vector<TagName>>(
+      "extra_vector_tags",
+      "The tag names for extra vectors that residual data should be saved into");
   return params;
 }
 
@@ -603,6 +606,9 @@ ContactAction::addMortarContact()
         params.set<std::vector<VariableName>>("disp_z") = {displacements[2]};
 
       params.set<bool>("use_displaced_mesh") = true;
+      if (isParamValid("extra_vector_tags"))
+        params.set<std::vector<TagName>>("extra_vector_tags") =
+            getParam<std::vector<TagName>>("extra_vector_tags");
 
       _problem->addConstraint(
           mortar_constraint_name, action_name + "_normal_lm_weighted_gap", params);
@@ -656,6 +662,9 @@ ContactAction::addMortarContact()
             tangential_lagrange_multiplier_3d_name};
 
       params.set<Real>("mu") = getParam<Real>("friction_coefficient");
+      if (isParamValid("extra_vector_tags"))
+        params.set<std::vector<TagName>>("extra_vector_tags") =
+            getParam<std::vector<TagName>>("extra_vector_tags");
 
       _problem->addConstraint(mortar_constraint_name, action_name + "_tangential_lm", params);
       _problem->haveADObjects(true);
@@ -684,6 +693,9 @@ ContactAction::addMortarContact()
       // The second frictional LM acts on a perpendicular direction.
       if (is_additional_frictional_constraint)
         params.set<MooseEnum>("direction") = "direction_2";
+      if (isParamValid("extra_vector_tags"))
+        params.set<std::vector<TagName>>("extra_vector_tags") =
+            getParam<std::vector<TagName>>("extra_vector_tags");
 
       for (unsigned int i = 0; i < displacements.size(); ++i)
       {
@@ -779,6 +791,9 @@ ContactAction::addNodeFaceContact()
       params.set<BoundaryName>("secondary") = contact_pair.second;
       params.set<NonlinearVariableName>("variable") = displacements[i];
       params.set<std::vector<VariableName>>("primary_variable") = {displacements[i]};
+      if (isParamValid("extra_vector_tags"))
+        params.set<std::vector<TagName>>("extra_vector_tags") =
+            getParam<std::vector<TagName>>("extra_vector_tags");
       _problem->addConstraint(constraint_type, name, params);
     }
   }

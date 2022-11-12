@@ -29,12 +29,14 @@ ModularGapConductanceConstraint::validParams()
                                                "List of GapFluxModel user objects");
   params.addCoupledVar("displacements", "Displacement variables");
 
-  MooseEnum gap_geometry_type("PLATE CYLINDER SPHERE", "PLATE");
-  params.addParam<MooseEnum>("gap_geometry_type",
-                             gap_geometry_type,
-                             "Gap calculation type. The geometry type is used to compute "
-                             "gap distances and scale fluxes to ensure energy balance.");
-  params.addRangeCheckedParam<Real>("max_gap", 1e6, "max_gap>=0", "A maximum gap size");
+  MooseEnum gap_geometry_type("AUTO PLATE CYLINDER SPHERE", "AUTO");
+  params.addParam<MooseEnum>(
+      "gap_geometry_type",
+      gap_geometry_type,
+      "Gap calculation type. The geometry type is used to compute "
+      "gap distances and scale fluxes to ensure energy balance. If AUTO is selected, the gap "
+      "geometry is automatically set via the mesh coordinate system.");
+  params.addRangeCheckedParam<Real>("max_gap", 1.0e6, "max_gap>=0", "A maximum gap size");
   params.addParam<RealVectorValue>("cylinder_axis_point_1",
                                    "Start point for line defining cylindrical axis");
   params.addParam<RealVectorValue>("cylinder_axis_point_2",
@@ -56,8 +58,8 @@ ModularGapConductanceConstraint::ModularGapConductanceConstraint(const InputPara
     _n_disp(_disp_name.size()),
     _disp_secondary(_n_disp),
     _disp_primary(_n_disp),
-    _gap_width(0.0),
     _gap_geometry_type(getParam<MooseEnum>("gap_geometry_type").getEnum<GapGeometry>()),
+    _gap_width(0.0),
     _surface_integration_factor(1.0),
     _p1(declareRestartableData<Point>("cylinder_axis_point_1", Point(0, 1, 0))),
     _p2(declareRestartableData<Point>("cylinder_axis_point_2", Point(0, 0, 0))),
@@ -150,9 +152,7 @@ ModularGapConductanceConstraint::setGapGeometryParameters(
 
   // Determine what type of gap geometry we are dealing with
   // Either user input or from system's coordinate systems
-  if (params.isParamSetByUser("gap_geometry_type"))
-    gap_geometry_type = getParam<MooseEnum>("gap_geometry_type").getEnum<GapGeometry>();
-  else
+  if (gap_geometry_type == GapGeometry::AUTO)
   {
     if (coord_sys == Moose::COORD_XYZ)
       gap_geometry_type = GapGeometry::PLATE;
@@ -160,6 +160,8 @@ ModularGapConductanceConstraint::setGapGeometryParameters(
       gap_geometry_type = GapGeometry::CYLINDER;
     else if (coord_sys == Moose::COORD_RSPHERICAL)
       gap_geometry_type = GapGeometry::SPHERE;
+    else
+      mooseError("Internal Error");
   }
 
   if (params.isParamValid("cylinder_axis_point_1") != params.isParamValid("cylinder_axis_point_2"))

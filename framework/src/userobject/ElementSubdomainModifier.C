@@ -30,6 +30,10 @@ ElementSubdomainModifier::validParams()
       "moving_boundary_name",
       "Boundary to modify when an element is moved. A boundary with the provided name will be "
       "created if not already exists on the mesh.");
+  params.addParam<BoundaryName>("complement_moving_boundary_name",
+                                "Boundary that associated with the unmoved domain when neighbor "
+                                "element(s) is moved. A boundary with the provided name will be "
+                                "created if not already exists on the mesh.");
   params.set<bool>("use_displaced_mesh") = false;
   params.suppressParameter<bool>("use_displaced_mesh");
   return params;
@@ -39,7 +43,8 @@ ElementSubdomainModifier::ElementSubdomainModifier(const InputParameters & param
   : ElementUserObject(parameters),
     _displaced_problem(_fe_problem.getDisplacedProblem().get()),
     _apply_ic(getParam<bool>("apply_initial_conditions")),
-    _moving_boundary_specified(isParamValid("moving_boundary_name"))
+    _moving_boundary_specified(isParamValid("moving_boundary_name")),
+    _complement_moving_boundary_specified(isParamValid("complement_moving_boundary_name"))
 {
 }
 
@@ -53,6 +58,14 @@ ElementSubdomainModifier::initialSetup()
     if (_displaced_problem)
       setMovingBoundaryName(_displaced_problem->mesh());
   }
+
+  if (_complement_moving_boundary_specified)
+  {
+    _complement_moving_boundary_name = getParam<BoundaryName>("complement_moving_boundary_name");
+    setComplementMovingBoundaryName(_mesh);
+    if (_displaced_problem)
+      setComplementMovingBoundaryName(_displaced_problem->mesh());
+  }
 }
 
 void
@@ -65,6 +78,21 @@ ElementSubdomainModifier::setMovingBoundaryName(MooseMesh & mesh)
   mesh.setBoundaryName(_moving_boundary_id, _moving_boundary_name);
   mesh.getMesh().get_boundary_info().sideset_name(_moving_boundary_id) = _moving_boundary_name;
   mesh.getMesh().get_boundary_info().nodeset_name(_moving_boundary_id) = _moving_boundary_name;
+}
+
+void
+ElementSubdomainModifier::setComplementMovingBoundaryName(MooseMesh & mesh)
+{
+  // We only need one boundary to modify. Create a dummy vector just to use the API.
+  const std::vector<BoundaryID> boundary_ids =
+      mesh.getBoundaryIDs({{_complement_moving_boundary_name}}, true);
+  mooseAssert(boundary_ids.size() == 1, "Expect exactly one boundary ID.");
+  _complement_moving_boundary_id = boundary_ids[0];
+  mesh.setBoundaryName(_complement_moving_boundary_id, _complement_moving_boundary_name);
+  mesh.getMesh().get_boundary_info().sideset_name(_complement_moving_boundary_id) =
+      _complement_moving_boundary_name;
+  mesh.getMesh().get_boundary_info().nodeset_name(_complement_moving_boundary_id) =
+      _complement_moving_boundary_name;
 }
 
 void
@@ -171,15 +199,14 @@ void
 ElementSubdomainModifier::updateBoundaryInfo(MooseMesh & mesh,
                                              const std::vector<const Elem *> & moved_elems)
 {
-  if (!_moving_boundary_specified)
+  if (!_moving_boundary_specified && !_complement_moving_boundary_specified)
     return;
 
   BoundaryInfo & bnd_info = mesh.getMesh().get_boundary_info();
 
-  // save the removed ghost sides and associated nodes to sync across processors
-  std::unordered_map<processor_id_type, std::vector<std::pair<dof_id_type, unsigned int>>>
-      ghost_sides_to_remove;
-  std::unordered_map<processor_id_type, std::vector<dof_id_type>> ghost_nodes_to_remove;
+  _ghost_sides_to_add.clear();
+  _ghost_sides_to_remove.clear();
+  _ghost_nodes_to_remove.clear();
 
   // The logic below updates the side set and the node set associated with the moving boundary.
   std::set<dof_id_type> added_nodes, removed_nodes;
@@ -189,21 +216,40 @@ ElementSubdomainModifier::updateBoundaryInfo(MooseMesh & mesh,
     for (auto side : elem->side_index_range())
     {
       const Elem * neighbor = elem->neighbor_ptr(side);
+      if (_complement_moving_boundary_specified)
+        bnd_info.remove_side(elem, side, _complement_moving_boundary_id);
       if (neighbor && neighbor != libMesh::remote_elem)
       {
         // If the neighbor has a different subdomain ID, then this side should be added to
         // the moving boundary
         if (neighbor->subdomain_id() != elem->subdomain_id())
-          bnd_info.add_side(elem, side, _moving_boundary_id);
+        {
+          if (_moving_boundary_specified)
+            bnd_info.add_side(elem, side, _moving_boundary_id);
+          if (_complement_moving_boundary_specified)
+          {
+            unsigned int neighbor_side = neighbor->which_neighbor_am_i(elem);
+            bnd_info.add_side(neighbor, neighbor_side, _complement_moving_boundary_id);
+            if (neighbor->processor_id() != this->processor_id())
+            {
+              _ghost_sides_to_add[neighbor->processor_id()].emplace_back(neighbor->id(),
+                                                                         neighbor_side);
+            }
+          }
+        }
         // Otherwise remove this side and the neighbor side from the boundary.
         else
         {
-          bnd_info.remove_side(elem, side);
-          unsigned int neighbor_side = neighbor->which_neighbor_am_i(elem);
-          bnd_info.remove_side(neighbor, neighbor_side);
-          if (neighbor->processor_id() != this->processor_id())
-            ghost_sides_to_remove[neighbor->processor_id()].emplace_back(neighbor->id(),
-                                                                         neighbor_side);
+          if (_moving_boundary_specified || _complement_moving_boundary_specified)
+          {
+            // this will destroy any overlapping third side sets!
+            bnd_info.remove_side(elem, side);
+            unsigned int neighbor_side = neighbor->which_neighbor_am_i(elem);
+            bnd_info.remove_side(neighbor, neighbor_side);
+            if (neighbor->processor_id() != this->processor_id())
+              _ghost_sides_to_remove[neighbor->processor_id()].emplace_back(neighbor->id(),
+                                                                            neighbor_side);
+          }
         }
       }
     }
@@ -226,13 +272,13 @@ ElementSubdomainModifier::updateBoundaryInfo(MooseMesh & mesh,
           {
             removed_nodes.insert(elem->node_id(node));
             if (neighbor->processor_id() != this->processor_id())
-              ghost_nodes_to_remove[neighbor->processor_id()].push_back(elem->node_id(node));
+              _ghost_nodes_to_remove[neighbor->processor_id()].push_back(elem->node_id(node));
           }
         }
     }
   }
 
-  // make sure to remove nodes that are not in the add set
+  // make sure to remove only nodes that are not in the add set
   std::set<dof_id_type> nodes_to_remove;
   std::set_difference(removed_nodes.begin(),
                       removed_nodes.end(),
@@ -240,59 +286,68 @@ ElementSubdomainModifier::updateBoundaryInfo(MooseMesh & mesh,
                       added_nodes.end(),
                       std::inserter(nodes_to_remove, nodes_to_remove.end()));
   for (auto node_id : nodes_to_remove)
-    mesh.getMesh().get_boundary_info().remove_node(mesh.nodePtr(node_id), _moving_boundary_id);
+  {
+    if (_moving_boundary_specified)
+      mesh.getMesh().get_boundary_info().remove_node(mesh.nodePtr(node_id), _moving_boundary_id);
+    if (_complement_moving_boundary_specified)
+      mesh.getMesh().get_boundary_info().remove_node(mesh.nodePtr(node_id),
+                                                     _complement_moving_boundary_id);
+  }
   // synchronize boundary information across processors
-  pushBoundarySideInfo(mesh, ghost_sides_to_remove);
-  pushBoundaryNodeInfo(mesh, ghost_nodes_to_remove);
+  pushBoundarySideInfo(mesh);
+  pushBoundaryNodeInfo(mesh);
   mesh.getMesh().get_boundary_info().parallel_sync_side_ids();
   mesh.getMesh().get_boundary_info().parallel_sync_node_ids();
   mesh.update();
 }
 
 void
-ElementSubdomainModifier::recordNodeIdsOnElemSide(const Elem * elem,
-                                                  const unsigned short int side,
-                                                  std::set<dof_id_type> & node_ids)
+ElementSubdomainModifier::pushBoundarySideInfo(MooseMesh & moose_mesh)
 {
-  for (unsigned int i = 0; i < elem->side_ptr(side)->n_nodes(); ++i)
-    node_ids.insert(elem->side_ptr(side)->node_id(i));
-}
-
-void
-ElementSubdomainModifier::pushBoundarySideInfo(
-    MooseMesh & mesh,
-    std::unordered_map<processor_id_type, std::vector<std::pair<dof_id_type, unsigned int>>> &
-        elems_to_push)
-{
-  auto elem_action_functor =
-      [&mesh, this](processor_id_type,
-                    const std::vector<std::pair<dof_id_type, unsigned int>> & received_elem)
+  auto & mesh = moose_mesh.getMesh();
+  auto elem_remove_functor =
+      [&mesh](processor_id_type,
+              const std::vector<std::pair<dof_id_type, unsigned short int>> & received_elem)
   {
     // remove the side
     for (const auto & pr : received_elem)
-      mesh.getMesh().get_boundary_info().remove_side(
-          mesh.getMesh().elem_ptr(pr.first), pr.second, _moving_boundary_id);
+      mesh.get_boundary_info().remove_side(mesh.elem_ptr(pr.first), pr.second);
+  };
+  auto elem_add_functor =
+      [&mesh, this](processor_id_type,
+                    const std::vector<std::pair<dof_id_type, unsigned short int>> & received_elem)
+  {
+    // add the side
+    for (const auto & pr : received_elem)
+      mesh.get_boundary_info().add_side(
+          mesh.elem_ptr(pr.first), pr.second, _complement_moving_boundary_id);
   };
 
   Parallel::push_parallel_vector_data(
-      mesh.getMesh().get_boundary_info().comm(), elems_to_push, elem_action_functor);
+      mesh.get_boundary_info().comm(), _ghost_sides_to_remove, elem_remove_functor);
+  if (_complement_moving_boundary_specified)
+    Parallel::push_parallel_vector_data(
+        mesh.get_boundary_info().comm(), _ghost_sides_to_add, elem_add_functor);
 }
 
 void
-ElementSubdomainModifier::pushBoundaryNodeInfo(
-    MooseMesh & mesh,
-    std::unordered_map<processor_id_type, std::vector<dof_id_type>> & nodes_to_push)
+ElementSubdomainModifier::pushBoundaryNodeInfo(MooseMesh & moose_mesh)
 {
-  auto node_action_functor =
+  auto & mesh = moose_mesh.getMesh();
+  auto node_remove_functor =
       [&mesh, this](processor_id_type, const std::vector<dof_id_type> & received_nodes)
   {
     for (const auto & pr : received_nodes)
-      mesh.getMesh().get_boundary_info().remove_node(mesh.getMesh().node_ptr(pr),
-                                                     _moving_boundary_id);
+    {
+      if (_moving_boundary_specified)
+        mesh.get_boundary_info().remove_node(mesh.node_ptr(pr), _moving_boundary_id);
+      if (_complement_moving_boundary_specified)
+        mesh.get_boundary_info().remove_node(mesh.node_ptr(pr), _complement_moving_boundary_id);
+    }
   };
 
   Parallel::push_parallel_vector_data(
-      mesh.getMesh().get_boundary_info().comm(), nodes_to_push, node_action_functor);
+      mesh.get_boundary_info().comm(), _ghost_nodes_to_remove, node_remove_functor);
 }
 
 void

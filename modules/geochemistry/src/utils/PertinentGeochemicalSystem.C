@@ -867,6 +867,8 @@ PertinentGeochemicalSystem::addKineticRate(const KineticRateUserDescription & de
   const unsigned num_basis = _model.basis_species_name.size();
   const unsigned num_eqm = _model.eqm_species_name.size();
   std::vector<Real> promoting_ind(num_basis + num_eqm, 0.0);
+  std::vector<Real> promoting_m_ind(num_basis + num_eqm, 0.0);
+  std::vector<Real> promoting_k(num_basis + num_eqm, 0.0);
   for (unsigned i = 0; i < num_pro; ++i)
   {
     unsigned index = 0;
@@ -879,9 +881,22 @@ PertinentGeochemicalSystem::addKineticRate(const KineticRateUserDescription & de
       mooseError(
           "Promoting species ", promoting_species, " must be a basis or a secondary species");
     promoting_ind[index] = description.promoting_indices[i];
+    promoting_m_ind[index] = description.promoting_monod_indices[i];
+    promoting_k[index] = description.promoting_half_saturation[i];
   }
+  unsigned progeny_num = 0;
+  if (_model.basis_species_index.count(description.progeny) == 1)
+    progeny_num = _model.basis_species_index.at(description.progeny);
+  else if (_model.eqm_species_index.count(description.progeny) == 1)
+    progeny_num = num_basis + _model.eqm_species_index.at(description.progeny);
+  else
+    mooseError("Progeny ", description.progeny, " must be a basis or a secondary species");
 
   // append the result to kin_rate
-  _model.kin_rate.push_back(
-      KineticRateDefinition(kinetic_species_index, promoting_ind, description));
+  _model.kin_rate.push_back(KineticRateDefinition(kinetic_species_index,
+                                                  promoting_ind,
+                                                  promoting_m_ind,
+                                                  promoting_k,
+                                                  progeny_num,
+                                                  description));
 }

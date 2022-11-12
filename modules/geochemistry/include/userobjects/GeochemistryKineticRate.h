@@ -30,5 +30,8 @@ public:
   const KineticRateUserDescription & getRateDescription() const;
 
 private:
+  const std::vector<std::string> _promoting_names;
+  const std::vector<Real> _monod_ind;
+  const std::vector<Real> _half_sat;
   const KineticRateUserDescription _rate_description;
 };
