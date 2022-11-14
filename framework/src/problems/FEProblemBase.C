@@ -5788,7 +5788,7 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
         }
         catch (libMesh::LogicError & e)
         {
-          throw MooseException("We caught a libMesh error in FEProblemBase");
+          throw MooseException("We caught a libMesh error in FEProblemBase: " + std::string(e.what()));
         }
       }
       catch (MooseException & e)
