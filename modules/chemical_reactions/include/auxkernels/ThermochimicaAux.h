@@ -35,8 +35,6 @@ protected:
 
 private:
 #ifdef THERMOCHIMICA_ENABLED
-  const ThermochimicaNodalData * _thermo_nodal_data_uo;
-#else
-  const void * _thermo_nodal_data_uo;
+  const ThermochimicaNodalData & _thermo_nodal_data_uo;
 #endif
 };

@@ -4,9 +4,13 @@
     input = MoRu.i
     exodiff = MoRu_out.e
     design = ChemicalCompositionAction.md
-    issues = '#1671'
+    issues = '#22711'
     requirement = 'The system shall be able to set up a nodal thermochemistry solve using an action'
+
     max_threads = 1
+    # Recover changes the results and would require the same rel_err as the test below. Let's keep one test tight.
+    recover = false
+    required_objects = 'ThermochimicaNodalData'
   []
 
   [MoRu_reinit]
@@ -14,10 +18,11 @@
     input = MoRu.i
     exodiff = MoRu_out.e
     design = ThermochimicaNodalData.md
-    issues = '#1671'
+    issues = '#22711'
     requirement = 'The system shall be able to use reinitialization to speed up a thermochimica solve'
     cli_args = 'UserObjects/data/reinit_requested=true'
     max_threads = 1
     rel_err = 1e-4 # reinit improves the results
+    required_objects = 'ThermochimicaNodalData'
   []
 []

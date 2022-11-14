@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ThermochimicaAux.h"
-
 #include "libmesh/int_range.h"
 
 #include <iostream>
@@ -31,7 +30,8 @@ ThermochimicaAux::validParams()
   params.addRequiredParam<UserObjectName>("thermo_nodal_data_uo", "Name of the user object");
   params.addCoupledVar("element_potentials", "Chemical potentials of elements");
 
-  params.addClassDescription("Thermodynamics calculations for oxygen transport model.");
+  params.addClassDescription("Extracts phase and species amounts, and element chemical potentials "
+                             "from a Thermochimica user object.");
 
   return params;
 }
@@ -46,11 +46,10 @@ ThermochimicaAux::ThermochimicaAux(const InputParameters & parameters)
     _sp_phase_name(_n_species),
     _sp_species_name(_n_species),
     _n_elements(coupledComponents("element_potentials")),
-    _el_pot(_n_elements),
+    _el_pot(_n_elements)
 #ifdef THERMOCHIMICA_ENABLED
-    _thermo_nodal_data_uo(&getUserObject<ThermochimicaNodalData>("thermo_nodal_data_uo"))
-#else
-    _thermo_nodal_data_uo(nullptr)
+    ,
+    _thermo_nodal_data_uo(getUserObject<ThermochimicaNodalData>("thermo_nodal_data_uo"))
 #endif
 {
 #ifndef THERMOCHIMICA_ENABLED
@@ -83,7 +82,7 @@ ThermochimicaAux::computeValue()
   Real n_active_phases = 0.0;
 
 #ifdef THERMOCHIMICA_ENABLED
-  const auto & data = _thermo_nodal_data_uo->getNodalData(_current_node->id());
+  const auto & data = _thermo_nodal_data_uo.getNodalData(_current_node->id());
 
   // Save requested phase data into coupled aux variables
   for (const auto i : make_range(_n_phases))
@@ -100,7 +99,8 @@ ThermochimicaAux::computeValue()
     (*_sp[i])[_qp] = data._species_fractions[i];
 
   // Save requested element potentials into coupled aux variables
-  for (unsigned int i = 0; i < _el_pot.size(); i++)
+  mooseAssert(_el_pot.size() == data._element_potential.size(), "Inconsistent sizes.");
+  for (const auto i : make_range(_n_elements))
     (*_el_pot[i])[_qp] = data._element_potential[i];
 #endif
 

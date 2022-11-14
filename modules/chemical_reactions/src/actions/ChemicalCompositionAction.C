@@ -153,13 +153,12 @@ ChemicalCompositionAction::act()
                    " characters: ",
                    thermo_file);
 
-      Thermochimica::setThermoFileName(thermo_file.c_str(), thermo_file.length());
+      Thermochimica::setThermoFilename(thermo_file);
 
       // Read in thermodynamics model, only once
-      Thermochimica::sSParseCSDataFile();
+      Thermochimica::parseThermoFile();
 
-      int idbg = 0;
-      Thermochimica::checkInfoThermo(&idbg);
+      int idbg = Thermochimica::checkInfoThermo();
       if (idbg != 0)
         paramError("thermofile", "Thermochimica data file cannot be parsed. ", idbg);
 
@@ -167,9 +166,9 @@ ChemicalCompositionAction::act()
       Thermochimica::checkPressure(_punit);
       Thermochimica::checkMass(_munit);
 
-      Thermochimica::setUnitTemperature(_tunit.c_str(), _tunit.length());
-      Thermochimica::setUnitPressure(_punit.c_str(), _punit.length());
-      Thermochimica::setUnitMass(_munit.c_str(), _munit.length());
+      Thermochimica::setUnitTemperature(_tunit);
+      Thermochimica::setUnitPressure(_punit);
+      Thermochimica::setUnitMass(_munit);
     }
   }
 

@@ -39,6 +39,7 @@
     elements = 'Mo Ru'
     output_phases = 'BCCN HCPN'
     execute_on = 'INITIAL TIMESTEP_END'
+    reinit_requested = false # changes parallel results slightly
   []
 []
 

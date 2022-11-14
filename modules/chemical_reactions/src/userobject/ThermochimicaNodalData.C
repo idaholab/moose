@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ThermochimicaNodalData.h"
-
 #include "libmesh/int_range.h"
 
 #ifdef THERMOCHIMICA_ENABLED
@@ -98,51 +97,39 @@ void
 ThermochimicaNodalData::execute()
 {
 #ifdef THERMOCHIMICA_ENABLED
-
   auto temperature = _temperature[_qp];
   auto pressure = _pressure;
 
-  Real dMol;
-  int iElement;
-  int idbg = 0;
-
   // Set temperature and pressure for thermochemistry solver
-  Thermochimica::setTemperaturePressure(&temperature, &pressure);
+  Thermochimica::setTemperaturePressure(temperature, pressure);
 
-  iElement = 0;
-  dMol = 0.0;
-  Thermochimica::setElementMass(&iElement, &dMol); // Reset all element masses to 0
+  Thermochimica::setElementMass(0, 0.0); // Reset all element masses to 0
 
   // Set element masses
   for (const auto i : make_range(_n_elements))
-  {
-    iElement = Thermochimica::atomicNumber(_el_name[i]);
-    dMol = (*_el[i])[_qp];
-    Thermochimica::setElementMass(&iElement, &dMol);
-  }
+    Thermochimica::setElementMass(Thermochimica::atomicNumber(_el_name[i]), (*_el[i])[_qp]);
 
   // Optionally ask for a re-initialization (if reinit_requested == true)
   reinitDataMooseToTc();
 
   // Calculate thermochemical equilibrium
-  FORTRAN_CALL(Thermochimica::thermochimica)();
+  Thermochimica::thermochimica();
 
   // if (_current_node->id() == 1)
   // {
-  //   int iPrint = 2;
-  //   FORTRAN_CALL(Thermochimica::setprintresultsmode)(&iPrint);
-  //   FORTRAN_CALL(Thermochimica::printresults)();
+  //   Thermochimica::setPrintResultsMode(2);
+  //   Thermochimica::printResults();
   // }
 
   // fetch data for the current node
   auto & d = _data[_current_node->id()];
 
   // Check for error status
-  Thermochimica::checkInfoThermo(&idbg);
+  auto idbg = Thermochimica::checkInfoThermo();
   if (idbg != 0)
   {
-    FORTRAN_CALL(Thermochimica::printstate)();
-    mooseError("Yhermochimica error ", idbg);
+    // Thermochimica::printState();
+    mooseError("Thermochimica error ", idbg);
   }
   else
   {
@@ -151,11 +138,11 @@ ThermochimicaNodalData::execute()
     d._phase_indices.resize(_n_phases);
     for (const auto i : make_range(_n_phases))
     {
-      Thermochimica::getPhaseIndex(
-          _ph_name[i].c_str(), _ph_name[i].length(), &d._phase_indices[i], &idbg);
+      auto [index, idbg] = Thermochimica::getPhaseIndex(_ph_name[i]);
       if (idbg != 0)
         mooseError("Failed to get index of phase '", _ph_name[i], "'");
-      d._phase_indices[i]--; // Convert from 1-based (fortran) to 0-based (c++) indexing
+      // Convert from 1-based (fortran) to 0-based (c++) indexing
+      d._phase_indices[i] = index - 1;
     }
 
     // Save data for future reinits
@@ -164,15 +151,14 @@ ThermochimicaNodalData::execute()
     d._species_fractions.resize(_n_species);
     for (const auto i : make_range(_n_species))
     {
-      Thermochimica::getOutputMolSpeciesPhase(_sp_phase_name[i].c_str(),
-                                              _sp_phase_name[i].length(),
-                                              _sp_species_name[i].c_str(),
-                                              _sp_species_name[i].length(),
-                                              &d._species_fractions[i],
-                                              &idbg);
-      if (idbg == 1)
+      auto [fraction, idbg] =
+          Thermochimica::getOutputMolSpeciesPhase(_sp_phase_name[i], _sp_species_name[i]);
+
+      if (idbg == 0)
+        d._species_fractions[i] = fraction;
+      else if (idbg == 1)
         d._species_fractions[i] = 0;
-      else if (idbg != 0)
+      else
         mooseError("Failed to get phase speciation for phase '",
                    _sp_phase_name[i],
                    "' and species '",
@@ -186,16 +172,15 @@ ThermochimicaNodalData::execute()
       d._element_potential_for_output.resize(_element_potentials.size());
       for (const auto i : index_range(_element_potentials))
       {
-        d._element_potential_for_output[i] = 0.0;
-        Thermochimica::getOutputChemPot(_element_potentials[i].c_str(),
-                                        _element_potentials[i].length(),
-                                        &d._element_potential_for_output[i],
-                                        &idbg);
-        if (idbg == -1)
-          Moose::out << "getoutputchempot " << idbg << "\n";
+        auto [potential, idbg] = Thermochimica::getOutputChemPot(_element_potentials[i]);
+
+        if (idbg == 0)
+          d._element_potential_for_output[i] = potential;
         else if (idbg == 1)
           // element not present, just leave this at 0 for now
           d._element_potential_for_output[i] = 0.0;
+        else if (idbg == -1)
+          Moose::out << "getoutputchempot " << idbg << "\n";
       }
     }
   }
@@ -210,49 +195,27 @@ ThermochimicaNodalData::reinitDataMooseFromTc()
 
   if (_reinit_requested)
   {
-    FORTRAN_CALL(Thermochimica::savereinitdata)();
-    d._elements = 0;
-    d._species = 0;
-    FORTRAN_CALL(Thermochimica::getreinitdatasizes)(&d._elements, &d._species);
-
-    d._assemblage.resize(d._elements);
-    d._moles_phase.resize(d._elements);
-    d._element_potential.resize(d._elements);
-    d._elements_used.resize(169);
-    d._chemical_potential.resize(d._species);
-    d._mol_fraction.resize(d._species);
-    FORTRAN_CALL(Thermochimica::reinitdatatctomoose)
-    (d._assemblage.data(),
-     d._moles_phase.data(),
-     d._element_potential.data(),
-     d._chemical_potential.data(),
-     d._mol_fraction.data(),
-     d._elements_used.data(),
-     &d._reinit_available);
+    Thermochimica::saveReinitData();
+    auto data = Thermochimica::getReinitData();
+    d._assemblage = std::move(data.assemblage);
+    d._moles_phase = std::move(data.molesPhase);
+    d._element_potential = std::move(data.elementPotential);
+    d._chemical_potential = std::move(data.chemicalPotential);
+    d._mol_fraction = std::move(data.moleFraction);
+    d._elements_used = std::move(data.elementsUsed);
+    d._reinit_available = data.reinitAvailable;
   }
   else
   {
     // If phase concentration data output has been requested, _moles_phase is required even if other
     // re-initialization data is not
     if (_n_phases > 0)
-    {
-      d._elements = 0;
-      FORTRAN_CALL(Thermochimica::getreinitdatasizes)(&d._elements, &d._species);
-      d._moles_phase.resize(d._elements);
-      FORTRAN_CALL(Thermochimica::getmolesphase)(d._moles_phase.data());
-    }
-    // // If element chemical potential data output has been requested, _element_potential is required even if other re-initialization data is not
-    // if (_output_element_potential)
-    // {
-    //   _elements[_current_node->id()] = 0;
-    //   FORTRAN_CALL(Thermochimica::getreinitdatasizes)(&_elements[_current_node->id()],&_species[_current_node->id()]);
-    //   _element_potential[_current_node->id()].resize(_elements[_current_node->id()]);
-    //   int idbg = 0;
-    //   for (int i = 1; i <= _elements[_current_node->id()]; i++)
-    //   {
-    //     FORTRAN_CALL(Thermochimica::getallelementpotential)(&_element_potential[_current_node->id()][0])
-    //   }
-    // }
+      d._moles_phase = Thermochimica::getMolesPhase();
+
+    // If element chemical potential data output has been requested, _element_potential is required
+    // even if other re-initialization data is not
+    if (_output_element_potential)
+      d._element_potential = Thermochimica::getAllElementPotential();
   }
 #endif
 }
@@ -262,8 +225,7 @@ ThermochimicaNodalData::reinitDataMooseToTc()
 {
 #ifdef THERMOCHIMICA_ENABLED
   // Tell Thermochimica whether a re-initialization is requested for this calculation
-  int reinit = _reinit_requested ? 1 : 0;
-  FORTRAN_CALL(Thermochimica::setreinitrequested)(&reinit);
+  Thermochimica::setReinitRequested(_reinit_requested);
 
   // If we have re-initialization data and want a re-initialization, then
   // load data into Thermochimica
@@ -273,16 +235,15 @@ ThermochimicaNodalData::reinitDataMooseToTc()
     auto & d = it->second;
     if (d._reinit_available)
     {
-      FORTRAN_CALL(Thermochimica::resetreinit)();
-      FORTRAN_CALL(Thermochimica::reinitdatatcfrommoose)
-      (&d._elements,
-       &d._species,
-       d._assemblage.data(),
-       d._moles_phase.data(),
-       d._element_potential.data(),
-       d._chemical_potential.data(),
-       d._mol_fraction.data(),
-       d._elements_used.data());
+      Thermochimica::resetReinit();
+      Thermochimica::reinitData data;
+      data.assemblage = d._assemblage;
+      data.molesPhase = d._moles_phase;
+      data.elementPotential = d._element_potential;
+      data.chemicalPotential = d._chemical_potential;
+      data.moleFraction = d._mol_fraction;
+      data.elementsUsed = d._elements_used;
+      Thermochimica::setReinitData(data);
     }
   }
 #endif
