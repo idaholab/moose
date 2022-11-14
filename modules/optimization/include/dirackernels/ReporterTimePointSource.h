@@ -16,11 +16,11 @@
 /**
  * Apply a point load defined by vectors.
  */
-class VectorPointSource : public DiracKernel, public ReporterInterface
+class ReporterTimePointSource : public DiracKernel, public ReporterInterface
 {
 public:
   static InputParameters validParams();
-  VectorPointSource(const InputParameters & parameters);
+  ReporterTimePointSource(const InputParameters & parameters);
   virtual void addPoints() override;
 
 protected:

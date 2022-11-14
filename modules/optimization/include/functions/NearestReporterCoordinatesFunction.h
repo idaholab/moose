@@ -15,12 +15,12 @@
  * Function based on the nearest point to coordinates and values defined by a
  * vector of values, interpolates linearly in time with transient data.
  */
-class VectorNearestPointFunction : public OptimizationFunction, public ReporterInterface
+class NearestReporterCoordinatesFunction : public OptimizationFunction, public ReporterInterface
 {
 public:
   static InputParameters validParams();
 
-  VectorNearestPointFunction(const InputParameters & parameters);
+  NearestReporterCoordinatesFunction(const InputParameters & parameters);
 
   using Function::value;
   virtual Real value(Real t, const Point & p) const override;

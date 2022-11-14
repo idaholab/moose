@@ -60,10 +60,10 @@
 
 [Functions]
   [diffusivity_function]
-    type = VectorNearestPointFunction
-    coord_x = data/coordx
-    coord_y = data/coordy
-    value = data/diffusivity
+    type = NearestReporterCoordinatesFunction
+    x_coord_name = data/coordx
+    y_coord_name = data/coordy
+    value_name = data/diffusivity
   []
 []
 

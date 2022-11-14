@@ -4,7 +4,7 @@
 
 ## Overview
 
-This vector-postprocessor computes the side inner product of a variable with the derivative of an `OptimizationFunction` like [VectorNearestPointFunction.md]. For steady-state problems, the inner product is defined as:
+This vector-postprocessor computes the side inner product of a variable with the derivative of an `OptimizationFunction` like [NearestReporterCoordinatesFunction.md]. For steady-state problems, the inner product is defined as:
 
 !equation
 V_i = \left(u,\frac{df}{dp_i}\right)_{\partial\Omega} = \oint_{\partial\Omega}u(\vec{r})\left.\frac{df(\vec{r},\vec{p})}{dp_i}\right|_{\vec{p}=\vec{p}_0}d\vec{r},

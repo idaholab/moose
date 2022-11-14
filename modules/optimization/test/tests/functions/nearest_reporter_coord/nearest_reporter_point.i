@@ -27,61 +27,61 @@
 [Functions]
   active = 'xyzt'
   [xx]
-    type = VectorNearestPointFunction
-    coord_x = 'values1D/coordx'
-    value = 'values1D/value'
+    type = NearestReporterCoordinatesFunction
+    x_coord_name = 'values1D/coordx'
+    value_name = 'values1D/value'
   []
   [xy]
-    type = VectorNearestPointFunction
-    coord_x = 'values2D/coordx'
-    coord_y = 'values2D/coordy'
-    value = 'values2D/value'
+    type = NearestReporterCoordinatesFunction
+    x_coord_name = 'values2D/coordx'
+    y_coord_name = 'values2D/coordy'
+    value_name = 'values2D/value'
   []
   [xyz]
-    type = VectorNearestPointFunction
-    coord_x = 'values3D/coordx'
-    coord_y = 'values3D/coordy'
-    coord_z = 'values3D/coordz'
-    value = 'values3D/value'
+    type = NearestReporterCoordinatesFunction
+    x_coord_name = 'values3D/coordx'
+    y_coord_name = 'values3D/coordy'
+    z_coord_name = 'values3D/coordz'
+    value_name = 'values3D/value'
   []
   [xyzt]
-    type = VectorNearestPointFunction
-    coord_x = 'values4D/coordx'
-    coord_y = 'values4D/coordy'
-    coord_z = 'values4D/coordz'
-    time = 'values4D/time'
-    value = 'values4D/value'
+    type = NearestReporterCoordinatesFunction
+    x_coord_name = 'values4D/coordx'
+    y_coord_name = 'values4D/coordy'
+    z_coord_name = 'values4D/coordz'
+    time_name = 'values4D/time'
+    value_name = 'values4D/value'
   []
 
   [errorv]
-    type = VectorNearestPointFunction
-    coord_x = 'values4D/coordx'
-    value = 'values1D/val'
+    type = NearestReporterCoordinatesFunction
+    x_coord_name = 'values4D/coordx'
+    value_name = 'values1D/val'
   []
   [errorx]
-    type = VectorNearestPointFunction
-    coord_x = 'values1D/coordx'
-    coord_y = 'values4D/coordx'
-    value = 'values4D/value'
+    type = NearestReporterCoordinatesFunction
+    x_coord_name = 'values1D/coordx'
+    y_coord_name = 'values4D/coordx'
+    value_name = 'values4D/value'
   []
   [errory]
-    type = VectorNearestPointFunction
-    coord_x = 'values4D/coordx'
-    coord_y = 'values1D/coordx'
-    value = 'values4D/value'
+    type = NearestReporterCoordinatesFunction
+    x_coord_name = 'values4D/coordx'
+    y_coord_name = 'values1D/coordx'
+    value_name = 'values4D/value'
   []
   [errorz]
-    type = VectorNearestPointFunction
+    type = NearestReporterCoordinatesFunction
     variable = val
-    coord_x = 'values4D/coordx'
-    coord_z = 'values1D/coordx'
-    value = 'values4D/value'
+    x_coord_name = 'values4D/coordx'
+    z_coord_name = 'values1D/coordx'
+    value_name = 'values4D/value'
   []
   [errort]
-    type = VectorNearestPointFunction
-    coord_x = 'values4D/coordx'
-    time = 'values1D/coordx'
-    value = 'values4D/value'
+    type = NearestReporterCoordinatesFunction
+    x_coord_name = 'values4D/coordx'
+    time_name = 'values1D/coordx'
+    value_name = 'values4D/value'
   []
 []
 

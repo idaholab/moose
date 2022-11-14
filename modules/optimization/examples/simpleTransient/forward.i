@@ -63,11 +63,11 @@
     value = '2*exp(-2.0*(x - sin(2*pi*t))^2)*exp(-2.0*(y - cos(2*pi*t))^2)*cos((1/2)*x*pi)*cos((1/2)*y*pi)/pi'
   []
   [source]
-    type = VectorNearestPointFunction
-    coord_x = src_values/coordx
-    coord_y = src_values/coordy
-    time = src_values/time
-    value = src_values/values
+    type = NearestReporterCoordinatesFunction
+    x_coord_name = src_values/coordx
+    y_coord_name = src_values/coordy
+    time_name = src_values/time
+    value_name = src_values/values
   []
 []
 

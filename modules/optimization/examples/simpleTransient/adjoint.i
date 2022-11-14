@@ -50,13 +50,13 @@
 
 [DiracKernels]
   [misfit]
-    type = VectorPointSource
+    type = ReporterTimePointSource
     variable = u
-    value = measured_data/misfit_values
-    coord_x = measured_data/measurement_xcoord
-    coord_y = measured_data/measurement_ycoord
-    coord_z = measured_data/measurement_zcoord
-    time = measured_data/measurement_time
+    value_name = measured_data/misfit_values
+    x_coord_name = measured_data/measurement_xcoord
+    y_coord_name = measured_data/measurement_ycoord
+    z_coord_name = measured_data/measurement_zcoord
+    time_name = measured_data/measurement_time
     reverse_time_end = 1
   []
 []
@@ -71,11 +71,11 @@
 
 [Functions]
   [source]
-    type = VectorNearestPointFunction
-    coord_x = src_values/coordx
-    coord_y = src_values/coordy
-    time = src_values/time
-    value = src_values/values
+    type = NearestReporterCoordinatesFunction
+    x_coord_name = src_values/coordx
+    y_coord_name = src_values/coordy
+    time_name = src_values/time
+    value_name = src_values/values
   []
 []
 

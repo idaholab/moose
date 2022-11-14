@@ -26,13 +26,13 @@
 
 [DiracKernels]
   [vpp_point_source]
-    type = VectorPointSource
+    type = ReporterTimePointSource
     variable = u
-    value = values4D/value
-    coord_x = values4D/coordx
-    coord_y = values4D/coordy
-    coord_z = values4D/coordz
-    time = values4D/time
+    value_name = values4D/value
+    x_coord_name = values4D/coordx
+    y_coord_name = values4D/coordy
+    z_coord_name = values4D/coordz
+    time_name = values4D/time
   []
 []
 

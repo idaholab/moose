@@ -7,45 +7,53 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "VectorNearestPointFunction.h"
+#include "NearestReporterCoordinatesFunction.h"
 
-registerMooseObject("OptimizationApp", VectorNearestPointFunction);
+registerMooseObject("OptimizationApp", NearestReporterCoordinatesFunction);
 
 InputParameters
-VectorNearestPointFunction::validParams()
+NearestReporterCoordinatesFunction::validParams()
 {
   InputParameters params = OptimizationFunction::validParams();
   params.addClassDescription(
       "Function based on the nearest point to coordinates and values defined by a vector of "
-      "values, interpolates linearly in time with transient data.");
-  params.addParam<ReporterName>(
-      "coord_x",
-      "Vector value containing x-coordinate of points, default is assumed to be all 0s.");
-  params.addParam<ReporterName>(
-      "coord_y",
-      "Vector value containing y-coordinate of points, default is assumed to be all 0s.");
-  params.addParam<ReporterName>(
-      "coord_z",
-      "Vector value containing z-coordinate of points, default is assumed to be all 0s.");
-  params.addParam<ReporterName>("time",
-                                "Vector value containing time, default is assumed to be all 0s.");
-  params.addRequiredParam<ReporterName>("value", "Reporter containing value data.");
+      "values from a vector-postprocessor or reporter, interpolates linearly in time with "
+      "transient data.");
+  params.addParam<ReporterName>("x_coord_name",
+                                "Name of vector-postprocessor or reporter vector containing "
+                                "x-coordinate of points, default is assumed to be all 0s.");
+  params.addParam<ReporterName>("y_coord_name",
+                                "Name of vector-postprocessor or reporter vector containing "
+                                "y-coordinate of points, default is assumed to be all 0s.");
+  params.addParam<ReporterName>("z_coord_name",
+                                "Name of vector-postprocessor or reporter vector containing "
+                                "z-coordinate of points, default is assumed to be all 0s.");
+  params.addParam<ReporterName>("time_name",
+                                "Name of vector-postprocessor or reporter vector containing time, "
+                                "default is assumed to be all 0s.");
+  params.addRequiredParam<ReporterName>(
+      "value_name", "Name of vector-postprocessor or reporter vector containing value data.");
   return params;
 }
 
-VectorNearestPointFunction::VectorNearestPointFunction(const InputParameters & parameters)
+NearestReporterCoordinatesFunction::NearestReporterCoordinatesFunction(
+    const InputParameters & parameters)
   : OptimizationFunction(parameters),
     ReporterInterface(this),
-    _coordx(isParamValid("coord_x") ? getReporterValue<std::vector<Real>>("coord_x") : _empty_vec),
-    _coordy(isParamValid("coord_y") ? getReporterValue<std::vector<Real>>("coord_y") : _empty_vec),
-    _coordz(isParamValid("coord_z") ? getReporterValue<std::vector<Real>>("coord_z") : _empty_vec),
-    _coordt(isParamValid("time") ? getReporterValue<std::vector<Real>>("time") : _empty_vec),
-    _values(getReporterValue<std::vector<Real>>("value"))
+    _coordx(isParamValid("x_coord_name") ? getReporterValue<std::vector<Real>>("x_coord_name")
+                                         : _empty_vec),
+    _coordy(isParamValid("y_coord_name") ? getReporterValue<std::vector<Real>>("y_coord_name")
+                                         : _empty_vec),
+    _coordz(isParamValid("z_coord_name") ? getReporterValue<std::vector<Real>>("z_coord_name")
+                                         : _empty_vec),
+    _coordt(isParamValid("time_name") ? getReporterValue<std::vector<Real>>("time_name")
+                                      : _empty_vec),
+    _values(getReporterValue<std::vector<Real>>("value_name"))
 {
 }
 
 Real
-VectorNearestPointFunction::value(Real t, const Point & p) const
+NearestReporterCoordinatesFunction::value(Real t, const Point & p) const
 {
   const std::array<std::pair<Real, std::size_t>, 2> tv = findNearestPoint(t, p);
 
@@ -60,13 +68,13 @@ VectorNearestPointFunction::value(Real t, const Point & p) const
 }
 
 RealGradient
-VectorNearestPointFunction::gradient(Real /*t*/, const Point & /*p*/) const
+NearestReporterCoordinatesFunction::gradient(Real /*t*/, const Point & /*p*/) const
 {
   return RealGradient(0, 0, 0);
 }
 
 Real
-VectorNearestPointFunction::timeDerivative(Real t, const Point & p) const
+NearestReporterCoordinatesFunction::timeDerivative(Real t, const Point & p) const
 {
   const std::array<std::pair<Real, std::size_t>, 2> tv = findNearestPoint(t, p);
 
@@ -81,7 +89,7 @@ VectorNearestPointFunction::timeDerivative(Real t, const Point & p) const
 }
 
 std::vector<Real>
-VectorNearestPointFunction::parameterGradient(Real t, const Point & p) const
+NearestReporterCoordinatesFunction::parameterGradient(Real t, const Point & p) const
 {
   const std::array<std::pair<Real, std::size_t>, 2> tv = findNearestPoint(t, p);
   std::vector<Real> pd(_nval, 0.0);
@@ -99,35 +107,35 @@ VectorNearestPointFunction::parameterGradient(Real t, const Point & p) const
 }
 
 void
-VectorNearestPointFunction::buildCoordinateMapping() const
+NearestReporterCoordinatesFunction::buildCoordinateMapping() const
 {
   // Do some size checks
   _nval = std::max({_coordx.size(), _coordy.size(), _coordz.size(), _coordt.size()});
   if (_nval == 0)
     paramError("value", "At least one coordinate vector must not be empty.");
   else if (!_coordx.empty() && _coordx.size() != _nval)
-    paramError("coord_x",
+    paramError("x_coord_name",
                "Number of x coordinates (",
                _coordx.size(),
                ") does not match number of values (",
                _nval,
                ").");
   else if (!_coordy.empty() && _coordy.size() != _nval)
-    paramError("coord_y",
+    paramError("y_coord_name",
                "Number of y coordinates (",
                _coordy.size(),
                ") does not match number of values (",
                _nval,
                ").");
   else if (!_coordz.empty() && _coordz.size() != _nval)
-    paramError("coord_z",
+    paramError("z_coord_name",
                "Number of z coordinates (",
                _coordz.size(),
                ") does not match number of values (",
                _nval,
                ").");
   else if (!_coordt.empty() && _coordt.size() != _nval)
-    paramError("time",
+    paramError("time_name",
                "Number of times (",
                _coordt.size(),
                ") does not match number of values (",
@@ -157,20 +165,21 @@ VectorNearestPointFunction::buildCoordinateMapping() const
     vec->emplace_back(time, i);
     std::sort(vec->begin(),
               vec->end(),
-              [](const std::pair<Real, Real> & a, const std::pair<Real, Real> & b)
-              { return a.first < b.first; });
+              [](const std::pair<Real, Real> & a, const std::pair<Real, Real> & b) {
+                return a.first < b.first;
+              });
   }
 }
 
 std::array<std::pair<Real, std::size_t>, 2>
-VectorNearestPointFunction::findNearestPoint(Real t, const Point & p) const
+NearestReporterCoordinatesFunction::findNearestPoint(Real t, const Point & p) const
 {
   if (_coord_mapping.empty())
     buildCoordinateMapping();
 
   // Make sure values is correct size
   if (_values.size() != _nval)
-    paramError("value",
+    paramError("value_name",
                "Size of value vector (",
                _values.size(),
                ") does not match number of coordinates specified (",
@@ -178,11 +187,13 @@ VectorNearestPointFunction::findNearestPoint(Real t, const Point & p) const
                ").");
 
   const auto & tval =
-      std::min_element(_coord_mapping.begin(),
-                       _coord_mapping.end(),
-                       [&p](const std::pair<Point, std::vector<std::pair<Real, std::size_t>>> & p1,
-                            const std::pair<Point, std::vector<std::pair<Real, std::size_t>>> & p2)
-                       { return (p - p1.first).norm_sq() < (p - p2.first).norm_sq(); })
+      std::min_element(
+          _coord_mapping.begin(),
+          _coord_mapping.end(),
+          [&p](const std::pair<Point, std::vector<std::pair<Real, std::size_t>>> & p1,
+               const std::pair<Point, std::vector<std::pair<Real, std::size_t>>> & p2) {
+            return (p - p1.first).norm_sq() < (p - p2.first).norm_sq();
+          })
           ->second;
 
   if (tval.size() == 1 || MooseUtils::absoluteFuzzyLessEqual(t, tval[0].first))

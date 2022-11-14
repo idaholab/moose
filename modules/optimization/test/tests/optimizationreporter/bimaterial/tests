@@ -1,6 +1,6 @@
 [Tests]
   issues = '#21885'
-  design = 'Optimize.md VectorNearestPointFunction.md ElementOptimizationDiffusionCoefFunctionInnerProduct.md'
+  design = 'Optimize.md NearestReporterCoordinatesFunction.md ElementOptimizationDiffusionCoefFunctionInnerProduct.md'
   [taoblmvm]
     type = CSVDiff
     max_threads = 1

@@ -96,23 +96,23 @@ ParsedOptimizationFunction::ParsedOptimizationFunction(const InputParameters & p
 Real
 ParsedOptimizationFunction::value(Real t, const Point & p) const
 {
-  return evaluate(*_parser, t, p);
+  return evaluateExpression(*_parser, t, p);
 }
 
 RealGradient
 ParsedOptimizationFunction::gradient(Real t, const Point & p) const
 {
   RealGradient result;
-  result(0) = evaluate(*_derivative_parsers[0], t, p, "gradient");
-  result(1) = evaluate(*_derivative_parsers[1], t, p, "gradient");
-  result(2) = evaluate(*_derivative_parsers[2], t, p, "gradient");
+  result(0) = evaluateExpression(*_derivative_parsers[0], t, p, "gradient");
+  result(1) = evaluateExpression(*_derivative_parsers[1], t, p, "gradient");
+  result(2) = evaluateExpression(*_derivative_parsers[2], t, p, "gradient");
   return result;
 }
 
 Real
 ParsedOptimizationFunction::timeDerivative(Real t, const Point & p) const
 {
-  return evaluate(*_derivative_parsers[3], t, p, "time derivative");
+  return evaluateExpression(*_derivative_parsers[3], t, p, "time derivative");
 }
 
 std::vector<Real>
@@ -120,15 +120,16 @@ ParsedOptimizationFunction::parameterGradient(Real t, const Point & p) const
 {
   std::vector<Real> result(_param_vars.size());
   for (const auto & i : index_range(result))
-    result[i] = evaluate(*_derivative_parsers[4 + i], t, p, _param_vars[i] + " derivative");
+    result[i] =
+        evaluateExpression(*_derivative_parsers[4 + i], t, p, _param_vars[i] + " derivative");
   return result;
 }
 
 Real
-ParsedOptimizationFunction::evaluate(FunctionParserADBase<Real> & parser,
-                                     Real t,
-                                     const Point & p,
-                                     std::string name) const
+ParsedOptimizationFunction::evaluateExpression(FunctionParserADBase<Real> & parser,
+                                               Real t,
+                                               const Point & p,
+                                               std::string name) const
 {
   if (_params.size() != _param_vars.size())
     paramError("param_vector_name",

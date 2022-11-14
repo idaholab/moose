@@ -4,7 +4,7 @@
 
 ## Overview
 
-This vector-postprocessor computes the inner product of the gradient of two variables with the derivative of an `OptimizationFunction` like [VectorNearestPointFunction.md]. For steady-state problems, the inner product is defined as:
+This vector-postprocessor computes the inner product of the gradient of two variables with the derivative of an `OptimizationFunction` like [NearestReporterCoordinatesFunction.md]. For steady-state problems, the inner product is defined as:
 
 !equation
 V_i = \left(\vec{\nabla}u,\frac{df}{dp_i}\vec{\nabla}v\right) = \int_{\Omega}\vec{\nabla}u(\vec{r})\cdot\left.\frac{df(\vec{r},\vec{p})}{dp_i}\right|_{\vec{p}=\vec{p}_0}\vec{\nabla}v(\vec{r})d\vec{r},
