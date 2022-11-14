@@ -96,6 +96,12 @@ def parse_args(args):
     if args.oras and args.conda:
         print('cannot output both conda and oras simultaneously')
         sys.exit(1)
+    # When supplying a non-tracked library and we are not asking for a dependency list then instead
+    # print the libmesh hash (we will never supply a pre-built moose that will work to build other
+    # applications). If we are asking for a list, then proceed to use 'moose' due to the dependency
+    # routines will not print itself as a dependency (we will get libmesh)
+    if _supply_default and not args.dependencies:
+        args.library = 'libmesh'
     if _supply_default and not args.quiet:
         print('Untracked library, using "moose" as your dependency')
     return args
