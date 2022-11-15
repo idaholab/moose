@@ -125,6 +125,13 @@ protected:
    */
   void insfvSetup();
 
+  /**
+   * Computes the inverse of the digaonal (1/A) of the system matrix plus the H/A components for the
+   * pressure equation plus Rhie-Chow interpolation. This should nly be used with segregated
+   * solvers.
+   */
+  void computeHbyA();
+
   /// The \p MooseMesh that this user object operates on
   MooseMesh & _moose_mesh;
 
@@ -170,8 +177,21 @@ protected:
   /// The subdomain ids this object operates on
   const std::set<SubdomainID> _sub_ids;
 
-  /// A map from element IDs to 'a' coefficient data
+  /// A map from element IDs to 'a' coefficient data (the elements from the diagonal of the system matrix)
   CellCenteredMapFunctor<ADRealVectorValue, std::unordered_map<dof_id_type, ADRealVectorValue>> _a;
+
+  /**
+   * A map from element IDs to $HbyA_{ij} = (A_{offdiag}*\mathrm{(predicted~velocity)} -
+   * \mathrm{Source})_{ij}/A_{ij}$. So this contains the offdiagonal part of the system matrix
+   * multiplied by the predicted velocity minus the source terms from the right hand side of the
+   * linearized momentum predictor stem.
+   */
+  CellCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>> _HbyA;
+
+  /**
+   * A map from element IDs to $1/A_ij$. ADD MORE
+   */
+  CellCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>> _Ainv;
 
   /**
    * @name 'a' component functors
@@ -244,7 +264,8 @@ private:
   bool _pull_all_nonlocal;
 };
 
-inline const Moose::FunctorBase<ADReal> & INSFVRhieChowInterpolator::epsilon(THREAD_ID) const
+inline const Moose::FunctorBase<ADReal> &
+INSFVRhieChowInterpolator::epsilon(THREAD_ID) const
 {
   return _unity_functor;
 }

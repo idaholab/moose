@@ -32,6 +32,10 @@
 #include "metaphysicl/parallel_semidynamicsparsenumberarray.h"
 #include "timpi/parallel_sync.h"
 
+#include "NonlinearSystem.h"
+#include "libmesh/petsc_matrix.h"
+#include "libmesh/petsc_vector.h"
+
 using namespace libMesh;
 
 registerMooseObject("NavierStokesApp", INSFVRhieChowInterpolator);
@@ -102,7 +106,19 @@ INSFVRhieChowInterpolator::validParams()
       "a_w",
       "For simulations in which the advecting velocities are aux variables, this parameter must be "
       "supplied when the mesh dimension is greater than 2. It represents the on-diagonal "
-      "coefficients for the 'z' component velocity, solved via the Navier-Stokes equations.");
+      "coefficients for the 'z' component velocity, solved "
+      "via the Navier-Stokes equations.");
+  params.addParam<bool>(
+      "pull_all_nonlocal_a",
+      false,
+      "Whether to pull all nonlocal 'a' coefficient data to our process. Note that 'nonlocal' "
+      "means elements that we have access to (this may not be all the elements in the mesh if the "
+      "mesh is distributed) but that we do not own.");
+  params.addParam<NonlinearSystemName>("mass_momentum_system",
+                                       "nl0",
+                                       "The nonlinear system in which the monolithic momentum and "
+                                       "continuity equations are located.");
+
   return params;
 }
 
@@ -131,6 +147,8 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
     _ws(libMesh::n_threads(), nullptr),
     _sub_ids(blockRestricted() ? blockIDs() : _moose_mesh.meshSubdomains()),
     _a(_moose_mesh, _sub_ids, "a"),
+    _HbyA(_moose_mesh, _sub_ids, "HbyA"),
+    _Ainv(_moose_mesh, _sub_ids, "Ainv"),
     _ax(_a, 0),
     _ay(_a, 1),
     _az(_a, 2),
@@ -398,6 +416,8 @@ INSFVRhieChowInterpolator::meshChanged()
   // - some elements may have been refined
   _elements_to_push_pull.clear();
   _a.clear();
+  _HbyA.clear();
+  _Ainv.clear();
 }
 
 void
@@ -704,4 +724,64 @@ INSFVRhieChowInterpolator::hasFaceSide(const FaceInfo & fi, const bool fi_elem_s
     return hasBlocks(fi.elem().subdomain_id());
   else
     return fi.neighborPtr() && hasBlocks(fi.neighbor().subdomain_id());
+}
+
+void
+INSFVRhieChowInterpolator::computeHbyA()
+{
+  NonlinearSystemBase & sys = _fe_problem.getNonlinearSystemBase(
+      _fe_problem.nlSysNum(getParam<NonlinearSystemName>("momentum_system")));
+
+  NonlinearImplicitSystem & momentum_system = dynamic_cast<NonlinearImplicitSystem &>(sys.system());
+
+  PetscMatrix<Number> * pmat = dynamic_cast<PetscMatrix<Number> *>(momentum_system.matrix);
+  PetscVector<Number> * solution =
+      dynamic_cast<PetscVector<Number> *>(momentum_system.solution.get());
+
+  std::unique_ptr<NumericVector<Number>> Ainv = solution->zero_clone();
+  std::unique_ptr<NumericVector<Number>> HbyA = solution->zero_clone();
+  std::unique_ptr<NumericVector<Number>> working_vector = solution->zero_clone();
+
+  // We compute the right hand side with a zero vector for starters
+  _fe_problem.computeResidualSys(momentum_system, *working_vector, *HbyA);
+
+  // Wpuld be cool to add asserts here
+  PetscVector<Number> * Ainv_petsc = dynamic_cast<PetscVector<Number> *>(Ainv.get());
+  PetscVector<Number> * HbyA_petsc = dynamic_cast<PetscVector<Number> *>(HbyA.get());
+  PetscVector<Number> * working_vector_petsc =
+      dynamic_cast<PetscVector<Number> *>(working_vector.get());
+
+  VecScale(HbyA_petsc->vec(), -1.0);
+
+  MatGetDiagonal(pmat->mat(), Ainv_petsc->vec());
+
+  // Now the hard part, let's get H*u and add it to the rhs
+  MatMult(pmat->mat(), solution->vec(), working_vector_petsc->vec());
+  VecAXPY(HbyA_petsc->vec(), 1.0, working_vector_petsc->vec());
+
+  // We subtract the diagonal component because we didn't want to modify the matrix
+  VecPointwiseMult(working_vector_petsc->vec(), Ainv_petsc->vec(), solution->vec());
+  VecAXPY(HbyA_petsc->vec(), -1.0, working_vector_petsc->vec());
+
+  // Now we invert the diagonal
+  VecSet(working_vector_petsc->vec(), 1.0);
+  VecPointwiseDivide(Ainv_petsc->vec(), working_vector_petsc->vec(), Ainv_petsc->vec());
+
+  // And divide H by the diagonal
+  VecPointwiseMult(HbyA_petsc->vec(), HbyA_petsc->vec(), Ainv_petsc->vec());
+
+  auto evaluable_begin = _mesh.evaluable_elements_begin(sys.dofMap());
+  auto evaluable_end = _mesh.evaluable_elements_end(sys.dofMap());
+
+  for (auto it = evaluable_begin; it != evaluable_end; ++it)
+  {
+    const Elem * elem = *it;
+
+    for (unsigned int var_index = 0; var_index < _var_numbers.size(); var_index++)
+    {
+      dof_id_type dof_index = elem->dof_number(sys.number(), _var_numbers[var_index], 0);
+      _HbyA[elem->id()](var_index) = HbyA_petsc->el(dof_index);
+      _Ainv[elem->id()](var_index) = Ainv_petsc->el(dof_index);
+    }
+  }
 }
