@@ -255,4 +255,10 @@
     issues = '#22946'
     requirement = "TestHarness shall be able to evaluate a given test with a user-supplied evaluation function."
   []
+  [test_failed_json]
+    type = PythonUnitTest
+    input = test_FailedJSON.py
+    requirement = "TestHarness shall test for a valid json output dump"
+    issues = '#21967'
+  []
 []

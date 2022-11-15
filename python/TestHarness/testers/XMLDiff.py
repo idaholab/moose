@@ -20,7 +20,7 @@ class XMLDiff(SchemaDiff):
 
     def __init__(self, name, params):
         params['schemadiff'] = params['xmldiff']
-        params['ignored_items'] = params['ignored_attributes']
+        params['ignored_items'] += params['ignored_attributes']
         SchemaDiff.__init__(self, name, params)
         if 'xmltodict' not in self.specs['required_python_packages']:
             self.specs['required_python_packages'] += ' xmltodict'
