@@ -3,9 +3,9 @@
 MOOSE *Actions* are used to execute *tasks*. Each application registers
 numerous *actions*, *tasks*, and *syntax*. Each task is associated with one or more
 actions, and each action may perform one or more tasks. Syntax is used by the
-input file parser to generate actions/tasks.
+input file parser to generate actions.
 
-Common uses for actions are to perform setup tasks and create MOOSE objects.
+Common uses for actions are to perform setup and create MOOSE objects.
 
 ## Creating Actions
 
@@ -104,6 +104,14 @@ the existence of a `Mesh` block triggers [SetupMeshCompleteAction.md]:
 registerSyntax("SetupMeshCompleteAction", "Mesh");
 ```
 
+Also, note that actions do not necessarily require registration of any associated
+syntax to execute a task: if that task is registered as required, then the action
+always will be built:
+
+``` language=cpp
+registerTask("task_name", true);
+```
+
 ## Relationship Managers and Actions
 
 If adding any `MooseObjects` in a custom action and those objects have
@@ -114,6 +122,12 @@ the `ContactAction` in the contact module, and `PorousFlowActionBase` in the
 porous flow module provide examples of overriding this method. For the reasons
 behind why this must be done in the action system, please see [RelationshipManager.md#rm_action].
 
+## Controlling Action Parameters
+
+Action parameters can be controlled like other MOOSE object parameters. See
+[syntax/Controls/index.md#controllable_params_added_by_actions] for more
+information.
+
 ## Troubleshooting Actions
 
 To see the list of actions as they execute, use `Debug/show_actions=true`:
@@ -123,3 +137,14 @@ To see the list of actions as they execute, use `Debug/show_actions=true`:
   show_actions = true
 []
 ```
+
+## Additional Notes
+
+The following is a list of miscellaneous notes that may be useful to advanced
+developers:
+
+- The lifetime of actions is the entire simulation.
+- Actions can be obtained via the `ActionWarehouse` with methods such as `getAction`,
+  `getActions`, etc.
+- Actions may be added by other actions, but the added action will only execute
+  for tasks occurring after the task in which the action is added.
