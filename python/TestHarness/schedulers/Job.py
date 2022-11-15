@@ -250,6 +250,22 @@ class Job(object):
         """ Return the contents of output """
         return self.__joined_out
 
+    def getOutputFile(self):
+        """ Return the output file path """
+        if ((self.options.pbs
+             or self.options.ok_files
+             or self.options.fail_files
+             or self.options.sep_files)
+             and (self.isPass() or self.isFail())):
+            (status, message, color, exit_code) = self.getJointStatus()
+            output_dir = self.options.output_dir if self.options.output_dir else self.getTestDir()
+            output_file = os.path.join(output_dir,
+                                       '.'.join([os.path.basename(self.getTestDir()),
+                                                 self.getTestNameShort().replace(os.sep, '.'),
+                                                 status,
+                                                 'txt']))
+            return os.path.join(output_dir, output_file)
+
     def setOutput(self, output):
         """ Method to allow schedulers to overwrite the output if certain conditions are met """
         if (not self.__tester.outfile is None and not self.__tester.outfile.closed

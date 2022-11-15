@@ -41,6 +41,7 @@ class QueueManager(Scheduler):
         self.options = self.harness.getOptions()
         self.__job_storage_file = self.harness.original_storage
         self.__clean_args = None
+        self.__status_system = StatusSystem()
 
     def augmentJobs(self, Jobs):
         """
@@ -195,8 +196,11 @@ class QueueManager(Scheduler):
         args = list(self.cleanAndModifyArgs())
 
         # Build [<args>, '--spec-file' ,/path/to/tests', '-o', '/path/to']
-        args.extend(['--spec-file', os.path.join(job.getTestDir(), self.options.input_file_name),
-                     '-o', job.getTestDir()])
+        args.extend(['--spec-file',
+                     os.path.join(job.getTestDir(),
+                     self.options.input_file_name),
+                     '-o', job.getTestDir(),
+                     '--sep-files'])
 
         # Build [<command>, <args>]
         command.extend(args)
@@ -313,6 +317,15 @@ class QueueManager(Scheduler):
                     tester.setStatus(tester.queued, 'LAUNCHING')
                     job.setStatus(job.finished)
 
+    def _prevJobFinished(self, job_list, job_results):
+        my_job = { job_list[0].getTestDir() : job_results }
+        if job_results:
+            for job in job_list:
+                (my_status, message, caveats) = job.previousTesterStatus(self.options, my_job)
+                if self.__status_system.isValid(my_status) and my_status in self.__status_system.getPendingStatuses():
+                    return False
+            return True
+
     def _setJobStatus(self, job_data):
         """
         Read the json results file for the finished submitted job group, and match our
@@ -351,7 +364,13 @@ class QueueManager(Scheduler):
 
                     # Recover useful job information from job results
                     job.setPreviousTime(job_results['TIMING'])
-                    job.setOutput(job_results['OUTPUT'])
+
+                    # Read output file (--sep-files-ok|fail)
+                    if job.getOutputFile() and os.path.exists(job.getOutputFile()):
+                        with open(job.getOutputFile(), 'r') as outfile:
+                            job.setOutput(outfile.read())
+                    else:
+                        job.setOutput('Output file is not available, or was never generated')
 
                 # This is a newly added test in the spec file, which was not a part of original launch
                 else:

@@ -796,6 +796,14 @@ class TestHarness:
 
                 # Create empty key based on TestDir, or re-inialize with existing data so we can append to it
                 self.options.results_storage[job.getTestDir()] = self.options.results_storage.get(job.getTestDir(), {})
+
+                # If output has been stored in separate files, don't make additional copies by
+                # storing that data in this json results file (--pbs || --sep-files, etc options).
+                if job.getOutputFile() is not None:
+                    output = ''
+                else:
+                    output = job.getOutput()
+
                 self.options.results_storage[job.getTestDir()][job.getTestName()] = {'NAME'           : job.getTestNameShort(),
                                                                                      'LONG_NAME'      : job.getTestName(),
                                                                                      'TIMING'         : job.getTiming(),
@@ -804,7 +812,7 @@ class TestHarness:
                                                                                      'FAIL'           : job.isFail(),
                                                                                      'COLOR'          : message_color,
                                                                                      'CAVEATS'        : list(job.getCaveats()),
-                                                                                     'OUTPUT'         : job.getOutput(),
+                                                                                     'OUTPUT'         : output,
                                                                                      'COMMAND'        : job.getCommand()}
 
                 # Additional data to store (overwrites any previous matching keys)
@@ -863,17 +871,9 @@ class TestHarness:
                                 output += "\n\nINPUT FILE:\n" + str(input_file)
 
                         output += "\n\nTEST OUTPUT:" + job.getOutput()
-
-                        # Yes, by design test dir will be apart of the output file name
-                        output_file = os.path.join(output_dir, '.'.join([os.path.basename(job.getTestDir()),
-                                                                         job.getTestNameShort().replace(os.sep, '.'),
-                                                                         status,
-                                                                         'txt']))
-
+                        output_file = job.getOutputFile()
                         formated_results = util.formatResult(job, self.options, result=output, color=False)
-
-                        if (self.options.ok_files and job.isPass()) or \
-                           (self.options.fail_files and job.isFail()):
+                        if output_file:
                             with open(output_file, 'w') as f:
                                 f.write(formated_results)
 

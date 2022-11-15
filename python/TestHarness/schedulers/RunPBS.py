@@ -7,7 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os, re
+import os, sys, re, json
 from QueueManager import QueueManager
 from TestHarness import util # to execute qsub
 import math # to compute node requirement
@@ -47,7 +47,10 @@ class RunPBS(QueueManager):
 
         # We shouldn't run into a null, but just in case, lets handle it
         if launch_id:
-            qstat_command_result = util.runCommand('qstat -xf %s' % (launch_id))
+            qstat_command_result = util.runCommand(f'qstat -xf -F json {launch_id}')
+            json_out = json.loads(qstat_command_result)
+            pbs_server = json_out['pbs_server']
+            job_meta = json_out['Jobs'][f'{launch_id}.{pbs_server}']
 
             # handle a qstat execution failure for some reason
             if qstat_command_result.find('ERROR') != -1:
@@ -57,19 +60,22 @@ class RunPBS(QueueManager):
                     job.setStatus(job.error, 'QSTAT')
                 return True
 
-            qstat_job_result = re.findall(r'Exit_status = (.*)', qstat_command_result)
+            job_result = job_meta.get('Exit_status', False)
+            job_output = job_meta.get('Output_Path', False)
+            if not job_result:
+                return
 
             # woops. This job was killed by PBS for some reason
-            if qstat_job_result and qstat_job_result[0] in KNOWN_EXITCODES.keys():
+            if job_result and job_result in KNOWN_EXITCODES.keys():
                 for job in job_data.jobs.getJobs():
-                    job.addCaveats(KNOWN_EXITCODES[qstat_job_result[0]])
+                    job.addCaveats(KNOWN_EXITCODES[job_result])
                 return True
 
             # Capture TestHarness exceptions
-            elif qstat_job_result and qstat_job_result[0] != "0":
+            elif job_result and job_result != "0":
 
                 # Try and gather some useful output we can tack on to one of the job objects
-                output_file = job_data.json_data.get(job_data.job_dir, {}).get(job_data.plugin, {}).get('QSUB_OUTPUT', "")
+                output_file = job_output.split(':')[1]
                 if os.path.exists(output_file):
                     with open(output_file, 'r') as f:
                         output_string = util.readOutput(f, None, job_data.jobs.getJobs()[0].getTester())

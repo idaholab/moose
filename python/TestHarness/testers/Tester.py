@@ -153,7 +153,7 @@ class Tester(MooseObject):
         self.diff = self.test_status.diff
         self.deleted = self.test_status.deleted
 
-        self.__failed_statuses = [self.fail, self.diff, self.deleted]
+        self.__failed_statuses = self.test_status.getFailingStatuses()
         self.__skipped_statuses = [self.skip, self.silent]
 
     def getStatus(self):
