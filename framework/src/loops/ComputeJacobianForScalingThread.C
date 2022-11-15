@@ -67,7 +67,8 @@ ComputeJacobianForScalingThread::operator()(const ConstElemRange & range,
     }
     catch (libMesh::LogicError & e)
     {
-      throw MooseException("We caught a libMesh error in ComputeJacobianForScalingThread: " + std::string(e.what()));
+      throw MooseException("We caught a libMesh error in ComputeJacobianForScalingThread: " +
+                           std::string(e.what()));
     }
     catch (MetaPhysicL::LogicError & e)
     {
