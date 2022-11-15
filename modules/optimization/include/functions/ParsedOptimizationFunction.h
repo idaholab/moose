@@ -30,9 +30,9 @@ public:
 protected:
   /// Function to evaluate an inputted parser
   Real evaluateExpression(FunctionParserADBase<Real> & parser,
-                Real t,
-                const Point & p,
-                std::string name = "") const;
+                          Real t,
+                          const Point & p,
+                          std::string name = "") const;
 
   /// Function expression passed to FParser
   const std::string & _value;

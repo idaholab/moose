@@ -165,9 +165,8 @@ NearestReporterCoordinatesFunction::buildCoordinateMapping() const
     vec->emplace_back(time, i);
     std::sort(vec->begin(),
               vec->end(),
-              [](const std::pair<Real, Real> & a, const std::pair<Real, Real> & b) {
-                return a.first < b.first;
-              });
+              [](const std::pair<Real, Real> & a, const std::pair<Real, Real> & b)
+              { return a.first < b.first; });
   }
 }
 
@@ -187,13 +186,11 @@ NearestReporterCoordinatesFunction::findNearestPoint(Real t, const Point & p) co
                ").");
 
   const auto & tval =
-      std::min_element(
-          _coord_mapping.begin(),
-          _coord_mapping.end(),
-          [&p](const std::pair<Point, std::vector<std::pair<Real, std::size_t>>> & p1,
-               const std::pair<Point, std::vector<std::pair<Real, std::size_t>>> & p2) {
-            return (p - p1.first).norm_sq() < (p - p2.first).norm_sq();
-          })
+      std::min_element(_coord_mapping.begin(),
+                       _coord_mapping.end(),
+                       [&p](const std::pair<Point, std::vector<std::pair<Real, std::size_t>>> & p1,
+                            const std::pair<Point, std::vector<std::pair<Real, std::size_t>>> & p2)
+                       { return (p - p1.first).norm_sq() < (p - p2.first).norm_sq(); })
           ->second;
 
   if (tval.size() == 1 || MooseUtils::absoluteFuzzyLessEqual(t, tval[0].first))
