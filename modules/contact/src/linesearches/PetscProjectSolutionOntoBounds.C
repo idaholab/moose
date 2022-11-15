@@ -8,8 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PetscProjectSolutionOntoBounds.h"
-
-#if !PETSC_VERSION_LESS_THAN(3, 6, 0)
 #include "FEProblem.h"
 #include "DisplacedProblem.h"
 #include "NonlinearSystem.h"
@@ -163,5 +161,3 @@ PetscProjectSolutionOntoBounds::lineSearch()
   ierr = SNESLineSearchComputeNorms(line_search);
   LIBMESH_CHKERR(ierr);
 }
-
-#endif // !PETSC_VERSION_LESS_THAN(3, 6, 0)

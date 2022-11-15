@@ -23,9 +23,6 @@
     exodiff = 'normalized_penalty_kin_out.e'
     abs_zero = 1e-7
     max_parallel = 1                                    # -pc_type lu
-    # This test no longer works on older versions of PETSc due to the
-    # changes in 3061bbd5d.
-    petsc_version = '>=3.5.0'
     requirement = 'The contact system shall yield repeatable results for 2D contact with elements of various aspect ratios. Kinematic contact.'
   [../]
   [./normalized_penalty_kin_Q8]
@@ -34,9 +31,6 @@
     exodiff = 'normalized_penalty_kin_Q8_out.e'
     abs_zero = 1e-7
     max_parallel = 1                                    # -pc_type lu
-    # This test no longer works on older versions of PETSc due to the
-    # changes in 3061bbd5d.
-    petsc_version = '>=3.5.0'
     requirement = 'The contact system shall yield repeatable results for 2D contact with Q8 elements of various aspect ratios. Kinematic contact.'
   [../]
 []

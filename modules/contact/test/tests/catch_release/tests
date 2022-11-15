@@ -6,11 +6,6 @@
     input = 'catch_release.i'
     exodiff = 'catch_release_out.e'
     custom_cmp = 'catch_release.exodiff'
-    # This test fails with a negative Jacobian for older versions of
-    # PETSc, possibly due to the changes in 3061bbd5d. It had already
-    # been restricted for many years to PETSc >= 3.1, most likely due
-    # to numerical instability.
-    petsc_version = '>=3.5.0'
     requirement = 'The contact system shall enforce three-dimensional block to block interaction using a penalty approach.'
   [../]
 []
