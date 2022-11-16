@@ -122,6 +122,7 @@ public:
    * Gets wall temperature names for connected heat transfers
    */
   std::vector<VariableName> getWallTemperatureNames() const { return _T_wall_names; }
+  std::vector<MaterialPropertyName> getWallTemperatureMatNames() const { return _T_wall_mat_names; }
 
   /**
    * Gets wall heat flux names for connected heat transfers
@@ -223,8 +224,10 @@ protected:
   std::vector<MaterialPropertyName> _Hw_vapor_names;
   /// heated perimeter names for connected heat transfers
   std::vector<VariableName> _P_hf_names;
-  /// wall temperature names for connected heat transfers
+  /// wall temperature auxvariable names for connected heat transfers
   std::vector<VariableName> _T_wall_names;
+  /// wall temperature material names for connected heat transfers
+  std::vector<MaterialPropertyName> _T_wall_mat_names;
   /// wall heat flux names for connected heat transfers
   std::vector<MaterialPropertyName> _q_wall_names;
 
