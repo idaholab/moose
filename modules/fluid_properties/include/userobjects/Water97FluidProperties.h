@@ -181,6 +181,9 @@ public:
   virtual void s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const override;
 
   virtual Real h_from_p_T(Real pressure, Real temperature) const override;
+  virtual ADReal h_from_p_T(const ADReal & pressure, const ADReal & temperature) const override;
+  template <typename T>
+  T h_from_p_T_template(const T & pressure, const T & temperature) const;
 
   virtual void
   h_from_p_T(Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const override;
@@ -2493,11 +2496,11 @@ Water97FluidProperties::p_T_from_v_h(const T & v, const T & h) const
                        T & rho,
                        T & drho_dpressure,
                        T & drho_dtemperature)
-  { rho_from_p_T(pressure, temperature, rho, drho_dpressure, drho_dtemperature); };
+  { rho_from_p_T_template(pressure, temperature, rho, drho_dpressure, drho_dtemperature); };
   FuncType f2 =
       [this](
           const T & pressure, const T & temperature, T & h, T & dh_dpressure, T & dh_dtemperature)
-  { h_from_p_T(pressure, temperature, h, dh_dpressure, dh_dtemperature); };
+  { h_from_p_T_template(pressure, temperature, h, dh_dpressure, dh_dtemperature); };
 
   DenseVector<T> y_in(2);
   y_in(0) = rho;
@@ -2514,11 +2517,10 @@ Water97FluidProperties::p_T_from_v_h(const T & v, const T & h) const
 }
 
 template <typename T>
-void
-Water97FluidProperties::h_from_p_T_template(
-    const T & pressure, const T & temperature, T & h, T & dh_dp, T & dh_dT) const
+T
+Water97FluidProperties::h_from_p_T_template(const T & pressure, const T & temperature) const
 {
-  T enthalpy, pi, tau, delta, denthalpy_dp, denthalpy_dT;
+  T enthalpy, pi, tau, delta;
 
   // Determine which region the point is in
   unsigned int region =
@@ -2529,16 +2531,12 @@ Water97FluidProperties::h_from_p_T_template(
       pi = pressure / _p_star[0];
       tau = _T_star[0] / temperature;
       enthalpy = _Rw * _T_star[0] * dgamma1_dtau(pi, tau);
-      denthalpy_dp = _Rw * _T_star[0] * d2gamma1_dpitau(pi, tau) / _p_star[0];
-      denthalpy_dT = -_Rw * tau * tau * d2gamma1_dtau2(pi, tau);
       break;
 
     case 2:
       pi = pressure / _p_star[1];
       tau = _T_star[1] / temperature;
       enthalpy = _Rw * _T_star[1] * dgamma2_dtau(pi, tau);
-      denthalpy_dp = _Rw * _T_star[1] * d2gamma2_dpitau(pi, tau) / _p_star[1];
-      denthalpy_dT = -_Rw * tau * tau * d2gamma2_dtau2(pi, tau);
       break;
 
     case 3:
@@ -2547,15 +2545,8 @@ Water97FluidProperties::h_from_p_T_template(
       T density3 = densityRegion3(pressure, temperature);
       delta = density3 / _rho_critical;
       tau = _T_star[2] / temperature;
-      T dpdd = dphi3_ddelta(delta, tau);
-      T d2pddt = d2phi3_ddeltatau(delta, tau);
-      T d2pdd2 = d2phi3_ddelta2(delta, tau);
-      enthalpy = _Rw * temperature * (tau * dphi3_dtau(delta, tau) + delta * dpdd);
-      denthalpy_dp = (d2pddt + dpdd + delta * d2pdd2) / _rho_critical /
-                     (2.0 * delta * dpdd + delta * delta * d2pdd2);
-      denthalpy_dT = _Rw * delta * dpdd * (1.0 - tau * d2pddt / dpdd) *
-                         (1.0 - tau * d2pddt / dpdd) / (2.0 + delta * d2pdd2 / dpdd) -
-                     _Rw * tau * tau * d2phi3_dtau2(delta, tau);
+      enthalpy =
+          _Rw * temperature * (tau * dphi3_dtau(delta, tau) + delta * dphi3_ddelta(delta, tau));
       break;
     }
 
@@ -2563,16 +2554,25 @@ Water97FluidProperties::h_from_p_T_template(
       pi = pressure / _p_star[4];
       tau = _T_star[4] / temperature;
       enthalpy = _Rw * _T_star[4] * dgamma5_dtau(pi, tau);
-      denthalpy_dp = _Rw * _T_star[4] * d2gamma5_dpitau(pi, tau) / _p_star[4];
-      denthalpy_dT = -_Rw * tau * tau * d2gamma5_dtau2(pi, tau);
       break;
 
     default:
       mooseError("Water97FluidProperties::inRegion has given an incorrect region");
   }
-  h = enthalpy;
-  dh_dp = denthalpy_dp;
-  dh_dT = denthalpy_dT;
+  return enthalpy;
+}
+
+template <typename T>
+void
+Water97FluidProperties::h_from_p_T_template(
+    const T & pressure, const T & temperature, T & h, T & dh_dp, T & dh_dT) const
+{
+  auto functor = [this](const T & pressure, const T & temperature)
+  { return h_from_p_T_template(pressure, temperature); };
+  auto ad_functor = [this](const FPDualReal & pressure, const FPDualReal & temperature)
+  { return h_from_p_T_template(pressure, temperature); };
+
+  xyDerivatives(pressure, temperature, h, dh_dp, dh_dT, functor, ad_functor);
 }
 
 template <typename T>
