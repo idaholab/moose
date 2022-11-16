@@ -431,31 +431,61 @@ LiquidMetalSubChannel1PhaseProblem::computeDP(int iblock)
         auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
         auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
 
+        // interpolation weight coefficient
+        PetscScalar Pe = 0.5;
+        if (_interpolation_scheme.compare("exponential") == 0)
+        {
+          // Compute the Peclet number
+          // S
+          auto S_in = (*_S_flow_soln)(node_in);
+          auto S_out = (*_S_flow_soln)(node_out);
+          auto S_interp = computeInterpolatedValue(S_out, S_in, "central_difference", 0.5);
+          // wetted perimeter
+          auto w_perim_in = (*_w_perim_soln)(node_in);
+          auto w_perim_out = (*_w_perim_soln)(node_out);
+          auto w_perim_interp =
+              this->computeInterpolatedValue(w_perim_out, w_perim_in, "central_difference", 0.5);
+          // mdot
+          auto mdot_loc = this->computeInterpolatedValue(
+              (*_mdot_soln)(node_out), (*_mdot_soln)(node_in), "central_difference", 0.5);
+          // dynamic viscosity
+          auto mu_in = (*_mu_soln)(node_in);
+          auto mu_out = (*_mu_soln)(node_out);
+          auto mu_interp = this->computeInterpolatedValue(mu_out, mu_in, "central_difference", 0.5);
+          // hydraulic diameter in the i direction
+          auto Dh_i = 4.0 * S_interp / w_perim_interp;
+          // Compute friction
+          auto Re = ((mdot_loc / S_interp) * Dh_i / mu_interp);
+          auto fi = computeFrictionFactor(Re, i_ch, S_interp, w_perim_interp, Dh_i);
+          auto ki = computeInterpolatedValue(
+              k_grid[i_ch][iz], k_grid[i_ch][iz - 1], "central_difference", 0.5);
+
+          Pe = 1.0 / ((fi * dz / Dh_i + ki) * 0.5) * mdot_loc / std::abs(mdot_loc);
+        }
+        // Computing interpolation weights
+        auto alpha = computeInterpolationCoefficients(_interpolation_scheme, Pe);
+
         // inlet, outlet, and interpolated density
         auto rho_in = (*_rho_soln)(node_in);
         auto rho_out = (*_rho_soln)(node_out);
         auto rho_interp =
-            this->computeInterpolatedValue(rho_out, rho_in, "central_difference", 0.5);
+            this->computeInterpolatedValue(rho_out, rho_in, _interpolation_scheme, Pe);
 
         // inlet, outlet, and interpolated viscosity
         auto mu_in = (*_mu_soln)(node_in);
         auto mu_out = (*_mu_soln)(node_out);
-        auto mu_interp = this->computeInterpolatedValue(mu_out, mu_in, "central_difference", 0.5);
+        auto mu_interp = this->computeInterpolatedValue(mu_out, mu_in, _interpolation_scheme, Pe);
 
         // inlet, outlet, and interpolated axial surface area
         auto S_in = (*_S_flow_soln)(node_in);
         auto S_out = (*_S_flow_soln)(node_out);
-        auto S_interp = this->computeInterpolatedValue(S_out, S_in, "central_difference", 0.5);
+        auto S_interp = this->computeInterpolatedValue(S_out, S_in, _interpolation_scheme, Pe);
 
         // inlet, outlet, and interpolated wetted perimeter
         auto w_perim_in = (*_w_perim_soln)(node_in);
         auto w_perim_out = (*_w_perim_soln)(node_out);
         auto w_perim_interp =
-            this->computeInterpolatedValue(w_perim_out, w_perim_in, "central_difference", 0.5);
-
-        // interpolation weight coefficient
-        PetscScalar Pe = 0.5;
-        auto alpha = computeInterpolationCoefficients("central_difference", Pe);
+            this->computeInterpolatedValue(w_perim_out, w_perim_in, _interpolation_scheme, Pe);
 
         // hydraulic diameter in the i direction
         auto Dh_i = 4.0 * S_interp / w_perim_interp;
@@ -483,7 +513,7 @@ LiquidMetalSubChannel1PhaseProblem::computeDP(int iblock)
 
         // Adding RHS elements
         PetscScalar mdot_old_interp = computeInterpolatedValue(
-            _mdot_soln->old(node_out), _mdot_soln->old(node_in), "central_difference", Pe);
+            _mdot_soln->old(node_out), _mdot_soln->old(node_in), _interpolation_scheme, Pe);
         PetscScalar value_vec_tt = _TR * mdot_old_interp * dz / _dt;
         PetscInt row_vec_tt = i_ch + _n_channels * iz_ind;
         VecSetValues(_amc_time_derivative_rhs, 1, &row_vec_tt, &value_vec_tt, ADD_VALUES);
@@ -524,13 +554,13 @@ LiquidMetalSubChannel1PhaseProblem::computeDP(int iblock)
           auto * node_out_i = _subchannel_mesh.getChannelNode(ii_ch, iz);
           auto * node_out_j = _subchannel_mesh.getChannelNode(jj_ch, iz);
           auto rho_i = computeInterpolatedValue(
-              (*_rho_soln)(node_out_i), (*_rho_soln)(node_in_i), "central_difference", Pe);
+              (*_rho_soln)(node_out_i), (*_rho_soln)(node_in_i), _interpolation_scheme, Pe);
           auto rho_j = computeInterpolatedValue(
-              (*_rho_soln)(node_out_j), (*_rho_soln)(node_in_j), "central_difference", Pe);
+              (*_rho_soln)(node_out_j), (*_rho_soln)(node_in_j), _interpolation_scheme, Pe);
           auto S_i = computeInterpolatedValue(
-              (*_S_flow_soln)(node_out_i), (*_S_flow_soln)(node_in_i), "central_difference", Pe);
+              (*_S_flow_soln)(node_out_i), (*_S_flow_soln)(node_in_i), _interpolation_scheme, Pe);
           auto S_j = computeInterpolatedValue(
-              (*_S_flow_soln)(node_out_j), (*_S_flow_soln)(node_in_j), "central_difference", Pe);
+              (*_S_flow_soln)(node_out_j), (*_S_flow_soln)(node_in_j), _interpolation_scheme, Pe);
           auto u_star = 0.0;
           // figure out donor axial velocity
           if (_Wij(i_gap, cross_index) > 0.0)
@@ -649,11 +679,11 @@ LiquidMetalSubChannel1PhaseProblem::computeDP(int iblock)
 
         /// Friction term
         PetscScalar mdot_interp = computeInterpolatedValue(
-            (*_mdot_soln)(node_out), (*_mdot_soln)(node_in), "central_difference", Pe);
+            (*_mdot_soln)(node_out), (*_mdot_soln)(node_in), _interpolation_scheme, Pe);
         auto Re = ((mdot_interp / S_interp) * Dh_i / mu_interp);
         auto fi = computeFrictionFactor(Re, i_ch, S_interp, w_perim_interp, Dh_i);
         auto ki = computeInterpolatedValue(
-            k_grid[i_ch][iz], k_grid[i_ch][iz - 1], "central_difference", Pe);
+            k_grid[i_ch][iz], k_grid[i_ch][iz - 1], _interpolation_scheme, Pe);
         // if (ki != 0.0)
         //   _console << " ki : " << ki << "\n";
         auto coef = (fi * dz / Dh_i + ki) * 0.5 * std::abs((*_mdot_soln)(node_out)) /
@@ -756,7 +786,7 @@ LiquidMetalSubChannel1PhaseProblem::computeDP(int iblock)
           // inlet, outlet, and interpolated axial surface area
           auto S_in = (*_S_flow_soln)(node_in);
           auto S_out = (*_S_flow_soln)(node_out);
-          auto S_interp = this->computeInterpolatedValue(S_out, S_in, "central_difference", 0.5);
+          auto S_interp = this->computeInterpolatedValue(S_out, S_in, _interpolation_scheme, 0.5);
 
           // Setting solutions
           if (S_interp != 0)
@@ -1176,12 +1206,30 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
         auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
         auto S_in = (*_S_flow_soln)(node_in);
         auto S_out = (*_S_flow_soln)(node_out);
-
-        // interpolation weight coefficient
-        PetscScalar Pe = 0.5;
-        auto alpha = computeInterpolationCoefficients("central_difference", Pe);
-        auto S_interp = computeInterpolatedValue(S_in, S_out, "central_difference", Pe);
+        auto S_interp = computeInterpolatedValue(S_out, S_in, "central_difference", 0.5);
         auto volume = dz * S_interp;
+
+        PetscScalar Pe = 0.5;
+        if (_interpolation_scheme.compare("exponential") == 0)
+        {
+          // Compute the Peclet number
+          auto w_perim_in = (*_w_perim_soln)(node_in);
+          auto w_perim_out = (*_w_perim_soln)(node_out);
+          auto w_perim_interp =
+              this->computeInterpolatedValue(w_perim_out, w_perim_in, "central_difference", 0.5);
+          auto K_in = _fp->k_from_p_T((*_P_soln)(node_in), (*_T_soln)(node_in));
+          auto K_out = _fp->k_from_p_T((*_P_soln)(node_out), (*_T_soln)(node_out));
+          auto K = this->computeInterpolatedValue(K_out, K_in, "central_difference", 0.5);
+          auto cp_in = _fp->cp_from_p_T((*_P_soln)(node_in), (*_T_soln)(node_in));
+          auto cp_out = _fp->cp_from_p_T((*_P_soln)(node_out), (*_T_soln)(node_out));
+          auto cp = this->computeInterpolatedValue(cp_out, cp_in, "central_difference", 0.5);
+          auto mdot_loc = this->computeInterpolatedValue(
+              (*_mdot_soln)(node_out), (*_mdot_soln)(node_in), "central_difference", 0.5);
+          // hydraulic diameter in the i direction
+          auto Dh_i = 4.0 * S_interp / w_perim_interp;
+          Pe = mdot_loc * Dh_i * cp / (K * S_interp) * (mdot_loc / std::abs(mdot_loc));
+        }
+        auto alpha = computeInterpolationCoefficients(_interpolation_scheme, Pe);
 
         /// Time derivative term
         if (iz == first_node)
@@ -1207,43 +1255,96 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
 
         // Adding RHS elements
         PetscScalar rho_old_interp = computeInterpolatedValue(
-            _rho_soln->old(node_out), _rho_soln->old(node_in), "central_difference", Pe);
+            _rho_soln->old(node_out), _rho_soln->old(node_in), _interpolation_scheme, Pe);
         PetscScalar h_old_interp = computeInterpolatedValue(
-            _h_soln->old(node_out), _h_soln->old(node_in), "central_difference", Pe);
+            _h_soln->old(node_out), _h_soln->old(node_in), _interpolation_scheme, Pe);
         PetscScalar value_vec_tt = _TR * rho_old_interp * h_old_interp * volume / _dt;
         PetscInt row_vec_tt = i_ch + _n_channels * iz_ind;
         VecSetValues(_hc_time_derivative_rhs, 1, &row_vec_tt, &value_vec_tt, ADD_VALUES);
 
         /// Advective derivative term
+        // if (iz == first_node)
+        // {
+        //   PetscScalar value_vec_at = (*_mdot_soln)(node_in) * (*_h_soln)(node_in);
+        //   PetscInt row_vec_at = i_ch + _n_channels * iz_ind;
+        //   VecSetValues(_hc_advective_derivative_rhs, 1, &row_vec_at, &value_vec_at, ADD_VALUES);
+        // }
+        // else
+        // {
+        //   PetscInt row_at = i_ch + _n_channels * iz_ind;
+        //   PetscInt col_at = i_ch + _n_channels * (iz_ind - 1);
+        //   PetscScalar value_at = -1.0 * (*_mdot_soln)(node_in);
+        //   MatSetValues(_hc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at,
+        //   ADD_VALUES);
+        // }
+        // // Adding diagonal elements
+        // PetscInt row_at = i_ch + _n_channels * iz_ind;
+        // PetscInt col_at = i_ch + _n_channels * iz_ind;
+        // PetscScalar value_at = (*_mdot_soln)(node_out);
+        // MatSetValues(_hc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at,
+        // ADD_VALUES);
+
         if (iz == first_node)
         {
-          PetscScalar value_vec_at = (*_mdot_soln)(node_in) * (*_h_soln)(node_in);
-          PetscInt row_vec_at = i_ch + _n_channels * iz_ind;
-          VecSetValues(_hc_advective_derivative_rhs, 1, &row_vec_at, &value_vec_at, ADD_VALUES);
+          PetscInt row_at = i_ch + _n_channels * iz_ind;
+          PetscScalar value_at = alpha * (*_mdot_soln)(node_in) * (*_h_soln)(node_in);
+          VecSetValues(_hc_advective_derivative_rhs, 1, &row_at, &value_at, ADD_VALUES);
+
+          value_at = alpha * (*_mdot_soln)(node_out) - (1 - alpha) * (*_mdot_soln)(node_in);
+          PetscInt col_at = i_ch + _n_channels * iz_ind;
+          MatSetValues(_hc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, ADD_VALUES);
+
+          value_at = (1 - alpha) * (*_mdot_soln)(node_out);
+          col_at = i_ch + _n_channels * (iz_ind + 1);
+          MatSetValues(_hc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, ADD_VALUES);
         }
         else if (iz == last_node)
         {
           PetscInt row_at = i_ch + _n_channels * iz_ind;
-          PetscInt col_at = i_ch + _n_channels * (iz_ind - 1);
-          PetscScalar value_at = -1.0 * (*_mdot_soln)(node_in);
-          MatSetValues(
-              _hc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, INSERT_VALUES);
+          PetscScalar value_at = 1.0 * (*_mdot_soln)(node_out);
+          PetscInt col_at = i_ch + _n_channels * iz_ind;
+          MatSetValues(_hc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, ADD_VALUES);
+
+          value_at = -1.0 * (*_mdot_soln)(node_in);
+          col_at = i_ch + _n_channels * (iz_ind - 1);
+          MatSetValues(_hc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, ADD_VALUES);
         }
         else
         {
           PetscInt row_at = i_ch + _n_channels * iz_ind;
-          PetscInt col_at = i_ch + _n_channels * (iz_ind - 1);
-          PetscScalar value_at = -1.0 * (*_mdot_soln)(node_in);
-          MatSetValues(
-              _hc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, INSERT_VALUES);
+          PetscInt col_at;
+
+          PetscScalar value_at = -alpha * (*_mdot_soln)(node_in);
+          if ((*_mdot_soln)(node_in) > 0)
+          {
+            col_at = i_ch + _n_channels * (iz_ind - 1);
+          }
+          else
+          {
+            col_at = i_ch + _n_channels * (iz_ind);
+          }
+          col_at = i_ch + _n_channels * (iz_ind - 1);
+          MatSetValues(_hc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, ADD_VALUES);
+
+          value_at = alpha * (*_mdot_soln)(node_out) - (1 - alpha) * (*_mdot_soln)(node_in);
+          col_at = i_ch + _n_channels * iz_ind;
+          MatSetValues(_hc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, ADD_VALUES);
+
+          value_at = (1 - alpha) * (*_mdot_soln)(node_out);
+          if ((*_mdot_soln)(node_out) > 0)
+          {
+            col_at = i_ch + _n_channels * (iz_ind);
+          }
+          else
+          {
+            col_at = i_ch + _n_channels * (iz_ind + 1);
+          }
+          col_at = i_ch + _n_channels * (iz_ind + 1);
+          MatSetValues(_hc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, ADD_VALUES);
         }
 
-        // Adding diagonal elements
-        PetscInt row_at = i_ch + _n_channels * iz_ind;
-        PetscInt col_at = i_ch + _n_channels * iz_ind;
-        PetscScalar value_at = (*_mdot_soln)(node_out);
-        MatSetValues(
-            _hc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, INSERT_VALUES);
+        Pe = 0.5;
+        alpha = computeInterpolationCoefficients(_interpolation_scheme, Pe);
 
         /// Axial heat conduction
         auto * node_center = _subchannel_mesh.getChannelNode(i_ch, iz);
@@ -1721,7 +1822,7 @@ LiquidMetalSubChannel1PhaseProblem::externalSolve()
     if (P_it == P_it_max and _n_blocks != 1)
     {
       _console << "Reached maximum number of axial pressure iterations" << std::endl;
-      // _converged = false;
+      _converged = false;
     }
     _console << "Solving Outer Iteration : " << P_it << std::endl;
     auto P_L2norm_old_axial = _P_soln->L2norm();

@@ -2,7 +2,7 @@
   [subchannel]
     type = DetailedTriSubChannelMeshGenerator
     nrings = 3
-    n_cells = 72
+    n_cells = 36
     flat_to_flat = 3.41e-2
     heated_length = 0.5334
     unheated_length_entry = 0.3048
