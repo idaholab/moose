@@ -16,7 +16,7 @@ P_out = 2.0e5 # Pa
   [subchannel]
     type = TriSubChannelMeshGenerator
     nrings = 3
-    n_cells = 72
+    n_cells = 36
     flat_to_flat = 3.41e-2
     heated_length = 0.5334
     unheated_length_entry = 0.3048
@@ -30,7 +30,7 @@ P_out = 2.0e5 # Pa
     z_blockage = '0.6858 0.69215'
     index_blockage = '0 1 2 3 4 5'
     reduction_blockage = '0.1 0.1 0.1 0.1 0.1 0.1'
-    k_blockage = '1 1 1 1 1 1'
+    k_blockage = '0.0 0.0 0.0 0.0 0.0 0.0'
   []
 []
 
@@ -83,7 +83,7 @@ P_out = 2.0e5 # Pa
   T_tol = 1.0e-5
   implicit = true
   segregated = false
-  # interpolation_scheme = upwind
+  interpolation_scheme = 'upwind'
 []
 
 [ICs]
