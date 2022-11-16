@@ -1721,7 +1721,7 @@ LiquidMetalSubChannel1PhaseProblem::externalSolve()
     if (P_it == P_it_max and _n_blocks != 1)
     {
       _console << "Reached maximum number of axial pressure iterations" << std::endl;
-      _converged = false;
+      // _converged = false;
     }
     _console << "Solving Outer Iteration : " << P_it << std::endl;
     auto P_L2norm_old_axial = _P_soln->L2norm();
@@ -1740,7 +1740,7 @@ LiquidMetalSubChannel1PhaseProblem::externalSolve()
         {
           _console << "Reached maximum number of temperature iterations for block: " << iblock
                    << std::endl;
-          _converged = false;
+          // _converged = false;
         }
         auto T_L2norm_old_block = _T_soln->L2norm();
 

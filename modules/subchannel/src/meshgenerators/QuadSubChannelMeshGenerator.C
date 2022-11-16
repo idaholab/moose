@@ -159,23 +159,18 @@ QuadSubChannelMeshGenerator::QuadSubChannelMeshGenerator(const InputParameters &
   for (unsigned int i = 0; i < _n_channels; i++)
     _k_grid[i] = kgrid;
 
-  // Figure out how many axial layers are blocked
-  int axial_levels_blocked = std::round((_z_blockage.back() - _z_blockage.front()) * _n_cells / L);
-
   // Add blockage resistance to the 2D grid resistane array
   Real dz = L / _n_cells;
   for (unsigned int i = 0; i < _n_cells + 1; i++)
   {
-    if ((dz * i >= _z_blockage.front() && dz * i <= _z_blockage.back()) &&
-        axial_levels_blocked != 0)
+    if ((dz * i >= _z_blockage.front() && dz * i <= _z_blockage.back()))
     {
       unsigned int index(0);
       for (const auto & i_ch : _index_blockage)
       {
-        _k_grid[i_ch][i] += _k_blockage[index]; //(_k_blockage[index] / axial_levels_blocked);
+        _k_grid[i_ch][i] += _k_blockage[index];
         index++;
       }
-      // break;
     }
   }
 
