@@ -81,6 +81,8 @@ public:
 
   virtual Real e_from_p_rho(Real p, Real rho) const override;
   virtual ADReal e_from_p_rho(const ADReal & p, const ADReal & rho) const override;
+  template <typename T>
+  T e_from_p_rho_template(const T & p, const T & rho) const;
   void e_from_p_rho(Real p, Real rho, Real & e, Real & de_dp, Real & de_drho) const override;
   void e_from_p_rho(const ADReal & p,
                     const ADReal & rho,
@@ -2177,7 +2179,7 @@ Water97FluidProperties::T_from_p_rho(const T & p, const T & rho) const
   // z = T
   auto lambda =
       [this](const T & p, const T & temperature, T & rho, T & drho_dp, T & drho_dtemperature)
-  { rho_from_p_T(p, temperature, rho, drho_dp, drho_dtemperature); };
+  { rho_from_p_T_template(p, temperature, rho, drho_dp, drho_dtemperature); };
   return FluidPropertiesUtils::NewtonSolve(p, rho, _T_initial_guess, _tolerance, lambda);
 }
 
@@ -2427,6 +2429,14 @@ Water97FluidProperties::p_from_v_e_template(const T & v, const T & e) const
   auto lambda = [this](const T & rho, const T & p, T & e, T & de_drho, T & de_dp)
   { e_from_p_rho(p, rho, e, de_dp, de_drho); };
   return FluidPropertiesUtils::NewtonSolve(rho, e, _p_initial_guess, _tolerance, lambda).first;
+}
+
+template <typename T>
+T
+Water97FluidProperties::e_from_p_rho_template(const T & p, const T & rho) const
+{
+  const auto temperature = T_from_p_rho(p, rho).first;
+  return e_from_p_T_template(p, temperature);
 }
 
 template <typename T>
