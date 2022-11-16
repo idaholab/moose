@@ -1478,13 +1478,15 @@ private:
   template <typename T>
   std::pair<T, T> p_T_from_v_h(const T & v, const T & h) const;
 
-  /**
-   * Assign the derivatives of the qoi to the d_qoi. This is a null operation if \p T is not a dual
-   * number
-   */
   template <typename T>
-  void assignDerivatives(T & /*d_qoi*/, const T & /*qoi*/) const
+  void assignQoIs(const T & /*x*/,
+                  const T & /*y*/,
+                  T & /*z*/,
+                  T & /*dz_dx*/,
+                  T & /*dz_dy*/,
+                  const FPDualReal & /*raw_z*/) const
   {
+    mooseError("Not implemented for this template type");
   }
 };
 
@@ -1492,9 +1494,34 @@ private:
 
 template <>
 inline void
-Water97FluidProperties::assignDerivatives(ADReal & d_qoi, const ADReal & qoi) const
+Water97FluidProperties::assignQoIs(const Real & /*x*/,
+                                   const Real & /*y*/,
+                                   Real & z,
+                                   Real & dz_dx,
+                                   Real & dz_dy,
+                                   const FPDualReal & raw_z) const
 {
-  d_qoi.derivatives() = qoi.derivatives();
+  z = raw_z.value();
+  dz_dx = raw_z.derivatives()[0];
+  dz_dy = raw_z.derivatives()[1];
+}
+
+template <>
+inline void
+Water97FluidProperties::assignQoIs(const ADReal & x,
+                                   const ADReal & y,
+                                   ADReal & z,
+                                   ADReal & dz_dx,
+                                   ADReal & dz_dy,
+                                   const FPDualReal & raw_z) const
+{
+  z = raw_z.value();
+  dz_dx = raw_z.derivatives()[0];
+  dz_dy = raw_z.derivatives()[1];
+
+  z.derivatives() = dz_dx.value() * x.derivatives() + dz_dy.value() * y.derivatives();
+  dz_dx.derivatives() = x.derivatives();
+  dz_dy.derivatives() = y.derivatives();
 }
 
 template <typename T>
@@ -1991,80 +2018,12 @@ void
 Water97FluidProperties::rho_from_p_T_template(
     const T & pressure, const T & temperature, T & rho, T & drho_dp, T & drho_dT) const
 {
-  T pi, tau, ddensity_dp, ddensity_dT;
+  auto functor = [this](const T & pressure, const T & temperature)
+  { return rho_from_p_T_template(pressure, temperature); };
+  auto ad_functor = [this](const FPDualReal & pressure, const FPDualReal & temperature)
+  { return rho_from_p_T_template(pressure, temperature); };
 
-  // Determine which region the point is in
-  unsigned int region =
-      inRegion(MetaPhysicL::raw_value(pressure), MetaPhysicL::raw_value(temperature));
-
-  switch (region)
-  {
-    case 1:
-    {
-      pi = pressure / _p_star[0];
-      tau = _T_star[0] / temperature;
-      T dgdp = dgamma1_dpi(pi, tau);
-      ddensity_dp = -d2gamma1_dpi2(pi, tau) / (_Rw * temperature * dgdp * dgdp);
-      ddensity_dT = -pressure * (dgdp - tau * d2gamma1_dpitau(pi, tau)) /
-                    (_Rw * pi * temperature * temperature * dgdp * dgdp);
-      break;
-    }
-
-    case 2:
-    {
-      pi = pressure / _p_star[1];
-      tau = _T_star[1] / temperature;
-      T dgdp = dgamma2_dpi(pi, tau);
-      ddensity_dp = -d2gamma2_dpi2(pi, tau) / (_Rw * temperature * dgdp * dgdp);
-      ddensity_dT = -pressure * (dgdp - tau * d2gamma2_dpitau(pi, tau)) /
-                    (_Rw * pi * temperature * temperature * dgdp * dgdp);
-      break;
-    }
-
-    case 3:
-    {
-      // Calculate density first, then use that in Helmholtz free energy
-      T density = densityRegion3(pressure, temperature);
-      T delta = density / _rho_critical;
-      tau = _T_star[2] / temperature;
-      T dpdd = dphi3_ddelta(delta, tau);
-      T d2pdd2 = d2phi3_ddelta2(delta, tau);
-      ddensity_dp = 1.0 / (_Rw * temperature * delta * (2.0 * dpdd + delta * d2pdd2));
-      ddensity_dT = density * (tau * d2phi3_ddeltatau(delta, tau) - dpdd) / temperature /
-                    (2.0 * dpdd + delta * d2pdd2);
-      break;
-    }
-
-    case 5:
-    {
-      pi = pressure / _p_star[4];
-      tau = _T_star[4] / temperature;
-      T dgdp = dgamma5_dpi(pi, tau);
-      ddensity_dp = -d2gamma5_dpi2(pi, tau) / (_Rw * temperature * dgdp * dgdp);
-      ddensity_dT = -pressure * (dgdp - tau * d2gamma5_dpitau(pi, tau)) /
-                    (_Rw * pi * temperature * temperature * dgdp * dgdp);
-      break;
-    }
-
-    default:
-      mooseError("inRegion() has given an incorrect region");
-  }
-
-  rho = rho_from_p_T(pressure, temperature);
-  drho_dp = ddensity_dp;
-  drho_dT = ddensity_dT;
-
-#ifdef DEBUG
-  static constexpr Real perturbation_factor = 1 + 1e-8;
-  const auto perturbed_rho_p = rho_from_p_T(perturbation_factor * pressure, temperature);
-  const auto perturbed_rho_T = rho_from_p_T(pressure, perturbation_factor * temperature);
-  const auto Jp = (perturbed_rho_p - rho) / 1e-8;
-  const auto JT = (perturbed_rho_T - rho) / 1e-8;
-  if (MetaPhysicL::raw_value(std::abs((Jp - drho_dp) / Jp)) > 1e-8)
-    mooseError("Bad pressure Jacobian in NewtonSolve");
-  if (MetaPhysicL::raw_value(std::abs((JT - drho_dT) / Jp)) > 1e-8)
-    mooseError("Bad temperature Jacobian in NewtonSolve");
-#endif
+  xyDerivatives(pressure, temperature, rho, drho_dp, drho_dT, functor, ad_functor);
 }
 
 template <typename T>

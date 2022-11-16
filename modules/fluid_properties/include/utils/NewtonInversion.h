@@ -9,8 +9,8 @@
 
 #pragma once
 
-// MOOSE includes
 #include "Moose.h"
+#include "MooseUtils.h"
 
 namespace FluidPropertiesUtils
 {
@@ -55,11 +55,11 @@ NewtonSolve(const T & x,
 
 #ifdef DEBUG
     static constexpr Real perturbation_factor = 1 + 1e-8;
-    T perturbed_y, dummy;
-    func(x, perturbation_factor * z, perturbed_y, dummy, dummy);
+    T perturbed_y, dummy, dummy2;
+    func(x, perturbation_factor * z, perturbed_y, dummy, dummy2);
     // Check the accuracy of the Jacobian
-    auto J_differenced = (perturbed_y - new_y) / 1e-8;
-    if (MetaPhysicL::raw_value(std::abs((J_differenced - dy_dz) / J_differenced)) > 1e-8)
+    auto J_differenced = (perturbed_y - new_y) / (1e-8 * z);
+    if (!MooseUtils::relativeFuzzyEqual(J_differenced, dy_dz, 1e-4))
       mooseError("Bad Jacobian in NewtonSolve");
 #endif
 
