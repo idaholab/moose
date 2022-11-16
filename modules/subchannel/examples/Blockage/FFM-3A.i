@@ -29,8 +29,8 @@ P_out = 2.0e5 # Pa
     spacer_k = '0.0'
     z_blockage = '0.6858 0.69215'
     index_blockage = '0 1 2 3 4 5'
-    reduction_blockage = '0.1 0.1 0.1 0.1 0.1 0.1'
-    k_blockage = '4 4 4 4 4 4 '
+    reduction_blockage = '0.05 0.05 0.05 0.05 0.05 0.05'
+    k_blockage = '10 10 10 10 10 10 '
   []
 []
 
