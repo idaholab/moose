@@ -479,11 +479,7 @@ SinglePhaseFluidProperties::xyDerivatives(const T x,
                                           T & z,
                                           T & dz_dx,
                                           T & dz_dy,
-                                          const Functor &
-#ifdef DEBUG
-                                              z_from_x_y
-#endif
-                                          ,
+                                          const Functor & libmesh_dbg_var(z_from_x_y),
                                           const ADFunctor & z_from_x_y_ad)
 {
   FPDualReal raw_x = MetaPhysicL::raw_value(x);
@@ -493,7 +489,7 @@ SinglePhaseFluidProperties::xyDerivatives(const T x,
   const FPDualReal raw_z = z_from_x_y_ad(raw_x, raw_y);
   assignQoIs(x, y, z, dz_dx, dz_dy, raw_z);
 
-#ifdef DEBUG
+#ifndef NDEBUG
   const auto straight_z = z_from_x_y(x, y);
   checkDerivatives(z, straight_z);
   static constexpr Real perturbation_factor = 1 + 1e-8;

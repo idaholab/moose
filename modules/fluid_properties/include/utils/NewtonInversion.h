@@ -56,7 +56,7 @@ NewtonSolve(const T & x,
     // immediately return if we are converged
     const bool converged = convergence_check(f, y);
 
-#ifdef DEBUG
+#ifndef NDEBUG
     static constexpr Real perturbation_factor = 1 + 1e-8;
     T perturbed_y, dummy, dummy2;
     func(x, perturbation_factor * z, perturbed_y, dummy, dummy2);
@@ -114,7 +114,7 @@ NewtonSolve(const DenseVector<T> & y_in,
   DenseMatrix<T> J(system_size, system_size);
   std::array<std::array<T, 2>, 2> dy_dz;
   unsigned int iteration = 0;
-#ifdef DEBUG
+#ifndef NDEBUG
   DenseVector<Real> svs(system_size), evs_real(system_size), evs_imag(system_size);
   DenseMatrix<Real> raw_J(system_size, system_size), raw_J2(system_size, system_size);
 #endif
@@ -130,7 +130,7 @@ NewtonSolve(const DenseVector<T> & y_in,
     if (convergence_check(minus_R))
       break;
 
-#ifdef DEBUG
+#ifndef NDEBUG
     //
     // Check accuracy of Jacobian
     //
@@ -159,7 +159,7 @@ NewtonSolve(const DenseVector<T> & y_in,
       minus_R(i) /= diagonal;
     }
 
-#ifdef DEBUG
+#ifndef NDEBUG
     //
     // Check nature of linearized system
     //
