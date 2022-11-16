@@ -19,47 +19,6 @@
 
 namespace FluidPropertiesUtils
 {
-Real
-NewtonSolve(const Real & x,
-            const Real & y,
-            const Real & z_initial_guess,
-            const Real & tolerance,
-            std::function<void(Real, Real, Real &, Real &, Real &)> const & func,
-            const unsigned int max_its)
-{
-  Real next_z;
-  Real f;
-
-  // Initialize algorithm
-  Real current_z = z_initial_guess;
-  unsigned int iteration = 1;
-  Real residual = 10;
-
-  while (residual > tolerance)
-  {
-    Real new_y, df_dx, df_dz;
-    func(x, current_z, new_y, df_dx, df_dz);
-    f = new_y - y;
-    next_z = current_z - (f / df_dz);
-
-    // residual is absolute residual, not relative
-    residual = std::abs(current_z - next_z);
-
-    // Check for NaNs
-    if (std::isnan(next_z))
-      mooseError("NaN detected in Newton solve");
-
-    current_z = next_z;
-    ++iteration;
-
-    // Check for divergence or slow convergence of Newton's method
-    if (iteration > max_its)
-      mooseError(
-          "Newton solve convergence failed: maximum number of iterations, ", max_its, " exceeded");
-  }
-  return current_z;
-}
-
 void
 NewtonSolve2D(const Real & f,
               const Real & g,
@@ -135,5 +94,4 @@ NewtonSolve2D(const Real & f,
   y_final = current_vec[1];
   converged = true;
 }
-
 } // namespace FluidPropertiesUtils
