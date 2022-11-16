@@ -418,13 +418,45 @@ private:
                          T & /*z*/,
                          T & /*dz_dx*/,
                          T & /*dz_dy*/,
-                         const FPDualReal & /*raw_z*/)
-  {
-    ::mooseError("Not implemented for this template type");
-  }
+                         const FPDualReal & /*raw_z*/);
+
+  template <typename T>
+  static void checkDerivatives(const T & /*a*/, const T & /*b*/);
 };
 
 #pragma GCC diagnostic pop
+
+template <typename T>
+inline void
+SinglePhaseFluidProperties::checkDerivatives(const T & a, const T & b)
+{
+  mooseAssert(MooseUtils::relativeFuzzyEqual(a.value(), b.value(), 1e-2), "Must be equal");
+  mooseAssert(a.derivatives().size() == b.derivatives().size(), "Must be equal");
+  const auto & a_derivs = a.derivatives().nude_data();
+  const auto & b_derivs = b.derivatives().nude_data();
+  for (const auto i : make_range(a.derivatives().size()))
+    mooseAssert(MooseUtils::relativeFuzzyEqual(a_derivs[i], b_derivs[i], 1e-2), "Must be equal");
+}
+
+template <>
+inline void
+SinglePhaseFluidProperties::checkDerivatives(const Real &, const Real &)
+{
+}
+
+template <typename T>
+void
+SinglePhaseFluidProperties::assignQoIs(
+    const T & x, const T & y, T & z, T & dz_dx, T & dz_dy, const FPDualReal & raw_z)
+{
+  z = raw_z.value();
+  dz_dx = raw_z.derivatives()[0];
+  dz_dy = raw_z.derivatives()[1];
+
+  z.derivatives() = dz_dx.value() * x.derivatives() + dz_dy.value() * y.derivatives();
+  dz_dx.derivatives() = x.derivatives();
+  dz_dy.derivatives() = y.derivatives();
+}
 
 template <>
 inline void
@@ -438,24 +470,6 @@ SinglePhaseFluidProperties::assignQoIs(const Real & /*x*/,
   z = raw_z.value();
   dz_dx = raw_z.derivatives()[0];
   dz_dy = raw_z.derivatives()[1];
-}
-
-template <>
-inline void
-SinglePhaseFluidProperties::assignQoIs(const ADReal & x,
-                                       const ADReal & y,
-                                       ADReal & z,
-                                       ADReal & dz_dx,
-                                       ADReal & dz_dy,
-                                       const FPDualReal & raw_z)
-{
-  z = raw_z.value();
-  dz_dx = raw_z.derivatives()[0];
-  dz_dy = raw_z.derivatives()[1];
-
-  z.derivatives() = dz_dx.value() * x.derivatives() + dz_dy.value() * y.derivatives();
-  dz_dx.derivatives() = x.derivatives();
-  dz_dy.derivatives() = y.derivatives();
 }
 
 template <typename T, typename Functor, typename ADFunctor>
@@ -480,14 +494,24 @@ SinglePhaseFluidProperties::xyDerivatives(const T x,
   assignQoIs(x, y, z, dz_dx, dz_dy, raw_z);
 
 #ifdef DEBUG
+  const auto straight_z = z_from_x_y(x, y);
+  checkDerivatives(z, straight_z);
   static constexpr Real perturbation_factor = 1 + 1e-8;
   const auto perturbed_z_x = z_from_x_y(perturbation_factor * x, y);
   const auto perturbed_z_y = z_from_x_y(x, perturbation_factor * y);
   const auto Jx = (perturbed_z_x - z) / (1e-8 * x);
   const auto Jy = (perturbed_z_y - z) / (1e-8 * y);
-  if (!MooseUtils::relativeFuzzyEqual(Jx, dz_dx, 1e-4))
+  if (!MooseUtils::relativeFuzzyEqual(Jx, dz_dx, 1e-2))
+  {
+    const FPDualReal raw_z = z_from_x_y_ad(raw_x, raw_y);
+    assignQoIs(x, y, z, dz_dx, dz_dy, raw_z);
     ::mooseError("Bad x Jacobian");
-  if (!MooseUtils::relativeFuzzyEqual(Jy, dz_dy, 1e-4))
+  }
+  if (!MooseUtils::relativeFuzzyEqual(Jy, dz_dy, 1e-2))
+  {
+    const FPDualReal raw_z = z_from_x_y_ad(raw_x, raw_y);
+    assignQoIs(x, y, z, dz_dx, dz_dy, raw_z);
     ::mooseError("Bad y Jacobian");
+  }
 #endif
 }

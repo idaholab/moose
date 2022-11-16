@@ -11,6 +11,7 @@
 
 #include "Moose.h"
 #include "MooseUtils.h"
+#include "libmesh/dense_matrix.h"
 
 namespace FluidPropertiesUtils
 {
@@ -50,8 +51,10 @@ NewtonSolve(const T & x,
     func(x, z, new_y, dy_dx, dy_dz);
     f = new_y - y;
 
-    if (convergence_check(f, y))
-      break;
+    // We always want to perform at least one update in order to get derivatives on z correct (z
+    // corresponding to the initial guess will have no derivative information), so we don't
+    // immediately return if we are converged
+    const bool converged = convergence_check(f, y);
 
 #ifdef DEBUG
     static constexpr Real perturbation_factor = 1 + 1e-8;
@@ -59,8 +62,8 @@ NewtonSolve(const T & x,
     func(x, perturbation_factor * z, perturbed_y, dummy, dummy2);
     // Check the accuracy of the Jacobian
     auto J_differenced = (perturbed_y - new_y) / (1e-8 * z);
-    if (!MooseUtils::relativeFuzzyEqual(J_differenced, dy_dz, 1e-4))
-      mooseError("Bad Jacobian in NewtonSolve");
+    if (!MooseUtils::relativeFuzzyEqual(J_differenced, dy_dz, 1e-2))
+      mooseDoOnce(mooseWarning("Bad Jacobian in NewtonSolve"));
 #endif
 
     z += -(f / dy_dz);
@@ -68,6 +71,9 @@ NewtonSolve(const T & x,
     // Check for NaNs
     if (std::isnan(z))
       mooseError("NaN detected in Newton solve");
+
+    if (converged)
+      break;
   } while (++iteration < max_its);
 
   // Check for divergence or slow convergence of Newton's method
@@ -108,6 +114,10 @@ NewtonSolve(const DenseVector<T> & y_in,
   DenseMatrix<T> J(system_size, system_size);
   std::array<std::array<T, 2>, 2> dy_dz;
   unsigned int iteration = 0;
+#ifdef DEBUG
+  DenseVector<Real> svs(system_size), evs_real(system_size), evs_imag(system_size);
+  DenseMatrix<Real> raw_J(system_size, system_size), raw_J2(system_size, system_size);
+#endif
 
   do
   {
@@ -119,6 +129,49 @@ NewtonSolve(const DenseVector<T> & y_in,
 
     if (convergence_check(minus_R))
       break;
+
+#ifdef DEBUG
+    //
+    // Check accuracy of Jacobian
+    //
+    DenseVector<T> perturbed_z;
+    for (const auto i : make_range(system_size))
+      for (const auto j : make_range(system_size))
+      {
+        static constexpr Real perturbation_factor = 1 + 1e-8;
+        T perturbed_y, dummy, dummy2;
+        perturbed_z = z;
+        perturbed_z(j) *= perturbation_factor;
+        func[i](perturbed_z(0), perturbed_z(1), perturbed_y, dummy, dummy2);
+        // Check the accuracy of the Jacobian
+        auto J_differenced = (perturbed_y - y(i)) / (1e-8 * z(j));
+        if (!MooseUtils::relativeFuzzyEqual(J_differenced, J(i, j), 1e-2))
+          mooseError("Bad Jacobian in NewtonSolve");
+      }
+#endif
+
+    // Do some Jacobi preconditioning
+    for (const auto i : make_range(system_size))
+    {
+      const auto diagonal = J(i, i);
+      for (const auto j : make_range(system_size))
+        J(i, j) /= diagonal;
+      minus_R(i) /= diagonal;
+    }
+
+#ifdef DEBUG
+    //
+    // Check nature of linearized system
+    //
+    for (const auto i : make_range(system_size))
+      for (const auto j : make_range(system_size))
+      {
+        raw_J(i, j) = MetaPhysicL::raw_value(J(i, j));
+        raw_J2(i, j) = MetaPhysicL::raw_value(J(i, j));
+      }
+    raw_J.svd(svs);
+    raw_J2.evd(evs_real, evs_imag);
+#endif
 
     J.lu_solve(minus_R, z_update);
     z += z_update;

@@ -141,12 +141,7 @@ void
 Water97FluidProperties::e_from_p_rho(
     const ADReal & p, const ADReal & rho, ADReal & e, ADReal & de_dp, ADReal & de_drho) const
 {
-  auto functor = [this](const ADReal & p, const ADReal & rho)
-  { return e_from_p_rho_template(p, rho); };
-  auto ad_functor = [this](const FPDualReal & p, const FPDualReal & rho)
-  { return e_from_p_rho_template(p, rho); };
-
-  xyDerivatives(p, rho, e, de_dp, de_drho, functor, ad_functor);
+  e_from_p_rho_template(p, rho, e, de_dp, de_drho);
 }
 
 Real

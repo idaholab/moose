@@ -2444,11 +2444,11 @@ void
 Water97FluidProperties::e_from_p_rho_template(
     const T & p, const T & rho, T & e, T & de_dp, T & de_drho) const
 {
-  const auto [temperature, drho_dT] = T_from_p_rho(p, rho);
+  auto functor = [this](const T & p, const T & rho) { return e_from_p_rho_template(p, rho); };
+  auto ad_functor = [this](const FPDualReal & p, const FPDualReal & rho)
+  { return e_from_p_rho_template(p, rho); };
 
-  T de_dT;
-  e_from_p_T(p, temperature, e, de_dp, de_dT);
-  de_drho = de_dT / drho_dT;
+  xyDerivatives(p, rho, e, de_dp, de_drho, functor, ad_functor);
 }
 
 template <typename T>
