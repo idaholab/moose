@@ -250,4 +250,10 @@
     requirement = "TestHarness shall test for a valid json output dump"
     issues = '#21967'
   []
+  [test_show_last_results]
+    type = PythonUnitTest
+    input = test_Replay.py
+    requirement = "TestHarness shall be able to replay last results"
+    issues = '#22545'
+  []
 []
