@@ -766,7 +766,7 @@ AuxiliarySystem::computeMortarNodalVars(const ExecFlagType type)
           }
           catch (libMesh::LogicError & e)
           {
-            _fe_problem.setException("We caught a libMesh::LogicError.");
+            _fe_problem.setException("We caught a libMesh::LogicError:" + std::string(e.what()));
           }
         }
         PARALLEL_CATCH;
