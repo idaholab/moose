@@ -69,7 +69,7 @@ SubChannel1PhaseProblem::validParams()
   params.addRequiredParam<Real>("CT", "Turbulent modeling parameter");
   params.addParam<Real>("P_tol", 1e-6, "Pressure tolerance");
   params.addParam<Real>("T_tol", 1e-6, "Temperature tolerance");
-  params.addParam<int>("T_maxit", 1000, "Maximum number of iterations for inner temperature loop");
+  params.addParam<int>("T_maxit", 100, "Maximum number of iterations for inner temperature loop");
   params.addParam<PetscReal>("rtol", 1e-6, "Relative tolerance for ksp solver");
   params.addParam<PetscReal>("atol", 1e-6, "Absolute tolerance for ksp solver");
   params.addParam<PetscReal>("dtol", 1e5, "Divergence tolerance or ksp solver");
