@@ -1203,6 +1203,16 @@ public:
    */
   const MooseUnits & lengthUnit() const;
 
+  /**
+   * This function attempts to return the map from a high-order element side to its corresponding
+   * lower-d element
+   */
+  const std::unordered_map<std::pair<const Elem *, unsigned short int>, const Elem *> &
+  getLowerDElemMap() const
+  {
+    return _higher_d_elem_side_to_lower_d_elem;
+  }
+
 protected:
   /// Deprecated (DO NOT USE)
   std::vector<std::unique_ptr<GhostingFunctor>> _ghosting_functors;
