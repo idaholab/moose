@@ -607,7 +607,9 @@ class TestHarness:
         The Scheduler is calling back the TestHarness to inform us of a status change.
         The job may or may not be finished yet (RUNNING), or failing, passing, etc.
         """
-        if not job.isSilent():
+        if self.options.show_last_run and job.isSkip():
+            return
+        elif not job.isSilent():
             # Print results and perform any desired post job processing
             if job.isFinished():
                 status, message, color, status_code = job.getJointStatus()
@@ -764,7 +766,7 @@ class TestHarness:
 
     def writeResults(self):
         """ Don't update the results file when using the --failed-tests argument """
-        if self.options.failed_tests:
+        if self.options.failed_tests or self.options.show_last_run:
             return
 
         """ write test results to disc in some fashion the user has requested """
@@ -968,8 +970,13 @@ class TestHarness:
     def useExistingStorage(self):
         """ reasons for returning bool if we should use a previous results_storage file """
         if (os.path.exists(self.options.results_file)
-            and (self.options.failed_tests or self.options.pbs)):
+            and (self.options.failed_tests or self.options.pbs or self.options.show_last_run)):
             return True
+        elif ((self.options.failed_tests or self.options.show_last_run)
+            and not os.path.exists(self.options.results_file)):
+            print('A previous run does not exist')
+            sys.exit(1)
+
 
     ## Parse command line options and assign them to self.options
     def parseCLArgs(self, argv):
@@ -1026,6 +1033,7 @@ class TestHarness:
         parser.add_argument('--dry-run', action='store_true', dest='dry_run', help="Pass --dry-run to print commands to run, but don't actually run them")
         parser.add_argument('--use-subdir-exe', action="store_true", help='If there are sub directories that contain a new testroot, use that for running tests under that directory.')
 
+        # Options which manipulate the output in some way
         outputgroup = parser.add_argument_group('Output Options', 'These options control the output of the test harness. The sep-files options write output to files named test_name.TEST_RESULT.txt. All file output will overwrite old files')
         outputgroup.add_argument('-v', '--verbose', action='store_true', dest='verbose', help='show the output of every test')
         outputgroup.add_argument('-q', '--quiet', action='store_true', dest='quiet', help='only show the result of every test, don\'t show test output even if it fails')
@@ -1044,6 +1052,7 @@ class TestHarness:
         outputgroup.add_argument("--no-trimmed-output", action="store_true", dest="no_trimmed_output", help="Do not trim the output")
         outputgroup.add_argument("--no-trimmed-output-on-error", action="store_true", dest="no_trimmed_output_on_error", help="Do not trim output for tests which cause an error")
         outputgroup.add_argument("--results-file", nargs=1, default='.previous_test_results.json', help="Save run_tests results to an alternative json file (default: %(default)s)")
+        outputgroup.add_argument("--show-last-run", action="store_true", dest="show_last_run", help="Display previous results without executing tests again")
 
         queuegroup = parser.add_argument_group('Queue Options', 'Options controlling which queue manager to use')
         queuegroup.add_argument('--pbs', nargs=1, action='store', metavar='name', help='Launch tests using PBS as your scheduler. You must supply a name to identify this session with')
