@@ -127,8 +127,10 @@ NewtonSolve(const DenseVector<T> & y_in,
     for (const auto i : make_range(system_size))
       minus_R(i) = y_in(i) - y(i);
 
-    if (convergence_check(minus_R))
-      break;
+    // We always want to perform at least one update in order to get derivatives on z correct (z
+    // corresponding to the initial guess will have no derivative information), so we don't
+    // immediately return if we are converged
+    const bool converged = convergence_check(minus_R);
 
 #ifndef NDEBUG
     //
@@ -180,6 +182,9 @@ NewtonSolve(const DenseVector<T> & y_in,
     for (const auto i : make_range(system_size))
       if (std::isnan(z(i)))
         mooseError("NaN detected in Newton solve");
+
+    if (converged)
+      break;
   } while (++iteration < max_its);
 
   // Check for divergence or slow convergence of Newton's method

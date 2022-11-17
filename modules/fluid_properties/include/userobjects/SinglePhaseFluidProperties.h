@@ -10,6 +10,7 @@
 #pragma once
 
 #include "FluidProperties.h"
+#include "metaphysicl/dualnumberarray.h"
 
 /**
  * Adds AD versions of each fluid property. These functions use the Real versions of these methods
@@ -384,14 +385,12 @@ public:
                             Real & T,
                             bool & conversion_succeeded) const;
 
-  template <typename T, typename Functor, typename ADFunctor>
-  static void xyDerivatives(const T x,
-                            const T & y,
-                            T & z,
-                            T & dz_dx,
-                            T & dz_dy,
-                            const Functor & z_from_x_y,
-                            const ADFunctor & z_from_x_y_ad);
+  template <typename T, typename Functor>
+  static void
+  xyDerivatives(const T x, const T & y, T & z, T & dz_dx, T & dz_dy, const Functor & z_from_x_y);
+
+  template <typename T>
+  static std::pair<T, T> makeZeroAndOne(const T &);
 
   /**
    * Newton's method may be used to convert between variable sets
@@ -411,103 +410,41 @@ private:
     else
       mooseError(std::forward<Args>(args)...);
   }
-
-  template <typename T>
-  static void assignQoIs(const T & /*x*/,
-                         const T & /*y*/,
-                         T & /*z*/,
-                         T & /*dz_dx*/,
-                         T & /*dz_dy*/,
-                         const FPDualReal & /*raw_z*/);
-
-  template <typename T>
-  static void checkDerivatives(const T & /*a*/, const T & /*b*/);
 };
 
 #pragma GCC diagnostic pop
 
 template <typename T>
-inline void
-SinglePhaseFluidProperties::checkDerivatives(const T & a, const T & b)
+std::pair<T, T>
+SinglePhaseFluidProperties::makeZeroAndOne(const T & /*ex*/)
 {
-  mooseAssert(MooseUtils::relativeFuzzyEqual(a.value(), b.value(), 1e-2), "Must be equal");
-  mooseAssert(a.derivatives().size() == b.derivatives().size(), "Must be equal");
-  const auto & a_derivs = a.derivatives().nude_data();
-  const auto & b_derivs = b.derivatives().nude_data();
-  for (const auto i : make_range(a.derivatives().size()))
-    mooseAssert(MooseUtils::relativeFuzzyEqual(a_derivs[i], b_derivs[i], 1e-2), "Must be equal");
+  return {T{0, 0}, T{1, 0}};
 }
 
 template <>
-inline void
-SinglePhaseFluidProperties::checkDerivatives(const Real &, const Real &)
+inline std::pair<Real, Real>
+SinglePhaseFluidProperties::makeZeroAndOne(const Real & /*ex*/)
 {
+  return {Real{0}, Real{1}};
 }
 
-template <typename T>
+template <typename T, typename Functor>
 void
-SinglePhaseFluidProperties::assignQoIs(
-    const T & x, const T & y, T & z, T & dz_dx, T & dz_dy, const FPDualReal & raw_z)
+SinglePhaseFluidProperties::xyDerivatives(
+    const T x, const T & y, T & z, T & dz_dx, T & dz_dy, const Functor & z_from_x_y)
 {
-  z = raw_z.value();
-  dz_dx = raw_z.derivatives()[0];
-  dz_dy = raw_z.derivatives()[1];
+  typedef MetaPhysicL::DualNumber<T, MetaPhysicL::NumberArray<2, T>> CompoundType;
+  const auto [zero, one] = makeZeroAndOne(x);
 
-  z.derivatives() = dz_dx.value() * x.derivatives() + dz_dy.value() * y.derivatives();
-  dz_dx.derivatives() = x.derivatives();
-  dz_dy.derivatives() = y.derivatives();
-}
+  CompoundType x_c(x, zero);
+  auto & x_cd = x_c.derivatives();
+  x_cd[0] = one;
+  CompoundType y_c(y, zero);
+  auto & y_cd = y_c.derivatives();
+  y_cd[1] = one;
 
-template <>
-inline void
-SinglePhaseFluidProperties::assignQoIs(const Real & /*x*/,
-                                       const Real & /*y*/,
-                                       Real & z,
-                                       Real & dz_dx,
-                                       Real & dz_dy,
-                                       const FPDualReal & raw_z)
-{
-  z = raw_z.value();
-  dz_dx = raw_z.derivatives()[0];
-  dz_dy = raw_z.derivatives()[1];
-}
-
-template <typename T, typename Functor, typename ADFunctor>
-void
-SinglePhaseFluidProperties::xyDerivatives(const T x,
-                                          const T & y,
-                                          T & z,
-                                          T & dz_dx,
-                                          T & dz_dy,
-                                          const Functor & libmesh_dbg_var(z_from_x_y),
-                                          const ADFunctor & z_from_x_y_ad)
-{
-  FPDualReal raw_x = MetaPhysicL::raw_value(x);
-  Moose::derivInsert(raw_x.derivatives(), 0, 1);
-  FPDualReal raw_y = MetaPhysicL::raw_value(y);
-  Moose::derivInsert(raw_y.derivatives(), 1, 1);
-  const FPDualReal raw_z = z_from_x_y_ad(raw_x, raw_y);
-  assignQoIs(x, y, z, dz_dx, dz_dy, raw_z);
-
-#ifndef NDEBUG
-  const auto straight_z = z_from_x_y(x, y);
-  checkDerivatives(z, straight_z);
-  static constexpr Real perturbation_factor = 1 + 1e-8;
-  const auto perturbed_z_x = z_from_x_y(perturbation_factor * x, y);
-  const auto perturbed_z_y = z_from_x_y(x, perturbation_factor * y);
-  const auto Jx = (perturbed_z_x - z) / (1e-8 * x);
-  const auto Jy = (perturbed_z_y - z) / (1e-8 * y);
-  if (!MooseUtils::relativeFuzzyEqual(Jx, dz_dx, 1e-2))
-  {
-    const FPDualReal raw_z = z_from_x_y_ad(raw_x, raw_y);
-    assignQoIs(x, y, z, dz_dx, dz_dy, raw_z);
-    ::mooseError("Bad x Jacobian");
-  }
-  if (!MooseUtils::relativeFuzzyEqual(Jy, dz_dy, 1e-2))
-  {
-    const FPDualReal raw_z = z_from_x_y_ad(raw_x, raw_y);
-    assignQoIs(x, y, z, dz_dx, dz_dy, raw_z);
-    ::mooseError("Bad y Jacobian");
-  }
-#endif
+  const auto z_c = z_from_x_y(x_c, y_c);
+  z = z_c.value();
+  dz_dx = z_c.derivatives()[0];
+  dz_dy = z_c.derivatives()[1];
 }
