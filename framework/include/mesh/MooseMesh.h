@@ -534,10 +534,7 @@ public:
    * to refine the mesh by a few levels. Otherwise, it might introduce an
    * unbalanced workload and too large ghosting domain.
    */
-  bool skipDeletionRepartitionAfterRefine() const
-  {
-    return _skip_deletion_repartition_after_refine;
-  }
+  bool skipDeletionRepartitionAfterRefine() const;
 
   /**
    * Whether or not skip uniform refinements when using a pre-split mesh
@@ -589,6 +586,7 @@ public:
    * Getter for the maximum leaf size parameter.
    */
   unsigned int getMaxLeafSize() const { return _max_leaf_size; };
+
   /**
    * Set the patch size update strategy
    */
@@ -954,11 +952,7 @@ public:
   /**
    *  Allow to change parallel type
    */
-  void setParallelType(ParallelType parallel_type)
-  {
-    _parallel_type = parallel_type;
-    determineUseDistributedMesh();
-  }
+  void setParallelType(ParallelType parallel_type);
 
   /*
    * Set/Get the partitioner name
@@ -1051,20 +1045,12 @@ public:
   /**
    * Whether mesh has an extra element integer with a given name
    */
-  bool hasElementID(const std::string & id_name) const
-  {
-    return getMesh().has_elem_integer(id_name);
-  }
+  bool hasElementID(const std::string & id_name) const;
 
   /**
    * Return the accessing integer for an extra element integer with its name
    */
-  unsigned int getElementIDIndex(const std::string & id_name) const
-  {
-    if (!hasElementID(id_name))
-      mooseError("Mesh does not have element ID for ", id_name);
-    return getMesh().get_elem_integer_index(id_name);
-  }
+  unsigned int getElementIDIndex(const std::string & id_name) const;
 
   /**
    * Return the maximum element ID for an extra element integer with its accessing index
@@ -1079,12 +1065,7 @@ public:
   /**
    * Whether or not two extra element integers are identical
    */
-  bool areElemIDsIdentical(const std::string & id_name1, const std::string & id_name2) const
-  {
-    auto id1 = getElementIDIndex(id_name1);
-    auto id2 = getElementIDIndex(id_name2);
-    return _id_identical_flag[id1][id2];
-  }
+  bool areElemIDsIdentical(const std::string & id_name1, const std::string & id_name2) const;
 
   /**
    * Return all the unique element IDs for an extra element integer with its index
@@ -1100,20 +1081,15 @@ public:
 
   ///@{ accessors for the FaceInfo objects
   unsigned int nFace() const { return _face_info.size(); }
+
   /// Accessor for local \p FaceInfo objects.
-  const std::vector<const FaceInfo *> & faceInfo() const
-  {
-    buildFiniteVolumeInfo();
-    return _face_info;
-  }
+  const std::vector<const FaceInfo *> & faceInfo() const;
+
   /// Accessor for the local FaceInfo object on the side of one element. Returns null if ghosted.
   const FaceInfo * faceInfo(const Elem * elem, unsigned int side) const;
+
   /// Accessor for all \p FaceInfo objects.
-  const std::vector<FaceInfo> & allFaceInfo() const
-  {
-    buildFiniteVolumeInfo();
-    return _all_face_info;
-  }
+  const std::vector<FaceInfo> & allFaceInfo() const;
   ///@}
 
   /**
@@ -1142,10 +1118,7 @@ public:
   /**
    * @return A map from nodeset ids to the vector of node ids in the nodeset
    */
-  const std::map<boundary_id_type, std::vector<dof_id_type>> & nodeSetNodes() const
-  {
-    return _node_set_nodes;
-  }
+  const std::map<boundary_id_type, std::vector<dof_id_type>> & nodeSetNodes() const;
 
   /**
    * Get the coordinate system type, e.g. xyz, rz, or r-spherical, for the provided subdomain id \p
@@ -1208,10 +1181,7 @@ public:
    * lower-d element
    */
   const std::unordered_map<std::pair<const Elem *, unsigned short int>, const Elem *> &
-  getLowerDElemMap() const
-  {
-    return _higher_d_elem_side_to_lower_d_elem;
-  }
+  getLowerDElemMap() const;
 
 protected:
   /// Deprecated (DO NOT USE)
@@ -1747,4 +1717,65 @@ MooseMesh::buildTypedMesh(unsigned int dim)
     setPartitionerHelper(mesh.get());
 
   return mesh;
+}
+
+inline bool
+MooseMesh::skipDeletionRepartitionAfterRefine() const
+{
+  return _skip_deletion_repartition_after_refine;
+}
+
+inline void
+MooseMesh::setParallelType(ParallelType parallel_type)
+{
+  _parallel_type = parallel_type;
+  determineUseDistributedMesh();
+}
+
+inline bool
+MooseMesh::hasElementID(const std::string & id_name) const
+{
+  return getMesh().has_elem_integer(id_name);
+}
+
+inline unsigned int
+MooseMesh::getElementIDIndex(const std::string & id_name) const
+{
+  if (!hasElementID(id_name))
+    mooseError("Mesh does not have element ID for ", id_name);
+  return getMesh().get_elem_integer_index(id_name);
+}
+
+inline bool
+MooseMesh::areElemIDsIdentical(const std::string & id_name1, const std::string & id_name2) const
+{
+  auto id1 = getElementIDIndex(id_name1);
+  auto id2 = getElementIDIndex(id_name2);
+  return _id_identical_flag[id1][id2];
+}
+
+inline const std::vector<const FaceInfo *> &
+MooseMesh::faceInfo() const
+{
+  buildFiniteVolumeInfo();
+  return _face_info;
+}
+
+inline const std::vector<FaceInfo> &
+MooseMesh::allFaceInfo() const
+{
+  buildFiniteVolumeInfo();
+  return _all_face_info;
+}
+
+inline const std::map<boundary_id_type, std::vector<dof_id_type>> &
+MooseMesh::nodeSetNodes() const
+{
+  return _node_set_nodes;
+}
+
+inline const std::unordered_map<std::pair<const Elem *, unsigned short int>, const Elem *> &
+MooseMesh::getLowerDElemMap() const
+{
+  return _higher_d_elem_side_to_lower_d_elem;
 }
