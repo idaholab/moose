@@ -2024,7 +2024,7 @@ Water97FluidProperties::rho_from_p_T_template(
     const T & pressure, const T & temperature, T & rho, T & drho_dp, T & drho_dT) const
 {
   auto functor = [this](const auto & pressure, const auto & temperature)
-  { return rho_from_p_T_template(pressure, temperature); };
+  { return this->rho_from_p_T_template(pressure, temperature); };
 
   xyDerivatives(pressure, temperature, rho, drho_dp, drho_dT, functor);
 }
@@ -2445,7 +2445,8 @@ void
 Water97FluidProperties::e_from_p_rho_template(
     const T & p, const T & rho, T & e, T & de_dp, T & de_drho) const
 {
-  auto functor = [this](const auto & p, const auto & rho) { return e_from_p_rho_template(p, rho); };
+  auto functor = [this](const auto & p, const auto & rho)
+  { return this->e_from_p_rho_template(p, rho); };
 
   xyDerivatives(p, rho, e, de_dp, de_drho, functor);
 }
@@ -2564,7 +2565,7 @@ Water97FluidProperties::h_from_p_T_template(
     const T & pressure, const T & temperature, T & h, T & dh_dp, T & dh_dT) const
 {
   auto functor = [this](const auto & pressure, const auto & temperature)
-  { return h_from_p_T_template(pressure, temperature); };
+  { return this->h_from_p_T_template(pressure, temperature); };
 
   xyDerivatives(pressure, temperature, h, dh_dp, dh_dT, functor);
 }
