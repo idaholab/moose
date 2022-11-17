@@ -112,7 +112,6 @@ NewtonSolve(const DenseVector<T> & y_in,
   DenseVector<T> z = z_initial_guess;
   DenseVector<T> minus_R(system_size), y(system_size), z_update;
   DenseMatrix<T> J(system_size, system_size);
-  std::array<std::array<T, 2>, 2> dy_dz;
   unsigned int iteration = 0;
 #ifndef NDEBUG
   DenseVector<Real> svs(system_size), evs_real(system_size), evs_imag(system_size);
@@ -132,6 +131,12 @@ NewtonSolve(const DenseVector<T> & y_in,
     // immediately return if we are converged
     const bool converged = convergence_check(minus_R);
 
+    // Check for NaNs before proceeding to system solve. We may simultaneously not have NaNs in z
+    // but have NaNs in the function evaluation
+    for (const auto i : make_range(system_size))
+      if (std::isnan(minus_R(i)))
+        mooseException("NaN detected in Newton solve");
+
 #ifndef NDEBUG
     //
     // Check accuracy of Jacobian
@@ -148,7 +153,7 @@ NewtonSolve(const DenseVector<T> & y_in,
         // Check the accuracy of the Jacobian
         auto J_differenced = (perturbed_y - y(i)) / (1e-8 * z(j));
         if (!MooseUtils::relativeFuzzyEqual(J_differenced, J(i, j), 1e-2))
-          mooseError("Bad Jacobian in NewtonSolve");
+          mooseException("Bad Jacobian in NewtonSolve");
       }
 #endif
 
@@ -176,12 +181,14 @@ NewtonSolve(const DenseVector<T> & y_in,
 #endif
 
     J.lu_solve(minus_R, z_update);
+    // reset the decomposition
+    J.zero();
     z += z_update;
 
     // Check for NaNs
     for (const auto i : make_range(system_size))
       if (std::isnan(z(i)))
-        mooseError("NaN detected in Newton solve");
+        mooseException("NaN detected in Newton solve");
 
     if (converged)
       break;
@@ -189,37 +196,9 @@ NewtonSolve(const DenseVector<T> & y_in,
 
   // Check for divergence or slow convergence of Newton's method
   if (iteration >= max_its)
-    mooseError(
+    mooseException(
         "Newton solve convergence failed: maximum number of iterations, ", max_its, " exceeded");
 
   return {z(0), z(1)};
 }
-
-/**
- * NewtonSolve2D does a 2D Newton Solve to solve for the x and y such that:
- * f = func1(x, y) and g = func2(x, y). This is done for example in the constant of (v, e)
- * to (p, T) variable set conversion.
- * @param[in] f target value for func1
- * @param[in] g target value for func2
- * @param[in] x0 initial guess for first output variable
- * @param[in] y0 initial guess for second output variable
- * @param[out] x_final output for first variable
- * @param[out] y_final output for second variable
- * @param[in] tolerance criterion on absolute norm between successive iterates to judge convergence
- * @param[in] func1 two-variable function returning both values and derivatives as references
- * @param[in] func2 two-variable function returning both values and derivatives as references
- * @param[in] max_its the maximum number of iterations for Newton's method
- */
-void NewtonSolve2D(const Real & f,
-                   const Real & g,
-                   const Real & x0,
-                   const Real & y0,
-                   Real & x_final,
-                   Real & y_final,
-                   const Real & tolerance,
-                   bool & converged,
-                   std::function<void(Real, Real, Real &, Real &, Real &)> const & func1,
-                   std::function<void(Real, Real, Real &, Real &, Real &)> const & func2,
-                   const unsigned int max_its = 100);
-
 } // namespace FluidPropertiesUtils
