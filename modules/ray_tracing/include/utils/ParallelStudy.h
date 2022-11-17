@@ -201,6 +201,11 @@ protected:
   virtual void executeWork(const WorkType & work, const THREAD_ID tid) = 0;
 
   /**
+   * Virtual function that allows for the customization of loop over executeWork.
+   */
+  virtual void loopExecuteWork(const work_iterator begin, const work_iterator end);
+
+  /**
    * Virtual that allows for the customization of error text for moving work into the buffer.
    */
   virtual void moveWorkError(const MoveWorkError error, const WorkType * work = nullptr) const;
@@ -494,16 +499,9 @@ ParallelStudy<WorkType, ParallelDataType>::validParams()
 
 template <typename WorkType, typename ParallelDataType>
 void
-ParallelStudy<WorkType, ParallelDataType>::executeAndBuffer(const std::size_t chunk_size)
+ParallelStudy<WorkType, ParallelDataType>::loopExecuteWork(const work_iterator begin,
+                                                           const work_iterator end)
 {
-  _currently_executing_work = true;
-
-  // If chunk_size > the number of objects left, this will properly grab all of them
-  const auto begin = _work_buffer->beginChunk(chunk_size);
-  const auto end = _work_buffer->endChunk(chunk_size);
-
-  _local_chunks_executed++;
-
 #ifdef LIBMESH_HAVE_OPENMP
 #pragma omp parallel
 #endif
@@ -521,6 +519,21 @@ ParallelStudy<WorkType, ParallelDataType>::executeAndBuffer(const std::size_t ch
     for (auto it = begin; it < end; ++it)
       executeWork(*it, tid);
   }
+}
+
+template <typename WorkType, typename ParallelDataType>
+void
+ParallelStudy<WorkType, ParallelDataType>::executeAndBuffer(const std::size_t chunk_size)
+{
+  _currently_executing_work = true;
+
+  // If chunk_size > the number of objects left, this will properly grab all of them
+  const auto begin = _work_buffer->beginChunk(chunk_size);
+  const auto end = _work_buffer->endChunk(chunk_size);
+
+  _local_chunks_executed++;
+
+  loopExecuteWork(begin, end);
 
   // Increment the executed and completed counters
   _local_work_executed += std::distance(begin, end);
