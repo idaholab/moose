@@ -119,7 +119,6 @@ function configure_petsc()
       --download-slepc=1 \
       --with-mpi=1 \
       --with-openmp=1 \
-      --with-cxx-dialect=C++11 \
       --with-fortran-bindings=0 \
       --with-sowing=0 \
       --with-64-bit-indices \

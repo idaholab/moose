@@ -43,11 +43,7 @@ configure_petsc \
     --FOPTFLAGS=-O3 \
     --with-x=0 \
     --with-ssl=0 \
-    CC="$CC" \
-    CXX="$CXX" \
-    FC="$FC" \
-    F90="$F90" \
-    F77="$F77" \
+    --with-mpi-dir=$PREFIX \
     AR="$AR" \
     RANLIB="$RANLIB" \
     CFLAGS="$CFLAGS" \
