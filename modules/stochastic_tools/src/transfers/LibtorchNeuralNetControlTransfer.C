@@ -68,7 +68,7 @@ LibtorchNeuralNetControlTransfer::execute()
           std::dynamic_pointer_cast<LibtorchNeuralNetControl>(control_ref);
 
       if (!control_object)
-        mooseError("Couldn't cast Control object to LibtorchNeuralNetrControl!");
+        paramError("control_name", "The given gontrol is not a LibtorchNeuralNetrControl!");
 
       // Copy and the neural net and execute it to get the initial values
       control_object->loadControlNeuralNet(trainer_nn);

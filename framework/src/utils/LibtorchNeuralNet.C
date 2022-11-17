@@ -16,8 +16,7 @@ template <>
 torch::Tensor
 LibtorchNeuralNet<torch::jit::script::Module>::forward(torch::Tensor & x)
 {
-  std::vector<torch::jit::IValue> inputs;
-  inputs.push_back(x);
+  std::vector<torch::jit::IValue> inputs(1, x);
   return torch::jit::script::Module::forward(inputs).toTensor();
 }
 }

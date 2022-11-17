@@ -33,7 +33,7 @@ public:
   virtual torch::Tensor forward(torch::Tensor & x) override;
 };
 
-// Ex[plicitly instantiate the two different libtorch module branches
+// Explicitly instantiate the two different libtorch module branches
 template class LibtorchNeuralNet<torch::nn::Module>;
 template class LibtorchNeuralNet<torch::jit::script::Module>;
 

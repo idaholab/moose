@@ -26,7 +26,7 @@ LibtorchDRLControlTrainer::validParams()
   params.addClassDescription("Trains a simple neural network controller using libtorch.");
 
   params.addRequiredParam<std::vector<ReporterName>>(
-      "response_reporter", "Reporters containing the response values from the model.");
+      "response", "Reporter values containing the response values from the model.");
   params.addParam<std::vector<Real>>(
       "response_shift_factors",
       "A shift constant which will be used to shift the response values. This is used for the "
@@ -36,13 +36,17 @@ LibtorchDRLControlTrainer::validParams()
       "A normalization constant which will be used to divide the response values. This is used for "
       "the manipulation of the neural net inputs for better training efficiency.");
   params.addRequiredParam<std::vector<ReporterName>>(
-      "control_reporter", "Reporters containing the control values fromthe models.");
+      "control",
+      "Reporters containing the values of the controlled quantities (control signals) from the "
+      "model simulations.");
   params.addRequiredParam<std::vector<ReporterName>>("log_probability_reporter",
                                                      "Log probability reporters.");
-  params.addRequiredParam<ReporterName>("reward_reporter", "Reward reporter.");
-  params.addParam<unsigned int>(
+  params.addRequiredParam<ReporterName>(
+      "reward", "Reporter containing the earned time-dependent rewards from the simulation.");
+  params.addRangeCheckedParam<unsigned int>(
       "input_timesteps",
       1,
+      "1<=input_timesteps",
       "Number of time steps to use in the input data, if larger than 1, "
       "data from the previous timesteps will be used as inputs in the training.");
   params.addParam<unsigned int>("skip_num_rows",
@@ -52,8 +56,10 @@ LibtorchDRLControlTrainer::validParams()
 
   params.addRequiredParam<unsigned int>("num_epochs", "Number of epochs for the training.");
 
-  params.addRequiredParam<Real>("critic_learning_rate",
-                                "Learning rate (relaxation) for the emulator training.");
+  params.addRequiredRangeCheckedParam<Real>(
+      "critic_learning_rate",
+      "0<critic_learning_rate",
+      "Learning rate (relaxation) for the emulator training.");
   params.addRequiredParam<std::vector<unsigned int>>(
       "num_critic_neurons_per_layer", "Number of neurons per layer in the emulator neural net.");
   params.addParam<std::vector<std::string>>(
@@ -62,10 +68,13 @@ LibtorchDRLControlTrainer::validParams()
       "The type of activation functions to use in the emulator neural net. It is either one value "
       "or one value per hidden layer.");
 
-  params.addRequiredParam<Real>("control_learning_rate",
-                                "Learning rate (relaxation) for the control neural net training.");
-  params.addRequiredParam<std::vector<unsigned int>>("num_control_neurons_per_layer",
-                                                     "Number of neurons per layer.");
+  params.addRequiredRangeCheckedParam<Real>(
+      "control_learning_rate",
+      "0<control_learning_rate",
+      "Learning rate (relaxation) for the control neural net training.");
+  params.addRequiredParam<std::vector<unsigned int>>(
+      "num_control_neurons_per_layer",
+      "Number of neurons per layer for the control neural network.");
   params.addParam<std::vector<std::string>>(
       "control_activation_functions",
       std::vector<std::string>({"relu"}),
@@ -84,15 +93,18 @@ LibtorchDRLControlTrainer::validParams()
 
   params.addParam<Real>(
       "clip_parameter", 0.2, "Clip parameter used while clamping the advantage value.");
-  params.addParam<unsigned int>(
+  params.addRangeCheckedParam<unsigned int>(
       "update_frequency",
       1,
+      "1<=update_frequency",
       "Number of transient simulation data to collect for updating the controller neural network.");
 
-  params.addParam<Real>("decay_factor",
-                        1.0,
-                        "Decay factor for calculating the return. This accounts for decreased "
-                        "reward values from the later steps.");
+  params.addRangeCheckedParam<Real>(
+      "decay_factor",
+      1.0,
+      "0.0<=decay_factor<=1.0",
+      "Decay factor for calculating the return. This accounts for decreased "
+      "reward values from the later steps.");
 
   params.addParam<bool>(
       "read_from_file", false, "Switch to read the neural network parameters from a file.");
@@ -113,13 +125,22 @@ LibtorchDRLControlTrainer::validParams()
 
 LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & parameters)
   : SurrogateTrainerBase(parameters),
-    _response_names(getParam<std::vector<ReporterName>>("response_reporter")),
-    _control_names(getParam<std::vector<ReporterName>>("control_reporter")),
+    _response_names(getParam<std::vector<ReporterName>>("response")),
+    _response_shift_factors(isParamValid("response_shift_factors")
+                                ? getParam<std::vector<Real>>("response_shift_factors")
+                                : std::vector<Real>(_response_names.size(), 0.0)),
+    _response_scaling_factors(isParamValid("response_scaling_factors")
+                                  ? getParam<std::vector<Real>>("response_scaling_factors")
+                                  : std::vector<Real>(_response_names.size(), 1.0)),
+    _control_names(getParam<std::vector<ReporterName>>("control")),
     _log_probability_names(getParam<std::vector<ReporterName>>("log_probability_reporter")),
     _reward_name(getParam<ReporterName>("reward_reporter")),
     _input_timesteps(getParam<unsigned int>("input_timesteps")),
     _num_inputs(_input_timesteps * _response_names.size()),
     _num_outputs(_control_names.size()),
+    _input_data(std::vector<std::vector<Real>>(_num_inputs)),
+    _output_data(std::vector<std::vector<Real>>(_num_outputs)),
+    _log_probability_data(std::vector<std::vector<Real>>(_num_outputs)),
     _num_epochs(getParam<unsigned int>("num_epochs")),
     _num_critic_neurons_per_layer(
         getParam<std::vector<unsigned int>>("num_critic_neurons_per_layer")),
@@ -128,7 +149,6 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
         getParam<std::vector<unsigned int>>("num_control_neurons_per_layer")),
     _control_learning_rate(getParam<Real>("control_learning_rate")),
     _update_frequency(getParam<unsigned int>("update_frequency")),
-    _update_counter(_update_frequency),
     _clip_param(getParam<Real>("clip_parameter")),
     _decay_factor(getParam<Real>("decay_factor")),
     _action_std(getParam<std::vector<Real>>("action_standard_deviations")),
@@ -136,43 +156,17 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
     _read_from_file(getParam<bool>("read_from_file")),
     _shift_outputs(getParam<bool>("shift_outputs")),
     _standardize_advantage(getParam<bool>("standardize_advantage")),
-    _loss_print_frequency(getParam<unsigned int>("loss_print_frequency"))
+    _loss_print_frequency(getParam<unsigned int>("loss_print_frequency")),
+    _update_counter(_update_frequency)
 {
+  if (_response_names.size() != _response_shift_factors.size())
+    paramError("response_shift_factors",
+               "The number of shift factors is not the same as the number of responses!");
 
-  if (_response_names.size() == 0)
-    mooseError("The number of reponses reporters should be more than 0!");
-
-  if (_control_names.size() == 0)
-    mooseError("The number of control reporters should be more than 0!");
-
-  if (_log_probability_names.size() == 0)
-    mooseError("The number of log probability reporters should be more than 0!");
-
-  if (isParamValid("response_shift_factors"))
-  {
-    _response_shift_factors = getParam<std::vector<Real>>("response_shift_factors");
-    if (_response_names.size() != _response_shift_factors.size())
-      paramError("response_shift_factors",
-                 "The number of shift factors is not the same as the number of responses!");
-  }
-  else
-    _response_shift_factors = std::vector<Real>(_response_names.size(), 0.0);
-
-  if (isParamValid("response_scaling_factors"))
-  {
-    _response_scaling_factors = getParam<std::vector<Real>>("response_scaling_factors");
-    if (_response_names.size() != _response_scaling_factors.size())
-      paramError(
-          "response_scaling_factors",
-          "The number of normalization coefficients is not the same as the number of responses!");
-  }
-  else
-    _response_scaling_factors = std::vector<Real>(_response_names.size(), 1.0);
-
-  // Dimension of the input/output data
-  _input_data.resize(_num_inputs);
-  _output_data.resize(_num_outputs);
-  _log_probability_data.resize(_num_outputs);
+  if (_response_names.size() != _response_scaling_factors.size())
+    paramError(
+        "response_scaling_factors",
+        "The number of normalization coefficients is not the same as the number of responses!");
 
 #ifdef LIBTORCH_ENABLED
 
@@ -279,6 +273,8 @@ LibtorchDRLControlTrainer::computeAverageEpisodeReward()
   if (_reward_data.size())
     _average_episode_reward =
         std::accumulate(_reward_data.begin(), _reward_data.end(), 0.0) / _reward_data.size();
+  else
+    _average_episode_reward = 0.0;
 }
 
 void
@@ -287,7 +283,7 @@ LibtorchDRLControlTrainer::getInputDataFromReporter(
     const std::vector<ReporterName> & reporter_names,
     unsigned int num_timesteps)
 {
-  for (unsigned int rep_i = 0; rep_i < reporter_names.size(); rep_i++)
+  for (const auto & rep_i : index_range(reporter_names))
   {
     std::vector<Real> reporter_data =
         getReporterValueByName<std::vector<Real>>(reporter_names[rep_i]);
@@ -301,7 +297,7 @@ LibtorchDRLControlTrainer::getInputDataFromReporter(
         { return (value - _response_shift_factors[rep_i]) * _response_scaling_factors[rep_i]; });
 
     // Fill the corresponding containers
-    for (unsigned int start_step = 0; start_step < num_timesteps; start_step++)
+    for (const auto & start_step : make_range(num_timesteps))
     {
       unsigned int row = reporter_names.size() * start_step + rep_i;
       for (unsigned int fill_i = 1; fill_i < num_timesteps - start_step; ++fill_i)
@@ -319,7 +315,7 @@ void
 LibtorchDRLControlTrainer::getOutputDataFromReporter(
     std::vector<std::vector<Real>> & data, const std::vector<ReporterName> & reporter_names)
 {
-  for (unsigned int rep_i = 0; rep_i < reporter_names.size(); rep_i++)
+  for (const auto & rep_i : index_range(reporter_names))
   {
     const std::vector<Real> & reporter_data =
         getReporterValueByName<std::vector<Real>>(reporter_names[rep_i]);
@@ -351,7 +347,7 @@ LibtorchDRLControlTrainer::computeRewardToGo()
   getRewardDataFromReporter(reward_data_per_sim, _reward_name);
 
   // Discount the reward to get the return value
-  Real discounted_reward = 0;
+  Real discounted_reward(0.0);
   for (int i = reward_data_per_sim.size() - 1; i >= 0; --i)
   {
     discounted_reward = reward_data_per_sim[i] + discounted_reward * _decay_factor;
@@ -426,7 +422,7 @@ LibtorchDRLControlTrainer::trainController()
 void
 LibtorchDRLControlTrainer::convertDataToTensor(std::vector<std::vector<Real>> & vector_data,
                                                torch::Tensor & tensor_data,
-                                               const bool & detach)
+                                               const bool detach)
 {
   auto options = torch::TensorOptions().dtype(at::kDouble);
 
@@ -449,7 +445,7 @@ LibtorchDRLControlTrainer::convertDataToTensor(std::vector<std::vector<Real>> & 
 void
 LibtorchDRLControlTrainer::convertDataToTensor(std::vector<Real> & vector_data,
                                                torch::Tensor & tensor_data,
-                                               const bool & detach)
+                                               const bool detach)
 {
   auto options = torch::TensorOptions().dtype(at::kDouble);
   const int size = vector_data.size();
@@ -482,14 +478,12 @@ LibtorchDRLControlTrainer::evaluateAction(torch::Tensor & input, torch::Tensor &
 void
 LibtorchDRLControlTrainer::resetData()
 {
-  for (auto i : index_range(_input_data))
-    _input_data[i].clear();
-
-  for (auto i : index_range(_output_data))
-    _output_data[i].clear();
-
-  for (auto i : index_range(_log_probability_data))
-    _log_probability_data[i].clear();
+  for (auto & data : _input_data)
+    data.clear();
+  for (auto & data : _output_data)
+    data.clear();
+  for (auto & data : _log_probability_data)
+    data.clear();
 
   _reward_data.clear();
   _return_data.clear();

@@ -18,10 +18,10 @@
   [time]
     type = CoefTimeDerivative
     variable = temp
-    Coefficient = ${fparse 1.00630182*1.225}
+    Coefficient = '${fparse 1.00630182*1.225}'
   []
   [heat_conduc]
-    type = ADMatDiffusion
+    type = MatDiffusion
     variable = temp
     diffusivity = 'k'
   []
@@ -29,13 +29,13 @@
 
 [BCs]
   [left_flux]
-    type = ADNeumannBC
+    type = NeumannBC
     value = 0.0
     boundary = 'left'
     variable = temp
   []
   [dirichlet]
-    type = ADFunctionDirichletBC
+    type = FunctionDirichletBC
     function = temp_env
     variable = temp
     boundary = 'right'
@@ -62,7 +62,7 @@
 
 [Materials]
   [constant]
-    type = ADGenericConstantMaterial
+    type = GenericConstantMaterial
     prop_names = 'k'
     prop_values = 26.53832364
   []
@@ -103,8 +103,7 @@
 [Reporters]
   [T_reporter]
     type = AccumulateReporter
-    reporters = 'center_temp_tend/value env_temp/value reward/value left_flux/value '
-                'log_prob_left_flux/value'
+    reporters = 'center_temp_tend/value env_temp/value reward/value left_flux/value log_prob_left_flux/value'
   []
 []
 

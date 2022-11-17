@@ -68,15 +68,15 @@ protected:
   /// results are used, e.g. the size of _old_responses)
   const unsigned int _input_timesteps;
 
-  /// Number of timesteps to use as the input data from the reporter
+  /// Flag to show if the vector containing the time-series of responses has been initialized or not
   bool _initialized;
 
   /// Shifting constants for the responses
-  std::vector<Real> _response_shift_factors;
+  const std::vector<Real> _response_shift_factors;
   /// Scaling constants (multipliers) for the responses
-  std::vector<Real> _response_scaling_factors;
+  const std::vector<Real> _response_scaling_factors;
   /// Multipliers for the actions
-  std::vector<Real> _action_scaling_factors;
+  const std::vector<Real> _action_scaling_factors;
 
 #ifdef LIBTORCH_ENABLED
   /// Pointer to the neural net object which is supposed to be used to control

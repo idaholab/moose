@@ -8,9 +8,9 @@
 #include "Control.h"
 
 /**
- * A time-dependent, neural network-based which is associated with a Proximal Policy
- * Optimization. We use this neural net for the training of a controller. The
- * additional functionality in this controller is the addition of the variability
+ * A time-dependent, neural-network-based controller which is
+ * associated with a Proximal Policy Optimization. We use this neural net for the training of a
+ * controller. The additional functionality in this controller is the addition of the variability
  * (using an assumed Gaussian distribution) to avoid overfitting. This control is
  * supposed to be used in conjunction with LibtorchDRLControlTrainer.
  */

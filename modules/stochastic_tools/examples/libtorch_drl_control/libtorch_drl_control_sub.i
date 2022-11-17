@@ -25,10 +25,10 @@ air_effective_k = 0.5 # W/(m K)
   [time_derivative]
     type = CoefTimeDerivative
     variable = T
-    Coefficient = ${fparse air_density*air_cp}
+    Coefficient = '${fparse air_density*air_cp}'
   []
   [heat_conduction]
-    type = ADMatDiffusion
+    type = MatDiffusion
     variable = T
     diffusivity = 'k'
   []
@@ -36,13 +36,13 @@ air_effective_k = 0.5 # W/(m K)
 
 [BCs]
   [top_flux]
-    type = ADNeumannBC
+    type = NeumannBC
     value = 0.0
     boundary = 'top'
     variable = T
   []
   [dirichlet]
-    type = ADFunctionDirichletBC
+    type = FunctionDirichletBC
     function = temp_env
     variable = T
     boundary = 'left right'
@@ -69,7 +69,7 @@ air_effective_k = 0.5 # W/(m K)
 
 [Materials]
   [constant]
-    type = ADGenericConstantMaterial
+    type = GenericConstantMaterial
     prop_names = 'k'
     prop_values = ${air_effective_k}
   []
@@ -110,8 +110,7 @@ air_effective_k = 0.5 # W/(m K)
 [Reporters]
   [T_reporter]
     type = AccumulateReporter
-    reporters = 'center_temp_tend/value env_temp/value reward/value top_flux/value '
-                'log_prob_top_flux/value'
+    reporters = 'center_temp_tend/value env_temp/value reward/value top_flux/value log_prob_top_flux/value'
   []
 []
 

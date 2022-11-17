@@ -4,7 +4,6 @@ Parameter Studies, Statistics, and Sensitivity Analysis:
 - Example 2: [modules/stochastic_tools/examples/parameter_study.md]
 - Example 3: [modules/stochastic_tools/examples/nonlin_parameter_study.md]
 - Example 4: [modules/stochastic_tools/examples/sobol.md]
-- Example 5: [modules/stochastic_tools/examples/libtorch_drl_control.md]
 
 Surrogate Models:
 
@@ -17,3 +16,7 @@ Surrogate Models:
 - Example 11: [modules/stochastic_tools/examples/combined_example_2d_trans_diff.md]
 - Example 12: [examples/gaussian_process_surrogate.md]
 - Example 13: [modules/stochastic_tools/examples/cross_validation.md]
+
+Deep Reinforcement Learning Models:
+
+- Example 14: [modules/stochastic_tools/examples/libtorch_drl_control.md]

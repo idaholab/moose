@@ -9,8 +9,9 @@
 
 #pragma once
 
-// files that contain torch includes
+// torch-based includes
 #include "LibtorchDRLControlTrainer.h"
+
 #include "MultiAppTransfer.h"
 #include "SurrogateModelInterface.h"
 

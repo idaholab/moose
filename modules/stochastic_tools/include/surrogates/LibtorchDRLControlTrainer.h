@@ -18,7 +18,7 @@
 #include "SurrogateTrainer.h"
 
 /**
- * This trainer is responsible for the training neural networks witch can efficiently control
+ * This trainer is responsible for training neural networks that efficiently control
  * different processes. It utilizes the Proximal Policy Optimization algorithms. For more
  * information on the algorithm, see the following resources: Schulman, John, et al. "Proximal
  * policy optimization algorithms." arXiv preprint arXiv:1707.06347 (2017).
@@ -52,7 +52,7 @@ public:
 protected:
   /**
    * Extract the response values from the postprocessors of the controlled system.
-   * his assumes that they are stored in an AccumulateReporter
+   * This assumes that they are stored in an AccumulateReporter
    * @param data The data where we would like to store the response values
    * @param reporter_names The names of the reporters which need to be extracted
    * @param num_timesteps The number of timesteps we want to use for training
@@ -89,7 +89,7 @@ protected:
    */
   void convertDataToTensor(std::vector<std::vector<Real>> & vector_data,
                            torch::Tensor & tensor_data,
-                           const bool & detach = false);
+                           const bool detach = false);
 
   /**
    * Function to convert input/output data from std::vector to torch::tensor
@@ -99,7 +99,7 @@ protected:
    */
   void convertDataToTensor(std::vector<Real> & vector_data,
                            torch::Tensor & tensor_data,
-                           const bool & detach = false);
+                           const bool detach = false);
 
   /**
    * Function which evaluates the critic to get the value (discounter reward)
@@ -129,10 +129,10 @@ protected:
   const std::vector<ReporterName> _response_names;
 
   /// Shifting constants for the responses
-  std::vector<Real> _response_shift_factors;
+  const std::vector<Real> _response_shift_factors;
 
   /// Scaling constants for the responses
-  std::vector<Real> _response_scaling_factors;
+  const std::vector<Real> _response_scaling_factors;
 
   /// Control reporter names
   const std::vector<ReporterName> _control_names;
@@ -151,14 +151,18 @@ protected:
   /// Number of outputs for the control neural network
   unsigned int _num_outputs;
 
-  /// The gathered data from the reporter, each row represents one QoI, each column represents one time step
+  ///@{
+  /// The gathered data from the reporters, each row represents one QoI, each column represents one time step
   std::vector<std::vector<Real>> _input_data;
   std::vector<std::vector<Real>> _output_data;
   std::vector<std::vector<Real>> _log_probability_data;
+  ///@}
 
+  ///@{
   /// The reward and return data. The return is calculated using the _reward_data
   std::vector<Real> _reward_data;
   std::vector<Real> _return_data;
+  ///@}
 
   /// Number of epochs for the training of the emulator
   const unsigned int _num_epochs;
@@ -175,11 +179,8 @@ protected:
   /// The learning rate for the optimization algorithm for the control
   const Real _control_learning_rate;
 
-  /// Number of transient simulation data to collect before updating the controller neural net.
+  /// Number of transients to run and collect data from before updating the controller neural net.
   const unsigned int _update_frequency;
-
-  /// Counter for number of transient simulations to run before updating the controller
-  unsigned int _update_counter;
 
   /// The clip parameter used while clamping the advantage value
   const Real _clip_param;
@@ -228,4 +229,8 @@ protected:
   torch::Tensor _return_tensor;
   torch::Tensor _log_probability_tensor;
 #endif
+
+private:
+  /// Counter for number of transient simulations that have been run before updating the controller
+  unsigned int _update_counter;
 };

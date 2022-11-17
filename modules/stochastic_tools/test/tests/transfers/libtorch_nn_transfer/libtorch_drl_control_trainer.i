@@ -26,18 +26,16 @@
   [r_transfer]
     type = MultiAppReporterTransfer
     from_multi_app = runner
-    to_reporters = 'results/center_temp results/env_temp results/reward results/left_flux '
-                   'results/log_prob_left_flux'
-    from_reporters = 'T_reporter/center_temp_tend:value T_reporter/env_temp:value T_reporter/reward:value '
-                     'T_reporter/left_flux:value T_reporter/log_prob_left_flux:value'
+    to_reporters = 'results/center_temp results/env_temp results/reward results/left_flux results/log_prob_left_flux'
+    from_reporters = 'T_reporter/center_temp_tend:value T_reporter/env_temp:value T_reporter/reward:value T_reporter/left_flux:value T_reporter/log_prob_left_flux:value'
   []
 []
 
 [Trainers]
   [nn_trainer]
     type = LibtorchDRLControlTrainer
-    response_reporter = 'results/center_temp results/env_temp'
-    control_reporter = 'results/left_flux'
+    response = 'results/center_temp results/env_temp'
+    control = 'results/left_flux'
     log_probability_reporter = 'results/log_prob_left_flux'
     reward_reporter = 'results/reward'
 
@@ -90,6 +88,6 @@
 []
 
 [Outputs]
-  file_base =train_out
+  file_base = train_out
   csv = true
 []

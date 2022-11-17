@@ -54,7 +54,7 @@ Next, we set up the data collection using the `Postprocessors` and `Reporters` b
 
 !listing examples/libtorch_drl_control/libtorch_drl_control_sub.i block=Postprocessors
 
-It is visible that we have two `postprocessors` measuring the temperature at the location of the sensor.
+It is visible that we have two postprocessors measuring the temperature at the location of the sensor.
 One saves the value at the beginning of the time step, while the other saves it at the end of the
 time step. This is due to the fact that the neural network needs the measured temperature at the
 beginning of the time step, while we would like to compute the reward for the training process
@@ -79,13 +79,10 @@ object defined in the `Controls` block.
 This object can be used to evaluate the neural network without the additional random
 sampling process needed for the training process. In other words, this object will evaluate the
 final product of this training process.
-The complete input file for the main application is presented below:
-
-!listing examples/libtorch_drl_control/libtorch_drl_control_sub.i
 
 ### Main Application
 
-The input for the main application start with the definition of a `Sampler`. In this example we
+The input for the main application start with the definition of a [Sampler](Samplers/index.md). In this example we
 do not aim to train a controller which can adapt to random model parameters, so we just
 define a dummy sampler which does not rely on random numbers.
 
@@ -116,7 +113,7 @@ When these are set, we define the architecture of the critic and control neural 
 [!param](/Trainers/LibtorchDRLControlTrainer/num_critic_neurons_per_layer) and 
 [!param](/Trainers/LibtorchDRLControlTrainer/num_control_neurons_per_layer).
 The corresponding learning rates can be defined by
-[!param](/Trainers/LibtorchDRLControlTrainer/critic_learning_rate),
+[!param](/Trainers/LibtorchDRLControlTrainer/critic_learning_rate) and
 [!param](/Trainers/LibtorchDRLControlTrainer/control_learning_rate).
 Then, we copy-paste the input/output standardization options from the `Control` in the sub-app.
 Additionally, we can select to standardize the advantage function which makes 
@@ -129,9 +126,6 @@ We set the iteration number by setting the number of time steps below:
 !listing examples/libtorch_drl_control/libtorch_drl_control_trainer.i block=Executioner
 
 Which means that we run 440 problems altogether.
-The complete trainer input file is presented below:
-
-!listing examples/libtorch_drl_control/libtorch_drl_control_trainer.i
 
 ## Results
 

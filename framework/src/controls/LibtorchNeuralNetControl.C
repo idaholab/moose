@@ -51,6 +51,7 @@ LibtorchNeuralNetControl::validParams()
                                              "The number of neurons on each hidden layer.");
   params.addParam<std::vector<std::string>>(
       "activation_function",
+      std::vector<std::string>({"relu"}),
       "The type of activation functions to use. It is either one value "
       "or one value per hidden layer.");
 
@@ -68,7 +69,15 @@ LibtorchNeuralNetControl::LibtorchNeuralNetControl(const InputParameters & param
     _action_postprocessor_names(getParam<std::vector<PostprocessorName>>("action_postprocessors")),
     _input_timesteps(getParam<unsigned int>("input_timesteps")),
     _initialized(false),
-    _action_scaling_factors(getParam<std::vector<Real>>("action_scaling_factors"))
+    _response_shift_factors(isParamValid("response_shift_factors")
+                                ? getParam<std::vector<Real>>("response_shift_factors")
+                                : std::vector<Real>(_response_names.size(), 0.0)),
+    _response_scaling_factors(isParamValid("response_scaling_factors")
+                                  ? getParam<std::vector<Real>>("response_scaling_factors")
+                                  : std::vector<Real>(_response_names.size(), 1.0)),
+    _action_scaling_factors(isParamValid("action_scaling_factors")
+                                ? getParam<std::vector<Real>>("action_scaling_factors")
+                                : std::vector<Real>(_control_names.size(), 1.0))
 {
   // We first check if the input parameters make sense and throw errors if different parameter
   // combinations are not allowed
@@ -76,49 +85,32 @@ LibtorchNeuralNetControl::LibtorchNeuralNetControl(const InputParameters & param
                             {"num_neurons_per_layer", "activation_function"},
                             !getParam<bool>("torch_script_format"));
 
-  if (isParamValid("response_shift_factors"))
-  {
-    _response_shift_factors = getParam<std::vector<Real>>("response_shift_factors");
-    if (_response_names.size() != _response_shift_factors.size())
-      paramError("response_shift_factors",
-                 "The number of shift factors is not the same as the number of responses!");
-  }
-  else
-    _response_shift_factors = std::vector<Real>(_response_names.size(), 0.0);
+  if (_response_names.size() != _response_shift_factors.size())
+    paramError("response_shift_factors",
+               "The number of shift factors is not the same as the number of responses!");
 
-  if (isParamValid("response_scaling_factors"))
-  {
-    _response_scaling_factors = getParam<std::vector<Real>>("response_scaling_factors");
-    if (_response_names.size() != _response_scaling_factors.size())
-      paramError(
-          "response_scaling_factors",
-          "The number of normalization coefficients is not the same as the number of responses!");
-  }
-  else
-    _response_scaling_factors = std::vector<Real>(_response_names.size(), 1.0);
+  if (_response_names.size() != _response_scaling_factors.size())
+    paramError(
+        "response_scaling_factors",
+        "The number of normalization coefficients is not the same as the number of responses!");
 
-  if (isParamValid("action_scaling_factors"))
-  {
-    _action_scaling_factors = getParam<std::vector<Real>>("action_scaling_factors");
-    if (_control_names.size() != _action_scaling_factors.size())
-      paramError("action_scaling_factors",
-                 "The number of normalization coefficients is not the same as the number of "
-                 "controlled parameters!");
-  }
-  else
-    _action_scaling_factors = std::vector<Real>(_control_names.size(), 1.0);
+  if (_control_names.size() != _action_scaling_factors.size())
+    paramError("action_scaling_factors",
+               "The number of normalization coefficients is not the same as the number of "
+               "controlled parameters!");
 
   if (_control_names.size() != _action_postprocessor_names.size())
     paramError("action_postprocessors",
-               "Number of action_postprocessors " +
-                   std::to_string(_action_postprocessor_names.size()) +
-                   " does not match the number of controlled parameters " +
-                   std::to_string(_control_names.size()) + ".");
+               "Number of action_postprocessors (",
+               _action_postprocessor_names.size(),
+               ") does not match the number of controlled parameters (",
+               _control_names.size(),
+               ").");
 
 #ifdef LIBTORCH_ENABLED
   // If the user wants to read the neural net from file, we do it. We can read it from a
   // torchscript file, or we can create a shell and read back the parameters
-  if (parameters.isParamSetByUser("filename"))
+  if (isParamValid("filename"))
   {
     std::string filename = getParam<std::string>("filename");
     if (getParam<bool>("torch_script_format"))
@@ -164,20 +156,17 @@ LibtorchNeuralNetControl::execute()
     unsigned int n_controls = _control_names.size();
     unsigned int num_old_timesteps = _input_timesteps - 1;
 
-    // Gather the current response values values
+    // Gather the current response values
     _current_response.clear();
     for (unsigned int resp_i = 0; resp_i < n_responses; ++resp_i)
       _current_response.push_back(
           (getPostprocessorValueByName(_response_names[resp_i]) - _response_shift_factors[resp_i]) *
           _response_scaling_factors[resp_i]);
 
-    // If we need old responses and this is the initial timestep, we fill up the old
-    // values with the initial value
+    // If this is the first timestep, we fill up the old values with the initial value
     if (!_initialized)
     {
-      _old_responses.clear();
-      for (unsigned int step_i = 0; step_i < num_old_timesteps; ++step_i)
-        _old_responses.push_back(_current_response);
+      _old_responses.assign(num_old_timesteps, _current_response);
       _initialized = true;
     }
 
@@ -212,14 +201,8 @@ LibtorchNeuralNetControl::execute()
 
     // We add the curent solution to the old solutions and move everything in there one step
     // backward
-    for (unsigned int step_i = 0; step_i < num_old_timesteps; ++step_i)
-    {
-      if (step_i == num_old_timesteps - 1)
-        _old_responses[0] = _current_response;
-      else
-        _old_responses[(num_old_timesteps - 1) - step_i] =
-            _old_responses[(num_old_timesteps - 1) - step_i - 1];
-    }
+    std::rotate(_old_responses.rbegin(), _old_responses.rbegin() + 1, _old_responses.rend());
+    _old_responses[0] = _current_response;
   }
 #endif
 }
@@ -243,6 +226,9 @@ LibtorchNeuralNetControl::conditionalParameterError(
     for (const auto & param : conditional_params)
       if (parameters().isParamSetByUser(param) != should_be_defined)
         paramError(param,
-                   "This parameter should " + std::string(should_be_defined ? "" : "not") +
-                       " be defined when " + param_name + " is defined!");
+                   "This parameter should",
+                   (should_be_defined ? " " : " not "),
+                   "be defined when ",
+                   param_name,
+                   " is defined!");
 }
