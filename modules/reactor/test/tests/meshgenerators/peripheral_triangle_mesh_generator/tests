@@ -1,73 +1,19 @@
 [Tests]
   design = 'meshgenerators/PeripheralTriangleMeshGenerator.md'
-  issues = '#18628'
-  [no_steiner_points_inner_boundary_name]
+  issues = '#22435'
+  [no_refinement]
     type = 'Exodiff'
     input = 'abtr_tri.i'
     exodiff = 'abtr_tri.e'
     cli_args = '--mesh-only "abtr_tri.e"'
-    requirement ='The system shall generate a triangulation without any Steiner points, given an inner boundary name.'
+    requirement ='The system shall generate a triangulation without any refinement.'
     recover = false
   []
-  [no_steiner_points_inner_boundary_id]
-    type = 'Exodiff'
-    input = 'abtr_tri_err.i'
-    exodiff = 'abtr_tri.e'
-    cli_args = 'Mesh/tmg/inner_boundary_id=10000
-                --mesh-only "abtr_tri.e"'
-    requirement ='The system shall generate a triangulation without any Steiner points, given an inner boundary id.'
+  [refinement]
+    type = 'CSVDiff'
+    input = 'abtr_tri_refine.i'
+    csvdiff = 'abtr_tri_refine.csv'
+    requirement ='The system shall generate a triangulation with area refinement.'
     recover = false
-  []
-  [steiner_points]
-    type = 'Exodiff'
-    input = 'abtr_tri.i'
-    exodiff = 'abtr_tri_steiner.e'
-    cli_args = 'Mesh/tmg/extra_circle_num_segments=100 
-                Mesh/tmg/extra_circle_radii=137
-                --mesh-only "abtr_tri_steiner.e"'
-    requirement ='The system shall generate a triangulation with Steiner points.'
-    recover = false
-  []
-  [err_steiner_input_length]
-    type = 'RunException'
-    input = 'abtr_tri_err.i'
-    cli_args = 'Mesh/tmg/inner_boundary_name=core_out
-                Mesh/tmg/extra_circle_num_segments="100 200" 
-                Mesh/tmg/extra_circle_radii=137
-                --mesh-only "abtr_tri_err.e"'
-    expect_err = "The size of 'extra_circle_num_segments' must be equal to the size of 'extra_circle_radii'."
-    requirement ="The system shall throw an error if extra_circle_radii and extra_circle_num_segments are not compatible."
-  []
-  [err_inner_mesh_both_boundary]
-    type = 'RunException'
-    input = 'abtr_tri_err.i'
-    cli_args = 'Mesh/tmg/inner_boundary_id=10000
-                Mesh/tmg/inner_boundary_name=core_out
-                --mesh-only "abtr_tri_err.e"'
-    expect_err = "Either 'inner_boundary_id' or 'inner_boundary_name' must be provided, but not both."
-    requirement ="The system shall throw an error if both inner_boundary_name and inner_boundary_id are both provided."
-  []
-  [err_inner_mesh_no_boundary]
-    type = 'RunException'
-    input = 'abtr_tri_err.i'
-    cli_args = '--mesh-only "abtr_tri_err.e"'
-    expect_err = "Either 'inner_boundary_id' or 'inner_boundary_name' must be provided, but not both."
-    requirement ="The system shall throw an error if neither inner_boundary_name and inner_boundary_id are provided."
-  []
-  [err_inner_mesh_name_not_found]
-    type = 'RunException'
-    input = 'abtr_tri_err.i'
-    cli_args = 'Mesh/tmg/inner_boundary_name=name_not_defined
-                --mesh-only "abtr_tri_err.e"'
-    expect_err = "Boundary name not found in input mesh."
-    requirement ="The system shall throw an error if inner_boundary_name is not defined on the input mesh."
-  []
-  [err_inner_mesh_id_not_found]
-    type = 'RunException'
-    input = 'abtr_tri_err.i'
-    cli_args = 'Mesh/tmg/inner_boundary_id=-123
-                --mesh-only "abtr_tri_err.e"'
-    expect_err = "Boundary id not found in input mesh."
-    requirement ="The system shall throw an error if inner_boundary_id is not defined on the input mesh."
   []
 []
