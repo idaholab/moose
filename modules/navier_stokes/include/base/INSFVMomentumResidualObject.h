@@ -10,7 +10,7 @@
 #pragma once
 
 #include "InputParameters.h"
-#include "INSFVRhieChowInterpolator.h"
+#include "RhieChowInterpolatorBase.h"
 
 class MooseObject;
 class FaceInfo;
@@ -49,9 +49,8 @@ public:
   virtual ~INSFVMomentumResidualObject() = default;
 
 protected:
-  /// The Rhie-Chow user object that holds the 'a' data structure which we will be feeding
-  /// data to
-  INSFVRhieChowInterpolator & _rc_uo;
+  /// SOMETHING NICE
+  RhieChowInterpolatorBase & _rc_uo;
 
   /// index x|y|z
   const unsigned int _index;
@@ -59,8 +58,8 @@ protected:
 
 template <typename T>
 INSFVMomentumResidualObject::INSFVMomentumResidualObject(T & obj)
-  : _rc_uo(const_cast<INSFVRhieChowInterpolator &>(
-        obj.template getUserObject<INSFVRhieChowInterpolator>("rhie_chow_user_object"))),
+  : _rc_uo(const_cast<RhieChowInterpolatorBase &>(
+        obj.template getUserObject<RhieChowInterpolatorBase>("rhie_chow_user_object"))),
     _index(obj.template getParam<MooseEnum>("momentum_component"))
 {
 }

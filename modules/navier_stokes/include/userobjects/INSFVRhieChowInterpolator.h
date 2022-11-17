@@ -9,11 +9,7 @@
 
 #pragma once
 
-#include "GeneralUserObject.h"
-#include "TaggingInterface.h"
-#include "BlockRestrictable.h"
-#include "ADReal.h"
-#include "MooseTypes.h"
+#include "RhieChowInterpolatorBase.h"
 #include "CellCenteredMapFunctor.h"
 #include "VectorComponentFunctor.h"
 #include "FaceArgInterface.h"
@@ -43,11 +39,8 @@ class MeshBase;
  * velocity although this is generally not encouraged as it will lead to a checkerboard in the
  * pressure field
  */
-class INSFVRhieChowInterpolator : public GeneralUserObject,
-                                  public TaggingInterface,
-                                  public BlockRestrictable,
-                                  public FaceArgProducerInterface,
-                                  public ADFunctorInterface
+
+class INSFVRhieChowInterpolator : public RhieChowInterpolatorBase
 {
 public:
   /**
@@ -70,21 +63,21 @@ public:
    * @param component The velocity component we are adding 'a' coefficient data for
    * @param value The value of 'a' that we are adding
    */
-  void addToA(const libMesh::Elem * elem, unsigned int component, const ADReal & value);
+  void addToA(const libMesh::Elem * elem, unsigned int component, const ADReal & value) override;
 
   /**
    * Retrieve a face velocity
-   * @param m The velocity interpolation method. This is either Rhie-Chow or Average. Rhie-Chow is
-   * recommended as it avoids checkerboards in the pressure field
    * @param fi The face that we wish to retrieve the velocity for
    * @param time The time at which to evaluate the velocity
-   * @param tid The thread ID
+   * @param tid The thread ID\
+   * @param m The velocity interpolation method. This is either Rhie-Chow or Average. Rhie-Chow is
+   * recommended as it avoids checkerboards in the pressure field
    * @return The face velocity
    */
-  VectorValue<ADReal> getVelocity(Moose::FV::InterpMethod m,
-                                  const FaceInfo & fi,
+  VectorValue<ADReal> getVelocity(const FaceInfo & fi,
                                   const Moose::StateArg & time,
-                                  THREAD_ID tid) const;
+                                  THREAD_ID tid,
+                                  Moose::FV::InterpMethod m) const;
 
   /// Return the interpolation method used for velocity
   Moose::FV::InterpMethod velocityInterpolationMethod() const { return _velocity_interp_method; }
@@ -116,48 +109,15 @@ public:
 
 protected:
   /**
-   * A virtual method that allows us to only implement getVelocity once for free and porous flows
-   */
-  virtual const Moose::FunctorBase<ADReal> & epsilon(THREAD_ID tid) const;
-
-  /**
    * perform the setup of this object
    */
   void insfvSetup();
-
-  /**
-   * Computes the inverse of the digaonal (1/A) of the system matrix plus the H/A components for the
-   * pressure equation plus Rhie-Chow interpolation. This should nly be used with segregated
-   * solvers.
-   */
-  void computeHbyA();
-
-  /// The \p MooseMesh that this user object operates on
-  MooseMesh & _moose_mesh;
-
-  /// The \p libMesh mesh that this object acts on
-  const libMesh::MeshBase & _mesh;
-
-  /// The dimension of the mesh, e.g. 3 for hexes and tets, 2 for quads and tris
-  const unsigned int _dim;
 
   /// A functor for computing the (non-RC corrected) velocity
   std::vector<std::unique_ptr<PiecewiseByBlockLambdaFunctor<ADRealVectorValue>>> _vel;
 
   /// The interpolation method to use for the velocity
   Moose::FV::InterpMethod _velocity_interp_method;
-
-  /// The thread 0 copy of the pressure variable
-  INSFVPressureVariable * const _p;
-
-  /// The thread 0 copy of the x-velocity variable
-  INSFVVelocityVariable * const _u;
-
-  /// The thread 0 copy of the y-velocity variable (null if the problem is 1D)
-  INSFVVelocityVariable * const _v;
-
-  /// The thread 0 copy of the z-velocity variable (null if the problem is not 3D)
-  INSFVVelocityVariable * const _w;
 
   /// All the thread copies of the pressure variable
   std::vector<MooseVariableFVReal *> _ps;
@@ -174,24 +134,8 @@ protected:
   /// All the active and elements local to this process that exist on this object's subdomains
   std::unique_ptr<ConstElemRange> _elem_range;
 
-  /// The subdomain ids this object operates on
-  const std::set<SubdomainID> _sub_ids;
-
-  /// A map from element IDs to 'a' coefficient data (the elements from the diagonal of the system matrix)
+  /// A map from element IDs to 'a' coefficient data
   CellCenteredMapFunctor<ADRealVectorValue, std::unordered_map<dof_id_type, ADRealVectorValue>> _a;
-
-  /**
-   * A map from element IDs to $HbyA_{ij} = (A_{offdiag}*\mathrm{(predicted~velocity)} -
-   * \mathrm{Source})_{ij}/A_{ij}$. So this contains the offdiagonal part of the system matrix
-   * multiplied by the predicted velocity minus the source terms from the right hand side of the
-   * linearized momentum predictor stem.
-   */
-  CellCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>> _HbyA;
-
-  /**
-   * A map from element IDs to $1/A_ij$. ADD MORE
-   */
-  CellCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>> _Ainv;
 
   /**
    * @name 'a' component functors
@@ -231,20 +175,11 @@ private:
   /// Non-local elements that we should push and pull data for across processes
   std::unordered_set<const Elem *> _elements_to_push_pull;
 
-  /// The nonlinear system
-  SystemBase & _sys;
-
   /// An example datum used to help communicate AD vector information in parallel
   const VectorValue<ADReal> _example;
 
   /// Mutex that prevents multiple threads from saving into the 'a' coefficients at the same time
   Threads::spin_mutex _a_mutex;
-
-  /// A unity functor used in the epsilon virtual method
-  const Moose::ConstantFunctor<ADReal> _unity_functor{1};
-
-  /// A zero functor potentially used in _a_read
-  const Moose::ConstantFunctor<ADReal> _zero_functor{0};
 
   /// A vector sized according to the number of threads that holds the 'a' data we will read from
   /// when computing the Rhie-Chow velocity
@@ -264,11 +199,10 @@ private:
   bool _pull_all_nonlocal;
 };
 
-inline const Moose::FunctorBase<ADReal> &
-INSFVRhieChowInterpolator::epsilon(THREAD_ID) const
-{
-  return _unity_functor;
+/// A zero functor potentially used in _a_read
+const Moose::ConstantFunctor<ADReal> _zero_functor{0};
 }
+;
 
 inline void
 INSFVRhieChowInterpolator::addToA(const Elem * const elem,

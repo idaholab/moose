@@ -33,5 +33,5 @@ protected:
   Moose::FV::InterpMethod _velocity_interp_method;
 
   /// The Rhie-Chow user object that provides us with the velocity
-  const INSFVRhieChowInterpolator & _rc_vel_provider;
+  const RhieChowInterpolatorBase & _rc_vel_provider;
 };
