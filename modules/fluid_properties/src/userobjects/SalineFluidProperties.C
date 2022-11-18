@@ -27,35 +27,35 @@ SalineFluidProperties::validParams()
 }
 
 //// Input parser for salt component names
-//std::vector<std::string>
-//splitString_str(std::string str)
+// std::vector<std::string>
+// splitString_str(std::string str)
 //{
-//  std::string delimiter = "-";
-//  std::string tmpstr = str;
+//   std::string delimiter = "-";
+//   std::string tmpstr = str;
 //
-//  std::vector<std::string> list;
-//  size_t pos = 0;
-//  std::string token;
-//  while ((pos = tmpstr.find(delimiter)) != std::string::npos)
-//  {
-//    token = tmpstr.substr(0, pos);
-//    list.push_back(token);
-//    tmpstr.erase(0, pos + delimiter.length());
-//  }
-//  list.push_back(tmpstr);
-//  return list;
-//}
+//   std::vector<std::string> list;
+//   size_t pos = 0;
+//   std::string token;
+//   while ((pos = tmpstr.find(delimiter)) != std::string::npos)
+//   {
+//     token = tmpstr.substr(0, pos);
+//     list.push_back(token);
+//     tmpstr.erase(0, pos + delimiter.length());
+//   }
+//   list.push_back(tmpstr);
+//   return list;
+// }
 //
 //// Input parser for salt component mole fractions
-//std::vector<Real>
-//splitString_float(std::string str)
+// std::vector<Real>
+// splitString_float(std::string str)
 //{
-//  std::vector<std::string> list = splitString_str(str);
-//  std::vector<Real> res;
-//  for (std::string s : list)
-//    res.push_back(stof(s));
-//  return res;
-//}
+//   std::vector<std::string> list = splitString_str(str);
+//   std::vector<Real> res;
+//   for (std::string s : list)
+//     res.push_back(stof(s));
+//   return res;
+// }
 
 SalineFluidProperties::SalineFluidProperties(const InputParameters & parameters)
   : SinglePhaseFluidProperties(parameters)
@@ -126,7 +126,6 @@ SalineFluidProperties::rho_from_p_T(
   drho_dT = (rho_from_p_T(pressure, temperature + 1.0) - rho) / 1.0;
 }
 
-
 Real
 SalineFluidProperties::cp_from_p_T(Real pressure, Real temperature) const
 {
@@ -142,17 +141,17 @@ SalineFluidProperties::cp_from_p_T(
   dcp_dT = (cp_from_p_T(pressure, temperature + 1.0) - cp) / 1.0;
 }
 
-//Real
-//SalineFluidProperties::enthalpy_from_T(Real temperature) const
+// Real
+// SalineFluidProperties::enthalpy_from_T(Real temperature) const
 //{
-//  return _tp.h_t_kg(temperature);
-//}
+//   return _tp.h_t_kg(temperature);
+// }
 //
-//Real
-//SalineFluidProperties::T_from_enthalpy(Real enthalpy) const
+// Real
+// SalineFluidProperties::T_from_enthalpy(Real enthalpy) const
 //{
-//  return _tp.t_h_kg(enthalpy);
-//}
+//   return _tp.t_h_kg(enthalpy);
+// }
 
 Real
 SalineFluidProperties::mu_from_p_T(Real pressure, Real temperature) const

@@ -26,13 +26,12 @@ public:
 
   SalineFluidProperties(const InputParameters & parameters);
 
-
 #ifdef SALINE_ENABLED
 
   /**
    * Fluid name
    *
-   * @return "flibe"
+   * @return the name of the salt
    */
   virtual std::string fluidName() const override;
 
@@ -54,9 +53,8 @@ public:
    * @param[out] drho_dp   derivative of density w.r.t. pressure
    * @param[out] drho_dT   derivative of density w.r.t. temperature
    */
-  virtual void
-  rho_from_p_T(Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const override;
-
+  virtual void rho_from_p_T(
+      Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const override;
 
   /**
    * Isobaric specific heat capacity from pressure and temperature
@@ -75,8 +73,8 @@ public:
    * @param[out] cp     isobaric specific heat (J/kg/K)
    * @param[out] dcp_dp derivative of isobaric specific heat w.r.t. pressure (J/kg/K/Pa)
    */
-  virtual void
-  cp_from_p_T(Real pressure, Real temperature, Real & cp, Real & dcp_dp, Real & dcp_dT) const override;
+  virtual void cp_from_p_T(
+      Real pressure, Real temperature, Real & cp, Real & dcp_dp, Real & dcp_dT) const override;
 
   /**
    * Dynamic viscosity from pressure and temperature
