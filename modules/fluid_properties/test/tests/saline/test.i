@@ -24,7 +24,7 @@
 []
 
 [FluidProperties]
-  [flibe]
+  [salt]
     type = SalineFluidProperties
     comp_name = "LiF-NaF-KF"
     comp_val = "0.465-0.115-0.42"
@@ -38,7 +38,7 @@
     variable = rho
     p = p
     T = T
-    fp = flibe
+    fp = salt
     execute_on = 'initial'
   []
 []

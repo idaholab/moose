@@ -82,7 +82,7 @@ SalineFluidProperties::SalineFluidProperties(const InputParameters & parameters)
   success = _tp.setComposition(nameList, valList);
   if (!success)
     mooseError("The composition set has failed");
-  _propName = name;
+  _fluid_name = name;
 
 #endif
 #ifndef SALINE_ENABLED
@@ -107,7 +107,7 @@ const Real mN_to_N = 1 / N_to_mN;
 std::string
 SalineFluidProperties::fluidName() const
 {
-  return _propName;
+  return _fluid_name;
 }
 
 Real

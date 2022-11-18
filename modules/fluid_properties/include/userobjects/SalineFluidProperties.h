@@ -98,9 +98,12 @@ public:
 
 protected:
 #ifdef SALINE_ENABLED
+  /// Saline DataStore object
   saline::Default_Data_Store _d;
+  /// Saline interface to fluid properties
   saline::Thermophysical_Properties _tp;
-  std::string _propName;
+  /// Name of the fluid
+  std::string _fluid_name;
 #endif
 };
 

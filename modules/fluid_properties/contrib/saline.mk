@@ -1,14 +1,8 @@
 # source files
 Saline_srcfiles    := $(shell find $(SALINE_SRC) -name "*.cc")
-#$(shell find $(SALINE_SRC) -name "*.cpp")
-#Saline_f90modfiles := $(shell find $(SALINE_SRC) -name "*.f90")
-#Saline_f90srcfiles := $(shell find $(SALINE_SRC) -name "*.f90" -not -name "Module*")
 
 # object files
 Saline_objects     := $(patsubst %.cc, %.$(obj-suffix), $(Saline_srcfiles))
-#Saline_objects     += $(patsubst %.cpp, %.$(obj-suffix), $(Saline_srcfiles))
-#Saline_objects     += $(patsubst %.f90, %.$(obj-suffix), $(Saline_f90modfiles))
-#Saline_objects     += $(patsubst %.f90, %.$(obj-suffix), $(Thermochimica_f90srcfiles))
 
 # dependencies (C, C++ files only)
 Saline_deps := $(patsubst %.cc, %.$(obj-suffix).d, $(Saline_srcfiles))
@@ -32,6 +26,3 @@ $(SALINE_DIR)/lib/libSaline-$(METHOD).la : $(Saline_objects)
 ADDITIONAL_LIBS += $(SALINE_DIR)/lib/libSaline-$(METHOD).la
 
 app_INCLUDES += -I$(SALINE_SRC) -I$(SALINE_SRC)/api -I$(SALINE_DIR)/include -I$(SALINE_SRC)/fortran
-
-# F90 module dependency rules
-#$(Saline_f90srcfiles): $(patsubst %.f90, %.$(obj-suffix), $(Saline_f90modfiles))
