@@ -107,6 +107,11 @@ LibtorchNeuralNetControl::LibtorchNeuralNetControl(const InputParameters & param
                _control_names.size(),
                ").");
 
+  // We link to the postprocessor values so that we can fetch them any time. This also raises
+  // errors if we don't have the postprocessors requested in the input.
+  for (unsigned int resp_i = 0; resp_i < _response_names.size(); ++resp_i)
+    _response_values.push_back(&getPostprocessorValueByName(_response_names[resp_i]));
+
 #ifdef LIBTORCH_ENABLED
   // If the user wants to read the neural net from file, we do it. We can read it from a
   // torchscript file, or we can create a shell and read back the parameters
@@ -159,9 +164,8 @@ LibtorchNeuralNetControl::execute()
     // Gather the current response values
     _current_response.clear();
     for (unsigned int resp_i = 0; resp_i < n_responses; ++resp_i)
-      _current_response.push_back(
-          (getPostprocessorValueByName(_response_names[resp_i]) - _response_shift_factors[resp_i]) *
-          _response_scaling_factors[resp_i]);
+      _current_response.push_back((*_response_values[resp_i] - _response_shift_factors[resp_i]) *
+                                  _response_scaling_factors[resp_i]);
 
     // If this is the first timestep, we fill up the old values with the initial value
     if (!_initialized)

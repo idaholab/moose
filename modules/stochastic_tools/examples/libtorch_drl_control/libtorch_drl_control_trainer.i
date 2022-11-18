@@ -36,8 +36,8 @@
     type = LibtorchDRLControlTrainer
     response = 'results/center_temp results/env_temp'
     control = 'results/top_flux'
-    log_probability_reporter = 'results/log_prob_top_flux'
-    reward_reporter = 'results/reward'
+    log_probability = 'results/log_prob_top_flux'
+    reward = 'results/reward'
 
     num_epochs = 1000
     update_frequency = 10

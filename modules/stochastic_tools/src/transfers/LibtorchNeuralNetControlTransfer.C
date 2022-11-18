@@ -22,6 +22,10 @@ LibtorchNeuralNetControlTransfer::validParams()
   params.addClassDescription("Copies a neural network from a trainer object on the main app to a "
                              "LibtorchNeuralNetControl object on the subapp.");
 
+  params.suppressParameter<MultiAppName>("from_multi_app");
+  params.suppressParameter<MultiAppName>("multi_app");
+  params.suppressParameter<MultiMooseEnum>("direction");
+
   params.addRequiredParam<UserObjectName>("trainer_name",
                                           "Trainer object that contains the neural networks."
                                           " for different samples.");
@@ -46,35 +50,24 @@ void
 LibtorchNeuralNetControlTransfer::execute()
 {
 #ifdef LIBTORCH_ENABLED
-  // Selecting the appropriate action based on the drection.
-  switch (_direction)
-  {
-    case FROM_MULTIAPP:
 
-      mooseError("This transfer does not support transfer from the subapps.");
-      break;
+  // Get the control neural net from the trainer
+  const std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & trainer_nn =
+      _trainer.controlNeuralNet();
 
-    case TO_MULTIAPP:
+  // Get the control object from the other app
+  FEProblemBase & app_problem = _multi_app->appProblemBase(0);
+  auto & control_warehouse = app_problem.getControlWarehouse();
+  const auto & control_ref = control_warehouse.getActiveObject(_control_name);
+  std::shared_ptr<LibtorchNeuralNetControl> control_object =
+      std::dynamic_pointer_cast<LibtorchNeuralNetControl>(control_ref);
 
-      // Get the control neural net from the trainer
-      const std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & trainer_nn =
-          _trainer.controlNeuralNet();
+  if (!control_object)
+    paramError("control_name", "The given gontrol is not a LibtorchNeuralNetrControl!");
 
-      // Get the control object from the other app
-      FEProblemBase & app_problem = _multi_app->appProblemBase(0);
-      auto & control_warehouse = app_problem.getControlWarehouse();
-      const auto & control_ref = control_warehouse.getActiveObject(_control_name);
-      std::shared_ptr<LibtorchNeuralNetControl> control_object =
-          std::dynamic_pointer_cast<LibtorchNeuralNetControl>(control_ref);
+  // Copy and the neural net and execute it to get the initial values
+  control_object->loadControlNeuralNet(trainer_nn);
+  control_object->execute();
 
-      if (!control_object)
-        paramError("control_name", "The given gontrol is not a LibtorchNeuralNetrControl!");
-
-      // Copy and the neural net and execute it to get the initial values
-      control_object->loadControlNeuralNet(trainer_nn);
-      control_object->execute();
-
-      break;
-  }
 #endif
 }

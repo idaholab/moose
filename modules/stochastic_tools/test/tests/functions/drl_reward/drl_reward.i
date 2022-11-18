@@ -18,10 +18,10 @@
   [time]
     type = CoefTimeDerivative
     variable = temp
-    Coefficient = ${fparse 1.00630182*1.225}
+    Coefficient = '${fparse 1.00630182*1.225}'
   []
   [heat_conduc]
-    type = ADMatDiffusion
+    type = MatDiffusion
     variable = temp
     diffusivity = 'k'
   []
@@ -29,7 +29,7 @@
 
 [BCs]
   [dirichlet]
-    type = ADFunctionDirichletBC
+    type = FunctionDirichletBC
     function = "200"
     variable = temp
     boundary = 'right'
@@ -52,7 +52,7 @@
 
 [Materials]
   [constant]
-    type = ADGenericConstantMaterial
+    type = GenericConstantMaterial
     prop_names = 'k'
     prop_values = 26.53832364
   []
@@ -84,7 +84,7 @@
     type = FunctionValuePostprocessor
     function = reward_function
     execute_on = 'INITIAL TIMESTEP_END'
-    indirect_dependencies = 'center_temp_tend env_temp'
+    indirect_dependencies = 'center_temp_tend'
   []
 []
 

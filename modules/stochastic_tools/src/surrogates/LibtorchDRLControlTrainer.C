@@ -39,8 +39,9 @@ LibtorchDRLControlTrainer::validParams()
       "control",
       "Reporters containing the values of the controlled quantities (control signals) from the "
       "model simulations.");
-  params.addRequiredParam<std::vector<ReporterName>>("log_probability_reporter",
-                                                     "Log probability reporters.");
+  params.addRequiredParam<std::vector<ReporterName>>(
+      "log_probability",
+      "Reporters containing the log probabilities of the actions taken during the simulations.");
   params.addRequiredParam<ReporterName>(
       "reward", "Reporter containing the earned time-dependent rewards from the simulation.");
   params.addRangeCheckedParam<unsigned int>(
@@ -117,7 +118,7 @@ LibtorchDRLControlTrainer::validParams()
       true,
       "Switch to enable the shifting and normalization of the advantages in the PPO algorithm.");
   params.addParam<unsigned int>("loss_print_frequency",
-                                10,
+                                0,
                                 "The frequency which is used to print the loss values. If 0, the "
                                 "loss values are not printed.");
   return params;
@@ -133,8 +134,8 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
                                   ? getParam<std::vector<Real>>("response_scaling_factors")
                                   : std::vector<Real>(_response_names.size(), 1.0)),
     _control_names(getParam<std::vector<ReporterName>>("control")),
-    _log_probability_names(getParam<std::vector<ReporterName>>("log_probability_reporter")),
-    _reward_name(getParam<ReporterName>("reward_reporter")),
+    _log_probability_names(getParam<std::vector<ReporterName>>("log_probability")),
+    _reward_name(getParam<ReporterName>("reward")),
     _input_timesteps(getParam<unsigned int>("input_timesteps")),
     _num_inputs(_input_timesteps * _response_names.size()),
     _num_outputs(_control_names.size()),
@@ -346,15 +347,19 @@ LibtorchDRLControlTrainer::computeRewardToGo()
   std::vector<Real> return_data_per_sim;
   getRewardDataFromReporter(reward_data_per_sim, _reward_name);
 
-  // Discount the reward to get the return value
+  // Discount the reward to get the return value, we need this to be able to anticipate
+  // rewards based on the current behavior.
   Real discounted_reward(0.0);
   for (int i = reward_data_per_sim.size() - 1; i >= 0; --i)
   {
     discounted_reward = reward_data_per_sim[i] + discounted_reward * _decay_factor;
+
+    // We are inserting to the front of the vector and push the rest back, this will
+    // ensure that the first element of the vector is the discounter reward for the whole transient
     return_data_per_sim.insert(return_data_per_sim.begin(), discounted_reward);
   }
 
-  // Save the return values
+  // Save and accumulate the return values
   _return_data.insert(_return_data.end(), return_data_per_sim.begin(), return_data_per_sim.end());
 }
 

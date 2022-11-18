@@ -58,11 +58,15 @@ protected:
   std::vector<std::vector<Real>> _old_responses;
 
   /// The names of the controllable parameters
-  const std::vector<std::string> _control_names;
+  const std::vector<std::string> & _control_names;
   /// Names of the postprocessors which contain the observations of the system
-  const std::vector<PostprocessorName> _response_names;
+  const std::vector<PostprocessorName> & _response_names;
   /// Names of the postprocessors which will store the resulting action values from this controller
-  const std::vector<PostprocessorName> _action_postprocessor_names;
+  const std::vector<PostprocessorName> & _action_postprocessor_names;
+
+  /// Links to the current response postprocessor values. This is necessary so that we can check
+  /// if the postprocessors exist.
+  std::vector<const Real *> _response_values;
 
   /// Number of timesteps to use as input data from the reporters (this influences how many past
   /// results are used, e.g. the size of _old_responses)

@@ -18,10 +18,10 @@
   [time]
     type = CoefTimeDerivative
     variable = temp
-    Coefficient = ${fparse 1.00630182*1.225}
+    Coefficient = '${fparse 1.00630182*1.225}'
   []
   [heat_conduc]
-    type = ADMatDiffusion
+    type = MatDiffusion
     variable = temp
     diffusivity = 'k'
   []
@@ -29,13 +29,13 @@
 
 [BCs]
   [left_flux]
-    type = ADNeumannBC
+    type = NeumannBC
     value = 0.0
     boundary = 'left'
     variable = temp
   []
   [dirichlet]
-    type = ADFunctionDirichletBC
+    type = FunctionDirichletBC
     function = temp_env
     variable = temp
     boundary = 'right'
@@ -51,7 +51,7 @@
 
 [Materials]
   [constant]
-    type = ADGenericConstantMaterial
+    type = GenericConstantMaterial
     prop_names = 'k'
     prop_values = 26.53832364
   []
@@ -99,10 +99,10 @@
     action_standard_deviations = '0.1'
     action_scaling_factors = 200
 
-    filename='mynet_control.net'
-    torch_script_format=false
-    num_neurons_per_layer='16 6'
-    activation_function='relu'
+    filename = 'mynet_control.net'
+    torch_script_format = false
+    num_neurons_per_layer = '16 6'
+    activation_function = 'relu'
 
     execute_on = 'TIMESTEP_BEGIN'
   []

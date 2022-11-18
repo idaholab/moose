@@ -74,9 +74,8 @@ LibtorchDRLControl::execute()
     // Fill a vector with the current values of the responses
     _current_response.clear();
     for (unsigned int resp_i = 0; resp_i < n_responses; ++resp_i)
-      _current_response.push_back(
-          (getPostprocessorValueByName(_response_names[resp_i]) - _response_shift_factors[resp_i]) *
-          _response_scaling_factors[resp_i]);
+      _current_response.push_back((*_response_values[resp_i] - _response_shift_factors[resp_i]) *
+                                  _response_scaling_factors[resp_i]);
 
     // If this is the first time this control is called and we need to use older values, fill up the
     // needed old values using the initial values
