@@ -18,21 +18,6 @@ ADDITIONAL_CPPFLAGS += -Wall -Wextra
 include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
 
-################################## SALINE #######################################
-# Include link to Saline property database if the directory exists
-ifneq ("$(wildcard saline_moose/Makefile)", "")
-   #MOOSE_UNITY=false
-   APPLICATION_DIR    := $(shell pwd)/saline_moose
-   APPLICATION_NAME   := saline_moose
-   BUILD_EXEC         := no
-   ADDITIONAL_CPPFLAGS += -DSALINE_ENABLED
-   ADDITIONAL_INCLUDES := -I$(APPLICATION_DIR)/include/base
-   ADDITIONAL_LIBS    += -L$(APPLICATION_DIR)/lib
-   DEP_APPS           := $(shell $(FRAMEWORK_DIR)/scripts/find_dep_apps.py $(APPLICATION_NAME))
-   include            $(FRAMEWORK_DIR)/app.mk
-   #MOOSE_UNITY=true
-endif
-
 # Module
 MODULE_NAME := fluid_properties
 include $(MODULE_DIR)/modules.mk

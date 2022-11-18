@@ -6,6 +6,6 @@
     rel_err = 1e-8
     allow_test_objects = true
     threading = '!pthreads'
-    required_submodule = 'saline_moose'
+    required_objects = 'SalineFluidProperties'
   []
 []

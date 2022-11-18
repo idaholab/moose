@@ -12,8 +12,8 @@
 #include "SinglePhaseFluidProperties.h"
 
 #ifdef SALINE_ENABLED
-#include "default_data_store.h"
-#include "thermophysical_properties.h"
+#include "default_data_store.hh"
+#include "thermophysical_properties.hh"
 #endif
 
 class SalineFluidProperties : public SinglePhaseFluidProperties
@@ -27,7 +27,7 @@ public:
   SalineFluidProperties(const InputParameters & parameters);
 
 
-#ifdef SALINEAPP_H
+#ifdef SALINE_ENABLED
 
   /**
    * Fluid name
@@ -99,7 +99,7 @@ public:
 #endif
 
 protected:
-#ifdef SALINEAPP_H
+#ifdef SALINE_ENABLED
   saline::Default_Data_Store _d;
   saline::Thermophysical_Properties _tp;
   std::string _propName;

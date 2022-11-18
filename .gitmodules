@@ -12,9 +12,9 @@
     path = modules/chemical_reactions/contrib/thermochimica
     url = https://github.com/ORNL-CEES/thermochimica.git
     update = none
-[submodule "modules/fluid_properties/saline_moose"]
-	path = modules/fluid_properties/saline_moose
-	url = git@code.ornl.gov:neams/saline_moose.git
+[submodule "modules/fluid_properties/contrib/saline"]
+	path = modules/fluid_properties/contrib/saline
+	url = https://code.ornl.gov/neams/saline
 [submodule "framework/contrib/wasp"]
     path = framework/contrib/wasp
     url = https://code.ornl.gov/neams-workbench/wasp.git

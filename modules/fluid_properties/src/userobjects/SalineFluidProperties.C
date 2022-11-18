@@ -26,36 +26,36 @@ SalineFluidProperties::validParams()
   return params;
 }
 
-// Input parser for salt component names
-std::vector<std::string>
-splitString_str(std::string str)
-{
-  std::string delimiter = "-";
-  std::string tmpstr = str;
-
-  std::vector<std::string> list;
-  size_t pos = 0;
-  std::string token;
-  while ((pos = tmpstr.find(delimiter)) != std::string::npos)
-  {
-    token = tmpstr.substr(0, pos);
-    list.push_back(token);
-    tmpstr.erase(0, pos + delimiter.length());
-  }
-  list.push_back(tmpstr);
-  return list;
-}
-
-// Input parser for salt component mole fractions
-std::vector<Real>
-splitString_float(std::string str)
-{
-  std::vector<std::string> list = splitString_str(str);
-  std::vector<Real> res;
-  for (std::string s : list)
-    res.push_back(stof(s));
-  return res;
-}
+//// Input parser for salt component names
+//std::vector<std::string>
+//splitString_str(std::string str)
+//{
+//  std::string delimiter = "-";
+//  std::string tmpstr = str;
+//
+//  std::vector<std::string> list;
+//  size_t pos = 0;
+//  std::string token;
+//  while ((pos = tmpstr.find(delimiter)) != std::string::npos)
+//  {
+//    token = tmpstr.substr(0, pos);
+//    list.push_back(token);
+//    tmpstr.erase(0, pos + delimiter.length());
+//  }
+//  list.push_back(tmpstr);
+//  return list;
+//}
+//
+//// Input parser for salt component mole fractions
+//std::vector<Real>
+//splitString_float(std::string str)
+//{
+//  std::vector<std::string> list = splitString_str(str);
+//  std::vector<Real> res;
+//  for (std::string s : list)
+//    res.push_back(stof(s));
+//  return res;
+//}
 
 SalineFluidProperties::SalineFluidProperties(const InputParameters & parameters)
   : SinglePhaseFluidProperties(parameters)
@@ -70,8 +70,10 @@ SalineFluidProperties::SalineFluidProperties(const InputParameters & parameters)
     mooseError("The initialize of the Saline interface has failed");
   std::string name = getParam<std::string>("comp_name");
   std::string comp = getParam<std::string>("comp_val");
-  std::vector<std::string> nameList = splitString_str(name);
-  std::vector<Real> valList = splitString_float(comp);
+  std::vector<std::string> nameList;
+  MooseUtils::tokenize<std::string>(name, nameList, 1, "-");
+  std::vector<Real> valList;
+  MooseUtils::tokenizeAndConvert<Real>(comp, valList, "-");
   Real mole_sum = 0.0;
   for (Real val : valList)
     mole_sum = mole_sum + val;
@@ -83,7 +85,7 @@ SalineFluidProperties::SalineFluidProperties(const InputParameters & parameters)
   _propName = name;
 
 #endif
-#ifndef SALINEAPP_H
+#ifndef SALINE_ENABLED
 
   mooseError("Saline was not made available during the build and can not be used.");
 
@@ -100,7 +102,7 @@ const Real cm_to_m = 1.0 / m_to_cm;
 const Real N_to_mN = 1.0e3;
 const Real mN_to_N = 1 / N_to_mN;
 
-#ifdef SALINEAPP_H
+#ifdef SALINE_ENABLED
 
 std::string
 SalineFluidProperties::fluidName() const
@@ -124,12 +126,6 @@ SalineFluidProperties::rho_from_p_T(
   drho_dT = (rho_from_p_T(pressure, temperature + 1.0) - rho) / 1.0;
 }
 
-
-//Real
-//SalineFluidProperties::cv_from_p_T(Real /*pressure*/, Real temperature) const
-//{
-//  return cp_from_p_T(1e5, temperature);
-//}
 
 Real
 SalineFluidProperties::cp_from_p_T(Real pressure, Real temperature) const

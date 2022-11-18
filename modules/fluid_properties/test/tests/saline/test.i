@@ -13,42 +13,42 @@
 []
 
 [AuxVariables]
-  [./p]
+  [p]
     initial_condition = 1e5
-  [../]
-  [./T]
+  []
+  [T]
     initial_condition = 700
-  [../]
-  [./rho]
-  [../]
+  []
+  [rho]
+  []
 []
 
 [FluidProperties]
-  [./flibe]
+  [flibe]
     type = SalineFluidProperties
     comp_name = "LiF-NaF-KF"
     comp_val = "0.465-0.115-0.42"
     prop_def = "saline_custom.prp"
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./rho_aux]
+  [rho_aux]
     type = FluidDensityAux
     variable = rho
     p = p
     T = T
     fp = flibe
     execute_on = 'initial'
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./rho]
+  [rho]
     type = NodalVariableValue
     variable = rho
     nodeid = 0
-  [../]
+  []
 
   # Acceptance test
   [check_rho]
@@ -57,7 +57,7 @@
     value_a = ${fparse (2.579-6.24e-4*700)*1000}
     value_b = "rho"
     absolute_tolerance = "0.1" # kg/m^3
-  [../]
+  []
 []
 
 [Executioner]
