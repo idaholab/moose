@@ -12,13 +12,13 @@
 #include "GeneralReporter.h"
 #include "ParallelMarkovChainMonteCarloBase.h"
 #include "LikelihoodInterface.h"
-#include "DistributionInterface.h"
+// #include "DistributionInterface.h"
 
 /**
  * ParallelMarkovChainMonteCarloDecision will help make sample accept/reject decisions in MCMC
  * schemes (for e.g., when performing Bayesian inference).
  */
-class ParallelMarkovChainMonteCarloDecision : public GeneralReporter, public LikelihoodInterface, public DistributionInterface
+class ParallelMarkovChainMonteCarloDecision : public GeneralReporter, public LikelihoodInterface // , public DistributionInterface
 {
 public:
   static InputParameters validParams();
@@ -30,16 +30,18 @@ public:
   /**
    * Compute the transition probability vector
    */
-  virtual void computeTransitionVector(std::vector<Real> tv, std::vector<const Distribution *> priors, std::vector<const Likelihood *> likelihoods, const DenseMatrix<Real> & inputs, const std::vector<Real> & outputs) const = 0;
+  void computeTransitionVector(std::vector<Real> & tv, std::vector<const Distribution *> priors, std::vector<const Likelihood *> likelihoods, const DenseMatrix<Real> & inputs, const std::vector<Real> & outputs, const dof_id_type & num_confg); //  const = 0
+  // virtual 
 
   /**
    * Resample inputs given weights
    */
-  virtual std::vector<Real> resample(const DenseMatrix<Real> & given_inputs, const std::vector<Real> & weights) const = 0;
+  void resample(const DenseMatrix<Real> & given_inputs, const std::vector<Real> & weights, std::vector<Real> & req_inputs, const dof_id_type & num_confg); //  const = 0
+  // virtual 
 
 protected:
   /// Reporter value of the seed input values for proposing the next set of samples
-  const std::vector<Real> & _seed_inputs;
+  std::vector<Real> & _seed_inputs;
 
   /// Model output value from SubApp
   const std::vector<Real> & _output_value;
@@ -71,5 +73,8 @@ private:
 
   /// Facilitate allGather of outputs
   std::vector<Real> _output_comm;
+
+  /// Storage for previous inputs
+  DenseMatrix<Real> data_prev;
   
 };
