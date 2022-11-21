@@ -110,7 +110,6 @@
     block = 1
     reg_props_in = 'reg_eigenstrain1'
     ad_props_out = 'eigenstrain1'
-
   [../]
   [./thermal_expansion_strain2]
     type = ADComputeInstantaneousThermalExpansionFunctionEigenstrain
