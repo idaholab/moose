@@ -21,7 +21,7 @@ ParallelMarkovChainMonteCarloBase::validParams()
   InputParameters params = Sampler::validParams();
   params.addClassDescription("Parallel Markov chain Monte Carlo base.");
   params.addRequiredParam<std::vector<DistributionName>>(
-      "prior distributions",
+      "prior_distributions",
       "The prior distributions of the parameters to be calibrated.");
   params.addRequiredParam<ReporterName>("seed_inputs",
                                         "Reporter with seed inputs values for the next proposals.");
@@ -53,7 +53,7 @@ ParallelMarkovChainMonteCarloBase::ParallelMarkovChainMonteCarloBase(const Input
     _num_random_seeds(getParam<unsigned int>("num_random_seeds"))
 {
   // Filling the `priors` vector with the user-provided distributions.
-  for (const DistributionName & name : getParam<std::vector<DistributionName>>("distributions"))
+  for (const DistributionName & name : getParam<std::vector<DistributionName>>("prior_distributions"))
     _priors.push_back(&getDistributionByName(name));
 
   MooseUtils::DelimitedFileReader reader(getParam<FileName>("file_name"));
@@ -75,12 +75,20 @@ ParallelMarkovChainMonteCarloBase::ParallelMarkovChainMonteCarloBase(const Input
     _new_samples[i].resize(_priors.size()+1);
   
   setNumberOfRandomSeeds(_num_random_seeds);
+
+  _check_step = 0;
 }
 
 dof_id_type
 ParallelMarkovChainMonteCarloBase::getNumberOfConfigParams() const
 {
   return _confg_values.size();
+}
+
+dof_id_type
+ParallelMarkovChainMonteCarloBase::getNumParallelProposals() const
+{
+  return _num_parallel_proposals;
 }
 
 void
@@ -95,12 +103,12 @@ ParallelMarkovChainMonteCarloBase::sampleSetUp(const SampleMode /*mode*/)
   // Filling the new_samples vector of vectors with new proposal samples
   std::vector<Real> tmp(_priors.size() + 1);
   unsigned int count1 = 0;
-  if (_step == 1)
+  if (_step < 3)
   {
     for (unsigned int j = 0; j < _num_parallel_proposals; ++j)
     {
         for (unsigned int i = 0; i < _priors.size(); ++i)
-            tmp[i] = Normal::quantile(getRand(seed_value), _initial_values[i], 1.0);
+            tmp[i] = Normal::quantile(getRand(seed_value), _initial_values[i], 0.15);
         for (unsigned int i = 0; i < _confg_values.size(); ++i)
         {
             tmp[_priors.size()] = _confg_values[i];
@@ -113,15 +121,16 @@ ParallelMarkovChainMonteCarloBase::sampleSetUp(const SampleMode /*mode*/)
     for (unsigned int i = 0; i < _confg_values.size(); ++i)
     {
         tmp[_priors.size()] = _confg_values[i];
-        _new_samples[_num_parallel_proposals + i] = tmp;
+        _new_samples[_num_parallel_proposals * _confg_values.size() + i] = tmp;
     }
   }
   else
   {
+    // std::cout << "_seed_inputs " << Moose::stringify(_seed_inputs) << std::endl;
     for (unsigned int j = 0; j < _num_parallel_proposals; ++j)
     {
         for (unsigned int i = 0; i < _priors.size(); ++i)
-            tmp[i] = Normal::quantile(getRand(seed_value), _seed_inputs[i], 1.0);
+            tmp[i] = Normal::quantile(getRand(seed_value), _seed_inputs[i], 0.15); // 
         for (unsigned int i = 0; i < _confg_values.size(); ++i)
         {
             tmp[_priors.size()] = _confg_values[i];
@@ -134,13 +143,23 @@ ParallelMarkovChainMonteCarloBase::sampleSetUp(const SampleMode /*mode*/)
     for (unsigned int i = 0; i < _confg_values.size(); ++i)
     {
         tmp[_priors.size()] = _confg_values[i];
-        _new_samples[_num_parallel_proposals + i] = tmp;
+        _new_samples[_num_parallel_proposals * _confg_values.size() + i] = tmp;
     }
   }
+//   for (unsigned int i = 0; i < ((_num_parallel_proposals + 1) * _confg_values.size()); ++i)
+//     std::cout << Moose::stringify(_new_samples[i]) << std::endl;
 }
 
 Real
 ParallelMarkovChainMonteCarloBase::computeSample(dof_id_type row_index, dof_id_type col_index)
 {
-  return _new_samples[row_index][col_index];
+
+//   std::cout << Moose::stringify(_new_samples[row_index]) << std::endl;  
+// std::cout << "Here *****" << std::endl;
+
+  if (_step == 0)
+    return 1.0;
+  else
+    return _new_samples[row_index][col_index];
+
 }

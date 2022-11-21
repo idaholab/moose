@@ -79,8 +79,14 @@
   [./h]
     type = AverageElementSize
   []
+  [u_val]
+    type = ElementalVariableValue
+    variable = u
+    elementid = 0
+  []
 []
 
 [Outputs]
   csv = true
+  exodus = false
 []

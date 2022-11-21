@@ -28,6 +28,11 @@ public:
    */
   dof_id_type getNumberOfConfigParams() const;
 
+  /**
+   * Return the number of parallel proposals.
+   */
+  dof_id_type getNumParallelProposals() const;
+
 protected:
   virtual void sampleSetUp(const Sampler::SampleMode mode) override;
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
