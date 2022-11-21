@@ -137,26 +137,6 @@ NewtonSolve(const DenseVector<T> & y_in,
       if (std::isnan(minus_R(i)))
         mooseException("NaN detected in Newton solve");
 
-#ifndef NDEBUG
-    //
-    // Check accuracy of Jacobian
-    //
-    DenseVector<T> perturbed_z;
-    for (const auto i : make_range(system_size))
-      for (const auto j : make_range(system_size))
-      {
-        static constexpr Real perturbation_factor = 1 + 1e-8;
-        T perturbed_y, dummy, dummy2;
-        perturbed_z = z;
-        perturbed_z(j) *= perturbation_factor;
-        func[i](perturbed_z(0), perturbed_z(1), perturbed_y, dummy, dummy2);
-        // Check the accuracy of the Jacobian
-        auto J_differenced = (perturbed_y - y(i)) / (1e-8 * z(j));
-        if (!MooseUtils::relativeFuzzyEqual(J_differenced, J(i, j), 1e-2))
-          mooseException("Bad Jacobian in NewtonSolve");
-      }
-#endif
-
     // Do some Jacobi preconditioning
     for (const auto i : make_range(system_size))
     {
