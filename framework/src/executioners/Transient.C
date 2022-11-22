@@ -115,7 +115,7 @@ Transient::validParams()
       "Throw error when timestep is less than dtmin instead of just aborting solve.");
   params.addParam<MooseEnum>("scheme", schemes, "Time integration scheme used.");
   params.addParam<Real>("timestep_tolerance",
-                        1.0e-13,
+                        1.0e-12,
                         "the tolerance setting for final timestep size and sync times");
 
   params.addParam<bool>("use_multiapp_dt",
