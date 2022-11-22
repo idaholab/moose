@@ -266,4 +266,7 @@ private:
   std::string _errmsg;
   std::string _warnmsg;
   void walkRaw(std::string fullpath, std::string nodepath, hit::Node * n);
+
+  // Allow the MooseServer class to access the root node of the hit parse tree
+  friend class MooseServer;
 };

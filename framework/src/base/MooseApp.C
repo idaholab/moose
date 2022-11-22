@@ -51,6 +51,7 @@
 #include "NullExecutor.h"
 #include "ExecFlagRegistry.h"
 #include "SolutionInvalidity.h"
+#include "MooseServer.h"
 
 // Regular expression includes
 #include "pcrecpp.h"
@@ -128,6 +129,13 @@ MooseApp::validParams()
       "--minimal",
       false,
       "Ignore input file and build a minimal application with Transient executioner.");
+
+#ifdef WASP_ENABLED
+  params.addCommandLineParam<bool>(
+      "language_server",
+      "--language-server",
+      "Starts a process to communicate with development tools using the language server protocol");
+#endif
 
   params.addCommandLineParam<std::string>(
       "definition", "--definition", "Shows a SON style input definition dump for input validation");
@@ -394,6 +402,7 @@ MooseApp::MooseApp(InputParameters parameters)
                                : nullptr),
     _mesh_generator_system(*this),
     _execute_flags(moose::internal::ExecFlagRegistry::getExecFlagRegistry().getFlags()),
+    _output_buffer_cache(nullptr),
     _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling"))
 {
   // Set the TIMPI sync type via --timpi-sync
@@ -482,6 +491,12 @@ MooseApp::MooseApp(InputParameters parameters)
   if (std::getenv("MOOSE_PROFILE_BASE") || std::getenv("MOOSE_HEAP_BASE"))
     mooseError("gperftool is not available for CPU or heap profiling");
 #endif
+
+  // If this will be a language server then turn off output until that starts
+  if (isParamValid("language_server"))
+  {
+    _output_buffer_cache = Moose::out.rdbuf(nullptr);
+  }
 
   Registry::addKnownLabel(_type);
   Moose::registerAll(_factory, _action_factory, _syntax);
@@ -944,6 +959,12 @@ MooseApp::setupOptions()
     if (_input_filenames.empty())
       _input_filenames = getParam<std::vector<std::string>>("input_file");
 
+    // Reset output to the buffer what was cached before it was turned it off
+    if (!Moose::out.rdbuf() && _output_buffer_cache)
+    {
+      Moose::out.rdbuf(_output_buffer_cache);
+    }
+
     if (isParamValid("recover"))
     {
       // We need to set the flag manually here since the recover parameter is a string type (takes
@@ -1012,6 +1033,31 @@ MooseApp::setupOptions()
       // default file base for multiapps is set by MultiApp
     }
   }
+
+#ifdef WASP_ENABLED
+  else if (isParamValid("language_server"))
+  {
+    _perf_graph.disableLivePrint();
+
+    Moose::perf_log.disable_logging();
+
+    // Reset output to the buffer what was cached before it was turned it off
+    if (!Moose::out.rdbuf() && _output_buffer_cache)
+    {
+      Moose::out.rdbuf(_output_buffer_cache);
+    }
+
+    // Start a language server that communicates using an iostream connection
+    MooseServer moose_server;
+
+    moose_server.setup(this);
+
+    moose_server.run();
+
+    _ready_to_exit = true;
+  }
+#endif
+
   else /* The catch-all case for bad options or missing options, etc. */
   {
     Moose::perf_log.disable_logging();
