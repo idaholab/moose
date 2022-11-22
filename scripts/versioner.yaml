@@ -1,0 +1,31 @@
+# Add paths relative to repository root that should be taken into account when generating a hash
+packages:
+  mpich:
+    - apptainer/mpich.def
+    - conda/mpich/meta.yaml
+    - conda/mpich/conda_build_config.yaml
+  petsc:
+    - petsc
+    - apptainer/petsc.def
+    - conda/petsc/meta.yaml
+    - conda/petsc/conda_build_config.yaml
+    - scripts/configure_petsc.sh
+    - scripts/update_and_rebuild_petsc.sh
+  libmesh:
+    - libmesh
+    - apptainer/libmesh.def
+    - conda/libmesh/meta.yaml
+    - conda/libmesh/conda_build_config.yaml
+    - scripts/configure_libmesh.sh
+    - scripts/update_and_rebuild_libmesh.sh
+  moose:
+    - apptainer/moose.def
+    - conda/test-tools/meta.yaml
+    - conda/test-tools/conda_build_config.yaml
+    - conda/tools/meta.yaml
+    - conda/tools/conda_build_config.yaml
+  app:
+    - apptainer/app.def
+  moose:
+    - conda/moose/meta.yaml
+    - conda/moose/conda_build_config.yaml

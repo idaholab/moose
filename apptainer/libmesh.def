@@ -1,60 +1,58 @@
-BootStrap: <PROTOCOL>
-From: <LOCATION>
+{#- Required jinja arguments                                                                  -#}
+{#- APPTAINER_BOOTSTRAP: The BootStrap to use (typically localimage or oras)                  -#}
+{#- APPTAINER_FROM: The From to use (path to an image or an oras URI)                         -#}
+{#- MOOSE_DIR: Path on the host to the MOOSE repository                                       -#}
 
-%files
-    # NOTE: Do not include paths to MOOSE based repositories.
-    #       Too many repos are including broken symlinks, which
-    #       apptainer cannot work around. Therefor the repo must
-    #       be cloned during %post.
+{#- Optional jinja arguments                                                                  -#}
+{#- DEV_CONTAINER: Set to anything to add development packages and install _all_ methods      -#}
+{#- LIBMESH_OPTIONS: Options to pass to the libMesh build script                              -#}
+{#- MOOSE_JOBS: Number of jobs to pass to the libMesh build script                            -#}
+{#- METHODS: Methods to build (defaults to opt, unused if DEV_CONTAINER is set)               -#}
 
-    # Populate SSH Keys if necessary
-    <KEY>
+{#- The within-container build directory to use                                               -#}
+{%- set ROOT_BUILD_DIR = '/root/build' -%}
+
+{#- The installation location for libMesh                                                     -#}
+{%- set LIBMESH_DIR = '/usr/local/libmesh' -%}
+
+BootStrap: {{ APPTAINER_BOOTSTRAP }}
+From: {{ APPTAINER_FROM }}
+
+%setup
+    # Copy moose from MOOSE_DIR into the container
+    ROOT_BUILD_DIR=${APPTAINER_ROOTFS}{{ ROOT_BUILD_DIR }}
+    mkdir ${ROOT_BUILD_DIR}
+    MOOSE_DIR={{ MOOSE_DIR }}
+    cp -r ${MOOSE_DIR} ${ROOT_BUILD_DIR}
+    cd ${ROOT_BUILD_DIR}/moose
+    git submodule update --init --recursive libmesh
 
 %environment
-    # libMesh
-    export LIBMESH_DIR=/usr/local/libmesh
+    # From moose-libmesh
+    export LIBMESH_DIR={{ LIBMESH_DIR }}
 
 %post
-    # By default, lets not print every command
-    set +x
-
-    # Apply SSH Key to GIT command
-    if [ -n "<KEY>" ]; then
-        export GIT_SSH_COMMAND="ssh -i $(echo '<KEY>' | cut -d\  -f2) -o StrictHostKeyChecking=no"
-    fi
-
-    # Prepare a temp directory
-    export TEMP_LOC=`mktemp -d /tmp/_apptainer.XXXXX`
-    mkdir -p ${TEMP_LOC}/tmp
-    cd ${TEMP_LOC} || exit 1
-
-    # Fetch repository, submodule libMesh (recursively)
-    git clone <CIVET_HEAD_SSH_URL>
-    cd $(basename <CIVET_HEAD_SSH_URL> .git)
-    git checkout <CIVET_HEAD_REF>
-    git submodule update --init --recursive libmesh
+    # Load jinja vars
+    ROOT_BUILD_DIR={{ ROOT_BUILD_DIR }}
+    LIBMESH_DIR={{ LIBMESH_DIR }}
+    MOOSE_JOBS={{ MOOSE_JOBS }}
+{%- if DEV_CONTAINER is defined %}
+    # DEV_CONTAINER set
+    METHODS="opt dbg oprof devel"
+    dnf --enablerepo=powertools install -y valgrind cppunit
+{%- else %}
+    # DEV_CONTAINER not set
+    METHODS="{{ METHODS or "opt" }}"
+{%- endif %}
 
     # Build libMesh
     umask 022
-    export LIBMESH_DIR=/usr/local/libmesh
-    # Hardcode optmized only
-    export MOOSE_JOBS=${MOOSE_JOBS:-12}
-    export METHODS='opt'
-    cd scripts
-    echo -e "JOBS: $MOOSE_JOBS\n METHODS: ${METHODS}"
-    ./update_and_rebuild_libmesh.sh
+    cd ${ROOT_BUILD_DIR}/moose
+    LIBMESH_DIR=${LIBMESH_DIR} MOOSE_JOBS=${MOOSE_JOBS} METHODS=${METHODS} ./scripts/update_and_rebuild_libmesh.sh {{ LIBMESH_OPTIONS }}
 
     # Fix possibly bad permissions
-    chmod -R o=u-w,g=u-w /usr/local/libmesh
+    chmod -R o=u-w,g=u-w ${LIBMESH_DIR}
 
     # Clean Up
-    # Remove any keys somehow populated in root's home
-    rm -rf /root/.ssh
-    # Verify that root keys/configs/etc no longer exists
-    if [ -d /root/.ssh ]; then exit 1; fi
-
-    # Erase Key: <'KEY'> (if set)
-    if [ -n "<KEY>" ]; then
-        rm -f "$(echo '<KEY>' | cut -d\  -f2)"
-    fi
-    rm -rf ${TEMP_LOC}
+    rm -rf ${ROOT_BUILD_DIR}
+    dnf clean all

@@ -1,0 +1,79 @@
+{%- set ROOT_BUILD_DIR = '/root/build' -%}
+BootStrap: {{ APPTAINER_BOOTSTRAP }}
+From: {{ APPTAINER_FROM }}
+
+%setup
+    # Copy application into the container
+    ROOT_BUILD_DIR=${APPTAINER_ROOTFS}{{ ROOT_BUILD_DIR }}
+    mkdir ${ROOT_BUILD_DIR}
+    APPLICATION_DIR={{ APPLICATION_DIR }}
+    cp -r ${APPLICATION_DIR} ${ROOT_BUILD_DIR}
+
+    # If MOOSE_DIR is not in the application, we need to copy it too
+    MOOSE_DIR={{ MOOSE_DIR }}
+    if [[ $MOOSE_DIR/ != $APPLICATION_DIR/* ]]; then
+        cp -r ${MOOSE_DIR} ${ROOT_BUILD_DIR}
+    fi
+
+{% if MOOSE_SKIP_DOCS is not defined %}
+    # Need large_media for documentation
+    cd ${ROOT_BUILD_DIR}/moose
+    git submodule update --init large_media
+{% endif %}
+
+%environment
+    export PATH=/usr/local/{{ BINARY_NAME }}/bin:$PATH
+
+%post
+    # Load common jinja vars
+    TEMP_LOC={{ ROOT_BUILD_DIR }}
+    TEMP_LOC_APP=${TEMP_LOC}/{{ APPLICATION_NAME }}
+    MOOSE_JOBS={{ MOOSE_JOBS or "1" }}
+
+    # Find the MOOSE_DIR
+    if [ -d ${TEMP_LOC}/moose ]; then
+        export MOOSE_DIR=${TEMP_LOC}/moose
+    elif [ -d ${TEMP_LOC_APP}/moose ]; then
+        export MOOSE_DIR=${TEMP_LOC_APP}/moose
+    else
+        exit 1
+    fi
+
+    # Install moose-tools from moose-base container
+    # TODO: add insertion point for installing more
+    # on a per-app basis
+    source /root/install_moose_tools.sh
+
+    # Setup install
+    MOOSE_PREFIX=/usr/local/{{ BINARY_NAME }}
+    cd ${MOOSE_DIR}
+    ./configure --prefix=$MOOSE_PREFIX {{ MOOSE_OPTIONS }}
+
+    # Build and install
+    MOOSE_JOBS={{ MOOSE_JOBS or "1" }}
+    cd ${TEMP_LOC_APP}
+    make -j ${MOOSE_JOBS}
+    make install -j ${MOOSE_JOBS} MOOSE_SKIP_DOCS={{ MOOSE_SKIP_DOCS }} MOOSE_DOCS_FLAGS="{{ MOOSE_DOCS_FLAGS }}"
+
+    # Fix permissions for installed application
+    chmod -R o=u-w,g=u-w ${MOOSE_PREFIX}
+
+    # Cleanup
+    rm -rf $TEMP_LOC
+
+%test
+    # Temp location for copying and running in
+    TEMP_LOC=$(mktemp -u -d /tmp/${BINARY_NAME}test.XXXXXX)
+    # Really make sure that we nuke the temp location in all circumstances
+    trap "if [ -e $TEMP_LOC ]; then rm -rf $TEMP_LOC; fi" EXIT HUP INT TERM
+
+    # Copy and run each subset of tests
+    BINARY_NAME={{ BINARY_NAME }}
+    for TEST_DIR in {{ TEST_DIRS or "tests" }}; do
+        mkdir $TEMP_LOC
+        cd $TEMP_LOC
+        ${BINARY_NAME}-opt --copy-inputs $TEST_DIR
+        cd ${BINARY_NAME}/${TEST_DIR}
+        ${BINARY_NAME}-opt --run -j ${MOOSE_JOBS:-1} -t
+        rm -rf $TEMP_LOC
+    done
