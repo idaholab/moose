@@ -15,6 +15,7 @@
 
 class FluidProperties;
 class Simulation;
+class THMMesh;
 
 #define registerComponent(name) registerObject(name)
 #define registerNamedComponent(obj, name) registerNamedObject(obj, name)
@@ -56,6 +57,18 @@ public:
    * Gets the log
    */
   Logger & log() { return _log; }
+
+  /**
+   * Gets the THM mesh
+   */
+  std::shared_ptr<THMMesh> & getTHMMesh();
+
+  /**
+   * Sets the THM mesh
+   *
+   * @param thm_mesh   The THM mesh
+   */
+  void setTHMMesh(std::shared_ptr<THMMesh> & thm_mesh);
 
   /**
    * Registers a closures option
@@ -101,10 +114,16 @@ public:
   static InputParameters validParams();
 
 protected:
+  /// The THM mesh
+  std::shared_ptr<THMMesh> _thm_mesh;
+
   /// Map from flow model ID to map of closures option to its class
   static std::map<THM::FlowModelID, std::map<std::string, std::string>> _closures_class_names_map;
 
 private:
   /// Logger
   Logger _log;
+
+  /// Flag that the THM mesh has been set
+  bool _set_thm_mesh;
 };

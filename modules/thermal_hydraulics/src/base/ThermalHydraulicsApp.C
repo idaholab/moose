@@ -57,7 +57,8 @@ ThermalHydraulicsApp::validParams()
 
 registerKnownLabel("ThermalHydraulicsApp");
 
-ThermalHydraulicsApp::ThermalHydraulicsApp(InputParameters parameters) : MooseApp(parameters)
+ThermalHydraulicsApp::ThermalHydraulicsApp(InputParameters parameters)
+  : MooseApp(parameters), _thm_mesh(nullptr), _set_thm_mesh(false)
 {
   ThermalHydraulicsApp::registerAll(_factory, _action_factory, _syntax);
 
@@ -163,6 +164,27 @@ ThermalHydraulicsApp::registerClosuresOption(const std::string & closures_option
 {
   const std::string closures_option_lc = MooseUtils::toLower(closures_option);
   _closures_class_names_map[flow_model_id][closures_option_lc] = class_name;
+}
+
+std::shared_ptr<THMMesh> &
+ThermalHydraulicsApp::getTHMMesh()
+{
+  if (_set_thm_mesh)
+    return _thm_mesh;
+  else
+    mooseError("The THM mesh has not been set.");
+}
+
+void
+ThermalHydraulicsApp::setTHMMesh(std::shared_ptr<THMMesh> & thm_mesh)
+{
+  if (_set_thm_mesh)
+    mooseError("The THM mesh has already been set.");
+  else
+  {
+    _thm_mesh = thm_mesh;
+    _set_thm_mesh = true;
+  }
 }
 
 //
