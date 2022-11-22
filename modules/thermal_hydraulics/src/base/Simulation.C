@@ -34,7 +34,7 @@
 
 Simulation::Simulation(FEProblemBase & fe_problem, const InputParameters & pars)
   : ParallelObject(fe_problem.comm()),
-    LoggingInterface(_log),
+    LoggingInterface(static_cast<ThermalHydraulicsApp &>(fe_problem.getMooseApp()).log()),
     _mesh(*static_cast<THMMesh *>(pars.get<MooseMesh *>("mesh"))),
     _fe_problem(fe_problem),
     _app(static_cast<ThermalHydraulicsApp &>(*pars.get<MooseApp *>("_moose_app"))),
@@ -49,9 +49,6 @@ Simulation::Simulation(FEProblemBase & fe_problem, const InputParameters & pars)
   bool second_order_mesh = pars.get<bool>("2nd_order_mesh");
   HeatConductionModel::_fe_type =
       second_order_mesh ? FEType(SECOND, LAGRANGE) : FEType(FIRST, LAGRANGE);
-
-  if (Moose::_warnings_are_errors)
-    _log.setWarningsAsErrors();
 }
 
 Simulation::~Simulation()
@@ -715,7 +712,7 @@ Simulation::integrityCheck() const
   for (auto && comp : _components)
     comp->executeCheck();
 
-  if (_log.getNumberOfErrors() > 0)
+  if (log().getNumberOfErrors() > 0)
   {
     if (processor_id() == 0)
     {
@@ -723,7 +720,7 @@ Simulation::integrityCheck() const
                  << "Execution stopped, the following problems were found:" << COLOR_DEFAULT
                  << std::endl
                  << std::endl;
-      _log.print();
+      log().print();
       Moose::err << std::endl;
     }
 
@@ -731,9 +728,9 @@ Simulation::integrityCheck() const
     exit(1);
   }
 
-  if ((_log.getNumberOfWarnings() > 0) && (processor_id() == 0))
+  if ((log().getNumberOfWarnings() > 0) && (processor_id() == 0))
   {
-    _log.print();
+    log().print();
     Moose::err << std::endl;
   }
 }
@@ -753,13 +750,13 @@ Simulation::controlDataIntegrityCheck()
                "' was requested, but was not declared by any active control object.");
   }
 
-  if (_log.getNumberOfErrors() > 0)
+  if (log().getNumberOfErrors() > 0)
   {
     Moose::err << COLOR_RED
                << "Execution stopped, the following problems were found:" << COLOR_DEFAULT
                << std::endl
                << std::endl;
-    _log.print();
+    log().print();
     Moose::err << std::endl;
     MOOSE_ABORT;
   }

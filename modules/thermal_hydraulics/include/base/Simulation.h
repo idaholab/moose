@@ -11,7 +11,6 @@
 
 #include "ThermalHydraulicsApp.h"
 #include "FlowModel.h"
-#include "Logger.h"
 #include "ControlData.h"
 #include "LoggingInterface.h"
 #include "NamingInterface.h"
@@ -294,7 +293,10 @@ public:
    */
   bool hasInitialConditionsFromFile() const;
 
-  Logger & log() { return _log; }
+  /**
+   * Gets the log
+   */
+  Logger & log() const { return _app.log(); }
 
   /**
    * Enable Jacobian checking
@@ -411,8 +413,6 @@ protected:
 
   /// true if using implicit time integration scheme
   bool _implicit_time_integration;
-
-  Logger _log;
 
   /// True if checking jacobian
   bool _check_jacobian;

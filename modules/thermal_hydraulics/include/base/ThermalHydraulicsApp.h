@@ -11,6 +11,7 @@
 
 #include "MooseApp.h"
 #include "MooseUtils.h"
+#include "Logger.h"
 
 class FluidProperties;
 class Simulation;
@@ -52,6 +53,11 @@ public:
   virtual ~ThermalHydraulicsApp();
 
   /**
+   * Gets the log
+   */
+  Logger & log() { return _log; }
+
+  /**
    * Registers a closures option
    *
    * @param[in] closures_option   Closures option string to register
@@ -89,7 +95,6 @@ public:
    */
   const std::string & getFlowModelClassName(const THM::FlowModelID & flow_model_id);
 
-public:
   /// Map from flow model ID to flow model instance
   static std::map<THM::FlowModelID, std::string> _flow_model_map;
 
@@ -98,4 +103,8 @@ public:
 protected:
   /// Map from flow model ID to map of closures option to its class
   static std::map<THM::FlowModelID, std::map<std::string, std::string>> _closures_class_names_map;
+
+private:
+  /// Logger
+  Logger _log;
 };

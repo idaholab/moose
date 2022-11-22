@@ -32,7 +32,7 @@ Component::validParams()
 
 Component::Component(const InputParameters & parameters)
   : THMObject(parameters),
-    LoggingInterface(getCheckedPointerParam<THMProblem *>("_thm_problem")->log()),
+    LoggingInterface(getTHMApp().log()),
     NamingInterface(),
 
     _parent(getParam<Component *>("_parent")),

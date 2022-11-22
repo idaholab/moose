@@ -60,6 +60,9 @@ registerKnownLabel("ThermalHydraulicsApp");
 ThermalHydraulicsApp::ThermalHydraulicsApp(InputParameters parameters) : MooseApp(parameters)
 {
   ThermalHydraulicsApp::registerAll(_factory, _action_factory, _syntax);
+
+  if (getParam<bool>("error"))
+    log().setWarningsAsErrors();
 }
 
 ThermalHydraulicsApp::~ThermalHydraulicsApp() {}
