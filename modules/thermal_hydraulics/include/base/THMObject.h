@@ -10,11 +10,14 @@
 #pragma once
 
 #include "MooseObject.h"
+#include "THMAppInterface.h"
+
+class ThermalHydraulicsApp;
 
 /**
- *
+ * Base class for THM objects
  */
-class THMObject : public MooseObject
+class THMObject : public MooseObject, public THMAppInterface
 {
 public:
   THMObject(const InputParameters & parameters);

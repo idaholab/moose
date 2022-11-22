@@ -13,7 +13,11 @@ InputParameters
 THMObject::validParams()
 {
   InputParameters params = MooseObject::validParams();
+  params += THMAppInterface::validParams();
   return params;
 }
 
-THMObject::THMObject(const InputParameters & parameters) : MooseObject(parameters) {}
+THMObject::THMObject(const InputParameters & parameters)
+  : MooseObject(parameters), THMAppInterface(parameters)
+{
+}
