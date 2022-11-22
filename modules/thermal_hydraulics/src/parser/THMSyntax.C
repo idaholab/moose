@@ -20,6 +20,7 @@ associateSyntax(Syntax & syntax)
   syntax.registerActionSyntax("AddHeatStructureMaterialAction",
                               "HeatStructureMaterials/*",
                               "THM:add_heat_structure_material");
+  syntax.registerActionSyntax("CreateTHMMeshAction", "Components");
   syntax.registerActionSyntax("THMCreateMeshAction", "Components");
   syntax.registerActionSyntax("AddComponentAction", "Components/*", "THM:add_component");
   syntax.registerActionSyntax("AddComponentAction", "Components/*/*", "THM:add_component");
@@ -41,6 +42,7 @@ void
 registerActions(Syntax & syntax)
 {
   registerTask("THM:init_simulation", true);
+  registerTask("THM:create_thm_mesh", false);
   registerTask("THM:setup_mesh", true);
   registerTask("THM:build_mesh", true);
   registerTask("THM:init_components", true);
