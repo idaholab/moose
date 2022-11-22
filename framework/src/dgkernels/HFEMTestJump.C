@@ -62,10 +62,10 @@ HFEMTestJump::computeQpOffDiagJacobian(Moose::DGJacobianType type, unsigned int 
   switch (type)
   {
     case Moose::ElementElement:
-      return -sign*_phi_lambda[_j][_qp] * _test[_i][_qp];
+      return -sign * _phi_lambda[_j][_qp] * _test[_i][_qp];
 
     case Moose::NeighborElement:
-      return sign*_phi_lambda[_j][_qp] * _test_neighbor[_i][_qp];
+      return sign * _phi_lambda[_j][_qp] * _test_neighbor[_i][_qp];
 
     case Moose::ElementNeighbor:
       return 0;

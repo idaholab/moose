@@ -43,7 +43,7 @@ HFEMTrialJump::computeQpResidual(Moose::DGResidualType type)
   switch (type)
   {
     case Moose::Element:
-      return sign*_test[_i][_qp] * (_interior_neighbor[_qp] - _interior[_qp]);
+      return sign * _test[_i][_qp] * (_interior_neighbor[_qp] - _interior[_qp]);
       break;
 
     case Moose::Neighbor:
@@ -64,13 +64,13 @@ HFEMTrialJump::computeQpOffDiagJacobian(Moose::DGJacobianType type, unsigned int
   switch (type)
   {
     case Moose::ElementElement:
-      return -sign*_test[_i][_qp] * _phi_interior[_j][_qp];
+      return -sign * _test[_i][_qp] * _phi_interior[_j][_qp];
 
     case Moose::NeighborElement:
       return 0;
 
     case Moose::ElementNeighbor:
-      return sign*_test[_i][_qp] * _phi_interior_neighbor[_j][_qp];
+      return sign * _test[_i][_qp] * _phi_interior_neighbor[_j][_qp];
 
     case Moose::NeighborNeighbor:
       return 0;
