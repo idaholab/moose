@@ -36,25 +36,29 @@ NewtonSolve(const T & x,
             const Functor & func,
             const unsigned int max_its = 100)
 {
-  std::function<bool(const T &, const T &)> abs_tol_check =
-      [tolerance](const T & f, const T & /*y*/)
-  { return MetaPhysicL::raw_value(std::abs(f)) < tolerance; };
-  std::function<bool(const T &, const T &)> rel_tol_check = [tolerance](const T & f, const T & y)
-  { return MetaPhysicL::raw_value(std::abs(f / y)) < tolerance; };
-  auto convergence_check = MetaPhysicL::raw_value(y) == 0 ? abs_tol_check : rel_tol_check;
+  // R represents residual
 
-  T z = z_initial_guess, f, new_y, dy_dx, dy_dz;
+  std::function<bool(const T &, const T &)> abs_tol_check =
+      [tolerance](const T & R, const T & /*y*/)
+  { return MetaPhysicL::raw_value(std::abs(R)) < tolerance; };
+  std::function<bool(const T &, const T &)> rel_tol_check = [tolerance](const T & R, const T & y)
+  { return MetaPhysicL::raw_value(std::abs(R / y)) < tolerance; };
+  auto convergence_check = MooseUtils::absoluteFuzzyEqual(MetaPhysicL::raw_value(y), 0, tolerance)
+                               ? abs_tol_check
+                               : rel_tol_check;
+
+  T z = z_initial_guess, R, new_y, dy_dx, dy_dz;
   unsigned int iteration = 0;
 
   do
   {
     func(x, z, new_y, dy_dx, dy_dz);
-    f = new_y - y;
+    R = new_y - y;
 
     // We always want to perform at least one update in order to get derivatives on z correct (z
     // corresponding to the initial guess will have no derivative information), so we don't
     // immediately return if we are converged
-    const bool converged = convergence_check(f, y);
+    const bool converged = convergence_check(R, y);
 
 #ifndef NDEBUG
     static constexpr Real perturbation_factor = 1 + 1e-8;
@@ -66,7 +70,7 @@ NewtonSolve(const T & x,
       mooseDoOnce(mooseWarning("Bad Jacobian in NewtonSolve"));
 #endif
 
-    z += -(f / dy_dz);
+    z += -(R / dy_dz);
 
     // Check for NaNs
     if (std::isnan(z))
@@ -125,7 +129,9 @@ NewtonSolve2D(const T & f,
   {
     for (const auto i : index_range(minus_R))
     {
-      const auto error = std::abs(targets(i) == 0 ? minus_R(i) : minus_R(i) / targets(i));
+      const auto error = std::abs(MooseUtils::absoluteFuzzyEqual(targets(i), 0, tolerances(i))
+                                      ? minus_R(i)
+                                      : minus_R(i) / targets(i));
       if (error >= tolerances(i))
         return false;
     }

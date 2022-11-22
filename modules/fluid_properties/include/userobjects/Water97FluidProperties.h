@@ -1501,7 +1501,7 @@ private:
    * member of the pair) with respect to temperature as a function of pressure and density
    */
   template <typename T>
-  std::pair<T, T> T_from_p_rho(const T & p, const T & rho) const;
+  std::pair<T, T> T_drhodT_from_p_rho(const T & p, const T & rho) const;
 };
 
 #pragma GCC diagnostic pop
@@ -2167,7 +2167,7 @@ Water97FluidProperties::subregionVolume(
 
 template <typename T>
 std::pair<T, T>
-Water97FluidProperties::T_from_p_rho(const T & p, const T & rho) const
+Water97FluidProperties::T_drhodT_from_p_rho(const T & p, const T & rho) const
 {
   // For NewtonSolve
   // y = rho
@@ -2185,7 +2185,7 @@ Water97FluidProperties::p_T_from_v_e(const T & v, const T & e) const
 {
   const auto rho = 1 / v;
   const auto p = p_from_v_e(v, e);
-  return {p, T_from_p_rho(p, rho).first};
+  return {p, T_drhodT_from_p_rho(p, rho).first};
 }
 
 template <typename T>
@@ -2194,7 +2194,7 @@ Water97FluidProperties::rho_T_from_v_e(const T & v, const T & e) const
 {
   const auto rho = 1 / v;
   const auto p = p_from_v_e(v, e);
-  return {rho, T_from_p_rho(p, rho).first};
+  return {rho, T_drhodT_from_p_rho(p, rho).first};
 }
 
 template <typename T>
@@ -2431,7 +2431,7 @@ template <typename T>
 T
 Water97FluidProperties::e_from_p_rho_template(const T & p, const T & rho) const
 {
-  const auto temperature = T_from_p_rho(p, rho).first;
+  const auto temperature = T_drhodT_from_p_rho(p, rho).first;
   return e_from_p_T_template(p, temperature);
 }
 
