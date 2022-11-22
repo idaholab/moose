@@ -439,6 +439,23 @@ Water97FluidProperties::s_from_p_T(const ADReal & pressure, const ADReal & tempe
   return s_from_p_T_template(pressure, temperature);
 }
 
+void
+Water97FluidProperties::s_from_p_T(
+    const Real pressure, const Real temperature, Real & s, Real & ds_dp, Real & ds_dT) const
+{
+  s_from_p_T_template(pressure, temperature, s, ds_dp, ds_dT);
+}
+
+void
+Water97FluidProperties::s_from_p_T(const ADReal & pressure,
+                                   const ADReal & temperature,
+                                   ADReal & s,
+                                   ADReal & ds_dp,
+                                   ADReal & ds_dT) const
+{
+  s_from_p_T_template(pressure, temperature, s, ds_dp, ds_dT);
+}
+
 Real
 Water97FluidProperties::h_from_p_T(Real pressure, Real temperature) const
 {

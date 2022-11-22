@@ -196,10 +196,7 @@ public:
   template <typename T>
   T k_from_v_e_template(const T & v, const T & e) const;
 
-  virtual Real s_from_p_T(Real pressure, Real temperature) const override;
-  virtual ADReal s_from_p_T(const ADReal & pressure, const ADReal & temperature) const override;
-  template <typename T>
-  T s_from_p_T_template(const T & pressure, const T & temperature) const;
+  propfuncWithDefinitionOverride(s, p, T);
 
   virtual Real h_from_p_T(Real pressure, Real temperature) const override;
   virtual ADReal h_from_p_T(const ADReal & pressure, const ADReal & temperature) const override;
@@ -2635,4 +2632,15 @@ Water97FluidProperties::s_from_p_T_template(const T & pressure, const T & temper
       mooseError("inRegion() has given an incorrect region");
   }
   return entropy;
+}
+
+template <typename T>
+void
+Water97FluidProperties::s_from_p_T_template(
+    const T & pressure, const T & temperature, T & s, T & ds_dp, T & ds_dT) const
+{
+  auto functor = [this](const auto & pressure, const auto & temperature)
+  { return this->s_from_p_T_template(pressure, temperature); };
+
+  xyDerivatives(pressure, temperature, s, ds_dp, ds_dT, functor);
 }
