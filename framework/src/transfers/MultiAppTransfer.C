@@ -159,17 +159,25 @@ MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters)
 void
 MultiAppTransfer::checkMultiAppExecuteOn()
 {
-  if (_from_multi_app)
+  if (_from_multi_app && !_to_multi_app)
     if (getExecuteOnEnum() != _from_multi_app->getExecuteOnEnum())
       mooseDoOnce(
           mooseWarning("MultiAppTransfer execute_on flags do not match associated from_multi_app "
                        "execute_on flags"));
 
-  if (_to_multi_app)
+  if (_to_multi_app && !_from_multi_app)
     if (getExecuteOnEnum() != _to_multi_app->getExecuteOnEnum())
       mooseDoOnce(
           mooseWarning("MultiAppTransfer execute_on flags do not match associated to_multi_app "
                        "execute_on flags"));
+
+  // In the case of siblings transfer, the check will be looser
+  if (_from_multi_app && _to_multi_app)
+    if (getExecuteOnEnum() != _from_multi_app->getExecuteOnEnum() &&
+        getExecuteOnEnum() != _to_multi_app->getExecuteOnEnum())
+      mooseDoOnce(
+          mooseWarning("MultiAppTransfer execute_on flags do not match associated to_multi_app "
+                       "and from_multi_app execute_on flags"));
 }
 
 void
