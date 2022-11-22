@@ -11,7 +11,7 @@
 
 #ifdef LIBTORCH_ENABLED
 
-#include "LibtorchNeuralNet.h"
+#include "LibtorchArtificialNeuralNet.h"
 #include "LibtorchDataset.h"
 #include "DataIO.h"
 #include "MooseEnum.h"
@@ -65,7 +65,7 @@ public:
    * @param nn The neural network which needs to be trained
    * @param comm Reference to the parallel communicator
    */
-  LibtorchArtificialNeuralNetTrainer(std::shared_ptr<LibtorchNeuralNet<torch::nn::Module>> nn,
+  LibtorchArtificialNeuralNetTrainer(std::shared_ptr<LibtorchArtificialNeuralNet> nn,
                                      const Parallel::Communicator & comm);
 
   /**
@@ -101,18 +101,17 @@ public:
    * @param options The options for the training process
    */
   static std::unique_ptr<torch::optim::Optimizer>
-  createOptimizer(const std::shared_ptr<LibtorchNeuralNet<torch::nn::Module>> nn,
+  createOptimizer(const std::shared_ptr<LibtorchArtificialNeuralNet> nn,
                   const LibtorchTrainingOptions & options);
 
 protected:
   /// Pointer to the neural network which is trained
-  const std::shared_ptr<LibtorchNeuralNet<torch::nn::Module>> _nn;
+  const std::shared_ptr<LibtorchArtificialNeuralNet> _nn;
 };
 
 template <typename SamplerType>
 LibtorchArtificialNeuralNetTrainer<SamplerType>::LibtorchArtificialNeuralNetTrainer(
-    std::shared_ptr<Moose::LibtorchNeuralNet<torch::nn::Module>> nn,
-    const Parallel::Communicator & comm)
+    std::shared_ptr<LibtorchArtificialNeuralNet> nn, const Parallel::Communicator & comm)
   : libMesh::ParallelObject(comm), _nn(nn)
 {
 }
@@ -122,10 +121,16 @@ unsigned int
 LibtorchArtificialNeuralNetTrainer<SamplerType>::computeBatchSize(const unsigned int num_samples,
                                                                   const unsigned int num_batches)
 {
+  // If we have more requested batches than the number of samples, we automatically decrease
+  // the number of batches and put one sample in each
   if (num_samples < num_batches)
     return 1;
+  // If the samples can be divided between the batches equally, we do that
   else if (num_samples % num_batches == 0)
     return num_samples / num_batches;
+  // In all other cases, we compute the batch sizes with the specified number of batches
+  // and we check if we could divide the data more evenly if we put one less sample in each
+  // batch and potentially create a new batch.
   else
   {
     const unsigned int sample_per_batch_1 = num_samples / num_batches;
@@ -159,8 +164,7 @@ LibtorchArtificialNeuralNetTrainer<SamplerType>::computeLocalBatchSize(
 template <typename SamplerType>
 std::unique_ptr<torch::optim::Optimizer>
 LibtorchArtificialNeuralNetTrainer<SamplerType>::createOptimizer(
-    const std::shared_ptr<LibtorchNeuralNet<torch::nn::Module>> nn,
-    const LibtorchTrainingOptions & options)
+    const std::shared_ptr<LibtorchArtificialNeuralNet> nn, const LibtorchTrainingOptions & options)
 {
   std::unique_ptr<torch::optim::Optimizer> optimizer;
   switch (options.optimizer_type)

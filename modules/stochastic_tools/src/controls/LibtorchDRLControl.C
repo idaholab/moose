@@ -67,15 +67,11 @@ LibtorchDRLControl::execute()
 #ifdef LIBTORCH_ENABLED
   if (_nn)
   {
-    unsigned int n_responses = _response_names.size();
     unsigned int n_controls = _control_names.size();
     unsigned int num_old_timesteps = _input_timesteps - 1;
 
     // Fill a vector with the current values of the responses
-    _current_response.clear();
-    for (unsigned int resp_i = 0; resp_i < n_responses; ++resp_i)
-      _current_response.push_back((*_response_values[resp_i] - _response_shift_factors[resp_i]) *
-                                  _response_scaling_factors[resp_i]);
+    updateCurrentResponse();
 
     // If this is the first time this control is called and we need to use older values, fill up the
     // needed old values using the initial values
@@ -87,17 +83,10 @@ LibtorchDRLControl::execute()
       _initialized = true;
     }
 
-    // Convert the input to a tensor so that we can call the neural net on it
-    std::vector<Real> raw_input(_current_response);
-    for (unsigned int step_i = 0; step_i < num_old_timesteps; ++step_i)
-      raw_input.insert(
-          raw_input.end(), _old_responses[step_i].begin(), _old_responses[step_i].end());
+    // Organize the old an current solution into a tensor so we can evaluate the neural net
+    torch::Tensor input_tensor = prepareInputTensor();
 
-    auto options = torch::TensorOptions().dtype(at::kDouble);
-    torch::Tensor input_tensor =
-        torch::from_blob(raw_input.data(), {1, _input_timesteps * n_responses}, options)
-            .to(at::kDouble);
-
+    // Evaluate the neural network to get the expected control value
     torch::Tensor output_tensor = _nn->forward(input_tensor);
 
     // Sample control value (action) from Gaussian distribution
@@ -132,14 +121,8 @@ LibtorchDRLControl::execute()
 
     // We add the curent solution to the old solutions and move everything in there one step
     // backward
-    for (unsigned int step_i = 0; step_i < num_old_timesteps; ++step_i)
-    {
-      if (step_i == num_old_timesteps - 1)
-        _old_responses[0] = _current_response;
-      else
-        _old_responses[(num_old_timesteps - 1) - step_i] =
-            _old_responses[(num_old_timesteps - 1) - step_i - 1];
-    }
+    std::rotate(_old_responses.rbegin(), _old_responses.rbegin() + 1, _old_responses.rend());
+    _old_responses[0] = _current_response;
   }
 #endif
 }

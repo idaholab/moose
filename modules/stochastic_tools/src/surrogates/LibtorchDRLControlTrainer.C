@@ -10,6 +10,7 @@
 #ifdef LIBTORCH_ENABLED
 #include "LibtorchDataset.h"
 #include "LibtorchArtificialNeuralNetTrainer.h"
+#include "LibtorchUtils.h"
 #endif
 
 #include "LibtorchDRLControlTrainer.h"
@@ -83,8 +84,8 @@ LibtorchDRLControlTrainer::validParams()
       "is either one value "
       "or one value per hidden layer.");
 
-  params.addParam<std::string>(
-      "filename_base", "mynet", "Filename used to output the neural net parameters.");
+  params.addParam<std::string>("filename_base",
+                               "Filename used to output the neural net parameters.");
 
   params.addParam<unsigned int>(
       "seed", 11, "Random number generator seed for stochastic optimizers.");
@@ -136,6 +137,7 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
     _control_names(getParam<std::vector<ReporterName>>("control")),
     _log_probability_names(getParam<std::vector<ReporterName>>("log_probability")),
     _reward_name(getParam<ReporterName>("reward")),
+    _reward_value_pointer(&getReporterValueByName<std::vector<Real>>(_reward_name)),
     _input_timesteps(getParam<unsigned int>("input_timesteps")),
     _num_inputs(_input_timesteps * _response_names.size()),
     _num_outputs(_control_names.size()),
@@ -153,7 +155,7 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
     _clip_param(getParam<Real>("clip_parameter")),
     _decay_factor(getParam<Real>("decay_factor")),
     _action_std(getParam<std::vector<Real>>("action_standard_deviations")),
-    _filename_base(getParam<std::string>("filename_base")),
+    _filename_base(isParamValid("filename_base") ? getParam<std::string>("filename_base") : ""),
     _read_from_file(getParam<bool>("read_from_file")),
     _shift_outputs(getParam<bool>("shift_outputs")),
     _standardize_advantage(getParam<bool>("standardize_advantage")),
@@ -169,6 +171,11 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
         "response_scaling_factors",
         "The number of normalization coefficients is not the same as the number of responses!");
 
+  // We establish the links with the chosen reporters
+  getReporterPointers(_response_names, _response_value_pointers);
+  getReporterPointers(_control_names, _control_value_pointers);
+  getReporterPointers(_log_probability_names, _log_probability_value_pointers);
+
 #ifdef LIBTORCH_ENABLED
 
   // Fixing the RNG seed to make sure every experiment is the same.
@@ -180,9 +187,11 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
   for (unsigned int i = 0; i < _control_names.size(); ++i)
     _std[i][i] = _action_std[i];
 
+  bool filename_valid = isParamValid("filename_base");
+
   // Initializing the control neural net so that the control can grab it right away
   _control_nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(
-      _filename_base + "_control.net",
+      filename_valid ? _filename_base + "_control.net" : "control.net",
       _num_inputs,
       _num_outputs,
       _num_control_neurons_per_layer,
@@ -201,12 +210,12 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
       mooseError("The requested pytorch file could not be loaded for the control neural net.");
     }
   }
-  else
+  else if (filename_valid)
     torch::save(_control_nn, _control_nn->name());
 
   // Initialize the critic neural net
   _critic_nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(
-      _filename_base + "_ctiric.net",
+      filename_valid ? _filename_base + "_ctiric.net" : "ctiric.net",
       _num_inputs,
       1,
       _num_critic_neurons_per_layer,
@@ -225,7 +234,7 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
       mooseError("The requested pytorch file could not be loaded for the critic neural net.");
     }
   }
-  else
+  else if (filename_valid)
     torch::save(_critic_nn, _critic_nn->name());
 
 #endif
@@ -236,10 +245,10 @@ LibtorchDRLControlTrainer::execute()
 {
 #ifdef LIBTORCH_ENABLED
   // Extract data from the reporters
-  getInputDataFromReporter(_input_data, _response_names, _input_timesteps);
-  getOutputDataFromReporter(_output_data, _control_names);
-  getOutputDataFromReporter(_log_probability_data, _log_probability_names);
-  getRewardDataFromReporter(_reward_data, _reward_name);
+  getInputDataFromReporter(_input_data, _response_value_pointers, _input_timesteps);
+  getOutputDataFromReporter(_output_data, _control_value_pointers);
+  getOutputDataFromReporter(_log_probability_data, _log_probability_value_pointers);
+  getRewardDataFromReporter(_reward_data, _reward_value_pointer);
 
   // Calculate return from the reward (discounting the reward)
   computeRewardToGo();
@@ -256,8 +265,9 @@ LibtorchDRLControlTrainer::execute()
     convertDataToTensor(_input_data, _input_tensor);
     convertDataToTensor(_output_data, _output_tensor);
     convertDataToTensor(_log_probability_data, _log_probability_tensor);
+
     // Discard (detach) the gradient info for return data
-    convertDataToTensor(_return_data, _return_tensor, true);
+    LibtorchUtils::vectorToTensor<Real>(_return_data, _return_tensor, true);
 
     // We train the controller using the emulator to get a good control strategy
     trainController();
@@ -278,66 +288,6 @@ LibtorchDRLControlTrainer::computeAverageEpisodeReward()
     _average_episode_reward = 0.0;
 }
 
-void
-LibtorchDRLControlTrainer::getInputDataFromReporter(
-    std::vector<std::vector<Real>> & data,
-    const std::vector<ReporterName> & reporter_names,
-    unsigned int num_timesteps)
-{
-  for (const auto & rep_i : index_range(reporter_names))
-  {
-    std::vector<Real> reporter_data =
-        getReporterValueByName<std::vector<Real>>(reporter_names[rep_i]);
-
-    // We shift and scale the inputs to get better training efficiency
-    std::transform(
-        reporter_data.begin(),
-        reporter_data.end(),
-        reporter_data.begin(),
-        [this, &rep_i](Real value) -> Real
-        { return (value - _response_shift_factors[rep_i]) * _response_scaling_factors[rep_i]; });
-
-    // Fill the corresponding containers
-    for (const auto & start_step : make_range(num_timesteps))
-    {
-      unsigned int row = reporter_names.size() * start_step + rep_i;
-      for (unsigned int fill_i = 1; fill_i < num_timesteps - start_step; ++fill_i)
-        data[row].push_back(reporter_data[0]);
-
-      data[row].insert(data[row].end(),
-                       reporter_data.begin(),
-                       reporter_data.begin() + start_step + reporter_data.size() -
-                           (num_timesteps - 1) - _shift_outputs);
-    }
-  }
-}
-
-void
-LibtorchDRLControlTrainer::getOutputDataFromReporter(
-    std::vector<std::vector<Real>> & data, const std::vector<ReporterName> & reporter_names)
-{
-  for (const auto & rep_i : index_range(reporter_names))
-  {
-    const std::vector<Real> & reporter_data =
-        getReporterValueByName<std::vector<Real>>(reporter_names[rep_i]);
-
-    // Fill the corresponding containers
-    data[rep_i].insert(
-        data[rep_i].end(), reporter_data.begin() + _shift_outputs, reporter_data.end());
-  }
-}
-
-void
-LibtorchDRLControlTrainer::getRewardDataFromReporter(std::vector<Real> & data,
-                                                     const ReporterName & reporter_name)
-{
-  const std::vector<Real> & reporter_data =
-      getReporterValueByName<std::vector<Real>>(reporter_name);
-
-  // Fill the corresponding container
-  data.insert(data.end(), reporter_data.begin() + _shift_outputs, reporter_data.end());
-}
-
 #ifdef LIBTORCH_ENABLED
 void
 LibtorchDRLControlTrainer::computeRewardToGo()
@@ -345,7 +295,7 @@ LibtorchDRLControlTrainer::computeRewardToGo()
   // Get reward data from one simulation
   std::vector<Real> reward_data_per_sim;
   std::vector<Real> return_data_per_sim;
-  getRewardDataFromReporter(reward_data_per_sim, _reward_name);
+  getRewardDataFromReporter(reward_data_per_sim, _reward_value_pointer);
 
   // Discount the reward to get the return value, we need this to be able to anticipate
   // rewards based on the current behavior.
@@ -429,33 +379,16 @@ LibtorchDRLControlTrainer::convertDataToTensor(std::vector<std::vector<Real>> & 
                                                torch::Tensor & tensor_data,
                                                const bool detach)
 {
-  auto options = torch::TensorOptions().dtype(at::kDouble);
-
   for (unsigned int i = 0; i < vector_data.size(); ++i)
   {
-    const int size = vector_data[i].size();
-    torch::Tensor input_row =
-        torch::from_blob(vector_data[i].data(), {size, 1}, options).to(at::kDouble);
+    torch::Tensor input_row;
+    LibtorchUtils::vectorToTensor(vector_data[i], input_row, detach);
 
     if (i == 0)
       tensor_data = input_row;
     else
       tensor_data = torch::cat({tensor_data, input_row}, 1);
   }
-
-  if (detach)
-    tensor_data.detach();
-}
-
-void
-LibtorchDRLControlTrainer::convertDataToTensor(std::vector<Real> & vector_data,
-                                               torch::Tensor & tensor_data,
-                                               const bool detach)
-{
-  auto options = torch::TensorOptions().dtype(at::kDouble);
-  const int size = vector_data.size();
-
-  tensor_data = torch::from_blob(vector_data.data(), {size, 1}, options).to(at::kDouble);
 
   if (detach)
     tensor_data.detach();
@@ -494,4 +427,67 @@ LibtorchDRLControlTrainer::resetData()
   _return_data.clear();
 
   _update_counter = _update_frequency;
+}
+
+void
+LibtorchDRLControlTrainer::getInputDataFromReporter(
+    std::vector<std::vector<Real>> & data,
+    const std::vector<const std::vector<Real> *> & reporter_links,
+    const unsigned int num_timesteps)
+{
+  for (const auto & rep_i : index_range(reporter_links))
+  {
+    std::vector<Real> reporter_data = *reporter_links[rep_i];
+
+    // We shift and scale the inputs to get better training efficiency
+    std::transform(
+        reporter_data.begin(),
+        reporter_data.end(),
+        reporter_data.begin(),
+        [this, &rep_i](Real value) -> Real
+        { return (value - _response_shift_factors[rep_i]) * _response_scaling_factors[rep_i]; });
+
+    // Fill the corresponding containers
+    for (const auto & start_step : make_range(num_timesteps))
+    {
+      unsigned int row = reporter_links.size() * start_step + rep_i;
+      for (unsigned int fill_i = 1; fill_i < num_timesteps - start_step; ++fill_i)
+        data[row].push_back(reporter_data[0]);
+
+      data[row].insert(data[row].end(),
+                       reporter_data.begin(),
+                       reporter_data.begin() + start_step + reporter_data.size() -
+                           (num_timesteps - 1) - _shift_outputs);
+    }
+  }
+}
+
+void
+LibtorchDRLControlTrainer::getOutputDataFromReporter(
+    std::vector<std::vector<Real>> & data,
+    const std::vector<const std::vector<Real> *> & reporter_links)
+{
+  for (const auto & rep_i : index_range(reporter_links))
+    // Fill the corresponding containers
+    data[rep_i].insert(data[rep_i].end(),
+                       reporter_links[rep_i]->begin() + _shift_outputs,
+                       reporter_links[rep_i]->end());
+}
+
+void
+LibtorchDRLControlTrainer::getRewardDataFromReporter(std::vector<Real> & data,
+                                                     const std::vector<Real> * const reporter_link)
+{
+  // Fill the corresponding container
+  data.insert(data.end(), reporter_link->begin() + _shift_outputs, reporter_link->end());
+}
+
+void
+LibtorchDRLControlTrainer::getReporterPointers(
+    const std::vector<ReporterName> & reporter_names,
+    std::vector<const std::vector<Real> *> & pointer_storage)
+{
+  pointer_storage.clear();
+  for (const auto & name : reporter_names)
+    pointer_storage.push_back(&getReporterValueByName<std::vector<Real>>(name));
 }

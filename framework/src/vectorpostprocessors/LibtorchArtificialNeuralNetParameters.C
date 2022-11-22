@@ -50,11 +50,12 @@ LibtorchArtificialNeuralNetParameters::execute()
   std::shared_ptr<LibtorchNeuralNetControl> control_object =
       std::dynamic_pointer_cast<LibtorchNeuralNetControl>(control_ref);
 
-  const std::shared_ptr<torch::nn::Module> ann =
-      std::dynamic_pointer_cast<torch::nn::Module>(control_object->controlNeuralNet());
+  const std::shared_ptr<Moose::LibtorchArtificialNeuralNet> ann =
+      std::dynamic_pointer_cast<Moose::LibtorchArtificialNeuralNet>(
+          control_object->controlNeuralNet());
 
   if (ann)
-    fillParameterValues(ann);
+    fillParameterValues(_nn_parameter_values, ann);
   else
     mooseError("The supplied neural network from the controller could not be cast into a "
                "troch::nn::Module!");
@@ -65,7 +66,8 @@ LibtorchArtificialNeuralNetParameters::execute()
 #ifdef LIBTORCH_ENABLED
 void
 LibtorchArtificialNeuralNetParameters::fillParameterValues(
-    const std::shared_ptr<torch::nn::Module> & ann)
+    std::vector<Real> & parameter_values,
+    const std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & ann)
 {
 
   const auto & ann_params = ann->named_parameters();
@@ -80,7 +82,7 @@ LibtorchArtificialNeuralNetParameters::fillParameterValues(
 
     auto flattened_tensor = ann_params[param_i].value().data().reshape({max_size, 1});
     for (unsigned int value_i : make_range(max_size))
-      _nn_parameter_values.push_back(flattened_tensor[value_i][0].item<double>());
+      parameter_values.push_back(flattened_tensor[value_i][0].item<double>());
   }
 }
 #endif

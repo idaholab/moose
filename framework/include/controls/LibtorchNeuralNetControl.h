@@ -51,6 +51,15 @@ protected:
                                  const std::vector<std::string> & conditional_param,
                                  bool should_be_defined = true);
 
+  /// Function that updates the values of the current response
+  void updateCurrentResponse();
+
+#ifdef LIBTORCH_ENABLED
+  /// Function that prepares the input tensor for the controller neural network
+  torch::Tensor prepareInputTensor();
+
+#endif
+
   /// The values of the current observed postprocessor values
   std::vector<Real> _current_response;
   /// This variable is populated if the controller needs acess to older values of the

@@ -10,22 +10,30 @@
 #pragma once
 
 #include "LibtorchArtificialNeuralNetParameters.h"
+#include "LibtorchArtificialNeuralNet.h"
+
 #include "SurrogateModelInterface.h"
+#include "GeneralVectorPostprocessor.h"
 
 /**
  * A VectorPostprocessor which can print the parameter values of a
  * LibtorchArtificialNeuralNetwork from within a DRL Trainer object.
  */
-class DRLControlNeuralNetParameters : public LibtorchArtificialNeuralNetParameters,
+class DRLControlNeuralNetParameters : public GeneralVectorPostprocessor,
                                       public SurrogateModelInterface
 {
 public:
   static InputParameters validParams();
   DRLControlNeuralNetParameters(const InputParameters & params);
 
+  virtual void initialize() override{};
   virtual void execute() override;
+  virtual void finalize() override{};
 
 protected:
-  /// The name of the DRL trainer objects which hold the neural networks
-  UserObjectName _trainer_name;
+  /// A vector which stores the parameters of the neural net
+  VectorPostprocessorValue & _nn_parameter_values;
+
+  /// Pointer to the neural network
+  std::shared_ptr<Moose::LibtorchArtificialNeuralNet> _ann;
 };

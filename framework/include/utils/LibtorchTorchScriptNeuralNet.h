@@ -11,7 +11,9 @@
 
 #ifdef LIBTORCH_ENABLED
 
-#include "LibtorchNeuralNet.h"
+#include <torch/torch.h>
+#include <torch/script.h>
+#include "LibtorchNeuralNetBase.h"
 #include "DataIO.h"
 #include "MultiMooseEnum.h"
 
@@ -19,7 +21,7 @@ namespace Moose
 {
 
 // A class that describes a torch-script-based neural network.
-class LibtorchTorchScriptNeuralNet : public LibtorchNeuralNet<torch::jit::script::Module>
+class LibtorchTorchScriptNeuralNet : public torch::jit::script::Module, public LibtorchNeuralNetBase
 {
 public:
   /**

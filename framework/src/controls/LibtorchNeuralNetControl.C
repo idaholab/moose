@@ -11,6 +11,7 @@
 
 #ifdef LIBTORCH_ENABLED
 #include "LibtorchTorchScriptNeuralNet.h"
+#include "LibtorchUtils.h"
 #endif
 
 #include "Transient.h"
@@ -157,15 +158,11 @@ LibtorchNeuralNetControl::execute()
 #ifdef LIBTORCH_ENABLED
   if (_nn)
   {
-    unsigned int n_responses = _response_names.size();
-    unsigned int n_controls = _control_names.size();
-    unsigned int num_old_timesteps = _input_timesteps - 1;
+    const unsigned int n_controls = _control_names.size();
+    const unsigned int num_old_timesteps = _input_timesteps - 1;
 
-    // Gather the current response values
-    _current_response.clear();
-    for (unsigned int resp_i = 0; resp_i < n_responses; ++resp_i)
-      _current_response.push_back((*_response_values[resp_i] - _response_shift_factors[resp_i]) *
-                                  _response_scaling_factors[resp_i]);
+    // Fetch current reporter values and populate _current_response
+    updateCurrentResponse();
 
     // If this is the first timestep, we fill up the old values with the initial value
     if (!_initialized)
@@ -174,23 +171,14 @@ LibtorchNeuralNetControl::execute()
       _initialized = true;
     }
 
-    // We convert the standard vectors to libtorch tensors
-    std::vector<Real> raw_input(_current_response);
-    for (unsigned int step_i = 0; step_i < num_old_timesteps; ++step_i)
-      raw_input.insert(
-          raw_input.end(), _old_responses[step_i].begin(), _old_responses[step_i].end());
-
-    auto options = torch::TensorOptions().dtype(at::kDouble);
-    torch::Tensor input_tensor =
-        torch::from_blob(raw_input.data(), {1, _input_timesteps * n_responses}, options)
-            .to(at::kDouble);
+    // Organize the old an current solution into a tensor so we can evaluate the neural net
+    torch::Tensor input_tensor = prepareInputTensor();
 
     // Evaluate the neural network to get the control values then convert it back to vectors
     torch::Tensor action = _nn->forward(input_tensor);
 
     std::vector<Real> converted_action = {action.data_ptr<Real>(),
                                           action.data_ptr<Real>() + action.size(1)};
-
     for (unsigned int control_i = 0; control_i < n_controls; ++control_i)
     {
       // We scale the controllable value for physically meaningful control action
@@ -211,15 +199,6 @@ LibtorchNeuralNetControl::execute()
 #endif
 }
 
-#ifdef LIBTORCH_ENABLED
-void
-LibtorchNeuralNetControl::loadControlNeuralNet(
-    const std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & input_nn)
-{
-  _nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(*input_nn);
-}
-#endif
-
 void
 LibtorchNeuralNetControl::conditionalParameterError(
     const std::string & param_name,
@@ -236,3 +215,40 @@ LibtorchNeuralNetControl::conditionalParameterError(
                    param_name,
                    " is defined!");
 }
+
+void
+LibtorchNeuralNetControl::updateCurrentResponse()
+{
+  // Gather the current response values from the reporters
+  _current_response.clear();
+
+  for (const auto & resp_i : index_range(_response_names))
+    _current_response.push_back((*_response_values[resp_i] - _response_shift_factors[resp_i]) *
+                                _response_scaling_factors[resp_i]);
+}
+
+#ifdef LIBTORCH_ENABLED
+void
+LibtorchNeuralNetControl::loadControlNeuralNet(
+    const std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & input_nn)
+{
+  _nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(*input_nn);
+}
+
+torch::Tensor
+LibtorchNeuralNetControl::prepareInputTensor()
+{
+  const unsigned int num_old_timesteps = _input_timesteps - 1;
+
+  // We convert the standard vectors to libtorch tensors
+  std::vector<Real> raw_input(_current_response);
+
+  for (const auto & step_i : make_range(num_old_timesteps))
+    raw_input.insert(raw_input.end(), _old_responses[step_i].begin(), _old_responses[step_i].end());
+
+  torch::Tensor input_tensor;
+  LibtorchUtils::vectorToTensor(raw_input, input_tensor);
+
+  return input_tensor.transpose(0, 1);
+}
+#endif

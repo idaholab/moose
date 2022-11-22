@@ -11,7 +11,10 @@
 
 #ifdef LIBTORCH_ENABLED
 
-#include "LibtorchNeuralNet.h"
+#include <torch/torch.h>
+#include <torch/script.h>
+#include "LibtorchNeuralNetBase.h"
+#include "MooseError.h"
 #include "DataIO.h"
 #include "MultiMooseEnum.h"
 
@@ -19,7 +22,7 @@ namespace Moose
 {
 
 // A class that describes a simple feed-forward neural net.
-class LibtorchArtificialNeuralNet : public LibtorchNeuralNet<torch::nn::Module>
+class LibtorchArtificialNeuralNet : public torch::nn::Module, public LibtorchNeuralNetBase
 {
 public:
   /**

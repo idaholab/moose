@@ -15,7 +15,7 @@ registerMooseObject("StochasticToolsApp", DRLControlNeuralNetParameters);
 InputParameters
 DRLControlNeuralNetParameters::validParams()
 {
-  InputParameters params = LibtorchArtificialNeuralNetParameters::validParams();
+  InputParameters params = GeneralVectorPostprocessor::validParams();
 
   params.addClassDescription("Outputs the parameters of a LibtorchArtificialNeuralNetwork within a "
                              "LibtorchDRLControlTrainer.");
@@ -30,10 +30,13 @@ DRLControlNeuralNetParameters::validParams()
 }
 
 DRLControlNeuralNetParameters::DRLControlNeuralNetParameters(const InputParameters & params)
-  : LibtorchArtificialNeuralNetParameters(params),
+  : GeneralVectorPostprocessor(params),
     SurrogateModelInterface(this),
-    _trainer_name(getParam<UserObjectName>("trainer_name"))
+    _nn_parameter_values(declareVector("nn_parameter_values")),
+    _ann(getSurrogateTrainer<LibtorchDRLControlTrainer>("trainer_name").controlNeuralNet())
 {
+  if (!_ann)
+    mooseError("Failed to fetch the neural network from the DRLControlTrainer!");
 }
 
 void
@@ -43,13 +46,8 @@ DRLControlNeuralNetParameters::execute()
 
   _nn_parameter_values.clear();
 
-  const auto & trainer = getSurrogateTrainerByName<LibtorchDRLControlTrainer>(_trainer_name);
-
-  const std::shared_ptr<torch::nn::Module> ann =
-      std::dynamic_pointer_cast<torch::nn::Module>(trainer.controlNeuralNet());
-
-  if (ann)
-    fillParameterValues(ann);
+  if (_ann)
+    LibtorchArtificialNeuralNetParameters::fillParameterValues(_nn_parameter_values, _ann);
   else
     mooseError("The supplied neural network from the controller could not be cast into a "
                "troch::nn::Module!");

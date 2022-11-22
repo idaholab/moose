@@ -11,6 +11,7 @@
 
 #ifdef LIBTORCH_ENABLED
 #include <torch/torch.h>
+#include "LibtorchArtificialNeuralNet.h"
 #endif
 
 #include "GeneralVectorPostprocessor.h"
@@ -30,12 +31,13 @@ public:
   virtual void execute() override;
   virtual void finalize() override{};
 
-protected:
 #ifdef LIBTORCH_ENABLED
   /// Fill the vector psotprocessor values with the parameters
-  void fillParameterValues(const std::shared_ptr<torch::nn::Module> & ann);
+  static void fillParameterValues(std::vector<Real> & parameter_values,
+                                  const std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & ann);
 #endif
 
+protected:
   /// The name of the control objects which hold the neural networks
   const std::string _control_name;
   /// A vector which stores the parameters of the neural net

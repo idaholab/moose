@@ -50,33 +50,6 @@ public:
 #endif
 
 protected:
-  /**
-   * Extract the response values from the postprocessors of the controlled system.
-   * This assumes that they are stored in an AccumulateReporter
-   * @param data The data where we would like to store the response values
-   * @param reporter_names The names of the reporters which need to be extracted
-   * @param num_timesteps The number of timesteps we want to use for training
-   */
-  void getInputDataFromReporter(std::vector<std::vector<Real>> & data,
-                                const std::vector<ReporterName> & reporter_names,
-                                unsigned int num_timesteps);
-  /**
-   * Extract the output (actions, logarithmic probabilities) values from the postprocessors
-   * of the controlled system. This assumes that they are stored in an AccumulateReporter
-   * @param data The data where we would like to store the output values
-   * @param reporter_names The names of the reporters which need to be extracted
-   */
-  void getOutputDataFromReporter(std::vector<std::vector<Real>> & data,
-                                 const std::vector<ReporterName> & reporter_names);
-
-  /**
-   * Extract the reward values from the postprocessors of the controlled system
-   * This assumes that they are stored in an AccumulateReporter.
-   * @param data The data where we would like to store the reward values
-   * @param reporter_names The name of the reporter which need to be extracted
-   */
-  void getRewardDataFromReporter(std::vector<Real> & data, const ReporterName & reporter_name);
-
   /// Compute the average eposiodic reward
   void computeAverageEpisodeReward();
 
@@ -88,16 +61,6 @@ protected:
    * @param detach If the gradient info needs to be detached from the tensor
    */
   void convertDataToTensor(std::vector<std::vector<Real>> & vector_data,
-                           torch::Tensor & tensor_data,
-                           const bool detach = false);
-
-  /**
-   * Function to convert input/output data from std::vector to torch::tensor
-   * @param vector_data The input data in vector format
-   * @param tensor_data The tensor where we would like to save the results
-   * @param detach If the gradient info needs to be detached from the tensor
-   */
-  void convertDataToTensor(std::vector<Real> & vector_data,
                            torch::Tensor & tensor_data,
                            const bool detach = false);
 
@@ -128,6 +91,9 @@ protected:
   /// Response reporter names
   const std::vector<ReporterName> _response_names;
 
+  /// Pointers to the current values of the responses
+  std::vector<const std::vector<Real> *> _response_value_pointers;
+
   /// Shifting constants for the responses
   const std::vector<Real> _response_shift_factors;
 
@@ -137,11 +103,20 @@ protected:
   /// Control reporter names
   const std::vector<ReporterName> _control_names;
 
+  /// Pointers to the current values of the control signals
+  std::vector<const std::vector<Real> *> _control_value_pointers;
+
   /// Log probability reporter names
   const std::vector<ReporterName> _log_probability_names;
 
+  /// Pointers to the current values of the control log probabilities
+  std::vector<const std::vector<Real> *> _log_probability_value_pointers;
+
   /// Reward reporter name
   const ReporterName _reward_name;
+
+  /// Pointer to the current values of the reward
+  const std::vector<Real> * _reward_value_pointer;
 
   /// Number of timesteps to fetch from the reporters to be the input of then eural nets
   const unsigned int _input_timesteps;
@@ -231,6 +206,38 @@ protected:
 #endif
 
 private:
+  /**
+   * Extract the response values from the postprocessors of the controlled system.
+   * This assumes that they are stored in an AccumulateReporter
+   * @param data The data where we would like to store the response values
+   * @param reporter_names The names of the reporters which need to be extracted
+   * @param num_timesteps The number of timesteps we want to use for training
+   */
+  void getInputDataFromReporter(std::vector<std::vector<Real>> & data,
+                                const std::vector<const std::vector<Real> *> & reporter_links,
+                                const unsigned int num_timesteps);
+  /**
+   * Extract the output (actions, logarithmic probabilities) values from the postprocessors
+   * of the controlled system. This assumes that they are stored in an AccumulateReporter
+   * @param data The data where we would like to store the output values
+   * @param reporter_names The names of the reporters which need to be extracted
+   */
+  void getOutputDataFromReporter(std::vector<std::vector<Real>> & data,
+                                 const std::vector<const std::vector<Real> *> & reporter_links);
+
+  /**
+   * Extract the reward values from the postprocessors of the controlled system
+   * This assumes that they are stored in an AccumulateReporter.
+   * @param data The data where we would like to store the reward values
+   * @param reporter_names The name of the reporter which need to be extracted
+   */
+  void getRewardDataFromReporter(std::vector<Real> & data,
+                                 const std::vector<Real> * const reporter_link);
+
+  /// Getting reporter pointers with given names
+  void getReporterPointers(const std::vector<ReporterName> & reporter_names,
+                           std::vector<const std::vector<Real> *> & pointer_storage);
+
   /// Counter for number of transient simulations that have been run before updating the controller
   unsigned int _update_counter;
 };

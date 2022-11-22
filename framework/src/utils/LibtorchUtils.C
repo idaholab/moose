@@ -8,17 +8,15 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #ifdef LIBTORCH_ENABLED
-#include "LibtorchNeuralNet.h"
+#include "LibtorchUtils.h"
 
-namespace Moose
+namespace LibtorchUtils
 {
-template <>
-torch::Tensor
-LibtorchNeuralNet<torch::jit::script::Module>::forward(torch::Tensor & x)
-{
-  std::vector<torch::jit::IValue> inputs(1, x);
-  return torch::jit::script::Module::forward(inputs).toTensor();
-}
-}
 
+template void
+vectorToTensor<Real>(std::vector<Real> & vector, torch::Tensor & tensor, const bool detach);
+
+template void tensorToVector<Real>(torch::Tensor & tensor, std::vector<Real> & vector);
+
+} // LibtorchUtils namespace
 #endif
