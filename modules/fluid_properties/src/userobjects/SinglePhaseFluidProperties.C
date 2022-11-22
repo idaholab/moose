@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SinglePhaseFluidProperties.h"
-#include "NewtonInversion.h"
 
 InputParameters
 SinglePhaseFluidProperties::validParams()
@@ -520,65 +519,19 @@ SinglePhaseFluidProperties::p_T_from_v_e(const Real & v,  // v value
   { v_from_p_T(pressure, temperature, new_v, dv_dp, dv_dT); };
   auto e_lambda = [&](Real pressure, Real temperature, Real & new_e, Real & de_dp, Real & de_dT)
   { e_from_p_T(pressure, temperature, new_e, de_dp, de_dT); };
-
-  typedef std::function<void(Real, Real, Real &, Real &, Real &)> FuncType;
-  DenseVector<Real> y_in(2);
-  y_in(0) = v;
-  y_in(1) = e;
-  DenseVector<Real> z_initial_guess(2);
-  z_initial_guess(0) = p0;
-  z_initial_guess(1) = T0;
-  std::array<FuncType, 2> functors = {{std::move(v_lambda), std::move(e_lambda)}};
-  DenseVector<Real> tolerances(2);
-  tolerances(0) = _tolerance;
-  tolerances(1) = _tolerance;
-
   try
   {
-    std::tie(p, T) = FluidPropertiesUtils::NewtonSolve(y_in, z_initial_guess, tolerances, functors);
+    FluidPropertiesUtils::NewtonSolve2D(
+        v, e, p0, T0, p, T, _tolerance, _tolerance, v_lambda, e_lambda);
     conversion_succeeded = true;
   }
-  catch (const MooseException &)
+  catch (MooseException &)
   {
     conversion_succeeded = false;
   }
-}
 
-void
-SinglePhaseFluidProperties::p_T_from_v_h(const Real & v,  // v value
-                                         const Real & h,  // e value
-                                         const Real & p0, // initial guess
-                                         const Real & T0, // initial guess
-                                         Real & p,        // returned pressure
-                                         Real & T,        // returned temperature
-                                         bool & conversion_succeeded) const
-{
-  auto v_lambda = [&](Real pressure, Real temperature, Real & new_v, Real & dv_dp, Real & dv_dT)
-  { v_from_p_T(pressure, temperature, new_v, dv_dp, dv_dT); };
-  auto h_lambda = [&](Real pressure, Real temperature, Real & new_h, Real & dh_dp, Real & dh_dT)
-  { h_from_p_T(pressure, temperature, new_h, dh_dp, dh_dT); };
-
-  typedef std::function<void(Real, Real, Real &, Real &, Real &)> FuncType;
-  DenseVector<Real> y_in(2);
-  y_in(0) = v;
-  y_in(1) = h;
-  DenseVector<Real> z_initial_guess(2);
-  z_initial_guess(0) = p0;
-  z_initial_guess(1) = T0;
-  std::array<FuncType, 2> functors = {{std::move(v_lambda), std::move(h_lambda)}};
-  DenseVector<Real> tolerances(2);
-  tolerances(0) = _tolerance;
-  tolerances(1) = _tolerance;
-
-  try
-  {
-    std::tie(p, T) = FluidPropertiesUtils::NewtonSolve(y_in, z_initial_guess, tolerances, functors);
-    conversion_succeeded = true;
-  }
-  catch (const MooseException &)
-  {
-    conversion_succeeded = false;
-  }
+  if (!conversion_succeeded)
+    mooseDoOnce(mooseWarning("Conversion from (v, e)=(", v, ", ", e, ") to (p, T) failed"));
 }
 
 void
@@ -594,28 +547,19 @@ SinglePhaseFluidProperties::p_T_from_h_s(const Real & h,  // h value
   { h_from_p_T(pressure, temperature, new_h, dh_dp, dh_dT); };
   auto s_lambda = [&](Real pressure, Real temperature, Real & new_s, Real & ds_dp, Real & ds_dT)
   { s_from_p_T(pressure, temperature, new_s, ds_dp, ds_dT); };
-
-  typedef std::function<void(Real, Real, Real &, Real &, Real &)> FuncType;
-  DenseVector<Real> y_in(2);
-  y_in(0) = h;
-  y_in(1) = s;
-  DenseVector<Real> z_initial_guess(2);
-  z_initial_guess(0) = p0;
-  z_initial_guess(1) = T0;
-  std::array<FuncType, 2> functors = {{std::move(h_lambda), std::move(s_lambda)}};
-  DenseVector<Real> tolerances(2);
-  tolerances(0) = _tolerance;
-  tolerances(1) = _tolerance;
-
   try
   {
-    std::tie(p, T) = FluidPropertiesUtils::NewtonSolve(y_in, z_initial_guess, tolerances, functors);
+    FluidPropertiesUtils::NewtonSolve2D(
+        h, s, p0, T0, p, T, _tolerance, _tolerance, h_lambda, s_lambda);
     conversion_succeeded = true;
   }
-  catch (const MooseException &)
+  catch (MooseException &)
   {
     conversion_succeeded = false;
   }
+
+  if (!conversion_succeeded)
+    mooseDoOnce(mooseWarning("Conversion from (h, s)=(", h, ", ", s, ") to (p, T) failed"));
 }
 
 Real

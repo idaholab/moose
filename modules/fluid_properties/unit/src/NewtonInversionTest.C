@@ -109,11 +109,13 @@ TEST(NewtonInversion, NewtonSolve2D)
   Real y1 = -3;
   Real y2 = -37;
 
+  // Roots of the problem obtained by Newton's method
+  Real return_x1;
+  Real return_x2;
+
   // Known solution for the first problem
   Real x1_soln = -4;
   Real x2_soln = -11;
-
-  typedef std::function<void(Real, Real, Real &, Real &, Real &)> FuncType;
 
   auto func1 = [&](Real x, Real y, Real & f, Real & dfdx, Real & dfdy)
   { function_g1(x, y, f, dfdx, dfdy); };
@@ -121,20 +123,8 @@ TEST(NewtonInversion, NewtonSolve2D)
   { function_g2(x, y, g, dgdx, dgdy); };
   auto func3 = [&](Real x, Real y, Real & g, Real & dgdx, Real & dgdy)
   { function_g3(x, y, g, dgdx, dgdy); };
-
-  DenseVector<Real> z_initial_guess(2);
-  z_initial_guess(0) = guess1;
-  z_initial_guess(1) = guess2;
-  DenseVector<Real> y_in(2);
-  y_in(0) = y1;
-  y_in(1) = y2;
-  DenseVector<Real> tolerances(2);
-  tolerances(0) = 1e-8;
-  tolerances(1) = 1e-8;
-  std::array<FuncType, 2> functors = {{func1, func2}};
-
-  auto [return_x1, return_x2] =
-      FluidPropertiesUtils::NewtonSolve(y_in, z_initial_guess, tolerances, functors);
+  FluidPropertiesUtils::NewtonSolve2D(
+      y1, y2, guess1, guess2, return_x1, return_x2, 1e-8, 1e-8, func1, func2);
 
   // Check values
   Real tol = 1e-6;
@@ -142,33 +132,31 @@ TEST(NewtonInversion, NewtonSolve2D)
   EXPECT_NEAR(return_x2, x2_soln, tol);
 
   // Try other combinations of g functions
-  y_in(0) = 0.1;
-  y_in(1) = 1.1196002982765987;
-  functors[1] = func3;
-  std::tie(return_x1, return_x2) =
-      FluidPropertiesUtils::NewtonSolve(y_in, z_initial_guess, tolerances, functors);
+  y1 = 0.1;
+  y2 = 1.1196002982765987;
+  FluidPropertiesUtils::NewtonSolve2D(
+      y1, y2, guess1, guess2, return_x1, return_x2, 1e-8, 1e-8, func1, func3);
   x1_soln = 0.1;
   x2_soln = 0.3;
   EXPECT_NEAR(return_x1, x1_soln, tol);
   EXPECT_NEAR(return_x2, x2_soln, tol);
 
-  y_in(0) = 1.98;
-  y_in(1) = 1.1196002982765987;
-  functors[0] = func2;
-  std::tie(return_x1, return_x2) =
-      FluidPropertiesUtils::NewtonSolve(y_in, z_initial_guess, tolerances, functors);
+  y1 = 1.98;
+  y2 = 1.1196002982765987;
+  FluidPropertiesUtils::NewtonSolve2D(
+      y1, y2, guess1, guess2, return_x1, return_x2, 1e-8, 1e-8, func2, func3);
   x1_soln = 0.1;
   x2_soln = 0.3;
   EXPECT_NEAR(return_x1, x1_soln, tol);
   EXPECT_NEAR(return_x2, x2_soln, tol);
 
   // If there is no solution it should not converge
-  y_in(0) = -2000;
-  y_in(1) = -2000; // no solution
-  functors[0] = func1;
+  y1 = -2000;
+  y2 = -2000; // no solution
   try
   {
-    FluidPropertiesUtils::NewtonSolve(y_in, z_initial_guess, tolerances, functors);
+    FluidPropertiesUtils::NewtonSolve2D(
+        y1, y2, guess1, guess2, return_x1, return_x2, 1e-8, 1e-8, func1, func3);
     FAIL();
   }
   catch (MooseException &)

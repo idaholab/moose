@@ -10,6 +10,7 @@
 #pragma once
 
 #include "FluidProperties.h"
+#include "NewtonInversion.h"
 #include "metaphysicl/dualnumberarray.h"
 
 /**
@@ -359,13 +360,14 @@ public:
    * @param[out] fluid pressure (Pa / kg)
    * @param[out] Temperature (K)
    */
-  virtual void p_T_from_v_h(const Real & v,
-                            const Real & h,
-                            const Real & p0,
-                            const Real & T0,
-                            Real & p,
-                            Real & T,
-                            bool & conversion_succeeded) const;
+  template <typename T>
+  void p_T_from_v_h(const T & v,
+                    const T & h,
+                    Real p0,
+                    Real T0,
+                    T & pressure,
+                    T & temperature,
+                    bool & conversion_succeeded) const;
   /**
    * Determines (p,T) from (h,s) using Newton Solve in 2D
    * Useful for conversion between different sets of state variables
@@ -447,4 +449,33 @@ SinglePhaseFluidProperties::xyDerivatives(
   z = z_c.value();
   dz_dx = z_c.derivatives()[0];
   dz_dy = z_c.derivatives()[1];
+}
+
+template <typename T>
+void
+SinglePhaseFluidProperties::p_T_from_v_h(const T & v,     // v value
+                                         const T & h,     // e value
+                                         const Real p0,   // initial guess
+                                         const Real T0,   // initial guess
+                                         T & pressure,    // returned pressure
+                                         T & temperature, // returned temperature
+                                         bool & conversion_succeeded) const
+{
+  auto v_lambda = [&](const T & pressure, const T & temperature, T & new_v, T & dv_dp, T & dv_dT)
+  { v_from_p_T(pressure, temperature, new_v, dv_dp, dv_dT); };
+  auto h_lambda = [&](const T & pressure, const T & temperature, T & new_h, T & dh_dp, T & dh_dT)
+  { h_from_p_T(pressure, temperature, new_h, dh_dp, dh_dT); };
+  try
+  {
+    FluidPropertiesUtils::NewtonSolve2D(
+        v, h, p0, T0, pressure, temperature, _tolerance, _tolerance, v_lambda, h_lambda);
+    conversion_succeeded = true;
+  }
+  catch (MooseException &)
+  {
+    conversion_succeeded = false;
+  }
+
+  if (!conversion_succeeded)
+    mooseDoOnce(mooseWarning("Conversion from (v, h)=(", v, ", ", h, ") to (p, T) failed"));
 }

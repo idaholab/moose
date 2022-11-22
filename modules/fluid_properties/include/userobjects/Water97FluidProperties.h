@@ -1482,6 +1482,7 @@ private:
    */
   template <typename T>
   std::pair<T, T> p_T_from_v_h(const T & v, const T & h) const;
+  using SinglePhaseFluidProperties::p_T_from_v_h;
 
   template <typename T>
   void assignQoIs(const T & /*x*/,
@@ -2485,32 +2486,11 @@ template <typename T>
 std::pair<T, T>
 Water97FluidProperties::p_T_from_v_h(const T & v, const T & h) const
 {
-  const auto rho = 1 / v;
-
-  typedef std::function<void(const T &, const T &, T &, T &, T &)> FuncType;
-  FuncType f1 = [this](const T & pressure,
-                       const T & temperature,
-                       T & rho,
-                       T & drho_dpressure,
-                       T & drho_dtemperature)
-  { rho_from_p_T_template(pressure, temperature, rho, drho_dpressure, drho_dtemperature); };
-  FuncType f2 =
-      [this](
-          const T & pressure, const T & temperature, T & h, T & dh_dpressure, T & dh_dtemperature)
-  { h_from_p_T_template(pressure, temperature, h, dh_dpressure, dh_dtemperature); };
-
-  DenseVector<T> y_in(2);
-  y_in(0) = rho;
-  y_in(1) = h;
-  DenseVector<Real> z_initial_guess(2);
-  z_initial_guess(0) = _p_initial_guess;
-  z_initial_guess(1) = _T_initial_guess;
-  std::array<FuncType, 2> functors = {{std::move(f1), std::move(f2)}};
-  DenseVector<Real> tolerances(2);
-  tolerances(0) = _tolerance;
-  tolerances(1) = _tolerance;
-
-  return FluidPropertiesUtils::NewtonSolve(y_in, z_initial_guess, tolerances, functors);
+  T pressure, temperature;
+  bool conversion_succeeded;
+  p_T_from_v_h(
+      v, h, _p_initial_guess, _T_initial_guess, pressure, temperature, conversion_succeeded);
+  return {std::move(pressure), std::move(temperature)};
 }
 
 template <typename T>
