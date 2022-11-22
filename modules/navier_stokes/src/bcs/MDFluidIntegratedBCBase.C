@@ -53,7 +53,7 @@ MDFluidIntegratedBCBase::MDFluidIntegratedBCBase(const InputParameters & paramet
     _has_porosity(isParamValid("porosity")),
     _porosity(_has_porosity ? coupledValue("porosity") : _zero),
 
-    _eos(getUserObject<PTEquationOfState>("eos"))
+    _eos(getUserObject<SinglePhaseFluidProperties>("eos"))
 {
 }
 

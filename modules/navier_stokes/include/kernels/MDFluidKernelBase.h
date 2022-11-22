@@ -10,7 +10,7 @@
 #pragma once
 
 #include "Kernel.h"
-#include "PTEquationOfState.h"
+#include "SinglePhaseFluidProperties.h"
 #include "MooseVariable.h"
 
 /**
@@ -77,7 +77,7 @@ protected:
   // the "canonical" numbering for the porous medium equations.
   unsigned map_var_number(unsigned var);
 
-  const PTEquationOfState & _eos;
+  const SinglePhaseFluidProperties & _eos;
 
   RealVectorValue _vec_g;
 };

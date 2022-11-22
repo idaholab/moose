@@ -9,10 +9,11 @@
 
 #pragma once
 
-#include "FluidPressureTimeDerivative.h"
+#include "TimeKernel.h"
+#include "SinglePhaseFluidProperties.h"
 
 // The transient term of the porous-media mass conservation equation
-class PMFluidPressureTimeDerivative : public FluidPressureTimeDerivative
+class PMFluidPressureTimeDerivative : public TimeKernel
 {
 public:
   static InputParameters validParams();
@@ -25,6 +26,11 @@ protected:
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
-  // porosity
+  const VariableValue & _temperature;
+  const VariableValue & _temperature_dot;
+  const VariableValue & _d_temperaturedot_du;
+  unsigned _temperature_var_number;
   const VariableValue & _porosity;
+
+  const SinglePhaseFluidProperties & _eos;
 };

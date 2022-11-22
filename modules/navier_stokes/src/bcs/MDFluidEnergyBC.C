@@ -62,7 +62,7 @@ MDFluidEnergyBC::computeQpResidual()
     if (_has_Tbranch)
       T_bc = _T_branch[0];
   }
-  Real enthalpy = _eos.enthalpy_from_T(T_bc);
+  Real enthalpy = _eos.h_from_p_T(_pressure[_qp], T_bc);
 
   Real convection_term = _rho[_qp] * v_bc * enthalpy * _test[_i][_qp];
   Real diffusion_term =
@@ -84,7 +84,7 @@ MDFluidEnergyBC::computeQpJacobian()
   {
     Real rho, drho_dp, drho_dT;
     _eos.rho_from_p_T(_pressure[_qp], _u[_qp], rho, drho_dp, drho_dT);
-    Real enthalpy = _eos.enthalpy_from_T(_u[_qp]);
+    Real enthalpy = _eos.h_from_p_T(_pressure[_qp], _u[_qp]);
 
     convection_term =
         (_rho[_qp] * _cp[_qp] + drho_dT * enthalpy) * v_bc * _phi[_j][_qp] * _test[_i][_qp];
@@ -108,7 +108,7 @@ MDFluidEnergyBC::computeQpOffDiagJacobian(unsigned int jvar)
     Real v_bc = _has_vbc ? -_v_fn->value(_t, _q_point[_qp]) : vec_vel * _normals[_qp];
     if (v_bc < 0)
     {
-      return _rho[_qp] * v_bc * _eos.c_p_from_T(_T_branch[0]) * _test[_i][_qp];
+      return _rho[_qp] * v_bc * _eos.cp_from_p_T(1e5, _T_branch[0]) * _test[_i][_qp];
     }
   }
   switch (m)
@@ -128,7 +128,7 @@ MDFluidEnergyBC::computeQpOffDiagJacobian(unsigned int jvar)
           if (_has_Tbranch)
             T_bc = _T_branch[0];
         }
-        Real enthalpy = _eos.enthalpy_from_T(T_bc);
+        Real enthalpy = _eos.h_from_p_T(_pressure[_qp], T_bc);
         return _rho[_qp] * _phi[_j][_qp] * enthalpy * _normals[_qp](m - 1) * _test[_i][_qp];
       }
 

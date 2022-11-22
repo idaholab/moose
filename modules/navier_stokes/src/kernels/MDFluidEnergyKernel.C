@@ -55,7 +55,7 @@ MDFluidEnergyKernel::computeQpResidual()
   Real porosity = _has_porosity ? _porosity[_qp] : 1.0;
   Real porosity_elem = (_has_porosity_elem || _has_porosity) ? _porosity_elem[_qp] : 1.0;
   RealVectorValue vec_vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
-  Real enthalpy = _eos.enthalpy_from_T(_u[_qp]);
+  Real enthalpy = _eos.h_from_p_T(_pressure[_qp], _u[_qp]);
 
   // Residual weak form terms: convection + diffusion + volumetric heat
   Real convective_part = _conservative_form
@@ -94,7 +94,7 @@ MDFluidEnergyKernel::computeQpJacobian()
   Real porosity_elem = (_has_porosity_elem || _has_porosity) ? _porosity_elem[_qp] : 1.0;
   Real rho, drho_dp, drho_dT;
   _eos.rho_from_p_T(_pressure[_qp], _u[_qp], rho, drho_dp, drho_dT);
-  Real enthalpy = _eos.enthalpy_from_T(_u[_qp]);
+  Real enthalpy = _eos.h_from_p_T(_pressure[_qp], _u[_qp]);
   RealVectorValue vec_vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
 
   // convection part
@@ -127,7 +127,7 @@ MDFluidEnergyKernel::computeQpOffDiagJacobian(unsigned int jvar)
   unsigned m = this->map_var_number(jvar);
 
   RealVectorValue vec_vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
-  Real enthalpy = _eos.enthalpy_from_T(_u[_qp]);
+  Real enthalpy = _eos.h_from_p_T(_pressure[_qp], _u[_qp]);
 
   Real jac = 0.;
   switch (m)

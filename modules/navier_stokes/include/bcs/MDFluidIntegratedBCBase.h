@@ -10,7 +10,7 @@
 #pragma once
 
 #include "IntegratedBC.h"
-#include "PTEquationOfState.h"
+#include "SinglePhaseFluidProperties.h"
 
 /**
  * This class couples together all the variables for the 3D fluid equations to allow them to be used
@@ -54,5 +54,5 @@ protected:
   // Helper function for mapping Moose variable numberings into
   // the "canonical" numbering for the porous medium equations.
   unsigned map_var_number(unsigned var);
-  const PTEquationOfState & _eos;
+  const SinglePhaseFluidProperties & _eos;
 };

@@ -10,7 +10,7 @@
 #pragma once
 
 #include "TimeDerivative.h"
-#include "PTEquationOfState.h"
+#include "SinglePhaseFluidProperties.h"
 
 class PMFluidTemperatureTimeDerivative : public TimeDerivative
 {
@@ -28,5 +28,5 @@ protected:
   const VariableValue & _porosity;
   const MaterialProperty<Real> & _rho;
   const MaterialProperty<Real> & _cp;
-  const PTEquationOfState & _eos;
+  const SinglePhaseFluidProperties & _eos;
 };

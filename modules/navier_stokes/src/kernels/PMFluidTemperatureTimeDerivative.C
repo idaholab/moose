@@ -31,7 +31,7 @@ PMFluidTemperatureTimeDerivative::PMFluidTemperatureTimeDerivative(
     _porosity(coupledValue("porosity")),
     _rho(getMaterialProperty<Real>("rho_fluid")),
     _cp(getMaterialProperty<Real>("cp_fluid")),
-    _eos(getUserObject<PTEquationOfState>("eos"))
+    _eos(getUserObject<SinglePhaseFluidProperties>("eos"))
 {
 }
 

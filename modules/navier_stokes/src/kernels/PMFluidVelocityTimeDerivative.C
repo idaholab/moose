@@ -30,7 +30,7 @@ PMFluidVelocityTimeDerivative::PMFluidVelocityTimeDerivative(const InputParamete
     _temperature(coupledValue("temperature")),
     _temperature_dot(coupledDot("temperature")),
     _rho(getMaterialProperty<Real>("rho_fluid")),
-    _eos(getUserObject<PTEquationOfState>("eos"))
+    _eos(getUserObject<SinglePhaseFluidProperties>("eos"))
 {
 }
 

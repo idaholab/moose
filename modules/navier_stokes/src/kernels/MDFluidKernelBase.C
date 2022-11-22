@@ -76,7 +76,7 @@ MDFluidKernelBase::MDFluidKernelBase(const InputParameters & parameters)
     _viscous_stress_tensor(getMaterialProperty<RealTensorValue>("viscous_stress_tensor")),
     _dynamic_viscosity(getMaterialProperty<Real>("dynamic_viscosity")),
     _turbulence_viscosity(getMaterialProperty<Real>("turbulence_viscosity")),
-    _eos(getUserObject<PTEquationOfState>("eos")),
+    _eos(getUserObject<SinglePhaseFluidProperties>("eos")),
     _vec_g(0., 0., 0.)
 {
   if (isParamValid("gravity"))
