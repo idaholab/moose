@@ -229,6 +229,11 @@ protected:
   THMProblem & getTHMProblem() const;
 
   /**
+   * Gets a zero value that lasts
+   */
+  const Real & getZero() const { return getTHMProblem()._real_zero[0]; }
+
+  /**
    * Performs any post-constructor, pre-mesh-setup setup
    */
   virtual void preSetupMesh() {}
@@ -388,8 +393,6 @@ protected:
 
   /// The Factory associated with the MooseApp
   Factory & _factory;
-
-  const Real & _zero;
 
 private:
   /// The THM mesh
