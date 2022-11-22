@@ -755,6 +755,17 @@ TEST_F(Water97FluidPropertiesTest, conservative)
     REL_TEST(MetaPhysicL::raw_value(_fp->k_from_v_e(v, e)),
              MetaPhysicL::raw_value(_fp->k_from_p_T(pressure, temperature)),
              REL_TOL_CONSISTENCY);
+
+    const Real p0 = MetaPhysicL::raw_value(pressure) * 1.01;
+    const Real T0 = MetaPhysicL::raw_value(temperature) * 1.01;
+
+    auto s = _fp->s_from_p_T(pressure, temperature);
+    bool conversion_succeeded = false;
+    _fp->p_T_from_h_s(h, s, p0, T0, p_test, T_test, conversion_succeeded);
+    EXPECT_TRUE(conversion_succeeded);
+    REL_TEST(MetaPhysicL::raw_value(pressure), MetaPhysicL::raw_value(p_test), REL_TOL_CONSISTENCY);
+    REL_TEST(
+        MetaPhysicL::raw_value(temperature), MetaPhysicL::raw_value(T_test), REL_TOL_CONSISTENCY);
   };
 
   run_tests(Real{});

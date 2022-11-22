@@ -81,6 +81,31 @@
   propfuncAD(want, prop1, prop2)
 
 /**
+ * Adds Real and ADReal declarations of functions that have a default implementation.
+ * Important: properties declared using this macro must be defined in SinglePhaseFluidProperties.h
+ * (the template) or SinglePhaseFluidProperties.C (the non-templates)
+ */
+#define propfuncWithDefinition(want, prop1, prop2)                                                 \
+  virtual Real want##_from_##prop1##_##prop2(Real, Real) const;                                    \
+  virtual void want##_from_##prop1##_##prop2(                                                      \
+      Real prop1, Real prop2, Real & val, Real & d##want##d1, Real & d##want##d2) const;           \
+  virtual ADReal want##_from_##prop1##_##prop2(const ADReal &, const ADReal &) const;              \
+  virtual void want##_from_##prop1##_##prop2(const ADReal & prop1,                                 \
+                                             const ADReal & prop2,                                 \
+                                             ADReal & val,                                         \
+                                             ADReal & d##want##d1,                                 \
+                                             ADReal & d##want##d2) const;                          \
+  template <typename CppType>                                                                      \
+  CppType want##_from_##prop1##_##prop2##_template(const CppType & prop1, const CppType & prop2)   \
+      const;                                                                                       \
+  template <typename CppType>                                                                      \
+  void want##_from_##prop1##_##prop2##_template(const CppType & prop1,                             \
+                                                const CppType & prop2,                             \
+                                                CppType & val,                                     \
+                                                CppType & d##want##d1,                             \
+                                                CppType & d##want##d2) const
+
+/**
  * Common class for single phase fluid properties
  */
 class SinglePhaseFluidProperties : public FluidProperties
@@ -157,11 +182,11 @@ public:
   propfunc(cv, v, e)
   propfunc(mu, v, e)
   propfunc(k, v, e)
-  propfuncWithDefault(s, v, e)
+  propfuncWithDefinition(s, v, e);
   propfunc(s, h, p)
   propfunc(rho, p, s)
   propfunc(e, v, h)
-  propfuncWithDefault(s, p, T)
+  propfuncWithDefinition(s, p, T);
   propfunc(pp_sat, p, T)
   propfunc(mu, rho, T)
   propfunc(k, rho, T)
@@ -291,15 +316,17 @@ public:
    */
   virtual std::vector<Real> henryCoefficients() const;
 
-  virtual void v_e_from_p_T(Real p, Real T, Real & v, Real & e) const;
-  virtual void v_e_from_p_T(Real p,
-                            Real T,
-                            Real & v,
-                            Real & dv_dp,
-                            Real & dv_dT,
-                            Real & e,
-                            Real & de_dp,
-                            Real & de_dT) const;
+  template <typename CppType>
+  void v_e_from_p_T(const CppType & p, const CppType & T, CppType & v, CppType & e) const;
+  template <typename CppType>
+  void v_e_from_p_T(const CppType & p,
+                    const CppType & T,
+                    CppType & v,
+                    CppType & dv_dp,
+                    CppType & dv_dT,
+                    CppType & e,
+                    CppType & de_dp,
+                    CppType & de_dT) const;
 
   /**
    * Combined methods. These methods are particularly useful for the PorousFlow
@@ -341,13 +368,14 @@ public:
    * @param[out] fluid pressure (Pa / kg)
    * @param[out] Temperature (K)
    */
-  virtual void p_T_from_v_e(const Real & v,
-                            const Real & e,
-                            const Real & p0,
-                            const Real & T0,
-                            Real & p,
-                            Real & T,
-                            bool & conversion_succeeded) const;
+  template <typename CppType>
+  void p_T_from_v_e(const CppType & v,
+                    const CppType & e,
+                    Real p0,
+                    Real T0,
+                    CppType & p,
+                    CppType & T,
+                    bool & conversion_succeeded) const;
 
   /**
    * Determines (p,T) from (v,h) using Newton Solve in 2D
@@ -379,18 +407,29 @@ public:
    * @param[out] fluid pressure (Pa / kg)
    * @param[out] Temperature (K)
    */
-  virtual void p_T_from_h_s(const Real & h,
-                            const Real & s,
-                            const Real & p0,
-                            const Real & T0,
-                            Real & p,
-                            Real & T,
-                            bool & conversion_succeeded) const;
+  template <typename T>
+  void p_T_from_h_s(const T & h,
+                    const T & s,
+                    Real p0,
+                    Real T0,
+                    T & pressure,
+                    T & temperature,
+                    bool & conversion_succeeded) const;
 
+protected:
+  /**
+   * Computes the dependent variable z and it's derivatives with respect to the independent
+   * variables x and y using the simple two parameter \p z_from_x_y functor. The derivatives are
+   * computed using a compound automatic differentiantion type
+   */
   template <typename T, typename Functor>
   static void
   xyDerivatives(const T x, const T & y, T & z, T & dz_dx, T & dz_dy, const Functor & z_from_x_y);
 
+  /**
+   * Given a type example, this method returns zero and unity reperesentations of that type (first
+   * and second members of returned pair respectively)
+   */
   template <typename T>
   static std::pair<T, T> makeZeroAndOne(const T &);
 
@@ -451,6 +490,41 @@ SinglePhaseFluidProperties::xyDerivatives(
   dz_dy = z_c.derivatives()[1];
 }
 
+template <typename CppType>
+void
+SinglePhaseFluidProperties::p_T_from_v_e(const CppType & v, // v value
+                                         const CppType & e, // e value
+                                         const Real p0,     // initial guess
+                                         const Real T0,     // initial guess
+                                         CppType & p,       // returned pressure
+                                         CppType & T,       // returned temperature
+                                         bool & conversion_succeeded) const
+{
+  auto v_lambda = [&](const CppType & pressure,
+                      const CppType & temperature,
+                      CppType & new_v,
+                      CppType & dv_dp,
+                      CppType & dv_dT) { v_from_p_T(pressure, temperature, new_v, dv_dp, dv_dT); };
+  auto e_lambda = [&](const CppType & pressure,
+                      const CppType & temperature,
+                      CppType & new_e,
+                      CppType & de_dp,
+                      CppType & de_dT) { e_from_p_T(pressure, temperature, new_e, de_dp, de_dT); };
+  try
+  {
+    FluidPropertiesUtils::NewtonSolve2D(
+        v, e, p0, T0, p, T, _tolerance, _tolerance, v_lambda, e_lambda);
+    conversion_succeeded = true;
+  }
+  catch (MooseException &)
+  {
+    conversion_succeeded = false;
+  }
+
+  if (!conversion_succeeded)
+    mooseDoOnce(mooseWarning("Conversion from (v, e)=(", v, ", ", e, ") to (p, T) failed"));
+}
+
 template <typename T>
 void
 SinglePhaseFluidProperties::p_T_from_v_h(const T & v,     // v value
@@ -478,4 +552,121 @@ SinglePhaseFluidProperties::p_T_from_v_h(const T & v,     // v value
 
   if (!conversion_succeeded)
     mooseDoOnce(mooseWarning("Conversion from (v, h)=(", v, ", ", h, ") to (p, T) failed"));
+}
+
+template <typename T>
+void
+SinglePhaseFluidProperties::p_T_from_h_s(const T & h,     // h value
+                                         const T & s,     // s value
+                                         const Real p0,   // initial guess
+                                         const Real T0,   // initial guess
+                                         T & pressure,    // returned pressure
+                                         T & temperature, // returned temperature
+                                         bool & conversion_succeeded) const
+{
+  auto h_lambda = [&](const T & pressure, const T & temperature, T & new_h, T & dh_dp, T & dh_dT)
+  { h_from_p_T(pressure, temperature, new_h, dh_dp, dh_dT); };
+  auto s_lambda = [&](const T & pressure, const T & temperature, T & new_s, T & ds_dp, T & ds_dT)
+  { s_from_p_T(pressure, temperature, new_s, ds_dp, ds_dT); };
+  try
+  {
+    FluidPropertiesUtils::NewtonSolve2D(
+        h, s, p0, T0, pressure, temperature, _tolerance, _tolerance, h_lambda, s_lambda);
+    conversion_succeeded = true;
+  }
+  catch (MooseException &)
+  {
+    conversion_succeeded = false;
+  }
+
+  if (!conversion_succeeded)
+    mooseDoOnce(mooseWarning("Conversion from (h, s)=(", h, ", ", s, ") to (p, T) failed"));
+}
+
+template <typename T>
+T
+SinglePhaseFluidProperties::s_from_p_T_template(const T & pressure, const T & temperature) const
+{
+  T v, e;
+  v_e_from_p_T(pressure, temperature, v, e);
+  return s_from_v_e(v, e);
+}
+
+template <typename T>
+void
+SinglePhaseFluidProperties::s_from_p_T_template(
+    const T & pressure, const T & temperature, T & s, T & ds_dp, T & ds_dT) const
+{
+  T v, e, dv_dp, dv_dT, de_dp, de_dT;
+  v_e_from_p_T(pressure, temperature, v, dv_dp, dv_dT, e, de_dp, de_dT);
+
+  T ds_dv, ds_de;
+  s_from_v_e(v, e, s, ds_dv, ds_de);
+  ds_dp = ds_dv * dv_dp + ds_de * de_dp;
+  ds_dT = ds_dv * dv_dT + ds_de * de_dT;
+}
+
+template <typename CppType>
+void
+SinglePhaseFluidProperties::v_e_from_p_T(const CppType & p,
+                                         const CppType & T,
+                                         CppType & v,
+                                         CppType & e) const
+{
+  const CppType rho = rho_from_p_T(p, T);
+  v = 1.0 / rho;
+  e = e_from_p_rho(p, rho);
+}
+
+template <typename CppType>
+void
+SinglePhaseFluidProperties::v_e_from_p_T(const CppType & p,
+                                         const CppType & T,
+                                         CppType & v,
+                                         CppType & dv_dp,
+                                         CppType & dv_dT,
+                                         CppType & e,
+                                         CppType & de_dp,
+                                         CppType & de_dT) const
+{
+  CppType rho, drho_dp, drho_dT;
+  rho_from_p_T(p, T, rho, drho_dp, drho_dT);
+
+  v = 1.0 / rho;
+  const CppType dv_drho = -1.0 / (rho * rho);
+  dv_dp = dv_drho * drho_dp;
+  dv_dT = dv_drho * drho_dT;
+
+  CppType de_dp_partial, de_drho;
+  e_from_p_rho(p, rho, e, de_dp_partial, de_drho);
+  de_dp = de_dp_partial + de_drho * drho_dp;
+  de_dT = de_drho * drho_dT;
+}
+
+template <typename CppType>
+CppType
+SinglePhaseFluidProperties::s_from_v_e_template(const CppType & v, const CppType & e) const
+{
+  const Real p0 = _p_initial_guess;
+  const Real T0 = _T_initial_guess;
+  CppType p, T;
+  bool conversion_succeeded = true;
+  p_T_from_v_e(v, e, p0, T0, p, T, conversion_succeeded);
+  const CppType s = s_from_p_T(p, T);
+  return s;
+}
+
+template <typename CppType>
+void
+SinglePhaseFluidProperties::s_from_v_e_template(
+    const CppType & v, const CppType & e, CppType & s, CppType & ds_dv, CppType & ds_de) const
+{
+  const Real p0 = _p_initial_guess;
+  const Real T0 = _T_initial_guess;
+  CppType p, T;
+  bool conversion_succeeded = true;
+  p_T_from_v_e(v, e, p0, T0, p, T, conversion_succeeded);
+  s = s_from_p_T(p, T);
+  ds_dv = p / T;
+  ds_de = 1 / T;
 }

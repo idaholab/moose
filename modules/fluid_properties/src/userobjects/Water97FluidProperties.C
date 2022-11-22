@@ -430,48 +430,13 @@ Water97FluidProperties::k_from_v_e(const ADReal & v, const ADReal & e) const
 Real
 Water97FluidProperties::s_from_p_T(Real pressure, Real temperature) const
 {
-  Real entropy, pi, tau, density3, delta;
-
-  // Determine which region the point is in
-  unsigned int region = inRegion(pressure, temperature);
-  switch (region)
-  {
-    case 1:
-      pi = pressure / _p_star[0];
-      tau = _T_star[0] / temperature;
-      entropy = _Rw * (tau * dgamma1_dtau(pi, tau) - gamma1(pi, tau));
-      break;
-
-    case 2:
-      pi = pressure / _p_star[1];
-      tau = _T_star[1] / temperature;
-      entropy = _Rw * (tau * dgamma2_dtau(pi, tau) - gamma2(pi, tau));
-      break;
-
-    case 3:
-      // Calculate density first, then use that in Helmholtz free energy
-      density3 = densityRegion3(pressure, temperature);
-      delta = density3 / _rho_critical;
-      tau = _T_star[2] / temperature;
-      entropy = _Rw * (tau * dphi3_dtau(delta, tau) - phi3(delta, tau));
-      break;
-
-    case 5:
-      pi = pressure / _p_star[4];
-      tau = _T_star[4] / temperature;
-      entropy = _Rw * (tau * dgamma5_dtau(pi, tau) - gamma5(pi, tau));
-      break;
-
-    default:
-      mooseError("inRegion() has given an incorrect region");
-  }
-  return entropy;
+  return s_from_p_T_template(pressure, temperature);
 }
 
-void
-Water97FluidProperties::s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const
+ADReal
+Water97FluidProperties::s_from_p_T(const ADReal & pressure, const ADReal & temperature) const
 {
-  SinglePhaseFluidProperties::s_from_p_T(p, T, s, ds_dp, ds_dT);
+  return s_from_p_T_template(pressure, temperature);
 }
 
 Real
