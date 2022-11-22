@@ -81,31 +81,6 @@
   propfuncAD(want, prop1, prop2)
 
 /**
- * Adds Real and ADReal declarations of functions that have a default implementation.
- * Important: properties declared using this macro must be defined in SinglePhaseFluidProperties.h
- * (the template) or SinglePhaseFluidProperties.C (the non-templates)
- */
-#define propfuncWithDefinition(want, prop1, prop2)                                                 \
-  virtual Real want##_from_##prop1##_##prop2(Real, Real) const;                                    \
-  virtual void want##_from_##prop1##_##prop2(                                                      \
-      Real prop1, Real prop2, Real & val, Real & d##want##d1, Real & d##want##d2) const;           \
-  virtual ADReal want##_from_##prop1##_##prop2(const ADReal &, const ADReal &) const;              \
-  virtual void want##_from_##prop1##_##prop2(const ADReal & prop1,                                 \
-                                             const ADReal & prop2,                                 \
-                                             ADReal & val,                                         \
-                                             ADReal & d##want##d1,                                 \
-                                             ADReal & d##want##d2) const;                          \
-  template <typename CppType>                                                                      \
-  CppType want##_from_##prop1##_##prop2##_template(const CppType & prop1, const CppType & prop2)   \
-      const;                                                                                       \
-  template <typename CppType>                                                                      \
-  void want##_from_##prop1##_##prop2##_template(const CppType & prop1,                             \
-                                                const CppType & prop2,                             \
-                                                CppType & val,                                     \
-                                                CppType & d##want##d1,                             \
-                                                CppType & d##want##d2) const
-
-/**
  * Adds Real and ADReal declarations of functions that have an implementation.
  */
 #define propfuncWithDefinitionOverride(want, prop1, prop2)                                         \
@@ -205,7 +180,7 @@ public:
   propfunc(cv, v, e)
   propfunc(mu, v, e)
   propfunc(k, v, e)
-  propfuncWithDefinition(s, v, e);
+  propfuncWithDefault(s, v, e)
   propfunc(s, h, p)
   propfunc(rho, p, s)
   propfunc(e, v, h)
@@ -231,8 +206,8 @@ public:
   propfunc(T, h, p)  // temporary, until uniformization
   propfuncWithDefault(T, p, h)
   propfuncWithDefault(beta, p, T)
-  propfuncWithDefinition(v, p, T);
-  propfuncWithDefinition(e, p, T);
+  propfuncWithDefault(v, p, T)
+  propfuncWithDefault(e, p, T)
   propfuncWithDefault(gamma, v, e)
   propfuncWithDefault(gamma, p, T)
   ///@}
@@ -606,29 +581,6 @@ SinglePhaseFluidProperties::p_T_from_h_s(const T & h,     // h value
     mooseDoOnce(mooseWarning("Conversion from (h, s)=(", h, ", ", s, ") to (p, T) failed"));
 }
 
-template <typename T>
-T
-SinglePhaseFluidProperties::s_from_p_T_template(const T & pressure, const T & temperature) const
-{
-  T v, e;
-  v_e_from_p_T(pressure, temperature, v, e);
-  return s_from_v_e(v, e);
-}
-
-template <typename T>
-void
-SinglePhaseFluidProperties::s_from_p_T_template(
-    const T & pressure, const T & temperature, T & s, T & ds_dp, T & ds_dT) const
-{
-  T v, e, dv_dp, dv_dT, de_dp, de_dT;
-  v_e_from_p_T(pressure, temperature, v, dv_dp, dv_dT, e, de_dp, de_dT);
-
-  T ds_dv, ds_de;
-  s_from_v_e(v, e, s, ds_dv, ds_de);
-  ds_dp = ds_dv * dv_dp + ds_de * de_dp;
-  ds_dT = ds_dv * dv_dT + ds_de * de_dT;
-}
-
 template <typename CppType>
 void
 SinglePhaseFluidProperties::v_e_from_p_T(const CppType & p,
@@ -664,82 +616,4 @@ SinglePhaseFluidProperties::v_e_from_p_T(const CppType & p,
   e_from_p_rho(p, rho, e, de_dp_partial, de_drho);
   de_dp = de_dp_partial + de_drho * drho_dp;
   de_dT = de_drho * drho_dT;
-}
-
-template <typename CppType>
-CppType
-SinglePhaseFluidProperties::s_from_v_e_template(const CppType & v, const CppType & e) const
-{
-  const Real p0 = _p_initial_guess;
-  const Real T0 = _T_initial_guess;
-  CppType p, T;
-  bool conversion_succeeded = true;
-  p_T_from_v_e(v, e, p0, T0, p, T, conversion_succeeded);
-  const CppType s = s_from_p_T(p, T);
-  return s;
-}
-
-template <typename CppType>
-void
-SinglePhaseFluidProperties::s_from_v_e_template(
-    const CppType & v, const CppType & e, CppType & s, CppType & ds_dv, CppType & ds_de) const
-{
-  const Real p0 = _p_initial_guess;
-  const Real T0 = _T_initial_guess;
-  CppType p, T;
-  bool conversion_succeeded = true;
-  p_T_from_v_e(v, e, p0, T0, p, T, conversion_succeeded);
-  s = s_from_p_T(p, T);
-  ds_dv = p / T;
-  ds_de = 1 / T;
-}
-
-template <typename CppType>
-CppType
-SinglePhaseFluidProperties::v_from_p_T_template(const CppType & p, const CppType & T) const
-{
-  const CppType rho = rho_from_p_T(p, T);
-  return 1.0 / rho;
-}
-
-template <typename CppType>
-void
-SinglePhaseFluidProperties::v_from_p_T_template(
-    const CppType & p, const CppType & T, CppType & v, CppType & dv_dp, CppType & dv_dT) const
-{
-  CppType rho, drho_dp, drho_dT;
-  rho_from_p_T(p, T, rho, drho_dp, drho_dT);
-
-  v = 1.0 / rho;
-  const CppType dv_drho = -1.0 / (rho * rho);
-
-  dv_dp = dv_drho * drho_dp;
-  dv_dT = dv_drho * drho_dT;
-}
-
-template <typename CppType>
-CppType
-SinglePhaseFluidProperties::e_from_p_T_template(const CppType & p, const CppType & T) const
-{
-  const CppType rho = rho_from_p_T(p, T);
-  return e_from_p_rho(p, rho);
-}
-
-template <typename CppType>
-void
-SinglePhaseFluidProperties::e_from_p_T_template(
-    const CppType & p, const CppType & T, CppType & e, CppType & de_dp, CppType & de_dT) const
-{
-  // From rho(p,T), compute: drho(p,T)/dp, drho(p,T)/dT
-  CppType rho = 0., drho_dp = 0., drho_dT = 0.;
-  rho_from_p_T(p, T, rho, drho_dp, drho_dT);
-
-  // From e(p, rho), compute: de(p,rho)/dp, de(p,rho)/drho
-  CppType depr_dp = 0., depr_drho = 0.;
-  e_from_p_rho(p, rho, e, depr_dp, depr_drho);
-  // Using partial derivative rules, we have:
-  // de(p,T)/dp = de(p,rho)/dp * dp/dp + de(p,rho)/drho * drho(p,T)/dp, (dp/dp == 1)
-  // de(p,T)/dT = de(p,rho)/dp * dp/dT + de(p,rho)/drho * drho(p,T)/dT, (dp/dT == 0)
-  de_dp = depr_dp + depr_drho * drho_dp;
-  de_dT = depr_drho * drho_dT;
 }

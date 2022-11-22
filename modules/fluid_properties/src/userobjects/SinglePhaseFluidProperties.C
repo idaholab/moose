@@ -50,53 +50,50 @@ SinglePhaseFluidProperties::~SinglePhaseFluidProperties() {}
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 
 Real
-SinglePhaseFluidProperties::s_from_p_T(Real p, Real T) const
+SinglePhaseFluidProperties::s_from_p_T(const Real pressure, const Real temperature) const
 {
-  return s_from_p_T_template(p, T);
-}
-
-void
-SinglePhaseFluidProperties::s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const
-{
-  s_from_p_T_template(p, T, s, ds_dp, ds_dT);
-}
-
-ADReal
-SinglePhaseFluidProperties::s_from_p_T(const ADReal & p, const ADReal & T) const
-{
-  return s_from_p_T_template(p, T);
+  Real v, e;
+  v_e_from_p_T(pressure, temperature, v, e);
+  return s_from_v_e(v, e);
 }
 
 void
 SinglePhaseFluidProperties::s_from_p_T(
-    const ADReal & p, const ADReal & T, ADReal & s, ADReal & ds_dp, ADReal & ds_dT) const
+    const Real pressure, const Real temperature, Real & s, Real & ds_dp, Real & ds_dT) const
 {
-  s_from_p_T_template(p, T, s, ds_dp, ds_dT);
+  Real v, e, dv_dp, dv_dT, de_dp, de_dT;
+  v_e_from_p_T(pressure, temperature, v, dv_dp, dv_dT, e, de_dp, de_dT);
+
+  Real ds_dv, ds_de;
+  s_from_v_e(v, e, s, ds_dv, ds_de);
+  ds_dp = ds_dv * dv_dp + ds_de * de_dp;
+  ds_dT = ds_dv * dv_dT + ds_de * de_dT;
 }
 
 Real
-SinglePhaseFluidProperties::s_from_v_e(Real v, Real e) const
+SinglePhaseFluidProperties::s_from_v_e(const Real v, const Real e) const
 {
-  return s_from_v_e_template(v, e);
-}
-
-void
-SinglePhaseFluidProperties::s_from_v_e(Real v, Real e, Real & s, Real & ds_dv, Real & ds_de) const
-{
-  s_from_v_e_template(v, e, s, ds_dv, ds_de);
-}
-
-ADReal
-SinglePhaseFluidProperties::s_from_v_e(const ADReal & v, const ADReal & e) const
-{
-  return s_from_v_e_template(v, e);
+  const Real p0 = _p_initial_guess;
+  const Real T0 = _T_initial_guess;
+  Real p, T;
+  bool conversion_succeeded = true;
+  p_T_from_v_e(v, e, p0, T0, p, T, conversion_succeeded);
+  const Real s = s_from_p_T(p, T);
+  return s;
 }
 
 void
 SinglePhaseFluidProperties::s_from_v_e(
-    const ADReal & v, const ADReal & e, ADReal & s, ADReal & ds_dv, ADReal & ds_de) const
+    const Real v, const Real e, Real & s, Real & ds_dv, Real & ds_de) const
 {
-  s_from_v_e_template(v, e, s, ds_dv, ds_de);
+  const Real p0 = _p_initial_guess;
+  const Real T0 = _T_initial_guess;
+  Real p, T;
+  bool conversion_succeeded = true;
+  p_T_from_v_e(v, e, p0, T0, p, T, conversion_succeeded);
+  s = s_from_p_T(p, T);
+  ds_dv = p / T;
+  ds_de = 1 / T;
 }
 
 Real
@@ -205,51 +202,45 @@ SinglePhaseFluidProperties::k_from_p_T(Real p, Real T, Real & k, Real & dk_dp, R
 Real
 SinglePhaseFluidProperties::e_from_p_T(Real p, Real T) const
 {
-  return e_from_p_T_template(p, T);
+  const Real rho = rho_from_p_T(p, T);
+  return e_from_p_rho(p, rho);
 }
 
 void
 SinglePhaseFluidProperties::e_from_p_T(Real p, Real T, Real & e, Real & de_dp, Real & de_dT) const
 {
-  e_from_p_T_template(p, T, e, de_dp, de_dT);
-}
+  // From rho(p,T), compute: drho(p,T)/dp, drho(p,T)/dT
+  Real rho = 0., drho_dp = 0., drho_dT = 0.;
+  rho_from_p_T(p, T, rho, drho_dp, drho_dT);
 
-ADReal
-SinglePhaseFluidProperties::e_from_p_T(const ADReal & p, const ADReal & T) const
-{
-  return e_from_p_T_template(p, T);
-}
-
-void
-SinglePhaseFluidProperties::e_from_p_T(
-    const ADReal & p, const ADReal & T, ADReal & e, ADReal & de_dp, ADReal & de_dT) const
-{
-  e_from_p_T_template(p, T, e, de_dp, de_dT);
+  // From e(p, rho), compute: de(p,rho)/dp, de(p,rho)/drho
+  Real depr_dp = 0., depr_drho = 0.;
+  e_from_p_rho(p, rho, e, depr_dp, depr_drho);
+  // Using partial derivative rules, we have:
+  // de(p,T)/dp = de(p,rho)/dp * dp/dp + de(p,rho)/drho * drho(p,T)/dp, (dp/dp == 1)
+  // de(p,T)/dT = de(p,rho)/dp * dp/dT + de(p,rho)/drho * drho(p,T)/dT, (dp/dT == 0)
+  de_dp = depr_dp + depr_drho * drho_dp;
+  de_dT = depr_drho * drho_dT;
 }
 
 Real
 SinglePhaseFluidProperties::v_from_p_T(Real p, Real T) const
 {
-  return v_from_p_T_template(p, T);
+  const Real rho = rho_from_p_T(p, T);
+  return 1.0 / rho;
 }
 
 void
 SinglePhaseFluidProperties::v_from_p_T(Real p, Real T, Real & v, Real & dv_dp, Real & dv_dT) const
 {
-  v_from_p_T_template(p, T, v, dv_dp, dv_dT);
-}
+  Real rho, drho_dp, drho_dT;
+  rho_from_p_T(p, T, rho, drho_dp, drho_dT);
 
-ADReal
-SinglePhaseFluidProperties::v_from_p_T(const ADReal & p, const ADReal & T) const
-{
-  return v_from_p_T_template(p, T);
-}
+  v = 1.0 / rho;
+  const Real dv_drho = -1.0 / (rho * rho);
 
-void
-SinglePhaseFluidProperties::v_from_p_T(
-    const ADReal & p, const ADReal & T, ADReal & v, ADReal & dv_dp, ADReal & dv_dT) const
-{
-  v_from_p_T_template(p, T, v, dv_dp, dv_dT);
+  dv_dp = dv_drho * drho_dp;
+  dv_dT = dv_drho * drho_dT;
 }
 
 void
