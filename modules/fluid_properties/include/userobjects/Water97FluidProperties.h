@@ -60,6 +60,21 @@ public:
   virtual Real rho_from_p_T(Real pressure, Real temperature) const override;
   virtual ADReal rho_from_p_T(const ADReal & pressure, const ADReal & temperature) const override;
 
+  virtual Real v_from_p_T(Real pressure, Real temperature) const override;
+  virtual ADReal v_from_p_T(const ADReal & pressure, const ADReal & temperature) const override;
+  template <typename T>
+  T v_from_p_T_template(const T & pressure, const T & temperature) const;
+  virtual void
+  v_from_p_T(Real pressure, Real temperature, Real & v, Real & dv_dp, Real & dv_dT) const override;
+  virtual void v_from_p_T(const ADReal & pressure,
+                          const ADReal & temperature,
+                          ADReal & v,
+                          ADReal & dv_dp,
+                          ADReal & dv_dT) const override;
+  template <typename T>
+  void
+  v_from_p_T_template(const T & pressure, const T & temperature, T & v, T & dv_dp, T & dv_dt) const;
+
   template <typename T>
   T rho_from_p_T_template(const T & pressure, const T & temperature) const;
   template <typename T>
@@ -136,6 +151,9 @@ public:
   virtual ADReal cv_from_v_e(const ADReal & v, const ADReal & e) const override;
 
   virtual Real mu_from_p_T(Real pressure, Real temperature) const override;
+  virtual ADReal mu_from_p_T(const ADReal & pressure, const ADReal & temperature) const override;
+  template <typename T>
+  T mu_from_p_T_template(const T & pressure, const T & temperature) const;
 
   virtual void mu_from_p_T(
       Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const override;
@@ -162,6 +180,7 @@ public:
                                Real & dmu_dT) const override;
 
   virtual Real k_from_p_T(Real pressure, Real temperature) const override;
+  virtual ADReal k_from_p_T(const ADReal & pressure, const ADReal & temperature) const override;
   template <typename T>
   T k_from_p_T_template(const T & pressure, const T & temperature) const;
 
@@ -349,6 +368,28 @@ public:
   void
   henryConstant(Real temperature, const std::vector<Real> & coeffs, Real & Kh, Real & dKh_dT) const;
   DualReal henryConstant(const DualReal & temperature, const std::vector<Real> & coeffs) const;
+
+  /**
+   * Computes the pressure (first member of the pair) and temperature (second member of the pair) as
+   * functions of specific volume and specific internal energy
+   */
+  template <typename T>
+  std::pair<T, T> p_T_from_v_e(const T & v, const T & e) const;
+
+  /**
+   * Computes the density (first member of the pair) and temperature (second member of the pair) as
+   * functions of specific volume and specific internal energy
+   */
+  template <typename T>
+  std::pair<T, T> rho_T_from_v_e(const T & v, const T & e) const;
+
+  /**
+   * Computes the pressure (first member of the pair) and temperature (second member of the pair) as
+   * functions of specific volume and specific enthalpy
+   */
+  template <typename T>
+  std::pair<T, T> p_T_from_v_h(const T & v, const T & h) const;
+  using SinglePhaseFluidProperties::p_T_from_v_h;
 
 protected:
   /**
@@ -1461,74 +1502,9 @@ private:
    */
   template <typename T>
   std::pair<T, T> T_from_p_rho(const T & p, const T & rho) const;
-
-  /**
-   * Computes the pressure (first member of the pair) and temperature (second member of the pair) as
-   * functions of specific volume and specific internal energy
-   */
-  template <typename T>
-  std::pair<T, T> p_T_from_v_e(const T & v, const T & e) const;
-
-  /**
-   * Computes the density (first member of the pair) and temperature (second member of the pair) as
-   * functions of specific volume and specific internal energy
-   */
-  template <typename T>
-  std::pair<T, T> rho_T_from_v_e(const T & v, const T & e) const;
-
-  /**
-   * Computes the pressure (first member of the pair) and temperature (second member of the pair) as
-   * functions of specific volume and specific enthalpy
-   */
-  template <typename T>
-  std::pair<T, T> p_T_from_v_h(const T & v, const T & h) const;
-  using SinglePhaseFluidProperties::p_T_from_v_h;
-
-  template <typename T>
-  void assignQoIs(const T & /*x*/,
-                  const T & /*y*/,
-                  T & /*z*/,
-                  T & /*dz_dx*/,
-                  T & /*dz_dy*/,
-                  const FPDualReal & /*raw_z*/) const
-  {
-    mooseError("Not implemented for this template type");
-  }
 };
 
 #pragma GCC diagnostic pop
-
-template <>
-inline void
-Water97FluidProperties::assignQoIs(const Real & /*x*/,
-                                   const Real & /*y*/,
-                                   Real & z,
-                                   Real & dz_dx,
-                                   Real & dz_dy,
-                                   const FPDualReal & raw_z) const
-{
-  z = raw_z.value();
-  dz_dx = raw_z.derivatives()[0];
-  dz_dy = raw_z.derivatives()[1];
-}
-
-template <>
-inline void
-Water97FluidProperties::assignQoIs(const ADReal & x,
-                                   const ADReal & y,
-                                   ADReal & z,
-                                   ADReal & dz_dx,
-                                   ADReal & dz_dy,
-                                   const FPDualReal & raw_z) const
-{
-  z = raw_z.value();
-  dz_dx = raw_z.derivatives()[0];
-  dz_dy = raw_z.derivatives()[1];
-
-  z.derivatives() = dz_dx.value() * x.derivatives() + dz_dy.value() * y.derivatives();
-  dz_dx.derivatives() = x.derivatives();
-  dz_dy.derivatives() = y.derivatives();
-}
 
 template <typename T>
 T
@@ -2028,6 +2004,24 @@ Water97FluidProperties::rho_from_p_T_template(
   { return this->rho_from_p_T_template(pressure, temperature); };
 
   xyDerivatives(pressure, temperature, rho, drho_dp, drho_dT, functor);
+}
+
+template <typename T>
+T
+Water97FluidProperties::v_from_p_T_template(const T & pressure, const T & temperature) const
+{
+  return 1 / rho_from_p_T_template(pressure, temperature);
+}
+
+template <typename T>
+void
+Water97FluidProperties::v_from_p_T_template(
+    const T & pressure, const T & temperature, T & v, T & dv_dp, T & dv_dT) const
+{
+  auto functor = [this](const auto & pressure, const auto & temperature)
+  { return this->v_from_p_T_template(pressure, temperature); };
+
+  xyDerivatives(pressure, temperature, v, dv_dp, dv_dT, functor);
 }
 
 template <typename T>
@@ -2588,4 +2582,12 @@ Water97FluidProperties::rho_from_p_T_template(const T & pressure, const T & temp
       mooseError("inRegion() has given an incorrect region");
   }
   return density;
+}
+
+template <typename T>
+T
+Water97FluidProperties::mu_from_p_T_template(const T & pressure, const T & temperature) const
+{
+  T rho = this->rho_from_p_T_template(pressure, temperature);
+  return this->mu_from_rho_T_template(rho, temperature);
 }

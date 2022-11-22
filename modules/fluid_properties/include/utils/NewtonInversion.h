@@ -172,13 +172,13 @@ NewtonSolve2D(const T & f,
         mooseException("NaN detected in Newton solve");
       }
 
-    // Do some Jacobi preconditioning
+    // Do some Jacobi (rowmax) preconditioning
     for (const auto i : make_range(system_size))
     {
-      const auto diagonal = J(i, i);
+      const auto rowmax = std::max(std::abs(J(i, 0)), std::abs(J(i, 1)));
       for (const auto j : make_range(system_size))
-        J(i, j) /= diagonal;
-      minus_R(i) /= diagonal;
+        J(i, j) /= rowmax;
+      minus_R(i) /= rowmax;
     }
 
 #ifndef NDEBUG
