@@ -60,7 +60,7 @@ ExtraIDIntegralVectorPostprocessor::ExtraIDIntegralVectorPostprocessor(
     _var_extra_ids.push_back(&p);
   }
 
-  // declare vectors containg integral values
+  // declare vectors containing integral values
   for (unsigned int i = 0; i < _nvar; ++i)
   {
     _vars.push_back(getVar("variable", i));

@@ -13,6 +13,10 @@ The output to CSV is **by default** ordered as follows:
 
 - columns are ordered by alphabetical order of the properties sampled. The distance along the sampled line and the x, y and z coordinates of the sampled points are added to the output as additional columns.
 
+!alert note title=Vector names / CSV output column names
+The `LineMaterialSampler` declares a vector for each spatial coordinate, (`x`, `y`, `z`) of the sampled points,
+the distance along the sampled line, in a vector called `id`,
+and a vector named after each material property sampled, containing the material property values at each point.
 
 ## Example Input File Syntax
 

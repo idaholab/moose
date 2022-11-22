@@ -8,9 +8,10 @@
 
 Used to compute the histogram for all columns of another VectorPostprocessor (VPP).  The only inputs are the other VPP (`vpp`) and the number of bins to use in the histogram (`num_bins`).
 
-This will actually generate three columns for each column in the original VPP:
+This will actually generate three columns for each column in the original VPP. The `column_name` is the name of the vector considered in the histogram, and is also the
+name used to declare the vector containing the histogram data.
 
-- column_name: The histogram data
+- column_name: The histogram data for the vector in the original vpp
 - column_name_lower: The lower bound for each bin
 - column_name_upper: The upper bound for each bin
 

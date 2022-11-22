@@ -13,6 +13,11 @@ If the variable to be plotted needs to be scaled, this can be done by supplying 
 !alert note
 If the line value sampler is used with a discontinuous variable on the edge/face of a 2D/3D element, then the value from the element with the lowest ID will be returned.
 
+!alert note title=Vector names / CSV output column names
+The `LineValueSampler` declares a vector for each spatial coordinate, (`x`, `y`, `z`) of the sampled points,
+the distance along the sampled line, in a vector called `id`,
+and a vector named after each value sampled, containing the variable values at each point.
+
 !syntax parameters /VectorPostprocessors/LineValueSampler
 
 !syntax inputs /VectorPostprocessors/LineValueSampler

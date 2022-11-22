@@ -18,6 +18,9 @@ This vector postprocessor output to CSV has the following columns, in this order
 
 - the third (Z in Cartesian) coordinate of the location of the maximum difference
 
+!alert note title=Vector names / CSV output column names
+The names of the vectors declared are `Difference`, the name of the [!param](/VectorPostprocessors/ElementVariablesDifferenceMax/compare_a) variable,
+the name of the [!param](/VectorPostprocessors/ElementVariablesDifferenceMax/compare_b) variable, and finally `X`, `Y`, `Z` for the location of the maximum difference.
 
 ## Example input syntax
 

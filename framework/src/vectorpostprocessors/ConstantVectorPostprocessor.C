@@ -18,6 +18,7 @@ ConstantVectorPostprocessor::validParams()
   params.addClassDescription(
       "Populate constant VectorPostprocessorValue directly from input file.");
   params.addParam<std::vector<std::string>>("vector_names",
+                                            std::vector<std::string>(1, "value"),
                                             "Names of the column vectors in this object");
   params.addRequiredParam<std::vector<std::vector<Real>>>(
       "value",
@@ -30,11 +31,7 @@ ConstantVectorPostprocessor::validParams()
 ConstantVectorPostprocessor::ConstantVectorPostprocessor(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters)
 {
-  std::vector<std::string> names;
-  if (isParamValid("vector_names"))
-    names = getParam<std::vector<std::string>>("vector_names");
-  else
-    names = {"value"};
+  std::vector<std::string> names = getParam<std::vector<std::string>>("vector_names");
   unsigned int nvec = names.size();
 
   _value.resize(nvec);
