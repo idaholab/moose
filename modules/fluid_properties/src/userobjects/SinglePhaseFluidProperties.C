@@ -205,45 +205,51 @@ SinglePhaseFluidProperties::k_from_p_T(Real p, Real T, Real & k, Real & dk_dp, R
 Real
 SinglePhaseFluidProperties::e_from_p_T(Real p, Real T) const
 {
-  const Real rho = rho_from_p_T(p, T);
-  return e_from_p_rho(p, rho);
+  return e_from_p_T_template(p, T);
 }
 
 void
 SinglePhaseFluidProperties::e_from_p_T(Real p, Real T, Real & e, Real & de_dp, Real & de_dT) const
 {
-  // From rho(p,T), compute: drho(p,T)/dp, drho(p,T)/dT
-  Real rho = 0., drho_dp = 0., drho_dT = 0.;
-  rho_from_p_T(p, T, rho, drho_dp, drho_dT);
+  e_from_p_T_template(p, T, e, de_dp, de_dT);
+}
 
-  // From e(p, rho), compute: de(p,rho)/dp, de(p,rho)/drho
-  Real depr_dp = 0., depr_drho = 0.;
-  e_from_p_rho(p, rho, e, depr_dp, depr_drho);
-  // Using partial derivative rules, we have:
-  // de(p,T)/dp = de(p,rho)/dp * dp/dp + de(p,rho)/drho * drho(p,T)/dp, (dp/dp == 1)
-  // de(p,T)/dT = de(p,rho)/dp * dp/dT + de(p,rho)/drho * drho(p,T)/dT, (dp/dT == 0)
-  de_dp = depr_dp + depr_drho * drho_dp;
-  de_dT = depr_drho * drho_dT;
+ADReal
+SinglePhaseFluidProperties::e_from_p_T(const ADReal & p, const ADReal & T) const
+{
+  return e_from_p_T_template(p, T);
+}
+
+void
+SinglePhaseFluidProperties::e_from_p_T(
+    const ADReal & p, const ADReal & T, ADReal & e, ADReal & de_dp, ADReal & de_dT) const
+{
+  e_from_p_T_template(p, T, e, de_dp, de_dT);
 }
 
 Real
 SinglePhaseFluidProperties::v_from_p_T(Real p, Real T) const
 {
-  const Real rho = rho_from_p_T(p, T);
-  return 1.0 / rho;
+  return v_from_p_T_template(p, T);
 }
 
 void
 SinglePhaseFluidProperties::v_from_p_T(Real p, Real T, Real & v, Real & dv_dp, Real & dv_dT) const
 {
-  Real rho, drho_dp, drho_dT;
-  rho_from_p_T(p, T, rho, drho_dp, drho_dT);
+  v_from_p_T_template(p, T, v, dv_dp, dv_dT);
+}
 
-  v = 1.0 / rho;
-  const Real dv_drho = -1.0 / (rho * rho);
+ADReal
+SinglePhaseFluidProperties::v_from_p_T(const ADReal & p, const ADReal & T) const
+{
+  return v_from_p_T_template(p, T);
+}
 
-  dv_dp = dv_drho * drho_dp;
-  dv_dT = dv_drho * drho_dT;
+void
+SinglePhaseFluidProperties::v_from_p_T(
+    const ADReal & p, const ADReal & T, ADReal & v, ADReal & dv_dp, ADReal & dv_dT) const
+{
+  v_from_p_T_template(p, T, v, dv_dp, dv_dT);
 }
 
 void
