@@ -391,11 +391,10 @@ protected:
 
   const Real & _zero;
 
+private:
   /// The THM mesh
-  /// TODO: make _mesh private (applications need to switch to getters to avoid breaking)
   THMMesh & _mesh;
 
-private:
   /// Component setup status
   mutable EComponentSetupStatus _component_setup_status;
 
