@@ -2601,11 +2601,18 @@ NSFVAction::checkBoundaryParameterErrors()
                             "inlet_boundaries",
                             "passive_scalar_inlet_types",
                             "inlet boundaries");
-      checkSizeFriendParams(_passive_scalar_inlet_types.size(),
+      checkSizeFriendParams(_passive_scalar_names.size(),
                             _passive_scalar_inlet_function.size(),
-                            "passive_scalar_inlet_types",
+                            "passive_scalar_names",
                             "passive_scalar_inlet_function",
-                            "boundaries");
+                            "names");
+      for (const auto & passive_scalar_index : index_range(_passive_scalar_inlet_function))
+        checkSizeFriendParams(_passive_scalar_inlet_function[passive_scalar_index].size(),
+                              _inlet_boundaries.size(),
+                              "passive_scalar_inlet_function index " +
+                                  std::to_string(passive_scalar_index),
+                              "inlet_boundaries",
+                              "entries");
     }
   }
 }
