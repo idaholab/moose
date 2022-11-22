@@ -18,6 +18,7 @@
 #include "Moose.h"
 #include "ADReal.h"
 #include "ExecutablePath.h"
+#include "ConsoleUtils.h"
 
 #include "libmesh/compare_types.h"
 #include "libmesh/bounding_box.h"
@@ -656,6 +657,14 @@ void MaterialPropertyStorageDump(
     const HashMap<const libMesh::Elem *, HashMap<unsigned int, MaterialProperties>> & props);
 
 /**
+ * Adds line breaks (\n) in a string to make it fit within the desired output/console width
+ *
+ * @param message the message to cut/break over multiple lines
+ * @param line_width how long each line should be in the message.
+ */
+void addLineBreaks(std::string & message, unsigned int line_width = ConsoleUtils::console_line_length);
+
+/**
  * Indents the supplied message given the prefix and color
  * @param prefix The prefix to use for indenting
  * @param message The message that will be indented
@@ -664,7 +673,7 @@ void MaterialPropertyStorageDump(
  *
  * Takes a message like the following and indents it with another color code (see below)
  *
- * Input messsage:
+ * Input message:
  * COLOR_YELLOW
  * *** Warning ***
  * Something bad has happened and we want to draw attention to it with color
@@ -678,7 +687,7 @@ void MaterialPropertyStorageDump(
  * COLOR_DEFAULT
  *
  * Also handles single line color codes
- * COLOR_CYAN sub_app: 0 Nonline |R| = COLOR_GREEN 1.0e-10 COLOR_DEFAULT
+ * COLOR_CYAN sub_app: 0 Nonlinear |R| = COLOR_GREEN 1.0e-10 COLOR_DEFAULT
  *
  * Not indenting the first line is useful in the case where the first line is actually finishing
  * the line before it.

@@ -55,6 +55,19 @@ public:
 
 protected:
   FEProblemBase & _fe_problem;
+
+  /**
+   * Routine to output the ordering of objects within a vector. These objects must implement the
+   * name() routine, and it must return a string or compatible type.
+   *
+   * @tparam RangeType the type of the element-based loop
+   * @tparam T the object type
+   * @param objs the vector with all the objects
+   * @param objects_type the name of the type of objects. Defaults to the CPP object name
+   */
+  template <typename T>
+  void printVectorOrdering(std::vector<T *> objs, std::string objects_type="") const;
+
 };
 
 template <typename RangeType>
@@ -115,4 +128,32 @@ ThreadedElementLoop<RangeType>::neighborSubdomainChanged()
 {
   _fe_problem.neighborSubdomainSetup(ThreadedElementLoopBase<RangeType>::_neighbor_subdomain,
                                      ThreadedElementLoopBase<RangeType>::_tid);
+}
+
+template <typename RangeType>
+template <typename T>
+void
+ThreadedElementLoop<RangeType>::printVectorOrdering(std::vector<T *> objs, std::string objects_type) const
+{
+  if (objs.size())
+  {
+    auto console = _fe_problem.console();
+
+    // Check for a missing name for the objects
+    if (objects_type == "")
+      objects_type = MooseUtils::prettyCppType(objs[0]);
+
+    // Gather all the object names
+    std::vector<std::string> names;
+    names.reserve(objs.size());
+    for (const auto & obj : objs)
+      names.push_back(obj->name());
+
+    // Print string with a DBG prefix and with sufficient line breaks
+    std::string message = "Executing " + objects_type + " on " + _fe_problem.getCurrentExecuteOnFlag().name() +
+        "\nOrder of execution:\n" + MooseUtils::join(names, " ");
+    MooseUtils::addLineBreaks(message, ConsoleUtils::console_line_length - 6);
+    MooseUtils::indentMessage("[DBG] ", message);
+    console << message << std::endl;
+  }
 }

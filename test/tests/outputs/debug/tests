@@ -114,7 +114,7 @@
     [fv_kernels_bcs]
       type = RunApp
       input = 'show_execution_fv_flux_objects.i'
-      expect_out = '\[DBG\]  2_burger 1_burgers'
+      expect_out = '\[DBG\] 2_burger 1_burgers'
       detail = 'finite volume flux objects contributing to the residual and Jacobian, notably finite volume flux kernels and flux boundary conditions'
     []
     [nodal_kernel_bcs]
@@ -123,11 +123,11 @@
       expect_out = '\[DBG\] source bc_all '
       detail = 'nodal objects contributing to the residual, notably nodal kernels and boundary conditions'
     []
-    # These three tests make sure the targetting of a single execution flag works
+    # The three next tests make sure the targetting of a single execution flag works
     [user_objects_initial]
       type = RunApp
       input = 'show_execution_userobjects.i'
-      cli_args = 'Debug/show_execution_order=INITIAL UserObjects/find_node/execute_on=INITIAL UserObjects/side_int/execute_on=INITIAL UserObjects/values/execute_on=INITIAL'
+      cli_args = 'Debug/show_execution_order=INITIAL Postprocessors/dofs/execute_on=INITIAL UserObjects/find_node/execute_on=INITIAL UserObjects/side_int/execute_on=INITIAL UserObjects/values/execute_on=INITIAL'
       expect_out = '\[DBG\] values'
       detail = 'user objects, including postprocessors, executed at the beginning of the simulation'
     []
@@ -138,6 +138,8 @@
       expect_out = 'h L2u H1error H1Semierror L2v_elem f_integral elem_sample'
       detail = 'user objects, including postprocessors, executed at the beginning and end of each time step'
     []
+    # This is one way to understand conservative transfers are only conservative if the conserved quantity linearly depends on the transferred quantity
+    # The postprocessors are only executed once!
     [user_objects_transfers]
       type = RunApp
       input = 'show_execution_userobjects.i'
@@ -167,6 +169,5 @@
       expect_out = '\[DBG\] b_saux c_saux '
       detail = 'auxiliary kernels intermingled with initial conditions and user objects'
     []
->>>>>>> 512f489057 (Add tests for execution logs)
   []
 []

@@ -402,7 +402,7 @@ ThreadedElementLoopBase<RangeType>::shouldComputeInternalSide(const Elem & elem,
   // When looping over elements and then sides, we need to make sure that we do not duplicate
   // effort, e.g. if a face is shared by element 1 and element 2, then we do not want to do compute
   // work both when we are visiting element 1 *and* then later when visiting element 2. Our rule is
-  // to only compute when we are visting the element that has the lower element id when element and
+  // to only compute when we are visiting the element that has the lower element id when element and
   // neighbor are of the same adaptivity level, and then if they are not of the same level, then
   // we only compute when we are visiting the finer element
   return (neighbor.active() && (neighbor.level() == elem.level()) && (elem_id < neighbor_id)) ||

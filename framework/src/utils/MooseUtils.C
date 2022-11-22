@@ -697,6 +697,14 @@ removeColor(std::string & msg)
 }
 
 void
+addLineBreaks(std::string & message,
+              unsigned int line_width /*= ConsoleUtils::console_line_length*/)
+{
+  for (auto i : make_range(int(message.length() / line_width)))
+    message.insert((i + 1) * (line_width + 2) - 2, "\n");
+}
+
+void
 indentMessage(const std::string & prefix,
               std::string & message,
               const char * color /*= COLOR_CYAN*/,
