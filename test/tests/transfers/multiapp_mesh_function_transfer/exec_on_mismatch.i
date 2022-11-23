@@ -57,12 +57,25 @@
 []
 
 [MultiApps]
+  active = 'sub'
   [sub]
     positions = '.099 .099 0 .599 .599 0 0.599 0.099 0'
     type = TransientMultiApp
     app_type = MooseTestApp
     input_files = fromsub_sub.i
     execute_on = 'initial timestep_begin'
+  []
+  [sub_sibling_1]
+    type = TransientMultiApp
+    app_type = MooseTestApp
+    input_files = fromsub_sub.i
+    execute_on = 'initial timestep_begin'
+  []
+  [sub_sibling_2]
+    type = TransientMultiApp
+    app_type = MooseTestApp
+    input_files = fromsub_sub.i
+    execute_on = 'timestep_begin'
   []
 []
 
