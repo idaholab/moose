@@ -1503,7 +1503,7 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
 void
 NonlinearSystemBase::residualSetup()
 {
-  TIME_SECTION("computeResidualInternal", 3);
+  TIME_SECTION("residualSetup", 3);
 
   SystemBase::residualSetup();
 
