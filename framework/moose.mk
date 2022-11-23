@@ -213,7 +213,9 @@ moose_non_unity := %/base %/utils
 
 # Add additional non-unity directories if libtorch is enabled
 ifeq ($(ENABLE_LIBTORCH),true)
-  moose_non_unity += %/controls %/vectorpostprocessors
+	libtorch_dirs = $(shell find src/libtorch -type d -not -path '*/.libs*')
+  converted_dirs = $(foreach i, $(libtorch_dirs), %$(i))
+  moose_non_unity += $(converted_dirs)
 endif
 
 unity_src_dir := $(FRAMEWORK_DIR)/build/unity_src
