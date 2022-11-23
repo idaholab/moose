@@ -8,7 +8,7 @@
     ny = 3
   []
   [mirror]
-    type = SymmetryTransformGenerator 
+    type = SymmetryTransformGenerator
     input = file
     mirror_point = "0 1 0"
     mirror_normal_vector = "0 1 0"
@@ -17,6 +17,6 @@
   [stitch]
     type = StitchedMeshGenerator
     inputs = 'file mirror'
-    stitch_boundaries_pairs = 'top top' 
+    stitch_boundaries_pairs = 'top top'
   []
 []

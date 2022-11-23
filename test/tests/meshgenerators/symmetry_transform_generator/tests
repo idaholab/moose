@@ -1,5 +1,5 @@
 [Tests]
-  design = 'meshgenerators/SymmetryTransformerGenerator.md'
+  design = 'meshgenerators/SymmetryTransformGenerator.md'
   issues = ' #21578'
 
   [plane_symmetry]
