@@ -72,7 +72,7 @@ QuadSubChannelMeshGenerator::validParams()
   params.addRequiredParam<unsigned int>("n_cells", "The number of cells in the axial direction");
   params.addRequiredParam<unsigned int>("nx", "Number of channels in the x direction [-]");
   params.addRequiredParam<unsigned int>("ny", "Number of channels in the y direction [-]");
-  params.addRequiredParam<Real>("gap", "Half gap between assemblies [m]");
+  params.addRequiredParam<Real>("gap", "(Edge Pitch W = pitch/2 + rod_diameter/2 + gap) [m]");
   params.addParam<unsigned int>("block_id", 0, "Domain Index");
   return params;
 }

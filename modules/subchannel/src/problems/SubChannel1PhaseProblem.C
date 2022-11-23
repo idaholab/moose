@@ -75,7 +75,9 @@ SubChannel1PhaseProblem::validParams()
   params.addParam<PetscReal>("dtol", 1e5, "Divergence tolerance or ksp solver");
   params.addParam<PetscInt>("maxit", 1e4, "Maximum number of iterations for ksp solver");
   params.addParam<std::string>(
-      "interpolation_scheme", "central_difference", "Interpolation scheme used for the method.");
+      "interpolation_scheme",
+      "central_difference",
+      "Interpolation scheme used for the method. Only affects implicit solutions");
   params.addParam<bool>(
       "implicit", false, "Boolean to define the use of explicit or implicit solution.");
   params.addParam<bool>(
@@ -626,7 +628,6 @@ SubChannel1PhaseProblem::computeMdot(int iblock)
         if (_segregated_bool)
         {
           PetscScalar value_vec_2 = -1.0 * (*_SumWij_soln)(node_out);
-          // PetscScalar value_vec_2 = -1.0 * (*_SumWij_soln)(node_in);
           PetscInt row_vec_2 = i_ch + _n_channels * iz_ind;
           VecSetValues(_mc_axial_convection_rhs, 1, &row_vec_2, &value_vec_2, ADD_VALUES);
         }
@@ -872,30 +873,58 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
         auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
 
+        // interpolation weight coefficient
+        PetscScalar Pe = 0.5;
+        if (_interpolation_scheme.compare("exponential") == 0)
+        {
+          // Compute the Peclet number
+          auto S_in = (*_S_flow_soln)(node_in);
+          auto S_out = (*_S_flow_soln)(node_out);
+          auto S_interp = computeInterpolatedValue(S_out, S_in, "central_difference", 0.5);
+          auto w_perim_in = (*_w_perim_soln)(node_in);
+          auto w_perim_out = (*_w_perim_soln)(node_out);
+          auto w_perim_interp =
+              this->computeInterpolatedValue(w_perim_out, w_perim_in, "central_difference", 0.5);
+          auto mdot_loc = this->computeInterpolatedValue(
+              (*_mdot_soln)(node_out), (*_mdot_soln)(node_in), "central_difference", 0.5);
+          auto mu_in = (*_mu_soln)(node_in);
+          auto mu_out = (*_mu_soln)(node_out);
+          auto mu_interp = this->computeInterpolatedValue(mu_out, mu_in, "central_difference", 0.5);
+          auto Dh_i = 4.0 * S_interp / w_perim_interp;
+          // Compute friction
+          auto Re = ((mdot_loc / S_interp) * Dh_i / mu_interp);
+          auto fi = 0.0;
+          if (_default_friction_model)
+            fi = computeFrictionFactor(Re);
+          else
+            fi = computeFrictionFactor(Re, i_ch);
+          auto ki = computeInterpolatedValue(
+              k_grid[i_ch][iz], k_grid[i_ch][iz - 1], "central_difference", 0.5);
+          Pe = 1.0 / ((fi * dz / Dh_i + ki) * 0.5) * mdot_loc / std::abs(mdot_loc);
+        }
+        // interpolation weight coefficient
+        auto alpha = computeInterpolationCoefficients(_interpolation_scheme, Pe);
+
         // inlet, outlet, and interpolated density
         auto rho_in = (*_rho_soln)(node_in);
         auto rho_out = (*_rho_soln)(node_out);
-        auto rho_interp = computeInterpolatedValue(rho_out, rho_in, _interpolation_scheme);
+        auto rho_interp = computeInterpolatedValue(rho_out, rho_in, _interpolation_scheme, Pe);
 
         // inlet, outlet, and interpolated viscosity
         auto mu_in = (*_mu_soln)(node_in);
         auto mu_out = (*_mu_soln)(node_out);
-        auto mu_interp = computeInterpolatedValue(mu_out, mu_in, _interpolation_scheme);
+        auto mu_interp = computeInterpolatedValue(mu_out, mu_in, _interpolation_scheme, Pe);
 
         // inlet, outlet, and interpolated axial surface area
         auto S_in = (*_S_flow_soln)(node_in);
         auto S_out = (*_S_flow_soln)(node_out);
-        auto S_interp = computeInterpolatedValue(S_out, S_in, _interpolation_scheme);
+        auto S_interp = computeInterpolatedValue(S_out, S_in, _interpolation_scheme, Pe);
 
         // inlet, outlet, and interpolated wetted perimeter
         auto w_perim_in = (*_w_perim_soln)(node_in);
         auto w_perim_out = (*_w_perim_soln)(node_out);
         auto w_perim_interp =
-            computeInterpolatedValue(w_perim_out, w_perim_in, _interpolation_scheme);
-
-        // interpolation weight coefficient
-        PetscScalar Pe = 0.5;
-        auto alpha = computeInterpolationCoefficients(_interpolation_scheme, Pe);
+            computeInterpolatedValue(w_perim_out, w_perim_in, _interpolation_scheme, Pe);
 
         // hydraulic diameter in the i direction
         auto Dh_i = 4.0 * S_interp / w_perim_interp;
@@ -939,7 +968,7 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         {
           PetscInt row_at = i_ch + _n_channels * iz_ind;
           PetscInt col_at = i_ch + _n_channels * (iz_ind - 1);
-          PetscScalar value_at = -1.0 * abs((*_mdot_soln)(node_in)) / (S_in * rho_in);
+          PetscScalar value_at = -1.0 * std::abs((*_mdot_soln)(node_in)) / (S_in * rho_in);
           MatSetValues(
               _amc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, INSERT_VALUES);
         }
@@ -947,7 +976,7 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         // Adding diagonal elements
         PetscInt row_at = i_ch + _n_channels * iz_ind;
         PetscInt col_at = i_ch + _n_channels * iz_ind;
-        PetscScalar value_at = abs((*_mdot_soln)(node_out)) / (S_out * rho_out);
+        PetscScalar value_at = std::abs((*_mdot_soln)(node_out)) / (S_out * rho_out);
         MatSetValues(
             _amc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, INSERT_VALUES);
 
@@ -1283,7 +1312,7 @@ SubChannel1PhaseProblem::computeP(int iblock)
           // inlet, outlet, and interpolated axial surface area
           auto S_in = (*_S_flow_soln)(node_in);
           auto S_out = (*_S_flow_soln)(node_out);
-          auto S_interp = computeInterpolatedValue(S_out, S_in, _interpolation_scheme);
+          auto S_interp = computeInterpolatedValue(S_out, S_in, "central_difference");
 
           // Creating matrix of coefficients
           PetscInt row = i_ch + _n_channels * iz_ind;
@@ -1309,7 +1338,6 @@ SubChannel1PhaseProblem::computeP(int iblock)
           {
             auto dp_out = (*_DP_soln)(node_out);
             PetscScalar value_v = -1.0 * dp_out * S_interp;
-            ;
             PetscInt row_v = i_ch + _n_channels * iz_ind;
             VecSetValues(_amc_pressure_force_rhs, 1, &row_v, &value_v, ADD_VALUES);
           }
@@ -1364,7 +1392,7 @@ SubChannel1PhaseProblem::computeP(int iblock)
           // inlet, outlet, and interpolated axial surface area
           auto S_in = (*_S_flow_soln)(node_in);
           auto S_out = (*_S_flow_soln)(node_out);
-          auto S_interp = computeInterpolatedValue(S_out, S_in, _interpolation_scheme);
+          auto S_interp = computeInterpolatedValue(S_out, S_in, "central_difference");
 
           // Creating matrix of coefficients
           PetscInt row = i_ch + _n_channels * iz_ind;
@@ -1565,7 +1593,10 @@ SubChannel1PhaseProblem::computeh(int iblock)
       {
         auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
         auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-        auto volume = dz * (*_S_flow_soln)(node_in);
+        auto S_in = (*_S_flow_soln)(node_in);
+        auto S_out = (*_S_flow_soln)(node_out);
+        auto S_interp = computeInterpolatedValue(S_out, S_in, "central_difference", 0.5);
+        auto volume = dz * S_interp;
 
         // interpolation weight coefficient
         PetscScalar Pe = 0.5;
@@ -2011,7 +2042,7 @@ SubChannel1PhaseProblem::computeWij(int iblock)
 
         // Assembling inertial term
         PetscScalar Pe = 0.5;
-        auto alpha = computeInterpolationCoefficients("upwind", Pe);
+        auto alpha = computeInterpolationCoefficients(_interpolation_scheme, Pe);
         auto mass_term_out = (*_mdot_soln)(node_out_i) / S_i_out / rho_i_out +
                              (*_mdot_soln)(node_out_j) / S_j_out / rho_j_out;
         auto mass_term_in = (*_mdot_soln)(node_in_i) / S_i_in / rho_i_in +
@@ -2358,10 +2389,6 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   }
   // Mass conservation
   PetscInt field_num = 0;
-  ierr = MatAssemblyBegin(_mc_axial_convection_mat, MAT_FINAL_ASSEMBLY);
-  CHKERRQ(ierr);
-  ierr = MatAssemblyEnd(_mc_axial_convection_mat, MAT_FINAL_ASSEMBLY);
-  CHKERRQ(ierr);
   ierr = MatDuplicate(_mc_axial_convection_mat, MAT_COPY_VALUES, &mat_array[Q * field_num + 0]);
   CHKERRQ(ierr);
   ierr = MatAssemblyBegin(mat_array[Q * field_num + 0], MAT_FINAL_ASSEMBLY);
@@ -2371,10 +2398,6 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   mat_array[Q * field_num + 1] = NULL;
   if (_axial_mass_flow_tight_coupling)
   {
-    ierr = MatAssemblyBegin(_mc_sumWij_mat, MAT_FINAL_ASSEMBLY);
-    CHKERRQ(ierr);
-    ierr = MatAssemblyEnd(_mc_sumWij_mat, MAT_FINAL_ASSEMBLY);
-    CHKERRQ(ierr);
     ierr = MatDuplicate(_mc_sumWij_mat, MAT_COPY_VALUES, &mat_array[Q * field_num + 2]);
     CHKERRQ(ierr);
     ierr = MatAssemblyBegin(mat_array[Q * field_num + 2], MAT_FINAL_ASSEMBLY);
@@ -2424,10 +2447,6 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   field_num = 1;
   if (_pressure_axial_momentum_tight_coupling)
   {
-    ierr = MatAssemblyBegin(_amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY);
-    CHKERRQ(ierr);
-    ierr = MatAssemblyEnd(_amc_sys_mdot_mat, MAT_FINAL_ASSEMBLY);
-    CHKERRQ(ierr);
     ierr = MatDuplicate(_amc_sys_mdot_mat, MAT_COPY_VALUES, &mat_array[Q * field_num + 0]);
     CHKERRQ(ierr);
     ierr = MatAssemblyBegin(mat_array[Q * field_num + 0], MAT_FINAL_ASSEMBLY);
@@ -2439,10 +2458,6 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   {
     mat_array[Q * field_num + 0] = NULL;
   }
-  ierr = MatAssemblyBegin(_amc_pressure_force_mat, MAT_FINAL_ASSEMBLY);
-  CHKERRQ(ierr);
-  ierr = MatAssemblyEnd(_amc_pressure_force_mat, MAT_FINAL_ASSEMBLY);
-  CHKERRQ(ierr);
   ierr = MatDuplicate(_amc_pressure_force_mat, MAT_COPY_VALUES, &mat_array[Q * field_num + 1]);
   CHKERRQ(ierr);
   ierr = MatAssemblyBegin(mat_array[Q * field_num + 1], MAT_FINAL_ASSEMBLY);
@@ -2473,7 +2488,6 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     VecDuplicate(_amc_sys_mdot_rhs, &ls);
     MatMult(_amc_sys_mdot_mat, _prod, ls);
     VecAXPY(ls, -1.0, _amc_sys_mdot_rhs);
-    // VecView(ls, PETSC_VIEWER_STDOUT_WORLD);
     VecAXPY(vec_array[field_num], -1.0, ls);
     VecDestroy(&ls);
   }
@@ -2486,10 +2500,6 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   mat_array[Q * field_num + 0] = NULL;
   if (_pressure_cross_momentum_tight_coupling)
   {
-    ierr = MatAssemblyBegin(_cmc_pressure_force_mat, MAT_FINAL_ASSEMBLY);
-    CHKERRQ(ierr);
-    ierr = MatAssemblyEnd(_cmc_pressure_force_mat, MAT_FINAL_ASSEMBLY);
-    CHKERRQ(ierr);
     ierr = MatDuplicate(_cmc_pressure_force_mat, MAT_COPY_VALUES, &mat_array[Q * field_num + 1]);
     CHKERRQ(ierr);
     ierr = MatAssemblyBegin(mat_array[Q * field_num + 1], MAT_FINAL_ASSEMBLY);
@@ -2502,10 +2512,6 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     mat_array[Q * field_num + 1] = NULL;
   }
 
-  ierr = MatAssemblyBegin(_cmc_sys_Wij_mat, MAT_FINAL_ASSEMBLY);
-  CHKERRQ(ierr);
-  ierr = MatAssemblyEnd(_cmc_sys_Wij_mat, MAT_FINAL_ASSEMBLY);
-  CHKERRQ(ierr);
   ierr = MatDuplicate(_cmc_sys_Wij_mat, MAT_COPY_VALUES, &mat_array[Q * field_num + 2]);
   CHKERRQ(ierr);
   ierr = MatAssemblyBegin(mat_array[Q * field_num + 2], MAT_FINAL_ASSEMBLY);
@@ -2553,10 +2559,6 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     mat_array[Q * field_num + 0] = NULL;
     mat_array[Q * field_num + 1] = NULL;
     mat_array[Q * field_num + 2] = NULL;
-    ierr = MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
-    CHKERRQ(ierr);
-    ierr = MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
-    CHKERRQ(ierr);
     ierr = MatDuplicate(_hc_sys_h_mat, MAT_COPY_VALUES, &mat_array[Q * field_num + 3]);
     if (lag_block_thermal_solve)
     {
