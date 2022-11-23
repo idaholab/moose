@@ -529,7 +529,7 @@ LiquidMetalSubChannel1PhaseProblem::computeDP(int iblock)
         {
           PetscInt row_at = i_ch + _n_channels * iz_ind;
           PetscInt col_at = i_ch + _n_channels * (iz_ind - 1);
-          PetscScalar value_at = -1.0 * abs((*_mdot_soln)(node_in)) / (S_in * rho_in);
+          PetscScalar value_at = -1.0 * std::abs((*_mdot_soln)(node_in)) / (S_in * rho_in);
           MatSetValues(
               _amc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, INSERT_VALUES);
         }
@@ -537,7 +537,7 @@ LiquidMetalSubChannel1PhaseProblem::computeDP(int iblock)
         // Adding diagonal elements
         PetscInt row_at = i_ch + _n_channels * iz_ind;
         PetscInt col_at = i_ch + _n_channels * iz_ind;
-        PetscScalar value_at = abs((*_mdot_soln)(node_out)) / (S_out * rho_out);
+        PetscScalar value_at = std::abs((*_mdot_soln)(node_out)) / (S_out * rho_out);
         MatSetValues(
             _amc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, INSERT_VALUES);
 
@@ -684,8 +684,8 @@ LiquidMetalSubChannel1PhaseProblem::computeDP(int iblock)
         auto fi = computeFrictionFactor(Re, i_ch, S_interp, w_perim_interp, Dh_i);
         auto ki = computeInterpolatedValue(
             k_grid[i_ch][iz], k_grid[i_ch][iz - 1], _interpolation_scheme, Pe);
-        // if (ki != 0.0)
-        //   _console << " ki : " << ki << "\n";
+        // _console << " ki : " << ki << "\n";
+        // _console << " fi : " << fi << "\n";
         auto coef = (fi * dz / Dh_i + ki) * 0.5 * std::abs((*_mdot_soln)(node_out)) /
                     (S_interp * rho_interp);
         if (iz == first_node)
@@ -1157,16 +1157,6 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
             (mdot_in * h_in - sumWijh - sumWijPrimeDhij + added_enthalpy + e_cond + sweep_enthalpy +
              _TR * _rho_soln->old(node_out) * _h_soln->old(node_out) * volume / _dt) /
             (mdot_out + _TR * (*_rho_soln)(node_out)*volume / _dt);
-
-        // if (h_out < 0)
-        // {
-        //   _console << "Wij = : " << _Wij << "\n";
-        //   mooseError(name(),
-        //              " : Calculation of negative Enthalpy h_out = : ",
-        //              h_out,
-        //              " Axial Level= : ",
-        //              iz);
-        // }
         _h_soln->set(node_out, h_out); // J/kg
       }
     }
@@ -1217,11 +1207,11 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
           auto w_perim_out = (*_w_perim_soln)(node_out);
           auto w_perim_interp =
               this->computeInterpolatedValue(w_perim_out, w_perim_in, "central_difference", 0.5);
-          auto K_in = _fp->k_from_p_T((*_P_soln)(node_in), (*_T_soln)(node_in));
-          auto K_out = _fp->k_from_p_T((*_P_soln)(node_out), (*_T_soln)(node_out));
+          auto K_in = _fp->k_from_p_T((*_P_soln)(node_in) + _P_out, (*_T_soln)(node_in));
+          auto K_out = _fp->k_from_p_T((*_P_soln)(node_out) + _P_out, (*_T_soln)(node_out));
           auto K = this->computeInterpolatedValue(K_out, K_in, "central_difference", 0.5);
-          auto cp_in = _fp->cp_from_p_T((*_P_soln)(node_in), (*_T_soln)(node_in));
-          auto cp_out = _fp->cp_from_p_T((*_P_soln)(node_out), (*_T_soln)(node_out));
+          auto cp_in = _fp->cp_from_p_T((*_P_soln)(node_in) + _P_out, (*_T_soln)(node_in));
+          auto cp_out = _fp->cp_from_p_T((*_P_soln)(node_out) + _P_out, (*_T_soln)(node_out));
           auto cp = this->computeInterpolatedValue(cp_out, cp_in, "central_difference", 0.5);
           auto mdot_loc = this->computeInterpolatedValue(
               (*_mdot_soln)(node_out), (*_mdot_soln)(node_in), "central_difference", 0.5);
@@ -1263,27 +1253,6 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
         VecSetValues(_hc_time_derivative_rhs, 1, &row_vec_tt, &value_vec_tt, ADD_VALUES);
 
         /// Advective derivative term
-        // if (iz == first_node)
-        // {
-        //   PetscScalar value_vec_at = (*_mdot_soln)(node_in) * (*_h_soln)(node_in);
-        //   PetscInt row_vec_at = i_ch + _n_channels * iz_ind;
-        //   VecSetValues(_hc_advective_derivative_rhs, 1, &row_vec_at, &value_vec_at, ADD_VALUES);
-        // }
-        // else
-        // {
-        //   PetscInt row_at = i_ch + _n_channels * iz_ind;
-        //   PetscInt col_at = i_ch + _n_channels * (iz_ind - 1);
-        //   PetscScalar value_at = -1.0 * (*_mdot_soln)(node_in);
-        //   MatSetValues(_hc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at,
-        //   ADD_VALUES);
-        // }
-        // // Adding diagonal elements
-        // PetscInt row_at = i_ch + _n_channels * iz_ind;
-        // PetscInt col_at = i_ch + _n_channels * iz_ind;
-        // PetscScalar value_at = (*_mdot_soln)(node_out);
-        // MatSetValues(_hc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at,
-        // ADD_VALUES);
-
         if (iz == first_node)
         {
           PetscInt row_at = i_ch + _n_channels * iz_ind;
@@ -1315,14 +1284,6 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
           PetscInt col_at;
 
           PetscScalar value_at = -alpha * (*_mdot_soln)(node_in);
-          if ((*_mdot_soln)(node_in) > 0)
-          {
-            col_at = i_ch + _n_channels * (iz_ind - 1);
-          }
-          else
-          {
-            col_at = i_ch + _n_channels * (iz_ind);
-          }
           col_at = i_ch + _n_channels * (iz_ind - 1);
           MatSetValues(_hc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, ADD_VALUES);
 
@@ -1331,20 +1292,9 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
           MatSetValues(_hc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, ADD_VALUES);
 
           value_at = (1 - alpha) * (*_mdot_soln)(node_out);
-          if ((*_mdot_soln)(node_out) > 0)
-          {
-            col_at = i_ch + _n_channels * (iz_ind);
-          }
-          else
-          {
-            col_at = i_ch + _n_channels * (iz_ind + 1);
-          }
           col_at = i_ch + _n_channels * (iz_ind + 1);
           MatSetValues(_hc_advective_derivative_mat, 1, &row_at, 1, &col_at, &value_at, ADD_VALUES);
         }
-
-        Pe = 0.5;
-        alpha = computeInterpolationCoefficients(_interpolation_scheme, Pe);
 
         /// Axial heat conduction
         auto * node_center = _subchannel_mesh.getChannelNode(i_ch, iz);
@@ -2016,23 +1966,6 @@ LiquidMetalSubChannel1PhaseProblem::externalSolve()
   auto h_bulk_out = power_out / mass_flow_out;
   auto T_bulk_out = _fp->T_from_p_h(_P_out, h_bulk_out);
 
-  _console << " ============================ " << std::endl;
-  _console << "Channel 37 exit temperature :"
-           << (*_T_soln)(_subchannel_mesh.getChannelNode(37, _n_cells)) << " K" << std::endl;
-  _console << "Channel 36 exit temperature :"
-           << (*_T_soln)(_subchannel_mesh.getChannelNode(36, _n_cells)) << " K" << std::endl;
-  _console << "Channel 20 exit temperature :"
-           << (*_T_soln)(_subchannel_mesh.getChannelNode(20, _n_cells)) << " K" << std::endl;
-  _console << "Channel 10 exit temperature :"
-           << (*_T_soln)(_subchannel_mesh.getChannelNode(10, _n_cells)) << " K" << std::endl;
-  _console << "Channel 4 exit temperature :"
-           << (*_T_soln)(_subchannel_mesh.getChannelNode(4, _n_cells)) << " K" << std::endl;
-  _console << "Channel 1 exit temperature :"
-           << (*_T_soln)(_subchannel_mesh.getChannelNode(1, _n_cells)) << " K" << std::endl;
-  _console << "Channel 14 exit temperature :"
-           << (*_T_soln)(_subchannel_mesh.getChannelNode(14, _n_cells)) << " K" << std::endl;
-  _console << "Channel 28 exit temperature :"
-           << (*_T_soln)(_subchannel_mesh.getChannelNode(28, _n_cells)) << " K" << std::endl;
   _console << " ============================ " << std::endl;
   _console << "Bulk sodium temperature at the bundle outlet :" << T_bulk_out << std::endl;
   _console << "Power added to coolant is: " << power_out - power_in << " Watt" << std::endl;

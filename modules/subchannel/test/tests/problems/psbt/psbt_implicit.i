@@ -89,7 +89,7 @@ P_out = 4.923e6 # Pa
   segregated = true
   monolithic_thermal = false
   staggered_pressure = false
-  interpolation_scheme = 'central_difference'
+  interpolation_scheme = 'exponential'
   P_tol = 1e-04
   T_tol = 1e-04
 []
