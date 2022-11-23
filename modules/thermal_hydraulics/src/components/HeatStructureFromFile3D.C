@@ -137,7 +137,7 @@ HeatStructureFromFile3D::buildMesh()
     _name_index[subdomain_name] = i;
 
     const std::string solid_block_name = genName(_name, subdomain_name);
-    SubdomainID sid = _mesh.getNextSubdomainId();
+    SubdomainID sid = mesh().getNextSubdomainId();
     setSubdomainInfo(sid, solid_block_name, Moose::COORD_XYZ);
 
     const std::string type_str(exio_helper.get_elem_type());
@@ -177,18 +177,18 @@ HeatStructureFromFile3D::buildMesh()
     if (sideset_name.empty())
       sideset_name = Moose::stringify(ex_sideset_id);
 
-    unsigned int bc_id = _mesh.getNextBoundaryId();
+    unsigned int bc_id = mesh().getNextBoundaryId();
     thm_bc_id_map[ex_sideset_id] = bc_id;
     new_ids_to_names.emplace(bc_id, sideset_name);
   }
 
-  auto & boundary_info = _mesh.getMesh().get_boundary_info();
+  auto & boundary_info = mesh().getMesh().get_boundary_info();
 
   for (auto e : index_range(exio_helper.elem_list))
   {
     int ex_elem_id = exio_helper.elem_num_map[exio_helper.elem_list[e] - 1];
     dof_id_type elem_id = thm_elem_map[ex_elem_id];
-    Elem * elem = _mesh.elemPtr(elem_id);
+    Elem * elem = mesh().elemPtr(elem_id);
     const auto & conv = exio_helper.get_conversion(elem->type());
     // Map the zero-based Exodus side numbering to the libmesh side numbering
     unsigned int raw_side_index = exio_helper.side_list[e] - 1;
@@ -199,7 +199,7 @@ HeatStructureFromFile3D::buildMesh()
     boundary_info.add_side(elem, mapped_side, bc_id);
   }
   for (const auto & pr : new_ids_to_names)
-    _mesh.getMesh().get_boundary_info().sideset_name(pr.first) = genName(_name, pr.second);
+    mesh().getMesh().get_boundary_info().sideset_name(pr.first) = genName(_name, pr.second);
 
   _number_of_hs = _names.size();
 }

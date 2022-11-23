@@ -30,7 +30,9 @@ HeatTransferFromHeatStructure1Phase::validParams()
 
 HeatTransferFromHeatStructure1Phase::HeatTransferFromHeatStructure1Phase(
     const InputParameters & parameters)
-  : HeatTransferFromTemperature1Phase(parameters), HSBoundaryInterface(this), _fch_alignment(_mesh)
+  : HeatTransferFromTemperature1Phase(parameters),
+    HSBoundaryInterface(this),
+    _fch_alignment(constMesh())
 {
 }
 

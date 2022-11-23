@@ -41,8 +41,8 @@ Component1DBoundary::setupMesh()
     _normal = _normals[0];
 
     // create a nodeset/sideset corresponding to the node of the connected component end
-    const BoundaryID boundary_id = _mesh.getNextBoundaryId();
-    auto & binfo = _mesh.getMesh().get_boundary_info();
+    const BoundaryID boundary_id = mesh().getNextBoundaryId();
+    auto & binfo = mesh().getMesh().get_boundary_info();
     binfo.add_node(_node, boundary_id);
     binfo.nodeset_name(boundary_id) = name();
   }

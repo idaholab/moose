@@ -43,7 +43,7 @@ HeatTransferFromHeatStructure3D1Phase::HeatTransferFromHeatStructure3D1Phase(
     _flow_channel_names(getParam<std::vector<std::string>>("flow_channels")),
     _boundary(getParam<BoundaryName>("boundary")),
     _hs_name(getParam<std::string>("hs")),
-    _fch_alignment(_mesh),
+    _fch_alignment(constMesh()),
     _layered_average_uo_direction(MooseEnum("x y z"))
 {
   for (const auto & fch_name : _flow_channel_names)
@@ -76,9 +76,9 @@ HeatTransferFromHeatStructure3D1Phase::setupMesh()
     }
     // Boundary info (element ID, local side number) for the heat structure side
     std::vector<std::tuple<dof_id_type, unsigned short int>> bnd_info;
-    BoundaryID bd_id = _mesh.getBoundaryID(_boundary);
-    _mesh.buildBndElemList();
-    const auto & bnd_to_elem_map = _mesh.getBoundariesToActiveSemiLocalElemIds();
+    BoundaryID bd_id = mesh().getBoundaryID(_boundary);
+    mesh().buildBndElemList();
+    const auto & bnd_to_elem_map = mesh().getBoundariesToActiveSemiLocalElemIds();
     auto search = bnd_to_elem_map.find(bd_id);
     if (search == bnd_to_elem_map.end())
       mooseDoOnce(logError("The boundary '", _boundary, "' (", bd_id, ") was not found."));
@@ -87,8 +87,8 @@ HeatTransferFromHeatStructure3D1Phase::setupMesh()
       const std::unordered_set<dof_id_type> & bnd_elems = search->second;
       for (auto elem_id : bnd_elems)
       {
-        const Elem * elem = _mesh.elemPtr(elem_id);
-        unsigned int side = _mesh.sideWithBoundaryID(elem, bd_id);
+        const Elem * elem = mesh().elemPtr(elem_id);
+        unsigned int side = mesh().sideWithBoundaryID(elem, bd_id);
         bnd_info.push_back(std::tuple<dof_id_type, unsigned short int>(elem_id, side));
       }
 

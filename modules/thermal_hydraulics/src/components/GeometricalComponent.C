@@ -45,7 +45,7 @@ GeometricalComponent::computeNumberOfNodes(unsigned int n_elems)
 Node *
 GeometricalComponent::addNode(const Point & pt)
 {
-  auto node = _mesh.addNode(pt);
+  auto node = mesh().addNode(pt);
   _node_ids.push_back(node->id());
   return node;
 }
@@ -54,7 +54,7 @@ Elem *
 GeometricalComponent::addElement(libMesh::ElemType elem_type,
                                  const std::vector<dof_id_type> & node_ids)
 {
-  auto elem = _mesh.addElement(elem_type, node_ids);
+  auto elem = mesh().addElement(elem_type, node_ids);
   _elem_ids.push_back(elem->id());
   return elem;
 }
@@ -62,7 +62,7 @@ GeometricalComponent::addElement(libMesh::ElemType elem_type,
 Elem *
 GeometricalComponent::addElementEdge2(dof_id_type node0, dof_id_type node1)
 {
-  auto elem = _mesh.addElementEdge2(node0, node1);
+  auto elem = mesh().addElementEdge2(node0, node1);
   _elem_ids.push_back(elem->id());
   return elem;
 }
@@ -70,7 +70,7 @@ GeometricalComponent::addElementEdge2(dof_id_type node0, dof_id_type node1)
 Elem *
 GeometricalComponent::addElementEdge3(dof_id_type node0, dof_id_type node1, dof_id_type node2)
 {
-  auto elem = _mesh.addElementEdge3(node0, node1, node2);
+  auto elem = mesh().addElementEdge3(node0, node1, node2);
   _elem_ids.push_back(elem->id());
   return elem;
 }
@@ -81,7 +81,7 @@ GeometricalComponent::addElementQuad4(dof_id_type node0,
                                       dof_id_type node2,
                                       dof_id_type node3)
 {
-  auto elem = _mesh.addElementQuad4(node0, node1, node2, node3);
+  auto elem = mesh().addElementQuad4(node0, node1, node2, node3);
   _elem_ids.push_back(elem->id());
   return elem;
 }
@@ -97,7 +97,7 @@ GeometricalComponent::addElementQuad9(dof_id_type node0,
                                       dof_id_type node7,
                                       dof_id_type node8)
 {
-  auto elem = _mesh.addElementQuad9(node0, node1, node2, node3, node4, node5, node6, node7, node8);
+  auto elem = mesh().addElementQuad9(node0, node1, node2, node3, node4, node5, node6, node7, node8);
   _elem_ids.push_back(elem->id());
   return elem;
 }
@@ -111,7 +111,7 @@ GeometricalComponent::setupMesh()
   // displace nodes
   for (auto && node_id : _node_ids)
   {
-    Node & curr_node = _mesh.nodeRef(node_id);
+    Node & curr_node = mesh().nodeRef(node_id);
     RealVectorValue p(curr_node(0), curr_node(1), curr_node(2));
     curr_node = computeRealPointFromReferencePoint(p);
   }
@@ -231,7 +231,7 @@ GeometricalComponent::setSubdomainInfo(SubdomainID subdomain_id,
     gc->_subdomain_names.push_back(subdomain_name);
     gc->_coord_sys.push_back(coord_system);
   }
-  _mesh.setSubdomainName(subdomain_id, subdomain_name);
+  mesh().setSubdomainName(subdomain_id, subdomain_name);
 }
 
 const std::vector<dof_id_type> &

@@ -37,7 +37,7 @@ HeatStructure2DCouplerBase::HeatStructure2DCouplerBase(const InputParameters & p
     _hs_boundaries(
         {getParam<BoundaryName>("primary_boundary"), getParam<BoundaryName>("secondary_boundary")}),
 
-    _mesh_alignment(_mesh),
+    _mesh_alignment(constMesh()),
     _is_plate({false, false}),
     _is_cylindrical({false, false})
 {
@@ -51,7 +51,7 @@ HeatStructure2DCouplerBase::init()
   BoundaryBase::init();
 
   if (hasComponentByName<HeatStructureBase>(_hs_names[0]) &&
-      hasComponentByName<HeatStructureBase>(_hs_names[1]) && !_mesh.isDistributedMesh())
+      hasComponentByName<HeatStructureBase>(_hs_names[1]) && !constMesh().isDistributedMesh())
   {
     const HeatStructureBase & primary_hs = getComponentByName<HeatStructureBase>(_hs_names[0]);
     const HeatStructureBase & secondary_hs = getComponentByName<HeatStructureBase>(_hs_names[1]);
@@ -116,7 +116,7 @@ HeatStructure2DCouplerBase::check() const
   if ((_is_plate[0] && _is_cylindrical[1]) || (_is_cylindrical[0] && _is_plate[1]))
     logError("The coupled heat structures must have the same type.");
 
-  if (_mesh.isDistributedMesh())
+  if (constMesh().isDistributedMesh())
     logError("HeatStructure2DCouplerBase does not work with a distributed mesh.");
 
 #ifndef MOOSE_GLOBAL_AD_INDEXING
