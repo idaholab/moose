@@ -135,6 +135,12 @@ Component::addDependency(const std::string & dependency)
   _dependencies.push_back(dependency);
 }
 
+THMProblem &
+Component::getTHMProblem() const
+{
+  return _sim;
+}
+
 void
 Component::makeFunctionControllableIfConstant(const FunctionName & fn_name,
                                               const std::string & control_name,

@@ -38,7 +38,7 @@ HeatTransferFromHeatFlux1Phase::addMooseObjects()
     params.set<std::vector<SubdomainName>>("block") = _flow_channel_subdomains;
     params.set<std::vector<std::string>>("prop_names") = {_q_wall_name};
     params.set<std::vector<FunctionName>>("prop_values") = {_q_wall_fn_name};
-    _sim.addMaterial(class_name, genName(name(), "q_wall_material"), params);
+    getTHMProblem().addMaterial(class_name, genName(name(), "q_wall_material"), params);
   }
 
   // wall heat transfer kernel
@@ -49,7 +49,7 @@ HeatTransferFromHeatFlux1Phase::addMooseObjects()
     params.set<std::vector<SubdomainName>>("block") = _flow_channel_subdomains;
     params.set<MaterialPropertyName>("q_wall") = _q_wall_name;
     params.set<std::vector<VariableName>>("P_hf") = {_P_hf_name};
-    _sim.addKernel(class_name, genName(name(), "wall_heat"), params);
+    getTHMProblem().addKernel(class_name, genName(name(), "wall_heat"), params);
   }
 }
 

@@ -224,6 +224,11 @@ public:
 
 protected:
   /**
+   * Gets the THM problem
+   */
+  THMProblem & getTHMProblem() const;
+
+  /**
    * Performs any post-constructor, pre-mesh-setup setup
    */
   virtual void preSetupMesh() {}
@@ -377,6 +382,8 @@ protected:
   Component * _parent;
 
   /// THM problem this component is part of
+  /// TODO: make _sim private (applications need to switch to getters to avoid breaking).
+  /// Also, rename to "_thm_problem" at that point.
   THMProblem & _sim;
 
   /// The Factory associated with the MooseApp

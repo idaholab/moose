@@ -50,7 +50,7 @@ protected:
   /**
    * Adds a material for the hydraulic diameter
    */
-  virtual void addHydraulicDiameterMaterial() const;
+  virtual void addHydraulicDiameterMaterial();
 
   /**
    * Populates heat connection variable names lists

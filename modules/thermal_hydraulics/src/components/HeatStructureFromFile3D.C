@@ -61,7 +61,7 @@ HeatStructureFromFile3D::buildModel()
 {
   const std::string class_name = "HeatConductionModel";
   InputParameters pars = _factory.getValidParams(class_name);
-  pars.set<THMProblem *>("_thm_problem") = &_sim;
+  pars.set<THMProblem *>("_thm_problem") = &getTHMProblem();
   pars.set<HeatStructureBase *>("_hs") = this;
   pars.applyParameters(parameters());
   return _factory.create<HeatConductionModel>(class_name, name(), pars, 0);
@@ -78,7 +78,7 @@ HeatStructureFromFile3D::check() const
 {
   GeometricalComponent::check();
 
-  bool ics_set = _sim.hasInitialConditionsFromFile() || isParamValid("initial_T");
+  bool ics_set = getTHMProblem().hasInitialConditionsFromFile() || isParamValid("initial_T");
   if (!ics_set && !_app.isRestarting())
     logError("Missing initial condition for temperature.");
 }

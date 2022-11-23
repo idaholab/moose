@@ -68,7 +68,7 @@ HeatTransferFromHeatStructure1Phase::setupMesh()
     {
       dof_id_type nearest_elem_id = _fch_alignment.getNearestElemID(elem_id);
       if (nearest_elem_id != DofObject::invalid_id)
-        _sim.augmentSparsity(elem_id, nearest_elem_id);
+        getTHMProblem().augmentSparsity(elem_id, nearest_elem_id);
     }
   }
 }
@@ -124,10 +124,10 @@ HeatTransferFromHeatStructure1Phase::addVariables()
   HeatTransferFromTemperature1Phase::addVariables();
 
   // wall temperature initial condition
-  if (!_sim.hasInitialConditionsFromFile() && !_app.isRestarting())
+  if (!getTHMProblem().hasInitialConditionsFromFile() && !_app.isRestarting())
   {
     const HeatStructureBase & hs = getComponentByName<HeatStructureBase>(_hs_name);
-    _sim.addFunctionIC(_T_wall_name, hs.getInitialT(), _flow_channel_subdomains);
+    getTHMProblem().addFunctionIC(_T_wall_name, hs.getInitialT(), _flow_channel_subdomains);
   }
 }
 
@@ -155,7 +155,7 @@ HeatTransferFromHeatStructure1Phase::addMooseObjects()
     params.set<MaterialPropertyName>("Hw") = _Hw_1phase_name;
     params.set<MaterialPropertyName>("T") = FlowModelSinglePhase::TEMPERATURE;
     params.set<ExecFlagEnum>("execute_on") = execute_on;
-    _sim.addUserObject(class_name, heat_flux_uo_name, params);
+    getTHMProblem().addUserObject(class_name, heat_flux_uo_name, params);
   }
 
   {
@@ -164,7 +164,7 @@ HeatTransferFromHeatStructure1Phase::addMooseObjects()
     params.set<std::vector<SubdomainName>>("block") = flow_channel.getSubdomainNames();
     params.set<NonlinearVariableName>("variable") = FlowModelSinglePhase::RHOEA;
     params.set<UserObjectName>("q_uo") = heat_flux_uo_name;
-    _sim.addKernel(class_name, genName(name(), "heat_flux_kernel"), params);
+    getTHMProblem().addKernel(class_name, genName(name(), "heat_flux_kernel"), params);
   }
 
   {
@@ -176,7 +176,7 @@ HeatTransferFromHeatStructure1Phase::addMooseObjects()
     params.set<Real>("P_hs_unit") = hs.getUnitPerimeter(_hs_side);
     params.set<unsigned int>("n_unit") = hs.getNumberOfUnits();
     params.set<bool>("hs_coord_system_is_cylindrical") = is_cylindrical;
-    _sim.addBoundaryCondition(class_name, genName(name(), "heat_flux_bc"), params);
+    getTHMProblem().addBoundaryCondition(class_name, genName(name(), "heat_flux_bc"), params);
   }
 
   // Transfer the temperature of the solid onto the flow channel
@@ -188,7 +188,7 @@ HeatTransferFromHeatStructure1Phase::addMooseObjects()
     params.set<BoundaryName>("secondary_boundary") = {getSlaveSideName()};
     params.set<BoundaryName>("primary_boundary") = getMasterSideName();
     params.set<std::string>("paired_variable") = HeatConductionModel::TEMPERATURE;
-    _sim.addMaterial(class_name, genName(name(), "T_wall_transfer_mat"), params);
+    getTHMProblem().addMaterial(class_name, genName(name(), "T_wall_transfer_mat"), params);
   }
 
   // Transfer the temperature of the solid onto the flow channel as aux varaible for visualization
@@ -200,7 +200,7 @@ HeatTransferFromHeatStructure1Phase::addMooseObjects()
     params.set<BoundaryName>("paired_boundary") = getMasterSideName();
     params.set<std::vector<VariableName>>("paired_variable") =
         std::vector<VariableName>(1, HeatConductionModel::TEMPERATURE);
-    _sim.addAuxKernel(class_name, genName(name(), "T_wall_transfer"), params);
+    getTHMProblem().addAuxKernel(class_name, genName(name(), "T_wall_transfer"), params);
   }
 }
 

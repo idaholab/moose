@@ -31,7 +31,7 @@ FlowBoundary::init()
     if (hasComponentByName<FlowChannelBase>(_connected_component_name))
     {
       const FlowChannelBase & comp =
-          _sim.getComponentByName<FlowChannelBase>(_connected_component_name);
+          getTHMProblem().getComponentByName<FlowChannelBase>(_connected_component_name);
 
       _fp_name = comp.getFluidPropertiesName();
       _flow_model_id = comp.getFlowModelID();

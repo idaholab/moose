@@ -98,7 +98,7 @@ HeatTransferFromHeatStructure3D1Phase::setupMesh()
       {
         dof_id_type nearest_elem_id = _fch_alignment.getNearestElemID(elem_id);
         if (nearest_elem_id != DofObject::invalid_id)
-          _sim.augmentSparsity(elem_id, nearest_elem_id);
+          getTHMProblem().augmentSparsity(elem_id, nearest_elem_id);
       }
     }
   }
@@ -238,20 +238,22 @@ HeatTransferFromHeatStructure3D1Phase::check() const
 void
 HeatTransferFromHeatStructure3D1Phase::addVariables()
 {
-  _sim.addSimVariable(false, _P_hf_name, _sim.getFlowFEType(), _flow_channel_subdomains);
+  getTHMProblem().addSimVariable(
+      false, _P_hf_name, getTHMProblem().getFlowFEType(), _flow_channel_subdomains);
 
   _P_hf_fn_name = getParam<FunctionName>("P_hf");
-  _sim.addFunctionIC(_P_hf_name, _P_hf_fn_name, _flow_channel_subdomains);
+  getTHMProblem().addFunctionIC(_P_hf_name, _P_hf_fn_name, _flow_channel_subdomains);
 
-  _sim.addSimVariable(
+  getTHMProblem().addSimVariable(
       false, FlowModel::TEMPERATURE_WALL, FEType(CONSTANT, MONOMIAL), _flow_channel_subdomains);
-  _sim.addSimVariable(false, _T_wall_name, FEType(CONSTANT, MONOMIAL), _flow_channel_subdomains);
+  getTHMProblem().addSimVariable(
+      false, _T_wall_name, FEType(CONSTANT, MONOMIAL), _flow_channel_subdomains);
 
   // wall temperature initial condition
-  if (!_sim.hasInitialConditionsFromFile() && !_app.isRestarting())
+  if (!getTHMProblem().hasInitialConditionsFromFile() && !_app.isRestarting())
   {
     const HeatStructureBase & hs = getComponentByName<HeatStructureBase>(_hs_name);
-    _sim.addFunctionIC(_T_wall_name, hs.getInitialT(), _flow_channel_subdomains);
+    getTHMProblem().addFunctionIC(_T_wall_name, hs.getInitialT(), _flow_channel_subdomains);
   }
 }
 
@@ -286,7 +288,7 @@ HeatTransferFromHeatStructure3D1Phase::addMooseObjects()
     params.set<MooseEnum>("direction") = _layered_average_uo_direction;
     params.set<unsigned int>("num_layers") = _num_layers;
     params.set<std::vector<Point>>("points") = fch_positions;
-    _sim.addUserObject(class_name, T_wall_avg_uo_name, params);
+    getTHMProblem().addUserObject(class_name, T_wall_avg_uo_name, params);
   }
   {
     std::string class_name = "SpatialUserObjectAux";
@@ -295,7 +297,7 @@ HeatTransferFromHeatStructure3D1Phase::addMooseObjects()
     params.set<AuxVariableName>("variable") = _T_wall_name;
     params.set<ExecFlagEnum>("execute_on") = execute_on;
     params.set<UserObjectName>("user_object") = T_wall_avg_uo_name;
-    _sim.addAuxKernel(class_name, genName(name(), "T_wall_transfer"), params);
+    getTHMProblem().addAuxKernel(class_name, genName(name(), "T_wall_transfer"), params);
   }
   {
     const std::string class_name = "ADOneD3EqnEnergyHeatFluxFromHeatStructure3D";
@@ -306,7 +308,7 @@ HeatTransferFromHeatStructure3D1Phase::addMooseObjects()
     params.set<UserObjectName>("user_object") = T_wall_avg_uo_name;
     params.set<MaterialPropertyName>("T") = FlowModelSinglePhase::TEMPERATURE;
     params.set<NonlinearVariableName>("variable") = FlowModelSinglePhase::RHOEA;
-    _sim.addKernel(class_name, genName(name(), "heat_flux_kernel"), params);
+    getTHMProblem().addKernel(class_name, genName(name(), "heat_flux_kernel"), params);
   }
 
   const UserObjectName heat_transfer_uo_name = genName(name(), "heat_flux_uo");
@@ -319,7 +321,7 @@ HeatTransferFromHeatStructure3D1Phase::addMooseObjects()
     params.set<MaterialPropertyName>("Hw") = _Hw_1phase_name;
     params.set<MaterialPropertyName>("T") = FlowModelSinglePhase::TEMPERATURE;
     params.set<ExecFlagEnum>("execute_on") = execute_on;
-    _sim.addUserObject(class_name, heat_transfer_uo_name, params);
+    getTHMProblem().addUserObject(class_name, heat_transfer_uo_name, params);
   }
   {
     const std::string class_name = "ADConvectionHeatTransfer3DBC";
@@ -327,6 +329,6 @@ HeatTransferFromHeatStructure3D1Phase::addMooseObjects()
     params.set<std::vector<BoundaryName>>("boundary") = {_boundary};
     params.set<NonlinearVariableName>("variable") = HeatConductionModel::TEMPERATURE;
     params.set<UserObjectName>("ht_uo") = heat_transfer_uo_name;
-    _sim.addBoundaryCondition(class_name, genName(name(), "heat_flux_bc"), params);
+    getTHMProblem().addBoundaryCondition(class_name, genName(name(), "heat_flux_bc"), params);
   }
 }

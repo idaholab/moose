@@ -39,7 +39,8 @@ FlowJunction::init()
       const std::string comp_name = connection._component_name;
       if (hasComponentByName<FlowChannelBase>(comp_name))
       {
-        const FlowChannelBase & comp = _sim.getComponentByName<FlowChannelBase>(comp_name);
+        const FlowChannelBase & comp =
+            getTHMProblem().getComponentByName<FlowChannelBase>(comp_name);
 
         fp_names.push_back(comp.getFluidPropertiesName());
         flow_model_ids.push_back(comp.getFlowModelID());

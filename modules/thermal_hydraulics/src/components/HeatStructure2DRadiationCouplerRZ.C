@@ -102,6 +102,6 @@ HeatStructure2DRadiationCouplerRZ::addMooseObjects()
     params.set<Real>("perimeter") = _perimeters[i];
     params.set<Real>("coupled_perimeter") = _perimeters[j];
     params.set<Real>("stefan_boltzmann_constant") = getParam<Real>("stefan_boltzmann_constant");
-    _sim.addBoundaryCondition(class_name, genName(name(), class_name, i), params);
+    getTHMProblem().addBoundaryCondition(class_name, genName(name(), class_name, i), params);
   }
 }

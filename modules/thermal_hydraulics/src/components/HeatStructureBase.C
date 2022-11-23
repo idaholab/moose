@@ -53,7 +53,7 @@ HeatStructureBase::buildModel()
 {
   const std::string class_name = "HeatConductionModel";
   InputParameters pars = _factory.getValidParams(class_name);
-  pars.set<THMProblem *>("_thm_problem") = &_sim;
+  pars.set<THMProblem *>("_thm_problem") = &getTHMProblem();
   pars.set<HeatStructureBase *>("_hs") = this;
   pars.applyParameters(parameters());
   return _factory.create<HeatConductionModel>(class_name, name(), pars, 0);
@@ -70,7 +70,7 @@ HeatStructureBase::check() const
 {
   Component2D::check();
 
-  bool ics_set = _sim.hasInitialConditionsFromFile() || isParamValid("initial_T");
+  bool ics_set = getTHMProblem().hasInitialConditionsFromFile() || isParamValid("initial_T");
 
   if (!ics_set && !_app.isRestarting())
     logError("Missing initial condition for temperature.");
@@ -106,7 +106,7 @@ HeatStructureBase::addMooseObjects()
     for (unsigned int i = 0; i < _number_of_hs; i++)
     {
       const SolidMaterialProperties & smp =
-          _sim.getUserObject<SolidMaterialProperties>(_material_names[i]);
+          getTHMProblem().getUserObject<SolidMaterialProperties>(_material_names[i]);
 
       Component * comp = (_parent != nullptr) ? _parent : this;
       // if the values were given as constant, allow them to be controlled

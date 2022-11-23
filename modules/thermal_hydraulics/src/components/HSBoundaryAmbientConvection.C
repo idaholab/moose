@@ -45,7 +45,7 @@ HSBoundaryAmbientConvection::check() const
   if (isParamValid("scale_pp"))
   {
     const PostprocessorName & pp_name = getParam<PostprocessorName>("scale_pp");
-    if (!_sim.hasPostprocessor(pp_name))
+    if (!getTHMProblem().hasPostprocessor(pp_name))
       logError("The post-processor name provided for the parameter 'scale_pp' is '" + pp_name +
                "', but no post-processor of this name exists.");
   }
@@ -76,7 +76,7 @@ HSBoundaryAmbientConvection::addMooseObjects()
     if (isParamValid("scale_pp"))
       pars.set<PostprocessorName>("scale_pp") = getParam<PostprocessorName>("scale_pp");
 
-    _sim.addBoundaryCondition(class_name, genName(name(), "bc"), pars);
+    getTHMProblem().addBoundaryCondition(class_name, genName(name(), "bc"), pars);
   }
 
   // Create integral PP for cylindrical heat structures
@@ -92,6 +92,6 @@ HSBoundaryAmbientConvection::addMooseObjects()
     pars.set<RealVectorValue>("axis_dir") = hs.getDirection();
     pars.set<Real>("offset") = hs_cyl->getInnerRadius() - hs_cyl->getAxialOffset();
     pars.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
-    _sim.addPostprocessor(class_name, genSafeName(name(), "integral"), pars);
+    getTHMProblem().addPostprocessor(class_name, genSafeName(name(), "integral"), pars);
   }
 }
