@@ -10,11 +10,6 @@
   ymax = 2
 []
 
-[AuxVariables]
-  [T_forward]
-  []
-[]
-
 [OptimizationReporter]
   type = OptimizationReporter
   parameter_names = 'parameter_results'
@@ -99,13 +94,8 @@
   [fromforwardMesh]
     type = MultiAppCopyTransfer
     from_multi_app = forward
-    source_variable = 'T'
-    variable = 'T_forward'
-  []
-  [toAdjointMesh]
-    type = MultiAppCopyTransfer
     to_multi_app = adjoint
-    source_variable = 'T_forward'
+    source_variable = 'T'
     variable = 'T'
   []
 []

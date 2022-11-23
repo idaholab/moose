@@ -9,10 +9,6 @@
   xmax = 2
   ymax = 2
 []
-[AuxVariables]
-  [temperature_forward]
-  []
-[]
 
 [OptimizationReporter]
   type = OptimizationReporter
@@ -71,6 +67,7 @@
   [fromForward_mesh]
     type = MultiAppCopyTransfer
     from_multi_app = forward
+    to_multi_app = adjoint
     source_variable = 'temperature'
     variable = 'temperature_forward'
   []
@@ -96,12 +93,6 @@
                     misfit/measurement_time
                     misfit/misfit_values
                     params/p1'
-  []
-  [toAdjoint_mesh]
-    type = MultiAppCopyTransfer
-    to_multi_app = adjoint
-    source_variable = 'temperature_forward'
-    variable = 'temperature_forward'
   []
   [fromAdjoint]
     type = MultiAppReporterTransfer

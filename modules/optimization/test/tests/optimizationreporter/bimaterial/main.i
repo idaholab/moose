@@ -48,11 +48,6 @@
   verbose = true
 []
 
-[AuxVariables]
-  [temperature_forward]
-  []
-[]
-
 [MultiApps]
   [forward]
     type = FullSolveMultiApp
@@ -90,17 +85,12 @@
     to_reporters = 'OptimizationReporter/simulation_values'
   []
   #############
-  #copy the temprature variable - we will need this for the compuation of the gradient
+  #copy the temperature variable - we will need this for the computation of the gradient
   [fromforwardMesh]
     type = MultiAppCopyTransfer
     from_multi_app = forward
-    source_variable = 'temperature'
-    variable = 'temperature_forward'
-  []
-  [toAdjointMesh]
-    type = MultiAppCopyTransfer
     to_multi_app = adjoint
-    source_variable = 'temperature_forward'
+    source_variable = 'temperature'
     variable = 'temperature_forward'
   []
   #############

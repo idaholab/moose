@@ -12,13 +12,6 @@
   []
 []
 
-[AuxVariables]
-  [temperature_forward]
-    order = FIRST
-    family = LAGRANGE
-  []
-[]
-
 [OptimizationReporter]
   type = OptimizationReporter
   parameter_names = 'p1'
@@ -139,20 +132,15 @@
     to_reporters = 'OptimizationReporter/adjoint'
   []
 
-  #these are transferring data from subapp to subapp because the adjoint problem
+  # these are transferring data from subapp to subapp because the adjoint problem
   # needs the forward solution to compute the gradient.  Maybe this step could be
   # done on the main app.  The adjoint only passes the adjoint variable (whole mesh)
   # to the main app and the main app computes the gradient from this.
-  [fromForward_temp]
+  [fromForwardtoAdjoint_temp]
     type = MultiAppCopyTransfer
     from_multi_app = forward
-    source_variable = 'temperature'
-    variable = 'temperature_forward'
-  []
-  [toAdjoint_temp]
-    type = MultiAppCopyTransfer
     to_multi_app = adjoint
-    source_variable = 'temperature_forward'
+    source_variable = 'temperature'
     variable = 'temperature_forward'
   []
 []

@@ -10,11 +10,6 @@
   ymax = 2
 []
 
-[AuxVariables]
-  [forwardT]
-  []
-[]
-
 [OptimizationReporter]
   type = OptimizationReporter
   parameter_names = 'heat_source'
@@ -84,16 +79,11 @@
     from_reporters = 'measurement_locations/simulation_values'
     to_reporters = 'OptimizationReporter/simulation_values'
   []
-  [CurrentStateFromForwardNonlinear]
+  ### RUN THE HOMOGENEOUS_FORWARD WITH CURRENT NONLINEAR STATE, PARAMETER_STEP,
+  ### AND EXTRACT SIMULATED DATA AT MEASURMENT POINTS
+  [CurrentStateFromForwardNonlinearToHomogeneousForwardNonlinear]
     type = MultiAppCopyTransfer
     from_multi_app = forward
-    source_variable = 'forwardT'
-    variable = 'forwardT'
-  []
-  ### RUN THE HOMOGENEOUS_FORWARD WITH CURRENT NONLINEAR STATE, PARAMTER_STEP,
-  ### AND EXTRACT SIMULATED DATA AT MEASURMENT POINTS
-  [CurrentStateToHomogeneousForwardNonlinear]
-    type = MultiAppCopyTransfer
     to_multi_app = homogeneous_forward
     source_variable = 'forwardT'
     variable = 'forwardT'
@@ -124,6 +114,7 @@
   ### AND EXTRACT GRADIENT
   [CurrentStateToAdjointNonlinear]
     type = MultiAppCopyTransfer
+    from_multi_app = forward
     to_multi_app = adjoint
     source_variable = 'forwardT'
     variable = 'forwardT'
