@@ -19,7 +19,7 @@ P_out = 101325  # Pa
     z_blockage = '0.60325 0.67945'
     index_blockage = '18 19 20 21 26 27 28 29 34 35 36 37 42 43 44 45'
     reduction_blockage = '0.83 0.65 0.65 0.83 0.65 0.30 0.30 0.65 0.65 0.30 0.30 0.65 0.83 0.65 0.65 0.83'
-    k_blockage = '0.0 0.0 0.0 0.0 0.0 0.52 0.52 0.0 0.0 0.52 0.52 0.0 0.0 0.0 0.0 0.0'
+    k_blockage = '0.0 0.0 0.0 0.0 0.0 0.2 0.2 0.0 0.0 0.2 0.2 0.0 0.0 0.0 0.0 0.0'
     spacer_z = '0.3683 1.3843'
     spacer_k = '1.14 1.14'
   []
@@ -96,7 +96,7 @@ P_out = 101325  # Pa
   segregated = false
   staggered_pressure = false
   monolithic_thermal = false
-  interpolation_scheme = 'upwind'
+  interpolation_scheme = 'exponential'
 []
 
 [ICs]

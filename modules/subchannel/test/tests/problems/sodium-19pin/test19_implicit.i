@@ -80,6 +80,7 @@ P_out = 2.0e5 # Pa
   segregated = true
   staggered_pressure = false
   monolithic_thermal = false
+  interpolation_scheme = 'exponential'
 []
 
 [ICs]
