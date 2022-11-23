@@ -163,7 +163,7 @@ CrystalPlasticityStressUpdateBase::getSlipSystems()
     for (const auto i : make_range(_number_slip_systems))
     {
       // directly grab the raw data and scale it by the unit cell dimension
-      for (const auto j : make_range(_reader.getData(i).size()))
+      for (const auto j : index_range(_reader.getData(i)))
       {
         if (j < LIBMESH_DIM)
           _slip_plane_normal[i](j) = _reader.getData(i)[j] / _unit_cell_dimension[j];

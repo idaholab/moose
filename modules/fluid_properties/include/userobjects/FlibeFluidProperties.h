@@ -38,16 +38,6 @@ public:
    * @return pressure (Pa)
    */
   virtual Real p_from_v_e(Real v, Real e) const override;
-
-  /**
-   * Pressure and its derivatives from specific volume and specific internal energy
-   *
-   * @param[in] v        specific volume (m$^3$/kg)
-   * @param[in] e        specific internal energy (J/kg)
-   * @param[out] p       pressure (Pa)
-   * @param[out] dp_dv   derivative of pressure w.r.t. specific volume
-   * @param[out] dp_de   derivative of pressure w.r.t. specific internal energy
-   */
   virtual void p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Real & dp_de) const override;
   virtual void p_from_v_e(const DualReal & v,
                           const DualReal & e,
@@ -55,6 +45,14 @@ public:
                           DualReal & dp_dv,
                           DualReal & dp_de) const override;
 
+  /**
+   * Temperature and its derivatives from pressure and specific enthalpy
+   *
+   * @param[in] h       specific enthalpy (J/kg)
+   * @param[out] rho    density (kg/m$^3$)
+   * @param[out] T       temperature (K)
+   */
+  virtual Real T_from_p_rho(Real p, Real rho) const;
   /**
    * Temperature from specific volume and specific internal energy
    *
@@ -79,6 +77,15 @@ public:
                           DualReal & T,
                           DualReal & dT_dv,
                           DualReal & dT_de) const override;
+
+  /**
+   * Temperature and its derivatives from pressure and specific enthalpy
+   *
+   * @param[in] h       specific enthalpy (J/kg)
+   * @param[in] p       pressure (Pa)
+   * @param[out] T      temperature (K)
+   */
+  virtual Real T_from_p_h(Real p, Real h) const override;
 
   /**
    * Isobaric specific heat from specific volume and specific internal energy
@@ -181,7 +188,6 @@ public:
    * @return specific volume (m$^3$/kg)
    */
   virtual Real v_from_p_T(Real p, Real T) const override;
-
   virtual DualReal v_from_p_T(const DualReal & p, const DualReal & T) const override;
 
   /**
@@ -234,6 +240,14 @@ public:
    * @param[out] de_dT   derivative of specific internal energy w.r.t. temperature
    */
   virtual void e_from_p_T(Real p, Real T, Real & e, Real & de_dp, Real & de_dT) const override;
+
+  /**
+   * Specific energy from pressure and density
+   *
+   * @param[in] p            pressure (Pa)
+   * @param[in] rho        density (kg/m3)
+   */
+  virtual Real e_from_p_rho(Real p, Real rho) const override;
 
   /**
    * Isobaric specific heat capacity from pressure and temperature

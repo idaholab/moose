@@ -92,12 +92,10 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [simple_fluid] # same properties used for both phases
-      type = SimpleFluidProperties
-      bulk_modulus = 10 # so pumping does not result in excessive porepressure
-    []
+[FluidProperties]
+  [simple_fluid] # same properties used for both phases
+    type = SimpleFluidProperties
+    bulk_modulus = 10 # so pumping does not result in excessive porepressure
   []
 []
 

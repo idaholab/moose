@@ -16,7 +16,7 @@ class ReadExecutorParamsAction : public MooseObjectAction
 public:
   static InputParameters validParams();
 
-  ReadExecutorParamsAction(InputParameters params);
+  ReadExecutorParamsAction(const InputParameters & params);
 
   virtual void act() override;
 

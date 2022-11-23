@@ -10,23 +10,17 @@
 #pragma once
 
 #include "Component.h"
+#include "DiscreteLineSegmentInterface.h"
 #include "libmesh/enum_elem_type.h"
 
 /**
  * Intermediate class for all geometrical components (i.e components that have position, direction,
  * etc. in space - they generate a mesh)
  */
-class GeometricalComponent : public Component
+class GeometricalComponent : public Component, public DiscreteLineSegmentInterface
 {
 public:
   GeometricalComponent(const InputParameters & parameters);
-
-  virtual Point getPosition() const { return _position; }
-  virtual RealVectorValue getDirection() const { return _dir; }
-  virtual Real getRotation() const { return _rotation; }
-
-  virtual unsigned int getNumElems() const { return _n_elem; }
-  virtual Real getLength() const { return _length; }
 
   /**
    * Gets the subdomain names for this component
@@ -64,7 +58,6 @@ protected:
                          dof_id_type node7,
                          dof_id_type node8);
   virtual void check() const override;
-  virtual void computeMeshTransformation();
   virtual void setupMesh() override;
 
   virtual void buildMesh() = 0;
@@ -90,30 +83,6 @@ protected:
 
   const FunctionName & getVariableFn(const FunctionName & fn_param_name);
 
-  /// Physical position in the space
-  const Point & _position;
-
-  /// Direction this flow channel is going to
-  const RealVectorValue & _dir;
-
-  /// Rotation of the component around x-axis in non-displaced space
-  const Real & _rotation;
-
-  /// Length of each subsection of the geometric component
-  std::vector<Real> _lengths;
-
-  /// Total length of the geometric component along the main axis
-  Real _length;
-
-  /// Number of elements in each subsection of the geometric component
-  const std::vector<unsigned int> & _n_elems;
-
-  /// Number of elements along the main axis
-  const unsigned int _n_elem;
-
-  /// Number of sections in the geometric component
-  const unsigned int _n_sections;
-
   /// Axial region names
   const std::vector<std::string> & _axial_region_names;
 
@@ -133,11 +102,6 @@ protected:
   std::vector<dof_id_type> _node_ids;
   /// Elements ids of this flow channel component
   std::vector<dof_id_type> _elem_ids;
-
-  /// Rotational matrix about x-axis
-  RealTensorValue _Rx;
-  /// Rotational matrix to place the node in its final position
-  RealTensorValue _R;
 
 private:
   void generateNodeLocations();

@@ -85,14 +85,12 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [fluid0]
-      type = SimpleFluidProperties
-    []
-    [fluid1]
-      type = SimpleFluidProperties
-    []
+[FluidProperties]
+  [fluid0]
+    type = SimpleFluidProperties
+  []
+  [fluid1]
+    type = SimpleFluidProperties
   []
 []
 

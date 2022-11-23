@@ -24,7 +24,7 @@ PartitionerAction::validParams()
   return params;
 }
 
-PartitionerAction::PartitionerAction(InputParameters params) : MooseObjectAction(params) {}
+PartitionerAction::PartitionerAction(const InputParameters & params) : MooseObjectAction(params) {}
 
 void
 PartitionerAction::act()

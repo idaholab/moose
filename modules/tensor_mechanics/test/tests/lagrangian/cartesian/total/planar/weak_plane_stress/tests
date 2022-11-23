@@ -1,0 +1,64 @@
+[Tests]
+  issues = '#21757'
+  design = 'source/kernels/lagrangian/TotalLagrangianWeakPlaneStress.md'
+  [jacobian_small_unstabilized]
+    type = PetscJacobianTester
+    input = 'convergence.i'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+    run_sim = true
+    cli_args = "GlobalParams/large_kinematics=false GlobalParams/stabilize_strain=false"
+    requirement = 'Weak plane stress Jacobian is exact with relative tolerance of 1e-6 for small '
+                  'displacements without stabilization.'
+  []
+  [jacobian_small_stabilized]
+    type = PetscJacobianTester
+    input = 'convergence.i'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+    run_sim = true
+    cli_args = "GlobalParams/large_kinematics=false GlobalParams/stabilize_strain=true"
+    requirement = 'Weak plane stress Jacobian is exact with relative tolerance of 1e-6 for small '
+                  'displacements with stabilization.'
+  []
+  [jacobian_large_unstabilized]
+    type = PetscJacobianTester
+    input = 'convergence.i'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+    run_sim = true
+    cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=false"
+    requirement = 'Weak plane stress Jacobian is exact with relative tolerance of 1e-6 for large '
+                  'displacements without stabilization.'
+  []
+  [jacobian_large_stabilized]
+    type = PetscJacobianTester
+    input = 'convergence.i'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+    run_sim = true
+    cli_args = "GlobalParams/large_kinematics=true GlobalParams/stabilize_strain=true"
+    requirement = 'Weak plane stress Jacobian is exact with relative tolerance of 1e-6 for large '
+                  'displacements with stabilization.'
+  []
+  [correctness]
+    requirement = "Using weak plane stress,"
+    [2D]
+      type = CSVDiff
+      input = 'pull_2D.i'
+      csvdiff = 'pull_3D_out.csv'
+      abs_zero = 1E-6
+      rel_err = 1e-6
+      cli_args = "Outputs/file_base=pull_3D_out"
+      detail = "the 2D weak plane stress result should match"
+    []
+    [3D]
+      type = CSVDiff
+      input = 'pull_3D.i'
+      csvdiff = 'pull_3D_out.csv'
+      abs_zero = 1E-6
+      rel_err = 1e-6
+      detail = "the 3D result where the out-of-plane stress is zero."
+    []
+  []
+[]

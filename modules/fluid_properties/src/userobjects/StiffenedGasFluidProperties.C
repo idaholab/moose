@@ -50,7 +50,7 @@ StiffenedGasFluidProperties::StiffenedGasFluidProperties(const InputParameters &
     _e_c(getParam<Real>("e_c"))
 {
   if (_cv == 0.0)
-    mooseError(name(), ": cv cannot be zero.");
+    mooseError("cv cannot be zero.");
   _cp = _cv * _gamma;
 }
 
@@ -612,9 +612,21 @@ StiffenedGasFluidProperties::k_from_p_T(
   dk_dp = 0.0;
   dk_dT = 0.0;
 }
+Real
+StiffenedGasFluidProperties::beta_from_p_T(Real /* pressure */, Real temperature) const
+{
+  return 1 / temperature;
+}
+void
+StiffenedGasFluidProperties::beta_from_p_T(
+    Real pressure, Real temperature, Real & beta, Real & dbeta_dp, Real & dbeta_dT) const
+{
+  beta = this->beta_from_p_T(pressure, temperature);
+  dbeta_dp = 0.0;
+  dbeta_dT = -1 / (temperature * temperature);
+}
 
 Real StiffenedGasFluidProperties::pp_sat_from_p_T(Real /*p*/, Real /*T*/) const
 {
-  mooseError(
-      name(), ": ", __PRETTY_FUNCTION__, " not implemented. Use a real fluid property class!");
+  mooseError(__PRETTY_FUNCTION__, " not implemented. Use a real fluid property class!");
 }

@@ -1,8 +1,8 @@
 rpv_core_gap_size = 0.15
 
 core_outer_radius = 2
-rpv_inner_radius = ${fparse 2 + rpv_core_gap_size}
-rpv_outer_radius = ${fparse 2.5 + rpv_core_gap_size}
+rpv_inner_radius = '${fparse 2 + rpv_core_gap_size}'
+rpv_outer_radius = '${fparse 2.5 + rpv_core_gap_size}'
 
 rpv_outer_htc = 10 # W/m^2/K
 rpv_outer_Tinf = 300 # K
@@ -117,8 +117,6 @@ rpv_blocks = '3'
     secondary_subdomain = 10001
     gap_flux_models = 'radiation conduction'
     gap_geometry_type = 'CYLINDER'
-    cylinder_axis_point_1 = '0 0 0'
-    cylinder_axis_point_2 = '0 0 5'
   []
 []
 
@@ -210,10 +208,8 @@ rpv_blocks = '3'
   type = Steady
 
   petsc_options = '-snes_converged_reason -pc_svd_monitor'
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -mat_mffd_err -pc_factor_shift_type '
-                        '-pc_factor_shift_amount'
-  petsc_options_value = ' lu       superlu_dist                  1e-5          NONZERO               '
-                        '1e-15'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -mat_mffd_err -pc_factor_shift_type -pc_factor_shift_amount'
+  petsc_options_value = ' lu       superlu_dist                  1e-5          NONZERO               1e-15'
   snesmf_reuse_base = false
 
   nl_rel_tol = 1e-10

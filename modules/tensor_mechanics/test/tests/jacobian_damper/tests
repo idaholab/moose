@@ -22,4 +22,11 @@
     requirement = "The module shall be able to apply a damper on the undisplaced mesh to limit the "
                   "element Jacobian change over nonlinear iterations."
   []
+  [ref_damper_block_restricted]
+    type = 'Exodiff'
+    input = 'block_restriction.i'
+    exodiff = 'block_restriction_out.e'
+    requirement = "The module shall be able to apply a damper on certain blocks of the undisplaced "
+                  "mesh to limit the element Jacobian change over nonlinear iterations."
+  []
 []

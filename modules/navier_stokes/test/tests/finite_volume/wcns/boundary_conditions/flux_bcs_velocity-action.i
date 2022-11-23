@@ -25,6 +25,12 @@ inlet_velocity = 0.001
   []
 []
 
+[FluidProperties]
+  [fp]
+    type = FlibeFluidProperties
+  []
+[]
+
 [Modules]
   [NavierStokesFV]
     compressibility = 'weakly-compressible'
@@ -63,11 +69,6 @@ inlet_velocity = 0.001
     external_heat_source = 'power_density'
     passive_scalar_source = 2.1
   []
-  [FluidProperties]
-    [fp]
-      type = FlibeFluidProperties
-    []
-  []
 []
 
 [Postprocessors]
@@ -100,8 +101,8 @@ inlet_velocity = 0.001
 [Materials]
   [const_functor]
     type = ADGenericFunctorMaterial
-    prop_names = 'cp k mu dcp_dt'
-    prop_values = '${cp} ${k} ${mu} 0'
+    prop_names = 'cp k mu'
+    prop_values = '${cp} ${k} ${mu}'
   []
   [rho]
     type = RhoFromPTFunctorMaterial

@@ -1,16 +1,24 @@
+L = 2
+l = 1
+q1 = 1
+q2 = 2
+uR = 1
+D1 = 1
+D2 = 2
+
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
     dim = 1
     nx = 10
-    xmax = 2
+    xmax = ${L}
   []
   [subdomain1]
     input = gen
     type = SubdomainBoundingBoxGenerator
-    bottom_left = '1.0 0 0'
+    bottom_left = '${l} 0 0'
     block_id = 1
-    top_right = '2.0 1.0 0'
+    top_right = '${L} 1.0 0'
   []
   [interface_primary]
     input = subdomain1
@@ -40,20 +48,26 @@
     variable = u
     coeff = 'left'
     block = 0
+    coeff_interp_method = average
   []
-  [gradient_creating]
+  [source_left]
     type = FVBodyForce
     variable = u
+    function = ${q1}
+    block = 0
   []
   [diff_right]
     type = FVDiffusion
     variable = v
     coeff = 'right'
     block = 1
+    coeff_interp_method = average
   []
-  [gradient_creating_2]
+  [source_right]
     type = FVBodyForce
     variable = v
+    function = ${q2}
+    block = 1
   []
 []
 
@@ -67,21 +81,16 @@
     subdomain2 = '1'
     coeff1 = 'left'
     coeff2 = 'right'
+    coeff_interp_method = average
   []
 []
 
 [FVBCs]
-  [left]
-    type = FVDirichletBC
-    variable = u
-    boundary = 'left'
-    value = 1
-  []
   [v_left]
     type = FVDirichletBC
     variable = v
     boundary = 'right'
-    value = 0
+    value = ${uR}
   []
 []
 
@@ -90,13 +99,13 @@
     type = ADGenericFunctorMaterial
     block = '0'
     prop_names = 'left'
-    prop_values = '1'
+    prop_values = '${D1}'
   []
   [block1]
     type = ADGenericFunctorMaterial
     block = '1'
     prop_names = 'right'
-    prop_values = '1'
+    prop_values = '${D2}'
   []
 []
 

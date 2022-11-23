@@ -30,4 +30,13 @@
       detail = 'in three dimensions.'
     []
   []
+
+  [bad_order]
+    type = 'RunException'
+    input = 'monomial-const-1d.i'
+    expect_err = "This type is only meant for a CONSTANT MONOMIAL finite element basis\. You have requested a MONOMIAL family and order FIRST"
+    cli_args = "Variables/u/type=MooseVariableConstMonomial Variables/u/order=FIRST"
+    issues = '#9836'
+    requirement = 'The system shall error if a user requests a constant monomial finite element variable type with either a non-monomial family or non-constant order.'
+  []
 []

@@ -27,6 +27,15 @@
     ad_indexing_type = 'global'
     valgrind = HEAVY
   []
+  [initialize-var-from-exodus]
+    type = 'Exodiff'
+    input = 2d-rc-action-nulltr.i
+    exodiff = 2d-rc-action-nulltr_out.e
+    method = "!dbg"
+    requirement = 'The system shall be able to initialize variables added by NSFV action from the mesh file.'
+    ad_indexing_type = 'global'
+    prereq = free-slip-action
+  []
   [no-slip]
     type = 'Exodiff'
     input = 2d-rc-no-slip.i
@@ -185,6 +194,7 @@
     issues = '#16948'
     ad_indexing_type = 'global'
     design = 'NSFVEnergyAmbientConvection.md'
+    valgrind = none
   []
   [ambient-convection-action]
     type = 'CSVDiff'
@@ -194,6 +204,7 @@
     issues = '#19472'
     ad_indexing_type = 'global'
     design = 'NSFVEnergyAmbientConvection.md'
+    valgrind = none
   []
   [triangles]
     requirement = 'The system shall be able to run incompressible Navier-Stokes channel-flow simulations with'

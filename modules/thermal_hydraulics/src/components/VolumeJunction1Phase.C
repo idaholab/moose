@@ -81,9 +81,6 @@ VolumeJunction1Phase::check() const
 {
   FlowJunction1Phase::check();
 
-  if (_flow_model_id != THM::FM_SINGLE_PHASE)
-    logModelNotImplementedError(_flow_model_id);
-
   bool ics_set =
       _sim.hasInitialConditionsFromFile() ||
       (isParamValid("initial_p") && isParamValid("initial_T") && isParamValid("initial_vel_x") &&

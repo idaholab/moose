@@ -87,42 +87,16 @@ public:
   // throwing mooseError's from them instead of silently doing nothing (e.g.
   // reinitNodes, reinitAux, prepareLowerD, etc.).
 
-  virtual void prepare() override final
-  {
-    // mooseError("prepare not supported by MooseVariableFVBase");
-  }
-  virtual void prepareNeighbor() override final
-  {
-    // mooseError("prepareNeighbor not supported by MooseVariableFVBase");
-  }
-  virtual void prepareAux() override final
-  {
-    // mooseError("prepareAux not supported by MooseVariableFVBase");
-  }
-  virtual void reinitNode() override final
-  {
-    // mooseError("reinitNode not supported by MooseVariableFVBase");
-  }
-  virtual void reinitNodes(const std::vector<dof_id_type> & /*nodes*/) override final
-  {
-    // mooseError("reinitNodes not supported by MooseVariableFVBase");
-  }
-  virtual void reinitNodesNeighbor(const std::vector<dof_id_type> & /*nodes*/) override final
-  {
-    // mooseError("reinitNodesNeighbor not supported by MooseVariableFVBase");
-  }
-  virtual void reinitAux() override final
-  {
-    // mooseError("reinitAux not supported by MooseVariableFVBase");
-  }
-  virtual void reinitAuxNeighbor() override final
-  {
-    // mooseError("reinitAuxNeighbor not supported by MooseVariableFVBase");
-  }
-  virtual void prepareLowerD() override final
-  {
-    // mooseError("prepareLowerD not supported by MooseVariableFVBase");
-  }
+  virtual void prepare() override final {}
+  virtual void prepareNeighbor() override final {}
+  virtual void prepareAux() override final;
+  virtual void reinitNode() override final {}
+  virtual void reinitNodes(const std::vector<dof_id_type> & /*nodes*/) override final {}
+  virtual void reinitNodesNeighbor(const std::vector<dof_id_type> & /*nodes*/) override final {}
+  virtual void reinitAux() override final {}
+  virtual void reinitAuxNeighbor() override final {}
+  virtual void prepareLowerD() override final {}
+
   virtual const dof_id_type & nodalDofIndex() const override final
   {
     mooseError("nodalDofIndex not supported by MooseVariableFVBase");
@@ -160,10 +134,7 @@ public:
   {
     // mooseError("computeNodalValues not supported by MooseVariableFVBase");
   }
-  virtual const std::vector<dof_id_type> & dofIndicesLower() const override final
-  {
-    mooseError("dofIndicesLower not supported by MooseVariableFVBase");
-  }
+  virtual const std::vector<dof_id_type> & dofIndicesLower() const override final;
 
   unsigned int numberOfDofs() const override final { return _element_data->numberOfDofs(); }
 
@@ -173,6 +144,8 @@ public:
   }
 
   virtual bool isNodal() const override final { return false; }
+
+  bool hasDoFsOnNodes() const override final { return false; }
 
   virtual bool isNodalDefined() const override final { return false; }
 
@@ -220,6 +193,10 @@ public:
   const FieldVariableValue & vectorTagValue(TagID tag) const override
   {
     return _element_data->vectorTagValue(tag);
+  }
+  const DoFValue & vectorTagDofValue(TagID tag) const override
+  {
+    return _element_data->vectorTagDofValue(tag);
   }
   const FieldVariableValue & matrixTagValue(TagID tag)
   {
@@ -459,22 +436,6 @@ public:
   ADReal getElemValue(const Elem * elem) const;
 
   /**
-   * Get the solution value with derivative seeding on the \p neighbor element. If the neighbor
-   * is null or this variable doesn't exist on the neighbor element's subdomain, then we compute a
-   * neighbor value based on any Dirichlet boundary conditions associated with the face information,
-   * or absent that we assume a zero gradient and simply return the \p elem_value
-   * @param neighbor The \p neighbor element that we want to retrieve the solution value for
-   * @param fi The face information object
-   * @param elem_value The solution value on the "element". This value may be used for computing the
-   * neighbor value if the neighbor is null or this variable doesn't exist on the neighbor subdomain
-   * @return The neighbor solution value with derivative seeding according to the associated degree
-   * of freedom
-   */
-  ADReal getNeighborValue(const Elem * const neighbor,
-                          const FaceInfo & fi,
-                          const ADReal & elem_value) const;
-
-  /**
    * Compute or retrieve from cache the solution value on an internal face using linear
    * interpolation.
    * @param fi The face information object
@@ -494,12 +455,14 @@ public:
   template <typename FaceCallingArg>
   ADReal getInternalFaceValue(const FaceCallingArg & face) const;
 
-protected:
+  void setActiveTags(const std::set<TagID> & vtags) override;
+
   /**
    * @return whether \p fi is an internal face for this variable
    */
-  bool isInternalFace(const FaceInfo & fi) const;
+  bool isInternalFace(const FaceInfo & fi) const override;
 
+protected:
   /**
    * @return whether \p fi is a Dirichlet boundary face for this variable
    */
@@ -520,7 +483,8 @@ protected:
   /**
    * @return the extrapolated value on the boundary face associated with \p fi
    */
-  virtual ADReal getExtrapolatedBoundaryFaceValue(const FaceInfo & fi) const;
+  virtual ADReal getExtrapolatedBoundaryFaceValue(const FaceInfo & fi,
+                                                  bool two_term_expansion) const;
 
 private:
   using MooseVariableField<OutputType>::evaluate;
@@ -762,6 +726,22 @@ typename MooseVariableFV<OutputType>::DotType
 MooseVariableFV<OutputType>::evaluateDot(const SingleSidedFaceArg & face, unsigned int) const
 {
   return evaluateFaceDotHelper(face);
+}
+
+template <typename OutputType>
+void
+MooseVariableFV<OutputType>::setActiveTags(const std::set<TagID> & vtags)
+{
+  _element_data->setActiveTags(vtags);
+  _neighbor_data->setActiveTags(vtags);
+}
+
+template <typename OutputType>
+const std::vector<dof_id_type> &
+MooseVariableFV<OutputType>::dofIndicesLower() const
+{
+  static const std::vector<dof_id_type> empty;
+  return empty;
 }
 
 template <>

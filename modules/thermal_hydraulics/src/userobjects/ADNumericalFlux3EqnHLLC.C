@@ -51,8 +51,6 @@ ADNumericalFlux3EqnHLLC::calcFlux(const std::vector<ADReal> & U1,
   const ADReal rhoEA2 = U2[THM3Eqn::CONS_VAR_RHOEA];
   const ADReal A2 = U2[THM3Eqn::CONS_VAR_AREA];
 
-  const ADReal A_flow = std::min(A1, A2);
-
   // reference transformation normal
   const ADReal & nx = nLR_dot_d;
 
@@ -117,6 +115,8 @@ ADNumericalFlux3EqnHLLC::calcFlux(const std::vector<ADReal> & U1,
   const ADReal rhouRs = omeg2 * ((s2 - q2) * rhou2 + (ps - p2) * nx);
   const ADReal rhoERs = omeg2 * ((s2 - q2) * rhoE2 - p2 * q2 + ps * sm);
 
+  const ADReal A_flow = computeFlowArea(U1, U2);
+
   // compute the fluxes
   FL.resize(THM3Eqn::N_EQ);
   if (s1 > 0.0)
@@ -163,4 +163,11 @@ ADNumericalFlux3EqnHLLC::calcFlux(const std::vector<ADReal> & U1,
 
   const ADReal A_wall_R = A2 - A_flow;
   FR[THM3Eqn::EQ_MOMENTUM] += p2 * A_wall_R;
+}
+
+ADReal
+ADNumericalFlux3EqnHLLC::computeFlowArea(const std::vector<ADReal> & U1,
+                                         const std::vector<ADReal> & U2) const
+{
+  return std::min(U1[THM3Eqn::CONS_VAR_AREA], U2[THM3Eqn::CONS_VAR_AREA]);
 }

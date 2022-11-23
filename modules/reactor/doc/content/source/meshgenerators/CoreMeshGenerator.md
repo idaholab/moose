@@ -8,7 +8,7 @@ This object is designed to be used in the Reactor MeshGenerator workflow, which 
 
 The `CoreMeshGenerator` object generates core-like reactor geometry structures in either square or hexagonal geometries with block ID assignments and reporting (extra integer) IDs, as described in [`CartesianIDPatternedMeshGenerator`](CartesianIDPatternedMeshGenerator.md and [`HexIDPatternedMeshGenerator`](HexIDPatternedMeshGenerator.md). There is expected to only be a single `CoreMeshGenerator` in a Mesh definition.
 
-This object automates the use and functionality of the [`CartesianIDPatternedMeshGenerator`](CartesianIDPatternedMeshGenerator.md) for cartesian  reactor geometry, [`HexIDPatternedMeshGenerator`](HexIDPatternedMeshGenerator.md) for hexagonal reactor geometry and, if extruding to three dimensions, the [`FancyExtruderGenerator'](FancyExtruderGenerator.md) through the use of the `MeshSubgenerator` functionality and supporting functionality from [`RenameBoundaryGenerator`](RenameBoundaryGenerator.md) and [`PlaneIDMeshGenerator'](PlaneIDMeshGenerator.md). In addition to the functionality of the `MeshGenerators` used, this object also automates boundary ID and name assignment.
+This object automates the use and functionality of the [`CartesianIDPatternedMeshGenerator`](CartesianIDPatternedMeshGenerator.md) for cartesian  reactor geometry, [`HexIDPatternedMeshGenerator`](HexIDPatternedMeshGenerator.md) for hexagonal reactor geometry and, if extruding to three dimensions, the [`AdvancedExtruderGenerator'](AdvancedExtruderGenerator.md) through the use of the `MeshSubgenerator` functionality and supporting functionality from [`RenameBoundaryGenerator`](RenameBoundaryGenerator.md) and [`PlaneIDMeshGenerator'](PlaneIDMeshGenerator.md). In addition to the functionality of the `MeshGenerators` used, this object also automates boundary ID and name assignment.
 
 In addition to the functionality of [`CartesianIDPatternedMeshGenerator`](CartesianIDPatternedMeshGenerator.md) or [`HexIDPatternedMeshGenerator`](HexIDPatternedMeshGenerator.md), this object allows for the definition of "empty" lattice locations using `MeshSubgenerators`. This is achieved through the use of creating "dummy" assembly meshes via [`CartesianMeshGenerator`](CartesianMeshGenerator.md) or [`HexagonConcentricCircleAdaptiveBoundaryMeshGenerator`](HexagonConcentricCircleAdaptiveBoundaryMeshGenerator.md) respectively. These assemblies are then removed after the core mesh creation via [`BlockDeletionGenerator`](BlockDeletionGenerator.md).
 
@@ -28,7 +28,13 @@ If the core is extruded to three dimensions the top-most boundary ID must be ass
 
 !listing modules/reactor/test/tests/meshgenerators/core_mesh_generator/core.i block=Mesh
 
-!media reactor/meshgenerators/core_mesh_generator.png style=width:60%;
+This is the resulting mesh block layout, where by default a single block is assigned to all of the quadrilateral elements in the mesh:
+
+!media reactor/meshgenerators/core_mesh_generator.png style=width:40%;
+
+This is the resulting "region_id" extra element integer layout, which was chosen by setting the region IDs for each of the constituent pins and assemblies:
+
+!media reactor/meshgenerators/core_mesh_generator_rid.png style=width:40%;
 
 !syntax parameters /Mesh/CoreMeshGenerator
 

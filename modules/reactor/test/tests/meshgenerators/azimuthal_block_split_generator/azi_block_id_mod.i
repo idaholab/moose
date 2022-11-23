@@ -13,7 +13,7 @@
     polygon_size = 5.0
     preserve_volumes = true
   []
-  [./cd_azi_define]
+  [cd_azi_define]
     type = AzimuthalBlockSplitGenerator
     input = cd
     start_angle = 280

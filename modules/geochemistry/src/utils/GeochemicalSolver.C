@@ -43,7 +43,8 @@ GeochemicalSolver::GeochemicalSolver(unsigned num_basis,
     _max_ionic_strength(max_ionic_strength),
     _ramp_max_ionic_strength(ramp_max_ionic_strength),
     _evaluate_kin_always(evaluate_kin_always),
-    _input_kin_mole_additions(_num_kin)
+    _input_mole_additions(_num_basis + _num_kin),
+    _input_dmole_additions(_num_basis + _num_kin, _num_basis + _num_kin)
 {
   if (_ramp_max_ionic_strength > _max_iter)
     mooseError("GeochemicalSolver: ramp_max_ionic_strength must be less than max_iter");
@@ -65,6 +66,12 @@ GeochemicalSolver::setMaxInitialResidual(Real max_initial_residual)
   if (max_initial_residual <= 0.0)
     mooseError("GeochemicalSolver: max_initial_residual must be positive");
   _max_initial_residual = max_initial_residual;
+}
+
+Real
+GeochemicalSolver::getMaxInitialResidual() const
+{
+  return _max_initial_residual;
 }
 
 Real
@@ -269,8 +276,9 @@ GeochemicalSolver::reduceInitialResidual(GeochemicalSystem & egs,
     egs.setAlgebraicVariables(new_molality_and_pot);
     if (_evaluate_kin_always)
     {
-      egs.setKineticRates(dt, mole_additions, dmole_additions);
-      addKineticInputMoleAdditions(mole_additions);
+      mole_additions = _input_mole_additions;
+      dmole_additions = _input_dmole_additions;
+      egs.addKineticRates(dt, mole_additions, dmole_additions);
     }
     _abs_residual = computeResidual(egs, _residual, mole_additions);
     if (_abs_residual < initial_r)
@@ -281,8 +289,9 @@ GeochemicalSolver::reduceInitialResidual(GeochemicalSystem & egs,
     egs.setAlgebraicVariables(new_molality_and_pot);
     if (_evaluate_kin_always)
     {
-      egs.setKineticRates(dt, mole_additions, dmole_additions);
-      addKineticInputMoleAdditions(mole_additions);
+      mole_additions = _input_mole_additions;
+      dmole_additions = _input_dmole_additions;
+      egs.addKineticRates(dt, mole_additions, dmole_additions);
     }
     _abs_residual = computeResidual(egs, _residual, mole_additions);
     if (_abs_residual < initial_r)
@@ -294,8 +303,9 @@ GeochemicalSolver::reduceInitialResidual(GeochemicalSystem & egs,
     egs.setAlgebraicVariables(new_molality_and_pot);
     if (_evaluate_kin_always)
     {
-      egs.setKineticRates(dt, mole_additions, dmole_additions);
-      addKineticInputMoleAdditions(mole_additions);
+      mole_additions = _input_mole_additions;
+      dmole_additions = _input_dmole_additions;
+      egs.addKineticRates(dt, mole_additions, dmole_additions);
     }
     _abs_residual = computeResidual(egs, _residual, mole_additions);
   }
@@ -315,8 +325,9 @@ GeochemicalSolver::solveSystem(GeochemicalSystem & egs,
   tot_iter = 0;
   unsigned num_swaps = 0;
 
-  for (unsigned k = 0; k < _num_kin; ++k)
-    _input_kin_mole_additions(k) = mole_additions(k + _num_basis);
+  // capture the inputs expressed in the current basis
+  _input_mole_additions = mole_additions;
+  _input_dmole_additions = dmole_additions;
 
   const ModelGeochemicalDatabase & mgd = egs.getModelGeochemicalDatabase();
 
@@ -334,8 +345,11 @@ GeochemicalSolver::solveSystem(GeochemicalSystem & egs,
         std::min(1.0, (iter + 1.0) / (_ramp_max_ionic_strength + 1.0)) * _max_ionic_strength;
     _is.setMaxIonicStrength(max_is0);
     _is.setMaxStoichiometricIonicStrength(max_is0);
-    egs.setKineticRates(dt, mole_additions, dmole_additions);
-    addKineticInputMoleAdditions(mole_additions);
+
+    mole_additions = _input_mole_additions;
+    dmole_additions = _input_dmole_additions;
+    egs.addKineticRates(dt, mole_additions, dmole_additions);
+
     _abs_residual = computeResidual(egs, _residual, mole_additions);
     bool reducing_initial_molalities = (_abs_residual > _max_initial_residual);
     const unsigned max_tries =
@@ -367,8 +381,9 @@ GeochemicalSolver::solveSystem(GeochemicalSystem & egs,
            << mgd.basis_species_name.at(egs.getChargeBalanceBasisIndex()) << std::endl;
       if (_evaluate_kin_always)
       {
-        egs.setKineticRates(dt, mole_additions, dmole_additions);
-        addKineticInputMoleAdditions(mole_additions);
+        mole_additions = _input_mole_additions;
+        dmole_additions = _input_dmole_additions;
+        egs.addKineticRates(dt, mole_additions, dmole_additions);
       }
       _abs_residual = computeResidual(egs, _residual, mole_additions);
       ss << "iter = " << iter << " |R| = " << _abs_residual << std::endl;
@@ -393,23 +408,27 @@ GeochemicalSolver::solveSystem(GeochemicalSystem & egs,
     {
       mooseException(e.what());
     }
-    // ASSUMPTION: since mole_additions for the basis species have been added above (via
-    // addToBulkMoles) they are now considered fixed.  This is an OK assumption if mole_additions do
-    // not depend on molalities, or still_swapping = false, but otherwise this approach will
-    // introduce error.  Since they have been added to the system, they need to be set to zero (if a
-    // swap is needed and another solve is needed then they should not be added again, otherwise
-    // they should not be added again using updateOldWithCurrent):
-    for (unsigned i = 0; i < _num_basis; ++i)
-    {
-      mole_additions(i) = 0.0;
-      for (unsigned j = 0; j < _num_basis + _num_kin; ++j)
-        dmole_additions(i, j) = 0.0;
-    }
     if (still_swapping)
     {
       // need to do a swap and re-solve
       try
       {
+        // before swapping, remove any basis mole_additions that came from kinetics.  The
+        // following loop over i, combined with the above egs.addToBulkMoles(mole_additions), where
+        // mole_additions = _input_mole_additions + kinetic_additions, means that the bulk
+        // moles in egs will have only been incremented by _input_mole_additions.  Hence,
+        // _input_mole_additions can be set to zero in preparation for the next solve in the new
+        // basis.
+        // NOTE: if _input_mole_additions depend on molalities, this approach introduces error,
+        // because the following call to addToBulkMoles and subsequent _input_mole_additions = 0
+        // means the mole additions are FIXED
+        for (unsigned i = 0; i < _num_basis; ++i)
+        {
+          egs.addToBulkMoles(i, _input_mole_additions(i) - mole_additions(i));
+          _input_mole_additions(i) = 0.0;
+          for (unsigned j = 0; j < _num_basis + _num_kin; ++j)
+            _input_dmole_additions(i, j) = 0.0;
+        }
         egs.performSwap(swap_out_of_basis, swap_into_basis);
         num_swaps += 1;
       }
@@ -430,6 +449,10 @@ GeochemicalSolver::solveSystem(GeochemicalSystem & egs,
   }
   else
   {
+    // the basis species additions have been added above with addtoBulkMoles: now add the kinetic
+    // additions:
+    for (unsigned i = 0; i < _num_basis; ++i)
+      mole_additions(i) = 0.0;
     egs.updateOldWithCurrent(mole_additions);
     egs.enforceChargeBalance();
   }
@@ -447,11 +470,4 @@ unsigned
 GeochemicalSolver::getRampMaxIonicStrength() const
 {
   return _ramp_max_ionic_strength;
-}
-
-void
-GeochemicalSolver::addKineticInputMoleAdditions(DenseVector<Real> & mole_additions) const
-{
-  for (unsigned k = 0; k < _num_kin; ++k)
-    mole_additions(k + _num_basis) += _input_kin_mole_additions(k);
 }

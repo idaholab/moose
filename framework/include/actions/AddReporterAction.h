@@ -18,6 +18,6 @@ class AddReporterAction : public MooseObjectAction
 {
 public:
   static InputParameters validParams();
-  AddReporterAction(InputParameters params);
+  AddReporterAction(const InputParameters & params);
   virtual void act() override;
 };

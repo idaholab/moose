@@ -3,7 +3,7 @@
     issues = '#7904'
     design = 'cgfe.md'
     requirement = 'The system shall be able to solve Jeffery-Hamel flow in a 2D wedge and compare to the analytical solution '
-    [./wedge_dirichlet]
+    [wedge_dirichlet]
       type = 'Exodiff'
       input = 'wedge_dirichlet.i'
       exodiff = 'wedge_dirichlet_out.e'
@@ -12,13 +12,13 @@
       custom_cmp = 'wedge_dirichlet.cmp'
       allow_test_objects = true
       detail = 'with pressure Dirichlet boundary conditions'
-    [../]
-    [./wedge_natural]
+    []
+    [wedge_natural]
       type = 'Exodiff'
       input = 'wedge_natural.i'
       exodiff = 'wedge_natural_out.e'
       allow_test_objects = true
       detail = 'and with natural advection boundary conditions.'
-    [../]
+    []
   []
 []

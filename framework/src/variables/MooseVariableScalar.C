@@ -106,8 +106,6 @@ MooseVariableScalar::reinit(bool reinit_for_derivative_reordering /* = false*/)
   auto safe_access_tagged_matrices = sys.subproblem().safeAccessTaggedMatrices();
   auto & active_coupleable_matrix_tags =
       sys.subproblem().getActiveScalarVariableCoupleableMatrixTags(_tid);
-  auto & active_coupleable_vector_tags =
-      sys.subproblem().getActiveScalarVariableCoupleableVectorTags(_tid);
 
   _dof_map.SCALAR_dof_indices(_dof_indices, _var_num);
 
@@ -163,7 +161,7 @@ MooseVariableScalar::reinit(bool reinit_for_derivative_reordering /* = false*/)
     if (_need_u_older)
       sys.solutionOlder().get(_dof_indices, &_u_older[0]);
 
-    for (auto tag : active_coupleable_vector_tags)
+    for (auto tag : _required_vector_tags)
       if ((sys.subproblem().vectorTagType(tag) == Moose::VECTOR_TAG_RESIDUAL &&
            safe_access_tagged_vectors) ||
           sys.subproblem().vectorTagType(tag) == Moose::VECTOR_TAG_SOLUTION)
@@ -211,7 +209,7 @@ MooseVariableScalar::reinit(bool reinit_for_derivative_reordering /* = false*/)
 
         if (safe_access_tagged_vectors)
         {
-          for (auto tag : active_coupleable_vector_tags)
+          for (auto tag : _required_vector_tags)
             if (sys.hasVector(tag) && _need_vector_tag_u[tag])
               sys.getVector(tag).get(one_dof_index, &_vector_tag_u[tag][i]);
         }
@@ -250,7 +248,7 @@ MooseVariableScalar::reinit(bool reinit_for_derivative_reordering /* = false*/)
         if (_need_u_older)
           _u_older.resize(i);
 
-        for (auto tag : active_coupleable_vector_tags)
+        for (auto tag : _required_vector_tags)
           if (sys.hasVector(tag) && _need_vector_tag_u[tag])
             _vector_tag_u[tag].resize(i);
 
@@ -279,7 +277,7 @@ MooseVariableScalar::reinit(bool reinit_for_derivative_reordering /* = false*/)
         if (_need_u_older)
           _u_older[i] = std::numeric_limits<Real>::quiet_NaN();
 
-        for (auto tag : active_coupleable_vector_tags)
+        for (auto tag : _required_vector_tags)
           if (sys.hasVector(tag) && _need_vector_tag_u[tag])
             _vector_tag_u[tag][i] = std::numeric_limits<Real>::quiet_NaN();
 
@@ -320,6 +318,8 @@ MooseVariableScalar::computeAD(bool
 {
 #endif
   auto n_dofs = _dof_indices.size();
+  const bool do_derivatives =
+      ADReal::do_derivatives && _sys.number() == _subproblem.currentNlSysNum();
 
   if (_need_ad_u)
   {
@@ -327,10 +327,11 @@ MooseVariableScalar::computeAD(bool
     for (MooseIndex(n_dofs) i = 0; i < n_dofs; ++i)
     {
       _ad_u[i] = _u[i];
+      if (do_derivatives)
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-      Moose::derivInsert(_ad_u[i].derivatives(), _dof_indices[i], 1.);
+        Moose::derivInsert(_ad_u[i].derivatives(), _dof_indices[i], 1.);
 #else
-      Moose::derivInsert(_ad_u[i].derivatives(), ad_offset + i, 1.);
+        Moose::derivInsert(_ad_u[i].derivatives(), ad_offset + i, 1.);
 #endif
     }
   }
@@ -341,10 +342,11 @@ MooseVariableScalar::computeAD(bool
     for (MooseIndex(n_dofs) i = 0; i < n_dofs; ++i)
     {
       _ad_u_dot[i] = _u_dot[i];
+      if (do_derivatives)
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-      Moose::derivInsert(_ad_u_dot[i].derivatives(), _dof_indices[i], _du_dot_du[i]);
+        Moose::derivInsert(_ad_u_dot[i].derivatives(), _dof_indices[i], _du_dot_du[i]);
 #else
-      Moose::derivInsert(_ad_u_dot[i].derivatives(), ad_offset + i, _du_dot_du[i]);
+        Moose::derivInsert(_ad_u_dot[i].derivatives(), ad_offset + i, _du_dot_du[i]);
 #endif
     }
   }

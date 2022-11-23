@@ -35,6 +35,7 @@ public:
   virtual void lineSearch() { mooseError("You must implement a line-search method."); }
 
   virtual void timestepSetup() {}
+  virtual void customSetup(const ExecFlagType & /*exec_type*/) {}
   virtual void initialSetup() {}
 
 protected:

@@ -186,7 +186,7 @@ class LineSettingsWidget(peacock.base.MooseWidget, QtWidgets.QWidget):
         qobject.setMaximumWidth(qobject.height())
         qobject.setAutoFillBackground(False)
         color = self._settings['color']
-        c = QtGui.QColor(color[0]*255, color[1]*255, color[2]*255)
+        c = QtGui.QColor(int(color[0]*255), int(color[1]*255), int(color[2]*255))
         qobject.setStyleSheet('border:none; background:rgb' + str(c.getRgb()))
         qobject.clicked.connect(self._callbackColorButton)
 

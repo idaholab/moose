@@ -52,7 +52,10 @@ SetAdaptivityOptionsAction::validParams()
   return params;
 }
 
-SetAdaptivityOptionsAction::SetAdaptivityOptionsAction(InputParameters params) : Action(params) {}
+SetAdaptivityOptionsAction::SetAdaptivityOptionsAction(const InputParameters & params)
+  : Action(params)
+{
+}
 
 void
 SetAdaptivityOptionsAction::act()

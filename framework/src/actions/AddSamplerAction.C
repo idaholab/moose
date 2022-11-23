@@ -20,7 +20,7 @@ AddSamplerAction::validParams()
   return params;
 }
 
-AddSamplerAction::AddSamplerAction(InputParameters params) : MooseObjectAction(params) {}
+AddSamplerAction::AddSamplerAction(const InputParameters & params) : MooseObjectAction(params) {}
 
 void
 AddSamplerAction::act()

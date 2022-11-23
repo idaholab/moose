@@ -66,7 +66,7 @@ InterfaceDomainUserObject::initialize()
 void
 InterfaceDomainUserObject::executeOnElement()
 {
-  for (const auto i : make_range(_test.size()))
+  for (const auto i : index_range(_test))
   {
     auto & integral = _nodal_integrals[_current_elem->node_ref(i).id()];
     for (const auto qp : make_range(qRule().n_points()))
@@ -81,7 +81,7 @@ InterfaceDomainUserObject::executeOnBoundary()
   if (!_robin_bnd_ids.count(_current_boundary_id))
     return;
 
-  for (const auto i : make_range(_test_face.size()))
+  for (const auto i : index_range(_test_face))
   {
     auto & integral = _nodal_integrals[_current_elem->node_ref(i).id()];
     for (const auto qp : make_range(qRule().n_points()))
@@ -95,7 +95,7 @@ InterfaceDomainUserObject::executeOnInterface()
   mooseAssert(_interface_bnd_ids.count(_current_boundary_id),
               "We should only get called if shouldExecuteOnInterface returns true");
 
-  for (const auto i : make_range(_test_face.size()))
+  for (const auto i : index_range(_test_face))
   {
     auto & integral = _nodal_integrals[_current_elem->node_ref(i).id()];
     for (const auto qp : make_range(qRule().n_points()))

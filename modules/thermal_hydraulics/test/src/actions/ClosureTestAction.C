@@ -29,7 +29,7 @@ ClosureTestAction::validParams()
   return params;
 }
 
-ClosureTestAction::ClosureTestAction(InputParameters params)
+ClosureTestAction::ClosureTestAction(const InputParameters & params)
   : TestAction(params),
     _dummy_name("dummy"),
     _T_wall_name("T_wall"),
@@ -72,7 +72,10 @@ ClosureTestAction::addMaterials()
   {
     const std::string class_name = "AddMaterialAction";
     InputParameters params = _action_factory.getValidParams(class_name);
-    params.set<std::string>("type") = "GenericConstantMaterial";
+    if (_ad)
+      params.set<std::string>("type") = "ADGenericConstantMaterial";
+    else
+      params.set<std::string>("type") = "GenericConstantMaterial";
 
     std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
         _action_factory.create(class_name, "q_wall_mat", params));

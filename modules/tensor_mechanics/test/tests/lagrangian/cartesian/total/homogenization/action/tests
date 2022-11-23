@@ -1,0 +1,20 @@
+[Tests]
+  issues = '#17473'
+  design = 'source/actions/TensorMechanicsAction.md'
+  [compare_3d]
+    type = Exodiff
+    input = 'action_3d.i'
+    exodiff = '3d.e'
+    requirement = "Action produces identical results for a 3D, large deformation problem with mixed "
+                  "constraints compared to a case where the components are specified manually."
+    abs_zero = 1e-6
+  []
+  [compare_2d]
+    type = Exodiff
+    input = 'action_2d.i'
+    exodiff = '2d.e'
+    requirement = "Action produces identical results for a 2D, small deformation problem with mixed "
+                  "constraints compared to a case where the components are specific manually."
+    abs_zero = 1e-6
+  []
+[]

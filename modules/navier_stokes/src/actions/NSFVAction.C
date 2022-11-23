@@ -16,6 +16,7 @@
 #include "MooseObject.h"
 #include "NonlinearSystemBase.h"
 #include "RelationshipManager.h"
+#include "AuxiliarySystem.h"
 
 registerMooseAction("NavierStokesApp", NSFVAction, "add_navier_stokes_variables");
 registerMooseAction("NavierStokesApp", NSFVAction, "add_navier_stokes_user_objects");
@@ -25,6 +26,8 @@ registerMooseAction("NavierStokesApp", NSFVAction, "add_navier_stokes_bcs");
 registerMooseAction("NavierStokesApp", NSFVAction, "add_material");
 registerMooseAction("NavierStokesApp", NSFVAction, "add_navier_stokes_pps");
 registerMooseAction("NavierStokesApp", NSFVAction, "add_navier_stokes_materials");
+registerMooseAction("NavierStokesApp", NSFVAction, "navier_stokes_check_copy_nodal_vars");
+registerMooseAction("NavierStokesApp", NSFVAction, "navier_stokes_copy_nodal_vars");
 
 InputParameters
 NSFVAction::validParams()
@@ -47,6 +50,16 @@ NSFVAction::validParams()
   params.addParam<bool>(
       "porous_medium_treatment", false, "Whether to use porous medium kernels or not.");
 
+  params.addParam<bool>("initialize_variables_from_mesh_file",
+                        false,
+                        "Determines if the variables that are added by the action are initialized "
+                        "from the mesh file (only for Exodus format)");
+  params.addParam<std::string>(
+      "initial_from_file_timestep",
+      "LATEST",
+      "Gives the timestep (or \"LATEST\") for which to read a solution from a file "
+      "for a given variable. (Default: LATEST)");
+
   MooseEnum turbulence_type("mixing-length none", "none");
   params.addParam<MooseEnum>(
       "turbulence_handling",
@@ -58,7 +71,7 @@ NSFVAction::validParams()
   params.addParam<bool>("add_scalar_equation", false, "True to add advected scalar(s) equation");
 
   params.addParamNamesToGroup("compressibility porous_medium_treatment turbulence_handling "
-                              "add_flow_equations add_energy_equation add_scalar_equation",
+                              "add_flow_equations add_energy_equation add_scalar_equation ",
                               "General control");
 
   params.addParam<std::vector<std::string>>(
@@ -338,7 +351,7 @@ NSFVAction::validParams()
    * Navier-Stokes + energy equations.
    */
 
-  MooseEnum adv_interpol_types("average upwind skewness-corrected", "average");
+  MooseEnum adv_interpol_types("average upwind skewness-corrected min_mod vanLeer", "average");
   params.addParam<MooseEnum>("mass_advection_interpolation",
                              adv_interpol_types,
                              "The numerical scheme to use for interpolating density, "
@@ -374,6 +387,13 @@ NSFVAction::validParams()
       face_interpol_types,
       "The numerical scheme to interpolate the passive scalar field variables to the "
       "face (separate from the advected quantity interpolation).");
+
+  MooseEnum velocity_interpolation("average rc", "rc");
+  params.addParam<MooseEnum>(
+      "velocity_interpolation",
+      velocity_interpolation,
+      "The interpolation to use for the velocity. Options are "
+      "'average' and 'rc' which stands for Rhie-Chow. The default is Rhie-Chow.");
 
   params.addParam<bool>(
       "pressure_two_term_bc_expansion",
@@ -479,13 +499,14 @@ NSFVAction::validParams()
       "Boundary condition");
 
   params.addParamNamesToGroup(
-      "initial_pressure initial_velocity initial_temperature initial_scalar_variables",
+      "initial_pressure initial_velocity initial_temperature initial_scalar_variables "
+      "initialize_variables_from_mesh_file initial_from_file_timestep",
       "Initial condition");
 
   return params;
 }
 
-NSFVAction::NSFVAction(InputParameters parameters)
+NSFVAction::NSFVAction(const InputParameters & parameters)
   : Action(parameters),
     _blocks(getParam<std::vector<SubdomainName>>("block")),
     _compressibility(getParam<MooseEnum>("compressibility")),
@@ -496,6 +517,10 @@ NSFVAction::NSFVAction(InputParameters parameters)
     _turbulence_handling(getParam<MooseEnum>("turbulence_handling")),
     _porous_medium_treatment(getParam<bool>("porous_medium_treatment")),
     _porosity_name(getParam<MooseFunctorName>("porosity")),
+    _flow_porosity_functor_name(isParamValid("porosity_smoothing_layers") &&
+                                        getParam<unsigned short>("porosity_smoothing_layers")
+                                    ? NS::smoothed_porosity
+                                    : _porosity_name),
     _use_friction_correction(isParamValid("use_friction_correction")
                                  ? getParam<bool>("use_friction_correction")
                                  : false),
@@ -569,6 +594,7 @@ NSFVAction::NSFVAction(InputParameters parameters)
     _momentum_face_interpolation(getParam<MooseEnum>("momentum_face_interpolation")),
     _energy_face_interpolation(getParam<MooseEnum>("energy_face_interpolation")),
     _passive_scalar_face_interpolation(getParam<MooseEnum>("passive_scalar_face_interpolation")),
+    _velocity_interpolation(getParam<MooseEnum>("velocity_interpolation")),
     _pressure_two_term_bc_expansion(getParam<bool>("pressure_two_term_bc_expansion")),
     _momentum_two_term_bc_expansion(getParam<bool>("momentum_two_term_bc_expansion")),
     _energy_two_term_bc_expansion(getParam<bool>("energy_two_term_bc_expansion")),
@@ -742,6 +768,54 @@ NSFVAction::act()
 
     addBoundaryPostprocessors();
   }
+
+  if (getParam<bool>("initialize_variables_from_mesh_file"))
+  {
+    if (_current_task == "navier_stokes_check_copy_nodal_vars")
+      _app.setExodusFileRestart(true);
+    else if (_current_task == "navier_stokes_copy_nodal_vars")
+    {
+      SystemBase & system = _problem->getNonlinearSystemBase();
+
+      if (_create_pressure)
+        system.addVariableToCopy(
+            _pressure_name, _pressure_name, getParam<std::string>("initial_from_file_timestep"));
+
+      if (_create_velocity)
+        for (unsigned int d = 0; d < _dim; ++d)
+          system.addVariableToCopy(_velocity_name[d],
+                                   _velocity_name[d],
+                                   getParam<std::string>("initial_from_file_timestep"));
+
+      if (getParam<bool>("pin_pressure"))
+        system.addVariableToCopy(
+            "lambda", "lambda", getParam<std::string>("initial_from_file_timestep"));
+
+      if (_turbulence_handling == "mixing-length")
+        _problem->getAuxiliarySystem().addVariableToCopy(
+            NS::mixing_length,
+            NS::mixing_length,
+            getParam<std::string>("initial_from_file_timestep"));
+
+      if (_has_energy_equation && _create_fluid_temperature)
+        system.addVariableToCopy(_fluid_temperature_name,
+                                 _fluid_temperature_name,
+                                 getParam<std::string>("initial_from_file_timestep"));
+
+      if (_has_scalar_equation)
+        for (unsigned int name_i = 0; name_i < _passive_scalar_names.size(); ++name_i)
+        {
+          bool create_me = true;
+          if (_create_scalar_variable.size())
+            if (!_create_scalar_variable[name_i])
+              create_me = false;
+          if (create_me)
+            system.addVariableToCopy(_passive_scalar_names[name_i],
+                                     _passive_scalar_names[name_i],
+                                     getParam<std::string>("initial_from_file_timestep"));
+        }
+    }
+  }
 }
 
 void
@@ -877,6 +951,10 @@ NSFVAction::addRhieChowUserObjects()
 void
 NSFVAction::addINSInitialConditions()
 {
+  // do not set initial conditions if we load from file
+  if (getParam<bool>("initialize_variables_from_mesh_file"))
+    return;
+
   InputParameters params = _factory.getValidParams("FunctionIC");
   auto vvalue = getParam<std::vector<FunctionName>>("initial_velocity");
 
@@ -984,18 +1062,7 @@ NSFVAction::addINSEnergyTimeKernels()
     params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
     if (_problem->hasFunctor(NS::time_deriv(_density_name), /*thread_id=*/0))
       params.set<MooseFunctorName>(NS::time_deriv(NS::density)) = NS::time_deriv(_density_name);
-    if (_problem->hasFunctor(NS::time_deriv(_specific_heat_name), /*thread_id=*/0))
-      params.set<MooseFunctorName>(NS::time_deriv(NS::cp)) = NS::time_deriv(_specific_heat_name);
     params.set<bool>("is_solid") = false;
-  }
-  else
-  {
-    // check if the name of the specific heat is just a constant, if it is,
-    // we automatically assign a zero timederivative
-    if (MooseUtils::parsesToReal(_specific_heat_name))
-      params.set<MooseFunctorName>(NS::time_deriv(NS::cp)) = "0";
-    else
-      params.set<MooseFunctorName>(NS::time_deriv(NS::cp)) = NS::time_deriv(_specific_heat_name);
   }
 
   _problem->addFVKernel(kernel_type, kernel_name, params);
@@ -1033,7 +1100,7 @@ NSFVAction::addINSMassKernels()
   params.set<std::vector<SubdomainName>>("block") = _blocks;
   params.set<NonlinearVariableName>("variable") = _pressure_name;
   params.set<MooseFunctorName>(NS::density) = _density_name;
-  params.set<MooseEnum>("velocity_interp_method") = "rc";
+  params.set<MooseEnum>("velocity_interp_method") = _velocity_interpolation;
   params.set<UserObjectName>("rhie_chow_user_object") = rhie_chow_name;
   params.set<MooseEnum>("advected_interp_method") = _mass_advection_interpolation;
 
@@ -1075,11 +1142,11 @@ NSFVAction::addINSMomentumAdvectionKernels()
   InputParameters params = _factory.getValidParams(kernel_type);
   params.set<std::vector<SubdomainName>>("block") = _blocks;
   params.set<MooseFunctorName>(NS::density) = _density_name;
-  params.set<MooseEnum>("velocity_interp_method") = "rc";
+  params.set<MooseEnum>("velocity_interp_method") = _velocity_interpolation;
   params.set<UserObjectName>("rhie_chow_user_object") = rhie_chow_name;
   params.set<MooseEnum>("advected_interp_method") = _momentum_advection_interpolation;
   if (_porous_medium_treatment)
-    params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
+    params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
 
   for (unsigned int d = 0; d < _dim; ++d)
   {
@@ -1110,7 +1177,7 @@ NSFVAction::addINSMomentumViscousDissipationKernels()
   params.set<MooseFunctorName>(NS::mu) = _dynamic_viscosity_name;
 
   if (_porous_medium_treatment)
-    params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
+    params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
 
   for (unsigned int d = 0; d < _dim; ++d)
   {
@@ -1189,7 +1256,7 @@ NSFVAction::addINSMomentumPressureKernels()
   params.set<UserObjectName>("rhie_chow_user_object") = rhie_chow_name;
   params.set<CoupledName>("pressure") = {_pressure_name};
   if (_porous_medium_treatment)
-    params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
+    params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
 
   for (unsigned int d = 0; d < _dim; ++d)
   {
@@ -1221,14 +1288,17 @@ NSFVAction::addINSMomentumGravityKernels()
     params.set<MooseFunctorName>(NS::density) = _density_name;
     params.set<RealVectorValue>("gravity") = getParam<RealVectorValue>("gravity");
     if (_porous_medium_treatment)
-      params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
+      params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
 
     for (unsigned int d = 0; d < _dim; ++d)
     {
-      params.set<MooseEnum>("momentum_component") = NS::directions[d];
-      params.set<NonlinearVariableName>("variable") = _velocity_name[d];
+      if (getParam<RealVectorValue>("gravity")(d) != 0)
+      {
+        params.set<MooseEnum>("momentum_component") = NS::directions[d];
+        params.set<NonlinearVariableName>("variable") = _velocity_name[d];
 
-      _problem->addFVKernel(kernel_type, kernel_name + NS::directions[d], params);
+        _problem->addFVKernel(kernel_type, kernel_name + NS::directions[d], params);
+      }
     }
   }
 }
@@ -1258,7 +1328,7 @@ NSFVAction::addINSMomentumBoussinesqKernels()
     params.set<Real>("ref_temperature") = getParam<Real>("ref_temperature");
     params.set<MooseFunctorName>("alpha_name") = _thermal_expansion_name;
     if (_porous_medium_treatment)
-      params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
+      params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
 
     for (unsigned int d = 0; d < _dim; ++d)
     {
@@ -1282,7 +1352,7 @@ NSFVAction::addINSMomentumFrictionKernels()
     InputParameters params = _factory.getValidParams(kernel_type);
     params.set<MooseFunctorName>(NS::density) = _density_name;
     params.set<UserObjectName>("rhie_chow_user_object") = "pins_rhie_chow_interpolator";
-    params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
+    params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
 
     for (unsigned int block_i = 0; block_i < num_used_blocks; ++block_i)
     {
@@ -1325,7 +1395,7 @@ NSFVAction::addINSMomentumFrictionKernels()
           corr_params.set<std::vector<SubdomainName>>("block") = _blocks;
         corr_params.set<MooseFunctorName>(NS::density) = _density_name;
         corr_params.set<UserObjectName>("rhie_chow_user_object") = "pins_rhie_chow_interpolator";
-        corr_params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
+        corr_params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
         corr_params.set<Real>("consistent_scaling") = getParam<Real>("consistent_scaling");
         for (unsigned int d = 0; d < _dim; ++d)
         {
@@ -1405,7 +1475,7 @@ NSFVAction::addINSEnergyAdvectionKernels()
   InputParameters params = _factory.getValidParams(kernel_type);
   params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
   params.set<std::vector<SubdomainName>>("block") = _blocks;
-  params.set<MooseEnum>("velocity_interp_method") = "rc";
+  params.set<MooseEnum>("velocity_interp_method") = _velocity_interpolation;
   params.set<UserObjectName>("rhie_chow_user_object") = rhie_chow_name;
   params.set<MooseEnum>("advected_interp_method") = _energy_advection_interpolation;
 
@@ -1513,7 +1583,7 @@ NSFVAction::addScalarAdvectionKernels()
     const std::string kernel_type = "INSFVScalarFieldAdvection";
     InputParameters params = _factory.getValidParams(kernel_type);
     params.set<NonlinearVariableName>("variable") = vname;
-    params.set<MooseEnum>("velocity_interp_method") = "rc";
+    params.set<MooseEnum>("velocity_interp_method") = _velocity_interpolation;
     params.set<MooseEnum>("advected_interp_method") = _passive_scalar_advection_interpolation;
 
     if (_porous_medium_treatment)
@@ -1640,12 +1710,16 @@ NSFVAction::addINSInletBC()
              _momentum_inlet_types[bc_ind] == "flux-velocity")
     {
       {
-        const std::string bc_type = "WCNSFVMomentumFluxBC";
+        const std::string bc_type =
+            _porous_medium_treatment ? "PWCNSFVMomentumFluxBC" : "WCNSFVMomentumFluxBC";
         InputParameters params = _factory.getValidParams(bc_type);
         params.set<MooseFunctorName>(NS::density) = _density_name;
         params.set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
         if (_porous_medium_treatment)
+        {
           params.set<UserObjectName>("rhie_chow_user_object") = "pins_rhie_chow_interpolator";
+          params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
+        }
         else
           params.set<UserObjectName>("rhie_chow_user_object") = "ins_rhie_chow_interpolator";
 
@@ -1802,7 +1876,7 @@ NSFVAction::addINSOutletBC()
         const std::string bc_type = "PINSFVMomentumAdvectionOutflowBC";
         InputParameters params = _factory.getValidParams(bc_type);
         params.set<std::vector<BoundaryName>>("boundary") = {_outlet_boundaries[bc_ind]};
-        params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
+        params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
         params.set<UserObjectName>("rhie_chow_user_object") = "pins_rhie_chow_interpolator";
         params.set<MooseFunctorName>(NS::density) = _density_name;
 
@@ -2019,7 +2093,7 @@ NSFVAction::addWCNSMassTimeKernels()
   params.set<NonlinearVariableName>("variable") = _pressure_name;
   params.set<MooseFunctorName>(NS::time_deriv(NS::density)) = NS::time_deriv(_density_name);
   if (_porous_medium_treatment)
-    params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
+    params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
 
   _problem->addFVKernel(mass_kernel_type, kernel_name, params);
 }
@@ -2071,7 +2145,6 @@ NSFVAction::addWCNSEnergyTimeKernels()
   params.set<MooseFunctorName>(NS::density) = _density_name;
   params.set<MooseFunctorName>(NS::time_deriv(NS::density)) = NS::time_deriv(_density_name);
   params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
-  params.set<MooseFunctorName>(NS::time_deriv(NS::cp)) = NS::time_deriv(_specific_heat_name);
 
   if (_porous_medium_treatment)
   {
@@ -2125,7 +2198,7 @@ NSFVAction::addPorousMediumSpeedMaterial()
 
   for (unsigned int dim_i = 0; dim_i < _dim; ++dim_i)
     params.set<MooseFunctorName>(NS::superficial_velocity_vector[dim_i]) = _velocity_name[dim_i];
-  params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
+  params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
 
   _problem->addMaterial("PINSFVSpeedFunctorMaterial", "pins_speed_material", params);
 }
@@ -2303,6 +2376,15 @@ NSFVAction::checkGeneralControlErrors()
     paramError("consistent_scaling",
                "Consistent scaling should not be defined if friction correction is disabled!");
 
+  if (getParam<bool>("pin_pressure"))
+  {
+    checkDependentParameterError("pin_pressure", {"pinned_pressure_type"}, true);
+
+    MooseEnum pin_type = getParam<MooseEnum>("pinned_pressure_type");
+    checkDependentParameterError(
+        "pinned_pressure_type", {"pinned_pressure_point"}, pin_type == "point-value");
+  }
+
   if (!_has_energy_equation)
     checkDependentParameterError("add_energy_equation",
                                  {"energy_inlet_types",
@@ -2380,6 +2462,13 @@ NSFVAction::checkICParameterErrors()
   if (parameters().isParamSetByUser("initial_temperature") && !_create_fluid_temperature)
     paramError("initial_temperature",
                "T_fluid is defined externally of NavierStokesFV, so should the inital condition");
+
+  if (getParam<bool>("initialize_variables_from_mesh_file"))
+    checkDependentParameterError("initialize_variables_from_mesh_file",
+                                 {"initial_velocity",
+                                  "initial_pressure",
+                                  "initial_temperature",
+                                  "initial_scalar_variables"});
 }
 
 void
@@ -2512,11 +2601,18 @@ NSFVAction::checkBoundaryParameterErrors()
                             "inlet_boundaries",
                             "passive_scalar_inlet_types",
                             "inlet boundaries");
-      checkSizeFriendParams(_passive_scalar_inlet_types.size(),
+      checkSizeFriendParams(_passive_scalar_names.size(),
                             _passive_scalar_inlet_function.size(),
-                            "passive_scalar_inlet_types",
+                            "passive_scalar_names",
                             "passive_scalar_inlet_function",
-                            "boundaries");
+                            "names");
+      for (const auto & passive_scalar_index : index_range(_passive_scalar_inlet_function))
+        checkSizeFriendParams(_passive_scalar_inlet_function[passive_scalar_index].size(),
+                              _inlet_boundaries.size(),
+                              "passive_scalar_inlet_function index " +
+                                  std::to_string(passive_scalar_index),
+                              "inlet_boundaries",
+                              "entries");
     }
   }
 }
@@ -2620,13 +2716,15 @@ NSFVAction::checkPassiveScalarParameterErrors()
 
 void
 NSFVAction::checkDependentParameterError(const std::string main_parameter,
-                                         const std::vector<std::string> dependent_parameters)
+                                         const std::vector<std::string> dependent_parameters,
+                                         const bool should_be_defined)
 {
   for (const auto & param : dependent_parameters)
-    if (_pars.isParamSetByUser(param))
+    if (_pars.isParamSetByUser(param) == !should_be_defined)
       paramError(param,
-                 "This parameter should not be given by the user with the corresponding " +
-                     main_parameter + " setting!");
+                 "This parameter should " + std::string(should_be_defined ? "" : "not") +
+                     " be given by the user with the corresponding " + main_parameter +
+                     " setting!");
 }
 
 void

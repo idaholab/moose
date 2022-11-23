@@ -1,1 +1,1 @@
-!template load file=sqa/app_vvr.md.template app=Ray Tracing category=ray_tracing
+!template load file=sqa/module_vvr.md.template module=Ray Tracing category=ray_tracing

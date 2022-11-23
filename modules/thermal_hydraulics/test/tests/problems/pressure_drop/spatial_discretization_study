@@ -1,0 +1,54 @@
+[Tests]
+  parallel_scheduling = True
+
+  [none]
+    type = RunApp
+    input = 'pressure_drop.i'
+    cli_args= 'GlobalParams/rdg_slope_reconstruction=none Outputs/file_base=none'
+  []
+  [none_junc]
+    type = RunApp
+    input = 'pressure_drop_with_junction.i'
+    cli_args= 'GlobalParams/rdg_slope_reconstruction=none Outputs/file_base=none_junc'
+  []
+  [full]
+    type = RunApp
+    input = 'pressure_drop.i'
+    cli_args= 'GlobalParams/rdg_slope_reconstruction=full Outputs/file_base=full'
+  []
+  [full_junc]
+    type = RunApp
+    input = 'pressure_drop_with_junction.i'
+    cli_args= 'GlobalParams/rdg_slope_reconstruction=full Outputs/file_base=full_junc'
+  []
+  [minmod]
+    type = RunApp
+    input = 'pressure_drop.i'
+    cli_args= 'GlobalParams/rdg_slope_reconstruction=minmod Outputs/file_base=minmod'
+  []
+  [minmod_junc]
+    type = RunApp
+    input = 'pressure_drop_with_junction.i'
+    cli_args= 'GlobalParams/rdg_slope_reconstruction=minmod Outputs/file_base=minmod_junc'
+  []
+  [mc]
+    type = RunApp
+    input = 'pressure_drop.i'
+    cli_args= 'GlobalParams/rdg_slope_reconstruction=mc Outputs/file_base=mc'
+  []
+  [mc_junc]
+    type = RunApp
+    input = 'pressure_drop_with_junction.i'
+    cli_args= 'GlobalParams/rdg_slope_reconstruction=mc Outputs/file_base=mc_junc'
+  []
+  [superbee]
+    type = RunApp
+    input = 'pressure_drop.i'
+    cli_args= 'GlobalParams/rdg_slope_reconstruction=superbee Outputs/file_base=superbee'
+  []
+  [superbee_junc]
+    type = RunApp
+    input = 'pressure_drop_with_junction.i'
+    cli_args= 'GlobalParams/rdg_slope_reconstruction=superbee Outputs/file_base=superbee_junc'
+  []
+[]

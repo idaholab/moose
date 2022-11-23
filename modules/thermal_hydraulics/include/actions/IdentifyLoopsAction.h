@@ -17,7 +17,7 @@
 class IdentifyLoopsAction : public Action
 {
 public:
-  IdentifyLoopsAction(InputParameters parameters);
+  IdentifyLoopsAction(const InputParameters & parameters);
 
   virtual void act();
 

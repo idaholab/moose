@@ -18,7 +18,7 @@
 class JacobianTest1PhaseRDGAction : public JacobianTestAction
 {
 public:
-  JacobianTest1PhaseRDGAction(InputParameters params);
+  JacobianTest1PhaseRDGAction(const InputParameters & params);
 
 protected:
   virtual void addObjects() override;

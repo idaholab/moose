@@ -3,6 +3,7 @@
   issues = '#18628 #20148 #20514'
   [hexagon_boundary]
     type = 'Exodiff'
+    exodiff_opts = '-pedantic'
     input = 'patterned_2d.i'
     exodiff = 'patterned_hex.e'
     cli_args = 'Mesh/pattern/background_intervals=2 Mesh/pattern/background_block_id=25
@@ -15,6 +16,35 @@
                 Mesh/pattern/uniform_mesh_on_sides=true
                 --mesh-only "patterned_hex.e"'
     requirement ='The system shall stitch hexagon meshes to form a large mesh with hexagon boundary.'
+    recover = false
+  []
+  [hexagon_boundary_no_interface]
+    type = 'Exodiff'
+    exodiff_opts = '-pedantic'
+    input = 'patterned_2d.i'
+    exodiff = 'patterned_hex_no_interface.e'
+    cli_args = 'Mesh/pattern/background_intervals=2 Mesh/pattern/background_block_id=25
+                Mesh/pattern/background_block_name="assem_block"
+                Mesh/pattern/hexagon_size=18
+                Mesh/pattern/duct_sizes=17
+                Mesh/pattern/duct_intervals=1
+                Mesh/pattern/duct_block_ids=30
+                Mesh/pattern/duct_block_names="duct_block"
+                Mesh/pattern/uniform_mesh_on_sides=true
+                Mesh/pattern/create_interface_boundaries=false
+                --mesh-only "patterned_hex_no_interface.e"'
+    requirement ='The system shall stitch hexagon meshes to form a large mesh with hexagon boundary and without interface boundaries defined.'
+    recover = false
+  []
+  [hexagon_boundary_no_deform]
+    type = 'Exodiff'
+    exodiff_opts = '-pedantic'
+    input = 'patterned_2d.i'
+    exodiff = 'patterned_hex_no_deform.e'
+    cli_args = 'Mesh/pattern/hexagon_size=15
+                Mesh/pattern/deform_non_circular_region=false
+                --mesh-only "patterned_hex_no_deform.e"'
+    requirement ='The system shall stitch hexagon meshes to form a large mesh with hexagon boundary without deforming the input meshes.'
     recover = false
   []
   [none_boundary]
@@ -172,5 +202,14 @@
     cli_args = '--mesh-only "patterned_err.e"'
     expect_err = 'pattern_pitch metadata values of all input mesh generators must be identical'
     requirement ='The system shall throw an error if input meshes have different pattern pitch meta data.'
+  []
+  [err_cut_off_input]
+    type = 'RunException'
+    input = 'patterned_2d.i'
+    cli_args = 'Mesh/pattern/hexagon_size=13
+                Mesh/pattern/deform_non_circular_region=false
+                --mesh-only "patterned_err.e"'
+    expect_err = 'the assembly is cut off so much that the internal structure that should not be altered is compromised.'
+    requirement ='The system shall throw an error if the input mesh geometry that should not be deformed is cut off.'
   []
 []

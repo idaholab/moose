@@ -104,7 +104,7 @@ public:
    * Gets the number of this system
    * @return The number of this system
    */
-  virtual unsigned int number() const;
+  unsigned int number() const;
   virtual MooseMesh & mesh() { return _mesh; }
   virtual const MooseMesh & mesh() const { return _mesh; }
   virtual SubProblem & subproblem() { return _subproblem; }
@@ -879,6 +879,7 @@ public:
   /// Setup Functions
   virtual void initialSetup();
   virtual void timestepSetup();
+  virtual void customSetup(const ExecFlagType & exec_type);
   virtual void subdomainSetup();
   virtual void residualSetup();
   virtual void jacobianSetup();
@@ -887,6 +888,21 @@ public:
    * Clear all dof indices from moose variables
    */
   void clearAllDofIndices();
+
+  /**
+   * Set the active vector tags for the variables
+   */
+  void setActiveVariableCoupleableVectorTags(const std::set<TagID> & vtags, THREAD_ID tid);
+
+  /**
+   * Set the active vector tags for the scalar variables
+   */
+  void setActiveScalarVariableCoupleableVectorTags(const std::set<TagID> & vtags, THREAD_ID tid);
+
+  /**
+   * @return the type of variables this system holds, e.g. nonlinear or auxiliary
+   */
+  Moose::VarKindType varKind() const { return _var_kind; }
 
 protected:
   /**
@@ -947,9 +963,6 @@ protected:
 
   /// Map variable number to its pointer
   std::vector<std::vector<MooseVariableFieldBase *>> _numbered_vars;
-
-  /// Storage for MooseVariable objects
-  MooseObjectWarehouseBase<MooseVariableBase> _variable_warehouse;
 
   /// Whether to automatically scale the variables
   bool _automatic_scaling;

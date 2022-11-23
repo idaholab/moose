@@ -1,10 +1,10 @@
-mu=1
-rho=1
-cp=1
-u_inlet=1
-T_inlet=200
-advected_interp_method='average'
-velocity_interp_method='rc'
+mu = 1
+rho = 1
+cp = 1
+u_inlet = 1
+T_inlet = 200
+advected_interp_method = 'average'
+velocity_interp_method = 'rc'
 
 [Mesh]
   [gen]
@@ -171,6 +171,7 @@ velocity_interp_method='rc'
 []
 
 [FVBCs]
+  inactive = 'inlet-T-dirichlet'
   [inlet-u]
     type = INSFVInletVelocityBC
     boundary = 'left'
@@ -186,7 +187,13 @@ velocity_interp_method='rc'
   [inlet-T]
     type = FVNeumannBC
     variable = T_fluid
-    value = ${fparse u_inlet * rho * cp * T_inlet}
+    value = '${fparse u_inlet * rho * cp * T_inlet}'
+    boundary = 'left'
+  []
+  [inlet-T-dirichlet]
+    type = FVDirichletBC
+    variable = T_fluid
+    value = '${T_inlet}'
     boundary = 'left'
   []
 
@@ -261,9 +268,8 @@ velocity_interp_method='rc'
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_type -sub_pc_factor_shift_type'
-  petsc_options_value = 'asm      100                lu           NONZERO'
-  line_search = 'none'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type'
+  petsc_options_value = 'lu NONZERO'
   nl_rel_tol = 1e-12
 []
 

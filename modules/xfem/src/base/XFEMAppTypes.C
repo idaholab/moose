@@ -8,6 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "XFEMAppTypes.h"
-#include "MooseEnumItem.h"
+#include "ExecFlagRegistry.h"
 
-const ExecFlagType EXEC_XFEM_MARK("XFEM_MARK");
+const ExecFlagType EXEC_XFEM_MARK = registerExecFlag("XFEM_MARK");

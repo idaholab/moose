@@ -92,15 +92,21 @@ PatternedHexMeshGenerator::validParams()
   params.addRangeCheckedParam<boundary_id_type>("external_boundary_id",
                                                 "external_boundary_id>0",
                                                 "Optional customized external boundary id.");
+  params.addParam<bool>(
+      "create_interface_boundaries", true, "Whether the interface boundary sidesets are created.");
   params.addParam<std::string>("external_boundary_name",
                                "Optional customized external boundary name.");
+  params.addParam<bool>("deform_non_circular_region",
+                        true,
+                        "Whether the non-circular region (outside the rings) can be deformed.");
   params.addParamNamesToGroup("background_block_id background_block_name duct_block_ids "
                               "duct_block_names external_boundary_id external_boundary_name",
                               "Customized Subdomain/Boundary");
   params.addParamNamesToGroup(
       "generate_control_drum_positions_file assign_control_drum_id position_file", "Control Drum");
-  params.addParamNamesToGroup("background_intervals duct_intervals uniform_mesh_on_sides",
-                              "Mesh Density");
+  params.addParamNamesToGroup(
+      "background_intervals duct_intervals uniform_mesh_on_sides deform_non_circular_region",
+      "Mesh Density");
   params.addClassDescription(
       "This PatternedHexMeshGenerator source code assembles hexagonal meshes into a hexagonal grid "
       "and optionally forces the outer boundary to be hexagonal and/or adds a duct.");
@@ -139,9 +145,12 @@ PatternedHexMeshGenerator::PatternedHexMeshGenerator(const InputParameters & par
     _external_boundary_name(isParamValid("external_boundary_name")
                                 ? getParam<std::string>("external_boundary_name")
                                 : std::string()),
+    _create_interface_boundaries(getParam<bool>("create_interface_boundaries")),
     _hexagon_size_style(
         getParam<MooseEnum>("hexagon_size_style").template getEnum<PolygonSizeStyle>()),
+    _deform_non_circular_region(getParam<bool>("deform_non_circular_region")),
     _pattern_pitch_meta(declareMeshProperty("pattern_pitch_meta", 0.0)),
+    _input_pitch_meta(declareMeshProperty("input_pitch_meta", 0.0)),
     _is_control_drum_meta(declareMeshProperty<bool>("is_control_drum_meta", false)),
     _control_drum_positions(
         declareMeshProperty<std::vector<Point>>("control_drum_positions", std::vector<Point>())),
@@ -151,10 +160,14 @@ PatternedHexMeshGenerator::PatternedHexMeshGenerator(const InputParameters & par
         "control_drums_azimuthal_meta", std::vector<std::vector<Real>>())),
     _position_file_name(declareMeshProperty<std::string>("position_file_name",
                                                          getParam<std::string>("position_file"))),
+    _hexagon_peripheral_trimmability(
+        declareMeshProperty<bool>("hexagon_peripheral_trimmability", !_generate_core_metadata)),
+    _hexagon_center_trimmability(declareMeshProperty<bool>("hexagon_center_trimmability", true)),
     _peripheral_modifier_compatible(
         declareMeshProperty<bool>("peripheral_modifier_compatible", _pattern_boundary == "hexagon"))
 {
   const unsigned int n_pattern_layers = _pattern.size();
+  declareMeshProperty("pattern_size", n_pattern_layers);
   if (n_pattern_layers % 2 == 0)
     paramError(
         "pattern",
@@ -288,7 +301,10 @@ PatternedHexMeshGenerator::generate()
                  ": pattern_pitch metadata values of all input mesh generators must be identical "
                  "when pattern_boundary is 'none' and generate_core_metadata is true.");
     else
+    {
       _pattern_pitch = pattern_pitch_array.front();
+      _input_pitch_meta = _pattern_pitch;
+    }
   }
   else
   {
@@ -335,6 +351,7 @@ PatternedHexMeshGenerator::generate()
       mooseError("In PatternedHexMeshGenerator ",
                  _name,
                  ": pitch metadata values of all input mesh generators must be identical.");
+    _input_pitch_meta = pitch_array.front();
     if (*std::max_element(num_sectors_per_side_array.begin(), num_sectors_per_side_array.end()) !=
         *std::min_element(num_sectors_per_side_array.begin(), num_sectors_per_side_array.end()))
       mooseError(
@@ -380,15 +397,17 @@ PatternedHexMeshGenerator::generate()
       extra_dist_shift = extra_dist_shift_0 - extra_dist.front();
       for (Real & d : extra_dist)
         d += extra_dist_shift;
-      y_min = max_radius_global; // Currently use this, ideally this should be the max of the outer
-                                 // layer radii;
+      y_min = _deform_non_circular_region
+                  ? max_radius_global // Currently use this, ideally this should be the max of the
+                                      // outer layer radii
+                  : (pitch_array.front() / std::sqrt(3.0));
       y_max_0 = pitch_array.front() / std::sqrt(3.0) + extra_dist.front();
       y_max_n = y_max_0 - extra_dist_shift;
       if (y_max_n <= y_min)
         mooseError("In PatternedHexMeshGenerator ",
                    _name,
-                   ": the assembly is cut off so much that the internal circular structure is "
-                   "compromised.");
+                   ": the assembly is cut off so much that the internal structure that should not "
+                   "be altered is compromised.");
     }
   }
 
@@ -536,7 +555,8 @@ PatternedHexMeshGenerator::generate()
                             num_sectors_per_side_array,
                             peripheral_duct_intervals,
                             rotation_angle,
-                            mesh_type);
+                            mesh_type,
+                            _create_interface_boundaries);
 
           if (extra_dist_shift != 0)
             cutOffHexDeform(*tmp_peripheral_mesh, orientation, y_max_0, y_max_n, y_min, mesh_type);
@@ -590,13 +610,24 @@ PatternedHexMeshGenerator::generate()
                               OUTER_SIDESET_ID,
                               OUTER_SIDESET_ID,
                               TOLERANCE,
-                              /*clear_stitched_boundary_ids=*/true);
+                              /*clear_stitched_boundary_ids=*/false);
 
       // Translate back now that we've stitched so that anyone else that uses this mesh has it at
       // the origin
       MeshTools::Modification::translate(pattern_mesh, -(deltax + j * input_pitch), -deltay, 0);
     }
   }
+
+  // Check if OUTER_SIDESET_ID is really the external boundary. Correct if needed.
+  auto side_list = out_mesh->get_boundary_info().build_side_list();
+  for (auto & sl : side_list)
+  {
+    if (std::get<2>(sl) == OUTER_SIDESET_ID)
+      if (out_mesh->elem_ptr(std::get<0>(sl))->neighbor_ptr(std::get<1>(sl)) != nullptr)
+        out_mesh->get_boundary_info().remove_side(
+            out_mesh->elem_ptr(std::get<0>(sl)), std::get<1>(sl), std::get<2>(sl));
+  }
+  out_mesh->get_boundary_info().clear_boundary_node_ids();
 
   out_mesh->get_boundary_info().build_node_list_from_side_list();
   const auto node_list = out_mesh->get_boundary_info().build_node_list();

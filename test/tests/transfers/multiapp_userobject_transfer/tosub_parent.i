@@ -91,11 +91,13 @@
     variable = multi_layered_average
     type = MultiAppUserObjectTransfer
     to_multi_app = sub_app
+    skip_coordinate_collapsing = true
   [../]
   [./element_layered_transfer]
     user_object = layered_average
     variable = element_multi_layered_average
     type = MultiAppUserObjectTransfer
     to_multi_app = sub_app
+    skip_coordinate_collapsing = true
   [../]
 []

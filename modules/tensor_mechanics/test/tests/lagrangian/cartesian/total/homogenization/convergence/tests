@@ -1,0 +1,76 @@
+[Tests]
+  issues = '#17473'
+  design = 'source/scalarkernels/lagrangian/HomogenizationConstraintScalarKernel.md'
+  [sd-strain_no_stab]
+    type = PetscJacobianTester
+    input = 'sd-strain.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = 'GlobalParams/stabilize_strain=false'
+    requirement = 'Jacobian is exact with rtol 1e-7 for small deformations, imposed strains, and no '
+                  'stabilization'
+  []
+  [sd-stress_no_stab]
+    type = PetscJacobianTester
+    input = 'sd-stress.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = 'GlobalParams/stabilize_strain=false'
+    requirement = 'Jacobian is exact with rtol 1e-7 for small deformations, imposed stresses, and no '
+                  'stabilization'
+  []
+  [ld-strain_no_stab]
+    type = PetscJacobianTester
+    input = 'ld-strain.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = 'GlobalParams/stabilize_strain=false'
+    requirement = 'Jacobian is exact with rtol 1e-7 for large deformations, imposed strains, and no '
+                  'stabilization'
+  []
+  [ld-stress_no_stab]
+    type = PetscJacobianTester
+    input = 'ld-stress.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = 'GlobalParams/stabilize_strain=false'
+    requirement = 'Jacobian is exact with rtol 1e-7 for large deformations, imposed stresses, and no '
+                  'stabilization'
+  []
+  [sd-strain_right_stab]
+    type = PetscJacobianTester
+    input = 'sd-strain.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = 'GlobalParams/stabilize_strain=true'
+    requirement = 'Jacobian is exact with rtol 1e-7 for small deformations, imposed strains, and '
+                  'stabilization on'
+  []
+  [sd-stress_right_stab]
+    type = PetscJacobianTester
+    input = 'sd-stress.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = 'GlobalParams/stabilize_strain=true'
+    requirement = 'Jacobian is exact with rtol 1e-7 for small deformations, imposed stresses, and '
+                  'stabilization on'
+  []
+  [ld-strain_right_stab]
+    type = PetscJacobianTester
+    input = 'ld-strain.i'
+    ratio_tol = 1E-6 # For some reason this one is 1.01e-7...
+    difference_tol = 1E10
+    cli_args = 'GlobalParams/stabilize_strain=true'
+    requirement = 'Jacobian is exact with rtol 1e-6 for large deformations, imposed strains, and '
+                  'stabilization on'
+  []
+  [ld-stress_right_stab]
+    type = PetscJacobianTester
+    input = 'ld-stress.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    cli_args = 'GlobalParams/stabilize_strain=true'
+    requirement = 'Jacobian is exact with rtol 1e-7 for large deformations, imposed stresses, and '
+                  'stabilization on'
+  []
+[]

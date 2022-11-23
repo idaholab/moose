@@ -21,6 +21,7 @@
     proposal_std = '1.0 1.0'
     output_limit = 0.65
     num_samples_train = 30
+    num_importance_sampling_steps = 30
     std_factor = 0.9
     initial_values = '-0.103 1.239'
     inputs_reporter = 'adaptive_MC/inputs'
@@ -73,7 +74,6 @@
 
 [Executioner]
   type = Transient
-  num_steps = 60
 []
 
 [Outputs]

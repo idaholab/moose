@@ -25,6 +25,8 @@
 #include "libmesh/petsc_macro.h"
 #include "libmesh/boundary_info.h"
 #include "libmesh/parameters.h"
+#include "libmesh/dense_vector.h"
+#include "libmesh/int_range.h"
 
 // BOOST include
 #include "bitmask_operators.h"
@@ -221,12 +223,12 @@ namespace Moose
 const size_t constMaxQpsPerElem = 216;
 
 // These are used by MooseVariableData and MooseVariableDataFV
-enum SolutionState
+enum SolutionState : int
 {
-  Current,
-  Old,
-  Older,
-  PreviousNL
+  Current = 0,
+  Old = 1,
+  Older = 2,
+  PreviousNL = -1
 };
 // These are used by MooseVariableData and MooseVariableDataFV
 enum GeometryType
@@ -422,6 +424,14 @@ struct ADType<VariableSecond>
   typedef ADVariableSecond type;
 };
 
+/**
+ * This is a helper variable template for cases when we want to use a default compile-time
+ * error with constexpr-based if conditions. The templating delays the triggering
+ * of the static assertion until the template is instantiated.
+ */
+template <class T>
+constexpr std::false_type always_false{};
+
 } // namespace Moose
 
 /**
@@ -493,6 +503,9 @@ template <bool is_ad>
 using GenericVariableGradient = typename Moose::GenericType<VariableGradient, is_ad>;
 template <bool is_ad>
 using GenericVariableSecond = typename Moose::GenericType<VariableSecond, is_ad>;
+template <bool is_ad>
+using GenericDenseVector =
+    typename std::conditional<is_ad, DenseVector<ADReal>, DenseVector<Real>>::type;
 
 // Should be removed with #19439
 #define defineLegacyParams(ObjectType)                                                             \
@@ -639,9 +652,9 @@ enum ConstraintJacobianType
   PrimaryLower
 };
 
-enum CoordinateSystemType
+enum CoordinateSystemType : int
 {
-  COORD_XYZ,
+  COORD_XYZ = 0,
   COORD_RZ,
   COORD_RSPHERICAL
 };
@@ -945,6 +958,12 @@ DerivativeStringClass(ReporterValueName);
 
 /// Name of an Executor.  Used for inputs to Executors
 DerivativeStringClass(ExecutorName);
+
+/// ParsedFunction/ParsedMaterial etc. FParser expression
+DerivativeStringClass(ParsedFunctionExpression);
+
+/// System name support of multiple nonlinear systems on the same mesh
+DerivativeStringClass(NonlinearSystemName);
 
 namespace Moose
 {

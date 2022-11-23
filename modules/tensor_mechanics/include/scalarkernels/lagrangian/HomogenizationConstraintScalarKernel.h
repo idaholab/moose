@@ -11,7 +11,7 @@
 
 #include "ScalarKernel.h"
 
-#include "HomogenizationConstraintIntegral.h"
+#include "HomogenizationConstraint.h"
 
 /// Enforces a cell-average constraint
 ///
@@ -24,7 +24,7 @@
 ///  It only works with the TotalLagrangianStressDivergence kernel
 ///  but works for both large and small deformations
 ///
-///  It relies on the HomogenizationConstraintIntegral to actually
+///  It relies on the HomogenizationConstraint to actually
 ///  calculate the residual and jacobian, as they are volume integrals over
 ///  the domain.
 ///
@@ -47,21 +47,13 @@ public:
   virtual void computeJacobian();
 
 protected:
-  /// If true we're using large deformation kinematics
-  const bool _ld;
-  /// Problem dimension
-  unsigned int _ndisp;
-  /// Number of constraints
-  unsigned int _ncomps;
-
   /// The user object that does the actual volume integral
-  const HomogenizationConstraintIntegral & _integrator;
-
-  /// Map between the flat list of constraints and the tensor index
-  const HomogenizationConstants::index_list _indices;
+  const HomogenizationConstraint & _constraint;
 
   /// The actual tensor residual, from the user object
   const RankTwoTensor & _residual;
   /// The actual tensor jacobian, from the user object
   const RankFourTensor & _jacobian;
+  /// The constraint map
+  const Homogenization::ConstraintMap & _cmap;
 };

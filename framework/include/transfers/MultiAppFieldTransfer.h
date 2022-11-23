@@ -18,7 +18,7 @@ class DofObject;
 }
 
 /**
- *  intermediary class that allows variable names as inputs
+ * Intermediary class that allows variable names as inputs
  */
 class MultiAppFieldTransfer : public MultiAppTransfer
 {
@@ -49,4 +49,12 @@ protected:
   virtual std::vector<VariableName> getFromVarNames() const = 0;
   /// Virtual function defining variables to transfer to
   virtual std::vector<AuxVariableName> getToVarNames() const = 0;
+
+private:
+  /// Whether block restriction is active
+  const bool _has_block_restrictions;
+  /// Subdomain IDs of the blocks to transfer from
+  std::vector<SubdomainID> _from_blocks;
+  /// Subdomain IDs of the blocks to transfer to
+  std::vector<SubdomainID> _to_blocks;
 };

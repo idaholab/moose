@@ -41,7 +41,7 @@ TEST(LimitersTest, limitVector)
     {
       FaceInfo fi(&ei, s);
       ElemInfo ni(ei.elem()->neighbor_ptr(s));
-      fi.computeCoefficients(&ni);
+      fi.computeInternalCoefficients(&ni);
       auto result = interpolate(limiter, upwind, downwind, &grad, fi, true);
       for (const auto d : make_range(unsigned(LIBMESH_DIM)))
         EXPECT_EQ(result(d), 1);

@@ -1,0 +1,3 @@
+time,aluminum_interface_temperature,interface_electrical_flux,interface_heat_flux_aluminum,interface_heat_flux_steel,steel_interface_temperature
+0,0,0,0,0,0
+1,345.56454959701,669835.89476421,-95685.554153716,-71773.41953735,743.04579961332

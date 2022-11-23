@@ -1,9 +1,9 @@
-mu=1
-rho=1
-k=1e-3
-cp=1
-u_inlet=1
-T_inlet=200
+mu = 1
+rho = 1
+k = 1e-3
+cp = 1
+u_inlet = 1
+T_inlet = 200
 h_cv = 1.0
 
 [Mesh]
@@ -95,9 +95,8 @@ h_cv = 1.0
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_type -sub_pc_factor_shift_type'
-  petsc_options_value = 'asm      100                lu           NONZERO'
-  line_search = 'none'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type'
+  petsc_options_value = 'lu NONZERO'
   nl_rel_tol = 1e-14
 []
 

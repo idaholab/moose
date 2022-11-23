@@ -3,7 +3,7 @@
     type = 'Exodiff'
     input = 'tosub_parent.i'
     exodiff = 'tosub_parent_out_sub0.e'
-    design = 'transfers/MultiAppInterpolationTransfer.md'
+    design = 'transfers/MultiAppGeometricInterpolationTransfer.md'
     issues = '#1879'
     requirement = "The system shall allow to interpolate variables from the parent app to the sub apps"
   []
@@ -12,7 +12,7 @@
     type = 'Exodiff'
     input = 'fromsub_parent.i'
     exodiff = 'fromsub_parent_out.e'
-    design = 'transfers/MultiAppInterpolationTransfer.md'
+    design = 'transfers/MultiAppGeometricInterpolationTransfer.md'
     issues = '#1879'
     requirement = "The system shall allow to interpolate variables from the sub apps to the parent app"
   []
@@ -23,7 +23,7 @@
     exodiff = 'fromrestrictedsub_parent_out.e'
     platform = darwin # Object is sensitive and needs to be evaluated #12800
 
-    design = 'transfers/MultiAppInterpolationTransfer.md'
+    design = 'transfers/MultiAppGeometricInterpolationTransfer.md'
     issues = '#1879 #12618'
     requirement = "The system shall allow to interpolate block restricted variables from the sub apps to the parent app"
   []

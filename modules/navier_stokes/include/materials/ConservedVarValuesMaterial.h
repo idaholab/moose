@@ -25,7 +25,6 @@ public:
 
 protected:
   virtual void computeQpProperties() override;
-  ADReal computeSpeed() const;
 
   /// fluid properties
   const SinglePhaseFluidProperties & _fluid;

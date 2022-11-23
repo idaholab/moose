@@ -38,7 +38,6 @@ protected:
   const bool _generate_core_metadata;
   /// Number of radial intervals in the background region
   const unsigned int _background_intervals;
-
   /// Whether the hexagonal pattern has external duct(s)
   const bool _has_assembly_duct;
   /// Size parameter(s) of duct(s)
@@ -63,12 +62,18 @@ protected:
   const boundary_id_type _external_boundary_id;
   /// Boundary name of mesh's external boundary
   const std::string _external_boundary_name;
+  /// Whether interface boundaries are created
+  const bool _create_interface_boundaries;
   /// Style of the polygon size parameter
   const PolygonSizeStyle _hexagon_size_style;
+  /// Whether the non-circular region (outside the rings) can be deformed
+  const bool _deform_non_circular_region;
   /// Pitch size of the input assembly mesh
   Real _pattern_pitch;
   /// MeshMetaData of the assembly pitch size
   Real & _pattern_pitch_meta;
+  /// MeshMetaData of input hexagon's pitch
+  Real & _input_pitch_meta;
   /// MeshMetaData: whether the generated mesh is a control drum
   const bool _is_control_drum_meta;
   /// MeshMetaData: positions of the control drums within the generated core mesh
@@ -79,6 +84,10 @@ protected:
   std::vector<std::vector<Real>> & _control_drums_azimuthal_meta;
   /// Filename of the text file containing the control drum positions
   const std::string _position_file_name;
+  /// MeshMetaData: whether the peripheral area of the generated mesh can be trimmed by PolygonMeshTrimmer
+  const bool & _hexagon_peripheral_trimmability;
+  /// MeshMetaData: whether the generated mesh can be trimmed through its center by PolygonMeshTrimmer
+  const bool & _hexagon_center_trimmability;
   /// a Boolean flag to tell PeripheralModifyGenerator that the input is valid
   const bool & _peripheral_modifier_compatible;
   /// Subdomain IDs of the peripheral regions

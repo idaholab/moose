@@ -53,7 +53,7 @@ class MooseDeepDiff(DeepDiff):
         absolute_error = abs(x - y)
         return absolute_error > max_absolute_error
 
-    def _diff_numbers(self, level):
+    def _diff_numbers(self, level, **kwargs):
         """Diff Numbers"""
         t1_type = "number" if self.ignore_numeric_type_changes else level.t1.__class__.__name__
         t2_type = "number" if self.ignore_numeric_type_changes else level.t2.__class__.__name__
@@ -71,7 +71,7 @@ class MooseDeepDiff(DeepDiff):
             if self.absolute_error(x, y, self.abs_err):
                 self._report_result('values_changed', level)
         else:
-            DeepDiff._diff_numbers(self, level)
+            DeepDiff._diff_numbers(self, level, **kwargs)
 
 class JSONDiffer(object):
     """Basic class for performing diff between JSON files/data"""

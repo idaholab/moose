@@ -53,6 +53,7 @@ public:
    */
   virtual void initialSetup(THREAD_ID tid = 0) const;
   virtual void timestepSetup(THREAD_ID tid = 0) const;
+  virtual void customSetup(const ExecFlagType & exec_type, THREAD_ID tid = 0) const;
   virtual void subdomainSetup(THREAD_ID tid = 0) const;
   virtual void subdomainSetup(SubdomainID id, THREAD_ID tid = 0) const;
   virtual void jacobianSetup(THREAD_ID tid = 0) const;
@@ -161,6 +162,15 @@ MooseObjectWarehouse<T>::timestepSetup(THREAD_ID tid /* = 0*/) const
   checkThreadID(tid);
   for (const auto & object : _active_objects[tid])
     object->timestepSetup();
+}
+
+template <typename T>
+void
+MooseObjectWarehouse<T>::customSetup(const ExecFlagType & exec_type, THREAD_ID tid /* = 0*/) const
+{
+  checkThreadID(tid);
+  for (const auto & object : _active_objects[tid])
+    object->customSetup(exec_type);
 }
 
 template <typename T>

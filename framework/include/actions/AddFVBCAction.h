@@ -18,7 +18,7 @@ class AddFVBCAction : public MooseObjectAction
 public:
   static InputParameters validParams();
 
-  AddFVBCAction(InputParameters params);
+  AddFVBCAction(const InputParameters & params);
 
   virtual void act() override;
 };

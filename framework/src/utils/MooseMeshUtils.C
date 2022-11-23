@@ -210,7 +210,7 @@ getExtraIDUniqueCombinationMap(const MeshBase & mesh,
   {
     // get set of extra id values;
     std::set<dof_id_type> ids;
-    for (const auto & elem : mesh.active_local_element_ptr_range())
+    for (const auto & elem : mesh.active_element_ptr_range())
     {
       if (block_restricted && block_ids.find(elem->subdomain_id()) == block_ids.end())
         continue;
@@ -220,7 +220,7 @@ getExtraIDUniqueCombinationMap(const MeshBase & mesh,
     mesh.comm().set_union(ids);
     // determine new extra id values;
     std::map<dof_id_type, dof_id_type> parsed_ids;
-    for (auto & elem : mesh.active_local_element_ptr_range())
+    for (auto & elem : mesh.active_element_ptr_range())
     {
       if (block_restricted && block_ids.find(elem->subdomain_id()) == block_ids.end())
         continue;
@@ -234,7 +234,7 @@ getExtraIDUniqueCombinationMap(const MeshBase & mesh,
       MooseMeshUtils::getExtraIDUniqueCombinationMap(mesh, block_ids, extra_ids);
   // parsing extra ids based on ref_parsed_ids
   std::set<std::pair<dof_id_type, dof_id_type>> unique_ids;
-  for (const auto & elem : mesh.active_local_element_ptr_range())
+  for (const auto & elem : mesh.active_element_ptr_range())
   {
     if (block_restricted && block_ids.find(elem->subdomain_id()) == block_ids.end())
       continue;
@@ -245,7 +245,7 @@ getExtraIDUniqueCombinationMap(const MeshBase & mesh,
   }
   mesh.comm().set_union(unique_ids);
   std::map<dof_id_type, dof_id_type> parsed_ids;
-  for (const auto & elem : mesh.active_local_element_ptr_range())
+  for (const auto & elem : mesh.active_element_ptr_range())
   {
     if (block_restricted && block_ids.find(elem->subdomain_id()) == block_ids.end())
       continue;
@@ -299,5 +299,76 @@ isCoPlanar(const std::vector<Point> vec_pts)
   }
   // If all the points are collinear, they are also coplanar
   return true;
+}
+
+SubdomainID
+getNextFreeSubdomainID(MeshBase & input_mesh)
+{
+  // Call this to get most up to date block id information
+  input_mesh.cache_elem_data();
+
+  std::set<SubdomainID> preexisting_subdomain_ids;
+  input_mesh.subdomain_ids(preexisting_subdomain_ids);
+  if (preexisting_subdomain_ids.empty())
+    return 0;
+  else
+  {
+    const auto highest_subdomain_id =
+        *std::max_element(preexisting_subdomain_ids.begin(), preexisting_subdomain_ids.end());
+    mooseAssert(highest_subdomain_id < std::numeric_limits<SubdomainID>::max(),
+                "A SubdomainID with max possible value was found");
+    return highest_subdomain_id + 1;
+  }
+}
+
+BoundaryID
+getNextFreeBoundaryID(MeshBase & input_mesh)
+{
+  auto boundary_ids = input_mesh.get_boundary_info().get_boundary_ids();
+  if (boundary_ids.empty())
+    return 0;
+  return (*boundary_ids.rbegin() + 1);
+}
+
+bool
+hasSubdomainID(MeshBase & input_mesh, const SubdomainID & id)
+{
+  std::set<SubdomainID> mesh_blocks;
+  input_mesh.subdomain_ids(mesh_blocks);
+
+  // On a distributed mesh we may have sideset IDs that only exist on
+  // other processors
+  if (!input_mesh.is_replicated())
+    input_mesh.comm().set_union(mesh_blocks);
+
+  return mesh_blocks.count(id) && (id != Moose::INVALID_BLOCK_ID);
+}
+
+bool
+hasSubdomainName(MeshBase & input_mesh, const SubdomainName & name)
+{
+  const auto id = getSubdomainID(name, input_mesh);
+  return hasSubdomainID(input_mesh, id);
+}
+
+bool
+hasBoundaryID(MeshBase & input_mesh, const BoundaryID & id)
+{
+  const libMesh::BoundaryInfo & boundary_info = input_mesh.get_boundary_info();
+  std::set<libMesh::boundary_id_type> boundary_ids = boundary_info.get_boundary_ids();
+
+  // On a distributed mesh we may have boundary IDs that only exist on
+  // other processors
+  if (!input_mesh.is_replicated())
+    input_mesh.comm().set_union(boundary_ids);
+
+  return boundary_ids.count(id) && (id != Moose::INVALID_BOUNDARY_ID);
+}
+
+bool
+hasBoundaryName(MeshBase & input_mesh, const BoundaryName & name)
+{
+  const auto id = getBoundaryID(name, input_mesh);
+  return hasBoundaryID(input_mesh, id);
 }
 }

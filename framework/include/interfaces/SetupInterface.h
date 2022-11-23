@@ -55,28 +55,15 @@ public:
   virtual void subdomainSetup();
 
   /**
+   * Gets called in FEProblemBase::execute() for execute flags other than initial, timestep_begin,
+   * nonlinear, linear and subdomain
+   */
+  virtual void customSetup(const ExecFlagType & /*exec_type*/) {}
+
+  /**
    * Return the execute on MultiMooseEnum for this object.
    */
   const ExecFlagEnum & getExecuteOnEnum() const;
-
-  /**
-   * (DEPRECATED) Get the execution flag for the object
-   * TODO: ExecFlagType
-   */
-  virtual const std::vector<ExecFlagType> & execFlags() const;
-
-  /**
-   * (DEPRECATED) Build and return the execution flags as a bitfield
-   * TODO: ExecFlagType
-   */
-  ExecFlagType execBitFlags() const;
-
-  /**
-   * (DEPRECATED) Returns the available options for the 'execute_on' input parameters
-   * TODO: ExecFlagType
-   * @return A MooseEnum with the available 'execute_on' options, the default is 'residual'
-   */
-  static ExecFlagEnum getExecuteOptions();
 
 private:
   /// Empty ExecFlagEnum for the case when the "execute_on" parameter is not included. This
@@ -84,11 +71,8 @@ private:
   ExecFlagEnum _empty_execute_enum;
 
 protected:
-  /// Execute settings for this oejct.
+  /// Execute settings for this object.
   const ExecFlagEnum & _execute_enum;
-
-  /// (DEPRECATED) execution flag (when is the object executed/evaluated) TODO: ExecFlagType
-  const std::vector<ExecFlagType> _exec_flags;
 
   /// Reference to FEProblemBase
   const ExecFlagType & _current_execute_flag;

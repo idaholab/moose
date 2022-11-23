@@ -10,6 +10,85 @@
 #pragma once
 
 #include "FluidProperties.h"
+/**
+ * Adds AD versions of each fluid property. These functions use the Real versions of these
+ methods
+ * to compute the AD variables complete with derivatives. Typically, these do not need to be
+ * overriden in derived classes.
+ */
+
+#define propfuncAD(want, prop1, prop2)                                                             \
+  virtual DualReal want##_from_##prop1##_##prop2(                                                  \
+      const DualReal & p1, const DualReal & p2, const std::vector<DualReal> & x) const             \
+  {                                                                                                \
+    Real p1_raw = p1.value();                                                                      \
+    Real p2_raw = p2.value();                                                                      \
+    std::vector<Real> x_raw(x.size(), 0);                                                          \
+    for (unsigned int i = 0; i < x.size(); ++i)                                                    \
+      x_raw[i] = x[i].value();                                                                     \
+                                                                                                   \
+    Real y_raw = 0;                                                                                \
+    Real dy_dp1 = 0;                                                                               \
+    Real dy_dp2 = 0;                                                                               \
+    std::vector<Real> dy_dx(x.size(), 0);                                                          \
+    want##_from_##prop1##_##prop2(p1_raw, p2_raw, x_raw, y_raw, dy_dp1, dy_dp2, dy_dx);            \
+                                                                                                   \
+    DualReal result = y_raw;                                                                       \
+    result.derivatives() = p1.derivatives() * dy_dp1 + p2.derivatives() * dy_dp2;                  \
+    for (unsigned int i = 0; i < x.size(); ++i)                                                    \
+      result.derivatives() += x[i].derivatives() * dy_dx[i];                                       \
+    return result;                                                                                 \
+  }                                                                                                \
+                                                                                                   \
+  virtual void want##_from_##prop1##_##prop2(const DualReal & prop1,                               \
+                                             const DualReal & prop2,                               \
+                                             std::vector<DualReal> & x,                            \
+                                             DualReal & val,                                       \
+                                             DualReal & d##want##d1,                               \
+                                             DualReal & d##want##d2,                               \
+                                             std::vector<DualReal> & d##want##dx) const            \
+  {                                                                                                \
+    fluidPropError(                                                                                \
+        name(), ": ", __PRETTY_FUNCTION__, " derivative derivatives not  implemented.");           \
+    Real dummy, tmp1, tmp2;                                                                        \
+    std::vector<Real> x_raw(x.size(), 0);                                                          \
+    std::vector<Real> tmp3(x.size(), 0);                                                           \
+    for (unsigned int i = 0; i < x.size(); ++i)                                                    \
+      x_raw[i] = x[i].value();                                                                     \
+    val = want##_from_##prop1##_##prop2(prop1, prop2, x);                                          \
+    want##_from_##prop1##_##prop2(prop1.value(), prop2.value(), x_raw, dummy, tmp1, tmp2, tmp3);   \
+    d##want##d1 = tmp1;                                                                            \
+    d##want##d2 = tmp2;                                                                            \
+    for (unsigned int i = 0; i < x.size(); ++i)                                                    \
+      d##want##dx[i] = tmp3[i];                                                                    \
+  }
+
+/**
+ * Adds function definitions with not implemented error. These functions should be overriden in
+ * derived classes where required. AD versions are constructed automatically using propfuncAD.
+ */
+#define propfunc(want, prop1, prop2)                                                               \
+  virtual Real want##_from_##prop1##_##prop2(Real, Real, const std::vector<Real> &) const          \
+  {                                                                                                \
+    mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");                            \
+  }                                                                                                \
+                                                                                                   \
+  virtual void want##_from_##prop1##_##prop2(Real prop1,                                           \
+                                             Real prop2,                                           \
+                                             const std::vector<Real> & x,                          \
+                                             Real & val,                                           \
+                                             Real & d##want##d1,                                   \
+                                             Real & d##want##d2,                                   \
+                                             std::vector<Real> & d##want##dx) const                \
+  {                                                                                                \
+    fluidPropError(name(), ": ", __PRETTY_FUNCTION__, " derivatives not implemented.");            \
+    d##want##d1 = 0;                                                                               \
+    d##want##d2 = 0;                                                                               \
+    std::fill(d##want##dx.begin(), d##want##dx.end(), 0.);                                         \
+    val = want##_from_##prop1##_##prop2(prop1, prop2, x);                                          \
+  }                                                                                                \
+                                                                                                   \
+  propfuncAD(want, prop1, prop2)
 
 /**
  * Base class for fluid properties of vapor mixtures
@@ -27,251 +106,33 @@ public:
   VaporMixtureFluidProperties(const InputParameters & parameters);
   virtual ~VaporMixtureFluidProperties();
 
-  /**
-   * Returns the number of secondary vapors
-   */
-  virtual unsigned int getNumberOfSecondaryVapors() const = 0;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+  // clang-format off
 
-  /**
-   * Pressure from specific volume and specific internal energy
-   *
-   * @param[in] v   specific volume
-   * @param[in] e   specific internal energy
-   * @param[in] x   vapor mass fraction values
-   */
-  virtual Real p_from_v_e(Real v, Real e, const std::vector<Real> & x) const = 0;
+  ///@{
+  propfunc(p, v, e)
+  propfunc(T, v, e)
+  propfunc(c, v, e)
+  propfunc(rho, p, T)
+  propfunc(e, p, T)
+  propfunc(c, p, T)
+  propfunc(cp, p, T)
+  propfunc(cv, p, T)
+  propfunc(mu, p, T)
+  propfunc(k, p, T)
+  propfunc(e, p, rho)
+  ///@}
 
-  /**
-   * Pressure and its derivatives from specific volume and specific internal energy
-   *
-   * @param[in] v        specific volume
-   * @param[in] e        specific internal energy
-   * @param[in] x        vapor mass fraction values
-   * @param[out] p       pressure
-   * @param[out] dp_dv   derivative of pressure w.r.t. specific volume
-   * @param[out] dp_de   derivative of pressure w.r.t. specific internal energy
-   * @param[out] dp_dx   derivative of pressure w.r.t. vapor mass fraction values
-   */
-  virtual void p_from_v_e(Real v,
-                          Real e,
-                          const std::vector<Real> & x,
-                          Real & p,
-                          Real & dp_dv,
-                          Real & dp_de,
-                          std::vector<Real> & dp_dx) const = 0;
+  // clang-format on
 
-  /**
-   * Temperature from specific volume and specific internal energy
-   *
-   * @param[in] v   specific volume
-   * @param[in] e   specific internal energy
-   * @param[in] x   vapor mass fraction values
-   */
-  virtual Real T_from_v_e(Real v, Real e, const std::vector<Real> & x) const = 0;
+#undef propfunc
+#undef propfuncAD
 
-  /**
-   * Temperature and its derivatives from specific volume and specific internal energy
-   *
-   * @param[in] v        specific volume
-   * @param[in] e        specific internal energy
-   * @param[in] x        vapor mass fraction values
-   * @param[out] T       temperature
-   * @param[out] dT_dv   derivative of temperature w.r.t. specific volume
-   * @param[out] dT_de   derivative of temperature w.r.t. specific internal energy
-   * @param[out] dT_dx   derivative of temperature w.r.t. vapor mass fraction values
-   */
-  virtual void T_from_v_e(Real v,
-                          Real e,
-                          const std::vector<Real> & x,
-                          Real & T,
-                          Real & dT_dv,
-                          Real & dT_de,
-                          std::vector<Real> & dT_dx) const = 0;
-
-  /**
-   * Speed of sound from specific volume and specific internal energy
-   *
-   * @param[in] v   specific volume
-   * @param[in] e   specific internal energy
-   * @param[in] x   vapor mass fraction values
-   * @return        speed of sound
-   */
-  virtual Real c_from_v_e(Real v, Real e, const std::vector<Real> & x) const = 0;
-
-  /**
-   * Speed of sound and its derivatives from specific volume and specific internal energy
-   *
-   * @param[in] v   specific volume
-   * @param[in] e   specific internal energy
-   * @param[in] x   vapor mass fraction values
-   * @param[out] c       Speed of sound
-   * @param[out] dc_dv   derivative of temperature w.r.t. specific volume
-   * @param[out] dc_de   derivative of temperature w.r.t. specific internal energy
-   * @param[out] dc_dx   derivative of temperature w.r.t. vapor mass fraction values
-   */
-  virtual void c_from_v_e(Real v,
-                          Real e,
-                          const std::vector<Real> & x,
-                          Real & c,
-                          Real & dc_dv,
-                          Real & dc_de,
-                          std::vector<Real> & dc_dx) const = 0;
-
-  /**
-   * Density from pressure and temperature
-   *
-   * @param[in] p   pressure
-   * @param[in] T   temperature
-   * @param[in] x   vapor mass fraction values
-   */
-  virtual Real rho_from_p_T(Real p, Real T, const std::vector<Real> & x) const = 0;
-
-  /**
-   * Density and its derivatives from pressure and temperature
-   *
-   * @param[in] p   pressure
-   * @param[in] T   temperature
-   * @param[in] x   vapor mass fraction values
-   * @param[in] x        vapor mass fraction values
-   * @param[out] rho       density
-   * @param[out] drho_dp   derivative of density w.r.t. pressure
-   * @param[out] drho_dT   derivative of density w.r.t. temperature
-   * @param[out] drho_dx   derivative of density w.r.t. vapor mass fraction values
-   */
-  virtual void rho_from_p_T(Real p,
-                            Real T,
-                            const std::vector<Real> & x,
-                            Real & rho,
-                            Real & drho_dp,
-                            Real & drho_dT,
-                            std::vector<Real> & drho_dx) const = 0;
-
-  /**
-   * Specific internal energy from pressure and temperature
-   *
-   * @param[in] p   pressure
-   * @param[in] T   temperature
-   * @param[in] x   vapor mass fraction values
-   */
-  virtual Real e_from_p_T(Real p, Real T, const std::vector<Real> & x) const = 0;
-
-  /**
-   * Specific internal energy and its derivatives from pressure and temperature
-   *
-   * @param[in] p   pressure
-   * @param[in] T   temperature
-   * @param[in] x   vapor mass fraction values
-   * @param[in] x        vapor mass fraction values
-   * @param[out] e       specific internal energy
-   * @param[out] de_dp   derivative of specific internal energy w.r.t. pressure
-   * @param[out] de_dT   derivative of specific internal energy w.r.t. temperature
-   * @param[out] de_dx   derivative of specific internal energy w.r.t. vapor mass fraction values
-   */
-  virtual void e_from_p_T(Real p,
-                          Real T,
-                          const std::vector<Real> & x,
-                          Real & e,
-                          Real & de_dp,
-                          Real & de_dT,
-                          std::vector<Real> & de_dx) const = 0;
-
-  /**
-   * Sound speed from pressure and temperature
-   *
-   * @return Sound speed
-   * @param[in] p   pressure
-   * @param[in] T   temperature
-   * @param[in] x   vapor mass fraction values
-   */
-  virtual Real c_from_p_T(Real p, Real T, const std::vector<Real> & x) const = 0;
-
-  /**
-   * Sound speed and its derivatives from pressure and temperature
-   *
-   * @param[in] p   pressure
-   * @param[in] T   temperature
-   * @param[in] x   vapor mass fraction values
-   * @param[out] c       sound speed
-   * @param[out] dc_dp   derivative of sound speed w.r.t. pressure
-   * @param[out] dc_dT   derivative of sound speed w.r.t. temperature
-   * @param[out] dc_dx   derivative of sound speed w.r.t. vapor mass fraction values
-   */
-  virtual void c_from_p_T(Real p,
-                          Real T,
-                          const std::vector<Real> & x,
-                          Real & c,
-                          Real & dc_dp,
-                          Real & dc_dT,
-                          std::vector<Real> & dc_dx) const = 0;
-
-  /**
-   * Isobaric (constant-pressure) specific heat from pressure and temperature
-   *
-   * @return Isobaric (constant-pressure) specific heat
-   * @param[in] p   pressure
-   * @param[in] T   temperature
-   * @param[in] x   vapor mass fraction values
-   */
-  virtual Real cp_from_p_T(Real p, Real T, const std::vector<Real> & x) const = 0;
-
-  /**
-   * Isochoric (constant-volume) specific heat from pressure and temperature
-   *
-   * @return Isochoric (constant-volume) specific heat
-   * @param[in] p   pressure
-   * @param[in] T   temperature
-   * @param[in] x   vapor mass fraction values
-   */
-  virtual Real cv_from_p_T(Real p, Real T, const std::vector<Real> & x) const = 0;
-
-  /**
-   * Dynamic viscosity from pressure and temperature
-   *
-   * @return Dynamic viscosity
-   * @param[in] p   pressure
-   * @param[in] T   temperature
-   * @param[in] x   vapor mass fraction values
-   */
-  virtual Real mu_from_p_T(Real p, Real T, const std::vector<Real> & x) const = 0;
-
-  /**
-   * Thermal conductivity from pressure and temperature
-   *
-   * @return Dynamic viscosity
-   * @param[in] p   pressure
-   * @param[in] T   temperature
-   * @param[in] x   vapor mass fraction values
-   */
-  virtual Real k_from_p_T(Real p, Real T, const std::vector<Real> & x) const = 0;
-
-  /**
-   * Specific internal energy from pressure and density
-   *
-   * @return        specific internal energy
-   * @param[in] p   pressure
-   * @param[in] rho density
-   * @param[in] x   vapor mass fraction values
-   */
-  virtual Real e_from_p_rho(Real p, Real rho, const std::vector<Real> & x) const = 0;
-
-  /**
-   * Specific internal energy and its derivatives from pressure and density
-   *
-   * @param[in] p   pressure
-   * @param[in] rho density
-   * @param[in] x   vapor mass fraction values
-   * @param[out] e       specific internal energy
-   * @param[out] de_dp   derivative of specific internal energy w.r.t. pressure
-   * @param[out] de_drho derivative of specific internal energy w.r.t. density
-   * @param[out] de_dx   derivative of specific internal energy w.r.t. vapor mass fraction values
-   */
-  virtual void e_from_p_rho(Real p,
-                            Real rho,
-                            const std::vector<Real> & x,
-                            Real & e,
-                            Real & de_dp,
-                            Real & de_drho,
-                            std::vector<Real> & de_dx) const = 0;
+      /**
+       * Returns the number of secondary vapors
+       */
+      virtual unsigned int getNumberOfSecondaryVapors() const = 0;
 
   /**
    * Computes the mass fraction of the primary vapor given mass fractions of the
@@ -285,4 +146,16 @@ public:
    * vapors.
    */
   Real primaryMassFraction(const std::vector<Real> & x) const;
+
+private:
+  template <typename... Args>
+  void fluidPropError(Args... args) const
+  {
+    if (_allow_imperfect_jacobians)
+      mooseDoOnce(mooseWarning(std::forward<Args>(args)...));
+    else
+      mooseError(std::forward<Args>(args)...);
+  }
 };
+
+#pragma GCC diagnostic pop

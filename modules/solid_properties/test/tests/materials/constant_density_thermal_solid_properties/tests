@@ -1,0 +1,10 @@
+[Tests]
+  [test]
+    type = CSVDiff
+    input = 'constant_density_thermal_solid_properties.i'
+    csvdiff = 'constant_density_thermal_solid_properties_out.csv'
+    requirement = "The system shall provide the ability to use a constant density for solid properties."
+    design = 'ConstantDensityThermalSolidPropertiesMaterial.md'
+    issues = '#21978'
+  []
+[]

@@ -124,6 +124,7 @@ C
         WRITE(*,205) PREDEF(2)
         WRITE(*,210) DPRED(1)
         WRITE(*,215) DPRED(2)
+        CALL FLUSH()
       ENDIF
 
 

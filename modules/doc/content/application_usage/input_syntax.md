@@ -6,20 +6,27 @@ MOOSE input file syntax basically works like this:
 ```
 # comment
 [section] # inline-comment
-  field1 = 'quoted-string'
-  field2 = "quoted-string"
-  field3 = "multi-line"
-           "string"
-  field4 = unquoted_string # can't have whitespace
+  field01 = 'quoted-string'
+  field02 = "quoted-string"
+  field03 = "multi-line"
+            "string"
+  field04 = unquoted_string # can't have whitespace
 
-  field5 = 42 # integer
-  field6 = 42.42 # floating point number
-  field7 = true # boolean (false, on, off - case insensitive)
+  field05 = 42 # integer
+  field06 = 42.42 # floating point number
+  field07 = true # boolean (false, on, off - case insensitive)
 
-  field8 = 'item0 item1 item2' # array of items (strings or numbers)
-  field9 = 'item00 item01 ;
-            item10 item11 ;
-            item20' # double indexed array (can even be jagged)
+  field08 = 'item0 item1 item2' # array of items (strings or numbers)
+  field09 = 'item00 item01 ;
+             item10 item11 ;
+             item20' # double indexed array (can even be jagged)
+  field10 = 'item000 item001 ;
+             item010 ;
+             item020 item021 item022 |
+             item100 item101 item102 ; ; # can use empty sub-sub-vectors
+             item120 | | # can also use empty sub-vectors
+             item300 item301 ;
+             item310 item311' # triple indexed array (primary and secondary delimiters are '|' and ';')
 
   [subsection]
     foo = 42
@@ -33,6 +40,12 @@ MOOSE input file syntax basically works like this:
 []
 ...
 ```
+
+Note that single `'` and double `"` quotes can be interchangably to quote strings (as long as
+the start quote and end quote character are the same) and are functionally equivalent. They do
+however behave differently when auto-formatting input files with [`hit format`](hit.md).
+Single quotes strings will not be reformatted, while double quoted strings are reindented
+and reflowed.
 
 ## Brace Expressions
 
@@ -65,7 +78,7 @@ string-value).  MOOSE currently has five built-in brace-expression commands:
   of `unit` and converts it to the unit `to_unit` using the [MooseUnit](/utils/Units.md)
   system. For example the expression `${units 1 J/mol -> eV/at}` would evaluate to the value
   `1.0364269656262e-05`. The `to_unit` argument is optional resulting in a no-op that serves
-  only for documentation purposes (`${units 1 J/mol}` would evaluate to the value `1.0`). 
+  only for documentation purposes (`${units 1 J/mol}` would evaluate to the value `1.0`).
 
 Examples:
 

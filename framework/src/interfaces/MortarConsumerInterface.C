@@ -41,6 +41,8 @@ MortarConsumerInterface::validParams()
             obj_params.get<SubdomainName>("primary_subdomain");
         rm_params.set<bool>("ghost_point_neighbors") =
             obj_params.get<bool>("ghost_point_neighbors");
+        rm_params.set<bool>("ghost_higher_d_neighbors") =
+            obj_params.get<bool>("ghost_higher_d_neighbors");
       });
 
   params.addRequiredParam<BoundaryName>("primary_boundary",
@@ -80,6 +82,21 @@ MortarConsumerInterface::validParams()
                         false,
                         "Whether we should ghost point neighbors of secondary face elements, and "
                         "consequently also their mortar interface couples.");
+  params.addParam<Real>(
+      "minimum_projection_angle",
+      40.0,
+      "Parameter to control which angle (in degrees) is admissible for the creation of mortar "
+      "segments.  If set to a value close to zero, very oblique projections are allowed, which "
+      "can result in mortar segments solving physics not meaningfully, and overprojection of "
+      "primary nodes onto the mortar segment mesh in extreme cases. This parameter is mostly "
+      "intended for mortar mesh debugging purposes in two dimensions.");
+
+  params.addParam<bool>(
+      "ghost_higher_d_neighbors",
+      false,
+      "Whether we should ghost higher-dimensional neighbors. This is necessary when we are doing "
+      "second order mortar with finite volume primal variables, because in order for the method to "
+      "be second order we must use cell gradients, which couples in the neighbor cells.");
 
   return params;
 }
@@ -90,7 +107,8 @@ MortarConsumerInterface::MortarConsumerInterface(const MooseObject * moose_objec
     _mci_subproblem(*moose_object->getCheckedPointerParam<SubProblem *>("_subproblem")),
     _mci_tid(moose_object->getParam<THREAD_ID>("_tid")),
     _mci_mesh(_mci_subproblem.mesh()),
-    _mci_assembly(_mci_subproblem.assembly(_mci_tid)),
+    // all geometric assembly information should be correct for nl system number 0
+    _mci_assembly(_mci_subproblem.assembly(_mci_tid, 0)),
     _mortar_data(_mci_fe_problem.mortarData()),
     _secondary_id(
         _mci_mesh.getBoundaryID(moose_object->getParam<BoundaryName>("secondary_boundary"))),
@@ -118,7 +136,8 @@ MortarConsumerInterface::MortarConsumerInterface(const MooseObject * moose_objec
       displaced,
       moose_object->getParam<bool>("periodic"),
       moose_object->getParam<bool>("debug_mesh"),
-      moose_object->getParam<bool>("correct_edge_dropping"));
+      moose_object->getParam<bool>("correct_edge_dropping"),
+      moose_object->getParam<Real>("minimum_projection_angle"));
 
   _amg = &_mci_fe_problem.getMortarInterface(
       std::make_pair(_primary_id, _secondary_id),

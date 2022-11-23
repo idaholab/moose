@@ -29,7 +29,7 @@
         Executioner/dt=0.01
         Executioner/num_steps=5
         Outputs/file_base=lax_shock_tube_implicit'
-      abs_zero = 1e-10
+      abs_zero = 1e-8
       rel_err = 1e-5
       max_parallel = 1
       method = opt

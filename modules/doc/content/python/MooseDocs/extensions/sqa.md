@@ -61,12 +61,32 @@ then the "app_stp.md.template" file should be loaded in a file named "bull_frog_
 - +app_scs.md.template+\\
   This will comprise the application Software Coding Standards.
 
+### MOOSE Module Templates
 
+The following is a list of templates that should be included within a MOOSE module to complete the
+SQA documentation. Similar naming conventions that applied to [#moose-based-application-templates]
+apply to MOOSE module templates. There are no [!ac](CCI) or [!ac](SCS) templates for modules because
+they follow the framework versions of the [framework_cci.md] and [framework_scs.md] documents.
+
+- +module_stp.md.template+\\
+  This will comprise the module Software Test Plan.
+- +module_sdd.md.template+\\
+  This will comprise the module Software Design Document.
+- +module_srs.md.template+\\
+  This will comprise the module Software Requirement Specification.
+- +module_rtm.md.template+\\
+  This will comprise the module Requirement Traceability Matrix.
+- +module_vvr.md.template+\\
+  This will comprise the module Verification and Validation Report.
+- +module_far.md.template+\\
+  This will comprise the module Failure Analysis Report.
+- +module_sll.md.template+\\
+  This will comprise the module Software Library List.
 
 ### General Templates
 
-The available general SQA templates are listed below. Unlike the MOOSE-based application versions
-above a landing page template does not exist and there is no naming convention required for
+The available general SQA templates are listed below. Unlike the MOOSE-based application or module
+versions above, a landing page template does not exist and there is no naming convention required for
 loading these templates. These templates based on the [!ac](INL) templates and are stand-alone to
 aid in creating SQA documentation for unique non-MOOSE applications. They are also used for the
 framework documents on which all MOOSE-based applications depend.

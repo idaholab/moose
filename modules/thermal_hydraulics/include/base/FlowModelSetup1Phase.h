@@ -17,7 +17,7 @@
 class FlowModelSetup1Phase : public FlowModelSetup
 {
 public:
-  FlowModelSetup1Phase(InputParameters params);
+  FlowModelSetup1Phase(const InputParameters & params);
 
 protected:
   virtual void addInitialConditions() override;

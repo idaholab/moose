@@ -31,15 +31,6 @@ InletFunction1Phase::InletFunction1Phase(const InputParameters & params)
 }
 
 void
-InletFunction1Phase::check() const
-{
-  FlowBoundary1Phase::check();
-
-  if (_flow_model_id != THM::FM_SINGLE_PHASE)
-    logModelNotImplementedError(_flow_model_id);
-}
-
-void
 InletFunction1Phase::addMooseObjects()
 {
   ExecFlagEnum execute_on(MooseUtils::getDefaultExecFlagEnum());

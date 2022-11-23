@@ -29,6 +29,11 @@ CrackFrontDefinition::validParams()
   params += BoundaryRestrictable::validParams();
   addCrackFrontDefinitionParams(params);
   params.set<bool>("use_displaced_mesh") = false;
+
+  params.addRelationshipManager("ElementSideNeighborLayers",
+                                Moose::RelationshipManagerType::ALGEBRAIC,
+                                [](const InputParameters &, InputParameters & rm_params)
+                                { rm_params.set<unsigned short>("layers") = 2; });
   return params;
 }
 
@@ -783,6 +788,7 @@ CrackFrontDefinition::updateCrackFrontGeometry()
   _tangent_directions.clear();
   _crack_directions.clear();
   _rot_matrix.clear();
+  _strain_along_front.clear();
 
   if (_treat_as_2d)
   {
@@ -1447,6 +1453,8 @@ CrackFrontDefinition::calculateTangentialStrainAlongFront()
   const Node * current_node;
   const Node * previous_node;
   const Node * next_node;
+
+  _strain_along_front.reserve(num_crack_front_nodes);
 
   // In finalize(), gatherMax builds and distributes the complete strain vector on all processors
   // -> reset the vector every time

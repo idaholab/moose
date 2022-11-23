@@ -222,7 +222,11 @@ ThreadedFaceLoop<RangeType>::operator()(const RangeType & range, bool bypass_thr
     }
     catch (libMesh::LogicError & e)
     {
-      throw MooseException("We caught a libMesh error");
+      mooseException("We caught a libMesh error: ", e.what());
+    }
+    catch (MetaPhysicL::LogicError & e)
+    {
+      moose::translateMetaPhysicLError(e);
     }
   }
   catch (MooseException & e)
@@ -345,7 +349,7 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::reinitVariables(const FaceInfo
   // to conditionally do some FE-specific reinit here if we have any active FE
   // variables.  However, we still want to keep/do FV-style quadrature.
   // Figure out how to do all this some day.
-  _fe_problem.assembly(_tid).reinitFVFace(fi);
+  _fe_problem.reinitFVFace(_tid, fi);
 
   // TODO: for FE variables, this is handled via setting needed vars through
   // fe problem API which passes the value on to the system class.  Then
@@ -370,12 +374,16 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::reinitVariables(const FaceInfo
     mat->computeProperties();
   }
 
-  _fe_problem.resizeMaterialData(Moose::MaterialDataType::NEIGHBOR_MATERIAL_DATA, /*nqp=*/1, _tid);
-
-  for (std::shared_ptr<MaterialBase> mat : _neigh_face_mats)
+  if (fi.neighborPtr())
   {
-    mat->setFaceInfo(fi);
-    mat->computeProperties();
+    _fe_problem.resizeMaterialData(
+        Moose::MaterialDataType::NEIGHBOR_MATERIAL_DATA, /*nqp=*/1, _tid);
+
+    for (std::shared_ptr<MaterialBase> mat : _neigh_face_mats)
+    {
+      mat->setFaceInfo(fi);
+      mat->computeProperties();
+    }
   }
 }
 

@@ -19,7 +19,7 @@
 class PostprocessorAsControlAction : public MooseObjectAction
 {
 public:
-  PostprocessorAsControlAction(InputParameters params);
+  PostprocessorAsControlAction(const InputParameters & params);
 
   virtual void act();
 

@@ -31,11 +31,11 @@ public:
   }
 
 #ifdef LIBMESH_HAVE_SLEPC
-  virtual void solve() override;
+  virtual void solve(unsigned int nl_sys_num = 0) override;
 
   virtual void init() override;
 
-  virtual bool converged() override;
+  virtual bool nlConverged(unsigned int nl_sys_num) override;
 
   unsigned int getNEigenPairsRequired() const { return _n_eigen_pairs_required; }
   void setNEigenPairsRequired(unsigned int n_eigen_pairs)
@@ -47,7 +47,8 @@ public:
   // silences warning in debug mode about the other computeJacobian signature being hidden
   using FEProblemBase::computeJacobian;
 
-  NonlinearEigenSystem & getNonlinearEigenSystem() { return *_nl_eigen; }
+  NonlinearEigenSystem & getNonlinearEigenSystem(unsigned int nl_sys_num = 0);
+  NonlinearEigenSystem & getCurrentNonlinearEigenSystem();
 
   virtual void checkProblemIntegrity() override;
 
@@ -140,7 +141,8 @@ public:
                          TagID tagA,
                          TagID tagB);
 
-  virtual void computeJacobianBlocks(std::vector<JacobianBlock *> & blocks) override;
+  virtual void computeJacobianBlocks(std::vector<JacobianBlock *> & blocks,
+                                     unsigned int nl_sys_num = 0) override;
 
   /**
    * Form a vector for all kernels and BCs with a given tag
@@ -240,10 +242,14 @@ private:
   void adjustEigenVector(const Real value, bool scaling);
 
 #endif
+
+  using FEProblemBase::_nl;
+
 protected:
   unsigned int _n_eigen_pairs_required;
   bool _generalized_eigenvalue_problem;
   std::shared_ptr<NonlinearEigenSystem> _nl_eigen;
+
   /// Whether or not use negative sign for Bx. Use negative sign by default to
   /// make the eigen system consistent with nonlinear system
   bool _negative_sign_eigen_kernel;
@@ -275,3 +281,21 @@ protected:
   /// A value used for initial normalization
   Real _initial_eigenvalue;
 };
+
+#ifdef LIBMESH_HAVE_SLEPC
+
+inline NonlinearEigenSystem &
+EigenProblem::getNonlinearEigenSystem(const unsigned int nl_sys_num)
+{
+  if (nl_sys_num > 0)
+    mooseError("eigen problems do not currently support multiple nonlinear eigen systems");
+  return *_nl_eigen;
+}
+
+inline NonlinearEigenSystem &
+EigenProblem::getCurrentNonlinearEigenSystem()
+{
+  return *_nl_eigen;
+}
+
+#endif

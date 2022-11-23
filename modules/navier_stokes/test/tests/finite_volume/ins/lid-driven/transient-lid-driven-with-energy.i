@@ -154,7 +154,6 @@ advected_interp_method = 'average'
     variable = T
     rho = ${rho}
     cp = 'cp'
-    dcp_dt = 0.0
   []
   [temp_conduction]
     type = FVDiffusion
@@ -226,7 +225,6 @@ advected_interp_method = 'average'
   []
 []
 
-
 [Executioner]
   type = Transient
   solve_type = NEWTON
@@ -234,12 +232,11 @@ advected_interp_method = 'average'
   num_steps = 5
   dt = .5
   dtmin = .5
-  petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_shift_type -ksp_gmres_restart'
-  petsc_options_value = 'asm      lu           NONZERO                   200'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type'
+  petsc_options_value = 'lu NONZERO'
   line_search = 'none'
   nl_rel_tol = 1e-12
   nl_max_its = 6
-  l_max_its = 200
 []
 
 [Outputs]

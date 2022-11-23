@@ -128,6 +128,9 @@ CommonOutputAction::validParams()
   params.addParam<bool>("print_linear_residuals",
                         true,
                         "Enable printing of linear residuals to the screen (Console)");
+  params.addParam<bool>("print_nonlinear_residuals",
+                        true,
+                        "Enable printing of nonlinear residuals to the screen (Console)");
   params.addParam<bool>("print_nonlinear_converged_reason",
                         true,
                         "Enable/disable printing of the nonlinear solver convergence reason to the "
@@ -143,7 +146,7 @@ CommonOutputAction::validParams()
   return params;
 }
 
-CommonOutputAction::CommonOutputAction(InputParameters params)
+CommonOutputAction::CommonOutputAction(const InputParameters & params)
   : Action(params), _action_params(_action_factory.getValidParams("AddOutputAction"))
 {
 }
@@ -176,8 +179,6 @@ CommonOutputAction::act()
     // Only create a Console if screen output was not created
     if (getParam<bool>("console") && !hasConsole())
       create("Console");
-    else
-      _pars.set<bool>("console") = false;
 
     if (getParam<bool>("csv"))
       create("CSV");

@@ -11,208 +11,143 @@
 
 registerMooseObject("TensorMechanicsApp", UpdatedLagrangianStressDivergence);
 
-InputParameters
-UpdatedLagrangianStressDivergence::validParams()
-{
-  InputParameters params = LagrangianStressDivergenceBase::validParams();
-
-  params.addClassDescription("Updated Lagrangian stress equilibrium kernel");
-
-  return params;
-}
-
-UpdatedLagrangianStressDivergence::UpdatedLagrangianStressDivergence(
+template <class G>
+UpdatedLagrangianStressDivergenceBase<G>::UpdatedLagrangianStressDivergenceBase(
     const InputParameters & parameters)
   : LagrangianStressDivergenceBase(parameters),
-    _avg_grad_trial(_grad_phi.size()),
-    _uF(getMaterialPropertyByName<RankTwoTensor>(_base_name + "unstabilized_deformation_gradient")),
-    _aF(getMaterialPropertyByName<RankTwoTensor>(_base_name + "avg_deformation_gradient")),
     _stress(getMaterialPropertyByName<RankTwoTensor>(_base_name + "cauchy_stress")),
     _material_jacobian(getMaterialPropertyByName<RankFourTensor>(_base_name + "cauchy_jacobian")),
-    _inv_inc_def_grad(getMaterialPropertyByName<RankTwoTensor>(_base_name + "inv_inc_def_grad"))
+
+    // Assembly quantities in the reference frame for stabilization
+    _assembly_undisplaced(_fe_problem.assembly(_tid)),
+    _grad_phi_undisplaced(_assembly_undisplaced.gradPhi()),
+    _JxW_undisplaced(_assembly_undisplaced.JxW()),
+    _coord_undisplaced(_assembly_undisplaced.coordTransformation()),
+    _q_point_undisplaced(_assembly_undisplaced.qPoints())
 {
   // This kernel requires used_displaced_mesh to be true if large kinematics
   // is on
   if (_large_kinematics && (!getParam<bool>("use_displaced_mesh")))
-    mooseError("The UpdatedLagrangianStressDivergence kernel requires "
+    mooseError("The UpdatedLagrangianStressDivergence kernels requires "
                "used_displaced_mesh = true for large_kinematics = true");
 
   // Similarly, if large kinematics is off so should use_displaced_mesh
   if (!_large_kinematics && (getParam<bool>("use_displaced_mesh")))
-    mooseError("The UpdatedLagrangianStressDivergence kernel requires "
+    mooseError("The UpdatedLagrangianStressDivergence kernels requires "
                "used_displaced_mesh = false for large_kinematics = false");
+
+  // TODO: add weak plane stress support
+  if (_out_of_plane_strain)
+    mooseError("The UpdatedLagrangianStressDivergence kernels do not yet support the weak plane "
+               "stress formulation. Please use the TotalLagrangianStressDivergecen kernels.");
 }
 
-Real
-UpdatedLagrangianStressDivergence::computeQpResidual()
+template <class G>
+RankTwoTensor
+UpdatedLagrangianStressDivergenceBase<G>::gradTest(unsigned int component)
 {
-  // Do the whole sum because future expansion to B_Bar would introduce
-  // off-diagonal terms
-  return _stress[_qp].doubleContraction(testGrad(_component));
+  // F-bar doesn't modify the test function
+  return G::gradOp(component, _grad_test[_i][_qp], _test[_i][_qp], _q_point[_qp]);
 }
 
-Real
-UpdatedLagrangianStressDivergence::computeQpJacobian()
+template <class G>
+RankTwoTensor
+UpdatedLagrangianStressDivergenceBase<G>::gradTrial(unsigned int component)
 {
-  Real value = matJacobianComponent(_material_jacobian[_qp],
-                                    testGrad(_component),
-                                    trialGrad(_component, _stabilize_strain),
-                                    _inv_inc_def_grad[_qp]);
-
-  if (_large_kinematics)
-    value +=
-        geomJacobianComponent(testGrad(_component), trialGrad(_component, false), _stress[_qp]);
-
-  return value;
+  return _stabilize_strain ? gradTrialStabilized(component) : gradTrialUnstabilized(component);
 }
 
-Real
-UpdatedLagrangianStressDivergence::computeQpOffDiagJacobian(unsigned int jvar)
+template <class G>
+RankTwoTensor
+UpdatedLagrangianStressDivergenceBase<G>::gradTrialUnstabilized(unsigned int component)
 {
-  Real value = 0.0;
+  // Without F-bar stabilization, simply return the gradient of the trial functions
+  return G::gradOp(component, _grad_phi[_j][_qp], _phi[_j][_qp], _q_point[_qp]);
+}
 
-  for (unsigned int cc = 0; cc < _ndisp; cc++)
+template <class G>
+RankTwoTensor
+UpdatedLagrangianStressDivergenceBase<G>::gradTrialStabilized(unsigned int component)
+{
+  // The base unstabilized trial function gradient
+  const auto Gb = G::gradOp(component, _grad_phi[_j][_qp], _phi[_j][_qp], _q_point[_qp]);
+  // The average trial function gradient
+  const auto Ga = _avg_grad_trial[component][_j];
+  // For updated Lagrangian, the modification is always linear
+  return Gb + (Ga.trace() - Gb.trace()) / 3.0 * RankTwoTensor::Identity();
+}
+
+template <class G>
+void
+UpdatedLagrangianStressDivergenceBase<G>::precalculateJacobianDisplacement(unsigned int component)
+{
+  // For updated Lagrangian, the averaging is taken on the reference frame. If large kinematics is
+  // used, the averaged gradients should be pushed forward to the current frame.
+  for (auto j : make_range(_phi.size()))
   {
-    if (jvar == _disp_nums[cc])
-    {
-      value += matJacobianComponent(_material_jacobian[_qp],
-                                    testGrad(_component),
-                                    trialGrad(cc, _stabilize_strain),
-                                    _inv_inc_def_grad[_qp]);
-      if (_large_kinematics)
-        value += geomJacobianComponent(testGrad(_component), trialGrad(cc, false), _stress[_qp]);
-      return value;
-    }
+    _avg_grad_trial[component][j] = StabilizationUtils::elementAverage(
+        [this, component, j](unsigned int qp)
+        {
+          return G::gradOp(
+              component, _grad_phi_undisplaced[j][qp], _phi[j][qp], _q_point_undisplaced[qp]);
+        },
+        _JxW_undisplaced,
+        _coord_undisplaced);
+    if (_large_kinematics)
+      // Push forward to the current frame.
+      // The average deformation gradient is the same at all qps.
+      _avg_grad_trial[component][j] *= _F_avg[0].inverse();
+  }
+}
+
+template <class G>
+Real
+UpdatedLagrangianStressDivergenceBase<G>::computeQpResidual()
+{
+  return gradTest(_alpha).doubleContraction(_stress[_qp]);
+}
+
+template <class G>
+Real
+UpdatedLagrangianStressDivergenceBase<G>::computeQpJacobianDisplacement(unsigned int alpha,
+                                                                        unsigned int beta)
+{
+  const auto grad_test = gradTest(alpha);
+  const auto grad_trial = gradTrial(beta);
+
+  //           J^{alpha beta} = J^{alpha beta}_material + J^{alpha beta}_geometric
+  //  J^{alpha beta}_material = phi^alpha_{i, j} T_{ijkl} f^{-1}_{km} g^beta_{ml}
+  // J^{alpha beta}_geometric = sigma_{ij} (phi^alpha_{k, k} psi^beta_{i, j} -
+  //                                        phi^alpha_{k, j} psi^beta_{i, k})
+
+  // The material jacobian
+  Real J = grad_test.doubleContraction(_material_jacobian[_qp] * (_f_inv[_qp] * grad_trial));
+
+  // The geometric jacobian
+  if (_large_kinematics)
+  {
+    // No stablization in the geometric jacobian
+    const auto grad_trial_ust = gradTrialUnstabilized(beta);
+    J += _stress[_qp].doubleContraction(grad_test) * grad_trial_ust.trace() -
+         _stress[_qp].doubleContraction(grad_test * grad_trial_ust);
   }
 
-  // Bail if jvar not coupled
-  if (getJvarMap()[jvar] < 0)
-    return 0.0;
-
-  // Off diagonal temperature term due to eigenstrain
-  return eigenstrainJacobianComponent(mapJvarToCvar(jvar),
-                                      _material_jacobian[_qp],
-                                      testGrad(_component),
-                                      _temperature->phi()[_j][_qp]);
+  return J;
 }
 
-void
-UpdatedLagrangianStressDivergence::precalculateJacobian()
-{
-  if (_stabilize_strain)
-    computeAverageGradTrial();
-}
-
+template <class G>
 Real
-UpdatedLagrangianStressDivergence::matJacobianComponent(const RankFourTensor & C,
-                                                        const RankTwoTensor & grad_test,
-                                                        const RankTwoTensor & grad_trial,
-                                                        const RankTwoTensor & df)
-{
-  return grad_test.doubleContraction(C * (df * grad_trial));
-}
-
-Real
-UpdatedLagrangianStressDivergence::geomJacobianComponent(const RankTwoTensor & grad_test,
-                                                         const RankTwoTensor & grad_trial,
-                                                         const RankTwoTensor & stress)
-{
-  return stress.doubleContraction(grad_test) * grad_trial.trace() -
-         stress.doubleContraction(grad_test * grad_trial);
-}
-
-Real
-UpdatedLagrangianStressDivergence::eigenstrainJacobianComponent(unsigned int cvar,
-                                                                const RankFourTensor & C,
-                                                                const RankTwoTensor & grad_test,
-                                                                const Real & phi)
+UpdatedLagrangianStressDivergenceBase<G>::computeQpJacobianTemperature(unsigned int cvar)
 {
   // Multiple eigenstrains may depend on the same coupled var
   RankTwoTensor total_deigen;
   for (const auto deigen_darg : _deigenstrain_dargs[cvar])
     total_deigen += (*deigen_darg)[_qp];
 
-  // This one is the same for both small and large deformations
+  RankFourTensor C = _material_jacobian[_qp];
   RankFourTensor Csym = 0.5 * (C + C.transposeMajor().transposeIj().transposeMajor());
-  return -(Csym * total_deigen).doubleContraction(grad_test) * phi;
+
+  return -(Csym * total_deigen).doubleContraction(gradTest(_alpha)) * _temperature->phi()[_j][_qp];
 }
 
-RankTwoTensor
-UpdatedLagrangianStressDivergence::testGrad(unsigned int i)
-{
-  return gradOp(i, _grad_test[_i][_qp]);
-}
-
-void
-UpdatedLagrangianStressDivergence::computeAverageGradTrial()
-{
-  avgGrad(_grad_phi, _avg_grad_trial);
-}
-
-RankTwoTensor
-UpdatedLagrangianStressDivergence::trialGrad(unsigned int m, bool stabilize)
-{
-  // We need the switch here because the "geometric" part of the tangent
-  // doesn't take the stabilization
-  if (stabilize)
-    return fullGrad(m, stabilize, _grad_phi[_j][_qp], _avg_grad_trial[_j]);
-  // Don't need the average value
-  else
-    return fullGrad(m, stabilize, _grad_phi[_j][_qp], RealVectorValue());
-}
-
-void
-UpdatedLagrangianStressDivergence::avgGrad(const VariablePhiGradient & grads,
-                                           std::vector<RealVectorValue> & res)
-{
-  // Annoyingly this needs to be a integral over the reference
-  // domain, like in the strain calculator...
-
-  // Make sure we have enough space for all the gradients
-  res.resize(grads.size());
-  // Loop on shape function
-  for (size_t beta = 0; beta < grads.size(); ++beta)
-  {
-    // Zero out
-    res[beta].zero();
-    Real v = 0.0;
-
-    for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
-    {
-      // We need to map back (and then forward) to do the right
-      // average, first setup this backward map
-      RankTwoTensor T = RankTwoTensor::Identity();
-      if (_large_kinematics)
-        T = _uF[_qp];
-      Real J = T.det();
-
-      // Accumulate the volume integral
-      v += _JxW[_qp] * _coord[_qp] / J;
-
-      // Map to reference
-      RealVectorValue ref_grad = T.transpose() * grads[beta][_qp];
-      // Accumulate
-      res[beta] += _JxW[_qp] * _coord[_qp] * ref_grad / J;
-    }
-    // Average
-    res[beta] /= v;
-
-    // Map forward
-    RankTwoTensor T = RankTwoTensor::Identity();
-    if (_large_kinematics)
-      T = _aF[0]; // All quad points have the same value
-    res[beta] = T.inverse().transpose() * res[beta];
-  }
-}
-
-RankTwoTensor
-UpdatedLagrangianStressDivergence::stabilizeGrad(const RankTwoTensor & Gb, const RankTwoTensor & Ga)
-{
-  // Take the base gradient (Gb) and the average gradient (Ga) and
-  // stabilize
-  if (_large_kinematics)
-    return (Gb - RankTwoTensor::Identity() * (Gb.trace() - Ga.trace()) / 3.0);
-
-  // Small deformation variant
-  return Gb + (Ga.trace() - Gb.trace()) / 3.0 * RankTwoTensor::Identity();
-}
+template class UpdatedLagrangianStressDivergenceBase<GradientOperatorCartesian>;

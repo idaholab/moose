@@ -143,12 +143,6 @@ Eigenvalue::Eigenvalue(const InputParameters & parameters)
 void
 Eigenvalue::init()
 {
-  if (_app.isRecovering())
-  {
-    _console << "\nCannot recover eigenvalue solves!\nExiting...\n" << std::endl;
-    return;
-  }
-
   if (isParamValid("normalization"))
   {
     const auto & normpp = getParam<PostprocessorName>("normalization");
@@ -217,7 +211,10 @@ Eigenvalue::execute()
   // Recovering makes sense for only transient simulations since the solution from
   // the previous time steps is required.
   if (_app.isRecovering())
+  {
+    _console << "\nCannot recover eigenvalue solves!\nExiting...\n" << std::endl;
     return;
+  }
 
   // Outputs initial conditions set by users
   // It is consistent with Steady

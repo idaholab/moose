@@ -6,7 +6,7 @@
   snes_test_err = 1e-1
 []
 
-[Modules/FluidProperties]
+[FluidProperties]
   [fp_1phase]
     type = LinearTestFluidProperties
   []

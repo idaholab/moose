@@ -19,7 +19,7 @@ class AddFunctionAction : public MooseObjectAction
 public:
   static InputParameters validParams();
 
-  AddFunctionAction(InputParameters params);
+  AddFunctionAction(const InputParameters & params);
 
   virtual void act() override;
 };

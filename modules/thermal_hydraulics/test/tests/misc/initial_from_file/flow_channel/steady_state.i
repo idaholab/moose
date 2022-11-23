@@ -1,6 +1,5 @@
 [GlobalParams]
   scaling_factor_1phase = '1. 1.e-2 1.e-4'
-  scaling_factor_temperature = 1e-2
 
   initial_T = 500
   initial_p = 6.e6
@@ -9,7 +8,7 @@
   closures = simple_closures
 []
 
-[Modules/FluidProperties]
+[FluidProperties]
   [fp]
     type = StiffenedGasFluidProperties
     gamma = 2.35

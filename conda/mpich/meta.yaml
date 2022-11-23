@@ -3,7 +3,9 @@
 #   petsc/
 #   libmesh-vtk/
 #   libmesh/
-{% set build = 0 %}
+#   template/
+#   moose/
+{% set build = 4 %}
 {% set strbuild = "build_" + build|string %}
 {% set version = "4.0.2" %}
 
@@ -28,6 +30,8 @@ requirements:
     - {{ base_mpicc }}
     - {{ base_mpicxx }}
     - {{ base_mpifort }}
+    - {{ moose_libgfortran }}
+    - {{ moose_libgfortran5 }}
     - {{ moose_hdf5 }}
     - {{ moose_ld64 }}          # [osx]
     - make
@@ -42,6 +46,8 @@ requirements:
     - {{ base_mpicc }}
     - {{ base_mpicxx }}
     - {{ base_mpifort }}
+    - {{ moose_libgfortran }}
+    - {{ moose_libgfortran5 }}
     - {{ moose_hdf5 }}
     - {{ moose_ld64 }}          # [osx]
     - cmake
@@ -61,7 +67,6 @@ requirements:
     - {{ moose_mesalib }}       # [linux]
     - openssl <3
     - mpi 1.0 mpich
-    - clang-format-12
 
 test:
   commands:

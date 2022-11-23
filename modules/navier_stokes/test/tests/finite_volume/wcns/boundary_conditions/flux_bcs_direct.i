@@ -148,7 +148,6 @@ inlet_velocity = 0.001
     cp = cp
     rho = rho
     drho_dt = drho_dt
-    dcp_dt = dcp_dt
   []
   [temp_conduction]
     type = FVDiffusion
@@ -275,21 +274,19 @@ inlet_velocity = 0.001
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [fp]
-      type = SimpleFluidProperties
-      density0 = 1980
-      cp = 2530
-    []
+[FluidProperties]
+  [fp]
+    type = SimpleFluidProperties
+    density0 = 1980
+    cp = 2530
   []
 []
 
 [Materials]
   [const_functor]
     type = ADGenericFunctorMaterial
-    prop_names = 'cp k dcp_dt'
-    prop_values = '${cp} ${k} 0'
+    prop_names = 'cp k'
+    prop_values = '${cp} ${k}'
   []
   [rho]
     type = RhoFromPTFunctorMaterial

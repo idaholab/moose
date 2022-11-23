@@ -865,34 +865,64 @@ TEST(GeochemistrySpeciesSwapperTest, swap3)
                                    1.0,
                                    2.0,
                                    true,
+                                   0.0,
+                                   0.0,
+                                   0.0,
                                    {"H+", "O2(aq)", "CO3--"},
                                    {1.1, 2.2, 3.3},
+                                   {-0.1, 0.2, -0.3},
+                                   {0.5, 0.25, 0.125},
                                    5.0,
                                    6.0,
                                    7.0,
-                                   8.0);
+                                   8.0,
+                                   DirectionChoiceEnum::BOTH,
+                                   "O2(aq)",
+                                   1.0,
+                                   -1.0,
+                                   0.0);
   model.addKineticRate(rate1);
   KineticRateUserDescription rate2("Fe(OH)3(ppd)",
                                    -1.0,
                                    -2.0,
                                    false,
+                                   0.0,
+                                   0.0,
+                                   0.0,
                                    {"O2(aq)", "Fe+++", "H2O"},
                                    {-1.1, -2.2, -3.3},
+                                   {0.75, 0.875, 1.0},
+                                   {0.2, 0.3, 0.4},
                                    -5.0,
                                    -6.0,
                                    -7.0,
-                                   -8.0);
+                                   -8.0,
+                                   DirectionChoiceEnum::BOTH,
+                                   "Fe++",
+                                   -2.0,
+                                   -1.0,
+                                   0.0);
   model.addKineticRate(rate2);
   KineticRateUserDescription rate3(">(s)FeO-",
                                    1.1,
                                    2.2,
                                    false,
+                                   0.0,
+                                   0.0,
+                                   0.0,
                                    {"CO2(aq)", "Fe+++", "Fe++"},
                                    {1.25, 2.25, 3.25},
+                                   {0.1, -0.12, 1.23},
+                                   {0.5, 0.6, 0.7},
                                    5.5,
                                    -6.6,
                                    -7.7,
-                                   -8.8);
+                                   -8.8,
+                                   DirectionChoiceEnum::BOTH,
+                                   "Fe+++",
+                                   2.0,
+                                   -1.0,
+                                   0.0);
   model.addKineticRate(rate3);
   ModelGeochemicalDatabase mgd = model.modelGeochemicalDatabase();
   GeochemistrySpeciesSwapper swapper(mgd.basis_species_index.size(), 1E-6);
@@ -1134,18 +1164,46 @@ TEST(GeochemistrySpeciesSwapperTest, swap3)
 
   ASSERT_EQ(mgd.kin_rate.size(), (std::size_t)3);
   std::vector<std::vector<Real>> kin_rate_gold(3, std::vector<Real>(7 + 6, 0.0));
+  std::vector<std::vector<Real>> kin_monod_gold(3, std::vector<Real>(7 + 6, 0.0));
+  std::vector<std::vector<Real>> kin_k_gold(3, std::vector<Real>(7 + 6, 0.0));
   kin_rate_gold[0][mgd.basis_species_index.at("H+")] = 1.1;
   kin_rate_gold[0][mgd.basis_species_index.at("O2(aq)")] = 2.2;
   kin_rate_gold[0][7 + mgd.eqm_species_index.at("CO3--")] = 3.3;
+  kin_monod_gold[0][mgd.basis_species_index.at("H+")] = -0.1;
+  kin_monod_gold[0][mgd.basis_species_index.at("O2(aq)")] = 0.2;
+  kin_monod_gold[0][7 + mgd.eqm_species_index.at("CO3--")] = -0.3;
+  kin_k_gold[0][mgd.basis_species_index.at("H+")] = 0.5;
+  kin_k_gold[0][mgd.basis_species_index.at("O2(aq)")] = 0.25;
+  kin_k_gold[0][7 + mgd.eqm_species_index.at("CO3--")] = 0.125;
   kin_rate_gold[1][mgd.basis_species_index.at("O2(aq)")] = -1.1;
   kin_rate_gold[1][7 + mgd.eqm_species_index.at("Fe+++")] = -2.2;
   kin_rate_gold[1][mgd.basis_species_index.at("H2O")] = -3.3;
+  kin_monod_gold[1][mgd.basis_species_index.at("O2(aq)")] = 0.75;
+  kin_monod_gold[1][7 + mgd.eqm_species_index.at("Fe+++")] = 0.875;
+  kin_monod_gold[1][mgd.basis_species_index.at("H2O")] = 1.0;
+  kin_k_gold[1][mgd.basis_species_index.at("O2(aq)")] = 0.2;
+  kin_k_gold[1][7 + mgd.eqm_species_index.at("Fe+++")] = 0.3;
+  kin_k_gold[1][mgd.basis_species_index.at("H2O")] = 0.4;
   kin_rate_gold[2][7 + mgd.eqm_species_index.at("CO2(aq)")] = 1.25;
   kin_rate_gold[2][7 + mgd.eqm_species_index.at("Fe+++")] = 2.25;
   kin_rate_gold[2][mgd.basis_species_index.at("Fe++")] = 3.25;
+  kin_monod_gold[2][7 + mgd.eqm_species_index.at("CO2(aq)")] = 0.1;
+  kin_monod_gold[2][7 + mgd.eqm_species_index.at("Fe+++")] = -0.12;
+  kin_monod_gold[2][mgd.basis_species_index.at("Fe++")] = 1.23;
+  kin_k_gold[2][7 + mgd.eqm_species_index.at("CO2(aq)")] = 0.5;
+  kin_k_gold[2][7 + mgd.eqm_species_index.at("Fe+++")] = 0.6;
+  kin_k_gold[2][mgd.basis_species_index.at("Fe++")] = 0.7;
   for (unsigned i = 0; i < 3; ++i)
     for (unsigned j = 0; j < 7 + 6; ++j)
+    {
       EXPECT_EQ(mgd.kin_rate[i].promoting_indices[j], kin_rate_gold[i][j]);
+      EXPECT_EQ(mgd.kin_rate[i].promoting_monod_indices[j], kin_monod_gold[i][j]);
+      EXPECT_EQ(mgd.kin_rate[i].promoting_half_saturation[j], kin_k_gold[i][j]);
+    }
+
+  EXPECT_EQ(mgd.kin_rate[0].progeny_index, mgd.basis_species_index.at("O2(aq)"));
+  EXPECT_EQ(mgd.kin_rate[1].progeny_index, mgd.basis_species_index.at("Fe++"));
+  EXPECT_EQ(mgd.kin_rate[2].progeny_index, 7 + mgd.eqm_species_index.at("Fe+++"));
 
   const unsigned o2aq_posn = mgd.basis_species_index["O2(aq)"];
   const unsigned fe3_posn = mgd.eqm_species_index["Fe+++"];
@@ -1321,18 +1379,47 @@ TEST(GeochemistrySpeciesSwapperTest, swap3)
 
   ASSERT_EQ(mgd.kin_rate.size(), (std::size_t)3);
   std::vector<std::vector<Real>> new_kin_rate_gold(3, std::vector<Real>(7 + 6, 0.0));
+  std::vector<std::vector<Real>> new_kin_monod_gold(3, std::vector<Real>(7 + 6, 0.0));
+  std::vector<std::vector<Real>> new_kin_k_gold(3, std::vector<Real>(7 + 6, 0.0));
   new_kin_rate_gold[0][mgd.basis_species_index.at("H+")] = 1.1;
   new_kin_rate_gold[0][7 + mgd.eqm_species_index.at("O2(aq)")] = 2.2;
   new_kin_rate_gold[0][7 + mgd.eqm_species_index.at("CO3--")] = 3.3;
+  new_kin_monod_gold[0][mgd.basis_species_index.at("H+")] = -0.1;
+  new_kin_monod_gold[0][7 + mgd.eqm_species_index.at("O2(aq)")] = 0.2;
+  new_kin_monod_gold[0][7 + mgd.eqm_species_index.at("CO3--")] = -0.3;
+  new_kin_k_gold[0][mgd.basis_species_index.at("H+")] = 0.5;
+  new_kin_k_gold[0][7 + mgd.eqm_species_index.at("O2(aq)")] = 0.25;
+  new_kin_k_gold[0][7 + mgd.eqm_species_index.at("CO3--")] = 0.125;
   new_kin_rate_gold[1][7 + mgd.eqm_species_index.at("O2(aq)")] = -1.1;
   new_kin_rate_gold[1][mgd.basis_species_index.at("Fe+++")] = -2.2;
   new_kin_rate_gold[1][mgd.basis_species_index.at("H2O")] = -3.3;
+  new_kin_monod_gold[1][7 + mgd.eqm_species_index.at("O2(aq)")] = 0.75;
+  new_kin_monod_gold[1][mgd.basis_species_index.at("Fe+++")] = 0.875;
+  new_kin_monod_gold[1][mgd.basis_species_index.at("H2O")] = 1.0;
+  new_kin_k_gold[1][7 + mgd.eqm_species_index.at("O2(aq)")] = 0.2;
+  new_kin_k_gold[1][mgd.basis_species_index.at("Fe+++")] = 0.3;
+  new_kin_k_gold[1][mgd.basis_species_index.at("H2O")] = 0.4;
   new_kin_rate_gold[2][7 + mgd.eqm_species_index.at("CO2(aq)")] = 1.25;
   new_kin_rate_gold[2][mgd.basis_species_index.at("Fe+++")] = 2.25;
   new_kin_rate_gold[2][mgd.basis_species_index.at("Fe++")] = 3.25;
+  new_kin_monod_gold[2][7 + mgd.eqm_species_index.at("CO2(aq)")] = 0.1;
+  new_kin_monod_gold[2][mgd.basis_species_index.at("Fe+++")] = -0.12;
+  new_kin_monod_gold[2][mgd.basis_species_index.at("Fe++")] = 1.23;
+  new_kin_k_gold[2][7 + mgd.eqm_species_index.at("CO2(aq)")] = 0.5;
+  new_kin_k_gold[2][mgd.basis_species_index.at("Fe+++")] = 0.6;
+  new_kin_k_gold[2][mgd.basis_species_index.at("Fe++")] = 0.7;
   for (unsigned i = 0; i < 3; ++i)
     for (unsigned j = 0; j < 7 + 6; ++j)
+    {
       EXPECT_EQ(mgd.kin_rate[i].promoting_indices[j], new_kin_rate_gold[i][j]);
+      EXPECT_EQ(mgd.kin_rate[i].promoting_monod_indices[j], new_kin_monod_gold[i][j]);
+      EXPECT_EQ(mgd.kin_rate[i].promoting_half_saturation[j], new_kin_k_gold[i][j]);
+    }
+
+  // check progeny_index is swapped correctly
+  EXPECT_EQ(mgd.kin_rate[0].progeny_index, 7 + fe3_posn);
+  EXPECT_EQ(mgd.kin_rate[1].progeny_index, mgd.basis_species_index.at("Fe++"));
+  EXPECT_EQ(mgd.kin_rate[2].progeny_index, o2aq_posn);
 }
 
 /// Test the swap works on redox in disequilibrium
@@ -1506,4 +1593,34 @@ TEST(GeochemistrySpeciesSwapperTest, findBestEqmSwap)
   legit = swapper.findBestEqmSwap(1, mgd, eqm_molality, true, true, true, best);
   EXPECT_TRUE(legit);
   EXPECT_EQ(best, (unsigned)5);
+
+  // The following system has mineral, gas and sorption, with secondary species: CO2(aq), CO3--,
+  // OH-, (O-phth)--, CH4(aq), Fe+++, CO2(aq), CO3--, OH-, >(s)FeO- (surface-sorption related),
+  // Fe(OH)3(ppd) (mineral), CH4(g)fake (gas)
+  PertinentGeochemicalSystem model_s(
+      database,
+      {"H2O", "H+", ">(s)FeOH", ">(w)FeOH", "Fe++", "HCO3-", "O2(aq)"},
+      {"Fe(OH)3(ppd)"},
+      {"CH4(g)fake"},
+      {},
+      {},
+      {},
+      "O2(aq)",
+      "e-");
+  ModelGeochemicalDatabase mgd_s = model_s.modelGeochemicalDatabase();
+  GeochemistrySpeciesSwapper swapper_s(mgd_s.basis_species_index.size(), 1E-6);
+
+  const std::vector<Real> eqm_molality_s = {0.0, 1.0, 2.0, 3.0, 4.0, 50.0, 6.0E3, 7.0E3, 8.0E3};
+  legit = swapper_s.findBestEqmSwap(1, mgd_s, eqm_molality_s, false, false, false, best);
+  EXPECT_TRUE(legit);
+  EXPECT_EQ(best, (unsigned)5);
+  legit = swapper_s.findBestEqmSwap(1, mgd_s, eqm_molality_s, true, false, false, best);
+  EXPECT_TRUE(legit);
+  EXPECT_EQ(best, (unsigned)7);
+  legit = swapper_s.findBestEqmSwap(5, mgd_s, eqm_molality_s, false, true, false, best);
+  EXPECT_TRUE(legit);
+  EXPECT_EQ(best, (unsigned)8);
+  legit = swapper_s.findBestEqmSwap(1, mgd_s, eqm_molality_s, false, false, true, best);
+  EXPECT_TRUE(legit);
+  EXPECT_EQ(best, (unsigned)6);
 }

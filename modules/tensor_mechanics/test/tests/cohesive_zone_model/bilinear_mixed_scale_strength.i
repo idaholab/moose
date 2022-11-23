@@ -54,17 +54,8 @@
         add_variables = true
         use_automatic_differentiation = true
         decomposition_method = TaylorExpansion
-        save_in = 'resid_x resid_y'
       []
     []
-  []
-[]
-
-[ICs]
-  [scale_factor]
-    type = FunctionIC
-    variable = scale_factor
-    function = 'if(x<0.5,1,100)'
   []
 []
 
@@ -103,31 +94,11 @@
 []
 
 [AuxVariables]
-  [resid_x]
-  []
-  [resid_y]
-  []
   [mode_mixity_ratio]
     order = CONSTANT
     family = MONOMIAL
   []
   [damage]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [effective_displacement_at_full_degradation]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [maximum_mixed_mode_relative_displacement]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [effective_displacement_at_damage_initiation]
-    order = CONSTANT
-    family = MONOMIAL
-  []
-  [scale_factor]
     order = CONSTANT
     family = MONOMIAL
   []
@@ -148,27 +119,6 @@
     execute_on = timestep_end
     boundary = interface
   []
-  [effective_displacement_at_damage_initiation]
-    type = MaterialRealAux
-    variable = effective_displacement_at_damage_initiation
-    property = effective_displacement_at_damage_initiation
-    execute_on = timestep_end
-    boundary = interface
-  []
-  [effective_displacement_at_full_degradation]
-    type = MaterialRealAux
-    variable = effective_displacement_at_full_degradation
-    property = effective_displacement_at_full_degradation
-    execute_on = timestep_end
-    boundary = interface
-  []
-  [maximum_mixed_mode_relative_displacement]
-    type = MaterialRealAux
-    variable = maximum_mixed_mode_relative_displacement
-    property = maximum_mixed_mode_relative_displacement
-    execute_on = timestep_end
-    boundary = interface
-  []
 []
 
 [Modules/TensorMechanics/CohesiveZoneMaster]
@@ -186,41 +136,22 @@
     fill_method = symmetric9
     C_ijkl = '1.684e5 0.176e5 0.176e5 1.684e5 0.176e5 1.684e5 0.754e5 0.754e5 0.754e5'
   []
+  [normal_strength]
+    type = GenericFunctionMaterial
+    prop_names = 'N'
+    prop_values = 'if(x<0.5,1,100)*1e4'
+  []
   [czm]
     type = BiLinearMixedModeTraction
     boundary = 'interface'
     penalty_stiffness = 1e6
-    GI_C = 1e3
-    GII_C = 1e2
-    normal_strength = 1e4
+    GI_c = 1e3
+    GII_c = 1e2
+    normal_strength = N
     shear_strength = 1e3
     displacements = 'disp_x disp_y'
     eta = 2.2
     viscosity = 1e-3
-    normal_strength_scale_factor = scale_factor
-  []
-[]
-
-[Postprocessors]
-  [resid_x]
-    type = NodalSum
-    variable = resid_x
-    boundary = top
-  []
-  [resid_y]
-    type = NodalSum
-    variable = resid_y
-    boundary = top
-  []
-  [disp_y]
-    type = SideAverageValue
-    variable = disp_y
-    boundary = top
-  []
-  [disp_x]
-    type = SideAverageValue
-    variable = disp_x
-    boundary = top
   []
 []
 
@@ -254,6 +185,5 @@
 []
 
 [Outputs]
-  csv = true
   exodus = true
 []

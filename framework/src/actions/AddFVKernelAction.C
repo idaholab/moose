@@ -21,7 +21,7 @@ AddFVKernelAction::validParams()
   return params;
 }
 
-AddFVKernelAction::AddFVKernelAction(InputParameters params) : MooseObjectAction(params) {}
+AddFVKernelAction::AddFVKernelAction(const InputParameters & params) : MooseObjectAction(params) {}
 
 void
 AddFVKernelAction::act()

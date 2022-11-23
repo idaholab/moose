@@ -136,6 +136,9 @@ TEST_F(HeliumFluidPropertiesTest, temperature)
 
   REL_TEST(_fp->T_from_v_e(v, e), T, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_fp->T_from_v_e, v, e, REL_TOL_DERIVATIVE);
+
+  const Real h = _fp->h_from_p_T(p, T);
+  REL_TEST(_fp->T_from_p_h(p, h), T, REL_TOL_SAVED_VALUE);
 }
 
 /**

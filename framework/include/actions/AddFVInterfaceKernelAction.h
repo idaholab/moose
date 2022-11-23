@@ -16,7 +16,7 @@ class AddFVInterfaceKernelAction : public MooseObjectAction
 public:
   static InputParameters validParams();
 
-  AddFVInterfaceKernelAction(InputParameters params);
+  AddFVInterfaceKernelAction(const InputParameters & params);
 
   virtual void act() override;
 };

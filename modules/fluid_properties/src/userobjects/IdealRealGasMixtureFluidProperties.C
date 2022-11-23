@@ -273,7 +273,7 @@ IdealRealGasMixtureFluidProperties::c_from_p_T(Real p, Real T, const std::vector
   Real dp_dv_s = dp_dv - dp_dT * ds_dv / ds_dT;
 
   if (dp_dv_s >= 0)
-    mooseWarning(name(), ":c_from_p_T(), dp_dv_s = ", dp_dv_s, ". Should be negative.");
+    mooseWarning("c_from_p_T(), dp_dv_s = ", dp_dv_s, ". Should be negative.");
   return v * std::sqrt(-dp_dv_s);
 }
 
@@ -341,6 +341,36 @@ IdealRealGasMixtureFluidProperties::cp_from_p_T(Real p, Real T, const std::vecto
 
   return cp;
 }
+void
+IdealRealGasMixtureFluidProperties::cp_from_p_T(Real p,
+                                                Real T,
+                                                const std::vector<Real> & x,
+                                                Real & cp,
+                                                Real & dcp_dp,
+                                                Real & dcp_dT,
+                                                std::vector<Real> & dcp_dx) const
+{
+  Real p_unused, dp_dT, dp_dv;
+  Real h, dh_dT, dh_dv;
+
+  Real v = v_from_p_T(p, T, x);
+  p_from_T_v(T, v, x, p_unused, dp_dT, dp_dv);
+
+  const Real x_primary = primaryMassFraction(x);
+
+  _fp_primary->h_from_T_v(T, v / x_primary, h, dh_dT, dh_dv);
+  const Real cp_xp = (dh_dT - dh_dv * dp_dT / dp_dv);
+  cp = x_primary * cp_xp;
+  dcp_dT = 0;
+  dcp_dp = 0;
+
+  for (unsigned int i = 0; i < _n_secondary_vapors; i++)
+  {
+    _fp_secondary[i]->h_from_T_v(T, v / x[i], h, dh_dT, dh_dv);
+    cp += x[i] * (dh_dT - dh_dv * dp_dT / dp_dv);
+    dcp_dx[i] = (dh_dT - dh_dv * dp_dT / dp_dv) - cp_xp;
+  }
+}
 
 Real
 IdealRealGasMixtureFluidProperties::cv_from_p_T(Real p, Real T, const std::vector<Real> & x) const
@@ -355,7 +385,30 @@ IdealRealGasMixtureFluidProperties::cv_from_p_T(Real p, Real T, const std::vecto
 
   return cv;
 }
+void
+IdealRealGasMixtureFluidProperties::cv_from_p_T(Real p,
+                                                Real T,
+                                                const std::vector<Real> & x,
+                                                Real & cv,
+                                                Real & dcv_dp,
+                                                Real & dcv_dT,
+                                                std::vector<Real> & dcv_dx) const
 
+{
+  Real v = v_from_p_T(p, T, x);
+
+  const Real x_primary = primaryMassFraction(x);
+  const Real cv_xp = _fp_primary->cv_from_T_v(T, v / x_primary);
+  cv = x_primary * cv_xp;
+  dcv_dT = 0;
+  dcv_dp = 0;
+
+  for (unsigned int i = 0; i < _n_secondary_vapors; i++)
+  {
+    cv += x[i] * _fp_secondary[i]->cv_from_T_v(T, v / x[i]);
+    dcv_dx[i] = _fp_secondary[i]->cv_from_T_v(T, v / x[i]) - cv_xp;
+  }
+}
 Real
 IdealRealGasMixtureFluidProperties::mu_from_p_T(Real p, Real T, const std::vector<Real> & x) const
 {
@@ -376,12 +429,57 @@ IdealRealGasMixtureFluidProperties::mu_from_p_T(Real p, Real T, const std::vecto
   for (unsigned int i = 0; i < _n_secondary_vapors; i++)
   {
     Real vi = v / x[i];
-    Real ei = _fp_secondary[i]->e_from_T_v(T, vp);
+    Real ei = _fp_secondary[i]->e_from_T_v(T, vi);
     Real Mi = _fp_secondary[i]->molarMass();
     mu += x[i] * M_star / Mi * _fp_secondary[i]->mu_from_v_e(vi, ei);
   }
 
   return mu;
+}
+void
+IdealRealGasMixtureFluidProperties::mu_from_p_T(Real p,
+                                                Real T,
+                                                const std::vector<Real> & x,
+                                                Real & mu,
+                                                Real & dmu_dp,
+                                                Real & dmu_dT,
+                                                std::vector<Real> & dmu_dx) const
+{
+  Real v = v_from_p_T(p, T, x);
+
+  const Real x_primary = primaryMassFraction(x);
+  Real M_primary = _fp_primary->molarMass();
+
+  Real sum = x_primary / M_primary;
+  for (unsigned int i = 0; i < _n_secondary_vapors; i++)
+    sum += x[i] / _fp_secondary[i]->molarMass();
+  Real M_star = 1. / sum;
+
+  Real vp = v / x_primary;
+  Real ep = _fp_primary->e_from_T_v(T, vp);
+  Real mup = _fp_primary->mu_from_v_e(vp, ep);
+  mu = x_primary * M_star / M_primary * mup;
+  dmu_dT = 0;
+  dmu_dp = 0;
+
+  Real sum_muj = 0;
+  for (unsigned int i = 0; i < _n_secondary_vapors; i++)
+  {
+    const Real vi = v / x[i];
+    const Real ei = _fp_secondary[i]->e_from_T_v(T, vi);
+    const Real Mi = _fp_secondary[i]->molarMass();
+    const Real mui = _fp_secondary[i]->mu_from_v_e(vi, ei);
+    mu += x[i] * M_star / Mi * mui;
+    dmu_dx[i] = -M_star / M_primary * mup -
+                x_primary * (1 / Mi - 1 / M_primary) * M_star * M_star / M_primary * mup +
+                M_star / Mi * mui;
+    sum_muj += x[i] * mui / Mi;
+  }
+  for (unsigned int i = 0; i < _n_secondary_vapors; i++)
+  {
+    const Real Mi = _fp_secondary[i]->molarMass();
+    dmu_dx[i] += -M_star * M_star * (1 / Mi - 1 / M_primary) * sum_muj;
+  }
 }
 
 Real
@@ -404,12 +502,57 @@ IdealRealGasMixtureFluidProperties::k_from_p_T(Real p, Real T, const std::vector
   for (unsigned int i = 0; i < _n_secondary_vapors; i++)
   {
     Real vi = v / x[i];
-    Real ei = _fp_secondary[i]->e_from_T_v(T, vp);
+    Real ei = _fp_secondary[i]->e_from_T_v(T, vi);
     Real Mi = _fp_secondary[i]->molarMass();
     k += x[i] * M_star / Mi * _fp_secondary[i]->k_from_v_e(vi, ei);
   }
 
   return k;
+}
+void
+IdealRealGasMixtureFluidProperties::k_from_p_T(Real p,
+                                               Real T,
+                                               const std::vector<Real> & x,
+                                               Real & k,
+                                               Real & dk_dp,
+                                               Real & dk_dT,
+                                               std::vector<Real> & dk_dx) const
+{
+  Real v = v_from_p_T(p, T, x);
+
+  const Real x_primary = primaryMassFraction(x);
+  Real M_primary = _fp_primary->molarMass();
+
+  Real sum = x_primary / M_primary;
+  for (unsigned int i = 0; i < _n_secondary_vapors; i++)
+    sum += x[i] / _fp_secondary[i]->molarMass();
+  Real M_star = 1. / sum;
+
+  Real vp = v / x_primary;
+  Real ep = _fp_primary->e_from_T_v(T, vp);
+  const Real kp = _fp_primary->k_from_v_e(vp, ep);
+  k = x_primary * M_star / M_primary * kp;
+  dk_dp = 0;
+  dk_dT = 0;
+
+  Real sum_kj = 0;
+  for (unsigned int i = 0; i < _n_secondary_vapors; i++)
+  {
+    Real vi = v / x[i];
+    Real ei = _fp_secondary[i]->e_from_T_v(T, vi);
+    Real Mi = _fp_secondary[i]->molarMass();
+    Real ki = _fp_secondary[i]->k_from_v_e(vi, ei);
+    k += x[i] * M_star / Mi * ki;
+    dk_dx[i] = -M_star / M_primary * kp -
+               x_primary * (1 / Mi - 1 / M_primary) * M_star * M_star / M_primary * kp +
+               M_star / Mi * ki;
+    sum_kj += x[i] * ki / Mi;
+  }
+  for (unsigned int i = 0; i < _n_secondary_vapors; i++)
+  {
+    Real Mi = _fp_secondary[i]->molarMass();
+    dk_dx[i] += -M_star * M_star * (1 / Mi - 1 / M_primary) * sum_kj;
+  }
 }
 
 Real
@@ -762,7 +905,7 @@ IdealRealGasMixtureFluidProperties::c_from_T_v(Real T, Real v, const std::vector
   Real dp_dv_s = dp_dv - dp_dT * ds_dv / ds_dT;
 
   if (dp_dv_s >= 0)
-    mooseWarning(name(), ":c_from_T_v(), dp_dv_s = ", dp_dv_s, ". Should be negative.");
+    mooseWarning("c_from_T_v(), dp_dv_s = ", dp_dv_s, ". Should be negative.");
   return v * std::sqrt(-dp_dv_s);
 }
 

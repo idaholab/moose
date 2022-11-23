@@ -98,7 +98,10 @@ protected:
                                              FeatureData *& feature,
                                              Status & status,
                                              unsigned int & new_id) override;
+  virtual void prepareDataForTransfer() override;
   virtual void mergeSets() override;
+  virtual processor_id_type numberOfDistributedMergeHelpers() const override;
+  virtual void restoreOriginalDataStructures(std::vector<std::list<FeatureData>> & orig) override;
 
   /**
    * Builds a dense adjacency matrix based on the discovery of grain neighbors and halos
@@ -157,6 +160,9 @@ protected:
   static const unsigned int HALO_THICKNESS;
 
 private:
+  /// The number of chunks (for merging the features together)
+  processor_id_type _num_chunks;
+
   /// A vector indicating which op is assigned to each grain (by index of the grain)
   std::vector<unsigned int> _grain_idx_to_op;
 

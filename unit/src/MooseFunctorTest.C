@@ -40,6 +40,7 @@ private:
   ValueType evaluate(const SingleSidedFaceArg &, unsigned int) const override final { return 0; }
   ValueType evaluate(const ElemQpArg &, unsigned int) const override final { return 0; }
   ValueType evaluate(const ElemSideQpArg &, unsigned int) const override final { return 0; }
+  ValueType evaluate(const ElemPointArg &, unsigned int) const override final { return 0; }
 };
 
 template <typename T>
@@ -90,7 +91,7 @@ TEST(MooseFunctorTest, testArgs)
   ElemInfo ei(elem.get());
   ElemInfo ni(neighbor.get());
   FaceInfo fi(&ei, 1);
-  fi.computeCoefficients(&ni);
+  fi.computeInternalCoefficients(&ni);
 
   QGauss qrule(1, CONSTANT);
 
@@ -102,6 +103,7 @@ TEST(MooseFunctorTest, testArgs)
   auto elem_from_face = ElemFromFaceArg({elem.get(), &fi, false, INVALID_BLOCK_ID});
   auto elem_qp = std::make_tuple(elem.get(), 0, &qrule);
   auto elem_side_qp = std::make_tuple(elem.get(), 0, 0, &qrule);
+  auto elem_point = ElemPointArg({elem.get(), Point(0), false});
 
   // Test not-implemented errors
   {
@@ -124,6 +126,7 @@ TEST(MooseFunctorTest, testArgs)
     test_dot(elem_from_face);
     test_dot(elem_qp);
     test_dot(elem_side_qp);
+    test_dot(elem_point);
 
     auto test_gradient = [&test](const auto & arg)
     {
@@ -144,6 +147,7 @@ TEST(MooseFunctorTest, testArgs)
     test_gradient(elem_from_face);
     test_gradient(elem_qp);
     test_gradient(elem_side_qp);
+    test_gradient(elem_point);
   }
 
   auto zero_gradient_test = [](const auto & functor, const auto & arg)
@@ -163,6 +167,7 @@ TEST(MooseFunctorTest, testArgs)
     EXPECT_EQ(cf(elem_from_face), 2);
     EXPECT_EQ(cf(elem_qp), 2);
     EXPECT_EQ(cf(elem_side_qp), 2);
+    EXPECT_EQ(cf(elem_point), 2);
 
     zero_gradient_test(cf, elem_arg);
     zero_gradient_test(cf, elem_from_face);
@@ -171,6 +176,7 @@ TEST(MooseFunctorTest, testArgs)
     zero_gradient_test(cf, elem_from_face);
     zero_gradient_test(cf, elem_qp);
     zero_gradient_test(cf, elem_side_qp);
+    zero_gradient_test(cf, elem_point);
 
     EXPECT_EQ(cf.dot(elem_arg), 0);
     EXPECT_EQ(cf.dot(elem_from_face), 0);
@@ -179,6 +185,7 @@ TEST(MooseFunctorTest, testArgs)
     EXPECT_EQ(cf.dot(elem_from_face), 0);
     EXPECT_EQ(cf.dot(elem_qp), 0);
     EXPECT_EQ(cf.dot(elem_side_qp), 0);
+    EXPECT_EQ(cf.dot(elem_point), 0);
   }
 
   const char * argv[2] = {"foo", "\0"};
@@ -227,6 +234,7 @@ TEST(MooseFunctorTest, testArgs)
     EXPECT_EQ(vec_comp(elem_from_face), 0);
     EXPECT_EQ(vec_comp(elem_qp), 0);
     EXPECT_EQ(vec_comp(elem_side_qp), 0);
+    EXPECT_EQ(vec_comp(elem_point), 0);
 
     bool found_internal = false;
     for (const auto & mesh_fi : all_fi)
@@ -276,15 +284,18 @@ TEST(MooseFunctorTest, testArgs)
     test_null_error(elem_from_face);
     test_null_error(elem_qp);
     test_null_error(elem_side_qp);
+    test_null_error(elem_point);
   }
 
   // Test PiecewiseByBlockLambdaFunctor
   {
     // Test subdomain error
     {
-      auto dummy_lammy = [](const auto &, const auto &) -> Real { return 0; };
+      auto dummy_lammy = [](const auto &, const auto &) -> Real { return 2; };
       PiecewiseByBlockLambdaFunctor<Real> errorful(
           "errorful", dummy_lammy, {EXEC_ALWAYS}, *mesh, {});
+      PiecewiseByBlockLambdaFunctor<Real> errorfree(
+          "errorfree", dummy_lammy, {EXEC_ALWAYS}, *mesh, mesh->meshSubdomains());
 
       auto test_sub_error = [&errorful](const auto & arg)
       {
@@ -308,6 +319,8 @@ TEST(MooseFunctorTest, testArgs)
       test_sub_error(elem_from_face);
       test_sub_error(elem_qp);
       test_sub_error(elem_side_qp);
+      test_sub_error(elem_point);
+      EXPECT_EQ(errorfree(elem_point), 2);
     }
 
     // Test functions

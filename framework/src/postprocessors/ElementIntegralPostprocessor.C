@@ -38,7 +38,6 @@ ElementIntegralPostprocessor::execute()
 Real
 ElementIntegralPostprocessor::getValue()
 {
-  gatherSum(_integral_value);
   return _integral_value;
 }
 
@@ -57,4 +56,10 @@ ElementIntegralPostprocessor::computeIntegral()
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     sum += _JxW[_qp] * _coord[_qp] * computeQpIntegral();
   return sum;
+}
+
+void
+ElementIntegralPostprocessor::finalize()
+{
+  gatherSum(_integral_value);
 }

@@ -80,9 +80,6 @@ ADSpecificImpulse1Phase::initialize()
 Real
 ADSpecificImpulse1Phase::getValue()
 {
-  gatherSum(_thrust);
-  gatherSum(_mass_flow_rate);
-
   if (_cumulative)
   {
     _accumulated_thrust += _dt * _thrust;
@@ -91,6 +88,13 @@ ADSpecificImpulse1Phase::getValue()
   }
   else
     return _thrust / _mass_flow_rate / THM::gravity_const;
+}
+
+void
+ADSpecificImpulse1Phase::finalize()
+{
+  gatherSum(_thrust);
+  gatherSum(_mass_flow_rate);
 }
 
 void

@@ -58,10 +58,11 @@ ComputeMortarNodalAuxBndThread<AuxKernelType>::onNode(ConstBndNodeRange::const_i
     mooseAssert(dynamic_cast<MortarNodalAuxKernel *>(kernel.get()),
                 "This should be amortar nodal aux kernel");
     _fe_problem.reinitNodeFace(node, _bnd_id, _tid);
-    kernel->compute();
-    // update the solution vector
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    kernel->variable().insert(_aux_sys.solution());
+    if (kernel->variable().isNodalDefined())
+    {
+      kernel->compute();
+      kernel->variable().insert(_aux_sys.solution());
+    }
   }
 }
 

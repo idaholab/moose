@@ -28,11 +28,9 @@ outlet_pressure = 0.9e5
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [fp]
-      type = IdealGasFluidProperties
-    []
+[FluidProperties]
+  [fp]
+    type = IdealGasFluidProperties
   []
 []
 

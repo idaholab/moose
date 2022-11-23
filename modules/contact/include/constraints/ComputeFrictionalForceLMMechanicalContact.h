@@ -59,13 +59,6 @@ protected:
   virtual void enforceConstraintOnDof3d(const DofObject * const dof);
 
   /**
-   * Communicate weighted velocities to the owning process
-   */
-#ifdef MOOSE_SPARSE_AD
-  template <typename T>
-  void communicateVelocities(std::unordered_map<const DofObject *, std::array<T, 2>> & dof);
-#endif
-  /**
    * Compute coefficient of friction. Allows the use of contact pressure and relative velocity
    * dependent friction.
    */

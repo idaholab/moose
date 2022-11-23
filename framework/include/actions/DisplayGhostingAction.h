@@ -22,7 +22,7 @@ class DisplayGhostingAction : public Action
 public:
   static InputParameters validParams();
 
-  DisplayGhostingAction(InputParameters params);
+  DisplayGhostingAction(const InputParameters & params);
 
 protected:
   virtual void act() override;

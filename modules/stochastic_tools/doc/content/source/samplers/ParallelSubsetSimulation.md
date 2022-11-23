@@ -112,15 +112,15 @@ The input file for using the PSS algorithm is somewhat similar to the other samp
 
 !listing modules/stochastic_tools/test/tests/samplers/ParallelSubsetSimulation/pss.i block=Samplers
 
-where, `num_samplessub` is the number of samples per subset and `use_absolute_value`
-is used when failure is defined as a non-exceedance rather than an exceedance.
+where, `num_samplessub` is the number of samples per subset and `num_subsets` is the number of subsets.
 `inputs_reporter` and `output_reporter` are the reporter values which transfer
 information between the `ParallelSubsetSimulation` sampler and the `AdaptiveMonteCarloDecision` reporter. There is an optional input parameter `subset_probability` which has been defaulted to
 `0.1`, meaning that there are $1/0.1$ samples per Markov chain. This can, however, be
 changed as per the user preference. `num_parallel_chains` is also an optional parameter
 that explicitly specifies the number of Markov chains to be run in parallel per subset.
 If `num_parallel_chains` is not specified, the number of parallel Markov chains per subset
-will be equal to the number of processors.
+will be equal to the number of processors. Besides, `use_absolute_value` can be set to true
+when failure is defined as a non-exceedance rather than an exceedance.
 
 Second, the `Reporters` block is presented below with the `AdaptiveMonteCarloDecision` reporter:
 
@@ -132,16 +132,9 @@ Third, the `Executioner` block is presented below:
 
 !listing modules/stochastic_tools/test/tests/samplers/ParallelSubsetSimulation/pss.i block=Executioner
 
-where, it is noticed that unlike some other sampler classes, the `type` is transient.
- `num_steps` in the above code block are the total number of samples required per processor.
-This value should not be less than $(1/p_o~N_s)$ (i.e., one over the subset probability
-times the number of subsets).
+where it is noticed that unlike some other sampler classes, the `type` is transient.
+The number of time steps is automatically determined based on `num_samplessub`, `num_subsets` and the number of processors used.
 
-!alert note title=Fixing the total number of samples or numerical model evaluations
-`num_steps` is used to fix the total number of samples. Note that this is the total
-  number of samples per processors rather than the absolute total number of samples.
-  If you require 1000 samples across 4 subsets and are using 50 processors, then
-  `num_steps` will be $1000 \times 4~/~50$.
 
 ## Output format
 

@@ -128,9 +128,9 @@ protected:
    * ExecFlagEnum to allow users to modify the available execute flags for their object.
    */
   void addEnumerationNames(const std::string & names);
-  void addEnumerationName(const std::string & raw_name);
-  void addEnumerationName(const std::string & name, const int & value);
-  void addEnumerationItem(const MooseEnumItem & item);
+  const MooseEnumItem & addEnumerationName(const std::string & raw_name);
+  const MooseEnumItem & addEnumerationName(const std::string & name, const int & value);
+  const MooseEnumItem & addEnumerationItem(const MooseEnumItem & item);
   ///@}
 
   /**

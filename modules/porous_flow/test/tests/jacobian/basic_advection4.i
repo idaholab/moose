@@ -69,11 +69,9 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [methane]
-      type = MethaneFluidProperties
-    []
+[FluidProperties]
+  [methane]
+    type = MethaneFluidProperties
   []
 []
 

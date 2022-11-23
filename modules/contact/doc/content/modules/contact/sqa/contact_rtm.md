@@ -1,1 +1,1 @@
-!template load file=sqa/app_rtm.md.template category=contact app=Contact
+!template load file=sqa/module_rtm.md.template category=contact module=Contact stp_filename=contact_stp.md

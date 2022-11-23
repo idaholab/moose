@@ -47,7 +47,7 @@ available login nodes: "sawtooth1" or "sawtooth2".
 ssh sawtooth2
 ```
 
-This will log you into the login node of a an HPC machine, you can verify that you connected to
+This will log you into the login node of an HPC machine, and you can verify that you connected to
 the machine by displaying the host name:
 
 ```bash

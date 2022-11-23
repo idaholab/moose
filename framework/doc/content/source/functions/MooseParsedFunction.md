@@ -22,6 +22,12 @@ bound to. Variables can be bound to:
 Further information can be found at the
 [function parser site](http://warp.povusers.org/FunctionParser/).
 
+!alert warning title=Scalar Variable Jacobian Contributions Omitted
+Note that if this function is used for any residual contribution, inclusion of
+scalar variables in the `value` expression will result in missing Jacobian
+contributions, even if using [Automatic differentiation](automatic differentiation/index.md),
+since `Function`s can currently only return `Real` values, not `ADReal` values.
+
 ## Example Input Syntax
 
 !listing examples/ex13_functions/ex13.i block=Functions

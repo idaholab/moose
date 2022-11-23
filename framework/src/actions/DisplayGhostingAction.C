@@ -32,7 +32,7 @@ DisplayGhostingAction::validParams()
   return params;
 }
 
-DisplayGhostingAction::DisplayGhostingAction(InputParameters params)
+DisplayGhostingAction::DisplayGhostingAction(const InputParameters & params)
   : Action(params),
     _display_ghosting(getParam<bool>("output_ghosting")),
     _include_local(getParam<bool>("include_local_in_ghosting"))

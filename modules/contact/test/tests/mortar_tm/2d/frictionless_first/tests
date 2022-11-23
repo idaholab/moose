@@ -20,6 +20,14 @@
       heavy = true
       ad_indexing_type = 'global'
     []
+    [finite_short]
+      detail = 'using the finite strain formulation for a limited time simulation.'
+      type = 'CSVDiff'
+      input = 'finite.i'
+      csvdiff = 'finite_short.csv'
+      cli_args = 'name=finite_short Executioner/num_steps=10'
+      ad_indexing_type = 'global'
+    []
     [finite_scaling]
       detail = 'using the finite strain formulation with automatic scaling.'
       type = 'CSVDiff'
@@ -36,6 +44,14 @@
       input = 'finite_rr.i'
       csvdiff = 'finite_rr.csv'
       heavy = true
+      ad_indexing_type = 'global'
+    []
+    [finite_rr_full]
+      detail = 'using the finite strain formulation and reference residual with extra_vector_tags passed to the constraints.'
+      type = 'CSVDiff'
+      input = 'finite_rr.i'
+      csvdiff = 'finite_rr_full.csv'
+      cli_args = 'Contact/frictionless/extra_vector_tags=ref name=finite_rr_full Executioner/num_steps=10'
       ad_indexing_type = 'global'
     []
   []

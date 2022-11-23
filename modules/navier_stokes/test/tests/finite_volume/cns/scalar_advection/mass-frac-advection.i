@@ -26,11 +26,9 @@ v_in=1
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [fp]
-      type = IdealGasFluidProperties
-    []
+[FluidProperties]
+  [fp]
+    type = IdealGasFluidProperties
   []
 []
 

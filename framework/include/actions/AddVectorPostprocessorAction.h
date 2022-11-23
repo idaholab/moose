@@ -16,7 +16,7 @@ class AddVectorPostprocessorAction : public MooseObjectAction
 public:
   static InputParameters validParams();
 
-  AddVectorPostprocessorAction(InputParameters params);
+  AddVectorPostprocessorAction(const InputParameters & params);
 
   virtual void act() override;
 };

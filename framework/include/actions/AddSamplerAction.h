@@ -23,7 +23,7 @@ class AddSamplerAction : public MooseObjectAction
 public:
   static InputParameters validParams();
 
-  AddSamplerAction(InputParameters params);
+  AddSamplerAction(const InputParameters & params);
 
   virtual void act() override;
 };

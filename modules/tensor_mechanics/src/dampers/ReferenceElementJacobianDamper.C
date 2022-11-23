@@ -21,6 +21,7 @@ InputParameters
 ReferenceElementJacobianDamper::validParams()
 {
   InputParameters params = GeneralDamper::validParams();
+  params += BlockRestrictable::validParams();
   params.addClassDescription("Damper that limits the change in element Jacobians");
   params.addRequiredCoupledVar("displacements", "The nonlinear displacement variables");
   params.addParam<Real>(
@@ -31,6 +32,7 @@ ReferenceElementJacobianDamper::validParams()
 ReferenceElementJacobianDamper::ReferenceElementJacobianDamper(const InputParameters & parameters)
   : GeneralDamper(parameters),
     Coupleable(this, /*nodal=*/true),
+    BlockRestrictable(this),
     _max_jacobian_diff(getParam<Real>("max_increment")),
     _tid(getParam<THREAD_ID>("_tid")),
     _mesh(_subproblem.mesh()),
@@ -41,7 +43,11 @@ ReferenceElementJacobianDamper::ReferenceElementJacobianDamper(const InputParame
 {
   _grad_phi.resize(_ndisp);
   for (auto i : make_range(_ndisp))
-    _grad_phi[i] = &_sys.getFieldVariable<Real>(_tid, _disp_num[i]).gradPhi();
+  {
+    const auto & disp_var = _sys.getFieldVariable<Real>(_tid, _disp_num[i]);
+    checkVariable(disp_var);
+    _grad_phi[i] = &disp_var.gradPhi();
+  }
 }
 
 Real
@@ -54,8 +60,8 @@ ReferenceElementJacobianDamper::computeDamping(const NumericVector<Number> & sol
   // Loop over elements in the mesh
   for (const auto & elem : _mesh.getMesh().active_local_element_ptr_range())
   {
-    // Reinit variable shape functions
-    _subproblem.reinitElem(elem, _tid);
+    if (!hasBlocks(elem->subdomain_id()))
+      continue;
 
     // Compute gradients of displacements before and after this update
     computeGradDisp(elem, solution, update);
@@ -92,6 +98,10 @@ ReferenceElementJacobianDamper::computeGradDisp(const Elem * elem,
                                                 const NumericVector<Number> & solution,
                                                 const NumericVector<Number> & update)
 {
+  // Reinit variable shape functions
+  _assembly.setCurrentSubdomainID(elem->subdomain_id());
+  _assembly.reinit(elem);
+
   _grad_disp.resize(_ndisp);
   _grad_disp_update.resize(_ndisp);
   for (auto i : make_range(_ndisp))

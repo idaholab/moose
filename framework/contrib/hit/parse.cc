@@ -18,6 +18,8 @@
 namespace hit
 {
 
+static const Token EOFToken{TokType::EOF, "", ""};
+
 std::string
 quoteChar(const std::string & s)
 {
@@ -229,6 +231,11 @@ Node::strVal()
 }
 std::vector<double>
 Node::vecFloatVal()
+{
+  valthrow();
+}
+std::vector<bool>
+Node::vecBoolVal()
 {
   valthrow();
 }
@@ -475,48 +482,88 @@ Field::render(int indent, const std::string & indent_text, int maxlen)
   auto quote = quoteChar(_val);
   int max = maxlen - prefix_len - 1;
 
-  // special rendering logic for quoted strings that go over maxlen:
-  if (_kind == Kind::String && quote != "" && max > 0)
+  // special rendering logic for double quoted strings that go over maxlen:
+  if (_kind == Kind::String && quote == "\"" && max > 0)
   {
-    // strip outer quotes - will will add back our own for each line
-    std::string unquoted = _val.substr(1, _val.size() - 2);
-
-    // iterate over the string in chunks of size "max"
-    size_t pos = 0;
-    while (pos + max < unquoted.size())
+    if (_val.find('\n') == std::string::npos)
     {
-      // to avoid splitting words, walk backwards from the "max" sized chunk boundary to find a
-      // space character
-      size_t boundary = pos + max;
-      while (boundary > pos && !charIn(unquoted[boundary], " \t"))
-        boundary--;
+      // strip outer quotes - will will add back our own for each line
+      std::string unquoted = _val.substr(1, _val.size() - 2);
 
-      // if we didn't find a space, just fall back to the original max sized chunk boundary and
-      // split the word anyway
-      if (boundary == pos)
-        boundary = pos + max;
+      // iterate over the string in chunks of size "max"
+      size_t pos = 0;
+      while (pos + max < unquoted.size())
+      {
+        // to avoid splitting words, walk backwards from the "max" sized chunk boundary to find a
+        // space character
+        size_t boundary = pos + max;
+        while (boundary > pos && !charIn(unquoted[boundary], " \t"))
+          boundary--;
 
-      // shift the boundary to after the space character (instead of before it) unless that would
-      // make the index beyond the string length.
-      boundary = std::min(boundary + 1, unquoted.size());
+        // if we didn't find a space, just fall back to the original max sized chunk boundary and
+        // split the word anyway
+        if (boundary == pos)
+          boundary = pos + max;
 
-      // add the leading indentation and newline - skip it for the first first chunk of a string
-      // because it should go on the same line as the "=",
-      if (pos > 0)
-        s += "\n" + strRepeat(" ", prefix_len);
+        // shift the boundary to after the space character (instead of before it) unless that would
+        // make the index beyond the string length.
+        boundary = std::min(boundary + 1, unquoted.size());
 
-      // add the quoted chunk to our string text
-      s += quote + unquoted.substr(pos, boundary - pos) + quote;
-      pos = boundary;
+        // add the leading indentation and newline - skip it for the first chunk of a string
+        // because it should go on the same line as the "=",
+        if (pos > 0)
+          s += "\n" + strRepeat(" ", prefix_len);
+
+        // add the quoted chunk to our string text
+        s += quote + unquoted.substr(pos, boundary - pos) + quote;
+        pos = boundary;
+      }
+
+      // add any remaining partial chunk of the string value
+      if (pos < unquoted.size())
+      {
+        // again only add leading newline and indentation for greater chunks after the first.
+        if (pos > 0)
+          s += "\n" + strRepeat(" ", prefix_len);
+        s += quote + unquoted.substr(pos, std::string::npos) + quote;
+      }
     }
-
-    // add any remaining partial chunk of the string value
-    if (pos < unquoted.size())
+    else
     {
-      // again only add leading newline and indentation for greater chunks after the first.
-      if (pos > 0)
-        s += "\n" + strRepeat(" ", prefix_len);
-      s += quote + unquoted.substr(pos, std::string::npos) + quote;
+      const int delta_indent = prefix_len - tokens()[2].column;
+
+      // first line is always added as is
+      std::size_t start = 0;
+      std::size_t end = _val.find('\n', start);
+      s += _val.substr(start, end - start + 1);
+
+      // remaining lines
+      do
+      {
+        start = end + 1;
+        end = _val.find('\n', start);
+        if (end == std::string::npos)
+          end = _val.length() - 1;
+
+        // remove leading whitespace
+        const auto old_start = start;
+        while (_val[start] == ' ' || _val[start] == '\t')
+          ++start;
+
+        // correct indentation
+        if (delta_indent < 0)
+        {
+          if (old_start - delta_indent - 1 < start)
+            start = old_start - delta_indent - 1;
+        }
+        else
+        {
+          start = old_start;
+          s += std::string(delta_indent + 1, ' ');
+        }
+
+        s += _val.substr(start, end - start + 1);
+      } while (end < _val.length() - 1);
     }
   }
   else if (_val.size() == 0)
@@ -555,6 +602,27 @@ std::string
 Field::val()
 {
   return _val;
+}
+
+std::vector<bool>
+Field::vecBoolVal()
+{
+  auto items = vecStrVal();
+  std::vector<bool> vec;
+  for (auto & s : items)
+  {
+    try
+    {
+      bool converted_val = false;
+      toBool(s, &converted_val);
+      vec.push_back(converted_val);
+    }
+    catch (...)
+    {
+      throw Error("cannot convert '" + s + "' to bool");
+    }
+  }
+  return vec;
 }
 
 std::vector<int>
@@ -703,32 +771,32 @@ public:
   size_t pos() { return _pos; }
   std::vector<Token> & tokens() { return _tokens; }
 
-  Token next()
+  const Token & next()
   {
     if (_pos >= _tokens.size())
     {
       _pos++;
-      return Token{TokType::EOF, "", _name, _input.size()};
+      return EOFToken;
     }
-    auto tok = _tokens[_pos];
+    const auto & tok = _tokens[_pos];
     _pos++;
     return tok;
   }
   void backup() { _pos--; }
-  Token peek()
+  const Token & peek()
   {
-    auto tok = next();
+    const auto & tok = next();
     backup();
     return tok;
   }
-  void error(Token loc, const std::string & msg)
+  void error(const Token & loc, const std::string & msg)
   {
     throw ParseError(_name + ":" + std::to_string(loc.line) + ": " + msg);
   }
 
-  Token require(TokType t, const std::string & err_msg)
+  const Token & require(TokType t, const std::string & err_msg)
   {
-    auto tok = next();
+    const auto & tok = next();
     if (tok.type == TokType::Error)
       error(tok, tok.val);
     else if (tok.type != t)
@@ -771,13 +839,13 @@ void parseExitPath(Parser * p, Node * n);
 void
 parseExitPath(Parser * p, Node * n)
 {
-  auto secOpenToks = p->scope()->tokens();
+  const auto & secOpenToks = p->scope()->tokens();
 
-  auto tok = p->next();
+  const auto & tok = p->next();
   if (tok.type != TokType::LeftBracket)
     p->error(secOpenToks[0], "missing closing '[]' for section");
 
-  auto path = p->require(TokType::Path, "malformed section close, expected PATH");
+  const auto & path = p->require(TokType::Path, "malformed section close, expected PATH");
   p->require(TokType::RightBracket, "expected ']'");
 
   auto s = n->children().back();
@@ -796,7 +864,7 @@ parseEnterPath(Parser * p, Node * n)
 {
   p->ignore();
   p->require(TokType::LeftBracket, "");
-  auto tok = p->require(TokType::Path, "invalid path in section header");
+  const auto & tok = p->require(TokType::Path, "invalid path in section header");
   p->require(TokType::RightBracket, "missing ']'");
   if (tok.val == "./" || tok.val == "")
     p->error(tok, "empty section name - did you mean '../'?");
@@ -811,8 +879,8 @@ parseSectionBody(Parser * p, Node * n)
 {
   while (true)
   {
-    auto tok = p->next();
-    auto next = p->peek();
+    const auto & tok = p->next();
+    const auto & next = p->peek();
     p->backup();
     if (tok.type == TokType::BlankLine)
     {
@@ -846,14 +914,14 @@ void
 parseField(Parser * p, Node * n)
 {
   p->ignore();
-  auto fieldtok = p->require(TokType::Ident, "unexpected token for field");
+  const auto & fieldtok = p->require(TokType::Ident, "unexpected token for field");
   p->require(TokType::Equals, "missing '='");
 
   Node * field = nullptr;
-  auto valtok = p->next();
-  if (valtok.type == TokType::Number)
+  auto * valtok = &p->next();
+  if (valtok->type == TokType::Number)
   {
-    std::string s = valtok.val;
+    std::string s = valtok->val;
     Field::Kind kind = Field::Kind::Int;
     try
     {
@@ -869,21 +937,21 @@ parseField(Parser * p, Node * n)
 
     field = p->emit(new Field(fieldtok.val, kind, s));
   }
-  else if (valtok.type == TokType::String)
+  else if (valtok->type == TokType::String)
   {
     bool v = false;
-    bool isbool = toBool(valtok.val, &v);
+    bool isbool = toBool(valtok->val, &v);
     if (isbool)
-      field = p->emit(new Field(fieldtok.val, Field::Kind::Bool, valtok.val));
+      field = p->emit(new Field(fieldtok.val, Field::Kind::Bool, valtok->val));
     else
     {
       std::string strval;
-      std::string quote = quoteChar(valtok.val);
+      std::string quote = quoteChar(valtok->val);
       while (true)
       {
-        if (valtok.type == TokType::String)
+        if (valtok->type == TokType::String)
         {
-          auto s = valtok.val;
+          auto s = valtok->val;
           if (quote != "")
             s = s.substr(1, s.size() - 2);
           strval += s;
@@ -891,20 +959,21 @@ parseField(Parser * p, Node * n)
 
         if (p->peek().type != TokType::BlankLine && p->peek().type != TokType::String)
         {
-          if (valtok.type == TokType::BlankLine)
+          if (valtok->type == TokType::BlankLine)
             p->backup();
           break;
         }
-        valtok = p->next();
+        valtok = &p->next();
       }
       strval = quote + strval + quote;
       field = p->emit(new Field(fieldtok.val, Field::Kind::String, strval));
     }
   }
-  else if (valtok.type == TokType::Error)
-    p->error(valtok, valtok.val);
+  else if (valtok->type == TokType::Error)
+    p->error(*valtok, valtok->val);
   else
-    p->error(valtok, "missing value for field '" + fieldtok.val + "' - found '" + valtok.val + "'");
+    p->error(*valtok,
+             "missing value for field '" + fieldtok.val + "' - found '" + valtok->val + "'");
   n->addChild(field);
 }
 
@@ -912,7 +981,7 @@ void
 parseComment(Parser * p, Node * n)
 {
   p->ignore();
-  auto tok = p->next();
+  const auto & tok = p->next();
   bool isinline = false;
   if (tok.type == TokType::Comment)
     isinline = false;

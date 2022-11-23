@@ -1,5 +1,5 @@
 {% set build = 0 %}
-{% set version = "2022.06.23" %}
+{% set version = "2022.08.09" %}
 
 package:
   name: moose-pyhit

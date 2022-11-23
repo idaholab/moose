@@ -110,7 +110,7 @@ Water97FluidProperties::rho_from_p_T(Real pressure, Real temperature) const
       break;
 
     default:
-      mooseError(name(), ": inRegion() has given an incorrect region");
+      mooseError("inRegion() has given an incorrect region");
   }
   return density;
 }
@@ -174,7 +174,7 @@ Water97FluidProperties::rho_from_p_T(
     }
 
     default:
-      mooseError(name(), ": inRegion() has given an incorrect region");
+      mooseError("inRegion() has given an incorrect region");
   }
 
   rho = this->rho_from_p_T(pressure, temperature);
@@ -223,7 +223,7 @@ Water97FluidProperties::e_from_p_T(Real pressure, Real temperature) const
       break;
 
     default:
-      mooseError(name(), ": inRegion() has given an incorrect region");
+      mooseError("inRegion() has given an incorrect region");
   }
   // Output in J/kg
   return internal_energy;
@@ -297,7 +297,7 @@ Water97FluidProperties::e_from_p_T(
     }
 
     default:
-      mooseError(name(), ": inRegion has given an incorrect region");
+      mooseError("inRegion has given an incorrect region");
   }
 
   e = this->e_from_p_T(pressure, temperature);
@@ -357,7 +357,7 @@ Water97FluidProperties::c_from_p_T(Real pressure, Real temperature) const
       break;
 
     default:
-      mooseError(name(), ": inRegion() has given an incorrect region");
+      mooseError("inRegion() has given an incorrect region");
   }
 
   return std::sqrt(speed2);
@@ -407,7 +407,7 @@ Water97FluidProperties::cp_from_p_T(Real pressure, Real temperature) const
       break;
 
     default:
-      mooseError(name(), ": inRegion() has given an incorrect region");
+      mooseError("inRegion() has given an incorrect region");
   }
   return specific_heat;
 }
@@ -459,7 +459,7 @@ Water97FluidProperties::cv_from_p_T(Real pressure, Real temperature) const
       break;
 
     default:
-      mooseError(name(), ": inRegion() has given an incorrect region");
+      mooseError("inRegion() has given an incorrect region");
   }
   return specific_heat;
 }
@@ -598,7 +598,7 @@ Water97FluidProperties::k_from_p_T(Real pressure, Real temperature) const
 void
 Water97FluidProperties::k_from_p_T(Real, Real, Real &, Real &, Real &) const
 {
-  mooseError(name(), ": k_from_p_T() is not implemented.");
+  mooseError("k_from_p_T() is not implemented.");
 }
 
 Real
@@ -672,7 +672,7 @@ Water97FluidProperties::s_from_p_T(Real pressure, Real temperature) const
       break;
 
     default:
-      mooseError(name(), ": inRegion() has given an incorrect region");
+      mooseError("inRegion() has given an incorrect region");
   }
   return entropy;
 }
@@ -1456,7 +1456,7 @@ Water97FluidProperties::subregion3(Real pressure, Real temperature) const
       subregion = 23;
   }
   else
-    mooseError(name(), ": subregion3(): Shouldn't have got here!");
+    mooseError("subregion3(): Shouldn't have got here!");
 
   return subregion;
 }
@@ -1744,11 +1744,11 @@ Water97FluidProperties::T_from_p_h_ad(const FPDualReal & pressure,
     }
 
     case 5:
-      mooseError(name(), ": temperature_from_ph() not implemented for region 5");
+      mooseError("temperature_from_ph() not implemented for region 5");
       break;
 
     default:
-      mooseError(name(), ": inRegionPH() has given an incorrect region");
+      mooseError("inRegionPH() has given an incorrect region");
   }
 
   return temperature;

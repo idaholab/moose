@@ -48,14 +48,12 @@ FVAdvection::FVAdvection(const InputParameters & params)
 ADReal
 FVAdvection::computeQpResidual()
 {
-  ADReal u_interface;
-  interpolate(_advected_interp_method,
-              u_interface,
-              _u_elem[_qp],
-              _u_neighbor[_qp],
-              _velocity,
-              *_face_info,
-              true);
+  const bool elem_is_upwind = _velocity * _normal >= 0;
+  const auto face = makeFace(*_face_info,
+                             Moose::FV::limiterType(_advected_interp_method),
+                             elem_is_upwind,
+                             faceArgSubdomains());
+  ADReal u_interface = _var(face);
 
   return _normal * _velocity * u_interface;
 }

@@ -61,14 +61,6 @@ protected:
   void timestepSetup() override;
 
   /**
-   * Communicate weighted velocities to the owning process
-   */
-#ifdef MOOSE_SPARSE_AD
-  template <typename T>
-  void communicateVelocities(std::unordered_map<const DofObject *, std::array<T, 2>> & dof_map);
-#endif
-
-  /**
    * Apply constant or function-based friction coefficient
    */
   ADReal computeFrictionValue(const ADReal & contact_pressure,

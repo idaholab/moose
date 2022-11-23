@@ -144,6 +144,7 @@ public:
   bool activeOnSubdomain(SubdomainID subdomain) const override;
 
   bool isNodal() const override { return _element_data->isNodal(); }
+  bool hasDoFsOnNodes() const override { return _element_data->hasDoFsOnNodes(); }
   Moose::VarFieldType fieldType() const override;
   bool isArray() const override;
   bool isVector() const override;
@@ -267,7 +268,7 @@ public:
   {
     return _element_data->vectorTagGradient(tag);
   }
-  const DoFValue & vectorTagDofValue(TagID tag) const
+  const DoFValue & vectorTagDofValue(TagID tag) const override
   {
     return _element_data->vectorTagDofValue(tag);
   }
@@ -664,6 +665,8 @@ public:
 
   unsigned int oldestSolutionStateRequested() const override final;
 
+  void setActiveTags(const std::set<TagID> & vtags) override;
+
 protected:
   usingMooseVariableBaseMembers;
 
@@ -716,4 +719,13 @@ inline const typename Moose::ADType<OutputType>::type &
 MooseVariableFE<OutputType>::adNodalValue() const
 {
   return _element_data->adNodalValue();
+}
+
+template <typename OutputType>
+void
+MooseVariableFE<OutputType>::setActiveTags(const std::set<TagID> & vtags)
+{
+  _element_data->setActiveTags(vtags);
+  _neighbor_data->setActiveTags(vtags);
+  _lower_data->setActiveTags(vtags);
 }

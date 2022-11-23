@@ -447,12 +447,17 @@ public:
   bool getDistributedMeshOnCommandLine() const { return _distributed_mesh_on_command_line; }
 
   /**
-   * Whether or not this is a "recover" calculation.
+   * Whether or not this is a "recover" calculation. More specifically whether this simulation has
+   * been recovered with something like the \p --recover command line argument. Note that this will
+   * never return true when \p isRestarting is true
    */
   bool isRecovering() const;
 
   /**
-   * Whether or not this is a "restart" calculation.
+   * Whether or not this is a "restart" calculation. More specifically whether this has been
+   * restarted using the \p Problem/restart_file_base parameter. Note that this will only return
+   * true when doing \emph checkpoint restart. This will be false if doing \emph exodus restart.
+   * Finally this will never return true when \p isRecovering is true
    */
   bool isRestarting() const;
 
@@ -771,14 +776,6 @@ public:
 
   /// Returns whether FPE trapping is turned on (either because of debug or user requested)
   bool getFPTrapFlag() const { return _trap_fpe; }
-
-  /**
-   * WARNING: This is an internal method for MOOSE, if you need the add new ExecFlagTypes then
-   * use the registerExecFlag macro as done in Moose.C/h.
-   *
-   * @param flag The flag to add as available to the app level ExecFlagEnum.
-   */
-  void addExecFlag(const ExecFlagType & flag);
 
   /**
    * Returns a Boolean indicating whether a RelationshipManater exists with the same name.
@@ -1286,7 +1283,7 @@ private:
   std::shared_ptr<Backup> _cached_backup;
 
   /// Execution flags for this App
-  ExecFlagEnum _execute_flags;
+  const ExecFlagEnum & _execute_flags;
 
   /// Whether to turn on automatic scaling by default
   const bool _automatic_automatic_scaling;

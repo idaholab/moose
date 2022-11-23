@@ -17,7 +17,7 @@
 class THMInitComponentsAction : public Action
 {
 public:
-  THMInitComponentsAction(InputParameters parameters);
+  THMInitComponentsAction(const InputParameters & parameters);
 
   virtual void act();
 

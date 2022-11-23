@@ -16,7 +16,7 @@ class AppendMeshGeneratorAction : public MooseObjectAction
 public:
   static InputParameters validParams();
 
-  AppendMeshGeneratorAction(InputParameters params);
+  AppendMeshGeneratorAction(const InputParameters & params);
 
   virtual void act() override;
 };

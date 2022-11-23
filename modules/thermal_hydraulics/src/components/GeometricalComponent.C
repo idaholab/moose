@@ -15,30 +15,18 @@ InputParameters
 GeometricalComponent::validParams()
 {
   InputParameters params = Component::validParams();
+  params += DiscreteLineSegmentInterface::validParams();
 
-  params.addRequiredParam<Point>("position", "Origin (start) of the component [m]");
-  params.addRequiredParam<RealVectorValue>("orientation", "Orientation vector of the component");
-  params.addParam<Real>("rotation", 0., "Rotation of the component [degrees]");
   params.addParam<std::vector<std::string>>("axial_region_names",
                                             "Names to assign to axial regions");
-  params.addRequiredParam<std::vector<Real>>(
-      "length", "Length of each subsection of the geometric component along the main axis [m]");
-  params.addRequiredParam<std::vector<unsigned int>>(
-      "n_elems", "Number of elements in each subsection along the main axis");
 
   return params;
 }
 
 GeometricalComponent::GeometricalComponent(const InputParameters & parameters)
   : Component(parameters),
-    _position(getParam<Point>("position")),
-    _dir(getParam<RealVectorValue>("orientation")),
-    _rotation(getParam<Real>("rotation")),
-    _lengths(getParam<std::vector<Real>>("length")),
-    _length(std::accumulate(_lengths.begin(), _lengths.end(), 0.0)),
-    _n_elems(getParam<std::vector<unsigned int>>("n_elems")),
-    _n_elem(std::accumulate(_n_elems.begin(), _n_elems.end(), 0)),
-    _n_sections(_lengths.size()),
+    DiscreteLineSegmentInterface(this),
+
     _axial_region_names(getParam<std::vector<std::string>>("axial_region_names")),
     _displace_node_user_object_name(genName(name(), "displace_node"))
 {
@@ -52,25 +40,6 @@ unsigned int
 GeometricalComponent::computeNumberOfNodes(unsigned int n_elems)
 {
   return usingSecondOrderMesh() ? (2 * n_elems) + 1 : n_elems + 1;
-}
-
-void
-GeometricalComponent::computeMeshTransformation()
-{
-  Real rotation_rad = M_PI * _rotation / 180.;
-  // rows of rotation matrix to rotate about x-axis
-  RealVectorValue Rx_x(1., 0., 0.);
-  RealVectorValue Rx_y(0., cos(rotation_rad), -sin(rotation_rad));
-  RealVectorValue Rx_z(0., sin(rotation_rad), cos(rotation_rad));
-  _Rx = RealTensorValue(Rx_x, Rx_y, Rx_z);
-
-  // figure out the rotation
-  Real r = _dir.norm();
-  Real theta = acos(_dir(2) / r);
-  Real aphi = atan2(_dir(1), _dir(0));
-  _R = RealTensorValue(RealVectorValue(cos(aphi) * sin(theta), -sin(aphi), -cos(aphi) * cos(theta)),
-                       RealVectorValue(sin(aphi) * sin(theta), cos(aphi), -sin(aphi) * cos(theta)),
-                       RealVectorValue(cos(theta), 0.0, sin(theta)));
 }
 
 Node *
@@ -136,7 +105,6 @@ GeometricalComponent::addElementQuad9(dof_id_type node0,
 void
 GeometricalComponent::setupMesh()
 {
-  computeMeshTransformation();
   generateNodeLocations();
   buildMesh();
 
@@ -145,7 +113,7 @@ GeometricalComponent::setupMesh()
   {
     Node & curr_node = _mesh.nodeRef(node_id);
     RealVectorValue p(curr_node(0), curr_node(1), curr_node(2));
-    curr_node = _R * (_Rx * p) + _position;
+    curr_node = computeRealPointFromReferencePoint(p);
   }
 }
 

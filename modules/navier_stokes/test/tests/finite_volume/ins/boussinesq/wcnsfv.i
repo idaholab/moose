@@ -234,11 +234,9 @@ hot_temp=310
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [fp]
-      type = IdealGasFluidProperties
-    []
+[FluidProperties]
+  [fp]
+    type = IdealGasFluidProperties
   []
 []
 

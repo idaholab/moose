@@ -37,9 +37,10 @@ struct Token
         const std::string & val,
         const std::string & name,
         size_t offset = 0,
-        int line = 0);
+        int line = 0,
+        int column = 0);
   /// str returns a human-friendly string representation of the token.
-  std::string str();
+  std::string str() const;
 
   /// type identifies the category/type of the token (i.e. String, Number, Comment, etc.)
   TokType type;
@@ -55,6 +56,10 @@ struct Token
   /// character) on which the beginning of the token was found - this is redundant with the offset
   /// combined with a reference to the original input, but is here for convenience.
   int line;
+  /// column is the char position after the preceeding \n (or beginning of the file) at which
+  /// the beginning of the token was found - this is redundant with the offset
+  /// combined with a reference to the original input, but is here for convenience.
+  int column;
 };
 
 class Lexer;
@@ -143,7 +148,7 @@ public:
 
   /// input returns the full input text the lexer is operating on i.e. the entire input string it
   /// was initialized/constructed with.
-  std::string input();
+  const std::string & input();
   /// start returns the current start byte offset into the input identifying the start of the next
   /// token that will be emitted (or next section of input that will be ignored).
   size_t start();

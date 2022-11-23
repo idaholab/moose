@@ -20,7 +20,10 @@ THMInitSimulationAction::validParams()
   return params;
 }
 
-THMInitSimulationAction::THMInitSimulationAction(InputParameters parameters) : Action(parameters) {}
+THMInitSimulationAction::THMInitSimulationAction(const InputParameters & parameters)
+  : Action(parameters)
+{
+}
 
 void
 THMInitSimulationAction::act()

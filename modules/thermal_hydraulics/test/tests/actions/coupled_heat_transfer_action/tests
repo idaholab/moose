@@ -1,8 +1,57 @@
 [Tests]
-  [action]
-    type = Exodiff
+  design = 'CoupledHeatTransferAction.md'
+  issues = '#21818'
+
+  [test]
+    requirement = 'The system shall be able to couple solid heat conduction region to a 1-D flow channel via convective heat transfer'
+
+    [without_positions]
+      type = Exodiff
+      input = 'master.i'
+      exodiff = 'master_out.e master_out_thm0_out.e'
+      ad_indexing_type = 'global'
+
+      detail = 'Without sub-app positions provided.'
+    []
+    [with_positions]
+      type = Exodiff
+      input = 'master.i'
+      cli_args = "CoupledHeatTransfers/right/positions='0 0 0'"
+      prereq = 'test/without_positions'
+      exodiff = 'master_out.e master_out_thm0_out.e'
+      ad_indexing_type = 'global'
+
+      detail = 'With sub-app positions provided.'
+    []
+    [multiple_phases]
+      type = Exodiff
+      input = 'master.i'
+      cli_args = "
+        AuxVariables/kappa/family=MONOMIAL
+        AuxVariables/kappa/order=CONSTANT
+        AuxVariables/kappa/initial_condition=0
+        CoupledHeatTransfers/right/T_fluid='T_fluid T_fluid'
+        CoupledHeatTransfers/right/htc='htc htc'
+        CoupledHeatTransfers/right/kappa='kappa kappa'
+        CoupledHeatTransfers/right/T_fluid_user_objects='T_uo T_uo'
+        CoupledHeatTransfers/right/htc_user_objects='Hw_uo Hw_uo'
+        CoupledHeatTransfers/right/kappa_user_objects='kappa_uo kappa_uo'
+        MultiApps/thm/input_files=sub_2phase.i
+        Outputs/show='T T_fluid htc T_wall_avg T_fluid_avg htc_avg'"
+      prereq = 'test/with_positions'
+      exodiff = 'master_out.e master_out_thm0_out.e'
+      ad_indexing_type = 'global'
+
+      detail = 'With multiple phases.'
+    []
+  []
+
+  [misaligned]
+    type = RunException
     input = 'master.i'
-    exodiff = 'master_out.e master_out_thm0_out.e'
-    ad_indexing_type = 'global'
+    cli_args = "CoupledHeatTransfers/right/orientation='0.01 1 0'"
+    expect_err = "The direction given by the parameter 'orientation' must be aligned with the x, y, or z axis"
+
+    requirement = 'The system shall report an error for the coupled heat transfer action if the mesh is not aligned with the x, y, or z axis.'
   []
 []

@@ -13,8 +13,8 @@
 #include "MultiAppTransfer.h"
 
 /**
- * Samples a variable's value in the Master domain at the point where
- * the MultiApp is.  Copies that value into a field in the MultiApp.
+ * Samples a variable's value in the parent application domain at the point where
+ * the MultiApp (for each child app) is. Copies that value into a field variable in the MultiApp.
  */
 class MultiAppVariableValueSampleTransfer : public MultiAppTransfer
 {
@@ -28,6 +28,9 @@ public:
   virtual void execute() override;
 
 protected:
+  /// Variable to sample in the parent application
   AuxVariableName _to_var_name;
+
+  /// Variable in the MultiApp to fill with the sampled value
   VariableName _from_var_name;
 };

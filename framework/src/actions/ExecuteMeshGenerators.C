@@ -19,7 +19,7 @@ ExecuteMeshGenerators::validParams()
   return params;
 }
 
-ExecuteMeshGenerators::ExecuteMeshGenerators(InputParameters params) : Action(params) {}
+ExecuteMeshGenerators::ExecuteMeshGenerators(const InputParameters & params) : Action(params) {}
 
 void
 ExecuteMeshGenerators::act()

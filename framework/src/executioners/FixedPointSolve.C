@@ -325,6 +325,10 @@ FixedPointSolve::solve()
   if (_has_fixed_point_its)
     printFixedPointConvergenceReason();
 
+  // clear history to avoid displaying it again on next solve that can happen for example during
+  // transient
+  _pp_history.str("");
+
   return converged;
 }
 

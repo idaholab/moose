@@ -83,11 +83,9 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [the_simple_fluid]
-      type = Water97FluidProperties
-    []
+[FluidProperties]
+  [the_simple_fluid]
+    type = Water97FluidProperties
   []
 []
 

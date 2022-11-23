@@ -12,6 +12,8 @@
 #include "ActionWarehouse.h"
 #include "AddAuxVariableAction.h"
 #include "ComputeFiniteStrain.h"
+#include "MooseApp.h"
+#include "InputParameterWarehouse.h"
 
 // map tensor name shortcuts to tensor material property names
 std::map<std::string, std::string> TensorMechanicsActionBase::_rank_two_cartesian_component_table =
@@ -231,10 +233,15 @@ TensorMechanicsActionBase::validParams()
 TensorMechanicsActionBase::TensorMechanicsActionBase(const InputParameters & parameters)
   : Action(parameters), _use_ad(getParam<bool>("use_automatic_differentiation"))
 {
+  // FIXME: suggest to use action of action to add this to avoid changing the input parameters in
+  // the warehouse.
+  const auto & params = _app.getInputParameterWarehouse().getInputParameters();
+  InputParameters & pars(*(params.find(uniqueActionName())->second.get()));
+
   // check if a container block with common parameters is found
   auto action = _awh.getActions<CommonTensorMechanicsAction>();
   if (action.size() == 1)
-    _pars.applyParameters(action[0]->parameters());
+    pars.applyParameters(action[0]->parameters());
 
   // append additional_generate_output
   if (isParamValid("additional_generate_output"))
@@ -258,9 +265,9 @@ TensorMechanicsActionBase::TensorMechanicsActionBase(const InputParameters & par
     for (auto & family : additional_material_output_family)
       material_output_family.push_back(family);
 
-    _pars.set<MultiMooseEnum>("generate_output") = generate_output;
-    _pars.set<MultiMooseEnum>("material_output_order") = material_output_order;
-    _pars.set<MultiMooseEnum>("material_output_family") = material_output_family;
+    pars.set<MultiMooseEnum>("generate_output") = generate_output;
+    pars.set<MultiMooseEnum>("material_output_order") = material_output_order;
+    pars.set<MultiMooseEnum>("material_output_family") = material_output_family;
   }
 }
 

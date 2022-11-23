@@ -9,7 +9,7 @@
     method = '!dbg'
     ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
-    valgrind = HEAVY
+    valgrind = none
   []
   [skewcorrected]
     type = PythonUnitTest
@@ -19,7 +19,7 @@
     method = '!dbg'
     ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
-    valgrind = HEAVY
+    valgrind = none
   []
   [skewcorrected-advection]
     type = PythonUnitTest
@@ -29,6 +29,6 @@
     method = '!dbg'
     ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
-    valgrind = HEAVY
+    valgrind = none
   []
 []

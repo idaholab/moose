@@ -20,7 +20,7 @@ class SetupResidualDebugAction : public Action
 public:
   static InputParameters validParams();
 
-  SetupResidualDebugAction(InputParameters parameters);
+  SetupResidualDebugAction(const InputParameters & parameters);
 
   virtual void act() override;
 

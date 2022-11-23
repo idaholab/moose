@@ -1,10 +1,5 @@
 moose_mpich:
-  - moose-mpich 4.0.2 build_0
-
-moose_python:
-  - python 3.9
-  - python 3.8
-  - python 3.7                                              # [not arm64]
+  - moose-mpich 4.0.2 build_4
 
 #### Darwin SDK SYSROOT
 CONDA_BUILD_SYSROOT:                                        # [osx]

@@ -27,4 +27,13 @@
     max_threads = 1 #6511
     requirement = "The system shall support the ability to linearly constrain nodal values."
   []
+
+  [linear_nodal_constraint_different_variables]
+    type = 'Exodiff'
+    input = 'linear_nodal_constraint_different_variables.i'
+    exodiff = 'linear_nodal_constraint_different_variables_out.e'
+    max_parallel = 1
+    max_threads = 1
+    requirement = "The system shall support the ability to constrain nodal values of different variables."
+  []
 []

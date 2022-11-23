@@ -17,6 +17,7 @@
 #include "MultiApp.h"
 #include "AuxiliarySystem.h"
 #include "MooseUtils.h"
+#include "MooseAppCoordTransform.h"
 
 #include "libmesh/meshfree_interpolation.h"
 #include "libmesh/system.h"
@@ -148,6 +149,8 @@ MultiAppVariableValueSamplePostprocessorTransfer::cacheElemToPostprocessorData()
 void
 MultiAppVariableValueSamplePostprocessorTransfer::initialSetup()
 {
+  MultiAppTransfer::initialSetup();
+
   setupPostprocessorCommunication();
   cacheElemToPostprocessorData();
 }

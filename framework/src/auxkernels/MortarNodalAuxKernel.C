@@ -10,7 +10,7 @@
 #include "MortarNodalAuxKernel.h"
 #include "MooseVariableField.h"
 #include "MortarUtils.h"
-
+#include "MooseUtils.h"
 #include "libmesh/quadrature.h"
 
 namespace
@@ -36,6 +36,12 @@ MortarNodalAuxKernelTempl<ComputeValueType>::validParams()
   params.suppressParameter<std::vector<SubdomainName>>("block");
   params.addParam<bool>(
       "incremental", false, "Whether to accumulate mortar auxiliary kernel value");
+
+  // We should probably default use_displaced_mesh to true. If no displaced mesh exists
+  // FEProblemBase::addKernel will automatically correct it to false. However,
+  // this will still prompt a call from AugmentSparsityOnInterface to get a displaced
+  // mortar interface since object._use_displaced_mesh = true.
+
   return params;
 }
 
@@ -43,8 +49,6 @@ template <typename ComputeValueType>
 MortarNodalAuxKernelTempl<ComputeValueType>::MortarNodalAuxKernelTempl(
     const InputParameters & parameters)
   : AuxKernelTempl<ComputeValueType>(setBoundaryParam(parameters)),
-    MortarExecutorInterface(
-        *this->template getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     MortarConsumerInterface(this),
     _displaced(this->template getParam<bool>("use_displaced_mesh")),
     _fe_problem(*this->template getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
@@ -58,7 +62,7 @@ MortarNodalAuxKernelTempl<ComputeValueType>::MortarNodalAuxKernelTempl(
 
 template <typename ComputeValueType>
 void
-MortarNodalAuxKernelTempl<ComputeValueType>::mortarSetup()
+MortarNodalAuxKernelTempl<ComputeValueType>::initialSetup()
 {
   std::array<const MortarNodalAuxKernelTempl<ComputeValueType> *, 1> consumers = {{this}};
 
@@ -79,7 +83,6 @@ MortarNodalAuxKernelTempl<ComputeValueType>::compute()
   Real total_volume = 0;
 
   const auto & its = amg().secondariesToMortarSegments(*_current_node);
-  std::array<MortarNodalAuxKernelTempl<ComputeValueType> *, 1> consumers = {{this}};
 
   auto act_functor = [&value, &total_volume, this]()
   {
@@ -87,6 +90,8 @@ MortarNodalAuxKernelTempl<ComputeValueType>::compute()
     value += computeValue();
     total_volume += _msm_volume;
   };
+
+  std::array<MortarNodalAuxKernelTempl<ComputeValueType> *, 1> consumers = {{this}};
 
   Moose::Mortar::loopOverMortarSegments(its,
                                         _assembly,
@@ -104,14 +109,23 @@ MortarNodalAuxKernelTempl<ComputeValueType>::compute()
   // We have to reinit the node for this variable in order to get the dof index set for the node
   _var.reinitNode();
 
+  // If the node doesn't have corresponding mortar segments, force the value assigned in this step
+  // to be zero. This can be useful when nodes initially do not project but will project at a
+  // different stage of the simulation
+
+  if (MooseUtils::relativeFuzzyEqual(total_volume, 0.0))
+    value = 0;
+  else
+    value /= total_volume;
+
   // Allow mortar auxiliary kernels to compute quantities incrementally
   if (!_incremental)
-    _var.setNodalValue(value / total_volume);
+    _var.setNodalValue(value);
   else
   {
     mooseAssert(_u_old.size() == 1,
                 "Expected 1 value in MortarNodalAuxKernel, but got " << _u_old.size());
-    _var.setNodalValue(value / total_volume + _u_old[0]);
+    _var.setNodalValue(value + _u_old[0]);
   }
 }
 

@@ -22,7 +22,10 @@ AddScalarKernelAction::validParams()
   return params;
 }
 
-AddScalarKernelAction::AddScalarKernelAction(InputParameters params) : MooseObjectAction(params) {}
+AddScalarKernelAction::AddScalarKernelAction(const InputParameters & params)
+  : MooseObjectAction(params)
+{
+}
 
 void
 AddScalarKernelAction::act()

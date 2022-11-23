@@ -80,6 +80,42 @@ VolumetricFlowRate::VolumetricFlowRate(const InputParameters & parameters)
   }
 }
 
+void
+VolumetricFlowRate::initialSetup()
+{
+  if (_rc_uo && _rc_uo->velocityInterpolationMethod() == Moose::FV::InterpMethod::RhieChow)
+  {
+    // We must make sure the A coefficients in the Rhie Chow interpolator are present on
+    // both sides of the boundaries so that interpolation coefficients may be computed
+    for (const auto bid : boundaryIDs())
+      const_cast<INSFVRhieChowInterpolator *>(_rc_uo)->ghostADataOnBoundary(bid);
+
+    // On INITIAL, we cannot compute Rhie Chow coefficients on internal surfaces because
+    // - the time integrator is not ready to compute time derivatives
+    // - the setup routine is called too early for porosity functions to be initialized
+    // We must check that the boundaries requested are all external
+    if (getExecuteOnEnum().contains(EXEC_INITIAL))
+      for (const auto bid : boundaryIDs())
+      {
+        if (!_mesh.isBoundaryFullyExternalToSubdomains(bid, _rc_uo->blockIDs()))
+          paramError(
+              "execute_on",
+              "Boundary '",
+              _mesh.getBoundaryName(bid),
+              "' (id=",
+              bid,
+              ") has been detected to be internal to the flow domain.\n"
+              "Volumetric flow rates cannot be computed on internal flow boundaries on INITIAL");
+      }
+  }
+}
+
+void
+VolumetricFlowRate::meshChanged()
+{
+  initialSetup();
+}
+
 Real
 VolumetricFlowRate::computeFaceInfoIntegral([[maybe_unused]] const FaceInfo * fi)
 {
@@ -96,21 +132,20 @@ VolumetricFlowRate::computeFaceInfoIntegral([[maybe_unused]] const FaceInfo * fi
   if (!fi->neighborPtr() || !_adv_quant->hasBlocks(fi->neighborPtr()->subdomain_id()))
   {
     const auto ssf = Moose::SingleSidedFaceArg({fi,
-                                                Moose::FV::LimiterType::CentralDifference,
-                                                true,
+                                                limiterType(_advected_interp_method),
+                                                MetaPhysicL::raw_value(vel) * fi->normal() > 0,
                                                 correct_skewness,
                                                 _current_elem->subdomain_id()});
     return fi->normal() * MetaPhysicL::raw_value((*_adv_quant)(ssf)) * vel;
   }
-  // Internal faces
   else
   {
     const auto adv_quant_face = MetaPhysicL::raw_value((*_adv_quant)(
         Moose::FV::makeFace(*fi,
                             Moose::FV::limiterType(_advected_interp_method),
                             MetaPhysicL::raw_value(vel) * fi->normal() > 0,
-                            std::make_pair(fi->elemSubdomainID(), fi->neighborSubdomainID()))));
-
+                            std::make_pair(fi->elemSubdomainID(), fi->neighborSubdomainID()),
+                            correct_skewness)));
     return fi->normal() * adv_quant_face * vel;
   }
 

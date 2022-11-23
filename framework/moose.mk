@@ -13,14 +13,6 @@ ifneq (,$(findstring darwin,$(libmesh_HOST)))
 endif
 
 #
-# Verify Conda
-#
-CONDA_RESULT:=$(shell bash -c "$(MOOSE_DIR)/scripts/verify_conda_libmesh.py $(MOOSE_DIR)")
-ifneq ($(CONDA_RESULT),0)
- $(error Build failed)
-endif
-
-#
 # MOOSE
 #
 APPLICATION_DIR := $(FRAMEWORK_DIR)

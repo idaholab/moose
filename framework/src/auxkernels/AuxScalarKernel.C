@@ -51,7 +51,7 @@ AuxScalarKernel::AuxScalarKernel(const InputParameters & parameters)
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
-    _assembly(_subproblem.assembly(_tid)),
+    _assembly(_subproblem.assembly(_tid, 0)),
     _var(_sys.getScalarVariable(_tid, parameters.get<AuxVariableName>("variable"))),
     _mesh(_subproblem.mesh()),
     _u(_var.sln())

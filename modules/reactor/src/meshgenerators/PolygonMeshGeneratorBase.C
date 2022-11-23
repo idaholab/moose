@@ -88,6 +88,7 @@ PolygonMeshGeneratorBase::buildGeneralSlice(
                          0,
                          quad_center_elements,
                          center_quad_factor,
+                         true,
                          0,
                          pitch_scale_factor);
   MeshTools::Modification::rotate(*mesh, rotation_angle, 0, 0);
@@ -119,6 +120,7 @@ PolygonMeshGeneratorBase::buildSimpleSlice(
     const subdomain_id_type block_id_shift,
     const bool quad_center_elements,
     const Real center_quad_factor,
+    const bool create_interface_boundaries,
     const boundary_id_type boundary_id_shift)
 {
 
@@ -145,6 +147,7 @@ PolygonMeshGeneratorBase::buildSimpleSlice(
                     block_id_shift,
                     quad_center_elements,
                     center_quad_factor,
+                    create_interface_boundaries,
                     boundary_id_shift,
                     1.0);
 }
@@ -174,6 +177,7 @@ PolygonMeshGeneratorBase::buildSlice(
     const subdomain_id_type block_id_shift,
     const bool quad_center_elements,
     const Real center_quad_factor,
+    const bool create_interface_boundaries,
     const boundary_id_type boundary_id_shift,
     const Real pitch_scale_factor)
 {
@@ -328,6 +332,7 @@ PolygonMeshGeneratorBase::buildSlice(
     cenQuadElemDef(*mesh,
                    div_num,
                    block_id_shift,
+                   create_interface_boundaries,
                    boundary_id_shift,
                    nodes,
                    (!has_rings) && (!has_ducts) && (background_intervals == 1),
@@ -337,6 +342,8 @@ PolygonMeshGeneratorBase::buildSlice(
                   num_sectors_per_side,
                   azimuthal_tangent,
                   block_id_shift,
+                  create_interface_boundaries ||
+                      ((!has_rings) && (!has_ducts) && (background_intervals == 1)),
                   boundary_id_shift,
                   (!has_rings) && (!has_ducts) && (background_intervals == 1),
                   side_index);
@@ -382,6 +389,7 @@ PolygonMeshGeneratorBase::buildSlice(
               azimuthal_tangent,
               block_id_shift,
               quad_center_elements ? (div_num * div_num - 1) : 0,
+              create_interface_boundaries,
               boundary_id_shift);
 
   return mesh;
@@ -667,6 +675,7 @@ void
 PolygonMeshGeneratorBase::cenQuadElemDef(ReplicatedMesh & mesh,
                                          const unsigned int div_num,
                                          const subdomain_id_type block_id_shift,
+                                         const bool create_interface_boundaries,
                                          const boundary_id_type boundary_id_shift,
                                          std::vector<std::vector<Node *>> & nodes,
                                          const bool assign_external_boundary,
@@ -707,7 +716,8 @@ PolygonMeshGeneratorBase::cenQuadElemDef(ReplicatedMesh & mesh,
     elem_Quad4->set_node(2) = mesh.node_ptr(i + 2 * div_num);
     elem_Quad4->set_node(1) = mesh.node_ptr(i + 1);
     elem_Quad4->subdomain_id() = 1 + block_id_shift;
-    boundary_info.add_side(elem_Quad4, 2, 1 + boundary_id_shift);
+    if (create_interface_boundaries)
+      boundary_info.add_side(elem_Quad4, 2, 1 + boundary_id_shift);
     if (i == (div_num - 1) * (div_num - 1))
       boundary_info.add_side(elem_Quad4, 3, SLICE_BEGIN);
     if (i == div_num * div_num - 2)
@@ -725,6 +735,7 @@ PolygonMeshGeneratorBase::cenTriElemDef(ReplicatedMesh & mesh,
                                         const unsigned int num_sectors_per_side,
                                         const std::vector<Real> azimuthal_tangent,
                                         const subdomain_id_type block_id_shift,
+                                        const bool create_interface_boundaries,
                                         const boundary_id_type boundary_id_shift,
                                         const bool assign_external_boundary,
                                         const unsigned int side_index) const
@@ -739,7 +750,8 @@ PolygonMeshGeneratorBase::cenTriElemDef(ReplicatedMesh & mesh,
     elem->set_node(0) = mesh.node_ptr(0);
     elem->set_node(2) = mesh.node_ptr(i);
     elem->set_node(1) = mesh.node_ptr(i + 1);
-    boundary_info.add_side(elem, 1, 1 + boundary_id_shift);
+    if (create_interface_boundaries)
+      boundary_info.add_side(elem, 1, 1 + boundary_id_shift);
     elem->subdomain_id() = 1 + block_id_shift;
     if (i == 1)
       boundary_info.add_side(elem, 2, SLICE_BEGIN);
@@ -759,6 +771,7 @@ PolygonMeshGeneratorBase::quadElemDef(ReplicatedMesh & mesh,
                                       const std::vector<Real> azimuthal_tangent,
                                       const subdomain_id_type block_id_shift,
                                       const dof_id_type nodeid_shift,
+                                      const bool create_interface_boundaries,
                                       const boundary_id_type boundary_id_shift) const
 {
   unsigned int angle_number =
@@ -791,20 +804,20 @@ PolygonMeshGeneratorBase::quadElemDef(ReplicatedMesh & mesh,
 
         if (m == (subdomain_rings[k] - 1))
         {
-          if (k != (subdomain_rings.size() - 1))
-          {
-            if (subdomain_rings[0] == 0)
-              boundary_info.add_side(elem_Quad4, 2, k + 1 + boundary_id_shift);
-            else
-              boundary_info.add_side(elem_Quad4, 2, k + 2 + boundary_id_shift);
-          }
-          else
+          if (k == (subdomain_rings.size() - 1))
           {
             boundary_info.add_side(elem_Quad4, 2, OUTER_SIDESET_ID);
             if (i <= angle_number / 2)
               boundary_info.add_side(elem_Quad4, 2, OUTER_SIDESET_ID + side_index);
             else
               boundary_info.add_side(elem_Quad4, 2, OUTER_SIDESET_ID_ALT + side_index);
+          }
+          else if (create_interface_boundaries)
+          {
+            if (subdomain_rings[0] == 0)
+              boundary_info.add_side(elem_Quad4, 2, k + 1 + boundary_id_shift);
+            else
+              boundary_info.add_side(elem_Quad4, 2, k + 2 + boundary_id_shift);
           }
         }
       }
@@ -834,7 +847,8 @@ PolygonMeshGeneratorBase::buildSimplePeripheral(
     const unsigned int peripheral_invervals,
     const std::vector<std::pair<Real, Real>> & positions_inner,
     const std::vector<std::pair<Real, Real>> & d_positions_outer,
-    const subdomain_id_type id_shift)
+    const subdomain_id_type id_shift,
+    const bool create_interface_boundaries)
 {
   auto mesh = buildReplicatedMesh(2);
   std::pair<Real, Real> positions_p;
@@ -891,12 +905,14 @@ PolygonMeshGeneratorBase::buildSimplePeripheral(
       if (i == 0)
       {
         boundary_info.add_side(elem_Quad4, 0, OUTER_SIDESET_ID);
-        boundary_info.add_side(elem_Quad4, 0, SLICE_ALT + id_shift);
+        if (create_interface_boundaries)
+          boundary_info.add_side(elem_Quad4, 0, SLICE_ALT + id_shift);
       }
       if (i == peripheral_invervals - 1)
       {
         boundary_info.add_side(elem_Quad4, 2, OUTER_SIDESET_ID);
-        boundary_info.add_side(elem_Quad4, 2, SLICE_ALT + id_shift + 1);
+        if (create_interface_boundaries)
+          boundary_info.add_side(elem_Quad4, 2, SLICE_ALT + id_shift + 1);
       }
       if (j == 0)
         boundary_info.add_side(elem_Quad4, 3, OUTER_SIDESET_ID);
@@ -944,7 +960,8 @@ PolygonMeshGeneratorBase::addPeripheralMesh(
     const std::vector<unsigned int> & num_sectors_per_side_array,
     const std::vector<unsigned int> & peripheral_duct_intervals,
     const Real rotation_angle,
-    const unsigned int mesh_type)
+    const unsigned int mesh_type,
+    const bool create_interface_boundaries)
 {
   std::vector<std::pair<Real, Real>> positions_inner;
   std::vector<std::pair<Real, Real>> d_positions_outer;
@@ -995,7 +1012,8 @@ PolygonMeshGeneratorBase::addPeripheralMesh(
                                           peripheral_duct_intervals[i],
                                           sub_positions_inner,
                                           sub_d_positions_outer,
-                                          i);
+                                          i,
+                                          create_interface_boundaries);
       if (mesh.is_prepared()) // Need to prepare if the other is prepared to stitch
         meshp0->prepare_for_use();
 
@@ -1389,4 +1407,109 @@ PolygonMeshGeneratorBase::biasTermsCalculator(
                                 (Real)(outer_boundary_layer_params.intervals))) *
                 outer_boundary_layer_params.fraction)));
   return biased_terms;
+}
+
+void
+PolygonMeshGeneratorBase::addRingAndSectorIDParams(InputParameters & params)
+{
+  params.addParam<std::string>("sector_id_name",
+                               "Name of integer (reporting) ID for sector regions to use the "
+                               "reporting ID for azimuthal sector regions of ring geometry block.");
+  params.addParam<std::string>("ring_id_name",
+                               "Name of integer (reporting) ID for ring regions to use the "
+                               "reporting ID for annular regions of ring geometry block.");
+  MooseEnum ring_id_option("block_wise ring_wise", "block_wise");
+  params.addParam<MooseEnum>(
+      "ring_id_assign_type", ring_id_option, "Type of ring ID assignment: block_wise or ring_wise");
+  params.addParamNamesToGroup("sector_id_name ring_id_name ring_id_assign_type", "Ring/Sector IDs");
+}
+
+void
+PolygonMeshGeneratorBase::setSectorExtraIDs(MeshBase & mesh,
+                                            const std::string id_name,
+                                            const unsigned int num_sides,
+                                            const std::vector<unsigned int> num_sectors_per_side)
+{
+  const auto extra_id_index = mesh.add_elem_integer(id_name);
+  // vector to store sector ids for each element
+  auto elem_it = mesh.elements_begin();
+  unsigned int id = 1;
+  // starting element id of the current sector
+  for (unsigned int is = 0; is < num_sides; ++is)
+  {
+    // number of elements in the current sector
+    unsigned int nelem_sector =
+        mesh.n_elem() * num_sectors_per_side[is] /
+        (accumulate(num_sectors_per_side.begin(), num_sectors_per_side.end(), 0));
+    // assign sector ids to mesh
+    for (unsigned i = 0; i < nelem_sector; ++i, ++elem_it)
+      (*elem_it)->set_extra_integer(extra_id_index, id);
+    // update sector id
+    ++id;
+  }
+}
+
+void
+PolygonMeshGeneratorBase::setRingExtraIDs(MeshBase & mesh,
+                                          const std::string id_name,
+                                          const unsigned int num_sides,
+                                          const std::vector<unsigned int> num_sectors_per_side,
+                                          const std::vector<unsigned int> ring_intervals,
+                                          const bool ring_wise_id,
+                                          const bool quad_center_elements)
+{
+  // this function assumes that elements are ordered by rings (inner) then by sectors (outer
+  // ordering)
+  const auto extra_id_index = mesh.add_elem_integer(id_name);
+  auto elem_it = mesh.elements_begin();
+  for (unsigned int is = 0; is < num_sides; ++is)
+  {
+    // number of elements in the current sector
+    unsigned int nelem = mesh.n_elem() * num_sectors_per_side[is] /
+                         (accumulate(num_sectors_per_side.begin(), num_sectors_per_side.end(), 0));
+    if (!ring_wise_id)
+    {
+      for (unsigned int ir : index_range(ring_intervals))
+      {
+        // number of elements in the current ring and sector
+        unsigned int nelem_annular_ring = num_sectors_per_side[is] * ring_intervals[ir];
+        // if _quad_center_elements is true, the number of elements in center ring are
+        // _num_sectors_per_side[is] * _num_sectors_per_side[is] / 4
+        if (quad_center_elements && ir == 0)
+          nelem_annular_ring = num_sectors_per_side[is] * (ring_intervals[ir] - 1) +
+                               num_sectors_per_side[is] * num_sectors_per_side[is] / 4;
+        // assign ring id
+        for (unsigned i = 0; i < nelem_annular_ring; ++i, ++elem_it)
+          (*elem_it)->set_extra_integer(extra_id_index, ir + 1);
+        // update number of elements in background region of current side.
+        nelem -= nelem_annular_ring;
+      }
+    }
+    else
+    {
+      unsigned int ir = 0;
+      for (unsigned int ir0 : index_range(ring_intervals))
+      {
+        for (unsigned int ir1 = 0; ir1 < ring_intervals[ir0]; ++ir1)
+        {
+          // number of elements in the current ring and sector
+          unsigned int nelem_annular_ring = num_sectors_per_side[is];
+          // if _quad_center_elements is true, the number of elements in center ring are
+          // _num_sectors_per_side[is] * _num_sectors_per_side[is] / 4
+          if (quad_center_elements && ir == 0)
+            nelem_annular_ring = num_sectors_per_side[is] * num_sectors_per_side[is] / 4;
+          // assign ring id
+          for (unsigned i = 0; i < nelem_annular_ring; ++i, ++elem_it)
+            (*elem_it)->set_extra_integer(extra_id_index, ir + 1);
+          // update ring id
+          ++ir;
+          // update number of elements in background region of current side.
+          nelem -= nelem_annular_ring;
+        }
+      }
+    }
+    // assign ring id of 0 to the background region
+    for (unsigned i = 0; i < nelem; ++i, ++elem_it)
+      (*elem_it)->set_extra_integer(extra_id_index, 0);
+  }
 }

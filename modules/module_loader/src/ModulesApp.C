@@ -67,6 +67,9 @@
 #ifdef RICHARDS_ENABLED
 #include "RichardsApp.h"
 #endif
+#ifdef SOLID_PROPERTIES_ENABLED
+#include "SolidPropertiesApp.h"
+#endif
 #ifdef STOCHASTIC_TOOLS_ENABLED
 #include "StochasticToolsApp.h"
 #endif
@@ -185,6 +188,10 @@ ModulesApp::registerObjects(Factory & factory)
   RichardsApp::registerObjects(factory);
 #endif
 
+#ifdef SOLID_PROPERTIES_ENABLED
+  SolidPropertiesApp::registerObjects(factory);
+#endif
+
 #ifdef STOCHASTIC_TOOLS_ENABLED
   StochasticToolsApp::registerObjects(factory);
 #endif
@@ -272,6 +279,10 @@ ModulesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   RichardsApp::associateSyntax(syntax, action_factory);
 #endif
 
+#ifdef SOLID_PROPERTIES_ENABLED
+  SolidPropertiesApp::associateSyntax(syntax, action_factory);
+#endif
+
 #ifdef STOCHASTIC_TOOLS_ENABLED
   StochasticToolsApp::associateSyntax(syntax, action_factory);
 #endif
@@ -294,7 +305,7 @@ ModulesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 void
 ModulesApp::registerExecFlags(Factory & factory)
 {
-  mooseDeprecated("use registerAll instead of registerExecFlags");
+  mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
 #ifdef CHEMICAL_REACTIONS_ENABLED
   ChemicalReactionsApp::registerExecFlags(factory);
 #endif
@@ -353,6 +364,10 @@ ModulesApp::registerExecFlags(Factory & factory)
 
 #ifdef RICHARDS_ENABLED
   RichardsApp::registerExecFlags(factory);
+#endif
+
+#ifdef SOLID_PROPERTIES_ENABLED
+  SolidPropertiesApp::registerExecFlags(factory);
 #endif
 
 #ifdef STOCHASTIC_TOOLS_ENABLED
@@ -443,6 +458,10 @@ ModulesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 
 #ifdef RICHARDS_ENABLED
   RichardsApp::registerAll(f, af, s);
+#endif
+
+#ifdef SOLID_PROPERTIES_ENABLED
+  SolidPropertiesApp::registerAll(f, af, s);
 #endif
 
 #ifdef STOCHASTIC_TOOLS_ENABLED

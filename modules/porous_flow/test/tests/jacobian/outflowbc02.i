@@ -26,17 +26,15 @@
   temperature = T
 []
 
-[Modules]
-  [FluidProperties]
-    [simple_fluid]
-      type = SimpleFluidProperties
-      bulk_modulus = 1.5
-      density0 = 1.2
-      cp = 0.9
-      cv = 1.1
-      viscosity = 0.4
-      thermal_expansion = 0.7
-    []
+[FluidProperties]
+  [simple_fluid]
+    type = SimpleFluidProperties
+    bulk_modulus = 1.5
+    density0 = 1.2
+    cp = 0.9
+    cv = 1.1
+    viscosity = 0.4
+    thermal_expansion = 0.7
   []
 []
 

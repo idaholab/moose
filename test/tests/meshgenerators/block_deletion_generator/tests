@@ -2,7 +2,7 @@
   [block_deletion]
     design = 'meshgenerators/BlockDeletionGenerator.md'
     requirement = 'The system shall be capable of deleting '
-    issues = '#11640 #17052'
+    issues = '#11640 #17052 #22117'
     [all_by_block_ids]
       type = 'Exodiff'
       input = 'block_deletion_test1.i'
@@ -32,6 +32,96 @@
       cli_args = '--mesh-only'
       recover = false
       detail = 'blocks and assigning the new boundary even if the input mesh is not prepared.'
+    []
+    [delete_interior_parents]
+      type = 'Exodiff'
+      input = 'delete_interior_parents.i'
+      exodiff = 'delete_interior_parents_out.e'
+      recover = false
+      detail = 'blocks and properly removing lower dimensional elements with a deleted element as their interior parent.'
+    []
+    [missing_block]
+      type = RunException
+      input = block_deletion_test1.i
+      cli_args = "Mesh/ed0/block=50"
+      expect_err = "The block '50' was not found within the mesh"
+      detail = 'blocks and erroring if a block does not exist.'
+    []
+  []
+
+  [delete]
+    requirement = "The system shall support removing elements including"
+    design = 'meshgenerators/BlockDeletionGenerator.md'
+    issues = '#11640 #17052'
+    [block_deletion_test2]
+      type = 'Exodiff'
+      input = 'block_deletion_test2.i'
+      exodiff = 'block_deletion_test2_out.e'
+
+      detail = "a 3D concave subdomain;"
+    []
+    [block_deletion_test3]
+      type = 'Exodiff'
+      input = 'block_deletion_test3.i'
+      exodiff = 'block_deletion_test3_out.e'
+
+      detail = "a 2D interior subdomain;"
+    []
+    [block_deletion_test4]
+      type = 'Exodiff'
+      input = 'block_deletion_test4.i'
+      exodiff = 'block_deletion_test4_out.e'
+
+      detail = "a 3D interior subdomain;"
+    []
+    [block_deletion_test5]
+      type = 'Exodiff'
+      input = 'block_deletion_test5.i'
+      exodiff = 'block_deletion_test5_out.e'
+
+      detail = "a 2D non-concave subdomain;"
+    []
+    [block_deletion_test6]
+      type = 'Exodiff'
+      input = 'block_deletion_test6.i'
+      exodiff = 'block_deletion_test6_out.e'
+
+      detail = "a 3D non-concave subdomain;"
+    []
+    [block_deletion_test7]
+      type = 'Exodiff'
+      input = 'block_deletion_test7.i'
+      exodiff = 'block_deletion_test7_out.e'
+
+      detail = "a 2D removal of a union of disjoint pieces;"
+    []
+    [block_deletion_test8]
+      type = 'Exodiff'
+      input = 'block_deletion_test8.i'
+      exodiff = 'block_deletion_test8_out.e'
+
+      detail = "a 2D removal of a subdomain containing a nodeset;"
+    []
+    [block_deletion_test9]
+      type = 'Exodiff'
+      input = 'block_deletion_test9.i'
+      exodiff = 'block_deletion_test9_out.e'
+
+      detail = "a 2D removal of a subdomain that eliminates sideset;"
+    []
+    [block_deletion_test10]
+      type = 'Exodiff'
+      input = 'block_deletion_test10.i'
+      exodiff = 'block_deletion_test10_out.e'
+
+      detail = "a 2D removal of a subdomain containing a sideset;"
+    []
+    [block_deletion_test12]
+      type = 'Exodiff'
+      input = 'block_deletion_test12.i'
+      exodiff = 'block_deletion_test12_out.e'
+
+      detail = "a 2D concave subdomain with a cut across elements."
     []
   []
 []

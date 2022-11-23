@@ -1,0 +1,76 @@
+[Tests]
+  issues = '#17472'
+  design = 'source/materials/lagrangian/ComputeLagrangianObjectiveStress.md'
+  [truesdell_shear]
+    type = CSVDiff
+    input = 'shear.i'
+    cli_args = 'Materials/compute_stress/objective_rate=truesdell Outputs/file_base=truesdell_shear_out'
+    csvdiff = 'truesdell_shear_out.csv'
+    requirement = "Classical Truesdell response to pure shear matches known solution"
+    abs_zero = 1e-6
+  []
+  [jaumann_shear]
+    type = CSVDiff
+    input = 'shear.i'
+    cli_args = 'Materials/compute_stress/objective_rate=jaumann Outputs/file_base=jaumann_shear_out'
+    csvdiff = 'jaumann_shear_out.csv'
+    requirement = "Classical Jaumann response to pure shear matches known solution"
+    abs_zero = 1e-6
+  []
+  [green_naghdi_shear]
+    type = CSVDiff
+    input = 'shear.i'
+    cli_args = 'Materials/compute_stress/objective_rate=green_naghdi Outputs/file_base=green_naghdi_shear_out'
+    csvdiff = 'green_naghdi_shear_out.csv'
+    requirement = "Classical Green-Naghdi response to pure shear matches known solution"
+    abs_zero = 1e-6
+  []
+  [truesdell_rotation]
+    type = CSVDiff
+    input = 'rotation.i'
+    cli_args = 'Materials/stress/objective_rate=truesdell Outputs/file_base=truesdell_rotation_out'
+    csvdiff = 'truesdell_rotation_out.csv'
+    requirement = "Classical Truesdell response to pure rotation matches known solution"
+    abs_zero = 1e-6
+  []
+  [jaumann_rotation]
+    type = CSVDiff
+    input = 'rotation.i'
+    cli_args = 'Materials/stress/objective_rate=jaumann Outputs/file_base=jaumann_rotation_out'
+    csvdiff = 'jaumann_rotation_out.csv'
+    requirement = "Classical Jaumann response to pure rotation matches known solution"
+    abs_zero = 1e-6
+  []
+  [green_naghdi_rotation]
+    type = CSVDiff
+    input = 'rotation.i'
+    cli_args = 'Materials/stress/objective_rate=green_naghdi Outputs/file_base=green_naghdi_rotation_out'
+    csvdiff = 'green_naghdi_rotation_out.csv'
+    requirement = "Classical Green-Naghdi response to pure rotation matches known solution"
+    abs_zero = 1e-6
+  []
+  [truesdell_jacobian]
+    type = PetscJacobianTester
+    input = 'jacobian.i'
+    cli_args = 'Materials/compute_stress/objective_rate=truesdell'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    requirement = "Treusdell tangent is exact within rtol of 1e-7"
+  []
+  [jaumann_jacobian]
+    type = PetscJacobianTester
+    input = 'jacobian.i'
+    cli_args = 'Materials/compute_stress/objective_rate=jaumann'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    requirement = "Jaumann tangent is exact within rtol of 1e-7"
+  []
+  [green_naghdi_jacobian]
+    type = PetscJacobianTester
+    input = 'jacobian.i'
+    cli_args = 'Materials/compute_stress/objective_rate=green_naghdi'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    requirement = "Green-Naghdi tangent is exact within rtol of 1e-7"
+  []
+[]

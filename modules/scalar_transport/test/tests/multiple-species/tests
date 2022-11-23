@@ -1,0 +1,16 @@
+[Tests]
+  design = 'DissociationFluxBC.md BinaryRecombinationBC.md'
+  issues = '#22442'
+  [exo]
+    type = Exodiff
+    input = multiple-species.i
+    exodiff = multiple-species_out.e
+    requirement = 'The system shall be able to solve for multiple species masss transport with various dissociation and recombination reactions occurring at boundaries'
+  []
+  [surface_limited]
+    type = Exodiff
+    input = single-specie.i
+    exodiff = single-specie_out.e
+    requirement = 'The system shall calculate a domain averaged flux consistent with the theoretical value for the surface limited case'
+  []
+[]

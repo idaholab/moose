@@ -21,7 +21,7 @@ THMAddRelationshipManagersAction::validParams()
   return params;
 }
 
-THMAddRelationshipManagersAction::THMAddRelationshipManagersAction(InputParameters params)
+THMAddRelationshipManagersAction::THMAddRelationshipManagersAction(const InputParameters & params)
   : Action(params)
 {
 }

@@ -43,9 +43,6 @@ GateValve1Phase::check() const
 {
   FlowJunction1Phase::check();
 
-  if (_flow_model_id != THM::FM_SINGLE_PHASE)
-    logModelNotImplementedError(_flow_model_id);
-
   // Check that there are exactly 2 connections
   checkNumberOfConnections(2);
 

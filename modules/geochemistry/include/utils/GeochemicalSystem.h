@@ -822,15 +822,16 @@ public:
 
   /**
    * Computes the kinetic rates and their derivatives based on the current values of molality, mole
-   * number, etc, and places them (multiplied by dt) in the num_kin final slots of mole_additions
-   * and dmole_additions.  This method is not const because it modifies _eqm_activity for
+   * number, etc, and then, using dt, calculates the appropriate mole_additions and dmole_additions.
+   * NOTE: this *adds* the kinetic contributes to mole_additions and dmole_additions.
+   * This method is not const because it modifies _eqm_activity for
    * equilibrium gases and eqm species H+ and OH- (if there are any).
    * @param dt time-step size
    * @param mole_additions The kinetic rates multiplied by dt get placed in the last num_kin slots
    * @param dmole_additions d(mole_additions)/d(molality or kinetic_moles)
    */
   void
-  setKineticRates(Real dt, DenseVector<Real> & mole_additions, DenseMatrix<Real> & dmole_additions);
+  addKineticRates(Real dt, DenseVector<Real> & mole_additions, DenseMatrix<Real> & dmole_additions);
 
 private:
   /// The minimal geochemical database

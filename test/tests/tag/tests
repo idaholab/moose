@@ -90,7 +90,7 @@
       # so that we do not need to run the test
       # in parallel
       max_parallel = 1
-      # csv file contains more rows 
+      # csv file contains more rows
       recover = false
 
       detail = 'the scalar kernel system (without the variable scaling),'
@@ -152,5 +152,62 @@
     requirement = 'Cached Active object state will be maintained correctly even when objects\' '
                   'active state changes during runtime.'
     issues = '#15515'
+  []
+  [array]
+    type = 'Exodiff'
+    input = 'tag-array-var.i'
+    issues = '#20586'
+    requirement = 'The system shall be able to populate auxiliary variables using the residual components of nonlinear array variables.'
+    exodiff = 'tag-array-var_out.e'
+    design = 'TagVectorArrayVariableAux.md'
+  []
+  [array_value]
+    type = 'Exodiff'
+    input = 'tag-array-var.i'
+    issues = '#21839'
+    requirement = 'The system shall be able to populate auxiliary variable values using the residual components of nonlinear array variables.'
+    exodiff = 'tag-array-var_out.e'
+    cli_args = 'AuxKernels/u_tag/type=TagVectorArrayVariableValueAux'
+    design = 'TagVectorArrayVariableValueAux.md'
+  []
+  [array_value_size_error]
+    type = 'RunException'
+    input = 'tag-array-var.i'
+    issues = '#21839'
+    requirement = 'An error will be thrown when the different number of array components are used in the aux and coupled varibles.'
+    cli_args = 'AuxKernels/u_tag/type=TagVectorArrayVariableValueAux AuxVariables/u_tag/components=3'
+    design = 'TagVectorArrayVariableValueAux.md'
+    expect_err = 'The AuxVariable this AuxKernel is acting on has to have the same number of components as the variable'
+  []
+  [array_value_fe_type_error]
+    type = 'RunException'
+    input = 'tag-array-var.i'
+    issues = '#21839'
+    requirement = 'An error will be thrown when the different FE family are used in the aux and coupled varibles.'
+    cli_args = 'AuxKernels/u_tag/type=TagVectorArrayVariableValueAux AuxVariables/u_tag/family=HERMITE'
+    design = 'TagVectorArrayVariableValueAux.md'
+    expect_err = 'The AuxVariable this AuxKernel is acting on has to have the same order and family as the variable'
+  []
+  [array_grad]
+    type = 'Exodiff'
+    input = 'tag-array-grad.i'
+    issues = '#21839'
+    requirement = 'The system shall be able to populate auxiliary variable values using the residual components of nonlinear array variable gradient.'
+    exodiff = 'tag-array-grad_out.e'
+    abs_zero = 1e-08
+  []
+  [multiple_component_tag_interface]
+    type = 'Exodiff'
+    input = 2d_diffusion_tag_vector.i
+    exodiff = multiple_component_tag_interface.e
+    requirement = 'The system shall be able to retrieve tagged vector values for multiple coupled variables using a single interface.'
+    cli_args = "AuxKernels/active='on_the_fly TagVectorAux2' Outputs/file_base=multiple_component_tag_interface"
+  []
+  [fv]
+    type = 'Exodiff'
+    input = tag-fv.i
+    exodiff = tag-fv_out.e
+    requirement = 'The system shall be able to index solution vectors and residual vectors using the degree of freedom indices of a finite volume variable.'
+    ad_indexing_type = 'global'
   []
 []

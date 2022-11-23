@@ -9,6 +9,7 @@
 
 #include "ExplodeMeshGenerator.h"
 #include "CastUniquePointer.h"
+#include "MooseMeshUtils.h"
 
 #include "libmesh/partitioner.h"
 
@@ -20,8 +21,7 @@ ExplodeMeshGenerator::validParams()
   InputParameters params = MeshGenerator::validParams();
   params.addClassDescription("Break all element-element interfaces in the specified subdomains.");
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
-  params.addParam<std::vector<SubdomainID>>("subdomains",
-                                            "The list of subdomain names to explode.");
+  params.addParam<std::vector<SubdomainID>>("subdomains", "The list of subdomain IDs to explode.");
   params.addRequiredParam<BoundaryName>(
       "interface_name", "The boundary name containing all broken element-element interfaces.");
   return params;
@@ -39,6 +39,11 @@ std::unique_ptr<MeshBase>
 ExplodeMeshGenerator::generate()
 {
   std::unique_ptr<MeshBase> mesh = std::move(_input);
+
+  // check that the subdomain IDs exist in the mesh
+  for (const auto & id : _subdomains)
+    if (!MooseMeshUtils::hasSubdomainID(*mesh, id))
+      paramError("subdomains", "The block ID '", id, "' was not found in the mesh");
 
   BoundaryInfo & boundary_info = mesh->get_boundary_info();
   if (boundary_info.get_id_by_name(_interface_name) != Moose::INVALID_BOUNDARY_ID)

@@ -16,6 +16,10 @@
   boundary_name = 'top left right bottom1 bottom2 bottom3'
 []
 
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+[]
+
 [Variables]
   [./disp_x]
     order = FIRST

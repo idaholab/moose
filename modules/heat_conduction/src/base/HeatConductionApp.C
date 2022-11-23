@@ -111,7 +111,7 @@ HeatConductionApp::associateSyntax(Syntax & syntax, ActionFactory & action_facto
 void
 HeatConductionApp::registerExecFlags(Factory & /*factory*/)
 {
-  mooseDeprecated("use registerAll instead of registerExecFlags");
+  mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
 }
 
 extern "C" void

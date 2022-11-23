@@ -32,15 +32,17 @@ public:
    * These methods are intentionally empty
    */
   virtual ~TestPostprocessor(){};
-  virtual void initialize(){};
-  virtual void execute(){};
+  virtual void initialize() override {}
+  virtual void execute() override {}
   ///@}
+
+  virtual void customSetup(const ExecFlagType & exec_type) override;
 
   /**
    * Returns the postprocessor depending on the 'test_type' parameter
    * @return The postprocessor value
    */
-  virtual Real getValue();
+  virtual Real getValue() override;
 
 private:
   /// Type of testing action to perform

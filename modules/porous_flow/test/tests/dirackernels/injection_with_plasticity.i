@@ -26,15 +26,13 @@ porosity0 = 0.1
   strain_at_nearest_qp = true
 []
 
-[Modules]
-  [FluidProperties]
-    [simple_fluid]
-      type = SimpleFluidProperties
-      thermal_expansion = 0 # Not doing a thermal simulation
-      bulk_modulus = 2E9
-      density0 = ${fluid_density}
-      viscosity = 5E-4
-    []
+[FluidProperties]
+  [simple_fluid]
+    type = SimpleFluidProperties
+    thermal_expansion = 0 # Not doing a thermal simulation
+    bulk_modulus = 2E9
+    density0 = ${fluid_density}
+    viscosity = 5E-4
   []
 []
 

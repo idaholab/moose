@@ -107,25 +107,23 @@
   [../]
 []
 
-[Modules]
-  [./FluidProperties]
-    [./sg]
-      type = StiffenedGasFluidProperties
-      gamma = 2.35
-      q = -1167e3
-      q_prime = 0
-      p_inf = 1.e9
-      cv = 1816
+[FluidProperties]
+  [./sg]
+    type = StiffenedGasFluidProperties
+    gamma = 2.35
+    q = -1167e3
+    q_prime = 0
+    p_inf = 1.e9
+    cv = 1816
 
-      mu = 0.9
-      k = 0.6
-    [../]
-  []
+    mu = 0.9
+    k = 0.6
+  [../]
 []
 
 [Materials]
   [./fp_mat]
-    type = FluidPropertiesMaterial
+    type = FluidPropertiesMaterialVE
     e = e
     v = v
     fp = sg

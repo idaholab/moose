@@ -111,7 +111,7 @@ The sum on the right-hand side includes only the surface species that sorb onto 
 
 ### Kinetic reactions
 
-The reactions for kinetically-controlled species --- $A_{\bar{j}}$ ([decoupled redox reactions](basis.md)), $A_{\bar{l}}$ (minerals that slowly dissolve or precipitate) and $A_{\bar{q}}$ (kinetically-controlled surface complexation) --- are similar in form to [eqm.second.eqn], [eqm.mineral.eqn] and [eqm.sorb.eqn], and the database specifies the equilibrium constants for these reactions.  Using the collective notation $A_{\bar{k}}$,
+The reactions for kinetically-controlled species --- $A_{\bar{j}}$ ([decoupled redox reactions](basis.md)), $A_{\bar{l}}$ (minerals that slowly dissolve or precipitate) and $A_{\bar{q}}$ (kinetically-controlled surface complexation) --- are similar in form to [eqm.second.eqn], [eqm.mineral.eqn] and [eqm.sorb.eqn], and the database specifies the equilibrium constants for these reactions.  All the material below holds for kinetically-controlled biogeochemical reactions too, but such cases contain additional complications, and details are found on the [biogeochemistry](biogeochemistry.md) page.  Using the collective notation $A_{\bar{k}}$,
 \begin{equation}
 \label{eqm.kin.eqn}
 A_{\bar{k}} \rightleftharpoons \nu_{w\bar{k}}A_{w} + \sum_{i}\nu_{i\bar{k}}A_{i} + \sum_{k}\nu_{k\bar{k}}A_{k} + \sum_{m}\nu_{m\bar{k}}A_{m} + \nu_{p\bar{k}}A_{p} \ ,
@@ -133,25 +133,9 @@ Precipitation is assumed to follow the same rate as dissolution.
 In the geochemistry module, the rate $r_{\bar{k}}$ is a sum of an arbitrary number of terms of the form
 \begin{equation}
 \label{eqn.indiv.rate}
-r = kA[M] \left( \prod_{\alpha}m_{\alpha}^{P_{\alpha}} \right) \left|1 - \left(Q/K\right)^{\theta}\right|^{\eta} \exp\left( \frac{E_{a}}{R} \left(\frac{1}{T_{0}} - \frac{1}{T}\right)\right) {\mathrm{sgn}}(1 - (Q/K)) \ .
+r = kA[M] \frac{\tilde{m}^{\tilde{P}}}{(\tilde{m}^{\tilde{P}} + \tilde{K}^{\tilde{P}})^{\tilde{\beta}}}\left( \prod_{\alpha}\frac{m_{\alpha}^{P_{\alpha}}}{(m_{\alpha}^{P_{\alpha}} + K_{\alpha}^{P_{\alpha}})^{\beta_{\alpha}}} \right) \left|1 - \left(Q/K\right)^{\theta}\right|^{\eta} \exp\left( \frac{E_{a}}{R} \left(\frac{1}{T_{0}} - \frac{1}{T}\right)\right) D(Q/K) \ .
 \end{equation}
-Each term in the sum may have different parameters $k$, $A$, $P_{\alpha}$, etc.  This is a rather complicated equation, and examples are given in the [GeochemistryKineticRate](GeochemistryKineticRate.md) documentation.  In this equation:
-
-- $r$ \[units: mol.s$^{-1}$\] is the rate of the kinetic reaction.  If it is positive then the kinetic species' mass will be decreasing (eg, dissolution).  If it is negative then the kinetic species' mass will be increasing (eg, precipitation).
-- $k$ is the intrinsic rate constant.  The product $kA[M]$ has units mol.s$^{-1}$ (assuming the simulation's time units are seconds).  Note that mole units are used, even if the initial amount of the kinetic species is given in mass or volume units.  Examples of $k$ are given in the [GeochemistryKineticRate](GeochemistryKineticRate.md) documentation.
-- $[M]$ \[units: g\] is the mass of the kinetic species.  It is optional.
-- $A$ is either the surface area (units: m$^{2}$) for the kinetic species (if $r$ does not contain $M$), or the specific surface area (units: m$^{2}$.g$^{-1}$) (if $r$ contains $M$)
-- $\alpha$ is a label denoting a promoting species
-- $m_{\alpha}$ is either: mass of solvent water (in kg) if the promoting species is H$_{2}$O; fugacity of a gas if the promoting species is a gas; activity if the promoting species is either H$^{+}$ or OH$^{-}$; mobility, otherwise.
-- $P_{\alpha}$ is a dimensionless power
-- $Q$ is the activity product given in [eqn.kin.ap]
-- $K$ is the reaction's equilibrium constant defined through the database file
-- $\theta$ and $\eta$ are dimensionless exponents
-- $E_{a}$ \[units: J.mol$^{-1}$\] is the activation energy
-- $R=8.314472\,$J.K$^{-1}$.mol$^{-1}$ is the gas constant
-- $T_{0}$ \[units: K\] is a reference temperature
-- $T$ \[units: K\] is the temperature
-- ${\mathrm{sgn}}(1-(Q/K))$ is -1 if $Q>K$ (kinetic species mass will increase with time), 1 if $Q<K$ (kinetic species mass will decrease with time).
+Each term in the sum may have different parameters $k$, $A$, $P_{\alpha}$, etc.  This is a rather complicated equation, and a full explanation and examples are given in the [GeochemistryKineticRate](GeochemistryKineticRate.md) documentation.
 
 Because the overall kinetic rate is a sum of terms of the form [eqn.indiv.rate], acid-neutral-alkali promotion as listed in the correlations prepared by [!cite](palandri) may be used in `geochemistry` models.
 

@@ -20,7 +20,9 @@ AddIndicatorAction::validParams()
   return params;
 }
 
-AddIndicatorAction::AddIndicatorAction(InputParameters params) : MooseObjectAction(params) {}
+AddIndicatorAction::AddIndicatorAction(const InputParameters & params) : MooseObjectAction(params)
+{
+}
 
 void
 AddIndicatorAction::act()

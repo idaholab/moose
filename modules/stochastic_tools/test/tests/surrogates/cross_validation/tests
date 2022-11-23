@@ -3,13 +3,21 @@
   design = 'Surrogates/index.md'
   [cross_validate]
     requirement = 'The system shall demonstrate cross validation '
-    [csv_check]
-      type = CSVDiff
+    [cv_real]
+      type = JSONDiff
       input = train_and_cv.i
       allow_test_objects = true
-      cli_args =  "Trainers/train/cv_surrogate='surrogate'"
-      csvdiff = 'train_and_cv_out_cv_scores_0002.csv'
-      detail = 'for a 1-dimensional polynomial regression surrogate'
+      cli_args =  "Trainers/train/cv_surrogate='surrogate' Outputs/out/execute_system_information_on=none"
+      jsondiff = 'train_and_cv_out.json'
+      detail = 'for a 1-dimensional polynomial regression surrogate with Real'
+    []
+    [cv_vector_real]
+      type = JSONDiff
+      input = poly_reg_vec.i
+      allow_test_objects = true
+      cli_args = 'Outputs/out/execute_system_information_on=none'
+      jsondiff = 'poly_reg_vec_out.json'
+      detail = ' and std::vector<Real> response types.'
     []
     [surr-error]
       type = RunException

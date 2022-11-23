@@ -148,4 +148,5 @@
 [Outputs]
   exodus = true
   file_base = core_in
+  execute_on = timestep_end
 []

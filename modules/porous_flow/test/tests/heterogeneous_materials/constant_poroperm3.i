@@ -201,16 +201,14 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [simple_fluid]
-      type = SimpleFluidProperties
-      bulk_modulus = 2e9
-      density0 = 1000
-      viscosity = 1e-3
-      thermal_expansion = 0
-      cv = 2
-    []
+[FluidProperties]
+  [simple_fluid]
+    type = SimpleFluidProperties
+    bulk_modulus = 2e9
+    density0 = 1000
+    viscosity = 1e-3
+    thermal_expansion = 0
+    cv = 2
   []
 []
 

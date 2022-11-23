@@ -29,13 +29,22 @@ public:
 
   virtual void setInputParametersFEProblem(InputParameters & parameters) override;
 
-  NonlinearSystem & getNonlinearSystem() override { return *_nl_sys; }
+  NonlinearSystem & getNonlinearSystem(unsigned int nl_sys_num = 0) override;
 
   virtual void addLineSearch(const InputParameters & parameters) override;
 
 protected:
   bool _use_nonlinear;
-  std::shared_ptr<NonlinearSystem> _nl_sys;
+  std::vector<std::shared_ptr<NonlinearSystem>> _nl_sys;
+
+private:
+  using FEProblemBase::_nl;
 };
 
 using FVProblem = FEProblem;
+
+inline NonlinearSystem &
+FEProblem::getNonlinearSystem(const unsigned int nl_sys_num)
+{
+  return *_nl_sys[nl_sys_num];
+}

@@ -31,11 +31,9 @@ cp=${fparse gamma*R_specific/(gamma-1)}
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [fp]
-      type = IdealGasFluidProperties
-    []
+[FluidProperties]
+  [fp]
+    type = IdealGasFluidProperties
   []
 []
 

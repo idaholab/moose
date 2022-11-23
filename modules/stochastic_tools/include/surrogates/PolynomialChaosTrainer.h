@@ -21,15 +21,13 @@ class PolynomialChaosTrainer : public SurrogateTrainer
 public:
   static InputParameters validParams();
   PolynomialChaosTrainer(const InputParameters & parameters);
+  virtual void preTrain() override;
   virtual void train() override;
   virtual void postTrain() override;
 
 private:
-  /// Predictor values (taken from sampler)
-  const std::vector<Real> & _pvals;
-
-  /// Response results
-  const Real & _rval;
+  /// Predictor values
+  const std::vector<Real> & _predictor_row;
 
   /// Maximum polynomial order. The sum of 1D polynomial orders does not go above this value.
   const unsigned int & _order;

@@ -82,7 +82,7 @@ AdaptivityAction::validParams()
   return params;
 }
 
-AdaptivityAction::AdaptivityAction(InputParameters params) : Action(params) {}
+AdaptivityAction::AdaptivityAction(const InputParameters & params) : Action(params) {}
 
 void
 AdaptivityAction::act()

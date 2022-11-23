@@ -38,12 +38,28 @@ protected:
     return _moving_boundary_id;
   }
 
+  // The ID of the complement moving boundary that this object creates/modifies.
+  BoundaryID complementMovingBoundaryID() const
+  {
+    if (!_complement_moving_boundary_specified)
+      mooseError("no complement moving boundary specified");
+    return _complement_moving_boundary_id;
+  }
+
   // The name of the moving boundary that this object creates/modifies.
   const BoundaryName movingBoundaryName() const
   {
     if (!_moving_boundary_specified)
       mooseError("no moving boundary specified");
     return _moving_boundary_name;
+  }
+
+  // The name of the complement moving boundary that this object creates/modifies.
+  const BoundaryName complementMovingBoundaryName() const
+  {
+    if (!_complement_moving_boundary_specified)
+      mooseError("no complement moving boundary specified");
+    return _complement_moving_boundary_name;
   }
 
   // Range of the elements who changed their subdomain ID
@@ -59,24 +75,17 @@ private:
   // Set the name of the moving boundary. Create the nodeset/sideset if not exist.
   void setMovingBoundaryName(MooseMesh & mesh);
 
-  // Update the moving boundary (both the underlying sideset and nodeset)
+  // Set the name of the complement moving boundary. Create the nodeset/sideset if not exist.
+  void setComplementMovingBoundaryName(MooseMesh & mesh);
+
+  // Update the moving and complement moving boundaries (both the underlying sideset and nodeset)
   void updateBoundaryInfo(MooseMesh & mesh, const std::vector<const Elem *> & moved_elems);
 
-  // Helper function to add nodes on a side of an element to a set
-  void recordNodeIdsOnElemSide(const Elem * elem,
-                               const unsigned short int side,
-                               std::set<dof_id_type> & node_ids);
-
   // Remove ghosted element sides
-  void pushBoundarySideInfo(
-      MooseMesh & mesh,
-      std::unordered_map<processor_id_type, std::vector<std::pair<dof_id_type, unsigned int>>> &
-          elems_to_push);
+  void pushBoundarySideInfo(MooseMesh & mesh);
 
   // Remove ghosted boundary nodes
-  void pushBoundaryNodeInfo(
-      MooseMesh & mesh,
-      std::unordered_map<processor_id_type, std::vector<dof_id_type>> & nodes_to_push);
+  void pushBoundaryNodeInfo(MooseMesh & mesh);
 
   // Helper function to build the range of moved elements
   void buildMovedElemsRange();
@@ -108,9 +117,26 @@ private:
   /// Whether a moving boundary name is provided
   const bool _moving_boundary_specified;
 
+  /// Whether a complement moving boundary name is provided
+  const bool _complement_moving_boundary_specified;
+
   /// The name of the moving boundary
   BoundaryName _moving_boundary_name;
 
+  /// The name of the complement moving boundary
+  BoundaryName _complement_moving_boundary_name;
+
   /// The Id of the moving boundary
   BoundaryID _moving_boundary_id;
+
+  /// The Id of the complement moving boundary
+  BoundaryID _complement_moving_boundary_id;
+
+  /// save the added/removed ghost sides to sync across processors
+  std::unordered_map<processor_id_type, std::vector<std::pair<dof_id_type, unsigned short int>>>
+      _ghost_sides_to_remove, _ghost_sides_to_add;
+
+  /// save the added/removed ghost nodes to sync across processors
+  std::unordered_map<processor_id_type, std::vector<dof_id_type>> _ghost_nodes_to_remove,
+      _ghost_nodes_to_add;
 };

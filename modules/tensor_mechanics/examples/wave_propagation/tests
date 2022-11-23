@@ -1,0 +1,20 @@
+[Tests]
+  [1D_axial]
+    issues = '#21364'
+    design = '1d_elastic_waves.md'
+    type = 'CSVDiff'
+    input = '1D_elastic_wave_propagation.i'
+    csvdiff = '1D_elastic_wave_propagation_out_midpt_real_0001.csv 1D_elastic_wave_propagation_out_midpt_imag_0001.csv'
+    requirement = 'The system shall validate the frequency domain solution of the'
+                  ' real and imaginary part an axially loaded beam against the analytical solution.'
+  []
+  [3D_cantilever]
+    issues = '#22252 #22262'
+    design = '1d_elastic_waves.md'
+    type = 'CSVDiff'
+    input = 'cantilever_sweep.i'
+    csvdiff = 'cantilever_sweep_out.csv'
+    abs_zero = 1e-4
+    requirement = 'The system shall compute eigenvalues for an aluminum cantilever beam that match the analytic solution'
+  []
+[]

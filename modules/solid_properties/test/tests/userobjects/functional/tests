@@ -1,0 +1,19 @@
+[Tests]
+  [test]
+    type = CSVDiff
+    input = '../thermal_solid_properties.i'
+    cli_args = "
+      solid_properties_class=ThermalFunctionSolidProperties
+      file_base=functional
+      T_min=800
+      T_max=1200
+      SolidProperties/sp/rho='1000.0'
+      SolidProperties/sp/cp='200*t+150.0'
+      SolidProperties/sp/k='2.0*exp(-100.0/(2.0+t))+1.0'"
+    csvdiff = 'functional_vpp_0000.csv'
+    mesh_mode = 'replicated' # see #21865
+    requirement = "The system shall compute solid thermal properties as functions of temperature."
+    design = 'ThermalFunctionSolidProperties.md ThermalSolidProperties.md'
+    issues = '#12284'
+  []
+[]

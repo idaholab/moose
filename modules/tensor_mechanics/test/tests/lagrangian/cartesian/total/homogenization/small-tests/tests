@@ -1,0 +1,73 @@
+[Tests]
+  issues = '#17473'
+  design = 'source/scalarkernels/lagrangian/HomogenizationConstraintScalarKernel.md'
+  [1d-strain]
+    type = CSVDiff
+    input = '1d.i'
+    csvdiff = '1d-strain_out.csv'
+    cli_args = "Outputs/file_base=1d-strain_out constraint_types='strain none none none none none "
+               "none none none' targets=func_strain"
+    requirement = "Homogenized strain field hits the targets in 1D"
+  []
+  [1d-stress]
+    type = CSVDiff
+    input = '1d.i'
+    csvdiff = '1d-stress_out.csv'
+    cli_args = "Outputs/file_base=1d-stress_out constraint_types='stress none none none none none "
+               "none none none' targets=func_stress"
+    requirement = "Homogenized stress field hits the targets in 1D"
+  []
+
+  [2d-strain]
+    type = CSVDiff
+    input = '2d.i'
+    csvdiff = '2d-strain_out.csv'
+    cli_args = "Outputs/file_base=2d-strain_out constraint_types='strain none none strain strain "
+               "none none none none' targets='strain11 strain12 strain22'"
+    requirement = "Homogenization with strain constraints hits the targets in 2D"
+  []
+  [2d-stress]
+    type = CSVDiff
+    input = '2d.i'
+    csvdiff = '2d-stress_out.csv'
+    cli_args = "Outputs/file_base=2d-stress_out constraint_types='stress none none stress stress "
+               "none none none none' targets='stress11 stress12 stress22'"
+    requirement = "Homogenization with stress constraints hits the targets in 2D"
+  []
+  [2d-mixed]
+    type = CSVDiff
+    input = '2d.i'
+    csvdiff = '2d-mixed_out.csv'
+    cli_args = "Outputs/file_base=2d-mixed_out constraint_types='stress none none stress strain none "
+               "none none none' targets='stress11 stress12 strain22'"
+    requirement = "Homogenization with mixed stress and strain constraints hits the targets in 2D"
+  []
+
+  [3d-strain]
+    type = CSVDiff
+    input = '3d.i'
+    csvdiff = '3d-strain_out.csv'
+    cli_args = "Outputs/file_base=3d-strain_out constraint_types='strain none none strain strain "
+               "none strain strain strain' targets='strain11 strain12 strain22 strain13 strain23 "
+               "strain33'"
+    requirement = "Homogenization with strain constraints hits the targets in 3D"
+  []
+  [3d-stress]
+    type = CSVDiff
+    input = '3d.i'
+    csvdiff = '3d-stress_out.csv'
+    cli_args = "Outputs/file_base=3d-stress_out constraint_types='stress none none stress stress "
+               "none stress stress stress' targets='stress11 stress12 stress22 stress13 stress23 "
+               "stress33'"
+    requirement = "Homogenization with stress constraints hits the targets in 3D"
+  []
+  [3d-mixed]
+    type = CSVDiff
+    input = '3d.i'
+    csvdiff = '3d-mixed_out.csv'
+    cli_args = "Outputs/file_base=3d-mixed_out constraint_types='stress none none strain strain none "
+               "stress stress stress' targets='stress11 strain12 strain22 stress13 stress23 "
+               "stress33'"
+    requirement = "Homogenization with mixed stress and strain constraints hits the targets in 3D"
+  []
+[]

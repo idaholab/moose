@@ -88,9 +88,13 @@ TorqueReaction::execute()
 Real
 TorqueReaction::getValue()
 {
-  gatherSum(_sum);
-
   return _sum;
+}
+
+void
+TorqueReaction::finalize()
+{
+  gatherSum(_sum);
 }
 
 void

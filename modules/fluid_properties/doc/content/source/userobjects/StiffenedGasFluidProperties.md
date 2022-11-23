@@ -1,6 +1,6 @@
 # StiffenedGasFluidProperties
 
-!syntax description /Modules/FluidProperties/StiffenedGasFluidProperties
+!syntax description /FluidProperties/StiffenedGasFluidProperties
 
 A simple fluid class that implements a stiffened equation of state [!citep](metayer2004)
 \begin{equation}
@@ -11,10 +11,10 @@ zero reference state for internal energy, and $p_{\infty}$ is a constant represe
 between fluid molecules that makes the fluid *stiff* in comparison to an ideal gas. This equation of
 state is typically used to represent water that is under very high pressure.
 
-!syntax parameters /Modules/FluidProperties/StiffenedGasFluidProperties
+!syntax parameters /FluidProperties/StiffenedGasFluidProperties
 
-!syntax inputs /Modules/FluidProperties/StiffenedGasFluidProperties
+!syntax inputs /FluidProperties/StiffenedGasFluidProperties
 
-!syntax children /Modules/FluidProperties/StiffenedGasFluidProperties
+!syntax children /FluidProperties/StiffenedGasFluidProperties
 
 !bibtex bibliography

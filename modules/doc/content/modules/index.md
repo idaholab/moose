@@ -22,6 +22,7 @@ application.
 - [Reactor](modules/reactor/index.md)
 - [Reconstructed Discontinous Galerkin](modules/rdg/index.md)
 - [Richards](modules/richards/index.md)
+- [Solid Properties](modules/solid_properties/index.md)
 - [Stochastic Tools](modules/stochastic_tools/index.md)
 - [Tensor Mechanics](modules/tensor_mechanics/index.md)
 - [Thermal Hydraulics](modules/thermal_hydraulics/index.md)

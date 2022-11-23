@@ -39,7 +39,8 @@ static void
 associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 {
   registerSyntaxTask(
-      "AddFluidPropertiesAction", "Modules/FluidProperties/*", "add_fluid_properties");
+      "AddFluidPropertiesDeprecatedAction", "Modules/FluidProperties/*", "add_fluid_properties");
+  registerSyntaxTask("AddFluidPropertiesAction", "FluidProperties/*", "add_fluid_properties");
   registerMooseObjectTask("add_fluid_properties", FluidProperties, false);
   registerMooseObjectTask("add_fp_output", Output, false);
 
@@ -81,7 +82,7 @@ FluidPropertiesApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
 void
 FluidPropertiesApp::registerExecFlags(Factory & /*factory*/)
 {
-  mooseDeprecated("use registerAll instead of registerExecFlags");
+  mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
 }
 
 extern "C" void

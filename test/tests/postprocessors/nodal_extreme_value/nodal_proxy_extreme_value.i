@@ -68,13 +68,13 @@
   # because we set v_x and v_y equal to the x and y coordinates, these two postprocessors
   # should just return the point at which u reaches a maximum value
   [max_v_from_proxy_x]
-    type = ElementExtremeValue
+    type = NodalExtremeValue
     variable = v_x
     proxy_variable = u
     value_type = max
   []
   [max_v_from_proxy_y]
-    type = ElementExtremeValue
+    type = NodalExtremeValue
     variable = v_y
     proxy_variable = u
     value_type = max
@@ -83,13 +83,13 @@
   # because we set v_x and v_y equal to the x and y coordinates, these two postprocessors
   # should just return the point at which w reaches a minimum value
   [min_v_from_proxy_x]
-    type = ElementExtremeValue
+    type = NodalExtremeValue
     variable = v_x
     proxy_variable = w
     value_type = min
   []
   [min_v_from_proxy_y]
-    type = ElementExtremeValue
+    type = NodalExtremeValue
     variable = v_y
     proxy_variable = w
     value_type = min
@@ -98,13 +98,6 @@
 
 [Executioner]
   type = Steady
-
-  # increase the quadrature order to get more quadrature points so that were closer
-  # to hitting the expect max/min
-  [Quadrature]
-    type = GAUSS
-    order = SECOND
-  []
 []
 
 [Outputs]

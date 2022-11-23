@@ -55,6 +55,7 @@ srcnamelow=$(echo "$srcname" | perl -pe "${regex}"'tr/[A-Z]/[a-z]/')
 srcnameup=$(echo "$srcname" | perl -pe "${regex}"'tr/[a-z]/[A-Z]/')
 dstnamelow=$(echo "$dstname" | perl -pe "${regex}"'tr/[A-Z]/[a-z]/')
 dstnameup=$(echo "$dstname" | perl -pe "${regex}"'tr/[a-z]/[A-Z]/')
+dstnamespace=$(echo "$dstname" | sed 's/\([^[:blank:]]\)\([A-Z]\)/\1 \2/g')
 dir="$dstnamelow"
 if [[ -z $MOOSE_DIR ]]; then
     MOOSE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/.."
@@ -124,7 +125,7 @@ if [[ "$kind" == "app" ]]; then
     cp $MOOSE_DIR/.gitignore $dir/
 
     dir="$PWD/$dir"
-    (cd $dir && git init && git add * .clang-format .gitignore && git commit -m"Initial files")
+    (cd $dir && git init && git add * .clang-format .gitignore && git commit -m "Initial files" && git branch -m main)
 
     echo "MOOSE app created in '$dir'"
     echo ""
@@ -145,7 +146,7 @@ if [[ "$kind" == "app" ]]; then
 fi
 
 if [[ "$kind" == "module" ]]; then
-    echo "new Module created in moose/modules"
+    echo "New Module created in moose/modules"
     echo ""
     echo "There are several more steps that need to be completed"
     echo "    1. Modify the moose/modules/modules.mk file"
@@ -153,9 +154,19 @@ if [[ "$kind" == "module" ]]; then
     echo "      b. Add the new module to the MODULE_NAMES variable (alphabetical)"
     echo "      c. Create a new registration section for the new module"
     echo "    2. Modify the moose/scripts/sqa_stats.py file"
-    echo "      a. Add a new compute requirements stats section"
-    echo "    3. Ensure that no stork files hang around before committing"
-    echo "    4. Ensure that proper testing is performed for per module tests (e.g. parallel testing)"
+    echo "      a. Add a new compute requirements stats entry for the module"
+    echo "    3. Modify the moose/modules/combined/src/base/CombinedApp.C file"
+    echo "      a. Add the new module to the set of included files (alphabetical)"
+    echo "      b. Add the new module to the registerAll function (alphabetical)"
+    echo "    4. Modify the moose/modules/doc/config.yml file"
+    echo "       a. Add the module to the content listing (alphabetical)"
+    echo "    5. Initialize module SQA (reach out to the MOOSE development team with questions)"
+    echo "       a. Navigate to moose/modules/$dstnamelow/doc"
+    echo "       b. Run './moosedocs.py init sqa --module '$dstnamespace' --category $dstnamelow'"
+    echo "       c. Add new module to SQA extension categories in modules/doc/config.yml (alphabetical)"
+    echo "       d. Add new module to Applications and Requirements sections of modules/doc/sqa_reports.yml (alphabetical)"
+    echo "    6. Ensure that no stork files hang around before committing"
+    echo "    7. Ensure that proper testing is performed for per-module tests (e.g. parallel, recover testing)"
     echo ""
 
     rm -f $dir/LICENSE

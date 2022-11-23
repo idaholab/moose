@@ -11,6 +11,7 @@
 #include "FlowChannel1Phase.h"
 #include "FlowModelSinglePhase.h"
 #include "THMMesh.h"
+#include "SlopeReconstruction1DInterface.h"
 
 registerMooseObject("ThermalHydraulicsApp", JunctionOneToOne1Phase);
 
@@ -26,7 +27,9 @@ JunctionOneToOne1Phase::validParams()
 }
 
 JunctionOneToOne1Phase::JunctionOneToOne1Phase(const InputParameters & params)
-  : FlowJunction1Phase(params)
+  : FlowJunction1Phase(params),
+    _slope_reconstruction(
+        SlopeReconstruction1DInterface<true>::getSlopeReconstructionMooseEnum("None"))
 {
 }
 
@@ -40,28 +43,29 @@ JunctionOneToOne1Phase::setupMesh()
 }
 
 void
-JunctionOneToOne1Phase::check() const
+JunctionOneToOne1Phase::init()
 {
-  FlowJunction1Phase::check();
+  FlowJunction1Phase::init();
 
-  // Check that there are exactly 2 connections
-  checkNumberOfConnections(2);
-
-  // Log warning if slope reconstruction is used on one or more of the adjacent flow channels
-  bool slope_reconstruction_used = false;
+  // Get slope reconstruction option used
   for (const auto & connection : getConnections())
   {
     const std::string & comp_name = connection._component_name;
     if (hasComponentByName<FlowChannel1Phase>(comp_name))
     {
       const FlowChannel1Phase & comp = getComponentByName<FlowChannel1Phase>(comp_name);
-      slope_reconstruction_used =
-          slope_reconstruction_used || (comp.getSlopeReconstruction() != "none");
+      _slope_reconstruction = comp.getSlopeReconstruction();
     }
   }
-  if (slope_reconstruction_used)
-    logWarning("Currently JunctionOneToOne1Phase cannot perform slope reconstruction across the "
-               "junction, so the slopes on the adjacent elements will be zero.");
+}
+
+void
+JunctionOneToOne1Phase::check() const
+{
+  FlowJunction1Phase::check();
+
+  // Check that there are exactly 2 connections
+  checkNumberOfConnections(2);
 }
 
 void
@@ -77,14 +81,17 @@ JunctionOneToOne1Phase::addMooseObjects()
     params.set<std::vector<BoundaryName>>("boundary") = _boundary_names;
     params.set<std::vector<Real>>("normals") = _normals;
     params.set<std::vector<processor_id_type>>("processor_ids") = _proc_ids;
+    params.set<UserObjectName>("fluid_properties") = _fp_name;
     // It is assumed that each channel should have the same numerical flux, so
     // just use the first one.
     params.set<UserObjectName>("numerical_flux") = _numerical_flux_names[0];
-    params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
+    params.set<std::vector<VariableName>>("A_elem") = {FlowModel::AREA};
+    params.set<std::vector<VariableName>>("A_linear") = {FlowModel::AREA_LINEAR};
     params.set<std::vector<VariableName>>("rhoA") = {FlowModelSinglePhase::RHOA};
     params.set<std::vector<VariableName>>("rhouA") = {FlowModelSinglePhase::RHOUA};
     params.set<std::vector<VariableName>>("rhoEA") = {FlowModelSinglePhase::RHOEA};
     params.set<std::string>("junction_name") = name();
+    params.set<MooseEnum>("scheme") = _slope_reconstruction;
     params.set<ExecFlagEnum>("execute_on") = execute_on;
     _sim.addUserObject(class_name, _junction_uo_name, params);
   }
@@ -103,8 +110,6 @@ JunctionOneToOne1Phase::addMooseObjects()
       params.set<NonlinearVariableName>("variable") = var_names[j];
       params.set<UserObjectName>("junction_uo") = _junction_uo_name;
       params.set<unsigned int>("connection_index") = i;
-      params.set<std::vector<VariableName>>("A_elem") = {FlowModel::AREA};
-      params.set<std::vector<VariableName>>("A_linear") = {FlowModel::AREA_LINEAR};
       params.set<std::vector<VariableName>>("rhoA") = {FlowModelSinglePhase::RHOA};
       params.set<std::vector<VariableName>>("rhouA") = {FlowModelSinglePhase::RHOUA};
       params.set<std::vector<VariableName>>("rhoEA") = {FlowModelSinglePhase::RHOEA};

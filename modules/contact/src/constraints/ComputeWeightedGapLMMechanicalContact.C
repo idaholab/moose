@@ -10,6 +10,7 @@
 #include "ComputeWeightedGapLMMechanicalContact.h"
 #include "DisplacedProblem.h"
 #include "Assembly.h"
+#include "MortarContactUtils.h"
 #include "metaphysicl/dualsemidynamicsparsenumberarray.h"
 #include "metaphysicl/parallel_dualnumber.h"
 #include "metaphysicl/parallel_dynamic_std_array_wrapper.h"
@@ -210,51 +211,12 @@ ComputeWeightedGapLMMechanicalContact::computeJacobian(const Moose::MortarType m
 }
 
 void
-ComputeWeightedGapLMMechanicalContact::communicateGaps()
-{
-#ifdef MOOSE_SPARSE_AD
-  // We may have weighted gap information that should go to other processes that own the dofs
-  using Datum = std::tuple<dof_id_type, ADReal, Real>;
-  std::unordered_map<processor_id_type, std::vector<Datum>> push_data;
-
-  for (auto & pr : _dof_to_weighted_gap)
-  {
-    const auto * const dof_object = pr.first;
-    const auto proc_id = dof_object->processor_id();
-    if (proc_id == this->processor_id())
-      continue;
-
-    push_data[proc_id].push_back(
-        std::make_tuple(dof_object->id(), std::move(pr.second.first), pr.second.second));
-  }
-
-  const auto & lm_mesh = _mesh.getMesh();
-
-  auto action_functor = [this, &lm_mesh](const processor_id_type libmesh_dbg_var(pid),
-                                         const std::vector<Datum> & sent_data)
-  {
-    mooseAssert(pid != this->processor_id(), "We do not send messages to ourself here");
-    for (auto & tup : sent_data)
-    {
-      const auto dof_id = std::get<0>(tup);
-      const auto * const dof_object =
-          _nodal ? static_cast<const DofObject *>(lm_mesh.node_ptr(dof_id))
-                 : static_cast<const DofObject *>(lm_mesh.elem_ptr(dof_id));
-      mooseAssert(dof_object, "This should be non-null");
-      auto & weighted_gap_pr = _dof_to_weighted_gap[dof_object];
-      weighted_gap_pr.first += std::move(std::get<1>(tup));
-      if (_normalize_c)
-        weighted_gap_pr.second += std::get<2>(tup);
-    }
-  };
-  TIMPI::push_parallel_vector_data(_communicator, push_data, action_functor);
-#endif
-}
-
-void
 ComputeWeightedGapLMMechanicalContact::post()
 {
-  communicateGaps();
+#ifdef MOOSE_SPARSE_AD
+  Moose::Mortar::Contact::communicateGaps(
+      _dof_to_weighted_gap, this->processor_id(), _mesh, _nodal, _normalize_c, _communicator);
+#endif
 
   for (const auto & pr : _dof_to_weighted_gap)
   {
@@ -272,7 +234,10 @@ void
 ComputeWeightedGapLMMechanicalContact::incorrectEdgeDroppingPost(
     const std::unordered_set<const Node *> & inactive_lm_nodes)
 {
-  communicateGaps();
+#ifdef MOOSE_SPARSE_AD
+  Moose::Mortar::Contact::communicateGaps(
+      _dof_to_weighted_gap, this->processor_id(), _mesh, _nodal, _normalize_c, _communicator);
+#endif
 
   for (const auto & pr : _dof_to_weighted_gap)
   {

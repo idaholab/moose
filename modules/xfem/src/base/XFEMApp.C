@@ -50,9 +50,6 @@ XFEMApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   associateSyntaxInner(s, af);
 
   TensorMechanicsApp::registerAll(f, af, s);
-
-  auto & factory = f; // for registerExecFlags macro
-  registerExecFlag(EXEC_XFEM_MARK);
 }
 
 void
@@ -91,10 +88,9 @@ XFEMApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 }
 
 void
-XFEMApp::registerExecFlags(Factory & factory)
+XFEMApp::registerExecFlags(Factory &)
 {
-  mooseDeprecated("use registerAll instead of registerExecFlags");
-  registerExecFlag(EXEC_XFEM_MARK);
+  mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
 }
 
 extern "C" void

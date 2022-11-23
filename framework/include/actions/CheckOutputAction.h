@@ -24,7 +24,7 @@ public:
    */
   static InputParameters validParams();
 
-  CheckOutputAction(InputParameters params);
+  CheckOutputAction(const InputParameters & params);
 
   virtual void act() override;
 

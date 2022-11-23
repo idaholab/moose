@@ -117,8 +117,11 @@ Real
 ContactSlipDamper::computeDamping(const NumericVector<Number> & solution,
                                   const NumericVector<Number> & /*update*/)
 {
+  std::map<unsigned int, const NumericVector<Number> *> nl_soln;
+  nl_soln.emplace(_sys.number(), &solution);
+
   // Do new contact search to update positions of slipped nodes
-  _displaced_problem->updateMesh(solution, *_aux_sys.currentSolution());
+  _displaced_problem->updateMesh(nl_soln, *_aux_sys.currentSolution());
 
   Real damping = 1.0;
 

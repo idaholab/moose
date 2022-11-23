@@ -27,20 +27,7 @@ NaCl;  molality = 0.02402mol/kg(solvent water);  free_conc = 1184mg/kg(soln);  a
   [./ph_constraint]
     type = 'RunApp'
     input = 'ph_constraint.i'
-    expect_out = 'Mass of solvent water = 1kg
-Total mass = 1.101kg
-Mass of aqueous solution = 1.003kg (without free minerals)
-pH = 6
-Ionic strength = 0.06006mol/kg(solvent water)
-Stoichiometric ionic strength = 0.03374mol/kg(solvent water)
-Activity of water = 0.9988
-Temperature = 25
-
-Basis Species:
-Calcite;  bulk_moles = 1mol;  bulk_conc = 9.977e+04mg/kg(soln);  free_moles = 0.9783mol;  free_mass = 9.792e+04mg
-Cl-;  bulk_moles = 0.03522mol;  bulk_conc = 1245mg/kg(soln);  molality = 0.03374mol/kg(solvent water);  free_conc = 1192mg/kg(soln);  act_coeff = 0.7979;  log10(a) = -1.57
-Ca++;  bulk_moles = -2.22e-16mol;  bulk_conc = -8.871e-12mg/kg(soln);  molality = 0.01918mol/kg(solvent water);  free_conc = 766.1mg/kg(soln);  act_coeff = 0.4633;  log10(a) = -2.051
-H+;  bulk_moles = 0.03522mol;  bulk_conc = 35.39mg/kg(soln);  molality = 1.175e-06mol/kg(solvent water);  free_conc = 0.00118mg/kg(soln);  act_coeff = 0.8513;  log10(a) = -6
+    expect_out = 'H+;  bulk_moles = 0.03522mol;  bulk_conc = 35.39mg/kg(soln);  molality = 1.175e-06mol/kg(solvent water);  free_conc = 0.00118mg/kg(soln);  act_coeff = 0.8513;  log10(a) = -6
 
 Equilibrium Species:
 CO2(aq);  molality = 0.01352mol/kg(solvent water);  free_conc = 593mg/kg(soln);  act_coeff = 1;  log10(a) = -1.869;  CO2(aq) = -1*H2O - 1*Ca++ + 2*H+ + 1*Calcite;  log10K = -8.079
@@ -56,68 +43,68 @@ CaHCO3+;  molality = 0.001048mol/kg(solvent water);  free_conc = 105.6mg/kg(soln
     type = 'RunApp'
     input = 'seawater_no_precip.i'
     expect_out = 'Mass of solvent water = 1kg
-Total mass = 1.036kg
-Mass of aqueous solution = 1.036kg (without free minerals)
-pH = 8.305
-pe = 12.3
-Ionic strength = 0.6522mol/kg(solvent water)
-Stoichiometric ionic strength = 0.5502mol/kg(solvent water)
-Activity of water = 0.982
+Total mass = 1.036345kg
+Mass of aqueous solution = 1.036345kg (without free minerals)
+pH = 8.304627
+pe = 12.30027
+Ionic strength = 0.6522188mol/kg(solvent water)
+Stoichiometric ionic strength = 0.5502474mol/kg(solvent water)
+Activity of water = 0.98202
 Temperature = 25
 
 Basis Species:
-Cl-;  bulk_moles = 0.566mol;  bulk_conc = 1.936e+04mg/kg(soln);  molality = 0.5502mol/kg(solvent water);  free_conc = 1.882e+04mg/kg(soln);  act_coeff = 0.6276;  log10(a) = -0.4617
-Na+;  bulk_moles = 0.485mol;  bulk_conc = 1.076e+04mg/kg(soln);  molality = 0.4754mol/kg(solvent water);  free_conc = 1.055e+04mg/kg(soln);  act_coeff = 0.6717;  log10(a) = -0.4958
-Mg++;  bulk_moles = 0.055mol;  bulk_conc = 1290mg/kg(soln);  molality = 0.03978mol/kg(solvent water);  free_conc = 933mg/kg(soln);  act_coeff = 0.316;  log10(a) = -1.901
-SO4--;  bulk_moles = 0.0292mol;  bulk_conc = 2707mg/kg(soln);  molality = 0.01604mol/kg(solvent water);  free_conc = 1487mg/kg(soln);  act_coeff = 0.1692;  log10(a) = -2.566
-K+;  bulk_moles = 0.0106mol;  bulk_conc = 399.9mg/kg(soln);  molality = 0.01035mol/kg(solvent water);  free_conc = 390.7mg/kg(soln);  act_coeff = 0.6276;  log10(a) = -2.187
-Ca++;  bulk_moles = 0.0106mol;  bulk_conc = 409.9mg/kg(soln);  molality = 0.005942mol/kg(solvent water);  free_conc = 229.8mg/kg(soln);  act_coeff = 0.2465;  log10(a) = -2.834
-HCO3-;  bulk_moles = 0.00241mol;  bulk_conc = 141.9mg/kg(soln);  molality = 0.001377mol/kg(solvent water);  free_conc = 81.1mg/kg(soln);  act_coeff = 0.6906;  log10(a) = -3.022
-SiO2(aq);  bulk_moles = 0.000103mol;  bulk_conc = 5.972mg/kg(soln);  molality = 8.292e-05mol/kg(solvent water);  free_conc = 4.808mg/kg(soln);  act_coeff = 1.173;  log10(a) = -4.012
+Cl-;  bulk_moles = 0.56599mol;  bulk_conc = 19362.32mg/kg(soln);  molality = 0.5502474mol/kg(solvent water);  free_conc = 18823.77mg/kg(soln);  act_coeff = 0.6276176;  log10(a) = -0.4617469
+Na+;  bulk_moles = 0.485mol;  bulk_conc = 10759.02mg/kg(soln);  molality = 0.4754136mol/kg(solvent water);  free_conc = 10546.36mg/kg(soln);  act_coeff = 0.6716872;  log10(a) = -0.4957613
+Mg++;  bulk_moles = 0.055mol;  bulk_conc = 1289.894mg/kg(soln);  molality = 0.03978202mol/kg(solvent water);  free_conc = 932.9925mg/kg(soln);  act_coeff = 0.3160134;  log10(a) = -1.900608
+SO4--;  bulk_moles = 0.0292mol;  bulk_conc = 2706.514mg/kg(soln);  molality = 0.01604297mol/kg(solvent water);  free_conc = 1487.005mg/kg(soln);  act_coeff = 0.1692175;  log10(a) = -2.56627
+K+;  bulk_moles = 0.0106mol;  bulk_conc = 399.9074mg/kg(soln);  molality = 0.01035496mol/kg(solvent water);  free_conc = 390.6627mg/kg(soln);  act_coeff = 0.6276176;  log10(a) = -2.187157
+Ca++;  bulk_moles = 0.0106mol;  bulk_conc = 409.9485mg/kg(soln);  molality = 0.005941591mol/kg(solvent water);  free_conc = 229.7873mg/kg(soln);  act_coeff = 0.2465104;  log10(a) = -2.834262
+HCO3-;  bulk_moles = 0.00241mol;  bulk_conc = 141.8941mg/kg(soln);  molality = 0.001377458mol/kg(solvent water);  free_conc = 81.10091mg/kg(soln);  act_coeff = 0.6906067;  log10(a) = -3.021691
+SiO2(aq);  bulk_moles = 0.000103mol;  bulk_conc = 5.971644mg/kg(soln);  molality = 8.292161e-05mol/kg(solvent water);  free_conc = 4.807556mg/kg(soln);  act_coeff = 1.173468;  log10(a) = -4.011861
 CO2(g);  fugacity = 0.0003162
 O2(g);  fugacity = 0.2
 
 Equilibrium Species:
-MgCl+;  molality = 0.009136mol/kg(solvent water);  free_conc = 526.8mg/kg(soln);  act_coeff = 0.6717;  log10(a) = -2.212;  MgCl+ = 1*Cl- + 1*Mg++;  log10K = -0.1503
-NaSO4-;  molality = 0.006377mol/kg(solvent water);  free_conc = 732.5mg/kg(soln);  act_coeff = 0.6717;  log10(a) = -2.368;  NaSO4- = 1*Na+ + 1*SO4--;  log10K = -0.6938
-MgSO4;  molality = 0.005763mol/kg(solvent water);  free_conc = 669.3mg/kg(soln);  act_coeff = 1;  log10(a) = -2.239;  MgSO4 = 1*SO4-- + 1*Mg++;  log10K = -2.228
-CaCl+;  molality = 0.003774mol/kg(solvent water);  free_conc = 275.1mg/kg(soln);  act_coeff = 0.6717;  log10(a) = -2.596;  CaCl+ = 1*Cl- + 1*Ca++;  log10K = -0.7
-NaCl;  molality = 0.002774mol/kg(solvent water);  free_conc = 156.4mg/kg(soln);  act_coeff = 1;  log10(a) = -2.557;  NaCl = 1*Cl- + 1*Na+;  log10K = 1.599
-CaSO4;  molality = 0.0008306mol/kg(solvent water);  free_conc = 109.1mg/kg(soln);  act_coeff = 1;  log10(a) = -3.081;  CaSO4 = 1*SO4-- + 1*Ca++;  log10K = -2.32
-NaHCO3;  molality = 0.0004088mol/kg(solvent water);  free_conc = 33.14mg/kg(soln);  act_coeff = 1;  log10(a) = -3.388;  NaHCO3 = 1*Na+ + 1*HCO3-;  log10K = -0.129
-O2(aq);  molality = 0.0002151mol/kg(solvent water);  free_conc = 6.64mg/kg(soln);  act_coeff = 1.173;  log10(a) = -3.598;  O2(aq) = 1*O2(g);  log10K = 2.899
-KSO4-;  molality = 0.000187mol/kg(solvent water);  free_conc = 24.39mg/kg(soln);  act_coeff = 0.6717;  log10(a) = -3.901;  KSO4- = 1*SO4-- + 1*K+;  log10K = -0.8525
-MgHCO3+;  molality = 0.0001822mol/kg(solvent water);  free_conc = 15mg/kg(soln);  act_coeff = 0.6717;  log10(a) = -3.912;  MgHCO3+ = 1*Mg++ + 1*HCO3-;  log10K = -1.01
-MgCO3;  molality = 9.031e-05mol/kg(solvent water);  free_conc = 7.347mg/kg(soln);  act_coeff = 1;  log10(a) = -4.044;  MgCO3 = -1*H2O - 1*CO2(g) + 1*Mg++ + 2*HCO3-;  log10K = -0.3918
-KCl;  molality = 5.801e-05mol/kg(solvent water);  free_conc = 4.173mg/kg(soln);  act_coeff = 1;  log10(a) = -4.237;  KCl = 1*Cl- + 1*K+;  log10K = 1.588
-CO3--;  molality = 4.596e-05mol/kg(solvent water);  free_conc = 2.661mg/kg(soln);  act_coeff = 0.1891;  log10(a) = -5.061;  CO3-- = -1*H2O - 1*CO2(g) + 2*HCO3-;  log10K = 2.525
-CaHCO3+;  molality = 3.252e-05mol/kg(solvent water);  free_conc = 3.173mg/kg(soln);  act_coeff = 0.7143;  log10(a) = -4.634;  CaHCO3+ = 1*Ca++ + 1*HCO3-;  log10K = -1.222
-CaCO3;  molality = 2.093e-05mol/kg(solvent water);  free_conc = 2.021mg/kg(soln);  act_coeff = 1;  log10(a) = -4.679;  CaCO3 = -1*H2O - 1*CO2(g) + 1*Ca++ + 2*HCO3-;  log10K = -0.6904
-Mg2CO3++;  molality = 1.897e-05mol/kg(solvent water);  free_conc = 1.988mg/kg(soln);  act_coeff = 0.2087;  log10(a) = -5.402;  Mg2CO3++ = -1*H2O - 1*CO2(g) + 2*Mg++ + 2*HCO3-;  log10K = -0.9342
-NaH3SiO4;  molality = 1.324e-05mol/kg(solvent water);  free_conc = 1.508mg/kg(soln);  act_coeff = 1;  log10(a) = -4.878;  NaH3SiO4 = 1*H2O - 1*CO2(g) + 1*Na+ + 1*HCO3- + 1*SiO2(aq);  log10K = 0.8411
-NaCO3-;  molality = 1.319e-05mol/kg(solvent water);  free_conc = 1.057mg/kg(soln);  act_coeff = 0.6717;  log10(a) = -5.052;  NaCO3- = -1*H2O - 1*CO2(g) + 1*Na+ + 2*HCO3-;  log10K = 2.021
-CO2(aq);  molality = 1.116e-05mol/kg(solvent water);  free_conc = 0.4738mg/kg(soln);  act_coeff = 1;  log10(a) = -4.952;  CO2(aq) = 1*CO2(g);  log10K = 1.452
+MgCl+;  molality = 0.009136471mol/kg(solvent water);  free_conc = 526.8296mg/kg(soln);  act_coeff = 0.6716872;  log10(a) = -2.212054;  MgCl+ = 1*Cl- + 1*Mg++;  log10K = -0.1503
+NaSO4-;  molality = 0.006376786mol/kg(solvent water);  free_conc = 732.5166mg/kg(soln);  act_coeff = 0.6716872;  log10(a) = -2.368231;  NaSO4- = 1*Na+ + 1*SO4--;  log10K = -0.6938
+MgSO4;  molality = 0.005762655mol/kg(solvent water);  free_conc = 669.2831mg/kg(soln);  act_coeff = 1;  log10(a) = -2.239377;  MgSO4 = 1*SO4-- + 1*Mg++;  log10K = -2.2275
+CaCl+;  molality = 0.003774193mol/kg(solvent water);  free_conc = 275.0784mg/kg(soln);  act_coeff = 0.6716872;  log10(a) = -2.596009;  CaCl+ = 1*Cl- + 1*Ca++;  log10K = -0.7
+NaCl;  molality = 0.002773907mol/kg(solvent water);  free_conc = 156.4295mg/kg(soln);  act_coeff = 1;  log10(a) = -2.556908;  NaCl = 1*Cl- + 1*Na+;  log10K = 1.5994
+CaSO4;  molality = 0.0008305548mol/kg(solvent water);  free_conc = 109.1043mg/kg(soln);  act_coeff = 1;  log10(a) = -3.080632;  CaSO4 = 1*SO4-- + 1*Ca++;  log10K = -2.3199
+NaHCO3;  molality = 0.0004088349mol/kg(solvent water);  free_conc = 33.14046mg/kg(soln);  act_coeff = 1;  log10(a) = -3.388452;  NaHCO3 = 1*Na+ + 1*HCO3-;  log10K = -0.129
+O2(aq);  molality = 0.0002150595mol/kg(solvent water);  free_conc = 6.640304mg/kg(soln);  act_coeff = 1.173468;  log10(a) = -3.59797;  O2(aq) = 1*O2(g);  log10K = 2.899
+KSO4-;  molality = 0.000187028mol/kg(solvent water);  free_conc = 24.39143mg/kg(soln);  act_coeff = 0.6716872;  log10(a) = -3.900926;  KSO4- = 1*SO4-- + 1*K+;  log10K = -0.8525
+MgHCO3+;  molality = 0.0001822362mol/kg(solvent water);  free_conc = 15.00347mg/kg(soln);  act_coeff = 0.6716872;  log10(a) = -3.912198;  MgHCO3+ = 1*Mg++ + 1*HCO3-;  log10K = -1.0101
+MgCO3;  molality = 9.030852e-05mol/kg(solvent water);  free_conc = 7.347255mg/kg(soln);  act_coeff = 1;  log10(a) = -4.044271;  MgCO3 = -1*H2O - 1*CO2(g) + 1*Mg++ + 2*HCO3-;  log10K = -0.3918
+KCl;  molality = 5.800917e-05mol/kg(solvent water);  free_conc = 4.172992mg/kg(soln);  act_coeff = 1;  log10(a) = -4.236503;  KCl = 1*Cl- + 1*K+;  log10K = 1.5876
+CO3--;  molality = 4.595535e-05mol/kg(solvent water);  free_conc = 2.661029mg/kg(soln);  act_coeff = 0.1891038;  log10(a) = -5.060964;  CO3-- = -1*H2O - 1*CO2(g) + 2*HCO3-;  log10K = 2.5255
+CaHCO3+;  molality = 3.252268e-05mol/kg(solvent water);  free_conc = 3.172639mg/kg(soln);  act_coeff = 0.7142676;  log10(a) = -4.633953;  CaHCO3+ = 1*Ca++ + 1*HCO3-;  log10K = -1.222
+CaCO3;  molality = 2.092543e-05mol/kg(solvent water);  free_conc = 2.020958mg/kg(soln);  act_coeff = 1;  log10(a) = -4.679326;  CaCO3 = -1*H2O - 1*CO2(g) + 1*Ca++ + 2*HCO3-;  log10K = -0.6904
+Mg2CO3++;  molality = 1.897e-05mol/kg(solvent water);  free_conc = 1.988243mg/kg(soln);  act_coeff = 0.208667;  log10(a) = -5.402479;  Mg2CO3++ = -1*H2O - 1*CO2(g) + 2*Mg++ + 2*HCO3-;  log10K = -0.9342
+NaH3SiO4;  molality = 1.323566e-05mol/kg(solvent water);  free_conc = 1.508268mg/kg(soln);  act_coeff = 1;  log10(a) = -4.878254;  NaH3SiO4 = 1*H2O - 1*CO2(g) + 1*Na+ + 1*HCO3- + 1*SiO2(aq);  log10K = 0.8411
+NaCO3-;  molality = 1.319496e-05mol/kg(solvent water);  free_conc = 1.05676mg/kg(soln);  act_coeff = 0.6716872;  log10(a) = -5.052425;  NaCO3- = -1*H2O - 1*CO2(g) + 1*Na+ + 2*HCO3-;  log10K = 2.0212
+CO2(aq);  molality = 1.115737e-05mol/kg(solvent water);  free_conc = 0.473813mg/kg(soln);  act_coeff = 1;  log10(a) = -4.952438;  CO2(aq) = 1*CO2(g);  log10K = 1.4524
 
 Kinetic Species:
 
 Minerals:
-Antigorite = -8.5*H2O - 48*CO2(g) + 24*Mg++ + 48*HCO3- + 17*SiO2(aq);  log10K = -133.3;  SI = 42.51
-Tremolite = -6*H2O - 14*CO2(g) + 5*Mg++ + 2*Ca++ + 14*HCO3- + 8*SiO2(aq);  log10K = -47.79;  SI = 7.264
-Talc = -2*H2O - 6*CO2(g) + 3*Mg++ + 6*HCO3- + 4*SiO2(aq);  log10K = -25.35;  SI = 6.484
-Chrysotile = -1*H2O - 6*CO2(g) + 3*Mg++ + 6*HCO3- + 2*SiO2(aq);  log10K = -15.36;  SI = 4.514
-Sepiolite = 3*H2O - 8*CO2(g) + 4*Mg++ + 8*HCO3- + 6*SiO2(aq);  log10K = -31.54;  SI = 3.673
-Dolomite-ord = -2*H2O - 2*CO2(g) + 1*Mg++ + 1*Ca++ + 4*HCO3-;  log10K = -13.12;  SI = 3.31
-Dolomite = -2*H2O - 2*CO2(g) + 1*Mg++ + 1*Ca++ + 4*HCO3-;  log10K = -13.12;  SI = 3.31
-Anthophyllite = -6*H2O - 14*CO2(g) + 7*Mg++ + 14*HCO3- + 8*SiO2(aq);  log10K = -41.67;  SI = 3.014
-Huntite = -4*H2O - 4*CO2(g) + 3*Mg++ + 1*Ca++ + 8*HCO3-;  log10K = -20.52;  SI = 1.841
-Dolomite-dis = -2*H2O - 2*CO2(g) + 1*Mg++ + 1*Ca++ + 4*HCO3-;  log10K = -11.57;  SI = 1.766
-Magnesite = -1*H2O - 1*CO2(g) + 1*Mg++ + 2*HCO3-;  log10K = -5.382;  SI = 0.9458
-Calcite = -1*H2O - 1*CO2(g) + 1*Ca++ + 2*HCO3-;  log10K = -6.105;  SI = 0.7357
-Aragonite = -1*H2O - 1*CO2(g) + 1*Ca++ + 2*HCO3-;  log10K = -5.941;  SI = 0.5708
-Quartz = 1*SiO2(aq);  log10K = -3.999;  SI = -0.01256
+Antigorite = -8.5*H2O - 48*CO2(g) + 24*Mg++ + 48*HCO3- + 17*SiO2(aq);  log10K = -133.2982;  SI = 42.50963
+Tremolite = -6*H2O - 14*CO2(g) + 5*Mg++ + 2*Ca++ + 14*HCO3- + 8*SiO2(aq);  log10K = -47.7861;  SI = 7.263792
+Talc = -2*H2O - 6*CO2(g) + 3*Mg++ + 6*HCO3- + 4*SiO2(aq);  log10K = -25.3476;  SI = 6.484177
+Chrysotile = -1*H2O - 6*CO2(g) + 3*Mg++ + 6*HCO3- + 2*SiO2(aq);  log10K = -15.3616;  SI = 4.514019
+Sepiolite = 3*H2O - 8*CO2(g) + 4*Mg++ + 8*HCO3- + 6*SiO2(aq);  log10K = -31.5435;  SI = 3.673044
+Dolomite-ord = -2*H2O - 2*CO2(g) + 1*Mg++ + 1*Ca++ + 4*HCO3-;  log10K = -13.1161;  SI = 3.310303
+Dolomite = -2*H2O - 2*CO2(g) + 1*Mg++ + 1*Ca++ + 4*HCO3-;  log10K = -13.1161;  SI = 3.310303
+Anthophyllite = -6*H2O - 14*CO2(g) + 7*Mg++ + 14*HCO3- + 8*SiO2(aq);  log10K = -41.6692;  SI = 3.014201
+Huntite = -4*H2O - 4*CO2(g) + 3*Mg++ + 1*Ca++ + 8*HCO3-;  log10K = -20.5185;  SI = 1.84056
+Dolomite-dis = -2*H2O - 2*CO2(g) + 1*Mg++ + 1*Ca++ + 4*HCO3-;  log10K = -11.5717;  SI = 1.765903
+Magnesite = -1*H2O - 1*CO2(g) + 1*Mg++ + 2*HCO3-;  log10K = -5.3819;  SI = 0.9458287
+Calcite = -1*H2O - 1*CO2(g) + 1*Ca++ + 2*HCO3-;  log10K = -6.1054;  SI = 0.7356744
+Aragonite = -1*H2O - 1*CO2(g) + 1*Ca++ + 2*HCO3-;  log10K = -5.9405;  SI = 0.5707744
+Quartz = 1*SiO2(aq);  log10K = -3.9993;  SI = -0.01256092
 
 Nernst potentials:
-e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7277V
+e- = 0.5*H2O - 1*H+ - 0.25*O2(aq);  Eh = 0.7276767V
 '
     match_literal = true
     requirement = "The geochemistry module shall be able to solve equilibrium reaction systems with no precipitation"

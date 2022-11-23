@@ -21,7 +21,7 @@ class BadAddKernelAction : public MooseObjectAction
 public:
   static InputParameters validParams();
 
-  BadAddKernelAction(InputParameters params);
+  BadAddKernelAction(const InputParameters & params);
 
   virtual void act();
 };

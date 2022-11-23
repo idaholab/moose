@@ -1,7 +1,7 @@
-mu=0.01
-rho=2000
+mu = 0.01
+rho = 2000
 u_inlet = 1
-advected_interp_method='upwind'
+advected_interp_method = 'upwind'
 
 [Mesh]
   [gen]
@@ -88,10 +88,8 @@ advected_interp_method='upwind'
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_type -sub_pc_factor_shift_type'
-  petsc_options_value = 'asm      100                lu           NONZERO'
-  line_search = 'none'
-
+  petsc_options_iname = '-pc_type -pc_factor_shift_type'
+  petsc_options_value = 'lu NONZERO'
   nl_rel_tol = 1e-12
   nl_abs_tol = 1e-11
 []

@@ -28,6 +28,9 @@ SideIntegralFunctorPostprocessorTempl<is_ad>::validParams()
                         "the sideset, allows to skip the parts where it is not defined. Please "
                         "keep in mind that if the sideset is defined with the wrong normal, this "
                         "may allow to skip the entire integral.");
+  MooseEnum functor_args("qp face", "face");
+  params.addParam<MooseEnum>(
+      "functor_argument", functor_args, "Location to evaluate the functors at");
   params.addClassDescription(
       "Computes a surface integral of the specified functor, using the "
       "single-sided face argument, which usually means that the functor will be"
@@ -44,8 +47,7 @@ SideIntegralFunctorPostprocessorTempl<is_ad>::SideIntegralFunctorPostprocessorTe
     _prefactor(getFunctor<GenericReal<is_ad>>("prefactor")),
     _partial_integral(getParam<bool>("restrict_to_functors_domain"))
 {
-  // Only support face info integration for now
-  _qp_integration = false;
+  _qp_integration = (getParam<MooseEnum>("functor_argument") == "qp");
 }
 
 template <bool is_ad>
@@ -53,48 +55,74 @@ Real
 SideIntegralFunctorPostprocessorTempl<is_ad>::computeFaceInfoIntegral(const FaceInfo * fi)
 {
   mooseAssert(fi, "We should have a FaceInfo");
+  Moose::SingleSidedFaceArg ssf = {
+      fi, Moose::FV::LimiterType::CentralDifference, true, false, _current_elem->subdomain_id()};
+  return computeLocalContribution<Moose::SingleSidedFaceArg>(ssf);
+}
+
+template <bool is_ad>
+template <typename T>
+Real
+SideIntegralFunctorPostprocessorTempl<is_ad>::computeLocalContribution(const T & functor_arg) const
+{
   // It's possible the functor is not defined on that side of the boundary
   // We wont allow that case, unless explicitly requested by the user,
   // as this means the sideset is reversed, but we will allow the case where
   // both sides are defined
-  bool has_elem;
+  const bool has_elem = checkFunctorDefinedOnSideBlock();
+
+  if (has_elem)
+    return MetaPhysicL::raw_value(_prefactor(functor_arg) * _functor(functor_arg));
+  else
+  {
+    if (!_partial_integral)
+      errorFunctorNotDefinedOnSideBlock();
+    return 0;
+  }
+}
+
+template <bool is_ad>
+Real
+SideIntegralFunctorPostprocessorTempl<is_ad>::computeQpIntegral()
+{
+  Moose::ElemSideQpArg elem_side_qp = {_current_elem, _current_side, _qp, _qrule};
+  return computeLocalContribution<Moose::ElemSideQpArg>(elem_side_qp);
+}
+
+template <bool is_ad>
+bool
+SideIntegralFunctorPostprocessorTempl<is_ad>::checkFunctorDefinedOnSideBlock() const
+{
   if (_functor.hasBlocks(_current_elem->subdomain_id()) &&
       _prefactor.hasBlocks(_current_elem->subdomain_id()))
-    has_elem = true;
+    return true;
   else
   {
 #ifndef NDEBUG
-    if (fi->neighborPtr())
+    const auto neighbor_ptr = _current_elem->neighbor_ptr(_current_side);
+    if (neighbor_ptr)
     {
       mooseAssert(_functor.hasBlocks(_current_elem->subdomain_id()) ||
-                      _functor.hasBlocks(fi->neighborPtr()->subdomain_id()),
+                      _functor.hasBlocks(neighbor_ptr->subdomain_id()),
                   "Functor should be defined on at least one side of the boundary");
       mooseAssert(_prefactor.hasBlocks(_current_elem->subdomain_id()) ||
-                      _prefactor.hasBlocks(fi->neighborPtr()->subdomain_id()),
+                      _prefactor.hasBlocks(neighbor_ptr->subdomain_id()),
                   "Prefactor should be defined on at least one side of the boundary");
     }
 #endif
-    has_elem = false;
+    return false;
   }
+}
 
-  if (has_elem)
-  {
-    Moose::SingleSidedFaceArg ssf = {
-        fi, Moose::FV::LimiterType::CentralDifference, true, false, _current_elem->subdomain_id()};
-    return MetaPhysicL::raw_value(_prefactor(ssf) * _functor(ssf));
-  }
-  else
-  {
-    if (_partial_integral)
-      return 0;
-    else
-      paramError("boundary",
-                 "Functor " + _functor.functorName() + " (or prefactor " +
-                     _prefactor.functorName() + ") is not defined on block " +
-                     std::to_string(_current_elem->subdomain_id()) +
-                     ". Is the functor defined along the whole sideset? "
-                     "Are the sidesets in 'boundary' all oriented correctly?");
-  }
+template <bool is_ad>
+void
+SideIntegralFunctorPostprocessorTempl<is_ad>::errorFunctorNotDefinedOnSideBlock() const
+{
+  paramError("boundary",
+             "Functor " + _functor.functorName() + " (or prefactor " + _prefactor.functorName() +
+                 ") is not defined on block " + std::to_string(_current_elem->subdomain_id()) +
+                 ". Is the functor defined along the whole sideset? "
+                 "Are the sidesets in 'boundary' all oriented correctly?");
 }
 
 template class SideIntegralFunctorPostprocessorTempl<false>;

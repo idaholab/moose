@@ -61,7 +61,8 @@ yum install -y \
   gtest \
   sudo \
   file \
-  zlib-devel
+  zlib-devel \
+  rsync
 
 # Clear cache
 yum clean all

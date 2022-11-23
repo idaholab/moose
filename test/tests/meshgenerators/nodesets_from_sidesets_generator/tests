@@ -1,0 +1,16 @@
+[Tests]
+  issues = '#18436'
+  design = 'meshgenerators/NodeSetsFromSideSetsGenerator.md'
+
+  [side_to_node]
+    type = 'Exodiff'
+    input = 'from_sides.i'
+    exodiff = 'from_sides_in.e'
+    cli_args = "--mesh-only"
+    recover = false
+    requirement = 'The system shall be able to create node sets from all side sets.'
+
+    # Parsed generation of sidesets returns a warning on distributed meshes, #21185
+    allow_warnings = true
+  []
+[]

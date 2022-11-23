@@ -14,6 +14,7 @@
 #include "MooseMesh.h"
 #include "MooseTypes.h"
 #include "MultiApp.h"
+#include "MooseAppCoordTransform.h"
 
 #include "libmesh/meshfree_interpolation.h"
 #include "libmesh/numeric_vector.h"
@@ -45,7 +46,6 @@ MultiAppPostprocessorInterpolationTransfer::validParams()
                         "Radius to use for radial_basis interpolation.  If negative "
                         "then the radius is taken as the max distance between "
                         "points.");
-
   return params;
 }
 
@@ -60,11 +60,8 @@ MultiAppPostprocessorInterpolationTransfer::MultiAppPostprocessorInterpolationTr
     _radius(getParam<Real>("radius")),
     _nodal(false)
 {
-  if (_directions.contains(TO_MULTIAPP))
-    mooseError("Can't interpolate to a MultiApp!");
-
   if (isParamValid("to_multi_app"))
-    mooseError("Bi-directional or MultiApp-to-MultiApp transfers are not implemented");
+    paramError("to_multi_app", "Unused parameter; only from-MultiApp transfers are implemented");
 
   auto & to_fe_type =
       getFromMultiApp()->problemBase().getStandardVariable(0, _to_var_name).feType();
@@ -114,11 +111,15 @@ MultiAppPostprocessorInterpolationTransfer::execute()
       idi->set_field_variables(field_vars);
 
       {
+        mooseAssert(_to_transforms.size() == 1, "There should only be one transform here");
+        const auto & to_coord_transform = *_to_transforms[0];
         for (unsigned int i = 0; i < getFromMultiApp()->numGlobalApps(); i++)
         {
           if (getFromMultiApp()->hasLocalApp(i) && getFromMultiApp()->isRootProcessor())
           {
-            src_pts.push_back(getFromMultiApp()->position(i));
+            // Evaluation of the _from_transform at the origin yields the transformed position of
+            // the from multi-app
+            src_pts.push_back(to_coord_transform.mapBack((*_from_transforms[i])(Point(0))));
             src_vals.push_back(getFromMultiApp()->appPostprocessorValue(i, _postprocessor));
           }
         }
@@ -201,5 +202,4 @@ MultiAppPostprocessorInterpolationTransfer::execute()
       break;
     }
   }
-
 }

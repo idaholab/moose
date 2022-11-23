@@ -53,7 +53,7 @@ UniqueExtraIDMeshGenerator::generate()
   std::map<dof_id_type, dof_id_type> parsed_ids =
       MooseMeshUtils::getExtraIDUniqueCombinationMap(*mesh, block_ids, _extra_ids);
 
-  // override the extra ID values from MooseMeshUtils::getExtraIDUniqueCombinationMap by usning
+  // override the extra ID values from MooseMeshUtils::getExtraIDUniqueCombinationMap by using
   // new_id_rule
   if (_use_new_id_rule)
   {
@@ -79,7 +79,7 @@ UniqueExtraIDMeshGenerator::generate()
     paramWarning(
         "new_id_name", "An element integer with the name '", new_id_name, "' already exists");
   }
-  for (auto & elem : mesh->active_local_element_ptr_range())
+  for (auto & elem : mesh->active_element_ptr_range())
     elem->set_extra_integer(extra_id_index, parsed_ids.at(elem->id()));
   return mesh;
 }

@@ -21,6 +21,8 @@ Content:
     - modules/rdg/doc/content
     - modules/reactor/doc/content
     - modules/richards/doc/content
+    - modules/scalar_transport/doc/content
+    - modules/solid_properties/doc/content
     - modules/stochastic_tools/doc/content
     - modules/tensor_mechanics/doc/content
     - modules/thermal_hydraulics/doc/content
@@ -36,9 +38,28 @@ Extensions:
         repo: https://github.com/idaholab/moose
         google-cse: 000781241768298771085:pedtnlxdkx8
         menu:
-            Getting Started: getting_started.menu.md
-            Documentation: documentation.menu.md
-            Help: help.menu.md
+            Getting Started:
+                Installing MOOSE: getting_started/installation/index.md
+                Creating an Application: getting_started/new_users.md
+                Tutorials: getting_started/examples_and_tutorials/index.md
+                Supplemental Resources: getting_started/supplemental_resources/index.md
+                INL HPC Remote Access: help/inl/index.md
+            Documentation:
+                Application Usage: application_usage/index.md
+                Application Development: application_development/index.md
+                Framework Development: framework_development/index.md
+                Modules: modules/index.md
+                INL Applications: help/inl/applications.md
+                MOOSEDocs: MooseDocs/index.md
+                Infrastructure: infrastructure/index.md
+                Syntax Index: syntax/index.md
+                Source Index: /source/index.md
+                A-to-Z Index: help/a-to-z.md
+            Help:
+                Frequently Asked Questions: help/faq/index.md
+                Troubleshooting: help/troubleshooting.md
+                Help Forum: https://github.com/idaholab/moose/discussions
+                Contact Us: help/contact_us.md
             Gallery: /gallery.md
             News: newsletter/index.md
             Citing: citing.md
@@ -106,6 +127,7 @@ Extensions:
             scalarkernels: syntax/ScalarKernels/index.md
             splits: syntax/Preconditioning/index.md
             surrogates: syntax/Surrogates/index.md
+            systems: syntax/Systems/index.md
             timeintegrators: syntax/Executioner/TimeIntegrator/index.md
             timesteppers: syntax/Executioner/TimeStepper/index.md
             transfers: syntax/Transfers/index.md
@@ -124,6 +146,8 @@ Extensions:
         active: True
         args:
             company: Ford # used for example in python/MooseDocs/extensions/template.md
+            thm-bin-opt: thermal_hydraulics-opt
+            thm-bin-dbg: thermal_hydraulics-dbg
     MooseDocs.extensions.sqa:
         active: True
         reports: !include modules/doc/sqa_reports.yml
@@ -141,6 +165,8 @@ Extensions:
             rdg: !include modules/rdg/doc/sqa_rdg.yml
             reactor: !include modules/reactor/doc/sqa_reactor.yml
             ray_tracing: !include modules/ray_tracing/doc/sqa_ray_tracing.yml
+            scalar_transport: !include modules/scalar_transport/doc/sqa_scalar_transport.yml
+            solid_properties: !include modules/solid_properties/doc/sqa_solid_properties.yml
             fsi: !include modules/fsi/doc/sqa_fsi.yml
             thermal_hydraulics: !include modules/thermal_hydraulics/doc/sqa_thermal_hydraulics.yml
             porous_flow: !include modules/porous_flow/doc/sqa_porous_flow.yml

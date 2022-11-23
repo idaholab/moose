@@ -1,6 +1,6 @@
 # CO2FluidProperties
 
-!syntax description /Modules/FluidProperties/CO2FluidProperties
+!syntax description /FluidProperties/CO2FluidProperties
 
 Fluid properties for CO$_2$ are mainly calculated using the Span and Wagner equation of state
 [!citep](spanwagner1996). This formulation uses density and temperature as the primary variables with
@@ -33,10 +33,10 @@ The CO2FluidProperties UserObject is valid for:
 
 - 216.592 K $\le$ T $\le$ 1100 K for p $\le$ 800 MPa
 
-!syntax parameters /Modules/FluidProperties/CO2FluidProperties
+!syntax parameters /FluidProperties/CO2FluidProperties
 
-!syntax inputs /Modules/FluidProperties/CO2FluidProperties
+!syntax inputs /FluidProperties/CO2FluidProperties
 
-!syntax children /Modules/FluidProperties/CO2FluidProperties
+!syntax children /FluidProperties/CO2FluidProperties
 
 !bibtex bibliography

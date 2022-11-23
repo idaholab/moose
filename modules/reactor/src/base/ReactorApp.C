@@ -51,7 +51,7 @@ ReactorApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 void
 ReactorApp::registerExecFlags(Factory & /*factory*/)
 {
-  mooseDeprecated("use registerAll instead of registerExecFlags");
+  mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
 }
 
 /***************************************************************************************************

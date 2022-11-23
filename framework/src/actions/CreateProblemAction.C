@@ -24,7 +24,8 @@ CreateProblemAction::validParams()
   return params;
 }
 
-CreateProblemAction::CreateProblemAction(InputParameters parameters) : MooseObjectAction(parameters)
+CreateProblemAction::CreateProblemAction(const InputParameters & parameters)
+  : MooseObjectAction(parameters)
 {
 }
 

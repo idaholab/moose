@@ -19,10 +19,10 @@ class Transfer;
  * This transfer serves as a base class for transferring reporter values between
  * multiapps. This includes reporters, vector postprocessors, and postprocessors.
  *
- * The undelying purpose fo this class is to avoid using non-const access to ReporterData
+ * The underlying purpose fo this class is to avoid using non-const access to ReporterData
  * through FEProblemBase to set reporter data. Instead, we simply have this class
  * as a friend to ReporterData::WriteKey and provide these protected functions for derived
- * classes. This avoids any ol' object modifying reporter data.
+ * classes. This avoids any old object modifying reporter data.
  */
 class ReporterTransferInterface
 {
@@ -37,7 +37,7 @@ protected:
   }
 
   /*
-   * This function allows derived objects how the "from" reporters should be transferred.
+   * This function allows derived objects to decide how the "from" reporters should be transferred.
    * I.e. whether we are transferring the entire data or part of it. Without calling this
    * early (constructor is preferred) there could be unintended behaiviour for
    * non-broadcasted data like VPPs.

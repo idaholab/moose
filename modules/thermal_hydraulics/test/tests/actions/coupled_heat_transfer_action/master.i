@@ -9,6 +9,7 @@
   ymax = 1
   ny = 10
   parallel_type = replicated
+  coord_type = RZ
 []
 
 [Variables]
@@ -52,20 +53,20 @@
 [CoupledHeatTransfers]
   [right]
     boundary = right
-    T_fluid = T_fluid
+    T_fluid = 'T_fluid'
     T = T
     T_wall = T_wall
-    htc = htc
-    direction = y
-    num_layers = 10
+    htc = 'htc'
     multi_app = thm
-    T_fluid_user_object = T_uo
-    htc_user_object = Hw_uo
-  []
-[]
+    T_fluid_user_objects = 'T_uo'
+    htc_user_objects = 'Hw_uo'
 
-[Problem]
-  coord_type = RZ
+    position = '0 0 0'
+    orientation = '0 1 0'
+    length = 1
+    n_elems = 10
+    skip_coordinate_collapsing = true
+  []
 []
 
 [Executioner]

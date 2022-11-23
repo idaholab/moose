@@ -12,6 +12,7 @@ import subprocess
 from mooseutils import colorText
 from collections import OrderedDict
 import json
+import sys
 
 TERM_COLS = int(os.getenv('MOOSE_TERM_COLS', '110'))
 TERM_FORMAT = os.getenv('MOOSE_TERM_FORMAT', 'njcst')
@@ -518,7 +519,7 @@ def getLibtorchVersion(moose_dir):
     return major_version.pop() + '.' + minor_version.pop()
 
 def checkLogicVersionSingle(checks, iversion, package):
-    logic, version = re.search(r'(.*?)(\d\S+)', iversion).groups()
+    logic, version = re.search(r'(.*?)\s*(\d\S+)', iversion).groups()
     if logic == '' or logic == '=':
         if version == checks[package]:
             return True
@@ -797,9 +798,17 @@ def getExeJSON(exe):
     Extracts the JSON from the dump
     """
     output = runCommand("%s --json" % exe)
-    output = output.split('**START JSON DATA**\n')[1]
-    output = output.split('**END JSON DATA**\n')[0]
-    return json.loads(output)
+    try:
+        output = output.split('**START JSON DATA**\n')[1]
+        output = output.split('**END JSON DATA**\n')[0]
+        results = json.loads(output)
+    except IndexError:
+        print(f'{exe} --json, produced an error during execution')
+        sys.exit(1)
+    except json.decoder.JSONDecodeError:
+        print(f'{exe} --json, produced invalid JSON output')
+        sys.exit(1)
+    return results
 
 def getExeObjects(exe):
     """

@@ -22,7 +22,8 @@ NearestPointSurrogate::validParams()
 
 NearestPointSurrogate::NearestPointSurrogate(const InputParameters & parameters)
   : SurrogateModel(parameters),
-    _sample_points(getModelData<std::vector<std::vector<Real>>>("_sample_points"))
+    _sample_points(getModelData<std::vector<std::vector<Real>>>("_sample_points")),
+    _sample_results(getModelData<std::vector<std::vector<Real>>>("_sample_results"))
 {
 }
 
@@ -30,11 +31,30 @@ Real
 NearestPointSurrogate::evaluate(const std::vector<Real> & x) const
 {
   // Check whether input point has same dimensionality as training data
-  mooseAssert((_sample_points.size() - 1) == x.size(),
+  mooseAssert(_sample_points.size() == x.size(),
               "Input point does not match dimensionality of training data.");
 
-  // Returned value from training data (first sample is default)
-  Real val = _sample_points.back()[0];
+  return _sample_results[0][findNearestPoint(x)];
+}
+
+void
+NearestPointSurrogate::evaluate(const std::vector<Real> & x, std::vector<Real> & y) const
+{
+  mooseAssert(_sample_points.size() == x.size(),
+              "Input point does not match dimensionality of training data.");
+
+  y.assign(_sample_results.size(), 0.0);
+
+  unsigned int idx = findNearestPoint(x);
+
+  for (const auto & r : index_range(y))
+    y[r] = _sample_results[r][idx];
+}
+
+unsigned int
+NearestPointSurrogate::findNearestPoint(const std::vector<Real> & x) const
+{
+  unsigned int idx = 0;
 
   // Container of current minimum distance during training sample loop
   Real dist_min = std::numeric_limits<Real>::max();
@@ -52,10 +72,9 @@ NearestPointSurrogate::evaluate(const std::vector<Real> & x) const
     // Check if this training point distance is smaller than the current minimum
     if (dist < dist_min)
     {
-      val = _sample_points.back()[p];
+      idx = p;
       dist_min = dist;
     }
   }
-
-  return val;
+  return idx;
 }

@@ -1,0 +1,17 @@
+[Tests]
+  [test]
+    type = CSVDiff
+    input = '../thermal_solid_properties.i'
+    cli_args = "
+      solid_properties_class=ThermalMonolithicSiCProperties
+      file_base=monolithic_sic
+      T_min=200
+      T_max=2400
+      SolidProperties/sp/thermal_conductivity_model=SNEAD"
+    csvdiff = 'monolithic_sic_vpp_0000.csv'
+    mesh_mode = 'replicated' # see #21865
+    requirement = "The system shall compute thermal properties for monolithic silicon carbide."
+    design = 'ThermalMonolithicSiCProperties.md ThermalSolidPropertiesMaterial.md'
+    issues = '#12284'
+  []
+[]

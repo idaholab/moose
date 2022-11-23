@@ -42,19 +42,11 @@ LevelSetApp::registerApps()
   registerApp(LevelSetApp);
 }
 
-static void
-registerExecFlagsInner(Factory & factory)
-{
-  registerExecFlag(LevelSet::EXEC_ADAPT_MESH);
-  registerExecFlag(LevelSet::EXEC_COMPUTE_MARKERS);
-}
-
 void
 LevelSetApp::registerAll(Factory & f, ActionFactory & af, Syntax & /*s*/)
 {
   Registry::registerObjectsTo(f, {"LevelSetApp"});
   Registry::registerActionsTo(af, {"LevelSetApp"});
-  registerExecFlagsInner(f);
 }
 
 void
@@ -71,10 +63,9 @@ LevelSetApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory
   Registry::registerActionsTo(action_factory, {"LevelSetApp"});
 }
 void
-LevelSetApp::registerExecFlags(Factory & factory)
+LevelSetApp::registerExecFlags(Factory &)
 {
-  mooseDeprecated("use registerAll instead of registerExecFlags");
-  registerExecFlagsInner(factory);
+  mooseDeprecated("Do not use registerExecFlags, apps no longer require flag registration");
 }
 
 // Dynamic Library Entry Points - DO NOT MODIFY

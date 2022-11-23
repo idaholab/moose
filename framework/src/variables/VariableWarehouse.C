@@ -259,6 +259,13 @@ VariableWarehouse::timestepSetup()
 }
 
 void
+VariableWarehouse::customSetup(const ExecFlagType & exec_type)
+{
+  for (auto & pair : _all_objects)
+    pair.second->customSetup(exec_type);
+}
+
+void
 VariableWarehouse::subdomainSetup()
 {
   for (auto & pair : _all_objects)
@@ -284,6 +291,20 @@ VariableWarehouse::clearAllDofIndices()
 {
   for (auto * var : _vars)
     var->clearAllDofIndices();
+}
+
+void
+VariableWarehouse::setActiveVariableCoupleableVectorTags(const std::set<TagID> & vtags)
+{
+  for (auto * var : _vars)
+    var->setActiveTags(vtags);
+}
+
+void
+VariableWarehouse::setActiveScalarVariableCoupleableVectorTags(const std::set<TagID> & vtags)
+{
+  for (auto * var : _scalar_vars)
+    var->setActiveTags(vtags);
 }
 
 template MooseVariableField<Real> *

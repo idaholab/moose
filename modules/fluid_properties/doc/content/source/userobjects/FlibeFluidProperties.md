@@ -1,6 +1,6 @@
 # FlibeFluidProperties
 
-!syntax description /Modules/FluidProperties/FlibeFluidProperties
+!syntax description /FluidProperties/FlibeFluidProperties
 
 ## Description
 
@@ -46,8 +46,8 @@ pressure, the melting and boiling points of flibe are approximately 458$\degree$
 and 1400$\degree$C, respectively [!cite](richard). These fluid properties should
 not be used outside this range.
 
-!syntax parameters /Modules/FluidProperties/FlibeFluidProperties
+!syntax parameters /FluidProperties/FlibeFluidProperties
 
-!syntax inputs /Modules/FluidProperties/FlibeFluidProperties
+!syntax inputs /FluidProperties/FlibeFluidProperties
 
-!syntax children /Modules/FluidProperties/FlibeFluidProperties
+!syntax children /FluidProperties/FlibeFluidProperties

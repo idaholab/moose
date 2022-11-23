@@ -22,11 +22,6 @@ LagrangianStressDivergenceBase::validParams()
 
   params.addParam<std::string>("base_name", "Material property base name");
 
-  params.addRequiredRangeCheckedParam<unsigned int>("component",
-                                                    "component < 3",
-                                                    "An integer corresponding to the direction "
-                                                    "the variable this kernel acts in. (0 for x, "
-                                                    "1 for y, 2 for z)");
   params.addCoupledVar("temperature",
                        "The name of the temperature variable used in the "
                        "ComputeThermalExpansionEigenstrain.  (Not required for "
@@ -37,6 +32,9 @@ LagrangianStressDivergenceBase::validParams()
       "List of eigenstrains used in the strain calculation. Used for computing their derivatives "
       "for off-diagonal Jacobian terms.");
 
+  params.addCoupledVar("out_of_plane_strain",
+                       "The out-of-plane strain variable for weak plane stress formulation.");
+
   return params;
 }
 
@@ -45,10 +43,20 @@ LagrangianStressDivergenceBase::LagrangianStressDivergenceBase(const InputParame
     _large_kinematics(getParam<bool>("large_kinematics")),
     _stabilize_strain(getParam<bool>("stabilize_strain")),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
-    _component(getParam<unsigned int>("component")),
+    _alpha(getParam<unsigned int>("component")),
     _ndisp(coupledComponents("displacements")),
     _disp_nums(_ndisp),
-    _temperature(isCoupled("temperature") ? getVar("temperature", 0) : nullptr)
+    _avg_grad_trial(_ndisp),
+    _F_ust(
+        getMaterialPropertyByName<RankTwoTensor>(_base_name + "unstabilized_deformation_gradient")),
+    _F_avg(getMaterialPropertyByName<RankTwoTensor>(_base_name + "average_deformation_gradient")),
+    _f_inv(getMaterialPropertyByName<RankTwoTensor>(_base_name +
+                                                    "inverse_incremental_deformation_gradient")),
+    _F_inv(getMaterialPropertyByName<RankTwoTensor>(_base_name + "inverse_deformation_gradient")),
+    _F(getMaterialPropertyByName<RankTwoTensor>(_base_name + "deformation_gradient")),
+    _temperature(isCoupled("temperature") ? getVar("temperature", 0) : nullptr),
+    _out_of_plane_strain(isCoupled("out_of_plane_strain") ? getVar("out_of_plane_strain", 0)
+                                                          : nullptr)
 {
   // Do the vector coupling of the displacements
   for (unsigned int i = 0; i < _ndisp; i++)
@@ -73,74 +81,60 @@ LagrangianStressDivergenceBase::LagrangianStressDivergenceBase(const InputParame
 }
 
 void
-LagrangianStressDivergenceBase::computeResidual()
-{
-  precalculateResidual();
-  Kernel::computeResidual();
-}
-
-void
-LagrangianStressDivergenceBase::computeJacobian()
-{
-  precalculateJacobian();
-  Kernel::computeJacobian();
-}
-
-void
-LagrangianStressDivergenceBase::computeOffDiagJacobian(const unsigned int jvar)
-{
-  precalculateJacobian();
-  Kernel::computeOffDiagJacobian(jvar);
-}
-
-void
-LagrangianStressDivergenceBase::precalculateResidual()
-{
-  // i.e. do nothing by default
-}
-
-void
 LagrangianStressDivergenceBase::precalculateJacobian()
 {
-  // i.e. do nothing by default
+  // Skip if we are not doing stabilization
+  if (!_stabilize_strain)
+    return;
+
+  // We need the gradients of shape functions in the reference frame
+  _fe_problem.prepareShapes(_var.number(), _tid);
+  _avg_grad_trial[_alpha].resize(_phi.size());
+  precalculateJacobianDisplacement(_alpha);
 }
 
-RankTwoTensor
-LagrangianStressDivergenceBase::fullGrad(unsigned int m,
-                                         bool use_stable,
-                                         const RealGradient & base_grad,
-                                         const RealGradient & avg_grad)
+void
+LagrangianStressDivergenceBase::precalculateOffDiagJacobian(unsigned int jvar)
 {
-  // The trick here is for the standard solids formulation you can work
-  // with trial function gradient vectors (i.e. don't worry about the
-  // other displacement components).  However for the
-  // stabilized methods the "trace" term introduces non-zeros on
-  // m indices other than the current trial function index...
+  // Skip if we are not doing stabilization
+  if (!_stabilize_strain)
+    return;
 
-  // Certain "cross-jacobian" terms, like the updated geometric stiffness
-  // work better if you split things out into "stabilized" and "unstabilized"
-  // test/trial gradients, hence we have a bool to apply stabilization
-  // rather than rely on a property.
-
-  // So this is the base, unstabilized version of the gradient
-  // with zeros on the non-m rows
-
-  // Unstabilized first
-  RankTwoTensor G = gradOp(m, base_grad);
-
-  // And this adds  stabilization, only if required
-  if (use_stable)
-    return stabilizeGrad(G, gradOp(m, avg_grad));
-
-  return G;
+  for (auto beta : make_range(_ndisp))
+    if (jvar == _disp_nums[beta])
+    {
+      // We need the gradients of shape functions in the reference frame
+      _fe_problem.prepareShapes(jvar, _tid);
+      _avg_grad_trial[beta].resize(_phi.size());
+      precalculateJacobianDisplacement(beta);
+    }
 }
 
-RankTwoTensor
-LagrangianStressDivergenceBase::gradOp(unsigned int m, const RealGradient & grad)
+Real
+LagrangianStressDivergenceBase::computeQpJacobian()
 {
-  RankTwoTensor G;
-  for (size_t j = 0; j < _ndisp; j++)
-    G(m, j) = grad(j);
+  return computeQpJacobianDisplacement(_alpha, _alpha);
+}
 
-  return G;
+Real
+LagrangianStressDivergenceBase::computeQpOffDiagJacobian(unsigned int jvar)
+{
+  // Bail if jvar not coupled
+  if (getJvarMap()[jvar] < 0)
+    return 0.0;
+
+  // Off diagonal terms for other displacements
+  for (auto beta : make_range(_ndisp))
+    if (jvar == _disp_nums[beta])
+      return computeQpJacobianDisplacement(_alpha, beta);
+
+  // Off diagonal temperature term due to eigenstrain
+  if (_temperature && jvar == _temperature->number())
+    return computeQpJacobianTemperature(mapJvarToCvar(jvar));
+
+  // Off diagonal term due to weak plane stress
+  if (_out_of_plane_strain && jvar == _out_of_plane_strain->number())
+    return computeQpJacobianOutOfPlaneStrain();
+
+  return 0;
 }

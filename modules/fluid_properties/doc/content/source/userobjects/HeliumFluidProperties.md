@@ -1,6 +1,6 @@
 # HeliumFluidProperties
 
-!syntax description /Modules/FluidProperties/HeliumFluidProperties
+!syntax description /FluidProperties/HeliumFluidProperties
 
 ## Description
 
@@ -51,10 +51,10 @@ The HeliumFluidProperties UserObject is valid for:
 - 273.15 K $\le$ $T$ $\le$ 1800 K and
 - 0.1 MPa $\le$ $p$ $\le$ 10 MPa.
 
-!syntax parameters /Modules/FluidProperties/HeliumFluidProperties
+!syntax parameters /FluidProperties/HeliumFluidProperties
 
-!syntax inputs /Modules/FluidProperties/HeliumFluidProperties
+!syntax inputs /FluidProperties/HeliumFluidProperties
 
-!syntax children /Modules/FluidProperties/HeliumFluidProperties
+!syntax children /FluidProperties/HeliumFluidProperties
 
 !bibtex bibliography

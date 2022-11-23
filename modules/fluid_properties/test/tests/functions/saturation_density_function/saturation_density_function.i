@@ -10,20 +10,18 @@
   nx = 1
 []
 
-[Modules]
-  [FluidProperties]
-    [fp_liquid]
-      type = IdealGasFluidProperties
-    []
-    [fp_vapor]
-      type = IdealGasFluidProperties
-      molar_mass = 0.05
-    []
-    [fp_2phase]
-      type = TestTwoPhaseFluidProperties
-      fp_liquid = fp_liquid
-      fp_vapor = fp_vapor
-    []
+[FluidProperties]
+  [fp_liquid]
+    type = IdealGasFluidProperties
+  []
+  [fp_vapor]
+    type = IdealGasFluidProperties
+    molar_mass = 0.05
+  []
+  [fp_2phase]
+    type = TestTwoPhaseFluidProperties
+    fp_liquid = fp_liquid
+    fp_vapor = fp_vapor
   []
 []
 

@@ -13,8 +13,7 @@ for the fluid phase and
 \end{equation}
 for the solid phase, where $\epsilon$ is the porosity, $\rho_{f/s}$ the fluid/solid material density, $c_{pf/s}$ the fluid/solid specific heat and $T_{f/s}$ the fluid/solid temperature.
 
-The time derivatives of density and the specific heat capacity are ignored if [!param](/FVKernels/PINSFVEnergyTimeDerivative/drho_dt)
-and [!param](/FVKernels/PINSFVEnergyTimeDerivative/dcp_dt) are not provided. For incompressible flows, the former should not be provided.
+The time derivative of the density is ignored if [!param](/FVKernels/PINSFVEnergyTimeDerivative/drho_dt) is not provided. For incompressible flows, the former should not be provided.
 
 The variation of the kinetic energy is not considered in this kernel.
 

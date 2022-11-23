@@ -104,17 +104,24 @@ WCNSFVMixingLengthEnergyDiffusion::computeQpResidual()
 
   const auto dTdn = gradUDotNormal();
 
-  // Interpolate the heat capacity
-  const auto face_elem = elemFromFace();
-  const auto face_neighbor = neighborFromFace();
-
   ADReal rho_cp_face;
-  interpolate(Moose::FV::InterpMethod::Average,
-              rho_cp_face,
-              _rho(face_elem) * _cp(face_elem),
-              _rho(face_neighbor) * _cp(face_neighbor),
-              *_face_info,
-              true);
+  if (onBoundary(*_face_info))
+  {
+    const auto ssf = singleSidedFaceArg();
+    rho_cp_face = _rho(ssf) * _cp(ssf);
+  }
+  else
+  {
+    // Interpolate the heat capacity
+    const auto face_elem = elemFromFace();
+    const auto face_neighbor = neighborFromFace();
+    interpolate(Moose::FV::InterpMethod::Average,
+                rho_cp_face,
+                _rho(face_elem) * _cp(face_elem),
+                _rho(face_neighbor) * _cp(face_neighbor),
+                *_face_info,
+                true);
+  }
 
   return -1 * eddy_diff * rho_cp_face * dTdn;
 

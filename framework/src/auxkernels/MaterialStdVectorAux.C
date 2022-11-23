@@ -10,11 +10,13 @@
 #include "MaterialStdVectorAux.h"
 
 registerMooseObject("MooseApp", MaterialStdVectorAux);
+registerMooseObject("MooseApp", ADMaterialStdVectorAux);
 
+template <bool is_ad>
 InputParameters
-MaterialStdVectorAux::validParams()
+MaterialStdVectorAuxTempl<is_ad>::validParams()
 {
-  InputParameters params = MaterialStdVectorAuxBase<>::validParams();
+  InputParameters params = MaterialStdVectorAuxBaseTempl<Real, is_ad>::validParams();
   params.addClassDescription("Extracts a component of a material type std::vector<Real> to an aux "
                              "variable.  If the std::vector is not of sufficient size then zero is "
                              "returned");
@@ -27,15 +29,17 @@ MaterialStdVectorAux::validParams()
   return params;
 }
 
-MaterialStdVectorAux::MaterialStdVectorAux(const InputParameters & parameters)
-  : MaterialStdVectorAuxBase<Real>(parameters),
-    _has_selected_qp(isParamValid("selected_qp")),
-    _selected_qp(_has_selected_qp ? getParam<unsigned int>("selected_qp") : 0)
+template <bool is_ad>
+MaterialStdVectorAuxTempl<is_ad>::MaterialStdVectorAuxTempl(const InputParameters & parameters)
+  : MaterialStdVectorAuxBaseTempl<Real, is_ad>(parameters),
+    _has_selected_qp(this->isParamValid("selected_qp")),
+    _selected_qp(_has_selected_qp ? this->template getParam<unsigned int>("selected_qp") : 0)
 {
 }
 
+template <bool is_ad>
 Real
-MaterialStdVectorAux::getRealValue()
+MaterialStdVectorAuxTempl<is_ad>::getRealValue()
 {
   if (_has_selected_qp)
   {
@@ -48,8 +52,10 @@ MaterialStdVectorAux::getRealValue()
                  _q_point.size(),
                  " quadpoints in the element");
     }
-
-    return _prop[_selected_qp][_index];
+    return MetaPhysicL::raw_value(_prop[_selected_qp][_index]);
   }
-  return _prop[_qp][_index];
+  return MetaPhysicL::raw_value(_prop[_qp][_index]);
 }
+
+template class MaterialStdVectorAuxTempl<false>;
+template class MaterialStdVectorAuxTempl<true>;

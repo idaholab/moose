@@ -1,6 +1,6 @@
 [Tests]
   design = "ShellElements.md"
-  issues = "#14280"
+  issues = "#14280 #21384"
   [./beam_bending]
     type = 'Exodiff'
     input = 'beam_bending_moment_AD.i'
@@ -56,5 +56,40 @@
     exodiff = 'pinched_cylinder_symm_out.e'
 
     requirement = "The mechanics system shall accurately model the deflection of a pinched cylinder modeled when it is modeled using shell elements."
+  [../]
+  [./inclined_plane]
+    type = 'Exodiff'
+    input = inclined_straintest.i
+    exodiff = 'inclined_straintest_out.e'
+
+    requirement = "The mechanics system shall accurately model the deflection of a inclined shell elements."
+  [../]
+  [./straintest_axial]
+    type = 'Exodiff'
+    input = straintest.i
+    exodiff = 'straintest_out.e'
+
+    requirement = "The mechanics system shall accurately compute the axial stress and strain of the shell elements."
+  [../]
+  [./straintest_shear]
+    type = 'Exodiff'
+    input = straintest_shear.i
+    exodiff = 'straintest_shear_out.e'
+
+    requirement = "The mechanics system shall accurately compute the stress and strain of the shell elements subjected to shear deformation."
+  [../]
+  [./tapered]
+    type = 'Exodiff'
+    input = tapered.i
+    exodiff = 'tapered_out.e'
+
+    requirement = "The mechanics system shall accurately compute the stress and strain of the tapered shell elements."
+  [../]
+  [./qp_error]
+    type = 'RunException'
+    input = pressure_error.i
+    expect_err = 'Shell element needs to have exactly four quadrature points.'
+
+    requirement = "The system shall generate an error if the shell strain material is evaluated when the number of quadrature points does not equal 4."
   [../]
 []

@@ -42,21 +42,44 @@ public:
                   std::vector<Real> min = std::vector<Real>(),
                   std::vector<Real> max = std::vector<Real>());
 
+  /// Structure containing the optimization options for
+  /// hyperparameter-tuning
+  struct GPOptimizerOptions
+  {
+    /// Default constructor
+    GPOptimizerOptions();
+    /// Construct using user-input
+    GPOptimizerOptions(const MooseEnum & inp_opt_type,
+                       const std::string & inp_tao_options,
+                       const bool inp_show_optimization_details,
+                       const unsigned int inp_iter_adam_ = 1000,
+                       const unsigned int inp_batch_size = 0,
+                       const Real inp_learning_rate_adam = 1e-3);
+
+    /// The optimizer type
+    MooseEnum opt_type = MooseEnum("adam tao none", "adam");
+    /// String defining the options for TAO optimizers
+    std::string tao_options = "";
+    /// Switch to enable verbose output for parameter tuning
+    bool show_optimization_details = false;
+    /// The number of iterations for Adam optimizer
+    unsigned int iter_adam = 1000;
+    /// The batch isize for Adam optimizer
+    unsigned int batch_size = 0;
+    /// The learning rate for Adam optimizer
+    Real learning_rate_adam = 1e-3;
+  };
   /**
    * Sets up the covariance matrix given data and optimization options.
    * @param training_params The training parameter values (x values) for the
    *                        covariance matrix.
    * @param training_data The training data (y values) for the inversion of the
    *                      covariance matrix.
-   * @param opt_type The optimization algorithm for the hyperparameters.
-   * @param tao_options Additional options if TAO is used for parameter optimization.
-   * @param show_tao Switch to show details of TAO optimization.
+   * @param opts The optimizer options.
    */
   void setupCovarianceMatrix(const RealEigenMatrix & training_params,
                              const RealEigenMatrix & training_data,
-                             MooseEnum opt_type,
-                             std::string tao_options = "",
-                             bool show_tao = false);
+                             const GPOptimizerOptions & opts);
 
   /**
    * Sets up the Cholesky decomposition and inverse action of the covariance matrix.
@@ -103,12 +126,12 @@ public:
    * @param training_data The training data (y values) for the inversion of the
    *                      covariance matrix.
    * @param tao_options Additional options for TAO.
-   * @param show_tao Switch to show details of TAO optimization.
+   * @param show_optimization_details Switch to show details of TAO or Adam optimization.
    */
   PetscErrorCode tuneHyperParamsTAO(const RealEigenMatrix & training_params,
                                     const RealEigenMatrix & training_data,
                                     std::string tao_options = "",
-                                    bool show_tao = false);
+                                    bool verbose = false);
 
   /// Used to form initial guesses in the TAO optimization routines
   PetscErrorCode formInitialGuessTAO(Vec theta_vec);
@@ -121,8 +144,22 @@ public:
   static PetscErrorCode
   formFunctionGradientWrapper(Tao tao, Vec theta, PetscReal * f, Vec Grad, void * ptr);
 
-  // Computes Gradient of the loss function
+  // Computes Gradient of the loss function for TAO usage
   void formFunctionGradient(Tao tao, Vec theta, PetscReal * f, Vec Grad);
+
+  // Tune hyperparameters using Adam
+  void tuneHyperParamsAdam(const RealEigenMatrix & training_params,
+                           const RealEigenMatrix & training_data,
+                           unsigned int iter,
+                           const unsigned int & batch_size,
+                           const Real & learning_rate,
+                           const bool & verbose);
+
+  // Computes the loss function for Adam usage
+  Real getLossAdam(RealEigenMatrix & inputs, RealEigenMatrix & outputs);
+
+  // Computes Gradient of the loss function for Adam usage
+  std::vector<Real> getGradientAdam(RealEigenMatrix & inputs);
 
   /// Function used to convert the hyperparameter maps in this object to
   /// Petsc vectors
@@ -227,6 +264,9 @@ protected:
 
   /// Data (y) used for training
   const RealEigenMatrix * _training_data;
+
+  /// The batch size for Adam optimization
+  unsigned int _batch_size;
 };
 
 } // StochasticTools namespac

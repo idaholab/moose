@@ -24,6 +24,7 @@ public:
   virtual void initialize() override;
   virtual void execute() override;
   virtual Real getValue() override;
+  virtual void finalize() override;
 
   /**
    * The method called to compute the value that will be returned

@@ -23,7 +23,7 @@ public:
    */
   static InputParameters validParams();
 
-  AddAuxVariableAction(InputParameters params);
+  AddAuxVariableAction(const InputParameters & params);
 
   /**
    * Returns available families for AuxVariables

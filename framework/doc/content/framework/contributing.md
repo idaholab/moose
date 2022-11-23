@@ -9,7 +9,7 @@ time on something that is already possible. MOOSE has broad capabilities and an 
 engaging in the community will certainly be beneficial.
 
 !style halign=center
-[+Start a Discussion+](https://github.com/idaholab/discussions)
+[+Start a Discussion+](https://github.com/idaholab/moose/discussions)
 
 !alert-end!
 

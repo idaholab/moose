@@ -74,6 +74,7 @@
 #include "FVElementalKernel.h"
 #include "FVScalarLagrangeMultiplierConstraint.h"
 #include "FVFluxKernel.h"
+#include "FVScalarLagrangeMultiplierInterface.h"
 #include "UserObject.h"
 #include "OffDiagonalScalingMatrix.h"
 
@@ -290,49 +291,40 @@ NonlinearSystemBase::initialSetup()
   {
     TIME_SECTION("mortarSetup", 2, "Initializing Mortar Interfaces");
 
-    // go over mortar interfaces and construct functors
-    const auto & undisplaced_mortar_interfaces =
-        _fe_problem.getMortarInterfaces(/*displaced=*/false);
-    for (const auto & mortar_interface : undisplaced_mortar_interfaces)
+    auto create_mortar_functors = [this](const bool displaced)
     {
-      const auto primary_secondary_boundary_pair = mortar_interface.first;
-      if (!_constraints.hasActiveMortarConstraints(primary_secondary_boundary_pair, false))
-        continue;
+      // go over mortar interfaces and construct functors
+      const auto & mortar_interfaces = _fe_problem.getMortarInterfaces(displaced);
+      for (const auto & mortar_interface : mortar_interfaces)
+      {
+        const auto primary_secondary_boundary_pair = mortar_interface.first;
+        if (!_constraints.hasActiveMortarConstraints(primary_secondary_boundary_pair, displaced))
+          continue;
 
-      const auto & mortar_generation_object = mortar_interface.second;
+        const auto & mortar_generation_object = mortar_interface.second;
 
-      auto & mortar_constraints = _constraints.getActiveMortarConstraints(
-          primary_secondary_boundary_pair, /*displaced=*/false);
+        auto & mortar_constraints =
+            _constraints.getActiveMortarConstraints(primary_secondary_boundary_pair, displaced);
 
-      _undisplaced_mortar_functors.emplace(primary_secondary_boundary_pair,
-                                           ComputeMortarFunctor(mortar_constraints,
-                                                                mortar_generation_object,
-                                                                _fe_problem,
-                                                                _fe_problem,
-                                                                /*displaced=*/false));
-    }
+        auto & subproblem = displaced
+                                ? static_cast<SubProblem &>(*_fe_problem.getDisplacedProblem())
+                                : static_cast<SubProblem &>(_fe_problem);
 
-    const auto & displaced_mortar_interfaces = _fe_problem.getMortarInterfaces(/*displaced=*/true);
-    for (const auto & mortar_interface : displaced_mortar_interfaces)
-    {
-      mooseAssert(_fe_problem.getDisplacedProblem(),
-                  "Cannot create displaced mortar functors when the displaced problem is null");
-      const auto primary_secondary_boundary_pair = mortar_interface.first;
-      if (!_constraints.hasActiveMortarConstraints(primary_secondary_boundary_pair, true))
-        continue;
+        auto & mortar_functors =
+            displaced ? _displaced_mortar_functors : _undisplaced_mortar_functors;
 
-      const auto & mortar_generation_object = mortar_interface.second;
+        mortar_functors.emplace(primary_secondary_boundary_pair,
+                                ComputeMortarFunctor(mortar_constraints,
+                                                     mortar_generation_object,
+                                                     subproblem,
+                                                     _fe_problem,
+                                                     displaced,
+                                                     subproblem.assembly(0, number())));
+      }
+    };
 
-      auto & mortar_constraints = _constraints.getActiveMortarConstraints(
-          primary_secondary_boundary_pair, /*displaced=*/true);
-
-      _displaced_mortar_functors.emplace(primary_secondary_boundary_pair,
-                                         ComputeMortarFunctor(mortar_constraints,
-                                                              mortar_generation_object,
-                                                              *_fe_problem.getDisplacedProblem(),
-                                                              _fe_problem,
-                                                              /*displaced=*/true));
-    }
+    create_mortar_functors(false);
+    create_mortar_functors(true);
   }
 
   if (_automatic_scaling)
@@ -396,6 +388,60 @@ NonlinearSystemBase::timestepSetup()
   _constraints.timestepSetup();
   _general_dampers.timestepSetup();
   _nodal_bcs.timestepSetup();
+}
+
+void
+NonlinearSystemBase::customSetup(const ExecFlagType & exec_type)
+{
+  SystemBase::customSetup(exec_type);
+
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  {
+    _kernels.customSetup(exec_type, tid);
+    _nodal_kernels.customSetup(exec_type, tid);
+    _dirac_kernels.customSetup(exec_type, tid);
+    if (_doing_dg)
+      _dg_kernels.customSetup(exec_type, tid);
+    _interface_kernels.customSetup(exec_type, tid);
+    _element_dampers.customSetup(exec_type, tid);
+    _nodal_dampers.customSetup(exec_type, tid);
+    _integrated_bcs.customSetup(exec_type, tid);
+
+    if (_fe_problem.haveFV())
+    {
+      std::vector<FVFluxBC *> bcs;
+      _fe_problem.theWarehouse()
+          .query()
+          .template condition<AttribSystem>("FVFluxBC")
+          .template condition<AttribThread>(tid)
+          .queryInto(bcs);
+
+      std::vector<FVInterfaceKernel *> iks;
+      _fe_problem.theWarehouse()
+          .query()
+          .template condition<AttribSystem>("FVInterfaceKernel")
+          .template condition<AttribThread>(tid)
+          .queryInto(iks);
+
+      std::vector<FVFluxKernel *> kernels;
+      _fe_problem.theWarehouse()
+          .query()
+          .template condition<AttribSystem>("FVFluxKernel")
+          .template condition<AttribThread>(tid)
+          .queryInto(kernels);
+
+      for (auto * bc : bcs)
+        bc->customSetup(exec_type);
+      for (auto * ik : iks)
+        ik->customSetup(exec_type);
+      for (auto * kernel : kernels)
+        kernel->customSetup(exec_type);
+    }
+  }
+  _scalar_kernels.customSetup(exec_type);
+  _constraints.customSetup(exec_type);
+  _general_dampers.customSetup(exec_type);
+  _nodal_bcs.customSetup(exec_type);
 }
 
 void
@@ -693,7 +739,6 @@ NonlinearSystemBase::zeroVectorForResidual(const std::string & vector_name)
 void
 NonlinearSystemBase::computeResidualTag(NumericVector<Number> & residual, TagID tag_id)
 {
-
   _nl_vector_tags.clear();
   _nl_vector_tags.insert(tag_id);
   _nl_vector_tags.insert(residualVectorTag());
@@ -718,6 +763,7 @@ NonlinearSystemBase::computeResidualTags(const std::set<TagID> & tags)
 {
   TIME_SECTION("nl::computeResidualTags", 5);
 
+  _fe_problem.setCurrentNonlinearSystem(number());
   _fe_problem.setCurrentlyComputingResidual(true);
 
   bool required_residual = tags.find(residualVectorTag()) == tags.end() ? false : true;
@@ -1457,7 +1503,7 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
 void
 NonlinearSystemBase::residualSetup()
 {
-  TIME_SECTION("computeResidualInternal", 3);
+  TIME_SECTION("residualSetup", 3);
 
   SystemBase::residualSetup();
 
@@ -1869,7 +1915,7 @@ NonlinearSystemBase::computeNodalBCsResidualAndJacobian()
   PARALLEL_CATCH;
 
   // Set the cached NodalBCBase values in the Jacobian matrix
-  _fe_problem.assembly(0).setCachedJacobian();
+  _fe_problem.assembly(0, number()).setCachedJacobian();
 }
 
 void
@@ -2136,26 +2182,27 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
                     nfc->overwriteSecondaryJacobian() ? 1. : nfc->variable().scalingFactor();
 
                 // Cache the jacobian block for the secondary side
-                _fe_problem.assembly(0).cacheJacobianBlock(
-                    nfc->_Kee, secondary_dofs, nfc->_connected_dof_indices, scaling_factor);
+                _fe_problem.assembly(0, number())
+                    .cacheJacobianBlock(
+                        nfc->_Kee, secondary_dofs, nfc->_connected_dof_indices, scaling_factor);
 
                 // Cache Ken, Kne, Knn
                 if (nfc->addCouplingEntriesToJacobian())
                 {
                   // Make sure we use a proper scaling factor (e.g. don't use an interior scaling
                   // factor when we're overwriting secondary stuff)
-                  _fe_problem.assembly(0).cacheJacobianBlock(
-                      nfc->_Ken,
-                      secondary_dofs,
-                      nfc->primaryVariable().dofIndicesNeighbor(),
-                      scaling_factor);
+                  _fe_problem.assembly(0, number())
+                      .cacheJacobianBlock(nfc->_Ken,
+                                          secondary_dofs,
+                                          nfc->primaryVariable().dofIndicesNeighbor(),
+                                          scaling_factor);
 
                   // Use _connected_dof_indices to get all the correct columns
-                  _fe_problem.assembly(0).cacheJacobianBlock(
-                      nfc->_Kne,
-                      nfc->primaryVariable().dofIndicesNeighbor(),
-                      nfc->_connected_dof_indices,
-                      nfc->variable().scalingFactor());
+                  _fe_problem.assembly(0, number())
+                      .cacheJacobianBlock(nfc->_Kne,
+                                          nfc->primaryVariable().dofIndicesNeighbor(),
+                                          nfc->_connected_dof_indices,
+                                          nfc->variable().scalingFactor());
 
                   // We've handled Ken and Kne, finally handle Knn
                   _fe_problem.cacheJacobianNeighbor(0);
@@ -2184,22 +2231,25 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
                   nfc->computeOffDiagJacobian(jvar->number());
 
                   // Cache the jacobian block for the secondary side
-                  _fe_problem.assembly(0).cacheJacobianBlock(
-                      nfc->_Kee, secondary_dofs, nfc->_connected_dof_indices, scaling_factor);
+                  _fe_problem.assembly(0, number())
+                      .cacheJacobianBlock(
+                          nfc->_Kee, secondary_dofs, nfc->_connected_dof_indices, scaling_factor);
 
                   // Cache Ken, Kne, Knn
                   if (nfc->addCouplingEntriesToJacobian())
                   {
                     // Make sure we use a proper scaling factor (e.g. don't use an interior scaling
                     // factor when we're overwriting secondary stuff)
-                    _fe_problem.assembly(0).cacheJacobianBlock(
-                        nfc->_Ken, secondary_dofs, jvar->dofIndicesNeighbor(), scaling_factor);
+                    _fe_problem.assembly(0, number())
+                        .cacheJacobianBlock(
+                            nfc->_Ken, secondary_dofs, jvar->dofIndicesNeighbor(), scaling_factor);
 
                     // Use _connected_dof_indices to get all the correct columns
-                    _fe_problem.assembly(0).cacheJacobianBlock(nfc->_Kne,
-                                                               nfc->variable().dofIndicesNeighbor(),
-                                                               nfc->_connected_dof_indices,
-                                                               nfc->variable().scalingFactor());
+                    _fe_problem.assembly(0, number())
+                        .cacheJacobianBlock(nfc->_Kne,
+                                            nfc->variable().dofIndicesNeighbor(),
+                                            nfc->_connected_dof_indices,
+                                            nfc->variable().scalingFactor());
 
                     // We've handled Ken and Kne, finally handle Knn
                     _fe_problem.cacheJacobianNeighbor(0);
@@ -2366,17 +2416,18 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
                 std::vector<dof_id_type> secondary_dofs(1, nec->variable().nodalDofIndex());
 
                 // Cache the jacobian block for the secondary side
-                _fe_problem.assembly(0).cacheJacobianBlock(nec->_Kee,
-                                                           secondary_dofs,
-                                                           nec->_connected_dof_indices,
-                                                           nec->variable().scalingFactor());
+                _fe_problem.assembly(0, number())
+                    .cacheJacobianBlock(nec->_Kee,
+                                        secondary_dofs,
+                                        nec->_connected_dof_indices,
+                                        nec->variable().scalingFactor());
 
                 // Cache the jacobian block for the primary side
-                _fe_problem.assembly(0).cacheJacobianBlock(
-                    nec->_Kne,
-                    nec->primaryVariable().dofIndicesNeighbor(),
-                    nec->_connected_dof_indices,
-                    nec->variable().scalingFactor());
+                _fe_problem.assembly(0, number())
+                    .cacheJacobianBlock(nec->_Kne,
+                                        nec->primaryVariable().dofIndicesNeighbor(),
+                                        nec->_connected_dof_indices,
+                                        nec->variable().scalingFactor());
 
                 _fe_problem.cacheJacobian(0);
                 _fe_problem.cacheJacobianNeighbor(0);
@@ -2404,16 +2455,18 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
                   nec->computeOffDiagJacobian(jvar->number());
 
                   // Cache the jacobian block for the secondary side
-                  _fe_problem.assembly(0).cacheJacobianBlock(nec->_Kee,
-                                                             secondary_dofs,
-                                                             nec->_connected_dof_indices,
-                                                             nec->variable().scalingFactor());
+                  _fe_problem.assembly(0, number())
+                      .cacheJacobianBlock(nec->_Kee,
+                                          secondary_dofs,
+                                          nec->_connected_dof_indices,
+                                          nec->variable().scalingFactor());
 
                   // Cache the jacobian block for the primary side
-                  _fe_problem.assembly(0).cacheJacobianBlock(nec->_Kne,
-                                                             nec->variable().dofIndicesNeighbor(),
-                                                             nec->_connected_dof_indices,
-                                                             nec->variable().scalingFactor());
+                  _fe_problem.assembly(0, number())
+                      .cacheJacobianBlock(nec->_Kne,
+                                          nec->variable().dofIndicesNeighbor(),
+                                          nec->_connected_dof_indices,
+                                          nec->variable().scalingFactor());
 
                   _fe_problem.cacheJacobian(0);
                   _fe_problem.cacheJacobianNeighbor(0);
@@ -2516,6 +2569,8 @@ NonlinearSystemBase::jacobianSetup()
 void
 NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
 {
+  _fe_problem.setCurrentNonlinearSystem(number());
+
   // Make matrix ready to use
   activeAllMatrixTags();
 
@@ -2576,7 +2631,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
       unsigned int n_threads = libMesh::n_threads();
       for (unsigned int i = 0; i < n_threads;
            i++) // Add any cached jacobians that might be hanging around
-        _fe_problem.assembly(i).addCachedJacobian();
+        _fe_problem.assembly(i, number()).addCachedJacobian();
     }
 
     if (_fe_problem.haveFV())
@@ -2635,7 +2690,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
           unsigned int n_threads = libMesh::n_threads();
           for (unsigned int i = 0; i < n_threads;
                i++) // Add any cached jacobians that might be hanging around
-            _fe_problem.assembly(i).addCachedJacobian();
+            _fe_problem.assembly(i, number()).addCachedJacobian();
         }
       }
       break;
@@ -2660,7 +2715,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
           unsigned int n_threads = libMesh::n_threads();
           for (unsigned int i = 0; i < n_threads;
                i++) // Add any cached jacobians that might be hanging around
-            _fe_problem.assembly(i).addCachedJacobian();
+            _fe_problem.assembly(i, number()).addCachedJacobian();
         }
       }
       break;
@@ -2805,7 +2860,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
     } // end loop over boundary nodes
 
     // Set the cached NodalBCBase values in the Jacobian matrix
-    _fe_problem.assembly(0).setCachedJacobian();
+    _fe_problem.assembly(0, number()).setCachedJacobian();
   }
   PARALLEL_CATCH;
 
@@ -3340,6 +3395,16 @@ NonlinearSystemBase::checkKernelCoverage(const std::set<SubdomainID> & mesh_subd
         global_kernels_exist = true;
       kernel_variables.insert(fv_kernel->variable().name());
     }
+
+    std::vector<FVInterfaceKernel *> fv_interface_kernels;
+    _fe_problem.theWarehouse()
+        .query()
+        .template condition<AttribSystem>("FVInterfaceKernel")
+        .queryInto(fv_interface_kernels);
+
+    for (auto fvik : fv_interface_kernels)
+      if (auto scalar_fvik = dynamic_cast<FVScalarLagrangeMultiplierInterface *>(fvik))
+        kernel_variables.insert(scalar_fvik->lambdaVariable().name());
   }
 
   // Check kernel coverage of subdomains (blocks) in your mesh
@@ -3496,34 +3561,42 @@ NonlinearSystemBase::setupScalingData()
   if (_auto_scaling_initd)
     return;
 
-  const auto & field_variables = _vars[0].fieldVariables();
+  // Want the libMesh count of variables, not MOOSE, e.g. I don't care about array variable counts
+  const auto n_vars = system().n_vars();
 
   if (_scaling_group_variables.empty())
   {
-    _var_to_group_var.reserve(field_variables.size());
-    _num_scaling_groups = field_variables.size();
+    _var_to_group_var.reserve(n_vars);
+    _num_scaling_groups = n_vars;
 
-    for (auto & field_var : field_variables)
-      _var_to_group_var.insert(std::make_pair(field_var->number(), field_var->number()));
+    for (const auto var_number : make_range(n_vars))
+      _var_to_group_var.emplace(var_number, var_number);
   }
   else
   {
     std::set<unsigned int> var_numbers, var_numbers_covered, var_numbers_not_covered;
-    for (const auto & field_var : field_variables)
-      var_numbers.insert(field_var->number());
+    for (const auto var_number : make_range(n_vars))
+      var_numbers.insert(var_number);
 
     _num_scaling_groups = _scaling_group_variables.size();
 
-    for (MooseIndex(_scaling_group_variables) group_index = 0;
-         group_index < _scaling_group_variables.size();
-         ++group_index)
+    for (const auto group_index : index_range(_scaling_group_variables))
       for (const auto & var_name : _scaling_group_variables[group_index])
       {
-        auto & fe_var = getVariable(/*tid=*/0, var_name);
-        auto map_pair = _var_to_group_var.insert(std::make_pair(fe_var.number(), group_index));
+        if (!hasVariable(var_name) && !hasScalarVariable(var_name))
+          mooseError("'",
+                     var_name,
+                     "', provided to the 'scaling_group_variables' parameter, does not exist in "
+                     "the nonlinear system.");
+
+        const MooseVariableBase & var =
+            hasVariable(var_name)
+                ? static_cast<MooseVariableBase &>(getVariable(0, var_name))
+                : static_cast<MooseVariableBase &>(getScalarVariable(0, var_name));
+        auto map_pair = _var_to_group_var.emplace(var.number(), group_index);
         if (!map_pair.second)
           mooseError("Variable ", var_name, " is contained in multiple scaling grouplings");
-        var_numbers_covered.insert(fe_var.number());
+        var_numbers_covered.insert(var.number());
       }
 
     std::set_difference(var_numbers.begin(),
@@ -3536,26 +3609,19 @@ NonlinearSystemBase::setupScalingData()
 
     auto index = static_cast<unsigned int>(_scaling_group_variables.size());
     for (auto var_number : var_numbers_not_covered)
-      _var_to_group_var.insert(std::make_pair(var_number, index++));
+      _var_to_group_var.emplace(var_number, index++);
   }
 
-  const auto & scalar_variables = _vars[0].scalars();
-  _field_variable_autoscaled.resize(field_variables.size(), true);
-  _scalar_variable_autoscaled.resize(scalar_variables.size(), true);
+  _variable_autoscaled.resize(n_vars, true);
+  const auto & number_to_var_map = _vars[0].numberToVariableMap();
 
   if (_ignore_variables_for_autoscaling.size())
-  {
-    for (MooseIndex(_field_variable_autoscaled) i = 0; i < _field_variable_autoscaled.size(); ++i)
+    for (const auto i : index_range(_variable_autoscaled))
       if (std::find(_ignore_variables_for_autoscaling.begin(),
                     _ignore_variables_for_autoscaling.end(),
-                    (*field_variables[i]).name()) != _ignore_variables_for_autoscaling.end())
-        _field_variable_autoscaled[i] = false;
-    for (MooseIndex(_scalar_variable_autoscaled) i = 0; i < _scalar_variable_autoscaled.size(); ++i)
-      if (std::find(_ignore_variables_for_autoscaling.begin(),
-                    _ignore_variables_for_autoscaling.end(),
-                    (*scalar_variables[i]).name()) != _ignore_variables_for_autoscaling.end())
-        _scalar_variable_autoscaled[i] = false;
-  }
+                    libmesh_map_find(number_to_var_map, i)->name()) !=
+          _ignore_variables_for_autoscaling.end())
+        _variable_autoscaled[i] = false;
 }
 
 void
@@ -3577,12 +3643,9 @@ NonlinearSystemBase::computeScaling()
   if (!_auto_scaling_initd)
     setupScalingData();
 
-  auto & field_variables = _vars[0].fieldVariables();
-  auto & scalar_variables = _vars[0].scalars();
-
-  std::vector<Real> inverse_scaling_factors(_num_scaling_groups + scalar_variables.size(), 0);
-  std::vector<Real> resid_inverse_scaling_factors(_num_scaling_groups + scalar_variables.size(), 0);
-  std::vector<Real> jac_inverse_scaling_factors(_num_scaling_groups + scalar_variables.size(), 0);
+  std::vector<Real> inverse_scaling_factors(_num_scaling_groups, 0);
+  std::vector<Real> resid_inverse_scaling_factors(_num_scaling_groups, 0);
+  std::vector<Real> jac_inverse_scaling_factors(_num_scaling_groups, 0);
   auto & dof_map = dofMap();
 
   // what types of scaling do we want?
@@ -3623,58 +3686,47 @@ NonlinearSystemBase::computeScaling()
     _fe_problem.computingScalingResidual(false);
   }
 
+  auto examine_dof_indices = [this,
+                              jac_scaling,
+                              resid_scaling,
+                              &dof_map,
+                              &jac_inverse_scaling_factors,
+                              &resid_inverse_scaling_factors,
+                              &scaling_residual](const auto & dof_indices, const auto var_number)
+  {
+    for (auto dof_index : dof_indices)
+      if (dof_map.local_index(dof_index))
+      {
+        if (jac_scaling)
+        {
+          // For now we will use the diagonal for determining scaling
+          auto mat_value = (*_scaling_matrix)(dof_index, dof_index);
+          auto & factor = jac_inverse_scaling_factors[_var_to_group_var[var_number]];
+          factor = std::max(factor, std::abs(mat_value));
+        }
+        if (resid_scaling)
+        {
+          auto vec_value = scaling_residual(dof_index);
+          auto & factor = resid_inverse_scaling_factors[_var_to_group_var[var_number]];
+          factor = std::max(factor, std::abs(vec_value));
+        }
+      }
+  };
+
   // Compute our scaling factors for the spatial field variables
   for (const auto & elem : *mesh().getActiveLocalElementRange())
-    for (MooseIndex(field_variables) i = 0; i < field_variables.size(); ++i)
-      if (_field_variable_autoscaled[i])
+    for (const auto i : make_range(system().n_vars()))
+      if (_variable_autoscaled[i] && system().variable_type(i).family != SCALAR)
       {
-        auto & field_variable = *field_variables[i];
-        auto var_number = field_variable.number();
-        dof_map.dof_indices(elem, dof_indices, var_number);
-        for (auto dof_index : dof_indices)
-          if (dof_map.local_index(dof_index))
-          {
-            if (jac_scaling)
-            {
-              // For now we will use the diagonal for determining scaling
-              auto mat_value = (*_scaling_matrix)(dof_index, dof_index);
-              auto & factor = jac_inverse_scaling_factors[_var_to_group_var[var_number]];
-              factor = std::max(factor, std::abs(mat_value));
-            }
-            if (resid_scaling)
-            {
-              auto vec_value = scaling_residual(dof_index);
-              auto & factor = resid_inverse_scaling_factors[_var_to_group_var[var_number]];
-              factor = std::max(factor, std::abs(vec_value));
-            }
-          }
+        dof_map.dof_indices(elem, dof_indices, i);
+        examine_dof_indices(dof_indices, i);
       }
 
-  auto offset = _num_scaling_groups;
-
-  // Compute scalar factors for scalar variables
-  for (MooseIndex(scalar_variables) i = 0; i < scalar_variables.size(); ++i)
-    if (_scalar_variable_autoscaled[i])
+  for (const auto i : make_range(system().n_vars()))
+    if (_variable_autoscaled[i] && system().variable_type(i).family == SCALAR)
     {
-      auto & scalar_variable = *scalar_variables[i];
-      dof_map.SCALAR_dof_indices(dof_indices, scalar_variable.number());
-      for (auto dof_index : dof_indices)
-        if (dof_map.local_index(dof_index))
-        {
-          if (jac_scaling)
-          {
-            // For now we will use the diagonal for determining scaling
-            auto mat_value = (*_scaling_matrix)(dof_index, dof_index);
-            jac_inverse_scaling_factors[offset + i] =
-                std::max(jac_inverse_scaling_factors[offset + i], std::abs(mat_value));
-          }
-          if (resid_scaling)
-          {
-            auto vec_value = scaling_residual(dof_index);
-            resid_inverse_scaling_factors[offset + i] =
-                std::max(resid_inverse_scaling_factors[offset + i], std::abs(vec_value));
-          }
-        }
+      dof_map.SCALAR_dof_indices(dof_indices, i);
+      examine_dof_indices(dof_indices, i);
     }
 
   if (resid_scaling)
@@ -3714,17 +3766,15 @@ NonlinearSystemBase::computeScaling()
       scaling_factor = 1;
 
   // Now flatten the group scaling factors to the individual variable scaling factors
-  std::vector<Real> flattened_inverse_scaling_factors(field_variables.size() +
-                                                      scalar_variables.size());
-  for (MooseIndex(field_variables) i = 0; i < field_variables.size(); ++i)
+  std::vector<Real> flattened_inverse_scaling_factors(system().n_vars());
+  for (const auto i : index_range(flattened_inverse_scaling_factors))
     flattened_inverse_scaling_factors[i] = inverse_scaling_factors[_var_to_group_var[i]];
-  for (MooseIndex(scalar_variables) i = 0; i < scalar_variables.size(); ++i)
-    flattened_inverse_scaling_factors[i + offset] = inverse_scaling_factors[i + offset];
 
   // Now set the scaling factors for the variables
   applyScalingFactors(flattened_inverse_scaling_factors);
   if (auto displaced_problem = _fe_problem.getDisplacedProblem().get())
-    displaced_problem->systemBaseNonlinear().applyScalingFactors(flattened_inverse_scaling_factors);
+    displaced_problem->systemBaseNonlinear(number()).applyScalingFactors(
+        flattened_inverse_scaling_factors);
 
   _auto_scaling_initd = true;
 }
@@ -3772,6 +3822,6 @@ NonlinearSystemBase::assembleScalingVector()
 
   if (auto * displaced_problem = _fe_problem.getDisplacedProblem().get())
     // copy into the corresponding displaced system vector because they should be the exact same
-    displaced_problem->systemBaseNonlinear().getVector("scaling_factors") = scaling_vector;
+    displaced_problem->systemBaseNonlinear(number()).getVector("scaling_factors") = scaling_vector;
 }
 #endif

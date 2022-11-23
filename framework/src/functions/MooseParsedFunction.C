@@ -13,6 +13,7 @@
 #include "InputParameters.h"
 #include "MooseParsedFunction.h"
 #include "MooseParsedFunctionWrapper.h"
+#include "FEProblemBase.h"
 
 registerMooseObjectAliased("MooseApp", MooseParsedFunction, "ParsedFunction");
 registerMooseObjectAliased("MooseApp", ADMooseParsedFunction, "ADParsedFunction");
@@ -43,6 +44,7 @@ template <typename T>
 Real
 MooseParsedFunctionTempl<T>::value(Real t, const Point & p) const
 {
+  mooseAssert(_function_ptr, "ParsedFunction should have been initialized");
   return _function_ptr->evaluate<Real>(t, p);
 }
 
@@ -50,6 +52,7 @@ template <typename T>
 RealGradient
 MooseParsedFunctionTempl<T>::gradient(Real t, const Point & p) const
 {
+  mooseAssert(_function_ptr, "ParsedFunction should have been initialized");
   return _function_ptr->evaluateGradient(t, p);
 }
 
@@ -57,6 +60,7 @@ template <typename T>
 Real
 MooseParsedFunctionTempl<T>::timeDerivative(Real t, const Point & p) const
 {
+  mooseAssert(_function_ptr, "ParsedFunction should have been initialized");
   return _function_ptr->evaluateDot(t, p);
 }
 
@@ -71,6 +75,21 @@ template <typename T>
 void
 MooseParsedFunctionTempl<T>::initialSetup()
 {
+  for (const auto i : index_range(_vars))
+  {
+    // Check for non-scalar variables.
+    // First, see if the var is actually assigned to a proper scalar value
+    if (_pfb_feproblem.hasVariable(_vars[i]) && _pfb_feproblem.hasVariable(_vals[i]))
+    {
+      // Then see if the var has the same name as a function or postprocessor
+      if (!_pfb_feproblem.hasFunction(_vars[i]) &&
+          !_pfb_feproblem.hasPostprocessorValueByName(_vars[i]))
+        mooseError(
+            "The only variables supported by ParsedFunction are scalar variables, and var '" +
+            _vars[i] + "' is not scalar.");
+    }
+  }
+
   if (!_function_ptr)
   {
     THREAD_ID tid = 0;

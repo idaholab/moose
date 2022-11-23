@@ -457,9 +457,11 @@ Parser::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node * 
   if (iters.first == iters.second)
   {
     _errmsg += hit::errormsg(n,
-                             "section '",
+                             "section '[",
                              curr_identifier,
-                             "' does not have an associated \"Action\".\nDid you misspell it?") +
+                             "]' does not have an associated \"Action\".\n Common causes:\n"
+                             "- you misspelled the Action/section name\n"
+                             "- the app you are running does not support this Action/syntax") +
                "\n";
     return;
   }
@@ -484,9 +486,13 @@ Parser::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node * 
     params.blockLocation() = n->filename() + ":" + std::to_string(n->line());
     params.blockFullpath() = n->fullpath();
 
+    if (!(params.have_parameter<bool>("isObjectAction") && params.get<bool>("isObjectAction")))
+      params.set<std::vector<std::string>>("control_tags")
+          .push_back(MooseUtils::baseName(curr_identifier));
+
     // Create the Action
     std::shared_ptr<Action> action_obj =
-        _action_factory.create(it->second._action, MooseUtils::shortName(curr_identifier), params);
+        _action_factory.create(it->second._action, curr_identifier, params);
 
     {
       // extract the MooseObject params if necessary
@@ -701,6 +707,10 @@ Parser::parse(const std::vector<std::string> & input_filenames)
     _errmsg += msg + "\n";
   for (auto & msg : bw.errors)
     _errmsg += msg + "\n";
+
+  // Print parse errors related to brace expansion early
+  if (_errmsg.size() > 0)
+    mooseError(_errmsg);
 
   // There are a few order dependent actions that have to be built first in
   // order for the parser and application to function properly:
@@ -1309,6 +1319,15 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
           dynamic_cast<InputParameters::Parameter<std::vector<std::vector<ptype>>> *>(par),        \
           in_global,                                                                               \
           global_params_block)
+#define setvectorvectorvector(ptype)                                                               \
+  else if (par->type() == demangle(typeid(std::vector<std::vector<std::vector<ptype>>>).name()))   \
+      setTripleIndexParameter<ptype>(                                                              \
+          full_name,                                                                               \
+          short_name,                                                                              \
+          dynamic_cast<                                                                            \
+              InputParameters::Parameter<std::vector<std::vector<std::vector<ptype>>>> *>(par),    \
+          in_global,                                                                               \
+          global_params_block)
 
       /**
        * Scalar types
@@ -1358,6 +1377,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       setscalar(ExtraElementIDName, string);
       setscalar(PostprocessorName, PostprocessorName);
       setscalar(ExecutorName, string);
+      setscalar(NonlinearSystemName, string);
 
       // Moose Compound Scalars
       setscalar(RealVectorValue, RealVectorValue);
@@ -1370,8 +1390,10 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       setscalar(ExecFlagEnum, ExecFlagEnum);
       setscalar(ReporterName, string);
       setscalar(ReporterValueName, string);
+      setscalar(ParsedFunctionExpression, string);
 
       // vector types
+      setvector(bool, bool);
       setvector(Real, double);
       setvector(int, int);
       setvector(long, int);
@@ -1422,6 +1444,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       setvector(ReporterName, string);
       setvector(ReporterValueName, string);
       setvector(ExecutorName, string);
+      setvector(NonlinearSystemName, string);
 
       // map types
       setmap(string, Real);
@@ -1467,6 +1490,45 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       setvectorvector(MaterialName);
       setvectorvector(DistributionName);
       setvectorvector(SamplerName);
+      setvectorvector(TagName);
+
+      // Triple indexed types
+      setvectorvectorvector(Real);
+      setvectorvectorvector(int);
+      setvectorvectorvector(long);
+      setvectorvectorvector(unsigned int);
+      setvectorvectorvector(unsigned long long);
+
+// See vector type explanation
+#if LIBMESH_DOF_ID_BYTES == 8
+      setvectorvectorvector(uint64_t);
+#endif
+
+      setvectorvectorvector(SubdomainID);
+      setvectorvectorvector(BoundaryID);
+      setvectorvectorvector(string);
+      setvectorvectorvector(FileName);
+      setvectorvectorvector(FileNameNoExtension);
+      setvectorvectorvector(MeshFileName);
+      setvectorvectorvector(SubdomainName);
+      setvectorvectorvector(BoundaryName);
+      setvectorvectorvector(VariableName);
+      setvectorvectorvector(NonlinearVariableName);
+      setvectorvectorvector(AuxVariableName);
+      setvectorvectorvector(FunctionName);
+      setvectorvectorvector(UserObjectName);
+      setvectorvectorvector(IndicatorName);
+      setvectorvectorvector(MarkerName);
+      setvectorvectorvector(MultiAppName);
+      setvectorvectorvector(PostprocessorName);
+      setvectorvectorvector(VectorPostprocessorName);
+      setvectorvectorvector(MarkerName);
+      setvectorvectorvector(OutputName);
+      setvectorvectorvector(MaterialPropertyName);
+      setvectorvectorvector(MooseFunctorName);
+      setvectorvectorvector(MaterialName);
+      setvectorvectorvector(DistributionName);
+      setvectorvectorvector(SamplerName);
       else
       {
         mooseError("unsupported type '", par->type(), "' for input parameter '", full_name, "'");
@@ -1475,6 +1537,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
 #undef setscalarValueType
 #undef setscalar
 #undef setvector
+#undef setvectorvectorvector
 #undef setvectorvector
 #undef setmap
     }
@@ -1482,7 +1545,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
 
   // All of the parameters for this object have been extracted.  See if there are any errors
   if (!error_stream.str().empty())
-    mooseError(error_stream.str());
+    mooseError(_errmsg + error_stream.str());
 
   // Here we will see if there are any auto build vectors that need to be created
   std::map<std::string, std::pair<std::string, std::string>> auto_build_vectors =
@@ -1840,6 +1903,82 @@ Parser::setDoubleIndexParameter(const std::string & full_name,
       global_block->setDoubleIndexParam<T>(short_name)[j].resize(param->get()[j].size());
       for (unsigned int i = 0; i < param->get()[j].size(); ++i)
         global_block->setDoubleIndexParam<T>(short_name)[j][i] = param->get()[j][i];
+    }
+  }
+}
+
+template <typename T>
+void
+Parser::setTripleIndexParameter(
+    const std::string & full_name,
+    const std::string & short_name,
+    InputParameters::Parameter<std::vector<std::vector<std::vector<T>>>> * param,
+    bool in_global,
+    GlobalParamsAction * global_block)
+{
+  // Get the full string assigned to the variable full_name
+  const std::string buffer_raw = _root->param<std::string>(full_name);
+  // In case the parameter is empty
+  if (buffer_raw.find_first_not_of(' ', 0) == std::string::npos)
+    return;
+
+  // Add a space between neighboring delim's, before the first delim if nothing is ahead of it, and
+  // after the last delim if nothing is behind it.
+  std::string buffer;
+  buffer.push_back(buffer_raw[0]);
+  if (buffer[0] == '|' || buffer[0] == ';')
+    buffer = ' ' + buffer;
+  for (std::string::size_type i = 1; i < buffer_raw.size(); i++)
+  {
+    if ((buffer_raw[i - 1] == '|' || buffer_raw[i - 1] == ';') &&
+        (buffer_raw[i] == '|' || buffer_raw[i] == ';'))
+      buffer.push_back(' ');
+    buffer.push_back(buffer_raw[i]);
+  }
+  if (buffer.back() == '|' || buffer.back() == ';')
+    buffer.push_back(' ');
+
+  // split vector at delim | to get a series of 2D subvectors
+  std::vector<std::string> first_tokenized_vector;
+  std::vector<std::vector<std::string>> second_tokenized_vector;
+  MooseUtils::tokenize(buffer, first_tokenized_vector, 1, "|");
+  param->set().resize(first_tokenized_vector.size());
+  second_tokenized_vector.resize(first_tokenized_vector.size());
+  for (unsigned j = 0; j < first_tokenized_vector.size(); ++j)
+  {
+    // Identify empty subvector first
+    if (first_tokenized_vector[j].find_first_not_of(' ', 0) == std::string::npos)
+    {
+      param->set()[j].resize(0);
+      continue;
+    }
+    // split each 2D subvector at delim ; to get 1D sub-subvectors
+    // NOTE: the 1D sub-subvectors are _not_ of type T yet
+    MooseUtils::tokenize(first_tokenized_vector[j], second_tokenized_vector[j], 1, ";");
+    param->set()[j].resize(second_tokenized_vector[j].size());
+    for (unsigned k = 0; k < second_tokenized_vector[j].size(); ++k)
+      if (!MooseUtils::tokenizeAndConvert<T>(second_tokenized_vector[j][k], param->set()[j][k]))
+      {
+        _errmsg +=
+            hit::errormsg(_root->find(full_name), "invalid format for parameter ", full_name) +
+            "\n";
+        return;
+      }
+  }
+
+  if (in_global)
+  {
+    global_block->remove(short_name);
+    global_block->setTripleIndexParam<T>(short_name).resize(first_tokenized_vector.size());
+    for (unsigned j = 0; j < first_tokenized_vector.size(); ++j)
+    {
+      global_block->setTripleIndexParam<T>(short_name)[j].resize(second_tokenized_vector[j].size());
+      for (unsigned k = 0; k < second_tokenized_vector[j].size(); ++k)
+      {
+        global_block->setTripleIndexParam<T>(short_name)[j][k].resize(param->get()[j][k].size());
+        for (unsigned int i = 0; i < param->get()[j][k].size(); ++i)
+          global_block->setTripleIndexParam<T>(short_name)[j][k][i] = param->get()[j][k][i];
+      }
     }
   }
 }

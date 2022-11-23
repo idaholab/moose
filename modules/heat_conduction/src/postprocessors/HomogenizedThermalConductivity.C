@@ -62,10 +62,14 @@ HomogenizedThermalConductivity::execute()
 Real
 HomogenizedThermalConductivity::getValue()
 {
+  return (_integral_value / _volume);
+}
+
+void
+HomogenizedThermalConductivity::finalize()
+{
   gatherSum(_integral_value);
   gatherSum(_volume);
-
-  return (_integral_value / _volume);
 }
 
 void

@@ -47,6 +47,9 @@ public:
   const ADMaterialProperty<T> & getNeighborADMaterialProperty(const std::string & name);
 
   template <typename T>
+  const ADMaterialProperty<T> & getNeighborADMaterialPropertyByName(const std::string & name);
+
+  template <typename T>
   const MaterialProperty<T> & getNeighborMaterialPropertyOld(const std::string & name);
 
   template <typename T>
@@ -80,6 +83,13 @@ const MaterialProperty<T> &
 TwoMaterialPropertyInterface::getNeighborMaterialPropertyByName(const std::string & name)
 {
   return getMaterialPropertyByName<T>(name, *_neighbor_material_data);
+}
+
+template <typename T>
+const ADMaterialProperty<T> &
+TwoMaterialPropertyInterface::getNeighborADMaterialPropertyByName(const std::string & name)
+{
+  return getADMaterialPropertyByName<T>(name, *_neighbor_material_data);
 }
 
 template <typename T>

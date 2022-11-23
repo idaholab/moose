@@ -17,8 +17,8 @@ p_outlet = 10
 top_side_temperature = 150
 
 # Numerical scheme
-advected_interp_method='average'
-velocity_interp_method='rc'
+advected_interp_method = 'average'
+velocity_interp_method = 'rc'
 
 [Mesh]
   [gen]
@@ -161,7 +161,6 @@ velocity_interp_method='rc'
     type = PINSFVEnergyTimeDerivative
     variable = T_fluid
     cp = ${cp}
-    dcp_dt = 'dcp_dt'
     rho = ${rho}
     drho_dt = 'drho_dt'
     is_solid = false
@@ -282,11 +281,9 @@ velocity_interp_method='rc'
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [fp]
-      type = FlibeFluidProperties
-    []
+[FluidProperties]
+  [fp]
+    type = FlibeFluidProperties
   []
 []
 
@@ -330,7 +327,8 @@ velocity_interp_method='rc'
     type = ParsedAux
     variable = 'velocity_norm'
     args = 'superficial_vel_x superficial_vel_y porosity'
-    function = 'sqrt(superficial_vel_x*superficial_vel_x + superficial_vel_y*superficial_vel_y) / porosity'
+    function = 'sqrt(superficial_vel_x*superficial_vel_x + superficial_vel_y*superficial_vel_y) / '
+               'porosity'
   []
 []
 

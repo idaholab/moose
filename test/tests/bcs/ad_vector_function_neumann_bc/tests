@@ -1,0 +1,19 @@
+[Tests]
+  issues = '#22327'
+  design = 'ADVectorFunctionNeumannBC.md'
+  [vector]
+    requirement = 'The system shall support Neumann type boundary conditions defined by a function'
+    [test]
+      type = 'Exodiff'
+      input = 'vector_ad_neumann_bc.i'
+      exodiff = 'vector_ad_neumann_bc_out.e'
+      detail = 'for vector variables with automatic differentiation and'
+    []
+    [test-jac]
+      type = 'PetscJacobianTester'
+      input = 'vector_ad_neumann_bc.i'
+      run_sim = False
+      detail = 'be able to produce the exact Jacobian.'
+    []
+  []
+[]

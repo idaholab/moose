@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SimpleFluidProperties.h"
+#include "NewtonInversion.h"
 
 registerMooseObject("FluidPropertiesApp", SimpleFluidProperties);
 
@@ -212,6 +213,11 @@ SimpleFluidProperties::s_from_p_T(
   ds_dT = 0;
 }
 
+Real SimpleFluidProperties::s_from_h_p(Real /*enthalpy*/, Real /*pressure*/) const
+{
+  return _specific_entropy;
+}
+
 Real SimpleFluidProperties::s_from_v_e(Real /*v*/, Real /*e*/) const { return _specific_entropy; }
 
 void
@@ -274,6 +280,33 @@ SimpleFluidProperties::T_from_v_e(
 }
 
 Real
+SimpleFluidProperties::T_from_p_rho(Real p, Real rho) const
+{
+  mooseAssert(rho > 0, "Density should be positive");
+  return (std::log(rho / _density0) - p / _bulk_modulus) / -_thermal_expansion;
+}
+
+void
+SimpleFluidProperties::T_from_p_rho(Real p, Real rho, Real & T, Real & dT_dp, Real & dT_drho) const
+{
+  T = T_from_p_rho(p, rho);
+  dT_dp = 1 / (_thermal_expansion * _bulk_modulus);
+  dT_drho = 1 / (-_thermal_expansion * rho);
+}
+
+Real
+SimpleFluidProperties::T_from_p_h(Real p, Real h) const
+{
+  // Likely a better guess than user-selected
+  Real T_initial = h / _cp;
+
+  // exponential dependence in rho and linear dependence in e makes it challenging
+  auto lambda = [&](Real p, Real current_T, Real & new_rho, Real & dh_dp, Real & dh_dT)
+  { h_from_p_T(p, current_T, new_rho, dh_dp, dh_dT); };
+  return FluidPropertiesUtils::NewtonSolve(p, h, T_initial, _tolerance, lambda);
+}
+
+Real
 SimpleFluidProperties::p_from_v_e(Real v, Real e) const
 {
   Real temperature = T_from_v_e(v, e);
@@ -310,6 +343,27 @@ SimpleFluidProperties::e_from_p_T(
   e = this->e_from_p_T(pressure, temperature);
   de_dp = 0.0;
   de_dT = _cv;
+}
+
+Real
+SimpleFluidProperties::e_from_p_rho(Real p, Real rho) const
+{
+  Real T = T_from_p_rho(p, rho);
+  return e_from_p_T(p, T);
+}
+
+void
+SimpleFluidProperties::e_from_p_rho(Real p, Real rho, Real & e, Real & de_dp, Real & de_drho) const
+{
+  // get temperature and derivatives
+  Real T, dT_dp, dT_drho;
+  T_from_p_rho(p, rho, T, dT_dp, dT_drho);
+
+  // get energy and derivatives
+  Real de_dT;
+  e_from_p_T(p, T, e, de_dp, de_dT);
+  de_dp = de_dT * dT_dp + de_dp;
+  de_drho = de_dT * dT_drho + de_dp * dT_dp;
 }
 
 Real SimpleFluidProperties::mu_from_p_T(Real /*pressure*/, Real /*temperature*/) const

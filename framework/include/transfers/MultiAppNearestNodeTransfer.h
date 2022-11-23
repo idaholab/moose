@@ -16,6 +16,7 @@ namespace libMesh
 {
 class DofObject;
 }
+class MooseAppCoordTransform;
 
 /**
  * Copy the value to the target domain from the nearest node in the source domain.
@@ -30,16 +31,6 @@ public:
   virtual void execute() override;
 
 protected:
-  /**
-   * Return the nearest node to the point p.
-   * @param p The point you want to find the nearest node to.
-   * @param distance This will hold the distance between the returned node and p
-   * @param mesh The mesh in which we search for the node
-   * @param local true if we look at local nodes, otherwise we look at all nodes
-   * @return The Node closest to point p.
-   */
-  Node * getNearestNode(const Point & p, Real & distance, MooseMesh * mesh, bool local);
-
   /**
    * Return the distance between the given point and the farthest corner of the
    * given bounding box.
@@ -72,10 +63,6 @@ protected:
                                      bool nodal,
                                      bool constant);
 
-  void getLocalEntities(MooseMesh * mesh,
-                        std::vector<std::pair<Point, DofObject *>> & local_entities,
-                        bool nodal);
-
   /// If true then node connections will be cached
   bool _fixed_meshes;
 
@@ -89,22 +76,14 @@ protected:
   bool & _neighbors_cached;
   std::map<processor_id_type, std::vector<unsigned int>> & _cached_froms;
   std::map<processor_id_type, std::vector<dof_id_type>> & _cached_dof_ids;
-  std::map<dof_id_type, unsigned int> & _cached_from_inds;
-  std::map<dof_id_type, unsigned int> & _cached_qp_inds;
+  std::map<std::pair<unsigned int, dof_id_type>, unsigned int> & _cached_from_inds;
+  std::map<std::pair<unsigned int, dof_id_type>, unsigned int> & _cached_qp_inds;
 
 private:
+  bool usesMooseAppCoordTransform() const override { return true; }
+
   /// Target local nodes for receiving a nodal variable
   std::vector<Node *> _target_local_nodes;
-
-  /// Extend bounding box by a factor in all directions
-  /// Non-zero values of this member may be necessary because the nearest bounding
-  /// box does not necessarily give you the closest node/element. It will depend
-  /// on the partition and geometry. A node/element will more likely find its
-  /// nearest source element/node by extending bounding boxes. If each of the
-  /// bounding boxes covers the entire domain, a node/element will be able to
-  /// find its nearest source element/node for sure,
-  /// but at the same time, more communication will be involved and can be expensive.
-  Real _bbox_extend_factor;
 
   /**
    * Get the local nodes on the target boundary for the transfer

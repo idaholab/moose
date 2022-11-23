@@ -47,11 +47,15 @@ template <bool is_ad>
 Real
 InterfaceDiffusiveFluxAverageTempl<is_ad>::getValue()
 {
-  Real integral = InterfaceDiffusiveFluxIntegralTempl<is_ad>::getValue();
+  return _integral_value / _volume;
+}
 
+template <bool is_ad>
+void
+InterfaceDiffusiveFluxAverageTempl<is_ad>::finalize()
+{
   this->gatherSum(_volume);
-
-  return integral / _volume;
+  this->gatherSum(_integral_value);
 }
 
 template <bool is_ad>

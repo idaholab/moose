@@ -18,6 +18,9 @@ SideUserObject::validParams()
   InputParameters params = UserObject::validParams();
   params += BoundaryRestrictableRequired::validParams();
   params += MaterialPropertyInterface::validParams();
+  params.addRelationshipManager("GhostLowerDElems",
+                                Moose::RelationshipManagerType::GEOMETRIC |
+                                    Moose::RelationshipManagerType::ALGEBRAIC);
   return params;
 }
 

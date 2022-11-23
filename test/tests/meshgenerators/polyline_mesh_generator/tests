@@ -1,0 +1,40 @@
+[Tests]
+  [polyline]
+    design = 'meshgenerators/PolyLineMeshGenerator.md'
+    issues = '#20192'
+    requirement = "The system shall have the capability of generating a polyline geometry mesh"
+
+    [basic]
+      type = 'Exodiff'
+      input = 'polyline_mesh_generator.i'
+      cli_args = '--mesh-only'
+      exodiff = 'polyline_mesh_generator_in.e'
+      recover = false
+      detail = "from user-specified points"
+    []
+    [loop]
+      type = 'Exodiff'
+      input = 'polyline_mesh_generator_loop.i'
+      cli_args = '--mesh-only'
+      exodiff = 'polyline_mesh_generator_loop_in.e'
+      recover = false
+      detail = "optionally connecting points in a loop"
+    []
+    [refine]
+      type = 'Exodiff'
+      input = 'polyline_mesh_generator_refine.i'
+      cli_args = '--mesh-only'
+      exodiff = 'polyline_mesh_generator_refine_in.e'
+      recover = false
+      detail = "refining a line if requested"
+    []
+    [loop_refine]
+      type = 'Exodiff'
+      input = 'polyline_mesh_generator_loop_refine.i'
+      cli_args = '--mesh-only'
+      exodiff = 'polyline_mesh_generator_loop_refine_in.e'
+      recover = false
+      detail = "refining a loop if requested"
+    []
+  []
+[]

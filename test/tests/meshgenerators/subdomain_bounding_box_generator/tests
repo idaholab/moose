@@ -1,5 +1,5 @@
 [Tests]
-  [./subdomain_bounding_box_generator_test]
+  [subdomain_bounding_box_generator_test]
     type = 'Exodiff'
     input = 'subdomain_bounding_box_generator_inside.i'
     exodiff = 'subdomain_bounding_box_generator_inside_out.e'
@@ -8,9 +8,9 @@
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false
-  [../]
+  []
 
-  [./subdomain_bounding_box_generator_outside_test]
+  [subdomain_bounding_box_generator_outside_test]
     type = 'Exodiff'
     input = 'subdomain_bounding_box_generator_outside.i'
     exodiff = 'subdomain_bounding_box_generator_outside_out.e'
@@ -19,20 +19,32 @@
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false
-  [../]
+  []
 
-  [./oriented_subdomain_bounding_box_generator_test]
+  [oriented_subdomain_bounding_box_generator_test]
     type = 'Exodiff'
     input = 'oriented_subdomain_bounding_box_generator.i'
     exodiff = 'oriented_subdomain_bounding_box_generator_out.e'
     requirement = 'The system shall include the ability to assign subdomain identifiers for elements within an arbitrarily oriented bounding box.'
-    design = 'meshgenerators/SubdomainBoundingBoxGenerator.md'
+    design = 'meshgenerators/OrientedSubdomainBoundingBoxGenerator.md'
     issues = '#11640'
     mesh_mode = 'REPLICATED'
     recover = false
   [../]
 
-  [./subdomain_bounding_box_generator_restricted_test]
+  [./oriented_subdomain_bounding_box_generator_test_outside]
+    type = 'Exodiff'
+    input = 'oriented_subdomain_bounding_box_generator.i'
+    cli_args = 'Mesh/subdomains/location=OUTSIDE Outputs/file_base=outside'
+    exodiff = 'outside.e'
+    requirement = 'The system shall include the ability to assign subdomain identifiers for elements outside an arbitrarily oriented bounding box.'
+    design = 'meshgenerators/OrientedSubdomainBoundingBoxGenerator.md'
+    issues = '#11640'
+    mesh_mode = 'REPLICATED'
+    recover = false
+  []
+
+  [subdomain_bounding_box_generator_restricted_test]
     type = 'Exodiff'
     input = 'subdomain_bounding_box_generator_restricted.i'
     exodiff = 'subdomain_bounding_box_generator_restricted_in.e'
@@ -42,9 +54,9 @@
     issues = '#12279'
     mesh_mode = 'REPLICATED'
     recover = false
-  [../]
+  []
 
-  [./subdomain_bounding_box_element_integer_test]
+  [subdomain_bounding_box_element_integer_test]
     type = 'Exodiff'
     input = 'bounding_box_integers.i'
     exodiff = 'bounding_box_integers_out.e'
@@ -53,5 +65,17 @@
     issues = '#13764'
     mesh_mode = 'REPLICATED'
     recover = false
-  [../]
+  []
+
+  [invalid_restricted_subdomain]
+    type = RunException
+    input = subdomain_bounding_box_generator_restricted.i
+    cli_args = "Mesh/subdomains2/restricted_subdomains='missing'"
+    expect_err = "The block 'missing' was not found in the mesh"
+    requirement = 'The system shall error if a restricted subdomain of the bounding box subdomain generation does not exist in the mesh'
+    design = 'meshgenerators/SubdomainBoundingBoxGenerator.md'
+    issues = '#22117'
+    mesh_mode = 'REPLICATED'
+    recover = false
+  []
 []

@@ -23,12 +23,9 @@ TagVectorAux::validParams()
 TagVectorAux::TagVectorAux(const InputParameters & parameters)
   : TagAuxBase<AuxKernel>(parameters),
     _v(coupledVectorTagValue("v", "vector_tag")),
-    _v_var(*getVar("v", 0))
+    _v_var(*getFieldVar("v", 0))
 {
-  if (_v_var.feType() != _var.feType())
-    paramError("variable",
-               "The AuxVariable this AuxKernel is acting on has to have the same order and family "
-               "as the variable 'v'");
+  checkCoupledVariable(&_v_var, &_var);
 }
 
 Real

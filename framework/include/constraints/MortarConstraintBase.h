@@ -76,6 +76,11 @@ public:
   const MooseVariable & variable() const override { return *_var; }
 
   /**
+   * The variable number that this object operates on (pointer).
+   */
+  const MooseVariable * variablePtr() const { return _var; }
+
+  /**
    * Whether to use dual mortar
    */
   bool useDual() const { return _use_dual; }
@@ -106,10 +111,10 @@ protected:
   MooseVariable * const _var;
 
   /// Reference to the secondary variable
-  MooseVariable & _secondary_var;
+  MooseVariableField<Real> & _secondary_var;
 
   /// Reference to the primary variable
-  MooseVariable & _primary_var;
+  MooseVariableField<Real> & _primary_var;
 
   /// Whether to compute primal residuals
   const bool _compute_primal_residuals;
@@ -149,6 +154,15 @@ protected:
 
   /// The shape function gradients corresponding to the primary interior primal variable
   const VariableTestGradient & _grad_test_primary;
+
+  /// the higher-dimensional secondary face element
+  const Elem * const & _interior_secondary_elem;
+
+  /// the higher-dimensional primary face element
+  const Elem * const & _interior_primary_elem;
+
+  /// the lower-dimensional secondary element
+  const Elem * const & _lower_secondary_elem;
 
   /// The primary face lower dimensional element (not the mortar element!). The mortar element
   /// lives on the secondary side of the mortar interface and *may* correspond to \p

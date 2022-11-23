@@ -24,7 +24,10 @@ SetupRecoverFileBaseAction::validParams()
   return params;
 }
 
-SetupRecoverFileBaseAction::SetupRecoverFileBaseAction(InputParameters params) : Action(params) {}
+SetupRecoverFileBaseAction::SetupRecoverFileBaseAction(const InputParameters & params)
+  : Action(params)
+{
+}
 
 void
 SetupRecoverFileBaseAction::act()

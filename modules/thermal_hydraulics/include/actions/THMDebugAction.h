@@ -14,7 +14,7 @@
 class THMDebugAction : public Action
 {
 public:
-  THMDebugAction(InputParameters params);
+  THMDebugAction(const InputParameters & params);
 
   virtual void act();
 

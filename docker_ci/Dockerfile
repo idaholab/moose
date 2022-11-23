@@ -58,11 +58,11 @@ RUN for CURR_USR in root dev; do \
 done
 
 #-----------------------------------------------------------------------------#
-# Install mpich-3.3 to system path
+# Install mpich-4.0.2 to system path
 #-----------------------------------------------------------------------------#
-RUN curl -L -O http://www.mpich.org/static/downloads/3.3/mpich-3.3.tar.gz ; \
-tar -xf mpich-3.3* ; \
-cd mpich-3.3 && mkdir gcc-build && cd gcc-build ; \
+RUN curl -L -O https://www.mpich.org/static/downloads/4.0.2/mpich-4.0.2.tar.gz ; \
+tar -xf mpich-4.0.2.tar.gz ; \
+cd mpich-4.0.2 && mkdir gcc-build && cd gcc-build ; \
 # Configure build env
 ../configure --prefix=/usr/local \
 --enable-shared \
@@ -70,7 +70,7 @@ cd mpich-3.3 && mkdir gcc-build && cd gcc-build ; \
 --enable-fast=O2 \
 --enable-debuginfo \
 --enable-totalview \
---enable-two-level-namespace \
+--with-device=ch3 \
 CC=gcc \
 CXX=g++ \
 FC=gfortran \
@@ -86,7 +86,7 @@ F77FLAGS='' ; \
 make -j ${MOOSE_JOBS} ; \
 make install ; \
 # Cleanup
-cd ../../ ; rm -rf mpich-3.3* ; \
+cd ../../ ; rm -rf mpich-4.0.2 ; \
 # Ensure mpich was installed by checking for binary
 if [ ! -f $(which mpicc) ]; then exit 1; fi
 
@@ -114,7 +114,7 @@ if [ ! -d $PETSC_DIR/lib/petsc ]; then exit 1; fi
 #-----------------------------------------------------------------------------#
 # Install Libmesh to system path
 #-----------------------------------------------------------------------------#
-ARG LIBMESH_REV=4747096de5d6c69ed79f28e38ce45c76546364c3
+ARG LIBMESH_REV=3f05f40f4a45060c1fd07281f8869a4667086291
 ARG LIBMESH_OPTIONS
 ARG LIBMESH_METHODS="opt dbg"
 ENV LIBMESH_DIR=/usr/local \
@@ -145,7 +145,8 @@ ARG BUILD_MODULES
 ARG MOOSE_METHODS=opt
 RUN ./docker_ci/build_moose.sh ; \
 # Ensure a MOOSE test binary was built
-if [ ! -f $MOOSE_DIR/test/moose_test* ]; then exit 1; fi
+if [ ! -f $MOOSE_DIR/test/moose_test* ]; then exit 1; fi ; \
+git submodule init
 
 #-----------------------------------------------------------------------------#
 # Add needed env vars to /etc/environment

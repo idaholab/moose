@@ -1,0 +1,39 @@
+Applications:
+    solid_properties:
+        exe_directory: ${MOOSE_DIR}/modules/solid_properties
+        app_types:
+            - SolidPropertiesApp
+        content_directory: ${MOOSE_DIR}/modules/solid_properties/doc/content
+        unregister:
+            - ${MOOSE_DIR}/framework/doc/unregister.yml
+        remove:
+            - ${MOOSE_DIR}/framework/doc/remove.yml
+            - ${MOOSE_DIR}/modules/solid_properties/doc/remove.yml
+        log_stub_files: WARNING
+        log_missing_markdown: WARNING
+
+Documents:
+    software_quality_plan: sqa/inl_records.md#software_quality_plan
+    enterprise_architecture_entry: sqa/inl_records.md#enterprise_architecture_entry
+    safety_software_determination: sqa/inl_records.md#safety_software_determination
+    quality_level_determination: sqa/inl_records.md#quality_level_determination
+    configuration_management_plan: sqa/inl_records.md#configuration_management_plan
+    asset_management_plan: sqa/inl_records.md#asset_management_plan
+    verification_validation_plan: sqa/inl_records.md#verification_and_validation_plan
+    software_requirements_specification: sqa/solid_properties_srs.md
+    software_design_description: sqa/solid_properties_sdd.md
+    software_test_plan: sqa/solid_properties_stp.md
+    requirements_traceablity_matrix: sqa/solid_properties_rtm.md
+    verification_validation_report: sqa/solid_properties_vvr.md
+    failure_analysis_report: sqa/solid_properties_far.md
+    software_library_list: sqa/solid_properties_sll.md
+    communication_and_contact_information: sqa/framework_cci.md
+    software_coding_standards: sqa/framework_scs.md
+    log_user_manual: WARNING
+    log_theory_manual: WARNING
+
+Requirements:
+    solid_properties:
+        directories:
+            - ${MOOSE_DIR}/modules/solid_properties
+        log_missing: WARNING

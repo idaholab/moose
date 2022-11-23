@@ -10,6 +10,8 @@
 #pragma once
 
 #include "LagrangianStressDivergenceBase.h"
+#include "GradientOperator.h"
+#include "Assembly.h"
 
 /// Enforce equilibrium with an updated Lagrangian formulation
 ///
@@ -26,70 +28,69 @@
 /// use_displaced_mesh must be true for large deformation kinematics
 /// The kernel enforces this with an error
 ///
-class UpdatedLagrangianStressDivergence : public LagrangianStressDivergenceBase
+template <class G>
+class UpdatedLagrangianStressDivergenceBase : public LagrangianStressDivergenceBase, public G
 {
 public:
+  static InputParameters baseParams()
+  {
+    InputParameters params = LagrangianStressDivergenceBase::validParams();
+    return params;
+  }
   static InputParameters validParams();
-  UpdatedLagrangianStressDivergence(const InputParameters & parameters);
+  UpdatedLagrangianStressDivergenceBase(const InputParameters & parameters);
+  virtual void initialSetup() override;
 
 protected:
-  /// Implement the residual for some specific _i
+  virtual RankTwoTensor gradTest(unsigned int component) override;
+  virtual RankTwoTensor gradTrial(unsigned int component) override;
+  virtual void precalculateJacobianDisplacement(unsigned int component) override;
   virtual Real computeQpResidual() override;
-
-  /// Implement a specific _i, _j Jacobian
-  virtual Real computeQpJacobian() override;
-  /// Implement a specific _i, _j Jacobian
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
-
-  /// Trial gradient averaging
-  virtual void precalculateJacobian() override;
-
-  /// Stabilize a generic gradient tensor
-  RankTwoTensor stabilizeGrad(const RankTwoTensor & Gb, const RankTwoTensor & Ga) override;
-
-  /// Calculate the full test gradient (could later be modified for stabilization)
-  RankTwoTensor testGrad(unsigned int i);
-
-  /// Calculate the modified trial function gradient for stabilization
-  RankTwoTensor trialGrad(unsigned int m, bool stabilize);
-
-private:
-  /// A component of the material Jacobian
-  Real matJacobianComponent(const RankFourTensor & C,
-                            const RankTwoTensor & grad_test,
-                            const RankTwoTensor & grad_trial,
-                            const RankTwoTensor & df);
-  /// A component of the geometric Jacobian
-  Real geomJacobianComponent(const RankTwoTensor & grad_test,
-                             const RankTwoTensor & grad_trial,
-                             const RankTwoTensor & stress);
-
-  /// Off diagonal Jacobian coming through eigenstrain
-  Real eigenstrainJacobianComponent(unsigned int cvar,
-                                    const RankFourTensor & C,
-                                    const RankTwoTensor & grad_test,
-                                    const Real & phi);
-
-  /// Compute the average trial function gradient
-  void computeAverageGradTrial();
-
-  /// Calculate the average gradient of some type (test or trial)
-  void avgGrad(const VariablePhiGradient & grads, std::vector<RealVectorValue> & res);
-
-protected:
-  /// Averaged trial function gradients
-  std::vector<RealVectorValue> _avg_grad_trial;
-
-  /// The unmodified deformation gradient: needed for mapping averages
-  const MaterialProperty<RankTwoTensor> & _uF;
-
-  /// The element-average deformation gradient: needed for mapping averages
-  const MaterialProperty<RankTwoTensor> & _aF;
+  virtual Real computeQpJacobianDisplacement(unsigned int alpha, unsigned int beta) override;
+  virtual Real computeQpJacobianTemperature(unsigned int cvar) override;
+  virtual Real computeQpJacobianOutOfPlaneStrain() override { return 0; }
 
   /// The Cauchy stress
   const MaterialProperty<RankTwoTensor> & _stress;
-  /// The derivative of the increment in Cauchy stress wrt the increment in the spatial velocity gradient
+
+  // The derivative of the increment in Cauchy stress w.r.t. the increment in the spatial velocity
+  // gradient
   const MaterialProperty<RankFourTensor> & _material_jacobian;
-  /// The inverse incremental deformation gradient
-  const MaterialProperty<RankTwoTensor> & _inv_inc_def_grad;
+
+  // @{
+  // The assembly quantities in the reference frame for stabilization
+  Assembly & _assembly_undisplaced;
+  const VariablePhiGradient & _grad_phi_undisplaced;
+  const MooseArray<Real> & _JxW_undisplaced;
+  const MooseArray<Real> & _coord_undisplaced;
+  const MooseArray<Point> & _q_point_undisplaced;
+  // @}
+
+private:
+  /// The unstabilized trial function gradient
+  virtual RankTwoTensor gradTrialUnstabilized(unsigned int component);
+
+  /// The stabilized trial function gradient
+  virtual RankTwoTensor gradTrialStabilized(unsigned int component);
 };
+
+template <>
+inline InputParameters
+UpdatedLagrangianStressDivergenceBase<GradientOperatorCartesian>::validParams()
+{
+  InputParameters params = UpdatedLagrangianStressDivergenceBase::baseParams();
+  params.addClassDescription(
+      "Enforce equilibrium with an updated Lagrangian formulation in Cartesian coordinates.");
+  return params;
+}
+
+template <>
+inline void
+UpdatedLagrangianStressDivergenceBase<GradientOperatorCartesian>::initialSetup()
+{
+  if (getBlockCoordSystem() != Moose::COORD_XYZ)
+    mooseError("This kernel should only act in Cartesian coordinates.");
+}
+
+typedef UpdatedLagrangianStressDivergenceBase<GradientOperatorCartesian>
+    UpdatedLagrangianStressDivergence;

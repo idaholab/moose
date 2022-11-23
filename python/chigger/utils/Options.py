@@ -304,7 +304,7 @@ class Options(object):
         # Unused options
         changed = False
         unused = set()
-        warn = kwargs.pop('warn_unused', False)
+        warn = kwargs.pop('allow_unused', False)
 
         # Update from Options object
         if isinstance(options, Options):

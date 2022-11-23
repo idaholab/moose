@@ -27,7 +27,12 @@ protected:
   virtual void executeToMultiapp();
   virtual void executeFromMultiapp();
 
+  /// Vector of reporters to transfer data from
   const std::vector<ReporterName> & _from_reporter_names;
+
+  /// Vector of reporters to transfer data to
   const std::vector<ReporterName> & _to_reporter_names;
+
+  /// If set, indicates a particular subapp to transfer the reporter to/from
   const unsigned int & _subapp_index;
 };

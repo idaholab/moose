@@ -1562,7 +1562,11 @@ public:
    */
   void setXFEM(std::shared_ptr<XFEMInterface> xfem) { _xfem = xfem; }
 
-  void assignDisplacements(std::vector<unsigned> && disp_numbers) { _displacements = disp_numbers; }
+  /**
+   * Assign the displacement numbers and directions
+   */
+  void assignDisplacements(
+      std::vector<std::pair<unsigned int, unsigned short>> && disp_numbers_and_directions);
 
   /**
    * Helper function for assembling residual contriubutions on local
@@ -1933,16 +1937,25 @@ protected:
    */
   void modifyFaceWeightsDueToXFEM(const Elem * elem, unsigned int side = 0);
 
+  /**
+   * compute gradient of phi possibly with derivative information with respect to nonlinear
+   * displacement variables
+   */
   template <typename OutputType>
   void computeGradPhiAD(const Elem * elem,
                         unsigned int n_qp,
                         ADTemplateVariablePhiGradient<OutputType> & grad_phi,
                         FEGenericBase<OutputType> * fe);
+
+  /**
+   * resize any objects that contribute to automatic differentiation-related mapping calculations
+   */
   void resizeADMappingObjects(unsigned int n_qp, unsigned int dim);
-  void computeAffineMapAD(const Elem * elem,
-                          const std::vector<Real> & qw,
-                          unsigned int n_qp,
-                          FEBase * fe);
+
+  /**
+   * compute the finite element reference-physical mapping quantities (such as JxW) with possible
+   * dependence on nonlinear displacement variables at a single quadrature point
+   */
   void
   computeSinglePointMapAD(const Elem * elem, const std::vector<Real> & qw, unsigned p, FEBase * fe);
 
@@ -2653,7 +2666,10 @@ protected:
   MooseArray<Real> _curvatures;
   MooseArray<DualReal> _ad_curvatures;
 
-  std::vector<unsigned> _displacements;
+  /**
+   * Container of displacement numbers and directions
+   */
+  std::vector<std::pair<unsigned int, unsigned short>> _disp_numbers_and_directions;
 
   mutable bool _calculate_xyz;
   mutable bool _calculate_face_xyz;
@@ -2916,4 +2932,11 @@ Assembly::neighborLowerDElemVolume() const
 {
   _need_neighbor_lower_d_elem_volume = true;
   return _current_neighbor_lower_d_elem_volume;
+}
+
+inline void
+Assembly::assignDisplacements(
+    std::vector<std::pair<unsigned int, unsigned short>> && disp_numbers_and_directions)
+{
+  _disp_numbers_and_directions = std::move(disp_numbers_and_directions);
 }

@@ -1,0 +1,11 @@
+[Tests]
+  [fv_anisotropic_diffusion]
+    type = 'Exodiff'
+    input = 'fv_anisotropic_diffusion.i'
+    exodiff = 'fv_anisotropic_diffusion_out.e'
+    requirement = 'The system shall be able to solve anisotropic diffusion problems using the finite volume method.'
+    design = 'FVAnisotropicDiffusion.md'
+    issues = '#21832'
+    ad_indexing_type = 'global'
+  []
+[]

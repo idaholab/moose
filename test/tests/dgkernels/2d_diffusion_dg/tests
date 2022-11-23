@@ -1,20 +1,31 @@
 [Tests]
   issues = '#869'
   design = 'source/bcs/DGFunctionDiffusionDirichletBC.md source/dgkernels/DGDiffusion.md'
-  [./test]
+  [test]
     type = 'Exodiff'
     input = '2d_diffusion_dg_test.i'
     exodiff = 'out.e-s003'
     max_parallel = 1
-    requirement = "The system shall support solving 2D diffusion using the discontinuous Galerkin method."
-  [../]
-  [./stateful_props]
+    requirement = "The system shall support solving 2D diffusion using the discontinuous Galerkin "
+                  "method."
+  []
+  [constMonomial]
+    type = 'Exodiff'
+    input = '2d_diffusion_dg_test.i'
+    exodiff = 'constMonomial.e-s003'
+    cli_args = 'Outputs/file_base=constMonomial Variables/u/order=CONSTANT'
+    max_parallel = 1
+    issues = '#21314'
+    requirement = "The system shall support solving 2D diffusion using the discontinuous Galerkin "
+                  "method with constant monomial shape functions."
+  []
+  [stateful_props]
     type = 'RunApp'
     input = 'dg_stateful.i'
     requirement = 'DGKernels shall coexist with stateful material properties'
     issues = '#11766'
     design = 'DGKernels/index.md'
-  [../]
+  []
   [no_mallocs_during_scaling]
     type = 'RunApp'
     input = '2d_diffusion_dg_test.i'

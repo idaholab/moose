@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#12293'
+  design = 'Transfers/index.md'
+  [both-transformed]
+    type = RunException
+    input = main-app.i
+    requirement = 'The system shall report a warning when transferring a variable (for main app) and postprocessor (for subapp) for applications that both have non-identity transformations into the reference space.'
+    expect_err = "Transfer 'send' of type 'MultiAppVariableValueSamplePostprocessorTransfer' has non-translation transformations but it does not implement coordinate transformations using the 'MooseAppCoordTransform' class. Your data transfers will not be performed in the expected transformed frame"
+  []
+[]

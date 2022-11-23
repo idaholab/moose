@@ -81,6 +81,8 @@ MultiAppReporterTransfer::MultiAppReporterTransfer(const InputParameters & param
 void
 MultiAppReporterTransfer::initialSetup()
 {
+  MultiAppTransfer::initialSetup();
+
   // We need to get a reference to the data now so we can tell ReporterData
   // that we consume a replicated version.
   // Find proper FEProblem

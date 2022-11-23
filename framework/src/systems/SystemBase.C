@@ -385,9 +385,9 @@ SystemBase::prepareFace(THREAD_ID tid, bool resize_data)
     if (resize_data)
       for (const auto var_ptr : newly_prepared_vars)
       {
-        _subproblem.assembly(tid).prepareVariable(var_ptr);
+        _subproblem.assembly(tid, number()).prepareVariable(var_ptr);
         if (_subproblem.checkNonlocalCouplingRequirement())
-          _subproblem.assembly(tid).prepareVariableNonlocal(var_ptr);
+          _subproblem.assembly(tid, number()).prepareVariableNonlocal(var_ptr);
       }
   }
 }
@@ -1565,6 +1565,13 @@ SystemBase::timestepSetup()
 }
 
 void
+SystemBase::customSetup(const ExecFlagType & exec_type)
+{
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+    _vars[tid].customSetup(exec_type);
+}
+
+void
 SystemBase::subdomainSetup()
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
@@ -1590,6 +1597,19 @@ SystemBase::clearAllDofIndices()
 {
   for (auto & var_warehouse : _vars)
     var_warehouse.clearAllDofIndices();
+}
+
+void
+SystemBase::setActiveVariableCoupleableVectorTags(const std::set<TagID> & vtags, THREAD_ID tid)
+{
+  _vars[tid].setActiveVariableCoupleableVectorTags(vtags);
+}
+
+void
+SystemBase::setActiveScalarVariableCoupleableVectorTags(const std::set<TagID> & vtags,
+                                                        THREAD_ID tid)
+{
+  _vars[tid].setActiveScalarVariableCoupleableVectorTags(vtags);
 }
 
 template MooseVariableFE<Real> & SystemBase::getFieldVariable<Real>(THREAD_ID tid,

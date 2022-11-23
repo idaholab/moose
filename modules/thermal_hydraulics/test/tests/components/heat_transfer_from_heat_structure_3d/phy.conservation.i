@@ -15,7 +15,7 @@ P_hf = ${fparse 0.6 * sin (pi/24)}
   []
 []
 
-[Modules/FluidProperties]
+[FluidProperties]
   [fp]
     type = StiffenedGasFluidProperties
     gamma = 2.35

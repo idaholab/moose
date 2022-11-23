@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/MeshExtruderGenerator.md'
-  issues = '#11640 #14037'
+  issues = '#11640 #14037 #22117'
 
   [extruder]
     requirement = 'The system shall have the capability of extruding a lower dimensional mesh to '
@@ -13,6 +13,14 @@
       recover = false
 
       detail = 'from 2D quads to 3D hexes,'
+    []
+
+    [tri_test]
+      type = 'Exodiff'
+      input = 'extruder_tri.i'
+      exodiff = 'out_tri.e'
+
+      detail = "2D triangular elements;"
     []
 
     [new_subdomains]
@@ -61,5 +69,13 @@
 
       detail = 'while making sure to preserve existing side set names.'
     []
+  []
+
+  [invalid_existing_subdomain]
+    type = RunException
+    input = extrude_remap_layer1.i
+    cli_args = 'Mesh/extrude/existing_subdomains="1 2 800"'
+    expect_err = "The block ID '800' was not found in the mesh"
+    requirement = "The system shall error if the existing subdomain does not exist in the mesh"
   []
 []

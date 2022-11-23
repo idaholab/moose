@@ -9,13 +9,14 @@
 
 #pragma once
 
-#include "ADGeneralizedRadialReturnStressUpdate.h"
+#include "GeneralizedRadialReturnStressUpdate.h"
 
 /**
  * This class provides baseline functionality for plasticity models based on the stress update
  * material in a generalized (Hill-like) radial return calculations.
  */
-class ADAnisotropicReturnPlasticityStressUpdateBase : public ADGeneralizedRadialReturnStressUpdate
+class ADAnisotropicReturnPlasticityStressUpdateBase
+  : public GeneralizedRadialReturnStressUpdateTempl<true>
 {
 public:
   static InputParameters validParams();

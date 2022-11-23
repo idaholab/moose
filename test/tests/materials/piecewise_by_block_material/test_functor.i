@@ -25,6 +25,7 @@
     type = FVDiffusion
     variable = u
     coeff = 'coeff'
+    coeff_interp_method = average
   []
 []
 

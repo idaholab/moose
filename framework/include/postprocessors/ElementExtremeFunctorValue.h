@@ -10,60 +10,30 @@
 #pragma once
 
 #include "ElementPostprocessor.h"
-
-// Forward Declarations
-template <bool>
-class ElementExtremeFunctorValueTempl;
-typedef ElementExtremeFunctorValueTempl<false> ElementExtremeFunctorValue;
-typedef ElementExtremeFunctorValueTempl<true> ADElementExtremeFunctorValue;
+#include "ExtremeValueBase.h"
 
 /// A postprocessor for collecting an extreme value for a functor with an element argument
 template <bool is_ad>
-class ElementExtremeFunctorValueTempl : public ElementPostprocessor
+class ElementExtremeFunctorValueTempl : public ExtremeValueBase<ElementPostprocessor>
 {
 public:
   static InputParameters validParams();
 
-  /// Type of extreme value we are going to compute
-  enum ExtremeType
-  {
-    MAX,
-    MIN
-  };
-
-  /**
-   * Class constructor
-   * @param parameters The input parameters
-   */
   ElementExtremeFunctorValueTempl(const InputParameters & parameters);
-
-  virtual void initialize() override;
-  virtual void execute() override { computeValue(); }
-  virtual Real getValue() override;
-  virtual void threadJoin(const UserObject & y) override;
+  virtual void execute() override { computeExtremeValue(); }
 
 protected:
-  /// Get the extreme value with a functor element argument
-  virtual void computeValue();
+  virtual std::pair<Real, Real> getProxyValuePair() override;
 
-  /// The extreme value type
-  ExtremeType _type;
-
-  /**
-   * The value of the variable at the point at which the proxy variable
-   * reaches the max/min value.
-   */
-  Real _value;
-
-  /// Variable to search the extrema for
+  /// Functor to search the extrema for
   const Moose::Functor<GenericReal<is_ad>> & _functor;
 
   /**
-   * A proxy variable used to find the quadrature point at
-   * which to evaluate the variable. If not provided, defaults to the variable.
+   * A proxy functor used to find the quadrature point at
+   * which to evaluate the functor. If not provided, defaults to the functor.
    */
   const Moose::Functor<GenericReal<is_ad>> & _proxy_functor;
-
-  /// Extreme value of the proxy variable
-  Real _proxy_value;
 };
+
+typedef ElementExtremeFunctorValueTempl<false> ElementExtremeFunctorValue;
+typedef ElementExtremeFunctorValueTempl<true> ADElementExtremeFunctorValue;

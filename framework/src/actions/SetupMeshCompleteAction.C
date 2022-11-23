@@ -12,6 +12,7 @@
 #include "Moose.h"
 #include "Adaptivity.h"
 #include "MooseApp.h"
+#include "FEProblemBase.h"
 
 registerMooseAction("MooseApp", SetupMeshCompleteAction, "prepare_mesh");
 
@@ -31,7 +32,7 @@ SetupMeshCompleteAction::validParams()
   return params;
 }
 
-SetupMeshCompleteAction::SetupMeshCompleteAction(InputParameters params) : Action(params) {}
+SetupMeshCompleteAction::SetupMeshCompleteAction(const InputParameters & params) : Action(params) {}
 
 void
 SetupMeshCompleteAction::act()
@@ -62,27 +63,30 @@ SetupMeshCompleteAction::act()
      * file based restart and we need uniform refinements, we'll have to postpone
      * those refinements until after the solution has been read in.
      */
-    if (_app.getExodusFileRestart() == false && _app.isRecovering() == false)
+    if (_app.getExodusFileRestart() == false)
     {
-      TIME_SECTION("uniformRefine", 2, "Uniformly Refining");
-
-      if (_mesh->uniformRefineLevel())
+      if (_app.isRecovering() == false || !_app.isUltimateMaster())
       {
-        if (_mesh->meshSubdomains().count(Moose::INTERNAL_SIDE_LOWERD_ID) ||
-            _mesh->meshSubdomains().count(Moose::BOUNDARY_SIDE_LOWERD_ID))
-          mooseError("HFEM does not support mesh uniform refinement currently.");
+        TIME_SECTION("uniformRefine", 2, "Uniformly Refining");
 
-        Adaptivity::uniformRefine(_mesh.get());
-        // After refinement we need to make sure that all of our MOOSE-specific containers are
-        // up-to-date
-        _mesh->update();
-
-        if (_displaced_mesh)
+        if (_mesh->uniformRefineLevel())
         {
-          Adaptivity::uniformRefine(_displaced_mesh.get());
+          if (_mesh->meshSubdomains().count(Moose::INTERNAL_SIDE_LOWERD_ID) ||
+              _mesh->meshSubdomains().count(Moose::BOUNDARY_SIDE_LOWERD_ID))
+            mooseError("HFEM does not support mesh uniform refinement currently.");
+
+          Adaptivity::uniformRefine(_mesh.get());
           // After refinement we need to make sure that all of our MOOSE-specific containers are
           // up-to-date
-          _displaced_mesh->update();
+          _mesh->update();
+
+          if (_displaced_mesh)
+          {
+            Adaptivity::uniformRefine(_displaced_mesh.get());
+            // After refinement we need to make sure that all of our MOOSE-specific containers are
+            // up-to-date
+            _displaced_mesh->update();
+          }
         }
       }
     }
@@ -100,6 +104,9 @@ SetupMeshCompleteAction::act()
     // geometric ghosting functor and/or we have a displaced mesh
     if (_mesh->needsRemoteElemDeletion())
     {
+      // Must make sure to create the mortar meshes to build our data structures that ensure we will
+      // keep the correct elements in the mesh around
+      _problem->updateMortarMesh();
       _mesh->deleteRemoteElements();
       if (_displaced_mesh)
         _displaced_mesh->deleteRemoteElements();

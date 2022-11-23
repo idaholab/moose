@@ -14,7 +14,7 @@ pout = 7e6
   f = 1
 []
 
-[Modules/FluidProperties]
+[FluidProperties]
   [fp]
     type = IdealGasFluidProperties
     gamma = 1.66

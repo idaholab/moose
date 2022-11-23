@@ -15,6 +15,7 @@
 #include "SetupInterface.h"
 #include "MooseTypes.h"
 #include "MooseArray.h"
+#include "MooseError.h"
 
 #include "libmesh/fe_type.h"
 
@@ -113,6 +114,12 @@ public:
   virtual bool isNodal() const { return true; }
 
   /**
+   * Does this variable have DoFs on nodes
+   * @return true if it does, false if not.
+   */
+  virtual bool hasDoFsOnNodes() const { return true; }
+
+  /**
    * The DofMap associated with the system this variable is in.
    */
   const DofMap & dofMap() const { return _dof_map; }
@@ -152,6 +159,13 @@ public:
   void initialSetup() override;
 
   virtual void clearAllDofIndices() { _dof_indices.clear(); }
+
+  /**
+   * Set the active vector tags
+   * @param vtags Additional vector tags that this variable will need to query at dof indices for,
+   * in addition to our own required solution tags
+   */
+  virtual void setActiveTags(const std::set<TagID> & vtags);
 
 protected:
   /// System this variable is part of
@@ -205,6 +219,12 @@ protected:
   /// If dual mortar approach is used
   bool _use_dual;
 };
+
+inline void
+MooseVariableBase::setActiveTags(const std::set<TagID> &)
+{
+  mooseError("setActiveTags must be overridden in derived classes.");
+}
 
 #define usingMooseVariableBaseMembers                                                              \
   using MooseVariableBase::_sys;                                                                   \

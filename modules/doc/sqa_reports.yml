@@ -205,6 +205,26 @@ Applications:
         unregister:
             - framework/doc/unregister.yml
 
+    scalar_transport:
+        exe_directory: modules/combined
+        app_types:
+            - ScalarTransportApp
+        content_directory: modules/scalar_transport/doc/content
+        unregister:
+            - framework/doc/unregister.yml
+        remove:
+            - framework/doc/remove.yml
+
+    solid_properties:
+        exe_directory: modules/combined
+        app_types:
+            - SolidPropertiesApp
+        content_directory: modules/solid_properties/doc/content
+        unregister:
+            - framework/doc/unregister.yml
+        remove:
+            - framework/doc/remove.yml
+
     stochastic_tools:
         exe_directory: modules/combined
         app_types:
@@ -415,6 +435,14 @@ Requirements:
         directories:
             - modules/richards
         log_missing: NONE # deprcated module
+
+    scalar_transport:
+        directories:
+            - modules/scalar_transport
+
+    solid_properties:
+        directories:
+            - modules/solid_properties
 
     stochastic_tools:
         directories:

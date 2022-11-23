@@ -1,0 +1,17 @@
+[Tests]
+  [test_451]
+    type = CSVDiff
+    input = '../thermal_solid_properties.i'
+    cli_args = "
+      solid_properties_class=ThermalGraphiteProperties
+      file_base=graphite_451
+      T_min=200
+      T_max=3500
+      SolidProperties/sp/grade=H_451"
+    csvdiff = 'graphite_451_vpp_0000.csv'
+    mesh_mode = 'replicated' # see #21865
+    requirement = "The system shall compute thermal properties for H-451 graphite."
+    design = 'ThermalGraphiteProperties.md ThermalSolidPropertiesMaterial.md'
+    issues = '#12284'
+  []
+[]

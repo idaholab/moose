@@ -16,9 +16,9 @@ p0 = 1e5
 molar_mass = 29.0e-3
 T0 = 328
 Ru = 8.3145
-Ri = ${fparse Ru / molar_mass}
-density = ${fparse p0 / (Ri * T0)}
-head = ${fparse height * density * gravity}
+Ri = '${fparse Ru / molar_mass}'
+density = '${fparse p0 / (Ri * T0)}'
+head = '${fparse height * density * gravity}'
 k = 25.68e-3
 gamma = 1.4
 
@@ -35,6 +35,15 @@ gamma = 1.4
 
 [GlobalParams]
   rhie_chow_user_object = pins_rhie_chow_interpolator
+[]
+
+[FluidProperties]
+  [air]
+    type = IdealGasFluidProperties
+    molar_mass = ${molar_mass}
+    k = ${k}
+    gamma = ${gamma}
+  []
 []
 
 [Modules]
@@ -68,15 +77,6 @@ gamma = 1.4
     friction_coeffs = 'Darcy_coef'
     porous_medium_treatment = true
     porosity = porosity
-  []
-
-  [FluidProperties]
-    [air]
-      type = IdealGasFluidProperties
-      molar_mass = ${molar_mass}
-      k = ${k}
-      gamma = ${gamma}
-    []
   []
 []
 
@@ -126,7 +126,7 @@ gamma = 1.4
 
   [vector_props]
     type = ADGenericVectorFunctorMaterial
-    prop_names =  'Darcy_coef'
+    prop_names = 'Darcy_coef'
     prop_values = '1.3 1.3 1.3'
   []
 []
@@ -173,6 +173,7 @@ gamma = 1.4
     vel_y = superficial_vel_y
     advected_quantity = rho
     boundary = bottom
+    advected_interp_method = average
   []
 
   [outlet_mfr]
@@ -181,6 +182,7 @@ gamma = 1.4
     vel_y = superficial_vel_y
     advected_quantity = rho
     boundary = top
+    advected_interp_method = average
   []
 
   [inlet_energy]
@@ -189,6 +191,7 @@ gamma = 1.4
     vel_y = superficial_vel_y
     advected_quantity = rho_cp_T_fluid_var
     boundary = bottom
+    advected_interp_method = average
   []
 
   [outlet_energy]
@@ -197,7 +200,12 @@ gamma = 1.4
     vel_y = superficial_vel_y
     advected_quantity = rho_cp_T_fluid_var
     boundary = top
+    advected_interp_method = average
   []
+[]
+
+[Debug]
+  show_var_residual_norms = true
 []
 
 [Outputs]

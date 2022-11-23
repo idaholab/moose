@@ -17,6 +17,9 @@
 #include "MooseVariableFE.h"
 #include "Problem.h"
 #include "SwapBackSentinel.h"
+// For dynamic casting to Coupleable
+#include "Material.h"
+#include "InterfaceMaterial.h"
 
 #include "libmesh/threads.h"
 
@@ -55,6 +58,16 @@ ComputeIndicatorThread::subdomainChanged()
   _indicator_whs.updateVariableDependency(needed_moose_vars, _tid);
   _internal_side_indicators.updateVariableDependency(needed_moose_vars, _tid);
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
+
+  // Update variable coupleable vector tags
+  std::set<TagID> needed_var_vector_tags;
+  _indicator_whs.updateBlockFEVariableCoupledVectorTagDependency(
+      _subdomain, needed_var_vector_tags, _tid);
+  _internal_side_indicators.updateBlockFEVariableCoupledVectorTagDependency(
+      _subdomain, needed_var_vector_tags, _tid);
+  _fe_problem.getMaterialWarehouse().updateBlockFEVariableCoupledVectorTagDependency(
+      _subdomain, needed_var_vector_tags, _tid);
+  _fe_problem.setActiveFEVariableCoupleableVectorTags(needed_var_vector_tags, _tid);
 
   std::set<unsigned int> needed_mat_props;
   _indicator_whs.updateMatPropDependency(needed_mat_props, _tid);

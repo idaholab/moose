@@ -39,10 +39,12 @@ PINSFVRhieChowInterpolator::validParams()
 
 PINSFVRhieChowInterpolator::PINSFVRhieChowInterpolator(const InputParameters & params)
   : INSFVRhieChowInterpolator(params),
-    _eps(const_cast<Moose::Functor<ADReal> &>(getFunctor<ADReal>(NS::porosity))),
+    _eps(getFunctor<ADReal>(NS::porosity)),
+    _smoothed_eps(_moose_mesh, NS::smoothed_porosity),
     _epss(libMesh::n_threads(), nullptr),
+    _smoothed_epss(libMesh::n_threads(), nullptr),
     _smoothing_layers(getParam<unsigned short>("smoothing_layers")),
-    _smoothed_eps(_moose_mesh, "smoothed_eps")
+    _pinsfv_setup_done(false)
 {
   if (_smoothing_layers && _eps.wrapsType<MooseVariableBase>())
     paramError(
@@ -58,7 +60,19 @@ PINSFVRhieChowInterpolator::PINSFVRhieChowInterpolator(const InputParameters & p
   const auto porosity_name = deduceFunctorName(NS::porosity);
 
   for (const auto tid : make_range(libMesh::n_threads()))
+  {
     _epss[tid] = &UserObject::_subproblem.getFunctor<ADReal>(porosity_name, tid, name());
+
+    if (_smoothing_layers > 0)
+    {
+      if (!UserObject::_subproblem.hasFunctor(NS::smoothed_porosity, tid))
+        // Smoothed porosity is only an envelope at this point, it will be set during pinsfvSetup()
+        UserObject::_subproblem.addFunctor(NS::smoothed_porosity, _smoothed_eps, tid);
+
+      _smoothed_epss[tid] =
+          &UserObject::_subproblem.getFunctor<ADReal>(NS::smoothed_porosity, tid, name());
+    }
+  }
 }
 
 void
@@ -66,18 +80,6 @@ PINSFVRhieChowInterpolator::meshChanged()
 {
   insfvSetup();
   pinsfvSetup();
-}
-
-void
-PINSFVRhieChowInterpolator::residualSetup()
-{
-  if (!_initial_setup_done)
-  {
-    insfvSetup();
-    pinsfvSetup();
-  }
-
-  _initial_setup_done = true;
 }
 
 void
@@ -101,15 +103,28 @@ PINSFVRhieChowInterpolator::pinsfvSetup()
       _smoothed_eps, _eps, _smoothing_layers, false, _geometric_fi, *this);
   ADReal::do_derivatives = saved_do_derivatives;
 
-  _eps.assign(_smoothed_eps);
-
-  const auto porosity_name = deduceFunctorName(NS::porosity);
+  // Assign the new functor to all
   for (const auto tid : make_range((unsigned int)(1), libMesh::n_threads()))
   {
-    auto & other_epss = const_cast<Moose::Functor<ADReal> &>(
-        UserObject::_subproblem.getFunctor<ADReal>(porosity_name, tid, name()));
-    other_epss.assign(_smoothed_eps);
+    auto & other_smoothed_epss = const_cast<Moose::Functor<ADReal> &>(
+        UserObject::_subproblem.getFunctor<ADReal>(NS::smoothed_porosity, tid, name()));
+    other_smoothed_epss.assign(_smoothed_eps);
   }
+}
+
+void
+PINSFVRhieChowInterpolator::residualSetup()
+{
+  // We cant do this on initialSetup because user objects are initialized before
+  // functions are, so the porosity function is not available for interpolation-reconstruction
+  // on initialSetup().
+  if (!_pinsfv_setup_done)
+  {
+    pinsfvSetup();
+    _pinsfv_setup_done = true;
+  }
+
+  INSFVRhieChowInterpolator::residualSetup();
 }
 
 bool

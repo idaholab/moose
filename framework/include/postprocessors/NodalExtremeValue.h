@@ -10,40 +10,19 @@
 #pragma once
 
 #include "NodalVariablePostprocessor.h"
+#include "ExtremeValueBase.h"
 
-// Input parameters
 /// A postprocessor for collecting the nodal min or max value
-class NodalExtremeValue : public NodalVariablePostprocessor
+class NodalExtremeValue : public ExtremeValueBase<NodalVariablePostprocessor>
 {
 public:
   static InputParameters validParams();
 
-  /// What type of extreme value we are going to compute
-  enum ExtremeType
-  {
-    MAX,
-    MIN
-  };
-
-  /**
-   * Class constructor
-   * @param parameters The input parameters
-   */
   NodalExtremeValue(const InputParameters & parameters);
-  virtual void initialize() override;
-  virtual void execute() override;
-  virtual Real getValue() override;
-  virtual void threadJoin(const UserObject & y) override;
+  virtual void execute() override { computeExtremeValue(); }
 
 protected:
-  /// The extreme value type ("min" or "max")
-  ExtremeType _type;
-
-  /**
-   * The value of the variable at the point at which the proxy variable
-   * reaches the max/min value.
-   */
-  Real _value;
+  virtual std::pair<Real, Real> getProxyValuePair() override;
 
   /**
    * A proxy variable used to find the quadrature point at

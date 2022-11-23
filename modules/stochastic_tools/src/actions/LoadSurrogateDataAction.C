@@ -24,7 +24,7 @@ LoadSurrogateDataAction::validParams()
   return params;
 }
 
-LoadSurrogateDataAction::LoadSurrogateDataAction(InputParameters params) : Action(params) {}
+LoadSurrogateDataAction::LoadSurrogateDataAction(const InputParameters & params) : Action(params) {}
 
 void
 LoadSurrogateDataAction::act()

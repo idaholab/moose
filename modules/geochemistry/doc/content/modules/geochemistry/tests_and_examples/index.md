@@ -62,5 +62,15 @@ Many of the tests and examples are drawn from the popular textbook [!cite](bethk
 - [A 2D GeoTES simulation](geotes_2D.md)
 - [A GeoTES simulation involving the Weber-Tensleep formation](geotes_weber_tensleep.md)
 - [A geothermal simulation involving 2D flow](forge.md)
+- [Zoning in an aquifer](bio_zoning.md)
+
+## Biogeochemistry
+
+- [Basics](theory/biogeochemistry.md)
+- [Simulating mortality](bio_death.md)
+- [A sulfate reducer in the presence of acetate](bio_sulfate.md)
+- [Arsenate reduction in the presence of lactate](bio_arsenate.md)
+- [Zoning in an aquifer: a reactive-transport model](bio_zoning.md)
+
 
 !bibtex bibliography

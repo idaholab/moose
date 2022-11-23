@@ -152,6 +152,8 @@ PolygonConcentricCircleMeshGeneratorBase::validParams()
                         true,
                         "Volume of concentric circles can be preserved using this function.");
   params.addParam<subdomain_id_type>("block_id_shift", 0, "Integer used to shift block IDs.");
+  params.addParam<bool>(
+      "create_interface_boundaries", true, "Whether the interface boundaries are created.");
   params.addParam<boundary_id_type>(
       "interface_boundary_id_shift", 0, "Integer used to shift interface boundary IDs.");
   params.addRangeCheckedParam<boundary_id_type>("external_boundary_id",
@@ -183,7 +185,7 @@ PolygonConcentricCircleMeshGeneratorBase::validParams()
   params.addParamNamesToGroup(
       "background_block_ids background_block_names duct_block_ids duct_block_names ring_block_ids "
       "ring_block_names external_boundary_id external_boundary_name interface_boundary_names "
-      "block_id_shift interface_boundary_id_shift",
+      "block_id_shift create_interface_boundaries interface_boundary_id_shift",
       "Customized Subdomain/Boundary");
   params.addParamNamesToGroup("num_sectors_per_side background_intervals duct_intervals "
                               "ring_intervals uniform_mesh_on_sides",
@@ -200,6 +202,7 @@ PolygonConcentricCircleMeshGeneratorBase::validParams()
       "duct_inner_boundary_layer_intervals duct_outer_boundary_layer_biases "
       "duct_outer_boundary_layer_widths duct_outer_boundary_layer_intervals",
       "Mesh Boundary Layers and Biasing Options");
+  addRingAndSectorIDParams(params);
   params.addClassDescription("This PolygonConcentricCircleMeshGeneratorBase object is a base class "
                              "to be inherited for polygon mesh generators.");
 
@@ -319,6 +322,7 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
                                 : std::vector<SubdomainName>()),
     _preserve_volumes(getParam<bool>("preserve_volumes")),
     _block_id_shift(getParam<subdomain_id_type>("block_id_shift")),
+    _create_interface_boundaries(getParam<bool>("create_interface_boundaries")),
     _interface_boundary_id_shift(getParam<boundary_id_type>("interface_boundary_id_shift")),
     _external_boundary_id(isParamValid("external_boundary_id")
                               ? getParam<boundary_id_type>("external_boundary_id")
@@ -344,7 +348,10 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
     _pattern_pitch_meta(declareMeshProperty<Real>("pattern_pitch_meta", 0.0)),
     _azimuthal_angle_meta(
         declareMeshProperty<std::vector<Real>>("azimuthal_angle_meta", std::vector<Real>())),
-    _is_control_drum_meta(declareMeshProperty<bool>("is_control_drum_meta", false))
+    _is_control_drum_meta(declareMeshProperty<bool>("is_control_drum_meta", false)),
+    _max_radius_meta(declareMeshProperty<Real>("max_radius_meta", 0.0)),
+    _quad_center_block_id(declareMeshProperty<subdomain_id_type>(
+        "quad_center_block_id", libMesh::Elem::invalid_subdomain_id))
 {
   // This error message is only reserved for future derived classes. Neither of the current derived
   // classes will trigger this error.
@@ -354,6 +361,11 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
                       ? _polygon_size
                       : _polygon_size * std::cos(M_PI / Real(_num_sides)));
   _pitch_meta = _pitch;
+  if (!_create_interface_boundaries &&
+      (_interface_boundary_names.size() > 0 || _interface_boundary_id_shift != 0))
+    paramError("create_interface_boundaries",
+               "If set false, neither interface_boundary_names nor interface_boundary_id_shift "
+               "should be set as they are not used.");
   if (_interface_boundary_names.size() > 0 &&
       _interface_boundary_names.size() != _duct_sizes.size() + _ring_radii.size())
     paramError("interface_boundary_names",
@@ -560,6 +572,9 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
   if (!_quad_center_elements && _center_quad_factor)
     paramError("center_quad_factor",
                "this parameter is only applicable if quad_center_elements is set true.");
+  if (_quad_center_elements)
+    _quad_center_block_id =
+        _ring_block_ids.empty() ? _background_block_ids.front() : _ring_block_ids.front();
 }
 
 std::unique_ptr<MeshBase>
@@ -632,6 +647,7 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
       paramError("ring_radii",
                  "Elements of this parameter must be smaller than polygon apothem (after volume "
                  "preserve correction if applicable).");
+    _max_radius_meta = ring_radii_corr.back();
   }
   // build the first slice of the polygon.
   auto mesh0 = buildSimpleSlice(ring_radii_corr,
@@ -657,6 +673,7 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
                                 _block_id_shift,
                                 _quad_center_elements,
                                 _center_quad_factor,
+                                _create_interface_boundaries,
                                 _interface_boundary_id_shift);
   // This loop builds add-on slices and stitches them to the first slice
   for (unsigned int mesh_index = 1; mesh_index < _num_sides; mesh_index++)
@@ -684,6 +701,7 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
                                      _block_id_shift,
                                      _quad_center_elements,
                                      _center_quad_factor,
+                                     _create_interface_boundaries,
                                      _interface_boundary_id_shift);
 
     ReplicatedMesh other_mesh(*mesh_tmp);
@@ -859,7 +877,7 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
         _external_boundary_id > 0 ? _external_boundary_id : (boundary_id_type)OUTER_SIDESET_ID) =
         _external_boundary_name;
   }
-  if (!_interface_boundary_names.empty())
+  if (_create_interface_boundaries && !_interface_boundary_names.empty())
   {
     unsigned int interface_id_shift =
         _has_rings ? (_ring_intervals.front() > 1 ? 2 : 1) : (_background_intervals > 1 ? 2 : 1);
@@ -871,6 +889,22 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
           i + interface_id_shift + _interface_boundary_id_shift) = _interface_boundary_names[i];
     }
   }
+
+  // add sector ids
+  if (isParamValid("sector_id_name"))
+    setSectorExtraIDs(
+        *mesh0, getParam<std::string>("sector_id_name"), _num_sides, _num_sectors_per_side);
+
+  // add ring ids
+  if (isParamValid("ring_id_name"))
+    setRingExtraIDs(*mesh0,
+                    getParam<std::string>("ring_id_name"),
+                    _num_sides,
+                    _num_sectors_per_side,
+                    _ring_intervals,
+                    getParam<MooseEnum>("ring_id_assign_type") == "ring_wise",
+                    _quad_center_elements);
+
   if (_flat_side_up)
     MeshTools::Modification::rotate(*mesh0, 180.0 / (Real)_num_sides, 0.0, 0.0);
   return dynamic_pointer_cast<MeshBase>(mesh0);

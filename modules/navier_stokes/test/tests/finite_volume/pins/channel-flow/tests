@@ -68,7 +68,7 @@
     requirement = 'The system shall be able to model no-slip conditions in a porous media channel with a set mean pressure; specifically, moving down the channel, the tangential velocity shall develop a parabolic profile.'
     abs_zero = 1e-9
     ad_indexing_type = 'global'
-    cli_args = "Variables/inactive='' FVKernels/inactive='' FVBCs/active='inlet-u inlet-v outlet-p-novalue outlet-u outlet-v no-slip-u no-slip-v' Outputs/file_base='rc-no-slip-mean-pressure'"
+    cli_args = "Executioner/automatic_scaling=true Executioner/nl_rel_tol=1e-13 Variables/inactive='' FVKernels/inactive='' FVBCs/active='inlet-u inlet-v outlet-p-novalue outlet-u outlet-v no-slip-u no-slip-v' Outputs/file_base='rc-no-slip-mean-pressure'"
   []
   [no-slip-pressure-average-action]
     type = 'Exodiff'

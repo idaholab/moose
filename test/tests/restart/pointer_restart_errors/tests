@@ -14,6 +14,8 @@
     type = 'RunApp'
     input = 'pointer_load_error.i'
     max_parallel = 1 # Sometimes times out in parallel after producing correct message
+    # this test is only used for generating the checkpoint files
+    recover = false
 
     requirement = 'The system shall store a custom type that contains a data serialization routine that is declared as restartable.'
   [../]

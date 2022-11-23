@@ -26,7 +26,8 @@ AddElementalFieldAction::validParams()
   return params;
 }
 
-AddElementalFieldAction::AddElementalFieldAction(InputParameters params) : AddVariableAction(params)
+AddElementalFieldAction::AddElementalFieldAction(const InputParameters & params)
+  : AddVariableAction(params)
 {
 }
 

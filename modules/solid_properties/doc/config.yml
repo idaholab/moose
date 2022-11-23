@@ -1,0 +1,27 @@
+Content:
+    - framework/doc/content
+    - modules/solid_properties/doc/content
+    - modules/heat_conduction/doc/content
+    - modules/ray_tracing/doc/content
+
+Renderer:
+    type: MooseDocs.base.MaterializeRenderer
+
+Extensions:
+    MooseDocs.extensions.navigation:
+        name: MOOSE Solid Properties Module
+        repo: https://github.com/idaholab/moose
+        home: modules/solid_properties/index.md
+    MooseDocs.extensions.appsyntax:
+        executable: ${MOOSE_DIR}/modules/solid_properties
+        remove: !include framework/doc/remove.yml
+        includes:
+            - framework/include
+            - modules/solid_properties/include
+            - modules/heat_conduction/include
+            - modules/ray_tracing/include
+    MooseDocs.extensions.common:
+        shortcuts: !include framework/doc/globals.yml
+    MooseDocs.extensions.acronym:
+        acronyms: !include framework/doc/acronyms.yml
+    MooseDocs.extensions.sqa: disable

@@ -26,6 +26,10 @@ public:
 
   VolumetricFlowRate(const InputParameters & parameters);
 
+  /// Currently only requests some boundary data from the RhieChow interpolator
+  void initialSetup() override;
+  void meshChanged() override;
+
 protected:
   Real computeFaceInfoIntegral(const FaceInfo * fi) override;
 

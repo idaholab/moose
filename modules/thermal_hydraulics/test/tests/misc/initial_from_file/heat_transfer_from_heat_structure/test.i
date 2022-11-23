@@ -9,7 +9,7 @@
   initial_from_file = 'steady_state_out.e'
 []
 
-[Modules/FluidProperties]
+[FluidProperties]
   [fp]
     type = StiffenedGasFluidProperties
     gamma = 2.35
@@ -68,6 +68,7 @@
     n_part_elems = 1
     materials = 'mat1'
     inner_radius = 0.01
+    offset_mesh_by_inner_radius = true
     widths = 0.1
   []
 

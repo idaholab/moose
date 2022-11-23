@@ -91,7 +91,14 @@ ReferenceResidualProblem::ReferenceResidualProblem(const InputParameters & param
                  ")");
   }
   else if (params.isParamValid("reference_vector"))
-    _reference_vector = &_nl->getVector(getVectorTagID(getParam<TagName>("reference_vector")));
+  {
+    if (numNonlinearSystems() > 1)
+      paramError(
+          "nl_sys_names",
+          "reference residual problem does not currently support multiple nonlinear systems");
+    _reference_vector =
+        &getNonlinearSystemBase(0).getVector(getVectorTagID(getParam<TagName>("reference_vector")));
+  }
   else
     mooseInfo("Neither the `reference_residual_variables` nor `reference_vector` parameter is "
               "specified for `ReferenceResidualProblem`, which means that no reference "
@@ -244,11 +251,11 @@ ReferenceResidualProblem::initialSetup()
                       s.variable_name(_soln_vars[i])) != _group_variables[j].end())
         {
           if (!_converge_on_var[i])
-            paramError(
-                "converge_on",
-                "You added variable '",
-                _soln_var_names[i],
-                "' to a group but excluded it from the convergence check. This is not permitted.");
+            paramError("converge_on",
+                       "You added variable '",
+                       _soln_var_names[i],
+                       "' to a group but excluded it from the convergence check. This is not "
+                       "permitted.");
 
           _variable_group_num_index[i] = j;
           find_group = true;

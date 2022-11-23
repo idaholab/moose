@@ -36,8 +36,10 @@ public:
                             DualReal & drho_dT) const override;
 
   virtual Real v_from_p_T(Real p, Real T) const override;
-  virtual DualReal v_from_p_T(const DualReal & p, const DualReal & T) const override;
   virtual void v_from_p_T(Real p, Real T, Real & v, Real & dv_dp, Real & dv_dT) const override;
+
+  virtual Real p_from_v_e(Real v, Real e) const override;
+  virtual Real T_from_v_e(Real v, Real e) const override;
 
   virtual Real h_from_p_T(Real p, Real T) const override;
   virtual void h_from_p_T(Real p, Real T, Real & h, Real & dh_dp, Real & dh_dT) const override;

@@ -33,12 +33,10 @@
   porepressure = pp
 []
 
-[Modules]
-  [FluidProperties]
-    [simple_fluid]
-      type = SimpleFluidProperties
-      viscosity = 0.001
-    []
+[FluidProperties]
+  [simple_fluid]
+    type = SimpleFluidProperties
+    viscosity = 0.001
   []
 []
 
@@ -100,4 +98,3 @@
     execute_on = final
   []
 []
-

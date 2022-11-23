@@ -197,19 +197,17 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [brine]
-      type = BrineFluidProperties
-    []
-    [methane]
-      type = MethaneFluidProperties
-    []
-    [methane_tab]
-      type = TabulatedFluidProperties
-      fp = methane
-      save_file = false
-    []
+[FluidProperties]
+  [brine]
+    type = BrineFluidProperties
+  []
+  [methane]
+    type = MethaneFluidProperties
+  []
+  [methane_tab]
+    type = TabulatedFluidProperties
+    fp = methane
+    save_file = false
   []
 []
 

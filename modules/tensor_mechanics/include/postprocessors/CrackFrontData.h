@@ -26,7 +26,8 @@ public:
   CrackFrontData(const InputParameters & parameters);
 
   virtual void initialize();
-  virtual void execute() {}
+  virtual void execute();
+  virtual void finalize();
 
   /**
    * This will return the degrees of freedom in the system.
@@ -41,4 +42,5 @@ protected:
   std::string _var_name;
   const Real _scale_factor;
   MooseVariable & _field_var;
+  Real _value;
 };

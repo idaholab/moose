@@ -73,8 +73,14 @@ template <bool is_ad>
 Real
 CFLTimeStepSizeTempl<is_ad>::getValue()
 {
-  gatherMin(_dt);
   return _dt;
+}
+
+template <bool is_ad>
+void
+CFLTimeStepSizeTempl<is_ad>::finalize()
+{
+  gatherMin(_dt);
 }
 
 template <bool is_ad>

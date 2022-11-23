@@ -1,13 +1,41 @@
 [Tests]
   design = 'meshgenerators/PeripheralRingMeshGenerator.md'
-  issues = '#19978 #20637'
+  issues = '#19978 #20637 #22138'
   [core_peripheral_ring_nonpreserved]
     type = 'Exodiff'
     input = 'core_ring.i'
     exodiff = 'core_ring_in.e'
     cli_args = 'Mesh/pr/preserve_volumes=false
+                Mesh/inactive=tg
                 --mesh-only'
     requirement ='The system shall add a peripheral ring to to the input mesh without preserving volumes due to polygonization.'
+    recover = false
+    mesh_mode = 'REPLICATED'
+  []
+  [core_peripheral_ring_noncentered]
+    type = 'Exodiff'
+    input = 'core_ring.i'
+    exodiff = 'core_ring_noncentered_in.e'
+    cli_args = 'Mesh/fmg/file=input_sim.e
+                Mesh/pr/input=tg
+                Mesh/pr/peripheral_ring_radius=10
+                Mesh/pr/peripheral_layer_num=1
+                --mesh-only core_ring_noncentered_in.e'
+    requirement ='The system shall add a peripheral ring to the input mesh with its centroid off the origin.'
+    recover = false
+    mesh_mode = 'REPLICATED'
+  []
+  [core_peripheral_ring_centered]
+    type = 'Exodiff'
+    input = 'core_ring.i'
+    exodiff = 'core_ring_centered_in.e'
+    cli_args = 'Mesh/fmg/file=input_sim.e
+                Mesh/pr/input=tg
+                Mesh/pr/force_input_centroid_as_center=true
+                Mesh/pr/peripheral_ring_radius=10
+                Mesh/pr/peripheral_layer_num=1
+                --mesh-only core_ring_centered_in.e'
+    requirement ='The system shall add a peripheral ring to the input mesh after moving its centroid to the origin.'
     recover = false
     mesh_mode = 'REPLICATED'
   []
@@ -15,7 +43,8 @@
     type = 'Exodiff'
     input = 'core_ring.i'
     exodiff = 'core_ring_preserved_in.e'
-    cli_args = '--mesh-only core_ring_preserved_in.e'
+    cli_args = 'Mesh/inactive=tg
+                --mesh-only core_ring_preserved_in.e'
     requirement ='The system shall be able to add a peripheral ring to the input mesh and preserve volumes even with polygonization.'
     recover = false
     mesh_mode = 'REPLICATED'
@@ -25,6 +54,7 @@
     input = 'core_ring.i'
     exodiff = 'core_ring_bias_in.e'
     cli_args = 'Mesh/pr/peripheral_radial_bias=0.5
+                Mesh/inactive=tg
                 --mesh-only core_ring_bias_in.e'
     requirement ='The system shall be able to add a peripheral ring with radial biasing to the input mesh and preserve volumes even with polygonization.'
     recover = false
@@ -41,6 +71,7 @@
                 Mesh/pr/peripheral_outer_boundary_layer_intervals=4
                 Mesh/pr/peripheral_outer_boundary_layer_bias=0.5
                 Mesh/pr/peripheral_ring_radius=85
+                Mesh/inactive=tg
                 --mesh-only core_ring_boundary_layers_in.e'
     requirement ='The system shall be able to add a peripheral ring with boundary layers to the input mesh and preserve volumes even with polygonization.'
     recover = false
@@ -51,6 +82,7 @@
     input = 'core_ring.i'
     cli_args = 'Mesh/pr/peripheral_inner_boundary_layer_width=3
                 Mesh/pr/peripheral_outer_boundary_layer_width=3
+                Mesh/inactive=tg
                 --mesh-only'
     expect_err = 'must be smaller than the thickness of'
     requirement ='The system shall throw an error if the specified inner and outer boundary layers are overlapped.'
@@ -61,6 +93,7 @@
     input = 'core_ring.i'
     cli_args = 'Mesh/fmg/type=GeneratedMeshGenerator
                 Mesh/fmg/dim=1
+                Mesh/inactive=tg
                 --mesh-only'
     expect_err = 'Only 2D meshes are supported.'
     requirement ='The system shall throw an error if a non-2D mesh is given as the input mesh.'
@@ -70,6 +103,7 @@
     type = 'RunException'
     input = 'core_ring.i'
     cli_args = 'Mesh/pr/input_mesh_external_boundary=1
+                Mesh/inactive=tg
                 --mesh-only'
     expect_err = 'This mesh generator does not work for the provided external boundary as it has more than one segments.'
     requirement ='The system shall throw an error if the given boundary of the input mesh has two or more segments.'
@@ -80,6 +114,7 @@
     input = 'core_ring.i'
     cli_args = 'Mesh/pr/input_mesh_external_boundary=10001
                 Mesh/fmg/file=input_mesh_invalid_bdry_2.e
+                Mesh/inactive=tg
                 --mesh-only'
     expect_err = 'This mesh generator does not work for the provided external boundary as it is not a closed loop.'
     requirement ='The system shall throw an error if the given boundary of the input mesh is an open curve.'
@@ -94,6 +129,7 @@
                 Mesh/ssasg/new_boundary=5000
                 Mesh/pr/input=ssasg
                 Mesh/pr/input_mesh_external_boundary=5000
+                Mesh/inactive=tg
                 --mesh-only'
     expect_err = 'This mesh generator does not work for the provided external boundary as azimuthal angles of consecutive nodes do not change monotonically.'
     requirement ='The system shall throw an error if the consecutive nodes of the given boundary of the input mesh do not change monotonically.'
@@ -103,6 +139,7 @@
     type = 'RunException'
     input = 'core_ring.i'
     cli_args = 'Mesh/pr/peripheral_ring_radius=20
+                Mesh/inactive=tg
                 --mesh-only'
     expect_err = 'The peripheral ring to be generated must be large enough to cover the entire input mesh.'
     requirement ='The system shall throw an error if the given peripheral ring radius is not enough to cover the input mesh.'
@@ -113,6 +150,7 @@
     input = 'core_ring.i'
     cli_args = 'Mesh/fmg/file=input_mesh_err.e
                 Mesh/pr/input_mesh_external_boundary=30500
+                Mesh/inactive=tg
                 --mesh-only'
     expect_err = 'The boundary provided is not an external boundary.'
     requirement ='The system shall throw an error if the given external boundary is actually an internal boundary of the input mesh.'

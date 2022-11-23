@@ -42,19 +42,19 @@ ComparisonPostprocessor::comparisonIsTrue(const Real & a, const Real & b) const
   {
     case ComparisonType::EQUALS:
       return MooseUtils::absoluteFuzzyEqual(a, b, _absolute_tolerance);
-      break;
+
     case ComparisonType::GREATER_THAN_EQUALS:
       return MooseUtils::absoluteFuzzyGreaterEqual(a, b, _absolute_tolerance);
-      break;
+
     case ComparisonType::LESS_THAN_EQUALS:
       return MooseUtils::absoluteFuzzyLessEqual(a, b, _absolute_tolerance);
-      break;
+
     case ComparisonType::GREATER_THAN:
       return MooseUtils::absoluteFuzzyGreaterThan(a, b, _absolute_tolerance);
-      break;
+
     case ComparisonType::LESS_THAN:
       return MooseUtils::absoluteFuzzyLessThan(a, b, _absolute_tolerance);
-      break;
+
     default:
       mooseError("Invalid comparison type.");
   }

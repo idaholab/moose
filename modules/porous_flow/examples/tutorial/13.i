@@ -242,12 +242,10 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [simple_fluid]
-      type = SimpleFluidProperties
-      viscosity = 1E-3
-    []
+[FluidProperties]
+  [simple_fluid]
+    type = SimpleFluidProperties
+    viscosity = 1E-3
   []
 []
 

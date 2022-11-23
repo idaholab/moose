@@ -1,0 +1,112 @@
+[Tests]
+  design = 'Constraints/index.md'
+  issues = '#13080 #20773'
+  parallel_scheduling = true
+  [soft]
+    requirement = 'The system shall be able to compute a soft block bouncing on a soft plank problem '
+                  'on a first order 2D mesh using tensor mechanics and frictional mortar contact'
+    [finite]
+      detail = 'using the finite strain formulation.'
+      type = 'CSVDiff'
+      input = 'finite.i'
+      csvdiff = 'finite.csv'
+      heavy = true
+      ad_indexing_type = 'global'
+    []
+    [finite_short]
+      detail = 'using the finite strain formulation for a limited time simulation.'
+      type = 'CSVDiff'
+      input = 'finite.i'
+      csvdiff = 'finite_short.csv'
+      cli_args = 'name=finite_short Executioner/num_steps=10'
+      ad_indexing_type = 'global'
+      valgrind = 'heavy'
+    []
+    [finite_rr]
+      detail = 'using the finite strain formulation and reference residual.'
+      type = 'CSVDiff'
+      input = 'finite_rr.i'
+      csvdiff = 'finite_rr.csv'
+      heavy = true
+      ad_indexing_type = 'global'
+    []
+    [finite_rr_full]
+      detail = 'using the finite strain formulation and reference residual with extra_vector_tags passed to the constraints.'
+      type = 'CSVDiff'
+      input = 'finite_rr.i'
+      csvdiff = 'finite_rr_full.csv'
+      cli_args = 'Contact/frictional/extra_vector_tags=ref name=finite_rr_full Executioner/num_steps=10'
+      ad_indexing_type = 'global'
+      valgrind = 'heavy'
+    []
+  []
+  [stiff]
+    requirement = 'The system shall be able to compute a block bouncing on a plank problem on a '
+                  'first order 2D mesh using tensor mechanics and frictional mortar contact and finite strain'
+    [stiff_stiff]
+      detail = 'using with a stiff block and a stiff plank.'
+      type = 'CSVDiff'
+      input = 'finite.i'
+      csvdiff = 'stiff_stiff.csv'
+      cli_args = 'E_block=1e9 E_plank=1e9 name=stiff_stiff Contact/frictional/c_tangential=1e7'
+      heavy = true
+      ad_indexing_type = 'global'
+    []
+    [soft_stiff]
+      detail = 'using with a soft block and a stiff plank.'
+      type = 'CSVDiff'
+      input = 'finite.i'
+      csvdiff = 'soft_stiff.csv'
+      cli_args = 'E_block=1e7 E_plank=1e9 name=soft_stiff'
+      heavy = true
+      ad_indexing_type = 'global'
+    []
+  []
+
+  [soft_second]
+    requirement = 'The system shall be able to compute a soft block bouncing on a soft plank problem '
+                  'on a first order 2D mesh using tensor mechanics with second order elements and frictional mortar contact'
+    [finite]
+      detail = 'using the finite strain formulation.'
+      type = 'CSVDiff'
+      input = 'finite.i'
+      csvdiff = 'finite_second.csv'
+      cli_args = 'name=finite_second order=SECOND elem=QUAD8'
+      heavy = true
+      ad_indexing_type = 'global'
+    []
+    [finite_rr]
+      detail = 'using the finite strain formulation and reference residual.'
+      type = 'CSVDiff'
+      input = 'finite_rr.i'
+      csvdiff = 'finite_rr_second.csv'
+      heavy = true
+      cli_args = 'name=finite_rr_second order=SECOND elem=QUAD8'
+      ad_indexing_type = 'global'
+    []
+  []
+  [stiff_second]
+    requirement = 'The system shall be able to compute a block bouncing on a plank problem on a '
+                  'first order 2D mesh using tensor mechanics with second order elements and frictional mortar contact and finite strain'
+    [stiff_stiff]
+      detail = 'using with a stiff block and a stiff plank.'
+      type = 'CSVDiff'
+      input = 'finite.i'
+      csvdiff = 'stiff_stiff_second.csv'
+      cli_args = 'E_block=1e9 E_plank=1e9 name=stiff_stiff_second Contact/frictional/c_tangential=1e8 Contact/frictional/c_normal=1e4 name=stiff_stiff_second order=SECOND elem=QUAD8'
+      heavy = true
+      ad_indexing_type = 'global'
+      skip = 'Not ready'
+    []
+    [soft_stiff]
+      detail = 'using with a soft block and a stiff plank.'
+      type = 'CSVDiff'
+      input = 'finite.i'
+      csvdiff = 'soft_stiff_second.csv'
+      cli_args = 'E_block=1e7 E_plank=1e9 name=soft_stiff_second name=stiff_stiff_second order=SECOND elem=QUAD8 Contact/frictional/c_tangential=1e8 Contact/frictional/c_normal=1e4'
+      heavy = true
+      ad_indexing_type = 'global'
+      skip = 'Not ready'
+    []
+  []
+[]

@@ -81,7 +81,7 @@
   [direction_error]
     type = 'RunException'
     input = 'parent.i'
-    expect_err = "Bi-directional or MultiApp-to-MultiApp transfers are not implemented"
+    expect_err = "only from-MultiApp transfers are implemented"
     cli_args = 'Transfers/pp_transfer/to_multi_app=sub'
     requirement = "The system shall report an error if parameters for an unsupported direction are provided for the transfer between sub-app scalars and a main app field variablea."
   []

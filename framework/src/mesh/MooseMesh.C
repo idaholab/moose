@@ -20,6 +20,7 @@
 #include "SubProblem.h"
 #include "MooseVariableBase.h"
 #include "MooseMeshUtils.h"
+#include "MooseAppCoordTransform.h"
 
 #include <utility>
 
@@ -146,6 +147,8 @@ MooseMesh::validParams()
                         true,
                         "True to skip uniform refinements when using a pre-split mesh.");
 
+  params += MooseAppCoordTransform::validParams();
+
   // This indicates that the derived mesh type accepts a MeshGenerator, and should be set to true in
   // derived types that do so.
   params.addPrivateParam<bool>("_mesh_generator_mesh", false);
@@ -193,7 +196,8 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     _allow_remote_element_removal(true),
     _need_ghost_ghosted_boundaries(true),
     _is_displaced(false),
-    _rz_coord_axis(1) // default to RZ rotation around y-axis
+    _rz_coord_axis(getParam<MooseEnum>("rz_coord_axis")),
+    _coord_system_set(false)
 {
   if (isParamValid("ghosting_patch_size") && (_patch_update_strategy != Moose::Iteration))
     mooseError("Ghosting patch size parameter has to be set in the mesh block "
@@ -230,7 +234,8 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _allow_remote_element_removal(other_mesh._allow_remote_element_removal),
     _need_ghost_ghosted_boundaries(other_mesh._need_ghost_ghosted_boundaries),
     _coord_sys(other_mesh._coord_sys),
-    _rz_coord_axis(other_mesh._rz_coord_axis)
+    _rz_coord_axis(other_mesh._rz_coord_axis),
+    _coord_system_set(other_mesh._coord_system_set)
 {
   // Note: this calls BoundaryInfo::operator= without changing the
   // ownership semantics of either Mesh's BoundaryInfo object.
@@ -266,6 +271,8 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     for (std::size_t j = 0; j < _bounds[i].size(); ++j)
       _bounds[i][j] = other_mesh._bounds[i][j];
   }
+
+  updateCoordTransform();
 }
 
 MooseMesh::~MooseMesh()
@@ -355,6 +362,16 @@ MooseMesh::prepare(bool)
     _communicator.set_union(_mesh_nodeset_ids);
     _communicator.set_union(_mesh_sideset_ids);
   }
+
+  if (!_coord_system_set)
+    setCoordSystem(getParam<std::vector<SubdomainName>>("block"),
+                   getParam<MultiMooseEnum>("coord_type"));
+  else if (_pars.isParamSetByUser("coord_type"))
+    mooseError(
+        "Trying to set coordinate system type information based on the user input file, but "
+        "the coordinate system type information has already been set programmatically! "
+        "Either remove your coordinate system type information from the input file, or contact "
+        "your application developer");
 
   detectOrthogonalDimRanges();
 
@@ -984,7 +1001,92 @@ MooseMesh::getBoundaryElementRange()
 const std::unordered_map<boundary_id_type, std::unordered_set<dof_id_type>> &
 MooseMesh::getBoundariesToElems() const
 {
+  mooseDeprecated("MooseMesh::getBoundariesToElems is deprecated, "
+                  "use MooseMesh::getBoundariesToActiveSemiLocalElemIds");
+  return getBoundariesToActiveSemiLocalElemIds();
+}
+
+const std::unordered_map<boundary_id_type, std::unordered_set<dof_id_type>> &
+MooseMesh::getBoundariesToActiveSemiLocalElemIds() const
+{
   return _bnd_elem_ids;
+}
+
+std::unordered_set<dof_id_type>
+MooseMesh::getBoundaryActiveSemiLocalElemIds(BoundaryID bid) const
+{
+  // The boundary to element map is computed on every mesh update
+  const auto it = _bnd_elem_ids.find(bid);
+  if (it == _bnd_elem_ids.end())
+    // Boundary is not local to this domain, return an empty set
+    return std::unordered_set<dof_id_type>{};
+  return it->second;
+}
+
+std::unordered_set<dof_id_type>
+MooseMesh::getBoundaryActiveNeighborElemIds(BoundaryID bid) const
+{
+  // Vector of boundary elems is updated every mesh update
+  std::unordered_set<dof_id_type> neighbor_elems;
+  for (const auto & bnd_elem : _bnd_elems)
+  {
+    const auto & [elem_ptr, elem_side, elem_bid] = *bnd_elem;
+    if (elem_bid == bid)
+    {
+      const auto * neighbor = elem_ptr->neighbor_ptr(elem_side);
+      // Dont add fully remote elements, ghosted is fine
+      if (neighbor && neighbor != libMesh::remote_elem)
+      {
+        // handle mesh refinement, only return active elements near the boundary
+        if (neighbor->active())
+          neighbor_elems.insert(neighbor->id());
+        else
+        {
+          std::vector<const Elem *> family;
+          neighbor->active_family_tree_by_neighbor(family, elem_ptr);
+          for (const auto & child_neighbor : family)
+            neighbor_elems.insert(child_neighbor->id());
+        }
+      }
+    }
+  }
+
+  return neighbor_elems;
+}
+
+bool
+MooseMesh::isBoundaryFullyExternalToSubdomains(BoundaryID bid,
+                                               const std::set<SubdomainID> & blk_group) const
+{
+  mooseAssert(_bnd_elem_range, "Boundary element range is not initialized");
+  const bool all_blocks = blk_group.find(Moose::ANY_BLOCK_ID) != blk_group.end();
+
+  // Loop over all side elements of the mesh, select those on the boundary
+  for (const auto & bnd_elem : *_bnd_elem_range)
+  {
+    const auto & [elem_ptr, elem_side, elem_bid] = *bnd_elem;
+    if (elem_bid == bid)
+    {
+      // If an element is internal to the group of subdomain, check the neighbor
+      if (all_blocks || blk_group.find(elem_ptr->subdomain_id()) != blk_group.end())
+      {
+        const auto * const neighbor = elem_ptr->neighbor_ptr(elem_side);
+
+        // If we did not ghost the neighbor, we cannot decide
+        if (neighbor == libMesh::remote_elem)
+          mooseError("Insufficient level of geometrical ghosting to determine "
+                     "if a boundary is internal to the mesh");
+        // If the neighbor does not exist, then we are on the edge of the mesh
+        if (!neighbor)
+          continue;
+        // If the neighbor is also in the group of subdomain,
+        // then the boundary cuts the subdomains
+        if (all_blocks || blk_group.find(neighbor->subdomain_id()) != blk_group.end())
+          return false;
+      }
+    }
+  }
+  return true;
 }
 
 void
@@ -1028,16 +1130,16 @@ MooseMesh::cacheInfo()
     SubdomainID subdomain_id = elem->subdomain_id();
     for (unsigned int side = 0; side < elem->n_sides(); side++)
     {
-      std::vector<BoundaryID> boundaryids = getBoundaryIDs(elem, side);
+      std::vector<BoundaryID> boundary_ids = getBoundaryIDs(elem, side);
       std::set<BoundaryID> & subdomain_set = _subdomain_boundary_ids[subdomain_id];
 
-      subdomain_set.insert(boundaryids.begin(), boundaryids.end());
+      subdomain_set.insert(boundary_ids.begin(), boundary_ids.end());
 
       Elem * neig = elem->neighbor_ptr(side);
       if (neig)
       {
-        _neighbor_subdomain_boundary_ids[neig->subdomain_id()].insert(boundaryids.begin(),
-                                                                      boundaryids.end());
+        _neighbor_subdomain_boundary_ids[neig->subdomain_id()].insert(boundary_ids.begin(),
+                                                                      boundary_ids.end());
         SubdomainID neighbor_subdomain_id = neig->subdomain_id();
         if (neighbor_subdomain_id != subdomain_id)
           _sub_to_neighbor_subs[subdomain_id].insert(neighbor_subdomain_id);
@@ -1362,12 +1464,8 @@ MooseMesh::setBoundaryName(BoundaryID boundary_id, BoundaryName name)
 {
   BoundaryInfo & boundary_info = getMesh().get_boundary_info();
 
-  std::vector<BoundaryID> side_boundaries;
-  boundary_info.build_side_boundary_ids(side_boundaries);
-
   // We need to figure out if this boundary is a sideset or nodeset
-  if (std::find(side_boundaries.begin(), side_boundaries.end(), boundary_id) !=
-      side_boundaries.end())
+  if (boundary_info.get_side_boundary_ids().count(boundary_id))
     boundary_info.sideset_name(boundary_id) = name;
   else
     boundary_info.nodeset_name(boundary_id) = name;
@@ -1378,12 +1476,8 @@ MooseMesh::getBoundaryName(BoundaryID boundary_id)
 {
   BoundaryInfo & boundary_info = getMesh().get_boundary_info();
 
-  std::vector<BoundaryID> side_boundaries;
-  boundary_info.build_side_boundary_ids(side_boundaries);
-
   // We need to figure out if this boundary is a sideset or nodeset
-  if (std::find(side_boundaries.begin(), side_boundaries.end(), boundary_id) !=
-      side_boundaries.end())
+  if (boundary_info.get_side_boundary_ids().count(boundary_id))
     return boundary_info.get_sideset_name(boundary_id);
   else
     return boundary_info.get_nodeset_name(boundary_id);
@@ -3196,7 +3290,6 @@ MooseMesh::buildFiniteVolumeInfo() const
   _elem_side_to_face_info.clear();
 
   _elem_to_elem_info.clear();
-  _elem_to_ghost_info.clear();
 
   // by performing the element ID comparison check in the below loop, we are ensuring that we never
   // double count face contributions. If a face lies along a process boundary, the only process that
@@ -3208,18 +3301,7 @@ MooseMesh::buildFiniteVolumeInfo() const
   // We prepare a map connecting the Elem* and the corresponding ElemInfo
   // for the active elements.
   for (const Elem * elem : as_range(begin, end))
-  {
-    // We fill the vector with the real ElemInfo-s and the corresponding map first
     _elem_to_elem_info.emplace(elem, elem);
-
-    // Then we fill a map with the ElemInfo shells for the ghost elements
-    for (unsigned int side = 0; side < elem->n_sides(); ++side)
-    {
-      const Elem * neighbor = elem->neighbor_ptr(side);
-      if (!neighbor || neighbor == remote_elem)
-        _elem_to_ghost_info.try_emplace(std::make_pair(elem, side));
-    }
-  }
 
   for (const Elem * elem : as_range(begin, end))
   {
@@ -3251,13 +3333,9 @@ MooseMesh::buildFiniteVolumeInfo() const
         // or is remote (so when we are on some sort of mesh boundary), we initiualize the ghost
         // cell and use it to compute the weights corresponding to the faceInfo.
         if (!neighbor || neighbor == remote_elem)
-        {
-          auto & ghost_cell = _elem_to_ghost_info[std::make_pair(elem, side)];
-          ghost_cell.initialize(_elem_to_elem_info[elem], fi);
-          fi.computeCoefficients(&ghost_cell);
-        }
+          fi.computeBoundaryCoefficients();
         else
-          fi.computeCoefficients(&_elem_to_elem_info[neighbor]);
+          fi.computeInternalCoefficients(&_elem_to_elem_info[neighbor]);
 
         auto lit = side_map.find(Keytype(&fi.elem(), fi.elemSideID()));
         if (lit != side_map.end())
@@ -3416,6 +3494,16 @@ MooseMesh::setCoordSystem(const std::vector<SubdomainName> & blocks,
                           const MultiMooseEnum & coord_sys)
 {
   TIME_SECTION("setCoordSystem", 5, "Setting Coordinate System");
+  if (_pars.isParamSetByUser("block") && getParam<std::vector<SubdomainName>>("block") != blocks)
+    mooseError("Supplied blocks in the 'setCoordSystem' method do not match the value of the "
+               "'Mesh/block' parameter. Did you provide different parameter values for 'block' to "
+               "'Mesh' and 'Problem'?");
+  if (_pars.isParamSetByUser("coord_type") && getParam<MultiMooseEnum>("coord_type") != coord_sys)
+    mooseError(
+        "Supplied coordinate systems in the 'setCoordSystem' method do not match the value of the "
+        "'Mesh/coord_type' parameter. Did you provide different parameter values for 'coord_type' "
+        "to "
+        "'Mesh' and 'Problem'?");
 
   const std::set<SubdomainID> & subdomains = meshSubdomains();
   if (blocks.size() == 0)
@@ -3475,6 +3563,10 @@ MooseMesh::setCoordSystem(const std::vector<SubdomainName> & blocks,
                      "' does not have a coordinate system specified.");
     }
   }
+
+  _coord_system_set = true;
+
+  updateCoordTransform();
 }
 
 Moose::CoordinateSystemType
@@ -3487,10 +3579,27 @@ MooseMesh::getCoordSystem(SubdomainID sid) const
     mooseError("Requested subdomain ", sid, " does not exist.");
 }
 
+const std::map<SubdomainID, Moose::CoordinateSystemType> &
+MooseMesh::getCoordSystem() const
+{
+  return _coord_sys;
+}
+
 void
 MooseMesh::setAxisymmetricCoordAxis(const MooseEnum & rz_coord_axis)
 {
   _rz_coord_axis = rz_coord_axis;
+
+  updateCoordTransform();
+}
+
+void
+MooseMesh::updateCoordTransform()
+{
+  if (!_coord_transform)
+    _coord_transform = std::make_unique<MooseAppCoordTransform>(*this);
+  else
+    _coord_transform->setCoordinateSystem(*this);
 }
 
 unsigned int
@@ -3522,4 +3631,11 @@ MooseMesh::setCoordData(const MooseMesh & other_mesh)
 {
   _coord_sys = other_mesh._coord_sys;
   _rz_coord_axis = other_mesh._rz_coord_axis;
+}
+
+const MooseUnits &
+MooseMesh::lengthUnit() const
+{
+  mooseAssert(_coord_transform, "This must be non-null");
+  return _coord_transform->lengthUnit();
 }

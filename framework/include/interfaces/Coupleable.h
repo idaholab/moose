@@ -206,7 +206,7 @@ protected:
 
   /**
    * Returns the values for all of a coupled variable's components for use in Automatic
-   * Differentation
+   * Differentiation
    * @param var_name Name of coupled variable
    * @return Vector of ADVariableValue pointers for each component of \p var_name
    */
@@ -233,7 +233,7 @@ protected:
 
   /**
    * Returns the values for all of a coupled vector variable's components for use in
-   * Automatic Differentation
+   * Automatic Differentiation
    * @param var_name Name of coupled variable
    * @return Vector of ADVariableValue pointers for each component of \p var_name
    */
@@ -242,109 +242,175 @@ protected:
 
   /**
    * Returns value of a coupled variable for a given tag
-   * @param var_name Name of coupled variable
+   * @param var_names Name(s) of coupled variable(s)
    * @param tag vector tag ID
-   * @param comp Component number for vector of coupled variables
+   * @param index Index of the desired variable in the vector of coupled variables
    * @return Reference to a VariableValue for the coupled variable
    * @see Kernel::_u
    */
   virtual const VariableValue &
-  coupledVectorTagValue(const std::string & var_name, TagID tag, unsigned int comp = 0) const;
+  coupledVectorTagValue(const std::string & var_names, TagID tag, unsigned int index = 0) const;
 
-  virtual const VariableValue & coupledVectorTagValue(const std::string & var_name,
+  virtual const VariableValue & coupledVectorTagValue(const std::string & var_names,
                                                       const std::string & tag_name,
-                                                      unsigned int comp = 0) const;
+                                                      unsigned int index = 0) const;
 
   /**
-   * Returns the values for all of a coupled variable's components for a given tag
-   * @param var_name Name of coupled variable
+   * Returns the values for all the coupled variables desired for a given tag
+   * @param var_names Name(s) of coupled variable(s)
    * @param tag vector tag ID
-   * @return Vector of VariableValue pointers for each component of \p var_name
+   * @return Vector of VariableValue pointers for each variable in \p var_names
    */
-  std::vector<const VariableValue *> coupledVectorTagValues(const std::string & var_name,
+  std::vector<const VariableValue *> coupledVectorTagValues(const std::string & var_names,
                                                             TagID tag) const;
 
-  std::vector<const VariableValue *> coupledVectorTagValues(const std::string & var_name,
+  std::vector<const VariableValue *> coupledVectorTagValues(const std::string & var_names,
                                                             const std::string & tag_name) const;
 
   /**
-   * Returns gradient of a coupled variable for a given tag
-   * @param var_name Name of coupled variable
+   * Returns value of a coupled array variable for a given tag
+   * @param var_names Name(s) of coupled array variable(s)
    * @param tag vector tag ID
-   * @param comp Component number for vector of coupled variables
+   * @param index Index of the desired variable in the vector of coupled variables
+   * @return Reference to a VariableValue for the coupled array variable
+   * @see Kernel::_u
+   */
+  virtual const ArrayVariableValue & coupledVectorTagArrayValue(const std::string & var_names,
+                                                                TagID tag,
+                                                                unsigned int index = 0) const;
+
+  virtual const ArrayVariableValue & coupledVectorTagArrayValue(const std::string & var_names,
+                                                                const std::string & tag_name,
+                                                                unsigned int index = 0) const;
+
+  /**
+   * Returns the values for all the coupled variables desired for a given tag
+   * @param var_name Name of array coupled variable
+   * @param tag vector tag ID
+   * @return Vector of ArrayVariableValue pointers for each variable in \p var_names
+   */
+  std::vector<const ArrayVariableValue *> coupledVectorTagArrayValues(const std::string & var_names,
+                                                                      TagID tag) const;
+
+  std::vector<const ArrayVariableValue *>
+  coupledVectorTagArrayValues(const std::string & var_names, const std::string & tag_name) const;
+
+  /**
+   * Returns gradient of a coupled variable for a given tag
+   * @param var_names Name(s) of coupled variable(s)
+   * @param tag vector tag ID
+   * @param index Index of the desired variable in the vector of coupled variables
    * @return Reference to a VariableGradient containing the gradient of the coupled variable
    * @see Kernel::gradient
    */
   virtual const VariableGradient &
-  coupledVectorTagGradient(const std::string & var_name, TagID tag, unsigned int comp = 0) const;
+  coupledVectorTagGradient(const std::string & var_names, TagID tag, unsigned int index = 0) const;
 
-  virtual const VariableGradient & coupledVectorTagGradient(const std::string & var_name,
+  virtual const VariableGradient & coupledVectorTagGradient(const std::string & var_names,
                                                             const std::string & tag_name,
-                                                            unsigned int comp = 0) const;
+                                                            unsigned int index = 0) const;
 
   /**
-   * Returns gradients for all of a coupled variable's components for a given tag
-   * @param var_name Name of coupled variable
+   * Returns gradients for all the coupled variables desired for a given tag
+   * @param var_names Name(s) of coupled array variable(s)
    * @param tag vector tag ID
-   * @return Vector of VariableGradient pointers for each component of \p var_name
+   * @return Vector of VariableGradient pointers for each variables in \p var_name
    */
-  std::vector<const VariableGradient *> coupledVectorTagGradients(const std::string & var_name,
+  std::vector<const VariableGradient *> coupledVectorTagGradients(const std::string & var_names,
                                                                   TagID tag) const;
 
   std::vector<const VariableGradient *>
-  coupledVectorTagGradients(const std::string & var_name, const std::string & tag_name) const;
+  coupledVectorTagGradients(const std::string & var_names, const std::string & tag_name) const;
+
+  /**
+   * Returns gradient of a coupled array variable for a given tag
+   * @param var_names Name(s) of coupled array variable(s)
+   * @param tag vector tag ID
+   * @param index Index of the desired variable in the vector of coupled variables
+   * @return Reference to a ArrayVariableGradient containing the gradient of the coupled array
+   * variable
+   * @see Kernel::gradient
+   */
+  virtual const ArrayVariableGradient & coupledVectorTagArrayGradient(const std::string & var_names,
+                                                                      TagID tag,
+                                                                      unsigned int index = 0) const;
+
+  virtual const ArrayVariableGradient & coupledVectorTagArrayGradient(const std::string & var_names,
+                                                                      const std::string & tag_name,
+                                                                      unsigned int index = 0) const;
+
+  /**
+   * Returns gradients for all the coupled variables desired for a given tag
+   * @param var_names Name(s) of coupled array variable(s)
+   * @param tag vector tag ID
+   * @return Vector of ArrayVariableGradient pointers for each variable in \p var_name
+   */
+  std::vector<const ArrayVariableGradient *>
+  coupledVectorTagArrayGradients(const std::string & var_names, TagID tag) const;
+
+  std::vector<const ArrayVariableGradient *>
+  coupledVectorTagArrayGradients(const std::string & var_names, const std::string & tag_name) const;
 
   /**
    * Returns dof value of a coupled variable for a given tag
-   * @param var_name Name of coupled variable
+   * @param var_names Name(s) of coupled variable(s)
    * @param tag vector tag ID
-   * @param comp Component number for vector of coupled variables
+   * @param index Index of the desired variable in the vector of coupled variables
    * @return Reference to a DofValue for the coupled variable
    */
   virtual const VariableValue &
-  coupledVectorTagDofValue(const std::string & var_name, TagID tag, unsigned int comp = 0) const;
+  coupledVectorTagDofValue(const std::string & var_name, TagID tag, unsigned int index = 0) const;
 
-  virtual const VariableValue & coupledVectorTagDofValue(const std::string & var_name,
+  virtual const VariableValue & coupledVectorTagDofValue(const std::string & var_names,
                                                          const std::string & tag_name,
-                                                         unsigned int comp = 0) const;
+                                                         unsigned int index = 0) const;
 
   /**
-   * Returns the dof values for all of a coupled variable's components for a given tag
+   * Returns evaluations of a tagged vector at the requested variable's degree of freedom indices
    * @param var_name Name of coupled variable
-   * @param tag vector tag ID
-   * @return Vector of VariableValue pointers for each component of \p var_name
+   * @param tag_name vector tag name
+   * @return Reference to a ArrayVariableValue for the coupled variable
    */
-  std::vector<const VariableValue *> coupledVectorTagDofValues(const std::string & var_name,
+  const ArrayVariableValue & coupledVectorTagArrayDofValue(const std::string & var_name,
+                                                           const std::string & tag_name) const;
+
+  /**
+   * Returns the dof values for all the coupled variables desired for a given tag
+   * @param var_names Name(s) of coupled variable(s)
+   * @param tag vector tag ID
+   * @return Vector of VariableValue pointers for each variable in \p var_name
+   */
+  std::vector<const VariableValue *> coupledVectorTagDofValues(const std::string & var_names,
                                                                TagID tag) const;
 
-  std::vector<const VariableValue *> coupledVectorTagDofValues(const std::string & var_name,
+  std::vector<const VariableValue *> coupledVectorTagDofValues(const std::string & var_names,
                                                                const std::string & tag_name) const;
 
   /**
    * Returns value of a coupled variable for a given tag. This couples the diag vector of matrix
-   * @param var_name Name of coupled variable
+   * @param var_names Name(s) of coupled variable(s)
    * @param tag matrix tag ID
-   * @param comp Component number for vector of coupled variables
+   * @param index Index of the desired variable in the vector of coupled variables
    * @return Reference to a VariableValue for the coupled variable
    * @see Kernel::_u
    */
   virtual const VariableValue &
-  coupledMatrixTagValue(const std::string & var_name, TagID tag, unsigned int comp = 0) const;
+  coupledMatrixTagValue(const std::string & var_names, TagID tag, unsigned int index = 0) const;
 
-  virtual const VariableValue & coupledMatrixTagValue(const std::string & var_name,
+  virtual const VariableValue & coupledMatrixTagValue(const std::string & var_names,
                                                       const std::string & tag_name,
-                                                      unsigned int comp = 0) const;
+                                                      unsigned int index = 0) const;
 
   /**
-   * Returns the diagonal matrix values for all of a coupled variable's components for a given tag
-   * @param var_name Name of coupled variable
+   * Returns the diagonal matrix values for all the coupled variables desired for a given tag
+   * @param var_names Name(s) of coupled variable(s)
    * @param tag matrix tag ID
-   * @return Vector of VariableValue pointers for each component of \p var_name
+   * @return Vector of VariableValue pointers for each variable in \p var_name
    */
-  std::vector<const VariableValue *> coupledMatrixTagValues(const std::string & var_name,
+  std::vector<const VariableValue *> coupledMatrixTagValues(const std::string & var_names,
                                                             TagID tag) const;
 
-  std::vector<const VariableValue *> coupledMatrixTagValues(const std::string & var_name,
+  std::vector<const VariableValue *> coupledMatrixTagValues(const std::string & var_names,
                                                             const std::string & tag_name) const;
 
   /**
@@ -480,7 +546,7 @@ protected:
   std::vector<const VariableGradient *> coupledGradients(const std::string & var_name) const;
 
   /**
-   * Returns gradient of a coupled variable for use in Automatic Differentation
+   * Returns gradient of a coupled variable for use in Automatic Differentiation
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
    * @return Reference to an ADVariableGradient containing the gradient of the coupled variable
@@ -490,7 +556,7 @@ protected:
                                                unsigned int comp = 0) const;
 
   /**
-   * Returns gradient of a coupled variable's time derivative for use in Automatic Differentation
+   * Returns gradient of a coupled variable's time derivative for use in Automatic Differentiation
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
    * @return Reference to an ADVariableGradient containing the gradient of the coupled variable's
@@ -529,7 +595,7 @@ protected:
   coupledGenericGradients(const std::string & var_name) const;
 
   /**
-   * Returns gradient of a coupled vector variable for use in Automatic Differentation
+   * Returns gradient of a coupled vector variable for use in Automatic Differentiation
    * @param var_name Name of coupled vector variable
    * @param comp Component number for vector of coupled vector variables
    * @return Reference to a VectorVariableGradient containing the gradient of the coupled variable
@@ -539,7 +605,7 @@ protected:
                                                            unsigned int comp = 0) const;
 
   /**
-   * Returns second derivatives of a coupled variable for use in Automatic Differentation
+   * Returns second derivatives of a coupled variable for use in Automatic Differentiation
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
    * @return Reference to a VariableSecond containing the second derivatives of the coupled variable
@@ -548,7 +614,7 @@ protected:
                                            unsigned int comp = 0) const;
 
   /**
-   * Returns second derivatives of a coupled vector variable for use in Automatic Differentation
+   * Returns second derivatives of a coupled vector variable for use in Automatic Differentiation
    * @param var_name Name of coupled vector variable
    * @param comp Component number for vector of coupled vector variables
    * @return Reference to a VectorVariableSecond containing the second derivatives of the coupled
@@ -1045,7 +1111,7 @@ protected:
    * Returns DoFs in the current solution vector of all of a coupled variable's components for the
    * local element
    * @param var_name Name of coupled variable
-   * @return Vector of VariableValue pointers for each compontnet of the coupled variable
+   * @return Vector of VariableValue pointers for each component of the coupled variable
    */
   std::vector<const VariableValue *> coupledAllDofValues(const std::string & var_name) const;
 
@@ -1079,7 +1145,7 @@ protected:
    * Returns DoFs in the older solution vector of all of a coupled variable's components for the
    * local element
    * @param var_name Name of coupled variable
-   * @return Vector of VariableValue pointers for each compontnet of the coupled variable
+   * @return Vector of VariableValue pointers for each component of the coupled variable
    */
   std::vector<const VariableValue *> coupledAllDofValuesOlder(const std::string & var_name) const;
 
@@ -1143,6 +1209,9 @@ protected:
   // Reference to FEProblemBase
   FEProblemBase & _c_fe_problem;
 
+  /// Pointer to the system object if the moose object this is an interface for has one
+  const SystemBase * const _c_sys;
+
   /// Coupled vars whose values we provide
   std::unordered_map<std::string, std::vector<MooseVariableFieldBase *>> _coupled_vars;
 
@@ -1158,7 +1227,7 @@ protected:
   /// Vector of array coupled variables
   std::vector<ArrayMooseVariable *> _coupled_array_moose_vars;
 
-  /// Vector of standard finite volume oupled variables
+  /// Vector of standard finite volume coupled variables
   std::vector<MooseVariableFV<Real> *> _coupled_standard_fv_moose_vars;
 
   /// map from new to deprecated variable names
@@ -1270,6 +1339,44 @@ protected:
   checkVar(const std::string & var_name, unsigned int comp = 0, unsigned int comp_bound = 0) const;
 
 private:
+  /**
+   * Generic helper method to get vector tag values based on tag ID
+   */
+  template <typename T>
+  const typename OutputTools<T>::VariableValue &
+  vectorTagValueHelper(const std::string & var_names, TagID tag, unsigned int index = 0) const;
+
+  /**
+   * Generic helper method to get vector tag values based on tag name
+   */
+  template <typename T>
+  const typename OutputTools<T>::VariableValue & vectorTagValueHelper(const std::string & var_names,
+                                                                      const std::string & tag_name,
+                                                                      unsigned int index = 0) const;
+
+  /**
+   * Generic helper method to get vector tag degree of freedom values based on tag ID
+   */
+  template <typename T>
+  const typename OutputTools<T>::VariableValue &
+  vectorTagDofValueHelper(const std::string & var_name, TagID tag, unsigned int comp = 0) const;
+
+  /**
+   * Generic helper method to get vector tag degree of freedom values based on tag name
+   */
+  template <typename T>
+  const typename OutputTools<T>::VariableValue & vectorTagDofValueHelper(
+      const std::string & var_name, const std::string & tag_name, unsigned int comp = 0) const;
+
+  /**
+   * Method that may request additional solution states from the variable's system depending on the
+   * value of \p tag_name. E.g. if the tag name corresponds to old or older variable solution
+   * values, then we must request more states
+   */
+  template <typename T>
+  void
+  requestStates(const std::string & var_name, const TagName & tag_name, const unsigned int comp);
+
   enum class FuncAge
   {
     Curr,
@@ -1475,6 +1582,10 @@ private:
   const bool _is_fv;
 
   const MooseObject * const _obj;
+
+  /// vector tag names for which we need to request older solution states from the system
+  const std::set<std::string> _older_state_tags = {Moose::OLD_SOLUTION_TAG,
+                                                   Moose::OLDER_SOLUTION_TAG};
 };
 
 template <typename T>

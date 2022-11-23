@@ -2,7 +2,7 @@
   [break_mesh_by_blocks_generator]
     requirement = 'The system shall be able to create separate blocks in a mesh'
     design = 'meshgenerators/BreakMeshByBlockGenerator.md'
-    issues = '#11640'
+    issues = '#11640 #22117'
 
     [3d_auto_test]
       type = 'Exodiff'
@@ -223,5 +223,27 @@
     min_parallel = 12
     max_parallel = 12
     recover = false
+  []
+
+  [invalid_block_pair]
+    type = RunException
+    input = break_mesh_block_pairs_restricted.i
+    cli_args = 'Mesh/split/block_pairs="0 missing;2 3"'
+    expect_err = "The block 'missing' was not found in the mesh"
+    requirement = "The system shall error if the mesh does not contain the specified block pair"
+    mesh_mode = 'REPLICATED'
+    design = 'meshgenerators/BreakMeshByBlockGenerator.md'
+    issues = '#22117'
+  []
+
+  [invalid_surrounding_block]
+    type = RunException
+    input = break_mesh_block_restricted.i
+    cli_args = 'Mesh/split/surrounding_blocks="missing"'
+    expect_err = "The block 'missing' was not found in the mesh"
+    requirement = "The system shall error if the mesh does not contain the specified surrounding block"
+    mesh_mode = 'REPLICATED'
+    design = 'meshgenerators/BreakMeshByBlockGenerator.md'
+    issues = '#22117'
   []
 []

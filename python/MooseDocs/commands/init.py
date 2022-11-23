@@ -28,23 +28,35 @@ def command_line_options(subparser, parent):
     init_subparser = parser.add_subparsers(dest='init_command', help="Initialization command(s).")
 
     sqa_parser = init_subparser.add_parser('sqa', help="Initialize SQA documentation.")
-    sqa_parser.add_argument('--app', required=True, type=str, help="Name of application to use in SQA template files.")
-    sqa_parser.add_argument('--category', default=None, type=str, help="Name of application to use in SQA configuration category name; if not provided it will be the lower case of the 'app' option.")
+    group = sqa_parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('--app', type=str, help="Name of application to use in SQA template files.")
+    group.add_argument('--module', type=str, help="Name of MOOSE module to use in SQA template files.")
+    sqa_parser.add_argument('--category', default=None, type=str, help="Name of application to use in SQA configuration category name; if not provided it will be the lower case of the 'app' or 'module' option.")
 
 def _write_file(filename, content):
     """Helper for easy mock"""
     with open(filename, 'w') as fid:
         fid.write(content)
 
-def init_sqa_docs(app, category):
+def init_sqa_docs(app, is_module, category):
     """Adds markdown files that load MOOSE SQA template files."""
 
+    # Create glob applicable to module or app
+    if is_module:
+        glb = glob.glob(os.path.join(MooseDocs.MOOSE_DIR, 'framework', 'doc', 'content', 'templates', 'sqa', 'module*.template'))
+    else:
+        glb = glob.glob(os.path.join(MooseDocs.MOOSE_DIR, 'framework', 'doc', 'content', 'templates', 'sqa', 'app*.template'))
+
     # Loop through MOOSE SQA template files
-    for tname in glob.glob(os.path.join(MooseDocs.MOOSE_DIR, 'framework', 'doc', 'content', 'templates', 'sqa', 'app*.template')):
+    for tname in glb:
         template_name = os.path.basename(tname)
 
         # Application SQA document filename
-        fname = '{}{}'.format(category, template_name[3:-9])
+        if is_module:
+            fname = '{}{}'.format(category, template_name[6:-9])
+        else:
+            fname = '{}{}'.format(category, template_name[3:-9])
+
         if fname.endswith('index.md'):
             fname = 'index.md'
 
@@ -54,12 +66,19 @@ def init_sqa_docs(app, category):
         os.makedirs(os.path.dirname(filename), exist_ok=True)
 
         # Write the content to the output file
-        content = "!template load file=sqa/{} app={} category={}".format(template_name, app, category)
+        if is_module:
+            content = "!template load file=sqa/{} module={} category={}".format(template_name, app, category)
+        else:
+            content = "!template load file=sqa/{} app={} category={}".format(template_name, app, category)
+
         _write_file(filename, content)
 
-def init_sqa_config(app, category):
+def init_sqa_config(app, is_module, category):
     """Creates default file to load from MooseDocs configuration."""
-    template = os.path.join(os.path.dirname(__file__), 'sqa_app.yml.template')
+    if is_module:
+        template = os.path.join(os.path.dirname(__file__), 'sqa_module.yml.template')
+    else:
+        template = os.path.join(os.path.dirname(__file__), 'sqa_app.yml.template')
 
     with open(template, 'r') as fid:
         content = fid.read()
@@ -70,9 +89,12 @@ def init_sqa_config(app, category):
     filename = os.path.join(os.getcwd(), 'sqa_{}.yml'.format(category))
     _write_file(filename, content)
 
-def init_sqa_report(app, category):
+def init_sqa_report(app, is_module, category):
     """Creates default SQA report configuration file."""
-    template = os.path.join(os.path.dirname(__file__), 'sqa_reports.yml.template')
+    if is_module:
+        template = os.path.join(os.path.dirname(__file__), 'sqa_reports_module.yml.template')
+    else:
+        template = os.path.join(os.path.dirname(__file__), 'sqa_reports_app.yml.template')
 
     with open(template, 'r') as fid:
         content = fid.read()
@@ -113,11 +135,19 @@ def main(options):
                 "is not guaranteed to work and modifications are expected.")
 
     if options.init_command == 'sqa':
-        category = options.category or options.app.lower()
-        init_sqa_config(options.app, category)
-        init_sqa_docs(options.app, category)
-        init_sqa_report(options.app, category)
-        update_config_with_sqa(options.config, options.app, category)
+        if options.app:
+            is_module = False
+            appname = options.app
+            category = options.category or options.app.lower()
+        elif options.module:
+            is_module = True
+            appname = options.module
+            category = options.category or options.module.lower()
+
+        init_sqa_config(appname, is_module, category)
+        init_sqa_docs(appname, is_module, category)
+        init_sqa_report(appname, is_module, category)
+        update_config_with_sqa(options.config, appname, category)
     else:
         LOG.error("The 'init' command requires a sub-command, see --help.")
         errno = 1

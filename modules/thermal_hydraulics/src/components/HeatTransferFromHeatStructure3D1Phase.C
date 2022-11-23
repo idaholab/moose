@@ -78,7 +78,7 @@ HeatTransferFromHeatStructure3D1Phase::setupMesh()
     std::vector<std::tuple<dof_id_type, unsigned short int>> bnd_info;
     BoundaryID bd_id = _mesh.getBoundaryID(_boundary);
     _mesh.buildBndElemList();
-    const auto & bnd_to_elem_map = _mesh.getBoundariesToElems();
+    const auto & bnd_to_elem_map = _mesh.getBoundariesToActiveSemiLocalElemIds();
     auto search = bnd_to_elem_map.find(bd_id);
     if (search == bnd_to_elem_map.end())
       mooseDoOnce(logError("The boundary '", _boundary, "' (", bd_id, ") was not found."));

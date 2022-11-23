@@ -37,7 +37,27 @@ MortarConstraintBase::validParams()
                                       obj_params.get<SubdomainName>("secondary_subdomain");
                                   rm_params.set<SubdomainName>("primary_subdomain") =
                                       obj_params.get<SubdomainName>("primary_subdomain");
+                                  rm_params.set<bool>("ghost_higher_d_neighbors") =
+                                      obj_params.get<bool>("ghost_higher_d_neighbors");
                                 });
+
+  // If the LM is ever a Lagrange variable, we will attempt to obtain its dof indices from the
+  // process that owns the node. However, in order for the dof indices to get set for the Lagrange
+  // variable, the process that owns the node needs to have local copies of any lower-d elements
+  // that have the connected node. Note that the geometric ghosting done here is different than that
+  // done by the AugmentSparsityOnInterface RM, even when ghost_point_neighbors is true. The latter
+  // ghosts equal-manifold lower-dimensional secondary element point neighbors and their interface
+  // couplings. This ghosts lower-dimensional point neighbors of higher-dimensional elements.
+  // Neither is guaranteed to be a superset of the other. For instance ghosting of lower-d point
+  // neighbors (AugmentSparsityOnInterface with ghost_point_neighbors = true) is only guaranteed to
+  // ghost those lower-d point neighbors on *processes that own lower-d elements*. And you may have
+  // a process that only owns higher-dimensionsional elements
+  //
+  // Note that in my experience it is only important for the higher-d lower-d point neighbors to be
+  // ghosted when forming sparsity patterns and so I'm putting this here instead of at the
+  // MortarConsumerInterface level
+  params.addRelationshipManager("GhostHigherDLowerDPointNeighbors",
+                                Moose::RelationshipManagerType::GEOMETRIC);
 
   params.addParam<VariableName>("secondary_variable", "Primal variable on secondary surface.");
   params.addParam<VariableName>(
@@ -80,11 +100,11 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
              : nullptr),
     _secondary_var(
         isParamValid("secondary_variable")
-            ? _subproblem.getStandardVariable(_tid, parameters.getMooseType("secondary_variable"))
-            : _subproblem.getStandardVariable(_tid, parameters.getMooseType("primary_variable"))),
+            ? _sys.getActualFieldVariable<Real>(_tid, parameters.getMooseType("secondary_variable"))
+            : _sys.getActualFieldVariable<Real>(_tid, parameters.getMooseType("primary_variable"))),
     _primary_var(
         isParamValid("primary_variable")
-            ? _subproblem.getStandardVariable(_tid, parameters.getMooseType("primary_variable"))
+            ? _sys.getActualFieldVariable<Real>(_tid, parameters.getMooseType("primary_variable"))
             : _secondary_var),
 
     _compute_primal_residuals(getParam<bool>("compute_primal_residuals")),
@@ -100,6 +120,9 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
     _test_primary(_primary_var.phiFaceNeighbor()),
     _grad_test_secondary(_secondary_var.gradPhiFace()),
     _grad_test_primary(_primary_var.gradPhiFaceNeighbor()),
+    _interior_secondary_elem(_assembly.elem()),
+    _interior_primary_elem(_assembly.neighbor()),
+    _lower_secondary_elem(_assembly.lowerDElem()),
     _lower_primary_elem(_assembly.neighborLowerDElem()),
     _displaced(getParam<bool>("use_displaced_mesh"))
 {

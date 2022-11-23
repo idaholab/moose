@@ -25,10 +25,7 @@ GaussianProcess::validParams()
 GaussianProcess::GaussianProcess(const InputParameters & parameters)
   : SurrogateModel(parameters),
     CovarianceInterface(parameters),
-    _gp_handler(
-        isParamValid("trainer")
-            ? dynamic_cast<GaussianProcessTrainer &>(getSurrogateTrainer("trainer")).gpHandler()
-            : setModelData<StochasticTools::GaussianProcessHandler>("_gp_handler")),
+    _gp_handler(setModelData<StochasticTools::GaussianProcessHandler>("_gp_handler")),
     _training_params(getModelData<RealEigenMatrix>("_training_params"))
 {
 }

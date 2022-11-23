@@ -8,6 +8,10 @@ The mesh extruder generator is a tool for increasing the dimensionality of a low
 to one or more copies of its corresponding higher dimensional element along the specified axis. The Mesh Extruder can also add
 in the extra sidesets resulting from increasing the dimensionality of the original mesh. Existing sidesets are extruded.
 
+Through the `existing_subdomains`, `layers`, and `new_ids` options, it is possible to specify that an extruded block exists in some layers,
+ but not others. This allows for serrated patterns and gaps. Note that no error will be thrown if the resulting blocks overlap. These three
+  options must have the same number of values given to them.  The extrusion vector may use decimal values. 
+
 ## Visual Example
 
 ### Input 2D Mesh

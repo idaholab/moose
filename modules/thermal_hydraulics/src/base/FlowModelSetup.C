@@ -24,7 +24,7 @@ FlowModelSetup::validParams()
   return params;
 }
 
-FlowModelSetup::FlowModelSetup(InputParameters params)
+FlowModelSetup::FlowModelSetup(const InputParameters & params)
   : _this_params(params),
     _this_app(*_this_params.getCheckedPointerParam<MooseApp *>("_moose_app")),
     _this_action_factory(_this_app.getActionFactory()),

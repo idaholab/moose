@@ -24,6 +24,9 @@ typedef TransientSystem<ExplicitSystem> TransientExplicitSystem;
 class DisplacedSystem : public SystemBase
 {
 public:
+  DisplacedSystem(DisplacedSystem &&) = delete;
+  DisplacedSystem & operator=(DisplacedSystem &&) = delete;
+
   DisplacedSystem(DisplacedProblem & problem,
                   SystemBase & undisplaced_system,
                   const std::string & name,

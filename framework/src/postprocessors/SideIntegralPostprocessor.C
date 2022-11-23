@@ -38,7 +38,7 @@ SideIntegralPostprocessor::execute()
 Real
 SideIntegralPostprocessor::getValue()
 {
-  gatherSum(_integral_value);
+
   return _integral_value;
 }
 
@@ -65,4 +65,10 @@ SideIntegralPostprocessor::computeIntegral()
       sum += fi->faceArea() * fi->faceCoord() * computeFaceInfoIntegral(fi);
   }
   return sum;
+}
+
+void
+SideIntegralPostprocessor::finalize()
+{
+  gatherSum(_integral_value);
 }

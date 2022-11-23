@@ -4,7 +4,7 @@
 `gold_dir` folder. `Exodus` output(s) contains both field variables, scalar variables and postprocessors,
 the latter two defined as global variables. This tester picks up any difference between
 all fields at any spatial location, at any time step included in the output(s).
-Complete documentation for the `Exodiff` utility may be found [here](https://gsjaardema.github.io/seacas-docs/sphinx/html/index.html#exodiff).
+Complete documentation for the `Exodiff` utility may be found [here](https://sandialabs.github.io/seacas-docs/sphinx/html/index.html#exodiff).
 
 ## Options
 
@@ -16,7 +16,7 @@ Test configuration options are added to the `tests` file.
 - `rel_tol`: sets a relative tolerance. Defaults to 5.5e-6.
 
 - `exodiff_opts`: additional options passed to the `Exodiff` utility on the command line. Their list
-  may be found in its [documentation](https://gsjaardema.github.io/seacas-docs/sphinx/html/index.html#exodiff)
+  may be found in its [documentation](https://sandialabs.github.io/seacas-docs/sphinx/html/index.html#exodiff)
 
 - `custom_cmp`: use a custom comparison. The output of the comparison
   must match the specified file. See [below](#custom_cmp) for more details

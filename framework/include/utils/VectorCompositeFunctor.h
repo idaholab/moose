@@ -32,6 +32,7 @@ public:
   using SingleSidedFaceArg = Moose::SingleSidedFaceArg;
   using ElemQpArg = Moose::ElemQpArg;
   using ElemSideQpArg = Moose::ElemSideQpArg;
+  using ElemPointArg = Moose::ElemPointArg;
 
   VectorCompositeFunctor(const MooseFunctorName & name,
                          const FunctorBase<T> & x_comp,
@@ -94,6 +95,13 @@ private:
   {
     return {
         _x_comp(elem_side_qp, state), _y_comp(elem_side_qp, state), _z_comp(elem_side_qp, state)};
+  }
+
+  ValueType evaluate(const ElemPointArg & elem_point_arg, unsigned int state) const override final
+  {
+    return {_x_comp(elem_point_arg, state),
+            _y_comp(elem_point_arg, state),
+            _z_comp(elem_point_arg, state)};
   }
 
   using Moose::FunctorBase<VectorValue<T>>::evaluateGradient;

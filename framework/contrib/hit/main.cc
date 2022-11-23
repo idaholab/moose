@@ -5,6 +5,7 @@
 #include <set>
 #include <sstream>
 #include <string>
+#include <chrono>
 
 #include "braceexpr.h"
 #include "parse.h"
@@ -19,6 +20,7 @@ int merge(int argc, char ** argv);
 int diff(int argc, char ** argv);
 int common(int argc, char ** argv);
 int subtract(int argc, char ** argv);
+int profile(int argc, char ** argv);
 
 bool
 globCompare(const std::string & candidate,
@@ -84,6 +86,8 @@ main(int argc, char ** argv)
     return common(argc - 2, argv + 2);
   else if (subcmd == "subtract")
     return subtract(argc - 2, argv + 2);
+  else if (subcmd == "profile")
+    return profile(argc - 2, argv + 2);
   else if (subcmd == "braceexpr")
   {
     std::stringstream ss;
@@ -821,4 +825,63 @@ validate(int argc, char ** argv)
       std::cout << msg << "\n";
   }
   return ret;
+}
+
+class Timer
+{
+public:
+  Timer(const std::string & msg, int n) : _msg(msg), _n(n), _begin(std::chrono::steady_clock::now())
+  {
+  }
+  ~Timer()
+  {
+    const auto end = std::chrono::steady_clock::now();
+    std::cout << _msg << ": "
+              << std::chrono::duration_cast<std::chrono::milliseconds>(end - _begin).count() / _n
+              << " ms" << std::endl;
+  }
+
+private:
+  const std::string _msg;
+  const int _n;
+  const std::chrono::steady_clock::time_point _begin;
+};
+
+int
+profile(int argc, char ** argv)
+{
+  Flags flags("hit profile [flags] file\n  Specify '-' as a file name to accept "
+              "input from stdin.");
+  flags.add("h", "print help");
+  flags.add("help", "print help");
+  flags.add("n", "Number of parse cycles", "100");
+
+  auto positional = parseOpts(argc, argv, flags);
+
+  if (flags.have("h") || flags.have("help"))
+  {
+    std::cout << flags.usage();
+    return 0;
+  }
+
+  if (positional.size() != 1)
+  {
+    std::cout << flags.usage();
+    return 1;
+  }
+
+  std::string input;
+  {
+    Timer timer("Reading input", 1);
+    input = readInput(positional[0]);
+  }
+
+  const unsigned int num_iteration = std::stoi(flags.val("n"));
+  {
+    Timer timer("Parsing input", num_iteration);
+    for (unsigned int i = 0; i < num_iteration; ++i)
+      volatile auto root = hit::parse(positional[0], input);
+  }
+
+  return 0;
 }

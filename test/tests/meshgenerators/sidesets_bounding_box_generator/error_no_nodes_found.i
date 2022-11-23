@@ -10,8 +10,8 @@
   [./createNewSidesetOne]
     type = SideSetsFromBoundingBoxGenerator
     input = gmg
-    boundary_id_old = 'right'
-    boundary_id_new = 11
+    boundaries_old = 'right'
+    boundary_new = 11
     bottom_left = '0.5 0.5 0'
     top_right = '1.9 1.9 0'
     block_id = 0
@@ -19,8 +19,8 @@
   [./createNewSidesetTwo]
     type = SideSetsFromBoundingBoxGenerator
     input = createNewSidesetOne
-    boundary_id_old = 'top right'
-    boundary_id_new = 10
+    boundaries_old = 'top right'
+    boundary_new = 10
     bottom_left = '-0.1 -0.1 0'
     top_right = '0.7 0.3 0'
     block_id = 0

@@ -28,7 +28,7 @@ public:
   usingDerivativeParsedMaterialHelperMembers(is_ad);
 
 protected:
-  virtual void resetQpProperties();
+  virtual void resetQpProperties() override {}
 };
 
 typedef DerivativeParsedMaterialTempl<false> DerivativeParsedMaterial;

@@ -268,7 +268,7 @@ The simulation's coupling involves the following steps (see also the [page on tr
 
 These steps could be performed during the simulation initialization, however, it is more convenient to perform them at each time-step.  When these steps have been accomplished, each time-step involves the following (which is also used in the sections above).
 
-1. The matrix temperature, `matrix_T`, is sent to the fracture nodes using a [MultiAppInterpolationTransfer](MultiAppInterpolationTransfer.md) Transfer.
+1. The matrix temperature, `matrix_T`, is sent to the fracture nodes using a [MultiAppGeometricInterpolationTransfer](MultiAppGeometricInterpolationTransfer.md) Transfer.
 2. The fracture physics is solved.
 3. The heat flowing between the fracture and matrix is transferred using a [MultiAppReporterTransfer](MultiAppReporterTransfer.md) Transfer.
 4. The matrix physics is solved.

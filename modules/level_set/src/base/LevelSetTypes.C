@@ -11,7 +11,7 @@
 #include "LevelSetTypes.h"
 
 // MOOSE includes
-#include "MooseEnumItem.h"
+#include "ExecFlagRegistry.h"
 
-const ExecFlagType LevelSet::EXEC_ADAPT_MESH("ADAPT_MESH");
-const ExecFlagType LevelSet::EXEC_COMPUTE_MARKERS("COMPUTE_MARKERS", 1234);
+const ExecFlagType LevelSet::EXEC_ADAPT_MESH = registerExecFlag("ADAPT_MESH");
+const ExecFlagType LevelSet::EXEC_COMPUTE_MARKERS = registerExecFlag("COMPUTE_MARKERS");

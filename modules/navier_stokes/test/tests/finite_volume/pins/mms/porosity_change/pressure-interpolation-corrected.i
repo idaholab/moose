@@ -36,10 +36,6 @@ forch=1.1
   []
 []
 
-[Problem]
-  fv_bcs_integrity_check = true
-[]
-
 [Variables]
   [u]
     type = PINSFVSuperficialVelocityVariable

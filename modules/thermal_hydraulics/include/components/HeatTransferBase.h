@@ -36,6 +36,14 @@ public:
    * @return The name of wall temperature variable
    */
   const VariableName & getWallTemperatureName() const;
+
+  /**
+   * Returns wall temperature name
+   *
+   * @return The name of wall temperature material
+   */
+  const MaterialPropertyName & getWallTemperatureMatName() const;
+
   /**
    * Returns wall heat flux name
    *
@@ -92,6 +100,8 @@ protected:
   VariableName _P_hf_name;
   /// wall temperature name
   VariableName _T_wall_name;
+  /// wall temperature material name
+  MaterialPropertyName _T_wall_mat_name;
   /// wall heat flux name
   MaterialPropertyName _q_wall_name;
 
