@@ -60,7 +60,7 @@ WallDistanceMixingLengthAux::computeValue()
 
   // Loop over all boundaries
   Real min_dist2 = 1e9;
-  const auto & bnd_to_elem_map = _mesh.getBoundariesToElems();
+  const auto & bnd_to_elem_map = _mesh.getBoundariesToActiveSemiLocalElemIds();
   for (BoundaryID bid : vec_ids)
   {
     // Get the set of elements on this boundary
