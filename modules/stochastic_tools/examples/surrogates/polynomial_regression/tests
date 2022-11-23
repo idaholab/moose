@@ -37,7 +37,7 @@
       type = JSONDiff
       input = uniform_surr.i
       allow_test_objects = true
-      cli_args = "Samplers/sample/num_rows=5 Outputs/out/execute_system_information_on=none"
+      cli_args = "Samplers/sample/num_rows=5"
       jsondiff = "uniform_surr_out.json"
       method = opt
       detail = "with uniform parameter distributions "
@@ -46,7 +46,7 @@
       type = JSONDiff
       input = normal_surr.i
       allow_test_objects = true
-      cli_args = "Samplers/sample/num_rows=5 Outputs/out/execute_system_information_on=none"
+      cli_args = "Samplers/sample/num_rows=5"
       jsondiff = "normal_surr_out.json"
       method = opt
       detail = "and with normally distributed parameters."

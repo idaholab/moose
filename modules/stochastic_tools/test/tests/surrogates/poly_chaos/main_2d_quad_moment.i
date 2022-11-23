@@ -83,7 +83,6 @@
 [Outputs]
   [out]
     type = JSON
-    execute_system_information_on = none
     execute_on = FINAL
   []
 []

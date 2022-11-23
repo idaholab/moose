@@ -7,21 +7,21 @@
     [basic]
       type = JSONDiff
       input = main.i
-      cli_args = 'Samplers/hypercube/num_rows=10 Reporters/results/parallel_type=ROOT Outputs/out/execute_system_information_on=none'
+      cli_args = 'Samplers/hypercube/num_rows=10 Reporters/results/parallel_type=ROOT'
       jsondiff = main_out.json
       detail = "basic postprocessor values;"
     []
     [transient]
       type = JSONDiff
       input = main_time.i
-      cli_args = 'Samplers/hypercube/num_rows=10 Reporters/results/parallel_type=ROOT Outputs/out/execute_system_information_on=none'
+      cli_args = 'Samplers/hypercube/num_rows=10 Reporters/results/parallel_type=ROOT'
       jsondiff = main_time_out.json
       detail = "time dependent and vector quantities;"
     []
     [vector]
       type = JSONDiff
       input = main_vector.i
-      cli_args = 'Samplers/hypercube/num_rows=10 Reporters/results/parallel_type=ROOT Outputs/out/execute_system_information_on=none'
+      cli_args = 'Samplers/hypercube/num_rows=10 Reporters/results/parallel_type=ROOT'
       jsondiff = main_vector_out.json
       abs_zero = 1e-5
       detail = "time dependence with accumulative reporter;"
