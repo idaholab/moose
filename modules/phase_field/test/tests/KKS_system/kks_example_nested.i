@@ -1,201 +1,211 @@
 #
-# This test is for the 2-phase KKS nested solve
+# KKS toy problem in the split form
 #
 
 [Mesh]
   type = GeneratedMesh
-  dim = 1
-  nx = 10
-  xmin = 0
-  xmax = 100
+  dim = 2
+  nx = 15
+  ny = 15
+  nz = 0
+  xmin = -2.5
+  xmax = 2.5
+  ymin = -2.5
+  ymax = 2.5
+  zmin = 0
+  zmax = 0
+  elem_type = QUAD4
+[]
+
+[AuxVariables]
+  [./Fglobal]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 [Variables]
-  [./c]
-  [../]
-  [./b]
-  [../]
+  # order parameter
   [./eta]
+    order = FIRST
+    family = LAGRANGE
   [../]
-  [./mu_c]
+
+  # hydrogen concentration
+  [./c]
+    order = FIRST
+    family = LAGRANGE
   [../]
-  [./mu_b]
+
+  # chemical potential
+  [./w]
+    order = FIRST
+    family = LAGRANGE
   [../]
 []
 
 [ICs]
-  [./c]
-    type = NestedBoundingBoxIC
-    variable = c
-    int_width = 2
-    smaller_coordinate_corners = '-4 0 0'
-    larger_coordinate_corners = '30 0 0'
-    inside = 0.4
-    outside = 0.6
-  [../]
-  [./b]
-    type = NestedBoundingBoxIC
-    variable = b
-    int_width = 2
-    smaller_coordinate_corners = '-4 0 0'
-    larger_coordinate_corners = '30 0 0'
-    inside = 0.1
-    outside = 0.2
-  [../]
   [./eta]
-    type = NestedBoundingBoxIC
     variable = eta
-    int_width = 2
-    smaller_coordinate_corners = '-4 0 0'
-    larger_coordinate_corners = '30 0 0'
-    inside = '0'
-    outside = 1
+    type = SmoothCircleIC
+    x1 = 0.0
+    y1 = 0.0
+    radius = 1.5
+    invalue = 0.2
+    outvalue = 0.1
+    int_width = 0.75
+  [../]
+  [./c]
+    variable = c
+    type = SmoothCircleIC
+    x1 = 0.0
+    y1 = 0.0
+    radius = 1.5
+    invalue = 0.6
+    outvalue = 0.4
+    int_width = 0.75
   [../]
 []
 
-[GlobalParams]
-  derivative_order = 2
-  evalerror_behavior = error
-  enable_ad_cache = false
-  enable_jit = false
+
+[BCs]
+  [./Periodic]
+    [./all]
+      variable = 'eta w c'
+      auto_direction = 'x y'
+    [../]
+  [../]
 []
 
 [Materials]
-  [./const]
-    type = GenericConstantMaterial
-    prop_names = 'kappa  L  l  M  ptol'
-    prop_values = '0.1   2  2  1  1e-4'
-  [../]
-  [./F1_mat]
+  # Free energy of the matrix
+  [./fm]
     type = DerivativeParsedMaterial
-    f_name = F1_mat
-    function = '10*c1 + 500*b1 + 40*(1 - c1 - b1) + 400*(c1*plog(c1, ptol) + b1*plog(b1, ptol) + (1 - c1 - b1)*plog((1 - c1 - b1), ptol))'
-    material_property_names = 'c1 b1 ptol'
-    additional_derivative_symbols = 'c1 b1'
+    f_name = fm
+    function = '(0.1-cm)^2'
+    material_property_names = 'cm'
+    additional_derivative_symbols = 'cm'
     compute = false
   [../]
-  [./F2_mat]
+
+  # Free energy of the delta phase
+  [./fd]
     type = DerivativeParsedMaterial
-    f_name = F2_mat
-    function = '100*c2 + 4*b2 + 300*(1 - c2 - b2) + 500*(c2*plog(c2, ptol) + b2*plog(b2, ptol) + (1 - c2 - b2)*plog((1 - c2 - b2), ptol))'
-    material_property_names = 'c2 b2 ptol'
-    additional_derivative_symbols = 'c2 b2'
+    f_name = fd
+    function = '(0.9-cd)^2'
+    material_property_names = 'cd'
+    additional_derivative_symbols = 'cd'
     compute = false
   [../]
+
+  # Compute phase concentrations
   [./PhaseConcentrationMaterial]
     type = KKSPhaseConcentrationMaterial
-    global_cs = 'c b'
-    ci_names = 'c1 c2 b1 b2'
-    ci_IC = '0.4 0.6 0.1 0.2'
-    Fa_material = F1_mat
-    Fb_material = F2_mat
+    global_cs = 'c'
+    ci_names = 'cm cd'
+    ci_IC = '0 0'
+    Fa_material = fm
+    Fb_material = fd
     h_name = h
     min_iterations = 1
     max_iterations = 100
     absolute_tolerance = 1e-9
     relative_tolerance = 1e-9
+    nested_iterations = iter
+    outputs = exodus
   [../]
+
+  # Compute chain rule terms
   [./PhaseConcentrationDerivatives]
     type = KKSPhaseConcentrationDerivatives
-    global_cs = 'c b'
+    global_cs = 'c'
     eta = eta
-    ci_names = 'c1 c2
-                b1 b2'
-    Fa_material = F1_mat
-    Fb_material = F2_mat
+    ci_names = 'cm cd'
+    Fa_material = fm
+    Fb_material = fd
     h_name = h
   [../]
-  [./h]
+
+  # h(eta)
+  [./h_eta]
     type = SwitchingFunctionMaterial
-    function_name = h
     h_order = HIGH
     eta = eta
   [../]
-  [./g]
+
+  # g(eta)
+  [./g_eta]
     type = BarrierFunctionMaterial
     g_order = SIMPLE
     eta = eta
   [../]
+
+  # constant properties
+  [./constants]
+    type = GenericConstantMaterial
+    prop_names  = 'M   L   kappa'
+    prop_values = '0.7 0.7 0.4  '
+  [../]
 []
 
 [Kernels]
-  # Concentration c
-  [./CHBulk_c]
+  # full transient
+  active = 'CHBulk ACBulkF ACBulkC ACInterface dcdt detadt ckernel'
+
+  #
+  # Cahn-Hilliard Equation
+  #
+  [./CHBulk]
     type = NestKKSSplitCHCRes
     variable = c
-    global_cs = 'c b'
-    w = mu_c
+    global_cs = 'c'
+    w        = w
     all_etas = eta
-    c1_names = 'c1 b1'
-    F1_name = F1_mat
-    args = 'eta b mu_c'
+    c1_names = 'cm cd'
+    F1_name = fm
+    args = 'eta w'
   [../]
-  [./dcdt_c]
+  [./dcdt]
     type = CoupledTimeDerivative
-    variable = mu_c
+    variable = w
     v = c
   [../]
-  [./ckernel_c]
+  [./ckernel]
     type = SplitCHWRes
-    variable = mu_c
     mob_name = M
-    args = eta
+    variable = w
   [../]
 
-  # Concentration b
-  [./CHBulk_b]
-    type = NestKKSSplitCHCRes
-    variable = b
-    global_cs = 'c b'
-    w = mu_b
-    all_etas = eta
-    c1_names = 'c1 b1'
-    F1_name = F1_mat
-    args = 'eta c mu_b'
-  [../]
-  [./dcdt_b]
-    type = CoupledTimeDerivative
-    variable = mu_b
-    v = b
-  [../]
-  [./ckernel_b]
-    type = SplitCHWRes
-    variable = mu_b
-    mob_name = M
-    args = eta
-  [../]
-
-  # Phase parameter
+  #
+  # Allen-Cahn Equation
+  #
   [./ACBulkF]
     type = NestKKSACBulkF
     variable = eta
-    global_cs = 'c b'
-    ci_names = 'c1 c2
-                b1 b2'
-    fa_name = F1_mat
-    fb_name = F2_mat
+    global_cs = 'c'
+    ci_names = 'cm cd'
+    fa_name = fm
+    fb_name = fd
     g_name = g
     h_name = h
     mob_name = L
-    w = 1
-    args = 'c b'
+    w = 0.4
+    args = 'c'
   [../]
   [./ACBulkC]
     type = NestKKSACBulkC
     variable = eta
-    global_cs = 'c b'
-    ci_names = 'c1 c2
-                b1 b2'
-    fa_name = F1_mat
+    global_cs = 'c'
+    ci_names = 'cm cd'
+    fa_name = fm
     h_name = h
     mob_name = L
-    args = 'c b'
+    args = 'c'
   [../]
   [./ACInterface]
     type = ACInterface
     variable = eta
     kappa_name = kappa
-    mob_name = L
   [../]
   [./detadt]
     type = TimeDerivative
@@ -203,26 +213,40 @@
   [../]
 []
 
-[Executioner]
-  type = Transient
-  solve_type = NEWTON
-  nl_abs_tol = 1e-9
-  nl_rel_tol = 1e-8
-  l_tol = 1e-4
-  l_max_its = 50
-  nl_max_its = 15
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
-  petsc_options_value = 'lu       superlu_dist'
-  num_steps = 2
-  dt = 1e-3
+[AuxKernels]
+  [./GlobalFreeEnergy]
+    variable = Fglobal
+    type = KKSGlobalFreeEnergy
+    fa_name = fm
+    fb_name = fd
+    w = 0.4
+  [../]
 []
 
+[Executioner]
+  type = Transient
+  solve_type = 'PJFNK'
+
+  petsc_options_iname = '-pctype -sub_pc_type -sub_pc_factor_shift_type -pc_factor_shift_type'
+  petsc_options_value = ' asm    lu          nonzero                    nonzero'
+
+  l_max_its = 100
+  nl_max_its = 100
+  num_steps = 3
+
+  dt = 0.1
+[]
+
+#
+# Precondition using handcoded off-diagonal terms
+#
 [Preconditioning]
   [./full]
     type = SMP
     full = true
   [../]
 []
+
 
 [Outputs]
   file_base = kks_example_nested
