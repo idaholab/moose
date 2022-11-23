@@ -60,9 +60,23 @@ SymmetryTransformGenerator::SymmetryTransformGenerator(const InputParameters & p
   const auto norm = _mirror_normal_vector.norm();
   if (!MooseUtils::absoluteFuzzyEqual(norm, 1))
     mooseInfo("Input normal plane vector was not normalized, normalization was performed");
-  _mirror_normal_vector =
-      _mirror_normal_vector / norm; // _mirror_normal_vector[0] / norm, _mirror_normal_vector[1] /
-                                    // norm, _mirror_normal_vector[2] / norm;
+  _mirror_normal_vector = _mirror_normal_vector / norm;
+
+  // Add stitch sub mesh generator if stitching is requested
+  if (_stitch_boundaries_pairs.size() > 0)
+  {
+    auto params = _app.getFactory().getValidParams("StitchedMeshGenerator");
+
+    // order of vector elements matters for this generator
+    // here order by: original mesh first, our custom mesh second
+    params.set<std::vector<MeshGeneratorName>>("inputs") = {getParam<MeshGeneratorName>("input"),
+                                                            name()};
+    params.set<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs") =
+        _stitch_boundaries_pairs;
+
+    // stitch the mirrored mesh and the original mesh
+    addMeshSubgenerator("StitchedMeshGenerator", name() + "_stitchedMeshGenerator", params);
+  }
 }
 
 std::unique_ptr<MeshBase>
@@ -95,22 +109,6 @@ SymmetryTransformGenerator::generate()
 
   // Fix flipped orientation from the symmetry
   MeshTools::Modification::orient_elements(*mesh);
-
-  if (_stitch_boundaries_pairs.size() > 0)
-  {
-    auto params = _app.getFactory().getValidParams("StitchedMeshGenerator");
-
-    // order of vector elements matters for this generator
-    // here order by: original mesh first, our custom mesh second
-    params.set<std::vector<MeshGeneratorName>>("inputs") = {getParam<MeshGeneratorName>("input"),
-                                                            name()};
-    params.set<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs") =
-        _stitch_boundaries_pairs;
-
-    // stitch the newly made high-dimensional mesh back to the original mesh
-    return dynamic_pointer_cast<MeshBase>(
-        addMeshSubgenerator("StitchedMeshGenerator", name() + "_stitchedMeshGenerator", params));
-  }
 
   return mesh;
 }
