@@ -141,7 +141,6 @@
     ci_names = 'c1 c2 c3'
     ci_IC = '0.2 0.5 0.8'
     Fj_material = 'F1 F2 F3'
-    outputs = exodus
     min_iterations = 1
     max_iterations = 1000
     absolute_tolerance = 1e-11
