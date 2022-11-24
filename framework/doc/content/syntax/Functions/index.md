@@ -10,6 +10,11 @@ time: $f(x,y,z,t)$. These objects can serve a wide variety of purposes, includin
 - defining residual contributions (sources, boundary conditions, etc.), and
 - defining post-processing quantities.
 
+!alert note title=Dependency on Solution Values
+Note that there are exceptions to the rule that `Function`s only depend on
+space and time; for example, [MooseParsedFunction.md] may depend on post-processor
+values (which may depend on the solution) and scalar variable values.
+
 Moose `Function`s should override the following member functions
 
 - `Real value(Real, Point)` - returning the value of the function at a point in space and time

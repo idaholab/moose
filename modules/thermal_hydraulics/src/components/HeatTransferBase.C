@@ -74,6 +74,7 @@ HeatTransferBase::initSecondary()
 
     _P_hf_name = FlowModel::HEAT_FLUX_PERIMETER + suffix;
     _T_wall_name = FlowModel::TEMPERATURE_WALL + suffix;
+    _T_wall_mat_name = FlowModel::TEMPERATURE_WALL + suffix;
     _q_wall_name = FlowModel::HEAT_FLUX_WALL + suffix;
   }
 }
@@ -155,6 +156,14 @@ HeatTransferBase::getWallTemperatureName() const
   checkSetupStatus(INITIALIZED_SECONDARY);
 
   return _T_wall_name;
+}
+
+const MaterialPropertyName &
+HeatTransferBase::getWallTemperatureMatName() const
+{
+  checkSetupStatus(INITIALIZED_SECONDARY);
+
+  return _T_wall_mat_name;
 }
 
 const MaterialPropertyName &

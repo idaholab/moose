@@ -50,8 +50,8 @@
 [ICs]
   [velocity]
     type = VectorConstantIC
-    x_value = 1e-15
-    y_value = 1e-15
+    x_value = 0
+    y_value = 0
     variable = velocity
   []
 []

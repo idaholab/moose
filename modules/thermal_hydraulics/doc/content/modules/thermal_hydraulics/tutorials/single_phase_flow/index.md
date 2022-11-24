@@ -18,6 +18,4 @@
 In this tutorial, you will learn how to build a simple model of a primary loop with helium, with
 a pump and a heat exchanger, and with secondary side with liquid water.
 
-This tutorial teaches the basic concepts of {{project-name-abbrev}}.
-
 !template-end!

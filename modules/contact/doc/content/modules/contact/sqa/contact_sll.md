@@ -1,1 +1,1 @@
-!template load file=sqa/app_sll.md.template category=contact app=Contact
+!template load file=sqa/module_sll.md.template category=contact module=Contact

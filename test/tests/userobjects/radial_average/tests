@@ -1,0 +1,36 @@
+[Tests]
+  issues = '#21786 #21944 #21963'
+  design = '/RadialAverage.md'
+
+  [weight]
+    requirement = 'The system shall will compute a radial average of a material property that changes over time with '
+    [constant]
+      type = 'Exodiff'
+      input = 'test.i'
+      cli_args = 'Outputs/file_base=constant UserObjects/average/weights=constant'
+      exodiff = 'constant.e'
+      recover = false
+      abs_zero = 1e-10
+      detail = 'an equal weight for all material points'
+    []
+    [linear]
+      type = 'Exodiff'
+      input = 'test.i'
+      cli_args = 'Outputs/file_base=linear UserObjects/average/weights=linear'
+      exodiff = 'linear.e'
+      recover = false
+      abs_zero = 1e-10
+      detail = 'a weight factor that falls off linearly to zero with distance'
+    []
+    [cosine]
+      type = 'Exodiff'
+      input = 'test.i'
+      cli_args = 'Outputs/file_base=cosine UserObjects/average/weights=cosine'
+      exodiff = 'cosine.e'
+      recover = false
+      abs_zero = 1e-10
+      detail = 'a weight factor that falls off with a cosine profile with distance'
+    []
+  []
+[]
+

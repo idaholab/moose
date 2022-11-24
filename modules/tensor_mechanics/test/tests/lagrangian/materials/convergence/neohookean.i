@@ -2,7 +2,6 @@
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
-  large_kinematics = true
 []
 
 [Variables]
@@ -66,15 +65,15 @@
 [Functions]
   [pullx]
     type = ParsedFunction
-    value = '400 * t'
+    value = '4000 * t'
   []
   [pully]
     type = ParsedFunction
-    value = '-200 * t'
+    value = '-2000 * t'
   []
   [pullz]
     type = ParsedFunction
-    value = '300 * t'
+    value = '3000 * t'
   []
 []
 
@@ -123,8 +122,8 @@
 [Materials]
   [compute_stress]
     type = ComputeNeoHookeanStress
-    lambda = 40000.0
-    mu = 67000.0
+    lambda = 4000.0
+    mu = 6700.0
   []
   [compute_strain]
     type = ComputeLagrangianStrain
@@ -146,15 +145,15 @@
 
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
+  automatic_scaling = true
 
   l_max_its = 2
   l_tol = 1e-14
-  nl_max_its = 3
   nl_rel_tol = 1e-8
   nl_abs_tol = 1e-10
 
   start_time = 0.0
   dt = 1.0
   dtmin = 1.0
-  end_time = 1.0
+  end_time = 2.0
 []

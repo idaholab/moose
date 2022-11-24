@@ -1,1 +1,1 @@
-!template load file=sqa/app_sdd.md.template category=fsi app=Fluid Structure Interaction
+!template load file=sqa/module_sdd.md.template category=fsi module=Fluid Structure Interaction

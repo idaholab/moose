@@ -34,17 +34,17 @@ protected:
   MaterialProperty<Real> & _rho;
   /// Viscosity (Pa.s)
   MaterialProperty<Real> & _mu;
-  /// Isobaric specific heat capacity (kJ/kg/K)
+  /// Isobaric specific heat capacity (J/kg/K)
   MaterialProperty<Real> & _cp;
-  /// Isochoric specific heat capacity (kJ/kg/K)
+  /// Isochoric specific heat capacity (J/kg/K)
   MaterialProperty<Real> & _cv;
   /// Thermal conductivity (W/m/K)
   MaterialProperty<Real> & _k;
-  /// Specific enthalpy (kJ/kg)
+  /// Specific enthalpy (J/kg)
   MaterialProperty<Real> & _h;
-  /// Internal energy (kJ/kg)
+  /// Internal energy (J/kg)
   MaterialProperty<Real> & _e;
-  /// Specific entropy (kJ/kg/K)
+  /// Specific entropy (J/kg/K)
   MaterialProperty<Real> & _s;
   /// Speed of sound (m/s)
   MaterialProperty<Real> & _c;

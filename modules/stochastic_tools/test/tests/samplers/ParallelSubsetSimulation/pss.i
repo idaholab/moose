@@ -19,6 +19,7 @@
     type = ParallelSubsetSimulation
     distributions = 'mu1 mu2'
     num_samplessub = 20
+    num_subsets = 6
     num_parallel_chains = 2
     output_reporter = 'constant/reporter_transfer:average:value'
     inputs_reporter = 'adaptive_MC/inputs'
@@ -66,7 +67,6 @@
 
 [Executioner]
   type = Transient
-  num_steps = 60
 []
 
 [Outputs]

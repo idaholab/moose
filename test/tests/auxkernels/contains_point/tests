@@ -1,0 +1,10 @@
+[Tests]
+  design = 'ContainsPointAux.md'
+  issues = '#22534'
+  [test]
+    type = Exodiff
+    input = test.i
+    exodiff = test_out.e
+    requirement = 'The system shall be able to identify what element contains a point through visualization of an auxiliary variable.'
+  []
+[]

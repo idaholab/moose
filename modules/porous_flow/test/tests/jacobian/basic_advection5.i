@@ -56,15 +56,13 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [simple_fluid]
-      type = SimpleFluidProperties
-      bulk_modulus = 3
-      density0 = 4
-      thermal_expansion = 0
-      viscosity = 150.0
-    []
+[FluidProperties]
+  [simple_fluid]
+    type = SimpleFluidProperties
+    bulk_modulus = 3
+    density0 = 4
+    thermal_expansion = 0
+    viscosity = 150.0
   []
 []
 

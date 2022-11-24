@@ -25,14 +25,25 @@ which reduces to
   h_r = \sigma F_e \left( T_s^2 + T_f^2 \right) \left( T_s + T_f \right).
 \end{equation}
 
-The emissivity function is given as the harmonic mean of the two emissivity values,
-approximating the gap as defined by two infinite parallel planes.
+If the coordinate system type is Cartesian, the emissivity is computed using an
+infinite parallel plate approximation given by
 \begin{equation}
   \label{eqn:emissivityFunction}
-  F_e = \frac{1}{\left( 1/e_s - 1/e_f -1 \right)}
+  F_e = \frac{1}{\left( 1/e_s + 1/e_f -1 \right)}
 \end{equation}
-where $e_s$ and $e_f$ are the near surface and farfield emissivity values, respectively.
+where $e_s$ and $e_f$ are the near surface and farfield emissivity values,
+respectively. The primary and secondary surface emissivity values can be assigned
+arbitrarily to $e_s$ and $e_f$. For an axisymmetric coordinate system, the
+emissivity is computed using the same formula as that given in
+[FVInfiniteCylinderRadiativeBC.md]:
 
+\begin{equation}
+\frac{e_s e_f r_f}{e_f r_f + e_s r_s \left(1 - e_f\right)}
+\end{equation}
+
+Here the $s$ subscript should correspond to whichever surface (secondary or
+primary) has the smaller radius, and the $f$ subscript should correspond to
+whichever surface has the larger radius.
 
 ## Example Input File Syntax
 

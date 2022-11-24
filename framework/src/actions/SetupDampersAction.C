@@ -20,7 +20,7 @@ SetupDampersAction::validParams()
   return params;
 }
 
-SetupDampersAction::SetupDampersAction(InputParameters params) : Action(params) {}
+SetupDampersAction::SetupDampersAction(const InputParameters & params) : Action(params) {}
 
 void
 SetupDampersAction::act()

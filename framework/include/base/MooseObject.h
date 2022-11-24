@@ -15,6 +15,7 @@
 #include "Registry.h"
 #include "MooseUtils.h"
 #include "DataFileInterface.h"
+#include "MooseObjectParameterName.h"
 
 #include "libmesh/parallel_object.h"
 
@@ -64,6 +65,14 @@ public:
    * @return The name of the object
    */
   virtual const std::string & name() const { return _name; }
+
+  /**
+   * The unique parameter name of a valid parameter of this object for accessing parameter controls
+   */
+  MooseObjectParameterName uniqueParameterName(const std::string & parameter_name) const
+  {
+    return MooseObjectParameterName(_pars.get<std::string>("_moose_base"), _name, parameter_name);
+  }
 
   /**
    * Get the object's combined type and name; useful in error handling.

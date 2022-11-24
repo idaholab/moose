@@ -30,9 +30,9 @@ public:
   NodalVariableValue(const InputParameters & parameters);
 
   virtual void initialize() override {}
-  virtual void execute() override {}
+  virtual void execute() override;
   virtual Real getValue() override;
-
+  virtual void finalize() override;
   void initialSetup() override;
 
 protected:
@@ -40,4 +40,5 @@ protected:
   std::string _var_name;
   Node * _node_ptr;
   const Real _scale_factor;
+  Real _value;
 };

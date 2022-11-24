@@ -86,6 +86,9 @@ private:
 
   /// current temperature
   const GenericVariableValue<is_ad> & _temperature_prop;
+
+  /// mean coefficient of thermal expansion (for output verification)
+  MaterialProperty<Real> * _mean_thermal_expansion_coefficient;
 };
 
 typedef ComputeThermalExpansionEigenstrainBaseTempl<false> ComputeThermalExpansionEigenstrainBase;

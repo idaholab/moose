@@ -16,7 +16,7 @@ class AddInitialConditionAction : public MooseObjectAction
 public:
   static InputParameters validParams();
 
-  AddInitialConditionAction(InputParameters params);
+  AddInitialConditionAction(const InputParameters & params);
 
   virtual void act() override;
 };

@@ -7,4 +7,13 @@
     issues = '#13250'
     design = 'ScalarMaterialDamage.md MaterialTimeStepPostprocessor.md'
   [../]
+  [./no_inelastic_model_limit_defined]
+    type = 'CSVDiff'
+    input = 'no_inelastic_model_timestep_limit.i'
+    csvdiff = 'no_inelastic_model_timestep_limit_defined_out.csv'
+    requirement = 'The system shall compute a time step equal to a user input maximum real number if no inelastic model is provided'
+    cli_args = 'Postprocessors/time_step_limit/maximum_value=0.2 Outputs/file_base=no_inelastic_model_timestep_limit_defined_out'
+    issues = '#22604'
+    design = 'MaterialTimeStepPostprocessor.md'
+  [../]
 []

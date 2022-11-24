@@ -118,6 +118,15 @@ public:
     return batch_mode ? _rank_config.second : _rank_config.first;
   }
 
+  /**
+   * Returns true if the adaptive sampling is completed
+   */
+  virtual bool isAdaptiveSamplingCompleted() const
+  {
+    mooseError("This method should be overridden in adaptive sampling classes.");
+    return false;
+  }
+
 protected:
   /**
    * Enum describing the type of parallel communication to perform.

@@ -1,6 +1,6 @@
 # CaloricallyImperfectGas
 
-!syntax description /Modules/FluidProperties/CaloricallyImperfectGas
+!syntax description /FluidProperties/CaloricallyImperfectGas
 
 This class implements fluid properties for a gas that behaves like an
 ideal gas except that the specific heat capacities are a function of temperature
@@ -22,7 +22,7 @@ The internal energy $e$ is a user-provided function of temperature:
   e = e(T).
 \end{equation}  
 
-The function $e(T)$ is provided via parameter [!param](/Modules/FluidProperties/CaloricallyImperfectGas/e). The time argument is interpreted
+The function $e(T)$ is provided via parameter [!param](/FluidProperties/CaloricallyImperfectGas/e). The time argument is interpreted
 as temperature.
 
 The enthalpy is computed by:
@@ -129,10 +129,10 @@ The derivatives of entropy with respect to $T$, $e$, $h$, $v$ are given by:
 These derivatives are implemented in the 5 argument versions of the `s_from_x_y`
 functions.
 
-!syntax parameters /Modules/FluidProperties/CaloricallyImperfectGas
+!syntax parameters /FluidProperties/CaloricallyImperfectGas
 
-!syntax inputs /Modules/FluidProperties/CaloricallyImperfectGas
+!syntax inputs /FluidProperties/CaloricallyImperfectGas
 
-!syntax children /Modules/FluidProperties/CaloricallyImperfectGas
+!syntax children /FluidProperties/CaloricallyImperfectGas
 
 !bibtex bibliography

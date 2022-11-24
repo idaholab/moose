@@ -49,11 +49,14 @@ protected:
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
-  /// Derivatives of the residual w.r.t. the displacement dofs
+  // Derivatives of the residual w.r.t. the displacement dofs
   virtual Real computeQpJacobianDisplacement(unsigned int alpha, unsigned int beta) = 0;
 
   // Derivatives of the residual w.r.t. the temperature dofs through eigenstrain
   virtual Real computeQpJacobianTemperature(unsigned int cvar) = 0;
+
+  // Derivatives of the residual w.r.t. the out-of-plane strain
+  virtual Real computeQpJacobianOutOfPlaneStrain() = 0;
 
 protected:
   /// If true use large deformation kinematics
@@ -96,6 +99,9 @@ protected:
 
   /// Temperature, if provided.  This is used only to get the trial functions
   const MooseVariable * _temperature;
+
+  /// Out-of-plane strain, if provided.
+  const MooseVariable * _out_of_plane_strain;
 
   /// Eigenstrain derivatives wrt generate coupleds
   std::vector<std::vector<const MaterialProperty<RankTwoTensor> *>> _deigenstrain_dargs;

@@ -25,7 +25,7 @@ ComputeDiracThread::ComputeDiracThread(FEProblemBase & feproblem,
                                        bool is_jacobian)
   : ThreadedElementLoop<DistElemRange>(feproblem),
     _is_jacobian(is_jacobian),
-    _nl(feproblem.getNonlinearSystemBase()),
+    _nl(feproblem.currentNonlinearSystem()),
     _tags(tags),
     _dirac_kernels(_nl.getDiracKernelWarehouse())
 {
@@ -116,7 +116,8 @@ ComputeDiracThread::onElement(const Elem * elem)
     }
 
     // Get a list of coupled variables from the SubProblem
-    const auto & coupling_entries = dirac_kernel->subProblem().assembly(_tid).couplingEntries();
+    const auto & coupling_entries =
+        dirac_kernel->subProblem().assembly(_tid, _nl.number()).couplingEntries();
 
     // Loop over the list of coupled variable pairs
     for (const auto & it : coupling_entries)

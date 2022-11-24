@@ -182,15 +182,6 @@ PolygonConcentricCircleMeshGeneratorBase::validParams()
       "flat_side_up",
       false,
       "Whether to rotate the generated polygon mesh to ensure that one flat side faces up.");
-  MooseEnum ring_id_option("block_wise ring_wise", "block_wise");
-  params.addParam<MooseEnum>(
-      "ring_id_assign_type", ring_id_option, "Type of ring ID assignment: block_wise or ring_wise");
-  params.addParam<std::string>("sector_id_name",
-                               "Name of integer (reporting) ID for sector regions to use the "
-                               "reporting ID for azimuthal sector regions of ring geometry block.");
-  params.addParam<std::string>("ring_id_name",
-                               "Name of integer (reporting) ID for ring regions to use the "
-                               "reporting ID for annular regions of ring geometry block.");
   params.addParamNamesToGroup(
       "background_block_ids background_block_names duct_block_ids duct_block_names ring_block_ids "
       "ring_block_names external_boundary_id external_boundary_name interface_boundary_names "
@@ -211,6 +202,7 @@ PolygonConcentricCircleMeshGeneratorBase::validParams()
       "duct_inner_boundary_layer_intervals duct_outer_boundary_layer_biases "
       "duct_outer_boundary_layer_widths duct_outer_boundary_layer_intervals",
       "Mesh Boundary Layers and Biasing Options");
+  addRingAndSectorIDParams(params);
   params.addClassDescription("This PolygonConcentricCircleMeshGeneratorBase object is a base class "
                              "to be inherited for polygon mesh generators.");
 
@@ -356,7 +348,10 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
     _pattern_pitch_meta(declareMeshProperty<Real>("pattern_pitch_meta", 0.0)),
     _azimuthal_angle_meta(
         declareMeshProperty<std::vector<Real>>("azimuthal_angle_meta", std::vector<Real>())),
-    _is_control_drum_meta(declareMeshProperty<bool>("is_control_drum_meta", false))
+    _is_control_drum_meta(declareMeshProperty<bool>("is_control_drum_meta", false)),
+    _max_radius_meta(declareMeshProperty<Real>("max_radius_meta", 0.0)),
+    _quad_center_block_id(declareMeshProperty<subdomain_id_type>(
+        "quad_center_block_id", libMesh::Elem::invalid_subdomain_id))
 {
   // This error message is only reserved for future derived classes. Neither of the current derived
   // classes will trigger this error.
@@ -577,6 +572,9 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
   if (!_quad_center_elements && _center_quad_factor)
     paramError("center_quad_factor",
                "this parameter is only applicable if quad_center_elements is set true.");
+  if (_quad_center_elements)
+    _quad_center_block_id =
+        _ring_block_ids.empty() ? _background_block_ids.front() : _ring_block_ids.front();
 }
 
 std::unique_ptr<MeshBase>
@@ -649,6 +647,7 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
       paramError("ring_radii",
                  "Elements of this parameter must be smaller than polygon apothem (after volume "
                  "preserve correction if applicable).");
+    _max_radius_meta = ring_radii_corr.back();
   }
   // build the first slice of the polygon.
   auto mesh0 = buildSimpleSlice(ring_radii_corr,
@@ -891,84 +890,20 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
     }
   }
 
+  // add sector ids
   if (isParamValid("sector_id_name"))
-  {
-    const auto extra_id_index = mesh0->add_elem_integer(getParam<std::string>("sector_id_name"));
-    // vector to store sector ids for each element
-    auto elem_it = mesh0->elements_begin();
-    unsigned int id = 1;
-    // starting element id of the current sector
-    for (unsigned int is = 0; is < _num_sides; ++is)
-    {
-      // number of elements in the current sector
-      unsigned int nelem_sector =
-          mesh0->n_elem() * _num_sectors_per_side[is] /
-          (accumulate(_num_sectors_per_side.begin(), _num_sectors_per_side.end(), 0));
-      // assign sector ids to mesh
-      for (unsigned i = 0; i < nelem_sector; ++i, ++elem_it)
-        (*elem_it)->set_extra_integer(extra_id_index, id);
-      // update sector id
-      ++id;
-    }
-  }
+    setSectorExtraIDs(
+        *mesh0, getParam<std::string>("sector_id_name"), _num_sides, _num_sectors_per_side);
 
+  // add ring ids
   if (isParamValid("ring_id_name"))
-  {
-    const auto extra_id_index = mesh0->add_elem_integer(getParam<std::string>("ring_id_name"));
-
-    auto elem_it = mesh0->elements_begin();
-    for (unsigned int is = 0; is < _num_sides; ++is)
-    {
-      // number of elements in the current sector
-      unsigned int nelem =
-          mesh0->n_elem() * _num_sectors_per_side[is] /
-          (accumulate(_num_sectors_per_side.begin(), _num_sectors_per_side.end(), 0));
-      if (getParam<MooseEnum>("ring_id_assign_type") == "block_wise")
-      {
-        for (unsigned int ir = 0; ir < _ring_radii.size(); ++ir)
-        {
-          // number of elements in the current ring and sector
-          unsigned int nelem_annular_ring = _num_sectors_per_side[is] * _ring_intervals[ir];
-          // if _quad_center_elements is true, the number of elements in center ring are
-          // _num_sectors_per_side[is] * _num_sectors_per_side[is] / 4
-          if (_quad_center_elements && ir == 0)
-            nelem_annular_ring = _num_sectors_per_side[is] * (_ring_intervals[ir] - 1) +
-                                 _num_sectors_per_side[is] * _num_sectors_per_side[is] / 4;
-          // assign ring id
-          for (unsigned i = 0; i < nelem_annular_ring; ++i, ++elem_it)
-            (*elem_it)->set_extra_integer(extra_id_index, ir + 1);
-          // update number of elements in background region of current side.
-          nelem -= nelem_annular_ring;
-        }
-      }
-      else
-      {
-        unsigned int ir = 0;
-        for (unsigned int ir0 = 0; ir0 < _ring_radii.size(); ++ir0)
-        {
-          for (unsigned int ir1 = 0; ir1 < _ring_intervals[ir0]; ++ir1)
-          {
-            // number of elements in the current ring and sector
-            unsigned int nelem_annular_ring = _num_sectors_per_side[is];
-            // if _quad_center_elements is true, the number of elements in center ring are
-            // _num_sectors_per_side[is] * _num_sectors_per_side[is] / 4
-            if (_quad_center_elements && ir == 0)
-              nelem_annular_ring = _num_sectors_per_side[is] * _num_sectors_per_side[is] / 4;
-            // assign ring id
-            for (unsigned i = 0; i < nelem_annular_ring; ++i, ++elem_it)
-              (*elem_it)->set_extra_integer(extra_id_index, ir + 1);
-            // update ring id
-            ++ir;
-            // update number of elements in background region of current side.
-            nelem -= nelem_annular_ring;
-          }
-        }
-      }
-      // assign ring id to background region
-      for (unsigned i = 0; i < nelem; ++i, ++elem_it)
-        (*elem_it)->set_extra_integer(extra_id_index, 0);
-    }
-  }
+    setRingExtraIDs(*mesh0,
+                    getParam<std::string>("ring_id_name"),
+                    _num_sides,
+                    _num_sectors_per_side,
+                    _ring_intervals,
+                    getParam<MooseEnum>("ring_id_assign_type") == "ring_wise",
+                    _quad_center_elements);
 
   if (_flat_side_up)
     MeshTools::Modification::rotate(*mesh0, 180.0 / (Real)_num_sides, 0.0, 0.0);

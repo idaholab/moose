@@ -15,15 +15,18 @@
 #include "MooseApp.h"
 #include "MooseVariableFE.h"
 #include "MooseArray.h"
-#include "SystemBase.h"
 #include "Assembly.h"
 #include "MooseObjectName.h"
 #include "RelationshipManager.h"
 #include "MooseUtils.h"
+#include "DisplacedSystem.h"
+#include "NonlinearSystemBase.h"
 
 #include "libmesh/equation_systems.h"
 #include "libmesh/system.h"
 #include "libmesh/dof_map.h"
+
+#include <regex>
 
 InputParameters
 SubProblem::validParams()
@@ -44,7 +47,6 @@ SubProblem::validParams()
 SubProblem::SubProblem(const InputParameters & parameters)
   : Problem(parameters),
     _factory(_app.getFactory()),
-    _nonlocal_cm(),
     _requires_nonlocal_coupling(false),
     _default_ghosting(getParam<bool>("default_ghosting")),
     _currently_computing_jacobian(false),
@@ -54,6 +56,7 @@ SubProblem::SubProblem(const InputParameters & parameters)
     _safe_access_tagged_matrices(false),
     _safe_access_tagged_vectors(false),
     _have_ad_objects(false),
+    _output_functors(false),
     _typed_vector_tags(2)
 {
   unsigned int n_threads = libMesh::n_threads();
@@ -306,7 +309,8 @@ void
 SubProblem::setActiveFEVariableCoupleableVectorTags(std::set<TagID> & vtags, THREAD_ID tid)
 {
   _active_fe_var_coupleable_vector_tags[tid] = vtags;
-  systemBaseNonlinear().setActiveVariableCoupleableVectorTags(vtags, tid);
+  for (const auto nl_sys_num : make_range(numNonlinearSystems()))
+    systemBaseNonlinear(nl_sys_num).setActiveVariableCoupleableVectorTags(vtags, tid);
   systemBaseAuxiliary().setActiveVariableCoupleableVectorTags(vtags, tid);
 }
 
@@ -344,7 +348,8 @@ void
 SubProblem::setActiveScalarVariableCoupleableVectorTags(std::set<TagID> & vtags, THREAD_ID tid)
 {
   _active_sc_var_coupleable_vector_tags[tid] = vtags;
-  systemBaseNonlinear().setActiveScalarVariableCoupleableVectorTags(vtags, tid);
+  for (const auto nl_sys_num : make_range(numNonlinearSystems()))
+    systemBaseNonlinear(nl_sys_num).setActiveScalarVariableCoupleableVectorTags(vtags, tid);
   systemBaseAuxiliary().setActiveScalarVariableCoupleableVectorTags(vtags, tid);
 }
 
@@ -690,19 +695,19 @@ SubProblem::diracKernelInfo()
 }
 
 Real
-SubProblem::finalNonlinearResidual() const
+SubProblem::finalNonlinearResidual(unsigned int) const
 {
   return 0;
 }
 
 unsigned int
-SubProblem::nNonlinearIterations() const
+SubProblem::nNonlinearIterations(unsigned int) const
 {
   return 0;
 }
 
 unsigned int
-SubProblem::nLinearIterations() const
+SubProblem::nLinearIterations(unsigned int) const
 {
   return 0;
 }
@@ -733,7 +738,8 @@ SubProblem::restrictionBoundaryCheckName(BoundaryID check_id)
 void
 SubProblem::setCurrentBoundaryID(BoundaryID bid, THREAD_ID tid)
 {
-  assembly(tid).setCurrentBoundaryID(bid);
+  for (const auto nl_sys_num : make_range(numNonlinearSystems()))
+    assembly(tid, nl_sys_num).setCurrentBoundaryID(bid);
 }
 
 unsigned int
@@ -742,29 +748,33 @@ SubProblem::getAxisymmetricRadialCoord() const
   return mesh().getAxisymmetricRadialCoord();
 }
 
+template <typename T>
 MooseVariableFEBase &
 SubProblem::getVariableHelper(THREAD_ID tid,
                               const std::string & var_name,
                               Moose::VarKindType expected_var_type,
                               Moose::VarFieldType expected_var_field_type,
-                              const SystemBase & nl,
+                              const std::vector<T> & nls,
                               const SystemBase & aux) const
 {
   // Eventual return value
   MooseVariableFEBase * var = nullptr;
 
+  const auto [var_in_nl, nl_sys_num] = determineNonlinearSystem(var_name);
+
   // First check that the variable is found on the expected system.
   if (expected_var_type == Moose::VarKindType::VAR_ANY)
   {
-    if (nl.hasVariable(var_name))
-      var = &(nl.getVariable(tid, var_name));
+    if (var_in_nl)
+      var = &(nls[nl_sys_num]->getVariable(tid, var_name));
     else if (aux.hasVariable(var_name))
       var = &(aux.getVariable(tid, var_name));
     else
       mooseError("Unknown variable " + var_name);
   }
-  else if (expected_var_type == Moose::VarKindType::VAR_NONLINEAR && nl.hasVariable(var_name))
-    var = &(nl.getVariable(tid, var_name));
+  else if (expected_var_type == Moose::VarKindType::VAR_NONLINEAR &&
+           nls[nl_sys_num]->hasVariable(var_name))
+    var = &(nls[nl_sys_num]->getVariable(tid, var_name));
   else if (expected_var_type == Moose::VarKindType::VAR_AUXILIARY && aux.hasVariable(var_name))
     var = &(aux.getVariable(tid, var_name));
   else
@@ -812,25 +822,33 @@ SubProblem::reinitElemFaceRef(const Elem * elem,
                               const std::vector<Real> * const weights,
                               THREAD_ID tid)
 {
-  // - Set our _current_elem for proper dof index getting in the moose variables
-  // - Reinitialize all of our FE objects so we have current phi, dphi, etc. data
-  // Note that our number of shape functions will reflect the number of shapes associated with the
-  // interior element while the number of quadrature points will be determined by the passed pts
-  // parameter (which presumably will have a number of pts reflective of a facial quadrature rule)
-  assembly(tid).reinitElemFaceRef(elem, side, tolerance, pts, weights);
+  for (const auto nl_sys_num : make_range(numNonlinearSystems()))
+  {
+    // - Set our _current_elem for proper dof index getting in the moose variables
+    // - Reinitialize all of our FE objects so we have current phi, dphi, etc. data
+    // Note that our number of shape functions will reflect the number of shapes associated with the
+    // interior element while the number of quadrature points will be determined by the passed pts
+    // parameter (which presumably will have a number of pts reflective of a facial quadrature rule)
+    assembly(tid, nl_sys_num).reinitElemFaceRef(elem, side, tolerance, pts, weights);
 
-  // Actually get the dof indices in the moose variables
-  systemBaseNonlinear().prepare(tid);
+    auto & nl = systemBaseNonlinear(nl_sys_num);
+
+    // Actually get the dof indices in the moose variables
+    nl.prepare(tid);
+
+    // Let's finally compute our variable values!
+    nl.reinitElemFace(elem, side, bnd_id, tid);
+  }
+
+  // do same for aux as for nl
   systemBaseAuxiliary().prepare(tid);
+  systemBaseAuxiliary().reinitElemFace(elem, side, bnd_id, tid);
 
   // With the dof indices set in the moose variables, now let's properly size
   // our local residuals/Jacobians
-  assembly(tid).prepareJacobianBlock();
-  assembly(tid).prepareResidual();
-
-  // Let's finally compute our variable values!
-  systemBaseNonlinear().reinitElemFace(elem, side, bnd_id, tid);
-  systemBaseAuxiliary().reinitElemFace(elem, side, bnd_id, tid);
+  auto & current_assembly = assembly(tid, currentNlSysNum());
+  current_assembly.prepareJacobianBlock();
+  current_assembly.prepareResidual();
 }
 
 void
@@ -842,24 +860,32 @@ SubProblem::reinitNeighborFaceRef(const Elem * neighbor_elem,
                                   const std::vector<Real> * const weights,
                                   THREAD_ID tid)
 {
-  // - Set our _current_neighbor_elem for proper dof index getting in the moose variables
-  // - Reinitialize all of our FE objects so we have current phi, dphi, etc. data
-  // Note that our number of shape functions will reflect the number of shapes associated with the
-  // interior element while the number of quadrature points will be determined by the passed pts
-  // parameter (which presumably will have a number of pts reflective of a facial quadrature rule)
-  assembly(tid).reinitNeighborFaceRef(neighbor_elem, neighbor_side, tolerance, pts, weights);
+  for (const auto nl_sys_num : make_range(numNonlinearSystems()))
+  {
+    // - Set our _current_neighbor_elem for proper dof index getting in the moose variables
+    // - Reinitialize all of our FE objects so we have current phi, dphi, etc. data
+    // Note that our number of shape functions will reflect the number of shapes associated with the
+    // interior element while the number of quadrature points will be determined by the passed pts
+    // parameter (which presumably will have a number of pts reflective of a facial quadrature rule)
+    assembly(tid, nl_sys_num)
+        .reinitNeighborFaceRef(neighbor_elem, neighbor_side, tolerance, pts, weights);
 
-  // Actually get the dof indices in the moose variables
-  systemBaseNonlinear().prepareNeighbor(tid);
+    auto & nl = systemBaseNonlinear(nl_sys_num);
+
+    // Actually get the dof indices in the moose variables
+    nl.prepareNeighbor(tid);
+
+    // Let's finally compute our variable values!
+    nl.reinitNeighborFace(neighbor_elem, neighbor_side, bnd_id, tid);
+  }
+
+  // do same for aux as for nl
   systemBaseAuxiliary().prepareNeighbor(tid);
+  systemBaseAuxiliary().reinitNeighborFace(neighbor_elem, neighbor_side, bnd_id, tid);
 
   // With the dof indices set in the moose variables, now let's properly size
   // our local residuals/Jacobians
-  assembly(tid).prepareNeighbor();
-
-  // Let's finally compute our variable values!
-  systemBaseNonlinear().reinitNeighborFace(neighbor_elem, neighbor_side, bnd_id, tid);
-  systemBaseAuxiliary().reinitNeighborFace(neighbor_elem, neighbor_side, bnd_id, tid);
+  assembly(tid, currentNlSysNum()).prepareNeighbor();
 }
 
 void
@@ -868,33 +894,42 @@ SubProblem::reinitLowerDElem(const Elem * elem,
                              const std::vector<Point> * const pts,
                              const std::vector<Real> * const weights)
 {
-  // - Set our _current_lower_d_elem for proper dof index getting in the moose variables
-  // - Reinitialize all of our lower-d FE objects so we have current phi, dphi, etc. data
-  assembly(tid).reinitLowerDElem(elem, pts, weights);
+  for (const auto nl_sys_num : make_range(numNonlinearSystems()))
+  {
+    // - Set our _current_lower_d_elem for proper dof index getting in the moose variables
+    // - Reinitialize all of our lower-d FE objects so we have current phi, dphi, etc. data
+    assembly(tid, nl_sys_num).reinitLowerDElem(elem, pts, weights);
 
-  // Actually get the dof indices in the moose variables
-  systemBaseNonlinear().prepareLowerD(tid);
+    auto & nl = systemBaseNonlinear(nl_sys_num);
+
+    // Actually get the dof indices in the moose variables
+    nl.prepareLowerD(tid);
+
+    // With the dof indices set in the moose variables, now let's properly size
+    // our local residuals/Jacobians
+    assembly(tid, nl_sys_num).prepareLowerD();
+
+    // Let's finally compute our variable values!
+    nl.reinitLowerD(tid);
+  }
+
+  // do same for aux as for nl
   systemBaseAuxiliary().prepareLowerD(tid);
-
-  // With the dof indices set in the moose variables, now let's properly size
-  // our local residuals/Jacobians
-  assembly(tid).prepareLowerD();
-
-  // Let's finally compute our variable values!
-  systemBaseNonlinear().reinitLowerD(tid);
   systemBaseAuxiliary().reinitLowerD(tid);
 }
 
 void
 SubProblem::reinitNeighborLowerDElem(const Elem * elem, THREAD_ID tid)
 {
-  assembly(tid).reinitNeighborLowerDElem(elem);
+  for (const auto nl_sys_num : make_range(numNonlinearSystems()))
+    assembly(tid, nl_sys_num).reinitNeighborLowerDElem(elem);
 }
 
 void
 SubProblem::reinitMortarElem(const Elem * elem, THREAD_ID tid)
 {
-  assembly(tid).reinitMortarElem(elem);
+  for (const auto nl_sys_num : make_range(numNonlinearSystems()))
+    assembly(tid, nl_sys_num).reinitMortarElem(elem);
 }
 
 void
@@ -981,13 +1016,16 @@ SubProblem::removeAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf)
 void
 SubProblem::automaticScaling(bool automatic_scaling)
 {
-  systemBaseNonlinear().automaticScaling(automatic_scaling);
+  for (const auto nl_sys_num : make_range(numNonlinearSystems()))
+    systemBaseNonlinear(nl_sys_num).automaticScaling(automatic_scaling);
 }
 
 bool
 SubProblem::automaticScaling() const
 {
-  return systemBaseNonlinear().automaticScaling();
+  // Currently going to assume that we are applying or not applying automatic scaling consistently
+  // across nonlinear systems
+  return systemBaseNonlinear(0).automaticScaling();
 }
 
 #ifdef MOOSE_GLOBAL_AD_INDEXING
@@ -995,14 +1033,16 @@ void
 SubProblem::hasScalingVector()
 {
   for (const THREAD_ID tid : make_range(libMesh::n_threads()))
-    assembly(tid).hasScalingVector();
+    for (const auto nl_sys_num : make_range(numNonlinearSystems()))
+      assembly(tid, nl_sys_num).hasScalingVector();
 }
 #endif
 
 void
 SubProblem::clearAllDofIndices()
 {
-  systemBaseNonlinear().clearAllDofIndices();
+  for (const auto nl_sys_num : make_range(numNonlinearSystems()))
+    systemBaseNonlinear(nl_sys_num).clearAllDofIndices();
   systemBaseAuxiliary().clearAllDofIndices();
 }
 
@@ -1012,6 +1052,14 @@ SubProblem::timestepSetup()
   for (auto & map : _functors)
     for (auto & pr : map)
       pr.second->timestepSetup();
+}
+
+void
+SubProblem::customSetup(const ExecFlagType & exec_type)
+{
+  for (auto & map : _functors)
+    for (auto & pr : map)
+      pr.second->customSetup(exec_type);
 }
 
 void
@@ -1033,6 +1081,12 @@ SubProblem::jacobianSetup()
 void
 SubProblem::initialSetup()
 {
+  if (_output_functors)
+  {
+    showFunctors();
+    showFunctorRequestors();
+  }
+
   for (const auto & functors : _functors)
     for (const auto & pr : functors)
       if (pr.second->wrapsNull())
@@ -1041,6 +1095,29 @@ SubProblem::initialSetup()
                    "', which was requested by '",
                    MooseUtils::join(libmesh_map_find(_functor_to_requestors, pr.first), ","),
                    "'.");
+}
+
+void
+SubProblem::showFunctors() const
+{
+  _console << "[DBG] Wrapped functors found in Subproblem" << std::endl;
+  std::string functor_names = "[DBG] ";
+  for (const auto & functor_pair : _functors[0])
+    functor_names += std::regex_replace(functor_pair.first, std::regex("wraps_"), "") + " ";
+  if (functor_names.size())
+    functor_names.pop_back();
+  _console << functor_names << std::endl;
+}
+
+void
+SubProblem::showFunctorRequestors() const
+{
+  for (const auto & [functor, requestors] : _functor_to_requestors)
+  {
+    _console << "[DBG] Requestors for wrapped functor "
+             << std::regex_replace(functor, std::regex("wraps_"), "") << std::endl;
+    _console << "[DBG] " << MooseUtils::join(requestors, " ") << std::endl;
+  }
 }
 
 bool
@@ -1056,3 +1133,18 @@ SubProblem::getCoordSystem(SubdomainID sid) const
 {
   return mesh().getCoordSystem(sid);
 }
+
+template MooseVariableFEBase &
+SubProblem::getVariableHelper(THREAD_ID tid,
+                              const std::string & var_name,
+                              Moose::VarKindType expected_var_type,
+                              Moose::VarFieldType expected_var_field_type,
+                              const std::vector<std::shared_ptr<NonlinearSystemBase>> & nls,
+                              const SystemBase & aux) const;
+template MooseVariableFEBase &
+SubProblem::getVariableHelper(THREAD_ID tid,
+                              const std::string & var_name,
+                              Moose::VarKindType expected_var_type,
+                              Moose::VarFieldType expected_var_field_type,
+                              const std::vector<std::unique_ptr<DisplacedSystem>> & nls,
+                              const SystemBase & aux) const;

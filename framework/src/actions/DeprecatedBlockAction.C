@@ -20,7 +20,10 @@ DeprecatedBlockAction::validParams()
   return params;
 }
 
-DeprecatedBlockAction::DeprecatedBlockAction(InputParameters parameters) : Action(parameters) {}
+DeprecatedBlockAction::DeprecatedBlockAction(const InputParameters & parameters)
+  : Action(parameters)
+{
+}
 
 void
 DeprecatedBlockAction::act()

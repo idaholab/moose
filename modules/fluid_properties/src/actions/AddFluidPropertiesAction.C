@@ -17,7 +17,7 @@ AddFluidPropertiesAction::validParams()
   return AddUserObjectAction::validParams();
 }
 
-AddFluidPropertiesAction::AddFluidPropertiesAction(InputParameters params)
+AddFluidPropertiesAction::AddFluidPropertiesAction(const InputParameters & params)
   : AddUserObjectAction(params)
 {
 }

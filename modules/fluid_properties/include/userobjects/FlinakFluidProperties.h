@@ -81,6 +81,24 @@ public:
                           DualReal & dT_de) const override;
 
   /**
+   * Temperature from pressure and specific enthalpy
+   *
+   * @param[in] p       pressure (Pa)
+   * @param[in] h       specific enthalpy (J/kg)
+   * @param[out] T      temperature (K)
+   */
+  virtual Real T_from_p_h(Real p, Real h) const override;
+
+  /**
+   * Temperature from pressure and density
+   *
+   * @param[in] h       specific enthalpy (J/kg)
+   * @param[out] rho    density (kg/m$^3$)
+   * @param[out] T       temperature (K)
+   */
+  virtual Real T_from_p_rho(Real p, Real rho) const;
+
+  /**
    * Isobaric specific heat from specific volume and specific internal energy
    *
    * @param[in] v   specific volume (m$^3$/kg)
@@ -234,6 +252,15 @@ public:
    * @param[out] de_dT   derivative of specific internal energy w.r.t. temperature
    */
   virtual void e_from_p_T(Real p, Real T, Real & e, Real & de_dp, Real & de_dT) const override;
+
+  /**
+   * Specific internal energy from pressure and density
+   *
+   * @param[in] p       pressure (Pa)
+   * @param[out] rho       density (kg/m$^3$)
+   * @return specific internal energy (J/kg)
+   */
+  virtual Real e_from_p_rho(Real p, Real rho) const override;
 
   using SinglePhaseFluidProperties::beta_from_p_T;
 

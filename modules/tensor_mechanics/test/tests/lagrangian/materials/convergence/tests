@@ -1,43 +1,107 @@
 [Tests]
-  issues = '#17472'  
-  [./cauchy_linear]
+  issues = '#17472'
+  [cauchy_linear]
     type = PetscJacobianTester
     input = 'cauchy-elastic.i'
-    ratio_tol = 1E-4
+    cli_args = 'GlobalParams/large_kinematics=true'
+    ratio_tol = 1E-6
     difference_tol = 1E10
     design = 'source/materials/lagrangian/ComputeLagrangianLinearElasticStress.md'
-    requirement = 'Correct Jacobian coming from the material model'
-  [../]
-  [./pk_stvenant]
+    requirement = 'Correct Jacobian coming from the material model for nonlinear kinematics  with '
+                  'relative error less than 1e-6'
+  []
+  [cauchy_linear_small]
+    type = PetscJacobianTester
+    input = 'cauchy-elastic.i'
+    cli_args = 'GlobalParams/large_kinematics=false'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+    design = 'source/materials/lagrangian/ComputeLagrangianLinearElasticStress.md'
+    requirement = 'Correct Jacobian coming from the material model for linear kinematics  with '
+                  'relative error less than 1e-6'
+  []
+  [pk_stvenant]
     type = PetscJacobianTester
     input = 'stvenantkirchhoff.i'
-    ratio_tol = 1E-4
+    cli_args = 'GlobalParams/large_kinematics=true'
+    ratio_tol = 1E-6
     difference_tol = 1E10
     design = 'source/materials/lagrangian/ComputeStVenantKirchhoffStress.md'
-    requirement = 'Correct Jacobian coming from the material model for nonlinear kinematics  with relative error less than 1e-4'
-  [../]
-  [./pk_stvenant_small]
+    requirement = 'Correct Jacobian coming from the material model for nonlinear kinematics  with '
+                  'relative error less than 1e-6'
+  []
+  [pk_stvenant_small]
     type = PetscJacobianTester
-    input = 'stvenantkirchhoff_small.i'
-    ratio_tol = 1E-4
+    input = 'stvenantkirchhoff.i'
+    cli_args = 'GlobalParams/large_kinematics=false'
+    ratio_tol = 1E-6
     difference_tol = 1E10
     design = 'source/materials/lagrangian/ComputeStVenantKirchhoffStress.md'
-    requirement = 'Correct Jacobian coming from the material model for linear kinematics  with relative error less than 1e-4'
-  [../]
-  [./neohookean]
+    requirement = 'Correct Jacobian coming from the material model for linear kinematics  with '
+                  'relative error less than 1e-6'
+  []
+  [neohookean]
     type = PetscJacobianTester
     input = 'neohookean.i'
-    ratio_tol = 1E-4
+    cli_args = 'GlobalParams/large_kinematics=true'
+    ratio_tol = 1E-6
     difference_tol = 1E10
     design = 'source/materials/lagrangian/ComputeNeoHookeanStress.md'
-    requirement = 'Correct Jacobian coming from the material model for nonlinear kinematics with relative error less than 1e-4'
-  [../]
-  [./neohookean_small]
+    requirement = 'Correct Jacobian coming from the material model for nonlinear kinematics with '
+                  'relative error less than 1e-6'
+  []
+  [neohookean_small]
     type = PetscJacobianTester
-    input = 'neohookean_small.i'
-    ratio_tol = 1E-4
+    input = 'neohookean.i'
+    cli_args = 'GlobalParams/large_kinematics=false'
+    ratio_tol = 1E-6
     difference_tol = 1E10
     design = 'source/materials/lagrangian/ComputeNeoHookeanStress.md'
-    requirement = 'Correct Jacobian coming from the material model for nonlinear kinematics with relative error less than 1e-4'
-  [../]
+    requirement = 'Correct Jacobian coming from the material model for linear kinematics with '
+                  'relative error less than 1e-6'
+  []
+  [hypoelastic_stvenant]
+    type = PetscJacobianTester
+    input = 'stvenantkirchhoff.i'
+    cli_args = 'GlobalParams/large_kinematics=true '
+               'Materials/compute_stress/type=ComputeHypoelasticStVenantKirchhoffStress'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+    design = 'source/materials/lagrangian/ComputeStVenantKirchhoffStress.md'
+    requirement = 'Correct Jacobian coming from the material model for nonlinear kinematics with '
+                  'relative error less than 1e-6'
+  []
+  [hypoelastic_stvenant_small]
+    type = PetscJacobianTester
+    input = 'stvenantkirchhoff.i'
+    cli_args = 'GlobalParams/large_kinematics=false '
+               'Materials/compute_stress/type=ComputeHypoelasticStVenantKirchhoffStress'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+    design = 'source/materials/lagrangian/ComputeStVenantKirchhoffStress.md'
+    requirement = 'Correct Jacobian coming from the material model for linear kinematics with '
+                  'relative error less than 1e-6'
+  []
+  [elastoplastic_linear_hardening]
+    type = PetscJacobianTester
+    input = hyperelastic_J2_plastic.i
+    cli_args = "Materials/flow_stress/function='320+688*effective_plastic_strain'"
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+    run_sim = true
+    design = 'source/materials/lagrangian/ComputeSimoHughesJ2PlasticityStress.md'
+    requirement = 'Correct Jacobian for elastoplasticity with linear hardening with relative error '
+                  'less than 1e-6'
+  []
+  [elastoplastic_powerlaw_hardening]
+    type = PetscJacobianTester
+    input = hyperelastic_J2_plastic.i
+    cli_args = "Materials/flow_stress/function='320*(1+effective_plastic_strain/1e-3)^(1/5)'"
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+    run_sim = true
+    design = 'source/materials/lagrangian/ComputeSimoHughesJ2PlasticityStress.md'
+    requirement = 'Correct Jacobian for elastoplasticity with power-law hardening with relative '
+                  'error less than 1e-6'
+  []
 []

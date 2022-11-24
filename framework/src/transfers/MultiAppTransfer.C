@@ -15,7 +15,6 @@
 #include "DisplacedProblem.h"
 #include "MultiApp.h"
 #include "MooseMesh.h"
-#include "MooseCoordTransform.h"
 
 #include "libmesh/parallel_algebra.h"
 #include "libmesh/mesh_tools.h"
@@ -47,6 +46,7 @@ MultiAppTransfer::validParams()
   params.addParam<bool>("displaced_target_mesh",
                         false,
                         "Whether or not to use the displaced mesh for the target mesh.");
+  addSkipCoordCollapsingParam(params);
   return params;
 }
 
@@ -62,6 +62,19 @@ MultiAppTransfer::addBBoxFactorParam(InputParameters & params)
       "generally not advised to ever shrink the bounding box. On the other hand it may be helpful "
       "to enlarge the bounding box. Larger bounding boxes will lead to more accurate determination "
       "of the closest node/element with the tradeoff of more communication.");
+}
+
+void
+MultiAppTransfer::addSkipCoordCollapsingParam(InputParameters & params)
+{
+  params.addParam<bool>(
+      "skip_coordinate_collapsing",
+      true,
+      "Whether to skip coordinate collapsing (translation and rotation are still performed, only "
+      "XYZ, RZ etc collapsing is skipped) when performing mapping and inverse "
+      "mapping coordinate transformation operations. This parameter should only "
+      "be set by users who really know what they're doing.");
+  params.addParamNamesToGroup("skip_coordinate_collapsing", "Advanced");
 }
 
 MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters)
@@ -113,9 +126,9 @@ MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters)
   {
     if (_from_multi_app && (!_to_multi_app || _from_multi_app == _to_multi_app))
       _directions.push_back("from_multiapp");
-    else if (_to_multi_app && (!_from_multi_app || _from_multi_app == _to_multi_app))
+    if (_to_multi_app && (!_from_multi_app || _from_multi_app == _to_multi_app))
       _directions.push_back("to_multiapp");
-    else
+    if (_from_multi_app && _to_multi_app && _from_multi_app != _to_multi_app)
       _directions.push_back("between_multiapp");
 
     // So it's available in the next constructors
@@ -146,17 +159,25 @@ MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters)
 void
 MultiAppTransfer::checkMultiAppExecuteOn()
 {
-  if (_from_multi_app)
+  if (_from_multi_app && !_to_multi_app)
     if (getExecuteOnEnum() != _from_multi_app->getExecuteOnEnum())
       mooseDoOnce(
           mooseWarning("MultiAppTransfer execute_on flags do not match associated from_multi_app "
                        "execute_on flags"));
 
-  if (_to_multi_app)
+  if (_to_multi_app && !_from_multi_app)
     if (getExecuteOnEnum() != _to_multi_app->getExecuteOnEnum())
       mooseDoOnce(
           mooseWarning("MultiAppTransfer execute_on flags do not match associated to_multi_app "
                        "execute_on flags"));
+
+  // In the case of siblings transfer, the check will be looser
+  if (_from_multi_app && _to_multi_app)
+    if (getExecuteOnEnum() != _from_multi_app->getExecuteOnEnum() &&
+        getExecuteOnEnum() != _to_multi_app->getExecuteOnEnum())
+      mooseDoOnce(
+          mooseWarning("MultiAppTransfer execute_on flags do not match associated to_multi_app "
+                       "and from_multi_app execute_on flags"));
 }
 
 void
@@ -190,6 +211,17 @@ MultiAppTransfer::variableIntegrityCheck(const AuxVariableName & var_name) const
 }
 
 void
+MultiAppTransfer::initialSetup()
+{
+  getAppInfo();
+
+  if (_from_multi_app)
+    _from_multi_app->addAssociatedTransfer(*this);
+  if (_to_multi_app)
+    _to_multi_app->addAssociatedTransfer(*this);
+}
+
+void
 MultiAppTransfer::getAppInfo()
 {
   // I would like to do all of this in initialSetup, but it will fail with
@@ -214,26 +246,24 @@ MultiAppTransfer::getAppInfo()
   _to_local2global_map.clear();
   _from_local2global_map.clear();
 
+  const bool skip_coordinate_collapsing = isParamValid("skip_coordinate_collapsing")
+                                              ? getParam<bool>("skip_coordinate_collapsing")
+                                              : false;
+
   // Build the vectors for to problems, from problems, and subapps positions.
   if (_current_direction == FROM_MULTIAPP)
   {
     _to_problems.push_back(&_from_multi_app->problemBase());
     _to_positions.push_back(Point(0., 0., 0.));
-    _to_transforms.push_back(&_from_multi_app->problemBase().coordTransform());
-
     getFromMultiAppInfo();
   }
-
-  if (_current_direction == TO_MULTIAPP)
+  else if (_current_direction == TO_MULTIAPP)
   {
     _from_problems.push_back(&_to_multi_app->problemBase());
     _from_positions.push_back(Point(0., 0., 0.));
-    _from_transforms.push_back(&_to_multi_app->problemBase().coordTransform());
-
     getToMultiAppInfo();
   }
-
-  if (_current_direction == BETWEEN_MULTIAPP)
+  else if (_current_direction == BETWEEN_MULTIAPP)
   {
     mooseAssert(&_from_multi_app->problemBase().coordTransform() ==
                     &_to_multi_app->problemBase().coordTransform(),
@@ -263,18 +293,112 @@ MultiAppTransfer::getAppInfo()
       _from_meshes.push_back(&_from_problems[i]->mesh());
   }
 
-  if (!_from_transforms.empty() && !_to_transforms.empty())
-  {
-    // set the destination coordinate systems for each transform for the purposes of determining
-    // coordinate collapsing. For example if TO is XYZ and FROM is RZ, then TO will have its XYZ
-    // coordinates collapsed into RZ and FROM will have a no-op for coordinate collapsing
-    const auto & ex_from_transform = *_from_transforms[0];
-    const auto & ex_to_transform = *_to_transforms[0];
+  MooseAppCoordTransform::MinimalData from_app_transform_construction_data{};
+  if (_communicator.rank() == 0)
+    from_app_transform_construction_data =
+        _current_direction == TO_MULTIAPP
+            ? _to_multi_app->problemBase().coordTransform().minimalDataDescription()
+            : _from_multi_app->appProblemBase(0).coordTransform().minimalDataDescription();
+  _communicator.broadcast(from_app_transform_construction_data);
+  _from_moose_app_transform =
+      std::make_unique<MooseAppCoordTransform>(from_app_transform_construction_data);
 
-    for (auto * const from_transform : _from_transforms)
-      from_transform->setDestinationCoordinateSystem(ex_to_transform);
-    for (auto * const to_transform : _to_transforms)
-      to_transform->setDestinationCoordinateSystem(ex_from_transform);
+  MooseAppCoordTransform::MinimalData to_app_transform_construction_data{};
+  if (_communicator.rank() == 0)
+    to_app_transform_construction_data =
+        _current_direction == FROM_MULTIAPP
+            ? _from_multi_app->problemBase().coordTransform().minimalDataDescription()
+            : _to_multi_app->appProblemBase(0).coordTransform().minimalDataDescription();
+  _communicator.broadcast(to_app_transform_construction_data);
+  _to_moose_app_transform =
+      std::make_unique<MooseAppCoordTransform>(to_app_transform_construction_data);
+
+  /*
+   * skip_coordinate_collapsing: whether to set the transform to skip coordinate collapsing
+   *                             (from XYZ to RZ for example)
+   * transforms: vector of transforms to add the new transforms to
+   * moose_app_transform: base for the new transform
+   * is_parent_app_transform: whether working on the transform for the parent app (this app, the
+   *                          one creating the transfer) or for child apps
+   * multiapp: pointer to the multiapp to obtain the position of the child apps
+   */
+  auto create_multiapp_transforms =
+      [skip_coordinate_collapsing](auto & transforms,
+                                   const auto & moose_app_transform,
+                                   const bool is_parent_app_transform,
+                                   const MultiApp * const multiapp = nullptr)
+  {
+    mooseAssert(is_parent_app_transform || multiapp,
+                "Coordinate transform must be created either for child app or parent app");
+    if (is_parent_app_transform)
+    {
+      transforms.push_back(std::make_unique<MultiAppCoordTransform>(moose_app_transform));
+      transforms.back()->skipCoordinateCollapsing(skip_coordinate_collapsing);
+      // zero translation
+    }
+    else
+    {
+      mooseAssert(transforms.size() == 0, "transforms should not be initialized at this point");
+      for (const auto i : make_range(multiapp->numGlobalApps()))
+      {
+        transforms.push_back(std::make_unique<MultiAppCoordTransform>(moose_app_transform));
+        auto & transform = transforms[i];
+        transform->skipCoordinateCollapsing(skip_coordinate_collapsing);
+        if (multiapp->usingPositions())
+          transform->setTranslationVector(multiapp->position(i));
+      }
+    }
+  };
+
+  if (_current_direction == TO_MULTIAPP)
+  {
+    create_multiapp_transforms(
+        _to_transforms, *_to_moose_app_transform, false, _to_multi_app.get());
+    create_multiapp_transforms(_from_transforms, *_from_moose_app_transform, true);
+  }
+  if (_current_direction == FROM_MULTIAPP)
+  {
+    create_multiapp_transforms(_to_transforms, *_to_moose_app_transform, true);
+    create_multiapp_transforms(
+        _from_transforms, *_from_moose_app_transform, false, _from_multi_app.get());
+  }
+  if (_current_direction == BETWEEN_MULTIAPP)
+  {
+    create_multiapp_transforms(
+        _to_transforms, *_to_moose_app_transform, false, _to_multi_app.get());
+    create_multiapp_transforms(
+        _from_transforms, *_from_moose_app_transform, false, _from_multi_app.get());
+  }
+
+  auto check_transform_compatibility = [this](const MultiAppCoordTransform & transform)
+  {
+    if (transform.hasNonTranslationTransformation() && !usesMooseAppCoordTransform())
+      mooseWarning("Transfer '",
+                   name(),
+                   "' of type '",
+                   type(),
+                   "' has non-translation transformations but it does not implement coordinate "
+                   "transformations using the 'MooseAppCoordTransform' class. Your data transfers "
+                   "will not be performed in the expected transformed frame");
+  };
+
+  // set the destination coordinate systems for each transform for the purposes of determining
+  // coordinate collapsing. For example if TO is XYZ and FROM is RZ, then TO will have its XYZ
+  // coordinates collapsed into RZ and FROM will have a no-op for coordinate collapsing
+
+  for (const auto i : index_range(_from_transforms))
+  {
+    auto & from_transform = _from_transforms[i];
+    from_transform->setDestinationCoordTransform(*_to_moose_app_transform);
+    if (i == 0)
+      check_transform_compatibility(*from_transform);
+  }
+  for (const auto i : index_range(_to_transforms))
+  {
+    auto & to_transform = _to_transforms[i];
+    to_transform->setDestinationCoordTransform(*_from_moose_app_transform);
+    if (i == 0)
+      check_transform_compatibility(*to_transform);
   }
 }
 
@@ -284,8 +408,7 @@ void
 fillInfo(MultiApp & multi_app,
          std::vector<unsigned int> & map,
          std::vector<FEProblemBase *> & problems,
-         std::vector<Point> & positions,
-         std::vector<MooseCoordTransform *> & transforms)
+         std::vector<Point> & positions)
 {
   for (unsigned int i_app = 0; i_app < multi_app.numGlobalApps(); i_app++)
   {
@@ -293,28 +416,12 @@ fillInfo(MultiApp & multi_app,
       continue;
 
     auto & subapp_problem = multi_app.appProblemBase(i_app);
-    const auto position = multi_app.position(i_app);
-    auto & subapp_transform = subapp_problem.coordTransform();
-    subapp_transform.setTranslationVector(position);
 
     map.push_back(i_app);
     problems.push_back(&subapp_problem);
-    positions.push_back(position);
-    transforms.push_back(&subapp_transform);
+    if (multi_app.usingPositions())
+      positions.push_back(multi_app.position(i_app));
   }
-
-  if (transforms.empty())
-    // Can happen if there are no local apps
-    return;
-
-  const auto first_transform = transforms[0]->coordinateSystem();
-  std::for_each(transforms.begin() + 1,
-                transforms.end(),
-                [first_transform](const auto * const transform_obj)
-                {
-                  if (transform_obj->coordinateSystem() != first_transform)
-                    mooseError("Coordinate systems must be consistent between multiapps");
-                });
 }
 }
 
@@ -324,7 +431,7 @@ MultiAppTransfer::getToMultiAppInfo()
   if (!_to_multi_app)
     mooseError("There is no to_multiapp to get info from");
 
-  fillInfo(*_to_multi_app, _to_local2global_map, _to_problems, _to_positions, _to_transforms);
+  fillInfo(*_to_multi_app, _to_local2global_map, _to_problems, _to_positions);
 }
 
 void
@@ -333,52 +440,17 @@ MultiAppTransfer::getFromMultiAppInfo()
   if (!_from_multi_app)
     mooseError("There is no from_multiapp to get info from");
 
-  fillInfo(
-      *_from_multi_app, _from_local2global_map, _from_problems, _from_positions, _from_transforms);
+  fillInfo(*_from_multi_app, _from_local2global_map, _from_problems, _from_positions);
+}
+
+void
+MultiAppTransfer::transformBoundingBox(BoundingBox & box, const MultiAppCoordTransform & transform)
+{
+  MultiApp::transformBoundingBox(box, transform);
 }
 
 namespace
 {
-void
-transformBoundingBox(BoundingBox & box, const MooseCoordTransform & transform)
-{
-  const Real min_x = box.first(0);
-  const Real max_x = box.second(0);
-  const Real min_y = box.first(1);
-  const Real max_y = box.second(1);
-  const Real min_z = box.first(2);
-  const Real max_z = box.second(2);
-
-  std::array<Point, 8> box_corners = {{Point(min_x, min_y, min_z),
-                                       Point(max_x, min_y, min_z),
-                                       Point(min_x, max_y, min_z),
-                                       Point(max_x, max_y, min_z),
-                                       Point(min_x, min_y, max_z),
-                                       Point(max_x, min_y, max_z),
-                                       Point(min_x, max_y, max_z),
-                                       Point(max_x, max_y, max_z)}};
-
-  // transform each corner
-  for (auto & corner : box_corners)
-    corner = transform(corner);
-
-  // Create new bounding box
-  Point new_box_min = box_corners[0];
-  Point new_box_max = new_box_min;
-  for (const auto p : make_range(1, 8))
-    for (const auto d : make_range(Moose::dim))
-    {
-      const Point & pt = box_corners[p];
-      if (new_box_min(d) > pt(d))
-        new_box_min(d) = pt(d);
-
-      if (new_box_max(d) < pt(d))
-        new_box_max(d) = pt(d);
-    }
-  box.first = new_box_min;
-  box.second = new_box_max;
-}
-
 template <typename T>
 void
 extendBoundingBoxes(const Real factor, T & bboxes)
@@ -423,7 +495,8 @@ MultiAppTransfer::getFromBoundingBoxes()
 
     // Translate the bounding box to the from domain's position. We may have rotations so we must
     // be careful in constructing the new min and max (first and second)
-    transformBoundingBox(bbox, *_from_transforms[i]);
+    const auto from_global_num = _current_direction == TO_MULTIAPP ? 0 : _from_local2global_map[i];
+    transformBoundingBox(bbox, *_from_transforms[from_global_num]);
 
     // Cast the bounding box into a pair of points (so it can be put through
     // MPI communication).
@@ -479,9 +552,13 @@ MultiAppTransfer::getFromBoundingBoxes(BoundaryID boundary_id)
     if (!at_least_one)
       bbox.min() = max; // If we didn't hit any nodes, this will be _the_ minimum bbox
     else
+    {
       // Translate the bounding box to the from domain's position. We may have rotations so we must
       // be careful in constructing the new min and max (first and second)
-      transformBoundingBox(bbox, *_from_transforms[i]);
+      const auto from_global_num =
+          _current_direction == TO_MULTIAPP ? 0 : _from_local2global_map[i];
+      transformBoundingBox(bbox, *_from_transforms[from_global_num]);
+    }
 
     // Cast the bounding box into a pair of points (so it can be put through
     // MPI communication).

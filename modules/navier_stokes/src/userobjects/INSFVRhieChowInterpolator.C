@@ -25,6 +25,7 @@
 #include "libmesh/mesh_base.h"
 #include "libmesh/elem_range.h"
 #include "libmesh/parallel_algebra.h"
+#include "libmesh/remote_elem.h"
 #include "metaphysicl/dualsemidynamicsparsenumberarray.h"
 #include "metaphysicl/parallel_dualnumber.h"
 #include "metaphysicl/parallel_dynamic_std_array_wrapper.h"
@@ -45,6 +46,9 @@ INSFVRhieChowInterpolator::validParams()
   exec_enum.addAvailableFlags(EXEC_PRE_KERNELS);
   exec_enum = {EXEC_PRE_KERNELS};
   params.suppressParameter<ExecFlagEnum>("execute_on");
+
+  // Avoid uninitialized residual objects
+  params.suppressParameter<bool>("force_preic");
 
   MooseEnum velocity_interp_method("average rc", "rc");
   params.addParam<MooseEnum>(
@@ -262,6 +266,8 @@ INSFVRhieChowInterpolator::fillARead()
 void
 INSFVRhieChowInterpolator::initialSetup()
 {
+  insfvSetup();
+
   if (_velocity_interp_method == Moose::FV::InterpMethod::Average)
     return;
   for (const auto var_num : _var_numbers)
@@ -308,25 +314,24 @@ INSFVRhieChowInterpolator::insfvSetup()
 }
 
 void
-INSFVRhieChowInterpolator::residualSetup()
-{
-  if (!_initial_setup_done)
-    insfvSetup();
-
-  _initial_setup_done = true;
-}
-
-void
 INSFVRhieChowInterpolator::meshChanged()
 {
   insfvSetup();
+
+  // If the mesh has been modified:
+  // - the boundary elements may have changed
+  // - some elements may have been refined
+  _elements_to_push_pull.clear();
+  _a.clear();
 }
 
 void
 INSFVRhieChowInterpolator::initialize()
 {
-  _elements_to_push_pull.clear();
-  _a.clear();
+  // Reset map of coefficients to zero.
+  // The keys should not have changed unless the mesh has changed
+  for (const auto & pair : _a)
+    _a[pair.first] = 0;
 }
 
 void
@@ -339,10 +344,12 @@ INSFVRhieChowInterpolator::execute()
   if (_sys.number() != _u->sys().number())
     return;
 
+  TIME_SECTION("execute", 1, "Computing Rhie-Chow coefficients");
+
   // A lot of RC data gathering leverages the automatic differentiation system, e.g. for linear
-  // operators we pull out the 'a' coefficents by querying the ADReal residual derivatives member at
-  // the element or neighbor dof locations. Consequently we need to enable derivative computation.
-  // We do this here outside the threaded regions
+  // operators we pull out the 'a' coefficients by querying the ADReal residual derivatives member
+  // at the element or neighbor dof locations. Consequently we need to enable derivative
+  // computation. We do this here outside the threaded regions
   const auto saved_do_derivatives = ADReal::do_derivatives;
   ADReal::do_derivatives = true;
 
@@ -437,6 +444,35 @@ INSFVRhieChowInterpolator::finalize()
 #else
   mooseError("INSFVRhieChowInterpolator only supported for global AD indexing.");
 #endif
+}
+
+void
+INSFVRhieChowInterpolator::ghostADataOnBoundary(const BoundaryID boundary_id)
+{
+  if (_a_data_provided || this->n_processors() == 1 ||
+      _velocity_interp_method == Moose::FV::InterpMethod::Average)
+    return;
+
+  // Ghost a for the elements on the boundary
+  for (auto elem_id : _moose_mesh.getBoundaryActiveSemiLocalElemIds(boundary_id))
+  {
+    const auto & elem = _moose_mesh.elemPtr(elem_id);
+    // no need to ghost if locally owned or far from local process
+    if (elem->processor_id() != this->processor_id() && elem->is_semilocal(this->processor_id()))
+      // Adding to the a coefficient will make sure the final result gets communicated
+      addToA(elem, 0, 0);
+  }
+
+  // Ghost a for the neighbors of the elements on the boundary
+  for (auto neighbor_id : _moose_mesh.getBoundaryActiveNeighborElemIds(boundary_id))
+  {
+    const auto & neighbor = _moose_mesh.queryElemPtr(neighbor_id);
+    // no need to ghost if locally owned or far from local process
+    if (neighbor->processor_id() != this->processor_id() &&
+        neighbor->is_semilocal(this->processor_id()))
+      // Adding to the a coefficient will make sure the final result gets communicated
+      addToA(neighbor, 0, 0);
+  }
 }
 
 VectorValue<ADReal>

@@ -31,7 +31,7 @@ SetupDarcySimulation::validParams()
   return params;
 }
 
-SetupDarcySimulation::SetupDarcySimulation(InputParameters parameters)
+SetupDarcySimulation::SetupDarcySimulation(const InputParameters & parameters)
   : Action(parameters),
     _compute_velocity(getParam<bool>("compute_velocity")),
     _compute_pressure(getParam<bool>("compute_pressure")),

@@ -1,6 +1,6 @@
 # Water97FluidProperties
 
-!syntax description /Modules/FluidProperties/Water97FluidProperties
+!syntax description /FluidProperties/Water97FluidProperties
 
 The water implementation in Fluid Properties is the IAPWS Industrial Formulation 1997 for the
 Thermodynamic Properties of Water and Steam. This formulation calculates properties of water and
@@ -38,10 +38,10 @@ The Water97FluidProperties UserObject is valid for:
 - 273.15 K $\le$ T $\le$ 1073.15 K for p $\le$ 100 MPa
 - 1073.15 K $\le$ T $\le$ 2273.15 K for p $\le$ 50 MPa
 
-!syntax parameters /Modules/FluidProperties/Water97FluidProperties
+!syntax parameters /FluidProperties/Water97FluidProperties
 
-!syntax inputs /Modules/FluidProperties/Water97FluidProperties
+!syntax inputs /FluidProperties/Water97FluidProperties
 
-!syntax children /Modules/FluidProperties/Water97FluidProperties
+!syntax children /FluidProperties/Water97FluidProperties
 
 !bibtex bibliography

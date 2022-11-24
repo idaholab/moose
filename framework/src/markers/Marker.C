@@ -47,7 +47,7 @@ Marker::Marker(const InputParameters & parameters)
     _adaptivity(_fe_problem.adaptivity()),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
-    _assembly(_subproblem.assembly(_tid)),
+    _assembly(_subproblem.assembly(_tid, 0)),
     _field_var(_subproblem.getStandardVariable(_tid, name())),
     _current_elem(_field_var.currentElem()),
 

@@ -10,11 +10,13 @@
 #include "PenaltyInterfaceDiffusion.h"
 
 registerMooseObject("MooseApp", PenaltyInterfaceDiffusion);
+registerMooseObject("MooseApp", ADPenaltyInterfaceDiffusion);
 
+template <bool is_ad>
 InputParameters
-PenaltyInterfaceDiffusion::validParams()
+PenaltyInterfaceDiffusionTempl<is_ad>::validParams()
 {
-  InputParameters params = InterfaceKernel::validParams();
+  InputParameters params = GenericInterfaceKernel<is_ad>::validParams();
   params.addRequiredParam<Real>(
       "penalty", "The penalty that penalizes jump between primary and neighbor variables.");
   params.addParam<MaterialPropertyName>(
@@ -25,25 +27,27 @@ PenaltyInterfaceDiffusion::validParams()
   return params;
 }
 
-PenaltyInterfaceDiffusion::PenaltyInterfaceDiffusion(const InputParameters & parameters)
-  : InterfaceKernel(parameters),
-    _penalty(getParam<Real>("penalty")),
-    _jump(isParamValid("jump_prop_name") ? &getMaterialProperty<Real>("jump_prop_name") : nullptr)
+template <bool is_ad>
+PenaltyInterfaceDiffusionTempl<is_ad>::PenaltyInterfaceDiffusionTempl(
+    const InputParameters & parameters)
+  : GenericInterfaceKernel<is_ad>(parameters),
+    _penalty(this->template getParam<Real>("penalty")),
+    _jump(isParamValid("jump_prop_name")
+              ? &this->template getGenericMaterialProperty<Real, is_ad>("jump_prop_name")
+              : nullptr)
 {
 }
 
-Real
-PenaltyInterfaceDiffusion::computeQpResidual(Moose::DGResidualType type)
+template <bool is_ad>
+GenericReal<is_ad>
+PenaltyInterfaceDiffusionTempl<is_ad>::computeQpResidual(Moose::DGResidualType type)
 {
-  Real r = 0;
+  GenericReal<is_ad> r = 0;
 
-  Real jump_value = 0;
+  GenericReal<is_ad> jump_value = 0;
 
   if (_jump != nullptr)
-  {
     jump_value = (*_jump)[_qp];
-    mooseAssert(jump_value == _u[_qp] - _neighbor_value[_qp], "");
-  }
   else
     jump_value = _u[_qp] - _neighbor_value[_qp];
 
@@ -61,8 +65,9 @@ PenaltyInterfaceDiffusion::computeQpResidual(Moose::DGResidualType type)
   return r;
 }
 
+template <bool is_ad>
 Real
-PenaltyInterfaceDiffusion::computeQpJacobian(Moose::DGJacobianType type)
+PenaltyInterfaceDiffusionTempl<is_ad>::computeQpJacobian(Moose::DGJacobianType type)
 {
   Real jac = 0;
 
@@ -87,3 +92,6 @@ PenaltyInterfaceDiffusion::computeQpJacobian(Moose::DGJacobianType type)
 
   return jac;
 }
+
+template class PenaltyInterfaceDiffusionTempl<false>;
+template class PenaltyInterfaceDiffusionTempl<true>;

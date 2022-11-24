@@ -1,21 +1,21 @@
 [Tests]
-  [./quartz_dissolution]
+  [quartz_dissolution]
     type = CSVDiff
     input = 'quartz_dissolution.i'
     csvdiff = 'quartz_dissolution_out.csv'
     requirement = "The geochemistry module shall be able to solve kinetically-controlled reactions such as dissolution"
     issues = '#15330'
     design = 'kinetic_quartz.md'
-  [../]
-  [./kinetic_albite]
+  []
+  [kinetic_albite]
     type = CSVDiff
     input = 'kinetic_albite.i'
     csvdiff = 'kinetic_albite_out.csv'
     requirement = "The geochemistry module shall be able to solve kinetically-controlled reactions with promoting species"
     issues = '#15330'
     design = 'kinetic_albite.md'
-  [../]
-  [./quartz_equilibrium_at300degC]
+  []
+  [quartz_equilibrium_at300degC]
     type = 'RunApp'
     input = 'quartz_equilibrium_at300degC.i'
     expect_out = 'Mass of solvent water = 1kg
@@ -38,13 +38,77 @@ NaCl;  molality = 1.808e-20mol/kg(solvent water);  free_conc = 1.056e-15mg/kg(so
     requirement = "The geochemistry module shall be able to solve kinetically-controlled reactions with a temperature-dependent rate"
     issues = '#15330'
     design = 'kinetic_quartz_arrhenius.md'
-  [../]
-  [./quartz_deposition]
+  []
+  [quartz_deposition]
     type = CSVDiff
     input = 'quartz_deposition.i'
     csvdiff = 'quartz_deposition_out.csv'
     requirement = "The geochemistry module shall be able to solve kinetically-controlled deposition reactions with a temperature-dependent rate"
     issues = '#15330'
     design = 'kinetic_quartz_arrhenius.md'
-  [../]
+  []
+  [bio_death]
+    type = CSVDiff
+    input = 'bio_death.i'
+    csvdiff = 'bio_death_out.csv'
+    cli_args = 'Executioner/dt=2 Outputs/interval=1'
+    requirement = "The geochemistry module shall be able to solve mortality of microbes using a constant-rate model"
+    issues = '#21559'
+    design = 'biogeochemistry.md bio_death.md'
+  []
+  [bio_sulfate_1]
+    type = CSVDiff
+    input = 'bio_sulfate_1.i'
+    csvdiff = 'bio_sulfate_1_out.csv'
+    cli_args = 'Executioner/end_time=1 Executioner/TimeStepper/function=1'
+    requirement = "The geochemistry module shall be able to solve sulfate reduction catalysed by microbes, when the microbes are treated as basis species and acetate as a kinetic species"
+    issues = '#21559'
+    design = 'biogeochemistry.md bio_sulfate.md'
+  []
+  [bio_sulfate_2]
+    type = CSVDiff
+    input = 'bio_sulfate_2.i'
+    csvdiff = 'bio_sulfate_2_out.csv'
+    cli_args = 'Executioner/end_time=1 Executioner/TimeStepper/function=1'
+    requirement = "The geochemistry module shall be able to solve sulfate reduction catalysed by microbes, when the microbes are treated as kinetic species"
+    issues = '#21559'
+    design = 'biogeochemistry.md bio_sulfate.md'
+  []
+  [bio_sulfate0]
+    type = 'RunApp'
+    input = 'bio_sulfate_0.i'
+    expect_out = 'CH3COO- = -1*H2O + 1*HCO3- + 1*CH4(aq)  .  log10(K) = 4.789'
+    match_literal = true
+    requirement = "The geochemistry module shall be produce equilibrium constants for methane production from acetate, catalysized by microbes"
+    issues = '#21559'
+    design = 'biogeochemistry.md bio_sulfate.md'
+  []
+  [bio_arsenate0]
+    type = 'RunApp'
+    input = 'bio_arsenate0.i'
+    expect_out = 'Lactate- = -2*H2O + 1*CO3-- + 1*CH3COO- - 2*HAsO4-- + 2*As(OH)4-  .  log10(K) = 26.75'
+    match_literal = true
+    requirement = "The geochemistry module shall be produce equilibrium constants for lactate reduction catalysis by microbes"
+    issues = '#21559'
+    design = 'biogeochemistry.md bio_arsenate.md'
+  []
+  [bio_arsenate1]
+    type = CSVDiff
+    input = 'bio_arsenate1.i'
+    csvdiff = 'bio_arsenate1_out.csv'
+    cli_args = 'Executioner/dt=0.2'
+    requirement = "The geochemistry module shall be able to solve arsenate reduction catalysed by microbes"
+    issues = '#21559'
+    design = 'biogeochemistry.md bio_arsenate.md'
+  []
+  [bio_zoning]
+    type = Exodiff
+    input = 'bio_zoning_flow.i'
+    exodiff = 'bio_zoning_flow_out_react0.e'
+    cli_args = 'Mesh/gen/nx=50 Executioner/end_time=0.1'
+    heavy = true
+    requirement = "The geochemistry module shall be able to solve reactive-transport models that include biogeochemistry"
+    issues = '#21559'
+    design = 'biogeochemistry.md bio_zoning.md'
+  []
 []

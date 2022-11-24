@@ -11,17 +11,11 @@
 
 #include "SideIntegralPostprocessor.h"
 
-// Forward Declarations
-template <bool>
-class SideIntegralFunctorPostprocessorTempl;
-typedef SideIntegralFunctorPostprocessorTempl<false> SideIntegralFunctorPostprocessor;
-typedef SideIntegralFunctorPostprocessorTempl<true> ADSideIntegralFunctorPostprocessor;
-
 /**
  * This postprocessor computes a surface integral of the specified functor
  *
  * Note that specializations of this integral are possible by deriving from this
- * class and overriding computeQpIntegral().
+ * class and overriding computeQpIntegral() or computeFaceInfoIntegral()
  */
 template <bool is_ad>
 class SideIntegralFunctorPostprocessorTempl : public SideIntegralPostprocessor
@@ -39,11 +33,13 @@ protected:
    */
   virtual Real computeFaceInfoIntegral(const FaceInfo * fi) override;
 
-  /// Quadrature point integration of functors is not implemented
-  Real computeQpIntegral() override
-  {
-    mooseError("Functor side integrals are implemented over FaceInfos not quadrature points");
-  };
+  Real computeQpIntegral() override;
+
+  /// Check if the functor and the prefactor are defined on the primary block by the sideset
+  bool checkFunctorDefinedOnSideBlock() const;
+
+  /// Error with a helpful message if the functor is not defined on the primary block by the sideset
+  void errorFunctorNotDefinedOnSideBlock() const;
 
   /// Functor being integrated
   const Moose::Functor<GenericReal<is_ad>> & _functor;
@@ -53,4 +49,11 @@ protected:
 
   /// Whether to skip integrating where the functors are not both defined
   const bool _partial_integral;
+
+private:
+  template <typename T>
+  Real computeLocalContribution(const T & functor_arg) const;
 };
+
+typedef SideIntegralFunctorPostprocessorTempl<false> SideIntegralFunctorPostprocessor;
+typedef SideIntegralFunctorPostprocessorTempl<true> ADSideIntegralFunctorPostprocessor;

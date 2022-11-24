@@ -1,0 +1,21 @@
+[Tests]
+  design = 'ParsedNodeTransformGenerator.md'
+  issues = '#22449'
+
+  [2d]
+    type = Exodiff
+    input = '2d.i'
+    exodiff = '2d_in.e'
+    cli_args = "--mesh-only"
+    requirement = "The system shall support arbitrary transforms of node positions in 2D."
+    recover = false
+  []
+  [3d]
+    type = Exodiff
+    input = '3d.i'
+    exodiff = '3d_in.e'
+    cli_args = "--mesh-only"
+    requirement = "The system shall support arbitrary transforms of node positions in 3D."
+    recover = false
+  []
+[]

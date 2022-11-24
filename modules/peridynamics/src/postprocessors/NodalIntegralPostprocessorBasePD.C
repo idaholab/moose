@@ -39,11 +39,13 @@ NodalIntegralPostprocessorBasePD::execute()
 Real
 NodalIntegralPostprocessorBasePD::getValue()
 {
-  gatherSum(_integral_value);
-
   return _integral_value;
 }
-
+void
+NodalIntegralPostprocessorBasePD::finalize()
+{
+  gatherSum(_integral_value);
+}
 void
 NodalIntegralPostprocessorBasePD::threadJoin(const UserObject & uo)
 {

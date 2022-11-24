@@ -14,7 +14,7 @@
 class AddHeatStructureMaterialAction : public AddUserObjectAction
 {
 public:
-  AddHeatStructureMaterialAction(InputParameters params);
+  AddHeatStructureMaterialAction(const InputParameters & params);
 
 public:
   static InputParameters validParams();

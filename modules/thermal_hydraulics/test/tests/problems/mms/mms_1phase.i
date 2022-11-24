@@ -85,7 +85,7 @@ cv = ${fparse cp / gamma}
   []
 []
 
-[Modules/FluidProperties]
+[FluidProperties]
   [fp]
     type = IdealGasFluidProperties
     gamma = ${gamma}

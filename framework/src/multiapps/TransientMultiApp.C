@@ -217,6 +217,25 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
           (ex->getTime() >= ex->endTime()))
         continue;
 
+      // Examine global time synchronization
+      if (!_sub_cycling && !_reset_happened)
+      {
+        // The multi-app general offset is substracted to go into local time.
+        if (std::abs(target_time - _app.getGlobalTimeOffset() - ex->getTime() - dt) >
+            ex->timestepTol())
+          mooseDoOnce(mooseWarning(
+              "The target time (time a multiapp must reach at the end of the time step) "
+              "is desynchronized between this app and subapp ",
+              i,
+              ".\n If this is desired: use the 'global_time_offset' multiapp parameter to "
+              "declare a constant offset\n"
+              "If the apps should (eventually) be synchronized in time, please either: \n"
+              "  - match the 'start_time' in the main app and the multiapp, in the Executioner "
+              "block\n"
+              "  - set 'sub_cycling' to true in the multiapp parameters\n"
+              "This message will only print once for all apps and all time steps."));
+      }
+
       if (_sub_cycling)
       {
         Real time_old = ex->getTime() + app_time_offset;
@@ -362,7 +381,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
         // If we were looking for a steady state, but didn't reach one, we still need to output one
         // more time, regardless of interval
-        // Note: if we turn off the output for all time steps for sub-scycling, we still need to
+        // Note: if we turn off the output for all time steps for sub-cycling, we still need to
         // have one output at the end.
         if ((!at_steady && _detect_steady_state) || !_output_sub_cycles)
           problem.outputStep(EXEC_FORCED);
@@ -409,7 +428,9 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
               unsigned int catch_up_step = 0;
 
+              // Cut the timestep in half to first try two half-step solves
               Real catch_up_dt = dt / 2;
+              Real catch_up_time = 0;
 
               while (!caught_up && catch_up_step < _max_catch_up_steps)
               {
@@ -418,21 +439,26 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
                            << std::endl;
                 ex->incrementStepOrReject();
 
+                // Avoid numerical precision errors on target time
+                if (catch_up_time + catch_up_dt > dt)
+                  catch_up_dt = dt - catch_up_time;
+
                 ex->computeDT();
-                ex->takeStep(catch_up_dt); // Cut the timestep in half to try two half-step solves
+                ex->takeStep(catch_up_dt);
                 ex->endStep();
 
                 if (ex->lastSolveConverged())
                 {
-                  if (ex->getTime() + app_time_offset +
-                          (ex->timestepTol() * std::abs(ex->getTime())) >=
-                      target_time)
+                  catch_up_time += catch_up_dt;
+                  if (std::abs(catch_up_time - dt) <
+                      (1 + std::abs(ex->getTime())) * ex->timestepTol())
                   {
                     problem.outputStep(EXEC_FORCED);
                     caught_up = true;
                   }
                 }
                 else
+                  // Keep cutting time step in half until it converges
                   catch_up_dt /= 2.0;
 
                 ex->postStep();

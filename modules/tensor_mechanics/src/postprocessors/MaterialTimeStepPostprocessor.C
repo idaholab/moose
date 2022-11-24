@@ -49,6 +49,10 @@ MaterialTimeStepPostprocessor::validParams()
                                     "Maximum permitted change in the value of "
                                     "'elements_changed_property' in 'elements_changed' elements "
                                     "before the time step is limited.");
+  params.addRangeCheckedParam<Real>("maximum_value",
+                                    std::numeric_limits<Real>::max(),
+                                    "maximum_value>=0",
+                                    "Maximum value returned by this postprocessor.");
 
   return params;
 }
@@ -59,7 +63,7 @@ MaterialTimeStepPostprocessor::MaterialTimeStepPostprocessor(const InputParamete
     _matl_time_step(_use_material_timestep_limit
                         ? &getMaterialPropertyByName<Real>("material_timestep_limit")
                         : nullptr),
-    _matl_value(std::numeric_limits<Real>::max()),
+    _matl_value(getParam<Real>("maximum_value")),
     _use_elements_changed(parameters.isParamSetByUser("elements_changed_property")),
     _changed_property(_use_elements_changed
                           ? &getMaterialPropertyByName<Real>(
@@ -74,6 +78,7 @@ MaterialTimeStepPostprocessor::MaterialTimeStepPostprocessor(const InputParamete
     _elements_changed_threshold(parameters.isParamSetByUser("elements_changed_threshold'")
                                     ? getParam<Real>("elements_changed_threshold'")
                                     : TOLERANCE * TOLERANCE),
+    _max(getParam<Real>("maximum_value")),
     _qp(0)
 {
   if (_use_elements_changed && !parameters.isParamSetByUser("elements_changed"))
@@ -87,7 +92,7 @@ MaterialTimeStepPostprocessor::MaterialTimeStepPostprocessor(const InputParamete
 void
 MaterialTimeStepPostprocessor::initialize()
 {
-  _matl_value = std::numeric_limits<Real>::max(); // start w/ the min
+  _matl_value = _max; // start w/ the maximum allowed value
   _count = 0;
 }
 
@@ -118,13 +123,17 @@ MaterialTimeStepPostprocessor::execute()
 Real
 MaterialTimeStepPostprocessor::getValue()
 {
-  gatherMin(_matl_value);
-  gatherSum(_count);
-
   if (_count == 0 || !_use_elements_changed)
     return _matl_value;
 
   return std::min(_dt * (Real)_elements_changed / (Real)_count, _matl_value);
+}
+
+void
+MaterialTimeStepPostprocessor::finalize()
+{
+  gatherMin(_matl_value);
+  gatherSum(_count);
 }
 
 void

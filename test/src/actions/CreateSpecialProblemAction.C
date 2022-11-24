@@ -23,7 +23,7 @@ CreateSpecialProblemAction::validParams()
   return params;
 }
 
-CreateSpecialProblemAction::CreateSpecialProblemAction(InputParameters parameters)
+CreateSpecialProblemAction::CreateSpecialProblemAction(const InputParameters & parameters)
   : Action(parameters)
 {
 }

@@ -29,26 +29,24 @@
   [../]
 []
 
-[Modules]
-  [./FluidProperties]
-    # rho1 = 1.149425287 kg/m^3
-    [./fp1]
-      type = IdealGasFluidProperties
-      gamma = 1.4
-      molar_mass = 0.02867055103448276
-    [../]
-    # rho2 = 0.6666666667 kg/m^3
-    [./fp2]
-      type = IdealGasFluidProperties
-      gamma = 1.2
-      molar_mass = 0.0166289196
-    [../]
-    [./fp_2phase]
-      type = TwoPhaseFluidPropertiesIndependent
-      fp_liquid = fp1
-      fp_vapor = fp2
-    [../]
-  []
+[FluidProperties]
+  # rho1 = 1.149425287 kg/m^3
+  [./fp1]
+    type = IdealGasFluidProperties
+    gamma = 1.4
+    molar_mass = 0.02867055103448276
+  [../]
+  # rho2 = 0.6666666667 kg/m^3
+  [./fp2]
+    type = IdealGasFluidProperties
+    gamma = 1.2
+    molar_mass = 0.0166289196
+  [../]
+  [./fp_2phase]
+    type = TwoPhaseFluidPropertiesIndependent
+    fp_liquid = fp1
+    fp_vapor = fp2
+  [../]
 []
 
 [AuxKernels]

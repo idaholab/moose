@@ -1,6 +1,6 @@
 # IdealGasFluidProperties
 
-!syntax description /Modules/FluidProperties/IdealGasFluidProperties
+!syntax description /FluidProperties/IdealGasFluidProperties
 
 A simple formulation that is suitable for ideal gases, where properties are derived from
 the ideal gas law
@@ -13,8 +13,8 @@ Temperature is calculated using the internal energy of an ideal gas
   u = c_v T.
 \end{equation}
 
-!syntax parameters /Modules/FluidProperties/IdealGasFluidProperties
+!syntax parameters /FluidProperties/IdealGasFluidProperties
 
-!syntax inputs /Modules/FluidProperties/IdealGasFluidProperties
+!syntax inputs /FluidProperties/IdealGasFluidProperties
 
-!syntax children /Modules/FluidProperties/IdealGasFluidProperties
+!syntax children /FluidProperties/IdealGasFluidProperties

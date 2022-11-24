@@ -17,6 +17,8 @@
 #include "Parser.h"
 #include "Factory.h"
 #include "AddVariableAction.h"
+#include "MooseApp.h"
+#include "InputParameterWarehouse.h"
 
 #include "GeometricCutUserObject.h"
 #include "CrackFrontDefinition.h"
@@ -79,7 +81,7 @@ XFEMAction::validParams()
   return params;
 }
 
-XFEMAction::XFEMAction(InputParameters params)
+XFEMAction::XFEMAction(const InputParameters & params)
   : Action(params),
     _geom_cut_userobjects(getParam<std::vector<UserObjectName>>("geometric_cut_userobjects")),
     _xfem_qrule(getParam<std::string>("qrule")),
@@ -135,7 +137,9 @@ XFEMAction::act()
   std::shared_ptr<XFEMInterface> xfem_interface = _problem->getXFEM();
   if (xfem_interface == NULL)
   {
-    _pars.set<FEProblemBase *>("_fe_problem_base") = &*_problem;
+    const auto & params = _app.getInputParameterWarehouse().getInputParameters();
+    InputParameters & pars(*(params.find(uniqueActionName())->second.get()));
+    pars.set<FEProblemBase *>("_fe_problem_base") = &*_problem;
     std::shared_ptr<XFEM> new_xfem(new XFEM(_pars));
     _problem->initXFEM(new_xfem);
     xfem_interface = _problem->getXFEM();

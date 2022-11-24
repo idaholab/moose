@@ -92,9 +92,6 @@ dataLoad(std::istream & stream, BoundingBox & bbox, void * context)
 // Utility routines
 void updateBBoxExtremesHelper(BoundingBox & bbox, const Point & node);
 void updateBBoxExtremesHelper(BoundingBox & bbox, const Elem & elem);
-bool areElemListsMergeable(const std::list<dof_id_type> & elem_list1,
-                           const std::list<dof_id_type> & elem_list2,
-                           MeshBase & mesh);
 
 registerMooseObject("PhaseFieldApp", FeatureFloodCount);
 
@@ -287,7 +284,7 @@ void
 FeatureFloodCount::initialize()
 {
   // Clear the feature marking maps and region counters and other data structures
-  for (MooseIndex(_maps_size) map_num = 0; map_num < _maps_size; ++map_num)
+  for (const auto map_num : make_range(_maps_size))
   {
     _feature_maps[map_num].clear();
     _partial_feature_sets[map_num].clear();
@@ -366,7 +363,7 @@ FeatureFloodCount::execute()
       if (elem->processor_id() == rank)
       {
         if (hasBoundary(boundary_id))
-          for (MooseIndex(_vars) var_num = 0; var_num < _vars.size(); ++var_num)
+          for (const auto var_num : index_range(_vars))
             flood(elem, var_num);
       }
     }
@@ -378,17 +375,17 @@ FeatureFloodCount::execute()
       // Loop over elements or nodes
       if (_is_elemental)
       {
-        for (MooseIndex(_vars) var_num = 0; var_num < _vars.size(); ++var_num)
+        for (const auto var_num : index_range(_vars))
           flood(current_elem, var_num);
       }
       else
       {
         auto n_nodes = current_elem->n_vertices();
-        for (MooseIndex(n_nodes) i = 0; i < n_nodes; ++i)
+        for (const auto i : make_range(n_nodes))
         {
           const Node * current_node = current_elem->node_ptr(i);
 
-          for (MooseIndex(_vars) var_num = 0; var_num < _vars.size(); ++var_num)
+          for (const auto var_num : index_range(_vars))
             flood(current_node, var_num);
         }
       }
@@ -443,7 +440,7 @@ FeatureFloodCount::communicateAndMerge()
     if (is_merging_processor)
       recv_buffers.reserve(_app.n_processors());
 
-    for (MooseIndex(n_merging_procs) i = 0; i < n_merging_procs; ++i)
+    for (const auto i : make_range(n_merging_procs))
     {
       serialize(send_buffers[0], i);
 
@@ -586,7 +583,7 @@ FeatureFloodCount::sortAndLabel()
    * with each feature's _var_index.
    */
   unsigned int feature_offset = 0;
-  for (MooseIndex(_maps_size) map_num = 0; map_num < _maps_size; ++map_num)
+  for (const auto map_num : make_range(_maps_size))
   {
     // Skip empty map checks
     if (_feature_counts_per_map[map_num] == 0)
@@ -608,7 +605,7 @@ FeatureFloodCount::sortAndLabel()
 #endif
 
   // Label the features with an ID based on the sorting (processor number independent value)
-  for (MooseIndex(_feature_sets) i = 0; i < _feature_sets.size(); ++i)
+  for (const auto i : index_range(_feature_sets))
     if (_feature_sets[i]._id == invalid_id)
       _feature_sets[i]._id = i;
 }
@@ -633,7 +630,7 @@ FeatureFloodCount::buildLocalToGlobalIndices(std::vector<std::size_t> & local_to
   // Build the offsets vector
   unsigned int globalsize = 0;
   std::vector<int> offsets(_n_procs); // Type is signed for use with the MPI API
-  for (MooseIndex(offsets) i = 0; i < offsets.size(); ++i)
+  for (const auto i : index_range(offsets))
   {
     offsets[i] = globalsize;
     globalsize += counts[i];
@@ -663,8 +660,7 @@ void
 FeatureFloodCount::buildFeatureIdToLocalIndices(unsigned int max_id)
 {
   _feature_id_to_local_index.assign(max_id + 1, invalid_size_t);
-  for (MooseIndex(_feature_sets) feature_index = 0; feature_index < _feature_sets.size();
-       ++feature_index)
+  for (const auto feature_index : index_range(_feature_sets))
   {
     if (_feature_sets[feature_index]._status != Status::INACTIVE)
     {
@@ -1087,7 +1083,7 @@ FeatureFloodCount::deserialize(std::vector<std::string> & serialized_buffers, un
 
   auto rank = processor_id();
 
-  for (MooseIndex(serialized_buffers) proc_id = 0; proc_id < serialized_buffers.size(); ++proc_id)
+  for (const auto proc_id : index_range(serialized_buffers))
   {
     /**
      * Usually we have the local processor data already in the _partial_feature_sets data structure.
@@ -1120,7 +1116,7 @@ FeatureFloodCount::mergeSets()
   TIME_SECTION("mergeSets", 3, "Merging Sets");
 
   // When working with _distribute_merge_work all of the maps will be empty except for one
-  for (MooseIndex(_maps_size) map_num = 0; map_num < _maps_size; ++map_num)
+  for (const auto map_num : make_range(_maps_size))
   {
     for (auto it1 = _partial_feature_sets[map_num].begin();
          it1 != _partial_feature_sets[map_num].end();
@@ -1191,7 +1187,7 @@ FeatureFloodCount::consolidateMergedFeatures(std::vector<std::list<FeatureData>>
   unsigned int feature_offset = 0;
   // Set the member feature count to zero and start counting the actual features
   _feature_count = 0;
-  for (MooseIndex(_maps_size) map_num = 0; map_num < _partial_feature_sets.size(); ++map_num)
+  for (const auto map_num : index_range(_partial_feature_sets))
   {
     for (auto & feature : _partial_feature_sets[map_num])
     {
@@ -1261,7 +1257,7 @@ FeatureFloodCount::areFeaturesMergeable(const FeatureData & f1, const FeatureDat
 void
 FeatureFloodCount::updateFieldInfo()
 {
-  for (MooseIndex(_feature_sets) i = 0; i < _feature_sets.size(); ++i)
+  for (const auto i : index_range(_feature_sets))
   {
     auto & feature = _feature_sets[i];
 
@@ -1500,7 +1496,7 @@ FeatureFloodCount::expandPointHalos()
 
         // Get the nodes on a current element so that we can add in point neighbors
         auto n_nodes = elem->n_vertices();
-        for (MooseIndex(n_nodes) i = 0; i < n_nodes; ++i)
+        for (const auto i : make_range(n_nodes))
         {
           const Node * current_node = elem->node_ptr(i);
 
@@ -1548,8 +1544,7 @@ FeatureFloodCount::expandEdgeHalos(unsigned int num_layers_to_expand)
   {
     for (auto & feature : list_ref)
     {
-      for (MooseIndex(num_layers_to_expand) halo_level = 0; halo_level < num_layers_to_expand;
-           ++halo_level)
+      for (unsigned short halo_level = 0; halo_level < num_layers_to_expand; ++halo_level)
       {
         /**
          * Create a copy of the halo set so that as we insert new ids into the
@@ -1605,7 +1600,7 @@ FeatureFloodCount::visitElementalNeighbors(const Elem * elem,
   MeshBase & mesh = _mesh.getMesh();
 
   // Loop over all neighbors (at the the same level as the current element)
-  for (MooseIndex(elem->n_neighbors()) i = 0; i < elem->n_neighbors(); ++i)
+  for (const auto i : make_range(elem->n_neighbors()))
   {
     const Elem * neighbor_ancestor = nullptr;
     bool topological_neighbor = false;
@@ -1711,7 +1706,7 @@ FeatureFloodCount::visitNeighborsHelper(const T * curr_entity,
 
         if (topological_neighbor || disjoint_only)
           feature->_disjoint_halo_ids.insert(feature->_disjoint_halo_ids.end(), entity_id);
-        else if (feature->_local_ids.find(entity_id) == feature->_local_ids.end())
+        else if (!FeatureFloodCount::contains(feature->_local_ids, entity_id))
           feature->_halo_ids.insert(feature->_halo_ids.end(), entity_id);
       }
       else
@@ -1805,7 +1800,7 @@ FeatureFloodCount::appendPeriodicNeighborNodes(FeatureData & feature) const
     {
       Elem * elem = _mesh.elemPtr(entity);
 
-      for (MooseIndex(elem->n_nodes()) node_n = 0; node_n < elem->n_nodes(); ++node_n)
+      for (const auto node_n : make_range(elem->n_nodes()))
       {
         auto iters = _periodic_node_map.equal_range(elem->node_id(node_n));
 
@@ -1858,79 +1853,66 @@ FeatureFloodCount::FeatureData::updateBBoxExtremes(MeshBase & mesh)
   for (auto & ghost_id : _ghosted_ids)
     updateBBoxExtremesHelper(_bboxes[0], mesh.elem_ref(ghost_id));
 
+  FeatureData::container_type all_primary_region_ids;
+  FeatureFloodCount::reserve(all_primary_region_ids, _local_ids.size() + _halo_ids.size());
+  std::set_union(_local_ids.begin(),
+                 _local_ids.end(),
+                 _halo_ids.begin(),
+                 _halo_ids.end(),
+                 std::insert_iterator<FeatureData::container_type>(all_primary_region_ids,
+                                                                   all_primary_region_ids.begin()));
+
   // Remove all of the IDs that are in the primary region
   std::list<dof_id_type> disjoint_elem_id_list;
   std::set_difference(_disjoint_halo_ids.begin(),
                       _disjoint_halo_ids.end(),
-                      _halo_ids.begin(),
-                      _halo_ids.end(),
+                      all_primary_region_ids.begin(),
+                      all_primary_region_ids.end(),
                       std::insert_iterator<std::list<dof_id_type>>(disjoint_elem_id_list,
                                                                    disjoint_elem_id_list.begin()));
 
-  if (!disjoint_elem_id_list.empty())
+  /**
+   * Now we need to find how many distinct topologically disconnected sets of elements we have.
+   * We've already removed elements that are part of the primary region, now we need to iterate
+   * over the remaining "possible" disjoint elements and partition them into independent
+   * bboxes regions.
+   */
+  constexpr auto TOLERANCE = libMesh::TOLERANCE * libMesh::TOLERANCE;
+  for (auto elem_id : disjoint_elem_id_list)
   {
-    /**
-     * Now we need to find how many distinct topologically disconnected sets of elements we have.
-     * We've already removed elements that are part of the primary halo, we'll start by assuming
-     * that element left is part of the same disjoint set. For each element, we'll see if it is a
-     * neighbor of any other element in the current set. If it's not, then it must be part of yet
-     * another set. The process repeats until every element is processed and put in the right
-     * bucket.
-     */
-    std::list<std::list<dof_id_type>> disjoint_regions;
-    for (auto elem_id : _disjoint_halo_ids)
-    {
-      disjoint_regions.emplace_back(std::list<dof_id_type>({elem_id}));
-    }
+    BoundingBox elem_bbox;
+    updateBBoxExtremesHelper(elem_bbox, *mesh.elem_ptr(elem_id));
 
-    for (auto it1 = disjoint_regions.begin(); it1 != disjoint_regions.end(); /* No increment */)
+    bool found_match = false;
+    for (auto & bbox : _bboxes)
     {
-      bool merge_occured = false;
-      for (auto it2 = disjoint_regions.begin(); it2 != disjoint_regions.end(); ++it2)
+      if (bbox.intersects(elem_bbox, TOLERANCE))
       {
-        if (it1 != it2 && areElemListsMergeable(*it1, *it2, mesh))
-        {
-          it2->splice(it2->begin(), *it1);
-
-          disjoint_regions.emplace_back(std::move(*it2));
-          disjoint_regions.erase(it2);
-          it1 = disjoint_regions.erase(it1);
-
-          merge_occured = true;
-
-          break;
-        }
+        updateBBoxExtremes(bbox, elem_bbox);
+        found_match = true;
+        break;
       }
-
-      if (!merge_occured)
-        ++it1;
     }
 
-    // Finally create new bounding boxes for each disjoint region
-    auto num_regions = disjoint_regions.size();
-    // We have num_regions *new* bounding boxes plus the existing bounding box
-    _bboxes.resize(num_regions + 1);
-
-    decltype(num_regions) region = 1;
-    for (const auto & list_ref : disjoint_regions)
-    {
-      for (const auto elem_id : list_ref)
-        updateBBoxExtremesHelper(_bboxes[region], *mesh.elem_ptr(elem_id));
-
-      FeatureData::container_type set_union;
-      FeatureFloodCount::reserve(set_union, _halo_ids.size() + _disjoint_halo_ids.size());
-      std::set_union(
-          _halo_ids.begin(),
-          _halo_ids.end(),
-          _disjoint_halo_ids.begin(),
-          _disjoint_halo_ids.end(),
-          std::insert_iterator<FeatureData::container_type>(set_union, set_union.begin()));
-      _halo_ids.swap(set_union);
-
-      _disjoint_halo_ids.clear();
-      ++region;
-    }
+    if (!found_match)
+      _bboxes.push_back(elem_bbox);
   }
+
+  mergeBBoxes(_bboxes, false);
+
+  /**
+   * We no longer need to distinguish among the various halo ids in disjoint bounding
+   * boxes. We'll just merge them altogether for the remaining portions of the algorithm.
+   */
+  FeatureData::container_type set_union;
+  FeatureFloodCount::reserve(set_union, _halo_ids.size() + _disjoint_halo_ids.size());
+  std::set_union(_halo_ids.begin(),
+                 _halo_ids.end(),
+                 _disjoint_halo_ids.begin(),
+                 _disjoint_halo_ids.end(),
+                 std::insert_iterator<FeatureData::container_type>(set_union, set_union.begin()));
+  _halo_ids.swap(set_union);
+  _disjoint_halo_ids.clear();
 }
 
 void
@@ -2046,10 +2028,10 @@ FeatureFloodCount::FeatureData::merge(FeatureData && rhs)
    * If we had a physical intersection, we need to expand boxes. If we had a virtual (periodic)
    * intersection we need to preserve all of the boxes from each of the regions' sets.
    */
-  if (physical_intersection)
-    expandBBox(rhs);
-  else
-    std::move(rhs._bboxes.begin(), rhs._bboxes.end(), std::back_inserter(_bboxes));
+  _bboxes.reserve(_bboxes.size() + rhs._bboxes.size());
+  std::copy(rhs._bboxes.begin(), rhs._bboxes.end(), std::back_inserter(_bboxes));
+
+  mergeBBoxes(_bboxes, physical_intersection);
 
   set_union.clear();
   FeatureFloodCount::reserve(set_union, _disjoint_halo_ids.size() + rhs._disjoint_halo_ids.size());
@@ -2125,42 +2107,60 @@ FeatureFloodCount::FeatureData::clear()
 }
 
 void
-FeatureFloodCount::FeatureData::expandBBox(const FeatureData & rhs)
+FeatureFloodCount::FeatureData::mergeBBoxes(std::vector<BoundingBox> & bboxes,
+                                            bool physical_intersection)
 {
-  std::vector<bool> intersected_boxes(rhs._bboxes.size(), false);
+  /**
+   * It's possible to iterate over these disjoint elements in a way such that bounding boxes in
+   * geometrically related region won't overlap on a single pass. Imagine having three elements
+   * across a periodic boundary that represent the halo that just bleeds over. If we attempt to
+   * merge the first and third bounding boxes, they won't intersect without having the second
+   * bounding box there to link them together. We'll have to continue to merge bounding boxes
+   * until convergence.
+   */
+  std::list<BoundingBox> box_list(bboxes.begin(), bboxes.end());
 
   auto box_expanded = false;
-  for (auto & bbox : _bboxes)
-    for (MooseIndex(rhs._bboxes) j = 0; j < rhs._bboxes.size(); ++j)
+  for (auto it1 = box_list.begin(); it1 != box_list.end(); /* No increment on it1 */)
+  {
+    auto merge_occured = false;
+    for (auto it2 = box_list.begin(); it2 != box_list.end(); ++it2)
     {
-      if (bbox.intersects(rhs._bboxes[j], libMesh::TOLERANCE * libMesh::TOLERANCE))
+      if (it1 != it2 && it1->intersects(*it2, TOLERANCE))
       {
-        updateBBoxExtremes(bbox, rhs._bboxes[j]);
-        intersected_boxes[j] = true;
+        updateBBoxExtremes(*it2, *it1);
+        box_list.emplace_back(std::move(*it2));
+
+        box_list.erase(it2);
+        it1 = box_list.erase(it1); // it1 is incremented here!
+
         box_expanded = true;
+        merge_occured = true;
+
+        break;
       }
     }
 
+    if (!merge_occured)
+      ++it1;
+  }
+
+  /**
+   * Now copy the list back into the original vector.
+   */
+  bboxes.resize(box_list.size());
+  std::copy(box_list.begin(), box_list.end(), bboxes.begin());
+
   // Error check
-  if (!box_expanded)
+  if (physical_intersection && !box_expanded)
   {
     std::ostringstream oss;
     oss << "LHS BBoxes:\n";
-    for (MooseIndex(_bboxes) i = 0; i < _bboxes.size(); ++i)
+    for (const auto i : index_range(_bboxes))
       oss << "Max: " << _bboxes[i].max() << " Min: " << _bboxes[i].min() << '\n';
-
-    oss << "RHS BBoxes:\n";
-    for (MooseIndex(rhs._bboxes) i = 0; i < rhs._bboxes.size(); ++i)
-      oss << "Max: " << rhs._bboxes[i].max() << " Min: " << rhs._bboxes[i].min() << '\n';
 
     ::mooseError("No Bounding Boxes Expanded - This is a catastrophic error!\n", oss.str());
   }
-
-  // Any bounding box in the rhs vector that doesn't intersect
-  // needs to be appended to the lhs vector
-  for (MooseIndex(intersected_boxes) j = 0; j < intersected_boxes.size(); ++j)
-    if (!intersected_boxes[j])
-      _bboxes.push_back(rhs._bboxes[j]);
 }
 
 std::ostream &
@@ -2244,26 +2244,8 @@ updateBBoxExtremesHelper(BoundingBox & bbox, const Point & node)
 void
 updateBBoxExtremesHelper(BoundingBox & bbox, const Elem & elem)
 {
-  for (MooseIndex(elem.n_nodes()) node_n = 0; node_n < elem.n_nodes(); ++node_n)
+  for (const auto node_n : make_range(elem.n_nodes()))
     updateBBoxExtremesHelper(bbox, *(elem.node_ptr(node_n)));
-}
-
-bool
-areElemListsMergeable(const std::list<dof_id_type> & elem_list1,
-                      const std::list<dof_id_type> & elem_list2,
-                      MeshBase & mesh)
-{
-  for (const auto elem_id1 : elem_list1)
-  {
-    const auto * elem1 = mesh.elem_ptr(elem_id1);
-    for (const auto elem_id2 : elem_list2)
-    {
-      const auto * elem2 = mesh.elem_ptr(elem_id2);
-      if (elem1->has_neighbor(elem2))
-        return true;
-    }
-  }
-  return false;
 }
 
 // Constants

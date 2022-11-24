@@ -29,7 +29,7 @@ BoundaryMarker::validParams()
 BoundaryMarker::BoundaryMarker(const InputParameters & parameters)
   : Marker(parameters),
     _distance(getParam<Real>("distance")),
-    _bnd_elem_ids(_mesh.getBoundariesToElems()),
+    _bnd_elem_ids(_mesh.getBoundariesToActiveSemiLocalElemIds()),
     _mark(parameters.get<MooseEnum>("mark").getEnum<MarkerValue>()),
     _boundary(_mesh.getBoundaryID(getParam<BoundaryName>("next_to")))
 {

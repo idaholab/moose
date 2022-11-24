@@ -40,10 +40,16 @@ SetupDebugAction::validParams()
   params.addParam<bool>("show_mesh_meta_data", false, "Print out the available mesh meta data");
   params.addParam<bool>(
       "show_reporters", false, "Print out information about the declared and requested Reporters");
-  params.addParam<bool>(
+  params.addDeprecatedParam<bool>(
       "pid_aux",
+      "Add a AuxVariable named \"pid\" that shows the processors and partitioning",
+      "pid_aux is deprecated, use output_process_domains");
+  params.addParam<bool>(
+      "output_process_domains",
       false,
-      "Add a AuxVariable named \"pid\" that shows the processors and partitioning");
+      "Add a AuxVariable named \"pid\" that shows the partitioning for each process");
+  params.addParam<bool>(
+      "show_functors", false, "Whether to print information about the functors in the problem");
 
   params.addClassDescription(
       "Adds various debugging type Output objects to the simulation system.");
@@ -51,7 +57,7 @@ SetupDebugAction::validParams()
   return params;
 }
 
-SetupDebugAction::SetupDebugAction(InputParameters parameters) : Action(parameters)
+SetupDebugAction::SetupDebugAction(const InputParameters & parameters) : Action(parameters)
 {
   _awh.showActionDependencies(getParam<bool>("show_action_dependencies"));
   _awh.showActions(getParam<bool>("show_actions"));
@@ -69,7 +75,7 @@ SetupDebugAction::act()
     _problem->addOutput(type, "_moose_material_property_debug_output", params);
   }
 
-  // Variable residusl norms
+  // Variable residual norms
   if (_pars.get<bool>("show_var_residual_norms"))
   {
     const std::string type = "VariableResidualNormsDebugOutput";
@@ -105,10 +111,11 @@ SetupDebugAction::act()
   }
 
   // Add pid aux
-  if (getParam<bool>("pid_aux"))
+  if (getParam<bool>("output_process_domains") ||
+      (isParamValid("pid_aux") && getParam<bool>("pid_aux")))
   {
     if (_problem->hasVariable("pid"))
-      paramError("pid_aux", "Variable with the name \"pid\" already exists");
+      paramError("output_process_domains", "Variable with the name \"pid\" already exists");
 
     auto fe_type = FEType(CONSTANT, MONOMIAL);
     auto type = AddAuxVariableAction::variableType(fe_type);
@@ -119,4 +126,8 @@ SetupDebugAction::act()
     params.set<AuxVariableName>("variable") = "pid";
     _problem->addAuxKernel("ProcessorIDAux", "pid_aux", params);
   }
+
+  // Add functor output
+  if (getParam<bool>("show_functors"))
+    _problem->setFunctorOutput(getParam<bool>("show_functors"));
 }

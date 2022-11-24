@@ -44,7 +44,6 @@ postprocessor_type = InterfaceDiffusiveFluxAverage
   []
 []
 
-
 [FVKernels]
   [diff_u]
     type = FVDiffusion
@@ -79,6 +78,7 @@ postprocessor_type = InterfaceDiffusiveFluxAverage
     boundary = 'interface'
     subdomain1 = '0'
     subdomain2 = '1'
+    coeff_interp_method = average
   []
 []
 
@@ -108,6 +108,6 @@ postprocessor_type = InterfaceDiffusiveFluxAverage
 []
 
 [Outputs]
-  file_base = ${raw ${postprocessor_type} _fv}
+  file_base = '${raw ${postprocessor_type} _fv}'
   exodus = true
 []

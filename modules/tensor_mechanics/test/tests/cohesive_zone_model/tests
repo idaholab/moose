@@ -304,6 +304,7 @@
       exodiff = bilinear_mixed_normal_out.e
       cli_args = "Outputs/file_base=bilinear_mixed_normal_out"
       abs_zero = 1e-6
+      rel_err = 1e-5
       detail = "under mode I loading."
     []
     [scale_strength_normal]
@@ -311,30 +312,36 @@
       input = 'bilinear_mixed_scale_strength.i'
       exodiff = bilinear_mixed_scale_strength_out.e
       abs_zero = 1e-6
+      rel_err = 1e-5
       detail = "under mode I loading with scaled normal strength."
     []
     [shear]
       type = Exodiff
       input = 'bilinear_mixed.i'
       exodiff = bilinear_mixed_shear_out.e
-      cli_args = "Outputs/file_base=bilinear_mixed_shear_out BCs/fix_top/variable=disp_y BCs/top/variable=disp_x"
+      cli_args = "Outputs/file_base=bilinear_mixed_shear_out BCs/fix_top/variable=disp_y "
+                 "BCs/top/variable=disp_x"
       abs_zero = 1e-6
+      rel_err = 1e-5
       detail = "under mode II loading."
     []
     [normal_lag]
       type = Exodiff
       input = 'bilinear_mixed.i'
       exodiff = bilinear_mixed_lag_out.e
-      cli_args = "Materials/czm/lag_seperation_state=true Outputs/file_base=bilinear_mixed_lag_out"
+      cli_args = "Materials/czm/lag_displacement_jump=true Outputs/file_base=bilinear_mixed_lag_out"
       abs_zero = 1e-5
+      rel_err = 1e-5
       detail = "under mode I loading by lagging the seperation state."
     []
     [normal_power_law]
       type = Exodiff
       input = 'bilinear_mixed.i'
       exodiff = bilinear_mixed_normal_power_law_out.e
-      cli_args = "Materials/czm/mixed_mode_criterion=POWER_LAW Outputs/file_base=bilinear_mixed_normal_power_law_out"
+      cli_args = "Materials/czm/mixed_mode_criterion=POWER_LAW "
+                 "Outputs/file_base=bilinear_mixed_normal_power_law_out"
       abs_zero = 1e-6
+      rel_err = 1e-5
       detail = "under mode I loading with power law propagation criterion."
     []
   []

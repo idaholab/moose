@@ -25,8 +25,6 @@ PINSFVEnergyTimeDerivative::validParams()
   params.addRequiredParam<MooseFunctorName>(NS::density, "Density");
   params.addParam<MooseFunctorName>(NS::time_deriv(NS::density), "Density time derivative functor");
   params.addRequiredParam<MooseFunctorName>(NS::cp, "Specific heat capacity");
-  params.addParam<MooseFunctorName>(NS::time_deriv(NS::cp),
-                                    "Specific heat capacity time derivative functor");
   params.addRequiredParam<MooseFunctorName>(NS::porosity, "Porosity");
 
   params.addRequiredParam<bool>("is_solid", "Whether this kernel acts on the solid temperature");
@@ -45,8 +43,6 @@ PINSFVEnergyTimeDerivative::PINSFVEnergyTimeDerivative(const InputParameters & p
                  ? &getFunctor<ADReal>(NS::time_deriv(NS::density))
                  : nullptr),
     _cp(getFunctor<ADReal>(NS::cp)),
-    _cp_dot(isParamValid(NS::time_deriv(NS::cp)) ? &getFunctor<ADReal>(NS::time_deriv(NS::cp))
-                                                 : nullptr),
     _eps(getFunctor<ADReal>(NS::porosity)),
     _is_solid(getParam<bool>("is_solid")),
     _scaling(getParam<Real>("scaling")),
@@ -65,8 +61,6 @@ PINSFVEnergyTimeDerivative::computeQpResidual()
     auto time_derivative = _rho(elem_arg) * _cp(elem_arg) * FVTimeKernel::computeQpResidual();
     if (_rho_dot)
       time_derivative += (*_rho_dot)(elem_arg)*_cp(elem_arg) * _var(elem_arg);
-    if (_cp_dot)
-      time_derivative += _rho(elem_arg) * (*_cp_dot)(elem_arg)*_var(elem_arg);
 
     return _scaling * (_is_solid ? 1 - _eps(elem_arg) : _eps(elem_arg)) * time_derivative;
   }

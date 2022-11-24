@@ -20,7 +20,10 @@ THMInitComponentsAction::validParams()
   return params;
 }
 
-THMInitComponentsAction::THMInitComponentsAction(InputParameters parameters) : Action(parameters) {}
+THMInitComponentsAction::THMInitComponentsAction(const InputParameters & parameters)
+  : Action(parameters)
+{
+}
 
 void
 THMInitComponentsAction::act()

@@ -34,7 +34,7 @@ AddOutputAction::validParams()
   return params;
 }
 
-AddOutputAction::AddOutputAction(InputParameters params) : MooseObjectAction(params) {}
+AddOutputAction::AddOutputAction(const InputParameters & params) : MooseObjectAction(params) {}
 
 void
 AddOutputAction::act()

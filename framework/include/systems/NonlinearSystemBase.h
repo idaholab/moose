@@ -99,6 +99,7 @@ public:
   // Setup Functions ////
   virtual void initialSetup() override;
   virtual void timestepSetup() override;
+  virtual void customSetup(const ExecFlagType & exec_type) override;
   virtual void residualSetup() override;
   virtual void jacobianSetup() override;
 
@@ -955,11 +956,8 @@ protected:
   /// like for solid/fluid mechanics
   std::vector<std::vector<std::string>> _scaling_group_variables;
 
-  /// Container to hold flag if field variable is to partipate in autoscaling
-  std::vector<bool> _field_variable_autoscaled;
-
-  /// Container to hold flag if scalar variable is to partipate in autoscaling
-  std::vector<bool> _scalar_variable_autoscaled;
+  /// Container to hold flag if variable is to participate in autoscaling
+  std::vector<bool> _variable_autoscaled;
 
   /// A container for variables that do not partipate in autoscaling
   std::vector<std::string> _ignore_variables_for_autoscaling;

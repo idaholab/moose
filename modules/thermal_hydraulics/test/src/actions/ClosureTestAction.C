@@ -29,7 +29,7 @@ ClosureTestAction::validParams()
   return params;
 }
 
-ClosureTestAction::ClosureTestAction(InputParameters params)
+ClosureTestAction::ClosureTestAction(const InputParameters & params)
   : TestAction(params),
     _dummy_name("dummy"),
     _T_wall_name("T_wall"),

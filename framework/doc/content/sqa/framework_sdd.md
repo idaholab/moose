@@ -121,10 +121,12 @@ specific packages to be installed prior to using MOOSE, which can be found on th
 
 !template! item key=definitions
 !! definitions-begin
+
 - +Pull (Merge) Request+: A proposed change to the software (e.g. usually a code change, but may also include documentation, requirements, design, and/or testing).
-- +Baseline+: A specification or product (e.g., project plan, maintenance and operations (M&O) plan, requirements, or design) that has been formally reviewed and agreed upon, that thereafter serves as the basis for use and further development, and that can be changed only by using an approved change control process (NQA-1, 2009).
-- +Validation+: Confirmation, through the provision of objective evidence (e.g., acceptance test), that the requirements for a specific intended use or application have been fulfilled (24765:2010(E), 2010).
-- +Verification+: (1) The process of: evaluating a system or component to determine whether the products of a given development phase satisfy the conditions imposed at the start of that phase. (2) Formal proof of program correctness (e.g., requirements, design, implementation reviews, system tests) (24765:2010(E), 2010).
+- +Baseline+: A specification or product (e.g., project plan, maintenance and operations (M&O) plan, requirements, or design) that has been formally reviewed and agreed upon, that thereafter serves as the basis for use and further development, and that can be changed only by using an approved change control process [!citep](ASME-NQA-1-2008).
+- +Validation+: Confirmation, through the provision of objective evidence (e.g., acceptance test), that the requirements for a specific intended use or application have been fulfilled [!citep](ISO-systems-software).
+- +Verification+: (1) The process of: evaluating a system or component to determine whether the products of a given development phase satisfy the conditions imposed at the start of that phase. (2) Formal proof of program correctness (e.g., requirements, design, implementation reviews, system tests) [!citep](ISO-systems-software).
+
 !! definitions-finish
 !template-end!
 
@@ -161,11 +163,10 @@ composed of a single or small set of C++ objects intended to be specialized by a
 specific problem. To accomplish this design goal, MOOSE uses several modern object-oriented design
 patterns. The primary overarching pattern is the "Factory Pattern". Users needing to extend MOOSE
 may inherit from one of MOOSE's systems to providing an implementation meeting his or her needs. The
-design of each of these systems is documented on the mooseframework.org wiki in the Tutorial
-section. Additionally, up-to-date documentation extracted from the source is maintained on the the
-mooseframework.org documentation site after every successful merge to MOOSE's stable branch. After
-these objects are created, the can be registered with the framework and used immediately in a MOOSE
-input file.
+design of each of these systems is documented on the [MOOSE homepage](https://mooseframework.inl.gov).
+Additionally, up-to-date documentation extracted from the source is maintained on the same documentation
+site after every successful merge to MOOSE's stable branch. After these objects are created, they can be
+registered with the framework and used immediately in a MOOSE input file.
 !! system-design-finish
 !template-end!
 
@@ -179,14 +180,14 @@ every simulation configuration that the framework is capable of running.
 !syntax complete subsystems=False actions=False objects=False
 
 The MooseApp is the top-level object used to hold all of the other objects in a simulation. In a
-normal simulation a single MooseApp object is created and "run()". This object uses it's Factory
+normal simulation a single MooseApp object is created and "run()". This object uses its Factory
 objects to build user defined objects which are stored in a series of Warehouse objects and
 executed. The Finite Element data is stored in the Systems and Assembly object while the domain
 information (the Mesh) is stored in the Mesh object. A series of threaded loops are used to run
 parallel calculations on the objects created and stored within the warehouses.
 
-MOOSE's pluggable systems are documented on the mooseframework.org wiki. Each of these systems has
-set of defined polymorphic interfaces and are designed to accomplish a specific task within the
+MOOSE's pluggable systems are documented on https://mooseframework.inl.gov. Each of these systems
+has a set of defined polymorphic interfaces and are designed to accomplish a specific task within the
 simulation. The design of these systems is fluid and is managed through agile methods and ticket
 request system on the Github.org website.
 !! system-structure-finish

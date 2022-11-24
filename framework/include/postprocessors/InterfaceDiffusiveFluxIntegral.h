@@ -42,4 +42,8 @@ protected:
   /// Material properties for the diffusion coefficient
   const GenericMaterialProperty<Real, is_ad> & _diffusion_coef;
   const GenericMaterialProperty<Real, is_ad> & _diffusion_coef_neighbor;
+
+  /// Decides if a geometric arithmetic or harmonic average is used for the
+  /// face interpolation of the diffusion coefficient.
+  Moose::FV::InterpMethod _coeff_interp_method;
 };

@@ -67,7 +67,7 @@
 []
 
 [Debug]
-  pid_aux = true
+  output_process_domains = true
 []
 
 [Problem]

@@ -117,9 +117,12 @@ LineMaterialSamplerBase<T>::LineMaterialSamplerBase(const InputParameters & para
     _start(getParam<Point>("start")),
     _end(getParam<Point>("end")),
     _mesh(_subproblem.mesh()),
-    _qrule(_subproblem.assembly(_tid).qRule()),
-    _q_point(_subproblem.assembly(_tid).qPoints())
+    _qrule(_subproblem.assembly(_tid, 0).qRule()),
+    _q_point(_subproblem.assembly(_tid, 0).qPoints())
 {
+  // See https://github.com/idaholab/moose/issues/21865
+  _mesh.errorIfDistributedMesh("LineMaterialSamplerBase");
+
   std::vector<std::string> material_property_names = getParam<std::vector<std::string>>("property");
   for (unsigned int i = 0; i < material_property_names.size(); ++i)
   {

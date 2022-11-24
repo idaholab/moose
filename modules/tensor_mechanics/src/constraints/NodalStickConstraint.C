@@ -41,6 +41,11 @@ NodalStickConstraint::NodalStickConstraint(const InputParameters & parameters)
     _secondary_boundary_id(getParam<BoundaryName>("secondary")),
     _penalty(getParam<Real>("penalty"))
 {
+  if (_var.number() != _var_secondary.number())
+    paramError("variable_secondary",
+               "Primary variable must be identical to secondary variable. "
+               "Different variables are currently not supported.");
+
   updateConstrainedNodes();
 }
 

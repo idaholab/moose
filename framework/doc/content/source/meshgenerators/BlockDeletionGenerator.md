@@ -17,6 +17,9 @@ with the pipe.
 Once a block is deleted from the mesh, it should not be referred to in the input.
 Variables and materials can no longer be block restricted to a deleted block, for example.
 
+!alert note
+Lower-dimensional elements created from the deleted elements will also be removed.
+
 ## Example input syntax
 
 In this example input file, we remove blocks 1 and 3 with a single `BlockDeletionGenerator`.

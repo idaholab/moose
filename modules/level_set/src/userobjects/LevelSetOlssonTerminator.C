@@ -26,7 +26,7 @@ LevelSetOlssonTerminator::validParams()
 
 LevelSetOlssonTerminator::LevelSetOlssonTerminator(const InputParameters & params)
   : GeneralUserObject(params),
-    _solution_diff(_fe_problem.getNonlinearSystem().addVector("solution_diff", false, PARALLEL)),
+    _solution_diff(_fe_problem.getNonlinearSystem(0).addVector("solution_diff", false, PARALLEL)),
     _tol(getParam<Real>("tol")),
     _min_t_steps(getParam<int>("min_steps"))
 {
@@ -35,8 +35,8 @@ LevelSetOlssonTerminator::LevelSetOlssonTerminator(const InputParameters & param
 void
 LevelSetOlssonTerminator::execute()
 {
-  _solution_diff = *_fe_problem.getNonlinearSystem().currentSolution();
-  _solution_diff -= _fe_problem.getNonlinearSystem().solutionOld();
+  _solution_diff = *_fe_problem.getNonlinearSystem(0).currentSolution();
+  _solution_diff -= _fe_problem.getNonlinearSystem(0).solutionOld();
   Real delta = _solution_diff.l2_norm() / _dt;
   _console << "Computed convergence criteria: " << delta << std::endl;
 

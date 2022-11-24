@@ -30,6 +30,8 @@
 #include "RdgApp.h"
 #include "ReactorApp.h"
 #include "RichardsApp.h"
+#include "ScalarTransportApp.h"
+#include "SolidPropertiesApp.h"
 #include "StochasticToolsApp.h"
 #include "PeridynamicsApp.h"
 #include "TensorMechanicsApp.h"
@@ -88,6 +90,8 @@ CombinedApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   RdgApp::registerAll(f, af, s);
   ReactorApp::registerAll(f, af, s);
   RichardsApp::registerAll(f, af, s);
+  ScalarTransportApp::registerAll(f, af, s);
+  SolidPropertiesApp::registerAll(f, af, s);
   StochasticToolsApp::registerAll(f, af, s);
   TensorMechanicsApp::registerAll(f, af, s);
   ThermalHydraulicsApp::registerAll(f, af, s);

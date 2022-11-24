@@ -290,7 +290,7 @@ elementsCreationFromNodesVectors(ReplicatedMesh & mesh,
       // Define the two possible options and chose the one with shorter distance
       Real dis1 = (*nodes[i + 1][nodes_up_it] - *nodes[i][nodes_down_it + 1]).norm();
       Real dis2 = (*nodes[i + 1][nodes_up_it + 1] - *nodes[i][nodes_down_it]).norm();
-      if (dis1 > dis2)
+      if (MooseUtils::absoluteFuzzyGreaterThan(dis1, dis2))
       {
         Elem * elem = mesh.add_elem(new Tri3);
         bool is_elem_flip = buildTriElement(elem,
@@ -543,13 +543,11 @@ isBoundarySimpleClosedLoop(ReplicatedMesh & mesh,
     else
     {
       if (isFlipped)
-      {
         // Flipped twice; this means the boundary has at least two segments.
         // This is invalid type #1
         throw MooseException("This mesh generator does not work for the provided external boundary "
                              "as it has more than one segments.");
-        return false;
-      }
+
       // mark the first flip event.
       isFlipped = true;
       std::reverse(boundary_ordered_node_list.begin(), boundary_ordered_node_list.end());
@@ -585,12 +583,9 @@ isBoundarySimpleClosedLoop(ReplicatedMesh & mesh,
     }
     std::sort(ordered_node_azi_list.begin(), ordered_node_azi_list.end());
     if (ordered_node_azi_list.front() * ordered_node_azi_list.back() < 0.0)
-    {
       // This is invalid type #3
       throw MooseException("This mesh generator does not work for the provided external boundary "
                            "as azimuthal angles of consecutive nodes do not change monotonically.");
-      return false;
-    }
     else
       return true;
   }
@@ -630,15 +625,12 @@ isBoundaryOpenSingleSegment(ReplicatedMesh & mesh,
     if (((std::string)e.what())
             .compare("This mesh generator does not work for the provided external boundary as it "
                      "is not a closed loop.") != 0)
-    {
       throw MooseException("The provided boundary is not an open single-segment boundary.");
-      return false;
-    }
     else
       return true;
   }
+
   throw MooseException("The provided boundary is closed loop, which is not supported.");
-  return false;
 }
 
 bool

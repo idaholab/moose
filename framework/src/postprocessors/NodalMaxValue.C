@@ -42,10 +42,13 @@ NodalMaxValue::execute()
 Real
 NodalMaxValue::getValue()
 {
-  gatherMax(_value);
   return _value;
 }
-
+void
+NodalMaxValue::finalize()
+{
+  gatherMax(_value);
+}
 void
 NodalMaxValue::threadJoin(const UserObject & y)
 {

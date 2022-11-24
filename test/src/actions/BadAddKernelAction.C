@@ -18,7 +18,9 @@ BadAddKernelAction::validParams()
   return MooseObjectAction::validParams();
 }
 
-BadAddKernelAction::BadAddKernelAction(InputParameters params) : MooseObjectAction(params) {}
+BadAddKernelAction::BadAddKernelAction(const InputParameters & params) : MooseObjectAction(params)
+{
+}
 
 void
 BadAddKernelAction::act()
@@ -27,5 +29,5 @@ BadAddKernelAction::act()
   // Note: we chose addIndicator() for this Action so that a specific
   // Factory error is triggered (and not some other error check on
   // e.g. variable types).
-  _problem->addIndicator(_type, _name, _moose_object_pars);
+  _problem->addBoundaryCondition(_type, _name, _moose_object_pars);
 }

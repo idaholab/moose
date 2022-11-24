@@ -42,7 +42,7 @@ AddNodalNormalsAction::validParams()
   return params;
 }
 
-AddNodalNormalsAction::AddNodalNormalsAction(InputParameters parameters)
+AddNodalNormalsAction::AddNodalNormalsAction(const InputParameters & parameters)
   : Action(parameters),
     _boundary(getParam<std::vector<BoundaryName>>("boundary")),
     _has_corners(isParamValid("corner_boundary")),

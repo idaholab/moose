@@ -15,7 +15,7 @@
 #include "MooseMesh.h"
 #include "MooseTypes.h"
 #include "MooseVariableFE.h"
-#include "MooseCoordTransform.h"
+#include "MooseAppCoordTransform.h"
 
 #include "libmesh/system.h"
 #include "libmesh/mesh_tools.h"
@@ -81,8 +81,6 @@ MultiAppNearestNodeTransfer::execute()
   TIME_SECTION(
       "MultiAppNearestNodeTransfer::execute()", 5, "Transferring variables based on nearest nodes");
 
-  getAppInfo();
-
   // Get the bounding boxes for the "from" domains.
   std::vector<BoundingBox> bboxes;
   if (isParamValid("source_boundary"))
@@ -129,7 +127,9 @@ MultiAppNearestNodeTransfer::execute()
       unsigned int sys_num = to_sys->number();
       unsigned int var_num = to_sys->variable_number(_to_var_name);
       MeshBase * to_mesh = &_to_meshes[i_to]->getMesh();
-      const auto & to_transform = *_to_transforms[i_to];
+      const auto to_global_num =
+          _current_direction == FROM_MULTIAPP ? 0 : _to_local2global_map[i_to];
+      const auto & to_transform = *_to_transforms[to_global_num];
       auto & fe_type = to_sys->variable_type(var_num);
       bool is_constant = fe_type.order == CONSTANT;
       bool is_to_nodal = fe_type.family == LAGRANGE;
@@ -382,7 +382,9 @@ MultiAppNearestNodeTransfer::execute()
           System & from_sys = from_var.sys().system();
           unsigned int from_sys_num = from_sys.number();
           unsigned int from_var_num = from_sys.variable_number(from_var.name());
-          const auto & from_transform = *_from_transforms[i_local_from];
+          const auto from_global_num =
+              _current_direction == TO_MULTIAPP ? 0 : _from_local2global_map[i_local_from];
+          const auto & from_transform = *_from_transforms[from_global_num];
 
           for (unsigned int i_node = 0; i_node < local_entities[i_local_from].size(); i_node++)
           {

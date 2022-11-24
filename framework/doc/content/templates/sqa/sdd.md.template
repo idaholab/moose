@@ -41,12 +41,6 @@ List the dependencies or limitations that may affect the design of the system. E
 budget and schedule constraints, staffing issues, availability of components, etc. Describe how each
 factor will affect the functional design.
 
-
-## References id=references
-
-!bibtex bibliography title=None
-
-
 ## Definitions and Acronyms id=definitions-and-acronyms
 
 !template field key=definitions-and-acronyms required=False
@@ -189,3 +183,7 @@ encryption technology for securing data in storage or transmission.
 For each numbered system requirement, identify the section(s) of this document that specify how the
 functional design will meet the requirement. A separate requirements traceability matrix may be
 referenced for this section (see TEM-214).
+
+## References id=references
+
+!bibtex bibliography title=None

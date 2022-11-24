@@ -36,7 +36,8 @@ AddTimeDependentReactionSolverAction::validParams()
   return params;
 }
 
-AddTimeDependentReactionSolverAction::AddTimeDependentReactionSolverAction(InputParameters params)
+AddTimeDependentReactionSolverAction::AddTimeDependentReactionSolverAction(
+    const InputParameters & params)
   : AddGeochemistrySolverAction(params)
 {
 }

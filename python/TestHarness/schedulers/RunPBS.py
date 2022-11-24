@@ -32,6 +32,15 @@ class RunPBS(QueueManager):
 
     def hasTimedOutOrFailed(self, job_data):
         """ use qstat and return bool on job failures outside of the TestHarness's control """
+
+        KNOWN_EXITCODES = { '271' : 'JOB_EXEC_KILL_WALLTIME 271',
+                            '-24' : 'JOB_EXEC_KILL_NCPUS_BURST -24',
+                            '-25' : 'JOB_EXEC_KILL_NCPUS_SUM -25',
+                            '-26' : 'JOB_EXEC_KILL_VMEM -26',
+                            '-27' : 'JOB_EXEC_KILL_MEM -27',
+                            '-28' : 'JOB_EXEC_KILL_CPUT -28',
+                            '-29' : 'JOB_EXEC_KILL_WALLTIME -29' }
+
         launch_id = job_data.json_data.get(job_data.job_dir,
                                            {}).get(job_data.plugin,
                                                    {}).get('ID', "").split('.')[0]
@@ -48,12 +57,12 @@ class RunPBS(QueueManager):
                     job.setStatus(job.error, 'QSTAT')
                 return True
 
-            qstat_job_result = re.findall(r'Exit_status = (\d+)', qstat_command_result)
+            qstat_job_result = re.findall(r'Exit_status = (.*)', qstat_command_result)
 
-            # woops. This job was killed by PBS by exceeding walltime
-            if qstat_job_result and qstat_job_result[0] == "271":
+            # woops. This job was killed by PBS for some reason
+            if qstat_job_result and qstat_job_result[0] in KNOWN_EXITCODES.keys():
                 for job in job_data.jobs.getJobs():
-                    job.addCaveats('Killed by PBS Exceeded Walltime')
+                    job.addCaveats(KNOWN_EXITCODES[qstat_job_result[0]])
                 return True
 
             # Capture TestHarness exceptions

@@ -91,7 +91,7 @@
 
 [Transfers]
   [from_sub]
-    type = MultiAppMeshFunctionTransfer
+    type = MultiAppShapeEvaluationTransfer
     from_multi_app = sub
     source_variable = v
     variable = v
@@ -102,7 +102,7 @@
     bbox_factor = 1.1
   []
   [from_sub_elem]
-    type = MultiAppMeshFunctionTransfer
+    type = MultiAppShapeEvaluationTransfer
     from_multi_app = sub
     source_variable = v_elem
     variable = v_elem
@@ -110,7 +110,7 @@
     error_on_miss = true
   []
   [to_sub]
-    type = MultiAppMeshFunctionTransfer
+    type = MultiAppShapeEvaluationTransfer
     to_multi_app = sub
     source_variable = w
     variable = w
@@ -121,7 +121,7 @@
     bbox_factor = 1.1
   []
   [to_sub_elem]
-    type = MultiAppMeshFunctionTransfer
+    type = MultiAppShapeEvaluationTransfer
     to_multi_app = sub
     source_variable = w_elem
     variable = w_elem

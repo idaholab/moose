@@ -17,6 +17,7 @@ velocity_interp_method='rc'
 
 [GlobalParams]
   rhie_chow_user_object = 'rc'
+  porosity = porosity
 []
 
 [UserObjects]
@@ -93,21 +94,18 @@ velocity_interp_method='rc'
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
     rho = ${rho}
-    porosity = porosity
     momentum_component = 'x'
   []
   [u_viscosity]
     type = PINSFVMomentumDiffusion
     variable = u
     mu = ${mu}
-    porosity = porosity
     momentum_component = 'x'
   []
   [u_pressure]
     type = PINSFVMomentumPressure
     variable = u
     pressure = pressure
-    porosity = porosity
     momentum_component = 'x'
   []
 
@@ -117,21 +115,18 @@ velocity_interp_method='rc'
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
     rho = ${rho}
-    porosity = porosity
     momentum_component = 'y'
   []
   [v_viscosity]
     type = PINSFVMomentumDiffusion
     variable = v
     mu = ${mu}
-    porosity = porosity
     momentum_component = 'y'
   []
   [v_pressure]
     type = PINSFVMomentumPressure
     variable = v
     pressure = pressure
-    porosity = porosity
     momentum_component = 'y'
   []
 []

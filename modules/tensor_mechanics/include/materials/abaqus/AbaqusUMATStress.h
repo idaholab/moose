@@ -11,6 +11,7 @@
 
 #include "ComputeStressBase.h"
 #include "DynamicLibraryLoader.h"
+#include "ComputeFiniteStrain.h"
 
 /**
  * Coupling material to use Abaqus UMAT models in MOOSE
@@ -241,4 +242,8 @@ protected:
 
   /// parameter to assist with the transition to 1-based indexing
   const bool _use_one_based_indexing;
+
+private:
+  /// Method being used to compute strain and rotation increments
+  const ComputeFiniteStrain::DecompMethod _decomposition_method;
 };

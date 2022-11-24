@@ -24,7 +24,7 @@ CheckFVBCAction::validParams()
   return params;
 }
 
-CheckFVBCAction::CheckFVBCAction(InputParameters params) : Action(params) {}
+CheckFVBCAction::CheckFVBCAction(const InputParameters & params) : Action(params) {}
 
 void
 CheckFVBCAction::act()

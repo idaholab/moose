@@ -177,6 +177,18 @@ protected:
                                GlobalParamsAction * global_block);
 
   /**
+   * Template method for setting any triple indexed type parameter read from the input file or
+   * command line.
+   */
+  template <typename T>
+  void setTripleIndexParameter(
+      const std::string & full_name,
+      const std::string & short_name,
+      InputParameters::Parameter<std::vector<std::vector<std::vector<T>>>> * param,
+      bool in_global,
+      GlobalParamsAction * global_block);
+
+  /**
    * Template method for setting any multivalue "scalar" type parameter read from the input file or
    * command line.  Examples include "Point" and "RealVectorValue".
    */

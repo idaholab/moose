@@ -78,7 +78,6 @@ LinearInterpolation::sample(const T & x) const
 
   // If this point is reached, x must be a NaN.
   mooseException("Sample point in LinearInterpolation is a NaN.");
-  return 0;
 }
 
 template Real LinearInterpolation::sample<Real>(const Real &) const;
@@ -111,7 +110,6 @@ LinearInterpolation::sampleDerivative(const T & x) const
 
   // If this point is reached, x must be a NaN.
   mooseException("Sample point in LinearInterpolation is a NaN.");
-  return 0;
 }
 
 template Real LinearInterpolation::sampleDerivative<Real>(const Real &) const;

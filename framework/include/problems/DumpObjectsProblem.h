@@ -38,7 +38,7 @@ public:
   void dumpGeneratedSyntax(const std::string path);
 
   /// output data in solve
-  virtual void solve() override;
+  virtual void solve(unsigned int nl_sys_num) override;
 
   virtual void initialSetup() override {}
   virtual void advanceState() override {}

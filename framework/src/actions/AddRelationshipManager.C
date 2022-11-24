@@ -25,7 +25,7 @@ AddRelationshipManager::validParams()
   return Action::validParams();
 }
 
-AddRelationshipManager::AddRelationshipManager(InputParameters params) : Action(params) {}
+AddRelationshipManager::AddRelationshipManager(const InputParameters & params) : Action(params) {}
 
 void
 AddRelationshipManager::act()

@@ -27,14 +27,16 @@
 
 
 
-[Modules]
-  [FluidProperties]
-    [ideal_gas]
-      type = IdealGasFluidProperties
-      gamma = 1.4
-    []
+[FluidProperties]
+  [ideal_gas]
+    type = IdealGasFluidProperties
+    gamma = 1.4
   []
+[]
 
+
+
+[Modules]
   [CompressibleNavierStokes]
     # steady-state or transient
     equation_type = transient

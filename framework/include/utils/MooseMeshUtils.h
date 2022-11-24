@@ -168,8 +168,43 @@ bool isCoPlanar(const std::vector<Point> vec_pts);
 
 /**
  * Checks input mesh and returns max(block ID) + 1, which represents
- * a block ID in the mesh that is not currently in use
+ * a block ID that is not currently in use in the mesh
  * @param input mesh over which to compute the next free block id
  */
 SubdomainID getNextFreeSubdomainID(MeshBase & input_mesh);
+
+/**
+ * Checks input mesh and returns the largest boundary ID in the mesh plus one, which is
+ * a boundary ID in the mesh that is not currently in use
+ * @param input mesh over which to compute the next free boundary ID
+ */
+
+BoundaryID getNextFreeBoundaryID(MeshBase & input_mesh);
+/**
+ * Whether a particular subdomain ID exists in the mesh
+ * @param input mesh over which to determine subdomain IDs
+ * @param subdomain ID
+ */
+bool hasSubdomainID(MeshBase & input_mesh, const SubdomainID & id);
+
+/**
+ * Whether a particular subdomain name exists in the mesh
+ * @param input mesh over which to determine subdomain names
+ * @param subdomain name
+ */
+bool hasSubdomainName(MeshBase & input_mesh, const SubdomainName & name);
+
+/**
+ * Whether a particular boundary ID exists in the mesh
+ * @param input mesh over which to determine boundary IDs
+ * @param boundary ID
+ */
+bool hasBoundaryID(MeshBase & input_mesh, const BoundaryID & id);
+
+/**
+ * Whether a particular boundary name exists in the mesh
+ * @param input mesh over which to determine boundary names
+ * @param boundary name
+ */
+bool hasBoundaryName(MeshBase & input_mesh, const BoundaryName & name);
 }

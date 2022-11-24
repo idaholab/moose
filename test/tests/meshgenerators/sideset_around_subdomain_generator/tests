@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/SideSetsAroundSubdomainGenerator.md'
-  issues = '#11640'
+  issues = '#11640 #22117'
 
   [group]
     requirement = 'The system shall have the ability to create new mesh side sets around subdomains:'
@@ -32,7 +32,7 @@
       exodiff = 'around_multi_created_subdomain_in.e'
       recover = false
 
-      detail = 'around multiple subdomains within a larger domain, and'
+      detail = 'around multiple subdomains within a larger domain,'
     []
 
     [two_inside]
@@ -42,7 +42,28 @@
       exodiff = 'around_in.e'
       recover = false
 
-      detail = 'around two blocks within a domain.'
+      detail = 'around two blocks within a domain, and'
     []
+
+    [adjacent_to_boundary]
+      type = 'Exodiff'
+      input = 'sideset_around_subdomain_including_boundary.i'
+      cli_args = "--mesh-only"
+      exodiff = 'sideset_around_subdomain_including_boundary_in.e'
+      recover = false
+
+      detail = "for a subdomain contained completely within a larger domain but containing part of that subdomain's boundary."
+      # To ensure the current coverage recipe triggers the communication of sides
+      min_parallel = 5
+      mesh_mode = 'distributed'
+    []
+  []
+
+  [invalid_block]
+    type = RunException
+    input = around.i
+    cli_args = 'Mesh/block_2/block="missing"'
+    expect_err = "The block 'missing' was not found in the mesh"
+    requirement = "The system shall error if the subdomain to create sidesets around does not exist in the mesh"
   []
 []

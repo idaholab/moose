@@ -32,6 +32,9 @@ LagrangianStressDivergenceBase::validParams()
       "List of eigenstrains used in the strain calculation. Used for computing their derivatives "
       "for off-diagonal Jacobian terms.");
 
+  params.addCoupledVar("out_of_plane_strain",
+                       "The out-of-plane strain variable for weak plane stress formulation.");
+
   return params;
 }
 
@@ -51,7 +54,9 @@ LagrangianStressDivergenceBase::LagrangianStressDivergenceBase(const InputParame
                                                     "inverse_incremental_deformation_gradient")),
     _F_inv(getMaterialPropertyByName<RankTwoTensor>(_base_name + "inverse_deformation_gradient")),
     _F(getMaterialPropertyByName<RankTwoTensor>(_base_name + "deformation_gradient")),
-    _temperature(isCoupled("temperature") ? getVar("temperature", 0) : nullptr)
+    _temperature(isCoupled("temperature") ? getVar("temperature", 0) : nullptr),
+    _out_of_plane_strain(isCoupled("out_of_plane_strain") ? getVar("out_of_plane_strain", 0)
+                                                          : nullptr)
 {
   // Do the vector coupling of the displacements
   for (unsigned int i = 0; i < _ndisp; i++)
@@ -114,14 +119,22 @@ LagrangianStressDivergenceBase::computeQpJacobian()
 Real
 LagrangianStressDivergenceBase::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  for (auto beta : make_range(_ndisp))
-    if (jvar == _disp_nums[beta])
-      return computeQpJacobianDisplacement(_alpha, beta);
-
   // Bail if jvar not coupled
   if (getJvarMap()[jvar] < 0)
     return 0.0;
 
+  // Off diagonal terms for other displacements
+  for (auto beta : make_range(_ndisp))
+    if (jvar == _disp_nums[beta])
+      return computeQpJacobianDisplacement(_alpha, beta);
+
   // Off diagonal temperature term due to eigenstrain
-  return computeQpJacobianTemperature(mapJvarToCvar(jvar));
+  if (_temperature && jvar == _temperature->number())
+    return computeQpJacobianTemperature(mapJvarToCvar(jvar));
+
+  // Off diagonal term due to weak plane stress
+  if (_out_of_plane_strain && jvar == _out_of_plane_strain->number())
+    return computeQpJacobianOutOfPlaneStrain();
+
+  return 0;
 }

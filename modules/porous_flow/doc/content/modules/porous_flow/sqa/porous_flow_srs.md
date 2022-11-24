@@ -1,1 +1,1 @@
-!template load file=sqa/app_srs.md.template category=porous_flow app=Porous Flow
+!template load file=sqa/module_srs.md.template category=porous_flow module=Porous Flow

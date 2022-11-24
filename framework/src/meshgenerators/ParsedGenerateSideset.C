@@ -51,8 +51,8 @@ ParsedGenerateSideset::validParams()
       "normal",
       Point(),
       "If provided specifies the normal vector on sides that are added to the new ");
-  params.addParam<std::vector<std::string>>(
-      "constant_names", "Vector of constants used in the parsed function (use this for kB etc.)");
+  params.addParam<std::vector<std::string>>("constant_names",
+                                            "Vector of constants used in the parsed function");
   params.addParam<std::vector<std::string>>(
       "constant_expressions",
       "Vector of values for the constants in constant_names (can be an FParser expression)");
@@ -130,11 +130,26 @@ ParsedGenerateSideset::generate()
 
   // Get the boundary ids from the names
   if (parameters().isParamValid("included_subdomains"))
-    _included_ids = MooseMeshUtils::getSubdomainIDs(
-        *mesh, getParam<std::vector<SubdomainName>>("included_subdomains"));
+  {
+    // check that the subdomains exist in the mesh
+    const auto subdomains = getParam<std::vector<SubdomainName>>("included_subdomains");
+    for (const auto & name : subdomains)
+      if (!MooseMeshUtils::hasSubdomainName(*mesh, name))
+        paramError("included_subdomains", "The block '", name, "' was not found in the mesh");
+
+    _included_ids = MooseMeshUtils::getSubdomainIDs(*mesh, subdomains);
+  }
+
   if (parameters().isParamValid("included_neighbors"))
-    _included_neighbor_ids = MooseMeshUtils::getSubdomainIDs(
-        *mesh, getParam<std::vector<SubdomainName>>("included_neighbors"));
+  {
+    // check that the subdomains exist in the mesh
+    const auto subdomains = getParam<std::vector<SubdomainName>>("included_neighbors");
+    for (const auto & name : subdomains)
+      if (!MooseMeshUtils::hasSubdomainName(*mesh, name))
+        paramError("included_neighbors", "The block '", name, "' was not found in the mesh");
+
+    _included_neighbor_ids = MooseMeshUtils::getSubdomainIDs(*mesh, subdomains);
+  }
 
   // Get the BoundaryIDs from the mesh
   std::vector<boundary_id_type> boundary_ids =

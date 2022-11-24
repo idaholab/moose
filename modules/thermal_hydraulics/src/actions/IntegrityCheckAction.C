@@ -21,7 +21,9 @@ IntegrityCheckAction::validParams()
   return params;
 }
 
-IntegrityCheckAction::IntegrityCheckAction(InputParameters parameters) : Action(parameters) {}
+IntegrityCheckAction::IntegrityCheckAction(const InputParameters & parameters) : Action(parameters)
+{
+}
 
 void
 IntegrityCheckAction::act()

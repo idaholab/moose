@@ -122,7 +122,7 @@ AuxKernelTempl<ComputeValueType>::AuxKernelTempl(const InputParameters & paramet
     _u(_nodal ? _var.nodalValueArray() : _var.sln()),
 
     _test(_var.phi()),
-    _assembly(_subproblem.assembly(_tid)),
+    _assembly(_subproblem.assembly(_tid, 0)),
     _bnd(boundaryRestricted()),
     _mesh(_subproblem.mesh()),
 

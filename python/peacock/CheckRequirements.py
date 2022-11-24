@@ -7,10 +7,15 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+from platform import python_version
+
 def print_error(msg):
-    print("\nError starting peacock: %s\n" % msg)
-    print("You need to use the miniconda module. Run:")
-    print("\tmodule load miniconda")
+    python_short = '.'.join(python_version().split('.')[:2])
+    print(f"\nError starting peacock: {msg}"
+           "\n\nYou may need to either create or load an environment providing PyQt, VTK, etc."
+           "\nThe MOOSE development team provides a conda package with the required dependencies:"
+           f"\n\n\tmamba create -n peacock moose-peacock python={python_short}"
+           "\n\tmamba activate peacock\n\nThen run peacock again\n")
 
 class ErrorObserver(object):
     """

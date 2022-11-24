@@ -34,7 +34,8 @@ NodalVariableValue::NodalVariableValue(const InputParameters & parameters)
     _mesh(_subproblem.mesh()),
     _var_name(parameters.get<VariableName>("variable")),
     _node_ptr(nullptr),
-    _scale_factor(getParam<Real>("scale_factor"))
+    _scale_factor(getParam<Real>("scale_factor")),
+    _value(0)
 {
   // This class may be too dangerous to use if renumbering is enabled,
   // as the nodeid parameter obviously depends on a particular
@@ -58,15 +59,24 @@ NodalVariableValue::initialSetup()
                "' not found in the mesh!");
 }
 
+void
+NodalVariableValue::execute()
+{
+  _value = 0;
+
+  if (_node_ptr && _node_ptr->processor_id() == processor_id())
+    _value = _subproblem.getStandardVariable(_tid, _var_name).getNodalValue(*_node_ptr);
+}
+
 Real
 NodalVariableValue::getValue()
 {
-  Real value = 0;
 
-  if (_node_ptr && _node_ptr->processor_id() == processor_id())
-    value = _subproblem.getStandardVariable(_tid, _var_name).getNodalValue(*_node_ptr);
+  return _scale_factor * _value;
+}
 
-  gatherSum(value);
-
-  return _scale_factor * value;
+void
+NodalVariableValue::finalize()
+{
+  gatherSum(_value);
 }

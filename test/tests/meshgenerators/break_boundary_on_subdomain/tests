@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#7887 #11640'
+  issues = '#7887 #11640 #22117'
   design = 'meshgenerators/BreakBoundaryOnSubdomainGenerator.md'
 
   [boundary_type]
@@ -24,7 +24,15 @@
       mesh_mode = 'REPLICATED'
       recover = false
 
-      detail = 'on internal boundaries.'
+      detail = 'on internal boundaries, and'
+    []
+
+    [invalid_boundary]
+      type = RunException
+      input = break_boundary_on_subdomain.i
+      cli_args = 'Mesh/break_boundary/boundaries="missing"'
+      expect_err = "The boundary 'missing' was not found in the mesh"
+      detail = 'error when the boundary does not exist in the mesh.'
     []
   []
 []

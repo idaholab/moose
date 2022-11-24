@@ -20,7 +20,7 @@ AddReporterAction::validParams()
   return params;
 }
 
-AddReporterAction::AddReporterAction(InputParameters params) : MooseObjectAction(params) {}
+AddReporterAction::AddReporterAction(const InputParameters & params) : MooseObjectAction(params) {}
 
 void
 AddReporterAction::act()

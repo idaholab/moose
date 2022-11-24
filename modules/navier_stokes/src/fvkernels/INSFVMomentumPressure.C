@@ -55,6 +55,8 @@ INSFVMomentumPressure::computeQpResidual()
 #else
   bool correct_skewness =
       (_p_var->faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
+
   return _p_var->adGradSln(_current_elem, correct_skewness)(_index);
+
 #endif
 }

@@ -24,7 +24,9 @@ LoadCovarianceDataAction::validParams()
   return params;
 }
 
-LoadCovarianceDataAction::LoadCovarianceDataAction(InputParameters params) : Action(params) {}
+LoadCovarianceDataAction::LoadCovarianceDataAction(const InputParameters & params) : Action(params)
+{
+}
 
 void
 LoadCovarianceDataAction::act()

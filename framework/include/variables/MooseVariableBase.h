@@ -114,6 +114,12 @@ public:
   virtual bool isNodal() const { return true; }
 
   /**
+   * Does this variable have DoFs on nodes
+   * @return true if it does, false if not.
+   */
+  virtual bool hasDoFsOnNodes() const { return true; }
+
+  /**
    * The DofMap associated with the system this variable is in.
    */
   const DofMap & dofMap() const { return _dof_map; }

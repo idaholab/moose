@@ -94,14 +94,14 @@
 
 [Transfers]
   [v_to_sub]
-    type = MultiAppMeshFunctionTransfer
+    type = MultiAppShapeEvaluationTransfer
     source_variable = v
     variable = v
     to_multi_app = level2-
     execute_on = 'timestep_end'
   []
   [w_from_sub]
-    type = MultiAppMeshFunctionTransfer
+    type = MultiAppShapeEvaluationTransfer
     source_variable = w
     variable = w
     from_multi_app = level2-

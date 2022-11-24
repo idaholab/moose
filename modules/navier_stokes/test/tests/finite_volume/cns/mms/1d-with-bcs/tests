@@ -4,10 +4,11 @@
     type = PythonUnitTest
     input = test.py
     test_case = Test1DFreeFlowHLLC
-    requirement = 'The system shall exhibit first order convergence for all variables for the free-flow Euler equations using a HLLC discretization scheme for the advection flux and with specified temperature and momentum at one boundary and specified pressure at another boundary.'
+    requirement = 'The system shall exhibit first order convergence for all variables for the free-flow Euler equations with added artificial diffusion using a HLLC discretization scheme for the advection flux and with specified temperature and momentum at one boundary and specified pressure at another boundary.'
     required_python_packages = 'pandas matplotlib'
     method = "!dbg"
     design = 'CNSFVHLLCBase.md'
+    ad_indexing_type = 'global'
   []
   [1d-porous-hllc]
     requirement = 'The system shall exhibit first order convergence for all variables for the porous Euler equations using a HLLC discretization scheme for the advection flux and with specified temperature and momentum/velocity at one boundary and specified pressure at another boundary with'

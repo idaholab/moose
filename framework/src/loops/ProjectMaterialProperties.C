@@ -9,7 +9,6 @@
 
 // MOOSE includes
 #include "ProjectMaterialProperties.h"
-#include "NonlinearSystem.h"
 #include "Problem.h"
 #include "FEProblem.h"
 #include "MaterialPropertyStorage.h"
@@ -23,16 +22,14 @@
 ProjectMaterialProperties::ProjectMaterialProperties(
     bool refine,
     FEProblemBase & fe_problem,
-    NonlinearSystemBase & sys,
     std::vector<std::shared_ptr<MaterialData>> & material_data,
     std::vector<std::shared_ptr<MaterialData>> & bnd_material_data,
     MaterialPropertyStorage & material_props,
     MaterialPropertyStorage & bnd_material_props,
-    std::vector<std::unique_ptr<Assembly>> & assembly)
+    std::vector<std::vector<std::unique_ptr<Assembly>>> & assembly)
   : ThreadedElementLoop<ConstElemPointerRange>(fe_problem),
     _refine(refine),
     _fe_problem(fe_problem),
-    _sys(sys),
     _material_data(material_data),
     _bnd_material_data(bnd_material_data),
     _material_props(material_props),
@@ -50,7 +47,6 @@ ProjectMaterialProperties::ProjectMaterialProperties(ProjectMaterialProperties &
   : ThreadedElementLoop<ConstElemPointerRange>(x, split),
     _refine(x._refine),
     _fe_problem(x._fe_problem),
-    _sys(x._sys),
     _material_data(x._material_data),
     _bnd_material_data(x._bnd_material_data),
     _material_props(x._material_props),
@@ -82,7 +78,7 @@ ProjectMaterialProperties::onElement(const Elem * elem)
       !_discrete_materials.hasActiveBlockObjects(elem->subdomain_id(), _tid))
     return;
 
-  _assembly[_tid]->reinit(elem);
+  _assembly[_tid][0]->reinit(elem);
 
   if (_refine)
   {
@@ -91,8 +87,8 @@ ProjectMaterialProperties::onElement(const Elem * elem)
 
     _material_props.prolongStatefulProps(
         refinement_map,
-        *_assembly[_tid]->qRule(),
-        *_assembly[_tid]->qRuleFace(),
+        *_assembly[_tid][0]->qRule(),
+        *_assembly[_tid][0]->qRuleFace(),
         _material_props, // Passing in the same properties to do volume to volume projection
         *_material_data[_tid],
         *elem,
@@ -107,8 +103,8 @@ ProjectMaterialProperties::onElement(const Elem * elem)
 
     _material_props.restrictStatefulProps(coarsening_map,
                                           _mesh.coarsenedElementChildren(elem),
-                                          *_assembly[_tid]->qRule(),
-                                          *_assembly[_tid]->qRuleFace(),
+                                          *_assembly[_tid][0]->qRule(),
+                                          *_assembly[_tid][0]->qRuleFace(),
                                           *_material_data[_tid],
                                           *elem,
                                           -1);
@@ -124,7 +120,7 @@ ProjectMaterialProperties::onBoundary(const Elem * elem,
   if (_fe_problem.needBoundaryMaterialOnSide(bnd_id, _tid) &&
       _bnd_material_props.hasStatefulProperties())
   {
-    _assembly[_tid]->reinit(elem, side);
+    _assembly[_tid][0]->reinit(elem, side);
 
     if (_refine)
     {
@@ -133,8 +129,8 @@ ProjectMaterialProperties::onBoundary(const Elem * elem,
 
       _bnd_material_props.prolongStatefulProps(
           refinement_map,
-          *_assembly[_tid]->qRule(),
-          *_assembly[_tid]->qRuleFace(),
+          *_assembly[_tid][0]->qRule(),
+          *_assembly[_tid][0]->qRuleFace(),
           _bnd_material_props, // Passing in the same properties to do side_to_side projection
           *_bnd_material_data[_tid],
           *elem,
@@ -149,8 +145,8 @@ ProjectMaterialProperties::onBoundary(const Elem * elem,
 
       _bnd_material_props.restrictStatefulProps(coarsening_map,
                                                 _mesh.coarsenedElementChildren(elem),
-                                                *_assembly[_tid]->qRule(),
-                                                *_assembly[_tid]->qRuleFace(),
+                                                *_assembly[_tid][0]->qRule(),
+                                                *_assembly[_tid][0]->qRuleFace(),
                                                 *_material_data[_tid],
                                                 *elem,
                                                 side);
@@ -177,8 +173,8 @@ ProjectMaterialProperties::onInternalSide(const Elem * elem, unsigned int /*side
 
           _bnd_material_props.prolongStatefulProps(
               refinement_map,
-              *_assembly[_tid]->qRule(),
-              *_assembly[_tid]->qRuleFace(),
+              *_assembly[_tid][0]->qRule(),
+              *_assembly[_tid][0]->qRuleFace(),
               _material_props, // Passing in the same properties to do side_to_side projection
               *_bnd_material_data[_tid],
               *elem,

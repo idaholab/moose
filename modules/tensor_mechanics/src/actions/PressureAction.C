@@ -23,7 +23,7 @@ PressureAction::validParams()
   params.addRequiredParam<std::vector<BoundaryName>>(
       "boundary", "The list of boundary IDs from the mesh where the pressure will be applied");
 
-  params.addParam<std::vector<VariableName>>(
+  params.addRequiredParam<std::vector<VariableName>>(
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
 

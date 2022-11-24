@@ -1,4 +1,4 @@
-# INL Applications and Remote Access
+# INL HPC Remote Access
 
 [!ac](INL) builds and maintains a wide range of MOOSE-based applications as well as [!ac](HPC)
 support for these applications. The following links will aid researchers learning more about the

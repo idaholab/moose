@@ -63,7 +63,7 @@ simulation may be performed in Cartesian 3D space whereas a fuel performance
 calculation may be performed using a 2D axisymmetric coordinate
 system. Communicating information between these different configurations can be
 difficult. One mechanism MOOSE provides for making this communication simpler is
-the `MooseCoordTransform` class. Each `MooseApp` instance holds a coordinate
+the `MooseAppCoordTransform` class. Each `MooseApp` instance holds a coordinate
 transformation object in its `MooseMesh` object. Users may specify
 transformation information about their simulation setup on a per-application
 basis in the input file `Mesh` block. The [!param](/Mesh/GeneratedMesh/coord_type)
@@ -78,22 +78,22 @@ a alpha-beta-gamma Euler angle rotation is:
 
 
 [!param](/Mesh/GeneratedMesh/length_unit) allows the user to specify
-their mesh length unit. The code in `MooseCoordTransform`
+their mesh length unit. The code in `MooseAppCoordTransform`
 which processes this parameter leverages the [MooseUnits](/Units.md) system. A
 scaling transform will be constructed to convert a point in the mesh domain with
 the prescribed mesh length unit to the reference domain with units of meters.
 The last option which contributes to
-transformation information held by the `MooseCoordTransform` class is the
+transformation information held by the `MooseAppCoordTransform` class is the
 [!param](/MultiApps/TransientMultiApp/positions) parameter which is described in
 [MultiApps/index.md#multiapp-positions]. The value of `positions` exactly
-corresponds to the translation vector set in the `MooseCoordTransform` object of
+corresponds to the translation vector set in the `MooseAppCoordTransform` object of
 the sub-application. The `alpha_rotation`, `beta_rotation`, `gamma_rotation`,
 and `positions` parameters essentially describe forward transformations of the
 mesh domain described by the MOOSE `Mesh` block to a reference domain. Following
 the ordering
 [here](https://docs.microsoft.com/en-us/dotnet/desktop/winforms/advanced/why-transformation-order-is-significant?view=netframeworkdesktop-4.8),
 the sequence of
-transformations applied in the `MooseCoordTransform` class is:
+transformations applied in the `MooseAppCoordTransform` class is:
 
 1. scaling
 2. rotation
@@ -137,8 +137,8 @@ forward. One option would be to average the field data from equivalent points.
 Framework transfer classes that support the coordinate transformation
 processes described here are:
 
-- [MultiAppInterpolationTransfer.md]
-- [MultiAppMeshFunctionTransfer.md]
+- [MultiAppGeometricInterpolationTransfer.md]
+- [MultiAppShapeEvaluationTransfer.md]
 - [MultiAppNearestNodeTransfer.md]
 - [MultiAppPostprocessorInterpolationTransfer.md]
 - [MultiAppProjectionTransfer.md]
@@ -171,7 +171,7 @@ applying the transformation order outlined above (rotation, scale, translation).
 !media transfers/rotated-scaled-translated.png id=transformed caption=Example of rotation, scaling, and translation transformations between multiapps
 
 
-Another example leveraging the `MooseCoordTransform` class is a simulation in
+Another example leveraging the `MooseAppCoordTransform` class is a simulation in
 which one application is in 3D XYZ space and another is in 2D RZ space. In this
 example we wish to rotate the axis of symmetry, which is the Y-axis in the 2D RZ
 simulation, in order to align with the z-axis when transferring data between the
@@ -191,7 +191,7 @@ We mentioned how forward rotation transformations can be achieved by specifying
 Euler angles. Another parameter that can be used to perform rotations is
 [!param](/Mesh/GeneratedMesh/up_direction). As described in the parameter
 documentation string, if `up_direction` is specified, then in the
-`MooseCoordTransform` object we will prescribe a rotation matrix that
+`MooseAppCoordTransform` object we will prescribe a rotation matrix that
 corresponds to a single 90 degree rotation such that a point lying on the
 `up_direction` axis will now lie on the y-axis. We have chosen the y-axis to be
 the canonical reference frame up-direction because it is the literal

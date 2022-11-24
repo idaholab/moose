@@ -42,7 +42,6 @@ public:
   /// Map of pipe type to enum
   static const std::map<std::string, EPipeType> _pipe_type_to_enum;
 
-  virtual void buildMesh() override;
   virtual void addVariables() override;
   virtual void addMooseObjects() override;
 
@@ -94,9 +93,6 @@ public:
    */
   virtual FunctionName createAreaFunctionAndGetName();
 
-  unsigned int getNodesetID() const;
-  const BoundaryName & getNodesetName() const;
-
   /**
    * Gets heat transfer geometry
    */
@@ -126,6 +122,7 @@ public:
    * Gets wall temperature names for connected heat transfers
    */
   std::vector<VariableName> getWallTemperatureNames() const { return _T_wall_names; }
+  std::vector<MaterialPropertyName> getWallTemperatureMatNames() const { return _T_wall_mat_names; }
 
   /**
    * Gets wall heat flux names for connected heat transfers
@@ -172,8 +169,6 @@ protected:
 
   virtual std::shared_ptr<ClosuresBase> buildClosures();
 
-  virtual void buildMeshNodes();
-
   /**
    * Adds objects which are common for single- and two-phase flow
    */
@@ -214,11 +209,6 @@ protected:
   /// True if user provides PoD
   bool _has_PoD;
 
-  /// Nodeset id for all flow channel nodes
-  BoundaryID _nodeset_id;
-  /// Nodeset name for all flow channel nodes
-  BoundaryName _nodeset_name;
-
   /// True if there is one or more sources specified by wall temperature
   bool _temperature_mode;
   /// Names of the heat transfer components connected to this component
@@ -234,8 +224,10 @@ protected:
   std::vector<MaterialPropertyName> _Hw_vapor_names;
   /// heated perimeter names for connected heat transfers
   std::vector<VariableName> _P_hf_names;
-  /// wall temperature names for connected heat transfers
+  /// wall temperature auxvariable names for connected heat transfers
   std::vector<VariableName> _T_wall_names;
+  /// wall temperature material names for connected heat transfers
+  std::vector<MaterialPropertyName> _T_wall_mat_names;
   /// wall heat flux names for connected heat transfers
   std::vector<MaterialPropertyName> _q_wall_names;
 

@@ -144,7 +144,7 @@ num_steps=2
 
 [Transfers]
   [./mesh_function_begin]
-    type = MultiAppMeshFunctionTransfer
+    type = MultiAppShapeEvaluationTransfer
     from_multi_app = coarser
     source_variable = u
     variable = u

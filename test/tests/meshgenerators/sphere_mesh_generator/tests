@@ -1,0 +1,32 @@
+[Tests]
+  [sphere]
+    type = Exodiff
+    input = sphere.i
+    cli_args = '--mesh-only'
+    exodiff = sphere_in.e
+    requirement = 'The system shall be able to generate a sphere volume mesh.'
+    design = 'meshgenerators/SphereMeshGenerator.md'
+    recover = false
+    issues = '#22591'
+  []
+  [smooth]
+    type = Exodiff
+    input = smooth.i
+    cli_args = '--mesh-only'
+    exodiff = smooth_in.e
+    requirement = 'The system shall be able to generate a sphere volume mesh with smoothing.'
+    design = 'meshgenerators/SphereMeshGenerator.md'
+    recover = false
+    issues = '#22591'
+  []
+  [hex27]
+    type = Exodiff
+    input = sphere_hex27.i
+    cli_args = '--mesh-only'
+    exodiff = sphere_hex27_in.e
+    requirement = 'The system shall be able to generate a sphere volume mesh with HEX27 elements.'
+    design = 'meshgenerators/SphereMeshGenerator.md'
+    recover = false
+    issues = '#22591'
+  []
+[]

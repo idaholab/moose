@@ -26,11 +26,13 @@ public:
   virtual void initialize() override;
   virtual void execute() override;
   virtual Real getValue() override;
+  virtual void finalize() override;
   virtual void threadJoin(const UserObject & y) override;
 
 protected:
   /// Domain volume
   Real _volume;
+  using MaterialTensorIntegralTempl<is_ad>::_integral_value;
 };
 
 typedef MaterialTensorAverageTempl<false> MaterialTensorAverage;

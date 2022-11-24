@@ -117,7 +117,10 @@ FVFluxBC::computeJacobian(Moose::DGJacobianType type, const ADReal & residual)
     if (ivar != _var.number())
       continue;
 
-    SystemBase & sys = _subproblem.systemBaseNonlinear();
+    mooseAssert(_var.kind() == Moose::VAR_NONLINEAR,
+                "This is a predicate for the next line...and since this is a residual/Jacobian "
+                "object, this better well be a nonlinear variable");
+    SystemBase & sys = _subproblem.systemBaseNonlinear(_var.sys().number());
     auto dofs_per_elem = sys.getMaxVarNDofsPerElem();
 
     auto ad_offset = Moose::adOffset(jvar, dofs_per_elem, type, sys.system().n_vars());

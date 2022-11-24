@@ -4,11 +4,12 @@
 
 The `SideIntegralFunctorPostprocessor` is also an intermediate base class
 that should be derived from for any calculation involving
-the integral of a variable quantity over a side.
+the integral of a functor quantity over a side.
 
-!alert note
-Functors are currently restricted to finite volume variables, functor material
-properties and functions.
+The [!param](/Postprocessors/SideIntegralFunctorPostprocessor/functor_argument) parameter lets
+the user select between face integration and element side quadrature point integration. Face integration
+is more appropriate for finite volume variables, and quadrature point integration is more appropriate
+for finite element variables.
 
 !syntax parameters /Postprocessors/SideIntegralFunctorPostprocessor
 

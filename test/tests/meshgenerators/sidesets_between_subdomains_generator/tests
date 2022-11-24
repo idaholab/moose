@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/SideSetsBetweenSubdomainsGenerator.md'
-  issues = '#11640'
+  issues = '#11640 #21861'
 
   [group]
     requirement = 'The system shall have the ability to create new side sets between adjacent '
@@ -35,6 +35,33 @@
       recover = false
 
       detail = 'between two subdomains in a mesh with two adjacent subdomains.'
+    []
+
+    [unprepared_input]
+      type = 'Exodiff'
+      input = 'sideset_between_subdomains_not_prepared.i'
+      cli_args = '--mesh-only'
+      exodiff = 'sideset_between_subdomains_not_prepared_in.e'
+      exodiff_opts = '-pedantic'
+      recover = false
+
+      detail = 'between two subdomains in an unprepared mesh.'
+    []
+
+    [invalid_primary_block]
+      type = RunException
+      input = sideset_between_subdomains.i
+      cli_args = "Mesh/central_boundary/primary_block='missing'"
+      expect_err = "The block 'missing' was not found within the mesh"
+      detail = 'only when the primary block exists in the mesh.'
+    []
+
+    [invalid_paired_block]
+      type = RunException
+      input = sideset_between_subdomains.i
+      cli_args = "Mesh/central_boundary/paired_block='missing'"
+      expect_err = "The block 'missing' was not found within the mesh"
+      detail = 'only when the paired block exists in the mesh.'
     []
   []
 []

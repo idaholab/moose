@@ -51,7 +51,10 @@ AddPeriodicBCAction::validParams()
   return params;
 }
 
-AddPeriodicBCAction::AddPeriodicBCAction(InputParameters params) : Action(params), _mesh(nullptr) {}
+AddPeriodicBCAction::AddPeriodicBCAction(const InputParameters & params)
+  : Action(params), _mesh(nullptr)
+{
+}
 
 void
 AddPeriodicBCAction::setPeriodicVars(PeriodicBoundaryBase & p,

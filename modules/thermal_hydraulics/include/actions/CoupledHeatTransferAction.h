@@ -14,8 +14,8 @@
 #include "MooseEnum.h"
 
 /**
- * Action that controls the creation of all of the necessary objects for
- * doing transfer between heat conduction and thermal hydraulics module
+ * Action that creates the necessary objects, for the solid side, to couple a
+ * solid heat conduction region to a 1-D flow channel via convective heat transfer
  */
 class CoupledHeatTransferAction : public Action
 {
@@ -33,32 +33,35 @@ protected:
   /// Boundary where the BC is applied
   std::vector<BoundaryName> _boundary;
 
-  /// The name of the solid temperature variable
-  VariableName _solid_temp_var_name;
+  /// Solid side temperature variable name
+  const VariableName _T_solid_var_name;
 
-  /// The name of the fluid temperature variable
-  VariableName _fluid_temp_var_name;
+  /// Variable on the flow channel side into which to transfer the solid temperature
+  const VariableName _T_wall_var_name;
 
-  /// The name of the wall temperature variable in THM
-  VariableName _wall_temp_var_name;
+  /// Variable(s) on the solid side into which to transfer the fluid temperature(s)
+  const std::vector<VariableName> _T_fluid_var_names;
 
-  /// The name of the heat transfer coefficient variable
-  VariableName _htc_var_name;
+  /// Variable(s) on the solid side into which to transfer the heat transfer coefficient(s)
+  const std::vector<VariableName> _htc_var_names;
 
-  /// The MooseEnum direction the layers are going in
-  MooseEnum _direction_enum;
+  /// Variables on the solid side into which to transfer the wall contact fractions
+  std::vector<VariableName> _kappa_var_names;
 
-  /// Number of layers to split the mesh into
-  unsigned int _num_layers;
+  /// Number of fluid phases
+  const unsigned int _n_phases;
 
   /// User object name with solid temperature
-  UserObjectName _T_avg_user_object_name;
+  const UserObjectName _T_wall_user_object_name;
 
-  /// User object name with fluid temperature
-  UserObjectName _th_T_fluid_user_object_name;
+  /// Spatial user object(s) holding the fluid temperature values
+  std::vector<UserObjectName> _T_fluid_user_object_names;
 
-  /// User object name with heat transfer temperature
-  UserObjectName _th_htc_user_object_name;
+  /// Spatial user object(s) holding the heat transfer coefficient values
+  std::vector<UserObjectName> _htc_user_object_names;
+
+  /// Spatial user objects holding the wall contact fraction values
+  std::vector<UserObjectName> _kappa_user_object_names;
 
   /// Name of the THM multi-app
   MultiAppName _multi_app_name;

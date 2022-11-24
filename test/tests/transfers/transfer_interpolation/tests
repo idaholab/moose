@@ -1,6 +1,6 @@
 [Tests]
   issues = '#1950'
-  design = 'MultiAppInterpolationTransfer.md'
+  design = 'MultiAppGeometricInterpolationTransfer.md'
   [test]
     type = 'Exodiff'
     input = 'parent.i'

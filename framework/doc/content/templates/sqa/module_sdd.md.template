@@ -1,0 +1,65 @@
+!template load file=sdd.md.template category={{category}} project={{module}}
+
+!template! item key=pre-intro
+!alert! note
+This document serves as an addendum to [framework_sdd.md] and captures information for
+[!ac](SDD) specific to the {{module}} module.
+
+!sqa dependencies suffix=sdd category={{category}}
+!alert-end!
+!template-end!
+
+!template! item key=system-purpose
+The Software Design Description provided here is description of each object in the
+system. The pluggable architecture of the underlying framework of the {{module}} module makes
+[!ac](MOOSE) and [!ac](MOOSE)-based applications straightforward to develop as each
+piece of end-user (developer) code that goes into the system follows a well-defined
+interface for the underlying systems that those object plug into. These descriptions are
+provided through developer-supplied "markdown" files that are required for all new
+objects that are developed as part of the {{module}} module. More information about the design
+documentation for MOOSE-based applications and like the {{module}} module can be found in [framework/documenting.md].
+!template-end!
+
+!template item key=definitions
+!include framework_sdd.md start=definitions-begin end=definitions-finish
+
+!template item key=acronyms
+!acronym list
+
+!template! item key=stakeholder-design-concerns
+Concerns from many of the stakeholders are similar. These concerns include correctness, stability,
+and performance. The mitigation plan for each of these can be addressed. For correctness, {{module}}
+module development requires either regression or unit testing for all new code added to the repository.
+The project contains several comparisons against analytical solutions where possible and also
+other verification methods such as [MMS](python/mms.md optional=True). For stability, the {{module}} module
+(located within the [!ac](MOOSE) repository) maintains multiple branches to incorporate several layers of
+testing both internally and for dependent applications. Finally, performance tests are also performed
+as part of the the normal testing suite to monitor code change impacts to performance.
+!template-end!
+
+!template item key=data-design-and-control
+!include framework_sdd.md start=data-design-and-control-begin end=data-design-and-control-finish
+
+!template! item key=human-machine-interface-design
+The {{module}} module is a command-line driven program. All interaction with the {{module}} module is
+ultimately done through the command line. This is typical for [!ac](HPC) applications that
+use the [!ac](MPI) interface for running on super computing clusters. Optional GUIs may be
+used to assist in creating input files and launching executables on the command line.
+!template-end!
+
+!template! item key=system-design-interface
+All external system interaction is performed either through file [!ac](I/O) or through
+local [!ac](API) calls. Neither the {{module}} module, nor the MOOSE framework, nor the other MOOSE
+modules are designed to interact with any external system directly through remote procedure calls.
+Any code to code coupling performed using the framework are done directly through API calls
+either in a static binary or after loading shared libraries.
+!template-end!
+
+!template! item key=security-structure
+The {{module}} module does not require any elevated privileges to operate and does not
+run any stateful services, daemons or other network programs. Distributed runs rely on the
+[!ac](MPI) library.
+!template-end!
+
+!template item key=requirements-cross-reference
+!sqa cross-reference category={{category}}

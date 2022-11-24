@@ -71,12 +71,12 @@ WCNSFVMomentumFluxBC::computeQpResidual()
     if (MooseUtils::absoluteFuzzyEqual(*_area_pp, 0))
       mooseError("Surface area is 0");
 
-  const Real contrib = abs(_face_info->normal()(_index));
+  const Real contrib = std::abs(_face_info->normal()(_index));
 
   if (_velocity_pp)
     return -_scaling_factor * std::pow((*_velocity_pp), 2) * contrib *
            (*_rho)(singleSidedFaceArg());
   else
-    return -_scaling_factor * std::pow((*_mdot_pp), 2) * contrib / (*_rho)(singleSidedFaceArg()) /
-           (*_area_pp);
+    return -_scaling_factor * std::pow((*_mdot_pp) / (*_area_pp), 2) * contrib /
+           (*_rho)(singleSidedFaceArg());
 }

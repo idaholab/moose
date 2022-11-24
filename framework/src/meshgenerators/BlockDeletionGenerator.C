@@ -48,11 +48,8 @@ BlockDeletionGenerator::generate()
         MooseMeshUtils::getSubdomainIDs(*_input, getParam<std::vector<SubdomainName>>("block"));
 
   // Check that the block ids/names exist in the mesh
-  std::set<SubdomainID> mesh_blocks;
-  _input->subdomain_ids(mesh_blocks);
-
   for (std::size_t i = 0; i < _block_ids.size(); ++i)
-    if (_block_ids[i] == Moose::INVALID_BLOCK_ID || !mesh_blocks.count(_block_ids[i]))
+    if (!MooseMeshUtils::hasSubdomainID(*_input, _block_ids[i]))
     {
       if (isParamValid("block"))
         paramError("block",

@@ -19,7 +19,7 @@ class AddTimeDependentReactionSolverAction : public AddGeochemistrySolverAction
 public:
   static InputParameters validParams();
 
-  AddTimeDependentReactionSolverAction(InputParameters parameters);
+  AddTimeDependentReactionSolverAction(const InputParameters & parameters);
 
   virtual void act() override;
 };

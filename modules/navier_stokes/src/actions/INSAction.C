@@ -161,7 +161,7 @@ INSAction::validParams()
   return params;
 }
 
-INSAction::INSAction(InputParameters parameters)
+INSAction::INSAction(const InputParameters & parameters)
   : Action(parameters),
     _type(getParam<MooseEnum>("equation_type")),
     _blocks(getParam<std::vector<SubdomainName>>("block")),

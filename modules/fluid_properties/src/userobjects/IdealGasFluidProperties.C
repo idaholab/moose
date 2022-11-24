@@ -676,6 +676,5 @@ IdealGasFluidProperties::k_from_p_T(Real p, Real T, Real & k, Real & dk_dp, Real
 
 Real IdealGasFluidProperties::pp_sat_from_p_T(Real /*p*/, Real /*T*/) const
 {
-  mooseError(
-      name(), ": ", __PRETTY_FUNCTION__, " not implemented. Use a real fluid property class!");
+  mooseError(__PRETTY_FUNCTION__, " not implemented. Use a real fluid property class!");
 }

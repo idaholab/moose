@@ -16,7 +16,7 @@ class SetupDampersAction : public Action
 public:
   static InputParameters validParams();
 
-  SetupDampersAction(InputParameters params);
+  SetupDampersAction(const InputParameters & params);
 
   virtual void act() override;
 };

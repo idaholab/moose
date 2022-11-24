@@ -256,17 +256,15 @@ production_rate = 1.0 # kg/s/m
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [the_simple_fluid]
-      type = SimpleFluidProperties
-      thermal_expansion = 0
-      bulk_modulus = 2E9
-      viscosity = 1E-3
-      density0 = 1000
-      cv = 4000.0
-      cp = 4000.0
-    []
+[FluidProperties]
+  [the_simple_fluid]
+    type = SimpleFluidProperties
+    thermal_expansion = 0
+    bulk_modulus = 2E9
+    viscosity = 1E-3
+    density0 = 1000
+    cv = 4000.0
+    cp = 4000.0
   []
 []
 

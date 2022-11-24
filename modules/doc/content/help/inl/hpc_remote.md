@@ -1,6 +1,6 @@
 # Remote Access to INL-HPC
 
-The following instructions are designed to users with access to [!ac](INL) [!ac](HPC) computing
+The following instructions are designed for users with access to [!ac](INL) [!ac](HPC) computing
 resources and operating from a machine outside of [!ac](INL).
 
 ## SSH Config id=ssh-config
@@ -21,7 +21,7 @@ Host hpclogin hpclogin.inl.gov
   DynamicForward 5555
 
 ## Forwarding
-Host sawtooth1 sawtooth2 falcon1 falcon2 lemhi1 lemhi2 rod moosebuild.hpc.inl.gov hpcgitlab.hpc.inl.gov hpcsc.hpc.inl.gov
+Host sawtooth1 sawtooth2 lemhi1 lemhi2 rod moosebuild.hpc.inl.gov hpcgitlab.hpc.inl.gov
   ProxyJump hpclogin
 ```
 
@@ -77,7 +77,7 @@ Log in using your HPC id and password, +not+ your RSA token or PIN.
 
 Create your SSH public/private key and install it on GitLab. Instructions for doing so can be found
 on GitLab itself at:
-[https://hpcgitlab.hpc.inl.gov/help/ssh/README](https://hpcgitlab.hpc.inl.gov/help/ssh/README)
+[https://hpcgitlab.hpc.inl.gov/help/user/ssh.md](https://hpcgitlab.hpc.inl.gov/help/user/ssh.md)
 
 ## Request Access
 

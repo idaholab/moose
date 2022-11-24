@@ -24,7 +24,9 @@ AddSurrogateAction::validParams()
   return params;
 }
 
-AddSurrogateAction::AddSurrogateAction(InputParameters params) : MooseObjectAction(params) {}
+AddSurrogateAction::AddSurrogateAction(const InputParameters & params) : MooseObjectAction(params)
+{
+}
 
 void
 AddSurrogateAction::act()

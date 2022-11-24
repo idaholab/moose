@@ -75,7 +75,7 @@ complete thermophysical description of the model given pressure and enthalpy.
 
 The water fluid formulation is set in the [FluidProperties](/fluid_properties/index.md) block
 
-!listing modules/porous_flow/test/tests/fluidstate/water_vapor.i block=Modules
+!listing modules/porous_flow/test/tests/fluidstate/water_vapor.i block=FluidProperties
 
 ### Materials
 

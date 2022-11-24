@@ -36,8 +36,8 @@ RandomInterface::RandomInterface(const InputParameters & parameters,
     _master_seed(parameters.get<unsigned int>("seed")),
     _is_nodal(is_nodal),
     _reset_on(EXEC_LINEAR),
-    _curr_node(problem.assembly(tid).node()),
-    _curr_element(problem.assembly(tid).elem())
+    _curr_node(problem.assembly(tid, 0).node()),
+    _curr_element(problem.assembly(tid, 0).elem())
 {
 }
 

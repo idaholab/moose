@@ -28,6 +28,8 @@ public:
 protected:
   /// Name of the mesh generator to get the input mesh
   const MeshGeneratorName _input_name;
+  /// Whether to enforce use of the centroid position of the input mesh as the center of the peripheral ring
+  const bool _force_input_centroid_as_center;
   /// Number of layers of elements of the peripheral region in radial direction
   const unsigned int _peripheral_layer_num;
   /// Bias value used to induce biasing to radial meshing in peripheral ring region
@@ -52,6 +54,10 @@ protected:
   const BoundaryName _external_boundary_name;
   /// Reference to input mesh pointer
   std::unique_ptr<MeshBase> & _input;
+  /// MeshMetaData: whether the peripheral area of the generated mesh can be trimmed by PolygonMeshTrimmer
+  const bool & _hexagon_peripheral_trimmability;
+  /// MeshMetaData: whether the generated mesh can be trimmed through its center by PolygonMeshTrimmer
+  bool & _hexagon_center_trimmability;
   /// ID of the external boundary of the input mesh
   boundary_id_type _input_mesh_external_bid;
 

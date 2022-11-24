@@ -28,13 +28,18 @@ UpdatedLagrangianStressDivergenceBase<G>::UpdatedLagrangianStressDivergenceBase(
   // This kernel requires used_displaced_mesh to be true if large kinematics
   // is on
   if (_large_kinematics && (!getParam<bool>("use_displaced_mesh")))
-    mooseError("The UpdatedLagrangianStressDivergenceBase kernel requires "
+    mooseError("The UpdatedLagrangianStressDivergence kernels requires "
                "used_displaced_mesh = true for large_kinematics = true");
 
   // Similarly, if large kinematics is off so should use_displaced_mesh
   if (!_large_kinematics && (getParam<bool>("use_displaced_mesh")))
-    mooseError("The UpdatedLagrangianStressDivergenceBase kernel requires "
+    mooseError("The UpdatedLagrangianStressDivergence kernels requires "
                "used_displaced_mesh = false for large_kinematics = false");
+
+  // TODO: add weak plane stress support
+  if (_out_of_plane_strain)
+    mooseError("The UpdatedLagrangianStressDivergence kernels do not yet support the weak plane "
+               "stress formulation. Please use the TotalLagrangianStressDivergecen kernels.");
 }
 
 template <class G>
@@ -107,14 +112,15 @@ Real
 UpdatedLagrangianStressDivergenceBase<G>::computeQpJacobianDisplacement(unsigned int alpha,
                                                                         unsigned int beta)
 {
+  const auto grad_test = gradTest(alpha);
+  const auto grad_trial = gradTrial(beta);
+
   //           J^{alpha beta} = J^{alpha beta}_material + J^{alpha beta}_geometric
   //  J^{alpha beta}_material = phi^alpha_{i, j} T_{ijkl} f^{-1}_{km} g^beta_{ml}
   // J^{alpha beta}_geometric = sigma_{ij} (phi^alpha_{k, k} psi^beta_{i, j} -
   //                                        phi^alpha_{k, j} psi^beta_{i, k})
 
   // The material jacobian
-  const auto grad_test = gradTest(alpha);
-  const auto grad_trial = gradTrial(beta);
   Real J = grad_test.doubleContraction(_material_jacobian[_qp] * (_f_inv[_qp] * grad_trial));
 
   // The geometric jacobian

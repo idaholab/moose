@@ -9,7 +9,7 @@
   solve = false
 []
 
-[Modules/FluidProperties/sodium]
+[FluidProperties/sodium]
   type = SodiumProperties
   thermal_conductivity = 123
   specific_heat = 456

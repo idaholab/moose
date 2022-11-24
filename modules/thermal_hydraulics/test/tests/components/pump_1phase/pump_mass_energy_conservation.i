@@ -16,7 +16,7 @@ g = 9.81
   A = ${A}
 []
 
-[Modules/FluidProperties]
+[FluidProperties]
   [fp]
     type = StiffenedGasFluidProperties
     gamma = 2.35

@@ -120,7 +120,7 @@
   []
 
   [hill_tensor]
-    type = HillConstants
+    type = ADHillConstants
     # F G H L M N
     hill_constants = "0.5 0.25 0.3866 1.6413 1.6413 1.2731"
   []

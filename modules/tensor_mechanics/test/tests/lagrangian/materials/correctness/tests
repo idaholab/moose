@@ -1,25 +1,56 @@
 [Tests]
   issues = '#17472'
-  [./cauchy-elastic]
+  [cauchy-elastic]
     type = CSVDiff
     input = cauchy-elastic.i
     csvdiff = 'cauchy-elastic_out.csv'
     requirement = 'Stress matches elastic solution (xx=1e4, rest zero)'
     design = 'source/materials/lagrangian/ComputeLagrangianLinearElasticStress.md'
-  [../]
-  [./stvenantkirchhoff]
+  []
+  [stvenantkirchhoff]
     type = CSVDiff
     input = stvenantkirchhoff.i
     csvdiff = 'stvenantkirchhoff_out.csv'
     requirement = 'Stress matches exact solution (xx=1.6144e3, rest zero)'
     design = 'source/materials/lagrangian/ComputeStVenantKirchhoffStress.md'
-  [../]
-  [./neohookean]
+  []
+  [neohookean]
     type = CSVDiff
     input = neohookean.i
     csvdiff = 'neohookean_out.csv'
     abs_zero = 1e-9
     requirement = 'Stress matches exact analytic solution, rest zero'
     design = 'source/materials/lagrangian/ComputeNeoHookeanStress.md'
-  [../]
+  []
+  [stvenantkirchhoff_hypoelastic]
+    type = CSVDiff
+    input = stvenantkirchhoff.i
+    cli_args = 'Materials/compute_stress/type=ComputeHypoelasticStVenantKirchhoffStress '
+               'Outputs/file_base=stvenantkirchhoff_hypoelastic_out'
+    csvdiff = 'stvenantkirchhoff_hypoelastic_out.csv'
+    requirement = 'The hypoelastic equivalent of the St. Venant-Kirchhoff model gives the same '
+                  'result as its hyperelastic counterpart.'
+    design = 'source/materials/lagrangian/ComputeHypoelasticStVenantKirchhoffStress.md'
+  []
+  [elastoplastic_linear_hardening]
+    type = CSVDiff
+    input = hyperelastic_J2_plastic.i
+    cli_args = 'Materials/flow_stress/function=320+688*effective_plastic_strain '
+               'Outputs/file_base=hyperelastic_J2_plastic_linear_hardening_out'
+    csvdiff = 'hyperelastic_J2_plastic_linear_hardening_out.csv'
+    abs_zero = 1e-9
+    requirement = 'Stress matches exact analytic solution for elastoplasticity with linear hardening'
+    design = 'source/materials/lagrangian/ComputeSimoHughesJ2PlasticityStress.md'
+  []
+  [elastoplastic_powerlaw_hardening]
+    type = CSVDiff
+    input = hyperelastic_J2_plastic.i
+    cli_args = "Materials/flow_stress/function='320*(1+effective_plastic_strain/1e-3)^(1/5)' "
+               "Outputs/file_base=hyperelastic_J2_plastic_powerlaw_hardening_out"
+    csvdiff = 'hyperelastic_J2_plastic_powerlaw_hardening_out.csv'
+    abs_zero = 1e-9
+    requirement = 'Stress matches exact analytic solution for elastoplasticity with power-law '
+                  'hardening'
+    design = 'source/materials/lagrangian/ComputeSimoHughesJ2PlasticityStress.md'
+  []
 []

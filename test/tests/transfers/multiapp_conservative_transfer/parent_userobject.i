@@ -98,6 +98,7 @@
     variable = multi_layered_average
     type = MultiAppUserObjectTransfer
     from_multi_app = sub_app
+    skip_coordinate_collapsing = true
 
     from_postprocessors_to_be_preserved  = 'from_postprocessor'
     to_postprocessors_to_be_preserved  = 'to_nearest_point'
@@ -107,6 +108,7 @@
     variable = element_multi_layered_average
     type = MultiAppUserObjectTransfer
     from_multi_app = sub_app
+    skip_coordinate_collapsing = true
 
     from_postprocessors_to_be_preserved  = 'from_postprocessor'
     to_postprocessors_to_be_preserved  = 'to_nearest_point_element'

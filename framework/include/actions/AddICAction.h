@@ -16,7 +16,7 @@ class AddICAction : public MooseObjectAction
 public:
   static InputParameters validParams();
 
-  AddICAction(InputParameters params);
+  AddICAction(const InputParameters & params);
 
   virtual void act() override;
 };

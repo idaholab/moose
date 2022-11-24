@@ -84,8 +84,18 @@ public:
 
   virtual bool checkNonlocalCouplingRequirement() { return _requires_nonlocal_coupling; }
 
-  virtual void solve() = 0;
-  virtual bool converged() = 0;
+  /**
+   * @return whether the given \p nl_sys_num is converged
+   */
+  virtual bool nlConverged(unsigned int nl_sys_num) = 0;
+
+  /**
+   * Eventually we want to convert this virtual over to taking a nonlinear system number argument.
+   * We will have to first convert apps to use nlConverged, and then once that is done, we can
+   * change this signature. Then we can go through the apps again and convert back to this changed
+   * API
+   */
+  virtual bool converged() { return nlConverged(0); }
 
   virtual void onTimestepBegin() = 0;
   virtual void onTimestepEnd() = 0;
@@ -284,14 +294,14 @@ public:
    */
   virtual void clearActiveElementalMooseVariables(THREAD_ID tid);
 
-  virtual Assembly & assembly(THREAD_ID tid) = 0;
-  virtual const Assembly & assembly(THREAD_ID tid) const = 0;
+  virtual Assembly & assembly(THREAD_ID tid, unsigned int nl_sys_num = 0) = 0;
+  virtual const Assembly & assembly(THREAD_ID tid, unsigned int nl_sys_num = 0) const = 0;
 
   /**
-   * Return the nonlinear system object as a base class reference
+   * Return the nonlinear system object as a base class reference given the system number
    */
-  virtual const SystemBase & systemBaseNonlinear() const = 0;
-  virtual SystemBase & systemBaseNonlinear() = 0;
+  virtual const SystemBase & systemBaseNonlinear(unsigned int sys_num = 0) const = 0;
+  virtual SystemBase & systemBaseNonlinear(unsigned int sys_num = 0) = 0;
   /**
    * Return the auxiliary system object as a base class reference
    */
@@ -310,9 +320,9 @@ public:
   unsigned int getAxisymmetricRadialCoord() const;
 
   virtual DiracKernelInfo & diracKernelInfo();
-  virtual Real finalNonlinearResidual() const;
-  virtual unsigned int nNonlinearIterations() const;
-  virtual unsigned int nLinearIterations() const;
+  virtual Real finalNonlinearResidual(unsigned int nl_sys_num = 0) const;
+  virtual unsigned int nNonlinearIterations(unsigned int nl_sys_num = 0) const;
+  virtual unsigned int nLinearIterations(unsigned int nl_sys_num = 0) const;
 
   virtual void addResidual(THREAD_ID tid) = 0;
   virtual void addResidualNeighbor(THREAD_ID tid) = 0;
@@ -601,7 +611,7 @@ public:
    * Returns true if the problem is in the process of computing it's initial residual.
    * @return Whether or not the problem is currently computing the initial residual.
    */
-  virtual bool computingInitialResidual() const = 0;
+  virtual bool computingInitialResidual(unsigned int nl_sys_num = 0) const = 0;
 
   /**
    * Return the list of elements that should have their DoFs ghosted to this processor.
@@ -610,7 +620,11 @@ public:
   virtual std::set<dof_id_type> & ghostedElems() { return _ghosted_elems; }
 
   std::map<std::string, std::vector<dof_id_type>> _var_dof_map;
-  const CouplingMatrix & nonlocalCouplingMatrix() const { return _nonlocal_cm; }
+
+  /**
+   * @return the nonlocal coupling matrix for the i'th nonlinear system
+   */
+  const CouplingMatrix & nonlocalCouplingMatrix(const unsigned i) const { return _nonlocal_cm[i]; }
 
   /**
    * Returns true if the problem is in the process of computing the Jacobian
@@ -705,7 +719,7 @@ public:
   /**
    * The coupling matrix defining what blocks exist in the preconditioning matrix
    */
-  virtual const CouplingMatrix * couplingMatrix() const = 0;
+  virtual const CouplingMatrix * couplingMatrix(unsigned int nl_sys_num = 0) const = 0;
 
 private:
   /**
@@ -805,7 +819,7 @@ public:
   void addFunctor(const std::string & name, const Moose::FunctorBase<T> & functor, THREAD_ID tid);
 
   /**
-   * Add a functor that has blockwise lambda definitions, e.g. the evaluations of the functor are
+   * Add a functor that has block-wise lambda definitions, e.g. the evaluations of the functor are
    * based on a user-provided lambda expression.
    * @param name The name of the functor to add
    * @param my_lammy The lambda expression that will be called when the functor is evaluated
@@ -828,19 +842,34 @@ public:
 
   virtual void initialSetup();
   virtual void timestepSetup();
+  virtual void customSetup(const ExecFlagType & exec_type);
   virtual void residualSetup();
   virtual void jacobianSetup();
+
+  /// Setter for debug functor output
+  void setFunctorOutput(bool set_output) { _output_functors = set_output; }
+
+  /**
+   * @return the number of nonlinear systems in the problem
+   */
+  virtual std::size_t numNonlinearSystems() const = 0;
+
+  /**
+   * @return the current nonlinear system number
+   */
+  virtual unsigned int currentNlSysNum() const = 0;
 
 protected:
   /**
    * Helper function called by getVariable that handles the logic for
    * checking whether Variables of the requested type are available.
    */
+  template <typename T>
   MooseVariableFieldBase & getVariableHelper(THREAD_ID tid,
                                              const std::string & var_name,
                                              Moose::VarKindType expected_var_type,
                                              Moose::VarFieldType expected_var_field_type,
-                                             const SystemBase & nl,
+                                             const std::vector<T> & nls,
                                              const SystemBase & aux) const;
 
   /**
@@ -857,7 +886,7 @@ protected:
   /// The Factory for building objects
   Factory & _factory;
 
-  CouplingMatrix _nonlocal_cm; /// nonlocal coupling matrix;
+  std::vector<CouplingMatrix> _nonlocal_cm; /// nonlocal coupling matrix;
 
   DiracKernelInfo _dirac_kernel_info;
 
@@ -877,7 +906,7 @@ protected:
   ///@{
   /**
    * Data structures of the requested material properties.  We store them in a map
-   * from boudnary/block id to multimap.  Each of the multimaps is a list of
+   * from boundary/block id to multimap.  Each of the multimaps is a list of
    * requestor object names to material property names.
    */
   std::map<SubdomainID, std::multimap<std::string, std::string>> _map_block_material_props_check;
@@ -933,19 +962,36 @@ protected:
   bool _have_ad_objects;
 
 private:
+  /**
+   * @return whether a given variable name is in the nonlinear systems (reflected the first member
+   * of the returned paired which is a boolean) and if so, what nonlinear system number it is in
+   * (the second member of the returned pair; if the variable is not in the nonlinear systems, then
+   * this will be an invalid unsigned integer)
+   */
+  virtual std::pair<bool, unsigned int>
+  determineNonlinearSystem(const std::string & var_name, bool error_if_not_found = false) const = 0;
+
   /// A container holding pointers to all the functors in our problem
   std::vector<std::multimap<std::string, std::unique_ptr<Moose::FunctorEnvelopeBase>>> _functors;
 
-private:
+  /// Lists all functors in the problem
+  void showFunctors() const;
+
+  /// Lists all functors and all the objects that requested them
+  void showFunctorRequestors() const;
+
   /// The requestors of functors where the key is the prop name and the value is a set of names of
   /// requestors
   std::map<std::string, std::set<std::string>> _functor_to_requestors;
+
+  /// Whether to output a list of the functors used and requested (currently only at initialSetup)
+  bool _output_functors;
 
   /// The declared vector tags
   std::vector<VectorTag> _vector_tags;
 
   /**
-   * The vector tags assoicated with each VectorTagType
+   * The vector tags associated with each VectorTagType
    * This is kept separate from _vector_tags for quick access into typed vector tags in places where
    * we don't want to build a new vector every call (like in residual evaluation)
    */
@@ -1102,7 +1148,5 @@ SubProblem::setCurrentlyComputingResidualAndJacobian(
 
 namespace Moose
 {
-
 void initial_condition(EquationSystems & es, const std::string & system_name);
-
 } // namespace Moose

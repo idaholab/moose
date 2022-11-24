@@ -82,6 +82,7 @@
     boundary = middle
     variable = v
     diffusivity = 'coeff'
+    coeff_interp_method = average
   []
 []
 

@@ -25,11 +25,14 @@ public:
 
 protected:
   /// pressure
-  const MooseVariableFVReal & _pressure;
+  const Moose::Functor<ADReal> & _pressure;
 
   /// temperature
-  const MooseVariableFVReal & _temperature;
+  const Moose::Functor<ADReal> & _temperature;
 
   /// fluid properties user object
   const SinglePhaseFluidProperties & _fluid;
+
+  /// name of the density functor declared
+  const MooseFunctorName _density_name;
 };

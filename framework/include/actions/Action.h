@@ -15,6 +15,7 @@
 #include "Registry.h"
 #include "PerfGraphInterface.h"
 #include "DataFileInterface.h"
+#include "MooseObjectParameterName.h"
 
 #include "libmesh/parallel_object.h"
 
@@ -41,7 +42,7 @@ class Action : public ConsoleStreamInterface,
 public:
   static InputParameters validParams();
 
-  Action(InputParameters parameters);
+  Action(const InputParameters & parameters);
 
   virtual ~Action() = default;
 
@@ -111,9 +112,16 @@ public:
   std::string getShortName() const;
   ///@}
 
+  /**
+   * The unique name for accessing input parameters of this action in the InputParameterWarehouse
+   */
+  MooseObjectName uniqueActionName() const
+  {
+    return MooseObjectName(_pars.get<std::string>("_unique_name"));
+  }
+
   const std::string & type() const { return _action_type; }
 
-  InputParameters & parameters() { return _pars; }
   const InputParameters & parameters() const { return _pars; }
 
   const std::string & specificTaskName() const { return _specific_task_name; }
@@ -207,8 +215,21 @@ protected:
    */
   virtual void act() = 0;
 
+  /**
+   * Connect controllable parameter of this action with the controllable parameters of the
+   * objects added by this action.
+   * @param parameter Name of the controllable parameter of this action
+   * @param object_type Type of the object added by this action.
+   * @param object_name Name of the object added by this action.
+   * @param object_parameter Name of the parameter of the object.
+   */
+  virtual void connectControllableParams(const std::string & parameter,
+                                         const std::string & object_type,
+                                         const std::string & object_name,
+                                         const std::string & object_parameter) const;
+
   /// Input parameters for the action
-  InputParameters _pars;
+  const InputParameters & _pars;
 
   // The registered syntax for this block if any
   std::string _registered_identifier;

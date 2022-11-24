@@ -16,7 +16,7 @@ class AddExecutorAction : public Action
 public:
   static InputParameters validParams();
 
-  AddExecutorAction(InputParameters params);
+  AddExecutorAction(const InputParameters & params);
 
   virtual void act() override;
 };

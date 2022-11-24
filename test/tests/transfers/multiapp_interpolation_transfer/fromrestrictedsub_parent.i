@@ -3,7 +3,7 @@
   dim = 2
   nx = 10
   ny = 10
-  # The MultiAppInterpolationTransfer object only works with ReplicatedMesh
+  # The MultiAppGeometricInterpolationTransfer object only works with ReplicatedMesh
   parallel_type = replicated
 []
 
@@ -68,13 +68,13 @@
 
 [Transfers]
   [elemental_fromsub]
-    type = MultiAppInterpolationTransfer
+    type = MultiAppGeometricInterpolationTransfer
     from_multi_app = sub
     source_variable = elemental
     variable = elemental_from_sub
   []
   [nodal_fromsub]
-    type = MultiAppInterpolationTransfer
+    type = MultiAppGeometricInterpolationTransfer
     from_multi_app = sub
     source_variable = nodal
     variable = nodal_from_sub

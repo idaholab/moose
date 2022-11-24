@@ -31,7 +31,7 @@ CreateExecutionerAction::validParams()
   return params;
 }
 
-CreateExecutionerAction::CreateExecutionerAction(InputParameters params)
+CreateExecutionerAction::CreateExecutionerAction(const InputParameters & params)
   : MooseObjectAction(params), _auto_preconditioning(getParam<bool>("auto_preconditioning"))
 {
 }

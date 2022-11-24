@@ -1,0 +1,10 @@
+[Tests]
+  [test]
+    type = Exodiff
+    input = 'heat_conduction.i'
+    exodiff = 'heat_conduction_out.e'
+    requirement = "The system shall simulate a transient heat conduction problem using solid thermal properties."
+    design = 'ThermalSolidPropertiesMaterial.md'
+    issues = '#12284'
+  []
+[]

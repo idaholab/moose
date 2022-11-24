@@ -624,8 +624,7 @@ FluidPropertiesInterrogator::getSpecifiedSetMap(
                             std::inserter(extraneous_parameters, extraneous_parameters.end()));
         for (const auto & parameter : extraneous_parameters)
           if (isParamValid(parameter))
-            mooseError(name(),
-                       ": (",
+            mooseError("(",
                        parameter_set_name,
                        ") has been specified; ",
                        parameter,
@@ -641,7 +640,7 @@ FluidPropertiesInterrogator::getSpecifiedSetMap(
   if (!specified_a_set && throw_error_if_no_match)
   {
     std::stringstream ss;
-    ss << name() << ": For " << fp_type
+    ss << "For " << fp_type
        << " fluid properties, you must provide one of the following\n"
           "combinations of thermodynamic properties:\n";
     for (const auto & parameter_set_name : parameter_set_names)

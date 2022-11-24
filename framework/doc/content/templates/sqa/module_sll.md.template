@@ -1,0 +1,16 @@
+# {{module}} Software Library List
+
+## Introduction id=introduction
+
+!template field key=introduction required=False
+The [!ac](SLL) provides a list of software libraries utilized by the {{module}} module.
+
+## Dependencies id=dependencies
+
+!template field key=dependencies-intro required=False
+The {{module}} module is developed using MOOSE and can itself be based on various MOOSE modules,
+as such the [!ac](VVR) for the {{module}} module is dependent upon the following documents.
+
+!template! field key=dependencies required=False
+!sqa dependencies suffix=sll category={{category}}
+!template-end!

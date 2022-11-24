@@ -11,7 +11,7 @@
   initial_vel = 0
 []
 
-[Modules/FluidProperties]
+[FluidProperties]
   [fp]
     type = IdealGasFluidProperties
     gamma = 1.4
@@ -34,7 +34,7 @@
   [pipe]
     type = FlowChannel1Phase
     position = '0 0 0'
-    orientation = '0 0 0'
+    orientation = '1 0 0'
     length = 0.5
     n_elems = 2
     A = 0.1

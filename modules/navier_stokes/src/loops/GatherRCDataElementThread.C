@@ -11,6 +11,7 @@
 #include "INSFVAttributes.h"
 #include "INSFVMomentumResidualObject.h"
 #include "FVElementalKernel.h"
+#include "FVTimeKernel.h"
 
 GatherRCDataElementThread::GatherRCDataElementThread(FEProblemBase & fe_problem,
                                                      const std::vector<unsigned int> & vars)

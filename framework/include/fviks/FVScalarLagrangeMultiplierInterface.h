@@ -20,6 +20,11 @@ public:
   void computeResidual(const FaceInfo & fi) override final;
   void computeJacobian(const FaceInfo & fi) override final;
 
+  /**
+   * @return the Lagrange Multiplier scalar variable that enforces the interface constraint
+   */
+  const MooseVariableScalar & lambdaVariable() const { return _lambda_var; }
+
 protected:
   ADReal computeQpResidual() override = 0;
 

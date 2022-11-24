@@ -221,24 +221,24 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
       derivativePropertyNameFirst(NS::Prandtl, NS::pressure),
       [&mu, &cp, &k, &dmu_dp, &dcp_dp, &dk_dp](const auto & r, const auto & t) -> Real
       {
-        return prandtlPropertyDerivative(MetaPhysicL::raw_value(mu(r, t)),
-                                         MetaPhysicL::raw_value(cp(r, t)),
-                                         MetaPhysicL::raw_value(k(r, t)),
-                                         dmu_dp(r, t),
-                                         dcp_dp(r, t),
-                                         dk_dp(r, t));
+        return NS::prandtlPropertyDerivative(MetaPhysicL::raw_value(mu(r, t)),
+                                             MetaPhysicL::raw_value(cp(r, t)),
+                                             MetaPhysicL::raw_value(k(r, t)),
+                                             dmu_dp(r, t),
+                                             dcp_dp(r, t),
+                                             dk_dp(r, t));
       });
 
   addFunctorProperty<Real>(
       derivativePropertyNameFirst(NS::Prandtl, NS::T_fluid),
       [&mu, &cp, &k, &dmu_dT, &dcp_dT, &dk_dT](const auto & r, const auto & t) -> Real
       {
-        return prandtlPropertyDerivative(MetaPhysicL::raw_value(mu(r, t)),
-                                         MetaPhysicL::raw_value(cp(r, t)),
-                                         MetaPhysicL::raw_value(k(r, t)),
-                                         dmu_dT(r, t),
-                                         dcp_dT(r, t),
-                                         dk_dT(r, t));
+        return NS::prandtlPropertyDerivative(MetaPhysicL::raw_value(mu(r, t)),
+                                             MetaPhysicL::raw_value(cp(r, t)),
+                                             MetaPhysicL::raw_value(k(r, t)),
+                                             dmu_dT(r, t),
+                                             dcp_dT(r, t),
+                                             dk_dT(r, t));
       });
 
   //
@@ -263,22 +263,22 @@ GeneralFunctorFluidProps::GeneralFunctorFluidProps(const InputParameters & param
       derivativePropertyNameFirst(NS::Reynolds, NS::pressure),
       [this, &Re, &mu, &drho_dp, &dmu_dp](const auto & r, const auto & t) -> Real
       {
-        return reynoldsPropertyDerivative(MetaPhysicL::raw_value(Re(r, t)),
-                                          MetaPhysicL::raw_value(_rho(r, t)),
-                                          MetaPhysicL::raw_value(mu(r, t)),
-                                          drho_dp(r, t),
-                                          dmu_dp(r, t));
+        return NS::reynoldsPropertyDerivative(MetaPhysicL::raw_value(Re(r, t)),
+                                              MetaPhysicL::raw_value(_rho(r, t)),
+                                              MetaPhysicL::raw_value(mu(r, t)),
+                                              drho_dp(r, t),
+                                              dmu_dp(r, t));
       });
 
   addFunctorProperty<Real>(
       derivativePropertyNameFirst(NS::Reynolds, NS::T_fluid),
       [this, &Re, &mu, &drho_dT, &dmu_dT](const auto & r, const auto & t) -> Real
       {
-        return reynoldsPropertyDerivative(MetaPhysicL::raw_value(Re(r, t)),
-                                          MetaPhysicL::raw_value(_rho(r, t)),
-                                          MetaPhysicL::raw_value(mu(r, t)),
-                                          drho_dT(r, t),
-                                          dmu_dT(r, t));
+        return NS::reynoldsPropertyDerivative(MetaPhysicL::raw_value(Re(r, t)),
+                                              MetaPhysicL::raw_value(_rho(r, t)),
+                                              MetaPhysicL::raw_value(mu(r, t)),
+                                              drho_dT(r, t),
+                                              dmu_dT(r, t));
       });
 
   // (hydraulic) Reynolds number

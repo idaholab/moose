@@ -17,7 +17,7 @@
 class AddRayKernelAction : public AddRayTracingObjectAction
 {
 public:
-  AddRayKernelAction(InputParameters params);
+  AddRayKernelAction(const InputParameters & params);
 
   static InputParameters validParams();
 

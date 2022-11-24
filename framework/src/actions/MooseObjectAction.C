@@ -26,7 +26,7 @@ MooseObjectAction::validParams()
   return params;
 }
 
-MooseObjectAction::MooseObjectAction(InputParameters params)
+MooseObjectAction::MooseObjectAction(const InputParameters & params)
   : Action(params),
     _type(getParam<std::string>("type")),
     // We will create a second parameters object from the main factory unless instructed otherwise

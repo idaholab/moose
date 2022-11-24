@@ -62,6 +62,13 @@ OutputWarehouse::timestepSetup()
 }
 
 void
+OutputWarehouse::customSetup(const ExecFlagType & exec_type)
+{
+  for (const auto & obj : _all_objects)
+    obj->customSetup(exec_type);
+}
+
+void
 OutputWarehouse::solveSetup()
 {
   for (const auto & obj : _all_objects)
@@ -277,13 +284,13 @@ OutputWarehouse::getFileNumbers()
 }
 
 void
-OutputWarehouse::setCommonParameters(InputParameters * params_ptr)
+OutputWarehouse::setCommonParameters(const InputParameters * params_ptr)
 {
   _common_params_ptr = params_ptr;
 }
 
-InputParameters *
-OutputWarehouse::getCommonParameters()
+const InputParameters *
+OutputWarehouse::getCommonParameters() const
 {
   return _common_params_ptr;
 }

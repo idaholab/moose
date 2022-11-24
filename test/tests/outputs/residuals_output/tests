@@ -1,0 +1,23 @@
+[Tests]
+  design = 'syntax/Outputs/index.md'
+  issues = '#22056'
+  [./no_linear_residuals]
+    type = 'RunApp'
+    input = 'no_output_residuals.i'
+    expect_out = 'Nonlinear |R|'
+    absent_out = 'Linear |R|'
+    match_literal = true
+    requirement = 'The system shall not output linear residuals when requested.'
+    cli_args = 'Outputs/print_linear_residuals=false'
+
+  [../]
+  [./no_nonlinear_residuals]
+    type = 'RunApp'
+    input = 'no_output_residuals.i'
+    match_literal = true
+    absent_out = 'Nonlinear |R|'
+    expect_out = 'Linear |R|'
+    requirement = 'The system shall not output non-linear residuals when requested.'
+    cli_args = 'Outputs/print_nonlinear_residuals=false'
+  [../]
+[]

@@ -113,17 +113,18 @@ ADNodalBCTempl<T>::computeJacobian()
           mooseAssert(ad_offset + i < MOOSE_AD_MAX_DOFS_PER_ELEM,
                       "Out of bounds access in derivative vector.");
 #endif
-          _fe_problem.assembly(0).cacheJacobian(cached_rows[i],
-                                                cached_rows[i],
-                                                conversionHelper(residual, i)
-                                                    .derivatives()[
+          _fe_problem.assembly(0, _sys.number())
+              .cacheJacobian(cached_rows[i],
+                             cached_rows[i],
+                             conversionHelper(residual, i)
+                                 .derivatives()[
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-                                                        cached_rows[i]
+                                     cached_rows[i]
 #else
-                                                        ad_offset + i
+                                     ad_offset + i
 #endif
           ],
-                                                tag);
+                             tag);
         }
 }
 
@@ -149,11 +150,11 @@ ADNodalBCTempl<T>::computeResidualAndJacobian()
     if (_sys.hasMatrix(tag_id))
       for (const auto i : index_range(cached_rows))
         if (_set_components[i])
-          _fe_problem.assembly(0).cacheJacobian(
-              cached_rows[i],
-              cached_rows[i],
-              conversionHelper(residual, i).derivatives()[cached_rows[i]],
-              tag_id);
+          _fe_problem.assembly(0, _sys.number())
+              .cacheJacobian(cached_rows[i],
+                             cached_rows[i],
+                             conversionHelper(residual, i).derivatives()[cached_rows[i]],
+                             tag_id);
 }
 
 template <typename T>
@@ -189,17 +190,18 @@ ADNodalBCTempl<T>::computeOffDiagJacobian(const unsigned int jvar_num)
             mooseAssert(ad_offset + i < MOOSE_AD_MAX_DOFS_PER_ELEM,
                         "Out of bounds access in derivative vector.");
 #endif
-            _fe_problem.assembly(0).cacheJacobian(cached_rows[i],
-                                                  cached_col,
-                                                  conversionHelper(residual, i)
-                                                      .derivatives()[
+            _fe_problem.assembly(0, _sys.number())
+                .cacheJacobian(cached_rows[i],
+                               cached_col,
+                               conversionHelper(residual, i)
+                                   .derivatives()[
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-                                                          cached_col
+                                       cached_col
 #else
-                                                          ad_offset + i
+                                       ad_offset + i
 #endif
             ],
-                                                  tag);
+                               tag);
           }
   }
 }
@@ -237,17 +239,18 @@ ADNodalBCTempl<T>::computeOffDiagJacobianScalar(unsigned int jvar)
           mooseAssert(ad_offset + i < MOOSE_AD_MAX_DOFS_PER_ELEM,
                       "Out of bounds access in derivative vector.");
 #endif
-          _fe_problem.assembly(0).cacheJacobian(cached_rows[i],
-                                                scalar_dof_indices[0],
-                                                conversionHelper(residual, i)
-                                                    .derivatives()[
+          _fe_problem.assembly(0, _sys.number())
+              .cacheJacobian(cached_rows[i],
+                             scalar_dof_indices[0],
+                             conversionHelper(residual, i)
+                                 .derivatives()[
 #ifdef MOOSE_GLOBAL_AD_INDEXING
-                                                        scalar_dof_indices[0]
+                                     scalar_dof_indices[0]
 #else
-                                                        ad_offset + i
+                                     ad_offset + i
 #endif
           ],
-                                                tag);
+                             tag);
         }
 }
 

@@ -34,8 +34,6 @@ By the nature of the software as a library it is not possible to guarantee the f
 of the software from an end-user perspective, since the input provided by the user cannot be
 controlled.
 
-The test cases
-
 !template-end!
 
 !template! item key=assumptions

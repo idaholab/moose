@@ -27,6 +27,7 @@ public:
   void initialize() override;
   void execute() override;
 
+  virtual void finalize() override;
   PostprocessorValue getValue() override;
 
 private:

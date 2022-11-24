@@ -24,7 +24,7 @@ THMPreconditioningIntegrityCheckAction::validParams()
 }
 
 THMPreconditioningIntegrityCheckAction::THMPreconditioningIntegrityCheckAction(
-    InputParameters parameters)
+    const InputParameters & parameters)
   : Action(parameters)
 {
 }

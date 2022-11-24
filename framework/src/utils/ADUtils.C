@@ -9,7 +9,7 @@
 
 #include "ADUtils.h"
 
-#include "SystemBase.h"
+#include "NonlinearSystemBase.h"
 #include "SubProblem.h"
 #include "Assembly.h"
 #include "MooseError.h"
@@ -25,7 +25,9 @@ globalDofIndexToDerivative(const ADReal & ad_real,
                            const ElementType elem_type /*=ElementType::Element*/,
                            const THREAD_ID tid /*=0*/)
 {
-  const Assembly & assembly = sys.subproblem().assembly(tid);
+  mooseAssert(dynamic_cast<const NonlinearSystemBase *>(&sys),
+              "This must be a nonlinear system base object");
+  const Assembly & assembly = sys.subproblem().assembly(tid, sys.number());
   const Elem * elem;
   switch (elem_type)
   {

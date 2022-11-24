@@ -11,9 +11,7 @@
 - [Where is the stiffness matrix?](help/faq/what_is_fem.md)
 - [How do I execute MOOSE in parallel?](getting_started/examples_and_tutorials/tutorial01_app_development/step07_parallel.md optional=True)
 
+Numerous questions/answers can also be found in:
 
-### Mailing lists:
-
-- [MOOSE Discussion forum](https://github.com/idaholab/moose/discussions) - Technical Q&A (moderate traffic)
-- [moose-announce@googlegroups.com](https://groups.google.com/forum/#!forum/moose-announce) - Announcements (very light traffic)
-- You can also browse our [old technical Q&A mailing list](https://groups.google.com/forum/#!forum/moose-users).
+- [The MOOSE Discussion forum](https://github.com/idaholab/moose/discussions)
+- [The old MOOSE Q&A mailing list](https://groups.google.com/forum/#!forum/moose-users)

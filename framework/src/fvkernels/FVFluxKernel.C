@@ -13,6 +13,7 @@
 #include "SystemBase.h"
 #include "MooseMesh.h"
 #include "ADUtils.h"
+#include "RelationshipManager.h"
 
 #include "libmesh/elem.h"
 #include "libmesh/system.h"
@@ -188,10 +189,9 @@ FVFluxKernel::computeJacobianType(Moose::DGJacobianType type, const ADReal & res
     if (ivar != _var.number())
       continue;
 
-    SystemBase & sys = _subproblem.systemBaseNonlinear();
-    auto dofs_per_elem = sys.getMaxVarNDofsPerElem();
+    auto dofs_per_elem = _sys.getMaxVarNDofsPerElem();
 
-    auto ad_offset = Moose::adOffset(jvar, dofs_per_elem, type, sys.system().n_vars());
+    auto ad_offset = Moose::adOffset(jvar, dofs_per_elem, type, _sys.system().n_vars());
 
     prepareMatrixTagNeighbor(_assembly, ivar, jvar, type);
 
@@ -326,8 +326,21 @@ FVFluxKernel::gradUDotNormal() const
   const bool correct_skewness =
       (_var.faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
 
+  const Elem * const elem = &_face_info->elem();
+  const Elem * const neighbor = _face_info->neighborPtr();
+
+  bool var_defined_on_elem = _var.hasBlocks(_face_info->elem().subdomain_id());
+  bool is_internal_face = _var.isInternalFace(*_face_info);
+
+  const ADReal side_one_value = (!is_internal_face && !var_defined_on_elem)
+                                    ? _var.getBoundaryFaceValue(*_face_info)
+                                    : _var.getElemValue(elem);
+  const ADReal side_two_value = (var_defined_on_elem && !is_internal_face)
+                                    ? _var.getBoundaryFaceValue(*_face_info)
+                                    : _var.getElemValue(neighbor);
+
   return Moose::FV::gradUDotNormal(
-      _var(elemFromFace()), _var(neighborFromFace()), *_face_info, _var, correct_skewness);
+      side_one_value, side_two_value, *_face_info, _var, correct_skewness);
 }
 
 Moose::ElemFromFaceArg
@@ -375,6 +388,32 @@ FVFluxKernel::avoidBoundary(const FaceInfo & fi) const
     if (_boundaries_to_avoid.count(bnd_id))
       return true;
   return false;
+}
+
+void
+FVFluxKernel::adjustRMGhostLayers(const unsigned short ghost_layers) const
+{
+  auto & factory = _app.getFactory();
+
+  auto rm_params = factory.getValidParams("ElementSideNeighborLayers");
+
+  rm_params.set<std::string>("for_whom") = name();
+  rm_params.set<MooseMesh *>("mesh") = &const_cast<MooseMesh &>(_mesh);
+  rm_params.set<Moose::RelationshipManagerType>("rm_type") =
+      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC |
+      Moose::RelationshipManagerType::COUPLING;
+  FVKernel::setRMParams(
+      _pars, rm_params, std::max(ghost_layers, _pars.get<unsigned short>("ghost_layers")));
+  mooseAssert(rm_params.areAllRequiredParamsValid(),
+              "All relationship manager parameters should be valid.");
+
+  auto rm_obj = factory.create<RelationshipManager>(
+      "ElementSideNeighborLayers", name() + "_skew_correction", rm_params);
+
+  // Delete the resources created on behalf of the RM if it ends up not being added to the
+  // App.
+  if (!_app.addRelationshipManager(rm_obj))
+    factory.releaseSharedObjects(*rm_obj);
 }
 
 void

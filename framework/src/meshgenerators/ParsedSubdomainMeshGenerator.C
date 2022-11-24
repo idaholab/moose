@@ -39,8 +39,8 @@ ParsedSubdomainMeshGenerator::validParams()
       "A set of subdomain ids that will not changed even if "
       "they are inside/outside the combinatorial geometry",
       "excluded_subdomain_ids is deprecated, use excluded_subdomains (ids or names accepted)");
-  params.addParam<std::vector<std::string>>(
-      "constant_names", "Vector of constants used in the parsed function (use this for kB etc.)");
+  params.addParam<std::vector<std::string>>("constant_names",
+                                            "Vector of constants used in the parsed function");
   params.addParam<std::vector<std::string>>(
       "constant_expressions",
       "Vector of values for the constants in constant_names (can be an FParser expression)");
@@ -91,8 +91,17 @@ ParsedSubdomainMeshGenerator::generate()
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 
   if (isParamValid("excluded_subdomains"))
-    _excluded_ids = MooseMeshUtils::getSubdomainIDs(
-        *mesh, parameters().get<std::vector<SubdomainName>>("excluded_subdomains"));
+  {
+    auto excluded_subdomains = parameters().get<std::vector<SubdomainName>>("excluded_subdomains");
+
+    // check that the subdomains exist in the mesh
+    for (const auto & name : excluded_subdomains)
+      if (!MooseMeshUtils::hasSubdomainName(*mesh, name))
+        paramError("excluded_subdomains", "The block '", name, "' was not found in the mesh");
+
+    _excluded_ids = MooseMeshUtils::getSubdomainIDs(*mesh, excluded_subdomains);
+  }
+
   // Loop over the elements
   for (const auto & elem : mesh->active_element_ptr_range())
   {

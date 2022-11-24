@@ -39,7 +39,7 @@
     multiply_by_mass = true
     area_quantity = 1000
     promoting_species_names = "H+"
-    promoting_species_indices = "-0.5"
+    promoting_indices = "-0.5"
   []
   [definition]
     type = GeochemicalModelDefinition

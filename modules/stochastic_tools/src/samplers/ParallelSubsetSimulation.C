@@ -31,6 +31,7 @@ ParallelSubsetSimulation::validParams()
                                     "subset_probability>0 & subset_probability<=1",
                                     "Conditional probability of each subset");
   params.addRequiredParam<unsigned int>("num_samplessub", "Number of samples per subset");
+  params.addRequiredParam<unsigned int>("num_subsets", "Number of desired subsets");
   params.addParam<unsigned int>("num_parallel_chains",
                                 "Number of Markov chains to run in parallel, default is based on "
                                 "the number of processors used.");
@@ -46,6 +47,7 @@ ParallelSubsetSimulation::ParallelSubsetSimulation(const InputParameters & param
   : Sampler(parameters),
     ReporterInterface(this),
     _num_samplessub(getParam<unsigned int>("num_samplessub")),
+    _num_subsets(getParam<unsigned int>("num_subsets")),
     _use_absolute_value(getParam<bool>("use_absolute_value")),
     _subset_probability(getParam<Real>("subset_probability")),
     _num_random_seeds(getParam<unsigned int>("num_random_seeds")),
@@ -54,7 +56,8 @@ ParallelSubsetSimulation::ParallelSubsetSimulation(const InputParameters & param
     _step(getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")->timeStep()),
     _count_max(std::floor(1 / _subset_probability)),
     _check_step(0),
-    _subset(0)
+    _subset(0),
+    _is_sampling_completed(false)
 {
   // Fixing the number of rows to the number of processors
   const dof_id_type nchains = isParamValid("num_parallel_chains")
@@ -117,6 +120,10 @@ ParallelSubsetSimulation::sampleSetUp(const SampleMode mode)
     return;
   _check_step = _step;
 
+  if (_is_sampling_completed)
+    mooseError("Internal bug: the adaptive sampling is supposed to be completed but another sample "
+               "has been requested.");
+
   _subset = ((_step - 1) * getNumberOfRows()) / _num_samplessub;
   const unsigned int sub_ind = (_step - 1) - (_num_samplessub / getNumberOfRows()) * _subset;
   const unsigned int offset = sub_ind * getNumberOfRows();
@@ -165,6 +172,11 @@ ParallelSubsetSimulation::sampleSetUp(const SampleMode mode)
                                _inputs_sto[j].begin() + offset + getLocalRowEnd());
     }
   }
+
+  // check if we have completed the last sample (sub_ind == _num_samplessub /getNumberOfRows() - 1)
+  // of the last subset (_subset == _num_subsets - 1)
+  if (_subset == _num_subsets - 1 && sub_ind == _num_samplessub / getNumberOfRows() - 1)
+    _is_sampling_completed = true;
 }
 
 Real

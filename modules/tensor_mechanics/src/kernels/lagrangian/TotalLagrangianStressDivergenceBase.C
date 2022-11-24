@@ -123,6 +123,13 @@ TotalLagrangianStressDivergenceBase<G>::computeQpJacobianTemperature(unsigned in
          _temperature->phi()[_j][_qp];
 }
 
+template <class G>
+Real
+TotalLagrangianStressDivergenceBase<G>::computeQpJacobianOutOfPlaneStrain()
+{
+  return _dpk1[_qp].contractionKl(2, 2, gradTest(_alpha)) * _out_of_plane_strain->phi()[_j][_qp];
+}
+
 template class TotalLagrangianStressDivergenceBase<GradientOperatorCartesian>;
 template class TotalLagrangianStressDivergenceBase<GradientOperatorAxisymmetricCylindrical>;
 template class TotalLagrangianStressDivergenceBase<GradientOperatorCentrosymmetricSpherical>;

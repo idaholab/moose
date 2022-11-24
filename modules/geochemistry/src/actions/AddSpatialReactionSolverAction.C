@@ -32,7 +32,7 @@ AddSpatialReactionSolverAction::validParams()
   return params;
 }
 
-AddSpatialReactionSolverAction::AddSpatialReactionSolverAction(InputParameters params)
+AddSpatialReactionSolverAction::AddSpatialReactionSolverAction(const InputParameters & params)
   : AddGeochemistrySolverAction(params)
 {
 }

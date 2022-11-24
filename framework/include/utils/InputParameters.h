@@ -461,12 +461,12 @@ public:
   /**
    * Returns a Boolean indicating whether the specified parameter is controllable
    */
-  bool isControllable(const std::string & name);
+  bool isControllable(const std::string & name) const;
 
   /**
    * Return the allowed execute flags for a controllable parameter
    */
-  const std::set<ExecFlagType> & getControllableExecuteOnTypes(const std::string & name);
+  const std::set<ExecFlagType> & getControllableExecuteOnTypes(const std::string & name) const;
 
   /**
    * This method must be called from every base "Moose System" to create linkage with the Action
@@ -850,6 +850,15 @@ public:
    **/
   bool fromLegacyConstruction() const { return _from_legacy_construction; }
 
+  /**
+   * Determine the actual variable name from the given variable \emph parameter name
+   * @param var_param_name the name of the variable parameter, e.g. 'variable'
+   * @param moose_object_with_var_param_name the name of the moose object holding the variable
+   * parameter. Used for potential error messaging
+   */
+  std::string varName(const std::string & var_param_name,
+                      const std::string & moose_object_with_var_param_name) const;
+
 private:
   // Private constructor so that InputParameters can only be created in certain places.
   InputParameters();
@@ -1015,6 +1024,8 @@ private:
   friend InputParameters emptyInputParameters();
   friend class InputParameterWarehouse;
   friend class Parser;
+  // for the printInputFile function in the action warehouse
+  friend class ActionWarehouse;
 
   // For setting _from_legacy_construction (remove with #19440)
   template <typename T>

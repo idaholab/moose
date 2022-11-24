@@ -23,4 +23,5 @@
 
 [Testing/LotsOfDiffusion/vars]
   number = 10
+  diffusion_coefficients = '1 1'
 []

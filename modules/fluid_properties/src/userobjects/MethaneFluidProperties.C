@@ -161,7 +161,7 @@ MethaneFluidProperties::vaporPressure(Real temperature) const
 void
 MethaneFluidProperties::vaporPressure(Real, Real &, Real &) const
 {
-  mooseError(name(), ": vaporPressure() is not implemented");
+  mooseError("vaporPressure() is not implemented");
 }
 
 std::vector<Real>

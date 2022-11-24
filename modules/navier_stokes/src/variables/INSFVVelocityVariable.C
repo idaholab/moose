@@ -67,7 +67,8 @@ INSFVVelocityVariable::INSFVVelocityVariable(const InputParameters & params) : I
 #ifdef MOOSE_GLOBAL_AD_INDEXING
 
 ADReal
-INSFVVelocityVariable::getExtrapolatedBoundaryFaceValue(const FaceInfo & fi) const
+INSFVVelocityVariable::getExtrapolatedBoundaryFaceValue(const FaceInfo & fi,
+                                                        bool two_term_expansion) const
 {
   ADReal boundary_value;
   if (_two_term_boundary_expansion && isFullyDevelopedFlowFace(fi))
@@ -76,11 +77,10 @@ INSFVVelocityVariable::getExtrapolatedBoundaryFaceValue(const FaceInfo & fi) con
     const Elem * const elem = std::get<0>(tup);
     const Point vector_to_face = std::get<2>(tup) ? (fi.faceCentroid() - fi.elemCentroid())
                                                   : (fi.faceCentroid() - fi.neighborCentroid());
-
     boundary_value = uncorrectedAdGradSln(fi) * vector_to_face + getElemValue(elem);
   }
   else
-    boundary_value = INSFVVariable::getExtrapolatedBoundaryFaceValue(fi);
+    boundary_value = INSFVVariable::getExtrapolatedBoundaryFaceValue(fi, two_term_expansion);
 
   return boundary_value;
 }

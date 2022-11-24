@@ -24,7 +24,7 @@ MeshOnlyAction::validParams()
   return Action::validParams();
 }
 
-MeshOnlyAction::MeshOnlyAction(InputParameters params) : Action(params) {}
+MeshOnlyAction::MeshOnlyAction(const InputParameters & params) : Action(params) {}
 
 void
 MeshOnlyAction::act()

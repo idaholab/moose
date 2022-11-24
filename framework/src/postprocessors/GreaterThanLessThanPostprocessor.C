@@ -96,12 +96,16 @@ GreaterThanLessThanPostprocessor::execute()
   }
   else
     mooseError("Invalid comparator ", _comparator);
-
-  gatherSum(_count);
 }
 
 PostprocessorValue
 GreaterThanLessThanPostprocessor::getValue()
 {
   return _count;
+}
+
+void
+GreaterThanLessThanPostprocessor::finalize()
+{
+  gatherSum(_count);
 }

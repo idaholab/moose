@@ -1,3 +1,23 @@
 # {{project}} Verification and Validation Report
 
 ## Introduction id=introduction
+
+!template field key=introduction required=False
+The [!ac](VVR) for the {{project}} provides evidence that the {{project}} fullfills its intended purpose.
+
+## Verification
+
+!template field key=verification-intro required=False
+The following lists all the verification test cases and the associated documentation for the {{project}}.
+
+!template! field key=verification required=False
+!sqa verification category={{category}}
+!template-end!
+
+## Validation
+
+!template field key=validation-intro required=False
+The following lists all the validation test cases and the associated documentation for the {{project}}.
+
+!template field key=validation required=False
+!sqa validation category={{category}}

@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SinglePhaseFluidProperties.h"
+#include "NewtonInversion.h"
 
 InputParameters
 SinglePhaseFluidProperties::validParams()
@@ -15,11 +16,32 @@ SinglePhaseFluidProperties::validParams()
   InputParameters params = FluidProperties::validParams();
   params.addCustomTypeParam<std::string>(
       "fp_type", "single-phase-fp", "FPType", "Type of the fluid property object");
+
+  // Variable set conversion parameters
+  params.addRangeCheckedParam<Real>(
+      "tolerance", 1e-8, "tolerance > 0", "Tolerance for 2D Newton variable set conversion");
+  params.addRangeCheckedParam<Real>(
+      "T_initial_guess",
+      400,
+      "T_initial_guess > 0",
+      "Temperature initial guess for Newton Method variable set conversion");
+  params.addRangeCheckedParam<Real>(
+      "p_initial_guess",
+      2e5,
+      "p_initial_guess > 0",
+      "Pressure initial guess for Newton Method variable set conversion");
+  params.addParamNamesToGroup("tolerance T_initial_guess p_initial_guess",
+                              "Variable set conversions Newton solve");
+
   return params;
 }
 
 SinglePhaseFluidProperties::SinglePhaseFluidProperties(const InputParameters & parameters)
-  : FluidProperties(parameters)
+  : FluidProperties(parameters),
+    // downstream apps are creating fluid properties without their parameters, hence the workaround
+    _tolerance(isParamValid("tolerance") ? getParam<Real>("tolerance") : 1e-8),
+    _T_initial_guess(isParamValid("T_initial_guess") ? getParam<Real>("T_initial_guess") : 400),
+    _p_initial_guess(isParamValid("p_initial_guess") ? getParam<Real>("p_initial_guess") : 2e5)
 {
 }
 
@@ -46,6 +68,31 @@ SinglePhaseFluidProperties::s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, R
   s_from_v_e(v, e, s, ds_dv, ds_de);
   ds_dp = ds_dv * dv_dp + ds_de * de_dp;
   ds_dT = ds_dv * dv_dT + ds_de * de_dT;
+}
+
+Real
+SinglePhaseFluidProperties::s_from_v_e(Real v, Real e) const
+{
+  Real p0 = _p_initial_guess;
+  Real T0 = _T_initial_guess;
+  Real p, T;
+  bool conversion_succeeded = true;
+  p_T_from_v_e(v, e, p0, T0, p, T, conversion_succeeded);
+  const Real s = s_from_p_T(p, T);
+  return s;
+}
+
+void
+SinglePhaseFluidProperties::s_from_v_e(Real v, Real e, Real & s, Real & ds_dv, Real & ds_de) const
+{
+  Real p0 = _p_initial_guess;
+  Real T0 = _T_initial_guess;
+  Real p, T;
+  bool conversion_succeeded = true;
+  p_T_from_v_e(v, e, p0, T0, p, T, conversion_succeeded);
+  s = s_from_p_T(p, T);
+  ds_dv = p / T;
+  ds_de = 1 / T;
 }
 
 Real
@@ -168,7 +215,6 @@ SinglePhaseFluidProperties::e_from_p_T(Real p, Real T, Real & e, Real & de_dp, R
   // From e(p, rho), compute: de(p,rho)/dp, de(p,rho)/drho
   Real depr_dp = 0., depr_drho = 0.;
   e_from_p_rho(p, rho, e, depr_dp, depr_drho);
-
   // Using partial derivative rules, we have:
   // de(p,T)/dp = de(p,rho)/dp * dp/dp + de(p,rho)/drho * drho(p,T)/dp, (dp/dp == 1)
   // de(p,T)/dT = de(p,rho)/dp * dp/dT + de(p,rho)/drho * drho(p,T)/dT, (dp/dT == 0)
@@ -199,7 +245,7 @@ SinglePhaseFluidProperties::v_from_p_T(Real p, Real T, Real & v, Real & dv_dp, R
 void
 SinglePhaseFluidProperties::beta_from_p_T(Real, Real, Real &, Real &, Real &) const
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " is not implemented.");
+  mooseError(__PRETTY_FUNCTION__, " is not implemented.");
 }
 
 Real
@@ -220,7 +266,7 @@ SinglePhaseFluidProperties::beta_from_p_T(Real p, Real T) const
 Real
 SinglePhaseFluidProperties::molarMass() const
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+  mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }
 
 std::string
@@ -232,37 +278,37 @@ SinglePhaseFluidProperties::fluidName() const
 Real
 SinglePhaseFluidProperties::criticalPressure() const
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+  mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }
 
 Real
 SinglePhaseFluidProperties::criticalTemperature() const
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+  mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }
 
 Real
 SinglePhaseFluidProperties::criticalDensity() const
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+  mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }
 
 Real
 SinglePhaseFluidProperties::criticalInternalEnergy() const
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+  mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }
 
 Real
 SinglePhaseFluidProperties::triplePointPressure() const
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+  mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }
 
 Real
 SinglePhaseFluidProperties::triplePointTemperature() const
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+  mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }
 
 Real
@@ -275,7 +321,7 @@ void
 SinglePhaseFluidProperties::gamma_from_v_e(
     Real v, Real e, Real & gamma, Real & dgamma_dv, Real & dgamma_de) const
 {
-  fluidPropError(name(), ": ", __PRETTY_FUNCTION__, " derivatives not implemented.");
+  fluidPropError(__PRETTY_FUNCTION__, " derivatives not implemented.");
 
   dgamma_dv = 0.0;
   dgamma_de = 0.0;
@@ -292,7 +338,7 @@ void
 SinglePhaseFluidProperties::gamma_from_p_T(
     Real p, Real T, Real & gamma, Real & dgamma_dp, Real & dgamma_dT) const
 {
-  fluidPropError(name(), ": ", __PRETTY_FUNCTION__, " derivatives not implemented.");
+  fluidPropError(__PRETTY_FUNCTION__, " derivatives not implemented.");
 
   dgamma_dp = 0.0;
   dgamma_dT = 0.0;
@@ -301,19 +347,19 @@ SinglePhaseFluidProperties::gamma_from_p_T(
 
 Real SinglePhaseFluidProperties::vaporPressure(Real) const
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+  mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }
 
 std::vector<Real>
 SinglePhaseFluidProperties::henryCoefficients() const
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+  mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }
 
 void
 SinglePhaseFluidProperties::vaporPressure(Real T, Real & p, Real & dp_dT) const
 {
-  fluidPropError(name(), ": ", __PRETTY_FUNCTION__, " derivatives not implemented.");
+  fluidPropError(__PRETTY_FUNCTION__, " derivatives not implemented.");
 
   dp_dT = 0.0;
   p = vaporPressure(T);
@@ -336,13 +382,13 @@ SinglePhaseFluidProperties::vaporPressure(const DualReal & T) const
 
 Real SinglePhaseFluidProperties::vaporTemperature(Real) const
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+  mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }
 
 void
 SinglePhaseFluidProperties::vaporTemperature(Real p, Real & T, Real & dT_dp) const
 {
-  fluidPropError(name(), ": ", __PRETTY_FUNCTION__, " derivatives not implemented.");
+  fluidPropError(__PRETTY_FUNCTION__, " derivatives not implemented.");
 
   dT_dp = 0.0;
   T = vaporTemperature(p);
@@ -442,13 +488,13 @@ SinglePhaseFluidProperties::rho_mu_from_p_T(const DualReal & p,
 
 Real SinglePhaseFluidProperties::e_spndl_from_v(Real) const
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+  mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }
 
 void
 SinglePhaseFluidProperties::v_e_spndl_from_T(Real, Real &, Real &) const
 {
-  mooseError(name(), ": ", __PRETTY_FUNCTION__, " not implemented.");
+  mooseError(__PRETTY_FUNCTION__, " not implemented.");
 }
 
 Real
@@ -459,6 +505,89 @@ SinglePhaseFluidProperties::T_from_p_h(Real p, Real h) const
   const Real v = 1. / rho;
   const Real e = e_from_v_h(v, h);
   return T_from_v_e(v, e);
+}
+
+void
+SinglePhaseFluidProperties::p_T_from_v_e(const Real & v,  // v value
+                                         const Real & e,  // e value
+                                         const Real & p0, // initial guess
+                                         const Real & T0, // initial guess
+                                         Real & p,        // returned pressure
+                                         Real & T,        // returned temperature
+                                         bool & conversion_succeeded) const
+{
+  auto v_lambda = [&](Real pressure, Real temperature, Real & new_v, Real & dv_dp, Real & dv_dT)
+  { v_from_p_T(pressure, temperature, new_v, dv_dp, dv_dT); };
+  auto e_lambda = [&](Real pressure, Real temperature, Real & new_e, Real & de_dp, Real & de_dT)
+  { e_from_p_T(pressure, temperature, new_e, de_dp, de_dT); };
+  FluidPropertiesUtils::NewtonSolve2D(
+      v, e, p0, T0, p, T, _tolerance, conversion_succeeded, v_lambda, e_lambda);
+
+  if (!conversion_succeeded)
+    mooseDoOnce(mooseWarning("Conversion from (v, e)=(", v, ", ", e, ") to (p, T) failed"));
+}
+
+void
+SinglePhaseFluidProperties::p_T_from_v_h(const Real & v,  // v value
+                                         const Real & h,  // e value
+                                         const Real & p0, // initial guess
+                                         const Real & T0, // initial guess
+                                         Real & p,        // returned pressure
+                                         Real & T,        // returned temperature
+                                         bool & conversion_succeeded) const
+{
+  auto v_lambda = [&](Real pressure, Real temperature, Real & new_v, Real & dv_dp, Real & dv_dT)
+  { v_from_p_T(pressure, temperature, new_v, dv_dp, dv_dT); };
+  auto h_lambda = [&](Real pressure, Real temperature, Real & new_h, Real & dh_dp, Real & dh_dT)
+  { h_from_p_T(pressure, temperature, new_h, dh_dp, dh_dT); };
+  FluidPropertiesUtils::NewtonSolve2D(
+      v, h, p0, T0, p, T, _tolerance, conversion_succeeded, v_lambda, h_lambda);
+
+  if (!conversion_succeeded)
+    mooseDoOnce(mooseWarning("Conversion from (v, h)=(", v, ", ", h, ") to (p, T) failed"));
+}
+
+void
+SinglePhaseFluidProperties::p_T_from_h_s(const Real & h,  // h value
+                                         const Real & s,  // s value
+                                         const Real & p0, // initial guess
+                                         const Real & T0, // initial guess
+                                         Real & p,        // returned pressure
+                                         Real & T,        // returned temperature
+                                         bool & conversion_succeeded) const
+{
+  auto h_lambda = [&](Real pressure, Real temperature, Real & new_h, Real & dh_dp, Real & dh_dT)
+  { h_from_p_T(pressure, temperature, new_h, dh_dp, dh_dT); };
+  auto s_lambda = [&](Real pressure, Real temperature, Real & new_s, Real & ds_dp, Real & ds_dT)
+  { s_from_p_T(pressure, temperature, new_s, ds_dp, ds_dT); };
+  FluidPropertiesUtils::NewtonSolve2D(
+      h, s, p0, T0, p, T, _tolerance, conversion_succeeded, h_lambda, s_lambda);
+
+  if (!conversion_succeeded)
+    mooseDoOnce(mooseWarning("Conversion from (h, s)=(", h, ", ", s, ") to (p, T) failed"));
+}
+
+Real
+SinglePhaseFluidProperties::p_from_h_s(Real h, Real s) const
+{
+  Real p0 = _p_initial_guess;
+  Real T0 = _T_initial_guess;
+  Real p, T;
+  bool conversion_succeeded = true;
+  p_T_from_h_s(h, s, p0, T0, p, T, conversion_succeeded);
+  return p;
+}
+
+void
+SinglePhaseFluidProperties::p_from_h_s(Real h, Real s, Real & p, Real & dp_dh, Real & dp_ds) const
+{
+  Real p0 = _p_initial_guess;
+  Real T0 = _T_initial_guess;
+  Real T;
+  bool conversion_succeeded = true;
+  p_T_from_h_s(h, s, p0, T0, p, T, conversion_succeeded);
+  dp_dh = rho_from_p_T(p, T);
+  dp_ds = -T * rho_from_p_T(p, T);
 }
 
 void

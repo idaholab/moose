@@ -17,12 +17,10 @@
   [../]
 []
 
-[Modules]
-  [./FluidProperties]
-    [./fp]
-      type = NaNInterfaceTestFluidProperties
-    [../]
-  []
+[FluidProperties]
+  [./fp]
+    type = NaNInterfaceTestFluidProperties
+  [../]
 []
 
 [Executioner]

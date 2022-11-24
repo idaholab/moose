@@ -66,8 +66,9 @@ The input file for using the AIS algorithm is somewhat similar to the other samp
 where, `proposal_std` are proposal standard deviations (in Standard Normal space) used during the learning phase,
  `output_limit` is the limiting value greater than which is characterized as model failure
  , `num_samples_train` is the number of samples to learn the importance distribution,
+ `num_importance_sampling_steps` is the number of importance sampling steps (after the importance distribution has been trained),
  `std_factor` is the factor multiplied to the standard deviation of the importance samples
-while characterizing the importance distribution, `use_absolute_value` is used this when failure is defined as a non-exceedance rather than an exceedance. `inputs_reporter` and `output_reporter` are the
+while characterizing the importance distribution, `use_absolute_value` can be set to true when failure is defined as a non-exceedance rather than an exceedance. `inputs_reporter` and `output_reporter` are the
 reporter values which transfer information between the `AIS` sampler and the
 `AdaptiveMonteCarloDecision` reporter.
 
@@ -81,9 +82,8 @@ Third, the `Executioner` block is presented below:
 
 !listing modules/stochastic_tools/test/tests/samplers/AdaptiveImportanceSampler/ais.i block=Executioner
 
-where, it is noticed that unlike some other sampler classes, the `type` is transient.
- `num_steps` in the above code block are the total number of samples required; that is
- learning phase samples plus importance sampling phase samples.
+where it is noticed that unlike some other sampler classes, the `type` is transient.
+The number of time steps is automatically determined based on `num_samples_train` and `num_importance_sampling_steps`.
 
 ## Output format
 

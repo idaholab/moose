@@ -1,0 +1,19 @@
+[Tests]
+  issues = '#22074'
+  design = 'navier_stokes/index.md INSElementIntegralEnergyAdvection.md'
+  [conservation]
+    requirement = 'The system shall exhibit global conservation of energy when using the continuous-Galerkin finite element spatial discretization with streamline-upwind Petrov-Galerkin stabilization and with'
+    [q2q1]
+      type = CSVDiff
+      input = q2q1.i
+      csvdiff = q2q1_out.csv
+      detail = 'q2q1 elements'
+    []
+    [q1q1]
+      type = CSVDiff
+      input = q1q1.i
+      csvdiff = q1q1_out.csv
+      detail = 'q1q1 elements and pressure-stabilized Petrov-Galerkin stabilization'
+    []
+  []
+[]

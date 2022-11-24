@@ -12,7 +12,7 @@
 #include "MultiAppFieldTransfer.h"
 
 /**
- * Copy the value to the target domain from the nearest node in the source domain.
+ * Copy the fields directly from one application to another, based on degree-of-freedom indexing
  */
 class MultiAppCopyTransfer : public MultiAppFieldTransfer
 {
@@ -30,12 +30,15 @@ protected:
   virtual std::vector<VariableName> getFromVarNames() const override { return _from_var_names; }
   virtual std::vector<AuxVariableName> getToVarNames() const override { return _to_var_names; }
 
+  // These attributes are used if a derived class supports transferring multiple variables
   /// Name of variables transfering from
   const std::vector<VariableName> _from_var_names;
   /// Name of variables transfering to
   const std::vector<AuxVariableName> _to_var_names;
 
-  /// This values are used if a derived class only supports one variable
+  // These attributes are used if a derived class only supports one variable
+  /// Name of variables transfering from
   VariableName _from_var_name;
+  /// Name of variables transfering to
   AuxVariableName _to_var_name;
 };

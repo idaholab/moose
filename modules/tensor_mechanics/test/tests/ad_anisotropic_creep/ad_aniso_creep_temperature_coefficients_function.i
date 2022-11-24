@@ -198,7 +198,7 @@
     max_iterations = 50
   []
   [hill_constants]
-    type = HillConstants
+    type = ADHillConstants
     # F G H L M N
     hill_constants = "0.5 0.5 0.5 1.5 1.5 1.5"
     function_names = 'F G H L M N'

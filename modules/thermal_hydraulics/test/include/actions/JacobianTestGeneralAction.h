@@ -21,7 +21,7 @@
 class JacobianTestGeneralAction : public JacobianTestAction
 {
 public:
-  JacobianTestGeneralAction(InputParameters params);
+  JacobianTestGeneralAction(const InputParameters & params);
 
 protected:
   virtual void addInitialConditions() override;

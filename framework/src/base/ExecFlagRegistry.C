@@ -28,13 +28,22 @@ getExecFlagRegistry()
 ExecFlagRegistry::ExecFlagRegistry() {}
 
 const ExecFlagType &
-ExecFlagRegistry::registerFlag(const std::string & name)
+ExecFlagRegistry::registerFlag(const std::string & name, const bool is_default)
 {
   const auto name_upper = MooseUtils::toUpper(name);
   std::unique_lock lock(_flags_mutex);
   if (_flags.find(name_upper) != _flags.items().end())
     mooseError("The exec flag ", name_upper, " is already registered");
-  return _flags.addAvailableFlags(ExecFlagType(name_upper, _flags.getNextValidID()));
+
+  const auto & flag = _flags.addAvailableFlags(ExecFlagType(name_upper, _flags.getNextValidID()));
+
+  if (is_default)
+  {
+    std::unique_lock default_lock(_default_flags_mutex);
+    _default_flags.addAvailableFlags(flag);
+  }
+
+  return flag;
 }
 
 }

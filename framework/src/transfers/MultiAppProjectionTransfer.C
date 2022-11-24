@@ -15,7 +15,7 @@
 #include "MooseMesh.h"
 #include "MooseVariableFE.h"
 #include "SystemBase.h"
-#include "MooseCoordTransform.h"
+#include "MooseAppCoordTransform.h"
 
 #include "libmesh/dof_map.h"
 #include "libmesh/linear_implicit_system.h"
@@ -83,8 +83,6 @@ void
 MultiAppProjectionTransfer::initialSetup()
 {
   MultiAppConservativeTransfer::initialSetup();
-
-  getAppInfo();
 
   _proj_sys.resize(_to_problems.size(), NULL);
 
@@ -196,8 +194,6 @@ MultiAppProjectionTransfer::execute()
   TIME_SECTION(
       "MultiAppProjectionTransfer::execute()", 5, "Transferring variables through projection");
 
-  getAppInfo();
-
   ////////////////////
   // We are going to project the solutions by solving some linear systems.  In
   // order to assemble the systems, we need to evaluate the "from" domain
@@ -247,6 +243,9 @@ MultiAppProjectionTransfer::execute()
   {
     for (unsigned int i_to = 0; i_to < _to_problems.size(); i_to++)
     {
+      // Indexing into the coordinate transforms vector
+      const auto to_global_num =
+          _current_direction == FROM_MULTIAPP ? 0 : _to_local2global_map[i_to];
       MeshBase & to_mesh = _to_meshes[i_to]->getMesh();
 
       LinearImplicitSystem & system = *_proj_sys[i_to];
@@ -272,7 +271,7 @@ MultiAppProjectionTransfer::execute()
             for (unsigned int qp = 0; qp < qrule.n_points() && !qp_hit; qp++)
             {
               Point qpt = xyz[qp];
-              if (bboxes[from0 + i_from].contains_point((*_to_transforms[i_to])(qpt)))
+              if (bboxes[from0 + i_from].contains_point((*_to_transforms[to_global_num])(qpt)))
                 qp_hit = true;
             }
           }
@@ -287,7 +286,7 @@ MultiAppProjectionTransfer::execute()
             for (unsigned int qp = 0; qp < qrule.n_points(); qp++)
             {
               Point qpt = xyz[qp];
-              outgoing_qps[i_proc].push_back((*_to_transforms[i_to])(qpt));
+              outgoing_qps[i_proc].push_back((*_to_transforms[to_global_num])(qpt));
             }
           }
         }
@@ -380,10 +379,12 @@ MultiAppProjectionTransfer::execute()
       {
         if (local_bboxes[i_from].contains_point(qpt))
         {
+          const auto from_global_num =
+              _current_direction == TO_MULTIAPP ? 0 : _from_local2global_map[i_from];
           outgoing_evals_ids[pid][qp].first =
-              (*local_meshfuns[i_from])(_from_transforms[i_from]->mapBack(qpt));
+              (*local_meshfuns[i_from])(_from_transforms[from_global_num]->mapBack(qpt));
           if (_current_direction == FROM_MULTIAPP)
-            outgoing_evals_ids[pid][qp].second = _from_local2global_map[i_from];
+            outgoing_evals_ids[pid][qp].second = from_global_num;
         }
       }
     }

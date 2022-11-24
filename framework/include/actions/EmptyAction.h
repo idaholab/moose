@@ -19,7 +19,7 @@ class EmptyAction : public Action
 public:
   static InputParameters validParams();
 
-  EmptyAction(InputParameters params);
+  EmptyAction(const InputParameters & params);
 
   virtual void act() override;
 };

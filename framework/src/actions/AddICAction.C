@@ -29,7 +29,7 @@ AddICAction::validParams()
   return params;
 }
 
-AddICAction::AddICAction(InputParameters params) : MooseObjectAction(params) {}
+AddICAction::AddICAction(const InputParameters & params) : MooseObjectAction(params) {}
 
 void
 AddICAction::act()

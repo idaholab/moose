@@ -17,7 +17,7 @@
 class TestAction : public Action
 {
 public:
-  TestAction(InputParameters params);
+  TestAction(const InputParameters & params);
 
   virtual void act();
 

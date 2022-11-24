@@ -51,7 +51,13 @@ BreakBoundaryOnSubdomainGenerator::generate()
   {
     auto & boundary_names = getParam<std::vector<BoundaryName>>("boundaries");
     for (auto & boundary_name : boundary_names)
+    {
+      // check that the boundary exists in the mesh
+      if (!MooseMeshUtils::hasBoundaryName(*mesh, boundary_name))
+        paramError("boundaries", "The boundary '", boundary_name, "' was not found in the mesh");
+
       breaking_boundary_ids.insert(boundary_info.get_id_by_name(boundary_name));
+    }
   }
   else
   {

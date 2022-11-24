@@ -16,7 +16,7 @@ class LoadCovarianceDataAction : public Action
 {
 public:
   static InputParameters validParams();
-  LoadCovarianceDataAction(InputParameters params);
+  LoadCovarianceDataAction(const InputParameters & params);
   virtual void act() override;
 
 private:

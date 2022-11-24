@@ -8,7 +8,7 @@
   initial_from_file = 'steady_state_out.e'
 []
 
-[Modules/FluidProperties]
+[FluidProperties]
   [fp]
     type = StiffenedGasFluidProperties
     gamma = 2.35

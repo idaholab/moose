@@ -1,0 +1,27 @@
+# {{module}} Failure Analysis Report
+
+## Introduction id=introduction
+
+!template field key=introduction required=False
+The [!ac](FAR) for the {{module}} module describes the system functional and non-functional requirements that
+describe the expected interactions that the software shall provide.
+
+## Dependencies id=dependencies
+
+!template field key=dependencies-intro required=False
+The {{module}} module is developed using MOOSE and can itself be based on various MOOSE modules,
+as such the [!ac](FAR) for the {{module}} module is dependent upon the following documents.
+
+!template! field key=dependencies required=False
+!sqa dependencies suffix=far category={{category}}
+!template-end!
+
+## Failure Analysis Requirements id=failure-analysis-requirements
+
+!template field key=failure-analysis-requirements-intro required=False
+The following is a complete list for all the requirements related to failure analysis for the {{module}}
+module.
+
+!template! field key=failure-analysis-requirements required=False
+!sqa requirements link=True collections=FAILURE_ANALYSIS category={{category}}
+!template-end!

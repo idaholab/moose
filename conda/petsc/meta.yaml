@@ -2,7 +2,8 @@
 # REMEMBER TO UPDATE the .yaml files for the following packages:
 #   libmesh/
 #   template/
-{% set build = 0 %}
+#   moose/
+{% set build = 3 %}
 {% set strbuild = "build_" + build|string %}
 {% set version = "3.16.6" %}
 {% set sha256 = "d676eb67e79314d6cca6422d7c477d2b192c830b89d5edc6b46934f7453bcfc0" %}

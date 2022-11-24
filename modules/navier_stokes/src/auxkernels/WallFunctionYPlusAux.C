@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "WallFunctionYPlusAux.h"
-#include "INSFVMethods.h"
+#include "NavierStokesMethods.h"
 
 registerMooseObject("NavierStokesApp", WallFunctionYPlusAux);
 
@@ -119,7 +119,7 @@ WallFunctionYPlusAux::computeValue()
   const auto elem_arg = makeElemArg(_current_elem);
   const auto rho = _rho(elem_arg);
   const auto mu = _mu(elem_arg);
-  ADReal u_star = findUStar(mu.value(), rho.value(), parallel_speed, dist);
+  ADReal u_star = NS::findUStar(mu.value(), rho.value(), parallel_speed, dist);
   ADReal tau = u_star * u_star * rho;
 
   return (dist * u_star * rho / mu).value();

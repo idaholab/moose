@@ -17,7 +17,7 @@
 class ControlDataIntegrityCheckAction : public Action
 {
 public:
-  ControlDataIntegrityCheckAction(InputParameters parameters);
+  ControlDataIntegrityCheckAction(const InputParameters & parameters);
 
   virtual void act();
 

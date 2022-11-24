@@ -114,7 +114,7 @@ if [ ! -d $PETSC_DIR/lib/petsc ]; then exit 1; fi
 #-----------------------------------------------------------------------------#
 # Install Libmesh to system path
 #-----------------------------------------------------------------------------#
-ARG LIBMESH_REV=fd99dadd91eb3f4155e7767613fc37ecf1bd75f3
+ARG LIBMESH_REV=3f05f40f4a45060c1fd07281f8869a4667086291
 ARG LIBMESH_OPTIONS
 ARG LIBMESH_METHODS="opt dbg"
 ENV LIBMESH_DIR=/usr/local \
@@ -145,7 +145,8 @@ ARG BUILD_MODULES
 ARG MOOSE_METHODS=opt
 RUN ./docker_ci/build_moose.sh ; \
 # Ensure a MOOSE test binary was built
-if [ ! -f $MOOSE_DIR/test/moose_test* ]; then exit 1; fi
+if [ ! -f $MOOSE_DIR/test/moose_test* ]; then exit 1; fi ; \
+git submodule init
 
 #-----------------------------------------------------------------------------#
 # Add needed env vars to /etc/environment

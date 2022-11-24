@@ -275,6 +275,12 @@ public:
   RankFourTensorTempl<T> transposeIj() const;
 
   /**
+   * Transpose the tensor by swapping the last two indeces
+   * @return C_ijlk
+   */
+  RankFourTensorTempl<T> transposeKl() const;
+
+  /**
    * single contraction of a RankFourTensor with a vector over index m
    * @return C_xxx = a_ijkl*b_m where m={i,j,k,l} and xxx the remaining indices
    */
@@ -361,13 +367,31 @@ public:
   /// Calculates the vector a[i] = sum over j Ciijj for i and j varying from 0 to 2
   VectorValue<T> sum3x1() const;
 
-  /// Calculates C_ijkl A_jm B_kn C_lt
+  /// Calculates C_imnt A_jm B_kn C_lt
   RankFourTensorTempl<T> tripleProductJkl(const RankTwoTensorTempl<T> &,
+                                          const RankTwoTensorTempl<T> &,
+                                          const RankTwoTensorTempl<T> &) const;
+  /// Calculates C_mjnt A_im B_kn C_lt
+  RankFourTensorTempl<T> tripleProductIkl(const RankTwoTensorTempl<T> &,
+                                          const RankTwoTensorTempl<T> &,
+                                          const RankTwoTensorTempl<T> &) const;
+  /// Calculates C_mnkt A_im B_jn C_lt
+  RankFourTensorTempl<T> tripleProductIjl(const RankTwoTensorTempl<T> &,
+                                          const RankTwoTensorTempl<T> &,
+                                          const RankTwoTensorTempl<T> &) const;
+  /// Calculates C_mntl A_im B_jn C_kt
+  RankFourTensorTempl<T> tripleProductIjk(const RankTwoTensorTempl<T> &,
                                           const RankTwoTensorTempl<T> &,
                                           const RankTwoTensorTempl<T> &) const;
 
   /// Calculates C_mjkl A_im
   RankFourTensorTempl<T> singleProductI(const RankTwoTensorTempl<T> &) const;
+  /// Calculates C_imkl A_jm
+  RankFourTensorTempl<T> singleProductJ(const RankTwoTensorTempl<T> &) const;
+  /// Calculates C_ijml A_km
+  RankFourTensorTempl<T> singleProductK(const RankTwoTensorTempl<T> &) const;
+  /// Calculates C_ijkm A_lm
+  RankFourTensorTempl<T> singleProductL(const RankTwoTensorTempl<T> &) const;
 
   /// checks if the tensor is symmetric
   bool isSymmetric() const;

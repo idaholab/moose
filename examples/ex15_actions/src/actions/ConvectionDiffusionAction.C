@@ -24,7 +24,10 @@ ConvectionDiffusionAction::validParams()
   return params;
 }
 
-ConvectionDiffusionAction::ConvectionDiffusionAction(InputParameters params) : Action(params) {}
+ConvectionDiffusionAction::ConvectionDiffusionAction(const InputParameters & params)
+  : Action(params)
+{
+}
 
 void
 ConvectionDiffusionAction::act()

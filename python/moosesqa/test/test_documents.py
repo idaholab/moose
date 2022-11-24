@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
@@ -26,7 +26,10 @@ class TestSQA(unittest.TestCase):
                              'sll.md.template', 'app_index.md.template',
                              'app_far.md.template', 'app_rtm.md.template', 'app_sdd.md.template',
                              'app_srs.md.template', 'app_stp.md.template', 'app_vvr.md.template',
-                             'app_cci.md.template', 'app_scs.md.template', 'app_sll.md.template']
+                             'app_cci.md.template', 'app_scs.md.template', 'app_sll.md.template',
+                             'module_far.md.template', 'module_rtm.md.template', 'module_sdd.md.template',
+                             'module_srs.md.template', 'module_stp.md.template', 'module_vvr.md.template',
+                             'module_sll.md.template']
         cls.DOC_FILE = os.path.join(cls.ROOT_DIR, 'modules', 'doc', 'content', 'python', 'MooseDocs', 'extensions', 'sqa.md')
         cls.COLLECTIONS = {'FUNCTIONAL', 'USABILITY', 'PERFORMANCE', 'SYSTEM', 'FAILURE_ANALYSIS'}
 

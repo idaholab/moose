@@ -22,14 +22,12 @@
   porepressure = pp
 []
 
-[Modules]
-  [FluidProperties]
-    [simple_fluid]
-      type = SimpleFluidProperties
-      bulk_modulus = 1.5
-      density0 = 1.2
-      viscosity = 0.4
-    []
+[FluidProperties]
+  [simple_fluid]
+    type = SimpleFluidProperties
+    bulk_modulus = 1.5
+    density0 = 1.2
+    viscosity = 0.4
   []
 []
 

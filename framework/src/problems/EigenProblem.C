@@ -51,7 +51,6 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
     // By default, we want to compute an eigenvalue only (smallest or largest)
     _n_eigen_pairs_required(1),
     _generalized_eigenvalue_problem(false),
-    _nl_eigen(std::make_shared<NonlinearEigenSystem>(*this, "eigen0")),
     _negative_sign_eigen_kernel(getParam<bool>("negative_sign_eigen_kernel")),
     _active_eigen_index(getParam<unsigned int>("active_eigen_index")),
     _do_free_power_iteration(false),
@@ -64,12 +63,24 @@ EigenProblem::EigenProblem(const InputParameters & parameters)
     _first_solve(declareRestartableData<bool>("first_solve", true))
 {
 #ifdef LIBMESH_HAVE_SLEPC
-  _nl = _nl_eigen;
+  if (_nl_sys_names.size() > 1)
+    paramError("nl_sys_names",
+               "eigen problems do not currently support multiple nonlinear eigen systems");
+
+  for (const auto i : index_range(_nl_sys_names))
+  {
+    const auto & sys_name = _nl_sys_names[i];
+    auto & nl = _nl[i];
+    nl = std::make_shared<NonlinearEigenSystem>(*this, sys_name);
+    _nl_eigen = std::dynamic_pointer_cast<NonlinearEigenSystem>(nl);
+    _current_nl_sys = nl.get();
+  }
+
   _aux = std::make_shared<AuxiliarySystem>(*this, "aux0");
 
-  newAssemblyArray(*_nl_eigen);
+  newAssemblyArray(_nl);
 
-  FEProblemBase::initNullSpaceVectors(parameters, *_nl_eigen);
+  FEProblemBase::initNullSpaceVectors(parameters, _nl);
 
   _eq.parameters.set<EigenProblem *>("_eigen_problem") = this;
 #else
@@ -207,9 +218,11 @@ EigenProblem::computeMatricesTags(
 }
 
 void
-EigenProblem::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
+EigenProblem::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks,
+                                    const unsigned int nl_sys_num)
 {
   TIME_SECTION("computeJacobianBlocks", 3);
+  setCurrentNonlinearSystem(nl_sys_num);
 
   if (_displaced_problem)
     _aux->compute(EXEC_PRE_DISPLACE);
@@ -218,7 +231,7 @@ EigenProblem::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
 
   _currently_computing_jacobian = true;
 
-  _nl->computeJacobianBlocks(blocks, {_nl_eigen->precondMatrixTag()});
+  _current_nl_sys->computeJacobianBlocks(blocks, {_nl_eigen->precondMatrixTag()});
 
   _currently_computing_jacobian = false;
 }
@@ -471,13 +484,15 @@ EigenProblem::checkProblemIntegrity()
 void
 EigenProblem::doFreeNonlinearPowerIterations(unsigned int free_power_iterations)
 {
+  mooseAssert(_current_nl_sys, "This needs to be non-null");
+
   doFreePowerIteration(true);
   // Set free power iterations
   Moose::SlepcSupport::setFreeNonlinearPowerIterations(free_power_iterations);
 
   // Call solver
-  _nl->solve();
-  _nl->update();
+  _current_nl_sys->solve();
+  _current_nl_sys->update();
 
   // Clear free power iterations
   auto executioner = getMooseApp().getExecutioner();
@@ -490,13 +505,15 @@ EigenProblem::doFreeNonlinearPowerIterations(unsigned int free_power_iterations)
 }
 
 void
-EigenProblem::solve()
+EigenProblem::solve(const unsigned int nl_sys_num)
 {
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
   // Master has the default database
   if (!_app.isUltimateMaster())
     PetscOptionsPush(_petsc_option_data_base);
 #endif
+
+  setCurrentNonlinearSystem(nl_sys_num);
 
   if (_solve)
   {
@@ -552,8 +569,8 @@ EigenProblem::solve()
       _console << " -------------------------------------" << std::endl << std::endl;
     }
 
-    _nl->solve();
-    _nl->update();
+    _current_nl_sys->solve();
+    _current_nl_sys->update();
 
     // with PJFNKMO solve type, we need to evaluate the linear objects to bring them up-to-date
     if (solverParams()._eigen_solve_type == Moose::EST_PJFNKMO)
@@ -599,7 +616,7 @@ EigenProblem::init()
 }
 
 bool
-EigenProblem::converged()
+EigenProblem::nlConverged(unsigned int)
 {
   return _nl_eigen->converged();
 }

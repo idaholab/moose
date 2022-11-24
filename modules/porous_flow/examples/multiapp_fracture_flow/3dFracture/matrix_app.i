@@ -64,12 +64,10 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [water]
-      type = SimpleFluidProperties # this is largely irrelevant here since we care about heat conduction only
-      thermal_expansion = 0 # to prevent depressurization as the reservoir is cooled
-    []
+[FluidProperties]
+  [water]
+    type = SimpleFluidProperties # this is largely irrelevant here since we care about heat conduction only
+    thermal_expansion = 0 # to prevent depressurization as the reservoir is cooled
   []
 []
 
@@ -195,7 +193,7 @@
     variable = enclosing_element_normal_thermal_cond
   []
   [T_to_fracture]
-    type = MultiAppInterpolationTransfer
+    type = MultiAppGeometricInterpolationTransfer
     to_multi_app = fracture_app
     source_variable = matrix_T
     variable = transferred_matrix_T

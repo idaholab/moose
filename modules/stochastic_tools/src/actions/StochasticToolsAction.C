@@ -12,6 +12,7 @@
 #include "ActionFactory.h"
 #include "MooseEnum.h"
 #include "SetupMeshAction.h"
+#include "CreateProblemAction.h"
 
 registerMooseAction("StochasticToolsApp", StochasticToolsAction, "auto_create_mesh");
 registerMooseAction("StochasticToolsApp", StochasticToolsAction, "auto_create_problem");
@@ -38,7 +39,7 @@ StochasticToolsAction::validParams()
   return params;
 }
 
-StochasticToolsAction::StochasticToolsAction(InputParameters params) : Action(params) {}
+StochasticToolsAction::StochasticToolsAction(const InputParameters & params) : Action(params) {}
 
 void
 StochasticToolsAction::act()
@@ -65,24 +66,46 @@ StochasticToolsAction::act()
   }
 
   // [Problem]
-  else if (_current_task == "auto_create_problem" && getParam<bool>("auto_create_problem") &&
-           !_awh.hasActions("create_problem"))
+  else if (_current_task == "auto_create_problem" && getParam<bool>("auto_create_problem"))
   {
-    // Build the Action parameters
-    InputParameters action_params = _action_factory.getValidParams("CreateProblemAction");
+    if (_awh.hasActions("create_problem"))
+    {
+      for (const auto & act : _awh.getActionListByName("create_problem"))
+      {
+        auto * action = dynamic_cast<CreateProblemAction *>(act);
+        if (action)
+        {
+          InputParameters & params = action->getObjectParams();
 
-    // Create the action
-    auto action = std::static_pointer_cast<MooseObjectAction>(
-        _action_factory.create("CreateProblemAction", "Problem", action_params));
+          if (!params.isParamSetByUser("solve"))
+            params.set<bool>("solve") = false;
 
-    // Set the object parameters
-    InputParameters & params = action->getObjectParams();
-    params.set<bool>("solve") = false;
-    params.set<bool>("kernel_coverage_check") = false;
-    params.set<bool>("skip_nl_system_check") = true;
+          if (!params.isParamSetByUser("kernel_coverage_check"))
+            params.set<bool>("kernel_coverage_check") = false;
 
-    // Add Action to the warehouse
-    _awh.addActionBlock(action);
+          if (!params.isParamSetByUser("skip_nl_system_check"))
+            params.set<bool>("skip_nl_system_check") = true;
+        }
+      }
+    }
+    else
+    {
+      // Build the Action parameters
+      InputParameters action_params = _action_factory.getValidParams("CreateProblemAction");
+
+      // Create the action
+      auto action = std::static_pointer_cast<MooseObjectAction>(
+          _action_factory.create("CreateProblemAction", "Problem", action_params));
+
+      // Set the object parameters
+      InputParameters & params = action->getObjectParams();
+      params.set<bool>("solve") = false;
+      params.set<bool>("kernel_coverage_check") = false;
+      params.set<bool>("skip_nl_system_check") = true;
+
+      // Add Action to the warehouse
+      _awh.addActionBlock(action);
+    }
   }
 
   // [Executioner]

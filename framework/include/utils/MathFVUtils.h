@@ -159,8 +159,10 @@ makeCDFace(const FaceInfo & fi, const bool correct_skewness = false)
 /// generically applicable.
 enum class InterpMethod
 {
-  /// (elem+neighbor)/2
+  /// gc*elem+(1-gc)*neighbor
   Average,
+  /// 1/(gc/elem+(1-gc)/neighbor)
+  HarmonicAverage,
   /// (gc*elem+(1-gc)*neighbor)+gradient*(rf-rf')
   SkewCorrectedAverage,
   /// weighted
@@ -172,6 +174,14 @@ enum class InterpMethod
   SOU,
   QUICK
 };
+
+/*
+ * Converts from the interpolation method to the interpolation enum.
+ * This routine is here in lieu of using a MooseEnum for InterpMethod
+ * @param interp_method the name of the interpolation method
+ * @return the interpolation method
+ */
+InterpMethod selectInterpolationMethod(const std::string & interp_method);
 
 /**
  * Produce the interpolation coefficients in the equation:
@@ -242,6 +252,88 @@ linearInterpolation(const T & value1,
 }
 
 /**
+ * Computes the harmonic mean (1/(gc/value1+(1-gc)/value2)) of Reals, RealVectorValues and
+ * RealTensorValues while accounting for the possibility that one or both of them are AD.
+ * For tensors, we use a component-wise mean instead of the matrix-inverse based option.
+ * @param value1 Reference to value1 in the (1/(gc/value1+(1-gc)/value2)) expression
+ * @param value2 Reference to value2 in the (1/(gc/value1+(1-gc)/value2)) expression
+ * @param fi Reference to the FaceInfo of the face on which the interpolation is requested
+ * @param one_is_elem Boolean indicating if the interpolation weight on FaceInfo belongs to the
+ * elementcorresponding to value1
+ * @return The interpolated value
+ */
+template <typename T1, typename T2>
+typename libMesh::CompareTypes<T1, T2>::supertype
+harmonicInterpolation(const T1 & value1,
+                      const T2 & value2,
+                      const FaceInfo & fi,
+                      const bool one_is_elem)
+{
+  // We check if the base values of the given template types match, if not we throw a compile-time
+  // error
+  static_assert(std::is_same<typename MetaPhysicL::RawType<T1>::value_type,
+                             typename MetaPhysicL::RawType<T2>::value_type>::value,
+                "The input values for harmonic interpolation need to have the same raw-value!");
+
+  // Fetch the interpolation coefficients, we use the exact same coefficients as for a simple
+  // weighted average
+  const auto coeffs = interpCoeffs(InterpMethod::Average, fi, one_is_elem);
+
+  // We check if the types are fit to compute the harmonic mean of. This is done compile-time
+  // using constexpr. We start with Real/ADReal which is straightforward if the input values are
+  // positive.
+  if constexpr (libMesh::TensorTools::TensorTraits<T1>::rank == 0)
+  {
+    // The harmonic mean of mixed positive and negative numbers (and 0 as well) is not well-defined
+    // so we assert that the input values shall be positive.
+    mooseAssert(value1 > 0, "Input value 1 needs to be positive for harmonic interpolation!");
+    mooseAssert(value2 > 0, "Input value 2 needs to be positive for harmonic interpolation!");
+    return 1.0 / (coeffs.first / value1 + coeffs.second / value2);
+  }
+  // For vectors (ADRealVectorValue, VectorValue), we take the component-wise harmonic mean
+  else if constexpr (libMesh::TensorTools::TensorTraits<T1>::rank == 1)
+  {
+    typename libMesh::CompareTypes<T1, T2>::supertype result;
+    for (const auto i : make_range(Moose::dim))
+    {
+      mooseAssert(value1(i) > 0,
+                  "Component " + std::to_string(i) +
+                      " of input value 1 needs to be positive for harmonic interpolation!");
+      mooseAssert(value2(i) > 0,
+                  "Component " + std::to_string(i) +
+                      " of input value 2 needs to be positive for harmonic interpolation!");
+      result(i) = 1.0 / (coeffs.first / value1(i) + coeffs.second / value2(i));
+    }
+    return result;
+  }
+  // For tensors (ADRealTensorValue, TensorValue), similarly to the vectors,
+  // we take the component-wise harmonic mean instead of the matrix-inverse approach
+  else if constexpr (libMesh::TensorTools::TensorTraits<T1>::rank == 2)
+  {
+    typename libMesh::CompareTypes<T1, T2>::supertype result;
+    for (const auto i : make_range(Moose::dim))
+      for (const auto j : make_range(Moose::dim))
+      {
+        mooseAssert(value1(i, j) > 0,
+                    "Component (" + std::to_string(i) + "," + std::to_string(j) +
+                        ") of input value 1 needs to be positive for harmonic interpolation!");
+        mooseAssert(value2(i, j) > 0,
+                    "Component (" + std::to_string(i) + "," + std::to_string(j) +
+                        ") of input value 2 needs to be positive for harmonic interpolation!");
+        result(i, j) = 1.0 / (coeffs.first / value1(i, j) + coeffs.second / value2(i, j));
+      }
+    return result;
+  }
+  // We ran out of options, harmonic mean is not supported for other types at the moment
+  else
+    // This line is supposed to throw an error when the user tries to compile this function with
+    // types that are not supported. This is the reason we needed the always_false function. Hope as
+    // C++ gets nicer, we can do this in a nicer way.
+    static_assert(Moose::always_false<T1>,
+                  "Harmonic interpolation is not implemented for the used type!");
+}
+
+/**
  * Linear interpolation with skewness correction using the face gradient.
  * See more info in Moukalled Chapter 9. The correction involves a first order
  * Taylor expansion around the intersection of the cell face and the line
@@ -283,8 +375,11 @@ interpolate(InterpMethod m,
     case InterpMethod::SkewCorrectedAverage:
       result = linearInterpolation(value1, value2, fi, one_is_elem);
       break;
+    case InterpMethod::HarmonicAverage:
+      result = harmonicInterpolation(value1, value2, fi, one_is_elem);
+      break;
     default:
-      mooseError("unsupported interpolation method for FVFaceInterface::interpolate");
+      mooseError("unsupported interpolation method for interpolate() function");
   }
 }
 
@@ -649,7 +744,7 @@ containerInterpolate(const FunctorBase<T> & functor, const FaceArg & face)
   if (face.limiter_type == LimiterType::Upwind ||
       face.limiter_type == LimiterType::CentralDifference)
   {
-    for (const auto i : make_range(ret.size()))
+    for (const auto i : index_range(ret))
     {
       const auto &component_upwind = phi_upwind[i], component_downwind = phi_downwind[i];
       std::tie(coeff_upwind, coeff_downwind) = interpCoeffs(*limiter,
@@ -664,7 +759,7 @@ containerInterpolate(const FunctorBase<T> & functor, const FaceArg & face)
   else
   {
     const auto grad_phi_upwind = functor.gradient(upwind_arg);
-    for (const auto i : make_range(ret.size()))
+    for (const auto i : index_range(ret))
     {
       const auto &component_upwind = phi_upwind[i], component_downwind = phi_downwind[i];
       const auto & grad = grad_phi_upwind[i];

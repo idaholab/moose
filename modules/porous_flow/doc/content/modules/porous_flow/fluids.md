@@ -10,7 +10,7 @@ calculate fluid properties such as density or viscosity.
 PorousFlow can use any of the UserObjects in the [Fluid Properties](/fluid_properties/index.md)
 module. A specific fluid can be included in the input file by adding the following block
 
-!listing modules/porous_flow/test/tests/fluids/h2o.i block=Modules/FluidProperties
+!listing modules/porous_flow/test/tests/fluids/h2o.i block=FluidProperties
 
 To calculate fluid properties, a
 [`PorousFlowSingleComponentFluid`](/PorousFlowSingleComponentFluid.md)

@@ -101,9 +101,9 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
     {
       // Found dummy assembly in input assembly names
       make_empty = true;
-      for (const auto i : make_range(_pattern.size()))
+      for (const auto i : index_range(_pattern))
       {
-        for (const auto j : make_range(_pattern[i].size()))
+        for (const auto j : index_range(_pattern[i]))
         {
           // Found dummy assembly in input lattice definition
           if (_pattern[i][j] == empty_pattern_loc)
@@ -339,7 +339,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
     const auto bottom_boundary = getReactorParam<boundary_id_type>("bottom_boundary_id");
     {
       declareMeshProperty("extruded", true);
-      auto params = _app.getFactory().getValidParams("FancyExtruderGenerator");
+      auto params = _app.getFactory().getValidParams("AdvancedExtruderGenerator");
 
       params.set<MeshGeneratorName>("input") = name() + "_delbds";
       params.set<Point>("direction") = Point(0, 0, 1);
@@ -349,7 +349,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
       params.set<boundary_id_type>("bottom_boundary") = bottom_boundary;
       params.set<boundary_id_type>("top_boundary") = top_boundary;
 
-      addMeshSubgenerator("FancyExtruderGenerator", name() + "_extruded", params);
+      addMeshSubgenerator("AdvancedExtruderGenerator", name() + "_extruded", params);
     }
 
     {

@@ -1,17 +1,15 @@
 # Version of simple_fluid_yr_MPa_C.i but using a PorousFlowFullySaturated Action, to check that the Action passes the unit choices through to the remainder of PorousFlow
 
-[Modules]
-  [FluidProperties]
-    [the_simple_fluid]
-      type = SimpleFluidProperties
-      thermal_expansion = 2.0E-4
-      cv = 4000.0
-      cp = 5000.0
-      bulk_modulus = 1.0E9
-      thermal_conductivity = 1.0
-      viscosity = 1.1E-3
-      density0 = 1500.0
-    []
+[FluidProperties]
+  [the_simple_fluid]
+    type = SimpleFluidProperties
+    thermal_expansion = 2.0E-4
+    cv = 4000.0
+    cp = 5000.0
+    bulk_modulus = 1.0E9
+    thermal_conductivity = 1.0
+    viscosity = 1.1E-3
+    density0 = 1500.0
   []
 []
 

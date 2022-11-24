@@ -74,6 +74,7 @@ public:
                       const Elem * const & elem);
 
   bool isNodal() const override { return false; }
+  bool hasDoFsOnNodes() const override { return false; }
 
   /**
    * Returns whether this data structure needs automatic differentiation calculations
@@ -92,8 +93,6 @@ public:
    * compute the variable values
    */
   void computeValuesFace(const FaceInfo & fi);
-
-  void computeGhostValuesFace(const FaceInfo & fi, MooseVariableDataFV<OutputType> & other_face);
 
   /**
    * compute the variable values

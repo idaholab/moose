@@ -26,7 +26,8 @@
 #include "Conversion.h"
 #include "NonlinearSystemBase.h"
 #include "DelimitedFileReader.h"
-#include "MooseCoordTransform.h"
+#include "MooseAppCoordTransform.h"
+#include "MultiAppTransfer.h"
 
 #include "libmesh/mesh_tools.h"
 #include "libmesh/numeric_vector.h"
@@ -123,7 +124,7 @@ MultiApp::validParams()
   params.addParam<Real>("global_time_offset",
                         0,
                         "The time offset relative to the parent application for the purpose of "
-                        "starting a subapp at different time from the parent application. The "
+                        "starting a subapp at a different time from the parent application. The "
                         "global time will be ahead by the offset specified here.");
   params.addParam<Real>("reset_time",
                         std::numeric_limits<Real>::max(),
@@ -521,6 +522,12 @@ MultiApp::preTransfer(Real /*dt*/, Real target_time)
     _reset_happened = true;
     for (auto & app : _reset_apps)
       resetApp(app);
+
+    // If we reset an application, then we delete the old objects, including the coordinate
+    // transformation classes. Consequently we need to reset the coordinate transformation classes
+    // in the associated transfer classes
+    for (auto * const transfer : _associated_transfers)
+      transfer->getAppInfo();
   }
 
   // Now move any apps that should be moved
@@ -658,8 +665,50 @@ MultiApp::keepSolutionDuringRestore(bool keep_solution_during_restore)
   _keep_solution_during_restore = keep_solution_during_restore;
 }
 
+void
+MultiApp::transformBoundingBox(BoundingBox & box, const MultiAppCoordTransform & transform)
+{
+  const Real min_x = box.first(0);
+  const Real max_x = box.second(0);
+  const Real min_y = box.first(1);
+  const Real max_y = box.second(1);
+  const Real min_z = box.first(2);
+  const Real max_z = box.second(2);
+
+  std::array<Point, 8> box_corners = {{Point(min_x, min_y, min_z),
+                                       Point(max_x, min_y, min_z),
+                                       Point(min_x, max_y, min_z),
+                                       Point(max_x, max_y, min_z),
+                                       Point(min_x, min_y, max_z),
+                                       Point(max_x, min_y, max_z),
+                                       Point(min_x, max_y, max_z),
+                                       Point(max_x, max_y, max_z)}};
+
+  // transform each corner
+  for (auto & corner : box_corners)
+    corner = transform(corner);
+
+  // Create new bounding box
+  Point new_box_min = box_corners[0];
+  Point new_box_max = new_box_min;
+  for (const auto p : make_range(1, 8))
+    for (const auto d : make_range(Moose::dim))
+    {
+      const Point & pt = box_corners[p];
+      if (new_box_min(d) > pt(d))
+        new_box_min(d) = pt(d);
+
+      if (new_box_max(d) < pt(d))
+        new_box_max(d) = pt(d);
+    }
+  box.first = new_box_min;
+  box.second = new_box_max;
+}
+
 BoundingBox
-MultiApp::getBoundingBox(unsigned int app, bool displaced_mesh)
+MultiApp::getBoundingBox(unsigned int app,
+                         bool displaced_mesh,
+                         const MultiAppCoordTransform * const coord_transform)
 {
   if (!_has_an_app)
     mooseError("No app for ", name(), " on processor ", _orig_rank);
@@ -695,16 +744,14 @@ MultiApp::getBoundingBox(unsigned int app, bool displaced_mesh)
   Point inflated_min = min - inflation_amount;
   Point inflated_max = max + inflation_amount;
 
-  // This is where the app is located.  We need to shift by this amount.
-  Point p = position(app);
-
   Point shifted_min = inflated_min;
   Point shifted_max = inflated_max;
 
-  // If the problem is RZ then we're going to invent a box that would cover the whole "3D" app
-  // FIXME: Assuming all subdomains are the same coordinate system type!
-  if (fe_problem_base.getCoordSystem(*(mesh.meshSubdomains().begin())) == Moose::COORD_RZ)
+  if ((!coord_transform || coord_transform->skipCoordinateCollapsing()) &&
+      fe_problem_base.getCoordSystem(*(mesh.meshSubdomains().begin())) == Moose::COORD_RZ)
   {
+    // If the problem is RZ then we're going to invent a box that would cover the whole "3D" app
+    // FIXME: Assuming all subdomains are the same coordinate system type!
     shifted_min(0) = -inflated_max(0);
     shifted_min(1) = inflated_min(1);
     shifted_min(2) = -inflated_max(0);
@@ -714,11 +761,22 @@ MultiApp::getBoundingBox(unsigned int app, bool displaced_mesh)
     shifted_max(2) = inflated_max(0);
   }
 
-  // Shift them to the position they're supposed to be
-  shifted_min += p;
-  shifted_max += p;
+  if (coord_transform)
+  {
+    BoundingBox transformed_bbox(shifted_min, shifted_max);
+    transformBoundingBox(transformed_bbox, *coord_transform);
+    return transformed_bbox;
+  }
+  else
+  {
+    // This is where the app is located.  We need to shift by this amount.
+    Point p = position(app);
 
-  return BoundingBox(shifted_min, shifted_max);
+    // Shift them to the position they're supposed to be
+    shifted_min += p;
+    shifted_max += p;
+    return BoundingBox(shifted_min, shifted_max);
+  }
 }
 
 FEProblemBase &
@@ -770,7 +828,7 @@ MultiApp::appTransferVector(unsigned int app, std::string var_name)
 }
 
 bool
-MultiApp::hasLocalApp(unsigned int global_app)
+MultiApp::hasLocalApp(unsigned int global_app) const
 {
   if (_has_an_app && global_app >= _first_local_app &&
       global_app <= _first_local_app + (_my_num_apps - 1))
@@ -1086,8 +1144,8 @@ MultiApp::preRunInputFile()
 {
 }
 
-Point
-MultiApp::transformedPosition(const unsigned int app)
+void
+MultiApp::addAssociatedTransfer(MultiAppTransfer & transfer)
 {
-  return appProblemBase(app).coordTransform()(Point(0));
+  _associated_transfers.push_back(&transfer);
 }

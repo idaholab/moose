@@ -1,4 +1,4 @@
-## Minimum System Requirements
+### Minimum System Requirements
 
 In general, the following is required for MOOSE-based development:
 
@@ -9,3 +9,4 @@ In general, the following is required for MOOSE-based development:
 - Memory: 16 GBs (debug builds)
 - Processor: 64-bit x86
 - Disk: 30GB
+- Many flavors of modern Linux and the two most recent versions of MacOS

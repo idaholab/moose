@@ -1,1 +1,1 @@
-!template load file=sqa/app_srs.md.template app=Reconstructed Discontinuous Galerkin category=rdg
+!template load file=sqa/module_srs.md.template module=Reconstructed Discontinuous Galerkin category=rdg

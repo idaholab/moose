@@ -39,7 +39,8 @@ static void
 associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 {
   registerSyntaxTask(
-      "AddFluidPropertiesAction", "Modules/FluidProperties/*", "add_fluid_properties");
+      "AddFluidPropertiesDeprecatedAction", "Modules/FluidProperties/*", "add_fluid_properties");
+  registerSyntaxTask("AddFluidPropertiesAction", "FluidProperties/*", "add_fluid_properties");
   registerMooseObjectTask("add_fluid_properties", FluidProperties, false);
   registerMooseObjectTask("add_fp_output", Output, false);
 

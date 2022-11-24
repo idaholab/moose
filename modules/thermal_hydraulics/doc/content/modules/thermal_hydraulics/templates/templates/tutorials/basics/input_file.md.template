@@ -12,13 +12,11 @@ Every input file will contain blocks with the following format:
 []
 ```
 
-where `BlockName` can contain letters, numbers.
-Whitespaces should be avoided, since they can create unexpected problems
-
+where `BlockName` can contain letters, numbers, and underscores.
 
 ## Nested Blocks
 
-Some blocks allow nesting, an example of a nested block would look like this:
+Some blocks allow nesting; an example of a nested block would look like this:
 
 ```
 [BlockName]
@@ -144,7 +142,7 @@ The global value can be locally overriden inside the block:
 
 ## Example
 
-The following input file shows the above-explained features on a simple {{project-name-abbrev}} input file:
+The following input file shows the above-explained features on a simple input file:
 
 ```
 # radius of a flow channel
@@ -163,7 +161,7 @@ D_h_pipe = ${fparse 2 * r}
   rdg_slope_reconstruction = full
 []
 
-[Modules/FluidProperties]
+[FluidProperties]
   [fluid]
     type = IdealGasFluidProperties
   []

@@ -276,13 +276,11 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
     }
     catch (libMesh::LogicError & e)
     {
-      throw MooseException("We caught a libMesh error in ThreadedElementLoopBase");
+      mooseException("We caught a libMesh error in ThreadedElementLoopBase:", e.what());
     }
-    catch (MetaPhysicL::LogicError &)
+    catch (MetaPhysicL::LogicError & e)
     {
-      mooseError("We caught a MetaPhysicL error in ThreadedElementLoopBase. This is very likely "
-                 "due to AD not having a sufficiently large derivative container size. Please run "
-                 "MOOSE configure with the '--with-derivative-size=<n>' option");
+      moose::translateMetaPhysicLError(e);
     }
   }
   catch (MooseException & e)

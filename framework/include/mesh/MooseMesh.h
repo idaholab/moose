@@ -38,7 +38,7 @@
 class Assembly;
 class RelationshipManager;
 class MooseVariableBase;
-class MooseCoordTransform;
+class MooseAppCoordTransform;
 class MooseUnits;
 
 // libMesh forward declarations
@@ -418,10 +418,44 @@ public:
   ///@}
 
   /**
-   * Returns a map of boundaries to elements.
+   * Returns a map of boundaries to ids of elements on the boundary.
    */
   const std::unordered_map<boundary_id_type, std::unordered_set<dof_id_type>> &
   getBoundariesToElems() const;
+
+  /**
+   * Returns a map of boundaries to ids of elements on the boundary.
+   */
+  const std::unordered_map<boundary_id_type, std::unordered_set<dof_id_type>> &
+  getBoundariesToActiveSemiLocalElemIds() const;
+
+  /**
+   * Return all ids of elements which have a side which is part of a sideset.
+   * Note that boundaries are sided.
+   * @param bid the id of the sideset of interest
+   */
+  std::unordered_set<dof_id_type> getBoundaryActiveSemiLocalElemIds(BoundaryID bid) const;
+
+  /**
+   * Return all ids of neighbors of elements which have a side which is part of a sideset.
+   * Note that boundaries are sided, this is on the neighbor side. For the sideset side, use
+   * getBoundariesActiveLocalElemIds.
+   * Note that while the element is local and active, the neighbor is not guaranteed to be local,
+   * it could be ghosted.
+   * Note that if the neighbor is not ghosted, is a remote_elem, then it will not be included
+   * @param bid the id of the sideset of interest
+   */
+  std::unordered_set<dof_id_type> getBoundaryActiveNeighborElemIds(BoundaryID bid) const;
+
+  /**
+   * Returns whether a boundary (given by its id) is not crossing through a group of blocks,
+   * by which we mean that elements on both sides of the boundary are in those blocks
+   * @param bid the id of the boundary of interest
+   * @param blk_group the group of blocks potentially traversed
+   * @return whether the boundary does not cross between the subdomains in the group
+   */
+  bool isBoundaryFullyExternalToSubdomains(BoundaryID bid,
+                                           const std::set<SubdomainID> & blk_group) const;
 
   /**
    * Returns a read-only reference to the set of subdomains currently
@@ -500,10 +534,7 @@ public:
    * to refine the mesh by a few levels. Otherwise, it might introduce an
    * unbalanced workload and too large ghosting domain.
    */
-  bool skipDeletionRepartitionAfterRefine() const
-  {
-    return _skip_deletion_repartition_after_refine;
-  }
+  bool skipDeletionRepartitionAfterRefine() const;
 
   /**
    * Whether or not skip uniform refinements when using a pre-split mesh
@@ -555,6 +586,7 @@ public:
    * Getter for the maximum leaf size parameter.
    */
   unsigned int getMaxLeafSize() const { return _max_leaf_size; };
+
   /**
    * Set the patch size update strategy
    */
@@ -920,11 +952,7 @@ public:
   /**
    *  Allow to change parallel type
    */
-  void setParallelType(ParallelType parallel_type)
-  {
-    _parallel_type = parallel_type;
-    determineUseDistributedMesh();
-  }
+  void setParallelType(ParallelType parallel_type);
 
   /*
    * Set/Get the partitioner name
@@ -1017,20 +1045,12 @@ public:
   /**
    * Whether mesh has an extra element integer with a given name
    */
-  bool hasElementID(const std::string & id_name) const
-  {
-    return getMesh().has_elem_integer(id_name);
-  }
+  bool hasElementID(const std::string & id_name) const;
 
   /**
    * Return the accessing integer for an extra element integer with its name
    */
-  unsigned int getElementIDIndex(const std::string & id_name) const
-  {
-    if (!hasElementID(id_name))
-      mooseError("Mesh does not have element ID for ", id_name);
-    return getMesh().get_elem_integer_index(id_name);
-  }
+  unsigned int getElementIDIndex(const std::string & id_name) const;
 
   /**
    * Return the maximum element ID for an extra element integer with its accessing index
@@ -1045,12 +1065,7 @@ public:
   /**
    * Whether or not two extra element integers are identical
    */
-  bool areElemIDsIdentical(const std::string & id_name1, const std::string & id_name2) const
-  {
-    auto id1 = getElementIDIndex(id_name1);
-    auto id2 = getElementIDIndex(id_name2);
-    return _id_identical_flag[id1][id2];
-  }
+  bool areElemIDsIdentical(const std::string & id_name1, const std::string & id_name2) const;
 
   /**
    * Return all the unique element IDs for an extra element integer with its index
@@ -1066,20 +1081,15 @@ public:
 
   ///@{ accessors for the FaceInfo objects
   unsigned int nFace() const { return _face_info.size(); }
+
   /// Accessor for local \p FaceInfo objects.
-  const std::vector<const FaceInfo *> & faceInfo() const
-  {
-    buildFiniteVolumeInfo();
-    return _face_info;
-  }
+  const std::vector<const FaceInfo *> & faceInfo() const;
+
   /// Accessor for the local FaceInfo object on the side of one element. Returns null if ghosted.
   const FaceInfo * faceInfo(const Elem * elem, unsigned int side) const;
+
   /// Accessor for all \p FaceInfo objects.
-  const std::vector<FaceInfo> & allFaceInfo() const
-  {
-    buildFiniteVolumeInfo();
-    return _all_face_info;
-  }
+  const std::vector<FaceInfo> & allFaceInfo() const;
   ///@}
 
   /**
@@ -1108,10 +1118,7 @@ public:
   /**
    * @return A map from nodeset ids to the vector of node ids in the nodeset
    */
-  const std::map<boundary_id_type, std::vector<dof_id_type>> & nodeSetNodes() const
-  {
-    return _node_set_nodes;
-  }
+  const std::map<boundary_id_type, std::vector<dof_id_type>> & nodeSetNodes() const;
 
   /**
    * Get the coordinate system type, e.g. xyz, rz, or r-spherical, for the provided subdomain id \p
@@ -1162,12 +1169,19 @@ public:
    * @return the coordinate transformation object that describes how to transform this problem's
    * coordinate system into the canonical/reference coordinate system
    */
-  MooseCoordTransform & coordTransform();
+  MooseAppCoordTransform & coordTransform();
 
   /**
    * @return the length unit of this mesh provided through the coordinate transformation object
    */
   const MooseUnits & lengthUnit() const;
+
+  /**
+   * This function attempts to return the map from a high-order element side to its corresponding
+   * lower-d element
+   */
+  const std::unordered_map<std::pair<const Elem *, unsigned short int>, const Elem *> &
+  getLowerDElemMap() const;
 
 protected:
   /// Deprecated (DO NOT USE)
@@ -1349,8 +1363,6 @@ private:
   /// FaceInfo objects accessible from this process
   mutable std::vector<FaceInfo> _all_face_info;
 
-  /// Map storing the ElemInfo-s of the ghost elements
-  mutable std::unordered_map<std::pair<const Elem *, unsigned int>, ElemInfo> _elem_to_ghost_info;
   /// Map connecting elems with their corresponding ElemInfo
   mutable std::unordered_map<const Elem *, ElemInfo> _elem_to_elem_info;
 
@@ -1471,6 +1483,12 @@ private:
                             int child,
                             int child_side);
 
+  /**
+   * Update the coordinate transformation object based on our coordinate system data. The coordinate
+   * transformation will be created if it hasn't been already
+   */
+  void updateCoordTransform();
+
   /// Holds mappings for volume to volume and parent side to child side
   std::map<std::pair<int, ElemType>, std::vector<std::vector<QpMap>>> _elem_type_to_refinement_map;
 
@@ -1543,13 +1561,16 @@ private:
 
   /// A coordinate transformation object that describes how to transform this problem's coordinate
   /// system into the canonical/reference coordinate system
-  std::unique_ptr<MooseCoordTransform> _coord_transform;
+  std::unique_ptr<MooseAppCoordTransform> _coord_transform;
+
+  /// Whether the coordinate system has been set
+  bool _coord_system_set;
 
   template <typename T>
   struct MeshType;
 };
 
-inline MooseCoordTransform &
+inline MooseAppCoordTransform &
 MooseMesh::coordTransform()
 {
   mooseAssert(_coord_transform, "The coordinate transformation object is null.");
@@ -1696,4 +1717,65 @@ MooseMesh::buildTypedMesh(unsigned int dim)
     setPartitionerHelper(mesh.get());
 
   return mesh;
+}
+
+inline bool
+MooseMesh::skipDeletionRepartitionAfterRefine() const
+{
+  return _skip_deletion_repartition_after_refine;
+}
+
+inline void
+MooseMesh::setParallelType(ParallelType parallel_type)
+{
+  _parallel_type = parallel_type;
+  determineUseDistributedMesh();
+}
+
+inline bool
+MooseMesh::hasElementID(const std::string & id_name) const
+{
+  return getMesh().has_elem_integer(id_name);
+}
+
+inline unsigned int
+MooseMesh::getElementIDIndex(const std::string & id_name) const
+{
+  if (!hasElementID(id_name))
+    mooseError("Mesh does not have element ID for ", id_name);
+  return getMesh().get_elem_integer_index(id_name);
+}
+
+inline bool
+MooseMesh::areElemIDsIdentical(const std::string & id_name1, const std::string & id_name2) const
+{
+  auto id1 = getElementIDIndex(id_name1);
+  auto id2 = getElementIDIndex(id_name2);
+  return _id_identical_flag[id1][id2];
+}
+
+inline const std::vector<const FaceInfo *> &
+MooseMesh::faceInfo() const
+{
+  buildFiniteVolumeInfo();
+  return _face_info;
+}
+
+inline const std::vector<FaceInfo> &
+MooseMesh::allFaceInfo() const
+{
+  buildFiniteVolumeInfo();
+  return _all_face_info;
+}
+
+inline const std::map<boundary_id_type, std::vector<dof_id_type>> &
+MooseMesh::nodeSetNodes() const
+{
+  return _node_set_nodes;
+}
+
+inline const std::unordered_map<std::pair<const Elem *, unsigned short int>, const Elem *> &
+MooseMesh::getLowerDElemMap() const
+{
+  return _higher_d_elem_side_to_lower_d_elem;
 }

@@ -35,13 +35,13 @@ MaterialWarehouse::operator[](Moose::MaterialDataType data_type) const
   {
     case Moose::NEIGHBOR_MATERIAL_DATA:
       return _neighbor_materials;
-      break;
+
     case Moose::FACE_MATERIAL_DATA:
       return _face_materials;
-      break;
+
     case Moose::INTERFACE_MATERIAL_DATA:
       return _interface_materials;
-      break;
+
     default:
       return *this;
   }

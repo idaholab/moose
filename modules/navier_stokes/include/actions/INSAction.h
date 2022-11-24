@@ -27,7 +27,7 @@ class INSAction : public Action
 public:
   static InputParameters validParams();
 
-  INSAction(InputParameters parameters);
+  INSAction(const InputParameters & parameters);
 
   virtual void act() override;
 

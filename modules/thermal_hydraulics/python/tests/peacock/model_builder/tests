@@ -4,5 +4,6 @@
     input = test_FlowChannelParametersCalculator.py
     separate = True
     display_required = True
+    required_python_packages = PyQt5
   [../]
 []

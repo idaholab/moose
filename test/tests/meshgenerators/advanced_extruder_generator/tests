@@ -1,0 +1,110 @@
+[Tests]
+  [test]
+    type = 'Exodiff'
+    input = 'gen_extrude.i'
+    cli_args = '--mesh-only'
+    exodiff = 'gen_extrude_in.e'
+    recover = false
+
+    requirement = 'The system shall be able to extrude a mesh with variable height elevations, with variable numbers of layers, and swap subdomain IDs'
+    design = 'AdvancedExtruderGenerator.md'
+    issues = '#13276 #3554 #5634'
+  []
+  [test_flip]
+    type = 'Exodiff'
+    input = 'gen_extrude.i'
+    cli_args = 'Mesh/extrude/direction="0 0 -1" --mesh-only gen_extrude_flip_in.e'
+    exodiff = 'gen_extrude_flip_in.e'
+    recover = false
+
+    requirement = 'The system shall be able to extrude a mesh with variable height elevations, with variable numbers of layers, and swap subdomain IDs in the reverse direction'
+    design = 'AdvancedExtruderGenerator.md'
+    issues = '#13276 #3554 #5634 #21162'
+  []
+  [test_boundary]
+    type = 'Exodiff'
+    input = 'advanced_extruder_with_interface_boundaries.i'
+    cli_args = '--mesh-only'
+    exodiff = 'advanced_extruder_with_interface_boundaries_in.e'
+    recover = false
+
+    requirement = 'The system shall be able to extrude a mesh with variable height elevations, with variable numbers of layers, and swap interface boundaries'
+    design = 'AdvancedExtruderGenerator.md'
+    issues = '#21852'
+  []
+  [test_bias]
+    type = 'Exodiff'
+    input = 'gen_extrude.i'
+    cli_args = '--mesh-only gen_extrude_bias_in.e
+                Mesh/extrude/biases="1.0 2.0 0.5"'
+    exodiff = 'gen_extrude_bias_in.e'
+    recover = false
+
+    requirement = 'The system shall be able to extrude a mesh with variable height elevations, with variable numbers of layers, with biased axial element sizes, and swap subdomain IDs'
+    design = 'AdvancedExtruderGenerator.md'
+    issues = '#21852'
+  []
+  [prepare_mesh]
+    type = 'RunApp'
+    input = need-neighbors.i
+
+    requirement = 'The system shall make sure the mesh is prepared after a mesh generator has indicated the mesh is not prepared and before running a solve.'
+    issues = '#15944 #15936 #15823'
+    design = 'AdvancedExtruderGenerator.md'
+  []
+  [elem_flip]
+    type = 'Exodiff'
+    input = elem_flip.i
+    cli_args = '--mesh-only'
+    exodiff = 'elem_flip_in.e'
+    exodiff_opts = '-pedantic'
+    recover = false
+
+    requirement = 'The system shall be able to fix the negative-volume elements by flipping them during extrusion.'
+    design = 'AdvancedExtruderGenerator.md'
+    issues = '#21162'
+    mesh_mode = 'REPLICATED'
+  []
+  [extruder_then_parsed_gen_sideset]
+    type = 'Exodiff'
+    input = advanced_extruder_then_parsed_gen_sideset.i
+    cli_args = '--mesh-only'
+    exodiff = 'advanced_extruder_then_parsed_gen_sideset_in.e'
+    recover = false
+
+    requirement = 'The system shall be able to use the result from AdvancedExtruderGenerator in subsequent mesh generators'
+    design = 'AdvancedExtruderGenerator.md'
+    issues = '#16902'
+    allow_warnings = true # parsed sideset generation isn't fully supported on distributed meshes
+  []
+  [extruder_with_element_extra_integer_swap]
+    type = 'Exodiff'
+    input = advanced_extruder_with_element_extra_integer_swap.i
+    exodiff = 'advanced_extruder_with_element_extra_integer_swap_out.e'
+
+    requirement = 'The system shall be able to retain and swap element extra integers during extrusion.'
+    design = 'AdvancedExtruderGenerator.md'
+    issues = '#18087'
+  []
+  [mixed_extrude]
+    type = RunException
+    input = gen_extrude.i
+    cli_args = 'Mesh/extrude/heights="1 2 -3" --mesh-only'
+    expect_err = "Cannot have both positive and negative heights!"
+
+    requirement = "The system shall error if missing a consistent positive or negative extrusion direction."
+    design = "AdvancedExtruderGenerator.md"
+    issues = "#21273"
+  []
+  [extruder_with_boundary_swap]
+    type = 'Exodiff'
+    input = advanced_extruder_with_boundary_swap.i
+    exodiff = 'advanced_extruder_with_boundary_swap_in.e'
+    cli_args = '--mesh-only'
+    recover = false
+
+    requirement = 'The system shall be able to retain and swap boundary ids during extrusion.'
+    design = 'AdvancedExtruderGenerator.md'
+    issues = '#21852'
+  []
+[]

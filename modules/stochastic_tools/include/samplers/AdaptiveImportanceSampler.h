@@ -46,6 +46,11 @@ public:
   // Access the output limit
   const Real & getStdFactor() const { return _std_factor; }
 
+  /**
+   * Returns true if the adaptive sampling is completed
+   */
+  virtual bool isAdaptiveSamplingCompleted() const override { return _is_sampling_completed; }
+
 protected:
   /// Return the sample for the given row (the sample index) and column (the parameter index)
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
@@ -65,6 +70,9 @@ protected:
   /// Number of samples to train the importance sampler
   const int & _num_samples_train;
 
+  /// Number of importance sampling steps (after the importance distribution has been trained)
+  const int & _num_importance_sampling_steps;
+
   /// Factor to be multiplied to the standard deviation of the proposal distribution
   const Real & _std_factor;
 
@@ -73,6 +81,9 @@ protected:
 
   /// Initialize a certain number of random seeds. Change from the default only if you have to.
   const unsigned int & _num_random_seeds;
+
+  /// True if the sampling is completed
+  bool _is_sampling_completed;
 
 private:
   /// Track the current step of the main App

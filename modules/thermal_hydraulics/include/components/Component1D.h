@@ -38,6 +38,18 @@ public:
     }
   };
 
+  virtual void buildMesh() override;
+
+  /**
+   * Gets the 1D component nodeset ID
+   */
+  unsigned int getNodesetID() const;
+
+  /**
+   * Gets the 1D component nodeset name
+   */
+  const BoundaryName & getNodesetName() const;
+
   /**
    * Gets the vector of connections of an end type for this component
    *
@@ -51,6 +63,14 @@ protected:
 
   /// Map of end type to a list of connections
   std::map<Component1DConnection::EEndType, std::vector<Connection>> _connections;
+
+private:
+  virtual void buildMeshNodes();
+
+  /// Nodeset ID for all 1D component nodes
+  BoundaryID _nodeset_id;
+  /// Nodeset name for all 1D component nodes
+  BoundaryName _nodeset_name;
 
 public:
   static InputParameters validParams();

@@ -177,8 +177,10 @@ MooseApp::validParams()
   params.addCommandLineParam<unsigned int>(
       "n_threads", "--n-threads=<n>", 1, "Runs the specified number of threads per process");
 
-  params.addCommandLineParam<bool>(
-      "warn_unused", "-w --warn-unused", false, "Warn about unused input file options");
+  params.addCommandLineParam<bool>("allow_unused",
+                                   "-w --allow-unused",
+                                   false,
+                                   "Warn about unused input file options instead of erroring.");
   params.addCommandLineParam<bool>("error_unused",
                                    "-e --error-unused",
                                    false,
@@ -644,7 +646,7 @@ MooseApp::setupOptions()
 
   if (getParam<bool>("error_unused"))
     setCheckUnusedFlag(true);
-  else if (getParam<bool>("warn_unused"))
+  else if (getParam<bool>("allow_unused"))
     setCheckUnusedFlag(false);
 
   if (getParam<bool>("error_override"))
@@ -2570,7 +2572,7 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
       {
         MeshBase & undisp_mesh_base = mesh->getMesh();
         const DofMap * const undisp_nl_dof_map =
-            _executioner ? &feProblem().systemBaseNonlinear().dofMap() : nullptr;
+            _executioner ? &feProblem().systemBaseNonlinear(0).dofMap() : nullptr;
         undisp_mesh_base.add_ghosting_functor(
             createRMFromTemplateAndInit(*rm, undisp_mesh_base, undisp_nl_dof_map));
 
@@ -2581,7 +2583,7 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
           MeshBase & disp_mesh_base = _action_warehouse.displacedMesh()->getMesh();
           const DofMap * disp_nl_dof_map = nullptr;
           if (_executioner && feProblem().getDisplacedProblem())
-            disp_nl_dof_map = &feProblem().getDisplacedProblem()->systemBaseNonlinear().dofMap();
+            disp_nl_dof_map = &feProblem().getDisplacedProblem()->systemBaseNonlinear(0).dofMap();
           disp_mesh_base.add_ghosting_functor(
               createRMFromTemplateAndInit(*rm, disp_mesh_base, disp_nl_dof_map));
         }
@@ -2602,7 +2604,7 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
 
       // Now we've built the problem, so we can use it
       auto & problem = feProblem();
-      auto & undisp_nl = problem.systemBaseNonlinear();
+      auto & undisp_nl = problem.systemBaseNonlinear(0);
       auto & undisp_nl_dof_map = undisp_nl.dofMap();
       auto & undisp_mesh = problem.mesh().getMesh();
 
@@ -2627,7 +2629,7 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
         {
           auto & displaced_problem = *problem.getDisplacedProblem();
           MeshBase & disp_mesh = displaced_problem.mesh().getMesh();
-          const DofMap * const disp_nl_dof_map = &displaced_problem.systemBaseNonlinear().dofMap();
+          const DofMap * const disp_nl_dof_map = &displaced_problem.systemBaseNonlinear(0).dofMap();
           displaced_problem.addAlgebraicGhostingFunctor(
               createRMFromTemplateAndInit(*rm, disp_mesh, disp_nl_dof_map),
               /*to_mesh = */ false);

@@ -15,6 +15,7 @@
 #include "MaterialProperty.h"
 #include "MooseArray.h"
 #include "INSADMaterial.h"
+#include "NavierStokesMethods.h"
 
 #include "libmesh/elem.h"
 
@@ -137,11 +138,10 @@ INSADTauMaterialTempl<T>::computeQpProperties()
 {
   T::computeQpProperties();
 
-  auto && nu = _mu[_qp] / _rho[_qp];
-  auto && transient_part = _has_transient ? 4. / (_dt * _dt) : 0.;
-  _tau[_qp] = _alpha / std::sqrt(transient_part +
-                                 (2. * _velocity[_qp].norm() / _hmax) *
-                                     (2. * _velocity[_qp].norm() / _hmax) +
+  const auto nu = _mu[_qp] / _rho[_qp];
+  const auto transient_part = _has_transient ? 4. / (_dt * _dt) : 0.;
+  const auto speed = NS::computeSpeed(_velocity[_qp]);
+  _tau[_qp] = _alpha / std::sqrt(transient_part + (2. * speed / _hmax) * (2. * speed / _hmax) +
                                  9. * (4. * nu / (_hmax * _hmax)) * (4. * nu / (_hmax * _hmax)));
 
   _momentum_strong_residual[_qp] = _advective_strong_residual[_qp] + _grad_p[_qp];

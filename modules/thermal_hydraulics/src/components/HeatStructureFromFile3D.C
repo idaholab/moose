@@ -63,6 +63,7 @@ HeatStructureFromFile3D::buildModel()
   InputParameters pars = _factory.getValidParams(class_name);
   pars.set<THMProblem *>("_thm_problem") = &_sim;
   pars.set<HeatStructureBase *>("_hs") = this;
+  pars.applyParameters(parameters());
   return _factory.create<HeatConductionModel>(class_name, name(), pars, 0);
 }
 
@@ -198,7 +199,7 @@ HeatStructureFromFile3D::buildMesh()
     boundary_info.add_side(elem, mapped_side, bc_id);
   }
   for (const auto & pr : new_ids_to_names)
-    _mesh.setBoundaryName(pr.first, genName(_name, pr.second));
+    _mesh.getMesh().get_boundary_info().sideset_name(pr.first) = genName(_name, pr.second);
 
   _number_of_hs = _names.size();
 }

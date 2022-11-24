@@ -29,13 +29,8 @@ InputParameters
 HomogenizationConstraintScalarKernel::validParams()
 {
   InputParameters params = ScalarKernel::validParams();
-  params.addRequiredParam<unsigned int>("ndim",
-                                        "Number of problem"
-                                        " displacements");
-  params.addRequiredParam<UserObjectName>("integrator",
-                                          "The integrator user object doing the "
-                                          "element calculations.");
-  params.addParam<bool>("large_kinematics", false, "Are we using large deformations?");
+  params.addRequiredParam<UserObjectName>("homogenization_constraint",
+                                          "The UserObject defining the homogenization constraint");
 
   return params;
 }
@@ -43,18 +38,13 @@ HomogenizationConstraintScalarKernel::validParams()
 HomogenizationConstraintScalarKernel::HomogenizationConstraintScalarKernel(
     const InputParameters & parameters)
   : ScalarKernel(parameters),
-    _ld(getParam<bool>("large_kinematics")),
-    _ndisp(getParam<unsigned int>("ndim")),
-    _ncomps(HomogenizationConstants::required.at(_ld)[_ndisp - 1]),
-    _integrator(getUserObject<HomogenizationConstraintIntegral>("integrator")),
-    _indices(HomogenizationConstants::indices.at(_ld)[_ndisp - 1]),
-    _residual(_integrator.getResidual()),
-    _jacobian(_integrator.getJacobian())
+    _constraint(getUserObject<HomogenizationConstraint>("homogenization_constraint")),
+    _residual(_constraint.getResidual()),
+    _jacobian(_constraint.getJacobian()),
+    _cmap(_constraint.getConstraintMap())
 {
-  if (_var.order() != _ncomps)
-  {
-    mooseError("Homogenization kernel requires a variable of order ", _ncomps);
-  }
+  if (_var.order() != _cmap.size())
+    mooseError("Homogenization kernel requires a variable of order ", _cmap.size());
 }
 
 void
@@ -66,16 +56,28 @@ void
 HomogenizationConstraintScalarKernel::computeResidual()
 {
   DenseVector<Number> & re = _assembly.residualBlock(_var.number());
-  for (_i = 0; _i < re.size(); _i++)
-    re(_i) += _residual(_indices[_i].first, _indices[_i].second);
+  _i = 0;
+  for (auto && indices : _cmap)
+  {
+    auto && [i, j] = indices.first;
+    re(_i++) += _residual(i, j);
+  }
 }
 
 void
 HomogenizationConstraintScalarKernel::computeJacobian()
 {
   DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
-  for (_i = 0; _i < ke.m(); _i++)
-    for (_j = 0; _j < ke.m(); _j++)
-      ke(_i, _j) += _jacobian(
-          _indices[_i].first, _indices[_i].second, _indices[_j].first, _indices[_j].second);
+  _i = 0;
+  for (auto && indices1 : _cmap)
+  {
+    auto && [i, j] = indices1.first;
+    _j = 0;
+    for (auto && indices2 : _cmap)
+    {
+      auto && [a, b] = indices2.first;
+      ke(_i, _j++) += _jacobian(i, j, a, b);
+    }
+    _i++;
+  }
 }

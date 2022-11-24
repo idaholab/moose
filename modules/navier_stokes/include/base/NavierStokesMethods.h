@@ -11,7 +11,12 @@
 
 #include <vector>
 #include "Moose.h"
+#include "MooseUtils.h"
+#include "ADReal.h"
+#include "metaphysicl/raw_type.h"
 
+namespace NS
+{
 /**
  * Delta function, which returns zero if $i\ne j$ and unity if $i=j$
  * @param[in] i   integer number
@@ -81,3 +86,23 @@ Real prandtlPropertyDerivative(const Real & mu,
                                const Real & dmu,
                                const Real & dcp,
                                const Real & dk);
+
+/**
+ * Finds the friction velocity using standard velocity wall functions formulation.
+ * It is used in WallFunctionWallShearStressAux, WallFunctionYPlusAux and
+ * INSFVWallFunctionBC.
+ * @param mu the dynamic viscosity
+ * @param rho the density
+ * @param u the centroid velocity
+ * @param dist the element centroid distance to the wall
+ * @return the velocity at the wall
+ */
+ADReal findUStar(const ADReal & mu, const ADReal & rho, const ADReal & u, Real dist);
+
+using MooseUtils::isZero;
+
+/**
+ * Compute the speed (velocity norm) given the supplied velocity
+ */
+ADReal computeSpeed(const ADRealVectorValue & velocity);
+}

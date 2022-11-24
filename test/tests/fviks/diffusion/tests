@@ -8,4 +8,17 @@
     exodiff = 'test_out.e'
     ad_indexing_type = 'global'
   []
+  [diffusion-harmonic]
+    issues = '#21923'
+    design = 'FVDiffusionInterface.md'
+    requirement = 'The system shall be able to solve a diffusion problem with the domain split in half and two finite volume variables living on each side and interpolating the diffusivities using a harmonic mean.'
+    type = Exodiff
+    input = test.i
+    exodiff = 'harmonic.e'
+    ad_indexing_type = 'global'
+    cli_args = "FVKernels/diff_left/coeff_interp_method=harmonic "
+               "FVKernels/diff_right/coeff_interp_method=harmonic "
+               "FVInterfaceKernels/interface/coeff_interp_method=harmonic "
+               "Outputs/file_base='harmonic'"
+  []
 []

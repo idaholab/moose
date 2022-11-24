@@ -148,7 +148,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
     _block_names = getParam<std::vector<std::vector<std::string>>>("block_names");
     if (_region_ids.size() != _block_names.size())
       mooseError("The size of block_names must match the size of region_ids");
-    for (const auto i : make_range(_region_ids.size()))
+    for (const auto i : index_range(_region_ids))
       if (_region_ids[i].size() != _block_names[i].size())
         mooseError("The size of block_names must match the size of region_ids");
   }
@@ -170,7 +170,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
   // Use special block id to designate TRI elements
   unsigned int pin_block_id_tri = pin_block_id_start - 1;
 
-  for (const auto i : make_range(_intervals.size()))
+  for (const auto i : index_range(_intervals))
   {
     const auto block_name = "RGMB_PIN" + std::to_string(_pin_type) + "_R" + std::to_string(i);
     const auto block_id = pin_block_id_start + i;
@@ -349,7 +349,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
     const auto bottom_boundary = getReactorParam<boundary_id_type>("bottom_boundary_id");
     {
       declareMeshProperty("extruded", true);
-      auto params = _app.getFactory().getValidParams("FancyExtruderGenerator");
+      auto params = _app.getFactory().getValidParams("AdvancedExtruderGenerator");
 
       params.set<MeshGeneratorName>("input") = name() + "_del_bds";
       params.set<Point>("direction") = Point(0, 0, 1);
@@ -358,7 +358,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       params.set<std::vector<Real>>("heights") = axial_boundaries;
       params.set<boundary_id_type>("bottom_boundary") = bottom_boundary;
       params.set<boundary_id_type>("top_boundary") = top_boundary;
-      addMeshSubgenerator("FancyExtruderGenerator", name() + "_extruded", params);
+      addMeshSubgenerator("AdvancedExtruderGenerator", name() + "_extruded", params);
     }
 
     {

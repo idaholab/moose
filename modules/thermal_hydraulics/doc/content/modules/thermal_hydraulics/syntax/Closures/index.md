@@ -6,8 +6,8 @@ as friction factors and heat transfer coefficients.
 
 ## Objects and Associated Actions
 
-!syntax list /Components objects=True actions=False subsystems=False
+!syntax list /Closures objects=True actions=False subsystems=False
 
-!syntax list /Components objects=False actions=False subsystems=True
+!syntax list /Closures objects=False actions=False subsystems=True
 
-!syntax list /Components objects=False actions=True subsystems=False
+!syntax list /Closures objects=False actions=True subsystems=False

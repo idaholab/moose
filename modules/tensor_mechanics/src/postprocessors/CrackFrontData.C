@@ -44,7 +44,8 @@ CrackFrontData::CrackFrontData(const InputParameters & parameters)
     _mesh(_subproblem.mesh()),
     _var_name(parameters.get<VariableName>("variable")),
     _scale_factor(getParam<Real>("scale_factor")),
-    _field_var(_subproblem.getStandardVariable(_tid, _var_name))
+    _field_var(_subproblem.getStandardVariable(_tid, _var_name)),
+    _value(0)
 {
   if (!_field_var.isNodal())
     mooseError("CrackFrontData can be output only for nodal variables, variable '",
@@ -63,16 +64,24 @@ CrackFrontData::initialize()
 
   _crack_front_node = _crack_front_definition->getCrackFrontNodePtr(_crack_front_point_index);
 }
+void
+CrackFrontData::execute()
+{
+  _value = 0;
+
+  if (_crack_front_node->processor_id() == processor_id())
+    _value = _field_var.getNodalValue(*_crack_front_node);
+}
 
 Real
 CrackFrontData::getValue()
 {
-  Real value = 0;
 
-  if (_crack_front_node->processor_id() == processor_id())
-    value = _field_var.getNodalValue(*_crack_front_node);
+  return _scale_factor * _value;
+}
 
-  gatherSum(value);
-
-  return _scale_factor * value;
+void
+CrackFrontData::finalize()
+{
+  gatherSum(_value);
 }

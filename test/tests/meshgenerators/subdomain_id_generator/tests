@@ -9,6 +9,6 @@
 
     requirement = 'The system shall have the ability to change or overwrite the subdomain IDs of all elements in a mesh.'
     design = 'meshgenerators/SubdomainIDGenerator.md'
-    issues = '#11640'
+    issues = '#11640 #13814'
   [../]
 []

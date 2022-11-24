@@ -97,14 +97,13 @@ LibmeshPartitioner::clone() const
   {
     case -2: // metis
       return std::make_unique<MetisPartitioner>();
-      break;
+
     case -1: // parmetis
       return std::make_unique<ParmetisPartitioner>();
-      break;
 
     case 0: // linear
       return std::make_unique<LinearPartitioner>();
-      break;
+
     case 1: // centroid
     {
       if (!isParamValid("centroid_partitioner_direction"))
@@ -125,13 +124,12 @@ LibmeshPartitioner::clone() const
     }
     case 2: // hilbert_sfc
       return std::make_unique<HilbertSFCPartitioner>();
-      break;
+
     case 3: // morton_sfc
       return std::make_unique<MortonSFCPartitioner>();
-      break;
+
     case 4: // subdomain_partitioner
       return std::make_unique<LibmeshPartitioner>(parameters());
-      break;
   }
   // this cannot happen but I need to trick the compiler into
   // believing me

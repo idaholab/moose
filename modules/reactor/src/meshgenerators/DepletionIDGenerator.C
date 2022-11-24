@@ -74,7 +74,7 @@ DepletionIDGenerator::generate()
     }
     // list of unique IDs not removed by "exclude_id_name" and "exclude_id_value" option
     std::set<dof_id_type> ids;
-    for (const auto & elem : mesh->active_local_element_ptr_range())
+    for (const auto & elem : mesh->active_element_ptr_range())
     {
       // don't need to check if this unique parsed ID corresponding to this element is already in
       // the "ids"
@@ -97,7 +97,7 @@ DepletionIDGenerator::generate()
     }
     comm().set_union(ids);
     // reassign parsed (depletion) ids
-    for (const auto & elem : mesh->active_local_element_ptr_range())
+    for (const auto & elem : mesh->active_element_ptr_range())
     {
       dof_id_type id = parsed_ids[elem->id()];
       dof_id_type new_id = 0;
@@ -108,7 +108,7 @@ DepletionIDGenerator::generate()
   }
   // assign depletion id to mesh
   const auto depletion_id = mesh->add_elem_integer("depletion_id");
-  for (auto & elem : mesh->active_local_element_ptr_range())
+  for (auto & elem : mesh->active_element_ptr_range())
     elem->set_extra_integer(depletion_id, parsed_ids.at(elem->id()));
   return mesh;
 }

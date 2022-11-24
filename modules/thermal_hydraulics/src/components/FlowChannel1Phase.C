@@ -30,6 +30,11 @@ FlowChannel1Phase::validParams()
       "rdg_slope_reconstruction",
       SlopeReconstruction1DInterface<true>::getSlopeReconstructionMooseEnum("None"),
       "Slope reconstruction type for rDG spatial discretization");
+  std::vector<Real> sf_1phase(3, 1.0);
+  params.addParam<std::vector<Real>>(
+      "scaling_factor_1phase",
+      sf_1phase,
+      "Scaling factors for each single phase variable (rhoA, rhouA, rhoEA)");
 
   params.declareControllable("initial_p initial_T initial_vel D_h");
 
@@ -63,10 +68,9 @@ FlowChannel1Phase::buildFlowModel()
   InputParameters pars = _factory.getValidParams(class_name);
   pars.set<THMProblem *>("_thm_problem") = &_sim;
   pars.set<FlowChannelBase *>("_flow_channel") = this;
-  pars.set<UserObjectName>("fp") = _fp_name;
   pars.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
-  pars.set<MooseEnum>("rdg_slope_reconstruction") = _rdg_slope_reconstruction;
   pars.set<bool>("output_vector_velocity") = _sim.getVectorValuedVelocity();
+  pars.applyParameters(parameters());
   return _factory.create<FlowModel>(class_name, name(), pars, 0);
 }
 

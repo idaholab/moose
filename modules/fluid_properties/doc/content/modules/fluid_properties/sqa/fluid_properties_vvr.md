@@ -1,1 +1,1 @@
-!template load file=sqa/app_vvr.md.template category=fluid_properties app=Fluid Properties
+!template load file=sqa/module_vvr.md.template category=fluid_properties module=Fluid Properties

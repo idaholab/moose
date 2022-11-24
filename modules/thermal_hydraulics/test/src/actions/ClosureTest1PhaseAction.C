@@ -21,7 +21,7 @@ ClosureTest1PhaseAction::validParams()
   return params;
 }
 
-ClosureTest1PhaseAction::ClosureTest1PhaseAction(InputParameters params)
+ClosureTest1PhaseAction::ClosureTest1PhaseAction(const InputParameters & params)
   : ClosureTestAction(params), FlowModelSetup1Phase(params)
 {
 }

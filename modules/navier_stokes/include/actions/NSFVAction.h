@@ -32,7 +32,7 @@ class NSFVAction : public Action
 public:
   static InputParameters validParams();
 
-  NSFVAction(InputParameters parameters);
+  NSFVAction(const InputParameters & parameters);
 
   virtual void act() override;
 
@@ -154,6 +154,8 @@ protected:
   const bool _porous_medium_treatment;
   /// The name of the functor for the porosity field
   const MooseFunctorName _porosity_name;
+  /// The name of the functor for the smoothed porosity field
+  const MooseFunctorName _flow_porosity_functor_name;
   /// Switch to enable friction correction for the porous medium momentum
   /// equations
   const bool _use_friction_correction;
@@ -260,6 +262,9 @@ protected:
   const MooseEnum _energy_face_interpolation;
   /// The type of the face interpolation method for the passive scalar fields
   const MooseEnum _passive_scalar_face_interpolation;
+
+  /// The type of velocity interpolation to perform
+  const MooseEnum _velocity_interpolation;
 
   /// If a two-term Taylor expansion is needed for the determination of the boundary values
   /// of the pressure

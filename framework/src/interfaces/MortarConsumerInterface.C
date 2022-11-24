@@ -107,7 +107,8 @@ MortarConsumerInterface::MortarConsumerInterface(const MooseObject * moose_objec
     _mci_subproblem(*moose_object->getCheckedPointerParam<SubProblem *>("_subproblem")),
     _mci_tid(moose_object->getParam<THREAD_ID>("_tid")),
     _mci_mesh(_mci_subproblem.mesh()),
-    _mci_assembly(_mci_subproblem.assembly(_mci_tid)),
+    // all geometric assembly information should be correct for nl system number 0
+    _mci_assembly(_mci_subproblem.assembly(_mci_tid, 0)),
     _mortar_data(_mci_fe_problem.mortarData()),
     _secondary_id(
         _mci_mesh.getBoundaryID(moose_object->getParam<BoundaryName>("secondary_boundary"))),

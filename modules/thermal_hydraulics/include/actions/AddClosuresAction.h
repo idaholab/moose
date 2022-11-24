@@ -17,7 +17,7 @@
 class AddClosuresAction : public MooseObjectAction
 {
 public:
-  AddClosuresAction(InputParameters params);
+  AddClosuresAction(const InputParameters & params);
 
   virtual void act() override;
 

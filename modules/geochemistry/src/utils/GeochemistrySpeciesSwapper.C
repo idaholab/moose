@@ -328,6 +328,26 @@ GeochemistrySpeciesSwapper::alterMGD(ModelGeochemicalDatabase & mgd,
     mgd.kin_rate[r].promoting_indices[basis_index_to_replace] =
         mgd.kin_rate[r].promoting_indices[pro_ind_eqm];
     mgd.kin_rate[r].promoting_indices[pro_ind_eqm] = promoting_index_of_original_basis;
+    const Real promoting_monod_index_of_original_basis =
+        mgd.kin_rate[r].promoting_monod_indices[basis_index_to_replace];
+    mgd.kin_rate[r].promoting_monod_indices[basis_index_to_replace] =
+        mgd.kin_rate[r].promoting_monod_indices[pro_ind_eqm];
+    mgd.kin_rate[r].promoting_monod_indices[pro_ind_eqm] = promoting_monod_index_of_original_basis;
+    const Real promoting_half_saturation_of_original_basis =
+        mgd.kin_rate[r].promoting_half_saturation[basis_index_to_replace];
+    mgd.kin_rate[r].promoting_half_saturation[basis_index_to_replace] =
+        mgd.kin_rate[r].promoting_half_saturation[pro_ind_eqm];
+    mgd.kin_rate[r].promoting_half_saturation[pro_ind_eqm] =
+        promoting_half_saturation_of_original_basis;
+  }
+
+  // swap progeny, if needed
+  for (unsigned r = 0; r < num_rate; ++r)
+  {
+    if (mgd.kin_rate[r].progeny_index == pro_ind_eqm)
+      mgd.kin_rate[r].progeny_index = basis_index_to_replace;
+    else if (mgd.kin_rate[r].progeny_index == basis_index_to_replace)
+      mgd.kin_rate[r].progeny_index = pro_ind_eqm;
   }
 }
 
