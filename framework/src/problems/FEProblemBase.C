@@ -2114,7 +2114,8 @@ FEProblemBase::reinitElemNeighborAndLowerD(const Elem * elem, unsigned int side,
     }
   }
 
-  if (_displaced_problem)
+  if (_displaced_problem &&
+      (_reinit_displaced_elem || _reinit_displaced_face || _reinit_displaced_neighbor))
     _displaced_problem->reinitElemNeighborAndLowerD(
         _displaced_mesh->elemPtr(elem->id()), side, tid);
 }
