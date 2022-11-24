@@ -74,7 +74,7 @@ NewtonSolve(const T & x,
 
     // Check for NaNs
     if (std::isnan(z))
-      mooseError("NaN detected in Newton solve");
+      mooseException("NaN detected in Newton solve");
 
     if (converged)
       break;
@@ -82,7 +82,7 @@ NewtonSolve(const T & x,
 
   // Check for divergence or slow convergence of Newton's method
   if (iteration >= max_its)
-    mooseError(
+    mooseException(
         "Newton solve convergence failed: maximum number of iterations, ", max_its, " exceeded");
 
   return {z, dy_dz};
