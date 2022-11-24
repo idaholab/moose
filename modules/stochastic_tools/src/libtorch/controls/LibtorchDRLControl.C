@@ -21,9 +21,6 @@ LibtorchDRLControl::validParams()
   params.addClassDescription(
       "Sets the value of multiple 'Real' input parameters and postprocessors based on a Deep "
       "Reinforcement Learning (DRL) neural network trained using a PPO algorithm.");
-  params.addRequiredParam<std::vector<PostprocessorName>>(
-      "log_probability_postprocessors",
-      "The postprocessors which store the log probability of the action/control values.");
   params.addRequiredParam<std::vector<Real>>(
       "action_standard_deviations", "Standard deviation value used while sampling the actions.");
   params.addParam<unsigned int>("seed", "Seed for the random number generator.");
@@ -33,18 +30,12 @@ LibtorchDRLControl::validParams()
 
 LibtorchDRLControl::LibtorchDRLControl(const InputParameters & parameters)
   : LibtorchNeuralNetControl(parameters),
-    _log_probability_postprocessor_names(
-        getParam<std::vector<PostprocessorName>>("log_probability_postprocessors")),
+    _current_control_signal_log_probabilities(std::vector<Real>(_control_names.size(), 0.0)),
     _action_std(getParam<std::vector<Real>>("action_standard_deviations"))
 {
   if (_control_names.size() != _action_std.size())
     paramError("action_standard_deviations",
                "Number of action_standard_deviations does not match the number of controlled "
-               "parameters.");
-
-  if (_control_names.size() != _log_probability_postprocessor_names.size())
-    paramError("log_probability_postprocessors",
-               "Number of log_probability_postprocessors does not match the number of controlled "
                "parameters.");
 
 #ifdef LIBTORCH_ENABLED
@@ -96,27 +87,18 @@ LibtorchDRLControl::execute()
     torch::Tensor log_probability = computeLogProbability(action, output_tensor);
 
     // Convert data
-    std::vector<Real> converted_action = {action.data_ptr<Real>(),
-                                          action.data_ptr<Real>() + action.size(1)};
+    _current_control_signals = {action.data_ptr<Real>(), action.data_ptr<Real>() + action.size(1)};
 
-    std::vector<Real> converted_log_probability = {log_probability.data_ptr<Real>(),
-                                                   log_probability.data_ptr<Real>() +
-                                                       log_probability.size(1)};
+    _current_control_signal_log_probabilities = {log_probability.data_ptr<Real>(),
+                                                 log_probability.data_ptr<Real>() +
+                                                     log_probability.size(1)};
 
     for (unsigned int control_i = 0; control_i < n_controls; ++control_i)
     {
       // We scale the controllable value for physically meaningful control action
       setControllableValueByName<Real>(_control_names[control_i],
-                                       converted_action[control_i] *
+                                       _current_control_signals[control_i] *
                                            _action_scaling_factors[control_i]);
-      // Save action values to postprocessor. We do not scale the action value here, it will be used
-      // and reported directly for training
-      _fe_problem.setPostprocessorValueByName(_action_postprocessor_names[control_i],
-                                              converted_action[control_i]);
-
-      // Save log probability values to postprocessor
-      _fe_problem.setPostprocessorValueByName(_log_probability_postprocessor_names[control_i],
-                                              converted_log_probability[control_i]);
     }
 
     // We add the curent solution to the old solutions and move everything in there one step
@@ -139,3 +121,12 @@ LibtorchDRLControl::computeLogProbability(const torch::Tensor & action,
          std::log(std::sqrt(2.0 * M_PI));
 }
 #endif
+
+Real
+LibtorchDRLControl::getSignalLogProbability(const unsigned int signal_index)
+{
+  mooseAssert(signal_index < _control_names.size(),
+              "The index of the requested control signal is not in the [0," +
+                  std::to_string(_control_names.size()) + ") range!");
+  return _current_control_signal_log_probabilities[signal_index];
+}

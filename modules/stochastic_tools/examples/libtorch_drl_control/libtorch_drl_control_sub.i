@@ -100,10 +100,12 @@ air_effective_k = 0.5 # W/(m K)
     indirect_dependencies = 'center_temp_tend env_temp'
   []
   [top_flux]
-    type = Receiver
+    type = LibtorchControlValuePostprocessor
+    control_name = src_control
   []
   [log_prob_top_flux]
-    type = Receiver
+    type = LibtorchDRLLogProbabilityPostprocessor
+    control_name = src_control
   []
 []
 
@@ -119,8 +121,6 @@ air_effective_k = 0.5 # W/(m K)
   [src_control]
     type = LibtorchDRLControl
     parameters = "BCs/top_flux/value"
-    action_postprocessors = "top_flux"
-    log_probability_postprocessors = "log_prob_top_flux"
     responses = 'center_temp_tend env_temp'
 
     # keep consistent with LibtorchDRLControlTrainer
@@ -140,8 +140,6 @@ air_effective_k = 0.5 # W/(m K)
     activation_function = 'relu'
 
     parameters = "BCs/top_flux/value"
-    action_postprocessors = "top_flux"
-    log_probability_postprocessors = "log_prob_top_flux"
     responses = 'center_temp_tend env_temp'
 
     # keep consistent with LibtorchDRLControlTrainer

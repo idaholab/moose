@@ -36,8 +36,6 @@ LibtorchNeuralNetControl::validParams()
       "response_scaling_factors",
       "Constants which will be used to multiply the shifted response values. This is used for "
       "the manipulation of the neural net inputs for better training efficiency.");
-  params.addRequiredParam<std::vector<PostprocessorName>>(
-      "action_postprocessors", "The postprocessors which store the control (action) values.");
   params.addParam<std::string>("filename",
                                "Define if the neural net is supposed to be loaded from a file.");
   params.addParam<bool>("torch_script_format",
@@ -66,8 +64,8 @@ LibtorchNeuralNetControl::validParams()
 LibtorchNeuralNetControl::LibtorchNeuralNetControl(const InputParameters & parameters)
   : Control(parameters),
     _control_names(getParam<std::vector<std::string>>("parameters")),
+    _current_control_signals(std::vector<Real>(_control_names.size(), 0.0)),
     _response_names(getParam<std::vector<PostprocessorName>>("responses")),
-    _action_postprocessor_names(getParam<std::vector<PostprocessorName>>("action_postprocessors")),
     _input_timesteps(getParam<unsigned int>("input_timesteps")),
     _initialized(false),
     _response_shift_factors(isParamValid("response_shift_factors")
@@ -99,14 +97,6 @@ LibtorchNeuralNetControl::LibtorchNeuralNetControl(const InputParameters & param
     paramError("action_scaling_factors",
                "The number of normalization coefficients is not the same as the number of "
                "controlled parameters!");
-
-  if (_control_names.size() != _action_postprocessor_names.size())
-    paramError("action_postprocessors",
-               "Number of action_postprocessors (",
-               _action_postprocessor_names.size(),
-               ") does not match the number of controlled parameters (",
-               _control_names.size(),
-               ").");
 
   // We link to the postprocessor values so that we can fetch them any time. This also raises
   // errors if we don't have the postprocessors requested in the input.
@@ -177,18 +167,13 @@ LibtorchNeuralNetControl::execute()
     // Evaluate the neural network to get the control values then convert it back to vectors
     torch::Tensor action = _nn->forward(input_tensor);
 
-    std::vector<Real> converted_action = {action.data_ptr<Real>(),
-                                          action.data_ptr<Real>() + action.size(1)};
+    _current_control_signals = {action.data_ptr<Real>(), action.data_ptr<Real>() + action.size(1)};
     for (unsigned int control_i = 0; control_i < n_controls; ++control_i)
     {
       // We scale the controllable value for physically meaningful control action
       setControllableValueByName<Real>(_control_names[control_i],
-                                       converted_action[control_i] *
+                                       _current_control_signals[control_i] *
                                            _action_scaling_factors[control_i]);
-      // Save action values to postprocessors. We do not scale the action value here.
-      // It will be used and reported directly for training
-      _fe_problem.setPostprocessorValueByName(_action_postprocessor_names[control_i],
-                                              converted_action[control_i]);
     }
 
     // We add the curent solution to the old solutions and move everything in there one step
@@ -197,6 +182,15 @@ LibtorchNeuralNetControl::execute()
     _old_responses[0] = _current_response;
   }
 #endif
+}
+
+Real
+LibtorchNeuralNetControl::getSignal(const unsigned int signal_index)
+{
+  mooseAssert(signal_index < _control_names.size(),
+              "The index of the requested control signal is not in the [0," +
+                  std::to_string(_control_names.size()) + ") range!");
+  return _current_control_signals[signal_index];
 }
 
 void

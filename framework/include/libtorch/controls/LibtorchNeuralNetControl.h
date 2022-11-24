@@ -34,6 +34,12 @@ public:
   /// Execute neural network to determine the controllable parameter values
   virtual void execute() override;
 
+  /// Get the (signal_index)-th signal of the control neural net
+  Real getSignal(const unsigned int signal_index);
+
+  /// Get the number of controls this object is computing
+  unsigned int numberOfControlSignals() { return _control_names.size(); }
+
 #ifdef LIBTORCH_ENABLED
   /**
    * Function responsible for loading the neural network for the controller. This function is used
@@ -68,10 +74,11 @@ protected:
 
   /// The names of the controllable parameters
   const std::vector<std::string> & _control_names;
+  /// The control signals from the last evaluation of the controller
+  std::vector<Real> _current_control_signals;
+
   /// Names of the postprocessors which contain the observations of the system
   const std::vector<PostprocessorName> & _response_names;
-  /// Names of the postprocessors which will store the resulting action values from this controller
-  const std::vector<PostprocessorName> & _action_postprocessor_names;
 
   /// Links to the current response postprocessor values. This is necessary so that we can check
   /// if the postprocessors exist.

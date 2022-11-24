@@ -213,7 +213,7 @@ moose_non_unity := %/base %/utils
 
 # Add additional non-unity directories if libtorch is enabled
 ifeq ($(ENABLE_LIBTORCH),true)
-	libtorch_dirs := $(shell find $(FRAMEWORK_DIR)/src/libtorch -type d -not -path '*/.libs*')
+	libtorch_dirs := $(shell find $(FRAMEWORK_DIR)/src/libtorch -type d -not -path '*/.libs*' 2> /dev/null)
   moose_non_unity += $(libtorch_dirs)
 endif
 

@@ -25,7 +25,7 @@ cp = 1.0
     type = ParsedSubdomainMeshGenerator
     input = msh
     combinatorial_geometry = '(x<0.2 & x>-0.2) & (y<0.2 & y>-0.2)'
-    block_id=1
+    block_id = 1
   []
 []
 
@@ -87,7 +87,8 @@ cp = 1.0
     execute_on = 'INITIAL TIMESTEP_END'
   []
   [control_value]
-    type = Receiver
+    type = LibtorchControlValuePostprocessor
+    control_name = src_control
     execute_on = 'INITIAL TIMESTEP_END'
   []
 []

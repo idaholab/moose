@@ -5,7 +5,6 @@
 #endif
 
 #include "LibtorchNeuralNetControl.h"
-#include "Control.h"
 
 /**
  * A time-dependent, neural-network-based controller which is
@@ -25,6 +24,9 @@ public:
   /// We compute the actions in this function together with the corresponding logarithmic probabilities.
   virtual void execute() override;
 
+  /// Get the (signal_index)-th signal of the control neural net
+  Real getSignalLogProbability(const unsigned int signal_index);
+
 protected:
 #ifdef LIBTORCH_ENABLED
   /// Function which computes the logarithmic probability of given actions.
@@ -32,8 +34,8 @@ protected:
                                       const torch::Tensor & output_tensor);
 #endif
 
-  /// The name of postprocessors which will be used to save the logarithmic probabilities to.
-  const std::vector<PostprocessorName> _log_probability_postprocessor_names;
+  /// The log probability of control signals from the last evaluation of the controller
+  std::vector<Real> _current_control_signal_log_probabilities;
 
   /// Standard deviation for the actions, supplied by the user
   const std::vector<Real> _action_std;

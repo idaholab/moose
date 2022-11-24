@@ -93,10 +93,14 @@
     indirect_dependencies = 'center_temp_tend env_temp'
   []
   [left_flux]
-    type = Receiver
+    type = LibtorchControlValuePostprocessor
+    control_name = src_control
+    execute_on = 'INITIAL TIMESTEP_END'
   []
   [log_prob_left_flux]
-    type = Receiver
+    type = LibtorchDRLLogProbabilityPostprocessor
+    control_name = src_control
+    execute_on = 'INITIAL TIMESTEP_END'
   []
 []
 
@@ -111,8 +115,6 @@
   [src_control]
     type = LibtorchDRLControl
     parameters = "BCs/left_flux/value"
-    action_postprocessors = "left_flux"
-    log_probability_postprocessors = "log_prob_left_flux"
     responses = 'center_temp env_temp'
 
     # keep consistent with LibtorchDRLControlTrainer

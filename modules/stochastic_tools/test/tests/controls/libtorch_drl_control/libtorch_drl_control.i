@@ -76,10 +76,14 @@
     execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
   [left_flux]
-    type = Receiver
+    type = LibtorchControlValuePostprocessor
+    control_name = src_control
+    execute_on = 'INITIAL TIMESTEP_END'
   []
   [log_prob_left_flux]
-    type = Receiver
+    type = LibtorchDRLLogProbabilityPostprocessor
+    control_name = src_control
+    execute_on = 'INITIAL TIMESTEP_END'
   []
 []
 
@@ -89,8 +93,6 @@
     seed = 11
     type = LibtorchDRLControl
     parameters = "BCs/left_flux/value"
-    action_postprocessors = "left_flux"
-    log_probability_postprocessors = "log_prob_left_flux"
     responses = 'center_temp env_temp'
 
     input_timesteps = 2
@@ -109,8 +111,6 @@
   [src_control_empty]
     type = LibtorchDRLControl
     parameters = "BCs/left_flux/value"
-    action_postprocessors = "left_flux"
-    log_probability_postprocessors = "log_prob_left_flux"
     responses = 'center_temp env_temp'
 
     input_timesteps = 2
