@@ -88,5 +88,5 @@
 
 [Outputs]
   csv = true
-  exodus = false
+  exodus = true
 []

@@ -2,15 +2,15 @@
 []
 
 [Distributions]
-  [left]
+  [k1]
     type = Normal
-    mean = 0.0 # 0.15 #
-    standard_deviation = 1.0 # 0.15 #
+    mean = 8.0
+    standard_deviation = 4.0 # 0.15 #
   []
-  [right]
+  [q1]
     type = Normal
-    mean = 0.0 # -1.5 #
-    standard_deviation = 1.0 # 0.15 #
+    mean = 1000.0 # -1.5 #
+    standard_deviation = 200.0 # 0.15 #
   []
 []
 
@@ -29,7 +29,7 @@
     prior_distributions = 'left right'
     seed_inputs = 'mcmc_reporter/seed_inputs'
     proposal_std = 'mcmc_reporter/proposal_std'
-    num_parallel_proposals = 10
+    num_parallel_proposals = 1
     initial_values = '0.05 0.05'
     file_name = 'confg.csv'
     execute_on = PRE_MULTIAPP_SETUP
@@ -90,7 +90,7 @@
 
 [Executioner]
   type = Transient
-  num_steps = 300
+  num_steps = 1000
 []
 
 [Outputs]

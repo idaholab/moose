@@ -1,6 +1,6 @@
 left_bc = 1.0
-right_bc = 1.0
-mesh1 = 1
+right_bc = -0.39
+mesh1 = 8
 
 param1 = '${fparse left_bc}'
 param2 = '${fparse right_bc}'
@@ -72,4 +72,5 @@ param3 = '${fparse mesh1}'
 
 [Outputs]
   console = 'false'
+  # csv = true
 []

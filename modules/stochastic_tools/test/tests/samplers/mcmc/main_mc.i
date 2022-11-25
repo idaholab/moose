@@ -5,33 +5,25 @@
   [left]
     type = Normal
     mean = 0.0 # 0.15 #
-    standard_deviation = 1.0 # 0.15 #
+    standard_deviation = 1.5 # 0.15 #
   []
   [right]
     type = Normal
     mean = 0.0 # -1.5 #
-    standard_deviation = 1.0 # 0.15 #
+    standard_deviation = 1.5 # 0.15 #
   []
-[]
-
-[Likelihoods]
-  [gaussian]
-    type = Gaussian
-    noise = 0.05
-    file_name = 'exp_0_05.csv'
-    log_likelihood=true
+  [len]
+    type = 
+    mean = 0.0 # -1.5 #
+    standard_deviation = 1.5 # 0.15 #
   []
 []
 
 [Samplers]
   [sample]
-    type = PMCMCBase
-    prior_distributions = 'left right'
-    seed_inputs = 'mcmc_reporter/seed_inputs'
-    proposal_std = 'mcmc_reporter/proposal_std'
-    num_parallel_proposals = 10
-    initial_values = '0.05 0.05'
-    file_name = 'confg.csv'
+    type = MonteCarlo
+    distributions = 'left right'
+    num_rows = 1000
     execute_on = PRE_MULTIAPP_SETUP
     seed = 2547
   []
@@ -90,7 +82,7 @@
 
 [Executioner]
   type = Transient
-  num_steps = 300
+  num_steps = 1000
 []
 
 [Outputs]
