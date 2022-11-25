@@ -17,7 +17,7 @@ is fit to experimental data.  This is a nonlinear optimization problem but is li
 
 ## Main-App Optimization Executioner
 
-The main input file containing the optimization reporter, executioner and transfers is shown in [main].  The adjoint problem will need the simulation temperature from the forward problem to evaluate [!eqref](theory/InvOptTheory.md#eq:convectiveBC) for the convective BC.  This requires us to transfer the forward simulation temperature field into an AuxVariable on the main app and then transfer it to the adjoint-app.  For these reasons, we only define the mesh on the main-app and clone it to the forward and adjoint sub-apps when they are created in the `[MultiApps]` block by setting `clone_parent_mesh=true`. The main app also has an `AuxVariable` for the forward problem temperature field to be transferred into.
+The main input file containing the optimization reporter, executioner and transfers is shown in [main].  The adjoint problem will need the simulation temperature from the forward problem to evaluate [!eqref](theory/InvOptTheory.md#eq:convectiveBC) for the convective BC.  This requires us to transfer the forward simulation temperature field to the adjoint-app.    
 
 !listing modules/combined/test/tests/invOpt_bc_convective/main.i id=main
 

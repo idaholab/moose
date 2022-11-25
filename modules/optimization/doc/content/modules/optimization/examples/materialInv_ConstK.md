@@ -16,7 +16,7 @@ In this example, material properties are the design parameters, described in thi
 
 ## Main-App Optimization Executioner
 
-The main input file containing the optimization reporter, executioner and transfers is shown in [main].  The gradient of the PDE given by [!eqref](theory/InvOptTheory.md#eq:kappaLambda) requires the temperature field from the forward problem to be available in the adjoint problem.  This requires the forward problem temperature field be transferred into an `Auxvariable` on the main app which can then be transferred to the adjoint problem.  The adjoint problem also needs to be executed with the same material properties used in the forward problem, see the `toAdjointParameter` transfer in [main].
+The main input file containing the optimization reporter, executioner and transfers is shown in [main].  The gradient of the PDE given by [!eqref](theory/InvOptTheory.md#eq:kappaLambda) requires the temperature field from the forward problem to be available in the adjoint problem.  This requires the forward problem temperature field be transferred to the adjoint problem.  The adjoint problem also needs to be executed with the same material properties used in the forward problem, see the `toAdjointParameter` transfer in [main].
 
 !listing test/tests/optimizationreporter/material/main.i id=main
 
