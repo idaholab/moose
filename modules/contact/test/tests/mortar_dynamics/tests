@@ -16,6 +16,19 @@
     requirement = 'The system shall solve mortar frictionless contact between two blocks with '
                   'weighted gap time stabilization using mortar nodal geometry.'
   []
+  [block-dynamics-reference]
+    type = 'CSVDiff'
+    input = 'block-dynamics-reference.i'
+    csvdiff = 'block-dynamics-reference_out.csv'
+    rel_err = 5.0e-4
+    abs_zero = 1.0e-5
+    min_parallel = 1
+    max_parallel = 4
+    min_ad_size = '50'
+    ad_indexing_type = 'global'
+    requirement = 'The system shall solve dynamics mortar contact between two blocks with weighted '
+                  'gap time stabilization and match reference kinetic and elastic energy results.'
+  []
   [block-dynamics-action]
     type = 'Exodiff'
     exodiff = 'block-dynamics-action_out.e'
@@ -40,8 +53,8 @@
                'Executioner/end_time=0.3'
     min_ad_size = '50'
     ad_indexing_type = 'global'
-    requirement = 'The system shall generate an error if dynamics is not specifically requested '
-                  'and Newmark-beta integration parameter beta is provided.'
+    requirement = 'The system shall generate an error if dynamics is not specifically requested and '
+                  'Newmark-beta integration parameter beta is provided.'
   []
   [block-dynamics-action-gamma-error]
     type = RunException
@@ -51,8 +64,8 @@
                'Executioner/end_time=0.3'
     min_ad_size = '50'
     ad_indexing_type = 'global'
-    requirement = 'The system shall generate an error if dynamics is not specifically requested '
-                  'and Newmark-beta integration parameter gamma is provided.'
+    requirement = 'The system shall generate an error if dynamics is not specifically requested and '
+                  'Newmark-beta integration parameter gamma is provided.'
 
   []
   [block-dynamics-friction]
@@ -151,8 +164,8 @@
     abs_zero = 1.0e-5
     min_ad_size = 100
     ad_indexing_type = 'global'
-    requirement = 'The system shall solve a dynamic 3D frictional one-element bouncing block problem with '
-                  'mortar constraint using nodal-attached geometry and a friction coefficient that '
-                  'depends on the normal contact pressure and the relative tangential velocity'
+    requirement = 'The system shall solve a dynamic 3D frictional one-element bouncing block problem '
+                  'with mortar constraint using nodal-attached geometry and a friction coefficient '
+                  'that depends on the normal contact pressure and the relative tangential velocity'
   []
 []
