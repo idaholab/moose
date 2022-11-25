@@ -1,10 +1,10 @@
 [Tests]
   issues = '#21885'
-  design = 'MaterialScaledGradientVector.md'
+  design = 'FunctorElementalGradientAux.md'
   [forward_solve]
     type = CSVDiff
-    input = gradientVector.i
-    csvdiff = gradientVector_out_results_0001.csv
+    input = functor_gradient.i
+    csvdiff = functor_gradient_out_results_0001.csv
     requirement = "The system shall be able to compute a vector auxvariable given by scaling a "
                   "variable's gradient by a material property"
   []

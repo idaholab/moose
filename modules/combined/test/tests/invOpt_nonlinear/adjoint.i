@@ -41,10 +41,10 @@
 
 [AuxKernels]
   [dDdTgradT]
-    type = MaterialScaledGradientVector
-    gradient_variable = forwardT
+    type = ADFunctorElementalGradientAux
+    functor = forwardT
     variable = dDdTgradT
-    material_scaling = 'dDdT'
+    factor_matprop = 'dDdT'
   []
 []
 
@@ -56,7 +56,7 @@
     args = 'forwardT'
   []
   [dDdT]
-    type = ParsedMaterial
+    type = ADParsedMaterial
     f_name = 'dDdT'
     function = '500'
     args = 'forwardT'
