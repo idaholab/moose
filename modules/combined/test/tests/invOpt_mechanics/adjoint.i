@@ -41,8 +41,8 @@
 [Functions]
   [right_fy_func]
     type = ParsedOptimizationFunction
-    value = 'val'
-    param_vars = 'val'
+    expression = 'val'
+    param_symbol_names = 'val'
     param_vector_name = 'params/right_fy_value'
   []
 []

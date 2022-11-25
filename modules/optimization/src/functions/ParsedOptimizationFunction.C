@@ -22,42 +22,42 @@ ParsedOptimizationFunction::validParams()
       "Function used for optimization that uses a parsed expression with parameter dependence.");
 
   params.addRequiredCustomTypeParam<std::string>(
-      "value", "FunctionExpression", "The user defined function.");
+      "expression", "FunctionExpression", "The user defined function.");
   params.addRequiredParam<std::vector<std::string>>(
-      "param_vars", "Names of parameters in 'value' being optimized.");
+      "param_symbol_names", "Names of parameters in 'expression' being optimized.");
   params.addRequiredParam<ReporterName>(
       "param_vector_name", "Reporter or VectorPostprocessor vector containing parameter values.");
   params.addParam<std::vector<std::string>>(
-      "constant_vars",
+      "constant_symbol_names",
       std::vector<std::string>(),
       "Variables (excluding t,x,y,z) that are bound to the values provided by the corresponding "
-      "items in the constant_vals vector.");
+      "items in the symbol_values vector.");
   params.addParam<std::vector<Real>>(
-      "constant_vals", std::vector<Real>(), "Constant numeric values for vars.");
+      "constant_symbol_values", std::vector<Real>(), "Constant numeric values for vars.");
   return params;
 }
 
 ParsedOptimizationFunction::ParsedOptimizationFunction(const InputParameters & parameters)
   : OptimizationFunction(parameters),
     ReporterInterface(this),
-    _value(getParam<std::string>("value")),
-    _param_vars(getParam<std::vector<std::string>>("param_vars")),
+    _expression(getParam<std::string>("expression")),
+    _param_names(getParam<std::vector<std::string>>("param_symbol_names")),
     _params(getReporterValue<std::vector<Real>>("param_vector_name")),
-    _vars(getParam<std::vector<std::string>>("constant_vars")),
-    _vals(getParam<std::vector<Real>>("constant_vals"))
+    _symbol_names(getParam<std::vector<std::string>>("constant_symbol_names")),
+    _symbol_values(getParam<std::vector<Real>>("constant_symbol_values"))
 {
-  if (_vars.size() != _vals.size())
-    paramError("constant_vars", "Number of vars must match the number of vals for a ", type(), "!");
+  if (_symbol_names.size() != _symbol_values.size())
+    paramError("symbol_names", "Number of vars must match the number of vals for a ", type(), "!");
 
   // Loop through the variables assigned by the user and give an error if x,y,z,t are used
   std::string msg = "The variables \"x, y, z, and t\" in the ParsedFunction are pre-declared for "
                     "use and must not be declared.";
-  for (const auto & var : _param_vars)
+  for (const auto & var : _param_names)
     if (var.find_first_of("xyzt") != std::string::npos && var.size() == 1)
-      paramError("param_vars", msg);
-  for (const auto & var : _vars)
+      paramError("param_names", msg);
+  for (const auto & var : _symbol_names)
     if (var.find_first_of("xyzt") != std::string::npos && var.size() == 1)
-      paramError("constant_vars", msg);
+      paramError("symbol_names", msg);
 
   // Create parser
   _parser = std::make_unique<FunctionParserADBase<Real>>();
@@ -66,16 +66,16 @@ ParsedOptimizationFunction::ParsedOptimizationFunction(const InputParameters & p
   _parser->AddConstant("NaN", std::numeric_limits<Real>::quiet_NaN());
   _parser->AddConstant("pi", libMesh::pi);
   _parser->AddConstant("e", std::exp(1.0));
-  for (const auto & i : index_range(_vars))
-    _parser->AddConstant(_vars[i], _vals[i]);
+  for (const auto & i : index_range(_symbol_names))
+    _parser->AddConstant(_symbol_names[i], _symbol_values[i]);
 
   // Join xyzt and parameters to give to FParser as variables
   std::vector<std::string> all_vars = {"x", "y", "z", "t"};
-  all_vars.insert(all_vars.end(), _param_vars.begin(), _param_vars.end());
+  all_vars.insert(all_vars.end(), _param_names.begin(), _param_names.end());
 
   // Parse expression and error if something goes wrong
-  if (_parser->Parse(_value, MooseUtils::join(all_vars, ",")) != -1)
-    paramError("value", "Unable to parse expression\n", _parser->ErrorMsg());
+  if (_parser->Parse(_expression, MooseUtils::join(all_vars, ",")) != -1)
+    paramError("expression", "Unable to parse expression\n", _parser->ErrorMsg());
   _parser->SetADFlags(FunctionParserADBase<Real>::ADAutoOptimize);
   _parser->Optimize();
 
@@ -85,7 +85,7 @@ ParsedOptimizationFunction::ParsedOptimizationFunction(const InputParameters & p
   {
     _derivative_parsers[i] = std::make_unique<FunctionParserADBase<Real>>(*_parser);
     if (_derivative_parsers[i]->AutoDiff(all_vars[i]) != -1)
-      paramError("value",
+      paramError("expression",
                  "Unable to take derivative with respect to ",
                  all_vars[i],
                  "\n",
@@ -118,10 +118,10 @@ ParsedOptimizationFunction::timeDerivative(Real t, const Point & p) const
 std::vector<Real>
 ParsedOptimizationFunction::parameterGradient(Real t, const Point & p) const
 {
-  std::vector<Real> result(_param_vars.size());
+  std::vector<Real> result(_param_names.size());
   for (const auto & i : index_range(result))
     result[i] =
-        evaluateExpression(*_derivative_parsers[4 + i], t, p, _param_vars[i] + " derivative");
+        evaluateExpression(*_derivative_parsers[4 + i], t, p, _param_names[i] + " derivative");
   return result;
 }
 
@@ -131,20 +131,20 @@ ParsedOptimizationFunction::evaluateExpression(FunctionParserADBase<Real> & pars
                                                const Point & p,
                                                std::string name) const
 {
-  if (_params.size() != _param_vars.size())
+  if (_params.size() != _param_names.size())
     paramError("param_vector_name",
                "Size of vector (",
                _params.size(),
-               ") does not match number of specified 'param_vars' (",
-               _param_vars.size(),
+               ") does not match number of specified 'param_names' (",
+               _param_names.size(),
                ").");
 
-  std::vector<Real> parser_var_values(4 + _param_vars.size());
+  std::vector<Real> parser_var_values(4 + _param_names.size());
   parser_var_values[0] = p(0);
   parser_var_values[1] = p(1);
   parser_var_values[2] = p(2);
   parser_var_values[3] = t;
-  for (const auto & i : index_range(_param_vars))
+  for (const auto & i : index_range(_param_names))
     parser_var_values[4 + i] = _params[i];
 
   Real result = parser.Eval(parser_var_values.data());
@@ -172,7 +172,7 @@ ParsedOptimizationFunction::evaluateExpression(FunctionParserADBase<Real> & pars
         break;
     }
 
-    paramError("value", msg);
+    paramError("expression", msg);
   }
 
   return result;

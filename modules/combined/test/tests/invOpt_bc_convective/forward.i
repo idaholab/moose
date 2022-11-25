@@ -69,8 +69,8 @@
 [Functions]
   [function1]
     type = ParsedOptimizationFunction
-    value = 'a'
-    param_vars = 'a'
+    expression = 'a'
+    param_symbol_names = 'a'
     param_vector_name = 'params/vals'
   []
 []

@@ -55,8 +55,8 @@
 [Functions]
   [volumetric_heat_func]
     type = ParsedOptimizationFunction
-    value = q
-    param_vars = 'q'
+    expression = q
+    param_symbol_names = 'q'
     param_vector_name = 'params/q'
   []
 []

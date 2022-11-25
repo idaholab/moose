@@ -35,19 +35,19 @@ protected:
                           std::string name = "") const;
 
   /// Function expression passed to FParser
-  const std::string & _value;
+  const std::string & _expression;
 
   /// Parameters passed to FParser
-  const std::vector<std::string> & _param_vars;
+  const std::vector<std::string> & _param_names;
 
   /// Vector containing parameter values
   const std::vector<Real> & _params;
 
   /// Variables passed to FParser
-  const std::vector<std::string> & _vars;
+  const std::vector<std::string> & _symbol_names;
 
   /// Values passed by the user, they may be Reals for Postprocessors
-  const std::vector<Real> & _vals;
+  const std::vector<Real> & _symbol_values;
 
   /// Pointer to parsed function object
   std::unique_ptr<FunctionParserADBase<Real>> _parser;

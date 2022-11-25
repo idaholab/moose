@@ -84,8 +84,8 @@
 [Functions]
   [left_function]
     type = ParsedOptimizationFunction
-    value = 'a + b*y'
-    param_vars = 'a b'
+    expression = 'a + b*y'
+    param_symbol_names = 'a b'
     param_vector_name = 'params/vals'
   []
 []

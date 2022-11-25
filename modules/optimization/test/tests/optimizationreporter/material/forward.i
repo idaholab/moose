@@ -49,8 +49,8 @@
 [Functions]
   [thermo_conduct]
     type = ParsedOptimizationFunction
-    value = 'alpha'
-    param_vars = 'alpha'
+    expression = 'alpha'
+    param_symbol_names = 'alpha'
     param_vector_name = 'params/p1'
   []
 []

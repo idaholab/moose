@@ -13,8 +13,8 @@
 [Functions]
   [parsed_opt]
     type = ParsedOptimizationFunction
-    value = 'x*v1 + y*v2*v2 + z*v3*v3*v3 + t*v4*v4*v4*v4'
-    param_vars = 'v1 v2 v3 v4'
+    expression = 'x*v1 + y*v2*v2 + z*v3*v3*v3 + t*v4*v4*v4*v4'
+    param_symbol_names = 'v1 v2 v3 v4'
     param_vector_name = 'params/vals'
   []
 []

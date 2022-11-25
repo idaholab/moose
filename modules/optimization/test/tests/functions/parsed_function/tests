@@ -15,7 +15,7 @@
       input = parsed_function.i
       allow_test_objects = true
       cli_args = "Reporters/params/real_vector_values='1 2 3'"
-      expect_err = "Size of vector \(\d+\) does not match number of specified 'param_vars' \(\d+\)\."
+      expect_err = "Size of vector \(\d+\) does not match number of specified 'param_names' \(\d+\)\."
       detail = 'erroring if vector is incorrect size;'
     []
   []
