@@ -37,6 +37,12 @@ public:
    * Resample inputs given weights
    */
   void resample(const DenseMatrix<Real> & given_inputs, const std::vector<Real> & weights, std::vector<Real> & req_inputs, const dof_id_type & num_confg); //  const = 0
+  // virtual
+
+  /**
+   * Resample inputs given weights
+   */
+  void proposeSTD(const DenseMatrix<Real> & given_inputs, const std::vector<Real> & weights, std::vector<Real> & req_inputs, const dof_id_type & num_confg); //  const = 0
   // virtual 
 
 protected:
@@ -48,6 +54,15 @@ protected:
 
   /// Model input data that is uncertain
   std::vector<std::vector<Real>> & _inputs;
+
+  /// Model input data that is uncertain
+  std::vector<Real> & _outputs;
+
+  /// TPM
+  std::vector<Real> & _tpm;
+
+  /// Proposal STD
+  std::vector<Real> & _proposal_std;
 
 private:
   /// Track the current step of the main App
@@ -76,5 +91,7 @@ private:
 
   /// Storage for previous inputs
   DenseMatrix<Real> data_prev;
+
+  std::vector<std::vector<Real>> _inputs_sto;
   
 };

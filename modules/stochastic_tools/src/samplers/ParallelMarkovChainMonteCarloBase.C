@@ -10,6 +10,7 @@
 #include "ParallelMarkovChainMonteCarloBase.h"
 #include "AdaptiveMonteCarloUtils.h"
 #include "Normal.h"
+#include "TruncatedNormal.h"
 #include "Uniform.h"
 #include "DelimitedFileReader.h"
 
@@ -25,6 +26,8 @@ ParallelMarkovChainMonteCarloBase::validParams()
       "The prior distributions of the parameters to be calibrated.");
   params.addRequiredParam<ReporterName>("seed_inputs",
                                         "Reporter with seed inputs values for the next proposals.");
+  params.addRequiredParam<ReporterName>("proposal_std",
+                                        "Reporter with proposal stds for the next proposals.");
   params.addRequiredParam<unsigned int>("num_parallel_proposals",
                                         "Number of proposals to made and corresponding subApps executed in "
                                         "parallel.");
@@ -45,6 +48,7 @@ ParallelMarkovChainMonteCarloBase::ParallelMarkovChainMonteCarloBase(const Input
     ReporterInterface(this),
     LikelihoodInterface(this),
     _seed_inputs(getReporterValue<std::vector<Real>>("seed_inputs")),
+    _proposal_std(getReporterValue<std::vector<Real>>("proposal_std")),
     _num_parallel_proposals(getParam<unsigned int>("num_parallel_proposals")),
     // _likelihood(getLikelihoodByName(getParam<LikelihoodName>("likelihood"))),
     _initial_values(getParam<std::vector<Real>>("initial_values")),
@@ -77,6 +81,21 @@ ParallelMarkovChainMonteCarloBase::ParallelMarkovChainMonteCarloBase(const Input
   setNumberOfRandomSeeds(_num_random_seeds);
 
   _check_step = 0;
+
+  _std_use.resize(_priors.size());
+  _std_use[0] = 1e-3;
+  _std_use[1] = 5.0;
+  _std_use[2] = 0.01;
+
+  _lb.resize(_priors.size());
+  _lb[0] = 1e-3;
+  _lb[1] = 20.0;
+  _lb[2] = 0.01;
+
+  _ub.resize(_priors.size());
+  _ub[0] = 9e-2;
+  _ub[1] = 2200.0;
+  _ub[2] = 1.0;
 }
 
 dof_id_type
@@ -107,54 +126,61 @@ ParallelMarkovChainMonteCarloBase::sampleSetUp(const SampleMode /*mode*/)
   {
     for (unsigned int j = 0; j < _num_parallel_proposals; ++j)
     {
-        for (unsigned int i = 0; i < _priors.size(); ++i)
-            tmp[i] = Normal::quantile(getRand(seed_value), _initial_values[i], 0.15);
-        for (unsigned int i = 0; i < _confg_values.size(); ++i)
-        {
-            tmp[_priors.size()] = _confg_values[i];
-            _new_samples[count1] = tmp;
-            count1 += 1;
-        }
+      for (unsigned int i = 0; i < _priors.size(); ++i)
+        tmp[i] = TruncatedNormal::quantile(getRand(seed_value), _initial_values[i], _std_use[i], _lb[i], _ub[i]); // Normal::quantile(getRand(seed_value), _initial_values[i], _std_use[i]); // 1e-5 5e-5
+      for (unsigned int i = 0; i < _confg_values.size(); ++i)
+      {
+        tmp[_priors.size()] = _confg_values[i];
+        _new_samples[count1] = tmp;
+        count1 += 1;
+      }
     }
     for (unsigned int i = 0; i < _priors.size(); ++i)
-        tmp[i] = _initial_values[i];
+      tmp[i] = _initial_values[i];
     for (unsigned int i = 0; i < _confg_values.size(); ++i)
     {
-        tmp[_priors.size()] = _confg_values[i];
-        _new_samples[_num_parallel_proposals * _confg_values.size() + i] = tmp;
+      tmp[_priors.size()] = _confg_values[i];
+      _new_samples[_num_parallel_proposals * _confg_values.size() + i] = tmp;
     }
   }
   else
   {
+    // Real std_tmp;
     // std::cout << "_seed_inputs " << Moose::stringify(_seed_inputs) << std::endl;
     for (unsigned int j = 0; j < _num_parallel_proposals; ++j)
     {
-        for (unsigned int i = 0; i < _priors.size(); ++i)
-            tmp[i] = Normal::quantile(getRand(seed_value), _seed_inputs[i], 0.15); // 
-        for (unsigned int i = 0; i < _confg_values.size(); ++i)
-        {
-            tmp[_priors.size()] = _confg_values[i];
-            _new_samples[count1] = tmp;
-            count1 += 1;
-        }
+      for (unsigned int i = 0; i < _priors.size(); ++i)
+      {
+        // if (_step > 10000)
+        //   std_tmp = _proposal_std[i];
+        // else
+        //   std_tmp = 0.15; // 1e-5; // 5e-5
+        tmp[i] = TruncatedNormal::quantile(getRand(seed_value), _seed_inputs[i], _std_use[i], _lb[i], _ub[i]); // Normal::quantile(getRand(seed_value), _seed_inputs[i], _std_use[i]); // TruncatedNormal::quantile(getRand(seed_value), _seed_inputs[i], std_tmp, 1e-4, 9e-4); //  // 0.15
+      }
+      for (unsigned int i = 0; i < _confg_values.size(); ++i)
+      {
+        tmp[_priors.size()] = _confg_values[i];
+        _new_samples[count1] = tmp;
+        count1 += 1;
+      }
     }
     for (unsigned int i = 0; i < _priors.size(); ++i)
-        tmp[i] = _seed_inputs[i];
+      tmp[i] = _seed_inputs[i];
     for (unsigned int i = 0; i < _confg_values.size(); ++i)
     {
-        tmp[_priors.size()] = _confg_values[i];
-        _new_samples[_num_parallel_proposals * _confg_values.size() + i] = tmp;
+      tmp[_priors.size()] = _confg_values[i];
+      _new_samples[_num_parallel_proposals * _confg_values.size() + i] = tmp;
     }
   }
-//   for (unsigned int i = 0; i < ((_num_parallel_proposals + 1) * _confg_values.size()); ++i)
-//     std::cout << Moose::stringify(_new_samples[i]) << std::endl;
+  // for (unsigned int i = 0; i < ((_num_parallel_proposals + 1) * _confg_values.size()); ++i)
+  //   std::cout << Moose::stringify(_new_samples[i]) << std::endl;
 }
 
 Real
 ParallelMarkovChainMonteCarloBase::computeSample(dof_id_type row_index, dof_id_type col_index)
 {
 
-//   std::cout << Moose::stringify(_new_samples[row_index]) << std::endl;  
+  // std::cout << Moose::stringify(_new_samples[row_index]) << std::endl;  
 // std::cout << "Here *****" << std::endl;
 
   if (_step == 0)

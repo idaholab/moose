@@ -40,6 +40,9 @@ protected:
   /// Reporter value the seed input values for proposing the next set of samples
   const std::vector<Real> & _seed_inputs;
 
+  /// Reporter value for the proposal stds
+  const std::vector<Real> & _proposal_std;
+
   /// Number of parallel proposals to be made and subApps to be executed
   const unsigned int & _num_parallel_proposals;
 
@@ -68,5 +71,11 @@ private:
 
   /// Initialize a certain number of random seeds. Change from the default only if you have to.
   std::vector<std::vector<Real>> _new_samples;
+
+  std::vector<Real> _std_use;
+
+  std::vector<Real> _lb;
+
+  std::vector<Real> _ub;
   
 };
