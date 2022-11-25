@@ -526,16 +526,16 @@ def checkLogicVersionSingle(checks, iversion, package):
         else:
             return False
 
-    # Logical match
-    if logic == '>' and list(map(int, checks[package].split("."))) > list(map(int, version.split("."))):
-        return True
-    elif logic == '>=' and list(map(int, checks[package].split("."))) >= list(map(int, version.split("."))):
-        return True
-    elif logic == '<' and list(map(int, checks[package].split("."))) < list(map(int, version.split("."))):
-        return True
-    elif logic == '<=' and list(map(int, checks[package].split("."))) <= list(map(int, version.split("."))):
-        return True
+    from operator import lt, gt, le, ge
+    ops = {
+      '<': lt,
+      '>': gt,
+      '<=': le,
+      '>=': ge,
+    }
 
+    if ops[logic]([int(x) for x in checks[package].split(".")], [int(x) for x in version.split(".")]):
+        return True
     return False
 
 def checkVersion(checks, test, package):
