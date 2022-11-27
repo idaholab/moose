@@ -42,6 +42,9 @@ based weight function to be used in the averaging process. `constant` assigns an
 to all material points, `linear` weights each point by $r_0-r$ (a linear fall-off with distance),
 and `cosine` weights each point by $1+\cos (\frac r{r_0}\pi}$.
 
+!alert note
+The weights currently do not take into account the quadrature point weight in the quadrature.
+
 !syntax parameters /UserObjects/RadialAverage
 
 !syntax inputs /UserObjects/RadialAverage
