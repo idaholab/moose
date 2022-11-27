@@ -53,8 +53,7 @@ protected:
 
   bool _compute_visc_turbulenc;
   bool _has_turb_visc_auxvar;
-  Real _mixing_length_const;
-  const Function * _mixing_length_func;
+  const Function * _mixing_length;
   const VariableValue & _turb_visc_auxvar;
 
   bool _has_scale_vel;

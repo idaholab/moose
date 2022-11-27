@@ -11,7 +11,6 @@
 #include "MooseMesh.h"
 #include "Steady.h"
 #include "libmesh/quadrature.h"
-#include "SAMTypes.h"
 
 registerMooseObject("NavierStokesApp", MDFluidMaterial);
 
@@ -31,8 +30,8 @@ MDFluidMaterial::validParams()
 
   params.addParam<bool>(
       "compute_turbulence_viscosity", false, "If turbulence viscosity will be computed.");
-  params.addParam<std::string>("mixing_length",
-                               "Prandtl mixing length to compute turbulence viscosity.");
+  params.addParam<FunctionName>("mixing_length",
+                                "Prandtl mixing length to compute turbulence viscosity.");
   params.addCoupledVar("turbulence_viscosity_var",
                        "An aux variable turbulence_viscosity will be computed from.");
   return params;
@@ -65,8 +64,7 @@ MDFluidMaterial::MDFluidMaterial(const InputParameters & parameters)
     _taue(declareProperty<Real>("taue")),
     _compute_visc_turbulenc(getParam<bool>("compute_turbulence_viscosity")),
     _has_turb_visc_auxvar(isParamValid("turbulence_viscosity_var")),
-    _mixing_length_const(0.0),
-    _mixing_length_func(NULL),
+    _mixing_length(NULL),
     _turb_visc_auxvar(_has_turb_visc_auxvar ? coupledValue("turbulence_viscosity_var") : _zero),
     _has_scale_vel(isParamValid("scaling_velocity")),
     _scaling_velocity(_has_scale_vel ? getParam<Real>("scaling_velocity") : 1.),
@@ -84,15 +82,9 @@ MDFluidMaterial::MDFluidMaterial(const InputParameters & parameters)
       mooseError("To compute turbulence viscosity, "
                  "please provide either 'mixing_length' or 'turbulence_viscosity_var'");
 
-    // If 'turbulence_viscosity_var' is not given, 'mixing_length' is expected
+    // If 'turbulence_viscosity_var' is not given, 'mixing_length' is used
     if (!_has_turb_visc_auxvar)
-    {
-      std::string str = getParam<std::string>("mixing_length");
-      if (SAM::isNumber(str))
-        _mixing_length_const = SAM::toNumber(str);
-      else
-        _mixing_length_func = &getFunctionByName(str);
-    }
+      _mixing_length = &getFunction("mixing_length");
   }
 }
 
@@ -145,8 +137,7 @@ MDFluidMaterial::computeQpProperties()
         for (unsigned int j = 0; j < 3; j++)
           strain_rate_mag += 0.5 * grad_vel(i, j) * grad_vel(i, j);
 
-      Real L_mix = (_mixing_length_func == NULL) ? _mixing_length_const
-                                                 : _mixing_length_func->value(_t, _q_point[_qp]);
+      Real L_mix = _mixing_length->value(_t, _q_point[_qp]);
 
       _turbulence_viscosity[_qp] = _rho[_qp] * L_mix * L_mix * std::sqrt(strain_rate_mag);
     }

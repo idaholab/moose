@@ -8,6 +8,14 @@
     issues = '#000'
     requirement = 'We shall be able to solve a canonical lid-driven problem without stabilization, using mixed order finite elements for velocity and pressure.'
   [../]
+  [./lid_driven_md]
+    type = 'Exodiff'
+    input = 'lid_driven_md.i'
+    exodiff = 'lid_driven_md_out.e'
+    custom_cmp = 'lid_driven.cmp'
+    issues = '#000'
+    requirement = 'We shall be able to solve a canonical lid-driven problem using same order variables and the PSPG/SUPG stabilization scheme.'
+  [../]
   [./ad_lid_driven]
     type = 'Exodiff'
     input = 'ad_lid_driven.i'
