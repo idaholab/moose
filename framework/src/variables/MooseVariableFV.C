@@ -731,7 +731,10 @@ MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi, const bool correct_s
                                     : getElemValue(neighbor);
 
   const auto delta =
-      isInternalFace(fi) ? fi.dCNMag() : (fi.faceCentroid() - fi.elemCentroid()).norm();
+      isInternalFace(fi)
+          ? fi.dCNMag()
+          : (fi.faceCentroid() - (var_defined_on_elem ? fi.elemCentroid() : fi.neighborCentroid()))
+                .norm();
 
   // This is the component of the gradient which is parallel to the line connecting
   // the cell centers. Therefore, we can use our second order, central difference
