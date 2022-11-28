@@ -40,7 +40,7 @@ VariableValueVolumeHistogram::VariableValueVolumeHistogram(const InputParameters
     _max_value(getParam<Real>("max_value")),
     _deltaV((_max_value - _min_value) / _nbins),
     _value(coupledValue("variable")),
-    _bin_center(declareVector(getVar("variable", 0)->name())),
+    _bin_center(declareVector(coupledName("variable"))),
     _volume(declareVector("n"))
 {
   if (coupledComponents("variable") != 1)
