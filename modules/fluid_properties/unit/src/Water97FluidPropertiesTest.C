@@ -694,67 +694,46 @@ TEST_F(Water97FluidPropertiesTest, conservative)
     auto e = _fp->e_from_p_T(pressure, temperature);
 
     auto [p_test, T_test] = _fp->p_T_from_v_e(v, e);
-    REL_TEST(MetaPhysicL::raw_value(pressure), MetaPhysicL::raw_value(p_test), REL_TOL_CONSISTENCY);
-    REL_TEST(
-        MetaPhysicL::raw_value(temperature), MetaPhysicL::raw_value(T_test), REL_TOL_CONSISTENCY);
+    REL_TEST(pressure, p_test, REL_TOL_CONSISTENCY);
+    REL_TEST(temperature, T_test, REL_TOL_CONSISTENCY);
 
     decltype(p_test) rho_test;
     std::tie(rho_test, T_test) = _fp->rho_T_from_v_e(v, e);
-    REL_TEST(MetaPhysicL::raw_value(rho), MetaPhysicL::raw_value(rho_test), REL_TOL_CONSISTENCY);
-    REL_TEST(
-        MetaPhysicL::raw_value(temperature), MetaPhysicL::raw_value(T_test), REL_TOL_CONSISTENCY);
+    REL_TEST(rho, rho_test, REL_TOL_CONSISTENCY);
+    REL_TEST(temperature, T_test, REL_TOL_CONSISTENCY);
 
-    REL_TEST(MetaPhysicL::raw_value(_fp->k_from_p_T(pressure, temperature)),
-             MetaPhysicL::raw_value(_fp->k_from_v_e(v, e)),
-             REL_TOL_CONSISTENCY);
-    REL_TEST(MetaPhysicL::raw_value(_fp->e_from_p_rho(pressure, rho)),
-             MetaPhysicL::raw_value(e),
-             REL_TOL_CONSISTENCY);
+    REL_TEST(_fp->k_from_p_T(pressure, temperature), _fp->k_from_v_e(v, e), REL_TOL_CONSISTENCY);
+    REL_TEST(_fp->e_from_p_rho(pressure, rho), e, REL_TOL_CONSISTENCY);
 
     constexpr Real perturbation_factor = 1 + 1e-8;
     TestType de_dp, de_drho, de_dT;
     _fp->e_from_p_rho(pressure, rho, e, de_dp, de_drho);
     auto de_dp_diff =
         (_fp->e_from_p_rho(perturbation_factor * pressure, rho) - e) / (1e-8 * pressure);
-    REL_TEST(MetaPhysicL::raw_value(de_dp), MetaPhysicL::raw_value(de_dp_diff), 1e-2);
+    REL_TEST(de_dp, de_dp_diff, 1e-2);
     auto de_drho_diff = (_fp->e_from_p_rho(pressure, perturbation_factor * rho) - e) / (1e-8 * rho);
-    REL_TEST(MetaPhysicL::raw_value(de_drho), MetaPhysicL::raw_value(de_drho_diff), 1e-2);
+    REL_TEST(de_drho, de_drho_diff, 1e-2);
 
     _fp->e_from_p_T(pressure, temperature, e, de_dp, de_dT);
     de_dp_diff =
         (_fp->e_from_p_T(perturbation_factor * pressure, temperature) - e) / (1e-8 * pressure);
-    REL_TEST(MetaPhysicL::raw_value(de_dp), MetaPhysicL::raw_value(de_dp_diff), 1e-2);
+    REL_TEST(de_dp, de_dp_diff, 1e-2);
     auto de_dT_diff =
         (_fp->e_from_p_T(pressure, perturbation_factor * temperature) - e) / (1e-8 * temperature);
-    REL_TEST(MetaPhysicL::raw_value(de_dT), MetaPhysicL::raw_value(de_dT_diff), 1e-2);
+    REL_TEST(de_dT, de_dT_diff, 1e-2);
 
     auto h = _fp->h_from_p_T(pressure, temperature);
     std::tie(p_test, T_test) = _fp->p_T_from_v_h(v, h);
-    REL_TEST(MetaPhysicL::raw_value(pressure), MetaPhysicL::raw_value(p_test), REL_TOL_CONSISTENCY);
-    REL_TEST(
-        MetaPhysicL::raw_value(temperature), MetaPhysicL::raw_value(T_test), REL_TOL_CONSISTENCY);
+    REL_TEST(pressure, p_test, REL_TOL_CONSISTENCY);
+    REL_TEST(temperature, T_test, REL_TOL_CONSISTENCY);
 
-    REL_TEST(MetaPhysicL::raw_value(_fp->e_from_v_h(v, h)),
-             MetaPhysicL::raw_value(e),
-             REL_TOL_CONSISTENCY);
-    REL_TEST(MetaPhysicL::raw_value(_fp->T_from_v_e(v, e)),
-             MetaPhysicL::raw_value(temperature),
-             REL_TOL_CONSISTENCY);
-    REL_TEST(MetaPhysicL::raw_value(_fp->c_from_v_e(v, e)),
-             MetaPhysicL::raw_value(_fp->c_from_p_T(pressure, temperature)),
-             REL_TOL_CONSISTENCY);
-    REL_TEST(MetaPhysicL::raw_value(_fp->cp_from_v_e(v, e)),
-             MetaPhysicL::raw_value(_fp->cp_from_p_T(pressure, temperature)),
-             REL_TOL_CONSISTENCY);
-    REL_TEST(MetaPhysicL::raw_value(_fp->cv_from_v_e(v, e)),
-             MetaPhysicL::raw_value(_fp->cv_from_p_T(pressure, temperature)),
-             REL_TOL_CONSISTENCY);
-    REL_TEST(MetaPhysicL::raw_value(_fp->mu_from_v_e(v, e)),
-             MetaPhysicL::raw_value(_fp->mu_from_p_T(pressure, temperature)),
-             REL_TOL_CONSISTENCY);
-    REL_TEST(MetaPhysicL::raw_value(_fp->k_from_v_e(v, e)),
-             MetaPhysicL::raw_value(_fp->k_from_p_T(pressure, temperature)),
-             REL_TOL_CONSISTENCY);
+    REL_TEST(_fp->e_from_v_h(v, h), e, REL_TOL_CONSISTENCY);
+    REL_TEST(_fp->T_from_v_e(v, e), temperature, REL_TOL_CONSISTENCY);
+    REL_TEST(_fp->c_from_v_e(v, e), _fp->c_from_p_T(pressure, temperature), REL_TOL_CONSISTENCY);
+    REL_TEST(_fp->cp_from_v_e(v, e), _fp->cp_from_p_T(pressure, temperature), REL_TOL_CONSISTENCY);
+    REL_TEST(_fp->cv_from_v_e(v, e), _fp->cv_from_p_T(pressure, temperature), REL_TOL_CONSISTENCY);
+    REL_TEST(_fp->mu_from_v_e(v, e), _fp->mu_from_p_T(pressure, temperature), REL_TOL_CONSISTENCY);
+    REL_TEST(_fp->k_from_v_e(v, e), _fp->k_from_p_T(pressure, temperature), REL_TOL_CONSISTENCY);
 
     const Real p0 = MetaPhysicL::raw_value(pressure) * 1.01;
     const Real T0 = MetaPhysicL::raw_value(temperature) * 1.01;
@@ -763,9 +742,8 @@ TEST_F(Water97FluidPropertiesTest, conservative)
     bool conversion_succeeded = false;
     _fp->p_T_from_h_s(h, s, p0, T0, p_test, T_test, conversion_succeeded);
     EXPECT_TRUE(conversion_succeeded);
-    REL_TEST(MetaPhysicL::raw_value(pressure), MetaPhysicL::raw_value(p_test), REL_TOL_CONSISTENCY);
-    REL_TEST(
-        MetaPhysicL::raw_value(temperature), MetaPhysicL::raw_value(T_test), REL_TOL_CONSISTENCY);
+    REL_TEST(pressure, p_test, REL_TOL_CONSISTENCY);
+    REL_TEST(temperature, T_test, REL_TOL_CONSISTENCY);
   };
 
   run_tests(Real{});

@@ -416,9 +416,9 @@ public:
 
 protected:
   /**
-   * Computes the dependent variable z and it's derivatives with respect to the independent
+   * Computes the dependent variable z and its derivatives with respect to the independent
    * variables x and y using the simple two parameter \p z_from_x_y functor. The derivatives are
-   * computed using a compound automatic differentiantion type
+   * computed using a compound automatic differentiation type
    */
   template <typename T, typename Functor>
   static void

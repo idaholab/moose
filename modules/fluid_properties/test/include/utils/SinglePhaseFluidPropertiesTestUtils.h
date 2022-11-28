@@ -36,10 +36,9 @@
     const ADReal df_db_fd = (f(a, b + db) - f(a, b - db)) / (2 * db);                              \
     ADReal f_value, df_da, df_db;                                                                  \
     f(a, b, f_value, df_da, df_db);                                                                \
-    REL_TEST(                                                                                      \
-        MetaPhysicL::raw_value(f(a, b)), MetaPhysicL::raw_value(f_value), REL_TOL_CONSISTENCY);    \
-    REL_TEST(MetaPhysicL::raw_value(df_da), MetaPhysicL::raw_value(df_da_fd), tol);                \
-    REL_TEST(MetaPhysicL::raw_value(df_db), MetaPhysicL::raw_value(df_db_fd), tol);                \
+    REL_TEST(f(a, b), f_value, REL_TOL_CONSISTENCY);                                               \
+    REL_TEST(df_da, df_da_fd, tol);                                                                \
+    REL_TEST(df_db, df_db_fd, tol);                                                                \
   }
 
 // Macro for performing a derivative test

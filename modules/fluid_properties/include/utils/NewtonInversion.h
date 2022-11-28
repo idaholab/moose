@@ -83,7 +83,7 @@ NewtonSolve(const T & x,
   // Check for divergence or slow convergence of Newton's method
   if (iteration >= max_its)
     mooseException(
-        "Newton solve convergence failed: maximum number of iterations, ", max_its, " exceeded");
+        "Newton solve convergence failed: maximum number of iterations, ", max_its, ", exceeded");
 
   return {z, dy_dz};
 }
@@ -223,6 +223,6 @@ NewtonSolve2D(const T & f,
   // Check for divergence or slow convergence of Newton's method
   if (iteration >= max_its)
     mooseException(
-        "Newton solve convergence failed: maximum number of iterations, ", max_its, " exceeded");
+        "Newton solve convergence failed: maximum number of iterations, ", max_its, ", exceeded");
 }
 } // namespace FluidPropertiesUtils
