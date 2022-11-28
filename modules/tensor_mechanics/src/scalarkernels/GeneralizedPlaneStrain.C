@@ -11,7 +11,7 @@
 
 // MOOSE includes
 #include "Assembly.h"
-#include "GeneralizedPlaneStrainUserObject.h"
+#include "GeneralizedPlaneStrainUOInterface.h"
 #include "MooseVariableScalar.h"
 #include "SystemBase.h"
 #include "ReferenceResidualProblem.h"
@@ -37,7 +37,7 @@ GeneralizedPlaneStrain::validParams()
 
 GeneralizedPlaneStrain::GeneralizedPlaneStrain(const InputParameters & parameters)
   : ScalarKernel(parameters),
-    _gps(getUserObject<GeneralizedPlaneStrainUserObject>("generalized_plane_strain")),
+    _gps(getUserObject<GeneralizedPlaneStrainUOInterface>("generalized_plane_strain")),
     _scalar_var_id(isParamValid("scalar_out_of_plane_strain_index")
                        ? getParam<unsigned int>("scalar_out_of_plane_strain_index")
                        : 0)

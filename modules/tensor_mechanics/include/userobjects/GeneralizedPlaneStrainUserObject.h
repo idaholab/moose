@@ -13,10 +13,12 @@
 #include "SubblockIndexProvider.h"
 #include "RankTwoTensorForward.h"
 #include "RankFourTensorForward.h"
+#include "GeneralizedPlaneStrainUOInterface.h"
 
 class Function;
 
-class GeneralizedPlaneStrainUserObject : public ElementUserObject
+class GeneralizedPlaneStrainUserObject : public ElementUserObject,
+                                         public GeneralizedPlaneStrainUOInterface
 {
 public:
   static InputParameters validParams();
@@ -27,9 +29,9 @@ public:
   void execute() override;
   void threadJoin(const UserObject & uo) override;
   void finalize() override;
-  virtual Real returnResidual(unsigned int scalar_var_id = 0) const;
-  virtual Real returnReferenceResidual(unsigned int scalar_var_id = 0) const;
-  virtual Real returnJacobian(unsigned int scalar_var_id = 0) const;
+  virtual Real returnResidual(unsigned int scalar_var_id = 0) const override;
+  virtual Real returnReferenceResidual(unsigned int scalar_var_id = 0) const override;
+  virtual Real returnJacobian(unsigned int scalar_var_id = 0) const override;
 
 protected:
   /// Base name of the material system
