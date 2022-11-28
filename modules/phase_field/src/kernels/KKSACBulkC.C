@@ -24,10 +24,10 @@ KKSACBulkC::validParams()
 
 KKSACBulkC::KKSACBulkC(const InputParameters & parameters)
   : KKSACBulkBase(parameters),
-    _ca_name(getVar("ca", 0)->name()),
+    _ca_name(coupledName("ca", 0)),
     _ca_var(coupled("ca")),
     _ca(coupledValue("ca")),
-    _cb_name(getVar("cb", 0)->name()),
+    _cb_name(coupledName("cb", 0)),
     _cb_var(coupled("cb")),
     _cb(coupledValue("cb")),
     _prop_dFadca(getMaterialPropertyDerivative<Real>("fa_name", _ca_name)),

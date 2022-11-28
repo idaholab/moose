@@ -37,8 +37,8 @@ StressBasedChemicalPotential::StressBasedChemicalPotential(const InputParameters
   if (_has_coupled_c)
   {
     _dchemical_potential = &declarePropertyDerivative<Real>(
-        getParam<MaterialPropertyName>("property_name"), getVar("c", 0)->name());
-    _dprefactor_dc = &getMaterialPropertyDerivative<Real>("prefactor_name", getVar("c", 0)->name());
+        getParam<MaterialPropertyName>("property_name"), coupledName("c", 0));
+    _dprefactor_dc = &getMaterialPropertyDerivative<Real>("prefactor_name", coupledName("c", 0));
   }
 }
 

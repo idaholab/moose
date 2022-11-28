@@ -36,7 +36,7 @@ SemiconductorLinearConductivity::SemiconductorLinearConductivity(const InputPara
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _electric_conductivity(declareProperty<Real>(_base_name + "electrical_conductivity")),
     _delectric_conductivity_dT(declarePropertyDerivative<Real>(
-        _base_name + "electrical_conductivity", getVar("temp", 0)->name()))
+        _base_name + "electrical_conductivity", coupledName("temp", 0)))
 {
 }
 

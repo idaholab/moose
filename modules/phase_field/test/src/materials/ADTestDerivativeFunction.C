@@ -37,8 +37,8 @@ ADTestDerivativeFunction::ADTestDerivativeFunction(const InputParameters & param
     _prop_dFdop(coupledComponents("op"))
 {
   for (std::size_t i = 0; i < _op.size(); ++i)
-    _prop_dFdop[i] = &declareADProperty<Real>(
-        derivativePropertyNameFirst(_f_name, this->getVar("op", i)->name()));
+    _prop_dFdop[i] =
+        &declareADProperty<Real>(derivativePropertyNameFirst(_f_name, this->coupledName("op", i)));
 
   if (_function == FunctionEnum::F1 && _op.size() != 1)
     paramError("op", "Specify exactly one variable to an F1 type function.");

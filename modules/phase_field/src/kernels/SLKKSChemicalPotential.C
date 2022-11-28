@@ -37,7 +37,7 @@ SLKKSChemicalPotential::validParams()
 SLKKSChemicalPotential::SLKKSChemicalPotential(const InputParameters & parameters)
   : DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>(parameters),
     _cs_var(coupled("cs")),
-    _cs_name(getVar("cs", 0)->name()),
+    _cs_name(coupledName("cs", 0)),
     // first derivatives
     _dFdu(getMaterialPropertyDerivative<Real>("F", _var.name())),
     _dFdcs(getMaterialPropertyDerivative<Real>("F", _cs_name)),

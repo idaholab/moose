@@ -25,7 +25,7 @@ CoupledAllenCahn::validParams()
 
 CoupledAllenCahn::CoupledAllenCahn(const InputParameters & parameters)
   : ACBulk<Real>(parameters),
-    _v_name(getVar("v", 0)->name()),
+    _v_name(coupledName("v", 0)),
     _dFdV(getMaterialPropertyDerivative<Real>("f_name", _v_name)),
     _d2FdVdEta(getMaterialPropertyDerivative<Real>("f_name", _v_name, _var.name())),
     _d2FdVdarg(_n_args)

@@ -78,7 +78,7 @@ ElectrochemicalSinteringMaterial::ElectrochemicalSinteringMaterial(
     _w(coupledValues("chemical_potentials")),
     _w_name(_ndefects),
     _phi(coupledValue("void_op")),
-    _phi_name(getVar("void_op", 0)->name()),
+    _phi_name(coupledName("void_op", 0)),
     _ns_min_names(getParam<std::vector<MaterialPropertyName>>("min_vacancy_concentrations_solid")),
     _ns_min(_ndefects),
     _dns_min(_ndefects),
@@ -145,7 +145,7 @@ ElectrochemicalSinteringMaterial::ElectrochemicalSinteringMaterial(
 
   for (unsigned int i = 0; i < _ndefects; ++i)
   {
-    _w_name[i] = getVar("chemical_potentials", i)->name();
+    _w_name[i] = coupledName("chemical_potentials", i);
     _ns_min[i] = &getMaterialPropertyByName<Real>(_ns_min_names[i]);
     _dns_min[i].resize(_neta);
     _d2ns_min[i].resize(_neta);
@@ -170,7 +170,7 @@ ElectrochemicalSinteringMaterial::ElectrochemicalSinteringMaterial(
   for (unsigned int i = 0; i < _neta; ++i)
   {
     _eta[i] = &coupledValue("etas", i);
-    _eta_name[i] = getVar("etas", i)->name();
+    _eta_name[i] = coupledName("etas", i);
     _domegasdeta[i] = &declarePropertyDerivative<Real>("omegas", _eta_name[i]);
     _d2omegasdetadeta[i].resize(_neta);
 

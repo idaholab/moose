@@ -27,7 +27,7 @@ ForceDensityMaterial::validParams()
 ForceDensityMaterial::ForceDensityMaterial(const InputParameters & parameters)
   : DerivativeMaterialInterface<Material>(parameters),
     _c(coupledValue("c")),
-    _c_name(getVar("c", 0)->name()),
+    _c_name(coupledName("c", 0)),
     _ceq(getParam<Real>("ceq")),
     _cgb(getParam<Real>("cgb")),
     _k(getParam<Real>("k")),

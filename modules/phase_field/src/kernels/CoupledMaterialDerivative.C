@@ -28,7 +28,7 @@ CoupledMaterialDerivative::validParams()
 
 CoupledMaterialDerivative::CoupledMaterialDerivative(const InputParameters & parameters)
   : DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>(parameters),
-    _v_name(getVar("v", 0)->name()),
+    _v_name(coupledName("v", 0)),
     _v_var(coupled("v")),
     _dFdv(getMaterialPropertyDerivative<Real>("f_name", _v_name)),
     _d2Fdvdu(getMaterialPropertyDerivative<Real>("f_name", _v_name, _var.name())),

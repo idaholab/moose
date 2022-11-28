@@ -46,7 +46,7 @@ ComputeVariableIsotropicElasticityTensor::ComputeVariableIsotropicElasticityTens
   // fetch prerequisite derivatives and build elasticity tensor derivatives and cross-derivatives
   for (unsigned int i = 0; i < _num_args; ++i)
   {
-    const VariableName & iname = getVar("args", i)->name();
+    const VariableName & iname = coupledName("args", i);
     _dyoungs_modulus[i] = &getMaterialPropertyDerivative<Real>("youngs_modulus", iname);
     _dpoissons_ratio[i] = &getMaterialPropertyDerivative<Real>("poissons_ratio", iname);
 
@@ -59,7 +59,7 @@ ComputeVariableIsotropicElasticityTensor::ComputeVariableIsotropicElasticityTens
 
     for (unsigned int j = i; j < _num_args; ++j)
     {
-      const VariableName & jname = getVar("args", j)->name();
+      const VariableName & jname = coupledName("args", j);
       _d2youngs_modulus[i][j] =
           &getMaterialPropertyDerivative<Real>("youngs_modulus", iname, jname);
       _d2poissons_ratio[i][j] =
@@ -77,7 +77,7 @@ ComputeVariableIsotropicElasticityTensor::initialSetup()
   validateCoupling<Real>("poissons_ratio");
   for (unsigned int i = 0; i < _num_args; ++i)
   {
-    const VariableName & iname = getVar("args", i)->name();
+    const VariableName & iname = coupledName("args", i);
 
     if (!_fe_problem.isMatPropRequested(
             derivativePropertyNameFirst(_elasticity_tensor_name, iname)))
@@ -85,7 +85,7 @@ ComputeVariableIsotropicElasticityTensor::initialSetup()
 
     for (unsigned int j = 0; j < _num_args; ++j)
     {
-      const VariableName & jname = getVar("args", j)->name();
+      const VariableName & jname = coupledName("args", j);
       if (!_fe_problem.isMatPropRequested(
               derivativePropertyNameSecond(_elasticity_tensor_name, iname, jname)))
         _d2elasticity_tensor[i][j] = nullptr;

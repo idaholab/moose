@@ -33,7 +33,7 @@ ExternalForceDensityMaterial::ExternalForceDensityMaterial(const InputParameters
     _force_y(getFunction("force_y")),
     _force_z(getFunction("force_z")),
     _c(coupledValue("c")),
-    _c_name(getVar("c", 0)->name()),
+    _c_name(coupledName("c", 0)),
     _k(getParam<Real>("k")),
     _op_num(coupledComponents(
         "etas")), // determine number of grains from the number of names passed in.

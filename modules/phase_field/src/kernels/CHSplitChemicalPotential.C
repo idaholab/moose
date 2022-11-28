@@ -28,7 +28,7 @@ CHSplitChemicalPotential::CHSplitChemicalPotential(const InputParameters & param
     _mu_prop_name(getParam<MaterialPropertyName>("chemical_potential_prop")),
     _chemical_potential(getMaterialProperty<Real>(_mu_prop_name)),
     _dchemical_potential_dc(
-        getMaterialPropertyDerivative<Real>(_mu_prop_name, getVar("c", 0)->name())),
+        getMaterialPropertyDerivative<Real>(_mu_prop_name, coupledName("c", 0))),
     _c_var(coupled("c"))
 {
 }

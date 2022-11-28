@@ -50,20 +50,19 @@ ComputePFFractureStressBase::ComputePFFractureStressBase(const InputParameters &
     _barrier(getDefaultMaterialProperty<Real>("barrier_energy")),
     _E(declareProperty<Real>(getParam<MaterialPropertyName>("E_name"))),
     _dEdc(declarePropertyDerivative<Real>(getParam<MaterialPropertyName>("E_name"),
-                                          getVar("c", 0)->name())),
+                                          coupledName("c", 0))),
     _d2Ed2c(declarePropertyDerivative<Real>(
-        getParam<MaterialPropertyName>("E_name"), getVar("c", 0)->name(), getVar("c", 0)->name())),
+        getParam<MaterialPropertyName>("E_name"), coupledName("c", 0), coupledName("c", 0))),
     _dstress_dc(
-        declarePropertyDerivative<RankTwoTensor>(_base_name + "stress", getVar("c", 0)->name())),
+        declarePropertyDerivative<RankTwoTensor>(_base_name + "stress", coupledName("c", 0))),
     _d2Fdcdstrain(declareProperty<RankTwoTensor>("d2Fdcdstrain")),
     _D(getMaterialProperty<Real>("D_name")),
-    _dDdc(getMaterialPropertyDerivative<Real>("D_name", getVar("c", 0)->name())),
-    _d2Dd2c(getMaterialPropertyDerivative<Real>(
-        "D_name", getVar("c", 0)->name(), getVar("c", 0)->name())),
+    _dDdc(getMaterialPropertyDerivative<Real>("D_name", coupledName("c", 0))),
+    _d2Dd2c(
+        getMaterialPropertyDerivative<Real>("D_name", coupledName("c", 0), coupledName("c", 0))),
     _I(getDefaultMaterialProperty<Real>("I_name")),
-    _dIdc(getMaterialPropertyDerivative<Real>("I_name", getVar("c", 0)->name())),
-    _d2Id2c(getMaterialPropertyDerivative<Real>(
-        "I_name", getVar("c", 0)->name(), getVar("c", 0)->name()))
+    _dIdc(getMaterialPropertyDerivative<Real>("I_name", coupledName("c", 0))),
+    _d2Id2c(getMaterialPropertyDerivative<Real>("I_name", coupledName("c", 0), coupledName("c", 0)))
 {
 }
 

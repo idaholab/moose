@@ -35,7 +35,7 @@ ComputeCrystalPlasticityThermalEigenstrain::ComputeCrystalPlasticityThermalEigen
     _temperature(coupledValue("temperature")),
     _temperature_old(coupledValueOld("temperature")),
     _ddeformation_gradient_dT(declarePropertyDerivative<RankTwoTensor>(
-        _deformation_gradient_name, getVar("temperature", 0)->name())),
+        _deformation_gradient_name, coupledName("temperature", 0))),
     _thermal_expansion_coefficients(getParam<std::vector<Real>>("thermal_expansion_coefficients")),
     _lattice_thermal_expansion_coefficients(declareProperty<RankTwoTensor>(
         _eigenstrain_name +

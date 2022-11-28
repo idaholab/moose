@@ -28,7 +28,7 @@ ADMathFreeEnergy::ADMathFreeEnergy(const InputParameters & parameters)
     _f_name(getParam<MaterialPropertyName>("f_name")),
     _prop_F(declareADProperty<Real>(_f_name)),
     _prop_dFdc(
-        declareADProperty<Real>(derivativePropertyNameFirst(_f_name, this->getVar("c", 0)->name())))
+        declareADProperty<Real>(derivativePropertyNameFirst(_f_name, this->coupledName("c", 0))))
 {
 }
 

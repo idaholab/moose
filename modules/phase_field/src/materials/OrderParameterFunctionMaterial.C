@@ -22,7 +22,7 @@ OrderParameterFunctionMaterial::OrderParameterFunctionMaterial(const InputParame
   : DerivativeMaterialInterface<Material>(parameters),
     _eta(coupledValue("eta")),
     _eta_var(coupled("eta")),
-    _eta_name(getVar("eta", 0)->name()),
+    _eta_name(coupledName("eta", 0)),
     _function_name(getParam<std::string>("function_name")),
     _prop_f(declareProperty<Real>(_function_name)),
     _prop_df(declarePropertyDerivative<Real>(_function_name, _eta_name)),

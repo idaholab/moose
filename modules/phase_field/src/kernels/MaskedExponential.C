@@ -35,7 +35,7 @@ MaskedExponential::MaskedExponential(const InputParameters & parameters)
   : DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>(parameters),
     _w_var(coupled("w")),
     _w(coupledValue("w")),
-    _temp_name(getVar("T", 0)->name()),
+    _temp_name(coupledName("T", 0)),
     _temp_var(coupled("T")),
     _temp(coupledValue("T")),
     _mask(getMaterialProperty<Real>("mask")),

@@ -30,7 +30,7 @@ ComputeExternalGrainForceAndTorque::ComputeExternalGrainForceAndTorque(
     const InputParameters & parameters)
   : DerivativeMaterialInterface<ShapeElementUserObject>(parameters),
     GrainForceAndTorqueInterface(),
-    _c_name(getVar("c", 0)->name()),
+    _c_name(coupledName("c", 0)),
     _c_var(coupled("c")),
     _dF_name(getParam<MaterialPropertyName>("force_density")),
     _dF(getMaterialPropertyByName<std::vector<RealGradient>>(_dF_name)),
@@ -45,7 +45,7 @@ ComputeExternalGrainForceAndTorque::ComputeExternalGrainForceAndTorque(
   for (unsigned int i = 0; i < _op_num; ++i)
   {
     _vals_var[i] = coupled("etas", i);
-    _vals_name[i] = getVar("etas", i)->name();
+    _vals_name[i] = coupledName("etas", i);
     _dFdeta[i] = &getMaterialPropertyByName<std::vector<RealGradient>>(
         derivativePropertyNameFirst(_dF_name, _vals_name[i]));
   }

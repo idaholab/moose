@@ -50,7 +50,7 @@ AnisoHeatConductionMaterialTempl<is_ad>::AnisoHeatConductionMaterialTempl(
     _has_temp(isCoupled("temperature")),
     _T(coupledGenericValue<is_ad>("temperature")),
     _T_var(coupled("temperature")),
-    _T_name(getVar("temperature", 0)->name()),
+    _T_name(coupledName("temperature", 0)),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
 
     _user_provided_thermal_conductivity(getParam<std::vector<Real>>("thermal_conductivity")),

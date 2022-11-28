@@ -36,7 +36,7 @@ KKSPhaseConcentration::KKSPhaseConcentration(const InputParameters & parameters)
     _eta(coupledValue("eta")),
     _eta_var(coupled("eta")),
     _prop_h(getMaterialProperty<Real>("h_name")),
-    _prop_dh(getMaterialPropertyDerivative<Real>("h_name", getVar("eta", 0)->name()))
+    _prop_dh(getMaterialPropertyDerivative<Real>("h_name", coupledName("eta", 0)))
 {
 }
 

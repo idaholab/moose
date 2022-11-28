@@ -37,7 +37,7 @@ ACKappaFunction::ACKappaFunction(const InputParameters & parameters)
 {
   for (unsigned int i = 0; i < _v_num; ++i)
   {
-    auto v_name = getVar("v", i)->name();
+    auto v_name = coupledName("v", i);
     _grad_v[i] = &coupledGradient("v", i);
     _dLdv[i] = &getMaterialPropertyDerivative<Real>("mob_name", v_name);
     _d2kappadvardv[i] = &getMaterialPropertyDerivative<Real>(_kappa_name, _var.name(), v_name);

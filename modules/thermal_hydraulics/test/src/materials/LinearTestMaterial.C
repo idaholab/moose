@@ -45,7 +45,7 @@ LinearTestMaterial::LinearTestMaterial(const InputParameters & parameters)
   for (unsigned int i = 0; i < _n_vars; ++i)
   {
     _vars[i] = &coupledValue("vars", i);
-    _y_derivatives[i] = &declarePropertyDerivative<Real>(_y_name, getVar("vars", i)->name());
+    _y_derivatives[i] = &declarePropertyDerivative<Real>(_y_name, coupledName("vars", i));
   }
 }
 

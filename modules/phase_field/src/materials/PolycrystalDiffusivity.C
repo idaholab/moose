@@ -41,7 +41,7 @@ PolycrystalDiffusivity::validParams()
 PolycrystalDiffusivity::PolycrystalDiffusivity(const InputParameters & parameters)
   : DerivativeMaterialInterface<Material>(parameters),
     _c(coupledValue("c")),
-    _c_name(getVar("c", 0)->name()),
+    _c_name(coupledName("c", 0)),
     _op_num(coupledComponents("v")),
     _vals(_op_num),
     _diff_name(getParam<MaterialPropertyName>("diffusivity")),
@@ -69,8 +69,8 @@ PolycrystalDiffusivity::PolycrystalDiffusivity(const InputParameters & parameter
   for (MooseIndex(_op_num) op_index = 0; op_index < _op_num; ++op_index)
   {
     _vals[op_index] = &coupledValue("v", op_index);
-    const VariableName op_name = getVar("v", op_index)->name();
-    _dDdv[op_index] = &declarePropertyDerivative<Real>(_diff_name, getVar("v", op_index)->name());
+    const VariableName op_name = coupledName("v", op_index);
+    _dDdv[op_index] = &declarePropertyDerivative<Real>(_diff_name, coupledName("v", op_index));
     _dhbdv[op_index] = &getMaterialPropertyDerivative<Real>("void_switch", op_index);
     _dhmdv[op_index] = &getMaterialPropertyDerivative<Real>("solid_switch", op_index);
   }

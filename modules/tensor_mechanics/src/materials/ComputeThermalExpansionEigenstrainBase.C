@@ -36,10 +36,10 @@ ComputeThermalExpansionEigenstrainBaseTempl<is_ad>::ComputeThermalExpansionEigen
     _use_old_temperature(this->template getParam<bool>("use_old_temperature")),
     _temperature_old(this->_fe_problem.isTransient() ? this->coupledValueOld("temperature")
                                                      : this->_zero),
-    _deigenstrain_dT((is_ad || !(this->getVar("temperature", 0)))
+    _deigenstrain_dT((is_ad || this->isCoupledConstant("temperature"))
                          ? nullptr
                          : &this->template declarePropertyDerivative<RankTwoTensor>(
-                               _eigenstrain_name, this->getVar("temperature", 0)->name())),
+                               _eigenstrain_name, this->coupledName("temperature"))),
     _stress_free_temperature(this->coupledValue("stress_free_temperature")),
     _temperature_prop(this->template coupledGenericValue<is_ad>("temperature")),
     _mean_thermal_expansion_coefficient(

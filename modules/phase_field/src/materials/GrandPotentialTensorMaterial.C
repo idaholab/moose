@@ -58,7 +58,7 @@ GrandPotentialTensorMaterial::GrandPotentialTensorMaterial(const InputParameters
 {
   for (unsigned int i = 0; i < _op_num; ++i)
   {
-    _vals_name[i] = getVar("v", i)->name();
+    _vals_name[i] = coupledName("v", i);
     _dchideta[i] = &getMaterialPropertyDerivative<Real>(_chi_name, _vals_name[i]);
     _dchiDdeta[i] = &declarePropertyDerivative<RealTensorValue>(_chiD_name, _vals_name[i]);
   }

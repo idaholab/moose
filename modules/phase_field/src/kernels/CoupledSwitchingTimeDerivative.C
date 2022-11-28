@@ -31,7 +31,7 @@ CoupledSwitchingTimeDerivative::validParams()
 
 CoupledSwitchingTimeDerivative::CoupledSwitchingTimeDerivative(const InputParameters & parameters)
   : DerivativeMaterialInterface<JvarMapKernelInterface<CoupledTimeDerivative>>(parameters),
-    _v_name(getVar("v", 0)->name()),
+    _v_name(coupledName("v", 0)),
     _Fj_names(getParam<std::vector<MaterialPropertyName>>("Fj_names")),
     _num_j(_Fj_names.size()),
     _prop_Fj(_num_j),

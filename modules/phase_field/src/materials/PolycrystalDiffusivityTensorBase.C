@@ -38,7 +38,7 @@ PolycrystalDiffusivityTensorBase::PolycrystalDiffusivityTensorBase(
     _T(coupledValue("T")),
     _c(coupledValue("c")),
     _grad_c(coupledGradient("c")),
-    _c_name(getVar("c", 0)->name()),
+    _c_name(coupledName("c", 0)),
     _diffusivity_name(getParam<std::string>("diffusivity_name")),
     _D(declareProperty<RealTensorValue>(_diffusivity_name)),
     _dDdc(declarePropertyDerivative<RealTensorValue>(_diffusivity_name, _c_name)),
