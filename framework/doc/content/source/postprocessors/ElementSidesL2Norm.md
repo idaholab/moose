@@ -16,7 +16,7 @@ The side $L_2$ norm of a variable $u$ is computed as:
 !equation
 ||u||_{L_2(\Gamma)} = \sqrt{\sum_{\text{mesh element sides}} \sum_{\text{quadrature point qp}} J[qp] W[qp] c[qp] u(qp)^2}
 
-These terms are initialized on eeach side, so the $J$ term accounts
+These terms are initialized on each side, so the $J$ term accounts
 for the geometry/area of the element, the $W$ for the weight in the
 [quadrature](syntax/Executioner/Quadrature/index.md), $c$ for any
 eventual coordinate change (cylindrical, spherical) and $u(qp)$ is the
