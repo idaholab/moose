@@ -170,8 +170,8 @@ offset = -0.19
 []
 
 [Constraints]
-# Not using 'dynamic' constraints results in poor enforcement of contact
-# constraints and lack of kinetic and elastic energy conservation.
+  # Not using 'dynamic' constraints results in poor enforcement of contact
+  # constraints and lack of kinetic and elastic energy conservation.
   [weighted_gap_lm]
     type = ComputeDynamicWeightedGapLMMechanicalContact
     primary_boundary = 20
@@ -251,14 +251,11 @@ offset = -0.19
   dt = 0.025
   dtmin = .025
   solve_type = 'NEWTON'
-  petsc_options = '-snes_converged_reason -ksp_converged_reason -pc_svd_monitor '
-                  '-snes_linesearch_monitor'
+  petsc_options = '-snes_converged_reason -ksp_converged_reason -snes_linesearch_monitor'
   petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount'
   petsc_options_value = 'lu       NONZERO               1e-15'
-  l_max_its = 100
   nl_max_its = 50
   line_search = 'none'
-  snesmf_reuse_base = false
   [TimeIntegrator]
     type = NewmarkBeta
     beta = 0.25
@@ -274,13 +271,6 @@ offset = -0.19
   exodus = true
   checkpoint = true
   csv = true
-[]
-
-[Preconditioning]
-  [smp]
-    type = SMP
-    full = true
-  []
 []
 
 [Postprocessors]

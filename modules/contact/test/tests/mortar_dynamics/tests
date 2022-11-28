@@ -8,8 +8,6 @@
     input = 'block-dynamics.i'
     rel_err = 5.0e-4
     abs_zero = 1.0e-5
-    min_parallel = 1
-    max_parallel = 4
     min_ad_size = '50'
     ad_indexing_type = 'global'
     cli_args = 'Executioner/dt=0.05 Executioner/end_time=0.3'
@@ -22,8 +20,6 @@
     csvdiff = 'block-dynamics-reference_out.csv'
     rel_err = 5.0e-4
     abs_zero = 1.0e-5
-    min_parallel = 1
-    max_parallel = 4
     min_ad_size = '50'
     ad_indexing_type = 'global'
     requirement = 'The system shall solve dynamics mortar contact between two blocks with weighted '
@@ -35,8 +31,6 @@
     input = 'block-dynamics-action.i'
     rel_err = 5.0e-4
     abs_zero = 1.0e-5
-    min_parallel = 1
-    max_parallel = 4
     min_ad_size = '50'
     ad_indexing_type = 'global'
     cli_args = 'Contact/mechanical/mortar_dynamics=true Contact/mechanical/newmark_beta=0.25  '
@@ -74,8 +68,6 @@
     input = 'block-dynamics-friction.i'
     rel_err = 5.0e-4
     abs_zero = 1.0e-5
-    min_parallel = 1
-    max_parallel = 4
     min_ad_size = '50'
     ad_indexing_type = 'global'
     cli_args = 'Executioner/dt=0.05 Executioner/end_time=0.3'
@@ -119,7 +111,6 @@
     rel_err = 1.0e-5
     abs_zero = 1.0e-5
     min_ad_size = 100
-    max_parallel = 8
     method = 'opt'
   []
   [frictional-mortar-3d-dynamics-light]
@@ -165,7 +156,7 @@
     min_ad_size = 100
     ad_indexing_type = 'global'
     requirement = 'The system shall solve a dynamic 3D frictional one-element bouncing block problem '
-                  'with mortar constraint using nodal-attached geometry and a friction coefficient '
+                  'with mortar constraints using nodal geometry and a friction coefficient '
                   'that depends on the normal contact pressure and the relative tangential velocity'
   []
 []
