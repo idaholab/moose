@@ -2140,10 +2140,22 @@ Coupleable::coupledIndices(const std::string & var_name) const
   return coupledVectorHelper<unsigned int>(var_name, func);
 }
 
+VariableName
+Coupleable::coupledName(const std::string & var_name, unsigned int comp) const
+{
+  if (getVar(var_name, comp))
+    return getVar(var_name, comp)->name();
+  // For constants, we ll just return the constant as the name
+  else if (MooseUtils::parsesToReal(var_name))
+    return var_name;
+  else
+    mooseError("Variable '", var_name, "' does not exist, yet its coupled name is requested");
+}
+
 std::vector<VariableName>
 Coupleable::coupledNames(const std::string & var_name) const
 {
-  auto func = [this, &var_name](unsigned int comp) { return getVar(var_name, comp)->name(); };
+  auto func = [this, &var_name](unsigned int comp) { return coupledName(var_name, comp); };
   return coupledVectorHelper<VariableName>(var_name, func);
 }
 
