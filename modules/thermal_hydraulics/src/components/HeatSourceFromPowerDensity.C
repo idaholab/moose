@@ -57,6 +57,6 @@ HeatSourceFromPowerDensity::addMooseObjects()
       pars.set<Real>("offset") = hs_cyl->getInnerRadius() - hs_cyl->getAxialOffset();
     }
     std::string mon = genName(name(), "heat_src");
-    _sim.addKernel(class_name, mon, pars);
+    getTHMProblem().addKernel(class_name, mon, pars);
   }
 }

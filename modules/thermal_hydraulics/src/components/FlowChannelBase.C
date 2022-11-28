@@ -134,8 +134,8 @@ FlowChannelBase::init()
   {
     _flow_model->init();
 
-    if (_sim.hasClosures(_closures_name))
-      _closures = _sim.getClosures(_closures_name);
+    if (getTHMProblem().hasClosures(_closures_name))
+      _closures = getTHMProblem().getClosures(_closures_name);
     else
       _closures = buildClosures();
   }
@@ -147,8 +147,8 @@ FlowChannelBase::buildClosures()
   const std::string class_name =
       ThermalHydraulicsApp::getClosuresClassName(_closures_name, getFlowModelID());
   InputParameters params = _factory.getValidParams(class_name);
-  params.set<THMProblem *>("_thm_problem") = &_sim;
-  params.set<Logger *>("_logger") = &_sim.log();
+  params.set<THMProblem *>("_thm_problem") = &getTHMProblem();
+  params.set<Logger *>("_logger") = &getTHMProblem().log();
   return _factory.create<ClosuresBase>(
       class_name, genName(name(), "closure", _closures_name), params);
 }
@@ -209,7 +209,7 @@ FlowChannelBase::addVariables()
     params.set<VariableName>("variable") = FlowModel::HEAT_FLUX_PERIMETER;
     params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
     params.set<std::vector<VariableName>>("values") = _P_hf_names;
-    _sim.addSimInitialCondition(class_name, genName(name(), "P_hf_ic"), params);
+    getTHMProblem().addSimInitialCondition(class_name, genName(name(), "P_hf_ic"), params);
   }
 
   _flow_model->addInitialConditions();
@@ -225,7 +225,7 @@ FlowChannelBase::addCommonObjects()
     std::string class_name = "DirectionMaterial";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
-    _sim.addMaterial(class_name, genName(name(), "dir_mat"), params);
+    getTHMProblem().addMaterial(class_name, genName(name(), "dir_mat"), params);
   }
 
   if (!_pipe_pars_transferred)
@@ -239,7 +239,7 @@ FlowChannelBase::addCommonObjects()
       params.set<FunctionName>("function") = _area_function;
       params.set<ExecFlagEnum>("execute_on") = ts_execute_on;
       const std::string aux_kernel_name = genName(name(), "area_linear_aux");
-      _sim.addAuxKernel(class_name, aux_kernel_name, params);
+      getTHMProblem().addAuxKernel(class_name, aux_kernel_name, params);
       makeFunctionControllableIfConstant(_area_function, "Area");
     }
     {
@@ -250,7 +250,7 @@ FlowChannelBase::addCommonObjects()
       params.set<std::vector<VariableName>>("source") = {FlowModel::AREA_LINEAR};
       params.set<ExecFlagEnum>("execute_on") = ts_execute_on;
       const std::string aux_kernel_name = genName(name(), "area_aux");
-      _sim.addAuxKernel(class_name, aux_kernel_name, params);
+      getTHMProblem().addAuxKernel(class_name, aux_kernel_name, params);
       makeFunctionControllableIfConstant(_area_function, "Area");
     }
   }
@@ -273,7 +273,7 @@ FlowChannelBase::addMooseObjects()
     params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
     params.set<std::vector<VariableName>>("values") = _P_hf_names;
     params.set<ExecFlagEnum>("execute_on") = execute_on_initial_linear;
-    _sim.addAuxKernel(class_name, genName(name(), "P_hf_auxkernel"), params);
+    getTHMProblem().addAuxKernel(class_name, genName(name(), "P_hf_auxkernel"), params);
   }
 
   // weighted average wall heat flux aux kernel
@@ -287,7 +287,8 @@ FlowChannelBase::addMooseObjects()
       params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
       params.set<std::vector<MaterialPropertyName>>("values") = _q_wall_names;
       params.set<std::vector<VariableName>>("weights") = _P_hf_names;
-      _sim.addMaterial(class_name, genName(name(), FlowModel::HEAT_FLUX_WALL, "w_avg_mat"), params);
+      getTHMProblem().addMaterial(
+          class_name, genName(name(), FlowModel::HEAT_FLUX_WALL, "w_avg_mat"), params);
     }
     else if (_n_heat_transfer_connections == 0)
     {
@@ -296,7 +297,8 @@ FlowChannelBase::addMooseObjects()
       params.set<std::string>("property_name") = FlowModel::HEAT_FLUX_WALL;
       params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
       params.set<Real>("value") = 0;
-      _sim.addMaterial(class_name, genName(name(), FlowModel::HEAT_FLUX_WALL, "zero_mat"), params);
+      getTHMProblem().addMaterial(
+          class_name, genName(name(), FlowModel::HEAT_FLUX_WALL, "zero_mat"), params);
     }
   }
 

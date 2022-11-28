@@ -39,7 +39,7 @@ JunctionOneToOne1Phase::setupMesh()
   FlowJunction1Phase::setupMesh();
 
   if (_connected_elems.size() == 2)
-    _sim.augmentSparsity(_connected_elems[0], _connected_elems[1]);
+    getTHMProblem().augmentSparsity(_connected_elems[0], _connected_elems[1]);
 }
 
 void
@@ -93,7 +93,7 @@ JunctionOneToOne1Phase::addMooseObjects()
     params.set<std::string>("junction_name") = name();
     params.set<MooseEnum>("scheme") = _slope_reconstruction;
     params.set<ExecFlagEnum>("execute_on") = execute_on;
-    _sim.addUserObject(class_name, _junction_uo_name, params);
+    getTHMProblem().addUserObject(class_name, _junction_uo_name, params);
   }
 
   const std::vector<NonlinearVariableName> var_names = {
@@ -113,8 +113,8 @@ JunctionOneToOne1Phase::addMooseObjects()
       params.set<std::vector<VariableName>>("rhoA") = {FlowModelSinglePhase::RHOA};
       params.set<std::vector<VariableName>>("rhouA") = {FlowModelSinglePhase::RHOUA};
       params.set<std::vector<VariableName>>("rhoEA") = {FlowModelSinglePhase::RHOEA};
-      params.set<bool>("implicit") = _sim.getImplicitTimeIntegrationFlag();
-      _sim.addBoundaryCondition(
+      params.set<bool>("implicit") = getTHMProblem().getImplicitTimeIntegrationFlag();
+      getTHMProblem().addBoundaryCondition(
           class_name, genName(name(), i, var_names[j] + ":" + class_name), params);
     }
 }

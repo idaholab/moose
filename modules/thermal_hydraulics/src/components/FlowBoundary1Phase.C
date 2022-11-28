@@ -31,7 +31,7 @@ FlowBoundary1Phase::init()
   if (hasComponentByName<FlowChannel1Phase>(_connected_component_name))
   {
     const FlowChannel1Phase & comp =
-        _sim.getComponentByName<FlowChannel1Phase>(_connected_component_name);
+        getTHMProblem().getComponentByName<FlowChannel1Phase>(_connected_component_name);
 
     _numerical_flux_name = comp.getNumericalFluxUserObjectName();
   }
@@ -57,7 +57,7 @@ FlowBoundary1Phase::addWeakBC3Eqn()
   params.set<std::vector<VariableName>>("rhoA") = {FlowModelSinglePhase::RHOA};
   params.set<std::vector<VariableName>>("rhouA") = {FlowModelSinglePhase::RHOUA};
   params.set<std::vector<VariableName>>("rhoEA") = {FlowModelSinglePhase::RHOEA};
-  params.set<bool>("implicit") = _sim.getImplicitTimeIntegrationFlag();
+  params.set<bool>("implicit") = getTHMProblem().getImplicitTimeIntegrationFlag();
 
   const std::vector<NonlinearVariableName> variables{
       FlowModelSinglePhase::RHOA, FlowModelSinglePhase::RHOUA, FlowModelSinglePhase::RHOEA};
@@ -65,6 +65,7 @@ FlowBoundary1Phase::addWeakBC3Eqn()
   for (const auto & var : variables)
   {
     params.set<NonlinearVariableName>("variable") = var;
-    _sim.addBoundaryCondition(class_name, genName(name(), var, "bnd_flux_3eqn_bc"), params);
+    getTHMProblem().addBoundaryCondition(
+        class_name, genName(name(), var, "bnd_flux_3eqn_bc"), params);
   }
 }

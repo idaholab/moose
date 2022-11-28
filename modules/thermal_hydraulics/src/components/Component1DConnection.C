@@ -72,7 +72,7 @@ Component1DConnection::init()
       const std::string comp_name = connection._component_name;
       if (hasComponentByName<Component1D>(comp_name))
       {
-        const Component1D & comp = _sim.getComponentByName<Component1D>(comp_name);
+        const Component1D & comp = getTHMProblem().getComponentByName<Component1D>(comp_name);
 
         // add to list of subdomain names
         const std::vector<SubdomainName> & subdomain_names = comp.getSubdomainNames();

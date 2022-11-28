@@ -33,8 +33,8 @@ ShaftConnectedTestComponent::ShaftConnectedTestComponent(const InputParameters &
 void
 ShaftConnectedTestComponent::addVariables()
 {
-  _sim.addSimVariable(true, _jct_var_name, FEType(FIRST, SCALAR));
-  _sim.addConstantScalarIC(_jct_var_name, 2.3);
+  getTHMProblem().addSimVariable(true, _jct_var_name, FEType(FIRST, SCALAR));
+  getTHMProblem().addConstantScalarIC(_jct_var_name, 2.3);
 }
 
 void
@@ -60,14 +60,14 @@ ShaftConnectedTestComponent::addMooseObjects()
     params.set<std::vector<VariableName>>("omega") = {omega_var_name};
     params.set<std::vector<VariableName>>("jct_var") = {_jct_var_name};
     params.set<ExecFlagEnum>("execute_on") = execute_on;
-    _sim.addUserObject(class_name, getShaftConnectedUserObjectName(), params);
+    getTHMProblem().addUserObject(class_name, getShaftConnectedUserObjectName(), params);
   }
 
   {
     const std::string class_name = "ADScalarTimeDerivative";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<NonlinearVariableName>("variable") = _jct_var_name;
-    _sim.addScalarKernel(class_name, genName(name(), _jct_var_name, "td"), params);
+    getTHMProblem().addScalarKernel(class_name, genName(name(), _jct_var_name, "td"), params);
   }
   {
     const std::string class_name = "ADVolumeJunctionAdvectionScalarKernel";
@@ -75,6 +75,6 @@ ShaftConnectedTestComponent::addMooseObjects()
     params.set<NonlinearVariableName>("variable") = _jct_var_name;
     params.set<UserObjectName>("volume_junction_uo") = getShaftConnectedUserObjectName();
     params.set<unsigned int>("equation_index") = 0;
-    _sim.addScalarKernel(class_name, genName(name(), _jct_var_name, "vja_sk"), params);
+    getTHMProblem().addScalarKernel(class_name, genName(name(), _jct_var_name, "vja_sk"), params);
   }
 }

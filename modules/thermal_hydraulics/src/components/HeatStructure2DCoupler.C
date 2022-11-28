@@ -68,6 +68,6 @@ HeatStructure2DCoupler::addMooseObjects()
       params.set<Real>("offset") =
           hs_cylindrical.getInnerRadius() - hs_cylindrical.getAxialOffset();
     }
-    _sim.addBoundaryCondition(class_name, genName(name(), class_name, i), params);
+    getTHMProblem().addBoundaryCondition(class_name, genName(name(), class_name, i), params);
   }
 }

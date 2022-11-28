@@ -13,7 +13,7 @@
 #include "libmesh/fe_type.h"
 #include "libmesh/fe_interface.h"
 
-FlowChannelAlignment::FlowChannelAlignment(THMMesh & mesh) : _mesh(mesh) {}
+FlowChannelAlignment::FlowChannelAlignment(const THMMesh & mesh) : _mesh(mesh) {}
 
 void
 FlowChannelAlignment::build(

@@ -36,7 +36,8 @@ HSBoundaryExternalAppTemperature::addVariables()
   const HeatStructureBase & hs = getComponent<HeatStructureBase>("hs");
   const std::vector<SubdomainName> & subdomain_names = hs.getSubdomainNames();
 
-  _sim.addSimVariable(false, _T_ext_var_name, HeatConductionModel::feType(), subdomain_names);
+  getTHMProblem().addSimVariable(
+      false, _T_ext_var_name, HeatConductionModel::feType(), subdomain_names);
 }
 
 void
@@ -48,6 +49,6 @@ HSBoundaryExternalAppTemperature::addMooseObjects()
     pars.set<NonlinearVariableName>("variable") = HeatConductionModel::TEMPERATURE;
     pars.set<std::vector<BoundaryName>>("boundary") = _boundary;
     pars.set<std::vector<VariableName>>("v") = {_T_ext_var_name};
-    _sim.addBoundaryCondition(class_name, genName(name(), "bc"), pars);
+    getTHMProblem().addBoundaryCondition(class_name, genName(name(), "bc"), pars);
   }
 }

@@ -80,7 +80,7 @@ HeatSourceFromTotalPower::addMooseObjects()
     std::string class_name = "ConstantFunction";
     InputParameters pars = _factory.getValidParams(class_name);
     pars.set<Real>("value") = 1. / hs.getLength();
-    _sim.addFunction(class_name, _power_shape_func, pars);
+    getTHMProblem().addFunction(class_name, _power_shape_func, pars);
   }
 
   const std::string power_shape_integral_name = _has_psf
@@ -104,8 +104,8 @@ HeatSourceFromTotalPower::addMooseObjects()
     // that should be here, becuase we don't want this PPS to be in any output. The effect
     // of this line is correct, but for some reason, MOOSE will start output scalar variables
     // even though we did not ask it to do so. Refs idaholab/thm#
-    // pars.set<std::vector<OutputName>>("outputs") = _sim.getOutputsVector("none");
-    _sim.addPostprocessor(class_name, power_shape_integral_name, pars);
+    // pars.set<std::vector<OutputName>>("outputs") = getTHMProblem().getOutputsVector("none");
+    getTHMProblem().addPostprocessor(class_name, power_shape_integral_name, pars);
   }
 
   {
@@ -134,7 +134,7 @@ HeatSourceFromTotalPower::addMooseObjects()
     }
     pars.set<PostprocessorName>("power_shape_integral_pp") = power_shape_integral_name;
     std::string mon = genName(name(), "heat_src");
-    _sim.addKernel(class_name, mon, pars);
+    getTHMProblem().addKernel(class_name, mon, pars);
     connectObject(pars, mon, "power_fraction");
   }
 }
