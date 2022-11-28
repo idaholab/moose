@@ -56,7 +56,7 @@ FlowChannel1Phase::init()
 {
   FlowChannelBase::init();
 
-  const UserObject & fp = _sim.getUserObject<UserObject>(_fp_name);
+  const UserObject & fp = getTHMProblem().getUserObject<UserObject>(_fp_name);
   if (dynamic_cast<const SinglePhaseFluidProperties *>(&fp) == nullptr)
     logError("Supplied fluid properties must be for 1-phase fluids.");
 }
@@ -66,10 +66,10 @@ FlowChannel1Phase::buildFlowModel()
 {
   const std::string class_name = "FlowModelSinglePhase";
   InputParameters pars = _factory.getValidParams(class_name);
-  pars.set<THMProblem *>("_thm_problem") = &_sim;
+  pars.set<THMProblem *>("_thm_problem") = &getTHMProblem();
   pars.set<FlowChannelBase *>("_flow_channel") = this;
   pars.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
-  pars.set<bool>("output_vector_velocity") = _sim.getVectorValuedVelocity();
+  pars.set<bool>("output_vector_velocity") = getTHMProblem().getVectorValuedVelocity();
   pars.applyParameters(parameters());
   return _factory.create<FlowModel>(class_name, name(), pars, 0);
 }
@@ -90,7 +90,7 @@ FlowChannel1Phase::check() const
   }
 
   bool ics_set =
-      _sim.hasInitialConditionsFromFile() ||
+      getTHMProblem().hasInitialConditionsFromFile() ||
       (isParamValid("initial_p") && isParamValid("initial_T") && isParamValid("initial_vel"));
 
   if (!ics_set && !_app.isRestarting())
@@ -116,7 +116,7 @@ FlowChannel1Phase::addMooseObjects()
 }
 
 void
-FlowChannel1Phase::addHydraulicDiameterMaterial() const
+FlowChannel1Phase::addHydraulicDiameterMaterial()
 {
   const std::string mat_name = genName(name(), "D_h_material");
 
@@ -129,7 +129,7 @@ FlowChannel1Phase::addHydraulicDiameterMaterial() const
     params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
     params.set<std::vector<std::string>>("prop_names") = {FlowModelSinglePhase::HYDRAULIC_DIAMETER};
     params.set<std::vector<FunctionName>>("prop_values") = {D_h_fn_name};
-    _sim.addMaterial(class_name, mat_name, params);
+    getTHMProblem().addMaterial(class_name, mat_name, params);
 
     makeFunctionControllableIfConstant(D_h_fn_name, "D_h");
   }
@@ -140,7 +140,7 @@ FlowChannel1Phase::addHydraulicDiameterMaterial() const
     params.set<std::vector<SubdomainName>>("block") = getSubdomainNames();
     params.set<MaterialPropertyName>("D_h_name") = FlowModelSinglePhase::HYDRAULIC_DIAMETER;
     params.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
-    _sim.addMaterial(class_name, mat_name, params);
+    getTHMProblem().addMaterial(class_name, mat_name, params);
   }
 }
 

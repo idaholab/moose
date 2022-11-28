@@ -33,7 +33,7 @@ HeatTransferFromSpecifiedTemperature1Phase::addVariables()
 {
   HeatTransferFromTemperature1Phase::addVariables();
 
-  _sim.addFunctionIC(_T_wall_name, _T_wall_fn_name, _flow_channel_subdomains);
+  getTHMProblem().addFunctionIC(_T_wall_name, _T_wall_fn_name, _flow_channel_subdomains);
   makeFunctionControllableIfConstant(_T_wall_fn_name, "T_wall");
 }
 
@@ -53,7 +53,7 @@ HeatTransferFromSpecifiedTemperature1Phase::addMooseObjects()
     execute_on = {EXEC_INITIAL, EXEC_LINEAR};
     params.set<ExecFlagEnum>("execute_on") = execute_on;
 
-    _sim.addAuxKernel(class_name, genName(name(), "T_wall_auxkernel"), params);
+    getTHMProblem().addAuxKernel(class_name, genName(name(), "T_wall_auxkernel"), params);
   }
 
   addHeatTransferKernels();

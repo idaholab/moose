@@ -907,7 +907,7 @@ Simulation::getOutputsVector(const std::string & key) const
 }
 
 bool
-Simulation::hasInitialConditionsFromFile()
+Simulation::hasInitialConditionsFromFile() const
 {
   return _pars.isParamValid("initial_from_file");
 }

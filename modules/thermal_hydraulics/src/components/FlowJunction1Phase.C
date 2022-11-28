@@ -29,7 +29,8 @@ FlowJunction1Phase::init()
     const std::string comp_name = connection._component_name;
     if (hasComponentByName<FlowChannel1Phase>(comp_name))
     {
-      const FlowChannel1Phase & comp = _sim.getComponentByName<FlowChannel1Phase>(comp_name);
+      const FlowChannel1Phase & comp =
+          getTHMProblem().getComponentByName<FlowChannel1Phase>(comp_name);
 
       _numerical_flux_names.push_back(comp.getNumericalFluxUserObjectName());
     }

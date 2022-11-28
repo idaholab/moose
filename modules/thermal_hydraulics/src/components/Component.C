@@ -38,8 +38,8 @@ Component::Component(const InputParameters & parameters)
     _parent(getParam<Component *>("_parent")),
     _sim(*getCheckedPointerParam<THMProblem *>("_thm_problem")),
     _factory(_app.getFactory()),
-    _mesh(static_cast<THMMesh &>(_sim.mesh())),
     _zero(_sim._real_zero[0]),
+    _mesh(static_cast<THMMesh &>(_sim.mesh())),
     _component_setup_status(CREATED)
 {
 }
@@ -51,6 +51,16 @@ Component::cname() const
     return _parent->cname();
   else
     return name();
+}
+
+THMMesh &
+Component::mesh()
+{
+  if (_component_setup_status >= MESH_PREPARED)
+    mooseError(
+        "A non-const reference to the THM mesh cannot be obtained after mesh setup is complete.");
+  else
+    return _mesh;
 }
 
 void
@@ -123,6 +133,12 @@ void
 Component::addDependency(const std::string & dependency)
 {
   _dependencies.push_back(dependency);
+}
+
+THMProblem &
+Component::getTHMProblem() const
+{
+  return _sim;
 }
 
 void

@@ -72,7 +72,7 @@ Component2D::build2DMesh()
     _outer_heat_node_ids.push_back(node_ids[i][_total_elem_number]);
   }
 
-  auto & boundary_info = _mesh.getMesh().get_boundary_info();
+  auto & boundary_info = mesh().getMesh().get_boundary_info();
 
   // create elements from nodes
   unsigned int i = 0;
@@ -222,7 +222,7 @@ Component2D::build2DMesh2ndOrder()
     _outer_heat_node_ids.push_back(node_ids[i][_total_elem_number * 2]);
   }
 
-  auto & boundary_info = _mesh.getMesh().get_boundary_info();
+  auto & boundary_info = mesh().getMesh().get_boundary_info();
 
   // create elements from nodes
   unsigned int i = 0;
@@ -335,38 +335,38 @@ Component2D::buildMesh()
     // The coordinate system for MOOSE is always XYZ, even for axisymmetric
     // components, since we do the RZ integration ourselves until we can set
     // arbitrary number of axis symmetries in MOOSE.
-    setSubdomainInfo(_mesh.getNextSubdomainId(), genName(_name, _names[i]), Moose::COORD_XYZ);
+    setSubdomainInfo(mesh().getNextSubdomainId(), genName(_name, _names[i]), Moose::COORD_XYZ);
   }
 
   // Create boundary IDs and associated boundary names
-  _inner_bc_id.push_back(_mesh.getNextBoundaryId());
-  _outer_bc_id.push_back(_mesh.getNextBoundaryId());
+  _inner_bc_id.push_back(mesh().getNextBoundaryId());
+  _outer_bc_id.push_back(mesh().getNextBoundaryId());
   _boundary_names_inner.push_back(genName(name(), "inner"));
   _boundary_names_outer.push_back(genName(name(), "outer"));
   if (_n_sections > 1 && _axial_region_names.size() == _n_sections)
     for (unsigned int i = 0; i < _n_sections; i++)
     {
-      _axial_inner_bc_id.push_back(_mesh.getNextBoundaryId());
-      _axial_outer_bc_id.push_back(_mesh.getNextBoundaryId());
+      _axial_inner_bc_id.push_back(mesh().getNextBoundaryId());
+      _axial_outer_bc_id.push_back(mesh().getNextBoundaryId());
       _boundary_names_axial_inner.push_back(genName(name(), _axial_region_names[i], "inner"));
       _boundary_names_axial_outer.push_back(genName(name(), _axial_region_names[i], "outer"));
     }
 
   // exterior axial boundaries
-  _start_bc_id.push_back(_mesh.getNextBoundaryId());
-  _end_bc_id.push_back(_mesh.getNextBoundaryId());
+  _start_bc_id.push_back(mesh().getNextBoundaryId());
+  _end_bc_id.push_back(mesh().getNextBoundaryId());
   _boundary_names_start.push_back(genName(name(), "start"));
   _boundary_names_end.push_back(genName(name(), "end"));
   if (_names.size() > 1)
     for (unsigned int i = 0; i < _names.size(); i++)
     {
-      _radial_start_bc_id.push_back(_mesh.getNextBoundaryId());
-      _radial_end_bc_id.push_back(_mesh.getNextBoundaryId());
+      _radial_start_bc_id.push_back(mesh().getNextBoundaryId());
+      _radial_end_bc_id.push_back(mesh().getNextBoundaryId());
       _boundary_names_radial_start.push_back(genName(name(), _names[i], "start"));
       _boundary_names_radial_end.push_back(genName(name(), _names[i], "end"));
       if (i != _names.size() - 1)
       {
-        _inner_radial_bc_id.push_back(_mesh.getNextBoundaryId());
+        _inner_radial_bc_id.push_back(mesh().getNextBoundaryId());
         _boundary_names_inner_radial.push_back(genName(name(), _names[i], _names[i + 1]));
       }
     }
@@ -376,7 +376,7 @@ Component2D::buildMesh()
     for (unsigned int i = 0; i < _n_sections - 1; i++)
       for (unsigned int j = 0; j < _names.size(); j++)
       {
-        _interior_axial_per_radial_section_bc_id.push_back(_mesh.getNextBoundaryId());
+        _interior_axial_per_radial_section_bc_id.push_back(mesh().getNextBoundaryId());
         _boundary_names_interior_axial_per_radial_section.push_back(
             genName(name(), _names[j], _axial_region_names[i] + ":" + _axial_region_names[i + 1]));
       }
@@ -388,7 +388,7 @@ Component2D::buildMesh()
     build2DMesh();
 
   // Set boundary names
-  auto & binfo = _mesh.getMesh().get_boundary_info();
+  auto & binfo = mesh().getMesh().get_boundary_info();
   binfo.sideset_name(_inner_bc_id[0]) = _boundary_names_inner[0];
   binfo.sideset_name(_outer_bc_id[0]) = _boundary_names_outer[0];
   if (_n_sections > 1 && _axial_region_names.size() == _n_sections)

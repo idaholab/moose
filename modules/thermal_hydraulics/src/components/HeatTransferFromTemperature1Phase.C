@@ -39,7 +39,7 @@ HeatTransferFromTemperature1Phase::addVariables()
 {
   HeatTransfer1PhaseBase::addVariables();
 
-  _sim.addSimVariable(false, _T_wall_name, getFEType(), _flow_channel_subdomains);
+  getTHMProblem().addSimVariable(false, _T_wall_name, getFEType(), _flow_channel_subdomains);
 }
 
 void
@@ -60,7 +60,7 @@ HeatTransferFromTemperature1Phase::addHeatTransferKernels()
     params.set<MaterialPropertyName>("Hw") = _Hw_1phase_name;
     params.set<std::vector<VariableName>>("P_hf") = {_P_hf_name};
     params.set<MaterialPropertyName>("T") = FlowModelSinglePhase::TEMPERATURE;
-    _sim.addKernel(class_name, genName(name(), "wall_heat_transfer"), params);
+    getTHMProblem().addKernel(class_name, genName(name(), "wall_heat_transfer"), params);
   }
 }
 

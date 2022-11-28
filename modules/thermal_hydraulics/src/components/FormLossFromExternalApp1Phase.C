@@ -30,7 +30,8 @@ FormLossFromExternalApp1Phase::FormLossFromExternalApp1Phase(const InputParamete
 void
 FormLossFromExternalApp1Phase::addVariables()
 {
-  _sim.addSimVariable(false, _K_prime_var_name, FEType(FIRST, LAGRANGE), _flow_channel_subdomains);
+  getTHMProblem().addSimVariable(
+      false, _K_prime_var_name, FEType(FIRST, LAGRANGE), _flow_channel_subdomains);
 }
 
 void
@@ -44,6 +45,6 @@ FormLossFromExternalApp1Phase::addMooseObjects()
     params.set<std::vector<SubdomainName>>("block") = _flow_channel_subdomains;
     params.set<MaterialPropertyName>("prop_name") = "K_prime";
     params.set<std::vector<VariableName>>("coupled_variable") = {_K_prime_var_name};
-    _sim.addMaterial(class_name, genName(name(), "k_prime_material"), params);
+    getTHMProblem().addMaterial(class_name, genName(name(), "k_prime_material"), params);
   }
 }
