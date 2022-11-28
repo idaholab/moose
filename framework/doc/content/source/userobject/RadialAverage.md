@@ -43,7 +43,7 @@ to all material points, `linear` weights each point by $r_0-r$ (a linear fall-of
 and `cosine` weights each point by $1+\cos (\frac{r}{r_0} \pi)$.
 
 !alert note
-The weights currently do not take into account the quadrature point weight in the quadrature.
+The weights mentioned above currently do not take into account the quadrature point weight.
 
 !syntax parameters /UserObjects/RadialAverage
 
