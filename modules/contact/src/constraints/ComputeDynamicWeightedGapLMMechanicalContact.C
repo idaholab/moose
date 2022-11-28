@@ -41,7 +41,7 @@ ComputeDynamicWeightedGapLMMechanicalContact::validParams()
   params.addRequiredRangeCheckedParam<Real>(
       "newmark_beta", "newmark_beta > 0", "Beta parameter for the Newmark time integrator");
   params.addRequiredRangeCheckedParam<Real>(
-      "newmark_gamma", "newmark_gamma >= 0.25", "Gamma parameter for the Newmark time integrator");
+      "newmark_gamma", "newmark_gamma >= 0.0", "Gamma parameter for the Newmark time integrator");
 
   return params;
 }
@@ -235,7 +235,6 @@ ComputeDynamicWeightedGapLMMechanicalContact::post()
       ADReal term = -_newmark_gamma / _newmark_beta / _dt * _dof_to_old_weighted_gap[pr.first];
       term += _dof_to_old_velocity[pr.first];
       _dof_to_weighted_gap_dynamics[pr.first] += term;
-
       _weighted_gap_ptr = &_dof_to_weighted_gap_dynamics[pr.first];
     }
 
@@ -267,7 +266,6 @@ ComputeDynamicWeightedGapLMMechanicalContact::incorrectEdgeDroppingPost(
     _dof_to_weighted_gap[pr.first].first += _dof_to_nodal_wear_depth[pr.first];
     _dof_to_weighted_gap_dynamics[pr.first] +=
         _newmark_gamma / _newmark_beta * _dof_to_nodal_wear_depth[pr.first] / _dt;
-    //
     const auto is_dof_on_map = _dof_to_old_weighted_gap.find(pr.first);
 
     // If is_dof_on_map isn't on map, it means it's an initial step
@@ -280,6 +278,10 @@ ComputeDynamicWeightedGapLMMechanicalContact::incorrectEdgeDroppingPost(
     }
     else
     {
+      ADReal term = _dof_to_weighted_gap[pr.first].first * _newmark_gamma / (_newmark_beta * _dt);
+      term -= _dof_to_old_weighted_gap[pr.first] * _newmark_gamma / (_newmark_beta * _dt);
+      term -= _dof_to_old_velocity[pr.first];
+      _dof_to_weighted_gap_dynamics[pr.first] = term;
       // Enable the application of persistency condition
       _weighted_gap_ptr = &_dof_to_weighted_gap_dynamics[pr.first];
     }
