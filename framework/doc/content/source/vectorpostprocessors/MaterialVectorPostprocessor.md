@@ -9,7 +9,7 @@ The `MaterialVectorPostprocessor` output to CSV is sorted as follows:
 - the rows are major (outer) sorted by element ID and minor (inner) sorted by quadrature point. Quadrature points are sorted by increasing order. Element IDs are also sorted by increasing order, with no regards to the user ordering in the `elem_ids` parameter.
 
 !alert note title=Vector names
-The `MaterialVectorPostprocessor` declares vectors named `elem_ids`, `qp_ids` and a vector for each property requested with the name of the property.
+`MaterialVectorPostprocessor` declares vectors named `elem_ids`, `qp_ids`, and a vector for each property requested with the name of the property.
 
 !alert note
 Only scalar-valued (floating point and integer-valued) material properties are supported by the vector postprocessor. Vector-valued material properties are not currently supported, though this addition would not be difficult and would be a welcome contribution.

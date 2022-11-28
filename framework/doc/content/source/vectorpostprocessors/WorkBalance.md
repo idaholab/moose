@@ -11,7 +11,7 @@ The idea here is to compute per-processor metrics to help in determining the qua
 Currently computes: number of local elements, nodes, dofs and partition sides.  The partition sides are the sides of elements that are on processor boundaries (also known as the "edge-cuts" in partitioner lingo).  Also computes the "surface area" of each partition (physically, how much processor boundary each partitioning has).
 
 !alert note title=Vector names
-The names of the vectors declared by the `WorkBalance` are the names of [!param](/VectorPostprocessors/WorkBalance/balances) requested.
+The names of the vectors declared by `WorkBalance` are the names of the [!param](/VectorPostprocessors/WorkBalance/balances) requested.
 
 ### HardwareID
 

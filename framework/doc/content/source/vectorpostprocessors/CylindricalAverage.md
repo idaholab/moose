@@ -13,7 +13,7 @@ of desired shells.
 The average is an average over quadrature points! The specific weight / volume associated with each quadrature point is not taken into account. The `SpatialAverageBase::execute` routine should be modified for that purpose.
 
 !alert note title=Vector names / CSV output column names
-The `CylindricalAverage` declares a vector for the average cylindrical shell radii, named `radius` and a vector for each variable requested, named with the variable name.
+`CylindricalAverage` declares a vector for the average cylindrical shell radii, named `radius`, and a vector for each variable requested, named with the variable name.
 
 !syntax parameters /VectorPostprocessors/CylindricalAverage
 

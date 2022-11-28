@@ -12,8 +12,8 @@ The output to CSV is by default ordered as follows:
 The order can be changed using the `sort_by` parameter.
 
 !alert note title=Vector names / CSV output column names
-The `LineFunctionSampler` declares a vector for each spatial coordinate, (`x`, `y`, `z`) of the sampled points,
-the distance along the sampled line, in a vector called `id`,
+`LineFunctionSampler` declares a vector for each spatial coordinate, (`x`, `y`, `z`), of the sampled points,
+the distance along the sampled line in a vector called `id`,
 and a vector named after each function sampled, containing the function values at each point.
 
 ## Example input syntax

@@ -18,7 +18,7 @@ These points will represent locations in space where the user object obtains a u
 To use this feature, the user object must define the `spatialPoints()` interface.
 
 !alert note title=Vector names / CSV output column names
-The `SpatialUserObjectVectorPostprocessor` declares a vector with its own name. The full reporter name ends up being `<vpp_object_name>/<vpp_object_name>`.
+`SpatialUserObjectVectorPostprocessor` declares a vector with its own name. The full reporter name ends up being `<vpp_object_name>/<vpp_object_name>`.
 
 ## Example Input File Syntax
 

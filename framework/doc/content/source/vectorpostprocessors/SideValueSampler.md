@@ -5,9 +5,9 @@
 The data output to CSV is output with the columns listed below. The declared vectors use the same
 names.
 
-- the id of the element the quadrature point, on the side, belongs to
+- the id of the element that the quadrature point, on the side, belongs to
 
-- the values of the requested variables, with a column named after the variable
+- the values of the requested variables, with a column named after each variable
 
 - the X, Y, Z coordinates of the quadrature points on the side
 

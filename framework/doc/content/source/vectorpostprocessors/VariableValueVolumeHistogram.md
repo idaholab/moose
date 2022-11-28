@@ -10,7 +10,7 @@ The CSV output contains the two columns for:
 
 - the volume in which the variable holds the values within the bins, with the name `n` in the first row
 
-The names of the vectors declared by the `VariableValueVolumeHistogram` match the CSV output column header names.
+The names of the vectors declared by `VariableValueVolumeHistogram` match the CSV output column header names.
 
 ## Example input syntax
 
