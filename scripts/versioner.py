@@ -168,7 +168,7 @@ class Versioner:
 
         # Load the yaml file at the given commit; the location changed
         # from module_hash.yaml -> versioner.yaml at changed_commit
-        changed_commit = '355541f165f2d53b9a5b7de32ce4a8497c8bba3b'
+        changed_commit = 'bd99d2074e06b720bdc8cd3017f4597a36fd36de'
         if self.git_ancestor(changed_commit, commit) and commit != changed_commit:
             yaml_file = self.yaml_file
         else:
