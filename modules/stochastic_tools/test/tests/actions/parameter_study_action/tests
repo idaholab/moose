@@ -1,0 +1,232 @@
+[Tests]
+  issues = '#22512'
+  design = 'ParameterStudy/index.md'
+
+  [sampling]
+    requirement = 'The system shall be able to setup a simple parameter study with the following sampling schemes '
+    [monte_carlo]
+      type = CSVDiff
+      input = monte_carlo.i
+      csvdiff = 'monte_carlo_csv_study_qoi_0001.csv monte_carlo_csv_study_samples_0001.csv'
+      detail = 'Monte Carlo;'
+    []
+    [lhs]
+      type = CSVDiff
+      input = lhs.i
+      csvdiff = 'lhs_csv_study_qoi_0001.csv lhs_csv_study_samples_0001.csv'
+      detail = 'latin hypercube;'
+    []
+    [cartesian_product]
+      type = CSVDiff
+      input = cartesian_product.i
+      csvdiff = 'cartesian_product_csv_study_qoi_0001.csv cartesian_product_csv_study_samples_0001.csv'
+      detail = 'cartesian product;'
+    []
+    [csv]
+      type = CSVDiff
+      input = csv.i
+      cli_args = 'Outputs/file_base=monte_carlo_csv'
+      csvdiff = 'monte_carlo_csv_study_qoi_0001.csv monte_carlo_csv_study_samples_0001.csv'
+      detail = 'CSV;'
+    []
+    [csv_indices]
+      type = CSVDiff
+      input = csv.i
+      cli_args = 'ParameterStudy/csv_column_indices=\'0 1\' Outputs/file_base=monte_carlo_csv'
+      csvdiff = 'monte_carlo_csv_study_qoi_0001.csv monte_carlo_csv_study_samples_0001.csv'
+      detail = 'CSV when specifiying column indices;'
+    []
+    [csv_names]
+      type = CSVDiff
+      input = csv.i
+      cli_args = 'ParameterStudy/csv_column_names=\'study_sampler_0 study_sampler_1\' Outputs/file_base=monte_carlo_csv'
+      csvdiff = 'monte_carlo_csv_study_qoi_0001.csv monte_carlo_csv_study_samples_0001.csv'
+      detail = 'CSV when specifiying column names;'
+    []
+    [input_matrix]
+      type = CSVDiff
+      input = input_matrix.i
+      cli_args = 'Outputs/file_base=monte_carlo_csv'
+      csvdiff = 'monte_carlo_csv_study_qoi_0001.csv monte_carlo_csv_study_samples_0001.csv'
+      detail = 'input matrix;'
+    []
+  []
+
+  [sampling_errors]
+    requirement = 'The system shall throw an error if the following sampler parameters are missing when doing a simple parameter study '
+    [monte_carlo_num_rows]
+      type = RunException
+      input = sampling_error.i
+      cli_args = 'ParameterStudy/sampling_type=monte-carlo'
+      expect_err = 'The num_rows parameter is required to build the requested sampling type\.'
+      detail = '\'num_rows\' parameter for Monte Carlo sampling;'
+    []
+    [monte_carlo_distributions]
+      type = RunException
+      input = sampling_error.i
+      cli_args = 'ParameterStudy/sampling_type=monte-carlo ParameterStudy/num_rows=1'
+      expect_err = 'The distributions parameter is required to build the requested sampling type\.'
+      detail = '\'distributions\' parameter for Monte Carlo sampling;'
+    []
+    [lhs_num_rows]
+      type = RunException
+      input = sampling_error.i
+      cli_args = 'ParameterStudy/sampling_type=lhs'
+      expect_err = 'The num_rows parameter is required to build the requested sampling type\.'
+      detail = '\'num_rows\' parameter for latin hypercube sampling;'
+    []
+    [lhs_distributions]
+      type = RunException
+      input = sampling_error.i
+      cli_args = 'ParameterStudy/sampling_type=lhs ParameterStudy/num_rows=1'
+      expect_err = 'The distributions parameter is required to build the requested sampling type\.'
+      detail = '\'distributions\' parameter for latin hypercube sampling;'
+    []
+    [cartesian_product]
+      type = RunException
+      input = sampling_error.i
+      cli_args = 'ParameterStudy/sampling_type=cartesian-product'
+      expect_err = 'The linear_space_items parameter is required to build the requested sampling type\.'
+      detail = '\'linear_space_items\' parameter for cartesian product sampling;'
+    []
+    [csv]
+      type = RunException
+      input = sampling_error.i
+      cli_args = 'ParameterStudy/sampling_type=csv'
+      expect_err = 'The csv_samples_file parameter is required to build the requested sampling type\.'
+      detail = '\'samples_file\' parameter for CSV sampling;'
+    []
+    [input_matrix]
+      type = RunException
+      input = sampling_error.i
+      cli_args = 'ParameterStudy/sampling_type=input-matrix'
+      expect_err = 'The input_matrix parameter is required to build the requested sampling type\.'
+      detail = '\'matrix\' parameter for input matrix sampling;'
+    []
+  []
+
+  [distributions]
+    type = CSVDiff
+    input = distributions.i
+    csvdiff = distributions_csv_study_qoi_0001.csv
+    requirement = 'The system shall be able to setup a Monte Carlo parameter study with uniform, normal, Weibull, lognormal, and truncated normal distributions.'
+  []
+  
+  [distribution_errors]
+    requirement = 'The system shall throw an error when doing a simple parameter study if distribution parameters are '
+    [missing]
+      type = RunException
+      input = distributions_error.i
+      cli_args = 'ParameterStudy/distributions=\'uniform uniform\'
+                  ParameterStudy/uniform_upper_bound=\'1 1\''
+      expect_err = 'The uniform_lower_bound parameter is required to build the listed distributions\.'
+      detail = 'missing;'
+    []
+    [inconsistent]
+      type = RunException
+      input = distributions_error.i
+      cli_args = 'ParameterStudy/distributions=\'uniform uniform\'
+                  ParameterStudy/uniform_lower_bound=\'0\'
+                  ParameterStudy/uniform_upper_bound=\'1 1\''
+      expect_err = 'There are not enough entries in uniform_lower_bound to build the listed distributions\.'
+      detail = 'inconsitent size;'
+    []
+  []
+
+  [stats]
+    type = JSONDiff
+    input = monte_carlo.i
+    cli_args = 'ParameterStudy/sampler_output_type=json
+                ParameterStudy/qoi_output_type=json'
+    jsondiff = monte_carlo_json.json
+    rel_err = 1e-4
+    requirement = 'The system shall be able to compute stastics of a simple parameter study.'
+  []
+  
+  [outputs]
+    requirement = 'The system shall be able to output the results of a simple parameter study with '
+    [none]
+      type = RunApp
+      input = monte_carlo.i
+      cli_args = 'ParameterStudy/sampler_output_type=none
+                  ParameterStudy/qoi_output_type=none
+                  ParameterStudy/compute_statistics=false
+                  ParameterStudy/show_study_objects=true
+                  --color off'
+      expect_out = 'outputs : none'
+      absent_out = 'Base Type:\s+Output'
+      detail = 'no output;'
+    []
+    [csv]
+      type = CSVDiff
+      input = monte_carlo.i
+      cli_args = 'ParameterStudy/sampler_output_type=csv
+                  ParameterStudy/qoi_output_type=csv
+                  ParameterStudy/compute_statistics=false
+                  ParameterStudy/show_study_objects=true
+                  --color off'
+      csvdiff = 'monte_carlo_csv_study_qoi_0001.csv monte_carlo_csv_study_samples_0001.csv'
+      expect_out = 'Type:\s+CSV'
+      absent_out = 'Type:\s+JSON'
+      detail = 'CSV output;'
+    []
+    [json]
+      type = JSONDiff
+      input = monte_carlo.i
+      cli_args = 'ParameterStudy/sampler_output_type=json
+                  ParameterStudy/qoi_output_type=json
+                  ParameterStudy/show_study_objects=true
+                  --color off'
+      jsondiff = monte_carlo_json.json
+      rel_err = 1e-4
+      expect_out = 'Type:\s+JSON'
+      absent_out = 'Type:\s+CSV'
+      detail = 'JSON output;'
+    []
+  []
+
+  [mode]
+    requirement = 'The system shall be able to run a simple parameter study in the following modes '
+    [normal]
+      type = CSVDiff
+      input = monte_carlo.i
+      cli_args = 'ParameterStudy/show_study_objects=true ParameterStudy/multiapp_mode=normal --color off'
+      csvdiff = 'monte_carlo_csv_study_qoi_0001.csv monte_carlo_csv_study_samples_0001.csv'
+      expect_out = 'mode : normal'
+      detail = 'one sub-app per sample;'
+    []
+    [batch_reset]
+      type = CSVDiff
+      input = monte_carlo.i
+      cli_args = 'ParameterStudy/show_study_objects=true ParameterStudy/multiapp_mode=batch-reset --color off'
+      csvdiff = 'monte_carlo_csv_study_qoi_0001.csv monte_carlo_csv_study_samples_0001.csv'
+      expect_out = 'mode : batch-reset'
+      detail = 'batches with one sub-app per processor while re-initializing;'
+    []
+    [batch_restore]
+      type = CSVDiff
+      input = monte_carlo.i
+      cli_args = 'ParameterStudy/show_study_objects=true ParameterStudy/multiapp_mode=batch-restore --color off'
+      csvdiff = 'monte_carlo_csv_study_qoi_0001.csv monte_carlo_csv_study_samples_0001.csv'
+      expect_out = 'mode : batch-restore'
+      detail = 'batches one sub-app per processor while restoring;'
+    []
+    [batch_keep_solution]
+      type = CSVDiff
+      input = monte_carlo.i
+      cli_args = 'ParameterStudy/show_study_objects=true ParameterStudy/multiapp_mode=batch-keep-solution --color off'
+      csvdiff = 'monte_carlo_csv_study_qoi_0001.csv monte_carlo_csv_study_samples_0001.csv'
+      expect_out = 'keep_solution_during_restore : 1\n.*\n\s*mode : batch-restore'
+      detail = 'batches one sub-app per processor while restoring and keeping solution;'
+    []
+    [batch_no_restore]
+      type = CSVDiff
+      input = monte_carlo.i
+      cli_args = 'ParameterStudy/show_study_objects=true ParameterStudy/multiapp_mode=batch-no-restore --color off'
+      csvdiff = 'monte_carlo_csv_study_qoi_0001.csv monte_carlo_csv_study_samples_0001.csv'
+      expect_out = 'mode : batch-restore\n\s*no_backup_and_restore : 1'
+      detail = 'batches one sub-app per processor without restoring;'
+    []
+  []
+
+[]
