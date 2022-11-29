@@ -14,6 +14,7 @@
 #include "MooseMesh.h"
 #include "SystemBase.h"
 #include "MooseAppCoordTransform.h"
+#include "MooseMeshUtils.h"
 
 #include "libmesh/system.h"
 #include "libmesh/id_types.h"
@@ -69,31 +70,50 @@ MultiAppFieldTransfer::initialSetup()
   {
     const FEProblemBase * from_problem;
     const FEProblemBase * to_problem;
+    MeshBase * from_mesh;
+    MeshBase * to_mesh;
 
     if (_current_direction == FROM_MULTIAPP)
     {
       // Subdomain and variable type information is shared on all subapps
       from_problem = &getFromMultiApp()->appProblemBase(0);
+      from_mesh = &getFromMultiApp()->appProblemBase(0).mesh().getMesh();
+
       to_problem = &getFromMultiApp()->problemBase();
+      to_mesh = &getFromMultiApp()->problemBase().mesh().getMesh();
     }
     else if (_current_direction == TO_MULTIAPP)
     {
       from_problem = &getToMultiApp()->problemBase();
+      from_mesh = &getToMultiApp()->problemBase().mesh().getMesh();
+
       to_problem = &getToMultiApp()->appProblemBase(0);
+      to_mesh = &getToMultiApp()->appProblemBase(0).mesh().getMesh();
     }
     else
     {
       from_problem = &getFromMultiApp()->appProblemBase(0);
+      from_mesh = &getFromMultiApp()->appProblemBase(0).mesh().getMesh();
+
       to_problem = &getToMultiApp()->appProblemBase(0);
+      to_mesh = &getToMultiApp()->appProblemBase(0).mesh().getMesh();
     }
 
     const auto & from_block_names = getParam<std::vector<SubdomainName>>("from_blocks");
+    for (const auto & b : from_block_names)
+      if (!MooseMeshUtils::hasSubdomainName(*from_mesh, b))
+        paramError("from_blocks", "The block '", b, "' was not found in the mesh");
+
     if (from_block_names.size())
       _from_blocks = from_problem->mesh().getSubdomainIDs(from_block_names);
     else
       _from_blocks = {Moose::ANY_BLOCK_ID};
 
     const auto & to_block_names = getParam<std::vector<SubdomainName>>("to_blocks");
+    for (const auto & b : to_block_names)
+      if (!MooseMeshUtils::hasSubdomainName(*to_mesh, b))
+        paramError("to_blocks", "The block '", b, "' was not found in the mesh");
+
     if (to_block_names.size())
       _to_blocks = to_problem->mesh().getSubdomainIDs(to_block_names);
     else
