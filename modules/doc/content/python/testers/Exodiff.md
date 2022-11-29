@@ -10,10 +10,10 @@ Complete documentation for the `Exodiff` utility may be found [here](https://san
 
 Test configuration options are added to the `tests` file.
 
-- `abs_tol`: sets an absolute tolerance, defaults to 1e-10. Both absolute and relative tolerances must
+- `abs_zero`: sets an absolute tolerance, defaults to 1e-10. Both absolute and relative tolerances must
   be met for a test to pass.
 
-- `rel_tol`: sets a relative tolerance. Defaults to 5.5e-6.
+- `rel_err`: sets a relative tolerance. Defaults to 5.5e-6.
 
 - `exodiff_opts`: additional options passed to the `Exodiff` utility on the command line. Their list
   may be found in its [documentation](https://sandialabs.github.io/seacas-docs/sphinx/html/index.html#exodiff)
@@ -42,17 +42,13 @@ ${MOOSE_DIR}/framework/contrib/exodiff/exodiff -summary moose_simulation_out.e
 
 This generates a summary of the simulation which can be edited to make the
 custom comparison file, where the tolerances for each variable may be set individually.
-In the example shown below, the relative tolerance criterion for the `z_field` variable
-is modified from the global value of `5.5e-6` to `10`. This essentially disables
-comparison for that field.
+In the example below, the tolerances are adjusted for local comparisons of field variables,
+both nodal and elemental. The relative error criteria is set to `1e-6` and the absolute
+criteria is disabled by setting it to `0`. These modifications apply to variable `u` and `distance`,
+and any variable that is **not** listed in the comparison file is not compared.
+The time step and nodal coordinates tolerances are also modified to `1e-6`.
 
-!listing test/tests/test_harness/csvdiff_comparison_relative.cmp
-
-In this example, the global absolute tolerance for all variables is being modified
-from its default of `1e-11` to `10`. This essentially disables comparison for all variables,
-but lower values (`1e-8` is common) may be useful to loosen tolerances in a test.
-
-!listing test/tests/test_harness/csvdiff_comparison_global_floor.cmp
+!listing geomsearch/quadrature_nearest_node_locator/qnnl_ad.cmp
 
 A field may be ignored by either setting a loose tolerance, or if it may be present
 in only one of the files by deleting the line for the field in the comparison file.
