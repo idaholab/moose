@@ -48,6 +48,7 @@ PinMeshGenerator::validParams()
 
   params.addRangeCheckedParam<std::vector<unsigned int>>(
       "mesh_intervals",
+      std::vector<unsigned int>{1},
       "mesh_intervals>0",
       "The number of meshing intervals for each region starting at the center. Parameter should be "
       "size:"
@@ -76,9 +77,10 @@ PinMeshGenerator::validParams()
 
   params.addParam<bool>(
       "quad_center_elements", true, "Whether the center elements are quad or triangular.");
-  params.addParamNamesToGroup("region_ids pin_type use_as_assembly", "ID assigment");
-  params.addParamNamesToGroup("mesh_intervals ring_radii num_sectors pin_type homogenized",
-                              "Pin specifications");
+  params.addParamNamesToGroup("region_ids pin_type", "ID assigment");
+  params.addParamNamesToGroup(
+      "mesh_intervals ring_radii num_sectors pin_type homogenized use_as_assembly",
+      "Pin specifications");
   params.addParamNamesToGroup("mesh_intervals duct_halfpitch num_sectors", "Duct specifications");
 
   params.addClassDescription("This PinMeshGenerator object is designed to generate pin-like "
@@ -100,9 +102,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
                                            : std::vector<Real>()),
     _duct_halfpitch(isParamValid("duct_halfpitch") ? getParam<std::vector<Real>>("duct_halfpitch")
                                                    : std::vector<Real>()),
-    _intervals(isParamValid("mesh_intervals")
-                   ? getParam<std::vector<unsigned int>>("mesh_intervals")
-                   : std::vector<unsigned int>{1}),
+    _intervals(getParam<std::vector<unsigned int>>("mesh_intervals")),
     _region_ids(isParamValid("region_ids")
                     ? getParam<std::vector<std::vector<subdomain_id_type>>>("region_ids")
                     : std::vector<std::vector<subdomain_id_type>>()),
@@ -142,8 +142,9 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
     const std::vector<std::string> disallowed_parameters = {
         "num_sectors", "ring_radii", "duct_halfpitch", "mesh_intervals"};
     for (const auto & parameter : disallowed_parameters)
-      if (isParamValid(parameter))
-        mooseError("Parameter " + parameter + " should not be defined for a homogenized pin mesh");
+      if (parameters.isParamSetByUser(parameter))
+        paramError(parameter,
+                   "Parameter " + parameter + " should not be defined for a homogenized pin mesh");
   }
   else
   {
