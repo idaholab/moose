@@ -5,7 +5,7 @@
 ## Overview
 
 This object populates an elemental auxiliary variable by evaluating a functor vector
-(material properties only currently) with an element argument, and selecting one of
+(functor material properties only currently) with an element argument, and selecting one of
 its component using the [!param](/AuxKernels/FunctorVectorElementalAux/component) parameter.
 
 !alert note

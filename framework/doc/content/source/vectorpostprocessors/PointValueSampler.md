@@ -5,7 +5,8 @@
 !alert note
 If the point value sampler is used with a discontinuous variable on the edge/face of a 2D/3D element, then the value from the element with the lowest ID will be returned.
 
-The CSV output, with rows for each sampled point, contains the following columns:
+The CSV output, with rows for each sampled point, contains the columns listed below. The vectors declared by `PointValueSampler`
+share the same names as the column headers.
 
 - the id of the elements containing the sampled points, with the convention mentioned above
 

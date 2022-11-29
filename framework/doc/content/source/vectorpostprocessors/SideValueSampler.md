@@ -2,17 +2,14 @@
 
 !syntax description /VectorPostprocessors/SideValueSampler
 
-The data output to CSV is output with the following columns:
+The data output to CSV is output with the columns listed below. The declared vectors use the same
+names.
 
-- the id of the element the quadrature point, on the side, belongs to
+- the id of the element that the quadrature point, on the side, belongs to
 
-- the values of the requested variables
+- the values of the requested variables, with a column named after each variable
 
 - the X, Y, Z coordinates of the quadrature points on the side
-
-
-!alert note
-When this VectorPostprocessor is executed on an internal boundary, the nodes are shared by more than one element, which each have a quadrature point on them. A value is output for every quadrature point.
 
 ## Example input syntax
 

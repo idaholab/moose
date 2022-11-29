@@ -15,6 +15,9 @@ ConstantReporter gives the ability to produce integer, real number, and string r
 
 The user may specify more than one value of the same type, which will create multiple reporter values of that type.
 
+!alert note title=Reporter names
+The reporter names created by the `ConstantReporter` match the names passed in each of the `_names` parameters.
+
 ## Example Input File Syntax
 
 !listing constant_reporter/constant_reporter.i block=constant

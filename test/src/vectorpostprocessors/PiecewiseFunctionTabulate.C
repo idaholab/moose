@@ -10,7 +10,7 @@
 #include "PiecewiseFunctionTabulate.h"
 #include "PiecewiseBase.h"
 
-registerMooseObject("MooseApp", PiecewiseFunctionTabulate);
+registerMooseObject("MooseTestApp", PiecewiseFunctionTabulate);
 
 InputParameters
 PiecewiseFunctionTabulate::validParams()
