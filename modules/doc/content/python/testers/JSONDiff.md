@@ -12,6 +12,10 @@ Test configuration options are added to the `tests` file.
 
 - `skip_keys`: A list of keys to skip in the `JSON` comparison
 
+- `abs_zero`: Sets an absolute zero cutoff used in comparisons, defaults to 1e-10.
+
+- `rel_err`: Sets a relative error comparison tolerance, defaults to 5.5e-6.
+
 
 Other test commands & restrictions may be found in the [TestHarness documentation](TestHarness.md).
 
