@@ -86,8 +86,13 @@ MultiAppNearestNodeTransfer::execute()
   if (isParamValid("source_boundary"))
   {
     if (_from_meshes.size())
-      bboxes = getFromBoundingBoxes(
-          _from_meshes[0]->getBoundaryID(getParam<BoundaryName>("source_boundary")));
+    {
+      const auto & sb = getParam<BoundaryName>("source_boundary");
+      if (!MooseMeshUtils::hasBoundaryName(_from_meshes[0]->getMesh(), sb))
+        paramError("source_boundary", "The boundary '", sb, "' was not found in the mesh");
+
+      bboxes = getFromBoundingBoxes(_from_meshes[0]->getBoundaryID(sb));
+    }
     else
       bboxes = getFromBoundingBoxes(Moose::INVALID_BOUNDARY_ID);
   }
@@ -715,7 +720,11 @@ MultiAppNearestNodeTransfer::getLocalEntitiesAndComponents(
 
   if (isParamValid("source_boundary"))
   {
-    BoundaryID src_bnd_id = mesh->getBoundaryID(getParam<BoundaryName>("source_boundary"));
+    const auto & sb = getParam<BoundaryName>("source_boundary");
+    BoundaryID src_bnd_id = mesh->getBoundaryID(sb);
+    if (!MooseMeshUtils::hasBoundaryName(mesh_base, sb))
+      paramError("source_boundary", "The boundary '", sb, "' was not found in the mesh");
+
     if (is_nodal)
     {
       const ConstBndNodeRange & bnd_nodes = *mesh->getBoundaryNodeRange();
@@ -806,6 +815,10 @@ MultiAppNearestNodeTransfer::getTargetLocalNodes(const unsigned int to_problem_i
   {
     const std::vector<BoundaryName> & target_boundaries =
         getParam<std::vector<BoundaryName>>("target_boundary");
+    for (const auto & b : target_boundaries)
+      if (!MooseMeshUtils::hasBoundaryName(to_mesh, b))
+        paramError("target_boundary", "The boundary '", b, "' was not found in the mesh");
+
     ConstBndNodeRange & bnd_nodes = *(_to_meshes[to_problem_id])->getBoundaryNodeRange();
 
     for (const auto & t : target_boundaries)
