@@ -81,7 +81,7 @@ WCNSFVInletTemperatureBC::WCNSFVInletTemperatureBC(const InputParameters & param
                "mass flow rate, it should not be set if the temperature is set directly");
 }
 
-Real
+ADReal
 WCNSFVInletTemperatureBC::boundaryValue(const FaceInfo & fi) const
 {
   if (_area_pp)
@@ -95,12 +95,12 @@ WCNSFVInletTemperatureBC::boundaryValue(const FaceInfo & fi) const
     ADReal rho = (*_rho)(singleSidedFaceArg(&fi));
     ADReal cp = (*_cp)(singleSidedFaceArg(&fi));
 
-    return _scaling_factor * (*_energy_pp) / (*_area_pp * rho.value() * *_velocity_pp * cp.value());
+    return _scaling_factor * (*_energy_pp) / (*_area_pp * rho * *_velocity_pp * cp);
   }
   else
   {
     ADReal cp = (*_cp)(singleSidedFaceArg(&fi));
 
-    return _scaling_factor * (*_energy_pp) / (*_mdot_pp * cp.value());
+    return _scaling_factor * (*_energy_pp) / (*_mdot_pp * cp);
   }
 }
