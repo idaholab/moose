@@ -274,7 +274,9 @@ SolutionUserObject::readExodusII()
         // Check if the scalar matches any field variables, and ignore the var if it does. This
         // means its a Postprocessor.
         if (std::find(begin(_nodal_variables), end(_nodal_variables), var_name) ==
-            _nodal_variables.end())
+                _nodal_variables.end() &&
+            std::find(begin(_elemental_variables), end(_elemental_variables), var_name) ==
+                _elemental_variables.end())
           _scalar_variables.push_back(var_name);
     }
   }
@@ -283,22 +285,24 @@ SolutionUserObject::readExodusII()
     _nodal_variables = all_nodal;
     _elemental_variables = all_elemental;
 
-    for (std::string var_name : all_scalar)
+    for (auto var_name : all_scalar)
       // Check if the scalar matches any field variables, and ignore the var if it does. This means
       // its a Postprocessor.
       if (std::find(begin(_nodal_variables), end(_nodal_variables), var_name) ==
-          _nodal_variables.end())
+              _nodal_variables.end() &&
+          std::find(begin(_elemental_variables), end(_elemental_variables), var_name) ==
+              _elemental_variables.end())
         _scalar_variables.push_back(var_name);
   }
 
   // Add the variables to the system
-  for (const std::string & var_name : _nodal_variables)
+  for (const auto & var_name : _nodal_variables)
     _system->add_variable(var_name, FIRST);
 
-  for (const std::string & var_name : _elemental_variables)
+  for (const auto & var_name : _elemental_variables)
     _system->add_variable(var_name, CONSTANT, MONOMIAL);
 
-  for (const std::string & var_name : _scalar_variables)
+  for (const auto & var_name : _scalar_variables)
     _system->add_variable(var_name, FIRST, SCALAR);
 
   // Initialize the equations systems
@@ -376,6 +380,7 @@ SolutionUserObject::readExodusII()
     if (!_scalar_variables.empty())
       _exodusII_io->copy_scalar_solution(
           *_system, _scalar_variables, _scalar_variables, _exodus_time_index);
+
     // Update the equations systems
     _system->update();
     _es->update();
