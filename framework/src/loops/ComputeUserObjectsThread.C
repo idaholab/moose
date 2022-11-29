@@ -415,19 +415,3 @@ ComputeUserObjectsThread::printBlockExecutionInformation()
       console << "[DBG] No User Objects on block " << _subdomain << std::endl;
   }
 }
-
-template <typename T>
-void
-ComputeUserObjectsThread::printVectorOrdering(std::vector<T *> uos, std::string name) const
-{
-  if (uos.size())
-  {
-    auto console = _fe_problem.console();
-    const auto make_name = [](const std::string & str_out, T * uo)
-    { return str_out + " " + uo->name(); };
-
-    console << "[DBG] Ordering of " + name + ":" << std::endl;
-    std::string uos_names = std::accumulate(uos.begin() + 1, uos.end(), uos[0]->name(), make_name);
-    console << "[DBG] " << uos_names << std::endl;
-  }
-}

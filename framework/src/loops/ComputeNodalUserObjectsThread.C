@@ -131,5 +131,11 @@ ComputeNodalUserObjectsThread::printGeneralExecutionInformation() const
         console << "[DBG] - block restricted user objects" << std::endl;
         console << "[DBG] Nodal UOs executed on each node will differ based on these restrictions"
                 << std::endl;);
+
+    std::vector<std::string> uo_names;
+    uo_names.reserve(nodal_uos.size());
+    for (const auto & uo : nodal_uos)
+      uo_names.push_back(uo->name());
+    console << MooseUtils::join(uo_names, " ") << std::endl;
   }
 }

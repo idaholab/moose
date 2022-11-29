@@ -63,6 +63,6 @@ ComputeThreadedGeneralUserObjectsThread::printGeneralExecutionInformation(
     std::string threaded_uos = "";
     for (auto it = range.begin(); it != range.end(); ++it)
       threaded_uos += (*it)->name() + " ";
-    console << "[DBG] " << threaded_uos << std::endl;
+    console << "[DBG] " << MooseUtils::join(threaded_uos, " ") << std::endl;
   }
 }
