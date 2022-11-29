@@ -10,10 +10,9 @@ Complete documentation for the `Exodiff` utility may be found [here](https://san
 
 Test configuration options are added to the `tests` file.
 
-- `abs_zero`: sets an absolute tolerance, defaults to 1e-10. Both absolute and relative tolerances must
-  be met for a test to pass.
+- `abs_zero`: sets an absolute zero cutoff used in comparisons, defaults to 1e-10.
 
-- `rel_err`: sets a relative tolerance. Defaults to 5.5e-6.
+- `rel_err`: sets a relative error tolerance. Defaults to 5.5e-6.
 
 - `exodiff_opts`: additional options passed to the `Exodiff` utility on the command line. Their list
   may be found in its [documentation](https://sandialabs.github.io/seacas-docs/sphinx/html/index.html#exodiff)
@@ -44,7 +43,7 @@ This generates a summary of the simulation which can be edited to make the
 custom comparison file, where the tolerances for each variable may be set individually.
 In the example below, the tolerances are adjusted for local comparisons of field variables,
 both nodal and elemental. The relative error criteria is set to `1e-6` and the absolute
-criteria is disabled by setting it to `0`. These modifications apply to variable `u` and `distance`,
+error criteria is strongly tightened by setting it to `0`. These modifications apply to variable `u` and `distance`,
 and any variable that is **not** listed in the comparison file is not compared.
 The time step and nodal coordinates tolerances are also modified to `1e-6`.
 
