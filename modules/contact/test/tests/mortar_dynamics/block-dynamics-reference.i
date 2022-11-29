@@ -6,10 +6,7 @@ offset = -0.19
 []
 
 [Mesh]
-  [file]
-    type = FileMeshGenerator
-    file = long-bottom-block-no-lower-d.e
-  []
+  file = long-bottom-block-1elem-blocks.e
 []
 
 [Variables]
@@ -18,6 +15,10 @@ offset = -0.19
   []
   [disp_y]
     block = '1 2'
+  []
+  [normal_lm]
+    block = 3
+    use_dual = true
   []
 []
 
@@ -36,7 +37,7 @@ offset = -0.19
     generate_output = 'stress_xx stress_yy'
     strain = FINITE
     block = '1 2'
-    zeta = 0.05
+    zeta = 1.0
     alpha = 0.0
   []
   [inertia_x]
@@ -111,6 +112,14 @@ offset = -0.19
   [accel_z]
     block = '1 2'
   []
+  [kinetic_energy]
+    order = CONSTANT
+    family = MONOMIAL
+  []
+  [elastic_energy]
+    order = CONSTANT
+    family = MONOMIAL
+  []
 []
 
 [AuxKernels]
@@ -120,14 +129,14 @@ offset = -0.19
     displacement = disp_x
     velocity = vel_x
     beta = 0.25
-    execute_on = 'LINEAR timestep_end'
+    execute_on = 'timestep_end'
   []
   [vel_x]
     type = NewmarkVelAux
     variable = vel_x
     acceleration = accel_x
     gamma = 0.5
-    execute_on = 'LINEAR timestep_end'
+    execute_on = 'timestep_end'
   []
   [accel_y]
     type = NewmarkAccelAux
@@ -135,31 +144,77 @@ offset = -0.19
     displacement = disp_y
     velocity = vel_y
     beta = 0.25
-    execute_on = 'LINEAR timestep_end'
+    execute_on = 'timestep_end'
   []
   [vel_y]
     type = NewmarkVelAux
     variable = vel_y
     acceleration = accel_y
     gamma = 0.5
-    execute_on = 'LINEAR timestep_end'
+    execute_on = 'timestep_end'
+  []
+  [kinetic_energy]
+    type = KineticEnergyAux
+    block = '1 2'
+    variable = kinetic_energy
+    newmark_velocity_x = vel_x
+    newmark_velocity_y = vel_y
+    newmark_velocity_z = 0.0
+    density = density
+  []
+  [elastic_energy]
+    type = ElasticEnergyAux
+    variable = elastic_energy
+    block = '1 2'
   []
 []
 
-[Contact]
-  [mechanical]
-    formulation = mortar
-    model = coulomb
-    primary = 20
-    secondary = 10
-    friction_coefficient = 0.5
-    c_normal = 1.0e4
-    c_tangential = 1.0e4
-    interpolate_normals = false
-    mortar_dynamics = true
+[Constraints]
+  # Not using 'dynamic' constraints results in poor enforcement of contact
+  # constraints and lack of kinetic and elastic energy conservation.
+  [weighted_gap_lm]
+    type = ComputeDynamicWeightedGapLMMechanicalContact
+    primary_boundary = 20
+    secondary_boundary = 10
+    primary_subdomain = 4
+    secondary_subdomain = 3
+    variable = normal_lm
+    disp_x = disp_x
+    disp_y = disp_y
     newmark_beta = 0.25
     newmark_gamma = 0.5
+    use_displaced_mesh = true
+    interpolate_normals = false
+    # Capture tolerance is important. If too small, stabilization takes longer
     capture_tolerance = 1.0e-5
+    c = 1.0e6
+  []
+
+  [normal_x]
+    type = NormalMortarMechanicalContact
+    primary_boundary = 20
+    secondary_boundary = 10
+    primary_subdomain = 4
+    secondary_subdomain = 3
+    variable = normal_lm
+    secondary_variable = disp_x
+    component = x
+    use_displaced_mesh = true
+    compute_lm_residuals = false
+    interpolate_normals = false
+  []
+  [normal_y]
+    type = NormalMortarMechanicalContact
+    primary_boundary = 20
+    secondary_boundary = 10
+    primary_subdomain = 4
+    secondary_subdomain = 3
+    variable = normal_lm
+    secondary_variable = disp_y
+    component = y
+    use_displaced_mesh = true
+    compute_lm_residuals = false
+    interpolate_normals = false
   []
 []
 
@@ -192,18 +247,15 @@ offset = -0.19
 
 [Executioner]
   type = Transient
-  end_time = 75
-  dt = 0.05
-  dtmin = .005
-  solve_type = 'PJFNK'
-  petsc_options = '-snes_converged_reason -ksp_converged_reason -pc_svd_monitor '
-                  '-snes_linesearch_monitor -snes_ksp_ew'
-  petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount -mat_mffd_err '
-  petsc_options_value = 'lu       NONZERO               1e-15                   1e-5'
+  end_time = 0.275 # 8.0
+  dt = 0.025
+  dtmin = .025
+  solve_type = 'NEWTON'
+  petsc_options = '-snes_converged_reason -ksp_converged_reason -snes_linesearch_monitor'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount'
+  petsc_options_value = 'lu       NONZERO               1e-15'
   nl_max_its = 50
   line_search = 'none'
-  snesmf_reuse_base = false
-
   [TimeIntegrator]
     type = NewmarkBeta
     beta = 0.25
@@ -217,21 +269,33 @@ offset = -0.19
 
 [Outputs]
   exodus = true
+  checkpoint = true
+  csv = true
 []
 
-[VectorPostprocessors]
-  [mechanical_tangential_lm]
-    type = NodalValueSampler
-    block = 'mechanical_secondary_subdomain'
-    variable = mechanical_tangential_lm
-    sort_by = 'x'
-    execute_on = TIMESTEP_END
+[Postprocessors]
+  active = 'contact total_kinetic_energy total_elastic_energy'
+  [num_nl]
+    type = NumNonlinearIterations
   []
-[]
-
-[Preconditioning]
-  [smp]
-    type = SMP
-    full = true
+  [cumulative]
+    type = CumulativeValuePostprocessor
+    postprocessor = num_nl
+  []
+  [contact]
+    type = ContactDOFSetSize
+    variable = normal_lm
+    subdomain = '3'
+    execute_on = 'nonlinear timestep_end'
+  []
+  [total_kinetic_energy]
+    type = ElementIntegralVariablePostprocessor
+    variable = kinetic_energy
+    block = '1 2'
+  []
+  [total_elastic_energy]
+    type = ElementIntegralVariablePostprocessor
+    variable = elastic_energy
+    block = '1 2'
   []
 []

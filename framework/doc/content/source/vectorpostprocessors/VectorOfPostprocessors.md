@@ -8,6 +8,8 @@ This vector postprocessor is mainly used for two purposes:
 
 - to combine postprocessors to match the expected vector postprocessor input of a kernel, a user object, etc
 
+!alert note title=Vector names / CSV output column names
+`VectorOfPostprocessors` declares a vector with its own name. The full reporter name ends up being `<vpp_object_name>/<vpp_object_name>`.
 
 ## Example input syntax
 

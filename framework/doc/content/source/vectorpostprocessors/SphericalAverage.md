@@ -13,6 +13,9 @@ The CSV data output consists of the following columns, ordered by column name:
 
 - average of inner and outer radius of each shell of the sphere
 
+!alert note title=Vector names / CSV output column names
+`SphericalAverage` declares a vector for the average shell radii, named `radius`, and a vector for each variable requested, named with the variable name.
+Prepend with the name of the `SphericalAverage` object to obtain the reporter name of each vector.
 
 ## Example input syntax
 

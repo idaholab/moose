@@ -2,7 +2,7 @@
 
 A Reporter object for tracking mesh information, such as the number of elements, nodes, or
 degrees-of-freedom. The [!param](/Reporters/MeshInfo/items) parameter controls the items
-computed.
+computed. `MeshInfo` will declare reporters for each item requested.
 
 ## Example Input Syntax
 
