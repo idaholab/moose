@@ -36,34 +36,20 @@ ArrayVarReductionAux::ArrayVarReductionAux(const InputParameters & parameters)
 Real
 ArrayVarReductionAux::computeValue()
 {
-  Real r = 0;
   switch (_value_type)
   {
     case 0:
-      r = std::numeric_limits<Real>::lowest();
-      for (unsigned int t = 0; t < _nentries; ++t)
-        if (_array_variable[_qp](t) > r)
-          r = _array_variable[_qp](t);
-      break;
+      return _array_variable[_qp].maxCoeff();
 
     case 1:
-      r = std::numeric_limits<Real>::max();
-      for (unsigned int t = 0; t < _nentries; ++t)
-        if (_array_variable[_qp](t) < r)
-          r = _array_variable[_qp](t);
-      break;
+      return _array_variable[_qp].minCoeff();
 
     case 2:
-      r = 0;
-      for (unsigned int t = 0; t < _nentries; ++t)
-        r += _array_variable[_qp](t);
-      break;
+      return _array_variable[_qp].sum();
 
     case 3:
-      r = 0;
-      for (unsigned int t = 0; t < _nentries; ++t)
-        r += _array_variable[_qp](t) / _nentries;
-      return r;
+      return _array_variable[_qp].mean();
   }
-  return r;
+  
+  return 0.0;
 }
