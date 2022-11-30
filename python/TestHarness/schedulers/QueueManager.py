@@ -225,8 +225,10 @@ class QueueManager(Scheduler):
 
         is_ready = True
         # Job group exists in queue session and was apart of the queueing process
-        # TODO holly whack job data dictionary batman... make this easier
-        if job_data.json_data and job_data.json_data.get(job_data.job_dir, {}).get(job_data.json_data['SCHEDULER'], {}):
+        job_meta = job_data.json_data.get(job_data.job_dir, {})
+        scheduler = job_data.json_data.get('SCHEDULER', '')
+        if job_meta:
+        #if job_data.json_data and job_data.json_data.get(job_data.job_dir, {}).get(job_data.json_data['SCHEDULER'], {}):
 
             # result file exists (jobs are finished)
             if os.path.exists(os.path.join(job_data.job_dir, self.__job_storage_file)):
@@ -243,7 +245,7 @@ class QueueManager(Scheduler):
                 for job in job_data.jobs.getJobs():
                     tester = job.getTester()
                     status, message, caveats = job.previousTesterStatus(self.options, job_data.json_data)
-                    tester.setStatus(status, message)
+                    tester.setStatus(status, job_meta[scheduler]['STATUS'])
                     if caveats:
                         tester.addCaveats(caveats)
                     status_message = tester.getStatusMessage()
@@ -269,6 +271,7 @@ class QueueManager(Scheduler):
 
         if not is_ready:
             for job in job_data.jobs.getJobs():
+                # TODO: Silent and Deleted tests end up being printed (if the top job is deleted/silent)
                 job.setStatus(job.finished)
 
         return is_ready
@@ -355,16 +358,16 @@ class QueueManager(Scheduler):
             group_results = results[job_data.job_dir]
 
             # Continue to store previous third-party queueing data
-            job_list[0].addMetaData(**{job_data.plugin : self.options.results_storage[job_data.job_dir][job_data.plugin]})
+            job_meta = self.options.results_storage[job_data.job_dir]
+            job_list[0].addMetaData(**{job_data.plugin : job_meta[job_data.plugin]})
+            job_meta[job_data.plugin]['STATUS'] = 'FINISHED'
 
             for job in job_list:
-                job.setStatus(job.finished)
-                tester = job.getTester()
-
                 # Perhaps the user is filtering this job (--re, --failed-tests, etc)
+                tester = job.getTester()
                 if tester.isSilent() and not tester.isDeleted():
                     continue
-
+                job.setStatus(job.finished)
                 if group_results.get(job.getTestName(), {}):
                     job_results = group_results[job.getTestName()]
                     status, message, caveats = job.previousTesterStatus(self.options, results)
