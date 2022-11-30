@@ -17,25 +17,28 @@ ArrayTimeDerivative::validParams()
   InputParameters params = ArrayTimeKernel::validParams();
   params.addClassDescription("Array time derivative operator with the weak form of $(\\psi_i, "
                              "\\frac{\\partial u_h}{\\partial t})$.");
-  params.addRequiredParam<MaterialPropertyName>("time_derivative_coefficient",
-                                                "The name of the time derivative coefficient. "
-                                                "Can be scalar, vector, or matrix");
+  params.addParam<MaterialPropertyName>("time_derivative_coefficient",
+                                        "The name of the time derivative coefficient. "
+                                        "Can be scalar, vector, or matrix material property.");
   return params;
 }
 
 ArrayTimeDerivative::ArrayTimeDerivative(const InputParameters & parameters)
   : ArrayTimeKernel(parameters),
-    _coeff(hasMaterialProperty<Real>("time_derivative_coefficient")
+    _has_coefficient(isParamValid("time_derivative_coefficient")),
+    _coeff(_has_coefficient && hasMaterialProperty<Real>("time_derivative_coefficient")
                ? &getMaterialProperty<Real>("time_derivative_coefficient")
                : nullptr),
-    _coeff_array(hasMaterialProperty<RealEigenVector>("time_derivative_coefficient")
+    _coeff_array(_has_coefficient &&
+                         hasMaterialProperty<RealEigenVector>("time_derivative_coefficient")
                      ? &getMaterialProperty<RealEigenVector>("time_derivative_coefficient")
                      : nullptr),
-    _coeff_2d_array(hasMaterialProperty<RealEigenMatrix>("time_derivative_coefficient")
+    _coeff_2d_array(_has_coefficient &&
+                            hasMaterialProperty<RealEigenMatrix>("time_derivative_coefficient")
                         ? &getMaterialProperty<RealEigenMatrix>("time_derivative_coefficient")
                         : nullptr)
 {
-  if (!_coeff && !_coeff_array && !_coeff_2d_array)
+  if (!_coeff && !_coeff_array && !_coeff_2d_array && _has_coefficient)
   {
     MaterialPropertyName mat = getParam<MaterialPropertyName>("time_derivative_coefficient");
     mooseError("Property " + mat + " is of unsupported type for ArrayTimeDerivative");
@@ -45,7 +48,9 @@ ArrayTimeDerivative::ArrayTimeDerivative(const InputParameters & parameters)
 void
 ArrayTimeDerivative::computeQpResidual(RealEigenVector & residual)
 {
-  if (_coeff)
+  if (!_has_coefficient)
+    residual = _u_dot[_qp] * _test[_i][_qp];
+  else if (_coeff)
     residual = (*_coeff)[_qp] * _u_dot[_qp] * _test[_i][_qp];
   else if (_coeff_array)
   {
@@ -72,7 +77,9 @@ RealEigenVector
 ArrayTimeDerivative::computeQpJacobian()
 {
   Real tmp = _test[_i][_qp] * _phi[_j][_qp] * _du_dot_du[_qp];
-  if (_coeff)
+  if (!_has_coefficient)
+    return RealEigenVector::Constant(_var.count(), tmp);
+  else if (_coeff)
     return RealEigenVector::Constant(_var.count(), tmp * (*_coeff)[_qp]);
   else if (_coeff_array)
     return tmp * (*_coeff_array)[_qp];
