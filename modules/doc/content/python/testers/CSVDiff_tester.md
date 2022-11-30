@@ -26,6 +26,18 @@ Test configuration options are added to the `tests` file.
 
 
 Other test commands & restrictions may be found in the [TestHarness documentation](TestHarness.md).
+An example of a custom comparison file for a `CSVDiff` test is shown below.
+The relative tolerance criterion for the `z_field` global variable (usually a postprocessor or a scalar variable)
+is modified from the global value of `5.5e-6` to `10`. This essentially disables
+comparison for that value, as it can vary by two orders of magnitude and not trigger a failure.
+
+!listing test/tests/test_harness/csvdiff_comparison_relative.cmp
+
+In this example, the global absolute tolerance for all variables is being modified
+from its default of `1e-11` to `10`. This essentially disables comparison for all global variables,
+but lower values (`1e-8` is common) may be useful to loosen tolerances in a test.
+
+!listing test/tests/test_harness/csvdiff_comparison_global_floor.cmp
 
 ## Example test configuration in the MOOSE test suite
 

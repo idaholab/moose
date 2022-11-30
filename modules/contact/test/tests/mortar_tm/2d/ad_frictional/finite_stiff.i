@@ -1,11 +1,11 @@
 E_block = 1e7
-E_plank = 1e7
-elem = QUAD4
-order = FIRST
-name = 'finite'
+E_plank = 1e9
+elem = QUAD8
+order = SECOND
+name = 'finite_stiff'
 
 [Mesh]
-  patch_size = 80
+  patch_size = 200
   patch_update_strategy = auto
   [plank]
     type = GeneratedMeshGenerator
@@ -89,10 +89,11 @@ name = 'finite'
     secondary = block_left
     formulation = mortar
     model = coulomb
-    normalize_c = true
-    c_normal = 1e5
-    c_tangential = 1e5
+    c_normal = 1e8
+    c_tangential = 1e8
     friction_coefficient = 0.1
+    #normal_lm_scaling = 1.0e-5
+    #tangential_lm_scaling = 1.0e-5
   []
 []
 
@@ -151,17 +152,15 @@ name = 'finite'
   solve_type = 'NEWTON'
   petsc_options = '-snes_converged_reason -ksp_converged_reason'
   petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount'
-  petsc_options_value = 'lu        NONZERO               1e-15'
+  petsc_options_value = 'lu        NONZERO               1e-24'
   end_time = 5.3
   dt = 0.12
   dtmin = 0.12
-  timestep_tolerance = 1e-6
-  line_search = 'contact'
+  line_search = 'none'
   nl_div_tol = 1e100
-  nl_abs_tol = 1e-7
-  automatic_scaling = true
-  compute_scaling_once = false
-  ignore_variables_for_autoscaling = 'frictional_normal_lm frictional_tangential_lm'
+  timestep_tolerance = 1e-6
+  nl_abs_tol = 1e-4
+  nl_rel_tol = 1e-14
 []
 
 [Postprocessors]
@@ -220,6 +219,7 @@ name = 'finite'
 
 [Outputs]
   file_base = ${name}
+  exodus = true
   [comp]
     type = CSV
     show = 'contact'

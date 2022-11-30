@@ -1,5 +1,5 @@
 diff --git a/install-tpl.sh b/install-tpl.sh
-index d4601be6a..8fbc554e5 100755
+index 5a23107a04..a592c3b3c5 100755
 --- a/install-tpl.sh
 +++ b/install-tpl.sh
 @@ -215,7 +215,6 @@ fi
@@ -10,12 +10,12 @@ index d4601be6a..8fbc554e5 100755
 
  if [ "$NEEDS_SZIP" == "YES" ]
  then
-@@ -418,7 +417,7 @@ then
-         elif [ "${H5VERSION}" == "V110" ]; then
-             wget --no-check-certificate https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-${hdf_version}/src/hdf5-${hdf_version}.tar.bz2
-         elif [ "${H5VERSION}" == "V112" ]; then
--            wget --no-check-certificate https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.12/hdf5-${hdf_version}/src/hdf5-${hdf_version}.tar.bz2
-+            curl --insecure -L -O https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.12/hdf5-${hdf_version}/src/hdf5-${hdf_version}.tar.bz2
-         elif [ "${H5VERSION}" == "V113" ]; then
-             wget --no-check-certificate https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.13/hdf5-${hdf_version}/src/hdf5-${hdf_version}.tar.bz2
-         elif [ "${H5VERSION}" == "develop" ]; then
+@@ -423,7 +422,7 @@ then
+         if [ "${H5VERSION}" == "develop" ]; then
+             git clone https://github.com/HDFGroup/hdf5.git hdf5-develop
+         else
+-            wget --no-check-certificate https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-${hdf_base}/hdf5-${hdf_version}/src/hdf5-${hdf_version}.tar.bz2
++            curl --insecure -L -O https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-${hdf_base}/hdf5-${hdf_version}/src/hdf5-${hdf_version}.tar.bz2
+         fi
+         if [ "${H5VERSION}" != "develop" ]
+         then

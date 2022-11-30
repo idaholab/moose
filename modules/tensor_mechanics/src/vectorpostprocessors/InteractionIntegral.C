@@ -17,21 +17,25 @@
 #include "libmesh/utility.h"
 
 registerMooseObject("TensorMechanicsApp", InteractionIntegral);
+registerMooseObject("TensorMechanicsApp", ADInteractionIntegral);
 
+template <bool is_ad>
 MooseEnum
-InteractionIntegral::qFunctionType()
+InteractionIntegralTempl<is_ad>::qFunctionType()
 {
   return MooseEnum("Geometry Topology", "Geometry");
 }
 
+template <bool is_ad>
 MooseEnum
-InteractionIntegral::sifModeType()
+InteractionIntegralTempl<is_ad>::sifModeType()
 {
   return MooseEnum("KI KII KIII T", "KI");
 }
 
+template <bool is_ad>
 InputParameters
-InteractionIntegral::validParams()
+InteractionIntegralTempl<is_ad>::validParams()
 {
   InputParameters params = ElementVectorPostprocessor::validParams();
   params.addRequiredCoupledVar(
@@ -59,13 +63,14 @@ InteractionIntegral::validParams()
   params.set<bool>("use_displaced_mesh") = false;
   params.addRequiredParam<unsigned int>("ring_index", "Ring ID");
   params.addParam<MooseEnum>("q_function_type",
-                             InteractionIntegral::qFunctionType(),
+                             InteractionIntegralTempl<is_ad>::qFunctionType(),
                              "The method used to define the integration domain. Options are: " +
-                                 InteractionIntegral::qFunctionType().getRawNames());
-  params.addRequiredParam<MooseEnum>("sif_mode",
-                                     InteractionIntegral::sifModeType(),
-                                     "Stress intensity factor to calculate. Choices are: " +
-                                         InteractionIntegral::sifModeType().getRawNames());
+                                 InteractionIntegralTempl<is_ad>::qFunctionType().getRawNames());
+  params.addRequiredParam<MooseEnum>(
+      "sif_mode",
+      InteractionIntegralTempl<is_ad>::sifModeType(),
+      "Stress intensity factor to calculate. Choices are: " +
+          InteractionIntegralTempl<is_ad>::sifModeType().getRawNames());
   params.addParam<MaterialPropertyName>("eigenstrain_gradient",
                                         "Material defining gradient of eigenstrain tensor");
   params.addParam<MaterialPropertyName>("body_force", "Material defining body force");
@@ -76,13 +81,14 @@ InteractionIntegral::validParams()
   return params;
 }
 
-InteractionIntegral::InteractionIntegral(const InputParameters & parameters)
+template <bool is_ad>
+InteractionIntegralTempl<is_ad>::InteractionIntegralTempl(const InputParameters & parameters)
   : ElementVectorPostprocessor(parameters),
     _ndisp(coupledComponents("displacements")),
     _crack_front_definition(&getUserObject<CrackFrontDefinition>("crack_front_definition")),
     _treat_as_2d(false),
-    _stress(getMaterialPropertyByName<RankTwoTensor>("stress")),
-    _strain(getMaterialPropertyByName<RankTwoTensor>("elastic_strain")),
+    _stress(getGenericMaterialPropertyByName<RankTwoTensor, is_ad>("stress")),
+    _strain(getGenericMaterialPropertyByName<RankTwoTensor, is_ad>("elastic_strain")),
     _fe_vars(getCoupledMooseVars()),
     _fe_type(_fe_vars[0]->feType()),
     _grad_disp(3),
@@ -93,12 +99,13 @@ InteractionIntegral::InteractionIntegral(const InputParameters & parameters)
     _poissons_ratio(getParam<Real>("poissons_ratio")),
     _youngs_modulus(getParam<Real>("youngs_modulus")),
     _ring_index(getParam<unsigned int>("ring_index")),
-    _total_deigenstrain_dT(hasMaterialProperty<RankTwoTensor>("total_deigenstrain_dT")
-                               ? &getMaterialProperty<RankTwoTensor>("total_deigenstrain_dT")
-                               : nullptr),
-    _q_function_type(getParam<MooseEnum>("q_function_type").getEnum<QMethod>()),
-    _position_type(getParam<MooseEnum>("position_type").getEnum<PositionType>()),
-    _sif_mode(getParam<MooseEnum>("sif_mode").getEnum<SifMethod>()),
+    _total_deigenstrain_dT(
+        hasMaterialProperty<RankTwoTensor>("total_deigenstrain_dT")
+            ? &getGenericMaterialProperty<RankTwoTensor, is_ad>("total_deigenstrain_dT")
+            : nullptr),
+    _q_function_type(getParam<MooseEnum>("q_function_type").template getEnum<QMethod>()),
+    _position_type(getParam<MooseEnum>("position_type").template getEnum<PositionType>()),
+    _sif_mode(getParam<MooseEnum>("sif_mode").template getEnum<SifMethod>()),
     _x(declareVector("x")),
     _y(declareVector("y")),
     _z(declareVector("z")),
@@ -133,7 +140,8 @@ InteractionIntegral::InteractionIntegral(const InputParameters & parameters)
 
   if (isParamValid("eigenstrain_gradient"))
   {
-    _eigenstrain_gradient = &getMaterialProperty<RankThreeTensor>("eigenstrain_gradient");
+    _eigenstrain_gradient =
+        &getGenericMaterialProperty<RankThreeTensor, is_ad>("eigenstrain_gradient");
     if (_total_deigenstrain_dT)
       paramError("eigenstrain_gradient",
                  "eigenstrain_gradient cannot be specified for materials that provide the "
@@ -143,14 +151,16 @@ InteractionIntegral::InteractionIntegral(const InputParameters & parameters)
     _body_force = &getMaterialProperty<RealVectorValue>("body_force");
 }
 
+template <bool is_ad>
 void
-InteractionIntegral::initialSetup()
+InteractionIntegralTempl<is_ad>::initialSetup()
 {
   _treat_as_2d = _crack_front_definition->treatAs2D();
 }
 
+template <bool is_ad>
 void
-InteractionIntegral::initialize()
+InteractionIntegralTempl<is_ad>::initialize()
 {
   std::size_t num_pts;
   if (_treat_as_2d)
@@ -171,10 +181,11 @@ InteractionIntegral::initialize()
   }
 }
 
+template <bool is_ad>
 Real
-InteractionIntegral::computeQpIntegral(const std::size_t crack_front_point_index,
-                                       const Real scalar_q,
-                                       const RealVectorValue & grad_of_scalar_q)
+InteractionIntegralTempl<is_ad>::computeQpIntegral(const std::size_t crack_front_point_index,
+                                                   const Real scalar_q,
+                                                   const RealVectorValue & grad_of_scalar_q)
 {
   // In the crack front coordinate system, the crack direction is (1,0,0)
   RealVectorValue crack_direction(1.0, 0.0, 0.0);
@@ -199,10 +210,10 @@ InteractionIntegral::computeQpIntegral(const std::size_t crack_front_point_index
       _crack_front_definition->rotateToCrackFrontCoords(grad_of_scalar_q, crack_front_point_index);
   RankTwoTensor grad_disp_cf =
       _crack_front_definition->rotateToCrackFrontCoords(grad_disp, crack_front_point_index);
-  RankTwoTensor stress_cf =
-      _crack_front_definition->rotateToCrackFrontCoords((_stress)[_qp], crack_front_point_index);
-  RankTwoTensor strain_cf =
-      _crack_front_definition->rotateToCrackFrontCoords((_strain)[_qp], crack_front_point_index);
+  RankTwoTensor stress_cf = _crack_front_definition->rotateToCrackFrontCoords(
+      MetaPhysicL::raw_value((_stress)[_qp]), crack_front_point_index);
+  RankTwoTensor strain_cf = _crack_front_definition->rotateToCrackFrontCoords(
+      MetaPhysicL::raw_value((_strain)[_qp]), crack_front_point_index);
   RealVectorValue grad_temp_cf =
       _crack_front_definition->rotateToCrackFrontCoords(_grad_temp[_qp], crack_front_point_index);
 
@@ -230,7 +241,8 @@ InteractionIntegral::computeQpIntegral(const std::size_t crack_front_point_index
   Real term4 = 0.0;
   if (_has_temp)
   {
-    Real sigma_alpha = aux_stress.doubleContraction((*_total_deigenstrain_dT)[_qp]);
+    Real sigma_alpha =
+        aux_stress.doubleContraction(MetaPhysicL::raw_value((*_total_deigenstrain_dT)[_qp]));
     term4 = scalar_q * sigma_alpha * grad_temp_cf(0);
   }
 
@@ -243,7 +255,8 @@ InteractionIntegral::computeQpIntegral(const std::size_t crack_front_point_index
     // d_eigenstrain/dx_k*aux_stress*scalar_q
     const RealVectorValue & crack_dir =
         _crack_front_definition->getCrackDirection(crack_front_point_index);
-    RankTwoTensor eigenstrain_grad_in_crack_dir = crack_dir * (*_eigenstrain_gradient)[_qp];
+    RankTwoTensor eigenstrain_grad_in_crack_dir =
+        crack_dir * MetaPhysicL::raw_value((*_eigenstrain_gradient)[_qp]);
     term4a = scalar_q * aux_stress.doubleContraction(eigenstrain_grad_in_crack_dir);
   }
 
@@ -254,7 +267,7 @@ InteractionIntegral::computeQpIntegral(const std::size_t crack_front_point_index
     // b_i*aux_du*crack_dir*scalar_q
     const RealVectorValue & crack_dir =
         _crack_front_definition->getCrackDirection(crack_front_point_index);
-    term5 = -scalar_q * (*_body_force)[_qp] * aux_du * crack_dir;
+    term5 = -scalar_q * MetaPhysicL::raw_value((*_body_force)[_qp]) * aux_du * crack_dir;
   }
 
   Real q_avg_seg = 1.0;
@@ -271,8 +284,9 @@ InteractionIntegral::computeQpIntegral(const std::size_t crack_front_point_index
   return eq / q_avg_seg;
 }
 
+template <bool is_ad>
 void
-InteractionIntegral::execute()
+InteractionIntegralTempl<is_ad>::execute()
 {
   // calculate phi and dphi for this element
   const std::size_t dim = _current_elem->dim();
@@ -322,8 +336,9 @@ InteractionIntegral::execute()
   }
 }
 
+template <bool is_ad>
 void
-InteractionIntegral::finalize()
+InteractionIntegralTempl<is_ad>::finalize()
 {
   gatherSum(_interaction_integral);
 
@@ -350,17 +365,21 @@ InteractionIntegral::finalize()
   }
 }
 
+template <bool is_ad>
 void
-InteractionIntegral::threadJoin(const UserObject & y)
+InteractionIntegralTempl<is_ad>::threadJoin(const UserObject & y)
 {
-  const InteractionIntegral & uo = static_cast<const InteractionIntegral &>(y);
+  const InteractionIntegralTempl<is_ad> & uo =
+      static_cast<const InteractionIntegralTempl<is_ad> &>(y);
 
   for (auto i = beginIndex(_interaction_integral); i < _interaction_integral.size(); ++i)
     _interaction_integral[i] += uo._interaction_integral[i];
 }
 
+template <bool is_ad>
 void
-InteractionIntegral::computeAuxFields(RankTwoTensor & aux_stress, RankTwoTensor & grad_disp)
+InteractionIntegralTempl<is_ad>::computeAuxFields(RankTwoTensor & aux_stress,
+                                                  RankTwoTensor & grad_disp)
 {
   RealVectorValue k(0.0);
   if (_sif_mode == SifMethod::KI)
@@ -421,8 +440,10 @@ InteractionIntegral::computeAuxFields(RankTwoTensor & aux_stress, RankTwoTensor 
   grad_disp(0, 2) = k(2) / (_shear_modulus * sqrt2PiR) * (st2 * ct - ct2 * st);
 }
 
+template <bool is_ad>
 void
-InteractionIntegral::computeTFields(RankTwoTensor & aux_stress, RankTwoTensor & grad_disp)
+InteractionIntegralTempl<is_ad>::computeTFields(RankTwoTensor & aux_stress,
+                                                RankTwoTensor & grad_disp)
 {
 
   Real t = _theta;
@@ -448,3 +469,6 @@ InteractionIntegral::computeTFields(RankTwoTensor & aux_stress, RankTwoTensor & 
                     (st * (4.0 * Utility::pow<2>(_poissons_ratio) - 3.0 + _poissons_ratio) +
                      std::sin(3.0 * t) * (1.0 + _poissons_ratio));
 }
+
+template class InteractionIntegralTempl<false>;
+template class InteractionIntegralTempl<true>;

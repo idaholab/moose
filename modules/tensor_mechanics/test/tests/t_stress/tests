@@ -1,18 +1,38 @@
 [Tests]
-design = 'syntax/DomainIntegral/index.md'
-issues = '#4276'
- [./2d]
-   type = 'CSVDiff'
-   input = 't_stress_crack_infinite_plate_2d.i'
-   csvdiff = 't_stress_crack_infinite_plate_out.csv'
-   rel_err = 2e-5
-   requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the T stress for cracks in an infinite plate.'
- [../]
- [./3d]
-   type = 'CSVDiff'
-   input = 't_stress_ellip_crack_3d.i'
-   csvdiff = 't_stress_ellip_crack_out.csv t_stress_ellip_crack_out_II_KI_1_0001.csv t_stress_ellip_crack_out_II_KI_2_0001.csv t_stress_ellip_crack_out_II_KI_3_0001.csv t_stress_ellip_crack_out_II_T_1_0001.csv t_stress_ellip_crack_out_II_T_2_0001.csv t_stress_ellip_crack_out_II_T_3_0001.csv t_stress_ellip_crack_out_J_1_0001.csv t_stress_ellip_crack_out_J_2_0001.csv t_stress_ellip_crack_out_J_3_0001.csv'
-   rel_err = 2e-5
-   requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals including the T stress for an elliptical crack in 3D.'
- [../]
+  design = 'syntax/DomainIntegral/index.md'
+  issues = '#4276'
+  [t_stress_crack_infinite_plate_2d]
+    type = 'CSVDiff'
+    input = 't_stress_crack_infinite_plate_2d.i'
+    csvdiff = 't_stress_crack_infinite_plate_out.csv'
+    rel_err = 2e-5
+    requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals '
+                  'including the T stress for cracks in an infinite plate.'
+  []
+  [t_stress_ellip_crack_3d]
+    type = 'CSVDiff'
+    input = 't_stress_ellip_crack_3d.i'
+    csvdiff = 't_stress_ellip_crack_out.csv t_stress_ellip_crack_out_II_KI_1_0001.csv '
+              't_stress_ellip_crack_out_II_KI_2_0001.csv t_stress_ellip_crack_out_II_KI_3_0001.csv '
+              't_stress_ellip_crack_out_II_T_1_0001.csv t_stress_ellip_crack_out_II_T_2_0001.csv '
+              't_stress_ellip_crack_out_II_T_3_0001.csv t_stress_ellip_crack_out_J_1_0001.csv '
+              't_stress_ellip_crack_out_J_2_0001.csv t_stress_ellip_crack_out_J_3_0001.csv'
+    rel_err = 2e-5
+    valgrind = 'heavy'
+    requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals '
+                  'including the T stress for an elliptical crack in 3D.'
+  []
+  [ad_t_stress_ellip_crack_3d]
+    type = 'CSVDiff'
+    input = 'ad_t_stress_ellip_crack_3d.i'
+    csvdiff = 'ad_t_stress_ellip_crack_out.csv ad_t_stress_ellip_crack_out_II_KI_1_0001.csv '
+              'ad_t_stress_ellip_crack_out_II_KI_2_0001.csv ad_t_stress_ellip_crack_out_II_KI_3_0001.csv '
+              'ad_t_stress_ellip_crack_out_II_T_1_0001.csv ad_t_stress_ellip_crack_out_II_T_2_0001.csv '
+              'ad_t_stress_ellip_crack_out_II_T_3_0001.csv ad_t_stress_ellip_crack_out_J_1_0001.csv '
+              'ad_t_stress_ellip_crack_out_J_2_0001.csv ad_t_stress_ellip_crack_out_J_3_0001.csv'
+    rel_err = 2e-5
+    valgrind = 'heavy'
+    requirement = 'The Domain Integral Action shall compute all of the fracture domain integrals '
+                  'including the T stress for an elliptical crack in 3D using automatic differentiation objects.'
+  []
 []
