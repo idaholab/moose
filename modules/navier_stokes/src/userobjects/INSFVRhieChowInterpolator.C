@@ -21,6 +21,7 @@
 #include "PiecewiseByBlockLambdaFunctor.h"
 #include "VectorCompositeFunctor.h"
 #include "FVElementalKernel.h"
+#include "NSFVUtils.h"
 
 #include "libmesh/mesh_base.h"
 #include "libmesh/elem_range.h"
@@ -515,9 +516,11 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   if (w)
     velocity(2) = w->getInternalFaceValue(fi, correct_skewness);
 
-  // Return if Rhie-Chow was not requested
-  if (m == Moose::FV::InterpMethod::Average)
+  // Return if Rhie-Chow was not requested or if we have a porosity jump
+  if (m == Moose::FV::InterpMethod::Average ||
+      std::get<0>(NS::isPorosityJumpFace(epsilon(tid), fi)))
     return velocity;
+
   mooseAssert(((m == Moose::FV::InterpMethod::RhieChow) &&
                (_velocity_interp_method == Moose::FV::InterpMethod::RhieChow)) ||
                   _a_data_provided,
