@@ -521,14 +521,6 @@ ParameterStudyAction::quantityOfInterestName(const ReporterName & qoi) const
   return ReporterName(stochasticReporterName(), qoi.getObjectName() + ":" + qoi.getValueName());
 }
 
-unsigned int
-ParameterStudyAction::inferMultiAppMode()
-{
-  if (isParamValid("multiapp_mode"))
-    return getParam<MooseEnum>("multiapp_mode");
-  return 1;
-}
-
 void
 ParameterStudyAction::showObject(std::string type,
                                  std::string name,
@@ -572,4 +564,148 @@ ParameterStudyAction::showObject(std::string type,
   }
 
   _console << std::endl;
+}
+
+/**
+ * This class is a hit walker used to see if a list of parameters are all controllable
+ */
+class AreParametersControllableWalker : public hit::Walker
+{
+public:
+  AreParametersControllableWalker(const std::vector<std::string> & parameters, MooseApp & app)
+    : _app(app), _is_controllable(parameters.size(), false)
+  {
+    // Seperate the object from the parameter into a list of pairs
+    for (const auto & param : parameters)
+    {
+      auto pos = param.rfind("/");
+      _pars.emplace_back(param.substr(0, pos), param.substr(pos + 1));
+    }
+  }
+
+  void walk(const std::string & fullpath, const std::string & /*nodename*/, hit::Node * n) override
+  {
+    for (const auto & i : index_range(_pars))
+    {
+      std::string obj = _pars[i].first;
+      std::string par = _pars[i].second;
+      if (obj == fullpath)
+      {
+        auto typeit = n->find("type");
+        if (typeit && typeit != n && typeit->type() == hit::NodeType::Field)
+        {
+          std::string obj_type = n->param<std::string>("type");
+          auto params = _app.getFactory().getValidParams(obj_type);
+          _is_controllable[i] = params.isControllable(par);
+        }
+      }
+    }
+  }
+
+  bool areControllable() const
+  {
+    for (const auto & ic : _is_controllable)
+      if (!ic)
+        return false;
+    return true;
+  }
+
+private:
+  MooseApp & _app;
+  std::vector<bool> _is_controllable;
+  std::vector<std::pair<std::string, std::string>> _pars;
+};
+
+class ExecutionTypeWalker : public hit::Walker
+{
+public:
+  ExecutionTypeWalker() : _exec_type(0), _found_exec(false) {}
+
+  void walk(const std::string & fullpath, const std::string & /*nodename*/, hit::Node * n) override
+  {
+    if (fullpath == "Executioner")
+    {
+      // This should not be hit since there shouldn't be two Executioner blocks
+      // But if it does happen, then go back to not knowing
+      if (_found_exec)
+        _exec_type = 0;
+      else
+      {
+        // Get the type of executioner
+        std::string executioner_type = "Unknown";
+        auto typeit = n->find("type");
+        if (typeit && typeit != n && typeit->type() == hit::NodeType::Field)
+          executioner_type = n->param<std::string>("type");
+
+        // If it's Steady or Eigenvalue, then it's a steady-state problem
+        if (executioner_type == "Steady" || executioner_type == "Eigenvalue")
+          _exec_type = 1;
+        // If it's Transient
+        else if (executioner_type == "Transient")
+        {
+          // Now we'll see if it's a pseudo transient
+          auto it = n->find("steady_state_detection");
+          if (it && it != n && it->type() == hit::NodeType::Field &&
+              n->param<bool>("steady_state_detection"))
+            _exec_type = 2;
+          else
+            _exec_type = 3;
+        }
+      }
+
+      _found_exec = true;
+    }
+  }
+
+  unsigned int getExecutionType() const { return _exec_type; }
+
+private:
+  unsigned int _exec_type;
+  bool _found_exec;
+};
+
+unsigned int
+ParameterStudyAction::inferMultiAppMode()
+{
+  if (isParamValid("multiapp_mode"))
+    return getParam<MooseEnum>("multiapp_mode");
+
+  const auto & params = getParam<std::vector<std::string>>("parameters");
+  const unsigned int default_mode = 1;
+
+  // First obvious thing is if it is a parsed parameter, indicated by the lack of '/'
+  for (const auto & param : params)
+    if (param.find("/") == std::string::npos)
+      return default_mode;
+  // Next we'll see if there is a GlobalParam
+  for (const auto & param : params)
+    if (param.find("GlobalParams") != std::string::npos)
+      return default_mode;
+
+  // Now for the difficult check
+  // Parse input file and create root hit node
+  const auto input_filename = MooseUtils::realpath(getParam<FileName>("input"));
+  std::ifstream f(input_filename);
+  std::string input((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+  std::unique_ptr<hit::Node> root(hit::parse(input_filename, input));
+  hit::explode(root.get());
+
+  // Walk through the input and see if every param is controllable
+  AreParametersControllableWalker control_walker(params, _app);
+  root->walk(&control_walker, hit::NodeType::Section);
+  if (!control_walker.areControllable())
+    return default_mode;
+
+  // Walk through the input and determine how the problem is being executed
+  ExecutionTypeWalker exec_walker;
+  root->walk(&exec_walker, hit::NodeType::Section);
+  // If it is steady-state, then we don't need to restore
+  if (exec_walker.getExecutionType() == 1)
+    return 4;
+  // If it is pseudo-transeint, then we can keep the solution
+  else if (exec_walker.getExecutionType() == 2)
+    return 3;
+  // If it's transient or unknown, don't keep the solution and restore
+  else
+    return 2;
 }

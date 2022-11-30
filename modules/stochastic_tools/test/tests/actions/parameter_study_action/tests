@@ -229,4 +229,55 @@
     []
   []
 
+  [auto_mode]
+    requirement = 'The system shall be able to build a simple parameter study with an optimized execution mode by determining that '
+    [parsed]
+      type = CSVDiff
+      input = distributions.i
+      cli_args = 'ParameterStudy/show_study_objects=true --color off'
+      csvdiff = distributions_csv_study_qoi_0001.csv
+      expect_out = 'mode : batch-reset'
+      detail = 'parameters are parsed;'          
+    []
+    [not_controllable]
+      type = CSVDiff
+      input = monte_carlo_not_controllable.i
+      cli_args = 'Outputs/file_base=monte_carlo_csv ParameterStudy/show_study_objects=true --color off'
+      csvdiff = 'monte_carlo_csv_study_qoi_0001.csv monte_carlo_csv_study_samples_0001.csv'
+      expect_out = 'mode : batch-reset'
+      detail = 'parameters are not controllable;'          
+    []
+    [transient]
+      type = CSVDiff
+      input = monte_carlo_transient.i
+      cli_args = 'ParameterStudy/show_study_objects=true --color off'
+      csvdiff = 'monte_carlo_transient_csv_study_qoi_0001.csv monte_carlo_transient_csv_study_samples_0001.csv'
+      expect_out = 'mode : batch-restore'
+      detail = 'parameters are controllable in a transient problem;'      
+    []
+    [pseudo_transient]
+      type = CSVDiff
+      input = monte_carlo_pseudo_transient.i
+      cli_args = 'ParameterStudy/show_study_objects=true --color off'
+      csvdiff = 'monte_carlo_pseudo_transient_csv_study_qoi_0001.csv monte_carlo_pseudo_transient_csv_study_samples_0001.csv'
+      expect_out = 'keep_solution_during_restore : 1\n.*\n\s*mode : batch-restore'
+      detail = 'parameters are controllable in a pseudo-transient problem;'      
+    []
+    [steady]
+      type = CSVDiff
+      input = monte_carlo.i
+      cli_args = 'ParameterStudy/show_study_objects=true --color off'
+      csvdiff = 'monte_carlo_csv_study_qoi_0001.csv monte_carlo_csv_study_samples_0001.csv'
+      expect_out = 'mode : batch-restore\n\s*no_backup_and_restore : 1'
+      detail = 'parameters are controllable in a steady-state problem;'
+    []
+    [eigen]
+      type = CSVDiff
+      input = monte_carlo_eigen.i
+      cli_args = 'ParameterStudy/show_study_objects=true --color off'
+      csvdiff = 'monte_carlo_eigen_csv_study_qoi_0001.csv monte_carlo_eigen_csv_study_samples_0001.csv'
+      expect_out = 'mode : batch-restore\n\s*no_backup_and_restore : 1'
+      detail = 'parameters are controllable in a eigenvalue problem;'
+    []
+  []
 []
