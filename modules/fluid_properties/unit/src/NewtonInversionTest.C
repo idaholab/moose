@@ -13,17 +13,17 @@
 void
 function_f1(Real x1, Real x2, Real & z, Real & dzdx1, Real & dzdx2)
 {
-   z = x2 * x2 - 3 * x2 + 4 * x1 + 2;
-   dzdx1 = 4;
-   dzdx2 = 2 * x2 - 3;
+  z = x2 * x2 - 3 * x2 + 4 * x1 + 2;
+  dzdx1 = 4;
+  dzdx2 = 2 * x2 - 3;
 }
 
 void
 function_f2(Real x1, Real x2, Real & z, Real & dzdx1, Real & dzdx2)
 {
-   z = exp(x1 * x2) + x2 * log(x2);
-   dzdx1 = x2 * exp(x1 * x2);
-   dzdx2 = x1 * exp(x1 * x2) + log(x2) + 1;
+  z = exp(x1 * x2) + x2 * log(x2);
+  dzdx1 = x2 * exp(x1 * x2);
+  dzdx2 = x1 * exp(x1 * x2) + log(x2) + 1;
 }
 
 /**
@@ -42,12 +42,10 @@ TEST(NewtonInversion, NewtonSolve)
   Real z = 0;
   Real initial_guess = 11;
   auto func = [&](Real x1, Real x2, Real & z, Real & dzdx1, Real & dzdx2)
-  {
-    function_f1(x1, x2, z, dzdx1, dzdx2);
-  };
+  { function_f1(x1, x2, z, dzdx1, dzdx2); };
 
   // Solve z = f(x, y) with x constant
-  Real y = FluidPropertiesUtils::NewtonSolve(x, z, initial_guess, 1e-8, func);
+  Real y = FluidPropertiesUtils::NewtonSolve(x, z, initial_guess, 1e-8, func).first;
 
   // Check solution found
   Real tol = 1e-7;
@@ -56,15 +54,13 @@ TEST(NewtonInversion, NewtonSolve)
 
   // Test non linear function (f2)
   auto func2 = [&](Real x1, Real x2, Real & z, Real & dzdx1, Real & dzdx2)
-  {
-    function_f2(x1, x2, z, dzdx1, dzdx2);
-  };
+  { function_f2(x1, x2, z, dzdx1, dzdx2); };
 
   x = 1;
   z = 0.8749124087762432;
   soln = 0.1;
   initial_guess = 0.1;
-  y = FluidPropertiesUtils::NewtonSolve(x, z, initial_guess, 1e-8, func2);
+  y = FluidPropertiesUtils::NewtonSolve(x, z, initial_guess, 1e-8, func2).first;
   EXPECT_NEAR(y, soln, tol);
 }
 
@@ -87,7 +83,7 @@ function_g2(Real x1, Real x2, Real & g, Real & dgdx1, Real & dgdx2)
 void
 function_g3(Real x1, Real x2, Real & g, Real & dgdx1, Real & dgdx2)
 {
-  g = exp(x2) + x1*log(x1);
+  g = exp(x2) + x1 * log(x1);
   dgdx1 = 1 + log(x1);
   dgdx2 = exp(x2);
 }
@@ -121,25 +117,17 @@ TEST(NewtonInversion, NewtonSolve2D)
   Real x1_soln = -4;
   Real x2_soln = -11;
 
-  bool converged;
   auto func1 = [&](Real x, Real y, Real & f, Real & dfdx, Real & dfdy)
-  {
-    function_g1(x, y, f, dfdx, dfdy);
-  };
+  { function_g1(x, y, f, dfdx, dfdy); };
   auto func2 = [&](Real x, Real y, Real & g, Real & dgdx, Real & dgdy)
-  {
-    function_g2(x, y, g, dgdx, dgdy);
-  };
+  { function_g2(x, y, g, dgdx, dgdy); };
   auto func3 = [&](Real x, Real y, Real & g, Real & dgdx, Real & dgdy)
-  {
-    function_g3(x, y, g, dgdx, dgdy);
-  };
+  { function_g3(x, y, g, dgdx, dgdy); };
   FluidPropertiesUtils::NewtonSolve2D(
-      y1, y2, guess1, guess2, return_x1, return_x2, 1e-8, converged, func1, func2);
+      y1, y2, guess1, guess2, return_x1, return_x2, 1e-8, 1e-8, func1, func2);
 
   // Check values
   Real tol = 1e-6;
-  EXPECT_TRUE(converged);
   EXPECT_NEAR(return_x1, x1_soln, tol);
   EXPECT_NEAR(return_x2, x2_soln, tol);
 
@@ -147,27 +135,31 @@ TEST(NewtonInversion, NewtonSolve2D)
   y1 = 0.1;
   y2 = 1.1196002982765987;
   FluidPropertiesUtils::NewtonSolve2D(
-      y1, y2, guess1, guess2, return_x1, return_x2, 1e-8, converged, func1, func3);
+      y1, y2, guess1, guess2, return_x1, return_x2, 1e-8, 1e-8, func1, func3);
   x1_soln = 0.1;
   x2_soln = 0.3;
-  EXPECT_TRUE(converged);
   EXPECT_NEAR(return_x1, x1_soln, tol);
   EXPECT_NEAR(return_x2, x2_soln, tol);
 
   y1 = 1.98;
   y2 = 1.1196002982765987;
   FluidPropertiesUtils::NewtonSolve2D(
-      y1, y2, guess1, guess2, return_x1, return_x2, 1e-8, converged, func2, func3);
+      y1, y2, guess1, guess2, return_x1, return_x2, 1e-8, 1e-8, func2, func3);
   x1_soln = 0.1;
   x2_soln = 0.3;
-  EXPECT_TRUE(converged);
   EXPECT_NEAR(return_x1, x1_soln, tol);
   EXPECT_NEAR(return_x2, x2_soln, tol);
 
   // If there is no solution it should not converge
   y1 = -2000;
   y2 = -2000; // no solution
-  FluidPropertiesUtils::NewtonSolve2D(
-      y1, y2, guess1, guess2, return_x1, return_x2, 1e-8, converged, func1, func3);
-  EXPECT_FALSE(converged);
+  try
+  {
+    FluidPropertiesUtils::NewtonSolve2D(
+        y1, y2, guess1, guess2, return_x1, return_x2, 1e-8, 1e-8, func1, func3);
+    FAIL();
+  }
+  catch (MooseException &)
+  {
+  }
 }
