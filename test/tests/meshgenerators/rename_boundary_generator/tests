@@ -78,6 +78,10 @@
 
     requirement = 'The system shall be able to merge boundaries in a mesh.'
   []
+  [test_things]
+    type = RunApp
+    input = 'deptest.i'
+  []
 
   [errors]
     requirement = 'The system shall throw a reasonable error:'
