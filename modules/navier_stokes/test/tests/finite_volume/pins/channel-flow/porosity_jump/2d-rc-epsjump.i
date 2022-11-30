@@ -1,4 +1,4 @@
-mu=1.1
+# mu=1.1
 rho=1.1
 advected_interp_method='upwind'
 velocity_interp_method='rc'
@@ -9,8 +9,8 @@ velocity_interp_method='rc'
     dim = 2
     dx = '1 1'
     dy = '0.5'
-    ix = '30 30'
-    iy = '20'
+    ix = '3 3'
+    iy = '2'
     subdomain_id = '1 2'
   []
 []
@@ -40,7 +40,11 @@ velocity_interp_method='rc'
     initial_condition = 1e-6
   []
   [pressure]
-    type = INSFVPressureVariable
+    type = PINSFVPressureVariable
+    u = u
+    v = v
+    porosity = porosity
+    rho = ${rho}
   []
 []
 
@@ -96,12 +100,12 @@ velocity_interp_method='rc'
     rho = ${rho}
     momentum_component = 'x'
   []
-  [u_viscosity]
-    type = PINSFVMomentumDiffusion
-    variable = u
-    mu = ${mu}
-    momentum_component = 'x'
-  []
+  # [u_viscosity]
+  #   type = PINSFVMomentumDiffusion
+  #   variable = u
+  #   mu = ${mu}
+  #   momentum_component = 'x'
+  # []
   [u_pressure]
     type = PINSFVMomentumPressure
     variable = u
@@ -117,12 +121,12 @@ velocity_interp_method='rc'
     rho = ${rho}
     momentum_component = 'y'
   []
-  [v_viscosity]
-    type = PINSFVMomentumDiffusion
-    variable = v
-    mu = ${mu}
-    momentum_component = 'y'
-  []
+  # [v_viscosity]
+  #   type = PINSFVMomentumDiffusion
+  #   variable = v
+  #   mu = ${mu}
+  #   momentum_component = 'y'
+  # []
   [v_pressure]
     type = PINSFVMomentumPressure
     variable = v
@@ -167,7 +171,7 @@ velocity_interp_method='rc'
 []
 
 [Materials]
-  inactive = 'smooth'
+  inactive = 'smooth jump'
   [jump]
     type = ADPiecewiseByBlockFunctorMaterial
     prop_name = 'porosity'
