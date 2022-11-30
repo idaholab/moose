@@ -192,12 +192,6 @@ public:
   virtual void addMooseObjects();
 
   /**
-   * Perform mesh setup actions such as setting up the coordinate system(s) and
-   * creating ghosted elements.
-   */
-  virtual void setupMesh();
-
-  /**
    * Get the ThermalHydraulicsApp
    */
   ThermalHydraulicsApp & getApp() { return _app; }
@@ -329,6 +323,11 @@ public:
    */
   void addRelationshipManagers();
 
+  /**
+   * Sets up the coordinate system for each subdomain
+   */
+  void setupCoordinateSystem();
+
 protected:
   struct VariableInfo
   {
@@ -393,11 +392,6 @@ protected:
   void setupInitialConditionsFromFile();
 
   void setupInitialConditionObjects();
-
-  /**
-   * Sets the coordinate system for each subdomain
-   */
-  void setupCoordinateSystem();
 
   /**
    * Setup ctirical heat flux table user object

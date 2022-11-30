@@ -608,15 +608,6 @@ Simulation::setupCoordinateSystem()
 }
 
 void
-Simulation::setupMesh()
-{
-  if (_components.size() == 0)
-    return;
-
-  setupCoordinateSystem();
-}
-
-void
 Simulation::couplingMatrixIntegrityCheck() const
 {
   if (!_fe_problem.shouldSolve())

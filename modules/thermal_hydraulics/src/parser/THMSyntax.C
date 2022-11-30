@@ -43,7 +43,7 @@ registerActions(Syntax & syntax)
 {
   registerTask("THM:init_simulation", true);
   registerTask("THM:create_thm_mesh", false);
-  registerTask("THM:setup_mesh", true);
+  registerTask("THM:set_up_coordinate_system", true);
   registerTask("THM:build_mesh", true);
   registerTask("THM:init_components", true);
   registerTask("THM:identify_loops", true);
@@ -79,8 +79,8 @@ registerActions(Syntax & syntax)
     syntax.addDependency("THM:integrity_check", "THM:debug_action");
     syntax.addDependency("THM:build_mesh", "THM:init_simulation");
     syntax.addDependency("add_mesh_generator", "THM:build_mesh");
-    syntax.addDependency("THM:setup_mesh", "create_problem_complete");
-    syntax.addDependency("add_fluid_properties", "THM:setup_mesh");
+    syntax.addDependency("THM:set_up_coordinate_system", "create_problem_complete");
+    syntax.addDependency("add_fluid_properties", "THM:set_up_coordinate_system");
     syntax.addDependency("add_elemental_field_variable", "add_fluid_properties");
     syntax.addDependency("add_aux_variable", "add_fluid_properties");
     syntax.addDependency("add_variable", "add_fluid_properties");

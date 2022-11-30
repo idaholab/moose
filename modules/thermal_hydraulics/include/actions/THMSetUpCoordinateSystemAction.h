@@ -10,14 +10,17 @@
 #pragma once
 
 #include "Action.h"
+#include "THMAppInterface.h"
 
-class THMSetupMeshAction : public Action
+/**
+ * Sets up the coordinate system for THM.
+ */
+class THMSetUpCoordinateSystemAction : public Action, public THMAppInterface
 {
 public:
-  THMSetupMeshAction(const InputParameters & params);
-
-  virtual void act();
-
-public:
   static InputParameters validParams();
+
+  THMSetUpCoordinateSystemAction(const InputParameters & params);
+
+  virtual void act() override;
 };
