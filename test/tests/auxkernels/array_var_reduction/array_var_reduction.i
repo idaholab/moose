@@ -17,18 +17,10 @@
 []
 
 [AuxVariables]
-  [min_var]
-  []
-
-  [max_var]
-  []
-
-  [sum_var]
-  []
-
-  [average_var]
-  []
-
+  [min_var][]
+  [max_var][]
+  [sum_var][]
+  [average_var][]
   [arr_var]
     components = 4
   []
