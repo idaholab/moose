@@ -18,7 +18,7 @@ public:
   ArrayVarReductionAux(const InputParameters & parameters);
 
 protected:
-  virtual Real computeValue();
+  Real computeValue() override;
 
   /// variable for storing the array variable that needs to be processed
   const ArrayVariableValue & _array_variable;
