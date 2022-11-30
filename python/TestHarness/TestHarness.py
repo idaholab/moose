@@ -785,6 +785,15 @@ class TestHarness:
         # Record the input file name that was used
         self.options.results_storage['INPUT_FILE_NAME'] = self.options.input_file_name
 
+        # Record that we are using --sep-files* options
+        self.options.results_storage['SEP_FILES'] = (True if self.options.pbs else False
+                                                     or self.options.ok_files
+                                                     or self.options.fail_files
+                                                     or self.options.sep_files)
+
+        # Record the Scheduler Plugin used
+        self.options.results_storage['SCHEDULER'] = self.scheduler.__class__.__name__
+
         # Write some useful data to our results_storage
         for job_group in all_jobs:
             for job in job_group:
@@ -799,10 +808,7 @@ class TestHarness:
 
                 # If output has been stored in separate files, don't make additional copies by
                 # storing that data in this json results file (--pbs || --sep-files, etc options).
-                if job.getOutputFile() is not None:
-                    output = ''
-                else:
-                    output = job.getOutput()
+                output = '' if job.getOutputFile() else job.getOutput()
 
                 self.options.results_storage[job.getTestDir()][job.getTestName()] = {'NAME'           : job.getTestNameShort(),
                                                                                      'LONG_NAME'      : job.getTestName(),
@@ -813,7 +819,8 @@ class TestHarness:
                                                                                      'COLOR'          : message_color,
                                                                                      'CAVEATS'        : list(job.getCaveats()),
                                                                                      'OUTPUT'         : output,
-                                                                                     'COMMAND'        : job.getCommand()}
+                                                                                     'COMMAND'        : job.getCommand(),
+                                                                                     'META_DATA'      : job.getMetaData()}
 
                 # Additional data to store (overwrites any previous matching keys)
                 self.options.results_storage[job.getTestDir()].update(job.getMetaData())
@@ -1096,22 +1103,22 @@ class TestHarness:
             print('ERROR: The group and not_group options cannot specify the same group')
             sys.exit(1)
         if opts.valgrind_mode and opts.nthreads > 1:
-            print('ERROR: --threads can not be used with --valgrind')
+            print('ERROR: --threads cannot be used with --valgrind')
             sys.exit(1)
         if opts.check_input and opts.no_check_input:
-            print('ERROR: --check-input and --no-check-input can not be used together')
+            print('ERROR: --check-input and --no-check-input cannot be used simultaneously')
             sys.exit(1)
         if opts.check_input and opts.enable_recover:
-            print('ERROR: --check-input and --recover can not be used together')
+            print('ERROR: --check-input and --recover cannot be used simultaneously')
             sys.exit(1)
         if opts.spec_file and not os.path.exists(opts.spec_file):
             print('ERROR: --spec-file supplied but path does not exist')
             sys.exit(1)
         if opts.failed_tests and opts.pbs:
-            print('ERROR: --failed-tests and --pbs can not be used simultaneously')
+            print('ERROR: --failed-tests and --pbs cannot be used simultaneously')
             sys.exit(1)
         if opts.queue_cleanup and not opts.pbs:
-            print('ERROR: --queue-cleanup can not be used without additional queue options')
+            print('ERROR: --queue-cleanup cannot be used without additional queue options')
             sys.exit(1)
         if opts.queue_source_command and not os.path.exists(opts.queue_source_command):
             print('ERROR: pre-source supplied but path does not exist')
@@ -1120,7 +1127,13 @@ class TestHarness:
             print('ERROR: --failed-tests could not detect a previous run')
             sys.exit(1)
         if opts.pbs and opts.pedantic_checks:
-            print('ERROR: --pbs and --pedantic-checks  can not be used simultaneously')
+            print('ERROR: --pbs and --pedantic-checks cannot be used simultaneously')
+            sys.exit(1)
+        if opts.pbs and opts.jobs:
+            print('ERROR: --pbs and -j|--jobs cannot be used simultaneously')
+            sys.exit(1)
+        if opts.pbs and opts.extra_info:
+            print('ERROR: --pbs and -e (extra info) cannot be used simultaneously')
             sys.exit(1)
 
         # Flatten input_file_name from ['tests', 'speedtests'] to just tests if none supplied

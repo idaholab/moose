@@ -89,6 +89,10 @@ class Job(object):
                                     self.timeout,
                                     self.finished]
 
+        self.__pending_statuses = [self.hold,
+                                   self.queued,
+                                   self.running]
+
         # Initialize jobs with a holding status
         self.setStatus(self.hold)
 
@@ -360,6 +364,8 @@ class Job(object):
         return self.getStatus() == self.running
     def isTimeout(self):
         return self.getStatus() == self.timeout
+    def isPending(self):
+        return self.getStatus() in self.__pending_statuses
     def isFinished(self):
         return self.getStatus() in self.__finished_statuses
 

@@ -33,6 +33,10 @@ class RunPBS(QueueManager):
     def hasTimedOutOrFailed(self, job_data):
         """ use qstat and return bool on job failures outside of the TestHarness's control """
 
+        jobs = job_data.jobs.getJobs()
+        queue_plugin = self.__class__.__name__
+        meta_data = job_data.json_data.get(jobs[0].getTestDir())
+
         KNOWN_EXITCODES = { '271' : 'JOB_EXEC_KILL_WALLTIME 271',
                             '-24' : 'JOB_EXEC_KILL_NCPUS_BURST -24',
                             '-25' : 'JOB_EXEC_KILL_NCPUS_SUM -25',
@@ -41,9 +45,9 @@ class RunPBS(QueueManager):
                             '-28' : 'JOB_EXEC_KILL_CPUT -28',
                             '-29' : 'JOB_EXEC_KILL_WALLTIME -29' }
 
-        launch_id = job_data.json_data.get(job_data.job_dir,
-                                           {}).get(job_data.plugin,
-                                                   {}).get('ID', "").split('.')[0]
+        launch_id = meta_data.get(queue_plugin, {}).get('ID', '').split('.')[0]
+        with open('/home/milljm/testing_qsubplugin', 'w') as sfile:
+            sfile.write(str(launch_id))
 
         # We shouldn't run into a null, but just in case, lets handle it
         if launch_id:
@@ -62,12 +66,14 @@ class RunPBS(QueueManager):
 
             job_result = job_meta.get('Exit_status', False)
             job_output = job_meta.get('Output_Path', False)
+            with open('/home/milljm/qsub_testing_output', 'w') as sfile:
+                sfile.write(json.dumps(job_meta))
             if not job_result:
                 return
 
             # woops. This job was killed by PBS for some reason
             if job_result and job_result in KNOWN_EXITCODES.keys():
-                for job in job_data.jobs.getJobs():
+                for job in jobs:
                     job.addCaveats(KNOWN_EXITCODES[job_result])
                 return True
 
@@ -75,26 +81,31 @@ class RunPBS(QueueManager):
             elif job_result and job_result != "0":
 
                 # Try and gather some useful output we can tack on to one of the job objects
+                # TODO: Would be nice to tack this on to the exact job which caused the failure
+                # but I see no way how to do that when it was the job group that failed the
+                # TestHarness catastrohpically in some way.
                 output_file = job_output.split(':')[1]
                 if os.path.exists(output_file):
                     with open(output_file, 'r') as f:
-                        output_string = util.readOutput(f, None, job_data.jobs.getJobs()[0].getTester())
-                    job_data.jobs.getJobs()[0].setOutput(output_string)
+                        output_string = util.readOutput(f, None, jobs[0].getTester())
+                    jobs[0].setOutput(output_string)
 
                 # Add a caveat to each job, explaining that one of the jobs caused a TestHarness exception
-                for job in job_data.jobs.getJobs():
+                for job in jobs:
                     job.addCaveats('TESTHARNESS EXCEPTION')
                 return True
 
     def _augmentTemplate(self, job):
         """ populate qsub script template with paramaters """
+        job_data = self.options.results_storage.get(job.getTestDir(), {})
+
         template = {}
 
         # Launch script location
         template['launch_script'] = os.path.join(job.getTestDir(), os.path.basename(job.getTestNameShort()) + '.qsub')
 
         # NCPUS
-        template['mpi_procs'] = job.getMetaData().get('QUEUEING_NCPUS', 1)
+        template['mpi_procs'] = job_data[self.__class__.__name__].get('QUEUEING_NCPUS', 1)
 
         # Compute node requirement
         if self.options.pbs_node_cpus and template['mpi_procs'] > self.options.pbs_node_cpus:
@@ -105,7 +116,7 @@ class RunPBS(QueueManager):
         template['nodes'] = math.ceil(nodes)
 
         # Convert MAX_TIME to hours:minutes for walltime use
-        max_time = job.getMetaData().get('QUEUEING_MAXTIME', 1)
+        max_time = job_data[self.__class__.__name__].get('QUEUEING_MAXTIME', 1)
         hours = int(int(max_time) / 3600)
         minutes = int(int(max_time) / 60) % 60
         template['walltime'] = '{0:02d}'.format(hours) + ':' + '{0:02d}'.format(minutes) + ':00'
@@ -143,6 +154,7 @@ class RunPBS(QueueManager):
         """ execute qsub and return the launch id """
         template = self._augmentTemplate(job)
         tester = job.getTester()
+        job_meta = self.options.results_storage.get(job.getTestDir(), { job.getTestDir() : {} })
 
         self.createQueueScript(job, template)
 
@@ -170,9 +182,10 @@ class RunPBS(QueueManager):
             job.setOutput(launch_results)
 
         else:
-            job.addMetaData(RunPBS={'ID' : launch_results,
-                                    'QSUB_COMMAND' : command,
-                                    'NCPUS' : template['mpi_procs'],
-                                    'WALLTIME' : template['walltime'],
-                                    'QSUB_OUTPUT' : template['output']})
+            job_meta[self.__class__.__name__].update({'ID'           : launch_results,
+                                                      'QSUB_COMMAND' : command,
+                                                      'NCPUS'        : template['mpi_procs'],
+                                                      'WALLTIME'     : template['walltime'],
+                                                      'QSUB_OUTPUT'  : template['output']})
+
             tester.setStatus(tester.queued, 'LAUNCHING')
