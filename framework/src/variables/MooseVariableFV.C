@@ -841,23 +841,7 @@ MooseVariableFV<OutputType>::evaluate(const SingleSidedFaceArg & face,
   {
     _ssf_face = fi;
 
-    // We do this to ensure that given an upwind scheme we just use the upwind cell value
-    // instead of linear extrapolation
-    //
-    // lindsayad: I think this should be changed. I've decided that I don't think SSFs should take
-    // limiter or elem_is_upwind arguments because to me the purpose of the SSF is to only use data
-    // on side of the face. If elem_is_upwind is false but you want to evaluate on the element side
-    // of the face, it feels wrong to use to downwind (neighbor side of the face) information. Note
-    // that the developer here isn't violating my thoughts on this but it also appears the developer
-    // thought that the subdomain ID of the SSF would only ever correspond to the element side of
-    // the face. For instance I think the previous developer probably would also want to toggle this
-    // to false if the variable is only defined on the neighbor side of the face and
-    // face.elem_is_upwind is false
-    bool linear_extrapolation = _two_term_boundary_expansion;
-    if (face.limiter_type == Moose::FV::LimiterType::Upwind && face.elem_is_upwind)
-      linear_extrapolation = false;
-
-    const auto boundary_value = getExtrapolatedBoundaryFaceValue(*fi, linear_extrapolation);
+    const auto boundary_value = getExtrapolatedBoundaryFaceValue(*fi, _two_term_boundary_expansion);
     _ssf_face = nullptr;
     return boundary_value;
   }
