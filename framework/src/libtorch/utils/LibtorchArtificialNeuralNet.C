@@ -120,6 +120,33 @@ LibtorchArtificialNeuralNet::addLayer(
 
   _weights.push_back(register_module(layer_name, torch::nn::Linear(inp_neurons, out_neurons)));
 }
+
+void
+LibtorchArtificialNeuralNet::store(nlohmann::json & json) const
+{
+  for (const auto & param_layer : this->named_parameters())
+  {
+    auto sizes = param_layer.value().data().sizes();
+
+    // Libtorch holds sizes in integers instead of unsigned integers
+    int max_size = 1;
+    for (const auto & dim_size : sizes)
+      max_size *= dim_size;
+
+    // We cast the parameters into a 1D vector
+    json[param_layer.key()] =
+        std::vector<Real>({param_layer.value().data().data_ptr<Real>(),
+                           param_layer.value().data().data_ptr<Real>() + max_size});
+  }
+}
+
+void
+to_json(nlohmann::json & json, const Moose::LibtorchArtificialNeuralNet * const & network)
+{
+  if (network)
+    network->store(json);
+}
+
 }
 
 template <>
@@ -186,6 +213,24 @@ dataLoad<Moose::LibtorchArtificialNeuralNet>(
       name, num_inputs, num_outputs, num_neurons_per_layer, activation_functions);
 
   torch::load(nn, name);
+}
+
+template <>
+void
+dataStore<Moose::LibtorchArtificialNeuralNet const>(
+    std::ostream & /*stream*/,
+    Moose::LibtorchArtificialNeuralNet const *& /*nn*/,
+    void * /*context*/)
+{
+}
+
+template <>
+void
+dataLoad<Moose::LibtorchArtificialNeuralNet const>(
+    std::istream & /*stream*/,
+    Moose::LibtorchArtificialNeuralNet const *& /*nn*/,
+    void * /*context*/)
+{
 }
 
 #endif

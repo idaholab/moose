@@ -14,32 +14,34 @@
 #include "LibtorchArtificialNeuralNet.h"
 #endif
 
-#include "GeneralVectorPostprocessor.h"
+#include "GeneralReporter.h"
+#include "nlohmann/json.h"
 
 /**
- * A VectorPostprocessor which can print the parameter values of a
+ * A Reporter which can print the parameter values of a
  * LibtorchArtificialNeuralNetwork from within a Controller object.
  */
-class LibtorchArtificialNeuralNetParameters : public GeneralVectorPostprocessor
+class LibtorchArtificialNeuralNetParameters : public GeneralReporter
 {
 public:
   static InputParameters validParams();
 
   LibtorchArtificialNeuralNetParameters(const InputParameters & params);
 
-  virtual void initialize() override{};
-  virtual void execute() override;
-  virtual void finalize() override{};
+  void initialize() override{};
+  void execute() override;
+  void finalize() override{};
 
-#ifdef LIBTORCH_ENABLED
-  /// Fill the vector psotprocessor values with the parameters
-  static void fillParameterValues(std::vector<Real> & parameter_values,
-                                  const std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & ann);
-#endif
+  void initialSetup() override;
 
 protected:
   /// The name of the control objects which hold the neural networks
   const std::string _control_name;
-  /// A vector which stores the parameters of the neural net
-  VectorPostprocessorValue & _nn_parameter_values;
+
+  /// Pointer to the controller so that we can avoid warehouse lookups in the execute function
+  const LibtorchNeuralNetControl * _controller;
+
+  /// Reference to a neural net pointer declared as a reporter.
+  /// The parameters of this network are printed into a json file.
+  const Moose::LibtorchArtificialNeuralNet *& _network;
 };

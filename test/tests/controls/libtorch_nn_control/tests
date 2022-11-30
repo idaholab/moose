@@ -14,16 +14,17 @@
     libtorch = true
   []
   [run-with-torch-parameters]
-    type = CSVDiff
+    type = JSONDiff
     input = read_control.i
-    csvdiff = 'torch_parameter_read_T_reporter_0026.csv torch_parameter_read_nn_parameters_0026.csv'
+    jsondiff = 'torch_parameter_read.json'
     cli_args = "Controls/src_control/filename='model_parameters_2.net'
                 Controls/src_control/torch_script_format=false
                 Controls/src_control/input_timesteps=2
                 Controls/src_control/num_neurons_per_layer='4 2'
                 Controls/src_control/activation_function='relu'
-                VectorPostprocessors/inactive=''
-                Outputs/file_base='torch_parameter_read'"
+                Reporters/inactive=''
+                Outputs/file_base='torch_parameter_read'
+                Reporters/T_reporter/outputs='json_out'"
     requirement = "The system shall be able to read a neural network from a parameter file and use "
                   "it to control a transient process."
     libtorch = true

@@ -245,4 +245,12 @@ LibtorchNeuralNetControl::prepareInputTensor()
 
   return input_tensor.transpose(0, 1);
 }
+
+const Moose::LibtorchNeuralNetBase &
+LibtorchNeuralNetControl::controlNeuralNet() const
+{
+  mooseAssert(_nn, "The neural network in the controller must exist!");
+  return *_nn;
+}
+
 #endif

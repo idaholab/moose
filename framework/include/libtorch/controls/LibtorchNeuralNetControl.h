@@ -47,8 +47,8 @@ public:
    */
   void loadControlNeuralNet(const std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & input_nn);
 
-  /// Return a pointer to the stored neural network
-  const std::shared_ptr<Moose::LibtorchNeuralNetBase> controlNeuralNet() { return _nn; }
+  /// Return a pointer to the stored neural networt
+  const Moose::LibtorchNeuralNetBase & controlNeuralNet() const;
 #endif
 
 protected:

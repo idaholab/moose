@@ -66,19 +66,13 @@
     type = ConstantReporter
     real_vector_names = 'center_temp env_temp reward left_flux log_prob_left_flux'
     real_vector_values = '0; 0; 0; 0; 0;'
-    outputs = csv
+    outputs = 'csv_out'
     execute_on = timestep_begin
   []
-  [reward]
-    type = DRLRewardReporter
-    drl_trainer_name = nn_trainer
-  []
-[]
-
-[VectorPostprocessors]
   [nn_parameters]
     type = DRLControlNeuralNetParameters
     trainer_name = nn_trainer
+    outputs = json_out
   []
 []
 
@@ -89,5 +83,14 @@
 
 [Outputs]
   file_base = train_out
-  csv = true
+  [csv_out]
+    type = CSV
+    execute_on = FINAL
+  []
+  [json_out]
+    type = JSON
+    start_step = 3
+    interval = 3
+    execute_system_information_on = NONE
+  []
 []

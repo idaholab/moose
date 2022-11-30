@@ -97,28 +97,33 @@ cp = 1.0
   [src_control]
     type = LibtorchNeuralNetControl
     parameters = "Kernels/anti_source/value"
-    action_postprocessors = "control_value"
     responses = 'T_max'
   []
 []
 
 [Reporters]
+  inactive = 'nn_parameters'
   [T_reporter]
     type = AccumulateReporter
     reporters = 'T_max/value control_value/value'
+    outputs = csv_out
   []
-[]
-
-[VectorPostprocessors]
-  inactive = 'nn_parameters'
   [nn_parameters]
     type = LibtorchArtificialNeuralNetParameters
     control_name = src_control
     execute_on = FINAL
+    outputs = json_out
   []
 []
 
 [Outputs]
-  csv = true
-  execute_on = FINAL
+  [csv_out]
+    type = CSV
+    execute_on = FINAL
+  []
+  [json_out]
+    type = JSON
+    execute_on = FINAL
+    execute_system_information_on = NONE
+  []
 []

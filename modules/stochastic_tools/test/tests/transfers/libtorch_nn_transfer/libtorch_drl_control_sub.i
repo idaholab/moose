@@ -108,6 +108,12 @@
   [T_reporter]
     type = AccumulateReporter
     reporters = 'center_temp_tend/value env_temp/value reward/value left_flux/value log_prob_left_flux/value'
+    outputs = 'csv_out'
+  []
+  [nn_parameters]
+    type = LibtorchArtificialNeuralNetParameters
+    control_name = src_control
+    outputs = json_out
   []
 []
 
@@ -128,13 +134,6 @@
   []
 []
 
-[VectorPostprocessors]
-  [nn_param_pp]
-    type = LibtorchArtificialNeuralNetParameters
-    control_name = src_control
-  []
-[]
-
 [Executioner]
   type = Transient
   solve_type = 'NEWTON'
@@ -151,6 +150,13 @@
 []
 
 [Outputs]
-  csv = true
-  execute_on = FINAL
+  [csv_out]
+    type = CSV
+    execute_on = FINAL
+  []
+  [json_out]
+    type = JSON
+    execute_on = FINAL
+    execute_system_information_on = NONE
+  []
 []

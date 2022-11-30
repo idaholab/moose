@@ -17,6 +17,7 @@
 #include "MooseError.h"
 #include "DataIO.h"
 #include "MultiMooseEnum.h"
+#include "nlohmann/json.h"
 
 namespace Moose
 {
@@ -76,6 +77,9 @@ public:
   /// Construct the neural network
   void constructNeuralNetwork();
 
+  /// Store the network architecture in a json file (for debugging, visualization)
+  void store(nlohmann::json & json) const;
+
 protected:
   /// Name of the neural network
   const std::string _name;
@@ -93,6 +97,8 @@ protected:
   MultiMooseEnum _activation_function;
 };
 
+void to_json(nlohmann::json & json, const Moose::LibtorchArtificialNeuralNet * const & network);
+
 }
 
 template <>
@@ -106,5 +112,16 @@ void dataLoad<Moose::LibtorchArtificialNeuralNet>(
     std::istream & stream,
     std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & nn,
     void * context);
+
+// This is needed because the reporter which is used to ouput the neural net parameters to JSON
+// requires a dataStore/dataLoad. However, these functions will be empty due to the fact that
+// we are only interested in the JSON output and we don't want to output everything
+template <>
+void dataStore<Moose::LibtorchArtificialNeuralNet const>(
+    std::ostream & stream, Moose::LibtorchArtificialNeuralNet const *& nn, void * context);
+
+template <>
+void dataLoad<Moose::LibtorchArtificialNeuralNet const>(
+    std::istream & stream, Moose::LibtorchArtificialNeuralNet const *& nn, void * context);
 
 #endif
