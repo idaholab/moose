@@ -84,10 +84,10 @@ TabulatedBicubicFluidProperties::constructInterpolation()
     {
       // incrementing the exponent linearly will yield a log-spaced grid after taking the value to
       // the power of 10
-      Real dv = (log10(_v_max) - log10(_v_min)) / ((Real)_num_v - 1);
-      Real log_v_min = log10(_v_min);
+      Real dv = (std::log10(_v_max) - std::log10(_v_min)) / ((Real)_num_v - 1);
+      Real log_v_min = std::log10(_v_min);
       for (unsigned int j = 0; j < _num_v; ++j)
-        _specific_volume[j] = pow(log_v_min + j * dv, 10);
+        _specific_volume[j] = std::pow(10, log_v_min + j * dv);
     }
     else
     {
