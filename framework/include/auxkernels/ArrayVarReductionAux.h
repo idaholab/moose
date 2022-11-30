@@ -20,7 +20,7 @@ public:
 protected:
   Real computeValue() override;
 
-  /// variable for storing the array variable that needs to be processed
+  /// the array variable value we will perform the reduction on
   const ArrayVariableValue & _array_variable;
 
   /// The type of reduction operation performed on the array variable
