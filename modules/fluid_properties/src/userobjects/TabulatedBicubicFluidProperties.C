@@ -133,6 +133,8 @@ TabulatedBicubicFluidProperties::constructInterpolation()
 
     for (unsigned int i = 0; i < _num_v; ++i)
     {
+      Real p_guess = _p_initial_guess;
+      Real T_guess = _T_initial_guess;
       p_from_v_e[i].resize(_num_e);
       T_from_v_e[i].resize(_num_e);
       for (unsigned int j = 0; j < _num_e; ++j)
@@ -155,8 +157,8 @@ TabulatedBicubicFluidProperties::constructInterpolation()
           _error_on_out_of_bounds = false;
           p_T_from_v_e(_specific_volume[i],
                        _internal_energy[j],
-                       _p_initial_guess,
-                       _T_initial_guess,
+                       p_guess,
+                       T_guess,
                        p_ve,
                        T_ve,
                        conversion_succeeded);
@@ -184,6 +186,9 @@ TabulatedBicubicFluidProperties::constructInterpolation()
 
         p_from_v_e[i][j] = p_ve;
         T_from_v_e[i][j] = T_ve;
+
+        p_guess = p_ve;
+        T_guess = T_ve;
       }
     }
     // output warning if nans or values out of bounds
@@ -237,6 +242,8 @@ TabulatedBicubicFluidProperties::constructInterpolation()
 
     for (unsigned int i = 0; i < _num_v; ++i)
     {
+      Real p_guess = _p_initial_guess;
+      Real T_guess = _T_initial_guess;
       p_from_v_h[i].resize(_num_e);
       T_from_v_h[i].resize(_num_e);
       for (unsigned int j = 0; j < _num_e; ++j)
@@ -259,8 +266,8 @@ TabulatedBicubicFluidProperties::constructInterpolation()
           _error_on_out_of_bounds = false;
           p_T_from_v_h(_specific_volume[i],
                        _enthalpy[j],
-                       _p_initial_guess,
-                       _T_initial_guess,
+                       p_guess,
+                       T_guess,
                        p_vh,
                        T_vh,
                        conversion_succeeded);
@@ -288,6 +295,9 @@ TabulatedBicubicFluidProperties::constructInterpolation()
 
         p_from_v_h[i][j] = p_vh;
         T_from_v_h[i][j] = T_vh;
+
+        p_guess = p_vh;
+        T_guess = T_vh;
       }
     }
     // output warnings if nans our values out of bounds
