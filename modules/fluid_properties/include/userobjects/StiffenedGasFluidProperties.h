@@ -26,10 +26,6 @@ public:
   StiffenedGasFluidProperties(const InputParameters & parameters);
   virtual ~StiffenedGasFluidProperties();
 
-  virtual Real p_from_v_e(Real v, Real e) const override;
-  virtual void p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Real & dp_de) const override;
-  virtual Real T_from_v_e(Real v, Real e) const override;
-  virtual void T_from_v_e(Real v, Real e, Real & T, Real & dT_dv, Real & dT_de) const override;
   virtual Real c_from_v_e(Real v, Real e) const override;
   virtual void c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Real & dc_de) const override;
   virtual Real cp_from_v_e(Real v, Real e) const override;
@@ -40,21 +36,17 @@ public:
   virtual void mu_from_v_e(Real v, Real e, Real & mu, Real & dmu_dv, Real & dmu_de) const override;
   virtual Real k_from_v_e(Real v, Real e) const override;
   virtual void k_from_v_e(Real v, Real e, Real & k, Real & dk_dv, Real & dk_de) const override;
-  virtual Real s_from_v_e(Real v, Real e) const override;
-  virtual void s_from_v_e(Real v, Real e, Real & s, Real & ds_dv, Real & ds_de) const override;
   virtual Real s_from_h_p(Real h, Real p) const override;
   virtual void s_from_h_p(Real h, Real p, Real & s, Real & ds_dh, Real & ds_dp) const override;
-  virtual Real s_from_p_T(Real p, Real T) const override;
-  virtual void s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const override;
   virtual Real rho_from_p_s(Real p, Real s) const override;
   virtual void
   rho_from_p_s(Real p, Real s, Real & rho, Real & drho_dp, Real & drho_ds) const override;
-  virtual Real rho_from_p_T(Real p, Real T) const override;
-  virtual void
-  rho_from_p_T(Real p, Real T, Real & rho, Real & drho_dp, Real & drho_dT) const override;
-  virtual Real e_from_p_rho(Real p, Real rho) const override;
-  virtual void
-  e_from_p_rho(Real p, Real rho, Real & e, Real & de_dp, Real & de_drho) const override;
+  propfuncWithDefinitionOverride(rho, p, T);
+  propfuncWithDefinitionOverride(e, p, rho);
+  propfuncWithDefinitionOverride(s, v, e);
+  propfuncWithDefinitionOverride(s, p, T);
+  propfuncWithDefinitionOverride(T, v, e);
+  propfuncWithDefinitionOverride(p, v, e);
   virtual Real e_from_T_v(Real T, Real v) const override;
   virtual void e_from_T_v(Real T, Real v, Real & e, Real & de_dT, Real & de_dv) const override;
   virtual Real p_from_T_v(Real T, Real v) const override;
@@ -115,3 +107,167 @@ protected:
 };
 
 #pragma GCC diagnostic pop
+
+template <typename CppType>
+CppType
+StiffenedGasFluidProperties::rho_from_p_T_template(const CppType & p, const CppType & T) const
+{
+  mooseAssert(((_gamma - 1.0) * _cv * T) != 0.0, "Invalid gamma or cv or temperature detected!");
+  CppType rho = (p + _p_inf) / ((_gamma - 1.0) * _cv * T);
+  if (!_allow_nonphysical_states && rho <= 0.)
+    return getNaN();
+  else
+    return rho;
+}
+
+template <typename CppType>
+void
+StiffenedGasFluidProperties::rho_from_p_T_template(
+    const CppType & p, const CppType & T, CppType & rho, CppType & drho_dp, CppType & drho_dT) const
+{
+  mooseAssert(((_gamma - 1.0) * _cv * T) != 0.0, "Invalid gamma or cv or temperature detected!");
+  rho = (p + _p_inf) / ((_gamma - 1.0) * _cv * T);
+  if (!_allow_nonphysical_states && rho <= 0.)
+  {
+    drho_dp = getNaN();
+    drho_dT = getNaN();
+  }
+  else
+  {
+    drho_dp = 1. / ((_gamma - 1.0) * _cv * T);
+    drho_dT = -(p + _p_inf) / ((_gamma - 1.0) * _cv * T * T);
+  }
+}
+
+template <typename CppType>
+CppType
+StiffenedGasFluidProperties::e_from_p_rho_template(const CppType & p, const CppType & rho) const
+{
+  mooseAssert((_gamma - 1.0) * rho != 0., "Invalid gamma or density detected!");
+  return (p + _gamma * _p_inf) / ((_gamma - 1.0) * rho) + _q;
+}
+
+template <typename CppType>
+void
+StiffenedGasFluidProperties::e_from_p_rho_template(
+    const CppType & p, const CppType & rho, CppType & e, CppType & de_dp, CppType & de_drho) const
+{
+  e = e_from_p_rho_template(p, rho);
+  de_dp = 1.0 / ((_gamma - 1.0) * rho);
+  de_drho = -(p + _gamma * _p_inf) / ((_gamma - 1.0) * rho * rho);
+}
+
+template <typename CppType>
+CppType
+StiffenedGasFluidProperties::T_from_v_e_template(const CppType & v, const CppType & e) const
+{
+  return (1.0 / _cv) * (e - _q - _p_inf * v);
+}
+
+template <typename CppType>
+void
+StiffenedGasFluidProperties::T_from_v_e_template(
+    const CppType & v, const CppType & e, CppType & T, CppType & dT_dv, CppType & dT_de) const
+{
+  T = T_from_v_e_template(v, e);
+  dT_dv = -_p_inf / _cv;
+  dT_de = 1.0 / _cv;
+}
+
+template <typename CppType>
+CppType
+StiffenedGasFluidProperties::p_from_v_e_template(const CppType & v, const CppType & e) const
+{
+  return (_gamma - 1.0) * (e - _q) / v - _gamma * _p_inf;
+}
+
+template <typename CppType>
+void
+StiffenedGasFluidProperties::p_from_v_e_template(
+    const CppType & v, const CppType & e, CppType & p, CppType & dp_dv, CppType & dp_de) const
+{
+  p = p_from_v_e_template(v, e);
+  dp_dv = -(_gamma - 1.0) * (e - _q) / v / v;
+  dp_de = (_gamma - 1.0) / v;
+}
+
+template <typename CppType>
+CppType
+StiffenedGasFluidProperties::s_from_v_e_template(const CppType & v, const CppType & e) const
+{
+  CppType T = T_from_v_e_template(v, e);
+  CppType p = p_from_v_e_template(v, e);
+  CppType n = std::pow(T, _gamma) / std::pow(p + _p_inf, _gamma - 1.0);
+  if (n <= 0.0)
+    return getNaN();
+  else
+    return _cv * std::log(n) + _q_prime;
+}
+
+template <typename CppType>
+void
+StiffenedGasFluidProperties::s_from_v_e_template(
+    const CppType & v, const CppType & e, CppType & s, CppType & ds_dv, CppType & ds_de) const
+{
+  CppType T, dT_dv, dT_de;
+  T_from_v_e_template(v, e, T, dT_dv, dT_de);
+
+  CppType p, dp_dv, dp_de;
+  p_from_v_e_template(v, e, p, dp_dv, dp_de);
+
+  const CppType n = std::pow(T, _gamma) / std::pow(p + _p_inf, _gamma - 1.0);
+  if (n <= 0.0)
+  {
+    s = getNaN();
+    ds_dv = getNaN();
+    ds_de = getNaN();
+  }
+  else
+  {
+    s = _cv * std::log(n) + _q_prime;
+
+    const CppType dn_dT = _gamma * std::pow(T, _gamma - 1.0) / std::pow(p + _p_inf, _gamma - 1.0);
+    const CppType dn_dp = std::pow(T, _gamma) * (1.0 - _gamma) * std::pow(p + _p_inf, -_gamma);
+
+    const CppType dn_dv = dn_dT * dT_dv + dn_dp * dp_dv;
+    const CppType dn_de = dn_dT * dT_de + dn_dp * dp_de;
+
+    ds_dv = _cv / n * dn_dv;
+    ds_de = _cv / n * dn_de;
+  }
+}
+
+template <typename CppType>
+CppType
+StiffenedGasFluidProperties::s_from_p_T_template(const CppType & p, const CppType & T) const
+{
+  CppType n = std::pow(T, _gamma) / std::pow(p + _p_inf, _gamma - 1.0);
+  if (n <= 0.0)
+    return getNaN();
+  else
+    return _cv * std::log(n) + _q_prime;
+}
+
+template <typename CppType>
+void
+StiffenedGasFluidProperties::s_from_p_T_template(
+    const CppType & p, const CppType & T, CppType & s, CppType & ds_dp, CppType & ds_dT) const
+{
+  const CppType n = std::pow(T, _gamma) / std::pow(p + _p_inf, _gamma - 1.0);
+  if (n <= 0.0)
+  {
+    s = getNaN();
+    ds_dp = getNaN();
+    ds_dT = getNaN();
+  }
+  else
+  {
+    s = _cv * std::log(n) + _q_prime;
+
+    const CppType dn_dT = _gamma * std::pow(T, _gamma - 1.0) / std::pow(p + _p_inf, _gamma - 1.0);
+    const CppType dn_dp = std::pow(T, _gamma) * (1.0 - _gamma) * std::pow(p + _p_inf, -_gamma);
+
+    ds_dp = _cv / n * dn_dp;
+    ds_dT = _cv / n * dn_dT;
+  }
+}

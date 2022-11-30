@@ -36,4 +36,13 @@
     max_parallel = 1
     ad_indexing_type = 'global'
   []
+  [jacobian-water97]
+    type = PetscJacobianTester
+    run_sim = True
+    ratio_tol = 1e-5
+    difference_tol = 1e6
+    cli_args = 'Executioner/num_steps=3 Components/pipe/n_elems=3 -snes_test_err 1e-10'
+    input = jac.massflowrate_3eqn_water97.i
+    ad_indexing_type = 'global'
+  []
 []

@@ -59,29 +59,51 @@ StiffenedGasFluidProperties::~StiffenedGasFluidProperties() {}
 Real
 StiffenedGasFluidProperties::p_from_v_e(Real v, Real e) const
 {
-  return (_gamma - 1.0) * (e - _q) / v - _gamma * _p_inf;
+  return p_from_v_e_template(v, e);
 }
 
 void
 StiffenedGasFluidProperties::p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Real & dp_de) const
 {
-  p = p_from_v_e(v, e);
-  dp_dv = -(_gamma - 1.0) * (e - _q) / v / v;
-  dp_de = (_gamma - 1.0) / v;
+  p_from_v_e_template(v, e, p, dp_dv, dp_de);
+}
+
+ADReal
+StiffenedGasFluidProperties::p_from_v_e(const ADReal & v, const ADReal & e) const
+{
+  return p_from_v_e_template(v, e);
+}
+
+void
+StiffenedGasFluidProperties::p_from_v_e(
+    const ADReal & v, const ADReal & e, ADReal & p, ADReal & dp_dv, ADReal & dp_de) const
+{
+  p_from_v_e_template(v, e, p, dp_dv, dp_de);
 }
 
 Real
 StiffenedGasFluidProperties::T_from_v_e(Real v, Real e) const
 {
-  return (1.0 / _cv) * (e - _q - _p_inf * v);
+  return T_from_v_e_template(v, e);
 }
 
 void
 StiffenedGasFluidProperties::T_from_v_e(Real v, Real e, Real & T, Real & dT_dv, Real & dT_de) const
 {
-  T = T_from_v_e(v, e);
-  dT_dv = -_p_inf / _cv;
-  dT_de = 1.0 / _cv;
+  T_from_v_e_template(v, e, T, dT_dv, dT_de);
+}
+
+ADReal
+StiffenedGasFluidProperties::T_from_v_e(const ADReal & v, const ADReal & e) const
+{
+  return T_from_v_e_template(v, e);
+}
+
+void
+StiffenedGasFluidProperties::T_from_v_e(
+    const ADReal & v, const ADReal & e, ADReal & p, ADReal & dp_dv, ADReal & dp_de) const
+{
+  T_from_v_e_template(v, e, p, dp_dv, dp_de);
 }
 
 Real
@@ -187,44 +209,26 @@ StiffenedGasFluidProperties::k_from_v_e(Real v, Real e, Real & k, Real & dk_dv, 
 Real
 StiffenedGasFluidProperties::s_from_v_e(Real v, Real e) const
 {
-  Real T = T_from_v_e(v, e);
-  Real p = p_from_v_e(v, e);
-  Real n = std::pow(T, _gamma) / std::pow(p + _p_inf, _gamma - 1.0);
-  if (n <= 0.0)
-    return getNaN();
-  else
-    return _cv * std::log(n) + _q_prime;
+  return s_from_v_e_template(v, e);
 }
 
 void
 StiffenedGasFluidProperties::s_from_v_e(Real v, Real e, Real & s, Real & ds_dv, Real & ds_de) const
 {
-  Real T, dT_dv, dT_de;
-  T_from_v_e(v, e, T, dT_dv, dT_de);
+  s_from_v_e_template(v, e, s, ds_dv, ds_de);
+}
 
-  Real p, dp_dv, dp_de;
-  p_from_v_e(v, e, p, dp_dv, dp_de);
+ADReal
+StiffenedGasFluidProperties::s_from_v_e(const ADReal & v, const ADReal & e) const
+{
+  return s_from_v_e_template(v, e);
+}
 
-  const Real n = std::pow(T, _gamma) / std::pow(p + _p_inf, _gamma - 1.0);
-  if (n <= 0.0)
-  {
-    s = getNaN();
-    ds_dv = getNaN();
-    ds_de = getNaN();
-  }
-  else
-  {
-    s = _cv * std::log(n) + _q_prime;
-
-    const Real dn_dT = _gamma * std::pow(T, _gamma - 1.0) / std::pow(p + _p_inf, _gamma - 1.0);
-    const Real dn_dp = std::pow(T, _gamma) * (1.0 - _gamma) * std::pow(p + _p_inf, -_gamma);
-
-    const Real dn_dv = dn_dT * dT_dv + dn_dp * dp_dv;
-    const Real dn_de = dn_dT * dT_de + dn_dp * dp_de;
-
-    ds_dv = _cv / n * dn_dv;
-    ds_de = _cv / n * dn_de;
-  }
+void
+StiffenedGasFluidProperties::s_from_v_e(
+    const ADReal & v, const ADReal & e, ADReal & s, ADReal & ds_dv, ADReal & ds_de) const
+{
+  s_from_v_e_template(v, e, s, ds_dv, ds_de);
 }
 
 Real
@@ -263,33 +267,26 @@ StiffenedGasFluidProperties::s_from_h_p(Real h, Real p, Real & s, Real & ds_dh, 
 Real
 StiffenedGasFluidProperties::s_from_p_T(Real p, Real T) const
 {
-  Real n = std::pow(T, _gamma) / std::pow(p + _p_inf, _gamma - 1.0);
-  if (n <= 0.0)
-    return getNaN();
-  else
-    return _cv * std::log(n) + _q_prime;
+  return s_from_p_T_template(p, T);
 }
 
 void
 StiffenedGasFluidProperties::s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const
 {
-  const Real n = std::pow(T, _gamma) / std::pow(p + _p_inf, _gamma - 1.0);
-  if (n <= 0.0)
-  {
-    s = getNaN();
-    ds_dp = getNaN();
-    ds_dT = getNaN();
-  }
-  else
-  {
-    s = _cv * std::log(n) + _q_prime;
+  s_from_p_T_template(p, T, s, ds_dp, ds_dT);
+}
 
-    const Real dn_dT = _gamma * std::pow(T, _gamma - 1.0) / std::pow(p + _p_inf, _gamma - 1.0);
-    const Real dn_dp = std::pow(T, _gamma) * (1.0 - _gamma) * std::pow(p + _p_inf, -_gamma);
+ADReal
+StiffenedGasFluidProperties::s_from_p_T(const ADReal & p, const ADReal & T) const
+{
+  return s_from_p_T_template(p, T);
+}
 
-    ds_dp = _cv / n * dn_dp;
-    ds_dT = _cv / n * dn_dT;
-  }
+void
+StiffenedGasFluidProperties::s_from_p_T(
+    const ADReal & p, const ADReal & T, ADReal & s, ADReal & ds_dp, ADReal & ds_dT) const
+{
+  s_from_p_T_template(p, T, s, ds_dp, ds_dT);
 }
 
 Real
@@ -347,46 +344,53 @@ StiffenedGasFluidProperties::e_from_v_h(Real v, Real h, Real & e, Real & de_dv, 
 Real
 StiffenedGasFluidProperties::rho_from_p_T(Real p, Real T) const
 {
-  mooseAssert(((_gamma - 1.0) * _cv * T) != 0.0, "Invalid gamma or cv or temperature detected!");
-  Real rho = (p + _p_inf) / ((_gamma - 1.0) * _cv * T);
-  if (!_allow_nonphysical_states && rho <= 0.)
-    return getNaN();
-  else
-    return rho;
+  return rho_from_p_T_template(p, T);
 }
 
 void
 StiffenedGasFluidProperties::rho_from_p_T(
     Real p, Real T, Real & rho, Real & drho_dp, Real & drho_dT) const
 {
-  mooseAssert(((_gamma - 1.0) * _cv * T) != 0.0, "Invalid gamma or cv or temperature detected!");
-  rho = (p + _p_inf) / ((_gamma - 1.0) * _cv * T);
-  if (!_allow_nonphysical_states && rho <= 0.)
-  {
-    drho_dp = getNaN();
-    drho_dT = getNaN();
-  }
-  else
-  {
-    drho_dp = 1. / ((_gamma - 1.0) * _cv * T);
-    drho_dT = -(p + _p_inf) / ((_gamma - 1.0) * _cv * T * T);
-  }
+  rho_from_p_T_template(p, T, rho, drho_dp, drho_dT);
+}
+
+ADReal
+StiffenedGasFluidProperties::rho_from_p_T(const ADReal & p, const ADReal & T) const
+{
+  return rho_from_p_T_template(p, T);
+}
+
+void
+StiffenedGasFluidProperties::rho_from_p_T(
+    const ADReal & p, const ADReal & T, ADReal & rho, ADReal & drho_dp, ADReal & drho_dT) const
+{
+  rho_from_p_T_template(p, T, rho, drho_dp, drho_dT);
 }
 
 Real
 StiffenedGasFluidProperties::e_from_p_rho(Real p, Real rho) const
 {
-  mooseAssert((_gamma - 1.0) * rho != 0., "Invalid gamma or density detected!");
-  return (p + _gamma * _p_inf) / ((_gamma - 1.0) * rho) + _q;
+  return e_from_p_rho_template(p, rho);
 }
 
 void
 StiffenedGasFluidProperties::e_from_p_rho(
     Real p, Real rho, Real & e, Real & de_dp, Real & de_drho) const
 {
-  e = e_from_p_rho(p, rho);
-  de_dp = 1.0 / ((_gamma - 1.0) * rho);
-  de_drho = -(p + _gamma * _p_inf) / ((_gamma - 1.0) * rho * rho);
+  e_from_p_rho_template(p, rho, e, de_dp, de_drho);
+}
+
+ADReal
+StiffenedGasFluidProperties::e_from_p_rho(const ADReal & p, const ADReal & rho) const
+{
+  return e_from_p_rho_template(p, rho);
+}
+
+void
+StiffenedGasFluidProperties::e_from_p_rho(
+    const ADReal & p, const ADReal & rho, ADReal & e, ADReal & de_dp, ADReal & de_drho) const
+{
+  e_from_p_rho_template(p, rho, e, de_dp, de_drho);
 }
 
 Real

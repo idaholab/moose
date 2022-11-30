@@ -366,7 +366,11 @@ petscNonlinearConverged(SNES snes,
                                         std::numeric_limits<Real>::max());
 
   if (msg.length() > 0)
+#if !PETSC_VERSION_LESS_THAN(3, 17, 0)
+    PetscInfo(snes, "%s", msg.c_str());
+#else
     PetscInfo(snes, msg.c_str());
+#endif
 
   switch (moose_reason)
   {
