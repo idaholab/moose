@@ -584,7 +584,15 @@ template <typename OutputType>
 std::pair<bool, const Elem *>
 MooseVariableFV<OutputType>::isExtrapolatedBoundaryFace(const FaceInfo & fi) const
 {
-  const bool extrapolated = !isDirichletBoundaryFace(fi) && !isInternalFace(fi);
+  const bool extrapolated = [this, &fi]()
+  {
+    if (isDirichletBoundaryFace(fi))
+      return false;
+    if (&fi == _ssf_face)
+      return true;
+
+    return !isInternalFace(fi);
+  }();
 
   if (!fi.neighborPtr())
     return std::make_pair(extrapolated, &fi.elem());
@@ -800,7 +808,9 @@ MooseVariableFV<OutputType>::evaluate(const FaceArg & face,
   mooseAssert(state == 0, "Only current time state supported.");
   const FaceInfo * const fi = face.fi;
   mooseAssert(fi, "The face information must be non-null");
-  if (isInternalFace(*fi))
+  if (isDirichletBoundaryFace(*fi))
+    return getDirichletBoundaryFaceValue(*fi);
+  else if (isInternalFace(*fi))
     return Moose::FV::interpolate(*this, face);
   else
   {
@@ -823,22 +833,33 @@ MooseVariableFV<OutputType>::evaluate(const SingleSidedFaceArg & face,
   mooseAssert(state == 0, "Only current time state supported.");
   const FaceInfo * const fi = face.fi;
   mooseAssert(fi, "The face information must be non-null");
-  if (isExtrapolatedBoundaryFace(*fi).first)
+  mooseAssert(this->hasBlocks(face.sub_id),
+              "Evaluating our variable on a side on which we are not defined");
+  if (isDirichletBoundaryFace(*fi))
+    return getDirichletBoundaryFaceValue(*fi);
+  else
   {
+    _ssf_face = fi;
+
     // We do this to ensure that given an upwind scheme we just use the upwind cell value
     // instead of linear extrapolation
+    //
+    // lindsayad: I think this should be changed. I've decided that I don't think SSFs should take
+    // limiter or elem_is_upwind arguments because to me the purpose of the SSF is to only use data
+    // on side of the face. If elem_is_upwind is false but you want to evaluate on the element side
+    // of the face, it feels wrong to use to downwind (neighbor side of the face) information. Note
+    // that the developer here isn't violating my thoughts on this but it also appears the developer
+    // thought that the subdomain ID of the SSF would only ever correspond to the element side of
+    // the face. For instance I think the previous developer probably would also want to toggle this
+    // to false if the variable is only defined on the neighbor side of the face and
+    // face.elem_is_upwind is false
     bool linear_extrapolation = _two_term_boundary_expansion;
     if (face.limiter_type == Moose::FV::LimiterType::Upwind && face.elem_is_upwind)
       linear_extrapolation = false;
 
-    return getExtrapolatedBoundaryFaceValue(*fi, linear_extrapolation);
-  }
-  else if (isInternalFace(*fi))
-    return getInternalFaceValue(face);
-  else
-  {
-    mooseAssert(isDirichletBoundaryFace(*fi), "We've run out of face types");
-    return getDirichletBoundaryFaceValue(*fi);
+    const auto boundary_value = getExtrapolatedBoundaryFaceValue(*fi, linear_extrapolation);
+    _ssf_face = nullptr;
+    return boundary_value;
   }
 }
 

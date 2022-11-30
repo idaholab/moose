@@ -36,3 +36,9 @@ bool setInterpolationMethods(const MooseObject & obj,
 InputParameters interpolationParameters();
 }
 }
+
+namespace NS
+{
+std::tuple<bool, ADReal, ADReal> isPorosityJumpFace(const Moose::Functor<ADReal> & porosity,
+                                                    const FaceInfo & fi);
+}

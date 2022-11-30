@@ -486,6 +486,11 @@ protected:
   virtual ADReal getExtrapolatedBoundaryFaceValue(const FaceInfo & fi,
                                                   bool two_term_expansion) const;
 
+  /// Points to a 'current' single sided face. This member allows us to be sure to perform
+  /// extrapolation (when we don't have a Dirichlet boundary condition) when evaluating this with a
+  /// single sided face argument
+  mutable const FaceInfo * _ssf_face = nullptr;
+
 private:
   using MooseVariableField<OutputType>::evaluate;
   using MooseVariableField<OutputType>::evaluateGradient;

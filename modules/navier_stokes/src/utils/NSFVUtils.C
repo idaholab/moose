@@ -11,6 +11,7 @@
 #include "MooseObject.h"
 #include "InputParameters.h"
 #include "MooseEnum.h"
+#include "MooseUtils.h"
 
 namespace Moose
 {
@@ -79,5 +80,26 @@ interpolationParameters()
       "'average' and 'rc' which stands for Rhie-Chow. The default is Rhie-Chow.");
   return params;
 }
+}
+}
+
+namespace NS
+{
+std::tuple<bool, ADReal, ADReal>
+isPorosityJumpFace(const Moose::Functor<ADReal> & porosity, const FaceInfo & fi)
+{
+  if (!fi.neighborPtr())
+    return {false, 0, 0};
+
+  if (!porosity.hasBlocks(fi.elem().subdomain_id()) ||
+      !porosity.hasBlocks(fi.neighbor().subdomain_id()))
+    return {false, 0, 0};
+
+  const Moose::SingleSidedFaceArg ssf_elem{
+      &fi, Moose::FV::LimiterType::CentralDifference, true, false, fi.elem().subdomain_id()};
+  const Moose::SingleSidedFaceArg ssf_neighbor{
+      &fi, Moose::FV::LimiterType::CentralDifference, true, false, fi.neighbor().subdomain_id()};
+  const auto eps_elem = porosity(ssf_elem), eps_neighbor = porosity(ssf_neighbor);
+  return {!MooseUtils::relativeFuzzyEqual(eps_elem, eps_neighbor), eps_elem, eps_neighbor};
 }
 }
