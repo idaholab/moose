@@ -18,9 +18,6 @@ public:
   ArrayVarReductionAux(const InputParameters & parameters);
 
 protected:
-  /// size of the array variable
-  unsigned int _nentries;
-
   virtual Real computeValue();
 
   /// variable for storing the array variable that needs to be processed

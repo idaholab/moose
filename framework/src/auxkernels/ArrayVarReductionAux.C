@@ -27,7 +27,6 @@ ArrayVarReductionAux::validParams()
 
 ArrayVarReductionAux::ArrayVarReductionAux(const InputParameters & parameters)
   : AuxKernel(parameters),
-    _nentries(getArrayVar("array_variable", 0)->count()),
     _array_variable(coupledArrayValue("array_variable")),
     _value_type(getParam<MooseEnum>("value_type"))
 {
@@ -50,6 +49,6 @@ ArrayVarReductionAux::computeValue()
     case 3:
       return _array_variable[_qp].mean();
   }
-  
+
   return 0.0;
 }
