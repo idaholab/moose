@@ -7,6 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#ifdef LIBTORCH_ENABLED
+
 #pragma once
 
 #include "GeneralVectorPostprocessor.h"
@@ -29,3 +31,5 @@ protected:
   // We create a vector to store the output of the neural net
   VectorPostprocessorValue & _nn_values;
 };
+
+#endif

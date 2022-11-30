@@ -8,10 +8,9 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #ifdef LIBTORCH_ENABLED
-#include "LibtorchTorchScriptNeuralNet.h"
-#include <torch/torch.h>
-#endif
 
+#include <torch/torch.h>
+#include "LibtorchTorchScriptNeuralNet.h"
 #include "LibtorchTorchScriptNeuralNetTest.h"
 
 registerMooseObject("MooseTestApp", LibtorchTorchScriptNeuralNetTest);
@@ -33,8 +32,6 @@ LibtorchTorchScriptNeuralNetTest::LibtorchTorchScriptNeuralNetTest(const InputPa
     _z_values(declareVector("z_values")),
     _nn_values(declareVector("nn_values"))
 {
-#ifdef LIBTORCH_ENABLED
-
   // We read the neural net from a file which was prepared in python
   std::shared_ptr<Moose::LibtorchNeuralNetBase> nn =
       std::make_shared<Moose::LibtorchTorchScriptNeuralNet>(getParam<std::string>("filename"));
@@ -59,6 +56,6 @@ LibtorchTorchScriptNeuralNetTest::LibtorchTorchScriptNeuralNetTest(const InputPa
     _z_values.push_back(i * 0.5);
     _nn_values.push_back(prediction.item<double>());
   }
+}
 
 #endif
-}

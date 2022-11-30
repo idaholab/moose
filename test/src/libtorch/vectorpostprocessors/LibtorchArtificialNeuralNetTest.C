@@ -8,10 +8,9 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #ifdef LIBTORCH_ENABLED
-#include "LibtorchArtificialNeuralNet.h"
-#include <torch/torch.h>
-#endif
 
+#include <torch/torch.h>
+#include "LibtorchArtificialNeuralNet.h"
 #include "LibtorchArtificialNeuralNetTest.h"
 
 registerMooseObject("MooseTestApp", LibtorchArtificialNeuralNetTest);
@@ -30,8 +29,6 @@ LibtorchArtificialNeuralNetTest::validParams()
 LibtorchArtificialNeuralNetTest::LibtorchArtificialNeuralNetTest(const InputParameters & params)
   : GeneralVectorPostprocessor(params), _nn_values(declareVector("nn_values"))
 {
-#ifdef LIBTORCH_ENABLED
-
   torch::manual_seed(11);
 
   // Define neurons per hidden layer: we will have two hidden layers with 4 neurons each
@@ -68,6 +65,6 @@ LibtorchArtificialNeuralNetTest::LibtorchArtificialNeuralNetTest(const InputPara
   prediction = nn->forward(input);
   // We save our second prediction
   _nn_values.push_back(prediction.item<double>());
+}
 
 #endif
-}

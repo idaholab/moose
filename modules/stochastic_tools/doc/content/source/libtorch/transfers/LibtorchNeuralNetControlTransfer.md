@@ -5,7 +5,7 @@
 ## Overview
 
 Transfer which copies a [LibtorchArtificialNeuralNet.md] from a neural net control trainer object
-(say [LibtorchDRLControlTrainer.md]) on the main app to a [LibtorchNeuralNetControl.md] object on the sub app.
+(say [LibtorchDRLControlTrainer.md]) on the main app to a [LibtorchNeuralNetControl](source/libtorch/controls/LibtorchNeuralNetControl.md) object on the sub app.
 
 !syntax parameters /Transfers/LibtorchNeuralNetControlTransfer
 

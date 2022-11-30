@@ -8,11 +8,10 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #ifdef LIBTORCH_ENABLED
+
+#include <torch/torch.h>
 #include "LibtorchArtificialNeuralNet.h"
 #include "LibtorchArtificialNeuralNetTrainer.h"
-#include <torch/torch.h>
-#endif
-
 #include "LibtorchArtificialNeuralNetTrainerTest.h"
 
 registerMooseObject("MooseTestApp", LibtorchArtificialNeuralNetTrainerTest);
@@ -47,8 +46,6 @@ LibtorchArtificialNeuralNetTrainerTest::LibtorchArtificialNeuralNetTrainerTest(
     _nn_values_1(declareVector("nn_values_1")),
     _nn_values_2(declareVector("nn_values_2"))
 {
-#ifdef LIBTORCH_ENABLED
-
   torch::manual_seed(11);
 
   unsigned int num_inputs = 3;
@@ -110,6 +107,6 @@ LibtorchArtificialNeuralNetTrainerTest::LibtorchArtificialNeuralNetTrainerTest(
 
   _nn_values_1.push_back(prediction[0][0].item<double>());
   _nn_values_2.push_back(prediction[0][1].item<double>());
+}
 
 #endif
-}

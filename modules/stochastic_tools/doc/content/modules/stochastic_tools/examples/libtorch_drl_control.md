@@ -2,7 +2,7 @@
 
 The following example showcases how to set up a Deep Reinforcement Learning (DRL)
 training sequence for the generation of neural-net-based controllers of simulations
-with MOOSE applications. We employ a Proximal Policy Optimization (PPO) 
+with MOOSE applications. We employ a Proximal Policy Optimization (PPO)
 (see [!cite](schulman2017proximal) for more information) to train our neural nets.
 
 ## Problem Statement
@@ -10,7 +10,7 @@ with MOOSE applications. We employ a Proximal Policy Optimization (PPO)
 In this example we would like to design a DRL-based controller for the air conditioning of a
 room. The room in this problem is a 2D box presented below:
 
-!media problem_statement.png style=display:block;margin-left:auto;margin-right:auto;width:40%; 
+!media problem_statement.png style=display:block;margin-left:auto;margin-right:auto;width:40%;
        id=problem_setup caption=Problem setup for the DRL control example.
 
 The control problem can then be defined as follows: Try to ensure that the temperature at the
@@ -71,10 +71,14 @@ The last step is to set up the neural-net-based controller for the input file:
 
 For this, we need to supply the controllable parameters using [!param](/Controls/LibtorchDRLControl/parameters).
 Then, we supply the neural net inputs using [!param](/Controls/LibtorchDRLControl/responses).
-The containers for the action and its logarithmic probability are attached using
-[!param](/Controls/LibtorchDRLControl/action_postprocessors) and [!param](/Controls/LibtorchDRLControl/log_probability_postprocessors). Lastly we define the scaling of the input (responses) and the output
+Lastly we define the scaling of the input (responses) and the output
 of the neural net. These must be consistent with the values of the [LibtorchDRLControlTrainer.md]
-object in the main application. It is visible that there is an additional [LibtorchNeuralNetControl.md]
+object in the main application.
+The containers for the control signal and its logarithmic probability are defined in the `Postprocessors` block
+using [LibtorchControlValuePostprocessor](source/libtorch/postprocessors/LibtorchControlValuePostprocessor.md) and
+[LibtorchDRLLogProbabilityPostprocessor](source/libtorch/postprocessors/LibtorchDRLLogProbabilityPostprocessor.md) as
+shown above.
+Furthermore, it is visible that there is an additional [LibtorchNeuralNetControl](source/libtorch/controls/LibtorchNeuralNetControl.md)
 object defined in the `Controls` block.
 This object can be used to evaluate the neural network without the additional random
 sampling process needed for the training process. In other words, this object will evaluate the
@@ -109,17 +113,17 @@ Finally, we can set up our trainer object for the problem:
 The trainer object will need the names of the reporters containing the responses (input of the neural net)
 of the system together with the control signals, control signal logarithmic probabilities and the rewards.
 When these are set, we define the architecture of the critic and control neural nets
-(see [!cite](schulman2017proximal) for more information on these) using 
-[!param](/Trainers/LibtorchDRLControlTrainer/num_critic_neurons_per_layer) and 
+(see [!cite](schulman2017proximal) for more information on these) using
+[!param](/Trainers/LibtorchDRLControlTrainer/num_critic_neurons_per_layer) and
 [!param](/Trainers/LibtorchDRLControlTrainer/num_control_neurons_per_layer).
 The corresponding learning rates can be defined by
 [!param](/Trainers/LibtorchDRLControlTrainer/critic_learning_rate) and
 [!param](/Trainers/LibtorchDRLControlTrainer/control_learning_rate).
 Then, we copy-paste the input/output standardization options from the `Control` in the sub-app.
-Additionally, we can select to standardize the advantage function which makes 
-convergence more robust in certain scenarios. 
+Additionally, we can select to standardize the advantage function which makes
+convergence more robust in certain scenarios.
 
-Lastly, we request 1000 epochs for training the neural networks in each iteration and 
+Lastly, we request 1000 epochs for training the neural networks in each iteration and
 collect data from 10 simulations on the sub-app every time step of the main app.
 We set the iteration number by setting the number of time steps below:
 
@@ -146,15 +150,16 @@ to balance these two factors by tuning the parameters in the `Trainer` and `Cont
           'yaxis':{'type':'linear','title':'Average Episodic Reward'}}
 
 Following the training procedure, we can replace the [LibtorchDRLControl.md] object with
-[LibtorchNeuralNetControl.md] to evaluate the final version of the neural network
+[LibtorchNeuralNetControl](source/libtorch/controls/LibtorchNeuralNetControl.md)
+to evaluate the final version of the neural network
 without the additional randomization. By doing this, the following results are obtained:
 
 !plot scatter
   id=results caption=The evolution of the room temperature at the sensor over the day.
   filename=examples/libtorch_drl_control/gold/results.csv
-  data=[{'x':'time', 'y':'controlled', 'name':'Controlled'}, 
-        {'x':'time', 'y':'uncontrolled', 'name':'Uncontrolled'}, 
-        {'x':'time', 'y':'env', 'name':'Environment'}, 
+  data=[{'x':'time', 'y':'controlled', 'name':'Controlled'},
+        {'x':'time', 'y':'uncontrolled', 'name':'Uncontrolled'},
+        {'x':'time', 'y':'env', 'name':'Environment'},
         {'x':'time', 'y':'target', 'name':'Target'}]
   layout={'xaxis':{'type':'linear', 'title':'Time (s)'},
           'yaxis':{'type':'linear','title':'Temperature (K)'}}

@@ -21,8 +21,8 @@ InputParameters
 LibtorchNeuralNetControl::validParams()
 {
   InputParameters params = Control::validParams();
-  params.addClassDescription("Sets the value of multiple 'Real' input parameters and "
-                             "postprocessors using a neural network.");
+  params.addClassDescription("Controls the value of multiple controllable input parameters using a "
+                             "Libtorch-based neural network.");
   params.addRequiredParam<std::vector<std::string>>("parameters",
                                                     "The input parameter(s) to control.");
   params.addRequiredParam<std::vector<PostprocessorName>>(
