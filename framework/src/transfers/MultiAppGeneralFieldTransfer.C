@@ -238,7 +238,8 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const VariableName & var_nam
   for (unsigned int i_to = 0; i_to < _to_problems.size(); ++i_to)
   {
     // libMesh EquationSystems
-    auto & es = getEquationSystem(*_to_problems[i_to], _displaced_target_mesh);
+    // NOTE: we would expect to set variables from the displaced equation system here
+    auto & es = getEquationSystem(*_to_problems[i_to], false);
     // libMesh system that has this variable
     // Assume var name is unique in an equation system
     System * to_sys = find_sys(es, var_name);
@@ -402,7 +403,8 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
     const std::pair<unsigned int, dof_id_type> dofobject(problem_id, dof_object_id);
 
     // libMesh EquationSystems
-    auto & es = getEquationSystem(*_to_problems[problem_id], _displaced_target_mesh);
+    // NOTE: we would expect to set variables from the displaced equation system here
+    auto & es = getEquationSystem(*_to_problems[problem_id], false);
     // libMesh system
     System * to_sys = find_sys(es, var_name);
 
@@ -485,7 +487,8 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
     auto & dofobject_to_val = dofobject_to_valsvec[problem_id];
 
     // libMesh EquationSystems
-    auto & es = getEquationSystem(*_to_problems[problem_id], _displaced_target_mesh);
+    // NOTE: we would expect to set variables from the displaced equation system here
+    auto & es = getEquationSystem(*_to_problems[problem_id], false);
 
     // libMesh system
     System * to_sys = find_sys(es, var_name);
