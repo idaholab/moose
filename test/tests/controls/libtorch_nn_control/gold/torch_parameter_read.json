@@ -14,7 +14,7 @@
         "nn_parameters": {
             "type": "LibtorchArtificialNeuralNetParameters",
             "values": {
-                "src_control": {
+                "nn_parameters": {
                     "type": "Moose::LibtorchArtificialNeuralNet const*"
                 }
             }
@@ -81,7 +81,7 @@
                 ]
             },
             "nn_parameters": {
-                "src_control": {
+                "nn_parameters": {
                     "hidden_layer_1.bias": [
                         0.10199680179357529,
                         0.6000460320234761,

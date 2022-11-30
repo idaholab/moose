@@ -7,6 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#ifdef LIBTORCH_ENABLED
+
 #include "LibtorchANNSurrogate.h"
 
 registerMooseObject("StochasticToolsApp", LibtorchANNSurrogate);
@@ -20,26 +22,18 @@ LibtorchANNSurrogate::validParams()
 }
 
 LibtorchANNSurrogate::LibtorchANNSurrogate(const InputParameters & parameters)
-  : SurrogateModel(parameters)
-#ifdef LIBTORCH_ENABLED
-    ,
+  : SurrogateModel(parameters),
     _nn(getModelData<std::shared_ptr<Moose::LibtorchArtificialNeuralNet>>("nn"))
-#endif
 {
   // We check if MOOSE is compiled with torch, if not this throws an error
   StochasticToolsApp::requiresTorch(*this);
 }
 
 Real
-LibtorchANNSurrogate::evaluate(const std::vector<Real> &
-#ifdef LIBTORCH_ENABLED
-                                   x
-#endif
-) const
+LibtorchANNSurrogate::evaluate(const std::vector<Real> & x) const
 {
   Real val(0.0);
 
-#ifdef LIBTORCH_ENABLED
   // Check whether input point has same dimensionality as training data
   mooseAssert(_nn->numInputs() == x.size(),
               "Input point does not match dimensionality of training data.");
@@ -48,7 +42,8 @@ LibtorchANNSurrogate::evaluate(const std::vector<Real> &
 
   // Compute prediction
   val = _nn->forward(x_tf).item<double>();
-#endif
 
   return val;
 }
+
+#endif

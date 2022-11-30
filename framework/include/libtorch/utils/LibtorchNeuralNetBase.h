@@ -7,9 +7,10 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#ifdef LIBTORCH_ENABLED
+
 #pragma once
 
-#ifdef LIBTORCH_ENABLED
 #include <torch/torch.h>
 #include "MooseError.h"
 

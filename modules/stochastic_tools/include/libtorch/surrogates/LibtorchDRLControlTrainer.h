@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#ifdef LIBTORCH_ENABLED
+
 #pragma once
 
-#ifdef LIBTORCH_ENABLED
 #include <torch/torch.h>
 #include "LibtorchArtificialNeuralNet.h"
-#endif
 
 #include "libmesh/utility.h"
 #include "SurrogateTrainer.h"
@@ -39,7 +39,6 @@ public:
   /// at the end of every episode.
   Real averageEpisodeReward() { return _average_episode_reward; }
 
-#ifdef LIBTORCH_ENABLED
   /// The condensed training function
   void trainController();
 
@@ -47,13 +46,11 @@ public:
   {
     return _control_nn;
   }
-#endif
 
 protected:
   /// Compute the average eposiodic reward
   void computeAverageEpisodeReward();
 
-#ifdef LIBTORCH_ENABLED
   /**
    * Function to convert input/output data from std::vector<std::vector> to torch::tensor
    * @param vector_data The input data in vector-vectors format
@@ -79,8 +76,6 @@ protected:
    * @return The estimated value for the logarithmic probability
    */
   torch::Tensor evaluateAction(torch::Tensor & input, torch::Tensor & output);
-
-#endif
 
   /// Compute the return value by discounting the rewards and summing them
   void computeRewardToGo();
@@ -189,7 +184,6 @@ protected:
   /// The frequency the loss should be printed
   const unsigned int _loss_print_frequency;
 
-#ifdef LIBTORCH_ENABLED
   /// Pointer to the control (or actor) neural net object
   std::shared_ptr<Moose::LibtorchArtificialNeuralNet> _control_nn;
   /// Pointer to the critic neural net object
@@ -203,7 +197,6 @@ protected:
   torch::Tensor _output_tensor;
   torch::Tensor _return_tensor;
   torch::Tensor _log_probability_tensor;
-#endif
 
 private:
   /**
@@ -241,3 +234,5 @@ private:
   /// Counter for number of transient simulations that have been run before updating the controller
   unsigned int _update_counter;
 };
+
+#endif

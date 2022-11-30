@@ -7,12 +7,11 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#ifdef LIBTORCH_ENABLED
+
 #pragma once
 
-#ifdef LIBTORCH_ENABLED
 #include "LibtorchArtificialNeuralNet.h"
-#endif
-
 #include "Control.h"
 
 /**
@@ -40,7 +39,6 @@ public:
   /// Get the number of controls this object is computing
   unsigned int numberOfControlSignals() { return _control_names.size(); }
 
-#ifdef LIBTORCH_ENABLED
   /**
    * Function responsible for loading the neural network for the controller. This function is used
    * when copying the neural network from a main app which trains it.
@@ -49,7 +47,6 @@ public:
 
   /// Return a pointer to the stored neural networt
   const Moose::LibtorchNeuralNetBase & controlNeuralNet() const;
-#endif
 
 protected:
   /// Function responsible for checking for potential user errors in the input file
@@ -60,11 +57,8 @@ protected:
   /// Function that updates the values of the current response
   void updateCurrentResponse();
 
-#ifdef LIBTORCH_ENABLED
   /// Function that prepares the input tensor for the controller neural network
   torch::Tensor prepareInputTensor();
-
-#endif
 
   /// The values of the current observed postprocessor values
   std::vector<Real> _current_response;
@@ -98,9 +92,9 @@ protected:
   /// Multipliers for the actions
   const std::vector<Real> _action_scaling_factors;
 
-#ifdef LIBTORCH_ENABLED
   /// Pointer to the neural net object which is supposed to be used to control
   /// the parameter values
   std::shared_ptr<Moose::LibtorchNeuralNetBase> _nn;
-#endif
 };
+
+#endif

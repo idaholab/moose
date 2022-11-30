@@ -7,6 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#ifdef LIBTORCH_ENABLED
+
 #include "LibtorchANNTrainer.h"
 #include "LibtorchDataset.h"
 #include "Sampler.h"
@@ -64,16 +66,9 @@ LibtorchANNTrainer::LibtorchANNTrainer(const InputParameters & parameters)
     _activation_function(declareModelData<std::vector<std::string>>(
         "activation_function", getParam<std::vector<std::string>>("activation_function"))),
     _filename(getParam<std::string>("filename")),
-    _read_from_file(getParam<bool>("read_from_file"))
-#ifdef LIBTORCH_ENABLED
-    ,
+    _read_from_file(getParam<bool>("read_from_file")),
     _nn(declareModelData<std::shared_ptr<Moose::LibtorchArtificialNeuralNet>>("nn"))
-#endif
 {
-  // We check if MOOSE is compiled with torch, if not this throws an error
-  StochasticToolsApp::requiresTorch(*this);
-
-#ifdef LIBTORCH_ENABLED
   // Fixing the RNG seed to make sure every experiment is the same.
   // Otherwise sampling / stochastic gradient descent would be different.
   torch::manual_seed(getParam<unsigned int>("seed"));
@@ -86,7 +81,6 @@ LibtorchANNTrainer::LibtorchANNTrainer(const InputParameters & parameters)
   _optim_options.print_loss = getParam<unsigned int>("print_epoch_loss") > 0;
   _optim_options.print_epoch_loss = getParam<unsigned int>("print_epoch_loss");
   _optim_options.parallel_processes = getParam<unsigned int>("max_processes");
-#endif
 }
 
 void
@@ -113,8 +107,6 @@ LibtorchANNTrainer::postTrain()
 {
   _communicator.allgather(_flattened_data);
   _communicator.allgather(_flattened_response);
-
-#ifdef LIBTORCH_ENABLED
 
   // Then, we create and load our Tensors
   unsigned int num_samples = _flattened_response.size();
@@ -149,6 +141,6 @@ LibtorchANNTrainer::postTrain()
   // We create atrainer for our neral net and train it with the dataset
   Moose::LibtorchArtificialNeuralNetTrainer<> trainer(_nn, comm());
   trainer.train(my_data, _optim_options);
+}
 
 #endif
-}

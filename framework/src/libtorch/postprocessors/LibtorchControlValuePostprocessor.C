@@ -7,6 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#ifdef LIBTORCH_ENABLED
+
 #include "LibtorchControlValuePostprocessor.h"
 
 registerMooseObject("MooseApp", LibtorchControlValuePostprocessor);
@@ -57,3 +59,5 @@ LibtorchControlValuePostprocessor::getValue()
   // Return the value of the control signal
   return _libtorch_nn_control->getSignal(_signal_index);
 }
+
+#endif

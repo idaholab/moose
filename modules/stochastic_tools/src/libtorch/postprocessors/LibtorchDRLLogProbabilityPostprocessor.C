@@ -7,6 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#ifdef LIBTORCH_ENABLED
+
 #include "LibtorchDRLLogProbabilityPostprocessor.h"
 
 registerMooseObject("StochasticToolsApp", LibtorchDRLLogProbabilityPostprocessor);
@@ -58,3 +60,5 @@ LibtorchDRLLogProbabilityPostprocessor::getValue()
   // Return the value of the control signal
   return _libtorch_nn_control->getSignalLogProbability(_signal_index);
 }
+
+#endif

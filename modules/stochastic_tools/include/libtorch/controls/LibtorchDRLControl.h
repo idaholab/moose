@@ -1,9 +1,8 @@
+#ifdef LIBTORCH_ENABLED
+
 #pragma once
 
-#ifdef LIBTORCH_ENABLED
 #include "LibtorchArtificialNeuralNet.h"
-#endif
-
 #include "LibtorchNeuralNetControl.h"
 
 /**
@@ -28,11 +27,9 @@ public:
   Real getSignalLogProbability(const unsigned int signal_index);
 
 protected:
-#ifdef LIBTORCH_ENABLED
   /// Function which computes the logarithmic probability of given actions.
   torch::Tensor computeLogProbability(const torch::Tensor & action,
                                       const torch::Tensor & output_tensor);
-#endif
 
   /// The log probability of control signals from the last evaluation of the controller
   std::vector<Real> _current_control_signal_log_probabilities;
@@ -40,8 +37,8 @@ protected:
   /// Standard deviation for the actions, supplied by the user
   const std::vector<Real> _action_std;
 
-#ifdef LIBTORCH_ENABLED
   /// Standard deviations converted to a 2D diagonal tensor that can be used by Libtorch routines.
   torch::Tensor _std;
-#endif
 };
+
+#endif

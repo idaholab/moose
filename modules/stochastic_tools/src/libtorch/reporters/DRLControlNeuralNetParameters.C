@@ -7,6 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#ifdef LIBTORCH_ENABLED
+
 #include "DRLControlNeuralNetParameters.h"
 #include "LibtorchDRLControlTrainer.h"
 
@@ -33,3 +35,5 @@ DRLControlNeuralNetParameters::DRLControlNeuralNetParameters(const InputParamete
       declareValueByName<const Moose::LibtorchArtificialNeuralNet *>(name(), REPORTER_MODE_ROOT);
   network = getSurrogateTrainer<LibtorchDRLControlTrainer>("trainer_name").controlNeuralNet().get();
 }
+
+#endif

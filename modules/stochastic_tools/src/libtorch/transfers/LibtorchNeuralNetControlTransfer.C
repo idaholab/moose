@@ -7,7 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-// MOOSE includes
+#ifdef LIBTORCH_ENABLED
+
 #include "LibtorchNeuralNetControlTransfer.h"
 #include "LibtorchNeuralNetControl.h"
 
@@ -37,20 +38,15 @@ LibtorchNeuralNetControlTransfer::LibtorchNeuralNetControlTransfer(
     const InputParameters & parameters)
   : MultiAppTransfer(parameters),
     SurrogateModelInterface(this),
-    _control_name(getParam<std::string>("control_name"))
-#ifdef LIBTORCH_ENABLED
-    ,
+    _control_name(getParam<std::string>("control_name")),
     _trainer(getSurrogateTrainerByName<LibtorchDRLControlTrainer>(
         getParam<UserObjectName>("trainer_name")))
-#endif
 {
 }
 
 void
 LibtorchNeuralNetControlTransfer::execute()
 {
-#ifdef LIBTORCH_ENABLED
-
   // Get the control neural net from the trainer
   const std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & trainer_nn =
       _trainer.controlNeuralNet();
@@ -68,6 +64,5 @@ LibtorchNeuralNetControlTransfer::execute()
   // Copy and the neural net and execute it to get the initial values
   control_object->loadControlNeuralNet(trainer_nn);
   control_object->execute();
-
-#endif
 }
+#endif

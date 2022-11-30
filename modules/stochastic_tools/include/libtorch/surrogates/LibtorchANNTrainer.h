@@ -7,14 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#ifdef LIBTORCH_ENABLED
+
 #pragma once
 
-#ifdef LIBTORCH_ENABLED
 #include <torch/torch.h>
 #include "LibtorchArtificialNeuralNet.h"
 #include "LibtorchArtificialNeuralNetTrainer.h"
-#endif
-
 #include "libmesh/utility.h"
 #include "SurrogateTrainer.h"
 
@@ -62,11 +61,11 @@ private:
   /// MOOSE or python runs for retraining and further manipulation)
   const bool _read_from_file;
 
-#ifdef LIBTORCH_ENABLED
   /// The struct which contains the information for the training of the neural net
   Moose::LibtorchTrainingOptions _optim_options;
 
   /// Pointer to the neural net object (initialized as null)
   std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & _nn;
-#endif
 };
+
+#endif

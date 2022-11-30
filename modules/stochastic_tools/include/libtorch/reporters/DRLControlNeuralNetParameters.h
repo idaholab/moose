@@ -7,10 +7,11 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#ifdef LIBTORCH_ENABLED
+
 #pragma once
 
 #include "LibtorchArtificialNeuralNet.h"
-
 #include "SurrogateModelInterface.h"
 #include "GeneralReporter.h"
 
@@ -28,3 +29,5 @@ public:
   void execute() override{};
   void finalize() override{};
 };
+
+#endif

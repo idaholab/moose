@@ -8,9 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #ifdef LIBTORCH_ENABLED
-#include "LibtorchNeuralNetControl.h"
-#endif
 
+#include "LibtorchNeuralNetControl.h"
 #include "LibtorchArtificialNeuralNetParameters.h"
 
 registerMooseObject("MooseApp", LibtorchArtificialNeuralNetParameters);
@@ -49,6 +48,10 @@ LibtorchArtificialNeuralNetParameters::initialSetup()
 void
 LibtorchArtificialNeuralNetParameters::execute()
 {
+  // We update the network link in the reporter so it always prints the latest network, this matters
+  // when the network in the controller is trained on the fly
   _network =
       dynamic_cast<const Moose::LibtorchArtificialNeuralNet *>(&(_controller->controlNeuralNet()));
 }
+
+#endif

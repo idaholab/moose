@@ -7,12 +7,11 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#ifdef LIBTORCH_ENABLED
+
 #pragma once
 
-#ifdef LIBTORCH_ENABLED
 #include "LibtorchDRLControl.h"
-#endif
-
 #include "GeneralPostprocessor.h"
 #include "InputParameterWarehouse.h"
 
@@ -52,8 +51,8 @@ public:
 private:
   unsigned int _signal_index;
 
-#ifdef LIBTORCH_ENABLED
   // This can't be const beause PPs are constructed before Controls
   std::shared_ptr<LibtorchDRLControl> _libtorch_nn_control;
-#endif
 };
+
+#endif

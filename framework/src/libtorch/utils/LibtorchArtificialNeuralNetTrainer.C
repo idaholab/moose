@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #ifdef LIBTORCH_ENABLED
+
 #include "LibtorchArtificialNeuralNetTrainer.h"
 
 namespace Moose

@@ -8,11 +8,10 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #ifdef LIBTORCH_ENABLED
+
 #include "LibtorchDataset.h"
 #include "LibtorchArtificialNeuralNetTrainer.h"
 #include "LibtorchUtils.h"
-#endif
-
 #include "LibtorchDRLControlTrainer.h"
 #include "Sampler.h"
 #include "Function.h"
@@ -176,8 +175,6 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
   getReporterPointers(_control_names, _control_value_pointers);
   getReporterPointers(_log_probability_names, _log_probability_value_pointers);
 
-#ifdef LIBTORCH_ENABLED
-
   // Fixing the RNG seed to make sure every experiment is the same.
   // Otherwise sampling / stochastic gradient descent would be different.
   torch::manual_seed(getParam<unsigned int>("seed"));
@@ -236,14 +233,11 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
   }
   else if (filename_valid)
     torch::save(_critic_nn, _critic_nn->name());
-
-#endif
 }
 
 void
 LibtorchDRLControlTrainer::execute()
 {
-#ifdef LIBTORCH_ENABLED
   // Extract data from the reporters
   getInputDataFromReporter(_input_data, _response_value_pointers, _input_timesteps);
   getOutputDataFromReporter(_output_data, _control_value_pointers);
@@ -275,7 +269,6 @@ LibtorchDRLControlTrainer::execute()
     // We clean the training data after contoller update and reset the counter
     resetData();
   }
-#endif
 }
 
 void
@@ -288,7 +281,6 @@ LibtorchDRLControlTrainer::computeAverageEpisodeReward()
     _average_episode_reward = 0.0;
 }
 
-#ifdef LIBTORCH_ENABLED
 void
 LibtorchDRLControlTrainer::computeRewardToGo()
 {
@@ -411,8 +403,6 @@ LibtorchDRLControlTrainer::evaluateAction(torch::Tensor & input, torch::Tensor &
          std::log(std::sqrt(2 * M_PI));
 }
 
-#endif
-
 void
 LibtorchDRLControlTrainer::resetData()
 {
@@ -491,3 +481,5 @@ LibtorchDRLControlTrainer::getReporterPointers(
   for (const auto & name : reporter_names)
     pointer_storage.push_back(&getReporterValueByName<std::vector<Real>>(name));
 }
+
+#endif

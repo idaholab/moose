@@ -7,13 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#ifdef LIBTORCH_ENABLED
+
 #pragma once
 
-#ifdef LIBTORCH_ENABLED
 #include <torch/torch.h>
 #include "LibtorchArtificialNeuralNet.h"
-#endif
-
 #include "SurrogateModel.h"
 
 class LibtorchANNSurrogate : public SurrogateModel
@@ -26,8 +25,8 @@ public:
   virtual Real evaluate(const std::vector<Real> & x) const override;
 
 protected:
-#ifdef LIBTORCH_ENABLED
   /// Pointer to the neural net object (initialized as null)
   const std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & _nn;
-#endif
 };
+
+#endif

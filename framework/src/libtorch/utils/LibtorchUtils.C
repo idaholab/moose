@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #ifdef LIBTORCH_ENABLED
+
 #include "LibtorchUtils.h"
 
 namespace LibtorchUtils
@@ -19,4 +20,5 @@ vectorToTensor<Real>(std::vector<Real> & vector, torch::Tensor & tensor, const b
 template void tensorToVector<Real>(torch::Tensor & tensor, std::vector<Real> & vector);
 
 } // LibtorchUtils namespace
+
 #endif

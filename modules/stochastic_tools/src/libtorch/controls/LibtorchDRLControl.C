@@ -7,6 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#ifdef LIBTORCH_ENABLED
+
 #include "LibtorchDRLControl.h"
 #include "LibtorchTorchScriptNeuralNet.h"
 #include "LibtorchArtificialNeuralNet.h"
@@ -38,8 +40,6 @@ LibtorchDRLControl::LibtorchDRLControl(const InputParameters & parameters)
                "Number of action_standard_deviations does not match the number of controlled "
                "parameters.");
 
-#ifdef LIBTORCH_ENABLED
-
   // Fixing the RNG seed to make sure every experiment is the same.
   if (isParamValid("seed"))
     torch::manual_seed(getParam<unsigned int>("seed"));
@@ -49,13 +49,11 @@ LibtorchDRLControl::LibtorchDRLControl(const InputParameters & parameters)
   _std = torch::eye(_control_names.size());
   for (unsigned int i = 0; i < _control_names.size(); ++i)
     _std[i][i] = _action_std[i];
-#endif
 }
 
 void
 LibtorchDRLControl::execute()
 {
-#ifdef LIBTORCH_ENABLED
   if (_nn)
   {
     unsigned int n_controls = _control_names.size();
@@ -106,10 +104,8 @@ LibtorchDRLControl::execute()
     std::rotate(_old_responses.rbegin(), _old_responses.rbegin() + 1, _old_responses.rend());
     _old_responses[0] = _current_response;
   }
-#endif
 }
 
-#ifdef LIBTORCH_ENABLED
 torch::Tensor
 LibtorchDRLControl::computeLogProbability(const torch::Tensor & action,
                                           const torch::Tensor & output_tensor)
@@ -120,7 +116,6 @@ LibtorchDRLControl::computeLogProbability(const torch::Tensor & action,
   return -((action - output_tensor) * (action - output_tensor)) / (2.0 * var) - torch::log(_std) -
          std::log(std::sqrt(2.0 * M_PI));
 }
-#endif
 
 Real
 LibtorchDRLControl::getSignalLogProbability(const unsigned int signal_index)
@@ -130,3 +125,5 @@ LibtorchDRLControl::getSignalLogProbability(const unsigned int signal_index)
                   std::to_string(_control_names.size()) + ") range!");
   return _current_control_signal_log_probabilities[signal_index];
 }
+
+#endif

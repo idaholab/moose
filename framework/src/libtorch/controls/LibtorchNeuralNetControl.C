@@ -7,12 +7,11 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "LibtorchNeuralNetControl.h"
-
 #ifdef LIBTORCH_ENABLED
+
+#include "LibtorchNeuralNetControl.h"
 #include "LibtorchTorchScriptNeuralNet.h"
 #include "LibtorchUtils.h"
-#endif
 
 #include "Transient.h"
 
@@ -103,7 +102,6 @@ LibtorchNeuralNetControl::LibtorchNeuralNetControl(const InputParameters & param
   for (unsigned int resp_i = 0; resp_i < _response_names.size(); ++resp_i)
     _response_values.push_back(&getPostprocessorValueByName(_response_names[resp_i]));
 
-#ifdef LIBTORCH_ENABLED
   // If the user wants to read the neural net from file, we do it. We can read it from a
   // torchscript file, or we can create a shell and read back the parameters
   if (isParamValid("filename"))
@@ -139,13 +137,11 @@ LibtorchNeuralNetControl::LibtorchNeuralNetControl(const InputParameters & param
       }
     }
   }
-#endif
 }
 
 void
 LibtorchNeuralNetControl::execute()
 {
-#ifdef LIBTORCH_ENABLED
   if (_nn)
   {
     const unsigned int n_controls = _control_names.size();
@@ -181,7 +177,6 @@ LibtorchNeuralNetControl::execute()
     std::rotate(_old_responses.rbegin(), _old_responses.rbegin() + 1, _old_responses.rend());
     _old_responses[0] = _current_response;
   }
-#endif
 }
 
 Real
@@ -221,7 +216,6 @@ LibtorchNeuralNetControl::updateCurrentResponse()
                                 _response_scaling_factors[resp_i]);
 }
 
-#ifdef LIBTORCH_ENABLED
 void
 LibtorchNeuralNetControl::loadControlNeuralNet(
     const std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & input_nn)

@@ -7,6 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#ifdef LIBTORCH_ENABLED
+
 #pragma once
 
 // torch-based includes
@@ -28,8 +30,8 @@ protected:
   /// The name of the control object on the other app where we want to copy our neural net
   const std::string _control_name;
 
-#ifdef LIBTORCH_ENABLED
   /// The trainer object which will contains the control neural net
   const LibtorchDRLControlTrainer & _trainer;
-#endif
 };
+
+#endif
