@@ -22,6 +22,22 @@ public:
 
   virtual void act() override;
 
+protected:
+  /**
+   * Executes this action's 'setup_mesh' task
+   */
+  void executeSetupMeshTask();
+
+  /**
+   * Executes this action's 'set_mesh_base' task
+   */
+  void executeSetMeshBaseTask();
+
+  /**
+   * Executes this action's 'init_mesh' task
+   */
+  void executeInitMeshTask();
+
 private:
   void setupMesh(MooseMesh * mesh);
 

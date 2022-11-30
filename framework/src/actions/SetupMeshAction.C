@@ -241,131 +241,146 @@ SetupMeshAction::act()
   {
     TIME_SECTION("SetupMeshAction::act::setup_mesh", 1, "Setting Up Mesh", true);
 
-    if (_app.masterMesh())
-      _mesh = _app.masterMesh()->safeClone();
-    else
-    {
-      const auto & generator_actions = _awh.getActionListByName("add_mesh_generator");
-
-      // If we trigger any actions that can build MeshGenerators, whether through input file
-      // syntax or through custom actions, change the default type to construct. We can't yet
-      // check whether there are any actual MeshGenerator objects because those are added after
-      // setup_mesh
-      if (!generator_actions.empty())
-      {
-        // Check for whether type has been set or whether for the default type (FileMesh) a file has
-        // been provided
-        if (!_pars.isParamSetByUser("type") && !_moose_object_pars.isParamValid("file"))
-        {
-          _type = "MeshGeneratorMesh";
-          auto original_params = _moose_object_pars;
-          _moose_object_pars = _factory.getValidParams("MeshGeneratorMesh");
-
-          // Since we changing the type on the fly, we'll have to manually extract parameters again
-          // from the input file object.
-          _app.parser().extractParams(_registered_identifier, _moose_object_pars);
-        }
-        else if (!_moose_object_pars.get<bool>("_mesh_generator_mesh"))
-        {
-          // There are cases where a custom action may register the "add_mesh_generator" task, but
-          // may not actually add any mesh generators depending on user input. We don't want to risk
-          // giving false warnings in this case. However, if we triggered the "add_mesh_generator"
-          // task through explicit input file syntax, then it is definitely safe to warn
-          for (auto generator_action_ptr : generator_actions)
-            if (dynamic_cast<AddMeshGeneratorAction *>(generator_action_ptr))
-            {
-              mooseWarning("Mesh Generators present but the [Mesh] block is set to construct a \"",
-                           _type,
-                           "\" mesh, which does not use Mesh Generators in constructing the mesh.");
-              break;
-            }
-        }
-      }
-
-      // switch non-file meshes to be a file-mesh if using a pre-split mesh configuration.
-      if (_app.isUseSplit())
-        _type = modifyParamsForUseSplit(_moose_object_pars);
-
-      _mesh = _factory.create<MooseMesh>(_type, "mesh", _moose_object_pars);
-    }
+    executeSetupMeshTask();
   }
-
   else if (_current_task == "set_mesh_base")
   {
     TIME_SECTION("SetupMeshAction::act::set_mesh_base", 1, "Setting Mesh", true);
 
-    if (!_app.masterMesh() && !_mesh->hasMeshBase())
-    {
-      // We want to set the MeshBase object to that coming from mesh generators when the following
-      // conditions are met:
-      // 1. We have mesh generators
-      // 2. We are not using the pre-split mesh
-      // 3. We are not: recovering/restarting and we are the master application
-      if (!_app.getMeshGeneratorNames().empty() && !_app.isUseSplit() &&
-          !((_app.isRecovering() || _app.isRestarting()) && _app.isUltimateMaster()))
-      {
-        auto mesh_base = _app.getMeshGeneratorMesh();
-        if (_mesh->allowRemoteElementRemoval() != mesh_base->allow_remote_element_removal())
-          mooseError("The MooseMesh and libmesh::MeshBase object coming from mesh generators are "
-                     "out of sync with respect to whether remote elements can be deleted");
-        _mesh->setMeshBase(std::move(mesh_base));
-      }
-      else
-      {
-        const auto & mg_names = _app.getMeshGeneratorNames();
-        std::vector<bool> use_dm;
-        for (const auto & mg_name : mg_names)
-          if (hasMeshProperty("use_distributed_mesh", mg_name))
-            use_dm.push_back(getMeshProperty<bool>("use_distributed_mesh", mg_name));
-
-        if (!use_dm.empty())
-        {
-          if (std::adjacent_find(use_dm.begin(), use_dm.end(), std::not_equal_to<bool>()) !=
-              use_dm.end())
-            mooseError("You cannot use mesh generators that set different values of the mesh "
-                       "property 'use_distributed_mesh' within the same simulation.");
-
-          const auto ptype = use_dm.front() ? MooseMesh::ParallelType::DISTRIBUTED
-                                            : MooseMesh::ParallelType::REPLICATED;
-          _mesh->setParallelType(ptype);
-        }
-
-        _mesh->setMeshBase(_mesh->buildMeshBaseObject());
-      }
-    }
+    executeSetMeshBaseTask();
   }
-
   else if (_current_task == "init_mesh")
   {
     TIME_SECTION("SetupMeshAction::act::set_mesh_base", 1, "Initializing Mesh", true);
 
-    if (_app.masterMesh())
+    executeInitMeshTask();
+  }
+}
+
+void
+SetupMeshAction::executeSetupMeshTask()
+{
+  if (_app.masterMesh())
+    _mesh = _app.masterMesh()->safeClone();
+  else
+  {
+    const auto & generator_actions = _awh.getActionListByName("add_mesh_generator");
+
+    // If we trigger any actions that can build MeshGenerators, whether through input file
+    // syntax or through custom actions, change the default type to construct. We can't yet
+    // check whether there are any actual MeshGenerator objects because those are added after
+    // setup_mesh
+    if (!generator_actions.empty())
     {
-      if (_app.masterDisplacedMesh())
-        _displaced_mesh = _app.masterDisplacedMesh()->safeClone();
+      // Check for whether type has been set or whether for the default type (FileMesh) a file has
+      // been provided
+      if (!_pars.isParamSetByUser("type") && !_moose_object_pars.isParamValid("file"))
+      {
+        _type = "MeshGeneratorMesh";
+        auto original_params = _moose_object_pars;
+        _moose_object_pars = _factory.getValidParams("MeshGeneratorMesh");
+
+        // Since we changing the type on the fly, we'll have to manually extract parameters again
+        // from the input file object.
+        _app.parser().extractParams(_registered_identifier, _moose_object_pars);
+      }
+      else if (!_moose_object_pars.get<bool>("_mesh_generator_mesh"))
+      {
+        // There are cases where a custom action may register the "add_mesh_generator" task, but
+        // may not actually add any mesh generators depending on user input. We don't want to risk
+        // giving false warnings in this case. However, if we triggered the "add_mesh_generator"
+        // task through explicit input file syntax, then it is definitely safe to warn
+        for (auto generator_action_ptr : generator_actions)
+          if (dynamic_cast<AddMeshGeneratorAction *>(generator_action_ptr))
+          {
+            mooseWarning("Mesh Generators present but the [Mesh] block is set to construct a \"",
+                         _type,
+                         "\" mesh, which does not use Mesh Generators in constructing the mesh.");
+            break;
+          }
+      }
+    }
+
+    // switch non-file meshes to be a file-mesh if using a pre-split mesh configuration.
+    if (_app.isUseSplit())
+      _type = modifyParamsForUseSplit(_moose_object_pars);
+
+    _mesh = _factory.create<MooseMesh>(_type, "mesh", _moose_object_pars);
+  }
+}
+
+void
+SetupMeshAction::executeSetMeshBaseTask()
+{
+  if (!_app.masterMesh() && !_mesh->hasMeshBase())
+  {
+    // We want to set the MeshBase object to that coming from mesh generators when the following
+    // conditions are met:
+    // 1. We have mesh generators
+    // 2. We are not using the pre-split mesh
+    // 3. We are not: recovering/restarting and we are the master application
+    if (!_app.getMeshGeneratorNames().empty() && !_app.isUseSplit() &&
+        !((_app.isRecovering() || _app.isRestarting()) && _app.isUltimateMaster()))
+    {
+      auto mesh_base = _app.getMeshGeneratorMesh();
+      if (_mesh->allowRemoteElementRemoval() != mesh_base->allow_remote_element_removal())
+        mooseError("The MooseMesh and libmesh::MeshBase object coming from mesh generators are "
+                   "out of sync with respect to whether remote elements can be deleted");
+      _mesh->setMeshBase(std::move(mesh_base));
     }
     else
     {
-      _mesh->init();
+      const auto & mg_names = _app.getMeshGeneratorNames();
+      std::vector<bool> use_dm;
+      for (const auto & mg_name : mg_names)
+        if (hasMeshProperty("use_distributed_mesh", mg_name))
+          use_dm.push_back(getMeshProperty<bool>("use_distributed_mesh", mg_name));
 
-      if (isParamValid("displacements") && getParam<bool>("use_displaced_mesh"))
+      if (!use_dm.empty())
       {
-        _displaced_mesh = _mesh->safeClone();
-        _displaced_mesh->isDisplaced(true);
-        _displaced_mesh->getMesh().allow_remote_element_removal(
-            _mesh->getMesh().allow_remote_element_removal());
+        if (std::adjacent_find(use_dm.begin(), use_dm.end(), std::not_equal_to<bool>()) !=
+            use_dm.end())
+          mooseError("You cannot use mesh generators that set different values of the mesh "
+                     "property 'use_distributed_mesh' within the same simulation.");
 
-        std::vector<std::string> displacements =
-            getParam<std::vector<std::string>>("displacements");
-        if (displacements.size() < _displaced_mesh->dimension())
-          mooseError("Number of displacements must be greater than or equal to the dimension of "
-                     "the mesh!");
+        const auto ptype = use_dm.front() ? MooseMesh::ParallelType::DISTRIBUTED
+                                          : MooseMesh::ParallelType::REPLICATED;
+        _mesh->setParallelType(ptype);
       }
 
-      setupMesh(_mesh.get());
-
-      if (_displaced_mesh)
-        setupMesh(_displaced_mesh.get());
+      _mesh->setMeshBase(_mesh->buildMeshBaseObject());
     }
+  }
+}
+
+void
+SetupMeshAction::executeInitMeshTask()
+{
+  if (_app.masterMesh())
+  {
+    if (_app.masterDisplacedMesh())
+      _displaced_mesh = _app.masterDisplacedMesh()->safeClone();
+  }
+  else
+  {
+    _mesh->init();
+
+    if (isParamValid("displacements") && getParam<bool>("use_displaced_mesh"))
+    {
+      _displaced_mesh = _mesh->safeClone();
+      _displaced_mesh->isDisplaced(true);
+      _displaced_mesh->getMesh().allow_remote_element_removal(
+          _mesh->getMesh().allow_remote_element_removal());
+
+      std::vector<std::string> displacements = getParam<std::vector<std::string>>("displacements");
+      if (displacements.size() < _displaced_mesh->dimension())
+        mooseError("Number of displacements must be greater than or equal to the dimension of "
+                   "the mesh!");
+    }
+
+    setupMesh(_mesh.get());
+
+    if (_displaced_mesh)
+      setupMesh(_displaced_mesh.get());
   }
 }
