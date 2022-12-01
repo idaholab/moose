@@ -1,5 +1,6 @@
 # LibtorchANNSurrogate
 
+!if function=hasLibtorch()
 !syntax description /Surrogates/LibtorchANNSurrogate
 
 ## Overview
@@ -33,8 +34,17 @@ to compute the approximate values of the target function at the new sample point
 
 !listing libtorch_nn/evaluate.i block=Reporters
 
+!if! function=hasLibtorch()
+
 !syntax parameters /Surrogates/LibtorchANNSurrogate
 
 !syntax inputs /Surrogates/LibtorchANNSurrogate
 
 !syntax children /Surrogates/LibtorchANNSurrogate
+
+!if-end!
+
+!else
+!alert warning
+The detailed documentation of this object is only available when Moose is compiled with Libtorch.
+For instructions on how to compile Moose with Libtorch, click [here](install_libtorch.md).

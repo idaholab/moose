@@ -1,5 +1,7 @@
 # LibtorchNeuralNetControl
 
+!if! function=hasLibtorch()
+
 !syntax description /Controls/LibtorchNeuralNetControl
 
 ## Overview
@@ -17,8 +19,19 @@ This capability supports two formats:
   architecture using [!param](/Controls/LibtorchNeuralNetControl/num_neurons_per_layer) and
   [!param](/Controls/LibtorchNeuralNetControl/activation_function) parameters.
 
+
 !syntax parameters /Controls/LibtorchNeuralNetControl
 
 !syntax inputs /Controls/LibtorchNeuralNetControl
 
 !syntax children /Controls/LibtorchNeuralNetControl
+
+!if-end!
+
+!else
+This object controls a physical process using a neural network. The neural network
+can be either read from a file of transferred from a trainer.
+
+!alert warning
+The detailed documentation of this object is only available when Moose is compiled with Libtorch.
+For instructions on how to compile Moose with Libtorch, click [here](install_libtorch.md).

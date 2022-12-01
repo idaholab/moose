@@ -1,5 +1,6 @@
 # LibtorchANNTrainer
 
+!if function=hasLibtorch()
 !syntax description /Trainers/LibtorchANNTrainer
 
 ## Overview
@@ -27,6 +28,8 @@ the weights:
 
 !listing libtorch_nn/train.i block=Trainers
 
+!if! function=hasLibtorch()
+
 We note that the user can set the architecture of the neural net using the
 [!param](/Trainers/LibtorchANNTrainer/num_neurons_per_layer) and
 [!param](/Trainers/LibtorchANNTrainer/activation_function) parameters.
@@ -42,3 +45,10 @@ The trained neural network can then be evaluated using [LibtorchANNSurrogate.md]
 !syntax inputs /Trainers/LibtorchANNTrainer
 
 !syntax children /Trainers/LibtorchANNTrainer
+
+!if-end!
+
+!else
+!alert warning
+The detailed documentation of this object is only available when Moose is compiled with Libtorch.
+For instructions on how to compile Moose with Libtorch, click [here](install_libtorch.md).

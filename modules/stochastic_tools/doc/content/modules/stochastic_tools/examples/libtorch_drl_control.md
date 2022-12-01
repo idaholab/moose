@@ -69,8 +69,8 @@ The last step is to set up the neural-net-based controller for the input file:
 
 !listing examples/libtorch_drl_control/libtorch_drl_control_sub.i block=Controls
 
-For this, we need to supply the controllable parameters using [!param](/Controls/LibtorchDRLControl/parameters).
-Then, we supply the neural net inputs using [!param](/Controls/LibtorchDRLControl/responses).
+For this, we need to supply the controllable parameters using `parameters`.
+Then, we supply the neural net inputs using `responses`.
 Lastly we define the scaling of the input (responses) and the output
 of the neural net. These must be consistent with the values of the [LibtorchDRLControlTrainer.md]
 object in the main application.
@@ -114,11 +114,8 @@ The trainer object will need the names of the reporters containing the responses
 of the system together with the control signals, control signal logarithmic probabilities and the rewards.
 When these are set, we define the architecture of the critic and control neural nets
 (see [!cite](schulman2017proximal) for more information on these) using
-[!param](/Trainers/LibtorchDRLControlTrainer/num_critic_neurons_per_layer) and
-[!param](/Trainers/LibtorchDRLControlTrainer/num_control_neurons_per_layer).
-The corresponding learning rates can be defined by
-[!param](/Trainers/LibtorchDRLControlTrainer/critic_learning_rate) and
-[!param](/Trainers/LibtorchDRLControlTrainer/control_learning_rate).
+`num_critic_neurons_per_layer` and `num_control_neurons_per_layer`.
+The corresponding learning rates can be defined by `critic_learning_rate` and `control_learning_rate`.
 Then, we copy-paste the input/output standardization options from the `Control` in the sub-app.
 Additionally, we can select to standardize the advantage function which makes
 convergence more robust in certain scenarios.
