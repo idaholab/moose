@@ -34,12 +34,12 @@ class RunPBS(QueueManager):
         """ use qstat and return bool on job failures outside of the TestHarness's control """
 
         PBS_EXITCODES = { '271' : 'JOB_EXEC_KILL_WALLTIME 271',
-                            '-24' : 'JOB_EXEC_KILL_NCPUS_BURST -24',
-                            '-25' : 'JOB_EXEC_KILL_NCPUS_SUM -25',
-                            '-26' : 'JOB_EXEC_KILL_VMEM -26',
-                            '-27' : 'JOB_EXEC_KILL_MEM -27',
-                            '-28' : 'JOB_EXEC_KILL_CPUT -28',
-                            '-29' : 'JOB_EXEC_KILL_WALLTIME -29' }
+                          '-24' : 'JOB_EXEC_KILL_NCPUS_BURST -24',
+                          '-25' : 'JOB_EXEC_KILL_NCPUS_SUM -25',
+                          '-26' : 'JOB_EXEC_KILL_VMEM -26',
+                          '-27' : 'JOB_EXEC_KILL_MEM -27',
+                          '-28' : 'JOB_EXEC_KILL_CPUT -28',
+                          '-29' : 'JOB_EXEC_KILL_WALLTIME -29' }
 
         PBS_STATUSES = { 'R' : 'RUNNING',
                          'F' : 'FINISHED',
@@ -72,9 +72,9 @@ class RunPBS(QueueManager):
                 return
 
             # woops. This job was killed by PBS for some reason
-            if job_result and job_result in PBS_EXITCODES.keys():
+            if job_result and str(job_result) in PBS_EXITCODES.keys():
                 for job in jobs:
-                    job.addCaveats(PBS_EXITCODES[job_result])
+                    job.addCaveats(PBS_EXITCODES[str(job_result)])
                 return True
 
             # Capture TestHarness exceptions
@@ -147,7 +147,7 @@ class RunPBS(QueueManager):
         template['working_dir'] = self.harness.base_dir
 
         # Command
-        template['command'] = ' '.join(self.getRunTestsCommand(job))
+        template['command'] = ' '.join(self.getRunTestsCommand(job, template['mpi_procs']))
 
         return template
 

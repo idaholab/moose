@@ -187,12 +187,12 @@ class QueueManager(Scheduler):
 
         return self.__clean_args
 
-    def getRunTestsCommand(self, job):
+    def getRunTestsCommand(self, job, cpus):
         """ return the command necessary to launch the TestHarness within the third party scheduler """
 
         # Build ['/path/to/run_tests', '-j', '#']
         command = [os.path.join(self.harness.run_tests_dir, 'run_tests'),
-                   '-j', str(job.getMetaData().get('QUEUEING_NCPUS', 1) )]
+                   '-j', cpus]
 
         # get current sys.args we are allowed to include when we launch run_tests
         args = list(self.cleanAndModifyArgs())
