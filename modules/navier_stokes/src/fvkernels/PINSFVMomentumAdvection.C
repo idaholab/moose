@@ -22,6 +22,8 @@ PINSFVMomentumAdvection::validParams()
   params.addClassDescription("Object for advecting superficial momentum, e.g. rho*u_d, "
                              "in the porous media momentum equation");
   params.addRequiredParam<MooseFunctorName>(NS::porosity, "Porosity");
+  // With porosity jumps our pressure stencil can grow to 3
+  params.set<unsigned short>("ghost_layers") = 3;
   return params;
 }
 
