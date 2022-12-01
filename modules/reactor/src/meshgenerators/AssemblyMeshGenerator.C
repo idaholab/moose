@@ -118,6 +118,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
   _geom_type = getReactorParam<std::string>("mesh_geometry");
   _mesh_dimensions = getReactorParam<int>("mesh_dimensions");
   declareMeshProperty("assembly_type", _assembly_type);
+  declareMeshProperty("homogenized_assembly", false);
 
   if (_extrude && _mesh_dimensions != 3)
     paramError("extrude",
@@ -397,7 +398,6 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
   }
   declareMeshProperty("pin_region_id_map", _pin_region_id_map);
   declareMeshProperty("pin_block_name_map", _pin_block_name_map);
-  declareMeshProperty("assembly_type_id", _assembly_type);
   declareMeshProperty("assembly_pitch", getMeshProperty<Real>("assembly_pitch", _reactor_params));
 
   if (_extrude && _mesh_dimensions == 3)

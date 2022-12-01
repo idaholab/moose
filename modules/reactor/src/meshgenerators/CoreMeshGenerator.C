@@ -60,7 +60,9 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
 {
   MeshGeneratorName reactor_params =
       MeshGeneratorName(getMeshProperty<std::string>("reactor_params_name", _inputs[0]));
-  // Check that MG name for reactor params is consistent across all assemblies
+  const auto assembly_homogenization = getMeshProperty<bool>("homogenized_assembly", _inputs[0]);
+  // Check that MG name for reactor params and assembly homogenization schemes are
+  // consistent across all assemblies
   for (unsigned int i = 1; i < _inputs.size(); i++)
   {
     // Skip if assembly name is equal to dummy assembly name
@@ -69,6 +71,9 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
     if (getMeshProperty<std::string>("reactor_params_name", _inputs[i]) != reactor_params)
       mooseError("The name of all reactor_params objects should be identical across all pins in "
                  "the input assemblies.\n");
+    if (getMeshProperty<bool>("homogenized_assembly", _inputs[i]) != assembly_homogenization)
+      mooseError(
+          "All assemblies in the core must be homogenized if assembly homogenization is used\n");
   }
 
   // Initialize ReactorMeshParams object stored in pin input
@@ -186,21 +191,33 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
     if (make_empty)
     {
       {
-        auto params = _app.getFactory().getValidParams(
-            "HexagonConcentricCircleAdaptiveBoundaryMeshGenerator");
+        if (assembly_homogenization)
+        {
+          auto params = _app.getFactory().getValidParams("SimpleHexagonGenerator");
 
-        params.set<Real>("hexagon_size") = getReactorParam<Real>("assembly_pitch") / 2.0;
-        params.set<std::vector<unsigned int>>("num_sectors_per_side") =
-            std::vector<unsigned int>(6, 2);
-        params.set<std::vector<unsigned int>>("sides_to_adapt") = std::vector<unsigned int>{0};
-        params.set<std::vector<MeshGeneratorName>>("inputs") =
-            std::vector<MeshGeneratorName>{_inputs[0]};
-        params.set<std::vector<subdomain_id_type>>("background_block_ids") =
-            std::vector<subdomain_id_type>{UINT16_MAX - 1};
+          params.set<Real>("hexagon_size") = getReactorParam<Real>("assembly_pitch") / 2.0;
+          params.set<subdomain_id_type>("block_id") = UINT16_MAX - 1;
 
-        addMeshSubgenerator("HexagonConcentricCircleAdaptiveBoundaryMeshGenerator",
-                            std::string(_empty_key),
-                            params);
+          addMeshSubgenerator("SimpleHexagonGenerator", std::string(_empty_key), params);
+        }
+        else
+        {
+          auto params = _app.getFactory().getValidParams(
+              "HexagonConcentricCircleAdaptiveBoundaryMeshGenerator");
+
+          params.set<Real>("hexagon_size") = getReactorParam<Real>("assembly_pitch") / 2.0;
+          params.set<std::vector<unsigned int>>("num_sectors_per_side") =
+              std::vector<unsigned int>(6, 2);
+          params.set<std::vector<unsigned int>>("sides_to_adapt") = std::vector<unsigned int>{0};
+          params.set<std::vector<MeshGeneratorName>>("inputs") =
+              std::vector<MeshGeneratorName>{_inputs[0]};
+          params.set<std::vector<subdomain_id_type>>("background_block_ids") =
+              std::vector<subdomain_id_type>{UINT16_MAX - 1};
+
+          addMeshSubgenerator("HexagonConcentricCircleAdaptiveBoundaryMeshGenerator",
+                              std::string(_empty_key),
+                              params);
+        }
       }
     }
     {
@@ -212,7 +229,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
       params.set<std::vector<MeshGeneratorName>>("inputs") = _inputs;
       params.set<std::vector<std::vector<unsigned int>>>("pattern") = _pattern;
       params.set<MooseEnum>("pattern_boundary") = "none";
-      params.set<bool>("generate_core_metadata") = true;
+      params.set<bool>("generate_core_metadata") = !assembly_homogenization;
       params.set<bool>("create_interface_boundaries") = false;
       if (make_empty)
       {
@@ -297,7 +314,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
       if (_geom_type == "Hex")
       {
         subdomain_id_type assembly_type =
-            getMeshProperty<subdomain_id_type>("assembly_type_id", assembly);
+            getMeshProperty<subdomain_id_type>("assembly_type", assembly);
         if (_background_region_id_map.find(assembly_type) == _background_region_id_map.end())
         {
           // Store region ids and block names associated with duct and background regions for each
