@@ -78,22 +78,22 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
     const auto ssf = singleSidedFaceArg();
     const Elem * const sided_elem = ssf.makeSidedElem().elem;
     const auto dof_number = sided_elem->dof_number(_sys.number(), _var.number(), 0);
-    const auto rhof = _rho(ssf);
-    const auto epsf = epsilon()(ssf);
-    const auto uf = _var(ssf);
-    const Real duf_du = uf.derivatives()[dof_number];
-    const auto v = _rc_vel_provider.getVelocity(_velocity_interp_method, fi, _tid);
-    const auto coeff = _normal * v * rhof / epsf;
+    const auto rho_face = _rho(ssf);
+    const auto eps_face = epsilon()(ssf);
+    const auto u_face = _var(ssf);
+    const Real d_u_face_d_dof = u_face.derivatives()[dof_number];
+    const auto v_face = _rc_vel_provider.getVelocity(_velocity_interp_method, fi, _tid);
+    const auto coeff = _normal * v_face * rho_face / eps_face;
 
     if (sided_elem == &fi.elem())
     {
-      _ae = coeff * duf_du;
-      _elem_residual = coeff * uf;
+      _ae = coeff * d_u_face_d_dof;
+      _elem_residual = coeff * u_face;
     }
     else
     {
-      _an = -coeff * duf_du;
-      _neighbor_residual = -coeff * uf;
+      _an = -coeff * d_u_face_d_dof;
+      _neighbor_residual = -coeff * u_face;
     }
   }
   else if (const auto [is_jump, eps_elem_face, eps_neighbor_face] =
@@ -105,11 +105,13 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
     const Moose::SingleSidedFaceArg ssf_neighbor{
         &fi, Moose::FV::LimiterType::CentralDifference, true, false, fi.neighbor().subdomain_id()};
 
-    const auto rho_elem_face = _rho(ssf_elem), rho_neighbor_face = _rho(ssf_neighbor);
+    const auto v_face = _rc_vel_provider.getUpwindSingleSidedFaceVelocity(fi, _tid);
+    const bool fi_elem_is_upwind = v_face * fi.normal() > 0;
+    const auto & upwind_ssf = fi_elem_is_upwind ? ssf_elem : ssf_neighbor;
+    const auto rho_face = _rho(upwind_ssf);
 
-    const auto v = _rc_vel_provider.getUpwindSingleSidedFaceVelocity(fi, _tid);
-    const auto & var_elem_face = v(_index);
-    const auto & var_neighbor_face = v(_index);
+    const auto & var_elem_face = v_face(_index);
+    const auto & var_neighbor_face = v_face(_index);
 
     const auto elem_dof_number = fi.elem().dof_number(_sys.number(), _var.number(), 0);
     const auto neighbor_dof_number = fi.neighbor().dof_number(_sys.number(), _var.number(), 0);
@@ -118,8 +120,8 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
     const auto d_var_neighbor_face_d_neighbor_dof =
         var_neighbor_face.derivatives()[neighbor_dof_number];
 
-    const auto elem_coeff = _normal * v * rho_elem_face / eps_elem_face;
-    const auto neighbor_coeff = _normal * v * rho_neighbor_face / eps_neighbor_face;
+    const auto elem_coeff = _normal * v_face * rho_face / eps_elem_face;
+    const auto neighbor_coeff = _normal * v_face * rho_face / eps_neighbor_face;
 
     _ae = elem_coeff * d_var_elem_face_d_elem_dof;
     _elem_residual = elem_coeff * var_elem_face;
@@ -129,13 +131,13 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
   }
   else
   {
-    const auto v = _rc_vel_provider.getVelocity(_velocity_interp_method, fi, _tid);
+    const auto v_face = _rc_vel_provider.getVelocity(_velocity_interp_method, fi, _tid);
 
     const auto [interp_coeffs, advected] =
         interpCoeffsAndAdvected(*_rho_u,
                                 makeFace(fi,
                                          limiterType(_advected_interp_method),
-                                         MetaPhysicL::raw_value(v) * _normal > 0,
+                                         MetaPhysicL::raw_value(v_face) * _normal > 0,
                                          faceArgSubdomains(),
                                          correct_skewness));
 
@@ -147,9 +149,9 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
     const auto var_elem = advected.first / rho_elem * eps_elem,
                var_neighbor = advected.second / rho_neighbor * eps_neighbor;
 
-    _ae = _normal * v * rho_elem / eps_elem * interp_coeffs.first;
+    _ae = _normal * v_face * rho_elem / eps_elem * interp_coeffs.first;
     // Minus sign because we apply a minus sign to the residual in computeResidual
-    _an = -_normal * v * rho_neighbor / eps_neighbor * interp_coeffs.second;
+    _an = -_normal * v_face * rho_neighbor / eps_neighbor * interp_coeffs.second;
 
     _elem_residual = _ae * var_elem - _an * var_neighbor;
     _neighbor_residual = -_elem_residual;
