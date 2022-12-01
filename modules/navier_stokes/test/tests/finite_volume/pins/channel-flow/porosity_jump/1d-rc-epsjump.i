@@ -1,4 +1,4 @@
-mu = 1.1
+# mu = 1.1
 rho = 1.1
 advected_interp_method = 'upwind'
 velocity_interp_method = 'rc'
@@ -8,7 +8,7 @@ velocity_interp_method = 'rc'
     type = CartesianMeshGenerator
     dim = 1
     dx = '1 1'
-    ix = '30 30'
+    ix = '3 3'
     subdomain_id = '1 2'
   []
 []
@@ -32,7 +32,10 @@ velocity_interp_method = 'rc'
     initial_condition = 1
   []
   [pressure]
-    type = INSFVPressureVariable
+    type = PINSFVPressureVariable
+    u = u
+    porosity = porosity
+    rho = ${rho}
   []
 []
 
@@ -80,6 +83,7 @@ velocity_interp_method = 'rc'
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
     rho = ${rho}
+    porosity = porosity
   []
 
   [u_advection]
@@ -91,13 +95,13 @@ velocity_interp_method = 'rc'
     porosity = porosity
     momentum_component = 'x'
   []
-  [u_viscosity]
-    type = PINSFVMomentumDiffusion
-    variable = u
-    mu = ${mu}
-    porosity = porosity
-    momentum_component = 'x'
-  []
+  # [u_viscosity]
+  #   type = PINSFVMomentumDiffusion
+  #   variable = u
+  #   mu = ${mu}
+  #   porosity = porosity
+  #   momentum_component = 'x'
+  # []
   [u_pressure]
     type = PINSFVMomentumPressure
     variable = u
