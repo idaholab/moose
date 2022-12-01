@@ -1,0 +1,11 @@
+[Tests]
+  [test]
+    type = Exodiff
+    input = 'mesh_generator_compatibility.i'
+    exodiff = 'mesh_generator_compatibility.e'
+
+    requirement = 'The system shall allow meshes generated within the component system to be combined with mesh generators.'
+    design = 'MeshGenerator.md'
+    issues = '#22354'
+  []
+[]
