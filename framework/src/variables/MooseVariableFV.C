@@ -610,8 +610,8 @@ MooseVariableFV<OutputType>::isExtrapolatedBoundaryFace(const FaceInfo & fi) con
 
 template <typename OutputType>
 ADReal
-MooseVariableFV<OutputType>::getExtrapolatedBoundaryFaceValue(const FaceInfo & fi,
-                                                              bool two_term_expansion) const
+MooseVariableFV<OutputType>::getExtrapolatedBoundaryFaceValue(
+    const FaceInfo & fi, bool two_term_expansion, const Elem * elem_to_extrapolate_from) const
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError(
@@ -622,17 +622,33 @@ MooseVariableFV<OutputType>::getExtrapolatedBoundaryFaceValue(const FaceInfo & f
               "This function should only be called on extrapolated boundary faces");
 
   ADReal boundary_value;
-  const auto & tup = Moose::FV::determineElemOneAndTwo(fi, *this);
-  const Elem * const elem = std::get<0>(tup);
+  bool elem_to_extrapolate_from_is_fi_elem;
+  std::tie(elem_to_extrapolate_from, elem_to_extrapolate_from_is_fi_elem) =
+      [this, &fi, elem_to_extrapolate_from]() -> std::pair<const Elem *, bool>
+  {
+    if (elem_to_extrapolate_from)
+      return {elem_to_extrapolate_from, elem_to_extrapolate_from == &fi.elem()};
+    else
+    {
+      const auto [elem_guaranteed_to_have_dofs,
+                  other_elem,
+                  elem_guaranteed_to_have_dofs_is_fi_elem] =
+          Moose::FV::determineElemOneAndTwo(fi, *this);
+      libmesh_ignore(other_elem);
+      return {elem_guaranteed_to_have_dofs, elem_guaranteed_to_have_dofs_is_fi_elem};
+    }
+  }();
 
   if (two_term_expansion)
   {
-    const Point vector_to_face = std::get<2>(tup) ? (fi.faceCentroid() - fi.elemCentroid())
-                                                  : (fi.faceCentroid() - fi.neighborCentroid());
-    boundary_value = adGradSln(elem) * vector_to_face + getElemValue(elem);
+    const Point vector_to_face = elem_to_extrapolate_from_is_fi_elem
+                                     ? (fi.faceCentroid() - fi.elemCentroid())
+                                     : (fi.faceCentroid() - fi.neighborCentroid());
+    boundary_value = adGradSln(elem_to_extrapolate_from) * vector_to_face +
+                     getElemValue(elem_to_extrapolate_from);
   }
   else
-    boundary_value = getElemValue(elem);
+    boundary_value = getElemValue(elem_to_extrapolate_from);
 
   return boundary_value;
 }
@@ -841,7 +857,10 @@ MooseVariableFV<OutputType>::evaluate(const SingleSidedFaceArg & face,
   {
     _ssf_face = fi;
 
-    const auto boundary_value = getExtrapolatedBoundaryFaceValue(*fi, _two_term_boundary_expansion);
+    const Elem * const elem_to_extrapolate_from =
+        face.sub_id == fi->elem().subdomain_id() ? &fi->elem() : fi->neighborPtr();
+    const auto boundary_value = getExtrapolatedBoundaryFaceValue(
+        *fi, _two_term_boundary_expansion, elem_to_extrapolate_from);
     _ssf_face = nullptr;
     return boundary_value;
   }

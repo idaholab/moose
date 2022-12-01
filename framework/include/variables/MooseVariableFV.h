@@ -483,8 +483,10 @@ protected:
   /**
    * @return the extrapolated value on the boundary face associated with \p fi
    */
-  virtual ADReal getExtrapolatedBoundaryFaceValue(const FaceInfo & fi,
-                                                  bool two_term_expansion) const;
+  virtual ADReal
+  getExtrapolatedBoundaryFaceValue(const FaceInfo & fi,
+                                   bool two_term_expansion,
+                                   const Elem * elem_side_to_extrapolate_from = nullptr) const;
 
   /// Points to a 'current' single sided face. This member allows us to be sure to perform
   /// extrapolation (when we don't have a Dirichlet boundary condition) when evaluating this with a

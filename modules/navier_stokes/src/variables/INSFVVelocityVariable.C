@@ -68,16 +68,34 @@ INSFVVelocityVariable::INSFVVelocityVariable(const InputParameters & params) : I
 
 ADReal
 INSFVVelocityVariable::getExtrapolatedBoundaryFaceValue(const FaceInfo & fi,
-                                                        bool two_term_expansion) const
+                                                        bool two_term_expansion,
+                                                        const Elem * elem_to_extrapolate_from) const
 {
   ADReal boundary_value;
+  bool elem_to_extrapolate_from_is_fi_elem;
+  std::tie(elem_to_extrapolate_from, elem_to_extrapolate_from_is_fi_elem) =
+      [this, &fi, elem_to_extrapolate_from]() -> std::pair<const Elem *, bool>
+  {
+    if (elem_to_extrapolate_from)
+      return {elem_to_extrapolate_from, elem_to_extrapolate_from == &fi.elem()};
+    else
+    {
+      const auto [elem_guaranteed_to_have_dofs,
+                  other_elem,
+                  elem_guaranteed_to_have_dofs_is_fi_elem] =
+          Moose::FV::determineElemOneAndTwo(fi, *this);
+      libmesh_ignore(other_elem);
+      return {elem_guaranteed_to_have_dofs, elem_guaranteed_to_have_dofs_is_fi_elem};
+    }
+  }();
+
   if (_two_term_boundary_expansion && isFullyDevelopedFlowFace(fi))
   {
-    const auto & tup = Moose::FV::determineElemOneAndTwo(fi, *this);
-    const Elem * const elem = std::get<0>(tup);
-    const Point vector_to_face = std::get<2>(tup) ? (fi.faceCentroid() - fi.elemCentroid())
-                                                  : (fi.faceCentroid() - fi.neighborCentroid());
-    boundary_value = uncorrectedAdGradSln(fi) * vector_to_face + getElemValue(elem);
+    const Point vector_to_face = elem_to_extrapolate_from_is_fi_elem
+                                     ? (fi.faceCentroid() - fi.elemCentroid())
+                                     : (fi.faceCentroid() - fi.neighborCentroid());
+    boundary_value =
+        uncorrectedAdGradSln(fi) * vector_to_face + getElemValue(elem_to_extrapolate_from);
   }
   else
     boundary_value = INSFVVariable::getExtrapolatedBoundaryFaceValue(fi, two_term_expansion);

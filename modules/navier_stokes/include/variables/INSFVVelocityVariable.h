@@ -38,8 +38,10 @@ protected:
    * @return the extrapolated value on the boundary face associated with \p fi
    */
   using INSFVVariable::getExtrapolatedBoundaryFaceValue;
-  ADReal getExtrapolatedBoundaryFaceValue(const FaceInfo & fi,
-                                          bool two_term_expansion) const override;
+  ADReal getExtrapolatedBoundaryFaceValue(
+      const FaceInfo & fi,
+      bool two_term_expansion,
+      const Elem * elem_side_to_extrapolate_from = nullptr) const override;
 
 #endif
 };
