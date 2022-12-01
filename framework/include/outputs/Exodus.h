@@ -195,6 +195,9 @@ private:
   /// Flag to output discontinuous format in Exodus
   bool _discontinuous;
 
+  /// Flag to output added disjoint fictitious sides for side_discontinuous variables
+  bool _side_discontinuous;
+
   /// Flag to output HDF5 format (when available) in Exodus
   bool _write_hdf5;
 
