@@ -241,7 +241,7 @@ SetupMeshAction::act()
   {
     TIME_SECTION("SetupMeshAction::act::setup_mesh", 1, "Setting Up Mesh", true);
 
-    executeSetupMeshTask();
+    executeSetupMeshTask("MeshGeneratorMesh");
   }
   else if (_current_task == "set_mesh_base")
   {
@@ -258,7 +258,7 @@ SetupMeshAction::act()
 }
 
 void
-SetupMeshAction::executeSetupMeshTask()
+SetupMeshAction::executeSetupMeshTask(const std::string & mesh_generator_mesh_type)
 {
   if (_app.masterMesh())
     _mesh = _app.masterMesh()->safeClone();
@@ -276,9 +276,9 @@ SetupMeshAction::executeSetupMeshTask()
       // been provided
       if (!_pars.isParamSetByUser("type") && !_moose_object_pars.isParamValid("file"))
       {
-        _type = "MeshGeneratorMesh";
+        _type = mesh_generator_mesh_type;
         auto original_params = _moose_object_pars;
-        _moose_object_pars = _factory.getValidParams("MeshGeneratorMesh");
+        _moose_object_pars = _factory.getValidParams(mesh_generator_mesh_type);
 
         // Since we changing the type on the fly, we'll have to manually extract parameters again
         // from the input file object.

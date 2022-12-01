@@ -25,8 +25,10 @@ public:
 protected:
   /**
    * Executes this action's 'setup_mesh' task
+   *
+   * @param[in] mesh_generator_mesh_type  Type of mesh generator mesh
    */
-  void executeSetupMeshTask();
+  void executeSetupMeshTask(const std::string & mesh_generator_mesh_type);
 
   /**
    * Executes this action's 'set_mesh_base' task
