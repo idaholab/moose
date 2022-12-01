@@ -75,9 +75,6 @@ FEProblem::addLineSearch(const InputParameters & parameters)
   Moose::LineSearchType enum_line_search = Moose::stringToEnum<Moose::LineSearchType>(line_search);
   if (enum_line_search == Moose::LS_CONTACT || enum_line_search == Moose::LS_PROJECT)
   {
-#if PETSC_VERSION_LESS_THAN(3, 6, 0)
-    mooseError("Shell line searches only became available in Petsc in version 3.6.0!");
-#else
     if (enum_line_search == Moose::LS_CONTACT)
     {
       InputParameters ls_params = _factory.getValidParams("PetscContactLineSearch");
@@ -102,7 +99,6 @@ FEProblem::addLineSearch(const InputParameters & parameters)
       _line_search = _factory.create<LineSearch>(
           "PetscProjectSolutionOntoBounds", "project_solution_onto_bounds_line_search", ls_params);
     }
-#endif
   }
   else
     mooseError("Requested line search ", line_search.operator std::string(), " is not supported");
