@@ -156,15 +156,18 @@ class RunPBS(QueueManager):
         template = self._augmentTemplate(job)
         tester = job.getTester()
         job_meta = self.options.results_storage.get(job.getTestDir(), { job.getTestDir() : {} })
+        print(job_meta)
 
         self.createQueueScript(job, template)
 
         command = ' '.join(['qsub', template['launch_script']])
+        command = 'true'
         launch_results = util.runCommand(command, job.getTestDir())
 
         # List of files we need to clean up when we are done
         dirty_files = [template['launch_script'],
-                       template['output']]
+                       template['output'],
+                       os.path.join(job.getTestDir(), self.harness.results_file)]
 
         if launch_results.find('ERROR') != -1:
             # The executor job failed (so fail all jobs in this group)
