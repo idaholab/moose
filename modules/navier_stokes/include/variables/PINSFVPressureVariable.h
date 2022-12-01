@@ -44,5 +44,5 @@ protected:
   const Moose::Functor<ADReal> * _rho;
 
 private:
-  mutable const Elem * _green_gauss_elem = nullptr;
+  mutable std::vector<const Elem *> _elems_to_extrapolate_from;
 };
