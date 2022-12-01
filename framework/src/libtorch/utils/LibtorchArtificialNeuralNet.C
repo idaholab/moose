@@ -39,7 +39,8 @@ LibtorchArtificialNeuralNet::LibtorchArtificialNeuralNet(
 
 LibtorchArtificialNeuralNet::LibtorchArtificialNeuralNet(
     const Moose::LibtorchArtificialNeuralNet & nn)
-  : _name(nn.name()),
+  : torch::nn::Module(),
+    _name(nn.name()),
     _num_inputs(nn.numInputs()),
     _num_outputs(nn.numOutputs()),
     _num_neurons_per_layer(nn.numNeuronsPerLayer()),

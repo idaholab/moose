@@ -10,4 +10,4 @@ using pytorch, click [here](https://pytorch.org/tutorials/advanced/cpp_export.ht
 
 Within MOOSE a torchscipt-based neural network can be created using the name of the torch-script file:
 
-!listing test/src/vectorpostprocessors/LibtorchTorchScriptNeuralNetTest.C start=We read the neural net end=LibtorchTorchScriptNeuralNet include-end=true
+!listing test/src/libtorch/vectorpostprocessors/LibtorchTorchScriptNeuralNetTest.C start=We read the neural net end=LibtorchTorchScriptNeuralNet include-end=true

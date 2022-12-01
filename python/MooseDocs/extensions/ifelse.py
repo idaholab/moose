@@ -103,14 +103,15 @@ class IfElseExtension(command.CommandExtension):
         return any([repo.endswith(name) for repo in status.keys()])
 
     def hasLibtorch(self):
-        mydir = os.path.dirname(os.path.realpath(__file__))
         moose_dir = os.getenv('MOOSE_DIR',
                               os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', '..', '..')))
 
         found_libtorch = False
-        # getMooseconfig returns a set of (ALL, True/False), so we have to iterate throgh it
+        # getMooseconfig returns a set of ('ALL', 'True/False'), so we have to iterate through it
         for it in util.getMooseConfigOption(moose_dir, 'libtorch'):
-            found_libtorch = (it == True)
+            if it.lower() == 'true':
+                found_libtorch = True
+                break
 
         return found_libtorch
 
