@@ -674,7 +674,7 @@ class TestHarness:
             self.error_code = self.error_code | 0x80
 
         # Alert the user to their session file
-        if self.options.queueing:
+        if self.options.queueing and not self.options.dry_run:
             print(('Your session file is %s' % self.options.results_file))
 
         # Print a different footer when performing a dry run

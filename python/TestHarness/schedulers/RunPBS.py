@@ -153,15 +153,15 @@ class RunPBS(QueueManager):
 
     def run(self, job):
         """ execute qsub and return the launch id """
-        template = self._augmentTemplate(job)
         tester = job.getTester()
+        if self.options.dry_run:
+            tester.setStatus(tester.success, 'DRY_RUN')
+            return
+
+        template = self._augmentTemplate(job)
         job_meta = self.options.results_storage.get(job.getTestDir(), { job.getTestDir() : {} })
-        print(job_meta)
-
         self.createQueueScript(job, template)
-
         command = ' '.join(['qsub', template['launch_script']])
-        command = 'true'
         launch_results = util.runCommand(command, job.getTestDir())
 
         # List of files we need to clean up when we are done
@@ -184,11 +184,16 @@ class RunPBS(QueueManager):
             job.setOutput(launch_results)
 
         else:
+            # While RunPBS believes this was a successful launch, perhaps this system's PBS system
+            # failed to launch for some other strange reason, and didn't error (above .find(ERROR)
+            # routine). In which case, it helps to set some 'past tense' grammar as our result
+            # in our '--pbs some_name' json file
             job_meta[self.__class__.__name__].update({'ID'           : launch_results,
                                                       'QSUB_COMMAND' : command,
                                                       'NCPUS'        : template['mpi_procs'],
                                                       'WALLTIME'     : template['walltime'],
                                                       'QSUB_OUTPUT'  : template['output'],
+                                                      'STATUS'       : 'PREVIOUSLY LAUNCHED',
                                                       'DIRTY_FILES'  : dirty_files})
 
             tester.setStatus(tester.queued, 'LAUNCHING')

@@ -48,6 +48,8 @@ class QueueManager(Scheduler):
         Filter through incomming jobs and figure out if we are launching them
         or attempting to process finished results.
         """
+        if self.options.dry_run:
+            return
         # Flatten the DAG. We want to easily iterate over all jobs produced by the spec file
         Jobs.removeAllDependencies()
 
@@ -74,6 +76,8 @@ class QueueManager(Scheduler):
 
     def createQueueScript(self, job, template):
         """ Write the launch script to disc """
+        if self.options.dry_run:
+            return
         # Get a list of prereq tests this test may have
         try:
             with open(self.params['queue_template'], 'r') as f:
@@ -220,8 +224,7 @@ class QueueManager(Scheduler):
         launch phase.
         """
         # No session file. Return immediately.
-        if not job_data.json_data:
-            print('NOT PROCESS READY')
+        if not job_data.json_data.get(job_data.job_dir, False):
             return False
 
         is_ready = True
@@ -282,9 +285,8 @@ class QueueManager(Scheduler):
 
     def _isLaunchable(self, job_data):
         """ bool if jobs are ready to launch """
-        # results file exists (set during scheduler plugin initialization), so do no launch again
-        print(f'Test Dir: {job_data.job_dir}, job_data.json data: {True if job_data.json_data else False}')
-        if job_data.json_data:
+        # results data exists (set during scheduler plugin initialization), so do no launch again
+        if job_data.json_data.get(job_data.job_dir, False):
             return False
 
         return True
@@ -306,7 +308,6 @@ class QueueManager(Scheduler):
             job.clearCaveats()
 
         if job_list:
-
             launchable_jobs = [x for x in job_list if not x.isFinished()]
             if launchable_jobs:
                 executor_job = job_list.pop(job_list.index(launchable_jobs.pop(0)))
@@ -407,13 +408,19 @@ class QueueManager(Scheduler):
         """ perform cleanup operations """
         job_list = self._setSilentForClean(Jobs)
         top_job_key = job_list[0].getTestDir()
-        # Top Job not originally part of what was launched
+        plugin = self.harness.scheduler.__class__.__name__
+
+        # Top Job (entire TestDir group) not originally part of what was launched
+        # (not launched due to: --re, -i --spec-file)
         if top_job_key not in self.options.results_storage.keys():
+            return
+        # All jobs ended up being skipped in this group
+        # (compiler!=gcc, heavy, petsc_version, etc)
+        elif plugin not in self.options.results_storage[top_job_key].keys():
             return
 
         # Build file_list with files we should delete
         file_list = [os.path.join(top_job_key, self.options.results_file)]
-        plugin = self.harness.scheduler.__class__.__name__
         job_meta = self.options.results_storage[top_job_key]
         scheduler_meta = job_meta[plugin]
         file_list.extend(scheduler_meta.get('DIRTY_FILES', []))
