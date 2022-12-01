@@ -22,6 +22,12 @@
 
       detail = "multiple subdomains."
     []
+    [vector]
+      type = 'Exodiff'
+      input = vector-test.i
+      exodiff = vector-test_out.e
+      detail = 'vector variables'
+    []
   []
   [missing_var_in_split]
     requirement = 'The system shall error if a user has forgotten a variable in their field splits.'
