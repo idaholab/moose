@@ -28,6 +28,12 @@
       exodiff = vector-test_out.e
       detail = 'vector variables'
     []
+    [array]
+      type = 'Exodiff'
+      input = array-test.i
+      exodiff = array-test_out.e
+      detail = 'array variables'
+    []
   []
   [missing_var_in_split]
     requirement = 'The system shall error if a user has forgotten a variable in their field splits.'

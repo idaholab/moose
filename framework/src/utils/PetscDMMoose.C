@@ -28,6 +28,7 @@
 #include "PenetrationLocator.h"
 #include "NearestNodeLocator.h"
 #include "GeometricSearchData.h"
+#include "MooseVariableScalar.h"
 
 #include "libmesh/nonlinear_implicit_system.h"
 #include "libmesh/nonlinear_solver.h"
@@ -295,7 +296,21 @@ DMMooseSetVariables(DM dm, const std::set<std::string> & vars)
     SETERRQ(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONGSTATE, "Not for an already setup DM");
   if (dmm->_vars)
     delete dmm->_vars;
-  dmm->_vars = new std::set<std::string>(vars);
+  std::set<std::string> processed_vars;
+  for (const auto & var_name : vars)
+  {
+    const auto * const var =
+        dmm->_nl->hasVariable(var_name)
+            ? static_cast<MooseVariableBase *>(&dmm->_nl->getVariable(0, var_name))
+            : static_cast<MooseVariableBase *>(&dmm->_nl->getScalarVariable(0, var_name));
+    if (var->isArray())
+      for (const auto i : make_range(var->count()))
+        processed_vars.insert(SubProblem::arrayVariableComponent(var_name, i));
+    else
+      processed_vars.insert(var_name);
+  }
+
+  dmm->_vars = new std::set<std::string>(std::move(processed_vars));
   PetscFunctionReturn(0);
 }
 
@@ -629,6 +644,20 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
         }
       };
 
+      auto process_elem_dof_indices =
+          [&dofmap](const std::vector<dof_id_type> & elem_indices,
+                    std::set<dof_id_type> & local_indices,
+                    std::set<dof_id_type> * const nonlocal_indices = nullptr)
+      {
+        for (const auto index : elem_indices)
+        {
+          if (index >= dofmap.first_dof() && index < dofmap.end_dof())
+            local_indices.insert(index);
+          else if (nonlocal_indices)
+            nonlocal_indices->insert(index);
+        }
+      };
+
       std::set<dof_id_type> indices;
       std::set<dof_id_type> unindices;
       std::set<dof_id_type> cached_indices;
@@ -649,11 +678,7 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
               // Get the degree of freedom indices for the given variable off the current element.
               std::vector<dof_id_type> evindices;
               dofmap.dof_indices(elem, evindices, v);
-
-              // might want to use variable_first/last_local_dof instead
-              for (const auto & dof : evindices)
-                if (dof >= dofmap.first_dof() && dof < dofmap.end_dof())
-                  indices.insert(dof);
+              process_elem_dof_indices(evindices, indices);
             }
 
             // Sometime, we own nodes but do not own the elements the nodes connected to
@@ -759,10 +784,11 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
           }
         };
 
-        auto process_contact_some_nodes = [dmm, process_nodal_dof_indices, v, &dofmap, &lm_mesh](
-                                              const auto & contact_names,
-                                              auto & indices_to_insert_to,
-                                              auto & nonlocal_indices_to_insert_to)
+        auto process_contact_some_nodes =
+            [dmm, process_nodal_dof_indices, v, &dofmap, &lm_mesh, process_elem_dof_indices](
+                const auto & contact_names,
+                auto & indices_to_insert_to,
+                auto & nonlocal_indices_to_insert_to)
         {
           std::vector<dof_id_type> evindices;
           for (const auto & it : contact_names)
@@ -802,12 +828,8 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
                 evindices.clear();
                 const Elem * primary_side = pinfo->_side;
                 dofmap.dof_indices(primary_side, evindices, v);
-                // indices of primary sides
-                for (const auto & edof : evindices)
-                  if (edof >= dofmap.first_dof() && edof < dofmap.end_dof())
-                    indices_to_insert_to.insert(edof);
-                  else
-                    nonlocal_indices_to_insert_to.insert(edof);
+                process_elem_dof_indices(
+                    evindices, indices_to_insert_to, &nonlocal_indices_to_insert_to);
               } // if pinfo
             }   // for penetration
           }     // for contact name
