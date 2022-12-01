@@ -83,7 +83,7 @@
     input = 'patterned_2d_block_name_conflict.i'
     cli_args = '--mesh-only "patterned_err.e"'
     expect_err = 'The input meshes contain subdomain name maps with conflicts.'
-    requirement ='The system shall throw an error if the input meshes contain different block ids that share the same block name.'
+    requirement ='The system shall throw an error if the input hexagonal meshes contain different block ids that share the same block name.'
   []
   [err_pattern_layer]
     type = 'RunException'
@@ -101,7 +101,7 @@
                 Mesh/pattern/pattern="0"
                 --mesh-only "patterned_err.e"'
     expect_err = 'this parameter must be larger than unity.'
-    requirement ='The system shall throw an error if the layer number of pattern is zero or unity.'
+    requirement ='The system shall throw an error if the layer number of hexagonal pattern is zero or unity.'
   []
   [err_pattern_shape]
     type = 'RunException'
@@ -110,7 +110,7 @@
                 Mesh/pattern/pattern="0 0;0 0 0;0"
                 --mesh-only "patterned_err.e"'
     expect_err = 'The two-dimentional array parameter pattern must have a correct hexagonal shape.'
-    requirement ='The system shall throw an error if the pattern does not represent a hexagonal pattern.'
+    requirement ='The system shall throw an error if the hexagonal pattern does not represent a hexagonal pattern.'
   []
   [err_out_of_range_pattern]
     type = 'RunException'
@@ -119,7 +119,7 @@
                 Mesh/pattern/pattern="0 0;0 1 0;0 0"
                 --mesh-only "patterned_err.e"'
     expect_err = 'Elements of this parameter must be smaller than the length of input_name.'
-    requirement ='The system shall throw an error if the pattern includes input mesh indices that exceed number of elements of inputs.'
+    requirement ='The system shall throw an error if the pattern includes input hexagonal mesh indices that exceed number of elements of inputs.'
   []
   [err_block_id]
     type = 'RunException'
@@ -138,7 +138,7 @@
                 Mesh/pattern/hexagon_size=18 Mesh/pattern/duct_sizes=17.5 Mesh/pattern/duct_intervals=2
                 --mesh-only "patterned_err.e"'
     expect_err = 'This parameter and duct_block_names must be provided simultaneously.'
-    requirement ='The system shall throw an error if background_block_name and duct_block_names are not provided simultaneously if the mesh has ducts.'
+    requirement ='The system shall throw an error if background_block_name and duct_block_names are not provided simultaneously if the hexagonal mesh has ducts.'
   []
   [err_duct_ids]
     type = 'RunException'
@@ -147,7 +147,7 @@
                 Mesh/pattern/hexagon_size=18 Mesh/pattern/duct_sizes="17.0 17.5" Mesh/pattern/duct_intervals="2 2"
                 --mesh-only "patterned_err.e"'
     expect_err = 'This parameter, if provided, must have a length equal to length of duct_sizes.'
-    requirement ='The system shall throw an error if length of duct_block_ids is not consistent with number of ducts.'
+    requirement ='The system shall throw an error if length of duct_block_ids is not consistent with number of hexagonal ducts.'
   []
   [err_duct_names]
     type = 'RunException'
@@ -156,7 +156,7 @@
                 Mesh/pattern/hexagon_size=18 Mesh/pattern/duct_sizes="17.0 17.5" Mesh/pattern/duct_intervals="2 2"
                 --mesh-only "patterned_err.e"'
     expect_err = 'This parameter, if provided, must have a length equal to length of duct_sizes.'
-    requirement ='The system shall throw an error if length of duct_block_names is not consistent with number of ducts.'
+    requirement ='The system shall throw an error if length of duct_block_names is not consistent with number of hexagonal ducts.'
   []
   [err_non_background]
     type = 'RunException'
@@ -165,7 +165,7 @@
                 Mesh/pattern/background_block_name="background"
                 --mesh-only "patterned_err.e"'
     expect_err = 'This parameter and background_block_name must not be set when the pattern_boundary is none.'
-    requirement ='The system shall throw an error if background_block_name or background_block_id are provided when pattern_boundary is none.'
+    requirement ='The system shall throw an error if background_block_name or background_block_id are provided for the hexagonal pattern when pattern_boundary is none.'
   []
   [err_no_hexagon_size]
     type = 'RunException'
@@ -179,7 +179,7 @@
     input = 'patterned_2d_err.i'
     cli_args = '--mesh-only "patterned_err.e"'
     expect_err = 'All the meshes provided in inputs must be used here.'
-    requirement ='The system shall throw an error if not all the meshes provided in inputs are used in pattern.'
+    requirement ='The system shall throw an error if not all the hexagonal meshes provided in inputs are used in pattern.'
   []
   [err_no_appropriate_pitch_meta]
     type = 'RunException'
@@ -187,21 +187,21 @@
     cli_args = 'Mesh/pattern_2/generate_core_metadata=false
                --mesh-only "patterned_err.e"'
     expect_err = 'the unit hexagonal input mesh does not contain appropriate meta data required for generating an assembly.'
-    requirement ='The system shall throw an error if no pitch meta data can be obtained from the input mesh.'
+    requirement ='The system shall throw an error if no pitch meta data can be obtained from the input hexagonal mesh.'
   []
   [err_no_appropriate_pattern_pitch_meta]
     type = 'RunException'
     input = 'patterned_pattern_err.i'
     cli_args = '--mesh-only "patterned_err.e"'
     expect_err = 'the unit hexagonal input mesh does not contain appropriate meta data required for generating a core mesh.'
-    requirement ='The system shall throw an error if no pattern pitch meta data can be obtained from the input mesh.'
+    requirement ='The system shall throw an error if no pattern pitch meta data can be obtained from the input hexagonal mesh.'
   []
   [err_different_pattern_pitch_meta]
     type = 'RunException'
     input = 'patterned_pattern_err2.i'
     cli_args = '--mesh-only "patterned_err.e"'
     expect_err = 'pattern_pitch metadata values of all input mesh generators must be identical'
-    requirement ='The system shall throw an error if input meshes have different pattern pitch meta data.'
+    requirement ='The system shall throw an error if input hexagonal meshes have different pattern pitch meta data.'
   []
   [err_cut_off_input]
     type = 'RunException'
@@ -210,6 +210,6 @@
                 Mesh/pattern/deform_non_circular_region=false
                 --mesh-only "patterned_err.e"'
     expect_err = 'the assembly is cut off so much that the internal structure that should not be altered is compromised.'
-    requirement ='The system shall throw an error if the input mesh geometry that should not be deformed is cut off.'
+    requirement ='The system shall throw an error if the input hexagonal mesh geometry that should not be deformed is cut off.'
   []
 []

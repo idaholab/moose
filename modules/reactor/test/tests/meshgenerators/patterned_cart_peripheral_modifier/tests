@@ -1,6 +1,6 @@
 [Tests]
-  # design = 'meshgenerators/PatternedHexPeripheralModifier.md'
-  # issues = '#20641'
+  design = 'meshgenerators/PatternedCartPeripheralModifier.md'
+  issues = '#22828'
   [single_square]
     type = 'Exodiff'
     input = 'single_square.i'
