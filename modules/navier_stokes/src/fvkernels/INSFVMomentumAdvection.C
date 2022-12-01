@@ -70,7 +70,6 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
   using namespace Moose::FV;
 
   const bool correct_skewness = _advected_interp_method == InterpMethod::SkewCorrectedAverage;
-  const auto v = _rc_vel_provider.getVelocity(_velocity_interp_method, fi, _tid);
 
   _elem_residual = 0, _neighbor_residual = 0, _ae = 0, _an = 0;
 
@@ -83,6 +82,7 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
     const auto epsf = epsilon()(ssf);
     const auto uf = _var(ssf);
     const Real duf_du = uf.derivatives()[dof_number];
+    const auto v = _rc_vel_provider.getVelocity(_velocity_interp_method, fi, _tid);
     const auto coeff = _normal * v * rhof / epsf;
 
     if (sided_elem == &fi.elem())
@@ -106,7 +106,10 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
         &fi, Moose::FV::LimiterType::CentralDifference, true, false, fi.neighbor().subdomain_id()};
 
     const auto rho_elem_face = _rho(ssf_elem), rho_neighbor_face = _rho(ssf_neighbor);
-    const auto var_elem_face = _var(ssf_elem), var_neighbor_face = _var(ssf_neighbor);
+
+    const auto v = _rc_vel_provider.getUpwindSingleSidedFaceVelocity(fi, _tid);
+    const auto & var_elem_face = v(_index);
+    const auto & var_neighbor_face = v(_index);
 
     const auto elem_dof_number = fi.elem().dof_number(_sys.number(), _var.number(), 0);
     const auto neighbor_dof_number = fi.neighbor().dof_number(_sys.number(), _var.number(), 0);
@@ -126,6 +129,8 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
   }
   else
   {
+    const auto v = _rc_vel_provider.getVelocity(_velocity_interp_method, fi, _tid);
+
     const auto [interp_coeffs, advected] =
         interpCoeffsAndAdvected(*_rho_u,
                                 makeFace(fi,

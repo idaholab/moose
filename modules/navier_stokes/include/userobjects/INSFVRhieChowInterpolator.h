@@ -66,6 +66,8 @@ public:
   VectorValue<ADReal>
   getVelocity(Moose::FV::InterpMethod m, const FaceInfo & fi, THREAD_ID tid) const;
 
+  VectorValue<ADReal> getUpwindSingleSidedFaceVelocity(const FaceInfo & fi, THREAD_ID tid) const;
+
   /// Return the interpolation method used for velocity
   Moose::FV::InterpMethod velocityInterpolationMethod() const { return _velocity_interp_method; }
 

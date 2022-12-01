@@ -598,3 +598,22 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
 
   return velocity;
 }
+
+VectorValue<ADReal>
+INSFVRhieChowInterpolator::getUpwindSingleSidedFaceVelocity(const FaceInfo & fi,
+                                                            THREAD_ID tid) const
+{
+  const auto face_v = getVelocity(Moose::FV::InterpMethod::Average, fi, tid);
+
+  mooseAssert(fi.neighborPtr(), "This method should not be called with a null neighbor");
+
+  const Moose::SingleSidedFaceArg ssf{&fi,
+                                      Moose::FV::LimiterType::CentralDifference,
+                                      true,
+                                      false,
+                                      MetaPhysicL::raw_value(face_v) * fi.normal() > 0
+                                          ? fi.elem().subdomain_id()
+                                          : fi.neighbor().subdomain_id()};
+
+  return {(*_u)(ssf), _v ? (*_v)(ssf) : ADReal(0), _w ? (*_w)(ssf) : ADReal(0)};
+}

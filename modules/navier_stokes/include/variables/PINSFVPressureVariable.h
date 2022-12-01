@@ -34,6 +34,9 @@ protected:
 
   ADReal getDirichletBoundaryFaceValue(const FaceInfo & fi) const override;
 
+  std::tuple<bool, ADRealVectorValue, ADRealVectorValue> elemIsUpwind(const Elem & elem,
+                                                                      const FaceInfo & fi) const;
+
   const Moose::Functor<ADReal> * _u;
   const Moose::Functor<ADReal> * _v;
   const Moose::Functor<ADReal> * _w;

@@ -47,6 +47,23 @@ PINSFVPressureVariable::initialSetup()
   _rho = &getFunctor<ADReal>(NS::density, _subproblem);
 }
 
+std::tuple<bool, ADRealVectorValue, ADRealVectorValue>
+PINSFVPressureVariable::elemIsUpwind(const Elem & elem, const FaceInfo & fi) const
+{
+  const Moose::SingleSidedFaceArg ssf_elem{
+      &fi, Moose::FV::LimiterType::CentralDifference, true, false, fi.elem().subdomain_id()};
+  const Moose::SingleSidedFaceArg ssf_neighbor{
+      &fi, Moose::FV::LimiterType::CentralDifference, true, false, fi.neighbor().subdomain_id()};
+
+  const VectorValue<ADReal> vel_elem{(*_u)(ssf_elem), (*_v)(ssf_elem), (*_w)(ssf_elem)};
+  const VectorValue<ADReal> vel_neighbor{
+      (*_u)(ssf_neighbor), (*_v)(ssf_neighbor), (*_w)(ssf_neighbor)};
+  const bool fi_elem_is_upwind = (vel_elem + vel_neighbor) * fi.normal() > 0;
+  const bool elem_is_upwind = &elem == &fi.elem() ? fi_elem_is_upwind : !fi_elem_is_upwind;
+
+  return {elem_is_upwind, vel_elem, vel_neighbor};
+}
+
 std::pair<bool, const Elem *>
 PINSFVPressureVariable::isExtrapolatedBoundaryFace(const FaceInfo & fi) const
 {
@@ -63,9 +80,8 @@ PINSFVPressureVariable::isExtrapolatedBoundaryFace(const FaceInfo & fi) const
     // If we got here, then we're definitely on an internal face
 
     if (_green_gauss_elem && std::get<0>(NS::isPorosityJumpFace(*_eps, fi)))
-      // We choose to extrapolate for the element that is the face info element (in general the
-      // lower ID element of the face pair)
-      return _green_gauss_elem == &fi.elem();
+      // We choose to extrapolate for the element that is downwind
+      return !std::get<0>(elemIsUpwind(*_green_gauss_elem, fi));
 
     return false;
   }();
@@ -91,9 +107,8 @@ PINSFVPressureVariable::isDirichletBoundaryFace(const FaceInfo & fi) const
     return true;
 
   if (isInternalFace(fi) && _green_gauss_elem && std::get<0>(NS::isPorosityJumpFace(*_eps, fi)))
-    // We choose to apply the Dirichlet condition for the element that is the face info neighbor (in
-    // general the higher ID element of the face pair)
-    return _green_gauss_elem == fi.neighborPtr();
+    // We choose to apply the Dirichlet condition for the upwind element
+    return std::get<0>(elemIsUpwind(*_green_gauss_elem, fi));
 
   return false;
 }
@@ -115,16 +130,26 @@ PINSFVPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi) const
   // For incompressible or weakly compressible flow these should really be about the same
   const auto rho_elem = (*_rho)(ssf_elem), rho_neighbor = (*_rho)(ssf_neighbor);
 
-  const VectorValue<ADReal> interstitial_vel_elem{
-      (*_u)(ssf_elem) / eps_elem, (*_v)(ssf_elem) / eps_elem, (*_w)(ssf_elem) / eps_elem};
-  const VectorValue<ADReal> interstitial_vel_neighbor{(*_u)(ssf_neighbor) / eps_neighbor,
-                                                      (*_v)(ssf_neighbor) / eps_neighbor,
-                                                      (*_w)(ssf_neighbor) / eps_neighbor};
+  mooseAssert(_green_gauss_elem, "If we are here, then we must have a Green-Gauss element");
+  const auto [gg_elem_is_upwind, vel_elem, vel_neighbor] = elemIsUpwind(*_green_gauss_elem, fi);
+
+  const VectorValue<ADReal> interstitial_vel_elem = vel_elem * (1 / eps_elem);
+  const VectorValue<ADReal> interstitial_vel_neighbor = vel_neighbor * (1 / eps_neighbor);
   const auto v_dot_n_elem = interstitial_vel_elem * fi.normal();
   const auto v_dot_n_neighbor = interstitial_vel_neighbor * fi.normal();
-  const auto p_elem = (*this)(ssf_elem);
-  return p_elem + 0.5 * rho_elem * v_dot_n_elem * v_dot_n_elem -
-         0.5 * rho_neighbor * v_dot_n_neighbor * v_dot_n_neighbor;
+  const auto bernoulli_vel_chunk_elem = 0.5 * rho_elem * v_dot_n_elem * v_dot_n_elem;
+  const auto bernoulli_vel_chunk_neighbor =
+      0.5 * rho_neighbor * v_dot_n_neighbor * v_dot_n_neighbor;
+
+  const bool fi_elem_is_upwind =
+      _green_gauss_elem == &fi.elem() ? gg_elem_is_upwind : !gg_elem_is_upwind;
+  const auto & downwind_ssf = fi_elem_is_upwind ? ssf_neighbor : ssf_elem;
+  const auto & upwind_bernoulli_vel_chunk =
+      fi_elem_is_upwind ? bernoulli_vel_chunk_elem : bernoulli_vel_chunk_neighbor;
+  const auto & downwind_bernoulli_vel_chunk =
+      fi_elem_is_upwind ? bernoulli_vel_chunk_neighbor : bernoulli_vel_chunk_elem;
+  const auto p_downwind = (*this)(downwind_ssf);
+  return p_downwind + downwind_bernoulli_vel_chunk - upwind_bernoulli_vel_chunk;
 }
 
 const VectorValue<ADReal> &
