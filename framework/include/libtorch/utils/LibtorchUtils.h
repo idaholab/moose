@@ -58,7 +58,8 @@ tensorToVector(torch::Tensor & tensor, std::vector<DataType> & vector)
 
   for (const auto & dim_size : sizes)
   {
-    max_size = std::max(dim_size, max_size);
+    // We do this comparison because XCode complains if we use std::max
+    max_size = dim_size > max_size ? dim_size : max_size;
     product_size *= dim_size;
   }
 

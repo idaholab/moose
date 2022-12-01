@@ -1,0 +1,13 @@
+[Tests]
+  design = 'LibtorchUtils.md'
+  issues = '#19571'
+
+  [vector-conversion]
+    type = CSVDiff
+    input = 'vector-conversion.i'
+    csvdiff = 'vector-conversion_out_test_0001.csv'
+    requirement = 'The system shall be able to convert torch tensors to standard vectors and standard vectors to tensors.'
+    libtorch = true
+    allow_test_objects = True
+  []
+[]
