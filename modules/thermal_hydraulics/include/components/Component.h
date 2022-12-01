@@ -386,11 +386,6 @@ protected:
   /// Pointer to a parent component (used in composed components)
   Component * _parent;
 
-  /// THM problem this component is part of
-  /// TODO: make _sim private (applications need to switch to getters to avoid breaking).
-  /// Also, rename to "_thm_problem" at that point.
-  THMProblem & _sim;
-
   /// The Factory associated with the MooseApp
   Factory & _factory;
 
@@ -427,7 +422,7 @@ template <typename T>
 const T &
 Component::getComponentByName(const std::string & comp_name) const
 {
-  return _sim.getComponentByName<T>(comp_name);
+  return getTHMApp().getComponentByName<T>(comp_name);
 }
 
 template <typename T>
@@ -442,7 +437,7 @@ template <typename T>
 bool
 Component::hasComponentByName(const std::string & comp_name) const
 {
-  if (_sim.hasComponentOfType<T>(comp_name))
+  if (getTHMApp().hasComponentOfType<T>(comp_name))
     return true;
   else
     return false;
@@ -508,9 +503,9 @@ template <typename T>
 void
 Component::checkComponentOfTypeExistsByName(const std::string & comp_name) const
 {
-  if (!_sim.hasComponentOfType<T>(comp_name))
+  if (!getTHMApp().hasComponentOfType<T>(comp_name))
   {
-    if (_sim.hasComponent(comp_name))
+    if (getTHMApp().hasComponent(comp_name))
       logError("The component '", comp_name, "' is not of type '", demangle(typeid(T).name()), "'");
     else
       logError("The component '", comp_name, "' does not exist");

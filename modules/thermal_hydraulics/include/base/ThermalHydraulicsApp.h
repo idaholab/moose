@@ -12,10 +12,12 @@
 #include "MooseApp.h"
 #include "MooseUtils.h"
 #include "Logger.h"
+#include "ComponentWarehouse.h"
 
 class FluidProperties;
 class Simulation;
 class THMMesh;
+class THMProblem;
 
 #define registerComponent(name) registerObject(name)
 #define registerNamedComponent(obj, name) registerNamedObject(obj, name)
@@ -71,6 +73,69 @@ public:
   void setTHMMesh(std::shared_ptr<THMMesh> & thm_mesh);
 
   /**
+   * Gets the THM problem
+   */
+  THMProblem & getTHMProblem() const;
+
+  /**
+   * Sets the THM problem
+   *
+   * @param problem   The FE problem base
+   */
+  void setTHMProblem(FEProblemBase & problem);
+
+  /**
+   * Returns the list of components
+   */
+  const std::vector<std::shared_ptr<Component>> & getComponents()
+  {
+    return _component_warehouse.getComponents();
+  }
+
+  /**
+   * Returns true if a component exists with the given name
+   *
+   * @param[in] name   The name of the component
+   */
+  bool hasComponent(const std::string & name) const
+  {
+    return _component_warehouse.hasComponent(name);
+  }
+
+  /**
+   * Returns true if a component exists with the given name and type
+   *
+   * @tparam T   Type of the component we are requesting
+   * @param[in] name   The name of the component
+   */
+  template <typename T>
+  bool hasComponentOfType(const std::string & name) const;
+
+  /**
+   * Gets a component by its name
+   *
+   * @tparam T   Type of the component we are requesting
+   * @param[in] name   The name of the component
+   * @return Pointer to the component if found (otherwise throws error)
+   */
+  template <typename T>
+  const T & getComponentByName(const std::string & name) const;
+
+  /**
+   * Adds a component into the simulation
+   *
+   * @param[in] type   Type (the registered class name) of the component
+   * @param[in] name   Name of the component
+   * @param[in] params   Input parameters
+   */
+  void addComponent(const std::string & type, const std::string & name, InputParameters & params);
+
+  /**
+   * Sorts the components using the dependency resolver
+   */
+  void sortComponents() { _component_warehouse.sortComponents(); }
+
+  /**
    * Registers a closures option
    *
    * @param[in] closures_option   Closures option string to register
@@ -124,6 +189,29 @@ private:
   /// Logger
   Logger _log;
 
+  /// The component warehouse
+  ComponentWarehouse _component_warehouse;
+
   /// Flag that the THM mesh has been set
   bool _set_thm_mesh;
+
+  /// The THM problem
+  THMProblem * _thm_problem;
+
+  /// Flag that the THMProblem pointer has been set
+  bool _set_thm_problem_pointer;
 };
+
+template <typename T>
+bool
+ThermalHydraulicsApp::hasComponentOfType(const std::string & name) const
+{
+  return _component_warehouse.hasComponentOfType<T>(name);
+}
+
+template <typename T>
+const T &
+ThermalHydraulicsApp::getComponentByName(const std::string & name) const
+{
+  return _component_warehouse.getComponentByName<T>(name);
+}

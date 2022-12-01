@@ -10,13 +10,17 @@
 #pragma once
 
 #include "Action.h"
+#include "THMAppInterface.h"
 
-class THMBuildMeshAction : public Action
+/**
+ * Builds the THM mesh.
+ */
+class THMBuildMeshAction : public Action, public THMAppInterface
 {
 public:
   THMBuildMeshAction(const InputParameters & params);
 
-  virtual void act();
+  virtual void act() override;
 
 public:
   static InputParameters validParams();

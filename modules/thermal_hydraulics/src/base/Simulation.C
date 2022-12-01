@@ -35,7 +35,6 @@
 Simulation::Simulation(FEProblemBase & fe_problem, const InputParameters & pars)
   : ParallelObject(fe_problem.comm()),
     LoggingInterface(static_cast<ThermalHydraulicsApp &>(fe_problem.getMooseApp()).log()),
-    _mesh(*static_cast<THMMesh *>(pars.get<MooseMesh *>("mesh"))),
     _fe_problem(fe_problem),
     _app(static_cast<ThermalHydraulicsApp &>(*pars.get<MooseApp *>("_moose_app"))),
     _factory(_app.getFactory()),
@@ -74,34 +73,16 @@ Simulation::augmentSparsity(const dof_id_type & elem_id1, const dof_id_type & el
 }
 
 void
-Simulation::buildMesh()
-{
-  if (_components.size() == 0)
-    return;
-
-  // perform any pre-mesh-setup initialization
-  for (auto && comp : _components)
-    comp->executePreSetupMesh();
-
-  // build mesh
-  for (auto && comp : _components)
-    comp->executeSetupMesh();
-  // Make sure all node sets have their corresponding side sets
-  if (_mesh.getMesh().get_boundary_info().n_nodeset_conds() > 0)
-    _mesh.getMesh().get_boundary_info().build_side_list_from_node_list();
-}
-
-void
 Simulation::setupQuadrature()
 {
-  if (_components.size() == 0)
+  if (getComponents().size() == 0)
     return;
 
   Order order = CONSTANT;
   unsigned int n_flow_channels = 0;
   unsigned int n_heat_structures = 0;
 
-  for (auto && comp : _components)
+  for (auto && comp : getComponents())
   {
     auto flow_channel = dynamic_cast<FlowChannelBase *>(comp.get());
     if (flow_channel != nullptr)
@@ -129,31 +110,15 @@ Simulation::setupQuadrature()
 }
 
 void
-Simulation::initSimulation()
-{
-  // sort the components using dependency resolver
-  DependencyResolver<std::shared_ptr<Component>> dependency_resolver;
-  for (const auto & comp : _components)
-  {
-    dependency_resolver.addNode(comp);
-    for (const auto & dep : comp->getDependencies())
-      if (hasComponent(dep))
-        dependency_resolver.addEdge(_comp_by_name[dep], comp);
-  }
-
-  _components = dependency_resolver.dfs();
-}
-
-void
 Simulation::initComponents()
 {
   // initialize components
-  for (auto && comp : _components)
+  for (auto && comp : getComponents())
     comp->executeInit();
 
   // perform secondary initialization, which relies on init() being called
   // already for all components
-  for (auto && comp : _components)
+  for (auto && comp : getComponents())
     comp->executeInitSecondary();
 }
 
@@ -161,7 +126,7 @@ void
 Simulation::identifyLoops()
 {
   // loop over junctions and boundaries (non-geometrical components)
-  for (const auto & component : _components)
+  for (const auto & component : getComponents())
   {
     const auto flow_connection =
         MooseSharedNamespace::dynamic_pointer_cast<Component1DConnection>(component);
@@ -222,7 +187,7 @@ Simulation::identifyLoops()
     // find a flow channel in this loop and get its model ID
     THM::FlowModelID model_id;
     bool found_model_id = false;
-    for (const auto & component : _components)
+    for (const auto & component : getComponents())
     {
       const auto flow_chan_base_component =
           MooseSharedNamespace::dynamic_pointer_cast<FlowChannelBase>(component);
@@ -418,11 +383,11 @@ Simulation::addVariables()
       _implicit_time_integration = false;
   }
 
-  if (_components.size() == 0)
+  if (getComponents().size() == 0)
     return;
 
   // let all components add their variables
-  for (auto && comp : _components)
+  for (auto && comp : getComponents())
     comp->addVariables();
 
   // pass the variables to MOOSE
@@ -556,7 +521,7 @@ Simulation::setupInitialConditionObjects()
 void
 Simulation::addMooseObjects()
 {
-  for (auto && comp : _components)
+  for (auto && comp : getComponents())
     comp->addMooseObjects();
 }
 
@@ -569,7 +534,7 @@ Simulation::addRelationshipManagers()
     params.set<Moose::RelationshipManagerType>("rm_type") =
         Moose::RelationshipManagerType::ALGEBRAIC | Moose::RelationshipManagerType::GEOMETRIC;
     params.set<std::string>("for_whom") = _fe_problem.name();
-    params.set<MooseMesh *>("mesh") = &_mesh;
+    params.set<MooseMesh *>("mesh") = _app.getTHMMesh().get();
     params.set<std::map<dof_id_type, std::vector<dof_id_type>> *>("_elem_map") =
         &_sparsity_elem_augmentation;
     auto rm = _factory.create<RelationshipManager>(class_name, "thm:sparsity_btw_elems", params);
@@ -584,7 +549,7 @@ Simulation::setupCoordinateSystem()
   MultiMooseEnum coord_types("XYZ RZ RSPHERICAL");
   std::vector<SubdomainName> blocks;
 
-  for (auto && comp : _components)
+  for (auto && comp : getComponents())
   {
     GeometricalComponent * gc = dynamic_cast<GeometricalComponent *>(comp.get());
     if (gc != NULL && gc->parent() == nullptr)
@@ -645,7 +610,7 @@ Simulation::couplingMatrixIntegrityCheck() const
 void
 Simulation::integrityCheck() const
 {
-  if (_components.size() == 0)
+  if (getComponents().size() == 0)
     return;
 
   if (_check_jacobian)
@@ -653,7 +618,7 @@ Simulation::integrityCheck() const
 
   // go over components and put flow channels into one "bucket"
   std::vector<Component *> flow_channels;
-  for (auto && comp : _components)
+  for (auto && comp : getComponents())
   {
     auto flow_channel = dynamic_cast<FlowChannelBase *>(comp.get());
     if (flow_channel != nullptr)
@@ -670,7 +635,7 @@ Simulation::integrityCheck() const
   }
 
   // mark connections of any Component1DConnection components
-  for (const auto & comp : _components)
+  for (const auto & comp : getComponents())
   {
     auto pc_comp = dynamic_cast<Component1DConnection *>(comp.get());
     if (pc_comp != nullptr)
@@ -700,7 +665,7 @@ Simulation::integrityCheck() const
   }
 
   // let components check themselves
-  for (auto && comp : _components)
+  for (auto && comp : getComponents())
     comp->executeCheck();
 
   if (log().getNumberOfErrors() > 0)
@@ -813,24 +778,6 @@ Simulation::controlDataIntegrityCheck()
 void
 Simulation::run()
 {
-}
-
-void
-Simulation::addComponent(const std::string & type, const std::string & name, InputParameters params)
-{
-  std::shared_ptr<Component> comp = _factory.create<Component>(type, name, params);
-  if (_comp_by_name.find(name) == _comp_by_name.end())
-    _comp_by_name[name] = comp;
-  else
-    logError("Component with name '", name, "' already exists");
-  _components.push_back(comp);
-}
-
-bool
-Simulation::hasComponent(const std::string & name) const
-{
-  auto it = _comp_by_name.find(name);
-  return (it != _comp_by_name.end());
 }
 
 void

@@ -10,16 +10,17 @@
 #pragma once
 
 #include "Action.h"
+#include "THMAppInterface.h"
 
 /**
- *
+ * Initializes the THM simulation.
  */
-class THMInitSimulationAction : public Action
+class THMInitSimulationAction : public Action, public THMAppInterface
 {
 public:
   THMInitSimulationAction(const InputParameters & parameters);
 
-  virtual void act();
+  virtual void act() override;
 
 public:
   static InputParameters validParams();

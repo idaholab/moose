@@ -10,8 +10,9 @@
 #pragma once
 
 #include "MooseObjectAction.h"
+#include "THMAppInterface.h"
 
-class AddComponentAction : public MooseObjectAction
+class AddComponentAction : public MooseObjectAction, public THMAppInterface
 {
 public:
   AddComponentAction(const InputParameters & params);

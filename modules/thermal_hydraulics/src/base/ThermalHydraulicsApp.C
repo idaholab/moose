@@ -16,6 +16,7 @@
 #include "RdgApp.h"
 #include "SolidPropertiesApp.h"
 #include "MiscApp.h"
+#include "THMProblem.h"
 
 #include "AppFactory.h"
 
@@ -58,7 +59,12 @@ ThermalHydraulicsApp::validParams()
 registerKnownLabel("ThermalHydraulicsApp");
 
 ThermalHydraulicsApp::ThermalHydraulicsApp(InputParameters parameters)
-  : MooseApp(parameters), _thm_mesh(nullptr), _set_thm_mesh(false)
+  : MooseApp(parameters),
+    _thm_mesh(nullptr),
+    _component_warehouse(getFactory()),
+    _set_thm_mesh(false),
+    _thm_problem(nullptr),
+    _set_thm_problem_pointer(false)
 {
   ThermalHydraulicsApp::registerAll(_factory, _action_factory, _syntax);
 
@@ -185,6 +191,39 @@ ThermalHydraulicsApp::setTHMMesh(std::shared_ptr<THMMesh> & thm_mesh)
     _thm_mesh = thm_mesh;
     _set_thm_mesh = true;
   }
+}
+
+THMProblem &
+ThermalHydraulicsApp::getTHMProblem() const
+{
+  if (_set_thm_problem_pointer)
+    return *_thm_problem;
+  else
+    mooseError("The THM problem has not been set.");
+}
+
+void
+ThermalHydraulicsApp::setTHMProblem(FEProblemBase & problem)
+{
+  auto thm_problem = dynamic_cast<THMProblem *>(&problem);
+  if (thm_problem)
+  {
+    _thm_problem = thm_problem;
+    _set_thm_problem_pointer = true;
+  }
+  else
+    mooseError("The problem is not of type THMProblem.");
+}
+
+void
+ThermalHydraulicsApp::addComponent(const std::string & type,
+                                   const std::string & name,
+                                   InputParameters & params)
+{
+  if (hasComponent(name))
+    mooseError("Component with name '", name, "' already exists");
+  else
+    _component_warehouse.addComponent(type, name, params);
 }
 
 //

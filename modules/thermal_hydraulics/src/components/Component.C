@@ -17,7 +17,6 @@ InputParameters
 Component::validParams()
 {
   InputParameters params = THMObject::validParams();
-  params.addPrivateParam<THMProblem *>("_thm_problem");
   params.addPrivateParam<Component *>("_parent", nullptr);
   params.addPrivateParam<std::string>("built_by_action", "add_component");
 
@@ -36,9 +35,8 @@ Component::Component(const InputParameters & parameters)
     NamingInterface(),
 
     _parent(getParam<Component *>("_parent")),
-    _sim(*getCheckedPointerParam<THMProblem *>("_thm_problem")),
     _factory(_app.getFactory()),
-    _mesh(static_cast<THMMesh &>(_sim.mesh())),
+    _mesh(*getTHMApp().getTHMMesh()),
     _component_setup_status(CREATED)
 {
 }
@@ -137,7 +135,7 @@ Component::addDependency(const std::string & dependency)
 THMProblem &
 Component::getTHMProblem() const
 {
-  return _sim;
+  return getTHMApp().getTHMProblem();
 }
 
 void
@@ -145,7 +143,7 @@ Component::makeFunctionControllableIfConstant(const FunctionName & fn_name,
                                               const std::string & control_name,
                                               const std::string & param) const
 {
-  const Function & fn = _sim.getFunction(fn_name);
+  const Function & fn = getTHMProblem().getFunction(fn_name);
   if (dynamic_cast<const ConstantFunction *>(&fn) != nullptr)
     connectObject(fn.parameters(), fn_name, control_name, param);
 }
@@ -153,7 +151,7 @@ Component::makeFunctionControllableIfConstant(const FunctionName & fn_name,
 void
 Component::checkComponentExistsByName(const std::string & comp_name) const
 {
-  if (!_sim.hasComponent(comp_name))
+  if (!getTHMProblem().hasComponent(comp_name))
     logError("The component '", comp_name, "' does not exist");
 }
 

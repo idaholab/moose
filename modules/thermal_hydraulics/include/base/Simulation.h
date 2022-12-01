@@ -42,11 +42,6 @@ public:
   virtual void setupQuadrature();
 
   /**
-   * Initialize this simulation
-   */
-  virtual void initSimulation();
-
-  /**
    * Initialize this simulation's components
    */
   virtual void initComponents();
@@ -67,20 +62,11 @@ public:
   virtual void run();
 
   /**
-   * Add a component into this simulation
-   * @param type Type (the registered class name) of the component
-   * @param name Name of the component
-   * @param params Input parameters
-   */
-  virtual void
-  addComponent(const std::string & type, const std::string & name, InputParameters params);
-
-  /**
    * Find out if simulation has a component with the given name
    * @param name The name of the component
    * @return true if the components exists, otherwise false
    */
-  bool hasComponent(const std::string & name) const;
+  bool hasComponent(const std::string & name) const { return _app.hasComponent(name); }
 
   /**
    * Find out if simulation has a component with the given name and specified type
@@ -103,7 +89,10 @@ public:
   /**
    * Return list of components available in the simulation
    */
-  const std::vector<std::shared_ptr<Component>> & getComponents() { return _components; }
+  const std::vector<std::shared_ptr<Component>> & getComponents() const
+  {
+    return _app.getComponents();
+  }
 
   /**
    * Add a closures object into this simulation
@@ -175,11 +164,6 @@ public:
    * @returns output names vector corresponding to key
    */
   std::vector<OutputName> getOutputsVector(const std::string & key) const;
-
-  /**
-   * Create mesh for this simulation
-   */
-  virtual void buildMesh();
 
   /**
    * Add variables involved in this simulation
@@ -336,7 +320,6 @@ protected:
     std::set<SubdomainName> _subdomain;
     Real _scaling_factor;
   };
-  THMMesh & _mesh;
 
   /// Pointer to FEProblem representing this simulation
   FEProblemBase & _fe_problem;
@@ -347,10 +330,6 @@ protected:
   /// The Factory associated with the MooseApp
   Factory & _factory;
 
-  /// List of components in this simulation
-  std::vector<std::shared_ptr<Component>> _components;
-  /// Map of components by their names
-  std::map<std::string, std::shared_ptr<Component>> _comp_by_name;
   /// Map of component name to component loop name
   std::map<std::string, std::string> _component_name_to_loop_name;
   /// Map of loop name to model type
@@ -425,23 +404,12 @@ template <typename T>
 bool
 Simulation::hasComponentOfType(const std::string & name) const
 {
-  auto it = _comp_by_name.find(name);
-  if (it != _comp_by_name.end())
-    return dynamic_cast<T *>((it->second).get()) != nullptr;
-  else
-    return false;
+  return _app.hasComponentOfType<T>(name);
 }
 
 template <typename T>
 const T &
 Simulation::getComponentByName(const std::string & name) const
 {
-  auto it = _comp_by_name.find(name);
-  if (it != _comp_by_name.end())
-    return *dynamic_cast<T *>((it->second).get());
-  else
-    mooseError("Component '",
-               name,
-               "' does not exist in the simulation. Use hasComponent or "
-               "checkComponnetByName before calling getComponent.");
+  return _app.getComponentByName<T>(name);
 }
