@@ -28,7 +28,7 @@
     valgrind = 'none'
     requirement = 'The contact module shall be able to compute nodal wear depth values in accordance with Archard '
                   'equation via a mortar auxiliary kernel.'
-
+    method = '!dbg'
   []
   [block-dynamics-aux-wear-vel]
     type = 'Exodiff'
