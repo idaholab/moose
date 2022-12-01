@@ -42,6 +42,12 @@ OptimizationData::validParams()
       "file_value", "value", "measurement value column name from csv file being read in");
 
   params.addParam<VariableName>("variable", "Variable to sample at measurement points.");
+
+  params.addParamNamesToGroup("measurement_points measurement_values measurement_times",
+                              "Input Measurement Data");
+  params.addParamNamesToGroup(
+      "measurement_file file_xcoord file_ycoord file_zcoord file_time file_value",
+      "File Measurement Data");
   return params;
 }
 
@@ -68,7 +74,10 @@ OptimizationData::OptimizationData(const InputParameters & parameters)
                                         Moose::VarFieldType::VAR_FIELD_STANDARD)
              : nullptr)
 {
-  if (isParamValid("measurement_file"))
+  if (isParamValid("measurement_file") && isParamValid("measurement_points"))
+    mooseError("Input file can only define a single input for measurement data. Use only "
+               "measurement_file or measurement_points, but never both");
+  else if (isParamValid("measurement_file"))
     readMeasurementsFromFile();
   else if (isParamValid("measurement_points"))
     readMeasurementsFromInput();
