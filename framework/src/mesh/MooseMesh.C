@@ -3419,7 +3419,7 @@ MooseMesh::allowRemoteElementRemoval(const bool allow_remote_element_removal)
 
   if (!allow_remote_element_removal)
     // If we're not allowing remote element removal now, then we will need deletion later after late
-    // geoemetric ghosting functors have been added (late geometric ghosting functor addition
+    // geometric ghosting functors have been added (late geometric ghosting functor addition
     // happens when algebraic ghosting functors are added)
     _need_delete = true;
 }
