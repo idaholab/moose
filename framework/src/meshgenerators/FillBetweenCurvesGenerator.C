@@ -10,7 +10,6 @@
 #include "FillBetweenCurvesGenerator.h"
 #include "FillBetweenPointVectorsTools.h"
 
-#include "MooseMeshUtils.h"
 #include "CastUniquePointer.h"
 #include "libmesh/node.h"
 
@@ -113,11 +112,10 @@ FillBetweenCurvesGenerator::generate()
 
   try
   {
-    FillBetweenPointVectorsTools::isCurveOpenSingleSegment(
-        *input_mesh_1,
-        max_input_mesh_1_node_radius,
-        curve_1_ordered_nodes,
-        MooseMeshUtils::meshCentroidCalculator(*input_mesh_1));
+    FillBetweenPointVectorsTools::isCurveOpenSingleSegment(*input_mesh_1,
+                                                           max_input_mesh_1_node_radius,
+                                                           curve_1_ordered_nodes,
+                                                           curveCentroidPoint(*input_mesh_1));
   }
   catch (MooseException & e)
   {
@@ -125,11 +123,10 @@ FillBetweenCurvesGenerator::generate()
   }
   try
   {
-    FillBetweenPointVectorsTools::isCurveOpenSingleSegment(
-        *input_mesh_2,
-        max_input_mesh_2_node_radius,
-        curve_2_ordered_nodes,
-        MooseMeshUtils::meshCentroidCalculator(*input_mesh_2));
+    FillBetweenPointVectorsTools::isCurveOpenSingleSegment(*input_mesh_2,
+                                                           max_input_mesh_2_node_radius,
+                                                           curve_2_ordered_nodes,
+                                                           curveCentroidPoint(*input_mesh_2));
   }
   catch (MooseException & e)
   {
@@ -164,4 +161,18 @@ FillBetweenCurvesGenerator::generate()
                                                                  _sigma);
 
   return dynamic_pointer_cast<MeshBase>(mesh);
+}
+
+Point
+FillBetweenCurvesGenerator::curveCentroidPoint(const ReplicatedMesh & curve)
+{
+  Point pt_tmp = Point(0.0, 0.0, 0.0);
+  Real length_tmp = 0.0;
+  for (const auto elem : curve.element_ptr_range())
+  {
+    Real elem_length = elem->hmax();
+    pt_tmp += (elem->vertex_average()) * elem_length;
+    length_tmp += elem_length;
+  }
+  return pt_tmp / length_tmp;
 }

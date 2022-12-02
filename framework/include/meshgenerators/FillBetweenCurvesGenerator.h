@@ -54,4 +54,11 @@ protected:
   std::unique_ptr<MeshBase> & _input_1;
   /// The mesh which contains the second input boundary
   std::unique_ptr<MeshBase> & _input_2;
+
+  /**
+   * Calculates the centroid of a curve mesh.
+   * @param curve input mesh that contains the curve whose centroid needs to be calculated
+   * @return a Point data containing the curve centroid
+   */
+  Point curveCentroidPoint(const ReplicatedMesh & curve);
 };
