@@ -27,26 +27,23 @@
 class MooseServer : public wasp::lsp::ServerImpl
 {
 public:
-  MooseServer() : is_setup(false)
+  MooseServer() : _is_setup(false)
   {
     // set server connection to new iostream connection shared pointer
 
-    connection = std::make_shared<wasp::lsp::IOStreamConnection>(this);
+    _connection = std::make_shared<wasp::lsp::IOStreamConnection>(this);
 
     // set server capabilities to receive full input text when changed
 
-    this->server_capabilities[wasp::lsp::m_text_doc_sync] = wasp::DataObject();
-
-    this->server_capabilities[wasp::lsp::m_text_doc_sync][wasp::lsp::m_open_close] = true;
-
-    this->server_capabilities[wasp::lsp::m_text_doc_sync][wasp::lsp::m_change] =
-        wasp::lsp::m_change_full;
+    server_capabilities[wasp::lsp::m_text_doc_sync] = wasp::DataObject();
+    server_capabilities[wasp::lsp::m_text_doc_sync][wasp::lsp::m_open_close] = true;
+    server_capabilities[wasp::lsp::m_text_doc_sync][wasp::lsp::m_change] = wasp::lsp::m_change_full;
   }
 
   /** get read / write connection - specific to this server implemention
    * @return - shared pointer to the server's read / write connection
    */
-  std::shared_ptr<wasp::lsp::Connection> getConnection() { return connection; }
+  std::shared_ptr<wasp::lsp::Connection> getConnection() { return _connection; }
 
   /** setup server for input validation and template based autocompletion
    * @param moose_app - pointer to moose app calling this set up method
@@ -146,39 +143,33 @@ private:
    * @param object - reference to object to be read into
    * @return - true if the read from the connection completed successfully
    */
-  bool connectionRead(wasp::DataObject & object)
-  {
-    return this->connection->read(object, this->errors);
-  }
+  bool connectionRead(wasp::DataObject & object) { return _connection->read(object, errors); }
 
   /** write object json to connection - specific to this server's connection
    * @param object - reference to object with contents to write to connection
    * @return - true if the write to the connection completed successfully
    */
-  bool connectionWrite(wasp::DataObject & object)
-  {
-    return this->connection->write(object, this->errors);
-  }
+  bool connectionWrite(wasp::DataObject & object) { return _connection->write(object, errors); }
 
   /**
-   * @brief is_setup - has the required server specific setup taken place
+   * @brief _is_setup - has the required server specific setup taken place
    */
-  bool is_setup;
+  bool _is_setup;
 
   /**
-   * @brief moose_app - pointer to moose app that owns this server instance
+   * @brief _moose_app - pointer to moose app that owns this server instance
    */
-  MooseApp * moose_app;
+  MooseApp * _moose_app;
 
   /**
-   * @brief check_app - application created to check input and access parser
+   * @brief _check_app - application created to check input and access parser
    */
-  std::shared_ptr<MooseApp> check_app;
+  std::shared_ptr<MooseApp> _check_app;
 
   /**
-   * @brief shared pointer to this server's iostream read / write connection
+   * @brief _connection - shared pointer to this server's read / write iostream
    */
-  std::shared_ptr<wasp::lsp::IOStreamConnection> connection;
+  std::shared_ptr<wasp::lsp::IOStreamConnection> _connection;
 };
 
 #endif
