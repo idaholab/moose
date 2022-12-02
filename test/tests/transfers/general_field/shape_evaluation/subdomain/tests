@@ -1,0 +1,58 @@
+[Tests]
+  issues = '#16427 #16429'
+  design = 'transfers/MultiAppGeneralFieldShapeEvaluationTransfer.md'
+
+  [2d_overlay]
+    requirement = "The system shall be able to transfer variables using a shape function evaluation in the origin mesh, limiting the transfer to a few subdomains,"
+    [same_var_type]
+      type = 'Exodiff'
+      input = 'main.i'
+      exodiff = 'main_out.e main_out_sub0.e main_out_sub1.e main_out_sub2.e'
+      detail = "for variables of the same type,"
+    []
+
+    [from_blocks]
+      type = 'Exodiff'
+      input = 'main.i'
+      exodiff = 'from_block.e from_block_sub0.e from_block_sub1.e from_block_sub2.e'
+      # This removes the block restriction by adding all the blocks
+      cli_args = "Outputs/file_base=from_block
+                  Transfers/from_sub/to_blocks='0 1' Transfers/from_sub_elem/to_blocks='0 1'
+                  Transfers/to_sub/to_blocks='0 1' Transfers/to_sub_elem/to_blocks='0 1'"
+      detail = "with block restriction only in the origin mesh,"
+    []
+
+    [to_blocks]
+      type = 'Exodiff'
+      input = 'main.i'
+      exodiff = 'to_block.e to_block_sub0.e to_block_sub1.e to_block_sub2.e'
+      # This removes the block restriction by adding all the blocks
+      cli_args = "Outputs/file_base=to_block
+                  Transfers/from_sub/from_blocks='0 1' Transfers/from_sub_elem/from_blocks='0 1'
+                  Transfers/to_sub/from_blocks='0 1' Transfers/to_sub_elem/from_blocks='0 1'"
+      detail = "with block restriction only in the target mesh,"
+    []
+
+    [projection_needed_receiving]
+      type = 'Exodiff'
+      input = 'main.i'
+      exodiff = 'projection_receive.e projection_receive_sub0.e projection_receive_sub1.e projection_receive_sub2.e'
+      # Set various types of finite element families to the received variables in both apps
+      cli_args = "Outputs/file_base=projection_receive Mesh/second_order=true
+                  AuxVariables/from_sub/order=SECOND AuxVariables/from_sub_elem/order=SECOND
+                  MultiApps/sub/cli_args='Mesh/second_order=true;AuxVariables/from_main/order=SECOND;AuxVariables/from_main_elem/order=FIRST'"
+      detail = "for variables of arbitrary types with higher order on the receiving app,"
+    []
+
+    [projection_needed_sending]
+      type = 'Exodiff'
+      input = 'main.i'
+      exodiff = 'projection_send.e projection_send_sub0.e projection_send_sub1.e projection_send_sub2.e'
+      # Set various types of finite element families to the transfered variables in both apps
+      cli_args = "Outputs/file_base=projection_send Mesh/second_order=true
+                  AuxVariables/to_sub/order=SECOND AuxVariables/to_sub_elem/order=SECOND
+                  MultiApps/sub/cli_args='Mesh/second_order=true;AuxVariables/to_main/order=FIRST;AuxVariables/to_main_elem/order=SECOND'"
+      detail = "for variables of arbitrary types with higher order on the sending app,"
+    []
+  []
+[]
