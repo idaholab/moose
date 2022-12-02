@@ -126,9 +126,10 @@ LibtorchArtificialNeuralNet::addLayer(
 void
 LibtorchArtificialNeuralNet::store(nlohmann::json & json) const
 {
-  for (const auto & param_layer : this->named_parameters())
+  const auto & named_params = this->named_parameters();
+  for (const auto & param_i : make_range(named_params.size()))
   {
-    auto sizes = param_layer.value().data().sizes();
+    const auto & sizes = named_params[param_i].value().sizes();
 
     // Libtorch holds sizes in integers instead of unsigned integers
     int max_size = 1;
@@ -136,9 +137,9 @@ LibtorchArtificialNeuralNet::store(nlohmann::json & json) const
       max_size *= dim_size;
 
     // We cast the parameters into a 1D vector
-    json[param_layer.key()] =
-        std::vector<Real>({param_layer.value().data().data_ptr<Real>(),
-                           param_layer.value().data().data_ptr<Real>() + max_size});
+    json[named_params[param_i].key()] =
+        std::vector<Real>({named_params[param_i].value().data_ptr<Real>(),
+                           named_params[param_i].value().data_ptr<Real>() + max_size});
   }
 }
 

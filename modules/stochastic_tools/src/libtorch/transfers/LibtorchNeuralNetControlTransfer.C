@@ -48,15 +48,14 @@ void
 LibtorchNeuralNetControlTransfer::execute()
 {
   // Get the control neural net from the trainer
-  const std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & trainer_nn =
-      _trainer.controlNeuralNet();
+  const Moose::LibtorchArtificialNeuralNet & trainer_nn = _trainer.controlNeuralNet();
 
   // Get the control object from the other app
   FEProblemBase & app_problem = _multi_app->appProblemBase(0);
   auto & control_warehouse = app_problem.getControlWarehouse();
-  const auto & control_ref = control_warehouse.getActiveObject(_control_name);
-  std::shared_ptr<LibtorchNeuralNetControl> control_object =
-      std::dynamic_pointer_cast<LibtorchNeuralNetControl>(control_ref);
+  std::shared_ptr<Control> control_ptr = control_warehouse.getActiveObject(_control_name);
+  LibtorchNeuralNetControl * control_object =
+      dynamic_cast<LibtorchNeuralNetControl *>(control_ptr.get());
 
   if (!control_object)
     paramError("control_name", "The given gontrol is not a LibtorchNeuralNetrControl!");

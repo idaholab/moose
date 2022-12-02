@@ -180,7 +180,7 @@ LibtorchNeuralNetControl::execute()
 }
 
 Real
-LibtorchNeuralNetControl::getSignal(const unsigned int signal_index)
+LibtorchNeuralNetControl::getSignal(const unsigned int signal_index) const
 {
   mooseAssert(signal_index < _control_names.size(),
               "The index of the requested control signal is not in the [0," +
@@ -217,10 +217,9 @@ LibtorchNeuralNetControl::updateCurrentResponse()
 }
 
 void
-LibtorchNeuralNetControl::loadControlNeuralNet(
-    const std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & input_nn)
+LibtorchNeuralNetControl::loadControlNeuralNet(const Moose::LibtorchArtificialNeuralNet & input_nn)
 {
-  _nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(*input_nn);
+  _nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(input_nn);
 }
 
 torch::Tensor

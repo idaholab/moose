@@ -40,8 +40,10 @@ LibtorchControlValuePostprocessor::initialSetup()
 {
   GeneralPostprocessor::initialSetup();
 
-  _libtorch_nn_control = std::dynamic_pointer_cast<LibtorchNeuralNetControl>(
-      _fe_problem.getControlWarehouse().getActiveObject(getParam<std::string>("control_name")));
+  _libtorch_nn_control = dynamic_cast<LibtorchNeuralNetControl *>(
+      _fe_problem.getControlWarehouse()
+          .getActiveObject(getParam<std::string>("control_name"))
+          .get());
   if (!_libtorch_nn_control)
     paramError("control_name",
                "The supplied control object is not derived from LibtorchNeuralNetControl!");

@@ -24,7 +24,7 @@ public:
   virtual void execute() override;
 
   /// Get the (signal_index)-th signal of the control neural net
-  Real getSignalLogProbability(const unsigned int signal_index);
+  Real getSignalLogProbability(const unsigned int signal_index) const;
 
 protected:
   /// Function which computes the logarithmic probability of given actions.

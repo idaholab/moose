@@ -118,7 +118,7 @@ LibtorchDRLControl::computeLogProbability(const torch::Tensor & action,
 }
 
 Real
-LibtorchDRLControl::getSignalLogProbability(const unsigned int signal_index)
+LibtorchDRLControl::getSignalLogProbability(const unsigned int signal_index) const
 {
   mooseAssert(signal_index < _control_names.size(),
               "The index of the requested control signal is not in the [0," +

@@ -65,7 +65,7 @@ public:
    * @param nn The neural network which needs to be trained
    * @param comm Reference to the parallel communicator
    */
-  LibtorchArtificialNeuralNetTrainer(std::shared_ptr<LibtorchArtificialNeuralNet> nn,
+  LibtorchArtificialNeuralNetTrainer(LibtorchArtificialNeuralNet & nn,
                                      const Parallel::Communicator & comm);
 
   /**
@@ -101,17 +101,16 @@ public:
    * @param options The options for the training process
    */
   static std::unique_ptr<torch::optim::Optimizer>
-  createOptimizer(const std::shared_ptr<LibtorchArtificialNeuralNet> nn,
-                  const LibtorchTrainingOptions & options);
+  createOptimizer(const LibtorchArtificialNeuralNet & nn, const LibtorchTrainingOptions & options);
 
 protected:
-  /// Pointer to the neural network which is trained
-  const std::shared_ptr<LibtorchArtificialNeuralNet> _nn;
+  /// Reference to the neural network which is trained
+  LibtorchArtificialNeuralNet & _nn;
 };
 
 template <typename SamplerType>
 LibtorchArtificialNeuralNetTrainer<SamplerType>::LibtorchArtificialNeuralNetTrainer(
-    std::shared_ptr<LibtorchArtificialNeuralNet> nn, const Parallel::Communicator & comm)
+    LibtorchArtificialNeuralNet & nn, const Parallel::Communicator & comm)
   : libMesh::ParallelObject(comm), _nn(nn)
 {
 }
@@ -164,23 +163,23 @@ LibtorchArtificialNeuralNetTrainer<SamplerType>::computeLocalBatchSize(
 template <typename SamplerType>
 std::unique_ptr<torch::optim::Optimizer>
 LibtorchArtificialNeuralNetTrainer<SamplerType>::createOptimizer(
-    const std::shared_ptr<LibtorchArtificialNeuralNet> nn, const LibtorchTrainingOptions & options)
+    const LibtorchArtificialNeuralNet & nn, const LibtorchTrainingOptions & options)
 {
   std::unique_ptr<torch::optim::Optimizer> optimizer;
   switch (options.optimizer_type)
   {
     case 0:
       optimizer = std::make_unique<torch::optim::Adam>(
-          nn->parameters(), torch::optim::AdamOptions(options.learning_rate));
+          nn.parameters(), torch::optim::AdamOptions(options.learning_rate));
       break;
     case 1:
-      optimizer = std::make_unique<torch::optim::Adagrad>(nn->parameters(), options.learning_rate);
+      optimizer = std::make_unique<torch::optim::Adagrad>(nn.parameters(), options.learning_rate);
       break;
     case 2:
-      optimizer = std::make_unique<torch::optim::RMSprop>(nn->parameters(), options.learning_rate);
+      optimizer = std::make_unique<torch::optim::RMSprop>(nn.parameters(), options.learning_rate);
       break;
     case 3:
-      optimizer = std::make_unique<torch::optim::SGD>(nn->parameters(), options.learning_rate);
+      optimizer = std::make_unique<torch::optim::SGD>(nn.parameters(), options.learning_rate);
       break;
   }
   return optimizer;
@@ -249,7 +248,7 @@ LibtorchArtificialNeuralNetTrainer<SamplerType>::train(LibtorchDataset & dataset
       optimizer->zero_grad();
 
       // Compute prediction
-      torch::Tensor prediction = _nn->forward(batch.data);
+      torch::Tensor prediction = _nn.forward(batch.data);
 
       // Compute loss values using a MSE ( mean squared error)
       torch::Tensor loss = torch::mse_loss(prediction, batch.target);
@@ -266,7 +265,7 @@ LibtorchArtificialNeuralNetTrainer<SamplerType>::train(LibtorchDataset & dataset
       // For this we sum the data on every processor and then divide it by the active processor
       // numbers. Note: We need to zero out the gradients for inactive processors (which are beyond
       // the predefined limit)
-      for (auto & param : _nn->named_parameters())
+      for (auto & param : _nn.named_parameters())
       {
         if (real_rank != used_rank)
           param.value().grad().data() = param.value().grad().data() * 0.0;

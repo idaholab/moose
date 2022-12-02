@@ -52,7 +52,7 @@ private:
   unsigned int _signal_index;
 
   // This can't be const beause PPs are constructed before Controls
-  std::shared_ptr<LibtorchNeuralNetControl> _libtorch_nn_control;
+  const LibtorchNeuralNetControl * _libtorch_nn_control;
 };
 
 #endif

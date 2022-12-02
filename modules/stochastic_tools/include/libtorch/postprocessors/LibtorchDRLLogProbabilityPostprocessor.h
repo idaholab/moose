@@ -49,10 +49,10 @@ public:
   virtual Real getValue() override;
 
 private:
-  unsigned int _signal_index;
+  const unsigned int _signal_index;
 
   // This can't be const beause PPs are constructed before Controls
-  std::shared_ptr<LibtorchDRLControl> _libtorch_nn_control;
+  const LibtorchDRLControl * _libtorch_nn_control;
 };
 
 #endif

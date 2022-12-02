@@ -33,7 +33,7 @@ DRLControlNeuralNetParameters::DRLControlNeuralNetParameters(const InputParamete
 {
   auto & network =
       declareValueByName<const Moose::LibtorchArtificialNeuralNet *>(name(), REPORTER_MODE_ROOT);
-  network = getSurrogateTrainer<LibtorchDRLControlTrainer>("trainer_name").controlNeuralNet().get();
+  network = &getSurrogateTrainer<LibtorchDRLControlTrainer>("trainer_name").controlNeuralNet();
 }
 
 #endif

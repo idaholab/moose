@@ -42,10 +42,7 @@ public:
   /// The condensed training function
   void trainController();
 
-  const std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & controlNeuralNet() const
-  {
-    return _control_nn;
-  }
+  const Moose::LibtorchArtificialNeuralNet & controlNeuralNet() const { return *_control_nn; }
 
 protected:
   /// Compute the average eposiodic reward

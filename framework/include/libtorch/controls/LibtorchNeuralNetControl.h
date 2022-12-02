@@ -34,16 +34,16 @@ public:
   virtual void execute() override;
 
   /// Get the (signal_index)-th signal of the control neural net
-  Real getSignal(const unsigned int signal_index);
+  Real getSignal(const unsigned int signal_index) const;
 
   /// Get the number of controls this object is computing
-  unsigned int numberOfControlSignals() { return _control_names.size(); }
+  unsigned int numberOfControlSignals() const { return _control_names.size(); }
 
   /**
    * Function responsible for loading the neural network for the controller. This function is used
    * when copying the neural network from a main app which trains it.
    */
-  void loadControlNeuralNet(const std::shared_ptr<Moose::LibtorchArtificialNeuralNet> & input_nn);
+  void loadControlNeuralNet(const Moose::LibtorchArtificialNeuralNet & input_nn);
 
   /// Return a pointer to the stored neural networt
   const Moose::LibtorchNeuralNetBase & controlNeuralNet() const;
@@ -93,7 +93,8 @@ protected:
   const std::vector<Real> _action_scaling_factors;
 
   /// Pointer to the neural net object which is supposed to be used to control
-  /// the parameter values
+  /// the parameter values. The controller owns this object, but it can be read
+  /// from file or copied by a transfer.
   std::shared_ptr<Moose::LibtorchNeuralNetBase> _nn;
 };
 
