@@ -36,6 +36,10 @@ MultiAppGeneralFieldShapeEvaluationTransfer::validParams()
   params.addClassDescription(
       "Transfers field data at the MultiApp position using the finite element shape "
       "functions from the origin application.");
+
+  // Blanket ban on origin boundary restriction. Most shape functions have their support extend
+  // outside the boundary. For a true face variable, this parameter would make sense again
+  params.suppressParameter<std::vector<BoundaryName>>("from_boundaries");
   return params;
 }
 

@@ -48,8 +48,8 @@
     [one_app_serial]
       type = Exodiff
       input = main_between_multiapp.i
-      exodiff = 'nodal_nodal_serial_ma10.e nodal_nodal_serial_ma20.e'
-      cli_args = "Outputs/file_base=nodal_nodal_serial
+      exodiff = 'serial_ma10.e serial_ma20.e'
+      cli_args = "Outputs/file_base=serial
                   Transfers/active='app1_to_2_nodal_nodal app2_to_1_nodal_nodal app1_to_2_elem_elem app2_to_1_elem_elem'
                   MultiApps/ma1/max_procs_per_app=1"
       detail = 'when one multiapp is run in serial,'
