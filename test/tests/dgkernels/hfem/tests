@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#20191'
+  design = 'HFEMTestJump.md HFEMTrialJump.md'
+  [./jacobian]
+    type = 'PetscJacobianTester'
+    input = 'hfem_jacobian.i'
+    run_sim = True
+    requirement = "The example side-discontinuous kernels shall have correct analytic Jacobians."
+  [../]
+[]

@@ -7,18 +7,11 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-// This only works with petsc-3.3 and above.
-#include "libmesh/petsc_macro.h"
-
 #include "PetscDMMoose.h"
 
 // PETSc includes
 #include <petscerror.h>
-#if !PETSC_RELEASE_LESS_THAN(3, 6, 0)
 #include <petsc/private/dmimpl.h>
-#else
-#include <petsc-private/dmimpl.h>
-#endif
 
 // MOOSE includes
 #include "FEProblem.h"
@@ -31,6 +24,7 @@
 
 #include "libmesh/nonlinear_implicit_system.h"
 #include "libmesh/nonlinear_solver.h"
+#include "libmesh/petsc_macro.h"
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
 #include "libmesh/dof_map.h"
@@ -2002,12 +1996,9 @@ DMSetFromOptions_Moose(DM dm, PetscOptionItems * /*options*/) // >= 3.18.0
 #elif !PETSC_VERSION_LESS_THAN(3, 7, 0)
 PetscErrorCode
 DMSetFromOptions_Moose(PetscOptionItems * /*options*/, DM dm) // >= 3.7.0
-#elif !PETSC_RELEASE_LESS_THAN(3, 6, 0)
-PetscErrorCode
-DMSetFromOptions_Moose(PetscOptions * /*options*/, DM dm) // >= 3.6.0
 #else
 PetscErrorCode
-DMSetFromOptions_Moose(DM dm) // < 3.6.0
+DMSetFromOptions_Moose(PetscOptions * /*options*/, DM dm) // >= 3.6.0
 #endif
 {
   PetscErrorCode ierr;
@@ -2438,10 +2429,7 @@ DMCreate_Moose(DM dm)
 
   PetscFunctionBegin;
   PetscValidHeaderSpecific(dm, DM_CLASSID, 1);
-#if PETSC_RELEASE_LESS_THAN(3, 5, 0)
-  ierr = PetscNewLog(dm, DM_Moose, &dmm);
-  CHKERRQ(ierr);
-#elif PETSC_RELEASE_LESS_THAN(3, 18, 0)
+#if PETSC_RELEASE_LESS_THAN(3, 18, 0)
   ierr = PetscNewLog(dm, &dmm);
   CHKERRQ(ierr);
 #else // PetscNewLog was deprecated

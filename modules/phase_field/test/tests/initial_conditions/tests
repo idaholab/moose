@@ -144,8 +144,6 @@
       type = Exodiff
       input = 'PolycrystalVoronoi_fromfile.i'
       exodiff = 'PolycrystalVoronoi_fromfile_out.e'
-      # This test uses a coloring algorithm that requires PETSc >= 3.5.0.
-      petsc_version = '>=3.5.0'
 
       detail = 'polycrystal structure with centroids specified from a file,'
     []
@@ -154,8 +152,6 @@
       type = Exodiff
       input = 'polycrystalcircles_fromfile.i'
       exodiff = 'polycrystalcircles_fromfile_out.e'
-      # This test uses a coloring algorithm that requires PETSc >= 3.5.0.
-      petsc_version = '>=3.5.0'
 
       detail = 'polycrystal circles specified from a file,'
     []
@@ -164,8 +160,6 @@
       type = Exodiff
       input = 'polycrystalcircles_clipped.i'
       exodiff = 'polycrystalcircles_clipped_out.e'
-      # This test uses a coloring algorithm that requires PETSc >= 3.5.0.
-      petsc_version = '>=3.5.0'
 
       detail = 'polycrystal circles specified from a file that may not appear in the final domain,'
     []
@@ -174,8 +168,6 @@
       type = Exodiff
       input = 'polycrystalcircles_fromvector.i'
       exodiff = 'polycrystalcircles_fromvector_out.e'
-      # This test uses a coloring algorithm that requires PETSc >= 3.5.0.
-      petsc_version = '>=3.5.0'
 
       detail = 'polycrystal circles specified from an input vector,'
     []
