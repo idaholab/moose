@@ -136,6 +136,9 @@ private:
   /// A map from processor to pointInfo vector
   ProcessorToPointInforVec _processor_to_pointInfoVec;
 
+  /// Number of conflicts between points in the mesh
+  unsigned int _num_overlaps;
+
   /**
    * Performs the transfer for the variable of index i
    */

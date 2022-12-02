@@ -61,7 +61,8 @@ MultiAppGeneralFieldTransfer::MultiAppGeneralFieldTransfer(const InputParameters
   : MultiAppConservativeTransfer(parameters),
     _error_on_miss(getParam<bool>("error_on_miss")),
     _bbox_factor(getParam<Real>("bbox_factor")),
-    _greedy_search(getParam<bool>("greedy_search"))
+    _greedy_search(getParam<bool>("greedy_search")),
+    _num_overlaps(0)
 {
   if (_to_var_names.size() == _from_var_names.size())
     _var_size = _to_var_names.size();
@@ -74,9 +75,19 @@ MultiAppGeneralFieldTransfer::execute()
 {
   getAppInfo();
 
+  // Reset number of overlaps found
+  _num_overlaps = 0;
+
   // loop over the vector of variables and make the transfer one by one
   for (unsigned int i = 0; i < _var_size; ++i)
     transferVariable(i);
+
+  // Warn user about overlaps
+  if (_num_overlaps)
+    mooseWarning("Multiple origin positions & values were found. " +
+        + "Over all target points and variables: "
+        + std::to_string(_num_overlaps) + "instances.\nAre multiple subapps overlapping?\n" +
+        "Are some target mesh locations exactly equidistant from nodes in origin mesh(es)?");
 
   postExecute();
 }
@@ -392,7 +403,7 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
     InterpCaches & interp_caches)
 {
   mooseAssert(pointInfoVec.size() == incoming_vals.size(),
-              " Number of dof objects does not equal to the number of incoming values");
+              "Number of dof objects does not equal to the number of incoming values");
 
   dof_id_type val_offset = 0;
   for (auto & pointinfo : pointInfoVec)
@@ -416,9 +427,11 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
     {
       InterpCache & cache = interp_caches[problem_id];
       Point p = point_requests[val_offset];
-      // We should only have one value for each variable at any given point.
-      libmesh_assert(cache.count(p) == 0);
       const Number val = incoming_vals[val_offset].first;
+      // We should only have one value for each variable at any given point.
+      if (cache.count(p) != 0 && !GeneralFieldTransfer::isBetterOutOfMeshValue(val) &&
+          !MooseUtils::absoluteFuzzyEqual(cache[p], val))
+        _num_overlaps++;
       if (!GeneralFieldTransfer::isBetterOutOfMeshValue(val))
         cache[p] = val;
     }
@@ -426,20 +439,22 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
     {
       // Use this dof object pointer, so we can handle
       // both element and node using the same code
-      // DofObject * dof_object_ptr = nullptr;
+#ifdef NDEBUG
+      DofObject * dof_object_ptr = nullptr;
       // It is a node
-      // if (is_nodal)
-      //  dof_object_ptr = to_mesh.node_ptr(dof_object_id);
+      if (is_nodal)
+        dof_object_ptr = to_mesh.node_ptr(dof_object_id);
       // It is an element
-      // else
-      //  dof_object_ptr = to_mesh.elem_ptr(dof_object_id);
+      else
+        dof_object_ptr = to_mesh.elem_ptr(dof_object_id);
 
       // We should only be supporting nodal and constant elemental
       // variables in this code path; if we see multiple DoFs on one
       // object we should have been using GenericProjector
-      // mooseAssert(dof_object_ptr->n_dofs(sys_num, var_num) == 1,
-      //            "Unexpectedly found " << dof_object_ptr->n_dofs(sys_num, var_num)
-      //                                  << "dofs instead of 1");
+      mooseAssert(dof_object_ptr->n_dofs(sys_num, var_num) == 1,
+                  "Unexpectedly found " << dof_object_ptr->n_dofs(sys_num, var_num)
+                                        << "dofs instead of 1");
+#endif
 
       auto & dofobject_to_val = dofobject_to_valsvec[problem_id];
 
@@ -460,10 +475,19 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
       else
       {
         auto & val = values_ptr->second;
-        // We adopt values from the smallest rank which has a valid value
-        if (val.distance > incoming_vals[val_offset].second ||
-            (val.pid > pid && val.distance == incoming_vals[val_offset].second))
+        // We adopt values that are, in order of priority
+        // - valid
+        // - closest distance
+        // - the smallest rank with the same distance
+        if (!GeneralFieldTransfer::isBetterOutOfMeshValue(incoming_vals[val_offset].first) &&
+            (MooseUtils::absoluteFuzzyGreaterThan(val.distance, incoming_vals[val_offset].second) ||
+             (val.pid > pid &&
+              MooseUtils::absoluteFuzzyEqual(val.distance, incoming_vals[val_offset].second))))
         {
+          // Count disagreeing overlaps
+          if (MooseUtils::absoluteFuzzyEqual(val.distance, incoming_vals[val_offset].second) &&
+              !MooseUtils::absoluteFuzzyEqual(val.interp, incoming_vals[val_offset].first))
+            _num_overlaps++;
           val.interp = incoming_vals[val_offset].first;
           val.pid = pid;
           val.distance = incoming_vals[val_offset].second;
