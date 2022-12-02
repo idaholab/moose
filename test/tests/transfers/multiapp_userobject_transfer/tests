@@ -86,4 +86,44 @@
     issues = "#13701"
     recover = false
   [../]
+
+  [invalid_block_to_app]
+    type = RunException
+    input = restricted_elem_parent.i
+    cli_args = "Transfers/to_ch0/block='abc'"
+    expect_err = "The block 'abc' was not found in the mesh"
+    mesh_mode = replicated
+    issues = '#22817'
+    requirement = "The system shall error if an invalid block is specified for the to_multiapp direction."
+  []
+
+  [invalid_block_from_app]
+    type = RunException
+    input = 3d_1d_parent.i
+    cli_args = "Transfers/layered_transfer_from_sub_app/block='abc'"
+    expect_err = "The block 'abc' was not found in the mesh"
+    mesh_mode = replicated
+    issues = '#22817'
+    requirement = "The system shall error if an invalid block is specified for the from_multiapp direction."
+  []
+
+  [invalid_boundary_to_app]
+    type = RunException
+    input = 3d_1d_parent.i
+    cli_args = "Transfers/layered_transfer_to_sub_app/boundary='abc'"
+    expect_err = "The boundary 'abc' was not found in the mesh"
+    mesh_mode = replicated
+    issues = '#22817'
+    requirement = "The system shall error if an invalid boundary is specified for the to_multiapp direction."
+  []
+
+  [invalid_boundary_from_app]
+    type = RunException
+    input = restricted_elem_parent.i
+    cli_args = "Transfers/from_ch1/boundary='abc'"
+    expect_err = "The boundary 'abc' was not found in the mesh"
+    mesh_mode = replicated
+    issues = '#22817'
+    requirement = "The system shall error if an invalid boundary is specified for the from_multiapp direction."
+  []
 []
