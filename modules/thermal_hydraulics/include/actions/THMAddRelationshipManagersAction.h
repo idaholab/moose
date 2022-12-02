@@ -10,13 +10,17 @@
 #pragma once
 
 #include "Action.h"
+#include "THMAppInterface.h"
 
-class THMAddRelationshipManagersAction : public Action
+/**
+ * Adds relationship managers for THM.
+ */
+class THMAddRelationshipManagersAction : public Action, public THMAppInterface
 {
 public:
   THMAddRelationshipManagersAction(const InputParameters & params);
 
-  virtual void act();
+  virtual void act() override;
 
 public:
   static InputParameters validParams();

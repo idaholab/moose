@@ -173,6 +173,19 @@ public:
    */
   const std::string & getFlowModelClassName(const THM::FlowModelID & flow_model_id);
 
+  /**
+   * Symmetrically augment the sparsity pattern between two elements
+   */
+  virtual void augmentSparsity(const dof_id_type & elem_id1, const dof_id_type & elem_id2);
+
+  /**
+   * Get the sparsity augmentation map
+   */
+  const std::map<dof_id_type, std::vector<dof_id_type>> & getSparsityAugmentationMap() const
+  {
+    return _sparsity_augmentation_map;
+  }
+
   /// Map from flow model ID to flow model instance
   static std::map<THM::FlowModelID, std::string> _flow_model_map;
 
@@ -200,6 +213,9 @@ private:
 
   /// Flag that the THMProblem pointer has been set
   bool _set_thm_problem_pointer;
+
+  /// Additional sparsity pattern that needs to be added into the Jacobian matrix
+  std::map<dof_id_type, std::vector<dof_id_type>> _sparsity_augmentation_map;
 };
 
 template <typename T>

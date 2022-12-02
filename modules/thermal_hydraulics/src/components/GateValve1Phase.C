@@ -35,7 +35,7 @@ GateValve1Phase::setupMesh()
   FlowJunction1Phase::setupMesh();
 
   if (_connected_elems.size() == 2)
-    getTHMProblem().augmentSparsity(_connected_elems[0], _connected_elems[1]);
+    getTHMApp().augmentSparsity(_connected_elems[0], _connected_elems[1]);
 }
 
 void

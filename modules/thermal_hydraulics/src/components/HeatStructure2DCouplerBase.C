@@ -73,7 +73,7 @@ HeatStructure2DCouplerBase::init()
         {
           const auto neighbor_elem_id = _mesh_alignment.getNeighborElemID(elem_id);
           if (neighbor_elem_id != DofObject::invalid_id)
-            getTHMProblem().augmentSparsity(elem_id, neighbor_elem_id);
+            getTHMApp().augmentSparsity(elem_id, neighbor_elem_id);
         }
     }
   }

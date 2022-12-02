@@ -68,7 +68,7 @@ HeatTransferFromHeatStructure1Phase::setupMesh()
     {
       dof_id_type nearest_elem_id = _fch_alignment.getNearestElemID(elem_id);
       if (nearest_elem_id != DofObject::invalid_id)
-        getTHMProblem().augmentSparsity(elem_id, nearest_elem_id);
+        getTHMApp().augmentSparsity(elem_id, nearest_elem_id);
     }
   }
 }

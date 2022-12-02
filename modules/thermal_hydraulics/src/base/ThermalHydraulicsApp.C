@@ -128,6 +128,24 @@ ThermalHydraulicsApp::getFlowModelClassName(const THM::FlowModelID & flow_model_
 }
 
 void
+ThermalHydraulicsApp::augmentSparsity(const dof_id_type & elem_id1, const dof_id_type & elem_id2)
+{
+  // augment the first element's sparsity
+  auto it = _sparsity_augmentation_map.find(elem_id1);
+  if (it == _sparsity_augmentation_map.end())
+    it = _sparsity_augmentation_map.insert(_sparsity_augmentation_map.begin(),
+                                           {elem_id1, std::vector<dof_id_type>()});
+  it->second.push_back(elem_id2);
+
+  // augment the second element's sparsity
+  it = _sparsity_augmentation_map.find(elem_id2);
+  if (it == _sparsity_augmentation_map.end())
+    it = _sparsity_augmentation_map.insert(_sparsity_augmentation_map.begin(),
+                                           {elem_id2, std::vector<dof_id_type>()});
+  it->second.push_back(elem_id1);
+}
+
+void
 ThermalHydraulicsApp::registerApps()
 {
   registerApp(ThermalHydraulicsApp);

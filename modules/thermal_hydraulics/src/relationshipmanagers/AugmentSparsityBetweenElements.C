@@ -18,14 +18,14 @@ InputParameters
 AugmentSparsityBetweenElements::validParams()
 {
   InputParameters params = RelationshipManager::validParams();
-  params.addRequiredParam<std::map<dof_id_type, std::vector<dof_id_type>> *>(
+  params.addRequiredParam<const std::map<dof_id_type, std::vector<dof_id_type>> *>(
       "_elem_map", "Element to element augmentation map");
   return params;
 }
 
 AugmentSparsityBetweenElements::AugmentSparsityBetweenElements(const InputParameters & params)
   : RelationshipManager(params),
-    _elem_map(*getParam<std::map<dof_id_type, std::vector<dof_id_type>> *>("_elem_map"))
+    _elem_map(*getParam<const std::map<dof_id_type, std::vector<dof_id_type>> *>("_elem_map"))
 {
 }
 

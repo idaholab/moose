@@ -57,22 +57,6 @@ Simulation::~Simulation()
 }
 
 void
-Simulation::augmentSparsity(const dof_id_type & elem_id1, const dof_id_type & elem_id2)
-{
-  auto it = _sparsity_elem_augmentation.find(elem_id1);
-  if (it == _sparsity_elem_augmentation.end())
-    it = _sparsity_elem_augmentation.insert(_sparsity_elem_augmentation.begin(),
-                                            {elem_id1, std::vector<dof_id_type>()});
-  it->second.push_back(elem_id2);
-
-  it = _sparsity_elem_augmentation.find(elem_id2);
-  if (it == _sparsity_elem_augmentation.end())
-    it = _sparsity_elem_augmentation.insert(_sparsity_elem_augmentation.begin(),
-                                            {elem_id2, std::vector<dof_id_type>()});
-  it->second.push_back(elem_id1);
-}
-
-void
 Simulation::setupQuadrature()
 {
   if (getComponents().size() == 0)
@@ -523,24 +507,6 @@ Simulation::addMooseObjects()
 {
   for (auto && comp : getComponents())
     comp->addMooseObjects();
-}
-
-void
-Simulation::addRelationshipManagers()
-{
-  {
-    const std::string class_name = "AugmentSparsityBetweenElements";
-    auto params = _factory.getValidParams(class_name);
-    params.set<Moose::RelationshipManagerType>("rm_type") =
-        Moose::RelationshipManagerType::ALGEBRAIC | Moose::RelationshipManagerType::GEOMETRIC;
-    params.set<std::string>("for_whom") = _fe_problem.name();
-    params.set<MooseMesh *>("mesh") = _app.getTHMMesh().get();
-    params.set<std::map<dof_id_type, std::vector<dof_id_type>> *>("_elem_map") =
-        &_sparsity_elem_augmentation;
-    auto rm = _factory.create<RelationshipManager>(class_name, "thm:sparsity_btw_elems", params);
-    if (!_app.addRelationshipManager(rm))
-      _factory.releaseSharedObjects(*rm);
-  }
 }
 
 void
