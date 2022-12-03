@@ -224,7 +224,7 @@ public:
   FEProblemBase & problemBase() { return _fe_problem; }
 
   /**
-   * Get the FEProblemBase for the global app is part of.
+   * Get the FEProblemBase for the global app desired.
    * @param app The global app number
    */
   FEProblemBase & appProblemBase(unsigned int app);

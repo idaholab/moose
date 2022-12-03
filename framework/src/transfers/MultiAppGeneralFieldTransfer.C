@@ -84,9 +84,11 @@ MultiAppGeneralFieldTransfer::execute()
 
   // Warn user about overlaps
   if (_num_overlaps)
-    mooseWarning("Multiple origin positions & values were found. " +
-        + "Over all target points and variables: "
-        + std::to_string(_num_overlaps) + "instances.\nAre multiple subapps overlapping?\n" +
+    mooseWarning(
+        "Multiple origin positions & values were found. "
+        "Over all target points and variables: " +
+        std::to_string(_num_overlaps) +
+        " instances.\nAre multiple subapps overlapping?\n"
         "Are some target mesh locations exactly equidistant from nodes in origin mesh(es)?");
 
   postExecute();

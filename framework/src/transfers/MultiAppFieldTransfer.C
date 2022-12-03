@@ -76,9 +76,10 @@ MultiAppFieldTransfer::initialSetup()
     if (_current_direction == FROM_MULTIAPP)
     {
       // Subdomain and variable type information is shared on all subapps
-      from_problem = &getFromMultiApp()->appProblemBase(0);
+      from_problem = &getFromMultiApp()->appProblemBase(getFromMultiApp()->firstLocalApp());
       from_mesh = &getFromMultiApp()->appProblemBase(0).mesh().getMesh();
 
+      // Subdomain and variable type information are shared on all subapps
       to_problem = &getFromMultiApp()->problemBase();
       to_mesh = &getFromMultiApp()->problemBase().mesh().getMesh();
     }
@@ -95,8 +96,13 @@ MultiAppFieldTransfer::initialSetup()
       from_problem = &getFromMultiApp()->appProblemBase(0);
       from_mesh = &getFromMultiApp()->appProblemBase(0).mesh().getMesh();
 
-      to_problem = &getToMultiApp()->appProblemBase(0);
+      to_problem = &getToMultiApp()->appProblemBase(getToMultiApp()->firstLocalApp());
       to_mesh = &getToMultiApp()->appProblemBase(0).mesh().getMesh();
+    }
+    else
+    {
+      from_problem = &getFromMultiApp()->appProblemBase(getFromMultiApp()->firstLocalApp());
+      to_problem = &getToMultiApp()->appProblemBase(getToMultiApp()->firstLocalApp());
     }
 
     const auto & from_block_names = getParam<std::vector<SubdomainName>>("from_blocks");
@@ -106,8 +112,14 @@ MultiAppFieldTransfer::initialSetup()
 
     if (from_block_names.size())
     {
-      const auto block_vec = from_problem->mesh().getSubdomainIDs(from_block_names);
-      _from_blocks = std::set<SubdomainID>(block_vec.begin(), block_vec.end());
+      if (from_problem)
+      {
+        const auto block_vec = from_problem->mesh().getSubdomainIDs(from_block_names);
+        _from_blocks = std::set<SubdomainID>(block_vec.begin(), block_vec.end());
+      }
+      // We dont even own any of these subapps
+      else
+        _from_blocks = {};
     }
     else
       _from_blocks = {Moose::ANY_BLOCK_ID};
@@ -119,8 +131,14 @@ MultiAppFieldTransfer::initialSetup()
 
     if (to_block_names.size())
     {
-      const auto block_vec = to_problem->mesh().getSubdomainIDs(to_block_names);
-      _to_blocks = std::set<SubdomainID>(block_vec.begin(), block_vec.end());
+      if (to_problem)
+      {
+        const auto block_vec = to_problem->mesh().getSubdomainIDs(to_block_names);
+        _to_blocks = std::set<SubdomainID>(block_vec.begin(), block_vec.end());
+      }
+      // We dont even own any of these subapps
+      else
+        _from_blocks = {};
     }
     else
       _to_blocks = {Moose::ANY_BLOCK_ID};
