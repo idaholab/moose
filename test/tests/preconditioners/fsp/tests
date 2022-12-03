@@ -1,6 +1,6 @@
 [Tests]
   design = FieldSplitPreconditioner.md
-  issues = '#1851'
+  issues = '#1851 #22359'
   [group]
     requirement = "The system shall support the use of field split preconditioner on"
 
@@ -22,5 +22,23 @@
 
       detail = "multiple subdomains."
     []
+    [vector]
+      type = 'Exodiff'
+      input = vector-test.i
+      exodiff = vector-test_out.e
+      detail = 'vector variables'
+    []
+    [array]
+      type = 'Exodiff'
+      input = array-test.i
+      exodiff = array-test_out.e
+      detail = 'array variables'
+    []
+  []
+  [missing_var_in_split]
+    requirement = 'The system shall error if a user has forgotten a variable in their field splits.'
+    input = 'missing-var-in-split.i'
+    type = RunException
+    expect_err = 'Local split size sum.*and local system matrix size.*do not match. Did you forget a variable or block in one of your splits?'
   []
 []

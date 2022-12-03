@@ -21,6 +21,7 @@
 #include "PenetrationLocator.h"
 #include "NearestNodeLocator.h"
 #include "GeometricSearchData.h"
+#include "MooseVariableScalar.h"
 
 #include "libmesh/nonlinear_implicit_system.h"
 #include "libmesh/nonlinear_solver.h"
@@ -289,7 +290,21 @@ DMMooseSetVariables(DM dm, const std::set<std::string> & vars)
     SETERRQ(PETSC_COMM_SELF, PETSC_ERR_ARG_WRONGSTATE, "Not for an already setup DM");
   if (dmm->_vars)
     delete dmm->_vars;
-  dmm->_vars = new std::set<std::string>(vars);
+  std::set<std::string> processed_vars;
+  for (const auto & var_name : vars)
+  {
+    const auto * const var =
+        dmm->_nl->hasVariable(var_name)
+            ? static_cast<MooseVariableBase *>(&dmm->_nl->getVariable(0, var_name))
+            : static_cast<MooseVariableBase *>(&dmm->_nl->getScalarVariable(0, var_name));
+    if (var->isArray())
+      for (const auto i : make_range(var->count()))
+        processed_vars.insert(SubProblem::arrayVariableComponent(var_name, i));
+    else
+      processed_vars.insert(var_name);
+  }
+
+  dmm->_vars = new std::set<std::string>(std::move(processed_vars));
   PetscFunctionReturn(0);
 }
 
@@ -605,38 +620,65 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
         !dmm->_nocontacts || !dmm->_nouncontacts)
     {
       DofMap & dofmap = dmm->_nl->system().get_dof_map();
+      // Put this outside the lambda scope to avoid constant memory reallocation
+      std::vector<dof_id_type> node_indices;
+      auto process_nodal_dof_indices =
+          [&dofmap, &node_indices](const Node & node,
+                                   const unsigned int var_num,
+                                   std::set<dof_id_type> & local_indices,
+                                   std::set<dof_id_type> * const nonlocal_indices = nullptr)
+      {
+        dofmap.dof_indices(&node, node_indices, var_num);
+        for (const auto index : node_indices)
+        {
+          if (index >= dofmap.first_dof() && index < dofmap.end_dof())
+            local_indices.insert(index);
+          else if (nonlocal_indices)
+            nonlocal_indices->insert(index);
+        }
+      };
+
+      auto process_elem_dof_indices =
+          [&dofmap](const std::vector<dof_id_type> & elem_indices,
+                    std::set<dof_id_type> & local_indices,
+                    std::set<dof_id_type> * const nonlocal_indices = nullptr)
+      {
+        for (const auto index : elem_indices)
+        {
+          if (index >= dofmap.first_dof() && index < dofmap.end_dof())
+            local_indices.insert(index);
+          else if (nonlocal_indices)
+            nonlocal_indices->insert(index);
+        }
+      };
+
       std::set<dof_id_type> indices;
       std::set<dof_id_type> unindices;
       std::set<dof_id_type> cached_indices;
       std::set<dof_id_type> cached_unindices;
+      auto & lm_mesh = dmm->_nl->system().get_mesh();
       const auto & node_to_elem_map = dmm->_nl->_fe_problem.mesh().nodeToElemMap();
       for (const auto & vit : *(dmm->_var_ids))
       {
         unsigned int v = vit.second;
         // Iterate only over this DM's blocks.
         if (!dmm->_all_blocks || (dmm->_nosides && dmm->_nocontacts))
-        {
           for (const auto & bit : *(dmm->_block_ids))
           {
             subdomain_id_type b = bit.second;
-            for (const auto & elem :
-                 as_range(dmm->_nl->system().get_mesh().active_local_subdomain_elements_begin(b),
-                          dmm->_nl->system().get_mesh().active_local_subdomain_elements_end(b)))
+            for (const auto & elem : as_range(lm_mesh.active_local_subdomain_elements_begin(b),
+                                              lm_mesh.active_local_subdomain_elements_end(b)))
             {
               // Get the degree of freedom indices for the given variable off the current element.
               std::vector<dof_id_type> evindices;
               dofmap.dof_indices(elem, evindices, v);
-
-              // might want to use variable_first/last_local_dof instead
-              for (const auto & dof : evindices)
-                if (dof >= dofmap.first_dof() && dof < dofmap.end_dof())
-                  indices.insert(dof);
+              process_elem_dof_indices(evindices, indices);
             }
 
             // Sometime, we own nodes but do not own the elements the nodes connected to
             {
               bool is_on_current_block = false;
-              for (auto & node : dmm->_nl->system().get_mesh().local_node_ptr_range())
+              for (auto & node : lm_mesh.local_node_ptr_range())
               {
                 const unsigned int n_comp = node->n_comp(dmm->_nl->system().number(), v);
 
@@ -650,7 +692,7 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
                 {
                   // if one of incident elements belongs to a block, we consider
                   // the node lives in the block
-                  Elem & neighbor_elem = dmm->_nl->system().get_mesh().elem_ref(elem_num);
+                  Elem & neighbor_elem = lm_mesh.elem_ref(elem_num);
                   if (neighbor_elem.subdomain_id() == b)
                   {
                     is_on_current_block = true;
@@ -661,13 +703,10 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
                 if (!is_on_current_block)
                   continue;
 
-                const dof_id_type index = node->dof_number(dmm->_nl->system().number(), v, 0);
-                if (index >= dofmap.first_dof() && index < dofmap.end_dof())
-                  indices.insert(index);
+                process_nodal_dof_indices(*node, v, indices);
               }
             }
           }
-        }
 
         // Iterate over the sides from this split.
         if (dmm->_side_ids->size())
@@ -692,11 +731,7 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
               continue;
 
             const Node * node = bnode->_node;
-            dof_id_type dof = node->dof_number(dmm->_nl->system().number(), v, 0);
-
-            // might want to use variable_first/last_local_dof instead
-            if (dof >= dofmap.first_dof() && dof < dofmap.end_dof())
-              indices.insert(dof);
+            process_nodal_dof_indices(*node, v, indices);
           }
         }
 
@@ -710,165 +745,47 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
             if (dmm->_unside_names->find(boundary_id) == dmm->_unside_names->end())
               continue;
             const Node * node = bnode->_node;
-
-            // might want to use variable_first/last_local_dof instead
-            dof_id_type dof = node->dof_number(dmm->_nl->system().number(), v, 0);
-            if (dof >= dofmap.first_dof() && dof < dofmap.end_dof())
-              unindices.insert(dof);
+            process_nodal_dof_indices(*node, v, unindices);
           }
         }
 
-        // Include all nodes on the contact surfaces
-        if (dmm->_contact_names->size() && dmm->_include_all_contact_nodes)
+        auto process_contact_all_nodes =
+            [dmm, process_nodal_dof_indices, v](const auto & contact_names,
+                                                auto & indices_to_insert_to)
         {
           std::set<boundary_id_type> bc_id_set;
           // loop over contacts
-          for (const auto & it : *(dmm->_contact_names))
+          for (const auto & [contact_bid_pair, contact_bname_pair] : contact_names)
           {
-            bc_id_set.insert(it.first.first);  // primary
-            bc_id_set.insert(it.first.second); // secondary
+            libmesh_ignore(contact_bname_pair);
+            bc_id_set.insert(contact_bid_pair.first);  // primary
+            bc_id_set.insert(contact_bid_pair.second); // secondary
           }
           // loop over boundary elements
-          std::vector<dof_id_type> evindices;
           ConstBndElemRange & range = *dmm->_nl->_fe_problem.mesh().getBoundaryElementRange();
           for (const auto & belem : range)
           {
             const Elem * elem_bdry = belem->_elem;
+            const auto side = belem->_side;
             BoundaryID boundary_id = belem->_bnd_id;
 
             if (bc_id_set.find(boundary_id) == bc_id_set.end())
               continue;
 
-            evindices.clear();
-            dofmap.dof_indices(elem_bdry, evindices, v);
-            for (const auto & edof : evindices)
-              if (edof >= dofmap.first_dof() && edof < dofmap.end_dof())
-                indices.insert(edof);
+            for (const auto node_idx : elem_bdry->node_index_range())
+              if (elem_bdry->is_node_on_side(node_idx, side))
+                process_nodal_dof_indices(elem_bdry->node_ref(node_idx), v, indices_to_insert_to);
           }
-          // loop over lower dimensional secondary elements
-          for (const auto & bit : *(dmm->_block_ids))
-            for (const auto & elem : as_range(
-                     dmm->_nl->system().get_mesh().active_local_subdomain_elements_begin(
-                         bit.second),
-                     dmm->_nl->system().get_mesh().active_local_subdomain_elements_end(bit.second)))
-            {
-              evindices.clear();
-              dofmap.dof_indices(elem, evindices, v);
-              for (const auto & edof : evindices)
-                if (edof >= dofmap.first_dof() && edof < dofmap.end_dof())
-                  indices.insert(edof);
-            }
-        }
+        };
 
-        // Iterate over the contacts included in this split.
-        if (dmm->_contact_names->size() && !(dmm->_include_all_contact_nodes))
+        auto process_contact_some_nodes =
+            [dmm, process_nodal_dof_indices, v, &dofmap, &lm_mesh, process_elem_dof_indices](
+                const auto & contact_names,
+                auto & indices_to_insert_to,
+                auto & nonlocal_indices_to_insert_to)
         {
           std::vector<dof_id_type> evindices;
-          for (const auto & it : *(dmm->_contact_names))
-          {
-            PetscBool displaced = (*dmm->_contact_displaced)[it.second];
-            PenetrationLocator * locator;
-            if (displaced)
-            {
-              std::shared_ptr<DisplacedProblem> displaced_problem =
-                  dmm->_nl->_fe_problem.getDisplacedProblem();
-              if (!displaced_problem)
-              {
-                std::ostringstream err;
-                err << "Cannot use a displaced contact (" << it.second.first << ","
-                    << it.second.second << ") with an undisplaced problem";
-                mooseError(err.str());
-              }
-              locator = displaced_problem->geomSearchData()._penetration_locators[it.first];
-            }
-            else
-              locator = dmm->_nl->_fe_problem.geomSearchData()._penetration_locators[it.first];
-
-            evindices.clear();
-            // penetration locator
-            auto lend = locator->_penetration_info.end();
-            for (auto lit = locator->_penetration_info.begin(); lit != lend; ++lit)
-            {
-              const dof_id_type secondary_node_num = lit->first;
-              PenetrationInfo * pinfo = lit->second;
-              if (pinfo && pinfo->isCaptured())
-              {
-                Node & secondary_node = dmm->_nl->system().get_mesh().node_ref(secondary_node_num);
-                dof_id_type dof = secondary_node.dof_number(dmm->_nl->system().number(), v, 0);
-                // might want to use variable_first/last_local_dof instead
-                if (dof >= dofmap.first_dof() && dof < dofmap.end_dof())
-                  indices.insert(dof);
-                else
-                  cached_indices.insert(dof); // cache nonlocal indices
-                // indices of secondary elements
-                evindices.clear();
-
-                auto node_to_elem_pair = node_to_elem_map.find(secondary_node_num);
-                mooseAssert(node_to_elem_pair != node_to_elem_map.end(),
-                            "Missing entry in node to elem map");
-                for (const auto & elem_num : node_to_elem_pair->second)
-                {
-                  Elem & secondary_elem = dmm->_nl->system().get_mesh().elem_ref(elem_num);
-                  // Get the degree of freedom indices for the given variable off the current
-                  // element.
-                  evindices.clear();
-                  dofmap.dof_indices(&secondary_elem, evindices, v);
-                  // might want to use variable_first/last_local_dof instead
-                  for (const auto & edof : evindices)
-                    if (edof >= dofmap.first_dof() && edof < dofmap.end_dof())
-                      indices.insert(edof);
-                    else
-                      cached_indices.insert(edof);
-                }
-                // indices for primary element
-                evindices.clear();
-                const Elem * primary_elem = pinfo->_elem;
-                dofmap.dof_indices(primary_elem, evindices, v);
-                for (const auto & edof : evindices)
-                  if (edof >= dofmap.first_dof() && edof < dofmap.end_dof())
-                    indices.insert(edof);
-                  else
-                    cached_indices.insert(edof);
-              } // if pinfo
-            }   // for penetration
-          }     // for contact names
-        }       // if size of contact names
-
-        if (dmm->_uncontact_names->size() && dmm->_include_all_contact_nodes)
-        {
-          ElemSideBuilder side_builder; // to avoid extra element allocation
-          std::set<boundary_id_type> bc_id_set;
-          // loop over contacts
-          for (const auto & it : *(dmm->_uncontact_names))
-          {
-            bc_id_set.insert(it.first.first);
-            bc_id_set.insert(it.first.second);
-          }
-          // loop over boundary elements
-          std::vector<dof_id_type> evindices;
-          ConstBndElemRange & range = *dmm->_nl->_fe_problem.mesh().getBoundaryElementRange();
-          for (const auto & belem : range)
-          {
-            const Elem * elem_bdry = belem->_elem;
-            unsigned short int side = belem->_side;
-            BoundaryID boundary_id = belem->_bnd_id;
-
-            if (bc_id_set.find(boundary_id) == bc_id_set.end())
-              continue;
-
-            evindices.clear();
-            dofmap.dof_indices(&side_builder(*elem_bdry, side), evindices, v);
-            for (const auto & edof : evindices)
-              if (edof >= dofmap.first_dof() && edof < dofmap.end_dof())
-                unindices.insert(edof);
-          }
-        }
-
-        // Iterate over the contacts excluded from this split.
-        if (dmm->_uncontact_names->size() && !(dmm->_include_all_contact_nodes))
-        {
-          std::vector<dof_id_type> evindices;
-          for (const auto & it : *(dmm->_uncontact_names))
+          for (const auto & it : contact_names)
           {
             PetscBool displaced = (*dmm->_uncontact_displaced)[it.second];
             PenetrationLocator * locator;
@@ -897,29 +814,37 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
               PenetrationInfo * pinfo = lit->second;
               if (pinfo && pinfo->isCaptured())
               {
-                Node & secondary_node = dmm->_nl->system().get_mesh().node_ref(secondary_node_num);
-                dof_id_type dof = secondary_node.dof_number(dmm->_nl->system().number(), v, 0);
-                // might want to use variable_first/last_local_dof instead
-                if (dof >= dofmap.first_dof() && dof < dofmap.end_dof())
-                  unindices.insert(dof);
-                else
-                  cached_unindices.insert(dof);
+                Node & secondary_node = lm_mesh.node_ref(secondary_node_num);
+                process_nodal_dof_indices(
+                    secondary_node, v, indices_to_insert_to, &nonlocal_indices_to_insert_to);
 
                 // indices for primary element
                 evindices.clear();
                 const Elem * primary_side = pinfo->_side;
                 dofmap.dof_indices(primary_side, evindices, v);
-                // indices of primary sides
-                for (const auto & edof : evindices)
-                  if (edof >= dofmap.first_dof() && edof < dofmap.end_dof())
-                    unindices.insert(edof);
-                  else
-                    cached_unindices.insert(edof);
+                process_elem_dof_indices(
+                    evindices, indices_to_insert_to, &nonlocal_indices_to_insert_to);
               } // if pinfo
             }   // for penetration
-          }     // for uncontact names
-        }       // if there exist uncontacts
-      }         // variables
+          }     // for contact name
+        };
+
+        // Include all nodes on the contact surfaces
+        if (dmm->_contact_names->size() && dmm->_include_all_contact_nodes)
+          process_contact_all_nodes(*dmm->_contact_names, indices);
+
+        // Iterate over the contacts included in this split.
+        if (dmm->_contact_names->size() && !(dmm->_include_all_contact_nodes))
+          process_contact_some_nodes(*dmm->_contact_names, indices, cached_indices);
+
+        // Exclude all nodes on the contact surfaces
+        if (dmm->_uncontact_names->size() && dmm->_include_all_contact_nodes)
+          process_contact_all_nodes(*dmm->_uncontact_names, unindices);
+
+        // Iterate over the contacts excluded from this split.
+        if (dmm->_uncontact_names->size() && !(dmm->_include_all_contact_nodes))
+          process_contact_some_nodes(*dmm->_uncontact_names, unindices, cached_unindices);
+      } // variables
 
       std::vector<dof_id_type> local_vec_indices(cached_indices.size());
       std::copy(cached_indices.begin(), cached_indices.end(), local_vec_indices.begin());
@@ -992,6 +917,9 @@ DMCreateFieldDecomposition_Moose(
   DM_Moose * dmm = (DM_Moose *)(dm->data);
 
   PetscFunctionBegin;
+
+  PetscInt split_size_sum = 0;
+
   /* Only called after DMSetUp(). */
   if (!dmm->_splitlocs)
     PetscFunctionReturn(0);
@@ -1099,6 +1027,9 @@ DMCreateFieldDecomposition_Moose(
       ierr = PetscObjectReference((PetscObject)(dinfo._rembedding));
       CHKERRQ(ierr);
       (*islist)[d] = dinfo._rembedding;
+      PetscInt is_size;
+      ISGetLocalSize(dinfo._rembedding, &is_size);
+      split_size_sum += is_size;
     }
     if (dmlist)
     {
@@ -1107,6 +1038,15 @@ DMCreateFieldDecomposition_Moose(
       (*dmlist)[d] = dinfo._dm;
     }
   }
+
+  if (islist && libMesh::cast_int<libMesh::numeric_index_type>(split_size_sum) !=
+                    dmm->_nl->nonlinearSolver()->system().get_system_matrix().local_m())
+    mooseError("Local split size sum ",
+               libMesh::cast_int<libMesh::numeric_index_type>(split_size_sum),
+               " and local system matrix size ",
+               dmm->_nl->nonlinearSolver()->system().get_system_matrix().local_m(),
+               " do not match. Did you forget a variable or block in one of your splits?");
+
   PetscFunctionReturn(0);
 }
 
@@ -1795,11 +1735,11 @@ DMSetUp_Moose_Pre(DM dm)
       ss << bid;
       bname = ss.str();
     }
-    if (dmm->_nosides)
+    if (dmm->_nosides && dmm->_nocontacts)
     {
-      // If no sides have been specified, by default (null or empty dmm->blocks) all blocks are
-      // included in the split
-      // Thus, skip this block only if it is explicitly excluded from a nonempty dmm->blocks.
+      // If no sides and no contacts have been specified, by default (null or empty dmm->blocks) all
+      // blocks are included in the split Thus, skip this block only if it is explicitly excluded
+      // from a nonempty dmm->blocks.
       if (dmm->_blocks && dmm->_blocks->size() &&
           (dmm->_blocks->find(bname) ==
                dmm->_blocks->end() && // We should allow users to use subdomain IDs
@@ -1808,11 +1748,10 @@ DMSetUp_Moose_Pre(DM dm)
     }
     else
     {
-      // If sides have been specified, only the explicitly-specified blocks (those in dmm->blocks,
-      // if it's non-null) are in the split.
-      // Thus, include this block only if it is explicitly specified in a nonempty dmm->blocks.
-      // Equivalently, skip this block if dmm->blocks is dmm->blocks is null or empty or excludes
-      // this block.
+      // If sides or contacts have been specified, only the explicitly-specified blocks (those in
+      // dmm->blocks, if it's non-null) are in the split. Thus, include this block only if it is
+      // explicitly specified in a nonempty dmm->blocks. Equivalently, skip this block if
+      // dmm->blocks is dmm->blocks is null or empty or excludes this block.
       if (!dmm->_blocks || !dmm->_blocks->size() ||
           (dmm->_blocks->find(bname) ==
                dmm->_blocks->end() // We should allow users to use subdomain IDs

@@ -124,8 +124,8 @@
       uncontact_displaced = '1'
       blocks              = '1 2'
       include_all_contact_nodes = 1
-      petsc_options_iname = '-ksp_type -ksp_max_it -ksp_rtol -ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter -pc_hypre_strong_threshold'
-      petsc_options_value = ' preonly 10 1e-4 201                hypre    boomeramg      1                            0.25'
+      petsc_options_iname = '-ksp_type -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter -pc_hypre_boomeramg_strong_threshold'
+      petsc_options_value = 'preonly   hypre    boomeramg      1                            0.25'
     [../]
     [./contact]
       type = ContactSplit
@@ -134,8 +134,8 @@
       contact_secondary    = '2'
       contact_displaced = '1'
       include_all_contact_nodes = 1
-      petsc_options_iname = '-ksp_type -ksp_max_it -pc_type -pc_asm_overlap -sub_pc_type   -pc_factor_levels'
-      petsc_options_value = '  preonly 10 asm  1 lu 0'
+      petsc_options_iname = '-ksp_type -pc_type -pc_asm_overlap -sub_pc_type'
+      petsc_options_value = 'preonly   asm      1               lu'
     [../]
   [../]
 []
