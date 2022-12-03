@@ -21,6 +21,7 @@
       cli_args = 'name=finite_short Executioner/num_steps=10'
       ad_indexing_type = 'global'
       valgrind = 'heavy'
+      method = '!dbg'
     []
     [finite_rr]
       detail = 'using the finite strain formulation and reference residual.'
@@ -38,6 +39,7 @@
       cli_args = 'Contact/frictional/extra_vector_tags=ref name=finite_rr_full Executioner/num_steps=10'
       ad_indexing_type = 'global'
       valgrind = 'heavy'
+      method = '!dbg'
     []
   []
   [stiff]

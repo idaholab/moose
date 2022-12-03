@@ -30,7 +30,6 @@
   [time]
     type = ArrayTimeDerivative
     variable = u
-    time_derivative_coefficient = tc
   []
   [diff]
     type = ArrayDiffusion
@@ -59,11 +58,6 @@
   [dc]
     type = GenericConstantArray
     prop_name = dc
-    prop_value = '1 1'
-  []
-  [tc]
-    type = GenericConstantArray
-    prop_name = tc
     prop_value = '1 1'
   []
 []
