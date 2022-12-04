@@ -46,6 +46,7 @@ public:
    * 5: the r-axis direction
    * 6: the z-axis direction
    * 7: whether there are multiple coordinate system types on the mesh
+   * 8: whether the mesh has been transformed using the transform
    */
   typedef std::tuple<short int,
                      Real,
@@ -54,6 +55,7 @@ public:
                      int,
                      unsigned int,
                      unsigned int,
+                     short int,
                      short int>
       MinimalData;
 
@@ -202,6 +204,10 @@ private:
   /// The Euler angles describing rotation
   std::array<Real, 3> _euler_angles;
 
+  /// Whether the mesh has been translated and rotated. In this case, applying the transform every
+  /// time is no longer necessary
+  bool _mesh_transformed;
+
   friend class MultiAppCoordTransform;
 };
 
@@ -237,6 +243,13 @@ public:
    * 3. invert scaling
    */
   libMesh::Point mapBack(const libMesh::Point & point) const;
+
+  /**
+   * Transforms the entire mesh with the coordinate transform
+   * This can be done to output in position, or to avoid transforming on every data point
+   * @param mesh the mesh to modify, usually the child app mesh
+   */
+  void transformMesh(MooseMesh & mesh);
 
   /**
    * Set how much our domain should be translated in order to match a reference frame. In practice
