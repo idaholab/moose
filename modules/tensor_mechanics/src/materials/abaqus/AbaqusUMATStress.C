@@ -45,7 +45,8 @@ AbaqusUMATStress::validParams()
                              ComputeFiniteStrain::decompositionType(),
                              "Method to calculate the strain kinematics.");
   params.addCoupledVar("displacements", 0.0, "displacement variables");
-  params.addParam<bool>("displace_qps", false, "Send displaced quadrature point coordinates to UMAT.");
+  params.addParam<bool>(
+      "displace_qps", false, "Send displaced quadrature point coordinates to UMAT.");
   return params;
 }
 
