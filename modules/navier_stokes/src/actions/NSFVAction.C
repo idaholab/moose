@@ -2596,11 +2596,11 @@ NSFVAction::checkBoundaryParameterErrors()
   {
     if (_inlet_boundaries.size())
     {
-      checkSizeFriendParams(_inlet_boundaries.size(),
+      checkSizeFriendParams(_inlet_boundaries.size() * _passive_scalar_names.size(),
                             _passive_scalar_inlet_types.size(),
                             "inlet_boundaries",
                             "passive_scalar_inlet_types",
-                            "inlet boundaries");
+                            "inlet boundaries times number of transported scalars");
       checkSizeFriendParams(_passive_scalar_names.size(),
                             _passive_scalar_inlet_function.size(),
                             "passive_scalar_names",
