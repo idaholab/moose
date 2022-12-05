@@ -18,6 +18,7 @@ build:
 requirements:
   build:
     - {{ moose_python }}
+    - setuptools
   run:
     - numpy
     - matplotlib
@@ -40,7 +41,7 @@ requirements:
     - gitpython
     - packaging
     - pyflakes
-
+    - python
 
 test:
   commands:
