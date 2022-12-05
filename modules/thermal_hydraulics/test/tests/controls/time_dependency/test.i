@@ -4,9 +4,6 @@
   nx = 1
 []
 
-[Components]
-[]
-
 [ControlLogic]
   [ctrl]
     type = ScalingControl

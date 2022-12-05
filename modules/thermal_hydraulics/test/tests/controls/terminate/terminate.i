@@ -43,9 +43,6 @@
   []
 []
 
-[Components]
-[]
-
 [ControlLogic]
   [threshold]
     type = UnitTripControl

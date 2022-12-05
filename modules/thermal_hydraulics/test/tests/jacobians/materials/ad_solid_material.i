@@ -36,9 +36,6 @@
   []
 []
 
-[Components]
-[]
-
 [Materials]
   [solid_mat]
     type = ADSolidMaterial

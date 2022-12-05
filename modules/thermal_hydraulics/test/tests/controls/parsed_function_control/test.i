@@ -69,9 +69,6 @@
   []
 []
 
-[Components]
-[]
-
 [Postprocessors]
   [pps]
     type = FunctionValuePostprocessor

@@ -43,9 +43,6 @@
   []
 []
 
-[Components]
-[]
-
 [Postprocessors]
   [a]
     type = FunctionValuePostprocessor

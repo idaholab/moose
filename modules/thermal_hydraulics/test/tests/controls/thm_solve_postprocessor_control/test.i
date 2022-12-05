@@ -54,9 +54,6 @@
   []
 []
 
-[Components]
-[]
-
 [ControlLogic]
   [solve_on_off]
     type = THMSolvePostprocessorControl
