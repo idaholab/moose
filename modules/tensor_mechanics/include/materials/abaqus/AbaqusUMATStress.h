@@ -246,4 +246,10 @@ protected:
 private:
   /// Method being used to compute strain and rotation increments
   const ComputeFiniteStrain::DecompMethod _decomposition_method;
+
+  /// Displacement variables
+  std::vector<const VariableValue *> _disp;
+
+  /// Flag to send displaced quadrature point coordinates to UMAT
+  const bool _displace_qps;
 };
