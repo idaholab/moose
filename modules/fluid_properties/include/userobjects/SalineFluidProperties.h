@@ -94,6 +94,35 @@ public:
    */
   virtual Real k_from_p_T(Real pressure, Real temperature) const override;
 
+  /**
+   * Specific enthalpy from pressure and temperature
+   *
+   * @param[in] p   pressure (Pa)
+   * @param[in] T   temperature (K)
+   * @return specific enthalpy (J/kg)
+   */
+  virtual Real h_from_p_T(Real p, Real T) const override;
+
+  /**
+   * Specific enthalpy and its derivatives from pressure and temperature
+   *
+   * @param[in] p        pressure (Pa)
+   * @param[in] T        temperature (K)
+   * @param[out] h       specific enthalpy (J/kg)
+   * @param[out] dh_dp   derivative of specific enthalpy w.r.t. pressure
+   * @param[out] dh_dT   derivative of specific enthalpy w.r.t. temperature
+   */
+  virtual void h_from_p_T(Real p, Real T, Real & h, Real & dh_dp, Real & dh_dT) const override;
+
+  /**
+   * Temperature from pressure and specific enthalpy
+   *
+   * @param[in] p       pressure (Pa)
+   * @param[in] h       specific enthalpy (J/kg)
+   * @param[out] T      temperature (K)
+   */
+  virtual Real T_from_p_h(Real p, Real h) const override;
+
 #endif
 
 protected:

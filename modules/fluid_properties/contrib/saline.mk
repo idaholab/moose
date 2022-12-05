@@ -25,4 +25,4 @@ $(SALINE_DIR)/lib/libSaline-$(METHOD).la : $(Saline_objects)
 
 ADDITIONAL_LIBS += $(SALINE_DIR)/lib/libSaline-$(METHOD).la
 
-app_INCLUDES += -I$(SALINE_SRC) -I$(SALINE_SRC)/api -I$(SALINE_DIR)/include -I$(SALINE_SRC)/fortran
+app_INCLUDES += -I$(SALINE_SRC) -I$(SALINE_DIR)/include -I$(SALINE_SRC)/fortran
