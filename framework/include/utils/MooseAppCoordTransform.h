@@ -42,15 +42,17 @@ public:
    * 1: a value describing the scaling
    * 2: whether a rotation matrix exists
    * 3: the Euler angles describing the rotation
-   * 4: the coordinate system type
-   * 5: the r-axis direction
-   * 6: the z-axis direction
-   * 7: whether there are multiple coordinate system types on the mesh
-   * 8: whether the mesh has been transformed using the transform
+   * 4: the translation vector
+   * 5: the coordinate system type
+   * 6: the r-axis direction
+   * 7: the z-axis direction
+   * 8: whether there are multiple coordinate system types on the mesh
+   * 9: whether the mesh has been transformed using the transform
    */
   typedef std::tuple<short int,
                      Real,
                      short int,
+                     std::array<Real, 3>,
                      std::array<Real, 3>,
                      int,
                      unsigned int,
@@ -103,6 +105,15 @@ public:
    * @return our coordinate system
    */
   Moose::CoordinateSystemType coordinateSystem() const { return _coord_type; }
+
+  /**
+   * Set how much our domain should be translated in order to match a reference frame. In practice
+   * we choose the parent application to be the reference frame with respect to translation, e.g.
+   * the parent application origin is the reference frame origin, and we set the translation vectors
+   * of child applications to the multiapp positions parameter. Similarly to the \p setRotation with
+   * angles API, this represents a forward transformation from our domain to the reference domain
+   */
+  void setTranslationVector(const libMesh::Point & translation);
 
   /**
    * Will setup a rotation transformation. The rotation transformation will be a single 90-degree
@@ -164,6 +175,13 @@ public:
    */
   void computeRS();
 
+  /**
+   * Transforms the entire mesh with the coordinate transform
+   * This can be done to output in position, or to avoid transforming on every data point
+   * @param mesh the mesh to modify, usually the child app mesh
+   */
+  void transformMesh(MooseMesh & mesh);
+
 private:
   /**
    * If the coordinate system type is RZ, then we return the provided argument. Otherwise we return
@@ -200,6 +218,9 @@ private:
 
   /// How much distance one mesh length unit represents, e.g. 1 cm, 1 nm, 1 ft, 5 inches
   MooseUnits _length_unit;
+
+  /// Describes a forward translation transformation from our domain to the reference frame domain
+  libMesh::Point _translation;
 
   /// The Euler angles describing rotation
   std::array<Real, 3> _euler_angles;
@@ -243,22 +264,6 @@ public:
    * 3. invert scaling
    */
   libMesh::Point mapBack(const libMesh::Point & point) const;
-
-  /**
-   * Transforms the entire mesh with the coordinate transform
-   * This can be done to output in position, or to avoid transforming on every data point
-   * @param mesh the mesh to modify, usually the child app mesh
-   */
-  void transformMesh(MooseMesh & mesh);
-
-  /**
-   * Set how much our domain should be translated in order to match a reference frame. In practice
-   * we choose the parent application to be the reference frame with respect to translation, e.g.
-   * the parent application origin is the reference frame origin, and we set the translation vectors
-   * of child applications to the multiapp positions parameter. Similarly to the \p setRotation with
-   * angles API, this represents a forward transformation from our domain to the reference domain
-   */
-  void setTranslationVector(const libMesh::Point & translation);
 
   /**
    * Set the destination coordinate system and destination radial and symmetry axes as appropriate
@@ -314,9 +319,6 @@ private:
   /// coordinate system transformations from the destination domain to the reference domain,
   /// e.g. transformations that occur irrespective of the existence of other applications
   const MooseAppCoordTransform * _destination_app_transform;
-
-  /// Describes a forward translation transformation from our domain to the reference frame domain
-  libMesh::Point _translation;
 
   /// whether coordinate collapsing operations should be skipped
   bool _skip_coordinate_collapsing;

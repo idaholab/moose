@@ -182,6 +182,16 @@ MooseAppCoordTransform::setCoordinateSystem(const MooseMesh & mesh)
   _has_different_coord_sys = coord_types.size() > 1;
 }
 
+void
+MooseAppCoordTransform::setTranslationVector(const Point & translation)
+{
+  if (_translation != Point(0, 0, 0))
+    mooseWarning(
+        "Application transformation is being overwritten. We do not support using the positions "
+        "parameter in a MultiApp and the translation parameter in the child app mesh");
+  _translation = translation;
+}
+
 InputParameters
 MooseAppCoordTransform::validParams()
 {
@@ -205,6 +215,7 @@ MooseAppCoordTransform::validParams()
       "coord_type", coord_types, "Type of the coordinate system per block param");
   params.addParam<MooseEnum>(
       "rz_coord_axis", rz_coord_axis, "The rotation axis (X | Y) for axisymetric coordinates");
+  params.addParam<Point>("translation", "Translation vector. Override by the app position");
   params.addParam<std::string>(
       "length_unit",
       "How much distance one mesh length unit represents, e.g. 1 cm, 1 nm, 1 ft, 5inches");
@@ -237,6 +248,10 @@ MooseAppCoordTransform::validParams()
       "y-axis, e.g. the y-axis is our canonical up direction. If you want finer grained control "
       "than this, please use the 'alpha_rotation', 'beta_rotation', and 'gamma_rotation' "
       "parameters.");
+  params.addParamNamesToGroup("block coord_type rz_coord_axis", "Coordinate system");
+  params.addParamNamesToGroup(
+      "translation length_unit alpha_rotation beta_rotation gamma_rotation up_direction",
+      "Transformations relative to parent application frame of reference");
   return params;
 }
 
@@ -250,14 +265,14 @@ MooseAppCoordTransform::MooseAppCoordTransform(const MooseMesh & mesh)
     _mesh_transformed(false)
 {
   //
-  // coordinate system transformation
+  // Coordinate system transformation
   //
   setCoordinateSystem(mesh);
 
   const auto & params = mesh.parameters();
 
   //
-  // rotation
+  // Rotation
   //
   const bool has_alpha = params.isParamValid("alpha_rotation");
   const bool has_beta = params.isParamValid("beta_rotation");
@@ -279,10 +294,16 @@ MooseAppCoordTransform::MooseAppCoordTransform(const MooseMesh & mesh)
     setUpDirection(Direction(static_cast<unsigned int>(int(up_direction))));
 
   //
-  // Scale
+  // Scaling
   //
   if (params.isParamValid("length_unit"))
     setLengthUnit(MooseUnits(params.get<std::string>("length_unit")));
+
+  //
+  // Translation
+  //
+  if (params.isParamValid("translation"))
+    setTranslationVector(params.get<Point>("translation"));
 }
 
 MooseAppCoordTransform::MooseAppCoordTransform()
@@ -291,6 +312,7 @@ MooseAppCoordTransform::MooseAppCoordTransform()
     _z_axis(INVALID),
     _has_different_coord_sys(false),
     _length_unit(std::string("1*m")),
+    _translation(),
     _euler_angles(),
     _mesh_transformed(false)
 {
@@ -302,6 +324,7 @@ MooseAppCoordTransform::MooseAppCoordTransform(const MooseAppCoordTransform & ot
     _z_axis(other._z_axis),
     _has_different_coord_sys(other._has_different_coord_sys),
     _length_unit(other._length_unit),
+    _translation(other._translation),
     _euler_angles(other._euler_angles),
     _mesh_transformed(other._mesh_transformed)
 {
@@ -313,13 +336,13 @@ MooseAppCoordTransform::MooseAppCoordTransform(const MooseAppCoordTransform & ot
 }
 
 MooseAppCoordTransform::MooseAppCoordTransform(const MinimalData & minimal_data)
-  : _coord_type(static_cast<Moose::CoordinateSystemType>(std::get<4>(minimal_data))),
-    _r_axis(static_cast<Direction>(std::get<5>(minimal_data))),
-    _z_axis(static_cast<Direction>(std::get<6>(minimal_data))),
-    _has_different_coord_sys(std::get<7>(minimal_data)),
+  : _coord_type(static_cast<Moose::CoordinateSystemType>(std::get<5>(minimal_data))),
+    _r_axis(static_cast<Direction>(std::get<6>(minimal_data))),
+    _z_axis(static_cast<Direction>(std::get<7>(minimal_data))),
+    _has_different_coord_sys(std::get<8>(minimal_data)),
     _length_unit(std::string("1*m")),
-    _euler_angles(),
-    _mesh_transformed(std::get<8>(minimal_data))
+    _translation(std::get<5>(minimal_data)),
+    _mesh_transformed(std::get<9>(minimal_data))
 {
   if (std::get<0>(minimal_data))
     setLengthUnit(MooseUnits(std::to_string(std::get<1>(minimal_data)) + "*m"));
@@ -340,6 +363,7 @@ MooseAppCoordTransform::minimalDataDescription() const
           scale_factor,
           static_cast<short int>(bool(_rotate)),
           _euler_angles,
+          {_translation(0), _translation(1), _translation(2)},
           static_cast<int>(_coord_type),
           static_cast<unsigned int>(_r_axis),
           static_cast<unsigned int>(_z_axis),
@@ -355,6 +379,7 @@ MooseAppCoordTransform::operator=(const MooseAppCoordTransform & other)
   _z_axis = other._z_axis;
   _has_different_coord_sys = other._has_different_coord_sys;
   _length_unit = other._length_unit;
+  _translation = other._translation;
   _euler_angles = other._euler_angles;
   _mesh_transformed = other._mesh_transformed;
 
@@ -393,10 +418,28 @@ MooseAppCoordTransform::computeRS()
   }
 }
 
+void
+MooseAppCoordTransform::transformMesh(MooseMesh & mesh)
+{
+  // Transforming a RZ or R-spherical mesh doesnt always make sense, disallow it
+  if (_coord_type != Moose::COORD_XYZ)
+    mooseError("Running MultiApps 'in position' is only supported for XYZ coordinate systems");
+  if (_mesh_transformed)
+    mooseError("Child app mesh is being transformed twice");
+
+  // Apply all the transformation to the mesh
+  MeshTools::Modification::translate(mesh, _translation(0), _translation(1), _translation(2));
+  MeshTools::Modification::rotate(mesh, _euler_angles[0], _euler_angles[1], _euler_angles[2]);
+  MeshTools::Modification::scale(mesh, (*_scale)(0, 0), (*_scale)(1, 1), (*_scale)(2, 2));
+
+  // Translation, scaling and rotation need not be applied anymore when performing coordinate
+  // transforms
+  _mesh_transformed = true;
+}
+
 MultiAppCoordTransform::MultiAppCoordTransform(const MooseAppCoordTransform & our_app_transform)
   : _our_app_transform(our_app_transform),
     _destination_app_transform(nullptr),
-    _translation(),
     _skip_coordinate_collapsing(false)
 {
 }
@@ -408,17 +451,16 @@ MultiAppCoordTransform::operator()(const Point & point) const
 
   Point ret(point);
 
-  // Translation, rotation and scaling have been applied already, coordinate system conversion
-  // is not supported
-  if (_mesh_transformed)
+  // Translation, rotation and scaling already applied, coordinate system conversion not supported
+  if (_our_app_transform._mesh_transformed)
     return ret;
 
   // Apply scaling and then rotation
-  if (_our_app_transform._rs && !_our_app_transform)
+  if (_our_app_transform._rs)
     ret = (*_our_app_transform._rs) * ret;
 
   // If this shows up in profiling we can make _translation a pointer
-  ret += _translation;
+  ret += _our_app_transform._translation;
 
   if (_skip_coordinate_collapsing)
     return ret;
@@ -470,46 +512,20 @@ MultiAppCoordTransform::operator()(const Point & point) const
   return ret;
 }
 
-void
-MultiAppCoordTransform::transformMesh(MooseMesh & mesh)
-{
-  // Transforming a RZ or R-spherical mesh doesnt always make sense, disallow it
-  if (_our_app_transform._coord_type != Moose::COORD_XYZ)
-    mooseError("Running MultiApps 'in position' is only supported for XYZ coordinate systems");
-  if (_our_app_transform._mesh_transformed)
-    mooseError("Child app mesh is being transformed twice");
-
-  // Apply all the transformation to the mesh
-  MeshTools::Modification::translate(mesh, _translation(0), _translation(1), _translation(2));
-  MeshTools::Modification::rotate(mesh,
-                                  _our_app_transform._euler_angles[0],
-                                  _our_app_transform._euler_angles[1],
-                                  _our_app_transform._euler_angles[2]);
-  MeshTools::Modification::scale(mesh,
-                                 (*_our_app_transform._scale)(0, 0),
-                                 (*_our_app_transform._scale)(1, 1),
-                                 (*_our_app_transform._scale)(2, 2));
-
-  // Translation, scaling and rotation need not be applied anymore when performing coordinate transforms
-  const_cast<MooseAppCoordTransform &>(_our_app_transform)._mesh_transformed = true;
-}
-
 Point
 MultiAppCoordTransform::mapBack(const Point & point) const
 {
   Point ret(point);
 
-  // Translation, rotation and scaling have been applied already, coordinate system conversion
-  // is not supported
-  if (_mesh_transformed)
+  // Translation, rotation and scaling already applied, coordinate system conversion not supported
+  if (_our_app_transform._mesh_transformed)
     return ret;
 
   // inverse translate
-  if (!_our_app_transform)
-    ret -= _translation;
+  ret -= _our_app_transform._translation;
 
   // inverse rotate and then inverse scale
-  if (_our_app_transform._rs_inverse && !_our_app_transform)
+  if (_our_app_transform._rs_inverse)
     ret = (*_our_app_transform._rs_inverse) * ret;
 
   if (_skip_coordinate_collapsing)
@@ -525,12 +541,6 @@ MultiAppCoordTransform::mapBack(const Point & point) const
                "return mapping");
 
   return ret;
-}
-
-void
-MultiAppCoordTransform::setTranslationVector(const Point & translation)
-{
-  _translation = translation;
 }
 
 void
@@ -595,7 +605,7 @@ MultiAppCoordTransform::isIdentity() const
     return false;
 
   for (const auto i : make_range(Moose::dim))
-    if (!MooseUtils::absoluteFuzzyEqual(_translation(i), 0))
+    if (!MooseUtils::absoluteFuzzyEqual(_our_app_transform._translation(i), 0))
       return false;
 
   return true;
