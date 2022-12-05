@@ -904,6 +904,14 @@ public:
    */
   Moose::VarKindType varKind() const { return _var_kind; }
 
+  /**
+   * Whether or not the converged solution is valid
+   */
+
+  bool solutionInvalid() const { return _solution_invalid; }
+
+  void solutionInvalid(bool solution_invalid) { _solution_invalid = solution_invalid; }
+
 protected:
   /**
    * Internal getter for solution owned by libMesh.
@@ -972,6 +980,9 @@ protected:
 
   /// Whether or not the solution states have been initialized
   bool _solution_states_initialized;
+
+  /// whether or not the converged solution is valid
+  bool _solution_invalid;
 
 private:
   /**

@@ -132,7 +132,8 @@ SystemBase::SystemBase(SubProblem & subproblem,
     _time_integrator(nullptr),
     _automatic_scaling(false),
     _verbose(false),
-    _solution_states_initialized(false)
+    _solution_states_initialized(false),
+    _solution_invalid(false)
 {
 }
 
