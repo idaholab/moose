@@ -16,9 +16,10 @@ NearestReporterCoordinatesFunction::validParams()
 {
   InputParameters params = OptimizationFunction::validParams();
   params.addClassDescription(
-      "Function based on the nearest point to coordinates and values defined by a vector of "
-      "values from a vector-postprocessor or reporter, interpolates linearly in time with "
-      "transient data.");
+      "This Function finds the nearest point in the specified vectors of coordinates and returns "
+      "the values specified in the vector of values at the index of the nearest point.  All the "
+      "vectors must be specified using either vector postprocessors or reporter vectors. This "
+      "function interpolates linearly in time with transient data.");
   params.addParam<ReporterName>("x_coord_name",
                                 "Name of vector-postprocessor or reporter vector containing "
                                 "x-coordinate of points, default is assumed to be all 0s.");
@@ -57,6 +58,9 @@ NearestReporterCoordinatesFunction::value(Real t, const Point & p) const
 {
   const std::array<std::pair<Real, std::size_t>, 2> tv = findNearestPoint(t, p);
 
+  // If the indices are equal then t is either less than the minimum time in the data
+  // or greater than the maximum time. In which case will extrapolate using a constant
+  // value.
   if (tv[0].second == tv[1].second)
     return _values[tv[0].second];
 
@@ -84,7 +88,7 @@ NearestReporterCoordinatesFunction::timeDerivative(Real t, const Point & p) cons
   const Real told = tv[0].first;
   const Real tnew = tv[1].first;
   const Real vold = _values[tv[0].second];
-  const Real vnew = _values[tv[0].second];
+  const Real vnew = _values[tv[1].second];
   return (vnew - vold) / (tnew - told);
 }
 
@@ -92,18 +96,18 @@ std::vector<Real>
 NearestReporterCoordinatesFunction::parameterGradient(Real t, const Point & p) const
 {
   const std::array<std::pair<Real, std::size_t>, 2> tv = findNearestPoint(t, p);
-  std::vector<Real> pd(_nval, 0.0);
+  std::vector<Real> param_grad(_nval, 0.0);
 
   if (tv[0].second == tv[1].second)
-    pd[tv[0].second] = 1;
+    param_grad[tv[0].second] = 1;
   else
   {
     const Real told = tv[0].first;
     const Real tnew = tv[1].first;
-    pd[tv[0].second] = (tnew - t) / (tnew - told);
-    pd[tv[1].second] = (t - told) / (tnew - told);
+    param_grad[tv[0].second] = (tnew - t) / (tnew - told);
+    param_grad[tv[1].second] = (t - told) / (tnew - told);
   }
-  return pd;
+  return param_grad;
 }
 
 void
@@ -201,5 +205,7 @@ NearestReporterCoordinatesFunction::findNearestPoint(Real t, const Point & p) co
     for (std::size_t ti = 1; ti < tval.size(); ++ti)
       if (MooseUtils::absoluteFuzzyGreaterEqual(tval[ti].first, t))
         return {tval[ti - 1], tval[ti]};
+
+  mooseError("Internal error: unable to find nearest point.");
   return std::array<std::pair<Real, std::size_t>, 2>();
 }

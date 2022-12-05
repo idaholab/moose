@@ -1,7 +1,7 @@
 [Tests]
   [transient]
     design = "ElementOptimizationSourceFunctionInnerProduct.md NearestReporterCoordinatesFunction.md  ReporterTimePointSource.md"
-    issues = '#42'
+    issues = '#21885'
     requirement = "The system shall be able to perform force-inversion optimization with time-dependent parameters and outputs with"
     [objective]
       type = JSONDiff

@@ -16,6 +16,7 @@
 // friends
 #include "OptimizeSolve.h"
 #include "OptimizationReporterTest.h"
+
 /**
  * Computes objective function, gradient and contains reporters for communicating between
  * optimizeSolve and subapps

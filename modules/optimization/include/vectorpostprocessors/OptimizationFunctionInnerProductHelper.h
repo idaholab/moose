@@ -30,15 +30,18 @@ public:
 protected:
   /**
    * This function sets up member variables for the inner product accumulation at certain time.
-   * The time step size is needed in order calculate the actual similation time (for adjoint
+   * The time step size is needed in order to calculate the actual simulation time (for adjoint
    * calculations)
+   *
+   * @param time Current simulation time, the actual time is computed via _reverse_time_end
+   * @param dt The current time step size
    */
   void setCurrentTime(Real time, Real dt);
 
   /**
    * Accumulates integration for inner product by multiplying the given value
    * by the function's parameterGradient
-   * @param time Current simulation time, the actual time is computed via _reverse_time_end
+   *
    * @param q_point The quadrature point location
    * @param q_inner_product The inner product value for the current quadrature point,
    *                        which is multiplied by the function parameter gradient.
@@ -46,7 +49,7 @@ protected:
   void update(const Point & q_point, Real q_inner_product);
 
   /**
-   * Accumulates quanties in _curr_time_ip from another object.
+   * Accumulates inner product integration in _curr_time_ip vector from another object.
    * This is used for thread joining.
    */
   void add(const OptimizationFunctionInnerProductHelper & other);

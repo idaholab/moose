@@ -107,6 +107,10 @@ OptimizationFunctionInnerProductHelper::getVector(std::vector<Real> & result)
               _time_ip.end(),
               [](const std::pair<Real, std::vector<Real>> & a,
                  const std::pair<Real, std::vector<Real>> & b) { return a.first < b.first; });
+    // We are integrating over the entire history here. Technically this can be done in an
+    // accumulative manner by storing the integration over previous time steps. However, this
+    // is a relatively cheap operation and considering all cases where time steps may be
+    // repeated would be difficult.
     for (std::size_t ti = 1; ti < _time_ip.size(); ++ti)
       for (const auto & i : make_range(nvar))
         result[i] += (_time_ip[ti].second[i] + _time_ip[ti - 1].second[i]) / 2.0 *

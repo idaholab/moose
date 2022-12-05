@@ -1,20 +1,23 @@
 # OptimizationInfo
 
-!alert construction title=Undocumented Class
-The OptimizationInfo has not been documented. The content listed below should be used as a starting point for
-documenting the class, which includes the typical automatic documentation associated with a
-MooseObject; however, what is contained is ultimately determined by what is necessary to make the
-documentation clear for users.
-
 !syntax description /Reporters/OptimizationInfo
 
 ## Overview
 
-!! Replace these lines with information regarding the OptimizationInfo object.
+`OptimizationInfo` provides the ability to output optimization solve information from [Optimize.md] for each [Tao iteration](https://petsc.org/release/docs/manualpages/Tao/TaoGetSolutionStatus/). The information outputted can be specified with [!param](/Reporters/OptimizationInfo/items). If this parameter is left unspecified, all information is outputted. The values that are optionally declared are shown in [tab:opt_info].
 
-## Example Input File Syntax
-
-!! Describe and include an example of how to use the OptimizationInfo object.
+!table id=tab:opt_info caption=List of values declared
+| Description | Name | [!param](/Reporters/OptimizationInfo/items) |
+| :- | - | - |
+| Objective Function Value | `function_value` | `function_value` |
+| Gradient Norm | `gnorm` | `gnorm` |
+| Infeasibility Norm | `cnorm` | `cnorm` |
+| Step Length | `xdiff` | `xdiff` |
+| Total Model Evaluations | `current_iterate` | `current_iterate` |
+| Forward Model Evaluations | `objective_iterate` | `current_iterate` |
+| Adjoint/Gradient Model Evaluations | `gradient_iterate` | `current_iterate` |
+| Homogeneous Model Evaluations | `hessian_iterate` | `current_iterate` |
+| Total Tao Iterations | `function_solves` | `current_iterate` |
 
 !syntax parameters /Reporters/OptimizationInfo
 

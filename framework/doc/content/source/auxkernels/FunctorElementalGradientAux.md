@@ -19,7 +19,7 @@ where the `AuxVariable` dDdTgradT is defined as a constant monomial vector:
 
 !listing modules/combined/test/tests/invOpt_nonlinear/adjoint.i block=AuxVariables/dDdTgradT  
 
-In this example, [!param](/AuxKernels/FunctorElementalGradientAux/material_scaling) is the tangent modulus of the temperature dependent thermal conductivity.
+In this example, [!param](/AuxKernels/FunctorElementalGradientAux/factor_matprop) is the tangent modulus of the temperature dependent thermal conductivity.
 `FunctorElementalGradientAux` provides an advection velocity in the adjoint problem solved by the `LevelSetAdvection` kernel.
 For Hessian based inversion, `FunctorElementalGradientAux` provides the advection velocity to the `ConservativeAdvection` kernel.
 

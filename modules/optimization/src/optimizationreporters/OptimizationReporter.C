@@ -132,6 +132,7 @@ OptimizationReporter::computeGradient(libMesh::PetscVector<Number> & gradient) c
 
   gradient.close();
 }
+
 // function only used for test objects
 void
 OptimizationReporter::setSimulationValuesForTesting(std::vector<Real> & data)

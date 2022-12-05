@@ -31,7 +31,7 @@ protected:
    */
   virtual Real computeQpInnerProduct() = 0;
 
-  /// Quadrature point values of coupled MOOSE variables
+  /// Quadrature point values of coupled variable
   const VariableValue & _var;
   /// Vector holding inner product
   VectorPostprocessorValue & _vec;

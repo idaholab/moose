@@ -46,4 +46,41 @@
       detail = "with multiple controllable parameters."
     []
   []
+
+  [debug]
+    design = 'Optimize.md'
+    requirement = 'The system shall be able to debug a optimization solve by '
+    [fd]
+      type = RunApp
+      input = debug_fd.i
+      cli_args = '-tao_ls_type unit'
+      allow_test_objects = True
+      expect_out = 'Solution converged'
+      detail = 'using finite-difference to compute the gradient;'
+    []
+    [grad_check]
+      type = RunApp
+      input = debug_gradient.i
+      cli_args = '-tao_ls_type unit'
+      allow_test_objects = True
+      expect_out = 'Testing Gradient'
+      detail = 'testing hand-coded gradient;'
+    []
+    [failed_ls]
+      type = RunApp
+      input = quadratic_minimize.i
+      cli_args = '-tao_fd_gradient true'
+      allow_test_objects = True
+      expect_out = 'Solver terminated: -6   Line Search Failure'
+      detail = 'indicating a failed line search;'
+    []
+    [failed_it]
+      type = RunApp
+      input = quadratic_minimize.i
+      cli_args = '-tao_fd_gradient true -tao_ls_type unit -tao_max_it 1'
+      allow_test_objects = True
+      expect_out = 'Solver terminated: -2   Maximum Iterations'
+      detail = 'indicating maximum iteration reached;'
+    []
+  []
 []

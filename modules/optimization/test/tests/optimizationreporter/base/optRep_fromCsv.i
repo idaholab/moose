@@ -24,7 +24,7 @@
   lower_bounds = '-1 -2 -3 -4 -5 -6 -7 -8 -9 -10 -11 -12'
   measurement_file = 'measurementData.csv'
   file_xcoord = 'coordx'
-  #file_ycoord ='y'
+  file_ycoord ='y'
   file_zcoord = 'z'
   file_value = 'measured_value'
   outputs = out
