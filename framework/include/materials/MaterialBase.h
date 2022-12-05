@@ -34,6 +34,7 @@
 #include "Assembly.h"
 #include "GeometricSearchInterface.h"
 #include "FunctorInterface.h"
+#include "SolutionInvalidInterface.h"
 
 #define usingMaterialBaseMembers                                                                   \
   usingTransientInterfaceMembers;                                                                  \
@@ -74,7 +75,8 @@ class MaterialBase : public MooseObject,
                      public RandomInterface,
                      public ElementIDInterface,
                      protected GeometricSearchInterface,
-                     protected FunctorInterface
+                     protected FunctorInterface,
+                     protected SolutionInvalidInterface
 {
 public:
   static InputParameters validParams();
