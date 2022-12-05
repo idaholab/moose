@@ -136,6 +136,11 @@ public:
   void sortComponents() { _component_warehouse.sortComponents(); }
 
   /**
+   * Gets a zero value that lasts
+   */
+  const Real & getZero() const { return _real_zero; }
+
+  /**
    * Registers a closures option
    *
    * @param[in] closures_option   Closures option string to register
@@ -216,6 +221,9 @@ private:
 
   /// Additional sparsity pattern that needs to be added into the Jacobian matrix
   std::map<dof_id_type, std::vector<dof_id_type>> _sparsity_augmentation_map;
+
+  /// Zero value that lasts
+  const Real _real_zero;
 };
 
 template <typename T>

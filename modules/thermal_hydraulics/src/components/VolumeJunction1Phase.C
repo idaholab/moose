@@ -67,7 +67,7 @@ VolumeJunction1Phase::VolumeJunction1Phase(const InputParameters & params)
     _velocity_var_name(genName(name(), "vel")),
 
     _K(getParam<Real>("K")),
-    _A_ref(isParamValid("A_ref") ? getParam<Real>("A_ref") : getZero())
+    _A_ref(isParamValid("A_ref") ? getParam<Real>("A_ref") : getTHMApp().getZero())
 {
   // Note: 'A_ref' can be required by child classes
   if (!params.isParamRequired("A_ref") && params.isParamSetByUser("A_ref") &&
