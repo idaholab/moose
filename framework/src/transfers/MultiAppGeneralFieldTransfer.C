@@ -352,10 +352,6 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const VariableName & var_nam
     }
     else // Elemental
     {
-      if (!_to_boundaries.empty())
-      {
-        mooseError("You can not restrict an elemental variable to any boundary");
-      }
       for (auto & elem : as_range(to_mesh.local_elements_begin(), to_mesh.local_elements_end()))
       {
         // Skip this element if the variable has no dofs at it.
@@ -427,6 +423,11 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
 
     if (fe_type.order > CONSTANT && !is_nodal)
     {
+      // Defining only boundary values will not be enough to describe the variable, disallow it
+      if (_to_boundaries.size() && fe_type.order > 0)
+        mooseError("Higher order elemental variables are not supported for target-boundary "
+                   "restricted transfers");
+
       InterpCache & cache = interp_caches[problem_id];
       Point p = point_requests[val_offset];
       const Number val = incoming_vals[val_offset].first;

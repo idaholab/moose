@@ -38,7 +38,7 @@
                   Transfers/from_sub/to_boundaries='front bottom left' Transfers/from_sub_elem/to_boundaries='front bottom left'
                   Transfers/to_sub/to_boundaries='front bottom left' Transfers/to_sub_elem/to_boundaries='front bottom left'
                   Mesh/second_order=true AuxVariables/to_sub/order=SECOND
-                  MultiApps/sub/cli_args='Mesh/second_order=true;AuxVariables/to_main/order=FIRST;"
+                  MultiApps/sub/cli_args='Mesh/second_order=true;AuxVariables/to_main/order=FIRST'"
       detail = "for nodal variables of arbitrary types with higher order on the sending app,"
     []
 
@@ -68,6 +68,19 @@
                   Transfers/from_sub/from_blocks='0' Transfers/from_sub_elem/from_blocks='0'
                   Transfers/to_sub/from_blocks='1' Transfers/to_sub_elem/from_blocks='1'"
       detail = 'limiting the transfer to certain blocks as well'
+    []
+  []
+
+  [errors]
+    requirement = "The system shall return an error if"
+    [write_elem_high_order]
+      type = RunException
+      input = main.i
+      cli_args = "AuxVariables/from_sub_elem/order=SECOND Transfers/from_sub_elem/to_boundaries='front bottom left'
+                  MultiApps/sub/cli_args='Mesh/second_order=true;AuxVariables/to_main_elem/order=SECOND' Transfers/to_sub_elem/to_boundaries='front bottom left'"
+      expect_err = "Higher order elemental variables are not supported for target-boundary restricted transfers"
+      # Elemental variables can be discontinuous on a boundary
+      detail = 'the user attempts transferring to a non-zeroth order elemental variables while restricting the transfer to a boundary'
     []
   []
 []

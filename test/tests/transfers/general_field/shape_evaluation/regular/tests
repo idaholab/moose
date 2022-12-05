@@ -44,4 +44,16 @@
       detail = "when specifying multiple variables in a single transfer"
     []
   []
+
+  [errors]
+    requirement = "The system shall return an error if"
+    [wrong_variable_numbers]
+      type = RunException
+      input = main.i
+      cli_args = "Transfers/active='from_sub'
+                  Transfers/from_sub/source_variable='to_main to_main_elem' Transfers/from_sub/variable='from_sub_elem'"
+      expect_err = "The number of variables to transfer to and from should be equal"
+      detail = 'a different number of variables is specified for the source and target variables of the transfer.'
+    []
+  []
 []

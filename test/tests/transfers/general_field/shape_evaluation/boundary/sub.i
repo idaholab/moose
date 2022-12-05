@@ -61,7 +61,7 @@
 [Outputs]
   [out]
     type = Exodus
-    hide = 'to_main'
+    hide = 'to_main to_main_elem'
     overwrite = true
   []
 []
