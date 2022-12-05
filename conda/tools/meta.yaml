@@ -30,7 +30,7 @@ requirements:
     - clang-tools 12.0.1
 
 test:
-   commands:
+  commands:
     - git clang-format -h
   imports:
     - bs4
