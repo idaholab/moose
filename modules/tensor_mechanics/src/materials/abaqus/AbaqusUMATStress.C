@@ -225,7 +225,7 @@ AbaqusUMATStress::computeQpStress()
 
   // current coordinates
   for (const auto i : make_range(Moose::dim))
-    _aqCOORDS[i] = _q_point[_qp](i) + ((_displace_qps) ? (*_disp[i])[_qp] : 0.0);
+    _aqCOORDS[i] = _q_point[_qp](i) + ((_displace_qps && i<_current_elem->dim()) ? (*_disp[i])[_qp] : 0.0);
 
   // zero out Jacobian contribution
   for (const auto i : make_range(_aqNTENS * _aqNTENS))
