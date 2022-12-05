@@ -548,7 +548,10 @@ protected:
   /// Transfers associated with this multiapp
   std::vector<MultiAppTransfer *> _associated_transfers;
 
-  ///Timers
+  /// Whether to run the child apps with their meshes transformed with the coordinate transforms
+  const bool _run_in_position;
+
+  /// Timers
   const PerfID _solve_step_timer;
   const PerfID _init_timer;
   const PerfID _backup_timer;
