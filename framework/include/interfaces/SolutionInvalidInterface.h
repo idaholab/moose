@@ -16,6 +16,8 @@
 
 // Forward declarations
 class MooseApp;
+class MooseObject;
+class FEProblemBase;
 
 /**
  * An interface to communicate the solutioninvalidity for one app to the materials

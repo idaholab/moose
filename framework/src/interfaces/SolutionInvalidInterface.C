@@ -14,7 +14,6 @@
 #include "SolutionInvalidityRegistry.h"
 #include "FEProblemBase.h"
 #include "MooseObject.h"
-#include "SolutionInvalidityRegistry.h"
 
 SolutionInvalidInterface::SolutionInvalidInterface(MooseApp & moose_app, FEProblemBase & problem)
   : _si_moose_app(moose_app), _si_problem(problem)
