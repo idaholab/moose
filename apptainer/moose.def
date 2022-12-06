@@ -9,13 +9,13 @@
 {#- DEV_CONTAINER: Set to anything to add development packages                                -#}
 
 {#- Location to install mambaforge                                                            -#}
-{%- set MOOSE_MAMBAFORGE = '/usr/local/mambaforge3' -%}
+{%- set MOOSE_MAMBAFORGE = '/opt/mambaforge3' -%}
 
 {#- Name of the environment to create in mamba                                                -#}
 {%- set MOOSE_MAMBA_ENV = 'moose' -%}
 
 {#- Location to install the packed mamba environment                                          -#}
-{%- set MOOSE_TOOLS_DIR = '/usr/local/moose-tools' -%}
+{%- set MOOSE_TOOLS_DIR = '/opt/moose-tools' -%}
 
 BootStrap: {{ APPTAINER_BOOTSTRAP }}
 From: {{ APPTAINER_FROM }}

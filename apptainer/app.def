@@ -14,7 +14,7 @@
 {#- TEST_DIRS: Directories to test in the %test section; defaults to just "tests"             -#}
 
 {#- The within-container build directory to use                                               -#}
-{%- set ROOT_BUILD_DIR = '/var/build' -%}
+{%- set ROOT_BUILD_DIR = '/root/build' -%}
 
 BootStrap: {{ APPTAINER_BOOTSTRAP }}
 From: {{ APPTAINER_FROM }}
