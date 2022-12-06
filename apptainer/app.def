@@ -24,7 +24,6 @@ From: {{ APPTAINER_FROM }}
     ROOT_BUILD_DIR={{ ROOT_BUILD_DIR }}
     APPLICATION_DIR={{ APPLICATION_DIR }}
     MOOSE_DIR={{ MOOSE_DIR }}
-    MOOSE_DIR=/ssd/tmp/harblh/apptainer/bison/moose
 
     # Build directory in the container
     BUILD_DIR=${APPTAINER_ROOTFS}${ROOT_BUILD_DIR}
