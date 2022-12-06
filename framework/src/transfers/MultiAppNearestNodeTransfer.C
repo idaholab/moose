@@ -48,10 +48,6 @@ MultiAppNearestNodeTransfer::validParams()
                         "nearest node neighbors to greatly speed up the "
                         "transfer.");
 
-  // Block restriction not implemented
-  params.suppressParameter<std::vector<SubdomainName>>("from_blocks");
-  params.suppressParameter<std::vector<SubdomainName>>("to_blocks");
-
   MultiAppTransfer::addBBoxFactorParam(params);
   return params;
 }

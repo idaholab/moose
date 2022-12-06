@@ -65,10 +65,6 @@ MultiAppUserObjectTransfer::validParams()
       "The boundary we are transferring to (if not specified, whole domain is used unless 'block' "
       "parameter is used).");
 
-  // Block restriction not implemented
-  params.suppressParameter<std::vector<SubdomainName>>("from_blocks");
-  params.suppressParameter<std::vector<SubdomainName>>("to_blocks");
-
   params.addClassDescription(
       "Samples a variable's value in the Parent app domain at the point where the MultiApp is and "
       "copies that value into a post-processor in the MultiApp");

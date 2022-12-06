@@ -26,6 +26,13 @@ MultiAppCopyTransfer::validParams()
   params.addRequiredParam<std::vector<VariableName>>("source_variable",
                                                      "The variable to transfer from.");
 
+  // Block restrictions
+  params.addParam<std::vector<SubdomainName>>(
+      "from_blocks",
+      "Subdomain restriction to transfer from (defaults to all the origin app domain)");
+  params.addParam<std::vector<SubdomainName>>(
+      "to_blocks", "Subdomain restriction to transfer to, (defaults to all the target app domain)");
+
   params.addClassDescription(
       "Copies variables (nonlinear and auxiliary) between multiapps that have identical meshes.");
   return params;
@@ -34,7 +41,8 @@ MultiAppCopyTransfer::validParams()
 MultiAppCopyTransfer::MultiAppCopyTransfer(const InputParameters & parameters)
   : MultiAppFieldTransfer(parameters),
     _from_var_names(getParam<std::vector<VariableName>>("source_variable")),
-    _to_var_names(getParam<std::vector<AuxVariableName>>("variable"))
+    _to_var_names(getParam<std::vector<AuxVariableName>>("variable")),
+    _has_block_restrictions(isParamValid("from_blocks") || isParamValid("to_blocks"))
 {
   /* Right now, most of derived transfers support one variable only */
   _to_var_name = _to_var_names[0];
@@ -52,18 +60,62 @@ MultiAppCopyTransfer::initialSetup()
   if (_current_direction == FROM_MULTIAPP)
   {
     // Subdomain and variable type information is shared on all subapps
-    from_problem = &getFromMultiApp()->appProblemBase(0);
+    from_problem = &getFromMultiApp()->appProblemBase(getFromMultiApp()->firstLocalApp());
     to_problem = &getFromMultiApp()->problemBase();
   }
   else if (_current_direction == TO_MULTIAPP)
   {
     from_problem = &getToMultiApp()->problemBase();
-    to_problem = &getToMultiApp()->appProblemBase(0);
+    to_problem = &getToMultiApp()->appProblemBase(getToMultiApp()->firstLocalApp());
   }
   else
   {
-    from_problem = &getFromMultiApp()->appProblemBase(0);
-    to_problem = &getToMultiApp()->appProblemBase(0);
+    from_problem = &getFromMultiApp()->appProblemBase(getFromMultiApp()->firstLocalApp());
+    to_problem = &getToMultiApp()->appProblemBase(getToMultiApp()->firstLocalApp());
+  }
+
+  // Convert block names to block IDs, fill with ANY_BLOCK_ID if unspecified
+  if (_has_block_restrictions)
+  {
+    const auto & from_block_names = getParam<std::vector<SubdomainName>>("from_blocks");
+    for (const auto & b : from_block_names)
+      if (!MooseMeshUtils::hasSubdomainName(
+            const_cast<MeshBase &>(from_problem->mesh().getMesh()), b))
+        paramError("from_blocks", "The block '", b, "' was not found in the mesh");
+
+    if (from_block_names.size())
+    {
+      if (from_problem)
+      {
+        const auto block_vec = from_problem->mesh().getSubdomainIDs(from_block_names);
+        _from_blocks = std::set<SubdomainID>(block_vec.begin(), block_vec.end());
+      }
+      // We dont even own any of these subapps
+      else
+        _from_blocks = {Moose::INVALID_BLOCK_ID};
+    }
+    else
+      _from_blocks = {Moose::ANY_BLOCK_ID};
+
+    const auto & to_block_names = getParam<std::vector<SubdomainName>>("to_blocks");
+    for (const auto & b : to_block_names)
+      if (!MooseMeshUtils::hasSubdomainName(
+            const_cast<MeshBase &>(to_problem->mesh().getMesh()), b))
+        paramError("to_blocks", "The block '", b, "' was not found in the mesh");
+
+    if (to_block_names.size())
+    {
+      if (to_problem)
+      {
+        const auto block_vec = to_problem->mesh().getSubdomainIDs(to_block_names);
+        _to_blocks = std::set<SubdomainID>(block_vec.begin(), block_vec.end());
+      }
+      // We dont even own any of these subapps
+      else
+        _from_blocks = {Moose::INVALID_BLOCK_ID};
+    }
+    else
+      _to_blocks = {Moose::ANY_BLOCK_ID};
   }
 
   // Forbid block restriction on nodal variables as currently not supported

@@ -34,6 +34,14 @@ MultiAppGeneralFieldTransfer::validParams()
                                     "bbox_factor>0",
                                     "Factor to inflate or deflate the source app bounding boxes");
 
+  // Block restrictions
+  params.addParam<std::vector<SubdomainName>>(
+      "from_blocks",
+      "Subdomain restriction to transfer from (defaults to all the origin app domain)");
+  params.addParam<std::vector<SubdomainName>>(
+      "to_blocks", "Subdomain restriction to transfer to, (defaults to all the target app domain)");
+
+  // Boundary restrictions
   params.addParam<std::vector<BoundaryName>>(
       "from_boundaries",
       "The boundary we are transferring from (if not specified, whole domain is used).");

@@ -63,4 +63,11 @@ protected:
   VariableName _from_var_name;
   /// Name of variables transferring to
   AuxVariableName _to_var_name;
+
+  /// Whether block restriction is active
+  const bool _has_block_restrictions;
+  /// Subdomain IDs of the blocks to transfer from
+  std::set<SubdomainID> _from_blocks;
+  /// Subdomain IDs of the blocks to transfer to
+  std::set<SubdomainID> _to_blocks;
 };

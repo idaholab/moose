@@ -57,10 +57,6 @@ MultiAppProjectionTransfer::validParams()
                         "no movement or adaptivity).  This will cache some "
                         "information to speed up the transfer.");
 
-  // Block restriction not implemented
-  params.suppressParameter<std::vector<SubdomainName>>("from_blocks");
-  params.suppressParameter<std::vector<SubdomainName>>("to_blocks");
-
   // Need one layer of ghosting
   params.addRelationshipManager("ElementSideNeighborLayers",
                                 Moose::RelationshipManagerType::GEOMETRIC |
