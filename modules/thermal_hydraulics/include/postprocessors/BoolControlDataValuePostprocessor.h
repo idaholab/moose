@@ -10,28 +10,24 @@
 #pragma once
 
 #include "GeneralPostprocessor.h"
+#include "THMAppInterface.h"
 #include "ControlData.h"
 
-class THMProblem;
-
 /**
- * Reads a boolean control value data and prints it out
+ * Copies a boolean control data value.
  */
-class BoolControlDataValuePostprocessor : public GeneralPostprocessor
+class BoolControlDataValuePostprocessor : public GeneralPostprocessor, public THMAppInterface
 {
 public:
   BoolControlDataValuePostprocessor(const InputParameters & parameters);
 
-  virtual void initialize();
-  virtual Real getValue();
-  virtual void execute();
+  virtual void initialize() override;
+  virtual Real getValue() override;
+  virtual void execute() override;
 
 protected:
-  THMProblem * _thm_problem;
-  /// The name of the control data value
-  const std::string & _control_data_name;
   /// The boolean value of the control data
-  const ControlData<bool> * _control_data_value;
+  const ControlData<bool> * const _control_data_value;
 
 public:
   static InputParameters validParams();
