@@ -24,7 +24,6 @@ requirements:
     - {{ moose_vtk }}
     - pandas
     - python
-    - openssl
     - setuptools
 
 test:
@@ -39,7 +38,7 @@ about:
   license: LGPL 2.1
   summary: >
     This superficial module (moose-tools) acts as a top-level module designed to provide all
-    dependencies required in order to run Peacock and MOOSE Documentation.
+    dependencies required in order to run Peacock.
 
 extra:
   recipe-maintainers:

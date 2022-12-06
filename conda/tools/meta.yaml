@@ -3,7 +3,7 @@
 #   template/ (must contain any python major.minor version this
 #              package is building. Usually the latest version.)
 {% set build = 0 %}
-{% set version = "2022.11.07" %}
+{% set version = "2022.12.05" %}
 
 package:
   name: moose-tools
@@ -18,57 +18,32 @@ build:
 requirements:
   build:
     - {{ moose_python }}
-    - openssl
     - setuptools
   run:
-    - numpy
-    - matplotlib
-    - pandas
-    - pyyaml
+    - moose-test-tools
+    - beautifulsoup4
+    - livereload
     - pybtex
     - mock
-    - lxml
-    - scikit-image
-    - sympy
-    - deepdiff
-    - beautifulsoup4
     - pylatexenc
-    - jinja2
-    - mako
-    - livereload
-    - yaml
-    - python
-    - openssl
-    - setuptools
-    - graphviz
     - clang-tools 12.0.1
 
 test:
-  commands:
-    - dot -V
+   commands:
     - git clang-format -h
   imports:
-    - numpy
-    - matplotlib
-    - pandas
-    - livereload
-    - yaml
     - bs4
+    - livereload
     - pybtex
     - mock
-    - lxml
-    - skimage
-    - sympy
     - pylatexenc
-    - jinja2
-    - deepdiff
 
 about:
   home: https://mooseframework.org/
   license: LGPL 2.1
   summary: >
     This superficial module (moose-tools) acts as a top-level module designed to provide all
-    dependencies required in order to run Peacock and MOOSE Documentation.
+    dependencies required in order to run the TestHarness and create MOOSE Documentation.
 
 extra:
   recipe-maintainers:

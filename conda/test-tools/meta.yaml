@@ -1,0 +1,76 @@
+# Making a Change to this package?
+# REMEMBER TO UPDATE the .yaml files for the following packages:
+#   template/ (must contain any python major.minor version this
+#              package is building. Usually the latest version.)
+{% set build = 0 %}
+{% set version = "2022.12.05" %}
+
+package:
+  name: moose-test-tools
+  version: {{ version }}
+
+source:
+  path: ../test-tools
+
+build:
+  number: {{ build }}
+
+requirements:
+  build:
+    - {{ moose_python }}
+  run:
+    - numpy
+    - matplotlib
+    - pandas
+    - pyyaml
+    - lxml
+    - scikit-image
+    - sympy
+    - deepdiff
+    - pylatexenc
+    - jinja2
+    - mako
+    - yaml
+    - setuptools
+    - graphviz
+    - pylint
+    - psycopg2
+    - pycobertura
+    - tabulate
+    - gitpython
+    - packaging
+    - pyflakes
+
+
+test:
+  commands:
+    - dot -V
+    - pg_config --help
+  imports:
+    - numpy
+    - matplotlib
+    - pandas
+    - yaml
+    - lxml
+    - skimage
+    - sympy
+    - jinja2
+    - deepdiff
+    - pylint
+    - psycopg2
+    - pycobertura
+    - tabulate
+    - git
+    - pyflakes
+
+about:
+  home: https://mooseframework.org/
+  license: LGPL 2.1
+  summary: >
+    This superficial module (moose-test-tools) acts as a low level module designed to provide all
+    dependencies required in order to run the TestHarness, clang-format, code coverage, pylint, etc
+    (mostly Civet CI stuff).
+
+extra:
+  recipe-maintainers:
+    - milljm
