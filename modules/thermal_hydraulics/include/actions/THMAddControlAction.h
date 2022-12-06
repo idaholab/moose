@@ -23,8 +23,6 @@ public:
    */
   THMAddControlAction(const InputParameters & parameters);
 
-  virtual void act() override;
-
 public:
   static InputParameters validParams();
 };

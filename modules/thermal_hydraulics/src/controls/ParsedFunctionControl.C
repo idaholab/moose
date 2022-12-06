@@ -41,7 +41,7 @@ ParsedFunctionControl::buildFunction()
       tid = getParam<THREAD_ID>("_tid");
 
     _function_ptr = std::make_unique<THMParsedFunctionWrapper>(
-        *_sim, _pfb_feproblem, _function, _vars, _vals, tid);
+        getTHMApp().getTHMProblem(), _pfb_feproblem, _function, _vars, _vals, tid);
   }
 }
 

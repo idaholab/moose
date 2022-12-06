@@ -48,7 +48,7 @@ UnitTripControl::buildConditionFunction()
       tid = getParam<THREAD_ID>("_tid");
 
     _condition_ptr = std::make_unique<THMParsedFunctionWrapper>(
-        *_sim, _pfb_feproblem, _condition, _vars, _vals, tid);
+        getTHMApp().getTHMProblem(), _pfb_feproblem, _condition, _vars, _vals, tid);
   }
 }
 

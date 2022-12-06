@@ -11,9 +11,11 @@
 
 #include "Control.h"
 #include "ControlData.h"
+#include "THMAppInterface.h"
+#include "ThermalHydraulicsApp.h"
 #include "THMProblem.h"
 
-class THMControl : public Control
+class THMControl : public Control, public THMAppInterface
 {
 public:
   THMControl(const InputParameters & parameters);
@@ -87,8 +89,6 @@ protected:
   template <typename T>
   const T & getComponentControlDataOld(const std::string & data_name);
 
-  THMProblem * _sim;
-
   /// A list of control data that are required to run before this control may run
   std::vector<std::string> _control_data_depends_on;
 
@@ -101,7 +101,7 @@ T &
 THMControl::declareComponentControlData(const std::string & data_name)
 {
   std::string full_name = name() + ":" + data_name;
-  ControlData<T> * data_ptr = _sim->declareControlData<T>(full_name, this);
+  ControlData<T> * data_ptr = getTHMApp().getTHMProblem().declareControlData<T>(full_name, this);
   return data_ptr->set();
 }
 
@@ -109,7 +109,7 @@ template <typename T>
 T &
 THMControl::declareControlData(const std::string & data_name)
 {
-  ControlData<T> * data_ptr = _sim->declareControlData<T>(data_name, this);
+  ControlData<T> * data_ptr = getTHMApp().getTHMProblem().declareControlData<T>(data_name, this);
   return data_ptr->set();
 }
 
@@ -133,7 +133,7 @@ template <typename T>
 const T &
 THMControl::getControlDataByName(const std::string & data_name)
 {
-  ControlData<T> * data_ptr = _sim->getControlData<T>(data_name);
+  ControlData<T> * data_ptr = getTHMApp().getTHMProblem().getControlData<T>(data_name);
   if (data_ptr == nullptr)
     mooseError("Trying to get control data '",
                data_name,
@@ -151,7 +151,7 @@ template <typename T>
 const T &
 THMControl::getControlDataOldByName(const std::string & data_name)
 {
-  ControlData<T> * data_ptr = _sim->getControlData<T>(data_name);
+  ControlData<T> * data_ptr = getTHMApp().getTHMProblem().getControlData<T>(data_name);
   if (data_ptr == nullptr)
     mooseError("Trying to get control data '",
                data_name,
