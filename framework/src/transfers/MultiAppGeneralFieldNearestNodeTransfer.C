@@ -85,32 +85,6 @@ MultiAppGeneralFieldNearestNodeTransfer::buildKDTrees(
     auto & fe_type = from_sys.variable_type(from_var.number());
     bool is_nodal = fe_type.family == LAGRANGE;
 
-    std::set<SubdomainID> from_blocks;
-    // Take users' input block names
-    // Change them to ids
-    // Store then in a member variables
-    if (isParamValid("from_blocks"))
-    {
-      // User input block names
-      auto & blocks = getParam<std::vector<SubdomainName>>("from_blocks");
-      // Subdomain ids
-      std::vector<SubdomainID> ids = from_mesh.getSubdomainIDs(blocks);
-      // We might have more than one problems
-      from_blocks.clear();
-      // Store these ids
-      from_blocks.insert(ids.begin(), ids.end());
-    }
-
-    std::set<BoundaryID> from_boundaries;
-    if (isParamValid("from_boundary"))
-    {
-      // User input block names
-      auto & boundary_names = getParam<std::vector<BoundaryName>>("from_boundary");
-      std::vector<BoundaryID> boundary_ids = from_mesh.getBoundaryIDs(boundary_names);
-      // Store these ids
-      from_boundaries.insert(boundary_ids.begin(), boundary_ids.end());
-    }
-
     if (is_nodal)
     {
       for (const auto & node : from_mesh.getMesh().local_node_ptr_range())
@@ -118,10 +92,10 @@ MultiAppGeneralFieldNearestNodeTransfer::buildKDTrees(
         if (node->n_dofs(from_sys.number(), from_var_num) < 1)
           continue;
 
-        if (!from_blocks.empty() && !hasBlocks(from_blocks, from_mesh, node))
+        if (!_from_blocks.empty() && !hasBlocks(_from_blocks, from_mesh, node))
           continue;
 
-        if (!from_boundaries.empty() && !hasBoundaries(from_boundaries, from_mesh, node))
+        if (!_from_boundaries.empty() && !hasBoundaries(_from_boundaries, from_mesh, node))
           continue;
 
         points[i_from].push_back(*node + _from_positions[i_from]);
@@ -132,17 +106,16 @@ MultiAppGeneralFieldNearestNodeTransfer::buildKDTrees(
     }
     else
     {
-      if (!from_boundaries.empty())
-      {
-        mooseError("You can not restrict an elemental variable to boundary");
-      }
       for (auto & elem : as_range(from_mesh.getMesh().local_elements_begin(),
                                   from_mesh.getMesh().local_elements_end()))
       {
         if (elem->n_dofs(from_sys.number(), from_var_num) < 1)
           continue;
 
-        if (!from_blocks.empty() && !hasBlocks(from_blocks, elem))
+        if (!_from_blocks.empty() && !hasBlocks(_from_blocks, elem))
+          continue;
+
+        if (!_from_boundaries.empty() && !hasBoundaries(_from_boundaries, from_mesh, elem))
           continue;
 
         auto dof = elem->dof_number(from_sys.number(), from_var_num, 0);

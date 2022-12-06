@@ -35,6 +35,8 @@ public:
 
   MultiAppGeneralFieldTransfer(const InputParameters & parameters);
 
+  virtual void initialSetup() override;
+
   virtual void execute() override;
 
   // This needs to be moved into libMesh
@@ -66,20 +68,38 @@ protected:
   void extractLocalFromBoundingBoxes(std::vector<BoundingBox> & local_bboxes);
 
   /*
-   * Whether or not a given element has blocks
+   * Whether or not a given element is part of the given blocks
    */
   bool hasBlocks(std::set<SubdomainID> & blocks, const Elem * elem) const;
 
   /*
-   * Whether or not a given node has blocks
+   * Whether or not a given node is part of an element near the given blocks
    */
   bool hasBlocks(std::set<SubdomainID> & blocks, const MooseMesh & mesh, const Node * node) const;
 
   /*
-   * Whether or not a given node has blocks
+   * Whether or not a given node is part of the given boundaries
    */
   bool
   hasBoundaries(std::set<BoundaryID> & boundaries, const MooseMesh & mesh, const Node * node) const;
+
+  /*
+   * Whether or not a given element has a side on the given boundaries
+   */
+  bool
+  hasBoundaries(std::set<BoundaryID> & boundaries, const MooseMesh & mesh, const Elem * elem) const;
+
+  /// Origin block(s) restriction
+  std::set<SubdomainID> _from_blocks;
+
+  /// Target block(s) restriction
+  std::set<SubdomainID> _to_blocks;
+
+  /// Target boundary(ies) restriction
+  std::set<BoundaryID> _to_boundaries;
+
+  /// Origin boundary(ies) restriction
+  std::set<BoundaryID> _from_boundaries;
 
 private:
   /// A map from pid to a set of points

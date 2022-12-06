@@ -71,6 +71,59 @@ MultiAppGeneralFieldTransfer::MultiAppGeneralFieldTransfer(const InputParameters
 }
 
 void
+MultiAppGeneralFieldTransfer::initialSetup()
+{
+  MultiAppConservativeTransfer::initialSetup();
+
+  // Use IDs for block and boundary restriction
+  // Loop over all source problems
+  for (unsigned int i_from = 0; i_from < _from_problems.size(); ++i_from)
+  {
+    const auto & from_moose_mesh = _from_problems[i_from]->mesh(_displaced_source_mesh);
+    if (isParamValid("from_blocks"))
+    {
+      auto & blocks = getParam<std::vector<SubdomainName>>("from_blocks");
+      std::vector<SubdomainID> ids = from_moose_mesh.getSubdomainIDs(blocks);
+      _from_blocks.insert(ids.begin(), ids.end());
+      if (_from_blocks.size() != blocks.size())
+        paramError("from_blocks", "Some blocks were not found in the mesh");
+    }
+
+    if (isParamValid("from_boundaries"))
+    {
+      auto & boundary_names = getParam<std::vector<BoundaryName>>("from_boundaries");
+      std::vector<BoundaryID> boundary_ids = from_moose_mesh.getBoundaryIDs(boundary_names);
+      _from_boundaries.insert(boundary_ids.begin(), boundary_ids.end());
+      if (_from_boundaries.size() != boundary_names.size())
+        paramError("from_boundaries", "Some boundaries were not found in the mesh");
+    }
+  }
+
+  // Loop over all target problems
+  for (unsigned int i_to = 0; i_to < _to_problems.size(); ++i_to)
+  {
+    const auto & to_moose_mesh = _to_problems[i_to]->mesh(_displaced_target_mesh);
+    if (isParamValid("to_blocks"))
+    {
+      auto & blocks = getParam<std::vector<SubdomainName>>("to_blocks");
+      std::vector<SubdomainID> ids = to_moose_mesh.getSubdomainIDs(blocks);
+      _to_blocks.insert(ids.begin(), ids.end());
+      if (_to_blocks.size() != blocks.size())
+        paramError("to_blocks", "Some blocks were not found in the mesh");
+    }
+
+    if (isParamValid("to_boundaries"))
+    {
+      auto & boundary_names = getParam<std::vector<BoundaryName>>("to_boundaries");
+      std::vector<BoundaryID> boundary_ids = to_moose_mesh.getBoundaryIDs(boundary_names);
+      _to_boundaries.insert(boundary_ids.begin(), boundary_ids.end());
+      if (_to_boundaries.size() != boundary_names.size())
+        paramError("to_boundaries", "Some boundaries were not found in the mesh");
+    }
+  }
+}
+
+void
 MultiAppGeneralFieldTransfer::execute()
 {
   getAppInfo();
@@ -266,31 +319,6 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const VariableName & var_nam
     const auto & to_moose_mesh = _to_problems[i_to]->mesh(_displaced_target_mesh);
     const auto & to_mesh = to_moose_mesh.getMesh();
 
-    std::set<SubdomainID> _to_blocks;
-
-    // Take users' input block names
-    // Change them to ids
-    // Store then in a member variables
-    if (isParamValid("to_blocks"))
-    {
-      // User input block names
-      auto & blocks = getParam<std::vector<SubdomainName>>("to_blocks");
-      // Subdomain ids
-      std::vector<SubdomainID> ids = to_moose_mesh.getSubdomainIDs(blocks);
-      // Store these ids
-      _to_blocks.insert(ids.begin(), ids.end());
-    }
-
-    std::set<BoundaryID> _to_boundaries;
-    if (isParamValid("to_boundaries"))
-    {
-      // User input block names
-      auto & boundary_names = getParam<std::vector<BoundaryName>>("to_boundaries");
-      std::vector<BoundaryID> boundary_ids = to_moose_mesh.getBoundaryIDs(boundary_names);
-      // Store these ids
-      _to_boundaries.insert(boundary_ids.begin(), boundary_ids.end());
-    }
-
     // We support more general variables via libMesh GenericProjector
     if (fe_type.order > CONSTANT && !is_nodal)
     {
@@ -361,6 +389,9 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const VariableName & var_nam
         // Skip if it is a block restricted block and current elem does not have
         // specified blocks
         if (!_to_blocks.empty() && !hasBlocks(_to_blocks, elem))
+          continue;
+
+        if (!_to_boundaries.empty() && !hasBoundaries(_to_boundaries, to_moose_mesh, elem))
           continue;
 
         // Cache point information
@@ -629,6 +660,25 @@ MultiAppGeneralFieldTransfer::hasBoundaries(std::set<BoundaryID> & boundaries,
   return !u.empty();
 }
 
+bool
+MultiAppGeneralFieldTransfer::hasBoundaries(std::set<BoundaryID> & boundaries,
+                                            const MooseMesh & mesh,
+                                            const Elem * elem) const
+{
+  const BoundaryInfo & bnd_info = mesh.getMesh().get_boundary_info();
+  std::vector<BoundaryID> vec_to_fill;
+  for (auto side : make_range(elem->n_sides()))
+    bnd_info.boundary_ids(elem, side, vec_to_fill);
+  std::set<BoundaryID> vec_to_fill_set(vec_to_fill.begin(), vec_to_fill.end());
+  std::set<BoundaryID> u;
+  std::set_intersection(boundaries.begin(),
+                        boundaries.end(),
+                        vec_to_fill_set.begin(),
+                        vec_to_fill_set.end(),
+                        std::inserter(u, u.begin()));
+  return !u.empty();
+}
+
 Real
 MultiAppGeneralFieldTransfer::bboxMaxDistance(const Point & p, const BoundingBox & bbox)
 {
@@ -692,36 +742,15 @@ MultiAppGeneralFieldTransfer::getRestrictedFromBoundingBoxes()
     bool at_least_one = false;
     const auto & from_mesh = _from_problems[j]->mesh(_displaced_source_mesh);
 
-    std::set<SubdomainID> subdomains;
-    if (isParamValid("from_blocks"))
-    {
-      // User input block names
-      auto & blocks = getParam<std::vector<SubdomainName>>("from_blocks");
-      // Subdomain ids
-      std::vector<SubdomainID> ids = from_mesh.getSubdomainIDs(blocks);
-      // Store these ids
-      subdomains.insert(ids.begin(), ids.end());
-    }
-
-    std::set<BoundaryID> boundaries;
-    if (isParamValid("from_boundaries"))
-    {
-      // User input block names
-      auto & boundary_names = getParam<std::vector<BoundaryName>>("from_boundaries");
-      std::vector<BoundaryID> boundary_ids = from_mesh.getBoundaryIDs(boundary_names);
-      // Store these ids
-      boundaries.insert(boundary_ids.begin(), boundary_ids.end());
-    }
-
     for (auto & elem : as_range(from_mesh.getMesh().local_elements_begin(),
                                 from_mesh.getMesh().local_elements_end()))
     {
-      if (!subdomains.empty() && !hasBlocks(subdomains, elem))
+      if (!_from_blocks.empty() && !hasBlocks(_from_blocks, elem))
         continue;
 
       for (auto & node : elem->node_ref_range())
       {
-        if (!boundaries.empty() && !hasBoundaries(boundaries, from_mesh, &node))
+        if (!_from_boundaries.empty() && !hasBoundaries(_from_boundaries, from_mesh, &node))
           continue;
 
         at_least_one = true;
