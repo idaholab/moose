@@ -1,43 +1,77 @@
-{%- set ROOT_BUILD_DIR = '/root/build' -%}
+{#- Required jinja arguments                                                                  -#}
+{#- APPTAINER_BOOTSTRAP: The BootStrap to use (typically localimage or oras)                  -#}
+{#- APPTAINER_FROM: The From to use (path to an image or an oras URI)                         -#}
+{#- APPLICATION_DIR: Path on the host to the application repository                           -#}
+{#- MOOSE_DIR: Path on the host to the MOOSE repository                                       -#}
+{#- BINARY_NAME: Name of the application binary                                               -#}
+
+{#- Optional jinja arguments                                                                  -#}
+{#- MOOSE_JOBS: Number of jobs to pass to the build                                           -#}
+{#- MOOSE_OPTIONS: Options to pass to the MOOSE configure                                     -#}
+{#- MOOSE_SKIP_DOCS: Set to anything to skip the docs build                                   -#}
+{#- MOOSE_DOCS_FLAGS: Doc options to pass during the make install                             -#}
+{#- METHOD: The method to build; defaults to "opt"                                            -#}
+{#- TEST_DIRS: Directories to test in the %test section; defaults to just "tests"             -#}
+
+{#- The within-container build directory to use                                               -#}
+{%- set ROOT_BUILD_DIR = '/var/build' -%}
+
 BootStrap: {{ APPTAINER_BOOTSTRAP }}
 From: {{ APPTAINER_FROM }}
 
 %setup
-    # Copy application into the container
-    ROOT_BUILD_DIR=${APPTAINER_ROOTFS}{{ ROOT_BUILD_DIR }}
-    mkdir ${ROOT_BUILD_DIR}
+    # Load jinja vars
+    ROOT_BUILD_DIR={{ ROOT_BUILD_DIR }}
     APPLICATION_DIR={{ APPLICATION_DIR }}
-    cp -r ${APPLICATION_DIR} ${ROOT_BUILD_DIR}
-
-    # If MOOSE_DIR is not in the application, we need to copy it too
     MOOSE_DIR={{ MOOSE_DIR }}
-    if [[ $MOOSE_DIR/ != $APPLICATION_DIR/* ]]; then
-        cp -r ${MOOSE_DIR} ${ROOT_BUILD_DIR}
+    MOOSE_DIR=/ssd/tmp/harblh/apptainer/bison/moose
+
+    # Build directory in the container
+    BUILD_DIR=${APPTAINER_ROOTFS}${ROOT_BUILD_DIR}
+    mkdir ${BUILD_DIR}
+
+    # Copy application into the container
+    cp -r ${APPLICATION_DIR} ${BUILD_DIR}
+
+    # Where the application ends up; needed for MOOSE logic below
+    APPLICATION_NAME=$(basename ${APPLICATION_DIR})
+    APPLICATION_BUILD_DIR=${BUILD_DIR}/${APPLICATION_NAME}
+
+    # Figure out where moose is; regardless %post will expect
+    # it to be in {{ ROOT_BUILD_DIR }}/moose
+    MOOSE_BUILD_DIR=${BUILD_DIR}/moose
+    MOOSE_RELATIVE_PATH=$(realpath --relative-to ${APPLICATION_DIR} ${MOOSE_DIR})
+    # MOOSE_DIR is not in the application; we need to copy it
+    if [[ $MOOSE_RELATIVE_PATH = ..* ]]; then
+        mkdir ${MOOSE_BUILD_DIR}
+        cp -r ${MOOSE_DIR}/. ${MOOSE_BUILD_DIR}
+    # MOOSE_DIR is in the application, setup a symlink
+    else
+        ln -s ./${APPLICATION_NAME}/${MOOSE_RELATIVE_PATH} ${MOOSE_BUILD_DIR}
     fi
 
-{% if MOOSE_SKIP_DOCS is not defined %}
+{%- if MOOSE_SKIP_DOCS is not defined %}
     # Need large_media for documentation
-    cd ${ROOT_BUILD_DIR}/moose
+    cd ${MOOSE_BUILD_DIR}
     git submodule update --init large_media
-{% endif %}
+{%- endif %}
 
 %environment
     export PATH=/usr/local/{{ BINARY_NAME }}/bin:$PATH
 
 %post
-    # Load common jinja vars
+    # Load jinja vars
+    APPLICATION_NAME=$(basename {{ APPLICATION_DIR }})
+    BINARY_NAME={{ BINARY_NAME }}
+    METHOD={{ METHOD or "opt" }}
+    MOOSE_DOCS_FLAGS={{ MOOSE_DOCS_FLAGS }}
+    export MOOSE_JOBS={{ MOOSE_JOBS or "1" }}
+    MOOSE_OPTIONS="{{ MOOSE_OPTIONS }}"
+    MOOSE_SKIP_DOCS={{ MOOSE_SKIP_DOCS }}
     TEMP_LOC={{ ROOT_BUILD_DIR }}
-    TEMP_LOC_APP=${TEMP_LOC}/{{ APPLICATION_NAME }}
-    MOOSE_JOBS={{ MOOSE_JOBS or "1" }}
 
-    # Find the MOOSE_DIR
-    if [ -d ${TEMP_LOC}/moose ]; then
-        export MOOSE_DIR=${TEMP_LOC}/moose
-    elif [ -d ${TEMP_LOC_APP}/moose ]; then
-        export MOOSE_DIR=${TEMP_LOC_APP}/moose
-    else
-        exit 1
-    fi
+    APPLICATION_DIR=${TEMP_LOC}/${APPLICATION_NAME}
+    export MOOSE_DIR=${TEMP_LOC}/moose
 
     # Install moose-tools from moose-base container
     # TODO: add insertion point for installing more
@@ -45,15 +79,14 @@ From: {{ APPTAINER_FROM }}
     source /root/install_moose_tools.sh
 
     # Setup install
-    MOOSE_PREFIX=/usr/local/{{ BINARY_NAME }}
+    MOOSE_PREFIX=/usr/local/${BINARY_NAME}
     cd ${MOOSE_DIR}
-    ./configure --prefix=$MOOSE_PREFIX {{ MOOSE_OPTIONS }}
+    ./configure --prefix=$MOOSE_PREFIX ${MOOSE_OPTIONS}
 
     # Build and install
-    MOOSE_JOBS={{ MOOSE_JOBS or "1" }}
-    cd ${TEMP_LOC_APP}
-    make -j ${MOOSE_JOBS}
-    make install -j ${MOOSE_JOBS} MOOSE_SKIP_DOCS={{ MOOSE_SKIP_DOCS }} MOOSE_DOCS_FLAGS="{{ MOOSE_DOCS_FLAGS }}"
+    cd ${APPLICATION_DIR}
+    make -j ${MOOSE_JOBS} METHOD=${METHOD}
+    make install -j ${MOOSE_JOBS} MOOSE_SKIP_DOCS=${MOOSE_SKIP_DOCS} MOOSE_DOCS_FLAGS="${MOOSE_DOCS_FLAGS}" METHOD=${METHOD}
 
     # Fix permissions for installed application
     chmod -R o=u-w,g=u-w ${MOOSE_PREFIX}
@@ -62,18 +95,22 @@ From: {{ APPTAINER_FROM }}
     rm -rf $TEMP_LOC
 
 %test
+    # Load jinja vars
+    BINARY_NAME={{ BINARY_NAME }}
+    METHOD={{ METHOD or "opt" }}
+    TEST_DIRS={{ TEST_DIRS or "tests" }}
+
     # Temp location for copying and running in
     TEMP_LOC=$(mktemp -u -d /tmp/${BINARY_NAME}test.XXXXXX)
     # Really make sure that we nuke the temp location in all circumstances
     trap "if [ -e $TEMP_LOC ]; then rm -rf $TEMP_LOC; fi" EXIT HUP INT TERM
 
     # Copy and run each subset of tests
-    BINARY_NAME={{ BINARY_NAME }}
-    for TEST_DIR in {{ TEST_DIRS or "tests" }}; do
+    for TEST_DIR in ${TEST_DIRS}; do
         mkdir $TEMP_LOC
         cd $TEMP_LOC
-        ${BINARY_NAME}-opt --copy-inputs $TEST_DIR
+        ${BINARY_NAME}-${METHOD} --copy-inputs $TEST_DIR
         cd ${BINARY_NAME}/${TEST_DIR}
-        ${BINARY_NAME}-opt --run -j ${MOOSE_JOBS:-1} -t
+        ${BINARY_NAME}-${METHOD} --run -j ${MOOSE_JOBS:-1} -t
         rm -rf $TEMP_LOC
     done

@@ -412,7 +412,7 @@ class ApptainerGenerator:
         self.print(f'Writing definition to {container_definition_path}')
         if os.path.exists(container_definition_path):
             if self.args.overwrite:
-                self.warn(f'Deleting container {container_definition_path}')
+                self.warn(f'Deleting definition {container_definition_path}')
                 os.remove(container_definition_path)
             else:
                 self.error(f'Definition {container_definition_path} already exists')
