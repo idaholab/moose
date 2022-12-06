@@ -16,16 +16,8 @@
 #include "MooseTypes.h"
 #include "MooseVariableFE.h"
 
-#include "libmesh/generic_projector.h"
-#include "libmesh/meshfree_interpolation.h"
 #include "libmesh/system.h"
 #include "libmesh/mesh_function.h"
-#include "libmesh/mesh_tools.h"
-#include "libmesh/parallel_algebra.h" // for communicator send and receive stuff
-
-// TIMPI includes
-#include "timpi/communicator.h"
-#include "timpi/parallel_sync.h"
 
 registerMooseObject("MooseApp", MultiAppGeneralFieldShapeEvaluationTransfer);
 

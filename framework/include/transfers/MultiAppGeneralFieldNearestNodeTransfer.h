@@ -10,16 +10,11 @@
 #pragma once
 
 #include "MultiAppGeneralFieldTransfer.h"
-#include "libmesh/mesh_function.h"
-#include "MooseHashing.h"
 #include "KDTree.h"
 
 /**
- * It is a general field transfer. It will do the following things
- * 1) From part of source domain to part of domain. Support subdomains to
- *  subdomains
- * 2) Support vector vars and regular vars
- * 3) Support higher order FEM
+ * Performs a geometric interpolation based on the values at the nearest nodes to a target location
+ * in the origin mesh.
  */
 class MultiAppGeneralFieldNearestNodeTransfer : public MultiAppGeneralFieldTransfer
 {

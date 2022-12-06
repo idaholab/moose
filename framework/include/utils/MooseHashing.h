@@ -13,7 +13,6 @@
 #include <vector>
 #include <utility>
 #include <set>
-#include "MooseHashing.h"
 
 namespace Moose
 {

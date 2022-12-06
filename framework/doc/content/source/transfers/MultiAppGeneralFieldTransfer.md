@@ -14,7 +14,7 @@ domain. The bounding boxes may need to be extended using the
 parameter to expand the domain considered for transfers with wider stencils.
 
 Then each process shares the list of target points, locations it needs data for, with
-each all the processes owning the source applications of interest. These other processes
+each of the processes owning the source applications of interest. These other processes
 then, using the behavior defined in the derived class, compute the local value of the source
 variable. They also share geometric information about where this evaluation of the source
 variable was located, which can be used for interpolation for example.

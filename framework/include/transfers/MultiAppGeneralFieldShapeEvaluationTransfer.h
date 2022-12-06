@@ -14,11 +14,7 @@
 #include "MooseHashing.h"
 
 /**
- * It is a general field transfer. It will do the following things
- * 1) From part of source domain to part of domain. Support subdomains to
- *  subdomains
- * 2) Support vector vars and regular vars
- * 3) Support higher order FEM
+ * Evaluates origin shape functions to compute the target variables
  */
 class MultiAppGeneralFieldShapeEvaluationTransfer : public MultiAppGeneralFieldTransfer
 {

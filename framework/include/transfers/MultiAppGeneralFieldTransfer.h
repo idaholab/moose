@@ -18,7 +18,6 @@
 #include "libmesh/meshfree_interpolation.h"
 #include "libmesh/system.h"
 #include "libmesh/mesh_function.h"
-#include "libmesh/mesh_tools.h"
 #include "libmesh/parallel_algebra.h" // for communicator send and receive stuff
 
 /**

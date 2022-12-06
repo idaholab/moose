@@ -2,9 +2,10 @@
 
 !syntax description /Transfers/MultiAppGeneralFieldNearestNodeTransfer
 
-The nearest neighbor may be the nearest node or the nearest quadrature point, depending on the context
+The nearest neighbor may be the nearest node or the nearest element centroid
+(approximated by the vertex average), depending on the context
 such as the finite element/volume types of the source and target variables.
-This object derived from the [MultiAppGeneralFieldTransfer.md] family of transfers and inherits
+This object derives from the [MultiAppGeneralFieldTransfer.md] family of transfers and inherits
 many of its features and characteristics.
 
 Nearest node transfers may be preferred to [shape evaluation transfers](MultiAppGeneralFieldShapeEvaluationTransfer.md)

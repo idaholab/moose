@@ -50,5 +50,4 @@ public:
 protected:
   PointListAdaptor<Point> _point_list_adaptor;
   std::unique_ptr<KdTreeT> _kd_tree;
-  const std::size_t _number_points;
 };
