@@ -1821,9 +1821,10 @@ NSFVAction::addScalarInletBC()
   for (unsigned int name_i = 0; name_i < _passive_scalar_names.size(); ++name_i)
   {
     unsigned int flux_bc_counter = 0;
-    for (unsigned int bc_ind = 0; bc_ind < _inlet_boundaries.size(); ++bc_ind)
+    unsigned int num_inlets = _inlet_boundaries.size();
+    for (unsigned int bc_ind = 0; bc_ind < num_inlets; ++bc_ind)
     {
-      if (_passive_scalar_inlet_types[bc_ind] == "fixed-value")
+      if (_passive_scalar_inlet_types[name_i * num_inlets + bc_ind] == "fixed-value")
       {
         const std::string bc_type = "FVFunctionDirichletBC";
         InputParameters params = _factory.getValidParams(bc_type);
@@ -1834,13 +1835,13 @@ NSFVAction::addScalarInletBC()
         _problem->addFVBC(
             bc_type, _passive_scalar_names[name_i] + "_" + _inlet_boundaries[bc_ind], params);
       }
-      else if (_passive_scalar_inlet_types[bc_ind] == "flux-mass" ||
-               _passive_scalar_inlet_types[bc_ind] == "flux-velocity")
+      else if (_passive_scalar_inlet_types[name_i * num_inlets + bc_ind] == "flux-mass" ||
+               _passive_scalar_inlet_types[name_i * num_inlets + bc_ind] == "flux-velocity")
       {
         const std::string bc_type = "WCNSFVScalarFluxBC";
         InputParameters params = _factory.getValidParams(bc_type);
         params.set<NonlinearVariableName>("variable") = _passive_scalar_names[name_i];
-        if (_energy_inlet_types[bc_ind] == "flux-mass")
+        if (_passive_scalar_inlet_types[name_i * num_inlets + bc_ind] == "flux-mass")
         {
           params.set<PostprocessorName>("mdot_pp") = _flux_inlet_pps[flux_bc_counter];
           params.set<PostprocessorName>("area_pp") = "area_pp_" + _inlet_boundaries[bc_ind];
