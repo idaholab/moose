@@ -35,7 +35,7 @@
     scale_refine = 1
     issues = "#8642"
     requirement = "The system shall be able to run coupled thermo-mechanics simulations and match the deprecated solid mechanics methods"
-    design = "heat_conduction/index.md tensor_mechanics/index.md"
+    design = "modules/heat_conduction/index.md tensor_mechanics/index.md"
   [../]
   [./ad-thermo_mech]
     type = 'Exodiff'
@@ -44,7 +44,7 @@
     scale_refine = 1
     issues = "#13224"
     requirement = "The system shall be able to run coupled thermo-mechanics simulations using the AD system and match non-AD methods"
-    design = "heat_conduction/index.md tensor_mechanics/index.md jacobian_definition.md"
+    design = "modules/heat_conduction/index.md tensor_mechanics/index.md jacobian_definition.md"
   [../]
   [./ad-thermo_mech-jac]
     type = 'PetscJacobianTester'
@@ -66,7 +66,7 @@
     max_parallel = 1
     issues = "#8642"
     requirement = "The system shall be able to run coupled thermo-mechanics simulations using the SMP preconditioner and match the deprecated solid mechanics methods"
-    design = "heat_conduction/index.md tensor_mechanics/index.md"
+    design = "modules/heat_conduction/index.md tensor_mechanics/index.md"
     no_error_deprecated = true
   [../]
 []
