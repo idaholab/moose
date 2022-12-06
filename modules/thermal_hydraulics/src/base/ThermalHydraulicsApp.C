@@ -65,6 +65,7 @@ ThermalHydraulicsApp::ThermalHydraulicsApp(InputParameters parameters)
     _set_thm_mesh(false),
     _thm_problem(nullptr),
     _set_thm_problem_pointer(false),
+    _output_vector_velocity(true),
     _real_zero(0.0)
 {
   ThermalHydraulicsApp::registerAll(_factory, _action_factory, _syntax);

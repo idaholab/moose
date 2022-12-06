@@ -42,7 +42,6 @@ Simulation::Simulation(FEProblemBase & fe_problem, const InputParameters & pars)
     _flow_fe_type(FEType(CONSTANT, MONOMIAL)),
     _implicit_time_integration(true),
     _check_jacobian(false),
-    _output_vector_velocity(true),
     _zero(0)
 {
   bool second_order_mesh = pars.get<bool>("2nd_order_mesh");

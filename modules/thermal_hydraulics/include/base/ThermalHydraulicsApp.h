@@ -85,6 +85,18 @@ public:
   void setTHMProblem(FEProblemBase & problem);
 
   /**
+   * Is velocity output as vector-valued field
+   *
+   * @return true for vector-valued field, false for scalar
+   */
+  bool getVectorValuedVelocity() { return _output_vector_velocity; }
+
+  /**
+   * Set if velocity is being output as a vector-valued field
+   */
+  void setVectorValuedVelocity(bool vector_velocity) { _output_vector_velocity = vector_velocity; }
+
+  /**
    * Returns the list of components
    */
   const std::vector<std::shared_ptr<Component>> & getComponents()
@@ -218,6 +230,9 @@ private:
 
   /// Flag that the THMProblem pointer has been set
   bool _set_thm_problem_pointer;
+
+  /// Flag indicating if velocity is output as vector-valued field
+  bool _output_vector_velocity;
 
   /// Additional sparsity pattern that needs to be added into the Jacobian matrix
   std::map<dof_id_type, std::vector<dof_id_type>> _sparsity_augmentation_map;

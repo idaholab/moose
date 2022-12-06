@@ -18,20 +18,23 @@ InputParameters
 THMOutputVectorVelocityAction::validParams()
 {
   InputParameters params = Action::validParams();
+  params += THMAppInterface::validParams();
+
   params.addParam<bool>(
       "velocity_as_vector", true, "True for vector-valued velocity, false for scalar velocity.");
+
+  params.addClassDescription("Sets the flag of whether to output the velocity as a vector or not.");
+
   return params;
 }
 
 THMOutputVectorVelocityAction::THMOutputVectorVelocityAction(const InputParameters & params)
-  : Action(params)
+  : Action(params), THMAppInterface(params)
 {
 }
 
 void
 THMOutputVectorVelocityAction::act()
 {
-  THMProblem * thm_problem = dynamic_cast<THMProblem *>(_problem.get());
-  if (thm_problem)
-    thm_problem->setVectorValuedVelocity(getParam<bool>("velocity_as_vector"));
+  getTHMApp().setVectorValuedVelocity(getParam<bool>("velocity_as_vector"));
 }

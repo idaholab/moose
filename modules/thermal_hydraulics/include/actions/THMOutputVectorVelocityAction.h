@@ -10,16 +10,17 @@
 #pragma once
 
 #include "Action.h"
+#include "THMAppInterface.h"
 
 /**
- * Action to setup output of vector-valued velocity
+ * Sets the flag of whether to output the velocity as a vector or not.
  */
-class THMOutputVectorVelocityAction : public Action
+class THMOutputVectorVelocityAction : public Action, public THMAppInterface
 {
 public:
   THMOutputVectorVelocityAction(const InputParameters & params);
 
-  virtual void act();
+  virtual void act() override;
 
 public:
   static InputParameters validParams();

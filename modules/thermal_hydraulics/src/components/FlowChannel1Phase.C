@@ -69,7 +69,7 @@ FlowChannel1Phase::buildFlowModel()
   pars.set<THMProblem *>("_thm_problem") = &getTHMProblem();
   pars.set<FlowChannelBase *>("_flow_channel") = this;
   pars.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
-  pars.set<bool>("output_vector_velocity") = getTHMProblem().getVectorValuedVelocity();
+  pars.set<bool>("output_vector_velocity") = getTHMApp().getVectorValuedVelocity();
   pars.applyParameters(parameters());
   return _factory.create<FlowModel>(class_name, name(), pars, 0);
 }

@@ -284,18 +284,6 @@ public:
   void setCheckJacobian(bool state) { _check_jacobian = state; }
 
   /**
-   * Is velocity output as vector-valued field
-   *
-   * @return true for vector-valued field, false for scalar
-   */
-  bool getVectorValuedVelocity() { return _output_vector_velocity; }
-
-  /**
-   * Set if velocity is being output as a vector-valued field
-   */
-  void setVectorValuedVelocity(bool vector_velocity) { _output_vector_velocity = vector_velocity; }
-
-  /**
    * Sets up the coordinate system for each subdomain
    */
   void setupCoordinateSystem();
@@ -377,9 +365,6 @@ protected:
 
   /// True if checking jacobian
   bool _check_jacobian;
-
-  /// Flag indicating if velocity is output as vector-valued field
-  bool _output_vector_velocity;
 
 public:
   Real _zero;
