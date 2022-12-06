@@ -18,6 +18,8 @@ packages:
     - conda/libmesh/conda_build_config.yaml
     - scripts/configure_libmesh.sh
     - scripts/update_and_rebuild_libmesh.sh
+    - conda/libmesh-vtk/meta.yaml
+    - conda/libmesh-vtk/conda_build_config.yaml
   moose:
     - apptainer/moose.def
     - conda/test-tools/meta.yaml
