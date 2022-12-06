@@ -19,20 +19,23 @@ InputParameters
 THMPreconditioningIntegrityCheckAction::validParams()
 {
   InputParameters params = Action::validParams();
+  params += THMAppInterface::validParams();
+
+  params.addClassDescription("Triggers the integrity check of preconditioner.");
 
   return params;
 }
 
 THMPreconditioningIntegrityCheckAction::THMPreconditioningIntegrityCheckAction(
     const InputParameters & parameters)
-  : Action(parameters)
+  : Action(parameters), THMAppInterface(parameters)
 {
 }
 
 void
 THMPreconditioningIntegrityCheckAction::act()
 {
-  THMProblem * thm_problem = dynamic_cast<THMProblem *>(_problem.get());
-  if (thm_problem)
-    thm_problem->couplingMatrixIntegrityCheck();
+  auto & thm_app = getTHMApp();
+  if (thm_app.getComponents().size() > 0)
+    thm_app.getTHMProblem().couplingMatrixIntegrityCheck();
 }

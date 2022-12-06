@@ -10,16 +10,17 @@
 #pragma once
 
 #include "Action.h"
+#include "THMAppInterface.h"
 
 /**
- * Action to trigger the integrity check of preconditioner
+ * Triggers the integrity check of preconditioner.
  */
-class THMPreconditioningIntegrityCheckAction : public Action
+class THMPreconditioningIntegrityCheckAction : public Action, public THMAppInterface
 {
 public:
   THMPreconditioningIntegrityCheckAction(const InputParameters & parameters);
 
-  virtual void act();
+  virtual void act() override;
 
 public:
   static InputParameters validParams();
