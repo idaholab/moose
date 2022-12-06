@@ -19,8 +19,10 @@ From: mooseharbor.hpc.inl.gov/hpc-base/rocky8-x86_64-infiniband:10-19-2022
     mkdir ${TEMP_LOC}
 
     # Additional installs
-    dnf install -y python3-pyyaml python3-devel python39 cmake diffutils bison flex libtirpc \
-                   libtirpc-devel zlib-devel rsync patch patchutils wget epel-release
+    dnf install -y vim tmux emacs wget rsync hostname python3-pyyaml python3-devel python39 \
+                   cmake diffutils bison flex redhat-lsb-core.x86_64 perl-IO-Compress perl-JSON \
+                   perl-JSON-PP libtirpc libtirpc-devel zlib-devel patch patchutils epel-release \
+                   xterm libX11-devel libXt-devel file libpng libpng-devel
     # After epel-release
     dnf install -y glpk-devel patchelf
 
