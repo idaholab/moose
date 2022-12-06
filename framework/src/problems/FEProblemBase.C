@@ -251,6 +251,11 @@ FEProblemBase::validParams()
   params.addParam<std::vector<NonlinearSystemName>>(
       "nl_sys_names", std::vector<NonlinearSystemName>{"nl0"}, "The nonlinear system names");
 
+  params.addParam<bool>("check_uo_aux_state",
+                        false,
+                        "True to turn on a check that no state presents during the evaluation of "
+                        "user objects and aux kernels");
+
   params.addPrivateParam<MooseMesh *>("mesh");
 
   params.declareControllable("solve");
@@ -327,6 +332,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _material_coverage_check(getParam<bool>("material_coverage_check")),
     _fv_bcs_integrity_check(getParam<bool>("fv_bcs_integrity_check")),
     _material_dependency_check(getParam<bool>("material_dependency_check")),
+    _uo_aux_state_check(getParam<bool>("check_uo_aux_state")),
     _max_qps(std::numeric_limits<unsigned int>::max()),
     _max_shape_funcs(std::numeric_limits<unsigned int>::max()),
     _max_scalar_order(INVALID_ORDER),
@@ -3954,6 +3960,21 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
 
   // Return the current flag to None
   setCurrentExecuteOnFlag(EXEC_NONE);
+
+  if (_uo_aux_state_check && !_checking_uo_aux_state)
+  {
+    std::unique_ptr<NumericVector<Number>> x = _aux->currentSolution()->clone();
+
+    // call THIS execute one more time for checking the possible states
+    _checking_uo_aux_state = true;
+    FEProblemBase::execute(exec_type);
+    _checking_uo_aux_state = false;
+
+    // fixme: we should do the same check for reporter data that added by user objects.
+    *x -= *_aux->currentSolution();
+    if (x->l2_norm() > 1e-8)
+      mooseError("Aux variables, user objects appear to have state on ", exec_type);
+  }
 }
 
 void
