@@ -223,25 +223,26 @@ mooseDeprecatedStream(S & oss, bool expired, Args &&... args)
   if (Moose::_deprecated_is_error)
     mooseError("\n\nDeprecated code:\n", std::forward<Args>(args)...);
 
-  std::ostringstream ss; mooseStreamAll(ss, args...);
-              std::string msg = mooseMsgFmt(
-                  ss.str(),
+  std::ostringstream ss;
+  mooseStreamAll(ss, args...);
+  std::string msg =
+      mooseMsgFmt(ss.str(),
                   "*** Warning, This code is deprecated and will be removed in future versions:",
                   expired ? COLOR_RED : COLOR_YELLOW);
-              oss << msg;
-              ss.str("");
-              mooseDoOnce(
-              if (Moose::show_trace)
-              {
-                if (libMesh::global_n_processors() == 1)
-                  print_trace(ss);
-                else
-                  libMesh::write_traceout();
-                {
-                  Threads::spin_mutex::scoped_lock lock(moose_stream_lock);
-                  oss << ss.str() << std::endl;
-                };
-              };);
+  oss << msg;
+  ss.str("");
+
+  if (Moose::show_trace)
+  {
+    if (libMesh::global_n_processors() == 1)
+      print_trace(ss);
+    else
+      libMesh::write_traceout();
+    {
+      Threads::spin_mutex::scoped_lock lock(moose_stream_lock);
+      oss << ss.str() << std::endl;
+    };
+  };
 }
 /**
  * @}

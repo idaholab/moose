@@ -78,7 +78,7 @@
 
     requirement = 'The system shall be able to merge boundaries in a mesh.'
   []
-  
+
   [errors]
     requirement = 'The system shall throw a reasonable error:'
 

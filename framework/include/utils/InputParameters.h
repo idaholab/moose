@@ -1011,6 +1011,8 @@ private:
     std::set<ExecFlagType> _controllable_flags;
     /// whether user setting of this parameter should be ignored
     bool _ignore = false;
+    /// whether this program has printed its deprecation message yet
+    bool _has_deprec_printed = false;
   };
 
   Metadata & at(const std::string & param_name)

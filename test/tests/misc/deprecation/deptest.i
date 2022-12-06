@@ -14,11 +14,6 @@
   []
 []
 
-[Reporters/mesh_info]
-  type = MeshInfo
-  items = sideset_elems
-[]
-
 [Outputs]
   [out]
     type = JSON
