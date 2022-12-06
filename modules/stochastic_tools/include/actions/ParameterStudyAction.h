@@ -200,3 +200,36 @@ ParameterStudyAction::getSamplerParam(std::string param) const
                " parameter is required to build the requested sampling type.");
   return getParam<T>(param);
 }
+
+/**
+ * This class is a hit walker used to see if a list of parameters are all controllable
+ */
+class AreParametersControllableWalker : public hit::Walker
+{
+public:
+  AreParametersControllableWalker(const std::vector<std::string> & parameters, MooseApp & app);
+
+  void walk(const std::string & fullpath, const std::string & nodename, hit::Node * n) override;
+  bool areControllable() const;
+
+private:
+  MooseApp & _app;
+  std::vector<bool> _is_controllable;
+  std::vector<std::pair<std::string, std::string>> _pars;
+};
+
+/**
+ * This class is a hit walker used to see what type of execution the input is doing
+ */
+class ExecutionTypeWalker : public hit::Walker
+{
+public:
+  ExecutionTypeWalker() : _exec_type(0), _found_exec(false) {}
+
+  void walk(const std::string & fullpath, const std::string & nodename, hit::Node * n) override;
+  unsigned int getExecutionType() const { return _exec_type; }
+
+private:
+  unsigned int _exec_type;
+  bool _found_exec;
+};

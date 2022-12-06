@@ -4,7 +4,7 @@
   quantities_of_interest = 'T_avg/value q_left/value'
 
   sampling_type = lhs
-  num_rows = 5000
+  num_samples = 5000
   distributions = 'uniform weibull normal normal'
   uniform_lower_bound = 0.5
   uniform_upper_bound = 2.5

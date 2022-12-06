@@ -29,14 +29,14 @@ There are various methods of sampling included with the `ParameterStudy` syntax,
 
 ### Random Sampling id=sec:random
 
-The `monte-carlo` and `lhs` options in [!param](/ParameterStudy/sampling_type) implement random sampling using the [MonteCarloSampler.md] and [LatinHypercubeSampler.md] samplers, respectively. [!param](/ParameterStudy/num_rows) is a required parameter that defines the total number of samples. [!param](/ParameterStudy/distributions) is also a required parameter that defines the probablity distribution for each parameter. The available distributions are described in the following subsection. Each distribution type have their own set of required parameters that are specified via a list of values. For example, defining a random sampling with three parameters using `uniform`, `normal`, and `uniform` distributions is shown below:
+The `monte-carlo` and `lhs` options in [!param](/ParameterStudy/sampling_type) implement random sampling using the [MonteCarloSampler.md] and [LatinHypercubeSampler.md] samplers, respectively. [!param](/ParameterStudy/num_samples) is a required parameter that defines the total number of samples. [!param](/ParameterStudy/distributions) is also a required parameter that defines the probablity distribution for each parameter. The available distributions are described in the following subsection. Each distribution type have their own set of required parameters that are specified via a list of values. For example, defining a random sampling with three parameters using `uniform`, `normal`, and `uniform` distributions is shown below:
 
 !listing!
 [ParameterStudy]
   input = sub.i
   parameters = 'p1 p2 p3'
   sampling_type = monte-carlo
-  num_rows = 10
+  num_samples = 10
   distributions = 'uniform normal uniform'
   uniform_lower_bound = '1 100'
   uniform_upper_bound = '2 200'
@@ -85,7 +85,7 @@ Additionally, it is often useful to define the minimum processors to use when ru
 
 ### Normal mode
 
-The `normal` option for [!param](/ParameterStudy/multiapp_mode) runs the study in "normal" mode, which creates a sub-application for each sample. This mode is arguably the *least efficient* option as it can become extremely memory intensive. This option mainly exisits to replicate the typical execution mode for other MOOSE [MultiApps](MultiApps/index.md). It also serves as a useful debugging tool for stochastic tools module development.
+The `normal` option for [!param](/ParameterStudy/multiapp_mode) runs the study in "normal" mode, which creates a sub-application for each sample. The sub-applications are created upfront and run sequentially. This mode is arguably the *least efficient* option as it can become extremely memory intensive. This option mainly exisits to replicate the typical execution mode for other MOOSE [MultiApps](MultiApps/index.md). It also serves as a useful debugging tool for stochastic tools module development.
 
 ### Batch-Reset Mode
 

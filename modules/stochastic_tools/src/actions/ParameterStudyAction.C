@@ -71,7 +71,7 @@ ParameterStudyAction::validParams()
   // Samplers ///////////////////////////
   // Parameters for Monte Carlo and LHS
   params.addParam<dof_id_type>(
-      "num_rows", "The number of samples to generate for 'monte-carlo' and 'lhs' sampling.");
+      "num_samples", "The number of samples to generate for 'monte-carlo' and 'lhs' sampling.");
   params.addParam<MultiMooseEnum>(
       "distributions",
       distributionTypes(),
@@ -85,7 +85,7 @@ ParameterStudyAction::validParams()
   // Parameters for CSV sampler
   params.addParam<FileName>(
       "csv_samples_file",
-      "Name of the CSV file that contains the samples matrix for 'csv' sampling.");
+      "Name of the CSV file that contains the sample matrix for 'csv' sampling.");
   params.addParam<std::vector<dof_id_type>>(
       "csv_column_indices",
       "Column indices in the CSV file to be sampled from for 'csv' sampling. Number of indices "
@@ -105,8 +105,10 @@ ParameterStudyAction::validParams()
   params.addParam<std::vector<Real>>("normal_standard_deviation",
                                      "Standard deviations of the 'normal' distributions.");
   // Parameters for uniform distributions
-  params.addParam<std::vector<Real>>("uniform_lower_bound", "'uniform' distributions' lower bound");
-  params.addParam<std::vector<Real>>("uniform_upper_bound", "'uniform' distributions' upper bound");
+  params.addParam<std::vector<Real>>("uniform_lower_bound",
+                                     "Lower bounds for 'uniform' distributions.");
+  params.addParam<std::vector<Real>>("uniform_upper_bound",
+                                     "Upper bounds 'uniform' distributions.");
   // Parameters for Weibull distributions
   params.addParam<std::vector<Real>>("weibull_location",
                                      "Location parameter (a or low) for 'weibull' distributions.");
@@ -271,7 +273,7 @@ ParameterStudyAction::act()
     {
       sampler_type = sampling_type == "monte-carlo" ? "MonteCarlo" : "LatinHypercube";
       params = _factory.getValidParams(sampler_type);
-      params.set<dof_id_type>("num_rows") = getSamplerParam<dof_id_type>("num_rows");
+      params.set<dof_id_type>("num_rows") = getSamplerParam<dof_id_type>("num_samples");
       params.set<std::vector<DistributionName>>("distributions") =
           distributionNames(getSamplerParam<MultiMooseEnum>("distributions").size());
     }
@@ -447,7 +449,8 @@ ParameterStudyAction::act()
     {
       const auto & qoi_output = getParam<MultiMooseEnum>("qoi_output_type");
       auto params = _factory.getValidParams("StochasticReporter");
-      // Ideally this would be based on the number samples,
+      // Ideally this would be based on the number of samples since gathering
+      // data onto a single processor can be memory and run-time expensive,
       // but most people want everything in one output file
       params.set<MooseEnum>("parallel_type") = "ROOT";
       auto & outputs = params.set<std::vector<OutputName>>("outputs");
@@ -566,104 +569,6 @@ ParameterStudyAction::showObject(std::string type,
   _console << std::endl;
 }
 
-/**
- * This class is a hit walker used to see if a list of parameters are all controllable
- */
-class AreParametersControllableWalker : public hit::Walker
-{
-public:
-  AreParametersControllableWalker(const std::vector<std::string> & parameters, MooseApp & app)
-    : _app(app), _is_controllable(parameters.size(), false)
-  {
-    // Seperate the object from the parameter into a list of pairs
-    for (const auto & param : parameters)
-    {
-      auto pos = param.rfind("/");
-      _pars.emplace_back(param.substr(0, pos), param.substr(pos + 1));
-    }
-  }
-
-  void walk(const std::string & fullpath, const std::string & /*nodename*/, hit::Node * n) override
-  {
-    for (const auto & i : index_range(_pars))
-    {
-      std::string obj = _pars[i].first;
-      std::string par = _pars[i].second;
-      if (obj == fullpath)
-      {
-        auto typeit = n->find("type");
-        if (typeit && typeit != n && typeit->type() == hit::NodeType::Field)
-        {
-          std::string obj_type = n->param<std::string>("type");
-          auto params = _app.getFactory().getValidParams(obj_type);
-          _is_controllable[i] = params.isControllable(par);
-        }
-      }
-    }
-  }
-
-  bool areControllable() const
-  {
-    for (const auto & ic : _is_controllable)
-      if (!ic)
-        return false;
-    return true;
-  }
-
-private:
-  MooseApp & _app;
-  std::vector<bool> _is_controllable;
-  std::vector<std::pair<std::string, std::string>> _pars;
-};
-
-class ExecutionTypeWalker : public hit::Walker
-{
-public:
-  ExecutionTypeWalker() : _exec_type(0), _found_exec(false) {}
-
-  void walk(const std::string & fullpath, const std::string & /*nodename*/, hit::Node * n) override
-  {
-    if (fullpath == "Executioner")
-    {
-      // This should not be hit since there shouldn't be two Executioner blocks
-      // But if it does happen, then go back to not knowing
-      if (_found_exec)
-        _exec_type = 0;
-      else
-      {
-        // Get the type of executioner
-        std::string executioner_type = "Unknown";
-        auto typeit = n->find("type");
-        if (typeit && typeit != n && typeit->type() == hit::NodeType::Field)
-          executioner_type = n->param<std::string>("type");
-
-        // If it's Steady or Eigenvalue, then it's a steady-state problem
-        if (executioner_type == "Steady" || executioner_type == "Eigenvalue")
-          _exec_type = 1;
-        // If it's Transient
-        else if (executioner_type == "Transient")
-        {
-          // Now we'll see if it's a pseudo transient
-          auto it = n->find("steady_state_detection");
-          if (it && it != n && it->type() == hit::NodeType::Field &&
-              n->param<bool>("steady_state_detection"))
-            _exec_type = 2;
-          else
-            _exec_type = 3;
-        }
-      }
-
-      _found_exec = true;
-    }
-  }
-
-  unsigned int getExecutionType() const { return _exec_type; }
-
-private:
-  unsigned int _exec_type;
-  bool _found_exec;
-};
-
 unsigned int
 ParameterStudyAction::inferMultiAppMode()
 {
@@ -708,4 +613,86 @@ ParameterStudyAction::inferMultiAppMode()
   // If it's transient or unknown, don't keep the solution and restore
   else
     return 2;
+}
+
+AreParametersControllableWalker::AreParametersControllableWalker(
+    const std::vector<std::string> & parameters, MooseApp & app)
+  : _app(app), _is_controllable(parameters.size(), false)
+{
+  // Seperate the object from the parameter into a list of pairs
+  for (const auto & param : parameters)
+  {
+    const auto pos = param.rfind("/");
+    _pars.emplace_back(param.substr(0, pos), param.substr(pos + 1));
+  }
+}
+
+void
+AreParametersControllableWalker::walk(const std::string & fullpath,
+                                      const std::string & /*nodename*/,
+                                      hit::Node * n)
+{
+  for (const auto & i : index_range(_pars))
+  {
+    const std::string obj = _pars[i].first;
+    const std::string par = _pars[i].second;
+    if (obj == fullpath)
+    {
+      const auto typeit = n->find("type");
+      if (typeit && typeit != n && typeit->type() == hit::NodeType::Field)
+      {
+        const std::string obj_type = n->param<std::string>("type");
+        const auto params = _app.getFactory().getValidParams(obj_type);
+        _is_controllable[i] = params.isControllable(par);
+      }
+    }
+  }
+}
+
+bool
+AreParametersControllableWalker::areControllable() const
+{
+  for (const auto & ic : _is_controllable)
+    if (!ic)
+      return false;
+  return true;
+}
+
+void
+ExecutionTypeWalker::walk(const std::string & fullpath,
+                          const std::string & /*nodename*/,
+                          hit::Node * n)
+{
+  if (fullpath == "Executioner")
+  {
+    // This should not be hit since there shouldn't be two Executioner blocks
+    // But if it does happen, then go back to not knowing
+    if (_found_exec)
+      _exec_type = 0;
+    else
+    {
+      // Get the type of executioner
+      std::string executioner_type = "Unknown";
+      const auto typeit = n->find("type");
+      if (typeit && typeit != n && typeit->type() == hit::NodeType::Field)
+        executioner_type = n->param<std::string>("type");
+
+      // If it's Steady or Eigenvalue, then it's a steady-state problem
+      if (executioner_type == "Steady" || executioner_type == "Eigenvalue")
+        _exec_type = 1;
+      // If it's Transient
+      else if (executioner_type == "Transient")
+      {
+        // Now we'll see if it's a pseudo transient
+        const auto it = n->find("steady_state_detection");
+        if (it && it != n && it->type() == hit::NodeType::Field &&
+            n->param<bool>("steady_state_detection"))
+          _exec_type = 2;
+        else
+          _exec_type = 3;
+      }
+    }
+
+    _found_exec = true;
+  }
 }

@@ -29,7 +29,7 @@
     [action]
       type = JSONDiff
       input = main_parameter_study.i
-      cli_args = 'ParameterStudy/num_rows=10'
+      cli_args = 'ParameterStudy/num_samples=10'
       jsondiff = main_parameter_study_json.json
       detail = "action to setup main input;"
     []

@@ -5,5 +5,5 @@
   quantities_of_interest = 'average/value'
 
   sampling_type = monte-carlo
-  num_rows = 15
+  num_samples = 15
 []

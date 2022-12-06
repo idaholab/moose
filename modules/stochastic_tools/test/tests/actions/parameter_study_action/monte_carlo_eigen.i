@@ -4,7 +4,7 @@
   quantities_of_interest = 'eigenvalue/value'
 
   sampling_type = monte-carlo
-  num_rows = 5
+  num_samples = 5
   distributions = 'uniform uniform'
   uniform_lower_bound = '1 1'
   uniform_upper_bound = '2 2'

@@ -4,7 +4,7 @@
   quantities_of_interest = 'const/p0 const/p1 const/p2 const/p3 const/p4 const/p5 const/p6'
 
   sampling_type = monte-carlo
-  num_rows = 15
+  num_samples = 15
   distributions = 'uniform normal normal uniform weibull lognormal tnormal'
   uniform_lower_bound = '100 1'
   uniform_upper_bound = '200 2'
