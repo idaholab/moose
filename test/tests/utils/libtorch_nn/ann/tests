@@ -34,7 +34,7 @@
     []
   []
   [libtorch-nn-activation]
-    requirement = 'The system shall be able to create and evaluate a neural network with'
+    requirement = 'The system shall be able to create and evaluate a neural network with an activation function type of '
     [relu]
       type = CSVDiff
       input = 'test_ann.i'
@@ -48,7 +48,7 @@
       type = CSVDiff
       input = 'test_ann.i'
       csvdiff = 'sigmoid_test_0001.csv'
-      detail = 'sigmoid activation functions.'
+      detail = 'sigmoid;'
       cli_args = "VectorPostprocessors/test/activation_functions='sigmoid sigmoid' Outputs/file_base=sigmoid"
       libtorch = true
       allow_test_objects = True

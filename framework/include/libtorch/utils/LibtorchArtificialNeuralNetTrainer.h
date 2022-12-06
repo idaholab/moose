@@ -195,7 +195,7 @@ LibtorchArtificialNeuralNetTrainer<SamplerType>::train(LibtorchDataset & dataset
   const auto t_begin = MPI_Wtime();
 
   /*
-   * It might happen that we limit the number of processors that can be used for the praining
+   * It might happen that we limit the number of processors that can be used for the training
    * through the options argument. In this case every additional rank beyond the maximum will behave
    * as rank 0. This is necessary to avoid cases when the (number of MPI processes)*(num_batches)
    * exceeds the number of samples.

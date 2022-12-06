@@ -1,6 +1,6 @@
 [Tests]
   issues = "#19571"
-  design = "ScaledAbsDifferenceDRLRewardFunction.md LibtorchDRLControl.md LibtorchDRLControlTrainer.md LibtorchNeuralNetControlTransfer.md"
+  design = "libtorch_drl_control.md"
 
   [train]
     requirement = 'The system shall be able to train a controller based on the Proximal Policy Optimization algorithm.'

@@ -46,7 +46,7 @@
                 Controls/src_control/input_timesteps=2
                 Controls/src_control/num_neurons_per_layer='3 3'"
     expect_err = "This parameter should not be defined when filename is defined!"
-    requirement = "The system shall be able to forbidden parameters are defined while reading a "
+    requirement = "The system shall forbid specifying parameters when reading a "
                   "neural network from a torchscript file."
     libtorch = true
   []

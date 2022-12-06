@@ -45,7 +45,7 @@ public:
    */
   void loadControlNeuralNet(const Moose::LibtorchArtificialNeuralNet & input_nn);
 
-  /// Return a pointer to the stored neural networt
+  /// Return a reference to the stored neural network
   const Moose::LibtorchNeuralNetBase & controlNeuralNet() const;
 
 protected:

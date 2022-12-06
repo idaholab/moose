@@ -8,13 +8,13 @@ with MOOSE applications. We employ a Proximal Policy Optimization (PPO)
 ## Problem Statement
 
 In this example we would like to design a DRL-based controller for the air conditioning of a
-room. The room in this problem is a 2D box presented below:
+room. The room in this problem is a 2D box shown in [!ref](problem_setup):
 
 !media problem_statement.png style=display:block;margin-left:auto;margin-right:auto;width:40%;
        id=problem_setup caption=Problem setup for the DRL control example.
 
-The control problem can then be defined as follows: Try to ensure that the temperature at the
-sensor position is as close to $297~K$ as possible. For this, we are allowed to use
+The control problem can then be defined as follows: control the heat flux at the top of the box such that
+the temperature at the sensor position is as close to $297~K$ as possible. For this, we are allowed to use
 the current and past values of the temperature at the sensor together with the current and past measurements
 of the environment temperature. Furthermore, we assume the following:
 
@@ -34,28 +34,28 @@ physical problem at hand.
 
 ### Sub-application
 
-The input file of the sub-application requires the following essential
-parts in order to enable the control discussed functionalities. First, we need to add
+The sub-application input file requires the following
+parts in order to enable the control functionalities discussed later. First, we need to add
 a Neumann boundary condition for the top surface:
 
 !listing examples/libtorch_drl_control/libtorch_drl_control_sub.i block=BCs
 
-The [!param](/BCs/ADNeumannBC/value) parameter of the boundary condition will
-be controlled by the neural network. It is visible that the environment temperature
-is defined to be a function of time. It is specified in the `Functions` block:
+The [!param](/BCs/NeumannBC/value) parameter of the boundary condition will
+be controlled by the neural network. The environment temperature (`dirichlet`)
+is defined to be a function of time (`temp_env`), which is specified in the `Functions` block:
 
 !listing examples/libtorch_drl_control/libtorch_drl_control_sub.i block=Functions
 
-This block contains the function definition for the target temperature and the reward function as well.
-For this experiment, we set the target temperature to be $297~K$, while the reward function
-defined in [ScaledAbsDifferenceDRLRewardFunction.md] is used for the training.
+This block also contains the function definition for the target temperature and the reward function.
+For this experiment, we set the target temperature (`design_function`) to be $297~K$, while the reward function
+(`reward_function`), defined by [ScaledAbsDifferenceDRLRewardFunction.md], is used for the training.
 
 Next, we set up the data collection using the `Postprocessors` and `Reporters` blocks:
 
 !listing examples/libtorch_drl_control/libtorch_drl_control_sub.i block=Postprocessors
 
-It is visible that we have two postprocessors measuring the temperature at the location of the sensor.
-One saves the value at the beginning of the time step, while the other saves it at the end of the
+Two of these postprocessors measure the temperature at the location of the sensor.
+`center_temp` stores the value at the beginning of the time step, while `center_temp_tend ` stores it at the end of the
 time step. This is due to the fact that the neural network needs the measured temperature at the
 beginning of the time step, while we would like to compute the reward for the training process
 using the temperature at the end of the time step. Furthermore, the trainer needs the environment temperature
@@ -78,15 +78,14 @@ The containers for the control signal and its logarithmic probability are define
 using [LibtorchControlValuePostprocessor](source/libtorch/postprocessors/LibtorchControlValuePostprocessor.md) and
 [LibtorchDRLLogProbabilityPostprocessor](source/libtorch/postprocessors/LibtorchDRLLogProbabilityPostprocessor.md) as
 shown above.
-Furthermore, it is visible that there is an additional [LibtorchNeuralNetControl](source/libtorch/controls/LibtorchNeuralNetControl.md)
-object defined in the `Controls` block.
-This object can be used to evaluate the neural network without the additional random
+Furthermore, the additional [LibtorchNeuralNetControl](LibtorchNeuralNetControl.md) (`src_control_final`)
+can be used to evaluate the neural network without the additional random
 sampling process needed for the training process. In other words, this object will evaluate the
 final product of this training process.
 
 ### Main Application
 
-The input for the main application start with the definition of a [Sampler](Samplers/index.md). In this example we
+The input for the main application starts with the definition of a [Sampler](CartesianProduct.md). In this example we
 do not aim to train a controller which can adapt to random model parameters, so we just
 define a dummy sampler which does not rely on random numbers.
 
@@ -95,7 +94,7 @@ define a dummy sampler which does not rely on random numbers.
 In case we would like to increase the flexibility of the learner,
 this sampler can be switched to something that can scan the uncertain input parameter space.
 
-Following this, a `MultiApp` is created to run the sub-application many times for data generation:
+Following this, a [MultiApp](SamplerFullSolveMultiApp.md) is created to run the sub-application many times for data generation:
 
 !listing examples/libtorch_drl_control/libtorch_drl_control_trainer.i block=MultiApps
 
@@ -111,22 +110,22 @@ Finally, we can set up our trainer object for the problem:
 !listing examples/libtorch_drl_control/libtorch_drl_control_trainer.i block=Trainers
 
 The trainer object will need the names of the reporters containing the responses (input of the neural net)
-of the system together with the control signals, control signal logarithmic probabilities and the rewards.
+of the system together with the control signals, control signal logarithmic probabilities, and the rewards.
 When these are set, we define the architecture of the critic and control neural nets
 (see [!cite](schulman2017proximal) for more information on these) using
 `num_critic_neurons_per_layer` and `num_control_neurons_per_layer`.
 The corresponding learning rates can be defined by `critic_learning_rate` and `control_learning_rate`.
 Then, we copy-paste the input/output standardization options from the `Control` in the sub-app.
-Additionally, we can select to standardize the advantage function which makes
+Additionally, we can choose to standardize the advantage function which makes
 convergence more robust in certain scenarios.
 
-Lastly, we request 1000 epochs for training the neural networks in each iteration and
+Lastly, we request 1,000 epochs for training the neural networks in each iteration and
 collect data from 10 simulations on the sub-app every time step of the main app.
 We set the iteration number by setting the number of time steps below:
 
 !listing examples/libtorch_drl_control/libtorch_drl_control_trainer.i block=Executioner
 
-Which means that we run 440 problems altogether.
+Which means that we run a total of 440 simulations.
 
 ## Results
 
