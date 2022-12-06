@@ -12,7 +12,7 @@
 {%- set ROOT_BUILD_DIR = '/root/build' -%}
 
 {#- The installation location for PETSc                                                       -#}
-{%- set PETSC_DIR = '/usr/local/petsc' -%}
+{%- set PETSC_DIR = '/opt/petsc' -%}
 
 BootStrap: {{ APPTAINER_BOOTSTRAP }}
 From: {{ APPTAINER_FROM }}

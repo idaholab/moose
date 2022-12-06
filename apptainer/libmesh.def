@@ -13,7 +13,7 @@
 {%- set ROOT_BUILD_DIR = '/root/build' -%}
 
 {#- The installation location for libMesh                                                     -#}
-{%- set LIBMESH_DIR = '/usr/local/libmesh' -%}
+{%- set LIBMESH_DIR = '/opt/libmesh' -%}
 
 BootStrap: {{ APPTAINER_BOOTSTRAP }}
 From: {{ APPTAINER_FROM }}

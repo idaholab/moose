@@ -57,7 +57,7 @@ From: {{ APPTAINER_FROM }}
 {%- endif %}
 
 %environment
-    export PATH=/usr/local/{{ BINARY_NAME }}/bin:$PATH
+    export PATH=/opt/{{ BINARY_NAME }}/bin:$PATH
 
 %post
     # Load jinja vars
@@ -79,7 +79,7 @@ From: {{ APPTAINER_FROM }}
     source /root/install_moose_tools.sh
 
     # Setup install
-    MOOSE_PREFIX=/usr/local/${BINARY_NAME}
+    MOOSE_PREFIX=/opt/${BINARY_NAME}
     cd ${MOOSE_DIR}
     ./configure --prefix=$MOOSE_PREFIX ${MOOSE_OPTIONS}
 
