@@ -326,7 +326,7 @@ class ApptainerGenerator:
             jinja_data['BINARY_NAME'] = app_name
         # Set MOOSE_[TOOLS, TEST_TOOLS]_VERSION
         if self.args.library == 'moose':
-            for package in ['tools', 'tools']:
+            for package in ['tools', 'test-tools']:
                 meta_yaml = os.path.join(MOOSE_DIR, f'conda/{package}/meta.yaml')
                 with open(meta_yaml, 'r') as f:
                     _, version, _ = Versioner.conda_meta_jinja(f.read())
