@@ -2266,15 +2266,7 @@ NSFVAction::processBlocks()
   _problem->needFV();
 
   if (!_blocks.size())
-  {
-    for (const auto & id : _mesh->meshSubdomains())
-    {
-      if (_mesh->getSubdomainName(id) == "")
-        _blocks.push_back(std::to_string(id));
-      else
-        _blocks.push_back(_mesh->getSubdomainName(id));
-    }
-  }
+    _blocks.push_back("ANY_BLOCK_ID");
 }
 
 void
