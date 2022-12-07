@@ -51,6 +51,7 @@ From: {{ APPTAINER_FROM }}
     ROOT_BUILD_DIR={{ ROOT_BUILD_DIR }}
     LIBMESH_DIR={{ LIBMESH_DIR }}
     MOOSE_JOBS={{ MOOSE_JOBS }}
+    VTK_DIR={{ VTK_DIR }}
     VTKINCLUDE_DIR={{ VTK_DIR }}/include/vtk-{{ vtk_vtk_friendly_version }}
     VTKLIB_DIR={{ VTK_DIR }}/lib
 
@@ -74,6 +75,8 @@ From: {{ APPTAINER_FROM }}
         -DVTK_GROUP_ENABLE_Views:STRING=NO \
         -DVTK_GROUP_ENABLE_Web:STRING=NO
     make install -j ${MOOSE_JOBS}
+    export VTKINCLUDE_DIR
+    export VTKLIB_DIR
 
 {%- if DEV_CONTAINER is defined %}
     # DEV_CONTAINER set
