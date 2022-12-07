@@ -155,6 +155,11 @@ private:
   static std::vector<std::vector<std::string>> distributionParameters();
 
   /**
+   * List of parameters that are only associated with computing statistics
+   */
+  static std::set<std::string> statisticsParameters();
+
+  /**
    * This function will infer the best way to run the multiapps
    *
    * @return unsigned int The multiapp execution mode, see the 'multiapp_mode' input param for

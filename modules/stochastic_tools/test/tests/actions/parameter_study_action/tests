@@ -164,13 +164,38 @@
   []
 
   [stats]
-    type = JSONDiff
-    input = monte_carlo.i
-    cli_args = 'ParameterStudy/sampler_output_type=json
-                ParameterStudy/qoi_output_type=json'
-    jsondiff = monte_carlo_json.json
-    rel_err = 1e-4
-    requirement = 'The system shall be able to compute stastics of a simple parameter study.'
+    requirement = 'The system shall be able to setup a simple parameter study with ability to '
+    [true]
+      type = JSONDiff
+      input = monte_carlo.i
+      cli_args = 'ParameterStudy/sampler_output_type=json
+                  ParameterStudy/qoi_output_type=json
+                  ParameterStudy/show_study_objects=true
+                  --color off'
+      jsondiff = monte_carlo_json.json
+      rel_err = 1e-4
+      expect_out = 'Type:\s+StatisticsReporter'
+      detail = 'compute statistics;'
+    []
+    [false]
+      type = RunApp
+      input = monte_carlo.i
+      cli_args = 'ParameterStudy/compute_statistics=false
+                  ParameterStudy/show_study_objects=true
+                  --color off'
+      absent_out = 'Type:\s+StatisticsReporter'
+      detail = 'not compute statistics;'
+    []
+    [unused]
+      type = RunException
+      input = monte_carlo.i
+      cli_args = 'ParameterStudy/compute_statistics=false
+                  ParameterStudy/statistics=mean
+                  ParameterStudy/ci_levels=0.1
+                  ParameterStudy/ci_replicates=10'
+      expect_err = 'The following parameters are unused since statistics are not being computed: ci_levels, ci_replicates, statistics'
+      detail = 'error if there are unused statistics parameters;'
+    []
   []
   
   [outputs]

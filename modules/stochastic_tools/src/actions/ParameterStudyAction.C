@@ -12,6 +12,7 @@
 #include "StochasticToolsAction.h"
 #include "FEProblemBase.h"
 #include "Control.h"
+#include "Calculators.h"
 
 registerMooseAction("StochasticToolsApp", ParameterStudyAction, "meta_action");
 registerMooseAction("StochasticToolsApp", ParameterStudyAction, "add_distribution");
@@ -38,11 +39,26 @@ ParameterStudyAction::validParams()
       "quantities_of_interest",
       "List of the reporter names (object_name/value_name) "
       "that represent the quantities of interest for the study.");
-  params.addParam<bool>("compute_statistics",
-                        true,
-                        "Whether or not to compute statistics on the 'quantities_of_interest'. "
-                        "This will compute mean and standard deviation with 0.01, 0.05, 0.1, 0.9, "
-                        "0.95, and 0.99 confidence intervals.");
+
+  // Statistics Parameters
+  params.addParam<bool>(
+      "compute_statistics",
+      true,
+      "Whether or not to compute statistics on the 'quantities_of_interest'. "
+      "The default is to compute mean and standard deviation with 0.01, 0.05, 0.1, 0.9, "
+      "0.95, and 0.99 confidence intervals.");
+  MultiMooseEnum stats = StochasticTools::makeCalculatorEnum();
+  stats = "mean stddev";
+  params.addParam<MultiMooseEnum>(
+      "statistics", stats, "The statistic(s) to compute for the study.");
+  params.addParam<std::vector<Real>>("ci_levels",
+                                     std::vector<Real>({0.01, 0.05, 0.1, 0.9, 0.95, 0.99}),
+                                     "A vector of confidence levels to consider for statistics "
+                                     "confidence intervals, values must be in (0, 1).");
+  params.addParam<unsigned int>(
+      "ci_replicates",
+      1000,
+      "The number of replicates to use when computing confidence level intervals for statistics.");
 
   // Parameters for the sampling scheme
   params.addRequiredParam<MooseEnum>(
@@ -206,6 +222,19 @@ ParameterStudyAction::ParameterStudyAction(const InputParameters & parameters)
   if (!msg.empty())
     paramError(
         "distributions", "The following parameters are unused for the listed distributions: ", msg);
+
+  // Check statistics parameters
+  if (!_compute_stats)
+  {
+    msg = "";
+    for (const auto & param : statisticsParameters())
+      if (parameters.isParamSetByUser(param))
+        msg += (msg.empty() ? "" : ", ") + param;
+    if (!msg.empty())
+      paramError("compute_statistics",
+                 "The following parameters are unused since statistics are not being computed: ",
+                 msg);
+  }
 }
 
 MooseEnum
@@ -533,10 +562,10 @@ ParameterStudyAction::act()
       auto & reps = params.set<std::vector<ReporterName>>("reporters");
       for (const auto & qoi : getParam<std::vector<ReporterName>>("quantities_of_interest"))
         reps.push_back(quantityOfInterestName(qoi));
-      params.set<MultiMooseEnum>("compute") = "mean stddev";
+      params.set<MultiMooseEnum>("compute") = getParam<MultiMooseEnum>("statistics");
       params.set<MooseEnum>("ci_method") = "percentile";
-      params.set<std::vector<Real>>("ci_levels") = {0.01, 0.05, 0.1, 0.9, 0.95, 0.99};
-      params.set<unsigned int>("ci_replicates") = 1000;
+      params.set<std::vector<Real>>("ci_levels") = getParam<std::vector<Real>>("ci_levels");
+      params.set<unsigned int>("ci_replicates") = getParam<unsigned int>("ci_replicates");
       params.set<ExecFlagEnum>("execute_on") = {EXEC_TIMESTEP_END};
       params.set<std::vector<OutputName>>("outputs") = {outputName("json")};
       _problem->addReporter("StatisticsReporter", statisticsName(), params);
@@ -650,6 +679,12 @@ ParameterStudyAction::distributionParameters()
       {"weibull_location", "weibull_scale", "weibull_shape"},
       {"lognormal_location", "lognormal_scale"},
       {"tnormal_mean", "tnormal_standard_deviation", "tnormal_lower_bound", "tnormal_upper_bound"}};
+}
+
+std::set<std::string>
+ParameterStudyAction::statisticsParameters()
+{
+  return {"statistics", "ci_levels", "ci_replicates"};
 }
 
 unsigned int
