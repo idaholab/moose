@@ -32,7 +32,4 @@ This capability supports two formats:
 This object controls a physical process using a neural network. The neural network
 can be either read from a file of transferred from a trainer.
 
-!alert warning
-The detailed documentation of this object is only available when Moose is compiled with Libtorch.
-For instructions on how to compile Moose with Libtorch, visit the general installation webpage or click
-[here](getting_started/installation/install_libtorch.md optional=True).
+!include libtorch/libtorch_warning.md

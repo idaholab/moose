@@ -122,9 +122,9 @@ LibtorchANNTrainer::postTrain()
       torch::load(_nn, _filename);
       _console << "Loaded requested .pt file." << std::endl;
     }
-    catch (...)
+    catch (const c10::Error & e)
     {
-      mooseError("The requested pytorch file could not be loaded.");
+      mooseError("The requested pytorch file could not be loaded.\n", e.msg());
     }
 
   // The default data type in pytorch is float, while we use double in MOOSE.

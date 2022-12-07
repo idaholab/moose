@@ -17,7 +17,7 @@
 #include "MultiAppTransfer.h"
 #include "SurrogateModelInterface.h"
 
-class LibtorchNeuralNetControlTransfer : public MultiAppTransfer, SurrogateModelInterface
+class LibtorchNeuralNetControlTransfer : public MultiAppTransfer, public SurrogateModelInterface
 {
 public:
   static InputParameters validParams();

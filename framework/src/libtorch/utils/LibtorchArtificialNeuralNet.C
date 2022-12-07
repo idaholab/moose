@@ -138,8 +138,8 @@ LibtorchArtificialNeuralNet::store(nlohmann::json & json) const
 
     // We cast the parameters into a 1D vector
     json[named_params[param_i].key()] =
-        std::vector<Real>({named_params[param_i].value().data_ptr<Real>(),
-                           named_params[param_i].value().data_ptr<Real>() + max_size});
+        std::vector<Real>(named_params[param_i].value().data_ptr<Real>(),
+                          named_params[param_i].value().data_ptr<Real>() + max_size);
   }
 }
 

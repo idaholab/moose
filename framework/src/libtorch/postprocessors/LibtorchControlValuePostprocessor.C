@@ -18,14 +18,14 @@ LibtorchControlValuePostprocessor::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
 
+  params.addClassDescription("Reports the value stored in given controlled parameters.");
+
   params.addRequiredParam<std::string>("control_name",
                                        "The name of the LibtorchNeuralNetControl object.");
   params.addParam<unsigned int>("signal_index",
                                 0,
                                 "The index of the signal from the LibtorchNeuralNetControl object. "
                                 "This assumes indexing between [0,num_signals).");
-
-  params.addClassDescription("Reports the value stored in given controlled parameters.");
   return params;
 }
 

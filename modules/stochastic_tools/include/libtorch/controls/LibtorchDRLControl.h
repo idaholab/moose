@@ -23,11 +23,21 @@ public:
   /// We compute the actions in this function together with the corresponding logarithmic probabilities.
   virtual void execute() override;
 
-  /// Get the (signal_index)-th signal of the control neural net
+  /**
+   * Get the logarithmic probability of (signal_index)-th signal of the control neural net
+   * @param signal_index The index of the signal
+   * @return The logarithmic probability of the (signal_index)-th signal
+   */
   Real getSignalLogProbability(const unsigned int signal_index) const;
 
 protected:
-  /// Function which computes the logarithmic probability of given actions.
+  /**
+   * Function which computes the logarithmic probability of given actions.
+   * @param action The tensor containing the perturbed control signals (also known as the action of
+   * the controller)
+   * @param output_tensor The expected value of the signals predicted by the neural net
+   * @return The logarithmic probability of the action with respect to the neural net prediction
+   */
   torch::Tensor computeLogProbability(const torch::Tensor & action,
                                       const torch::Tensor & output_tensor);
 

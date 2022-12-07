@@ -35,8 +35,10 @@ public:
 
   virtual void execute() override;
 
-  /// Function which returns the current average episodic reward. It is only updated at
-  /// at the end of every episode.
+  /**
+   * Function which returns the current average episodic reward. It is only updated
+   * at the end of every episode.
+   */
   Real averageEpisodeReward() { return _average_episode_reward; }
 
   /// The condensed training function

@@ -28,7 +28,6 @@ protected:
   const Function & _design_function;
 
   /// Postprocessor containing the observed value
-  const PostprocessorName & _observed_pp_name;
   const PostprocessorValue & _observed_value;
 
   /// Coefficients for the reward function

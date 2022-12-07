@@ -51,7 +51,7 @@ LibtorchNeuralNetControlTransfer::execute()
   const Moose::LibtorchArtificialNeuralNet & trainer_nn = _trainer.controlNeuralNet();
 
   // Get the control object from the other app
-  FEProblemBase & app_problem = _multi_app->appProblemBase(0);
+  FEProblemBase & app_problem = *_to_problems[0];
   auto & control_warehouse = app_problem.getControlWarehouse();
   std::shared_ptr<Control> control_ptr = control_warehouse.getActiveObject(_control_name);
   LibtorchNeuralNetControl * control_object =

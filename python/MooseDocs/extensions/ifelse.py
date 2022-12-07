@@ -42,7 +42,7 @@ def hasSubmodule(ext, name):
 
 def hasLibtorch(ext):
     """Module function for testing if an application was compiled with libtorch."""
-    return ext.hasLibtorch()
+    return ext.hasConfigOption('libtorch', 'true')
 
 def hasPage(ext, filename):
     """Module function for the existence of markdown page."""
@@ -102,18 +102,16 @@ class IfElseExtension(command.CommandExtension):
         status = mooseutils.git_submodule_info(MooseDocs.ROOT_DIR, '--recursive')
         return any([repo.endswith(name) for repo in status.keys()])
 
-    def hasLibtorch(self):
+    def hasConfigOption(self, option, value):
         moose_dir = os.getenv('MOOSE_DIR',
                               os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', '..', '..')))
 
-        found_libtorch = False
-        # getMooseconfig returns a set of ('ALL', 'True/False'), so we have to iterate through it
-        for it in util.getMooseConfigOption(moose_dir, 'libtorch'):
-            if it.lower() == 'true':
-                found_libtorch = True
-                break
+        # getMooseconfig returns a set of ('ALL', value ), so we have to iterate through it
+        for it in util.getMooseConfigOption(moose_dir, option):
+            if it.lower() == value.lower():
+                return True
 
-        return found_libtorch
+        return False
 
     def extend(self, reader, renderer):
         self.requires(command)

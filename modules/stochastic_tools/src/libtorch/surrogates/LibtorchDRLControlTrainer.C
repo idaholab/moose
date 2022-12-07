@@ -23,7 +23,8 @@ LibtorchDRLControlTrainer::validParams()
 {
   InputParameters params = SurrogateTrainerBase::validParams();
 
-  params.addClassDescription("Trains a simple neural network controller using libtorch.");
+  params.addClassDescription(
+      "Trains a neural network controller using the Proximal Policy Optimization (PPO) algorithm.");
 
   params.addRequiredParam<std::vector<ReporterName>>(
       "response", "Reporter values containing the response values from the model.");
@@ -202,9 +203,10 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
       torch::load(_control_nn, _control_nn->name());
       _console << "Loaded requested .pt file." << std::endl;
     }
-    catch (...)
+    catch (const c10::Error & e)
     {
-      mooseError("The requested pytorch file could not be loaded for the control neural net.");
+      mooseError("The requested pytorch file could not be loaded for the control neural net.\n",
+                 e.msg());
     }
   }
   else if (filename_valid)
@@ -226,9 +228,10 @@ LibtorchDRLControlTrainer::LibtorchDRLControlTrainer(const InputParameters & par
       torch::load(_critic_nn, _critic_nn->name());
       _console << "Loaded requested .pt file." << std::endl;
     }
-    catch (...)
+    catch (const c10::Error & e)
     {
-      mooseError("The requested pytorch file could not be loaded for the critic neural net.");
+      mooseError("The requested pytorch file could not be loaded for the critic neural net.\n",
+                 e.msg());
     }
   }
   else if (filename_valid)

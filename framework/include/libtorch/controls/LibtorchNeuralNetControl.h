@@ -33,7 +33,11 @@ public:
   /// Execute neural network to determine the controllable parameter values
   virtual void execute() override;
 
-  /// Get the (signal_index)-th signal of the control neural net
+  /**
+   * Get the (signal_index)-th signal of the control neural net
+   * @param signal_index The index of the queried control signal
+   * @return The (signal_index)-th constol signal
+   */
   Real getSignal(const unsigned int signal_index) const;
 
   /// Get the number of controls this object is computing
@@ -42,6 +46,7 @@ public:
   /**
    * Function responsible for loading the neural network for the controller. This function is used
    * when copying the neural network from a main app which trains it.
+   * @param input_nn Reference to a neural network which will be copied into this object
    */
   void loadControlNeuralNet(const Moose::LibtorchArtificialNeuralNet & input_nn);
 
@@ -49,7 +54,13 @@ public:
   const Moose::LibtorchNeuralNetBase & controlNeuralNet() const;
 
 protected:
-  /// Function responsible for checking for potential user errors in the input file
+  /**
+   * Function responsible for checking for potential user errors in the input file
+   * @param param_name The name of the main parameter
+   * @param conditional_param Vector parameter names that depend on the main parameter
+   * @param should_be_defined If the conditional parameters should be defined when the main
+   * parameter is defined
+   */
   void conditionalParameterError(const std::string & param_name,
                                  const std::vector<std::string> & conditional_param,
                                  bool should_be_defined = true);

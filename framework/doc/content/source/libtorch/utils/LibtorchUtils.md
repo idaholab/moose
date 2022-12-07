@@ -7,3 +7,8 @@ Manipulating Libtorch tensors and interfacing them with MOOSE-based objects.
 
 The utility classes streamline the two-way conversion between standard vectors
 and Libtorch tensors.
+
+!listing framework/include/libtorch/utils/LibtorchUtils.h 
+ start=/**
+ end=tensorToVector
+ include-end=true

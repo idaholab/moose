@@ -127,13 +127,14 @@ LibtorchNeuralNetControl::LibtorchNeuralNetControl(const InputParameters & param
         torch::load(nn, filename);
         _nn = std::make_shared<Moose::LibtorchArtificialNeuralNet>(*nn);
       }
-      catch (...)
+      catch (const c10::Error & e)
       {
         mooseError(
             "The requested pytorch parameter file could not be loaded. This can either be the"
             "result of the file not existing or a misalignment in the generated container and"
             "the data in the file. Make sure the dimensions of the generated neural net are the"
-            "same as the dimensions of the parameters in the input file!");
+            "same as the dimensions of the parameters in the input file!\n",
+            e.msg());
       }
     }
   }
@@ -242,7 +243,7 @@ LibtorchNeuralNetControl::prepareInputTensor()
 const Moose::LibtorchNeuralNetBase &
 LibtorchNeuralNetControl::controlNeuralNet() const
 {
-  mooseAssert(_nn, "The neural network in the controller must exist!");
+  mooseError(_nn, "The neural network in the controller must exist!");
   return *_nn;
 }
 

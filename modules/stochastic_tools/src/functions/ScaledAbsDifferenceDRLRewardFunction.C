@@ -16,9 +16,9 @@ ScaledAbsDifferenceDRLRewardFunction::validParams()
 {
   InputParameters params = Function::validParams();
 
-  params.addClassDescription("Evaluates a scaled absolute difference reward function for a process "
-                             "which is controlled by a "
-                             "Deep Reinforcement Lerning based surrogate.");
+  params.addClassDescription(
+      "Evaluates a scaled absolute difference reward function for a process "
+      "which is controlled by a Deep Reinforcement Learning based surrogate.");
 
   params.addRequiredParam<FunctionName>("design_function", "The desired value to reach.");
   params.addRequiredParam<PostprocessorName>(
@@ -35,8 +35,7 @@ ScaledAbsDifferenceDRLRewardFunction::ScaledAbsDifferenceDRLRewardFunction(
   : Function(parameters),
     FunctionInterface(this),
     _design_function(getFunction("design_function")),
-    _observed_pp_name(getParam<PostprocessorName>("observed_value")),
-    _observed_value(getPostprocessorValueByName(_observed_pp_name)),
+    _observed_value(getPostprocessorValueByName(getParam<PostprocessorName>("observed_value"))),
     _c1(getParam<Real>("c1")),
     _c2(getParam<Real>("c2"))
 {

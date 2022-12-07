@@ -1,9 +1,9 @@
+!if! function=hasLibtorch()
 # Deep Reinforcement Learning Control Using Libtorch
 
-The following example showcases how to set up a Deep Reinforcement Learning (DRL)
-training sequence for the generation of neural-net-based controllers of simulations
-with MOOSE applications. We employ a Proximal Policy Optimization (PPO)
-(see [!cite](schulman2017proximal) for more information) to train our neural nets.
+The following example demonstrates how to set up a Proximal Policy Optimization (PPO) based 
+Deep Reinforcement Learning (DRL) training sequence for neural-net-based controllers of MOOSE simulations. 
+See [!cite](schulman2017proximal) for a more theoretical background on the PPO algorithm.
 
 ## Problem Statement
 
@@ -21,7 +21,8 @@ of the environment temperature. Furthermore, we assume the following:
 - The density of the air is: $\rho = 1.184~\frac{kg}{m^3}$
 - The specific heat of the air is: $c_p = 1000 \frac{J}{kg~K}$
 - The effective thermal condictivity (increased to account for mixing effects) is: $k = 0.5 \frac{W}{m~K}$
-- The environment temperature is is handled as a Dirichlet boundary condition with a value of:
+- The environment temperature is handled as a Dirichlet boundary condition applied 
+  to the right and left walls with a value of:
   $T_\mathrm{env}(t)~[K]=273+15*\sin{\left(\frac{\pi t}{86400}\right)}$
 - The air conditioner is modeled as a Neumann boundary condition on the top with given heat flux
 
@@ -55,12 +56,12 @@ Next, we set up the data collection using the `Postprocessors` and `Reporters` b
 !listing examples/libtorch_drl_control/libtorch_drl_control_sub.i block=Postprocessors
 
 Two of these postprocessors measure the temperature at the location of the sensor.
-`center_temp` stores the value at the beginning of the time step, while `center_temp_tend ` stores it at the end of the
+`center_temp` stores the value at the beginning of the time step, while `center_temp_tend` stores it at the end of the
 time step. This is due to the fact that the neural network needs the measured temperature at the
 beginning of the time step, while we would like to compute the reward for the training process
 using the temperature at the end of the time step. Furthermore, the trainer needs the environment temperature
-and the reward values as well. Additionally, we save the action of the neural net together with its
-logarithmic probability. Our control object will be responsible to populate these two postprocessors.
+and the reward values as well. Additionally, we save the action (`top_flux`) of the neural net together with its
+logarithmic probability (`log_prob_top_flux`). Our control object will be responsible to populate these two postprocessors.
 Finally, we create an [AccumulateReporter.md] to store every data point throughout the simulation:
 
 !listing examples/libtorch_drl_control/libtorch_drl_control_sub.i block=Reporters
@@ -85,13 +86,13 @@ final product of this training process.
 
 ### Main Application
 
-The input for the main application starts with the definition of a [Sampler](CartesianProduct.md). In this example we
+The input for the main application starts with the definition of a [Sampler](CartesianProductSampler.md). In this example we
 do not aim to train a controller which can adapt to random model parameters, so we just
 define a dummy sampler which does not rely on random numbers.
 
 !listing examples/libtorch_drl_control/libtorch_drl_control_trainer.i block=Samplers
 
-In case we would like to increase the flexibility of the learner,
+In case we would like to increase the flexibility of the neural-net based controller,
 this sampler can be switched to something that can scan the uncertain input parameter space.
 
 Following this, a [MultiApp](SamplerFullSolveMultiApp.md) is created to run the sub-application many times for data generation:
@@ -113,8 +114,11 @@ The trainer object will need the names of the reporters containing the responses
 of the system together with the control signals, control signal logarithmic probabilities, and the rewards.
 When these are set, we define the architecture of the critic and control neural nets
 (see [!cite](schulman2017proximal) for more information on these) using
-`num_critic_neurons_per_layer` and `num_control_neurons_per_layer`.
-The corresponding learning rates can be defined by `critic_learning_rate` and `control_learning_rate`.
+[!param](/Trainers/LibtorchDRLControlTrainer/num_critic_neurons_per_layer) and
+[!param](/Trainers/LibtorchDRLControlTrainer/num_control_neurons_per_layer).
+The corresponding learning rates can be defined by 
+[!param](/Trainers/LibtorchDRLControlTrainer/critic_learning_rate) and 
+[!param](/Trainers/LibtorchDRLControlTrainer/control_learning_rate).
 Then, we copy-paste the input/output standardization options from the `Control` in the sub-app.
 Additionally, we can choose to standardize the advantage function which makes
 convergence more robust in certain scenarios.
@@ -131,8 +135,16 @@ Which means that we run a total of 440 simulations.
 
 First, we take a look at how the average episodic reward evolves throughout the
 training process. We see that the average reward increases to a point where it is
-comparable with the theoretical maximum. However, it is important to note
-that the higher the standard deviation is for the action, the more flexible the controller
+comparable with the theoretical maximum.  
+
+!alert note
+In this example we used [ScaledAbsDifferenceDRLRewardFunction.md] as follows:
+$R = 10 - |T_\mathrm{target} - T_\mathrm{sensor}|$ which means that the maximum achievable 
+reward was 10. 
+
+However, it is important to note
+that the higher the standard deviation is for the controllers signal to the system 
+(also referred to as action), the more flexible the controller
 will be (due to less overfitting). On the other hand, by increasing the random
 variation in the action, we also decrease its accuracy. Therefore, the user needs
 to balance these two factors by tuning the parameters in the `Trainer` and `Control` objects.
@@ -162,3 +174,5 @@ without the additional randomization. By doing this, the following results are o
 
 We see that the controller is able to maintain the comfortable room temperature with a constantly changing
 environment temperature.
+
+!if-end!

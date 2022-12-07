@@ -17,55 +17,25 @@
 namespace LibtorchUtils
 {
 
+/**
+ * Utility function that converts a standard vector to a `torch::Tensor`.
+ * @tparam DataType The type of data (float,double, etc.) which the vector is filled with
+ * @param vector The vector that needs to be converted
+ * @param tensor The output tensor
+ * @param detach If the gradient information needs to be detached during the conversion
+ */
 template <typename DataType>
 void
-vectorToTensor(std::vector<DataType> & vector, torch::Tensor & tensor, const bool detach = false)
-{
-  auto options = torch::TensorOptions();
-  if constexpr (std::is_same<DataType, double>::value)
-    options = torch::TensorOptions().dtype(at::kDouble);
-  else if constexpr (std::is_same<DataType, float>::value)
-    options = torch::TensorOptions().dtype(at::kFloat);
-  else
-    static_assert(Moose::always_false<DataType>,
-                  "vectorToTensor is not implemented for the given data type!");
+vectorToTensor(std::vector<DataType> & vector, torch::Tensor & tensor, const bool detach = false);
 
-  // We need to clone here because from_blob() doesn't take ownership of the pointer so if it
-  // vector goes out of scope before tensor, we get unwanted behavior
-  tensor = torch::from_blob(vector.data(), {long(vector.size()), 1}, options).clone();
-
-  if (detach)
-    tensor.detach();
-}
-
+/**
+ * Utility function that converts a `torch::Tensor` to a standard vector.
+ * @tparam DataType The type of data (float,double, etc.) which the vector is filled with
+ * @param tensor The tensor which needs to be converted
+ * @param vector The output vector
+ */
 template <typename DataType>
-void
-tensorToVector(torch::Tensor & tensor, std::vector<DataType> & vector)
-{
-  try
-  {
-    tensor.data_ptr<DataType>();
-  }
-  catch (const c10::Error & e)
-  {
-    mooseError("Cannot cast tensor values to type given for the vector! " + e.msg());
-  }
-
-  const auto & sizes = tensor.sizes();
-
-  long int max_size = 0;
-  long int product_size = 1;
-
-  for (const auto & dim_size : sizes)
-  {
-    // We do this comparison because XCode complains if we use std::max
-    max_size = dim_size > max_size ? dim_size : max_size;
-    product_size *= dim_size;
-  }
-
-  mooseAssert(max_size == product_size, "The given tensor should be one-dimensional!");
-  vector = {tensor.data_ptr<Real>(), tensor.data_ptr<Real>() + max_size};
-}
+void tensorToVector(torch::Tensor & tensor, std::vector<DataType> & vector);
 
 } // LibtorchUtils namespace
 

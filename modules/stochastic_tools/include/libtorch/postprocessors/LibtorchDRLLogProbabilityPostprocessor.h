@@ -38,8 +38,10 @@ public:
   void execute() override {}
   ///@}
 
-  /// We override this to setup the linking withthe control object. We need to do it here
-  /// because the PPs are contructed before te Control objects.
+  /**
+   * We override this to setup the linking with the control object. We need to do it here
+   * because the PPs are contructed before te Control objects.
+   */
   void initialSetup() override;
 
   /**
