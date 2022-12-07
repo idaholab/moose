@@ -34,8 +34,6 @@ const std::string HeatConductionModel::TEMPERATURE = "T_solid";
 const std::string HeatConductionModel::THERMAL_CONDUCTIVITY = "thermal_conductivity";
 const std::string HeatConductionModel::SPECIFIC_HEAT_CONSTANT_PRESSURE = "specific_heat";
 
-FEType HeatConductionModel::_fe_type(FIRST, LAGRANGE);
-
 HeatConductionModel::HeatConductionModel(const InputParameters & params)
   : MooseObject(params),
     _sim(*params.getCheckedPointerParam<THMProblem *>("_thm_problem")),
@@ -51,7 +49,7 @@ HeatConductionModel::addVariables()
   const auto & subdomain_names = _hs.getSubdomainNames();
   const Real & scaling_factor = getParam<Real>("scaling_factor_temperature");
 
-  _sim.addSimVariable(true, TEMPERATURE, _fe_type, subdomain_names, scaling_factor);
+  _sim.addSimVariable(true, TEMPERATURE, _hs.getFEType(), subdomain_names, scaling_factor);
 }
 
 void

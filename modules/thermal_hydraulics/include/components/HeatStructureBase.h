@@ -84,6 +84,11 @@ public:
    */
   void setConnectedToFlowChannel() const { _connected_to_flow_channel = true; }
 
+  /**
+   * Gets the FE type
+   */
+  const FEType & getFEType() const { return _fe_type; }
+
 protected:
   virtual std::shared_ptr<HeatConductionModel> buildModel();
   virtual void init() override;
@@ -105,6 +110,10 @@ protected:
 
   /// True if this heat structure is connected to at least one flow channel
   mutable bool _connected_to_flow_channel;
+
+private:
+  /// FE type
+  const FEType _fe_type;
 
 public:
   /// map of heat structure side string to enum

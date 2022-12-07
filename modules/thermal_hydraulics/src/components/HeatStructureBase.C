@@ -40,11 +40,15 @@ HeatStructureBase::validParams()
   params.addParam<FunctionName>("initial_T", "Initial temperature [K]");
   params.addParam<Real>(
       "scaling_factor_temperature", 1.0, "Scaling factor for solid temperature variable.");
+  params.addParam<bool>("2nd_order_mesh", false, "Use 2nd-order elements in the mesh");
   return params;
 }
 
 HeatStructureBase::HeatStructureBase(const InputParameters & params)
-  : Component2D(params), _connected_to_flow_channel(false)
+  : Component2D(params),
+    _connected_to_flow_channel(false),
+    _fe_type(params.get<bool>("2nd_order_mesh") ? FEType(SECOND, LAGRANGE)
+                                                : FEType(FIRST, LAGRANGE))
 {
 }
 
@@ -85,7 +89,7 @@ HeatStructureBase::getIndexFromName(const std::string & name) const
 bool
 HeatStructureBase::usingSecondOrderMesh() const
 {
-  return HeatConductionModel::feType().order == SECOND;
+  return _fe_type.order == SECOND;
 }
 
 void

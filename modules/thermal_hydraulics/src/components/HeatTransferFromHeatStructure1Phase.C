@@ -39,7 +39,8 @@ HeatTransferFromHeatStructure1Phase::HeatTransferFromHeatStructure1Phase(
 const FEType &
 HeatTransferFromHeatStructure1Phase::getFEType()
 {
-  return HeatConductionModel::feType();
+  const HeatStructureBase & hs = getComponentByName<HeatStructureBase>(_hs_name);
+  return hs.getFEType();
 }
 
 void

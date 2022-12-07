@@ -333,7 +333,7 @@ protected:
   const InputParameters & _pars;
 
   /// finite element type for the flow in the simulation
-  FEType _flow_fe_type;
+  const FEType _flow_fe_type;
 
   /**
    * Setup equations to be solved in this simulation

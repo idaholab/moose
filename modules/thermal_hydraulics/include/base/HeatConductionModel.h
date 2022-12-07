@@ -53,12 +53,6 @@ public:
    */
   virtual void addHeatEquationRZ();
 
-  /**
-   * Get the FE type used for heat conduction
-   * @return The finite element type
-   */
-  static const FEType & feType() { return _fe_type; }
-
 protected:
   THMProblem & _sim;
   /// The Factory associated with the MooseApp
@@ -76,10 +70,4 @@ public:
   static const std::string SPECIFIC_HEAT_CONSTANT_PRESSURE;
 
   static InputParameters validParams();
-
-protected:
-  // FE type used for heat conduction
-  static FEType _fe_type;
-
-  friend class Simulation;
 };

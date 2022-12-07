@@ -17,8 +17,6 @@ THMProblem::validParams()
 {
   InputParameters params = FEProblem::validParams();
 
-  params.addParam<bool>("2nd_order_mesh", false, "Use 2nd order elements in the mesh");
-
   params.addParam<FileName>("initial_from_file",
                             "The name of an exodus file with initial conditions");
   params.addParam<std::string>(

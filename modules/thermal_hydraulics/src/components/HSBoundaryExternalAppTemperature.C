@@ -36,8 +36,7 @@ HSBoundaryExternalAppTemperature::addVariables()
   const HeatStructureBase & hs = getComponent<HeatStructureBase>("hs");
   const std::vector<SubdomainName> & subdomain_names = hs.getSubdomainNames();
 
-  getTHMProblem().addSimVariable(
-      false, _T_ext_var_name, HeatConductionModel::feType(), subdomain_names);
+  getTHMProblem().addSimVariable(false, _T_ext_var_name, hs.getFEType(), subdomain_names);
 }
 
 void
