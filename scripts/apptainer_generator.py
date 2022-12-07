@@ -340,7 +340,7 @@ class ApptainerGenerator:
             meta_yaml = os.path.join(MOOSE_DIR, f'conda/{package}/meta.yaml')
             with open(meta_yaml, 'r') as f:
                 _, _, _, meta = Versioner.conda_meta_jinja(f.read())
-            for var in ['url', 'sha256']:
+            for var in ['url', 'sha256', 'vtk_friendly_version']:
                 jinja_var = f'vtk_{var}'
                 jinja_data[jinja_var] = meta['source'][var]
 
