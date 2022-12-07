@@ -1,0 +1,94 @@
+[Tests]
+  design = 'meshgenerators/ParsedCurveGenerator.md'
+  issues = '#22848'
+  [open_curve]
+    type = 'Exodiff'
+    input = 'parsed_curve_open.i'
+    exodiff = 'parsed_curve_open_in.e'
+    cli_args = '--mesh-only'
+    requirement ='The system shall generate a 2D open curve mesh.'
+    recover = false
+  []
+  [open_curve_3d]
+    type = 'Exodiff'
+    input = 'parsed_curve_3d.i'
+    exodiff = 'parsed_curve_3d_in.e'
+    cli_args = '--mesh-only'
+    requirement ='The system shall generate a 3D open curve mesh.'
+    recover = false
+  []
+  [closed_curve]
+    type = 'Exodiff'
+    input = 'parsed_curve_closed.i'
+    exodiff = 'parsed_curve_closed_in.e'
+    cli_args = '--mesh-only'
+    requirement ='The system shall generate a closed loop curve mesh with starting and ending points overlapped.'
+    recover = false
+  []
+  [forced_closed_curve]
+    type = 'Exodiff'
+    input = 'parsed_curve_closed.i'
+    exodiff = 'parsed_curve_closed_forced_in.e'
+    cli_args = 'Mesh/pcg/critical_t_series="0 5"
+                Mesh/pcg/nums_segments=10
+                --mesh-only parsed_curve_closed_forced_in.e'
+    requirement ='The system shall generate a closed loop curve mesh with starting and ending points separated.'
+    recover = false
+  []
+  [xy_delaunay_curve]
+    type = 'Exodiff'
+    input = 'xy_curve.i'
+    exodiff = 'xy_curve_in.e'
+    cli_args = '--mesh-only'
+    requirement ='The system shall generate closed 2D curve meshes that can be used by XYDelaunayGenerator as inputs.'
+    recover = false
+  []
+  [err_repeated_t_series]
+    type = 'RunException'
+    input = 'parsed_curve_closed.i'
+    cli_args = 'Mesh/pcg/critical_t_series="0.0 1.0 1.0"
+                --mesh-only err.e'
+    expect_err = 'elements must be unique.'
+    requirement ='The system shall throw an error if the elements in critical_t_series are not unique.'
+  []
+  [err_unsorted_t_series]
+    type = 'RunException'
+    input = 'parsed_curve_closed.i'
+    cli_args = 'Mesh/pcg/critical_t_series="0.0 2.0 1.0"
+                --mesh-only err.e'
+    expect_err = 'elements must change monotonically.'
+    requirement ='The system shall throw an error if elements in critical_t_series do not change monotonically.'
+  []
+  [err_bad_nums_segments]
+    type = 'RunException'
+    input = 'parsed_curve_closed.i'
+    cli_args = 'Mesh/pcg/nums_segments=10
+                --mesh-only err.e'
+    expect_err = 'The size of this parameter must be one less than size of critical_t_series.'
+    requirement ='The system shall throw an error if size of nums_segments is not consistent with size of critical_t_series.'
+  []
+  [err_failed_parsing_x]
+    type = 'RunException'
+    input = 'parsed_curve_closed.i'
+    cli_args = 'Mesh/pcg/x_formulus=t2
+                --mesh-only err.e'
+    expect_err = 'Invalid function'
+    requirement ='The system shall throw an error if x_formulus cannot be parsed as a function.'
+  []
+  [err_failed_parsing_y]
+    type = 'RunException'
+    input = 'parsed_curve_closed.i'
+    cli_args = 'Mesh/pcg/y_formulus=t2
+                --mesh-only err.e'
+    expect_err = 'Invalid function'
+    requirement ='The system shall throw an error if y_formulus cannot be parsed as a function.'
+  []
+  [err_failed_parsing_z]
+    type = 'RunException'
+    input = 'parsed_curve_closed.i'
+    cli_args = 'Mesh/pcg/z_formulus=t2
+                --mesh-only err.e'
+    expect_err = 'Invalid function'
+    requirement ='The system shall throw an error if z_formulus cannot be parsed as a function.'
+  []
+[]
