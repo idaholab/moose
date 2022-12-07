@@ -47,6 +47,7 @@ AbaqusUMATStress::validParams()
   params.addCoupledVar("displacements", 0.0, "displacement variables");
   params.addParam<bool>(
       "displace_qps", false, "Send displaced quadrature point coordinates to UMAT.");
+  params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
 
