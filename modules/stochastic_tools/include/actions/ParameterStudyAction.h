@@ -123,22 +123,10 @@ protected:
    * @tparam T The type of parameter, it will be trying to get std::vector<T>
    * @param param The name of the parameter
    * @param count The index of the specific distribution
-   * @param full_count The index for all distributions
    * @return T The inputted value of the parameter at the given index
    */
   template <typename T>
   T getDistributionParam(std::string param, unsigned int count) const;
-
-  /**
-   * Helper function for getting the param value for building a sampler.
-   * Used for unified error checking.
-   *
-   * @tparam T The type of the parameter being retrieved
-   * @param param The name of the parameter
-   * @return T The inputted value of the parameter
-   */
-  template <typename T>
-  T getSamplerParam(std::string param) const;
 
   /**
    * Helper function to show the object being built. Will display:
@@ -155,6 +143,17 @@ protected:
 
 private:
   /**
+   * This is a vector associating the sampling type with a list of associated parameters
+   * The list includes the parameter name and whether or not it is required.
+   */
+  static std::vector<std::map<std::string, bool>> samplerParameters();
+
+  /**
+   * This is a vector associating the distribution type and a list of parameters that are needed
+   */
+  static std::vector<std::vector<std::string>> distributionParameters();
+
+  /**
    * This function will infer the best way to run the multiapps
    *
    * @return unsigned int The multiapp execution mode, see the 'multiapp_mode' input param for
@@ -162,6 +161,10 @@ private:
    */
   unsigned int inferMultiAppMode();
 
+  /// The sampling type
+  const unsigned int _sampling_type;
+  /// The distributions
+  const MultiMooseEnum _distributions;
   /// The multiapp mode. This is used for determining type of execution for the multiapp and the
   /// way to send the perturbed parameters
   const unsigned int _multiapp_mode;
@@ -175,30 +178,8 @@ template <typename T>
 T
 ParameterStudyAction::getDistributionParam(std::string param, unsigned int count) const
 {
-  if (!isParamValid(param))
-    paramError("distributions",
-               "The ",
-               param,
-               " parameter is required to build the listed distributions.");
   const auto & val = getParam<std::vector<T>>(param);
-  if (val.size() <= count)
-    paramError("distributions",
-               "There are not enough entries in ",
-               param,
-               " to build the listed distributions.");
   return val[count];
-}
-
-template <typename T>
-T
-ParameterStudyAction::getSamplerParam(std::string param) const
-{
-  if (!isParamValid(param))
-    paramError("sampling_type",
-               "The ",
-               param,
-               " parameter is required to build the requested sampling type.");
-  return getParam<T>(param);
 }
 
 /**

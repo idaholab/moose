@@ -145,12 +145,67 @@ ParameterStudyAction::validParams()
   return params;
 }
 
-ParameterStudyAction::ParameterStudyAction(const InputParameters & params)
-  : Action(params),
+ParameterStudyAction::ParameterStudyAction(const InputParameters & parameters)
+  : Action(parameters),
+    _sampling_type(getParam<MooseEnum>("sampling_type")),
+    _distributions(isParamValid("distributions") ? getParam<MultiMooseEnum>("distributions")
+                                                 : MultiMooseEnum("")),
     _multiapp_mode(inferMultiAppMode()),
     _compute_stats(isParamValid("quantities_of_interest") && getParam<bool>("compute_statistics")),
     _show_objects(getParam<bool>("show_study_objects"))
 {
+  // Check sampler parameters
+  const auto sampler_params = samplerParameters();
+  const auto this_sampler_params = sampler_params[_sampling_type];
+  // Check required sampler parameters
+  for (const auto & param : this_sampler_params)
+    if (param.second && !isParamValid(param.first))
+      paramError("sampling_type",
+                 "The ",
+                 param.first,
+                 " parameter is required to build the requested sampling type.");
+  // Check unused parameters
+  std::string msg = "";
+  for (unsigned int i = 0; i < sampler_params.size(); ++i)
+    for (const auto & param : sampler_params[i])
+      if (this_sampler_params.find(param.first) == this_sampler_params.end() &&
+          parameters.isParamSetByUser(param.first))
+        msg += (msg.empty() ? "" : ", ") + param.first;
+  if (!msg.empty())
+    paramError("sampling_type",
+               "The following parameters are unused for the selected sampling type: ",
+               msg);
+
+  // Check distribution parameters
+  const auto distribution_params = distributionParameters();
+  std::vector<unsigned int> dist_count(distribution_params.size(), 0);
+  for (const auto & dist : _distributions)
+    dist_count[(unsigned int)dist]++;
+  msg = "";
+  for (unsigned int i = 0; i < distribution_params.size(); ++i)
+    for (const auto & param : distribution_params[i])
+    {
+      // Check if parameter was set
+      if (dist_count[i] > 0 && !isParamValid(param))
+        paramError("distributions",
+                   "The ",
+                   param,
+                   " parameter is required to build the listed distributions.");
+      // Check if parameter has correct size
+      else if (dist_count[i] > 0 && getParam<std::vector<Real>>(param).size() != dist_count[i])
+        paramError("distributions",
+                   "The number of entries in ",
+                   param,
+                   " does not match the number of required entries (",
+                   dist_count[i],
+                   ") to build the listed distributions.");
+      // Check if parameter was set and unused
+      else if (dist_count[i] == 0 && parameters.isParamSetByUser(param))
+        msg += (msg.empty() ? "" : ", ") + param;
+    }
+  if (!msg.empty())
+    paramError(
+        "distributions", "The following parameters are unused for the listed distributions: ", msg);
 }
 
 MooseEnum
@@ -200,7 +255,7 @@ ParameterStudyAction::act()
 
     // Loop through the inputted distributions
     unsigned int full_count = 0;
-    for (const auto & dist : getParam<MultiMooseEnum>("distributions"))
+    for (const auto & dist : _distributions)
     {
       // Convenient reference to the current count
       unsigned int & count = dist_count[dist.name()];
@@ -261,46 +316,51 @@ ParameterStudyAction::act()
   }
   else if (_current_task == "add_sampler")
   {
-    const auto & sampling_type = getParam<MooseEnum>("sampling_type");
-
     // We will have a single call to addSampler
     // So declare these quantities and set in the if statements
     std::string sampler_type;
     InputParameters params = emptyInputParameters();
 
     // Set the distribution type and parameters
-    if (sampling_type == "monte-carlo" || sampling_type == "lhs")
+    // monte-carlo or lhs
+    if (_sampling_type == 0 || _sampling_type == 1)
     {
-      sampler_type = sampling_type == "monte-carlo" ? "MonteCarlo" : "LatinHypercube";
+      sampler_type = _sampling_type == 0 ? "MonteCarlo" : "LatinHypercube";
       params = _factory.getValidParams(sampler_type);
-      params.set<dof_id_type>("num_rows") = getSamplerParam<dof_id_type>("num_samples");
+      params.set<dof_id_type>("num_rows") = getParam<dof_id_type>("num_samples");
       params.set<std::vector<DistributionName>>("distributions") =
-          distributionNames(getSamplerParam<MultiMooseEnum>("distributions").size());
+          distributionNames(_distributions.size());
     }
-    else if (sampling_type == "cartesian-product")
+    // cartesian-product
+    else if (_sampling_type == 2)
     {
       sampler_type = "CartesianProduct";
       params = _factory.getValidParams(sampler_type);
       params.set<std::vector<Real>>("linear_space_items") =
-          getSamplerParam<std::vector<Real>>("linear_space_items");
+          getParam<std::vector<Real>>("linear_space_items");
     }
-    else if (sampling_type == "csv")
+    // csv
+    else if (_sampling_type == 3)
     {
       sampler_type = "CSVSampler";
       params = _factory.getValidParams(sampler_type);
-      params.set<FileName>("samples_file") = getSamplerParam<FileName>("csv_samples_file");
-      if (isParamValid("csv_column_indices"))
+      params.set<FileName>("samples_file") = getParam<FileName>("csv_samples_file");
+      if (isParamValid("csv_column_indices") && isParamValid("csv_column_names"))
+        paramError("csv_column_indices",
+                   "'csv_column_indices' and 'csv_column_names' cannot both be set.");
+      else if (isParamValid("csv_column_indices"))
         params.set<std::vector<dof_id_type>>("column_indices") =
-            getSamplerParam<std::vector<dof_id_type>>("csv_column_indices");
-      if (isParamValid("csv_column_names"))
+            getParam<std::vector<dof_id_type>>("csv_column_indices");
+      else if (isParamValid("csv_column_names"))
         params.set<std::vector<std::string>>("column_names") =
-            getSamplerParam<std::vector<std::string>>("csv_column_names");
+            getParam<std::vector<std::string>>("csv_column_names");
     }
-    else if (sampling_type == "input-matrix")
+    // input-matrix
+    else if (_sampling_type == 4)
     {
       sampler_type = "InputMatrix";
       params = _factory.getValidParams(sampler_type);
-      params.set<RealEigenMatrix>("matrix") = getSamplerParam<RealEigenMatrix>("input_matrix");
+      params.set<RealEigenMatrix>("matrix") = getParam<RealEigenMatrix>("input_matrix");
     }
     else
       paramError("sampling_type", "Unknown sampling type.");
@@ -567,6 +627,29 @@ ParameterStudyAction::showObject(std::string type,
   }
 
   _console << std::endl;
+}
+
+std::vector<std::map<std::string, bool>>
+ParameterStudyAction::samplerParameters()
+{
+  // monte-carlo, lhs, cartesian-product, csv, input-matrix
+  return {{{"num_samples", true}, {"distributions", true}},
+          {{"num_samples", true}, {"distributions", true}},
+          {{"linear_space_items", true}},
+          {{"csv_samples_file", true}, {"csv_column_indices", false}, {"csv_column_names", false}},
+          {{"input_matrix", true}}};
+}
+
+std::vector<std::vector<std::string>>
+ParameterStudyAction::distributionParameters()
+{
+  // normal, uniform, weibull, lognormal, tnormal
+  return {
+      {"normal_mean", "normal_standard_deviation"},
+      {"uniform_lower_bound", "uniform_upper_bound"},
+      {"weibull_location", "weibull_scale", "weibull_shape"},
+      {"lognormal_location", "lognormal_scale"},
+      {"tnormal_mean", "tnormal_standard_deviation", "tnormal_lower_bound", "tnormal_upper_bound"}};
 }
 
 unsigned int

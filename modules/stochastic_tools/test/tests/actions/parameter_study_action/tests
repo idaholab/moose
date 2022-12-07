@@ -53,11 +53,11 @@
   []
 
   [sampling_errors]
-    requirement = 'The system shall throw an error if the following sampler parameters are missing when doing a simple parameter study '
+    requirement = 'The system shall throw an error if the following sampler parameters are missing or unused when doing a simple parameter study '
     [monte_carlo_num_samples]
       type = RunException
       input = sampling_error.i
-      cli_args = 'ParameterStudy/sampling_type=monte-carlo'
+      cli_args = 'ParameterStudy/sampling_type=monte-carlo ParameterStudy/distributions=uniform'
       expect_err = 'The num_samples parameter is required to build the requested sampling type\.'
       detail = '\'num_samples\' parameter for Monte Carlo sampling;'
     []
@@ -68,10 +68,20 @@
       expect_err = 'The distributions parameter is required to build the requested sampling type\.'
       detail = '\'distributions\' parameter for Monte Carlo sampling;'
     []
+    [monte_carlo_unused]
+      type = RunException
+      input = sampling_error.i
+      cli_args = 'ParameterStudy/sampling_type=monte-carlo
+                  ParameterStudy/num_samples=1
+                  ParameterStudy/distributions=uniform
+                  ParameterStudy/linear_space_items=\'0 1 1\''
+      expect_err = 'The following parameters are unused for the selected sampling type:'
+      detail = '\'linear_space_items\' parameter with Monte Carlo sampling;'
+    []
     [lhs_num_samples]
       type = RunException
       input = sampling_error.i
-      cli_args = 'ParameterStudy/sampling_type=lhs'
+      cli_args = 'ParameterStudy/sampling_type=lhs ParameterStudy/distributions=uniform'
       expect_err = 'The num_samples parameter is required to build the requested sampling type\.'
       detail = '\'num_samples\' parameter for latin hypercube sampling;'
     []
@@ -95,6 +105,16 @@
       cli_args = 'ParameterStudy/sampling_type=csv'
       expect_err = 'The csv_samples_file parameter is required to build the requested sampling type\.'
       detail = '\'samples_file\' parameter for CSV sampling;'
+    []
+    [csv_both]
+      type = RunException
+      input = sampling_error.i
+      cli_args = 'ParameterStudy/sampling_type=csv
+                  ParameterStudy/csv_samples_file=gold/monte_carlo_csv_study_samples_0001.csv
+                  ParameterStudy/csv_column_indices=1
+                  ParameterStudy/csv_column_names=foo'
+      expect_err = '\'csv_column_indices\' and \'csv_column_names\' cannot both be set\.'
+      detail = 'both \'csv_column_indices\' and \'csv_column_names\' parameters are specified for CSV sampling;'
     []
     [input_matrix]
       type = RunException
@@ -128,8 +148,18 @@
       cli_args = 'ParameterStudy/distributions=\'uniform uniform\'
                   ParameterStudy/uniform_lower_bound=\'0\'
                   ParameterStudy/uniform_upper_bound=\'1 1\''
-      expect_err = 'There are not enough entries in uniform_lower_bound to build the listed distributions\.'
+      expect_err = 'The number of entries in uniform_lower_bound does not match the number of required entries \(\d+\) to build the listed distributions\.'
       detail = 'inconsitent size;'
+    []
+    [unused]
+      type = RunException
+      input = distributions_error.i
+      cli_args = 'ParameterStudy/distributions=\'uniform uniform\'
+                  ParameterStudy/uniform_lower_bound=\'0 0\'
+                  ParameterStudy/uniform_upper_bound=\'1 1\'
+                  ParameterStudy/normal_mean=1'
+      expect_err = 'The following parameters are unused for the listed distributions:'
+      detail = 'unused;'
     []
   []
 
