@@ -49,7 +49,7 @@ This top-level block is used to define the kernels that provide volume integrals
 in the partial differential equation being solved. Generally, a separate `Kernel`
 is used to define each term in a partial differential equation. The full heat equation
 is generally expressed with multiple terms, as described in the Heat Conduction module
-[introduction](heat_conduction/index.md). However, for this simple example, we are only
+[introduction](modules/heat_conduction/index.md). However, for this simple example, we are only
 including the conduction term, so the equation being solve takes the form:
 
 \begin{equation}\label{eq:heat_conduction_equation}

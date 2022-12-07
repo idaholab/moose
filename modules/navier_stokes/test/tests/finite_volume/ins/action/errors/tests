@@ -69,7 +69,7 @@
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the number of passive scalar inlet types does not match the number of inlet boundaries.'
     cli_args = "Modules/NavierStokesFV/passive_scalar_inlet_types=''"
-    expect_err = "Size \(0\) is not the same as the number of inlet boundaries in 'inlet_boundaries' "
+    expect_err = "Size \(0\) is not the same as the number of inlet boundaries times number of transported scalars in 'inlet_boundaries' "
                  "\(size 1\)"
     ad_indexing_type = 'global'
   []
