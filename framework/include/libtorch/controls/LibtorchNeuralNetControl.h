@@ -53,6 +53,9 @@ public:
   /// Return a reference to the stored neural network
   const Moose::LibtorchNeuralNetBase & controlNeuralNet() const;
 
+  /// Return true if the object already has a neural netwok
+  bool hasControlNeuralNet() const { return (_nn != NULL); };
+
 protected:
   /**
    * Function responsible for checking for potential user errors in the input file

@@ -129,17 +129,10 @@ LibtorchArtificialNeuralNet::store(nlohmann::json & json) const
   const auto & named_params = this->named_parameters();
   for (const auto & param_i : make_range(named_params.size()))
   {
-    const auto & sizes = named_params[param_i].value().sizes();
-
-    // Libtorch holds sizes in integers instead of unsigned integers
-    int max_size = 1;
-    for (const auto & dim_size : sizes)
-      max_size *= dim_size;
-
     // We cast the parameters into a 1D vector
-    json[named_params[param_i].key()] =
-        std::vector<Real>(named_params[param_i].value().data_ptr<Real>(),
-                          named_params[param_i].value().data_ptr<Real>() + max_size);
+    json[named_params[param_i].key()] = std::vector<Real>(
+        named_params[param_i].value().data_ptr<Real>(),
+        named_params[param_i].value().data_ptr<Real>() + named_params[param_i].value().numel());
   }
 }
 

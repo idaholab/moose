@@ -56,17 +56,12 @@ tensorToVector(torch::Tensor & tensor, std::vector<DataType> & vector)
   const auto & sizes = tensor.sizes();
 
   long int max_size = 0;
-  long int product_size = 1;
-
   for (const auto & dim_size : sizes)
-  {
     // We do this comparison because XCode complains if we use std::max
     max_size = dim_size > max_size ? dim_size : max_size;
-    product_size *= dim_size;
-  }
 
-  mooseAssert(max_size == product_size, "The given tensor should be one-dimensional!");
-  vector = {tensor.data_ptr<Real>(), tensor.data_ptr<Real>() + max_size};
+  mooseAssert(max_size == tensor.numel(), "The given tensor should be one-dimensional!");
+  vector = {tensor.data_ptr<DataType>(), tensor.data_ptr<DataType>() + tensor.numel()};
 }
 
 // Explicitly instantiate for DataType=Real

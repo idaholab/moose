@@ -243,7 +243,8 @@ LibtorchNeuralNetControl::prepareInputTensor()
 const Moose::LibtorchNeuralNetBase &
 LibtorchNeuralNetControl::controlNeuralNet() const
 {
-  mooseError(_nn, "The neural network in the controller must exist!");
+  if (!hasControlNeuralNet())
+    mooseError("The neural network in the controller must exist!");
   return *_nn;
 }
 
