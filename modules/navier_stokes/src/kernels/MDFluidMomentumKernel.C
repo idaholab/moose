@@ -44,13 +44,30 @@ MDFluidMomentumKernel::computeQpResidual()
                                  _pressure[_qp] * _grad_eps[_qp](_component) * _test[_i][_qp]
                            : porosity * _grad_pressure[_qp](_component) * _test[_i][_qp];
 
-  RealVectorValue viscous_stress_vec(_viscous_stress_tensor[_qp](_component, 0),
-                                     _viscous_stress_tensor[_qp](_component, 1),
-                                     _viscous_stress_tensor[_qp](_component, 2));
-  Real viscous_part = (porosity > 0.99) ? viscous_stress_vec * _grad_test[_i][_qp] : 0;
+  Real viscous_part = 0;
+  Real friction = 0;
+  Real friction_part = 0;
+  if (porosity > 0.99)
+  {
+    RealVectorValue viscous_stress_vec(_viscous_stress_tensor[_qp](_component, 0),
+                                       _viscous_stress_tensor[_qp](_component, 1),
+                                       _viscous_stress_tensor[_qp](_component, 2));
+    viscous_part = viscous_stress_vec * _grad_test[_i][_qp];
+  }
+  else
+  {
+    Real velmag = std::sqrt(_u_vel[_qp] * _u_vel[_qp] + _v_vel[_qp] * _v_vel[_qp] +
+                            _w_vel[_qp] * _w_vel[_qp]);
+    Real pm_inertial_part =
+        _inertia_resistance_coeff[_qp](_component, _component) * vec_vel(_component) * velmag;
+    Real pm_viscous_part =
+        _viscous_resistance_coeff[_qp](_component, _component) * vec_vel(_component);
+    friction = pm_inertial_part + pm_viscous_part;
+    friction_part = friction * _test[_i][_qp];
+  }
 
   // Assemble weak form terms
-  Real normal_part = convection_part + pressure_part + gravity_part + viscous_part;
+  Real normal_part = convection_part + pressure_part + gravity_part + viscous_part + friction_part;
 
   // SUPG contributions
   Real psi_supg = _taum[_qp] * _vel_elem * _grad_test[_i][_qp];
@@ -60,12 +77,13 @@ MDFluidMomentumKernel::computeQpResidual()
   Real pressure_supg = porosity * _grad_pressure[_qp](_component);
   Real gravity_supg = -porosity * _rho[_qp] * _vec_g(_component);
   Real viscous_supg = 0;
+  Real friction_supg = friction;
   if (porosity > 0.99)
     viscous_supg = -(_dynamic_viscosity[_qp] + _turbulence_viscosity[_qp]) * _second_u[_qp].tr();
 
   // Assemble SUPG terms
-  Real supg_part =
-      psi_supg * (transient_supg + convection_supg + pressure_supg + viscous_supg + gravity_supg);
+  Real supg_part = psi_supg * (transient_supg + convection_supg + pressure_supg + viscous_supg +
+                               friction_supg + gravity_supg);
 
   // Assemble weak form and SUPG contributions
   Real res = normal_part + supg_part;
@@ -97,13 +115,29 @@ MDFluidMomentumKernel::computeQpJacobian()
     convection_part = convection_supg * _test[_i][_qp];
 
   Real viscous_part = 0;
+  Real friction_part = 0;
+  Real friction_supg = 0;
   if (porosity > 0.99)
     viscous_part = (_dynamic_viscosity[_qp] + _turbulence_viscosity[_qp]) *
                    _grad_phi[_j][_qp](_component) * _grad_test[_i][_qp](_component);
+  else
+  {
+    Real velmag = std::sqrt(_u_vel[_qp] * _u_vel[_qp] + _v_vel[_qp] * _v_vel[_qp] +
+                            _w_vel[_qp] * _w_vel[_qp]);
+
+    Real pm_inertial_part = 0;
+    if (velmag > 1e-3)
+      pm_inertial_part = _inertia_resistance_coeff[_qp](_component, _component) * _phi[_j][_qp] *
+                         (velmag + vec_vel(_component) * vec_vel(_component) / velmag);
+    Real pm_viscous_part = _viscous_resistance_coeff[_qp](_component, _component) * _phi[_j][_qp];
+
+    friction_part = (pm_inertial_part + pm_viscous_part) * _test[_i][_qp];
+    friction_supg = (pm_inertial_part + pm_viscous_part) * psi_supg;
+  }
 
   // Assemble weak form and SUPG contributions
-  Real normal_part = convection_part + viscous_part;
-  Real supg_part = psi_supg * (transient_supg + convection_supg);
+  Real normal_part = convection_part + viscous_part + friction_part;
+  Real supg_part = psi_supg * (transient_supg + convection_supg) + friction_supg;
 
   return normal_part + supg_part;
 }
@@ -140,6 +174,18 @@ MDFluidMomentumKernel::computeQpOffDiagJacobian(unsigned int jvar)
           jac = _rho[_qp] / porosity * _phi[_j][_qp] * _grad_u[_qp](m - 1) * _test[_i][_qp];
         // convection SUPG term
         jac += _rho[_qp] / porosity * _phi[_j][_qp] * _grad_u[_qp](m - 1) * psi_supg;
+        // pm friction
+        if (porosity <= 0.99)
+        {
+          Real velmag = std::sqrt(_u_vel[_qp] * _u_vel[_qp] + _v_vel[_qp] * _v_vel[_qp] +
+                                  _w_vel[_qp] * _w_vel[_qp]);
+          if (velmag > 1e-3)
+          {
+            // inertia_resistance, both normal and supg parts
+            jac += _inertia_resistance_coeff[_qp](_component, _component) * _phi[_j][_qp] *
+                   vec_vel(_component) * vec_vel(m - 1) / velmag * (_test[_i][_qp] + psi_supg);
+          }
+        }
       }
       break;
 

@@ -53,6 +53,8 @@ MDFluidMaterial::MDFluidMaterial(const InputParameters & parameters)
     _viscous_stress_tensor(declareProperty<RealTensorValue>("viscous_stress_tensor")),
     _dynamic_viscosity(declareProperty<Real>("dynamic_viscosity")),
     _turbulence_viscosity(declareProperty<Real>("turbulence_viscosity")),
+    _inertia_resistance_coeff(declareProperty<RealTensorValue>("inertia_resistance_coeff")),
+    _viscous_resistance_coeff(declareProperty<RealTensorValue>("viscous_resistance_coeff")),
     _k(declareProperty<Real>("k_fluid")),
     _k_turbulence(declareProperty<Real>("k_turbulence")),
     _k_elem(declareProperty<Real>("k_fluid_elem")),
@@ -153,6 +155,10 @@ MDFluidMaterial::computeQpProperties()
     grad_vel(i, i) -= 2.0 / 3.0 * div_vel;
 
   _viscous_stress_tensor[_qp] = (_dynamic_viscosity[_qp] + _turbulence_viscosity[_qp]) * grad_vel;
+
+  // place holder which will be handled by specific closure correlations
+  _inertia_resistance_coeff[_qp] = RealTensorValue(0, 0, 0, 0, 0, 0, 0, 0, 0);
+  _viscous_resistance_coeff[_qp] = RealTensorValue(0, 0, 0, 0, 0, 0, 0, 0, 0);
 
   // Compute stabilization parameters:
   compute_hsupg();

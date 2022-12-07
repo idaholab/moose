@@ -72,6 +72,8 @@ protected:
   const MaterialProperty<RealTensorValue> & _viscous_stress_tensor;
   const MaterialProperty<Real> & _dynamic_viscosity;
   const MaterialProperty<Real> & _turbulence_viscosity;
+  const MaterialProperty<RealTensorValue> & _inertia_resistance_coeff;
+  const MaterialProperty<RealTensorValue> & _viscous_resistance_coeff;
 
   // Helper function for mapping Moose variable numberings into
   // the "canonical" numbering for the porous medium equations.

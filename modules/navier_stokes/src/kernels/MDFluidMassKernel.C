@@ -45,6 +45,7 @@ MDFluidMassKernel::computeQpResidual()
   Real gravity_pspg = -porosity * _rho[_qp] * _vec_g * psi_pspg;
 
   Real viscous_pspg = 0;
+  Real pm_friction_pspg = 0;
   if (porosity > 0.99)
   {
     RealVectorValue vec_vel_second(
@@ -52,9 +53,18 @@ MDFluidMassKernel::computeQpResidual()
     viscous_pspg =
         -(_dynamic_viscosity[_qp] + _turbulence_viscosity[_qp]) * vec_vel_second * psi_pspg;
   }
+  else
+  {
+    Real velmag = std::sqrt(_u_vel[_qp] * _u_vel[_qp] + _v_vel[_qp] * _v_vel[_qp] +
+                            _w_vel[_qp] * _w_vel[_qp]);
+
+    pm_friction_pspg += _inertia_resistance_coeff[_qp] * vec_vel * velmag * psi_pspg;
+    pm_friction_pspg += _viscous_resistance_coeff[_qp] * vec_vel * psi_pspg;
+  }
 
   // Assemble PSPG terms
-  Real momeq_part = transient_pspg + convection_pspg + pressure_pspg + viscous_pspg + gravity_pspg;
+  Real momeq_part = transient_pspg + convection_pspg + pressure_pspg + viscous_pspg + gravity_pspg +
+                    pm_friction_pspg;
 
   // Assemble final residual
   return masseq_part + momeq_part;
@@ -78,7 +88,26 @@ MDFluidMassKernel::computeQpOffDiagJacobian(unsigned int jvar)
     case 1:
     case 2:
     case 3:
-      return -_rho[_qp] * _phi[_j][_qp] * _grad_test[_i][_qp](m - 1);
+    {
+      RealVectorValue vec_vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
+      Real velmag = std::sqrt(_u_vel[_qp] * _u_vel[_qp] + _v_vel[_qp] * _v_vel[_qp] +
+                              _w_vel[_qp] * _w_vel[_qp]);
+
+      Real mass_eqn_part = -_rho[_qp] * _phi[_j][_qp] * _grad_test[_i][_qp](m - 1);
+
+      Real pm_inertial_pspg = 0;
+      Real pm_viscous_pspg = 0;
+      if (velmag < 1e-3)
+        pm_inertial_pspg = 0.;
+      else
+        pm_inertial_pspg = _inertia_resistance_coeff[_qp](m - 1, m - 1) *
+                           (velmag + vec_vel(m - 1) * vec_vel(m - 1) / velmag) * _phi[_j][_qp] *
+                           _tauc[_qp] * _grad_test[_i][_qp](m - 1);
+      pm_viscous_pspg = _viscous_resistance_coeff[_qp](m - 1, m - 1) * _phi[_j][_qp] * _tauc[_qp] *
+                        _grad_test[_i][_qp](m - 1);
+
+      return mass_eqn_part + pm_inertial_pspg + pm_viscous_pspg;
+    }
 
     default:
       return 0;

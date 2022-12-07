@@ -41,6 +41,8 @@ protected:
   MaterialProperty<RealTensorValue> & _viscous_stress_tensor;
   MaterialProperty<Real> & _dynamic_viscosity;
   MaterialProperty<Real> & _turbulence_viscosity;
+  MaterialProperty<RealTensorValue> & _inertia_resistance_coeff;
+  MaterialProperty<RealTensorValue> & _viscous_resistance_coeff;
   MaterialProperty<Real> & _k;
   MaterialProperty<Real> & _k_turbulence;
   MaterialProperty<Real> & _k_elem;
