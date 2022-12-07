@@ -316,7 +316,9 @@ endif
 $(moose_revision_header): $(moose_HEADER_deps)
 	@echo "Checking if header needs updating: "$@"..."
 	$(shell $(FRAMEWORK_DIR)/scripts/get_repo_revision.py $(FRAMEWORK_DIR) \
-	  $(moose_revision_header) MOOSE)
+	  $(moose_revision_header) MOOSE) \
+        # ensure the header generation step didn't fail
+	@if [ $? ]; then $(error "Failed to generate MooseRevision.h"); fi
 	@if [ ! -e "$(moose_all_header_dir)/MooseRevision.h" ]; then \
 		ln -sf $(moose_revision_header) $(moose_all_header_dir); \
 	fi
