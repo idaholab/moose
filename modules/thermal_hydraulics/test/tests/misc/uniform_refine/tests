@@ -9,7 +9,7 @@
     ad_indexing_type = 'global'
 
     issues = "#226"
-    design = "THMCreateMeshAction.md"
-    requirement = "The system shall uniform refine mesh when specifid on the command line"
+    design = "SetupMeshCompleteAction.md"
+    requirement = "The system shall uniform refine mesh when specified on the command line"
   []
 []
