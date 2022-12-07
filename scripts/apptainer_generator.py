@@ -321,7 +321,7 @@ class ApptainerGenerator:
         """
         # Set application-related variables
         if self.args.library == 'app':
-            app_name, app_root, _, _ = Versioner.get_app()
+            app_name, app_root, _ = Versioner.get_app()
             jinja_data['APPLICATION_DIR'] = app_root
             jinja_data['APPLICATION_NAME'] = os.path.basename(app_root)
             jinja_data['BINARY_NAME'] = app_name
