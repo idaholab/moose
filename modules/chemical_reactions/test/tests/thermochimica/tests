@@ -10,6 +10,7 @@
     max_threads = 1
     # Recover changes the results and would require the same rel_err as the test below. Let's keep one test tight.
     recover = false
+    rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
     required_objects = 'ThermochimicaNodalData'
   []
 
@@ -22,7 +23,7 @@
     requirement = 'The system shall be able to use reinitialization to speed up a thermochimica solve'
     cli_args = 'UserObjects/data/reinit_requested=true'
     max_threads = 1
-    rel_err = 1e-4 # reinit improves the results
+    rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
     required_objects = 'ThermochimicaNodalData'
   []
 []

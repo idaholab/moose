@@ -3,8 +3,17 @@ Thermochimica_srcfiles    := $(shell find $(THERMOCHIMICA_SRC) -name "*.C")
 Thermochimica_f90modfiles := $(shell find $(THERMOCHIMICA_SRC) -name "Module*.f90")
 Thermochimica_f90srcfiles := $(shell find $(THERMOCHIMICA_SRC) -name "*.f90" -not -name "Module*")
 
-# object files
+# object files (from C)
 Thermochimica_objects     := $(patsubst %.C, %.$(obj-suffix), $(Thermochimica_srcfiles))
+
+# the C files depend on MooseConfig.h
+ifeq ($(MOOSE_HEADER_SYMLINKS),true)
+$(Thermochimica_objects): $(moose_config_symlink)
+else
+$(Thermochimica_objects): $(moose_config)
+endif
+
+# remaining object files (Fortran)
 Thermochimica_objects     += $(patsubst %.f90, %.$(obj-suffix), $(Thermochimica_f90modfiles))
 Thermochimica_objects     += $(patsubst %.f90, %.$(obj-suffix), $(Thermochimica_f90srcfiles))
 
