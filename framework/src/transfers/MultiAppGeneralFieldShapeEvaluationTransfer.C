@@ -100,7 +100,8 @@ MultiAppGeneralFieldShapeEvaluationTransfer::evaluateInterpValuesWithMeshFunctio
     // NOTE We are missing some overlap detection by accepting the first result
     for (MooseIndex(_from_problems.size()) i_from = 0;
          i_from < _from_problems.size() &&
-         outgoing_vals[i_pt].first == GeneralFieldTransfer::BetterOutOfMeshValue;
+         (outgoing_vals[i_pt].first == GeneralFieldTransfer::BetterOutOfMeshValue ||
+          _greedy_search);
          ++i_from)
     {
       if (local_bboxes[i_from].contains_point(pt))
@@ -111,6 +112,12 @@ MultiAppGeneralFieldShapeEvaluationTransfer::evaluateInterpValuesWithMeshFunctio
 
         // Use mesh function to compute interpolation values
         auto val = (*local_meshfuns[i_from])(pt - _from_positions[i_from]);
+
+        // Look for overlaps
+        if (_greedy_search && val != GeneralFieldTransfer::BetterOutOfMeshValue &&
+            outgoing_vals[i_pt].first != GeneralFieldTransfer::BetterOutOfMeshValue)
+          _num_overlaps++;
+
         // Assign value
         outgoing_vals[i_pt].first = val;
         if (outgoing_vals[i_pt].first == GeneralFieldTransfer::BetterOutOfMeshValue)

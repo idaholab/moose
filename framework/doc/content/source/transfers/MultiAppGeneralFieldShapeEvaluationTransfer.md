@@ -9,11 +9,16 @@ This object derived from the [MultiAppGeneralFieldTransfer.md] family of transfe
 many of its features and characteristics.
 
 !alert note
-If the two application meshes are the same and the variables involved are of the same type, the [MultiAppCopyTransfer.md] will
+If the origin and target meshes are the same, if there is only a single child app involved on both sides,
+and if the variables involved are of the same type, the [MultiAppCopyTransfer.md] will
 provide better performance with the same results.
 
 !alert note
 This is a re-implementation of [MultiAppShapeEvaluationTransfer.md] using a more flexible algorithm.
+
+!alert note title=Origin mesh overlap detection
+Indetermination due to overlapping origin mesh is only detected reliably if
+[!param](/Transfers/MultiAppGeneralFieldShapeEvaluationTransfer/greedy_search) is set to true.
 
 ## Example Input File Syntax
 

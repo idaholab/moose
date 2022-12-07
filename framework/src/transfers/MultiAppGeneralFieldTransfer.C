@@ -73,10 +73,10 @@ MultiAppGeneralFieldTransfer::validParams()
 
 MultiAppGeneralFieldTransfer::MultiAppGeneralFieldTransfer(const InputParameters & parameters)
   : MultiAppConservativeTransfer(parameters),
-    _error_on_miss(getParam<bool>("error_on_miss")),
-    _bbox_factor(getParam<Real>("bbox_factor")),
     _greedy_search(getParam<bool>("greedy_search")),
-    _num_overlaps(0)
+    _num_overlaps(0),
+    _error_on_miss(getParam<bool>("error_on_miss")),
+    _bbox_factor(getParam<Real>("bbox_factor"))
 {
   if (_to_var_names.size() == _from_var_names.size())
     _var_size = _to_var_names.size();
@@ -535,7 +535,7 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
         // - the smallest rank with the same distance
         if (!GeneralFieldTransfer::isBetterOutOfMeshValue(incoming_vals[val_offset].first) &&
             (MooseUtils::absoluteFuzzyGreaterThan(val.distance, incoming_vals[val_offset].second) ||
-             (val.pid > pid &&
+             ((val.pid > pid || _greedy_search) &&
               MooseUtils::absoluteFuzzyEqual(val.distance, incoming_vals[val_offset].second))))
         {
           // Count disagreeing overlaps

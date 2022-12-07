@@ -10,7 +10,6 @@
 #pragma once
 
 #include "MultiAppConservativeTransfer.h"
-#include "libmesh/mesh_function.h"
 #include "MooseHashing.h"
 #include "KDTree.h"
 
@@ -22,10 +21,12 @@
 
 /**
  * It is a general field transfer. It will do the following things
- * 1) From part of source domain to part of domain. Support subdomains to
- *  subdomains
+ * 1) From part of source domain to part of domain. Support subdomains/boundaries to
+ *    subdomains/boundaries, mixing as appropriate
  * 2) Support vector vars and regular vars
  * 3) Support higher order FEM
+ * 4) Support both distributed and replicated meshes
+ * 5) Support both origin and target displaced meshes
  */
 class MultiAppGeneralFieldTransfer : public MultiAppConservativeTransfer
 {
@@ -108,6 +109,14 @@ protected:
   /// Point locators, useful to examine point location with regards to domain restriction
   std::vector<std::unique_ptr<PointLocatorBase>> _from_point_locators;
 
+  /// Whether or not a greedy strategy will be used
+  /// If true, all the partitions will be checked for a given
+  /// outgoing point
+  bool _greedy_search;
+
+  /// Number of conflicts between points in the mesh
+  unsigned int _num_overlaps;
+
 private:
   /// A map from pid to a set of points
   typedef std::unordered_map<processor_id_type, std::vector<Point>> ProcessorToPointVec;
@@ -149,11 +158,6 @@ private:
   /// How much we should relax bounding boxes
   Real _bbox_factor;
 
-  /// Whether or not a greedy strategy will be used
-  /// If true, all the partitions will be checked for a given
-  /// outgoing point
-  bool _greedy_search;
-
   /// Number of froms per processor
   std::vector<unsigned int> _froms_per_proc;
 
@@ -162,9 +166,6 @@ private:
 
   /// A map from processor to pointInfo vector
   ProcessorToPointInforVec _processor_to_pointInfoVec;
-
-  /// Number of conflicts between points in the mesh
-  unsigned int _num_overlaps;
 
   /**
    * Performs the transfer for the variable of index i
