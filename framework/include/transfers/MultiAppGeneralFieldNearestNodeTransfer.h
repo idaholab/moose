@@ -55,7 +55,4 @@ private:
 
   /// Number of points to consider
   unsigned int _num_nearest_points;
-
-  using MultiAppGeneralFieldTransfer::_from_blocks;
-  using MultiAppGeneralFieldTransfer::_from_boundaries;
 };

@@ -16,6 +16,9 @@
 #include "MooseTypes.h"
 #include "MooseVariableFE.h"
 
+#include "libmesh/point_locator_base.h"
+#include "libmesh/enum_point_locator_type.h"
+
 // TIMPI includes
 #include "timpi/communicator.h"
 #include "timpi/parallel_sync.h"
@@ -29,8 +32,11 @@ InputParameters
 MultiAppGeneralFieldTransfer::validParams()
 {
   InputParameters params = MultiAppConservativeTransfer::validParams();
+  // Expansion default to make a node in the target mesh overlapping with a node in the origin
+  // mesh always register as being inside the origin application bounding box. The contains_point
+  // bounding box checks uses exact comparisons
   params.addRangeCheckedParam<Real>("bbox_factor",
-                                    1,
+                                    1.00000001,
                                     "bbox_factor>0",
                                     "Factor to inflate or deflate the source app bounding boxes");
 
@@ -128,6 +134,16 @@ MultiAppGeneralFieldTransfer::initialSetup()
       if (_to_boundaries.size() != boundary_names.size())
         paramError("to_boundaries", "Some boundaries were not found in the mesh");
     }
+  }
+
+  // Create the point locators to locate evaluation points in the origin mesh(es)
+  _from_point_locators.resize(_from_problems.size());
+  for (unsigned int i_from = 0; i_from < _from_problems.size(); ++i_from)
+  {
+    const auto & from_moose_mesh = _from_problems[i_from]->mesh(_displaced_source_mesh);
+    _from_point_locators[i_from] =
+        PointLocatorBase::build(TREE_LOCAL_ELEMENTS, from_moose_mesh.getMesh());
+    _from_point_locators[i_from]->enable_out_of_mesh_mode();
   }
 }
 
@@ -418,15 +434,11 @@ MultiAppGeneralFieldTransfer::extractLocalFromBoundingBoxes(std::vector<Bounding
   // Find the index to the first of this processor's local bounding boxes.
   unsigned int local_start = 0;
   for (processor_id_type i_proc = 0; i_proc < n_processors() && i_proc != processor_id(); ++i_proc)
-  {
     local_start += _froms_per_proc[i_proc];
-  }
 
   // Extract the local bounding boxes.
   for (unsigned int i_from = 0; i_from < _froms_per_proc[processor_id()]; ++i_from)
-  {
     local_bboxes[i_from] = _bboxes[local_start + i_from];
-  }
 }
 
 void
@@ -648,6 +660,15 @@ MultiAppGeneralFieldTransfer::hasBlocks(std::set<SubdomainID> & blocks,
                         node_blocks.end(),
                         std::inserter(u, u.begin()));
   return !u.empty();
+}
+
+bool
+MultiAppGeneralFieldTransfer::hasBlocks(std::set<SubdomainID> & blocks,
+                                        unsigned int i_from,
+                                        const Point & point) const
+{
+  const Elem * elem = (*_from_point_locators[i_from])(point - _from_positions[i_from], &blocks);
+  return (elem != nullptr);
 }
 
 bool

@@ -72,9 +72,14 @@ protected:
   bool hasBlocks(std::set<SubdomainID> & blocks, const Elem * elem) const;
 
   /*
-   * Whether or not a given node is part of an element near the given blocks
+   * Whether or not a given node is part of an element in the given blocks
    */
   bool hasBlocks(std::set<SubdomainID> & blocks, const MooseMesh & mesh, const Node * node) const;
+
+  /*
+   * Whether or not a given point is part of an element in the given blocks
+   */
+  bool hasBlocks(std::set<SubdomainID> & blocks, unsigned int i_from, const Point & pt) const;
 
   /*
    * Whether or not a given node is part of the given boundaries
@@ -99,6 +104,9 @@ protected:
 
   /// Origin boundary(ies) restriction
   std::set<BoundaryID> _from_boundaries;
+
+  /// Point locators, useful to examine point location with regards to domain restriction
+  std::vector<std::unique_ptr<PointLocatorBase>> _from_point_locators;
 
 private:
   /// A map from pid to a set of points

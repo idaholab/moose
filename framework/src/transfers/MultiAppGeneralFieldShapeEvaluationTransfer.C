@@ -97,6 +97,7 @@ MultiAppGeneralFieldShapeEvaluationTransfer::evaluateInterpValuesWithMeshFunctio
   {
     // Loop until we've found the lowest-ranked app that actually contains
     // the quadrature point.
+    // NOTE We are missing some overlap detection by accepting the first result
     for (MooseIndex(_from_problems.size()) i_from = 0;
          i_from < _from_problems.size() &&
          outgoing_vals[i_pt].first == GeneralFieldTransfer::BetterOutOfMeshValue;
@@ -104,6 +105,10 @@ MultiAppGeneralFieldShapeEvaluationTransfer::evaluateInterpValuesWithMeshFunctio
     {
       if (local_bboxes[i_from].contains_point(pt))
       {
+        // Check block restriction (boundary restriction is not supported)
+        if (_from_blocks.size() && !hasBlocks(_from_blocks, i_from, pt))
+          continue;
+
         // Use mesh function to compute interpolation values
         auto val = (*local_meshfuns[i_from])(pt - _from_positions[i_from]);
         // Assign value
