@@ -2,6 +2,9 @@
 {#- APPTAINER_BOOTSTRAP: The BootStrap to use (typically localimage or oras)                  -#}
 {#- APPTAINER_FROM: The From to use (path to an image or an oras URI)                         -#}
 {#- MOOSE_DIR: Path on the host to the MOOSE repository                                       -#}
+{#- vtk_url: URL to download VTK                                                              -#}
+{#- vtk_sha256: The shasum for downloaded file                                                -#}
+{#- vtk_vtk_friendly_version: The short version name. vtk_vtk_ is not a typo                  -#}
 
 {#- Optional jinja arguments                                                                  -#}
 {#- DEV_CONTAINER: Set to anything to add development packages and install _all_ methods      -#}
@@ -48,6 +51,8 @@ From: {{ APPTAINER_FROM }}
     ROOT_BUILD_DIR={{ ROOT_BUILD_DIR }}
     LIBMESH_DIR={{ LIBMESH_DIR }}
     MOOSE_JOBS={{ MOOSE_JOBS }}
+    VTKINCLUDE_DIR={{ VTK_DIR }}/include/vtk-{{ vtk_vtk_friendly_version }}
+    VTKLIB_DIR={{ VTK_DIR }}/lib
 
     # Build VTK
     cd ${ROOT_BUILD_DIR}/$(basename {{vtk_url}} .tar.gz)
@@ -55,9 +60,9 @@ From: {{ APPTAINER_FROM }}
     cmake .. \
         -Wno-dev \
         -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_PREFIX_PATH:PATH={{ VTK_DIR }} \
-        -DCMAKE_INSTALL_PREFIX:PATH={{ VTK_DIR }} \
-        -DCMAKE_INSTALL_RPATH:PATH={{ VTK_DIR }}/lib \
+        -DCMAKE_PREFIX_PATH:PATH=${VTK_DIR} \
+        -DCMAKE_INSTALL_PREFIX:PATH=${VTK_DIR} \
+        -DCMAKE_INSTALL_RPATH:PATH=${VTK_DIR}/lib \
         -DCMAKE_INSTALL_LIBDIR=lib \
         -DVTK_BUILD_DOCUMENTATION:BOOL=OFF \
         -DVTK_BUILD_TESTING:BOOL=OFF \
@@ -69,10 +74,6 @@ From: {{ APPTAINER_FROM }}
         -DVTK_GROUP_ENABLE_Views:STRING=NO \
         -DVTK_GROUP_ENABLE_Web:STRING=NO
     make install -j ${MOOSE_JOBS}
-
-    # Make VTK available for libMesh update_and_rebuild_libmesh.sh script, vtk_vtk_ is not a typo
-    export VTKINCLUDE_DIR={{ VTK_DIR }}/include/vtk-{{ vtk_vtk_friendly_version }}
-    export VTKLIB_DIR={{ VTK_DIR }}/lib
 
 {%- if DEV_CONTAINER is defined %}
     # DEV_CONTAINER set
