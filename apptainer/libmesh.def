@@ -27,6 +27,11 @@ From: {{ APPTAINER_FROM }}
     cd ${ROOT_BUILD_DIR}/moose
     git submodule update --init --recursive libmesh
 
+    # Obtain VTK
+    cd ${ROOT_BUILD_DIR}
+    curl -L -O {{vtk_url}} || exit 1
+    if [[ `sha256sum $(basename {{vtk_url}}) | cut -d\  -f1` != '{{vtk_sha256}}' ]]; then exit 1; fi
+
 %environment
     # From moose-libmesh
     export LIBMESH_DIR={{ LIBMESH_DIR }}

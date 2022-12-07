@@ -241,7 +241,7 @@ class Versioner:
         name = meta['package']['name']
         version = meta['package']['version']
         build = meta['build'].get('string', None)
-        return name, version, build
+        return name, version, build, meta
 
     @staticmethod
     def conda_meta(package, influential, commit):
@@ -252,7 +252,7 @@ class Versioner:
 
             # Read the conda-build jinja2 styled template
             contents = Versioner.git_file(entry, commit)
-            name, version, build = Versioner.conda_meta_jinja(contents)
+            name, version, build, meta = Versioner.conda_meta_jinja(contents)
 
             # Make sure the string is build_<NUMBER>
             build_re = re.search(r'^build\_([0-9]+)$', build)
@@ -263,7 +263,8 @@ class Versioner:
             return {'name': name,
                     'version': version,
                     'build': int(build_re.group(1)),
-                    'install': f'{name}={version}={build}'}
+                    'install': f'{name}={version}={build}',
+                    'meta': meta}
         return None
 
     @staticmethod

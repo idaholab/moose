@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import os
 import sys
 import argparse
@@ -320,7 +321,7 @@ class ApptainerGenerator:
         """
         # Set application-related variables
         if self.args.library == 'app':
-            app_name, app_root, _ = Versioner.get_app()
+            app_name, app_root, _, _ = Versioner.get_app()
             jinja_data['APPLICATION_DIR'] = app_root
             jinja_data['APPLICATION_NAME'] = os.path.basename(app_root)
             jinja_data['BINARY_NAME'] = app_name
@@ -329,11 +330,20 @@ class ApptainerGenerator:
             for package in ['tools', 'test-tools']:
                 meta_yaml = os.path.join(MOOSE_DIR, f'conda/{package}/meta.yaml')
                 with open(meta_yaml, 'r') as f:
-                    _, version, _ = Versioner.conda_meta_jinja(f.read())
+                    _, version, _, _ = Versioner.conda_meta_jinja(f.read())
                     variable_name = 'MOOSE_'
                     variable_name += package.upper().replace('-', '_')
                     variable_name += '_VERSION'
                     jinja_data[variable_name] = version
+        elif self.args.library == 'libmesh':
+            package = 'libmesh-vtk'
+            meta_yaml = os.path.join(MOOSE_DIR, f'conda/{package}/meta.yaml')
+            with open(meta_yaml, 'r') as f:
+                _, _, _, meta = Versioner.conda_meta_jinja(f.read())
+            for var in ['url', 'sha256']:
+                jinja_var = f'vtk_{var}'
+                jinja_data[jinja_var] = meta['source'][var]
+
 
     def _action_exists(self):
         """
