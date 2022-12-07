@@ -500,16 +500,16 @@ void
 dataLoad(std::istream & stream, PerfGraph & perf_graph, void *)
 {
   // Load in all of the recovered sections and register those that do not exist yet
-  // std::vector<moose::internal::PerfGraphSectionInfo> recovered_section_info;
+  std::vector<moose::internal::PerfGraphSectionInfo> recovered_section_info;
   // dataLoad(stream, recovered_section_info, nullptr);
-  // for (const auto & info : recovered_section_info)
-  // {
-  //   if (info._live_message.size())
-  //     perf_graph._perf_graph_registry.registerSection(
-  //         info._name, info._level, info._live_message, info._print_dots);
-  //   else
-  //     perf_graph._perf_graph_registry.registerSection(info._name, info._level);
-  // }
+  for (const auto & info : recovered_section_info)
+  {
+    if (info._live_message.size())
+      perf_graph._perf_graph_registry.registerSection(
+          info._name, info._level, info._live_message, info._print_dots);
+    else
+      perf_graph._perf_graph_registry.registerSection(info._name, info._level);
+  }
 
   // Update the current node time/memory/calls before loading the nodes as the load
   // will append information to current nodes that exist
