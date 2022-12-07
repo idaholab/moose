@@ -1197,6 +1197,15 @@ FEProblemBase::initialSetup()
 }
 
 void
+FEProblemBase::checkDuplicatePostprocessorVariableNames()
+{
+  for (const auto & pp : _reporter_data.getPostprocessorNames())
+    if (hasScalarVariable(pp))
+      mooseError("Postprocessor \"" + pp +
+                 "\" has the same name as a scalar variable in the system.");
+}
+
+void
 FEProblemBase::timestepSetup()
 {
   SubProblem::timestepSetup();
@@ -6978,6 +6987,9 @@ FEProblemBase::checkProblemIntegrity()
   // variables matches the order of the elements in the displaced
   // mesh.
   checkDisplacementOrders();
+
+  // Check for postprocessor names with same name as a scalar variable
+  checkDuplicatePostprocessorVariableNames();
 }
 
 void
