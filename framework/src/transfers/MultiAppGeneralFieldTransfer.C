@@ -54,7 +54,13 @@ MultiAppGeneralFieldTransfer::validParams()
   params.addParam<std::vector<BoundaryName>>(
       "to_boundaries",
       "The boundary we are transferring to (if not specified, whole domain is used).");
+  MooseEnum nodes_or_sides("nodes sides", "sides");
+  params.addParam<MooseEnum>("elemental_boundary_restriction",
+                             nodes_or_sides,
+                             "Whether elemental variable boundary restriction is considered by "
+                             "element side or element nodes");
 
+  // Search options
   params.addParam<bool>(
       "greedy_search",
       false,
@@ -65,14 +71,19 @@ MultiAppGeneralFieldTransfer::validParams()
       "error_on_miss",
       false,
       "Whether or not to error in the case that a target point is not found in the source domain.");
-  params.addParamNamesToGroup("to_blocks from_blocks to_boundaries from_boundaries",
-                              "Transfer spatial restriction");
+
+  params.addParamNamesToGroup(
+      "to_blocks from_blocks to_boundaries from_boundaries elemental_boundary_restriction",
+      "Transfer spatial restriction");
   params.addParamNamesToGroup("greedy_search error_on_miss", "Search algorithm");
+
   return params;
 }
 
 MultiAppGeneralFieldTransfer::MultiAppGeneralFieldTransfer(const InputParameters & parameters)
   : MultiAppConservativeTransfer(parameters),
+    _elemental_boundary_restriction_on_sides(
+        getParam<MooseEnum>("elemental_boundary_restriction") == "sides"),
     _greedy_search(getParam<bool>("greedy_search")),
     _num_overlaps(0),
     _error_on_miss(getParam<bool>("error_on_miss")),
@@ -694,11 +705,25 @@ MultiAppGeneralFieldTransfer::hasBoundaries(std::set<BoundaryID> & boundaries,
                                             const MooseMesh & mesh,
                                             const Elem * elem) const
 {
+  // Get all boundaries each side of the element is part of
   const BoundaryInfo & bnd_info = mesh.getMesh().get_boundary_info();
   std::vector<BoundaryID> vec_to_fill;
-  for (auto side : make_range(elem->n_sides()))
-    bnd_info.boundary_ids(elem, side, vec_to_fill);
+  std::vector<BoundaryID> vec_to_fill_temp;
+  if (_elemental_boundary_restriction_on_sides)
+    for (auto side : make_range(elem->n_sides()))
+    {
+      bnd_info.boundary_ids(elem, side, vec_to_fill_temp);
+      vec_to_fill.insert(vec_to_fill.end(), vec_to_fill_temp.begin(), vec_to_fill_temp.end());
+    }
+  else
+    for (auto node_index : make_range(elem->n_nodes()))
+    {
+      bnd_info.boundary_ids(elem->node_ptr(node_index), vec_to_fill_temp);
+      vec_to_fill.insert(vec_to_fill.end(), vec_to_fill_temp.begin(), vec_to_fill_temp.end());
+    }
   std::set<BoundaryID> vec_to_fill_set(vec_to_fill.begin(), vec_to_fill.end());
+
+  // Look for a match between the boundaries from the restriction and those near the element
   std::set<BoundaryID> u;
   std::set_intersection(boundaries.begin(),
                         boundaries.end(),

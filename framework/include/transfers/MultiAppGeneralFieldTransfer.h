@@ -106,6 +106,9 @@ protected:
   /// Origin boundary(ies) restriction
   std::set<BoundaryID> _from_boundaries;
 
+  /// Whether elemental variable boundary restriction is considered by element side or element nodes
+  const bool _elemental_boundary_restriction_on_sides;
+
   /// Point locators, useful to examine point location with regards to domain restriction
   std::vector<std::unique_ptr<PointLocatorBase>> _from_point_locators;
 

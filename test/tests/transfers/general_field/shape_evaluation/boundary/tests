@@ -54,6 +54,18 @@
       detail = 'for internal boundaries,'
     []
 
+    [internal_boundaries_nodes_for_elem_boundary_restriction]
+      type = 'Exodiff'
+      input = 'main.i'
+      exodiff = 'internal_nodes.e internal_nodes_sub0_out.e internal_nodes_sub1_out.e internal_nodes_sub2_out.e'
+      # Keep second order variable to test that
+      cli_args = "Outputs/file_base=internal_nodes
+                  Outputs/out/hide='to_sub from_sub to_sub_elem'
+                  Transfers/from_sub_elem/to_boundaries=internal Transfers/to_sub_elem/to_boundaries=internal
+                  Transfers/from_sub_elem/elemental_boundary_restriction=nodes Transfers/to_sub_elem/elemental_boundary_restriction=nodes"
+      detail = 'for internal boundaries using element nodes to detect whether an element is part of a boundary,'
+    []
+
     [block_restricted_as_well]
       type = 'Exodiff'
       input = 'main.i'
