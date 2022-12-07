@@ -104,7 +104,7 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
     _us(libMesh::n_threads(), nullptr),
     _vs(libMesh::n_threads(), nullptr),
     _ws(libMesh::n_threads(), nullptr),
-    _sub_ids(blockRestricted() ? blockIDs() : std::set<short unsigned int>({Moose::ANY_BLOCK_ID})),
+    _sub_ids(blockRestricted() ? blockIDs() : _moose_mesh.meshSubdomains()),
     _a(_moose_mesh, _sub_ids, "a"),
     _ax(_a, 0),
     _ay(_a, 1),

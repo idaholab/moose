@@ -290,7 +290,9 @@ protected:
 
 private:
   /// Process the mesh data and convert block names to block IDs
-  void processBlocks();
+  void processMesh();
+  /// Assign the necessary blocks to the input parameters
+  void assignBlocks(InputParameters & params, const std::vector<SubdomainName> & blocks);
   /// Process the supplied variable names and if they are not available, create them
   void processVariables();
   /// Process thermal conductivity (multiple functor input options are available).
@@ -359,12 +361,13 @@ NSFVAction::checkBlockwiseConsistency(const std::string block_param_name,
 
   if (block_names.size())
   {
-    for (const auto & block_group : block_names)
-      for (const auto & block : block_group)
-        if (std::find(_blocks.begin(), _blocks.end(), block) == _blocks.end())
-          paramError(block_param_name,
-                     "Block '" + block +
-                         "' is not present in the block restriction of the fluid flow action!");
+    if (_blocks.size())
+      for (const auto & block_group : block_names)
+        for (const auto & block : block_group)
+          if (std::find(_blocks.begin(), _blocks.end(), block) == _blocks.end())
+            paramError(block_param_name,
+                       "Block '" + block +
+                           "' is not present in the block restriction of the fluid flow action!");
 
     for (const auto & param_name : parameter_names)
     {

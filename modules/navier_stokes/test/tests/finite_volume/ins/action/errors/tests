@@ -275,7 +275,8 @@
     type = 'RunException'
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the user defines a non-existing block for thermal conductivity'
-    cli_args = "Modules/NavierStokesFV/thermal_conductivity_blocks='1; 3' "
+    cli_args = "Modules/NavierStokesFV/block='1 2' "
+               "Modules/NavierStokesFV/thermal_conductivity_blocks='1; 3' "
                "Modules/NavierStokesFV/thermal_conductivity='kappa kappa'"
     expect_err = "Block '3' is not present in the block restriction of the fluid flow action!"
     ad_indexing_type = 'global'
