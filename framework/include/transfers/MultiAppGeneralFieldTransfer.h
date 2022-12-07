@@ -25,8 +25,11 @@
  *    subdomains/boundaries, mixing as appropriate
  * 2) Support vector vars and regular vars
  * 3) Support higher order FEM
- * 4) Support both distributed and replicated meshes
- * 5) Support both origin and target displaced meshes
+ * 4) Support mixed orders between source and target variables
+ * 5) Support both distributed and replicated meshes
+ * 6) Support both origin and target displaced meshes
+ * 7) Support siblings transfers
+ * 8) Support multiple child apps in both the transfer source and target
  */
 class MultiAppGeneralFieldTransfer : public MultiAppConservativeTransfer
 {
@@ -160,6 +163,9 @@ private:
 
   /// How much we should relax bounding boxes
   Real _bbox_factor;
+
+  /// Set the bounding box sizes manually
+  std::vector<Real> _fixed_bbox_size;
 
   /// Number of froms per processor
   std::vector<unsigned int> _froms_per_proc;

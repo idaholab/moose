@@ -18,4 +18,16 @@
     custom_cmp = 'sub.cmp'
     prereq  = tosub1
   [../]
+
+
+  [fixed_bounding_boxes]
+    type = Exodiff
+    input = main.i
+    exodiff = 'main_out.e main_out_sub0_out.e main_out_sub1_out.e main_out_sub2_out.e'
+    # Offset the subapps and override the bounding box to keep them inside the scope
+    cli_args = "MultiApps/sub/positions='0 0 0.1 0.4 0.4 -0.1 0.7 0.1 0.05'
+                Transfers/from_sub/fixed_bounding_box_size='0.5 0.5 1' Transfers/from_sub_elem/fixed_bounding_box_size='0.5 0.5 1'
+                Transfers/to_sub/fixed_bounding_box_size='1 1 0.3' Transfers/to_sub_elem/fixed_bounding_box_size='1 1 0.3'"
+    detail = "while allowing for an user to set the size of the application bounding box directly"
+  []
 []

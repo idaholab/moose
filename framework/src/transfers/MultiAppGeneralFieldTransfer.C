@@ -39,6 +39,11 @@ MultiAppGeneralFieldTransfer::validParams()
                                     1.00000001,
                                     "bbox_factor>0",
                                     "Factor to inflate or deflate the source app bounding boxes");
+  params.addRangeCheckedParam<std::vector<Real>>(
+      "fixed_bounding_box_size",
+      "fixed_bounding_box_size >= 0",
+      "Override source app bounding box size(s) for searches. App bounding boxes will be grown "
+      "symmetrically. Only non-zero components passed will override.");
 
   // Block restrictions
   params.addParam<std::vector<SubdomainName>>(
@@ -76,7 +81,7 @@ MultiAppGeneralFieldTransfer::validParams()
       "to_blocks from_blocks to_boundaries from_boundaries elemental_boundary_restriction",
       "Transfer spatial restriction");
   params.addParamNamesToGroup("greedy_search error_on_miss", "Search algorithm");
-
+  params.addParamNamesToGroup("bbox_factor fixed_bounding_box_size", "Source app bounding box");
   return params;
 }
 
@@ -87,7 +92,10 @@ MultiAppGeneralFieldTransfer::MultiAppGeneralFieldTransfer(const InputParameters
     _greedy_search(getParam<bool>("greedy_search")),
     _num_overlaps(0),
     _error_on_miss(getParam<bool>("error_on_miss")),
-    _bbox_factor(getParam<Real>("bbox_factor"))
+    _bbox_factor(getParam<Real>("bbox_factor")),
+    _fixed_bbox_size(isParamValid("fixed_bounding_box_size")
+                         ? getParam<std::vector<Real>>("fixed_bounding_box_size")
+                         : std::vector<Real>(3, 0))
 {
   if (_to_var_names.size() == _from_var_names.size())
     _var_size = _to_var_names.size();
@@ -197,7 +205,7 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
   for (auto & box : _bboxes)
   {
     // libmesh set an invalid bounding box using this code
-    // for (unsigned int i=0; i<LIBMESH_DIM; i++)
+    // for (unsigned int i = 0; i < LIBMESH_DIM; i++)
     // {
     //   this->first(i)  =  std::numeric_limits<Real>::max();
     //   this->second(i) = -std::numeric_limits<Real>::max();
@@ -837,6 +845,17 @@ MultiAppGeneralFieldTransfer::getRestrictedFromBoundingBoxes()
   std::vector<BoundingBox> bboxes(bb_points.size());
   for (const auto i : make_range(bb_points.size()))
     bboxes[i] = static_cast<BoundingBox>(bb_points[i]);
+
+  // Check for a user-set fixed bounding box size and modify the sizes as appropriate
+  if (_fixed_bbox_size != std::vector<Real>(3, 0))
+    for (unsigned int i = 0; i < LIBMESH_DIM; i++)
+      if (!MooseUtils::absoluteFuzzyEqual(_fixed_bbox_size[i], 0))
+        for (const auto j : make_range(bboxes.size()))
+        {
+          const auto current_width = (bboxes[j].second - bboxes[j].first)(i);
+          bboxes[j].first(i) -= (_fixed_bbox_size[i] - current_width) / 2;
+          bboxes[j].second(i) += (_fixed_bbox_size[i] - current_width) / 2;
+        }
 
   return bboxes;
 }
