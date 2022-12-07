@@ -56,6 +56,7 @@
       cli_args = '-tao_ls_type unit'
       allow_test_objects = True
       expect_out = 'Solution converged'
+      max_threads = 1
       detail = 'using finite-difference to compute the gradient;'
     []
     [grad_check]
@@ -64,6 +65,7 @@
       cli_args = '-tao_ls_type unit'
       allow_test_objects = True
       expect_out = 'Testing Gradient'
+      max_threads = 1
       detail = 'testing hand-coded gradient;'
     []
     [failed_ls]
@@ -72,6 +74,7 @@
       cli_args = '-tao_fd_gradient true'
       allow_test_objects = True
       expect_out = 'Solver terminated: -6   Line Search Failure'
+      max_threads = 1
       detail = 'indicating a failed line search;'
     []
     [failed_it]
@@ -80,6 +83,7 @@
       cli_args = '-tao_fd_gradient true -tao_ls_type unit -tao_max_it 1'
       allow_test_objects = True
       expect_out = 'Solver terminated: -2   Maximum Iterations'
+      max_threads = 1
       detail = 'indicating maximum iteration reached;'
     []
   []
