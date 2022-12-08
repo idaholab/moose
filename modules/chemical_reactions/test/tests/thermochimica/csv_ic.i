@@ -2,7 +2,7 @@
   [gen]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 10
+    nx = 1
     ny = 1
   []
 []
@@ -16,19 +16,7 @@
 
 [ChemicalComposition]
   thermofile = Kaye_NobleMetals.dat
-[]
-
-[ICs]
-  [Mo]
-    type = FunctionIC
-    variable = Mo
-    function = '0.8*(1-x)+4.3*x'
-  []
-  [Ru]
-    type = FunctionIC
-    variable = Ru
-    function = '0.2*(1-x)+4.5*x'
-  []
+  initial_values = ic.csv
 []
 
 [UserObjects]

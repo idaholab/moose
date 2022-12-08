@@ -25,9 +25,6 @@ protected:
   /// Element names
   std::vector<std::string> _elements;
 
-  /// Varaible type
-  const enum class VarType { Nonlinear, Aux } _var_type;
-
   /// Initial conditions for each element: [element name] => initial condition value
   std::map<std::string, Real> _initial_conditions;
 

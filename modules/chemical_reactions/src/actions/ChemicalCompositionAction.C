@@ -11,6 +11,7 @@
 #include "FEProblemBase.h"
 #include "MooseMesh.h"
 #include "MooseUtils.h"
+#include "MooseUtils.h"
 
 #include "libmesh/string_to_enum.h"
 
@@ -33,8 +34,6 @@ ChemicalCompositionAction::validParams()
                              "thermochemistry using Thermochimica.");
   params.addParam<std::vector<std::string>>("elements", "List of chemical elements");
   params.addParam<FileName>("initial_values", "The CSV file name with initial conditions.");
-  MooseEnum varType("BASE AUX", "AUX");
-  params.addParam<MooseEnum>("var_type", varType, "Variable type to be generated");
   params.addParam<FileName>("thermofile", "Thermodynamics model file");
 
   MooseEnum tUnit("K C F R", "K");
@@ -58,7 +57,6 @@ ChemicalCompositionAction::validParams()
 ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & params)
   : Action(params),
     _elements(getParam<std::vector<std::string>>("elements")),
-    _var_type(getParam<MooseEnum>("var_type").getEnum<VarType>()),
     _tunit(getParam<MooseEnum>("tunit")),
     _punit(getParam<MooseEnum>("punit")),
     _munit(getParam<MooseEnum>("munit")),
@@ -77,30 +75,9 @@ ChemicalCompositionAction::act()
 {
 #ifdef THERMOCHIMICA_ENABLED
   //
-  // Add nonlinear Variables
-  //
-  if (_current_task == "add_variable" && _var_type == VarType::Nonlinear)
-  {
-    const std::string var_type = "MooseVariable";
-    auto params = _factory.getValidParams(var_type);
-    const bool second = _problem->mesh().hasSecondOrderElements();
-    params.set<MooseEnum>("order") = second ? "SECOND" : "FIRST";
-    params.set<MooseEnum>("family") = "LAGRANGE";
-
-    for (const auto i : index_range(_elements))
-      _problem->addVariable(var_type, _elements[i], params);
-
-    for (const auto i : index_range(_phases))
-      _problem->addVariable(var_type, _phases[i], params);
-
-    for (const auto i : index_range(_species))
-      _problem->addVariable(var_type, _species[i], params);
-  }
-
-  //
   // Add AuxVariables
   //
-  if (_current_task == "add_aux_variable" && _var_type == VarType::Aux)
+  if (_current_task == "add_aux_variable")
   {
     const std::string aux_var_type = "MooseVariable";
     auto params = _factory.getValidParams(aux_var_type);
@@ -173,9 +150,9 @@ ChemicalCompositionAction::act()
   }
 
   //
-  // do we need those?!
+  // do we need those?! (yes, for now we do)
   //
-  if (_current_task == "add_aux_kernel" && _var_type == VarType::Aux)
+  if (_current_task == "add_aux_kernel")
   {
     auto params = _factory.getValidParams("SelfAux");
     params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
@@ -213,29 +190,19 @@ ChemicalCompositionAction::readCSV()
   if (!file.good())
     paramError("initial_values", "Error opening file '", filename, "'.");
 
-  unsigned int n_lines = 0;
   std::string line;
-  while (getline(file, line))
+  std::vector<std::string> items;
+
+  // skip header
+  std::getline(file, line);
+  while (std::getline(file, line))
   {
-    // Replace all commas with spaces
-    while (size_t pos = line.find(','))
-    {
-      if (pos == line.npos)
-        break;
-      line.replace(pos, 1, 1, ' ');
-    }
+    MooseUtils::tokenize(line, items, 1, ",");
+    if (items.empty())
+      continue;
+    if (items.size() != 2)
+      paramError("initial_value", "Unexpected line in CSV file: ", line);
 
-    if (n_lines > 0)
-    {
-      std::istringstream iss(line);
-
-      std::string el_name;
-      iss >> el_name;
-      Real f;
-      iss >> f;
-
-      _initial_conditions[el_name] = f;
-    }
-    n_lines++;
+    _initial_conditions[items[0]] = MooseUtils::convert<Real>(items[1]);
   }
 }
