@@ -2263,12 +2263,19 @@ NSFVAction::processMesh()
 {
   _dim = _mesh->dimension();
   _problem->needFV();
+
+  // If the user doesn't define a block name we go with the default
+  if (!_blocks.size())
+    _blocks.push_back("ANY_BLOCK_ID");
 }
 
 void
 NSFVAction::assignBlocks(InputParameters & params, const std::vector<SubdomainName> & blocks)
 {
-  if (blocks.size())
+  // We only set the blocks if we don't have `ANY_BLOCK_ID` defined because the subproblem
+  // (throug the mesh) errors out if we use this keyword during the addVariable/Kernel
+  // functions
+  if (std::find(blocks.begin(), blocks.end(), "ANY_BLOCK_ID") == blocks.end())
     params.set<std::vector<SubdomainName>>("block") = blocks;
 }
 
@@ -2288,22 +2295,56 @@ NSFVAction::processVariables()
 
   if (!_create_velocity)
     for (const auto & vname : _velocity_name)
+    {
       if (!(_problem->hasVariable(vname)))
         paramError("velocity_variable",
                    "Variable (" + vname +
                        ") supplied to the NavierStokesFV action does not exist!");
+      else
+        checkVariableBlockConsistency(vname);
+    }
 
   if (!_create_pressure)
+  {
     if (!(_problem->hasVariable(_pressure_name)))
       paramError("pressure_variable",
                  "Variable (" + _pressure_name +
                      ") supplied to the NavierStokesFV action does not exist!");
+    else
+      checkVariableBlockConsistency(_pressure_name);
+  }
 
   if (!_create_fluid_temperature)
     if (!(_problem->hasVariable(_fluid_temperature_name)))
       paramError("pressure_variable",
                  "Variable (" + _fluid_temperature_name +
                      ") supplied to the NavierStokesFV action does not exist!");
+}
+
+void
+NSFVAction::checkVariableBlockConsistency(const std::string & var_name)
+{
+  const auto & fv_variable =
+      dynamic_cast<const MooseVariableFVReal &>(_problem->getVariable(0, var_name));
+  const auto & variable_blocks = fv_variable.blocks();
+
+  std::vector<SubdomainName> real_action_block_names =
+      _blocks.size() ? _blocks : std::vector<SubdomainName>({"ANY_BLOCK_ID"});
+
+  for (const auto & action_block : real_action_block_names)
+  {
+    if (std::find(variable_blocks.begin(), variable_blocks.end(), action_block) ==
+        variable_blocks.end())
+      paramError("block",
+                 "The suppled variable (",
+                 var_name,
+                 ") does not have the same block-restriction as the NSFVAction. The restriction of "
+                 "the variable is: (",
+                 Moose::stringify(variable_blocks),
+                 ") while the restriction for the action is: (",
+                 Moose::stringify(_blocks),
+                 ")");
+  }
 }
 
 bool

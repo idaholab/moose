@@ -1,0 +1,25 @@
+[Tests]
+  issues = '#22912'
+  design = 'NSFVAction.md'
+  [restricted-data-save]
+    type = 'CheckFiles'
+    input = ns-restart-steady.i
+    check_files = 'ns-restart-steady_out.e'
+    requirement = "The system shall be able to run the NSFVAction if no block-restriction is defined "
+                  "on a mesh which doesn't have a default block."
+    ad_indexing_type = 'global'
+    recover = false
+  []
+  [restricted-data-error]
+    type = 'RunException'
+    input = ns-restart-transient.i
+    requirement = 'The system shall throw an error if the block-restrictions of the external variable and the action are different.'
+    cli_args = "Modules/NavierStokesFV/block='1 2'"
+    expect_err = "The suppled variable \(vel_x\) does not have the same block-restriction as the "
+                 "NSFVAction. The restriction of the variable is: \(ANY_BLOCK_ID\) while the "
+                 "restriction for the action is: \(1,2\)"
+    ad_indexing_type = 'global'
+    prereq = restricted-data-save
+    recover = false
+  []
+[]
