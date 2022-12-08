@@ -42,6 +42,8 @@ These documentation pages are meant to be used by developers who are developing 
 
 ## MOOSE Systems
 
+[Actions](source/actions/Action.md) - Objects used to execute various tasks
+
 [Interfaces](framework_development/interfaces/index.md) - Base-classes that allow cross-cutting data retrieval
 
 [RelationshipManagers](/relationship_managers.md) - Telling MOOSE about extra geometric or algebraic information needed in parallel
