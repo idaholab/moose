@@ -46,9 +46,9 @@ velocity_interp_method = 'rc'
     xmax = 5
     ymin = 0
     ymax = '${fparse 0.5 * D}'
-    nx = 50
-    ny = 10
-    bias_y = '${fparse 1 / 1.0}'
+    nx = 100
+    ny = 20
+    bias_y = '${fparse 1 / 1.2}'
   []
 []
 
@@ -287,6 +287,7 @@ velocity_interp_method = 'rc'
 #   petsc_options_iname = '-pc_type -pc_svd_monitor'
 #   petsc_options_value = 'svd true'
 #   line_search = none
+# petsc_options = '-ksp_view_pmat'
   nl_abs_tol = 1e-6
   nl_rel_tol = 1e-2
   automatic_scaling = true

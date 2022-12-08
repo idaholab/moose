@@ -48,9 +48,9 @@ velocity_interp_method = 'rc'
     xmax = 5
     ymin = 0
     ymax = '${fparse 0.5 * D}'
-    nx = 50
-    ny = 10
-    bias_y = '${fparse 1 / 1.0}'
+    nx = 100
+    ny = 20
+    bias_y = '${fparse 1 / 1.2}'
   []
 []
 
