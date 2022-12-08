@@ -117,7 +117,8 @@ SamplerReporterTransfer::intitializeStochasticReporters()
         break;
       }
 
-  _converged = &_results->declareStochasticReporter<bool>(name() + ":converged", *_sampler_ptr);
+  _converged = &_results->declareStochasticReporter<bool>(
+      prefix + (prefix.empty() ? "" : ":") + "converged", *_sampler_ptr);
 }
 
 void

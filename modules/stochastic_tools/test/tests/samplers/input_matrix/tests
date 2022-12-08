@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#22512'
+  design = 'InputMatrixSampler.md'
+  [sampling_test]
+    type = CSVDiff
+    input = input_matrix.i
+    csvdiff = input_matrix_out_data_0001.csv
+    requirement = 'The system shall be able to sample an input-defined matrix.'
+  []
+[]

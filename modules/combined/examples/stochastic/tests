@@ -6,7 +6,7 @@
   [lhs_stats]
     type = JSONDiff
     input = lhs_uniform.i
-    cli_args = 'Samplers/sample/num_rows=10 Outputs/out/execute_system_information_on=none'
+    cli_args = 'Samplers/sample/num_rows=10'
     jsondiff = 'lhs_uniform_out.json'
     detail = "sample and compute statistics, "
     method = opt # a bit too slow for debug
@@ -30,7 +30,7 @@
   [poly_chaos_uniform]
     type = JSONDiff
     input = poly_chaos_uniform.i
-    cli_args = 'Samplers/sample/num_rows=10 Outputs/out/execute_system_information_on=none'
+    cli_args = 'Samplers/sample/num_rows=10'
     jsondiff = 'poly_chaos_uniform_out.json'
     allow_test_objects = true
     detail = "evaluate a polynomial chaos surrogate."
