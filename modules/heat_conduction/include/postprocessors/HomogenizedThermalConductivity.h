@@ -9,14 +9,14 @@
 
 #pragma once
 
-#include "ElementAverageValue.h"
+#include "ElementIntegralPostprocessor.h"
 
 /**
  * Homogenization of Temperature-Dependent Thermal Conductivity in Composite
  * Materials, Journal of Thermophysics and Heat Transfer, Vol. 15, No. 1,
  * January-March 2001.
  */
-class HomogenizedThermalConductivity : public ElementAverageValue
+class HomogenizedThermalConductivity : public ElementIntegralPostprocessor
 {
 public:
   static InputParameters validParams();
@@ -32,13 +32,22 @@ public:
 protected:
   virtual Real computeQpIntegral();
 
-private:
-  const VariableGradient & _grad_temp_x;
-  const VariableGradient & _grad_temp_y;
-  const VariableGradient & _grad_temp_z;
-  const unsigned int _component;
-  const MaterialProperty<Real> & _diffusion_coefficient;
-  Real _volume;
-  Real _integral_value;
+  /// the row index of the homogenized thermal conductivity tensor that is returned
+  const unsigned int _row;
+  /// the column index of the homogenized thermal conductivity tensor that is returned
+  const unsigned int _col;
+  /// a scale factor multiplied to the result
   const Real _scale;
+  /// dimension of the mesh
+  const unsigned int _dim;
+  /// the gradients of the "shape" functions usually denoted chi in the literature
+  std::vector<const VariableGradient *> _grad_chi;
+  ///@{ heterogeneous diffusion coefficient as scalar and tensor
+  const MaterialProperty<Real> * _diffusion_coefficient;
+  const MaterialProperty<RankTwoTensor> * _tensor_diffusion_coefficient;
+  ///@}
+  /// volume of the integration domain
+  Real _volume;
+  /// the integral value that is being accumulated
+  Real _integral_value;
 };

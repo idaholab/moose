@@ -16,33 +16,60 @@ registerMooseObject("HeatConductionApp", HomogenizedThermalConductivity);
 InputParameters
 HomogenizedThermalConductivity::validParams()
 {
-  InputParameters params = ElementAverageValue::validParams();
+  InputParameters params = ElementIntegralPostprocessor::validParams();
   params.addClassDescription(
       "Postprocessor for asymptotic expansion homogenization for thermal conductivity");
-  params.addRequiredCoupledVar("temp_x", "solution in x");
-  params.addCoupledVar("temp_y", "solution in y");
-  params.addCoupledVar("temp_z", "solution in z");
-  params.addRequiredRangeCheckedParam<unsigned int>(
-      "component",
-      "component < 3",
-      "An integer corresponding to the direction this pp acts in (0 for x, 1 for y, 2 for z)");
+  params.addRequiredCoupledVar(
+      "chi", "The characteristic functions used for homogenization of the thermal conductivity.");
+  params.addRequiredParam<unsigned int>(
+      "row",
+      "The row index of the homogenized thermal conductivity tensor entry computed by this "
+      "postprocessor.");
+  params.addRequiredParam<unsigned int>(
+      "col",
+      "The column index of the homogenized thermal conductivity tensor entry computed by this "
+      "postprocessor.");
+
   params.addParam<Real>("scale_factor", 1, "Scale factor");
   params.addParam<MaterialPropertyName>(
       "diffusion_coefficient",
       "thermal_conductivity",
       "Property name of the diffusivity (Default: thermal_conductivity)");
+  params.addParam<bool>(
+      "is_tensor", false, "True of the material property in diffusion_coefficient is a tensor");
   return params;
 }
 
 HomogenizedThermalConductivity::HomogenizedThermalConductivity(const InputParameters & parameters)
-  : ElementAverageValue(parameters),
-    _grad_temp_x(coupledGradient("temp_x")),
-    _grad_temp_y(_subproblem.mesh().dimension() >= 2 ? coupledGradient("temp_y") : _grad_zero),
-    _grad_temp_z(_subproblem.mesh().dimension() == 3 ? coupledGradient("temp_z") : _grad_zero),
-    _component(getParam<unsigned int>("component")),
-    _diffusion_coefficient(getMaterialProperty<Real>("diffusion_coefficient")),
-    _scale(getParam<Real>("scale_factor"))
+  : ElementIntegralPostprocessor(parameters),
+    _row(getParam<unsigned int>("row")),
+    _col(getParam<unsigned int>("col")),
+    _scale(getParam<Real>("scale_factor")),
+    _dim(_mesh.dimension())
 {
+  if (getParam<bool>("is_tensor"))
+  {
+    _tensor_diffusion_coefficient = &getMaterialProperty<RankTwoTensor>("diffusion_coefficient");
+    _diffusion_coefficient = nullptr;
+  }
+  else
+  {
+    _diffusion_coefficient = &getMaterialProperty<Real>("diffusion_coefficient");
+    _tensor_diffusion_coefficient = nullptr;
+  }
+
+  if (_row >= _dim)
+    paramError("row", "Must be smaller than mesh dimension (0, 1, 2 for 1D, 2D, 3D)");
+
+  if (_col >= _dim)
+    paramError("col", "Must be smaller than mesh dimension (0, 1, 2 for 1D, 2D, 3D)");
+
+  if (coupledComponents("chi") != _dim)
+    paramError("chi", "The number of entries must be identical to the mesh dimension.");
+
+  _grad_chi.resize(_dim);
+  for (unsigned int j = 0; j < _dim; ++j)
+    _grad_chi[j] = &coupledGradient("chi", j);
 }
 
 void
@@ -62,7 +89,7 @@ HomogenizedThermalConductivity::execute()
 Real
 HomogenizedThermalConductivity::getValue()
 {
-  return (_integral_value / _volume);
+  return _integral_value / _volume;
 }
 
 void
@@ -85,25 +112,22 @@ HomogenizedThermalConductivity::threadJoin(const UserObject & y)
 Real
 HomogenizedThermalConductivity::computeQpIntegral()
 {
-  Real value = 1.0;
+  // initialize the heterogeneous tensor
+  RankTwoTensor kij(0, 0, 0, 0, 0, 0, 0, 0, 0);
+  if (_diffusion_coefficient)
+    for (unsigned int j = 0; j < _dim; ++j)
+      kij(j, j) = (*_diffusion_coefficient)[_qp];
+  else
+    kij = (*_tensor_diffusion_coefficient)[_qp];
 
-  switch (_component)
+  // initialize the dchi/dx tensor
+  RankTwoTensor Mij(0, 0, 0, 0, 0, 0, 0, 0, 0);
+  for (unsigned int i = 0; i < _dim; ++i)
   {
-    case 0:
-      value += _grad_temp_x[_qp](0);
-      break;
-
-    case 1:
-      value += _grad_temp_y[_qp](1);
-      break;
-
-    case 2:
-      value += _grad_temp_z[_qp](2);
-      break;
-
-    default:
-      mooseError("Internal error.");
+    Mij(i, i) = 1.0;
+    for (unsigned int j = 0; j < _dim; ++j)
+      Mij(i, j) += (*_grad_chi[j])[_qp](i);
   }
 
-  return _scale * _diffusion_coefficient[_qp] * value;
+  return _scale * (kij * Mij)(_row, _col);
 }
