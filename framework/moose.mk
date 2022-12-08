@@ -416,7 +416,7 @@ install: install_libs install_bin install_harness install_exodiff install_adreal
 
 install_data::
 	@mkdir -p $(moose_share_dir)
-	@cp -a $(FRAMEWORK_DIR)/data $(moose_share_dir)
+	@cp -a $(FRAMEWORK_DIR)/data $(moose_share_dir)/
 
 install_adreal_monolith: ADRealMonolithic.h
 	@ mkdir -p $(moose_include_dir)
@@ -424,7 +424,8 @@ install_adreal_monolith: ADRealMonolithic.h
 
 install_exodiff: all
 	@echo "Installing exodiff"
-	@cp $(MOOSE_DIR)/framework/contrib/exodiff/exodiff $(bin_install_dir)
+	@mkdir -p $(bin_install_dir)
+	@cp $(MOOSE_DIR)/framework/contrib/exodiff/exodiff $(bin_install_dir)/
 
 install_python:
 	@echo "Installing python utilities"
@@ -445,7 +446,8 @@ install_harness: install_python
 
 install_hit: all
 	@echo "Installing HIT"
-	@cp $(MOOSE_DIR)/framework/contrib/hit/hit $(bin_install_dir)
+	@mkdir -p $(bin_install_dir)
+	@cp $(MOOSE_DIR)/framework/contrib/hit/hit $(bin_install_dir)/
 
 lib_install_suffix = lib/$(APPLICATION_NAME)
 lib_install_dir = $(PREFIX)/$(lib_install_suffix)
