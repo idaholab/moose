@@ -68,10 +68,10 @@ public:
   std::string getPrimaryFileName(bool stripLeadingPath = true) const;
 
   /**
-   * Parse an input file consisting of hit syntax and setup objects
+   * Parse an input file (or text string if non-empty) consisting of hit syntax and setup objects
    * in the MOOSE derived application
    */
-  void parse(const std::vector<std::string> & input_filenames);
+  void parse(const std::vector<std::string> & input_filenames, const std::string & input_text = "");
 
   /**
    * This function attempts to extract values from the input file based on the contents of

@@ -13,9 +13,6 @@
 
 #include <string>
 #include <memory>
-#include <sstream>
-#include <fstream>
-#include <cstdio>
 #include "wasplsp/LSP.h"
 #include "wasplsp/ServerImpl.h"
 #include "wasplsp/Connection.h"

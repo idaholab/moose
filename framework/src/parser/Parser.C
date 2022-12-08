@@ -616,7 +616,7 @@ Parser::hitCLIFilter(std::string appname, const std::vector<std::string> & argv)
 }
 
 void
-Parser::parse(const std::vector<std::string> & input_filenames)
+Parser::parse(const std::vector<std::string> & input_filenames, const std::string & input_text)
 {
   // Save the filename
   _input_filenames = input_filenames;
@@ -637,10 +637,14 @@ Parser::parse(const std::vector<std::string> & input_filenames)
 
   for (auto & input_filename : _input_filenames)
   {
-    MooseUtils::checkFileReadable(input_filename, true);
-
-    std::ifstream f(input_filename);
-    std::string input((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+    // Parse the input text string if non-empty, otherwise read file from disk
+    std::string input(input_text);
+    if (input.empty())
+    {
+      MooseUtils::checkFileReadable(input_filename, true);
+      std::ifstream f(input_filename);
+      input = std::string((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+    }
 
     try
     {
