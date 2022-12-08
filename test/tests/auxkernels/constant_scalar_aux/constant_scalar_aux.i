@@ -96,11 +96,6 @@
     execute_on = 'initial timestep_end'
   [../]
 
-  [./x]
-    type = ScalarVariable
-    variable = x
-    execute_on = 'initial timestep_end'
-  [../]
 []
 
 [Executioner]

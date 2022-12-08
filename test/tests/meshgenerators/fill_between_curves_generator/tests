@@ -1,0 +1,12 @@
+[Tests]
+  design = 'meshgenerators/FillBetweenCurvesGenerator.md'
+  issues = '#22848'
+  [fill_between_curves]
+    type = 'Exodiff'
+    input = 'fill_between_curves.i'
+    exodiff = 'fill_between_curves_in.e'
+    cli_args = '--mesh-only'
+    requirement ='The system shall generate a mesh that fills between two coplanar curves.'
+    recover = false
+  []
+[]
