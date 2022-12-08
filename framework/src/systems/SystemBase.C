@@ -1184,6 +1184,12 @@ SystemBase::matrixTagActive(TagID tag) const
   return tag < _matrix_tag_active_flags.size() && _matrix_tag_active_flags[tag];
 }
 
+void
+SystemBase::setSolutionInvalid(bool solution_invalid)
+{
+  _solution_invalid = solution_invalid;
+}
+
 unsigned int
 SystemBase::number() const
 {

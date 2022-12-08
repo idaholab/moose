@@ -907,10 +907,9 @@ public:
   /**
    * Whether or not the converged solution is valid
    */
-
   bool solutionInvalid() const { return _solution_invalid; }
 
-  void solutionInvalid(bool solution_invalid) { _solution_invalid = solution_invalid; }
+  void setSolutionInvalid(bool solution_invalid);
 
 protected:
   /**
