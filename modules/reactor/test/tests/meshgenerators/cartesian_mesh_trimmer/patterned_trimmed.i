@@ -15,7 +15,7 @@
     flat_side_up = true
   []
   [pattern]
-    type = PatternedCartMeshGenerator
+    type = PatternedCartesianMeshGenerator
     inputs = 'sq_1'
     pattern = '0 0 0;
                0 0 0;
@@ -80,7 +80,7 @@
     peripheral_trimming_section_boundary = peripheral_section
   []
   [pattern2]
-    type = PatternedCartMeshGenerator
+    type = PatternedCartesianMeshGenerator
     inputs = 'trim_0 trim_1 trim_2 trim_3 trim_4 trim_5 trim_6 trim_7 trim_8'
     pattern_boundary = none
     generate_core_metadata = true

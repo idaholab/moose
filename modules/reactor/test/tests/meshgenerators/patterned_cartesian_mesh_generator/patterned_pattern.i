@@ -30,7 +30,7 @@
     flat_side_up = true
   []
   [pattern]
-    type = PatternedCartMeshGenerator
+    type = PatternedCartesianMeshGenerator
     inputs = 'square_1 square_2'
     pattern = '0 0 0 0;
                0 1 0 0;
@@ -44,7 +44,7 @@
     background_block_id = 1500
   []
   [pattern_2]
-    type = PatternedCartMeshGenerator
+    type = PatternedCartesianMeshGenerator
     inputs = 'pattern'
     pattern = '0 0;
                0 0'

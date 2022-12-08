@@ -15,7 +15,7 @@
     preserve_volumes = on
   []
   [pattern]
-    type = PatternedCartMeshGenerator
+    type = PatternedCartesianMeshGenerator
     inputs = 'square'
     pattern = '0 0 0;
                0 0 0;
@@ -26,7 +26,7 @@
     #duct_intervals = '1 2'
   []
   [pmg]
-    type = PatternedCartPeripheralModifier
+    type = PatternedCartesianPeripheralModifier
     input = pattern
     input_mesh_external_boundary = 10000
     new_num_sector = 10

@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PatternedCartMeshGenerator.h"
+#include "PatternedCartesianMeshGenerator.h"
 #include "MooseUtils.h"
 #include "MooseMeshUtils.h"
 
@@ -15,10 +15,10 @@
 #include <cmath> // provides round, not std::round (see http://www.cplusplus.com/reference/cmath/round/)
 #include <fstream> // used to generate the optional control drum position file
 
-registerMooseObject("ReactorApp", PatternedCartMeshGenerator);
+registerMooseObject("ReactorApp", PatternedCartesianMeshGenerator);
 
 InputParameters
-PatternedCartMeshGenerator::validParams()
+PatternedCartesianMeshGenerator::validParams()
 {
   InputParameters params = PolygonMeshGeneratorBase::validParams();
   params.addRequiredParam<std::vector<MeshGeneratorName>>("inputs", "The input MeshGenerators.");
@@ -67,8 +67,8 @@ PatternedCartMeshGenerator::validParams()
   std::string position_file_default = "positions_meta.data";
   params.addParam<std::string>(
       "position_file", position_file_default, "Data file name to store control drum positions.");
-  // A square pattern_boundary mesh can be used in "inputs" of `PatternedCartMeshGenerator` without
-  // rotation or with rotation of 90, 180, or 270 degrees.
+  // A square pattern_boundary mesh can be used in "inputs" of `PatternedCartesianMeshGenerator`
+  // without rotation or with rotation of 90, 180, or 270 degrees.
   params.addParam<Real>(
       "rotate_angle",
       0.0,
@@ -108,14 +108,14 @@ PatternedCartMeshGenerator::validParams()
       "background_intervals duct_intervals uniform_mesh_on_sides deform_non_circular_region",
       "Mesh Density");
   params.addClassDescription(
-      "This PatternedCartMeshGenerator source code assembles square meshes into a sqaure "
+      "This PatternedCartesianMeshGenerator source code assembles square meshes into a sqaure "
       "grid "
       "and optionally forces the outer boundary to be square and/or adds a duct.");
 
   return params;
 }
 
-PatternedCartMeshGenerator::PatternedCartMeshGenerator(const InputParameters & parameters)
+PatternedCartesianMeshGenerator::PatternedCartesianMeshGenerator(const InputParameters & parameters)
   : PolygonMeshGeneratorBase(parameters),
     _mesh_ptrs(getMeshes("inputs")),
     _input_names(getParam<std::vector<MeshGeneratorName>>("inputs")),
@@ -232,7 +232,7 @@ PatternedCartMeshGenerator::PatternedCartMeshGenerator(const InputParameters & p
 }
 
 std::unique_ptr<MeshBase>
-PatternedCartMeshGenerator::generate()
+PatternedCartesianMeshGenerator::generate()
 {
   std::vector<ReplicatedMesh *> meshes(_input_names.size(), nullptr);
   for (MooseIndex(_input_names) i = 0; i < _input_names.size(); ++i)
@@ -268,14 +268,14 @@ PatternedCartMeshGenerator::generate()
     {
       // throw an error message if the input mesh does not contain the required meta data
       if (!hasMeshProperty("pattern_pitch_meta", _input_names[i]))
-        mooseError("In PatternedCartMeshGenerator ",
+        mooseError("In PatternedCartesianMeshGenerator ",
                    _name,
                    ": the unit square input mesh does not contain appropriate meta data "
                    "required for generating a core mesh.");
       pattern_pitch_array.push_back(getMeshProperty<Real>("pattern_pitch_meta", _input_names[i]));
       // throw an error message if the input mesh contains non-sense meta data
       if (pattern_pitch_array.back() == 0.0)
-        mooseError("In PatternedCartMeshGenerator ",
+        mooseError("In PatternedCartesianMeshGenerator ",
                    _name,
                    ": the unit square input mesh does not contain appropriate meta data "
                    "required for generating a core mesh.");
@@ -289,7 +289,7 @@ PatternedCartMeshGenerator::generate()
     if (!MooseUtils::absoluteFuzzyEqual(
             *std::max_element(pattern_pitch_array.begin(), pattern_pitch_array.end()),
             *std::min_element(pattern_pitch_array.begin(), pattern_pitch_array.end())))
-      mooseError("In PatternedCartMeshGenerator ",
+      mooseError("In PatternedCartesianMeshGenerator ",
                  _name,
                  ": pattern_pitch metadata values of all input mesh generators must be identical "
                  "when pattern_boundary is 'none' and generate_core_metadata is true.");
@@ -315,7 +315,7 @@ PatternedCartMeshGenerator::generate()
     {
       // throw an error message if the input mesh does not contain the required meta data
       if (!hasMeshProperty("pitch_meta", _input_names[i]))
-        mooseError("In PatternedCartMeshGenerator ",
+        mooseError("In PatternedCartesianMeshGenerator ",
                    _name,
                    ": the unit square input mesh does not contain appropriate meta data "
                    "required for generating an assembly.");
@@ -327,7 +327,7 @@ PatternedCartMeshGenerator::generate()
                             num_sectors_per_side_array_tmp.end()) !=
           *std::min_element(num_sectors_per_side_array_tmp.begin(),
                             num_sectors_per_side_array_tmp.end()))
-        mooseError("In PatternedCartMeshGenerator ",
+        mooseError("In PatternedCartesianMeshGenerator ",
                    _name,
                    ": num_sectors_per_side metadata values of all four sides of each input mesh "
                    "generator must be identical.");
@@ -341,14 +341,14 @@ PatternedCartMeshGenerator::generate()
     max_radius_global = *max_element(max_radius_array.begin(), max_radius_array.end());
     if (!MooseUtils::absoluteFuzzyEqual(*std::max_element(pitch_array.begin(), pitch_array.end()),
                                         *std::min_element(pitch_array.begin(), pitch_array.end())))
-      mooseError("In PatternedCartMeshGenerator ",
+      mooseError("In PatternedCartesianMeshGenerator ",
                  _name,
                  ": pitch metadata values of all input mesh generators must be identical.");
     _input_pitch_meta = pitch_array.front();
     if (*std::max_element(num_sectors_per_side_array.begin(), num_sectors_per_side_array.end()) !=
         *std::min_element(num_sectors_per_side_array.begin(), num_sectors_per_side_array.end()))
       mooseError(
-          "In PatternedCartMeshGenerator ",
+          "In PatternedCartesianMeshGenerator ",
           _name,
           ": num_sectors_per_side metadata values of all input mesh generators must be identical.");
   }
@@ -395,7 +395,7 @@ PatternedCartMeshGenerator::generate()
       y_max_0 = pitch_array.front() / 2.0 + extra_dist.front();
       y_max_n = y_max_0 - extra_dist_shift;
       if (y_max_n <= y_min)
-        mooseError("In PatternedCartMeshGenerator ",
+        mooseError("In PatternedCartesianMeshGenerator ",
                    _name,
                    ": the assembly is cut off so much that the internal structure that should not "
                    "be altered is compromised.");

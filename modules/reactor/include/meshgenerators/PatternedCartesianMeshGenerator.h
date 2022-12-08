@@ -13,15 +13,15 @@
 #include "MeshMetaDataInterface.h"
 
 /**
- * This PatternedCartMeshGenerator source code assembles square meshes into a rectangular grid and
- * optionally adds a duct.
+ * This PatternedCartesianMeshGenerator source code assembles square meshes into a rectangular grid
+ * and optionally adds a duct.
  */
-class PatternedCartMeshGenerator : public PolygonMeshGeneratorBase
+class PatternedCartesianMeshGenerator : public PolygonMeshGeneratorBase
 {
 public:
   static InputParameters validParams();
 
-  PatternedCartMeshGenerator(const InputParameters & parameters);
+  PatternedCartesianMeshGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 

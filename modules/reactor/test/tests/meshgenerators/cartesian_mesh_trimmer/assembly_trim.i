@@ -15,7 +15,7 @@
     flat_side_up = true
   []
   [pattern]
-    type = PatternedCartMeshGenerator
+    type = PatternedCartesianMeshGenerator
     inputs = 'sq_1'
     pattern = '0 0 0;
                0 0 0;
@@ -26,13 +26,13 @@
     square_size = 18
   []
   [pattern_mod]
-    type = PatternedCartPeripheralModifier
+    type = PatternedCartesianPeripheralModifier
     input = pattern
     new_num_sector = 7
     input_mesh_external_boundary = 10000
   []
   [pattern2]
-    type = PatternedCartMeshGenerator
+    type = PatternedCartesianMeshGenerator
     inputs = 'pattern'
     pattern_boundary = none
     generate_core_metadata = true

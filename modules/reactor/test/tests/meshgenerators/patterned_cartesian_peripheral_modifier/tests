@@ -1,5 +1,5 @@
 [Tests]
-  design = 'meshgenerators/PatternedCartPeripheralModifier.md'
+  design = 'meshgenerators/PatternedCartesianPeripheralModifier.md'
   issues = '#22828'
   [single_square]
     type = 'Exodiff'

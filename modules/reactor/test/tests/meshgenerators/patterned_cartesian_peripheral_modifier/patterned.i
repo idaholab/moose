@@ -19,7 +19,7 @@ num_layer = 2
     flat_side_up = true
   []
   [pattern_1]
-    type = PatternedCartMeshGenerator
+    type = PatternedCartesianMeshGenerator
     inputs = 'sq_1'
     pattern = '0 0 0;
                0 0 0;
@@ -28,7 +28,7 @@ num_layer = 2
     square_size = 17
   []
   [pmg_1]
-    type = PatternedCartPeripheralModifier
+    type = PatternedCartesianPeripheralModifier
     input = pattern_1
     input_mesh_external_boundary = 10000
     new_num_sector = ${new_num_sector}
@@ -51,7 +51,7 @@ num_layer = 2
     flat_side_up = true
   []
   [pattern_2]
-    type = PatternedCartMeshGenerator
+    type = PatternedCartesianMeshGenerator
     inputs = 'sq_2'
     pattern = '0 0 0 0;
                0 0 0 0;
@@ -61,7 +61,7 @@ num_layer = 2
     square_size = 17
   []
   [pmg_2]
-    type = PatternedCartPeripheralModifier
+    type = PatternedCartesianPeripheralModifier
     input = pattern_2
     input_mesh_external_boundary = 10000
     new_num_sector = ${new_num_sector}
@@ -84,7 +84,7 @@ num_layer = 2
     flat_side_up = true
   []
   [pattern_3]
-    type = PatternedCartMeshGenerator
+    type = PatternedCartesianMeshGenerator
     inputs = 'sq_3'
     pattern = '0 0 0 0 0;
                0 0 0 0 0;
@@ -95,7 +95,7 @@ num_layer = 2
     square_size = 17
   []
   [pmg_3]
-    type = PatternedCartPeripheralModifier
+    type = PatternedCartesianPeripheralModifier
     input = pattern_3
     input_mesh_external_boundary = 10000
     new_num_sector = ${new_num_sector}
@@ -118,7 +118,7 @@ num_layer = 2
     flat_side_up = true
   []
   [pattern_4]
-    type = PatternedCartMeshGenerator
+    type = PatternedCartesianMeshGenerator
     inputs = 'sq_4'
     pattern = '0 0 0 0 0 0;
                0 0 0 0 0 0;
@@ -130,14 +130,14 @@ num_layer = 2
     square_size = 17
   []
   [pmg_4]
-    type = PatternedCartPeripheralModifier
+    type = PatternedCartesianPeripheralModifier
     input = pattern_4
     input_mesh_external_boundary = 10000
     new_num_sector = ${new_num_sector}
     num_layers = ${num_layer}
   []
   [pattern_sum]
-    type = PatternedCartMeshGenerator
+    type = PatternedCartesianMeshGenerator
     inputs = 'pmg_1 pmg_2 pmg_3 pmg_4'
     pattern = '1 2 3;
                2 0 2;

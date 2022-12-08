@@ -29,37 +29,9 @@
     preserve_volumes = on
     flat_side_up = true
   []
-  [pattern_1]
-    type = PatternedCartMeshGenerator
-    inputs = 'square_1 square_2'
-    pattern = '0 0 0 0;
-               0 1 0 0;
-               0 0 1 0;
-               0 0 0 0'
-    square_size = 24
-    duct_sizes = '21 22 23'
-    duct_intervals = '2 2 2'
-    rotate_angle = 0
-    duct_block_ids = '2000 2100 2200'
-    background_block_id = 1500
-  []
   [pattern_2]
-    type = PatternedCartMeshGenerator
+    type = PatternedCartesianMeshGenerator
     inputs = 'square_1 square_2'
-    pattern = '0 0 0 0;
-               0 1 0 0;
-               0 0 1 0;
-               0 0 0 0'
-    square_size = 23.5
-    duct_sizes = '21 22 23'
-    duct_intervals = '2 2 2'
-    rotate_angle = 0
-    duct_block_ids = '2000 2100 2200'
-    background_block_id = 1500
-  []
-  [pattern_3]
-    type = PatternedCartMeshGenerator
-    inputs = 'pattern_1 pattern_2'
     pattern = '0 1;
                1 0'
     pattern_boundary = none

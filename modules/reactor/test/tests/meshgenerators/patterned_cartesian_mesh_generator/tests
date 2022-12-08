@@ -1,5 +1,5 @@
 [Tests]
-    design = 'meshgenerators/PatternedCartMeshGenerator.md'
+    design = 'meshgenerators/PatternedCartesianMeshGenerator.md'
     issues = '#22828'
     [square_boundary]
       type = 'Exodiff'

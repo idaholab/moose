@@ -14,15 +14,15 @@
 #include "LinearInterpolation.h"
 
 /**
- * This PatternedCartPeripheralModifier object removes the outmost layer of the input mesh and add a
- * transition layer mesh to facilitate stitching.
+ * This PatternedCartesianPeripheralModifier object removes the outmost layer of the input mesh and
+ * add a transition layer mesh to facilitate stitching.
  */
-class PatternedCartPeripheralModifier : public PatternedPolygonPeripheralModifierBase
+class PatternedCartesianPeripheralModifier : public PatternedPolygonPeripheralModifierBase
 {
 public:
   static InputParameters validParams();
 
-  PatternedCartPeripheralModifier(const InputParameters & parameters);
+  PatternedCartesianPeripheralModifier(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 
