@@ -743,6 +743,25 @@ MultiAppGeneralFieldTransfer::onBoundaries(std::set<BoundaryID> & boundaries,
   return !u.empty();
 }
 
+bool
+MultiAppGeneralFieldTransfer::onBoundaries(const std::set<BoundaryID> & boundaries,
+                                           const std::set<SubdomainID> & block_restriction,
+                                           const MooseMesh & mesh,
+                                           const PointLocatorBase * const pl,
+                                           const Point & point) const
+{
+  // Find the element containing the point and use the block restriction if known for speed
+  const Elem * elem;
+  if (block_restriction.empty()) 
+    elem = (*pl)(point);
+  else
+    elem = (*pl)(point, &block_restriction);
+
+  if (!elem)
+    return false;
+  return onBoundaries(boundaries, mesh, elem);
+}
+
 Real
 MultiAppGeneralFieldTransfer::bboxMaxDistance(const Point & p, const BoundingBox & bbox)
 {
@@ -825,6 +844,18 @@ MultiAppGeneralFieldTransfer::getRestrictedFromBoundingBoxes()
         }
       }
     }
+
+    // For 2D RZ problems, we need to amend the bounding box to cover the whole application
+    // - The box is large enough to cover the cases where Z is aligned with the Cartesian X, Y or Z
+    // - RZ systems also cover negative coordinates hence the use of the maximum R
+    // NOTE: We will only support the case where there is only one coordinate system
+    if ((from_mesh.getUniqueCoordSystem() == Moose::COORD_RZ) && (LIBMESH_DIM == 3))
+    {
+      min(0) = -max(0);
+      min(2) = -max(0);
+      max(2) = max(0);
+    }
+
     BoundingBox bbox(min, max);
     if (!at_least_one)
       bbox.min() = max; // If we didn't hit any nodes, this will be _the_ minimum bbox
