@@ -104,12 +104,10 @@ MultiAppGeneralFieldShapeEvaluationTransfer::evaluateInterpValuesWithMeshFunctio
           _greedy_search);
          ++i_from)
     {
-      if (local_bboxes[i_from].contains_point(pt))
+      if (!acceptPointInOriginMesh(i_from, local_bboxes, pt))
+        continue;
+      else
       {
-        // Check block restriction (boundary restriction is not supported)
-        if (_from_blocks.size() && !inBlocks(_from_blocks, i_from, pt))
-          continue;
-
         // Use mesh function to compute interpolation values
         auto val = (*local_meshfuns[i_from])(pt - _from_positions[i_from]);
 

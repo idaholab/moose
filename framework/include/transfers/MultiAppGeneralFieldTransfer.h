@@ -71,31 +71,73 @@ protected:
   void extractLocalFromBoundingBoxes(std::vector<BoundingBox> & local_bboxes);
 
   /*
+   * Whether all source mesh checks pass on the given points:
+   * - within the source mesh bounding box
+   * - inside block restriction
+   * - inside boundary restriction / in an element near the origin boundary restriction
+   * - inside app mesh (if not already known to be inside a block or near a boundary)
+   * @param i_from the index of the source problem/mesh
+   * @param local_bboxes the bounding boxes for the local applications
+   * @param pt the point to consider
+   */
+  bool acceptPointInOriginMesh(unsigned int i_from,
+                               const std::vector<BoundingBox> & local_bboxes,
+                               const Point & pt) const;
+
+  /*
+   * Whether or not a given point is within the mesh of an origin (from) app
+   */
+  bool inMesh(const PointLocatorBase * const pl, const Point & pt) const;
+
+  /*
    * Whether or not a given element is part of the given blocks
    */
-  bool inBlocks(std::set<SubdomainID> & blocks, const Elem * elem) const;
+  bool inBlocks(const std::set<SubdomainID> & blocks, const Elem * elem) const;
 
   /*
    * Whether or not a given node is part of an element in the given blocks
    */
-  bool inBlocks(std::set<SubdomainID> & blocks, const MooseMesh & mesh, const Node * node) const;
+  bool
+  inBlocks(const std::set<SubdomainID> & blocks, const MooseMesh & mesh, const Node * node) const;
 
   /*
    * Whether or not a given point is part of an element in the given blocks
    */
-  bool inBlocks(std::set<SubdomainID> & blocks, unsigned int i_from, const Point & pt) const;
+  bool inBlocks(const std::set<SubdomainID> & blocks,
+                const PointLocatorBase * const pl,
+                const Point & pt) const;
 
   /*
    * Whether or not a given node is part of the given boundaries
    */
-  bool
-  onBoundaries(std::set<BoundaryID> & boundaries, const MooseMesh & mesh, const Node * node) const;
+  bool onBoundaries(const std::set<BoundaryID> & boundaries,
+                    const MooseMesh & mesh,
+                    const Node * node) const;
 
   /*
-   * Whether or not a given element has a side on the given boundaries
+   * Whether or not a given element is near the specified boundaries
+   * Depending on the '_elemental_boundary_restriction_on_sides' this can mean it shares a side or
+   * a node with the boundary
    */
-  bool
-  onBoundaries(std::set<BoundaryID> & boundaries, const MooseMesh & mesh, const Elem * elem) const;
+  bool onBoundaries(const std::set<BoundaryID> & boundaries,
+                    const MooseMesh & mesh,
+                    const Elem * elem) const;
+
+  /*
+   * Whether or not a point is inside an element that is near the specified boundaries
+   * See onBoundaries(bd, mesh, elem) for definition of near
+   * @param boundaries boundaries of interest for whether the point is near one
+   * @param block_restriction limits the size of the mesh to search for the point.
+   *        Note: an empty set means ALL blocks should be considered
+   * @param mesh the mesh to look for the boundaries in
+   * @param pl the point locator that searches the mesh
+   * @param pt the point we want to know whether it is close to a boundary
+   */
+  bool onBoundaries(const std::set<BoundaryID> & boundaries,
+                    const std::set<SubdomainID> & block_restriction,
+                    const MooseMesh & mesh,
+                    const PointLocatorBase * const pl,
+                    const Point & pt) const;
 
   /// Origin block(s) restriction
   std::set<SubdomainID> _from_blocks;
@@ -122,6 +164,10 @@ protected:
 
   /// Number of conflicts between points in the mesh
   unsigned int _num_overlaps;
+
+  /// Whether the source app mesh must actually contain the points for them to be considered or whether
+  /// the bounding box is enough. If false, we can interpolate between apps
+  bool _source_app_must_contain_point;
 
 private:
   /// A map from pid to a set of points

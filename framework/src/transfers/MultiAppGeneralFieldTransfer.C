@@ -76,11 +76,18 @@ MultiAppGeneralFieldTransfer::validParams()
       "error_on_miss",
       false,
       "Whether or not to error in the case that a target point is not found in the source domain.");
+  params.addParam<bool>(
+      "from_multiapp_must_contain_point",
+      true,
+      "Wether on not the origin mesh must contain the point to evaluate data at. If false, this "
+      "allows for interpolation between origin app meshes. Origin app bounding boxes are still "
+      "considered so you may want to increase them with 'fixed_bounding_box_size'");
 
   params.addParamNamesToGroup(
       "to_blocks from_blocks to_boundaries from_boundaries elemental_boundary_restriction",
       "Transfer spatial restriction");
-  params.addParamNamesToGroup("greedy_search error_on_miss", "Search algorithm");
+  params.addParamNamesToGroup("greedy_search error_on_miss from_multiapp_must_contain_point",
+                              "Search algorithm");
   params.addParamNamesToGroup("bbox_factor fixed_bounding_box_size", "Source app bounding box");
   return params;
 }
@@ -91,6 +98,7 @@ MultiAppGeneralFieldTransfer::MultiAppGeneralFieldTransfer(const InputParameters
         getParam<MooseEnum>("elemental_boundary_restriction") == "sides"),
     _greedy_search(getParam<bool>("greedy_search")),
     _num_overlaps(0),
+    _source_app_must_contain_point(getParam<bool>("from_multiapp_must_contain_point")),
     _error_on_miss(getParam<bool>("error_on_miss")),
     _bbox_factor(getParam<Real>("bbox_factor")),
     _fixed_bbox_size(isParamValid("fixed_bounding_box_size")
@@ -663,15 +671,57 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
 }
 
 bool
-MultiAppGeneralFieldTransfer::inBlocks(std::set<SubdomainID> & blocks, const Elem * elem) const
+MultiAppGeneralFieldTransfer::acceptPointInOriginMesh(unsigned int i_from,
+                                                      const std::vector<BoundingBox> & local_bboxes,
+                                                      const Point & pt) const
+{
+  if (!local_bboxes[i_from].contains_point(pt))
+    return false;
+  else
+  {
+    auto * pl = _from_point_locators[i_from].get();
+
+    // Check block restriction
+    if (!_from_blocks.empty() && !inBlocks(_from_blocks, pl, pt - _from_positions[i_from]))
+      return false;
+
+    // Check boundary restriction. Passing the block restriction will speed up the search
+    if (!_from_boundaries.empty() && !onBoundaries(_from_boundaries,
+                                                   _from_blocks,
+                                                   *_from_meshes[i_from],
+                                                   pl,
+                                                   pt - _from_positions[i_from]))
+      return false;
+
+    // Check that the app actually contains the origin point
+    // We dont need to check if we already found it in a block or a boundary
+    if (_from_blocks.empty() && _from_boundaries.empty() && _source_app_must_contain_point &&
+        !inMesh(pl, pt - _from_positions[i_from]))
+      return false;
+  }
+  return true;
+}
+
+bool
+MultiAppGeneralFieldTransfer::inMesh(const PointLocatorBase * const pl, const Point & point) const
+{
+  // Note: we do not take advantage of a potential block restriction of the mesh here. This is
+  // because we can avoid this routine by calling inBlocks() instead
+  const Elem * elem = (*pl)(point);
+  return (elem != nullptr);
+}
+
+bool
+MultiAppGeneralFieldTransfer::inBlocks(const std::set<SubdomainID> & blocks,
+                                       const Elem * elem) const
 {
   return blocks.find(elem->subdomain_id()) != blocks.end();
 }
 
 bool
-MultiAppGeneralFieldTransfer::inBlocks(std::set<SubdomainID> & blocks,
-                                        const MooseMesh & mesh,
-                                        const Node * node) const
+MultiAppGeneralFieldTransfer::inBlocks(const std::set<SubdomainID> & blocks,
+                                       const MooseMesh & mesh,
+                                       const Node * node) const
 {
   const std::set<SubdomainID> & node_blocks = mesh.getNodeBlockIds(*node);
   std::set<SubdomainID> u;
@@ -684,18 +734,18 @@ MultiAppGeneralFieldTransfer::inBlocks(std::set<SubdomainID> & blocks,
 }
 
 bool
-MultiAppGeneralFieldTransfer::inBlocks(std::set<SubdomainID> & blocks,
-                                        unsigned int i_from,
-                                        const Point & point) const
+MultiAppGeneralFieldTransfer::inBlocks(const std::set<SubdomainID> & blocks,
+                                       const PointLocatorBase * const pl,
+                                       const Point & point) const
 {
-  const Elem * elem = (*_from_point_locators[i_from])(point - _from_positions[i_from], &blocks);
+  const Elem * elem = (*pl)(point, &blocks);
   return (elem != nullptr);
 }
 
 bool
-MultiAppGeneralFieldTransfer::onBoundaries(std::set<BoundaryID> & boundaries,
-                                            const MooseMesh & mesh,
-                                            const Node * node) const
+MultiAppGeneralFieldTransfer::onBoundaries(const std::set<BoundaryID> & boundaries,
+                                           const MooseMesh & mesh,
+                                           const Node * node) const
 {
   const BoundaryInfo & bnd_info = mesh.getMesh().get_boundary_info();
   std::vector<BoundaryID> vec_to_fill;
@@ -711,9 +761,9 @@ MultiAppGeneralFieldTransfer::onBoundaries(std::set<BoundaryID> & boundaries,
 }
 
 bool
-MultiAppGeneralFieldTransfer::onBoundaries(std::set<BoundaryID> & boundaries,
-                                            const MooseMesh & mesh,
-                                            const Elem * elem) const
+MultiAppGeneralFieldTransfer::onBoundaries(const std::set<BoundaryID> & boundaries,
+                                           const MooseMesh & mesh,
+                                           const Elem * elem) const
 {
   // Get all boundaries each side of the element is part of
   const BoundaryInfo & bnd_info = mesh.getMesh().get_boundary_info();
@@ -752,7 +802,7 @@ MultiAppGeneralFieldTransfer::onBoundaries(const std::set<BoundaryID> & boundari
 {
   // Find the element containing the point and use the block restriction if known for speed
   const Elem * elem;
-  if (block_restriction.empty()) 
+  if (block_restriction.empty())
     elem = (*pl)(point);
   else
     elem = (*pl)(point, &block_restriction);
@@ -845,7 +895,7 @@ MultiAppGeneralFieldTransfer::getRestrictedFromBoundingBoxes()
       }
     }
 
-    // For 2D RZ problems, we need to amend the bounding box to cover the whole application
+    // For 2D RZ problems, we need to amend the bounding box to cover the whole XYZ projection
     // - The box is large enough to cover the cases where Z is aligned with the Cartesian X, Y or Z
     // - RZ systems also cover negative coordinates hence the use of the maximum R
     // NOTE: We will only support the case where there is only one coordinate system

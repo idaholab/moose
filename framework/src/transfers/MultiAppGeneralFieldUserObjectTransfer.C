@@ -82,12 +82,10 @@ MultiAppGeneralFieldUserObjectTransfer::evaluateInterpValuesWithUserObjects(
           _greedy_search);
          ++i_from)
     {
-      if (local_bboxes[i_from].contains_point(pt))
+      if (!acceptPointInOriginMesh(i_from, local_bboxes, pt))
+        continue;
+      else
       {
-        // Check block restriction (boundary restriction is not supported)
-        if (_from_blocks.size() && !inBlocks(_from_blocks, i_from, pt))
-          continue;
-
         // Get user object from the local problem
         const UserObject & user_object =
             _from_problems[i_from]->getUserObjectBase(_user_object_name);
