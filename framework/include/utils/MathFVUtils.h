@@ -20,6 +20,7 @@
 
 template <typename>
 class MooseVariableFV;
+class HasBlocksInterface;
 
 namespace Moose
 {
@@ -107,9 +108,10 @@ makeFace(const FaceInfo & fi,
          const LimiterType limiter_type,
          const bool elem_is_upwind,
          const std::pair<SubdomainID, SubdomainID> & subs,
-         const bool correct_skewness = false)
+         const bool correct_skewness = false,
+         const Elem * const face_side = nullptr)
 {
-  return {&fi, limiter_type, elem_is_upwind, correct_skewness, subs.first, subs.second};
+  return {&fi, limiter_type, elem_is_upwind, correct_skewness, subs.first, subs.second, face_side};
 }
 
 /**
@@ -126,9 +128,10 @@ makeFace(const FaceInfo & fi,
 inline FaceArg
 makeCDFace(const FaceInfo & fi,
            const std::pair<SubdomainID, SubdomainID> & subs,
-           const bool correct_skewness = false)
+           const bool correct_skewness = false,
+           const Elem * const face_side = nullptr)
 {
-  return makeFace(fi, LimiterType::CentralDifference, true, subs, correct_skewness);
+  return makeFace(fi, LimiterType::CentralDifference, true, subs, correct_skewness, face_side);
 }
 
 /**
@@ -142,13 +145,16 @@ makeCDFace(const FaceInfo & fi,
  * @return a face argument for functors
  */
 inline FaceArg
-makeCDFace(const FaceInfo & fi, const bool correct_skewness = false)
+makeCDFace(const FaceInfo & fi,
+           const bool correct_skewness = false,
+           const Elem * const face_side = nullptr)
 {
   return makeCDFace(
       fi,
       std::make_pair(fi.elem().subdomain_id(),
                      fi.neighborPtr() ? fi.neighbor().subdomain_id() : Moose::INVALID_BLOCK_ID),
-      correct_skewness);
+      correct_skewness,
+      face_side);
 }
 
 /// This codifies a set of available ways to interpolate with elem+neighbor

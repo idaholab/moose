@@ -21,18 +21,14 @@ public:
 
   static InputParameters validParams();
 
-  std::pair<bool, const Elem *> isExtrapolatedBoundaryFace(const FaceInfo & fi) const override;
-
-  using INSFVPressureVariable::adGradSln;
-  const VectorValue<ADReal> & adGradSln(const Elem * const elem,
-                                        const bool correct_skewness = false) const override;
+  bool isExtrapolatedBoundaryFace(const FaceInfo & fi, const Elem * elem) const override;
 
   void initialSetup() override;
 
 protected:
-  bool isDirichletBoundaryFace(const FaceInfo & fi) const override;
+  bool isDirichletBoundaryFace(const FaceInfo & fi, const Elem * elem) const override;
 
-  ADReal getDirichletBoundaryFaceValue(const FaceInfo & fi) const override;
+  ADReal getDirichletBoundaryFaceValue(const FaceInfo & fi, const Elem * elem) const override;
 
   std::tuple<bool, ADRealVectorValue, ADRealVectorValue> elemIsUpwind(const Elem & elem,
                                                                       const FaceInfo & fi) const;
@@ -42,7 +38,4 @@ protected:
   const Moose::Functor<ADReal> * _w;
   const Moose::Functor<ADReal> * _eps;
   const Moose::Functor<ADReal> * _rho;
-
-private:
-  mutable std::vector<const Elem *> _elems_to_extrapolate_from;
 };

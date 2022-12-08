@@ -72,7 +72,9 @@ public:
   {
   }
 
-  std::pair<bool, const Elem *> isExtrapolatedBoundaryFace(const FaceInfo & fi) const override;
+  bool isExtrapolatedBoundaryFace(const FaceInfo & fi, const Elem * elem) const override;
+  bool hasBlocks(SubdomainID sub_id) const override;
+  bool hasBlocks(const Elem * elem) const;
 
 private:
   /// The mesh that this functor lives on
@@ -107,36 +109,12 @@ private:
     }
   }
 
-  ValueType evaluate(const ElemFromFaceArg & elem_from_face, unsigned int) const override
+  ValueType evaluate(const ElemFromFaceArg & elem_from_face, unsigned int) const override final
   {
     return (*this)(ElemArg({elem_from_face.elem, elem_from_face.correct_skewness}));
   }
 
-  ValueType evaluate(const FaceArg & face, unsigned int) const override final
-  {
-    const auto & fi = *face.fi;
-    mooseAssert(face.limiter_type == Moose::FV::LimiterType::CentralDifference,
-                "this implementation currently only supports linear interpolations");
-
-    if (!isExtrapolatedBoundaryFace(fi).first)
-      return Moose::FV::linearInterpolation(*this, face);
-
-    if (!fi.neighborPtr() || _sub_ids.count(fi.elem().subdomain_id()))
-    {
-      const auto elem_arg = face.makeElem();
-      const auto elem_value = (*this)(elem_arg);
-      // Two term expansion
-      return elem_value + this->gradient(elem_arg) * (fi.faceCentroid() - fi.elemCentroid());
-    }
-    else
-    {
-      const auto neighbor_arg = face.makeNeighbor();
-      const auto neighbor_value = (*this)(neighbor_arg);
-      // Two term expansion
-      return neighbor_value +
-             this->gradient(neighbor_arg) * (fi.faceCentroid() - fi.neighborCentroid());
-    }
-  }
+  ValueType evaluate(const FaceArg & face, unsigned int) const override final;
 
   ValueType evaluate(const ElemPointArg & elem_point, const unsigned int state) const override final
   {
@@ -152,58 +130,111 @@ private:
     return Moose::FV::greenGaussGradient(elem_arg, *this, true, _mesh);
   }
 
-  GradientType evaluateGradient(const FaceArg & face, unsigned int) const override final
-  {
-    const auto & fi = *face.fi;
-    if (!isExtrapolatedBoundaryFace(fi).first)
-    {
-      const auto elem_arg = face.makeElem();
-      const auto elem_gradient = this->gradient(elem_arg);
-      const auto neighbor_arg = face.makeNeighbor();
-      const auto linear_interp_gradient =
-          fi.gC() * elem_gradient + (1 - fi.gC()) * this->gradient(neighbor_arg);
-      return linear_interp_gradient +
-             Moose::outer_product(((*this)(neighbor_arg) - (*this)(elem_arg)) / fi.dCNMag() -
-                                      linear_interp_gradient * fi.eCN(),
-                                  fi.eCN());
-    }
+  GradientType evaluateGradient(const FaceArg & face, unsigned int) const override final;
 
-    // One term expansion
-    if (!fi.neighborPtr() || _sub_ids.count(fi.elem().subdomain_id()))
-      return this->gradient(face.makeElem());
-    else
-      return this->gradient(face.makeNeighbor());
-  }
-
-  ValueType evaluate(const SingleSidedFaceArg & ssf, unsigned int) const override
+  ValueType evaluate(const SingleSidedFaceArg & ssf, unsigned int) const override final
   {
     return (*this)(Moose::FV::makeCDFace(*ssf.fi));
   }
 
-  ValueType evaluate(const ElemQpArg &, unsigned int) const override
+  ValueType evaluate(const ElemQpArg &, unsigned int) const override final
   {
     mooseError("not implemented");
   }
 
-  ValueType evaluate(const ElemSideQpArg &, unsigned int) const override
+  ValueType evaluate(const ElemSideQpArg &, unsigned int) const override final
   {
     mooseError("not implemented");
   }
 };
 
 template <typename T, typename Map>
-std::pair<bool, const Elem *>
-CellCenteredMapFunctor<T, Map>::isExtrapolatedBoundaryFace(const FaceInfo & fi) const
+bool
+CellCenteredMapFunctor<T, Map>::isExtrapolatedBoundaryFace(const FaceInfo & fi, const Elem *) const
 {
-  if (!fi.neighborPtr())
-    return std::make_pair(true, &fi.elem());
-
-  const bool defined_on_elem = _sub_ids.empty() || _sub_ids.count(fi.elem().subdomain_id());
-  const bool defined_on_neighbor = _sub_ids.empty() || _sub_ids.count(fi.neighbor().subdomain_id());
+  const bool defined_on_elem = hasBlocks(&fi.elem());
+  const bool defined_on_neighbor = hasBlocks(fi.neighborPtr());
   const bool extrapolated = (defined_on_elem + defined_on_neighbor) == 1;
 
   mooseAssert(defined_on_elem || defined_on_neighbor,
               "This shouldn't be called if we aren't defined on either side.");
-  const Elem * const ret_elem = defined_on_elem ? &fi.elem() : fi.neighborPtr();
-  return std::make_pair(extrapolated, ret_elem);
+  return extrapolated;
+}
+
+template <typename T, typename Map>
+bool
+CellCenteredMapFunctor<T, Map>::hasBlocks(const Elem * const elem) const
+{
+  if (!elem)
+    return false;
+
+  return hasBlocks(elem->subdomain_id());
+}
+
+template <typename T, typename Map>
+bool
+CellCenteredMapFunctor<T, Map>::hasBlocks(const SubdomainID sub_id) const
+{
+  return _sub_ids.empty() || _sub_ids.count(sub_id);
+}
+
+template <typename T, typename Map>
+typename CellCenteredMapFunctor<T, Map>::ValueType
+CellCenteredMapFunctor<T, Map>::evaluate(const FaceArg & face, unsigned int) const
+{
+  const auto & fi = *face.fi;
+  mooseAssert(face.limiter_type == Moose::FV::LimiterType::CentralDifference,
+              "this implementation currently only supports linear interpolations");
+
+  const bool defined_on_elem = hasBlocks(&fi.elem());
+  const bool defined_on_neighbor = hasBlocks(fi.neighborPtr());
+  if (defined_on_elem && defined_on_neighbor)
+    return Moose::FV::linearInterpolation(*this, face);
+
+  if (defined_on_elem)
+  {
+    const auto elem_arg = face.makeElem();
+    const auto elem_value = (*this)(elem_arg);
+    // Two term expansion
+    return elem_value + this->gradient(elem_arg) * (fi.faceCentroid() - fi.elemCentroid());
+  }
+  else
+  {
+    mooseAssert(defined_on_neighbor, "We should be defined on one of the sides");
+    const auto neighbor_arg = face.makeNeighbor();
+    const auto neighbor_value = (*this)(neighbor_arg);
+    // Two term expansion
+    return neighbor_value +
+           this->gradient(neighbor_arg) * (fi.faceCentroid() - fi.neighborCentroid());
+  }
+}
+
+template <typename T, typename Map>
+typename CellCenteredMapFunctor<T, Map>::GradientType
+CellCenteredMapFunctor<T, Map>::evaluateGradient(const FaceArg & face, unsigned int) const
+{
+  const auto & fi = *face.fi;
+  const bool defined_on_elem = hasBlocks(&fi.elem());
+  const bool defined_on_neighbor = hasBlocks(fi.neighborPtr());
+  if (defined_on_elem && defined_on_neighbor)
+  {
+    const auto elem_arg = face.makeElem();
+    const auto elem_gradient = this->gradient(elem_arg);
+    const auto neighbor_arg = face.makeNeighbor();
+    const auto linear_interp_gradient =
+        fi.gC() * elem_gradient + (1 - fi.gC()) * this->gradient(neighbor_arg);
+    return linear_interp_gradient +
+           Moose::outer_product(((*this)(neighbor_arg) - (*this)(elem_arg)) / fi.dCNMag() -
+                                    linear_interp_gradient * fi.eCN(),
+                                fi.eCN());
+  }
+
+  // One term expansion
+  if (defined_on_elem)
+    return this->gradient(face.makeElem());
+  else
+  {
+    mooseAssert(defined_on_neighbor, "We should be defined on one of the sides");
+    return this->gradient(face.makeNeighbor());
+  }
 }

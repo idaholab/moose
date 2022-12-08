@@ -110,7 +110,7 @@ greenGaussGradient(const ElemArg & elem_arg,
       mooseAssert(elem_arg.elem == &functor_elem,
                   "Just a sanity check that the element being passed in is the one we passed out.");
 
-      if (functor.isExtrapolatedBoundaryFace(*fi).first)
+      if (functor.isExtrapolatedBoundaryFace(*fi, elem_arg.elem))
       {
         if (two_term_boundary_expansion)
         {
@@ -261,9 +261,10 @@ greenGaussGradient(const FaceArg & face_arg,
   const auto & fi = *(face_arg.fi);
   const auto & elem_arg = face_arg.makeElem();
   const auto & neighbor_arg = face_arg.makeNeighbor();
-  const auto [is_extrapolated, defined_elem] = functor.isExtrapolatedBoundaryFace(fi);
+  const bool defined_on_elem = functor.hasBlocks(fi.elemSubdomainID());
+  const bool defined_on_neighbor = fi.neighborPtr() && functor.hasBlocks(fi.neighborSubdomainID());
 
-  if (!is_extrapolated)
+  if (defined_on_elem && defined_on_neighbor)
   {
     const auto & value_elem = functor(elem_arg);
     const auto & value_neighbor = functor(neighbor_arg);
@@ -294,12 +295,12 @@ greenGaussGradient(const FaceArg & face_arg,
 
     return face_gradient;
   }
-
-  // One term expansion
-  if (&fi.elem() == defined_elem)
+  else if (defined_on_elem)
     return functor.gradient(elem_arg);
-  else
+  else if (defined_on_neighbor)
     return functor.gradient(neighbor_arg);
+  else
+    mooseError("The functor must be defined on one of the sides");
 }
 
 template <typename T>

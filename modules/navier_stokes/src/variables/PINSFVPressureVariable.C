@@ -64,77 +64,59 @@ PINSFVPressureVariable::elemIsUpwind(const Elem & elem, const FaceInfo & fi) con
   return {elem_is_upwind, vel_elem, vel_neighbor};
 }
 
-std::pair<bool, const Elem *>
-PINSFVPressureVariable::isExtrapolatedBoundaryFace(const FaceInfo & fi) const
+bool
+PINSFVPressureVariable::isExtrapolatedBoundaryFace(const FaceInfo & fi,
+                                                   const Elem * const elem) const
 {
-  const bool extrapolated = [this, &fi]()
-  {
-    if (isDirichletBoundaryFace(fi))
-      return false;
-    if (&fi == _ssf_face)
-      return true;
-    if (!isInternalFace(fi))
-      // We are neither a Dirichlet nor an internal face
-      return true;
-
-    // If we got here, then we're definitely on an internal face
-
-    if (!_elems_to_extrapolate_from.empty() && std::get<0>(NS::isPorosityJumpFace(*_eps, fi)))
-      // We choose to extrapolate for the element that is downwind
-      return !std::get<0>(elemIsUpwind(*_elems_to_extrapolate_from.back(), fi));
-
+  if (isDirichletBoundaryFace(fi, elem))
     return false;
-  }();
+  if (std::make_pair<const FaceInfo *, const Elem *>(&fi, elem) == _ssf_face)
+    return true;
+  if (!isInternalFace(fi))
+    // We are neither a Dirichlet nor an internal face
+    return true;
 
-  if (!fi.neighborPtr())
-    return std::make_pair(extrapolated, &fi.elem());
+  // If we got here, then we're definitely on an internal face
 
-  const bool defined_on_elem = this->hasBlocks(fi.elem().subdomain_id());
-#ifndef NDEBUG
-  const bool defined_on_neighbor = this->hasBlocks(fi.neighbor().subdomain_id());
+  if (std::get<0>(NS::isPorosityJumpFace(*_eps, fi)))
+    // We choose to extrapolate for the element that is downwind
+    return !std::get<0>(elemIsUpwind(elem, fi));
 
-  mooseAssert(defined_on_elem || defined_on_neighbor,
-              "This shouldn't be called if we aren't defined on either side.");
-#endif
-  const Elem * const ret_elem = defined_on_elem ? &fi.elem() : fi.neighborPtr();
-  return std::make_pair(extrapolated, ret_elem);
+  return false;
 }
 
 bool
-PINSFVPressureVariable::isDirichletBoundaryFace(const FaceInfo & fi) const
+PINSFVPressureVariable::isDirichletBoundaryFace(const FaceInfo & fi, const Elem * const elem) const
 {
-  if (INSFVPressureVariable::isDirichletBoundaryFace(fi))
+  if (INSFVPressureVariable::isDirichletBoundaryFace(fi, elem))
     return true;
 
-  if (isInternalFace(fi) && !_elems_to_extrapolate_from.empty() &&
-      std::get<0>(NS::isPorosityJumpFace(*_eps, fi)))
+  if (isInternalFace(fi) && std::get<0>(NS::isPorosityJumpFace(*_eps, fi)))
     // We choose to apply the Dirichlet condition for the upwind element
-    return std::get<0>(elemIsUpwind(*_elems_to_extrapolate_from.back(), fi));
+    return std::get<0>(elemIsUpwind(elem, fi));
 
   return false;
 }
 
 ADReal
-PINSFVPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi) const
+PINSFVPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi,
+                                                      const Elem * const elem) const
 {
-  mooseAssert(isDirichletBoundaryFace(fi), "This better be a Dirichlet face");
+  mooseAssert(isDirichletBoundaryFace(fi, elem), "This better be a Dirichlet face");
   const auto [is_jump_face, eps_elem, eps_neighbor] = NS::isPorosityJumpFace(*_eps, fi);
 
   if (!is_jump_face)
-    return INSFVPressureVariable::getDirichletBoundaryFaceValue(fi);
+    return INSFVPressureVariable::getDirichletBoundaryFaceValue(fi, elem);
 
   const Moose::SingleSidedFaceArg ssf_elem{
-      &fi, Moose::FV::LimiterType::CentralDifference, true, false, fi.elem().subdomain_id()};
+      &fi, Moose::FV::LimiterType::CentralDifference, true, false, &fi.elem()};
   const Moose::SingleSidedFaceArg ssf_neighbor{
-      &fi, Moose::FV::LimiterType::CentralDifference, true, false, fi.neighbor().subdomain_id()};
+      &fi, Moose::FV::LimiterType::CentralDifference, true, false, fi.neighborPtr()};
 
   // For incompressible or weakly compressible flow these should really be about the same
   const auto rho_elem = (*_rho)(ssf_elem), rho_neighbor = (*_rho)(ssf_neighbor);
 
-  mooseAssert(!_elems_to_extrapolate_from.empty(),
-              "If we are here, then we must have a Green-Gauss element");
-  const auto [gg_elem_is_upwind, vel_elem, vel_neighbor] =
-      elemIsUpwind(*_elems_to_extrapolate_from.back(), fi);
+  const auto [elem_is_upwind, vel_elem, vel_neighbor] = elemIsUpwind(elem, fi);
 
   const VectorValue<ADReal> interstitial_vel_elem = vel_elem * (1 / eps_elem);
   const VectorValue<ADReal> interstitial_vel_neighbor = vel_neighbor * (1 / eps_neighbor);
@@ -144,8 +126,7 @@ PINSFVPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi) const
   const auto bernoulli_vel_chunk_neighbor =
       0.5 * rho_neighbor * v_dot_n_neighbor * v_dot_n_neighbor;
 
-  const bool fi_elem_is_upwind =
-      _elems_to_extrapolate_from.back() == &fi.elem() ? gg_elem_is_upwind : !gg_elem_is_upwind;
+  const bool fi_elem_is_upwind = elem == &fi.elem() ? elem_is_upwind : !elem_is_upwind;
   const auto & downwind_ssf = fi_elem_is_upwind ? ssf_neighbor : ssf_elem;
   const auto & upwind_bernoulli_vel_chunk =
       fi_elem_is_upwind ? bernoulli_vel_chunk_elem : bernoulli_vel_chunk_neighbor;
@@ -155,13 +136,4 @@ PINSFVPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi) const
   const auto p_downwind = (*this)(downwind_ssf);
   _elems_to_extrapolate_from.pop_back();
   return p_downwind + downwind_bernoulli_vel_chunk - upwind_bernoulli_vel_chunk;
-}
-
-const VectorValue<ADReal> &
-PINSFVPressureVariable::adGradSln(const Elem * const elem, const bool correct_skewness) const
-{
-  _elems_to_extrapolate_from.push_back(elem);
-  const auto & grad = INSFVPressureVariable::adGradSln(elem, correct_skewness);
-  _elems_to_extrapolate_from.pop_back();
-  return grad;
 }

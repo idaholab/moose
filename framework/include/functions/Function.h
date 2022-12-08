@@ -137,7 +137,7 @@ public:
   void residualSetup() override;
   void jacobianSetup() override;
 
-  bool hasBlocks(const SubdomainID &) const override { return true; }
+  bool hasBlocks(SubdomainID) const override { return true; }
 
 private:
   using typename Moose::FunctorBase<T>::ValueType;
@@ -150,7 +150,6 @@ private:
   Real getTime(unsigned int state) const;
 
   using ElemArg = Moose::ElemArg;
-  using ElemFromFaceArg = Moose::ElemFromFaceArg;
   using ElemQpArg = Moose::ElemQpArg;
   using ElemSideQpArg = Moose::ElemSideQpArg;
   using FaceArg = Moose::FaceArg;
@@ -158,8 +157,6 @@ private:
   using ElemPointArg = Moose::ElemPointArg;
 
   ValueType evaluate(const ElemArg & elem, unsigned int state) const override final;
-  ValueType evaluate(const ElemFromFaceArg & elem_from_face,
-                     unsigned int state) const override final;
   ValueType evaluate(const FaceArg & face, unsigned int state) const override final;
   ValueType evaluate(const SingleSidedFaceArg & face, unsigned int state) const override final;
   ValueType evaluate(const ElemQpArg & qp, unsigned int state) const override final;
@@ -167,8 +164,6 @@ private:
   ValueType evaluate(const ElemPointArg & elem_point, unsigned int state) const override final;
 
   GradientType evaluateGradient(const ElemArg & elem, unsigned int state) const override final;
-  GradientType evaluateGradient(const ElemFromFaceArg & elem_from_face,
-                                unsigned int state) const override final;
   GradientType evaluateGradient(const FaceArg & face, unsigned int state) const override final;
   GradientType evaluateGradient(const SingleSidedFaceArg & face,
                                 unsigned int state) const override final;
@@ -179,8 +174,6 @@ private:
                                 unsigned int state) const override final;
 
   DotType evaluateDot(const ElemArg & elem, unsigned int state) const override final;
-  DotType evaluateDot(const ElemFromFaceArg & elem_from_face,
-                      unsigned int state) const override final;
   DotType evaluateDot(const FaceArg & face, unsigned int state) const override final;
   DotType evaluateDot(const SingleSidedFaceArg & face, unsigned int state) const override final;
   DotType evaluateDot(const ElemQpArg & qp, unsigned int state) const override final;

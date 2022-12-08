@@ -20,7 +20,6 @@ class QBase;
 namespace Moose
 {
 struct ElemArg;
-struct ElemFromFaceArg;
 struct FaceArg;
 struct SingleSidedFaceArg;
 using ElemQpArg = std::tuple<const libMesh::Elem *, unsigned int, const libMesh::QBase *>;

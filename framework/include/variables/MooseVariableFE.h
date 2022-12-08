@@ -140,9 +140,6 @@ public:
    */
   bool computingCurl() const override final;
 
-  const std::set<SubdomainID> & activeSubdomains() const override;
-  bool activeOnSubdomain(SubdomainID subdomain) const override;
-
   bool isNodal() const override { return _element_data->isNodal(); }
   bool hasDoFsOnNodes() const override { return _element_data->hasDoFsOnNodes(); }
   Moose::VarFieldType fieldType() const override;

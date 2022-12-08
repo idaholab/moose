@@ -32,10 +32,7 @@ public:
   {
   }
 
-  std::pair<bool, const Elem *> isExtrapolatedBoundaryFace(const FaceInfo & fi) const override
-  {
-    return _vector.isExtrapolatedBoundaryFace(fi);
-  }
+  bool isExtrapolatedBoundaryFace(const FaceInfo & fi, const Elem * elem) const override;
 
 private:
   /// The parent vector functor
@@ -97,3 +94,10 @@ private:
     return _vector.gradient(face, state).row(_component);
   }
 };
+
+template <typename T>
+bool
+VectorComponentFunctor<T>::isExtrapolatedBoundaryFace(const FaceInfo & fi, const Elem * elem) const
+{
+  return _vector.isExtrapolatedBoundaryFace(fi, elem);
+}

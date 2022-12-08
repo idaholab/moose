@@ -103,13 +103,14 @@ public:
   /**
    * The subdomains the variable is active on
    */
-  virtual const std::set<SubdomainID> & activeSubdomains() const = 0;
+  const std::set<SubdomainID> & activeSubdomains() const;
+
   /**
    * Is the variable active on the subdomain?
    * @param subdomain The subdomain id in question
    * @return true if active on subdomain, false otherwise
    */
-  virtual bool activeOnSubdomain(SubdomainID subdomain) const = 0;
+  bool activeOnSubdomain(SubdomainID subdomain) const;
 
   /**
    * Prepare the initial condition

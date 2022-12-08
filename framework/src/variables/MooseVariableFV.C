@@ -111,13 +111,6 @@ MooseVariableFV<OutputType>::MooseVariableFV(const InputParameters & parameters)
 }
 
 template <typename OutputType>
-const std::set<SubdomainID> &
-MooseVariableFV<OutputType>::activeSubdomains() const
-{
-  return this->_sys.system().variable(_var_num).active_subdomains();
-}
-
-template <typename OutputType>
 Moose::VarFieldType
 MooseVariableFV<OutputType>::fieldType() const
 {
@@ -129,13 +122,6 @@ MooseVariableFV<OutputType>::fieldType() const
     return Moose::VarFieldType::VAR_FIELD_ARRAY;
   else
     mooseError("Unknown variable field type");
-}
-
-template <typename OutputType>
-bool
-MooseVariableFV<OutputType>::activeOnSubdomain(SubdomainID subdomain) const
-{
-  return this->_sys.system().variable(_var_num).active_on_subdomain(subdomain);
 }
 
 template <typename OutputType>
@@ -550,7 +536,7 @@ MooseVariableFV<OutputType>::getInternalFaceValue(const FaceInfo & fi,
 
 template <typename OutputType>
 bool
-MooseVariableFV<OutputType>::isDirichletBoundaryFace(const FaceInfo & fi) const
+MooseVariableFV<OutputType>::isDirichletBoundaryFace(const FaceInfo & fi, const Elem *) const
 {
   const auto & pr = getDirichletBC(fi);
 
@@ -560,14 +546,15 @@ MooseVariableFV<OutputType>::isDirichletBoundaryFace(const FaceInfo & fi) const
 
 template <typename OutputType>
 ADReal
-MooseVariableFV<OutputType>::getDirichletBoundaryFaceValue(const FaceInfo & fi) const
+MooseVariableFV<OutputType>::getDirichletBoundaryFaceValue(
+    const FaceInfo & fi, const Elem * const libmesh_dbg_var(elem)) const
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError(
       "MooseVariableFV::getDirichletBoundaryFaceValue only supported for global AD indexing");
 #endif
 
-  mooseAssert(isDirichletBoundaryFace(fi),
+  mooseAssert(isDirichletBoundaryFace(fi, elem),
               "This function should only be called on Dirichlet boundary faces.");
 
   const auto & diri_pr = getDirichletBC(fi);
@@ -581,31 +568,16 @@ MooseVariableFV<OutputType>::getDirichletBoundaryFaceValue(const FaceInfo & fi) 
 }
 
 template <typename OutputType>
-std::pair<bool, const Elem *>
-MooseVariableFV<OutputType>::isExtrapolatedBoundaryFace(const FaceInfo & fi) const
+bool
+MooseVariableFV<OutputType>::isExtrapolatedBoundaryFace(const FaceInfo & fi,
+                                                        const Elem * const elem) const
 {
-  const bool extrapolated = [this, &fi]()
-  {
-    if (isDirichletBoundaryFace(fi))
-      return false;
-    if (&fi == _ssf_face)
-      return true;
+  if (isDirichletBoundaryFace(fi, elem))
+    return false;
+  if (std::make_pair<const FaceInfo *, const Elem *>(&fi, elem) == _ssf_face)
+    return true;
 
-    return !isInternalFace(fi);
-  }();
-
-  if (!fi.neighborPtr())
-    return std::make_pair(extrapolated, &fi.elem());
-
-  const bool defined_on_elem = this->hasBlocks(fi.elem().subdomain_id());
-#ifndef NDEBUG
-  const bool defined_on_neighbor = this->hasBlocks(fi.neighbor().subdomain_id());
-
-  mooseAssert(defined_on_elem || defined_on_neighbor,
-              "This shouldn't be called if we aren't defined on either side.");
-#endif
-  const Elem * const ret_elem = defined_on_elem ? &fi.elem() : fi.neighborPtr();
-  return std::make_pair(extrapolated, ret_elem);
+  return !isInternalFace(fi);
 }
 
 template <typename OutputType>
@@ -618,7 +590,7 @@ MooseVariableFV<OutputType>::getExtrapolatedBoundaryFaceValue(
       "MooseVariableFV::getExtrapolatedBoundaryFaceValue only supported for global AD indexing");
 #endif
 
-  mooseAssert(isExtrapolatedBoundaryFace(fi).first,
+  mooseAssert(isExtrapolatedBoundaryFace(fi, elem_to_extrapolate_from),
               "This function should only be called on extrapolated boundary faces");
 
   ADReal boundary_value;
@@ -665,7 +637,7 @@ MooseVariableFV<OutputType>::getBoundaryFaceValue(const FaceInfo & fi) const
 
   if (isDirichletBoundaryFace(fi))
     return getDirichletBoundaryFaceValue(fi);
-  else if (isExtrapolatedBoundaryFace(fi).first)
+  else if (isExtrapolatedBoundaryFace(fi))
     return getExtrapolatedBoundaryFaceValue(fi, _two_term_boundary_expansion);
 
   mooseError("Unknown boundary face type!");
@@ -824,19 +796,32 @@ MooseVariableFV<OutputType>::evaluate(const FaceArg & face,
   mooseAssert(state == 0, "Only current time state supported.");
   const FaceInfo * const fi = face.fi;
   mooseAssert(fi, "The face information must be non-null");
-  if (isDirichletBoundaryFace(*fi))
-    return getDirichletBoundaryFaceValue(*fi);
+  if (isDirichletBoundaryFace(*fi, face.face_side))
+    return getDirichletBoundaryFaceValue(*fi, face.face_side);
   else if (isInternalFace(*fi))
     return Moose::FV::interpolate(*this, face);
   else
   {
     const bool var_defined_on_elem = this->hasBlocks(fi->elem().subdomain_id());
+#ifndef NDEBUG
+    const bool var_defined_on_neighbor =
+        fi->neighborPtr() && this->hasBlocks(fi->neighborSubdomainID());
+    mooseAssert((var_defined_on_elem + var_defined_on_neighbor) == 1,
+                "We should only be defined on one side");
+    if (face.face_side)
+    {
+      const bool side_is_elem_side = face.face_side == &fi->elem();
+      mooseAssert(side_is_elem_side ? var_defined_on_elem : var_defined_on_neighbor,
+                  "We should not have a mismatch between requested sidedness of evaluation and "
+                  "where we are defined");
+    }
+#endif
+
     Moose::SingleSidedFaceArg ssfa = {fi,
                                       face.limiter_type,
                                       face.elem_is_upwind,
                                       face.correct_skewness,
-                                      var_defined_on_elem ? face.elem_sub_id
-                                                          : face.neighbor_sub_id};
+                                      var_defined_on_elem ? &fi->elem() : fi->neighborPtr()};
     return this->evaluate(ssfa, 0);
   }
 }
@@ -849,19 +834,17 @@ MooseVariableFV<OutputType>::evaluate(const SingleSidedFaceArg & face,
   mooseAssert(state == 0, "Only current time state supported.");
   const FaceInfo * const fi = face.fi;
   mooseAssert(fi, "The face information must be non-null");
-  mooseAssert(this->hasBlocks(face.sub_id),
+  mooseAssert(this->hasBlocks(face.elem->subdomain_id()),
               "Evaluating our variable on a side on which we are not defined");
-  if (isDirichletBoundaryFace(*fi))
-    return getDirichletBoundaryFaceValue(*fi);
+  if (isDirichletBoundaryFace(*fi, face.elem))
+    return getDirichletBoundaryFaceValue(*fi, face.elem);
   else
   {
-    _ssf_face = fi;
+    _ssf_face = std::make_pair(fi, face.elem);
 
-    const Elem * const elem_to_extrapolate_from =
-        face.sub_id == fi->elem().subdomain_id() ? &fi->elem() : fi->neighborPtr();
-    const auto boundary_value = getExtrapolatedBoundaryFaceValue(
-        *fi, _two_term_boundary_expansion, elem_to_extrapolate_from);
-    _ssf_face = nullptr;
+    const auto boundary_value =
+        getExtrapolatedBoundaryFaceValue(*fi, _two_term_boundary_expansion, face.elem);
+    _ssf_face = {nullptr, nullptr};
     return boundary_value;
   }
 }

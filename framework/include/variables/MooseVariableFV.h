@@ -157,9 +157,6 @@ public:
 
   virtual void prepareIC() override;
 
-  const std::set<SubdomainID> & activeSubdomains() const override;
-  bool activeOnSubdomain(SubdomainID subdomain) const override;
-
   Moose::VarFieldType fieldType() const override;
   bool isArray() const override;
   bool isVector() const override;
@@ -466,32 +463,32 @@ protected:
   /**
    * @return whether \p fi is a Dirichlet boundary face for this variable
    */
-  virtual bool isDirichletBoundaryFace(const FaceInfo & fi) const;
+  virtual bool isDirichletBoundaryFace(const FaceInfo & fi, const Elem * elem) const;
 
   /**
    * @return the Dirichlet value on the boundary face associated with \p fi
    */
-  virtual ADReal getDirichletBoundaryFaceValue(const FaceInfo & fi) const;
+  virtual ADReal getDirichletBoundaryFaceValue(const FaceInfo & fi, const Elem * elem) const;
 
   /**
    * Returns whether this is an extrapolated boundary face. An extrapolated boundary face is
    * boundary face for which is not a corresponding Dirichlet condition, e.g. we need to compute
    * some approximation for the boundary face value using the adjacent cell centroid information
    */
-  std::pair<bool, const Elem *> isExtrapolatedBoundaryFace(const FaceInfo & fi) const override;
+  std::pair<bool, const Elem *> isExtrapolatedBoundaryFace(const FaceInfo & fi,
+                                                           const Elem * elem) const override;
 
   /**
    * @return the extrapolated value on the boundary face associated with \p fi
    */
-  virtual ADReal
-  getExtrapolatedBoundaryFaceValue(const FaceInfo & fi,
-                                   bool two_term_expansion,
-                                   const Elem * elem_side_to_extrapolate_from = nullptr) const;
+  virtual ADReal getExtrapolatedBoundaryFaceValue(const FaceInfo & fi,
+                                                  bool two_term_expansion,
+                                                  const Elem * elem_side_to_extrapolate_from) const;
 
   /// Points to a 'current' single sided face. This member allows us to be sure to perform
   /// extrapolation (when we don't have a Dirichlet boundary condition) when evaluating this with a
   /// single sided face argument
-  mutable const FaceInfo * _ssf_face = nullptr;
+  mutable std::pair<const FaceInfo *, const Elem *> _ssf_face{nullptr, nullptr};
 
 private:
   using MooseVariableField<OutputType>::evaluate;

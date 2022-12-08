@@ -199,16 +199,6 @@ FunctionTempl<T>::evaluate(const ElemArg & elem_arg, const unsigned int state) c
 
 template <typename T>
 typename FunctionTempl<T>::ValueType
-FunctionTempl<T>::evaluate(const ElemFromFaceArg & elem_from_face, const unsigned int state) const
-{
-  const auto * const elem = elem_from_face.elem;
-  const auto * const fi = elem_from_face.fi;
-  mooseAssert(fi, "We must have a non-null face information pointer");
-  return value(getTime(state), (elem == &fi->elem()) ? fi->elemCentroid() : fi->neighborCentroid());
-}
-
-template <typename T>
-typename FunctionTempl<T>::ValueType
 FunctionTempl<T>::evaluate(const FaceArg & face, const unsigned int state) const
 {
   return value(getTime(state), face.fi->faceCentroid());
@@ -254,18 +244,6 @@ typename FunctionTempl<T>::GradientType
 FunctionTempl<T>::evaluateGradient(const ElemArg & elem_arg, const unsigned int state) const
 {
   return gradient(getTime(state), elem_arg.elem->vertex_average());
-}
-
-template <typename T>
-typename FunctionTempl<T>::GradientType
-FunctionTempl<T>::evaluateGradient(const ElemFromFaceArg & elem_from_face,
-                                   const unsigned int state) const
-{
-  const auto * const elem = elem_from_face.elem;
-  const auto * const fi = elem_from_face.fi;
-  mooseAssert(fi, "We must have a non-null face information pointer");
-  return gradient(getTime(state),
-                  (elem == &fi->elem()) ? fi->elemCentroid() : fi->neighborCentroid());
 }
 
 template <typename T>
@@ -318,18 +296,6 @@ typename FunctionTempl<T>::DotType
 FunctionTempl<T>::evaluateDot(const ElemArg & elem_arg, const unsigned int state) const
 {
   return timeDerivative(getTime(state), elem_arg.elem->vertex_average());
-}
-
-template <typename T>
-typename FunctionTempl<T>::DotType
-FunctionTempl<T>::evaluateDot(const ElemFromFaceArg & elem_from_face,
-                              const unsigned int state) const
-{
-  const auto * const elem = elem_from_face.elem;
-  const auto * const fi = elem_from_face.fi;
-  mooseAssert(fi, "We must have a non-null face information pointer");
-  return timeDerivative(getTime(state),
-                        (elem == &fi->elem()) ? fi->elemCentroid() : fi->neighborCentroid());
 }
 
 template <typename T>

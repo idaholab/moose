@@ -33,3 +33,15 @@ MooseVariableFieldBase::componentName(const unsigned int comp) const
   else
     return _var_name;
 }
+
+const std::set<SubdomainID> &
+MooseVariableFieldBase::activeSubdomains() const
+{
+  return this->_sys.system().variable(_var_num).active_subdomains();
+}
+
+bool
+MooseVariableFieldBase::activeOnSubdomain(SubdomainID subdomain) const
+{
+  return this->_sys.system().variable(_var_num).active_on_subdomain(subdomain);
+}

@@ -221,7 +221,7 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem, bool correct_skewness)
       mooseAssert(elem == &functor_elem,
                   "Just a sanity check that the element being passed in is the one we passed out.");
 
-      if (isExtrapolatedBoundaryFace(*fi).first)
+      if (isExtrapolatedBoundaryFace(*fi, &functor_elem))
       {
         if (_two_term_boundary_expansion)
         {
@@ -265,8 +265,8 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem, bool correct_skewness)
         grad_b += surface_vector * getInternalFaceValue(*fi, correct_skewness);
       else
       {
-        mooseAssert(isDirichletBoundaryFace(*fi), "We've run out of face types");
-        grad_b += surface_vector * getDirichletBoundaryFaceValue(*fi);
+        mooseAssert(isDirichletBoundaryFace(*fi, &functor_elem), "We've run out of face types");
+        grad_b += surface_vector * getDirichletBoundaryFaceValue(*fi, &functor_elem);
       }
 
       if (!volume_set)

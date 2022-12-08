@@ -30,10 +30,7 @@ public:
   {
   }
 
-  std::pair<bool, const Elem *> isExtrapolatedBoundaryFace(const FaceInfo & fi) const override
-  {
-    return _array.isExtrapolatedBoundaryFace(fi);
-  }
+  bool isExtrapolatedBoundaryFace(const FaceInfo & fi, const Elem * elem) const override;
 
 private:
   /// The parent array functor
@@ -89,3 +86,11 @@ private:
     return _array.gradient(elem, state)[_component];
   }
 };
+
+template <typename T, typename ArrayTypeFunctor>
+bool
+ArrayComponentFunctor<T, ArrayTypeFunctor>::isExtrapolatedBoundaryFace(
+    const FaceInfo & fi, const Elem * const elem) const
+{
+  return _array.isExtrapolatedBoundaryFace(fi, elem);
+}

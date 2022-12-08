@@ -52,10 +52,10 @@ public:
 
   virtual ~PiecewiseByBlockLambdaFunctor() = default;
 
-  std::pair<bool, const Elem *> isExtrapolatedBoundaryFace(const FaceInfo & fi) const override;
+  bool isExtrapolatedBoundaryFace(const FaceInfo & fi, const Elem * elem) const override;
   bool isInternalFace(const FaceInfo & fi) const override;
 
-  bool hasBlocks(const SubdomainID & id) const override;
+  bool hasBlocks(SubdomainID id) const override;
 
   using typename Moose::FunctorBase<T>::FunctorType;
   using typename Moose::FunctorBase<T>::ValueType;
@@ -172,11 +172,12 @@ PiecewiseByBlockLambdaFunctor<T>::setFunctor(const MooseMesh & mesh,
 }
 
 template <typename T>
-std::pair<bool, const Elem *>
-PiecewiseByBlockLambdaFunctor<T>::isExtrapolatedBoundaryFace(const FaceInfo & fi) const
+bool
+PiecewiseByBlockLambdaFunctor<T>::isExtrapolatedBoundaryFace(const FaceInfo & fi,
+                                                             const Elem *) const
 {
   if (!fi.neighborPtr())
-    return std::make_pair(true, &fi.elem());
+    return true;
 
   const bool defined_on_elem = _elem_functor.count(fi.elem().subdomain_id());
   const bool defined_on_neighbor = _elem_functor.count(fi.neighbor().subdomain_id());
@@ -184,8 +185,7 @@ PiecewiseByBlockLambdaFunctor<T>::isExtrapolatedBoundaryFace(const FaceInfo & fi
 
   mooseAssert(defined_on_elem || defined_on_neighbor,
               "This shouldn't be called if we aren't defined on either side.");
-  const Elem * const ret_elem = defined_on_elem ? &fi.elem() : fi.neighborPtr();
-  return std::make_pair(extrapolated, ret_elem);
+  return extrapolated;
 }
 
 template <typename T>
@@ -203,7 +203,7 @@ PiecewiseByBlockLambdaFunctor<T>::isInternalFace(const FaceInfo & fi) const
 
 template <typename T>
 bool
-PiecewiseByBlockLambdaFunctor<T>::hasBlocks(const SubdomainID & id) const
+PiecewiseByBlockLambdaFunctor<T>::hasBlocks(const SubdomainID id) const
 {
   // If any of the maps has a functor for that block, it has the block
   if (_elem_functor.count(id) || _elem_from_face_functor.count(id) || _face_functor.count(id) ||

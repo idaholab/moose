@@ -347,9 +347,7 @@ public:
    * @param id subdomain id we want to know whether the variable is defined on
    * @return whether the variable is defined on this domain
    */
-  bool hasBlocks(const SubdomainID & id) const override { return BlockRestrictable::hasBlocks(id); }
-  // The five other definitions of hasBlocks should not be hidden
-  using BlockRestrictable::hasBlocks;
+  bool hasBlocks(const SubdomainID id) const override { return activeOnSubdomain(id); }
 
 protected:
   using FunctorArg = typename Moose::ADType<OutputType>::type;
