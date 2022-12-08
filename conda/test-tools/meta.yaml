@@ -2,7 +2,6 @@
 # REMEMBER TO UPDATE the .yaml files for the following packages:
 #   template/ (must contain any python major.minor version this
 #              package is building. Usually the latest version.)
-#   tools/    (conda_build_config.yaml python versions)
 {% set build = 0 %}
 {% set version = "2022.12.05" %}
 
