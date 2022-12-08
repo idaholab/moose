@@ -69,7 +69,7 @@ about:
   license: LGPL 2.1
   summary: >
     This superficial module (moose-test-tools) acts as a low level module designed to provide all
-    dependencies required in order to run the TestHarness, clang-format, code coverage, pylint, etc
+    dependencies required in order to run the TestHarness, code coverage, pylint, etc
     (mostly Civet CI stuff).
 
 extra:
