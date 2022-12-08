@@ -192,7 +192,7 @@ class QueueManager(Scheduler):
 
         # Build ['/path/to/run_tests', '-j', '#']
         command = [os.path.join(self.harness.run_tests_dir, 'run_tests'),
-                   '-j', cpus]
+                   '-j', str(cpus)]
 
         # get current sys.args we are allowed to include when we launch run_tests
         args = list(self.cleanAndModifyArgs())
@@ -325,12 +325,8 @@ class QueueManager(Scheduler):
     def _prevJobGroupFinished(self, jobs):
         """ Loop through jobs and return immediately if any one job has a finished status """
         for job in jobs:
-            # ignore detection of silent/deleted finished statuses. While Silent _is_ a finished
-            # status, it would not have been recorded in the top-level json results file as a
-            # lauchable job in the third party scheduler (this would end up as a missing test
-            # exception). Likewise, we know something was launchable or there would be no job_group,
-            # so continue until we find the job that launched the rest.
-            if job.isSilent():
+            # ignore detection of skipped/silent/deleted finished statuses.
+            if job.isSilent() or job.isSkip():
                 continue
             (key, value) = job.getTestDir(), job.getTestName()
             previous_status = self.__status_system.createStatus(self.options.results_storage[key][value]['STATUS'])
@@ -385,8 +381,13 @@ class QueueManager(Scheduler):
                     # Read output file (--sep-files-ok|fail)
                     if job.getOutputFile() and os.path.exists(job.getOutputFile()):
                         self.addDirtyFiles(job, [job.getOutputFile()])
-                        with open(job.getOutputFile(), 'r') as outfile:
-                            job.setOutput(outfile.read())
+                        if (self.options.reg_exp
+                            or self.options.failed_tests
+                            or self.options.verbose):
+                            with open(job.getOutputFile(), 'r') as outfile:
+                                job.setOutput(outfile.read())
+                        else:
+                            job.setOutput(f'See error in file: {job.getOutputFile()}')
                     else:
                         job.setOutput('Output file is not available, or was never generated')
 

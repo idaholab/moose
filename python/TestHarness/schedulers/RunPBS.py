@@ -43,7 +43,8 @@ class RunPBS(QueueManager):
 
         PBS_STATUSES = { 'R' : 'RUNNING',
                          'F' : 'FINISHED',
-                         'Q' : 'QUEUED' }
+                         'Q' : 'QUEUED',
+                         'E' : 'EXITING'}
 
         jobs = job_data.jobs.getJobs()
         queue_plugin = self.__class__.__name__
