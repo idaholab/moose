@@ -365,9 +365,13 @@ class QueueManager(Scheduler):
             for job in job_list:
                 # Perhaps the user is filtering this job (--re, --failed-tests, etc)
                 tester = job.getTester()
+                job.setStatus(job.finished)
                 if tester.isSilent() or tester.isSkip():
                     continue
-                job.setStatus(job.finished)
+                elif self.options.failed_tests and tester.isPass():
+                    tester.setStatus(tester.silent)
+                    continue
+
                 if group_results.get(job.getTestName(), {}):
                     job_results = group_results[job.getTestName()]
                     status, message, caveats = job.previousTesterStatus(self.options, results)
@@ -383,7 +387,7 @@ class QueueManager(Scheduler):
                         self.addDirtyFiles(job, [job.getOutputFile()])
                         if (self.options.reg_exp
                             or self.options.failed_tests
-                            or self.options.verbose):
+                            or self.options.verbose) and not self.options.quiet:
                             with open(job.getOutputFile(), 'r') as outfile:
                                 job.setOutput(outfile.read())
                         else:

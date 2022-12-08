@@ -1037,7 +1037,6 @@ class TestHarness:
         parser.add_argument('--allow-unused',action='store_true', help='Run the tests without errors on unused parameters (Pass "--allow-unused" to executable)')
         # Option to use for passing unwrapped options to the executable
         parser.add_argument('--cli-args', nargs='?', type=str, dest='cli_args', help='Append the following list of arguments to the command line (Encapsulate the command in quotes)')
-
         parser.add_argument('--dry-run', action='store_true', dest='dry_run', help="Pass --dry-run to print commands to run, but don't actually run them")
         parser.add_argument('--use-subdir-exe', action="store_true", help='If there are sub directories that contain a new testroot, use that for running tests under that directory.')
 
@@ -1107,16 +1106,13 @@ class TestHarness:
         if opts.spec_file and not os.path.exists(opts.spec_file):
             print('ERROR: --spec-file supplied but path does not exist')
             sys.exit(1)
-        if opts.failed_tests and opts.pbs:
-            print('ERROR: --failed-tests and --pbs cannot be used simultaneously')
-            sys.exit(1)
         if opts.queue_cleanup and not opts.pbs:
             print('ERROR: --queue-cleanup cannot be used without additional queue options')
             sys.exit(1)
         if opts.queue_source_command and not os.path.exists(opts.queue_source_command):
             print('ERROR: pre-source supplied but path does not exist')
             sys.exit(1)
-        if opts.failed_tests and not os.path.exists(opts.results_file):
+        if opts.failed_tests and not opts.pbs and not os.path.exists(opts.results_file):
             print('ERROR: --failed-tests could not detect a previous run')
             sys.exit(1)
         if opts.pbs and opts.pedantic_checks:
@@ -1127,6 +1123,9 @@ class TestHarness:
             sys.exit(1)
         if opts.pbs and opts.extra_info:
             print('ERROR: --pbs and -e (extra info) cannot be used simultaneously')
+            sys.exit(1)
+        if opts.verbose and opts.quiet:
+            print('Do not be an oxymoron with --verbose and --quiet')
             sys.exit(1)
 
         # Flatten input_file_name from ['tests', 'speedtests'] to just tests if none supplied
