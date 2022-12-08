@@ -69,7 +69,7 @@ protected:
   Real _vel_mag;
   Real _k_elem_val;
 
-private:
+protected:
   void compute_fluid_properties();
   void compute_hsupg();
   void compute_tau();

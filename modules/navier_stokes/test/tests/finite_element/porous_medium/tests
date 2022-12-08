@@ -1,0 +1,19 @@
+[Tests]
+  design = 'modules/navier_stokes/index.md'
+  [./pm_friction]
+    type = 'Exodiff'
+    input = 'pm_friction.i'
+    exodiff = 'pm_friction_out.e'
+    abs_zero = 1e-6
+    issues = '#000'
+    requirement = 'We shall be able to solve a porous flow with pressure drop due to viscous and inertia frictions.'
+  [../]
+  [./pm_heat_source]
+    type = 'Exodiff'
+    input = 'pm_heat_source.i'
+    exodiff = 'pm_heat_source_out.e'
+    abs_zero = 1e-6
+    issues = '#000'
+    requirement = 'We shall be able to solve a porous flow with internal heating source.'
+  [../]
+[]
