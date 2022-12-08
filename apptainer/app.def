@@ -51,9 +51,9 @@ From: {{ APPTAINER_FROM }}
     fi
 
 {%- if MOOSE_SKIP_DOCS is not defined %}
-    # Need these submodules for documentation
+    # Need large_media for documentation
     cd ${MOOSE_BUILD_DIR}
-    git submodule update --init large_media petsc libmesh
+    git submodule update --init large_media
 {%- endif %}
 
 %environment
