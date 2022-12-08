@@ -107,7 +107,7 @@ MultiAppGeneralFieldShapeEvaluationTransfer::evaluateInterpValuesWithMeshFunctio
       if (local_bboxes[i_from].contains_point(pt))
       {
         // Check block restriction (boundary restriction is not supported)
-        if (_from_blocks.size() && !hasBlocks(_from_blocks, i_from, pt))
+        if (_from_blocks.size() && !inBlocks(_from_blocks, i_from, pt))
           continue;
 
         // Use mesh function to compute interpolation values

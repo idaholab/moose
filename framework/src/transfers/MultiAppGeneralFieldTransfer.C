@@ -311,7 +311,7 @@ MultiAppGeneralFieldTransfer::locatePointReceivers(const Point point,
 }
 
 void
-MultiAppGeneralFieldTransfer::cacheOutgoingPointInfor(const Point point,
+MultiAppGeneralFieldTransfer::cacheOutgoingPointInfo(const Point point,
                                                       const dof_id_type dof_object_id,
                                                       const unsigned int problem_id,
                                                       ProcessorToPointVec & outgoing_points)
@@ -327,7 +327,7 @@ MultiAppGeneralFieldTransfer::cacheOutgoingPointInfor(const Point point,
     outgoing_points[pid].push_back(point);
     // Store point information
     // We can use these information when insert values to solution vector
-    PointInfor pointinfo;
+    PointInfo pointinfo;
     pointinfo.problem_id = problem_id;
     pointinfo.dof_object_id = dof_object_id;
     pointinfo.offset = 0;
@@ -391,7 +391,7 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const VariableName & var_nam
       for (Point p : f.points_requested())
       {
         // using dof_object_id 0 for value requests
-        this->cacheOutgoingPointInfor(p, 0, i_to, outgoing_points);
+        this->cacheOutgoingPointInfo(p, 0, i_to, outgoing_points);
       }
 
       // This is going to require more complicated transfer work
@@ -410,15 +410,15 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const VariableName & var_nam
 
         // Skip if it is a block restricted transfer and current node does not have
         // specified blocks
-        if (!_to_blocks.empty() && !hasBlocks(_to_blocks, to_moose_mesh, node))
+        if (!_to_blocks.empty() && !inBlocks(_to_blocks, to_moose_mesh, node))
           continue;
 
-        if (!_to_boundaries.empty() && !hasBoundaries(_to_boundaries, to_moose_mesh, node))
+        if (!_to_boundaries.empty() && !onBoundaries(_to_boundaries, to_moose_mesh, node))
           continue;
 
         // Cache point information
         // We will use this information later for setting values back to solution vectors
-        cacheOutgoingPointInfor(*node + _to_positions[i_to], node->id(), i_to, outgoing_points);
+        cacheOutgoingPointInfo(*node + _to_positions[i_to], node->id(), i_to, outgoing_points);
       }
     }
     else // Elemental
@@ -431,15 +431,15 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const VariableName & var_nam
 
         // Skip if it is a block restricted block and current elem does not have
         // specified blocks
-        if (!_to_blocks.empty() && !hasBlocks(_to_blocks, elem))
+        if (!_to_blocks.empty() && !inBlocks(_to_blocks, elem))
           continue;
 
-        if (!_to_boundaries.empty() && !hasBoundaries(_to_boundaries, to_moose_mesh, elem))
+        if (!_to_boundaries.empty() && !onBoundaries(_to_boundaries, to_moose_mesh, elem))
           continue;
 
         // Cache point information
         // We will use this information later for setting values back to solution vectors
-        cacheOutgoingPointInfor(
+        cacheOutgoingPointInfo(
             elem->vertex_average() + _to_positions[i_to], elem->id(), i_to, outgoing_points);
       } // for
     }   // else
@@ -464,7 +464,7 @@ void
 MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
     processor_id_type pid,
     const VariableName & var_name,
-    std::vector<PointInfor> & pointInfoVec,
+    std::vector<PointInfo> & pointInfoVec,
     const std::vector<Point> & point_requests,
     const std::vector<std::pair<Real, Real>> & incoming_vals,
     DofobjectToInterpValVec & dofobject_to_valsvec,
@@ -661,13 +661,13 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
 }
 
 bool
-MultiAppGeneralFieldTransfer::hasBlocks(std::set<SubdomainID> & blocks, const Elem * elem) const
+MultiAppGeneralFieldTransfer::inBlocks(std::set<SubdomainID> & blocks, const Elem * elem) const
 {
   return blocks.find(elem->subdomain_id()) != blocks.end();
 }
 
 bool
-MultiAppGeneralFieldTransfer::hasBlocks(std::set<SubdomainID> & blocks,
+MultiAppGeneralFieldTransfer::inBlocks(std::set<SubdomainID> & blocks,
                                         const MooseMesh & mesh,
                                         const Node * node) const
 {
@@ -682,7 +682,7 @@ MultiAppGeneralFieldTransfer::hasBlocks(std::set<SubdomainID> & blocks,
 }
 
 bool
-MultiAppGeneralFieldTransfer::hasBlocks(std::set<SubdomainID> & blocks,
+MultiAppGeneralFieldTransfer::inBlocks(std::set<SubdomainID> & blocks,
                                         unsigned int i_from,
                                         const Point & point) const
 {
@@ -691,7 +691,7 @@ MultiAppGeneralFieldTransfer::hasBlocks(std::set<SubdomainID> & blocks,
 }
 
 bool
-MultiAppGeneralFieldTransfer::hasBoundaries(std::set<BoundaryID> & boundaries,
+MultiAppGeneralFieldTransfer::onBoundaries(std::set<BoundaryID> & boundaries,
                                             const MooseMesh & mesh,
                                             const Node * node) const
 {
@@ -709,7 +709,7 @@ MultiAppGeneralFieldTransfer::hasBoundaries(std::set<BoundaryID> & boundaries,
 }
 
 bool
-MultiAppGeneralFieldTransfer::hasBoundaries(std::set<BoundaryID> & boundaries,
+MultiAppGeneralFieldTransfer::onBoundaries(std::set<BoundaryID> & boundaries,
                                             const MooseMesh & mesh,
                                             const Elem * elem) const
 {
@@ -807,12 +807,12 @@ MultiAppGeneralFieldTransfer::getRestrictedFromBoundingBoxes()
     for (auto & elem : as_range(from_mesh.getMesh().local_elements_begin(),
                                 from_mesh.getMesh().local_elements_end()))
     {
-      if (!_from_blocks.empty() && !hasBlocks(_from_blocks, elem))
+      if (!_from_blocks.empty() && !inBlocks(_from_blocks, elem))
         continue;
 
       for (auto & node : elem->node_ref_range())
       {
-        if (!_from_boundaries.empty() && !hasBoundaries(_from_boundaries, from_mesh, &node))
+        if (!_from_boundaries.empty() && !onBoundaries(_from_boundaries, from_mesh, &node))
           continue;
 
         at_least_one = true;

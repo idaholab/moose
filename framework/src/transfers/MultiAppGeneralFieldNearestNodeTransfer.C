@@ -83,10 +83,10 @@ MultiAppGeneralFieldNearestNodeTransfer::buildKDTrees(
         if (node->n_dofs(from_sys.number(), from_var_num) < 1)
           continue;
 
-        if (!_from_blocks.empty() && !hasBlocks(_from_blocks, from_mesh, node))
+        if (!_from_blocks.empty() && !inBlocks(_from_blocks, from_mesh, node))
           continue;
 
-        if (!_from_boundaries.empty() && !hasBoundaries(_from_boundaries, from_mesh, node))
+        if (!_from_boundaries.empty() && !onBoundaries(_from_boundaries, from_mesh, node))
           continue;
 
         points[i_from].push_back(*node + _from_positions[i_from]);
@@ -103,10 +103,10 @@ MultiAppGeneralFieldNearestNodeTransfer::buildKDTrees(
         if (elem->n_dofs(from_sys.number(), from_var_num) < 1)
           continue;
 
-        if (!_from_blocks.empty() && !hasBlocks(_from_blocks, elem))
+        if (!_from_blocks.empty() && !inBlocks(_from_blocks, elem))
           continue;
 
-        if (!_from_boundaries.empty() && !hasBoundaries(_from_boundaries, from_mesh, elem))
+        if (!_from_boundaries.empty() && !onBoundaries(_from_boundaries, from_mesh, elem))
           continue;
 
         auto dof = elem->dof_number(from_sys.number(), from_var_num, 0);

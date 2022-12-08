@@ -73,29 +73,29 @@ protected:
   /*
    * Whether or not a given element is part of the given blocks
    */
-  bool hasBlocks(std::set<SubdomainID> & blocks, const Elem * elem) const;
+  bool inBlocks(std::set<SubdomainID> & blocks, const Elem * elem) const;
 
   /*
    * Whether or not a given node is part of an element in the given blocks
    */
-  bool hasBlocks(std::set<SubdomainID> & blocks, const MooseMesh & mesh, const Node * node) const;
+  bool inBlocks(std::set<SubdomainID> & blocks, const MooseMesh & mesh, const Node * node) const;
 
   /*
    * Whether or not a given point is part of an element in the given blocks
    */
-  bool hasBlocks(std::set<SubdomainID> & blocks, unsigned int i_from, const Point & pt) const;
+  bool inBlocks(std::set<SubdomainID> & blocks, unsigned int i_from, const Point & pt) const;
 
   /*
    * Whether or not a given node is part of the given boundaries
    */
   bool
-  hasBoundaries(std::set<BoundaryID> & boundaries, const MooseMesh & mesh, const Node * node) const;
+  onBoundaries(std::set<BoundaryID> & boundaries, const MooseMesh & mesh, const Node * node) const;
 
   /*
    * Whether or not a given element has a side on the given boundaries
    */
   bool
-  hasBoundaries(std::set<BoundaryID> & boundaries, const MooseMesh & mesh, const Elem * elem) const;
+  onBoundaries(std::set<BoundaryID> & boundaries, const MooseMesh & mesh, const Elem * elem) const;
 
   /// Origin block(s) restriction
   std::set<SubdomainID> _from_blocks;
@@ -128,15 +128,15 @@ private:
   typedef std::unordered_map<processor_id_type, std::vector<Point>> ProcessorToPointVec;
 
   /// Point information
-  struct PointInfor
+  struct PointInfo
   {
     unsigned int problem_id;   // problem id
     dof_id_type dof_object_id; // node or elem id
     dof_id_type offset;        // Useful when there are more than one point in a given dof object
   };
 
-  /// InterpInfor
-  struct InterpInfor
+  /// InterpInfo
+  struct InterpInfo
   {
     processor_id_type pid; // Processor id type
     Real interp;           // Interpolation
@@ -144,10 +144,10 @@ private:
   };
 
   /// A map from pid to a set of point info
-  typedef std::unordered_map<processor_id_type, std::vector<PointInfor>> ProcessorToPointInforVec;
+  typedef std::unordered_map<processor_id_type, std::vector<PointInfo>> ProcessorToPointInfoVec;
 
   /// A vector, indexed by to-problem id, of maps from dof object to interpolation values
-  typedef std::vector<std::unordered_map<dof_id_type, InterpInfor>> DofobjectToInterpValVec;
+  typedef std::vector<std::unordered_map<dof_id_type, InterpInfo>> DofobjectToInterpValVec;
 
   /// A map for caching a single variable's values
   typedef std::unordered_map<Point, Number, hash_point> InterpCache;
@@ -174,7 +174,7 @@ private:
   std::vector<BoundingBox> _bboxes;
 
   /// A map from processor to pointInfo vector
-  ProcessorToPointInforVec _processor_to_pointInfoVec;
+  ProcessorToPointInfoVec _processor_to_pointInfoVec;
 
   /**
    * Performs the transfer for the variable of index i
@@ -196,7 +196,7 @@ private:
    */
   void cacheIncomingInterpVals(processor_id_type pid,
                                const VariableName & var_name,
-                               std::vector<PointInfor> & pointInfoVec,
+                               std::vector<PointInfo> & pointInfoVec,
                                const std::vector<Point> & point_requests,
                                const std::vector<std::pair<Real, Real>> & incoming_vals,
                                DofobjectToInterpValVec & dofobject_to_valsvec,
@@ -212,7 +212,7 @@ private:
   /*
    * Cache pointInfo
    */
-  void cacheOutgoingPointInfor(const Point point,
+  void cacheOutgoingPointInfo(const Point point,
                                const dof_id_type dof_object_id,
                                const unsigned int problem_id,
                                ProcessorToPointVec & outgoing_points);
