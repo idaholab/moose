@@ -10,7 +10,7 @@
 #pragma once
 
 // MOOSE includes
-#include "ConsoleStream.h"
+#include "Moose.h"
 
 // Forward declarations
 class MooseApp;
@@ -18,19 +18,18 @@ class MooseObject;
 class FEProblemBase;
 
 /**
- * An inteface for the _console for outputting to the Console object
+ * An interface to communicate a solution invalid state to FEProblemBase
  */
 class SolutionInvalidInterface
 {
 public:
   /**
-   * A class for providing a helper stream object for writting message to
-   * all the Output objects.
+   * A class for providing a helper object for communicating to FEProblemBase
    */
   SolutionInvalidInterface(MooseObject * moose_object);
-  void solutionInvalid();
+  void setSolutionInvalid(bool solution_invalid);
 
 private:
-  /// An instance of helper class to write streams to the Console objects
+  /// A pointer to the FEProblem
   FEProblemBase * _si_fe_problem;
 };

@@ -1525,6 +1525,7 @@ NonlinearSystemBase::residualSetup()
   _nodal_bcs.residualSetup();
 
   _fe_problem.residualSetup();
+  setSolutionInvalid(false);
 }
 
 void

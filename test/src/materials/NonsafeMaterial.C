@@ -35,6 +35,6 @@ void
 NonsafeMaterial::computeQpProperties()
 {
   if (_input_diffusivity > _threshold)
-    solutionInvalid();
+    setSolutionInvalid(true);
   _diffusivity[_qp] = _input_diffusivity;
 }

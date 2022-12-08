@@ -341,7 +341,7 @@ NonlinearSystem::converged()
   if (_fe_problem.hasException())
     return false;
 
-  if (_solution_invalid)
+  if (solutionInvalid())
   {
     mooseWarning("The solution is not converged due to the solution being invalid.");
     return false;

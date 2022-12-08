@@ -2,9 +2,9 @@
   [./solution_invalid]
     type = 'RunException'
     input = 'solution_invalid.i'
-    expect_err = 'The solution is not converged due to the solution being invalid.'	
+    expect_err = 'The solution is not converged due to the solution being invalid.'
     design = 'syntax/Materials/index.md'
-    issues = '#22814'
-    requirement = 'The system shall not allow a converged solution with an invalid computation.'
+    issues = '#22884'
+    requirement = 'The system shall not accept a converged solution if the solution has been tagged as invalid.'
   [../]
 []

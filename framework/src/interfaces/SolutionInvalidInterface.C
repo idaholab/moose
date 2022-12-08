@@ -21,7 +21,7 @@ SolutionInvalidInterface::SolutionInvalidInterface(MooseObject * moose_object)
 }
 
 void
-SolutionInvalidInterface::solutionInvalid()
+SolutionInvalidInterface::setSolutionInvalid(bool solution_invalid)
 {
-  _si_fe_problem->getNonlinearSystemBase().solutionInvalid(true);
+  _si_fe_problem->getNonlinearSystemBase().setSolutionInvalid(solution_invalid);
 }

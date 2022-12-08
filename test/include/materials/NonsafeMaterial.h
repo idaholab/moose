@@ -13,7 +13,7 @@
 #include "MaterialProperty.h"
 
 /**
- * Simple material to test vector parameter range checking.
+ * Simple material to test SolutionInvalid feature.
  */
 class NonsafeMaterial : public Material
 {
