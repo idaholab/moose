@@ -447,9 +447,10 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
 const MooseMesh &
 FEProblemBase::mesh(bool use_displaced) const
 {
-  mooseAssert(!use_displaced || _displaced_problem,
-              "Displaced mesh was requested but displaced problem does not exist");
-  return (use_displaced ? _displaced_problem->mesh() : mesh());
+  if (use_displaced && !_displaced_problem)
+    mooseWarning("Displaced mesh was requested but the displaced problem does not exist. "
+                 "Regular mesh will be returned");
+  return ((use_displaced && _displaced_problem) ? _displaced_problem->mesh() : mesh());
 }
 
 void

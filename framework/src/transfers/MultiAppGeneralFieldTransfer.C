@@ -97,9 +97,8 @@ MultiAppGeneralFieldTransfer::MultiAppGeneralFieldTransfer(const InputParameters
                          ? getParam<std::vector<Real>>("fixed_bounding_box_size")
                          : std::vector<Real>(3, 0))
 {
-  if (_to_var_names.size() == _from_var_names.size())
-    _var_size = _to_var_names.size();
-  else
+  _var_size = _to_var_names.size();
+  if (_to_var_names.size() != _from_var_names.size() && !parameters.isPrivate("source_variable"))
     paramError("variable", "The number of variables to transfer to and from should be equal");
 }
 
@@ -230,7 +229,10 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
   ProcessorToPointVec outgoing_points;
   extractOutgoingPoints(_to_var_names[i], outgoing_points);
 
-  prepareEvaluationOfInterpValues(_from_var_names[i]);
+  if (_from_var_names.size())
+    prepareEvaluationOfInterpValues(_from_var_names[i]);
+  else
+    prepareEvaluationOfInterpValues("dummy");
 
   // Fill values and app ids for incoming points
   // We are responsible to compute values for these incoming points
