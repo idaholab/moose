@@ -4,12 +4,6 @@ The NCRC manages a wide range of applications and access to those applications t
 the needs of researchers around the world. Please follow the instructions for the level
 of access granted to you.
 
-- [Level 1 - HPC OnDemand Execution](ncrc_ondemand.md)
-- [Level 1 - Execution while on INL HPC systems](help/inl/hpc_binary.md)
-- [Level 2 - Local Binary Installation](ncrc_local_binary.md)
-- [Level 4 - Source Repository Access](ncrc_repository.md)
-
-
 ## Requesting Access id=access
 
 NCRC applications may be obtained by outside institutions and individuals for execution and/or development. Currently, the following access methods are available for certain applications.
@@ -18,7 +12,7 @@ NCRC applications may be obtained by outside institutions and individuals for ex
   Users in the category will be provided an INL-HPC account that includes a binary version of
   the desired application ready for use on INL-HPC resources.
 
-- +Binary Access+ (Coming soon)\\
+- +Binary Access+\\
   Users in this category will be provided with access to a binary version of the desired
   application that is executable on non-INL systems, such as a personal workstation or institution
   cluster.
@@ -32,6 +26,8 @@ NCRC applications may be obtained by outside institutions and individuals for ex
 To request access to an [!ac](INL) developed code, please  follow the instructions
 on [NCRC](https://inl.gov/ncrc) website.
 
-## HPC OnDemand id=gen_ondemand
+# HPC OnDemand id=gen_ondemand
 
 HPC OnDemand is a service provided by the INL, which allows a user direct access to the resources contained within the HPC enclave via their web browser. This is the recommended way to access INL HPC resources for most users. For general information on using INL HPC OnDemand [go here](gen_ondemand.md), specific information on using OnDemand for running simulations can be found in the Level 1 access instructions above.
+
+!include inl/applications.md

@@ -1,0 +1,1 @@
+!template load file=ncrc/applications/ncrc_ondemand_template.md ApplicationName=Pronghorn ApplicationLower=pronghorn binary=pronghorn

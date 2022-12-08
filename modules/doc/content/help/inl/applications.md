@@ -9,8 +9,10 @@ breadth of applications continues to expand as well. The following sections high
 
 - [Documentation](https://mooseframework.org/bison)
 - [Discussion Forum](https://bison-discourse.hpcondemand.inl.gov)
-- [Local Installation](ncrc/applications/conda_bison.md)
-- [HPC Binary](ncrc/applications/hpc_bison.md)
+- [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_bison_ondemand.md)
+- [Level 1 - HPC Binary Execution](ncrc/applications/hpc_bison.md)
+- [Level 2 - Local Binary Installation](ncrc/applications/conda_bison.md)
+- [Level 4 - Source Access](https://hpcgitlab.hpcondemand.inl.gov/idaholab/idaholab/bison)
 
 !row!
 !col small=12 medium=8 large=8
@@ -20,16 +22,44 @@ BISON is a finite element-based nuclear fuel performance code. It is applicable 
 !media xfem/image21.gif style=width:100%;align:bottom;
 !row-end!
 
+## Blue Crab
 
-<!-- Blue Crab goes here -->
-<!-- Dire Wolf goes here -->
+- [Documentation](https://bluecrab-dev.hpcondemand.inl.gov)
+- [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_bluecrab_ondemand.md)
+- [Level 1 - HPC Binary Execution](ncrc/applications/hpc_bluecrab.md)
+- [Level 2 - Local Binary Installation](ncrc/applications/conda_bluecrab.md)
+- [Level 4 - Source Access](https://hpcgitlab.hpcondemand.inl.gov/idaholab/blue_crab)
+
+!row!
+!col small=12 medium=8 large=8
+Blue Crab description goes here.
+
+!col small=8 medium=4 large=4
+!row-end!
+
+## Dire Wolf
+
+- [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_direwolf_ondemand.md)
+- [Level 1 - HPC Binary Execution](ncrc/applications/hpc_direwolf.md)
+- [Level 2 - Local Binary Installation](ncrc/applications/conda_direwolf.md)
+- [Level 4 - Source Access](https://hpcgitlab.hpcondemand.inl.gov/idaholab/dire_wolf)
+
+!row!
+!col small=12 medium=8 large=8
+Dire Wolf description goes here.
+
+!col small=8 medium=4 large=4
+!row-end!
+
 
 ## Griffin
 
 - [Documentation](https://griffin-docs.hpcondemand.inl.gov/latest/)
 - [Discussion Forum](https://griffin-discourse.hpcondemand.inl.gov)
-- [Local Installation](ncrc/applications/conda_griffin.md)
-- [HPC Binary](ncrc/applications/hpc_griffin.md)
+- [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_griffin_ondemand.md)
+- [Level 1 - HPC Binary Execution](ncrc/applications/hpc_griffin.md)
+- [Level 2 - Local Binary Installation](ncrc/applications/conda_griffin.md)
+- [Level 4 - Source Access](https://github.inl.gov/ncrc/griffin)
 
 !row!
 !col small=12 medium=8 large=8
@@ -43,8 +73,10 @@ Griffin is a finite element-based reactor multiphysics application. It is suitab
 
 - [Documentation](https://grizzly-docs.hpcondemand.inl.gov/latest/)
 - [Discussion Forum](https://grizzly-discourse.hpcondemand.inl.gov)
-- [Local Installation](ncrc/applications/conda_grizzly.md)
-- [HPC Binary](ncrc/applications/hpc_grizzly.md)
+- [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_grizzly_ondemand.md)
+- [Level 1 - HPC Binary Execution](ncrc/applications/hpc_grizzly.md)
+- [Level 2 - Local Binary Installation](ncrc/applications/conda_grizzly.md)
+- [Level 4 - Source Access](https://hpcgitlab.hpcondemand.inl.gov/idaholab/grizzly)
 
 !row!
 !col small=12 medium=8 large=8
@@ -58,8 +90,10 @@ Grizzly models the degradation due to normal operating conditions of nuclear pow
 
 - [Documentation](https://marmot-docs.hpcondemand.inl.gov/latest/)
 - [Discussion Forum](https://marmot-discourse.hpcondemand.inl.gov)
-- [Local Installation](ncrc/applications/conda_marmot.md)
-- [HPC Binary](ncrc/applications/hpc_marmot.md)
+- [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_marmot_ondemand.md)
+- [Level 1 - HPC Binary Execution](ncrc/applications/hpc_marmot.md)
+- [Level 2 - Local Binary Installation](ncrc/applications/conda_marmot.md)
+- [Level 4 - Source Access](https://hpcgitlab.hpcondemand.inl.gov/idaholab/marmot)
 
 !row!
 !col small=12 medium=8 large=8
@@ -73,8 +107,10 @@ MARMOT is a mesoscale fuel performance code. As such, it can predict the evoluti
 
 - [Documentation](https://pronghorn-docs.hpcondemand.inl.gov/latest/)
 - [Discussion Forum](https://pronghorn-discourse.hpcondemand.inl.gov)
-- [Local Installation](ncrc/applications/conda_pronghorn.md)
-- [HPC Binary](ncrc/applications/hpc_pronghorn.md)
+- [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_pronghorn_ondemand.md)
+- [Level 1 - HPC Binary Execution](ncrc/applications/hpc_pronghorn.md)
+- [Level 2 - Local Binary Installation](ncrc/applications/conda_pronghorn.md)
+- [Level 4 - Source Access](https://hpcgitlab.hpcondemand.inl.gov/idaholab/pronghorn)
 
 !row!
 !col small=12 medium=8 large=8
@@ -87,8 +123,10 @@ Pronghorn is a multi-dimensional, coarse-mesh, thermal-hydraulics code for advan
 
 - [Documentation](https://relap7-docs.hpcondemand.inl.gov/latest/)
 - [Discussion Forum](https://relap7-discourse.hpcondemand.inl.gov)
-- [Local Installation](ncrc/applications/conda_relap7.md)
-- [HPC Binary](ncrc/applications/hpc_relap7.md)
+- [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_relap7_ondemand.md)
+- [Level 1 - HPC Binary Execution](ncrc/applications/hpc_relap7.md)
+- [Level 2 - Local Binary Installation](ncrc/applications/conda_relap7.md)
+- [Level 4 - Source Access](https://hpcgitlab.hpcondemand.inl.gov/idaholab/relap-7)
 
 !row!
 !col small=12 medium=8 large=8
@@ -98,14 +136,31 @@ RELAP-7 is a two-phase thermal systems code based on MOOSE's thermal hydraulics 
 !media application_logos/relap-7_description.png style=width:100%;
 !row-end!
 
-<!-- Sabertooth goes here -->
+## Sabertooth
 
-# Sockeye
+- [Documentation](https://sabertooth-docs.hpcondemand.inl.gov/latest/)
+- [Discussion Forum](https://sabertooth-discourse.hpcondemand.inl.gov)
+- [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_sabertooth_ondemand.md)
+- [Level 1 - HPC Binary Execution](ncrc/applications/hpc_sabertooth.md)
+- [Level 2 - Local Binary Installation](ncrc/applications/conda_sabertooth.md)
+- [Level 4 - Source Access](https://hpcgitlab.hpcondemand.inl.gov/idaholab/sabertooth)
+
+!row!
+!col small=12 medium=8 large=8
+Sabertooth's description goes here.
+
+!col small=8 medium=4 large=4
+!row-end!
+
+
+## Sockeye
 
 - [Documentation](https://sockeye-docs.hpcondemand.inl.gov/latest/)
 - [Discussion Forum](https://sockeye-discourse.hpcondemand.inl.gov)
-- [Local Installation](ncrc/applications/conda_sockeye.md)
-- [HPC Binary](ncrc/applications/hpc_sockeye.md)
+- [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_sockeye_ondemand.md)
+- [Level 1 - HPC Binary Execution](ncrc/applications/hpc_sockeye.md)
+- [Level 2 - Local Binary Installation](ncrc/applications/conda_sockeye.md)
+- [Level 4 - Source Access](https://hpcgitlab.hpcondemand.inl.gov/idaholab/sockeye)
 
 !row!
 !col small=12 medium=8 large=8

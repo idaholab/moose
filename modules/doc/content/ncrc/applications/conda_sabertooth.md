@@ -1,0 +1,1 @@
+!template load file=ncrc/applications/conda_application_template.md ApplicationName=Sabertooth ApplicationLower=sabertooth binary=sabertooth
