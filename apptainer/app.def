@@ -12,6 +12,7 @@
 {#- MOOSE_DOCS_FLAGS: Doc options to pass during the make install                             -#}
 {#- METHOD: The method to build; defaults to "opt"                                            -#}
 {#- TEST_DIRS: Directories to test in the %test section; defaults to just "tests"             -#}
+{#- EXTRA_MAMBA_PACKAGES: Extra mamba packages to install                                     -#}
 
 {#- The within-container build directory to use                                               -#}
 {%- set ROOT_BUILD_DIR = '/root/build' -%}
@@ -72,10 +73,16 @@ From: {{ APPTAINER_FROM }}
     APPLICATION_DIR=${TEMP_LOC}/${APPLICATION_NAME}
     export MOOSE_DIR=${TEMP_LOC}/moose
 
-    # Install moose-tools from moose-base container
-    # TODO: add insertion point for installing more
-    # on a per-app basis
-    source /root/install_moose_tools.sh
+{%- if MOOSE_SKIP_DOCS is not defined %}
+    # These are needed for documentation and will be removed later
+    EXTRA_DOC_PACKAGES="livereload pybtex beautifulsoup4"
+    mamba install -yq $EXTRA_DOC_PACKAGES
+{%- endif %}
+
+{%- if EXTRA_MAMBA_PACKAGES is defined %}
+    # Install extra mamba packages
+    mamba install -yq {{ EXTRA_MAMBA_PACKAGES }}
+{%- endif %}
 
     # Setup install
     MOOSE_PREFIX=/opt/${BINARY_NAME}
@@ -89,6 +96,14 @@ From: {{ APPTAINER_FROM }}
 
     # Fix permissions for installed application
     chmod -R o=u-w,g=u-w ${MOOSE_PREFIX}
+
+{%- if MOOSE_SKIP_DOCS is not defined %}
+    # Remove the packages that were for only documentation
+    mamba uninstall -yq ${EXTRA_DOC_PACKAGES}
+{%- endif %}
+
+    # Install moose-tools from moose-base container
+    source /root/install_moose_tools.sh
 
     # Cleanup
     rm -rf $TEMP_LOC
