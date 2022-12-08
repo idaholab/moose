@@ -209,22 +209,7 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
 
   // Expand bounding boxes. Some desired points might be excluded
   // without an expansion
-  for (auto & box : _bboxes)
-  {
-    // libmesh set an invalid bounding box using this code
-    // for (unsigned int i = 0; i < LIBMESH_DIM; i++)
-    // {
-    //   this->first(i)  =  std::numeric_limits<Real>::max();
-    //   this->second(i) = -std::numeric_limits<Real>::max();
-    // }
-    // If it is an invalid box, we should skip it
-    if (box.first(0) == std::numeric_limits<Real>::max())
-      continue;
-
-    auto width = box.second - box.first;
-    box.second += width * (_bbox_factor - 1);
-    box.first -= width * (_bbox_factor - 1);
-  }
+  extendBoundingBoxes(_bbox_factor, _bboxes);
 
   // Figure out how many "from" domains each processor owns.
   _froms_per_proc.clear();
@@ -357,8 +342,7 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const VariableName & var_nam
   for (unsigned int i_to = 0; i_to < _to_problems.size(); ++i_to)
   {
     // libMesh EquationSystems
-    // NOTE: we would expect to set variables from the displaced equation system here
-    auto & es = getEquationSystem(*_to_problems[i_to], false);
+    auto & es = getEquationSystem(*_to_problems[i_to], _displaced_target_mesh);
     // libMesh system that has this variable
     // Assume var name is unique in an equation system
     System * to_sys = find_sys(es, var_name);
@@ -492,8 +476,7 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
     const std::pair<unsigned int, dof_id_type> dofobject(problem_id, dof_object_id);
 
     // libMesh EquationSystems
-    // NOTE: we would expect to set variables from the displaced equation system here
-    auto & es = getEquationSystem(*_to_problems[problem_id], false);
+    auto & es = getEquationSystem(*_to_problems[problem_id], _displaced_target_mesh);
     // libMesh system
     System * to_sys = find_sys(es, var_name);
 

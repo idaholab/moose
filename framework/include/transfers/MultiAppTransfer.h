@@ -208,6 +208,9 @@ protected:
                      const VariableName & var_name,
                      const std::string & param_name = "") const;
 
+  /// Extends bounding boxes to avoid missing points
+  void extendBoundingBoxes(const Real factor, std::vector<BoundingBox> & bboxes) const;
+
 private:
   /**
    * Whether this transfer handles non-translation-based transformations, e.g. whether it uses the
