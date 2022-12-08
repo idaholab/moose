@@ -247,7 +247,7 @@ class Versioner:
     def conda_meta(package, influential, commit):
         """ produces the conda meta entry """
         for entry in influential:
-            if 'meta.yaml' not in entry or package == 'base':
+            if 'meta.yaml' not in entry or package == 'moose':
                 continue
 
             # Read the conda-build jinja2 styled template
