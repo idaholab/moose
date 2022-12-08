@@ -1,5 +1,5 @@
 [Tests]
-  [./heatConduction_test]
+  [heatConduction_test]
     type = 'Exodiff'
     input = 'heatConduction2D.i'
     exodiff = 'heatConduction2D_out.e'
@@ -7,5 +7,14 @@
     design = 'HomogenizedHeatConduction.md'
     requirement = 'The system shall compute homogenized thermal conductivity using the asymptotic expansion homogenization approach'
     issues = '#6750'
-  [../]
+  []
+
+  [homogenize_tc_hexagonal]
+    type = 'CSVDiff'
+    input = 'homogenize_tc_hex.i'
+    csvdiff = 'homogenize_tc_hex_outp_csv.csv'
+    requirement = 'The system shall compute homogenized thermal conductivity using the asymptotic expansion homogenization approach for hexagonal geometries.'
+    design = 'HomogenizedThermalConductivity.md'
+    issues = '#22919'
+  []
 []
