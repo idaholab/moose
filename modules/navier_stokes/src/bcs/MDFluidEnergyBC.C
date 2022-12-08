@@ -99,8 +99,6 @@ MDFluidEnergyBC::computeQpJacobian()
 Real
 MDFluidEnergyBC::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  unsigned m = this->map_var_number(jvar);
-
   // this is jocabian term w.r.t branch temperature
   if (jvar == _T_branch_var_number)
   {
@@ -111,6 +109,9 @@ MDFluidEnergyBC::computeQpOffDiagJacobian(unsigned int jvar)
       return _rho[_qp] * v_bc * _eos.cp_from_p_T(1e5, _T_branch[0]) * _test[_i][_qp];
     }
   }
+
+  Real jac = 0;
+  unsigned m = this->map_var_number(jvar);
   switch (m)
   {
     case 1:
@@ -129,10 +130,12 @@ MDFluidEnergyBC::computeQpOffDiagJacobian(unsigned int jvar)
             T_bc = _T_branch[0];
         }
         Real enthalpy = _eos.h_from_p_T(_pressure[_qp], T_bc);
-        return _rho[_qp] * _phi[_j][_qp] * enthalpy * _normals[_qp](m - 1) * _test[_i][_qp];
+        jac = _rho[_qp] * _phi[_j][_qp] * enthalpy * _normals[_qp](m - 1) * _test[_i][_qp];
       }
+      break;
 
     default:
-      return 0;
+      jac = 0;
   }
+  return jac;
 }
