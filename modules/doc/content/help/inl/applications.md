@@ -12,7 +12,7 @@ breadth of applications continues to expand as well. The following sections high
 - [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_bison_ondemand.md)
 - [Level 1 - HPC Binary Execution](ncrc/applications/hpc_bison.md)
 - [Level 2 - Local Binary Installation](ncrc/applications/conda_bison.md)
-- [Level 4 - Source Access](https://hpcgitlab.hpcondemand.inl.gov/idaholab/idaholab/bison)
+- [Level 4 - Source Access](https://hpcgitlab.hpcondemand.inl.gov/idaholab/bison)
 
 !row!
 !col small=12 medium=8 large=8
