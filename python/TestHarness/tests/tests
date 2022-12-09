@@ -256,4 +256,8 @@
     requirement = "TestHarness shall be able to replay last results"
     issues = '#22545'
   []
+  [custom_eval]
+    type = PythonUnitTest
+    input = test_CustomEval.py
+  []
 []

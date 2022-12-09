@@ -1,0 +1,7 @@
+[Tests]
+  [custom_eval]
+    type = RunApp
+    input = good.i
+    custom_evaluation_script = 'custom_eval.py'
+  [../]
+[]
