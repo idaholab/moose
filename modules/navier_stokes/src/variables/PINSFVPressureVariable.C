@@ -47,21 +47,17 @@ PINSFVPressureVariable::initialSetup()
   _rho = &getFunctor<ADReal>(NS::density, _subproblem);
 }
 
-std::tuple<bool, ADRealVectorValue, ADRealVectorValue>
+std::pair<bool, ADRealVectorValue>
 PINSFVPressureVariable::elemIsUpwind(const Elem & elem, const FaceInfo & fi) const
 {
-  const Moose::SingleSidedFaceArg ssf_elem{
-      &fi, Moose::FV::LimiterType::CentralDifference, true, false, &fi.elem()};
-  const Moose::SingleSidedFaceArg ssf_neighbor{
-      &fi, Moose::FV::LimiterType::CentralDifference, true, false, fi.neighborPtr()};
+  const Moose::FaceArg face{
+      &fi, Moose::FV::LimiterType::CentralDifference, true, false, this, nullptr};
 
-  const VectorValue<ADReal> vel_elem{(*_u)(ssf_elem), (*_v)(ssf_elem), (*_w)(ssf_elem)};
-  const VectorValue<ADReal> vel_neighbor{
-      (*_u)(ssf_neighbor), (*_v)(ssf_neighbor), (*_w)(ssf_neighbor)};
-  const bool fi_elem_is_upwind = (vel_elem + vel_neighbor) * fi.normal() > 0;
+  const VectorValue<ADReal> vel_face{(*_u)(face), (*_v)(face), (*_w)(face)};
+  const bool fi_elem_is_upwind = vel_face * fi.normal() > 0;
   const bool elem_is_upwind = &elem == &fi.elem() ? fi_elem_is_upwind : !fi_elem_is_upwind;
 
-  return {elem_is_upwind, vel_elem, vel_neighbor};
+  return {elem_is_upwind, vel_face};
 }
 
 bool
@@ -70,8 +66,6 @@ PINSFVPressureVariable::isExtrapolatedBoundaryFace(const FaceInfo & fi,
 {
   if (isDirichletBoundaryFace(fi, elem))
     return false;
-  if (_ssf_faces.count(std::make_pair(&fi, elem)))
-    return true;
   if (!isInternalFace(fi))
     // We are neither a Dirichlet nor an internal face
     return true;
@@ -108,15 +102,17 @@ PINSFVPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi,
   if (!is_jump_face)
     return INSFVPressureVariable::getDirichletBoundaryFaceValue(fi, elem);
 
-  const Moose::SingleSidedFaceArg ssf_elem{
-      &fi, Moose::FV::LimiterType::CentralDifference, true, false, &fi.elem()};
-  const Moose::SingleSidedFaceArg ssf_neighbor{
-      &fi, Moose::FV::LimiterType::CentralDifference, true, false, fi.neighborPtr()};
+  const Moose::FaceArg face_elem{
+      &fi, Moose::FV::LimiterType::CentralDifference, true, false, this, &fi.elem()};
+  const Moose::FaceArg face_neighbor{
+      &fi, Moose::FV::LimiterType::CentralDifference, true, false, this, fi.neighborPtr()};
 
   // For incompressible or weakly compressible flow these should really be about the same
-  const auto rho_elem = (*_rho)(ssf_elem), rho_neighbor = (*_rho)(ssf_neighbor);
+  const auto rho_elem = (*_rho)(face_elem), rho_neighbor = (*_rho)(face_neighbor);
 
-  const auto [elem_is_upwind, vel_elem, vel_neighbor] = elemIsUpwind(*elem, fi);
+  const auto [elem_is_upwind, vel_face] = elemIsUpwind(*elem, fi);
+  const auto & vel_elem = vel_face;
+  const auto & vel_neighbor = vel_face;
 
   const VectorValue<ADReal> interstitial_vel_elem = vel_elem * (1 / eps_elem);
   const VectorValue<ADReal> interstitial_vel_neighbor = vel_neighbor * (1 / eps_neighbor);
@@ -127,11 +123,11 @@ PINSFVPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi,
       0.5 * rho_neighbor * v_dot_n_neighbor * v_dot_n_neighbor;
 
   const bool fi_elem_is_upwind = elem == &fi.elem() ? elem_is_upwind : !elem_is_upwind;
-  const auto & downwind_ssf = fi_elem_is_upwind ? ssf_neighbor : ssf_elem;
+  const auto & downwind_face = fi_elem_is_upwind ? face_neighbor : face_elem;
   const auto & upwind_bernoulli_vel_chunk =
       fi_elem_is_upwind ? bernoulli_vel_chunk_elem : bernoulli_vel_chunk_neighbor;
   const auto & downwind_bernoulli_vel_chunk =
       fi_elem_is_upwind ? bernoulli_vel_chunk_neighbor : bernoulli_vel_chunk_elem;
-  const auto p_downwind = (*this)(downwind_ssf);
+  const auto p_downwind = (*this)(downwind_face);
   return p_downwind + downwind_bernoulli_vel_chunk - upwind_bernoulli_vel_chunk;
 }

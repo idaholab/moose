@@ -574,10 +574,8 @@ MooseVariableFV<OutputType>::isExtrapolatedBoundaryFace(const FaceInfo & fi,
 {
   if (isDirichletBoundaryFace(fi, elem))
     return false;
-  if (_ssf_faces.count(std::make_pair(&fi, elem)))
-    return true;
-
-  return !isInternalFace(fi);
+  else
+    return !isInternalFace(fi);
 }
 
 template <typename OutputType>
@@ -799,31 +797,12 @@ MooseVariableFV<OutputType>::evaluate(const FaceArg & face,
   mooseAssert(fi, "The face information must be non-null");
   if (isDirichletBoundaryFace(*fi, face.face_side))
     return getDirichletBoundaryFaceValue(*fi, face.face_side);
-  else if (isInternalFace(*fi))
-    return Moose::FV::interpolate(*this, face);
+  else if (isExtrapolatedBoundaryFace(*fi, face.face_side))
+    return getExtrapolatedBoundaryFaceValue(*fi, _two_term_boundary_expansion, face.face_side);
   else
   {
-    const bool var_defined_on_elem = this->hasBlocks(fi->elem().subdomain_id());
-#ifndef NDEBUG
-    const bool var_defined_on_neighbor =
-        fi->neighborPtr() && this->hasBlocks(fi->neighborSubdomainID());
-    mooseAssert((var_defined_on_elem + var_defined_on_neighbor) == 1,
-                "We should only be defined on one side");
-    if (face.face_side)
-    {
-      const bool side_is_elem_side = face.face_side == &fi->elem();
-      mooseAssert(side_is_elem_side ? var_defined_on_elem : var_defined_on_neighbor,
-                  "We should not have a mismatch between requested sidedness of evaluation and "
-                  "where we are defined");
-    }
-#endif
-
-    Moose::SingleSidedFaceArg ssfa = {fi,
-                                      face.limiter_type,
-                                      face.elem_is_upwind,
-                                      face.correct_skewness,
-                                      var_defined_on_elem ? &fi->elem() : fi->neighborPtr()};
-    return this->evaluate(ssfa, 0);
+    mooseAssert(isInternalFace(*fi), "We must be either Dirichlet, extrapolated, or internal");
+    return Moose::FV::interpolate(*this, face);
   }
 }
 
@@ -840,14 +819,7 @@ MooseVariableFV<OutputType>::evaluate(const SingleSidedFaceArg & face,
   if (isDirichletBoundaryFace(*fi, face.elem))
     return getDirichletBoundaryFaceValue(*fi, face.elem);
   else
-  {
-    auto key = std::make_pair(fi, face.elem);
-    _ssf_faces.insert(key);
-    const auto boundary_value =
-        getExtrapolatedBoundaryFaceValue(*fi, _two_term_boundary_expansion, face.elem);
-    _ssf_faces.erase(key);
-    return boundary_value;
-  }
+    return getExtrapolatedBoundaryFaceValue(*fi, _two_term_boundary_expansion, face.elem);
 }
 
 template <typename OutputType>

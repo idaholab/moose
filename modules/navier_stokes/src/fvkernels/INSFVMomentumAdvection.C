@@ -100,15 +100,15 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
                NS::isPorosityJumpFace(epsilon(), fi);
            is_jump)
   {
-    const Moose::SingleSidedFaceArg ssf_elem{
-        &fi, Moose::FV::LimiterType::CentralDifference, true, false, &fi.elem()};
-    const Moose::SingleSidedFaceArg ssf_neighbor{
-        &fi, Moose::FV::LimiterType::CentralDifference, true, false, fi.neighborPtr()};
+    const Moose::FaceArg face_elem{
+        &fi, Moose::FV::LimiterType::CentralDifference, true, false, this, &fi.elem()};
+    const Moose::FaceArg face_neighbor{
+        &fi, Moose::FV::LimiterType::CentralDifference, true, false, this, fi.neighborPtr()};
 
-    const auto v_face = _rc_vel_provider.getUpwindSingleSidedFaceVelocity(fi, _tid);
+    const auto v_face = _rc_vel_provider.getVelocity(Moose::FV::InterpMethod::Average, fi, _tid);
     const bool fi_elem_is_upwind = v_face * fi.normal() > 0;
-    const auto & upwind_ssf = fi_elem_is_upwind ? ssf_elem : ssf_neighbor;
-    const auto rho_face = _rho(upwind_ssf);
+    const auto & upwind_face = fi_elem_is_upwind ? face_elem : face_neighbor;
+    const auto rho_face = _rho(upwind_face);
 
     const auto & var_elem_face = v_face(_index);
     const auto & var_neighbor_face = v_face(_index);

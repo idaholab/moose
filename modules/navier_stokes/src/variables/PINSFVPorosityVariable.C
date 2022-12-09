@@ -30,8 +30,6 @@ PINSFVPorosityVariable::isExtrapolatedBoundaryFace(const FaceInfo & fi,
 {
   if (isDirichletBoundaryFace(fi, elem))
     return false;
-  if (_ssf_faces.count(std::make_pair(&fi, elem)))
-    return true;
   if (!isInternalFace(fi))
     return true;
 

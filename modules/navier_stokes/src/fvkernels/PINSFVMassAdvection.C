@@ -42,18 +42,24 @@ PINSFVMassAdvection::computeQpResidual()
               _rho(singleSidedFaceArg())};
     else if (std::get<0>(NS::isPorosityJumpFace(_eps, *_face_info)))
     {
-      const Moose::SingleSidedFaceArg ssf_elem{
-          _face_info, Moose::FV::LimiterType::CentralDifference, true, false, &_face_info->elem()};
-      const Moose::SingleSidedFaceArg ssf_neighbor{_face_info,
-                                                   Moose::FV::LimiterType::CentralDifference,
-                                                   true,
-                                                   false,
-                                                   _face_info->neighborPtr()};
+      const Moose::FaceArg face_elem{_face_info,
+                                     Moose::FV::LimiterType::CentralDifference,
+                                     true,
+                                     false,
+                                     this,
+                                     &_face_info->elem()};
+      const Moose::FaceArg face_neighbor{_face_info,
+                                         Moose::FV::LimiterType::CentralDifference,
+                                         true,
+                                         false,
+                                         this,
+                                         _face_info->neighborPtr()};
 
-      const auto v_face = _rc_vel_provider.getUpwindSingleSidedFaceVelocity(*_face_info, _tid);
+      const auto v_face =
+          _rc_vel_provider.getVelocity(Moose::FV::InterpMethod::Average, *_face_info, _tid);
       const bool fi_elem_is_upwind = v_face * _normal > 0;
-      const auto & upwind_ssf = fi_elem_is_upwind ? ssf_elem : ssf_neighbor;
-      const auto rho_face = _rho(upwind_ssf);
+      const auto & upwind_face = fi_elem_is_upwind ? face_elem : face_neighbor;
+      const auto rho_face = _rho(upwind_face);
       return {v_face, rho_face};
     }
     else
