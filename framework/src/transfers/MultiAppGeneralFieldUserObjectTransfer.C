@@ -47,6 +47,8 @@ MultiAppGeneralFieldUserObjectTransfer::MultiAppGeneralFieldUserObjectTransfer(
   : MultiAppGeneralFieldTransfer(parameters),
     _user_object_name(getParam<UserObjectName>("source_user_object"))
 {
+  if (_to_var_names.size() > 1)
+    paramError("variable", "Only one variable at a time is supported by this transfer");
 }
 
 void
