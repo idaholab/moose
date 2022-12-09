@@ -34,11 +34,11 @@
     design = 'python/index.md'
     requirement = "The system shall include a utility for counting the number of lines for unique contributor."
   []
-  [module_hash]
+  [versioner]
     type = PythonUnitTest
-    input = test_modulehash.py
+    input = test_versioner.py
     issues = '#20336'
     design = 'python/index.md'
-    requirement = "The system shall include a utility for generating a unique hash that represents a moose environment module"
+    requirement = "The system shall include a utility for generating a unique hash for moose dependencies and moose applications"
   []
 []

@@ -4,18 +4,6 @@ moose_python:
   - python 3.8
   - python 3.7                                             # [not arm64]
 
-moose_pyqt:
-  - pyqt 5.15.7
-
-moose_qt:
-  - qt-main 5.15.4
-
-moose_matplotlib:
-  - matplotlib 3.5.2
-
-moose_vtk:
-  - vtk 9.1.0
-
 # Pesky packages that break internal CI
 # Note: Modifying/Updating this will require changes to conda/mpich!
 setuptools:
