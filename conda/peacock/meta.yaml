@@ -1,5 +1,5 @@
 {% set build = 0 %}
-{% set version = "2022.10.04" %}
+{% set version = "2022.12.05" %}
 
 package:
   name: moose-peacock
@@ -15,7 +15,6 @@ build:
 requirements:
   build:
     - {{ moose_python }}
-    - openssl
     - setuptools
   run:
     - {{ moose_pyqt }}
@@ -24,7 +23,6 @@ requirements:
     - {{ moose_vtk }}
     - pandas
     - python
-    - openssl
     - setuptools
 
 test:
@@ -38,8 +36,8 @@ about:
   home: https://mooseframework.org/
   license: LGPL 2.1
   summary: >
-    This superficial module (moose-tools) acts as a top-level module designed to provide all
-    dependencies required in order to run Peacock and MOOSE Documentation.
+    This superficial module (moose-peacock) acts as a top-level module designed to provide all
+    dependencies required in order to run Peacock.
 
 extra:
   recipe-maintainers:

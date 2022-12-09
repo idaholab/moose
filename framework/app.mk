@@ -483,7 +483,7 @@ install_lib_%: % all
 $(binlink): all $(copy_input_targets)
 	ln -sf ../../bin/$(notdir $(app_EXEC)) $@
 
-install_$(APPLICATION_NAME)_docs: all
+install_$(APPLICATION_NAME)_docs: install_python all
 ifeq ($(MOOSE_SKIP_DOCS),)
 	@echo "Installing docs"
 	@mkdir -p $(docs_install_dir)
