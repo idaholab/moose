@@ -45,6 +45,6 @@ INSFVEnergyAdvection::computeQpResidual()
       _adv_quant(Moose::FV::makeFace(*_face_info,
                                      limiterType(_advected_interp_method),
                                      MetaPhysicL::raw_value(v) * _normal > 0,
-                                     faceArgSubdomains()));
+                                     *this));
   return _normal * v * adv_quant_face;
 }

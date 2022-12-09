@@ -500,10 +500,9 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
 
   if (Moose::FV::onBoundary(*this, fi))
   {
-    const auto sub_id =
-        hasBlocks(elem->subdomain_id()) ? elem->subdomain_id() : neighbor->subdomain_id();
+    const Elem * const boundary_elem = hasBlocks(elem->subdomain_id()) ? elem : neighbor;
     const Moose::SingleSidedFaceArg boundary_face{
-        &fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, sub_id};
+        &fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, boundary_elem};
     return vel(boundary_face);
   }
 
@@ -606,13 +605,12 @@ INSFVRhieChowInterpolator::getUpwindSingleSidedFaceVelocity(const FaceInfo & fi,
 
   mooseAssert(fi.neighborPtr(), "This method should not be called with a null neighbor");
 
-  const Moose::SingleSidedFaceArg ssf{&fi,
-                                      Moose::FV::LimiterType::CentralDifference,
-                                      true,
-                                      false,
-                                      MetaPhysicL::raw_value(face_v) * fi.normal() > 0
-                                          ? fi.elem().subdomain_id()
-                                          : fi.neighbor().subdomain_id()};
+  const Moose::SingleSidedFaceArg ssf{
+      &fi,
+      Moose::FV::LimiterType::CentralDifference,
+      true,
+      false,
+      MetaPhysicL::raw_value(face_v) * fi.normal() > 0 ? &fi.elem() : fi.neighborPtr()};
 
   return {(*_u)(ssf), _v ? (*_v)(ssf) : ADReal(0), _w ? (*_w)(ssf) : ADReal(0)};
 }

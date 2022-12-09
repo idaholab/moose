@@ -42,16 +42,13 @@ PINSFVMassAdvection::computeQpResidual()
               _rho(singleSidedFaceArg())};
     else if (std::get<0>(NS::isPorosityJumpFace(_eps, *_face_info)))
     {
-      const Moose::SingleSidedFaceArg ssf_elem{_face_info,
-                                               Moose::FV::LimiterType::CentralDifference,
-                                               true,
-                                               false,
-                                               _face_info->elem().subdomain_id()};
+      const Moose::SingleSidedFaceArg ssf_elem{
+          _face_info, Moose::FV::LimiterType::CentralDifference, true, false, &_face_info->elem()};
       const Moose::SingleSidedFaceArg ssf_neighbor{_face_info,
                                                    Moose::FV::LimiterType::CentralDifference,
                                                    true,
                                                    false,
-                                                   _face_info->neighbor().subdomain_id()};
+                                                   _face_info->neighborPtr()};
 
       const auto v_face = _rc_vel_provider.getUpwindSingleSidedFaceVelocity(*_face_info, _tid);
       const bool fi_elem_is_upwind = v_face * _normal > 0;
@@ -66,7 +63,7 @@ PINSFVMassAdvection::computeQpResidual()
               _rho(Moose::FV::makeFace(*_face_info,
                                        limiterType(_advected_interp_method),
                                        MetaPhysicL::raw_value(v_face) * _normal > 0,
-                                       faceArgSubdomains()))};
+                                       *this))};
     }
   }();
 

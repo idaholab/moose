@@ -98,7 +98,8 @@ INSFVVelocityVariable::getExtrapolatedBoundaryFaceValue(const FaceInfo & fi,
         uncorrectedAdGradSln(fi) * vector_to_face + getElemValue(elem_to_extrapolate_from);
   }
   else
-    boundary_value = INSFVVariable::getExtrapolatedBoundaryFaceValue(fi, two_term_expansion);
+    boundary_value = INSFVVariable::getExtrapolatedBoundaryFaceValue(
+        fi, two_term_expansion, elem_to_extrapolate_from);
 
   return boundary_value;
 }
