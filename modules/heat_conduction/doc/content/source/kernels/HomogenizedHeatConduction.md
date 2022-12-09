@@ -4,20 +4,20 @@
 
 ## Description
 
-This `Kernel` computes
-\begin{equation}
-\int_Y \frac{\partial v}{\partial y_i}k_{ik} \text{d}y
-\end{equation}
-where $k_{ik}$ is the thermal conductivity.  It is used in conjunction with the [Heat Conduction](HeatConduction.md) `Kernel` and the [Homogenized Thermal Conductivity](HomogenizedThermalConductivity.md) `Postprocessor` to compute homogenized thermal conductivity values according to
-\begin{equation}
-\int_Y \frac{\partial v}{\partial y_i}k_{ik} \frac{\partial \psi^k}{\partial y_j} = \int_Y \frac{\partial v}{\partial y_i}k_{ik} \text{d}y
-\end{equation}
-and
-\begin{equation}
-k_{ij}^\text{H}=\frac{1}{\left|\text{Y}\right|}\int_\text{Y}k_{ij}\left(\bm{I} + \frac{\partial\psi^k}{\partial y_j}\right)\;\text{d}\bm{y}
-\end{equation}
-where $k^\text{H}_{ij}$ is the homogenized thermal conductivity.  See [!cite](hales15homogenization).
+This `Kernel` computes the right hand side of the equation of the equation
 
+!equation
+\int_Y \frac{\partial v}{\partial y_i}k_{ij} \frac{\partial \chi^k}{\partial y_j} = -\int_Y \frac{\partial v}{\partial y_i}k_{ik} \text{d}y
+
+where $k_{ik}$ is the thermal conductivity and $\chi^k$ is a function used for homogenizing the thermal conductivity.  
+In this case, the thermal conductivity is isotropic, i.e. $k_{ik} = k \delta_{ij}$ with $k$ being the thermal conductivity and $\delta_{ij}$ being the Kronecker delta.
+The equation simplifies to:
+
+!equation
+\int_Y \frac{\partial v}{\partial y_i}k \frac{\partial \chi^k}{\partial y_j} = -\int_Y \frac{\partial v}{\partial y_k}k \text{d}y
+
+This kernel is used in conjunction with the [Heat Conduction](HeatConduction.md) `Kernel` and the [Homogenized Thermal Conductivity](HomogenizedThermalConductivity.md) `Postprocessor` to compute homogenized thermal conductivity values.  
+See [!cite](hales15homogenization) and [!cite](SONG2006710) for more details.
 
 ## Example Input File Syntax
 
