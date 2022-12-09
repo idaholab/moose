@@ -31,5 +31,5 @@ public:
 
 private:
   /// A reference to the FEProblem
-  FEProblemBase * _si_fe_problem;
+  FEProblemBase & _si_fe_problem;
 };

@@ -16,12 +16,12 @@
 
 SolutionInvalidInterface::SolutionInvalidInterface(MooseObject * moose_object)
   : _si_fe_problem(
-        moose_object->parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
+        *moose_object->parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
 {
 }
 
 void
 SolutionInvalidInterface::setSolutionInvalid(bool solution_invalid)
 {
-  _si_fe_problem->getNonlinearSystemBase().setSolutionInvalid(solution_invalid);
+  _si_fe_problem.getNonlinearSystemBase().setSolutionInvalid(solution_invalid);
 }
