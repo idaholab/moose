@@ -13,12 +13,4 @@
     library_mode = 'DYNAMIC'
     valgrind = 'NONE'
   []
-  [plane_strain_displace_qps]
-    type = 'Exodiff'
-    input = 'plane_strain.i'
-    exodiff = 'plane_strain_out.e'
-    library_mode = 'DYNAMIC'
-    valgrind = 'NONE'
-    cli_args = 'Materials/constant/displace_qps=true'
-  []
 []

@@ -44,10 +44,6 @@ AbaqusUMATStress::validParams()
   params.addParam<MooseEnum>("decomposition_method",
                              ComputeFiniteStrain::decompositionType(),
                              "Method to calculate the strain kinematics.");
-  params.addCoupledVar("displacements", 0.0, "displacement variables");
-  params.addParam<bool>(
-      "displace_qps", false, "Send displaced quadrature point coordinates to UMAT.");
-  params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
 
@@ -89,9 +85,7 @@ AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
     _external_properties_old(_number_external_properties),
     _use_one_based_indexing(getParam<bool>("use_one_based_indexing")),
     _decomposition_method(
-        getParam<MooseEnum>("decomposition_method").getEnum<ComputeFiniteStrain::DecompMethod>()),
-    _disp(coupledValues("displacements")),
-    _displace_qps(getParam<bool>("displace_qps"))
+        getParam<MooseEnum>("decomposition_method").getEnum<ComputeFiniteStrain::DecompMethod>())
 {
   if (!_use_one_based_indexing)
     mooseDeprecated(
@@ -99,10 +93,6 @@ AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
         "integration point (NPT) numbers to ensure maximum compatibility with legacy UMAT files. "
         "Please ensure that any new UMAT plugins using these quantities are using the correct "
         "indexing. 0-based indexing will be deprecated soon.");
-
-  if ((_displace_qps) && (!parameters.isParamSetByUser("displacements")))
-    mooseError("In AbaqusUMATStress, the 'displacements' parameter is required when "
-               "requesting displaced quadrature point coordinates.");
 
   // get material properties
   for (std::size_t i = 0; i < _number_external_properties; ++i)
@@ -226,8 +216,7 @@ AbaqusUMATStress::computeQpStress()
 
   // current coordinates
   for (const auto i : make_range(Moose::dim))
-    _aqCOORDS[i] =
-        _q_point[_qp](i) + ((_displace_qps && i < _current_elem->dim()) ? (*_disp[i])[_qp] : 0.0);
+    _aqCOORDS[i] = _q_point[_qp](i);
 
   // zero out Jacobian contribution
   for (const auto i : make_range(_aqNTENS * _aqNTENS))

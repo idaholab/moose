@@ -19,7 +19,6 @@ ComputeStressBase::validParams()
                                "Optional parameter that allows the user to define "
                                "multiple mechanics material systems on the same "
                                "block, i.e. for multiple phases");
-  params.suppressParameter<bool>("use_displaced_mesh");
   return params;
 }
 
@@ -32,9 +31,6 @@ ComputeStressBase::ComputeStressBase(const InputParameters & parameters)
     _extra_stress(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "extra_stress")),
     _Jacobian_mult(declareProperty<RankFourTensor>(_base_name + "Jacobian_mult"))
 {
-
-  if (getParam<bool>("use_displaced_mesh"))
-    mooseError("The stress calculator needs to run on the undisplaced mesh.");
 }
 
 void
