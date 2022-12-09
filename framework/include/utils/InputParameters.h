@@ -70,6 +70,9 @@ public:
    */
   virtual void set_attributes(const std::string & name, bool inserted_only) override;
 
+  /// Prints the deprecated parameter message, assuming we have the right flags set
+  bool attemptPrintDeprecated(const std::string & name);
+
   /// This functions is called in set as a 'callback' to avoid code duplication
   template <typename T>
   void setHelper(const std::string & name);
@@ -1011,8 +1014,6 @@ private:
     std::set<ExecFlagType> _controllable_flags;
     /// whether user setting of this parameter should be ignored
     bool _ignore = false;
-    /// whether this program has printed its deprecation message yet
-    bool _has_deprec_printed = false;
   };
 
   Metadata & at(const std::string & param_name)

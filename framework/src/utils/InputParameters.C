@@ -95,8 +95,15 @@ InputParameters::set_attributes(const std::string & name_in, bool inserted_only)
     // valid_params don't make sense for MooseEnums
     if (!have_parameter<MooseEnum>(name) && !have_parameter<MultiMooseEnum>(name))
       _params[name]._valid = true;
+  }
+}
 
-    if (_show_deprecated_message)
+bool
+InputParameters::attemptPrintDeprecated(const std::string & name)
+{
+  if (_show_deprecated_message)
+  {
+    if (_params.count(name) && !_params[name]._deprecation_message.empty())
     {
       auto emit_deprecation_message =
           [this](const auto & deprecated_name, const auto & deprecation_message)
@@ -122,6 +129,7 @@ InputParameters::set_attributes(const std::string & name_in, bool inserted_only)
         emit_deprecation_message(name_in, it->second.second);
     }
   }
+  return false;
 }
 
 std::string
@@ -770,7 +778,6 @@ InputParameters::applyParameters(const InputParameters & common,
   {
     // Common parameter name
     const std::string & common_name = it.first;
-
     // Continue to next parameter, if the current is in list of  excluded parameters
     if (std::find(exclude.begin(), exclude.end(), common_name) != exclude.end())
       continue;

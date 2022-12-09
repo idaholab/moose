@@ -17,15 +17,14 @@ DeprecatedParamDiffusion::validParams()
 {
   InputParameters params = Diffusion::validParams();
   params.addDeprecatedParam<Real>("D", 1, "The diffusivity coefficient.", "This is deprecated");
-  params.addDeprecatedParam<Real>("E", 1, "The ediffusivity coefficient.", "This is also deprecated");
+  params.addDeprecatedParam<Real>(
+      "E", 1, "The E diffusivity coefficient.", "This is also deprecated");
   return params;
 }
 // MooseDocs::end
 
 DeprecatedParamDiffusion::DeprecatedParamDiffusion(const InputParameters & parameters)
-  : Diffusion(parameters),
-
-    _D(getParam<Real>("D"))
+  : Diffusion(parameters), _D(getParam<Real>("D"))
 {
 }
 

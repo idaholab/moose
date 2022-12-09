@@ -72,19 +72,11 @@
     design = 'InputParameters.md'
     issues = '#15497'
   []
-  [deprec_2param_1obj]
+  [deprec_param_duplicate_print]
     type = RunApp
-    input = 'deptest.i'
-    expect_out = "The parameter 'new_boundary_id' is deprecated.(.*)The parameter 'old_boundary_id' is deprecated."
+    input = 'deprecated_param.i'
+    custom_evaluation_script = 'deprec_param_custom_eval.py'
     issues = '#6780'
-    requirement = 'The system shall output multiple warnings when there are multiple deprecated parameters in a single object.'
-  []
-  [deprec_1param_2obj]
-    type = RunException
-    input = 'deptest.i'
-    cli_args = 'Outputs/out/execute_system_information=NONE'
-    expect_err = "The parameter 'new_boundary_id' is deprecated.(.*)The parameter 'execute_system_information' is deprecated."
-    issues = '#6780'
-    requirement = 'The system shall output multiple warnings when there are multiple objects with deprecated parameters.'
+    requirement = 'The system shall output one warning per deprecated parameter, regardless of how many deprecated parameters are in the system.'
   []
 []
