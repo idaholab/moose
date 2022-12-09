@@ -70,4 +70,21 @@
     ad_indexing_type = 'global'
     requirement = 'The system shall error if the user attempts to create a reconstructed field from a variable.'
   []
+  [automatic-jump-handling]
+    requirement = 'The system shall be able to automatically impose a change in pressure in line with the Bernoulli equation at porosity jumps in'
+    [1d]
+      type = CSVDiff
+      input = 'bernoulli-1d.i'
+      csvdiff = 'bernoulli-1d_out.csv'
+      detail = 'one dimension'
+      ad_indexing_type = 'global'
+    []
+    [2d]
+      type = CSVDiff
+      input = 'bernoulli-2d.i'
+      csvdiff = 'bernoulli-2d_out.csv'
+      detail = 'two dimensions'
+      ad_indexing_type = 'global'
+    []
+  []
 []

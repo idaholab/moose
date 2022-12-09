@@ -1,4 +1,3 @@
-mu = 1.1
 rho = 1.1
 advected_interp_method = 'upwind'
 velocity_interp_method = 'rc'
@@ -8,7 +7,7 @@ velocity_interp_method = 'rc'
     type = CartesianMeshGenerator
     dim = 1
     dx = '1 1'
-    ix = '30 30'
+    ix = '3 3'
     subdomain_id = '1 2'
   []
 []
@@ -32,20 +31,20 @@ velocity_interp_method = 'rc'
     initial_condition = 1
   []
   [pressure]
-    type = INSFVPressureVariable
+    type = PINSFVPressureVariable
+    u = u
+    porosity = porosity
+    rho = ${rho}
   []
 []
 
 [AuxVariables]
   [porosity]
-    family = MONOMIAL
-    order = CONSTANT
-    fv = true
+    type = PINSFVPorosityVariable
   []
 []
 
 [ICs]
-  inactive = 'porosity_continuous'
   [porosity_1]
     type = ConstantIC
     variable = porosity
@@ -58,19 +57,6 @@ velocity_interp_method = 'rc'
     block = 2
     value = 0.5
   []
-  [porosity_continuous]
-    type = FunctionIC
-    variable = porosity
-    block = '1 2'
-    function = smooth_jump
-  []
-[]
-
-[Functions]
-  [smooth_jump]
-    type = ParsedFunction
-    expression = '1 - 0.5 * 1 / (1 + exp(-30*(x-1)))'
-  []
 []
 
 [FVKernels]
@@ -80,6 +66,7 @@ velocity_interp_method = 'rc'
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
     rho = ${rho}
+    porosity = porosity
   []
 
   [u_advection]
@@ -88,13 +75,6 @@ velocity_interp_method = 'rc'
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
     rho = ${rho}
-    porosity = porosity
-    momentum_component = 'x'
-  []
-  [u_viscosity]
-    type = PINSFVMomentumDiffusion
-    variable = u
-    mu = ${mu}
     porosity = porosity
     momentum_component = 'x'
   []
@@ -145,5 +125,5 @@ velocity_interp_method = 'rc'
 
 [Outputs]
   exodus = true
-  csv = false
+  csv = true
 []

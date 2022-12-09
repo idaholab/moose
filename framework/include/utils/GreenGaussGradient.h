@@ -214,6 +214,9 @@ greenGaussGradient(const ElemArg & elem_arg,
       }
 
       A.lu_solve(b, x);
+      // libMesh is generous about what it considers nonsingular. Let's check a little more strictly
+      if (MooseUtils::absoluteFuzzyEqual(MetaPhysicL::raw_value(A(sys_dim - 1, sys_dim - 1)), 0))
+        throw libMesh::LogicError("Matrix A is singular!");
       for (const auto i : make_range(Moose::dim))
         grad(i) = x(i);
     }
