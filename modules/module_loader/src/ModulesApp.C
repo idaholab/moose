@@ -67,6 +67,9 @@
 #ifdef RICHARDS_ENABLED
 #include "RichardsApp.h"
 #endif
+#ifdef SCALAR_TRANSPORT_ENABLED
+#include "ScalarTransportApp.h"
+#endif
 #ifdef SOLID_PROPERTIES_ENABLED
 #include "SolidPropertiesApp.h"
 #endif
@@ -458,6 +461,10 @@ ModulesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 
 #ifdef RICHARDS_ENABLED
   RichardsApp::registerAll(f, af, s);
+#endif
+
+#ifdef SCALAR_TRANSPORT_ENABLED
+  ScalarTransportApp::registerAll(f, af, s);
 #endif
 
 #ifdef SOLID_PROPERTIES_ENABLED
