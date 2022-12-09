@@ -30,7 +30,14 @@ public:
   virtual PostprocessorValue getValue() override;
 
 protected:
+  /// the function that will be evaluated and returned as pp value
   const Function & _function;
-  const Point & _point;
+  /// a scale factor to scale the result of _function
   const Real & _scale_factor;
+  /// true of space postprocessors have been provided
+  bool _has_space_pp;
+  /// a postprocessor that is passed to the time argument of _function (if provided)
+  const PostprocessorValue * _time_pp;
+  /// a vector of postprocessor values that are passed into the space argument of _function (if provided)
+  std::vector<const PostprocessorValue *> _point;
 };
