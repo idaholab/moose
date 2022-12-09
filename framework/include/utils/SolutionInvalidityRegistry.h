@@ -15,17 +15,16 @@
 #include <mutex>
 
 // Forward Declarations
-class PerfGraph;
-class PerfGraphLivePrint;
-class PerfNode;
-void dataStore(std::ostream &, PerfGraph &, void *);
+class SolutionInvalidity;
+
+void dataStore(std::ostream &, SolutionInvalidity &, void *);
 
 namespace moose
 {
 namespace internal
 {
-class PerfGraphRegistry;
-class PerfGraphSectionInfo;
+class SolutionInvalidityRegistry;
+class SolutionInvaliditySectionInfo;
 }
 }
 
@@ -40,14 +39,11 @@ namespace internal
  * are not able to be created in place using emplace_back in
  * C++11.  This will be fixed in C++20.
  */
-class PerfGraphSectionInfo
+class SolutionInvaliditySectionInfo
 {
 public:
-  PerfGraphSectionInfo(const PerfID id,
-                       const std::string & name,
-                       const unsigned int level,
-                       const std::string & live_message,
-                       const bool print_dots)
+  SolutionInvaliditySectionInfo(
+      PerfID id, std::string name, unsigned int level, std::string live_message, bool print_dots)
     : _id(id), _name(name), _level(level), _live_message(live_message), _print_dots(print_dots)
   {
   }
@@ -67,15 +63,17 @@ public:
   /// Whether or not to print dots while this section runs
   bool _print_dots;
 };
+
 /**
- * Get the global PerfGraphRegistry singleton.
+ * Get the global SolutionInvalidityRegistry singleton.
  */
-PerfGraphRegistry & getPerfGraphRegistry();
+SolutionInvalidityRegistry & getSolutionInvalidityRegistry();
 
 /**
  * The place where all timed sections will be stored
  */
-class PerfGraphRegistry : private GeneralRegistry<std::string, PerfGraphSectionInfo>
+class SolutionInvalidityRegistry
+  : private GeneralRegistry<std::string, SolutionInvaliditySectionInfo>
 {
 public:
   /**
@@ -109,11 +107,11 @@ public:
   PerfID sectionID(const std::string & section_name) const { return id(section_name); }
 
   /**
-   * Given a PerfID return the PerfGraphSectionInfo
+   * Given a PerfID return the SolutionInvaliditySectionInfo
    * @section_id The ID
-   * @return The PerfGraphSectionInfo
+   * @return The SolutionInvaliditySectionInfo
    */
-  const PerfGraphSectionInfo & sectionInfo(const PerfID section_id) const
+  const SolutionInvaliditySectionInfo & sectionInfo(const PerfID section_id) const
   {
     return item(section_id);
   }
@@ -138,7 +136,7 @@ public:
   std::size_t numSections() const { return size(); }
 
 private:
-  PerfGraphRegistry();
+  SolutionInvalidityRegistry();
 
   /**
    * The internal function that actually carries out the registration
@@ -149,32 +147,36 @@ private:
                                  const bool print_dots = true);
 
   /**
-   * Special accessor just for PerfGraph so that
-   * no locking is needed in PerfGraph.  This could
+   * Special accessor just for SolutionInvalidity so that
+   * no locking is needed in SolutionInvalidity.  This could
    * probably be removed once we have C++17 with shared_mutex
    *
    * This function is NOT threadsafe - but it is ok
-   * for PerfGraph to call it because only the main
+   * for SolutionInvalidity to call it because only the main
    * thread will be registering sections and only
-   * the main thread will be running PerfGraph routines
+   * the main thread will be running SolutionInvalidity routines
    *
-   * @return the PerfGraphPerfGraphSectionInfo associated with the section_id
+   * @return the SolutionInvaliditySectionInfo associated with the section_id
    */
-  const PerfGraphSectionInfo & readSectionInfo(PerfID section_id) const
+  const SolutionInvaliditySectionInfo & readSectionInfo(PerfID section_id) const
   {
     return itemNonLocking(section_id);
   };
 
   /// So it can be constructed
-  friend PerfGraphRegistry & getPerfGraphRegistry();
-  /// This is only here so that PerfGraph can access readSectionInfo
-  friend PerfGraph;
-  // For accessing _id_to_section_info when storing the PerfGraph
-  friend void ::dataStore(std::ostream &, PerfGraph &, void *);
+  friend SolutionInvalidityRegistry & getSolutionInvalidityRegistry();
+  /// This is only here so that SolutionInvalidity can access readSectionInfo
+  friend SolutionInvalidity;
+  // For accessing _id_to_section_info when storing the SolutionInvalidity
+  friend void ::dataStore(std::ostream &, SolutionInvalidity &, void *);
 };
 
 }
 }
 
-void dataStore(std::ostream & stream, moose::internal::PerfGraphSectionInfo & info, void * context);
-void dataLoad(std::istream & stream, moose::internal::PerfGraphSectionInfo & info, void * context);
+void dataStore(std::ostream & stream,
+               moose::internal::SolutionInvaliditySectionInfo & info,
+               void * context);
+void dataLoad(std::istream & stream,
+              moose::internal::SolutionInvaliditySectionInfo & info,
+              void * context);
