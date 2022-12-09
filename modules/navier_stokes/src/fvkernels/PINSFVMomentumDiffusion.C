@@ -50,7 +50,7 @@ PINSFVMomentumDiffusion::computeStrongResidual()
   const bool has_neighbor = (_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ||
                              _face_type == FaceInfo::VarFaceNeighbors::BOTH);
 
-  const auto elem_face = elemFromFace();
+  const auto elem_face = elemArg();
   const auto neighbor_face = neighborFromFace();
 
   // Compute the diffusion driven by the velocity gradient

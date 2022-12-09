@@ -58,7 +58,7 @@ makeSidedFace(const SubdomainRestrictable & obj,
  */
 template <typename SubdomainRestrictable>
 ElemFromFaceArg
-elemFromFace(const SubdomainRestrictable & obj,
+elemArg(const SubdomainRestrictable & obj,
              const FaceInfo & fi,
              const bool correct_skewness = false)
 {
@@ -403,7 +403,7 @@ linearInterpolation(const FunctorBase<T> & functor, const FaceArg & face)
   mooseAssert(face.fi,
               "We must have a non-null face_info in order to prepare our ElemFromFace tuples");
 
-  const auto elem_from_face = face.elemFromFace();
+  const auto elem_from_face = face.elemArg();
   const auto neighbor_from_face = face.neighborFromFace();
 
   if (face.correct_skewness)
@@ -640,8 +640,8 @@ interpCoeffsAndAdvected(const FunctorBase<T> & functor, const FaceArg & face)
   mooseAssert(face.fi, "this must be non-null");
   const auto limiter = Limiter<typename LimiterValueType<T>::value_type>::build(face.limiter_type);
 
-  const auto upwind_arg = face.elem_is_upwind ? face.elemFromFace() : face.neighborFromFace();
-  const auto downwind_arg = face.elem_is_upwind ? face.neighborFromFace() : face.elemFromFace();
+  const auto upwind_arg = face.elem_is_upwind ? face.elemArg() : face.neighborFromFace();
+  const auto downwind_arg = face.elem_is_upwind ? face.neighborFromFace() : face.elemArg();
   auto phi_upwind = functor(upwind_arg);
   auto phi_downwind = functor(downwind_arg);
 
@@ -688,8 +688,8 @@ interpolate(const FunctorBase<VectorValue<T>> & functor, const FaceArg & face)
   mooseAssert(face.fi, "this must be non-null");
   const auto limiter = Limiter<typename LimiterValueType<T>::value_type>::build(face.limiter_type);
 
-  const auto upwind_arg = face.elem_is_upwind ? face.elemFromFace() : face.neighborFromFace();
-  const auto downwind_arg = face.elem_is_upwind ? face.neighborFromFace() : face.elemFromFace();
+  const auto upwind_arg = face.elem_is_upwind ? face.elemArg() : face.neighborFromFace();
+  const auto downwind_arg = face.elem_is_upwind ? face.neighborFromFace() : face.elemArg();
   auto phi_upwind = functor(upwind_arg);
   auto phi_downwind = functor(downwind_arg);
 
@@ -738,8 +738,8 @@ containerInterpolate(const FunctorBase<T> & functor, const FaceArg & face)
   mooseAssert(face.fi, "this must be non-null");
   const auto limiter = Limiter<typename T::value_type>::build(face.limiter_type);
 
-  const auto upwind_arg = face.elem_is_upwind ? face.elemFromFace() : face.neighborFromFace();
-  const auto downwind_arg = face.elem_is_upwind ? face.neighborFromFace() : face.elemFromFace();
+  const auto upwind_arg = face.elem_is_upwind ? face.elemArg() : face.neighborFromFace();
+  const auto downwind_arg = face.elem_is_upwind ? face.neighborFromFace() : face.elemArg();
   const auto phi_upwind = functor(upwind_arg);
   const auto phi_downwind = functor(downwind_arg);
 

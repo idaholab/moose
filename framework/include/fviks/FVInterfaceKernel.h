@@ -142,7 +142,7 @@ protected:
    * @return A structure that contains information about the face info element, face info, skewness
    * correction and element subdomain id for use with functors
    */
-  Moose::ElemFromFaceArg elemFromFace(bool correct_skewness = false) const;
+  Moose::ElemFromFaceArg elemArg(bool correct_skewness = false) const;
 
   /**
    * @return A structure that contains information about the face info neighbor, the face info,

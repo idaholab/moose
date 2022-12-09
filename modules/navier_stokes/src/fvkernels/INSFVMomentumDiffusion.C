@@ -54,7 +54,7 @@ INSFVMomentumDiffusion::computeStrongResidual()
   else
     Moose::FV::interpolate(_mu_interp_method,
                            face_mu,
-                           _mu(elemFromFace()),
+                           _mu(elemArg()),
                            _mu(neighborFromFace()),
                            *_face_info,
                            true);

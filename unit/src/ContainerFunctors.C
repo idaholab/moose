@@ -98,8 +98,8 @@ TEST(ContainerFunctors, Test)
 
       const auto vector_face_gradient = vector_functor.gradient(face_arg)[0];
       const auto array_face_gradient = array_functor.gradient(face_arg)[0];
-      const auto vector_elem_gradient = vector_functor.gradient(face_arg.elemFromFace())[0];
-      const auto array_elem_gradient = array_functor.gradient(face_arg.elemFromFace())[0];
+      const auto vector_elem_gradient = vector_functor.gradient(face_arg.elemArg())[0];
+      const auto array_elem_gradient = array_functor.gradient(face_arg.elemArg())[0];
       const auto vector_neighbor_gradient =
           face->neighborPtr() ? vector_functor.gradient(face_arg.neighborFromFace())[0]
                               : VectorValue<Real>();

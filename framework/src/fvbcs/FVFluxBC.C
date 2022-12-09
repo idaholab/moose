@@ -270,7 +270,7 @@ FVFluxBC::makeSidedFace(const bool fi_elem, const bool correct_skewness) const
 }
 
 Moose::ElemFromFaceArg
-FVFluxBC::elemFromFace(const bool correct_skewness) const
+FVFluxBC::elemArg(const bool correct_skewness) const
 {
   return makeSidedFace(true, correct_skewness);
 }
@@ -284,5 +284,5 @@ FVFluxBC::neighborFromFace(const bool correct_skewness) const
 std::pair<SubdomainID, SubdomainID>
 FVFluxBC::faceArgSubdomains() const
 {
-  return std::make_pair(elemFromFace().sub_id, neighborFromFace().sub_id);
+  return std::make_pair(elemArg().sub_id, neighborFromFace().sub_id);
 }

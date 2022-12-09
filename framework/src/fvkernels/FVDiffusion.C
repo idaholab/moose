@@ -57,7 +57,7 @@ FVDiffusion::computeQpResidual()
   if (_var.isInternalFace(*_face_info))
     interpolate(_coeff_interp_method,
                 coeff,
-                _coeff(elemFromFace()),
+                _coeff(elemArg()),
                 _coeff(neighborFromFace()),
                 *_face_info,
                 true);

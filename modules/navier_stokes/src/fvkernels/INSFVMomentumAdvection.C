@@ -141,7 +141,7 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
                                          faceArgSubdomains(),
                                          correct_skewness));
 
-    const auto elem_face = elemFromFace();
+    const auto elem_face = elemArg();
     const auto neighbor_face = neighborFromFace();
 
     const auto rho_elem = _rho(elem_face), rho_neighbor = _rho(neighbor_face);

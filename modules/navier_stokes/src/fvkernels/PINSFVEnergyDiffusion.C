@@ -67,7 +67,7 @@ PINSFVEnergyDiffusion::computeQpResidual()
   }
   else
   {
-    const auto face_elem = elemFromFace();
+    const auto face_elem = elemArg();
     const auto face_neighbor = neighborFromFace();
 
     const auto value1 =

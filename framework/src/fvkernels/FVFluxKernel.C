@@ -344,10 +344,10 @@ FVFluxKernel::gradUDotNormal() const
 }
 
 Moose::ElemFromFaceArg
-FVFluxKernel::elemFromFace(const bool correct_skewness) const
+FVFluxKernel::elemArg(const bool correct_skewness) const
 {
   mooseAssert(_face_info, "the face info should be non-null");
-  return Moose::FV::elemFromFace(*this, *_face_info, correct_skewness);
+  return Moose::FV::elemArg(*this, *_face_info, correct_skewness);
 }
 
 Moose::ElemFromFaceArg

@@ -61,7 +61,7 @@ FVDiffusionInterface::computeQpResidual()
   ADReal diffusivity;
   interpolate(_coeff_interp_method,
               diffusivity,
-              coef_elem(elemFromFace()),
+              coef_elem(elemArg()),
               coef_neighbor(neighborFromFace()),
               *_face_info,
               true);
