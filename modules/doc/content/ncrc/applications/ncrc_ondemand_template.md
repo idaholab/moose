@@ -41,7 +41,7 @@ By default, your submission of this form creates a basic submission command that
 
 ```bash
 {{binary_method}} -t -i /home/user/input.i
-{{binary_,ethod}} --timing -i /home/user/input.i
+{{binary_method}} --timing -i /home/user/input.i
 ```
 
  You are allowed to put more than one in this box. Everything that you put in this box will be entered between  `{{binary_method}}` and your input file `-i /home/user/input.i`.
