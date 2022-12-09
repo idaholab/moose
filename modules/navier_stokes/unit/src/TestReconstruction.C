@@ -114,7 +114,7 @@ testReconstruction(const Moose::CoordinateSystemType coord_type)
     {
       auto moukalled_reconstruct = [&fi](auto & functor, auto & container)
       {
-        auto face = Moose::FV::makeCDFace(fi, functor);
+        auto face = Moose::FV::makeCDFace(fi);
         const RealVectorValue uf(functor(face));
         const Point surface_vector = fi.normal() * fi.faceArea();
         auto product = (uf * fi.dCN()) * surface_vector;

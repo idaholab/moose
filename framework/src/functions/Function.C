@@ -203,12 +203,6 @@ FunctionTempl<T>::evaluate(const FaceArg & face, const unsigned int state) const
 {
   return value(getTime(state), face.fi->faceCentroid());
 }
-template <typename T>
-typename FunctionTempl<T>::ValueType
-FunctionTempl<T>::evaluate(const SingleSidedFaceArg & face, const unsigned int state) const
-{
-  return value(getTime(state), face.fi->faceCentroid());
-}
 
 template <typename T>
 typename FunctionTempl<T>::ValueType
@@ -255,13 +249,6 @@ FunctionTempl<T>::evaluateGradient(const FaceArg & face, const unsigned int stat
 
 template <typename T>
 typename FunctionTempl<T>::GradientType
-FunctionTempl<T>::evaluateGradient(const SingleSidedFaceArg & face, const unsigned int state) const
-{
-  return gradient(getTime(state), face.fi->faceCentroid());
-}
-
-template <typename T>
-typename FunctionTempl<T>::GradientType
 FunctionTempl<T>::evaluateGradient(const ElemQpArg & elem_qp, const unsigned int state) const
 {
   determineElemXYZ(elem_qp);
@@ -301,13 +288,6 @@ FunctionTempl<T>::evaluateDot(const ElemArg & elem_arg, const unsigned int state
 template <typename T>
 typename FunctionTempl<T>::DotType
 FunctionTempl<T>::evaluateDot(const FaceArg & face, const unsigned int state) const
-{
-  return timeDerivative(getTime(state), face.fi->faceCentroid());
-}
-
-template <typename T>
-typename FunctionTempl<T>::DotType
-FunctionTempl<T>::evaluateDot(const SingleSidedFaceArg & face, const unsigned int state) const
 {
   return timeDerivative(getTime(state), face.fi->faceCentroid());
 }

@@ -91,9 +91,6 @@ struct FaceArg
   /// Whether to perform skew correction
   bool correct_skewness;
 
-  /// The consumer object
-  const HasBlocksInterface * consumer;
-
   /// A member that can be used to indicate whether there is a sidedness to this face. If null, then
   /// this means we're evaluating "right on" the face
   const Elem * face_side;
@@ -110,52 +107,9 @@ struct FaceArg
 
   friend bool operator<(const FaceArg & l, const FaceArg & r)
   {
-    return std::make_tuple(l.fi,
-                           l.limiter_type,
-                           l.elem_is_upwind,
-                           l.correct_skewness,
-                           l.consumer,
-                           l.face_side) <
-           std::make_tuple(
-               r.fi, r.limiter_type, r.elem_is_upwind, r.correct_skewness, r.consumer, r.face_side);
-  }
-};
-
-/**
- * A structure defining a "single-sided face" evaluation argument for Moose functors. This is
- * identical to the \p FaceArg argument with the exception that a single SubdomainID is given as the
- * last argument to the tuple. This allows disambiguation, in \p FunctorMaterialProperty contexts,
- * of which property definition to use at a face on which there may be different property
- * definitions on either side of the face. Additionally this overload can be useful when on an
- * external boundary face when we want to avoid using ghost information
- */
-struct SingleSidedFaceArg
-{
-  /// a face information object which defines our location in space
-  const FaceInfo * fi;
-
-  /// a limiter which defines how the functor evaluated on this side of the face should be
-  /// interpolated to the face
-  Moose::FV::LimiterType limiter_type;
-
-  /// a boolean which states whether the face information element is upwind of the face
-  bool elem_is_upwind;
-
-  /// Whether to perform skew correction
-  bool correct_skewness;
-
-  /// The element which denotes the side of the face information we are evaluating on
-  const Elem * elem;
-
-  /**
-   * Make an element argument corresponding to the face side on which we are defined
-   */
-  ElemArg makeSidedElem() const { return {elem, correct_skewness}; }
-
-  friend bool operator<(const SingleSidedFaceArg & l, const SingleSidedFaceArg & r)
-  {
-    return std::make_tuple(l.fi, l.limiter_type, l.elem_is_upwind, l.correct_skewness, l.elem) <
-           std::make_tuple(r.fi, r.limiter_type, r.elem_is_upwind, r.correct_skewness, r.elem);
+    return std::make_tuple(
+               l.fi, l.limiter_type, l.elem_is_upwind, l.correct_skewness, l.face_side) <
+           std::make_tuple(r.fi, r.limiter_type, r.elem_is_upwind, r.correct_skewness, r.face_side);
   }
 };
 
@@ -222,7 +176,6 @@ public:
    */
   ValueType operator()(const ElemArg & elem, unsigned int state = 0) const;
   ValueType operator()(const FaceArg & face, unsigned int state = 0) const;
-  ValueType operator()(const SingleSidedFaceArg & face, unsigned int state = 0) const;
   ValueType operator()(const ElemQpArg & qp, unsigned int state = 0) const;
   ValueType operator()(const ElemSideQpArg & qp, unsigned int state = 0) const;
   ValueType operator()(const ElemPointArg & elem_point, unsigned int state = 0) const;
@@ -235,7 +188,6 @@ public:
    */
   GradientType gradient(const ElemArg & elem, unsigned int state = 0) const;
   GradientType gradient(const FaceArg & face, unsigned int state = 0) const;
-  GradientType gradient(const SingleSidedFaceArg & face, unsigned int state = 0) const;
   GradientType gradient(const ElemQpArg & qp, unsigned int state = 0) const;
   GradientType gradient(const ElemSideQpArg & qp, unsigned int state = 0) const;
   GradientType gradient(const ElemPointArg & elem_point, unsigned int state = 0) const;
@@ -248,7 +200,6 @@ public:
    */
   DotType dot(const ElemArg & elem, unsigned int state = 0) const;
   DotType dot(const FaceArg & face, unsigned int state = 0) const;
-  DotType dot(const SingleSidedFaceArg & face, unsigned int state = 0) const;
   DotType dot(const ElemQpArg & qp, unsigned int state = 0) const;
   DotType dot(const ElemSideQpArg & qp, unsigned int state = 0) const;
   DotType dot(const ElemPointArg & elem_point, unsigned int state = 0) const;
@@ -294,11 +245,6 @@ public:
 
 protected:
   /**
-   * converts the incoming FaceArg to a SingleSidedFaceArg if appropriate
-   */
-  SingleSidedFaceArg faceArgToSingleSidedFaceArg(const FaceArg & face_arg) const;
-
-  /**
    * Evaluate the functor with a given element. Some example implementations of this method
    * could compute an element-average or evaluate at the element centroid
    */
@@ -311,14 +257,6 @@ protected:
    * @return The functor evaluated at the requested time and space
    */
   virtual ValueType evaluate(const FaceArg & face, unsigned int state) const = 0;
-
-  /**
-   * @param face See the \p SingleSidedFaceArg doxygen
-   * @param state Corresponds to a time argument. A value of 0 corresponds to current time, 1
-   * corresponds to the old time, 2 corresponds to the older time, etc.
-   * @return The functor evaluated at the requested time and space
-   */
-  virtual ValueType evaluate(const SingleSidedFaceArg & face, unsigned int state) const = 0;
 
   /**
    * @param qp See the \p ElemQpArg doxygen
@@ -360,17 +298,6 @@ protected:
   virtual GradientType evaluateGradient(const FaceArg &, unsigned int) const
   {
     mooseError("Face gradient not implemented for functor " + functorName());
-  }
-
-  /**
-   * @param face See the \p SingleSidedFaceArg doxygen
-   * @param state Corresponds to a time argument. A value of 0 corresponds to current time, 1
-   * corresponds to the old time, 2 corresponds to the older time, etc.
-   * @return The functor gradient evaluated at the requested time and space
-   */
-  virtual GradientType evaluateGradient(const SingleSidedFaceArg &, unsigned int) const
-  {
-    mooseError("One-sided face gradient not implemented for functor " + functorName());
   }
 
   /**
@@ -422,17 +349,6 @@ protected:
   virtual DotType evaluateDot(const FaceArg &, unsigned int) const
   {
     mooseError("Face time derivative not implemented for functor " + functorName());
-  }
-
-  /**
-   * @param face See the \p SingleSidedFaceArg doxygen
-   * @param state Corresponds to a time argument. A value of 0 corresponds to current time, 1
-   * corresponds to the old time, 2 corresponds to the older time, etc.
-   * @return The functor time derivative evaluated at the requested time and space
-   */
-  virtual DotType evaluateDot(const SingleSidedFaceArg &, unsigned int) const
-  {
-    mooseError("One-sided face time derivative not implemented for functor " + functorName());
   }
 
   /**
@@ -534,9 +450,6 @@ private:
   /// Map from face arguments to their cached evaluations
   mutable std::map<FaceArg, ValueType> _face_arg_to_value;
 
-  /// Map from single-sided-face arguments to their cached evaluations
-  mutable std::map<SingleSidedFaceArg, ValueType> _ssf_arg_to_value;
-
   /// name of the functor
   MooseFunctorName _functor_name;
 };
@@ -582,19 +495,6 @@ FunctorBase<T>::operator()(const FaceArg & face, const unsigned int state) const
               "Cached evaluations are only currently supported for the current time state.");
 
   return queryFVArgCache(_face_arg_to_value, face);
-}
-
-template <typename T>
-typename FunctorBase<T>::ValueType
-FunctorBase<T>::operator()(const SingleSidedFaceArg & face, const unsigned int state) const
-{
-  if (_clearance_schedule.count(EXEC_ALWAYS))
-    return evaluate(face, state);
-
-  mooseAssert(state == 0,
-              "Cached evaluations are only currently supported for the current time state.");
-
-  return queryFVArgCache(_ssf_arg_to_value, face);
 }
 
 template <typename T>
@@ -716,7 +616,6 @@ FunctorBase<T>::clearCacheData()
 
   _elem_arg_to_value.clear();
   _face_arg_to_value.clear();
-  _ssf_arg_to_value.clear();
 }
 
 template <typename T>
@@ -767,13 +666,6 @@ FunctorBase<T>::gradient(const FaceArg & face, const unsigned int state) const
 
 template <typename T>
 typename FunctorBase<T>::GradientType
-FunctorBase<T>::gradient(const SingleSidedFaceArg & face, const unsigned int state) const
-{
-  return evaluateGradient(face, state);
-}
-
-template <typename T>
-typename FunctorBase<T>::GradientType
 FunctorBase<T>::gradient(const ElemQpArg & elem_qp, const unsigned int state) const
 {
   return evaluateGradient(elem_qp, state);
@@ -803,13 +695,6 @@ FunctorBase<T>::dot(const ElemArg & elem, const unsigned int state) const
 template <typename T>
 typename FunctorBase<T>::DotType
 FunctorBase<T>::dot(const FaceArg & face, const unsigned int state) const
-{
-  return evaluateDot(face, state);
-}
-
-template <typename T>
-typename FunctorBase<T>::DotType
-FunctorBase<T>::dot(const SingleSidedFaceArg & face, const unsigned int state) const
 {
   return evaluateDot(face, state);
 }
@@ -989,10 +874,6 @@ protected:
   {
     return _wrapped->operator()(face, state);
   }
-  ValueType evaluate(const SingleSidedFaceArg & face, unsigned int state = 0) const override
-  {
-    return _wrapped->operator()(face, state);
-  }
   ValueType evaluate(const ElemQpArg & qp, unsigned int state = 0) const override
   {
     return _wrapped->operator()(qp, state);
@@ -1011,11 +892,6 @@ protected:
     return _wrapped->gradient(elem, state);
   }
   GradientType evaluateGradient(const FaceArg & face, unsigned int state = 0) const override
-  {
-    return _wrapped->gradient(face, state);
-  }
-  GradientType evaluateGradient(const SingleSidedFaceArg & face,
-                                unsigned int state = 0) const override
   {
     return _wrapped->gradient(face, state);
   }
@@ -1038,10 +914,6 @@ protected:
     return _wrapped->dot(elem, state);
   }
   DotType evaluateDot(const FaceArg & face, unsigned int state = 0) const override
-  {
-    return _wrapped->dot(face, state);
-  }
-  DotType evaluateDot(const SingleSidedFaceArg & face, unsigned int state = 0) const override
   {
     return _wrapped->dot(face, state);
   }
@@ -1096,24 +968,18 @@ public:
 private:
   ValueType evaluate(const ElemArg &, unsigned int) const override { return _value; }
   ValueType evaluate(const FaceArg &, unsigned int) const override { return _value; }
-  ValueType evaluate(const SingleSidedFaceArg &, unsigned int) const override { return _value; }
   ValueType evaluate(const ElemQpArg &, unsigned int) const override { return _value; }
   ValueType evaluate(const ElemSideQpArg &, unsigned int) const override { return _value; }
   ValueType evaluate(const ElemPointArg &, unsigned int) const override { return _value; }
 
   GradientType evaluateGradient(const ElemArg &, unsigned int) const override { return 0; }
   GradientType evaluateGradient(const FaceArg &, unsigned int) const override { return 0; }
-  GradientType evaluateGradient(const SingleSidedFaceArg &, unsigned int) const override
-  {
-    return 0;
-  }
   GradientType evaluateGradient(const ElemQpArg &, unsigned int) const override { return 0; }
   GradientType evaluateGradient(const ElemSideQpArg &, unsigned int) const override { return 0; }
   GradientType evaluateGradient(const ElemPointArg &, unsigned int) const override { return 0; }
 
   DotType evaluateDot(const ElemArg &, unsigned int) const override { return 0; }
   DotType evaluateDot(const FaceArg &, unsigned int) const override { return 0; }
-  DotType evaluateDot(const SingleSidedFaceArg &, unsigned int) const override { return 0; }
   DotType evaluateDot(const ElemQpArg &, unsigned int) const override { return 0; }
   DotType evaluateDot(const ElemSideQpArg &, unsigned int) const override { return 0; }
   DotType evaluateDot(const ElemPointArg &, unsigned int) const override { return 0; }
@@ -1145,11 +1011,6 @@ private:
                "they've written broken code");
   }
   ValueType evaluate(const FaceArg &, unsigned int) const override
-  {
-    mooseError("We should never get here. If you have, contact a MOOSE developer and tell them "
-               "they've written broken code");
-  }
-  ValueType evaluate(const SingleSidedFaceArg &, unsigned int) const override
   {
     mooseError("We should never get here. If you have, contact a MOOSE developer and tell them "
                "they've written broken code");

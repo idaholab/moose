@@ -236,7 +236,7 @@ FVInterfaceKernel::neighborArg(const bool correct_skewness) const
   return {_face_info->neighborPtr(), correct_skewness};
 }
 
-Moose::SingleSidedFaceArg
+Moose::FaceArg
 FVInterfaceKernel::singleSidedFaceArg(const MooseVariableFV<Real> & variable,
                                       const FaceInfo * fi,
                                       const Moose::FV::LimiterType limiter_type,

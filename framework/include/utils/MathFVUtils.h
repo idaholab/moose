@@ -20,7 +20,6 @@
 
 template <typename>
 class MooseVariableFV;
-class HasBlocksInterface;
 
 namespace Moose
 {
@@ -39,11 +38,10 @@ inline FaceArg
 makeFace(const FaceInfo & fi,
          const LimiterType limiter_type,
          const bool elem_is_upwind,
-         const HasBlocksInterface & consumer,
          const bool correct_skewness = false,
          const Elem * const face_side = nullptr)
 {
-  return {&fi, limiter_type, elem_is_upwind, correct_skewness, &consumer, face_side};
+  return {&fi, limiter_type, elem_is_upwind, correct_skewness, face_side};
 }
 
 /**
@@ -56,11 +54,10 @@ makeFace(const FaceInfo & fi,
  */
 inline FaceArg
 makeCDFace(const FaceInfo & fi,
-           const HasBlocksInterface & consumer,
            const bool correct_skewness = false,
            const Elem * const face_side = nullptr)
 {
-  return makeFace(fi, LimiterType::CentralDifference, true, consumer, correct_skewness, face_side);
+  return makeFace(fi, LimiterType::CentralDifference, true, correct_skewness, face_side);
 }
 
 /// This codifies a set of available ways to interpolate with elem+neighbor

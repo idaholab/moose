@@ -357,7 +357,7 @@ FVFluxKernel::neighborArg(const bool correct_skewness) const
   return {_face_info->neighborPtr(), correct_skewness};
 }
 
-Moose::SingleSidedFaceArg
+Moose::FaceArg
 FVFluxKernel::singleSidedFaceArg(const FaceInfo * fi,
                                  const Moose::FV::LimiterType limiter_type,
                                  const bool correct_skewness) const

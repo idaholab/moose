@@ -80,7 +80,7 @@ INSFVMixingLengthReynoldsStress::computeStrongResidual()
 #ifdef MOOSE_GLOBAL_AD_INDEXING
   constexpr Real offset = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
 
-  const auto face = Moose::FV::makeCDFace(*_face_info, *this);
+  const auto face = Moose::FV::makeCDFace(*_face_info);
 
   const auto grad_u = _u_var->adGradSln(*_face_info);
   // Compute the dot product of the strain rate tensor and the normal vector

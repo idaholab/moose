@@ -49,12 +49,6 @@ private:
     return _array(face, state)[_component];
   }
 
-  ValueType evaluate(const Moose::SingleSidedFaceArg & face,
-                     const unsigned int state) const override final
-  {
-    return _array(face, state)[_component];
-  }
-
   ValueType evaluate(const Moose::ElemQpArg & elem_qp,
                      const unsigned int state) const override final
   {

@@ -65,14 +65,13 @@ public:
 
 protected:
   using ElemFn = std::function<T(const Moose::ElemArg &, const unsigned int &)>;
-  using FaceFn = std::function<T(const Moose::SingleSidedFaceArg &, const unsigned int &)>;
+  using FaceFn = std::function<T(const Moose::FaceArg &, const unsigned int &)>;
   using ElemQpFn = std::function<T(const Moose::ElemQpArg &, const unsigned int &)>;
   using ElemSideQpFn = std::function<T(const Moose::ElemSideQpArg &, const unsigned int &)>;
   using ElemPointFn = std::function<T(const Moose::ElemPointArg &, const unsigned int &)>;
 
   ValueType evaluate(const Moose::ElemArg & elem_arg, unsigned int state) const override;
   ValueType evaluate(const Moose::FaceArg & face, unsigned int state) const override;
-  ValueType evaluate(const Moose::SingleSidedFaceArg & face, unsigned int state) const override;
   ValueType evaluate(const Moose::ElemQpArg & elem_qp, unsigned int state) const override;
   ValueType evaluate(const Moose::ElemSideQpArg & elem_side_qp, unsigned int state) const override;
   ValueType evaluate(const Moose::ElemPointArg & elem_point, unsigned int state) const override;
@@ -232,18 +231,6 @@ PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::ElemArg & elem_arg,
 
 template <typename T>
 typename PiecewiseByBlockLambdaFunctor<T>::ValueType
-PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::SingleSidedFaceArg & face,
-                                           unsigned int state) const
-{
-  auto it = _face_functor.find(face.elem->subdomain_id());
-  if (it == _face_functor.end())
-    subdomainErrorMessage(face.elem->subdomain_id());
-
-  return it->second(face, state);
-}
-
-template <typename T>
-typename PiecewiseByBlockLambdaFunctor<T>::ValueType
 PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::FaceArg & face,
                                            unsigned int libmesh_dbg_var(state)) const
 {
@@ -253,13 +240,18 @@ PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::FaceArg & face,
   if (isInternalFace(*face.fi))
     return interpolate(*this, face);
 
-  Moose::SingleSidedFaceArg ssfa = {
-      face.fi,
-      face.limiter_type,
-      face.elem_is_upwind,
-      face.correct_skewness,
-      hasBlocks(face.fi->elem().subdomain_id()) ? &face.fi->elem() : face.fi->neighborPtr()};
-  return this->evaluate(ssfa, 0);
+  auto sided_face = face;
+  sided_face.face_side =
+      hasBlocks(face.fi->elem().subdomain_id()) ? &face.fi->elem() : face.fi->neighborPtr();
+  if (face.face_side && sided_face.face_side != face.face_side)
+    mooseError("Caller requested evaluation on a side we're not defined on");
+
+  const auto sub_id = sided_face.face_side->subdomain_id();
+  auto it = _face_functor.find(sub_id);
+  if (it == _face_functor.end())
+    subdomainErrorMessage(sub_id);
+
+  return it->second(sided_face, state);
 }
 
 template <typename T>

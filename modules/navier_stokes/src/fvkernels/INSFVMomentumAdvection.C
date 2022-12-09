@@ -76,7 +76,7 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
   if (onBoundary(fi))
   {
     const auto ssf = singleSidedFaceArg();
-    const Elem * const sided_elem = ssf.makeSidedElem().elem;
+    const Elem * const sided_elem = ssf.face_side;
     const auto dof_number = sided_elem->dof_number(_sys.number(), _var.number(), 0);
     const auto rho_face = _rho(ssf);
     const auto eps_face = epsilon()(ssf);
@@ -101,9 +101,9 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
            is_jump)
   {
     const Moose::FaceArg face_elem{
-        &fi, Moose::FV::LimiterType::CentralDifference, true, false, this, &fi.elem()};
+        &fi, Moose::FV::LimiterType::CentralDifference, true, false, &fi.elem()};
     const Moose::FaceArg face_neighbor{
-        &fi, Moose::FV::LimiterType::CentralDifference, true, false, this, fi.neighborPtr()};
+        &fi, Moose::FV::LimiterType::CentralDifference, true, false, fi.neighborPtr()};
 
     const auto v_face = _rc_vel_provider.getVelocity(Moose::FV::InterpMethod::Average, fi, _tid);
     const bool fi_elem_is_upwind = v_face * fi.normal() > 0;
@@ -138,7 +138,6 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
                                 makeFace(fi,
                                          limiterType(_advected_interp_method),
                                          MetaPhysicL::raw_value(v_face) * _normal > 0,
-                                         *this,
                                          correct_skewness));
 
     const auto elem_face = elemArg();

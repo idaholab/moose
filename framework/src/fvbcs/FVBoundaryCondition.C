@@ -85,7 +85,7 @@ FVBoundaryCondition::FVBoundaryCondition(const InputParameters & parameters)
     paramError("use_displaced_mesh", "FV boundary conditions do not yet support displaced mesh");
 }
 
-Moose::SingleSidedFaceArg
+Moose::FaceArg
 FVBoundaryCondition::singleSidedFaceArg(const FaceInfo * fi,
                                         const Moose::FV::LimiterType limiter_type,
                                         const bool correct_skewness) const

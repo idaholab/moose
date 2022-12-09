@@ -72,7 +72,7 @@ PINSFVMomentumDiffusion::computeStrongResidual()
   }
 
   // Compute face superficial velocity gradient
-  auto dudn = _var.gradient(Moose::FV::makeCDFace(*_face_info, *this)) * _face_info->normal();
+  auto dudn = _var.gradient(Moose::FV::makeCDFace(*_face_info)) * _face_info->normal();
 
   if (has_elem)
   {
@@ -95,7 +95,7 @@ PINSFVMomentumDiffusion::computeStrongResidual()
   // Get the face porosity gradient separately
   const auto & grad_eps_face =
       (has_elem && has_neighbor)
-          ? MetaPhysicL::raw_value(_eps.gradient(Moose::FV::makeCDFace(*_face_info, *this)))
+          ? MetaPhysicL::raw_value(_eps.gradient(Moose::FV::makeCDFace(*_face_info)))
           : MetaPhysicL::raw_value(_eps.gradient(
                 makeElemArg(has_elem ? &_face_info->elem() : _face_info->neighborPtr())));
 

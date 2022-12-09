@@ -531,7 +531,7 @@ MooseVariableFV<OutputType>::getInternalFaceValue(const FaceInfo & fi,
 
   mooseAssert(isInternalFace(fi), "This function shall only be called on internal faces.");
 
-  return Moose::FV::linearInterpolation(*this, Moose::FV::makeCDFace(fi, *this, correct_skewness));
+  return Moose::FV::linearInterpolation(*this, Moose::FV::makeCDFace(fi, correct_skewness));
 }
 
 template <typename OutputType>
@@ -804,22 +804,6 @@ MooseVariableFV<OutputType>::evaluate(const FaceArg & face,
     mooseAssert(isInternalFace(*fi), "We must be either Dirichlet, extrapolated, or internal");
     return Moose::FV::interpolate(*this, face);
   }
-}
-
-template <typename OutputType>
-typename MooseVariableFV<OutputType>::ValueType
-MooseVariableFV<OutputType>::evaluate(const SingleSidedFaceArg & face,
-                                      const unsigned int libmesh_dbg_var(state)) const
-{
-  mooseAssert(state == 0, "Only current time state supported.");
-  const FaceInfo * const fi = face.fi;
-  mooseAssert(fi, "The face information must be non-null");
-  mooseAssert(this->hasBlocks(face.elem->subdomain_id()),
-              "Evaluating our variable on a side on which we are not defined");
-  if (isDirichletBoundaryFace(*fi, face.elem))
-    return getDirichletBoundaryFaceValue(*fi, face.elem);
-  else
-    return getExtrapolatedBoundaryFaceValue(*fi, _two_term_boundary_expansion, face.elem);
 }
 
 template <typename OutputType>

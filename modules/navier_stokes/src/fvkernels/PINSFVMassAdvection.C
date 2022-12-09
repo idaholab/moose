@@ -42,17 +42,12 @@ PINSFVMassAdvection::computeQpResidual()
               _rho(singleSidedFaceArg())};
     else if (std::get<0>(NS::isPorosityJumpFace(_eps, *_face_info)))
     {
-      const Moose::FaceArg face_elem{_face_info,
-                                     Moose::FV::LimiterType::CentralDifference,
-                                     true,
-                                     false,
-                                     this,
-                                     &_face_info->elem()};
+      const Moose::FaceArg face_elem{
+          _face_info, Moose::FV::LimiterType::CentralDifference, true, false, &_face_info->elem()};
       const Moose::FaceArg face_neighbor{_face_info,
                                          Moose::FV::LimiterType::CentralDifference,
                                          true,
                                          false,
-                                         this,
                                          _face_info->neighborPtr()};
 
       const auto v_face =
@@ -68,8 +63,7 @@ PINSFVMassAdvection::computeQpResidual()
       return {v_face,
               _rho(Moose::FV::makeFace(*_face_info,
                                        limiterType(_advected_interp_method),
-                                       MetaPhysicL::raw_value(v_face) * _normal > 0,
-                                       *this))};
+                                       MetaPhysicL::raw_value(v_face) * _normal > 0))};
     }
   }();
 

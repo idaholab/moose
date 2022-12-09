@@ -501,7 +501,7 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   if (Moose::FV::onBoundary(*this, fi))
   {
     const Elem * const boundary_elem = hasBlocks(elem->subdomain_id()) ? elem : neighbor;
-    const Moose::SingleSidedFaceArg boundary_face{
+    const Moose::FaceArg boundary_face{
         &fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, boundary_elem};
     return vel(boundary_face);
   }
@@ -583,7 +583,7 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
                                                     : Moose::FV::InterpMethod::Average;
   Moose::FV::interpolate(coeff_interp_method, face_D, elem_D, neighbor_D, fi, true);
 
-  const auto face = Moose::FV::makeCDFace(fi, *this, correct_skewness);
+  const auto face = Moose::FV::makeCDFace(fi, correct_skewness);
 
   // evaluate face porosity, see (18) in Hanimann 2021 or (11) in Nordlund 2016
   const auto face_eps = epsilon(tid)(face);

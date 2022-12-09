@@ -91,8 +91,7 @@ TEST(ContainerFunctors, Test)
     {
       const auto neighbor_sub_id =
           face->neighborPtr() ? face->neighborSubdomainID() : face->elemSubdomainID();
-      const auto face_arg = makeFace(
-          *face, limiter_type, true, std::make_pair(face->elemSubdomainID(), neighbor_sub_id));
+      const auto face_arg = makeFace(*face, limiter_type, true);
       EXPECT_TRUE(vector_functor(face_arg)[0] == 1.);
       EXPECT_TRUE(array_functor(face_arg)[0] == 1.);
 
@@ -100,9 +99,9 @@ TEST(ContainerFunctors, Test)
       const auto array_face_gradient = array_functor.gradient(face_arg)[0];
       const auto vector_elem_gradient = vector_functor.gradient(face_arg.elemArg())[0];
       const auto array_elem_gradient = array_functor.gradient(face_arg.elemArg())[0];
-      const auto vector_neighbor_gradient =
-          face->neighborPtr() ? vector_functor.gradient(face_arg.neighborArg())[0]
-                              : VectorValue<Real>();
+      const auto vector_neighbor_gradient = face->neighborPtr()
+                                                ? vector_functor.gradient(face_arg.neighborArg())[0]
+                                                : VectorValue<Real>();
       const auto array_neighbor_gradient = array_functor.gradient(face_arg.neighborArg())[0];
 
       for (unsigned int i = 0; i < LIBMESH_DIM; ++i)

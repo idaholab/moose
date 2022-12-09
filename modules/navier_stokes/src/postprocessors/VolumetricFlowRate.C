@@ -131,11 +131,11 @@ VolumetricFlowRate::computeFaceInfoIntegral([[maybe_unused]] const FaceInfo * fi
   // External faces for the advected quantity
   if (!fi->neighborPtr() || !_adv_quant->hasBlocks(fi->neighborPtr()->subdomain_id()))
   {
-    const auto ssf = Moose::SingleSidedFaceArg({fi,
-                                                limiterType(_advected_interp_method),
-                                                MetaPhysicL::raw_value(vel) * fi->normal() > 0,
-                                                correct_skewness,
-                                                _current_elem});
+    const auto ssf = Moose::FaceArg({fi,
+                                     limiterType(_advected_interp_method),
+                                     MetaPhysicL::raw_value(vel) * fi->normal() > 0,
+                                     correct_skewness,
+                                     _current_elem});
     return fi->normal() * MetaPhysicL::raw_value((*_adv_quant)(ssf)) * vel;
   }
   else
@@ -144,7 +144,6 @@ VolumetricFlowRate::computeFaceInfoIntegral([[maybe_unused]] const FaceInfo * fi
         (*_adv_quant)(Moose::FV::makeFace(*fi,
                                           Moose::FV::limiterType(_advected_interp_method),
                                           MetaPhysicL::raw_value(vel) * fi->normal() > 0,
-                                          *_adv_quant,
                                           correct_skewness)));
     return fi->normal() * adv_quant_face * vel;
   }

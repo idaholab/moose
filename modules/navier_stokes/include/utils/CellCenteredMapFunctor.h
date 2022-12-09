@@ -52,7 +52,6 @@ public:
   using typename Moose::FunctorBase<T>::DotType;
   using ElemArg = Moose::ElemArg;
   using FaceArg = Moose::FaceArg;
-  using SingleSidedFaceArg = Moose::SingleSidedFaceArg;
   using ElemQpArg = Moose::ElemQpArg;
   using ElemSideQpArg = Moose::ElemSideQpArg;
   using ElemPointArg = Moose::ElemPointArg;
@@ -125,11 +124,6 @@ private:
   }
 
   GradientType evaluateGradient(const FaceArg & face, unsigned int) const override final;
-
-  ValueType evaluate(const SingleSidedFaceArg & ssf, unsigned int) const override final
-  {
-    return (*this)(Moose::FV::makeCDFace(*ssf.fi, *this));
-  }
 
   ValueType evaluate(const ElemQpArg &, unsigned int) const override final
   {

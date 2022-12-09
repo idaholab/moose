@@ -39,5 +39,5 @@ FVUseFunctorSideForSsfDirichletBCTempl<is_ad>::boundaryValue(const FaceInfo & fi
       _functor.hasBlocks(fi.elem().subdomain_id()) ? &fi.elem() : fi.neighborPtr();
 
   return _functor(
-      Moose::SingleSidedFaceArg{&fi, Moose::FV::LimiterType::CentralDifference, true, false, elem});
+      Moose::FaceArg{&fi, Moose::FV::LimiterType::CentralDifference, true, false, elem});
 }

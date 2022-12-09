@@ -37,7 +37,6 @@ INSFVScalarFieldAdvection::computeQpResidual()
                             ? _var(singleSidedFaceArg())
                             : _var(Moose::FV::makeFace(*_face_info,
                                                        limiterType(_advected_interp_method),
-                                                       MetaPhysicL::raw_value(v) * _normal > 0,
-                                                       *this));
+                                                       MetaPhysicL::raw_value(v) * _normal > 0));
   return _normal * v * var_face;
 }

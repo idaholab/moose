@@ -28,7 +28,6 @@ public:
   using typename FunctorBase<VectorValue<T>>::GradientType;
   using ElemArg = Moose::ElemArg;
   using FaceArg = Moose::FaceArg;
-  using SingleSidedFaceArg = Moose::SingleSidedFaceArg;
   using ElemQpArg = Moose::ElemQpArg;
   using ElemSideQpArg = Moose::ElemSideQpArg;
   using ElemPointArg = Moose::ElemPointArg;
@@ -71,11 +70,6 @@ private:
   ValueType evaluate(const FaceArg & face, unsigned int state) const override final
   {
     return {_x_comp(face, state), _y_comp(face, state), _z_comp(face, state)};
-  }
-
-  ValueType evaluate(const SingleSidedFaceArg & ssf, unsigned int state) const override
-  {
-    return {_x_comp(ssf, state), _y_comp(ssf, state), _z_comp(ssf, state)};
   }
 
   ValueType evaluate(const ElemQpArg & elem_qp, unsigned int state) const override

@@ -50,8 +50,7 @@ PINSFVPressureVariable::initialSetup()
 std::pair<bool, ADRealVectorValue>
 PINSFVPressureVariable::elemIsUpwind(const Elem & elem, const FaceInfo & fi) const
 {
-  const Moose::FaceArg face{
-      &fi, Moose::FV::LimiterType::CentralDifference, true, false, this, nullptr};
+  const Moose::FaceArg face{&fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr};
 
   const VectorValue<ADReal> vel_face{(*_u)(face), (*_v)(face), (*_w)(face)};
   const bool fi_elem_is_upwind = vel_face * fi.normal() > 0;
@@ -103,9 +102,9 @@ PINSFVPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi,
     return INSFVPressureVariable::getDirichletBoundaryFaceValue(fi, elem);
 
   const Moose::FaceArg face_elem{
-      &fi, Moose::FV::LimiterType::CentralDifference, true, false, this, &fi.elem()};
+      &fi, Moose::FV::LimiterType::CentralDifference, true, false, &fi.elem()};
   const Moose::FaceArg face_neighbor{
-      &fi, Moose::FV::LimiterType::CentralDifference, true, false, this, fi.neighborPtr()};
+      &fi, Moose::FV::LimiterType::CentralDifference, true, false, fi.neighborPtr()};
 
   // For incompressible or weakly compressible flow these should really be about the same
   const auto rho_elem = (*_rho)(face_elem), rho_neighbor = (*_rho)(face_neighbor);

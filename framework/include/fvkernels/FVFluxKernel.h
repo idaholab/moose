@@ -111,7 +111,7 @@ protected:
    *        interpolation is required for the parameters of the functor
    * @param correct_skewness whether to perform skew correction at the face
    */
-  Moose::SingleSidedFaceArg singleSidedFaceArg(
+  Moose::FaceArg singleSidedFaceArg(
       const FaceInfo * fi = nullptr,
       Moose::FV::LimiterType limiter_type = Moose::FV::LimiterType::CentralDifference,
       bool correct_skewness = false) const;
