@@ -183,7 +183,7 @@ using ElemSideQpArg = std::tuple<const libMesh::Elem *, unsigned int, unsigned i
  * evaluations
  */
 template <typename T>
-class FunctorBase
+class FunctorBase : public HasBlocksInterface
 {
 public:
   using FunctorType = FunctorBase<T>;

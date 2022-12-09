@@ -39,14 +39,14 @@ namespace FV
  * determining what are "external" faces and hence faces around which we should carefully choose the
  * subdomains we want to evaluate our \p input_functor on
  */
-template <typename T, typename Map, typename Consumer>
+template <typename T, typename Map>
 void
 interpolateReconstruct(CellCenteredMapFunctor<T, Map> & output_functor,
                        const Moose::FunctorBase<T> & input_functor,
                        const unsigned int num_int_recs,
                        const bool weight_with_sf,
                        const std::vector<const FaceInfo *> & faces,
-                       const Consumer & consumer)
+                       const HasBlocksInterface & consumer)
 {
   if (!num_int_recs)
     return;
@@ -57,8 +57,7 @@ interpolateReconstruct(CellCenteredMapFunctor<T, Map> & output_functor,
   {
     mooseAssert(face, "This must be non-null");
     const Real weight = weight_with_sf ? face->faceArea() * face->faceCoord() : 1;
-    const auto sub_pair = faceArgSubdomains(consumer, *face);
-    const auto face_arg = makeCDFace(*face, sub_pair);
+    const auto face_arg = makeCDFace(*face, consumer);
     auto face_value = input_functor(face_arg);
     std::pair<T, Real> * neighbor_pair = nullptr;
     if (face->neighborPtr() && face->neighborPtr() != libMesh::remote_elem)

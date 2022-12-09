@@ -531,7 +531,7 @@ MooseVariableFV<OutputType>::getInternalFaceValue(const FaceInfo & fi,
 
   mooseAssert(isInternalFace(fi), "This function shall only be called on internal faces.");
 
-  return Moose::FV::linearInterpolation(*this, Moose::FV::makeCDFace(fi, correct_skewness));
+  return Moose::FV::linearInterpolation(*this, Moose::FV::makeCDFace(fi, *this, correct_skewness));
 }
 
 template <typename OutputType>
@@ -862,8 +862,7 @@ MooseVariableFV<OutputType>::evaluate(const ElemFromFaceArg & elem_arg, unsigned
 
 template <typename OutputType>
 typename MooseVariableFV<OutputType>::GradientType
-MooseVariableFV<OutputType>::evaluateGradient(const ElemFromFaceArg & elem_arg,
-                                              unsigned int) const
+MooseVariableFV<OutputType>::evaluateGradient(const ElemFromFaceArg & elem_arg, unsigned int) const
 {
   const Elem * const requested_elem = elem_arg.elem;
   mooseAssert(requested_elem != remote_elem,

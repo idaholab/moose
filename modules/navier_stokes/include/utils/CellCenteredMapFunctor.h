@@ -134,7 +134,7 @@ private:
 
   ValueType evaluate(const SingleSidedFaceArg & ssf, unsigned int) const override final
   {
-    return (*this)(Moose::FV::makeCDFace(*ssf.fi));
+    return (*this)(Moose::FV::makeCDFace(*ssf.fi, *this));
   }
 
   ValueType evaluate(const ElemQpArg &, unsigned int) const override final

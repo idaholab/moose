@@ -86,8 +86,7 @@ INSFVMixingLengthScalarDiffusion::computeQpResidual()
   symmetric_strain_tensor_norm = std::sqrt(symmetric_strain_tensor_norm + offset);
 
   // Interpolate the mixing length to the face
-  ADReal mixing_len =
-      _mixing_len(Moose::FV::makeCDFace(*_face_info, faceArgSubdomains(_face_info)));
+  ADReal mixing_len = _mixing_len(Moose::FV::makeCDFace(*_face_info, *this));
 
   // Compute the eddy diffusivity for momentum
   ADReal eddy_diff = symmetric_strain_tensor_norm * mixing_len * mixing_len;
