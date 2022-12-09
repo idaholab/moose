@@ -14,7 +14,6 @@
                 Trainers/pc_max/order=1
                 Trainers/ann_max/num_epochs=10
                 Trainers/ann_max/num_neurons_per_layer='8'
-                Outputs/out/execute_system_information_on=none
                 "
     jsondiff = 'all_trainers_uniform_cv_out.json'
     detail = "for all SurrogateTrainer types."
@@ -31,7 +30,6 @@
                 Trainers/pc_max/order=1
                 Trainers/ann_max/num_epochs=10
                 Trainers/ann_max/num_neurons_per_layer='8'
-                Outputs/out/execute_system_information_on=none
                 Trainers/inactive=ann_max
                 Surrogates/inactive=ann_surr
                 Reporters/cv_scores/models='pr_surr pc_surr np_surr gp_surr'

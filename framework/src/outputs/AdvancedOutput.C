@@ -400,13 +400,15 @@ AdvancedOutput::initAvailableLists()
   // Initialize Postprocessor list
   // This flag is set to true if any postprocessor has the 'outputs' parameter set, it is then used
   // to produce an warning if postprocessor output is disabled
-  initPostprocessorOrVectorPostprocessorLists<Postprocessor>("postprocessors");
+  if (!_postprocessors_as_reporters)
+    initPostprocessorOrVectorPostprocessorLists<Postprocessor>("postprocessors");
 
   // Initialize vector postprocessor list
   // This flag is set to true if any vector postprocessor has the 'outputs' parameter set, it is
   // then used
   // to produce an warning if vector postprocessor output is disabled
-  initPostprocessorOrVectorPostprocessorLists<VectorPostprocessor>("vector_postprocessors");
+  if (!_vectorpostprocessors_as_reporters)
+    initPostprocessorOrVectorPostprocessorLists<VectorPostprocessor>("vector_postprocessors");
 
   // Get a list of the available variables
   std::vector<VariableName> variables = _problem_ptr->getVariableNames();

@@ -39,7 +39,6 @@
     type = JSONDiff
     input = np_vec.i
     jsondiff = 'np_vec_out.json'
-    cli_args = 'Outputs/out/execute_system_information_on=none'
     requirement = 'The sytem shall be able to create nearest point surrogates with vector-type response.'
   []
 []
