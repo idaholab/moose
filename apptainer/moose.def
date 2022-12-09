@@ -79,6 +79,7 @@ From: {{ APPTAINER_FROM }}
     {% if DEV_CONTAINER is defined -%}
     # Other Development container installs
     dnf --enablerepo=powertools install -y lcov
+    pip3 --no-cache install lcov-cobertura
     # need to add lcov-cobertura
     {%- endif %}
 
@@ -104,11 +105,6 @@ chmod -R o=u-w,g=u-w ${MOOSE_TOOLS_DIR}
 
 # so that we can use python in setup
 export PATH=${MOOSE_TOOLS_DIR}/bin:$PATH
-
-{% if DEV_CONTAINER is defined %}
-# Development container installs
-pip3 --no-cache install lcov-cobertura
-{% endif %}
 
 # done with this script
 rm /root/install_moose_tools.sh' > /root/install_moose_tools.sh
