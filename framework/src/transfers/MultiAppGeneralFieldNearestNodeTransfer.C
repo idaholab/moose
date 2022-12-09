@@ -10,7 +10,6 @@
 #include "MultiAppGeneralFieldNearestNodeTransfer.h"
 
 // MOOSE includes
-#include "DisplacedProblem.h"
 #include "FEProblem.h"
 #include "MooseMesh.h"
 #include "MooseTypes.h"
@@ -25,12 +24,18 @@ MultiAppGeneralFieldNearestNodeTransfer::validParams()
 {
   InputParameters params = MultiAppGeneralFieldTransfer::validParams();
   params.addClassDescription(
-      "Transfers field data at the MultiApp position by finding the value at the nearest neighbor "
-      "in the origin application.");
+      "Transfers field data at the MultiApp position by finding the value at the nearest "
+      "neighbor(s) in the origin application.");
   params.addParam<unsigned int>("num_nearest_points",
                                 1,
                                 "Number of nearest source (from) points will be chosen to "
-                                "construct a value for the target point.");
+                                "construct a value for the target point. All points will be "
+                                "selected from the same origin mesh!");
+
+  // Suppress all the options that are not considered
+  params.suppressParameter<bool>("from_multiapp_must_contain_point");
+  // Bounding boxes should still be used to locate the potential source problems
+
   return params;
 }
 
@@ -140,14 +145,9 @@ MultiAppGeneralFieldNearestNodeTransfer::evaluateInterpValuesNearestNode(
   dof_id_type i_pt = 0;
   for (auto & pt : incoming_points)
   {
-    // Loop until we've found the lowest-ranked app that actually contains
-    // the quadrature point.
-    for (MooseIndex(_from_problems.size()) i_from = 0;
-         i_from < _from_problems.size() &&
-         outgoing_vals[i_pt].first == GeneralFieldTransfer::BetterOutOfMeshValue;
-         ++i_from)
+    // Loop on all problems
+    for (MooseIndex(_from_problems.size()) i_from = 0; i_from < _from_problems.size(); ++i_from)
     {
-
       std::vector<std::size_t> return_index(_num_nearest_points);
       std::vector<Real> return_dist_sqr(_num_nearest_points);
       if (local_kdtrees[i_from]->numberCandidatePoints())
@@ -160,15 +160,13 @@ MultiAppGeneralFieldNearestNodeTransfer::evaluateInterpValuesNearestNode(
           val_sum += local_values[i_from][index];
           dist_sum += (local_points[i_from][index] - pt).norm();
         }
-        // Use mesh function to compute interpolation values
-        // Assign value
-        outgoing_vals[i_pt] = {val_sum / return_index.size(), dist_sum / return_dist_sqr.size()};
+        // Pick the closest
+        if (dist_sum / return_dist_sqr.size() < outgoing_vals[i_pt].second)
+          outgoing_vals[i_pt] = {val_sum / return_index.size(), dist_sum / return_dist_sqr.size()};
       }
       else
-      {
         outgoing_vals[i_pt] = {GeneralFieldTransfer::BetterOutOfMeshValue,
                                GeneralFieldTransfer::BetterOutOfMeshValue};
-      }
     }
 
     // Move to next point
