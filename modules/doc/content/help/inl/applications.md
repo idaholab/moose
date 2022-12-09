@@ -1,9 +1,6 @@
 # INL Applications
 
-[!ac](INL) develops a large number of MOOSE-based applications. These applications are typically
-focused on nuclear energy, but as MOOSE and [!ac](INL) simulation capabilities continue to grow the
-breadth of applications continues to expand as well. The following sections highlight some of the
-[!ac](INL) developed applications.
+NCRC distributes a number of NEAMS-developed applications. The following sections highlight some of the codes available through the NCRC.
 
 ## BISON
 
@@ -32,7 +29,7 @@ BISON is a finite element-based nuclear fuel performance code. It is applicable 
 
 !row!
 !col small=12 medium=8 large=8
-Blue Crab description goes here.
+Blue Crab is a combination (coupling) of other NCRC Applications: Bison, Griffin, Pronghorn and SAM.
 
 !col small=8 medium=4 large=4
 !row-end!
@@ -46,7 +43,7 @@ Blue Crab description goes here.
 
 !row!
 !col small=12 medium=8 large=8
-Dire Wolf description goes here.
+Dire Wolf is a combination (coupling) of other NCRC Applications: Bison, Griffin and Sockeye.
 
 !col small=8 medium=4 large=4
 !row-end!
@@ -119,6 +116,18 @@ Pronghorn is a multi-dimensional, coarse-mesh, thermal-hydraulics code for advan
 !col small=8 medium=4 large=4
 !row-end!
 
+## RELAP5
+
+- [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_relap5_ondemand.md)
+- [Level 1 - HPC Binary Execution](ncrc/applications/hpc_relap5.md)
+
+!row!
+!col small=12 medium=8 large=8
+RELAP5's description goes here.
+
+!col small=8 medium=4 large=4
+!row-end!
+
 ## RELAP-7
 
 - [Documentation](https://relap7-docs.hpcondemand.inl.gov/latest/)
@@ -147,11 +156,23 @@ RELAP-7 is a two-phase thermal systems code based on MOOSE's thermal hydraulics 
 
 !row!
 !col small=12 medium=8 large=8
-Sabertooth's description goes here.
+Sabertooth is a combination (coupling) of other NCRC Applications: Bison, Griffin, and Relap-7.
 
 !col small=8 medium=4 large=4
 !row-end!
 
+## SAM
+
+- [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_sam_ondemand.md)
+- [Level 1 - HPC Binary Execution](ncrc/applications/hpc_sam.md)
+- [Level 4 - Source Access](https://hpcgitlab.hpcondemand.inl.gov/idaholab/sam)
+
+!row!
+!col small=12 medium=8 large=8
+SAM is a Modern System Analysis Tool for Advanced non-LWR Safety Analysis.
+
+!col small=8 medium=4 large=4
+!row-end!
 
 ## Sockeye
 
