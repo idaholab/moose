@@ -51,7 +51,6 @@ public:
   using typename Moose::FunctorBase<T>::GradientType;
   using typename Moose::FunctorBase<T>::DotType;
   using ElemArg = Moose::ElemArg;
-  using ElemFromFaceArg = Moose::ElemFromFaceArg;
   using FaceArg = Moose::FaceArg;
   using SingleSidedFaceArg = Moose::SingleSidedFaceArg;
   using ElemQpArg = Moose::ElemQpArg;
@@ -107,11 +106,6 @@ private:
                    "' with a key that does not yet exist in the map. Make sure to fill your "
                    "CellCenteredMapFunctor for all elements you will attempt to access later.");
     }
-  }
-
-  ValueType evaluate(const ElemFromFaceArg & elem_arg, unsigned int) const override final
-  {
-    return (*this)(ElemArg({elem_arg.elem, elem_from_face.correct_skewness}));
   }
 
   ValueType evaluate(const FaceArg & face, unsigned int) const override final;

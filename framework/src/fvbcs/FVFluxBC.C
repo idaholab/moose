@@ -253,7 +253,7 @@ FVFluxBC::elemArg(const bool correct_skewness) const
   return { &_face_info->elem(), correct_skewness }
 }
 
-Moose::ElemFromFaceArg
+Moose::ElemArg
 FVFluxBC::neighborArg(const bool correct_skewness) const
 {
   return { _face_info->neighborPtr(), correct_skewness }

@@ -65,15 +65,12 @@ public:
 
 protected:
   using ElemFn = std::function<T(const Moose::ElemArg &, const unsigned int &)>;
-  using ElemAndFaceFn = std::function<T(const Moose::ElemFromFaceArg &, const unsigned int &)>;
   using FaceFn = std::function<T(const Moose::SingleSidedFaceArg &, const unsigned int &)>;
   using ElemQpFn = std::function<T(const Moose::ElemQpArg &, const unsigned int &)>;
   using ElemSideQpFn = std::function<T(const Moose::ElemSideQpArg &, const unsigned int &)>;
   using ElemPointFn = std::function<T(const Moose::ElemPointArg &, const unsigned int &)>;
 
   ValueType evaluate(const Moose::ElemArg & elem_arg, unsigned int state) const override;
-  ValueType evaluate(const Moose::ElemFromFaceArg & elem_arg,
-                     unsigned int state) const override;
   ValueType evaluate(const Moose::FaceArg & face, unsigned int state) const override;
   ValueType evaluate(const Moose::SingleSidedFaceArg & face, unsigned int state) const override;
   ValueType evaluate(const Moose::ElemQpArg & elem_qp, unsigned int state) const override;
@@ -83,8 +80,6 @@ protected:
   using Moose::FunctorBase<T>::evaluateGradient;
   GradientType evaluateGradient(const Moose::ElemArg & elem_arg, unsigned int) const override;
   GradientType evaluateGradient(const Moose::FaceArg & face_arg, unsigned int) const override;
-  GradientType evaluateGradient(const Moose::ElemFromFaceArg & elem_arg_arg,
-                                unsigned int) const override;
 
 private:
   /**
@@ -242,22 +237,6 @@ PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::ElemArg & elem_arg,
 
 template <typename T>
 typename PiecewiseByBlockLambdaFunctor<T>::ValueType
-PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::ElemFromFaceArg & elem_arg,
-                                           unsigned int state) const
-{
-  mooseAssert((elem_arg.elem && elem_from_face.elem != libMesh::remote_elem) ||
-                  elem_arg.fi,
-              "The element must be non-null and non-remote or the face must be non-null in functor "
-              "material properties");
-  auto it = _elem_arg_functor.find(elem_from_face.sub_id);
-  if (it == _elem_arg_functor.end())
-    subdomainErrorMessage(elem_arg.sub_id);
-
-  return it->second(elem_arg, state);
-}
-
-template <typename T>
-typename PiecewiseByBlockLambdaFunctor<T>::ValueType
 PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::SingleSidedFaceArg & face,
                                            unsigned int state) const
 {
@@ -345,17 +324,4 @@ PiecewiseByBlockLambdaFunctor<T>::evaluateGradient(const Moose::FaceArg & face_a
 {
   mooseAssert(state == 0, "Only current time state supported.");
   return Moose::FV::greenGaussGradient(face_arg, *this, true, _mesh);
-}
-
-template <typename T>
-typename PiecewiseByBlockLambdaFunctor<T>::GradientType
-PiecewiseByBlockLambdaFunctor<T>::evaluateGradient(
-    const Moose::ElemFromFaceArg & elem_arg_arg, unsigned int libmesh_dbg_var(state)) const
-{
-  mooseAssert(state == 0, "Only current time state supported.");
-  const auto elem_arg = elem_arg_arg.makeElem();
-  if (elem_arg.elem)
-    return Moose::FV::greenGaussGradient(elem_arg, *this, true, _mesh);
-  else
-    return GradientType();
 }

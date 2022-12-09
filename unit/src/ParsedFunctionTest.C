@@ -77,14 +77,6 @@ TEST_F(ParsedFunctionTest, basicConstructor)
       break;
     }
 
-  // Test elem_arg overloads
-  const FaceInfo * const fi = _mesh->faceInfo(elem, side);
-  const auto elem_arg = Moose::ElemFromFaceArg{elem, fi, false, elem->subdomain_id()};
-  f_functor = f_wrapped(elem_arg, 0);
-  gradient_functor = f_wrapped.gradient(elem_arg, 0);
-  dot_functor = f_wrapped.dot(elem_arg, 0);
-  test_eq();
-
   // Test face overloads
   auto face = Moose::FV::makeCDFace(*fi, f_wrapped);
   f_traditional = f.value(0, fi->faceCentroid());

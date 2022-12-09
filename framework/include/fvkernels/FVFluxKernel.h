@@ -95,12 +95,12 @@ protected:
   /**
    * @return the value of \p makeSidedFace called with the face info element
    */
-  Moose::ElemFromFaceArg elemArg(bool correct_skewness = false) const;
+  Moose::ElemArg elemArg(bool correct_skewness = false) const;
 
   /**
    * @return the value of \p makeSidedFace called with the face info neighbor
    */
-  Moose::ElemFromFaceArg neighborArg(bool correct_skewness = false) const;
+  Moose::ElemArg neighborArg(bool correct_skewness = false) const;
 
   /**
    * Determine the subdomain ID pair that should be used when creating a face argument for a

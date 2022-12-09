@@ -343,18 +343,18 @@ FVFluxKernel::gradUDotNormal() const
       side_one_value, side_two_value, *_face_info, _var, correct_skewness);
 }
 
-Moose::ElemFromFaceArg
+Moose::ElemArg
 FVFluxKernel::elemArg(const bool correct_skewness) const
 {
   mooseAssert(_face_info, "the face info should be non-null");
-  return Moose::FV::elemArg(*this, *_face_info, correct_skewness);
+  return {&_face_info->elem(), correct_skewness};
 }
 
-Moose::ElemFromFaceArg
+Moose::ElemArg
 FVFluxKernel::neighborArg(const bool correct_skewness) const
 {
   mooseAssert(_face_info, "the face info should be non-null");
-  return Moose::FV::neighborArg(*this, *_face_info, correct_skewness);
+  return {_face_info->neighborPtr(), correct_skewness};
 }
 
 std::pair<SubdomainID, SubdomainID>

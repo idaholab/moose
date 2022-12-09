@@ -679,7 +679,6 @@ protected:
 private:
   using MooseVariableField<OutputType>::evaluate;
   using ElemArg = Moose::ElemArg;
-  using ElemFromFaceArg = Moose::ElemFromFaceArg;
   using ElemQpArg = Moose::ElemQpArg;
   using ElemSideQpArg = Moose::ElemSideQpArg;
   using FaceArg = Moose::FaceArg;
@@ -688,11 +687,6 @@ private:
   ValueType evaluate(const ElemArg &, unsigned int) const override final
   {
     mooseError("Elem functor overload not yet implemented for finite element variables");
-  }
-  ValueType evaluate(const ElemFromFaceArg &, unsigned int) const override final
-  {
-    mooseError(
-        "Elem-and-face-info functor overload not yet implemented for finite element variables");
   }
   ValueType evaluate(const FaceArg &, unsigned int) const override final
   {

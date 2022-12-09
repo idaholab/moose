@@ -496,18 +496,14 @@ private:
   using MooseVariableField<OutputType>::evaluateDot;
   using ElemQpArg = Moose::ElemQpArg;
   using ElemArg = Moose::ElemArg;
-  using ElemFromFaceArg = Moose::ElemFromFaceArg;
   using FaceArg = Moose::FaceArg;
   using SingleSidedFaceArg = Moose::SingleSidedFaceArg;
 
   ValueType evaluate(const ElemArg & elem, unsigned int) const override final;
-  ValueType evaluate(const ElemFromFaceArg & elem_arg, unsigned int) const override final;
   ValueType evaluate(const FaceArg & face, unsigned int) const override final;
   ValueType evaluate(const SingleSidedFaceArg & face, unsigned int) const override final;
   GradientType evaluateGradient(const ElemQpArg & qp_arg, unsigned int) const override final;
   GradientType evaluateGradient(const ElemArg & elem_arg, unsigned int) const override final;
-  GradientType evaluateGradient(const ElemFromFaceArg & elem_arg,
-                                unsigned int) const override final;
   GradientType evaluateGradient(const FaceArg & face, unsigned int) const override final;
   GradientType evaluateGradient(const SingleSidedFaceArg & face, unsigned int) const override final;
   DotType evaluateDot(const ElemArg & elem, unsigned int) const override final;
