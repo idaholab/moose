@@ -250,11 +250,11 @@ FVFluxBC::uOnGhost() const
 Moose::ElemArg
 FVFluxBC::elemArg(const bool correct_skewness) const
 {
-  return { &_face_info->elem(), correct_skewness }
+  return {&_face_info->elem(), correct_skewness};
 }
 
 Moose::ElemArg
 FVFluxBC::neighborArg(const bool correct_skewness) const
 {
-  return { _face_info->neighborPtr(), correct_skewness }
+  return {_face_info->neighborPtr(), correct_skewness};
 }

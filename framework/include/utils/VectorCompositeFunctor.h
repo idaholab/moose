@@ -96,6 +96,14 @@ private:
             _z_comp(elem_point_arg, state)};
   }
 
+  using Moose::FunctorBase<VectorValue<T>>::evaluateGradient;
+  GradientType evaluateGradient(const ElemArg & elem_arg, unsigned int state) const override
+  {
+    return {_x_comp.gradient(elem_arg, state),
+            _y_comp.gradient(elem_arg, state),
+            _z_comp.gradient(elem_arg, state)};
+  }
+
   /// Possible holder of constant-0 y-component functor. This will be allocated if the user only
   /// supplies one component functor during construction
   std::unique_ptr<Moose::ConstantFunctor<T>> _y_constant;

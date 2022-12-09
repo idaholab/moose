@@ -103,16 +103,6 @@ protected:
   Moose::ElemArg neighborArg(bool correct_skewness = false) const;
 
   /**
-   * Determine the subdomain ID pair that should be used when creating a face argument for a
-   * functor. The first member of the pair will correspond to the SubdomainID in the tuple returned
-   * by \p elemArg. The second member of the pair will correspond to the SubdomainID in the
-   * tuple returned by \p neighborArg. As explained in the doxygen for \p makeSidedFace these
-   * subdomain IDs do not simply correspond to the subdomain ID of the element; they must respect
-   * the block restriction of this object
-   */
-  std::pair<SubdomainID, SubdomainID> faceArgSubdomains(const FaceInfo * face_info = nullptr) const;
-
-  /**
    * Determine the single sided face argument when evaluating a functor on a face.
    * This is used to perform evaluations of material properties with the actual face values of
    * their dependences, rather than interpolate the material property to the boundary.

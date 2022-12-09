@@ -113,6 +113,13 @@ public:
   bool activeOnSubdomain(SubdomainID subdomain) const;
 
   /**
+   * Is the variable active on the subdomains?
+   * @param subdomains The subdomain ids in question
+   * @return true if active on all provided subdomains, false otherwise
+   */
+  bool activeOnSubdomains(const std::set<SubdomainID> & subdomains) const;
+
+  /**
    * Prepare the initial condition
    */
   virtual void prepareIC() = 0;

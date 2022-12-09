@@ -110,8 +110,12 @@ struct FaceArg
 
   friend bool operator<(const FaceArg & l, const FaceArg & r)
   {
-    return std::make_tuple(
-               l.fi, l.limiter_type, l.elem_is_upwind, l.correct_skewness, l.consumer l.face_side) <
+    return std::make_tuple(l.fi,
+                           l.limiter_type,
+                           l.elem_is_upwind,
+                           l.correct_skewness,
+                           l.consumer,
+                           l.face_side) <
            std::make_tuple(
                r.fi, r.limiter_type, r.elem_is_upwind, r.correct_skewness, r.consumer, r.face_side);
   }
@@ -183,7 +187,7 @@ using ElemSideQpArg = std::tuple<const libMesh::Elem *, unsigned int, unsigned i
  * evaluations
  */
 template <typename T>
-class FunctorBase : public HasBlocksInterface
+class FunctorBase : public virtual HasBlocksInterface
 {
 public:
   using FunctorType = FunctorBase<T>;
@@ -711,7 +715,6 @@ FunctorBase<T>::clearCacheData()
   _current_side_qp_map_value = nullptr;
 
   _elem_arg_to_value.clear();
-  _elem_arg_arg_to_value.clear();
   _face_arg_to_value.clear();
   _ssf_arg_to_value.clear();
 }

@@ -10,6 +10,7 @@
 #pragma once
 
 #include "MooseObject.h"
+#include "BlockRestrictable.h"
 #include "OutputInterface.h"
 #include "SetupInterface.h"
 #include "MooseTypes.h"
@@ -30,7 +31,10 @@ class SubProblem;
 class SystemBase;
 class MooseMesh;
 
-class MooseVariableBase : public MooseObject, public OutputInterface, public SetupInterface
+class MooseVariableBase : public MooseObject,
+                          public BlockRestrictable,
+                          public OutputInterface,
+                          public SetupInterface
 {
 public:
   static InputParameters validParams();

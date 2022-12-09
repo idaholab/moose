@@ -45,3 +45,11 @@ MooseVariableFieldBase::activeOnSubdomain(SubdomainID subdomain) const
 {
   return this->_sys.system().variable(_var_num).active_on_subdomain(subdomain);
 }
+
+bool
+MooseVariableFieldBase::activeOnSubdomains(const std::set<SubdomainID> & subdomains) const
+{
+  const auto & active_subs = activeSubdomains();
+  return std::includes(
+      active_subs.begin(), active_subs.end(), subdomains.begin(), subdomains.end());
+}

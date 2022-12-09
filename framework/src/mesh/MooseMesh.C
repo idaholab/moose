@@ -3466,7 +3466,7 @@ MooseMesh::deleteRemoteElements()
 }
 
 void
-MooseMesh::cacheVarIndicesByFace(const std::vector<const MooseVariableBase *> & moose_vars)
+MooseMesh::cacheVarIndicesByFace(const std::vector<const MooseVariableFieldBase *> & moose_vars)
 {
   buildFiniteVolumeInfo();
 
@@ -3479,7 +3479,7 @@ MooseMesh::cacheVarIndicesByFace(const std::vector<const MooseVariableBase *> & 
     for (unsigned int j = 0; j < moose_vars.size(); ++j)
     {
       // get the variable, its name, and its domain of definition
-      const MooseVariableBase * const var = moose_vars[j];
+      const MooseVariableFieldBase * const var = moose_vars[j];
       const auto & var_name = var->name();
       std::set<SubdomainID> var_subdomains = var->blockIDs();
 

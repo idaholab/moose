@@ -60,13 +60,13 @@ FVMatAdvection::computeQpResidual()
   const auto v = _vel(makeFace(*_face_info,
                                LimiterType::CentralDifference,
                                true,
-                               faceArgSubdomains(),
+                               *this,
                                _advected_interp_method == InterpMethod::SkewCorrectedAverage));
   const auto adv_quant_interface =
       _adv_quant(makeFace(*_face_info,
                           limiterType(_advected_interp_method),
                           MetaPhysicL::raw_value(v) * _normal > 0,
-                          faceArgSubdomains(),
+                          *this,
                           _advected_interp_method == InterpMethod::SkewCorrectedAverage));
 
   return _normal * v * adv_quant_interface;

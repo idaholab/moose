@@ -249,7 +249,7 @@ FaceInfo::neighborVolume() const
 inline bool
 FaceInfo::isElem(const Elem * const elem) const
 {
-  mooseAssert(elem == &elem() || elem == neighborPtr(),
+  mooseAssert(elem == &this->elem() || elem == neighborPtr(),
               "The provided element should be either the elem or neighbor");
-  return elem == &elem();
+  return elem == &this->elem();
 }

@@ -55,7 +55,7 @@ class MooseVariableFieldBase;
  * \see Kernel
  * \see SideSetsAroundSubdomain
  */
-class BlockRestrictable : public HasBlocksInterface
+class BlockRestrictable : public virtual HasBlocksInterface
 {
 public:
   /**

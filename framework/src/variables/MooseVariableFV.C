@@ -489,7 +489,7 @@ MooseVariableFV<OutputType>::getElemValue(const Elem * const elem) const
       "The variable should be defined on the element's subdomain! This typically occurs when the "
       "user wants to evaluate the elements right next to the boundary of two variables (block "
       "boundary). The subdomain which is queried: " +
-          Moose::stringify(this->blockIDs()) + " the subdomain of the element " +
+          Moose::stringify(this->activeSubdomains()) + " the subdomain of the element " +
           std::to_string(elem->subdomain_id()));
 
   std::vector<dof_id_type> dof_indices;
@@ -574,7 +574,7 @@ MooseVariableFV<OutputType>::isExtrapolatedBoundaryFace(const FaceInfo & fi,
 {
   if (isDirichletBoundaryFace(fi, elem))
     return false;
-  if (std::make_pair<const FaceInfo *, const Elem *>(&fi, elem) == _ssf_face)
+  if (_ssf_face == std::make_pair(&fi, elem))
     return true;
 
   return !isInternalFace(fi);
@@ -627,7 +627,8 @@ MooseVariableFV<OutputType>::getExtrapolatedBoundaryFaceValue(
 
 template <typename OutputType>
 ADReal
-MooseVariableFV<OutputType>::getBoundaryFaceValue(const FaceInfo & fi) const
+MooseVariableFV<OutputType>::getBoundaryFaceValue(const FaceInfo & fi,
+                                                  const Elem * const elem) const
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("MooseVariableFV::getBoundaryFaceValue only supported for global AD indexing");
@@ -635,10 +636,10 @@ MooseVariableFV<OutputType>::getBoundaryFaceValue(const FaceInfo & fi) const
 
   mooseAssert(!isInternalFace(fi), "A boundary face value has been requested on an internal face.");
 
-  if (isDirichletBoundaryFace(fi))
-    return getDirichletBoundaryFaceValue(fi);
-  else if (isExtrapolatedBoundaryFace(fi))
-    return getExtrapolatedBoundaryFaceValue(fi, _two_term_boundary_expansion);
+  if (isDirichletBoundaryFace(fi, elem))
+    return getDirichletBoundaryFaceValue(fi, elem);
+  else if (isExtrapolatedBoundaryFace(fi, elem))
+    return getExtrapolatedBoundaryFaceValue(fi, _two_term_boundary_expansion, elem);
 
   mooseError("Unknown boundary face type!");
 }

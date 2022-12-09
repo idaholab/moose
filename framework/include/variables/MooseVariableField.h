@@ -340,6 +340,7 @@ public:
   void residualSetup() override;
   void jacobianSetup() override;
 
+  using MooseVariableFieldBase::hasBlocks;
   /*
    * Returns whether a variable is defined on a block as a functor.
    * This makes the link between functor block restriction and the
@@ -347,7 +348,7 @@ public:
    * @param id subdomain id we want to know whether the variable is defined on
    * @return whether the variable is defined on this domain
    */
-  bool hasBlocks(const SubdomainID id) const override { return activeOnSubdomain(id); }
+  bool hasBlocks(const SubdomainID id) const override { return BlockRestrictable::hasBlocks(id); }
 
 protected:
   using FunctorArg = typename Moose::ADType<OutputType>::type;

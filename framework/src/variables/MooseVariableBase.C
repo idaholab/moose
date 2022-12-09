@@ -87,6 +87,7 @@ MooseVariableBase::validParams()
 
 MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
   : MooseObject(parameters),
+    BlockRestrictable(this),
     OutputInterface(parameters),
     SetupInterface(this),
     _sys(*getParam<SystemBase *>("_system_base")), // TODO: get from _fe_problem_base

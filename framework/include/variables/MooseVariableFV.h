@@ -291,7 +291,7 @@ public:
    * then we will compute the gradient if necessary to help us interpolate from the element centroid
    * value to the face
    */
-  ADReal getBoundaryFaceValue(const FaceInfo & fi) const;
+  ADReal getBoundaryFaceValue(const FaceInfo & fi, const Elem * elem = nullptr) const;
 
   const ADTemplateVariableSecond<OutputType> & adSecondSln() const override
   {
@@ -475,8 +475,7 @@ protected:
    * boundary face for which is not a corresponding Dirichlet condition, e.g. we need to compute
    * some approximation for the boundary face value using the adjacent cell centroid information
    */
-  std::pair<bool, const Elem *> isExtrapolatedBoundaryFace(const FaceInfo & fi,
-                                                           const Elem * elem) const override;
+  bool isExtrapolatedBoundaryFace(const FaceInfo & fi, const Elem * elem) const override;
 
   /**
    * @return the extrapolated value on the boundary face associated with \p fi
@@ -732,9 +731,10 @@ MooseVariableFV<OutputType>::evaluateDot(const FaceArg & face, unsigned int) con
 
 template <typename OutputType>
 typename MooseVariableFV<OutputType>::DotType
-MooseVariableFV<OutputType>::evaluateDot(const SingleSidedFaceArg & face, unsigned int) const
+MooseVariableFV<OutputType>::evaluateDot(const SingleSidedFaceArg & face,
+                                         const unsigned int state) const
 {
-  return evaluateFaceDotHelper(face);
+  return this->dot(face.makeSidedElem(), state);
 }
 
 template <typename OutputType>

@@ -37,10 +37,7 @@ FVGradAndDotFunctorFluxKernel::computeQpResidual()
 {
   const Real sign = _velocity * _normal > 0 ? 1 : -1;
   // single-sided face
-  Moose::SingleSidedFaceArg ssf{_face_info,
-                                Moose::FV::LimiterType::CentralDifference,
-                                true,
-                                false,
-                                _face_info->elem().subdomain_id()};
+  Moose::SingleSidedFaceArg ssf{
+      _face_info, Moose::FV::LimiterType::CentralDifference, true, false, &_face_info->elem()};
   return sign * (_value(ssf) + _gradient(ssf)(0) + _dot(ssf));
 }

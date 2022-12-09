@@ -247,7 +247,7 @@ FVInterfaceKernel::singleSidedFaceArg(const MooseVariableFV<Real> & variable,
   const bool use_elem = fi->faceType(variable.name()) == FaceInfo::VarFaceNeighbors::ELEM;
 
   if (use_elem)
-    return {fi, limiter_type, true, correct_skewness, fi->elem().subdomain_id()};
+    return {fi, limiter_type, true, correct_skewness, &fi->elem()};
   else
-    return {fi, limiter_type, true, correct_skewness, fi->neighborPtr()->subdomain_id()};
+    return {fi, limiter_type, true, correct_skewness, fi->neighborPtr()};
 }

@@ -92,10 +92,6 @@ private:
   /// implementer wants to return for a given element argument)
   std::unordered_map<SubdomainID, ElemFn> _elem_functor;
 
-  /// Functors that return the value on the requested element that will perform any necessary
-  /// ghosting operations if this object is not technically defined on the requested subdomain
-  std::unordered_map<SubdomainID, ElemAndFaceFn> _elem_arg_functor;
-
   /// Functors that return the property value on the requested side of the face (e.g. the
   /// infinitesimal + or - side of the face)
   std::unordered_map<SubdomainID, FaceFn> _face_functor;
@@ -146,7 +142,6 @@ PiecewiseByBlockLambdaFunctor<T>::setFunctor(const MooseMesh & mesh,
                  "' for block id ",
                  block_id,
                  ". Another material must already declare this property on that block.");
-    _elem_arg_functor.emplace(block_id, my_lammy);
     _face_functor.emplace(block_id, my_lammy);
     _elem_qp_functor.emplace(block_id, my_lammy);
     _elem_side_qp_functor.emplace(block_id, my_lammy);
@@ -201,8 +196,8 @@ bool
 PiecewiseByBlockLambdaFunctor<T>::hasBlocks(const SubdomainID id) const
 {
   // If any of the maps has a functor for that block, it has the block
-  if (_elem_functor.count(id) || _elem_arg_functor.count(id) || _face_functor.count(id) ||
-      _elem_qp_functor.count(id) || _elem_side_qp_functor.count(id))
+  if (_elem_functor.count(id) || _face_functor.count(id) || _elem_qp_functor.count(id) ||
+      _elem_side_qp_functor.count(id))
     return true;
   else
     return false;
@@ -240,9 +235,9 @@ typename PiecewiseByBlockLambdaFunctor<T>::ValueType
 PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::SingleSidedFaceArg & face,
                                            unsigned int state) const
 {
-  auto it = _face_functor.find(face.sub_id);
+  auto it = _face_functor.find(face.elem->subdomain_id());
   if (it == _face_functor.end())
-    subdomainErrorMessage(face.sub_id);
+    subdomainErrorMessage(face.elem->subdomain_id());
 
   return it->second(face, state);
 }
@@ -258,12 +253,12 @@ PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::FaceArg & face,
   if (isInternalFace(*face.fi))
     return interpolate(*this, face);
 
-  Moose::SingleSidedFaceArg ssfa = {face.fi,
-                                    face.limiter_type,
-                                    face.elem_is_upwind,
-                                    face.correct_skewness,
-                                    hasBlocks(face.elem_sub_id) ? face.elem_sub_id
-                                                                : face.neighbor_sub_id};
+  Moose::SingleSidedFaceArg ssfa = {
+      face.fi,
+      face.limiter_type,
+      face.elem_is_upwind,
+      face.correct_skewness,
+      hasBlocks(face.fi->elem().subdomain_id()) ? &face.fi->elem() : face.fi->neighborPtr()};
   return this->evaluate(ssfa, 0);
 }
 

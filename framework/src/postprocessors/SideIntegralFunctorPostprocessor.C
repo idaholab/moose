@@ -56,7 +56,7 @@ SideIntegralFunctorPostprocessorTempl<is_ad>::computeFaceInfoIntegral(const Face
 {
   mooseAssert(fi, "We should have a FaceInfo");
   Moose::SingleSidedFaceArg ssf = {
-      fi, Moose::FV::LimiterType::CentralDifference, true, false, _current_elem->subdomain_id()};
+      fi, Moose::FV::LimiterType::CentralDifference, true, false, _current_elem};
   return computeLocalContribution<Moose::SingleSidedFaceArg>(ssf);
 }
 
