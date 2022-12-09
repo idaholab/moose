@@ -26,10 +26,10 @@ $ (base) ~> mamba activate {{ApplicationLower}}
 $ ({{ApplicationLower}}) ~>
 ```
 
-With {{ApplicationName}} activated (denoted by the prompt header), `{{binary}}-opt` becomes available within your PATH. This makes `{{binary}}-opt` available for execution from any directory.
+With {{ApplicationName}} activated (denoted by the prompt header), `{{binary_method}}` becomes available within your PATH. This makes `{{binary_method}}` available for execution from any directory.
 
 ```bash
-$ ({{ApplicationLower}}) ~> {{binary}}-opt --help
+$ ({{ApplicationLower}}) ~> {{binary_method}} --help
 
 <The {{ApplicationName}} help page is displayed>
 ```
@@ -38,7 +38,7 @@ A good first usage, would be to run the built-in tests. You should run this comm
 
 ```bash
 $ ({{ApplicationLower}}) ~> cd ~/
-$ ({{ApplicationLower}}) ~> {{binary}}-opt --copy-inputs tests
+$ ({{ApplicationLower}}) ~> {{binary_method}} --copy-inputs tests
 
 <Output of files being copied is displayed>
 
@@ -49,7 +49,7 @@ The very last line indicates the directory you need to enter next in order to ru
 
 ```bash
 $ ({{ApplicationLower}}) ~> cd ./{{binary}}/tests
-$ ({{ApplicationLower}}) ~/{{binary}}/tests> {{binary}}-opt --run -j 5
+$ ({{ApplicationLower}}) ~/{{binary}}/tests> {{binary_method}} --run -j 5
 
 <Output of tests being run>
 ```

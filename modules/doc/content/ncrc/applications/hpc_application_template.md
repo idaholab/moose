@@ -74,7 +74,7 @@ At this point you should be able to run the executable. For this example, the {{
 help can be displayed by running the following command:
 
 ```bash
-{{binary}}-opt --help
+{{binary}} --help
 ```
 
 ## Create a Test Input File
@@ -145,7 +145,7 @@ Next, execute the application with the "-i" argument followed by the input filen
 example, when using {{ApplicationName}} with the created test input file.
 
 ```bash
-{{binary}}-opt -i input.i
+{{binary}} -i input.i
 ```
 
 !alert note title=Available binaries are user dependent
@@ -195,7 +195,7 @@ cd $PBS_O_WORKDIR
 source /etc/profile.d/modules.sh
 module load use.moose moose-apps {{ApplicationLower}}
 
-mpirun {{binary}}-opt -i input.i Mesh/uniform_refine=7
+mpirun {{binary}} -i input.i Mesh/uniform_refine=7
 ```
 
 It is recommend that this script be created in the same location with the input file(s) it will be

@@ -72,7 +72,6 @@ Griffin is a finite element-based reactor multiphysics application. It is suitab
 - [Discussion Forum](https://grizzly-discourse.hpcondemand.inl.gov)
 - [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_grizzly_ondemand.md)
 - [Level 1 - HPC Binary Execution](ncrc/applications/hpc_grizzly.md)
-- [Level 2 - Local Binary Installation](ncrc/applications/conda_grizzly.md)
 - [Level 4 - Source Access](https://hpcgitlab.hpcondemand.inl.gov/idaholab/grizzly)
 
 !row!
