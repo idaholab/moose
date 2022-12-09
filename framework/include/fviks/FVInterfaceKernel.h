@@ -139,16 +139,16 @@ protected:
 #endif
 
   /**
-   * @return A structure that contains information about the face info element, face info, skewness
-   * correction and element subdomain id for use with functors
+   * @return A structure that contains information about the face info element and skewness
+   * correction for use with functors
    */
-  Moose::ElemFromFaceArg elemArg(bool correct_skewness = false) const;
+  Moose::ElemArg elemArg(bool correct_skewness = false) const;
 
   /**
-   * @return A structure that contains information about the face info neighbor, the face info,
-   * skewness correction and the face info neighbor subdomain id for use with functors
+   * @return A structure that contains information about the face info neighbor and skewness
+   * correction for use with functors
    */
-  Moose::ElemFromFaceArg neighborArg(bool correct_skenewss = false) const;
+  Moose::ElemArg neighborArg(bool correct_skenewss = false) const;
 
   /**
    * Determine the single sided face argument when evaluating a functor on a face.

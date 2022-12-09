@@ -224,19 +224,16 @@ FVInterfaceKernel::computeJacobian(const FaceInfo &)
 }
 #endif
 
-Moose::ElemFromFaceArg
+Moose::ElemArg
 FVInterfaceKernel::elemArg(const bool correct_skewness) const
 {
-  return {&_face_info->elem(), _face_info, correct_skewness, _face_info->elem().subdomain_id()};
+  return {&_face_info->elem(), correct_skewness};
 }
 
-Moose::ElemFromFaceArg
+Moose::ElemArg
 FVInterfaceKernel::neighborArg(const bool correct_skewness) const
 {
-  return {_face_info->neighborPtr(),
-          _face_info,
-          correct_skewness,
-          _face_info->neighborPtr()->subdomain_id()};
+  return {_face_info->neighborPtr(), correct_skewness};
 }
 
 Moose::SingleSidedFaceArg
