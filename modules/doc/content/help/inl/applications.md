@@ -2,7 +2,10 @@
 
 NCRC distributes a number of NEAMS-developed applications. The following sections highlight some of the codes available through the NCRC.
 
+
 ## BISON
+
+!media application_logos/bison.png style=width:8%;align:top;
 
 - [Documentation](https://mooseframework.org/bison)
 - [Discussion Forum](https://bison-discourse.hpcondemand.inl.gov)
@@ -21,6 +24,8 @@ BISON is a finite element-based nuclear fuel performance code. It is applicable 
 
 ## Blue Crab
 
+!media application_logos/blue_crab.png style=width:8%;align:top;
+
 - [Documentation](https://bluecrab-dev.hpcondemand.inl.gov)
 - [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_bluecrab_ondemand.md)
 - [Level 1 - HPC Binary Execution](ncrc/applications/hpc_bluecrab.md)
@@ -36,6 +41,8 @@ Blue Crab is a combination (coupling) of other NCRC Applications: Bison, Griffin
 
 ## Dire Wolf
 
+!media application_logos/dire_wolf.png style=width:8%;align:top;
+
 - [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_direwolf_ondemand.md)
 - [Level 1 - HPC Binary Execution](ncrc/applications/hpc_direwolf.md)
 - [Level 2 - Local Binary Installation](ncrc/applications/conda_direwolf.md)
@@ -50,6 +57,8 @@ Dire Wolf is a combination (coupling) of other NCRC Applications: Bison, Griffin
 
 
 ## Griffin
+
+!media application_logos/griffin.png style=width:8%;align:top;
 
 - [Documentation](https://griffin-docs.hpcondemand.inl.gov/latest/)
 - [Discussion Forum](https://griffin-discourse.hpcondemand.inl.gov)
@@ -68,6 +77,8 @@ Griffin is a finite element-based reactor multiphysics application. It is suitab
 
 ## Grizzly
 
+!media application_logos/grizzly.png style=width:8%;align:top;
+
 - [Documentation](https://grizzly-docs.hpcondemand.inl.gov/latest/)
 - [Discussion Forum](https://grizzly-discourse.hpcondemand.inl.gov)
 - [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_grizzly_ondemand.md)
@@ -83,6 +94,8 @@ Grizzly models the degradation due to normal operating conditions of nuclear pow
 !row-end!
 
 ## MARMOT
+
+!media application_logos/marmot.png style=width:8%;align:top;
 
 - [Documentation](https://marmot-docs.hpcondemand.inl.gov/latest/)
 - [Discussion Forum](https://marmot-discourse.hpcondemand.inl.gov)
@@ -100,6 +113,8 @@ MARMOT is a mesoscale fuel performance code. As such, it can predict the evoluti
 !row-end!
 
 ## Pronghorn
+
+!media application_logos/pronghorn.png style=width:8%;align:bottom;
 
 - [Documentation](https://pronghorn-docs.hpcondemand.inl.gov/latest/)
 - [Discussion Forum](https://pronghorn-discourse.hpcondemand.inl.gov)
@@ -147,6 +162,8 @@ RELAP-7 is a two-phase thermal systems code based on MOOSE's thermal hydraulics 
 
 ## Sabertooth
 
+!media application_logos/sabertooth.png style=width:8%;align:top;
+
 - [Documentation](https://sabertooth-docs.hpcondemand.inl.gov/latest/)
 - [Discussion Forum](https://sabertooth-discourse.hpcondemand.inl.gov)
 - [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_sabertooth_ondemand.md)
@@ -175,6 +192,8 @@ System Analysis Module (SAM) is a fast-running, whole-plant transient analysis c
 !row-end!
 
 ## Sockeye
+
+!media application_logos/sockeye.png style=width:10%;align:top;
 
 - [Documentation](https://sockeye-docs.hpcondemand.inl.gov/latest/)
 - [Discussion Forum](https://sockeye-discourse.hpcondemand.inl.gov)
