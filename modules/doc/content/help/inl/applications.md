@@ -169,7 +169,7 @@ Sabertooth is a combination (coupling) of other NCRC Applications: Bison, Griffi
 
 !row!
 !col small=12 medium=8 large=8
-SAM is a Modern System Analysis Tool for Advanced non-LWR Safety Analysis.
+System Analysis Module (SAM) is a fast-running, whole-plant transient analysis code with improved-fidelity capability for fast turnaround design scoping and safety analyses of advanced non-light-water reactors.
 
 !col small=8 medium=4 large=4
 !row-end!
