@@ -484,10 +484,10 @@ protected:
                                                   bool two_term_expansion,
                                                   const Elem * elem_side_to_extrapolate_from) const;
 
-  /// Points to a 'current' single sided face. This member allows us to be sure to perform
+  /// Points to sided faces. This member allows us to be sure to perform
   /// extrapolation (when we don't have a Dirichlet boundary condition) when evaluating this with a
   /// single sided face argument
-  mutable std::pair<const FaceInfo *, const Elem *> _ssf_face{nullptr, nullptr};
+  mutable std::set<std::pair<const FaceInfo *, const Elem *>> _ssf_faces;
 
 private:
   using MooseVariableField<OutputType>::evaluate;

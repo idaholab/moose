@@ -70,7 +70,7 @@ PINSFVPressureVariable::isExtrapolatedBoundaryFace(const FaceInfo & fi,
 {
   if (isDirichletBoundaryFace(fi, elem))
     return false;
-  if (_ssf_face == std::make_pair(&fi, elem))
+  if (_ssf_faces.count(std::make_pair(&fi, elem)))
     return true;
   if (!isInternalFace(fi))
     // We are neither a Dirichlet nor an internal face

@@ -8,7 +8,7 @@ velocity_interp_method = 'rc'
     type = CartesianMeshGenerator
     dim = 1
     dx = '1 1'
-    ix = '3 3'
+    ix = '2 2'
     subdomain_id = '1 2'
   []
 []
@@ -41,9 +41,7 @@ velocity_interp_method = 'rc'
 
 [AuxVariables]
   [porosity]
-    family = MONOMIAL
-    order = CONSTANT
-    fv = true
+    type = PINSFVPorosityVariable
   []
 []
 

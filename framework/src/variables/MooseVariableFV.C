@@ -574,7 +574,7 @@ MooseVariableFV<OutputType>::isExtrapolatedBoundaryFace(const FaceInfo & fi,
 {
   if (isDirichletBoundaryFace(fi, elem))
     return false;
-  if (_ssf_face == std::make_pair(&fi, elem))
+  if (_ssf_faces.count(std::make_pair(&fi, elem)))
     return true;
 
   return !isInternalFace(fi);
@@ -841,11 +841,11 @@ MooseVariableFV<OutputType>::evaluate(const SingleSidedFaceArg & face,
     return getDirichletBoundaryFaceValue(*fi, face.elem);
   else
   {
-    _ssf_face = std::make_pair(fi, face.elem);
-
+    auto key = std::make_pair(fi, face.elem);
+    _ssf_faces.insert(key);
     const auto boundary_value =
         getExtrapolatedBoundaryFaceValue(*fi, _two_term_boundary_expansion, face.elem);
-    _ssf_face = {nullptr, nullptr};
+    _ssf_faces.erase(key);
     return boundary_value;
   }
 }
