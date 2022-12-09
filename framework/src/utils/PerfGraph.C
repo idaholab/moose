@@ -501,7 +501,7 @@ dataLoad(std::istream & stream, PerfGraph & perf_graph, void *)
 {
   // Load in all of the recovered sections and register those that do not exist yet
   std::vector<moose::internal::PerfGraphSectionInfo> recovered_section_info;
-  // dataLoad(stream, recovered_section_info, nullptr);
+  dataLoad(stream, recovered_section_info, nullptr);
   for (const auto & info : recovered_section_info)
   {
     if (info._live_message.size())
