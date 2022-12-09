@@ -115,8 +115,9 @@ Pronghorn is a multi-dimensional, coarse-mesh, thermal-hydraulics code for advan
 !col small=8 medium=4 large=4
 !row-end!
 
-## RELAP5
+## RELAP5-3D
 
+- [Documentation](https://relap53d.inl.gov/SitePages/Home.aspx)
 - [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_relap5_ondemand.md)
 - [Level 1 - HPC Binary Execution](ncrc/applications/hpc_relap5.md)
 
