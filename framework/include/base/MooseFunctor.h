@@ -711,7 +711,7 @@ FunctorBase<T>::clearCacheData()
   _current_side_qp_map_value = nullptr;
 
   _elem_arg_to_value.clear();
-  _elem_from_face_arg_to_value.clear();
+  _elem_arg_arg_to_value.clear();
   _face_arg_to_value.clear();
   _ssf_arg_to_value.clear();
 }

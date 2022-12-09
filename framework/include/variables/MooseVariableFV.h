@@ -501,12 +501,12 @@ private:
   using SingleSidedFaceArg = Moose::SingleSidedFaceArg;
 
   ValueType evaluate(const ElemArg & elem, unsigned int) const override final;
-  ValueType evaluate(const ElemFromFaceArg & elem_from_face, unsigned int) const override final;
+  ValueType evaluate(const ElemFromFaceArg & elem_arg, unsigned int) const override final;
   ValueType evaluate(const FaceArg & face, unsigned int) const override final;
   ValueType evaluate(const SingleSidedFaceArg & face, unsigned int) const override final;
   GradientType evaluateGradient(const ElemQpArg & qp_arg, unsigned int) const override final;
   GradientType evaluateGradient(const ElemArg & elem_arg, unsigned int) const override final;
-  GradientType evaluateGradient(const ElemFromFaceArg & elem_from_face,
+  GradientType evaluateGradient(const ElemFromFaceArg & elem_arg,
                                 unsigned int) const override final;
   GradientType evaluateGradient(const FaceArg & face, unsigned int) const override final;
   GradientType evaluateGradient(const SingleSidedFaceArg & face, unsigned int) const override final;

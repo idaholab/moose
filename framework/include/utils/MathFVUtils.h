@@ -309,8 +309,8 @@ linearInterpolation(const FunctorBase<T> & functor, const FaceArg & face)
   mooseAssert(face.fi,
               "We must have a non-null face_info in order to prepare our ElemFromFace tuples");
 
-  const auto elem_from_face = face.elemArg();
-  const auto neighbor_from_face = face.neighborArg();
+  const auto elem_arg = face.elemArg();
+  const auto neighbor_arg = face.neighborArg();
 
   if (face.correct_skewness)
   {
@@ -323,11 +323,11 @@ linearInterpolation(const FunctorBase<T> & functor, const FaceArg & face)
     const auto surface_gradient = functor.gradient(new_face);
 
     return skewCorrectedLinearInterpolation(
-        functor(elem_from_face), functor(neighbor_from_face), surface_gradient, *face.fi, true);
+        functor(elem_arg), functor(neighbor_arg), surface_gradient, *face.fi, true);
   }
   else
     return linearInterpolation(
-        functor(elem_from_face), functor(neighbor_from_face), *face.fi, true);
+        functor(elem_arg), functor(neighbor_arg), *face.fi, true);
 }
 
 /**

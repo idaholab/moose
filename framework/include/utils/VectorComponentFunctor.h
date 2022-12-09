@@ -46,10 +46,10 @@ private:
     return _vector(elem, state)(_component);
   }
 
-  ValueType evaluate(const Moose::ElemFromFaceArg & elem_from_face,
+  ValueType evaluate(const Moose::ElemFromFaceArg & elem_arg,
                      const unsigned int state) const override final
   {
-    return _vector(elem_from_face, state)(_component);
+    return _vector(elem_arg, state)(_component);
   }
 
   ValueType evaluate(const Moose::FaceArg & face, const unsigned int state) const override final

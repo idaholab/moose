@@ -109,9 +109,9 @@ private:
     }
   }
 
-  ValueType evaluate(const ElemFromFaceArg & elem_from_face, unsigned int) const override final
+  ValueType evaluate(const ElemFromFaceArg & elem_arg, unsigned int) const override final
   {
-    return (*this)(ElemArg({elem_from_face.elem, elem_from_face.correct_skewness}));
+    return (*this)(ElemArg({elem_arg.elem, elem_from_face.correct_skewness}));
   }
 
   ValueType evaluate(const FaceArg & face, unsigned int) const override final;

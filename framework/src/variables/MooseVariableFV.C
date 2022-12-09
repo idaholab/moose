@@ -851,9 +851,9 @@ MooseVariableFV<OutputType>::evaluate(const SingleSidedFaceArg & face,
 
 template <typename OutputType>
 typename MooseVariableFV<OutputType>::ValueType
-MooseVariableFV<OutputType>::evaluate(const ElemFromFaceArg & elem_from_face, unsigned int) const
+MooseVariableFV<OutputType>::evaluate(const ElemFromFaceArg & elem_arg, unsigned int) const
 {
-  const Elem * const requested_elem = elem_from_face.elem;
+  const Elem * const requested_elem = elem_arg.elem;
   mooseAssert(requested_elem != remote_elem,
               "If the requested element is remote then I think we've messed up our ghosting");
 
@@ -862,15 +862,15 @@ MooseVariableFV<OutputType>::evaluate(const ElemFromFaceArg & elem_from_face, un
 
 template <typename OutputType>
 typename MooseVariableFV<OutputType>::GradientType
-MooseVariableFV<OutputType>::evaluateGradient(const ElemFromFaceArg & elem_from_face,
+MooseVariableFV<OutputType>::evaluateGradient(const ElemFromFaceArg & elem_arg,
                                               unsigned int) const
 {
-  const Elem * const requested_elem = elem_from_face.elem;
+  const Elem * const requested_elem = elem_arg.elem;
   mooseAssert(requested_elem != remote_elem,
               "If the requested element is remote then I think we've messed up our ghosting");
 
   if (requested_elem && this->hasBlocks(requested_elem->subdomain_id()))
-    return adGradSln(requested_elem, elem_from_face.correct_skewness);
+    return adGradSln(requested_elem, elem_arg.correct_skewness);
   else
     mooseError("We do not currently support ghosting of gradients");
 }

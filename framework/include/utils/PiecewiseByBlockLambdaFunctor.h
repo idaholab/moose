@@ -72,7 +72,7 @@ protected:
   using ElemPointFn = std::function<T(const Moose::ElemPointArg &, const unsigned int &)>;
 
   ValueType evaluate(const Moose::ElemArg & elem_arg, unsigned int state) const override;
-  ValueType evaluate(const Moose::ElemFromFaceArg & elem_from_face,
+  ValueType evaluate(const Moose::ElemFromFaceArg & elem_arg,
                      unsigned int state) const override;
   ValueType evaluate(const Moose::FaceArg & face, unsigned int state) const override;
   ValueType evaluate(const Moose::SingleSidedFaceArg & face, unsigned int state) const override;
@@ -83,7 +83,7 @@ protected:
   using Moose::FunctorBase<T>::evaluateGradient;
   GradientType evaluateGradient(const Moose::ElemArg & elem_arg, unsigned int) const override;
   GradientType evaluateGradient(const Moose::FaceArg & face_arg, unsigned int) const override;
-  GradientType evaluateGradient(const Moose::ElemFromFaceArg & elem_from_face_arg,
+  GradientType evaluateGradient(const Moose::ElemFromFaceArg & elem_arg_arg,
                                 unsigned int) const override;
 
 private:
@@ -99,7 +99,7 @@ private:
 
   /// Functors that return the value on the requested element that will perform any necessary
   /// ghosting operations if this object is not technically defined on the requested subdomain
-  std::unordered_map<SubdomainID, ElemAndFaceFn> _elem_from_face_functor;
+  std::unordered_map<SubdomainID, ElemAndFaceFn> _elem_arg_functor;
 
   /// Functors that return the property value on the requested side of the face (e.g. the
   /// infinitesimal + or - side of the face)
@@ -151,7 +151,7 @@ PiecewiseByBlockLambdaFunctor<T>::setFunctor(const MooseMesh & mesh,
                  "' for block id ",
                  block_id,
                  ". Another material must already declare this property on that block.");
-    _elem_from_face_functor.emplace(block_id, my_lammy);
+    _elem_arg_functor.emplace(block_id, my_lammy);
     _face_functor.emplace(block_id, my_lammy);
     _elem_qp_functor.emplace(block_id, my_lammy);
     _elem_side_qp_functor.emplace(block_id, my_lammy);
@@ -206,7 +206,7 @@ bool
 PiecewiseByBlockLambdaFunctor<T>::hasBlocks(const SubdomainID id) const
 {
   // If any of the maps has a functor for that block, it has the block
-  if (_elem_functor.count(id) || _elem_from_face_functor.count(id) || _face_functor.count(id) ||
+  if (_elem_functor.count(id) || _elem_arg_functor.count(id) || _face_functor.count(id) ||
       _elem_qp_functor.count(id) || _elem_side_qp_functor.count(id))
     return true;
   else
@@ -242,18 +242,18 @@ PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::ElemArg & elem_arg,
 
 template <typename T>
 typename PiecewiseByBlockLambdaFunctor<T>::ValueType
-PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::ElemFromFaceArg & elem_from_face,
+PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::ElemFromFaceArg & elem_arg,
                                            unsigned int state) const
 {
-  mooseAssert((elem_from_face.elem && elem_from_face.elem != libMesh::remote_elem) ||
-                  elem_from_face.fi,
+  mooseAssert((elem_arg.elem && elem_from_face.elem != libMesh::remote_elem) ||
+                  elem_arg.fi,
               "The element must be non-null and non-remote or the face must be non-null in functor "
               "material properties");
-  auto it = _elem_from_face_functor.find(elem_from_face.sub_id);
-  if (it == _elem_from_face_functor.end())
-    subdomainErrorMessage(elem_from_face.sub_id);
+  auto it = _elem_arg_functor.find(elem_from_face.sub_id);
+  if (it == _elem_arg_functor.end())
+    subdomainErrorMessage(elem_arg.sub_id);
 
-  return it->second(elem_from_face, state);
+  return it->second(elem_arg, state);
 }
 
 template <typename T>
@@ -350,10 +350,10 @@ PiecewiseByBlockLambdaFunctor<T>::evaluateGradient(const Moose::FaceArg & face_a
 template <typename T>
 typename PiecewiseByBlockLambdaFunctor<T>::GradientType
 PiecewiseByBlockLambdaFunctor<T>::evaluateGradient(
-    const Moose::ElemFromFaceArg & elem_from_face_arg, unsigned int libmesh_dbg_var(state)) const
+    const Moose::ElemFromFaceArg & elem_arg_arg, unsigned int libmesh_dbg_var(state)) const
 {
   mooseAssert(state == 0, "Only current time state supported.");
-  const auto elem_arg = elem_from_face_arg.makeElem();
+  const auto elem_arg = elem_arg_arg.makeElem();
   if (elem_arg.elem)
     return Moose::FV::greenGaussGradient(elem_arg, *this, true, _mesh);
   else

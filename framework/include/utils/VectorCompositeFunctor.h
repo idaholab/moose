@@ -69,11 +69,11 @@ private:
     return {_x_comp(elem_arg, state), _y_comp(elem_arg, state), _z_comp(elem_arg, state)};
   }
 
-  ValueType evaluate(const ElemFromFaceArg & elem_from_face, unsigned int state) const override
+  ValueType evaluate(const ElemFromFaceArg & elem_arg, unsigned int state) const override
   {
-    return {_x_comp(elem_from_face, state),
-            _y_comp(elem_from_face, state),
-            _z_comp(elem_from_face, state)};
+    return {_x_comp(elem_arg, state),
+            _y_comp(elem_arg, state),
+            _z_comp(elem_arg, state)};
   }
 
   ValueType evaluate(const FaceArg & face, unsigned int state) const override final
@@ -105,12 +105,12 @@ private:
   }
 
   using Moose::FunctorBase<VectorValue<T>>::evaluateGradient;
-  GradientType evaluateGradient(const ElemFromFaceArg & elem_from_face,
+  GradientType evaluateGradient(const ElemFromFaceArg & elem_arg,
                                 unsigned int state) const override
   {
-    return {_x_comp.gradient(elem_from_face, state),
-            _y_comp.gradient(elem_from_face, state),
-            _z_comp.gradient(elem_from_face, state)};
+    return {_x_comp.gradient(elem_arg, state),
+            _y_comp.gradient(elem_arg, state),
+            _z_comp.gradient(elem_arg, state)};
   }
 
   /// Possible holder of constant-0 y-component functor. This will be allocated if the user only
