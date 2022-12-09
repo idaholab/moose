@@ -101,9 +101,9 @@ TEST(ContainerFunctors, Test)
       const auto vector_elem_gradient = vector_functor.gradient(face_arg.elemArg())[0];
       const auto array_elem_gradient = array_functor.gradient(face_arg.elemArg())[0];
       const auto vector_neighbor_gradient =
-          face->neighborPtr() ? vector_functor.gradient(face_arg.neighborFromFace())[0]
+          face->neighborPtr() ? vector_functor.gradient(face_arg.neighborArg())[0]
                               : VectorValue<Real>();
-      const auto array_neighbor_gradient = array_functor.gradient(face_arg.neighborFromFace())[0];
+      const auto array_neighbor_gradient = array_functor.gradient(face_arg.neighborArg())[0];
 
       for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
       {

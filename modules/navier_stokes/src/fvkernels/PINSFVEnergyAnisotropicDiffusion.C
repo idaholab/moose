@@ -69,7 +69,7 @@ PINSFVEnergyAnisotropicDiffusion::computeQpResidual()
   else
   {
     const auto face_elem = elemArg();
-    const auto face_neighbor = neighborFromFace();
+    const auto face_neighbor = neighborArg();
 
     const auto value1 =
         _porosity_factored_in ? _k(face_elem) : _k(face_neighbor) * _eps(face_neighbor);

@@ -55,12 +55,8 @@ FVDiffusion::computeQpResidual()
 
   // If we are on internal faces, we interpolate the diffusivity as usual
   if (_var.isInternalFace(*_face_info))
-    interpolate(_coeff_interp_method,
-                coeff,
-                _coeff(elemArg()),
-                _coeff(neighborFromFace()),
-                *_face_info,
-                true);
+    interpolate(
+        _coeff_interp_method, coeff, _coeff(elemArg()), _coeff(neighborArg()), *_face_info, true);
   // Else we just use the boundary values (which depend on how the diffusion
   // coefficient is constructed)
   else

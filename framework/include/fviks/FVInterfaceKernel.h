@@ -148,7 +148,7 @@ protected:
    * @return A structure that contains information about the face info neighbor, the face info,
    * skewness correction and the face info neighbor subdomain id for use with functors
    */
-  Moose::ElemFromFaceArg neighborFromFace(bool correct_skenewss = false) const;
+  Moose::ElemFromFaceArg neighborArg(bool correct_skenewss = false) const;
 
   /**
    * Determine the single sided face argument when evaluating a functor on a face.

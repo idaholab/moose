@@ -114,7 +114,7 @@ WCNSFVMixingLengthEnergyDiffusion::computeQpResidual()
   {
     // Interpolate the heat capacity
     const auto face_elem = elemArg();
-    const auto face_neighbor = neighborFromFace();
+    const auto face_neighbor = neighborArg();
     interpolate(Moose::FV::InterpMethod::Average,
                 rho_cp_face,
                 _rho(face_elem) * _cp(face_elem),

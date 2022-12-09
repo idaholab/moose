@@ -231,7 +231,7 @@ FVInterfaceKernel::elemArg(const bool correct_skewness) const
 }
 
 Moose::ElemFromFaceArg
-FVInterfaceKernel::neighborFromFace(const bool correct_skewness) const
+FVInterfaceKernel::neighborArg(const bool correct_skewness) const
 {
   return {_face_info->neighborPtr(),
           _face_info,

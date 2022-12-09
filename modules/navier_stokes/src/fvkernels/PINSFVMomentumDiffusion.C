@@ -51,7 +51,7 @@ PINSFVMomentumDiffusion::computeStrongResidual()
                              _face_type == FaceInfo::VarFaceNeighbors::BOTH);
 
   const auto elem_face = elemArg();
-  const auto neighbor_face = neighborFromFace();
+  const auto neighbor_face = neighborArg();
 
   // Compute the diffusion driven by the velocity gradient
   // Interpolate viscosity divided by porosity on the face

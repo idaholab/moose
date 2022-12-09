@@ -59,7 +59,7 @@ FVOneVarDiffusionInterface::computeQpResidual()
   interpolate(_coeff_interp_method,
               coef,
               coef_elem(elemArg()),
-              coef_neighbor(neighborFromFace()),
+              coef_neighbor(neighborArg()),
               *_face_info,
               true);
 

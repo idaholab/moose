@@ -62,7 +62,7 @@ FVDiffusionInterface::computeQpResidual()
   interpolate(_coeff_interp_method,
               diffusivity,
               coef_elem(elemArg()),
-              coef_neighbor(neighborFromFace()),
+              coef_neighbor(neighborArg()),
               *_face_info,
               true);
 

@@ -68,7 +68,7 @@ PINSFVMomentumFrictionCorrection::gatherRCData(const FaceInfo & fi)
   using namespace Moose::FV;
 
   const auto elem_face = elemArg();
-  const auto neighbor_face = neighborFromFace();
+  const auto neighbor_face = neighborArg();
 
   Point _face_centroid = _face_info->faceCentroid();
   Point _elem_centroid = _face_info->elemCentroid();

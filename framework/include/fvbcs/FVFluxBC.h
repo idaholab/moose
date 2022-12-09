@@ -63,13 +63,13 @@ protected:
   /**
    * @return the value of \p makeSidedFace with \p fi_elem = false
    */
-  Moose::ElemFromFaceArg neighborFromFace(bool correct_skewness = false) const;
+  Moose::ElemFromFaceArg neighborArg(bool correct_skewness = false) const;
 
   /**
    * Determine the subdomain ID pair that should be used when creating a face argument for a
    * functor. The first member of the pair will correspond to the SubdomainID in the tuple returned
    * by \p elemArg. The second member of the pair will correspond to the SubdomainID in the
-   * tuple returned by \p neighborFromFace. As explained in the doxygen for \p makeSidedFace these
+   * tuple returned by \p neighborArg. As explained in the doxygen for \p makeSidedFace these
    * subdomain IDs do not simply correspond to the subdomain ID of the element; they must respect
    * the block restriction of the variable this object is acting upon
    */

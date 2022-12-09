@@ -351,10 +351,10 @@ FVFluxKernel::elemArg(const bool correct_skewness) const
 }
 
 Moose::ElemFromFaceArg
-FVFluxKernel::neighborFromFace(const bool correct_skewness) const
+FVFluxKernel::neighborArg(const bool correct_skewness) const
 {
   mooseAssert(_face_info, "the face info should be non-null");
-  return Moose::FV::neighborFromFace(*this, *_face_info, correct_skewness);
+  return Moose::FV::neighborArg(*this, *_face_info, correct_skewness);
 }
 
 std::pair<SubdomainID, SubdomainID>
