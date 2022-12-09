@@ -36,12 +36,14 @@ a browser setup with the correct settings, see [hpc_remote.md#socks-proxy].
 
 ## Connect to an INL-HPC Machine
 
-When you login to "hpclogin" you will then need to connect to an HPC machine such as Sawtooth, for
-a complete list of machines please refer to the internal INL HPC website:
-[hpcweb.hpc.inl.gov](https://hpcweb.hpc.inl.gov).
+When you login to "hpclogin" you will then need to connect to an HPC machine such as Sawtooth. The following
+table illustrates what machines are currently available:
+
+!include ncrc/hpc_cluster_information.md
 
 Assuming you want to work on Sawtooth, you can access it by logging into one of the two
-available login nodes: "sawtooth1" or "sawtooth2".
+available login nodes: "sawtooth1" or "sawtooth2" (each cluster name above has a login node  which exists as
+all lower cased letters, suffixed with a number):
 
 ```bash
 ssh sawtooth2

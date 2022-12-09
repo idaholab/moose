@@ -71,12 +71,7 @@ The HPC information section is an interactive form to create your scheduler subm
 - Select the number of cores for your job.
 - The following table shows the limitations of each system
 
-| Cluster  | Max Cores per Node | Max Hours |
-|----------|--------------------|--------------|
-| Falcon   | 36                 | 336          |
-| Lemhi    | 40                 | 72           |
-| Sawtooth | 48                 | 168          |
-
+!include ncrc/hpc_cluster_information.md
 
 ### Advanced HPC Submission Settings
 

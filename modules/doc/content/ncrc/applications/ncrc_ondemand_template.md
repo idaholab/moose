@@ -19,9 +19,9 @@ Every job submission is required to have a project specified. This is normally e
 
 This is the full path to your input file that will be submitted to the applicable executable. If your input file were to be submitted via the command line, it may look like:
 
- ```bash
- {{binary}}-opt **-i input.i**
- ```
+```bash
+{{binary}}-opt **-i input.i**
+```
 
  You do not need the `{{binary}}-opt -i` and you need the full path to your equivalent of `input.i`. The "Select File" button should open a dialog that will allow you to browse your INL HPC folder structure and manually select your input file to prevent typos in the full path to the input file (see Figure 2).
 
@@ -33,16 +33,16 @@ This is the full path to your input file that will be submitted to the applicabl
 
 By default, your submission of this form creates a basic submission command that gets submitted to the requested cluster.
 
- ```bash
- {{binary}}-opt -i /home/user/input.i
- ```
+```bash
+{{binary}}-opt -i /home/user/input.i
+```
 
  This form field allows you to add additional parameters. For example, if you wish to run performance logging, you can add a `-t` or `--timing` in this box and your application would then be executed as:
 
- ```bash
- {{binary}}-opt -t -i /home/user/input.i
- {{binary}}-opt --timing -i /home/user/input.i
- ```
+```bash
+{{binary}}-opt -t -i /home/user/input.i
+{{binary}}-opt --timing -i /home/user/input.i
+```
 
  You are allowed to put more than one in this box. Everything that you put in this box will be entered between  `{{binary}}-opt` and your input file `-i /home/user/input.i`.
 
@@ -71,11 +71,7 @@ The HPC information section is an interactive form to create your scheduler subm
 - Select the number of cores for your job.
 - The following table shows the limitations of each system
 
-| Cluster  | Max Cores per Node | Max Hours |
-|----------|--------------------|--------------|
-| Lemhi    | 40                 | 72           |
-| Sawtooth | 48                 | 168          |
-
+!include ncrc/hpc_cluster_information.md
 
 ### Advanced HPC Submission Settings
 
