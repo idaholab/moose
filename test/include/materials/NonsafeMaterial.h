@@ -13,7 +13,7 @@
 #include "MaterialProperty.h"
 
 /**
- * Simple material to test SolutionInvalid feature.
+ * Simple material to test SolutionInvalidInterface.
  */
 class NonsafeMaterial : public Material
 {

@@ -18,8 +18,9 @@ NonsafeMaterial::validParams()
 
   params.addRequiredParam<Real>("diffusivity", "The diffusivity value.");
   params.addParam<Real>(
-      "threshold", 0, "The value sets the upper limit for material property at given condition.");
-
+      "threshold",
+      0,
+      "This value sets the upper limit for the validity of the material property value.");
   return params;
 }
 

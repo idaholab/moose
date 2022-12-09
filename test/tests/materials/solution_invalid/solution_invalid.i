@@ -12,6 +12,7 @@
   []
 []
 
+# Sets solution invalid using the SolutionInvalidInterface, as diffusivity exceeds the set threshold.
 [Materials]
   [filter]
     type = NonsafeMaterial

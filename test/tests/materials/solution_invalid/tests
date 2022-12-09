@@ -3,7 +3,7 @@
     type = 'RunException'
     input = 'solution_invalid.i'
     expect_err = 'The solution is not converged due to the solution being invalid.'
-    design = 'syntax/Interfaces/SolutionInvalidInterface.md'
+    design = 'source/interfaces/SolutionInvalidInterface.md'
     issues = '#22884'
     requirement = 'The system shall not accept a converged solution if the solution has been tagged as invalid.'
   []
@@ -12,7 +12,7 @@
     type = 'RunApp'
     input = 'solution_invalid.i'
     cli_args = 'Problem/allow_invalid_solution=true'
-    design = 'syntax/Interfaces/SolutionInvalidInterface.md'
+    design = 'source/interfaces/SolutionInvalidInterface.md'
     issues = '#22884'
     requirement = 'The system shall allow overriding the solution validity checks.'
   []

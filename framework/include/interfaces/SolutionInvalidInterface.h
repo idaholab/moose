@@ -18,7 +18,7 @@ class MooseObject;
 class FEProblemBase;
 
 /**
- * An interface to communicate a solution invalid state to FEProblemBase
+ * An interface to communicate an invalid solution state to FEProblemBase
  */
 class SolutionInvalidInterface
 {
@@ -30,6 +30,6 @@ public:
   void setSolutionInvalid(bool solution_invalid);
 
 private:
-  /// A pointer to the FEProblem
+  /// A reference to the FEProblem
   FEProblemBase * _si_fe_problem;
 };
