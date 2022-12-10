@@ -128,9 +128,9 @@ testReconstruction(const Moose::CoordinateSystemType coord_type)
       moukalled_reconstruct(u, up_moukalled);
     }
 
-    struct AllBlocks
+    struct AllBlocks : public virtual HasBlocksInterface
     {
-      bool hasBlocks(SubdomainID) const { return true; }
+      bool hasBlocks(SubdomainID) const override { return true; }
     };
 
     AllBlocks consumer;

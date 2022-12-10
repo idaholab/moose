@@ -67,17 +67,16 @@ TEST_F(ParsedFunctionTest, basicConstructor)
   dot_functor = f_wrapped.dot(elem_arg, 0);
   test_eq();
 
-  const Elem * neighbor = nullptr;
   unsigned int side = libMesh::invalid_uint;
   for (const auto s : elem->side_index_range())
     if (elem->neighbor_ptr(s))
     {
-      neighbor = elem->neighbor_ptr(s);
       side = s;
       break;
     }
 
   // Test face overloads
+  const FaceInfo * const fi = _mesh->faceInfo(elem, side);
   auto face = Moose::FV::makeCDFace(*fi);
   f_traditional = f.value(0, fi->faceCentroid());
   f_functor = f_wrapped(face, 0);

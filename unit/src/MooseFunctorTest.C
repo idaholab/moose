@@ -33,6 +33,8 @@ public:
 
   TestFunctor() : FunctorBase<T>("test"){};
 
+  bool hasBlocks(SubdomainID) const override { return true; }
+
 private:
   ValueType evaluate(const ElemArg &, unsigned int) const override final { return 0; }
   ValueType evaluate(const FaceArg &, unsigned int) const override final { return 0; }
@@ -49,9 +51,9 @@ public:
 
   WithGradientTestFunctor(const MooseMesh & mesh) : _mesh(mesh) {}
 
-  std::pair<bool, const Elem *> isExtrapolatedBoundaryFace(const FaceInfo & fi) const override
+  bool isExtrapolatedBoundaryFace(const FaceInfo & fi, const Elem *) const override
   {
-    return std::make_pair(!fi.neighborPtr(), &fi.elem());
+    return !fi.neighborPtr();
   }
 
 private:
@@ -94,7 +96,7 @@ TEST(MooseFunctorTest, testArgs)
   QGauss qrule(1, CONSTANT);
 
   auto elem_arg = ElemArg{elem.get(), false};
-  auto face = FaceArg({&fi, LimiterType::CentralDifference, true, false, &test, elem.get()});
+  auto face = FaceArg({&fi, LimiterType::CentralDifference, true, false, nullptr});
   auto elem_qp = std::make_tuple(elem.get(), 0, &qrule);
   auto elem_side_qp = std::make_tuple(elem.get(), 0, 0, &qrule);
   auto elem_point = ElemPointArg({elem.get(), Point(0), false});
@@ -220,8 +222,7 @@ TEST(MooseFunctorTest, testArgs)
       if (!mesh_fi.neighborPtr())
         continue;
 
-      auto vec_face_arg =
-          FaceArg({&mesh_fi, LimiterType::CentralDifference, true, false, &vec_comp});
+      auto vec_face_arg = FaceArg({&mesh_fi, LimiterType::CentralDifference, true, false, nullptr});
       const auto vec_elem_arg = vec_face_arg.makeElem();
       const auto vec_neighbor_arg = vec_face_arg.makeNeighbor();
       zero_gradient_test(vec_comp, vec_elem_arg);
@@ -305,7 +306,7 @@ TEST(MooseFunctorTest, testArgs)
       }
 
       for (const auto & mesh_fi : all_fi)
-        EXPECT_TRUE(zero.isExtrapolatedBoundaryFace(mesh_fi).first == !(mesh_fi.neighborPtr()));
+        EXPECT_TRUE(zero.isExtrapolatedBoundaryFace(mesh_fi, nullptr) == !(mesh_fi.neighborPtr()));
     }
   }
 }

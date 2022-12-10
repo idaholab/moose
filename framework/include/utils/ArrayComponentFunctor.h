@@ -31,6 +31,7 @@ public:
   }
 
   bool isExtrapolatedBoundaryFace(const FaceInfo & fi, const Elem * elem) const override;
+  bool hasBlocks(SubdomainID sub_id) const override { return _array.hasBlocks(sub_id); }
 
 private:
   /// The parent array functor
