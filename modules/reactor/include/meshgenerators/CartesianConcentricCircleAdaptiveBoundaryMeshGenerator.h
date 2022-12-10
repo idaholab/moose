@@ -13,7 +13,7 @@
 
 /**
  * This CartesianConcentricCircleAdaptiveBoundaryMeshGenerator object is designed to generate
- * hexagonal meshes with adaptive boundary to facilitate stitching.
+ * cartesian meshes with adaptive boundary to facilitate stitching.
  */
 class CartesianConcentricCircleAdaptiveBoundaryMeshGenerator
   : public PolygonConcentricCircleMeshGeneratorBase

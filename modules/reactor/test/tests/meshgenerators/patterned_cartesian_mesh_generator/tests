@@ -97,7 +97,7 @@
       cli_args = 'Mesh/pattern/pattern_boundary=none
                   Mesh/pattern/pattern="0 0;0 0 0"
                   --mesh-only "patterned_err.e"'
-      expect_err = 'The two-dimentional array parameter pattern must have a correct square shape.'
+      expect_err = 'The two-dimensional array parameter pattern must have a correct square shape.'
       requirement ='The system shall throw an error if the cartesian pattern does not represent a hexagonal pattern.'
     []
     [err_out_of_range_pattern]
@@ -107,7 +107,7 @@
                   Mesh/pattern/pattern="0 0 0;0 1 0;0 2 0"
                   --mesh-only "patterned_err.e"'
       expect_err = 'Elements of this parameter must be smaller than the length of input_name.'
-      requirement ='The system shall throw an error if the pattern includes input cartesian mesh indices that exceed number of elements of inputs.'
+      requirement ='The system shall throw an error if the pattern includes input cartesian mesh indices that exceed number of elements of input meshes.'
     []
     [err_block_id]
       type = 'RunException'
@@ -144,7 +144,7 @@
                   Mesh/pattern/sqaure_size=22 Mesh/pattern/duct_sizes="21.0 21.5" Mesh/pattern/duct_intervals="2 2"
                   --mesh-only "patterned_err.e"'
       expect_err = 'This parameter, if provided, must have a length equal to length of duct_sizes.'
-      requirement ='The system shall throw an error if length of duct_block_names is not consistent with number of cartesian ducts.'
+      requirement ='The system shall throw an error if number of duct names specified is not consistent with number of cartesian ducts.'
     []
     [err_non_background]
       type = 'RunException'
@@ -191,7 +191,7 @@
       input = 'patterned_pattern_err2.i'
       cli_args = '--mesh-only "patterned_err.e"'
       expect_err = 'pattern_pitch metadata values of all input mesh generators must be identical'
-      requirement ='The system shall throw an error if input cartesian meshes have different pattern pitch meta data.'
+      requirement ='The system shall throw an error if input cartesian meshes that should form a lattice have different pattern pitch meta data.'
     []
     [err_cut_off_input]
       type = 'RunException'
