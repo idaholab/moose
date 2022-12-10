@@ -1,12 +1,12 @@
 # ChemicalComposition Action System
 
-!alert! note title=For Thermochemica module
-This action is designed for use with Thermochimica library.
+!alert! note title=For Thermochimica module
+This action is designed for use with thermochemistry library Thermochimica. Check out the corresponding submudle by running `git update --init --checkout modules/chemical_reactions/contrib/thermochimica`.
 !alert-end!
 
 ## Description
 
-The `ChemicalComposition` action simplifies the initiation of varaibles for thermochemical modeling and thermodynamic material model. It iniitates auxilliary or regular variables based on elements varaible in GlobalParameters block. The created variables have names of chemical elements used in the model and can be passed to other objects in the simulation.
+The `ChemicalComposition` action simplifies the initialization of variables for thermochemical modeling and thermodynamic material model. It initializes auxiliary based on the `elements` parameter (recomended in the  `GlobalParameters` block). The created variables have names of chemical elements used in the model and can be passed to other objects in the simulation.
 
 !syntax parameters /ChemicalComposition
 
@@ -30,7 +30,7 @@ defined in file `Pu_U_O_CEA.dat`.
 
 Parameter `initial_values' can be used for initialization of the variables specified in
 the vector `elements`  of the block `[GlobalParams]`.
-The iniitalization file is expected to be in comma-separated value(csv) format as shown in [chemact:inifile]. The first line of the file is ignored.
+The initialization file is expected to be in comma-separated value(csv) format as shown in [chemact:inifile]. The first line of the file is ignored.
 
 !listing id=chemact:inifile caption=Initialization of chemical elements variables from a file.
 element,initial condition

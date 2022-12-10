@@ -1,4 +1,4 @@
-# Thermochimica Aux Kernel
+# ThermochimicaAux
 
 !syntax description /AuxKernels/ThermochimicaAux
 

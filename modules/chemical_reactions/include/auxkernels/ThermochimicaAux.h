@@ -12,6 +12,11 @@
 #include "AuxKernel.h"
 #include "ThermochimicaNodalData.h"
 
+/**
+ * AuxKernel to extract data from a ThermochimicaNodalData user object
+ * into multiple (coupled) AuxVariables. The variable this AuxKernel is
+ * operating on is set to the number of stable phases.
+ */
 class ThermochimicaAux : public AuxKernel
 {
 public:
@@ -21,20 +26,30 @@ public:
 protected:
   virtual Real computeValue();
 
+  /// Total number of phases to output
   const std::size_t _n_phases;
+  /// Writable phase amount variables
   std::vector<VariableValue *> _ph;
+  /// Phase names
   std::vector<std::string> _ph_name;
 
+  /// Total number of species to output
   const std::size_t _n_species;
+  /// Writable species amount variables
   std::vector<VariableValue *> _sp;
+  /// Corresponding phase names
   std::vector<std::string> _sp_phase_name;
+  /// Corresponding species names
   std::vector<std::string> _sp_species_name;
 
+  /// Total number of elements to output
   const std::size_t _n_elements;
+  /// Writable chemical potential variables for each element
   std::vector<VariableValue *> _el_pot;
 
 private:
 #ifdef THERMOCHIMICA_ENABLED
+  /// User object to pull the data from
   const ThermochimicaNodalData & _thermo_nodal_data_uo;
 #endif
 };

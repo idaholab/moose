@@ -12,6 +12,10 @@
 // MOOSE includes
 #include "NodalUserObject.h"
 
+/**
+ * User object that performs a Gibbs energy minimization at each node by calling
+ * the Thermochimica code.
+ */
 class ThermochimicaNodalData : public NodalUserObject
 {
 public:

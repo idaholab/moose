@@ -9,6 +9,7 @@
 
 #include "ThermochimicaAux.h"
 #include "libmesh/int_range.h"
+#include "libmesh/fe.h"
 
 #include <iostream>
 #include <string>
@@ -55,6 +56,12 @@ ThermochimicaAux::ThermochimicaAux(const InputParameters & parameters)
 #ifndef THERMOCHIMICA_ENABLED
   mooseError("Thermochimica disabled");
 #endif
+
+  if (!isNodal())
+    paramError("variable", "A nodal variable must be supplied.");
+  for (const auto v : _coupled_moose_vars)
+    if (v->feType() != FEType(FIRST, LAGRANGE))
+      mooseError("All variables coupled in ThermochimicaAux must be of first order Lagrange type.");
 
   for (const auto i : make_range(_n_phases))
   {

@@ -123,9 +123,9 @@ ChemicalCompositionAction::act()
     if (isParamValid("thermofile"))
     {
       const auto thermo_file = getParam<FileName>("thermofile");
-      if (thermo_file.length() > 120)
+      if (thermo_file.length() > 1024)
         paramError("thermofile",
-                   "Path exceeds thermiochimica's maximal permisible length of 120 with ",
+                   "Path exceeds thermochimica's maximal permissible length of 1024 with ",
                    thermo_file.length(),
                    " characters: ",
                    thermo_file);

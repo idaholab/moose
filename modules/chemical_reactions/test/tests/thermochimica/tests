@@ -8,8 +8,6 @@
     requirement = 'The system shall be able to set up a nodal thermochemistry solve using an action'
 
     max_threads = 1
-    # Recover changes the results and would require the same rel_err as the test below. Let's keep one test tight.
-    recover = false
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
     required_objects = 'ThermochimicaNodalData'
   []
@@ -36,8 +34,6 @@
     requirement = 'The system shall be able to set up constant initial conditions from a CSV file'
 
     max_threads = 1
-    # Recover changes the results and would require the same rel_err as the test below. Let's keep one test tight.
-    recover = false
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
     required_objects = 'ThermochimicaNodalData'
   []

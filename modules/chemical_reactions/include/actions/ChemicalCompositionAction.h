@@ -11,6 +11,10 @@
 
 #include "AddFunctionAction.h"
 
+/**
+ * The ChemicalCompositionAction sets up user objects, aux kernels, and aux variables
+ * for a thermochemistry calculation using Thermochimica.
+ */
 class ChemicalCompositionAction : public Action
 {
 public:
@@ -28,10 +32,21 @@ protected:
   /// Initial conditions for each element: [element name] => initial condition value
   std::map<std::string, Real> _initial_conditions;
 
+  /// Temperature unit
   std::string _tunit;
+
+  /// Pressure unit
   std::string _punit;
+
+  /// Mass/amount unit
   std::string _munit;
+
+  /// List of phases tracked by Thermochimica
   std::vector<std::string> _phases;
+
+  /// List of species tracked by Thermochimica
   std::vector<std::string> _species;
+
+  /// List of element chemical potentials to be extracted from Thermochimica
   std::vector<std::string> _element_potentials;
 };
