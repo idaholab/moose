@@ -21,7 +21,7 @@
                0 0 0;
                0 0 0'
     background_intervals = 2
-    square_size = 17
+    square_size = 34
     #duct_sizes = '15 15.5'
     #duct_intervals = '1 2'
   []

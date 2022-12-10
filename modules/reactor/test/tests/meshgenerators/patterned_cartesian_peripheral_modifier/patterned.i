@@ -25,7 +25,7 @@ num_layer = 2
                0 0 0;
                0 0 0'
     background_intervals = 1
-    square_size = 17
+    square_size = 34
   []
   [pmg_1]
     type = PatternedCartesianPeripheralModifier
@@ -58,7 +58,7 @@ num_layer = 2
                0 0 0 0;
                0 0 0 0'
     background_intervals = 1
-    square_size = 17
+    square_size = 34
   []
   [pmg_2]
     type = PatternedCartesianPeripheralModifier
@@ -92,7 +92,7 @@ num_layer = 2
                0 0 0 0 0;
                0 0 0 0 0'
     background_intervals = 1
-    square_size = 17
+    square_size = 34
   []
   [pmg_3]
     type = PatternedCartesianPeripheralModifier
@@ -127,7 +127,7 @@ num_layer = 2
                0 0 0 0 0 0;
                0 0 0 0 0 0'
     background_intervals = 1
-    square_size = 17
+    square_size = 34
   []
   [pmg_4]
     type = PatternedCartesianPeripheralModifier

@@ -559,7 +559,7 @@ PatternedHexMeshGenerator::generate()
                             _create_interface_boundaries);
 
           if (extra_dist_shift != 0)
-            cutOffHexDeform(*tmp_peripheral_mesh, orientation, y_max_0, y_max_n, y_min, mesh_type);
+            cutOffPolyDeform(*tmp_peripheral_mesh, orientation, y_max_0, y_max_n, y_min, mesh_type);
 
           if (i == 0 && j == 0)
             out_mesh = std::move(tmp_peripheral_mesh);

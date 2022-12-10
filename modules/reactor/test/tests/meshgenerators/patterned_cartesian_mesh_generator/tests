@@ -8,7 +8,7 @@
       exodiff = 'patterned_sq.e'
       cli_args = 'Mesh/pattern/background_block_id=1500
                   Mesh/pattern/background_block_name="assem_block"
-                  Mesh/pattern/square_size=22
+                  Mesh/pattern/square_size=44
                   Mesh/pattern/duct_sizes=21
                   Mesh/pattern/duct_intervals=2
                   Mesh/pattern/duct_block_ids=2000
@@ -25,7 +25,7 @@
       exodiff = 'patterned_sq_no_interface.e'
       cli_args = 'Mesh/pattern/background_block_id=1500
                   Mesh/pattern/background_block_name="assem_block"
-                  Mesh/pattern/square_size=22
+                  Mesh/pattern/square_size=44
                   Mesh/pattern/duct_sizes=21
                   Mesh/pattern/duct_intervals=2
                   Mesh/pattern/duct_block_ids=2000
@@ -43,7 +43,7 @@
       exodiff = 'patterned_sq_no_deform.e'
       cli_args = 'Mesh/pattern/background_block_id=1500
                   Mesh/pattern/background_block_name="assem_block"
-                  Mesh/pattern/square_size=21
+                  Mesh/pattern/square_size=42
                   Mesh/pattern/deform_non_circular_region=false
                   --mesh-only "patterned_sq_no_deform.e"'
       requirement ='The system shall stitch square meshes to form a large mesh with square boundary without deforming the input meshes.'
@@ -98,7 +98,7 @@
                   Mesh/pattern/pattern="0 0;0 0 0"
                   --mesh-only "patterned_err.e"'
       expect_err = 'The two-dimensional array parameter pattern must have a correct square shape.'
-      requirement ='The system shall throw an error if the cartesian pattern does not represent a hexagonal pattern.'
+      requirement ='The system shall throw an error if the cartesian pattern does not represent a square pattern.'
     []
     [err_out_of_range_pattern]
       type = 'RunException'
@@ -114,7 +114,7 @@
       input = 'patterned_2d.i'
       cli_args = 'Mesh/pattern/background_intervals=2 Mesh/pattern/duct_block_ids=25
                   Mesh/pattern/background_block_name="assem_block"
-                  Mesh/pattern/sqaure_size=22 Mesh/pattern/duct_sizes=21 Mesh/pattern/duct_intervals=2
+                  Mesh/pattern/square_size=44 Mesh/pattern/duct_sizes=21 Mesh/pattern/duct_intervals=2
                   --mesh-only "patterned_err.e"'
       expect_err = 'This parameter and duct_block_ids must be provided simultaneously.'
       requirement ='The system shall throw an error if background_block_id and duct_block_ids are not provided simultaneously if the cartesian mesh has ducts.'
@@ -123,7 +123,7 @@
       type = 'RunException'
       input = 'patterned_2d.i'
       cli_args = 'Mesh/pattern/background_intervals=2 Mesh/pattern/duct_block_names="duct1"
-                  Mesh/pattern/sqaure_size=22 Mesh/pattern/duct_sizes=21 Mesh/pattern/duct_intervals=2
+                  Mesh/pattern/square_size=44 Mesh/pattern/duct_sizes=21 Mesh/pattern/duct_intervals=2
                   --mesh-only "patterned_err.e"'
       expect_err = 'This parameter and duct_block_names must be provided simultaneously.'
       requirement ='The system shall throw an error if background_block_name and duct_block_names are not provided simultaneously if the cartesian mesh has ducts.'
@@ -132,7 +132,7 @@
       type = 'RunException'
       input = 'patterned_2d.i'
       cli_args = 'Mesh/pattern/background_intervals=2 Mesh/pattern/duct_block_ids=20 Mesh/pattern/background_block_id=15
-                  Mesh/pattern/sqaure_size=22 Mesh/pattern/duct_sizes="21.0 21.5" Mesh/pattern/duct_intervals="2 2"
+                  Mesh/pattern/square_size=44 Mesh/pattern/duct_sizes="21.0 21.5" Mesh/pattern/duct_intervals="2 2"
                   --mesh-only "patterned_err.e"'
       expect_err = 'This parameter, if provided, must have a length equal to length of duct_sizes.'
       requirement ='The system shall throw an error if length of duct_block_ids is not consistent with number of cartesian ducts.'
@@ -141,7 +141,7 @@
       type = 'RunException'
       input = 'patterned_2d.i'
       cli_args = 'Mesh/pattern/background_intervals=2 Mesh/pattern/duct_block_names="duct1" Mesh/pattern/background_block_name="background"
-                  Mesh/pattern/sqaure_size=22 Mesh/pattern/duct_sizes="21.0 21.5" Mesh/pattern/duct_intervals="2 2"
+                  Mesh/pattern/square_size=44 Mesh/pattern/duct_sizes="21.0 21.5" Mesh/pattern/duct_intervals="2 2"
                   --mesh-only "patterned_err.e"'
       expect_err = 'This parameter, if provided, must have a length equal to length of duct_sizes.'
       requirement ='The system shall throw an error if number of duct names specified is not consistent with number of cartesian ducts.'
@@ -161,7 +161,7 @@
       cli_args = 'Mesh/pattern/pattern_boundary=expanded
                   --mesh-only "patterned_err.e"'
       expect_err = 'This parameter must be provided when pattern_boundary is expanded.'
-      requirement ='The system shall throw an error if no square size is provided when pattern_boundary is hexagon.'
+      requirement ='The system shall throw an error if no square size is provided when pattern_boundary is expanded.'
     []
     [err_missing_input_meshes_in_pattern]
       type = 'RunException'
@@ -196,10 +196,10 @@
     [err_cut_off_input]
       type = 'RunException'
       input = 'patterned_2d.i'
-      cli_args = 'Mesh/pattern/square_size=18
+      cli_args = 'Mesh/pattern/square_size=36
                   Mesh/pattern/deform_non_circular_region=false
                   --mesh-only "patterned_err.e"'
       expect_err = 'the assembly is cut off so much that the internal structure that should not be altered is compromised.'
-      requirement ='The system shall throw an error if the input cartesian mesh geometry that should not be deformed is cut off.'
+      requirement ='The system shall throw an error if the circular regions or protected non-circular regions of the input cartesian mesh geometry are cut off.'
     []
 []

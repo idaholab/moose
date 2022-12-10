@@ -41,11 +41,6 @@ PatternedCartesianMeshGenerator::validParams()
                                     "square_size>0.0",
                                     "Size of the outmost square boundary to be generated; this is "
                                     "required only when pattern type is 'square'.");
-  MooseEnum square_size_style("apothem radius", "apothem");
-  params.addParam<MooseEnum>(
-      "square_size_style",
-      square_size_style,
-      "Style in which the square size is given (default: apothem i.e. half-pitch).");
   params.addRangeCheckedParam<std::vector<Real>>(
       "duct_sizes", "duct_sizes>0.0", "Distance(s) from center to duct(s) inner boundaries.");
   MooseEnum duct_sizes_style("apothem radius", "apothem");
@@ -108,7 +103,7 @@ PatternedCartesianMeshGenerator::validParams()
       "background_intervals duct_intervals uniform_mesh_on_sides deform_non_circular_region",
       "Mesh Density");
   params.addClassDescription(
-      "This PatternedCartesianMeshGenerator source code assembles square meshes into a sqaure "
+      "This PatternedCartesianMeshGenerator source code assembles square meshes into a square "
       "grid "
       "and optionally forces the outer boundary to be square and/or adds a duct.");
 
@@ -147,8 +142,6 @@ PatternedCartesianMeshGenerator::PatternedCartesianMeshGenerator(const InputPara
                                 ? getParam<std::string>("external_boundary_name")
                                 : std::string()),
     _create_interface_boundaries(getParam<bool>("create_interface_boundaries")),
-    _square_size_style(
-        getParam<MooseEnum>("square_size_style").template getEnum<PolygonSizeStyle>()),
     _deform_non_circular_region(getParam<bool>("deform_non_circular_region")),
     _pattern_pitch_meta(declareMeshProperty("pattern_pitch_meta", 0.0)),
     _input_pitch_meta(declareMeshProperty("input_pitch_meta", 0.0)),
@@ -182,7 +175,7 @@ PatternedCartesianMeshGenerator::PatternedCartesianMeshGenerator(const InputPara
   }
   if (pattern_elem_size.size() > 1 || *pattern_elem_size.begin() != _pattern.size())
     paramError("pattern",
-               "The two-dimentional array parameter pattern must have a correct square shape.");
+               "The two-dimensional array parameter pattern must have a correct square shape.");
 
   if (*std::max_element(pattern_max_array.begin(), pattern_max_array.end()) >= _input_names.size())
     paramError("pattern",
@@ -307,9 +300,7 @@ PatternedCartesianMeshGenerator::generate()
         paramError("square_size",
                    "This parameter must be provided when pattern_boundary is expanded.");
       else
-        _pattern_pitch = 2.0 * (_square_size_style == PolygonSizeStyle::apothem
-                                    ? getParam<Real>("square_size")
-                                    : getParam<Real>("square_size") * std::cos(M_PI / 4.0));
+        _pattern_pitch = getParam<Real>("square_size");
     }
     for (MooseIndex(_input_names) i = 0; i < _input_names.size(); ++i)
     {
@@ -527,7 +518,7 @@ PatternedCartesianMeshGenerator::generate()
                                 _create_interface_boundaries);
 
           if (extra_dist_shift != 0)
-            cutOffHexDeform(
+            cutOffPolyDeform(
                 *tmp_peripheral_mesh, orientation, y_max_0, y_max_n, y_min, mesh_type, 90.0);
 
           if (i == 0 && j == 0)

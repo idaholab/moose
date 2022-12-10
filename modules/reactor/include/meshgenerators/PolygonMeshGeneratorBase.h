@@ -591,7 +591,7 @@ protected:
   void nodeCoordRotate(Real & x, Real & y, const Real theta) const;
 
   /**
-   * Deforms peripheral region when the external side of a hexagonal assembly of stitched meshes
+   * Deforms peripheral region when the external side of a polygon assembly of stitched meshes
    * cuts off the stitched meshes.
    * @param mesh input mesh to be deformed
    * @param orientation orientation angle of the input mesh (move the deformation direction to y)
@@ -603,14 +603,14 @@ protected:
    * @param unit_angle unit angle of the geometry, which is 60.0 for hexagonal and 90.0 for square
    * @return n/a (input mesh is directly altered)
    */
-  void cutOffHexDeform(MeshBase & mesh,
-                       const Real orientation,
-                       const Real y_max_0,
-                       const Real y_max_n,
-                       const Real y_min,
-                       const unsigned int mesh_type,
-                       const Real unit_angle = 60.0,
-                       const Real tols = 1E-5) const;
+  void cutOffPolyDeform(MeshBase & mesh,
+                        const Real orientation,
+                        const Real y_max_0,
+                        const Real y_max_n,
+                        const Real y_min,
+                        const unsigned int mesh_type,
+                        const Real unit_angle = 60.0,
+                        const Real tols = 1E-5) const;
 
   /**
    * Finds the center of a quadrilateral based on four vertices.

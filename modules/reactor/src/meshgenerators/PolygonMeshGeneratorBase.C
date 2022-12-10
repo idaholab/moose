@@ -1282,14 +1282,14 @@ PolygonMeshGeneratorBase::nodeCoordRotate(Real & x, Real & y, const Real theta) 
 }
 
 void
-PolygonMeshGeneratorBase::cutOffHexDeform(MeshBase & mesh,
-                                          const Real orientation,
-                                          const Real y_max_0,
-                                          const Real y_max_n,
-                                          const Real y_min,
-                                          const unsigned int mesh_type,
-                                          const Real unit_angle,
-                                          const Real tols) const
+PolygonMeshGeneratorBase::cutOffPolyDeform(MeshBase & mesh,
+                                           const Real orientation,
+                                           const Real y_max_0,
+                                           const Real y_max_n,
+                                           const Real y_min,
+                                           const unsigned int mesh_type,
+                                           const Real unit_angle,
+                                           const Real tols) const
 {
   for (auto & node_ptr : as_range(mesh.nodes_begin(), mesh.nodes_end()))
   {

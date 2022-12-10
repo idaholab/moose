@@ -64,8 +64,6 @@ protected:
   const std::string _external_boundary_name;
   /// Whether interface boundaries are created
   const bool _create_interface_boundaries;
-  /// Style of the polygon size parameter
-  const PolygonSizeStyle _square_size_style;
   /// Whether the non-circular region (outside the rings) can be deformed
   const bool _deform_non_circular_region;
   /// Pitch size of the input assembly mesh

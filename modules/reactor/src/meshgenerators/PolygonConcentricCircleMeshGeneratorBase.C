@@ -611,7 +611,7 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
     if (std::find(_sides_to_adapt.begin(), _sides_to_adapt.end(), mesh_index) !=
         _sides_to_adapt.end())
     {
-      // The following lines only work for hexagon and square; and only a hexagon or a sqaure needs
+      // The following lines only work for hexagon and square; and only a hexagon or a square needs
       // such functionality.
       Real lower_azi = isParamValid("hexagon_size") ? ((Real)mesh_index * 60.0 - 150.0)
                                                     : ((Real)mesh_index * 90.0 - 135.0);

@@ -23,7 +23,7 @@
     background_intervals = 2
     background_block_id = 25
     background_block_name = 'assem_block'
-    square_size = 18
+    square_size = 36
   []
   [pattern_mod]
     type = PatternedCartesianPeripheralModifier
