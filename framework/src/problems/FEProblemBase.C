@@ -255,6 +255,11 @@ FEProblemBase::validParams()
 
   params.declareControllable("solve");
 
+  params.addParam<bool>(
+      "allow_invalid_solution",
+      false,
+      "Set to true to allow convergence even though the solution has been marked as 'invalid'");
+
   return params;
 }
 
@@ -343,6 +348,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _skip_additional_restart_data(getParam<bool>("skip_additional_restart_data")),
     _skip_nl_system_check(getParam<bool>("skip_nl_system_check")),
     _fail_next_linear_convergence_check(false),
+    _allow_invalid_solution(getParam<bool>("allow_invalid_solution")),
     _started_initial_setup(false),
     _has_internal_edge_residual_objects(false),
     _u_dot_requested(false),

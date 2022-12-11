@@ -132,7 +132,8 @@ SystemBase::SystemBase(SubProblem & subproblem,
     _time_integrator(nullptr),
     _automatic_scaling(false),
     _verbose(false),
-    _solution_states_initialized(false)
+    _solution_states_initialized(false),
+    _solution_invalid(false)
 {
 }
 
@@ -1181,6 +1182,12 @@ SystemBase::matrixTagActive(TagID tag) const
   mooseAssert(_subproblem.matrixTagExists(tag), "Matrix tag " << tag << " does not exist");
 
   return tag < _matrix_tag_active_flags.size() && _matrix_tag_active_flags[tag];
+}
+
+void
+SystemBase::setSolutionInvalid(bool solution_invalid)
+{
+  _solution_invalid = solution_invalid;
 }
 
 unsigned int
