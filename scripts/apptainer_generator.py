@@ -32,6 +32,8 @@ class ApptainerGenerator:
             self.name = self.add_name_suffix(library_meta, self.args.suffix)
         if self.args.tag is not None:
             self.tag = self.args.tag
+        if self.args.tag_prefix is not None:
+            self.tag = f'{self.args.tag_prefix}-{self.tag}'
 
         if hasattr(self.args, 'dir'):
             self.dir = os.path.abspath(self.args.dir)
@@ -60,6 +62,7 @@ class ApptainerGenerator:
                     help='The library to act on')
             parser.add_argument('--suffix', type=str, help='Suffix to add to the name')
             parser.add_argument('--tag', type=str, help='Alternate tag')
+            parser.add_argument('--tag-prefix', type=str, help='Prefix to add to the tag')
             if write:
                 parser.add_argument('dir', help='The directory to perform actions in', default='.')
                 parser.add_argument('--overwrite', action='store_true',
@@ -82,6 +85,8 @@ class ApptainerGenerator:
                                 help='Use a local dependency container')
             parser.add_argument('--alt-dep-tag', type=str,
                                 help='An alternate dependency tag to pull')
+            parser.add_argument('--alt-dep-tag-prefix', type=str,
+                                help='A prefix to add to the alternate dependency tag')
             parser.add_argument('--dep-suffix', type=str)
         add_def_args(def_parser)
 
@@ -108,6 +113,8 @@ class ApptainerGenerator:
         add_default_args(push_parser, remote=True)
         push_parser.add_argument('--to-tag', type=str,
                                  help='An alternate tag to push to')
+        push_parser.add_argument('--to-tag-prefix', type=str,
+                                 help='A prefix to add to the pushed tag')
 
         uri_parser = action_parser.add_parser('uri', parents=[parent],
                                               help='Get the URI to a container')
@@ -282,13 +289,16 @@ class ApptainerGenerator:
         if not self.oras_exists(uri):
             not_found = f'Remote container dependency {uri} not found'
             # Without an alternate, we're screwed
-            if self.args.alt_dep_tag is None:
+            if self.args.alt_dep_tag is None and self.args.alt_dep_tag_prefix is None:
                 self.error(not_found)
 
             self.warn(not_found + '; trying alternate')
 
             # We have an alternate tag (example: trying to pull a PR); try it
-            tag = self.args.alt_dep_tag
+            if self.args.alt_dep_tag is not None:
+                tag = self.args.alt_dep_tag
+            if self.args.alt_dep_tag_prefix is not None:
+                tag = f'{self.args.alt_dep_tag_prefix}-{tag}'
             uri = self.oras_uri(project, name, tag)
             alt_exists = self.oras_exists(uri)
 
@@ -464,6 +474,8 @@ class ApptainerGenerator:
         """
         from_tag = self.tag
         to_tag = from_tag if self.args.to_tag is None else self.args.to_tag
+        if self.args.to_tag_prefix is not None:
+            to_tag = f'{self.args.to_tag_prefix}-{to_tag}'
 
         container_path = self.container_path(self.name, from_tag)
         if not os.path.exists(container_path):
