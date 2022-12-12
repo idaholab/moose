@@ -76,7 +76,7 @@ FunctionValuePostprocessor::execute()
 PostprocessorValue
 FunctionValuePostprocessor::getValue()
 {
-  Point p(0, 0, 0);
+  Point p;
   if (_has_space_pp)
     for (unsigned int j = 0; j < 3; ++j)
       p(j) = *_point[j];
