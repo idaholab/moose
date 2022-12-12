@@ -1946,6 +1946,7 @@ LiquidMetalSubChannel1PhaseProblem::externalSolve()
     }
   }
   _aux->solution().close();
+  _aux->update();
 
   auto power_in = 0.0;
   auto power_out = 0.0;
