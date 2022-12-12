@@ -73,6 +73,14 @@ From: {{ APPTAINER_FROM }}
     APPLICATION_DIR=${TEMP_LOC}/${APPLICATION_NAME}
     export MOOSE_DIR=${TEMP_LOC}/moose
 
+    # If MOOSE_DIR is a symlink, we're using MOOSE within
+    # the app, so use that instead
+    if test -h $MOOSE_DIR; then
+        MOOSE_DIR_REAL=$(realpath $MOOSE_DIR)
+        rm ${MOOSE_DIR}
+        export MOOSE_DIR=${MOOSE_DIR_REAL}
+    fi
+
 {%- if MOOSE_SKIP_DOCS is not defined %}
     # These are needed for documentation and will be removed later
     EXTRA_DOC_PACKAGES="livereload pybtex beautifulsoup4"
