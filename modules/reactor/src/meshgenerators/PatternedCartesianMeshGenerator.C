@@ -25,7 +25,7 @@ PatternedCartesianMeshGenerator::validParams()
   params.addRequiredRangeCheckedParam<std::vector<std::vector<unsigned int>>>(
       "pattern",
       "pattern>=0",
-      "A double-indexed square-shaped array starting with the upper-left corner.");
+      "A double-indexed cartesian (square-shaped) array starting with the upper-left corner.");
   MooseEnum cartesian_pattern_boundary("none expanded", "expanded");
   params.addParam<MooseEnum>(
       "pattern_boundary", cartesian_pattern_boundary, "The boundary shape of the patterned mesh.");
@@ -37,10 +37,11 @@ PatternedCartesianMeshGenerator::validParams()
                                             3,
                                             "background_intervals>0",
                                             "Radial intervals in the assembly peripheral region.");
-  params.addRangeCheckedParam<Real>("square_size",
-                                    "square_size>0.0",
-                                    "Size of the outmost square boundary to be generated; this is "
-                                    "required only when pattern type is 'square'.");
+  params.addRangeCheckedParam<Real>(
+      "square_size",
+      "square_size>0.0",
+      "Size (side length) of the outmost square boundary to be generated; this is "
+      "required only when pattern type is 'expanded'.");
   params.addRangeCheckedParam<std::vector<Real>>(
       "duct_sizes", "duct_sizes>0.0", "Distance(s) from center to duct(s) inner boundaries.");
   MooseEnum duct_sizes_style("apothem radius", "apothem");
@@ -235,7 +236,7 @@ PatternedCartesianMeshGenerator::generate()
       meshes[i] = replicated_mesh;
     else
       paramError("inputs", "Mesh '", _input_names[i], "' is not a replicated mesh but it must be");
-    // throw an error message if the input mesh has a flat side up
+    // throw an error message if the input mesh does not have a flat side up
     if (hasMeshProperty("flat_side_up", _input_names[i]))
       if (!getMeshProperty<bool>("flat_side_up", _input_names[i]))
         paramError("inputs",

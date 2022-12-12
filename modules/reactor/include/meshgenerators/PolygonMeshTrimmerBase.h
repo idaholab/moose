@@ -12,7 +12,9 @@
 #include "MooseEnum.h"
 
 /**
- * This PolygonMeshTrimmerBase is the base class for CartesianMeshTrimmer and HexagonMeshTrimmer.
+ * This PolygonMeshTrimmerBase is the base class for CartesianMeshTrimmer and HexagonMeshTrimmer,
+ * which take in a cartesian/hexagonal assembly or core mesh and perform peripheral and/or center
+ * trimming on it.
  */
 class PolygonMeshTrimmerBase : public PolygonMeshGeneratorBase
 {

@@ -154,7 +154,7 @@
     type = RunException
     input = 'err_trimmability.i'
     cli_args = 'Mesh/inactive="sq_1 peripheral_ring"'
-    expect_err = 'The input mesh is not compatible with CartesianMeshTrimmer.'
+    expect_err = "The input mesh's meta data is not compatible with the CartesianMeshTrimmer."
     requirement = "The system shall throw an error if the input mesh has not been marked compatible with cartesian mesh trimming."
   []
   [err_center_trimmable]

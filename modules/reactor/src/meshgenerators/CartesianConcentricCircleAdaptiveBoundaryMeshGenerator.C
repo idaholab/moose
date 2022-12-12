@@ -18,17 +18,16 @@ CartesianConcentricCircleAdaptiveBoundaryMeshGenerator::validParams()
 {
   InputParameters params = PolygonConcentricCircleMeshGeneratorBase::validParams();
   params.addRequiredRangeCheckedParam<Real>(
-      "square_size", "square_size>0.0", "Size of the square to be generated.");
+      "square_size", "square_size>0.0", "Size (side length) of the square mesh to be generated.");
   MooseEnum square_size_style("apothem radius", "apothem");
-  params.addParam<MooseEnum>(
-      "square_size_style",
-      square_size_style,
-      "Style in which the square size is given (default: apothem i.e. half-pitch).");
+  params.setParameters<MooseEnum>("square_size_style", square_size_style);
+  params.suppressParameter<MooseEnum>("square_size_style");
   params.addParam<std::vector<unsigned int>>(
       "sides_to_adapt",
       "List of the square reference side indices that correspond to the sides that need adaptive "
       "meshing. The meshes to adapt these sides to are provided in 'inputs'.");
-  params.addParam<std::vector<MeshGeneratorName>>("inputs", "The input MeshGenerator.");
+  params.addParam<std::vector<MeshGeneratorName>>("inputs",
+                                                  "The name list of the input meshes to adapt.");
   params.addParam<bool>("is_control_drum",
                         false,
                         "Whether this mesh is for a control drum. The value can be set as 'false' "

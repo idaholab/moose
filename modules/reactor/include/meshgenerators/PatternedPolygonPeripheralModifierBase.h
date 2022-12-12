@@ -14,8 +14,10 @@
 #include "LinearInterpolation.h"
 
 /**
- * This PatternedPolygonPeripheralModifierBase is the base class for PatternedCartesianPeripheralModifier
- * and PatternedHexPeripheralModifier.
+ * This PatternedPolygonPeripheralModifierBase is the base class for
+ * PatternedCartesianPeripheralModifier and PatternedHexPeripheralModifier, which remove the outmost
+ * layer of the input cartesian/hexagonal mesh and add a transition layer mesh to facilitate
+ * stitching.
  */
 class PatternedPolygonPeripheralModifierBase : public PolygonMeshGeneratorBase
 {

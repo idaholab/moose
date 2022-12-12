@@ -58,10 +58,8 @@ HexagonMeshTrimmer::HexagonMeshTrimmer(const InputParameters & parameters)
         MathUtils::euclideanMod(_trimming_end_sector - _trimming_start_sector, 12);
   if (_center_trim_sector_number > 6 && _center_trim_sector_number < 12)
     paramError("center_trim_starting_index",
-               "the remaining mesh after center trimming defined by this parameter "
-               "and "
-               "center_trim_ending_index must be equal or smaller than half of the "
-               "input mesh.");
+               "the remaining mesh after center trimming defined by this parameter and "
+               "center_trim_ending_index must be equal or smaller than half of the input mesh.");
   if (_center_trim_sector_number == 12 && !_center_trimming_section_boundary.empty())
     paramError("center_trimming_section_boundary",
                "this input parameter is not used if center trimming is not "

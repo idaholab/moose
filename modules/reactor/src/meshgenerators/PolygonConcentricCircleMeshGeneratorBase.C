@@ -301,7 +301,8 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
     _polygon_size(isParamValid("polygon_size")
                       ? getParam<Real>("polygon_size")
                       : (isParamValid("hexagon_size") ? getParam<Real>("hexagon_size")
-                                                      : getParam<Real>("square_size"))),
+                                                      : (getParam<Real>("square_size") /
+                                                         2.0))), // square size is twice as apothem
     _num_sectors_per_side(getParam<std::vector<unsigned int>>("num_sectors_per_side")),
     _background_intervals(getParam<unsigned int>("background_intervals")),
     // background is usually a single block; however, when there are no rings, background has two

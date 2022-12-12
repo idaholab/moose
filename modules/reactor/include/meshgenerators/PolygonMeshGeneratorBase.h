@@ -549,13 +549,14 @@ protected:
 
   /**
    * Sets up poisitions of peripheral region layer by layer before deformation due to cutoff.
-   * @param positions_inner key positions of the inner side of the peripheral region
-   * @param d_positions_outer key inremental positions of the outer side of the peripheral region
+   * @param positions_inner key positions (i.e., vertices and mid-points) of the inner side of the
+   * peripheral region
+   * @param d_positions_outer key inremental positions (i.e., vertices and mid-points) of the outer
+   * side of the peripheral region
    * @param extra_dist_in extra distance applied to the inner side
    * @param extra_dist_out extra distance applied to the outer side
    * @param pitch pitch size of the involved hexagon mesh
    * @param radial_index radial layer index
-   * @return n/a
    */
   void positionSetup(std::vector<std::pair<Real, Real>> & positions_inner,
                      std::vector<std::pair<Real, Real>> & d_positions_outer,
@@ -566,19 +567,19 @@ protected:
 
   /**
    * Sets up positions of peripheral region layer by layer before deformation due to cutoff.
-   * @param positions_inner key positions of the inner side of the peripheral region
-   * @param d_positions_outer key incremental positions of the outer side of the peripheral region
+   * @param positions_inner key positions (i.e., vertices and mid-points) of the inner side of the
+   * peripheral region
+   * @param d_positions_outer key incremental positions (i.e., vertices and mid-points) of the outer
+   * side of the peripheral region
    * @param extra_dist_in extra distance applied to the inner side of the peripheral layer
    * @param extra_dist_out extra distance applied to the outer side
    * @param pitch pitch size of the involved polygonal mesh
-   * @param radial_index radial layer index
    */
   void positionSetupRect(std::vector<std::pair<Real, Real>> & positions_inner,
                          std::vector<std::pair<Real, Real>> & d_positions_outer,
                          const Real extra_dist_in,
                          const Real extra_dist_out,
-                         const Real pitch,
-                         const unsigned int radial_index) const;
+                         const Real pitch) const;
 
   /**
    * Calculates x and y coordinates after rotating by theta angle.

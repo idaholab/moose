@@ -108,11 +108,8 @@ PolygonMeshTrimmerBase::generate()
     paramError("external_boundary",
                "the provided external boundary does not exist in the input mesh.");
 
-  std::vector<subdomain_id_type> subdomain_ids;
-  for (auto elem_it = mesh.active_elements_begin(); elem_it != mesh.active_elements_end();
-       elem_it++)
-    subdomain_ids.push_back((*elem_it)->subdomain_id());
-  std::set<subdomain_id_type> subdomain_ids_set(subdomain_ids.begin(), subdomain_ids.end());
+  std::set<subdomain_id_type> subdomain_ids_set;
+  mesh.subdomain_ids(subdomain_ids_set);
 
   if (*max_element(_trim_peripheral_region.begin(), _trim_peripheral_region.end()))
   {

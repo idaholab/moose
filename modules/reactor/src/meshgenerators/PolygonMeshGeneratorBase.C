@@ -1065,12 +1065,8 @@ PolygonMeshGeneratorBase::addPeripheralMeshRect(
   // Loop to calculate the positions of the boundaries.
   for (unsigned int i = 0; i < extra_dist.size(); i++)
   {
-    positionSetupRect(positions_inner,
-                      d_positions_outer,
-                      i == 0 ? 0.0 : extra_dist[i - 1],
-                      extra_dist[i],
-                      pitch,
-                      i);
+    positionSetupRect(
+        positions_inner, d_positions_outer, i == 0 ? 0.0 : extra_dist[i - 1], extra_dist[i], pitch);
 
     // Loop for all applicable sides that need peripherial mesh (3 for corner and 2 for edge)
     for (unsigned int peripheral_index = 0; peripheral_index < inner_index.size();
@@ -1216,8 +1212,7 @@ PolygonMeshGeneratorBase::positionSetupRect(std::vector<std::pair<Real, Real>> &
                                             std::vector<std::pair<Real, Real>> & d_positions_outer,
                                             const Real extra_dist_in,
                                             const Real extra_dist_out,
-                                            const Real pitch,
-                                            const unsigned int radial_index) const
+                                            const Real pitch) const
 {
   positions_inner.resize(0);
   d_positions_outer.resize(0);
@@ -1243,33 +1238,25 @@ PolygonMeshGeneratorBase::positionSetupRect(std::vector<std::pair<Real, Real>> &
   //           |         |
   //           |         |
   //           |_________|
-  positions_inner.push_back(
-      std::make_pair(-pitch / 2.0, pitch / 2.0 + (radial_index != 0 ? extra_dist_in : 0.0)));
-  positions_inner.push_back(
-      std::make_pair(0.0, pitch / 2.0 + (radial_index != 0 ? extra_dist_in : 0.0)));
-  positions_inner.push_back(
-      std::make_pair(pitch / 2.0 + (radial_index != 0 ? extra_dist_in : 0.0),
-                     pitch / 2.0 + (radial_index != 0 ? extra_dist_in : 0.0)));
-  positions_inner.push_back(
-      std::make_pair(pitch / 2.0 + (radial_index != 0 ? extra_dist_in : 0.0), 0.0));
-  positions_inner.push_back(
-      std::make_pair(pitch / 2.0 + (radial_index != 0 ? extra_dist_in : 0.0), -pitch / 2.0));
-  positions_inner.push_back(
-      std::make_pair(pitch / 2.0, pitch / 2.0 + (radial_index != 0 ? extra_dist_in : 0.0)));
 
+  // Inner positons defined from index 0 through 5 as shown in the above cartoon
+  positions_inner.push_back(std::make_pair(-pitch / 2.0, pitch / 2.0 + extra_dist_in));
+  positions_inner.push_back(std::make_pair(0.0, pitch / 2.0 + extra_dist_in));
+  positions_inner.push_back(
+      std::make_pair(pitch / 2.0 + extra_dist_in, pitch / 2.0 + extra_dist_in));
+  positions_inner.push_back(std::make_pair(pitch / 2.0 + extra_dist_in, 0.0));
+  positions_inner.push_back(std::make_pair(pitch / 2.0 + extra_dist_in, -pitch / 2.0));
+  positions_inner.push_back(std::make_pair(pitch / 2.0, pitch / 2.0 + extra_dist_in));
+
+  // Outer positons (relative displacement from inner ones) defined from index 0 through 5 as shown
+  // in the above cartoon
+  d_positions_outer.push_back(std::make_pair(0.0, extra_dist_out - extra_dist_in));
+  d_positions_outer.push_back(std::make_pair(0.0, extra_dist_out - extra_dist_in));
   d_positions_outer.push_back(
-      std::make_pair(0.0, extra_dist_out - (radial_index != 0 ? extra_dist_in : 0.0)));
-  d_positions_outer.push_back(
-      std::make_pair(0.0, extra_dist_out - (radial_index != 0 ? extra_dist_in : 0.0)));
-  d_positions_outer.push_back(
-      std::make_pair(extra_dist_out - (radial_index != 0 ? extra_dist_in : 0.0),
-                     extra_dist_out - (radial_index != 0 ? extra_dist_in : 0.0)));
-  d_positions_outer.push_back(
-      std::make_pair(extra_dist_out - (radial_index != 0 ? extra_dist_in : 0.0), 0.0));
-  d_positions_outer.push_back(
-      std::make_pair(extra_dist_out - (radial_index != 0 ? extra_dist_in : 0.0), 0.0));
-  d_positions_outer.push_back(
-      std::make_pair(0.0, extra_dist_out - (radial_index != 0 ? extra_dist_in : 0.0)));
+      std::make_pair(extra_dist_out - extra_dist_in, extra_dist_out - extra_dist_in));
+  d_positions_outer.push_back(std::make_pair(extra_dist_out - extra_dist_in, 0.0));
+  d_positions_outer.push_back(std::make_pair(extra_dist_out - extra_dist_in, 0.0));
+  d_positions_outer.push_back(std::make_pair(0.0, extra_dist_out - extra_dist_in));
 }
 
 void

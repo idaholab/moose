@@ -63,7 +63,8 @@ PatternedPolygonPeripheralModifierBase::PatternedPolygonPeripheralModifierBase(
             ? getParam<std::vector<dof_id_type>>("new_extra_id_values_to_assign")
             : std::vector<dof_id_type>()),
     _pattern_pitch_meta(declareMeshProperty<Real>("pattern_pitch_meta", 0.0)),
-    // Use CartesianConcentricCircleAdaptiveBoundaryMeshGenerator for control drum meshing
+    // Use CartesianConcentricCircleAdaptiveBoundaryMeshGenerator for cartesian control drum meshing
+    // Use HexagonConcentricCircleAdaptiveBoundaryMeshGenerator for hexagonal control drum meshing
     _is_control_drum_meta(declareMeshProperty<bool>("is_control_drum_meta", false)),
     _mesh(getMeshByName(_input_name))
 {
@@ -178,7 +179,7 @@ PatternedPolygonPeripheralModifierBase::generate()
   // Clone the original mesh without outer layer for information extraction
   auto input_mesh_origin = dynamic_pointer_cast<ReplicatedMesh>(input_mesh->clone());
 
-  // Make four meshes of new outer layer for four sides.
+  // Make four (cartesian) or six (hexagonal) meshes of new outer layer for four or six sides.
   for (unsigned i_side = 0; i_side < _num_sides; i_side++)
   {
     // Use azimuthalAnglesCollector to assign boundary Points to a reference vector

@@ -80,7 +80,8 @@ CartesianMeshTrimmer::generate()
       paramError("input", "The input mesh cannot be trimmed through its center.");
   }
   else
-    paramError("input", "The input mesh 's meta data is not compatible with the CartesianMeshTrimmer.");
+    paramError("input",
+               "The input mesh's meta data is not compatible with the CartesianMeshTrimmer.");
 
   return PolygonMeshTrimmerBase::generate();
 }

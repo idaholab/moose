@@ -8,7 +8,7 @@ This `PatternedCartesianPeripheralModifier` class utilizes [`FillBetweenPointVec
 
 ##  Motivation
 
-The motivation of developing this mesh generator is similar to that of the [`PatternedCartesianPeripheralModifier`](/PatternedCartesianPeripheralModifier.md). Please refer to that documentation for details.
+The motivation of developing this mesh generator is similar to that of the [`PatternedHexPeripheralModifier`](/PatternedHexPeripheralModifier.md). Please refer to that documentation for details.
 
 ## Modification of Peripheral Boundary to Allow Stitching
 
