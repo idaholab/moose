@@ -74,15 +74,17 @@
     # Note, in case you want to modify this test.  It is important that there are
     # an odd number of apps because this way we will catch errors caused by load
     # imbalances with our -p 2 tests.
+    # The tiny offsets are to remove indetermination on nodal variable transfers
     type = TransientMultiApp
     app_type = MooseTestApp
-    positions = '-0.11 -0.11 0.0
-                 0.91 -0.11 0.0
-                 0.4 0.4 0.0
-                 -0.11 0.91 0.0
-                 0.91 0.91 0.0'
+    positions = '-0.1100001 -0.1100001 0.0
+                 0.9100001 -0.1100001 0.0
+                 0.400001 0.400001 0.0
+                 -0.1100001 0.9100001 0.0
+                 0.9100001 0.9100001 0.0'
     input_files = two_way_many_apps_sub.i
     execute_on = timestep_end
+    output_in_position = true
   [../]
 []
 
@@ -96,7 +98,7 @@
   [./elemental_from_sub]
     type = MultiAppGeneralFieldNearestNodeTransfer
     from_multi_app = sub
-    source_variable = u
+    source_variable = u_elem
     variable = elemental_from_sub
   [../]
   [./to_sub]

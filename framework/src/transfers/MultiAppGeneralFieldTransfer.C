@@ -497,7 +497,11 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
       // We should only have one value for each variable at any given point.
       if (cache.count(p) != 0 && !GeneralFieldTransfer::isBetterOutOfMeshValue(val) &&
           !MooseUtils::absoluteFuzzyEqual(cache[p], val))
+      {
         _num_overlaps++;
+        mooseWarning("Equidistant origin points detected for point (" + std::to_string(p(0)) +
+                     ", " + std::to_string(p(1)) + ", " + std::to_string(p(2)) + ")");
+      }
       if (!GeneralFieldTransfer::isBetterOutOfMeshValue(val))
         cache[p] = val;
     }
@@ -553,7 +557,13 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
           // Count disagreeing overlaps
           if (MooseUtils::absoluteFuzzyEqual(val.distance, incoming_vals[val_offset].second) &&
               !MooseUtils::absoluteFuzzyEqual(val.interp, incoming_vals[val_offset].first))
+          {
             _num_overlaps++;
+            mooseWarning("Equidistant origin points detected for point (" +
+                         std::to_string(point_requests[val_offset](0)) + ", " +
+                         std::to_string(point_requests[val_offset](1)) + ", " +
+                         std::to_string(point_requests[val_offset](2)) + ")");
+          }
           val.interp = incoming_vals[val_offset].first;
           val.pid = pid;
           val.distance = incoming_vals[val_offset].second;

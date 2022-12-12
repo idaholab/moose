@@ -19,6 +19,8 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [u_elem]
+  []
 []
 
 [Kernels]
@@ -26,6 +28,15 @@
     type = Diffusion
     variable = u
   [../]
+[]
+
+[AuxKernels]
+  # this is done to avoid floating point precision on sending u, with two equidistant points
+  [copy_over]
+    type = SelfAux
+    v = u
+    variable = u_elem
+  []
 []
 
 [BCs]
