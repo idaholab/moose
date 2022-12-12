@@ -36,6 +36,9 @@ ParallelMarkovChainMonteCarloBase::validParams()
   params.addRequiredParam<FileName>("file_name", "Name of the CSV file with configuration values.");
   params.addParam<std::string>(
       "file_column_name", "Name of column in CSV file to use, by default first column is used.");
+  params.addRequiredParam<std::vector<Real>>("std_prop", "Standard deviations for making the next proposal.");
+  params.addParam<std::vector<Real>>("lb", "Lower bounds for making the next proposal.");
+  params.addParam<std::vector<Real>>("ub", "Upper bounds for making the next proposal.");
   params.addParam<unsigned int>(
       "num_random_seeds",
       100000,
@@ -52,6 +55,9 @@ ParallelMarkovChainMonteCarloBase::ParallelMarkovChainMonteCarloBase(const Input
     _num_parallel_proposals(getParam<unsigned int>("num_parallel_proposals")),
     // _likelihood(getLikelihoodByName(getParam<LikelihoodName>("likelihood"))),
     _initial_values(getParam<std::vector<Real>>("initial_values")),
+    _std_prop(getParam<std::vector<Real>>("std_prop")),
+    _lb(isParamValid("lb") ? &getParam<std::vector<Real>>("lb") : nullptr),
+    _ub(isParamValid("ub") ? &getParam<std::vector<Real>>("ub") : nullptr),
     _step(getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")->timeStep()),
     _check_step(0),
     _num_random_seeds(getParam<unsigned int>("num_random_seeds"))
@@ -82,20 +88,29 @@ ParallelMarkovChainMonteCarloBase::ParallelMarkovChainMonteCarloBase(const Input
 
   _check_step = 0;
 
-  _std_use.resize(_priors.size());
-  _std_use[0] = 1e-3;
-  _std_use[1] = 5.0;
-  _std_use[2] = 0.01;
+  if (_lb && !_ub)
+    mooseError("Both lower and upper bounds should be specified.");
+  
+  if (!_lb && _ub)
+    mooseError("Both lower and upper bounds should be specified.");
 
-  _lb.resize(_priors.size());
-  _lb[0] = 1e-3;
-  _lb[1] = 20.0;
-  _lb[2] = 0.01;
+  if (_std_prop.size() != _priors.size())
+    mooseError("The size of the proposal stds should be equal to the number of priors (or tunable params).");
 
-  _ub.resize(_priors.size());
-  _ub[0] = 9e-2;
-  _ub[1] = 2200.0;
-  _ub[2] = 1.0;
+  // _std_prop.resize(_priors.size());
+  // _std_prop[0] = 1e-3;
+  // _std_prop[1] = 5.0;
+  // _std_prop[2] = 0.01;
+
+  // _lb.resize(_priors.size());
+  // _lb[0] = 1e-3;
+  // _lb[1] = 20.0;
+  // _lb[2] = 0.01;
+
+  // _ub.resize(_priors.size());
+  // _ub[0] = 9e-2;
+  // _ub[1] = 2200.0;
+  // _ub[2] = 1.0;
 }
 
 dof_id_type
@@ -127,7 +142,12 @@ ParallelMarkovChainMonteCarloBase::sampleSetUp(const SampleMode /*mode*/)
     for (unsigned int j = 0; j < _num_parallel_proposals; ++j)
     {
       for (unsigned int i = 0; i < _priors.size(); ++i)
-        tmp[i] = TruncatedNormal::quantile(getRand(seed_value), _initial_values[i], _std_use[i], _lb[i], _ub[i]); // Normal::quantile(getRand(seed_value), _initial_values[i], _std_use[i]); // 1e-5 5e-5
+      {
+        if (_lb)
+          tmp[i] = TruncatedNormal::quantile(getRand(seed_value), _initial_values[i], _std_prop[i], (*_lb)[i], (*_ub)[i]);
+        else
+          tmp[i] = Normal::quantile(getRand(seed_value), _initial_values[i], _std_prop[i]);
+      }
       for (unsigned int i = 0; i < _confg_values.size(); ++i)
       {
         tmp[_priors.size()] = _confg_values[i];
@@ -155,7 +175,10 @@ ParallelMarkovChainMonteCarloBase::sampleSetUp(const SampleMode /*mode*/)
         //   std_tmp = _proposal_std[i];
         // else
         //   std_tmp = 0.15; // 1e-5; // 5e-5
-        tmp[i] = TruncatedNormal::quantile(getRand(seed_value), _seed_inputs[i], _std_use[i], _lb[i], _ub[i]); // Normal::quantile(getRand(seed_value), _seed_inputs[i], _std_use[i]); // TruncatedNormal::quantile(getRand(seed_value), _seed_inputs[i], std_tmp, 1e-4, 9e-4); //  // 0.15
+        if (_lb)
+          tmp[i] = TruncatedNormal::quantile(getRand(seed_value), _seed_inputs[i], _std_prop[i], (*_lb)[i], (*_ub)[i]);
+        else
+          tmp[i] = Normal::quantile(getRand(seed_value), _seed_inputs[i], _std_prop[i]);
       }
       for (unsigned int i = 0; i < _confg_values.size(); ++i)
       {
