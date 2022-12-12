@@ -55,6 +55,15 @@ protected:
   /// Storage for prior distribution objects to be utilized
   std::vector<const Distribution *> _priors;
 
+  /// Standard deviations for making the next proposal
+  const std::vector<Real> & _std_prop;
+
+  /// Lower bounds for making the next proposal
+  const std::vector<Real> * _lb;
+
+  /// Upper bounds for making the next proposal
+  const std::vector<Real> * _ub;
+
   /// Track the current step of the main App
   const int & _step;
 
@@ -72,10 +81,4 @@ private:
   /// Initialize a certain number of random seeds. Change from the default only if you have to.
   std::vector<std::vector<Real>> _new_samples;
 
-  std::vector<Real> _std_use;
-
-  std::vector<Real> _lb;
-
-  std::vector<Real> _ub;
-  
 };
