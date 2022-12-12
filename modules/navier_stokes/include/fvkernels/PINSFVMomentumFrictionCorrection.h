@@ -20,6 +20,7 @@ public:
   void gatherRCData(const FaceInfo & fi) override final;
 
 protected:
+  ADReal computeQpResidual() override;
   /// Darcy coefficient
   const Moose::Functor<ADRealVectorValue> * const _cL;
   /// Forchheimer coefficient

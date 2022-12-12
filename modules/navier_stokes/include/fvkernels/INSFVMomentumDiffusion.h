@@ -22,11 +22,7 @@ public:
   void gatherRCData(const FaceInfo & fi) override final;
 
 protected:
-  /**
-   * Routine to compute this object's strong residual (e.g. not multiplied by area). This routine
-   * should also populate the _ae and _an coefficients
-   */
-  virtual ADReal computeStrongResidual();
+  ADReal computeQpResidual() override;
 
   /// The dynamic viscosity
   const Moose::Functor<ADReal> & _mu;

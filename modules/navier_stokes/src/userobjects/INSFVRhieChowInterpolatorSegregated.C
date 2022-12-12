@@ -55,6 +55,8 @@ INSFVRhieChowInterpolatorSegregated::validParams()
 
   params.addParam<NonlinearSystemName>(
       "momentum_system", "momentum_system", "The nonlinear system for the momentum equation");
+  params.addParam<NonlinearSystemName>(
+      "pressure_system", "pressure_system", "The nonlinear system for the pressure equation");
   return params;
 }
 
@@ -62,7 +64,25 @@ INSFVRhieChowInterpolatorSegregated::INSFVRhieChowInterpolatorSegregated(
     const InputParameters & params)
   : RhieChowInterpolatorBase(params),
     _HbyA(_moose_mesh, _sub_ids, "HbyA"),
-    _Ainv(_moose_mesh, _sub_ids, "Ainv")
+    _Ainv(_moose_mesh, _sub_ids, "Ainv"),
+    _vel(std::make_unique<PiecewiseByBlockLambdaFunctor<ADRealVectorValue>>(
+        name(),
+        [this](const auto & r, const auto & t) -> ADRealVectorValue
+        {
+          ADRealVectorValue velocity((*_u)(r, t));
+          if (_dim >= 2)
+            velocity(1) = (*_v)(r, t);
+          if (_dim >= 3)
+            velocity(2) = (*_w)(r, t);
+          return velocity;
+        },
+        std::set<ExecFlagType>({EXEC_ALWAYS}),
+        _moose_mesh,
+        blockIDs())),
+    _momentum_sys_number(_fe_problem.nlSysNum(getParam<NonlinearSystemName>("momentum_system"))),
+    _pressure_sys_number(_fe_problem.nlSysNum(getParam<NonlinearSystemName>("pressure_system"))),
+    _momentum_sys(_fe_problem.getNonlinearSystemBase(_momentum_sys_number)),
+    _pressure_sys(_fe_problem.getNonlinearSystemBase(_pressure_sys_number))
 {
 }
 
@@ -90,11 +110,25 @@ INSFVRhieChowInterpolatorSegregated::execute()
 }
 
 VectorValue<ADReal>
-INSFVRhieChowInterpolatorSegregated::getVelocity(const FaceInfo & /*fi*/,
+INSFVRhieChowInterpolatorSegregated::getVelocity(const FaceInfo & fi,
                                                  const Moose::StateArg & /*time*/,
                                                  THREAD_ID /*tid*/,
                                                  Moose::FV::InterpMethod /*m*/) const
 {
+  if (Moose::FV::onBoundary(*this, fi))
+  {
+    const Elem * const elem = &fi.elem();
+    const Elem * const neighbor = fi.neighborPtr();
+    const bool correct_skewness =
+        (_u->faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
+
+    const auto sub_id =
+        hasBlocks(elem->subdomain_id()) ? elem->subdomain_id() : neighbor->subdomain_id();
+    const Moose::SingleSidedFaceArg boundary_face{
+        &fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, sub_id};
+    return (*_vel)(boundary_face);
+  }
+
   _console << "Something will come here eventually" << std::endl;
   return ADRealVectorValue(0.0);
 }
@@ -102,8 +136,7 @@ INSFVRhieChowInterpolatorSegregated::getVelocity(const FaceInfo & /*fi*/,
 void
 INSFVRhieChowInterpolatorSegregated::computeHbyA()
 {
-  NonlinearSystemBase & sys = _fe_problem.getNonlinearSystemBase(
-      _fe_problem.nlSysNum(getParam<NonlinearSystemName>("momentum_system")));
+  NonlinearSystemBase & sys = _fe_problem.getNonlinearSystemBase(_momentum_sys_number);
 
   NonlinearImplicitSystem & momentum_system = dynamic_cast<NonlinearImplicitSystem &>(sys.system());
 
@@ -125,13 +158,13 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA()
   // // PETSc version
   // // **************************************************************************
 
-  // We compute the right hand side with a zero vector for starters
+  // We compute the right hand side with a zero vector for starters. This is the right
+  // hand side of the linearized system and will be the basis of the HbyA vector.
   _fe_problem.computeResidualSys(momentum_system, *working_vector.get(), *HbyA.get());
 
-  sys.setSolution(*solution);
+  HbyA->print_global();
 
-  // _console << " Matrix initialized " << pmat->initialized() << std::endl;
-  // _console << " Matrix closed " << pmat->closed() << std::endl;
+  sys.setSolution(*solution);
 
   // if (pmat->closed())
   // {

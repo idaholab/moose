@@ -61,6 +61,9 @@ public:
                                           THREAD_ID tid,
                                           Moose::FV::InterpMethod m) const = 0;
 
+  /// Bool of the Rhie Chow user object is used in monolithic/segregated approaches
+  virtual bool segregated() const { return false; };
+
 protected:
   /**
    * A virtual method that allows us to only implement getVelocity once for free and porous flows

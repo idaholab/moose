@@ -28,18 +28,13 @@ public:
   virtual ~INSFVFluxKernel() = default;
 
   using FVFluxKernel::computeResidual;
-  void computeResidual(const FaceInfo &) override final {}
+  void computeResidual(const FaceInfo & fi) override final;
   using FVFluxKernel::computeJacobian;
-  void computeJacobian(const FaceInfo &) override final {}
+  void computeJacobian(const FaceInfo & fi) override final;
   using FVFluxKernel::computeResidualAndJacobian;
-  void computeResidualAndJacobian(const FaceInfo &) override final {}
+  void computeResidualAndJacobian(const FaceInfo & fi) override final;
 
 protected:
-  ADReal computeQpResidual() override final
-  {
-    mooseError("INSFVFluxKernels must implement gatherRCData and not computeQpResidual");
-  }
-
   /**
    * Process into either the system residual or Jacobian
    */

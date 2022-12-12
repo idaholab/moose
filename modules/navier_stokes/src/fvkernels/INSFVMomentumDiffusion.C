@@ -44,7 +44,7 @@ INSFVMomentumDiffusion::INSFVMomentumDiffusion(const InputParameters & params)
 }
 
 ADReal
-INSFVMomentumDiffusion::computeStrongResidual()
+INSFVMomentumDiffusion::computeQpResidual()
 {
   const auto state = determineState();
   const auto dudn = gradUDotNormal(state);

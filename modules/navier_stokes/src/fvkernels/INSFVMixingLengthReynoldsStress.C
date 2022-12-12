@@ -58,7 +58,7 @@ INSFVMixingLengthReynoldsStress::INSFVMixingLengthReynoldsStress(const InputPara
 }
 
 ADReal
-INSFVMixingLengthReynoldsStress::computeStrongResidual()
+INSFVMixingLengthReynoldsStress::computeQpResidual()
 {
   constexpr Real offset = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
 

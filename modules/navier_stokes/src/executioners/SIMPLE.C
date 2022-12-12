@@ -23,10 +23,7 @@ SIMPLE::validParams()
 {
   InputParameters params = Executioner::validParams();
   params += FEProblemSolve::validParams();
-  params.addRequiredParam<NonlinearSystemName>("momentum_system",
-                                               "The nonlinear system for the momentum equation");
-  params.addRequiredParam<NonlinearSystemName>("pressure_system",
-                                               "The nonlinear system for the pressure equation");
+  params.addRequiredParam<UserObjectName>("rhie_chow_user_object", "The rhie-chow user-object");
   return params;
 }
 
@@ -35,9 +32,7 @@ SIMPLE::SIMPLE(const InputParameters & parameters)
     _problem(_fe_problem),
     _feproblem_solve(*this),
     _time_step(_problem.timeStep()),
-    _time(_problem.time()),
-    _momentum_sys_number(_problem.nlSysNum(getParam<NonlinearSystemName>("momentum_system"))),
-    _pressure_sys_number(_problem.nlSysNum(getParam<NonlinearSystemName>("pressure_system")))
+    _time(_problem.time())
 {
   _fixed_point_solve->setInnerSolve(_feproblem_solve);
 
@@ -48,10 +43,15 @@ void
 SIMPLE::init()
 {
   _problem.initialSetup();
+  _rc_uo = const_cast<INSFVRhieChowInterpolatorSegregated *>(
+      &getUserObject<INSFVRhieChowInterpolatorSegregated>("rhie_chow_user_object"));
+  _momentum_sys = &_problem.getNonlinearSystemBase(_rc_uo->momentumSystemNumber());
+  _pressure_sys = &_problem.getNonlinearSystemBase(_rc_uo->pressureSystemNumber());
 }
 
 void
 SIMPLE::execute()
 {
+  _rc_uo->execute();
   _console << "This will be something smart" << std::endl;
 }

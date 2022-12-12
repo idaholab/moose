@@ -1,5 +1,5 @@
-mu = 1.1
-rho = 1.1
+mu = 0.6
+rho = 0.8
 advected_interp_method = 'upwind'
 velocity_interp_method = 'rc'
 
@@ -8,8 +8,8 @@ velocity_interp_method = 'rc'
     type = CartesianMeshGenerator
     dim = 1
     dx = '1 1'
-    ix = '30 30'
-    subdomain_id = '1 2'
+    ix = '2 2'
+    subdomain_id = '1 1'
   []
 []
 
@@ -27,13 +27,14 @@ velocity_interp_method = 'rc'
     u = u
     pressure = pressure
     momentum_system = 'momentum_system'
+    pressure_system = 'pressure_system'
   []
 []
 
 [Variables]
   [u]
     type = INSFVVelocityVariable
-    initial_condition = 1
+    initial_condition = 0.5
     nl_sys = momentum_system
   []
   [pressure]
@@ -65,12 +66,12 @@ velocity_interp_method = 'rc'
     mu = ${mu}
     momentum_component = 'x'
   []
-  [u_pressure]
-    type = INSFVMomentumPressure
-    variable = u
-    momentum_component = 'x'
-    pressure = pressure
-  []
+  # [u_pressure]
+  #   type = INSFVMomentumPressure
+  #   variable = u
+  #   momentum_component = 'x'
+  #   pressure = pressure
+  # []
 []
 
 [FVBCs]
@@ -78,7 +79,7 @@ velocity_interp_method = 'rc'
     type = INSFVInletVelocityBC
     boundary = 'left'
     variable = u
-    function = '1'
+    function = '1.1'
   []
   [outlet_p]
     type = INSFVOutletPressureBC
@@ -94,8 +95,7 @@ velocity_interp_method = 'rc'
   petsc_options_iname = '-pc_type -pc_factor_shift_type'
   petsc_options_value = 'lu NONZERO'
   nl_rel_tol = 1e-12
-  momentum_system = 'momentum_system'
-  pressure_system = 'pressure_system'
+  rhie_chow_user_object = 'rc'
 []
 
 [Postprocessors]

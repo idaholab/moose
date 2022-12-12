@@ -53,6 +53,12 @@ public:
   void execute() override;
   void finalize() override{};
 
+  unsigned int momentumSystemNumber() const { return _momentum_sys_number; };
+  unsigned int pressureSystemNumber() const { return _pressure_sys_number; };
+
+  /// Bool of the Rhie Chow user object is used in monolithic/segregated approaches
+  bool segregated() const override { return true; };
+
 protected:
   /**
    * Computes the inverse of the digaonal (1/A) of the system matrix plus the H/A components for the
@@ -73,4 +79,16 @@ protected:
    * A map from element IDs to $1/A_ij$. ADD MORE
    */
   CellCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>> _Ainv;
+
+  /// A functor for computing the (non-RC corrected) velocity
+  std::unique_ptr<PiecewiseByBlockLambdaFunctor<ADRealVectorValue>> _vel;
+
+  /// The number of the nonlinear system corresponding to the momentum equation
+  const unsigned int _momentum_sys_number;
+  /// The number of the nonlinear system corresponding to the pressure equation
+  const unsigned int _pressure_sys_number;
+  /// Reference to the nonlinear system corresponding to the momentum equation
+  NonlinearSystemBase & _momentum_sys;
+  /// Reference to the nonlinear system corresponding to the pressure equation
+  NonlinearSystemBase & _pressure_sys;
 };

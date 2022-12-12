@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Executioner.h"
+#include "INSFVRhieChowInterpolatorSegregated.h"
 
 // Forward declarations
 class InputParameters;
@@ -38,9 +39,10 @@ protected:
   int & _time_step;
   Real & _time;
 
-private:
-  const unsigned int _momentum_sys_number;
-  const unsigned int _pressure_sys_number;
+  INSFVRhieChowInterpolatorSegregated * _rc_uo;
+  NonlinearSystemBase * _momentum_sys;
+  NonlinearSystemBase * _pressure_sys;
 
+private:
   bool _last_solve_converged;
 };

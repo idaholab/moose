@@ -35,7 +35,7 @@ PINSFVMomentumDiffusion::PINSFVMomentumDiffusion(const InputParameters & params)
 }
 
 ADReal
-PINSFVMomentumDiffusion::computeStrongResidual()
+PINSFVMomentumDiffusion::computeQpResidual()
 {
   using namespace Moose::FV;
 

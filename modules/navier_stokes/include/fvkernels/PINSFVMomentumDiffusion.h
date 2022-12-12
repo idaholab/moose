@@ -21,7 +21,7 @@ public:
   PINSFVMomentumDiffusion(const InputParameters & params);
 
 protected:
-  ADReal computeStrongResidual() override;
+  ADReal computeQpResidual() override;
 
   /// the porosity
   const Moose::Functor<ADReal> & _eps;
