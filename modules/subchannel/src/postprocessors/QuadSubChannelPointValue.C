@@ -40,7 +40,6 @@ QuadSubChannelPointValue::validParams()
 QuadSubChannelPointValue::QuadSubChannelPointValue(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
     _mesh(dynamic_cast<QuadSubChannelMesh &>(_fe_problem.mesh())),
-    _variable(getParam<VariableName>("variable")),
     _height(getParam<Real>("height")),
     _ix(getParam<int>("ix")),
     _iy(getParam<int>("iy")),
@@ -56,8 +55,8 @@ QuadSubChannelPointValue::QuadSubChannelPointValue(const InputParameters & param
   auto nx = _mesh.getNx();
   auto ny = _mesh.getNy();
   auto pitch = _mesh.getPitch();
-  Real x = (_ix - (nx - 1) / 2) * pitch;
-  Real y = (_iy - (ny - 1) / 2) * pitch;
+  Real x = (_ix - (nx - 1) / 2.0) * pitch;
+  Real y = (_iy - (ny - 1) / 2.0) * pitch;
   _point = Point(x, y, _height);
 }
 

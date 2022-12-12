@@ -92,6 +92,6 @@ QuadSubChannelNormalSliceValues::output(const ExecFlagType & /*type*/)
 
   std::ofstream myfile;
   myfile.open(_file_base, std::ofstream::trunc);
-  myfile << std::setprecision(6) << std::fixed << _exit_value << "\n";
+  myfile << std::setprecision(10) << std::fixed << _exit_value << "\n";
   myfile.close();
 }
