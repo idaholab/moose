@@ -339,8 +339,8 @@ class ApptainerGenerator:
         if self.args.library == 'moose':
             for package in ['tools', 'test-tools']:
                 meta_yaml = os.path.join(MOOSE_DIR, f'conda/{package}/meta.yaml')
-                with open(meta_yaml, 'r') as f:
-                    _, version, _, _ = Versioner.conda_meta_jinja(f.read())
+                with open(meta_yaml, 'r') as meta_contents:
+                    _, version, _, _ = Versioner.conda_meta_jinja(meta_contents.read())
                     variable_name = 'MOOSE_'
                     variable_name += package.upper().replace('-', '_')
                     variable_name += '_VERSION'
@@ -348,8 +348,8 @@ class ApptainerGenerator:
         elif self.args.library == 'libmesh':
             package = 'libmesh-vtk'
             meta_yaml = os.path.join(MOOSE_DIR, f'conda/{package}/meta.yaml')
-            with open(meta_yaml, 'r') as f:
-                _, _, _, meta = Versioner.conda_meta_jinja(f.read())
+            with open(meta_yaml, 'r') as meta_contents:
+                _, _, _, meta = Versioner.conda_meta_jinja(meta_contents.read())
             for var in ['url', 'sha256', 'vtk_friendly_version']:
                 jinja_var = f'vtk_{var}'
                 jinja_data[jinja_var] = meta['source'][var]
