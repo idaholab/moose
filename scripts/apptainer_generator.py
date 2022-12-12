@@ -26,7 +26,11 @@ class ApptainerGenerator:
         self.project = library_meta['name_base']
         self.name = library_meta['name']
         self.tag = library_meta['tag']
-        self.def_path = library_meta['def']
+
+        if hasattr(self.args, 'modify') and self.args.modify is not None:
+            self.def_path = os.path.abspath(self.args.modify)
+        else:
+            self.def_path = library_meta['def']
 
         if self.args.suffix is not None:
             self.name = self.add_name_suffix(library_meta, self.args.suffix)
@@ -88,6 +92,8 @@ class ApptainerGenerator:
             parser.add_argument('--alt-dep-tag-prefix', type=str,
                                 help='A prefix to add to the alternate dependency tag')
             parser.add_argument('--dep-suffix', type=str)
+            parser.add_argument('--modify', type=str,
+                                help='Modify the container instead; path to def template')
         add_def_args(def_parser)
 
         pull_parser = action_parser.add_parser('pull', parents=[parent],
@@ -316,13 +322,16 @@ class ApptainerGenerator:
         Adds common labels to the given definition content
         """
         definition += '\n\n%labels\n'
-        definition += f'    {self.name}.buildhost {socket.gethostname()}\n'
-        definition += f'    {self.name}.version {self.tag}\n'
+        name = self.name
+        if hasattr(self.args, 'modify') and self.args.modify is not None:
+            name += '.modified'
+        definition += f'    {name}.buildhost {socket.gethostname()}\n'
+        definition += f'    {name}.version {self.tag}\n'
         # If we have CIVET info, add the url
         if 'CIVET_SERVER' in os.environ and 'CIVET_JOB_ID' in os.environ:
             civet_server = os.environ.get('CIVET_SERVER')
             civet_job_id = os.environ.get('CIVET_JOB_ID')
-            definition += f'    {self.name}.job {civet_server}/job/{civet_job_id}\n'
+            definition += f'    {name}.job {civet_server}/job/{civet_job_id}\n'
         return definition
 
     def add_definition_vars(self, jinja_data):
@@ -397,7 +406,11 @@ class ApptainerGenerator:
         jinja_data['MOOSE_DIR'] = MOOSE_DIR
 
         # Find the dependent library (if any)
-        dep_meta = self._find_dependency_meta(self.args.library)
+        if self.args.modify is None:
+            dep_meta = self._find_dependency_meta(self.args.library)
+        else:
+            self.print(f'Modifying container with definition {self.def_path}')
+            dep_meta = self.meta[self.args.library]['apptainer']
 
         # Whether or not the definition file has a dependency
         needs_from = '{{ APPTAINER_BOOTSTRAP }}' in definition
