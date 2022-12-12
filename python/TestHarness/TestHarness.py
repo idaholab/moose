@@ -419,7 +419,7 @@ class TestHarness:
 
                             # Create the testers for this test
                             testers = self.createTesters(dirpath, file, find_only, testroot_params)
-                            
+
 
                             # Schedule the testers (non blocking)
                             self.scheduler.schedule(testers)

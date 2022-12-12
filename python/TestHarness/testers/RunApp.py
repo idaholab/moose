@@ -63,7 +63,7 @@ class RunApp(Tester):
 
         # Make sure that either input or command is supplied
         if not (params.isValid('input') or params.isValid('command') or params['no_additional_cli_args']):
-            raise Exception('One of "input", "command", or "no_additional_cli_args" must be supplied for a RunApp test')\
+            raise Exception('One of "input", "command", or "no_additional_cli_args" must be supplied for a RunApp test')
 
     def getInputFile(self):
         if self.specs.isValid('input'):
@@ -219,6 +219,10 @@ class RunApp(Tester):
         specs = self.specs
 
         if specs["custom_evaluation_script"]:
+            if (specs.isValid('expect_out') or specs.isValid('absent_out')):
+                errors += 'expect_out and absent_out can not be supplied when using a custom evaluation function!'
+                self.setStatus(self.fail, "CUSTOM EVAL FAILED")
+                return errors
             import importlib.util, sys
             custom_mod_spec = importlib.util.spec_from_file_location("custom_module", os.path.join(self.getMooseDir(),self.getTestDir(), specs["custom_evaluation_script"]))
             custom_module = importlib.util.module_from_spec(custom_mod_spec)
@@ -232,7 +236,7 @@ class RunApp(Tester):
                 return errors
 
 
-            
+
 
         params_and_msgs = {'expect_err':
                               {'error_missing': True,
