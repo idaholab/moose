@@ -30,14 +30,13 @@ TriSubChannelPointValue::validParams()
   params.addRequiredParam<Real>("height", "Axial location of point [m]");
   params.addRequiredParam<int>("index", "Index of subchannel");
   params.addClassDescription(
-      "Prints out a user selected value of specified sub-channel at a user selected axial height");
+      "Prints out a user selected value of specified subchannel at a user selected axial height");
   return params;
 }
 
 TriSubChannelPointValue::TriSubChannelPointValue(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
     _mesh(dynamic_cast<TriSubChannelMesh &>(_fe_problem.mesh())),
-    _variable(getParam<VariableName>("variable")),
     _height(getParam<Real>("height")),
     _i_ch(getParam<int>("index")),
     _var_number(_subproblem
