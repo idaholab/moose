@@ -112,7 +112,7 @@ P_out = 2.0e5 # Pa
    [q_prime_IC]
     type = TriPowerIC
     variable = q_prime
-    power = 334442.0 #W
+    power = 332500.0 #W
     filename = "pin_power_profile_19.txt"
   []
 
@@ -198,6 +198,16 @@ P_out = 2.0e5 # Pa
   type = Steady
   nl_rel_tol = 0.9
   l_tol = 0.9
+[]
+
+[Postprocessors]
+  [T]
+    type = TriSubChannelPointValue
+    variable = T
+    index = 15
+    execute_on ='final timestep_end'
+    height = 0.9144
+  []
 []
 
 ################################################################################

@@ -31,7 +31,6 @@ public:
 
 protected:
   QuadSubChannelMesh & _mesh;
-  const VariableName & _variable;
   const Real & _height;
   const int & _ix;
   const int & _iy;

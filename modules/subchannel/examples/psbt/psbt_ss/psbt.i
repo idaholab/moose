@@ -41,7 +41,7 @@ P_out = 4.923e6 # Pa
   segregated = false
   staggered_pressure = false
   monolithic_thermal = false
-  interpolation_scheme = 'exponential'
+  # interpolation_scheme = 'exponential'
   # P_tol = 1e-11
 []
 
@@ -59,7 +59,7 @@ P_out = 4.923e6 # Pa
   [q_prime_IC]
     type = QuadPowerIC
     variable = q_prime
-    power = 0.0 # W
+    power = 100000.0 # W
     filename = "power_profile.txt"
   []
 
@@ -138,14 +138,14 @@ P_out = 4.923e6 # Pa
     variable = T
     execute_on = final
     file_base = "Temp_Out.txt"
-    height = 1.0
+    height = 3.0
   []
   [mdot_Out_MATRIX]
     type = QuadSubChannelNormalSliceValues
     variable = mdot
     execute_on = final
     file_base = "mdot_Out.txt"
-    height = 1.0
+    height = 3.0
   []
   [mdot_In_MATRIX]
     type = QuadSubChannelNormalSliceValues
@@ -160,6 +160,17 @@ P_out = 4.923e6 # Pa
   type = Steady
   nl_rel_tol = 0.9
   l_tol = 0.9
+[]
+
+[Postprocessors]
+  [T]
+    type = QuadSubChannelPointValue
+    variable = T
+    ix = 5
+    iy = 5
+    execute_on ='final timestep_end'
+    height = 3.0
+  []
 []
 
 ################################################################################

@@ -31,7 +31,6 @@ public:
 
 protected:
   TriSubChannelMesh & _mesh;
-  const VariableName & _variable;
   const Real & _height;
   const int & _i_ch;
   Point _point;
