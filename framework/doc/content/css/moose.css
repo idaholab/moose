@@ -1007,10 +1007,10 @@ div.moose-mega-menu-content{
 
 /* Text and background color for dark mode */
 @media (prefers-color-scheme: dark), (prefers-dark-interface) {
- body, table, li.list-group-item, .navbar, ol.breadcrumb, div.row, .well, .form-control {
-   background: var(--darkmode-back);
-   color: var(--darkmode-fore);
- }
+  body, table, li.list-group-item, .navbar, ol.breadcrumb, div.row, .well, .form-control, .sidenav, .sidenav > li a {
+    background: var(--darkmode-back);
+    color: var(--darkmode-fore);
+  }
 
  .dropdown-content, .dropdown-content li > a, .dropdown-content li > span {
   background-color: var(--darkmode-navigator);
@@ -1207,4 +1207,49 @@ div.moose-algorithm {
     padding-left:10px;
     padding-right:10px;
     line-height:15px;
+}
+
+/* Portrait */
+@media only screen
+  and (min-device-width: 320px)
+  and (max-device-width: 480px)
+  and (-webkit-min-device-pixel-ratio: 2)
+  and (orientation: portrait) {
+      header, main, footer {
+          font-size: 38px;
+      }
+      a {
+          font-size: 38px;
+      }
+      .moose-content-next {
+        margin-top: 8px;
+      }
+      .material-icons {
+          font-size: 50px !important;
+      }
+      .github-mark, .github-logo {
+          height: 56px;
+      }
+      .sidenav {
+        width: 440px;
+        margin-top: 65px;
+      }
+      .sidenav li > a {
+        font-size: 35px;
+      }
+      .btn, .btn-large, .btn-small, .btn-flat {
+        height: 50px;
+        line-height: 50px;
+        font-size: 35px;
+      }
+      .row .col.m4 {
+        width: 100%;
+      }
+      .row .col.m8 {
+        width: 100%;
+      }
+      .card .card-title {
+        font-weight: 100;
+        font-size: 90%;
+      }
 }
