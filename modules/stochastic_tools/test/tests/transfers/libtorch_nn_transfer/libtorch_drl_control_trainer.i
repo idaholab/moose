@@ -78,19 +78,14 @@
 
 [Executioner]
   type = Transient
-  num_steps = 4
+  num_steps = 1
 []
 
 [Outputs]
   file_base = train_out
-  [csv_out]
-    type = CSV
-    execute_on = FINAL
-  []
   [json_out]
     type = JSON
-    start_step = 3
-    interval = 3
+    execute_on = TIMESTEP_BEGIN
     execute_system_information_on = NONE
   []
 []

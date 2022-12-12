@@ -146,14 +146,10 @@
 
   start_time = 0.0
   end_time = 86400
-  dt = 1800.0
+  dt = 14400.0
 []
 
 [Outputs]
-  [csv_out]
-    type = CSV
-    execute_on = FINAL
-  []
   [json_out]
     type = JSON
     execute_on = FINAL
