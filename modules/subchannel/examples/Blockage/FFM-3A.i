@@ -201,11 +201,60 @@ P_out = 2.0e5 # Pa
 []
 
 [Postprocessors]
-  [T]
+  [T37]
     type = TriSubChannelPointValue
     variable = T
-    index = 15
-    execute_on ='final timestep_end'
+    index = 37
+    execute_on ='TIMESTEP_END'
+    height = 0.9144
+  []
+  [T36]
+    type = TriSubChannelPointValue
+    variable = T
+    index = 36
+    execute_on ='TIMESTEP_END'
+    height = 0.9144
+  []
+  [T20]
+    type = TriSubChannelPointValue
+    variable = T
+    index = 20
+    execute_on ='TIMESTEP_END'
+    height = 0.9144
+  []
+  [T10]
+    type = TriSubChannelPointValue
+    variable = T
+    index = 10
+    execute_on ='TIMESTEP_END'
+    height = 0.9144
+  []
+  [T4]
+    type = TriSubChannelPointValue
+    variable = T
+    index = 4
+    execute_on ='TIMESTEP_END'
+    height = 0.9144
+  []
+  [T1]
+    type = TriSubChannelPointValue
+    variable = T
+    index = 1
+    execute_on ='TIMESTEP_END'
+    height = 0.9144
+  []
+  [T14]
+    type = TriSubChannelPointValue
+    variable = T
+    index = 14
+    execute_on ='TIMESTEP_END'
+    height = 0.9144
+  []
+  [T28]
+    type = TriSubChannelPointValue
+    variable = T
+    index = 28
+    execute_on ='TIMESTEP_END'
     height = 0.9144
   []
 []
