@@ -28,3 +28,13 @@ d3894207f7baa021c4e61c9138e647ef945759f6: # 21789
 276361e07d4e0feed473b09c8dc6db70218b76c6: # 22616
   libmesh: dec445a
   petsc: befeb5c
+d653ad583d24150b608cbea5df9c2eef4ddec3a0: # 22778
+  mpich: d2f7c65
+  petsc: 46dee29
+  libmesh: 884a5a3
+  moose: 22e6e05
+c722ea3ae20406f0fec795fbf20953d618652f94: # 22945
+  mpich: f2f7e4c
+  petsc: 830572b
+  libmesh: a9719c0
+  moose: b477fc6
