@@ -58,8 +58,8 @@ ComputeNeoHookeanStress::computeQpPK2Stress()
   // Small deformations = linear strain
   else
   {
-    RankTwoTensor strain = 0.5 * (_F[_qp] + _F[_qp].transpose());
     const auto I = RankTwoTensor::Identity();
+    RankTwoTensor strain = 0.5 * (_F[_qp] + _F[_qp].transpose()) - I;
     _C[_qp] = _lambda[_qp] * I.times<i_, j_, k_, l_>(I) +
               2.0 * _mu[_qp] * RankFourTensor(RankFourTensor::initIdentitySymmetricFour);
     _S[_qp] = _C[_qp] * strain;
