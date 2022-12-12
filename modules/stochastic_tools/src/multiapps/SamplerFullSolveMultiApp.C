@@ -349,7 +349,7 @@ SamplerFullSolveMultiApp::sampledCommandLineArgs(const std::vector<Real> & row,
                          ") for ",
                          vector_param[0],
                          " is out of bound.");
-          oss << Moose::stringify(row[index]);
+          oss << Moose::stringifyExact(row[index]);
         }
       }
       oss << "';";
@@ -357,7 +357,7 @@ SamplerFullSolveMultiApp::sampledCommandLineArgs(const std::vector<Real> & row,
     // Assign scalar parameters
     else
     {
-      oss << cli_args_name[i] << "=" << Moose::stringify(row[i]) << ";";
+      oss << cli_args_name[i] << "=" << Moose::stringifyExact(row[i]) << ";";
     }
   }
 
