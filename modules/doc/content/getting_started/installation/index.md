@@ -3,7 +3,7 @@
 To install the MOOSE Framework, click the link below that corresponds to your operating system/platform and follow the instructions:
 
 - [Linux and MacOS](installation/conda.md)
-- [installation/windows10.md]
+- [installation/windows.md]
 - [installation/docker.md]
 - Advanced Instructions:
 
