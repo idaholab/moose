@@ -17,4 +17,29 @@
       detail = 'batch multiapp mode;'
     []
   []
+  [parameter_transfer]
+    design = 'SamplerParameterTransfer.md'
+    requirement = 'The system shall be able to transfer parameter(s) to nested sub-applications in'
+    [normal]
+      type = CSVDiff
+      input = stm_batch.i
+      cli_args = 'Outputs/file_base=stm_out'
+      csvdiff = stm_out_storage_0001.csv
+      detail = 'normal multiapp mode;'
+    []
+    [batch_reset]
+      type = CSVDiff
+      input = stm_batch.i
+      cli_args = 'Outputs/file_base=stm_out MultiApps/main/mode=batch-reset'
+      csvdiff = stm_out_storage_0001.csv
+      detail = 'batch-reset multiapp mode;'
+    []
+    [batch_restore]
+      type = CSVDiff
+      input = stm_batch.i
+      cli_args = 'Outputs/file_base=stm_out MultiApps/main/mode=batch-restore'
+      csvdiff = stm_out_storage_0001.csv
+      detail = 'batch-restore multiapp mode;'
+    []
+  []
 []

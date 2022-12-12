@@ -68,3 +68,7 @@
     subapp_index = 1
   []
 []
+
+[Controls/stm]
+  type = SamplerReceiver
+[]

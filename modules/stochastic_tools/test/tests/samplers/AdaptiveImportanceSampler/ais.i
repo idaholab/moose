@@ -44,7 +44,6 @@
     to_multi_app = sub
     sampler = sample
     parameters = 'BCs/left/value BCs/right/value'
-    to_control = 'stochastic'
   []
   [reporter_transfer]
     type = SamplerReporterTransfer

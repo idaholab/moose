@@ -36,17 +36,27 @@ public:
 
 protected:
   /**
-   * Return the SamplerReceiver object and perform error checking.
+   * Based on a cli_args-like string, return a map between SamplerReceiver objects and the
+   * parameter-value pairs.
+   *
    * @param app_index The global sup-app index
+   * @param cmd_line cli_args-like string
+   * @return A map between the SamplerReceiver object and the parameter-value pairs
    */
-  SamplerReceiver * getReceiver(unsigned int app_index);
+  std::map<SamplerReceiver *, std::map<std::string, std::vector<Real>>>
+  getReceivers(unsigned int app_index, const std::string & cmd_line);
 
   /// Storage for the list of parameters to control
   const std::vector<std::string> & _parameter_names;
 
-  /// The name of the SamplerReceiver Control object on the sub-application
-  const std::string & _receiver_name;
-
   /// Current global index for batch execution
   dof_id_type _global_index;
+
+private:
+  /**
+   * Helper function that recursively finds feproblem pointers from nested multiapps
+   */
+  static std::vector<FEProblemBase *>
+  getMultiAppProblemsHelper(FEProblemBase & base_problem,
+                            const std::vector<std::string> & multiapp_names);
 };

@@ -45,3 +45,7 @@
   type = Steady
   solve_type = NEWTON
 []
+
+[Controls/stm]
+  type = SamplerReceiver
+[]

@@ -463,7 +463,6 @@ ParameterStudyAction::act()
       auto params = _factory.getValidParams("SamplerParameterTransfer");
       params.set<MultiAppName>("to_multi_app") = multiappName();
       params.set<SamplerName>("sampler") = samplerName();
-      params.set<std::string>("to_control") = samplerReceiverName();
       params.set<std::vector<std::string>>("parameters") =
           getParam<std::vector<std::string>>("parameters");
       _problem->addTransfer("SamplerParameterTransfer", parameterTransferName(), params);

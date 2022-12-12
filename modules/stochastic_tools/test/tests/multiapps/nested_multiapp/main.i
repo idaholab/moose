@@ -57,3 +57,7 @@
   from_reporters = 'val/value receive/subsub0_left_val receive/subsub0_right_val receive/subsub1_left_val receive/subsub1_right_val'
   to_reporters = 'receive/sub_val receive/subsub0_left_val receive/subsub0_right_val receive/subsub1_left_val receive/subsub1_right_val'
 []
+
+[Controls/stm]
+  type = SamplerReceiver
+[]
