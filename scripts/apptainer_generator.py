@@ -26,12 +26,18 @@ class ApptainerGenerator:
         self.project = library_meta['name_base']
         self.name = library_meta['name']
         self.tag = library_meta['tag']
-        self.def_path = library_meta['def']
+
+        if hasattr(self.args, 'modify') and self.args.modify is not None:
+            self.def_path = os.path.abspath(self.args.modify)
+        else:
+            self.def_path = library_meta['def']
 
         if self.args.suffix is not None:
             self.name = self.add_name_suffix(library_meta, self.args.suffix)
         if self.args.tag is not None:
             self.tag = self.args.tag
+        if self.args.tag_prefix is not None:
+            self.tag = f'{self.args.tag_prefix}-{self.tag}'
 
         if hasattr(self.args, 'dir'):
             self.dir = os.path.abspath(self.args.dir)
@@ -60,6 +66,7 @@ class ApptainerGenerator:
                     help='The library to act on')
             parser.add_argument('--suffix', type=str, help='Suffix to add to the name')
             parser.add_argument('--tag', type=str, help='Alternate tag')
+            parser.add_argument('--tag-prefix', type=str, help='Prefix to add to the tag')
             if write:
                 parser.add_argument('dir', help='The directory to perform actions in', default='.')
                 parser.add_argument('--overwrite', action='store_true',
@@ -82,7 +89,11 @@ class ApptainerGenerator:
                                 help='Use a local dependency container')
             parser.add_argument('--alt-dep-tag', type=str,
                                 help='An alternate dependency tag to pull')
+            parser.add_argument('--alt-dep-tag-prefix', type=str,
+                                help='A prefix to add to the alternate dependency tag')
             parser.add_argument('--dep-suffix', type=str)
+            parser.add_argument('--modify', type=str,
+                                help='Modify the container instead; path to def template')
         add_def_args(def_parser)
 
         pull_parser = action_parser.add_parser('pull', parents=[parent],
@@ -108,6 +119,8 @@ class ApptainerGenerator:
         add_default_args(push_parser, remote=True)
         push_parser.add_argument('--to-tag', type=str,
                                  help='An alternate tag to push to')
+        push_parser.add_argument('--to-tag-prefix', type=str,
+                                 help='A prefix to add to the pushed tag')
 
         uri_parser = action_parser.add_parser('uri', parents=[parent],
                                               help='Get the URI to a container')
@@ -282,13 +295,16 @@ class ApptainerGenerator:
         if not self.oras_exists(uri):
             not_found = f'Remote container dependency {uri} not found'
             # Without an alternate, we're screwed
-            if self.args.alt_dep_tag is None:
+            if self.args.alt_dep_tag is None and self.args.alt_dep_tag_prefix is None:
                 self.error(not_found)
 
             self.warn(not_found + '; trying alternate')
 
             # We have an alternate tag (example: trying to pull a PR); try it
-            tag = self.args.alt_dep_tag
+            if self.args.alt_dep_tag is not None:
+                tag = self.args.alt_dep_tag
+            if self.args.alt_dep_tag_prefix is not None:
+                tag = f'{self.args.alt_dep_tag_prefix}-{tag}'
             uri = self.oras_uri(project, name, tag)
             alt_exists = self.oras_exists(uri)
 
@@ -306,13 +322,16 @@ class ApptainerGenerator:
         Adds common labels to the given definition content
         """
         definition += '\n\n%labels\n'
-        definition += f'    {self.name}.buildhost {socket.gethostname()}\n'
-        definition += f'    {self.name}.version {self.tag}\n'
+        name = self.name
+        if hasattr(self.args, 'modify') and self.args.modify is not None:
+            name += '.modified'
+        definition += f'    {name}.buildhost {socket.gethostname()}\n'
+        definition += f'    {name}.version {self.tag}\n'
         # If we have CIVET info, add the url
         if 'CIVET_SERVER' in os.environ and 'CIVET_JOB_ID' in os.environ:
             civet_server = os.environ.get('CIVET_SERVER')
             civet_job_id = os.environ.get('CIVET_JOB_ID')
-            definition += f'    {self.name}.job {civet_server}/job/{civet_job_id}\n'
+            definition += f'    {name}.job {civet_server}/job/{civet_job_id}\n'
         return definition
 
     def add_definition_vars(self, jinja_data):
@@ -329,8 +348,8 @@ class ApptainerGenerator:
         if self.args.library == 'moose':
             for package in ['tools', 'test-tools']:
                 meta_yaml = os.path.join(MOOSE_DIR, f'conda/{package}/meta.yaml')
-                with open(meta_yaml, 'r') as f:
-                    _, version, _, _ = Versioner.conda_meta_jinja(f.read())
+                with open(meta_yaml, 'r') as meta_contents:
+                    _, version, _, _ = Versioner.conda_meta_jinja(meta_contents.read())
                     variable_name = 'MOOSE_'
                     variable_name += package.upper().replace('-', '_')
                     variable_name += '_VERSION'
@@ -338,8 +357,8 @@ class ApptainerGenerator:
         elif self.args.library == 'libmesh':
             package = 'libmesh-vtk'
             meta_yaml = os.path.join(MOOSE_DIR, f'conda/{package}/meta.yaml')
-            with open(meta_yaml, 'r') as f:
-                _, _, _, meta = Versioner.conda_meta_jinja(f.read())
+            with open(meta_yaml, 'r') as meta_contents:
+                _, _, _, meta = Versioner.conda_meta_jinja(meta_contents.read())
             for var in ['url', 'sha256', 'vtk_friendly_version']:
                 jinja_var = f'vtk_{var}'
                 jinja_data[jinja_var] = meta['source'][var]
@@ -387,7 +406,11 @@ class ApptainerGenerator:
         jinja_data['MOOSE_DIR'] = MOOSE_DIR
 
         # Find the dependent library (if any)
-        dep_meta = self._find_dependency_meta(self.args.library)
+        if self.args.modify is None:
+            dep_meta = self._find_dependency_meta(self.args.library)
+        else:
+            self.print(f'Modifying container with definition {self.def_path}')
+            dep_meta = self.meta[self.args.library]['apptainer']
 
         # Whether or not the definition file has a dependency
         needs_from = '{{ APPTAINER_BOOTSTRAP }}' in definition
@@ -464,6 +487,8 @@ class ApptainerGenerator:
         """
         from_tag = self.tag
         to_tag = from_tag if self.args.to_tag is None else self.args.to_tag
+        if self.args.to_tag_prefix is not None:
+            to_tag = f'{self.args.to_tag_prefix}-{to_tag}'
 
         container_path = self.container_path(self.name, from_tag)
         if not os.path.exists(container_path):

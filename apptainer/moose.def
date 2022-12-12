@@ -58,10 +58,10 @@ From: {{ APPTAINER_FROM }}
     mamba install -yq python=${PYTHON_VERSION} conda-pack
 
     # Add moose channels
-    conda config --add channels https://conda.software.inl.gov/public
+    conda config --env --add channels https://conda.software.inl.gov/public
     # Add an alt channel if given
     if [ -n "$CONDA_ALT_CHANNEL" ]; then
-        conda config --add channels ${CONDA_ALT_CHANNEL}
+        conda config --env --add channels ${CONDA_ALT_CHANNEL}
     fi
     {% if DEV_CONTAINER is defined %}
     # DEV_CONTAINER is set, installing moose-tools
