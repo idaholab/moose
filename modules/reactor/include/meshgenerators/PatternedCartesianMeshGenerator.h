@@ -14,7 +14,7 @@
 
 /**
  * This PatternedCartesianMeshGenerator source code assembles square meshes into a rectangular grid
- * and optionally adds a duct.
+ * and optionally adds a duct around the grid.
  */
 class PatternedCartesianMeshGenerator : public PolygonMeshGeneratorBase
 {

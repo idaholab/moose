@@ -535,10 +535,10 @@ protected:
    * @param rotation_angle angle that the generated mesh will be rotated by
    * @param mesh_type whether the peripheral region is for a corner or a side hexagon mesh
    * @param create_interface_boundaries whether interface boundary sidesets are created
-   * @return a mesh of the hexagon unit mesh with peripheral region added.
+   * @return a mesh of the polygonal pattern mesh with peripheral region added.
    */
   void addPeripheralMeshRect(ReplicatedMesh & mesh,
-                             const unsigned int pattern, //_pattern{i][j]
+                             const unsigned int pattern, //_pattern[i][j]
                              const Real pitch,           // pitch_array.front()
                              const std::vector<Real> & extra_dist,
                              const std::vector<unsigned int> & num_sectors_per_side_array,
@@ -565,14 +565,13 @@ protected:
                      const unsigned int radial_index) const;
 
   /**
-   * Sets up poisitions of peripheral region layer by layer before deformation due to cutoff.
+   * Sets up positions of peripheral region layer by layer before deformation due to cutoff.
    * @param positions_inner key positions of the inner side of the peripheral region
-   * @param d_positions_outer key inremental positions of the outer side of the peripheral region
-   * @param extra_dist_in extra distance applied to the inner side
+   * @param d_positions_outer key incremental positions of the outer side of the peripheral region
+   * @param extra_dist_in extra distance applied to the inner side of the peripheral layer
    * @param extra_dist_out extra distance applied to the outer side
-   * @param pitch pitch size of the involved hexagon mesh
+   * @param pitch pitch size of the involved polygonal mesh
    * @param radial_index radial layer index
-   * @return n/a
    */
   void positionSetupRect(std::vector<std::pair<Real, Real>> & positions_inner,
                          std::vector<std::pair<Real, Real>> & d_positions_outer,

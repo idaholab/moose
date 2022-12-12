@@ -12,7 +12,7 @@
 #include "MooseEnum.h"
 
 /**
- * This CartesianMeshTrimmer object takes in a cartesian assembly or core mesh and perform
+ * This CartesianMeshTrimmer object takes in a cartesian assembly or core mesh and performs
  * peripheral and/or center trimming on it.
  */
 class CartesianMeshTrimmer : public PolygonMeshTrimmerBase

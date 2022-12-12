@@ -17,7 +17,7 @@ In order to generate the square patterned mesh, three fundamental parameters are
 !media reactor/meshgenerators/pattern_cart.png
       style=display: block;margin-left:auto;margin-right:auto;width:40%;
       id=pattern_cart
-      caption=A schematic showing the difference between `none` and `expanded` `pattern_boundary`.
+      caption=A schematic showing the difference between `none` and `square` `pattern_boundary`.
 
 When [!param](/Mesh/PatternedCartesianMeshGenerator/pattern_boundary) is set as `square`, the user can also provide [!param](/Mesh/PatternedCartesianMeshGenerator/duct_sizes) in either `apothem` (center-to-face) or `radius` (center-to-vertex) style determined by [!param](/Mesh/PatternedCartesianMeshGenerator/duct_sizes_style) to add external duct regions to the generated square mesh. Also, [!param](/Mesh/PatternedCartesianMeshGenerator/square_size) must also be provided to define the external square boundary size. In some cases, if [!param](/Mesh/PatternedCartesianMeshGenerator/square_size) is small enough, the square external boundary may cut off some of the stitched square meshes. As long as the concentric circular (`rings`) regions are not cut off, the rest of the mesh is deformed to accommodate the limited external boundaries. Users can also set [!param](/Mesh/PatternedCartesianMeshGenerator/deform_non_circular_region) as `false` to prevent the non-circular regions from being deformed.
 

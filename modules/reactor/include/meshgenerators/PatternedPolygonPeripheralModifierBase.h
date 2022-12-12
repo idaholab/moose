@@ -14,7 +14,7 @@
 #include "LinearInterpolation.h"
 
 /**
- * This PatternedPolygonPeripheralModifierBase is the base class for PatternedCartPeripheralModifier
+ * This PatternedPolygonPeripheralModifierBase is the base class for PatternedCartesianPeripheralModifier
  * and PatternedHexPeripheralModifier.
  */
 class PatternedPolygonPeripheralModifierBase : public PolygonMeshGeneratorBase
