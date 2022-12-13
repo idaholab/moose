@@ -108,6 +108,11 @@ public:
   DenseVector<Real> getAllPostprocessorValues() const;
 
   /**
+   * Get full names of all postprocessor values
+   */
+  std::vector<std::string> getAllPostprocessorFullNames() const;
+
+  /**
    * Method for returning read only references to Reporter values.
    * @tparam T The Reporter value C++ type.
    * @param reporter_name The name of the reporter value, which includes the object name and the

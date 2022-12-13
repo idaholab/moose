@@ -111,6 +111,7 @@
 #include "libmesh/sparse_matrix.h"
 #include "libmesh/string_to_enum.h"
 #include "libmesh/fe_interface.h"
+#include "libmesh/enum_norm_type.h"
 
 #include "metaphysicl/dualnumber.h"
 
@@ -3975,13 +3976,51 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
 
     *x -= *_aux->currentSolution();
     if (x->l2_norm() > 1e-8)
+    {
+      const auto & sys = _aux->system();
+      unsigned int n_vars = sys.n_vars();
+      std::multimap<Real, std::string, std::greater<Real>> ordered_map;
+      for (unsigned int i = 0; i < n_vars; i++)
+      {
+        Real vnorm = sys.calculate_norm(*x, i, DISCRETE_L2);
+        ordered_map.insert(std::pair<Real, std::string>(vnorm, sys.variable_name(i)));
+      }
+
+      std::ostringstream oss;
+      for (const auto & pair : ordered_map)
+        oss << "  {" << pair.second << ", " << pair.first << "},\n";
+
       mooseError("Aux kernels, user objects appear to have states for aux variables on ",
-                 exec_type);
+                 exec_type,
+                 ".\nVariable error norms in descending order:\n",
+                 oss.str());
+    }
 
     pp_values -= getReporterData().getAllPostprocessorValues();
     if (pp_values.l2_norm() > 1e-8)
+    {
+      auto pp_names = getReporterData().getAllPostprocessorFullNames();
+      std::multimap<Real, std::string, std::greater<Real>> ordered_map;
+      for (const auto i : index_range(pp_names))
+        ordered_map.insert(std::pair<Real, std::string>(std::abs(pp_values(i)), pp_names[i]));
+
+      std::ostringstream oss;
+      unsigned int counter = 0;
+      for (const auto & pair : ordered_map)
+      {
+        oss << "  {" << pair.second << ", " << pair.first << "},\n";
+        ++counter;
+        if (counter == 10 || pair.first < 1e-8)
+          break;
+      }
+
       mooseError("Aux kernels, user objects appear to have states for postprocessors on ",
-                 exec_type);
+                 exec_type,
+                 ".\nTop ",
+                 counter,
+                 " outliers of postprocessor values:\n",
+                 oss.str());
+    }
   }
 }
 

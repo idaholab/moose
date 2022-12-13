@@ -77,6 +77,28 @@ ReporterData::getAllPostprocessorValues() const
   return all_values;
 }
 
+std::vector<std::string>
+ReporterData::getAllPostprocessorFullNames() const
+{
+  std::vector<std::string> output;
+
+  for (const auto & name_context_pair : _context_ptrs)
+  {
+    if (name_context_pair.first.isPostprocessor())
+      output.push_back(name_context_pair.first.getCombinedName());
+
+    if (name_context_pair.first.isVectorPostprocessor())
+    {
+      auto pname = name_context_pair.first.getCombinedName();
+      auto & vec = getReporterValue<VectorPostprocessorValue>(pname);
+      for (unsigned int i = 0; i < vec.size(); ++i)
+        output.push_back(pname + "/" + std::to_string(i));
+    }
+  }
+
+  return output;
+}
+
 const ReporterContextBase &
 ReporterData::getReporterContextBase(const ReporterName & reporter_name) const
 {
