@@ -27,7 +27,7 @@ class RunApp(Tester):
         params.addParam('executable_pattern', "A test that only runs if the executable name matches the given pattern")
         params.addParam('delete_output_before_running',  True, "Delete pre-existing output files before running test. Only set to False if you know what you're doing!")
         params.addParam('delete_output_folders', True, "Delete output folders before running")
-        params.addParam('custom_evaluation_script', False, "")
+        params.addParam('custom_evaluation_script', False, "A .py file containing a custom function for evaluating a test's success. For syntax, please check https://mooseframework.inl.gov/python/TestHarness.html")
 
         # RunApp can also run arbitrary commands. If the "command" parameter is supplied
         # it'll be used in lieu of building up the command automatically

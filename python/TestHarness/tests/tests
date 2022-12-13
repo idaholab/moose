@@ -259,5 +259,7 @@
   [custom_eval]
     type = PythonUnitTest
     input = test_CustomEval.py
+    issues = '#22946'
+    requirement = "TestHarness shall be able to evaluate a given test with a user-supplied evaluation function."
   []
 []
