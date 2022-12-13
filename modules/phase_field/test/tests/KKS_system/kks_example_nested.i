@@ -156,13 +156,13 @@
   # Cahn-Hilliard Equation
   #
   [./CHBulk]
-    type = NestKKSSplitCHCRes
+    type = NestedKKSSplitCHCRes
     variable = c
     global_cs = 'c'
     w        = w
     all_etas = eta
-    c1_names = 'cm cd'
-    F1_name = fm
+    ca_names = 'cm cd'
+    Fa_name = fm
     args = 'eta w'
   [../]
   [./dcdt]
@@ -180,7 +180,7 @@
   # Allen-Cahn Equation
   #
   [./ACBulkF]
-    type = NestKKSACBulkF
+    type = NestedKKSACBulkF
     variable = eta
     global_cs = 'c'
     ci_names = 'cm cd'
@@ -193,7 +193,7 @@
     args = 'c'
   [../]
   [./ACBulkC]
-    type = NestKKSACBulkC
+    type = NestedKKSACBulkC
     variable = eta
     global_cs = 'c'
     ci_names = 'cm cd'

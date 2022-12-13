@@ -1,6 +1,6 @@
-# NestKKSACBulkC
+# NestedKKSACBulkC
 
-!syntax description /Kernels/NestKKSACBulkC
+!syntax description /Kernels/NestedKKSACBulkC
 
 Kim-Kim-Suzuki (KKS) nested solve kernel (1 of 3). An Allen-Cahn kernel for the terms with a direct composition dependence. This kernel can be used for one or multiple species.
 
@@ -58,8 +58,8 @@ The off-diagonal Jacobian contributions are multiplied by the Allen-Cahn
 mobility $L$ at each point for consistency with the other terms in the Allen-Cahn
 equation.
 
-!syntax parameters /Kernels/NestKKSACBulkC
+!syntax parameters /Kernels/NestedKKSACBulkC
 
-!syntax inputs /Kernels/NestKKSACBulkC
+!syntax inputs /Kernels/NestedKKSACBulkC
 
-!syntax children /Kernels/NestKKSACBulkC
+!syntax children /Kernels/NestedKKSACBulkC

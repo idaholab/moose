@@ -24,7 +24,7 @@ KKSPhaseConcentrationDerivatives::validParams()
   params.addRequiredCoupledVar("eta", "Order parameter.");
   params.addRequiredParam<std::vector<MaterialPropertyName>>(
       "ci_names",
-      "Phase concentrations. The order must match Fj_names and global_c, for example, c1, "
+      "Phase concentrations. The order must match Fa, Fb, and global_cs, for example, c1, "
       "c2, b1, b2, etc");
   params.addRequiredParam<MaterialName>("Fa_material", "Fa material object.");
   params.addRequiredParam<MaterialName>("Fb_material", "Fb material object.");

@@ -1,6 +1,6 @@
-# NestKKSSplitCHCRes
+# NestedKKSSplitCHCRes
 
-!syntax description /Kernels/NestKKSSplitCHCRes
+!syntax description /Kernels/NestedKKSSplitCHCRes
 
 Kim-Kim-Suzuki (KKS) nested solve kernel (3 of 3) for two-phase or multiphase models. A kernel for the split Cahn-Hilliard term. This kernel operates on the global concentration $c_i$ as the non-linear variable.
 
@@ -49,8 +49,8 @@ J &=& \phi_j\frac{\partial}{\partial T}(\frac{\partial F_1}{\partial c_{i,1}} - 
 \end{aligned}
 \end{equation}
 
-!syntax parameters /Kernels/NestKKSSplitCHCRes
+!syntax parameters /Kernels/NestedKKSSplitCHCRes
 
-!syntax inputs /Kernels/NestKKSSplitCHCRes
+!syntax inputs /Kernels/NestedKKSSplitCHCRes
 
-!syntax children /Kernels/NestKKSSplitCHCRes
+!syntax children /Kernels/NestedKKSSplitCHCRes

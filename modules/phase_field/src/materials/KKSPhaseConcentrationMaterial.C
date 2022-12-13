@@ -24,7 +24,7 @@ KKSPhaseConcentrationMaterial::validParams()
   params.addRequiredParam<MaterialPropertyName>("h_name", "Switching function h(eta).");
   params.addRequiredParam<std::vector<MaterialPropertyName>>(
       "ci_names",
-      "Phase concentrations, the order must match Fa, Fb, and global_cs, for example, c1, c2, b1, "
+      "Phase concentrations. The order must match Fa, Fb, and global_cs, for example, c1, c2, b1, "
       "b2, etc.");
   params.addRequiredParam<std::vector<Real>>("ci_IC",
                                              "Initial values of ci in the same order as ci_names.");
@@ -179,8 +179,7 @@ KKSPhaseConcentrationMaterial::computeQpProperties()
 
   auto compute = [&](const NestedSolve::Value<> & guess,
                      NestedSolve::Value<> & residual,
-                     NestedSolve::Jacobian<> & jacobian)
-  {
+                     NestedSolve::Jacobian<> & jacobian) {
     for (unsigned int m = 0; m < _num_c * 2; ++m)
       (*_prop_ci[m])[_qp] = guess(m);
 

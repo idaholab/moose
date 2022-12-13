@@ -11,8 +11,6 @@
 
 #include "KKSACBulkBase.h"
 
-// Forward Declarations
-
 /**
  * KKSACBulkBase child class for the phase concentration difference term
  * \f$ \frac{dh}{d\eta}\frac{\partial F_a}{\partial c_a}(c_a-c_b) \f$
@@ -20,13 +18,12 @@
  *
  * The non-linear variable for this Kernel is the order parameter 'eta'.
  */
-
-class NestKKSACBulkC : public KKSACBulkBase
+class NestedKKSACBulkC : public KKSACBulkBase
 {
 public:
   static InputParameters validParams();
 
-  NestKKSACBulkC(const InputParameters & parameters);
+  NestedKKSACBulkC(const InputParameters & parameters);
 
 protected:
   virtual Real computeDFDOP(PFFunctionType type);
