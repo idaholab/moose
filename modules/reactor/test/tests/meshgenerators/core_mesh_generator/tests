@@ -124,4 +124,19 @@
     exodiff = 'core_single_assembly_hex_empty.e'
     recover = false
   []
+  [ptmg_periphery]
+    requirement = 'The system shall generate a 2D hex core mesh with a reactor periphery meshed using a triangular mesh.'
+    type = 'CSVDiff'
+    input = 'core_periphery_ptmg_vol.i'
+    csvdiff = 'core_periphery_ptmg_in.csv'
+    recover = false
+  []
+  [prmg_periphery]
+    requirement = 'The system shall generate a 2D hex core mesh with a reactor periphery meshed using a quadrilateral element ring pattern.'
+    type = 'Exodiff'
+    input = 'core_periphery_prmg.i'
+    cli_args = '--mesh-only'
+    exodiff = 'core_periphery_prmg_in.e'
+    recover = false
+  []
 []
