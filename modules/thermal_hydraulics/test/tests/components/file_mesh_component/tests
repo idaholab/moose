@@ -6,6 +6,8 @@
     type = RunApp
     input = 'mesh.i'
     cli_args = '--mesh-only'
+    # Mesh-only runs should not test recovery
+    recover = False
 
     requirement = 'The system shall generate a mesh for the FileMeshComponent test.'
   []
@@ -14,6 +16,8 @@
     prereq = 'mesh'
     input = 'file_mesh_component.i'
     exodiff = 'file_mesh_component.e'
+    # Prereq does not test recover
+    recover = False
 
     requirement = 'The system shall provide a component that loads a mesh from an ExodusII file.'
   []
