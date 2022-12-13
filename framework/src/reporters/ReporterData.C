@@ -53,7 +53,7 @@ ReporterData::getPostprocessorNames() const
 }
 
 DenseVector<Real>
-ReporterData::getAllPostprocessorValues() const
+ReporterData::getAllRealReporterValues() const
 {
   DenseVector<Real> all_values;
 
@@ -61,14 +61,14 @@ ReporterData::getAllPostprocessorValues() const
 
   for (const auto & name_context_pair : _context_ptrs)
   {
-    if (name_context_pair.first.isPostprocessor())
-      output.push_back(
-          getReporterValue<PostprocessorValue>(name_context_pair.first.getCombinedName()));
+    const ReporterName & rname = name_context_pair.first;
 
-    if (name_context_pair.first.isVectorPostprocessor())
+    if (hasReporterValue<Real>(rname))
+      output.push_back(getReporterValue<Real>(rname.getCombinedName()));
+
+    if (hasReporterValue<std::vector<Real>>(rname))
     {
-      auto & vec =
-          getReporterValue<VectorPostprocessorValue>(name_context_pair.first.getCombinedName());
+      const auto & vec = getReporterValue<std::vector<Real>>(rname.getCombinedName());
       for (const auto & v : vec)
         output.push_back(v);
     }
@@ -78,19 +78,21 @@ ReporterData::getAllPostprocessorValues() const
 }
 
 std::vector<std::string>
-ReporterData::getAllPostprocessorFullNames() const
+ReporterData::getAllRealReporterFullNames() const
 {
   std::vector<std::string> output;
 
   for (const auto & name_context_pair : _context_ptrs)
   {
-    if (name_context_pair.first.isPostprocessor())
-      output.push_back(name_context_pair.first.getCombinedName());
+    const ReporterName & rname = name_context_pair.first;
 
-    if (name_context_pair.first.isVectorPostprocessor())
+    if (hasReporterValue<Real>(rname))
+      output.push_back(rname.getCombinedName());
+
+    if (hasReporterValue<std::vector<Real>>(rname))
     {
-      auto pname = name_context_pair.first.getCombinedName();
-      auto & vec = getReporterValue<VectorPostprocessorValue>(pname);
+      auto pname = rname.getCombinedName();
+      const auto & vec = getReporterValue<std::vector<Real>>(pname);
       for (unsigned int i = 0; i < vec.size(); ++i)
         output.push_back(pname + "/" + std::to_string(i));
     }

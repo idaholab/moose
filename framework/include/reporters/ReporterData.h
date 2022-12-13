@@ -103,14 +103,18 @@ public:
   std::set<std::string> getPostprocessorNames() const;
 
   /**
-   * Get all postprocessor values including vector postprocessor values into a dense vector
+   * Get all real reporter values including postprocessor and vector postprocessor values into a
+   * dense vector
    */
-  DenseVector<Real> getAllPostprocessorValues() const;
+  DenseVector<Real> getAllRealReporterValues() const;
 
   /**
-   * Get full names of all postprocessor values
+   * Get full names of all real reporter values
+   * Note: For a postprocessor, the full name is the postprocessor name plus '/value'.
+   *       For a vector postprocessor, the full name is the vector postprocessor name
+   *       plus the vector name followed by '/#' where '#' is the index of the vector.
    */
-  std::vector<std::string> getAllPostprocessorFullNames() const;
+  std::vector<std::string> getAllRealReporterFullNames() const;
 
   /**
    * Method for returning read only references to Reporter values.

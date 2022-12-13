@@ -6,6 +6,8 @@ problems [FEProblem.md] for solving "normal" physics problems and [EigenProblem.
 for solving Eigenvalue problems. Additionally, MOOSE contains an [ExternalProblem.md]
 problem useful for creating ["MOOSE-wrapped Apps"](moose_wrapped_apps.md optional=True).
 
+!syntax description /Problem/FEProblem
+
 ## Convenience Zeros
 
 One of the advantages of the MOOSE framework is the ease at building up Multiphysics
@@ -147,9 +149,15 @@ $\psi_8$
 - MOOSE `Kernels` must provide each of the terms in square brackets (evaluated at $\vec{x}_{q}$ or $\vec x_{q_{face}}$ as necessary).
 
 
-!syntax description /Problem/FEProblem
-
 !syntax parameters /Problem/FEProblem
+
+!alert note
+When [!param](/Problem/FEProblem/check_uo_aux_state) is set to true, MOOSE will evaluate user objects
+(including all postprocessors and vector postprocessors) and auxiliary kernels on every execute flag except `linear`
+twice. It then compares the results after two evaluations including the auxiliary system solutions and all the real reporter values added by user objects.
+When MOOSE sees a difference, it will issue an error indicating that there are unresolved dependencies
+during the evaluation because otherwise the results should only depend on primary solutions and should not change.
+MOOSE also prints the details about the difference to help users removing the states caused by these unresolved dependencies.
 
 !syntax inputs /Problem/FEProblem
 

@@ -3967,7 +3967,7 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
     // we will only check aux variables and postprocessors
     // checking more reporter data can be added in the future if needed
     std::unique_ptr<NumericVector<Number>> x = _aux->currentSolution()->clone();
-    DenseVector<Real> pp_values = getReporterData().getAllPostprocessorValues();
+    DenseVector<Real> pp_values = getReporterData().getAllRealReporterValues();
 
     // call THIS execute one more time for checking the possible states
     _checking_uo_aux_state = true;
@@ -3996,10 +3996,15 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
                  oss.str());
     }
 
-    pp_values -= getReporterData().getAllPostprocessorValues();
+    DenseVector<Real> new_pp_values = getReporterData().getAllRealReporterValues();
+    if (pp_values.size() != new_pp_values.size())
+      mooseError("Second execution for uo/aux state check should not change the number of "
+                 "real reporter values");
+
+    pp_values -= new_pp_values;
     if (pp_values.l2_norm() > 1e-8)
     {
-      auto pp_names = getReporterData().getAllPostprocessorFullNames();
+      auto pp_names = getReporterData().getAllRealReporterFullNames();
       std::multimap<Real, std::string, std::greater<Real>> ordered_map;
       for (const auto i : index_range(pp_names))
         ordered_map.insert(std::pair<Real, std::string>(std::abs(pp_values(i)), pp_names[i]));
@@ -4008,17 +4013,17 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
       unsigned int counter = 0;
       for (const auto & pair : ordered_map)
       {
+        if (counter == 11 || pair.first < 1e-8)
+          break;
         oss << "  {" << pair.second << ", " << pair.first << "},\n";
         ++counter;
-        if (counter == 10 || pair.first < 1e-8)
-          break;
       }
 
-      mooseError("Aux kernels, user objects appear to have states for postprocessors on ",
+      mooseError("Aux kernels, user objects appear to have states for real reporter values on ",
                  exec_type,
                  ".\nTop ",
                  counter,
-                 " outliers of postprocessor values:\n",
+                 " outlier(s) of postprocessor values:\n",
                  oss.str());
     }
   }
