@@ -15,6 +15,7 @@
 #include "ReporterState.h"
 #include "ReporterContext.h"
 #include "libmesh/parallel_object.h"
+#include "libmesh/dense_vector.h"
 #include <memory>
 
 class MooseApp;
@@ -100,6 +101,11 @@ public:
    * Return a list of all postprocessor names
    */
   std::set<std::string> getPostprocessorNames() const;
+
+  /**
+   * Get all postprocessor values including vector postprocessor values into a dense vector
+   */
+  DenseVector<Real> getAllPostprocessorValues() const;
 
   /**
    * Method for returning read only references to Reporter values.

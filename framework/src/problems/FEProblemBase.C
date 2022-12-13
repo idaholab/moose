@@ -3963,17 +3963,25 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
 
   if (_uo_aux_state_check && !_checking_uo_aux_state)
   {
+    // we will only check aux variables and postprocessors
+    // checking more reporter data can be added in the future if needed
     std::unique_ptr<NumericVector<Number>> x = _aux->currentSolution()->clone();
+    DenseVector<Real> pp_values = getReporterData().getAllPostprocessorValues();
 
     // call THIS execute one more time for checking the possible states
     _checking_uo_aux_state = true;
     FEProblemBase::execute(exec_type);
     _checking_uo_aux_state = false;
 
-    // fixme: we should do the same check for reporter data that added by user objects.
     *x -= *_aux->currentSolution();
     if (x->l2_norm() > 1e-8)
-      mooseError("Aux variables, user objects appear to have state on ", exec_type);
+      mooseError("Aux kernels, user objects appear to have states for aux variables on ",
+                 exec_type);
+
+    pp_values -= getReporterData().getAllPostprocessorValues();
+    if (pp_values.l2_norm() > 1e-8)
+      mooseError("Aux kernels, user objects appear to have states for postprocessors on ",
+                 exec_type);
   }
 }
 

@@ -52,6 +52,31 @@ ReporterData::getPostprocessorNames() const
   return output;
 }
 
+DenseVector<Real>
+ReporterData::getAllPostprocessorValues() const
+{
+  DenseVector<Real> all_values;
+
+  std::vector<Real> & output = all_values.get_values();
+
+  for (const auto & name_context_pair : _context_ptrs)
+  {
+    if (name_context_pair.first.isPostprocessor())
+      output.push_back(
+          getReporterValue<PostprocessorValue>(name_context_pair.first.getCombinedName()));
+
+    if (name_context_pair.first.isVectorPostprocessor())
+    {
+      auto & vec =
+          getReporterValue<VectorPostprocessorValue>(name_context_pair.first.getCombinedName());
+      for (const auto & v : vec)
+        output.push_back(v);
+    }
+  }
+
+  return all_values;
+}
+
 const ReporterContextBase &
 ReporterData::getReporterContextBase(const ReporterName & reporter_name) const
 {
