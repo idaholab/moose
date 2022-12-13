@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "GeometricalComponent.h"
+#include "GeneratedMeshComponent.h"
 
-class Component2D : public GeometricalComponent
+class Component2D : public GeneratedMeshComponent
 {
 public:
   Component2D(const InputParameters & params);

@@ -13,19 +13,19 @@
 InputParameters
 Component2D::validParams()
 {
-  InputParameters params = GeometricalComponent::validParams();
+  InputParameters params = GeneratedMeshComponent::validParams();
   return params;
 }
 
 Component2D::Component2D(const InputParameters & params)
-  : GeometricalComponent(params), _number_of_hs(0), _total_elem_number(0), _axial_offset(0.0)
+  : GeneratedMeshComponent(params), _number_of_hs(0), _total_elem_number(0), _axial_offset(0.0)
 {
 }
 
 void
 Component2D::check() const
 {
-  GeometricalComponent::check();
+  GeneratedMeshComponent::check();
 
   if (isParamValid("axial_region_names"))
     checkEqualSize<std::string, Real>("axial_region_names", "length");
