@@ -56,6 +56,11 @@ MemoryUsage::timestepSetup()
 void
 MemoryUsage::execute()
 {
+  // skip during checking uo/aux state so that this postprocessor returns the memory
+  // usage during the regular execution
+  if (_fe_problem.checkingUOAuxState())
+    return;
+
   MemoryUtils::Stats stats;
   MemoryUtils::getMemoryStats(stats);
 
@@ -80,6 +85,11 @@ MemoryUsage::execute()
 void
 MemoryUsage::finalize()
 {
+  // skip during checking uo/aux state so that this postprocessor returns the memory
+  // usage during the regular execution
+  if (_fe_problem.checkingUOAuxState())
+    return;
+
   // perform the requested reduction
   switch (_value_type)
   {
