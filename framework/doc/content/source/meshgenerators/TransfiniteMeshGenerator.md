@@ -6,14 +6,14 @@ The `TransfiniteMeshGenerator` produces two-dimensional meshes from a set of 4 c
 
 ## Overview
 
-!media media/meshgenerators/quad_convention.png style=float:right;width:20%;margin-left:2%; caption=Fig. 1: Convention for the corner vertices order.
+!media large_media/framework/meshgenerators/quad_convention.png style=float:right;width:20%;margin-left:2%; caption=Fig. 1: Convention for the corner vertices order.
 
 Given a set of 4 corners the TransfiniteMeshGenerator constructs by default the straight edges that connect the vertices and fills up the interior with straight lines. The test, [quadrilater_generator.i](test/tests/meshgenerators/transfinite_generator/quadrilater_generator.i),
 illustrates the use of the `TransfiniteMeshGenerator` object to construct general quadrilaterals as in Fig. 2. By default the distribution of points along edges is considered equidistant, unless specified otherwise by the user using the parameters `bias_x` or `bias_y`. The core of the algorithm interpolates/fills up the inner domain for any edge type, curved, parametrized, discrete. The current implementation considers all these cases with special attention given to arcs of a circle which are widely encountered in scientific computing applications. 
 
 The convention for the corners numbering should follow Fig. 1, prescribed in the order +(0,0) - (0,1) - (1,1) - (1,0)+. The direction along edges, important if the user provides them using the DISCRETE option, should follow the direction of the arrows as in Fig. 1.
 
-!media media/meshgenerators/transfinite_quadrilateral_sm.png style=float:right;margin:2%;width:30%; caption=Fig. 2: A quadrilateral with one edge on an arc circle.
+!media large_media/framework/meshgenerators/transfinite_quadrilateral_sm.png style=float:right;margin:2%;width:30%; caption=Fig. 2: A quadrilateral with one edge on an arc circle.
 
 This generator allows any type of curvilinear edges. In Fig. 2 we show a mesh where the bottom edge has an inward arc circle. However, this algorithm generates a mesh for any parametrized edge, or given set of points on an edge. For arcs of a circle, since they are widely encountered in applications, we customized an approach that requires a user to specify only the deviation from a straight line in the middle of an edge. 
 
@@ -21,7 +21,7 @@ The distribution of points on an edge can be either provided as a discrete set o
 
 ## Example 
 
-!media media/meshgenerators/transfinite_arccircle_annular_sm.png style=float:right;margin:2%;width:25%; caption=Fig. 3: Annulus section generated using `CIRCARC` edges.
+!media large_media/framework/meshgenerators/transfinite_arccircle_annular_sm.png style=float:right;margin:2%;width:25%; caption=Fig. 3: Annulus section generated using `CIRCARC` edges.
 
 
 This mesh generator considers 4 types of edges defined in `edge_type`, where `edge` is either left, right, top or bottom.
@@ -35,14 +35,14 @@ This mesh generator considers 4 types of edges defined in `edge_type`, where `ed
 !listing test/tests/meshgenerators/transfinite_generator/discrete_generator.i
     block=Mesh/transf
 
-!media media/meshgenerators/transfinite_discrete_arccircle_sm.png style=float:right;margin:2%;width:30%; caption=Fig. 4: A domain with edge types `CIRCARC` and `DISCRETE`.
+!media large_media/framework/meshgenerators/transfinite_discrete_arccircle_sm.png style=float:right;margin:2%;width:30%; caption=Fig. 4: A domain with edge types `CIRCARC` and `DISCRETE`.
 
   - `DISCRETE`, constructs a line along a set of points provided by the user in the order represented by arrows in Fig. 1, a test is available in [discrete_generator.i](test/tests/meshgenerators/transfinite_generator/discrete_generator.i) and illustrated in Fig. 4. This option is the only one that does not support a different point redistribution since it is assumed the user desires those edge points explicitely. Along an edge described by this option the `bias_x` and `bias_y` parameters will have no effect. 
 
   - `PARSED`, constructs a curvilinear edge as provided by a parametrization chosen by the user. The test [parsed_generator.i](test/tests/meshgenerators/transfinite_generator/parsed_generator.i) constructs a stenotic pipe using the parametrization of the top and bottom edges. The only requirement the user needs to take into account is to map the parametrization to the reference interval `[0, 1]`. 
 
 
-!media media/meshgenerators/transfinite_parsed_bias_sm.png style=float:right;margin:2%;width:30%; caption=Fig. 5: A stenotic pipe generated using parametrized edges using  `PARSED` and different point distributions (`bias_x`, `bias_y`).
+!media large_media/meshgenerators/transfinite_parsed_bias_sm.png style=float:right;margin:2%;width:30%; caption=Fig. 5: A stenotic pipe generated using parametrized edges using  `PARSED` and different point distributions (`bias_x`, `bias_y`).
 
 
 !listing test/tests/meshgenerators/transfinite_generator/parsed_biased_generator.i
