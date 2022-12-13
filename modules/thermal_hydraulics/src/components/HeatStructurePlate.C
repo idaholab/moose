@@ -67,14 +67,6 @@ HeatStructurePlate::check() const
     checkEqualSize<std::string, std::string>("names", "materials");
 }
 
-void
-HeatStructurePlate::addMooseObjects()
-{
-  HeatStructureBase::addMooseObjects();
-
-  _hc_model->addHeatEquationXYZ();
-}
-
 Real
 HeatStructurePlate::getUnitPerimeter(const HeatStructureSideType & side) const
 {

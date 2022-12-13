@@ -8,9 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "HeatSourceFromPowerDensity.h"
-#include "HeatStructureBase.h"
+#include "HeatStructureInterface.h"
 #include "HeatStructureCylindricalBase.h"
-#include "HeatStructurePlate.h"
 
 registerMooseObject("ThermalHydraulicsApp", HeatSourceFromPowerDensity);
 
@@ -32,14 +31,7 @@ void
 HeatSourceFromPowerDensity::addMooseObjects()
 {
   /// The heat structure component we work with
-  const HeatStructureBase & hs = getComponent<HeatStructureBase>("hs");
-  std::vector<SubdomainName> subdomain_names;
-  for (auto && region : _region_names)
-  {
-    const unsigned int idx = hs.getIndexFromName(region);
-    subdomain_names.push_back(hs.getSubdomainNames()[idx]);
-  }
-
+  const HeatStructureInterface & hs = getComponent<HeatStructureInterface>("hs");
   const HeatStructureCylindricalBase * hs_cyl =
       dynamic_cast<const HeatStructureCylindricalBase *>(&hs);
   const bool is_cylindrical = hs_cyl != nullptr;
@@ -48,12 +40,12 @@ HeatSourceFromPowerDensity::addMooseObjects()
     const std::string class_name = is_cylindrical ? "CoupledForceRZ" : "CoupledForce";
     InputParameters pars = _factory.getValidParams(class_name);
     pars.set<NonlinearVariableName>("variable") = HeatConductionModel::TEMPERATURE;
-    pars.set<std::vector<SubdomainName>>("block") = subdomain_names;
+    pars.set<std::vector<SubdomainName>>("block") = _subdomain_names;
     pars.set<std::vector<VariableName>>("v") = std::vector<VariableName>(1, _power_density_name);
     if (is_cylindrical)
     {
-      pars.set<Point>("axis_point") = hs.getPosition();
-      pars.set<RealVectorValue>("axis_dir") = hs.getDirection();
+      pars.set<Point>("axis_point") = hs_cyl->getPosition();
+      pars.set<RealVectorValue>("axis_dir") = hs_cyl->getDirection();
       pars.set<Real>("offset") = hs_cyl->getInnerRadius() - hs_cyl->getAxialOffset();
     }
     std::string mon = genName(name(), "heat_src");

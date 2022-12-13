@@ -21,10 +21,11 @@ public:
   HeatStructurePlate(const InputParameters & params);
 
   virtual void check() const override;
-  virtual void addMooseObjects() override;
   virtual Real getUnitPerimeter(const HeatStructureSideType & side) const override;
 
 protected:
+  virtual bool useCylindricalTransformation() const override { return false; }
+
   /// plate fuel depth
   const Real & _depth;
 

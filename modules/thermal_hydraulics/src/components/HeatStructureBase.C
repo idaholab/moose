@@ -11,7 +11,6 @@
 #include "SolidMaterialProperties.h"
 #include "ConstantFunction.h"
 #include "THMEnums.h"
-#include "THMMesh.h"
 
 const std::map<std::string, HeatStructureSideType> HeatStructureBase::_side_type_to_enum{
     {"INNER", HeatStructureSideType::INNER},
@@ -36,44 +35,27 @@ InputParameters
 HeatStructureBase::validParams()
 {
   InputParameters params = Component2D::validParams();
-  params.addPrivateParam<std::string>("component_type", "heat_struct");
-  params.addParam<FunctionName>("initial_T", "Initial temperature [K]");
-  params.addParam<Real>(
-      "scaling_factor_temperature", 1.0, "Scaling factor for solid temperature variable.");
+  params += HeatStructureInterface::validParams();
   return params;
 }
 
 HeatStructureBase::HeatStructureBase(const InputParameters & params)
-  : Component2D(params), _connected_to_flow_channel(false)
+  : Component2D(params), HeatStructureInterface(this), _connected_to_flow_channel(false)
 {
-}
-
-std::shared_ptr<HeatConductionModel>
-HeatStructureBase::buildModel()
-{
-  const std::string class_name = "HeatConductionModel";
-  InputParameters pars = _factory.getValidParams(class_name);
-  pars.set<THMProblem *>("_thm_problem") = &getTHMProblem();
-  pars.set<HeatStructureBase *>("_hs") = this;
-  pars.applyParameters(parameters());
-  return _factory.create<HeatConductionModel>(class_name, name(), pars, 0);
 }
 
 void
 HeatStructureBase::init()
 {
-  _hc_model = buildModel();
+  Component2D::init();
+  HeatStructureInterface::init();
 }
 
 void
 HeatStructureBase::check() const
 {
   Component2D::check();
-
-  bool ics_set = getTHMProblem().hasInitialConditionsFromFile() || isParamValid("initial_T");
-
-  if (!ics_set && !_app.isRestarting())
-    logError("Missing initial condition for temperature.");
+  HeatStructureInterface::check();
 }
 
 const unsigned int &
@@ -91,14 +73,14 @@ HeatStructureBase::usingSecondOrderMesh() const
 void
 HeatStructureBase::addVariables()
 {
-  _hc_model->addVariables();
-  if (isParamValid("initial_T"))
-    _hc_model->addInitialConditions();
+  HeatStructureInterface::addVariables();
 }
 
 void
 HeatStructureBase::addMooseObjects()
 {
+  HeatStructureInterface::addMooseObjects();
+
   if (isParamValid("materials"))
   {
     _hc_model->addMaterials();
@@ -124,15 +106,6 @@ HeatStructureBase::addMooseObjects()
         comp->connectObject(rho_fn->parameters(), rho_fn->name(), "rho", "value");
     }
   }
-}
-
-FunctionName
-HeatStructureBase::getInitialT() const
-{
-  if (isParamValid("initial_T"))
-    return getParam<FunctionName>("initial_T");
-  else
-    mooseError(name(), ": The parameter 'initial_T' was requested but not supplied");
 }
 
 const std::vector<unsigned int> &
@@ -201,39 +174,36 @@ HeatStructureBase::getBoundaryInfo(const HeatStructureSideType & side) const
   mooseError(name(), ": Unknown value of 'side' parameter.");
 }
 
+bool
+HeatStructureBase::hasHeatStructureSideType(const BoundaryName & boundary_name) const
+{
+  return hasBoundaryInVector(boundary_name, _boundary_names_inner) ||
+         hasBoundaryInVector(boundary_name, _boundary_names_axial_inner) ||
+         hasBoundaryInVector(boundary_name, _boundary_names_outer) ||
+         hasBoundaryInVector(boundary_name, _boundary_names_axial_outer) ||
+         hasBoundaryInVector(boundary_name, _boundary_names_start) ||
+         hasBoundaryInVector(boundary_name, _boundary_names_radial_start) ||
+         hasBoundaryInVector(boundary_name, _boundary_names_end) ||
+         hasBoundaryInVector(boundary_name, _boundary_names_radial_end);
+}
+
 HeatStructureSideType
 HeatStructureBase::getHeatStructureSideType(const BoundaryName & boundary_name) const
 {
-  if (std::find(_boundary_names_inner.begin(), _boundary_names_inner.end(), boundary_name) !=
-          _boundary_names_inner.end() ||
-      std::find(_boundary_names_axial_inner.begin(),
-                _boundary_names_axial_inner.end(),
-                boundary_name) != _boundary_names_axial_inner.end())
+  if (hasBoundaryInVector(boundary_name, _boundary_names_inner) ||
+      hasBoundaryInVector(boundary_name, _boundary_names_axial_inner))
     return HeatStructureSideType::INNER;
-  else if (std::find(_boundary_names_outer.begin(), _boundary_names_outer.end(), boundary_name) !=
-               _boundary_names_outer.end() ||
-           std::find(_boundary_names_axial_outer.begin(),
-                     _boundary_names_axial_outer.end(),
-                     boundary_name) != _boundary_names_axial_outer.end())
+  else if (hasBoundaryInVector(boundary_name, _boundary_names_outer) ||
+           hasBoundaryInVector(boundary_name, _boundary_names_axial_outer))
     return HeatStructureSideType::OUTER;
-  else if (std::find(_boundary_names_start.begin(), _boundary_names_start.end(), boundary_name) !=
-               _boundary_names_start.end() ||
-           std::find(_boundary_names_radial_start.begin(),
-                     _boundary_names_radial_start.end(),
-                     boundary_name) != _boundary_names_radial_start.end())
+  else if (hasBoundaryInVector(boundary_name, _boundary_names_start) ||
+           hasBoundaryInVector(boundary_name, _boundary_names_radial_start))
     return HeatStructureSideType::START;
-  else if (std::find(_boundary_names_end.begin(), _boundary_names_end.end(), boundary_name) !=
-               _boundary_names_end.end() ||
-           std::find(_boundary_names_radial_end.begin(),
-                     _boundary_names_radial_end.end(),
-                     boundary_name) != _boundary_names_radial_end.end())
+  else if (hasBoundaryInVector(boundary_name, _boundary_names_end) ||
+           hasBoundaryInVector(boundary_name, _boundary_names_radial_end))
     return HeatStructureSideType::END;
-  else if (std::find(_boundary_names_interior_axial_per_radial_section.begin(),
-                     _boundary_names_interior_axial_per_radial_section.end(),
-                     boundary_name) != _boundary_names_interior_axial_per_radial_section.end() ||
-           std::find(_boundary_names_inner_radial.begin(),
-                     _boundary_names_inner_radial.end(),
-                     boundary_name) != _boundary_names_inner_radial.end())
+  else if (hasBoundaryInVector(boundary_name, _boundary_names_interior_axial_per_radial_section) ||
+           hasBoundaryInVector(boundary_name, _boundary_names_inner_radial))
     mooseError("The boundary '", boundary_name, "' is an interior boundary.");
   else
     mooseError("No heat structure side type was found for the boundary '", boundary_name, "'.");

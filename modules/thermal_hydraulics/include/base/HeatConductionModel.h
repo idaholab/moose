@@ -12,7 +12,8 @@
 class THMProblem;
 class ThermalHydraulicsApp;
 class Factory;
-class HeatStructureBase;
+class HeatStructureInterface;
+class GeometricalComponent;
 
 #include "MooseObject.h"
 #include "NamingInterface.h"
@@ -63,8 +64,10 @@ protected:
   THMProblem & _sim;
   /// The Factory associated with the MooseApp
   Factory & _factory;
-  /// The heat structure component that built this class
-  HeatStructureBase & _hs;
+  /// The heat structure interface that built this class
+  HeatStructureInterface & _hs_interface;
+  /// The geometrical component that built this class
+  GeometricalComponent & _geometrical_component;
   /// Name of the component
   const std::string _comp_name;
 

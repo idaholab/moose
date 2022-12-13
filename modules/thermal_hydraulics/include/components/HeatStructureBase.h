@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Component2D.h"
+#include "HeatStructureInterface.h"
 #include "HeatConductionModel.h"
 
 /// heat structure side
@@ -21,7 +22,10 @@ enum class HeatStructureSideType
   END = 3
 };
 
-class HeatStructureBase : public Component2D
+/**
+ * Base class for 2D generated heat structures
+ */
+class HeatStructureBase : public Component2D, public HeatStructureInterface
 {
 public:
   HeatStructureBase(const InputParameters & params);
@@ -42,7 +46,13 @@ public:
    * @return Index of the block with name 'name'
    */
   const unsigned int & getIndexFromName(const std::string & name) const;
-  FunctionName getInitialT() const;
+
+  /**
+   * Returns true if a heat structure side type exists for the given boundary name
+   *
+   * @param[in] boundary_name   Boundary name for which to get heat structure side type
+   */
+  bool hasHeatStructureSideType(const BoundaryName & boundary_name) const;
 
   /**
    * Gets the heat structure side type of the provided boundary
@@ -85,16 +95,12 @@ public:
   void setConnectedToFlowChannel() const { _connected_to_flow_channel = true; }
 
 protected:
-  virtual std::shared_ptr<HeatConductionModel> buildModel();
   virtual void init() override;
   virtual void check() const override;
   virtual bool usingSecondOrderMesh() const override;
 
   void
   loadMaterial(InputParameters & pars, const std::string & par, const std::string & material_name);
-
-  /// The heat conduction model used by this heat structure
-  std::shared_ptr<HeatConductionModel> _hc_model;
 
   /// Map from block name to block index
   std::map<std::string, unsigned int> _name_index;

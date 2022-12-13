@@ -61,6 +61,11 @@ public:
   THMMesh & mesh();
 
   /**
+   * Gets the THM problem
+   */
+  THMProblem & getTHMProblem() const;
+
+  /**
    * Test if a parameter exists in the object's input parameters
    * @param name The name of the parameter
    * @return true if the parameter exists, false otherwise
@@ -223,11 +228,6 @@ public:
   void addDependency(const std::string & dependency);
 
 protected:
-  /**
-   * Gets the THM problem
-   */
-  THMProblem & getTHMProblem() const;
-
   /**
    * Performs any post-constructor, pre-mesh-setup setup
    */

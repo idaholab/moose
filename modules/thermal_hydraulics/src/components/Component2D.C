@@ -413,26 +413,26 @@ Component2D::buildMesh()
 }
 
 bool
+Component2D::hasBoundaryInVector(const BoundaryName & boundary_name,
+                                 const std::vector<BoundaryName> & boundary_name_vector) const
+{
+  return std::find(boundary_name_vector.begin(), boundary_name_vector.end(), boundary_name) !=
+         boundary_name_vector.end();
+}
+
+bool
 Component2D::hasBoundary(const BoundaryName & boundary_name) const
 {
-  // Put all boundary names in one vector
-  const std::vector<std::vector<BoundaryName>> all_boundary_names_vectors{
-      _boundary_names_inner,
-      _boundary_names_outer,
-      _boundary_names_start,
-      _boundary_names_end,
-      _boundary_names_interior_axial_per_radial_section,
-      _boundary_names_axial_inner,
-      _boundary_names_axial_outer,
-      _boundary_names_radial_start,
-      _boundary_names_radial_end,
-      _boundary_names_inner_radial};
-  std::vector<BoundaryName> all_boundary_names;
-  for (const auto & vec : all_boundary_names_vectors)
-    all_boundary_names.insert(all_boundary_names.end(), vec.begin(), vec.end());
-
-  return std::find(all_boundary_names.begin(), all_boundary_names.end(), boundary_name) !=
-         all_boundary_names.end();
+  return hasBoundaryInVector(boundary_name, _boundary_names_inner) ||
+         hasBoundaryInVector(boundary_name, _boundary_names_axial_inner) ||
+         hasBoundaryInVector(boundary_name, _boundary_names_outer) ||
+         hasBoundaryInVector(boundary_name, _boundary_names_axial_outer) ||
+         hasBoundaryInVector(boundary_name, _boundary_names_start) ||
+         hasBoundaryInVector(boundary_name, _boundary_names_radial_start) ||
+         hasBoundaryInVector(boundary_name, _boundary_names_end) ||
+         hasBoundaryInVector(boundary_name, _boundary_names_radial_end) ||
+         hasBoundaryInVector(boundary_name, _boundary_names_interior_axial_per_radial_section) ||
+         hasBoundaryInVector(boundary_name, _boundary_names_inner_radial);
 }
 
 const std::vector<std::tuple<dof_id_type, unsigned short int>> &

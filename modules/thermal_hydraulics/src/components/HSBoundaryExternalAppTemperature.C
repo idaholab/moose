@@ -9,6 +9,8 @@
 
 #include "HSBoundaryExternalAppTemperature.h"
 #include "HeatConductionModel.h"
+#include "HeatStructureInterface.h"
+#include "GeometricalComponent.h"
 
 registerMooseObject("ThermalHydraulicsApp", HSBoundaryExternalAppTemperature);
 
@@ -33,8 +35,9 @@ HSBoundaryExternalAppTemperature::HSBoundaryExternalAppTemperature(const InputPa
 void
 HSBoundaryExternalAppTemperature::addVariables()
 {
-  const HeatStructureBase & hs = getComponent<HeatStructureBase>("hs");
-  const std::vector<SubdomainName> & subdomain_names = hs.getSubdomainNames();
+  const HeatStructureInterface & hs = getComponent<HeatStructureInterface>("hs");
+  const std::vector<SubdomainName> & subdomain_names =
+      hs.getGeometricalComponent().getSubdomainNames();
 
   getTHMProblem().addSimVariable(
       false, _T_ext_var_name, HeatConductionModel::feType(), subdomain_names);

@@ -61,6 +61,7 @@ htc_right = 1000
   [hs_external]
     type = FileMeshComponent
     file = 'mesh_in.e'
+    position = '0 0 0'
   []
   [hs]
     type = HeatStructurePlate

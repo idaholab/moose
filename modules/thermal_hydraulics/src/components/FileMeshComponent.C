@@ -21,6 +21,7 @@ FileMeshComponent::validParams()
   InputParameters params = GeometricalComponent::validParams();
 
   params.addRequiredParam<FileName>("file", "The ExodusII mesh file name");
+  params.addRequiredParam<Point>("position", "Translation vector for the file mesh [m]");
 
   params.addClassDescription("Loads a mesh from an ExodusII file without adding physics.");
 
@@ -31,7 +32,8 @@ FileMeshComponent::FileMeshComponent(const InputParameters & parameters)
   : GeometricalComponent(parameters),
     _file_name(getParam<FileName>("file")),
     _file_is_readable(MooseUtils::pathExists(_file_name) &&
-                      MooseUtils::checkFileReadable(_file_name, false, false))
+                      MooseUtils::checkFileReadable(_file_name, false, false)),
+    _position(getParam<Point>("position"))
 {
   // The following is a mooseError instead of logError because the 'add_variable'
   // and 'add_aux_variable' tasks must execute before the integrity check, so if
@@ -48,7 +50,17 @@ void
 FileMeshComponent::setupMesh()
 {
   if (_file_is_readable)
+  {
     buildMesh();
+
+    // apply translation vector to all nodes
+    for (auto && node_id : _node_ids)
+    {
+      Node & node = mesh().nodeRef(node_id);
+      RealVectorValue p(node(0), node(1), node(2));
+      node = p + _position;
+    }
+  }
 }
 
 std::vector<std::string>

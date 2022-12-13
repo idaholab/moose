@@ -30,9 +30,11 @@ protected:
    */
   std::vector<std::string> buildMesh();
 
-private:
   /// The name of the ExodusII file to load the mesh from
   const FileName & _file_name;
   /// Is the file readable?
   const bool _file_is_readable;
+
+  /// Translation vector for the file mesh
+  const Point & _position;
 };
