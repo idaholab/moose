@@ -71,7 +71,7 @@ TransfiniteMeshGenerator::validParams()
                              "different distributions s long as the "
                              "number of points is identical. Along oppsite edges a different point "
                              "distribution can be prescribed "
-                             "via the options bias_x or bias_y for opssiong edges.");
+                             "via the options bias_x or bias_y for oposing edges.");
 
   params.addParamNamesToGroup("bottom_type left_type top_type right_type", "Edge type");
   params.addParamNamesToGroup("bottom_parameter left_parameter top_parameter right_parameter",
