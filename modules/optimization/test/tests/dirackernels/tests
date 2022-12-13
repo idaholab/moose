@@ -1,0 +1,26 @@
+[Tests]
+  issues = '#22215'
+  [vector_point_source]
+    design = 'ReporterTimePointSource.md'
+    requirement = 'The system shall support point sources with locations, times, and values given by a vector values with '
+    [forward]
+      type = CSVDiff
+      input = reporter_time_point_source.i
+      csvdiff = 'reporter_time_point_source_out_sample_0000.csv
+                 reporter_time_point_source_out_sample_0001.csv
+                 reporter_time_point_source_out_sample_0002.csv
+                 reporter_time_point_source_out_sample_0003.csv'
+      detail = 'forward time stepping;'
+    []
+    [reverse]
+      type = CSVDiff
+      input = reporter_time_point_source.i
+      cli_args = 'DiracKernels/vpp_point_source/reverse_time_end=0.3 Outputs/file_base=reporter_time_point_source_reverse'
+      csvdiff = 'reporter_time_point_source_reverse_sample_0000.csv
+                 reporter_time_point_source_reverse_sample_0001.csv
+                 reporter_time_point_source_reverse_sample_0002.csv
+                 reporter_time_point_source_reverse_sample_0003.csv'
+      detail = 'reverse time stepping;'
+    []
+  []
+[]

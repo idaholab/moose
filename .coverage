@@ -56,6 +56,9 @@ require_total = 55
 [navier_stokes]
 require_total = 77
 
+[optimization]
+require_total = 86
+
 [peridynamics]
 require_total = 78
 

@@ -1,0 +1,64 @@
+Framework Information:
+MOOSE Version:           git commit 608a9531ae on 2022-12-01
+LibMesh Version:         3f05f40f4a45060c1fd07281f8869a4667086291
+PETSc Version:           3.16.6
+SLEPc Version:           3.16.2
+Current Time:            Mon Dec  5 09:04:59 2022
+Executable Timestamp:    Sat Dec  3 14:45:35 2022
+
+Parallelism:
+  Num Processors:          1
+  Num Threads:             1
+
+Mesh: 
+  Parallel Type:           replicated
+  Mesh Dimension:          1
+  Spatial Dimension:       1
+  Nodes:                   2
+  Elems:                   1
+  Num Subdomains:          1
+
+Execution Information:
+  Executioner:             Optimize
+  Solver Mode:             Preconditioned JFNK
+
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+TAO SOLVER: iteration=0	f=56	gnorm=14.9666	cnorm=0	xdiff=1
+TAO SOLVER: iteration=0	f=5.55112e-17	gnorm=1.49012e-08	cnorm=0	xdiff=1
+Tao Object: 1 MPI processes
+  type: bncg
+    CG Type: ssml_bfgs
+    Skipped Stepdirection Updates: 1
+    Scaled gradient steps: 3
+    Pure gradient steps: 0
+    Not a descent direction: 0
+    Line search fails: 4
+    Mat Object: (tao_bncg_) 1 MPI processes
+      type: lmvmdiagbroyden
+      rows=3, cols=3
+        Scale history: 1
+        Scale params: alpha=1., beta=0.5, rho=1.
+        Convex factor: theta=0.
+        Max. storage: 1
+        Used storage: 0
+        Number of updates: 0
+        Number of rejects: 0
+        Number of resets: 5
+  TaoLineSearch Object: 1 MPI processes
+    type: more-thuente
+    maximum function evaluations=30
+    tolerances: ftol=0.0001, rtol=1e-10, gtol=0.9
+    total number of function evaluations=0
+    total number of gradient evaluations=0
+    total number of function/gradient evaluations=7
+    using variable bounds
+    Termination reason: 3
+  Active Set subset type: subvec
+  convergence tolerances: gatol=1e-08,   steptol=0.,   gttol=0.
+  Residual in Function/Gradient:=1.49012e-08
+  Objective value=5.55112e-17
+  total number of iterations=1,                          (max: 2000)
+  total number of function evaluations=147,                  max: 4000
+  total number of function/gradient evaluations=21,      (max: 4000)
+  Solver terminated: -6   Line Search Failure

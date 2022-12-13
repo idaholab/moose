@@ -16,5 +16,5 @@ class AddSolidPropertiesDeprecatedAction : public AddSolidPropertiesAction
 public:
   static InputParameters validParams();
 
-  AddSolidPropertiesDeprecatedAction(InputParameters params);
+  AddSolidPropertiesDeprecatedAction(const InputParameters & params);
 };

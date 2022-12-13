@@ -1,0 +1,34 @@
+[Tests]
+  issues = '#21885'
+  design = 'ReporterPointSource.md'
+  [hessian]
+  # DO NOT CHANGE THIS TEST
+  # this test is documented as an example in forceInv_pointLoads.md
+  # if this test is changed, the figures will need to be updated.
+    type = CSVDiff
+    max_threads = 1
+    rel_err = 0.1
+    abs_zero = 10
+    input = main.i
+    csvdiff = main_out_OptimizationReporter_0001.csv
+    requirement = "The system shall be able to invert for point loads using Hessian based "
+                  "optimimization;"
+    # steady solve
+    recover = false
+  []
+  [adjoint]
+    type = CSVDiff
+    max_threads = 1
+    rel_err = 0.1
+    abs_zero = 10
+    input = main.i
+    cli_args = "Executioner/tao_solver=taolmvm "
+               "Executioner/petsc_options_iname='-tao_gttol' "
+               "Executioner/petsc_options_value='1e-5'"
+    csvdiff = main_out_OptimizationReporter_0001.csv
+    requirement = "The system shall be able to invert for point loads using gradient based "
+                  "optimization;"
+    # steady solve
+    recover = false
+  []
+[]
