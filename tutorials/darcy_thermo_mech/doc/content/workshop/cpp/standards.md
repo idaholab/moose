@@ -164,7 +164,7 @@ std::for_each(container.begin(), container.end(), [= local_var](Foo & foo) {
 
 - Use the `override` keyword on overridden `virtual` methods
 - Use `std::make_shared<T>()` when allocating new memory for shared pointers
-- Use `libmesh_make_unique<T>()` when allocating new memory for unique pointers
+- Use `std::make_unique<T>()` when allocating new memory for unique pointers
 - Make use of std::move() for efficiency when possible
 
 !---

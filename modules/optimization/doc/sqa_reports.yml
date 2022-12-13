@@ -1,0 +1,35 @@
+Applications:
+    optimization:
+        exe_directory: ${MOOSE_DIR}/modules/optimization
+        app_types:
+            - OptimizationApp
+        content_directory: ${MOOSE_DIR}/modules/optimization/doc/content
+        unregister:
+            - ${MOOSE_DIR}/framework/doc/unregister.yml
+        remove:
+            - ${MOOSE_DIR}/framework/doc/remove.yml
+
+Documents:
+    software_quality_plan: sqa/inl_records.md#software_quality_plan
+    enterprise_architecture_entry: sqa/inl_records.md#enterprise_architecture_entry
+    safety_software_determination: sqa/inl_records.md#safety_software_determination
+    quality_level_determination: sqa/inl_records.md#quality_level_determination
+    configuration_management_plan: sqa/inl_records.md#configuration_management_plan
+    asset_management_plan: sqa/inl_records.md#asset_management_plan
+    verification_validation_plan: sqa/inl_records.md#verification_and_validation_plan
+    software_requirements_specification: sqa/optimization_srs.md
+    software_design_description: sqa/optimization_sdd.md
+    software_test_plan: sqa/optimization_stp.md
+    requirements_traceablity_matrix: sqa/optimization_rtm.md
+    verification_validation_report: sqa/optimization_vvr.md
+    failure_analysis_report: sqa/optimization_far.md
+    software_library_list: sqa/optimization_sll.md
+    communication_and_contact_information: sqa/framework_cci.md
+    software_coding_standards: sqa/framework_scs.md
+    user_manual: optimization/examples/index.md
+    theory_manual: theory/InvOptTheory.md
+
+Requirements:
+    optimization:
+        directories:
+            - ${MOOSE_DIR}/modules/optimization

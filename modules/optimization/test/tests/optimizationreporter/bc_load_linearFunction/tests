@@ -1,0 +1,16 @@
+[Tests]
+  issues = '#21885'
+  design = 'Optimize.md ParsedOptimizationFunction.md SideOptimizationNeumannFunctionInnerProduct.md'
+  [iterOutput]
+    requirement = "The system shall be able to scale linear and constant functions involved in two separate "
+                  "Neumann boundary conditions both applied to the same sideset using two parsed functions and "
+                  "the scale of the linear and constant functions are both being parameterized."
+    type = CSVDiff
+    max_threads = 1
+    rel_err = 0.0000001
+    input = main.i
+    csvdiff = main_out_optInfo_0001.csv
+    # steady solve
+    recover = false
+  []
+[]

@@ -6,14 +6,15 @@ Content:
     - modules/contact/doc/content
     - modules/electromagnetics/doc/content
     - modules/external_petsc_solver/doc/content
-    - modules/geochemistry/doc/content
     - modules/fluid_properties/doc/content
     - modules/fsi/doc/content
     - modules/functional_expansion_tools/doc/content
+    - modules/geochemistry/doc/content
     - modules/heat_conduction/doc/content
     - modules/level_set/doc/content
     - modules/misc/doc/content
     - modules/navier_stokes/doc/content
+    - modules/optimization/doc/content
     - modules/peridynamics/doc/content
     - modules/phase_field/doc/content
     - modules/porous_flow/doc/content
@@ -97,8 +98,8 @@ Extensions:
             executioners: syntax/Executioner/index.md
             functions: syntax/Functions/index.md
             fvbcs: syntax/FVBCs/index.md
-            fvkernels: syntax/FVKernels/index.md
             fviks: syntax/FVInterfaceKernels/index.md
+            fvkernels: syntax/FVKernels/index.md
             ics: syntax/ICs/index.md
             indicators: syntax/Adaptivity/Indicators/index.md
             interfacekernels: syntax/InterfaceKernels/index.md
@@ -111,6 +112,7 @@ Extensions:
             meshgenerators: syntax/Mesh/index.md
             multiapps: syntax/MultiApps/index.md
             nodalkernels: syntax/NodalKernels/index.md
+            optimizationreporters: syntax/OptimizationReporter/index.md
             outputs: syntax/Outputs/index.md
             parser: source/parser/Parser.md
             partitioner: syntax/Mesh/Partitioner/index.md
@@ -153,25 +155,26 @@ Extensions:
         reports: !include modules/doc/sqa_reports.yml
         categories:
             framework: !include framework/doc/sqa_framework.yml
-            tensor_mechanics: !include modules/tensor_mechanics/doc/sqa_tensor_mechanics.yml
-            stochastic_tools: !include modules/stochastic_tools/doc/sqa_stochastic_tools.yml
             contact: !include modules/contact/doc/sqa_contact.yml
-            heat_conduction: !include modules/heat_conduction/doc/sqa_heat_conduction.yml
+            electromagnetics: !include modules/electromagnetics/doc/sqa_electromagnetics.yml
             fluid_properties: !include modules/fluid_properties/doc/sqa_fluid_properties.yml
+            fsi: !include modules/fsi/doc/sqa_fsi.yml
+            heat_conduction: !include modules/heat_conduction/doc/sqa_heat_conduction.yml
+            level_set: !include modules/level_set/doc/sqa_level_set.yml
             misc: !include modules/misc/doc/sqa_misc.yml
-            phase_field: !include modules/phase_field/doc/sqa_phase_field.yml
-            xfem: !include modules/xfem/doc/sqa_xfem.yml
             navier_stokes: !include modules/navier_stokes/doc/sqa_navier_stokes.yml
+            optimization: !include modules/optimization/doc/sqa_optimization.yml
+            phase_field: !include modules/phase_field/doc/sqa_phase_field.yml
+            porous_flow: !include modules/porous_flow/doc/sqa_porous_flow.yml
+            ray_tracing: !include modules/ray_tracing/doc/sqa_ray_tracing.yml
             rdg: !include modules/rdg/doc/sqa_rdg.yml
             reactor: !include modules/reactor/doc/sqa_reactor.yml
-            ray_tracing: !include modules/ray_tracing/doc/sqa_ray_tracing.yml
             scalar_transport: !include modules/scalar_transport/doc/sqa_scalar_transport.yml
             solid_properties: !include modules/solid_properties/doc/sqa_solid_properties.yml
-            fsi: !include modules/fsi/doc/sqa_fsi.yml
+            stochastic_tools: !include modules/stochastic_tools/doc/sqa_stochastic_tools.yml
+            tensor_mechanics: !include modules/tensor_mechanics/doc/sqa_tensor_mechanics.yml
             thermal_hydraulics: !include modules/thermal_hydraulics/doc/sqa_thermal_hydraulics.yml
-            porous_flow: !include modules/porous_flow/doc/sqa_porous_flow.yml
-            level_set: !include modules/level_set/doc/sqa_level_set.yml
-            electromagnetics: !include modules/electromagnetics/doc/sqa_electromagnetics.yml
+            xfem: !include modules/xfem/doc/sqa_xfem.yml
 
         requirement-groups:
             dgkernels: DGKernel Objects

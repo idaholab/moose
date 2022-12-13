@@ -1,0 +1,35 @@
+Content:
+  - framework/doc/content
+  - modules/optimization/doc/content
+
+Renderer:
+  type: MooseDocs.base.MaterializeRenderer
+
+Extensions:
+  MooseDocs.extensions.navigation:
+    name: MOOSE Optimization Module
+    repo: https://github.com/idaholab/moose
+    home: /modules/optimization/index.md
+
+  MooseDocs.extensions.appsyntax:
+    executable: ${MOOSE_DIR}/modules/optimization
+    remove:
+      framework: !include framework/doc/remove.yml
+    unregister:
+      framework: !include framework/doc/unregister.yml
+    includes:
+        - framework/include
+        - modules/optimization/include
+
+  MooseDocs.extensions.common:
+    shortcuts: !include framework/doc/globals.yml
+  MooseDocs.extensions.acronym:
+    acronyms: !include framework/doc/acronyms.yml
+  MooseDocs.extensions.template:
+        active: True
+  MooseDocs.extensions.sqa:
+      active: False
+      reports: !include modules/optimization/doc/sqa_reports.yml
+      categories:
+          framework: !include framework/doc/sqa_framework.yml
+          optimization: !include modules/optimization/doc/sqa_optimization.yml
