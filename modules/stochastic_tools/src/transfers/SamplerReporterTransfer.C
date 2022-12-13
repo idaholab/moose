@@ -15,6 +15,7 @@
 #include "StochasticResults.h"
 #include "Sampler.h"
 #include "StochasticReporter.h"
+#include "Executioner.h"
 
 registerMooseObject("StochasticToolsApp", SamplerReporterTransfer);
 
@@ -135,6 +136,6 @@ SamplerReporterTransfer::transferStochasticReporters(dof_id_type global_index,
                                getFromMultiApp()->problemBase(),
                                local_index);
 
-    (*_converged)[local_index] = getFromMultiApp()->appProblemBase(app_index).converged();
+    (*_converged)[local_index] = getFromMultiApp()->getExecutioner(app_index)->lastSolveConverged();
   }
 }
