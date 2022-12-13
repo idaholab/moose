@@ -1225,22 +1225,33 @@ div.moose-algorithm {
         margin-top: 8px;
       }
       .material-icons {
-          font-size: 50px !important;
+        font-size: 76px !important;
       }
       .github-mark, .github-logo {
-          height: 56px;
+          height: 76px;
       }
-      .sidenav {
-        width: 440px;
-        margin-top: 65px;
+      nav, nav .nav-wrapper i, nav a.sidenav-trigger, nav a.sidenav-trigger i {
+        height: 86px;
+        line-height: 86px;
       }
       .sidenav li > a {
-        font-size: 35px;
+        font-size: 50px;
+        /*padding: 30px;*/
+        /*height: 60px;*/
       }
-      .btn, .btn-large, .btn-small, .btn-flat {
-        height: 50px;
-        line-height: 50px;
-        font-size: 35px;
+      .sidenav {
+        width: 80%;
+        /*margin-top: 86px;*/
+      }
+      .sidenav li > a > i, .sidenav li > a > [class^="mdi-"], .sidenav li > a li > a > [class*="mdi-"], .sidenav li > a > i.material-icons {
+        /*margin: -57px 824px 0px 0px;*/
+        color: white;
+      }
+      .sidenav > li {
+        padding-bottom: 25px;
+      }
+      .sidenav > li > ul > li {
+        padding-bottom: 40px;
       }
       .row .col.m4 {
         width: 100%;
@@ -1252,4 +1263,174 @@ div.moose-algorithm {
         font-weight: 100;
         font-size: 90%;
       }
+      .container {
+        width: 100%;
+      }
+      /*
+      .dropdown-content {
+        padding-bottom: 25px !important;
+        width: 80% !important;
+        height: 80% !important;
+      } */
+      /*
+      .sidenav {
+        width: 90%;
+        margin-top: 86px;
+      }
+      .dropdown-content {
+        width: 90% !important;
+        left: 209px !important;
+        margin: 0px -124px !important;
+        height: 48% !important;
+      }
+      nav .sidenav-trigger {
+        margin: 0px 0px 0px;
+        padding-right: 113px;
+      }
+      .sidenav li > a > i, .sidenav li > a > [class^="mdi-"], .sidenav li > a li > a > [class*="mdi-"], .sidenav li > a > i.material-icons {
+        margin: -57px 824px 0px 0px;
+        color: white;
+      }
+      nav i, nav [class^="mdi-"], nav [class*="mdi-"], nav i.material-icons {
+        margin: 0px 0px;
+      }
+      nav ul li {
+        padding: 17px;
+        margin-left: 2px;
+        margin-bottom: 5px;
+      }
+      .btn, .btn-large, .btn-small, .btn-flat {
+        height: 50px;
+        line-height: 50px;
+        font-size: 35px;
+      } */
+}
+
+/* Portrait iPad Pro 9.7" */
+@media only screen
+  and (min-device-width: 768px)
+  and (max-device-width: 1024px)
+  and (-webkit-min-device-pixel-ratio: 2) {
+    /*
+    header, main, footer {
+      font-size: 15px;
+    }
+    a {
+        font-size: 17px;
+    }
+    .moose-content-next {
+      margin-top: 0px;
+    }
+    .material-icons {
+        font-size: 40px !important;
+    }
+    .github-mark, .github-logo {
+        height: 46px;
+    }
+    .sidenav {
+      width: 640px;
+      margin-top: 65px;
+    }
+    .dropdown-content {
+      left: 60px !important;
+    }
+    .sidenav li > a {
+      font-size: 35px;
+      padding: 0px 24px;
+      height: 30px;
+    }
+    nav .sidenav-trigger {
+      margin: 0px 0px;
+      display: block;
+      padding-right: 80px;
+    }
+    .sidenav li > a > i, .sidenav li > a > [class^="mdi-"], .sidenav li > a li > a > [class*="mdi-"], .sidenav li > a > i.material-icons {
+      margin: -53px 584px 0px 0px;
+      color: white;
+    }
+    nav ul li {
+      padding: 10px;
+    }
+    .btn, .btn-large, .btn-small, .btn-flat {
+      height: 50px;
+      line-height: 50px;
+      font-size: 22px;
+    }
+    .row .col.m4 {
+      width: 33%;
+    }
+    .row .col.m8 {
+      width: 33%;
+    }
+    .card .card-title {
+      font-weight: 100;
+      font-size: 110%;
+    }
+    .container {
+      width: 95%;
+    }
+    */
+}
+/* Landscape iPad Pro 9.7" */
+@media only screen
+  and (min-device-width: 768px)
+  and (max-device-width: 1080px)
+  and (-webkit-min-device-pixel-ratio: 2) {
+    header, main, footer {
+      font-size: 20px;
+  }
+  a {
+      font-size: 20px;
+  }
+  .moose-content-next {
+    margin-top: 8px;
+  }
+  .material-icons {
+    font-size: 40px !important;
+  }
+  .github-mark, .github-logo {
+      height: 40px;
+  }
+  nav, nav .nav-wrapper i, nav a.sidenav-trigger, nav a.sidenav-trigger i {
+    height: 60px;
+    line-height: 60px;
+  }
+  .sidenav li > a {
+    font-size: 40px;
+  }
+  .sidenav {
+    width: 80%;
+  }
+  .sidenav li > a > i, .sidenav li > a > [class^="mdi-"], .sidenav li > a li > a > [class*="mdi-"], .sidenav li > a > i.material-icons {
+    /*margin: -57px 824px 0px 0px;*/
+    color: white;
+  }
+  .sidenav > li {
+    padding-bottom: 25px;
+  }
+  .sidenav > li > ul > li {
+    padding-bottom: 30px;
+  }
+  .sidenav > li > ul > li > a {
+    margin-left: 10px;
+  }
+  .dropdown-content {
+    width: 80% !important;
+  }
+  .dropdown-content > li {
+    margin-left: 30px !important;
+  }
+  .row .col.m4 {
+    width: 33%;
+  }
+  .row .col.m8 {
+    width: 33%;
+  }
+  .card .card-title {
+    font-weight: 100;
+    font-size: 90%;
+  }
+  .container {
+    width: 100%;
+  }
 }
