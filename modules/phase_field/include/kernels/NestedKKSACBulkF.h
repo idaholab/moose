@@ -11,22 +11,17 @@
 
 #include "KKSACBulkBase.h"
 
-// Forward Declarations
-
 /**
  * KKSACBulkBase child class for the free energy difference term
  * \f$ -\frac{dh}{d\eta}(F_a-F_b)+w\frac{dg}{d\eta} \f$
  * in the the Allen-Cahn bulk residual.
- *
- * The non-linear variable for this Kernel is the order parameter 'eta'.
  */
-
-class NestKKSACBulkF : public KKSACBulkBase
+class NestedKKSACBulkF : public KKSACBulkBase
 {
 public:
   static InputParameters validParams();
 
-  NestKKSACBulkF(const InputParameters & parameters);
+  NestedKKSACBulkF(const InputParameters & parameters);
 
 protected:
   virtual Real computeDFDOP(PFFunctionType type);

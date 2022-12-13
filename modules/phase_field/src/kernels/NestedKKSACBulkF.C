@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NestKKSACBulkF.h"
+#include "NestedKKSACBulkF.h"
 
-registerMooseObject("PhaseFieldApp", NestKKSACBulkF);
+registerMooseObject("PhaseFieldApp", NestedKKSACBulkF);
 
 InputParameters
-NestKKSACBulkF::validParams()
+NestedKKSACBulkF::validParams()
 {
   InputParameters params = KKSACBulkBase::validParams();
   params.addClassDescription("KKS model kernel (part 1 of 2) for the Bulk Allen-Cahn. This "
@@ -20,8 +20,8 @@ NestKKSACBulkF::validParams()
   params.addRequiredCoupledVar("global_cs", "The interpolated concentrations c, b, etc");
   params.addRequiredParam<std::vector<MaterialPropertyName>>(
       "ci_names",
-      "Phase concentrations. These must have the same order as Fj_names and global_cs, for "
-      "example, c1, c2, b1, b2.");
+      "Phase concentrations. The order must match Fa, Fb, and global_cs, for example, c1, "
+      "c2, b1, b2, etc");
   params.addRequiredParam<MaterialPropertyName>(
       "fb_name", "Free energy function Fb (fa_name is in the KKSACBulkBase).");
   params.addParam<MaterialPropertyName>(
@@ -30,7 +30,7 @@ NestKKSACBulkF::validParams()
   return params;
 }
 
-NestKKSACBulkF::NestKKSACBulkF(const InputParameters & parameters)
+NestedKKSACBulkF::NestedKKSACBulkF(const InputParameters & parameters)
   : KKSACBulkBase(parameters),
     _c_map(getParameterJvarMap("global_cs")),
     _num_c(coupledComponents("global_cs")),
@@ -84,7 +84,7 @@ NestKKSACBulkF::NestKKSACBulkF(const InputParameters & parameters)
 }
 
 Real
-NestKKSACBulkF::computeDFDOP(PFFunctionType type)
+NestedKKSACBulkF::computeDFDOP(PFFunctionType type)
 {
   const Real A1 = (*_prop_Fi[0])[_qp] - (*_prop_Fi[1])[_qp];
 
@@ -106,7 +106,7 @@ NestKKSACBulkF::computeDFDOP(PFFunctionType type)
 }
 
 Real
-NestKKSACBulkF::computeQpOffDiagJacobian(unsigned int jvar)
+NestedKKSACBulkF::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // first get dependence of mobility _L on other variables using parent class
   // member function

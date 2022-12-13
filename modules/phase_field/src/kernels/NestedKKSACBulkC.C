@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NestKKSACBulkC.h"
+#include "NestedKKSACBulkC.h"
 
-registerMooseObject("PhaseFieldApp", NestKKSACBulkC);
+registerMooseObject("PhaseFieldApp", NestedKKSACBulkC);
 
 InputParameters
-NestKKSACBulkC::validParams()
+NestedKKSACBulkC::validParams()
 {
   InputParameters params = KKSACBulkBase::validParams();
   params.addClassDescription("KKS model kernel (part 2 of 2) for the Bulk Allen-Cahn. This "
@@ -20,12 +20,12 @@ NestKKSACBulkC::validParams()
   params.addRequiredCoupledVar("global_cs", "The interpolated concentrations c, b, etc");
   params.addRequiredParam<std::vector<MaterialPropertyName>>(
       "ci_names",
-      "Phase concentrations. The order must match Fa, Fb, and global_c, for example, c1, "
+      "Phase concentrations. The order must match Fa, Fb, and global_cs, for example, c1, "
       "c2, b1, b2, etc");
   return params;
 }
 
-NestKKSACBulkC::NestKKSACBulkC(const InputParameters & parameters)
+NestedKKSACBulkC::NestedKKSACBulkC(const InputParameters & parameters)
   : KKSACBulkBase(parameters),
     _c_names(coupledNames("global_cs")),
     _c_map(getParameterJvarMap("global_cs")),
@@ -83,7 +83,7 @@ NestKKSACBulkC::NestKKSACBulkC(const InputParameters & parameters)
 }
 
 Real
-NestKKSACBulkC::computeDFDOP(PFFunctionType type)
+NestedKKSACBulkC::computeDFDOP(PFFunctionType type)
 {
   Real sum = 0.0;
   switch (type)
@@ -117,7 +117,7 @@ NestKKSACBulkC::computeDFDOP(PFFunctionType type)
 }
 
 Real
-NestKKSACBulkC::computeQpOffDiagJacobian(unsigned int jvar)
+NestedKKSACBulkC::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // first get dependence of mobility _L on other variables using parent class member function
   Real res = ACBulk<Real>::computeQpOffDiagJacobian(jvar);

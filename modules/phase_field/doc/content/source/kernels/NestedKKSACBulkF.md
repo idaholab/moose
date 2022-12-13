@@ -1,6 +1,6 @@
-# NestKKSACBulkF
+# NestedKKSACBulkF
 
-!syntax description /Kernels/NestKKSACBulkF
+!syntax description /Kernels/NestedKKSACBulkF
 
 Kim-Kim-Suzuki (KKS) nested solve kernel (2 of 3). An Allen-Cahn kernel for the terms without a direct composition dependence.
 
@@ -47,8 +47,8 @@ J = -\phi_j\frac{dh}{d\eta}\left( \frac{\partial F_a}{\partial T} - \frac{\parti
 
 The off-diagonal Jacobian contribution is multiplied by the Allen-Cahn mobility $L$ at each point for consistency with the other terms in the Allen-Cahn equation.
 
-!syntax parameters /Kernels/NestKKSACBulkF
+!syntax parameters /Kernels/NestedKKSACBulkF
 
-!syntax inputs /Kernels/NestKKSACBulkF
+!syntax inputs /Kernels/NestedKKSACBulkF
 
-!syntax children /Kernels/NestKKSACBulkF
+!syntax children /Kernels/NestedKKSACBulkF
