@@ -1,0 +1,10 @@
+[Tests]
+  [./test]
+    type = Exodiff
+    input = nearest_point_average.i
+    exodiff = nearest_point_average_out.e
+    requirement = 'The system shall compute averages computed from the closest values for a list of points'
+    design = 'NearestPointAverage.md'
+    issues = '#18536'
+  [../]
+[]
