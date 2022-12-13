@@ -76,9 +76,9 @@ protected:
   /// Configuration values
   std::vector<Real> _confg_values;
 
-private:
-
   /// Initialize a certain number of random seeds. Change from the default only if you have to.
   std::vector<std::vector<Real>> _new_samples;
+
+private:
 
 };
