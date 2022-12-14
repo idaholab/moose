@@ -50,6 +50,8 @@ OutputWarehouse::initialSetup()
 {
   TIME_SECTION("initialSetup", 5, "Setting Up Outputs");
 
+  resetFileBase();
+
   for (const auto & obj : _all_objects)
     obj->initialSetup();
 }
@@ -112,11 +114,6 @@ OutputWarehouse::addOutput(std::shared_ptr<Output> const output)
   _object_map[output->name()] = output.get();
   _object_names.insert(output->name());
 
-  // If the output object is a FileOutput then store the output filename
-  FileOutput * ptr = dynamic_cast<FileOutput *>(output.get());
-  if (ptr != NULL)
-    addOutputFilename(ptr->filename());
-
   // Insert object sync times to the global set
   if (output->parameters().isParamValid("sync_times"))
   {
@@ -144,11 +141,12 @@ OutputWarehouse::getOutputNames()
 }
 
 void
-OutputWarehouse::addOutputFilename(const OutFileBase & filename)
+OutputWarehouse::addOutputFilename(const OutputName & obj_name, const OutFileBase & filename)
 {
-  if (_file_base_set.find(filename) != _file_base_set.end())
-    mooseError("An output file with the name, ", filename, ", already exists.");
-  _file_base_set.insert(filename);
+  _file_base_map[obj_name].insert(filename);
+  for (const auto & it : _file_base_map)
+    if (it.first != obj_name && it.second.find(filename) != it.second.end())
+      mooseError("An output file with the name, ", filename, ", already exists.");
 }
 
 void
@@ -368,5 +366,24 @@ OutputWarehouse::reset()
     auto * exodus = dynamic_cast<Exodus *>(pair.second);
     if (exodus != NULL)
       exodus->clear();
+  }
+}
+
+void
+OutputWarehouse::resetFileBase()
+{
+  // Set the file base from the application to FileOutputs and add associated filenames
+  for (const auto & obj : _all_objects)
+  {
+    FileOutput * file_output = dynamic_cast<FileOutput *>(obj);
+    if (file_output)
+    {
+      const std::string file_base = obj->parameters().get<bool>("_built_by_moose")
+                                        ? _app.getOutputFileBase()
+                                        : (_app.getOutputFileBase(true) + "_" + obj->name());
+      file_output->setFileBase(file_base);
+
+      addOutputFilename(obj->name(), file_output->filename());
+    }
   }
 }

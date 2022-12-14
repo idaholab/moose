@@ -1031,6 +1031,22 @@ MooseApp::getOutputFileBase(bool for_non_moose_build_output) const
 }
 
 void
+MooseApp::setOutputFileBase(const std::string & output_file_base)
+{
+  _output_file_base = output_file_base;
+
+  // Reset the file base in the outputs
+  _output_warehouse.resetFileBase();
+
+  // Reset the file base in multiapps (if they have been constructed yet)
+  if (getExecutioner())
+    for (auto & multi_app : feProblem().getMultiAppWarehouse().getObjects())
+      multi_app->setAppOutputFileBase();
+
+  _file_base_set_by_user = true;
+}
+
+void
 MooseApp::runInputFile()
 {
   TIME_SECTION("runInputFile", 3);

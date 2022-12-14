@@ -154,6 +154,13 @@ SamplerTransientMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
       transfer->executeToMultiapp();
     }
 
+    // Set the file base based on the current row
+    for (unsigned int ai = 0; ai < _my_num_apps; ++ai)
+    {
+      const std::string mname = getMultiAppName(name(), i, _number_of_sampler_rows);
+      _apps[ai]->setOutputFileBase(_app.getOutputFileBase() + "_" + mname);
+    }
+
     last_solve_converged = TransientMultiApp::solveStep(dt, target_time, auto_advance);
 
     for (auto & transfer : from_transfers)

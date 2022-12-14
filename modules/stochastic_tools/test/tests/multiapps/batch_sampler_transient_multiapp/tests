@@ -34,4 +34,31 @@
     requirement = "The SamplerTransientMultiApp object shall error if the 'batch-reset' mode is "
                   "supplied."
   []
+
+  [file_output]
+    requirement = "The system shall support outputting results from sub-applications with input parameters varying "
+                  "at each time step using "
+    [normal]
+      type = CSVDiff
+      input = parent_transient.i
+      cli_args = 'MultiApps/runner/mode=normal runner:Outputs/csv=true'
+      csvdiff = 'parent_transient_out_runner0.csv
+                 parent_transient_out_runner1.csv
+                 parent_transient_out_runner2.csv
+                 parent_transient_out_runner3.csv
+                 parent_transient_out_runner4.csv'
+      detail = 'individual sub-applications;'
+    []
+    [batch]
+      type = CSVDiff
+      input = parent_transient.i
+      cli_args = 'MultiApps/runner/mode=batch-restore runner:Outputs/csv=true'
+      csvdiff = 'parent_transient_out_runner0.csv
+                 parent_transient_out_runner1.csv
+                 parent_transient_out_runner2.csv
+                 parent_transient_out_runner3.csv
+                 parent_transient_out_runner4.csv'
+      detail = 'sub-application batches;'
+    []
+  []
 []

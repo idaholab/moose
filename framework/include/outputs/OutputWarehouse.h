@@ -245,12 +245,14 @@ private:
   std::vector<std::shared_ptr<Output>> _all_ptrs;
 
   /**
-   * Adds the file name to the list of filenames being output
+   * Adds the file name to the map of filenames being output with an associated object
    * The main function of this object is to test that the same output file
-   * does not already exist to protect against output files overwriting each other
+   * does not already exist in another object to protect against output files overwriting each other
+   *
+   * @param obj_name Name of an FileOutput object
    * @param filename Name of an output file (extracted from filename() method of the objects)
    */
-  void addOutputFilename(const OutFileBase & filename);
+  void addOutputFilename(const OutputName & obj_name, const OutFileBase & filename);
 
   /**
    * Calls the initialSetup function for each of the output objects
@@ -313,6 +315,11 @@ private:
    */
   void flushConsoleBuffer();
 
+  /**
+   * Resets the file base for all FileOutput objects
+   */
+  void resetFileBase();
+
   /// MooseApp
   MooseApp & _app;
 
@@ -329,7 +336,7 @@ private:
   std::set<OutputName> _object_names;
 
   /// List of object names
-  std::set<OutFileBase> _file_base_set;
+  std::map<OutputName, std::set<OutFileBase>> _file_base_map;
 
   /// Pointer to the common InputParameters (@see CommonOutputAction)
   const InputParameters * _common_params_ptr;
@@ -382,6 +389,9 @@ private:
 
   // Console for calling flushConsoleBuffer()
   friend class PetscOutput;
+
+  // MooseApp for resetFileBase()
+  friend class MooseApp;
 };
 
 template <typename T>

@@ -425,6 +425,29 @@ protected:
    */
   void keepSolutionDuringRestore(bool keep_solution_during_restore);
 
+  /**
+   * Set's all the app's output file bases. @see MooseApp::setOutputFileBase for usage
+   */
+  void setAppOutputFileBase();
+
+  /**
+   * Set's the inputted app's output file base.
+   *
+   * @param index The sub-application index
+   */
+  void setAppOutputFileBase(unsigned int index);
+
+  /**
+   * Helper for constructiing name of multiapp
+   *
+   * @param base_name The base name of the multiapp, usuall name()
+   * @param index The index of the app
+   * @param total The total number of apps, which is used to pad the name with zeros
+   * @return std::string The name of the multiapp
+   */
+  static std::string
+  getMultiAppName(const std::string & base_name, dof_id_type index, dof_id_type total);
+
   /// The FEProblemBase this MultiApp is part of
   FEProblemBase & _fe_problem;
 
@@ -557,6 +580,9 @@ protected:
   const PerfID _backup_timer;
   const PerfID _restore_timer;
   const PerfID _reset_timer;
+
+  // MooseApp for setAppOutputFileBase
+  friend class MooseApp;
 };
 
 template <>
