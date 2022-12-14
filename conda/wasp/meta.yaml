@@ -1,0 +1,45 @@
+# Making a Change to this package?
+# REMEMBER TO UPDATE the .yaml files for the following packages:
+#   libmesh/
+#   template/
+#   moose/
+{% set build = 0 %}
+{% set strbuild = "build_" + build|string %}
+{% set version = "1.0.0" %}
+
+package:
+  name: moose-wasp
+  version: {{ version }}
+
+source:
+  - path: ../../wasp
+  - path: ../../scripts/configure_wasp.sh
+
+build:
+  number: {{ build }}
+  string: {{ strbuild }}
+  skip: true  # [win]
+  script_env:
+    - MOOSE_JOBS
+  run_exports:
+    - {{ pin_subpackage('moose-wasp', max_pin='x.x')}}
+
+requirements:
+  build:
+    - {{ moose_mpich }}
+    - pkg-config
+  host:
+    - {{ moose_mpich }}
+  run:
+    - {{ moose_mpich }}
+
+about:
+  home: https://mooseframework.orf
+  summary: 'WASP'
+  license: BSD 2-Clause
+  license_file: LICENSE
+  license_family: BSD
+
+extra:
+  recipe-maintainers:
+    - milljm

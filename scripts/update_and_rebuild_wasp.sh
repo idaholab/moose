@@ -8,6 +8,8 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 cd "$(dirname "${BASH_SOURCE[0]}")"/..
 
 WASP_SRC_DIR="`pwd`/wasp"
@@ -84,14 +86,11 @@ else
 
   cd "${WASP_SRC_DIR}"/build
 
-  cmake \
-    -D CMAKE_BUILD_TYPE:STRING=RELEASE \
-    -D wasp_ENABLE_testframework:BOOL=OFF \
-    -D wasp_ENABLE_TESTS:BOOL=OFF \
-    -D CMAKE_INSTALL_PREFIX:STRING="${WASP_SRC_DIR}"/install \
-    -D BUILD_SHARED_LIBS:BOOL=ON \
-    -D DISABLE_HIT_TYPE_PROMOTION:BOOL=ON \
-    "${WASP_SRC_DIR}"
+  WASP_OPTIONS="-D CMAKE_INSTALL_PREFIX:STRING=${WASP_SRC_DIR}/install"
+
+  source $SCRIPT_DIR/configure_wasp.sh
+
+  configure_wasp "$WASP_OPTIONS" ../ $*
 
   if [[ $? -ne 0 ]] ; then
 
