@@ -2,7 +2,7 @@
 set -eu
 export PATH=/bin:$PATH
 
-mkdir build; cd build
+rm -rf build; mkdir build; cd build
 WASP_OPTIONS="-D CMAKE_INSTALL_PREFIX:STRING=${PREFIX}/wasp"
 source $SRC_DIR/configure_wasp.sh
 configure_wasp "$WASP_OPTIONS" ../
