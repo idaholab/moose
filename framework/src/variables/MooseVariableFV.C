@@ -531,7 +531,7 @@ MooseVariableFV<OutputType>::getInternalFaceValue(const FaceInfo & fi,
 
   mooseAssert(isInternalFace(fi), "This function shall only be called on internal faces.");
 
-  return Moose::FV::linearInterpolation(*this, Moose::FV::makeCDFace(fi, correct_skewness));
+  return Moose::FV::linearInterpolation(*this, Moose::FV::makeCDFace(fi, *this, correct_skewness));
 }
 
 template <typename OutputType>

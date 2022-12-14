@@ -44,8 +44,7 @@ InternalSideIntegralVariablePostprocessor::InternalSideIntegralVariablePostproce
 Real
 InternalSideIntegralVariablePostprocessor::computeFaceInfoIntegral(const FaceInfo * const fi)
 {
-  return MetaPhysicL::raw_value((*_fv_variable)(
-      Moose::FV::makeCDFace(*fi, Moose::FV::faceArgSubdomains(*_fv_variable, *fi))));
+  return MetaPhysicL::raw_value((*_fv_variable)(Moose::FV::makeCDFace(*fi, *_fv_variable)));
 }
 
 Real

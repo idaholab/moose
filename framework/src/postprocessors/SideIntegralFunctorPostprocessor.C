@@ -55,7 +55,8 @@ Real
 SideIntegralFunctorPostprocessorTempl<is_ad>::computeFaceInfoIntegral(const FaceInfo * fi)
 {
   mooseAssert(fi, "We should have a FaceInfo");
-  Moose::FaceArg ssf = {fi, Moose::FV::LimiterType::CentralDifference, true, false, _current_elem};
+  Moose::FaceArg ssf = {
+      fi, Moose::FV::LimiterType::CentralDifference, true, false, &_functor, _current_elem};
   return computeLocalContribution(ssf);
 }
 

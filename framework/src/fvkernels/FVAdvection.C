@@ -50,7 +50,7 @@ FVAdvection::computeQpResidual()
 {
   const bool elem_is_upwind = _velocity * _normal >= 0;
   const auto face =
-      makeFace(*_face_info, Moose::FV::limiterType(_advected_interp_method), elem_is_upwind);
+      makeFace(*_face_info, Moose::FV::limiterType(_advected_interp_method), elem_is_upwind, *this);
   ADReal u_interface = _var(face);
 
   return _normal * _velocity * u_interface;

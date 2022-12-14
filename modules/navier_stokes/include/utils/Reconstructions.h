@@ -46,7 +46,7 @@ interpolateReconstruct(CellCenteredMapFunctor<T, Map> & output_functor,
                        const unsigned int num_int_recs,
                        const bool weight_with_sf,
                        const std::vector<const FaceInfo *> & faces,
-                       const HasBlocksInterface & consumer)
+                       const FaceArgInterface & consumer)
 {
   if (!num_int_recs)
     return;

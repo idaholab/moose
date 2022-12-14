@@ -247,7 +247,21 @@ FVInterfaceKernel::singleSidedFaceArg(const MooseVariableFV<Real> & variable,
   const bool use_elem = fi->faceType(variable.name()) == FaceInfo::VarFaceNeighbors::ELEM;
 
   if (use_elem)
-    return {fi, limiter_type, true, correct_skewness, &fi->elem()};
+    return {fi, limiter_type, true, correct_skewness, this, &fi->elem()};
   else
-    return {fi, limiter_type, true, correct_skewness, fi->neighborPtr()};
+    return {fi, limiter_type, true, correct_skewness, this, fi->neighborPtr()};
+}
+
+bool FVInterfaceKernel::hasBlocks(SubdomainID) const
+{
+  mooseError("hasBlocks not implemented for FVInterfaceKernel");
+}
+
+bool
+FVInterfaceKernel::hasFaceSide(const FaceInfo &, bool) const
+{
+  // Our default interface kernel treats elem and neighbor sides equivalently so we will assume for
+  // now that we will happily consume functor evaluations on either side of a face and any
+  // interpolation between said evaluations
+  return true;
 }

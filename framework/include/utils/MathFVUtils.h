@@ -20,46 +20,12 @@
 
 template <typename>
 class MooseVariableFV;
+class FaceArgInterface;
 
 namespace Moose
 {
 namespace FV
 {
-/**
- * Create a functor face argument from provided component arguments
- * @param fi the face information object
- * @param limiter_type the limiter that defines how to perform interpolations to the faces
- * @param elem_is_upwind whether the face information element is the upwind element (the value of
- * this doesn't matter when the limiter type is CentralDifference)
- * @param correct_skewness whether to apply skew correction
- * @return the functor face argument
- */
-inline FaceArg
-makeFace(const FaceInfo & fi,
-         const LimiterType limiter_type,
-         const bool elem_is_upwind,
-         const bool correct_skewness = false,
-         const Elem * const face_side = nullptr)
-{
-  return {&fi, limiter_type, elem_is_upwind, correct_skewness, face_side};
-}
-
-/**
- * Make a functor face argument with a central differencing limiter, e.g. compose a face argument
- * that will tell functors to perform (possibly skew-corrected) linear interpolations from cell
- * center values to faces
- * @param fi the face information
- * @param correct_skewness whether to apply skew correction
- * @return a face argument for functors
- */
-inline FaceArg
-makeCDFace(const FaceInfo & fi,
-           const bool correct_skewness = false,
-           const Elem * const face_side = nullptr)
-{
-  return makeFace(fi, LimiterType::CentralDifference, true, correct_skewness, face_side);
-}
-
 /// This codifies a set of available ways to interpolate with elem+neighbor
 /// solution information to calculate values (e.g. solution, material
 /// properties, etc.) at the face (centroid).  These methods are used in the

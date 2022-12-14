@@ -95,5 +95,20 @@ FVBoundaryCondition::singleSidedFaceArg(const FaceInfo * fi,
   const bool use_elem = fi->faceType(_var.name()) == FaceInfo::VarFaceNeighbors::ELEM;
   const Elem * const elem = use_elem ? &fi->elem() : fi->neighborPtr();
 
-  return {fi, limiter_type, true, correct_skewness, elem};
+  return {fi, limiter_type, true, correct_skewness, this, elem};
+}
+
+bool FVBoundaryCondition::hasBlocks(SubdomainID) const
+{
+  mooseError("hasBlocks not implemented for FVBoundaryCondition");
+}
+
+bool
+FVBoundaryCondition::hasFaceSide(const FaceInfo & fi, bool fi_elem_side) const
+{
+  const auto ft = fi.faceType(_var.name());
+  if (fi_elem_side)
+    return ft == FaceInfo::VarFaceNeighbors::ELEM || ft == FaceInfo::VarFaceNeighbors::BOTH;
+  else
+    return ft == FaceInfo::VarFaceNeighbors::NEIGHBOR || ft == FaceInfo::VarFaceNeighbors::BOTH;
 }

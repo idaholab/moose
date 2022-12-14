@@ -47,7 +47,7 @@ ADReal
 FVLimitedVectorAdvection::computeQpResidual()
 {
   const bool elem_is_upwind = _velocity * _normal >= 0;
-  const auto face = makeFace(*_face_info, _limiter_type, elem_is_upwind);
+  const auto face = makeFace(*_face_info, _limiter_type, elem_is_upwind, *this);
 
   ADReal phi_f;
 

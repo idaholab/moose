@@ -14,7 +14,7 @@
 #include "ParallelUniqueId.h"
 #include "MaterialData.h"
 #include "MooseObject.h"
-#include "HasBlocksInterface.h"
+#include "FaceArgInterface.h"
 
 #define usingBlockRestrictableMembers using BlockRestrictable::getBlockCoordSystem
 
@@ -55,7 +55,7 @@ class MooseVariableFieldBase;
  * \see Kernel
  * \see SideSetsAroundSubdomain
  */
-class BlockRestrictable : public virtual HasBlocksInterface
+class BlockRestrictable : public virtual FaceArgInterface
 {
 public:
   /**
