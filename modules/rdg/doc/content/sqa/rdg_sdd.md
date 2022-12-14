@@ -49,7 +49,7 @@ executed. The Finite Element data is stored in the Systems and Assembly object w
 information (the Mesh) is stored in the Mesh object. A series of threaded loops are used to run
 parallel calculations on the objects created and stored within the warehouses.
 
-MOOSE's pluggable systems are documented on [MOOSE website](https://mooseframework.inl.gov), and those
+MOOSE's pluggable systems are documented on the [MOOSE website](https://mooseframework.inl.gov), and those
 for the {{module}} module are on this webpage, accessible through the high-level system links above.
 Each of these systems has a set of defined polymorphic interfaces and are designed to accomplish a
 specific task within the simulation. The design of these systems is solid and is managed through agile
