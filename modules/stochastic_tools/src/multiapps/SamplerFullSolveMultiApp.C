@@ -12,6 +12,7 @@
 #include "Sampler.h"
 #include "StochasticToolsTransfer.h"
 #include "Console.h"
+#include "VariadicTable.h"
 
 registerMooseObject("StochasticToolsApp", SamplerFullSolveMultiApp);
 
@@ -197,12 +198,8 @@ SamplerFullSolveMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
         initialSetup();
     }
 
-    for (auto & transfer : to_transfers)
-    {
-      transfer->setGlobalRowIndex(i);
-      transfer->setCurrentRow(_row_data);
-      transfer->executeToMultiapp();
-    }
+    execBatchTransfers(
+        to_transfers, i, _row_data, MultiAppTransfer::TO_MULTIAPP, _fe_problem.verboseMultiApps());
 
     // Set the file base based on the current row
     for (unsigned int ai = 0; ai < _my_num_apps; ++ai)
@@ -215,12 +212,11 @@ SamplerFullSolveMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
         FullSolveMultiApp::solveStep(dt, target_time, auto_advance);
     last_solve_converged = last_solve_converged && curr_last_solve_converged;
 
-    for (auto & transfer : from_transfers)
-    {
-      transfer->setGlobalRowIndex(i);
-      transfer->setCurrentRow(_row_data);
-      transfer->executeFromMultiapp();
-    }
+    execBatchTransfers(from_transfers,
+                       i,
+                       _row_data,
+                       MultiAppTransfer::FROM_MULTIAPP,
+                       _fe_problem.verboseMultiApps());
 
     _local_batch_app_index++;
   }
@@ -233,6 +229,50 @@ SamplerFullSolveMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
     transfer->finalizeFromMultiapp();
 
   return last_solve_converged;
+}
+
+void
+SamplerFullSolveMultiApp::execBatchTransfers(
+    const std::vector<std::shared_ptr<StochasticToolsTransfer>> & transfers,
+    dof_id_type global_row_index,
+    const std::vector<Real> & row_data,
+    Transfer::DIRECTION direction,
+    bool verbose)
+{
+  if (verbose && transfers.size())
+  {
+    Moose::out << COLOR_CYAN << "\nBatch transfers for row " << global_row_index;
+    if (direction == MultiAppTransfer::TO_MULTIAPP)
+      Moose::out << " To ";
+    else if (direction == MultiAppTransfer::FROM_MULTIAPP)
+      Moose::out << " From ";
+    Moose::out << "MultiApps" << COLOR_DEFAULT << ":" << std::endl;
+
+    Moose::out << "Sampler row " << global_row_index << " data: [" << Moose::stringify(row_data)
+               << "]" << std::endl;
+
+    // Build Table of Transfer Info
+    VariadicTable<std::string, std::string, std::string, std::string> table(
+        {"Name", "Type", "From", "To"});
+    for (const auto & transfer : transfers)
+      table.addRow(
+          transfer->name(), transfer->type(), transfer->getFromName(), transfer->getToName());
+    table.print(Moose::out);
+  }
+
+  for (auto & transfer : transfers)
+  {
+    transfer->setGlobalRowIndex(global_row_index);
+    transfer->setCurrentRow(row_data);
+    if (direction == MultiAppTransfer::TO_MULTIAPP)
+      transfer->executeToMultiapp();
+    else if (direction == MultiAppTransfer::FROM_MULTIAPP)
+      transfer->executeFromMultiapp();
+  }
+
+  if (verbose && transfers.size())
+    Moose::out << COLOR_CYAN << "Batch transfers for row " << global_row_index << " Are Finished\n"
+               << COLOR_DEFAULT << std::endl;
 }
 
 void

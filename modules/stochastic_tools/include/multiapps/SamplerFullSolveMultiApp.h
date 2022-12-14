@@ -43,6 +43,23 @@ public:
   static std::string sampledCommandLineArgs(const std::vector<Real> & row,
                                             const std::vector<std::string> & full_args_name);
 
+  /**
+   * Helper for executing transfers when doing batch stochastic simulations
+   *
+   * @param transfers A vector of transfers to perform the transfer on
+   * @param global_row_index The global row index of the run
+   * @param row_data The current sampler row of data for the transfer to utilize
+   * @param type The current execution flag, used for info printing
+   * @param direction The direction of the transfer, used for info printing
+   * @param verbose Whether or not print information about the transfer
+   */
+  static void
+  execBatchTransfers(const std::vector<std::shared_ptr<StochasticToolsTransfer>> & transfers,
+                     dof_id_type global_row_index,
+                     const std::vector<Real> & row_data,
+                     Transfer::DIRECTION direction,
+                     bool verbose);
+
 protected:
   /// Override to avoid 'solve converged' message and print when processors are finished
   virtual void showStatusMessage(unsigned int i) const override;
