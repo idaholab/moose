@@ -17,4 +17,11 @@
 
     requirement = 'The system shall be capable of reading in field information and producing gradient values from both continuous and discontinuous fields.'
   [../]
+  [test_scalar]
+    type = RunApp
+    cli_args = 'UserObjects/soln/mesh=gold/testscalarrename.e UserObjects/soln/system_variables=""'
+    input = 'discontinuous_value_solution_uo_p2.i'
+    issues = '#15992'
+    requirement = "The system shall not create scalar variables from global variables that have a name that matches a field variables's name when importing a solution from an exodus file"
+  []
 []

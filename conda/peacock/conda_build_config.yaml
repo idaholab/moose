@@ -18,10 +18,7 @@ moose_vtk:
 
 # Pesky packages that break internal CI
 # Note: Modifying/Updating this will require changes to conda/mpich!
-openssl:
-  - <3.0
 setuptools:
   - <60.0
 pin_run_as_build:
-  openssl: x.x
   setuptools: x.x

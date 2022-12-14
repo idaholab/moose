@@ -1,0 +1,15 @@
+{#- Required jinja arguments                                                                  -#}
+{#- APPTAINER_BOOTSTRAP: The BootStrap to use (typically localimage or oras)                  -#}
+{#- APPTAINER_FROM: The From to use (path to an image or an oras URI)                         -#}
+{#- REMOVE_CHANNEL_CONTAINS: Remove conda channels that contain this text in the URL          -#}
+
+BootStrap: {{ APPTAINER_BOOTSTRAP }}
+From: {{ APPTAINER_FROM }}
+
+%post
+    readarray -t channels <<< "$(conda config --show channels)"
+    for line in "${channels[@]}"; do
+        if [[ $line =~ [a-zA-Z0-9:._\/-]+{{ REMOVE_CHANNEL_CONTAINS }}[a-zA-Z0-9._\/-]+ ]]; then
+            conda config --remove channels ${BASH_REMATCH[0]}
+        fi
+    done

@@ -7,6 +7,7 @@ provided below.
 
 ## 2022
 
+- [November, 2022](2022_11.md)
 - [October, 2022](2022_10.md)
 - [September, 2022](2022_09.md)
 - [August, 2022](2022_08.md)

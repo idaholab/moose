@@ -182,15 +182,6 @@ CaloricallyImperfectGas::cp_from_T(Real T) const
   return _e_T->timeDerivative(T, Point()) + _R_specific;
 }
 
-Real
-CaloricallyImperfectGas::cv_from_T(Real T) const
-{
-  if (T < _min_temperature || T > _max_temperature)
-    outOfBounds("cv_from_T", T, _min_temperature, _max_temperature);
-
-  return _e_T->timeDerivative(T, Point());
-}
-
 void
 CaloricallyImperfectGas::cv_from_T(Real T, Real & cv, Real & dcv_dT) const
 {
@@ -662,26 +653,27 @@ CaloricallyImperfectGas::rho_from_p_T(
 Real
 CaloricallyImperfectGas::e_from_p_rho(Real p, Real rho) const
 {
-  Real T = p / (rho * _R_specific);
-  return e_from_p_T(p, T);
+  return e_from_p_rho_template(p, rho);
 }
 
 ADReal
 CaloricallyImperfectGas::e_from_p_rho(const ADReal & p, const ADReal & rho) const
 {
-  ADReal T = p / (rho * _R_specific);
-  return e_from_p_T(p, T);
+  return e_from_p_rho_template(p, rho);
 }
 
 void
 CaloricallyImperfectGas::e_from_p_rho(
     Real p, Real rho, Real & e, Real & de_dp, Real & de_drho) const
 {
-  Real T = p / (rho * _R_specific);
-  e = e_from_p_rho(p, rho);
-  Real cv = cv_from_T(T);
-  de_dp = cv / (rho * _R_specific);
-  de_drho = -cv * p / (rho * rho * _R_specific);
+  e_from_p_rho_template(p, rho, e, de_dp, de_drho);
+}
+
+void
+CaloricallyImperfectGas::e_from_p_rho(
+    const ADReal & p, const ADReal & rho, ADReal & e, ADReal & de_dp, ADReal & de_drho) const
+{
+  e_from_p_rho_template(p, rho, e, de_dp, de_drho);
 }
 
 Real

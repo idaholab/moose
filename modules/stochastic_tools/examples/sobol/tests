@@ -5,7 +5,7 @@
   [stats]
     type = JSONDiff
     input = main.i
-    cli_args = 'Samplers/hypercube_a/num_rows=10 Samplers/hypercube_b/num_rows=10 Outputs/out/execute_system_information_on=none'
+    cli_args = 'Samplers/hypercube_a/num_rows=10 Samplers/hypercube_b/num_rows=10'
     jsondiff = 'main_out.json'
 
     requirement = "The system shall include an example demonstrating the computation of Sobol sensitivity analysis."

@@ -42,7 +42,7 @@ HSBoundarySpecifiedTemperature::addMooseObjects()
     pars.set<NonlinearVariableName>("variable") = HeatConductionModel::TEMPERATURE;
     pars.set<std::vector<BoundaryName>>("boundary") = _boundary;
     pars.set<FunctionName>("function") = _T_func;
-    _sim.addBoundaryCondition(class_name, genName(name(), "bc"), pars);
+    getTHMProblem().addBoundaryCondition(class_name, genName(name(), "bc"), pars);
     makeFunctionControllableIfConstant(_T_func, "T");
   }
 }

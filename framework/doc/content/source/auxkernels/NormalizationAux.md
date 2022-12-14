@@ -5,7 +5,7 @@
 The formula for the normalization is
 
 !equation
-\dfrac{variable * normal_factor}{normalization} - shift
+\dfrac{\text{variable * normal factor}}{\text{normalization}} - \text{shift}
 
 ## Example syntax
 
@@ -15,7 +15,7 @@ the numerical solve may not be normalized, and has to be normalized to obtain th
 power level. The power, used for normalization, is stored in `unorm`, an
 `ElementIntegralVariablePostprocessor`.
 
-!listing tests/problems/eigen_problem/eigensolvers/ne_coupled.i block=AuxKernels
+!listing tests/problems/eigen_problem/eigensolvers/ne_coupled.i block=AuxKernels Postprocessors
 
 !syntax parameters /AuxKernels/NormalizationAux
 

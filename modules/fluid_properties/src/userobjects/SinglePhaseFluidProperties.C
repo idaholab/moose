@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SinglePhaseFluidProperties.h"
-#include "NewtonInversion.h"
 
 InputParameters
 SinglePhaseFluidProperties::validParams()
@@ -51,18 +50,19 @@ SinglePhaseFluidProperties::~SinglePhaseFluidProperties() {}
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 
 Real
-SinglePhaseFluidProperties::s_from_p_T(Real p, Real T) const
+SinglePhaseFluidProperties::s_from_p_T(const Real pressure, const Real temperature) const
 {
   Real v, e;
-  v_e_from_p_T(p, T, v, e);
+  v_e_from_p_T(pressure, temperature, v, e);
   return s_from_v_e(v, e);
 }
 
 void
-SinglePhaseFluidProperties::s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, Real & ds_dT) const
+SinglePhaseFluidProperties::s_from_p_T(
+    const Real pressure, const Real temperature, Real & s, Real & ds_dp, Real & ds_dT) const
 {
   Real v, e, dv_dp, dv_dT, de_dp, de_dT;
-  v_e_from_p_T(p, T, v, dv_dp, dv_dT, e, de_dp, de_dT);
+  v_e_from_p_T(pressure, temperature, v, dv_dp, dv_dT, e, de_dp, de_dT);
 
   Real ds_dv, ds_de;
   s_from_v_e(v, e, s, ds_dv, ds_de);
@@ -71,10 +71,10 @@ SinglePhaseFluidProperties::s_from_p_T(Real p, Real T, Real & s, Real & ds_dp, R
 }
 
 Real
-SinglePhaseFluidProperties::s_from_v_e(Real v, Real e) const
+SinglePhaseFluidProperties::s_from_v_e(const Real v, const Real e) const
 {
-  Real p0 = _p_initial_guess;
-  Real T0 = _T_initial_guess;
+  const Real p0 = _p_initial_guess;
+  const Real T0 = _T_initial_guess;
   Real p, T;
   bool conversion_succeeded = true;
   p_T_from_v_e(v, e, p0, T0, p, T, conversion_succeeded);
@@ -83,10 +83,11 @@ SinglePhaseFluidProperties::s_from_v_e(Real v, Real e) const
 }
 
 void
-SinglePhaseFluidProperties::s_from_v_e(Real v, Real e, Real & s, Real & ds_dv, Real & ds_de) const
+SinglePhaseFluidProperties::s_from_v_e(
+    const Real v, const Real e, Real & s, Real & ds_dv, Real & ds_de) const
 {
-  Real p0 = _p_initial_guess;
-  Real T0 = _T_initial_guess;
+  const Real p0 = _p_initial_guess;
+  const Real T0 = _T_initial_guess;
   Real p, T;
   bool conversion_succeeded = true;
   p_T_from_v_e(v, e, p0, T0, p, T, conversion_succeeded);
@@ -410,38 +411,6 @@ SinglePhaseFluidProperties::vaporTemperature(const DualReal & p) const
 }
 
 void
-SinglePhaseFluidProperties::v_e_from_p_T(Real p, Real T, Real & v, Real & e) const
-{
-  const Real rho = rho_from_p_T(p, T);
-  v = 1.0 / rho;
-  e = e_from_p_rho(p, rho);
-}
-
-void
-SinglePhaseFluidProperties::v_e_from_p_T(Real p,
-                                         Real T,
-                                         Real & v,
-                                         Real & dv_dp,
-                                         Real & dv_dT,
-                                         Real & e,
-                                         Real & de_dp,
-                                         Real & de_dT) const
-{
-  Real rho, drho_dp, drho_dT;
-  rho_from_p_T(p, T, rho, drho_dp, drho_dT);
-
-  v = 1.0 / rho;
-  const Real dv_drho = -1.0 / (rho * rho);
-  dv_dp = dv_drho * drho_dp;
-  dv_dT = dv_drho * drho_dT;
-
-  Real de_dp_partial, de_drho;
-  e_from_p_rho(p, rho, e, de_dp_partial, de_drho);
-  de_dp = de_dp_partial + de_drho * drho_dp;
-  de_dT = de_drho * drho_dT;
-}
-
-void
 SinglePhaseFluidProperties::rho_e_from_p_T(Real p,
                                            Real T,
                                            Real & rho,
@@ -505,66 +474,6 @@ SinglePhaseFluidProperties::T_from_p_h(Real p, Real h) const
   const Real v = 1. / rho;
   const Real e = e_from_v_h(v, h);
   return T_from_v_e(v, e);
-}
-
-void
-SinglePhaseFluidProperties::p_T_from_v_e(const Real & v,  // v value
-                                         const Real & e,  // e value
-                                         const Real & p0, // initial guess
-                                         const Real & T0, // initial guess
-                                         Real & p,        // returned pressure
-                                         Real & T,        // returned temperature
-                                         bool & conversion_succeeded) const
-{
-  auto v_lambda = [&](Real pressure, Real temperature, Real & new_v, Real & dv_dp, Real & dv_dT)
-  { v_from_p_T(pressure, temperature, new_v, dv_dp, dv_dT); };
-  auto e_lambda = [&](Real pressure, Real temperature, Real & new_e, Real & de_dp, Real & de_dT)
-  { e_from_p_T(pressure, temperature, new_e, de_dp, de_dT); };
-  FluidPropertiesUtils::NewtonSolve2D(
-      v, e, p0, T0, p, T, _tolerance, conversion_succeeded, v_lambda, e_lambda);
-
-  if (!conversion_succeeded)
-    mooseDoOnce(mooseWarning("Conversion from (v, e)=(", v, ", ", e, ") to (p, T) failed"));
-}
-
-void
-SinglePhaseFluidProperties::p_T_from_v_h(const Real & v,  // v value
-                                         const Real & h,  // e value
-                                         const Real & p0, // initial guess
-                                         const Real & T0, // initial guess
-                                         Real & p,        // returned pressure
-                                         Real & T,        // returned temperature
-                                         bool & conversion_succeeded) const
-{
-  auto v_lambda = [&](Real pressure, Real temperature, Real & new_v, Real & dv_dp, Real & dv_dT)
-  { v_from_p_T(pressure, temperature, new_v, dv_dp, dv_dT); };
-  auto h_lambda = [&](Real pressure, Real temperature, Real & new_h, Real & dh_dp, Real & dh_dT)
-  { h_from_p_T(pressure, temperature, new_h, dh_dp, dh_dT); };
-  FluidPropertiesUtils::NewtonSolve2D(
-      v, h, p0, T0, p, T, _tolerance, conversion_succeeded, v_lambda, h_lambda);
-
-  if (!conversion_succeeded)
-    mooseDoOnce(mooseWarning("Conversion from (v, h)=(", v, ", ", h, ") to (p, T) failed"));
-}
-
-void
-SinglePhaseFluidProperties::p_T_from_h_s(const Real & h,  // h value
-                                         const Real & s,  // s value
-                                         const Real & p0, // initial guess
-                                         const Real & T0, // initial guess
-                                         Real & p,        // returned pressure
-                                         Real & T,        // returned temperature
-                                         bool & conversion_succeeded) const
-{
-  auto h_lambda = [&](Real pressure, Real temperature, Real & new_h, Real & dh_dp, Real & dh_dT)
-  { h_from_p_T(pressure, temperature, new_h, dh_dp, dh_dT); };
-  auto s_lambda = [&](Real pressure, Real temperature, Real & new_s, Real & ds_dp, Real & ds_dT)
-  { s_from_p_T(pressure, temperature, new_s, ds_dp, ds_dT); };
-  FluidPropertiesUtils::NewtonSolve2D(
-      h, s, p0, T0, p, T, _tolerance, conversion_succeeded, h_lambda, s_lambda);
-
-  if (!conversion_succeeded)
-    mooseDoOnce(mooseWarning("Conversion from (h, s)=(", h, ", ", s, ") to (p, T) failed"));
 }
 
 Real

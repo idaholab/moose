@@ -1525,6 +1525,7 @@ NonlinearSystemBase::residualSetup()
   _nodal_bcs.residualSetup();
 
   _fe_problem.residualSetup();
+  setSolutionInvalid(false);
 }
 
 void
@@ -3352,6 +3353,7 @@ NonlinearSystemBase::checkKernelCoverage(const std::set<SubdomainID> & mesh_subd
   global_kernels_exist |= _nodal_kernels.hasActiveObjects();
 
   _kernels.subdomainsCovered(input_subdomains, kernel_variables);
+  _dg_kernels.subdomainsCovered(input_subdomains, kernel_variables);
   _nodal_kernels.subdomainsCovered(input_subdomains, kernel_variables);
   _scalar_kernels.subdomainsCovered(input_subdomains, kernel_variables);
   _constraints.subdomainsCovered(input_subdomains, kernel_variables);

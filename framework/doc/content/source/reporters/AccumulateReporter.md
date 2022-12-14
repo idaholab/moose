@@ -18,6 +18,9 @@ If more types need to be supported, they can easily be added by adding a line in
 !listing framework/src/reporters/AccumulateReporter.C
          re=void\nAccumulateReporter::initialSetup.*?^}
 
+!alert note title=Reporter names
+The reporter names created by the `AccumulateReporter` match each of the accumulated reporters' names.
+
 !syntax parameters /Reporters/AccumulateReporter
 
 !syntax inputs /Reporters/AccumulateReporter

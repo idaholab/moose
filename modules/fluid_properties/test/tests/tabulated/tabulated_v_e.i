@@ -133,8 +133,8 @@
 [Materials]
   [fp_mat_ve]
     type = FluidPropertiesMaterialVE
-    v = 0.4957
-    e = 310163
+    v = 0.03108975251
+    e = -30797.6
     fp = tabulated
   []
 []

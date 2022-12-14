@@ -338,6 +338,7 @@ public:
   virtual std::vector<VariableName> getVariableNames();
 
   void initialSetup() override;
+  void checkDuplicatePostprocessorVariableNames();
   void timestepSetup() override;
   void customSetup(const ExecFlagType & exec_type) override;
   void residualSetup() override;
@@ -1613,6 +1614,11 @@ public:
     _error_on_jacobian_nonzero_reallocation = state;
   }
 
+  /**
+   * Whether or not we are allowing invalid solutions
+   */
+  bool allowInvalidSolution() { return _allow_invalid_solution; }
+
   bool ignoreZerosInJacobian() const { return _ignore_zeros_in_jacobian; }
 
   void setIgnoreZerosInJacobian(bool state) { _ignore_zeros_in_jacobian = state; }
@@ -2331,6 +2337,7 @@ private:
   const bool _skip_additional_restart_data;
   const bool _skip_nl_system_check;
   bool _fail_next_linear_convergence_check;
+  const bool & _allow_invalid_solution;
 
   /// At or beyond initialSteup stage
   bool _started_initial_setup;

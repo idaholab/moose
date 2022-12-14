@@ -69,8 +69,8 @@
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the number of passive scalar inlet types does not match the number of inlet boundaries.'
     cli_args = "Modules/NavierStokesFV/passive_scalar_inlet_types=''"
-    expect_err = "Size \(0\) is not the same as the number of inlet boundaries in 'inlet_boundaries' "
-                 "\(size 1\)"
+    expect_err = "Size \(0\) is not the same as the number of inlet boundaries times number of "
+                 "transported scalars in 'inlet_boundaries' \(size 1\)"
     ad_indexing_type = 'global'
   []
   [passive-scalar-inlet-function-error]
@@ -211,9 +211,9 @@
     type = 'RunException'
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the user supplies a velocity variable which does not exist'
-    cli_args = "Modules/NavierStokesFV/velocity_variable='vel_x vely' Variables/inactive='pressure "
+    cli_args = "Modules/NavierStokesFV/velocity_variable='velx vel_y' Variables/inactive='pressure "
                "T_fluid scalar'"
-    expect_err = "Variable \(vely\) supplied to the NavierStokesFV action does not exist!"
+    expect_err = "Variable \(velx\) supplied to the NavierStokesFV action does not exist!"
     ad_indexing_type = 'global'
   []
   [velocity-component-error]
@@ -275,7 +275,8 @@
     type = 'RunException'
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if the user defines a non-existing block for thermal conductivity'
-    cli_args = "Modules/NavierStokesFV/thermal_conductivity_blocks='1; 3' "
+    cli_args = "Modules/NavierStokesFV/block='1 2' "
+               "Modules/NavierStokesFV/thermal_conductivity_blocks='1; 3' "
                "Modules/NavierStokesFV/thermal_conductivity='kappa kappa'"
     expect_err = "Block '3' is not present in the block restriction of the fluid flow action!"
     ad_indexing_type = 'global'

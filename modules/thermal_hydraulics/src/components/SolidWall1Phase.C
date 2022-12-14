@@ -34,7 +34,7 @@ SolidWall1Phase::addMooseObjects()
     params.set<UserObjectName>("numerical_flux") = _numerical_flux_name;
     params.set<Real>("normal") = _normal;
     params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
-    _sim.addUserObject(class_name, _boundary_uo_name, params);
+    getTHMProblem().addUserObject(class_name, _boundary_uo_name, params);
   }
 
   // BCs

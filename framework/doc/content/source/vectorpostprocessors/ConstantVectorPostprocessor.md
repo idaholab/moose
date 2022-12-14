@@ -4,7 +4,7 @@
 
 The constant data is specified with a vector names, and a vector of vectors of values for each name. The vectors of values are separated by semicolons.
 
-A constant vector postprocessor is not generally used for output or postprocessing, but more to isolate part of the system using constant inputs. For example, if a subapp communicates with the main app by transfering a vector postprocessor, a `ConstantVectorPostprocessor` may be used to replace that transfer for debugging or parametric study purposes.
+A constant vector postprocessor is not generally used for output or postprocessing, but more to isolate part of the system using constant inputs. For example, if a subapp communicates with the main app by transferring a vector postprocessor, a `ConstantVectorPostprocessor` may be used to replace that transfer for debugging or parametric study purposes.
 
 ## Example input syntax
 

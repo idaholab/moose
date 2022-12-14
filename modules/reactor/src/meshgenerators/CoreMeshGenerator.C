@@ -33,6 +33,48 @@ CoreMeshGenerator::validParams()
       "pattern",
       "A double-indexed array starting with the upper-left corner where the index"
       "represents the layout of input assemblies in the core lattice.");
+  params.addParam<bool>(
+      "mesh_periphery", false, "Determines if the core periphery should be meshed.");
+  MooseEnum periphery_mesher("triangle quad_ring", "triangle");
+  params.addParam<MooseEnum>("periphery_generator",
+                             periphery_mesher,
+                             "The meshgenerator to use when meshing the core boundary.");
+
+  // Periphery meshing interface
+  params.addRangeCheckedParam<Real>(
+      "outer_circle_radius", 0, "outer_circle_radius>=0", "Radius of outer circle boundary.");
+  params.addRangeCheckedParam<unsigned int>(
+      "outer_circle_num_segments",
+      0,
+      "outer_circle_num_segments>=0",
+      "Number of radial segments to subdivide outer circle boundary.");
+  params.addRangeCheckedParam<unsigned int>(
+      "periphery_num_layers",
+      1,
+      "periphery_num_layers>0",
+      "Number of layers to subdivide the periphery boundary.");
+  params.addParam<std::string>(
+      "periphery_block_name", "RGMB_CORE", "Block name for periphery zone.");
+  params.addParam<subdomain_id_type>(
+      "periphery_region_id",
+      -1,
+      "ID for periphery zone for assignment of region_id extra element id.");
+  params.addRangeCheckedParam<Real>(
+      "desired_area",
+      0,
+      "desired_area>=0",
+      "Desired (maximum) triangle area, or 0 to skip uniform refinement");
+  params.addParam<std::string>(
+      "desired_area_func",
+      std::string(),
+      "Desired (local) triangle area as a function of x,y; omit to skip non-uniform refinement");
+  params.addParamNamesToGroup("periphery_block_name periphery_region_id outer_circle_radius "
+                              "mesh_periphery periphery_generator",
+                              "Periphery Meshing");
+  params.addParamNamesToGroup("outer_circle_num_segments desired_area desired_area_func",
+                              "Periphery Meshing: PTMG specific");
+  params.addParamNamesToGroup("periphery_num_layers", "Periphery Meshing: PRMG specific");
+  // end meshing interface
 
   params.addParam<bool>("extrude",
                         false,
@@ -56,11 +98,66 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
     _inputs(getParam<std::vector<MeshGeneratorName>>("inputs")),
     _empty_key(getParam<MeshGeneratorName>("dummy_assembly_name")),
     _pattern(getParam<std::vector<std::vector<unsigned int>>>("pattern")),
-    _extrude(getParam<bool>("extrude"))
+    _extrude(getParam<bool>("extrude")),
+    _mesh_periphery(getParam<bool>("mesh_periphery")),
+    _periphery_meshgenerator(getParam<MooseEnum>("periphery_generator")),
+    _periphery_region_id(getParam<subdomain_id_type>("periphery_region_id")),
+    _outer_circle_radius(getParam<Real>("outer_circle_radius")),
+    _outer_circle_num_segments(getParam<unsigned int>("outer_circle_num_segments")),
+    _periphery_block_name(getParam<std::string>("periphery_block_name")),
+    _periphery_num_layers(getParam<unsigned int>("periphery_num_layers")),
+    _desired_area(getParam<Real>("desired_area")),
+    _desired_area_func(getParam<std::string>("desired_area_func"))
 {
+  // periphery meshing input checking
+  if (_mesh_periphery)
+  {
+    // missing required input
+    if (!parameters.isParamSetByUser("outer_circle_radius"))
+    {
+      paramError("outer_circle_radius",
+                 "Outer circle radius must be specified when using periphery meshing.");
+    }
+    if (!parameters.isParamSetByUser("periphery_region_id"))
+    {
+      paramError("periphery_region_id",
+                 "Periphery region id must be specified when using periphery meshing.");
+    }
+    // using PTMG-specific options with PRMG
+    if (_periphery_meshgenerator == "quad_ring")
+    {
+      if (parameters.isParamSetByUser("outer_circle_num_segments"))
+      {
+        paramError("outer_circle_num_segments",
+                   "outer_circle_num_segments cannot be used with PRMG periphery mesher.");
+      }
+      if (parameters.isParamSetByUser("extra_circle_radii"))
+      {
+        paramError("extra_circle_radii",
+                   "extra_circle_radii cannot be used with PRMG periphery mesher.");
+      }
+      if (parameters.isParamSetByUser("extra_circle_num_segments"))
+      {
+        paramError("extra_circle_num_segments",
+                   "extra_circle_num_segments cannot be used with PRMG periphery mesher.");
+      }
+    }
+    // using PRMG-specific options with PTMG
+    if (_periphery_meshgenerator == "triangle")
+    {
+      if (parameters.isParamSetByUser("periphery_num_layers"))
+      {
+        paramError("periphery_num_layers",
+                   "periphery_num_layers cannot be used with PTMG periphery mesher.");
+      }
+    }
+  }
+
   MeshGeneratorName reactor_params =
       MeshGeneratorName(getMeshProperty<std::string>("reactor_params_name", _inputs[0]));
-  // Check that MG name for reactor params is consistent across all assemblies
+  const auto assembly_homogenization = getMeshProperty<bool>("homogenized_assembly", _inputs[0]);
+  // Check that MG name for reactor params and assembly homogenization schemes are
+  // consistent across all assemblies
   for (unsigned int i = 1; i < _inputs.size(); i++)
   {
     // Skip if assembly name is equal to dummy assembly name
@@ -69,6 +166,9 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
     if (getMeshProperty<std::string>("reactor_params_name", _inputs[i]) != reactor_params)
       mooseError("The name of all reactor_params objects should be identical across all pins in "
                  "the input assemblies.\n");
+    if (getMeshProperty<bool>("homogenized_assembly", _inputs[i]) != assembly_homogenization)
+      mooseError(
+          "All assemblies in the core must be homogenized if assembly homogenization is used\n");
   }
 
   // Initialize ReactorMeshParams object stored in pin input
@@ -186,21 +286,33 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
     if (make_empty)
     {
       {
-        auto params = _app.getFactory().getValidParams(
-            "HexagonConcentricCircleAdaptiveBoundaryMeshGenerator");
+        if (assembly_homogenization)
+        {
+          auto params = _app.getFactory().getValidParams("SimpleHexagonGenerator");
 
-        params.set<Real>("hexagon_size") = getReactorParam<Real>("assembly_pitch") / 2.0;
-        params.set<std::vector<unsigned int>>("num_sectors_per_side") =
-            std::vector<unsigned int>(6, 2);
-        params.set<std::vector<unsigned int>>("sides_to_adapt") = std::vector<unsigned int>{0};
-        params.set<std::vector<MeshGeneratorName>>("inputs") =
-            std::vector<MeshGeneratorName>{_inputs[0]};
-        params.set<std::vector<subdomain_id_type>>("background_block_ids") =
-            std::vector<subdomain_id_type>{UINT16_MAX - 1};
+          params.set<Real>("hexagon_size") = getReactorParam<Real>("assembly_pitch") / 2.0;
+          params.set<subdomain_id_type>("block_id") = UINT16_MAX - 1;
 
-        addMeshSubgenerator("HexagonConcentricCircleAdaptiveBoundaryMeshGenerator",
-                            std::string(_empty_key),
-                            params);
+          addMeshSubgenerator("SimpleHexagonGenerator", std::string(_empty_key), params);
+        }
+        else
+        {
+          auto params = _app.getFactory().getValidParams(
+              "HexagonConcentricCircleAdaptiveBoundaryMeshGenerator");
+
+          params.set<Real>("hexagon_size") = getReactorParam<Real>("assembly_pitch") / 2.0;
+          params.set<std::vector<unsigned int>>("num_sectors_per_side") =
+              std::vector<unsigned int>(6, 2);
+          params.set<std::vector<unsigned int>>("sides_to_adapt") = std::vector<unsigned int>{0};
+          params.set<std::vector<MeshGeneratorName>>("inputs") =
+              std::vector<MeshGeneratorName>{_inputs[0]};
+          params.set<std::vector<subdomain_id_type>>("background_block_ids") =
+              std::vector<subdomain_id_type>{UINT16_MAX - 1};
+
+          addMeshSubgenerator("HexagonConcentricCircleAdaptiveBoundaryMeshGenerator",
+                              std::string(_empty_key),
+                              params);
+        }
       }
     }
     {
@@ -212,7 +324,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
       params.set<std::vector<MeshGeneratorName>>("inputs") = _inputs;
       params.set<std::vector<std::vector<unsigned int>>>("pattern") = _pattern;
       params.set<MooseEnum>("pattern_boundary") = "none";
-      params.set<bool>("generate_core_metadata") = true;
+      params.set<bool>("generate_core_metadata") = !assembly_homogenization;
       params.set<bool>("create_interface_boundaries") = false;
       if (make_empty)
       {
@@ -297,7 +409,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
       if (_geom_type == "Hex")
       {
         subdomain_id_type assembly_type =
-            getMeshProperty<subdomain_id_type>("assembly_type_id", assembly);
+            getMeshProperty<subdomain_id_type>("assembly_type", assembly);
         if (_background_region_id_map.find(assembly_type) == _background_region_id_map.end())
         {
           // Store region ids and block names associated with duct and background regions for each
@@ -332,6 +444,43 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
 
   declareMeshProperty("assembly_pitch", getReactorParam<Real>("assembly_pitch"));
 
+  // periphery meshing
+  if (_mesh_periphery)
+  {
+    std::string periphery_mg_name;
+    if (_periphery_meshgenerator == "triangle")
+      periphery_mg_name = "PeripheralTriangleMeshGenerator";
+    else if (_periphery_meshgenerator == "quad_ring")
+      periphery_mg_name = "PeripheralRingMeshGenerator";
+    else
+      paramError("periphery_generator",
+                 "Provided periphery meshgenerator has not been implemented.");
+
+    // set up common options
+    auto params = _app.getFactory().getValidParams(periphery_mg_name);
+    params.set<MeshGeneratorName>("input") = name() + "_delbds";
+    params.set<Real>("peripheral_ring_radius") = _outer_circle_radius;
+    params.set<std::string>("external_boundary_name") = "outside_periphery";
+    params.set<SubdomainName>("peripheral_ring_block_name") = "RGMB_PERIPHERY_GENERATED";
+
+    // unique MG options
+    if (_periphery_meshgenerator == "triangle")
+    {
+      params.set<unsigned int>("peripheral_ring_num_segments") = _outer_circle_num_segments;
+      params.set<Real>("desired_area") = _desired_area;
+      params.set<std::string>("desired_area_func") = _desired_area_func;
+    }
+    else if (_periphery_meshgenerator == "quad_ring")
+    {
+      params.set<subdomain_id_type>("peripheral_ring_block_id") = 25000;
+      params.set<BoundaryName>("input_mesh_external_boundary") = (BoundaryName) "outer_core";
+      params.set<unsigned int>("peripheral_layer_num") = _periphery_num_layers;
+    }
+
+    // finish periphery input
+    _build_mesh = &addMeshSubgenerator(periphery_mg_name, name() + "_periphery", params);
+  }
+
   if (_extrude && _mesh_dimensions == 3)
   {
     std::vector<Real> axial_boundaries = getReactorParam<std::vector<Real>>("axial_boundaries");
@@ -341,7 +490,11 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
       declareMeshProperty("extruded", true);
       auto params = _app.getFactory().getValidParams("AdvancedExtruderGenerator");
 
-      params.set<MeshGeneratorName>("input") = name() + "_delbds";
+      if (_mesh_periphery)
+        params.set<MeshGeneratorName>("input") = name() + "_periphery";
+      else
+        params.set<MeshGeneratorName>("input") = name() + "_delbds";
+
       params.set<Point>("direction") = Point(0, 0, 1);
       params.set<std::vector<unsigned int>>("num_layers") =
           getReactorParam<std::vector<unsigned int>>("axial_mesh_intervals");
@@ -433,6 +586,18 @@ CoreMeshGenerator::generate()
       auto elem_block_name = default_block_name;
       if (has_block_names)
         elem_block_name += "_" + _pin_block_name_map[pin_type_id][z_id][radial_idx];
+      if (elem->type() == TRI3 || elem->type() == PRISM6)
+        elem_block_name += "_TRI";
+      updateElementBlockNameId(
+          *(*_build_mesh), elem, rgmb_name_id_map, elem_block_name, next_block_id);
+    }
+    else if ((*_build_mesh)->subdomain_name(elem->subdomain_id()) == "RGMB_PERIPHERY_GENERATED")
+    // periphery type element
+    {
+      // set region ID of core periphery element
+      elem->set_extra_integer(region_id_int, _periphery_region_id);
+      // set block name and block name of core periphery element
+      auto elem_block_name = _periphery_block_name;
       if (elem->type() == TRI3 || elem->type() == PRISM6)
         elem_block_name += "_TRI";
       updateElementBlockNameId(

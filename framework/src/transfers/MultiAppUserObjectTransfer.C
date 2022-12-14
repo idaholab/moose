@@ -145,6 +145,10 @@ MultiAppUserObjectTransfer::execute()
           {
             const std::vector<SubdomainName> & blocks =
                 getParam<std::vector<SubdomainName>>("block");
+            for (const auto & b : blocks)
+              if (!MooseMeshUtils::hasSubdomainName(*mesh, b))
+                paramError("block", "The block '", b, "' was not found in the mesh");
+
             std::vector<SubdomainID> ids = mesh->getSubdomainIDs(blocks);
             _blk_ids.insert(ids.begin(), ids.end());
           }
@@ -152,6 +156,10 @@ MultiAppUserObjectTransfer::execute()
           {
             const std::vector<BoundaryName> & boundary_names =
                 getParam<std::vector<BoundaryName>>("boundary");
+            for (const auto & b : boundary_names)
+              if (!MooseMeshUtils::hasBoundaryName(*mesh, b))
+                paramError("boundary", "The boundary '", b, "' was not found in the mesh");
+
             std::vector<BoundaryID> ids = mesh->getBoundaryIDs(boundary_names, true);
             _bnd_ids.insert(ids.begin(), ids.end());
           }
@@ -287,6 +295,10 @@ MultiAppUserObjectTransfer::execute()
       if (isParamValid("block"))
       {
         const std::vector<SubdomainName> & blocks = getParam<std::vector<SubdomainName>>("block");
+        for (const auto & b : blocks)
+          if (!MooseMeshUtils::hasSubdomainName(*to_mesh, b))
+            paramError("block", "The block '", b, "' was not found in the mesh");
+
         std::vector<SubdomainID> ids = to_mesh->getSubdomainIDs(blocks);
         _blk_ids.insert(ids.begin(), ids.end());
       }
@@ -294,6 +306,10 @@ MultiAppUserObjectTransfer::execute()
       {
         const std::vector<BoundaryName> & boundary_names =
             getParam<std::vector<BoundaryName>>("boundary");
+        for (const auto & b : boundary_names)
+          if (!MooseMeshUtils::hasBoundaryName(*to_mesh, b))
+            paramError("boundary", "The boundary '", b, "' was not found in the mesh");
+
         std::vector<BoundaryID> ids = to_mesh->getBoundaryIDs(boundary_names, true);
         _bnd_ids.insert(ids.begin(), ids.end());
       }

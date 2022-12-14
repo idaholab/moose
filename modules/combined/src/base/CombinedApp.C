@@ -16,6 +16,7 @@
 #include "ChemicalReactionsApp.h"
 #include "ContactApp.h"
 #include "ElectromagneticsApp.h"
+#include "ExternalPetscSolverApp.h"
 #include "FluidPropertiesApp.h"
 #include "FsiApp.h"
 #include "FunctionalExpansionToolsApp.h"
@@ -24,6 +25,8 @@
 #include "LevelSetApp.h"
 #include "MiscApp.h"
 #include "NavierStokesApp.h"
+#include "OptimizationApp.h"
+#include "PeridynamicsApp.h"
 #include "PhaseFieldApp.h"
 #include "PorousFlowApp.h"
 #include "RayTracingApp.h"
@@ -33,11 +36,9 @@
 #include "ScalarTransportApp.h"
 #include "SolidPropertiesApp.h"
 #include "StochasticToolsApp.h"
-#include "PeridynamicsApp.h"
 #include "TensorMechanicsApp.h"
 #include "ThermalHydraulicsApp.h"
 #include "XFEMApp.h"
-#include "ExternalPetscSolverApp.h"
 
 InputParameters
 CombinedApp::validParams()
@@ -83,6 +84,7 @@ CombinedApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   LevelSetApp::registerAll(f, af, s);
   MiscApp::registerAll(f, af, s);
   NavierStokesApp::registerAll(f, af, s);
+  OptimizationApp::registerAll(f, af, s);
   PeridynamicsApp::registerAll(f, af, s);
   PhaseFieldApp::registerAll(f, af, s);
   PorousFlowApp::registerAll(f, af, s);
@@ -96,7 +98,6 @@ CombinedApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   TensorMechanicsApp::registerAll(f, af, s);
   ThermalHydraulicsApp::registerAll(f, af, s);
   XFEMApp::registerAll(f, af, s);
-  ExternalPetscSolverApp::registerAll(f, af, s);
 }
 
 void

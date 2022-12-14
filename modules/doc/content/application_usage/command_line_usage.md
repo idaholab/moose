@@ -52,7 +52,7 @@ Options:
   -t --timing                                       Enable all performance logging for timing purposes. This will disable all screen output of performance logs for all Console objects.
   --trap-fpe                                        Enable Floating Point Exception handling in critical sections of code.  This is enabled automatically in DEBUG mode
   --use-split                                       use split distributed mesh files
-  -w --warn-unused                                  Warn about unused input file options
+  -w --allow_unused                                 Warn about unused input file options
   --yaml                                            Dumps input file syntax in YAML format.
 
 Solver Options:

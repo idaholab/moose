@@ -119,13 +119,14 @@
 []
 
 [Postprocessors]
-  # to print the values of x, y into a file so we can plot it
-  [./x]
+ # to print the values of x, y into a file so we can plot it
+  [./x_pp]
     type = ScalarVariable
     variable = x
     execute_on = timestep_end
   [../]
-  [./y]
+
+  [./y_pp]
     type = ScalarVariable
     variable = y
     execute_on = timestep_end

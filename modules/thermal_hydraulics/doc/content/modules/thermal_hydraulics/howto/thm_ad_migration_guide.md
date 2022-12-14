@@ -157,5 +157,5 @@ If the above information does not help you to fix the problem, contact THM devel
 *** ERROR ***
 The requested regular material property thermal_conductivity is declared as an AD property.
 Either retrieve it as an AD property with getADMaterialProperty or declare it as a regular
-property wtih declareProperty
+property with declareProperty
 ```

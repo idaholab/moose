@@ -255,6 +255,11 @@ FEProblemBase::validParams()
 
   params.declareControllable("solve");
 
+  params.addParam<bool>(
+      "allow_invalid_solution",
+      false,
+      "Set to true to allow convergence even though the solution has been marked as 'invalid'");
+
   return params;
 }
 
@@ -343,6 +348,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _skip_additional_restart_data(getParam<bool>("skip_additional_restart_data")),
     _skip_nl_system_check(getParam<bool>("skip_nl_system_check")),
     _fail_next_linear_convergence_check(false),
+    _allow_invalid_solution(getParam<bool>("allow_invalid_solution")),
     _started_initial_setup(false),
     _has_internal_edge_residual_objects(false),
     _u_dot_requested(false),
@@ -1194,6 +1200,15 @@ FEProblemBase::initialSetup()
   _reporter_data.check();
 
   setCurrentExecuteOnFlag(EXEC_NONE);
+}
+
+void
+FEProblemBase::checkDuplicatePostprocessorVariableNames()
+{
+  for (const auto & pp : _reporter_data.getPostprocessorNames())
+    if (hasScalarVariable(pp))
+      mooseError("Postprocessor \"" + pp +
+                 "\" has the same name as a scalar variable in the system.");
 }
 
 void
@@ -2114,7 +2129,8 @@ FEProblemBase::reinitElemNeighborAndLowerD(const Elem * elem, unsigned int side,
     }
   }
 
-  if (_displaced_problem)
+  if (_displaced_problem &&
+      (_reinit_displaced_elem || _reinit_displaced_face || _reinit_displaced_neighbor))
     _displaced_problem->reinitElemNeighborAndLowerD(
         _displaced_mesh->elemPtr(elem->id()), side, tid);
 }
@@ -6977,6 +6993,9 @@ FEProblemBase::checkProblemIntegrity()
   // variables matches the order of the elements in the displaced
   // mesh.
   checkDisplacementOrders();
+
+  // Check for postprocessor names with same name as a scalar variable
+  checkDuplicatePostprocessorVariableNames();
 }
 
 void

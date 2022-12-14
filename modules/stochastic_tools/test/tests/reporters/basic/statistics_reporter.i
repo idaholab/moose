@@ -20,5 +20,4 @@
 [Outputs/out]
   type = JSON
   execute_on = FINAL
-  execute_system_information_on = NONE
 []

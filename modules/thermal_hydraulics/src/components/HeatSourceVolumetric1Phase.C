@@ -49,6 +49,6 @@ HeatSourceVolumetric1Phase::addMooseObjects()
     pars.set<std::vector<SubdomainName>>("block") = fch.getSubdomainNames();
     pars.set<FunctionName>("q") = getParam<FunctionName>("q");
     pars.set<std::vector<VariableName>>("A") = {FlowModel::AREA};
-    _sim.addKernel(class_name, genName(name(), "rhoE_heat_source"), pars);
+    getTHMProblem().addKernel(class_name, genName(name(), "rhoE_heat_source"), pars);
   }
 }

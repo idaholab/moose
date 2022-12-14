@@ -16,7 +16,7 @@ The following table lists useful command line options:
 | `--version` | Print version of the code |
 | `--recover [file_base]` | Continue the calculation. If file_base is omitted then the most recent recovery file will be utilized |
 | `--recoversuffix [suffix]` | Use a different file extension, other than cpr, for a recovery file |
-| `-w --warn-unused` | Warn about unused input file options |
+| `-w --allow-unused` | Warn about unused input file options instead of erroring. |
 | `--disable-perf-graph-live` |  Disables PerfGraph Live Printing. |
 
 ## Command-Line Arguments for Parallel Execution

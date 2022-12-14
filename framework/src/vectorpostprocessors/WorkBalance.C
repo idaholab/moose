@@ -148,7 +148,7 @@ public:
   {
     if (_petsc_partitioner && _petsc_partitioner->applyElementEeight())
     {
-      // We should change parititioner interface to take const
+      // We should change partitioner interface to take const
       // But at this point let us keep API intact
       _local_num_elems += _petsc_partitioner->computeElementWeight(const_cast<Elem &>(*elem));
     }
@@ -182,7 +182,7 @@ public:
     {
       if (_petsc_partitioner && _petsc_partitioner->applySideWeight())
       {
-        // We should change parititioner interface to take const
+        // We should change partitioner interface to take const
         // But at this point let us keep API intact
         _local_num_partition_sides +=
             _petsc_partitioner->computeSideWeight(const_cast<Elem &>(*elem), side);

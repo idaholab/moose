@@ -160,6 +160,9 @@ protected:
   bool _exodus_initialized;
 
 private:
+  /// Handle the call to mesh renumbering in libmesh's ExodusIO on non-contiguously numbered meshes
+  void handleExodusIOMeshRenumbering();
+
   /**
    * A helper function for 'initializing' the ExodusII output file, see the comments for the
    * _initialized
@@ -192,6 +195,12 @@ private:
   /// Flag to output discontinuous format in Exodus
   bool _discontinuous;
 
+  /// Flag to output added disjoint fictitious sides for side_discontinuous variables
+  bool _side_discontinuous;
+
   /// Flag to output HDF5 format (when available) in Exodus
   bool _write_hdf5;
+
+  /// whether the mesh is contiguously numbered (exodus output will force that)
+  bool _mesh_contiguous_numbering;
 };

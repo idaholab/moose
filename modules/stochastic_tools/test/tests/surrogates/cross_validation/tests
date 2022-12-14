@@ -7,7 +7,7 @@
       type = JSONDiff
       input = train_and_cv.i
       allow_test_objects = true
-      cli_args =  "Trainers/train/cv_surrogate='surrogate' Outputs/out/execute_system_information_on=none"
+      cli_args =  "Trainers/train/cv_surrogate='surrogate'"
       jsondiff = 'train_and_cv_out.json'
       detail = 'for a 1-dimensional polynomial regression surrogate with Real'
     []
@@ -15,7 +15,6 @@
       type = JSONDiff
       input = poly_reg_vec.i
       allow_test_objects = true
-      cli_args = 'Outputs/out/execute_system_information_on=none'
       jsondiff = 'poly_reg_vec_out.json'
       detail = ' and std::vector<Real> response types.'
     []

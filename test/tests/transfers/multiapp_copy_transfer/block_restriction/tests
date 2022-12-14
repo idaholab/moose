@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#13754'
+  issues = '#13754 #22817'
   design = 'MultiAppCopyTransfer.md'
 
   [restricted]
@@ -39,6 +39,43 @@
       expect_err = "Block restriction is not implemented for nodal variables"
 
       detail = "with block restriction on the target mesh."
+    []
+  []
+
+  [block_ids]
+    requirement = "The system shall error if a variable is required to be transferred"
+    [invalid_from_block_to_app]
+      type = RunException
+      input = bi_direction.i
+      cli_args = "Transfers/to_sub/from_blocks=100"
+      expect_err = "The block '100' was not found in the mesh"
+
+      detail = "with an invalid source block for the to_multiapp direction."
+    []
+    [invalid_from_block_from_app]
+      type = RunException
+      input = bi_direction.i
+      cli_args = "Transfers/from_sub/from_blocks=100"
+      expect_err = "The block '100' was not found in the mesh"
+
+      detail = "with an invalid source block for the from_multiapp direction."
+    []
+
+    [invalid_to_block_to_app]
+      type = RunException
+      input = bi_direction.i
+      cli_args = "Transfers/to_sub/to_blocks=100"
+      expect_err = "The block '100' was not found in the mesh"
+
+      detail = "with an invalid target block for the to_multiapp direction."
+    []
+    [invalid_to_block_from_app]
+      type = RunException
+      input = bi_direction.i
+      cli_args = "Transfers/from_sub/to_blocks=100"
+      expect_err = "The block '100' was not found in the mesh"
+
+      detail = "with an invalid target block for the from_multiapp direction."
     []
   []
 []

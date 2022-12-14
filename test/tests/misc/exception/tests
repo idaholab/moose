@@ -3,13 +3,10 @@
   issues = '#3777 #9181'
   # This example throws an exception during computeResidual() in the
   # first timestep, and then continues running with a reduced
-  # timestep.  This example requires PETSc >= 3.6, otherwise you get:
-  # PETSC ERROR: Petsc has generated inconsistent data
-  # PETSC ERROR: Computed Nan differencing parameter h
+  # timestep.
   [./parallel_exception_residual_transient]
     type = 'Exodiff'
     input = 'parallel_exception_residual_transient.i'
-    petsc_version = '>=3.6.0'
     exodiff = 'parallel_exception_residual_transient_out.e'
     use_old_floor = true
 
@@ -20,7 +17,6 @@
   [./parallel_exception_residual_transient_non_zero_rank]
     type = 'Exodiff'
     input = 'parallel_exception_residual_transient.i'
-    petsc_version = '>=3.6.0'
     cli_args = 'Kernels/exception/rank=1'
     exodiff = 'parallel_exception_residual_transient_out.e'
     use_old_floor = true
@@ -39,7 +35,6 @@
   [./parallel_exception_jacobian_transient]
     type = 'Exodiff'
     input = 'parallel_exception_jacobian_transient.i'
-    petsc_version = '>=3.6.0'
     exodiff = 'parallel_exception_jacobian_transient_out.e'
     use_old_floor = true
 
@@ -50,7 +45,6 @@
   [./parallel_exception_jacobian_transient_non_zero_rank]
     type = 'Exodiff'
     input = 'parallel_exception_jacobian_transient.i'
-    petsc_version = '>=3.6.0'
     cli_args = 'Kernels/exception/rank=1'
     exodiff = 'parallel_exception_jacobian_transient_out.e'
     use_old_floor = true
@@ -66,7 +60,6 @@
   [./parallel_exception_initial_condition]
     type = RunApp
     input = 'parallel_exception_initial_condition.i'
-    petsc_version = '>=3.5.0'
     expect_out = 'MooseException thrown during initial condition computation'
 
     requirement = 'The system shall support throwing an exception during the initial condition '
@@ -77,7 +70,6 @@
   [./parallel_error_residual_transient_non_zero_rank]
     type = 'RunException'
     input = 'parallel_exception_residual_transient.i'
-    petsc_version = '>=3.6.0'
     min_parallel = 2
     cli_args = 'Kernels/exception/rank=1 Kernels/exception/should_throw=false Outputs/exodus=false'
     expect_err = 'Intentional error triggered during residual calculation'
@@ -91,7 +83,6 @@
   [./parallel_error_jacobian_transient_non_zero_rank]
     type = 'RunException'
     input = 'parallel_exception_residual_transient.i'
-    petsc_version = '>=3.6.0'
     min_parallel = 2
     cli_args = 'Kernels/exception/rank=1 Kernels/exception/should_throw=false Outputs/exodus=false'
     expect_err = 'Intentional error triggered during residual calculation'

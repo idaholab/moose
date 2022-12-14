@@ -22,7 +22,7 @@ public:
   /**
    * @param mesh[in] The mesh
    */
-  FlowChannel3DAlignment(THMMesh & mesh);
+  FlowChannel3DAlignment(const THMMesh & mesh);
 
   /**
    * Build the neighborhood information between the heat structure boundary and the flow channel
@@ -59,7 +59,7 @@ public:
 
 protected:
   /// Mesh
-  THMMesh & _mesh;
+  const THMMesh & _mesh;
   /// List of hs boundary infos
   std::vector<std::tuple<dof_id_type, unsigned short int>> _hs_boundary_info;
   /// List of hs element IDs

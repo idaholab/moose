@@ -34,9 +34,9 @@ Component1DJunction::setupMesh()
 {
   Component1DConnection::setupMesh();
 
-  const BoundaryID boundary_id = _mesh.getNextBoundaryId();
+  const BoundaryID boundary_id = mesh().getNextBoundaryId();
 
-  auto & boundary_info = _mesh.getMesh().get_boundary_info();
+  auto & boundary_info = mesh().getMesh().get_boundary_info();
 
   for (const auto & connection : getConnections())
   {
@@ -54,7 +54,7 @@ Component1DJunction::setupMesh()
   // name the nodeset/sideset corresponding to the nodes of all connected component ends
   boundary_info.nodeset_name(boundary_id) = name();
 
-  const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem = _mesh.nodeToElemMap();
+  const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem = mesh().nodeToElemMap();
   for (auto & nid : _nodes)
   {
     const auto & it = node_to_elem.find(nid);
@@ -74,7 +74,7 @@ Component1DJunction::initSecondary()
 
   for (auto & eid : _connected_elems)
   {
-    const Elem * elem = _mesh.queryElemPtr(eid);
+    const Elem * elem = constMesh().queryElemPtr(eid);
     if (elem != nullptr && elem->processor_id() == processor_id())
       _proc_ids.push_back(elem->processor_id());
     else

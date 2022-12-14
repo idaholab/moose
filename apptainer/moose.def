@@ -1,0 +1,119 @@
+{#- Required jinja arguments                                                                  -#}
+{#- APPTAINER_BOOTSTRAP: The BootStrap to use (typically localimage or oras)                  -#}
+{#- APPTAINER_FROM: The From to use (path to an image or an oras URI)                         -#}
+
+{#- Optional jinja arguments                                                                  -#}
+{#- CONDA_ALT_CHANNEL: An alternate channel to add to conda                                   -#}
+{#- MOOSE_TOOLS_VERSION: The version to pin moose-tools to (if any)                           -#}
+{#- MOOSE_TEST_TOOLS_VERSION: The version to pin moose-test-tools to (if any)                 -#}
+{#- DEV_CONTAINER: Set to anything to add development packages                                -#}
+
+{#- Location to install mambaforge                                                            -#}
+{%- set MOOSE_MAMBAFORGE = '/opt/mambaforge3' -%}
+
+{#- Name of the environment to create in mamba                                                -#}
+{%- set MOOSE_MAMBA_ENV = 'moose' -%}
+
+{#- Location to install the packed mamba environment                                          -#}
+{%- set MOOSE_TOOLS_DIR = '/opt/moose-tools' -%}
+
+BootStrap: {{ APPTAINER_BOOTSTRAP }}
+From: {{ APPTAINER_FROM }}
+
+%environment
+    # From moose-base
+    if [ -d {{ MOOSE_MAMBAFORGE }} ]; then
+      export PATH={{ MOOSE_MAMBAFORGE }}/bin:$PATH
+      source activate {{ MOOSE_MAMBAFORGE }}/envs/{{ MOOSE_MAMBA_ENV }}
+    fi
+    if [ -d {{ MOOSE_TOOLS_DIR }} ]; then
+      export PATH={{ MOOSE_TOOLS_DIR }}/bin:$PATH
+    fi
+
+%post
+    umask 022
+
+    # Setup temp location
+    TEMP_LOC=/root/build
+    mkdir $TEMP_LOC
+
+    # Load jinja vars
+    MOOSE_MAMBAFORGE={{ MOOSE_MAMBAFORGE }}
+    MOOSE_MAMBA_ENV={{ MOOSE_MAMBA_ENV }}
+    MOOSE_TOOLS_VERSION={{ MOOSE_TOOLS_VERSION }}
+    MOOSE_TEST_TOOLS_VERSION={{ MOOSE_TEST_TOOLS_VERSION }}
+    CONDA_ALT_CHANNEL={{ CONDA_ALT_CHANNEL }}
+
+    # Pinned versions
+    MAMBAFORGE_VERSION=22.9.0-2
+    PYTHON_VERSION=3.10
+
+    # Install mamba in MOOSE_MAMBAFORGE
+    curl -L https://github.com/conda-forge/miniforge/releases/download/${MAMBAFORGE_VERSION}/Mambaforge-${MAMBAFORGE_VERSION}-Linux-x86_64.sh -o ${TEMP_LOC}/mambaforge.sh
+    bash ${TEMP_LOC}/mambaforge.sh -b -p ${MOOSE_MAMBAFORGE}
+    rm ${TEMP_LOC}/mambaforge.sh
+    PATH=${MOOSE_MAMBAFORGE}/bin:$PATH
+
+    # Basic installs in the base
+    mamba install -yq python=${PYTHON_VERSION} conda-pack
+
+    # Add moose channels
+    conda config --env --add channels https://conda.software.inl.gov/public
+    # Add an alt channel if given
+    if [ -n "$CONDA_ALT_CHANNEL" ]; then
+        conda config --env --add channels ${CONDA_ALT_CHANNEL}
+    fi
+    {% if DEV_CONTAINER is defined %}
+    # DEV_CONTAINER is set, installing moose-tools
+    MAMBA_PACKAGES="moose-tools=${MOOSE_TOOLS_VERSION}"
+    {% else %}
+    # DEV_CONTAINER is not set, installing moose-test-tools
+    MAMBA_PACKAGES="moose-test-tools=${MOOSE_TEST_TOOLS_VERSION}"
+    {% endif -%}
+    # Install packages
+    mamba create -yq -n ${MOOSE_MAMBA_ENV} python=${PYTHON_VERSION} ${MAMBA_PACKAGES}
+
+    # Activate the new environment
+    source activate ${MOOSE_MAMBAFORGE}/envs/${MOOSE_MAMBA_ENV}
+
+    {% if DEV_CONTAINER is defined -%}
+    # Other Development container installs
+    dnf --enablerepo=powertools install -y lcov
+    # need to add lcov-cobertura
+    {%- endif %}
+
+    # Setup the install script to be ran in a later
+    # container that packages up the environment for a
+    # smaller install into MOOSE_TOOLS_DIR
+    echo '# moose-tools install script
+
+umask 022
+
+# package environment into MOOSE_TOOLS_TAR
+conda clean -ya
+MOOSE_TOOLS_TAR=$(mktemp -u).tar.gz
+conda pack -q -n {{ MOOSE_MAMBA_ENV }} -o ${MOOSE_TOOLS_TAR}
+rm -rf /root/.conda* {{ MOOSE_MAMBAFORGE }}
+
+# extract into MOOSE_TOOLS_DIR
+MOOSE_TOOLS_DIR={{ MOOSE_TOOLS_DIR }}
+mkdir ${MOOSE_TOOLS_DIR}
+tar -xzf ${MOOSE_TOOLS_TAR} -C ${MOOSE_TOOLS_DIR}
+rm ${MOOSE_TOOLS_TAR}
+chmod -R o=u-w,g=u-w ${MOOSE_TOOLS_DIR}
+
+# so that we can use python in setup
+export PATH=${MOOSE_TOOLS_DIR}/bin:$PATH
+
+{% if DEV_CONTAINER is defined %}
+# Development container installs
+pip3 --no-cache install lcov-cobertura
+{% endif %}
+
+# done with this script
+rm /root/install_moose_tools.sh' > /root/install_moose_tools.sh
+    chmod u+x /root/install_moose_tools.sh
+
+    # Clean up
+    conda clean -ya
+    rm -rf ${TEMP_LOC}

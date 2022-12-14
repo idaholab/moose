@@ -25,7 +25,7 @@ public:
   /**
    * @param mesh[in] The mesh
    */
-  FlowChannelAlignment(THMMesh & mesh);
+  FlowChannelAlignment(const THMMesh & mesh);
 
   /**
    * Build the neighborhood information between master and slave side
@@ -66,7 +66,7 @@ public:
 
 protected:
   /// Mesh
-  THMMesh & _mesh;
+  const THMMesh & _mesh;
   /// List of master element boundary infos
   std::vector<std::tuple<dof_id_type, unsigned short int>> _master_boundary_info;
   /// List of slave element IDs

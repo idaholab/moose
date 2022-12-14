@@ -18,6 +18,7 @@ class JSONDiff(FileTester):
         params = FileTester.validParams()
         params.addRequiredParam('jsondiff',   [], "A list of JSON files to compare.")
         params.addParam('skip_keys', [], "A list of keys to skip in the JSON comparison.")
+        params.addParam('keep_system_information', False, "Whether or not to keep the system information as part of the diff.")
         return params
 
     def __init__(self, name, params):
@@ -26,6 +27,16 @@ class JSONDiff(FileTester):
              self.specs['required_python_packages'] = 'deepdiff'
         elif 'deepdiff' not in self.specs['required_python_packages']:
             self.specs['required_python_packages'] += ' deepdiff'
+        # Add system information to skip keys
+        if (not self.specs['keep_system_information']):
+            self.specs['skip_keys'].extend(['app_name',
+                                            'current_time',
+                                            'executable',
+                                            'executable_time',
+                                            'moose_version',
+                                            'libmesh_version',
+                                            'petsc_version',
+                                            'slepc_version'])
 
     def getOutputFiles(self):
         return self.specs['jsondiff']

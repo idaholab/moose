@@ -50,6 +50,5 @@
   execute_on = 'timestep_end'
   [out]
     type = JSON
-    execute_system_information_on = none
   []
 []

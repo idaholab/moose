@@ -22,17 +22,14 @@ cp = 1
   [vel_x]
     type = 'INSFVVelocityVariable'
     initial_condition = 1
-    block = 0
   []
   [vel_y]
     type = 'INSFVVelocityVariable'
     initial_condition = 1
-    block = 0
   []
   [pressure]
     type = 'INSFVPressureVariable'
     initial_condition = 0
-    block = 0
   []
   [T_fluid]
     type = 'INSFVEnergyVariable'

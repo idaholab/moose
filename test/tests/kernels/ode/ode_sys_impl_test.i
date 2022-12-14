@@ -96,18 +96,7 @@
 []
 
 [Postprocessors]
-  active = 'exact_x l2err_x x y'
-
-  [./x]
-    type = ScalarVariable
-    variable = x
-    execute_on = 'initial timestep_end'
-  [../]
-  [./y]
-    type = ScalarVariable
-    variable = y
-    execute_on = 'initial timestep_end'
-  [../]
+  active = 'exact_x l2err_x'
 
   [./exact_x]
     type = FunctionValuePostprocessor

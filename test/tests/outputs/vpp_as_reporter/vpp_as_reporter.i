@@ -21,6 +21,5 @@
   [out]
     type = JSON
     vectorpostprocessors_as_reporters = true
-    execute_system_information_on = none
   []
 []

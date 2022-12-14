@@ -5,7 +5,7 @@
 #   libmesh/
 #   template/
 #   moose/
-{% set build = 4 %}
+{% set build = 6 %}
 {% set strbuild = "build_" + build|string %}
 {% set version = "4.0.2" %}
 
@@ -39,7 +39,6 @@ requirements:
     - autoconf
     - automake 1.16.1
     - m4
-    - openssl <3
   host: []
   run:
     - {{ base_mpich }}
@@ -65,7 +64,6 @@ requirements:
     - {{ moose_xorg_x11 }}      # [linux]
     - {{ moose_libglu }}        # [linux]
     - {{ moose_mesalib }}       # [linux]
-    - openssl <3
     - mpi 1.0 mpich
 
 test:

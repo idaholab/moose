@@ -182,7 +182,7 @@ offset = -0.19
     interpolate_normals = false
     newmark_beta = 0.25
     newmark_gamma = 0.5
-    capture_tolerance = 1.0e-3
+    capture_tolerance = 1.0e-5
   []
   [normal_x]
     type = NormalMortarMechanicalContact

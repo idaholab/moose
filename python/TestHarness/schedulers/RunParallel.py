@@ -82,6 +82,9 @@ class RunParallel(Scheduler):
             output += 'Python exception encountered:\n\n' + traceback.format_exc()
             tester.setStatus(tester.error, 'PYTHON EXCEPTION')
 
+        if job.getOutputFile():
+            job.addMetaData(DIRTY_FILES=[job.getOutputFile()])
+
         # Set testers output with modifications made above so it prints the way we want it
         job.setOutput(output)
 

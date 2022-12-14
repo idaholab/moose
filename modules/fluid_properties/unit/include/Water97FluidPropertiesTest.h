@@ -22,6 +22,9 @@ protected:
   void buildObjects()
   {
     InputParameters uo_pars = _factory.getValidParams("Water97FluidProperties");
+    // Give initial guesses that are slightly off
+    uo_pars.set<Real>("T_initial_guess") = 298.15 * 1.01;
+    uo_pars.set<Real>("p_initial_guess") = 1.01e5 * 1.01;
     _fe_problem->addUserObject("Water97FluidProperties", "fp", uo_pars);
     _fp = &_fe_problem->getUserObject<Water97FluidProperties>("fp");
 

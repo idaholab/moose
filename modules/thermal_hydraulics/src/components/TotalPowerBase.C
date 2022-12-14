@@ -24,5 +24,5 @@ TotalPowerBase::TotalPowerBase(const InputParameters & parameters)
 void
 TotalPowerBase::addVariables()
 {
-  _sim.addSimVariable(false, _power_var_name, FEType(FIRST, SCALAR));
+  getTHMProblem().addSimVariable(false, _power_var_name, FEType(FIRST, SCALAR));
 }

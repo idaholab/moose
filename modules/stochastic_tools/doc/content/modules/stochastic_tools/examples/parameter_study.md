@@ -56,6 +56,10 @@ uncertain parameters, running the stochastic simulations, and collecting the sto
 following sub-sections will step through each portion of the main file to explain the purpose. The
 complete analysis is discussed in [parameter_study.md#results].
 
+The specific parameter study performed in this tutorial can also done using the [ParameterStudy/index.md] syntax, shown in the code block below. However, it is very useful to learn each aspect of doing a stochastic simulation in the stochastic tools module, which is described in the following sub-sections.
+
+!listing examples/parameter_study/main_parameter_study.i caption=Parameter study using `ParameterStudy` input block
+
 ### StochasticTools Block
 
 The [StochasticTools](syntax/StochasticTools/index.md) block sets up the main file to be a

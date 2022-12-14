@@ -1,6 +1,7 @@
 [Tests]
   issues = '#20101'
   design = 'TabulatedFluidProperties.md'
+
   [tabulated_bicubic]
     type = CSVDiff
     input = 'tabulated.i'
@@ -22,6 +23,7 @@
       rel_err = 1e-4
       threading = '!pthreads'
       allow_warnings = true
+      prereq = tabulated_bicubic
       detail = 'using a regularly spaced interpolation grid'
     []
     [log_v]
@@ -34,54 +36,53 @@
       rel_err = 1e-4
       threading = '!pthreads'
       allow_warnings = true
+      prereq = tabulated_bicubic
       detail = 'using a log-spaced specific volume grid and a regularly spaced grid in specific energy'
     []
   []
-
   [exceptions]
     requirement = "The system shall throw an error if"
     [bad_pressure_bounds]
       type = RunException
       input = 'tabulated.i'
-      cli_args = 'FluidProperties/tabulated/pressure_min=1e6 FluidProperties/tabulated/pressure_max=1e5'
+      cli_args = 'FluidProperties/tabulated/pressure_min=1e6 FluidProperties/tabulated/pressure_max=1e5 FluidProperties/tabulated/save_file=false'
       expect_err = 'pressure_max must be greater than pressure_min'
       detail = 'if the user-specified pressure boundaries are inverted'
     []
     [bad_temperature_bounds]
       type = RunException
       input = 'tabulated.i'
-      cli_args = 'FluidProperties/tabulated/temperature_min=1e3 FluidProperties/tabulated/temperature_max=1e2'
+      cli_args = 'FluidProperties/tabulated/temperature_min=1e3 FluidProperties/tabulated/temperature_max=1e2 FluidProperties/tabulated/save_file=false'
       expect_err = 'temperature_max must be greater than temperature_min'
       detail = 'if the user-specified temperature boundaries are inverted'
     []
     [bad_pressure_guess]
       type = RunException
       input = 'tabulated_v_e.i'
-      cli_args = 'FluidProperties/tabulated/p_initial_guess=10'
+      cli_args = 'FluidProperties/tabulated/p_initial_guess=10 FluidProperties/tabulated/save_file=false'
       expect_err = 'Pressure initial guess for \(p,T\), \(v,e\) conversions 10 is outside the range of tabulated pressure'
       detail = 'if the user-specified pressure initial guess for variable set inversions is out of bounds'
     []
     [bad_temperature_guess]
       type = RunException
       input = 'tabulated_v_e.i'
-      cli_args = 'FluidProperties/tabulated/T_initial_guess=1e5'
+      cli_args = 'FluidProperties/tabulated/T_initial_guess=1e5 FluidProperties/tabulated/save_file=false'
       expect_err = 'Temperature initial guess for \(p,T\), \(v,e\) conversions 100000 is outside the range of tabulated temperature'
       detail = 'if the user-specified temperature initial guess for variable set inversions is out of bounds'
     []
     [pressure_out_of_bounds]
       type = RunException
-      input = 'tabulated_v_e.i'
-      cli_args = 'FluidProperties/tabulated/pressure_min=2.5e6 FluidProperties/tabulated/error_on_out_of_bounds=true'
+      input = 'tabulated.i'
+      cli_args = 'AuxVariables/pressure/initial_condition=1e4 FluidProperties/tabulated/error_on_out_of_bounds=true FluidProperties/tabulated/save_file=false'
       expect_err = 'is outside the range of tabulated pressure'
       detail = 'if the desired pressure for a fluid property evaluation is outside the user-specified bounds, when prescribed to error in such conditions'
     []
     [temperature_out_of_bounds]
       type = RunException
-      input = 'tabulated_v_e.i'
-      cli_args = 'FluidProperties/tabulated/temperature_min=590 FluidProperties/tabulated/error_on_out_of_bounds=true'
+      input = 'tabulated.i'
+      cli_args = 'AuxVariables/temperature/initial_condition=250 FluidProperties/tabulated/error_on_out_of_bounds=true FluidProperties/tabulated/save_file=false'
       expect_err = 'is outside the range of tabulated temperature'
       detail = 'if the desired temperature for a fluid property evaluation is outside the user-specified bounds, when prescribed to error in such conditions'
-      allow_warnings = true
     []
   []
 []

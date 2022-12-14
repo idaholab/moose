@@ -35,11 +35,11 @@ Component1D::buildMesh()
 {
   buildMeshNodes();
 
-  MeshBase & the_mesh = _mesh.getMesh();
+  MeshBase & the_mesh = mesh().getMesh();
   BoundaryInfo & boundary_info = the_mesh.get_boundary_info();
 
   // create nodeset for all nodes for this component
-  _nodeset_id = _mesh.getNextBoundaryId();
+  _nodeset_id = mesh().getNextBoundaryId();
   _nodeset_name = name();
   boundary_info.nodeset_name(_nodeset_id) = _nodeset_name;
 
@@ -73,9 +73,9 @@ Component1D::buildMesh()
   }
 
   // elems
-  BoundaryID bc_id_inlet = _mesh.getNextBoundaryId();
-  BoundaryID bc_id_outlet = _mesh.getNextBoundaryId();
-  auto & binfo = _mesh.getMesh().get_boundary_info();
+  BoundaryID bc_id_inlet = mesh().getNextBoundaryId();
+  BoundaryID bc_id_outlet = mesh().getNextBoundaryId();
+  auto & binfo = mesh().getMesh().get_boundary_info();
   for (unsigned int i = 0; i < _n_elem; i++)
   {
     Elem * elem = nullptr;
@@ -109,27 +109,27 @@ Component1D::buildMesh()
     for (unsigned int i = 0; i < _axial_region_names.size(); i++)
     {
       const std::string & region_name = _axial_region_names[i];
-      SubdomainID subdomain_id = _mesh.getNextSubdomainId();
+      SubdomainID subdomain_id = mesh().getNextSubdomainId();
       setSubdomainInfo(subdomain_id, genName(name(), region_name));
 
       for (unsigned int j = 0; j < _n_elems[i]; j++, k++)
       {
         dof_id_type elem_id = _elem_ids[k];
-        _mesh.elemPtr(elem_id)->subdomain_id() = subdomain_id;
+        mesh().elemPtr(elem_id)->subdomain_id() = subdomain_id;
       }
     }
   }
   else
   {
-    SubdomainID subdomain_id = _mesh.getNextSubdomainId();
+    SubdomainID subdomain_id = mesh().getNextSubdomainId();
     setSubdomainInfo(subdomain_id, name());
 
     for (auto && id : _elem_ids)
-      _mesh.elemPtr(id)->subdomain_id() = subdomain_id;
+      mesh().elemPtr(id)->subdomain_id() = subdomain_id;
   }
 
   // Update the mesh
-  _mesh.update();
+  mesh().update();
 }
 
 bool

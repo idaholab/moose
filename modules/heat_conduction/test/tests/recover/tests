@@ -1,5 +1,5 @@
 [Tests]
-  design = "heat_conduction/index.md"
+  design = "modules/heat_conduction/index.md"
   issues = "#10079"
   [./recover_1]
     type = Exodiff

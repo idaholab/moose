@@ -23,6 +23,8 @@ protected:
   virtual RealEigenVector computeQpJacobian() override;
   virtual RealEigenMatrix computeQpOffDiagJacobian(const MooseVariableFEBase & jvar) override;
 
+  /// whether or not the coefficient property is provided
+  const bool _has_coefficient;
   /// scalar time derivative coefficient
   const MaterialProperty<Real> * const _coeff;
   /// array time derivative coefficient

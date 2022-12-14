@@ -30,7 +30,7 @@ protected:
 
   virtual void computeQpProperties() override;
 
-  ///Base name prepended to material property name
+  /// Base name prepended to material property name
   const std::string _base_name;
   const VariableValue & _scalar_global_strain;
   MaterialProperty<RankTwoTensor> & _global_strain;

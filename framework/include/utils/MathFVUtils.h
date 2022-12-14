@@ -286,8 +286,10 @@ harmonicInterpolation(const T1 & value1,
   {
     // The harmonic mean of mixed positive and negative numbers (and 0 as well) is not well-defined
     // so we assert that the input values shall be positive.
-    mooseAssert(value1 > 0, "Input value 1 needs to be positive for harmonic interpolation!");
-    mooseAssert(value2 > 0, "Input value 2 needs to be positive for harmonic interpolation!");
+#ifndef NDEBUG
+    if (value1 * value2 <= 0)
+      mooseWarning("Input values must be of the same sign for harmonic interpolation");
+#endif
     return 1.0 / (coeffs.first / value1 + coeffs.second / value2);
   }
   // For vectors (ADRealVectorValue, VectorValue), we take the component-wise harmonic mean
@@ -296,12 +298,11 @@ harmonicInterpolation(const T1 & value1,
     typename libMesh::CompareTypes<T1, T2>::supertype result;
     for (const auto i : make_range(Moose::dim))
     {
-      mooseAssert(value1(i) > 0,
-                  "Component " + std::to_string(i) +
-                      " of input value 1 needs to be positive for harmonic interpolation!");
-      mooseAssert(value2(i) > 0,
-                  "Component " + std::to_string(i) +
-                      " of input value 2 needs to be positive for harmonic interpolation!");
+#ifndef NDEBUG
+      if (value1(i) * value2(i) <= 0)
+        mooseWarning("Component " + std::to_string(i) +
+                     "of input values must be of the same sign for harmonic interpolation");
+#endif
       result(i) = 1.0 / (coeffs.first / value1(i) + coeffs.second / value2(i));
     }
     return result;
@@ -314,12 +315,11 @@ harmonicInterpolation(const T1 & value1,
     for (const auto i : make_range(Moose::dim))
       for (const auto j : make_range(Moose::dim))
       {
-        mooseAssert(value1(i, j) > 0,
-                    "Component (" + std::to_string(i) + "," + std::to_string(j) +
-                        ") of input value 1 needs to be positive for harmonic interpolation!");
-        mooseAssert(value2(i, j) > 0,
-                    "Component (" + std::to_string(i) + "," + std::to_string(j) +
-                        ") of input value 2 needs to be positive for harmonic interpolation!");
+#ifndef NDEBUG
+        if (value1(i, j) * value2(i, j) <= 0)
+          mooseWarning("Component (" + std::to_string(i) + "," + std::to_string(j) +
+                       ") of input values must be of the same sign for harmonic interpolation");
+#endif
         result(i, j) = 1.0 / (coeffs.first / value1(i, j) + coeffs.second / value2(i, j));
       }
     return result;

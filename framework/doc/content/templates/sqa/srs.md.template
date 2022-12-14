@@ -297,7 +297,7 @@ If the system can exist in various modes or states define these and, as appropri
 The mode of a system refers to a collection of states.
 !template-end!
 
-### Phyisical Characteristics
+### Physical Characteristics
 
 !template field key=physical-characteristics
 Include constraints on weight, volume and dimension. Include the construction characteristics of

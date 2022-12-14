@@ -6,7 +6,7 @@ This page includes various demonstrations intended to introduce the basics of [!
 
 Before proceeding, please visit the [installation/index.md] page and the [getting_started/new_users.md] page. It is assumed that the reader has a minimial understanding in computer programming with [C++](#programming).
 
-## Examples
+## Framework Examples
 
 The [!ac](MOOSE) repository has a directory named `examples` with several subdirectories. Each subdirectory
 has code for a MOOSE-based application and input file(s) for running simulations. Each example can
@@ -37,37 +37,19 @@ demonstrates and how to use it is provided here:
 - [Example 20: UserObjects](examples/ex20_user_objects.md)
 - [Example 21: Debugging](examples/ex21_debugging.md)
 
-### Module Use Examples
+## Physics Module Examples and Tutorials
 
-Example problems are provided for some of the individual [modules/index.md]. A comprehensive list of all that are available is given below. Simply expand the example set under a module header and follow their links.
+The [modules/index.md] provide models based on the MOOSE framework for a variety of physical phenomena. These modules provide capabilities that can either be used by themselves, or serve as the basis for application-specific models tailored to specific problems. Example problems and tutorials are available for some of the individual physics modules as listed below.
 
-##### Contact
-
-!include modules/contact/contact_examples.md
-
-##### Geochemistry
-
-- [modules/geochemistry/tests_and_examples/index.md]
-
-##### Level Set
-
-!include modules/level_set/level_set_examples.md
-
-##### Porous Flow
-
-!include modules/porous_flow/porous_flow_examples.md
-
-##### Reconstructed Discontinuous Galerkin
-
-- [modules/rdg/index.md#example]
-
-##### Stochastic Tools
-
-!include modules/stochastic_tools/stochastic_tools_examples.md
-
-#### <!--empty header for breaking out of the collapsed section-->
-
-The following example combines the Heat Conduction, Tensor Mechanics, and Stochastic Tools modules and demonstrates one of the core purposes of MOOSE---solving multiphysics problems: [modules/combined/examples/stm_thermomechanics.md]
+- [Combined](modules/combined/tutorials/index.md) (coupling models from multiple modules)
+- [Contact](modules/contact/contact_examples.md)
+- [Geochemistry](modules/geochemistry/tests_and_examples/index.md)
+- [Heat Conduction](modules/heat_conduction/tutorials/introduction/index.md)
+- [Level Set](modules/level_set/level_set_examples.md)
+- [Porous Flow](modules/porous_flow/porous_flow_examples.md)
+- [Reconstructed Discontinuous Galerkin](modules/rdg/index.md#example)
+- [Stochastic Tools](modules/stochastic_tools/stochastic_tools_examples.md)
+- [Tensor Mechanics](modules/tensor_mechanics/tutorials/introduction/index.md)
 
 ## Tutorials
 
