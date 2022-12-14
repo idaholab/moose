@@ -44,6 +44,9 @@ public:
                                             const std::vector<std::string> & full_args_name);
 
 protected:
+  /// Override to avoid 'solve converged' message and print when processors are finished
+  virtual void showStatusMessage(unsigned int i) const override;
+
   /// Sampler to utilize for creating MultiApps
   Sampler & _sampler;
 

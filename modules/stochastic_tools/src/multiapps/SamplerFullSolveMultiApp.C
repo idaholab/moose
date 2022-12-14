@@ -11,6 +11,7 @@
 #include "SamplerFullSolveMultiApp.h"
 #include "Sampler.h"
 #include "StochasticToolsTransfer.h"
+#include "Console.h"
 
 registerMooseObject("StochasticToolsApp", SamplerFullSolveMultiApp);
 
@@ -210,7 +211,9 @@ SamplerFullSolveMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
       _apps[ai]->setOutputFileBase(_app.getOutputFileBase() + "_" + mname);
     }
 
-    last_solve_converged = FullSolveMultiApp::solveStep(dt, target_time, auto_advance);
+    const bool curr_last_solve_converged =
+        FullSolveMultiApp::solveStep(dt, target_time, auto_advance);
+    last_solve_converged = last_solve_converged && curr_last_solve_converged;
 
     for (auto & transfer : from_transfers)
     {
@@ -230,6 +233,41 @@ SamplerFullSolveMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
     transfer->finalizeFromMultiapp();
 
   return last_solve_converged;
+}
+
+void
+SamplerFullSolveMultiApp::showStatusMessage(unsigned int i) const
+{
+  // Local row is the app index if in normal mode, otherwise it's _local_batch_app_index
+  const dof_id_type local_row =
+      _mode == StochasticTools::MultiAppMode::NORMAL ? (dof_id_type)i : _local_batch_app_index;
+  // If the local row is less than the number of local sims, we aren't finished yet
+  if (local_row < _rank_config.num_local_sims - 1)
+    return;
+
+  // Loop through processors to communicate completeness
+  for (const auto & pid : make_range(n_processors()))
+  {
+    // This is what is being sent to trigger completeness
+    dof_id_type last_row = _rank_config.is_first_local_rank
+                               ? _rank_config.first_local_sim_index + _rank_config.num_local_sims
+                               : 0;
+    // Cannot send/receive to the same processor, so avoid if root
+    if (pid > 0)
+    {
+      // Send data to root
+      if (pid == processor_id())
+        _communicator.send(0, last_row);
+      // Receive data from source
+      else if (processor_id() == 0)
+        _communicator.receive(pid, last_row);
+    }
+
+    // Output the samples that are complete if it's the main processor for the batch
+    if (last_row)
+      _console << COLOR_CYAN << type() << " [" << name() << "] " << last_row << "/"
+               << _number_of_sampler_rows << " samples complete!" << std::endl;
+  }
 }
 
 std::vector<std::shared_ptr<StochasticToolsTransfer>>
