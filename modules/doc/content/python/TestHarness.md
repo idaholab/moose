@@ -107,6 +107,7 @@ MOOSE has various configurations for evaluating whether a created test is succes
 Sometimes, it may not be possible to properly evaluate a test with the built-in checks MOOSE provides. In this situation, MOOSE has functionality for evaluating a test using a custom, user-supplied evaluation function. 
 
 To do this, create a Python script in the folder containing your test. The script should be blank aside from a single function named `custom_evaluation(output)`:
+
 ```
 def custom_evaluation(output):
   #Do your evaluation logic here
@@ -114,9 +115,11 @@ def custom_evaluation(output):
     return True
   return False
 ```
+
 `output` is a string containing the test's entire output and can be manipulated as one sees fit. The function should return a boolean representing whether the test passed or not.
 
 After creating the .py file, add `custom_evaluation_script = '[filename].py'` to your test specification file. For example:
+
 ```
 [Tests]
   [my_test]
