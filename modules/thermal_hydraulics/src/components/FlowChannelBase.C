@@ -71,6 +71,11 @@ FlowChannelBase::validParams()
   params.addParam<bool>("lump_mass_matrix", false, "Lump the mass matrix");
   params.addRequiredParam<std::string>("closures", "Closures type");
 
+  params.setDocString(
+      "orientation",
+      "Direction of flow channel from start position to end position (no need to normalize). For "
+      "curved flow channels, it is the (tangent) direction at the start position.");
+
   params.addPrivateParam<std::string>("component_type", "pipe");
 
   params.declareControllable("A f");
