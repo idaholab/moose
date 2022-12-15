@@ -1,0 +1,13 @@
+[Tests]
+  [custom_eval]
+    type = RunApp
+    input = good.i
+    custom_evaluation_script = 'custom_eval.py'
+  []
+  [custom_eval_expect_out]
+    type = RunApp
+    input = good.i
+    custom_evaluation_script = 'custom_eval.py'
+    expect_out = 'foo'
+  []
+[]
