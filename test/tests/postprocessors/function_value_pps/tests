@@ -1,12 +1,18 @@
 [Tests]
-  issues = '#5197'
   design = 'FunctionValuePostprocessor.md'
-
-  [./test]
+  [function_value_pps]
     type = 'CSVDiff'
     input = 'function_value_pps.i'
     csvdiff = 'function_value_pps_out.csv'
-
+    issues = '#5197'
     requirement = 'The system shall support evaluating a function of space and time at a single point as a Postprocessor value.'
-  [../]
+  []
+
+  [pps_args_function_value]
+    type = 'CSVDiff'
+    input = 'pps_args_function_value_pps.i'
+    csvdiff = 'pps_args_function_value_pps_out.csv'
+    issues = '#22937'
+    requirement = 'The system shall support evaluating a function of space and time with values provided by postprocessors.'
+  []
 []
