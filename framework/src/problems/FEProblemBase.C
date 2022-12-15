@@ -3974,21 +3974,24 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
     FEProblemBase::execute(exec_type);
     _checking_uo_aux_state = false;
 
+    const Real check_tol = 1e-8;
+
+    const Real xnorm = x->l2_norm();
     *x -= *_aux->currentSolution();
-    if (x->l2_norm() > 1e-8)
+    if (x->l2_norm() > check_tol * xnorm)
     {
       const auto & sys = _aux->system();
-      unsigned int n_vars = sys.n_vars();
+      const unsigned int n_vars = sys.n_vars();
       std::multimap<Real, std::string, std::greater<Real>> ordered_map;
-      for (unsigned int i = 0; i < n_vars; i++)
+      for (const auto i : make_range(n_vars))
       {
-        Real vnorm = sys.calculate_norm(*x, i, DISCRETE_L2);
-        ordered_map.insert(std::pair<Real, std::string>(vnorm, sys.variable_name(i)));
+        const Real vnorm = sys.calculate_norm(*x, i, DISCRETE_L2);
+        ordered_map.emplace(vnorm, sys.variable_name(i));
       }
 
       std::ostringstream oss;
-      for (const auto & pair : ordered_map)
-        oss << "  {" << pair.second << ", " << pair.first << "},\n";
+      for (const auto & [error_norm, var_name] : ordered_map)
+        oss << "  {" << var_name << ", " << error_norm << "},\n";
 
       mooseError("Aux kernels, user objects appear to have states for aux variables on ",
                  exec_type,
@@ -3996,34 +3999,27 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
                  oss.str());
     }
 
-    DenseVector<Real> new_pp_values = getReporterData().getAllRealReporterValues();
+    const DenseVector<Real> new_pp_values = getReporterData().getAllRealReporterValues();
     if (pp_values.size() != new_pp_values.size())
       mooseError("Second execution for uo/aux state check should not change the number of "
                  "real reporter values");
 
+    const Real ppnorm = pp_values.l2_norm();
     pp_values -= new_pp_values;
-    if (pp_values.l2_norm() > 1e-8)
+    if (pp_values.l2_norm() > check_tol * ppnorm)
     {
-      auto pp_names = getReporterData().getAllRealReporterFullNames();
+      const auto pp_names = getReporterData().getAllRealReporterFullNames();
       std::multimap<Real, std::string, std::greater<Real>> ordered_map;
       for (const auto i : index_range(pp_names))
-        ordered_map.insert(std::pair<Real, std::string>(std::abs(pp_values(i)), pp_names[i]));
+        ordered_map.emplace(std::abs(pp_values(i)), pp_names[i]);
 
       std::ostringstream oss;
-      unsigned int counter = 0;
-      for (const auto & pair : ordered_map)
-      {
-        if (counter == 11 || pair.first < 1e-8)
-          break;
-        oss << "  {" << pair.second << ", " << pair.first << "},\n";
-        ++counter;
-      }
+      for (const auto & [error_norm, pp_name] : ordered_map)
+        oss << "  {" << pp_name << ", " << error_norm << "},\n";
 
       mooseError("Aux kernels, user objects appear to have states for real reporter values on ",
                  exec_type,
-                 ".\nTop ",
-                 counter,
-                 " outlier(s) of postprocessor values:\n",
+                 ".\nErrors of real reporter values in descending order:\n",
                  oss.str());
     }
   }
