@@ -10,18 +10,29 @@
 // MOOSE includes
 #include "SolutionInvalidInterface.h"
 #include "MooseApp.h"
-#include "NonlinearSystemBase.h"
-#include "FEProblemBase.h"
 #include "MooseObject.h"
+#include "SolutionInvalidityRegistry.h"
 
-SolutionInvalidInterface::SolutionInvalidInterface(MooseObject * moose_object)
-  : _si_fe_problem(
-        *moose_object->parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
+SolutionInvalidInterface::SolutionInvalidInterface(MooseApp & moose_app) : _si_moose_app(moose_app)
 {
 }
 
+/// Set solution invalid mark for the given solution ID
 void
-SolutionInvalidInterface::setSolutionInvalid(bool solution_invalid)
+SolutionInvalidInterface::setSolutionInvalid(SolutionID _solution_id)
 {
-  _si_fe_problem.getNonlinearSystemBase().setSolutionInvalid(solution_invalid);
+  return _si_moose_app.solutionInvalidity().setSolutionInvalid(_solution_id);
+}
+
+/// Register the section with a unique solution ID for the given section_name
+SolutionID
+SolutionInvalidInterface::registerInvalidSection(const std::string & section_name) const
+{
+  return moose::internal::getSolutionInvalidityRegistry().registerSection(section_name);
+}
+
+SolutionInvalidity &
+SolutionInvalidInterface::solutionInvalidity()
+{
+  return _si_moose_app.solutionInvalidity();
 }

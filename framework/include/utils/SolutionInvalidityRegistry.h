@@ -16,7 +16,6 @@
 
 // Forward Declarations
 class SolutionInvalidity;
-
 void dataStore(std::ostream &, SolutionInvalidity &, void *);
 
 namespace moose
@@ -42,26 +41,12 @@ namespace internal
 class SolutionInvaliditySectionInfo
 {
 public:
-  SolutionInvaliditySectionInfo(
-      PerfID id, std::string name, unsigned int level, std::string live_message, bool print_dots)
-    : _id(id), _name(name), _level(level), _live_message(live_message), _print_dots(print_dots)
-  {
-  }
+  SolutionInvaliditySectionInfo(SolutionID id, std::string name) : _id(id), _name(name) {}
 
   /// Unique ID
-  PerfID _id;
-
+  SolutionID _id;
   /// The name
   std::string _name;
-
-  /// Print level (verbosity level)
-  unsigned int _level;
-
-  /// Message to print while the section is running
-  std::string _live_message;
-
-  /// Whether or not to print dots while this section runs
-  bool _print_dots;
 };
 
 /**
@@ -70,48 +55,33 @@ public:
 SolutionInvalidityRegistry & getSolutionInvalidityRegistry();
 
 /**
- * The place where all timed sections will be stored
+ * The place where all sections with solution invalid warnings will be stored
  */
 class SolutionInvalidityRegistry
   : private GeneralRegistry<std::string, SolutionInvaliditySectionInfo>
 {
 public:
   /**
-   * Call to register a named section for timing.
+   * Call to register a named section for detecting solution invalid.
    *
-   * @param section_name The name of the code section to be timed
-   * @param level The importance of the timer - lower is more important (0 will always come out)
-   * @return The ID of the section - use when starting timing
+   * @param section_name The name of the code section to be detected
+   * @return The ID of the section - use when counting solution invalid warning
    */
-  PerfID registerSection(const std::string & section_name, const unsigned int level);
+  SolutionID registerSection(const std::string & section_name);
 
   /**
-   * Call to register a named section for timing.
-   *
-   * @param section_name The name of the code section to be timed
-   * @param level The importance of the timer - lower is more important (0 will always come out)
-   * @param live_message The message to be printed to the screen during execution
-   * @param print_dots Whether or not progress dots should be printed for this section
-   * @return The ID of the section - use when starting timing
-   */
-  PerfID registerSection(const std::string & section_name,
-                         const unsigned int level,
-                         const std::string & live_message,
-                         const bool print_dots = true);
-
-  /**
-   * Given a name return the PerfID
+   * Given a name return the SolutionID
    * @section_name The name of the section
    * @return the ID
    */
-  PerfID sectionID(const std::string & section_name) const { return id(section_name); }
+  SolutionID sectionID(const std::string & section_name) const { return id(section_name); }
 
   /**
-   * Given a PerfID return the SolutionInvaliditySectionInfo
+   * Given a SolutionID return the SolutionInvaliditySectionInfo
    * @section_id The ID
    * @return The SolutionInvaliditySectionInfo
    */
-  const SolutionInvaliditySectionInfo & sectionInfo(const PerfID section_id) const
+  const SolutionInvaliditySectionInfo & sectionInfo(const SolutionID section_id) const
   {
     return item(section_id);
   }
@@ -128,7 +98,7 @@ public:
    * @section_id The ID
    * @return Whether or not it exists
    */
-  bool sectionExists(const PerfID section_id) const { return idExists(section_id); }
+  bool sectionExists(const SolutionID section_id) const { return idExists(section_id); }
 
   /**
    * @return number of registered sections
@@ -141,10 +111,7 @@ private:
   /**
    * The internal function that actually carries out the registration
    */
-  PerfID actuallyRegisterSection(const std::string & section_name,
-                                 const unsigned int level,
-                                 const std::string & live_message,
-                                 const bool print_dots = true);
+  SolutionID actuallyRegisterSection(const std::string & section_name);
 
   /**
    * Special accessor just for SolutionInvalidity so that
@@ -158,7 +125,7 @@ private:
    *
    * @return the SolutionInvaliditySectionInfo associated with the section_id
    */
-  const SolutionInvaliditySectionInfo & readSectionInfo(PerfID section_id) const
+  const SolutionInvaliditySectionInfo & readSectionInfo(SolutionID section_id) const
   {
     return itemNonLocking(section_id);
   };

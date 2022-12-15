@@ -20,6 +20,7 @@
 #include "ConsoleStreamInterface.h"
 #include "PerfGraph.h"
 #include "PerfGraphInterface.h"
+#include "SolutionInvalidity.h"
 #include "TheWarehouse.h"
 #include "RankMap.h"
 
@@ -135,6 +136,11 @@ public:
    * Get the PerfGraph for this app
    */
   PerfGraph & perfGraph() { return _perf_graph; }
+
+  /**
+   * Get the SolutionInvalidity for this app
+   */
+  SolutionInvalidity & solutionInvalidity() { return _solution_invalidity; }
 
   ///@{
   /**
@@ -1022,6 +1028,9 @@ protected:
 
   /// The PerfGraph object for this application (recoverable)
   PerfGraph & _perf_graph;
+
+  /// The SolutionInvalidity object for this application
+  SolutionInvalidity _solution_invalidity;
 
   /// The RankMap is a useful object for determining how the processes are laid out on the physical hardware
   const RankMap _rank_map;

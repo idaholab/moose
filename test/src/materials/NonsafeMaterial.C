@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NonsafeMaterial.h"
+#include "MooseApp.h"
 
 registerMooseObject("MooseTestApp", NonsafeMaterial);
 
@@ -35,7 +36,12 @@ NonsafeMaterial::NonsafeMaterial(const InputParameters & parameters)
 void
 NonsafeMaterial::computeQpProperties()
 {
+  /// @brief register the section with a unique ID which will count the number of solution invalid warnings
+  static const auto solution_id = registerInvalidSection("computeQpProperties");
   if (_input_diffusivity > _threshold)
-    setSolutionInvalid(true);
+  {
+    /// @brief mark solution invalid when the value is out of bound
+    setSolutionInvalid(solution_id);
+  }
   _diffusivity[_qp] = _input_diffusivity;
 }

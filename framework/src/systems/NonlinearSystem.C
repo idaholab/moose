@@ -18,6 +18,7 @@
 #include "ComputeFDResidualFunctor.h"
 #include "MooseVariableScalar.h"
 #include "MooseTypes.h"
+#include "SolutionInvalidity.h"
 
 #include "libmesh/nonlinear_solver.h"
 #include "libmesh/petsc_nonlinear_solver.h"
@@ -341,7 +342,7 @@ NonlinearSystem::converged()
   if (_fe_problem.hasException())
     return false;
 
-  if (!_fe_problem.allowInvalidSolution() && solutionInvalid())
+  if (!_fe_problem.allowInvalidSolution() && _app.solutionInvalidity().solutionInvalid())
   {
     mooseWarning("The solution is not converged due to the solution being invalid.");
     return false;

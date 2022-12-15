@@ -45,6 +45,7 @@
 #include "Registry.h"
 #include "SerializerGuard.h"
 #include "PerfGraphInterface.h" // For TIME_SECTION
+#include "SolutionInvalidInterface.h"
 #include "Attributes.h"
 #include "MooseApp.h"
 #include "CommonOutputAction.h"
