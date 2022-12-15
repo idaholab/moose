@@ -30,7 +30,7 @@ class VariadicTable;
 /**
  * The SolutionInvalidity will contains all the solution invalid warnings info
  */
-class SolutionInvalidity : protected ConsoleStreamInterface
+class SolutionInvalidity
 {
 public:
   using SolutionInvalidityRegistry = moose::internal::SolutionInvalidityRegistry;
