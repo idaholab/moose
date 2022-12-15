@@ -5,9 +5,9 @@
 #   libmesh/
 #   template/
 #   moose/
-{% set build = 6 %}
+{% set build = 0 %}
 {% set strbuild = "build_" + build|string %}
-{% set version = "4.0.2" %}
+{% set version = "4.0.3" %}
 
 package:
   name: moose-mpich
