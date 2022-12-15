@@ -8,3 +8,7 @@
 [submodule "petsc"]
     path = petsc
     url = https://gitlab.com/petsc/petsc.git
+[submodule "modules/chemical_reactions/contrib/thermochimica"]
+    path = modules/chemical_reactions/contrib/thermochimica
+    url = https://github.com/ORNL-CEES/thermochimica.git
+    update = none
