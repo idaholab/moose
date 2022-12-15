@@ -58,13 +58,13 @@
 
 [Postprocessors]
   [./test_object]
-    type = FunctionValuePostprocessor
+    type = TestControlPointPP
     function = '2*(x+y)'
     point = '0.5 0.5 0'
     control_tags = 'tag'
   [../]
   [./other_point_test_object]
-    type = FunctionValuePostprocessor
+    type = TestControlPointPP
     function = '3*(x+y)'
     point = '0.5 0.5 0'
     control_tags = 'tag'

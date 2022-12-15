@@ -1,0 +1,40 @@
+[Tests]
+  [MoRu]
+    type = Exodiff
+    input = MoRu.i
+    exodiff = MoRu_out.e
+    design = ChemicalCompositionAction.md
+    issues = '#22711'
+    requirement = 'The system shall be able to set up a nodal thermochemistry solve using an action'
+
+    max_threads = 1
+    rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
+    required_objects = 'ThermochimicaNodalData'
+  []
+
+  [MoRu_reinit]
+    type = Exodiff
+    input = MoRu.i
+    exodiff = MoRu_out.e
+    design = ThermochimicaNodalData.md
+    issues = '#22711'
+    requirement = 'The system shall be able to use reinitialization to speed up a thermochimica solve'
+    cli_args = 'UserObjects/data/reinit_requested=true'
+    max_threads = 1
+    rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
+    required_objects = 'ThermochimicaNodalData'
+  []
+
+  [csv_ic]
+    type = Exodiff
+    input = csv_ic.i
+    exodiff = csv_ic_out.e
+    design = ChemicalCompositionAction.md
+    issues = '#22711'
+    requirement = 'The system shall be able to set up constant initial conditions from a CSV file'
+
+    max_threads = 1
+    rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
+    required_objects = 'ThermochimicaNodalData'
+  []
+[]
