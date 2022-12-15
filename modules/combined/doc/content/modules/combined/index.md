@@ -7,6 +7,4 @@ modules to allow them to be coupled together for testing and demonstration purpo
 
 ## Coupled physics tutorials
 
-A set of [tutorial problems](combined/tutorials/introduction/index.md) that show how
-capabilities from the other physics modules can be used together make use of the
-combined module.
+!include modules/combined/tutorials/index.md
