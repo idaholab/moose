@@ -141,7 +141,6 @@ P_out = 2.0e5 # Pa
     fp = sodium
   []
 
-
   [rho_ic]
     type = RhoFromPressureTemperatureIC
     variable = rho
