@@ -784,7 +784,14 @@ MooseVariableFV<OutputType>::evaluate(const FaceArg & face,
   if (isDirichletBoundaryFace(*fi, face.face_side))
     return getDirichletBoundaryFaceValue(*fi, face.face_side);
   else if (isExtrapolatedBoundaryFace(*fi, face.face_side))
-    return getExtrapolatedBoundaryFaceValue(*fi, _two_term_boundary_expansion, face.face_side);
+  {
+    bool two_term_boundary_expansion = _two_term_boundary_expansion;
+    if (face.limiter_type == Moose::FV::LimiterType::Upwind)
+      if ((face.elem_is_upwind && face.face_side == &fi->elem()) ||
+          (!face.elem_is_upwind && face.face_side == fi->neighborPtr()))
+        two_term_boundary_expansion = false;
+    return getExtrapolatedBoundaryFaceValue(*fi, two_term_boundary_expansion, face.face_side);
+  }
   else
   {
     mooseAssert(isInternalFace(*fi), "We must be either Dirichlet, extrapolated, or internal");
