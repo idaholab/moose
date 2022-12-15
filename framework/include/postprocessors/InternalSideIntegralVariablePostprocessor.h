@@ -11,7 +11,7 @@
 
 #include "InternalSideIntegralPostprocessor.h"
 #include "MooseVariableInterface.h"
-#include "FunctorArgInterface.h"
+#include "FaceArgInterface.h"
 
 /**
  * This postprocessor computes an integral on internal mesh sides of

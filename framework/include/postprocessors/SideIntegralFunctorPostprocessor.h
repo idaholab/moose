@@ -10,7 +10,7 @@
 #pragma once
 
 #include "SideIntegralPostprocessor.h"
-#include "FunctorArgInterface.h"
+#include "FaceArgInterface.h"
 
 /**
  * This postprocessor computes a surface integral of the specified functor

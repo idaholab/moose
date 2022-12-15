@@ -11,7 +11,7 @@
 
 #include "SideIntegralPostprocessor.h"
 #include "MooseVariableInterface.h"
-#include "FunctorArgInterface.h"
+#include "FaceArgInterface.h"
 
 /**
  * This postprocessor computes a surface integral of the specified variable.

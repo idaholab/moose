@@ -25,7 +25,7 @@
 #include "TaggingInterface.h"
 #include "MooseVariableDependencyInterface.h"
 #include "FunctorInterface.h"
-#include "FunctorArgInterface.h"
+#include "FaceArgInterface.h"
 
 // Forward declerations
 template <typename>

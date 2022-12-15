@@ -13,7 +13,7 @@
 
 #include "MooseFunctorForward.h"
 #include "MooseFunctorArguments.h"
-#include "FunctorArgInterface.h"
+#include "FaceArgInterface.h"
 #include "MooseMesh.h"
 #include "MooseTypes.h"
 #include "MooseError.h"

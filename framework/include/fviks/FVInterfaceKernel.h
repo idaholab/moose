@@ -27,7 +27,7 @@
 #include "TwoMaterialPropertyInterface.h"
 #include "FunctorInterface.h"
 #include "FVFaceResidualObject.h"
-#include "FunctorArgInterface.h"
+#include "FaceArgInterface.h"
 
 #include <set>
 

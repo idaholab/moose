@@ -11,7 +11,7 @@
 
 #include "InterfaceIntegralPostprocessor.h"
 #include "MooseVariableInterface.h"
-#include "FunctorArgInterface.h"
+#include "FaceArgInterface.h"
 
 /**
  * This postprocessor computes a weighted (by area) integral of the specified variable.

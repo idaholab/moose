@@ -16,7 +16,7 @@
 #include "NeighborMooseVariableInterface.h"
 #include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "FVFaceResidualObject.h"
-#include "FunctorArgInterface.h"
+#include "FaceArgInterface.h"
 
 class FaceInfo;
 
