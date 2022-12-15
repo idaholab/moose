@@ -44,11 +44,19 @@ InternalSideIntegralVariablePostprocessor::InternalSideIntegralVariablePostproce
 Real
 InternalSideIntegralVariablePostprocessor::computeFaceInfoIntegral(const FaceInfo * const fi)
 {
-  return MetaPhysicL::raw_value((*_fv_variable)(Moose::FV::makeCDFace(*fi, *_fv_variable)));
+  return MetaPhysicL::raw_value((*_fv_variable)(makeCDFace(*fi)));
 }
 
 Real
 InternalSideIntegralVariablePostprocessor::computeQpIntegral()
 {
   return _u[_qp];
+}
+
+bool
+InternalSideIntegralVariablePostprocessor::hasFaceSide(const FaceInfo & fi,
+                                                       const bool fi_elem_side) const
+{
+  mooseAssert(_fv_variable, "Must be non-null");
+  return _fv_variable->hasFaceSide(fi, fi_elem_side);
 }

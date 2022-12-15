@@ -35,9 +35,13 @@ template <bool is_ad>
 ADReal
 FVUseFunctorSideForSsfDirichletBCTempl<is_ad>::boundaryValue(const FaceInfo & fi) const
 {
-  const Elem * const elem =
-      _functor.hasBlocks(fi.elem().subdomain_id()) ? &fi.elem() : fi.neighborPtr();
+  return _functor(makeFace(fi, Moose::FV::LimiterType::CentralDifference, true, false));
+}
 
-  return _functor(
-      Moose::FaceArg{&fi, Moose::FV::LimiterType::CentralDifference, true, false, &_functor, elem});
+template <bool is_ad>
+bool
+FVUseFunctorSideForSsfDirichletBCTempl<is_ad>::hasFaceSide(const FaceInfo & fi,
+                                                           bool fi_elem_side) const
+{
+  return _functor.hasFaceSide(fi, fi_elem_side);
 }

@@ -10,6 +10,7 @@
 #pragma once
 
 #include "SideIntegralPostprocessor.h"
+#include "FunctorArgInterface.h"
 
 /**
  * This postprocessor computes a surface integral of the specified functor
@@ -18,12 +19,15 @@
  * class and overriding computeQpIntegral() or computeFaceInfoIntegral()
  */
 template <bool is_ad>
-class SideIntegralFunctorPostprocessorTempl : public SideIntegralPostprocessor
+class SideIntegralFunctorPostprocessorTempl : public SideIntegralPostprocessor,
+                                              public FaceArgProducerInterface
 {
 public:
   static InputParameters validParams();
 
   SideIntegralFunctorPostprocessorTempl(const InputParameters & parameters);
+
+  bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const override;
 
 protected:
   /**

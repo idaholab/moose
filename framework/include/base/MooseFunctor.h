@@ -13,6 +13,7 @@
 
 #include "MooseFunctorForward.h"
 #include "MooseFunctorArguments.h"
+#include "FunctorArgInterface.h"
 #include "MooseMesh.h"
 #include "MooseTypes.h"
 #include "MooseError.h"
@@ -34,7 +35,7 @@ namespace Moose
  * evaluations
  */
 template <typename T>
-class FunctorBase : public virtual FaceArgInterface
+class FunctorBase : public FaceArgConsumerInterface
 {
 public:
   using FunctorType = FunctorBase<T>;
@@ -111,7 +112,7 @@ public:
   /**
    * Returns whether the functor is defined on this block
    */
-  virtual bool hasBlocks(SubdomainID /* id */) const override
+  virtual bool hasBlocks(SubdomainID /* id */) const
   {
     mooseError("Block restriction has not been implemented for functor " + functorName());
     return false;
@@ -135,6 +136,8 @@ public:
    * Returns true if this functor is a constant
    */
   virtual bool isConstant() const { return false; }
+
+  bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const override;
 
 protected:
   /**
@@ -379,8 +382,10 @@ FunctorBase<T>::operator()(const ElemArg & elem, const unsigned int state) const
 
 template <typename T>
 typename FunctorBase<T>::ValueType
-FunctorBase<T>::operator()(const FaceArg & face, const unsigned int state) const
+FunctorBase<T>::operator()(const FaceArg & face_in, const unsigned int state) const
 {
+  const auto face = checkFace(face_in);
+
   if (_clearance_schedule.count(EXEC_ALWAYS))
     return evaluate(face, state);
 
@@ -554,7 +559,7 @@ template <typename T>
 typename FunctorBase<T>::GradientType
 FunctorBase<T>::gradient(const FaceArg & face, const unsigned int state) const
 {
-  return evaluateGradient(face, state);
+  return evaluateGradient(checkFace(face), state);
 }
 
 template <typename T>
@@ -589,7 +594,7 @@ template <typename T>
 typename FunctorBase<T>::DotType
 FunctorBase<T>::dot(const FaceArg & face, const unsigned int state) const
 {
-  return evaluateDot(face, state);
+  return evaluateDot(checkFace(face), state);
 }
 
 template <typename T>
@@ -611,6 +616,16 @@ typename FunctorBase<T>::DotType
 FunctorBase<T>::dot(const ElemPointArg & elem_point, const unsigned int state) const
 {
   return evaluateDot(elem_point, state);
+}
+
+template <typename T>
+bool
+FunctorBase<T>::hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const
+{
+  if (fi_elem_side)
+    return hasBlocks(fi.elem().subdomain_id());
+  else
+    return fi.neighborPtr() && hasBlocks(fi.neighbor().subdomain_id());
 }
 
 /**

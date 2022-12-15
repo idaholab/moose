@@ -17,7 +17,8 @@
 #include "libmesh/point.h"
 #include "libmesh/quadrature.h"
 
-class FaceArgInterface;
+class FaceArgProducerInterface;
+class FaceArgConsumerInterface;
 
 namespace Moose
 {
@@ -61,8 +62,9 @@ struct ElemPointArg
 /**
  * A structure defining a "face" evaluation calling argument for Moose functors
  */
-struct FaceArg
+class FaceArg
 {
+public:
   /// a face information object which defines our location in space
   const FaceInfo * fi;
 
@@ -92,15 +94,27 @@ struct FaceArg
 
   friend bool operator<(const FaceArg & l, const FaceArg & r)
   {
-    return std::make_tuple(l.fi,
-                           l.limiter_type,
-                           l.elem_is_upwind,
-                           l.correct_skewness,
-                           l.consumer,
-                           l.face_side) <
-           std::make_tuple(
-               r.fi, r.limiter_type, r.elem_is_upwind, r.correct_skewness, r.consumer, r.face_side);
+    return std::make_tuple(
+               l.fi, l.limiter_type, l.elem_is_upwind, l.correct_skewness, l.face_side) <
+           std::make_tuple(r.fi, r.limiter_type, r.elem_is_upwind, r.correct_skewness, r.face_side);
   }
+
+private:
+  FaceArg(const FaceInfo * const fi_in,
+          const Moose::FV::LimiterType limiter_type_in,
+          const bool elem_is_upwind_in,
+          const bool correct_skewness_in,
+          const Elem * const face_side_in)
+    : fi(fi_in),
+      limiter_type(limiter_type_in),
+      elem_is_upwind(elem_is_upwind_in),
+      correct_skewness(correct_skewness_in),
+      face_side(face_side_in)
+  {
+  }
+
+  friend class ::FaceArgProducerInterface;
+  friend class ::FaceArgConsumerInterface;
 };
 
 /**
@@ -123,3 +137,4 @@ using ElemQpArg = std::tuple<const libMesh::Elem *, unsigned int, const QBase *>
  * - The quadrature rule that can be used to initialize the functor on the given element and side
  */
 using ElemSideQpArg = std::tuple<const libMesh::Elem *, unsigned int, unsigned int, const QBase *>;
+}

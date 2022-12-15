@@ -40,7 +40,6 @@ template <typename OutputType>
 class MooseVariableField : public MooseVariableFieldBase,
                            public Moose::FunctorBase<typename Moose::ADType<OutputType>::type>,
                            public MeshChangedInterface
-
 {
 public:
   // type for gradient, second and divergence of template class OutputType

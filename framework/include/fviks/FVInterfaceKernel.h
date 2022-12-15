@@ -27,7 +27,7 @@
 #include "TwoMaterialPropertyInterface.h"
 #include "FunctorInterface.h"
 #include "FVFaceResidualObject.h"
-#include "FaceArgInterface.h"
+#include "FunctorArgInterface.h"
 
 #include <set>
 
@@ -58,7 +58,7 @@ class FVInterfaceKernel : public MooseObject,
                           public TwoMaterialPropertyInterface,
                           public FunctorInterface,
                           public FVFaceResidualObject,
-                          public FaceArgInterface
+                          public FaceArgProducerInterface
 {
 public:
   /**
@@ -79,7 +79,6 @@ public:
   void computeJacobian(const FaceInfo & fi) override;
   void computeResidualAndJacobian(const FaceInfo & fi) override;
 
-  bool hasBlocks(SubdomainID) const override;
   bool hasFaceSide(const FaceInfo & fi, bool fi_elem_side) const override;
 
 protected:

@@ -55,9 +55,8 @@ Real
 SideIntegralFunctorPostprocessorTempl<is_ad>::computeFaceInfoIntegral(const FaceInfo * fi)
 {
   mooseAssert(fi, "We should have a FaceInfo");
-  Moose::FaceArg ssf = {
-      fi, Moose::FV::LimiterType::CentralDifference, true, false, &_functor, _current_elem};
-  return computeLocalContribution(ssf);
+  const auto face = makeCDFace(*fi);
+  return computeLocalContribution(face);
 }
 
 template <bool is_ad>
@@ -123,6 +122,14 @@ SideIntegralFunctorPostprocessorTempl<is_ad>::errorFunctorNotDefinedOnSideBlock(
                  ") is not defined on block " + std::to_string(_current_elem->subdomain_id()) +
                  ". Is the functor defined along the whole sideset? "
                  "Are the sidesets in 'boundary' all oriented correctly?");
+}
+
+template <bool is_ad>
+bool
+SideIntegralFunctorPostprocessorTempl<is_ad>::hasFaceSide(const FaceInfo & fi,
+                                                          const bool fi_elem_side) const
+{
+  return _functor.hasFaceSide(fi, fi_elem_side);
 }
 
 template class SideIntegralFunctorPostprocessorTempl<false>;

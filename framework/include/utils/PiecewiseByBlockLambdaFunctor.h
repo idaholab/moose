@@ -231,27 +231,24 @@ PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::ElemArg & elem_arg,
 
 template <typename T>
 typename PiecewiseByBlockLambdaFunctor<T>::ValueType
-PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::FaceArg & face,
-                                           unsigned int libmesh_dbg_var(state)) const
+PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::FaceArg & face, unsigned int state) const
 {
   using namespace Moose::FV;
   mooseAssert(state == 0, "Only current time state supported.");
 
-  if (isInternalFace(*face.fi))
-    return interpolate(*this, face);
+  if (face.face_side)
+  {
+    const auto sub_id = face.face_side->subdomain_id();
+    auto it = _face_functor.find(sub_id);
+    if (it == _face_functor.end())
+      subdomainErrorMessage(sub_id);
 
-  auto sided_face = face;
-  sided_face.face_side =
-      hasBlocks(face.fi->elem().subdomain_id()) ? &face.fi->elem() : face.fi->neighborPtr();
-  if (face.face_side && sided_face.face_side != face.face_side)
-    mooseError("Caller requested evaluation on a side we're not defined on");
+    return it->second(face, state);
+  }
 
-  const auto sub_id = sided_face.face_side->subdomain_id();
-  auto it = _face_functor.find(sub_id);
-  if (it == _face_functor.end())
-    subdomainErrorMessage(sub_id);
-
-  return it->second(sided_face, state);
+  mooseAssert(isInternalFace(*face.fi),
+              "If we did not have a face side, then we must be an internal face");
+  return interpolate(*this, face);
 }
 
 template <typename T>

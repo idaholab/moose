@@ -21,6 +21,23 @@ namespace Moose
 {
 namespace FV
 {
+class GreenGaussProducer : public FaceArgProducerInterface
+{
+public:
+  GreenGaussProducer(const Elem & elem) : _elem(elem) {}
+
+  bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const override
+  {
+    if (fi_elem_side)
+      return &fi.elem() == &_elem;
+    else
+      return fi.neighborPtr() == &_elem;
+  }
+
+private:
+  const Elem & _elem;
+};
+
 /**
  * Compute a cell gradient using the method of Green-Gauss
  * @param elem_arg An element argument specifying the current element and whether to perform skew
@@ -48,6 +65,8 @@ greenGaussGradient(const ElemArg & elem_arg,
 
   // We'll count the extrapolated boundaries
   unsigned int num_ebfs = 0;
+
+  const GreenGaussProducer ggp(*elem_arg.elem);
 
   // silence warnings for failed two term expansions
   auto & err_stream = static_cast<typename OStreamProxy::streamT &>(libMesh::err);
@@ -97,6 +116,7 @@ greenGaussGradient(const ElemArg & elem_arg,
                            &grad_ebf_coeffs,
                            &grad_b,
                            &functor,
+                           &ggp,
                            two_term_boundary_expansion,
                            coord_type,
                            rz_radial_coord](const Elem & libmesh_dbg_var(functor_elem),
@@ -132,8 +152,7 @@ greenGaussGradient(const ElemArg & elem_arg,
           grad_b += surface_vector * elem_value;
       }
       else
-        grad_b += surface_vector *
-                  functor(makeCDFace(*fi, functor, elem_arg.correct_skewness, elem_arg.elem));
+        grad_b += surface_vector * functor(ggp.makeCDFace(*fi, elem_arg.correct_skewness));
 
       if (!volume_set)
       {

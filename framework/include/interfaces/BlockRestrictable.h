@@ -14,7 +14,6 @@
 #include "ParallelUniqueId.h"
 #include "MaterialData.h"
 #include "MooseObject.h"
-#include "FaceArgInterface.h"
 
 #define usingBlockRestrictableMembers using BlockRestrictable::getBlockCoordSystem
 
@@ -55,7 +54,7 @@ class MooseVariableFieldBase;
  * \see Kernel
  * \see SideSetsAroundSubdomain
  */
-class BlockRestrictable : public virtual FaceArgInterface
+class BlockRestrictable
 {
 public:
   /**
@@ -127,7 +126,7 @@ public:
    * @param id A SubdomainID to check
    * @return True if the given id is valid for this object
    */
-  bool hasBlocks(SubdomainID id) const override;
+  bool hasBlocks(SubdomainID id) const;
 
   /**
    * Test if the supplied vector block ids are valid for this object

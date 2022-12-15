@@ -432,25 +432,10 @@ public:
    */
   ADReal getElemValue(const Elem * elem) const;
 
-  /**
-   * Compute or retrieve from cache the solution value on an internal face using linear
-   * interpolation.
-   * @param fi The face information object
-   * @return The face value on the internal face associated with \p fi
-   */
-  ADReal getInternalFaceValue(const FaceInfo & fi, const bool correct_skewness = false) const;
-
   using FunctorArg = typename Moose::ADType<OutputType>::type;
   using typename Moose::FunctorBase<FunctorArg>::ValueType;
   using typename Moose::FunctorBase<FunctorArg>::DotType;
   using typename Moose::FunctorBase<FunctorArg>::GradientType;
-
-  /**
-   * This method gets forwarded calls to \p evaluate for the \p FaceArg
-   * spatial argument type and returns an internal face evaluation
-   */
-  template <typename FaceCallingArg>
-  ADReal getInternalFaceValue(const FaceCallingArg & face) const;
 
   void setActiveTags(const std::set<TagID> & vtags) override;
 
@@ -631,19 +616,6 @@ typename MooseVariableFV<OutputType>::ValueType
 MooseVariableFV<OutputType>::evaluate(const ElemArg & elem_arg, unsigned int) const
 {
   return getElemValue(elem_arg.elem);
-}
-
-template <typename OutputType>
-template <typename FaceCallingArg>
-ADReal
-MooseVariableFV<OutputType>::getInternalFaceValue(const FaceCallingArg & face) const
-{
-  const FaceInfo * const fi = face.fi;
-  mooseAssert(fi, "The face information must be non-null");
-  mooseAssert(face.limiter_type == Moose::FV::LimiterType::CentralDifference,
-              "This method currently only supports central differencing.");
-
-  return getInternalFaceValue(*fi, face.correct_skewness);
 }
 
 template <typename OutputType>

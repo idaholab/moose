@@ -25,7 +25,7 @@
 #include "TaggingInterface.h"
 #include "MooseVariableDependencyInterface.h"
 #include "FunctorInterface.h"
-#include "FaceArgInterface.h"
+#include "FunctorArgInterface.h"
 
 // Forward declerations
 template <typename>
@@ -56,7 +56,7 @@ class FVBoundaryCondition : public MooseObject,
                             public MooseVariableInterface<Real>,
                             public MooseVariableDependencyInterface,
                             public FunctorInterface,
-                            public FaceArgInterface
+                            public FaceArgProducerInterface
 {
 public:
   /**
@@ -76,7 +76,6 @@ public:
 
   const MooseVariableFV<Real> & variable() const { return _var; }
 
-  bool hasBlocks(SubdomainID) const override;
   bool hasFaceSide(const FaceInfo & fi, bool fi_elem_side) const override;
 
 protected:

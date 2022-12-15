@@ -16,6 +16,7 @@
 #include "NeighborMooseVariableInterface.h"
 #include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "FVFaceResidualObject.h"
+#include "FunctorArgInterface.h"
 
 class FaceInfo;
 
@@ -30,7 +31,8 @@ class FVFluxKernel : public FVKernel,
                      public TwoMaterialPropertyInterface,
                      public NeighborMooseVariableInterface<Real>,
                      public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
-                     public FVFaceResidualObject
+                     public FVFaceResidualObject,
+                     public FaceArgProducerInterface
 {
 public:
   static InputParameters validParams();
@@ -44,6 +46,8 @@ public:
   void computeResidualAndJacobian(const FaceInfo & fi) override;
 
   const MooseVariableFV<Real> & variable() const override { return _var; }
+
+  bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const override;
 
 protected:
   /// This is the primary function that must be implemented for flux kernel

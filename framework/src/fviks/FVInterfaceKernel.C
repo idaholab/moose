@@ -237,24 +237,14 @@ FVInterfaceKernel::neighborArg(const bool correct_skewness) const
 }
 
 Moose::FaceArg
-FVInterfaceKernel::singleSidedFaceArg(const MooseVariableFV<Real> & variable,
+FVInterfaceKernel::singleSidedFaceArg(const MooseVariableFV<Real> & /*variable*/,
                                       const FaceInfo * fi,
                                       const Moose::FV::LimiterType limiter_type,
                                       const bool correct_skewness) const
 {
   if (!fi)
     fi = _face_info;
-  const bool use_elem = fi->faceType(variable.name()) == FaceInfo::VarFaceNeighbors::ELEM;
-
-  if (use_elem)
-    return {fi, limiter_type, true, correct_skewness, this, &fi->elem()};
-  else
-    return {fi, limiter_type, true, correct_skewness, this, fi->neighborPtr()};
-}
-
-bool FVInterfaceKernel::hasBlocks(SubdomainID) const
-{
-  mooseError("hasBlocks not implemented for FVInterfaceKernel");
+  return makeFace(*fi, limiter_type, true, correct_skewness);
 }
 
 bool

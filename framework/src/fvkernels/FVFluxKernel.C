@@ -364,10 +364,8 @@ FVFluxKernel::singleSidedFaceArg(const FaceInfo * fi,
 {
   if (!fi)
     fi = _face_info;
-  const bool use_elem = fi->faceType(_var.name()) == FaceInfo::VarFaceNeighbors::ELEM;
-  const Elem * const elem = use_elem ? &fi->elem() : fi->neighborPtr();
 
-  return {fi, limiter_type, true, correct_skewness, this, elem};
+  return makeFace(*fi, limiter_type, true, correct_skewness);
 }
 
 bool
@@ -421,4 +419,13 @@ void
 FVFluxKernel::computeResidualAndJacobian()
 {
   mooseError("FVFluxKernel residual/Jacobian evaluation requires a face information object");
+}
+
+bool
+FVFluxKernel::hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const
+{
+  if (fi_elem_side)
+    return hasBlocks(fi.elem().subdomain_id());
+  else
+    return fi.neighborPtr() && hasBlocks(fi.neighbor().subdomain_id());
 }

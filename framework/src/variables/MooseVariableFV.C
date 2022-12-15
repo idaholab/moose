@@ -521,20 +521,6 @@ MooseVariableFV<OutputType>::isInternalFace(const FaceInfo & fi) const
 }
 
 template <typename OutputType>
-ADReal
-MooseVariableFV<OutputType>::getInternalFaceValue(const FaceInfo & fi,
-                                                  const bool correct_skewness) const
-{
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("MooseVariableFV::getInternalFaceValue only supported for global AD indexing");
-#endif
-
-  mooseAssert(isInternalFace(fi), "This function shall only be called on internal faces.");
-
-  return Moose::FV::linearInterpolation(*this, Moose::FV::makeCDFace(fi, *this, correct_skewness));
-}
-
-template <typename OutputType>
 bool
 MooseVariableFV<OutputType>::isDirichletBoundaryFace(const FaceInfo & fi, const Elem *) const
 {

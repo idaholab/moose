@@ -40,8 +40,8 @@ ADReal
 FVLimitedAdvection::computeQpResidual()
 {
   const bool elem_is_upwind = _velocity * _normal >= 0;
-  const auto face = makeFace(
-      *_face_info, LimiterType(int(getParam<MooseEnum>("limiter"))), elem_is_upwind, *this);
+  const auto face =
+      makeFace(*_face_info, LimiterType(int(getParam<MooseEnum>("limiter"))), elem_is_upwind);
   ADReal phi_f = _var(face);
 
   return _normal * _velocity * phi_f;
