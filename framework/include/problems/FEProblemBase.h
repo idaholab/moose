@@ -1630,7 +1630,7 @@ public:
   /**
    * Whether or not we are allowing invalid solutions
    */
-  bool allowInvalidSolution() { return _allow_invalid_solution; }
+  bool allowInvalidSolution() const { return _allow_invalid_solution; }
 
   bool ignoreZerosInJacobian() const { return _ignore_zeros_in_jacobian; }
 

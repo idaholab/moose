@@ -12,11 +12,19 @@
 // MOOSE Includes
 #include "MooseError.h"
 #include "MooseApp.h"
+#include "VariadicTable.h"
 
 // System Includes
 #include <chrono>
 #include <memory>
 
+SolutionInvalidity::SolutionInvalidity(MooseApp & app)
+  : ConsoleStreamInterface(app),
+    _solution_invalidity_registry(moose::internal::getSolutionInvalidityRegistry())
+{
+}
+
+SolutionInvalidity::~SolutionInvalidity() {}
 /// Count solution invalid occurrences for each solution id
 void
 SolutionInvalidity::setSolutionInvalid(SolutionID _solution_id)
@@ -55,4 +63,43 @@ void
 SolutionInvalidity::resetSolutionInvalid()
 {
   std::fill(_solution_invalid_counts.begin(), _solution_invalid_counts.end(), 0);
+}
+
+void
+SolutionInvalidity::print(const ConsoleStream & console)
+{
+  console << "\nThe Summary Table of Solution Invalidity Occurences:\n";
+  summaryTable().print(console);
+}
+
+/// Store all solution invalid warning for output
+SolutionInvalidity::FullTable
+SolutionInvalidity::summaryTable()
+{
+  FullTable vtable({"Section", "Calls"}, 2);
+
+  vtable.setColumnFormat({
+      VariadicTableColumnFormat::AUTO, // Section Name
+      VariadicTableColumnFormat::AUTO, // Calls
+  });
+
+  vtable.setColumnPrecision({
+      1, // Section Name
+      0, // Calls
+  });
+
+  if (_solution_invalid_counts.size() > 0)
+  {
+
+    // Now print out the sections that contain solution invalid info and occurences
+    for (unsigned int id = 0; id < _solution_invalid_counts.size(); id++)
+    {
+
+      vtable.addRow(_solution_invalidity_registry.sectionInfo(id)._name, // Section
+                    _solution_invalid_counts[id]                         // Calls
+      );
+    }
+  }
+
+  return vtable;
 }

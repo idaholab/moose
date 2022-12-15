@@ -353,6 +353,7 @@ MooseApp::MooseApp(InputParameters parameters)
     _parser(*this, _action_warehouse),
     _restartable_data(libMesh::n_threads()),
     _perf_graph(createRecoverablePerfGraph()),
+    _solution_invalidity(*this),
     _rank_map(*_comm, _perf_graph),
     _use_executor(parameters.get<bool>("use_executor")),
     _null_executor(NULL),

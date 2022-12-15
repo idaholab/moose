@@ -13,6 +13,8 @@
 #include "MooseTypes.h"
 #include "MooseError.h"
 #include "SolutionInvalidityRegistry.h"
+#include "ConsoleStream.h"
+#include "ConsoleStreamInterface.h"
 
 // System Includes
 #include <array>
@@ -22,14 +24,26 @@
 #include <mutex>
 
 // Forward Declarations
+template <class... Ts>
+class VariadicTable;
 
 /**
  * The SolutionInvalidity will contains all the solution invalid warnings info
  */
-class SolutionInvalidity
+class SolutionInvalidity : protected ConsoleStreamInterface
 {
 public:
   using SolutionInvalidityRegistry = moose::internal::SolutionInvalidityRegistry;
+
+  /**
+   * Create a new SolutionInvalidity
+   */
+  SolutionInvalidity(MooseApp & app);
+
+  /**
+   * Destructor
+   */
+  ~SolutionInvalidity();
 
   /// Count solution invalid occurrences for each solution id
   void setSolutionInvalid(SolutionID _solution_id);
@@ -42,4 +56,16 @@ public:
 
   /// Vector that contains the number of the solution invalid occurrences
   std::vector<unsigned int> _solution_invalid_counts;
+
+  /// @param console The output stream to output to
+  void print(const ConsoleStream & console);
+
+  /// The SolutionInvalidityRegistry
+  SolutionInvalidityRegistry & _solution_invalidity_registry;
+
+protected:
+  typedef VariadicTable<std::string, unsigned long int> FullTable;
+
+private:
+  FullTable summaryTable();
 };

@@ -209,6 +209,10 @@ NonlinearSystem::solve()
   // store info about the solve
   _final_residual = _nl_implicit_sys.final_nonlinear_residual();
 
+  // output the occurence of solution invalid in a summarry table
+  if (!_fe_problem.allowInvalidSolution() && _app.solutionInvalidity().solutionInvalid())
+    _app.solutionInvalidity().print(_console);
+
   if (_use_coloring_finite_difference)
     MatFDColoringDestroy(&_fdcoloring);
 }
