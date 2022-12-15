@@ -10,8 +10,6 @@ capabilities of MOOSE (Peacock), you should start VcXsrv before launching your W
 When starting VcXsrv, options for the server can be adjusted. In general, the default options are
 adequate, except for the following:
 
-- Un-check "Native opengl". We have found better performance instructing VcXsrv to use software
-  rendering over native OpenGL.
 - Check "Disable access control". This allows the WSL instance to open windows via VcXsrv without
   requiring an authorization protocol.
 
