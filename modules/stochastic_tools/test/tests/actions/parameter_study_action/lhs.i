@@ -9,6 +9,5 @@
   uniform_lower_bound = '100 1'
   uniform_upper_bound = '200 2'
 
-  sampler_output_type = 'csv'
-  qoi_output_type = 'csv'
+  output_type = 'csv'
 []

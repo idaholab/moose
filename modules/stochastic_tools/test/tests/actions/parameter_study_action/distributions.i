@@ -20,6 +20,5 @@
   tnormal_lower_bound = 50
   tnormal_upper_bound = 150
 
-  sampler_output_type = 'none'
-  qoi_output_type = 'csv'
+  output_type = 'csv'
 []

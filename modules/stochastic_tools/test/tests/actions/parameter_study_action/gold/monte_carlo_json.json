@@ -7,9 +7,19 @@
     "moose_version": "git commit 018761c722 on 2022-11-22",
     "petsc_version": "3.16.6",
     "reporters": {
-        "study_qoi": {
-            "type": "StochasticReporter",
+        "study_results": {
+            "type": "StochasticMatrix",
             "values": {
+                "BCs_left_value": {
+                    "row_begin": 0,
+                    "row_end": 15,
+                    "type": "std::vector<double>"
+                },
+                "BCs_right_value": {
+                    "row_begin": 0,
+                    "row_end": 15,
+                    "type": "std::vector<double>"
+                },
                 "average:value": {
                     "row_begin": 0,
                     "row_end": 15,
@@ -19,16 +29,6 @@
                     "row_begin": 0,
                     "row_end": 15,
                     "type": "std::vector<bool>"
-                }
-            }
-        },
-        "study_samples": {
-            "values": {
-                "study_sampler_0": {
-                    "type": "std::vector<double>"
-                },
-                "study_sampler_1": {
-                    "type": "std::vector<double>"
                 }
             }
         },
@@ -48,11 +48,11 @@
             },
             "type": "StatisticsReporter",
             "values": {
-                "study_qoi_average:value_MEAN": {
+                "study_results_average:value_MEAN": {
                     "stat": "MEAN",
                     "type": "std::pair<double, std::vector<double> >"
                 },
-                "study_qoi_average:value_STDDEV": {
+                "study_results_average:value_STDDEV": {
                     "stat": "STDDEV",
                     "type": "std::pair<double, std::vector<double> >"
                 }
@@ -62,7 +62,41 @@
     "slepc_version": "3.16.2",
     "time_steps": [
         {
-            "study_qoi": {
+            "study_results": {
+                "BCs_left_value": [
+                    179.41599636995926,
+                    139.07872659278414,
+                    165.65072324642603,
+                    169.57546049404704,
+                    136.5590251096429,
+                    119.32479139421773,
+                    112.74633152347208,
+                    124.59185548065497,
+                    151.6517944934033,
+                    193.20824463717213,
+                    117.88434878821792,
+                    173.368716506091,
+                    149.15010176171882,
+                    101.19782414530583,
+                    179.64063932210203
+                ],
+                "BCs_right_value": [
+                    1.15982462231328,
+                    1.9364851558334664,
+                    1.5591499273940193,
+                    1.1113323770418153,
+                    1.834054319119424,
+                    1.8584602769873846,
+                    1.8546412681126594,
+                    1.617877798074058,
+                    1.6999975045088922,
+                    1.3582053883860739,
+                    1.1089205078837314,
+                    1.0966096576624207,
+                    1.8434245121208528,
+                    1.086064339460231,
+                    1.2011262703264762
+                ],
                 "average:value": [
                     90.28791000160709,
                     70.50774500132209,
@@ -98,44 +132,8 @@
                     true
                 ]
             },
-            "study_samples": {
-                "study_sampler_0": [
-                    179.41599636995926,
-                    139.07872659278414,
-                    165.65072324642603,
-                    169.57546049404704,
-                    136.5590251096429,
-                    119.32479139421773,
-                    112.74633152347208,
-                    124.59185548065497,
-                    151.6517944934033,
-                    193.20824463717213,
-                    117.88434878821792,
-                    173.368716506091,
-                    149.15010176171882,
-                    101.19782414530583,
-                    179.64063932210203
-                ],
-                "study_sampler_1": [
-                    1.15982462231328,
-                    1.9364851558334664,
-                    1.5591499273940193,
-                    1.1113323770418153,
-                    1.834054319119424,
-                    1.8584602769873846,
-                    1.8546412681126594,
-                    1.617877798074058,
-                    1.6999975045088922,
-                    1.3582053883860739,
-                    1.1089205078837314,
-                    1.0966096576624207,
-                    1.8434245121208528,
-                    1.086064339460231,
-                    1.2011262703264762
-                ]
-            },
             "study_statistics": {
-                "study_qoi_average:value_MEAN": [
+                "study_results_average:value_MEAN": [
                     74.51237233469438,
                     [
                         65.7986493345507,
@@ -146,7 +144,7 @@
                         82.32865900148597
                     ]
                 ],
-                "study_qoi_average:value_STDDEV": [
+                "study_results_average:value_STDDEV": [
                     14.202659759188673,
                     [
                         9.478411900692892,

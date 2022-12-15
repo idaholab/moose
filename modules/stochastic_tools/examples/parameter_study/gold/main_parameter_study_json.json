@@ -7,9 +7,29 @@
     "moose_version": "git commit e5a78d2dd0 on 2022-11-23",
     "petsc_version": "3.16.6",
     "reporters": {
-        "study_qoi": {
-            "type": "StochasticReporter",
+        "study_results": {
+            "type": "StochasticMatrix",
             "values": {
+                "BCs_left_value": {
+                    "row_begin": 0,
+                    "row_end": 10,
+                    "type": "std::vector<double>"
+                },
+                "BCs_right_value": {
+                    "row_begin": 0,
+                    "row_end": 10,
+                    "type": "std::vector<double>"
+                },
+                "Kernels_source_value": {
+                    "row_begin": 0,
+                    "row_end": 10,
+                    "type": "std::vector<double>"
+                },
+                "Materials_constant_prop_values": {
+                    "row_begin": 0,
+                    "row_end": 10,
+                    "type": "std::vector<double>"
+                },
                 "T_avg:value": {
                     "row_begin": 0,
                     "row_end": 10,
@@ -24,22 +44,6 @@
                     "row_begin": 0,
                     "row_end": 10,
                     "type": "std::vector<bool>"
-                }
-            }
-        },
-        "study_samples": {
-            "values": {
-                "study_sampler_0": {
-                    "type": "std::vector<double>"
-                },
-                "study_sampler_1": {
-                    "type": "std::vector<double>"
-                },
-                "study_sampler_2": {
-                    "type": "std::vector<double>"
-                },
-                "study_sampler_3": {
-                    "type": "std::vector<double>"
                 }
             }
         },
@@ -59,19 +63,19 @@
             },
             "type": "StatisticsReporter",
             "values": {
-                "study_qoi_T_avg:value_MEAN": {
+                "study_results_T_avg:value_MEAN": {
                     "stat": "MEAN",
                     "type": "std::pair<double, std::vector<double> >"
                 },
-                "study_qoi_T_avg:value_STDDEV": {
+                "study_results_T_avg:value_STDDEV": {
                     "stat": "STDDEV",
                     "type": "std::pair<double, std::vector<double> >"
                 },
-                "study_qoi_q_left:value_MEAN": {
+                "study_results_q_left:value_MEAN": {
                     "stat": "MEAN",
                     "type": "std::pair<double, std::vector<double> >"
                 },
-                "study_qoi_q_left:value_STDDEV": {
+                "study_results_q_left:value_STDDEV": {
                     "stat": "STDDEV",
                     "type": "std::pair<double, std::vector<double> >"
                 }
@@ -81,7 +85,55 @@
     "slepc_version": "3.16.2",
     "time_steps": [
         {
-            "study_qoi": {
+            "study_results": {
+                "BCs_left_value": [
+                    105.0687460467851,
+                    95.47355625822676,
+                    133.6858803000008,
+                    76.34144304314813,
+                    116.26879639439662,
+                    111.00387725780324,
+                    89.9755556183598,
+                    125.19208707455101,
+                    84.8918738057713,
+                    62.47104910334905
+                ],
+                "BCs_right_value": [
+                    357.03632396593815,
+                    361.52435171068635,
+                    295.7599513029338,
+                    329.4372076059286,
+                    258.1523783770392,
+                    319.13327026743383,
+                    280.6905788342888,
+                    235.53331924148245,
+                    272.9476619507443,
+                    308.13892031560226
+                ],
+                "Kernels_source_value": [
+                    -107.15910670106229,
+                    -96.48408917931759,
+                    -80.05258658101849,
+                    -108.69437289463623,
+                    -68.96243486264218,
+                    -105.3455485086838,
+                    -92.40283978150518,
+                    -55.44867912301454,
+                    -91.41124435192026,
+                    -100.40511417437409
+                ],
+                "Materials_constant_prop_values": [
+                    0.731964924462656,
+                    0.9781574531855683,
+                    2.173118050219286,
+                    2.466810863823885,
+                    0.6588319927399185,
+                    1.2872970311666934,
+                    1.9222664754083632,
+                    1.6118299854788039,
+                    1.8391509209880943,
+                    1.431301446492852
+                ],
                 "T_avg:value": [
                     290.04938452425955,
                     248.6050947481139,
@@ -119,58 +171,8 @@
                     true
                 ]
             },
-            "study_samples": {
-                "study_sampler_0": [
-                    0.731964924462656,
-                    0.9781574531855683,
-                    2.173118050219286,
-                    2.466810863823885,
-                    0.6588319927399185,
-                    1.2872970311666934,
-                    1.9222664754083632,
-                    1.6118299854788039,
-                    1.8391509209880943,
-                    1.431301446492852
-                ],
-                "study_sampler_1": [
-                    -107.15910670106229,
-                    -96.48408917931759,
-                    -80.05258658101849,
-                    -108.69437289463623,
-                    -68.96243486264218,
-                    -105.3455485086838,
-                    -92.40283978150518,
-                    -55.44867912301454,
-                    -91.41124435192026,
-                    -100.40511417437409
-                ],
-                "study_sampler_2": [
-                    357.03632396593815,
-                    361.52435171068635,
-                    295.7599513029338,
-                    329.4372076059286,
-                    258.1523783770392,
-                    319.13327026743383,
-                    280.6905788342888,
-                    235.53331924148245,
-                    272.9476619507443,
-                    308.13892031560226
-                ],
-                "study_sampler_3": [
-                    105.0687460467851,
-                    95.47355625822676,
-                    133.6858803000008,
-                    76.34144304314813,
-                    116.26879639439662,
-                    111.00387725780324,
-                    89.9755556183598,
-                    125.19208707455101,
-                    84.8918738057713,
-                    62.47104910334905
-                ]
-            },
             "study_statistics": {
-                "study_qoi_T_avg:value_MEAN": [
+                "study_results_T_avg:value_MEAN": [
                     199.42784121541888,
                     [
                         164.41164300789643,
@@ -181,7 +183,7 @@
                         240.8364765209057
                     ]
                 ],
-                "study_qoi_T_avg:value_STDDEV": [
+                "study_results_T_avg:value_STDDEV": [
                     55.53057128319956,
                     [
                         27.9239572505363,
@@ -192,7 +194,7 @@
                         68.92747211912871
                     ]
                 ],
-                "study_qoi_q_left:value_MEAN": [
+                "study_results_q_left:value_MEAN": [
                     179.57502824720746,
                     [
                         127.89714389579183,
@@ -203,7 +205,7 @@
                         242.89963487453207
                     ]
                 ],
-                "study_qoi_q_left:value_STDDEV": [
+                "study_results_q_left:value_STDDEV": [
                     84.75102591003635,
                     [
                         30.236295674060372,
