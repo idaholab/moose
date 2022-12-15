@@ -60,6 +60,8 @@ protected:
   const bool _is_closed_loop;
   /// Oversampling factor to help make node distance nearly uniform
   const Real _oversample_factor;
+  /// A factor used to calculate the maximum oversampling points number in each section
+  const unsigned int _max_oversample_number_factor;
   /// t values that are sampled for curve points
   std::vector<Real> _t_space;
   /// cumulative distances of the curve points from the starting ppint

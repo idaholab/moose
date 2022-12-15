@@ -43,6 +43,22 @@
     requirement ='The system shall generate closed 2D curve meshes that can be used by XYDelaunayGenerator as inputs.'
     recover = false
   []
+  [err_crossed_curve]
+    type = 'RunException'
+    input = 'err_cross.i'
+    cli_args = '--mesh-only err.e'
+    expect_err = 'The curve has at least one cross, which is not supported.'
+    requirement = 'The system shall throw an error if the starting and ending points of a section are overlapped while the section is supposed to be open.'
+  []
+  [err_max_oversample]
+    type = 'RunException'
+    input = 'parsed_curve_3d.i'
+    cli_args = 'Mesh/pcg/z_formula=0
+                Mesh/pcg/critical_t_series="0 6.2"
+                --mesh-only err.e'
+    expect_err = 'Maximum oversampling points number has been exceeded.'
+    requirement = 'The system shall throw an error if the oversampling algorithm exceeds its designated maximum sampling number.'
+  []
   [err_repeated_t_series]
     type = 'RunException'
     input = 'parsed_curve_closed.i'
@@ -70,25 +86,25 @@
   [err_failed_parsing_x]
     type = 'RunException'
     input = 'parsed_curve_closed.i'
-    cli_args = 'Mesh/pcg/x_formulus=t2
+    cli_args = 'Mesh/pcg/x_formula=t2
                 --mesh-only err.e'
     expect_err = 'Invalid function'
-    requirement ='The system shall throw an error if x_formulus cannot be parsed as a function.'
+    requirement ='The system shall throw an error if x_formula cannot be parsed as a function.'
   []
   [err_failed_parsing_y]
     type = 'RunException'
     input = 'parsed_curve_closed.i'
-    cli_args = 'Mesh/pcg/y_formulus=t2
+    cli_args = 'Mesh/pcg/y_formula=t2
                 --mesh-only err.e'
     expect_err = 'Invalid function'
-    requirement ='The system shall throw an error if y_formulus cannot be parsed as a function.'
+    requirement ='The system shall throw an error if y_formula cannot be parsed as a function.'
   []
   [err_failed_parsing_z]
     type = 'RunException'
     input = 'parsed_curve_closed.i'
-    cli_args = 'Mesh/pcg/z_formulus=t2
+    cli_args = 'Mesh/pcg/z_formula=t2
                 --mesh-only err.e'
     expect_err = 'Invalid function'
-    requirement ='The system shall throw an error if z_formulus cannot be parsed as a function.'
+    requirement ='The system shall throw an error if z_formula cannot be parsed as a function.'
   []
 []
