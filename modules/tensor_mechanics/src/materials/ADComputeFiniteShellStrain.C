@@ -108,6 +108,9 @@ ADComputeFiniteShellStrain::computeProperties()
       (*_strain_increment[j])[i](2, 0) = (*_strain_increment[j])[i](0, 2);
       (*_strain_increment[j])[i](2, 1) = (*_strain_increment[j])[i](1, 2);
       (*_total_strain[j])[i] = (*_total_strain_old[j])[i] + (*_strain_increment[j])[i];
+      (*_total_global_strain[j])[i] = (*_contravariant_transformation_matrix[j])[i] *
+                                      _unrotated_total_strain *
+                                      (*_contravariant_transformation_matrix[j])[i].transpose();
     }
   }
 }
