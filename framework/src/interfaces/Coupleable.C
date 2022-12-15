@@ -561,7 +561,7 @@ template <>
 const GenericVariableValue<true> &
 Coupleable::coupledGenericDofValue<true>(const std::string & var_name, unsigned int comp) const
 {
-  return adCoupledValue(var_name, comp);
+  return adCoupledDofValues(var_name, comp);
 }
 
 const VariableValue &
