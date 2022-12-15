@@ -50,7 +50,7 @@ INSFVMomentumDiffusion::computeStrongResidual()
   ADReal face_mu;
 
   if (onBoundary(*_face_info))
-    face_mu = _mu(Moose::FV::makeCDFace(*_face_info));
+    face_mu = _mu(makeCDFace(*_face_info));
   else
     Moose::FV::interpolate(
         _mu_interp_method, face_mu, _mu(elemArg()), _mu(neighborArg()), *_face_info, true);

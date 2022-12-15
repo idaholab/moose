@@ -263,7 +263,10 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem, bool correct_skewness)
           grad_b += surface_vector * elem_value;
       }
       else if (isInternalFace(*fi))
-        grad_b += surface_vector * getInternalFaceValue(*fi, correct_skewness);
+        grad_b +=
+            surface_vector *
+            (*this)(Moose::FaceArg(
+                {fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, nullptr}));
       else
       {
         mooseAssert(isDirichletBoundaryFace(*fi, &functor_elem), "We've run out of face types");

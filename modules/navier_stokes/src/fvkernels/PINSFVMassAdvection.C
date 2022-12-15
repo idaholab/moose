@@ -61,9 +61,9 @@ PINSFVMassAdvection::computeQpResidual()
     {
       const auto v_face = _rc_vel_provider.getVelocity(_velocity_interp_method, *_face_info, _tid);
       return {v_face,
-              _rho(Moose::FV::makeFace(*_face_info,
-                                       limiterType(_advected_interp_method),
-                                       MetaPhysicL::raw_value(v_face) * _normal > 0))};
+              _rho(makeFace(*_face_info,
+                            limiterType(_advected_interp_method),
+                            MetaPhysicL::raw_value(v_face) * _normal > 0))};
     }
   }();
 

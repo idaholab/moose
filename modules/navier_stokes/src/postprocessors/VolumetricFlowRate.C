@@ -141,10 +141,11 @@ VolumetricFlowRate::computeFaceInfoIntegral([[maybe_unused]] const FaceInfo * fi
   else
   {
     const auto adv_quant_face = MetaPhysicL::raw_value(
-        (*_adv_quant)(Moose::FV::makeFace(*fi,
-                                          Moose::FV::limiterType(_advected_interp_method),
-                                          MetaPhysicL::raw_value(vel) * fi->normal() > 0,
-                                          correct_skewness)));
+        (*_adv_quant)(Moose::FaceArg({fi,
+                                      Moose::FV::limiterType(_advected_interp_method),
+                                      MetaPhysicL::raw_value(vel) * fi->normal() > 0,
+                                      correct_skewness,
+                                      nullptr})));
     return fi->normal() * adv_quant_face * vel;
   }
 

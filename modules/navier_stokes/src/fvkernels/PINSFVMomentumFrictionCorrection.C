@@ -126,7 +126,7 @@ PINSFVMomentumFrictionCorrection::gatherRCData(const FaceInfo & fi)
   }
 
   // Compute face superficial velocity gradient
-  auto dudn = _var.gradient(Moose::FV::makeCDFace(*_face_info)) * _face_info->normal();
+  auto dudn = _var.gradient(makeCDFace(*_face_info)) * _face_info->normal();
 
   if (_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
       _face_type == FaceInfo::VarFaceNeighbors::BOTH)

@@ -16,6 +16,8 @@
 #include "MooseTypes.h"
 #include "CellCenteredMapFunctor.h"
 #include "VectorComponentFunctor.h"
+#include "FaceArgInterface.h"
+
 #include "libmesh/vector_value.h"
 #include "libmesh/id_types.h"
 #include "libmesh/stored_range.h"
@@ -41,7 +43,8 @@ class MeshBase;
  */
 class INSFVRhieChowInterpolator : public GeneralUserObject,
                                   public TaggingInterface,
-                                  public BlockRestrictable
+                                  public BlockRestrictable,
+                                  public FaceArgProducerInterface
 {
 public:
   static InputParameters validParams();
@@ -80,6 +83,8 @@ public:
    * makes sure coefficient data gets communicated on both sides of a given boundary
    */
   void ghostADataOnBoundary(const BoundaryID boundary_id);
+
+  bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const override;
 
 protected:
   /**

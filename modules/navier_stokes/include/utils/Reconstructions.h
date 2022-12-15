@@ -57,7 +57,8 @@ interpolateReconstruct(CellCenteredMapFunctor<T, Map> & output_functor,
   {
     mooseAssert(face, "This must be non-null");
     const Real weight = weight_with_sf ? face->faceArea() * face->faceCoord() : 1;
-    const auto face_arg = makeCDFace(*face);
+    const Moose::FaceArg face_arg{
+        face, Moose::FV::LimiterType::CentralDifference, true, false, nullptr};
     auto face_value = input_functor(face_arg);
     std::pair<T, Real> * neighbor_pair = nullptr;
     if (face->neighborPtr() && face->neighborPtr() != libMesh::remote_elem)

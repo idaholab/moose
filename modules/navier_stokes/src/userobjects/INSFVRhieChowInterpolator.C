@@ -508,12 +508,14 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
 
   VectorValue<ADReal> velocity;
 
+  Moose::FaceArg face{
+      &fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, nullptr};
   // Create the average face velocity (not corrected using RhieChow yet)
-  velocity(0) = u->getInternalFaceValue(fi, correct_skewness);
+  velocity(0) = (*u)(face);
   if (v)
-    velocity(1) = v->getInternalFaceValue(fi, correct_skewness);
+    velocity(1) = (*v)(face);
   if (w)
-    velocity(2) = w->getInternalFaceValue(fi, correct_skewness);
+    velocity(2) = (*w)(face);
 
   // Return if Rhie-Chow was not requested or if we have a porosity jump
   if (m == Moose::FV::InterpMethod::Average ||
@@ -583,8 +585,6 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
                                                     : Moose::FV::InterpMethod::Average;
   Moose::FV::interpolate(coeff_interp_method, face_D, elem_D, neighbor_D, fi, true);
 
-  const auto face = Moose::FV::makeCDFace(fi, correct_skewness);
-
   // evaluate face porosity, see (18) in Hanimann 2021 or (11) in Nordlund 2016
   const auto face_eps = epsilon(tid)(face);
 
@@ -595,4 +595,13 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
     velocity(i) -= face_D(i) * face_eps * (grad_p(i) - unc_grad_p(i));
 
   return velocity;
+}
+
+bool
+INSFVRhieChowInterpolator::hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const
+{
+  if (fi_elem_side)
+    return hasBlocks(fi.elem().subdomain_id());
+  else
+    return fi.neighborPtr() && hasBlocks(fi.neighbor().subdomain_id());
 }
