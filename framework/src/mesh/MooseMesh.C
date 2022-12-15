@@ -3301,7 +3301,7 @@ MooseMesh::buildFiniteVolumeInfo() const
   // We prepare a map connecting the Elem* and the corresponding ElemInfo
   // for the active elements.
   for (const Elem * elem : as_range(begin, end))
-    _elem_to_elem_info.emplace(elem, elem);
+    _elem_to_elem_info.emplace(elem->id(), elem);
 
   for (const Elem * elem : as_range(begin, end))
   {
@@ -3320,7 +3320,7 @@ MooseMesh::buildFiniteVolumeInfo() const
                     "be active.");
 
         // We construct the faceInfo using the elementinfo and side index
-        _all_face_info.emplace_back(&_elem_to_elem_info[elem], side);
+        _all_face_info.emplace_back(&_elem_to_elem_info[elem->id()], side);
 
         auto & fi = _all_face_info.back();
 
@@ -3335,7 +3335,7 @@ MooseMesh::buildFiniteVolumeInfo() const
         if (!neighbor || neighbor == remote_elem)
           fi.computeBoundaryCoefficients();
         else
-          fi.computeInternalCoefficients(&_elem_to_elem_info[neighbor]);
+          fi.computeInternalCoefficients(&_elem_to_elem_info[neighbor->id()]);
 
         auto lit = side_map.find(Keytype(&fi.elem(), fi.elemSideID()));
         if (lit != side_map.end())

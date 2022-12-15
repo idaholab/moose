@@ -1363,8 +1363,9 @@ private:
   /// FaceInfo objects accessible from this process
   mutable std::vector<FaceInfo> _all_face_info;
 
-  /// Map connecting elems with their corresponding ElemInfo
-  mutable std::unordered_map<const Elem *, ElemInfo> _elem_to_elem_info;
+  /// Map connecting elems with their corresponding ElemInfo, we use the element ID as
+  /// the key
+  mutable std::unordered_map<dof_id_type, ElemInfo> _elem_to_elem_info;
 
   /// Holds only those \p FaceInfo objects that have \p processor_id equal to this process's id,
   /// e.g. the local \p FaceInfo objects
