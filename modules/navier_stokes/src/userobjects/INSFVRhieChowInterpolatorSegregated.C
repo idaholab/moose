@@ -49,14 +49,10 @@ INSFVRhieChowInterpolatorSegregated::validParams()
       "Computes the Rhie-Chow velocity based on gathered 'a' coefficient data.");
 
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
-  exec_enum.addAvailableFlags(EXEC_NONLINEAR);
-  exec_enum = {EXEC_NONLINEAR};
+  exec_enum.addAvailableFlags(EXEC_NONE);
+  exec_enum = {EXEC_NONE};
   params.suppressParameter<ExecFlagEnum>("execute_on");
 
-  params.addParam<NonlinearSystemName>(
-      "momentum_system", "momentum_system", "The nonlinear system for the momentum equation");
-  params.addParam<NonlinearSystemName>(
-      "pressure_system", "pressure_system", "The nonlinear system for the pressure equation");
   return params;
 }
 
@@ -78,12 +74,16 @@ INSFVRhieChowInterpolatorSegregated::INSFVRhieChowInterpolatorSegregated(
         },
         std::set<ExecFlagType>({EXEC_ALWAYS}),
         _moose_mesh,
-        blockIDs())),
-    _momentum_sys_number(_fe_problem.nlSysNum(getParam<NonlinearSystemName>("momentum_system"))),
-    _pressure_sys_number(_fe_problem.nlSysNum(getParam<NonlinearSystemName>("pressure_system"))),
-    _momentum_sys(_fe_problem.getNonlinearSystemBase(_momentum_sys_number)),
-    _pressure_sys(_fe_problem.getNonlinearSystemBase(_pressure_sys_number))
+        blockIDs()))
 {
+}
+
+void
+INSFVRhieChowInterpolatorSegregated::linkMomentumSystem(NonlinearSystemBase & momentum_system,
+                                                        const TagID & momentum_tag)
+{
+  _momentum_sys = &momentum_system;
+  _momentum_tag = momentum_tag;
 }
 
 void
@@ -126,19 +126,22 @@ INSFVRhieChowInterpolatorSegregated::getVelocity(const FaceInfo & fi,
         hasBlocks(elem->subdomain_id()) ? elem->subdomain_id() : neighbor->subdomain_id();
     const Moose::SingleSidedFaceArg boundary_face{
         &fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, sub_id};
+
+    _console << "returning: " << (*_vel)(boundary_face)(0) << std::endl;
     return (*_vel)(boundary_face);
   }
 
-  _console << "Something will come here eventually" << std::endl;
-  return ADRealVectorValue(0.0);
+  _console << "returning: " << ADRealVectorValue(0.5)(0) << std::endl;
+  return ADRealVectorValue(0.5);
 }
 
 void
 INSFVRhieChowInterpolatorSegregated::computeHbyA()
 {
-  NonlinearSystemBase & sys = _fe_problem.getNonlinearSystemBase(_momentum_sys_number);
+  mooseAssert(_momentum_sys, "The momentum system shall be linked before calling this function!");
 
-  NonlinearImplicitSystem & momentum_system = dynamic_cast<NonlinearImplicitSystem &>(sys.system());
+  NonlinearImplicitSystem & momentum_system =
+      dynamic_cast<NonlinearImplicitSystem &>(_momentum_sys->system());
 
   PetscMatrix<Number> * pmat = dynamic_cast<PetscMatrix<Number> *>(momentum_system.matrix);
   PetscVector<Number> * solution =
@@ -160,11 +163,13 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA()
 
   // We compute the right hand side with a zero vector for starters. This is the right
   // hand side of the linearized system and will be the basis of the HbyA vector.
-  _fe_problem.computeResidualSys(momentum_system, *working_vector.get(), *HbyA.get());
+  _fe_problem.computeResidualTag(*working_vector.get(), *HbyA.get(), _momentum_tag);
 
-  HbyA->print_global();
+  HbyA->print();
 
-  sys.setSolution(*solution);
+  _momentum_sys->setSolution(*solution);
+
+  solution->print();
 
   // if (pmat->closed())
   // {
@@ -197,17 +202,48 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA()
   // Libmesh version
   // **************************************************************************
 
-  // HbyA_petsc->scale(-1.0);
-  // pmat->get_diagonal(*Ainv_petsc);
-  // pmat->vector_mult(*working_vector_petsc, *solution);
-  // HbyA_petsc->add(*working_vector_petsc);
+  pmat->print();
+  pmat->get_diagonal(*Ainv_petsc);
 
-  // working_vector_petsc->pointwise_mult(*Ainv_petsc, *solution);
-  // HbyA_petsc->add(-1.0, *working_vector_petsc);
+  Ainv_petsc->print();
+  MatDiagonalSet(pmat->mat(), working_vector_petsc->vec(), INSERT_VALUES);
 
-  // *working_vector_petsc = 1.0;
-  // VecPointwiseDivide(Ainv_petsc->vec(), working_vector_petsc->vec(), Ainv_petsc->vec());
-  // HbyA_petsc->pointwise_mult(*HbyA_petsc, *Ainv_petsc);
+  pmat->print();
+
+  pmat->vector_mult(*working_vector_petsc, *solution);
+
+  working_vector_petsc->print();
+  HbyA_petsc->print();
+
+  HbyA_petsc->add(*working_vector_petsc);
+
+  HbyA_petsc->print();
+
+  *working_vector_petsc = 1.0;
+  VecPointwiseDivide(Ainv_petsc->vec(), working_vector_petsc->vec(), Ainv_petsc->vec());
+  HbyA_petsc->pointwise_mult(*HbyA_petsc, *Ainv_petsc);
+
+  HbyA_petsc->print();
+
+  // **************************************************************************
+  // Populating the
+  // **************************************************************************
+
+  auto begin = _mesh.active_local_elements_begin();
+  auto end = _mesh.active_local_elements_end();
+
+  for (const auto comp_index : make_range(_dim))
+  {
+    const auto var_num = momentum_system.variable_number(_u->name());
+
+    for (auto it = begin; it != end; ++it)
+    {
+      const Elem * elem = *it;
+      const auto dof_index = elem->dof_number(momentum_system.number(), var_num, 0);
+      _HbyA[elem->id()](comp_index) = (*HbyA)(dof_index);
+      _Ainv[elem->id()](comp_index) = (*Ainv)(dof_index);
+    }
+  }
 
   // **************************************************************************
   // END

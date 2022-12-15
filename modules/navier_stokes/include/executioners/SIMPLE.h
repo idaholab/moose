@@ -39,10 +39,19 @@ protected:
   int & _time_step;
   Real & _time;
 
+  /// The number of the nonlinear system corresponding to the momentum equation
+  const unsigned int _momentum_sys_number;
+  /// The number of the nonlinear system corresponding to the pressure equation
+  const unsigned int _pressure_sys_number;
+  /// Reference to the nonlinear system corresponding to the momentum equation
+  NonlinearSystemBase & _momentum_sys;
+  /// Reference to the nonlinear system corresponding to the pressure equation
+  NonlinearSystemBase & _pressure_sys;
+
   INSFVRhieChowInterpolatorSegregated * _rc_uo;
-  NonlinearSystemBase * _momentum_sys;
-  NonlinearSystemBase * _pressure_sys;
 
 private:
   bool _last_solve_converged;
+  const std::string _momentum_tag_name;
+  const TagID _momentum_tag_id;
 };

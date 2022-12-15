@@ -1,7 +1,9 @@
 mu = 0.6
 rho = 0.8
-advected_interp_method = 'upwind'
+advected_interp_method = 'average'
 velocity_interp_method = 'rc'
+
+momentum_tag = "non_pressure"
 
 [Mesh]
   [mesh]
@@ -26,8 +28,6 @@ velocity_interp_method = 'rc'
     type = INSFVRhieChowInterpolatorSegregated
     u = u
     pressure = pressure
-    momentum_system = 'momentum_system'
-    pressure_system = 'pressure_system'
   []
 []
 
@@ -40,6 +40,7 @@ velocity_interp_method = 'rc'
   [pressure]
     type = INSFVPressureVariable
     nl_sys = pressure_system
+    initial_condition = 0.2
   []
 []
 
@@ -59,19 +60,22 @@ velocity_interp_method = 'rc'
     velocity_interp_method = ${velocity_interp_method}
     rho = ${rho}
     momentum_component = 'x'
+    linearize = true
+    extra_vector_tags = ${momentum_tag}
   []
   [u_viscosity]
     type = INSFVMomentumDiffusion
     variable = u
     mu = ${mu}
     momentum_component = 'x'
+    extra_vector_tags = ${momentum_tag}
   []
-  # [u_pressure]
-  #   type = INSFVMomentumPressure
-  #   variable = u
-  #   momentum_component = 'x'
-  #   pressure = pressure
-  # []
+  [u_pressure]
+    type = INSFVMomentumPressure
+    variable = u
+    momentum_component = 'x'
+    pressure = pressure
+  []
 []
 
 [FVBCs]
@@ -85,7 +89,7 @@ velocity_interp_method = 'rc'
     type = INSFVOutletPressureBC
     boundary = 'right'
     variable = pressure
-    function = 1
+    function = 1.4
   []
 []
 
@@ -94,8 +98,11 @@ velocity_interp_method = 'rc'
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -pc_factor_shift_type'
   petsc_options_value = 'lu NONZERO'
-  nl_rel_tol = 1e-12
+  nl_max_its = 1
   rhie_chow_user_object = 'rc'
+  momentum_system = 'momentum_system'
+  pressure_system = 'pressure_system'
+  momentum_tag = ${momentum_tag}
 []
 
 [Postprocessors]

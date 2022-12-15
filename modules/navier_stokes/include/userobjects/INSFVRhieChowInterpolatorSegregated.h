@@ -53,11 +53,10 @@ public:
   void execute() override;
   void finalize() override{};
 
-  unsigned int momentumSystemNumber() const { return _momentum_sys_number; };
-  unsigned int pressureSystemNumber() const { return _pressure_sys_number; };
-
   /// Bool of the Rhie Chow user object is used in monolithic/segregated approaches
   bool segregated() const override { return true; };
+
+  void linkMomentumSystem(NonlinearSystemBase & momentum_system, const TagID & momentum_tag);
 
 protected:
   /**
@@ -83,12 +82,8 @@ protected:
   /// A functor for computing the (non-RC corrected) velocity
   std::unique_ptr<PiecewiseByBlockLambdaFunctor<ADRealVectorValue>> _vel;
 
-  /// The number of the nonlinear system corresponding to the momentum equation
-  const unsigned int _momentum_sys_number;
-  /// The number of the nonlinear system corresponding to the pressure equation
-  const unsigned int _pressure_sys_number;
   /// Reference to the nonlinear system corresponding to the momentum equation
-  NonlinearSystemBase & _momentum_sys;
+  NonlinearSystemBase * _momentum_sys;
   /// Reference to the nonlinear system corresponding to the pressure equation
-  NonlinearSystemBase & _pressure_sys;
+  TagID _momentum_tag;
 };
