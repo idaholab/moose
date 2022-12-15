@@ -37,8 +37,7 @@ void
 NonsafeMaterial::computeQpProperties()
 {
   /// @brief register the section with a unique ID which will count the number of solution invalid warnings
-  static const auto solution_id = registerInvalidSection(
-      "NonsafeMaterial", "The diffusivity is greater than the threshold value!");
+  static const auto solution_id = registerInvalidSection("computeQpProperties");
   if (_input_diffusivity > _threshold)
   {
     /// @brief mark solution invalid when the value is out of bound
