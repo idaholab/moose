@@ -397,8 +397,8 @@ TransfiniteMeshGenerator::getCircarcEdge(const Point & P1,
   Real b = std::atan2(x1(1), x1(0));
 
   if (a < 0)
-    a = a + 2*M_PI;
-  if (std::abs(b - a)> M_PI)
+    a = a + 2 * M_PI;
+  if (std::abs(b - a) > M_PI)
     b = a + arclength;
 
   auto it = 0;
