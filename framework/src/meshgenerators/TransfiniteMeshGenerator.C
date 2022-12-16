@@ -380,13 +380,11 @@ TransfiniteMeshGenerator::getCircarcEdge(const Point & P1,
 
   Real rad = computeRadius(P1, P2, P3);
   Point P0 = computeOrigin(P1, P2, P3);
+
   // need to shift to center of coordinates to find the corresponding radians
   Point x0 = (P1 - P0);
   Point x1 = (P2 - P0);
-  // The below function should be updated to take as an argument a Point
-  // and compute it in polar coordinates
-  Real a = getPolarAngle(x0);
-  Real b = getPolarAngle(x1);
+
   // The case when the edge spans quadrants 1 and 4 requires special treament
   // to periodically switch we compute the angle that needs added to one edge
   // to identify the entire edge span
@@ -394,7 +392,13 @@ TransfiniteMeshGenerator::getCircarcEdge(const Point & P1,
               "The point provided cannot generate an arc circle on the edge specified");
 
   Real arclength = std::acos((x0 * x1) / x0.norm() / x1.norm());
-  if (MooseUtils::absoluteFuzzyGreaterThan(std::abs(b - a), M_PI))
+
+  Real a = std::atan2(x0(1), x0(0));
+  Real b = std::atan2(x1(1), x1(0));
+
+  if (a < 0)
+    a = a + 2*M_PI;
+  if (std::abs(b - a)> M_PI)
     b = a + arclength;
 
   auto it = 0;
@@ -408,32 +412,6 @@ TransfiniteMeshGenerator::getCircarcEdge(const Point & P1,
   };
 
   return edge;
-}
-
-Real
-TransfiniteMeshGenerator::getPolarAngle(const Point & Px) const
-{
-  Real x = Px(0);
-  Real y = Px(1);
-  // define quadrants, note the 1st quadrant q1 is a "do nothing" case, thus skipped
-  const bool q2 = (x < 0 && y > 0);
-  const bool q3 = (x < 0 && y < 0);
-  const bool q4 = (x > 0 && y < 0);
-
-  mooseAssert(std::abs(x) > 0.0,
-              "The point provided cannot generate an arc circle on the edge specified.");
-  Real angle = std::atan(std::abs(y) / std::abs(x));
-  // compute angles via the inverse tangent
-  // however the quadrants do not provide sufficient info
-  // and we need to involve normals info as well
-  if (q2)
-    angle = M_PI - angle;
-  if (q3)
-    angle = M_PI + angle;
-  if (q4)
-    angle = 2 * M_PI - angle;
-
-  return angle;
 }
 
 Real

@@ -92,10 +92,6 @@ protected:
   Real getMapInterval(
       const Real & xab, const Real & a, const Real & b, const Real & c, const Real & d) const;
 
-  // For a circle the paramterization is based on radians and we need to compute
-  //  the angles spanned between 2 end vertices
-  Real getPolarAngle(const Point & P) const;
-
   std::vector<Real>
   getPointsDistribution(const Real & edge_length, const unsigned int & np, const Real & bias) const;
 
