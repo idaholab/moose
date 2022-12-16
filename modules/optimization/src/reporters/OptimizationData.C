@@ -81,6 +81,8 @@ OptimizationData::OptimizationData(const InputParameters & parameters)
     readMeasurementsFromFile();
   else if (isParamValid("measurement_points"))
     readMeasurementsFromInput();
+
+  _misfit_values.resize(_measurement_values.size());
 }
 
 void

@@ -9,71 +9,27 @@
 
 #pragma once
 
-#include "OptimizationData.h"
-#include "DataIO.h"
-#include "libmesh/petsc_vector.h"
-#include "libmesh/petsc_matrix.h"
-// friends
-#include "OptimizeSolve.h"
-#include "OptimizationReporterTest.h"
+#include "OptimizationReporterBase.h"
 
 /**
- * Computes objective function, gradient and contains reporters for communicating between
- * optimizeSolve and subapps
+ * Computes gradient and contains reporters for communicating between optimizeSolve and subapps
  */
-class OptimizationReporter : public OptimizationData
+class OptimizationReporter : public OptimizationReporterBase
 {
 public:
   static InputParameters validParams();
   OptimizationReporter(const InputParameters & parameters);
 
-  void initialize() override final {}
-  void execute() override final {}
-  void finalize() override final {}
-
-  /**
-   * Function to initialize petsc vectors from vpp data
-   * FIXME: this should be const
-   */
-  void setInitialCondition(libMesh::PetscVector<Number> & param);
-
-  /**
-   * Function to override misfit values with the simulated values from the matrix free hessian
-   * forward solve
-   */
-  void setMisfitToSimulatedValues();
-
-  /**
-   * Functions to check if bounds are set
-   */
-  bool hasBounds() const { return _upper_bounds.size() > 0 && _lower_bounds.size() > 0; }
-
-  /**
-   * Upper and lower bounds for each parameter being controlled
-   * @return vector containing one entry per controllable parameter for each upper/lower bound
-   */
-  const std::vector<Real> & getUpperBounds() const { return _upper_bounds; };
-  const std::vector<Real> & getLowerBounds() const { return _lower_bounds; };
-
-  /**
-   * Function to compute objective.
-   * This is the last function called in objective routine
-   */
-  virtual Real computeObjective();
-
-  /**
-   * Function to compute gradient.
-   * This is the last call of the gradient routine.
-   */
-  virtual void computeGradient(libMesh::PetscVector<Number> & gradient) const;
-
-  /**
-   * Function to get the total number of parameters
-   * @return total number of parameters
-   */
-  unsigned int getNumParams() const { return _ndof; };
+  virtual void setInitialCondition(libMesh::PetscVector<Number> & param) override;
+  virtual bool hasBounds() const override { return _upper_bounds.size() && _lower_bounds.size(); }
+  virtual Real getUpperBound(dof_id_type i) const override { return _upper_bounds[i]; }
+  virtual Real getLowerBound(dof_id_type i) const override { return _lower_bounds[i]; }
+  virtual void computeGradient(libMesh::PetscVector<Number> & gradient) const override;
+  virtual dof_id_type getNumParams() const override { return _ndof; }
 
 protected:
+  virtual void updateParameters(const libMesh::PetscVector<Number> & x) override;
+
   /// Parameter names
   const std::vector<ReporterValueName> & _parameter_names;
   /// Number of parameter vectors
@@ -92,16 +48,4 @@ protected:
 
   /// vector of adjoint data
   const std::vector<Real> & _adjoint_data;
-
-  /**
-   * Function to set parameters.
-   * This is the first function called in objective/gradient/hessian routine
-   */
-  void updateParameters(const libMesh::PetscVector<Number> & x);
-
-private:
-  friend class OptimizeSolve;
-  friend class OptimizationReporterTest;
-
-  void setSimulationValuesForTesting(std::vector<Real> & data);
 };

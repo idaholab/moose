@@ -11,13 +11,12 @@
 
 #include "SolveObject.h"
 
-#include "OptimizationReporter.h"
 #include "ExecFlagEnum.h"
 #include <petsctao.h>
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
 
-class OptimizationReporter;
+class OptimizationReporterBase;
 
 /**
  * solveObject to interface with Petsc Tao
@@ -30,7 +29,7 @@ public:
 
   virtual bool solve() override;
 
-  const OptimizationReporter & getOptimizationReporter() const { return *_obj_function; }
+  const OptimizationReporterBase & getOptimizationReporter() const { return *_obj_function; }
 
   /**
    * Record tao TaoGetSolutionStatus data for output by a reporter
@@ -75,7 +74,7 @@ protected:
   const ExecFlagEnum & _solve_on;
 
   /// objective function defining objective, gradient, and hessian
-  OptimizationReporter * _obj_function = nullptr;
+  OptimizationReporterBase * _obj_function = nullptr;
 
   /// Tao optimization object
   Tao _tao;
