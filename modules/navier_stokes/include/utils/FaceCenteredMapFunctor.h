@@ -19,10 +19,10 @@
 #include "libmesh/threads.h"
 
 /**
- * A functor whose evaluation relies on querying a map where the keys are face info pointers
- * and the values correspond to the face values. This is a very useful data type for
- * storing face based fields often encountered in fluid dynamics while using the finite volume
- * method
+ * A functor whose evaluation relies on querying a map where the keys are face info ids
+ * and the values correspond to the face values. The primary purpose of this functor is to
+ * store face based fields (face flux, face velocity, normal gradient) often encountered
+ * in fluid dynamics problems using the finite volume method
  */
 template <typename T, typename Map>
 class FaceCenteredMapFunctor : public Moose::FunctorBase<T>, public Map
@@ -73,19 +73,26 @@ private:
 
   ValueType evaluate(const FaceArg & face, unsigned int) const override final
   {
+    const auto * fi = face.fi;
     try
     {
-      return libmesh_map_find(*this, face.fi);
+      return libmesh_map_find(*this, fi->id());
     }
     catch (libMesh::LogicError &)
     {
-      if (!_sub_ids.empty() && !_sub_ids.count(elem->subdomain_id()))
-        mooseError("Attempted to evaluate FaceCenteredMapFunctor '",
-                   this->functorName(),
-                   "' with an element subdomain id of '",
-                   elem->subdomain_id(),
-                   "' but that subdomain id is not one of the subdomain ids the functor is "
-                   "restricted to.");
+      if (!_sub_ids.empty() && !_sub_ids.count(fi->elem()->subdomain_id()))
+      {
+        if (fi->neighborPtr() && !_sub_ids.count(fi->neighborPtr()->subdomain_id()))
+          mooseError("Attempted to evaluate FaceCenteredMapFunctor '",
+                     this->functorName(),
+                     "' with an element subdomain id of '",
+                     fi->elem()->subdomain_id(),
+                     fi->neighborPtr() ? " or neighbor subdomain id of '" +
+                                             std::to_string(fi->neighborPtr()->subdomain_id()) + "'"
+                                       : "",
+                     "' but that subdomain id is not one of the subdomain ids the functor is "
+                     "restricted to.");
+      }
       else
         mooseError("Attempted access into FaceCenteredMapFunctor '",
                    this->functorName(),
@@ -98,8 +105,6 @@ private:
   {
     mooseError("not implemented");
   }
-
-  using Moose::FunctorBase<T>::evaluateGradient;
 
   GradientType evaluateGradient(const ElemArg & elem_arg, unsigned int) const override final
   {

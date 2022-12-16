@@ -3303,6 +3303,7 @@ MooseMesh::buildFiniteVolumeInfo() const
   for (const Elem * elem : as_range(begin, end))
     _elem_to_elem_info.emplace(elem->id(), elem);
 
+  dof_id_type face_index = 0;
   for (const Elem * elem : as_range(begin, end))
   {
     for (unsigned int side = 0; side < elem->n_sides(); ++side)
@@ -3320,7 +3321,7 @@ MooseMesh::buildFiniteVolumeInfo() const
                     "be active.");
 
         // We construct the faceInfo using the elementinfo and side index
-        _all_face_info.emplace_back(&_elem_to_elem_info[elem->id()], side);
+        _all_face_info.emplace_back(&_elem_to_elem_info[elem->id()], side, face_index++);
 
         auto & fi = _all_face_info.back();
 

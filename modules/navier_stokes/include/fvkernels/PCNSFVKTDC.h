@@ -39,11 +39,11 @@ protected:
   Real getOldFlux(bool upwind) const;
 
   std::unique_ptr<Moose::FV::Limiter<ADReal>> _upwind_limiter;
-  std::unordered_map<std::pair<dof_id_type, unsigned int>, Real> & _old_upwind_fluxes;
+  std::unordered_map<dof_id_type, Real> & _old_upwind_fluxes;
   /// Old high order fluxes
-  std::unordered_map<std::pair<dof_id_type, unsigned int>, Real> & _old_ho_fluxes;
-  std::unordered_map<std::pair<dof_id_type, unsigned int>, Real> & _current_upwind_fluxes;
+  std::unordered_map<dof_id_type, Real> & _old_ho_fluxes;
+  std::unordered_map<dof_id_type, Real> & _current_upwind_fluxes;
   /// Current high order fluxes
-  std::unordered_map<std::pair<dof_id_type, unsigned int>, Real> & _current_ho_fluxes;
+  std::unordered_map<dof_id_type, Real> & _current_ho_fluxes;
   const Real _ho_implicit_fraction;
 };

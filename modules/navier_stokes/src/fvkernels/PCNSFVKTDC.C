@@ -33,17 +33,12 @@ PCNSFVKTDC::PCNSFVKTDC(const InputParameters & params)
   : PCNSFVKT(params),
     _upwind_limiter(Limiter<ADReal>::build(LimiterType::Upwind)),
     _old_upwind_fluxes(
-        declareRestartableData<std::unordered_map<std::pair<dof_id_type, unsigned int>, Real>>(
-            "old_upwind_fluxes")),
-    _old_ho_fluxes(
-        declareRestartableData<std::unordered_map<std::pair<dof_id_type, unsigned int>, Real>>(
-            "old_ho_fluxes")),
+        declareRestartableData<std::unordered_map<dof_id_type, Real>>("old_upwind_fluxes")),
+    _old_ho_fluxes(declareRestartableData<std::unordered_map<dof_id_type, Real>>("old_ho_fluxes")),
     _current_upwind_fluxes(
-        declareRestartableData<std::unordered_map<std::pair<dof_id_type, unsigned int>, Real>>(
-            "current_upwind_fluxes")),
+        declareRestartableData<std::unordered_map<dof_id_type, Real>>("current_upwind_fluxes")),
     _current_ho_fluxes(
-        declareRestartableData<std::unordered_map<std::pair<dof_id_type, unsigned int>, Real>>(
-            "current_ho_fluxes")),
+        declareRestartableData<std::unordered_map<dof_id_type, Real>>("current_ho_fluxes")),
     _ho_implicit_fraction(getParam<Real>("ho_implicit_fraction"))
 {
 }
