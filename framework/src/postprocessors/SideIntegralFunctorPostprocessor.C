@@ -129,7 +129,7 @@ bool
 SideIntegralFunctorPostprocessorTempl<is_ad>::hasFaceSide(const FaceInfo & fi,
                                                           const bool fi_elem_side) const
 {
-  return _functor.hasFaceSide(fi, fi_elem_side);
+  return _current_elem == (fi_elem_side ? &fi.elem() : fi.neighborPtr());
 }
 
 template class SideIntegralFunctorPostprocessorTempl<false>;
