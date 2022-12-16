@@ -77,7 +77,7 @@ TEST_F(ParsedFunctionTest, basicConstructor)
 
   // Test face overloads
   const FaceInfo * const fi = _mesh->faceInfo(elem, side);
-  auto face = Moose::FV::makeCDFace(*fi);
+  auto face = Moose::FaceArg({fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr});
   f_traditional = f.value(0, fi->faceCentroid());
   f_functor = f_wrapped(face, 0);
   gradient_traditional = f.gradient(0, fi->faceCentroid());

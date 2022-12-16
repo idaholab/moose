@@ -71,6 +71,23 @@ private:
   const MooseMesh & _mesh;
 };
 
+template <typename T>
+class BypassFaceError : public PiecewiseByBlockLambdaFunctor<T>
+{
+public:
+  template <typename PolymorphicLambda>
+  BypassFaceError(const std::string & name,
+                  PolymorphicLambda my_lammy,
+                  const std::set<ExecFlagType> & clearance_schedule,
+                  const MooseMesh & mesh,
+                  const std::set<SubdomainID> & block_ids)
+    : PiecewiseByBlockLambdaFunctor<T>(name, my_lammy, clearance_schedule, mesh, block_ids)
+  {
+  }
+
+  bool hasFaceSide(const FaceInfo &, bool) const override { return true; }
+};
+
 TEST(MooseFunctorTest, testArgs)
 {
   TestFunctor<Real> test;
@@ -264,9 +281,8 @@ TEST(MooseFunctorTest, testArgs)
     // Test subdomain error
     {
       auto dummy_lammy = [](const auto &, const auto &) -> Real { return 2; };
-      PiecewiseByBlockLambdaFunctor<Real> errorful(
-          "errorful", dummy_lammy, {EXEC_ALWAYS}, *mesh, {});
-      PiecewiseByBlockLambdaFunctor<Real> errorfree(
+      BypassFaceError<Real> errorful("errorful", dummy_lammy, {EXEC_ALWAYS}, *mesh, {});
+      BypassFaceError<Real> errorfree(
           "errorfree", dummy_lammy, {EXEC_ALWAYS}, *mesh, mesh->meshSubdomains());
 
       auto test_sub_error = [&errorful](const auto & arg)
@@ -286,7 +302,9 @@ TEST(MooseFunctorTest, testArgs)
       };
 
       test_sub_error(elem_arg);
+      face.face_side = elem.get();
       test_sub_error(face);
+      face.face_side = nullptr;
       test_sub_error(elem_qp);
       test_sub_error(elem_side_qp);
       test_sub_error(elem_point);

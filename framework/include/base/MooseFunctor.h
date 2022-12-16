@@ -912,6 +912,9 @@ public:
 
   NullFunctor() : FunctorBase<T>("null") {}
 
+  // For backwards compatiblity of unit testing
+  bool hasFaceSide(const FaceInfo & fi, bool) const override;
+
 private:
   ValueType evaluate(const ElemArg &, unsigned int) const override
   {
@@ -939,4 +942,12 @@ private:
                "they've written broken code");
   }
 };
+
+template <typename T>
+bool
+NullFunctor<T>::hasFaceSide(const FaceInfo &, const bool) const
+{
+  // For backwards compatiblity of unit testing
+  return true;
+}
 }

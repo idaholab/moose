@@ -89,7 +89,7 @@ TEST(ContainerFunctors, Test)
   for (const auto limiter_type : limiter_types)
     for (const auto * const face : faces)
     {
-      const auto face_arg = makeFace(*face, limiter_type, true);
+      const auto face_arg = Moose::FaceArg({face, limiter_type, true, false, nullptr});
       EXPECT_TRUE(vector_functor(face_arg)[0] == 1.);
       EXPECT_TRUE(array_functor(face_arg)[0] == 1.);
 
