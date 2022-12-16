@@ -35,9 +35,6 @@ namespace FV
  * (and maybe gradients) are weighted with the surface vector. If this is false, then the weights
  * are simply unity
  * @param faces the mesh faces we will be looping over for the interpolations and reconstructions
- * @param consumer the object that needs the reconstructed field. This argument is useful for
- * determining what are "external" faces and hence faces around which we should carefully choose the
- * subdomains we want to evaluate our \p input_functor on
  */
 template <typename T, typename Map>
 void
@@ -45,8 +42,7 @@ interpolateReconstruct(CellCenteredMapFunctor<T, Map> & output_functor,
                        const Moose::FunctorBase<T> & input_functor,
                        const unsigned int num_int_recs,
                        const bool weight_with_sf,
-                       const std::vector<const FaceInfo *> & faces,
-                       const FaceArgInterface & consumer)
+                       const std::vector<const FaceInfo *> & faces)
 {
   if (!num_int_recs)
     return;
@@ -78,8 +74,7 @@ interpolateReconstruct(CellCenteredMapFunctor<T, Map> & output_functor,
     output_functor[pair_.first] = data_pair.first / data_pair.second;
   }
 
-  interpolateReconstruct(
-      output_functor, output_functor, num_int_recs - 1, weight_with_sf, faces, consumer);
+  interpolateReconstruct(output_functor, output_functor, num_int_recs - 1, weight_with_sf, faces);
 }
 }
 }
