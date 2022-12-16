@@ -66,7 +66,6 @@ velocity_interp_method = 'rc'
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
     rho = ${rho}
-    porosity = porosity
   []
 
   [u_advection]

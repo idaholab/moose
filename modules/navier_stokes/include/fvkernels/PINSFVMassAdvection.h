@@ -19,9 +19,4 @@ class PINSFVMassAdvection : public INSFVMassAdvection
 public:
   static InputParameters validParams();
   PINSFVMassAdvection(const InputParameters & params);
-
-protected:
-  ADReal computeQpResidual() override;
-
-  const Moose::Functor<ADReal> & _eps;
 };
