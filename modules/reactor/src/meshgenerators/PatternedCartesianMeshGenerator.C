@@ -83,6 +83,7 @@ PatternedCartesianMeshGenerator::validParams()
       "provided along with 'background_block_id'.");
   params.addParam<std::vector<SubdomainName>>(
       "duct_block_names",
+      std::vector<SubdomainName>(),
       "Optional customized block names for each duct geometry block in 'assembly' mode; must be "
       "provided along with 'background_block_name'.");
   params.addRangeCheckedParam<boundary_id_type>("external_boundary_id",
@@ -90,8 +91,8 @@ PatternedCartesianMeshGenerator::validParams()
                                                 "Optional customized external boundary id.");
   params.addParam<bool>(
       "create_interface_boundaries", true, "Whether the interface boundary sidesets are created.");
-  params.addParam<std::string>("external_boundary_name",
-                               "Optional customized external boundary name.");
+  params.addParam<std::string>(
+      "external_boundary_name", std::string(), "Optional customized external boundary name.");
   params.addParam<bool>("deform_non_circular_region",
                         true,
                         "Whether the non-circular region (outside the rings) can be deformed.");
@@ -133,15 +134,11 @@ PatternedCartesianMeshGenerator::PatternedCartesianMeshGenerator(const InputPara
     _duct_block_ids(isParamValid("duct_block_ids")
                         ? getParam<std::vector<subdomain_id_type>>("duct_block_ids")
                         : std::vector<subdomain_id_type>()),
-    _duct_block_names(isParamValid("duct_block_names")
-                          ? getParam<std::vector<SubdomainName>>("duct_block_names")
-                          : std::vector<SubdomainName>()),
+    _duct_block_names(getParam<std::vector<SubdomainName>>("duct_block_names")),
     _external_boundary_id(isParamValid("external_boundary_id")
                               ? getParam<boundary_id_type>("external_boundary_id")
                               : 0),
-    _external_boundary_name(isParamValid("external_boundary_name")
-                                ? getParam<std::string>("external_boundary_name")
-                                : std::string()),
+    _external_boundary_name(getParam<std::string>("external_boundary_name")),
     _create_interface_boundaries(getParam<bool>("create_interface_boundaries")),
     _deform_non_circular_region(getParam<bool>("deform_non_circular_region")),
     _pattern_pitch_meta(declareMeshProperty("pattern_pitch_meta", 0.0)),
@@ -165,6 +162,7 @@ PatternedCartesianMeshGenerator::PatternedCartesianMeshGenerator(const InputPara
   declareMeshProperty("pattern_size", n_pattern_layers);
   if (n_pattern_layers == 1)
     paramError("pattern", "The length (layer number) of this parameter must be larger than unity.");
+  // Examine pattern for consistency
   std::vector<unsigned int> pattern_max_array;
   std::vector<unsigned int> pattern_1d;
   std::set<unsigned int> pattern_elem_size;
@@ -258,6 +256,7 @@ PatternedCartesianMeshGenerator::generate()
 
   if (_pattern_boundary == "none" && _generate_core_metadata)
   {
+    // Extract & check pitch and drum metadata
     for (MooseIndex(_input_names) i = 0; i < _input_names.size(); ++i)
     {
       // throw an error message if the input mesh does not contain the required meta data
@@ -396,8 +395,6 @@ PatternedCartesianMeshGenerator::generate()
 
   _pattern_pitch_meta = _pattern_pitch;
 
-  // int x_mov = 0;
-
   const Real input_pitch((_pattern_boundary == "expanded" || !_generate_core_metadata)
                              ? pitch_array.front()
                              : _pattern_pitch);
@@ -409,14 +406,7 @@ PatternedCartesianMeshGenerator::generate()
 
   for (unsigned i = 0; i < _pattern.size(); i++)
   {
-    // Real deltax = (Real)(_pattern.size() - 1) * input_pitch / 2.0;
     const Real deltax = 0.0;
-    // if (i == _pattern.size() - 1)
-    //   x_mov--;
-    // else if (_pattern[i].size() < _pattern[i + 1].size())
-    //   x_mov++;
-    // else
-    //   x_mov--;
     Real deltay = -(Real)(i)*input_pitch;
 
     for (unsigned int j = 0; j < _pattern[i].size(); j++)
@@ -595,7 +585,7 @@ PatternedCartesianMeshGenerator::generate()
 
   std::vector<Real> bd_x_list;
   std::vector<Real> bd_y_list;
-  std::vector<std::pair<Real, unsigned int>> node_azi_list;
+  std::vector<std::pair<Real, dof_id_type>> node_azi_list;
   const Point origin_pt = MooseMeshUtils::meshCentroidCalculator(*out_mesh);
   const Real origin_x = origin_pt(0);
   const Real origin_y = origin_pt(1);
@@ -646,7 +636,7 @@ PatternedCartesianMeshGenerator::generate()
     const Real azi_tol = 1E-8;
     std::vector<std::tuple<Real, Point, std::vector<Real>, dof_id_type>> control_drum_tmp;
     std::vector<dof_id_type> control_drum_id_sorted;
-    unsigned int id = out_mesh->get_elem_integer_index("control_drum_id");
+    unsigned int drum_integer_index = out_mesh->get_elem_integer_index("control_drum_id");
     for (unsigned int i = 0; i < control_drum_positions_x.size(); ++i)
     {
       control_drum_positions_x[i] -= origin_x;
@@ -687,13 +677,13 @@ PatternedCartesianMeshGenerator::generate()
     {
       for (const auto & elem : out_mesh->element_ptr_range())
       {
-        dof_id_type unsorted_control_drum_id = elem->get_extra_integer(id);
+        dof_id_type unsorted_control_drum_id = elem->get_extra_integer(drum_integer_index);
         if (unsorted_control_drum_id != 0)
         {
           auto sorted_iter = std::find(control_drum_id_sorted.begin(),
                                        control_drum_id_sorted.end(),
                                        unsorted_control_drum_id);
-          elem->set_extra_integer(id,
+          elem->set_extra_integer(drum_integer_index,
                                   std::distance(control_drum_id_sorted.begin(), sorted_iter) + 1);
         }
       }
@@ -738,7 +728,8 @@ PatternedCartesianMeshGenerator::generate()
         _external_boundary_id > 0 ? _external_boundary_id : (boundary_id_type)OUTER_SIDESET_ID) =
         _external_boundary_name;
   }
-  // assign sideset and nodeset maps
+  // Merge the boundary name maps of all the input meshed to generate the output mesh's boundary
+  // name maps
   auto & new_sideset_map = out_mesh->get_boundary_info().set_sideset_name_map();
   auto & new_nodeset_map = out_mesh->get_boundary_info().set_nodeset_name_map();
   for (unsigned int i = 0; i < meshes.size(); i++)

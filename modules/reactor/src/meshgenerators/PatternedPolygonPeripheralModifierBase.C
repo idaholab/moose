@@ -124,7 +124,7 @@ PatternedPolygonPeripheralModifierBase::generate()
       // List of elements on the boundary
       bid_elem_list.push_back(std::get<0>(side_list[i]));
       // Note this object only works with quad elements
-      // (side_id + 2)%4 gives the opposite side's neighoring element
+      // (side_id + 2)%4 gives the opposite side's neighboring element
       // Thus, list of elements on the new boundary is made
       new_bid_elem_list.push_back(input_mesh->elem_ptr(std::get<0>(side_list[i]))
                                       ->neighbor_ptr((std::get<1>(side_list[i]) + 2) % 4)

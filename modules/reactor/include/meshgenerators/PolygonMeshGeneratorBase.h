@@ -505,7 +505,8 @@ protected:
    * @param mesh input mesh to add the peripheral region onto
    * @param pattern index of the input mesh for patterning
    * @param pitch pitch size of the input mesh
-   * @param extra_dist extra distance needed to create the peripheral region
+   * @param extra_dist extra distances from inner boundary to define background and ducts layer
+   * locations that are needed to create the peripheral region
    * @param num_sectors_per_side_array numbers of azimuthal intervals of all input unit meshes
    * @param peripheral_duct_intervals numbers of radial intervals of the duct regions
    * @param rotation_angle angle that the generated mesh will be rotated by
@@ -524,18 +525,20 @@ protected:
                          const bool create_interface_boundaries);
 
   /**
-   * Adds background and duct region mesh to stitched square meshes. Note that the function works
-   * for single unit square mesh (corner or edge) separately before stitching.
+   * Adds background and duct region mesh to each part outer part of stitched square meshes. Note
+   * that the function works for single unit square mesh (corner or edge) separately before
+   * stitching.
    * @param mesh input mesh to add the peripheral region onto
    * @param pattern index of the input mesh for patterning
    * @param pitch pitch size of the input mesh
-   * @param extra_dist extra distance needed to create the peripheral region
+   * @param extra_dist extra distances from inner boundary to define background and ducts layer
+   * locations that are needed to create the peripheral region
    * @param num_sectors_per_side_array numbers of azimuthal intervals of all input unit meshes
    * @param peripheral_duct_intervals numbers of radial intervals of the duct regions
    * @param rotation_angle angle that the generated mesh will be rotated by
-   * @param mesh_type whether the peripheral region is for a corner or a side hexagon mesh
+   * @param mesh_type whether the peripheral region is for a corner or a side of a patterned mesh
    * @param create_interface_boundaries whether interface boundary sidesets are created
-   * @return a mesh of the polygonal pattern mesh with peripheral region added.
+   * @return a mesh of the cartesian pattern mesh with peripheral region added.
    */
   void addPeripheralMeshRect(ReplicatedMesh & mesh,
                              const unsigned int pattern, //_pattern[i][j]
@@ -548,7 +551,7 @@ protected:
                              const bool create_interface_boundaries);
 
   /**
-   * Sets up poisitions of peripheral region layer by layer before deformation due to cutoff.
+   * Computes the inner and outer node positions of the peripheral region for a single layer.
    * @param positions_inner key positions (i.e., vertices and mid-points) of the inner side of the
    * peripheral region
    * @param d_positions_outer key inremental positions (i.e., vertices and mid-points) of the outer
@@ -566,7 +569,7 @@ protected:
                      const unsigned int radial_index) const;
 
   /**
-   * Sets up positions of peripheral region layer by layer before deformation due to cutoff.
+   * Computes the inner and outer node positions of the peripheral region for a single layer.
    * @param positions_inner key positions (i.e., vertices and mid-points) of the inner side of the
    * peripheral region
    * @param d_positions_outer key incremental positions (i.e., vertices and mid-points) of the outer

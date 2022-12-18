@@ -614,22 +614,18 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
     {
       // The following lines only work for hexagon and square; and only a hexagon or a square needs
       // such functionality.
-      Real lower_azi = isParamValid("hexagon_size") ? ((Real)mesh_index * 60.0 - 150.0)
-                                                    : ((Real)mesh_index * 90.0 - 135.0);
-      Real upper_azi = isParamValid("hexagon_size") ? ((Real)((mesh_index + 1) % 6) * 60.0 - 150.0)
-                                                    : ((Real)((mesh_index + 1) % 4) * 90.0 - 135.0);
+      Real lower_azi =
+          _num_sides == 6 ? ((Real)mesh_index * 60.0 - 150.0) : ((Real)mesh_index * 90.0 - 135.0);
+      Real upper_azi = _num_sides == 6 ? ((Real)((mesh_index + 1) % 6) * 60.0 - 150.0)
+                                       : ((Real)((mesh_index + 1) % 4) * 90.0 - 135.0);
       _azimuthal_angles_array.push_back(azimuthalAnglesCollector(
-          *input[mesh_input_counter],
-          lower_azi,
-          upper_azi,
-          ANGLE_TANGENT,
-          isParamValid("hexagon_size") ? HEXAGON_NUM_SIDES : SQUARE_NUM_SIDES));
+          *input[mesh_input_counter], lower_azi, upper_azi, ANGLE_TANGENT, _num_sides));
       // loop over the _azimuthal_angles_array just collected to convert tangent to azimuthal
       // angles.
       for (unsigned int i = 1; i < _azimuthal_angles_array.back().size(); i++)
       {
         azimuthal_list.push_back(
-            isParamValid("hexagon_size")
+            _num_sides == 6
                 ? ((Real)mesh_index * 60.0 - 150.0 +
                    std::atan((_azimuthal_angles_array.back()[i - 1] - 1.0) / std::sqrt(3.0)) *
                        180.0 / M_PI)

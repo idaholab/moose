@@ -87,6 +87,7 @@ PatternedHexMeshGenerator::validParams()
       "provided along with 'background_block_id'.");
   params.addParam<std::vector<SubdomainName>>(
       "duct_block_names",
+      std::vector<SubdomainName>(),
       "Optional customized block names for each duct geometry block in 'assembly' mode; must be "
       "provided along with 'background_block_name'.");
   params.addRangeCheckedParam<boundary_id_type>("external_boundary_id",
@@ -94,8 +95,8 @@ PatternedHexMeshGenerator::validParams()
                                                 "Optional customized external boundary id.");
   params.addParam<bool>(
       "create_interface_boundaries", true, "Whether the interface boundary sidesets are created.");
-  params.addParam<std::string>("external_boundary_name",
-                               "Optional customized external boundary name.");
+  params.addParam<std::string>(
+      "external_boundary_name", std::string(), "Optional customized external boundary name.");
   params.addParam<bool>("deform_non_circular_region",
                         true,
                         "Whether the non-circular region (outside the rings) can be deformed.");
@@ -136,15 +137,11 @@ PatternedHexMeshGenerator::PatternedHexMeshGenerator(const InputParameters & par
     _duct_block_ids(isParamValid("duct_block_ids")
                         ? getParam<std::vector<subdomain_id_type>>("duct_block_ids")
                         : std::vector<subdomain_id_type>()),
-    _duct_block_names(isParamValid("duct_block_names")
-                          ? getParam<std::vector<SubdomainName>>("duct_block_names")
-                          : std::vector<SubdomainName>()),
+    _duct_block_names(getParam<std::vector<SubdomainName>>("duct_block_names")),
     _external_boundary_id(isParamValid("external_boundary_id")
                               ? getParam<boundary_id_type>("external_boundary_id")
                               : 0),
-    _external_boundary_name(isParamValid("external_boundary_name")
-                                ? getParam<std::string>("external_boundary_name")
-                                : std::string()),
+    _external_boundary_name(getParam<std::string>("external_boundary_name")),
     _create_interface_boundaries(getParam<bool>("create_interface_boundaries")),
     _hexagon_size_style(
         getParam<MooseEnum>("hexagon_size_style").template getEnum<PolygonSizeStyle>()),
@@ -634,7 +631,7 @@ PatternedHexMeshGenerator::generate()
 
   std::vector<Real> bd_x_list;
   std::vector<Real> bd_y_list;
-  std::vector<std::pair<Real, unsigned int>> node_azi_list;
+  std::vector<std::pair<Real, dof_id_type>> node_azi_list;
   const Point origin_pt = MooseMeshUtils::meshCentroidCalculator(*out_mesh);
   const Real origin_x = origin_pt(0);
   const Real origin_y = origin_pt(1);
@@ -775,7 +772,8 @@ PatternedHexMeshGenerator::generate()
         _external_boundary_id > 0 ? _external_boundary_id : (boundary_id_type)OUTER_SIDESET_ID) =
         _external_boundary_name;
   }
-  // assign sideset and nodeset maps
+  // Merge the boundary name maps of all the input meshed to generate the output mesh's boundary
+  // name maps
   auto & new_sideset_map = out_mesh->get_boundary_info().set_sideset_name_map();
   auto & new_nodeset_map = out_mesh->get_boundary_info().set_nodeset_name_map();
   for (unsigned int i = 0; i < meshes.size(); i++)

@@ -966,25 +966,18 @@ PolygonMeshGeneratorBase::addPeripheralMesh(
   std::vector<std::pair<Real, Real>> positions_inner;
   std::vector<std::pair<Real, Real>> d_positions_outer;
 
-  std::vector<std::vector<unsigned int>> inner_index;
-  std::vector<std::vector<unsigned int>> outer_index;
+  std::vector<std::vector<unsigned int>> peripheral_point_index;
   std::vector<std::pair<Real, Real>> sub_positions_inner;
   std::vector<std::pair<Real, Real>> sub_d_positions_outer;
 
   if (mesh_type == CORNER_MESH)
-  {
     // corner mesh has three sides that need peripheral meshes.
     // each element has three sub-elements, representing beginning, middle, and ending azimuthal
     // points
-    inner_index = {{0, 1, 2}, {2, 3, 4}, {4, 5, 6}};
-    outer_index = {{0, 1, 2}, {2, 3, 4}, {4, 5, 6}};
-  }
+    peripheral_point_index = {{0, 1, 2}, {2, 3, 4}, {4, 5, 6}};
   else
-  {
     // side mesh has two sides that need peripheral meshes.
-    inner_index = {{0, 1, 2}, {2, 7, 8}};
-    outer_index = {{0, 1, 2}, {2, 7, 8}};
-  }
+    peripheral_point_index = {{0, 1, 2}, {2, 7, 8}};
 
   // extra_dist includes background and ducts.
   // Loop to calculate the positions of the boundaries.
@@ -998,15 +991,16 @@ PolygonMeshGeneratorBase::addPeripheralMesh(
                   i);
 
     // Loop for all applicable sides that need peripherial mesh (3 for corner and 2 for edge)
-    for (unsigned int peripheral_index = 0; peripheral_index < inner_index.size();
+    for (unsigned int peripheral_index = 0; peripheral_index < peripheral_point_index.size();
          peripheral_index++)
     {
       // Loop for beginning, middle and ending positions of a side
       for (unsigned int vector_index = 0; vector_index < 3; vector_index++)
       {
-        sub_positions_inner.push_back(positions_inner[inner_index[peripheral_index][vector_index]]);
+        sub_positions_inner.push_back(
+            positions_inner[peripheral_point_index[peripheral_index][vector_index]]);
         sub_d_positions_outer.push_back(
-            d_positions_outer[outer_index[peripheral_index][vector_index]]);
+            d_positions_outer[peripheral_point_index[peripheral_index][vector_index]]);
       }
       auto meshp0 = buildSimplePeripheral(num_sectors_per_side_array[pattern],
                                           peripheral_duct_intervals[i],
@@ -1041,43 +1035,38 @@ PolygonMeshGeneratorBase::addPeripheralMeshRect(
   std::vector<std::pair<Real, Real>> positions_inner;
   std::vector<std::pair<Real, Real>> d_positions_outer;
 
-  std::vector<std::vector<unsigned int>> inner_index;
-  std::vector<std::vector<unsigned int>> outer_index;
+  std::vector<std::vector<unsigned int>> peripheral_point_index;
   std::vector<std::pair<Real, Real>> sub_positions_inner;
   std::vector<std::pair<Real, Real>> sub_d_positions_outer;
 
   if (mesh_type == CORNER_MESH)
-  {
     // corner mesh has two sides that need peripheral meshes.
     // each element has three sub-elements, representing beginning, middle, and ending azimuthal
     // points
-    inner_index = {{0, 1, 2}, {2, 3, 4}};
-    outer_index = {{0, 1, 2}, {2, 3, 4}};
-  }
+    peripheral_point_index = {{0, 1, 2}, {2, 3, 4}};
   else
-  {
     // side mesh has one side that need peripheral meshes.
-    inner_index = {{0, 1, 5}};
-    outer_index = {{0, 1, 5}};
-  }
+    peripheral_point_index = {{0, 1, 5}};
 
   // extra_dist includes background and ducts.
   // Loop to calculate the positions of the boundaries.
   for (unsigned int i = 0; i < extra_dist.size(); i++)
   {
+    // Generate the node positions for the peripheral meshes, for all indices around the input
     positionSetupRect(
         positions_inner, d_positions_outer, i == 0 ? 0.0 : extra_dist[i - 1], extra_dist[i], pitch);
 
-    // Loop for all applicable sides that need peripherial mesh (3 for corner and 2 for edge)
-    for (unsigned int peripheral_index = 0; peripheral_index < inner_index.size();
+    // Loop for all applicable sides that need peripheral mesh (3 for corner and 2 for edge)
+    for (unsigned int peripheral_index = 0; peripheral_index < peripheral_point_index.size();
          peripheral_index++)
     {
       // Loop for beginning, middle and ending positions of a side
       for (unsigned int vector_index = 0; vector_index < 3; vector_index++)
       {
-        sub_positions_inner.push_back(positions_inner[inner_index[peripheral_index][vector_index]]);
+        sub_positions_inner.push_back(
+            positions_inner[peripheral_point_index[peripheral_index][vector_index]]);
         sub_d_positions_outer.push_back(
-            d_positions_outer[outer_index[peripheral_index][vector_index]]);
+            d_positions_outer[peripheral_point_index[peripheral_index][vector_index]]);
       }
       auto meshp0 = buildSimplePeripheral(num_sectors_per_side_array[pattern],
                                           peripheral_duct_intervals[i],
