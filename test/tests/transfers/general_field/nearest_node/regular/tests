@@ -1,32 +1,47 @@
 [Tests]
   issues = '#16427 #16429'
-  design = 'transfers/MultiAppGeneralFieldTransfer.md'
+  design = 'transfers/MultiAppGeneralFieldShapeEvaluationTransfer.md'
 
-  [./tosub1]
-    type = 'Exodiff'
-    input = 'main_diffusion.i'
-    exodiff = 'main_diffusion_out.e'
-    requirement = "The system shall support the general nearest node transfer"
-    custom_cmp = 'main.cmp'
-  [../]
+  [2d_overlay]
+    requirement = "The system shall be able to transfer variables by evaluating shape functions in the origin problem"
+    [same_var_type]
+      type = 'Exodiff'
+      input = 'main.i'
+      exodiff = 'main_out.e main_out_sub0_out.e main_out_sub1_out.e main_out_sub2_out.e'
+      detail = "for variables of the same type,"
+    []
 
-  [./tosub2]
-    type = 'Exodiff'
-    input = 'main_diffusion.i'
-    exodiff = 'main_diffusion_out_sub0.e'
-    requirement = "The system shall support the general nearest node transfer 2"
-    custom_cmp = 'sub.cmp'
-    prereq  = tosub1
-  [../]
+    [projection_needed_receiving]
+      type = 'Exodiff'
+      input = 'main.i'
+      exodiff = 'projection_receive.e projection_receive_sub0_out.e projection_receive_sub1_out.e projection_receive_sub2_out.e'
+      # Set various types of finite element families to the received variables in both apps
+      cli_args = "Outputs/file_base=projection_receive Mesh/second_order=true
+                  AuxVariables/from_sub/order=SECOND AuxVariables/from_sub_elem/order=SECOND
+                  MultiApps/sub/cli_args='Mesh/second_order=true;AuxVariables/from_main/order=SECOND;AuxVariables/from_main_elem/order=FIRST'"
+      detail = "for variables of arbitrary types,"
+    []
 
+    [projection_needed_sending]
+      type = 'Exodiff'
+      input = 'main.i'
+      exodiff = 'projection_send.e projection_send_sub0_out.e projection_send_sub1_out.e projection_send_sub2_out.e'
+      # Set various types of finite element families to the transfered variables in both apps
+      cli_args = "Outputs/file_base=projection_send Mesh/second_order=true
+                  AuxVariables/to_sub/order=SECOND AuxVariables/to_sub_elem/order=SECOND
+                  MultiApps/sub/cli_args='Mesh/second_order=true;AuxVariables/to_main/order=FIRST;AuxVariables/to_main_elem/order=SECOND'"
+      detail = "for variables of arbitrary types,"
+    []
+  []
 
   [fixed_bounding_boxes]
     type = Exodiff
     input = main.i
     exodiff = 'main_out.e main_out_sub0_out.e main_out_sub1_out.e main_out_sub2_out.e'
-    # Offset the subapps and override the bounding box to keep them inside the scope
-    cli_args = "MultiApps/sub/positions='0 0 0.1 0.4 0.4 -0.1 0.7 0.1 0.05'
-                Transfers/from_sub/fixed_bounding_box_size='0.5 0.5 1' Transfers/from_sub_elem/fixed_bounding_box_size='0.5 0.5 1'
+    # Offset the subapps off the plane and override the bounding box to keep them inside the scope
+    # The offsets have to be the same to keep the same distances relatively, to keep the same gold files
+    cli_args = "MultiApps/sub/positions='0 0 0.1 0.4 0.4 -0.1 0.7 0.1 0.1'
+                Transfers/from_sub/fixed_bounding_box_size='0.2 0.2 1' Transfers/from_sub_elem/fixed_bounding_box_size='0.2 0.2 1'
                 Transfers/to_sub/fixed_bounding_box_size='1 1 0.3' Transfers/to_sub_elem/fixed_bounding_box_size='1 1 0.3'"
     detail = "while allowing for an user to set the size of the application bounding box directly"
   []
