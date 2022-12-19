@@ -12,6 +12,7 @@
 #include "FVUtils.h"
 #include "INSFVRhieChowInterpolator.h"
 #include "SystemBase.h"
+#include "NSFVUtils.h"
 
 registerMooseObject("NavierStokesApp", INSFVMomentumAdvection);
 

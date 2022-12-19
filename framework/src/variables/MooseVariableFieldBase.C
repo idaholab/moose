@@ -8,8 +8,9 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MooseVariableFieldBase.h"
-
 #include "SubProblem.h"
+#include "SystemBase.h"
+#include "libmesh/system.h"
 
 InputParameters
 MooseVariableFieldBase::validParams()

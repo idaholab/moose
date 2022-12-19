@@ -1689,7 +1689,6 @@ public:
    */
   void processResidual(Real residual, dof_id_type dof_index, const std::set<TagID> & vector_tags);
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   /**
    * This simply caches the derivative values for the corresponding column indices for the provided
    * \p matrix_tags, and applies any scaling factors
@@ -1705,7 +1704,6 @@ public:
                                   dof_id_type dof_index,
                                   const std::set<TagID> & vector_tags,
                                   const std::set<TagID> & matrix_tags);
-#endif
 
   /**
    * Process the \p derivatives() data of an \p ADReal. When using global indexing, this method
@@ -2853,6 +2851,12 @@ Assembly::processJacobian(const ADReal & residual,
 
   for (std::size_t i = 0; i < column_indices.size(); ++i)
     cacheJacobian(row_index, column_indices[i], values[i] * scalar, matrix_tags);
+}
+#else
+inline void
+Assembly::processJacobian(const ADReal &, const dof_id_type, const std::set<TagID> &)
+{
+  mooseError("Not implemented for local AD indexing");
 }
 #endif
 
