@@ -16,6 +16,7 @@
 #include "MooseTypes.h"
 #include "MooseVariableFE.h"
 
+// libmesh includes
 #include "libmesh/point_locator_base.h"
 #include "libmesh/enum_point_locator_type.h"
 
@@ -42,8 +43,8 @@ MultiAppGeneralFieldTransfer::validParams()
   params.addRangeCheckedParam<std::vector<Real>>(
       "fixed_bounding_box_size",
       "fixed_bounding_box_size >= 0",
-      "Override source app bounding box size(s) for searches. App bounding boxes will be grown "
-      "symmetrically. Only non-zero components passed will override.");
+      "Override source app bounding box size(s) for searches. App bounding boxes will still be  "
+      "centered on the same coordinates. Only non-zero components passed will override.");
 
   // Block restrictions
   params.addParam<std::vector<SubdomainName>>(
@@ -205,7 +206,19 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
   // Get the bounding boxes for the "from" domains.
   // Clean up _bboxes
   _bboxes.clear();
-  _bboxes = getRestrictedFromBoundingBoxes();
+
+  // Obey source block and boundary restriction if specified
+  // NOTE: This ignores the app's bounding box inflation and padding
+  if (_from_blocks.size() || _from_boundaries.size() || !hasFromMultiApp() ||
+      _fixed_bbox_size != std::vector<Real>(3, 0))
+    _bboxes = getRestrictedFromBoundingBoxes();
+  else
+  {
+    // The multiapp can also have padding and bounding box inflation parameters
+    _bboxes.resize(_from_meshes.size());
+    for (const auto i : make_range(_from_meshes.size()))
+      _bboxes[i] = getFromMultiApp()->getBoundingBox(i, _displaced_source_mesh, nullptr);
+  }
 
   // Expand bounding boxes. Some desired points might be excluded
   // without an expansion
@@ -889,7 +902,7 @@ MultiAppGeneralFieldTransfer::getRestrictedFromBoundingBoxes()
     }
 
     // For 2D RZ problems, we need to amend the bounding box to cover the whole XYZ projection
-    // - The box is large enough to cover the cases where Z is aligned with the Cartesian X, Y or Z
+    // - The XYZ-Y axis is assumed aligned with the RZ-Z axis
     // - RZ systems also cover negative coordinates hence the use of the maximum R
     // NOTE: We will only support the case where there is only one coordinate system
     if ((from_mesh.getUniqueCoordSystem() == Moose::COORD_RZ) && (LIBMESH_DIM == 3))
