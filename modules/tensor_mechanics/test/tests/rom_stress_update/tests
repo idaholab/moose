@@ -65,8 +65,7 @@
       petsc_version = '>=3.9.0'
       max_parallel = 1
       allow_test_objects = true
-      detail = 'in isolation (i.e. without a full displacement solve), and match with code-to-code '
-               'comparison with a small set of input parameters not using AD.'
+      detail = 'in isolation (i.e. without a full displacement solve), and match with code-to-code comparison with a small set of input parameters not using AD.'
     []
     [nonad_verification_heavy]
       type = 'CSVDiff'
@@ -78,8 +77,7 @@
       cli_args = 'Executioner/dt=1e-5 Outputs/file_base=nonad_verification_heavy_out Outputs/interval=100'
       max_parallel = 1
       allow_test_objects = true
-      detail = 'in isolation (i.e. without a full displacement solve), and match with code-to-code '
-               'comparison with a large set of input parameters not using AD.'
+      detail = 'in isolation (i.e. without a full displacement solve), and match with code-to-code comparison with a large set of input parameters not using AD.'
     []
 
     [lower_limit]
@@ -97,13 +95,30 @@
       allow_test_objects = true
       detail = 'below the lower temperature limit and extrapolate correctly.'
     []
+    [lower_limit_error]
+      type = 'RunException'
+      input = lower_limit.i
+      expect_err = "In rom_stress_prediction: temperature input parameter with value \(500\) is out "
+                   "of lower global range"
+      cli_args = 'temp=500 disp=0.5e6 Materials/rom_stress_prediction/temperature_input_window_low_failure=ERROR'
+      allow_test_objects = true
+      detail = 'but should error out below the lower temperature limit if requested by the user.'
+    []
+    [upper_limit_error]
+      type = 'RunException'
+      input = lower_limit.i
+      expect_err = "In rom_stress_prediction: temperature input parameter with value \(2500\) is out "
+                   "of upper global range"
+      cli_args = 'temp=2500 disp=0.5e6 Materials/rom_stress_prediction/temperature_input_window_low_failure=ERROR'
+      allow_test_objects = true
+      detail = 'but should error out above the upper temperature limit if requested by the user.'
+    []
     [creep_ramp_sub_false]
       type = 'CSVDiff'
       input = creep_ramp_sub_false.i
       csvdiff = creep_ramp_sub_false_out.csv
       allow_test_objects = true
-      detail = 'when substepping is off and the time step size does not guarantee the most accurate '
-               'results.'
+      detail = 'when substepping is off and the time step size does not guarantee the most accurate results.'
     []
     [creep_ramp_sub_false_more_steps]
       type = 'CSVDiff'
@@ -118,8 +133,7 @@
       csvdiff = creep_ramp_sub_true_out.csv
       allow_test_objects = true
       allow_warnings = true
-      detail = 'when substepping is on and the numerical integration error selected by the user '
-               'guarantees accurate results.'
+      detail = 'when substepping is on and the numerical integration error selected by the user guarantees accurate results.'
     []
     [creep_ramp_sub_true_exception]
       type = 'RunApp'
@@ -128,10 +142,7 @@
       cli_args = 'Materials/rom_stress_prediction/substep_strain_tolerance=5.0e-6'
       allow_test_objects = true
       allow_warnings = true
-      detail = 'when substepping is on and the numerical integration error selected by the user '
-               'guarantees accurate results but substepping settings require a system-wise time step '
-               'cut because the computed number of substeps exceeds the maximum_number_substeps '
-               'parameter.'
+      detail = 'when substepping is on and the numerical integration error selected by the user guarantees accurate results but substepping settings require a system-wise time step cut because the computed number of substeps exceeds the maximum_number_substeps parameter.'
     []
 
     [3tile]
@@ -234,8 +245,7 @@
       petsc_version = '>=3.9.0'
       max_parallel = 1
       allow_test_objects = true
-      detail = 'in isolation (i.e. without a full displacement solve), and match with code-to-code '
-               'comparison with a small set of input parameters using AD.'
+      detail = 'in isolation (i.e. without a full displacement solve), and match with code-to-code comparison with a small set of input parameters using AD.'
     []
     [ad_verification_heavy]
       type = 'CSVDiff'
@@ -247,8 +257,7 @@
       cli_args = 'Executioner/dt=1e-5 Outputs/file_base=ad_verification_heavy_out Outputs/interval=100'
       max_parallel = 1
       allow_test_objects = true
-      detail = 'in isolation (i.e. without a full displacement solve), and match with code-to-code '
-               'comparison with a large set of input parameters using AD.'
+      detail = 'in isolation (i.e. without a full displacement solve), and match with code-to-code comparison with a large set of input parameters using AD.'
     []
 
     [lower_limit]
