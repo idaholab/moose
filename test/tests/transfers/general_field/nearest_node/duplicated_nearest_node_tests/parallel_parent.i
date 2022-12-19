@@ -69,12 +69,14 @@
 []
 
 [Transfers]
-# Surface to volume data transfer
+  # Surface to volume data transfer
+  # This extrapolates, so we inflate the bounding box size
   [./from_sub]
     type = MultiAppGeneralFieldNearestNodeTransfer
     from_multi_app = sub
     source_variable = u
     variable = from_sub
     execute_on = 'timestep_end'
+    fixed_bounding_box_size = '1 1 0'
   [../]
 []
