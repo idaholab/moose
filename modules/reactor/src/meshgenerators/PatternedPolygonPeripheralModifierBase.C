@@ -71,6 +71,7 @@ PatternedPolygonPeripheralModifierBase::PatternedPolygonPeripheralModifierBase(
   if (_extra_id_names_to_modify.size() != _new_extra_id_values_to_assign.size())
     paramError("new_extra_id_values_to_assign",
                "This parameter must have the same size as extra_id_names_to_modify.");
+  declareMeshProperty<bool>("peripheral_modifier_compatible", false);
 }
 
 std::unique_ptr<MeshBase>
