@@ -2,9 +2,13 @@
 
 !syntax description /Modules/PhaseField/GrandPotential/GrandPotentialKernelAction
 
-For more information on the grand potential model, see [!cite](plapp_unified_2011) and
-[!cite](moelans_quantitative_2008).
-The following kernels are generated for each chemical potential variable:
+
+For more information on the multi-phase, multi-order parameter grand potential model, see [!cite](AagesenGP2018) (which is based on [!cite](plapp_unified_2011) and
+[!cite](moelans_quantitative_2008)). Documentation on the multi-phase, multi-order parameter grand potential model itself, including MOOSE implementation, is available here:
+
+[](/GrandPotentialMultiphase.md)
+
+In this action, the following kernels are generated for each chemical potential variable:
 
 - [`SusceptibilityTimeDerivative`](/SusceptibilityTimeDerivative.md)
 - [`MatDiffusion`](/MatDiffusion.md) or [`MatAnisoDiffusion`](/MatAnisoDiffusion.md)
