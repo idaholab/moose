@@ -207,7 +207,7 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
   // Clean up _bboxes
   _bboxes.clear();
 
-  // Obey source block and boundary restriction if specified
+  // Obey fixed box sizes or source block and boundary restriction if specified
   // NOTE: This ignores the app's bounding box inflation and padding
   if (_from_blocks.size() || _from_boundaries.size() || !hasFromMultiApp() ||
       _fixed_bbox_size != std::vector<Real>(3, 0))
@@ -215,6 +215,7 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
   else
   {
     // The multiapp can also have padding and bounding box inflation parameters
+    // NOTE: This ignores the transfer's fixed bounding box size
     _bboxes.resize(_from_meshes.size());
     for (const auto i : make_range(_from_meshes.size()))
       _bboxes[i] = getFromMultiApp()->getBoundingBox(i, _displaced_source_mesh, nullptr);

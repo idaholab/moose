@@ -31,12 +31,15 @@ All transfers derived from this base class should be able to support:
 - boundary restriction in both the source and target application
 - arbitrary number of parallel processes for both the source and target application
 - support for replicated and distributed meshes in both applications involved
-- transfers between parent and child applications as well as between sibling applications
+- transfers between parent and child applications
+- transfers between sibling applications (child to child)
+- transfers between parent and multiple child applications in different locations
 - transfers to and from a displaced mesh
 - transfers of nodal and elemental variables
 - transfers between variables of different finite element/volume family and type
 - transfers between regular and array variables
 - transfers from multiple variables to multiple variables
+- interpolation and extrapolation transfers, as defined by the derived class
 
 
 !alert note
