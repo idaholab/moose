@@ -100,6 +100,36 @@ that MOOSE [uses](/application_usage/input_syntax.html optional=True). An exampl
 
 !listing moose/test/tests/kernels/simple_diffusion/tests
 
+## Test Evaluation and Custom Evaluators
+
+MOOSE has various configurations for evaluating whether a created test is successful or not. Depending on what type of Tester you specify in the "test specification" file, these can range from comparing the output of JSON, XML, CSV, or Exodus files, or matching a pattern in the output of the test using a regular expression.
+
+Sometimes, it may not be possible to properly evaluate a test with the built-in checks MOOSE provides. In this situation, MOOSE has functionality for evaluating a test using a custom, user-supplied evaluation function. 
+
+To do this, create a Python script in the folder containing your test. The script should be blank aside from a single function named `custom_evaluation(output)`:
+
+```
+def custom_evaluation(output):
+  #Do your evaluation logic here
+  if output == "foo":
+    return True
+  return False
+```
+
+`output` is a string containing the test's entire output and can be manipulated as one sees fit. The function should return a boolean representing whether the test passed or not.
+
+After creating the .py file, add `custom_evaluation_script = '[filename].py'` to your test specification file. For example:
+
+```
+[Tests]
+  [my_test]
+    type = RunApp
+    input = my_input.i
+    custom_evaluation_script = 'my_custom_eval.py'
+  []
+[]
+```
+
 ## Parallel Test Execution id=parallel
 
 The TestHarness is designed to schedule several tests (jobs) concurrently. The `-j <n>` option to the
@@ -205,3 +235,4 @@ Ran 2 tests in 2.9 seconds.
 ```
 
 Caveats of MOOSE_TERM_COLS; If you specify too low a MOOSE_TERM_COLS, the TestHarness will only drop printing of the justification filler (see MOOSE_TERM_FORMAT above).
+   

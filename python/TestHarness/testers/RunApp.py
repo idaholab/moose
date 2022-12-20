@@ -27,6 +27,7 @@ class RunApp(Tester):
         params.addParam('executable_pattern', "A test that only runs if the executable name matches the given pattern")
         params.addParam('delete_output_before_running',  True, "Delete pre-existing output files before running test. Only set to False if you know what you're doing!")
         params.addParam('delete_output_folders', True, "Delete output folders before running")
+        params.addParam('custom_evaluation_script', False, "A .py file containing a custom function for evaluating a test's success. For syntax, please check https://mooseframework.inl.gov/python/TestHarness.html")
 
         # RunApp can also run arbitrary commands. If the "command" parameter is supplied
         # it'll be used in lieu of building up the command automatically
@@ -216,6 +217,26 @@ class RunApp(Tester):
         reason = ''
         errors = ''
         specs = self.specs
+
+        if specs["custom_evaluation_script"]:
+            if (specs.isValid('expect_out') or specs.isValid('absent_out')):
+                errors += 'expect_out and absent_out can not be supplied when using a custom evaluation function!'
+                self.setStatus(self.fail, "CUSTOM EVAL FAILED")
+                return errors
+            import importlib.util, sys
+            custom_mod_spec = importlib.util.spec_from_file_location("custom_module", os.path.join(self.getMooseDir(),self.getTestDir(), specs["custom_evaluation_script"]))
+            custom_module = importlib.util.module_from_spec(custom_mod_spec)
+            sys.modules['custom_module'] = custom_module
+            custom_mod_spec.loader.exec_module(custom_module)
+            if custom_module.custom_evaluation(output):
+                return errors
+            else:
+                errors += "#"*80 + "\n\n" + "Custom evaluation failed.\n"
+                self.setStatus(self.fail, "CUSTOM EVAL FAILED")
+                return errors
+
+
+
 
         params_and_msgs = {'expect_err':
                               {'error_missing': True,

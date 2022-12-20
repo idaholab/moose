@@ -71,8 +71,13 @@ private:
   /// Convenience reference to the execution_list within the PerfGraph
   std::array<PerfGraph::SectionIncrement, MAX_EXECUTION_LIST_SIZE> & _execution_list;
 
-  /// True when we should stop printing
-  bool _currently_destructing;
+  /**
+   * True when we stop printing. NOTE: Even though only one thread is supposed to
+   * touch this variable, we make it atomic to avoid potential memory leak errors
+   * when testing with libtorch. Doing this is not expected to influence the performance
+   * considerably.
+   */
+  std::atomic<bool> _currently_destructing;
 
   /// Whether or not printing is currently turned on
   /// This shadows PerfGraph._live_print_active so that we have consistency

@@ -15,4 +15,13 @@
     design = 'kernels/ACSwitching.md'
     issues = '#13713'
   [../]
+  [./GrandPotential3Phase_masscons]
+    type = RunApp
+    input = 'GrandPotential3Phase_masscons.i'
+    check_input = True
+    requirement = "The multi-phase grand potential phase-field model shall have an example with 3 phases that enforces strict mass conservation"
+    design = 'kernels/ACSwitching.md'
+    issues = '#22159'
+    method = '!DBG'
+  [../]
 []

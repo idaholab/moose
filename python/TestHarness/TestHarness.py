@@ -418,8 +418,9 @@ class TestHarness:
                             sys.path.append(os.path.abspath(dirpath))
                             os.chdir(dirpath)
 
-                            # Get the testers for this test
+                            # Create the testers for this test
                             testers = self.createTesters(dirpath, file, find_only, testroot_params)
+
 
                             # Schedule the testers (non blocking)
                             self.scheduler.schedule(testers)
@@ -468,6 +469,7 @@ class TestHarness:
 
         # Augment the Testers with additional information directly from the TestHarness
         for tester in testers:
+
             self.augmentParameters(file, tester, testroot_params)
             if testroot_params.get("caveats"):
                 # Show what executable we are using if using a different testroot file
