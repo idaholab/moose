@@ -8,5 +8,7 @@
     ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
     valgrind = none
+    design = 'FVInterfaceKernels/index.md FVBCs/index.md'
+    issues = '#16756'
   []
 []
