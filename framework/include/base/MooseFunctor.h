@@ -130,7 +130,7 @@ public:
   /**
    * Returns true if the face is an internal face
    */
-  virtual bool isInternalFace(const FaceInfo &) const { mooseError("not implemented"); }
+  bool isInternalFace(const FaceInfo &) const;
 
   /**
    * Returns true if this functor is a constant
@@ -349,6 +349,16 @@ private:
   /// name of the functor
   MooseFunctorName _functor_name;
 };
+
+template <typename T>
+bool
+FunctorBase<T>::isInternalFace(const FaceInfo & fi) const
+{
+  if (!fi.neighborPtr())
+    return false;
+
+  return hasBlocks(fi.elem().subdomain_id()) && hasBlocks(fi.neighborPtr()->subdomain_id());
+}
 
 template <typename T>
 template <typename SpaceArg>

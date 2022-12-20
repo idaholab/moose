@@ -511,17 +511,6 @@ MooseVariableFV<OutputType>::getElemValue(const Elem * const elem) const
 
 template <typename OutputType>
 bool
-MooseVariableFV<OutputType>::isInternalFace(const FaceInfo & fi) const
-{
-  const bool is_internal_face = fi.faceType(this->name()) == FaceInfo::VarFaceNeighbors::BOTH;
-  mooseAssert(is_internal_face == (this->hasBlocks(fi.elem().subdomain_id()) && fi.neighborPtr() &&
-                                   this->hasBlocks(fi.neighborPtr()->subdomain_id())),
-              "Sanity checking whether we are indeed an internal face");
-  return is_internal_face;
-}
-
-template <typename OutputType>
-bool
 MooseVariableFV<OutputType>::isDirichletBoundaryFace(const FaceInfo & fi, const Elem *) const
 {
   const auto & pr = getDirichletBC(fi);
@@ -561,7 +550,7 @@ MooseVariableFV<OutputType>::isExtrapolatedBoundaryFace(const FaceInfo & fi,
   if (isDirichletBoundaryFace(fi, elem))
     return false;
   else
-    return !isInternalFace(fi);
+    return !this->isInternalFace(fi);
 }
 
 template <typename OutputType>
@@ -618,7 +607,8 @@ MooseVariableFV<OutputType>::getBoundaryFaceValue(const FaceInfo & fi,
   mooseError("MooseVariableFV::getBoundaryFaceValue only supported for global AD indexing");
 #endif
 
-  mooseAssert(!isInternalFace(fi), "A boundary face value has been requested on an internal face.");
+  mooseAssert(!this->isInternalFace(fi),
+              "A boundary face value has been requested on an internal face.");
 
   if (isDirichletBoundaryFace(fi, elem))
     return getDirichletBoundaryFaceValue(fi, elem);
@@ -703,7 +693,7 @@ MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi, const bool correct_s
   const Elem * const elem = &fi.elem();
   const Elem * const neighbor = fi.neighborPtr();
 
-  const bool is_internal_face = isInternalFace(fi);
+  const bool is_internal_face = this->isInternalFace(fi);
 
   const ADReal side_one_value =
       (!is_internal_face && !var_defined_on_elem) ? getBoundaryFaceValue(fi) : getElemValue(elem);
@@ -712,7 +702,7 @@ MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi, const bool correct_s
                                     : getElemValue(neighbor);
 
   const auto delta =
-      isInternalFace(fi)
+      this->isInternalFace(fi)
           ? fi.dCNMag()
           : (fi.faceCentroid() - (var_defined_on_elem ? fi.elemCentroid() : fi.neighborCentroid()))
                 .norm();
@@ -794,7 +784,8 @@ MooseVariableFV<OutputType>::evaluate(const FaceArg & face,
   }
   else
   {
-    mooseAssert(isInternalFace(*fi), "We must be either Dirichlet, extrapolated, or internal");
+    mooseAssert(this->isInternalFace(*fi),
+                "We must be either Dirichlet, extrapolated, or internal");
     return Moose::FV::interpolate(*this, face);
   }
 }

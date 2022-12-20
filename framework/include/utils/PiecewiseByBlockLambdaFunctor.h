@@ -53,7 +53,6 @@ public:
   virtual ~PiecewiseByBlockLambdaFunctor() = default;
 
   bool isExtrapolatedBoundaryFace(const FaceInfo & fi, const Elem * elem) const override;
-  bool isInternalFace(const FaceInfo & fi) const override;
 
   bool hasBlocks(SubdomainID id) const override;
 
@@ -179,27 +178,17 @@ PiecewiseByBlockLambdaFunctor<T>::isExtrapolatedBoundaryFace(const FaceInfo & fi
 
 template <typename T>
 bool
-PiecewiseByBlockLambdaFunctor<T>::isInternalFace(const FaceInfo & fi) const
-{
-  if (!fi.neighborPtr())
-    return false;
-
-  const bool defined_on_elem = _elem_functor.count(fi.elem().subdomain_id());
-  const bool defined_on_neighbor = _elem_functor.count(fi.neighbor().subdomain_id());
-
-  return (defined_on_elem && defined_on_neighbor);
-}
-
-template <typename T>
-bool
 PiecewiseByBlockLambdaFunctor<T>::hasBlocks(const SubdomainID id) const
 {
   // If any of the maps has a functor for that block, it has the block
-  if (_elem_functor.count(id) || _face_functor.count(id) || _elem_qp_functor.count(id) ||
-      _elem_side_qp_functor.count(id))
-    return true;
-  else
-    return false;
+  const bool has_blocks = _elem_functor.count(id);
+  mooseAssert(has_blocks == _face_functor.count(id),
+              "All functor sets should agree on whether we have this sub id");
+  mooseAssert(has_blocks == _elem_qp_functor.count(id),
+              "All functor sets should agree on whether we have this sub id");
+  mooseAssert(has_blocks == _elem_side_qp_functor.count(id),
+              "All functor sets should agree on whether we have this sub id");
+  return has_blocks;
 }
 
 template <typename T>
@@ -246,7 +235,7 @@ PiecewiseByBlockLambdaFunctor<T>::evaluate(const Moose::FaceArg & face, unsigned
     return it->second(face, state);
   }
 
-  mooseAssert(isInternalFace(*face.fi),
+  mooseAssert(this->isInternalFace(*face.fi),
               "If we did not have a face side, then we must be an internal face");
   return interpolate(*this, face);
 }
