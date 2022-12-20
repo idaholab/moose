@@ -20,6 +20,8 @@ CriticalTimeStep::validParams()
   params.addParam<MaterialPropertyName>(
       "density",
       "Name of Material Property  or a constant real number defining the density of the material.");
+  params.addParam<MaterialPropertyName>(
+      "density_scaling", "Name of material property to add mass scaling in explicit simulations.");
   params.addParam<Real>("factor", 1.0, "Factor to mulitply to the critical time step.");
   return params;
 }
@@ -28,6 +30,9 @@ CriticalTimeStep::CriticalTimeStep(const InputParameters & parameters)
   : ElementPostprocessor(parameters),
     GuaranteeConsumer(this),
     _material_density(getMaterialPropertyByName<Real>("density")),
+    _density_scaling(parameters.isParamSetByUser("density_scaling")
+                         ? &getMaterialPropertyByName<Real>("density_scaling")
+                         : nullptr),
     _effective_stiffness(getMaterialPropertyByName<Real>("effective_stiffness")),
     _factor(getParam<Real>("factor")),
     _critical_time(parameters.isParamValid("critical_time"))
@@ -51,13 +56,15 @@ CriticalTimeStep::initialize()
 void
 CriticalTimeStep::execute()
 {
-  Real dens = _material_density[0];
+  const Real dens = _material_density[0];
+  const Real dens_scaling = _density_scaling ? (*_density_scaling)[0] : 0.0;
+
   // In the above line, density is inferred only at the first quadrature point
   // of each element. Since critical time step is computed across all elements and
   // a minimum is then taken, this is okay.
-  _critical_time =
-      std::min(_factor * _current_elem->hmin() * std::sqrt(dens) / (_effective_stiffness[0]),
-               _critical_time);
+  _critical_time = std::min(_factor * _current_elem->hmin() * std::sqrt(dens + dens_scaling) /
+                                (_effective_stiffness[0]),
+                            _critical_time);
 }
 
 void
