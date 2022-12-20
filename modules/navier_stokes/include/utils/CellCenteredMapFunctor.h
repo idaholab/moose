@@ -56,22 +56,25 @@ public:
   using ElemSideQpArg = Moose::ElemSideQpArg;
   using ElemPointArg = Moose::ElemPointArg;
 
-  CellCenteredMapFunctor(const MooseMesh & mesh, const std::string & name)
-    : Moose::FunctorBase<T>(name), _mesh(mesh)
-  {
-  }
+  /**
+   * Use this constructor when you want the object to live everywhere on the mesh
+   */
+  CellCenteredMapFunctor(const MooseMesh & mesh, const std::string & name);
 
+  /**
+   * Use this constructor if you want to potentially restrict this object to a specified set of
+   * subdomains/blocks
+   */
   CellCenteredMapFunctor(const MooseMesh & mesh,
                          const std::set<SubdomainID> & sub_ids,
-                         const std::string & name)
-    : Moose::FunctorBase<T>(name),
-      _mesh(mesh),
-      _sub_ids(sub_ids == mesh.meshSubdomains() ? std::set<SubdomainID>() : sub_ids)
-  {
-  }
+                         const std::string & name);
 
   bool isExtrapolatedBoundaryFace(const FaceInfo & fi, const Elem * elem) const override;
   bool hasBlocks(SubdomainID sub_id) const override;
+
+  /**
+   * Checks whether we are defined on the provided element
+   */
   bool hasBlocks(const Elem * elem) const;
 
 private:
@@ -82,59 +85,33 @@ private:
   /// on all subdomains
   const std::set<SubdomainID> _sub_ids;
 
-  ValueType evaluate(const ElemArg & elem_arg, unsigned int) const override final
-  {
-    const Elem * const elem = elem_arg.elem;
-
-    try
-    {
-      return libmesh_map_find(*this, elem->id());
-    }
-    catch (libMesh::LogicError &)
-    {
-      if (!_sub_ids.empty() && !_sub_ids.count(elem->subdomain_id()))
-        mooseError("Attempted to evaluate CellCenteredMapFunctor '",
-                   this->functorName(),
-                   "' with an element subdomain id of '",
-                   elem->subdomain_id(),
-                   "' but that subdomain id is not one of the subdomain ids the functor is "
-                   "restricted to.");
-      else
-        mooseError("Attempted access into CellCenteredMapFunctor '",
-                   this->functorName(),
-                   "' with a key that does not yet exist in the map. Make sure to fill your "
-                   "CellCenteredMapFunctor for all elements you will attempt to access later.");
-    }
-  }
-
-  ValueType evaluate(const FaceArg & face, unsigned int) const override final;
-
-  ValueType evaluate(const ElemPointArg & elem_point, const unsigned int state) const override final
-  {
-    return (*this)(elem_point.makeElem(), state) +
-           (elem_point.point - elem_point.elem->vertex_average()) *
-               this->gradient(elem_point.makeElem(), state);
-  }
+  ValueType evaluate(const ElemArg & elem_arg, unsigned int) const override;
+  ValueType evaluate(const ElemPointArg & elem_point, const unsigned int state) const override;
+  ValueType evaluate(const FaceArg & face, unsigned int) const override;
+  ValueType evaluate(const ElemQpArg &, unsigned int) const override;
+  ValueType evaluate(const ElemSideQpArg &, unsigned int) const override;
 
   using Moose::FunctorBase<T>::evaluateGradient;
-
-  GradientType evaluateGradient(const ElemArg & elem_arg, unsigned int) const override final
-  {
-    return Moose::FV::greenGaussGradient(elem_arg, *this, true, _mesh);
-  }
-
-  GradientType evaluateGradient(const FaceArg & face, unsigned int) const override final;
-
-  ValueType evaluate(const ElemQpArg &, unsigned int) const override final
-  {
-    mooseError("not implemented");
-  }
-
-  ValueType evaluate(const ElemSideQpArg &, unsigned int) const override final
-  {
-    mooseError("not implemented");
-  }
+  GradientType evaluateGradient(const ElemArg & elem_arg, unsigned int) const override;
+  GradientType evaluateGradient(const FaceArg & face, unsigned int) const override;
 };
+
+template <typename T, typename Map>
+CellCenteredMapFunctor<T, Map>::CellCenteredMapFunctor(const MooseMesh & mesh,
+                                                       const std::string & name)
+  : Moose::FunctorBase<T>(name), _mesh(mesh)
+{
+}
+
+template <typename T, typename Map>
+CellCenteredMapFunctor<T, Map>::CellCenteredMapFunctor(const MooseMesh & mesh,
+                                                       const std::set<SubdomainID> & sub_ids,
+                                                       const std::string & name)
+  : Moose::FunctorBase<T>(name),
+    _mesh(mesh),
+    _sub_ids(sub_ids == mesh.meshSubdomains() ? std::set<SubdomainID>() : sub_ids)
+{
+}
 
 template <typename T, typename Map>
 bool
@@ -168,6 +145,43 @@ CellCenteredMapFunctor<T, Map>::hasBlocks(const SubdomainID sub_id) const
 
 template <typename T, typename Map>
 typename CellCenteredMapFunctor<T, Map>::ValueType
+CellCenteredMapFunctor<T, Map>::evaluate(const ElemArg & elem_arg, unsigned int) const
+{
+  const Elem * const elem = elem_arg.elem;
+
+  try
+  {
+    return libmesh_map_find(*this, elem->id());
+  }
+  catch (libMesh::LogicError &)
+  {
+    if (!_sub_ids.empty() && !_sub_ids.count(elem->subdomain_id()))
+      mooseError("Attempted to evaluate CellCenteredMapFunctor '",
+                 this->functorName(),
+                 "' with an element subdomain id of '",
+                 elem->subdomain_id(),
+                 "' but that subdomain id is not one of the subdomain ids the functor is "
+                 "restricted to.");
+    else
+      mooseError("Attempted access into CellCenteredMapFunctor '",
+                 this->functorName(),
+                 "' with a key that does not yet exist in the map. Make sure to fill your "
+                 "CellCenteredMapFunctor for all elements you will attempt to access later.");
+  }
+}
+
+template <typename T, typename Map>
+typename CellCenteredMapFunctor<T, Map>::ValueType
+CellCenteredMapFunctor<T, Map>::evaluate(const ElemPointArg & elem_point,
+                                         const unsigned int state) const
+{
+  return (*this)(elem_point.makeElem(), state) +
+         (elem_point.point - elem_point.elem->vertex_average()) *
+             this->gradient(elem_point.makeElem(), state);
+}
+
+template <typename T, typename Map>
+typename CellCenteredMapFunctor<T, Map>::ValueType
 CellCenteredMapFunctor<T, Map>::evaluate(const FaceArg & face, unsigned int) const
 {
   const auto & fi = *face.fi;
@@ -195,6 +209,27 @@ CellCenteredMapFunctor<T, Map>::evaluate(const FaceArg & face, unsigned int) con
     return neighbor_value +
            this->gradient(neighbor_arg) * (fi.faceCentroid() - fi.neighborCentroid());
   }
+}
+
+template <typename T, typename Map>
+typename CellCenteredMapFunctor<T, Map>::ValueType
+CellCenteredMapFunctor<T, Map>::evaluate(const ElemQpArg &, unsigned int) const
+{
+  mooseError("not implemented");
+}
+
+template <typename T, typename Map>
+typename CellCenteredMapFunctor<T, Map>::ValueType
+CellCenteredMapFunctor<T, Map>::evaluate(const ElemSideQpArg &, unsigned int) const
+{
+  mooseError("not implemented");
+}
+
+template <typename T, typename Map>
+typename CellCenteredMapFunctor<T, Map>::GradientType
+CellCenteredMapFunctor<T, Map>::evaluateGradient(const ElemArg & elem_arg, unsigned int) const
+{
+  return Moose::FV::greenGaussGradient(elem_arg, *this, true, _mesh);
 }
 
 template <typename T, typename Map>

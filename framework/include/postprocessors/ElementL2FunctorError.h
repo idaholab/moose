@@ -11,6 +11,9 @@
 
 #include "ElementIntegralVariablePostprocessor.h"
 
+/**
+ * Computes L2 error between an 'approximate' functor and an 'exact' functor
+ */
 class ElementL2FunctorError : public ElementIntegralPostprocessor
 {
 public:
@@ -18,10 +21,10 @@ public:
 
   ElementL2FunctorError(const InputParameters & parameters);
 
-  virtual Real getValue() override;
+  Real getValue() override;
 
 protected:
-  virtual Real computeQpIntegral() override;
+  Real computeQpIntegral() override;
 
   /// The approximate functor
   const Moose::Functor<ADReal> & _approx;

@@ -32,71 +32,35 @@ public:
   using ElemSideQpArg = Moose::ElemSideQpArg;
   using ElemPointArg = Moose::ElemPointArg;
 
+  /**
+   * From xyz component constructor
+   */
   VectorCompositeFunctor(const MooseFunctorName & name,
                          const FunctorBase<T> & x_comp,
                          const FunctorBase<T> & y_comp,
-                         const FunctorBase<T> & z_comp)
-    : Moose::FunctorBase<VectorValue<T>>(name), _x_comp(x_comp), _y_comp(y_comp), _z_comp(z_comp)
-  {
-  }
+                         const FunctorBase<T> & z_comp);
 
+  /**
+   * From xy component constructor
+   */
   VectorCompositeFunctor(const MooseFunctorName & name,
                          const FunctorBase<T> & x_comp,
-                         const FunctorBase<T> & y_comp)
-    : Moose::FunctorBase<VectorValue<T>>(name),
-      _z_constant(std::make_unique<Moose::ConstantFunctor>(T(0))),
-      _x_comp(x_comp),
-      _y_comp(y_comp),
-      _z_comp(*_z_constant)
-  {
-  }
+                         const FunctorBase<T> & y_comp);
 
-  VectorCompositeFunctor(const MooseFunctorName & name, const FunctorBase<T> & x_comp)
-    : Moose::FunctorBase<VectorValue<T>>(name),
-      _y_constant(std::make_unique<Moose::ConstantFunctor>(T(0))),
-      _z_constant(std::make_unique<Moose::ConstantFunctor>(T(0))),
-      _x_comp(x_comp),
-      _y_comp(*_y_constant),
-      _z_comp(*_z_constant)
-  {
-  }
+  /**
+   * From x component constructor
+   */
+  VectorCompositeFunctor(const MooseFunctorName & name, const FunctorBase<T> & x_comp);
 
 private:
-  ValueType evaluate(const ElemArg & elem_arg, unsigned int state) const override final
-  {
-    return {_x_comp(elem_arg, state), _y_comp(elem_arg, state), _z_comp(elem_arg, state)};
-  }
-
-  ValueType evaluate(const FaceArg & face, unsigned int state) const override final
-  {
-    return {_x_comp(face, state), _y_comp(face, state), _z_comp(face, state)};
-  }
-
-  ValueType evaluate(const ElemQpArg & elem_qp, unsigned int state) const override
-  {
-    return {_x_comp(elem_qp, state), _y_comp(elem_qp, state), _z_comp(elem_qp, state)};
-  }
-
-  ValueType evaluate(const ElemSideQpArg & elem_side_qp, unsigned int state) const override
-  {
-    return {
-        _x_comp(elem_side_qp, state), _y_comp(elem_side_qp, state), _z_comp(elem_side_qp, state)};
-  }
-
-  ValueType evaluate(const ElemPointArg & elem_point_arg, unsigned int state) const override final
-  {
-    return {_x_comp(elem_point_arg, state),
-            _y_comp(elem_point_arg, state),
-            _z_comp(elem_point_arg, state)};
-  }
+  ValueType evaluate(const ElemArg & elem_arg, unsigned int state) const override;
+  ValueType evaluate(const FaceArg & face, unsigned int state) const override;
+  ValueType evaluate(const ElemQpArg & elem_qp, unsigned int state) const override;
+  ValueType evaluate(const ElemSideQpArg & elem_side_qp, unsigned int state) const override;
+  ValueType evaluate(const ElemPointArg & elem_point_arg, unsigned int state) const override;
 
   using Moose::FunctorBase<VectorValue<T>>::evaluateGradient;
-  GradientType evaluateGradient(const ElemArg & elem_arg, unsigned int state) const override
-  {
-    return {_x_comp.gradient(elem_arg, state),
-            _y_comp.gradient(elem_arg, state),
-            _z_comp.gradient(elem_arg, state)};
-  }
+  GradientType evaluateGradient(const ElemArg & elem_arg, unsigned int state) const override;
 
   /// Possible holder of constant-0 y-component functor. This will be allocated if the user only
   /// supplies one component functor during construction
@@ -113,3 +77,82 @@ private:
   /// The z-component functor
   const Moose::FunctorBase<T> & _z_comp;
 };
+
+template <typename T>
+VectorCompositeFunctor<T>::VectorCompositeFunctor(const MooseFunctorName & name,
+                                                  const FunctorBase<T> & x_comp,
+                                                  const FunctorBase<T> & y_comp,
+                                                  const FunctorBase<T> & z_comp)
+  : Moose::FunctorBase<VectorValue<T>>(name), _x_comp(x_comp), _y_comp(y_comp), _z_comp(z_comp)
+{
+}
+
+template <typename T>
+VectorCompositeFunctor<T>::VectorCompositeFunctor(const MooseFunctorName & name,
+                                                  const FunctorBase<T> & x_comp,
+                                                  const FunctorBase<T> & y_comp)
+  : Moose::FunctorBase<VectorValue<T>>(name),
+    _z_constant(std::make_unique<Moose::ConstantFunctor>(T(0))),
+    _x_comp(x_comp),
+    _y_comp(y_comp),
+    _z_comp(*_z_constant)
+{
+}
+
+template <typename T>
+VectorCompositeFunctor<T>::VectorCompositeFunctor(const MooseFunctorName & name,
+                                                  const FunctorBase<T> & x_comp)
+  : Moose::FunctorBase<VectorValue<T>>(name),
+    _y_constant(std::make_unique<Moose::ConstantFunctor>(T(0))),
+    _z_constant(std::make_unique<Moose::ConstantFunctor>(T(0))),
+    _x_comp(x_comp),
+    _y_comp(*_y_constant),
+    _z_comp(*_z_constant)
+{
+}
+
+template <typename T>
+typename VectorCompositeFunctor<T>::ValueType
+VectorCompositeFunctor<T>::evaluate(const ElemArg & elem_arg, unsigned int state) const
+{
+  return {_x_comp(elem_arg, state), _y_comp(elem_arg, state), _z_comp(elem_arg, state)};
+}
+
+template <typename T>
+typename VectorCompositeFunctor<T>::ValueType
+VectorCompositeFunctor<T>::evaluate(const FaceArg & face, unsigned int state) const
+{
+  return {_x_comp(face, state), _y_comp(face, state), _z_comp(face, state)};
+}
+
+template <typename T>
+typename VectorCompositeFunctor<T>::ValueType
+VectorCompositeFunctor<T>::evaluate(const ElemQpArg & elem_qp, unsigned int state) const
+{
+  return {_x_comp(elem_qp, state), _y_comp(elem_qp, state), _z_comp(elem_qp, state)};
+}
+
+template <typename T>
+typename VectorCompositeFunctor<T>::ValueType
+VectorCompositeFunctor<T>::evaluate(const ElemSideQpArg & elem_side_qp, unsigned int state) const
+{
+  return {_x_comp(elem_side_qp, state), _y_comp(elem_side_qp, state), _z_comp(elem_side_qp, state)};
+}
+
+template <typename T>
+typename VectorCompositeFunctor<T>::ValueType
+VectorCompositeFunctor<T>::evaluate(const ElemPointArg & elem_point_arg, unsigned int state) const
+{
+  return {_x_comp(elem_point_arg, state),
+          _y_comp(elem_point_arg, state),
+          _z_comp(elem_point_arg, state)};
+}
+
+template <typename T>
+typename VectorCompositeFunctor<T>::GradientType
+VectorCompositeFunctor<T>::evaluateGradient(const ElemArg & elem_arg, unsigned int state) const
+{
+  return {_x_comp.gradient(elem_arg, state),
+          _y_comp.gradient(elem_arg, state),
+          _z_comp.gradient(elem_arg, state)};
+}

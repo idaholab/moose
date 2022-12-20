@@ -21,22 +21,30 @@ namespace Moose
 {
 namespace FV
 {
+/**
+ * A helper class for computing Green-Gauss gradients that indices the sidedeness of the Green-Gauss
+ * computation
+ */
 class GreenGaussProducer : public FaceArgProducerInterface
 {
 public:
   GreenGaussProducer(const Elem & elem) : _elem(elem) {}
 
-  bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const override
-  {
-    if (fi_elem_side)
-      return &fi.elem() == &_elem;
-    else
-      return fi.neighborPtr() == &_elem;
-  }
+  bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const override;
 
 private:
+  /// The element we are computing the Green-Gauss gradient for
   const Elem & _elem;
 };
+
+inline bool
+GreenGaussProducer::hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const
+{
+  if (fi_elem_side)
+    return &fi.elem() == &_elem;
+  else
+    return fi.neighborPtr() == &_elem;
+}
 
 /**
  * Compute a cell gradient using the method of Green-Gauss

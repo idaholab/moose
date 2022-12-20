@@ -14,57 +14,38 @@
 #include "MooseFunctorArguments.h"
 #include "libmesh/elem.h"
 
+/**
+ * A base class interface for both producers and consumers of functor face arguments, e.g. residual
+ * objects/postprocessors and functors respectively
+ */
 class FaceArgInterface
 {
 public:
   virtual bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const = 0;
 };
 
+/**
+ * An interface for consumers of functor face arguments, e.g. the functors themselves
+ */
 class FaceArgConsumerInterface : public FaceArgInterface
 {
 public:
-  bool hasDiscontinuity(const FaceInfo &) const { return false; }
-
-  Moose::FaceArg checkFace(const Moose::FaceArg & face) const
-  {
-    const Elem * const elem = face.face_side;
-    const FaceInfo * const fi = face.fi;
-    mooseAssert(fi, "face info should be non-null");
-    auto ret_face = face;
-    bool check_elem_def = false;
-    bool check_neighbor_def = false;
-    if (!elem)
-    {
-      if (!hasFaceSide(*fi, true))
-      {
-        ret_face.face_side = fi->neighborPtr();
-        check_neighbor_def = true;
-      }
-      else if (!hasFaceSide(*fi, false))
-      {
-        ret_face.face_side = &fi->elem();
-        check_elem_def = true;
-      }
-    }
-    else if (elem == &fi->elem())
-      check_elem_def = true;
-    else
-    {
-      mooseAssert(elem == fi->neighborPtr(), "This has to match something");
-      check_neighbor_def = true;
-    }
-
-    if (check_elem_def && !hasFaceSide(*fi, true))
-      mooseError("Functor argument consumer is not defined on the element side of the face "
-                 "information, but a producer has requested evaluation there");
-    if (check_neighbor_def && !hasFaceSide(*fi, false))
-      mooseError("Functor argument consumer is not defined on the neighbor side of the face "
-                 "information, but a producer has requested evaluation there");
-
-    return ret_face;
-  }
+  /**
+   * Examines the incoming face argument. If the producer did not indicate a sidedness to the face,
+   * e.g. if the \p face_side member of the \p FaceArg is \p nullptr, then we may "modify" the
+   * sidedness of the argument if we are only defined on one side of the face. If the producer \emph
+   * has indicated a sidedness and we are not defined on that side, then we will error
+   * @param face The face argument created by the producer, likely a residual object
+   * @return a face with possibly changed sidedness depending on whether we aren't defined on both
+   * sides of the face
+   */
+  Moose::FaceArg checkFace(const Moose::FaceArg & face) const;
 };
 
+/**
+ * An interface for producers of functor face arguments, e.g. objects such as residual objects and
+ * postprocessors
+ */
 class FaceArgProducerInterface : public FaceArgInterface
 {
 public:
@@ -80,19 +61,7 @@ public:
   Moose::FaceArg makeFace(const FaceInfo & fi,
                           const Moose::FV::LimiterType limiter_type,
                           const bool elem_is_upwind,
-                          const bool correct_skewness = false) const
-  {
-    const bool defined_on_elem_side = hasFaceSide(fi, true);
-    const bool defined_on_neighbor_side = hasFaceSide(fi, false);
-    const Elem * const elem = defined_on_elem_side && defined_on_neighbor_side
-                                  ? nullptr
-                                  : (defined_on_elem_side ? &fi.elem() : fi.neighborPtr());
-
-    if (!defined_on_elem_side && !defined_on_neighbor_side)
-      mooseError("No definition on either side");
-
-    return {&fi, limiter_type, elem_is_upwind, correct_skewness, elem};
-  }
+                          const bool correct_skewness = false) const;
 
   /**
    * Make a functor face argument with a central differencing limiter, e.g. compose a face
@@ -102,8 +71,11 @@ public:
    * @param correct_skewness whether to apply skew correction
    * @return a face argument for functors
    */
-  Moose::FaceArg makeCDFace(const FaceInfo & fi, const bool correct_skewness = false) const
-  {
-    return makeFace(fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness);
-  }
+  Moose::FaceArg makeCDFace(const FaceInfo & fi, const bool correct_skewness = false) const;
 };
+
+inline Moose::FaceArg
+FaceArgProducerInterface::makeCDFace(const FaceInfo & fi, const bool correct_skewness) const
+{
+  return makeFace(fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness);
+}
