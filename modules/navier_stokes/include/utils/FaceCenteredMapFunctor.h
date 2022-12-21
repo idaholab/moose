@@ -61,57 +61,28 @@ private:
   /// on all subdomains
   const std::set<SubdomainID> _sub_ids;
 
-  ValueType evaluate(const ElemArg & elem_arg, unsigned int) const override final
+  ValueType evaluate(const ElemArg & elem_arg, unsigned int state) const override final;
+
+  ValueType evaluate(const FaceArg & face, unsigned int state) const override final;
+
+  ValueType evaluate(const FaceInfo * const fi) const;
+
+  ValueType evaluate(const ElemFromFaceArg &, unsigned int) const override
   {
     mooseError("not implemented");
   }
 
-  ValueType evaluate(const ElemFromFaceArg & elem_from_face, unsigned int) const override
+  ValueType evaluate(const ElemPointArg &, const unsigned int) const override final
   {
     mooseError("not implemented");
   }
 
-  ValueType evaluate(const FaceArg & face, unsigned int) const override final
-  {
-    const auto * fi = face.fi;
-    try
-    {
-      return libmesh_map_find(*this, fi->id());
-    }
-    catch (libMesh::LogicError &)
-    {
-      if (!_sub_ids.empty() && !_sub_ids.count(fi->elem()->subdomain_id()))
-      {
-        if (fi->neighborPtr() && !_sub_ids.count(fi->neighborPtr()->subdomain_id()))
-          mooseError("Attempted to evaluate FaceCenteredMapFunctor '",
-                     this->functorName(),
-                     "' with an element subdomain id of '",
-                     fi->elem()->subdomain_id(),
-                     fi->neighborPtr() ? " or neighbor subdomain id of '" +
-                                             std::to_string(fi->neighborPtr()->subdomain_id()) + "'"
-                                       : "",
-                     "' but that subdomain id is not one of the subdomain ids the functor is "
-                     "restricted to.");
-      }
-      else
-        mooseError("Attempted access into FaceCenteredMapFunctor '",
-                   this->functorName(),
-                   "' with a key that does not yet exist in the map. Make sure to fill your "
-                   "FaceCenteredMapFunctor for all elements you will attempt to access later.");
-    }
-  }
-
-  ValueType evaluate(const ElemPointArg & elem_point, const unsigned int state) const override final
+  GradientType evaluateGradient(const ElemArg &, unsigned int) const override final
   {
     mooseError("not implemented");
   }
 
-  GradientType evaluateGradient(const ElemArg & elem_arg, unsigned int) const override final
-  {
-    mooseError("not implemented");
-  }
-
-  GradientType evaluateGradient(const FaceArg & face, unsigned int) const override final
+  GradientType evaluateGradient(const FaceArg &, unsigned int) const override final
   {
     mooseError("not implemented");
   }
