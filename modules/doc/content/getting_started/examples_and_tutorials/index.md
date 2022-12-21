@@ -6,6 +6,24 @@ This page includes various demonstrations intended to introduce the basics of [!
 
 Before proceeding, please visit the [installation/index.md] page and the [getting_started/new_users.md] page. It is assumed that the reader has a minimial understanding in computer programming with [C++](#programming).
 
+## Framework Workshops id=workshop
+
+The [!ac](MOOSE) development team at [!ac](INL) occasionally hosts live training. Registration is
+typically open for all who wish to attend, although space is usually limited. Below is a recording
+of a MOOSE training webinar given in Summer 2020, as well as links to the training presentation and
+other targeted, advanced workshop presentations.
+
+!media https://www.youtube.com/embed/2tJwBsYaLaI
+       id=training-webinar
+       caption=MOOSE training workshop webinar given on June 9--10, 2020.
+
+- [MOOSE Training Workshop](workshop/index.md alternative=missing_config.md)
+- [MOOSE MultiApps Workshop](tutorial02_multiapps/presentation/index.md alternative=missing_config.md)
+- [MOOSE Verification Workshop](tutorial03_verification/presentation/index.md alternative=missing_config.md)
+
+MOOSE training events will typically be announced on the [home page](index.md exact=true), but be
+sure to join the [mailing list](help/contact_us.md) for further updates!
+
 ## Framework Examples
 
 The [!ac](MOOSE) repository has a directory named `examples` with several subdirectories. Each subdirectory
@@ -107,17 +125,6 @@ Other examples and tutorials for Porous flow are linked below:
 
 - [modules/tensor_mechanics/tutorials/introduction/index.md]
 - [tensor_mechanics/examples/cframe_iga.md]
-
-## Workshops id=workshop
-
-The [!ac](MOOSE) development team at [!ac](INL) occasionally hosts live training. Registration is typically open for all who wish to attend, although space is usually limited. Below are links to the training presentation, a recent video recording of the training, and other targeted more advanced workshop presentations.
-
-- [MOOSE Training Workshop](workshop/index.md alternative=missing_config.md)
-- [MOOSE Training Workshop (Video, Summer 2020)](https://www.youtube.com/watch?v=2tJwBsYaLaI)
-- [MOOSE MultiApps Workshop](tutorial02_multiapps/presentation/index.md alternative=missing_config.md)
-- [MOOSE Verification Workshop](tutorial03_verification/presentation/index.md alternative=missing_config.md)
-
-MOOSE training events will typically be announced on the [home page](index.md exact=true), but be sure to join the [mailing list](help/contact_us.md) for further updates!
 
 ## C++ Programming References id=programming
 
