@@ -1,7 +1,5 @@
 # SolutionInvalidity
 
-!syntax description /Outputs/SolutionInvalidity
-
 ## Description
 
 The [/SolutionInvalidity.md] object holds solution invalid warning information for MOOSE. With this object, you can mark a solution as "invalid" and output which section and how many times the warning occurs. An invalid solution means that the solution somehow does not satisfy requirements such as a value being out of the bounds of a correlation.  Solutions are allowed to be invalid _during_ the nonlinear solve - but are not allowed to be invalid once it converges. A "converged" solution that is marked as invalid will cause MOOSE to behave as if the solution did NOT converge - including cutting back timesteps, etc.
