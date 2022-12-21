@@ -72,17 +72,7 @@ private:
     mooseError("not implemented");
   }
 
-  ValueType evaluate(const ElemPointArg &, const unsigned int) const override final
-  {
-    mooseError("not implemented");
-  }
-
-  GradientType evaluateGradient(const ElemArg &, unsigned int) const override final
-  {
-    mooseError("not implemented");
-  }
-
-  GradientType evaluateGradient(const FaceArg &, unsigned int) const override final
+  ValueType evaluate(const ElemPointArg &, const unsigned int) const override
   {
     mooseError("not implemented");
   }
@@ -98,6 +88,18 @@ private:
   }
 
   ValueType evaluate(const ElemSideQpArg &, unsigned int) const override
+  {
+    mooseError("not implemented");
+  }
+
+  using Moose::FunctorBase<T>::evaluateGradient;
+
+  GradientType evaluateGradient(const ElemArg &, unsigned int) const override
+  {
+    mooseError("not implemented");
+  }
+
+  GradientType evaluateGradient(const FaceArg &, unsigned int) const override
   {
     mooseError("not implemented");
   }

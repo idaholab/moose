@@ -1088,6 +1088,9 @@ public:
   /// Accessor for the local FaceInfo object on the side of one element. Returns null if ghosted.
   const FaceInfo * faceInfo(const Elem * elem, unsigned int side) const;
 
+  /// Accessor for the elemInfo object for a given element ID
+  const ElemInfo & elemInfo(const dof_id_type id) const;
+
   /// Accessor for all \p FaceInfo objects.
   const std::vector<FaceInfo> & allFaceInfo() const;
   ///@}

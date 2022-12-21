@@ -3386,6 +3386,14 @@ MooseMesh::faceInfo(const Elem * elem, unsigned int side) const
   }
 }
 
+const ElemInfo &
+MooseMesh::elemInfo(const dof_id_type id) const
+{
+  mooseAssert(_elem_to_elem_info.find(id) != _elem_to_elem_info.end(),
+              "We should have found the elemInfo for the given element id!");
+  return _elem_to_elem_info[id];
+}
+
 void
 MooseMesh::computeFaceInfoFaceCoords()
 {
@@ -3419,8 +3427,8 @@ MooseMesh::allowRemoteElementRemoval(const bool allow_remote_element_removal)
     _mesh->allow_remote_element_removal(allow_remote_element_removal);
 
   if (!allow_remote_element_removal)
-    // If we're not allowing remote element removal now, then we will need deletion later after late
-    // geoemetric ghosting functors have been added (late geometric ghosting functor addition
+    // If we're not allowing remote element removal now, then we will need deletion later after
+    // late geoemetric ghosting functors have been added (late geometric ghosting functor addition
     // happens when algebraic ghosting functors are added)
     _need_delete = true;
 }
@@ -3500,11 +3508,12 @@ MooseMesh::setCoordSystem(const std::vector<SubdomainName> & blocks,
                "'Mesh/block' parameter. Did you provide different parameter values for 'block' to "
                "'Mesh' and 'Problem'?");
   if (_pars.isParamSetByUser("coord_type") && getParam<MultiMooseEnum>("coord_type") != coord_sys)
-    mooseError(
-        "Supplied coordinate systems in the 'setCoordSystem' method do not match the value of the "
-        "'Mesh/coord_type' parameter. Did you provide different parameter values for 'coord_type' "
-        "to "
-        "'Mesh' and 'Problem'?");
+    mooseError("Supplied coordinate systems in the 'setCoordSystem' method do not match the "
+               "value of the "
+               "'Mesh/coord_type' parameter. Did you provide different parameter values for "
+               "'coord_type' "
+               "to "
+               "'Mesh' and 'Problem'?");
 
   const std::set<SubdomainID> & subdomains = meshSubdomains();
   if (blocks.size() == 0)

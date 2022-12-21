@@ -24,21 +24,60 @@ FaceCenteredMapFunctor<T, Map>::evaluate(const ElemArg & elem_arg, unsigned int)
   // Aguerre, Horacio J., et al. "An oscillation-free flow solver based on flux reconstruction."
   // Journal of Computational Physics 365 (2018): 135-148.
 
-  RealTensorValue n_x_Sf;
-  typename Moose::FunctorBase<T>::ValueType reconstructed_value;
+  using ValueType = typename Moose::FunctorBase<T>::ValueType;
+  using PrimitiveType = typename MetaPhysicL::ReplaceAlgebraicType<
+      T,
+      typename TensorTools::DecrementRank<typename MetaPhysicL::ValueType<T>::type>::type>::type;
 
-  for (const auto side : make_range(elem_arg.elem->n_sides()))
+  if constexpr (libMesh::TensorTools::TensorTraits<ValueType>::rank == 1)
   {
-    const FaceInfo * const fi = _mesh.faceInfo(elem_arg.elem, side);
-    const auto & normal = fi->normal();
-    const auto area = fi->faceArea();
-    typename Moose::FunctorBase<T>::ValueType face_value = this->evaluate(fi);
+    const auto dim = _mesh.dimension();
+    // The reason why this is a
+    DenseMatrix<PrimitiveType> n_x_Sf(dim, dim);
+    DenseVector<PrimitiveType> sum_normal_flux(dim);
 
-    n_x_Sf += Moose::outer_product(normal, normal) * area;
-    reconstructed_value += normal * (face_value * normal * area);
+    const Elem * elem = elem_arg.elem;
+
+    for (const auto side : make_range(elem->n_sides()))
+    {
+      const Elem * neighbor = elem->neighbor_ptr(side);
+      const bool elem_has_fi = Moose::FV::elemHasFaceInfo(*elem, neighbor);
+      const FaceInfo * const fi = _mesh.faceInfo(
+          elem_has_fi ? elem : neighbor, elem_has_fi ? side : neighbor->which_neighbor_am_i(elem));
+      const Point & normal = elem_has_fi ? fi->normal() : Point(-fi->normal());
+      const Real area = fi->faceArea();
+
+      ValueType face_value = this->evaluate(fi);
+
+      const auto product = Moose::outer_product(normal, normal * area);
+      const auto flux_contrib = normal * (face_value * normal * area);
+      for (auto i : make_range(dim))
+      {
+        sum_normal_flux(i) += flux_contrib(i);
+        for (auto j : make_range(dim))
+          n_x_Sf(i, j) += product(i, j);
+      }
+    }
+
+    DenseVector<PrimitiveType> dense_result(dim);
+    n_x_Sf.lu_solve(sum_normal_flux, dense_result);
+
+    ValueType result;
+    for (auto i : make_range(dim))
+      result(i) = dense_result(i);
+
+    return result;
   }
+  else
+    mooseError("Cell center reconstruction is not implemented!");
+}
 
-  return n_x_Sf.inverse() * reconstructed_value;
+template <typename T, typename Map>
+typename Moose::FunctorBase<T>::ValueType
+FaceCenteredMapFunctor<T, Map>::evaluate(const FaceArg & face, unsigned int) const
+{
+  const FaceInfo * const fi = face.fi;
+  return this->evaluate(fi);
 }
 
 template <typename T, typename Map>
@@ -74,13 +113,7 @@ FaceCenteredMapFunctor<T, Map>::evaluate(const FaceInfo * fi) const
   }
 }
 
-template <typename T, typename Map>
-typename Moose::FunctorBase<T>::ValueType
-FaceCenteredMapFunctor<T, Map>::evaluate(const FaceArg & face, unsigned int) const
-{
-  const FaceInfo * const fi = face.fi;
-  return this->evaluate(fi);
-}
-
 template class FaceCenteredMapFunctor<ADRealVectorValue,
                                       std::unordered_map<dof_id_type, ADRealVectorValue>>;
+template class FaceCenteredMapFunctor<RealVectorValue,
+                                      std::unordered_map<dof_id_type, RealVectorValue>>;
