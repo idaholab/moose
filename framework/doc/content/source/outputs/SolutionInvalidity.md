@@ -33,7 +33,7 @@ Solution Invalid Warnings:
 **Total** shows the total number of soluton invalid warnings for the calculation.
 **Message** shows the decription of the solution invalidity(optional).
 
-This Solution Invalid Warning table can be slienced by setting `Problem/allow_invalid_solution=true`. Then the converged solution will be allowed even there are still solution invalid warnings, but a message will be generated in the end of the calculation as a reminder:
+This Solution Invalid Warning table can be silenced by setting `Problem/allow_invalid_solution=true`. Then the converged solution will be allowed even there are still solution invalid warnings, but a message will be generated in the end of the calculation as a reminder:
 ```
 *** Warning ***
 The Solution Invalidity warnings are detected but silenced! Use Problem/allow_invalid_solution=false to activate
