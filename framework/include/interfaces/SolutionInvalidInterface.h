@@ -12,6 +12,7 @@
 // MOOSE includes
 #include "Moose.h"
 #include "SolutionInvalidity.h"
+#include "FEProblemBase.h"
 
 // Forward declarations
 class MooseApp;
@@ -27,7 +28,7 @@ public:
   /**
    * A class to help communicating the solutioninvalidity for one app to the materials
    */
-  SolutionInvalidInterface(MooseApp & moose_app);
+  SolutionInvalidInterface(MooseApp & moose_app, FEProblemBase & problem);
 
   void setSolutionInvalid(SolutionID _solution_id);
 
@@ -37,8 +38,14 @@ public:
   SolutionInvalidity & solutionInvalidity();
 
 protected:
+  SolutionID registerInvalidSection(const std::string & section_name,
+                                    const std::string & message) const;
+
   SolutionID registerInvalidSection(const std::string & section_name) const;
 
   /// The MooseApp that owns the SolutionInvalidity
   MooseApp & _si_moose_app;
+
+  /// A reference to FEProblem base
+  FEProblemBase & _si_problem;
 };

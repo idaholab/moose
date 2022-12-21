@@ -41,12 +41,17 @@ namespace internal
 class SolutionInvaliditySectionInfo
 {
 public:
-  SolutionInvaliditySectionInfo(SolutionID id, std::string name) : _id(id), _name(name) {}
+  SolutionInvaliditySectionInfo(SolutionID id, const std::string name, const std::string message)
+    : _id(id), _name(name), _message(message)
+  {
+  }
 
   /// Unique ID
   SolutionID _id;
   /// The name
   std::string _name;
+  /// The message
+  std::string _message;
 };
 
 /**
@@ -68,6 +73,15 @@ public:
    * @return The ID of the section - use when counting solution invalid warning
    */
   SolutionID registerSection(const std::string & section_name);
+
+  /**
+   * Call to register a named section for detecting solution invalid.
+   *
+   * @param section_name The name of the code section to be detected
+   * @param message The description of the solution invalid warning
+   * @return The ID of the section - use when counting solution invalid warning
+   */
+  SolutionID registerSection(const std::string & section_name, const std::string & message);
 
   /**
    * Given a name return the SolutionID
@@ -111,7 +125,7 @@ private:
   /**
    * The internal function that actually carries out the registration
    */
-  SolutionID actuallyRegisterSection(const std::string & section_name);
+  SolutionID actuallyRegisterSection(const std::string & section_name, const std::string & message);
 
   /**
    * Special accessor just for SolutionInvalidity so that
@@ -134,16 +148,9 @@ private:
   friend SolutionInvalidityRegistry & getSolutionInvalidityRegistry();
   /// This is only here so that SolutionInvalidity can access readSectionInfo
   friend SolutionInvalidity;
-  // For accessing _id_to_section_info when storing the SolutionInvalidity
-  friend void ::dataStore(std::ostream &, SolutionInvalidity &, void *);
 };
 
 }
 }
 
-void dataStore(std::ostream & stream,
-               moose::internal::SolutionInvaliditySectionInfo & info,
-               void * context);
-void dataLoad(std::istream & stream,
-              moose::internal::SolutionInvaliditySectionInfo & info,
-              void * context);
+

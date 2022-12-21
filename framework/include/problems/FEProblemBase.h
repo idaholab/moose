@@ -1628,9 +1628,14 @@ public:
   }
 
   /**
-   * Whether or not we are allowing invalid solutions
+   * Whether or not the invalid solutions are allowed
    */
   bool allowInvalidSolution() const { return _allow_invalid_solution; }
+
+  /**
+   * Whether or not the solution invalid warnings are printed out immediately
+   */
+  bool ImmediatelyPrintInvalidSolution() const { return _immediately_print_invalid_solution; }
 
   bool ignoreZerosInJacobian() const { return _ignore_zeros_in_jacobian; }
 
@@ -2359,6 +2364,7 @@ private:
   const bool _skip_nl_system_check;
   bool _fail_next_nonlinear_convergence_check;
   const bool & _allow_invalid_solution;
+  const bool & _immediately_print_invalid_solution;
 
   /// At or beyond initialSteup stage
   bool _started_initial_setup;

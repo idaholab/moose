@@ -28,30 +28,24 @@ SolutionInvalidityRegistry::SolutionInvalidityRegistry()
 SolutionID
 SolutionInvalidityRegistry::registerSection(const std::string & section_name)
 {
-  return actuallyRegisterSection(section_name);
+  return actuallyRegisterSection(section_name, "");
 }
 
 SolutionID
-SolutionInvalidityRegistry::actuallyRegisterSection(const std::string & section_name)
+SolutionInvalidityRegistry::registerSection(const std::string & section_name,
+                                            const std::string & message)
 {
-  const auto create_item = [&section_name](const std::size_t id)
-  { return SolutionInvaliditySectionInfo(id, section_name); };
+  return actuallyRegisterSection(section_name, message);
+}
+
+SolutionID
+SolutionInvalidityRegistry::actuallyRegisterSection(const std::string & section_name,
+                                                    const std::string & message)
+{
+  const auto create_item = [&section_name, &message](const std::size_t id)
+  { return SolutionInvaliditySectionInfo(id, section_name, message); };
   return registerItem(section_name, create_item);
 }
 
 }
-}
-
-void
-dataStore(std::ostream & stream,
-          moose::internal::SolutionInvaliditySectionInfo & info,
-          void * context)
-{
-}
-
-void
-dataLoad(std::istream & stream,
-         moose::internal::SolutionInvaliditySectionInfo & info,
-         void * context)
-{
 }

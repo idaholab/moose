@@ -12,8 +12,10 @@
 #include "MooseApp.h"
 #include "MooseObject.h"
 #include "SolutionInvalidityRegistry.h"
+#include "FEProblemBase.h"
 
-SolutionInvalidInterface::SolutionInvalidInterface(MooseApp & moose_app) : _si_moose_app(moose_app)
+SolutionInvalidInterface::SolutionInvalidInterface(MooseApp & moose_app, FEProblemBase & problem)
+  : _si_moose_app(moose_app), _si_problem(problem)
 {
 }
 
@@ -21,10 +23,19 @@ SolutionInvalidInterface::SolutionInvalidInterface(MooseApp & moose_app) : _si_m
 void
 SolutionInvalidInterface::setSolutionInvalid(SolutionID _solution_id)
 {
+  if (_si_problem.ImmediatelyPrintInvalidSolution())
+    _si_moose_app.solutionInvalidity().printDebug(_solution_id);
   return _si_moose_app.solutionInvalidity().setSolutionInvalid(_solution_id);
 }
 
 /// Register the section with a unique solution ID for the given section_name
+SolutionID
+SolutionInvalidInterface::registerInvalidSection(const std::string & section_name,
+                                                 const std::string & message) const
+{
+  return moose::internal::getSolutionInvalidityRegistry().registerSection(section_name, message);
+}
+
 SolutionID
 SolutionInvalidInterface::registerInvalidSection(const std::string & section_name) const
 {

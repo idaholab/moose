@@ -92,7 +92,8 @@ MaterialBase::MaterialBase(const InputParameters & parameters)
     ElementIDInterface(this),
     GeometricSearchInterface(this),
     FunctorInterface(this),
-    SolutionInvalidInterface(getMooseApp()),
+    SolutionInvalidInterface(
+        getMooseApp(), *parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _tid(parameters.get<THREAD_ID>("_tid")),

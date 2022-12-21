@@ -51,20 +51,46 @@ public:
   /// Loop over all the tracked objects and determine whether solution invalid is detected
   bool solutionInvalid() const;
 
+  /// Reset the number of solution invalid occurrences back to zero for each time iteration
+  void resetSolutionInvalidTimeIter();
+
   /// Reset the number of solution invalid occurrences back to zero
   void resetSolutionInvalid();
 
-  /// Vector that contains the number of the solution invalid occurrences
+  /// Pass the number of solution invalid occurrences from current iteration to comulative counters
+  void solutionInvalidAccumulation();
+
+  /// Vector that contains the current number of the solution invalid occurrences
   std::vector<unsigned int> _solution_invalid_counts;
 
-  /// @param console The output stream to output to
+  /// Vector that contains the number of the solution invalid occurrences for each time iteration
+  std::vector<unsigned int> _solution_invalid_timeiter_counts;
+
+  /// Vector that contains the total number of the solution invalid occurrences
+  std::vector<unsigned int> _solution_invalid_total_counts;
+
+  /**
+   * Print the summary table of Solution Invalid warnings
+   *  @param console The output stream to output to
+   */
   void print(const ConsoleStream & console);
+
+  /**
+   * Immediately print the section and message for debug purpose
+   *  @param console The output stream to output to
+   */
+  void printDebug(SolutionID _solution_id);
 
   /// The SolutionInvalidityRegistry
   SolutionInvalidityRegistry & _solution_invalidity_registry;
 
 protected:
-  typedef VariadicTable<std::string, unsigned long int> FullTable;
+  typedef VariadicTable<std::string,
+                        unsigned long int,
+                        unsigned long int,
+                        unsigned long int,
+                        std::string>
+      FullTable;
 
 private:
   FullTable summaryTable();
