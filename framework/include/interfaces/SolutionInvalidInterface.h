@@ -13,6 +13,7 @@
 #include "Moose.h"
 #include "SolutionInvalidity.h"
 #include "FEProblemBase.h"
+#include "ConsoleStreamInterface.h"
 
 // Forward declarations
 class MooseApp;
@@ -22,7 +23,7 @@ class FEProblemBase;
 /**
  * An interface to communicate the solutioninvalidity for one app to the materials
  */
-class SolutionInvalidInterface
+class SolutionInvalidInterface : protected ConsoleStreamInterface
 {
 public:
   /**
