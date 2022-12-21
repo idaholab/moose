@@ -17,10 +17,9 @@ AnisoHomogenizedHeatConduction::validParams()
   InputParameters params = Kernel::validParams();
   params.addClassDescription("Kernel for asymptotic expansion homogenization for thermal "
                              "conductivity when anisotropic thermal conductivities are used");
-  params.addParam<MaterialPropertyName>(
-      "diffusion_coefficient",
-      "thermal_conductivity",
-      "The diffusion coefficient for the temperature gradient (Default: thermal_conductivity)");
+  params.addParam<MaterialPropertyName>("diffusion_coefficient",
+                                        "thermal_conductivity",
+                                        "The diffusion coefficient for the temperature gradient");
   params.addRequiredParam<unsigned int>(
       "component",
       "An integer corresponding to the direction the variable this "

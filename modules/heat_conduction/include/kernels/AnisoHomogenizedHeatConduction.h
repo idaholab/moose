@@ -24,9 +24,9 @@ public:
 protected:
   virtual Real computeQpResidual();
 
-  /// the diffusion coefficient/thermal conductivity
+  /// the diffusion/thermal conductivity tensor
   const MaterialProperty<RankTwoTensor> & _diffusion_coefficient;
 
-  /// the component of the homogenization shape function that is computed
+  /// the component of the homogenization characteristic function that is computed
   const unsigned int _component;
 };

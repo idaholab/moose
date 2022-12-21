@@ -40,12 +40,12 @@ protected:
   const Real _scale;
   /// dimension of the mesh
   const unsigned int _dim;
-  /// the gradients of the "shape" functions usually denoted chi in the literature
-  std::vector<const VariableGradient *> _grad_chi;
   ///@{ heterogeneous diffusion coefficient as scalar and tensor
   const MaterialProperty<Real> * _diffusion_coefficient;
   const MaterialProperty<RankTwoTensor> * _tensor_diffusion_coefficient;
   ///@}
+  /// the gradients of the characteristic functions usually denoted chi in the literature
+  std::vector<const VariableGradient *> _grad_chi;
   /// volume of the integration domain
   Real _volume;
   /// the integral value that is being accumulated

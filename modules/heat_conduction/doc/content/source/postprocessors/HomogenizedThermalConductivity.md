@@ -2,17 +2,20 @@
 
 !syntax description /Postprocessors/HomogenizedThermalConductivity
 
+!alert note title=Einstein summation convention
+Einstein summation convention is used in this documentation page.
+
 ## Description
 
 This `PostProcessor` computes
 
 !equation id=eq:0
-k^\text{H}_{ij}=\frac{1}{\left|\text{Y}\right|}\int_\text{Y}\left(k_{ij} + k_{ik} \frac{\partial \chi^j}{\partial y_k}\right)\;\text{d}\bm{y},
+\lambda^\text{H}_{ij}=\frac{1}{\left|\text{Y}\right|}\int_\text{Y}\left(\lambda_{ij} + \lambda_{ik} \frac{\partial \chi^j}{\partial y_k}\right)\;\text{d}\bm{y},
 
-where ${k}^\text{H}_{ij}$ is the $i,j$-th element of the homogenized thermal conductivity tensor, $k_{ij}$ is the $i,j$-th element of the thermal conductivity tensor in the heterogeneous problem, $\chi^j$ is the j-th shape function defined as:
+where $\lambda^\text{H}_{ij}$ is the $i,j$-th element of the homogenized thermal conductivity tensor, $\lambda_{ij}$ is the $i,j$-th element of the thermal conductivity tensor in the heterogeneous problem, $\chi^j$ is the j-th characteristic function defined as:
 
 !equation id=eq:1
-\int_Y \frac{\partial v}{\partial y_i}k_{ij} \frac{\partial \chi^k}{\partial y_j} = -\int_Y \frac{\partial v}{\partial y_i}k_{ik} \text{d}y
+\int_Y \frac{\partial v}{\partial y_i}\lambda_{ij} \frac{\partial \chi^k}{\partial y_j} = -\int_Y \frac{\partial v}{\partial y_i}\lambda_{ik} \text{d}y
 
 
 This `PostProcessor` is used in conjunction with the [Heat Conduction](HeatConduction.md) `Kernel` and the [Homogenized Heat Conduction](HomogenizedHeatConduction.md) `Kernel`.
