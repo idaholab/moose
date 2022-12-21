@@ -1,6 +1,6 @@
 # SolutionInvalidityOutput
 
-!syntax description /Outputs/SolutionInvalidityOutput
+!syntax description /Outputs/SolutionInvalidity
 
 ## Description
 
@@ -42,10 +42,10 @@ The Solution Invalidity warnings are detected but silenced! Use Problem/allow_in
 
 The Solution Invalid Warning can also be printed out immediately after it is detected by setting `Problem/immediately_print_invalid_solution=true`.
 
-!syntax parameters /Outputs/SolutionInvalidityOutput
+!syntax parameters /Outputs/SolutionInvalidity
 
-!syntax inputs /Outputs/SolutionInvalidityOutput
+!syntax inputs /Outputs/SolutionInvalidity
 
-!syntax children /Outputs/SolutionInvalidityOutput
+!syntax children /Outputs/SolutionInvalidity
 
 !bibtex bibliography
