@@ -866,24 +866,12 @@ struct enable_bitmask_operators<Moose::RelationshipManagerType>
   class TheName : public std::string                                                               \
   {                                                                                                \
   public:                                                                                          \
-    TheName() : std::string()                                                                      \
-    {                                                                                              \
-    }                                                                                              \
-    TheName(const std::string & str) : std::string(str)                                            \
-    {                                                                                              \
-    }                                                                                              \
-    TheName(const std::string & str, size_t pos, size_t n = npos) : std::string(str, pos, n)       \
-    {                                                                                              \
-    }                                                                                              \
-    TheName(const char * s, size_t n) : std::string(s, n)                                          \
-    {                                                                                              \
-    }                                                                                              \
-    TheName(const char * s) : std::string(s)                                                       \
-    {                                                                                              \
-    }                                                                                              \
-    TheName(size_t n, char c) : std::string(n, c)                                                  \
-    {                                                                                              \
-    }                                                                                              \
+    TheName() : std::string() {}                                                                   \
+    TheName(const std::string & str) : std::string(str) {}                                         \
+    TheName(const std::string & str, size_t pos, size_t n = npos) : std::string(str, pos, n) {}    \
+    TheName(const char * s, size_t n) : std::string(s, n) {}                                       \
+    TheName(const char * s) : std::string(s) {}                                                    \
+    TheName(size_t n, char c) : std::string(n, c) {}                                               \
   } /* No semicolon here because this is a macro */
 
 // Instantiate new Types
