@@ -209,17 +209,17 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
 
   // Obey fixed box sizes or source block and boundary restriction if specified
   // NOTE: This ignores the app's bounding box inflation and padding
-  if (_from_blocks.size() || _from_boundaries.size() || !hasFromMultiApp() ||
-      _fixed_bbox_size != std::vector<Real>(3, 0))
+  // if (_from_blocks.size() || _from_boundaries.size() || !hasFromMultiApp() ||
+  //     _fixed_bbox_size != std::vector<Real>(3, 0))
     _bboxes = getRestrictedFromBoundingBoxes();
-  else
-  {
-    // The multiapp can also have padding and bounding box inflation parameters
-    // NOTE: This ignores the transfer's fixed bounding box size
-    _bboxes.resize(_from_meshes.size());
-    for (const auto i : make_range(_from_meshes.size()))
-      _bboxes[i] = getFromMultiApp()->getBoundingBox(i, _displaced_source_mesh, nullptr);
-  }
+  // else
+  // {
+  //   // The multiapp can also have padding and bounding box inflation parameters
+  //   // NOTE: This ignores the transfer's fixed bounding box size
+  //   _bboxes.resize(_from_meshes.size());
+  //   for (const auto i : make_range(_from_meshes.size()))
+  //     _bboxes[i] = getFromMultiApp()->getBoundingBox(i, _displaced_source_mesh, nullptr);
+  // }
 
   // Expand bounding boxes. Some desired points might be excluded
   // without an expansion
@@ -256,9 +256,10 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
 
   DofobjectToInterpValVec dofobject_to_valsvec(_to_problems.size());
   InterpCaches interp_caches(_to_problems.size());
+  InterpCaches distance_caches(_to_problems.size());
 
   // Copy data out to incoming_vals_ids
-  auto action_functor = [this, &i, &dofobject_to_valsvec, &interp_caches](
+  auto action_functor = [this, &i, &dofobject_to_valsvec, &interp_caches, &distance_caches](
                             processor_id_type pid,
                             const std::vector<Point> & my_outgoing_points,
                             const std::vector<std::pair<Real, Real>> & incoming_vals)
@@ -272,7 +273,8 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
                             my_outgoing_points,
                             incoming_vals,
                             dofobject_to_valsvec,
-                            interp_caches);
+                            interp_caches,
+                            distance_caches);
   };
 
   // We assume incoming_vals_ids is ordered in the same way as outgoing_points
@@ -321,9 +323,9 @@ MultiAppGeneralFieldTransfer::locatePointReceivers(const Point point,
 
 void
 MultiAppGeneralFieldTransfer::cacheOutgoingPointInfo(const Point point,
-                                                      const dof_id_type dof_object_id,
-                                                      const unsigned int problem_id,
-                                                      ProcessorToPointVec & outgoing_points)
+                                                     const dof_id_type dof_object_id,
+                                                     const unsigned int problem_id,
+                                                     ProcessorToPointVec & outgoing_points)
 {
   std::set<processor_id_type> processors;
   // Try to find which processors
@@ -384,6 +386,7 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const VariableName & var_nam
                                 GeneralFieldTransfer::NullAction<Number>>
           request_gather(*to_sys, f, &g, nullsetter, varvec);
 
+      // We dont look at boundary restriction, not supported for higher order target variables
       const auto & to_begin = _to_blocks.empty()
                                   ? to_mesh.active_local_elements_begin()
                                   : to_mesh.active_local_subdomain_set_elements_begin(_to_blocks);
@@ -396,17 +399,17 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const VariableName & var_nam
 
       request_gather.project(to_elem_range);
 
+      dof_id_type point_id = 0;
       for (Point p : f.points_requested())
       {
-        // using dof_object_id 0 for value requests
-        this->cacheOutgoingPointInfo(p, 0, i_to, outgoing_points);
+        // using the point number as a "dof_object_id" will serve to identify the point if we ever
+        // rework interp/distance_cache into the dof_id_to_value maps
+        this->cacheOutgoingPointInfo(p + _to_positions[i_to], point_id++, i_to, outgoing_points);
       }
 
       // This is going to require more complicated transfer work
       if (!g.points_requested().empty())
-      {
         mooseError("We don't currently support variables with gradient degrees of freedom");
-      }
     }
     else if (is_nodal)
     {
@@ -429,7 +432,7 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const VariableName & var_nam
         cacheOutgoingPointInfo(*node + _to_positions[i_to], node->id(), i_to, outgoing_points);
       }
     }
-    else // Elemental
+    else // Elemental, constant monomial
     {
       for (auto & elem : as_range(to_mesh.local_elements_begin(), to_mesh.local_elements_end()))
       {
@@ -476,7 +479,8 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
     const std::vector<Point> & point_requests,
     const std::vector<std::pair<Real, Real>> & incoming_vals,
     DofobjectToInterpValVec & dofobject_to_valsvec,
-    InterpCaches & interp_caches)
+    InterpCaches & interp_caches,
+    InterpCaches & distance_caches)
 {
   mooseAssert(pointInfoVec.size() == incoming_vals.size(),
               "Number of dof objects does not equal to the number of incoming values");
@@ -484,10 +488,9 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
   dof_id_type val_offset = 0;
   for (auto & pointinfo : pointInfoVec)
   {
+    // Retrieve target information from cached point infos
     const auto problem_id = pointinfo.problem_id;
     const auto dof_object_id = pointinfo.dof_object_id;
-
-    const std::pair<unsigned int, dof_id_type> dofobject(problem_id, dof_object_id);
 
     // libMesh EquationSystems
     auto & es = getEquationSystem(*_to_problems[problem_id], _displaced_target_mesh);
@@ -498,26 +501,43 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
     auto & fe_type = to_sys->variable_type(var_num);
     bool is_nodal = fe_type.family == LAGRANGE;
 
+    // In the higher order elemental variable case, we receive point values, not nodal or elemental
+    // We use an InterpCache to store the values
+    // The distance_cache is necessary to choose between multiple origin problems sending values
+    // This code could be unified with the lower order order case by using the dofobject_to_valsvec
     if (fe_type.order > CONSTANT && !is_nodal)
     {
       // Defining only boundary values will not be enough to describe the variable, disallow it
-      if (_to_boundaries.size() && fe_type.order > 0)
+      if (_to_boundaries.size())
         mooseError("Higher order elemental variables are not supported for target-boundary "
                    "restricted transfers");
 
-      InterpCache & cache = interp_caches[problem_id];
-      Point p = point_requests[val_offset];
+      // Cache solution on target mesh in its local frame of reference
+      InterpCache & value_cache = interp_caches[problem_id];
+      InterpCache & distance_cache = distance_caches[problem_id];
+      Point p = point_requests[val_offset] - _to_positions[problem_id];
       const Number val = incoming_vals[val_offset].first;
-      // We should only have one value for each variable at any given point.
-      if (cache.count(p) != 0 && !GeneralFieldTransfer::isBetterOutOfMeshValue(val) &&
-          !MooseUtils::absoluteFuzzyEqual(cache[p], val))
+
+      // We should only have one closest value for each variable at any given point.
+      // We do expect to visit each point several times as there may be shared Qps,
+      // on vertices for example, but the incoming values (from the closest points)
+      // should be unique
+      if (!GeneralFieldTransfer::isBetterOutOfMeshValue(val) && value_cache.count(p) != 0 &&
+          !MooseUtils::absoluteFuzzyEqual(value_cache[p], val) &&
+          MooseUtils::absoluteFuzzyEqual(distance_cache[p], incoming_vals[val_offset].second))
       {
         _num_overlaps++;
-        mooseWarning("Equidistant origin points detected for point (" + std::to_string(p(0)) +
-                     ", " + std::to_string(p(1)) + ", " + std::to_string(p(2)) + ")");
+        mooseWarning("Several candidate values detected when sending to problem ", problem_id, " & point (" + std::to_string(p(0)) + ", " + std::to_string(p(1)) + ", " + std::to_string(p(2)) + ") : " + std::to_string(val) + " / " + std::to_string(value_cache[p]) + ".\nThis message will only print once for all overlaps.");
       }
-      if (!GeneralFieldTransfer::isBetterOutOfMeshValue(val))
-        cache[p] = val;
+      if (!GeneralFieldTransfer::isBetterOutOfMeshValue(val) &&
+          MooseUtils::absoluteFuzzyGreaterThan(distance_cache[p], incoming_vals[val_offset].second))
+      {
+        // NOTE: We store the distance as well as the value. We really only need the
+        // value to construct the variable, but the distance is used to make decisions in nearest
+        // node schemes
+        value_cache[p] = val;
+        distance_cache[p] = incoming_vals[val_offset].second;
+      }
     }
     else
     {
@@ -563,6 +583,7 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
         // - valid
         // - closest distance
         // - the smallest rank with the same distance
+        // If greedy search is on, we register the overlap, but selection rules stay the same
         if (!GeneralFieldTransfer::isBetterOutOfMeshValue(incoming_vals[val_offset].first) &&
             (MooseUtils::absoluteFuzzyGreaterThan(val.distance, incoming_vals[val_offset].second) ||
              ((val.pid > pid || _greedy_search) &&
@@ -577,6 +598,9 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
                          std::to_string(point_requests[val_offset](0)) + ", " +
                          std::to_string(point_requests[val_offset](1)) + ", " +
                          std::to_string(point_requests[val_offset](2)) + ")");
+            // We could have been let in the loop by the greedy search
+            if (val.pid < pid)
+              continue;
           }
           val.interp = incoming_vals[val_offset].first;
           val.pid = pid;
@@ -634,6 +658,7 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
 
       ConstElemRange active_local_elem_range(to_mesh.active_local_elements_begin(),
                                              to_mesh.active_local_elements_end());
+      // TODO: Investigate if we can only project on the block restricted domain
 
       set_solution.project(active_local_elem_range);
     }

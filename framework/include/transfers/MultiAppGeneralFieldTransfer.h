@@ -195,7 +195,7 @@ private:
   /// A vector, indexed by to-problem id, of maps from dof object to interpolation values
   typedef std::vector<std::unordered_map<dof_id_type, InterpInfo>> DofobjectToInterpValVec;
 
-  /// A map for caching a single variable's values
+  /// A map from Point to interpolation values
   typedef std::unordered_map<Point, Number, hash_point> InterpCache;
 
   /// A vector of such caches, indexed by to_problem
@@ -240,16 +240,23 @@ private:
   /*
    * cache incoming values
    */
-  void cacheIncomingInterpVals(processor_id_type pid,
-                               const VariableName & var_name,
-                               std::vector<PointInfo> & pointInfoVec,
-                               const std::vector<Point> & point_requests,
-                               const std::vector<std::pair<Real, Real>> & incoming_vals,
-                               DofobjectToInterpValVec & dofobject_to_valsvec,
-                               InterpCaches & interp_caches);
+  void cacheIncomingInterpVals(
+      processor_id_type pid,
+      const VariableName & var_name,
+      std::vector<PointInfo> & pointInfoVec,
+      const std::vector<Point> & point_requests,
+      const std::vector<std::pair<Real, Real>> & incoming_vals,
+      DofobjectToInterpValVec & dofobject_to_valsvec, // for nodal + constant monomial
+      InterpCaches & interp_caches,                   // for higher order elemental values
+      InterpCaches & distance_caches);                // same but helps make origin point decisions
 
   /*
    * Set values to solution
+   * @param var the variable to set
+   * @param dofobject_to_valsvec a vector of maps from DoF to values, for each to_problem
+   *                             Used for nodal + constant monomial variables
+   * @param interp_caches a vector of maps from point to value, for each to_problem
+   *                      Used for higher order elemental variables
    */
   void setSolutionVectorValues(const VariableName & var,
                                const DofobjectToInterpValVec & dofobject_to_valsvec,
@@ -387,8 +394,7 @@ private:
 };
 
 // We need a null action functor to use
-// with them (because we won't be ready to set any values at that
-// point)
+// with them (because we won't be ready to set any values at that point)
 template <typename Val>
 class NullAction
 {
@@ -422,17 +428,24 @@ public:
   typedef DofValueType ValuePushType;
   typedef Output FunctorValue;
 
+  /**
+   * Constructor
+   * @param cache a map/cache to search for points in
+   * @param backup a function that can be queried for a point value when the cache doesnt have it
+   */
   CachedData(const Cache & cache, const FunctionBase<Output> & backup)
     : _cache(cache), _backup(backup.clone())
   {
   }
 
+  /// Copy constructor
   CachedData(const CachedData & primary) : _cache(primary._cache), _backup(primary._backup->clone())
   {
   }
 
   void init_context(FEMContext &) {}
 
+  /// Gets a value at the node location
   Output eval_at_node(const FEMContext &,
                       unsigned int /*i*/,
                       unsigned int /*elem_dim*/,
@@ -447,6 +460,7 @@ public:
       return it->second;
   }
 
+  /// Gets a value at a point
   Output eval_at_point(const FEMContext &,
                        unsigned int /*i*/,
                        const Point & n,
@@ -468,13 +482,13 @@ public:
                               const Node & /*n*/,
                               std::vector<Output> & /*derivs*/)
   {
-    libmesh_error();
+    mooseError("Not implemented");
   } // this is only for grid projections
 
   void eval_old_dofs(
       const Elem &, unsigned int, unsigned int, std::vector<dof_id_type> &, std::vector<Output> &)
   {
-    libmesh_error();
+    mooseError("Not implemented");
   }
 
   void eval_old_dofs(const Elem &,
@@ -484,7 +498,7 @@ public:
                      std::vector<dof_id_type> &,
                      std::vector<Output> &)
   {
-    libmesh_error();
+    mooseError("Not implemented");
   }
 
 private:
