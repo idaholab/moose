@@ -38,6 +38,7 @@
     filename = mynet_tne.pt
     read_from_file = false
     print_epoch_loss = 10
+    max_processes = 1
   []
 []
 

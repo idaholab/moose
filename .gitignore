@@ -77,6 +77,7 @@ temp_print_trace.*
 *.pvtu
 *.zip
 *.pt
+*.net
 .depend
 *.png
 *.svg
@@ -102,7 +103,7 @@ temp_print_trace.*
 failed-unittest
 compile_commands.json
 build
-**/libtorch
+framework/contrib/libtorch
 
 # Allow certain files in gold directories
 !**/gold/*.e

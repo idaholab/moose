@@ -39,14 +39,6 @@
     prereq = evaluate
     libtorch = true
   []
-  [trainer-no-torch-error]
-    requirement = 'The system shall be able to throw an error if the user requires libtorch-based objects without installing libtorch.'
-    type = RunException
-    input = train.i
-    allow_test_objects = true
-    expect_err = "PyTorch C\+\+ API \(libtorch\) must be installed to use this object, see https://mooseframework.inl.gov/modules/stochastic_tools/install_pytorch.html for instruction."
-    libtorch = false
-  []
   [train-with-rel-tol]
     requirement = 'The system shall be able to train a libtorch-based neural network using a relative tolerance instead of fixed epoch number.'
     type = CheckFiles
