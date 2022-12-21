@@ -426,21 +426,22 @@ protected:
   void keepSolutionDuringRestore(bool keep_solution_during_restore);
 
   /**
-   * Set's all the app's output file bases. @see MooseApp::setOutputFileBase for usage
+   * Sets all the app's output file bases. @see MooseApp::setOutputFileBase for usage
    */
   void setAppOutputFileBase();
 
   /**
-   * Set's the inputted app's output file base.
+   * Set the output file base of the application which corresponds to the index passed to the
+   * function.
    *
    * @param index The sub-application index
    */
   void setAppOutputFileBase(unsigned int index);
 
   /**
-   * Helper for constructiing name of multiapp
+   * Helper for constructing the name of the multiapp
    *
-   * @param base_name The base name of the multiapp, usuall name()
+   * @param base_name The base name of the multiapp, usually name()
    * @param index The index of the app
    * @param total The total number of apps, which is used to pad the name with zeros
    * @return std::string The name of the multiapp

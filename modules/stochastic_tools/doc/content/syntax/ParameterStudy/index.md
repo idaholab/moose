@@ -109,7 +109,7 @@ While the execution mode can be explicitly specifyied using the [!param](/Parame
 
 ## Outputs
 
-The `ParameterStudy` syntax provides ways to output the results of the study in CSV and/or JSON format. The sampler matrix (the values of the perturbed parameters) and the resulting QoI values can be outputted by setting the [!param](/ParameterStudy/output_type) parameter to `csv` and/or `json`. However, the CSV output will not contain vector-type QoIs, like those from vector-postprocessors. The default for both of this parameter is `json`. A JSON output is automatically created if QoI statistics are computed.
+The `ParameterStudy` syntax provides ways to output the results of the study in CSV and/or JSON format. The sampler matrix (the values of the perturbed parameters) and the resulting QoI values can be output by setting the [!param](/ParameterStudy/output_type) parameter to `csv` and/or `json`. However, the CSV output will not contain vector-type QoIs, like those from vector-postprocessors. The default for both of this parameter is `json`. A JSON output is automatically created if QoI statistics are computed.
 
 ## List of Objects
 

@@ -942,7 +942,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
   const std::string multiapp_name = getMultiAppName(name(), _first_local_app + i, _total_num_apps);
   std::string full_name;
 
-  // Only add parent name if it the parent is not the main app
+  // Only add parent name if the parent is not the main app
   if (_app.multiAppLevel() > 0)
     full_name = _app.name() + "_" + multiapp_name;
   else

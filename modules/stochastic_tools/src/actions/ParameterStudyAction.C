@@ -531,7 +531,7 @@ ParameterStudyAction::act()
       names = getParam<std::vector<ReporterValueName>>("sampler_column_names");
     else
     {
-      // There isn't a garunteed mapping if using brackets
+      // There isn't a guaranteed mapping if using brackets
       bool has_bracket = false;
       for (const auto & param : _parameters)
         if (param.find("[") != std::string::npos)

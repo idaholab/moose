@@ -49,7 +49,7 @@
       input = stochastic_matrix.i
       cli_args = 'Samplers/wrong/type=InputMatrix Samplers/wrong/matrix=\'1 2 3 4\' Reporters/matrix/sampler=wrong'
       expect_err = 'Attempting to create a stochastic vector with a different sampler \(sample\) than the one specified at input \(wrong\)\.'
-      detail = 'using a different sampler than transfers;'
+      detail = 'using a different sampler than the transfer\'s;'
     []
   []
 []
