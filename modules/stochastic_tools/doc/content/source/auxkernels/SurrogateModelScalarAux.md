@@ -4,7 +4,7 @@
 
 This auxiliary scalar kernel takes a vector of scalar variables,
 postprocessors, and real numbers in [!param](/ScalarAuxKernels/SurrogateModelScalarAux/parameters)
-and evaluates the surrogate model provided in [!param](/AuxKernels/SurrogateModelScalarAux/model)
+and evaluates the surrogate model provided in [!param](/AuxScalarKernels/SurrogateModelScalarAux/model)
 at these values.
 
 !syntax parameters /AuxScalarKernels/SurrogateModelScalarAux
