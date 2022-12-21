@@ -1,4 +1,4 @@
-# SolutionInvalidityOutput
+# SolutionInvalidity
 
 !syntax description /Outputs/SolutionInvalidity
 
