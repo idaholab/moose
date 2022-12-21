@@ -56,6 +56,26 @@ protected:
    */
   const Sampler & sampler() const { return _sampler; }
 
+  const std::vector<std::vector<Real>> & getGlobalInputData() const
+  {
+    _input_data_requested = true;
+    return _input_data;
+  }
+
+  /**
+   * Get a const reference to the output data
+   */
+  const std::vector<T> & getGlobalOutputData() const
+  {
+    _output_data_requested = true;
+    return _output_data;
+  }
+
+  /**
+   * Optional virtual function that is called before the sampler loop calling needSample
+   */
+  virtual void preNeedSample() {}
+
   /**
    * This routine is called during the sampler loop in execute() and is meant to fill
    * in the "need_sample" reporter value and modify the data declared by the transfer.
@@ -84,6 +104,15 @@ private:
   std::vector<bool> & _need_sample;
   /// Reporter value declared with the transfer
   std::vector<T> * _data = nullptr;
+
+  /// Whether or not to gather global input data
+  mutable bool _input_data_requested = false;
+  /// Whether or not to gather global output data
+  mutable bool _output_data_requested = false;
+  /// Global input data from sampler
+  std::vector<std::vector<Real>> _input_data;
+  /// Global output data from sampler
+  std::vector<T> _output_data;
 };
 
 template <typename T>
@@ -107,6 +136,28 @@ template <typename T>
 void
 ActiveLearningReporterTempl<T>::execute()
 {
+  // If requesting global data, fill it in
+  if (_input_data_requested)
+  {
+    // Gather inputs for the current step
+    _input_data.assign(_sampler.getNumberOfRows(),
+                       std::vector<Real>(_sampler.getNumberOfCols(), 0.0));
+    for (dof_id_type i = _sampler.getLocalRowBegin(); i < _sampler.getLocalRowEnd(); ++i)
+      _input_data[i] = _sampler.getNextLocalRow();
+    for (auto & inp : _input_data)
+      gatherSum(inp);
+  }
+  if (_output_data_requested)
+  {
+    if (!_data)
+      mooseError("Output data has been requested, but none was declared in this object.");
+    _output_data = *_data;
+    _communicator.allgather(_output_data);
+  }
+
+  // Optional call for before sampler loop
+  preNeedSample();
+
   // Dummy value in case _data has not been declared yet
   T dummy;
   // Loop over samples to determine if sample is needed. Replace value in _data
@@ -115,7 +166,7 @@ ActiveLearningReporterTempl<T>::execute()
   for (const auto & i : make_range(_sampler.getNumberOfLocalRows()))
     _need_sample[i] = needSample(_sampler.getNextLocalRow(),
                                  i,
-                                 i + _sampler.getNumberOfLocalRows(),
+                                 i + _sampler.getLocalRowBegin(),
                                  (_data ? (*_data)[i] : dummy));
 }
 

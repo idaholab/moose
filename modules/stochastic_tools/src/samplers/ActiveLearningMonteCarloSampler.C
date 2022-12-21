@@ -38,47 +38,48 @@ ActiveLearningMonteCarloSampler::ActiveLearningMonteCarloSampler(const InputPara
     _flag_sample(getReporterValue<std::vector<bool>>("flag_sample")),
     _step(getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")->timeStep()),
     _num_batch(getParam<dof_id_type>("num_batch")),
-    _allowed_gp_fails(getParam<dof_id_type>("num_batch")),
-    _check_step(0),
-    _track_gp_fails(0)
+    _check_step(std::numeric_limits<int>::min())
 {
   for (const DistributionName & name : getParam<std::vector<DistributionName>>("distributions"))
     _distributions.push_back(&getDistributionByName(name));
-  setNumberOfRows(getParam<dof_id_type>("num_batch"));
+  setNumberOfRows(_num_batch);
   setNumberOfCols(_distributions.size());
-  _inputs_sto.resize(getParam<dof_id_type>("num_batch"), std::vector<Real>(_distributions.size()));
-  _inputs_gp_fails.resize(getParam<dof_id_type>("num_batch"),
-                          std::vector<Real>(_distributions.size()));
+  _inputs_sto.resize(_num_batch, std::vector<Real>(_distributions.size()));
   setNumberOfRandomSeeds(getParam<unsigned int>("num_random_seeds"));
+}
+
+void
+ActiveLearningMonteCarloSampler::sampleSetUp(const Sampler::SampleMode /*mode*/)
+{
+  // If we've already done this step, skip
+  if (_check_step == _step)
+    return;
+
+  // Keep data where the GP failed
+  if (_step > 0)
+    for (dof_id_type i = 0; i < _num_batch; ++i)
+      if (_flag_sample[i])
+        _inputs_gp_fails.push_back(_inputs_sto[i]);
+
+  // If we don't have enough failed inputs, generate new ones
+  if (_inputs_gp_fails.size() < _num_batch)
+  {
+    for (dof_id_type i = 0; i < _num_batch; ++i)
+      for (dof_id_type j = 0; j < _distributions.size(); ++j)
+        _inputs_sto[i][j] = _distributions[j]->quantile(getRand(_step));
+  }
+  // If we do have enough failed inputs, assign them and clear the tracked ones
+  else
+  {
+    _inputs_sto.assign(_inputs_gp_fails.begin(), _inputs_gp_fails.begin() + _num_batch);
+    _inputs_gp_fails.erase(_inputs_gp_fails.begin(), _inputs_gp_fails.begin() + _num_batch);
+  }
+
+  _check_step = _step;
 }
 
 Real
 ActiveLearningMonteCarloSampler::computeSample(dof_id_type row_index, dof_id_type col_index)
 {
-  if (col_index == 0 && _step > 0 && _check_step != _step)
-  {
-    for (dof_id_type i = 0; i < _num_batch; ++i)
-    {
-      if (_flag_sample[i])
-      {
-        _inputs_gp_fails[_track_gp_fails] = _inputs_sto[_track_gp_fails];
-        ++_track_gp_fails;
-      }
-      for (dof_id_type j = 0; j < _distributions.size(); ++j)
-        _inputs_sto[i][j] = _distributions[j]->quantile(getRand(_step));
-    }
-  }
-  else if (_step == 0)
-  {
-    for (dof_id_type j = 0; j < _distributions.size(); ++j)
-      _inputs_sto[row_index][j] = _distributions[j]->quantile(getRand(_step));
-  }
-  _check_step = _step;
-  if (_track_gp_fails >= _allowed_gp_fails)
-  {
-    _track_gp_fails = 0;
-    return _inputs_gp_fails[row_index][col_index];
-  }
-  else
-    return _inputs_sto[row_index][col_index];
+  return _inputs_sto[row_index][col_index];
 }

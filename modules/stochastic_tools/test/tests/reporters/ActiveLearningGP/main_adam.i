@@ -64,7 +64,7 @@
     type =  ActiveLearningGPDecision
     sampler = mc
     parallel_type = ROOT
-    execute_on = 'initial timestep_begin'
+    execute_on = 'timestep_begin'
     flag_sample = 'flag_sample'
     inputs = 'inputs'
     gp_mean = 'gp_mean'
@@ -114,7 +114,6 @@
 []
 
 [Outputs]
-  # perf_graph = true
   file_base = 'single_proc_single_row_ufunction'
   [out]
     type = JSON

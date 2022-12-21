@@ -66,11 +66,12 @@ ActiveLearningGaussianProcess::ActiveLearningGaussianProcess(const InputParamete
         getParam<Real>("learning_rate_adam")))
 {
   if (getParam<unsigned int>("batch_size") > 0 && _optimization_opts.opt_type == "tao")
-    mooseError("Mini-batch sampling is not compatible with the TAO optimization library. Please "
+    paramError("batch_size",
+               "Mini-batch sampling is not compatible with the TAO optimization library. Please "
                "use Adam optimization.");
 
   _gp_handler.initialize(
-      getCovarianceFunctionByName(parameters.get<UserObjectName>("covariance_function")),
+      getCovarianceFunctionByName(getParam<UserObjectName>("covariance_function")),
       getParam<std::vector<std::string>>("tune_parameters"),
       getParam<std::vector<Real>>("tuning_min"),
       getParam<std::vector<Real>>("tuning_max"));
@@ -82,18 +83,26 @@ ActiveLearningGaussianProcess::reTrain(const std::vector<std::vector<Real>> & in
 {
 
   // Addtional error check for each re-train call of the GP surrogate
+  if (inputs.size() != outputs.size())
+    mooseError("Number of inputs (",
+               inputs.size(),
+               ") does not match number of outputs (",
+               outputs.size(),
+               ").");
+  if (inputs.empty())
+    mooseError("There is no data for retraining.");
   if (outputs.size() < _optimization_opts.batch_size)
     paramError("batch_size", "Batch size cannot be greater than the training data set size.");
 
-  RealEigenMatrix _training_data;
-  _training_params.setZero(outputs.size(), inputs.size());
-  _training_data.setZero(outputs.size(), 1);
+  RealEigenMatrix training_data;
+  _training_params.setZero(outputs.size(), inputs[0].size());
+  training_data.setZero(outputs.size(), 1);
 
   for (unsigned int i = 0; i < outputs.size(); ++i)
   {
-    _training_data(i, 0) = outputs[i];
-    for (unsigned int j = 0; j < inputs.size(); ++j)
-      _training_params(i, j) = inputs[j][i];
+    training_data(i, 0) = outputs[i];
+    for (unsigned int j = 0; j < inputs[i].size(); ++j)
+      _training_params(i, j) = inputs[i][j];
   }
 
   // Standardize (center and scale) training params
@@ -101,15 +110,15 @@ ActiveLearningGaussianProcess::reTrain(const std::vector<std::vector<Real>> & in
     _gp_handler.standardizeParameters(_training_params);
   // if not standardizing data set mean=0, std=1 for use in surrogate
   else
-    _gp_handler.paramStandardizer().set(0, 1, inputs.size());
+    _gp_handler.paramStandardizer().set(0, 1, inputs[0].size());
 
   // Standardize (center and scale) training data
   if (_standardize_data)
-    _gp_handler.standardizeData(_training_data);
+    _gp_handler.standardizeData(training_data);
   // if not standardizing data set mean=0, std=1 for use in surrogate
   else
-    _gp_handler.dataStandardizer().set(0, 1, inputs.size());
+    _gp_handler.dataStandardizer().set(0, 1, inputs[0].size());
 
   // Setup the covariance
-  _gp_handler.setupCovarianceMatrix(_training_params, _training_data, _optimization_opts);
+  _gp_handler.setupCovarianceMatrix(_training_params, training_data, _optimization_opts);
 }

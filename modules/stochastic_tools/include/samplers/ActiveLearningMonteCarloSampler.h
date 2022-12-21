@@ -22,6 +22,8 @@ public:
   ActiveLearningMonteCarloSampler(const InputParameters & parameters);
 
 protected:
+  /// Gather all the samples
+  virtual void sampleSetUp(const Sampler::SampleMode mode) override;
   /// Return the sample for the given row and column
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
 
@@ -38,14 +40,8 @@ private:
   /// The maximum number of GP fails
   const unsigned int _num_batch;
 
-  /// Store the user-specified GP fails
-  const unsigned int _allowed_gp_fails;
-
   /// Ensure that the sampler proceeds in a sequential fashion
   int _check_step;
-
-  /// Track GP fails
-  unsigned int _track_gp_fails;
 
   /// Storage for previously accepted samples by the decision reporter system
   std::vector<std::vector<Real>> _inputs_sto;

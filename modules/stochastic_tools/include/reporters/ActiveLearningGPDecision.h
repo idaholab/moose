@@ -23,9 +23,16 @@ public:
 
 protected:
   /**
-   * This evaluates the inputted function to determine whether a multiapp solve is
-   * necessary/allowed, otherwise it replaces the "transferred" quantity with a
-   * default value.
+   * This is where most of the computations happen:
+   *   - Data is accumulated for training
+   *   - GP models are trained
+   *   - Decision is made whether more data is needed for GP training
+   */
+  virtual void preNeedSample() override;
+
+  /**
+   * Based on the computations in preNeedSample, the decision to get more data is passed and results
+   * from the GP fills @param val
    */
   virtual bool needSample(const std::vector<Real> & row,
                           dof_id_type local_ind,
@@ -35,56 +42,44 @@ protected:
 private:
   /**
    * This evaluates the active learning acquisition function and returns bool
-   * that indicates whether a full model evaluation is required or not.
+   * that indicates whether the GP model failed.
+   *
+   * @param gp_mean Mean of the gaussian process model
+   * @param gp_mean Standard deviation of the gaussian process model
+   * @return bool If the GP model failed
    */
-  bool learningFunction(const Real & gp_mean,
-                        const Real & gp_std,
-                        const MooseEnum & function_name,
-                        const Real & parameter,
-                        const Real & threshold);
+  bool learningFunction(const Real & gp_mean, const Real & gp_std) const;
 
   /**
    * This sets up data for re-training the GP.
+   *
+   * @param inputs Matrix of inputs for the current step
+   * @param outputs Vector of outputs for the current step
    */
-  void setupData(const std::vector<Real> & output_parallel,
-                 const std::vector<std::vector<Real>> & inputs_prev);
+  void setupData(const std::vector<std::vector<Real>> & inputs, const std::vector<Real> & outputs);
 
   /**
    * This makes decisions whether to call the full model or not based on
    * GP prediction and uncertainty.
+   *
+   * @return bool Whether a full order model evaluation is required
    */
-  void facilitateDecision(const std::vector<Real> & row,
-                          dof_id_type local_ind,
-                          Real & val,
-                          const bool & retrain);
-
-  /**
-   * This transmits GP outputs to file.
-   */
-  void transferOutput(const DenseMatrix<Real> & inputs_parallel,
-                      const std::vector<Real> & gp_mean_parallel,
-                      const std::vector<Real> & gp_std_parallel);
+  bool facilitateDecision();
 
   /// Track the current step of the main App
   const int & _step;
 
   /// The learning function for active learning
   const MooseEnum & _learning_function;
-
   /// The learning function threshold
   const Real & _learning_function_threshold;
-
   /// The learning function parameter
-  const Real * _learning_function_parameter;
+  const Real & _learning_function_parameter;
 
   /// The active learning GP trainer that permits re-training
   const ActiveLearningGaussianProcess & _al_gp;
-
   /// The GP evaluator object that permits re-evaluations
   const SurrogateModel & _gp_eval;
-
-  /// The Monte Carlo sampler
-  Sampler & _sampler;
 
   /// Flag samples when the GP fails
   std::vector<bool> & _flag_sample;
@@ -97,40 +92,19 @@ private:
 
   /// Broadcast the GP mean prediciton to JSON
   std::vector<Real> & _gp_mean;
-
   /// Broadcast the GP standard deviation to JSON
   std::vector<Real> & _gp_std;
 
-  /// Store all the input vectors in the batch
-  std::vector<std::vector<Real>> _inputs_batch;
-
-  /// Store all the outputs in the batch
-  std::vector<Real> _outputs_batch;
-
-  /// Store all the input vectors in the batch from the previous step
-  std::vector<std::vector<Real>> _inputs_batch_prev;
-
   /// GP pass/fail decision
-  std::vector<bool> _decision;
+  bool _decision;
 
-  /// Track GP fails
-  unsigned int _track_gp_fails;
+  /// Reference to global input data requested from base class
+  const std::vector<std::vector<Real>> & _inputs_global;
+  /// Reference to global output data requested from base class
+  const std::vector<Real> & _outputs_global;
 
-  /// Store the user-specified number of allowed GP fails
-  unsigned int _allowed_gp_fails;
-
-  /// For parallelization
-  libMesh::Parallel::Communicator _local_comm;
-
-  /// Store GP outputs
-  std::vector<Real> _gp_sto;
-
-  /// Facilitate allGather of outputs
-  std::vector<Real> _output_parallel;
-
-  /// Facilitate allGather of GP mean predictions
-  std::vector<Real> _gp_mean_parallel;
-
-  /// Facilitate allGather of GP prediction standard deviations
-  std::vector<Real> _gp_std_parallel;
+  /// Store all the input vectors used for training
+  std::vector<std::vector<Real>> _inputs_batch;
+  /// Store all the outputs used for training
+  std::vector<Real> _outputs_batch;
 };
