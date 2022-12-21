@@ -99,9 +99,10 @@ void
 SolutionInvalidity::printDebug(SolutionID _solution_id)
 {
   // std::stringstream output;
-  _console << _solution_invalidity_registry.sectionInfo(_solution_id)._name << ": "
-           << _solution_invalidity_registry.sectionInfo(_solution_id)._message << "\n";
-  _console << std::flush;
+  // console << _solution_invalidity_registry.sectionInfo(_solution_id)._name << ": "
+  //         << _solution_invalidity_registry.sectionInfo(_solution_id)._message << "\n"
+  //         << std::endl;
+  // console << std::flush;
 }
 
 /// Store all solution invalid warning for output
