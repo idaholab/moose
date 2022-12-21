@@ -23,7 +23,7 @@
  * It is a general field transfer. It will do the following things
  * 1) From part of source domain to part of domain. Support subdomains/boundaries to
  *    subdomains/boundaries, mixing as appropriate
- * 2) Support vector vars and regular vars
+ * 2) interpolation and extrapolation, as appropriate
  * 3) Support higher order FEM
  * 4) Support mixed orders between source and target variables
  * 5) Support both distributed and replicated meshes
@@ -42,14 +42,30 @@ public:
 
   virtual void execute() override;
 
-  // This needs to be moved into libMesh
+  // This needs to be moved into libMesh according to Fande
+  // The hash helps sort the points in buckets
+  // Hashing the floats also leads to floating point comparison errors in their own way
+  // We hash a rounding of the float instead
   struct hash_point
   {
     std::size_t operator()(const Point & p) const
     {
       std::size_t seed = 0;
-      Moose::hash_combine(seed, p(0), p(1), p(2));
+      Moose::hash_combine(seed, round(p(0) * 1e10), round(p(1) * 1e10), round(p(2) * 1e10));
       return seed;
+    }
+  };
+
+  // We cannot compare Points exactly, there will be floating point errors from
+  // operations like adjusting the position or coordinate transformations
+  // We do the next best thing and compare with a tolerance
+  struct compare_point : public std::binary_function<Point, Point, bool>
+  {
+    bool operator()(const Point & p1, const Point & p2) const
+    {
+      return (MooseUtils::absoluteFuzzyEqual(p1(0), p2(0)) &&
+              MooseUtils::absoluteFuzzyEqual(p1(1), p2(1)) &&
+              MooseUtils::absoluteFuzzyEqual(p1(2), p2(2)));
     }
   };
 
@@ -196,7 +212,7 @@ private:
   typedef std::vector<std::unordered_map<dof_id_type, InterpInfo>> DofobjectToInterpValVec;
 
   /// A map from Point to interpolation values
-  typedef std::unordered_map<Point, Number, hash_point> InterpCache;
+  typedef std::unordered_map<Point, Number, hash_point, compare_point> InterpCache;
 
   /// A vector of such caches, indexed by to_problem
   typedef std::vector<InterpCache> InterpCaches;
@@ -270,19 +286,23 @@ private:
                                const unsigned int problem_id,
                                ProcessorToPointVec & outgoing_points);
 
-  /*
+  /**
    * Compute minimum distance
+   * @param p the point of interest
+   * @param bbox the bounding box to find the minimum distance from
    */
   Real bboxMinDistance(const Point & p, const BoundingBox & bbox);
 
-  /*
+  /**
    * Compute max distance
+   * @param p the point of interest
+   * @param bbox the bounding box to find the maximum distance from
    */
   Real bboxMaxDistance(const Point & p, const BoundingBox & bbox);
 
-  /*
+  /**
    * Get from bounding boxes for given domains and boundaries
-   * */
+   */
   std::vector<BoundingBox> getRestrictedFromBoundingBoxes();
 };
 
@@ -366,13 +386,13 @@ public:
                               const Node & /*n*/,
                               std::vector<Output> & /*derivs*/)
   {
-    libmesh_error();
+    mooseError("Not implemented");
   } // this is only for grid projections
 
   void eval_old_dofs(
       const Elem &, unsigned int, unsigned int, std::vector<dof_id_type> &, std::vector<Output> &)
   {
-    libmesh_error();
+    mooseError("Not implemented");
   }
 
   void eval_old_dofs(const Elem &,
@@ -382,12 +402,13 @@ public:
                      std::vector<dof_id_type> &,
                      std::vector<Output> &)
   {
-    libmesh_error();
+    mooseError("Not implemented");
   }
 
   std::vector<Point> & points_requested() { return _points_requested; }
 
 private:
+  // Vector of points requested
   std::vector<Point> _points_requested;
 
   RecordRequests * _primary = nullptr;
@@ -422,7 +443,11 @@ protected:
   typedef typename TensorTools::MakeBaseNumber<Output>::type DofValueType;
 
 public:
-  typedef std::unordered_map<Point, Output, MultiAppGeneralFieldTransfer::hash_point> Cache;
+  typedef std::unordered_map<Point,
+                             Output,
+                             MultiAppGeneralFieldTransfer::hash_point,
+                             MultiAppGeneralFieldTransfer::compare_point>
+      Cache;
 
   typedef typename TensorTools::MakeReal<Output>::type RealType;
   typedef DofValueType ValuePushType;

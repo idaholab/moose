@@ -207,19 +207,8 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
   // Clean up _bboxes
   _bboxes.clear();
 
-  // Obey fixed box sizes or source block and boundary restriction if specified
   // NOTE: This ignores the app's bounding box inflation and padding
-  // if (_from_blocks.size() || _from_boundaries.size() || !hasFromMultiApp() ||
-  //     _fixed_bbox_size != std::vector<Real>(3, 0))
-    _bboxes = getRestrictedFromBoundingBoxes();
-  // else
-  // {
-  //   // The multiapp can also have padding and bounding box inflation parameters
-  //   // NOTE: This ignores the transfer's fixed bounding box size
-  //   _bboxes.resize(_from_meshes.size());
-  //   for (const auto i : make_range(_from_meshes.size()))
-  //     _bboxes[i] = getFromMultiApp()->getBoundingBox(i, _displaced_source_mesh, nullptr);
-  // }
+  _bboxes = getRestrictedFromBoundingBoxes();
 
   // Expand bounding boxes. Some desired points might be excluded
   // without an expansion
@@ -266,7 +255,7 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
   {
     auto & pointInfoVec = _processor_to_pointInfoVec[pid];
 
-    // Cache interpolation values for each dof object
+    // Cache interpolation values for each dof object / points
     cacheIncomingInterpVals(pid,
                             _to_var_names[i],
                             pointInfoVec,
@@ -401,11 +390,9 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const VariableName & var_nam
 
       dof_id_type point_id = 0;
       for (Point p : f.points_requested())
-      {
         // using the point number as a "dof_object_id" will serve to identify the point if we ever
         // rework interp/distance_cache into the dof_id_to_value maps
         this->cacheOutgoingPointInfo(p + _to_positions[i_to], point_id++, i_to, outgoing_points);
-      }
 
       // This is going to require more complicated transfer work
       if (!g.points_requested().empty())
@@ -518,8 +505,13 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
       Point p = point_requests[val_offset] - _to_positions[problem_id];
       const Number val = incoming_vals[val_offset].first;
 
+      // Initialize distance to be able to compare
+      if (!distance_cache.count(p))
+        distance_cache[p] = std::numeric_limits<Real>::max();
+
       // We should only have one closest value for each variable at any given point.
       // We do expect to visit each point several times as there may be shared Qps,
+      // (we seemingly dont, the generic projector seems to return only unique points)
       // on vertices for example, but the incoming values (from the closest points)
       // should be unique
       if (!GeneralFieldTransfer::isBetterOutOfMeshValue(val) && value_cache.count(p) != 0 &&
@@ -527,14 +519,19 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
           MooseUtils::absoluteFuzzyEqual(distance_cache[p], incoming_vals[val_offset].second))
       {
         _num_overlaps++;
-        mooseWarning("Several candidate values detected when sending to problem ", problem_id, " & point (" + std::to_string(p(0)) + ", " + std::to_string(p(1)) + ", " + std::to_string(p(2)) + ") : " + std::to_string(val) + " / " + std::to_string(value_cache[p]) + ".\nThis message will only print once for all overlaps.");
+        mooseWarning("Several candidate values detected when sending to problem ", problem_id,
+                     " & point (" + std::to_string(p(0)) + ", " + std::to_string(p(1)) + ", "
+                     + std::to_string(p(2)) + ") : " + std::to_string(val) + " / " +
+                     std::to_string(value_cache[p]) +
+                     ".\nThis message will only print once for all overlaps.");
       }
+
       if (!GeneralFieldTransfer::isBetterOutOfMeshValue(val) &&
           MooseUtils::absoluteFuzzyGreaterThan(distance_cache[p], incoming_vals[val_offset].second))
       {
         // NOTE: We store the distance as well as the value. We really only need the
         // value to construct the variable, but the distance is used to make decisions in nearest
-        // node schemes
+        // node schemes on which value to use
         value_cache[p] = val;
         distance_cache[p] = incoming_vals[val_offset].second;
       }
@@ -656,9 +653,16 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
                                 libMesh::VectorSetAction<Number>>
           set_solution(*to_sys, f, nullptr, setter, varvec);
 
-      ConstElemRange active_local_elem_range(to_mesh.active_local_elements_begin(),
-                                             to_mesh.active_local_elements_end());
-      // TODO: Investigate if we can only project on the block restricted domain
+      // We dont look at boundary restriction, not supported for higher order target variables
+      const auto & to_begin = _to_blocks.empty()
+                                  ? to_mesh.active_local_elements_begin()
+                                  : to_mesh.active_local_subdomain_set_elements_begin(_to_blocks);
+
+      const auto & to_end = _to_blocks.empty()
+                                ? to_mesh.active_local_elements_end()
+                                : to_mesh.active_local_subdomain_set_elements_end(_to_blocks);
+
+      ConstElemRange active_local_elem_range(to_begin, to_end);
 
       set_solution.project(active_local_elem_range);
     }
