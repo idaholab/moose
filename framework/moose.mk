@@ -69,7 +69,7 @@ ifeq ($(ENABLE_LIBTORCH),true)
     libmesh_CXXFLAGS += -DLIBTORCH_ENABLED
 
     # Adding the include directories, we use -isystem to silence the warning coming from
-	# libtorch (which would cause errors in the testing phase)
+    # libtorch (which would cause errors in the testing phase)
     libmesh_CXXFLAGS += -isystem $(LIBTORCH_DIR)/include/torch/csrc/api/include
     libmesh_CXXFLAGS += -isystem $(LIBTORCH_DIR)/include
 
@@ -210,6 +210,12 @@ ifeq ($(MOOSE_UNITY),true)
 srcsubdirs := $(shell find $(FRAMEWORK_DIR)/src -type d -not -path '*/.libs*')
 
 moose_non_unity := %/base %/utils
+
+# Add additional non-unity directories if libtorch is enabled
+ifeq ($(ENABLE_LIBTORCH),true)
+	libtorch_dirs := $(shell find $(FRAMEWORK_DIR)/src/libtorch -type d -not -path '*/.libs*' 2> /dev/null)
+  moose_non_unity += $(libtorch_dirs)
+endif
 
 unity_src_dir := $(FRAMEWORK_DIR)/build/unity_src
 

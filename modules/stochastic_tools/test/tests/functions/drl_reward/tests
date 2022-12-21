@@ -1,0 +1,13 @@
+[Tests]
+  [libtorch_drl_reward_linear]
+    type = CSVDiff
+    input = drl_reward.i
+    csvdiff = drl_reward_linear.csv
+    requirement = "The system shall be able to evaluate a linear DRL reward function with a given, "
+                  "time-dependent target."
+    issues = '#19571'
+    design = 'ScaledAbsDifferenceDRLRewardFunction.md'
+    cli_args = "Outputs/file_base='drl_reward_linear'"
+    libtorch = true
+  []
+[]

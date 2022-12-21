@@ -1,0 +1,53 @@
+[Tests]
+  design = 'LibtorchNeuralNetControl.md'
+  issues = '#19571'
+  [run-torch-script]
+    type = CSVDiff
+    input = read_control.i
+    csvdiff = torch_script_read_T_reporter_0026.csv
+    cli_args = "Controls/src_control/filename='model_2.pt'
+                Controls/src_control/torch_script_format=true
+                Controls/src_control/input_timesteps=2
+                Outputs/file_base='torch_script_read'"
+    requirement = "The system shall be able to read a neural network from a torchscript file and use "
+                  "it to control a transient process."
+    libtorch = true
+  []
+  [run-with-torch-parameters]
+    type = JSONDiff
+    input = read_control.i
+    jsondiff = 'torch_parameter_read.json'
+    cli_args = "Controls/src_control/filename='model_parameters_2.net'
+                Controls/src_control/torch_script_format=false
+                Controls/src_control/input_timesteps=2
+                Controls/src_control/num_neurons_per_layer='4 2'
+                Controls/src_control/activation_function='relu'
+                Reporters/inactive=''
+                Outputs/file_base='torch_parameter_read'
+                Reporters/T_reporter/outputs='json_out'"
+    requirement = "The system shall be able to read a neural network from a parameter file and use "
+                  "it to control a transient process."
+    libtorch = true
+  []
+  [run-without-nn]
+    type = CSVDiff
+    input = read_control.i
+    csvdiff = run_wo_nn_T_reporter_0026.csv
+    cli_args = "Outputs/file_base='run_wo_nn'"
+    requirement = "The system shall be able to run with a libtorch controller without having a "
+                  "neural net initialized in it."
+    libtorch = true
+  []
+  [invalid-torchscript-error]
+    type = RunException
+    input = read_control.i
+    cli_args = "Controls/src_control/filename='model_2.pt'
+                Controls/src_control/torch_script_format=true
+                Controls/src_control/input_timesteps=2
+                Controls/src_control/num_neurons_per_layer='3 3'"
+    expect_err = "This parameter should not be defined when filename is defined!"
+    requirement = "The system shall forbid specifying parameters when reading a "
+                  "neural network from a torchscript file."
+    libtorch = true
+  []
+[]

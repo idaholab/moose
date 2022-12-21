@@ -59,6 +59,6 @@
 []
 
 [Outputs]
-  csv=true
+  csv = true
   execute_on = FINAL
 []
