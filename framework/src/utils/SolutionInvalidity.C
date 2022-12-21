@@ -96,13 +96,12 @@ SolutionInvalidity::print(const ConsoleStream & console)
 
 /// Immediately print the section and message for debug purpose
 void
-SolutionInvalidity::printDebug(const ConsoleStream & console, SolutionID _solution_id)
+SolutionInvalidity::printDebug(SolutionID _solution_id)
 {
   // std::stringstream output;
-  console << _solution_invalidity_registry.sectionInfo(_solution_id)._name << ": "
-          << _solution_invalidity_registry.sectionInfo(_solution_id)._message << "\n"
-          << std::endl;
-  // console << std::flush;
+  _console << _solution_invalidity_registry.sectionInfo(_solution_id)._name << ": "
+           << _solution_invalidity_registry.sectionInfo(_solution_id)._message << "\n";
+  _console << std::flush;
 }
 
 /// Store all solution invalid warning for output
