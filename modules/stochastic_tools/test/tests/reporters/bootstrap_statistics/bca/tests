@@ -3,7 +3,8 @@
   issues = '#14409 #16584'
 
   [bca]
-    requirement = "The system shall support computing bias corrected and accelerated confidence level intervals of statistics"
+    requirement = "The system shall support computing bias corrected and accelerated confidence "
+                  "level intervals of statistics"
 
     [basic]
       type = JSONDiff
@@ -18,6 +19,7 @@
       jsondiff = bca_main_out.json
 
       detail = "of a vector of vector data"
+      valgrind = HEAVY
     []
 
     [replicated]
