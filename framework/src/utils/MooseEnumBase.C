@@ -171,6 +171,21 @@ MooseEnumBase::getIDs() const
   return out;
 }
 
+void
+MooseEnumBase::addDocumentation(const std::string & name, const std::string & doc)
+{
+  auto it = find(name);
+  if (it == _items.end())
+    mooseError("Item '", name, "' not found in addDocumentation.");
+  _item_documentation[*it] = doc;
+}
+
+const std::map<MooseEnumItem, std::string> &
+MooseEnumBase::getItemDocumentation() const
+{
+  return _item_documentation;
+}
+
 std::set<MooseEnumItem>::const_iterator
 MooseEnumBase::find(const std::string & name) const
 {

@@ -92,6 +92,16 @@ public:
    */
   const std::set<MooseEnumItem> & items() const { return _items; }
 
+  /**
+   * Add an item documentation string
+   */
+  void addDocumentation(const std::string & name, const std::string & doc);
+
+  /**
+   * Get the item documentation map
+   */
+  const std::map<MooseEnumItem, std::string> & getItemDocumentation() const;
+
   ///@{
   /**
    * Locate an item.
@@ -151,4 +161,7 @@ protected:
 
   /// Flag to enable enumeration items not previously defined
   bool _allow_out_of_range;
+
+  /// The map of deprecated names and optional replacements
+  std::map<MooseEnumItem, std::string> _item_documentation;
 };
