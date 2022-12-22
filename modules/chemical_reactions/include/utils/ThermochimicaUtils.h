@@ -13,17 +13,19 @@ class InputParameters;
 class MooseObject;
 class Action;
 
+#include <string>
+
 namespace ThermochimicaUtils
 {
 
 /**
- * Add the supplied class description if thermiochimica is available, otherwise add a warning
+ * Add the supplied class description if thermochimica is available, otherwise add a warning
  * message.
  */
 void addClassDescription(InputParameters & params, const std::string & desc);
 
 /**
- * Check if thermiochimica is available and throw an error if it is not.
+ * Check if thermochimica is available and throw an error if it is not.
  */
 void checkLibraryAvailability(MooseObject & self);
 void checkLibraryAvailability(Action & self);

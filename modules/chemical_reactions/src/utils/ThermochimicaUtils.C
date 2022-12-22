@@ -16,8 +16,8 @@ namespace ThermochimicaUtils
 {
 
 static const std::string message =
-    "This object requires the `Thermochimica` library to function. Check "
-    "the documentation for instructions to enable it.";
+    "To use this object, you need to have the `Thermochimica` library installed. Refer to the "
+    "documentation for guidance on how to enable it.";
 
 void
 addClassDescription(InputParameters & params, const std::string & desc)
@@ -34,6 +34,8 @@ checkLibraryAvailability(MooseObject & self)
 {
 #ifndef THERMOCHIMICA_ENABLED
   self.paramError("type", message);
+#else
+  libmesh_ignore(self);
 #endif
 }
 
@@ -42,6 +44,8 @@ checkLibraryAvailability(Action & self)
 {
 #ifndef THERMOCHIMICA_ENABLED
   mooseError(self.parameters().blockLocation() + ": " + message);
+#else
+  libmesh_ignore(self);
 #endif
 }
 
