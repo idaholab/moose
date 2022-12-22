@@ -16,7 +16,7 @@
 #include "FEProblemBase.h"
 
 SolutionInvalidInterface::SolutionInvalidInterface(MooseApp & moose_app, FEProblemBase & problem)
-  : ConsoleStreamInterface(moose_app), _si_moose_app(moose_app), _si_problem(problem)
+  : _si_moose_app(moose_app), _si_problem(problem)
 {
 }
 
@@ -25,8 +25,8 @@ void
 SolutionInvalidInterface::setSolutionInvalid(SolutionID _solution_id)
 {
   if (_si_problem.ImmediatelyPrintInvalidSolution())
-    //    _si_moose_app.solutionInvalidity().printDebug(_console, _solution_id);
-    return _si_moose_app.solutionInvalidity().setSolutionInvalid(_solution_id);
+    _si_moose_app.solutionInvalidity().printDebug(_solution_id);
+  return _si_moose_app.solutionInvalidity().setSolutionInvalid(_solution_id);
 }
 
 /// Register the section with a unique solution ID for the given section_name
