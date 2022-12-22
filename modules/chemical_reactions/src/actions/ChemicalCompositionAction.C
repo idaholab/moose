@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ChemicalCompositionAction.h"
+#include "ThermochimicaUtils.h"
 #include "FEProblemBase.h"
 #include "MooseMesh.h"
 #include "MooseUtils.h"
@@ -18,20 +19,23 @@
 #ifdef THERMOCHIMICA_ENABLED
 #include "Thermochimica-cxx.h"
 #include "checkUnits.h"
+#endif
 
 registerMooseAction("ChemicalReactionsApp", ChemicalCompositionAction, "add_variable");
 registerMooseAction("ChemicalReactionsApp", ChemicalCompositionAction, "add_aux_variable");
 registerMooseAction("ChemicalReactionsApp", ChemicalCompositionAction, "add_ic");
 registerMooseAction("ChemicalReactionsApp", ChemicalCompositionAction, "add_user_object");
 registerMooseAction("ChemicalReactionsApp", ChemicalCompositionAction, "add_aux_kernel");
-#endif
 
 InputParameters
 ChemicalCompositionAction::validParams()
 {
   InputParameters params = Action::validParams();
-  params.addClassDescription("Sets up the thermodynamic model and variables for the "
-                             "thermochemistry using Thermochimica.");
+
+  ThermochimicaUtils::addClassDescription(params,
+                                          "Sets up the thermodynamic model and variables for the "
+                                          "thermochemistry solve using Thermochimica.");
+
   params.addParam<std::vector<std::string>>("elements", "List of chemical elements");
   params.addParam<FileName>("initial_values", "The CSV file name with initial conditions.");
   params.addParam<FileName>("thermofile", "Thermodynamics model file");
@@ -64,10 +68,9 @@ ChemicalCompositionAction::ChemicalCompositionAction(const InputParameters & par
     _species(getParam<std::vector<std::string>>("output_species")),
     _element_potentials(getParam<std::vector<std::string>>("element_potentials"))
 {
+  ThermochimicaUtils::checkLibraryAvailability(*this);
+
   std::replace(_munit.begin(), _munit.end(), '_', ' ');
-#ifndef THERMOCHIMICA_ENABLED
-  mooseError("Thermochimica disabled");
-#endif
 }
 
 void
