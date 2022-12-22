@@ -1,6 +1,6 @@
 [Tests]
     issues = '#22548'
-    design = 'Gaussian.md'
+    design = 'GaussianIID.md TruncatedGaussianIID.md'
     [calculate_likelihoods]
       requirement = 'The system shall be be able to calculate the likelihood values when '
       [loglikelihood1_scalar]
@@ -8,15 +8,15 @@
         input = main.i
         allow_test_objects = true
         jsondiff = 'loglikelihood_scalar.json'
-        detail = 'using a Gaussian type with log-likelihoods requested and model/experiment values are scalars;'
+        detail = 'log-likelihoods requested and model/experiment values are scalars;'
       []
       [likelihood1_scalar]
         type = 'JSONDiff'
         input = main.i
         allow_test_objects = true
         jsondiff = 'likelihood_scalar.json'
-        cli_args = "Likelihoods/gaussian/log_likelihood='false' Outputs/file_base='likelihood_scalar'"
-        detail = 'using a Gaussian type with likelihoods requested and model/experiment values are scalars;'
+        cli_args = "Likelihoods/gaussian/log_likelihood='false' Likelihoods/truncgaussian/log_likelihood='false' Outputs/file_base='likelihood_scalar'"
+        detail = 'likelihoods requested and model/experiment values are scalars;'
       []
     []
   []

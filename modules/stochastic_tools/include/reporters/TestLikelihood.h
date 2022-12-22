@@ -32,6 +32,9 @@ private:
   /// Storage for the likelihood objects to be utilized
   std::vector<const Likelihood *> _likelihoods;
 
-  /// model prediction values
-  const std::vector<Real> & _model_pred;
+  /// Prediction values from models
+  std::vector<const std::vector<Real> *> _model_pred;
+
+  /// Weights for the models
+  const std::vector<Real> & _weights;
 };

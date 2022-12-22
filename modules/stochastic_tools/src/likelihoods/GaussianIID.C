@@ -7,19 +7,18 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "Gaussian.h"
-#include "math.h"
-#include "libmesh/utility.h"
+#include "GaussianIID.h"
 #include "DelimitedFileReader.h"
+#include "Normal.h"
 
-registerMooseObject("StochasticToolsApp", Gaussian);
+registerMooseObject("StochasticToolsApp", GaussianIID);
 
 InputParameters
-Gaussian::validParams()
+GaussianIID::validParams()
 {
   InputParameters params = Likelihood::validParams();
   params.addClassDescription(
-      "Gaussian likelihood function evaluating the model goodness against experiments.");
+      "GaussianIID likelihood function evaluating the model goodness against experiments.");
   params.addParam<bool>("log_likelihood", true, "Compute log-likelihood or likelihood.");
   params.addRequiredParam<Real>("noise",
                                 "Experimental noise plus model deviations against experiments.");
@@ -31,7 +30,7 @@ Gaussian::validParams()
   return params;
 }
 
-Gaussian::Gaussian(const InputParameters & parameters)
+GaussianIID::GaussianIID(const InputParameters & parameters)
   : Likelihood(parameters),
     ReporterInterface(this),
     _log_likelihood(getParam<bool>("log_likelihood")),
@@ -56,22 +55,34 @@ Gaussian::Gaussian(const InputParameters & parameters)
 }
 
 Real
-Gaussian::function(const std::vector<Real> & exp,
-                   const std::vector<Real> & model,
-                   const Real & noise,
-                   const bool & log_likelihood)
+GaussianIID::reqFunction(const std::vector<Real> & exp,
+                         const std::vector<std::vector<Real>> & model,
+                         const std::vector<Real> & weights,
+                         const Real & noise,
+                         const bool & log_likelihood) const
 {
   Real result = 0.0;
   for (unsigned i = 0; i < exp.size(); ++i)
-    result += std::log(1.0 / (noise * std::sqrt(2.0 * M_PI))) -
-              0.5 * Utility::pow<2>((exp[i] - model[i]) / noise);
-  if (!log_likelihood)
-    result = std::exp(result);
+  {
+    Real tmp = 0.0;
+    for (unsigned j = 0; j < model.size(); ++j)
+      tmp += weights[j] * Normal::pdf(exp[i], model[j][i], noise);
+    result += std::log(tmp);
+  }
+
+  result = log_likelihood ? result : std::exp(result);
   return result;
 }
 
 Real
-Gaussian::function(const std::vector<Real> & x) const
+GaussianIID::function(const std::vector<std::vector<Real>> & x, const std::vector<Real> & w) const
 {
-  return function(_exp_values, x, _noise, _log_likelihood);
+  if (x.size() != w.size())
+    mooseError("The number of models should be equal to the number of model weights.");
+
+  if (x[0].size() != _exp_values.size())
+    mooseError("The number of model evaluations should be equal to the number of experimental data "
+               "points.");
+
+  return reqFunction(_exp_values, x, w, _noise, _log_likelihood);
 }

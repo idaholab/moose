@@ -41,25 +41,44 @@
     from_multi_app = sub
     sampler = sample
   []
+  [reporter_transfer2]
+    type = SamplerReporterTransfer
+    from_reporter = 'average/value'
+    stochastic_reporter = 'constant2'
+    from_multi_app = sub
+    sampler = sample
+  []
 []
 
 [Reporters]
   [constant]
     type = StochasticReporter
   []
+  [constant2]
+    type = StochasticReporter
+  []
   [likelihoodtest]
     type = TestLikelihood
-    likelihoods = 'gaussian'
-    model_pred = constant/reporter_transfer:average:value
+    likelihoods = 'gaussian truncgaussian'
+    model_predictions = 'constant/reporter_transfer:average:value constant2/reporter_transfer2:average:value'
+    weights = '0.5 0.5'
   []
 []
 
 [Likelihoods]
   [gaussian]
-    type = Gaussian
+    type = GaussianIID
     noise = 0.2
     file_name = 'exp1.csv'
     log_likelihood=true
+  []
+  [truncgaussian]
+    type = TruncatedGaussianIID
+    noise = 0.2
+    file_name = 'exp1.csv'
+    log_likelihood=true
+    lower_bound = '-2.0 -2.0'
+    upper_bound = '2.0 2.0'
   []
 []
 
