@@ -11,6 +11,7 @@ import os, sys, re, json
 from QueueManager import QueueManager
 from TestHarness import util # to execute qsub
 import math # to compute node requirement
+from PBScodes import *
 
 ## This Class is responsible for maintaining an interface to the PBS scheduling syntax
 class RunPBS(QueueManager):
@@ -33,18 +34,18 @@ class RunPBS(QueueManager):
     def hasTimedOutOrFailed(self, job_data):
         """ use qstat and return bool on job failures outside of the TestHarness's control """
 
-        PBS_EXITCODES = { '271' : 'JOB_EXEC_KILL_WALLTIME 271',
-                          '-24' : 'JOB_EXEC_KILL_NCPUS_BURST -24',
-                          '-25' : 'JOB_EXEC_KILL_NCPUS_SUM -25',
-                          '-26' : 'JOB_EXEC_KILL_VMEM -26',
-                          '-27' : 'JOB_EXEC_KILL_MEM -27',
-                          '-28' : 'JOB_EXEC_KILL_CPUT -28',
-                          '-29' : 'JOB_EXEC_KILL_WALLTIME -29' }
+        # PBS_EXITCODES = { '271' : 'JOB_EXEC_KILL_WALLTIME 271',
+        #                   '-24' : 'JOB_EXEC_KILL_NCPUS_BURST -24',
+        #                   '-25' : 'JOB_EXEC_KILL_NCPUS_SUM -25',
+        #                   '-26' : 'JOB_EXEC_KILL_VMEM -26',
+        #                   '-27' : 'JOB_EXEC_KILL_MEM -27',
+        #                   '-28' : 'JOB_EXEC_KILL_CPUT -28',
+        #                   '-29' : 'JOB_EXEC_KILL_WALLTIME -29' }
 
-        PBS_STATUSES = { 'R' : 'RUNNING',
-                         'F' : 'FINISHED',
-                         'Q' : 'QUEUED',
-                         'E' : 'EXITING'}
+        # PBS_STATUSES = { 'R' : 'RUNNING',
+        #                  'F' : 'FINISHED',
+        #                  'Q' : 'QUEUED',
+        #                  'E' : 'EXITING'}
 
         jobs = job_data.jobs.getJobs()
         queue_plugin = self.__class__.__name__
@@ -73,9 +74,9 @@ class RunPBS(QueueManager):
                 return
 
             # woops. This job was killed by PBS for some reason
-            if job_result and str(job_result) in PBS_EXITCODES.keys():
+            if job_result and str(job_result) in PBS_User_EXITCODES.keys():
                 for job in jobs:
-                    job.addCaveats(PBS_EXITCODES[str(job_result)])
+                    job.addCaveats(PBS_User_EXITCODES[str(job_result)])
                 return True
 
             # Capture TestHarness exceptions
