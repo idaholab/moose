@@ -98,7 +98,7 @@ Terminator::handleMessage()
   switch (_error_level)
   {
     case ErrorLevel::INFO:
-      mooseInfo(message);
+      mooseInfoRepeated(message);
       break;
 
     case ErrorLevel::WARNING:
