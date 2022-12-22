@@ -23,7 +23,7 @@ class FEProblemBase;
 /**
  * An interface to communicate the solutioninvalidity for one app to the materials
  */
-class SolutionInvalidInterface : protected ConsoleStreamInterface
+class SolutionInvalidInterface
 {
 public:
   /**
