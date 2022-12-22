@@ -79,7 +79,7 @@ public:
    * Immediately print the section and message for debug purpose
    *  @param console The output stream to output to
    */
-  void printDebug(const ConsoleStream & console, SolutionID _solution_id);
+  // void printDebug(const ConsoleStream & console, SolutionID _solution_id);
 
   /// The SolutionInvalidityRegistry
   SolutionInvalidityRegistry & _solution_invalidity_registry;
