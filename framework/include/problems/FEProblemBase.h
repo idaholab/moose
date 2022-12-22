@@ -2001,7 +2001,7 @@ public:
   /**
    * Skip further residual evaluations and fail the next nonlinear convergence check
    */
-  bool failNextNonlinearConvergenceCheck() { return _fail_next_nonlinear_convergence_check; }
+  bool failNextNonlinearConvergenceCheck() const { return _fail_next_nonlinear_convergence_check; }
 
 protected:
   /// Create extra tagged vectors and matrices
