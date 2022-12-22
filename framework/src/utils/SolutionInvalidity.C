@@ -100,8 +100,9 @@ SolutionInvalidity::printDebug(const ConsoleStream & console, SolutionID _soluti
 {
   // std::stringstream output;
   console << _solution_invalidity_registry.sectionInfo(_solution_id)._name << ": "
-          << _solution_invalidity_registry.sectionInfo(_solution_id)._message << "\n";
-  console << std::flush;
+          << _solution_invalidity_registry.sectionInfo(_solution_id)._message << "\n"
+          << std::endl;
+  // console << std::flush;
 }
 
 /// Store all solution invalid warning for output
