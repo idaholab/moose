@@ -1998,6 +1998,11 @@ public:
    */
   unsigned int nlSysNum(const NonlinearSystemName & nl_sys_name) const;
 
+  /**
+   * Skip further residual evaluations and fail the next nonlinear convergence check
+   */
+  bool failNextNonlinearConvergenceCheck() { return _fail_next_nonlinear_convergence_check; }
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
@@ -2336,7 +2341,7 @@ private:
   const bool _force_restart;
   const bool _skip_additional_restart_data;
   const bool _skip_nl_system_check;
-  bool _fail_next_linear_convergence_check;
+  bool _fail_next_nonlinear_convergence_check;
   const bool & _allow_invalid_solution;
 
   /// At or beyond initialSteup stage

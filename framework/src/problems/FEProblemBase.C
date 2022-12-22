@@ -347,7 +347,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _force_restart(getParam<bool>("force_restart")),
     _skip_additional_restart_data(getParam<bool>("skip_additional_restart_data")),
     _skip_nl_system_check(getParam<bool>("skip_nl_system_check")),
-    _fail_next_linear_convergence_check(false),
+    _fail_next_nonlinear_convergence_check(false),
     _allow_invalid_solution(getParam<bool>("allow_invalid_solution")),
     _started_initial_setup(false),
     _has_internal_edge_residual_objects(false),
@@ -5402,10 +5402,10 @@ FEProblemBase::solve(const unsigned int nl_sys_num)
 
   possiblyRebuildGeomSearchPatches();
 
-  // reset flag so that linear solver does not use
-  // the old converged reason "DIVERGED_NANORINF", when
-  // we throw  an exception and stop solve
-  _fail_next_linear_convergence_check = false;
+  // reset flag so that residual evaluation does not get skipped
+  // and the next non-linear iteration does not automatically fail with
+  // "DIVERGED_NANORINF", when we throw  an exception and stop solve
+  _fail_next_nonlinear_convergence_check = false;
 
   if (_solve)
     _current_nl_sys->solve();
@@ -5463,8 +5463,9 @@ FEProblemBase::checkExceptionAndStopSolve(bool print_message)
     // We've handled this exception, so we no longer have one.
     _has_exception = false;
 
-    // Force the next linear convergence check to fail.
-    _fail_next_linear_convergence_check = true;
+    // Force the next non-linear convergence check to fail (and all further residual evaluation to
+    // be skipped).
+    _fail_next_nonlinear_convergence_check = true;
 
     // Repropagate the exception, so it can be caught at a higher level, typically
     // this is NonlinearSystem::computeResidual().
@@ -7261,6 +7262,12 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
 {
   TIME_SECTION("checkNonlinearConvergence", 5, "Checking Nonlinear Convergence");
   mooseAssert(_current_nl_sys, "This should be non-null");
+
+  if (_fail_next_nonlinear_convergence_check)
+  {
+    _fail_next_nonlinear_convergence_check = false;
+    return MooseNonlinearConvergenceReason::DIVERGED_FNORM_NAN;
+  }
 
   NonlinearSystemBase & system = *_current_nl_sys;
   MooseNonlinearConvergenceReason reason = MooseNonlinearConvergenceReason::ITERATING;
