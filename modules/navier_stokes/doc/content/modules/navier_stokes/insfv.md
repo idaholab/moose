@@ -88,3 +88,20 @@ increases the order of the $L^2$ error from $O(h)$ to $O(h^2)$ for velocity, and
 $O(h^{0.5})$ to $O(h)$ for pressure. For an example see:
 
 !listing modules/navier_stokes/test/tests/finite_volume/ins/mms/skew-correction/skewed-vortex.i
+
+## Cell-centered vector field reconstruction using face fluxes
+
+### Weller's method
+
+For a detailed description on the origins and properties of this method, see
+[!cite](weller2014non) and [!cite](aguerre2018oscillation). In short, this reconstruction
+can be used to obtain cell-center velocities and pressure gradients based on face fluxes and
+normal pressure face gradients, respectively. It exhibits a second order convergence ($O(h^2)$)
+spatially. The expression for the vector value at the cell centers is the following:
+
+!equation id=wellers-reconstruction
+\vec{v}_C = \left(\sum\limits_f^{N_f} S_f\vec{n}_f \otimes \vec{n}_f \right)^{-1} \left(\sum\limits_f^{N_f} \vec{n}_f \phi_f \right)
+
+where $\vec{n_f}$ denotes the surface normal, $S_f$ the surface area and $\phi_f$ the
+face flux. Latter can be computed by the face vector values by $\phi_f = (\vec{v}_f \cdot n_f) S_f$.
+

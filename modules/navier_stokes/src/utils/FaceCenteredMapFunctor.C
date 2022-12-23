@@ -10,7 +10,7 @@
 #include "FaceCenteredMapFunctor.h"
 
 template <typename T, typename Map>
-typename Moose::FunctorBase<T>::ValueType
+typename FaceCenteredMapFunctor<T, Map>::ValueType
 FaceCenteredMapFunctor<T, Map>::evaluate(const ElemArg & elem_arg, unsigned int) const
 {
   // The following reconstruction is based on Weller's method. For more information on this,
@@ -31,7 +31,7 @@ FaceCenteredMapFunctor<T, Map>::evaluate(const ElemArg & elem_arg, unsigned int)
   // where $S_f$ is the surface normal vector, $n_f$ is the unit surface vector and $\phi_f$ is a
   // vector value on the field. Hence the restriction to vector values.
 
-  using ValueType = typename Moose::FunctorBase<T>::ValueType;
+  using ValueType = typename FaceCenteredMapFunctor<T, Map>::ValueType;
   using PrimitiveType = typename MetaPhysicL::ReplaceAlgebraicType<
       T,
       typename TensorTools::DecrementRank<typename MetaPhysicL::ValueType<T>::type>::type>::type;
@@ -87,14 +87,14 @@ FaceCenteredMapFunctor<T, Map>::evaluate(const ElemArg & elem_arg, unsigned int)
 }
 
 template <typename T, typename Map>
-typename Moose::FunctorBase<T>::ValueType
+typename FaceCenteredMapFunctor<T, Map>::ValueType
 FaceCenteredMapFunctor<T, Map>::evaluate(const FaceArg & face, unsigned int) const
 {
   return this->evaluate(face.fi);
 }
 
 template <typename T, typename Map>
-typename Moose::FunctorBase<T>::ValueType
+typename FaceCenteredMapFunctor<T, Map>::ValueType
 FaceCenteredMapFunctor<T, Map>::evaluate(const FaceInfo * fi) const
 {
   try
@@ -122,7 +122,7 @@ FaceCenteredMapFunctor<T, Map>::evaluate(const FaceInfo * fi) const
                  "' with a key that does not yet exist in the map. Make sure to fill your "
                  "FaceCenteredMapFunctor for all elements you will attempt to access later.");
 
-    return typename Moose::FunctorBase<T>::ValueType();
+    return typename FaceCenteredMapFunctor<T, Map>::ValueType();
   }
 }
 
