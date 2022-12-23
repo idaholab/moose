@@ -15,6 +15,7 @@
 
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
+#include "libmesh/utility.h"
 
 #include <cmath>
 
@@ -30,13 +31,15 @@ GaussianProcessHandler::GPOptimizerOptions::GPOptimizerOptions(
     const bool inp_show_optimization_details,
     const unsigned int inp_iter_adam,
     const unsigned int inp_batch_size,
-    const Real inp_learning_rate_adam)
+    const Real inp_learning_rate_adam,
+    const Real inp_prior_std)
   : opt_type(inp_opt_type),
     tao_options(inp_tao_options),
     show_optimization_details(inp_show_optimization_details),
     iter_adam(inp_iter_adam),
     batch_size(inp_batch_size),
-    learning_rate_adam(inp_learning_rate_adam)
+    learning_rate_adam(inp_learning_rate_adam),
+    prior_std(inp_prior_std)
 {
 }
 
@@ -79,7 +82,8 @@ GaussianProcessHandler::setupCovarianceMatrix(const RealEigenMatrix & training_p
                         opts.iter_adam,
                         batch_size,
                         opts.learning_rate_adam,
-                        opts.show_optimization_details);
+                        opts.show_optimization_details,
+                        opts.prior_std);
 
   _K.resize(training_params.rows(), training_params.rows());
   _covariance_function->computeCovarianceMatrix(_K, training_params, training_params, true);
@@ -280,7 +284,8 @@ GaussianProcessHandler::tuneHyperParamsAdam(const RealEigenMatrix & training_par
                                             unsigned int iter,
                                             const unsigned int & batch_size,
                                             const Real & learning_rate,
-                                            const bool & show_optimization_details)
+                                            const bool & show_optimization_details,
+                                            const Real & prior_std)
 {
   libMesh::PetscVector<Number> theta(_tao_comm, _num_tunable);
   _batch_size = batch_size;
@@ -323,10 +328,10 @@ GaussianProcessHandler::tuneHyperParamsAdam(const RealEigenMatrix & training_par
       outputs(ii, 0) = training_data(v_sequence[ii], 0);
     }
 
-    store_loss = getLossAdam(inputs, outputs);
+    store_loss = getLossAdam(inputs, outputs, theta, prior_std);
     if (show_optimization_details && ss == 0)
       Moose::out << "INITIAL LOSS: " << store_loss << std::endl;
-    grad1 = getGradientAdam(inputs);
+    grad1 = getGradientAdam(inputs, theta, prior_std);
     for (unsigned int ii = 0; ii < _num_tunable; ++ii)
     {
       m0[ii] = b1 * m0[ii] + (1 - b1) * grad1[ii];
@@ -350,7 +355,10 @@ GaussianProcessHandler::tuneHyperParamsAdam(const RealEigenMatrix & training_par
 }
 
 Real
-GaussianProcessHandler::getLossAdam(RealEigenMatrix & inputs, RealEigenMatrix & outputs)
+GaussianProcessHandler::getLossAdam(RealEigenMatrix & inputs,
+                                    RealEigenMatrix & outputs,
+                                    libMesh::PetscVector<Number> & theta,
+                                    const Real & p_std)
 {
   _covariance_function->computeCovarianceMatrix(_K, inputs, inputs, true);
   setupStoredMatrices(outputs);
@@ -359,11 +367,16 @@ GaussianProcessHandler::getLossAdam(RealEigenMatrix & inputs, RealEigenMatrix & 
   log_likelihood += -std::log(_K.determinant());
   log_likelihood -= _batch_size * std::log(2 * M_PI);
   log_likelihood = -log_likelihood / 2;
+  for (unsigned int ii = 0; ii < _num_tunable; ++ii)
+    log_likelihood += -std::log(p_std) - std::log(2.0 * M_PI) / 2.0 -
+                      Utility::pow<2>((std::log(theta(ii)) / p_std)) / 2.0;
   return log_likelihood;
 }
 
 std::vector<Real>
-GaussianProcessHandler::getGradientAdam(RealEigenMatrix & inputs)
+GaussianProcessHandler::getGradientAdam(RealEigenMatrix & inputs,
+                                        libMesh::PetscVector<Number> & theta,
+                                        const Real & p_std)
 {
   RealEigenMatrix dKdhp(_batch_size, _batch_size);
   RealEigenMatrix alpha = _K_results_solve * _K_results_solve.transpose();
@@ -378,7 +391,7 @@ GaussianProcessHandler::getGradientAdam(RealEigenMatrix & inputs)
     {
       _covariance_function->computedKdhyper(dKdhp, inputs, hyper_param_name, ii);
       RealEigenMatrix tmp = alpha * dKdhp - _K_cho_decomp.solve(dKdhp);
-      Real grad1 = -tmp.trace() / 2.0;
+      Real grad1 = -tmp.trace() / 2.0 - std::log(theta(ii)) / Utility::pow<2>(p_std);
       if (hyper_param_name.compare("length_factor") == 0)
       {
         grad_vec[count] = grad1;

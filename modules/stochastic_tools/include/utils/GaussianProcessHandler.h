@@ -54,7 +54,8 @@ public:
                        const bool inp_show_optimization_details,
                        const unsigned int inp_iter_adam_ = 1000,
                        const unsigned int inp_batch_size = 0,
-                       const Real inp_learning_rate_adam = 1e-3);
+                       const Real inp_learning_rate_adam = 1e-3,
+                       const Real inp_prior_std = 1000.0);
 
     /// The optimizer type
     MooseEnum opt_type = MooseEnum("adam tao none", "adam");
@@ -68,6 +69,8 @@ public:
     unsigned int batch_size = 0;
     /// The learning rate for Adam optimizer
     Real learning_rate_adam = 1e-3;
+    /// The standard deviation of the prior for the hyper-params (regularizer)
+    Real prior_std = 1000.0;
   };
   /**
    * Sets up the covariance matrix given data and optimization options.
@@ -153,13 +156,19 @@ public:
                            unsigned int iter,
                            const unsigned int & batch_size,
                            const Real & learning_rate,
-                           const bool & verbose);
+                           const bool & verbose,
+                           const Real & p_std);
 
   // Computes the loss function for Adam usage
-  Real getLossAdam(RealEigenMatrix & inputs, RealEigenMatrix & outputs);
+  Real getLossAdam(RealEigenMatrix & inputs,
+                   RealEigenMatrix & outputs,
+                   libMesh::PetscVector<Number> & theta,
+                   const Real & p_std);
 
   // Computes Gradient of the loss function for Adam usage
-  std::vector<Real> getGradientAdam(RealEigenMatrix & inputs);
+  std::vector<Real> getGradientAdam(RealEigenMatrix & inputs,
+                                    libMesh::PetscVector<Number> & theta,
+                                    const Real & p_std);
 
   /// Function used to convert the hyperparameter maps in this object to
   /// Petsc vectors

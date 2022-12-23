@@ -102,6 +102,14 @@
       csvdiff = 'GP_Matern_half_int_tuned_adam_minibatch_samp_avg_0002.csv GP_Matern_half_int_tuned_adam_minibatch_results_0002.csv GP_Matern_half_int_tuned_adam_minibatch_hyperparams_0002.csv'
       detail = 'a Matern half integer kernel using Adam with mini-batch sampling;'
     []
+    [GP_Matern_half_int_tuned_adam_prior_std]
+      type = CSVDiff
+      input = GP_Matern_half_int_tuned_adam.i
+      cli_args = "Trainers/GP_avg_trainer/prior_std=1.0 Outputs/out/file_base='GP_Matern_half_int_tuned_adam_priorstd'"
+      allow_test_objects = true
+      csvdiff = 'GP_Matern_half_int_tuned_adam_priorstd_samp_avg_0002.csv GP_Matern_half_int_tuned_adam_priorstd_results_0002.csv GP_Matern_half_int_tuned_adam_priorstd_hyperparams_0002.csv'
+      detail = 'a Matern half integer kernel using Adam with a specified prior standard deviation for the hyper-params;'
+    []
   []
   [errors]
     requirement = 'The system shall throw an error when '

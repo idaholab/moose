@@ -44,6 +44,11 @@ GaussianProcessTrainer::validParams()
       "tao_options", "", "Command line options for PETSc/TAO hyperparameter optimization");
   params.addParam<bool>(
       "show_optimization_details", false, "Switch to show TAO or Adam solver results");
+  params.addRangeCheckedParam<Real>(
+      "prior_std",
+      1000.0,
+      "prior_std>0.0",
+      "The standard deviation of a Normal prior over the log of hyper-params");
   params.addParam<std::vector<std::string>>("tune_parameters",
                                             "Select hyperparameters to be tuned");
   params.addParam<std::vector<Real>>("tuning_min", "Minimum allowable tuning value");
@@ -68,7 +73,8 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
         getParam<bool>("show_optimization_details"),
         getParam<unsigned int>("iter_adam"),
         getParam<unsigned int>("batch_size"),
-        getParam<Real>("learning_rate_adam"))),
+        getParam<Real>("learning_rate_adam"),
+        getParam<Real>("prior_std"))),
     _sampler_row(getSamplerData()),
     _pvals(getParam<std::vector<ReporterName>>("predictors").size()),
     _pcols(getParam<std::vector<unsigned int>>("predictor_cols")),
