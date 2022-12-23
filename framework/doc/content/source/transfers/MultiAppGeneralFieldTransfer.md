@@ -40,6 +40,7 @@ All transfers derived from this base class should be able to support:
 - transfers between regular and array variables
 - transfers from multiple variables to multiple variables
 - interpolation and extrapolation transfers, as defined by the derived class
+- detection of indetermination due to source points equidistant to a target point
 
 
 !alert note
