@@ -1,6 +1,6 @@
 [Tests]
   issues = '#1836'
-  design = 'MultiAppShapeEvaluationTransfer.md'
+  design = 'MultiAppGeneralFieldShapeEvaluationTransfer.md'
 
   [transfer]
     requirement = "The system shall support the transfer of data using the finite element solution function:"
@@ -55,7 +55,7 @@
   []
 
   [errors]
-    requirement = "The system shall error if preforming a transfer of data using the finite element solution if:"
+    requirement = "The system shall error if performing a transfer of data using the finite element solution if:"
 
     [missed_point]
       type = 'RunException'
@@ -63,16 +63,6 @@
       expect_err = 'could not be located'
 
       detail = "the evaluation point does not exist and"
-    []
-
-    [mismatch_exec_on]
-      type = 'RunApp'
-      input = 'exec_on_mismatch.i'
-      expect_out = 'MultiAppTransfer execute_on flags do not match'
-      allow_warnings = true
-      max_parallel = 1
-
-      detail = "if the execution settings do not match between the parent and sub-applications."
     []
   []
 []

@@ -7,8 +7,6 @@
     exodiff = 'tosub_parent_out_sub0.e'
     issues = '#1866 #12245'
     requirement = "The system shall transfer both nodal and elemental fields to a SubApp from the Master App."
-    # Indetermination due to equidistant points is picked up by the new transfer
-    allow_warnings = true
   [../]
 
   [./fromsub]
@@ -17,8 +15,6 @@
     exodiff = 'fromsub_parent_out.e'
     issues = '#1866 #12245'
     requirement = "The system shall transfer both nodal and elemental fields from SubApps to the Master App."
-    # Indetermination due to equidistant points is picked up by the new transfer
-    allow_warnings = true
   [../]
 
   [./fromsub_displaced]
@@ -27,8 +23,6 @@
     exodiff = 'fromsub_displaced_parent_out.e'
     issues = '#1868'
     requirement = "The system shall transfer values from SubApps which set the displaced_source_mesh flag to true."
-    # Indetermination due to equidistant points is picked up by the new transfer
-    allow_warnings = true
   [../]
 
   [./tosub_displaced]
@@ -46,8 +40,6 @@
     exodiff = 'boundary_tosub_parent_out_sub0.e'
     issues = '#6156'
     requirement = "The system shall transfer values to multiple SubApps from the Master App's boundary."
-    # Indetermination due to equidistant points is picked up in debug mode
-    allow_warnings = true
   [../]
 
   [./boundary_toparent]

@@ -1,6 +1,6 @@
 [Tests]
   issues = '#13754 #19451'
-  design = 'MultiAppGeneralFieldNearestNodeTransfer.md'
+  design = 'MultiAppGeneralFieldUserObjectTransfer.md'
 
   [from_sub_to_sub]
     requirement = "The system shall be able to transfer user-defined spatial data on the origin mesh directly between multiapps"

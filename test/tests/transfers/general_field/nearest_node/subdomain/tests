@@ -2,7 +2,7 @@
   issues = '#16427 #16429'
   design = 'transfers/MultiAppGeneralFieldNearestNodeTransfer.md'
 
-  [to_sub]
+  [2d_overlay]
     requirement = "The system shall be able to transfer variables using a nearest node algorithm, limiting the transfer to boundaries,"
     [same_var_type]
       type = 'Exodiff'

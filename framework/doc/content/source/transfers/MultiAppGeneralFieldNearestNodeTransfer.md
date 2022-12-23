@@ -13,18 +13,24 @@ when extrapolation of data, e.g. when the target domain extends beyond the sourc
 It may also be preferred if evaluating shape functions or projecting variables is too expensive or
 unnecessary for the target application.
 
+!alert note
+This is a re-implementation of [MultiAppNearestNodeTransfer.md] using a more flexible algorithm.
+
+!alert warning
+Nearest-node algorithms are vulnerable to finite precision round-offs if multiple neighbors are exactly at the
+same distance. This can affect repeatability of results. Use the [!param](/Transfers/MultiAppGeneralFieldNearestNodeTransfer/search_value_conflicts)
+parameter to uncover these issues.
+
+The [!param](/Transfers/MultiAppGeneralFieldNearestNodeTransfer/num_nearest_points) allows for a
+simple geometric mixing of values of several nearest nodes to the target points. This mixing is performed
+in every origin problem independently, values from different child applications
+(or from different processes within each application) will not be mixed together.
+
 !alert warning
 If [!param](/Transfers/MultiAppGeneralFieldNearestNodeTransfer/num_nearest_points) is more than 1, the results
 will differ in parallel if the target locations are near the parallel process boundaries
 on the origin app mesh. Use the [!param](/Debug/SetupDebugAction/output_process_domains) parameter to examine
 process boundaries on Exodus/Nemesis output.
-
-!alert note
-This is a re-implementation of [MultiAppNearestNodeTransfer.md] using a more flexible algorithm.
-
-!alert warning
-Nearest-node algorithms are vulnerable to finite precision errors if multiple neighbors are exactly at the
-same distance. This can affect repeatability of results.
 
 ## Example Input File Syntax
 

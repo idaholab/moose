@@ -1,6 +1,6 @@
 [Tests]
   issues = '#13754 #19451'
-  design = 'MultiAppGeneralFieldNearestNodeTransfer.md'
+  design = 'MultiAppGeneralFieldShapeEvaluationTransfer.md'
 
   [from_sub_to_sub]
     requirement = "The system shall be able to transfer variables by evaluating shape functions in the origin mesh between multiapps"
@@ -56,7 +56,7 @@
     []
 
     # Block restriction of the transfer only is tested in ../subdomain
-    # We test here the block restriction of variables. Elemental variables are block restricted 
+    # We test here the block restriction of variables. Elemental variables are block restricted
     [block_restriction_variables_same_type]
       type = Exodiff
       input = main_between_multiapp.i

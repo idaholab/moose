@@ -1,8 +1,8 @@
 [Tests]
   issues = '#16427 #16429'
-  design = 'transfers/MultiAppGeneralFieldNearestNodeTransfer.md'
+  design = 'transfers/MultiAppGeneralFieldShapeEvaluationTransfer.md'
 
-  [check]
+  [3d_boxes]
     requirement = "The system shall be able to transfer variables by evaluating variable shape functions in the origin mesh,"
 
     [target_boundaries]

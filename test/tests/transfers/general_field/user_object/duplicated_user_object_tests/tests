@@ -1,6 +1,6 @@
 [Tests]
   issues = "#10313 #19056"
-  design = "MultiAppUserObjectTransfer.md"
+  design = "MultiAppGeneralFieldUserObjectTransfer.md"
 
   [transfer]
     requirement = "The system shall support an interface for transferring user-defined spatial data"
