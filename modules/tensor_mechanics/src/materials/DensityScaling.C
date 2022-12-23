@@ -38,8 +38,8 @@ DensityScaling::DensityScaling(const InputParameters & parameters)
     _effective_stiffness(getMaterialPropertyByName<Real>("effective_stiffness")),
     _factor(getParam<Real>("factor"))
 {
-  mooseDoOnce(mooseInfo("Usage of density (mass) scaling is only recommended for advanced users, "
-                        "since it can change key simulation results."));
+  mooseInfo("Since it can change key simulation results, usage of selective density (mass) scaling "
+            "is only recommended for advanced users.");
 }
 
 void
