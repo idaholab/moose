@@ -1,11 +1,11 @@
 # ChemicalComposition
 
 !alert note title=For Use with Thermochimica
-This action is designed for use with thermochemistry library Thermochimica [!cite](piro2013). Check out the corresponding submodule by running `git update --init --checkout modules/chemical_reactions/contrib/thermochimica`.
+This action is designed for use with the thermochemistry library Thermochimica [!cite](piro2013). Check out the corresponding submodule by running `git submodule update --init --checkout modules/chemical_reactions/contrib/thermochimica`.
 
 ## Description
 
-The `ChemicalComposition` action is used to initiate framework for thermochemical calculations using thermodynamics solver [_Thermochimica_](https://github.com/ORNL-CEES/thermochimica). The action creates variables needed for the analysis, reads the thermodynamic model for material system, and sets the units for temperature, pressure, and elemental amounts. It can optionally initiate the amounts of elements used in the model.
+The `ChemicalComposition` action is used to initiate the framework for thermochemical calculations using the thermodynamics solver [_Thermochimica_](https://github.com/ORNL-CEES/thermochimica). The action creates variables needed for the analysis, reads the thermodynamic model for material system, and sets the units for temperature, pressure, and elemental amounts. It can optionally initiate the amounts of elements used in the model.
 
 The `ChemicalComposition` action is also used to specify lists of chemical phases and chemical species for which concentrations should be output at each timestep. The phase and species names must match those in the data file specified. The `ChemicalComposition` action creates all AuxVariables and AuxKernels needed for output of phase concentration data. The list of phases is specified in the `output_phases` variable, and the list of species is specified in `output_species`. The species must be specified in the convention `phase_name:species_name` so that the desired species in the desired phase is uniquely identified. A combination of an AuxKernel derived from `ThermochimicaAux` and a UserObject derived from `ThermochimicaNodalData` can then be used to store the concentrations of these species in their respective phases.
 
