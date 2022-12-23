@@ -101,7 +101,7 @@ MultiAppGeneralFieldShapeEvaluationTransfer::evaluateInterpValuesWithMeshFunctio
     for (MooseIndex(_from_problems.size()) i_from = 0;
          i_from < _from_problems.size() &&
          (outgoing_vals[i_pt].first == GeneralFieldTransfer::BetterOutOfMeshValue ||
-          _greedy_search);
+          _search_value_conflicts);
          ++i_from)
     {
       if (!acceptPointInOriginMesh(i_from, local_bboxes, pt))
@@ -111,10 +111,13 @@ MultiAppGeneralFieldShapeEvaluationTransfer::evaluateInterpValuesWithMeshFunctio
         // Use mesh function to compute interpolation values
         auto val = (*local_meshfuns[i_from])(pt - _from_positions[i_from]);
 
-        // Look for overlaps
-        if (_greedy_search && val != GeneralFieldTransfer::BetterOutOfMeshValue &&
+        // Look for overlaps. The check is not active outside of overlap search because in that
+        // case we accept the first value from the lowest ranked process
+        // NOTE: There is no guarantee this will be the final value used among all problems
+        //       but for shape evaluation we really do expect only one value to even be valid
+        if (_search_value_conflicts && val != GeneralFieldTransfer::BetterOutOfMeshValue &&
             outgoing_vals[i_pt].first != GeneralFieldTransfer::BetterOutOfMeshValue)
-          _num_overlaps++;
+          registerConflict(i_from, 0, pt - _from_positions[i_from], 1, true);
 
         // Assign value
         outgoing_vals[i_pt].first = val;

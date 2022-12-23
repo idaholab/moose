@@ -81,7 +81,7 @@ MultiAppGeneralFieldUserObjectTransfer::evaluateInterpValuesWithUserObjects(
     for (MooseIndex(_from_problems.size()) i_from = 0;
          i_from < _from_problems.size() &&
          (outgoing_vals[i_pt].first == GeneralFieldTransfer::BetterOutOfMeshValue ||
-          _greedy_search);
+          _search_value_conflicts);
          ++i_from)
     {
       if (!acceptPointInOriginMesh(i_from, local_bboxes, pt))
@@ -95,11 +95,13 @@ MultiAppGeneralFieldUserObjectTransfer::evaluateInterpValuesWithUserObjects(
         // Use spatial value routine to compute the origin value to transfer
         auto val = user_object.spatialValue(pt - _from_positions[i_from]);
 
-        // Look for overlaps. The check is not active outside of greedy search because in that
+        // Look for overlaps. The check is not active outside of overlap search because in that
         // case we accept the first value from the lowest ranked process
-        if (_greedy_search && val != GeneralFieldTransfer::BetterOutOfMeshValue &&
+        // NOTE: There is no guarantee this will be the final value used among all problems
+        //       but we register an overlap as soon as two values are possible from this rank
+        if (_search_value_conflicts && val != GeneralFieldTransfer::BetterOutOfMeshValue &&
             outgoing_vals[i_pt].first != GeneralFieldTransfer::BetterOutOfMeshValue)
-          _num_overlaps++;
+          registerConflict(i_from, 0, pt - _from_positions[i_from], 1, true);
 
         // Assign value
         outgoing_vals[i_pt].first = val;

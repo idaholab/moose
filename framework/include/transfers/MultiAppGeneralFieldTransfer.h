@@ -155,6 +155,10 @@ protected:
                     const PointLocatorBase * const pl,
                     const Point & pt) const;
 
+  /// Whether the source app mesh must actually contain the points for them to be considered or whether
+  /// the bounding box is enough. If false, we can interpolate between apps
+  bool _source_app_must_contain_point;
+
   /// Origin block(s) restriction
   std::set<SubdomainID> _from_blocks;
 
@@ -178,12 +182,21 @@ protected:
   /// outgoing point
   bool _greedy_search;
 
-  /// Number of conflicts between points in the mesh
-  unsigned int _num_overlaps;
+  /// Whether to look for conflicts between origin points, multiple valid values for a target point
+  const bool _search_value_conflicts;
 
-  /// Whether the source app mesh must actually contain the points for them to be considered or whether
-  /// the bounding box is enough. If false, we can interpolate between apps
-  bool _source_app_must_contain_point;
+  /**
+   * Register a potential value conflict, e.g. two or more equidistant source points for a single
+   * target point, with different values possible
+   * @param problem problem ID for the point of interest.
+   *        For local conflicts, use origin problem id, for received conflicts, use target id
+   * @param dof_id id id of the DoF is transferring a DoF. If not, use -1
+   * @param p point where the conflict happens
+   * @param dist distance between the origin and the target
+   * @param local if true, local conflict found when gathering data to send, if false,
+   *        received value conflict found when receiving data from multiple source problems
+   */
+  void registerConflict(unsigned int problem, dof_id_type dof_id, Point p, Real dist, bool local);
 
 private:
   /// A map from pid to a set of points
@@ -212,6 +225,8 @@ private:
   typedef std::vector<std::unordered_map<dof_id_type, InterpInfo>> DofobjectToInterpValVec;
 
   /// A map from Point to interpolation values
+  /// NOTE: this is not an asynchronous cache. It is built to completion during the transfer
+  ///       and used as a whole to reconstruct the target variable
   typedef std::unordered_map<Point, Number, hash_point, compare_point> InterpCache;
 
   /// A vector of such caches, indexed by to_problem
@@ -237,6 +252,17 @@ private:
 
   /// A map from processor to pointInfo vector
   ProcessorToPointInfoVec _processor_to_pointInfoVec;
+
+  /// Keeps track of all local equidistant points to requested points, creating an indetermination
+  /// in which values should be sent for that request
+  /// We keep the origin problem ID, the dof ID, the point, and the distance origin-target
+  std::vector<std::tuple<unsigned int, dof_id_type, Point, Real>> _local_conflicts;
+
+  /// Keeps track of all received conflicts. Multiple problems (different subapps for example)
+  /// are sending values for a target point that do not match and are equally valid/distant
+  /// We keep the target problem ID, the point/dof ID, the point, and the origin-target distance.
+  /// The distance indicates whether a potential conflict ended up materializing
+  std::vector<std::tuple<unsigned int, dof_id_type, Point, Real>> _received_conflicts;
 
   /**
    * Performs the transfer for the variable of index i
@@ -265,6 +291,18 @@ private:
       DofobjectToInterpValVec & dofobject_to_valsvec, // for nodal + constant monomial
       InterpCaches & interp_caches,                   // for higher order elemental values
       InterpCaches & distance_caches);                // same but helps make origin point decisions
+
+  /// Remove potential value conflicts that did not materialize because another source was closer
+  void examineValueConflicts(
+      const VariableName var_name,
+      const DofobjectToInterpValVec & dofobject_to_valsvec,
+      const InterpCaches & distance_caches,
+      std::vector<std::tuple<unsigned int, dof_id_type, Point, Real>> conflicts_vec);
+
+  /// Report on conflicts between overlapping child apps, equidistant origin points etc
+  void outputValueConflicts(const VariableName var_name,
+                            const DofobjectToInterpValVec & dofobject_to_valsvec,
+                            const InterpCaches & distance_caches);
 
   /*
    * Set values to solution
