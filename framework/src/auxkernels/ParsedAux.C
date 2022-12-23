@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ParsedAux.h"
+#include "MooseApp.h"
 
 registerMooseObject("MooseApp", ParsedAux);
 
@@ -46,8 +47,7 @@ ParsedAux::validParams()
 ParsedAux::ParsedAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     FunctionParserUtils(parameters),
-    _function(isParamValid("function") ? getParam<std::string>("function")
-                                       : getParam<std::string>("expression")),
+    _function(getRenamedParam<std::string>("function", "expression")),
     _nargs(isCoupled("args") ? coupledComponents("args") : coupledComponents("coupled_variables")),
     _args(isCoupled("args") ? coupledValues("args") : coupledValues("coupled_variables")),
     _use_xyzt(getParam<bool>("use_xyzt"))

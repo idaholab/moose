@@ -12,6 +12,7 @@
 // MOOSE includes
 #include "MooseVariableScalar.h"
 #include "SystemBase.h"
+#include "MooseApp.h"
 
 #include "libmesh/fparser_ad.hh"
 
@@ -49,8 +50,7 @@ ParsedODEKernel::validParams()
 ParsedODEKernel::ParsedODEKernel(const InputParameters & parameters)
   : ODEKernel(parameters),
     FunctionParserUtils(parameters),
-    _function(isParamValid("function") ? getParam<std::string>("function")
-                                       : getParam<std::string>("expression")),
+    _function(getRenamedParam<std::string>("function", "expression")),
     _nargs(isCoupledScalar("args")                ? coupledScalarComponents("args")
            : isCoupledScalar("coupled_variables") ? coupledScalarComponents("coupled_variables")
                                                   : 0),

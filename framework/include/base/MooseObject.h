@@ -95,6 +95,16 @@ public:
   const T & getParam(const std::string & name) const;
 
   /**
+   * Retrieve a renamed parameter for the object. This helper makes sure we
+   * check both names before erroring, and that only one parameter is passed to avoid
+   * silent errors
+   * @param old_name the old name for the parameter
+   * @param new_name the new name for the parameter
+   */
+  template <typename T>
+  const T & getRenamedParam(const std::string & old_name, const std::string & new_name) const;
+
+  /**
    * Retrieve two parameters and provide pair of parameters for the object
    * @param param1 The name of first parameter
    * @param param2 The name of second parameter
@@ -267,6 +277,23 @@ const T &
 MooseObject::getParam(const std::string & name) const
 {
   return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0));
+}
+
+template <typename T>
+const T &
+MooseObject::getRenamedParam(const std::string & old_name, const std::string & new_name) const
+{
+  if (isParamValid(new_name) && !isParamValid(old_name))
+    return InputParameters::getParamHelper(new_name, _pars, static_cast<T *>(0));
+  else if (isParamValid(old_name) && !isParamValid(new_name))
+    return InputParameters::getParamHelper(old_name, _pars, static_cast<T *>(0));
+  else if (!isParamValid(old_name) && !isParamValid(new_name))
+    mooseError(_pars.blockFullpath() + ": parameter '" + new_name +
+               "' is being retrieved without being set.\n"
+               "Did you mispell it?");
+  else
+    mooseError(_pars.blockFullpath() + ": parameter '" + new_name +
+               "' may not be provided alongside former parameter '" + old_name + "'");
 }
 
 template <typename... Args>

@@ -26,8 +26,7 @@ FunctionMaterialBase<is_ad>::validParams()
 template <bool is_ad>
 FunctionMaterialBase<is_ad>::FunctionMaterialBase(const InputParameters & parameters)
   : DerivativeMaterialInterface<Material>(parameters),
-    _F_name(isParamValid("f_name") ? getParam<std::string>("f_name")
-                                   : getParam<std::string>("property_name")),
+    _F_name(getRenamedParam<std::string>("f_name", "property_name")),
     _prop_F(&declareGenericProperty<Real, is_ad>(_F_name))
 {
   // fetch names and numbers of all coupled variables

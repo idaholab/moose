@@ -33,9 +33,7 @@ template <class T>
 DerivativeKernelInterface<T>::DerivativeKernelInterface(const InputParameters & parameters)
   : DerivativeMaterialInterface<T>(parameters),
     _nvar(this->_coupled_moose_vars.size()),
-    _F_name(this->template isParamValid("f_name")
-                ? this->template getParam<std::string>("f_name")
-                : this->template getParam<std::string>("property_name"))
+    _F_name(this->template getRenamedParam<std::string>("f_name", "property_name"))
 {
 }
 

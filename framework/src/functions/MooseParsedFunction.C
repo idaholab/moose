@@ -42,9 +42,7 @@ template <typename T>
 MooseParsedFunctionTempl<T>::MooseParsedFunctionTempl(const InputParameters & parameters)
   : T(parameters),
     MooseParsedFunctionBase(parameters),
-    _value(parameters.isParamValid("value")
-               ? verifyFunction(this->template getParam<std::string>("value"))
-               : verifyFunction(this->template getParam<std::string>("expression")))
+    _value(verifyFunction(this->template getRenamedParam<std::string>("value", "expression")))
 {
 }
 
