@@ -98,7 +98,7 @@ public:
   void addDocumentation(const std::string & name, const std::string & doc);
 
   /**
-   * Get the item documentation map
+   * Get the map containing each item's documentation string
    */
   const std::map<MooseEnumItem, std::string> & getItemDocumentation() const;
 
@@ -162,6 +162,6 @@ protected:
   /// Flag to enable enumeration items not previously defined
   bool _allow_out_of_range;
 
-  /// The map of deprecated names and optional replacements
+  /// The map of items and their respective documentation strings
   std::map<MooseEnumItem, std::string> _item_documentation;
 };
