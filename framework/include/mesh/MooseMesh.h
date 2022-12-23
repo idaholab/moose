@@ -1085,6 +1085,17 @@ public:
   /// Accessor for local \p FaceInfo objects.
   const std::vector<const FaceInfo *> & faceInfo() const;
 
+  /// Need to declare these iterators here to make sure the iterators below work
+  struct face_info_iterator;
+  struct const_face_info_iterator;
+
+  /// Iterators to owned faceInfo objects. These faceInfo-s are required for the
+  /// face loops and to filter out the faceInfo-s that are not owned by this processor
+  /// in case we have a distributed mesh and we included FaceInfo objects that
+  /// are on processor boundaries
+  face_info_iterator ownedFaceInfoBegin();
+  face_info_iterator ownedFaceInfoEnd();
+
   /// Accessor for the local FaceInfo object on the side of one element. Returns null if ghosted.
   const FaceInfo * faceInfo(const Elem * elem, unsigned int side) const;
 
@@ -1591,6 +1602,50 @@ template <>
 struct MooseMesh::MeshType<DistributedMesh>
 {
   static const ParallelType value = ParallelType::DISTRIBUTED;
+};
+
+/**
+ * The definition of the face_info_iterator struct.
+ */
+struct MooseMesh::face_info_iterator
+  : variant_filter_iterator<MeshBase::Predicate, const FaceInfo *>
+{
+  // Templated forwarding ctor -- forwards to appropriate variant_filter_iterator ctor
+  template <typename PredType, typename IterType>
+  face_info_iterator(const IterType & d, const IterType & e, const PredType & p)
+    : variant_filter_iterator<MeshBase::Predicate, const FaceInfo *>(d, e, p)
+  {
+  }
+};
+
+/**
+ * The definition of the const_face_info_iterator struct. It is similar to the
+ * iterator above, but also provides an additional conversion-to-const ctor.
+ */
+struct MooseMesh::const_face_info_iterator : variant_filter_iterator<MeshBase::Predicate,
+                                                                     const FaceInfo * const,
+                                                                     const FaceInfo * const &,
+                                                                     const FaceInfo * const *>
+{
+  // Templated forwarding ctor -- forwards to appropriate variant_filter_iterator ctor
+  template <typename PredType, typename IterType>
+  const_face_info_iterator(const IterType & d, const IterType & e, const PredType & p)
+    : variant_filter_iterator<MeshBase::Predicate,
+                              const FaceInfo * const,
+                              const FaceInfo * const &,
+                              const FaceInfo * const *>(d, e, p)
+  {
+  }
+
+  // The conversion-to-const ctor.  Takes a regular iterator and calls the appropriate
+  // variant_filter_iterator copy constructor.  Note that this one is *not* templated!
+  const_face_info_iterator(const MooseMesh::face_info_iterator & rhs)
+    : variant_filter_iterator<MeshBase::Predicate,
+                              const FaceInfo * const,
+                              const FaceInfo * const &,
+                              const FaceInfo * const *>(rhs)
+  {
+  }
 };
 
 /**

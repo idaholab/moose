@@ -23,6 +23,13 @@ FaceCenteredMapFunctor<T, Map>::evaluate(const ElemArg & elem_arg, unsigned int)
   //
   // Aguerre, Horacio J., et al. "An oscillation-free flow solver based on flux reconstruction."
   // Journal of Computational Physics 365 (2018): 135-148.
+  //
+  // This basically reconstructes the cell value based on flux values as follows:
+  //
+  // $\left( \sum_f n_f \outer S_f \right)^{-1} \sum_f (\phi_f \cdot S_f)n_f$
+  //
+  // where $S_f$ is the surface normal vector, $n_f$ is the unit surface vector and $\phi_f$ is a
+  // vector value on the field. Hence the restriction to vector values.
 
   using ValueType = typename Moose::FunctorBase<T>::ValueType;
   using PrimitiveType = typename MetaPhysicL::ReplaceAlgebraicType<
@@ -32,7 +39,8 @@ FaceCenteredMapFunctor<T, Map>::evaluate(const ElemArg & elem_arg, unsigned int)
   if constexpr (libMesh::TensorTools::TensorTraits<ValueType>::rank == 1)
   {
     const auto dim = _mesh.dimension();
-    // The reason why this is a
+    // The reason why these are DenseVector/Matrix is that when the mesh dimension is lower than 3,
+    // we get singular matrixes if we try to invert TensorValues.
     DenseMatrix<PrimitiveType> n_x_Sf(dim, dim);
     DenseVector<PrimitiveType> sum_normal_flux(dim);
 
@@ -41,16 +49,20 @@ FaceCenteredMapFunctor<T, Map>::evaluate(const ElemArg & elem_arg, unsigned int)
     for (const auto side : make_range(elem->n_sides()))
     {
       const Elem * neighbor = elem->neighbor_ptr(side);
+
+      // We need to check if the faceinfo belongs to the element or the neighbor. Based on that we
+      // query the faceinfo and adjust the normal to point outward of the current cell
       const bool elem_has_fi = Moose::FV::elemHasFaceInfo(*elem, neighbor);
       const FaceInfo * const fi = _mesh.faceInfo(
           elem_has_fi ? elem : neighbor, elem_has_fi ? side : neighbor->which_neighbor_am_i(elem));
       const Point & normal = elem_has_fi ? fi->normal() : Point(-fi->normal());
-      const Real area = fi->faceArea();
 
+      const Point area_vector = normal * fi->faceArea();
       ValueType face_value = this->evaluate(fi);
 
-      const auto product = Moose::outer_product(normal, normal * area);
-      const auto flux_contrib = normal * (face_value * normal * area);
+      const auto product = Moose::outer_product(normal, area_vector);
+
+      const auto flux_contrib = normal * (face_value * area_vector);
       for (auto i : make_range(dim))
       {
         sum_normal_flux(i) += flux_contrib(i);
@@ -59,8 +71,10 @@ FaceCenteredMapFunctor<T, Map>::evaluate(const ElemArg & elem_arg, unsigned int)
       }
     }
 
+    // We do the inversion of the surface vector matrix here. It is symmetric
+    // so we can do it using a Cholesky decomposition.
     DenseVector<PrimitiveType> dense_result(dim);
-    n_x_Sf.lu_solve(sum_normal_flux, dense_result);
+    n_x_Sf.cholesky_solve(sum_normal_flux, dense_result);
 
     ValueType result;
     for (auto i : make_range(dim))
@@ -76,8 +90,7 @@ template <typename T, typename Map>
 typename Moose::FunctorBase<T>::ValueType
 FaceCenteredMapFunctor<T, Map>::evaluate(const FaceArg & face, unsigned int) const
 {
-  const FaceInfo * const fi = face.fi;
-  return this->evaluate(fi);
+  return this->evaluate(face.fi);
 }
 
 template <typename T, typename Map>

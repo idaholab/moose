@@ -23,7 +23,7 @@ public:
 
   TestFaceCenteredMapFunctor(const InputParameters & parameters);
 
-  void initialize() override {}
+  void initialize() override;
   void execute() override {}
 
   PostprocessorValue getValue() override final;

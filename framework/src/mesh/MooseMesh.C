@@ -1167,6 +1167,24 @@ MooseMesh::getNodeBlockIds(const Node & node) const
   return it->second;
 }
 
+MooseMesh::face_info_iterator
+MooseMesh::ownedFaceInfoBegin()
+{
+  return face_info_iterator(
+      _face_info.begin(),
+      _face_info.end(),
+      libMesh::Predicates::pid<std::vector<const FaceInfo *>::iterator>(this->processor_id()));
+}
+
+MooseMesh::face_info_iterator
+MooseMesh::ownedFaceInfoEnd()
+{
+  return face_info_iterator(
+      _face_info.end(),
+      _face_info.end(),
+      libMesh::Predicates::pid<std::vector<const FaceInfo *>::iterator>(this->processor_id()));
+}
+
 // default begin() accessor
 MooseMesh::bnd_node_iterator
 MooseMesh::bndNodesBegin()
@@ -3365,7 +3383,11 @@ MooseMesh::buildFiniteVolumeInfo() const
 #endif
         _elem_side_to_face_info.emplace(std::make_pair(elem, side), &fi);
     mooseAssert(pair_it.second, "We should be adding unique FaceInfo objects.");
-    if (fi.processor_id() == this->processor_id())
+
+    // We will add the faces on processor boundaries to the list of face infos on each
+    // associated processor.
+    if (fi.elem().processor_id() == this->processor_id() ||
+        (fi.neighborPtr() && (fi.neighborPtr()->processor_id() == this->processor_id())))
       _face_info.push_back(&fi);
   }
 }

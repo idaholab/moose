@@ -24,7 +24,13 @@ TestFaceCenteredMapFunctor::validParams()
 
 TestFaceCenteredMapFunctor::TestFaceCenteredMapFunctor(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
+    _reconstruction_error(0.0),
     _face_values(_subproblem.mesh(), _subproblem.mesh().meshSubdomains(), "face_values")
+{
+}
+
+void
+TestFaceCenteredMapFunctor::initialize()
 {
   for (auto & fi : _fe_problem.mesh().faceInfo())
   {
@@ -34,8 +40,9 @@ TestFaceCenteredMapFunctor::TestFaceCenteredMapFunctor(const InputParameters & p
     _face_values[fi->id()] = face_value;
   }
 
-  auto begin = _fe_problem.mesh().getMesh().active_elements_begin();
-  auto end = _fe_problem.mesh().getMesh().active_elements_end();
+  // Loop over the local elements if we have distributed tests
+  auto begin = _fe_problem.mesh().getMesh().active_local_elements_begin();
+  auto end = _fe_problem.mesh().getMesh().active_local_elements_end();
 
   for (const Elem * elem : as_range(begin, end))
   {
@@ -48,9 +55,11 @@ TestFaceCenteredMapFunctor::TestFaceCenteredMapFunctor(const InputParameters & p
                                 0);
 
     RealVectorValue diff = exact_value - _face_values(elem_arg);
-
     _reconstruction_error += diff * diff * elem_volume;
   }
+
+  // We collect and sum the values across every process
+  gatherSum(_reconstruction_error);
 
   _reconstruction_error = sqrt(_reconstruction_error);
 }

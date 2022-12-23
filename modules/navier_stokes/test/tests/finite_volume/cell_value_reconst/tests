@@ -1,14 +1,15 @@
 [Tests]
-  issues = '#15640'
+  issues = '#22970'
   design = 'navier_stokes/insfv.md'
-  [rc]
+  [weller-reconstruction]
     type = PythonUnitTest
     input = test.py
-    test_case = TestRC
-    requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations using a Rhie-Chow interpolation scheme and produce second order convergence for all variables.'
+    test_case = TestWellerReconstruction
+    requirement = "The system shall be able to use Weller's reconstruction method to build cell "
+                  "vector values from face fluxes with a second order convergence."
     method = '!dbg'
-    min_parallel = 8
     ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
+    min_parallel = 2
   []
 []

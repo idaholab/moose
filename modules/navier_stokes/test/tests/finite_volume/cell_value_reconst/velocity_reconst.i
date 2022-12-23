@@ -6,8 +6,8 @@
     xmax = '${fparse 2*pi}'
     ymin = 0
     ymax = '${fparse 2*pi}'
-    nx = 10
-    ny = 10
+    nx = 4
+    ny = 4
   []
 []
 
