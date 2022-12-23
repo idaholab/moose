@@ -63,6 +63,11 @@ public:
   virtual Real value(Real t, const Point & pt) const override;
   virtual ADReal value(const ADReal & t, const ADPoint & pt) const override;
 
+  static void parse(const std::string & data_file_name,
+                    std::vector<Real> & x,
+                    std::vector<Real> & y,
+                    ColumnMajorMatrix & z);
+
 private:
   std::unique_ptr<BilinearInterpolation> _bilinear_interp;
   const std::string _data_file_name;
@@ -77,6 +82,4 @@ private:
 
   template <typename T, typename P>
   T valueInternal(T t, const P & p) const;
-
-  void parse(std::vector<Real> & x, std::vector<Real> & y, ColumnMajorMatrix & z);
 };
