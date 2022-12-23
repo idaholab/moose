@@ -13,7 +13,6 @@
 #include "Moose.h"
 #include "SolutionInvalidity.h"
 #include "FEProblemBase.h"
-#include "ConsoleStreamInterface.h"
 
 // Forward declarations
 class MooseApp;
