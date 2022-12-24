@@ -177,6 +177,56 @@ MultiAppGeneralFieldNearestNodeTransfer::evaluateInterpValuesNearestNode(
     if (!value_found)
       outgoing_vals[i_pt] = {GeneralFieldTransfer::BetterOutOfMeshValue,
                              GeneralFieldTransfer::BetterOutOfMeshValue};
+    else if (_search_value_conflicts)
+    {
+      // Local source meshes conflicts can happen two ways:
+      // - two (or more) problems' nearest nodes are equidistant to the target point
+      // - within a problem, the num_nearest_points'th closest node is as close to the target point
+      //   as the num_nearest_points + 1'th closest node
+      unsigned int num_equidistant_problems = 0;
+
+      for (MooseIndex(_from_problems.size()) i_from = 0; i_from < _from_problems.size(); ++i_from)
+      {
+        unsigned int num_search = _num_nearest_points + 1;
+        std::vector<std::size_t> return_index(num_search);
+        std::vector<Real> return_dist_sqr(num_search);
+
+        if (local_kdtrees[i_from]->numberCandidatePoints())
+        {
+          local_kdtrees[i_from]->neighborSearch(pt, num_search, return_index, return_dist_sqr);
+          auto num_found = return_dist_sqr.size();
+
+          // Look for too many equidistant nodes within a problem. First zip then sort by distance
+          auto local_pt = pt - _from_positions[i_from];
+          std::vector<std::pair<Real, std::size_t>> zipped_nearest_points;
+          for (auto i : make_range(num_found))
+            zipped_nearest_points.push_back(std::make_pair(return_dist_sqr[i], return_index[i]));
+          std::sort(zipped_nearest_points.begin(), zipped_nearest_points.end());
+
+          // If two furthest are equally far from target point, then we have an indetermination
+          if (num_found > 1 &&
+              MooseUtils::absoluteFuzzyEqual(zipped_nearest_points[num_found - 1].first,
+                                             zipped_nearest_points[num_found - 2].first))
+            registerConflict(i_from, 0, local_pt, outgoing_vals[i_pt].second, true);
+
+          Real val_sum = 0, dist_sum = 0;
+          for (auto i : make_range(num_search - 1))
+          {
+            auto index = zipped_nearest_points[i].second;
+            val_sum += local_values[i_from][index];
+            dist_sum += (local_points[i_from][index] - pt).norm();
+          }
+          // Compare to the selected value found after looking at all the problems
+          if (MooseUtils::absoluteFuzzyEqual(dist_sum / return_dist_sqr.size(),
+                                             outgoing_vals[i_pt].second))
+          {
+            num_equidistant_problems++;
+            if (num_equidistant_problems > 1)
+              registerConflict(i_from, 0, local_pt, outgoing_vals[i_pt].second, true);
+          }
+        }
+      }
+    }
 
     // Move to next point
     i_pt++;
