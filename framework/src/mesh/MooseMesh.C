@@ -3584,8 +3584,12 @@ MooseMesh::getUniqueCoordSystem() const
 {
   const auto unique_system = _coord_sys.find(*meshSubdomains().begin())->second;
   // Check that it is actually unique
-  bool result = std::all_of(std::next(_coord_sys.begin()), _coord_sys.end(), 
-      [unique_system](typename std::unordered_map<SubdomainID, Moose::CoordinateSystemType>::const_reference item){ return (item.second == unique_system); });
+  bool result = std::all_of(
+      std::next(_coord_sys.begin()),
+      _coord_sys.end(),
+      [unique_system](
+          typename std::unordered_map<SubdomainID, Moose::CoordinateSystemType>::const_reference
+              item) { return (item.second == unique_system); });
   if (!result)
     mooseError("The unique coordinate system of the mesh was requested by the mesh contains "
                "multiple blocks with different coordinate systems");

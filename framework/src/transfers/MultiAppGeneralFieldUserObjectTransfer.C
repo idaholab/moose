@@ -30,10 +30,9 @@ MultiAppGeneralFieldUserObjectTransfer::validParams()
       "application.");
 
   params.suppressParameter<std::vector<VariableName>>("source_variable");
-  params.addRequiredParam<UserObjectName>(
-      "source_user_object",
-      "The UserObject you want to transfer values from. "
-      "It must implement the SpatialValue() class routine");
+  params.addRequiredParam<UserObjectName>("source_user_object",
+                                          "The UserObject you want to transfer values from. "
+                                          "It must implement the SpatialValue() class routine");
 
   // Blanket ban on origin boundary restriction. User objects tend to extend beyond boundaries,
   // and be able to be evaluated within a volume rather than only on a boundary
@@ -52,7 +51,8 @@ MultiAppGeneralFieldUserObjectTransfer::MultiAppGeneralFieldUserObjectTransfer(
 }
 
 void
-MultiAppGeneralFieldUserObjectTransfer::prepareEvaluationOfInterpValues(const VariableName & /* var_name */)
+MultiAppGeneralFieldUserObjectTransfer::prepareEvaluationOfInterpValues(
+    const VariableName & /* var_name */)
 {
   _local_bboxes.clear();
   extractLocalFromBoundingBoxes(_local_bboxes);
@@ -62,8 +62,7 @@ void
 MultiAppGeneralFieldUserObjectTransfer::evaluateInterpValues(
     const std::vector<Point> & incoming_points, std::vector<std::pair<Real, Real>> & outgoing_vals)
 {
-  evaluateInterpValuesWithUserObjects(
-      _local_bboxes, incoming_points, outgoing_vals);
+  evaluateInterpValuesWithUserObjects(_local_bboxes, incoming_points, outgoing_vals);
 }
 
 void

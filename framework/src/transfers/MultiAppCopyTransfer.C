@@ -79,8 +79,8 @@ MultiAppCopyTransfer::initialSetup()
   {
     const auto & from_block_names = getParam<std::vector<SubdomainName>>("from_blocks");
     for (const auto & b : from_block_names)
-      if (!MooseMeshUtils::hasSubdomainName(
-            const_cast<MeshBase &>(from_problem->mesh().getMesh()), b))
+      if (!MooseMeshUtils::hasSubdomainName(const_cast<MeshBase &>(from_problem->mesh().getMesh()),
+                                            b))
         paramError("from_blocks", "The block '", b, "' was not found in the mesh");
 
     if (from_block_names.size())
@@ -99,8 +99,8 @@ MultiAppCopyTransfer::initialSetup()
 
     const auto & to_block_names = getParam<std::vector<SubdomainName>>("to_blocks");
     for (const auto & b : to_block_names)
-      if (!MooseMeshUtils::hasSubdomainName(
-            const_cast<MeshBase &>(to_problem->mesh().getMesh()), b))
+      if (!MooseMeshUtils::hasSubdomainName(const_cast<MeshBase &>(to_problem->mesh().getMesh()),
+                                            b))
         paramError("to_blocks", "The block '", b, "' was not found in the mesh");
 
     if (to_block_names.size())

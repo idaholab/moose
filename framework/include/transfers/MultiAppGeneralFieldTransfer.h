@@ -320,9 +320,9 @@ private:
    * Cache pointInfo
    */
   void cacheOutgoingPointInfo(const Point point,
-                               const dof_id_type dof_object_id,
-                               const unsigned int problem_id,
-                               ProcessorToPointVec & outgoing_points);
+                              const dof_id_type dof_object_id,
+                              const unsigned int problem_id,
+                              ProcessorToPointVec & outgoing_points);
 
   /**
    * Compute minimum distance
