@@ -27,6 +27,10 @@
   file = heatConduction2D.e
 []
 
+[Debug]
+  show_material_props = true
+[]
+
 [Variables]
   [temp_x]
     order = FIRST
@@ -42,20 +46,20 @@
 
 [Kernels]
   [heat_x]
-    type = HeatConduction
+    type = AnisoHeatConduction
     variable = temp_x
   []
   [heat_y]
-    type = HeatConduction
+    type = AnisoHeatConduction
     variable = temp_y
   []
   [heat_rhs_x]
-    type = HomogenizedHeatConduction
+    type = AnisoHomogenizedHeatConduction
     variable = temp_x
     component = 0
   []
   [heat_rhs_y]
-    type = HomogenizedHeatConduction
+    type = AnisoHomogenizedHeatConduction
     variable = temp_y
     component = 1
   []
@@ -90,16 +94,18 @@
 
 [Materials]
   [heat1]
-    type = HeatConductionMaterial
+    type = AnisoHeatConductionMaterial
+    temperature = temp_x
     block = 1
     specific_heat = 0.116
-    thermal_conductivity = 10
+    thermal_conductivity = '10.0 0 0 0 10.0 0 0 0 0'
   []
   [heat2]
-    type = HeatConductionMaterial
+    type = AnisoHeatConductionMaterial
+    temperature = temp_x
     block = 2
     specific_heat = 0.116
-    thermal_conductivity = 100
+    thermal_conductivity = '100.0 0 0 0 100.0 0 0 0 0'
   []
 []
 
@@ -123,6 +129,7 @@
     chi = 'temp_x temp_y'
     row = 0
     col = 0
+    is_tensor = true
     execute_on = 'initial timestep_end'
   []
 
@@ -131,6 +138,7 @@
     chi = 'temp_x temp_y'
     row = 1
     col = 1
+    is_tensor = true
     execute_on = 'initial timestep_end'
   []
 []

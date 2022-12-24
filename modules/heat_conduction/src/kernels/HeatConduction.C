@@ -19,9 +19,7 @@ HeatConductionKernel::validParams()
   params.addClassDescription(
       "Computes residual/Jacobian contribution for $(k \\nabla T, \\nabla \\psi)$ term.");
   params.addParam<MaterialPropertyName>(
-      "diffusion_coefficient",
-      "thermal_conductivity",
-      "Property name of the diffusivity (Default: thermal_conductivity)");
+      "diffusion_coefficient", "thermal_conductivity", "Property name of the diffusivity");
   params.addParam<MaterialPropertyName>(
       "diffusion_coefficient_dT",
       "thermal_conductivity_dT",
