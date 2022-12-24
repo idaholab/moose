@@ -78,7 +78,7 @@ MultiAppGeneralFieldTransfer::validParams()
       false,
       "Whether or not to error in the case that a target point is not found in the source domain.");
   params.addParam<bool>(
-      "from_multiapp_must_contain_point",
+      "from_app_must_contain_point",
       true,
       "Wether on not the origin mesh must contain the point to evaluate data at. If false, this "
       "allows for interpolation between origin app meshes. Origin app bounding boxes are still "
@@ -91,7 +91,7 @@ MultiAppGeneralFieldTransfer::validParams()
   params.addParamNamesToGroup(
       "to_blocks from_blocks to_boundaries from_boundaries elemental_boundary_restriction",
       "Transfer spatial restriction");
-  params.addParamNamesToGroup("greedy_search error_on_miss from_multiapp_must_contain_point "
+  params.addParamNamesToGroup("greedy_search error_on_miss from_app_must_contain_point "
                               "search_value_conflicts",
                               "Search algorithm");
   params.addParamNamesToGroup("bbox_factor fixed_bounding_box_size", "Source app bounding box");
@@ -100,7 +100,7 @@ MultiAppGeneralFieldTransfer::validParams()
 
 MultiAppGeneralFieldTransfer::MultiAppGeneralFieldTransfer(const InputParameters & parameters)
   : MultiAppConservativeTransfer(parameters),
-    _source_app_must_contain_point(getParam<bool>("from_multiapp_must_contain_point")),
+    _source_app_must_contain_point(getParam<bool>("from_app_must_contain_point")),
     _elemental_boundary_restriction_on_sides(
         getParam<MooseEnum>("elemental_boundary_restriction") == "sides"),
     _greedy_search(getParam<bool>("greedy_search")),

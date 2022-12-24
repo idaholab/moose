@@ -32,9 +32,8 @@ MultiAppGeneralFieldNearestNodeTransfer::validParams()
                                 "construct a value for the target point. All points will be "
                                 "selected from the same origin mesh!");
 
-  // Suppress all the options that are not considered
-  params.suppressParameter<bool>("from_multiapp_must_contain_point");
-  // Bounding boxes should still be used to locate the potential source problems
+  // Nearest node is historically more an extrapolation transfer
+  params.set<bool>("from_app_must_contain_point") = false;
 
   return params;
 }
@@ -154,6 +153,10 @@ MultiAppGeneralFieldNearestNodeTransfer::evaluateInterpValuesNearestNode(
     {
       std::vector<std::size_t> return_index(_num_nearest_points);
       std::vector<Real> return_dist_sqr(_num_nearest_points);
+
+      // Check mesh restriction before anything
+      if (_source_app_must_contain_point && !inMesh(_from_point_locators[i_from].get(), pt))
+        continue;
 
       // KD Tree can be empty if no points are within block/boundary/bounding box restrictions
       if (local_kdtrees[i_from]->numberCandidatePoints())
