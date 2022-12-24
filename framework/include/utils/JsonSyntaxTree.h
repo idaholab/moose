@@ -81,7 +81,8 @@ public:
 
 protected:
   std::string buildOptions(const std::iterator_traits<InputParameters::iterator>::value_type & p,
-                           bool & out_of_range_allowed);
+                           bool & out_of_range_allowed,
+                           std::map<MooseEnumItem, std::string> & docs);
 
   size_t setParams(InputParameters * params, bool search_match, nlohmann::json & all_params);
 

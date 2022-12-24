@@ -100,19 +100,41 @@ YAMLFormatter::printParams(const std::string & prefix,
     std::string group_name = params.getGroupName(iter.first);
     if (!group_name.empty())
       oss << "'" << group_name << "'";
+    oss << "\n";
 
     if (params.have_parameter<MooseEnum>(name))
-      oss << "\n" << indent << "    options: " << params.get<MooseEnum>(name).getRawNames();
+      addEnumOptionsAndDocs(oss, params.get<MooseEnum>(name), indent);
     if (params.have_parameter<MultiMooseEnum>(name))
-      oss << "\n" << indent << "    options: " << params.get<MultiMooseEnum>(name).getRawNames();
+      addEnumOptionsAndDocs(oss, params.get<MultiMooseEnum>(name), indent);
+    if (params.have_parameter<ExecFlagEnum>(name))
+      addEnumOptionsAndDocs(oss, params.get<ExecFlagEnum>(name), indent);
     if (params.have_parameter<std::vector<MooseEnum>>(name))
-      oss << "\n"
-          << indent << "    options: " << params.get<std::vector<MooseEnum>>(name)[0].getRawNames();
+      addEnumOptionsAndDocs(oss, params.get<std::vector<MooseEnum>>(name)[0], indent);
 
-    oss << "\n" << indent << "    description: |\n      " << indent << doc << std::endl;
+    oss << indent << "    description: |\n      " << indent << doc << std::endl;
   }
 
   return oss.str();
+}
+
+template <typename T>
+void
+YAMLFormatter::addEnumOptionsAndDocs(std::ostringstream & oss,
+                                     T & param,
+                                     const std::string & indent)
+{
+  oss << indent << "    options: " << param.getRawNames() << '\n';
+  const auto & docs = param.getItemDocumentation();
+  if (!docs.empty())
+  {
+    oss << indent << "    option_docs:\n";
+    for (const auto & doc : docs)
+    {
+      oss << indent << "    - name: " << doc.first.name() << "\n";
+      oss << indent << "      description: |\n";
+      oss << indent << "        " << doc.second << "\n";
+    }
+  }
 }
 
 std::string
