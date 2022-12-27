@@ -37,6 +37,11 @@ KKSPhaseConcentrationMultiPhaseMaterial::validParams()
       "nested_iterations",
       "The output number of nested Newton iterations at each quadrature point.");
   params.addCoupledVar("args", "The coupled variables of free energies.");
+  params.addRequiredParam<bool>("damped_Newton",
+                                "Whether or not to use the damped Newton's method.");
+  params.addParam<Real>("damping_factor", 1, "The damping factor used in the Newton's method.");
+  params.addParam<std::vector<Real>>("lower_bounds", "The lower bounds of ci.");
+  params.addParam<std::vector<Real>>("upper_bounds", "The upper bounds of ci.");
   params += NestedSolve::validParams();
   return params;
 }
@@ -69,6 +74,10 @@ KKSPhaseConcentrationMultiPhaseMaterial::KKSPhaseConcentrationMultiPhaseMaterial
     _iter(declareProperty<Real>("nested_iterations")),
     _abs_tol(getParam<Real>("absolute_tolerance")),
     _rel_tol(getParam<Real>("relative_tolerance")),
+    _damped_newton(getParam<bool>("damped_Newton")),
+    _damping_factor(getParam<Real>("damping_factor")),
+    _ci_lower_bounds(getParam<std::vector<Real>>("lower_bounds")),
+    _ci_upper_bounds(getParam<std::vector<Real>>("upper_bounds")),
     _nested_solve(NestedSolve(parameters))
 
 {
@@ -174,8 +183,7 @@ KKSPhaseConcentrationMultiPhaseMaterial::computeQpProperties()
 
   auto compute = [&](const NestedSolve::Value<> & guess,
                      NestedSolve::Value<> & residual,
-                     NestedSolve::Jacobian<> & jacobian)
-  {
+                     NestedSolve::Jacobian<> & jacobian) {
     for (unsigned int m = 0; m < _num_c * _num_j; ++m)
       (*_prop_ci[m])[_qp] = guess(m);
 
@@ -221,7 +229,14 @@ KKSPhaseConcentrationMultiPhaseMaterial::computeQpProperties()
     }
   };
 
-  _nested_solve.nonlinear(solution, compute);
+  // choose between Newton or damped Newton's method
+  if (!_damped_newton)
+    _nested_solve.nonlinear(solution, compute);
+  else
+    _nested_solve.nonlinear(
+        solution, compute, _damping_factor, _ci_lower_bounds, _ci_upper_bounds, _num_j, _num_c);
+
+  // _nested_solve.nonlinear(solution, compute);
   _iter[_qp] = _nested_solve.getIterations();
 
   if (_nested_solve.getState() == NestedSolve::State::NOT_CONVERGED)
