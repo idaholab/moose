@@ -19,6 +19,9 @@ The `PatternedCartesianPeripheralModifier` class modifies assembly meshes so tha
       id=assembly_example
       caption=A schematic drawing of an example cartesian assembly mesh with transition layer as its outmost mesh layer.
 
+!alert note
+The extra element IDs from the original peripheral region are conserved. They may be modified using the [!param](/Mesh/PatternedCartesianPeripheralModifier/extra_id_names_to_modify) and [!param](/new_extra_id_values_to_assign) parameters.
+
 ## Advantages
 
 This mesh generator forces the number of nodes on a cartesian mesh to match a user-specified input. This allows assemblies with different number of pins or azimuthal discretizations (and consequently different numbers of boundary nodes) to be stitched together without increasing the mesh density to an unreasonable level.

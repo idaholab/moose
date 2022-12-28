@@ -1045,14 +1045,15 @@ PolygonMeshGeneratorBase::addPeripheralMeshRect(
     // points
     peripheral_point_index = {{0, 1, 2}, {2, 3, 4}};
   else
-    // side mesh has one side that need peripheral meshes.
+    // side mesh has one side that needs a peripheral mesh.
     peripheral_point_index = {{0, 1, 5}};
 
   // extra_dist includes background and ducts.
   // Loop to calculate the positions of the boundaries.
   for (unsigned int i = 0; i < extra_dist.size(); i++)
   {
-    // Generate the node positions for the peripheral meshes, for all indices around the input
+    // Generate the node positions for the peripheral meshes
+    // The node positions are generated for the two possible cases: the edge and the corner
     positionSetupRect(
         positions_inner, d_positions_outer, i == 0 ? 0.0 : extra_dist[i - 1], extra_dist[i], pitch);
 
@@ -1228,7 +1229,7 @@ PolygonMeshGeneratorBase::positionSetupRect(std::vector<std::pair<Real, Real>> &
   //           |         |
   //           |_________|
 
-  // Inner positons defined from index 0 through 5 as shown in the above cartoon
+  // Inner positions defined from index 0 through 5 as shown in the above cartoon
   positions_inner.push_back(std::make_pair(-pitch / 2.0, pitch / 2.0 + extra_dist_in));
   positions_inner.push_back(std::make_pair(0.0, pitch / 2.0 + extra_dist_in));
   positions_inner.push_back(
@@ -1237,7 +1238,7 @@ PolygonMeshGeneratorBase::positionSetupRect(std::vector<std::pair<Real, Real>> &
   positions_inner.push_back(std::make_pair(pitch / 2.0 + extra_dist_in, -pitch / 2.0));
   positions_inner.push_back(std::make_pair(pitch / 2.0, pitch / 2.0 + extra_dist_in));
 
-  // Outer positons (relative displacement from inner ones) defined from index 0 through 5 as shown
+  // Outer positions (relative displacement from inner ones) defined from index 0 through 5 as shown
   // in the above cartoon
   d_positions_outer.push_back(std::make_pair(0.0, extra_dist_out - extra_dist_in));
   d_positions_outer.push_back(std::make_pair(0.0, extra_dist_out - extra_dist_in));

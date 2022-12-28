@@ -21,11 +21,13 @@ InputParameters
 PatternedCartesianMeshGenerator::validParams()
 {
   InputParameters params = PolygonMeshGeneratorBase::validParams();
-  params.addRequiredParam<std::vector<MeshGeneratorName>>("inputs", "The input MeshGenerators.");
+  params.addRequiredParam<std::vector<MeshGeneratorName>>(
+      "inputs", "The names of the meshes forming the pattern.");
   params.addRequiredRangeCheckedParam<std::vector<std::vector<unsigned int>>>(
       "pattern",
       "pattern>=0",
-      "A double-indexed cartesian (square-shaped) array starting with the upper-left corner.");
+      "A two-dimensional cartesian (square-shaped) array starting with the upper-left corner."
+      "It is composed of indexes into the inputs vector");
   MooseEnum cartesian_pattern_boundary("none expanded", "expanded");
   params.addParam<MooseEnum>(
       "pattern_boundary", cartesian_pattern_boundary, "The boundary shape of the patterned mesh.");
@@ -177,8 +179,9 @@ PatternedCartesianMeshGenerator::PatternedCartesianMeshGenerator(const InputPara
                "The two-dimensional array parameter pattern must have a correct square shape.");
 
   if (*std::max_element(pattern_max_array.begin(), pattern_max_array.end()) >= _input_names.size())
-    paramError("pattern",
-               "Elements of this parameter must be smaller than the length of input_name.");
+    paramError(
+        "pattern",
+        "Elements of this parameter must be smaller than the length of inputs (0-indexing).");
   if ((unsigned int)std::distance(pattern_1d.begin(),
                                   std::unique(pattern_1d.begin(), pattern_1d.end())) <
       _input_names.size())
@@ -369,9 +372,9 @@ PatternedCartesianMeshGenerator::generate()
     extra_dist.push_back(0.5 * (_pattern_pitch - pitch_array.front() * _pattern.size()));
     peripheral_duct_intervals.insert(peripheral_duct_intervals.begin(), _background_intervals);
 
-    // In same cases, when the external square size is small enough, the external square boundary
+    // In some cases, when the external square size is small enough, the external square boundary
     // may either be very close to the input square meshes that are near the boundary or even cut
-    // off the these squares. As long as the ring regions are not cut off, the input squares can
+    // off by these squares. As long as the ring regions are not cut off, the input squares can
     // be deformed to accomodate the external square shape. This block sets up the range of mesh
     // region that needs to be deformed.
     if (extra_dist.front() <= extra_dist_tol)
@@ -650,7 +653,7 @@ PatternedCartesianMeshGenerator::generate()
         control_drum_azimuthals[i][j] =
             atan2(std::sin(control_drum_azimuthals[i][j] / 180.0 * M_PI),
                   std::cos(control_drum_azimuthals[i][j] / 180.0 * M_PI)) /
-            M_PI * 180.0; // quick way to move to -M_PI to M_PI
+            M_PI * 180.0; // quick way to move from -M_PI to M_PI
       }
       std::sort(control_drum_azimuthals[i].begin(), control_drum_azimuthals[i].end());
 

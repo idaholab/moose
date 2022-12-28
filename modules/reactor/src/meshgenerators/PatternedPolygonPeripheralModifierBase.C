@@ -20,7 +20,7 @@ PatternedPolygonPeripheralModifierBase::validParams()
   params.addRequiredParam<MeshGeneratorName>(
       "input",
       "The input mesh to be modified. Note that this generator only works with "
-      "PatternedHexMeshGenerator and its derived classes such as "
+      "PatternedHex/CartesianMeshGenerator and its derived classes such as "
       "HexIDPatternedMeshGenerator.");
   params.addRequiredParam<BoundaryName>("input_mesh_external_boundary",
                                         "The external boundary of the input mesh.");
@@ -35,12 +35,12 @@ PatternedPolygonPeripheralModifierBase::validParams()
                                  "Optional customized block name for the transition layer block.");
   params.addRangeCheckedParam<unsigned int>(
       "num_layers", 1, "num_layers>0", "Layers of elements for transition.");
-  params.addParam<std::vector<std::string>>("extra_id_names_to_modify",
-                                            "Names of the extra ids that need to be modified along "
-                                            "with the peripheral region modification.");
+  params.addParam<std::vector<std::string>>(
+      "extra_id_names_to_modify",
+      "Names of the element extra ids in the peripheral region that should be modified");
   params.addParam<std::vector<dof_id_type>>(
       "new_extra_id_values_to_assign",
-      "Optional extra ids to be assigned to the modified regions to override original values.");
+      "Values of the modified extra ids in the peripheral region.");
   params.addClassDescription("PatternedPolygonPeripheralModifierBase is the base class for "
                              "PatternedCartPeripheralModifier and PatternedHexPeripheralModifier.");
 
@@ -91,7 +91,8 @@ PatternedPolygonPeripheralModifierBase::generate()
   std::vector<std::tuple<dof_id_type, boundary_id_type>> node_list =
       input_mesh->get_boundary_info().build_node_list();
   // Find neighbors
-  input_mesh->find_neighbors();
+  if (!input_mesh->is_prepared())
+    input_mesh->find_neighbors();
   // Load all the extra integer indexing information from the input mesh
   const unsigned int n_extra_integer_input = input_mesh->n_elem_integers();
   std::vector<std::string> extra_integer_names;
@@ -246,7 +247,7 @@ PatternedPolygonPeripheralModifierBase::transferExtraElemIntegers(
     ReplicatedMesh & mesh,
     const std::vector<std::pair<Point, std::vector<dof_id_type>>> ref_extra_ids)
 {
-  // Build master points vector for k-d tree constructor
+  // Build points vector for k-d tree constructor
   std::vector<Point> ref_pts;
   for (auto & pt_extra_id : ref_extra_ids)
     ref_pts.push_back(pt_extra_id.first);
