@@ -106,7 +106,7 @@
       cli_args = 'Mesh/pattern/pattern_boundary=none
                   Mesh/pattern/pattern="0 0 0;0 1 0;0 2 0"
                   --mesh-only "patterned_err.e"'
-      expect_err = 'Elements of this parameter must be smaller than the length of input_name.'
+      expect_err = 'Elements of this parameter must be smaller than the length of inputs'
       requirement ='The system shall throw an error if the pattern includes input cartesian mesh indices that exceed number of elements of input meshes.'
     []
     [err_block_id]

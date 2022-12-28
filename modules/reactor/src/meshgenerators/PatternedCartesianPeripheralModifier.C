@@ -10,7 +10,6 @@
 #include "PatternedCartesianPeripheralModifier.h"
 
 #include "MooseMeshUtils.h"
-#include "FillBetweenPointVectorsTools.h"
 
 registerMooseObject("ReactorApp", PatternedCartesianPeripheralModifier);
 
@@ -44,7 +43,7 @@ PatternedCartesianPeripheralModifier::generate()
                "PatternedCartesianPeripheralModifier.");
   // Whether the input mesh is cartesian
   if (!hasMeshProperty("square_center_trimmability", _input_name))
-    paramError("input", "the input mesh does not have cartesian geometry.");
+    paramError("input", "The input mesh is not declared as center-trimmable in its metadata.");
 
   return PatternedPolygonPeripheralModifierBase::generate();
 }

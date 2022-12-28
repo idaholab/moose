@@ -29,7 +29,7 @@
     type = 'RunException'
     input = 'err_hex_input.i'
     cli_args = '--mesh-only err.e'
-    expect_err = 'the input mesh does not have cartesian geometry.'
+    expect_err = 'The input mesh is not declared as center-trimmable in its metadata.'
     requirement ='The system shall throw an error if the cartesian peripheral modifier is applied to a hexagonal mesh.'
   []
 []

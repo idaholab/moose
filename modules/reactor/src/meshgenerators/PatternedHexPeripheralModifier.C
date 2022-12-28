@@ -10,7 +10,6 @@
 #include "PatternedHexPeripheralModifier.h"
 
 #include "MooseMeshUtils.h"
-#include "FillBetweenPointVectorsTools.h"
 
 registerMooseObject("ReactorApp", PatternedHexPeripheralModifier);
 
@@ -44,7 +43,7 @@ PatternedHexPeripheralModifier::generate()
                "PatternedHexPeripheralModifier.");
   // Whether the input mesh is hexagonal
   if (!hasMeshProperty("hexagon_center_trimmability", _input_name))
-    paramError("input", "the input mesh does not have hexagonal geometry.");
+    paramError("input", "The input mesh is not declared as center-trimmable in its metadata.");
 
   return PatternedPolygonPeripheralModifierBase::generate();
 }
