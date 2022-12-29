@@ -9,6 +9,6 @@
     background_intervals = 2
     square_size = 10.0
     sides_to_adapt = 0
-    inputs = 'fmg'
+    meshes_to_adapt_to = 'fmg'
   []
 []

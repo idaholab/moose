@@ -40,6 +40,7 @@ PatternedPolygonPeripheralModifierBase::validParams()
       "Names of the element extra ids in the peripheral region that should be modified");
   params.addParam<std::vector<dof_id_type>>(
       "new_extra_id_values_to_assign",
+      std::vector<dof_id_type>(),
       "Values of the modified extra ids in the peripheral region.");
   params.addClassDescription("PatternedPolygonPeripheralModifierBase is the base class for "
                              "PatternedCartPeripheralModifier and PatternedHexPeripheralModifier.");
@@ -60,9 +61,7 @@ PatternedPolygonPeripheralModifierBase::PatternedPolygonPeripheralModifierBase(
                                   ? getParam<std::vector<std::string>>("extra_id_names_to_modify")
                                   : std::vector<std::string>()),
     _new_extra_id_values_to_assign(
-        isParamValid("new_extra_id_values_to_assign")
-            ? getParam<std::vector<dof_id_type>>("new_extra_id_values_to_assign")
-            : std::vector<dof_id_type>()),
+        getParam<std::vector<dof_id_type>>("new_extra_id_values_to_assign")),
     _pattern_pitch_meta(declareMeshProperty<Real>("pattern_pitch_meta", 0.0)),
     // Use CartesianConcentricCircleAdaptiveBoundaryMeshGenerator for cartesian control drum meshing
     // Use HexagonConcentricCircleAdaptiveBoundaryMeshGenerator for hexagonal control drum meshing
@@ -126,6 +125,11 @@ PatternedPolygonPeripheralModifierBase::generate()
     {
       // List of elements on the boundary
       bid_elem_list.push_back(std::get<0>(side_list[i]));
+      // Check if the element is QUAD4
+      if (input_mesh->elem_ptr(std::get<0>(side_list[i]))->n_nodes() != 4)
+        paramError("input",
+                   "The input mesh has non-QUAD4 elements in its peripheral area, which is not "
+                   "supported.");
       // Note this object only works with quad elements
       // (side_id + 2)%4 gives the opposite side's neighboring element
       // Thus, list of elements on the new boundary is made

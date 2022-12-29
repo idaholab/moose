@@ -1057,7 +1057,7 @@ PolygonMeshGeneratorBase::addPeripheralMeshRect(
     positionSetupRect(
         positions_inner, d_positions_outer, i == 0 ? 0.0 : extra_dist[i - 1], extra_dist[i], pitch);
 
-    // Loop for all applicable sides that need peripheral mesh (3 for corner and 2 for edge)
+    // Loop for all applicable sides that need peripheral mesh (2 for corner and 1 for edge)
     for (unsigned int peripheral_index = 0; peripheral_index < peripheral_point_index.size();
          peripheral_index++)
     {

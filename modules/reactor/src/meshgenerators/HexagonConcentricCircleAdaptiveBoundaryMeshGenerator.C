@@ -28,8 +28,12 @@ HexagonConcentricCircleAdaptiveBoundaryMeshGenerator::validParams()
       "sides_to_adapt",
       "List of the hexagon reference side indices that correspond to the sides that need adaptive "
       "meshing. The meshes to adapt these sides to are provided in 'inputs'.");
-  params.addParam<std::vector<MeshGeneratorName>>("inputs",
-                                                  "The name list of the input meshes to adapt.");
+  params.addDeprecatedParam<std::vector<MeshGeneratorName>>(
+      "inputs",
+      "The name list of the input meshes to adapt to.",
+      "Deprecated parameter, please use 'meshes_to_adapt_to' instead.");
+  params.addParam<std::vector<MeshGeneratorName>>("meshes_to_adapt_to",
+                                                  "The name list of the input meshes to adapt to.");
   params.addParam<bool>("is_control_drum",
                         false,
                         "Whether this mesh is for a control drum. The value can be set as 'false' "
@@ -52,13 +56,21 @@ HexagonConcentricCircleAdaptiveBoundaryMeshGenerator::validParams()
 HexagonConcentricCircleAdaptiveBoundaryMeshGenerator::
     HexagonConcentricCircleAdaptiveBoundaryMeshGenerator(const InputParameters & parameters)
   : PolygonConcentricCircleMeshGeneratorBase(parameters),
-    _input_names(isParamValid("inputs") ? getParam<std::vector<MeshGeneratorName>>("inputs")
-                                        : std::vector<MeshGeneratorName>())
+    _input_names(isParamValid("meshes_to_adapt_to")
+                     ? getParam<std::vector<MeshGeneratorName>>("meshes_to_adapt_to")
+                     : (isParamValid("inputs") ? getParam<std::vector<MeshGeneratorName>>("inputs")
+                                               : std::vector<MeshGeneratorName>()))
 {
   if (_sides_to_adapt.size() != _input_names.size())
     paramError("sides_to_adapt", "This parameter and inputs must have the same length.");
+  if (isParamValid("inputs") && isParamValid("meshes_to_adapt_to"))
+    paramError("inputs",
+               "this parameter is deprecated; it cannot be provided along with the new parameter "
+               "'meshes_to_adapt_to'.");
   if (isParamValid("inputs"))
     _input_ptrs = getMeshes("inputs");
+  else if (isParamValid("meshes_to_adapt_to"))
+    _input_ptrs = getMeshes("meshes_to_adapt_to");
   _is_control_drum_meta = getParam<bool>("is_control_drum");
   _is_general_polygon = false;
 }

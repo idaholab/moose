@@ -20,7 +20,7 @@ The `PatternedCartesianPeripheralModifier` class modifies assembly meshes so tha
       caption=A schematic drawing of an example cartesian assembly mesh with transition layer as its outmost mesh layer.
 
 !alert note
-The extra element IDs from the original peripheral region are conserved. They may be modified using the [!param](/Mesh/PatternedCartesianPeripheralModifier/extra_id_names_to_modify) and [!param](/new_extra_id_values_to_assign) parameters.
+The extra element IDs from the original peripheral region are conserved. They may be modified using the [!param](/Mesh/PatternedCartesianPeripheralModifier/extra_id_names_to_modify) and [!param](/Mesh/PatternedCartesianPeripheralModifier/new_extra_id_values_to_assign) parameters.
 
 ## Advantages
 

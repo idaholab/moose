@@ -22,7 +22,7 @@
   [err_sides_to_adpat_size]
     type = 'RunException'
     input = 'square_2d.i'
-    cli_args = 'Mesh/gen/sides_to_adapt="0 1" Mesh/gen/inputs="fmg"
+    cli_args = 'Mesh/gen/sides_to_adapt="0 1"
                 --mesh-only "square_2d_err.e"'
     expect_err = 'This parameter and inputs must have the same length.'
     requirement = "The system shall throw an error if the vector of sides to adapts and the vector of input meshes to adapt to have different sizes for the adaptive cartesian mesh."

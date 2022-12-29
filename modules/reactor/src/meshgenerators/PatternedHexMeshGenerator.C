@@ -29,10 +29,11 @@ PatternedHexMeshGenerator::validParams()
   MooseEnum pattern_boundary("none hexagon", "hexagon");
   params.addParam<MooseEnum>(
       "pattern_boundary", pattern_boundary, "The boundary shape of the patterned mesh.");
-  params.addParam<bool>("generate_core_metadata",
-                        false,
-                        "A Boolean parameter that controls whether the core related metadata "
-                        "is generated for other MOOSE objects or not.");
+  params.addParam<bool>(
+      "generate_core_metadata",
+      false,
+      "A Boolean parameter that controls whether the core related metadata "
+      "is generated for other MOOSE objects such as 'MultiControlDrumFunction' or not.");
   params.addRangeCheckedParam<unsigned int>("background_intervals",
                                             3,
                                             "background_intervals>0",

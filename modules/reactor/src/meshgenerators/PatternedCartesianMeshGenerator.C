@@ -31,10 +31,11 @@ PatternedCartesianMeshGenerator::validParams()
   MooseEnum cartesian_pattern_boundary("none expanded", "expanded");
   params.addParam<MooseEnum>(
       "pattern_boundary", cartesian_pattern_boundary, "The boundary shape of the patterned mesh.");
-  params.addParam<bool>("generate_core_metadata",
-                        false,
-                        "A Boolean parameter that controls whether the core related metadata "
-                        "is generated for other MOOSE objects or not.");
+  params.addParam<bool>(
+      "generate_core_metadata",
+      false,
+      "A Boolean parameter that controls whether the core related metadata "
+      "is generated for other MOOSE objects such as 'MultiControlDrumFunction' or not.");
   params.addRangeCheckedParam<unsigned int>("background_intervals",
                                             3,
                                             "background_intervals>0",
@@ -98,9 +99,10 @@ PatternedCartesianMeshGenerator::validParams()
   params.addParam<bool>("deform_non_circular_region",
                         true,
                         "Whether the non-circular region (outside the rings) can be deformed.");
-  params.addParamNamesToGroup("background_block_id background_block_name duct_block_ids "
-                              "duct_block_names external_boundary_id external_boundary_name",
-                              "Customized Subdomain/Boundary");
+  params.addParamNamesToGroup(
+      "pattern_boundary background_block_id background_block_name duct_block_ids duct_block_names "
+      "external_boundary_id external_boundary_name",
+      "Customized Subdomain/Boundary");
   params.addParamNamesToGroup(
       "generate_control_drum_positions_file assign_control_drum_id position_file", "Control Drum");
   params.addParamNamesToGroup(
