@@ -35,11 +35,11 @@
 Simulation::Simulation(FEProblemBase & fe_problem, const InputParameters & pars)
   : ParallelObject(fe_problem.comm()),
     LoggingInterface(_log),
-    _mesh(*static_cast<THMMesh *>(pars.get<MooseMesh *>("mesh"))),
+    _thm_mesh(*static_cast<THMMesh *>(pars.get<MooseMesh *>("mesh"))),
     _fe_problem(fe_problem),
-    _app(static_cast<ThermalHydraulicsApp &>(*pars.get<MooseApp *>("_moose_app"))),
-    _factory(_app.getFactory()),
-    _pars(pars),
+    _thm_app(static_cast<ThermalHydraulicsApp &>(*pars.get<MooseApp *>("_moose_app"))),
+    _thm_factory(_thm_app.getFactory()),
+    _thm_pars(pars),
     _flow_fe_type(FEType(CONSTANT, MONOMIAL)),
     _implicit_time_integration(true),
     _check_jacobian(false),
@@ -90,8 +90,8 @@ Simulation::buildMesh()
   for (auto && comp : _components)
     comp->executeSetupMesh();
   // Make sure all node sets have their corresponding side sets
-  if (_mesh.getMesh().get_boundary_info().n_nodeset_conds() > 0)
-    _mesh.getMesh().get_boundary_info().build_side_list_from_node_list();
+  if (_thm_mesh.getMesh().get_boundary_info().n_nodeset_conds() > 0)
+    _thm_mesh.getMesh().get_boundary_info().build_side_list_from_node_list();
 }
 
 void
@@ -319,7 +319,7 @@ void
 Simulation::addControl(const std::string & type, const std::string & name, InputParameters params)
 {
   params.addPrivateParam<FEProblemBase *>("_fe_problem_base", &_fe_problem);
-  std::shared_ptr<Control> control = _factory.create<Control>(type, name, params);
+  std::shared_ptr<Control> control = _thm_factory.create<Control>(type, name, params);
   _fe_problem.getControlWarehouse().addObject(control);
 }
 
@@ -353,7 +353,7 @@ Simulation::addConstantIC(const VariableName & var_name,
     blk_str += ":" + block_names[i];
 
   std::string class_name = "ConstantIC";
-  InputParameters params = _factory.getValidParams(class_name);
+  InputParameters params = _thm_factory.getValidParams(class_name);
   params.set<VariableName>("variable") = var_name;
   params.set<Real>("value") = value;
   params.set<std::vector<SubdomainName>>("block") = block_names;
@@ -373,7 +373,7 @@ Simulation::addFunctionIC(const VariableName & var_name,
     blk_str += ":" + block_names[i];
 
   std::string class_name = "FunctionIC";
-  InputParameters params = _factory.getValidParams(class_name);
+  InputParameters params = _thm_factory.getValidParams(class_name);
   params.set<VariableName>("variable") = var_name;
   params.set<std::vector<SubdomainName>>("block") = block_names;
   params.set<FunctionName>("function") = func_name;
@@ -387,7 +387,7 @@ Simulation::addConstantScalarIC(const VariableName & var_name, Real value)
     return;
 
   std::string class_name = "ScalarConstantIC";
-  InputParameters params = _factory.getValidParams(class_name);
+  InputParameters params = _thm_factory.getValidParams(class_name);
   params.set<VariableName>("variable") = var_name;
   params.set<Real>("value") = value;
   addSimInitialCondition(class_name, genName(var_name, "ic"), params);
@@ -400,7 +400,7 @@ Simulation::addComponentScalarIC(const VariableName & var_name, const std::vecto
     return;
 
   std::string class_name = "ScalarComponentIC";
-  InputParameters params = _factory.getValidParams(class_name);
+  InputParameters params = _thm_factory.getValidParams(class_name);
   params.set<VariableName>("variable") = var_name;
   params.set<std::vector<Real>>("values") = value;
   addSimInitialCondition(class_name, genName(var_name, "ic"), params);
@@ -446,7 +446,7 @@ Simulation::addVariables()
       family = Utility::enum_to_string(vi._type.family);
 
       auto var_type = "MooseVariable";
-      InputParameters params = _factory.getValidParams(var_type);
+      InputParameters params = _thm_factory.getValidParams(var_type);
       params.set<MooseEnum>("order") = order;
       params.set<MooseEnum>("family") = family;
       if (!vi._subdomain.empty())
@@ -482,7 +482,7 @@ Simulation::addVariables()
       family = Utility::enum_to_string(vi._type.family);
 
       auto var_type = "MooseVariableScalar";
-      InputParameters params = _factory.getValidParams(var_type);
+      InputParameters params = _thm_factory.getValidParams(var_type);
       params.set<MooseEnum>("order") = order;
       params.set<MooseEnum>("family") = family;
 
@@ -508,9 +508,9 @@ Simulation::setupInitialConditionsFromFile()
   const UserObjectName suo_name = genName("thm", "suo");
   {
     const std::string class_name = "SolutionUserObject";
-    InputParameters params = _factory.getValidParams(class_name);
-    params.set<MeshFileName>("mesh") = _pars.get<FileName>("initial_from_file");
-    params.set<std::string>("timestep") = _pars.get<std::string>("initial_from_file_timestep");
+    InputParameters params = _thm_factory.getValidParams(class_name);
+    params.set<MeshFileName>("mesh") = _thm_pars.get<FileName>("initial_from_file");
+    params.set<std::string>("timestep") = _thm_pars.get<std::string>("initial_from_file_timestep");
     _fe_problem.addUserObject(class_name, suo_name, params);
   }
 
@@ -522,7 +522,7 @@ Simulation::setupInitialConditionsFromFile()
     if (vi._type.family == SCALAR)
     {
       std::string class_name = "ScalarSolutionInitialCondition";
-      InputParameters params = _factory.getValidParams(class_name);
+      InputParameters params = _thm_factory.getValidParams(class_name);
       params.set<VariableName>("variable") = var_name;
       params.set<VariableName>("from_variable") = var_name;
       params.set<UserObjectName>("solution_uo") = suo_name;
@@ -531,7 +531,7 @@ Simulation::setupInitialConditionsFromFile()
     else
     {
       std::string class_name = "SolutionInitialCondition";
-      InputParameters params = _factory.getValidParams(class_name);
+      InputParameters params = _thm_factory.getValidParams(class_name);
       params.set<VariableName>("variable") = var_name;
       params.set<VariableName>("from_variable") = var_name;
       params.set<UserObjectName>("solution_uo") = suo_name;
@@ -568,16 +568,17 @@ Simulation::addRelationshipManagers()
 {
   {
     const std::string class_name = "AugmentSparsityBetweenElements";
-    auto params = _factory.getValidParams(class_name);
+    auto params = _thm_factory.getValidParams(class_name);
     params.set<Moose::RelationshipManagerType>("rm_type") =
         Moose::RelationshipManagerType::ALGEBRAIC | Moose::RelationshipManagerType::GEOMETRIC;
     params.set<std::string>("for_whom") = _fe_problem.name();
-    params.set<MooseMesh *>("mesh") = &_mesh;
+    params.set<MooseMesh *>("mesh") = &_thm_mesh;
     params.set<std::map<dof_id_type, std::vector<dof_id_type>> *>("_elem_map") =
         &_sparsity_elem_augmentation;
-    auto rm = _factory.create<RelationshipManager>(class_name, "thm:sparsity_btw_elems", params);
-    if (!_app.addRelationshipManager(rm))
-      _factory.releaseSharedObjects(*rm);
+    auto rm =
+        _thm_factory.create<RelationshipManager>(class_name, "thm:sparsity_btw_elems", params);
+    if (!_thm_app.addRelationshipManager(rm))
+      _thm_factory.releaseSharedObjects(*rm);
   }
 }
 
@@ -830,7 +831,7 @@ Simulation::run()
 void
 Simulation::addComponent(const std::string & type, const std::string & name, InputParameters params)
 {
-  std::shared_ptr<Component> comp = _factory.create<Component>(type, name, params);
+  std::shared_ptr<Component> comp = _thm_factory.create<Component>(type, name, params);
   if (_comp_by_name.find(name) == _comp_by_name.end())
     _comp_by_name[name] = comp;
   else
@@ -848,7 +849,7 @@ Simulation::hasComponent(const std::string & name) const
 void
 Simulation::addClosures(const std::string & type, const std::string & name, InputParameters params)
 {
-  std::shared_ptr<ClosuresBase> obj_ptr = _factory.create<ClosuresBase>(type, name, params);
+  std::shared_ptr<ClosuresBase> obj_ptr = _thm_factory.create<ClosuresBase>(type, name, params);
   if (_closures_by_name.find(name) == _closures_by_name.end())
     _closures_by_name[name] = obj_ptr;
   else
@@ -909,7 +910,7 @@ Simulation::getOutputsVector(const std::string & key) const
 bool
 Simulation::hasInitialConditionsFromFile() const
 {
-  return _pars.isParamValid("initial_from_file");
+  return _thm_pars.isParamValid("initial_from_file");
 }
 
 void
