@@ -107,8 +107,11 @@ protected:
 
   /*
    * Whether or not a given element is part of the given blocks
+   * Passing the mesh is useful to override the definition of the block restriction
    */
   bool inBlocks(const std::set<SubdomainID> & blocks, const Elem * elem) const;
+  virtual bool
+  inBlocks(const std::set<SubdomainID> & blocks, const MooseMesh & mesh, const Elem * elem) const;
 
   /*
    * Whether or not a given node is part of an element in the given blocks

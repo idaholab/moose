@@ -897,6 +897,14 @@ MultiAppGeneralFieldTransfer::inBlocks(const std::set<SubdomainID> & blocks,
 
 bool
 MultiAppGeneralFieldTransfer::inBlocks(const std::set<SubdomainID> & blocks,
+                                       const MooseMesh & /* mesh */,
+                                       const Elem * elem) const
+{
+  return inBlocks(blocks, elem);
+}
+
+bool
+MultiAppGeneralFieldTransfer::inBlocks(const std::set<SubdomainID> & blocks,
                                        const MooseMesh & mesh,
                                        const Node * node) const
 {
@@ -1046,7 +1054,6 @@ MultiAppGeneralFieldTransfer::getRestrictedFromBoundingBoxes()
 
   for (const auto j : make_range(_from_meshes.size()))
   {
-
     Point min(max_r, max_r, max_r);
     Point max(min_r, min_r, min_r);
     bool at_least_one = false;
@@ -1055,7 +1062,7 @@ MultiAppGeneralFieldTransfer::getRestrictedFromBoundingBoxes()
     for (auto & elem : as_range(from_mesh.getMesh().local_elements_begin(),
                                 from_mesh.getMesh().local_elements_end()))
     {
-      if (!_from_blocks.empty() && !inBlocks(_from_blocks, elem))
+      if (!_from_blocks.empty() && !inBlocks(_from_blocks, from_mesh, elem))
         continue;
 
       for (auto & node : elem->node_ref_range())

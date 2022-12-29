@@ -235,3 +235,25 @@ MultiAppGeneralFieldNearestNodeTransfer::evaluateInterpValuesNearestNode(
     i_pt++;
   }
 }
+
+bool
+MultiAppGeneralFieldNearestNodeTransfer::inBlocks(const std::set<SubdomainID> & blocks,
+                                                  const MooseMesh & mesh,
+                                                  const Elem * elem) const
+{
+  // We need to override the definition of block restriction for an element
+  for (const auto & i_node : make_range(elem->n_nodes()))
+  {
+    const auto & node = elem->node_ptr(i_node);
+    const std::set<SubdomainID> & node_blocks = mesh.getNodeBlockIds(*node);
+    std::set<SubdomainID> u;
+    std::set_intersection(blocks.begin(),
+                          blocks.end(),
+                          node_blocks.begin(),
+                          node_blocks.end(),
+                          std::inserter(u, u.begin()));
+    if (!u.empty())
+      return true;
+  }
+  return false;
+}

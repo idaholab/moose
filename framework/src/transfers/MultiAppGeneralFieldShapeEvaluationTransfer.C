@@ -32,6 +32,9 @@ MultiAppGeneralFieldShapeEvaluationTransfer::validParams()
   // Blanket ban on origin boundary restriction. Most shape functions have their support extend
   // outside the boundary. For a true face variable, this parameter would make sense again
   params.suppressParameter<std::vector<BoundaryName>>("from_boundaries");
+  // Shape function evaluations return an invalid value outside an app's domain anyway
+  params.suppressParameter<bool>("from_app_must_contain_point");
+
   return params;
 }
 

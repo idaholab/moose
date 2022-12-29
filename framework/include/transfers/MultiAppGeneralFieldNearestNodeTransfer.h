@@ -29,6 +29,11 @@ protected:
   virtual void evaluateInterpValues(const std::vector<Point> & incoming_points,
                                     std::vector<std::pair<Real, Real>> & outgoing_vals) override;
 
+  using MultiAppGeneralFieldTransfer::inBlocks;
+  bool inBlocks(const std::set<SubdomainID> & blocks,
+                const MooseMesh & mesh,
+                const Elem * elem) const override;
+
 private:
   /*
    * Build mesh functions
