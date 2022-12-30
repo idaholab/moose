@@ -36,6 +36,14 @@
       # Even though the source variable is continuous and varies over the target mesh,
       # only the (nearest) node values matter. Hence the checkerboards.
     []
+
+    [array_variables]
+      type = Exodiff
+      input = main_array.i
+      exodiff = 'array.e array_sub0_out.e array_sub1_out.e array_sub2_out.e'
+      cli_args = "Outputs/file_base=array"
+      detail = "for array variables"
+    []
   []
 
   [fixed_bounding_boxes]
