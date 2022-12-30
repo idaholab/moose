@@ -124,6 +124,14 @@ MultiAppGeneralFieldTransfer::MultiAppGeneralFieldTransfer(const InputParameters
   _var_size = _to_var_names.size();
   if (_to_var_names.size() != _from_var_names.size() && !parameters.isPrivate("source_variable"))
     paramError("variable", "The number of variables to transfer to and from should be equal");
+
+  // Check the parameters of the components of the array / vector variable
+  if (_from_var_names.size() != _from_var_components.size() && _from_var_components.size() > 0)
+    paramError("source_variable_components",
+               "This parameter must be equal to the number of source variables");
+  if (_to_var_names.size() != _to_var_components.size() && _to_var_components.size() > 0)
+    paramError("target_variable_components",
+               "This parameter must be equal to the number of target variables");
 }
 
 void

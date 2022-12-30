@@ -63,6 +63,34 @@
       expect_err = "The number of variables to transfer to and from should be equal"
       detail = 'a different number of variables is specified for the source and target variables of the transfer.'
     []
+    [forgot_source_array_component]
+      type = RunException
+      input = main_array.i
+      cli_args = "Transfers/from_sub/source_variable_components=''"
+      expect_err = "Component must be passed for an array variable"
+      detail = 'the user forgot to input the component to transfer for the source array variable'
+    []
+    [forgot_target_array_component]
+      type = RunException
+      input = main_array.i
+      cli_args = "Transfers/from_sub/target_variable_components=''"
+      expect_err = "Component must be passed for an array variable"
+      detail = 'the user forgot to input the component to transfer for the target array variable'
+    []
+    [too_big_source_component]
+      type = RunException
+      input = main_array.i
+      cli_args = "Transfers/from_sub/source_variable_components='10 10'"
+      expect_err = "Component passed is larger than size of variable"
+      detail = 'the user specified a source variable component to transfer that is larger than the variable size'
+    []
+    [too_big_target_component]
+      type = RunException
+      input = main_array.i
+      cli_args = "Transfers/from_sub/target_variable_components='10 10'"
+      expect_err = "Component passed is larger than size of variable"
+      detail = 'the user specified a target variable component to transfer to that is larger than the variable size'
+    []
   []
 
   [overlap]
