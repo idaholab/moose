@@ -24,7 +24,7 @@ public:
   MultiAppGeneralFieldShapeEvaluationTransfer(const InputParameters & parameters);
 
 protected:
-  virtual void prepareEvaluationOfInterpValues(const VariableName & var_name) override;
+  virtual void prepareEvaluationOfInterpValues(const unsigned int var_index) override;
 
   virtual void evaluateInterpValues(const std::vector<Point> & incoming_points,
                                     std::vector<std::pair<Real, Real>> & outgoing_vals) override;
@@ -35,7 +35,7 @@ private:
    * @param[in] var_name the variable to build the mesh functions for
    * @param[out] the mesh functions
    */
-  void buildMeshFunctions(const VariableName & var_name,
+  void buildMeshFunctions(const unsigned int var_index,
                           std::vector<std::shared_ptr<MeshFunction>> & local_meshfuns);
 
   /*

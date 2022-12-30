@@ -66,6 +66,14 @@ MultiAppGeneralFieldTransfer::validParams()
                              "Whether elemental variable boundary restriction is considered by "
                              "element side or element nodes");
 
+  // Array and vector variables
+  params.addParam<std::vector<unsigned int>>("source_variable_components",
+                                             std::vector<unsigned int>(),
+                                             "The source array or vector variable component(s).");
+  params.addParam<std::vector<unsigned int>>("target_variable_components",
+                                             std::vector<unsigned int>(),
+                                             "The target array or vector variable component(s).");
+
   // Search options
   params.addParam<bool>(
       "greedy_search",
@@ -100,6 +108,8 @@ MultiAppGeneralFieldTransfer::validParams()
 
 MultiAppGeneralFieldTransfer::MultiAppGeneralFieldTransfer(const InputParameters & parameters)
   : MultiAppConservativeTransfer(parameters),
+    _from_var_components(getParam<std::vector<unsigned int>>("source_variable_components")),
+    _to_var_components(getParam<std::vector<unsigned int>>("target_variable_components")),
     _source_app_must_contain_point(getParam<bool>("from_app_must_contain_point")),
     _elemental_boundary_restriction_on_sides(
         getParam<MooseEnum>("elemental_boundary_restriction") == "sides"),
@@ -177,6 +187,40 @@ MultiAppGeneralFieldTransfer::initialSetup()
         PointLocatorBase::build(TREE_LOCAL_ELEMENTS, from_moose_mesh.getMesh());
     _from_point_locators[i_from]->enable_out_of_mesh_mode();
   }
+
+  // Check if components are set correctly if using an array variable
+  for (unsigned int i_from = 0; i_from < _from_problems.size(); ++i_from)
+  {
+    for (const auto var_index : make_range(_from_var_names.size()))
+    {
+      MooseVariableFieldBase & from_var =
+          _from_problems[i_from]->getVariable(0,
+                                              _from_var_names[var_index],
+                                              Moose::VarKindType::VAR_ANY,
+                                              Moose::VarFieldType::VAR_FIELD_ANY);
+      if (from_var.count() > 1 && _from_var_components.empty())
+        paramError("source_variable_components", "Component must be passed for an array variable");
+      if (_from_var_components.size() && from_var.count() < _from_var_components[var_index])
+        paramError("source_variable_components",
+                   "Component passed is larger than size of variable");
+    }
+  }
+  for (unsigned int i_to = 0; i_to < _to_problems.size(); ++i_to)
+  {
+    for (const auto var_index : make_range(_to_var_names.size()))
+    {
+      MooseVariableFieldBase & to_var =
+          _to_problems[i_to]->getVariable(0,
+                                          _to_var_names[var_index],
+                                          Moose::VarKindType::VAR_ANY,
+                                          Moose::VarFieldType::VAR_FIELD_ANY);
+      if (to_var.count() > 1 && _to_var_components.empty())
+        paramError("target_variable_components", "Component must be passed for an array variable");
+      if (_to_var_components.size() && to_var.count() < _to_var_components[var_index])
+        paramError("target_variable_components",
+                   "Component passed is larger than size of variable");
+    }
+  }
 }
 
 void
@@ -216,12 +260,12 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
   // One processor will receive many points from many processors
   // One point may go to different processors
   ProcessorToPointVec outgoing_points;
-  extractOutgoingPoints(_to_var_names[i], outgoing_points);
+  extractOutgoingPoints(i, outgoing_points);
 
   if (_from_var_names.size())
-    prepareEvaluationOfInterpValues(_from_var_names[i]);
+    prepareEvaluationOfInterpValues(i);
   else
-    prepareEvaluationOfInterpValues("dummy");
+    prepareEvaluationOfInterpValues(-1);
 
   // Fill values and app ids for incoming points
   // We are responsible to compute values for these incoming points
@@ -250,7 +294,7 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
 
     // Cache interpolation values for each dof object / points
     cacheIncomingInterpVals(pid,
-                            _to_var_names[i],
+                            i,
                             pointInfoVec,
                             my_outgoing_points,
                             incoming_vals,
@@ -270,7 +314,7 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
     outputValueConflicts(_to_var_names[i], dofobject_to_valsvec, distance_caches);
 
   // Set cached values into solution vector
-  setSolutionVectorValues(_to_var_names[i], dofobject_to_valsvec, interp_caches);
+  setSolutionVectorValues(i, dofobject_to_valsvec, interp_caches);
 }
 
 void
@@ -333,9 +377,12 @@ MultiAppGeneralFieldTransfer::cacheOutgoingPointInfo(const Point point,
 }
 
 void
-MultiAppGeneralFieldTransfer::extractOutgoingPoints(const VariableName & var_name,
+MultiAppGeneralFieldTransfer::extractOutgoingPoints(const unsigned int var_index,
                                                     ProcessorToPointVec & outgoing_points)
 {
+  // Get the variable name, with the accomodation for array/vector names
+  const auto & var_name = getToVarName(var_index);
+
   // Clean up the map from processor to pointInfo vector
   // This map should be consistent with outgoing_points
   _processor_to_pointInfoVec.clear();
@@ -458,7 +505,7 @@ MultiAppGeneralFieldTransfer::extractLocalFromBoundingBoxes(std::vector<Bounding
 void
 MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
     processor_id_type pid,
-    const VariableName & var_name,
+    const unsigned int var_index,
     std::vector<PointInfo> & pointInfoVec,
     const std::vector<Point> & point_requests,
     const std::vector<std::pair<Real, Real>> & incoming_vals,
@@ -468,6 +515,9 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
 {
   mooseAssert(pointInfoVec.size() == incoming_vals.size(),
               "Number of dof objects does not equal to the number of incoming values");
+
+  // Get the variable name, with the accomodation for array/vector names
+  const auto & var_name = getToVarName(var_index);
 
   dof_id_type val_offset = 0;
   for (auto & pointinfo : pointInfoVec)
@@ -530,8 +580,10 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
     {
       // Use this dof object pointer, so we can handle
       // both element and node using the same code
-#ifdef NDEBUG
-      DofObject * dof_object_ptr = nullptr;
+#ifndef NDEBUG
+      const MeshBase & to_mesh = _to_problems[problem_id]->mesh(_displaced_target_mesh).getMesh();
+      const DofObject * dof_object_ptr = nullptr;
+      const auto sys_num = to_sys->number();
       // It is a node
       if (is_nodal)
         dof_object_ptr = to_mesh.node_ptr(dof_object_id);
@@ -754,10 +806,13 @@ MultiAppGeneralFieldTransfer::outputValueConflicts(
 
 void
 MultiAppGeneralFieldTransfer::setSolutionVectorValues(
-    const VariableName & var_name,
+    const unsigned int var_index,
     const DofobjectToInterpValVec & dofobject_to_valsvec,
     const InterpCaches & interp_caches)
 {
+  // Get the variable name, with the accomodation for array/vector names
+  const auto & var_name = getToVarName(var_index);
+
   for (unsigned int problem_id = 0; problem_id < _to_problems.size(); ++problem_id)
   {
     auto & dofobject_to_val = dofobject_to_valsvec[problem_id];
@@ -1125,4 +1180,22 @@ MultiAppGeneralFieldTransfer::getRestrictedFromBoundingBoxes()
         }
 
   return bboxes;
+}
+
+VariableName
+MultiAppGeneralFieldTransfer::getFromVarName(unsigned int var_index)
+{
+  VariableName var_name = _from_var_names[var_index];
+  if (_from_var_components.size())
+    var_name += "_" + std::to_string(_from_var_components[var_index]);
+  return var_name;
+}
+
+VariableName
+MultiAppGeneralFieldTransfer::getToVarName(unsigned int var_index)
+{
+  VariableName var_name = _to_var_names[var_index];
+  if (_to_var_components.size())
+    var_name += "_" + std::to_string(_to_var_components[var_index]);
+  return var_name;
 }

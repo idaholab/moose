@@ -47,17 +47,17 @@ MultiAppGeneralFieldNearestNodeTransfer::MultiAppGeneralFieldNearestNodeTransfer
 
 void
 MultiAppGeneralFieldNearestNodeTransfer::prepareEvaluationOfInterpValues(
-    const VariableName & var_name)
+    const unsigned int var_index)
 {
   _local_kdtrees.clear();
   _local_points.clear();
   _local_values.clear();
-  buildKDTrees(var_name, _local_kdtrees, _local_points, _local_values);
+  buildKDTrees(var_index, _local_kdtrees, _local_points, _local_values);
 }
 
 void
 MultiAppGeneralFieldNearestNodeTransfer::buildKDTrees(
-    const VariableName & var_name,
+    const unsigned int var_index,
     std::vector<std::shared_ptr<KDTree>> & kdtrees,
     std::vector<std::vector<Point>> & points,
     std::vector<std::vector<Real>> & local_values)
@@ -71,11 +71,14 @@ MultiAppGeneralFieldNearestNodeTransfer::buildKDTrees(
   {
     FEProblemBase & from_problem = *_from_problems[i_from];
     auto & from_mesh = from_problem.mesh(_displaced_source_mesh);
-    MooseVariableFEBase & from_var = from_problem.getVariable(
-        0, var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
+    MooseVariableFieldBase & from_var =
+        from_problem.getVariable(0,
+                                 _from_var_names[var_index],
+                                 Moose::VarKindType::VAR_ANY,
+                                 Moose::VarFieldType::VAR_FIELD_ANY);
 
     System & from_sys = from_var.sys().system();
-    unsigned int from_var_num = from_sys.variable_number(from_var.name());
+    unsigned int from_var_num = from_sys.variable_number(getFromVarName(var_index));
     // FEM type info
     auto & fe_type = from_sys.variable_type(from_var.number());
     bool is_nodal = fe_type.family == LAGRANGE;

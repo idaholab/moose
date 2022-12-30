@@ -42,6 +42,12 @@ public:
 
   virtual void execute() override;
 
+  /// Get the source variable name, with the suffix for array/vector variables
+  VariableName getFromVarName(unsigned int var_index);
+
+  /// Get the target variable name, with the suffix for array/vector variables
+  VariableName getToVarName(unsigned int var_index);
+
   // This needs to be moved into libMesh according to Fande
   // The hash helps sort the points in buckets
   // Hashing the floats also leads to floating point comparison errors in their own way
@@ -73,7 +79,7 @@ protected:
   /*
    * Prepare evaluation of interpolation values
    */
-  virtual void prepareEvaluationOfInterpValues(const VariableName & var_name) = 0;
+  virtual void prepareEvaluationOfInterpValues(const unsigned int var_index) = 0;
 
   /*
    * Evaluate interpolation values for incoming points
@@ -157,6 +163,12 @@ protected:
                     const MooseMesh & mesh,
                     const PointLocatorBase * const pl,
                     const Point & pt) const;
+
+  /// Origin array/vector variable components
+  const std::vector<unsigned int> _from_var_components;
+
+  /// Target array/vector variable components
+  const std::vector<unsigned int> _to_var_components;
 
   /// Whether the source app mesh must actually contain the points for them to be considered or whether
   /// the bounding box is enough. If false, we can interpolate between apps
@@ -275,7 +287,7 @@ private:
   /*
    * Extract to-points for which we need to compute interpolation values on the source domains
    */
-  void extractOutgoingPoints(const VariableName & var_name, ProcessorToPointVec & outgoing_points);
+  void extractOutgoingPoints(const unsigned int var_index, ProcessorToPointVec & outgoing_points);
 
   /*
    * Which processors include this point
@@ -287,7 +299,7 @@ private:
    */
   void cacheIncomingInterpVals(
       processor_id_type pid,
-      const VariableName & var_name,
+      const unsigned int var_index,
       std::vector<PointInfo> & pointInfoVec,
       const std::vector<Point> & point_requests,
       const std::vector<std::pair<Real, Real>> & incoming_vals,
@@ -315,7 +327,7 @@ private:
    * @param interp_caches a vector of maps from point to value, for each to_problem
    *                      Used for higher order elemental variables
    */
-  void setSolutionVectorValues(const VariableName & var,
+  void setSolutionVectorValues(const unsigned int var_index,
                                const DofobjectToInterpValVec & dofobject_to_valsvec,
                                const InterpCaches & interp_caches);
 

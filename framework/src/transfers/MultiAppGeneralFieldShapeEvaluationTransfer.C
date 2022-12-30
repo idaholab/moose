@@ -46,28 +46,31 @@ MultiAppGeneralFieldShapeEvaluationTransfer::MultiAppGeneralFieldShapeEvaluation
 
 void
 MultiAppGeneralFieldShapeEvaluationTransfer::prepareEvaluationOfInterpValues(
-    const VariableName & var_name)
+    const unsigned int var_index)
 {
   _local_bboxes.clear();
   extractLocalFromBoundingBoxes(_local_bboxes);
 
   _local_meshfuns.clear();
-  buildMeshFunctions(var_name, _local_meshfuns);
+  buildMeshFunctions(var_index, _local_meshfuns);
 }
 
 void
 MultiAppGeneralFieldShapeEvaluationTransfer::buildMeshFunctions(
-    const VariableName & var_name, std::vector<std::shared_ptr<MeshFunction>> & local_meshfuns)
+    const unsigned int var_index, std::vector<std::shared_ptr<MeshFunction>> & local_meshfuns)
 {
   // Construct a local mesh function for each origin problem
   for (unsigned int i_from = 0; i_from < _from_problems.size(); ++i_from)
   {
     FEProblemBase & from_problem = *_from_problems[i_from];
-    MooseVariableFEBase & from_var = from_problem.getVariable(
-        0, var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
+    MooseVariableFieldBase & from_var =
+        from_problem.getVariable(0,
+                                 _from_var_names[var_index],
+                                 Moose::VarKindType::VAR_ANY,
+                                 Moose::VarFieldType::VAR_FIELD_ANY);
 
     System & from_sys = from_var.sys().system();
-    unsigned int from_var_num = from_sys.variable_number(from_var.name());
+    unsigned int from_var_num = from_sys.variable_number(getFromVarName(var_index));
 
     std::shared_ptr<MeshFunction> from_func;
     from_func.reset(new MeshFunction(getEquationSystem(from_problem, _displaced_source_mesh),

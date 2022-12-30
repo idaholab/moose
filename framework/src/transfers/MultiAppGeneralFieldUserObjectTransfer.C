@@ -52,7 +52,7 @@ MultiAppGeneralFieldUserObjectTransfer::MultiAppGeneralFieldUserObjectTransfer(
 
 void
 MultiAppGeneralFieldUserObjectTransfer::prepareEvaluationOfInterpValues(
-    const VariableName & /* var_name */)
+    const unsigned int /* var_index */)
 {
   _local_bboxes.clear();
   extractLocalFromBoundingBoxes(_local_bboxes);

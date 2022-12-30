@@ -24,7 +24,7 @@ public:
   MultiAppGeneralFieldNearestNodeTransfer(const InputParameters & parameters);
 
 protected:
-  virtual void prepareEvaluationOfInterpValues(const VariableName & var_name) override;
+  virtual void prepareEvaluationOfInterpValues(const unsigned int var_index) override;
 
   virtual void evaluateInterpValues(const std::vector<Point> & incoming_points,
                                     std::vector<std::pair<Real, Real>> & outgoing_vals) override;
@@ -38,7 +38,7 @@ private:
   /*
    * Build mesh functions
    */
-  void buildKDTrees(const VariableName & var_name,
+  void buildKDTrees(const unsigned int var_index,
                     std::vector<std::shared_ptr<KDTree>> & local_kdtrees,
                     std::vector<std::vector<Point>> & local_points,
                     std::vector<std::vector<Real>> & local_values);
