@@ -21,6 +21,11 @@
                   AuxVariables/from_sub/order=SECOND AuxVariables/from_sub_elem/order=SECOND
                   MultiApps/sub/cli_args='Mesh/second_order=true;AuxVariables/from_main/order=SECOND;AuxVariables/from_main_elem/order=FIRST'"
       detail = "for variables of arbitrary types,"
+
+      # The value conflict search shows there are indetermination in which values get selected
+      # This is more an issue with using nearest node to build a higher order variable, which
+      # doesnt always make sense: the source information is piecewise flat
+      max_parallel = 5
     []
 
     [projection_needed_sending]
