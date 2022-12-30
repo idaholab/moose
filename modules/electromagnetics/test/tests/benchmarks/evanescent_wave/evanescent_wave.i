@@ -25,7 +25,7 @@
   []
   [curr_real]
     type = ParsedVectorFunction
-    value_y = 1.0
+    expression_y = 1.0
   []
   [curr_imag] # defaults to '0.0 0.0 0.0'
     type = ParsedVectorFunction

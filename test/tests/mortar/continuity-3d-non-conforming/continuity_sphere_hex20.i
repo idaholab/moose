@@ -68,15 +68,15 @@
 [Functions]
   [forcing_function]
     type = ParsedFunction
-    expression = 'x^2 + y^2 + z^2 - 6'
+    expression= 'x^2 + y^2 + z^2 - 6'
   []
   [exact_soln_primal]
     type = ParsedFunction
-    expression = 'x^2 + y^2 + z^2'
+    expression= 'x^2 + y^2 + z^2'
   []
   [exact_soln_lambda]
     type = ParsedFunction
-    expression = '4'
+    expression= '4'
   []
 []
 

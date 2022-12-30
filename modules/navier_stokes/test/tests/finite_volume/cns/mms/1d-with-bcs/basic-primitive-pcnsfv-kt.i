@@ -218,7 +218,7 @@
 []
 [exact_superficial_velocity]
   type = ParsedVectorFunction
-  value_x = '0.9*cos(1.1*x)/cos(x)'
+  expression_x = '0.9*cos(1.1*x)/cos(x)'
 []
 [eps]
   type = ParsedFunction

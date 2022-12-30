@@ -46,7 +46,7 @@
 
   [./solution]
     type = ParsedGradFunction
-    value = x+y+z
+    expression = x+y+z
     grad_x = 1
     grad_y = 1
     grad_z = 1

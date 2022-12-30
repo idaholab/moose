@@ -287,8 +287,8 @@ friction_coeff=10
 [Functions]
   [ud_in]
     type = ParsedVectorFunction
-    value_x = '0'
-    value_y = '${u_in}'
+    expression_x = '0'
+    expression_y = '${u_in}'
   []
   [eps]
     type = ParsedFunction

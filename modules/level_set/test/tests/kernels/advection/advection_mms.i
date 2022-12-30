@@ -60,8 +60,8 @@
   [../]
   [./velocity_func]
     type = ParsedVectorFunction
-    value_x = '2'
-    value_y = '2'
+    expression_x = '2'
+    expression_y = '2'
   [../]
 []
 

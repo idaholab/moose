@@ -35,7 +35,7 @@
 
   [./solution]
     type = ParsedGradFunction
-    value = x*x+y*y
+    expression = x*x+y*y
     grad_x = 2*x
     grad_y = 2*y
   [../]

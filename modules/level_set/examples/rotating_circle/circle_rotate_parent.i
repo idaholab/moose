@@ -39,8 +39,8 @@
   [../]
   [./velocity_func]
     type = ParsedVectorFunction
-    value_x = '4*y'
-    value_y = '-4*x'
+    expression_x = '4*y'
+    expression_y = '-4*x'
   [../]
 []
 

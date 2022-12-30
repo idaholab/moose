@@ -2,6 +2,7 @@ a=1.1
 diff=1.1
 
 [Mesh]
+  coord_type = 'RZ'
   [./gen_mesh]
     type = GeneratedMeshGenerator
     dim = 2
@@ -12,10 +13,6 @@ diff=1.1
     nx = 2
     ny = 2
   [../]
-[]
-
-[Problem]
-  coord_type = 'RZ'
 []
 
 [Variables]

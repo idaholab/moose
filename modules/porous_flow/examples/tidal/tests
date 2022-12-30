@@ -5,7 +5,7 @@
     csvdiff = 'earth_tide_fullsat_1step.csv'
     threading = '!pthreads'
     abs_zero = 1E-8
-    cli_args = 'Functions/earth_tide_x/value="-0.5E-8*x" Functions/earth_tide_y/value="-0.5E-8*y" Functions/earth_tide_z/value="-1E-8*z" Executioner/dt=1 Executioner/end_time=1 Outputs/file_base=earth_tide_fullsat_1step'
+    cli_args = 'Functions/earth_tide_x/expression="-0.5E-8*x" Functions/earth_tide_y/expression="-0.5E-8*y" Functions/earth_tide_z/expression="-1E-8*z" Executioner/dt=1 Executioner/end_time=1 Outputs/file_base=earth_tide_fullsat_1step'
     issues = '#13867'
     design = 'tidal.md'
     requirement = 'PorousFlow shall be able to simulate the porepressure response to earth tides'

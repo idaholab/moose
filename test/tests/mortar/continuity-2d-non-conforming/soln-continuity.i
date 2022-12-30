@@ -63,11 +63,11 @@
 [Functions]
   [./forcing_function]
     type = ParsedFunction
-    expression = '-4 + x^2 + y^2'
+    expression= '-4 + x^2 + y^2'
   [../]
   [./exact_soln]
     type = ParsedFunction
-    expression = 'x^2 + y^2'
+    expression= 'x^2 + y^2'
   [../]
 []
 

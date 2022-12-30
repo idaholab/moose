@@ -20,8 +20,8 @@ MooseParsedGradFunction::validParams()
   params += MooseParsedFunctionBase::validParams();
   params.addDeprecatedParam<std::string>(
       "value", "User defined function.", "value is deprecated, use expression instead");
-  // TODO Make required once deprecation is handled, see #19119
-  params.addParam<std::string>("expression", "0", "User defined function.");
+  // TODO Make required once deprecation is handled + add 0 default, see #19119
+  params.addParam<std::string>("expression", "User defined function.");
   params.addParam<std::string>("grad_x", "0", "Partial derivative with respect to x.");
   params.addParam<std::string>("grad_y", "0", "Partial derivative with respect to y.");
   params.addParam<std::string>("grad_z", "0", "Partial derivative with respect to z.");

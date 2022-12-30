@@ -26,11 +26,11 @@
 [Functions]
   [./exact_sln]
     type = ParsedFunction
-    expression = x*x+y*y
+    expression= x*x+y*y
   [../]
   [./ffn]
     type = ParsedFunction
-    expression = -4
+    expression= -4
   [../]
 []
 

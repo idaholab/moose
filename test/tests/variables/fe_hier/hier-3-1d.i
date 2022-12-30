@@ -24,7 +24,7 @@
 
   [./solution]
     type = ParsedGradFunction
-    value = x*x*x
+    expression = x*x*x
     grad_x = 3*x*x
   [../]
 []

@@ -156,15 +156,15 @@
 [Functions]
   [forcing_function]
     type = ParsedFunction
-    expression = 'sin(x*pi)*sin(y*pi)*sin(z*pi) + 3*pi^2*sin(x*pi)*sin(y*pi)*sin(z*pi)'
+    expression= 'sin(x*pi)*sin(y*pi)*sin(z*pi) + 3*pi^2*sin(x*pi)*sin(y*pi)*sin(z*pi)'
   []
   [exact_soln_primal]
     type = ParsedFunction
-    expression = 'sin(x*pi)*sin(y*pi)*sin(z*pi)'
+    expression= 'sin(x*pi)*sin(y*pi)*sin(z*pi)'
   []
   [exact_soln_lambda]
     type = ParsedFunction
-    expression = 'pi*sin(pi*y)*sin(pi*z)*cos(pi*x)'
+    expression= 'pi*sin(pi*y)*sin(pi*z)*cos(pi*x)'
   []
 []
 

@@ -269,7 +269,7 @@ user_limiter='upwind'
 [Functions]
   [ud_in]
     type = ParsedVectorFunction
-    value_x = '${u_in}'
+    expression_x = '${u_in}'
   []
   [eps]
     type = ParsedFunction

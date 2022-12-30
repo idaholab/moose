@@ -1,6 +1,7 @@
 a = 1.1
 
 [Mesh]
+  coord_type = 'RZ'
   [gen_mesh]
     type = GeneratedMeshGenerator
     dim = 2
@@ -11,10 +12,6 @@ a = 1.1
     nx = 2
     ny = 2
   []
-[]
-
-[Problem]
-  coord_type = 'RZ'
 []
 
 [Variables]
@@ -68,7 +65,7 @@ a = 1.1
     type = ParsedFunction
     expression = '-a*sin(x)*sin(y) + sin(x)*cos(y) + (x*a*cos(x)*cos(y) + a*sin(x)*cos(y))/x'
     symbol_names = 'a'
-    symbol_expressions = '${a}'
+    symbol_values = '${a}'
   []
 []
 
