@@ -24,7 +24,7 @@ KKSPhaseConcentrationMaterial::validParams()
   params.addRequiredParam<MaterialPropertyName>("h_name", "Switching function h(eta).");
   params.addRequiredParam<std::vector<MaterialPropertyName>>(
       "ci_names",
-      "Phase concentrations. The order must match Fa, Fb, and global_cs, for example, c1, c2, b1, "
+      "Phase concentrations, the order must match Fa, Fb, and global_cs, for example, c1, c2, b1, "
       "b2, etc.");
   params.addRequiredParam<std::vector<Real>>("ci_IC",
                                              "Initial values of ci in the same order as ci_names.");
@@ -34,6 +34,11 @@ KKSPhaseConcentrationMaterial::validParams()
       "nested_iterations",
       "The output number of nested Newton iterations at each quadrature point.");
   params.addCoupledVar("args", "The coupled variables of Fa and Fb.");
+  params.addParam<bool>(
+      "damped_Newton", "false", "Whether or not to use the damped Newton's method.");
+  params.addParam<Real>("damping_factor", 1, "The damping factor used in the Newton's method.");
+  params.addParam<std::vector<Real>>("lower_bounds", "The lower bounds of ci.");
+  params.addParam<std::vector<Real>>("upper_bounds", "The upper bounds of ci.");
   params += NestedSolve::validParams();
   return params;
 }
@@ -66,6 +71,10 @@ KKSPhaseConcentrationMaterial::KKSPhaseConcentrationMaterial(const InputParamete
     _iter(declareProperty<Real>("nested_iterations")),
     _abs_tol(getParam<Real>("absolute_tolerance")),
     _rel_tol(getParam<Real>("relative_tolerance")),
+    _damped_newton(getParam<bool>("damped_Newton")),
+    _damping_factor(getParam<Real>("damping_factor")),
+    _ci_lower_bounds(getParam<std::vector<Real>>("lower_bounds")),
+    _ci_upper_bounds(getParam<std::vector<Real>>("upper_bounds")),
     _nested_solve(NestedSolve(parameters))
 
 {
@@ -168,6 +177,11 @@ KKSPhaseConcentrationMaterial::initialSetup()
 void
 KKSPhaseConcentrationMaterial::computeQpProperties()
 {
+  // std::cout << (*_prop_ci[0])[_qp] << std::endl;
+  // std::cout << (*_prop_ci[1])[_qp] << std::endl;
+  // std::cout << (*_prop_ci[2])[_qp] << std::endl;
+  // std::cout << (*_prop_ci[3])[_qp] << std::endl;
+
   // parameters for nested Newton iteration
   NestedSolve::Value<> solution(_num_c * 2);
 
@@ -179,8 +193,7 @@ KKSPhaseConcentrationMaterial::computeQpProperties()
 
   auto compute = [&](const NestedSolve::Value<> & guess,
                      NestedSolve::Value<> & residual,
-                     NestedSolve::Jacobian<> & jacobian)
-  {
+                     NestedSolve::Jacobian<> & jacobian) {
     for (unsigned int m = 0; m < _num_c * 2; ++m)
       (*_prop_ci[m])[_qp] = guess(m);
 
@@ -213,7 +226,16 @@ KKSPhaseConcentrationMaterial::computeQpProperties()
     }
   };
 
-  _nested_solve.nonlinear(solution, compute);
+  // _nested_solve.nonlinear(solution, compute);
+  // _iter[_qp] = _nested_solve.getIterations();
+
+  if (!_damped_newton)
+    _nested_solve.nonlinear(solution, compute);
+  else
+    _nested_solve.nonlinear(
+        solution, compute, _damping_factor, _ci_lower_bounds, _ci_upper_bounds, 2, _num_c);
+  // std::cout << "marker" << std::endl;
+
   _iter[_qp] = _nested_solve.getIterations();
 
   if (_nested_solve.getState() == NestedSolve::State::NOT_CONVERGED)

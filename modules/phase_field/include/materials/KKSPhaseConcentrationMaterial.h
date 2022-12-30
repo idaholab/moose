@@ -79,6 +79,11 @@ protected:
   const Real _abs_tol;
   const Real _rel_tol;
 
+  const bool _damped_newton;
+  const Real _damping_factor;
+  const std::vector<Real> _ci_lower_bounds;
+  const std::vector<Real> _ci_upper_bounds;
+
   /// Instantiation of the NestedSolve class
   NestedSolve _nested_solve;
 

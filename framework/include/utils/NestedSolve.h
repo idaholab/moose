@@ -54,6 +54,18 @@ public:
   template <typename V, typename T>
   void nonlinear(V & guess, T compute);
 
+  template <typename V, typename B>
+  bool condition(
+      V & guess, B ci_lower_bounds, B ci_upper_bounds, unsigned int _num_eta, unsigned int _num_c);
+  template <typename V, typename T, typename B>
+  void nonlinear(V & guess,
+                 T compute,
+                 Real _damping_factor,
+                 B ci_lower_bounds,
+                 B ci_upper_bounds,
+                 unsigned int _num_eta,
+                 unsigned int _num_c);
+
   template <typename R, typename J>
   void nonlinear(DynamicVector & guess, R computeResidual, J computeJacobian);
   template <typename R, typename J>
@@ -319,8 +331,7 @@ NestedSolve::nonlinear(V & guess, T compute)
   auto r_square = r0_square;
 
   // lambda to check for convergence and set the state accordingly
-  auto is_converged = [&]()
-  {
+  auto is_converged = [&]() {
     if (r_square < _absolute_tolerance_square)
     {
       _state = State::CONVERGED_ABS;
@@ -345,6 +356,151 @@ NestedSolve::nonlinear(V & guess, T compute)
     linear(jacobian, delta, residual);
     guess -= delta;
     _n_iterations++;
+
+    // compute residual and jacobian for the next iteration
+    compute(guess, residual, jacobian);
+    r_square = normSquare(residual);
+  }
+
+  // if we exceed the max iterations, we could still be converged
+  if (!is_converged())
+    _state = State::NOT_CONVERGED;
+}
+
+template <typename V, typename B>
+bool
+NestedSolve::condition(
+    V & guess, B ci_lower_bounds, B ci_upper_bounds, unsigned int _num_eta, unsigned int _num_c)
+{
+  // check independent ci
+  for (unsigned int i = 0; i < _num_eta * _num_c; ++i)
+  {
+    if (guess[i] < ci_lower_bounds[i] || guess[i] == ci_lower_bounds[i] ||
+        guess[i] > ci_upper_bounds[i] || guess[i] == ci_upper_bounds[i])
+    {
+      // std::cout << "indenpendent out of bound" << std::endl;
+
+      return false;
+    }
+  }
+
+  // check dependent ci
+  for (unsigned int m = 0; m < _num_eta; ++m)
+  {
+    Real _sum_independent = 0;
+    for (unsigned int n = 0; n < _num_c; ++n)
+      _sum_independent += guess[n * _num_eta + m];
+
+    if (_sum_independent > 1 || _sum_independent == 1 || _sum_independent < 0 ||
+        _sum_independent == 0)
+    {
+      // std::cout << "dependent out of bound" << std::endl;
+      return false;
+    }
+  }
+  return true;
+}
+
+template <typename V, typename T, typename B>
+void
+NestedSolve::nonlinear(V & guess,
+                       T compute,
+                       Real _damping_factor,
+                       B ci_lower_bounds,
+                       B ci_upper_bounds,
+                       unsigned int _num_eta,
+                       unsigned int _num_c)
+{
+  V delta;
+  V residual;
+  V guess_prev;
+  CorrespondingJacobian<V> jacobian;
+  sizeItems(guess, residual, jacobian);
+
+  _n_iterations = 0;
+  compute(guess, residual, jacobian);
+
+  // compute first residual norm for relative convergence checks
+  auto r0_square = normSquare(residual);
+  if (r0_square == 0)
+  {
+    _state = State::EXACT_GUESS;
+    return;
+  }
+  auto r_square = r0_square;
+
+  // lambda to check for convergence and set the state accordingly
+  auto is_converged = [&]() {
+    if (r_square < _absolute_tolerance_square)
+    {
+      _state = State::CONVERGED_ABS;
+      return true;
+    }
+    if (r_square / r0_square < _relative_tolerance_square)
+    {
+      _state = State::CONVERGED_REL;
+      return true;
+    }
+    return false;
+  };
+
+  // std::cout << "beginning" << std::endl;
+  // std::cout << "guess " << guess[0] << std::endl;
+  // std::cout << "guess " << guess[1] << std::endl;
+  // std::cout << "guess " << guess[2] << std::endl;
+  // std::cout << "guess " << guess[3] << '\n' << std::endl;
+
+  // perform non-linear iterations
+  while (_n_iterations < _max_iterations)
+  {
+    // check convergence
+    if (_n_iterations >= _min_iterations && is_converged())
+      return;
+
+    // solve and apply next increment
+    linear(jacobian, delta, residual);
+
+    guess_prev = guess;
+    guess = guess_prev - delta;
+
+    // if (!condition(guess, ci_lower_bounds, ci_upper_bounds, _num_eta, _num_c))
+    // {
+    //   Real _alpha = 1;
+    //
+    //   while (!condition(guess, ci_lower_bounds, ci_upper_bounds, _num_eta, _num_c))
+    //   {
+    //     _alpha = _alpha * _damping_factor;
+    //     guess = guess_prev - _alpha * delta;
+    //
+    //     // std::cout << "update " << _alpha * delta[0] << std::endl;
+    //     // std::cout << "update " << _alpha * delta[1] << std::endl;
+    //     // std::cout << "update " << _alpha * delta[2] << std::endl;
+    //     // std::cout << "update " << _alpha * delta[3] << '\n' << std::endl;
+    //     //
+    //     std::cout << "guess " << guess[0] << std::endl;
+    //     std::cout << "guess " << guess[1] << std::endl;
+    //     std::cout << "guess " << guess[2] << std::endl;
+    //     std::cout << "guess " << guess[3] << '\n' << std::endl;
+    //   }
+    // }
+
+    if (!condition(guess, ci_lower_bounds, ci_upper_bounds, _num_eta, _num_c))
+    {
+      Real _alpha = 1;
+
+      _alpha = _alpha * _damping_factor;
+      guess = guess_prev - _alpha * delta;
+
+      // std::cout << "guess " << guess[0] << std::endl;
+      // std::cout << "guess " << guess[1] << std::endl;
+      // std::cout << "guess " << guess[2] << std::endl;
+      // std::cout << "guess " << guess[3] << '\n' << std::endl;
+    }
+
+    _n_iterations++;
+    // std::cout << "marker ===================================="
+    //           << "ITERATION IS " << _n_iterations << '\n'
+    //           << std::endl;
 
     // compute residual and jacobian for the next iteration
     compute(guess, residual, jacobian);
