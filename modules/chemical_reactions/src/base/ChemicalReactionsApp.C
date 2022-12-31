@@ -42,9 +42,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("AddSecondarySpeciesAction", "ReactionNetwork/SolidKineticReactions");
   registerSyntax("AddCoupledEqSpeciesAction", "ReactionNetwork/AqueousEquilibriumReactions");
   registerSyntax("AddCoupledSolidKinSpeciesAction", "ReactionNetwork/SolidKineticReactions");
-#ifdef THERMOCHIMICA_ENABLED
   registerSyntax("ChemicalCompositionAction", "ChemicalComposition");
-#endif
 }
 
 void
