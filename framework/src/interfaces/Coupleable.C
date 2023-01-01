@@ -199,7 +199,7 @@ Coupleable::checkVar(const std::string & var_name, unsigned int comp, unsigned i
 
   auto vars_vector_it = _coupled_vars.find(var_name);
   if (vars_vector_it == _coupled_vars.end())
-    mooseError("Trying to get a coupled var ", var_name, " that doesn't exist");
+    mooseError(_c_name, ": Trying to get a coupled var ", var_name, " that doesn't exist");
 
   const auto & vars_vector = vars_vector_it->second;
 
@@ -259,7 +259,7 @@ Coupleable::getVectorVar(const std::string & var_name, unsigned int comp)
       const_cast<VectorMooseVariable *>(getVarHelper<VectorMooseVariable>(var_name, comp));
 
   if (_c_nodal && var && var->feType().family != LAGRANGE_VEC)
-    mooseError("Only LAGRANGE_VEC vector variables are defined at nodes");
+    mooseError(_c_name, ": Only LAGRANGE_VEC vector variables are defined at nodes");
 
   return var;
 }
@@ -282,7 +282,7 @@ Coupleable::getVectorVar(const std::string & var_name, unsigned int comp) const
   const auto * const var = getVarHelper<VectorMooseVariable>(var_name, comp);
 
   if (_c_nodal && var && var->feType().family != LAGRANGE_VEC)
-    mooseError("Only LAGRANGE_VEC vector variables are defined at nodes");
+    mooseError(_c_name, ": Only LAGRANGE_VEC vector variables are defined at nodes");
 
   return var;
 }
@@ -534,7 +534,7 @@ Coupleable::coupledValueLower(const std::string & var_name, const unsigned int c
   checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
 
   if (_coupleable_neighbor)
-    mooseError("coupledValueLower cannot be called in a coupleable neighbor object");
+    mooseError(_c_name, ":coupledValueLower cannot be called in a coupleable neighbor object");
 
   if (_c_nodal)
     return (_c_is_implicit) ? var->dofValues() : var->dofValuesOld();
@@ -2145,11 +2145,12 @@ Coupleable::coupledName(const std::string & var_name, unsigned int comp) const
 {
   if (getVar(var_name, comp))
     return getVar(var_name, comp)->name();
-  // For constants, we ll just return the constant as the name
+  // For constants, we'll just return the constant as the name
   else if (MooseUtils::parsesToReal(var_name))
     return var_name;
   else
-    mooseError("Variable '", var_name, "' does not exist, yet its coupled name is requested");
+    mooseError(
+        _c_name, ": Variable '", var_name, "' does not exist, yet its coupled name is requested");
 }
 
 std::vector<VariableName>
