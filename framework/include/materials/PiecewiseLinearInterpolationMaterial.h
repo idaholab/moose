@@ -42,7 +42,7 @@ protected:
   /// Material property to be calculated
   MaterialProperty<Real> & _property;
   /// First derivative of the material property wrt the coupled variable
-  MaterialProperty<Real> & _dproperty;
+  MaterialProperty<Real> * const _dproperty;
 
   /// LinearInterpolation object
   std::unique_ptr<LinearInterpolation> _linear_interp;
