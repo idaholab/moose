@@ -21,9 +21,7 @@ A few of the most-used Transfers:
 
 Most important: by having MOOSE move data and fill fields... apps don't need to know or care where the data came from or how it got there!
 
-!alert note
-'GeneralField' transfers are a more efficient and more general implementation of their corresponding field transfers. They should be preferred over
-their non-'GeneralField' counterparts.
+'GeneralField' transfers are a more efficient and more general implementation of their corresponding field transfers. They should be preferred over their non-'GeneralField' counterparts.
 
 !---
 

@@ -3,7 +3,7 @@
   design = 'transfers/MultiAppGeneralFieldUserObjectTransfer.md'
 
   [2d_overlay]
-    requirement = "The system shall be able to transfer variables by evaluating shape functions in the origin problem"
+    requirement = "The system shall be able to transfer user-defined spatial data on the origin problem"
     [base_test]
       type = 'Exodiff'
       input = 'main.i'
@@ -19,7 +19,7 @@
       cli_args = "Outputs/file_base=projection_receive Mesh/second_order=true
                   AuxVariables/from_sub/order=SECOND AuxVariables/from_sub_elem/order=SECOND
                   MultiApps/sub/cli_args='Mesh/second_order=true;AuxVariables/from_main/order=SECOND;AuxVariables/from_main_elem/order=FIRST'"
-      detail = "for variables of arbitrary types,"
+      detail = "for variables of arbitrary types with higher order on the receiving app,"
     []
   []
 

@@ -11,6 +11,7 @@
 #include "MultiAppCopyTransfer.h"
 #include "FEProblemBase.h"
 #include "MultiApp.h"
+#include "SystemBase.h"
 
 #include "libmesh/id_types.h"
 #include "libmesh/string_to_enum.h"

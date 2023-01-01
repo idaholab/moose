@@ -19,7 +19,7 @@
       cli_args = "Outputs/file_base=projection_receive Mesh/second_order=true
                   AuxVariables/from_sub/order=SECOND AuxVariables/from_sub_elem/order=SECOND
                   MultiApps/sub/cli_args='Mesh/second_order=true;AuxVariables/from_main/order=SECOND;AuxVariables/from_main_elem/order=FIRST'"
-      detail = "for variables of arbitrary types,"
+      detail = "for variables of arbitrary types with higher order on the receiving app,"
     []
 
     [projection_needed_sending]
@@ -30,7 +30,7 @@
       cli_args = "Outputs/file_base=projection_send Mesh/second_order=true
                   AuxVariables/to_sub/order=SECOND AuxVariables/to_sub_elem/order=SECOND
                   MultiApps/sub/cli_args='Mesh/second_order=true;AuxVariables/to_main/order=FIRST;AuxVariables/to_main_elem/order=SECOND'"
-      detail = "for variables of arbitrary types,"
+      detail = "for variables of arbitrary types with higher order on the sending app,"
     []
 
     [multiple_variables_each_transfer]

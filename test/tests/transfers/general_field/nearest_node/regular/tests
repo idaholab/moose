@@ -3,7 +3,7 @@
   design = 'transfers/MultiAppGeneralFieldNearestNodeTransfer.md'
 
   [2d_overlay]
-    requirement = "The system shall be able to transfer variables by evaluating shape functions in the origin problem"
+    requirement = "The system shall be able to transfer variables using the value from the nearest node in the origin mesh"
     [same_var_type]
       type = 'Exodiff'
       input = 'main.i'
@@ -20,7 +20,7 @@
                   GlobalParams/bbox_factor=1.5
                   AuxVariables/from_sub/order=SECOND AuxVariables/from_sub_elem/order=SECOND
                   MultiApps/sub/cli_args='Mesh/second_order=true;AuxVariables/from_main/order=SECOND;AuxVariables/from_main_elem/order=FIRST'"
-      detail = "for variables of arbitrary types,"
+      detail = "for variables of arbitrary types with higher order on the receiving app,"
 
       # The value conflict search shows there are indetermination in which values get selected
       # This is more an issue with using nearest node to build a higher order variable, which
@@ -36,7 +36,7 @@
       cli_args = "Outputs/file_base=projection_send Mesh/second_order=true
                   AuxVariables/to_sub/order=SECOND AuxVariables/to_sub_elem/order=SECOND
                   MultiApps/sub/cli_args='Mesh/second_order=true;AuxVariables/to_main/order=FIRST;AuxVariables/to_main_elem/order=SECOND'"
-      detail = "for variables of arbitrary types,"
+      detail = "for nodal variables of arbitrary types with higher order on the sending app,"
       # NOTE: The results on the subapps look very coarse because this is a nearest node transfer
       # Even though the source variable is continuous and varies over the target mesh,
       # only the (nearest) node values matter. Hence the checkerboards.
@@ -49,18 +49,18 @@
       cli_args = "Outputs/file_base=array"
       detail = "for array variables"
     []
-  []
 
-  [fixed_bounding_boxes]
-    type = Exodiff
-    input = main.i
-    exodiff = 'main_out.e main_out_sub0_out.e main_out_sub1_out.e main_out_sub2_out.e'
-    # Offset the subapps off the plane and override the bounding box to keep them inside the scope
-    # The offsets have to be the same to keep the same distances relatively, to keep the same gold files
-    cli_args = "MultiApps/sub/positions='0.000001 0 0.1 0.4111 0.4112 -0.1 0.6999 0.099 0.1'
-                Transfers/from_sub/fixed_bounding_box_size='0.2 0.2 1' Transfers/from_sub_elem/fixed_bounding_box_size='0.2 0.2 1'
-                Transfers/to_sub/fixed_bounding_box_size='1 1 0.3' Transfers/to_sub_elem/fixed_bounding_box_size='1 1 0.3'"
-    detail = "while allowing for an user to set the size of the application bounding box directly"
+    [fixed_bounding_boxes]
+      type = Exodiff
+      input = main.i
+      exodiff = 'main_out.e main_out_sub0_out.e main_out_sub1_out.e main_out_sub2_out.e'
+      # Offset the subapps off the plane and override the bounding box to keep them inside the scope
+      # The offsets have to be the same to keep the same distances relatively, to keep the same gold files
+      cli_args = "MultiApps/sub/positions='0.000001 0 0.1 0.4111 0.4112 -0.1 0.6999 0.099 0.1'
+                  Transfers/from_sub/fixed_bounding_box_size='0.2 0.2 1' Transfers/from_sub_elem/fixed_bounding_box_size='0.2 0.2 1'
+                  Transfers/to_sub/fixed_bounding_box_size='1 1 0.3' Transfers/to_sub_elem/fixed_bounding_box_size='1 1 0.3'"
+      detail = "while allowing for an user to set the size of the application bounding box directly"
+    []
   []
 
   [overlap]

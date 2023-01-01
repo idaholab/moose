@@ -3,23 +3,25 @@
   design = 'transfers/MultiAppGeneralFieldNearestNodeTransfer.md'
 
   [3d_boxes]
-    requirement = "The system shall be able to transfer variables using a nearest node algorithm, limiting the transfer to boundaries,"
+    requirement = "The system shall be able to transfer variables using the value from the nearest node in the origin mesh, limiting the transfer to boundaries,"
 
     [source_boundaries]
       type = 'Exodiff'
       input = 'main.i'
       exodiff = 'source.e source_sub0_out.e source_sub1_out.e source_sub2_out.e'
-      detail = "limiting the transfer to certain source boundaries, for variables of the same type,"
+      detail = "such as certain source boundaries, for variables of the same type,"
       cli_args = "Outputs/file_base=source
                   Transfers/from_sub/from_boundaries='front bottom left' Transfers/from_sub_elem/from_boundaries='front bottom left'
                   Transfers/to_sub/from_boundaries='front bottom left' Transfers/to_sub_elem/from_boundaries='front bottom left'"
+      # Nearest node is vulnerable to floating point decisions on which node is the nearest
+      max_parallel = 14
     []
 
     [target_boundaries]
       type = 'Exodiff'
       input = 'main.i'
       exodiff = 'target.e target_sub0_out.e target_sub1_out.e target_sub2_out.e'
-      detail = "limiting the transfer to certain target boundaries, for variables of the same type,"
+      detail = "such as certain target boundaries, for variables of the same type,"
       cli_args = "Outputs/file_base=target
                   Transfers/from_sub/to_boundaries='front bottom left' Transfers/from_sub_elem/to_boundaries='front bottom left'
                   Transfers/to_sub/to_boundaries='front bottom left' Transfers/to_sub_elem/to_boundaries='front bottom left'"
@@ -78,6 +80,8 @@
                   Transfers/from_sub/from_blocks='0' Transfers/from_sub_elem/from_blocks='0'
                   Transfers/to_sub/from_blocks='1' Transfers/to_sub_elem/from_blocks='1'"
       detail = 'limiting the transfer to certain blocks as well'
+      # Nearest node is vulnerable to floating point decisions on which node is the nearest
+      max_parallel = 14
     []
   []
 []

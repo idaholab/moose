@@ -3,7 +3,7 @@
   design = 'MultiAppGeneralFieldShapeEvaluationTransfer.md'
 
   [transfer]
-    requirement = "The system shall support the transfer of data using the finite element solution function:"
+    requirement = "The system shall support the transfer of data evaluating the finite element solution function:"
 
     [tosub]
       type = 'Exodiff'
@@ -55,14 +55,14 @@
   []
 
   [errors]
-    requirement = "The system shall error if performing a transfer of data using the finite element solution if:"
+    requirement = "The system shall error if performing a transfer of data evaluating the finite element solution if:"
 
     [missed_point]
       type = 'RunException'
       input = 'missing_parent.i'
       expect_err = 'could not be located'
 
-      detail = "the evaluation point does not exist and"
+      detail = "the evaluation point does not exist"
     []
   []
 []

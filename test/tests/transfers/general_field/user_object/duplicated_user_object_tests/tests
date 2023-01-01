@@ -3,7 +3,7 @@
   design = "MultiAppGeneralFieldUserObjectTransfer.md"
 
   [transfer]
-    requirement = "The system shall support an interface for transferring user-defined spatial data"
+    requirement = "The system shall provide an interface for transferring user-defined spatial data"
 
     [from_sub]
       type = 'Exodiff'
@@ -43,8 +43,8 @@
     input = 'restricted_node_parent.i'
     exodiff = 'restricted_node_parent_out.e restricted_node_parent_out_ch00.e restricted_node_parent_out_ch10.e'
 
-    requirement = "The system shall transfer user-defined spatial data into block and boundary restricted nodal variables."
-    design = "MultiAppUserObjectTransfer.md"
+    requirement = "The system shall be able to transfer user-defined spatial data into block and boundary restricted nodal variables."
+    design = "MultiAppGeneralFieldUserObjectTransfer.md"
     issues = '#16241'
   []
 
@@ -53,8 +53,8 @@
     input = 'restricted_elem_parent.i'
     exodiff = 'restricted_elem_parent_out.e restricted_elem_parent_out_ch00.e restricted_elem_parent_out_ch10.e'
 
-    requirement = "The system shall transfer user-defined spatial data into block and boundary restricted elemental variables."
-    design = "MultiAppUserObjectTransfer.md"
+    requirement = "The system shall be able to transfer user-defined spatial data into block and boundary restricted elemental variables."
+    design = "MultiAppGeneralFieldUserObjectTransfer.md"
     issues = '#16241'
   []
 
@@ -62,7 +62,7 @@
     type = 'Exodiff'
     input = 'two_pipe_parent.i'
     exodiff = 'two_pipe_parent_out.e'
-    requirement = "MultiAppUserObjectTransfer shall allow skipping the bounding box test."
+    requirement = "The system shall be able to allow skipping the bounding box test."
     issues = "#13701"
     recover = false
   []
@@ -75,6 +75,6 @@
     prereq = transfer/3d_1d
 
     requirement = "The system shall error if a parent node/element is "
-                  "not contained within any sub application domains when this condition is explicitly requested by the user."
+                  "not contained within any sub application domains/meshes when this condition is explicitly requested by the user."
   []
 []

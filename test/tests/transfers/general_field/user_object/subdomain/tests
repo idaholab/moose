@@ -3,7 +3,7 @@
   design = 'transfers/MultiAppGeneralFieldUserObjectTransfer.md'
 
   [2d_overlay]
-    requirement = "The system shall be able to transfer variables using a shape function evaluation in the origin mesh, limiting the transfer to a few subdomains,"
+    requirement = "The system shall be able to transfer user-defined spatial data on the origin mesh, limiting the transfer to a few subdomains,"
     [same_var_type]
       type = 'Exodiff'
       input = 'main.i'

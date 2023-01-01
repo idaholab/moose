@@ -15,6 +15,7 @@
 #include "MooseMesh.h"
 #include "MooseTypes.h"
 #include "MooseVariableFE.h"
+#include "UserObject.h"
 
 #include "libmesh/system.h"
 #include "libmesh/mesh_function.h"
