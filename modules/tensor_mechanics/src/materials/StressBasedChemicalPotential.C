@@ -32,7 +32,7 @@ StressBasedChemicalPotential::StressBasedChemicalPotential(const InputParameters
     _stress_old(getMaterialPropertyOld<RankTwoTensor>("stress_name")),
     _direction_tensor(getMaterialProperty<RealTensorValue>("direction_tensor_name")),
     _prefactor(getMaterialProperty<Real>("prefactor_name")),
-    _has_coupled_c(isCoupled("c"))
+    _has_coupled_c(isCoupled("c") && !isCoupledConstant("c"))
 {
   if (_has_coupled_c)
   {

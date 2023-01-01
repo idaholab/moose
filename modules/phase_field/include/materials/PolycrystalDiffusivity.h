@@ -34,7 +34,7 @@ protected:
   ///Mateiral property and its derivatives declarations
   const MaterialPropertyName _diff_name;
   MaterialProperty<Real> & _diff;
-  MaterialProperty<Real> & _dDdc;
+  MaterialProperty<Real> * _dDdc;
   std::vector<MaterialProperty<Real> *> _dDdv;
 
   ///Switching function material and its derivatives

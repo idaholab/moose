@@ -34,7 +34,7 @@ protected:
 
   std::string _diffusivity_name;
   MaterialProperty<RealTensorValue> & _D;
-  MaterialProperty<RealTensorValue> & _dDdc;
+  MaterialProperty<RealTensorValue> * _dDdc;
 
   Real _D0;
   Real _Em;

@@ -34,5 +34,5 @@ protected:
   VariableName _c_name;
 
   /// Derivative of elasticity tensor with respect to concentration.
-  MaterialProperty<RankFourTensor> & _delasticity_tensor_dc;
+  MaterialProperty<RankFourTensor> * _delasticity_tensor_dc;
 };
