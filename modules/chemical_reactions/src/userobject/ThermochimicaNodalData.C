@@ -8,20 +8,22 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ThermochimicaNodalData.h"
+#include "ThermochimicaUtils.h"
 #include "libmesh/int_range.h"
 
 #ifdef THERMOCHIMICA_ENABLED
 #include "Thermochimica-cxx.h"
 #include "checkUnits.h"
+#endif
 
 registerMooseObject("ChemicalReactionsApp", ThermochimicaNodalData);
-#endif
 
 InputParameters
 ThermochimicaNodalData::validParams()
 {
   InputParameters params = NodalUserObject::validParams();
-  params.addClassDescription("Provides access to Thermochimica-calculated data at nodes.");
+  ThermochimicaUtils::addClassDescription(
+      params, "Provides access to Thermochimica-calculated data at nodes.");
 
   params.addRequiredCoupledVar("elements", "Amounts of elements");
   params.addCoupledVar("element_potentials", "Chemical potentials of elements");
@@ -50,9 +52,7 @@ ThermochimicaNodalData::ThermochimicaNodalData(const InputParameters & parameter
     _sp_species_name(_n_species),
     _output_element_potential(isCoupled("element_potentials"))
 {
-#ifndef THERMOCHIMICA_ENABLED
-  mooseError("Thermochimica disabled");
-#endif
+  ThermochimicaUtils::checkLibraryAvailability(*this);
 
   if (n_threads() > 1)
     mooseError("Thermochimica does not support multi-threaded runs.");
