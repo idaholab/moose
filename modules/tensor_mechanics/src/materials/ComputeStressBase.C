@@ -19,6 +19,7 @@ ComputeStressBase::validParams()
                                "Optional parameter that allows the user to define "
                                "multiple mechanics material systems on the same "
                                "block, i.e. for multiple phases");
+  params.suppressParameter<bool>("use_displaced_mesh");
   return params;
 }
 

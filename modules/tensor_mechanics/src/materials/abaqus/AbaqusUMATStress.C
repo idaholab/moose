@@ -44,6 +44,8 @@ AbaqusUMATStress::validParams()
   params.addParam<MooseEnum>("decomposition_method",
                              ComputeFiniteStrain::decompositionType(),
                              "Method to calculate the strain kinematics.");
+  params.unSuppressParameter<bool>("use_displaced_mesh");
+
   return params;
 }
 

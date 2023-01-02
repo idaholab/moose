@@ -294,6 +294,14 @@ public:
   void suppressParameter(const std::string & name);
 
   /**
+   * This method re-enables a suppressed parameter
+   * NOTE: The parameter will no longer be controllable or required
+   * Re-enabling a suppressed parameter can have dire consequences
+   */
+  template <typename T>
+  void unSuppressParameter(const std::string & name);
+
+  /**
    * Changes the parameter to be required.
    * @param name The parameter name
    */
@@ -1441,6 +1449,15 @@ InputParameters::suppressParameter(const std::string & name)
   _params[name]._required = false;
   _params[name]._is_private = true;
   _params[name]._controllable = false;
+}
+
+template <typename T>
+void
+InputParameters::unSuppressParameter(const std::string & name)
+{
+  if (!this->have_parameter<T>(name))
+    mooseError("Unable to un-suppress nonexistent parameter: ", name);
+  _params[name]._is_private = false;
 }
 
 template <typename T>
