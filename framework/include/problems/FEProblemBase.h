@@ -181,6 +181,19 @@ public:
   bool areCoupled(unsigned int ivar, unsigned int jvar, unsigned int nl_sys = 0) const;
 
   /**
+   * Whether or not MOOSE will perform a user object/auxiliary kernel state check
+   */
+  bool hasUOAuxStateCheck() const { return _uo_aux_state_check; }
+
+  /**
+   * Return a flag to indicate whether we are executing user objects and auxliary kernels for state
+   * check
+   * Note: This function can return true only when hasUOAuxStateCheck() returns true, i.e. the check
+   *       has been activated by users through Problem/check_uo_aux_state input parameter.
+   */
+  bool checkingUOAuxState() const { return _checking_uo_aux_state; }
+
+  /**
    * Whether to trust the user coupling matrix even if we want to do things like be paranoid and
    * create a full coupling matrix. See https://github.com/idaholab/moose/issues/16395 for detailed
    * background
@@ -2273,6 +2286,9 @@ protected:
   /// Determines whether a check to verify material dependencies on every subdomain
   const bool _material_dependency_check;
 
+  /// Whether or not checking the state of uo/aux evaluation
+  const bool _uo_aux_state_check;
+
   /// Maximum number of quadrature points used in the problem
   unsigned int _max_qps;
 
@@ -2384,6 +2400,9 @@ private:
 
   /// Flag used to indicate whether we are computing the scaling Residual
   bool _computing_scaling_residual = false;
+
+  /// Flag used to indicate whether we are doing the uo/aux state check in execute
+  bool _checking_uo_aux_state = false;
 };
 
 using FVProblemBase = FEProblemBase;

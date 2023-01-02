@@ -111,6 +111,7 @@
 #include "libmesh/sparse_matrix.h"
 #include "libmesh/string_to_enum.h"
 #include "libmesh/fe_interface.h"
+#include "libmesh/enum_norm_type.h"
 
 #include "metaphysicl/dualnumber.h"
 
@@ -251,6 +252,11 @@ FEProblemBase::validParams()
   params.addParam<std::vector<NonlinearSystemName>>(
       "nl_sys_names", std::vector<NonlinearSystemName>{"nl0"}, "The nonlinear system names");
 
+  params.addParam<bool>("check_uo_aux_state",
+                        false,
+                        "True to turn on a check that no state presents during the evaluation of "
+                        "user objects and aux kernels");
+
   params.addPrivateParam<MooseMesh *>("mesh");
 
   params.declareControllable("solve");
@@ -327,6 +333,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _material_coverage_check(getParam<bool>("material_coverage_check")),
     _fv_bcs_integrity_check(getParam<bool>("fv_bcs_integrity_check")),
     _material_dependency_check(getParam<bool>("material_dependency_check")),
+    _uo_aux_state_check(getParam<bool>("check_uo_aux_state")),
     _max_qps(std::numeric_limits<unsigned int>::max()),
     _max_shape_funcs(std::numeric_limits<unsigned int>::max()),
     _max_scalar_order(INVALID_ORDER),
@@ -3954,6 +3961,68 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
 
   // Return the current flag to None
   setCurrentExecuteOnFlag(EXEC_NONE);
+
+  if (_uo_aux_state_check && !_checking_uo_aux_state)
+  {
+    // we will only check aux variables and postprocessors
+    // checking more reporter data can be added in the future if needed
+    std::unique_ptr<NumericVector<Number>> x = _aux->currentSolution()->clone();
+    DenseVector<Real> pp_values = getReporterData().getAllRealReporterValues();
+
+    // call THIS execute one more time for checking the possible states
+    _checking_uo_aux_state = true;
+    FEProblemBase::execute(exec_type);
+    _checking_uo_aux_state = false;
+
+    const Real check_tol = 1e-8;
+
+    const Real xnorm = x->l2_norm();
+    *x -= *_aux->currentSolution();
+    if (x->l2_norm() > check_tol * xnorm)
+    {
+      const auto & sys = _aux->system();
+      const unsigned int n_vars = sys.n_vars();
+      std::multimap<Real, std::string, std::greater<Real>> ordered_map;
+      for (const auto i : make_range(n_vars))
+      {
+        const Real vnorm = sys.calculate_norm(*x, i, DISCRETE_L2);
+        ordered_map.emplace(vnorm, sys.variable_name(i));
+      }
+
+      std::ostringstream oss;
+      for (const auto & [error_norm, var_name] : ordered_map)
+        oss << "  {" << var_name << ", " << error_norm << "},\n";
+
+      mooseError("Aux kernels, user objects appear to have states for aux variables on ",
+                 exec_type,
+                 ".\nVariable error norms in descending order:\n",
+                 oss.str());
+    }
+
+    const DenseVector<Real> new_pp_values = getReporterData().getAllRealReporterValues();
+    if (pp_values.size() != new_pp_values.size())
+      mooseError("Second execution for uo/aux state check should not change the number of "
+                 "real reporter values");
+
+    const Real ppnorm = pp_values.l2_norm();
+    pp_values -= new_pp_values;
+    if (pp_values.l2_norm() > check_tol * ppnorm)
+    {
+      const auto pp_names = getReporterData().getAllRealReporterFullNames();
+      std::multimap<Real, std::string, std::greater<Real>> ordered_map;
+      for (const auto i : index_range(pp_names))
+        ordered_map.emplace(std::abs(pp_values(i)), pp_names[i]);
+
+      std::ostringstream oss;
+      for (const auto & [error_norm, pp_name] : ordered_map)
+        oss << "  {" << pp_name << ", " << error_norm << "},\n";
+
+      mooseError("Aux kernels, user objects appear to have states for real reporter values on ",
+                 exec_type,
+                 ".\nErrors of real reporter values in descending order:\n",
+                 oss.str());
+    }
+  }
 }
 
 void

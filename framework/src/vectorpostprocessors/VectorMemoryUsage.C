@@ -71,6 +71,11 @@ VectorMemoryUsage::timestepSetup()
 void
 VectorMemoryUsage::execute()
 {
+  // skip during checking uo/aux state so that this postprocessor returns the memory
+  // usage during the regular execution
+  if (_fe_problem.checkingUOAuxState())
+    return;
+
   MemoryUtils::Stats stats;
   MemoryUtils::getMemoryStats(stats);
 
@@ -88,6 +93,11 @@ VectorMemoryUsage::execute()
 void
 VectorMemoryUsage::finalize()
 {
+  // skip during checking uo/aux state so that this postprocessor returns the memory
+  // usage during the regular execution
+  if (_fe_problem.checkingUOAuxState())
+    return;
+
   // send data to rank zero (avoid buffer aliasing error using out-of-vector copies)
   auto local_physical_mem = _col_physical_mem[_my_rank];
   _communicator.gather(0, local_physical_mem, _col_physical_mem);
