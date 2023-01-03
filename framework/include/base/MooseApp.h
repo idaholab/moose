@@ -635,6 +635,15 @@ public:
   bool hasRestartableMetaData(const std::string & name,
                               const RestartableDataMapName & metaname) const;
 
+  /*
+   * Retrieve restartable meta data from restartable data map
+   *
+   * @param name The full (unique) name.
+   * @param metaname The name to the meta data storage
+   * @return A reference to the restartable meta data value
+   */
+  RestartableDataValue & getRestartableMetaData(const std::string & name, const RestartableDataMapName & metaname) const;
+
   /**
    * Return reference to the restartable data object
    * @return A const reference to the restartable data object

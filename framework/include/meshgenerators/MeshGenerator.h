@@ -69,6 +69,13 @@ protected:
   T & declareMeshProperty(const std::string & data_name, const T & init_value);
 
   /**
+   * Method for updating attributes to the mesh meta-data store, which can be invoked after the
+   * mesh generator constructor has been called.
+   */
+  template <typename T>
+  T & setMeshProperty(const std::string & data_name, const T & data_value);
+
+  /**
    * Takes the name of a MeshGeneratorName parameter and then gets a pointer to the
    * Mesh that MeshGenerator is going to create.
    *
@@ -199,6 +206,20 @@ MeshGenerator::declareMeshProperty(const std::string & data_name, const T & init
 {
   T & data = declareMeshProperty<T>(data_name);
   data = init_value;
+
+  return data;
+}
+
+template <typename T>
+T &
+MeshGenerator::setMeshProperty(const std::string & data_name, const T & data_value)
+{
+  std::string full_name =
+      std::string(MeshMetaDataInterface::SYSTEM) + "/" + name() + "/" + data_name;
+
+  auto & restartable_data_ref = static_cast<RestartableData<T> &>(_app.getRestartableMetaData(full_name, MooseApp::MESH_META_DATA));
+  T & data = restartable_data_ref.set();
+  data = data_value;
 
   return data;
 }

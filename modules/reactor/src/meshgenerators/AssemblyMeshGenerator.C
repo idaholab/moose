@@ -102,13 +102,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
     _duct_region_ids(isParamValid("duct_region_ids")
                          ? getParam<std::vector<std::vector<subdomain_id_type>>>("duct_region_ids")
                          : std::vector<std::vector<subdomain_id_type>>()),
-    _extrude(getParam<bool>("extrude")),
-    _max_radius_meta(declareMeshProperty<Real>("max_radius_meta", 0.0)),
-    _background_intervals_meta(declareMeshProperty<unsigned int>("background_intervals_meta", 0)),
-    _node_id_background_meta(declareMeshProperty<dof_id_type>("node_id_background_meta", 0)),
-    _pattern_pitch_meta(declareMeshProperty<Real>("pattern_pitch_meta", 0.0)),
-    _azimuthal_angle_meta(
-        declareMeshProperty<std::vector<Real>>("azimuthal_angle_meta", std::vector<Real>()))
+    _extrude(getParam<bool>("extrude"))
 {
   MeshGeneratorName reactor_params =
       MeshGeneratorName(getMeshProperty<std::string>("reactor_params_name", _inputs[0]));
@@ -315,6 +309,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
       _build_mesh =
           &addMeshSubgenerator("HexIDPatternedMeshGenerator", name() + "_pattern", params);
 
+      // Pass mesh meta-data defined in subgenerator constructor to this MeshGenerator
       if (hasMeshProperty("pitch_meta", name() + "_pattern"))
         declareMeshProperty("pitch_meta", getMeshProperty<Real>("pitch_meta", name() + "_pattern"));
       if (hasMeshProperty("num_sectors_per_side_meta", name() + "_pattern"))
@@ -340,6 +335,10 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
         declareMeshProperty(
             "position_file_name",
             getMeshProperty<std::string>("position_file_name", name() + "_pattern"));
+      if (hasMeshProperty("pattern_pitch_meta", name() + "_pattern"))
+        declareMeshProperty(
+            "pattern_pitch_meta",
+            getMeshProperty<Real>("pattern_pitch_meta", name() + "_pattern"));
 
       declareMeshProperty("background_region_ids", _background_region_id);
       declareMeshProperty("duct_region_ids", _duct_region_ids);
@@ -447,21 +446,13 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
 std::unique_ptr<MeshBase>
 AssemblyMeshGenerator::generate()
 {
-  // Set additional metadata at this point since value only gets set by PCCMG
+  // Update metadata at this point since values for these metadata only get set by PCCMG
   // at generate() stage
-  if (hasMeshProperty("max_radius_meta", name() + "_pattern"))
-    _max_radius_meta = getMeshProperty<Real>("max_radius_meta", name() + "_pattern");
-  if (hasMeshProperty("background_intervals_meta", name() + "_pattern"))
-    _background_intervals_meta =
-        getMeshProperty<unsigned int>("background_intervals_meta", name() + "_pattern");
-  if (hasMeshProperty("node_id_background_meta", name() + "_pattern"))
-    _node_id_background_meta =
-        getMeshProperty<dof_id_type>("node_id_background_meta", name() + "_pattern");
   if (hasMeshProperty("pattern_pitch_meta", name() + "_pattern"))
-    _pattern_pitch_meta = getMeshProperty<Real>("pattern_pitch_meta", name() + "_pattern");
-  if (hasMeshProperty("azimuthal_anlge_meta", name() + "_pattern"))
-    _azimuthal_angle_meta =
-        getMeshProperty<std::vector<Real>>("azimuthal_angle_meta", name() + "_pattern");
+  {
+    const auto pattern_pitch_meta = getMeshProperty<Real>("pattern_pitch_meta", name() + "_pattern");
+    setMeshProperty("pattern_pitch_meta", pattern_pitch_meta);
+  }
 
   // This generate() method will be called once the subgenerators that we depend on are
   // called. This is where we reassign subdomain ids/name in case they were merged when

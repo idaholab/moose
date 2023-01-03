@@ -1709,6 +1709,19 @@ MooseApp::hasRestartableMetaData(const std::string & name,
   }
 }
 
+RestartableDataValue &
+MooseApp::getRestartableMetaData(const std::string & name,
+                                 const RestartableDataMapName & metaname) const
+{
+  // Get metadata reference from RestartableDataMap and return its value
+  auto & restartable_data_map = getRestartableDataMap(metaname);
+  auto iter = restartable_data_map.find(name);
+  if (iter == restartable_data_map.end())
+    mooseError("Unable to find RestartableDataValue object with name " + name + " in RestartableDataMap");
+
+  return *iter->second.value;
+}
+
 void
 MooseApp::dynamicAppRegistration(const std::string & app_name,
                                  std::string library_path,
