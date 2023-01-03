@@ -28,6 +28,7 @@
 #include "DelimitedFileReader.h"
 #include "MooseAppCoordTransform.h"
 #include "MultiAppTransfer.h"
+#include "Transient.h"
 
 #include "libmesh/mesh_tools.h"
 #include "libmesh/numeric_vector.h"
