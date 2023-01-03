@@ -6,7 +6,7 @@
 
 This boundary condition computes convective heat flux $q'' = h \cdot (T - T_{bulk})$, where $h$ is the convective heat transfer coefficient,
 $T$ is the temperature, and $T_{bulk}$ is the far-field temperature. Both $h$ and $T_{bulk}$ are functors, which enables various spatial, variable and other dependences.
-The domain of the variable can be specified as either a fluid or a solid using $is\_solid$. For a solid domain, the equation above is applied.
+The domain of the variable can be specified as either a fluid or a solid using the `is_solid` parameter. For a solid domain, the equation above is applied.
 For a fluid domain, the negative of the heat flux is applied. This allows for easier implementation of a double Robin
 boundary condition.
 

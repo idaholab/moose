@@ -40,10 +40,10 @@ FVFunctorConvectiveHeatFluxBC::FVFunctorConvectiveHeatFluxBC(const InputParamete
 ADReal
 FVFunctorConvectiveHeatFluxBC::computeQpResidual()
 {
+  const auto ssf = singleSidedFaceArg();
+  const auto flux = _htc(ssf) * (_T_bulk(ssf) - _T_solid(ssf));
   if (_is_solid)
-    return -_htc(singleSidedFaceArg()) *
-           (_T_bulk(singleSidedFaceArg()) - _T_solid(singleSidedFaceArg()));
+    return -flux;
   else
-    return _htc(singleSidedFaceArg()) *
-           (_T_bulk(singleSidedFaceArg()) - _T_solid(singleSidedFaceArg()));
+    return flux;
 }

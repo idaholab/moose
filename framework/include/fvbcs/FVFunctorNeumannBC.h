@@ -11,8 +11,6 @@
 
 #include "FVFluxBC.h"
 
-class Function;
-
 /**
  * Neumann boundary (== inflow) condition for finite volume scheme
  * where the inflow is given as a functor
