@@ -503,15 +503,15 @@ PatternedCartesianMeshGenerator::generate()
         if (on_periphery)
         {
           auto tmp_peripheral_mesh = dynamic_pointer_cast<ReplicatedMesh>(pattern_mesh.clone());
-          addPeripheralMeshRect(*tmp_peripheral_mesh,
-                                pattern,
-                                pitch_array.front(),
-                                extra_dist,
-                                num_sectors_per_side_array,
-                                peripheral_duct_intervals,
-                                rotation_angle,
-                                mesh_type,
-                                _create_interface_boundaries);
+          addPeripheralMesh(*tmp_peripheral_mesh,
+                            pattern,
+                            pitch_array.front(),
+                            extra_dist,
+                            num_sectors_per_side_array,
+                            peripheral_duct_intervals,
+                            rotation_angle,
+                            mesh_type,
+                            _create_interface_boundaries);
 
           if (extra_dist_shift != 0)
             cutOffPolyDeform(
@@ -746,4 +746,124 @@ PatternedCartesianMeshGenerator::generate()
   }
 
   return dynamic_pointer_cast<MeshBase>(out_mesh);
+}
+
+void
+PatternedCartesianMeshGenerator::addPeripheralMesh(
+    ReplicatedMesh & mesh,
+    const unsigned int pattern,
+    const Real pitch,
+    const std::vector<Real> & extra_dist,
+    const std::vector<unsigned int> & num_sectors_per_side_array,
+    const std::vector<unsigned int> & peripheral_duct_intervals,
+    const Real rotation_angle,
+    const unsigned int mesh_type,
+    const bool create_interface_boundaries)
+{
+  std::vector<std::pair<Real, Real>> positions_inner;
+  std::vector<std::pair<Real, Real>> d_positions_outer;
+
+  std::vector<std::vector<unsigned int>> peripheral_point_index;
+  std::vector<std::pair<Real, Real>> sub_positions_inner;
+  std::vector<std::pair<Real, Real>> sub_d_positions_outer;
+
+  if (mesh_type == CORNER_MESH)
+    // corner mesh has two sides that need peripheral meshes.
+    // each element has three sub-elements, representing beginning, middle, and ending azimuthal
+    // points
+    peripheral_point_index = {{0, 1, 2}, {2, 3, 4}};
+  else
+    // side mesh has one side that needs a peripheral mesh.
+    peripheral_point_index = {{0, 1, 5}};
+
+  // extra_dist includes background and ducts.
+  // Loop to calculate the positions of the boundaries.
+  for (unsigned int i = 0; i < extra_dist.size(); i++)
+  {
+    // Generate the node positions for the peripheral meshes
+    // The node positions are generated for the two possible cases: the edge and the corner
+    positionSetup(
+        positions_inner, d_positions_outer, i == 0 ? 0.0 : extra_dist[i - 1], extra_dist[i], pitch);
+
+    // Loop for all applicable sides that need peripheral mesh (2 for corner and 1 for edge)
+    for (unsigned int peripheral_index = 0; peripheral_index < peripheral_point_index.size();
+         peripheral_index++)
+    {
+      // Loop for beginning, middle and ending positions of a side
+      for (unsigned int vector_index = 0; vector_index < 3; vector_index++)
+      {
+        sub_positions_inner.push_back(
+            positions_inner[peripheral_point_index[peripheral_index][vector_index]]);
+        sub_d_positions_outer.push_back(
+            d_positions_outer[peripheral_point_index[peripheral_index][vector_index]]);
+      }
+      auto meshp0 = buildSimplePeripheral(num_sectors_per_side_array[pattern],
+                                          peripheral_duct_intervals[i],
+                                          sub_positions_inner,
+                                          sub_d_positions_outer,
+                                          i,
+                                          create_interface_boundaries);
+      if (mesh.is_prepared()) // Need to prepare if the other is prepared to stitch
+        meshp0->prepare_for_use();
+
+      // rotate the peripheral mesh to the desired side of the hexagon.
+      MeshTools::Modification::rotate(*meshp0, rotation_angle, 0, 0);
+      mesh.stitch_meshes(*meshp0, OUTER_SIDESET_ID, OUTER_SIDESET_ID, TOLERANCE, true);
+      sub_positions_inner.resize(0);
+      sub_d_positions_outer.resize(0);
+    }
+  }
+}
+
+void
+PatternedCartesianMeshGenerator::positionSetup(
+    std::vector<std::pair<Real, Real>> & positions_inner,
+    std::vector<std::pair<Real, Real>> & d_positions_outer,
+    const Real extra_dist_in,
+    const Real extra_dist_out,
+    const Real pitch) const
+{
+  positions_inner.resize(0);
+  d_positions_outer.resize(0);
+  // Nine sets of positions are generated here, as shown below.
+  // CORNER MESH Peripheral {0 1 2} and {2 3 4}
+  //
+  //           0    1         2
+  //           |    |        /
+  //           |    |      /
+  //           |____|____/
+  //           |         |
+  //           |         |____ 3
+  //           |         |
+  //           |_________|____ 4
+  //
+  // EDGE MESH Peripheral {0 1 5}
+  //
+  //           0    1    5
+  //           |    |    |
+  //           |    |    |
+  //           |____|____|
+  //           |         |
+  //           |         |
+  //           |         |
+  //           |_________|
+
+  // Inner positions defined from index 0 through 5 as shown in the above cartoon
+  positions_inner.push_back(std::make_pair(-pitch / 2.0, pitch / 2.0 + extra_dist_in));
+  positions_inner.push_back(std::make_pair(0.0, pitch / 2.0 + extra_dist_in));
+  positions_inner.push_back(
+      std::make_pair(pitch / 2.0 + extra_dist_in, pitch / 2.0 + extra_dist_in));
+  positions_inner.push_back(std::make_pair(pitch / 2.0 + extra_dist_in, 0.0));
+  positions_inner.push_back(std::make_pair(pitch / 2.0 + extra_dist_in, -pitch / 2.0));
+  positions_inner.push_back(std::make_pair(pitch / 2.0, pitch / 2.0 + extra_dist_in));
+
+  // Outer positions (relative displacement from inner ones) defined from index 0 through 5 as shown
+  // in the above cartoon
+  d_positions_outer.push_back(std::make_pair(0.0, extra_dist_out - extra_dist_in));
+  d_positions_outer.push_back(std::make_pair(0.0, extra_dist_out - extra_dist_in));
+  d_positions_outer.push_back(
+      std::make_pair(extra_dist_out - extra_dist_in, extra_dist_out - extra_dist_in));
+  d_positions_outer.push_back(std::make_pair(extra_dist_out - extra_dist_in, 0.0));
+  d_positions_outer.push_back(std::make_pair(extra_dist_out - extra_dist_in, 0.0));
+  d_positions_outer.push_back(std::make_pair(0.0, extra_dist_out - extra_dist_in));
 }

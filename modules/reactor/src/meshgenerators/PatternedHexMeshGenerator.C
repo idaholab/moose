@@ -787,3 +787,182 @@ PatternedHexMeshGenerator::generate()
 
   return dynamic_pointer_cast<MeshBase>(out_mesh);
 }
+
+void
+PatternedHexMeshGenerator::addPeripheralMesh(
+    ReplicatedMesh & mesh,
+    const unsigned int pattern,
+    const Real pitch,
+    const std::vector<Real> & extra_dist,
+    const std::vector<unsigned int> & num_sectors_per_side_array,
+    const std::vector<unsigned int> & peripheral_duct_intervals,
+    const Real rotation_angle,
+    const unsigned int mesh_type,
+    const bool create_interface_boundaries)
+{
+  std::vector<std::pair<Real, Real>> positions_inner;
+  std::vector<std::pair<Real, Real>> d_positions_outer;
+
+  std::vector<std::vector<unsigned int>> peripheral_point_index;
+  std::vector<std::pair<Real, Real>> sub_positions_inner;
+  std::vector<std::pair<Real, Real>> sub_d_positions_outer;
+
+  if (mesh_type == CORNER_MESH)
+    // corner mesh has three sides that need peripheral meshes.
+    // each element has three sub-elements, representing beginning, middle, and ending azimuthal
+    // points
+    peripheral_point_index = {{0, 1, 2}, {2, 3, 4}, {4, 5, 6}};
+  else
+    // side mesh has two sides that need peripheral meshes.
+    peripheral_point_index = {{0, 1, 2}, {2, 7, 8}};
+
+  // extra_dist includes background and ducts.
+  // Loop to calculate the positions of the boundaries.
+  for (unsigned int i = 0; i < extra_dist.size(); i++)
+  {
+    positionSetup(positions_inner,
+                  d_positions_outer,
+                  i == 0 ? 0.0 : extra_dist[i - 1],
+                  extra_dist[i],
+                  pitch,
+                  i);
+
+    // Loop for all applicable sides that need peripherial mesh (3 for corner and 2 for edge)
+    for (unsigned int peripheral_index = 0; peripheral_index < peripheral_point_index.size();
+         peripheral_index++)
+    {
+      // Loop for beginning, middle and ending positions of a side
+      for (unsigned int vector_index = 0; vector_index < 3; vector_index++)
+      {
+        sub_positions_inner.push_back(
+            positions_inner[peripheral_point_index[peripheral_index][vector_index]]);
+        sub_d_positions_outer.push_back(
+            d_positions_outer[peripheral_point_index[peripheral_index][vector_index]]);
+      }
+      auto meshp0 = buildSimplePeripheral(num_sectors_per_side_array[pattern],
+                                          peripheral_duct_intervals[i],
+                                          sub_positions_inner,
+                                          sub_d_positions_outer,
+                                          i,
+                                          create_interface_boundaries);
+      if (mesh.is_prepared()) // Need to prepare if the other is prepared to stitch
+        meshp0->prepare_for_use();
+
+      // rotate the peripheral mesh to the desired side of the hexagon.
+      MeshTools::Modification::rotate(*meshp0, rotation_angle, 0, 0);
+      mesh.stitch_meshes(*meshp0, OUTER_SIDESET_ID, OUTER_SIDESET_ID, TOLERANCE, true);
+      sub_positions_inner.resize(0);
+      sub_d_positions_outer.resize(0);
+    }
+  }
+}
+
+void
+PatternedHexMeshGenerator::positionSetup(std::vector<std::pair<Real, Real>> & positions_inner,
+                                         std::vector<std::pair<Real, Real>> & d_positions_outer,
+                                         const Real extra_dist_in,
+                                         const Real extra_dist_out,
+                                         const Real pitch,
+                                         const unsigned int radial_index) const
+{
+  positions_inner.resize(0);
+  d_positions_outer.resize(0);
+
+  // Nine sets of positions are generated here, as shown below.
+  // CORNER MESH Peripheral {0 1 2}, {2 3 4} and {4 5 6}
+  //           3       2   1   0
+  //            \      :   :   :
+  //             \     :   :   :
+  //      4.       .       :   :
+  //         ` .               :
+  //      5.   |               |
+  //         ` |               |
+  //      6.   |               |
+  //         ` |               |
+  //               .       .
+  //                   .
+  //
+  // EDGE MESH Peripheral {0 1 2} and {2 7 8}
+  //           8   7   2   1   0
+  //           :   :   :   :   :
+  //           :   :   :   :   :
+  //           :   :       :   :
+  //           :               :
+  //           |               |
+  //           |               |
+  //           |               |
+  //           |               |
+  //               .       .
+  //                   .
+
+  positions_inner.push_back(
+      std::make_pair(-pitch / 2.0,
+                     std::sqrt(3.0) * pitch / 6.0 +
+                         (radial_index != 0 ? std::sqrt(3.0) * pitch / 6.0 + extra_dist_in : 0.0)));
+  positions_inner.push_back(std::make_pair(
+      -pitch / 4.0,
+      std::sqrt(3.0) * pitch / 4.0 +
+          (radial_index != 0 ? std::sqrt(3.0) * pitch / 12.0 + extra_dist_in : 0.0)));
+  positions_inner.push_back(std::make_pair(
+      0.0, std::sqrt(3.0) * pitch / 3.0 + (radial_index != 0 ? extra_dist_in : 0.0)));
+  positions_inner.push_back(std::make_pair(
+      pitch / 4.0 + (radial_index != 0 ? pitch / 12.0 + std::sqrt(3.0) * extra_dist_in / 3.0 : 0.0),
+      std::sqrt(3.0) * pitch / 4.0 +
+          (radial_index != 0 ? pitch * std::sqrt(3.0) / 12.0 + extra_dist_in : 0.0)));
+  positions_inner.push_back(std::make_pair(
+      pitch / 2.0 + (radial_index != 0 ? std::sqrt(3.0) * extra_dist_in / 2.0 : 0.0),
+      std::sqrt(3.0) * pitch / 6.0 + (radial_index != 0 ? extra_dist_in / 2.0 : 0.0)));
+  positions_inner.push_back(std::make_pair(
+      pitch / 2.0 + (radial_index != 0 ? pitch / 8.0 + std::sqrt(3.0) * extra_dist_in / 2.0 : 0.0),
+      0.0 + (radial_index != 0 ? std::sqrt(3.0) * pitch / 24.0 + extra_dist_in / 2.0 : 0.0)));
+  positions_inner.push_back(std::make_pair(
+      pitch / 2.0 + (radial_index != 0 ? pitch / 4.0 + std::sqrt(3.0) * extra_dist_in / 2.0 : 0.0),
+      -std::sqrt(3.0) * pitch / 6.0 +
+          (radial_index != 0 ? std::sqrt(3.0) * pitch / 12.0 + extra_dist_in / 2.0 : 0.0)));
+  positions_inner.push_back(std::make_pair(
+      pitch / 4.0,
+      std::sqrt(3.0) * pitch / 4.0 +
+          (radial_index != 0 ? std::sqrt(3.0) * pitch / 12.0 + extra_dist_in : 0.0)));
+  positions_inner.push_back(
+      std::make_pair(pitch / 2.0,
+                     std::sqrt(3.0) * pitch / 6.0 +
+                         (radial_index != 0 ? std::sqrt(3.0) * pitch / 6.0 + extra_dist_in : 0.0)));
+
+  d_positions_outer.push_back(
+      std::make_pair(0.0,
+                     std::sqrt(3.0) * pitch / 6.0 + extra_dist_out -
+                         (radial_index != 0 ? std::sqrt(3.0) * pitch / 6.0 + extra_dist_in : 0.0)));
+  d_positions_outer.push_back(std::make_pair(
+      0.0,
+      std::sqrt(3.0) * pitch / 12.0 + extra_dist_out -
+          (radial_index != 0 ? std::sqrt(3.0) * pitch / 12.0 + extra_dist_in : 0.0)));
+  d_positions_outer.push_back(
+      std::make_pair(0.0, extra_dist_out - (radial_index != 0 ? extra_dist_in : 0.0)));
+  d_positions_outer.push_back(std::make_pair(
+      pitch / 12.0 + std::sqrt(3.0) * extra_dist_out / 3.0 -
+          (radial_index != 0 ? pitch / 12.0 + std::sqrt(3.0) * extra_dist_in / 3.0 : 0.0),
+      pitch * std::sqrt(3.0) / 12.0 + extra_dist_out -
+          (radial_index != 0 ? pitch * std::sqrt(3.0) / 12.0 + extra_dist_in : 0.0)));
+  d_positions_outer.push_back(
+      std::make_pair(std::sqrt(3.0) * extra_dist_out / 2.0 -
+                         (radial_index != 0 ? std::sqrt(3.0) * extra_dist_in / 2.0 : 0.0),
+                     extra_dist_out / 2.0 - (radial_index != 0 ? extra_dist_in / 2.0 : 0.0)));
+  d_positions_outer.push_back(std::make_pair(
+      pitch / 8.0 + std::sqrt(3.0) * extra_dist_out / 2.0 -
+          (radial_index != 0 ? pitch / 8.0 + std::sqrt(3.0) * extra_dist_in / 2.0 : 0.0),
+      std::sqrt(3.0) * pitch / 24.0 + extra_dist_out / 2.0 -
+          (radial_index != 0 ? std::sqrt(3.0) * pitch / 24.0 + extra_dist_in / 2.0 : 0.0)));
+  d_positions_outer.push_back(std::make_pair(
+      pitch / 4.0 + std::sqrt(3.0) * extra_dist_out / 2.0 -
+          (radial_index != 0 ? pitch / 4.0 + std::sqrt(3.0) * extra_dist_in / 2.0 : 0.0),
+      std::sqrt(3.0) * pitch / 12.0 + extra_dist_out / 2.0 -
+          (radial_index != 0 ? std::sqrt(3.0) * pitch / 12.0 + extra_dist_in / 2.0 : 0.0)));
+  d_positions_outer.push_back(std::make_pair(
+      0.0,
+      std::sqrt(3.0) * pitch / 12.0 + extra_dist_out -
+          (radial_index != 0 ? std::sqrt(3.0) * pitch / 12.0 + extra_dist_in : 0.0)));
+  d_positions_outer.push_back(
+      std::make_pair(0.0,
+                     std::sqrt(3.0) * pitch / 6.0 + extra_dist_out -
+                         (radial_index != 0 ? std::sqrt(3.0) * pitch / 6.0 + extra_dist_in : 0.0)));
+}
