@@ -28,7 +28,7 @@ NonsafeMaterial::validParams()
 NonsafeMaterial::NonsafeMaterial(const InputParameters & parameters)
   : Material(parameters),
     _input_diffusivity(getParam<Real>("diffusivity")),
-    _threshold(getParam<Real>("threshold")),
+    _threshold(getParam<std::vector<Real>>("threshold")),
     _diffusivity(declareProperty<Real>("diffusivity"))
 {
 }
@@ -39,7 +39,7 @@ NonsafeMaterial::computeQpProperties()
   /// @brief register the section with a unique ID which will count the number of solution invalid warnings
   static const auto solution_id = registerInvalidSection(
       "NonsafeMaterial", "The diffusivity is greater than the threshold value!");
-  if (_input_diffusivity > _threshold)
+  if (_input_diffusivity > _threshold[0] && _input_diffusivity < _threshold[1])
   {
     /// @brief mark solution invalid when the value is out of bound
     setSolutionInvalid(solution_id);

@@ -8,7 +8,7 @@ To set it up, the section is required to be registered using "registerInvalidSec
 
 ```
   static const auto solution_id = registerInvalidSection("NonsafeMaterial");
-  if (material_property > _threshold)
+  if (material_property > _threshold[0] && material_property < _threshold[1])
   {
     setSolutionInvalid(solution_id);
   }
