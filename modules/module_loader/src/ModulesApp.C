@@ -46,6 +46,9 @@
 #ifdef NAVIER_STOKES_ENABLED
 #include "NavierStokesApp.h"
 #endif
+#ifdef OPTIMIZATION_ENABLED
+#include "OptimizationApp.h"
+#endif
 #ifdef PERIDYNAMICS_ENABLED
 #include "PeridynamicsApp.h"
 #endif
@@ -433,6 +436,10 @@ ModulesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 
 #ifdef NAVIER_STOKES_ENABLED
   NavierStokesApp::registerAll(f, af, s);
+#endif
+
+#ifdef OPTIMIZATION_ENABLED
+  OptimizationApp::registerAll(f, af, s);
 #endif
 
 #ifdef PERIDYNAMICS_ENABLED
