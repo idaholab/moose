@@ -34,19 +34,6 @@ class RunPBS(QueueManager):
     def hasTimedOutOrFailed(self, job_data):
         """ use qstat and return bool on job failures outside of the TestHarness's control """
 
-        # PBS_EXITCODES = { '271' : 'JOB_EXEC_KILL_WALLTIME 271',
-        #                   '-24' : 'JOB_EXEC_KILL_NCPUS_BURST -24',
-        #                   '-25' : 'JOB_EXEC_KILL_NCPUS_SUM -25',
-        #                   '-26' : 'JOB_EXEC_KILL_VMEM -26',
-        #                   '-27' : 'JOB_EXEC_KILL_MEM -27',
-        #                   '-28' : 'JOB_EXEC_KILL_CPUT -28',
-        #                   '-29' : 'JOB_EXEC_KILL_WALLTIME -29' }
-
-        # PBS_STATUSES = { 'R' : 'RUNNING',
-        #                  'F' : 'FINISHED',
-        #                  'Q' : 'QUEUED',
-        #                  'E' : 'EXITING'}
-
         jobs = job_data.jobs.getJobs()
         queue_plugin = self.__class__.__name__
         meta_data = job_data.json_data.get(jobs[0].getTestDir())
@@ -68,6 +55,7 @@ class RunPBS(QueueManager):
                 return True
 
             job_result = job_meta.get('Exit_status', False)
+            print("job_result={}".format(job_result))
             job_output = job_meta['Output_Path']
             meta_data[self.__class__.__name__]['STATUS'] = PBS_STATUSES[job_meta['job_state']]
             if not job_result:

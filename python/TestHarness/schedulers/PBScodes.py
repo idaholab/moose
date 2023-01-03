@@ -73,19 +73,19 @@ PBS_User_EXITCODES = { '0' : 'JOB_EXEC_OK:Job execution was successful',
                       '-29' : 'JOB_EXEC_KILL_WALLTIME:Job exec failed due to exceeding walltime',
                       '-30' : 'JOB_EXEC_JOINJOB:Job exec failed due to join job error' }
 
-PBS_STATUSES = { '0' : 'JOB_STATE_LTR_UNKNOWN',
-                 'B' : 'JOB_STATE_LTR_BEGUN',
-                 'E' : 'JOB_STATE_LTR_EXITING',
-                 'F' : 'JOB_STATE_LTR_FINISHED',
-                 'H' : 'JOB_STATE_LTR_HELD',
-                 'M' : 'JOB_STATE_LTR_MOVED',
-                 'Q' : 'JOB_STATE_LTR_QUEUED',
-                 'R' : 'JOB_STATE_LTR_RUNNING',
-                 'S' : 'JOB_STATE_LTR_SUSPENDED',
-                 'T' : 'JOB_STATE_LTR_TRANSIT ',
-                 'U' : 'JOB_STATE_LTR_USUSPENDED',
-                 'W' : 'JOB_STATE_LTR_WAITING',
-                 'X' : 'JOB_STATE_LTR_EXPIRED' }
+PBS_STATUSES = { '0' : 'UNKNOWN',
+                 'B' : 'BEGUN',
+                 'E' : 'EXITING',
+                 'F' : 'FINISHED',
+                 'H' : 'HELD',
+                 'M' : 'MOVED',
+                 'Q' : 'QUEUED',
+                 'R' : 'RUNNING',
+                 'S' : 'SUSPENDED',
+                 'T' : 'TRANSIT',
+                 'U' : 'USUSPENDED',
+                 'W' : 'WAITING',
+                 'X' : 'EXPIRED' }
 
 # These errors come from src/include/pbs_errors.h
 # This is the exit value of the top process in the job, typically the shell. This may be the exit value of the last command
