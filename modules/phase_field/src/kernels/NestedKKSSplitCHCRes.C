@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NestKKSSplitCHCRes.h"
+#include "NestedKKSSplitCHCRes.h"
 
-registerMooseObject("PhaseFieldApp", NestKKSSplitCHCRes);
+registerMooseObject("PhaseFieldApp", NestedKKSSplitCHCRes);
 
 InputParameters
-NestKKSSplitCHCRes::validParams()
+NestedKKSSplitCHCRes::validParams()
 {
   InputParameters params = JvarMapKernelInterface<Kernel>::validParams();
   params.addClassDescription(
@@ -29,7 +29,7 @@ NestKKSSplitCHCRes::validParams()
   return params;
 }
 
-NestKKSSplitCHCRes::NestKKSSplitCHCRes(const InputParameters & parameters)
+NestedKKSSplitCHCRes::NestedKKSSplitCHCRes(const InputParameters & parameters)
   : DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>(parameters),
     _eta_names(coupledNames("all_etas")),
     _num_j(_eta_names.size()),
@@ -82,13 +82,13 @@ NestKKSSplitCHCRes::NestKKSSplitCHCRes(const InputParameters & parameters)
 }
 
 Real
-NestKKSSplitCHCRes::computeQpResidual()
+NestedKKSSplitCHCRes::computeQpResidual()
 {
   return ((*_dF1dc1[_o])[_qp] - _w[_qp]) * _test[_i][_qp];
 }
 
 Real
-NestKKSSplitCHCRes::computeQpJacobian()
+NestedKKSSplitCHCRes::computeQpJacobian()
 {
   Real sum = 0.0;
 
@@ -99,7 +99,7 @@ NestKKSSplitCHCRes::computeQpJacobian()
 }
 
 Real
-NestKKSSplitCHCRes::computeQpOffDiagJacobian(unsigned int jvar)
+NestedKKSSplitCHCRes::computeQpOffDiagJacobian(unsigned int jvar)
 {
   Real sum = 0.0;
 

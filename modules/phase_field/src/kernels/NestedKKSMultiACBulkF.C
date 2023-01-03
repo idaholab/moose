@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NestKKSMultiACBulkF.h"
+#include "NestedKKSMultiACBulkF.h"
 
-registerMooseObject("PhaseFieldApp", NestKKSMultiACBulkF);
+registerMooseObject("PhaseFieldApp", NestedKKSMultiACBulkF);
 
 InputParameters
-NestKKSMultiACBulkF::validParams()
+NestedKKSMultiACBulkF::validParams()
 {
   InputParameters params = KKSMultiACBulkBase::validParams();
   params.addClassDescription("KKS model kernel (part 1 of 2) for the Bulk Allen-Cahn. This "
@@ -29,7 +29,7 @@ NestKKSMultiACBulkF::validParams()
   return params;
 }
 
-NestKKSMultiACBulkF::NestKKSMultiACBulkF(const InputParameters & parameters)
+NestedKKSMultiACBulkF::NestedKKSMultiACBulkF(const InputParameters & parameters)
   : KKSMultiACBulkBase(parameters),
     _c_names(coupledNames("global_cs")),
     _c_map(getParameterJvarMap("global_cs")),
@@ -103,7 +103,7 @@ NestKKSMultiACBulkF::NestKKSMultiACBulkF(const InputParameters & parameters)
 }
 
 Real
-NestKKSMultiACBulkF::computeDFDOP(PFFunctionType type)
+NestedKKSMultiACBulkF::computeDFDOP(PFFunctionType type)
 {
   Real sum = 0.0;
 
@@ -140,7 +140,7 @@ NestKKSMultiACBulkF::computeDFDOP(PFFunctionType type)
 }
 
 Real
-NestKKSMultiACBulkF::computeQpOffDiagJacobian(unsigned int jvar)
+NestedKKSMultiACBulkF::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // first get dependence of mobility _L on other variables using parent class
   // member function Real

@@ -24,12 +24,12 @@
  * corresponding phase concentration \f$ c_1 \f$
  */
 
-class NestKKSSplitCHCRes : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>
+class NestedKKSSplitCHCRes : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>
 {
 public:
   static InputParameters validParams();
 
-  NestKKSSplitCHCRes(const InputParameters & parameters);
+  NestedKKSSplitCHCRes(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
