@@ -11,25 +11,30 @@
                      0 0 0 1 1 1
                      0 0 0 1 1 1'
   []
-  [remove]
-    type = BlockDeletionGenerator
+  [interface]
+    type = SideSetsBetweenSubdomainsGenerator
     input = gen
-    block = 1
+    primary_block = 0
+    paired_block = 1
     new_boundary = interface
   []
+[]
+
+[Problem]
+  kernel_coverage_check = false
 []
 
 [Variables]
   [T_solid]
     type = MooseVariableFVReal
     initial_condition = 1
+    block = 0
   []
-[]
 
-[AuxVariables]
   [T_fluid]
     type = MooseVariableFVReal
     initial_condition = 0
+    block = 1
   []
 []
 
@@ -40,10 +45,20 @@
     block = 0
     coeff = 2
   []
+  [diff_fluid]
+    type = FVDiffusion
+    variable = T_fluid
+    block = 1
+    coeff = 4
+  []
+  [gradient_creating]
+    type = FVBodyForce
+    variable = T_fluid
+  []
 []
 
 [FVBCs]
-  [interface_fluid]
+  [interface_fluid_to_solid]
     type = FVFunctorConvectiveHeatFluxBC
     boundary = 'interface'
     variable = T_solid
@@ -58,28 +73,21 @@
     variable = T_solid
     value = 1
   []
-[]
 
-[MultiApps]
-  [interface_multiapp]
-    type = FullSolveMultiApp
-    input_files = 'fv_functor_convective_heat_flux_fluid.i'
-    execute_on = TIMESTEP_END
-  []
-[]
-
-[Transfers]
-  [solid_transfer]
-    type = MultiAppNearestNodeTransfer
-    source_variable = T_solid
-    variable = T_solid
-    to_multi_app = interface_multiapp
-  []
-  [fluid_transfer]
-    type = MultiAppNearestNodeTransfer
-    source_variable = T_fluid
+  [interface_solid_to_fluid]
+    type = FVFunctorConvectiveHeatFluxBC
+    boundary = 'interface'
     variable = T_fluid
-    from_multi_app = interface_multiapp
+    T_bulk = T_fluid
+    T_solid = T_solid
+    is_solid = false
+    heat_transfer_coefficient = 'htc'
+  []
+  [right]
+    type = FVDirichletBC
+    boundary = 'right'
+    variable = T_fluid
+    value = 0
   []
 []
 

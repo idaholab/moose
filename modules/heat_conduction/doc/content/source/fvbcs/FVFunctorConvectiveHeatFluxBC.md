@@ -17,7 +17,7 @@ Similar objects:
 # Example syntax
 
 In this example, the `FVFunctorConvectiveHeatFluxBC` boundary condition forms a convective boundary condition between
-the fluid and the solid. While both variables are defined on the same domain, convection only happens on the boundary.
+the fluid and the solid.
 
 !listing fv_functor_convective_heat_flux/fv_functor_convective_heat_flux.i block=Mesh FVBCs
 
