@@ -27,7 +27,7 @@ protected:
 
   const Real & _input_diffusivity;
 
-  std::vector<Real> _threshold;
+  const std::vector<Real> & _threshold;
 
   MaterialProperty<Real> & _diffusivity;
 };
