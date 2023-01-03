@@ -159,19 +159,6 @@
   [../]
 []
 
-[Postprocessors]
-  [./x]
-    type = ScalarVariable
-    variable = x
-    execute_on = timestep_end
-  [../]
-  [./y]
-    type = ScalarVariable
-    variable = y
-    execute_on = timestep_end
-  [../]
-[]
-
 [Executioner]
   type = Transient
 

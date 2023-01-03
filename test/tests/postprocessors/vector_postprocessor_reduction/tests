@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#22769'
+  design = 'VectorPostprocessorReductionValue.md'
+
+  [vpp_reduction]
+    type = CSVDiff
+    input = vpp_reduction.i
+    csvdiff = 'vpp_reduction_out.csv'
+    requirement = 'The system shall provide a Postprocessor that performs min, max, sum, and average operation on a VectorPostprocessor'
+  []
+[]

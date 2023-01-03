@@ -15,6 +15,10 @@ The `ExtraIDIntegralVectorPostprocessor` object needs the following parameters:
 
 - [!param](/VectorPostprocessors/ExtraIDIntegralVectorPostprocessor/id_name): list of extra IDs by which to separate integrals
 
+!alert note title=Vector names / CSV output column names
+`ExtraIDIntegralVectorPostprocessor` declares a vector for each variable, named after the variable,
+holding the values of the integrals computed.
+
 ## Example Syntax
 
 !listing test/tests/vectorpostprocessors/extra_id_integral/extra_id_vpp.i block=VectorPostprocessors

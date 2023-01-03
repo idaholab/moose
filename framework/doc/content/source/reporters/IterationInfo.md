@@ -2,7 +2,7 @@
 
 A Reporter object for tracking iteration information, such as the number of linear and nonlinear
 iterations. The [!param](/Reporters/IterationInfo/items) parameter controls the
-items computed.
+items computed. `IterationInfo` will declare reporters for each item requested.
 
 ## Example Input Syntax
 

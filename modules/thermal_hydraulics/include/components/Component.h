@@ -47,7 +47,18 @@ public:
 
   Component * parent() { return _parent; }
 
-  THMMesh & mesh() const { return _mesh; }
+  /**
+   * Const reference to mesh, which can be called at any point
+   *
+   * Note that overloading mesh() was not possible due to the need to call this
+   * const version, even when the component is not const.
+   */
+  const THMMesh & constMesh() const { return _mesh; }
+
+  /**
+   * Non-const reference to THM mesh, which can only be called before the end of mesh setup
+   */
+  THMMesh & mesh();
 
   /**
    * Test if a parameter exists in the object's input parameters
@@ -213,6 +224,11 @@ public:
 
 protected:
   /**
+   * Gets the THM problem
+   */
+  THMProblem & getTHMProblem() const;
+
+  /**
    * Performs any post-constructor, pre-mesh-setup setup
    */
   virtual void preSetupMesh() {}
@@ -366,15 +382,18 @@ protected:
   Component * _parent;
 
   /// THM problem this component is part of
+  /// TODO: make _sim private (applications need to switch to getters to avoid breaking).
+  /// Also, rename to "_thm_problem" at that point.
   THMProblem & _sim;
 
   /// The Factory associated with the MooseApp
   Factory & _factory;
 
-  /// Global mesh this component works on
-  THMMesh & _mesh;
-
   const Real & _zero;
+
+  /// The THM mesh
+  /// TODO: make _mesh private (applications need to switch to getters to avoid breaking)
+  THMMesh & _mesh;
 
 private:
   /// Component setup status

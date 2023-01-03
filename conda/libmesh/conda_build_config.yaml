@@ -1,5 +1,5 @@
 moose_mpich:
-  - moose-mpich 4.0.2 build_4
+  - moose-mpich 4.0.2 build_6
 
 moose_petsc:
   - moose-petsc 3.16.6

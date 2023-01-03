@@ -38,6 +38,7 @@ HEAT_CONDUCTION             := no
 LEVEL_SET                   := no
 MISC                        := no
 NAVIER_STOKES               := no
+OPTIMIZATION                := no
 PERIDYNAMICS                := no
 PHASE_FIELD                 := no
 POROUS_FLOW                 := no

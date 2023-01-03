@@ -74,7 +74,7 @@ The following model types were used:
 - Third degree [PolynomialRegression](source/surrogates/PolynomialRegressionTrainer.md).
 - Third degree [PolynomialChaos](source/surrogates/PolynomialChaos.md).
 - [GaussianProcess](source/surrogates/GaussianProcessTrainer.md), with a [SquaredExponentialCovariance](source/surrogates/SquaredExponentialCovariance.md) function. Length scales for each input parameter were chosen by first performing hyperparameter tuning with a reduced training data set.
-- [LibtorchANN](source/surrogates/LibtorchANNTrainer.md), with a single hidden layer and 64 neurons.
+- [LibtorchANN](source/libtorch/surrogates/LibtorchANNTrainer.md), with a single hidden layer and 64 neurons.
 - [NearestPoint](source/surrogates/NearestPointTrainer.md).
 
 The following listing summarizes the Surrogate types considered in this comparison, along with the required control parameters.

@@ -68,8 +68,6 @@
     abs_zero = 1e-8
     rel_err = 5e-4
     mesh_mode = REPLICATED
-    # The linesearch used by this test requires PETSc >= 3.6.0.
-    petsc_version = '>=3.6.0'
     requirement = "The Contact system shall enforce frictionless, penalty contact
     for 2D plane strain single point contact model using the contact line
     search solver options."

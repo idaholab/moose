@@ -131,9 +131,19 @@ JsonSyntaxTree::setParams(InputParameters * params, bool search_match, nlohmann:
       param_json["default"] = params->defaultCoupledValue(iter.first);
 
     bool out_of_range_allowed = false;
-    param_json["options"] = buildOptions(iter, out_of_range_allowed);
+    std::map<MooseEnumItem, std::string> docs;
+    param_json["options"] = buildOptions(iter, out_of_range_allowed, docs);
     if (!nlohmann::to_string(param_json["options"]).empty())
+    {
       param_json["out_of_range_allowed"] = out_of_range_allowed;
+      if (!docs.empty())
+      {
+        nlohmann::json jdocs;
+        for (const auto & doc : docs)
+          jdocs[doc.first.name()] = doc.second;
+        param_json["option_docs"] = jdocs;
+      }
+    }
     auto reserved_values = params->reservedValues(iter.first);
     for (const auto & reserved : reserved_values)
       param_json["reserved_values"].push_back(reserved);
@@ -234,45 +244,46 @@ JsonSyntaxTree::addParameters(const std::string & parent,
 
 std::string
 JsonSyntaxTree::buildOptions(const std::iterator_traits<InputParameters::iterator>::value_type & p,
-                             bool & out_of_range_allowed)
+                             bool & out_of_range_allowed,
+                             std::map<MooseEnumItem, std::string> & docs)
 {
   libMesh::Parameters::Value * val = MooseUtils::get(p.second);
 
   std::string options;
   {
-    InputParameters::Parameter<MooseEnum> * enum_type =
-        dynamic_cast<InputParameters::Parameter<MooseEnum> *>(val);
+    auto * enum_type = dynamic_cast<InputParameters::Parameter<MooseEnum> *>(val);
     if (enum_type)
     {
       out_of_range_allowed = enum_type->get().isOutOfRangeAllowed();
       options = enum_type->get().getRawNames();
+      docs = enum_type->get().getItemDocumentation();
     }
   }
   {
-    InputParameters::Parameter<MultiMooseEnum> * enum_type =
-        dynamic_cast<InputParameters::Parameter<MultiMooseEnum> *>(val);
+    auto * enum_type = dynamic_cast<InputParameters::Parameter<MultiMooseEnum> *>(val);
     if (enum_type)
     {
       out_of_range_allowed = enum_type->get().isOutOfRangeAllowed();
       options = enum_type->get().getRawNames();
+      docs = enum_type->get().getItemDocumentation();
     }
   }
   {
-    InputParameters::Parameter<ExecFlagEnum> * enum_type =
-        dynamic_cast<InputParameters::Parameter<ExecFlagEnum> *>(val);
+    auto * enum_type = dynamic_cast<InputParameters::Parameter<ExecFlagEnum> *>(val);
     if (enum_type)
     {
       out_of_range_allowed = enum_type->get().isOutOfRangeAllowed();
       options = enum_type->get().getRawNames();
+      docs = enum_type->get().getItemDocumentation();
     }
   }
   {
-    InputParameters::Parameter<std::vector<MooseEnum>> * enum_type =
-        dynamic_cast<InputParameters::Parameter<std::vector<MooseEnum>> *>(val);
+    auto * enum_type = dynamic_cast<InputParameters::Parameter<std::vector<MooseEnum>> *>(val);
     if (enum_type)
     {
       out_of_range_allowed = (enum_type->get())[0].isOutOfRangeAllowed();
       options = (enum_type->get())[0].getRawNames();
+      docs = enum_type->get()[0].getItemDocumentation();
     }
   }
   return options;

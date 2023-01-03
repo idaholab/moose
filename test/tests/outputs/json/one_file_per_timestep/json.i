@@ -25,6 +25,5 @@
   [out]
     type = JSON
     one_file_per_timestep = true
-    execute_system_information_on = None
   []
 []

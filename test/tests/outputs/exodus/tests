@@ -76,4 +76,20 @@
 
     requirement = "The system shall support outputting discontinuous finite element types with the ExodusII format."
   [../]
+
+  [./side_discontinuous_edge2]
+    type = 'Exodiff'
+    input = 'exodus_side_discontinuous_edge2.i'
+    exodiff = 'exodus_side_discontinuous_edge2_out.e'
+
+    requirement = "The system shall support outputting side-discontinuous edge element data with the ExodusII format."
+  [../]
+
+  [./side_discontinuous]
+    type = 'Exodiff'
+    input = 'exodus_side_discontinuous.i'
+    exodiff = 'exodus_side_discontinuous_out.e'
+
+    requirement = "The system shall support outputting side-discontinuous quad element data with the ExodusII format."
+  [../]
 []

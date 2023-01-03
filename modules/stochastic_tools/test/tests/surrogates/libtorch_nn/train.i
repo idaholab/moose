@@ -33,6 +33,7 @@
     read_from_file = false
     print_epoch_loss = 10
     activation_function = 'relu relu'
+    max_processes = 1
   []
 []
 

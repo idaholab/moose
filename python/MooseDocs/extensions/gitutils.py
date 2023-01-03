@@ -69,7 +69,14 @@ class SubmoduleHashCommand(command.CommandComponent):
             raise exceptions.MooseDocsException("The '!git submodule-hash' command is an inline level command, use '[!git!submodule-hash](name)' instead.")
 
         name = info['inline']
-        status = mooseutils.git_submodule_info(MooseDocs.ROOT_DIR, '--recursive')
+        # For submodules we pull from moose, use MOOSE_DIR
+        if name in ['large_media', 'libmesh', 'petsc']:
+            check_dir = MooseDocs.MOOSE_DIR
+        # Otherwise, use ROOT_DIR (which could be an app directory)
+        else:
+            check_dir = MooseDocs.ROOT_DIR
+
+        status = mooseutils.git_submodule_info(check_dir, '--recursive')
         for repo, ginfo in status.items():
             if repo.endswith(name):
                 url = settings['url']

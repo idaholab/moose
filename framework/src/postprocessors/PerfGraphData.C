@@ -40,6 +40,9 @@ PerfGraphData::PerfGraphData(const InputParameters & parameters)
 Real
 PerfGraphData::getValue()
 {
-  return perfGraph().sectionData(
-      static_cast<PerfGraph::DataType>(_data_type), _section_name, _must_exist);
+  if (!_fe_problem.checkingUOAuxState())
+    _current_data = perfGraph().sectionData(
+        static_cast<PerfGraph::DataType>(_data_type), _section_name, _must_exist);
+
+  return _current_data;
 }

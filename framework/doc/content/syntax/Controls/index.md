@@ -161,7 +161,7 @@ The tag name does not include the object name although the tag name is added by 
 To access a controllable parameter, the sytax is `tag/object/name`.
 Internally, MOOSE adds the input block name as a special tag name.
 
-## Controllable Parameters Added by Actions
+## Controllable Parameters Added by Actions id=controllable_params_added_by_actions
 
 MOOSE also allows parameters in [Actions](Action.md) to be controllable.
 The procedure for making a parameter in an [Action](Action.md) controllable is the same as documented in [syntax/Controls/index.md#sec:control-param].

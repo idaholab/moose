@@ -31,7 +31,7 @@ TotalPower::addVariables()
 {
   TotalPowerBase::addVariables();
 
-  _sim.addConstantScalarIC(_power_var_name, _power);
+  getTHMProblem().addConstantScalarIC(_power_var_name, _power);
 }
 
 void
@@ -43,7 +43,7 @@ TotalPower::addMooseObjects()
     pars.set<AuxVariableName>("variable") = _power_var_name;
     pars.set<Real>("value") = _power;
     std::string nm = genName(name(), "power_aux");
-    _sim.addAuxScalarKernel(class_name, nm, pars);
+    getTHMProblem().addAuxScalarKernel(class_name, nm, pars);
     connectObject(pars, nm, "power", "value");
   }
 }

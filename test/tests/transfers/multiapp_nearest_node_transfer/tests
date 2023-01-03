@@ -112,4 +112,40 @@
     prereq = 'source_boundary'
     requirement = "The system shall support source-and-target boundary transfer when use multiple mpi ranks"
   [../]
+
+  [invalid_source_boundary_from_app]
+    type = RunException
+    input = source_boundary_parent.i
+    cli_args = "Transfers/source_boundary/source_boundary='abc'"
+    expect_err = "The boundary 'abc' was not found in the mesh"
+    issues = '#22817'
+    requirement = "The system shall error if the specified source boundary was not found in the mesh for the from_multiapp direction."
+  []
+
+  [invalid_target_boundary_from_app]
+    type = RunException
+    input = source_boundary_parent.i
+    cli_args = "Transfers/source_boundary/target_boundary='abc'"
+    expect_err = "The boundary 'abc' was not found in the mesh"
+    issues = '#22817'
+    requirement = "The system shall error if the specified target boundary was not found in the mesh for the from_multiapp direction."
+  []
+
+  [invalid_source_boundary_to_app]
+    type = RunException
+    input = boundary_tosub_parent.i
+    cli_args = "Transfers/to_sub_1/source_boundary='abc'"
+    expect_err = "The boundary 'abc' was not found in the mesh"
+    issues = '#22817'
+    requirement = "The system shall error if the specified source boundary was not found in the mesh for the to_multiapp direction."
+  []
+
+  [invalid_target_boundary_to_app]
+    type = RunException
+    input = boundary_tosub_parent.i
+    cli_args = "Transfers/to_sub_1/target_boundary='abc'"
+    expect_err = "The boundary 'abc' was not found in the mesh"
+    issues = '#22817'
+    requirement = "The system shall error if the specified target boundary was not found in the mesh for the to_multiapp direction."
+  []
 []

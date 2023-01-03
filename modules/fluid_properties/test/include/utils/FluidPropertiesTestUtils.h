@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "metaphysicl/raw_type.h"
+
 // Relative tolerance to be used when comparing to a value from external fluid
 // property packages, which might be using different underlying models
 #define REL_TOL_EXTERNAL_VALUE 1e-3
@@ -31,7 +33,11 @@
   if (std::abs(ref_value) < 1e-15)                                                                 \
     ABS_TEST(value, ref_value, tol);                                                               \
   else                                                                                             \
-    EXPECT_LE(std::abs(((value) - (ref_value)) / (ref_value)), tol);
+    EXPECT_LE(std::abs(((MetaPhysicL::raw_value(value)) - (MetaPhysicL::raw_value(ref_value))) /   \
+                       (MetaPhysicL::raw_value(ref_value))),                                       \
+              tol);
 
 // Macro for computing absolute error
-#define ABS_TEST(value, ref_value, tol) EXPECT_LE(std::abs(((value) - (ref_value))), (tol))
+#define ABS_TEST(value, ref_value, tol)                                                            \
+  EXPECT_LE(std::abs(((MetaPhysicL::raw_value(value)) - (MetaPhysicL::raw_value(ref_value)))),     \
+            (tol))

@@ -70,14 +70,6 @@
   [../]
 []
 
-[Postprocessors]
-  [./f]
-    type = ScalarVariable
-    variable = f
-    execute_on = 'initial timestep_end'
-  [../]
-[]
-
 [Executioner]
   type = Transient
   dt = 1

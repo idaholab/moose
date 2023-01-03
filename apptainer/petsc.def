@@ -1,0 +1,58 @@
+{#- Required jinja arguments                                                                  -#}
+{#- APPTAINER_BOOTSTRAP: The BootStrap to use (typically localimage or oras)                  -#}
+{#- APPTAINER_FROM: The From to use (path to an image or an oras URI)                         -#}
+{#- MOOSE_DIR: Path on the host to the MOOSE repository                                       -#}
+
+{#- Optional jinja arguments                                                                  -#}
+{#- PETSC_ALT: Set to anything to use the alternate version of PETSc                          -#}
+{#- PETSC_OPTIONS: Options to pass to the PETSc build script                                  -#}
+{#- MOOSE_JOBS: Number of jobs to pass to the PETSc build script                              -#}
+
+{#- The within-container build directory to use                                               -#}
+{%- set ROOT_BUILD_DIR = '/root/build' -%}
+
+{#- The installation location for PETSc                                                       -#}
+{%- set PETSC_DIR = '/opt/petsc' -%}
+
+BootStrap: {{ APPTAINER_BOOTSTRAP }}
+From: {{ APPTAINER_FROM }}
+
+%setup
+    # Copy moose from MOOSE_DIR into the container
+    ROOT_BUILD_DIR=${APPTAINER_ROOTFS}{{ ROOT_BUILD_DIR }}
+    mkdir ${ROOT_BUILD_DIR}
+    MOOSE_DIR={{ MOOSE_DIR }}
+    cp -r ${MOOSE_DIR} ${ROOT_BUILD_DIR}
+    cd ${ROOT_BUILD_DIR}/moose
+    git submodule update --init petsc
+
+%environment
+    # From moose-petsc
+    export PETSC_DIR={{ PETSC_DIR }}
+
+%post
+    # Load jinja vars
+    ROOT_BUILD_DIR={{ ROOT_BUILD_DIR }}
+    PETSC_DIR={{ PETSC_DIR }}
+{%- if PETSC_ALT is defined %}
+    # PETSC_ALT set; using alt script
+    PETSC_BUILD_SCRIPT=./scripts/update_and_rebuild_petsc_alt.sh
+{%- else %}
+    # PETSC_ALT not set; using standard script
+    PETSC_BUILD_SCRIPT=./scripts/update_and_rebuild_petsc.sh
+{%- endif %}
+
+    # Build PETSc
+    umask 022
+    cd ${ROOT_BUILD_DIR}/moose
+    MOOSE_JOBS={{ MOOSE_JOBS }} PETSC_PREFIX=${PETSC_DIR} ${PETSC_BUILD_SCRIPT} {{ PETSC_OPTIONS }}
+
+    # Test PETSc
+    cd petsc
+    make SLEPC_DIR=${PETSC_DIR} PETSC_DIR=${PETSC_DIR} PETSC_ARCH= check
+
+    # Fix possibly bad permissions
+    chmod -R o=u-w,g=u-w ${PETSC_DIR}
+
+    # Clean Up
+    rm -rf ${ROOT_BUILD_DIR}

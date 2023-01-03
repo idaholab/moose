@@ -61,7 +61,6 @@ protected:
   MooseEnum _splitting_type;
   MooseEnum _schur_type;
   MooseEnum _schur_pre;
-  MooseEnum _schur_ainv;
   ///@}
 
   /// Additional PETSc options

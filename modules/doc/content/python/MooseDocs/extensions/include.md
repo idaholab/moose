@@ -23,4 +23,8 @@ file and [example-include-re] imports a portion of a file using the "re" setting
 !include /core.md re=(?P<content>^The core.*?)^Syntax
 !devel-end!
 
+!alert warning title=Including text with template arguments
+See the warning in [extensions/template.md#using-templates] for a caution about
+including text that includes template key/value pairs.
+
 [markdown]: https://en.wikipedia.org/wiki/Markdown

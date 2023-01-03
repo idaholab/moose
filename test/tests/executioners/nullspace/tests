@@ -5,14 +5,12 @@
     type = 'CSVDiff'
     input = 'singular.i'
     csvdiff = 'singular_out_sample_solution_0001.csv'
-    petsc_version = '>=3.6.0'
     requirement = "The system shall compute the solution of rank-deficient linear equations if the right hand side is within the range of the linear operator."
   [../]
   [./test_singular_contaminated]
     type = 'CSVDiff'
     input = 'singular_contaminated.i'
     csvdiff = 'singular_contaminated_out_sample_solution_0001.csv'
-    petsc_version = '>=3.6.0'
     requirement = "The system shall compute the solution of rank-deficient linear equations if the right hand side has components that are orthogonal to the range of the linear operator."
   [../]
 []

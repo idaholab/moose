@@ -14,7 +14,7 @@
 #include <set>
 
 // Forward Declarations
-class GeneralizedPlaneStrainUserObject;
+class GeneralizedPlaneStrainUOInterface;
 
 class GeneralizedPlaneStrain : public ScalarKernel
 {
@@ -27,7 +27,7 @@ public:
   virtual void computeResidual();
   virtual void computeJacobian();
 
-  const GeneralizedPlaneStrainUserObject & _gps;
+  const GeneralizedPlaneStrainUOInterface & _gps;
   const unsigned int _scalar_var_id;
 
   /// The reference vector tag ID

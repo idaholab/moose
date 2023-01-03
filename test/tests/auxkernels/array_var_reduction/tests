@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#22809'
+  design = '/auxkernels/ArrayVarReductionAux.md'
+  [test]
+    type = 'Exodiff'
+    input = 'array_var_reduction.i'
+    exodiff = 'array_var_reduction_out.e'
+    requirement = 'The system shall provide a way to reduce values in an array variable to a single variable using max/min/sum/average operations.'
+  []
+[]

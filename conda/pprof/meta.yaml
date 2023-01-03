@@ -1,4 +1,4 @@
-{% set version = "2022.06.29" %}
+{% set version = "2022.12.05" %}
 {% set build = 0 %}
 {% set strbuild = "build_" + build|string %}
 
@@ -31,7 +31,6 @@ requirements:
     - graphviz
     - perl
     - setuptools <60
-    - openssl <3
 
 test:
   commands:

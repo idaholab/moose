@@ -47,6 +47,7 @@ private:
   const bool _has_velocity;
   const bool _has_acceleration;
   const GenericMaterialProperty<Real, is_ad> & _eta;
+  const MaterialProperty<Real> & _density_scaling;
   const Real _alpha;
 
   // Velocity and acceleration calculated by time integrator

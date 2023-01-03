@@ -39,6 +39,11 @@ Terminator::validParams()
                                "when the termination condition is triggered");
 
   MooseEnum errorLevel("INFO WARNING ERROR NONE", "INFO");
+  errorLevel.addDocumentation("INFO", "Output an information message once.");
+  errorLevel.addDocumentation("WARNING", "Output a warning message once.");
+  errorLevel.addDocumentation("ERROR",
+                              "Throw a MOOSE error, resulting in the termination of the run.");
+  errorLevel.addDocumentation("NONE", "No message will be printed.");
   params.addParam<MooseEnum>(
       "error_level",
       errorLevel,
@@ -98,7 +103,7 @@ Terminator::handleMessage()
   switch (_error_level)
   {
     case ErrorLevel::INFO:
-      mooseInfo(message);
+      mooseInfoRepeated(message);
       break;
 
     case ErrorLevel::WARNING:

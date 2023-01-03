@@ -27,6 +27,7 @@ class RunApp(Tester):
         params.addParam('executable_pattern', "A test that only runs if the executable name matches the given pattern")
         params.addParam('delete_output_before_running',  True, "Delete pre-existing output files before running test. Only set to False if you know what you're doing!")
         params.addParam('delete_output_folders', True, "Delete output folders before running")
+        params.addParam('custom_evaluation_script', False, "A .py file containing a custom function for evaluating a test's success. For syntax, please check https://mooseframework.inl.gov/python/TestHarness.html")
 
         # RunApp can also run arbitrary commands. If the "command" parameter is supplied
         # it'll be used in lieu of building up the command automatically
@@ -40,7 +41,7 @@ class RunApp(Tester):
         params.addParam('redirect_output',  False, "Redirect stdout to files. Neccessary when expecting an error when using parallel options")
 
         params.addParam('allow_warnings',   True, "Whether or not warnings are allowed.  If this is False then a warning will be treated as an error.  Can be globally overridden by setting 'allow_warnings = False' in the testroot file.");
-        params.addParam('allow_unused',   True, "Whether or not unused parameters are allowed in the input file.  Can be globally overridden by setting 'allow_unused = False' in the testroot file.");
+        params.addParam('allow_unused',   False, "Whether or not unused parameters are allowed in the input file.  Can be globally overridden by setting 'allow_unused = False' in the testroot file.");
         params.addParam('allow_override', True, "Whether or not overriding a parameter/block in the input file generates an error.  Can be globally overridden by setting 'allow_override = False' in the testroot file.");
         params.addParam('allow_deprecated', True, "Whether or not deprecated warnings are allowed.  Setting to False will cause deprecation warnings to be treated as test failures.  We do NOT recommend you globally set this permanently to False!  Deprecations are a part of the normal development flow and _SHOULD_ be allowed!")
         params.addParam('no_error_deprecated', False, "Don't pass --error-deprecated on the command line even when running the TestHarness with --error-deprecated")
@@ -216,6 +217,26 @@ class RunApp(Tester):
         reason = ''
         errors = ''
         specs = self.specs
+
+        if specs["custom_evaluation_script"]:
+            if (specs.isValid('expect_out') or specs.isValid('absent_out')):
+                errors += 'expect_out and absent_out can not be supplied when using a custom evaluation function!'
+                self.setStatus(self.fail, "CUSTOM EVAL FAILED")
+                return errors
+            import importlib.util, sys
+            custom_mod_spec = importlib.util.spec_from_file_location("custom_module", os.path.join(self.getMooseDir(),self.getTestDir(), specs["custom_evaluation_script"]))
+            custom_module = importlib.util.module_from_spec(custom_mod_spec)
+            sys.modules['custom_module'] = custom_module
+            custom_mod_spec.loader.exec_module(custom_module)
+            if custom_module.custom_evaluation(output):
+                return errors
+            else:
+                errors += "#"*80 + "\n\n" + "Custom evaluation failed.\n"
+                self.setStatus(self.fail, "CUSTOM EVAL FAILED")
+                return errors
+
+
+
 
         params_and_msgs = {'expect_err':
                               {'error_missing': True,

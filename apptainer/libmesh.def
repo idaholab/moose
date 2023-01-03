@@ -1,0 +1,100 @@
+{#- Required jinja arguments                                                                  -#}
+{#- APPTAINER_BOOTSTRAP: The BootStrap to use (typically localimage or oras)                  -#}
+{#- APPTAINER_FROM: The From to use (path to an image or an oras URI)                         -#}
+{#- MOOSE_DIR: Path on the host to the MOOSE repository                                       -#}
+{#- vtk_url: URL to download VTK                                                              -#}
+{#- vtk_sha256: The shasum for downloaded file                                                -#}
+{#- vtk_vtk_friendly_version: The short version name. vtk_vtk_ is not a typo                  -#}
+
+{#- Optional jinja arguments                                                                  -#}
+{#- DEV_CONTAINER: Set to anything to add development packages and install _all_ methods      -#}
+{#- LIBMESH_OPTIONS: Options to pass to the libMesh build script                              -#}
+{#- MOOSE_JOBS: Number of jobs to pass to the libMesh build script                            -#}
+{#- METHODS: Methods to build (defaults to opt, unused if DEV_CONTAINER is set)               -#}
+
+{#- The within-container build directory to use                                               -#}
+{%- set ROOT_BUILD_DIR = '/root/build' -%}
+
+{#- The installation location for libMesh                                                     -#}
+{%- set LIBMESH_DIR = '/opt/libmesh' -%}
+
+{#- The installation location for VTK                                                         -#}
+{%- set VTK_DIR = '/opt/vtk' -%}
+
+BootStrap: {{ APPTAINER_BOOTSTRAP }}
+From: {{ APPTAINER_FROM }}
+
+%setup
+    # Copy moose from MOOSE_DIR into the container
+    ROOT_BUILD_DIR=${APPTAINER_ROOTFS}{{ ROOT_BUILD_DIR }}
+    mkdir ${ROOT_BUILD_DIR}
+    MOOSE_DIR={{ MOOSE_DIR }}
+    cp -r ${MOOSE_DIR} ${ROOT_BUILD_DIR}
+    cd ${ROOT_BUILD_DIR}/moose
+    git submodule update --init --recursive libmesh
+
+    # Obtain VTK
+    cd ${ROOT_BUILD_DIR}
+    curl -L -O {{vtk_url}} || exit 1
+    if [[ `sha256sum $(basename {{vtk_url}}) | cut -d\  -f1` != '{{vtk_sha256}}' ]]; then exit 1; fi
+    tar -xf $(basename {{vtk_url}})
+
+%environment
+    # From moose-libmesh
+    export LIBMESH_DIR={{ LIBMESH_DIR }}
+    # From moose-libmesh-vtk, vtk_vtk_ is not a typo
+    export VTKINCLUDE_DIR={{ VTK_DIR }}/include/vtk-{{ vtk_vtk_friendly_version }}
+    export VTKLIB_DIR={{ VTK_DIR }}/lib
+
+%post
+    # Load jinja vars
+    ROOT_BUILD_DIR={{ ROOT_BUILD_DIR }}
+    LIBMESH_DIR={{ LIBMESH_DIR }}
+    MOOSE_JOBS={{ MOOSE_JOBS }}
+    VTK_DIR={{ VTK_DIR }}
+    VTKINCLUDE_DIR={{ VTK_DIR }}/include/vtk-{{ vtk_vtk_friendly_version }}
+    VTKLIB_DIR={{ VTK_DIR }}/lib
+
+    # Build VTK
+    cd ${ROOT_BUILD_DIR}/$(basename {{vtk_url}} .tar.gz)
+    mkdir -p build; cd build
+    cmake .. \
+        -Wno-dev \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_PREFIX_PATH:PATH=${VTK_DIR} \
+        -DCMAKE_INSTALL_PREFIX:PATH=${VTK_DIR} \
+        -DCMAKE_INSTALL_RPATH:PATH=${VTK_DIR}/lib \
+        -DCMAKE_INSTALL_LIBDIR=lib \
+        -DVTK_BUILD_DOCUMENTATION:BOOL=OFF \
+        -DVTK_BUILD_TESTING:BOOL=OFF \
+        -DVTK_BUILD_EXAMPLES:BOOL=OFF \
+        -DBUILD_SHARED_LIBS:BOOL=ON \
+        -DVTK_USE_MPI:BOOL=ON \
+        -DVTK_GROUP_ENABLE_Rendering:STRING=DONT_WANT \
+        -DVTK_GROUP_ENABLE_Qt::STRING=NO \
+        -DVTK_GROUP_ENABLE_Views:STRING=NO \
+        -DVTK_GROUP_ENABLE_Web:STRING=NO
+    make install -j ${MOOSE_JOBS}
+    export VTKINCLUDE_DIR
+    export VTKLIB_DIR
+
+{%- if DEV_CONTAINER is defined %}
+    # DEV_CONTAINER set
+    METHODS="opt dbg oprof devel"
+    dnf --enablerepo=powertools install -y valgrind cppunit
+{%- else %}
+    # DEV_CONTAINER not set
+    METHODS="{{ METHODS or "opt" }}"
+{%- endif %}
+
+    # Build libMesh
+    umask 022
+    cd ${ROOT_BUILD_DIR}/moose
+    LIBMESH_DIR=${LIBMESH_DIR} MOOSE_JOBS=${MOOSE_JOBS} METHODS=${METHODS} ./scripts/update_and_rebuild_libmesh.sh {{ LIBMESH_OPTIONS }}
+
+    # Fix possibly bad permissions
+    chmod -R o=u-w,g=u-w ${LIBMESH_DIR}
+
+    # Clean Up
+    rm -rf ${ROOT_BUILD_DIR}
+    dnf clean all

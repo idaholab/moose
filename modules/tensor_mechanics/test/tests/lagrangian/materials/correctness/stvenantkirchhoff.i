@@ -88,11 +88,9 @@
   []
   [compute_stress]
     type = ComputeStVenantKirchhoffStress
-    large_kinematics = true
   []
   [compute_strain]
     type = ComputeLagrangianStrain
-    large_kinematics = true
   []
 []
 

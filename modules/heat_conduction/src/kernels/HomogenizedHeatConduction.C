@@ -17,10 +17,9 @@ HomogenizedHeatConduction::validParams()
   InputParameters params = Kernel::validParams();
   params.addClassDescription(
       "Kernel for asymptotic expansion homogenization for thermal conductivity");
-  params.addParam<MaterialPropertyName>(
-      "diffusion_coefficient",
-      "thermal_conductivity",
-      "The diffusion coefficient for the temperature gradient (Default: thermal_conductivity)");
+  params.addParam<MaterialPropertyName>("diffusion_coefficient",
+                                        "thermal_conductivity",
+                                        "The diffusion coefficient for the temperature gradient");
   params.addRequiredRangeCheckedParam<unsigned int>(
       "component",
       "component < 3",

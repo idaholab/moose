@@ -234,6 +234,7 @@ class TestHarness:
         self.code = b'2d2d6769726c2d6d6f6465'
         self.error_code = 0x0
         self.keyboard_talk = True
+        self.results_file = '.previous_test_results.json'
         # Assume libmesh is a peer directory to MOOSE if not defined
         if "LIBMESH_DIR" in os.environ:
             self.libmesh_dir = os.environ['LIBMESH_DIR']
@@ -417,8 +418,9 @@ class TestHarness:
                             sys.path.append(os.path.abspath(dirpath))
                             os.chdir(dirpath)
 
-                            # Get the testers for this test
+                            # Create the testers for this test
                             testers = self.createTesters(dirpath, file, find_only, testroot_params)
+
 
                             # Schedule the testers (non blocking)
                             self.scheduler.schedule(testers)
@@ -467,6 +469,7 @@ class TestHarness:
 
         # Augment the Testers with additional information directly from the TestHarness
         for tester in testers:
+
             self.augmentParameters(file, tester, testroot_params)
             if testroot_params.get("caveats"):
                 # Show what executable we are using if using a different testroot file
@@ -673,7 +676,7 @@ class TestHarness:
             self.error_code = self.error_code | 0x80
 
         # Alert the user to their session file
-        if self.options.queueing:
+        if self.options.queueing and not self.options.dry_run:
             print(('Your session file is %s' % self.options.results_file))
 
         # Print a different footer when performing a dry run
@@ -785,6 +788,15 @@ class TestHarness:
         # Record the input file name that was used
         self.options.results_storage['INPUT_FILE_NAME'] = self.options.input_file_name
 
+        # Record that we are using --sep-files* options
+        self.options.results_storage['SEP_FILES'] = (True if self.options.pbs else False
+                                                     or self.options.ok_files
+                                                     or self.options.fail_files
+                                                     or self.options.sep_files)
+
+        # Record the Scheduler Plugin used
+        self.options.results_storage['SCHEDULER'] = self.scheduler.__class__.__name__
+
         # Write some useful data to our results_storage
         for job_group in all_jobs:
             for job in job_group:
@@ -796,6 +808,11 @@ class TestHarness:
 
                 # Create empty key based on TestDir, or re-inialize with existing data so we can append to it
                 self.options.results_storage[job.getTestDir()] = self.options.results_storage.get(job.getTestDir(), {})
+
+                # If output has been stored in separate files, don't make additional copies by
+                # storing that data in this json results file (--pbs || --sep-files, etc options).
+                output = '' if job.getOutputFile() else job.getOutput()
+
                 self.options.results_storage[job.getTestDir()][job.getTestName()] = {'NAME'           : job.getTestNameShort(),
                                                                                      'LONG_NAME'      : job.getTestName(),
                                                                                      'TIMING'         : job.getTiming(),
@@ -804,8 +821,9 @@ class TestHarness:
                                                                                      'FAIL'           : job.isFail(),
                                                                                      'COLOR'          : message_color,
                                                                                      'CAVEATS'        : list(job.getCaveats()),
-                                                                                     'OUTPUT'         : job.getOutput(),
-                                                                                     'COMMAND'        : job.getCommand()}
+                                                                                     'OUTPUT'         : output,
+                                                                                     'COMMAND'        : job.getCommand(),
+                                                                                     'META_DATA'      : job.getMetaData()}
 
                 # Additional data to store (overwrites any previous matching keys)
                 self.options.results_storage[job.getTestDir()].update(job.getMetaData())
@@ -863,17 +881,9 @@ class TestHarness:
                                 output += "\n\nINPUT FILE:\n" + str(input_file)
 
                         output += "\n\nTEST OUTPUT:" + job.getOutput()
-
-                        # Yes, by design test dir will be apart of the output file name
-                        output_file = os.path.join(output_dir, '.'.join([os.path.basename(job.getTestDir()),
-                                                                         job.getTestNameShort().replace(os.sep, '.'),
-                                                                         status,
-                                                                         'txt']))
-
+                        output_file = job.getOutputFile()
                         formated_results = util.formatResult(job, self.options, result=output, color=False)
-
-                        if (self.options.ok_files and job.isPass()) or \
-                           (self.options.fail_files and job.isFail()):
+                        if output_file:
                             with open(output_file, 'w') as f:
                                 f.write(formated_results)
 
@@ -1029,7 +1039,6 @@ class TestHarness:
         parser.add_argument('--allow-unused',action='store_true', help='Run the tests without errors on unused parameters (Pass "--allow-unused" to executable)')
         # Option to use for passing unwrapped options to the executable
         parser.add_argument('--cli-args', nargs='?', type=str, dest='cli_args', help='Append the following list of arguments to the command line (Encapsulate the command in quotes)')
-
         parser.add_argument('--dry-run', action='store_true', dest='dry_run', help="Pass --dry-run to print commands to run, but don't actually run them")
         parser.add_argument('--use-subdir-exe', action="store_true", help='If there are sub directories that contain a new testroot, use that for running tests under that directory.')
 
@@ -1051,7 +1060,7 @@ class TestHarness:
         outputgroup.add_argument("--dump", action="store_true", dest="dump", help="Dump the parameters for the testers in GetPot Format")
         outputgroup.add_argument("--no-trimmed-output", action="store_true", dest="no_trimmed_output", help="Do not trim the output")
         outputgroup.add_argument("--no-trimmed-output-on-error", action="store_true", dest="no_trimmed_output_on_error", help="Do not trim output for tests which cause an error")
-        outputgroup.add_argument("--results-file", nargs=1, default='.previous_test_results.json', help="Save run_tests results to an alternative json file (default: %(default)s)")
+        outputgroup.add_argument("--results-file", nargs=1, default=self.results_file, help="Save run_tests results to an alternative json file (default: %(default)s)")
         outputgroup.add_argument("--show-last-run", action="store_true", dest="show_last_run", help="Display previous results without executing tests again")
 
         queuegroup = parser.add_argument_group('Queue Options', 'Options controlling which queue manager to use')
@@ -1060,10 +1069,7 @@ class TestHarness:
         queuegroup.add_argument('--pbs-project', nargs=1, action='store', dest='queue_project', type=str, default='moose', metavar='', help='Identify your job(s) with this project (default:  %(default)s)')
         queuegroup.add_argument('--pbs-queue', nargs=1, action='store', dest='queue_queue', type=str, metavar='', help='Submit jobs to the specified queue')
         queuegroup.add_argument('--pbs-node-cpus', nargs=1, action='store', type=int, default=None, metavar='', help='CPUS Per Node. The default (no setting), will always use only one node')
-        queuegroup.add_argument('--pbs-cleanup', nargs=1, action="store", metavar='name', help='Clean up files generated by supplied --pbs name')
-        queuegroup.add_argument('--queue-project', nargs=1, action='store', type=str, default='moose', metavar='', help='Deprecated. Use --pbs-project')
-        queuegroup.add_argument('--queue-queue', nargs=1, action='store', type=str, metavar='', help='Deprecated. Use --pbs-queue')
-        queuegroup.add_argument('--queue-cleanup', action="store_true", help='Deprecated. Use --pbs-cleanup')
+        queuegroup.add_argument('--pbs-cleanup', nargs=1, action="store", dest='queue_cleanup', metavar='name', help='Clean up files generated by supplied --pbs name')
 
         code = True
         if self.code.decode() in argv:
@@ -1084,11 +1090,6 @@ class TestHarness:
     ## Called after options are parsed from the command line
     # Exit if options don't make any sense, print warnings if they are merely weird
     def checkAndUpdateCLArgs(self):
-        # Support deprecated cleanup method for now
-        if self.options.pbs_cleanup:
-            self.options.pbs = self.options.pbs_cleanup
-            self.options.queue_cleanup = True
-
         opts = self.options
         if opts.output_dir and not (opts.file or opts.sep_files or opts.fail_files or opts.ok_files):
             print('WARNING: --output-dir is specified but no output files will be saved, use -f or a --sep-files option')
@@ -1096,31 +1097,37 @@ class TestHarness:
             print('ERROR: The group and not_group options cannot specify the same group')
             sys.exit(1)
         if opts.valgrind_mode and opts.nthreads > 1:
-            print('ERROR: --threads can not be used with --valgrind')
+            print('ERROR: --threads cannot be used with --valgrind')
             sys.exit(1)
         if opts.check_input and opts.no_check_input:
-            print('ERROR: --check-input and --no-check-input can not be used together')
+            print('ERROR: --check-input and --no-check-input cannot be used simultaneously')
             sys.exit(1)
         if opts.check_input and opts.enable_recover:
-            print('ERROR: --check-input and --recover can not be used together')
+            print('ERROR: --check-input and --recover cannot be used simultaneously')
             sys.exit(1)
         if opts.spec_file and not os.path.exists(opts.spec_file):
             print('ERROR: --spec-file supplied but path does not exist')
             sys.exit(1)
-        if opts.failed_tests and opts.pbs:
-            print('ERROR: --failed-tests and --pbs can not be used simultaneously')
-            sys.exit(1)
         if opts.queue_cleanup and not opts.pbs:
-            print('ERROR: --queue-cleanup can not be used without additional queue options')
+            print('ERROR: --queue-cleanup cannot be used without additional queue options')
             sys.exit(1)
         if opts.queue_source_command and not os.path.exists(opts.queue_source_command):
             print('ERROR: pre-source supplied but path does not exist')
             sys.exit(1)
-        if opts.failed_tests and not os.path.exists(opts.results_file):
+        if opts.failed_tests and not opts.pbs and not os.path.exists(opts.results_file):
             print('ERROR: --failed-tests could not detect a previous run')
             sys.exit(1)
         if opts.pbs and opts.pedantic_checks:
-            print('ERROR: --pbs and --pedantic-checks  can not be used simultaneously')
+            print('ERROR: --pbs and --pedantic-checks cannot be used simultaneously')
+            sys.exit(1)
+        if opts.pbs and opts.jobs:
+            print('ERROR: --pbs and -j|--jobs cannot be used simultaneously')
+            sys.exit(1)
+        if opts.pbs and opts.extra_info:
+            print('ERROR: --pbs and -e (extra info) cannot be used simultaneously')
+            sys.exit(1)
+        if opts.verbose and opts.quiet:
+            print('Do not be an oxymoron with --verbose and --quiet')
             sys.exit(1)
 
         # Flatten input_file_name from ['tests', 'speedtests'] to just tests if none supplied

@@ -1,0 +1,11 @@
+[Tests]
+  design = 'ElementOptimizationSourceFunctionInnerProduct.md'
+  [vector_nearest_point]
+    type = CSVDiff
+    input = element_source_inner_product.i
+    csvdiff = element_source_inner_product_out_inner_product_0011.csv
+    recover = false # Can't do recover since there is no mesh
+    issues = '#22215'
+    requirement = 'The system shall be able to compute the inner product of a variable and a nearest node optimization volumetric source function.'
+  []
+[]

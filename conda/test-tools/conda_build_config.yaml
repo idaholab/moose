@@ -1,0 +1,12 @@
+moose_python:
+  - python 3.10
+  - python 3.9
+  - python 3.8
+  - python 3.7                                             # [not arm64]
+
+# Pesky packages that break internal CI
+# Note: Modifying/Updating this will require changes to conda/mpich!
+setuptools:
+  - <60.0
+pin_run_as_build:
+  setuptools: x.x

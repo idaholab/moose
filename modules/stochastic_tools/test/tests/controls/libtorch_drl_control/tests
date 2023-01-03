@@ -1,0 +1,24 @@
+[Tests]
+  issues = '#19571'
+  design = 'LibtorchDRLControl.md'
+  [read-parameters]
+    type = CSVDiff
+    input = libtorch_drl_control.i
+    csvdiff = parameter_read.csv
+    cli_args = "Outputs/file_base='parameter_read'"
+    requirement = "The system shall be able to read a neural network from a parameter file and use "
+                  "it to control a transient process."
+    libtorch = true
+  []
+  [without-nn]
+    type = CSVDiff
+    input = libtorch_drl_control.i
+    csvdiff = run_wo_nn.csv
+    cli_args = "Outputs/file_base='run_wo_nn' Controls/inactive='src_control' "
+               "Postprocessors/left_flux/control_name='src_control_empty' "
+               "Postprocessors/log_prob_left_flux/control_name='src_control_empty'"
+    requirement = "The system shall be able to run with a DRL controller without having a neural net "
+                  "initialized in it."
+    libtorch = true
+  []
+[]

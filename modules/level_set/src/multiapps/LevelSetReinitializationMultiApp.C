@@ -29,7 +29,7 @@ LevelSetReinitializationMultiApp::validParams()
   params.suppressParameter<std::vector<Point>>("positions");
   params.suppressParameter<std::vector<FileName>>("positions_file");
   params.suppressParameter<bool>("output_in_position");
-  params.suppressParameter<Real>("reset_time");
+  params.suppressParameter<std::vector<Real>>("reset_time");
   params.suppressParameter<std::vector<unsigned int>>("reset_apps");
   params.suppressParameter<Real>("move_time");
   params.suppressParameter<std::vector<unsigned int>>("move_apps");

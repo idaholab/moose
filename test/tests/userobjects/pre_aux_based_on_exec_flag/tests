@@ -1,12 +1,20 @@
 [Tests]
-  issues = '#18189'
-  design = '/GeneralUserObject.md'
+  [state_detection]
+    type = 'RunException'
+    input = 'pre_post_aux_test.i'
+    cli_args = 'Problem/check_uo_aux_state=true AuxKernels/inactive=NormalizationAuxINITIAL'
+    expect_err = 'Aux kernels, user objects appear to have states for aux variables on FINAL'
+    issues = '#22802'
+    design = 'FEProblemBase.md'
+    requirement = 'The system shall provide means to detect unresolved dependency in evaluations of user objects and auxiliary kernels '
+ []
 
-  [./test_preaux_based_on_exec_flag_final]
+  [test_preaux_based_on_exec_flag_final]
     type = 'CSVDiff'
     input = 'pre_post_aux_test.i'
     csvdiff = 'pre_post_aux_test_out.csv'
-
+    issues = '#18189'
+    design = '/GeneralUserObject.md'
     requirement = 'The system shall consider that when auxkernel depends on a UO, the exec flag will be taken into consideration to determin when the UO must be executed preaux.'
-  [../]
+  []
 []

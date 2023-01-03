@@ -292,7 +292,7 @@ public:
    *
    * @return true if initial conditions are specified from a file
    */
-  bool hasInitialConditionsFromFile();
+  bool hasInitialConditionsFromFile() const;
 
   Logger & log() { return _log; }
 

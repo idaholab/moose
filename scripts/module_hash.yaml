@@ -1,14 +1,1 @@
-packages:
-  petsc:
-    - petsc
-    - conda/petsc/meta.yaml
-    - scripts/configure_petsc.sh
-    - scripts/update_and_rebuild_petsc.sh
-  libmesh:
-    - libmesh
-    - conda/libmesh/meta.yaml
-    - scripts/configure_libmesh.sh
-    - scripts/update_and_rebuild_libmesh.sh
-zip_keys:
-  - petsc
-  - libmesh
+versioner.yaml

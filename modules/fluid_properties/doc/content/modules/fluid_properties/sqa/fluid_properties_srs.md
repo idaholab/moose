@@ -2,7 +2,7 @@
 
 !template! item key=system-purpose
 !! system-purpose-begin
-The [!ac](MOOSE) {{module}} module provides uniform interfaces to numerous physical properties
+The [!ac](MOOSE) Fluid Properties module provides uniform interfaces to numerous physical properties
 of fluids and a library of fluid objects based on these interfaces. This module is intended to be used by
 a variety of MOOSE-based applications involving the simulation of fluid flow.
 !! system-purpose-finish
@@ -10,7 +10,7 @@ a variety of MOOSE-based applications involving the simulation of fluid flow.
 
 !template! item key=system-scope
 !! system-scope-begin
-The scope of the {{module}} module includes properties of both liquids and gases,
+The scope of the Fluid Properties module includes properties of both liquids and gases,
 as well as two-phase liquid-vapor properties. Additionally, the module includes
 some generic capability for defining a fluid's equation of state from user-defined
 functions or tabular data from files.

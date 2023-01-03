@@ -271,14 +271,28 @@ SolutionUserObject::readExodusII()
       if (std::find(all_elemental.begin(), all_elemental.end(), var_name) != all_elemental.end())
         _elemental_variables.push_back(var_name);
       if (std::find(all_scalar.begin(), all_scalar.end(), var_name) != all_scalar.end())
-        _scalar_variables.push_back(var_name);
+        // Check if the scalar matches any field variables, and ignore the var if it does. This
+        // means its a Postprocessor.
+        if (std::find(begin(_nodal_variables), end(_nodal_variables), var_name) ==
+                _nodal_variables.end() &&
+            std::find(begin(_elemental_variables), end(_elemental_variables), var_name) ==
+                _elemental_variables.end())
+          _scalar_variables.push_back(var_name);
     }
   }
   else
   {
     _nodal_variables = all_nodal;
     _elemental_variables = all_elemental;
-    _scalar_variables = all_scalar;
+
+    for (auto var_name : all_scalar)
+      // Check if the scalar matches any field variables, and ignore the var if it does. This means
+      // its a Postprocessor.
+      if (std::find(begin(_nodal_variables), end(_nodal_variables), var_name) ==
+              _nodal_variables.end() &&
+          std::find(begin(_elemental_variables), end(_elemental_variables), var_name) ==
+              _elemental_variables.end())
+        _scalar_variables.push_back(var_name);
   }
 
   // Add the variables to the system
@@ -363,7 +377,7 @@ SolutionUserObject::readExodusII()
     for (const auto & var_name : _elemental_variables)
       _exodusII_io->copy_elemental_solution(*_system, var_name, var_name, _exodus_time_index);
 
-    if (_scalar_variables.size() > 0)
+    if (!_scalar_variables.empty())
       _exodusII_io->copy_scalar_solution(
           *_system, _scalar_variables, _scalar_variables, _exodus_time_index);
 

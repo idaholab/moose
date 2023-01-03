@@ -4,6 +4,8 @@ The CSVReader reads [CSV](https://en.wikipedia.org/wiki/Comma-separated_values) 
 converts each column into a VectorPostprocessor vector. This object uses the
 [DelimitedFileReader](MooseUtils.md#delimitedfilereader) utility to perform the reading of the file.
 
+The names of the vectors declared by the `CSVReader` are the names of the columns in the CSV file.
+
 ## Example Input Syntax
 
 In this example, the `example.csv` file containing data for year/month/day is being read by

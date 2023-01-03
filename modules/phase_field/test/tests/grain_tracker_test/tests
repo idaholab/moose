@@ -86,8 +86,6 @@
     csvdiff = 'grain_tracker_remapping_test_out.csv'
     method = '!DBG' # slow test
     valgrind = 'NONE' # Exact same test used elsewhere
-    # This test uses a coloring algorithm that requires PETSc >= 3.5.0.
-    petsc_version = '>=3.5.0'
 
     requirement = "The GrainTracker object shall support remapping order parameter values."
     issues = '#1298'
@@ -101,8 +99,6 @@
 
     method = '!DBG' # slow test
     valgrind = 'HEAVY'
-    # This test uses a coloring algorithm that requires PETSc >= 3.5.0.
-    petsc_version = '>=3.5.0'
     prereq = 'test_remapping_serial'
 
     min_parallel = 8 # Test distributed merge work with grain tracker
@@ -120,7 +116,6 @@
 
     method = '!DBG'
     valgrind = 'NONE'
-    petsc_version = '>=3.5.0'
 
     requirement = "The GrainTracker object shall properly checkpoint unique grain information in serial."
     issues = "#6713 #12427"
@@ -137,7 +132,6 @@
 
     method = '!DBG'
     valgrind = 'NONE'
-    petsc_version = '>=3.5.0'
 
     requirement = "The GrainTracker object shall properly recover unique grain information in serial."
     issues = "#6713 #12427"
@@ -153,7 +147,6 @@
 
     method = '!DBG'
     valgrind = 'NONE'
-    petsc_version = '>=3.5.0'
 
     requirement = "The GrainTracker object shall properly checkpoint unique grain information in parallel."
     issues = "#6713 #12427"
@@ -172,7 +165,6 @@
 
     method = '!DBG'
     valgrind = 'NONE'
-    petsc_version = '>=3.5.0'
 
     requirement = "The GrainTracker object shall properly recover unique grain information in parallel."
     issues = "#6713 #12427"
@@ -188,8 +180,6 @@
 
     method = '!DBG' # slow test
     valgrind = 'NONE' # Exact same test used elsewhere
-    # This test uses a coloring algorithm that requires PETSc >= 3.5.0.
-    petsc_version = '>=3.5.0'
 
     requirement = "The GrainTracker shall support reusing the data structures from the PolycrystalUserObjectBase after the "
                   " initial condition for efficiency."
@@ -277,8 +267,6 @@
     max_time = 500
     method = '!DBG' # slow test
     valgrind ='HEAVY'
-    # This test uses a coloring algorithm that requires PETSc >= 3.5.0.
-    petsc_version = '>=3.5.0'
 
     requirement = "The GrainTracker shall support handling the splitting of a grain during a simulation."
     issues = '#7875'
@@ -293,8 +281,6 @@
     rel_err = 1e-4
     method = '!DBG' # slow test
     valgrind = 'HEAVY'
-    # This test uses a coloring algorithm that requires PETSc >= 3.5.0.
-    petsc_version = '>=3.5.0'
 
     requirement = "The AverageFeatureVolume Postprocessor shall calculate the average volume of each active grain in a simulation."
     issues = '#11822'
@@ -321,9 +307,7 @@
     input = 'distributed_poly_ic.i'
     csvdiff = 'distributed_poly_ic_out.csv'
 
-    # This test uses a coloring algorithm that requires PETSc >= 3.5.0.
     allow_test_objects = true
-    petsc_version = '>=3.5.0'
 
     requirement = 'The system shall properly create PolycrystalICs with halo extensions (elements) when using DistributedMesh.'
     issues = '#12216'

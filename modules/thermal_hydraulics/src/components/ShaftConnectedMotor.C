@@ -61,7 +61,7 @@ ShaftConnectedMotor::addMooseObjects()
     params.set<FunctionName>("torque") = _torque_fn_name;
     params.set<FunctionName>("inertia") = _inertia_fn_name;
     params.set<std::vector<VariableName>>("shaft_speed") = {shaft_speed_var_name};
-    _sim.addUserObject(class_name, uo_name, params);
+    getTHMProblem().addUserObject(class_name, uo_name, params);
   }
   else
   {
@@ -70,6 +70,6 @@ ShaftConnectedMotor::addMooseObjects()
     params.set<FunctionName>("torque") = _torque_fn_name;
     params.set<FunctionName>("inertia") = _inertia_fn_name;
     params.set<std::vector<VariableName>>("shaft_speed") = {shaft_speed_var_name};
-    _sim.addUserObject(class_name, uo_name, params);
+    getTHMProblem().addUserObject(class_name, uo_name, params);
   }
 }

@@ -49,12 +49,6 @@ Split::validParams()
   params.addParam<MooseEnum>(
       "schur_pre", SchurPreEnum, "Type of Schur complement preconditioner matrix");
 
-  MooseEnum SchurAInvEnum("diag lump", "diag");
-  params.addParam<MooseEnum>(
-      "schur_ainv",
-      SchurAInvEnum,
-      "Type of approximation to inv(A) used when forming S = D - C inv(A) B");
-
   params.addParam<MultiMooseEnum>("petsc_options",
                                   Moose::PetscSupport::getCommonPetscFlags(),
                                   "PETSc flags for the FieldSplit solver");
@@ -78,8 +72,7 @@ Split::Split(const InputParameters & parameters)
     _splitting(getParam<std::vector<std::string>>("splitting")),
     _splitting_type(getParam<MooseEnum>("splitting_type")),
     _schur_type(getParam<MooseEnum>("schur_type")),
-    _schur_pre(getParam<MooseEnum>("schur_pre")),
-    _schur_ainv(getParam<MooseEnum>("schur_ainv"))
+    _schur_pre(getParam<MooseEnum>("schur_pre"))
 {
   _petsc_options.flags = getParam<MultiMooseEnum>("petsc_options");
   _petsc_options.pairs =
@@ -143,11 +136,6 @@ Split::setup(const std::string & prefix)
       const std::string petsc_schur_pre[] = {"self", "selfp", "a11"};
       po.pairs.emplace_back(prefix + "pc_fieldsplit_schur_precondition",
                             petsc_schur_pre[_schur_pre]);
-
-      // set Schur AInv
-      const std::string petsc_schur_ainv[] = {"diag", "lump"};
-      po.pairs.emplace_back(prefix + "mat_schur_complement_ainv_type",
-                            petsc_schur_ainv[_schur_ainv]);
     }
 
     // The DM associated with this split defines the subsplits' geometry.

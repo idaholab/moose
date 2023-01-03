@@ -20,6 +20,5 @@
   [out]
     type = JSON
     postprocessors_as_reporters = true
-    execute_system_information_on = none
   []
 []

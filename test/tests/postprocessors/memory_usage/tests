@@ -3,6 +3,7 @@
     type = CheckFiles
     input = print_memory_usage.i
     check_files = print_memory_usage_out.csv
+    cli_args = 'Problem/check_uo_aux_state=true'
     issues = '#8619'
     requirement = "The system shall provide a postprocessor to measure physical and virtual memory usage and the major page fault count, depending on the operating system's ability to make those values available"
     design = '/MemoryUsage.md'
@@ -10,6 +11,7 @@
   [./vector_memory_usage]
     type = CheckFiles
     input = vector_memory_usage.i
+    cli_args = 'Problem/check_uo_aux_state=true'
     check_files = vector_memory_usage_out_mem_0001.csv
     issues = '#12333'
     requirement = "The system shall provide a vectorpostprocessor to, on each rank, measure physical and virtual memory usage, major page fault count, and total available ram available, depending on the operating system's ability to make those values available"

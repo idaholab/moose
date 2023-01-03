@@ -87,8 +87,6 @@
     min_parallel = 4
     abs_zero = 1e-6
     max_time = 800
-    # The linesearch used by this test requires PETSc >= 3.6.0.
-    petsc_version = '>=3.6.0'
     issues = '#10950'
     design = 'ContactLineSearch.md'
     requirement = 'We shall be able to solve the frictionless sliding block problem with a line serach customized for mechanical contact.'

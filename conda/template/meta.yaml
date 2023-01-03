@@ -36,7 +36,10 @@ test:
 about:
   home: https://mooseframework.org/
   license: LGPL 2.1
-  summary: 'The Multiphysics Object-Oriented Simulation Environment (MOOSE) is a finite-element, multiphysics framework primarily developed by Idaho National Laboratory. This superficial module (moose) if a future placeholder for binary releases of MOOSE.'
+  summary: >
+    The Multiphysics Object-Oriented Simulation Environment (MOOSE) is a finite-element,
+    multiphysics framework primarily developed by Idaho National Laboratory. This superficial
+    module (moose) if a future placeholder for binary releases of MOOSE.'
 
 extra:
   recipe-maintainers:

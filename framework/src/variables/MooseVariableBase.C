@@ -103,7 +103,8 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
     _mesh(_subproblem.mesh()),
     _tid(getParam<THREAD_ID>("tid")),
     _count(getParam<unsigned int>("components")),
-    _use_dual(getParam<bool>("use_dual"))
+    _use_dual(getParam<bool>("use_dual")),
+    _is_array(getParam<bool>("array"))
 {
   scalingFactor(isParamValid("scaling") ? getParam<std::vector<Real>>("scaling")
                                         : std::vector<Real>(_count, 1.));
@@ -114,10 +115,9 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
     paramError("family", "finite volume (fv=true) variables must be have MONOMIAL family");
   if (getParam<bool>("fv") && _fe_type.order != 0)
     paramError("order", "finite volume (fv=true) variables currently support CONST order only");
-  bool is_array = getParam<bool>("array");
   if (_count > 1)
-    mooseAssert(is_array, "Must be true with component > 1");
-  if (is_array)
+    mooseAssert(_is_array, "Must be true with component > 1");
+  if (_is_array)
   {
     auto name0 = _sys.system().variable(_var_num).name();
     std::size_t found = name0.find_last_of("_");

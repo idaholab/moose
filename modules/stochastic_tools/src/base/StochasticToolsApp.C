@@ -79,6 +79,9 @@ StochasticToolsApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax
 
   registerSyntaxTask("AdaptiveSamplerAction", "Samplers", "add_user_object");
   registerSyntaxTask("AdaptiveSamplerAction", "Samplers", "add_postprocessor");
+
+  // Adds [ParameterStudy] block
+  registerSyntax("ParameterStudyAction", "ParameterStudy");
 }
 
 void

@@ -167,6 +167,11 @@ public:
    */
   virtual void setActiveTags(const std::set<TagID> & vtags);
 
+  /**
+   * @return whether this is an array variable
+   */
+  bool isArray() const { return _is_array; }
+
 protected:
   /// System this variable is part of
   SystemBase & _sys;
@@ -218,6 +223,9 @@ protected:
 
   /// If dual mortar approach is used
   bool _use_dual;
+
+  /// Whether this is an array variable
+  const bool _is_array;
 };
 
 inline void

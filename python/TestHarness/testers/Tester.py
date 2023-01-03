@@ -153,7 +153,7 @@ class Tester(MooseObject):
         self.diff = self.test_status.diff
         self.deleted = self.test_status.deleted
 
-        self.__failed_statuses = [self.fail, self.diff, self.deleted]
+        self.__failed_statuses = self.test_status.getFailingStatuses()
         self.__skipped_statuses = [self.skip, self.silent]
 
     def getStatus(self):
@@ -666,6 +666,13 @@ class Tester(MooseObject):
         if self.specs['working_directory']:
             if self.specs['working_directory'][:1] == os.path.sep:
                 self.setStatus(self.fail, 'ABSOLUTE PATH DETECTED')
+
+        # We can't offer the option of reading output files outside of initial TestDir
+        if self.specs['working_directory'] and (options.pbs
+                                                or options.ok_files
+                                                or options.fail_files
+                                                or options.sep_files):
+            reasons['working_directory'] = '--sep-files* enabled'
 
         ##### The below must be performed last to register all above caveats #####
         # Remove any matching user supplied caveats from accumulated checkRunnable caveats that

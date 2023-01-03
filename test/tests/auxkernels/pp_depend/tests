@@ -9,15 +9,16 @@
   [../]
 
   [./pp_depend_indirect_wrong]
-    type = 'CSVDiff'
+    type = 'RunException'
     input = 'pp_depend_indirect_wrong.i'
-    csvdiff = 'pp_depend_indirect_wrong_out.csv'
-    requirement = "Execution of a FunctionValuePostprocessor that depends on a Function which depends on a second PostProcessor is construction order dependent."
+    cli_args = 'Problem/check_uo_aux_state=true'
+    expect_err = 'Aux kernels, user objects appear to have states for real reporter values on TIMESTEP_END'
+    requirement = "The system shall be able to detect wrong implicit dependencies of a function value postprocessor that depends on a function which depends on a second postprocessor."
   [../]
   [./pp_depend_indirect_correct]
     type = 'CSVDiff'
     input = 'pp_depend_indirect_correct.i'
     csvdiff = 'pp_depend_indirect_correct_out.csv'
-    requirement = "Implicit dependencies of FunctionValuePostprocessors may be declared to resolve execution order independently of construction order."
+    requirement = "Explicit dependencies of function value postprocessors may be declared to resolve execution order independently of construction order."
   [../]
 []

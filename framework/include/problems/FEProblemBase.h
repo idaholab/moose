@@ -181,6 +181,19 @@ public:
   bool areCoupled(unsigned int ivar, unsigned int jvar, unsigned int nl_sys = 0) const;
 
   /**
+   * Whether or not MOOSE will perform a user object/auxiliary kernel state check
+   */
+  bool hasUOAuxStateCheck() const { return _uo_aux_state_check; }
+
+  /**
+   * Return a flag to indicate whether we are executing user objects and auxliary kernels for state
+   * check
+   * Note: This function can return true only when hasUOAuxStateCheck() returns true, i.e. the check
+   *       has been activated by users through Problem/check_uo_aux_state input parameter.
+   */
+  bool checkingUOAuxState() const { return _checking_uo_aux_state; }
+
+  /**
    * Whether to trust the user coupling matrix even if we want to do things like be paranoid and
    * create a full coupling matrix. See https://github.com/idaholab/moose/issues/16395 for detailed
    * background
@@ -338,6 +351,7 @@ public:
   virtual std::vector<VariableName> getVariableNames();
 
   void initialSetup() override;
+  void checkDuplicatePostprocessorVariableNames();
   void timestepSetup() override;
   void customSetup(const ExecFlagType & exec_type) override;
   void residualSetup() override;
@@ -1613,6 +1627,11 @@ public:
     _error_on_jacobian_nonzero_reallocation = state;
   }
 
+  /**
+   * Whether or not we are allowing invalid solutions
+   */
+  bool allowInvalidSolution() { return _allow_invalid_solution; }
+
   bool ignoreZerosInJacobian() const { return _ignore_zeros_in_jacobian; }
 
   void setIgnoreZerosInJacobian(bool state) { _ignore_zeros_in_jacobian = state; }
@@ -1992,6 +2011,11 @@ public:
    */
   unsigned int nlSysNum(const NonlinearSystemName & nl_sys_name) const;
 
+  /**
+   * Skip further residual evaluations and fail the next nonlinear convergence check
+   */
+  bool failNextNonlinearConvergenceCheck() const { return _fail_next_nonlinear_convergence_check; }
+
 protected:
   /// Create extra tagged vectors and matrices
   void createTagVectors();
@@ -2267,6 +2291,9 @@ protected:
   /// Determines whether a check to verify material dependencies on every subdomain
   const bool _material_dependency_check;
 
+  /// Whether or not checking the state of uo/aux evaluation
+  const bool _uo_aux_state_check;
+
   /// Maximum number of quadrature points used in the problem
   unsigned int _max_qps;
 
@@ -2330,7 +2357,8 @@ private:
   const bool _force_restart;
   const bool _skip_additional_restart_data;
   const bool _skip_nl_system_check;
-  bool _fail_next_linear_convergence_check;
+  bool _fail_next_nonlinear_convergence_check;
+  const bool & _allow_invalid_solution;
 
   /// At or beyond initialSteup stage
   bool _started_initial_setup;
@@ -2377,6 +2405,9 @@ private:
 
   /// Flag used to indicate whether we are computing the scaling Residual
   bool _computing_scaling_residual = false;
+
+  /// Flag used to indicate whether we are doing the uo/aux state check in execute
+  bool _checking_uo_aux_state = false;
 };
 
 using FVProblemBase = FEProblemBase;

@@ -70,6 +70,10 @@ Exodus::validParams()
   params.addParam<bool>(
       "discontinuous", false, "Enables discontinuous output format for Exodus files.");
 
+  // Flag for outputting added side elements (for side-discontinuous data) to Exodus
+  params.addParam<bool>(
+      "side_discontinuous", false, "Enables adding side-discontinuous output in Exodus files.");
+
   // Flag for outputting Exodus data in HDF5 format (when libMesh is
   // configured with HDF5 support).  libMesh wants to do so by default
   // (for backwards compatibility with libMesh HDF5 users), but we
@@ -98,6 +102,7 @@ Exodus::Exodus(const InputParameters & parameters)
     _overwrite(getParam<bool>("overwrite")),
     _output_dimension(getParam<MooseEnum>("output_dimension").getEnum<OutputDimension>()),
     _discontinuous(getParam<bool>("discontinuous")),
+    _side_discontinuous(getParam<bool>("side_discontinuous")),
     _write_hdf5(getParam<bool>("write_hdf5"))
 {
   if (isParamValid("use_problem_dimension"))
@@ -145,6 +150,13 @@ Exodus::initialSetup()
       !hasScalarOutput())
     mooseError("The current settings results in only the input file and no variables being output "
                "to the Exodus file, this is not supported.");
+
+  // Check if the mesh is contiguously numbered, because exodus output will renumber to force that
+  const auto & mesh = _problem_ptr->mesh().getMesh();
+  if ((mesh.n_nodes() != mesh.max_node_id()) || (mesh.n_elem() != mesh.max_elem_id()))
+    _mesh_contiguous_numbering = false;
+  else
+    _mesh_contiguous_numbering = true;
 }
 
 void
@@ -223,6 +235,9 @@ Exodus::outputSetup()
   {
     _exodus_io_ptr->set_hdf5_writing(false);
   }
+
+  if (_side_discontinuous)
+    _exodus_io_ptr->write_added_sides(true);
 
   // Increment file number and set appending status, append if all the following conditions are met:
   //   (1) If the application is recovering (not restarting)
@@ -303,6 +318,7 @@ Exodus::outputNodalVariables()
     _exodus_num++;
 
   // This satisfies the initialization of the ExodusII_IO object
+  handleExodusIOMeshRenumbering();
   _exodus_initialized = true;
 }
 
@@ -494,6 +510,7 @@ Exodus::outputEmptyTimestep()
   if (!_overwrite)
     _exodus_num++;
 
+  handleExodusIOMeshRenumbering();
   _exodus_initialized = true;
 }
 
@@ -501,4 +518,16 @@ void
 Exodus::clear()
 {
   _exodus_io_ptr.reset();
+}
+
+void
+Exodus::handleExodusIOMeshRenumbering()
+{
+  // We know exodus_io renumbered on the first write_timestep()
+  if (!_exodus_initialized && !_mesh_contiguous_numbering)
+  {
+    // Objects that depend on element/node ids are no longer valid
+    _problem_ptr->meshChanged();
+    _mesh_contiguous_numbering = true;
+  }
 }

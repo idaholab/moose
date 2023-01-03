@@ -23,9 +23,6 @@
       input = 'open_bc_pressure_BC_fieldSplit.i'
       exodiff = 'open_bc_out_pressure_BC_fieldSplit.e'
       custom_cmp = open_bc_out_pressure_BC_fieldSplit.cmp
-      # This test uses the 'selfp' option for the fieldsplit
-      # preconditioner, which requires at least PETSc 3.5.0.
-      petsc_version = '>=3.5.0'
       detail = 'and using a field split preconditioning.'
     [../]
   []

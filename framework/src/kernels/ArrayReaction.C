@@ -15,9 +15,9 @@ InputParameters
 ArrayReaction::validParams()
 {
   InputParameters params = ArrayKernel::validParams();
-  params.addParam<MaterialPropertyName>("reaction_coefficient",
-                                        "The name of the reactivity, "
-                                        "can be scalar, vector, or matrix.");
+  params.addRequiredParam<MaterialPropertyName>(
+      "reaction_coefficient",
+      "The name of the reactivity, can be scalar, vector, or matrix material property.");
   params.addClassDescription("The array reaction operator with the weak "
                              "form of $(\\psi_i, u_h)$.");
   return params;

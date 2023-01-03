@@ -12,7 +12,7 @@ The vectors of values of the independent ($x$) and dependent ($y$) variables on 
 
 By default, if an insufficient number of points is provided in these data vectors, the order of the polynomial will be truncated to one less than the number of points. If the `truncate_order   parameter is set to `false`, an error will be generated in this case.
 
-The user must define whether the output should be in the form of polynomial coefficients or samples using the `output` parameter. If the option to output polynommial coefficients is used, they are stored in a vector named `coefficients`. If samples are requested, the names of the sample vectors are the same as those of the data specified by `x_name` and `y_name`.
+The user must define whether the output should be in the form of polynomial coefficients or samples using the `output` parameter. If the option to output polynomial coefficients is used, they are stored in a vector named `coefficients`. If samples are requested, the names of the sample vectors are the same as those of the data specified by `x_name` and `y_name`.
 
 !syntax parameters /VectorPostprocessors/LeastSquaresFit
 

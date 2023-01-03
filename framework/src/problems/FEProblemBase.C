@@ -111,6 +111,7 @@
 #include "libmesh/sparse_matrix.h"
 #include "libmesh/string_to_enum.h"
 #include "libmesh/fe_interface.h"
+#include "libmesh/enum_norm_type.h"
 
 #include "metaphysicl/dualnumber.h"
 
@@ -251,9 +252,19 @@ FEProblemBase::validParams()
   params.addParam<std::vector<NonlinearSystemName>>(
       "nl_sys_names", std::vector<NonlinearSystemName>{"nl0"}, "The nonlinear system names");
 
+  params.addParam<bool>("check_uo_aux_state",
+                        false,
+                        "True to turn on a check that no state presents during the evaluation of "
+                        "user objects and aux kernels");
+
   params.addPrivateParam<MooseMesh *>("mesh");
 
   params.declareControllable("solve");
+
+  params.addParam<bool>(
+      "allow_invalid_solution",
+      false,
+      "Set to true to allow convergence even though the solution has been marked as 'invalid'");
 
   return params;
 }
@@ -322,6 +333,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _material_coverage_check(getParam<bool>("material_coverage_check")),
     _fv_bcs_integrity_check(getParam<bool>("fv_bcs_integrity_check")),
     _material_dependency_check(getParam<bool>("material_dependency_check")),
+    _uo_aux_state_check(getParam<bool>("check_uo_aux_state")),
     _max_qps(std::numeric_limits<unsigned int>::max()),
     _max_shape_funcs(std::numeric_limits<unsigned int>::max()),
     _max_scalar_order(INVALID_ORDER),
@@ -342,7 +354,8 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _force_restart(getParam<bool>("force_restart")),
     _skip_additional_restart_data(getParam<bool>("skip_additional_restart_data")),
     _skip_nl_system_check(getParam<bool>("skip_nl_system_check")),
-    _fail_next_linear_convergence_check(false),
+    _fail_next_nonlinear_convergence_check(false),
+    _allow_invalid_solution(getParam<bool>("allow_invalid_solution")),
     _started_initial_setup(false),
     _has_internal_edge_residual_objects(false),
     _u_dot_requested(false),
@@ -1194,6 +1207,15 @@ FEProblemBase::initialSetup()
   _reporter_data.check();
 
   setCurrentExecuteOnFlag(EXEC_NONE);
+}
+
+void
+FEProblemBase::checkDuplicatePostprocessorVariableNames()
+{
+  for (const auto & pp : _reporter_data.getPostprocessorNames())
+    if (hasScalarVariable(pp))
+      mooseError("Postprocessor \"" + pp +
+                 "\" has the same name as a scalar variable in the system.");
 }
 
 void
@@ -2114,7 +2136,8 @@ FEProblemBase::reinitElemNeighborAndLowerD(const Elem * elem, unsigned int side,
     }
   }
 
-  if (_displaced_problem)
+  if (_displaced_problem &&
+      (_reinit_displaced_elem || _reinit_displaced_face || _reinit_displaced_neighbor))
     _displaced_problem->reinitElemNeighborAndLowerD(
         _displaced_mesh->elemPtr(elem->id()), side, tid);
 }
@@ -3938,6 +3961,68 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
 
   // Return the current flag to None
   setCurrentExecuteOnFlag(EXEC_NONE);
+
+  if (_uo_aux_state_check && !_checking_uo_aux_state)
+  {
+    // we will only check aux variables and postprocessors
+    // checking more reporter data can be added in the future if needed
+    std::unique_ptr<NumericVector<Number>> x = _aux->currentSolution()->clone();
+    DenseVector<Real> pp_values = getReporterData().getAllRealReporterValues();
+
+    // call THIS execute one more time for checking the possible states
+    _checking_uo_aux_state = true;
+    FEProblemBase::execute(exec_type);
+    _checking_uo_aux_state = false;
+
+    const Real check_tol = 1e-8;
+
+    const Real xnorm = x->l2_norm();
+    *x -= *_aux->currentSolution();
+    if (x->l2_norm() > check_tol * xnorm)
+    {
+      const auto & sys = _aux->system();
+      const unsigned int n_vars = sys.n_vars();
+      std::multimap<Real, std::string, std::greater<Real>> ordered_map;
+      for (const auto i : make_range(n_vars))
+      {
+        const Real vnorm = sys.calculate_norm(*x, i, DISCRETE_L2);
+        ordered_map.emplace(vnorm, sys.variable_name(i));
+      }
+
+      std::ostringstream oss;
+      for (const auto & [error_norm, var_name] : ordered_map)
+        oss << "  {" << var_name << ", " << error_norm << "},\n";
+
+      mooseError("Aux kernels, user objects appear to have states for aux variables on ",
+                 exec_type,
+                 ".\nVariable error norms in descending order:\n",
+                 oss.str());
+    }
+
+    const DenseVector<Real> new_pp_values = getReporterData().getAllRealReporterValues();
+    if (pp_values.size() != new_pp_values.size())
+      mooseError("Second execution for uo/aux state check should not change the number of "
+                 "real reporter values");
+
+    const Real ppnorm = pp_values.l2_norm();
+    pp_values -= new_pp_values;
+    if (pp_values.l2_norm() > check_tol * ppnorm)
+    {
+      const auto pp_names = getReporterData().getAllRealReporterFullNames();
+      std::multimap<Real, std::string, std::greater<Real>> ordered_map;
+      for (const auto i : index_range(pp_names))
+        ordered_map.emplace(std::abs(pp_values(i)), pp_names[i]);
+
+      std::ostringstream oss;
+      for (const auto & [error_norm, pp_name] : ordered_map)
+        oss << "  {" << pp_name << ", " << error_norm << "},\n";
+
+      mooseError("Aux kernels, user objects appear to have states for real reporter values on ",
+                 exec_type,
+                 ".\nErrors of real reporter values in descending order:\n",
+                 oss.str());
+    }
+  }
 }
 
 void
@@ -5386,10 +5471,10 @@ FEProblemBase::solve(const unsigned int nl_sys_num)
 
   possiblyRebuildGeomSearchPatches();
 
-  // reset flag so that linear solver does not use
-  // the old converged reason "DIVERGED_NANORINF", when
-  // we throw  an exception and stop solve
-  _fail_next_linear_convergence_check = false;
+  // reset flag so that residual evaluation does not get skipped
+  // and the next non-linear iteration does not automatically fail with
+  // "DIVERGED_NANORINF", when we throw  an exception and stop solve
+  _fail_next_nonlinear_convergence_check = false;
 
   if (_solve)
     _current_nl_sys->solve();
@@ -5447,8 +5532,9 @@ FEProblemBase::checkExceptionAndStopSolve(bool print_message)
     // We've handled this exception, so we no longer have one.
     _has_exception = false;
 
-    // Force the next linear convergence check to fail.
-    _fail_next_linear_convergence_check = true;
+    // Force the next non-linear convergence check to fail (and all further residual evaluation to
+    // be skipped).
+    _fail_next_nonlinear_convergence_check = true;
 
     // Repropagate the exception, so it can be caught at a higher level, typically
     // this is NonlinearSystem::computeResidual().
@@ -6977,6 +7063,9 @@ FEProblemBase::checkProblemIntegrity()
   // variables matches the order of the elements in the displaced
   // mesh.
   checkDisplacementOrders();
+
+  // Check for postprocessor names with same name as a scalar variable
+  checkDuplicatePostprocessorVariableNames();
 }
 
 void
@@ -7242,6 +7331,12 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
 {
   TIME_SECTION("checkNonlinearConvergence", 5, "Checking Nonlinear Convergence");
   mooseAssert(_current_nl_sys, "This should be non-null");
+
+  if (_fail_next_nonlinear_convergence_check)
+  {
+    _fail_next_nonlinear_convergence_check = false;
+    return MooseNonlinearConvergenceReason::DIVERGED_FNORM_NAN;
+  }
 
   NonlinearSystemBase & system = *_current_nl_sys;
   MooseNonlinearConvergenceReason reason = MooseNonlinearConvergenceReason::ITERATING;

@@ -56,7 +56,7 @@ ComputeStVenantKirchhoffStress::computeQpPK2Stress()
   if (_large_kinematics) // Large deformations = Green-Lagrange strain
     strain = _E[_qp];
   else // Small deformations = linear strain
-    strain = 0.5 * (_F[_qp] + _F[_qp].transpose());
+    strain = 0.5 * (_F[_qp] + _F[_qp].transpose()) - RankTwoTensor::Identity();
 
   // The stress update is linear with the correct strains/frame
   _S[_qp] = _C[_qp] * strain;

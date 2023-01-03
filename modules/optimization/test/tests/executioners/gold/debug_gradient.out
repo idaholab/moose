@@ -1,0 +1,260 @@
+Framework Information:
+MOOSE Version:           git commit 608a9531ae on 2022-12-01
+LibMesh Version:         3f05f40f4a45060c1fd07281f8869a4667086291
+PETSc Version:           3.16.6
+SLEPc Version:           3.16.2
+Current Time:            Mon Dec  5 08:51:18 2022
+Executable Timestamp:    Sat Dec  3 14:45:35 2022
+
+Parallelism:
+  Num Processors:          1
+  Num Threads:             1
+
+Mesh: 
+  Parallel Type:           replicated
+  Mesh Dimension:          1
+  Spatial Dimension:       1
+  Nodes:                   2
+  Elems:                   1
+  Num Subdomains:          1
+
+Execution Information:
+  Executioner:             Optimize
+  Solver Mode:             Preconditioned JFNK
+
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+  ---------- Testing Gradient -------------
+  Testing hand-coded Gradient, if (for double precision runs) ||G - Gfd||/||G|| is
+    O(1.e-8), the hand-coded Gradient is probably correct.
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+  ||Gfd|| 14.9666, ||G|| = 14.9666, angle cosine = (Gfd'G)/||Gfd||||G|| = 1.
+  2-norm ||G - Gfd||/||G|| = 2.92477e-08, ||G - Gfd|| = 4.3774e-07
+  max-norm ||G - Gfd||/||G|| = 2.75801e-08, ||G - Gfd|| = 3.30961e-07
+  Hand-coded gradient ----------
+Vec Object: 1 MPI processes
+  type: seq
+8.
+12.
+-4.
+  Finite difference gradient ----------
+Vec Object: 1 MPI processes
+  type: seq
+8.
+12.
+-4.
+  Hand-coded minus finite-difference gradient ----------
+Vec Object: 1 MPI processes
+  type: seq
+4.86198e-08
+-2.82342e-07
+3.30961e-07
+TAO SOLVER: iteration=0	f=56	gnorm=14.9666	cnorm=0	xdiff=1
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+  ---------- Testing Gradient -------------
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+  ||Gfd|| 2e-08, ||G|| = 2e-08, angle cosine = (Gfd'G)/||Gfd||||G|| = 1.
+  2-norm ||G - Gfd||/||G|| = 8.23107e-09, ||G - Gfd|| = 1.64621e-16
+  max-norm ||G - Gfd||/||G|| = 6.07747e-09, ||G - Gfd|| = 1.21549e-16
+  Hand-coded gradient ----------
+Vec Object: 1 MPI processes
+  type: seq
+0.
+0.
+2e-08
+  Finite difference gradient ----------
+Vec Object: 1 MPI processes
+  type: seq
+-1.11022e-16
+0.
+2e-08
+  Hand-coded minus finite-difference gradient ----------
+Vec Object: 1 MPI processes
+  type: seq
+1.11022e-16
+0.
+1.21549e-16
+TAO SOLVER: iteration=0	f=1e-16	gnorm=2e-08	cnorm=0	xdiff=1
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+  ---------- Testing Gradient -------------
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+  ||Gfd|| 5.98665e-07, ||G|| = 5.98665e-07, angle cosine = (Gfd'G)/||Gfd||||G|| = 1.
+  2-norm ||G - Gfd||/||G|| = 5.97715e-09, ||G - Gfd|| = 3.57831e-15
+  max-norm ||G - Gfd||/||G|| = 6.07747e-09, ||G - Gfd|| = 2.91719e-15
+  Hand-coded gradient ----------
+Vec Object: 1 MPI processes
+  type: seq
+3.2e-07
+4.8e-07
+-1.6e-07
+  Finite difference gradient ----------
+Vec Object: 1 MPI processes
+  type: seq
+3.2e-07
+4.8e-07
+-1.6e-07
+  Hand-coded minus finite-difference gradient ----------
+Vec Object: 1 MPI processes
+  type: seq
+-1.82997e-15
+2.91719e-15
+-9.72395e-16
+TAO SOLVER: iteration=1	f=8.96e-14	gnorm=5.98665e-07	cnorm=0	xdiff=1
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+  ---------- Testing Gradient -------------
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+  ||Gfd|| 3.01954e-08, ||G|| = 3.01954e-08, angle cosine = (Gfd'G)/||Gfd||||G|| = 1.
+  2-norm ||G - Gfd||/||G|| = 1.00293e-08, ||G - Gfd|| = 3.02839e-16
+  max-norm ||G - Gfd||/||G|| = 7.14738e-09, ||G - Gfd|| = 2.14997e-16
+  Hand-coded gradient ----------
+Vec Object: 1 MPI processes
+  type: seq
+-2.22582e-09
+-1.40259e-09
+3.00805e-08
+  Finite difference gradient ----------
+Vec Object: 1 MPI processes
+  type: seq
+-2.22582e-09
+-1.40259e-09
+3.00805e-08
+  Hand-coded minus finite-difference gradient ----------
+Vec Object: 1 MPI processes
+  type: seq
+1.09851e-16
+-2.14997e-16
+1.82813e-16
+TAO SOLVER: iteration=2	f=2.2794e-16	gnorm=3.01954e-08	cnorm=0	xdiff=1
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+  ---------- Testing Gradient -------------
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+ 0 Nonlinear |R| = 0.000000e+00
+ Solve Converged!
+  ||Gfd|| 8.18249e-09, ||G|| = 8.18249e-09, angle cosine = (Gfd'G)/||Gfd||||G|| = 1.
+  2-norm ||G - Gfd||/||G|| = 1.38729e-08, ||G - Gfd|| = 1.13515e-16
+  max-norm ||G - Gfd||/||G|| = 1.8602e-08, ||G - Gfd|| = 1.07967e-16
+  Hand-coded gradient ----------
+Vec Object: 1 MPI processes
+  type: seq
+-5.80408e-09
+-5.67286e-09
+-1.04133e-09
+  Finite difference gradient ----------
+Vec Object: 1 MPI processes
+  type: seq
+-5.80408e-09
+-5.67286e-09
+-1.04133e-09
+  Hand-coded minus finite-difference gradient ----------
+Vec Object: 1 MPI processes
+  type: seq
+1.07967e-16
+-3.44767e-17
+-6.32864e-18
+TAO SOLVER: iteration=3	f=1.67383e-17	gnorm=8.18249e-09	cnorm=0	xdiff=1
+Tao Object: 1 MPI processes
+  type: bncg
+    CG Type: ssml_bfgs
+    Skipped Stepdirection Updates: 0
+    Scaled gradient steps: 0
+    Pure gradient steps: 0
+    Not a descent direction: 0
+    Line search fails: 0
+    Mat Object: (tao_bncg_) 1 MPI processes
+      type: lmvmdiagbroyden
+      rows=3, cols=3
+        Scale history: 1
+        Scale params: alpha=1., beta=0.5, rho=1.
+        Convex factor: theta=0.
+        Max. storage: 1
+        Used storage: 1
+        Number of updates: 2
+        Number of rejects: 0
+        Number of resets: 1
+  TaoLineSearch Object: 1 MPI processes
+    type: unit
+      Line Search: Unit Step.
+    maximum function evaluations=30
+    tolerances: ftol=0.0001, rtol=1e-10, gtol=0.9
+    total number of function evaluations=0
+    total number of gradient evaluations=0
+    total number of function/gradient evaluations=1
+    using variable bounds
+    Termination reason: 1
+  Active Set subset type: subvec
+  convergence tolerances: gatol=1e-08,   steptol=0.,   gttol=0.
+  Residual in Function/Gradient:=8.18249e-09
+  Objective value=1.67383e-17
+  total number of iterations=3,                          (max: 2000)
+  total number of function evaluations=30,                  max: 4000
+  total number of function/gradient evaluations=5,      (max: 4000)
+  Solution converged:    ||g(X)|| <= gatol

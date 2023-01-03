@@ -69,7 +69,7 @@ ifeq ($(ENABLE_LIBTORCH),true)
     libmesh_CXXFLAGS += -DLIBTORCH_ENABLED
 
     # Adding the include directories, we use -isystem to silence the warning coming from
-	# libtorch (which would cause errors in the testing phase)
+    # libtorch (which would cause errors in the testing phase)
     libmesh_CXXFLAGS += -isystem $(LIBTORCH_DIR)/include/torch/csrc/api/include
     libmesh_CXXFLAGS += -isystem $(LIBTORCH_DIR)/include
 
@@ -211,6 +211,12 @@ srcsubdirs := $(shell find $(FRAMEWORK_DIR)/src -type d -not -path '*/.libs*')
 
 moose_non_unity := %/base %/utils
 
+# Add additional non-unity directories if libtorch is enabled
+ifeq ($(ENABLE_LIBTORCH),true)
+	libtorch_dirs := $(shell find $(FRAMEWORK_DIR)/src/libtorch -type d -not -path '*/.libs*' 2> /dev/null)
+  moose_non_unity += $(libtorch_dirs)
+endif
+
 unity_src_dir := $(FRAMEWORK_DIR)/build/unity_src
 
 unity_srcsubdirs := $(filter-out $(moose_non_unity), $(srcsubdirs))
@@ -317,6 +323,10 @@ $(moose_revision_header): $(moose_HEADER_deps)
 	@echo "Checking if header needs updating: "$@"..."
 	$(shell $(FRAMEWORK_DIR)/scripts/get_repo_revision.py $(FRAMEWORK_DIR) \
 	  $(moose_revision_header) MOOSE)
+  # make sure the header generation step didn't fail
+	@if [ $(.SHELLSTATUS) -ne 0 ]; then \
+	echo "\nFailed to generate MooseRevision.h\n"; exit $(.SHELLSTATUS); \
+	fi
 	@if [ ! -e "$(moose_all_header_dir)/MooseRevision.h" ]; then \
 		ln -sf $(moose_revision_header) $(moose_all_header_dir); \
 	fi
@@ -416,7 +426,7 @@ install: install_libs install_bin install_harness install_exodiff install_adreal
 
 install_data::
 	@mkdir -p $(moose_share_dir)
-	@cp -a $(FRAMEWORK_DIR)/data $(moose_share_dir)
+	@cp -a $(FRAMEWORK_DIR)/data $(moose_share_dir)/
 
 install_adreal_monolith: ADRealMonolithic.h
 	@ mkdir -p $(moose_include_dir)
@@ -424,25 +434,30 @@ install_adreal_monolith: ADRealMonolithic.h
 
 install_exodiff: all
 	@echo "Installing exodiff"
-	@cp $(MOOSE_DIR)/framework/contrib/exodiff/exodiff $(bin_install_dir)
+	@mkdir -p $(bin_install_dir)
+	@cp $(MOOSE_DIR)/framework/contrib/exodiff/exodiff $(bin_install_dir)/
 
-install_harness:
-	@echo "Installing TestHarness"
+install_python:
+	@echo "Installing python utilities"
 	@rm -rf $(python_install_dir)
 	@mkdir -p $(python_install_dir)
+	@cp -R $(MOOSE_DIR)/python/* $(python_install_dir)/
+	@cp -f $(HIT_DIR)/hit.so $(python_install_dir)/
+
+install_harness: install_python
+	@echo "Installing TestHarness"
 	@mkdir -p $(moose_share_dir)/bin
 	@mkdir -p $(moose_include_dir)
 	@mkdir -p $(bin_install_dir)
-	@cp -R $(MOOSE_DIR)/python/* $(python_install_dir)/
 	@cp -f $(MOOSE_DIR)/scripts/moose_test_runner $(bin_install_dir)/moose_test_runner
 	@cp -f $(MOOSE_DIR)/framework/contrib/exodiff/exodiff $(moose_share_dir)/bin/
 	@cp -f $(MOOSE_DIR)/framework/include/base/MooseConfig.h $(moose_include_dir)/
-	@cp -f $(HIT_DIR)/hit.so $(python_install_dir)/
 	@echo "libmesh_install_dir = '$(LIBMESH_DIR)'" > $(moose_share_dir)/moose_config.py
 
 install_hit: all
 	@echo "Installing HIT"
-	@cp $(MOOSE_DIR)/framework/contrib/hit/hit $(bin_install_dir)
+	@mkdir -p $(bin_install_dir)
+	@cp $(MOOSE_DIR)/framework/contrib/hit/hit $(bin_install_dir)/
 
 lib_install_suffix = lib/$(APPLICATION_NAME)
 lib_install_dir = $(PREFIX)/$(lib_install_suffix)

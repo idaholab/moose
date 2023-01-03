@@ -46,6 +46,9 @@
 #ifdef NAVIER_STOKES_ENABLED
 #include "NavierStokesApp.h"
 #endif
+#ifdef OPTIMIZATION_ENABLED
+#include "OptimizationApp.h"
+#endif
 #ifdef PERIDYNAMICS_ENABLED
 #include "PeridynamicsApp.h"
 #endif
@@ -66,6 +69,9 @@
 #endif
 #ifdef RICHARDS_ENABLED
 #include "RichardsApp.h"
+#endif
+#ifdef SCALAR_TRANSPORT_ENABLED
+#include "ScalarTransportApp.h"
 #endif
 #ifdef SOLID_PROPERTIES_ENABLED
 #include "SolidPropertiesApp.h"
@@ -432,6 +438,10 @@ ModulesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   NavierStokesApp::registerAll(f, af, s);
 #endif
 
+#ifdef OPTIMIZATION_ENABLED
+  OptimizationApp::registerAll(f, af, s);
+#endif
+
 #ifdef PERIDYNAMICS_ENABLED
   PeridynamicsApp::registerAll(f, af, s);
 #endif
@@ -458,6 +468,10 @@ ModulesApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 
 #ifdef RICHARDS_ENABLED
   RichardsApp::registerAll(f, af, s);
+#endif
+
+#ifdef SCALAR_TRANSPORT_ENABLED
+  ScalarTransportApp::registerAll(f, af, s);
 #endif
 
 #ifdef SOLID_PROPERTIES_ENABLED

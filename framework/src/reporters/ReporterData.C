@@ -42,6 +42,65 @@ ReporterData::getReporterNames() const
   return output;
 }
 
+std::set<std::string>
+ReporterData::getPostprocessorNames() const
+{
+  std::set<std::string> output;
+  for (const auto & name_context_pair : _context_ptrs)
+    if (name_context_pair.first.isPostprocessor())
+      output.insert(name_context_pair.first.getObjectName());
+  return output;
+}
+
+DenseVector<Real>
+ReporterData::getAllRealReporterValues() const
+{
+  DenseVector<Real> all_values;
+
+  std::vector<Real> & output = all_values.get_values();
+
+  for (const auto & name_context_pair : _context_ptrs)
+  {
+    const ReporterName & rname = name_context_pair.first;
+
+    if (hasReporterValue<Real>(rname))
+      output.push_back(getReporterValue<Real>(rname.getCombinedName()));
+
+    if (hasReporterValue<std::vector<Real>>(rname))
+    {
+      const auto & vec = getReporterValue<std::vector<Real>>(rname.getCombinedName());
+      for (const auto & v : vec)
+        output.push_back(v);
+    }
+  }
+
+  return all_values;
+}
+
+std::vector<std::string>
+ReporterData::getAllRealReporterFullNames() const
+{
+  std::vector<std::string> output;
+
+  for (const auto & name_context_pair : _context_ptrs)
+  {
+    const ReporterName & rname = name_context_pair.first;
+
+    if (hasReporterValue<Real>(rname))
+      output.push_back(rname.getCombinedName());
+
+    if (hasReporterValue<std::vector<Real>>(rname))
+    {
+      auto pname = rname.getCombinedName();
+      const auto & vec = getReporterValue<std::vector<Real>>(pname);
+      for (unsigned int i = 0; i < vec.size(); ++i)
+        output.push_back(pname + "/" + std::to_string(i));
+    }
+  }
+
+  return output;
+}
+
 const ReporterContextBase &
 ReporterData::getReporterContextBase(const ReporterName & reporter_name) const
 {

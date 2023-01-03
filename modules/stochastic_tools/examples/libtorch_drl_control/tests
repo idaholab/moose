@@ -1,0 +1,17 @@
+[Tests]
+  issues = "#19571"
+  design = "libtorch_drl_control.md"
+
+  [train]
+    requirement = 'The system shall be able to train a controller based on the Proximal Policy Optimization algorithm.'
+    type = CSVDiff
+    input = libtorch_drl_control_trainer.i
+    csvdiff = 'train_out.csv'
+    libtorch = true
+    cli_args = "Executioner/num_steps=1
+                Trainers/nn_trainer/update_frequency=1
+                Trainers/nn_trainer/num_epochs=100
+                Outputs/interval=1
+                Outputs/file_base='train_out'"
+  []
+[]

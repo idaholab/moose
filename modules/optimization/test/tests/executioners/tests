@@ -1,0 +1,90 @@
+[Tests]
+  issues = '#21885'
+  [quadraticObj]
+    design = 'Optimize.md'
+    requirement = "The system shall minimize a quadratic objective function from a test object "
+    [taonm]
+      type = CSVDiff
+      max_threads = 1
+      rel_err = 1.0e-4
+      cli_args = "Executioner/tao_solver=TAONM"
+      input = quadratic_minimize.i
+      csvdiff = quadratic_minimize_out_OptimizationReporter_0001.csv
+      allow_test_objects = True
+      detail = "using gradient free TAO Nelder Mead solver; "
+    []
+    [bncg]
+      type = CSVDiff
+      max_threads = 1
+      rel_err = 1.0e-4
+      cli_args = "Executioner/tao_solver=TAOBNCG Executioner/petsc_options_iname='-tao_gatol "
+                 "-tao_cg_delta_max' Executioner/petsc_options_value='1e-4 1e-2'"
+      input = quadratic_minimize.i
+      csvdiff = quadratic_minimize_out_OptimizationReporter_0001.csv
+      allow_test_objects = True
+      detail = "using gradient based TAO bounded conjugate gradient solver; "
+    []
+    [taontr]
+      type = CSVDiff
+      max_threads = 1
+      cli_args = "Executioner/tao_solver=TAONTR Executioner/petsc_options_iname='-tao_ntr_min_radius "
+                 "-tao_ntr_max_radius -tao_ntr_init_type -tao_ntr_pc_type' "
+                 "Executioner/petsc_options_value='0 1e16 constant none'"
+      input = quadratic_minimize.i
+      csvdiff = quadratic_minimize_out_OptimizationReporter_0001.csv
+      skip = "Matrix free Hessian not implemented for test object testing. issue #22274"
+      allow_test_objects = True
+      detail = "using Hessian based TAO Newton trust region solver."
+    []
+    [multi_params]
+      type = CSVDiff
+      rel_err = 1.0e-4
+      max_threads = 1
+      input = qm_multi_param.i
+      csvdiff = qm_multi_param_out_OptimizationReporter_0001.csv
+      allow_test_objects = True
+      detail = "with multiple controllable parameters."
+    []
+  []
+
+  [debug]
+    design = 'Optimize.md'
+    requirement = 'The system shall be able to debug a optimization solve by '
+    [fd]
+      type = RunApp
+      input = debug_fd.i
+      cli_args = '-tao_ls_type unit'
+      allow_test_objects = True
+      expect_out = 'Solution converged'
+      max_threads = 1
+      detail = 'using finite-difference to compute the gradient;'
+    []
+    [grad_check]
+      type = RunApp
+      input = debug_gradient.i
+      cli_args = '-tao_ls_type unit'
+      allow_test_objects = True
+      expect_out = 'Testing Gradient'
+      max_threads = 1
+      detail = 'testing hand-coded gradient;'
+    []
+    [failed_ls]
+      type = RunApp
+      input = quadratic_minimize.i
+      cli_args = '-tao_fd_gradient true'
+      allow_test_objects = True
+      expect_out = 'Solver terminated: -6   Line Search Failure'
+      max_threads = 1
+      detail = 'indicating a failed line search;'
+    []
+    [failed_it]
+      type = RunApp
+      input = quadratic_minimize.i
+      cli_args = '-tao_fd_gradient true -tao_ls_type unit -tao_max_it 1'
+      allow_test_objects = True
+      expect_out = 'Solver terminated: -2   Maximum Iterations'
+      max_threads = 1
+      detail = 'indicating maximum iteration reached;'
+    []
+  []
+[]
