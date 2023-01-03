@@ -60,7 +60,7 @@
     source_variable = u
     shift = -100.0
     normalization = 1.0
-    execute_on = 'INITIAL TIMESTEP_BEGIN TIMESTEP_END FINAL'
+    execute_on = 'INITIAL FINAL'
   []
   # This establishes a dependency for scale_initial on exec INITIAL
   [NormalizationAuxINITIAL]
@@ -163,5 +163,12 @@
 []
 
 [Outputs]
-  csv = true
+  [console]
+    type = Console
+    execute_on = 'INITIAL FINAL'
+  []
+  [out]
+    type = CSV
+    execute_on = 'INITIAL FINAL'
+  []
 []

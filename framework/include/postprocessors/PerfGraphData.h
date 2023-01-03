@@ -31,4 +31,8 @@ protected:
 
   /// Whether or not the section must exist (if it does not, 0 is returned)
   const bool _must_exist;
+
+private:
+  /// The current data
+  Real _current_data;
 };
