@@ -1,12 +1,11 @@
 [Tests]
   design = 'FVFunctorNeumannBC.md'
   issues = '#21632'
-  [./FVFunctorNeumannBC]
+  [test]
     type = Exodiff
     input = fv_functor_neumann.i
     exodiff = fv_functor_neumann_out.e
-    abs_zero = 1e-9
     requirement = "The system shall provide a boundary condition to satisfy neumann boundary conditions with a functor"
     ad_indexing_type = 'global'
-  [../]
+  []
 []
