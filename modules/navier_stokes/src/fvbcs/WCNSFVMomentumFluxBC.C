@@ -71,7 +71,16 @@ WCNSFVMomentumFluxBC::computeQpResidual()
     if (MooseUtils::absoluteFuzzyEqual(*_area_pp, 0))
       mooseError("Surface area is 0");
 
-  const Real contrib = std::abs(_face_info->normal()(_index));
+  // We restrict this BC for boundaries to be able to automatically determine the direction the
+  // flow is coming in from. In this case it is the negative of the surface normal (which points
+  // outwards). For internal faces, this would only be possible with additional parameters.
+  if (!_face_info->neighborPtr())
+    mooseError("WCNSFVMomentumFluxBC is restricted to be used on the boundary of the domain!");
+
+  // We assume that positive and negative mass flow rates/velocities correspond to fluid
+  // entering / leaving the domain, respectively. For this we need to multiply the boundary
+  // surface normal by -1.
+  const Real contrib = -_face_info->normal()(_index);
 
   if (_velocity_pp)
     return -_scaling_factor * std::pow((*_velocity_pp), 2) * contrib *
