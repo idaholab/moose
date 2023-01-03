@@ -21,6 +21,9 @@ public:
 
   ExceptionKernel(const InputParameters & parameters);
 
+  virtual void jacobianSetup() override;
+  virtual void residualSetup() override;
+
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
@@ -49,4 +52,7 @@ protected:
 
   /// Function which returns true if it's time to throw
   bool time_to_throw() const;
+
+  /// count down to throwing
+  int _counter;
 };

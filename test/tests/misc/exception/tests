@@ -4,17 +4,16 @@
   # This example throws an exception during computeResidual() in the
   # first timestep, and then continues running with a reduced
   # timestep.
-  [./parallel_exception_residual_transient]
+  [parallel_exception_residual_transient]
     type = 'Exodiff'
     input = 'parallel_exception_residual_transient.i'
     exodiff = 'parallel_exception_residual_transient_out.e'
     use_old_floor = true
 
-    requirement = 'The system shall support throwing an exception during the residual '
-                  'calculation, which will cut back the time step.'
-  [../]
+    requirement = 'The system shall support throwing an exception during the residual calculation, which will cut back the time step.'
+  []
 
-  [./parallel_exception_residual_transient_non_zero_rank]
+  [parallel_exception_residual_transient_non_zero_rank]
     type = 'Exodiff'
     input = 'parallel_exception_residual_transient.i'
     cli_args = 'Kernels/exception/rank=1'
@@ -25,24 +24,22 @@
     # The mesh is too small, and the number of elements on MPI rank 1 is 0 when we are uing 16 MPI processes. This happens with PETSc-3.8.3
     max_parallel = 10
 
-    requirement = 'The system shall support throwing an exception during the residual '
-                  'calculation on a non-zero rank, which will cut back the time step.'
-  [../]
+    requirement = 'The system shall support throwing an exception during the residual calculation on a non-zero rank, which will cut back the time step.'
+  []
 
   # This example throws an exception during computeJacobian() in the
   # first timestep, and then continues running with a reduced
   # timestep.
-  [./parallel_exception_jacobian_transient]
+  [parallel_exception_jacobian_transient]
     type = 'Exodiff'
     input = 'parallel_exception_jacobian_transient.i'
     exodiff = 'parallel_exception_jacobian_transient_out.e'
     use_old_floor = true
 
-    requirement = 'The system shall support throwing an exception during the Jacboain '
-                  'calculation, which will cut back the time step.'
-  [../]
+    requirement = 'The system shall support throwing an exception during the Jacboain calculation, which will cut back the time step.'
+  []
 
-  [./parallel_exception_jacobian_transient_non_zero_rank]
+  [parallel_exception_jacobian_transient_non_zero_rank]
     type = 'Exodiff'
     input = 'parallel_exception_jacobian_transient.i'
     cli_args = 'Kernels/exception/rank=1'
@@ -53,21 +50,19 @@
     # The mesh is too small, and the number of elements on MPI rank 1 is 0 when we are uing 16 MPI processes. This happens with PETSc-3.8.3
     max_parallel = 10
 
-    requirement = 'The system shall support throwing an exception during the Jacobian '
-                  'calculation on a non-zero rank, which will cut back the time step.'
-  [../]
+    requirement = 'The system shall support throwing an exception during the Jacobian calculation on a non-zero rank, which will cut back the time step.'
+  []
 
-  [./parallel_exception_initial_condition]
+  [parallel_exception_initial_condition]
     type = RunApp
     input = 'parallel_exception_initial_condition.i'
     expect_out = 'MooseException thrown during initial condition computation'
 
-    requirement = 'The system shall support throwing an exception during the initial condition '
-                  'calculation, which will terminate the solve.'
-  [../]
+    requirement = 'The system shall support throwing an exception during the initial condition calculation, which will terminate the solve.'
+  []
 
   # Test that we can trigger an error on a non-zero rank and exit as expected
-  [./parallel_error_residual_transient_non_zero_rank]
+  [parallel_error_residual_transient_non_zero_rank]
     type = 'RunException'
     input = 'parallel_exception_residual_transient.i'
     min_parallel = 2
@@ -76,11 +71,10 @@
     # The mesh is too small, and the number of elements on MPI rank 1 is 0 when we are uing 16 MPI processes. This happens with PETSc-3.8.3
     max_parallel = 10
 
-    requirement = 'The system shall support throwing an error during a residual '
-                  'calculation, which will terminate the solve.'
-  [../]
+    requirement = 'The system shall support throwing an error during a residual calculation, which will terminate the solve.'
+  []
 
-  [./parallel_error_jacobian_transient_non_zero_rank]
+  [parallel_error_jacobian_transient_non_zero_rank]
     type = 'RunException'
     input = 'parallel_exception_residual_transient.i'
     min_parallel = 2
@@ -89,16 +83,26 @@
     # The mesh is too small, and the number of elements on MPI rank 1 is 0 when we are uing 16 MPI processes. This happens with PETSc-3.8.3
     max_parallel = 10
 
-    requirement = 'The system shall support throwing an error during a Jacobian '
-                  'calculation, which will terminate the solve.'
-  [../]
+    requirement = 'The system shall support throwing an error during a Jacobian calculation, which will terminate the solve.'
+  []
 
-  [./skip_exception_check]
+  [skip_exception_check]
     type = 'Exodiff'
     input = '2d_diffusion_skip_exception.i'
     exodiff = '2d_diffusion_skip_exception_out.e'
     expect_out = 'MOOSE may fail to catch an exception when the "skip_exception_check" parameter is used. If you receive a terse MPI error during execution, remove this parameter and rerun your simulation'
     allow_warnings = true
-    requirement = "The system shall allow users to skip exception checks to avoid global communication."
-  [../]
+    requirement = "The system shall allow users to skip exception checks to avoid global "
+                  "communication."
+  []
+
+  [exception_transient]
+    type = 'CSVDiff'
+    input = 'exception_transient.i'
+    csvdiff = 'exception_transient_out.csv'
+    allow_warnings = true
+    allow_test_objects = true
+    recover = false
+    requirement = "The system shall interrupt a solve immediately as soon as an exception is thrown."
+  []
 []
