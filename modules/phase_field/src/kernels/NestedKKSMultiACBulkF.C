@@ -45,7 +45,7 @@ NestedKKSMultiACBulkF::NestedKKSMultiACBulkF(const InputParameters & parameters)
     _dgi(getMaterialPropertyDerivative<Real>("gi_name", _etai_name)),
     _d2gi(getMaterialPropertyDerivative<Real>("gi_name", _etai_name, _etai_name)),
     _d2hjdetaidetap(_num_j),
-    _dF1dc1(_num_c),
+    _dFadca(_num_c),
     _dFidarg(_num_j)
 {
   for (unsigned int i = 0; i < _num_j; ++i)
@@ -79,9 +79,9 @@ NestedKKSMultiACBulkF::NestedKKSMultiACBulkF(const InputParameters & parameters)
     }
   }
 
-  // _dF1dc1 is computed in KKSPhaseConcentrationMaterial
+  // _dFadca is computed in KKSPhaseConcentrationMaterial
   for (unsigned int m = 0; m < _num_c; ++m)
-    _dF1dc1[m] = &getMaterialPropertyDerivative<Real>("cp" + _Fj_names[0], _ci_names[m * _num_j]);
+    _dFadca[m] = &getMaterialPropertyDerivative<Real>("cp" + _Fj_names[0], _ci_names[m * _num_j]);
 
   for (unsigned int m = 0; m < _num_j; ++m)
   {
@@ -127,7 +127,7 @@ NestedKKSMultiACBulkF::computeDFDOP(PFFunctionType type)
         Real sum1 = 0.0;
 
         for (unsigned int n = 0; n < _num_c; ++n)
-          sum1 += (*_dF1dc1[n])[_qp] * (*_dcidetaj[n][m][_k])[_qp];
+          sum1 += (*_dFadca[n])[_qp] * (*_dcidetaj[n][m][_k])[_qp];
 
         sum +=
             (*_d2hjdetaidetap[m][_k])[_qp] * (*_prop_Fj[m])[_qp] + (*_prop_dhjdetai[m])[_qp] * sum1;
@@ -157,7 +157,7 @@ NestedKKSMultiACBulkF::computeQpOffDiagJacobian(unsigned int jvar)
       Real sum1 = 0.0;
 
       for (unsigned int n = 0; n < _num_c; ++n)
-        sum1 += (*_dF1dc1[n])[_qp] * (*_dcidb[n][m][compvar])[_qp];
+        sum1 += (*_dFadca[n])[_qp] * (*_dcidb[n][m][compvar])[_qp];
 
       sum += (*_prop_dhjdetai[m])[_qp] * sum1;
     }
@@ -176,7 +176,7 @@ NestedKKSMultiACBulkF::computeQpOffDiagJacobian(unsigned int jvar)
       Real sum1 = 0.0;
 
       for (unsigned int n = 0; n < _num_c; ++n)
-        sum1 += (*_dF1dc1[n])[_qp] * (*_dcidetaj[n][m][etavar])[_qp];
+        sum1 += (*_dFadca[n])[_qp] * (*_dcidetaj[n][m][etavar])[_qp];
 
       sum += (*_d2hjdetaidetap[m][etavar])[_qp] * (*_prop_Fj[m])[_qp] +
              (*_prop_dhjdetai[m])[_qp] * sum1;

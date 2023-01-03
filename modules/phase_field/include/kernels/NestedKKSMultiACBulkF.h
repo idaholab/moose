@@ -11,8 +11,6 @@
 
 #include "KKSMultiACBulkBase.h"
 
-// Forward Declarations
-
 /**
  * KKSMultiACBulkBase child class for the free energy term
  * \f$ \sum_j \frac{\partial h_j}{\partial \eta_i} F_j + w_i \frac{dg_i}{d\eta_i}
@@ -68,8 +66,8 @@ protected:
   /// Second derivative of switching function \f$ \frac {d^2}{deta_i deta_p} h_j \f$
   std::vector<std::vector<const MaterialProperty<Real> *>> _d2hjdetaidetap;
 
-  /// Derivative of the free energy function \f$ \frac d{dc_1} F_1 \f$
-  std::vector<const MaterialProperty<Real> *> _dF1dc1;
+  /// Derivative of the free energy function \f$ \frac d{dc_a} F_a \f$
+  std::vector<const MaterialProperty<Real> *> _dFadca;
 
   /// Derivative of the free energy function \f$ \frac d{dq} F_i \f$
   std::vector<std::vector<const MaterialProperty<Real> *>> _dFidarg;

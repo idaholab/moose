@@ -23,7 +23,6 @@
  * The user picks one phase free energy \f$ F_1 \f$ (f_base) and its
  * corresponding phase concentration \f$ c_1 \f$
  */
-
 class NestedKKSSplitCHCRes : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>
 {
 public:
@@ -55,27 +54,27 @@ protected:
   const VariableValue & _w;
 
   /// Phase concentration of the first phase in _eta_names
-  const std::vector<MaterialPropertyName> _c1_names;
+  const std::vector<MaterialPropertyName> _ca_names;
 
   /// Free energy
-  const MaterialPropertyName _F1_name;
+  const MaterialPropertyName _Fa_name;
 
-  /// Derivative of the free energy function \f$ \frac d{dc_1} F_1 \f$
-  std::vector<const MaterialProperty<Real> *> _dF1dc1;
+  /// Derivative of the free energy function \f$ \frac d{dc_a} F_a \f$
+  std::vector<const MaterialProperty<Real> *> _dFadca;
 
-  /// Second derivative of the free energy function \f$ \frac {d^2}{dc_1 db_1}
-  /// F_1 \f$
-  std::vector<const MaterialProperty<Real> *> _d2F1dc1db1;
+  /// Second derivative of the free energy function \f$ \frac {d^2}{dc_a db_a}
+  /// F_a \f$
+  std::vector<const MaterialProperty<Real> *> _d2Fadcadba;
 
   /// Derivative of the phase concentrations wrt global concentrations \f$ \frac
-  /// d{db} c_1 \f$
-  std::vector<std::vector<const MaterialProperty<Real> *>> _dc1db;
+  /// d{db} c_a \f$
+  std::vector<std::vector<const MaterialProperty<Real> *>> _dcadb;
 
   /// Derivative of the phase concentrations wrt phase parameter \f$ \frac
-  /// d{d{eta}} c_1 \f$
-  std::vector<std::vector<const MaterialProperty<Real> *>> _dc1detaj;
+  /// d{d{eta}} c_a \f$
+  std::vector<std::vector<const MaterialProperty<Real> *>> _dcadetaj;
 
   /// Second derivative of the free energy function wrt phase concentration and
   /// a coupled variable
-  std::vector<const MaterialProperty<Real> *> _d2F1dc1darg;
+  std::vector<const MaterialProperty<Real> *> _d2Fadcadarg;
 };

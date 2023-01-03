@@ -11,8 +11,6 @@
 
 #include "KKSMultiACBulkBase.h"
 
-// Forward Declarations
-
 /**
  * KKSACBulkBase child class for the phase concentration term
  * \f$ - \frac{\partial F_1}{\partial c_1} \sum_j \frac{\partial h_j}{\partial \eta_i} (c_j) \f$
@@ -59,13 +57,13 @@ protected:
   /// Second derivative of switching function \f$ \frac {d^2}{deta_i deta_p} h_j \f$
   std::vector<std::vector<const MaterialProperty<Real> *>> _prop_d2hjdetaidetap;
 
-  /// Derivative of the free energy function \f$ \frac d{dc_1} F_1 \f$
-  std::vector<const MaterialProperty<Real> *> _dF1dc1;
+  /// Derivative of the free energy function \f$ \frac d{dc_a} F_a \f$
+  std::vector<const MaterialProperty<Real> *> _dFadca;
 
-  /// Second derivative of the free energy function \f$ \frac {d^2}{dc_1 db_1} F_1 \f$
-  std::vector<std::vector<const MaterialProperty<Real> *>> _d2F1dc1db1;
+  /// Second derivative of the free energy function \f$ \frac {d^2}{dc_a db_a} F_a \f$
+  std::vector<std::vector<const MaterialProperty<Real> *>> _d2Fadcadba;
 
   /// Mixed partial derivatives of the free energy function wrt c and
-  /// any other coupled variables \f$ \frac {d^2}{dc_1 dq} F_1 \f$
-  std::vector<std::vector<const MaterialProperty<Real> *>> _d2F1dc1darg;
+  /// any other coupled variables \f$ \frac {d^2}{dc_a dq} F_a \f$
+  std::vector<std::vector<const MaterialProperty<Real> *>> _d2Fadcadarg;
 };

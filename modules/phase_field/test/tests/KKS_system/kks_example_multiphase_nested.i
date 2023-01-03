@@ -246,13 +246,13 @@
     v = c
   [../]
   [./CHBulk]
-    type = NestKKSSplitCHCRes
+    type = NestedKKSSplitCHCRes
     variable = c
     all_etas = 'eta1 eta2 eta3'
     global_cs = 'c'
     w = mu
-    c1_names = 'c1'
-    F1_name = F1
+    ca_names = 'c1'
+    Fa_name = F1
     args = 'eta1 eta2 eta3 mu'
   [../]
   [./ckernel]
@@ -267,7 +267,7 @@
     variable = eta1
   [../]
   [./ACBulkF1]
-    type = NestKKSMultiACBulkF
+    type = NestedKKSMultiACBulkF
     variable  = eta1
     global_cs = 'c'
     eta_i = eta1
@@ -281,7 +281,7 @@
     args      = 'c eta2 eta3'
   [../]
   [./ACBulkC1]
-    type = NestKKSMultiACBulkC
+    type = NestedKKSMultiACBulkC
     variable = eta1
     global_cs = 'c'
     eta_i = eta1
@@ -303,7 +303,7 @@
     variable = eta2
   [../]
   [./ACBulkF2]
-    type = NestKKSMultiACBulkF
+    type = NestedKKSMultiACBulkF
     variable  = eta2
     global_cs = 'c'
     eta_i = eta2
@@ -317,7 +317,7 @@
     args      = 'c eta1 eta3'
   [../]
   [./ACBulkC2]
-    type = NestKKSMultiACBulkC
+    type = NestedKKSMultiACBulkC
     variable = eta2
     global_cs = 'c'
     eta_i = eta2
@@ -339,7 +339,7 @@
     variable = eta3
   [../]
   [./ACBulkF3]
-    type = NestKKSMultiACBulkF
+    type = NestedKKSMultiACBulkF
     variable  = eta3
     global_cs = 'c'
     eta_i = eta3
@@ -353,7 +353,7 @@
     args      = 'c eta1 eta2'
   [../]
   [./ACBulkC3]
-    type = NestKKSMultiACBulkC
+    type = NestedKKSMultiACBulkC
     variable = eta3
     global_cs = 'c'
     eta_i = eta3

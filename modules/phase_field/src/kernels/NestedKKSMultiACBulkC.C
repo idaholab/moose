@@ -40,9 +40,9 @@ NestedKKSMultiACBulkC::NestedKKSMultiACBulkC(const InputParameters & parameters)
     _dcidetaj(_num_c),
     _dcidb(_num_c),
     _prop_d2hjdetaidetap(_num_j),
-    _dF1dc1(_num_c),
-    _d2F1dc1db1(_num_c),
-    _d2F1dc1darg(_n_args)
+    _dFadca(_num_c),
+    _d2Fadcadba(_num_c),
+    _d2Fadcadarg(_n_args)
 {
   for (unsigned int i = 0; i < _num_j; ++i)
   {
@@ -97,24 +97,24 @@ NestedKKSMultiACBulkC::NestedKKSMultiACBulkC(const InputParameters & parameters)
           &getMaterialPropertyDerivative<Real>(_hj_names[m], _eta_names[_k], _eta_names[n]);
   }
 
-  // _dF1dc1 and _d2F1dc1db1 are computed in KKSPhaseConcentrationMultiPhaseMaterial
+  // _dFadca and _d2Fadcadba are computed in KKSPhaseConcentrationMultiPhaseMaterial
   for (unsigned int m = 0; m < _num_c; ++m)
   {
-    _dF1dc1[m] = &getMaterialPropertyDerivative<Real>("cp" + _Fj_names[0], _ci_names[m * _num_j]);
-    _d2F1dc1db1[m].resize(_num_c);
+    _dFadca[m] = &getMaterialPropertyDerivative<Real>("cp" + _Fj_names[0], _ci_names[m * _num_j]);
+    _d2Fadcadba[m].resize(_num_c);
 
     for (unsigned int n = 0; n < _num_c; ++n)
-      _d2F1dc1db1[m][n] = &getMaterialPropertyDerivative<Real>(
+      _d2Fadcadba[m][n] = &getMaterialPropertyDerivative<Real>(
           "cp" + _Fj_names[0], _ci_name_matrix[m][0], _ci_name_matrix[n][0]);
   }
 
-  // _d2F1dc1darg are computed in KKSPhaseConcentrationMultiPhaseMaterial
+  // _d2Fadcadarg are computed in KKSPhaseConcentrationMultiPhaseMaterial
   for (unsigned int m = 0; m < _num_c; ++m)
   {
-    _d2F1dc1darg[m].resize(_n_args);
+    _d2Fadcadarg[m].resize(_n_args);
 
     for (unsigned int n = 0; n < _n_args; ++n)
-      _d2F1dc1darg[m][n] =
+      _d2Fadcadarg[m][n] =
           &getMaterialPropertyDerivative<Real>("cp" + _Fj_names[0], _ci_name_matrix[m][0], n);
   }
 }
@@ -135,7 +135,7 @@ NestedKKSMultiACBulkC::computeDFDOP(PFFunctionType type)
         for (unsigned int n = 0; n < _num_j; ++n)
           sum1 += (*_prop_dhjdetai[n])[_qp] * (*_prop_ci[m][n])[_qp];
 
-        sum += (*_dF1dc1[m])[_qp] * sum1;
+        sum += (*_dFadca[m])[_qp] * sum1;
       }
 
       return -sum;
@@ -153,7 +153,7 @@ NestedKKSMultiACBulkC::computeDFDOP(PFFunctionType type)
         Real sum3 = 0.0;
 
         for (unsigned int n = 0; n < _num_c; ++n)
-          sum1 += (*_d2F1dc1db1[m][n])[_qp] * (*_dcidetaj[n][0][_k])[_qp];
+          sum1 += (*_d2Fadcadba[m][n])[_qp] * (*_dcidetaj[n][0][_k])[_qp];
 
         for (unsigned int l = 0; l < _num_j; ++l)
         {
@@ -163,7 +163,7 @@ NestedKKSMultiACBulkC::computeDFDOP(PFFunctionType type)
                   (*_prop_dhjdetai[l])[_qp] * (*_dcidetaj[m][l][_k])[_qp];
         }
 
-        sum += sum1 * sum2 + (*_dF1dc1[m])[_qp] * sum3;
+        sum += sum1 * sum2 + (*_dFadca[m])[_qp] * sum3;
       }
 
       return -sum * _phi[_j][_qp];
@@ -192,7 +192,7 @@ NestedKKSMultiACBulkC::computeQpOffDiagJacobian(unsigned int jvar)
       Real sum3 = 0.0;
 
       for (unsigned int n = 0; n < _num_c; ++n)
-        sum1 += (*_d2F1dc1db1[m][n])[_qp] * (*_dcidb[n][0][compvar])[_qp];
+        sum1 += (*_d2Fadcadba[m][n])[_qp] * (*_dcidb[n][0][compvar])[_qp];
 
       for (unsigned int l = 0; l < _num_j; ++l)
       {
@@ -201,7 +201,7 @@ NestedKKSMultiACBulkC::computeQpOffDiagJacobian(unsigned int jvar)
         sum3 += (*_prop_dhjdetai[l])[_qp] * (*_dcidb[m][l][compvar])[_qp];
       }
 
-      sum += sum1 * sum2 + (*_dF1dc1[m])[_qp] * sum3;
+      sum += sum1 * sum2 + (*_dFadca[m])[_qp] * sum3;
     }
 
     res += -_L[_qp] * sum * _phi[_j][_qp] * _test[_i][_qp];
@@ -220,7 +220,7 @@ NestedKKSMultiACBulkC::computeQpOffDiagJacobian(unsigned int jvar)
       Real sum3 = 0.0;
 
       for (unsigned int n = 0; n < _num_c; ++n)
-        sum1 += (*_d2F1dc1db1[m][n])[_qp] * (*_dcidetaj[n][0][etavar])[_qp];
+        sum1 += (*_d2Fadcadba[m][n])[_qp] * (*_dcidetaj[n][0][etavar])[_qp];
 
       for (unsigned int l = 0; l < _num_j; ++l)
       {
@@ -230,7 +230,7 @@ NestedKKSMultiACBulkC::computeQpOffDiagJacobian(unsigned int jvar)
                 (*_prop_dhjdetai[l])[_qp] * (*_dcidetaj[m][l][etavar])[_qp];
       }
 
-      sum += sum1 * sum2 + (*_dF1dc1[m])[_qp] * sum3;
+      sum += sum1 * sum2 + (*_dFadca[m])[_qp] * sum3;
     }
 
     res += -_L[_qp] * sum * _phi[_j][_qp] * _test[_i][_qp];
@@ -243,7 +243,7 @@ NestedKKSMultiACBulkC::computeQpOffDiagJacobian(unsigned int jvar)
     Real sum1 = 0.0;
 
     for (unsigned int n = 0; n < _num_j; ++n)
-      sum1 += (*_d2F1dc1darg[m][cvar])[_qp] * (*_prop_dhjdetai[n])[_qp] * (*_prop_ci[m][n])[_qp];
+      sum1 += (*_d2Fadcadarg[m][cvar])[_qp] * (*_prop_dhjdetai[n])[_qp] * (*_prop_ci[m][n])[_qp];
 
     res += -_L[_qp] * sum1 * _phi[_j][_qp] * _test[_i][_qp];
   }
