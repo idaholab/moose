@@ -64,7 +64,8 @@ public:
                  B ci_lower_bounds,
                  B ci_upper_bounds,
                  unsigned int _num_eta,
-                 unsigned int _num_c);
+                 unsigned int _num_c,
+                 enum _damped_newton);
 
   template <typename R, typename J>
   void nonlinear(DynamicVector & guess, R computeResidual, J computeJacobian);
@@ -401,6 +402,8 @@ NestedSolve::condition(
   return true;
 }
 
+enum _damped_newton {a, b, c};
+
 template <typename V, typename T, typename B>
 void
 NestedSolve::nonlinear(V & guess,
@@ -409,8 +412,28 @@ NestedSolve::nonlinear(V & guess,
                        B ci_lower_bounds,
                        B ci_upper_bounds,
                        unsigned int _num_eta,
-                       unsigned int _num_c)
+                       unsigned int _num_c,
+                       enum _damped_newton)
 {
+  switch (_damped_newton)
+  {
+    case 0:
+      std::cout << "false" << std::endl;
+      break;
+
+    case 1:
+      std::cout << "once" << std::endl;
+      break;
+    
+    case 2:
+      std::cout << "range" << std::endl;
+      break;
+
+    default:
+      mooseError("Internal error");
+  }
+
+
   V delta;
   V residual;
   V guess_prev;
@@ -444,12 +467,6 @@ NestedSolve::nonlinear(V & guess,
     return false;
   };
 
-  // std::cout << "beginning" << std::endl;
-  // std::cout << "guess " << guess[0] << std::endl;
-  // std::cout << "guess " << guess[1] << std::endl;
-  // std::cout << "guess " << guess[2] << std::endl;
-  // std::cout << "guess " << guess[3] << '\n' << std::endl;
-
   // perform non-linear iterations
   while (_n_iterations < _max_iterations)
   {
@@ -463,39 +480,29 @@ NestedSolve::nonlinear(V & guess,
     guess_prev = guess;
     guess = guess_prev - delta;
 
-    // if (!condition(guess, ci_lower_bounds, ci_upper_bounds, _num_eta, _num_c))
-    // {
-    //   Real _alpha = 1;
-    //
-    //   while (!condition(guess, ci_lower_bounds, ci_upper_bounds, _num_eta, _num_c))
-    //   {
-    //     _alpha = _alpha * _damping_factor;
-    //     guess = guess_prev - _alpha * delta;
-    //
-    //     // std::cout << "update " << _alpha * delta[0] << std::endl;
-    //     // std::cout << "update " << _alpha * delta[1] << std::endl;
-    //     // std::cout << "update " << _alpha * delta[2] << std::endl;
-    //     // std::cout << "update " << _alpha * delta[3] << '\n' << std::endl;
-    //     //
-    //     std::cout << "guess " << guess[0] << std::endl;
-    //     std::cout << "guess " << guess[1] << std::endl;
-    //     std::cout << "guess " << guess[2] << std::endl;
-    //     std::cout << "guess " << guess[3] << '\n' << std::endl;
-    //   }
-    // }
-
     if (!condition(guess, ci_lower_bounds, ci_upper_bounds, _num_eta, _num_c))
     {
       Real _alpha = 1;
-
-      _alpha = _alpha * _damping_factor;
-      guess = guess_prev - _alpha * delta;
-
-      // std::cout << "guess " << guess[0] << std::endl;
-      // std::cout << "guess " << guess[1] << std::endl;
-      // std::cout << "guess " << guess[2] << std::endl;
-      // std::cout << "guess " << guess[3] << '\n' << std::endl;
+    
+      while (!condition(guess, ci_lower_bounds, ci_upper_bounds, _num_eta, _num_c))
+      {
+        _alpha = _alpha * _damping_factor;
+        guess = guess_prev - _alpha * delta;
+      }
     }
+
+    // if (!condition(guess, ci_lower_bounds, ci_upper_bounds, _num_eta, _num_c))
+    // {
+    //   Real _alpha = 1;
+
+    //   _alpha = _alpha * _damping_factor;
+    //   guess = guess_prev - _alpha * delta;
+
+    //   // std::cout << "guess " << guess[0] << std::endl;
+    //   // std::cout << "guess " << guess[1] << std::endl;
+    //   // std::cout << "guess " << guess[2] << std::endl;
+    //   // std::cout << "guess " << guess[3] << '\n' << std::endl;
+    // }
 
     _n_iterations++;
     // std::cout << "marker ===================================="
