@@ -1717,7 +1717,8 @@ MooseApp::getRestartableMetaData(const std::string & name,
   auto & restartable_data_map = getRestartableDataMap(metaname);
   auto iter = restartable_data_map.find(name);
   if (iter == restartable_data_map.end())
-    mooseError("Unable to find RestartableDataValue object with name " + name + " in RestartableDataMap");
+    mooseError("Unable to find RestartableDataValue object with name " + name +
+               " in RestartableDataMap");
 
   return *iter->second.value;
 }

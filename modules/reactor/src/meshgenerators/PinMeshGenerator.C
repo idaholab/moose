@@ -384,6 +384,9 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
   if (hasMeshProperty("node_id_background_meta", name() + "_2D"))
     declareMeshProperty("node_id_background_meta",
                         getMeshProperty<dof_id_type>("node_id_background_meta", name() + "_2D"));
+  if (hasMeshProperty("pattern_pitch_meta", name() + "_2D"))
+    declareMeshProperty("pattern_pitch_meta",
+                        getMeshProperty<Real>("pattern_pitch_meta", name() + "_2D"));
 
   // Store pin region ids and block names for id swap after extrusion if needed
   // by future mesh generators
@@ -481,12 +484,14 @@ PinMeshGenerator::generate()
   }
   if (hasMeshProperty("background_intervals_meta", name() + "_2D"))
   {
-    const auto background_intervals_meta = getMeshProperty<unsigned int>("background_intervals_meta", name() + "_2D");
+    const auto background_intervals_meta =
+        getMeshProperty<unsigned int>("background_intervals_meta", name() + "_2D");
     setMeshProperty("background_intervals_meta", background_intervals_meta);
   }
   if (hasMeshProperty("node_id_background_meta", name() + "_2D"))
   {
-    const auto node_id_background_meta = getMeshProperty<dof_id_type>("node_id_background_meta", name() + "_2D");
+    const auto node_id_background_meta =
+        getMeshProperty<dof_id_type>("node_id_background_meta", name() + "_2D");
     setMeshProperty("node_id_background_meta", node_id_background_meta);
   }
 

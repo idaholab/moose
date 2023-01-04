@@ -336,9 +336,8 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
             "position_file_name",
             getMeshProperty<std::string>("position_file_name", name() + "_pattern"));
       if (hasMeshProperty("pattern_pitch_meta", name() + "_pattern"))
-        declareMeshProperty(
-            "pattern_pitch_meta",
-            getMeshProperty<Real>("pattern_pitch_meta", name() + "_pattern"));
+        declareMeshProperty("pattern_pitch_meta",
+                            getMeshProperty<Real>("pattern_pitch_meta", name() + "_pattern"));
 
       declareMeshProperty("background_region_ids", _background_region_id);
       declareMeshProperty("duct_region_ids", _duct_region_ids);
@@ -450,7 +449,8 @@ AssemblyMeshGenerator::generate()
   // at generate() stage
   if (hasMeshProperty("pattern_pitch_meta", name() + "_pattern"))
   {
-    const auto pattern_pitch_meta = getMeshProperty<Real>("pattern_pitch_meta", name() + "_pattern");
+    const auto pattern_pitch_meta =
+        getMeshProperty<Real>("pattern_pitch_meta", name() + "_pattern");
     setMeshProperty("pattern_pitch_meta", pattern_pitch_meta);
   }
 

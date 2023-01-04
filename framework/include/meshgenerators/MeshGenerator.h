@@ -217,7 +217,8 @@ MeshGenerator::setMeshProperty(const std::string & data_name, const T & data_val
   std::string full_name =
       std::string(MeshMetaDataInterface::SYSTEM) + "/" + name() + "/" + data_name;
 
-  auto & restartable_data_ref = static_cast<RestartableData<T> &>(_app.getRestartableMetaData(full_name, MooseApp::MESH_META_DATA));
+  auto & restartable_data_ref = static_cast<RestartableData<T> &>(
+      _app.getRestartableMetaData(full_name, MooseApp::MESH_META_DATA));
   T & data = restartable_data_ref.set();
   data = data_value;
 
