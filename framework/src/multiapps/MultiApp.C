@@ -28,6 +28,7 @@
 #include "DelimitedFileReader.h"
 #include "MooseAppCoordTransform.h"
 #include "MultiAppTransfer.h"
+#include "Transient.h"
 
 #include "libmesh/mesh_tools.h"
 #include "libmesh/numeric_vector.h"
@@ -126,11 +127,12 @@ MultiApp::validParams()
                         "The time offset relative to the parent application for the purpose of "
                         "starting a subapp at a different time from the parent application. The "
                         "global time will be ahead by the offset specified here.");
-  params.addParam<Real>("reset_time",
-                        std::numeric_limits<Real>::max(),
-                        "The time at which to reset Apps given by the 'reset_apps' parameter.  "
-                        "Resetting an App means that it is destroyed and recreated, possibly "
-                        "modeling the insertion of 'new' material for that app.");
+  params.addParam<std::vector<Real>>(
+      "reset_time",
+      std::vector<Real>(),
+      "The time(s) at which to reset Apps given by the 'reset_apps' parameter.  "
+      "Resetting an App means that it is destroyed and recreated, possibly "
+      "modeling the insertion of 'new' material for that app.");
 
   params.addParam<std::vector<unsigned int>>(
       "reset_apps",
@@ -236,7 +238,7 @@ MultiApp::MultiApp(const InputParameters & parameters)
     _min_procs_per_app(getParam<unsigned int>("min_procs_per_app")),
     _output_in_position(getParam<bool>("output_in_position")),
     _global_time_offset(getParam<Real>("global_time_offset")),
-    _reset_time(getParam<Real>("reset_time")),
+    _reset_times(getParam<std::vector<Real>>("reset_time")),
     _reset_apps(getParam<std::vector<unsigned int>>("reset_apps")),
     _reset_happened(false),
     _move_time(getParam<Real>("move_time")),
@@ -253,15 +255,20 @@ MultiApp::MultiApp(const InputParameters & parameters)
     _restore_timer(registerTimedSection("restore", 3, "Restoring MultiApp")),
     _reset_timer(registerTimedSection("resetApp", 3, "Resetting MultiApp"))
 {
-
   if (parameters.isParamSetByUser("cli_args") && parameters.isParamValid("cli_args") &&
       parameters.isParamValid("cli_args_files"))
     paramError("cli_args",
                "'cli_args' and 'cli_args_files' cannot be specified simultaneously in MultiApp ");
 
-  if ((_reset_apps.size() > 0 && _reset_time == std::numeric_limits<Real>::max()) ||
-      (_reset_apps.size() == 0 && _reset_time < std::numeric_limits<Real>::max()))
+  if ((_reset_apps.size() > 0 && _reset_times.size() == 0) ||
+      (_reset_apps.size() == 0 && _reset_times.size() > 0))
     mooseError("reset_time and reset_apps may only be specified together");
+
+  // Check that the reset times are sorted by the user
+  auto sorted_times = _reset_times;
+  std::sort(sorted_times.begin(), sorted_times.end());
+  if (_reset_times.size() && _reset_times != sorted_times)
+    paramError("reset_time", "List of reset times must be sorted in increasing order");
 }
 
 void
@@ -285,6 +292,7 @@ MultiApp::init(unsigned int num_apps, const LocalRankConfig & config)
     _backups.emplace_back(std::make_shared<Backup>());
 
   _has_bounding_box.resize(_my_num_apps, false);
+  _reset_happened.resize(_reset_times.size(), false);
   _bounding_box.resize(_my_num_apps);
 
   if ((_cli_args.size() > 1) && (_total_num_apps != _cli_args.size()))
@@ -516,22 +524,39 @@ MultiApp::fillPositions()
 void
 MultiApp::preTransfer(Real /*dt*/, Real target_time)
 {
-  // First, see if any Apps need to be Reset
-  if (!_reset_happened && target_time + 1e-14 >= _reset_time)
-  {
-    _reset_happened = true;
-    for (auto & app : _reset_apps)
-      resetApp(app);
+  // Get a transient executioner to get a user-set tolerance
+  Real timestep_tol = 1e-13;
+  if (dynamic_cast<Transient *>(_fe_problem.getMooseApp().getExecutioner()))
+    timestep_tol =
+        dynamic_cast<Transient *>(_fe_problem.getMooseApp().getExecutioner())->timestepTol();
 
-    // If we reset an application, then we delete the old objects, including the coordinate
-    // transformation classes. Consequently we need to reset the coordinate transformation classes
-    // in the associated transfer classes
-    for (auto * const transfer : _associated_transfers)
-      transfer->getAppInfo();
+  // First, see if any Apps need to be reset
+  for (unsigned int i = 0; i < _reset_times.size(); i++)
+  {
+    if (!_reset_happened[i] && (target_time + timestep_tol >= _reset_times[i]))
+    {
+      _reset_happened[i] = true;
+      if (_reset_apps.size() > 0)
+        for (auto & app : _reset_apps)
+          resetApp(app);
+
+      // If we reset an application, then we delete the old objects, including the coordinate
+      // transformation classes. Consequently we need to reset the coordinate transformation classes
+      // in the associated transfer classes
+      for (auto * const transfer : _associated_transfers)
+        transfer->getAppInfo();
+
+      // If the time step covers multiple reset times, set them all as having 'happened'
+      for (unsigned int j = i; j < _reset_times.size(); j++)
+        if (target_time + timestep_tol >= _reset_times[j])
+          _reset_happened[j] = true;
+
+      break;
+    }
   }
 
   // Now move any apps that should be moved
-  if (_use_positions && !_move_happened && target_time + 1e-14 >= _move_time)
+  if (_use_positions && !_move_happened && target_time + timestep_tol >= _move_time)
   {
     _move_happened = true;
     for (unsigned int i = 0; i < _move_apps.size(); i++)

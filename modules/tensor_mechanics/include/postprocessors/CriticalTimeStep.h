@@ -39,6 +39,9 @@ protected:
   /// Density of the material
   const MaterialProperty<Real> & _material_density;
 
+  /// Added density due to mass scaling (zero if no scaling is selected or applied)
+  const MaterialProperty<Real> * _density_scaling;
+
   /// Effective stiffness of element: function of material properties and element size
   const MaterialProperty<Real> & _effective_stiffness;
 

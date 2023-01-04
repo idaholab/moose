@@ -35,6 +35,10 @@ InertialForceTempl<is_ad>::validParams()
                                         "Name of material property or a constant real "
                                         "number defining the eta parameter for the "
                                         "Rayleigh damping.");
+  params.addParam<MaterialPropertyName>(
+      "density_scaling",
+      0.0,
+      "Name of material property to add mass scaling in explicit simulations.");
   params.addParam<Real>("alpha",
                         0,
                         "alpha parameter for mass dependent numerical damping induced "
@@ -55,6 +59,7 @@ InertialForceTempl<is_ad>::InertialForceTempl(const InputParameters & parameters
     _has_velocity(this->isParamValid("velocity")),
     _has_acceleration(this->isParamValid("acceleration")),
     _eta(this->template getGenericMaterialProperty<Real, is_ad>("eta")),
+    _density_scaling(this->template getMaterialProperty<Real>("density_scaling")),
     _alpha(this->template getParam<Real>("alpha")),
     _time_integrator(*_sys.getTimeIntegrator())
 {
@@ -96,6 +101,12 @@ InertialForceTempl<is_ad>::InertialForceTempl(const InputParameters & parameters
     mooseError("InertialForce: Newmark-beta integration parameter, beta, cannot be provided along "
                "with an explicit time "
                "integrator.");
+
+  if (!(_time_integrator.isLumped() && _time_integrator.isExplicit()))
+    if (parameters.isParamSetByUser("density_scaling"))
+      this->paramError(
+          "density_scaling",
+          "Density (mass) scaling can only be used in lumped mass, explicit simulations");
 }
 
 template <bool is_ad>
@@ -118,8 +129,9 @@ InertialForceTempl<is_ad>::computeQpResidual()
   // Lumped mass option
   // Only lumping the masses here
   // will multiply by corresponding residual multiplier after lumping the matrix
+  // Density scaling is a fictitious added density to increase the time step
   else if (_time_integrator.isLumped() && _time_integrator.isExplicit() && !is_ad)
-    return _test[_i][_qp] * _density[_qp];
+    return _test[_i][_qp] * (_density[_qp] + _density_scaling[_qp]);
 
   // Consistent mass option
   // Same for explicit, implicit, and implicit with HHT
