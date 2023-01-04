@@ -453,30 +453,28 @@ NestedSolve::nonlinear(V & guess,
     guess_prev = guess;
     guess = guess_prev - delta;
 
-    if (_damped_newton == "damp_once") // damp once
+    if (!condition(guess, ci_lower_bounds, ci_upper_bounds, _num_eta, _num_c))
     {
-      if (!condition(guess, ci_lower_bounds, ci_upper_bounds, _num_eta, _num_c))
+      // damp once
+      if (_damped_newton == "damp_once")
       {
         Real _alpha = 1;
         _alpha = _alpha * _damping_factor;
         guess = guess_prev - _alpha * delta;
       }
-    }
-    else if (_damped_newton == "damp_loop") // damp till ci is within bounds
-    {
-      if (!condition(guess, ci_lower_bounds, ci_upper_bounds, _num_eta, _num_c))
+      // damp till ci is within bounds
+      else if (_damped_newton == "damp_loop")
       {
         Real _alpha = 1;
-
         while (!condition(guess, ci_lower_bounds, ci_upper_bounds, _num_eta, _num_c))
         {
           _alpha = _alpha * _damping_factor;
           guess = guess_prev - _alpha * delta;
         }
       }
+      else
+        mooseError("Internal error");
     }
-    else
-      mooseError("Internal error");
 
     _n_iterations++;
 

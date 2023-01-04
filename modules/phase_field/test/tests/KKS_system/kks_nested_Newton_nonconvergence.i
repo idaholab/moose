@@ -121,13 +121,13 @@
 [Kernels]
   # Concentration c
   [./CHBulk_c]
-    type = NestKKSSplitCHCRes
+    type = NestedKKSSplitCHCRes
     variable = c
     global_cs = 'c b'
     w = mu_c
     all_etas = eta
-    c1_names = 'c1 b1'
-    F1_name = F1_mat
+    ca_names = 'c1 b1'
+    Fa_name = F1_mat
     args = 'eta b mu_c'
   [../]
   [./dcdt_c]
@@ -144,13 +144,13 @@
 
   # Concentration b
   [./CHBulk_b]
-    type = NestKKSSplitCHCRes
+    type = NestedKKSSplitCHCRes
     variable = b
     global_cs = 'c b'
     w = mu_b
     all_etas = eta
-    c1_names = 'c1 b1'
-    F1_name = F1_mat
+    ca_names = 'c1 b1'
+    Fa_name = F1_mat
     args = 'eta c mu_b'
   [../]
   [./dcdt_b]
@@ -167,7 +167,7 @@
 
   # Phase parameter
   [./ACBulkF]
-    type = NestKKSACBulkF
+    type = NestedKKSACBulkF
     variable = eta
     global_cs = 'c b'
     ci_names = 'c1 c2
@@ -181,7 +181,7 @@
     args = 'c b'
   [../]
   [./ACBulkC]
-    type = NestKKSACBulkC
+    type = NestedKKSACBulkC
     variable = eta
     global_cs = 'c b'
     ci_names = 'c1 c2
