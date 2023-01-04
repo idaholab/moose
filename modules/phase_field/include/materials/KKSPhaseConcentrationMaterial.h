@@ -79,7 +79,7 @@ protected:
   const Real _abs_tol;
   const Real _rel_tol;
 
-  const bool _damped_newton;
+  MooseEnum _damped_newton;
   const Real _damping_factor;
   const std::vector<Real> _ci_lower_bounds;
   const std::vector<Real> _ci_upper_bounds;

@@ -53,6 +53,12 @@ public:
    */
   template <typename V, typename T>
   void nonlinear(V & guess, T compute);
+  template <typename R, typename J>
+  void nonlinear(DynamicVector & guess, R computeResidual, J computeJacobian);
+  template <typename R, typename J>
+  void nonlinear(Real & guess, R computeResidual, J computeJacobian);
+  template <typename R, typename J>
+  void nonlinear(RealVectorValue & guess, R computeResidual, J computeJacobian);
 
   template <typename V, typename B>
   bool condition(
@@ -65,14 +71,7 @@ public:
                  B ci_upper_bounds,
                  unsigned int _num_eta,
                  unsigned int _num_c,
-                 enum _damped_newton);
-
-  template <typename R, typename J>
-  void nonlinear(DynamicVector & guess, R computeResidual, J computeJacobian);
-  template <typename R, typename J>
-  void nonlinear(Real & guess, R computeResidual, J computeJacobian);
-  template <typename R, typename J>
-  void nonlinear(RealVectorValue & guess, R computeResidual, J computeJacobian);
+                 std::string _damped_newton);
 
   ///@{ default values
   static Real relativeToleranceDefault() { return 1e-8; }
@@ -332,7 +331,8 @@ NestedSolve::nonlinear(V & guess, T compute)
   auto r_square = r0_square;
 
   // lambda to check for convergence and set the state accordingly
-  auto is_converged = [&]() {
+  auto is_converged = [&]()
+  {
     if (r_square < _absolute_tolerance_square)
     {
       _state = State::CONVERGED_ABS;
@@ -378,11 +378,7 @@ NestedSolve::condition(
   {
     if (guess[i] < ci_lower_bounds[i] || guess[i] == ci_lower_bounds[i] ||
         guess[i] > ci_upper_bounds[i] || guess[i] == ci_upper_bounds[i])
-    {
-      // std::cout << "indenpendent out of bound" << std::endl;
-
       return false;
-    }
   }
 
   // check dependent ci
@@ -394,15 +390,10 @@ NestedSolve::condition(
 
     if (_sum_independent > 1 || _sum_independent == 1 || _sum_independent < 0 ||
         _sum_independent == 0)
-    {
-      // std::cout << "dependent out of bound" << std::endl;
       return false;
-    }
   }
   return true;
 }
-
-enum _damped_newton {a, b, c};
 
 template <typename V, typename T, typename B>
 void
@@ -413,27 +404,8 @@ NestedSolve::nonlinear(V & guess,
                        B ci_upper_bounds,
                        unsigned int _num_eta,
                        unsigned int _num_c,
-                       enum _damped_newton)
+                       std::string _damped_newton)
 {
-  switch (_damped_newton)
-  {
-    case 0:
-      std::cout << "false" << std::endl;
-      break;
-
-    case 1:
-      std::cout << "once" << std::endl;
-      break;
-    
-    case 2:
-      std::cout << "range" << std::endl;
-      break;
-
-    default:
-      mooseError("Internal error");
-  }
-
-
   V delta;
   V residual;
   V guess_prev;
@@ -453,7 +425,8 @@ NestedSolve::nonlinear(V & guess,
   auto r_square = r0_square;
 
   // lambda to check for convergence and set the state accordingly
-  auto is_converged = [&]() {
+  auto is_converged = [&]()
+  {
     if (r_square < _absolute_tolerance_square)
     {
       _state = State::CONVERGED_ABS;
@@ -480,34 +453,32 @@ NestedSolve::nonlinear(V & guess,
     guess_prev = guess;
     guess = guess_prev - delta;
 
-    if (!condition(guess, ci_lower_bounds, ci_upper_bounds, _num_eta, _num_c))
+    if (_damped_newton == "damp_once") // damp once
     {
-      Real _alpha = 1;
-    
-      while (!condition(guess, ci_lower_bounds, ci_upper_bounds, _num_eta, _num_c))
+      if (!condition(guess, ci_lower_bounds, ci_upper_bounds, _num_eta, _num_c))
       {
+        Real _alpha = 1;
         _alpha = _alpha * _damping_factor;
         guess = guess_prev - _alpha * delta;
       }
     }
+    else if (_damped_newton == "damp_loop") // damp till ci is within bounds
+    {
+      if (!condition(guess, ci_lower_bounds, ci_upper_bounds, _num_eta, _num_c))
+      {
+        Real _alpha = 1;
 
-    // if (!condition(guess, ci_lower_bounds, ci_upper_bounds, _num_eta, _num_c))
-    // {
-    //   Real _alpha = 1;
-
-    //   _alpha = _alpha * _damping_factor;
-    //   guess = guess_prev - _alpha * delta;
-
-    //   // std::cout << "guess " << guess[0] << std::endl;
-    //   // std::cout << "guess " << guess[1] << std::endl;
-    //   // std::cout << "guess " << guess[2] << std::endl;
-    //   // std::cout << "guess " << guess[3] << '\n' << std::endl;
-    // }
+        while (!condition(guess, ci_lower_bounds, ci_upper_bounds, _num_eta, _num_c))
+        {
+          _alpha = _alpha * _damping_factor;
+          guess = guess_prev - _alpha * delta;
+        }
+      }
+    }
+    else
+      mooseError("Internal error");
 
     _n_iterations++;
-    // std::cout << "marker ===================================="
-    //           << "ITERATION IS " << _n_iterations << '\n'
-    //           << std::endl;
 
     // compute residual and jacobian for the next iteration
     compute(guess, residual, jacobian);

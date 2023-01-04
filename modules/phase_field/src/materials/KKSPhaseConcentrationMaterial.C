@@ -34,8 +34,12 @@ KKSPhaseConcentrationMaterial::validParams()
       "nested_iterations",
       "The output number of nested Newton iterations at each quadrature point.");
   params.addCoupledVar("args", "The coupled variables of Fa and Fb.");
-  params.addRequiredParam<bool>("damped_Newton",
-                                "Whether or not to use the damped Newton's method.");
+  MooseEnum damped_newton("FALSE=0 DAMP_ONCE DAMP_LOOP", "FALSE");
+  params.addParam<MooseEnum>(
+      "damped_Newton",
+      damped_newton,
+      "Use nested Newton's method without damping (FALSE), damp once (DAMP_ONCE), or "
+      "damp until ci are within lower_bounds to upper_bounds (DAMP_LOOP).");
   params.addParam<Real>("damping_factor", 1, "The damping factor used in the Newton's method.");
   params.addParam<std::vector<Real>>("lower_bounds", "The lower bounds of ci.");
   params.addParam<std::vector<Real>>("upper_bounds", "The upper bounds of ci.");
@@ -71,7 +75,7 @@ KKSPhaseConcentrationMaterial::KKSPhaseConcentrationMaterial(const InputParamete
     _iter(declareProperty<Real>("nested_iterations")),
     _abs_tol(getParam<Real>("absolute_tolerance")),
     _rel_tol(getParam<Real>("relative_tolerance")),
-    _damped_newton(getParam<bool>("damped_Newton")),
+    _damped_newton(getParam<MooseEnum>("damped_Newton")),
     _damping_factor(getParam<Real>("damping_factor")),
     _ci_lower_bounds(getParam<std::vector<Real>>("lower_bounds")),
     _ci_upper_bounds(getParam<std::vector<Real>>("upper_bounds")),
@@ -188,7 +192,8 @@ KKSPhaseConcentrationMaterial::computeQpProperties()
 
   auto compute = [&](const NestedSolve::Value<> & guess,
                      NestedSolve::Value<> & residual,
-                     NestedSolve::Jacobian<> & jacobian) {
+                     NestedSolve::Jacobian<> & jacobian)
+  {
     for (unsigned int m = 0; m < _num_c * 2; ++m)
       (*_prop_ci[m])[_qp] = guess(m);
 
@@ -221,14 +226,37 @@ KKSPhaseConcentrationMaterial::computeQpProperties()
     }
   };
 
-  // _nested_solve.nonlinear(solution, compute);
-  // _iter[_qp] = _nested_solve.getIterations();
+  switch (_damped_newton)
+  {
+    case 0:
+      _nested_solve.nonlinear(solution, compute);
+      break;
 
-  if (!_damped_newton)
-    _nested_solve.nonlinear(solution, compute);
-  else
-    _nested_solve.nonlinear(
-        solution, compute, _damping_factor, _ci_lower_bounds, _ci_upper_bounds, 2, _num_c);
+    case 1:
+      _nested_solve.nonlinear(solution,
+                              compute,
+                              _damping_factor,
+                              _ci_lower_bounds,
+                              _ci_upper_bounds,
+                              2,
+                              _num_c,
+                              "damp_once");
+      break;
+
+    case 2:
+      _nested_solve.nonlinear(solution,
+                              compute,
+                              _damping_factor,
+                              _ci_lower_bounds,
+                              _ci_upper_bounds,
+                              2,
+                              _num_c,
+                              "damp_loop");
+      break;
+
+    default:
+      mooseError("damped_newton does not match the given options.");
+  }
 
   if (_nested_solve.getState() == NestedSolve::State::NOT_CONVERGED)
     mooseException("Nested Newton iteration did not converge.");
