@@ -218,7 +218,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
         continue;
 
       // Examine global time synchronization
-      if (!_sub_cycling && !_reset_happened)
+      if (!_sub_cycling && !_reset_happened.size())
       {
         // The multi-app general offset is substracted to go into local time.
         if (std::abs(target_time - _app.getGlobalTimeOffset() - ex->getTime() - dt) >

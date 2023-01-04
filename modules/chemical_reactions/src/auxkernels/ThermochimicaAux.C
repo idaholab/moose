@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ThermochimicaAux.h"
+#include "ThermochimicaUtils.h"
 #include "libmesh/int_range.h"
 #include "libmesh/fe.h"
 
@@ -17,9 +18,9 @@
 
 #ifdef THERMOCHIMICA_ENABLED
 #include "Thermochimica-cxx.h"
+#endif
 
 registerMooseObject("ChemicalReactionsApp", ThermochimicaAux);
-#endif
 
 InputParameters
 ThermochimicaAux::validParams()
@@ -31,8 +32,10 @@ ThermochimicaAux::validParams()
   params.addRequiredParam<UserObjectName>("thermo_nodal_data_uo", "Name of the user object");
   params.addCoupledVar("element_potentials", "Chemical potentials of elements");
 
-  params.addClassDescription("Extracts phase and species amounts, and element chemical potentials "
-                             "from a Thermochimica user object.");
+  ThermochimicaUtils::addClassDescription(
+      params,
+      "Extracts phase and species amounts, and element chemical potentials "
+      "from a Thermochimica user object.");
 
   return params;
 }
@@ -53,9 +56,7 @@ ThermochimicaAux::ThermochimicaAux(const InputParameters & parameters)
     _thermo_nodal_data_uo(getUserObject<ThermochimicaNodalData>("thermo_nodal_data_uo"))
 #endif
 {
-#ifndef THERMOCHIMICA_ENABLED
-  mooseError("Thermochimica disabled");
-#endif
+  ThermochimicaUtils::checkLibraryAvailability(*this);
 
   if (!isNodal())
     paramError("variable", "A nodal variable must be supplied.");

@@ -1,0 +1,25 @@
+[Tests]
+  issues = '#22980'
+  design = "SurrogateModelScalarAux.md"
+
+  [scalar_surrogate_aux]
+    type = 'CSVDiff'
+    input = 'surrogate_scalar_aux.i'
+    csvdiff = 'surrogate_scalar_aux_out.csv'
+    abs_zero = 1e-06
+    group = 'simple'
+    recover = false
+    requirement = 'The system shall be able to evaluate a surrogate at given scalar variable values and insert the result into a scalar variable'
+  []
+
+  [scalar_surrogate_aux_pp_arg]
+    type = 'CSVDiff'
+    input = 'surrogate_scalar_aux.i'
+    csvdiff = 'scalar_surrogate_aux_pp_arg.csv'
+    abs_zero = 1e-06
+    group = 'simple'
+    recover = false
+    cli_args = 'Outputs/file_base=scalar_surrogate_aux_pp_arg AuxScalarKernels/scalar_eval/parameters="Tpp 5"'
+    requirement = 'The system shall be able to evaluate a surrogate at given postprocessor values and insert the result into a scalar variable'
+  []
+[]

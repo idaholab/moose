@@ -42,6 +42,7 @@ ExceptionKernel::validParams()
 
   params.addParam<processor_id_type>(
       "rank", DofObject::invalid_processor_id, "Isolate an exception to a particular rank");
+  params.addParam<int>("counter", -1, "Countdown to throwing");
   return params;
 }
 
@@ -50,7 +51,8 @@ ExceptionKernel::ExceptionKernel(const InputParameters & parameters)
     _when(static_cast<WhenType>((int)getParam<MooseEnum>("when"))),
     _should_throw(getParam<bool>("should_throw")),
     _throw_std_exception(getParam<bool>("throw_std_exception")),
-    _rank(getParam<processor_id_type>("rank"))
+    _rank(getParam<processor_id_type>("rank")),
+    _counter(getParam<int>("counter"))
 {
 }
 
@@ -88,6 +90,20 @@ ExceptionKernel::computeQpResidual()
     return 0.;
 }
 
+void
+ExceptionKernel::jacobianSetup()
+{
+  if (_counter > 0)
+    _counter--;
+}
+
+void
+ExceptionKernel::residualSetup()
+{
+  if (_counter > 0)
+    _counter--;
+}
+
 Real
 ExceptionKernel::computeQpJacobian()
 {
@@ -115,6 +131,10 @@ ExceptionKernel::computeQpJacobian()
 bool
 ExceptionKernel::time_to_throw() const
 {
-  return (_t_step == 1 &&
-          _fe_problem.getNonlinearSystemBase().getCurrentNonlinearIterationNumber() == 1);
+  if (_counter < 0)
+    return (_t_step == 1 &&
+            _fe_problem.getNonlinearSystemBase().getCurrentNonlinearIterationNumber() == 1);
+  if (_counter == 0)
+    return true;
+  return false;
 }

@@ -4,7 +4,7 @@ from mooseutils import fuzzyEqual
 
 class TestSkewnessCorrectedStencil(unittest.TestCase):
     def test(self):
-        df1 = mms.run_spatial('advection-outflow.i', 5, 'Variables/v/face_interp_method=skewness-corrected', mpi=1)
+        df1 = mms.run_spatial('advection-outflow.i', 5, 'Variables/v/face_interp_method=skewness-corrected')
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1,

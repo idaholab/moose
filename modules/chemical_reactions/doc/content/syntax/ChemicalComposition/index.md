@@ -1,14 +1,14 @@
 # ChemicalComposition Action System
 
 !alert! note title=For Thermochimica module
-This action is designed for use with thermochemistry library Thermochimica [!cite](piro2013). Check out the corresponding submudle by running `git update --init --checkout modules/chemical_reactions/contrib/thermochimica`.
+This action is designed for use with thermochemistry library Thermochimica [!cite](piro2013). Check out the corresponding submodule by running `git submodule update --init --checkout modules/chemical_reactions/contrib/thermochimica`.
 !alert-end!
 
 ## Description
 
 The `ChemicalComposition` action simplifies the initialization of variables for
-thermochemical modeling and thermodynamic material model. It initializes auxiliary
-based on the `elements` parameter (recomended in the  `GlobalParameters` block). The
+thermochemical modeling and the thermodynamic material model. It initializes auxiliary variables
+based on the `elements` parameter (recommended in the  `GlobalParameters` block). The
 created variables have names of chemical elements used in the model and can be passed
 to other objects in the simulation.
 

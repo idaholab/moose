@@ -1,23 +1,27 @@
 [Tests]
   design = 'CentralDifference.md'
-  issues = '#13964 #9726'
+  issues = '#13964 #9726 #22997'
 
   # 3D implicit analysis with Newmark Beta time integration
-  [./implicit]
+  [implicit]
     type = 'CSVDiff'
     input = '3d_consistent_implicit.i'
     csvdiff = '3d_consistent_implicit_out.csv'
-    requirement = "The NewmarkBeta timeintegrator shall correctly calculate "
-                  "the response of a 3D mesh. "
-  [../]
-
+    requirement = "The NewmarkBeta timeintegrator shall correctly calculate the response of a 3D "
+                  "mesh. "
+  []
   # 3D explicit analysis of the above problem with Central Difference time integration
-  [./explicit]
+  [explicit]
     type = 'CSVDiff'
     input = '3d_consistent_explicit.i'
     csvdiff = '3d_consistent_explicit_out.csv'
-    requirement = "The CentralDifference timeintegrator shall correctly calculate "
-                  "the response of a 3D mesh when the the consistent mass matrix "
-                  "option is used."
-  [../]
+    requirement = "The CentralDifference timeintegrator shall correctly calculate the response of a "
+                  "3D mesh when the the consistent mass matrix option is used."
+  []
+  [explicit_mass_scaling]
+    type = 'Exodiff'
+    input = '3d_consistent_explicit_mass_scaling.i'
+    exodiff = '3d_consistent_explicit_mass_scaling_out.e'
+    requirement = "The central difference time integrator time step can be increased by selecting density scaling."
+  []
 []

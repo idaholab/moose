@@ -1,0 +1,13 @@
+[Tests]
+  issues = '#19571'
+  design = 'LibtorchNeuralNetControlTransfer.md'
+  [torch-parameters]
+    type = JSONDiff
+    input = libtorch_drl_control_trainer.i
+    jsondiff = 'train_out.json train_out_runner0_json_out.json'
+    skip_keys = 'reporters time time_step'
+    requirement = "The system shall be able to transfer an artificial neural network between a "
+                  "trainer object and a control object residing on different apps."
+    libtorch = true
+  []
+[]

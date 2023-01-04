@@ -1,0 +1,132 @@
+[Tests]
+  design = 'LibtorchArtificialNeuralNet.md'
+  issues = '#19571'
+
+  [libtorch-nn-errors]
+    requirement = 'The system shall throw an error while creating a LibtorchArtificialNeuralNet when encountering'
+
+    [wrong-activation]
+      type = RunException
+      input = 'test_ann.i'
+      cli_args = 'VectorPostprocessors/test/activation_functions=sad'
+      expect_err = 'Invalid option \"sad\" in MultiMooseEnum.  Valid options \(not case-sensitive\) are \"relu sigmoid elu gelu linear\".'
+      detail = 'an unsupported activation function;'
+      libtorch = true
+      allow_test_objects = True
+    []
+    [wrong-activation-number]
+      type = RunException
+      input = 'test_ann.i'
+      cli_args = "VectorPostprocessors/test/activation_functions='relu sigmoid elu'"
+      expect_err = 'The number of activation functions should be either one or the same as the number of hidden layers'
+      detail = 'the wrong number of activation functions;'
+      libtorch = true
+      allow_test_objects = True
+    []
+    [wrong-optimizer]
+      type = RunException
+      input = 'test_ann_trainer.i'
+      cli_args = "VectorPostprocessors/test_trainer/optimizer_type='random'"
+      expect_err = 'Invalid option "random" in MooseEnum.'
+      detail = 'a non-supported optimizer.'
+      libtorch = true
+      allow_test_objects = True
+    []
+  []
+  [libtorch-nn-activation]
+    requirement = 'The system shall be able to create and evaluate a neural network with an activation function type of '
+    [relu]
+      type = CSVDiff
+      input = 'test_ann.i'
+      csvdiff = 'relu_test_0001.csv'
+      detail = 'rectified linear unit (ReLU);'
+      cli_args = "Outputs/file_base=relu"
+      libtorch = true
+      allow_test_objects = True
+    []
+    [sigmoid]
+      type = CSVDiff
+      input = 'test_ann.i'
+      csvdiff = 'sigmoid_test_0001.csv'
+      detail = 'sigmoid;'
+      cli_args = "VectorPostprocessors/test/activation_functions='sigmoid sigmoid' "
+                 "Outputs/file_base=sigmoid"
+      libtorch = true
+      allow_test_objects = True
+    []
+    [gelu]
+      type = CSVDiff
+      input = 'test_ann.i'
+      csvdiff = 'gelu_test_0001.csv'
+      detail = 'Gaussian Error Linear Unit (GELU);'
+      cli_args = "VectorPostprocessors/test/activation_functions='gelu gelu' Outputs/file_base=gelu"
+      libtorch = true
+      allow_test_objects = True
+    []
+    [elu]
+      type = CSVDiff
+      input = 'test_ann.i'
+      csvdiff = 'elu_test_0001.csv'
+      detail = 'Exponential Linear Unit (ELU);'
+      cli_args = "VectorPostprocessors/test/activation_functions='elu elu' Outputs/file_base=elu"
+      libtorch = true
+      allow_test_objects = True
+    []
+    [linear]
+      type = CSVDiff
+      input = 'test_ann.i'
+      csvdiff = 'linear_test_0001.csv'
+      detail = 'linear;'
+      cli_args = "VectorPostprocessors/test/activation_functions='linear linear' "
+                 "Outputs/file_base=linear"
+      libtorch = true
+      allow_test_objects = True
+    []
+  []
+  [libtorch-nn-optimizer]
+    requirement = 'The system shall be able to train a neural network with an optimizer type of'
+    [adagrad]
+      type = CSVDiff
+      input = 'test_ann_trainer.i'
+      csvdiff = 'adagrad_test_trainer_0001.csv'
+      detail = 'Adaptive Gradient (AdaGrad);'
+      cli_args = "VectorPostprocessors/test_trainer/optimizer_type='adagrad' 
+                  VectorPostprocessors/test_trainer/num_epochs=40
+                  Outputs/file_base=adagrad"
+      libtorch = true
+      allow_test_objects = True
+      rel_err = 2e-4
+    []
+    [adam]
+      type = CSVDiff
+      input = 'test_ann_trainer.i'
+      csvdiff = 'adam_test_trainer_0001.csv'
+      detail = 'Adam;'
+      cli_args = "VectorPostprocessors/test_trainer/optimizer_type='adam' Outputs/file_base='adam'"
+      libtorch = true
+      allow_test_objects = True
+      rel_err = 1e-5
+    []
+    [rmsprop]
+      type = CSVDiff
+      input = 'test_ann_trainer.i'
+      csvdiff = 'rmsprop_test_trainer_0001.csv'
+      detail = 'Root Mean Squared Propagation (RMSProp);'
+      cli_args = "VectorPostprocessors/test_trainer/optimizer_type='rmsprop' "
+                 "Outputs/file_base='rmsprop'"
+      libtorch = true
+      allow_test_objects = True
+      rel_err = 1e-5
+    []
+    [sgd]
+      type = CSVDiff
+      input = 'test_ann_trainer.i'
+      csvdiff = 'sgd_test_trainer_0001.csv'
+      detail = 'Stochastic Gradient Descent (CGD);'
+      cli_args = "VectorPostprocessors/test_trainer/optimizer_type='sgd' Outputs/file_base='sgd'"
+      libtorch = true
+      allow_test_objects = True
+      rel_err = 1e-5
+    []
+  []
+[]

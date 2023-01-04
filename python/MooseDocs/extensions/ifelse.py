@@ -19,6 +19,7 @@ from ..base import Extension, components
 from ..base.readers import MarkdownReader
 from ..common import exceptions
 from ..tree import tokens
+from TestHarness import util
 from . import command, appsyntax
 
 LOG = logging.getLogger(__name__)
@@ -38,6 +39,10 @@ def hasMooseApp(ext, app):
 def hasSubmodule(ext, name):
     """Module function for testing if an application has a submodule ending with the given name."""
     return ext.hasSubmodule(name)
+
+def hasLibtorch(ext):
+    """Module function for testing if an application was compiled with libtorch."""
+    return ext.hasConfigOption('libtorch', 'true')
 
 def hasPage(ext, filename):
     """Module function for the existence of markdown page."""
@@ -96,6 +101,17 @@ class IfElseExtension(command.CommandExtension):
         """Helper for the 'hasSubmodule' function."""
         status = mooseutils.git_submodule_info(MooseDocs.ROOT_DIR, '--recursive')
         return any([repo.endswith(name) for repo in status.keys()])
+
+    def hasConfigOption(self, option, value):
+        moose_dir = os.getenv('MOOSE_DIR',
+                              os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', '..', '..')))
+
+        # getMooseconfig returns a set of ('ALL', value ), so we have to iterate through it
+        for it in util.getMooseConfigOption(moose_dir, option):
+            if it.lower() == value.lower():
+                return True
+
+        return False
 
     def extend(self, reader, renderer):
         self.requires(command)
@@ -162,7 +178,12 @@ class IfCommandBase(command.CommandComponent):
 
         # Locate and evaluate the function
         func = self.extension.getFunction(match.group('function'))
-        args = eval(match.group('args')[:-1] + ',)') # add trailing ',' to always create tuple
+
+        # If we don't haver agrs we define an empty tupple, otherwise we
+        # include every argument (which are treated as strings here), the trailing
+        # ',' is to always create tuple
+        arg_str = "tuple()" if match.group('args') == "()" else match.group('args')[:-1] + ',)'
+        args = eval(arg_str)
         value = func(self.extension, *args)
 
         # Require that an actual 'bool' is returned to avoid un-intended operation, for example

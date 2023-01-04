@@ -1,5 +1,5 @@
 [Tests]
-  [./heatConduction_test]
+  [heatConduction_test]
     type = 'Exodiff'
     input = 'heatConduction2D.i'
     exodiff = 'heatConduction2D_out.e'
@@ -7,5 +7,33 @@
     design = 'HomogenizedHeatConduction.md'
     requirement = 'The system shall compute homogenized thermal conductivity using the asymptotic expansion homogenization approach'
     issues = '#6750'
-  [../]
+  []
+
+  [homogenize_tc_hexagonal]
+    type = 'CSVDiff'
+    input = 'homogenize_tc_hex.i'
+    csvdiff = 'homogenize_tc_hex_outp_csv.csv'
+    requirement = 'The system shall compute homogenized thermal conductivity using the asymptotic expansion homogenization approach for hexagonal geometries.'
+    design = 'HomogenizedThermalConductivity.md'
+    issues = '#22919'
+  []
+
+  [homogenize_tensor_tc]
+    type = 'Exodiff'
+    input = 'heatConduction2D_tensor_tc.i'
+    exodiff = 'heatConduction2D_tensor_tc_out.e'
+    design = 'AnisoHomogenizedHeatConduction.md'
+    requirement = 'The system shall compute homogenized thermal conductivity using the asymptotic expansion homogenization approach when the heterogeneous thermal conductivities are given as tensor'
+    issues = '#22919'
+  []
+
+  [homogenize_aniso_tensor_tc]
+    type = 'Exodiff'
+    input = 'heatConduction2D_tensor_tc.i'
+    exodiff = 'homogenize_aniso_tensor_tc.e'
+    design = 'AnisoHomogenizedHeatConduction.md'
+    cli_args = 'Outputs/file_base=homogenize_aniso_tensor_tc Materials/heat2/thermal_conductivity="100 1 0 0 80 8 0 0 0"'
+    requirement = 'The system shall compute homogenized thermal conductivity using the asymptotic expansion homogenization approach when the heterogeneous thermal conductivities are given as anisotropic tensor'
+    issues = '#22919'
+  []
 []

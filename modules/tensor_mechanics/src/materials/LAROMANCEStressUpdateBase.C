@@ -36,7 +36,7 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::validParams()
   params.addParam<MaterialPropertyName>("environmental_factor",
                                         "Optional coupled environmental factor");
 
-  MooseEnum error_lower_limit_behavior("ERROR WARN IGNORE EXCEPTION DONTHING USELIMIT",
+  MooseEnum error_lower_limit_behavior("ERROR EXCEPTION WARN IGNORE DONTHING USELIMIT",
                                        "EXCEPTION");
   // Only allow ERROR and EXCEPTION on upper bounds
   MooseEnum error_upper_limit_behavior("ERROR EXCEPTION", "EXCEPTION");
@@ -68,7 +68,7 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::validParams()
       "What to do if old strain is outside the upper global window of applicability.");
 
   MooseEnum extrapolated_lower_limit_behavior(
-      "ERROR WARN IGNORE EXCEPTION DONOTHING USELIMIT EXTRAPOLATE", "EXTRAPOLATE");
+      "ERROR EXCEPTION WARN IGNORE DONOTHING USELIMIT EXTRAPOLATE", "EXTRAPOLATE");
   params.addParam<MooseEnum>(
       "stress_input_window_low_failure",
       extrapolated_lower_limit_behavior,
@@ -229,9 +229,16 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::LAROMANCEStressUpdateBaseTempl(
         this->_base_name + "cell_dislocations_step")),
     _plastic_strain_increment(),
     _number_of_substeps(
-        this->template declareProperty<Real>(this->_base_name + "number_of_substeps"))
+        this->template declareProperty<Real>(this->_base_name + "number_of_substeps")),
+    _index_name(_window_failure.size())
 {
   this->_check_range = true; // this may not be necessary?
+
+  _index_name[_cell_input_index] = "cell";
+  _index_name[_wall_input_index] = "wall";
+  _index_name[_stress_input_index] = "stress";
+  _index_name[_old_strain_input_index] = "old strain";
+  _index_name[_temperature_input_index] = "temperature";
 
   _window_failure[_cell_input_index].first =
       parameters.get<MooseEnum>("cell_input_window_low_failure").getEnum<WindowFailure>();
@@ -255,6 +262,7 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::LAROMANCEStressUpdateBaseTempl(
       parameters.get<MooseEnum>("temperature_input_window_high_failure").getEnum<WindowFailure>();
   if (_environmental)
   {
+    _index_name[_environmental_input_index] = "environmental";
     _window_failure[_environmental_input_index].first =
         parameters.get<MooseEnum>("environment_input_window_low_failure").getEnum<WindowFailure>();
     _window_failure[_environmental_input_index].second =
@@ -680,9 +688,9 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeTileWeight(
           {
             weights[p][t] = 0.0;
             std::stringstream msg;
-            msg << "In " << _name << ": input parameter with value ("
-                << MetaPhysicL::raw_value(input) << ") is out of lower global range ("
-                << _input_limits[p][t][in_index][0] << ")";
+            msg << "In " << _name << ": " << _index_name[in_index]
+                << " input parameter with value (" << MetaPhysicL::raw_value(input)
+                << ") is out of lower global range (" << _input_limits[p][t][in_index][0] << ")";
 
             // Set input to edge of limit so it is found later in computePartitionWeights
             input = _input_limits[p][t][in_index][0];
@@ -713,9 +721,9 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::computeTileWeight(
           {
             weights[p][t] = 0.0;
             std::stringstream msg;
-            msg << "In " << _name << ": input parameter with value ("
-                << MetaPhysicL::raw_value(input) << ") is out of upper global range ("
-                << _input_limits[p][t][in_index][1] << ")";
+            msg << "In " << _name << ": " << _index_name[in_index]
+                << " input parameter with value (" << MetaPhysicL::raw_value(input)
+                << ") is out of upper global range (" << _input_limits[p][t][in_index][1] << ")";
 
             // Set input to edge of limit so it is found later in computePartitionWeights
             input = _input_limits[p][t][in_index][1];

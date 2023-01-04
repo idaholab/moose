@@ -221,3 +221,33 @@
    fun:KSPSolve_Private
    fun:KSPSolve
 }
+{
+   libtorch_jit
+   Memcheck:Cond
+   fun:*deregisterOperator*
+   fun:*deregisterDef*
+   fun:*RegisterOperators*
+   fun:*finalize
+   obj:*libtorch_cpu.so
+}
+{
+   libtorch_at_native_leak
+   Memcheck:Leak
+   ...
+   fun:*at*native*
+   ...
+}
+{
+   libtorch_at_native_overlap
+   Memcheck:Overlap
+   ...
+   fun:*at*native*
+   ...
+}
+{
+   libtorch_torch_autograd
+   Memcheck:Leak
+   ...
+   fun:*torch*autograd*
+   ...
+}

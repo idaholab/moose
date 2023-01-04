@@ -3,7 +3,8 @@
   issues = '#14409 #16584'
 
   [percentile]
-    requirement = "The system shall support computing percentile confidence level intervals of statistics"
+    requirement = "The system shall support computing percentile confidence level intervals of "
+                  "statistics"
 
     [basic]
       type = JSONDiff
@@ -18,6 +19,7 @@
       jsondiff = percentile_main_out.json
 
       detail = "of a vector of vector data"
+      valgrind = HEAVY
     []
 
     # These two tests are restricted to 3 processors because the Test VPP creates unique data

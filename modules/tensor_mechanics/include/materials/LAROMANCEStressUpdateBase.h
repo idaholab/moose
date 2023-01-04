@@ -80,9 +80,9 @@ protected:
   enum class WindowFailure
   {
     ERROR,
+    EXCEPTION,
     WARN,
     IGNORE,
-    EXCEPTION,
     DONOTHING,
     USELIMIT,
     EXTRAPOLATE
@@ -635,6 +635,9 @@ protected:
 
   /// Material property capturing number of substeps for output purposes (defaults to one if substepping isn't used)
   MaterialProperty<Real> & _number_of_substeps;
+
+  /// index names for error output
+  std::vector<std::string> _index_name;
 
   /// check if a JSON file was loaded and if the specified key exists
   void checkJSONKey(const std::string & key);
