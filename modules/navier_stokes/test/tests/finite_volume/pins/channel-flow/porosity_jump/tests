@@ -86,5 +86,12 @@
       detail = 'two dimensions'
       ad_indexing_type = 'global'
     []
+    [2d-action]
+      type = CSVDiff
+      input = 'bernoulli-2d-action.i'
+      csvdiff = 'bernoulli-2d-action_out.csv'
+      detail = 'two dimensions using compact action syntax'
+      ad_indexing_type = 'global'
+    []
   []
 []

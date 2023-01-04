@@ -102,6 +102,11 @@ NSFVAction::validParams()
       "porosity_smoothing_layers",
       "The number of interpolation-reconstruction operations to perform on the porosity.");
 
+  MooseEnum porosity_interface_pressure_treatment("automatic bernoulli", "automatic");
+  params.addParam<MooseEnum>("porosity_interface_pressure_treatment",
+                             porosity_interface_pressure_treatment,
+                             "How to treat pressure at a porosity interface");
+
   params.addParam<bool>("use_friction_correction",
                         "If friction correction should be applied in the momentum equation.");
 
@@ -109,9 +114,9 @@ NSFVAction::validParams()
       "consistent_scaling",
       "Scaling parameter for the friction correction in the momentum equation (if requested).");
 
-  params.addParamNamesToGroup(
-      "porosity porosity_smoothing_layers use_friction_correction consistent_scaling",
-      "Porous medium treatment");
+  params.addParamNamesToGroup("porosity porosity_smoothing_layers use_friction_correction "
+                              "consistent_scaling porosity_interface_pressure_treatment",
+                              "Porous medium treatment");
 
   /**
    * Parameters used to define the boundaries of the domain.
@@ -851,13 +856,28 @@ NSFVAction::addINSVariables()
   // Add pressure variable
   if (_create_pressure)
   {
-    auto params = _factory.getValidParams("INSFVPressureVariable");
+    const bool using_pinsfv_pressure_var =
+        _porous_medium_treatment &&
+        getParam<MooseEnum>("porosity_interface_pressure_treatment") != "automatic";
+    const auto pressure_type =
+        using_pinsfv_pressure_var ? "PINSFVPressureVariable" : "INSFVPressureVariable";
+    auto params = _factory.getValidParams(pressure_type);
     assignBlocks(params, _blocks);
     params.set<std::vector<Real>>("scaling") = {_mass_scaling};
     params.set<MooseEnum>("face_interp_method") = _pressure_face_interpolation;
     params.set<bool>("two_term_boundary_expansion") = _pressure_two_term_bc_expansion;
+    if (using_pinsfv_pressure_var)
+    {
+      params.set<MooseFunctorName>("u") = _velocity_name[0];
+      if (_dim >= 2)
+        params.set<MooseFunctorName>("v") = _velocity_name[1];
+      if (_dim == 3)
+        params.set<MooseFunctorName>("w") = _velocity_name[2];
+      params.set<MooseFunctorName>(NS::porosity) = _porosity_name;
+      params.set<MooseFunctorName>(NS::density) = _density_name;
+    }
 
-    _problem->addVariable("INSFVPressureVariable", _pressure_name, params);
+    _problem->addVariable(pressure_type, _pressure_name, params);
   }
 
   // Add lagrange multiplier for pinning pressure, if needed
@@ -2264,10 +2284,10 @@ NSFVAction::addRelationshipManagers(Moose::RelationshipManagerType input_rm_type
   unsigned short necessary_layers = 2;
   if (_momentum_face_interpolation == "skewness-corrected" ||
       _energy_face_interpolation == "skewness-corrected" ||
-      _pressure_face_interpolation == "skewness-corrected")
-    necessary_layers = 3;
-
-  if (_turbulence_handling == "mixing-length")
+      _pressure_face_interpolation == "skewness-corrected" ||
+      _turbulence_handling == "mixing-length" ||
+      (_porous_medium_treatment &&
+       getParam<MooseEnum>("porosity_interface_pressure_treatment") != "automatic"))
     necessary_layers = 3;
 
   if (_porous_medium_treatment && isParamValid("porosity_smoothing_layers"))
