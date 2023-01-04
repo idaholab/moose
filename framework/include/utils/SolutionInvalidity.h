@@ -93,5 +93,9 @@ protected:
       FullTable;
 
 private:
+  /// Mutex for locking access to the invalid counts
+  /// NOTE: These can be changed to shared_mutexes once we get C++17
+  mutable std::mutex _invalid_mutex;
+
   FullTable summaryTable();
 };

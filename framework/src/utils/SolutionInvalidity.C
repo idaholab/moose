@@ -29,6 +29,8 @@ SolutionInvalidity::~SolutionInvalidity() {}
 void
 SolutionInvalidity::setSolutionInvalid(SolutionID _solution_id)
 {
+  std::lock_guard<std::mutex> lock_id(_invalid_mutex);
+
   if (_solution_invalid_counts.size() <= _solution_id)
   {
     _solution_invalid_counts.resize(_solution_id + 1);
