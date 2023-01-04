@@ -133,13 +133,15 @@ SolutionInvalidity::summaryTable()
     // Now print out the sections that contain solution invalid info and occurences
     for (unsigned int id = 0; id < _solution_invalid_counts.size(); id++)
     {
-
-      vtable.addRow(_solution_invalidity_registry.sectionInfo(id)._name, // Section
-                    _solution_invalid_counts[id],          // Current Interation Warnings
-                    _solution_invalid_timeiter_counts[id], // Current Time Interation Warnings
-                    _solution_invalid_total_counts[id],    // Total Iternation Warnings
-                    _solution_invalidity_registry.sectionInfo(id)._message // Message
-      );
+      if (_solution_invalid_counts[id] > 0)
+      {
+        vtable.addRow(_solution_invalidity_registry.sectionInfo(id)._name, // Section
+                      _solution_invalid_counts[id],          // Current Interation Warnings
+                      _solution_invalid_timeiter_counts[id], // Current Time Interation Warnings
+                      _solution_invalid_total_counts[id],    // Total Iternation Warnings
+                      _solution_invalidity_registry.sectionInfo(id)._message // Message
+        );
+      }
     }
   }
 
