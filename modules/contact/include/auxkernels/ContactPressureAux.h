@@ -32,6 +32,9 @@ protected:
   /// AuxVariable containing the nodal area
   const VariableValue & _nodal_area;
 
+  /// Number of contact pairs
+  const size_t _number_pairs;
+
   /// Reference to the PenetrationLocator object
-  const PenetrationLocator & _penetration_locator;
+  std::vector<const PenetrationLocator *> _penetration_locators;
 };

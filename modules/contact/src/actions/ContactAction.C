@@ -313,39 +313,47 @@ ContactAction::act()
           params.set<std::vector<VariableName>>("mapped_primary_gap_offset") = {
               getParam<VariableName>("mapped_primary_gap_offset")};
         params.set<bool>("use_displaced_mesh") = true;
-        std::string name = _name + "_contact_" + Moose::stringify(contact_auxkernel_counter);
+        std::string name = _name + "_contact_" + Moose::stringify(contact_auxkernel_counter++);
 
         _problem->addAuxKernel("PenetrationAux", name, params);
       }
+    }
 
-      // Add ContactPressureAux
-      // if (_formulation != ContactFormulation::MORTAR)
+    // Add ContactPressureAux: Only one object for all contact pairs
+    // if (_formulation != ContactFormulation::MORTAR)
+    {
+      std::vector<BoundaryName> boundary_vector(_boundary_pairs.size());
+      std::vector<BoundaryName> pair_boundary_vector(_boundary_pairs.size());
+
+      for (const auto i : make_range(_boundary_pairs.size()))
       {
-        InputParameters params = _factory.getValidParams("ContactPressureAux");
-        params.applyParameters(parameters(), {"order"});
-
-        std::vector<VariableName> displacements =
-            getParam<std::vector<VariableName>>("displacements");
-        const auto order = _problem->systemBaseNonlinear()
-                               .system()
-                               .variable_type(displacements[0])
-                               .order.get_order();
-
-        params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
-        params.set<std::vector<BoundaryName>>("boundary") = {contact_pair.second};
-        params.set<BoundaryName>("paired_boundary") = contact_pair.first;
-        params.set<AuxVariableName>("variable") = "contact_pressure";
-        params.addRequiredCoupledVar("nodal_area", "The nodal area");
-        params.set<std::vector<VariableName>>("nodal_area") = {"nodal_area_" + _name};
-        params.set<bool>("use_displaced_mesh") = true;
-
-        std::string name =
-            _name + "_contact_pressure_" + Moose::stringify(contact_auxkernel_counter++);
-
-        params.set<ExecFlagEnum>("execute_on",
-                                 true) = {EXEC_NONLINEAR, EXEC_TIMESTEP_END, EXEC_TIMESTEP_BEGIN};
-        _problem->addAuxKernel("ContactPressureAux", name, params);
+        pair_boundary_vector[i] = _boundary_pairs[i].first;
+        boundary_vector[i] = _boundary_pairs[i].second;
       }
+
+      InputParameters params = _factory.getValidParams("ContactPressureAux");
+      params.applyParameters(parameters(), {"order"});
+
+      std::vector<VariableName> displacements =
+          getParam<std::vector<VariableName>>("displacements");
+      const auto order = _problem->systemBaseNonlinear()
+                             .system()
+                             .variable_type(displacements[0])
+                             .order.get_order();
+
+      params.set<MooseEnum>("order") = Utility::enum_to_string<Order>(OrderWrapper{order});
+      params.set<std::vector<BoundaryName>>("boundary") = boundary_vector;
+      params.set<std::vector<BoundaryName>>("paired_boundary") = pair_boundary_vector;
+      params.set<AuxVariableName>("variable") = "contact_pressure";
+      params.addRequiredCoupledVar("nodal_area", "The nodal area");
+      params.set<std::vector<VariableName>>("nodal_area") = {"nodal_area_" + _name};
+      params.set<bool>("use_displaced_mesh") = true;
+
+      std::string name = _name + "_contact_pressure";
+
+      params.set<ExecFlagEnum>("execute_on",
+                               true) = {EXEC_NONLINEAR, EXEC_TIMESTEP_END, EXEC_TIMESTEP_BEGIN};
+      _problem->addAuxKernel("ContactPressureAux", name, params);
     }
 
     const unsigned int ndisp = getParam<std::vector<VariableName>>("displacements").size();
