@@ -4,7 +4,7 @@ from mooseutils import fuzzyEqual
 
 class TestAverageStencil(unittest.TestCase):
     def test(self):
-        df1 = mms.run_spatial('skewed.i', 5, 'Variables/v/face_interp_method=average', mpi=1)
+        df1 = mms.run_spatial('skewed.i', 5, 'Variables/v/face_interp_method=average')
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1,
@@ -20,7 +20,7 @@ class TestAverageStencil(unittest.TestCase):
 
 class TestSkewnessCorrectedStencil(unittest.TestCase):
     def test(self):
-        df1 = mms.run_spatial('skewed.i', 5, 'Variables/v/face_interp_method=skewness-corrected', mpi=1)
+        df1 = mms.run_spatial('skewed.i', 5, 'Variables/v/face_interp_method=skewness-corrected')
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1,
@@ -36,7 +36,7 @@ class TestSkewnessCorrectedStencil(unittest.TestCase):
 
 class TestSkewnessCorrectedDiffAdvStencil(unittest.TestCase):
     def test(self):
-        df1 = mms.run_spatial('skewed.i', 5, 'Variables/v/face_interp_method=skewness-corrected FVKernels/advection/advected_interp_method=skewness-corrected', mpi=1)
+        df1 = mms.run_spatial('skewed.i', 5, 'Variables/v/face_interp_method=skewness-corrected FVKernels/advection/advected_interp_method=skewness-corrected')
 
         fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
         fig.plot(df1,
