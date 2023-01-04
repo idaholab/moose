@@ -9,7 +9,7 @@
 
     max_threads = 1
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
-    required_objects = 'ThermochimicaNodalData'
+    required_submodule = 'contrib/thermochimica'
   []
 
   [MoRu_reinit]
@@ -22,7 +22,7 @@
     cli_args = 'UserObjects/data/reinit_requested=true'
     max_threads = 1
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
-    required_objects = 'ThermochimicaNodalData'
+    required_submodule = 'contrib/thermochimica'
   []
 
   [csv_ic]
@@ -35,6 +35,6 @@
 
     max_threads = 1
     rel_err = 1e-3 # this is the same error thermochimica uses for its internal tests
-    required_objects = 'ThermochimicaNodalData'
+    required_submodule = 'contrib/thermochimica'
   []
 []
