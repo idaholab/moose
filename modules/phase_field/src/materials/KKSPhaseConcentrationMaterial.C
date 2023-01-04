@@ -40,7 +40,7 @@ KKSPhaseConcentrationMaterial::validParams()
       damped_newton,
       "Use nested Newton's method without damping (FALSE), damp once (DAMP_ONCE), or "
       "damp until ci are within lower_bounds to upper_bounds (DAMP_LOOP).");
-  params.addParam<Real>("damping_factor", 1, "The damping factor used in the Newton's method.");
+  params.addParam<Real>("damping_factor", 1, "The damping factor used in the nested Newton's method. Must be between zero and one.");
   params.addParam<std::vector<Real>>("lower_bounds", "The lower bounds of ci.");
   params.addParam<std::vector<Real>>("upper_bounds", "The upper bounds of ci.");
   params += NestedSolve::validParams();
