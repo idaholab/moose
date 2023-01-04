@@ -353,6 +353,8 @@ FixedPointSolve::solveStep(Real & begin_norm,
                                            : std::numeric_limits<Real>::max());
 
   _executioner.preSolve();
+  _problem.execute(EXEC_FIXED_POINT_BEGIN);
+  _problem.execTransfers(EXEC_FIXED_POINT_BEGIN);
 
   _problem.execTransfers(EXEC_TIMESTEP_BEGIN);
   if (!_problem.execMultiApps(EXEC_TIMESTEP_BEGIN, auto_advance))
@@ -441,6 +443,8 @@ FixedPointSolve::solveStep(Real & begin_norm,
     return false;
   }
 
+  _problem.execute(EXEC_FIXED_POINT_END);
+  _problem.execTransfers(EXEC_FIXED_POINT_END);
   _executioner.postSolve();
 
   if (_has_fixed_point_its && _has_fixed_point_norm)
