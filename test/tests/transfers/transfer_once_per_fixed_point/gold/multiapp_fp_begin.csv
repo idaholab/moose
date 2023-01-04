@@ -1,0 +1,5 @@
+time,num_fixed_point_begin,num_fixed_point_end,num_fixed_point_total,subapp_fp_its
+1,1,0,1,3
+2,2,1,2,3
+3,3,2,3,3
+4,4,3,4,3
