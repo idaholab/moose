@@ -16,12 +16,12 @@
 // Forward Declarations
 class MooseMesh;
 
-class TestFaceCenteredMapFunctor : public GeneralPostprocessor
+class TestFaceToCellReconstruction : public GeneralPostprocessor
 {
 public:
   static InputParameters validParams();
 
-  TestFaceCenteredMapFunctor(const InputParameters & parameters);
+  TestFaceToCellReconstruction(const InputParameters & parameters);
 
   void initialize() override;
   void execute() override {}

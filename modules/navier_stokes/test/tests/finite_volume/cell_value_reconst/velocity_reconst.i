@@ -27,7 +27,7 @@
     type = AverageElementSize
   []
   [L2u]
-    type = TestFaceCenteredMapFunctor
+    type = TestFaceToCellReconstruction
   []
 []
 

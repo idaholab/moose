@@ -7,22 +7,22 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "TestFaceCenteredMapFunctor.h"
+#include "TestFaceToCellReconstruction.h"
 
 // MOOSE includes
 #include "MooseMesh.h"
 
-registerMooseObject("NavierStokesTestApp", TestFaceCenteredMapFunctor);
+registerMooseObject("NavierStokesTestApp", TestFaceToCellReconstruction);
 
 InputParameters
-TestFaceCenteredMapFunctor::validParams()
+TestFaceToCellReconstruction::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
   params.addClassDescription("Computes reconstruction error for face centered functor.");
   return params;
 }
 
-TestFaceCenteredMapFunctor::TestFaceCenteredMapFunctor(const InputParameters & parameters)
+TestFaceToCellReconstruction::TestFaceToCellReconstruction(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
     _reconstruction_error(0.0),
     _face_values(_subproblem.mesh(), _subproblem.mesh().meshSubdomains(), "face_values")
@@ -30,7 +30,7 @@ TestFaceCenteredMapFunctor::TestFaceCenteredMapFunctor(const InputParameters & p
 }
 
 void
-TestFaceCenteredMapFunctor::initialize()
+TestFaceToCellReconstruction::initialize()
 {
   for (auto & fi : _fe_problem.mesh().faceInfo())
   {
@@ -65,7 +65,7 @@ TestFaceCenteredMapFunctor::initialize()
 }
 
 PostprocessorValue
-TestFaceCenteredMapFunctor::getValue()
+TestFaceToCellReconstruction::getValue()
 {
   return _reconstruction_error;
 }
