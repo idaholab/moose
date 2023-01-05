@@ -25,7 +25,7 @@ class MooseObject;
   } while (0)
 
 /**
- * An interface to communicate the solutioninvalidity for one app to the materials
+ * An interface that allows the marking of invalid solutions during a solve
  */
 class SolutionInvalidInterface
 {
