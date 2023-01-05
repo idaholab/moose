@@ -38,6 +38,7 @@ class RunPBS(QueueManager):
             with open(output_file, 'r') as outfile:
                 for line in (outfile.readlines() [-N:]):
                     output.append(line)
+            output.append(f'Last {N} lines read. Full output file available at:\n{output_file}')
         return '\n'.join(output)
 
     def hasQueuingFailed(self, job_data):
@@ -96,8 +97,10 @@ class RunPBS(QueueManager):
 
         # Woops. This job was killed by PBS for some reason
         if job_result and str(job_result) in PBS_User_EXITCODES.keys():
+            output = f'{self._readJobOutput(output_file)}\n{PBS_User_EXITCODES[str(job_result)]}'
             for job in jobs:
-                job.addCaveats(PBS_User_EXITCODES[str(job_result)])
+                job.setOutput(output)
+                job.addCaveats(f'PBS ERROR: {job_result}')
             return True
 
         # Capture TestHarness exceptions
