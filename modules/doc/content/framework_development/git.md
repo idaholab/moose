@@ -22,7 +22,13 @@ however, you might find yourself with a huge number of remotes that you don't re
 
 #### Using the bash shell
 
-To enable bash completion for git (so you can tab-complete 'git co' or 'git br' commands) download [git-completion.bash](https://github.com/git/git/blob/master/contrib/completion/git-completion.bash) to your home directory, and append the following line to the end of your ~/.bash_profile (or ~/.bashrc)
+To enable bash completion for git (so you can tab-complete 'git co' or 'git br' commands) download the [git-completion.bash](https://github.com/git/git/blob/master/contrib/completion/git-completion.bash) to your home directory
+
+```bash
+curl -o git-completion.bash https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash
+```
+
+then append the following line to the end of your ~/.bash_profile (or ~/.bashrc)
 
 ```bash
 source ~/git-completion.bash
