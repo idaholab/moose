@@ -261,7 +261,7 @@ class Job(object):
              or self.options.fail_files
              or self.options.sep_files)
              and (self.isPass() or self.isFail())):
-            (status, message, color, exit_code) = self.getJointStatus()
+            (status, message, color, exit_code, sort_value) = self.getJointStatus()
             output_dir = self.options.output_dir if self.options.output_dir else self.getTestDir()
             output_file = os.path.join(output_dir,
                                        '.'.join([os.path.basename(self.getTestDir()),
@@ -395,11 +395,13 @@ class Job(object):
             return (self.getStatus().status,
                     self.getStatusMessage(),
                     self.getStatus().color,
-                    self.getStatus().code)
+                    self.getStatus().code,
+                    self.getStatus().sort_value)
 
         # Tester has a finished status of some sort
         else:
             return (self.__tester.getStatus().status,
                     self.__tester.getStatusMessage(),
                     self.__tester.getStatus().color,
-                    self.__tester.getStatus().code)
+                    self.__tester.getStatus().code,
+                    self.__tester.getStatus().sort_value)
