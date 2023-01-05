@@ -181,6 +181,12 @@ P_out = 2.0e5 # Pa
   l_tol = 0.9
 []
 
+[Postprocessors]
+  [total_pressure_drop]
+    type = TriSubChannelPressureDrop
+    execute_on = "timestep_end"
+  []
+[]
 ################################################################################
 # A multiapp that projects data to a detailed mesh
 ################################################################################

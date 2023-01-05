@@ -175,6 +175,13 @@ P_out = 2.0e5 # Pa
   []
 []
 
+[Postprocessors]
+  [total_pressure_drop]
+    type = TriSubChannelPressureDrop
+    execute_on = "timestep_end"
+  []
+[]
+
 [Outputs]
   exodus = true
 []

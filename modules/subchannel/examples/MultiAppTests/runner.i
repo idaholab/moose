@@ -17,8 +17,6 @@
   show_material_props = true
 []
 
-
-
 [Variables]
   [u]
   []

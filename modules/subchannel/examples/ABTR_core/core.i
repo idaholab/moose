@@ -116,19 +116,17 @@ inlet_vel = ${fparse -mdot / inlet_area / rho}
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [fp]
-      type = SimpleFluidProperties
-      cp = ${cp}
-      cv = ${cp}
-      thermal_conductivity = ${k}
-      density0 = ${rho}
-      viscosity = ${mu}
-      molar_mass = ${molar_mass}
-      thermal_expansion = 0
-      bulk_modulus = 1e16
-    []
+[FluidProperties]
+  [fp]
+    type = SimpleFluidProperties
+    cp = ${cp}
+    cv = ${cp}
+    thermal_conductivity = ${k}
+    density0 = ${rho}
+    viscosity = ${mu}
+    molar_mass = ${molar_mass}
+    thermal_expansion = 0
+    bulk_modulus = 1e16
   []
 []
 
@@ -417,10 +415,10 @@ inlet_vel = ${fparse -mdot / inlet_area / rho}
     use_friction_correction = true
     consistent_scaling = 50
     # conjugate heat transfer T_sold w/ T_fluid
-    ambient_convection_alpha = 'alpha alpha'
+    ambient_convection_alpha = 'alpha alpha alpha'
     # defined on the porous flow blocks
     ambient_convection_blocks = 'fuel; coupled_fuel; control'
-    ambient_temperature = 'T_solid T_solid'
+    ambient_temperature = 'T_solid T_solid T_solid'
 
     # discretization parameters
     energy_advection_interpolation = upwind
@@ -433,7 +431,7 @@ inlet_vel = ${fparse -mdot / inlet_area / rho}
     density = 'rho'
     dynamic_viscosity = 'mu'
     thermal_conductivity = 'kappa kappa kappa kappa kappa kappa
-                            kappa kappa kappa kappa kappa'
+                            kappa kappa kappa kappa kappa kappa'
     # defined on all flow blocks
     thermal_conductivity_blocks = 'fuel;
                                    coupled_fuel;
@@ -465,7 +463,7 @@ inlet_vel = ${fparse -mdot / inlet_area / rho}
     wall_boundaries = 'interior_walls interior_walls_coupled hot_pool_wall cold_pool_wall'
     momentum_wall_types = 'slip slip slip slip'
     energy_wall_types = 'heatflux heatflux heatflux heatflux'
-    energy_wall_function = '0 q_prime_duct_out 0 0'
+    energy_wall_function = '0 0 0 0'
 
     outlet_boundaries = 'outlet'
     momentum_outlet_types = 'fixed-pressure'
@@ -548,7 +546,7 @@ inlet_vel = ${fparse -mdot / inlet_area / rho}
 
   ## set characteristic length on each block
   [characteristic_length]
-    type = ADPiecewiseByBlockFunctorMaterial
+    type = PiecewiseByBlockFunctorMaterial
     prop_name =  'characteristic_length'
     subdomain_to_prop_value = 'fuel            ${D_hydraulic_fuel}
                                coupled_fuel    ${D_hydraulic_fuel}
@@ -775,14 +773,14 @@ inlet_vel = ${fparse -mdot / inlet_area / rho}
 []
 
 [Executioner]
-  type = Steady #Transient
+  type = Transient
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -ksp_gmres_restart'
   petsc_options_value = 'lu       30                '
 
   [TimeStepper]
     type = IterationAdaptiveDT
-    dt = 0.2
+    dt = 0.1
     iteration_window = 2
     optimal_iterations = 6
     growth_factor = 1.25
@@ -790,7 +788,7 @@ inlet_vel = ${fparse -mdot / inlet_area / rho}
   []
 
   nl_abs_tol = 1e-4
-  end_time = 1e5
+  end_time = 0.4 #1e5
   nl_max_its = 15
 []
 
