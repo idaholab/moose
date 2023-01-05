@@ -36,8 +36,14 @@ public:
 
   virtual Real computeTimeStepLimit() override;
 
+  /**
+   * Get the value of the damage index for the current quadrature point.
+   */
   const GenericReal<is_ad> & getQpDamageIndex(unsigned int qp);
 
+  /**
+   * Get the name of the material property containing the damage index
+   */
   const std::string getDamageIndexName() const { return _damage_index_name; }
 
 protected:
@@ -61,6 +67,9 @@ protected:
 
   /// Maximum damage increment allowed for the time step
   const Real & _maximum_damage_increment;
+
+  /// Maximum allowed value for the damage index
+  const Real & _maximum_damage;
 
   using DamageBaseTempl<is_ad>::_qp;
   using DamageBaseTempl<is_ad>::_base_name;

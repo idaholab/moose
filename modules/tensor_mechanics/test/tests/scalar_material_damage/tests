@@ -87,6 +87,26 @@
     abs_zero = 1.e-6
     requirement = "The system shall calculate the effective damage index from different damage models."
   []
+  [combined_scalar_damage_limit_sub]
+    type = 'CSVDiff'
+    input = 'combined_scalar_damage.i'
+    cli_args = 'Materials/damage_a/maximum_damage=0.8 '
+               'Outputs/file_base=combined_scalar_damage_limit_sub_out'
+    csvdiff = 'combined_scalar_damage_limit_sub_out.csv'
+    abs_zero = 1.e-6
+    requirement = "The system shall allow for damage to be limited to a user-defined value for an "
+                  "individual damage model that is combined with another damage model"
+  []
+  [combined_scalar_damage_limit_combined]
+    type = 'CSVDiff'
+    input = 'combined_scalar_damage.i'
+    cli_args = 'Materials/damage/maximum_damage=0.8 '
+               'Outputs/file_base=combined_scalar_damage_limit_combined_out'
+    csvdiff = 'combined_scalar_damage_limit_combined_out.csv'
+    abs_zero = 1.e-6
+    requirement = "The system shall allow for damage to be limited to a user-defined value for the "
+                  "combination of multiple damage models."
+  []
   [ad_combined_scalar_damage_max]
     type = 'CSVDiff'
     input = 'ad_combined_scalar_damage.i'
@@ -104,6 +124,27 @@
     abs_zero = 1.e-6
     requirement = "The system shall calculate the effective damage index from different damage models "
                   "when using automatic differentiation."
+  []
+  [ad_combined_scalar_damage_limit_sub]
+    type = 'CSVDiff'
+    input = 'ad_combined_scalar_damage.i'
+    cli_args = 'Materials/damage_a/maximum_damage=0.8 '
+               'Outputs/file_base=ad_combined_scalar_damage_limit_sub_out'
+    csvdiff = 'ad_combined_scalar_damage_limit_sub_out.csv'
+    abs_zero = 1.e-6
+    requirement = "The system shall allow for damage to be limited to a user-defined value for an "
+                  "individual damage model that is combined with another damage model when using "
+                  "automatic differentiation."
+  []
+  [ad_combined_scalar_damage_limit_combined]
+    type = 'CSVDiff'
+    input = 'ad_combined_scalar_damage.i'
+    cli_args = 'Materials/damage/maximum_damage=0.8 '
+               'Outputs/file_base=ad_combined_scalar_damage_limit_combined_out'
+    csvdiff = 'ad_combined_scalar_damage_limit_combined_out.csv'
+    abs_zero = 1.e-6
+    requirement = "The system shall allow for damage to be limited to a user-defined value for the "
+                  "combination of multiple damage models when using automatic differentiation."
   []
   [scalar_damage_material_inelastic]
     type = 'CSVDiff'
