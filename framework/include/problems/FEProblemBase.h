@@ -1635,7 +1635,7 @@ public:
   /**
    * Whether or not the solution invalid warnings are printed out immediately
    */
-  bool ImmediatelyPrintInvalidSolution() const { return _immediately_print_invalid_solution; }
+  bool immediatelyPrintInvalidSolution() const { return _immediately_print_invalid_solution; }
 
   bool ignoreZerosInJacobian() const { return _ignore_zeros_in_jacobian; }
 

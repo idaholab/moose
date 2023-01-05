@@ -17,34 +17,24 @@ getSolutionInvalidityRegistry()
 }
 
 SolutionInvalidityRegistry::SolutionInvalidityRegistry()
-  : GeneralRegistry<std::string, SolutionInvaliditySectionInfo>("SolutionInvalidityRegistry")
+  : GeneralRegistry<std::string, SolutionInvalidityInfo>("SolutionInvalidityRegistry")
 {
-  // Reserve space so that re-allocation doesn't need to happen much
-  // This does not take much memory and, for most cases, will keep a single
-  // reallocation from happening
-  reserve(5000);
 }
 
-SolutionID
-SolutionInvalidityRegistry::registerSection(const std::string & section_name)
+InvalidSolutionID
+SolutionInvalidityRegistry::registerInvalidObject(const std::string & object_name,
+                                                  const std::string & message)
 {
-  return actuallyRegisterSection(section_name, "");
+  return actuallyRegisterSection(object_name, message);
 }
 
-SolutionID
-SolutionInvalidityRegistry::registerSection(const std::string & section_name,
-                                            const std::string & message)
-{
-  return actuallyRegisterSection(section_name, message);
-}
-
-SolutionID
-SolutionInvalidityRegistry::actuallyRegisterSection(const std::string & section_name,
+InvalidSolutionID
+SolutionInvalidityRegistry::actuallyRegisterSection(const std::string & object_name,
                                                     const std::string & message)
 {
-  const auto create_item = [&section_name, &message](const std::size_t id)
-  { return SolutionInvaliditySectionInfo(id, section_name, message); };
-  return registerItem(section_name, create_item);
+  const auto create_item = [&object_name, &message](const std::size_t id)
+  { return SolutionInvalidityInfo(id, object_name, message); };
+  return registerItem(object_name, create_item);
 }
 
 }

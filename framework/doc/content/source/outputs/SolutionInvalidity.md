@@ -7,11 +7,8 @@ The [/SolutionInvalidity.md] object holds solution invalid warning information f
 To set it up, the section is required to be registered using "registerInvalidSection('section name of your choice')" and an optional message to describe the solution invalidity. This function will return a unique ID for the section you want to mark. When the solution doesn't satisfy requirements such as a value being out of the bounds of a correlation, Then you can mark the solution "invalid" with section IDs. An Example of marking "invalid" material properties is as below:
 
 ```
-  static const auto solution_id = registerInvalidSection("NonsafeMaterial");
-  if (material_property > _threshold[0] && material_property < _threshold[1])
-  {
-    setSolutionInvalid(solution_id);
-  }
+  if (_input_diffusivity > _threshold)
+    flagInvalidSolution("The diffusivity is greater than the threshold value!");
 ```
 
 If any solution invalidity is detected during the nonlinear solve, a summary table of solution invalid warnings will be generated and reported at the end of each time step as below:

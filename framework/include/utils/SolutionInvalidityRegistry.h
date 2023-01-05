@@ -18,36 +18,28 @@
 class SolutionInvalidity;
 void dataStore(std::ostream &, SolutionInvalidity &, void *);
 
-namespace moose
-{
-namespace internal
+namespace moose::internal
 {
 class SolutionInvalidityRegistry;
-class SolutionInvaliditySectionInfo;
-}
-}
-
-namespace moose
-{
-namespace internal
-{
-
+class SolutionInvalidityInfo;
 /**
  * Used to hold metadata about the registered sections
  * Note: this is a class instead of a struct because structs
  * are not able to be created in place using emplace_back in
  * C++11.  This will be fixed in C++20.
  */
-class SolutionInvaliditySectionInfo
+class SolutionInvalidityInfo
 {
 public:
-  SolutionInvaliditySectionInfo(SolutionID id, const std::string name, const std::string message)
+  SolutionInvalidityInfo(InvalidSolutionID id,
+                         const std::string & name,
+                         const std::string & message)
     : _id(id), _name(name), _message(message)
   {
   }
 
   /// Unique ID
-  SolutionID _id;
+  InvalidSolutionID _id;
   /// The name
   std::string _name;
   /// The message
@@ -62,57 +54,49 @@ SolutionInvalidityRegistry & getSolutionInvalidityRegistry();
 /**
  * The place where all sections with solution invalid warnings will be stored
  */
-class SolutionInvalidityRegistry
-  : private GeneralRegistry<std::string, SolutionInvaliditySectionInfo>
+class SolutionInvalidityRegistry : private GeneralRegistry<std::string, SolutionInvalidityInfo>
 {
 public:
   /**
-   * Call to register a named section for detecting solution invalid.
+   * Call to registerInvalidObject an invalid calculation
    *
-   * @param section_name The name of the code section to be detected
-   * @return The ID of the section - use when counting solution invalid warning
-   */
-  SolutionID registerSection(const std::string & section_name);
-
-  /**
-   * Call to register a named section for detecting solution invalid.
-   *
-   * @param section_name The name of the code section to be detected
+   * @param object_name The name of the object doing the registration
    * @param message The description of the solution invalid warning
-   * @return The ID of the section - use when counting solution invalid warning
+   * @return The registered ID
    */
-  SolutionID registerSection(const std::string & section_name, const std::string & message);
+  InvalidSolutionID registerInvalidObject(const std::string & object_name,
+                                          const std::string & message);
 
   /**
    * Given a name return the SolutionID
-   * @section_name The name of the section
+   * @object_name The name of the section
    * @return the ID
    */
-  SolutionID sectionID(const std::string & section_name) const { return id(section_name); }
+  InvalidSolutionID sectionID(const std::string & object_name) const { return id(object_name); }
 
   /**
-   * Given a SolutionID return the SolutionInvaliditySectionInfo
+   * Given a SolutionID return the SolutionInvalidityInfo
    * @section_id The ID
-   * @return The SolutionInvaliditySectionInfo
+   * @return The SolutionInvalidityInfo
    */
-  const SolutionInvaliditySectionInfo & sectionInfo(const SolutionID section_id) const
+  const SolutionInvalidityInfo & sectionInfo(const InvalidSolutionID section_id) const
   {
     return item(section_id);
   }
 
   /**
    * Whether or not a section with that name has been registered
-   * @section_name The name of the section
+   * @object_name The name of the section
    * @return Whether or not it exists
    */
-  bool sectionExists(const std::string & section_name) const { return keyExists(section_name); }
+  bool sectionExists(const std::string & object_name) const { return keyExists(object_name); }
 
   /**
    * Whether or not a section with that id has been registered
    * @section_id The ID
    * @return Whether or not it exists
    */
-  bool sectionExists(const SolutionID section_id) const { return idExists(section_id); }
+  bool sectionExists(const InvalidSolutionID section_id) const { return idExists(section_id); }
 
   /**
    * @return number of registered sections
@@ -125,7 +109,8 @@ private:
   /**
    * The internal function that actually carries out the registration
    */
-  SolutionID actuallyRegisterSection(const std::string & section_name, const std::string & message);
+  InvalidSolutionID actuallyRegisterSection(const std::string & object_name,
+                                            const std::string & message);
 
   /**
    * Special accessor just for SolutionInvalidity so that
@@ -137,9 +122,9 @@ private:
    * thread will be registering sections and only
    * the main thread will be running SolutionInvalidity routines
    *
-   * @return the SolutionInvaliditySectionInfo associated with the section_id
+   * @return the SolutionInvalidityInfo associated with the section_id
    */
-  const SolutionInvaliditySectionInfo & readSectionInfo(SolutionID section_id) const
+  const SolutionInvalidityInfo & readSectionInfo(InvalidSolutionID section_id) const
   {
     return itemNonLocking(section_id);
   };
@@ -150,5 +135,4 @@ private:
   friend SolutionInvalidity;
 };
 
-}
 }

@@ -9,42 +9,31 @@
 
 // MOOSE includes
 #include "SolutionInvalidInterface.h"
+#include "MooseObject.h"
 #include "MooseApp.h"
 #include "FEProblemBase.h"
-#include "MooseObject.h"
 #include "SolutionInvalidityRegistry.h"
-#include "FEProblemBase.h"
 
-SolutionInvalidInterface::SolutionInvalidInterface(MooseApp & moose_app, FEProblemBase & problem)
-  : _si_moose_app(moose_app), _si_problem(problem)
+SolutionInvalidInterface::SolutionInvalidInterface(MooseObject * const moose_object)
+  : _si_moose_object(*moose_object),
+    _si_problem(
+        *_si_moose_object.parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
 {
 }
 
 /// Set solution invalid mark for the given solution ID
 void
-SolutionInvalidInterface::setSolutionInvalid(SolutionID _solution_id)
+SolutionInvalidInterface::flagInvalidSolutionInternal(InvalidSolutionID _invalid_solution_id)
 {
-  if (_si_problem.ImmediatelyPrintInvalidSolution())
-    _si_moose_app.solutionInvalidity().printDebug(_solution_id);
-  return _si_moose_app.solutionInvalidity().setSolutionInvalid(_solution_id);
+  auto & app = _si_moose_object.getMooseApp();
+  if (_si_problem.immediatelyPrintInvalidSolution())
+    app.solutionInvalidity().printDebug(_invalid_solution_id);
+  return app.solutionInvalidity().flagInvalidSolutionInternal(_invalid_solution_id);
 }
 
-/// Register the section with a unique solution ID for the given section_name
-SolutionID
-SolutionInvalidInterface::registerInvalidSection(const std::string & section_name,
-                                                 const std::string & message) const
+InvalidSolutionID
+SolutionInvalidInterface::registerInvalidSolutionInternal(const std::string & message) const
 {
-  return moose::internal::getSolutionInvalidityRegistry().registerSection(section_name, message);
-}
-
-SolutionID
-SolutionInvalidInterface::registerInvalidSection(const std::string & section_name) const
-{
-  return moose::internal::getSolutionInvalidityRegistry().registerSection(section_name);
-}
-
-SolutionInvalidity &
-SolutionInvalidInterface::solutionInvalidity()
-{
-  return _si_moose_app.solutionInvalidity();
+  return moose::internal::getSolutionInvalidityRegistry().registerInvalidObject(
+      _si_moose_object.type(), message);
 }

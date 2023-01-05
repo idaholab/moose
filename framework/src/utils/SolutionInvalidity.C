@@ -24,60 +24,45 @@ SolutionInvalidity::SolutionInvalidity(MooseApp & app)
 {
 }
 
-SolutionInvalidity::~SolutionInvalidity() {}
-/// Count solution invalid occurrences for each solution id
 void
-SolutionInvalidity::setSolutionInvalid(SolutionID _solution_id)
+SolutionInvalidity::flagInvalidSolutionInternal(InvalidSolutionID _invalid_solution_id)
 {
   std::lock_guard<std::mutex> lock_id(_invalid_mutex);
 
-  if (_solution_invalid_counts.size() <= _solution_id)
+  if (_solution_invalid_counts.size() <= _invalid_solution_id)
   {
-    _solution_invalid_counts.resize(_solution_id + 1);
-    ++_solution_invalid_counts[_solution_id];
+    _solution_invalid_counts.resize(_invalid_solution_id + 1);
+    ++_solution_invalid_counts[_invalid_solution_id];
   }
   else
   {
-    ++_solution_invalid_counts[_solution_id];
+    ++_solution_invalid_counts[_invalid_solution_id];
   }
   _solution_invalid_total_counts.resize(_solution_invalid_counts.size());
   _solution_invalid_timeiter_counts.resize(_solution_invalid_counts.size());
 }
 
-/// Loop over all the tracked objects and determine whether solution invalid is detected
 bool
 SolutionInvalidity::solutionInvalid() const
 {
-  unsigned int sum_of_elems = 0;
-
-  std::for_each(_solution_invalid_counts.begin(),
-                _solution_invalid_counts.end(),
-                [&](int n) { sum_of_elems += n; });
-  if (sum_of_elems < 1)
-  {
-    return false;
-  }
-  else
-  {
-    return true;
-  }
+  for (const auto count : _solution_invalid_counts)
+    if (count)
+      return true;
+  return false;
 }
 
-/// Reset the number of solution invalid occurrences back to zero
 void
 SolutionInvalidity::resetSolutionInvalid()
 {
   std::fill(_solution_invalid_counts.begin(), _solution_invalid_counts.end(), 0);
 }
 
-/// Reset the number of solution invalid occurrences back to zero
 void
 SolutionInvalidity::resetSolutionInvalidTimeIter()
 {
   std::fill(_solution_invalid_timeiter_counts.begin(), _solution_invalid_timeiter_counts.end(), 0);
 }
 
-/// Pass the number of solution invalid occurrences from current iteration to comulative counters
 void
 SolutionInvalidity::solutionInvalidAccumulation()
 {
@@ -88,26 +73,23 @@ SolutionInvalidity::solutionInvalidAccumulation()
   }
 }
 
-/// Print the summary table of Solution Invalid warnings
 void
-SolutionInvalidity::print(const ConsoleStream & console)
+SolutionInvalidity::print(const ConsoleStream & console) const
 {
   console << "\nSolution Invalid Warnings:\n";
   summaryTable().print(console);
 }
 
-/// Immediately print the section and message for debug purpose
 void
-SolutionInvalidity::printDebug(SolutionID _solution_id)
+SolutionInvalidity::printDebug(InvalidSolutionID _invalid_solution_id) const
 {
-  _console << _solution_invalidity_registry.sectionInfo(_solution_id)._name << ": "
-           << _solution_invalidity_registry.sectionInfo(_solution_id)._message << "\n"
+  _console << _solution_invalidity_registry.sectionInfo(_invalid_solution_id)._name << ": "
+           << _solution_invalidity_registry.sectionInfo(_invalid_solution_id)._message << "\n"
            << std::flush;
 }
 
-/// Store all solution invalid warning for output
 SolutionInvalidity::FullTable
-SolutionInvalidity::summaryTable()
+SolutionInvalidity::summaryTable() const
 {
   FullTable vtable({"Section", "Current", "Timestep", "Total", "Message"}, 4);
 
@@ -130,7 +112,6 @@ SolutionInvalidity::summaryTable()
   if (_solution_invalid_counts.size() > 0)
   {
 
-    // Now print out the sections that contain solution invalid info and occurences
     for (unsigned int id = 0; id < _solution_invalid_counts.size(); id++)
     {
       if (_solution_invalid_counts[id] > 0)

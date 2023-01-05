@@ -214,14 +214,10 @@ NonlinearSystem::solve()
 
   // output the occurence of solution invalid in a summarry table
   if (!_fe_problem.allowInvalidSolution() && _app.solutionInvalidity().solutionInvalid())
-  {
     _app.solutionInvalidity().print(_console);
-  }
   else if (_fe_problem.allowInvalidSolution() && _app.solutionInvalidity().solutionInvalid())
-  {
     mooseWarning("The Solution Invalidity warnings are detected but silenced! "
                  "Use Problem/allow_invalid_solution=false to activate ");
-  }
 
   // reset solution invalid counter for time iteration
   _app.solutionInvalidity().resetSolutionInvalidTimeIter();

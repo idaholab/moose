@@ -266,10 +266,10 @@ FEProblemBase::validParams()
       false,
       "Set to true to allow convergence even though the solution has been marked as 'invalid'");
 
-  params.addParam<bool>(
-      "immediately_print_invalid_solution",
-      false,
-      "Set to true to immediately print out the invalid solution warning during the calculation");
+  params.addParam<bool>("immediately_print_invalid_solution",
+                        false,
+                        "Whether or not to report invalid solution warnings at the time the "
+                        "warning is produced instead of after the calculation");
 
   return params;
 }

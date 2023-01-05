@@ -15,7 +15,14 @@
 #include "FEProblemBase.h"
 
 // Forward declarations
-class MooseApp;
+class MooseObject;
+
+#define flagInvalidSolution(message)                                                               \
+  do                                                                                               \
+  {                                                                                                \
+    static const auto __invalid_id = this->registerInvalidSolutionInternal(message);               \
+    this->flagInvalidSolutionInternal(__invalid_id);                                               \
+  } while (0)
 
 /**
  * An interface to communicate the solutioninvalidity for one app to the materials
@@ -26,23 +33,15 @@ public:
   /**
    * A class to help communicating the solutioninvalidity for one app to the materials
    */
-  SolutionInvalidInterface(MooseApp & moose_app, FEProblemBase & problem);
+  SolutionInvalidInterface(MooseObject * const moose_object);
 
-  void setSolutionInvalid(SolutionID _solution_id);
+  void flagInvalidSolutionInternal(InvalidSolutionID _invalid_solution_id);
 
-  /**
-   * Get the SolutionInvalidity
-   */
-  SolutionInvalidity & solutionInvalidity();
+  InvalidSolutionID registerInvalidSolutionInternal(const std::string & message) const;
 
-protected:
-  SolutionID registerInvalidSection(const std::string & section_name,
-                                    const std::string & message) const;
-
-  SolutionID registerInvalidSection(const std::string & section_name) const;
-
-  /// The MooseApp that owns the SolutionInvalidity
-  MooseApp & _si_moose_app;
+private:
+  /// The MooseObject that owns this interface
+  MooseObject & _si_moose_object;
 
   /// A reference to FEProblem base
   FEProblemBase & _si_problem;

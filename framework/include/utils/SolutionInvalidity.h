@@ -22,6 +22,7 @@
 #include <thread>
 #include <future>
 #include <mutex>
+#include <vector>
 
 // Forward Declarations
 template <class... Ts>
@@ -40,13 +41,8 @@ public:
    */
   SolutionInvalidity(MooseApp & app);
 
-  /**
-   * Destructor
-   */
-  ~SolutionInvalidity();
-
   /// Count solution invalid occurrences for each solution id
-  void setSolutionInvalid(SolutionID _solution_id);
+  void flagInvalidSolutionInternal(InvalidSolutionID _invalid_solution_id);
 
   /// Loop over all the tracked objects and determine whether solution invalid is detected
   bool solutionInvalid() const;
@@ -60,7 +56,7 @@ public:
   /// Pass the number of solution invalid occurrences from current iteration to comulative counters
   void solutionInvalidAccumulation();
 
-  /// Vector that contains the current number of the solution invalid occurrences
+  /// Vector that contains the number of the solution invalid occurrences
   std::vector<unsigned int> _solution_invalid_counts;
 
   /// Vector that contains the number of the solution invalid occurrences for each time iteration
@@ -73,18 +69,18 @@ public:
    * Print the summary table of Solution Invalid warnings
    *  @param console The output stream to output to
    */
-  void print(const ConsoleStream & console);
+  void print(const ConsoleStream & console) const;
 
   /**
    * Immediately print the section and message for debug purpose
    *  @param console The output stream to output to
    */
-  void printDebug(SolutionID _solution_id);
+  void printDebug(InvalidSolutionID _invalid_solution_id) const;
 
-  /// The SolutionInvalidityRegistry
-  SolutionInvalidityRegistry & _solution_invalidity_registry;
-
-protected:
+private:
+  /// Mutex for locking access to the invalid counts
+  /// NOTE: These can be changed to shared_mutexes once we get C++17
+  mutable std::mutex _invalid_mutex;
   typedef VariadicTable<std::string,
                         unsigned long int,
                         unsigned long int,
@@ -92,10 +88,7 @@ protected:
                         std::string>
       FullTable;
 
-private:
-  /// Mutex for locking access to the invalid counts
-  /// NOTE: These can be changed to shared_mutexes once we get C++17
-  mutable std::mutex _invalid_mutex;
-
-  FullTable summaryTable();
+  FullTable summaryTable() const;
+  /// The SolutionInvalidityRegistry
+  SolutionInvalidityRegistry & _solution_invalidity_registry;
 };
