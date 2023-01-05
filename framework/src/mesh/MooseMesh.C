@@ -364,8 +364,37 @@ MooseMesh::prepare(bool)
   }
 
   if (!_coord_system_set)
+  {
+    const std::set<SubdomainName> provided_blocks(
+        getParam<std::vector<SubdomainName>>("block").begin(),
+        getParam<std::vector<SubdomainName>>("block").end());
+    if (!provided_blocks.empty())
+    {
+      std::set<SubdomainName> mesh_sub_names, difference;
+      for (const auto sub_id : _mesh_subdomains)
+      {
+        auto mesh_sub_name = getSubdomainName(sub_id);
+        if (mesh_sub_name.empty())
+          mesh_sub_name = std::to_string(sub_id);
+        mesh_sub_names.insert(mesh_sub_name);
+      }
+
+      std::set_difference(mesh_sub_names.begin(),
+                          mesh_sub_names.end(),
+                          provided_blocks.begin(),
+                          provided_blocks.end(),
+                          std::inserter(difference, difference.begin()));
+
+      if (!difference.empty())
+        paramError("block",
+                   "If the 'block' parameter is supplied to the Mesh, then it must cover all the "
+                   "mesh subdomains. However, the mesh subdomains: '",
+                   MooseUtils::join(difference, ", "),
+                   "' were not specified in the 'Mesh/block' parameter. Please add these");
+    }
     setCoordSystem(getParam<std::vector<SubdomainName>>("block"),
                    getParam<MultiMooseEnum>("coord_type"));
+  }
   else if (_pars.isParamSetByUser("coord_type"))
     mooseError(
         "Trying to set coordinate system type information based on the user input file, but "
