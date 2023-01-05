@@ -61,7 +61,7 @@ fpath=(~/.zsh $fpath)
 autoload -Uz compinit && compinit
 ```
 
-To add the git prompt functionality to your zsh shell, follow the bash shell instructions to download the `git_prompt.sh` file. Add the same lines given for the bash shell to the end of your `~/.zshrc` file.
+To add the git prompt functionality to your zsh shell, follow the bash shell instructions to download the `git-prompt.sh` file. Add the same lines given for the bash shell to the end of your `~/.zshrc` file.
 
 
 ## Git Config
