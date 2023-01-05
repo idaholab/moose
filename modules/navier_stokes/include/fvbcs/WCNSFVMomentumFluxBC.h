@@ -43,6 +43,14 @@ protected:
   /// Postprocessor with the inlet area
   const PostprocessorValue * const _area_pp;
 
+  /// The direction in which the flow is entering/leaving the domain. This is mainly used for cases
+  /// when the orientation of the face cannot be established (boundary on an internal face) or when the flow is
+  /// entering with an angle compared to the boundary surface.
+  const Point _direction;
+
+  /// Flag to store if the flow direction is specified by the user
+  const bool _direction_specified_by_user;
+
   /// Fluid density functor
   const Moose::Functor<ADReal> * const _rho;
 };

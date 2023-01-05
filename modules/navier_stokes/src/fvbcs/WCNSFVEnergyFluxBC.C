@@ -32,6 +32,7 @@ WCNSFVEnergyFluxBC::validParams()
   params.addParam<MooseFunctorName>(NS::cp, "specific heat capacity functor");
 
   params.addParam<PostprocessorName>("velocity_pp", "Postprocessor with the inlet velocity norm");
+  params.addParam<Point>("direction", Point(), "The direction of the flow at the boundary.");
   params.addParam<MooseFunctorName>(NS::density, "Density functor");
 
   // 3) Postprocessors for mass flow rate and energy, functor for specific heat
@@ -51,16 +52,28 @@ WCNSFVEnergyFluxBC::WCNSFVEnergyFluxBC(const InputParameters & params)
     _mdot_pp(isParamValid("mdot_pp") ? &getPostprocessorValue("mdot_pp") : nullptr),
     _area_pp(isParamValid("area_pp") ? &getPostprocessorValue("area_pp") : nullptr),
     _rho(isParamValid(NS::density) ? &getFunctor<ADReal>(NS::density) : nullptr),
-    _cp(isParamValid(NS::cp) ? &getFunctor<ADReal>(NS::cp) : nullptr)
+    _cp(isParamValid(NS::cp) ? &getFunctor<ADReal>(NS::cp) : nullptr),
+    _direction(getParam<Point>("direction")),
+    _direction_specified_by_user(params.isParamSetByUser("direction"))
 {
+  if (_direction_specified_by_user)
+  {
+    if (_direction.is_zero())
+      paramError("direction",
+                 "The user should not define zero inlet/outlet advective flux values! Use noslip "
+                 "boundary conditions for that purpose!");
+    if (!MooseUtils::absoluteFuzzyEqual(_direction.norm(), 1.0, 1e-6))
+      paramError("direction", "The direction should be a unit vector with a tolerance of 1e-6!");
+  }
+
   if (!dynamic_cast<INSFVEnergyVariable *>(&_var))
     paramError("variable",
                "The variable argument to WCNSFVEnergyFluxBC must be of type INSFVEnergyVariable");
 
   // Density is often set as global parameters so it is not checked
-  if (_energy_pp && (_velocity_pp || _mdot_pp || _temperature_pp))
+  if (_energy_pp && (_velocity_pp || _direction_specified_by_user || _mdot_pp || _temperature_pp))
     mooseWarning("If setting the energy flow rate directly, "
-                 "no need for inlet velocity, mass flow or energy");
+                 "no need for inlet velocity (magnitude or direction), mass flow or temperature");
 
   // Need enough information if trying to use a mass flow rate postprocessor
   if (!_energy_pp)
@@ -92,10 +105,33 @@ WCNSFVEnergyFluxBC::computeQpResidual()
 
   if (_energy_pp)
     return -_scaling_factor * *_energy_pp / *_area_pp;
-  else if (_velocity_pp)
-    return -_scaling_factor * (*_rho)(singleSidedFaceArg()) * *_velocity_pp *
-           (*_cp)(singleSidedFaceArg()) * *_temperature_pp;
   else
-    return -_scaling_factor * *_mdot_pp / *_area_pp * (*_cp)(singleSidedFaceArg()) *
-           *_temperature_pp;
+  {
+    if (_face_info->neighborPtr() && !_direction_specified_by_user)
+      mooseError("WCNSFVMomentumFluxBC can only be defined on an internal face if a direction "
+                 "parameter is supplied!");
+
+    if (_velocity_pp)
+    {
+      /*
+       * We assume that positive and negative mass velocities correspond to fluid
+       * entering / leaving the domain, respectively. There are two options for defining the
+       * the vector for the inlet velocity direction.
+       * 1. One can define it using the `direction` parameter. In this case the velocity and mdot
+       * parameters are positive if the fluid flows along direction in a positive direction. If the
+       * fluid is moving in the opposite direction they should be passed as negative values. The
+       * `direction` parameter is needed when we define a boundary on an internal face.
+       * 2. On boundaries, if `direction` is not defined, we use the surface normal and assume that
+       * the fluid enters the domain with an opposite directionality.
+       */
+      const Point incoming_vector =
+          !_direction_specified_by_user ? _face_info->normal() : _direction;
+      const Real cos_angle = std::abs(incoming_vector * _face_info->normal());
+      return -_scaling_factor * (*_rho)(singleSidedFaceArg()) * *_velocity_pp * cos_angle *
+             (*_cp)(singleSidedFaceArg()) * *_temperature_pp;
+    }
+    else
+      return -_scaling_factor * *_mdot_pp / *_area_pp * (*_cp)(singleSidedFaceArg()) *
+             *_temperature_pp;
+  }
 }

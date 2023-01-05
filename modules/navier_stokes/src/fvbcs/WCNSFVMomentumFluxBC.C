@@ -27,8 +27,10 @@ WCNSFVMomentumFluxBC::validParams()
   params.addParam<Real>("scaling_factor", 1, "To scale the momentum flux");
 
   // Two different ways to input velocity
-  // 1) Postprocessor with the velocity value
+  // 1) Postprocessor with the velocity value and optionally the direction
   params.addParam<PostprocessorName>("velocity_pp", "Postprocessor with the inlet velocity norm");
+  params.addParam<Point>("direction", Point(), "The direction of the flow at the boundary.");
+
   params.addParam<MooseFunctorName>(NS::density, "Density functor");
 
   // 2) Postprocessors with an inlet mass flow rate directly
@@ -46,8 +48,20 @@ WCNSFVMomentumFluxBC::WCNSFVMomentumFluxBC(const InputParameters & params)
     _velocity_pp(isParamValid("velocity_pp") ? &getPostprocessorValue("velocity_pp") : nullptr),
     _mdot_pp(isParamValid("mdot_pp") ? &getPostprocessorValue("mdot_pp") : nullptr),
     _area_pp(isParamValid("area_pp") ? &getPostprocessorValue("area_pp") : nullptr),
+    _direction(getParam<Point>("direction")),
+    _direction_specified_by_user(params.isParamSetByUser("direction")),
     _rho(isParamValid(NS::density) ? &getFunctor<ADReal>(NS::density) : nullptr)
 {
+  if (_direction_specified_by_user)
+  {
+    if (_direction.is_zero())
+      paramError("direction",
+                 "The user should not define zero inlet/outlet advective flux values! Use noslip "
+                 "boundary conditions for that purpose!");
+    if (!MooseUtils::absoluteFuzzyEqual(_direction.norm(), 1.0, 1e-6))
+      paramError("direction", "The direction should be a unit vector with a tolerance of 1e-6!");
+  }
+
   if (!dynamic_cast<INSFVVelocityVariable *>(&_var))
     paramError(
         "variable",
@@ -71,21 +85,36 @@ WCNSFVMomentumFluxBC::computeQpResidual()
     if (MooseUtils::absoluteFuzzyEqual(*_area_pp, 0))
       mooseError("Surface area is 0");
 
-  // We restrict this BC for boundaries to be able to automatically determine the direction the
-  // flow is coming in from. In this case it is the negative of the surface normal (which points
-  // outwards). For internal faces, this would only be possible with additional parameters.
-  if (!_face_info->neighborPtr())
-    mooseError("WCNSFVMomentumFluxBC is restricted to be used on the boundary of the domain!");
-
-  // We assume that positive and negative mass flow rates/velocities correspond to fluid
-  // entering / leaving the domain, respectively. For this we need to multiply the boundary
-  // surface normal by -1.
-  const Real contrib = -_face_info->normal()(_index);
+  /*
+   * We assume that positive and negative mass flow rates/velocities correspond to fluid
+   * entering / leaving the domain, respectively. There are two options for defining the
+   * the vector for the inlet velocity direction.
+   * 1. One can define it using the `direction` parameter. In this case the velocity and mdot
+   * parameters are positive if the fluid flows along direction in a positive direction. If the
+   * fluid is moving in the opposite direction they should be passed as negative values. The
+   * `direction` parameter is needed when we define a boundary on an internal face.
+   * 2. On boundaries, if `direction` is not defined, we use the surface normal and assume that
+   * the fluid enters the domain with an opposite directionality.
+   */
+  if (_face_info->neighborPtr() && !_direction_specified_by_user)
+    mooseError("WCNSFVMomentumFluxBC can only be defined on an internal face if a direction "
+               "parameter is supplied!");
+  const Point incoming_vector =
+      !_direction_specified_by_user ? Point(-_face_info->normal()) : _direction;
+  const Real cos_angle = std::abs(incoming_vector * _face_info->normal());
 
   if (_velocity_pp)
-    return -_scaling_factor * std::pow((*_velocity_pp), 2) * contrib *
+    // In the case when the stream comes with an angle we need to multiply this quantity
+    // with the dot product of the surface normal and the incoming jet direction
+    return -_scaling_factor * std::pow((*_velocity_pp), 2) * incoming_vector(_index) * cos_angle *
            (*_rho)(singleSidedFaceArg());
   else
-    return -_scaling_factor * std::pow((*_mdot_pp) / (*_area_pp), 2) * contrib /
-           (*_rho)(singleSidedFaceArg());
+  // In this case the cosine of the angle is already incorporated in mdot so we will
+  // have to correct back to get the right velocity magnitude
+  {
+    const auto velocity_magnitude =
+        (*_mdot_pp) / ((*_area_pp) * (*_rho)(singleSidedFaceArg()) * cos_angle);
+    return -_scaling_factor * (*_mdot_pp) / (*_area_pp) * incoming_vector(_index) *
+           velocity_magnitude;
+  }
 }
