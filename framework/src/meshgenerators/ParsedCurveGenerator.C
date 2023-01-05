@@ -43,6 +43,10 @@ ParsedCurveGenerator::validParams()
       "constant_expressions",
       "Vector of values for the constants in constant_names (can be an FParser expression)");
   params.addParam<bool>("is_closed_loop", false, "Whether the curve is closed or not.");
+  params.addRangeCheckedParam<unsigned int>(
+      "forced_closing_num_segments",
+      "forced_closing_num_segments>1",
+      "Number of segments of the curve section that is generated to forcefully close the loop.");
   params.addRangeCheckedParam<Real>("oversample_factor",
                                     10.0,
                                     "oversample_factor>2.0",
@@ -69,6 +73,9 @@ ParsedCurveGenerator::ParsedCurveGenerator(const InputParameters & parameters)
     _nums_segments(getParam<std::vector<unsigned int>>("nums_segments")),
     _critical_t_series(getParam<std::vector<Real>>("critical_t_series")),
     _is_closed_loop(getParam<bool>("is_closed_loop")),
+    _forced_closing_num_segments(isParamValid("forced_closing_num_segments")
+                                     ? getParam<unsigned int>("forced_closing_num_segments")
+                                     : 0),
     _oversample_factor(getParam<Real>("oversample_factor")),
     _max_oversample_number_factor(getParam<unsigned int>("max_oversample_number_factor"))
 {
@@ -125,6 +132,10 @@ ParsedCurveGenerator::ParsedCurveGenerator(const InputParameters & parameters)
                _func_Fz->ErrorMsg());
 
   _func_params.resize(1);
+
+  if (!_is_closed_loop && _forced_closing_num_segments > 0)
+    paramError("forced_closing_num_segments",
+               "this parameter is not needed is the curve to be generated is not a closed loop.");
 }
 
 std::unique_ptr<MeshBase>
@@ -171,12 +182,31 @@ ParsedCurveGenerator::generate()
 
   // For a closed loop, need to check if the first and last Points are overlapped
   if (_is_closed_loop)
+  {
     if (MooseUtils::absoluteFuzzyEqual((*nodes.back() - *nodes.front()).norm(), 0.0))
     {
       // Remove the overlapped nodes for a closed loop
       mesh->delete_node(nodes.back());
       nodes.resize(nodes.size() - 1);
+      if (_forced_closing_num_segments > 0)
+        paramError("forced_closing_num_segments",
+                   "this parameter is not needed if the first and last points of the curve to be "
+                   "generated are overlapped.");
     }
+    else if (_forced_closing_num_segments > 1)
+    {
+      // Add extra nodes on the curve section used to forcefully close the loop
+      const Point start_pt(*nodes.back());
+      const Point end_pt(*nodes.front());
+      const unsigned int num_nodes_0(nodes.size());
+      for (unsigned int i = 1; i < _forced_closing_num_segments; i++)
+      {
+        Point side_p =
+            start_pt + (end_pt - start_pt) * (Real)i / (Real)_forced_closing_num_segments;
+        nodes.push_back(mesh->add_point(side_p, num_nodes_0 + i - 1));
+      }
+    }
+  }
 
   for (unsigned int i = 0; i < nodes.size() - !_is_closed_loop; i++)
   {

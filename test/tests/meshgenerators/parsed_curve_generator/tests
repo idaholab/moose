@@ -35,6 +35,17 @@
     requirement ='The system shall generate a closed loop curve mesh with starting and ending points separated.'
     recover = false
   []
+  [forced_closed_curve_multi_segments]
+    type = 'Exodiff'
+    input = 'parsed_curve_closed.i'
+    exodiff = 'parsed_curve_closed_forced_ms_in.e'
+    cli_args = 'Mesh/pcg/critical_t_series="0 5"
+                Mesh/pcg/nums_segments=10
+                Mesh/pcg/forced_closing_num_segments=5
+                --mesh-only parsed_curve_closed_forced_ms_in.e'
+    requirement ='The system shall generate a closed loop curve mesh with starting and ending points separated using a section that contains multiple elements.'
+    recover = false
+  []
   [xy_delaunay_curve]
     type = 'Exodiff'
     input = 'xy_curve.i'
@@ -66,6 +77,25 @@
                 --mesh-only err.e'
     expect_err = 'elements must be unique.'
     requirement ='The system shall throw an error if the elements in critical_t_series are not unique.'
+  []
+  [err_unneeded_forced_closed_num_segments_1]
+    type = 'RunException'
+    input = 'parsed_curve_closed.i'
+    cli_args = 'Mesh/pcg/forced_closing_num_segments=5
+                --mesh-only err.e'
+    expect_err = 'this parameter is not needed if the first and last points of the curve to be generated are overlapped.'
+    requirement ='The system shall throw an error if forced_closed_num_segments is provided but the starting and ending points of the curve are overlapped.'
+  []
+  [err_unneeded_forced_closed_num_segments_2]
+    type = 'RunException'
+    input = 'parsed_curve_closed.i'
+    cli_args = 'Mesh/pcg/critical_t_series="0 5"
+                Mesh/pcg/is_closed_loop=false
+                Mesh/pcg/nums_segments=10
+                Mesh/pcg/forced_closing_num_segments=5
+                --mesh-only err.e'
+    expect_err = 'this parameter is not needed is the curve to be generated is not a closed loop.'
+    requirement ='The system shall throw an error if forced_closed_num_segments is provided but the curve to be generated is open.'
   []
   [err_unsorted_t_series]
     type = 'RunException'

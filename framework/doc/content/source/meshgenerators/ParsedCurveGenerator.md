@@ -69,6 +69,8 @@ If the starting and ending values of $t$ lead to different $x(t)$, $y(t)$, or $z
       id=forced_closed_curve
       caption=a fraction of the curve shown in [closed_curve] forced to be closed.
 
+By default, the curve section that closes the curve consists of only one EDGE2 element. However, users can also use [!param](/Mesh/ParsedCurveGenerator/forced_closing_num_segments) to specify the number of elements in that curve section.
+
 ## Used with Other Mesh Generators
 
 If [!param](/Mesh/ParsedCurveGenerator/z_formula) is set as zero (which is the default value), the generated curve resides in the XY-plane, and a pair of such `ParsedCurveGenerator` objects can naturally be connected by [`FillBetweenCurvesGenerator`](/FillBetweenCurvesGenerator.md) using [`FillBetweenPointVectorsTools`](/FillBetweenPointVectorsTools.md).
