@@ -22,7 +22,6 @@
 #include <thread>
 #include <future>
 #include <mutex>
-#include <vector>
 
 // Forward Declarations
 template <class... Ts>
@@ -56,14 +55,15 @@ public:
   /// Pass the number of solution invalid occurrences from current iteration to comulative counters
   void solutionInvalidAccumulation();
 
-  /// Vector that contains the number of the solution invalid occurrences
-  std::vector<unsigned int> _solution_invalid_counts;
+  /// create a data struct for the number of solution invalid occurrences at current, each time iteration and total calcultation
+  struct InvalidCounts
+  {
+    unsigned int counts;
+    unsigned int timeiter_counts;
+    unsigned int total_counts;
+  };
 
-  /// Vector that contains the number of the solution invalid occurrences for each time iteration
-  std::vector<unsigned int> _solution_invalid_timeiter_counts;
-
-  /// Vector that contains the total number of the solution invalid occurrences
-  std::vector<unsigned int> _solution_invalid_total_counts;
+  std::vector<InvalidCounts> _counts;
 
   /**
    * Print the summary table of Solution Invalid warnings

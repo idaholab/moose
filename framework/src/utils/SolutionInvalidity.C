@@ -28,25 +28,17 @@ void
 SolutionInvalidity::flagInvalidSolutionInternal(InvalidSolutionID _invalid_solution_id)
 {
   std::lock_guard<std::mutex> lock_id(_invalid_mutex);
+  if (_counts.size() <= _invalid_solution_id)
+    _counts.resize(_invalid_solution_id + 1);
 
-  if (_solution_invalid_counts.size() <= _invalid_solution_id)
-  {
-    _solution_invalid_counts.resize(_invalid_solution_id + 1);
-    ++_solution_invalid_counts[_invalid_solution_id];
-  }
-  else
-  {
-    ++_solution_invalid_counts[_invalid_solution_id];
-  }
-  _solution_invalid_total_counts.resize(_solution_invalid_counts.size());
-  _solution_invalid_timeiter_counts.resize(_solution_invalid_counts.size());
+  ++_counts[_invalid_solution_id].counts;
 }
 
 bool
 SolutionInvalidity::solutionInvalid() const
 {
-  for (const auto count : _solution_invalid_counts)
-    if (count)
+  for (auto & entry : _counts)
+    if (entry.counts)
       return true;
   return false;
 }
@@ -54,22 +46,24 @@ SolutionInvalidity::solutionInvalid() const
 void
 SolutionInvalidity::resetSolutionInvalid()
 {
-  std::fill(_solution_invalid_counts.begin(), _solution_invalid_counts.end(), 0);
+  for (auto & entry : _counts)
+    entry.counts = 0;
 }
 
 void
 SolutionInvalidity::resetSolutionInvalidTimeIter()
 {
-  std::fill(_solution_invalid_timeiter_counts.begin(), _solution_invalid_timeiter_counts.end(), 0);
+  for (auto & entry : _counts)
+    entry.timeiter_counts = 0;
 }
 
 void
 SolutionInvalidity::solutionInvalidAccumulation()
 {
-  for (unsigned int i = 0; i < _solution_invalid_counts.size(); i++)
+  for (auto & entry : _counts)
   {
-    _solution_invalid_total_counts[i] += _solution_invalid_counts[i];
-    _solution_invalid_timeiter_counts[i] += _solution_invalid_counts[i];
+    entry.timeiter_counts += entry.counts;
+    entry.total_counts += entry.counts;
   }
 }
 
@@ -83,9 +77,8 @@ SolutionInvalidity::print(const ConsoleStream & console) const
 void
 SolutionInvalidity::printDebug(InvalidSolutionID _invalid_solution_id) const
 {
-  _console << _solution_invalidity_registry.sectionInfo(_invalid_solution_id)._name << ": "
-           << _solution_invalidity_registry.sectionInfo(_invalid_solution_id)._message << "\n"
-           << std::flush;
+  const auto & info = _solution_invalidity_registry.sectionInfo(_invalid_solution_id);
+  _console << info._name << ": " << info._message << "\n" << std::flush;
 }
 
 SolutionInvalidity::FullTable
@@ -109,20 +102,18 @@ SolutionInvalidity::summaryTable() const
       1, // Message
   });
 
-  if (_solution_invalid_counts.size() > 0)
+  for (const auto id : index_range(_counts))
   {
-
-    for (unsigned int id = 0; id < _solution_invalid_counts.size(); id++)
+    const auto & entry = _counts[id];
+    if (entry.counts > 0)
     {
-      if (_solution_invalid_counts[id] > 0)
-      {
-        vtable.addRow(_solution_invalidity_registry.sectionInfo(id)._name, // Section
-                      _solution_invalid_counts[id],          // Current Interation Warnings
-                      _solution_invalid_timeiter_counts[id], // Current Time Interation Warnings
-                      _solution_invalid_total_counts[id],    // Total Iternation Warnings
-                      _solution_invalidity_registry.sectionInfo(id)._message // Message
-        );
-      }
+      const auto & info = _solution_invalidity_registry.sectionInfo(id);
+      vtable.addRow(info._name,            // Section
+                    entry.counts,          // Current Interation Warnings
+                    entry.timeiter_counts, // Current Time Interation Warnings
+                    entry.total_counts,    // Total Iternation Warnings
+                    info._message          // Message
+      );
     }
   }
 
