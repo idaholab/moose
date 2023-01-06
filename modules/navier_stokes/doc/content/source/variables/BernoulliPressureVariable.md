@@ -1,4 +1,4 @@
-# PINSFVPressureVariable
+# BernoulliPressureVariable
 
 This variable type is specific to the porous media incompressible Navier Stokes
 equations. When used instead of a typical finite volume variable, faces for
@@ -19,8 +19,8 @@ typically contains gravitational terms; however, we have omitted them under the
 assumption that $\rho_1 = \rho_2$ which should be true when density does not
 depend on pressure (the incompressible or "weakly" compressible case).
 
-!syntax parameters /Variables/PINSFVPressureVariable
+!syntax parameters /Variables/BernoulliPressureVariable
 
-!syntax inputs /Variables/PINSFVPressureVariable
+!syntax inputs /Variables/BernoulliPressureVariable
 
-!syntax children /Variables/PINSFVPressureVariable
+!syntax children /Variables/BernoulliPressureVariable

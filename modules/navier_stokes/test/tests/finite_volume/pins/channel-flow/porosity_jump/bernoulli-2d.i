@@ -39,7 +39,7 @@ velocity_interp_method='rc'
     initial_condition = 1e-6
   []
   [pressure]
-    type = PINSFVPressureVariable
+    type = BernoulliPressureVariable
     u = u
     v = v
     porosity = porosity

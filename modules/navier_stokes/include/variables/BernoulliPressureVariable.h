@@ -20,10 +20,10 @@ class InputParameters;
  * face while the upwind face is flagged as a Dirichlet face. The upwind Dirichlet value is computed
  * using the downwind extrapolated pressure value and the Bernoulli equation
  */
-class PINSFVPressureVariable : public INSFVPressureVariable, public FunctorInterface
+class BernoulliPressureVariable : public INSFVPressureVariable, public FunctorInterface
 {
 public:
-  PINSFVPressureVariable(const InputParameters & params);
+  BernoulliPressureVariable(const InputParameters & params);
 
   static InputParameters validParams();
 

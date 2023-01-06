@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PINSFVPressureVariable.h"
+#include "BernoulliPressureVariable.h"
 #include "NS.h"
 #include "NSFVUtils.h"
 
-registerMooseObject("NavierStokesApp", PINSFVPressureVariable);
+registerMooseObject("NavierStokesApp", BernoulliPressureVariable);
 
 InputParameters
-PINSFVPressureVariable::validParams()
+BernoulliPressureVariable::validParams()
 {
   auto params = INSFVPressureVariable::validParams();
   params += FunctorInterface::validParams();
@@ -26,7 +26,7 @@ PINSFVPressureVariable::validParams()
   return params;
 }
 
-PINSFVPressureVariable::PINSFVPressureVariable(const InputParameters & params)
+BernoulliPressureVariable::BernoulliPressureVariable(const InputParameters & params)
   : INSFVPressureVariable(params),
     FunctorInterface(this),
     _u(nullptr),
@@ -38,7 +38,7 @@ PINSFVPressureVariable::PINSFVPressureVariable(const InputParameters & params)
 }
 
 void
-PINSFVPressureVariable::initialSetup()
+BernoulliPressureVariable::initialSetup()
 {
   _u = &getFunctor<ADReal>("u", _subproblem);
   _v = &getFunctor<ADReal>("v", _subproblem);
@@ -48,7 +48,7 @@ PINSFVPressureVariable::initialSetup()
 }
 
 std::pair<bool, ADRealVectorValue>
-PINSFVPressureVariable::elemIsUpwind(const Elem & elem, const FaceInfo & fi) const
+BernoulliPressureVariable::elemIsUpwind(const Elem & elem, const FaceInfo & fi) const
 {
   const Moose::FaceArg face{&fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr};
 
@@ -60,8 +60,8 @@ PINSFVPressureVariable::elemIsUpwind(const Elem & elem, const FaceInfo & fi) con
 }
 
 bool
-PINSFVPressureVariable::isExtrapolatedBoundaryFace(const FaceInfo & fi,
-                                                   const Elem * const elem) const
+BernoulliPressureVariable::isExtrapolatedBoundaryFace(const FaceInfo & fi,
+                                                      const Elem * const elem) const
 {
   if (isDirichletBoundaryFace(fi, elem))
     return false;
@@ -79,7 +79,8 @@ PINSFVPressureVariable::isExtrapolatedBoundaryFace(const FaceInfo & fi,
 }
 
 bool
-PINSFVPressureVariable::isDirichletBoundaryFace(const FaceInfo & fi, const Elem * const elem) const
+BernoulliPressureVariable::isDirichletBoundaryFace(const FaceInfo & fi,
+                                                   const Elem * const elem) const
 {
   if (INSFVPressureVariable::isDirichletBoundaryFace(fi, elem))
     return true;
@@ -92,8 +93,8 @@ PINSFVPressureVariable::isDirichletBoundaryFace(const FaceInfo & fi, const Elem 
 }
 
 ADReal
-PINSFVPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi,
-                                                      const Elem * const elem) const
+BernoulliPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi,
+                                                         const Elem * const elem) const
 {
   mooseAssert(isDirichletBoundaryFace(fi, elem), "This better be a Dirichlet face");
   const auto [is_jump_face, eps_elem, eps_neighbor] = NS::isPorosityJumpFace(*_eps, fi);

@@ -860,7 +860,7 @@ NSFVAction::addINSVariables()
         _porous_medium_treatment &&
         getParam<MooseEnum>("porosity_interface_pressure_treatment") != "automatic";
     const auto pressure_type =
-        using_pinsfv_pressure_var ? "PINSFVPressureVariable" : "INSFVPressureVariable";
+        using_pinsfv_pressure_var ? "BernoulliPressureVariable" : "INSFVPressureVariable";
     auto params = _factory.getValidParams(pressure_type);
     assignBlocks(params, _blocks);
     params.set<std::vector<Real>>("scaling") = {_mass_scaling};

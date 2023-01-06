@@ -11,6 +11,7 @@
 #include "Reconstructions.h"
 #include "NS.h"
 #include "Assembly.h"
+#include "BernoulliPressureVariable.h"
 
 registerMooseObject("NavierStokesApp", PINSFVRhieChowInterpolator);
 
@@ -88,15 +89,16 @@ PINSFVRhieChowInterpolator::pinsfvSetup()
   if (!_smoothing_layers)
     return;
 
-  if (dynamic_cast<PINSFVPressureVariable *>(_p))
-    paramError(NS::pressure,
-               "If 'smoothing_layers' is non-zero, e.g. if the porosity is smooth(ed), "
-               "then the pressure drop should be computed automatically. The "
-               "'PINSFVPressureVariable' class enforces a pressure drop according to the Bernoulli "
-               "equation on any face which has different pressure values on either side. This is "
-               "undesirable when the porosity is varying smoothing and there may be pressure drops "
-               "corresponding to viscous effects. Please just use the 'INSFVPressureVariable' "
-               "class for pressure when the porosity is smooth.");
+  if (dynamic_cast<BernoulliPressureVariable *>(_p))
+    paramError(
+        NS::pressure,
+        "If 'smoothing_layers' is non-zero, e.g. if the porosity is smooth(ed), "
+        "then the pressure drop should be computed automatically. The "
+        "'BernoulliPressureVariable' class enforces a pressure drop according to the Bernoulli "
+        "equation on any face which has different pressure values on either side. This is "
+        "undesirable when the porosity is varying smoothing and there may be pressure drops "
+        "corresponding to viscous effects. Please just use the 'INSFVPressureVariable' "
+        "class for pressure when the porosity is smooth.");
 
   const auto & all_fi = _moose_mesh.allFaceInfo();
   _geometric_fi.reserve(all_fi.size());
