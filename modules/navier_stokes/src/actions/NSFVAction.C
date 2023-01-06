@@ -2439,9 +2439,19 @@ NSFVAction::checkGeneralControlErrors()
     paramError("boussinesq_approximation",
                "We cannot use boussinesq approximation while running in weakly-compressible mode!");
 
-  if (!_porous_medium_treatment && isParamValid("porosity_smoothing_layers"))
-    paramError("porosity_smoothing_layers",
-               "This parameter should not be defined if the porous medium treatment is disabled!");
+  if (isParamValid("porosity_smoothing_layers"))
+  {
+    if (!_porous_medium_treatment)
+      paramError(
+          "porosity_smoothing_layers",
+          "This parameter should not be defined if the porous medium treatment is disabled!");
+
+    if (getParam<unsigned short>("porosity_smoothing_layers") != 0 &&
+        getParam<MooseEnum>("porosity_interface_pressure_treatment") != "automatic")
+      paramError("porosity_interface_pressure_treatment",
+                 "If 'porosity_smoothing_layers' is non-zero, e.g. if the porosity is smooth(ed), "
+                 "then automatic pressure calculation should be used.");
+  }
 
   if (!_porous_medium_treatment && _use_friction_correction)
     paramError("use_friction_correction",
