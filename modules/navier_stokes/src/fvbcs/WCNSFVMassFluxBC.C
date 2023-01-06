@@ -28,7 +28,13 @@ WCNSFVMassFluxBC::validParams()
   // Two different ways to input velocity
   // 1) Postprocessor with the velocity value
   params.addParam<PostprocessorName>("velocity_pp", "Postprocessor with the inlet velocity norm");
-  params.addParam<Point>("direction", Point(), "The direction of the flow at the boundary.");
+  params.addParam<Point>(
+      "direction",
+      Point(),
+      "The direction of the flow at the boundary. This is mainly used for cases when an inlet "
+      "angle needs to be defined with respect to the normal and when a boundary is defined on an "
+      "internal face where the normal can point in both directions. Use positive mass flux and "
+      "velocity magnitude if the flux aligns with this direction vector.");
   params.addParam<MooseFunctorName>(NS::density, "Density functor");
 
   // 2) Postprocessors with an inlet mass flow rate directly
@@ -49,15 +55,8 @@ WCNSFVMassFluxBC::WCNSFVMassFluxBC(const InputParameters & params)
     _direction(getParam<Point>("direction")),
     _direction_specified_by_user(params.isParamSetByUser("direction"))
 {
-  if (_direction_specified_by_user)
-  {
-    if (_direction.is_zero())
-      paramError("direction",
-                 "The user should not define zero inlet/outlet advective flux values! Use noslip "
-                 "boundary conditions for that purpose!");
-    if (!MooseUtils::absoluteFuzzyEqual(_direction.norm(), 1.0, 1e-6))
-      paramError("direction", "The direction should be a unit vector with a tolerance of 1e-6!");
-  }
+  if (_direction_specified_by_user && !MooseUtils::absoluteFuzzyEqual(_direction.norm(), 1.0, 1e-6))
+    paramError("direction", "The direction should be a unit vector with a tolerance of 1e-6!");
 
   if (!dynamic_cast<INSFVPressureVariable *>(&_var))
     paramError("variable",
@@ -83,16 +82,19 @@ WCNSFVMassFluxBC::computeQpResidual()
 
   if (_velocity_pp)
   {
+    if (_face_info->neighborPtr() && !_direction_specified_by_user)
+      paramError("direction",
+                 type(),
+                 " can only be defined on an internal face if a direction parameter is supplied!");
     /*
-     * We assume that positive and negative mass velocities correspond to fluid
-     * entering / leaving the domain, respectively. There are two options for defining the
-     * the vector for the inlet velocity direction.
-     * 1. One can define it using the `direction` parameter. In this case the velocity and mdot
-     * parameters are positive if the fluid flows along direction in a positive direction. If the
-     * fluid is moving in the opposite direction they should be passed as negative values. The
-     * `direction` parameter is needed when we define a boundary on an internal face.
-     * 2. On boundaries, if `direction` is not defined, we use the surface normal and assume that
-     * the fluid enters the domain with an opposite directionality.
+     * We assume the following orientation: The supplied mass flow and velocity magnitude need to be
+     * positive if:
+     * 1. No direction parameter is supplied and we want to define an inlet condition (similarly, if
+     * the mass flow/velocity magnitude are negative we define an outlet)
+     * 2. If the fluid flows aligns with the direction parameter specified by the user. (similarly,
+     * if the postprocessor values are negative we assume the fluid flows backwards with respect to
+     * the direction parameter)
+     *
      */
     const Point incoming_vector = !_direction_specified_by_user ? _face_info->normal() : _direction;
     const Real cos_angle = std::abs(incoming_vector * _face_info->normal());

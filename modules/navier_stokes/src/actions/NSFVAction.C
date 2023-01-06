@@ -158,8 +158,16 @@ NSFVAction::validParams()
   params.addParam<std::vector<PostprocessorName>>(
       "flux_inlet_pps",
       std::vector<PostprocessorName>(),
-      "The name of the postprocessors which compute the mass flow/normal velocity magnitude. "
+      "The name of the postprocessors which compute the mass flow/ velocity magnitude. "
       "Mainly used for coupling between different applications.");
+  params.addParam<std::vector<Point>>(
+      "flux_inlet_directions",
+      std::vector<Point>(),
+      "The directions which can be used to define the orientation of the flux with respect to the "
+      "mesh. This can be used to define a flux which is incoming with an angle or to adjust the "
+      "flux direction with respect to the normal. If the inlet surface is defined on an internal "
+      "face, this is necessary to ensure the arbitrary orientation of the normal does not result "
+      "in non-physical results.");
 
   MultiMooseEnum mom_outlet_types("fixed-pressure zero-gradient fixed-pressure-zero-gradient");
   params.addParam<MultiMooseEnum>("momentum_outlet_types",
@@ -495,7 +503,8 @@ NSFVAction::validParams()
       "inlet_boundaries momentum_inlet_types momentum_inlet_function energy_inlet_types "
       "energy_inlet_function wall_boundaries momentum_wall_types energy_wall_types "
       "energy_wall_function outlet_boundaries momentum_outlet_types pressure_function "
-      "passive_scalar_inlet_types passive_scalar_inlet_function flux_inlet_pps",
+      "passive_scalar_inlet_types passive_scalar_inlet_function flux_inlet_pps "
+      "flux_inlet_directions",
       "Boundary condition");
 
   params.addParamNamesToGroup(
@@ -542,6 +551,7 @@ NSFVAction::NSFVAction(const InputParameters & parameters)
     _wall_boundaries(getParam<std::vector<BoundaryName>>("wall_boundaries")),
     _momentum_inlet_types(getParam<MultiMooseEnum>("momentum_inlet_types")),
     _flux_inlet_pps(getParam<std::vector<PostprocessorName>>("flux_inlet_pps")),
+    _flux_inlet_directions(getParam<std::vector<Point>>("flux_inlet_directions")),
     _momentum_inlet_function(
         getParam<std::vector<std::vector<FunctionName>>>("momentum_inlet_function")),
     _momentum_outlet_types(getParam<MultiMooseEnum>("momentum_outlet_types")),
@@ -1712,6 +1722,10 @@ NSFVAction::addINSInletBC()
         const std::string bc_type =
             _porous_medium_treatment ? "PWCNSFVMomentumFluxBC" : "WCNSFVMomentumFluxBC";
         InputParameters params = _factory.getValidParams(bc_type);
+
+        if (_flux_inlet_directions.size())
+          params.set<Point>("direction") = _flux_inlet_directions[flux_bc_counter];
+
         params.set<MooseFunctorName>(NS::density) = _density_name;
         params.set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
         if (_porous_medium_treatment)
@@ -1744,6 +1758,9 @@ NSFVAction::addINSInletBC()
         params.set<MooseFunctorName>(NS::density) = _density_name;
         params.set<NonlinearVariableName>("variable") = _pressure_name;
         params.set<std::vector<BoundaryName>>("boundary") = {_inlet_boundaries[bc_ind]};
+
+        if (_flux_inlet_directions.size())
+          params.set<Point>("direction") = _flux_inlet_directions[flux_bc_counter];
 
         if (_momentum_inlet_types[bc_ind] == "flux-mass")
         {
@@ -1794,6 +1811,8 @@ NSFVAction::addINSEnergyInletBC()
       const std::string bc_type = "WCNSFVEnergyFluxBC";
       InputParameters params = _factory.getValidParams(bc_type);
       params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
+      if (_flux_inlet_directions.size())
+        params.set<Point>("direction") = _flux_inlet_directions[flux_bc_counter];
       if (_energy_inlet_types[bc_ind] == "flux-mass")
       {
         params.set<PostprocessorName>("mdot_pp") = _flux_inlet_pps[flux_bc_counter];
@@ -2225,7 +2244,8 @@ void
 NSFVAction::addBoundaryPostprocessors()
 {
   for (unsigned int bc_ind = 0; bc_ind < _inlet_boundaries.size(); ++bc_ind)
-    if (_momentum_inlet_types[bc_ind] == "flux-mass")
+    if (_momentum_inlet_types[bc_ind] == "flux-mass" ||
+        (_has_energy_equation && _momentum_inlet_types[bc_ind] == "flux-velocity"))
     {
       const std::string pp_type = "AreaPostprocessor";
       InputParameters params = _factory.getValidParams(pp_type);
@@ -2578,6 +2598,13 @@ NSFVAction::checkBoundaryParameterErrors()
                  num_flux_bc_postprocessors,
                  "flux types",
                  "'inlet_boundaries'");
+
+  if (_flux_inlet_directions.size())
+    checkSizeParam(_flux_inlet_directions.size(),
+                   "flux_inlet_directions",
+                   num_flux_bc_postprocessors,
+                   "flux types",
+                   "'inlet_boundaries'");
 
   unsigned int num_pressure_outlets = 0;
   for (unsigned int enum_ind = 0; enum_ind < _outlet_boundaries.size(); ++enum_ind)
