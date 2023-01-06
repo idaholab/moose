@@ -273,7 +273,7 @@ MooseUtils::shuffle(std::vector<T> & data,
         offsets[i + 1] = offsets[i] + local_sizes[i];
     }
 
-    // Preform swaps
+    // Perform swaps
     auto rank = comm_ptr->rank();
     for (std::size_t idx0 = n_global - 1; idx0 > 0; --idx0)
     {

@@ -32,7 +32,7 @@ class Receiver;
  * first value is the current value and the data in the vector are the older data.
  *
  * The ReporterState object is a RestartableData object that serves as a helper for managing the
- * time history. A "context" object also exists that uses the ReporterState for preforming special
+ * time history. A "context" object also exists that uses the ReporterState for performing special
  * operations. Refer to ReporterState.h/C for more information.
  *
  * It is important to note that the Reporter values are not threaded. However, the Reporter

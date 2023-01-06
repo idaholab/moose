@@ -39,7 +39,7 @@ MultiAppTransfer::validParams()
   params.addParam<bool>(
       "check_multiapp_execute_on",
       true,
-      "When false the check between the multiapp and transfer execute on flags is not preformed.");
+      "When false the check between the multiapp and transfer execute on flags is not performed.");
   params.addParam<bool>("displaced_source_mesh",
                         false,
                         "Whether or not to use the displaced mesh for the source mesh.");
