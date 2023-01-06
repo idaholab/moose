@@ -1,6 +1,5 @@
 [Tests]
   design = 'WCNSFVMassFluxBC.md PWCNSFVMomentumFluxBC.md WCNSFVEnergyFluxBC.md NSFVAction.md'
-  issues = '#22038'
   [from_mdot_action]
     type = 'Exodiff'
     input = flux_bcs_mdot-action.i
@@ -8,6 +7,63 @@
     ad_indexing_type = 'global'
     abs_zero = 1e-9
     recover = false # see #19126
+    issues = '#22038'
     requirement = 'The system shall be able to model a momentum inlet condition based on mass flow rate for porous weakly-compressible flow.'
+  []
+  [from_mdot_with_direction_action]
+    issues = '#23060'
+    requirement = 'The system shall be able to model a momentum inlet condition based on mass flow rate for porous weakly-compressible flow'
+    [angle_0]
+      detail = 'with the incoming flow being parallel to the surface normal of the inlet;'
+      type = 'CSVDiff'
+      input = flux_bcs_mdot-direction-action.i
+      csvdiff = mass-angle-0.csv
+      cli_args = "Outputs/file_base='mass-angle-0'"
+      ad_indexing_type = 'global'
+      abs_zero = 1e-9
+      recover = false # see #19126
+    []
+    [angle_30]
+      detail = 'with the incoming flow direction spanning an angle with the normal surface of the inlet;'
+      type = 'CSVDiff'
+      input = flux_bcs_mdot-direction-action.i
+      csvdiff = mass-angle-30.csv
+      cli_args = "Outputs/file_base='mass-angle-30' "
+                 "Modules/NavierStokesFV/flux_inlet_directions='0.86602540378 -0.5 0.0'"
+      ad_indexing_type = 'global'
+      abs_zero = 1e-9
+      recover = false # see #19126
+    []
+  []
+  [from_velocity_with_direction_action]
+    issues = '#23060'
+    requirement = 'The system shall be able to model a momentum inlet condition based on velocity magnitude for porous weakly-compressible flow'
+    [angle_0]
+      detail = 'with the incoming flow being parallel to the surface normal of the inlet;'
+      type = 'CSVDiff'
+      input = flux_bcs_mdot-direction-action.i
+      csvdiff = velocity-angle-0.csv
+      cli_args = "Outputs/file_base='velocity-angle-0' "
+                 "Modules/NavierStokesFV/momentum_inlet_types='flux-velocity' "
+                 "Modules/NavierStokesFV/energy_inlet_types='flux-velocity' "
+                 "Modules/NavierStokesFV/flux_inlet_pps='inlet_velocity'"
+      ad_indexing_type = 'global'
+      abs_zero = 1e-9
+      recover = false # see #19126
+    []
+    [angle_30]
+      detail = 'with the incoming flow direction spanning an angle with the normal surface of the inlet;'
+      type = 'CSVDiff'
+      input = flux_bcs_mdot-direction-action.i
+      csvdiff = velocity-angle-30.csv
+      cli_args = "Outputs/file_base='velocity-angle-30' "
+                 "Modules/NavierStokesFV/momentum_inlet_types='flux-velocity' "
+                 "Modules/NavierStokesFV/energy_inlet_types='flux-velocity' "
+                 "Modules/NavierStokesFV/flux_inlet_pps='inlet_velocity' "
+                 "Modules/NavierStokesFV/flux_inlet_directions='0.86602540378 -0.5 0.0'"
+      ad_indexing_type = 'global'
+      abs_zero = 1e-9
+      recover = false # see #19126
+    []
   []
 []

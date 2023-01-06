@@ -1,0 +1,3 @@
+time,area_pp_left,inlet_T,inlet_mdot,inlet_mdot_check,inlet_vel_x_check,inlet_vel_y_check,inlet_velocity,outlet_mdot
+0,2,300,400,0,0,0,0.2,0
+1,2,300,400,-401.17095830063,0.20058547915032,-0.0855081873602,0.2,400

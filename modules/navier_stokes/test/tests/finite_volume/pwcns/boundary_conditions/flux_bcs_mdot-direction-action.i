@@ -14,9 +14,14 @@ inlet_temp = 300
 outlet_pressure = 1e5
 inlet_velocity = 0.2
 
-# The inlet angle
-direction = "0.86602540378 -0.5 0.0"
-cos_angle = 0.86602540378
+# The inlet angle, we will modify this and expect two things:
+# 1. If we use a velocity postprocessor for the flux terms, we expect the mass flow
+# to be proportional with "direction \cdot surface_normal".
+# 2. If a mass flow is specified, it should not change, only the direction and magnitude of the
+# inlet vleocity which is inferred based on the supplied massflow.
+# direction = "0.86602540378 -0.5 0.0"
+# direction = "1.0 0.0 0.0"
+# cos_angle = 0.86602540378
 
 [Mesh]
   [gen]
@@ -35,6 +40,9 @@ cos_angle = 0.86602540378
   [NavierStokesFV]
     compressibility = 'weakly-compressible'
     add_energy_equation = true
+    porous_medium_treatment = true
+
+    porosity = 'porosity'
 
     density = 'rho'
     dynamic_viscosity = 'mu'
@@ -46,10 +54,9 @@ cos_angle = 0.86602540378
     initial_pressure = '${outlet_pressure}'
 
     inlet_boundaries = 'left'
-    momentum_inlet_types = 'flux-velocity'
-    flux_inlet_pps = 'inlet_velocity'
-    flux_inlet_directions = '${direction}'
-    energy_inlet_types = 'flux-velocity'
+    momentum_inlet_types = 'flux-mass'
+    flux_inlet_pps = 'inlet_mdot'
+    energy_inlet_types = 'flux-mass'
     energy_inlet_function = 'inlet_T'
 
     wall_boundaries = 'top bottom'
@@ -68,7 +75,7 @@ cos_angle = 0.86602540378
 [Postprocessors]
   [inlet_mdot]
     type = Receiver
-    default = '${fparse rho * inlet_velocity * inlet_area * cos_angle}'
+    default = '${fparse rho * inlet_velocity * inlet_area}'
   []
   [inlet_velocity]
     type = Receiver
@@ -81,18 +88,28 @@ cos_angle = 0.86602540378
   [outlet_mdot]
     type = VolumetricFlowRate
     advected_quantity = rho
-    vel_x = vel_x
-    vel_y = vel_y
+    vel_x = superficial_vel_x
+    vel_y = superficial_vel_y
     boundary = right
-    rhie_chow_user_object = ins_rhie_chow_interpolator
+    rhie_chow_user_object = pins_rhie_chow_interpolator
   []
   [inlet_mdot_check]
     type = VolumetricFlowRate
     advected_quantity = rho
-    vel_x = vel_x
-    vel_y = vel_y
+    vel_x = superficial_vel_x
+    vel_y = superficial_vel_y
     boundary = left
-    rhie_chow_user_object = ins_rhie_chow_interpolator
+    rhie_chow_user_object = pins_rhie_chow_interpolator
+  []
+  [inlet_vel_x_check]
+    type = SideAverageValue
+    variable = superficial_vel_x
+    boundary = left
+  []
+  [inlet_vel_y_check]
+    type = SideAverageValue
+    variable = superficial_vel_y
+    boundary = left
   []
 []
 
@@ -116,7 +133,7 @@ cos_angle = 0.86602540378
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -pc_factor_shift_type'
   petsc_options_value = 'lu       NONZERO'
-  nl_abs_tol = 1e-9
+  nl_rel_tol = 1e-9
   nl_max_its = 50
   line_search = 'none'
 
@@ -124,5 +141,5 @@ cos_angle = 0.86602540378
 []
 
 [Outputs]
-  exodus = true
+  csv = true
 []
