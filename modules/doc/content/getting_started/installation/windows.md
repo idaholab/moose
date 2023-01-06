@@ -20,3 +20,43 @@ With the above complete, close the WSL terminal, and re-open it. Then proceed to
 !alert! tip
 Your Download's folder, while using WSL, is located at: `/mnt/c/Users/<Your User Name>/Downloads`
 !alert-end!
+
+## Miscellaneous Tips for WSL
+
+Like WSL installation, the following sections require performing all commands in a PowerShell
+or Command Prompt in *administrator* mode!
+
+### Updating the WSL Linux Kernel
+
+The WSL linux kernel receives periodic updates. To perform these updates, one can run:
+
+```bash
+wsl --update
+```
+
+### Change WSL Version
+
+In this instruction set, WSL version 2 is used (and is the default, recommended release). If WSL version
+1 is desired, this can be changed by performing the command:
+
+```bash
+wsl --set-version 1
+```
+
+The default for new Linux kernel instances can be set by performing the following:
+
+```bash
+wsl --set-default-version n
+```
+
+where `n` can be replaced by either 1 or 2, depending on the version desired.
+
+### Shutdown All WSL Instances
+
+To shutdown all instances of WSL on the machine, perform the following:
+
+```bash
+wsl --shutdown
+```
+
+WSL can then be restarted from the Start menu.

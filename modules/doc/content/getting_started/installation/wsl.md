@@ -29,7 +29,7 @@ used (10 version 2004+ and build 19041+, or 11). For more information see
 
 Open PowerShell or Windows Command Prompt in *administrator* mode by right-clicking the application
 and selecting "Run as administrator". In the prompt that appears, one command can be used to install
-WSL dependencies and a default Linux distribution of Ubuntu 20.04 LTS.
+WSL version 2 dependencies and a default Linux distribution of Ubuntu 20.04 LTS.
 
 ```bash
 wsl --install
