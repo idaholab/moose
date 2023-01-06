@@ -1,20 +1,21 @@
-#include "BasicExternalProblem.h"
+#include "TransientExternalProblem.h"
 #include "AuxiliarySystem.h"
 
-registerMooseObject("MooseTestApp", BasicExternalProblem);
+registerMooseObject("MooseTestApp", TransientExternalProblem);
 
 InputParameters
-BasicExternalProblem::validParams()
+TransientExternalProblem::validParams()
 {
   return ExternalProblem::validParams();
 }
 
-BasicExternalProblem::BasicExternalProblem(const InputParameters & params) : ExternalProblem(params)
+TransientExternalProblem::TransientExternalProblem(const InputParameters & params)
+  : ExternalProblem(params)
 {
 }
 
 void
-BasicExternalProblem::addExternalVariables()
+TransientExternalProblem::addExternalVariables()
 {
   auto var_params = _factory.getValidParams("MooseVariable");
   var_params.set<MooseEnum>("family") = "MONOMIAL";
@@ -25,12 +26,12 @@ BasicExternalProblem::addExternalVariables()
 }
 
 void
-BasicExternalProblem::externalSolve()
+TransientExternalProblem::externalSolve()
 {
 }
 
 void
-BasicExternalProblem::syncSolutions(ExternalProblem::Direction direction)
+TransientExternalProblem::syncSolutions(ExternalProblem::Direction direction)
 {
   switch (direction)
   {
@@ -48,7 +49,7 @@ BasicExternalProblem::syncSolutions(ExternalProblem::Direction direction)
         if (elem_ptr)
         {
           auto dof_idx = elem_ptr->dof_number(sys_number, _heat_source_var, 0);
-          solution.set(dof_idx, 12345);
+          solution.set(dof_idx, 12345 * time());
         }
       }
 
