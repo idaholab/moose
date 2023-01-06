@@ -40,7 +40,7 @@ velocity_interp_method = 'rc'
 
 [AuxVariables]
   [porosity]
-    type = PINSFVPorosityVariable
+    type = ExtrapolateAtJumpFacesVariable
   []
 []
 

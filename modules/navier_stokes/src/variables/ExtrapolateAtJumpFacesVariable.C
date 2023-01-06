@@ -7,26 +7,26 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PINSFVPorosityVariable.h"
+#include "ExtrapolateAtJumpFacesVariable.h"
 #include "NS.h"
 #include "NSFVUtils.h"
 
-registerMooseObject("NavierStokesApp", PINSFVPorosityVariable);
+registerMooseObject("NavierStokesApp", ExtrapolateAtJumpFacesVariable);
 
 InputParameters
-PINSFVPorosityVariable::validParams()
+ExtrapolateAtJumpFacesVariable::validParams()
 {
   return INSFVVariable::validParams();
 }
 
-PINSFVPorosityVariable::PINSFVPorosityVariable(const InputParameters & params)
+ExtrapolateAtJumpFacesVariable::ExtrapolateAtJumpFacesVariable(const InputParameters & params)
   : INSFVVariable(params)
 {
 }
 
 bool
-PINSFVPorosityVariable::isExtrapolatedBoundaryFace(const FaceInfo & fi,
-                                                   const Elem * const elem) const
+ExtrapolateAtJumpFacesVariable::isExtrapolatedBoundaryFace(const FaceInfo & fi,
+                                                           const Elem * const elem) const
 {
   if (isDirichletBoundaryFace(fi, elem))
     return false;
