@@ -58,7 +58,7 @@ class SolutionInvalidityRegistry : private GeneralRegistry<std::string, Solution
 {
 public:
   /**
-   * Call to registerInvalidObject an invalid calculation
+   * Call to register an invalid calculation
    *
    * @param object_name The name of the object doing the registration
    * @param message The description of the solution invalid warning

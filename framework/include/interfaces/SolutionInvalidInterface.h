@@ -30,9 +30,6 @@ class MooseObject;
 class SolutionInvalidInterface
 {
 public:
-  /**
-   * A class to help communicating the solutioninvalidity for one app to the materials
-   */
   SolutionInvalidInterface(MooseObject * const moose_object);
 
   void flagInvalidSolutionInternal(InvalidSolutionID _invalid_solution_id);
