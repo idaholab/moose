@@ -34,7 +34,7 @@ is given in [steady-sub].
 !listing stochastic_tools/examples/batch/sub.i id=steady-sub caption=Complete input file
          for steady-state diffusion problem.
 
-The master application does not preform a solve, it performs a stochastic analysis using the
+The master application does not perform a solve, it performs a stochastic analysis using the
 MonteCarlo object to perturb the values of the two Dirichlet conditions on the sub-applications
 to vary with a uniform distribution. The complete input file for the master application is given
 in [steady-sub].

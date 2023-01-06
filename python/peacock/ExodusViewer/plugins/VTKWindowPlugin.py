@@ -200,7 +200,7 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
 
         This is the only slot that actually causes a render to
         happen. The other slots should be used to setup the window,
-        then this called to actually preform the update. This avoids
+        then this called to actually perform the update. This avoids
         performing multiple updates to the window.
         """
 

@@ -37,7 +37,7 @@ Like [!ac](MOOSE), there are three kinds of users working on the {{module}} modu
 - +{{module}} module Developers+: These are the core developers of the {{module}} module.
   They are responsible for following and enforcing the software development standards of the module,
   as well as designing, implementing, and maintaining the software.
-- +Developers+: A scientist or engineering that uses the {{module}} module alongside [!ac](MOOSE)
+- +Developers+: A scientist or engineer that uses the {{module}} module alongside [!ac](MOOSE)
   to build their own application. This user will typically have a background in modeling or simulation
   techniques (and perhaps numerical analysis) but may only have a limited skillset when it comes to
   code development using the C++ language. This is the primary focus group of the module. In many cases,
