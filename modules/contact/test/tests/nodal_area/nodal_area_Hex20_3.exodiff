@@ -36,7 +36,7 @@ NODAL VARIABLES relative 1.e-6 floor 1e-5
 	displ_x           # min:               0 @ t1,n1	max:           2e-05 @ t2,n1
 	displ_y           # min:               0 @ t1,n1	max:   5.2615946e-10 @ t2,n422
 	displ_z           # min:               0 @ t1,n1	max:    5.261572e-10 @ t2,n422
-	nodal_area_dummy_name        # min:               0 @ t1,n1	max:     0.041666667 @ t2,n387
+	nodal_area        # min:               0 @ t1,n1	max:     0.041666667 @ t2,n387
 	react_x           # min:               0 @ t1,n1	max:      0.41664685 @ t2,n119
 	react_y relative 5e-5          # min:               0 @ t1,n1	max:   4.1620072e-05 @ t2,n350
 	react_z relative 5e-5          # min:               0 @ t1,n1	max:   4.1620062e-05 @ t2,n372

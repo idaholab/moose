@@ -114,5 +114,4 @@ private:
    * Add single contact pressure kernel for various contact action objects
    */
   void addContactPressureAuxKernel();
-
 };

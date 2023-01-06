@@ -15,7 +15,7 @@
     exodiff = 'frictionless_mortar_FS_out.e'
     abs_zero = 1e-8
     requirement = 'The system shall allow split preconditioning of frictionless mortar contact.'
-    petsc_version = '>= 3.16.6' # early versions of petsc can't handle change in sparsity pattern in field split
+    petsc_version = '>= 3.16.5' # early versions of petsc can't handle change in sparsity pattern in field split
     ad_indexing_type = 'global'
   []
   [mortar-FS-frictional]
@@ -24,7 +24,7 @@
     exodiff = 'frictional_mortar_FS_out.e'
     abs_zero = 1e-8
     requirement = 'The system shall allow split preconditioning of frictional mortar contact.'
-    petsc_version = '>= 3.16.6' # early versions of petsc can't handle change in sparsity pattern in field split
+    petsc_version = '>= 3.16.5' # early versions of petsc can't handle change in sparsity pattern in field split
     ad_indexing_type = 'global'
   []
 []

@@ -128,7 +128,7 @@
   [../]
   [./total_area]
     type = NodalSum
-    variable = nodal_area_dummy_name
+    variable = nodal_area
     boundary = 2
   [../]
 []
