@@ -76,21 +76,39 @@
       type = CSVDiff
       input = 'bernoulli-1d.i'
       csvdiff = 'bernoulli-1d_out.csv'
-      detail = 'one dimension'
+      detail = 'one dimension, using upwinding for advection and a Rhie-Chow interpolation of velocity'
       ad_indexing_type = 'global'
+    []
+    [1d-average]
+      type = CSVDiff
+      input = 'bernoulli-1d.i'
+      csvdiff = 'bernoulli-1d_out.csv'
+      detail = 'one dimension, using central differencing for advection and velocity'
+      ad_indexing_type = 'global'
+      cli_args = "advected_interp_method='average' velocity_interp_method='average'"
+      prereq = 'automatic-jump-handling/1d'
     []
     [2d]
       type = CSVDiff
       input = 'bernoulli-2d.i'
       csvdiff = 'bernoulli-2d_out.csv'
-      detail = 'two dimensions'
+      detail = 'two dimensions, using upwinding for advection and a Rhie-Chow interpolation of velocity'
       ad_indexing_type = 'global'
+    []
+    [2d-average]
+      type = CSVDiff
+      input = 'bernoulli-2d.i'
+      csvdiff = 'bernoulli-2d_out.csv'
+      detail = 'two dimensions, using central differencing for advection and velocity'
+      ad_indexing_type = 'global'
+      cli_args = "advected_interp_method='average' velocity_interp_method='average'"
+      prereq = 'automatic-jump-handling/2d'
     []
     [2d-action]
       type = CSVDiff
       input = 'bernoulli-2d-action.i'
       csvdiff = 'bernoulli-2d-action_out.csv'
-      detail = 'two dimensions using compact action syntax'
+      detail = 'two dimensions using compact action syntax, upwinding for advection, and a Rhie-Chow interpolation of velocity'
       ad_indexing_type = 'global'
     []
   []
