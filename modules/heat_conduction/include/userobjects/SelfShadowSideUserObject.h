@@ -11,6 +11,7 @@
 
 #include "SideUserObject.h"
 #include <vector>
+#include "libmesh/data_type.h"
 
 /**
  * Given a radiation direction vector this user object computes the illumination state of each side
@@ -36,8 +37,17 @@ public:
   // API to check if a QP is illuminated
   int illumination(const SideIDType & id) const;
 
-  using Triangle = std::array<Point, 3>;
-  using LineSegment = std::array<Point, 2>;
+  struct Triangle
+  {
+    std::array<Point, 3> node;
+    SideIDType id;
+  };
+
+  struct LineSegment
+  {
+    std::array<Point, 2> node;
+    SideIDType id;
+  };
 
 protected:
   /// problem dimension
@@ -45,9 +55,6 @@ protected:
 
   /// raw illumination vector data (direction the radiation is propagating in)
   std::vector<const PostprocessorValue *> _raw_direction;
-
-  /// tolerance for the check if a QP is in front or behind a segment in illumination direction
-  const Real _tolerance;
 
   /// matrix that rotates the direction onto the z-axis
   RealTensorValue _rotation;
@@ -65,12 +72,35 @@ protected:
   std::map<SideIDType, MooseArray<Point>> _local_qps;
 
 private:
-  void addLines();
-  void addTriangles();
-  bool check2DIllumination(const Point & qp);
-  bool check3DIllumination(const Point & qp);
+  void addLines(const SideIDType & id);
+  void addTriangles(const SideIDType & id);
+  bool check2DIllumination(const Point & qp, const SideIDType & id);
+  bool check3DIllumination(const Point & qp, const SideIDType & id);
 
   /// rotate all points in the given container
   template <typename T>
   void rotate(T & points);
 };
+
+namespace TIMPI
+{
+
+template <>
+class StandardType<SelfShadowSideUserObject::Triangle> : public DataType
+{
+public:
+  explicit StandardType(const SelfShadowSideUserObject::Triangle * example = nullptr);
+  StandardType(const StandardType<SelfShadowSideUserObject::Triangle> & t);
+  ~StandardType() { this->free(); }
+};
+
+template <>
+class StandardType<SelfShadowSideUserObject::LineSegment> : public DataType
+{
+public:
+  explicit StandardType(const SelfShadowSideUserObject::LineSegment * example = nullptr);
+  StandardType(const StandardType<SelfShadowSideUserObject::LineSegment> & t);
+  ~StandardType() { this->free(); }
+};
+
+} // namespace TIMPI

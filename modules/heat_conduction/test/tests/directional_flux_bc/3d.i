@@ -67,7 +67,6 @@
   [shadow]
     type = SelfShadowSideUserObject
     boundary = 0
-    tolerance = 0.001
     execute_on = INITIAL
   []
 []
