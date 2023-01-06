@@ -13,6 +13,7 @@ rho = 1000
 inlet_temp = 300
 outlet_pressure = 1e5
 inlet_velocity = 0.2
+inlet_scalar = 1.2
 
 # The inlet angle, we will modify this and expect two things:
 # 1. If we use a velocity postprocessor for the flux terms, we expect the mass flow
@@ -40,24 +41,28 @@ inlet_velocity = 0.2
   [NavierStokesFV]
     compressibility = 'weakly-compressible'
     add_energy_equation = true
-    porous_medium_treatment = true
-
-    porosity = 'porosity'
+    add_scalar_equation = true
+    passive_scalar_names = 'scalar'
 
     density = 'rho'
     dynamic_viscosity = 'mu'
     thermal_conductivity = 'k'
     specific_heat = 'cp'
+    passive_scalar_diffusivity = '10.0'
+    passive_scalar_schmidt_number = '1.0'
 
     initial_velocity = '${inlet_velocity} 1e-15 0'
     initial_temperature = '${inlet_temp}'
     initial_pressure = '${outlet_pressure}'
+    initial_scalar_variables = 1.0
 
     inlet_boundaries = 'left'
     momentum_inlet_types = 'flux-mass'
     flux_inlet_pps = 'inlet_mdot'
     energy_inlet_types = 'flux-mass'
     energy_inlet_function = 'inlet_T'
+    passive_scalar_inlet_types = 'flux-mass'
+    passive_scalar_inlet_function = 'inlet_scalar'
 
     wall_boundaries = 'top bottom'
     momentum_wall_types = 'slip slip'
@@ -85,30 +90,34 @@ inlet_velocity = 0.2
     type = Receiver
     default = ${inlet_temp}
   []
+  [inlet_scalar]
+    type = Receiver
+    default = ${inlet_scalar}
+  []
   [outlet_mdot]
     type = VolumetricFlowRate
     advected_quantity = rho
-    vel_x = superficial_vel_x
-    vel_y = superficial_vel_y
+    vel_x = vel_x
+    vel_y = vel_y
     boundary = right
-    rhie_chow_user_object = pins_rhie_chow_interpolator
+    rhie_chow_user_object = ins_rhie_chow_interpolator
   []
   [inlet_mdot_check]
     type = VolumetricFlowRate
     advected_quantity = rho
-    vel_x = superficial_vel_x
-    vel_y = superficial_vel_y
+    vel_x = vel_x
+    vel_y = vel_y
     boundary = left
-    rhie_chow_user_object = pins_rhie_chow_interpolator
+    rhie_chow_user_object = ins_rhie_chow_interpolator
   []
   [inlet_vel_x_check]
     type = SideAverageValue
-    variable = superficial_vel_x
+    variable = vel_x
     boundary = left
   []
   [inlet_vel_y_check]
     type = SideAverageValue
-    variable = superficial_vel_y
+    variable = vel_y
     boundary = left
   []
 []
@@ -123,8 +132,8 @@ inlet_velocity = 0.2
 [Materials]
   [const_functor]
     type = ADGenericFunctorMaterial
-    prop_names = 'rho cp k mu porosity'
-    prop_values = '${rho} ${cp} ${k} ${mu} 0.5'
+    prop_names = 'rho cp k mu'
+    prop_values = '${rho} ${cp} ${k} ${mu}'
   []
 []
 

@@ -1,5 +1,5 @@
-rho = 'rho'
-l = 10
+l = 5
+inlet_area = 2
 velocity_interp_method = 'rc'
 advected_interp_method = 'average'
 
@@ -9,6 +9,7 @@ advected_interp_method = 'average'
 k = 1
 cp = 1000
 mu = 1e2
+rho = 1000
 
 # Operating conditions
 inlet_temp = 300
@@ -17,14 +18,20 @@ inlet_velocity = 0.001
 
 [Mesh]
   [gen]
-    type = GeneratedMeshGenerator
+    type = CartesianMeshGenerator
     dim = 2
-    xmin = 0
-    xmax = ${l}
-    ymin = 0
-    ymax = 1
-    nx = 10
-    ny = 5
+    dx = '${l} ${l}'
+    dy = '${inlet_area}'
+    ix = '5 5'
+    iy = '2'
+    subdomain_id = '1 2'
+  []
+  [side_set]
+    type = SideSetsBetweenSubdomainsGenerator
+    input = gen
+    primary_block = '1'
+    paired_block = '2'
+    new_boundary = 'mid-inlet'
   []
 []
 
@@ -38,6 +45,7 @@ inlet_velocity = 0.001
     u = vel_x
     v = vel_y
     pressure = pressure
+    block = 2
   []
 []
 
@@ -45,22 +53,31 @@ inlet_velocity = 0.001
   [vel_x]
     type = INSFVVelocityVariable
     initial_condition = ${inlet_velocity}
+    block = 2
   []
   [vel_y]
     type = INSFVVelocityVariable
     initial_condition = 1e-15
+    block = 2
   []
   [pressure]
     type = INSFVPressureVariable
     initial_condition = ${outlet_pressure}
+    block = 2
   []
   [T_fluid]
     type = INSFVEnergyVariable
     initial_condition = ${inlet_temp}
+    block = 2
   []
   [scalar]
     type = MooseVariableFVReal
     initial_condition = 0.1
+    block = 2
+  []
+  [T_solid]
+    type = MooseVariableFVReal
+    initial_condition = ${inlet_temp}
   []
 []
 
@@ -72,11 +89,7 @@ inlet_velocity = 0.001
 []
 
 [FVKernels]
-  [mass_time]
-    type = WCNSFVMassTimeDerivative
-    variable = pressure
-    drho_dt = drho_dt
-  []
+  # Mass equation
   [mass]
     type = INSFVMassAdvection
     variable = pressure
@@ -85,13 +98,7 @@ inlet_velocity = 0.001
     rho = ${rho}
   []
 
-  [u_time]
-    type = WCNSFVMomentumTimeDerivative
-    variable = vel_x
-    drho_dt = drho_dt
-    rho = rho
-    momentum_component = 'x'
-  []
+  # X component momentum equation
   [u_advection]
     type = INSFVMomentumAdvection
     variable = vel_x
@@ -113,13 +120,7 @@ inlet_velocity = 0.001
     pressure = pressure
   []
 
-  [v_time]
-    type = WCNSFVMomentumTimeDerivative
-    variable = vel_y
-    drho_dt = drho_dt
-    rho = rho
-    momentum_component = 'y'
-  []
+  # Y component momentum equation
   [v_advection]
     type = INSFVMomentumAdvection
     variable = vel_y
@@ -141,13 +142,7 @@ inlet_velocity = 0.001
     pressure = pressure
   []
 
-  [temp_time]
-    type = WCNSFVEnergyTimeDerivative
-    variable = T_fluid
-    cp = cp
-    rho = rho
-    drho_dt = drho_dt
-  []
+  # Energy equation
   [temp_conduction]
     type = FVDiffusion
     coeff = 'k'
@@ -166,10 +161,6 @@ inlet_velocity = 0.001
   []
 
   # Scalar concentration equation
-  [scalar_time]
-    type = FVTimeKernel
-    variable = scalar
-  []
   [scalar_advection]
     type = INSFVScalarFieldAdvection
     variable = scalar
@@ -186,6 +177,13 @@ inlet_velocity = 0.001
     variable = scalar
     function = 2.1
   []
+
+  # Solid temperature
+  [solid_temp_conduction]
+    type = FVDiffusion
+    coeff = 'k'
+    variable = T_solid
+  []
 []
 
 [FVBCs]
@@ -193,41 +191,47 @@ inlet_velocity = 0.001
   [inlet_mass]
     type = WCNSFVMassFluxBC
     variable = pressure
-    boundary = 'left'
-    velocity_pp = 'inlet_u'
+    boundary = 'mid-inlet'
+    velocity_pp = 'inlet_velocity'
+    area_pp = 'area_pp_left'
     rho = 'rho'
   []
   [inlet_u]
     type = WCNSFVMomentumFluxBC
     variable = vel_x
-    boundary = 'left'
-    velocity_pp = 'inlet_u'
+    boundary = 'mid-inlet'
+    mdot_pp = 'inlet_mdot'
+    area_pp = 'area_pp_left'
     rho = 'rho'
     momentum_component = 'x'
   []
   [inlet_v]
     type = WCNSFVMomentumFluxBC
     variable = vel_y
-    boundary = 'left'
-    velocity_pp = 0
+    boundary = 'mid-inlet'
+    mdot_pp = 0
+    area_pp = 'area_pp_left'
     rho = 'rho'
     momentum_component = 'y'
   []
   [inlet_T]
     type = WCNSFVEnergyFluxBC
     variable = T_fluid
-    boundary = 'left'
-    velocity_pp = 'inlet_u'
+    boundary = 'mid-inlet'
     temperature_pp = 'inlet_T'
+    velocity_pp = 'inlet_velocity'
+    area_pp = 'area_pp_left'
     rho = 'rho'
     cp = 'cp'
   []
   [inlet_scalar]
     type = WCNSFVScalarFluxBC
     variable = scalar
-    boundary = 'left'
+    boundary = 'mid-inlet'
     scalar_value_pp = 'inlet_scalar_value'
-    velocity_pp = 'inlet_u'
+    velocity_pp = 'inlet_velocity'
+    area_pp = 'area_pp_left'
+    rho = 'rho'
   []
 
   [outlet_p]
@@ -254,7 +258,11 @@ inlet_velocity = 0.001
 
 # used for the boundary conditions in this example
 [Postprocessors]
-  [inlet_u]
+  [inlet_mdot]
+    type = Receiver
+    default = '${fparse 1980 * inlet_velocity * inlet_area}'
+  []
+  [inlet_velocity]
     type = Receiver
     default = ${inlet_velocity}
   []
@@ -273,23 +281,11 @@ inlet_velocity = 0.001
   []
 []
 
-[FluidProperties]
-  [fp]
-    type = FlibeFluidProperties
-  []
-[]
-
 [Materials]
   [const_functor]
     type = ADGenericFunctorMaterial
-    prop_names = 'cp k'
-    prop_values = '${cp} ${k}'
-  []
-  [rho]
-    type = RhoFromPTFunctorMaterial
-    fp = fp
-    temperature = T_fluid
-    pressure = pressure
+    prop_names = 'cp k rho'
+    prop_values = '${cp} ${k} ${rho}'
   []
   [ins_fv]
     type = INSFVEnthalpyMaterial
@@ -299,26 +295,14 @@ inlet_velocity = 0.001
 []
 
 [Executioner]
-  type = Transient
+  type = Steady
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -pc_factor_shift_type'
   petsc_options_value = 'lu       NONZERO'
-
-  [TimeStepper]
-    type = IterationAdaptiveDT
-    dt = 1e-2
-    optimal_iterations = 6
-  []
-  end_time = 1
 
   nl_abs_tol = 1e-9
   nl_max_its = 50
   line_search = 'none'
 
   automatic_scaling = true
-[]
-
-[Outputs]
-  exodus = true
-  execute_on = FINAL
 []

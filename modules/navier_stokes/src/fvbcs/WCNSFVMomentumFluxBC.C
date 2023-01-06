@@ -92,11 +92,10 @@ WCNSFVMomentumFluxBC::computeQpResidual()
    * 2. If the fluid flows aligns with the direction parameter specified by the user. (similarly, if
    * the postprocessor values are negative we assume the fluid flows backwards with respect to the
    * direction parameter)
-   *
    */
   if (_face_info->neighborPtr() && !_direction_specified_by_user)
     paramError("direction",
-               type(),
+               this->type(),
                " can only be defined on an internal face if a direction parameter is supplied!");
   const Point incoming_vector =
       !_direction_specified_by_user ? Point(-_face_info->normal()) : _direction;

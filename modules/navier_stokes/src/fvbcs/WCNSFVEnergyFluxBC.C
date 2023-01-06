@@ -106,23 +106,23 @@ WCNSFVEnergyFluxBC::computeQpResidual()
     return -_scaling_factor * *_energy_pp / *_area_pp;
   else
   {
+    /*
+     * We assume the following orientation: The supplied mass flow and velocity magnitude need to
+     * be positive if:
+     * 1. No direction parameter is supplied and we want to define an inlet condition (similarly,
+     * if the mass flow/velocity magnitude are negative we define an outlet)
+     * 2. If the fluid flows aligns with the direction parameter specified by the user.
+     * (similarly, if the postprocessor values are negative we assume the fluid flows backwards
+     * with respect to the direction parameter)
+     */
     if (_velocity_pp)
     {
       if (_face_info->neighborPtr() && !_direction_specified_by_user)
         paramError(
             "direction",
-            type(),
+            this->type(),
             " can only be defined on an internal face if a direction parameter is supplied!");
-      /*
-       * We assume the following orientation: The supplied mass flow and velocity magnitude need to
-       * be positive if:
-       * 1. No direction parameter is supplied and we want to define an inlet condition (similarly,
-       * if the mass flow/velocity magnitude are negative we define an outlet)
-       * 2. If the fluid flows aligns with the direction parameter specified by the user.
-       * (similarly, if the postprocessor values are negative we assume the fluid flows backwards
-       * with respect to the direction parameter)
-       *
-       */
+
       const Point incoming_vector =
           !_direction_specified_by_user ? _face_info->normal() : _direction;
       const Real cos_angle = std::abs(incoming_vector * _face_info->normal());

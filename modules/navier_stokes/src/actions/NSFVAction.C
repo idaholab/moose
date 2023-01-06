@@ -1859,6 +1859,8 @@ NSFVAction::addScalarInletBC()
         const std::string bc_type = "WCNSFVScalarFluxBC";
         InputParameters params = _factory.getValidParams(bc_type);
         params.set<NonlinearVariableName>("variable") = _passive_scalar_names[name_i];
+        if (_flux_inlet_directions.size())
+          params.set<Point>("direction") = _flux_inlet_directions[flux_bc_counter];
         if (_passive_scalar_inlet_types[name_i * num_inlets + bc_ind] == "flux-mass")
         {
           params.set<PostprocessorName>("mdot_pp") = _flux_inlet_pps[flux_bc_counter];
