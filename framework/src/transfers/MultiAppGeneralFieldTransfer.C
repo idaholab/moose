@@ -565,10 +565,8 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
         distance_cache[p] = std::numeric_limits<Real>::max();
 
       // We should only have one closest value for each variable at any given point.
-      // We do expect to visit each point several times as there may be shared Qps,
-      // (we seemingly dont, the generic projector seems to return only unique points)
-      // on vertices for example, but the incoming values (from the closest points)
-      // should be unique
+      // While there are shared Qps, on vertices for higher order variables usually,
+      // the generic projector only queries each point once
       if (_search_value_conflicts && !GeneralFieldTransfer::isBetterOutOfMeshValue(val) &&
           value_cache.count(p) != 0 && !MooseUtils::absoluteFuzzyEqual(value_cache[p], val) &&
           MooseUtils::absoluteFuzzyEqual(distance_cache[p], incoming_vals[val_offset].second))

@@ -20,6 +20,38 @@
 #include "libmesh/parallel_algebra.h" // for communicator send and receive stuff
 
 /**
+ * Get the nearest point with all coordinates of the form m * 10^n such that:
+ * - m * 1e12 is a signed integer
+ * - 1e12 =< |m * 1e12| < 1e13
+ * - n an integer
+ */
+inline Point
+getMantissaRoundedPoint(const Point & p)
+{
+  // - get the scientific notation for the number
+  // - use round on the mantissa * 1e12
+  // - if rounding to the next power of 10, adjust the exponent
+  // - form a new point using the scientific notation
+  std::vector<int> exponents{MooseUtils::absoluteFuzzyEqual(p(0), 0) ? 0 : (int)log10(fabs(p(0))),
+                             MooseUtils::absoluteFuzzyEqual(p(1), 0) ? 0 : (int)log10(fabs(p(1))),
+                             MooseUtils::absoluteFuzzyEqual(p(2), 0) ? 0 : (int)log10(fabs(p(2)))};
+  std::vector<Real> rounded_m{round(p(0) / pow(10, exponents[0] - 12)),
+                              round(p(1) / pow(10, exponents[1] - 12)),
+                              round(p(2) / pow(10, exponents[2] - 12))};
+  for (auto i : make_range(LIBMESH_DIM))
+  {
+    if (fabs(rounded_m[i]) == 1e13)
+    {
+      exponents[i] += 1;
+      rounded_m[i] = (rounded_m[i] > 0) ? 1e12 : -1e12;
+    }
+  }
+  return Point(rounded_m[0] * pow(10, exponents[0] - 12),
+               rounded_m[1] * pow(10, exponents[1] - 12),
+               rounded_m[2] * pow(10, exponents[2] - 12));
+}
+
+/**
  * It is a general field transfer. It will do the following things
  * 1) From part of source domain to part of domain. Support subdomains/boundaries to
  *    subdomains/boundaries, mixing as appropriate
@@ -57,21 +89,23 @@ public:
     std::size_t operator()(const Point & p) const
     {
       std::size_t seed = 0;
-      Moose::hash_combine(seed, round(p(0) * 1e10), round(p(1) * 1e10), round(p(2) * 1e10));
+      const auto rp = getMantissaRoundedPoint(p);
+      Moose::hash_combine(seed, rp(0), rp(1), rp(2));
       return seed;
     }
   };
 
   // We cannot compare Points exactly, there will be floating point errors from
   // operations like adjusting the position or coordinate transformations
-  // We do the next best thing and compare with a tolerance
+  // We do the next best thing and compare with a tolerance: 12 decimal digits in the
+  // scientific representation of the coordinates shall be the same
   struct compare_point : public std::binary_function<Point, Point, bool>
   {
     bool operator()(const Point & p1, const Point & p2) const
     {
-      return (MooseUtils::absoluteFuzzyEqual(p1(0), p2(0)) &&
-              MooseUtils::absoluteFuzzyEqual(p1(1), p2(1)) &&
-              MooseUtils::absoluteFuzzyEqual(p1(2), p2(2)));
+      const auto rp1 = getMantissaRoundedPoint(p1);
+      const auto rp2 = getMantissaRoundedPoint(p2);
+      return (rp1 == rp2);
     }
   };
 

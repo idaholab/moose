@@ -9,7 +9,7 @@ This object derives from the [MultiAppGeneralFieldTransfer.md] family of transfe
 many of its features and characteristics.
 
 Nearest node transfers may be preferred to [shape evaluation transfers](MultiAppGeneralFieldShapeEvaluationTransfer.md)
-when extrapolation of data, e.g. when the target domain extends beyond the source domain, is required.
+when extrapolation of data is required, e.g. when the target domain extends beyond the source domain.
 It may also be preferred if evaluating shape functions or projecting variables is too expensive or
 unnecessary for the target application.
 
