@@ -166,8 +166,8 @@ class JobDAG(object):
             tester.addCaveats('re-running')
             return
 
-        # This job was skipped, passed or silent
-        elif status in job.job_status.getSuccessStatuses():
+        # This job was skipped, passed, pending or silent
+        elif status in job.job_status.getSuccessStatuses() or status in job.job_status.getPendingStatuses():
             tester.setStatus(tester.silent)
             job.setStatus(job.finished)
 
