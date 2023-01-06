@@ -10,7 +10,7 @@
 []
 
 [Problem]
-  type = TransientExternalProblem
+  type = SyncTestExternalProblem
 []
 
 [AuxVariables]

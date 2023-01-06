@@ -1,21 +1,30 @@
-#include "TransientExternalProblem.h"
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "SyncTestExternalProblem.h"
 #include "AuxiliarySystem.h"
 
-registerMooseObject("MooseTestApp", TransientExternalProblem);
+registerMooseObject("MooseTestApp", SyncTestExternalProblem);
 
 InputParameters
-TransientExternalProblem::validParams()
+SyncTestExternalProblem::validParams()
 {
   return ExternalProblem::validParams();
 }
 
-TransientExternalProblem::TransientExternalProblem(const InputParameters & params)
+SyncTestExternalProblem::SyncTestExternalProblem(const InputParameters & params)
   : ExternalProblem(params)
 {
 }
 
 void
-TransientExternalProblem::addExternalVariables()
+SyncTestExternalProblem::addExternalVariables()
 {
   auto var_params = _factory.getValidParams("MooseVariable");
   var_params.set<MooseEnum>("family") = "MONOMIAL";
@@ -26,12 +35,12 @@ TransientExternalProblem::addExternalVariables()
 }
 
 void
-TransientExternalProblem::externalSolve()
+SyncTestExternalProblem::externalSolve()
 {
 }
 
 void
-TransientExternalProblem::syncSolutions(ExternalProblem::Direction direction)
+SyncTestExternalProblem::syncSolutions(ExternalProblem::Direction direction)
 {
   switch (direction)
   {

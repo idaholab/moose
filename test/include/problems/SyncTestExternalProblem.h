@@ -11,11 +11,11 @@
 
 #include "ExternalProblem.h"
 
-class BasicExternalProblem : public ExternalProblem
+class SyncTestExternalProblem : public ExternalProblem
 {
 public:
-  BasicExternalProblem(const InputParameters & params);
-  ~BasicExternalProblem() = default;
+  SyncTestExternalProblem(const InputParameters & params);
+  ~SyncTestExternalProblem() = default;
   static InputParameters validParams();
 
   virtual void addExternalVariables() override;
