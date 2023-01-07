@@ -23,25 +23,18 @@ class Jobs:
         for k, v in self.__job_data.items():
             yield k, v
 
-def hasExited(meta):
-    """
-    determine which scheduler plugin was used to launch jobs, and query that
-    system for current status on job
-    """
-    if meta.get('QUEUEING', '') == 'RunPBS':
-        job_id = meta['RunPBS']['ID'].split('.')[0]
-        qstat_process = subprocess.Popen([ 'qstat' , '-xf', job_id], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        qstat_result = qstat_process.communicate()[0].decode('utf-8')
-        job_result = re.findall(r'Exit_status = (.*)', qstat_result)
-        if job_result:
-            return True
 
 def isNotFinished(jobs):
     for path, meta in jobs.yieldJobsResultPath():
-        if type(meta) == type({}) and meta.get('QUEUEING', {}):
-            if (not os.path.exists(os.path.join(path, '.previous_test_results.json'))
-                and not hasExited(meta)):
+        if os.path.exists(path):
+            job_id = meta['RunPBS']['ID'].split('.')[0]
+            qstat_process = subprocess.Popen([ 'qstat' , '-xf', job_id], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            qstat_result = qstat_process.communicate()[0].decode('utf-8')
+            job_status = re.findall(r'job_state = (.*)', qstat_result)
+            if (job_status != ['F'] and job_status != ['X'] and job_status != ['U'] and job_status  != ['S'] and job_status != []):
                 return True
+
+
 
 def usage():
     print('Supply a path to json queue file. Multiple files are supported, in which case all'
