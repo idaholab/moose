@@ -11,6 +11,7 @@ import os, sys, re, json
 from QueueManager import QueueManager
 from TestHarness import util # to execute qsub
 import math # to compute node requirement
+from PBScodes import *
 
 ## This Class is responsible for maintaining an interface to the PBS scheduling syntax
 class RunPBS(QueueManager):
@@ -30,71 +31,90 @@ class RunPBS(QueueManager):
         """ arguments we need to remove from sys.argv """
         return ['--pbs']
 
-    def hasTimedOutOrFailed(self, job_data):
-        """ use qstat and return bool on job failures outside of the TestHarness's control """
+    def _readJobOutput(self, output_file, N=5):
+        """ return last few lines in output_file for job group """
+        output = []
+        if os.path.exists(output_file):
+            with open(output_file, 'r') as outfile:
+                for line in (outfile.readlines() [-N:]):
+                    output.append(line)
+            output.append(f'Last {N} lines read. Full output file available at:\n{output_file}')
+        return '\n'.join(output)
 
-        PBS_EXITCODES = { '271' : 'JOB_EXEC_KILL_WALLTIME 271',
-                          '-24' : 'JOB_EXEC_KILL_NCPUS_BURST -24',
-                          '-25' : 'JOB_EXEC_KILL_NCPUS_SUM -25',
-                          '-26' : 'JOB_EXEC_KILL_VMEM -26',
-                          '-27' : 'JOB_EXEC_KILL_MEM -27',
-                          '-28' : 'JOB_EXEC_KILL_CPUT -28',
-                          '-29' : 'JOB_EXEC_KILL_WALLTIME -29' }
-
-        PBS_STATUSES = { 'R' : 'RUNNING',
-                         'F' : 'FINISHED',
-                         'Q' : 'QUEUED',
-                         'E' : 'EXITING'}
-
-        jobs = job_data.jobs.getJobs()
+    def hasQueuingFailed(self, job_data):
+        """ Determine if PBS killed the job prematurely """
         queue_plugin = self.__class__.__name__
+        jobs = job_data.jobs.getJobs()
         meta_data = job_data.json_data.get(jobs[0].getTestDir())
         launch_id = meta_data.get(queue_plugin, {}).get('ID', '').split('.')[0]
+        output_file = os.path.join(jobs[0].getTestDir(), 'qsub.output')
 
-        # We shouldn't run into a null, but just in case, lets handle it
-        if launch_id:
-            qstat_command_result = util.runCommand(f'qstat -xf -F json {launch_id}')
+        # Job was never originally launched
+        if not meta_data.get(queue_plugin, False) or not launch_id:
+            return False
+
+        # Job ran to completion
+        elif os.path.exists(os.path.join(jobs[0].getTestDir(), '.previous_test_results.json')):
+            return False
+
+        ### Job has some other status ###
+
+        # Check qstat for current status
+        qstat_command_result = util.runCommand(f'qstat -xf -F json {launch_id}')
+
+        # Catch json parsing errors
+        try:
             json_out = json.loads(qstat_command_result)
             pbs_server = json_out['pbs_server']
             job_meta = json_out['Jobs'][f'{launch_id}.{pbs_server}']
 
-            # handle a qstat execution failure for some reason
-            if qstat_command_result.find('ERROR') != -1:
-                # set error for each job contained in group
-                for job in job_data.jobs.getJobs():
-                    job.setOutput('ERROR invoking `qstat`\n%s' % (qstat_command_result))
-                    job.setStatus(job.error, 'QSTAT')
-                return True
+        # JobID no longer exists (stale after 1 week)
+        except json.decoder.JSONDecodeError:
+            # Job did not run to completion (no .previous_test_results.json file exists)
+            if os.path.exists(output_file):
+                qstat_command_result = (f'ERROR: {self._readJobOutput(output_file)}'
+                                        '\n\nMore information available in\n'
+                                        f' {output_file}\n')
 
-            job_result = job_meta.get('Exit_status', False)
-            job_output = job_meta['Output_Path']
-            meta_data[self.__class__.__name__]['STATUS'] = PBS_STATUSES[job_meta['job_state']]
-            if not job_result:
-                return
+            # Failed parse, and no output file. Perhaps the PBS job was canceled, deleted, etc
+            else:
+                qstat_command_result = ('ERROR: TestHarness encountered an error while'
+                                       f'determining what to make of PBS JobID {launch_id}:\n'
+                                       f'{qstat_command_result}')
 
-            # woops. This job was killed by PBS for some reason
-            if job_result and str(job_result) in PBS_EXITCODES.keys():
-                for job in jobs:
-                    job.addCaveats(PBS_EXITCODES[str(job_result)])
-                return True
+        # Handle a qstat execution failure
+        if qstat_command_result.find('ERROR') != -1:
+            for job in job_data.jobs.getJobs():
+                job.setOutput(f'ERROR invoking `qstat`:\n{qstat_command_result}')
+                job.setStatus(job.error, 'QSTAT')
+            return True
 
-            # Capture TestHarness exceptions
-            elif job_result and job_result != "0":
+        # Use qstat json output to examine current status
+        job_result = job_meta.get('Exit_status', False)
 
-                # Try and gather some useful output we can tack on to one of the job objects
-                # TODO: Would be nice to tack this on to the exact job which caused the failure
-                # but I see no way how to do that when it was the job group that failed the
-                # TestHarness catastrohpically in some way.
-                output_file = job_output.split(':')[1]
-                if os.path.exists(output_file):
-                    with open(output_file, 'r') as f:
-                        output_string = util.readOutput(f, None, jobs[0].getTester())
-                    jobs[0].setOutput(output_string)
+        # Set the status as seen by qstat
+        meta_data[self.__class__.__name__]['STATUS'] = PBS_STATUSES[job_meta['job_state']]
 
-                # Add a caveat to each job, explaining that one of the jobs caused a TestHarness exception
-                for job in jobs:
-                    job.addCaveats('TESTHARNESS EXCEPTION')
-                return True
+        # Woops. This job was killed by PBS for some reason
+        if job_result and str(job_result) in PBS_User_EXITCODES.keys():
+            output = f'{self._readJobOutput(output_file)}\n{PBS_User_EXITCODES[str(job_result)]}'
+            for job in jobs:
+                job.setOutput(output)
+                job.addCaveats(f'PBS ERROR: {job_result}')
+            return True
+
+        # Capture TestHarness exceptions
+        elif job_result and job_result != "0":
+            if os.path.exists(output_file):
+                with open(output_file, 'r') as f:
+                    output_string = util.readOutput(f, None, jobs[0].getTester())
+                jobs[0].setOutput(output_string)
+            # Add a caveat to each job, explaining that one of the jobs caused a TestHarness exception
+            for job in jobs:
+                job.addCaveats('TESTHARNESS EXCEPTION')
+            return True
+
+        return False
 
     def _augmentTemplate(self, job):
         """ populate qsub script template with paramaters """
