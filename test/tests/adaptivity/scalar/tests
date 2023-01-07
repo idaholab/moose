@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#12538 #12309'
+  design = 'syntax/Adaptivity/index.md'
+  [./test]
+    type = 'Exodiff'
+    input = 'scalar_adaptivity.i'
+    exodiff = 'scalar_adaptivity_out.e-s002'
+    requirement = "The system shall support adaptivity with high-order scalar variables"
+  [../]
+[]

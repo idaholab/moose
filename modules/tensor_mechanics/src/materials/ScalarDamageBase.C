@@ -31,6 +31,10 @@ ScalarDamageBaseTempl<is_ad>::validParams()
       0.1,
       "maximum_damage_increment>0 & maximum_damage_increment<1",
       "maximum damage increment allowed for simulations with adaptive time step");
+  params.addRangeCheckedParam<Real>("maximum_damage",
+                                    1.0,
+                                    "maximum_damage>=0 & maximum_damage<=1",
+                                    "Maximum value allowed for damage index");
   params.addParam<MaterialPropertyName>(
       "damage_index_name",
       "damage_index",
@@ -49,7 +53,8 @@ ScalarDamageBaseTempl<is_ad>::ScalarDamageBaseTempl(const InputParameters & para
         this->template getMaterialPropertyOlder<Real>(_base_name + _damage_index_name)),
     _use_old_damage(this->template getParam<bool>("use_old_damage")),
     _residual_stiffness_fraction(this->template getParam<Real>("residual_stiffness_fraction")),
-    _maximum_damage_increment(this->template getParam<Real>("maximum_damage_increment"))
+    _maximum_damage_increment(this->template getParam<Real>("maximum_damage_increment")),
+    _maximum_damage(this->template getParam<Real>("maximum_damage"))
 {
 }
 
@@ -65,7 +70,7 @@ const GenericReal<is_ad> &
 ScalarDamageBaseTempl<is_ad>::getQpDamageIndex(unsigned int qp)
 {
   setQp(qp);
-  updateQpDamageIndex();
+  updateDamage();
   return _damage_index[_qp];
 }
 
@@ -74,6 +79,7 @@ void
 ScalarDamageBaseTempl<is_ad>::updateDamage()
 {
   updateQpDamageIndex();
+  _damage_index[_qp] = std::min(_maximum_damage, _damage_index[_qp]);
 }
 
 template <bool is_ad>
