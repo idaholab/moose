@@ -77,7 +77,6 @@
     coord = '0 0 0; 1.6 0 0; 2.7 0 0'
   []
 
-  coord_block = '0 1 2 inner_gap_primary_subdomain inner_gap_secondary_subdomain outer_gap_primary_subdomain outer_gap_secondary_subdomain'
   patch_update_strategy = iteration
 []
 

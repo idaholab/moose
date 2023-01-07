@@ -37,7 +37,6 @@
     inputs = 'generated1 generated2'
   []
 
-  coord_block = '0 pillars_primary_subdomain pillars_secondary_subdomain'
   patch_update_strategy = iteration
 []
 

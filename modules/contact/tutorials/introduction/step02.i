@@ -39,7 +39,6 @@
   []
 
   patch_update_strategy = iteration
-  coord_block = '0 pillars_primary_subdomain pillars_secondary_subdomain'
 []
 
 [Modules/TensorMechanics/Master]

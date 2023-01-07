@@ -381,41 +381,8 @@ MooseMesh::prepare(bool)
   }
 
   if (!_coord_system_set)
-  {
-    if (!_provided_coord_blocks.empty())
-    {
-      std::set<SubdomainName> mesh_sub_names, difference;
-      for (const auto sub_id : _mesh_subdomains)
-      {
-        auto mesh_sub_name = getSubdomainName(sub_id);
-        if (mesh_sub_name.empty())
-          mesh_sub_name = std::to_string(sub_id);
-        mesh_sub_names.insert(mesh_sub_name);
-      }
-
-      std::set_difference(mesh_sub_names.begin(),
-                          mesh_sub_names.end(),
-                          _provided_coord_blocks.begin(),
-                          _provided_coord_blocks.end(),
-                          std::inserter(difference, difference.begin()));
-
-      if (!difference.empty())
-      {
-        const std::string bad_param = isParamValid("coord_block") ? "coord_block" : "block";
-        paramError(bad_param,
-                   "If the '",
-                   bad_param,
-                   "' parameter is supplied to the Mesh, then it must cover all the "
-                   "mesh subdomains. However, the mesh subdomains: '",
-                   MooseUtils::join(difference, " "),
-                   "' were not specified in the 'Mesh/",
-                   bad_param,
-                   "' parameter. Please add these");
-      }
-    }
     setCoordSystem({_provided_coord_blocks.begin(), _provided_coord_blocks.end()},
                    getParam<MultiMooseEnum>("coord_type"));
-  }
   else if (_pars.isParamSetByUser("coord_type"))
     mooseError(
         "Trying to set coordinate system type information based on the user input file, but "
@@ -3617,22 +3584,16 @@ MooseMesh::setCoordSystem(const std::vector<SubdomainName> & blocks,
     if (coord_sys.size() == 0)
     {
       // set all blocks to cartesian coordinate system
-      for (const auto & block : blocks)
-      {
-        SubdomainID sid = getSubdomainID(block);
+      for (const auto sid : subdomains)
         _coord_sys[sid] = Moose::COORD_XYZ;
-      }
     }
     else if (coord_sys.size() == 1)
     {
       // set all blocks to the coordinate system specified by `coord_sys[0]`
       Moose::CoordinateSystemType coord_type =
           Moose::stringToEnum<Moose::CoordinateSystemType>(coord_sys[0]);
-      for (const auto & block : blocks)
-      {
-        SubdomainID sid = getSubdomainID(block);
+      for (const auto sid : subdomains)
         _coord_sys[sid] = coord_type;
-      }
     }
     else
     {

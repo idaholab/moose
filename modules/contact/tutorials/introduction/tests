@@ -9,7 +9,6 @@
     input = step02.i
     check_input = True
     ad_indexing_type = 'global'
-    allow_warnings = true
   []
   [plot02]
     type = RunApp
