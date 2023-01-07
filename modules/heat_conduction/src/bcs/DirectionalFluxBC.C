@@ -56,6 +56,7 @@ DirectionalFluxBC::computeQpResidual()
   auto projected_flux = -_direction * _normals[_qp];
   if (projected_flux > 0)
   {
+    // tests if the bit at position _qp is set
     if (_illumination & (1 << _qp))
       return FunctionNeumannBC::computeQpResidual() * projected_flux;
   }

@@ -15,7 +15,7 @@
 
 /**
  * Given a radiation direction vector this user object computes the illumination state of each side
- * QP on teh sideset it is operating on. A value of 1 indicates that the QP is receiving radiation,
+ * QP on the sideset it is operating on. A value of 1 indicates that the QP is receiving radiation,
  * while a value of 0 indicates it is in the shadow of another element.
  */
 class SelfShadowSideUserObject : public SideUserObject
@@ -60,7 +60,7 @@ protected:
   RealTensorValue _rotation;
 
   /// illumination status data (partition local), we use a bit for each QP
-  std::map<SideIDType, unsigned int> _illumination_status;
+  std::map<SideIDType, unsigned int> & _illumination_status;
 
   /// global triange data (3D)
   std::vector<Triangle> _triangles;
@@ -69,7 +69,7 @@ protected:
   std::vector<LineSegment> _lines;
 
   /// local QP data
-  std::map<SideIDType, MooseArray<Point>> _local_qps;
+  std::vector<std::pair<SideIDType, MooseArray<Point>>> _local_qps;
 
 private:
   void addLines(const SideIDType & id);

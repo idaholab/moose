@@ -14,7 +14,7 @@
 class SelfShadowSideUserObject;
 
 /**
- * Boundary condition of a Neumann style whose value is computed by a user-defined function
+ * Boundary condition to apply a directional flux multiplied by the surface normal vector
  */
 class DirectionalFluxBC : public FunctionNeumannBC
 {
@@ -27,12 +27,12 @@ protected:
   virtual Real computeQpResidual() override;
   virtual void precalculateResidual() override;
 
-  /// Flux vector
+  /// Flux direction and magnitude vector
   const RealVectorValue _direction;
 
-  /// self shadow illumination calculation user object
+  /// Self shadow illumination calculation user object
   const SelfShadowSideUserObject * const _self_shadow;
 
-  /// illumination state (bitmask)
+  /// Illumination state (bitmask)
   unsigned int _illumination;
 };

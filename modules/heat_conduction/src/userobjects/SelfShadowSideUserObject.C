@@ -31,7 +31,9 @@ SelfShadowSideUserObject::validParams()
 SelfShadowSideUserObject::SelfShadowSideUserObject(const InputParameters & parameters)
   : SideUserObject(parameters),
     _dim(_mesh.dimension()),
-    _raw_direction(coupledPostprocessors("illumination_flux"))
+    _raw_direction(coupledPostprocessors("illumination_flux")),
+    _illumination_status(
+        declareRestartableData<std::map<SideIDType, unsigned int>>("illumination_status"))
 {
   // we should check the coordinate system (i.e. permit only 0,0,+-1 for RZ)
 
@@ -74,9 +76,8 @@ SelfShadowSideUserObject::execute()
     addTriangles(id);
 
   // save off rotated QP coordinates got local sides
-  auto & qps = _local_qps[id];
-  qps = _q_point;
-  rotate(qps);
+  _local_qps.emplace_back(id, _q_point);
+  rotate(_local_qps.back().second);
 }
 
 void
@@ -85,8 +86,9 @@ SelfShadowSideUserObject::threadJoin(const UserObject & y)
   const SelfShadowSideUserObject & uo = static_cast<const SelfShadowSideUserObject &>(y);
 
   // merge lists
-  _lines.insert(_lines.begin(), uo._lines.begin(), uo._lines.end());
-  _triangles.insert(_triangles.begin(), uo._triangles.begin(), uo._triangles.end());
+  _lines.insert(_lines.end(), uo._lines.begin(), uo._lines.end());
+  _triangles.insert(_triangles.end(), uo._triangles.begin(), uo._triangles.end());
+  _local_qps.insert(_local_qps.end(), uo._local_qps.begin(), uo._local_qps.end());
 }
 
 int
@@ -117,9 +119,6 @@ SelfShadowSideUserObject::finalize()
   else
     _communicator.allgather(_triangles, /*identical_buffer_sizes=*/false);
 
-  // [check normal vector, if it points in the propagation direction (away from the source) then
-  // the entire side cannot be illuminated] this would require normal vectors to be stored
-
   // otherwise we iterate over QPs and check if any other side is in the way of the radiation
   for (const auto & [id, qps] : _local_qps)
   {
@@ -134,6 +133,7 @@ SelfShadowSideUserObject::finalize()
     // iterate over QPs
     for (const auto i : index_range(qps))
     {
+      // we set the bit at position _qp in the bitmask if the QP is illuminated
       if (_dim == 2 && check2DIllumination(qps[i], id))
         illumination |= bit;
       if (_dim == 3 && check3DIllumination(qps[i], id))
@@ -243,8 +243,6 @@ SelfShadowSideUserObject::check2DIllumination(const Point & qp, const SideIDType
 
       // compute intersection location
       const auto xs = (x2 - x1) * (y - y1) / (y2 - y1) + x1;
-      // tolerance is required to avoid an element to self shadow (might be problematic w. higher
-      // order elements)
       if (x > xs)
         return false;
     }
