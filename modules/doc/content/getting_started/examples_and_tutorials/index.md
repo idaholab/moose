@@ -30,8 +30,7 @@ The [!ac](MOOSE) repository has a directory named `examples` with several subdir
 has code for a MOOSE-based application and input file(s) for running simulations. Each example can
 be used by running a binary that is first compiled by running `make` in the applicable subdirectory.
 The resulting application binary (named e.g. `ex01-opt`) is used to run input
-files.  A guide explaining what each example
-demonstrates and how to use it is provided here:
+files. A guide explaining what each example demonstrates and how to use it is provided here:
 
 - [Example 1: As Simple As It Gets](examples/ex01_inputfile.md)
 - [Example 2: Adding a Custom Kernel](examples/ex02_kernel.md)
@@ -60,23 +59,17 @@ demonstrates and how to use it is provided here:
 Beyond individual examples, there are also general, guided tutorials that showcase application development,
 the [MOOSE MultiApp system](MultiApps/index.md), and verification of calculated solutions.
 
-##### Tutorial 1: Application Development
+- [Tutorial 1: Application Development](tutorial01_app_development/index.md) - Learn how to develop
+  a MOOSE-based application to solve coupled systems of differential equations in a multiphysics
+  setting. This tutorial teaches you how to create custom MOOSE objects, setup input files to invoke
+  these objects, and how to process and visualize the results of your simulations.
 
-- [Link](tutorial01_app_development/index.md) - Learn how to develop a MOOSE-based application to
-   solve coupled systems of differential equations in a multiphysics setting. This tutorial teaches
-   you how to create custom MOOSE objects, setup input files to invoke these objects, and how to
-   process and visualize the results of your simulations.
+- [Tutorial 2: MultiApp Demonstration](tutorial02_multiapps/index.md) - Learn how to use the
+  [Multiapp](MultiApps/index.md) and [Transfer](Transfers/index.md) systems to couple many multiphysics
+  applications together across differing time or length scales.
 
-##### Tutorial 2: MultiApp Demonstration
-
-- [Link](tutorial02_multiapps/index.md) - Learn how to use the [Multiapp](MultiApps/index.md) and
-  [Transfer](Transfers/index.md) systems to couple many multiphysics applications together across
-  differing time or length scales.
-
-##### Tutorial 3: Code Verification
-
-- [Link](tutorial03_verification/index.md) - Demonstrates the use of analytical solutions and the
-  [!ac](MMS) for code verification.
+- [Tutorial 3: Code Verification](tutorial03_verification/index.md) - Demonstrates the use of analytical
+  solutions and the [!ac](MMS) for code verification.
 
 ## Physics Module Examples and Tutorials
 
@@ -85,46 +78,15 @@ These modules provide capabilities that can either be used by themselves, or ser
 application-specific models tailored to specific problems. Example problems and tutorials are available
 for some of the individual physics modules as listed below.
 
-##### Combined (coupling models from multiple modules)
-
-!include modules/combined/tutorials/index.md
-
-##### Contact
-
-!include modules/contact/contact_examples.md
-
-##### Geochemistry
-
-- [Geochemistry Tests and Examples](modules/geochemistry/tests_and_examples/index.md)
-
-##### Heat Conduction
-
-- [modules/heat_conduction/tutorials/introduction/index.md]
-
-##### Level Set
-
-!include modules/level_set/level_set_examples.md
-
-##### Porous Flow
-
-- [Porous Flow Tutorial](modules/porous_flow/tutorial_00.md) - This broad tutorial guides the user through some commonly-used aspects of the [Porous Flow](modules/porous_flow/index.md) module. It concerns fluid injection through a borehole into a large fluid-filled reservoir. The tutorial begins with simple Darcy flow, and gradually adds more complex phenomena such as coupling with heat and solid mechanics, multi-phase flows and chemical reactions.
-
-Other examples and tutorials for Porous flow are linked below:
-
-!include modules/porous_flow/porous_flow_examples.md
-
-##### Reconstructed Discontinuous Galerkin
-
-- [rDG Implementation of the Advection Equation](modules/rdg/index.md#example)
-
-##### Stochastic Tools
-
-!include modules/stochastic_tools/stochastic_tools_examples.md
-
-##### Tensor Mechanics
-
-- [modules/tensor_mechanics/tutorials/introduction/index.md]
-- [tensor_mechanics/examples/cframe_iga.md]
+- [Combined](modules/combined/tutorials/index.md) (coupling models from multiple modules)
+- [Contact](modules/contact/tutorials/index.md)
+- [Geochemistry](modules/geochemistry/tests_and_examples/index.md)
+- [Heat Conduction](modules/heat_conduction/tutorials/introduction/index.md)
+- [Level Set](modules/level_set/level_set_examples.md)
+- [Porous Flow](modules/porous_flow/porous_flow_examples.md)
+- [Reconstructed Dicontinuous Galerkin](modules/rdg/index.md#example)
+- [Stochastic Tools](modules/stochastic_tools/examples/index.md)
+- [Tensor Mechanics](modules/tensor_mechanics/examples_index.md)
 
 ## C++ Programming References id=programming
 

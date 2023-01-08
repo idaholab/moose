@@ -1,3 +1,9 @@
+# Stochastic Tools Examples and Tutorials
+
+The following example problems demonstrate the capabilities of the MOOSE [modules/stochastic_tools/index.md].
+
+!! example-lists-begin
+
 Parameter Studies, Statistics, and Sensitivity Analysis:
 
 - Example 1: [modules/stochastic_tools/examples/monte_carlo.md]
@@ -24,3 +30,5 @@ Deep Reinforcement Learning Models:
 - Example 14: [modules/stochastic_tools/examples/libtorch_drl_control.md]
 
 !if-end!
+
+!! example-lists-end

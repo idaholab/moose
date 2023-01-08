@@ -5,7 +5,7 @@
 The MOOSE optimization module provides a flexible framework for solving inverse optimization problems in MOOSE.  This page is part of a set of examples for different types of inverse optimization problems.
 
 - [Theory](theory/InvOptTheory.md)
-- [Examples overview](examples/index.md)
+- [Examples overview](optimization/examples/index.md)
 - [Example 1: Convective Boundary Conditions](materialInv_ConvectiveBC.md)
 - [Example 2: Constant Thermal Conductivity](materialInv_ConstK.md)
 - [debuggingHelp.md]
@@ -17,7 +17,7 @@ is fit to experimental data.  This is a nonlinear optimization problem but is li
 
 ## Main-App Optimization Executioner
 
-The main input file containing the optimization reporter, executioner and transfers is shown in [main].  The adjoint problem will need the simulation temperature from the forward problem to evaluate [!eqref](theory/InvOptTheory.md#eq:convectiveBC) for the convective BC.  This requires us to transfer the forward simulation temperature field to the adjoint-app.    
+The main input file containing the optimization reporter, executioner and transfers is shown in [main].  The adjoint problem will need the simulation temperature from the forward problem to evaluate [!eqref](theory/InvOptTheory.md#eq:convectiveBC) for the convective BC.  This requires us to transfer the forward simulation temperature field to the adjoint-app.
 
 !listing modules/combined/test/tests/invOpt_bc_convective/main.i id=main
 
