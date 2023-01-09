@@ -25,14 +25,14 @@ Solution Invalid Warnings:
 **Total** shows the total number of soluton invalid warnings for the solve.
 **Message** shows the decription of the solution invalidity.
 
-This Solution Invalid Warning table can be silenced by setting [!param](materials/NonsafeMaterial/allow_invalid_solution) to 'true'. Then the converged solution will be allowed even there are still solution invalid warnings, but a message will be generated in the end of the calculation as a reminder:
+This Solution Invalid Warning table can be silenced by setting [!param](/Problem/FEProblem/allow_invalid_solution) to 'true'. Then the converged solution will be allowed even there are still solution invalid warnings, but a message will be generated in the end of the calculation as a reminder:
 ```
 *** Warning ***
 The Solution Invalidity warnings are detected but silenced! Use Problem/allow_invalid_solution=false to activate
 
 ```
 
-The Solution Invalid Warning can also be printed out immediately after it is detected by setting [!param](materials/NonsafeMaterial/immediately_print_invalid_solution) to `true`.
+The Solution Invalid Warning can also be printed out immediately after it is detected by setting [!param](/Problem/FEProblem/immediately_print_invalid_solution) to `true`.
 
 The two functions used internally in the 'SolutionInvalidInterface' for registeration are shown below:
 
@@ -43,3 +43,5 @@ The two functions used internally in the 'SolutionInvalidInterface' for register
 The code is showing below:
 
 !listing /framework/include/interfaces/SolutionInvalidInterface.h re=void flagInvalid.*\s*.*\;
+
+!syntax inputs /Problem/FEProblem
