@@ -9,13 +9,12 @@
 
 #pragma once
 
-#include "FVFluxBC.h"
-#include "INSFVFlowBC.h"
+#include "WCNSFVFluxBCBase.h"
 
 /**
  * Flux boundary condition for the weakly compressible energy equation
  */
-class WCNSFVEnergyFluxBC : public FVFluxBC, public INSFVFlowBC
+class WCNSFVEnergyFluxBC : public WCNSFVFluxBCBase
 {
 public:
   static InputParameters validParams();
@@ -24,35 +23,12 @@ public:
 protected:
   ADReal computeQpResidual() override;
 
-  /// Scaling factor
-  const Real _scaling_factor;
-
   /// Postprocessor with the inlet temperature
   const PostprocessorValue * const _temperature_pp;
 
   /// Postprocessor with the inlet energy flow rate
   const PostprocessorValue * const _energy_pp;
 
-  /// Postprocessor with the inlet velocity
-  const PostprocessorValue * const _velocity_pp;
-
-  /// Postprocessor with the inlet mass flow rate
-  const PostprocessorValue * const _mdot_pp;
-
-  /// Postprocessor with the inlet area
-  const PostprocessorValue * const _area_pp;
-
-  /// Fluid density functor
-  const Moose::Functor<ADReal> * const _rho;
-
   /// Fluid specific heat capacity functor
   const Moose::Functor<ADReal> * const _cp;
-
-  /// The direction in which the flow is entering/leaving the domain. This is mainly used for cases
-  /// when the orientation of the face cannot be established (boundary on an internal face) or when the flow is
-  /// entering with an angle compared to the boundary surface.
-  const Point _direction;
-
-  /// Flag to store if the flow direction is specified by the user
-  const bool _direction_specified_by_user;
 };

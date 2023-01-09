@@ -16,55 +16,27 @@ registerMooseObject("NavierStokesApp", WCNSFVEnergyFluxBC);
 InputParameters
 WCNSFVEnergyFluxBC::validParams()
 {
-  InputParameters params = FVFluxBC::validParams();
-  params += INSFVFlowBC::validParams();
+  InputParameters params = WCNSFVFluxBCBase::validParams();
   params.addClassDescription("Flux boundary conditions for energy advection.");
-
-  params.addParam<Real>("scaling_factor", 1, "To scale the energy flux");
 
   // Three different ways to input an advected energy flux
   // 1) Postprocessor with the energy flow rate directly
-  params.addParam<PostprocessorName>("energy_pp", "Postprocessor with the inlet energy flow rate");
-  params.addParam<PostprocessorName>("area_pp", "Postprocessor with the inlet flow area");
-
   // 2) Postprocessors for velocity and energy, functors for specific heat and density
+  // 3) Postprocessors for mass flow rate and energy, functor for specific heat
+  params.addParam<PostprocessorName>("energy_pp", "Postprocessor with the inlet energy flow rate");
   params.addParam<PostprocessorName>("temperature_pp", "Postprocessor with the inlet temperature");
   params.addParam<MooseFunctorName>(NS::cp, "specific heat capacity functor");
-
-  params.addParam<PostprocessorName>("velocity_pp", "Postprocessor with the inlet velocity norm");
-  params.addParam<Point>(
-      "direction",
-      Point(),
-      "The direction of the flow at the boundary. This is mainly used for cases when an inlet "
-      "angle needs to be defined with respect to the normal and when a boundary is defined on an "
-      "internal face where the normal can point in both directions. Use positive mass flux and "
-      "velocity magnitude if the flux aligns with this direction vector.");
-  params.addParam<MooseFunctorName>(NS::density, "Density functor");
-
-  // 3) Postprocessors for mass flow rate and energy, functor for specific heat
-  params.addParam<PostprocessorName>("mdot_pp", "Postprocessor with the inlet mass flow rate");
 
   return params;
 }
 
 WCNSFVEnergyFluxBC::WCNSFVEnergyFluxBC(const InputParameters & params)
-  : FVFluxBC(params),
-    INSFVFlowBC(params),
-    _scaling_factor(getParam<Real>("scaling_factor")),
+  : WCNSFVFluxBCBase(params),
     _temperature_pp(isParamValid("temperature_pp") ? &getPostprocessorValue("temperature_pp")
                                                    : nullptr),
     _energy_pp(isParamValid("energy_pp") ? &getPostprocessorValue("energy_pp") : nullptr),
-    _velocity_pp(isParamValid("velocity_pp") ? &getPostprocessorValue("velocity_pp") : nullptr),
-    _mdot_pp(isParamValid("mdot_pp") ? &getPostprocessorValue("mdot_pp") : nullptr),
-    _area_pp(isParamValid("area_pp") ? &getPostprocessorValue("area_pp") : nullptr),
-    _rho(isParamValid(NS::density) ? &getFunctor<ADReal>(NS::density) : nullptr),
-    _cp(isParamValid(NS::cp) ? &getFunctor<ADReal>(NS::cp) : nullptr),
-    _direction(getParam<Point>("direction")),
-    _direction_specified_by_user(params.isParamSetByUser("direction"))
+    _cp(isParamValid(NS::cp) ? &getFunctor<ADReal>(NS::cp) : nullptr)
 {
-  if (_direction_specified_by_user && !MooseUtils::absoluteFuzzyEqual(_direction.norm(), 1.0, 1e-6))
-    paramError("direction", "The direction should be a unit vector with a tolerance of 1e-6!");
-
   if (!dynamic_cast<INSFVEnergyVariable *>(&_var))
     paramError("variable",
                "The variable argument to WCNSFVEnergyFluxBC must be of type INSFVEnergyVariable");

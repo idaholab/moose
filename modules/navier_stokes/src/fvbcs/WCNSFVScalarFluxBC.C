@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "WCNSFVScalarFluxBC.h"
-#include "INSFVEnergyVariable.h"
 #include "NS.h"
 
 registerMooseObject("NavierStokesApp", WCNSFVScalarFluxBC);
@@ -16,55 +15,26 @@ registerMooseObject("NavierStokesApp", WCNSFVScalarFluxBC);
 InputParameters
 WCNSFVScalarFluxBC::validParams()
 {
-  InputParameters params = FVFluxBC::validParams();
-  params += INSFVFlowBC::validParams();
+  InputParameters params = WCNSFVFluxBCBase::validParams();
   params.addClassDescription("Flux boundary conditions for scalar quantity advection.");
 
-  params.addParam<Real>("scaling_factor", 1, "To scale the flux");
-
-  // Three different ways to input an advected scalar flux:
+  // Two different ways to input an advected scalar flux:
   // 1) Postprocessor with the scalar flow rate directly
+  // 2) Postprocessors for inlet velocity and scalar concentration
   params.addParam<PostprocessorName>("scalar_flux_pp",
                                      "Postprocessor with the inlet scalar flow rate");
-  params.addParam<PostprocessorName>("area_pp", "Postprocessor with the inlet flow area");
-
-  // 2) Postprocessors for inlet velocity and scalar concentration
   params.addParam<PostprocessorName>("scalar_value_pp",
                                      "Postprocessor with the inlet scalar concentration");
-  params.addParam<PostprocessorName>("velocity_pp", "Postprocessor with the inlet velocity norm");
-  params.addParam<Point>(
-      "direction",
-      Point(),
-      "The direction of the flow at the boundary. This is mainly used for cases when an inlet "
-      "angle needs to be defined with respect to the normal and when a boundary is defined on an "
-      "internal face where the normal can point in both directions. Use positive mass flux and "
-      "velocity magnitude if the flux aligns with this direction vector.");
-
-  // 3) Postprocessors for mass flow rate and energy, functor for density
-  params.addParam<PostprocessorName>("mdot_pp", "Postprocessor with the inlet mass flow rate");
-  params.addParam<MooseFunctorName>(NS::density, "Density functor");
-
   return params;
 }
 
 WCNSFVScalarFluxBC::WCNSFVScalarFluxBC(const InputParameters & params)
-  : FVFluxBC(params),
-    INSFVFlowBC(params),
-    _scaling_factor(getParam<Real>("scaling_factor")),
+  : WCNSFVFluxBCBase(params),
     _scalar_value_pp(isParamValid("scalar_value_pp") ? &getPostprocessorValue("scalar_value_pp")
                                                      : nullptr),
     _scalar_flux_pp(isParamValid("scalar_flux_pp") ? &getPostprocessorValue("scalar_flux_pp")
-                                                   : nullptr),
-    _velocity_pp(isParamValid("velocity_pp") ? &getPostprocessorValue("velocity_pp") : nullptr),
-    _mdot_pp(isParamValid("mdot_pp") ? &getPostprocessorValue("mdot_pp") : nullptr),
-    _area_pp(isParamValid("area_pp") ? &getPostprocessorValue("area_pp") : nullptr),
-    _rho(isParamValid(NS::density) ? &getFunctor<ADReal>(NS::density) : nullptr),
-    _direction(getParam<Point>("direction")),
-    _direction_specified_by_user(params.isParamSetByUser("direction"))
+                                                   : nullptr)
 {
-  if (_direction_specified_by_user && !MooseUtils::absoluteFuzzyEqual(_direction.norm(), 1.0, 1e-6))
-    paramError("direction", "The direction should be a unit vector with a tolerance of 1e-6!");
-
   // Density is often set as global parameters so it is not checked
   if (_scalar_flux_pp && (_velocity_pp || _mdot_pp || _scalar_value_pp))
     mooseWarning(
