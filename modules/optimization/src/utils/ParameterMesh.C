@@ -18,6 +18,7 @@
 ParameterMesh::ParameterMesh(const FEType & param_type, const std::string & exodus_mesh)
   : _communicator(MPI_COMM_SELF), _mesh(_communicator)
 {
+  _mesh.allow_renumbering(false);
   _mesh.read(exodus_mesh);
 
   // Create system to store parameter values

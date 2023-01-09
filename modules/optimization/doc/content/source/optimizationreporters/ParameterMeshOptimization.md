@@ -20,7 +20,7 @@ The mesh created +must+ be replicated. Ensure this by having `Mesh/parallel_type
 
 ## Example Input File Syntax
 
-The first step in doing mesh-passed inverse optimization is creating the parameter mesh. The easiest way of doing this is defining the mesh in a separate input file and run it with `--mesh-only` on command-line. The input below creates a two-by-two mesh outputted to exodus as `parameter_mesh_in.e`:
+The first step in doing mesh-based inverse optimization is creating the parameter mesh. The easiest way of doing this is defining the mesh in a separate input file and run it with `--mesh-only` on command-line. The input below creates a two-by-two mesh outputted to exodus as `parameter_mesh_in.e`:
 
 !listing mesh_source/parameter_mesh.i
 
