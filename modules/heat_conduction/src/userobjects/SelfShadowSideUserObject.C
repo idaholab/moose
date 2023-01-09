@@ -106,10 +106,10 @@ SelfShadowSideUserObject::finalize()
   // rotate triangulations
   if (_dim == 2)
     for (auto & line : _lines)
-      rotate(line.node);
+      rotate(line);
   else
     for (auto & triangle : _triangles)
-      rotate(triangle.node);
+      rotate(triangle);
 
   // [compute local projected bounding box (in x or xy)]
 
@@ -152,18 +152,18 @@ SelfShadowSideUserObject::addLines(const SideIDType & id)
   switch (cse.type())
   {
     case libMesh::EDGE2:
-      _lines.push_back(LineSegment{{cse.node_ref(0), cse.node_ref(1)}, id});
+      _lines.emplace_back(cse.node_ref(0), cse.node_ref(1), id);
       break;
 
     case libMesh::EDGE3:
-      _lines.push_back(LineSegment{{cse.node_ref(0), cse.node_ref(2)}, id});
-      _lines.push_back(LineSegment{{cse.node_ref(2), cse.node_ref(1)}, id});
+      _lines.emplace_back(cse.node_ref(0), cse.node_ref(2), id);
+      _lines.emplace_back(cse.node_ref(2), cse.node_ref(1), id);
       break;
 
     case libMesh::EDGE4:
-      _lines.push_back(LineSegment{{cse.node_ref(0), cse.node_ref(2)}, id});
-      _lines.push_back(LineSegment{{cse.node_ref(2), cse.node_ref(3)}, id});
-      _lines.push_back(LineSegment{{cse.node_ref(3), cse.node_ref(1)}, id});
+      _lines.emplace_back(cse.node_ref(0), cse.node_ref(2), id);
+      _lines.emplace_back(cse.node_ref(2), cse.node_ref(3), id);
+      _lines.emplace_back(cse.node_ref(3), cse.node_ref(1), id);
       break;
 
     default:
@@ -178,39 +178,39 @@ SelfShadowSideUserObject::addTriangles(const SideIDType & id)
   switch (cse.type())
   {
     case libMesh::TRI3:
-      _triangles.push_back(Triangle{{cse.node_ref(0), cse.node_ref(1), cse.node_ref(2)}, id});
+      _triangles.emplace_back(cse.node_ref(0), cse.node_ref(1), cse.node_ref(2), id);
       break;
 
     case libMesh::TRI6:
-      _triangles.push_back(Triangle{{cse.node_ref(0), cse.node_ref(3), cse.node_ref(5)}, id});
-      _triangles.push_back(Triangle{{cse.node_ref(3), cse.node_ref(1), cse.node_ref(4)}, id});
-      _triangles.push_back(Triangle{{cse.node_ref(4), cse.node_ref(2), cse.node_ref(5)}, id});
-      _triangles.push_back(Triangle{{cse.node_ref(3), cse.node_ref(4), cse.node_ref(5)}, id});
+      _triangles.emplace_back(cse.node_ref(0), cse.node_ref(3), cse.node_ref(5), id);
+      _triangles.emplace_back(cse.node_ref(3), cse.node_ref(1), cse.node_ref(4), id);
+      _triangles.emplace_back(cse.node_ref(4), cse.node_ref(2), cse.node_ref(5), id);
+      _triangles.emplace_back(cse.node_ref(3), cse.node_ref(4), cse.node_ref(5), id);
       break;
 
     case libMesh::QUAD4:
-      _triangles.push_back(Triangle{{cse.node_ref(0), cse.node_ref(1), cse.node_ref(2)}, id});
-      _triangles.push_back(Triangle{{cse.node_ref(2), cse.node_ref(3), cse.node_ref(0)}, id});
+      _triangles.emplace_back(cse.node_ref(0), cse.node_ref(1), cse.node_ref(2), id);
+      _triangles.emplace_back(cse.node_ref(2), cse.node_ref(3), cse.node_ref(0), id);
       break;
 
     case libMesh::QUAD8:
-      _triangles.push_back(Triangle{{cse.node_ref(0), cse.node_ref(4), cse.node_ref(7)}, id});
-      _triangles.push_back(Triangle{{cse.node_ref(4), cse.node_ref(1), cse.node_ref(5)}, id});
-      _triangles.push_back(Triangle{{cse.node_ref(5), cse.node_ref(2), cse.node_ref(6)}, id});
-      _triangles.push_back(Triangle{{cse.node_ref(6), cse.node_ref(3), cse.node_ref(7)}, id});
-      _triangles.push_back(Triangle{{cse.node_ref(6), cse.node_ref(7), cse.node_ref(4)}, id});
-      _triangles.push_back(Triangle{{cse.node_ref(4), cse.node_ref(5), cse.node_ref(6)}, id});
+      _triangles.emplace_back(cse.node_ref(0), cse.node_ref(4), cse.node_ref(7), id);
+      _triangles.emplace_back(cse.node_ref(4), cse.node_ref(1), cse.node_ref(5), id);
+      _triangles.emplace_back(cse.node_ref(5), cse.node_ref(2), cse.node_ref(6), id);
+      _triangles.emplace_back(cse.node_ref(6), cse.node_ref(3), cse.node_ref(7), id);
+      _triangles.emplace_back(cse.node_ref(6), cse.node_ref(7), cse.node_ref(4), id);
+      _triangles.emplace_back(cse.node_ref(4), cse.node_ref(5), cse.node_ref(6), id);
       break;
 
     case libMesh::QUAD9:
-      _triangles.push_back(Triangle{{cse.node_ref(0), cse.node_ref(4), cse.node_ref(7)}, id});
-      _triangles.push_back(Triangle{{cse.node_ref(4), cse.node_ref(1), cse.node_ref(5)}, id});
-      _triangles.push_back(Triangle{{cse.node_ref(5), cse.node_ref(2), cse.node_ref(6)}, id});
-      _triangles.push_back(Triangle{{cse.node_ref(6), cse.node_ref(3), cse.node_ref(7)}, id});
-      _triangles.push_back(Triangle{{cse.node_ref(8), cse.node_ref(6), cse.node_ref(7)}, id});
-      _triangles.push_back(Triangle{{cse.node_ref(8), cse.node_ref(5), cse.node_ref(6)}, id});
-      _triangles.push_back(Triangle{{cse.node_ref(8), cse.node_ref(4), cse.node_ref(5)}, id});
-      _triangles.push_back(Triangle{{cse.node_ref(8), cse.node_ref(7), cse.node_ref(4)}, id});
+      _triangles.emplace_back(cse.node_ref(0), cse.node_ref(4), cse.node_ref(7), id);
+      _triangles.emplace_back(cse.node_ref(4), cse.node_ref(1), cse.node_ref(5), id);
+      _triangles.emplace_back(cse.node_ref(5), cse.node_ref(2), cse.node_ref(6), id);
+      _triangles.emplace_back(cse.node_ref(6), cse.node_ref(3), cse.node_ref(7), id);
+      _triangles.emplace_back(cse.node_ref(8), cse.node_ref(6), cse.node_ref(7), id);
+      _triangles.emplace_back(cse.node_ref(8), cse.node_ref(5), cse.node_ref(6), id);
+      _triangles.emplace_back(cse.node_ref(8), cse.node_ref(4), cse.node_ref(5), id);
+      _triangles.emplace_back(cse.node_ref(8), cse.node_ref(7), cse.node_ref(4), id);
       break;
 
     default:
@@ -228,18 +228,37 @@ SelfShadowSideUserObject::check2DIllumination(const Point & qp, const SideIDType
   for (const auto & line : _lines)
   {
     // make sure a side never shades itself
-    if (line.id == id)
+    if (std::get<2>(line) == id)
       continue;
 
-    const int imax = line.node[0](1) > line.node[1](1) ? 0 : 1;
-    const auto y1 = line.node[1 - imax](1);
-    const auto y2 = line.node[imax](1);
+    const bool max0 = std::get<0>(line)(1) > std::get<1>(line)(1);
+
+    Real y1, y2;
+    if (max0)
+    {
+      y1 = std::get<1>(line)(1);
+      y2 = std::get<0>(line)(1);
+    }
+    else
+    {
+      y1 = std::get<0>(line)(1);
+      y2 = std::get<1>(line)(1);
+    }
 
     if (y >= y1 && y <= y2)
     {
       // segment is in line with the QP in radiation direction. Is it in front or behind?
-      const auto x1 = line.node[1 - imax](0);
-      const auto x2 = line.node[imax](0);
+      Real x1, x2;
+      if (max0)
+      {
+        x1 = std::get<1>(line)(0);
+        x2 = std::get<0>(line)(0);
+      }
+      else
+      {
+        x1 = std::get<0>(line)(0);
+        x2 = std::get<1>(line)(0);
+      }
 
       // compute intersection location
       const auto xs = (x2 - x1) * (y - y1) / (y2 - y1) + x1;
@@ -262,16 +281,16 @@ SelfShadowSideUserObject::check3DIllumination(const Point & qp, const SideIDType
   for (const auto & triangle : _triangles)
   {
     // make sure a side never shades itself
-    if (triangle.id == id)
+    if (std::get<3>(triangle) == id)
       continue;
 
-    const auto x1 = triangle.node[0](0);
-    const auto x2 = triangle.node[1](0);
-    const auto x3 = triangle.node[2](0);
+    const auto x1 = std::get<0>(triangle)(0);
+    const auto x2 = std::get<1>(triangle)(0);
+    const auto x3 = std::get<2>(triangle)(0);
 
-    const auto y1 = triangle.node[0](1);
-    const auto y2 = triangle.node[1](1);
-    const auto y3 = triangle.node[2](1);
+    const auto y1 = std::get<0>(triangle)(1);
+    const auto y2 = std::get<1>(triangle)(1);
+    const auto y3 = std::get<2>(triangle)(1);
 
     // compute barycentric coordinates
     const auto a = ((y2 - y3) * (x - x3) + (x3 - x2) * (y - y3)) /
@@ -285,7 +304,8 @@ SelfShadowSideUserObject::check3DIllumination(const Point & qp, const SideIDType
     {
       // Is the intersection it in front or behind the QP? (interpolate z using the barycentric
       // coordinates)
-      const auto zs = a * triangle.node[0](2) + b * triangle.node[1](2) + c * triangle.node[2](2);
+      const auto zs = a * std::get<0>(triangle)(2) + b * std::get<1>(triangle)(2) +
+                      c * std::get<2>(triangle)(2);
       if (z > zs)
         return false;
     }
@@ -294,117 +314,24 @@ SelfShadowSideUserObject::check3DIllumination(const Point & qp, const SideIDType
   return true;
 }
 
-template <typename T>
 void
-SelfShadowSideUserObject::rotate(T & points)
+SelfShadowSideUserObject::rotate(MooseArray<Point> & points)
 {
   for (const auto i : index_range(points))
     points[i] = _rotation * points[i];
 }
 
-namespace TIMPI
+void
+SelfShadowSideUserObject::rotate(Triangle & triangle)
 {
-
-StandardType<SelfShadowSideUserObject::Triangle>::StandardType(
-    const SelfShadowSideUserObject::Triangle * example)
-{
-  // We need an example for MPI_Address to use
-  static const SelfShadowSideUserObject::Triangle p;
-  if (!example)
-    example = &p;
-
-#ifdef LIBMESH_HAVE_MPI
-
-  // Get the sub-data-types, and make sure they live long enough
-  // to construct the derived type
-  StandardType<std::array<Point, 3>> d1(&example->node);
-  StandardType<SelfShadowSideUserObject::SideIDType> d2(&example->id);
-
-  MPI_Datatype types[] = {(data_type)d1, (data_type)d2};
-  int blocklengths[] = {1, 1};
-  MPI_Aint displs[2], start;
-
-  libmesh_call_mpi(
-      MPI_Get_address(const_cast<SelfShadowSideUserObject::Triangle *>(example), &start));
-  libmesh_call_mpi(MPI_Get_address(const_cast<std::array<Point, 3> *>(&example->node), &displs[0]));
-  libmesh_call_mpi(MPI_Get_address(const_cast<SelfShadowSideUserObject::SideIDType *>(&example->id),
-                                   &displs[1]));
-  for (std::size_t i = 0; i < 2; ++i)
-    displs[i] -= start;
-
-  // create a prototype structure
-  MPI_Datatype tmptype;
-  libmesh_call_mpi(MPI_Type_create_struct(2, blocklengths, displs, types, &tmptype));
-  libmesh_call_mpi(MPI_Type_commit(&tmptype));
-
-  // resize the structure type to account for padding, if any
-  libmesh_call_mpi(
-      MPI_Type_create_resized(tmptype, 0, sizeof(SelfShadowSideUserObject::Triangle), &_datatype));
-  libmesh_call_mpi(MPI_Type_free(&tmptype));
-
-  this->commit();
-
-#endif // LIBMESH_HAVE_MPI
+  std::get<0>(triangle) = _rotation * std::get<0>(triangle);
+  std::get<1>(triangle) = _rotation * std::get<1>(triangle);
+  std::get<2>(triangle) = _rotation * std::get<2>(triangle);
 }
 
-StandardType<SelfShadowSideUserObject::Triangle>::StandardType(
-    const StandardType<SelfShadowSideUserObject::Triangle> & t)
-  : DataType(t._datatype)
+void
+SelfShadowSideUserObject::rotate(LineSegment & line)
 {
-#ifdef LIBMESH_HAVE_MPI
-  libmesh_call_mpi(MPI_Type_dup(t._datatype, &_datatype));
-#endif
-}
-
-StandardType<SelfShadowSideUserObject::LineSegment>::StandardType(
-    const SelfShadowSideUserObject::LineSegment * example)
-{
-  // We need an example for MPI_Address to use
-  static const SelfShadowSideUserObject::LineSegment p;
-  if (!example)
-    example = &p;
-
-#ifdef LIBMESH_HAVE_MPI
-
-  // Get the sub-data-types, and make sure they live long enough
-  // to construct the derived type
-  StandardType<std::array<Point, 2>> d1(&example->node);
-  StandardType<SelfShadowSideUserObject::SideIDType> d2(&example->id);
-
-  MPI_Datatype types[] = {(data_type)d1, (data_type)d2};
-  int blocklengths[] = {1, 1};
-  MPI_Aint displs[2], start;
-
-  libmesh_call_mpi(
-      MPI_Get_address(const_cast<SelfShadowSideUserObject::LineSegment *>(example), &start));
-  libmesh_call_mpi(MPI_Get_address(const_cast<std::array<Point, 2> *>(&example->node), &displs[0]));
-  libmesh_call_mpi(MPI_Get_address(const_cast<SelfShadowSideUserObject::SideIDType *>(&example->id),
-                                   &displs[1]));
-  for (std::size_t i = 0; i < 2; ++i)
-    displs[i] -= start;
-
-  // create a prototype structure
-  MPI_Datatype tmptype;
-  libmesh_call_mpi(MPI_Type_create_struct(2, blocklengths, displs, types, &tmptype));
-  libmesh_call_mpi(MPI_Type_commit(&tmptype));
-
-  // resize the structure type to account for padding, if any
-  libmesh_call_mpi(MPI_Type_create_resized(
-      tmptype, 0, sizeof(SelfShadowSideUserObject::LineSegment), &_datatype));
-  libmesh_call_mpi(MPI_Type_free(&tmptype));
-
-  this->commit();
-
-#endif // LIBMESH_HAVE_MPI
-}
-
-StandardType<SelfShadowSideUserObject::LineSegment>::StandardType(
-    const StandardType<SelfShadowSideUserObject::LineSegment> & t)
-  : DataType(t._datatype)
-{
-#ifdef LIBMESH_HAVE_MPI
-  libmesh_call_mpi(MPI_Type_dup(t._datatype, &_datatype));
-#endif
-}
-
+  std::get<0>(line) = _rotation * std::get<0>(line);
+  std::get<1>(line) = _rotation * std::get<1>(line);
 }

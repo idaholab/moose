@@ -37,17 +37,11 @@ public:
   // API to check if a QP is illuminated
   int illumination(const SideIDType & id) const;
 
-  struct Triangle
-  {
-    std::array<Point, 3> node;
-    SideIDType id;
-  };
+  /// API to chek if teh UO runs on the displaced mesh
+  bool useDisplacedMesh() const { return getParam<bool>("use_displaced_mesh"); }
 
-  struct LineSegment
-  {
-    std::array<Point, 2> node;
-    SideIDType id;
-  };
+  using Triangle = std::tuple<Point, Point, Point, SideIDType>;
+  using LineSegment = std::tuple<Point, Point, SideIDType>;
 
 protected:
   /// problem dimension
@@ -78,29 +72,7 @@ private:
   bool check3DIllumination(const Point & qp, const SideIDType & id);
 
   /// rotate all points in the given container
-  template <typename T>
-  void rotate(T & points);
+  void rotate(MooseArray<Point> & points);
+  void rotate(Triangle & triangle);
+  void rotate(LineSegment & line);
 };
-
-namespace TIMPI
-{
-
-template <>
-class StandardType<SelfShadowSideUserObject::Triangle> : public DataType
-{
-public:
-  explicit StandardType(const SelfShadowSideUserObject::Triangle * example = nullptr);
-  StandardType(const StandardType<SelfShadowSideUserObject::Triangle> & t);
-  ~StandardType() { this->free(); }
-};
-
-template <>
-class StandardType<SelfShadowSideUserObject::LineSegment> : public DataType
-{
-public:
-  explicit StandardType(const SelfShadowSideUserObject::LineSegment * example = nullptr);
-  StandardType(const StandardType<SelfShadowSideUserObject::LineSegment> & t);
-  ~StandardType() { this->free(); }
-};
-
-} // namespace TIMPI

@@ -35,6 +35,10 @@ DirectionalFluxBC::DirectionalFluxBC(const InputParameters & parameters)
                      ? &getUserObject<SelfShadowSideUserObject>("self_shadow_uo")
                      : nullptr)
 {
+  if (_self_shadow && _self_shadow->useDisplacedMesh() != getParam<bool>("use_displaced_mesh"))
+    paramWarning("use_displaced_mesh",
+                 "The SelfShadowSideUserObject should operate on the same mesh (displaced or "
+                 "undisplaced) as this BC.");
 }
 
 void
