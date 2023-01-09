@@ -11,7 +11,9 @@
 
 #include "MDFluidKernelBase.h"
 
-/* Base class for stabilization kernels. */
+/**
+ * Base class for stabilization kernels.
+ */
 class MDFluidKernelStabilization : public MDFluidKernelBase
 {
 public:

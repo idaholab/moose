@@ -13,7 +13,9 @@
 #include "Material.h"
 #include "SinglePhaseFluidProperties.h"
 
-/* Fluid materials for 3D fluid model */
+/**
+ * Fluid materials for 3D fluid model
+ */
 class MDFluidMaterial : public Material
 {
 public:

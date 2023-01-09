@@ -12,7 +12,9 @@
 #include "NodalBC.h"
 #include "Function.h"
 
-/* A conditional Dirichlet BC for the energy (temperature) equation  */
+/**
+ * A conditional Dirichlet BC for the energy (temperature) equation
+ */
 class MDFluidEnergyDirichletBC : public NodalBC
 {
 public:
@@ -22,11 +24,11 @@ public:
   virtual ~MDFluidEnergyDirichletBC() {}
 
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
-  bool shouldApply();
+  bool shouldApply() override;
   bool isInlet();
 
   RealVectorValue _out_norm;

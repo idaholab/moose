@@ -12,7 +12,9 @@
 #include "MDFluidIntegratedBCBase.h"
 #include "Function.h"
 
-/* A specific BC for the mass (pressure) equation  */
+/**
+ * A specific BC for the mass (pressure) equation
+ */
 class MDFluidMassBC : public MDFluidIntegratedBCBase
 {
 public:
@@ -22,9 +24,9 @@ public:
   virtual ~MDFluidMassBC() {}
 
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
   bool _has_vfn;
   bool _has_vpps;

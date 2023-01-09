@@ -27,11 +27,7 @@ public:
 
 protected:
   Real velocityDiv() { return _grad_u_vel[_qp](0) + _grad_v_vel[_qp](1) + _grad_w_vel[_qp](2); }
-  RealVectorValue velocityDot()
-  {
-    RealVectorValue vec_vel_dot(_u_vel_dot[_qp], _v_vel_dot[_qp], _w_vel_dot[_qp]);
-    return vec_vel_dot;
-  }
+  RealVectorValue velocityDot() const;
 
   const VariableSecond & _second_u;
   // Coupled variables
@@ -75,11 +71,20 @@ protected:
   const MaterialProperty<RealTensorValue> & _inertia_resistance_coeff;
   const MaterialProperty<RealTensorValue> & _viscous_resistance_coeff;
 
-  // Helper function for mapping Moose variable numberings into
-  // the "canonical" numbering for the porous medium equations.
-  unsigned map_var_number(unsigned var);
+  /**
+   * Helper function for mapping Moose variable numberings into
+   * the "canonical" numbering for the porous medium equations.
+   */
+  unsigned int mapVarNumber(unsigned int var) const;
 
   const SinglePhaseFluidProperties & _eos;
 
   RealVectorValue _vec_g;
 };
+
+inline RealVectorValue
+MDFluidKernelBase::velocityDot() const
+{
+  RealVectorValue vec_vel_dot(_u_vel_dot[_qp], _v_vel_dot[_qp], _w_vel_dot[_qp]);
+  return vec_vel_dot;
+}

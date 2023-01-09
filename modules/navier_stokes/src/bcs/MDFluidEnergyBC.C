@@ -40,7 +40,6 @@ MDFluidEnergyBC::MDFluidEnergyBC(const InputParameters & parameters)
   if (_has_vbc && !_has_Tbc)
     mooseError("For an inlet condition ('v_fn' is given), a boundary temperature ('T_fn') is also "
                "needed.");
-  //
   if (_has_Tbc && _has_Tbranch)
     mooseError(
         "Temperature function and branch temperature cannot be BOTH specified in MDFluidEnergyBC.");

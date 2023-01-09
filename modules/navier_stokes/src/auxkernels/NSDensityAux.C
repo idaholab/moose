@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NSDensityAux.h"
+#include "NS.h"
 
 registerMooseObject("NavierStokesApp", NSDensityAux);
 
@@ -17,8 +18,8 @@ NSDensityAux::validParams()
   InputParameters params = AuxKernel::validParams();
 
   // Coupled variables
-  params.addRequiredCoupledVar("pressure", "Coupled fluid pressure variable");
-  params.addRequiredCoupledVar("temperature", "Coupled fluid temperature variable");
+  params.addRequiredCoupledVar(NS::pressure, "Coupled fluid pressure variable");
+  params.addRequiredCoupledVar(NS::temperature, "Coupled fluid temperature variable");
   params.addRequiredParam<UserObjectName>("eos", "The name of equation of state object to use.");
 
   return params;

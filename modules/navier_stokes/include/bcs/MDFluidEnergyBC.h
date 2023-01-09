@@ -12,7 +12,9 @@
 #include "MDFluidIntegratedBCBase.h"
 #include "Function.h"
 
-/* An integral BC for the energy (temperature) equation  */
+/**
+ * An integral BC for the energy (temperature) equation
+ */
 class MDFluidEnergyBC : public MDFluidIntegratedBCBase
 {
 public:
@@ -22,9 +24,9 @@ public:
   virtual ~MDFluidEnergyBC() {}
 
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
   // Material properties
   const MaterialProperty<Real> & _cp;

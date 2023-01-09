@@ -13,10 +13,9 @@
 
 #include "Function.h"
 
-// Forward Declarations
-class MDFluidEnergyKernel;
-
-// The spatial part of the 3D energy conservation for fluid flow
+/**
+ * The spatial part of the 3D energy conservation for fluid flow
+ */
 class MDFluidEnergyKernel : public MDFluidKernelStabilization
 {
 public:

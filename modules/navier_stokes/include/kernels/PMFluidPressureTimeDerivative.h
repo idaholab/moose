@@ -12,7 +12,9 @@
 #include "TimeKernel.h"
 #include "SinglePhaseFluidProperties.h"
 
-// The transient term of the porous-media mass conservation equation
+/**
+ * The transient term of the porous-media mass conservation equation
+ */
 class PMFluidPressureTimeDerivative : public TimeKernel
 {
 public:

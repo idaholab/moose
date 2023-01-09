@@ -11,7 +11,9 @@
 
 #include "MDFluidKernelStabilization.h"
 
-// The spatial part of the 3D momentum conservation for fluid flow
+/**
+ * The spatial part of the 3D momentum conservation for fluid flow
+ */
 class MDFluidMomentumKernel : public MDFluidKernelStabilization
 {
 public:
