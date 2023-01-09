@@ -210,14 +210,10 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
                    "You set both 'Mesh/block' and 'Mesh/coord_block'. The value of "
                    "'Mesh/coord_block' will be used.");
 
-    _provided_coord_blocks =
-        std::set<SubdomainName>(getParam<std::vector<SubdomainName>>("coord_block").begin(),
-                                getParam<std::vector<SubdomainName>>("coord_block").end());
+    _provided_coord_blocks = getParam<std::vector<SubdomainName>>("coord_block");
   }
   else if (isParamValid("block"))
-    _provided_coord_blocks =
-        std::set<SubdomainName>(getParam<std::vector<SubdomainName>>("block").begin(),
-                                getParam<std::vector<SubdomainName>>("block").end());
+    _provided_coord_blocks = getParam<std::vector<SubdomainName>>("block");
 
   determineUseDistributedMesh();
 }
@@ -381,8 +377,7 @@ MooseMesh::prepare(bool)
   }
 
   if (!_coord_system_set)
-    setCoordSystem({_provided_coord_blocks.begin(), _provided_coord_blocks.end()},
-                   getParam<MultiMooseEnum>("coord_type"));
+    setCoordSystem(_provided_coord_blocks, getParam<MultiMooseEnum>("coord_type"));
   else if (_pars.isParamSetByUser("coord_type"))
     mooseError(
         "Trying to set coordinate system type information based on the user input file, but "
@@ -3540,8 +3535,7 @@ MooseMesh::setCoordSystem(const std::vector<SubdomainName> & blocks,
                           const MultiMooseEnum & coord_sys)
 {
   TIME_SECTION("setCoordSystem", 5, "Setting Coordinate System");
-  if (!_provided_coord_blocks.empty() &&
-      (_provided_coord_blocks != std::set<SubdomainName>(blocks.begin(), blocks.end())))
+  if (!_provided_coord_blocks.empty() && (_provided_coord_blocks != blocks))
   {
     const std::string param_name = isParamValid("coord_block") ? "coord_block" : "block";
     mooseWarning("Supplied blocks in the 'setCoordSystem' method do not match the value of the "

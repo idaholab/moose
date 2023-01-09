@@ -1582,7 +1582,7 @@ private:
   bool _coord_system_set;
 
   /// Set for holding user-provided coordinate system type block names
-  std::set<SubdomainName> _provided_coord_blocks;
+  std::vector<SubdomainName> _provided_coord_blocks;
 
   template <typename T>
   struct MeshType;
