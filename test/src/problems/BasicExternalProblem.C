@@ -51,14 +51,10 @@ BasicExternalProblem::syncSolutions(ExternalProblem::Direction direction)
       const auto sys_number = _aux->number();
       const auto & mesh = _mesh.getMesh();
 
-      for (unsigned int e = 0; e < mesh.n_elem(); ++e)
+      for (const auto elem_ptr : mesh.element_ptr_range())
       {
-        auto elem_ptr = mesh.query_elem_ptr(e);
-        if (elem_ptr)
-        {
-          auto dof_idx = elem_ptr->dof_number(sys_number, _heat_source_var, 0);
-          solution.set(dof_idx, 12345);
-        }
+        auto dof_idx = elem_ptr->dof_number(sys_number, _heat_source_var, 0);
+        solution.set(dof_idx, 12345);
       }
 
       // close the parallel solution
