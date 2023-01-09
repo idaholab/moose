@@ -30,6 +30,26 @@ RadialReturnStressUpdateTempl<is_ad>::validParams()
       "effective_inelastic_strain_name",
       "Name of the material property that stores the effective inelastic strain");
   params.addParam<bool>("use_substep", false, "Whether to use substepping");
+
+  MooseEnum substeppingType("NONE ADAPTIVE ERROR_BASED INCREMENT_BASED", "NONE");
+  substeppingType.addDocumentation("NONE", "Do not use substepping");
+  substeppingType.addDocumentation(
+      "ADAPTIVE",
+      "Use adaptive substepping, where the number of substeps is successively doubled until the "
+      "return mapping model successfully converges or the maximum number of substeps is reached. ");
+  substeppingType.addDocumentation(
+      "ERROR_BASED",
+      "Use substepping with a substep size that will yield, at most, the creep numerical "
+      "integration error given by substep_strain_tolerance.");
+  substeppingType.addDocumentation(
+      "INCREMENT_BASED",
+      "Use substepping with a substep size that will keep each inelastic strain increment below "
+      "the maximum inelastic strain increment allowed in a time step.");
+  params.addParam<MooseEnum>(
+      "use_substepping", substeppingType, "Whether and how to use substepping");
+
+  params.addDeprecatedParam<bool>(
+      "use_substep", false, "Whether to use substepping", "Use `use_substepping` instead");
   params.addParam<Real>("substep_strain_tolerance",
                         0.1,
                         "Maximum ratio of the initial elastic strain increment at start of the "
@@ -66,16 +86,32 @@ RadialReturnStressUpdateTempl<is_ad>::RadialReturnStressUpdateTempl(
     _deviatoric_projection_four(_identity_symmetric_four -
                                 _identity_two.outerProduct(_identity_two) / 3.0),
     _apply_strain(this->template getParam<bool>("apply_strain")),
-    _use_substep(this->template getParam<bool>("use_substep")),
-    _use_substep_integration_error(this->template getParam<bool>("use_substep_integration_error")),
+    _use_substepping(
+        this->template getParam<MooseEnum>("use_substepping").template getEnum<SubsteppingType>()),
     _maximum_number_substeps(this->template getParam<unsigned>("maximum_number_substeps"))
 
 {
-  if (this->_pars.isParamSetByUser("maximum_number_substeps") && !_use_substep)
+  if (this->_pars.isParamSetByUser("use_substep"))
+  {
+    if (this->_pars.isParamSetByUser("use_substepping"))
+      this->template paramError(
+          "use_substep", "Remove this parameter and just keep `use_substepping` in the input");
+
+    if (parameters.get<bool>("use_substep"))
+    {
+      if (parameters.get<bool>("use_substep_integration_error"))
+        _use_substepping = SubsteppingType::ERROR_BASED;
+      else
+        _use_substepping = SubsteppingType::INCREMENT_BASED;
+    }
+  }
+
+  if (this->_pars.isParamSetByUser("maximum_number_substeps") &&
+      _use_substepping == SubsteppingType::NONE)
     this->template paramError(
         "maximum_number_substeps",
         "The parameter maximum_number_substeps can only be used when the substepping option "
-        "(use_substep) is set to true");
+        "(use_substep) is not set to NONE");
 }
 
 template <bool is_ad>
@@ -97,33 +133,34 @@ int
 RadialReturnStressUpdateTempl<is_ad>::calculateNumberSubsteps(
     const GenericRankTwoTensor<is_ad> & strain_increment)
 {
-  unsigned int number_of_substeps = 1;
   // compute an effective elastic strain measure
   const GenericReal<is_ad> contracted_elastic_strain =
       strain_increment.doubleContraction(strain_increment);
   const Real effective_elastic_strain =
       std::sqrt(3.0 / 2.0 * MetaPhysicL::raw_value(contracted_elastic_strain));
 
-  if (!MooseUtils::absoluteFuzzyEqual(effective_elastic_strain, 0.0))
+  if (MooseUtils::absoluteFuzzyEqual(effective_elastic_strain, 0.0))
+    return 1;
+
+  if (_use_substepping == SubsteppingType::INCREMENT_BASED)
   {
+    const Real ratio = effective_elastic_strain / _max_inelastic_increment;
 
-    if (!_use_substep_integration_error)
-    {
-      const Real ratio = effective_elastic_strain / _max_inelastic_increment;
-
-      if (ratio > _substep_tolerance)
-        number_of_substeps = std::ceil(ratio / _substep_tolerance);
-    }
-    else
-    {
-      const Real accurate_time_step_ratio = _substep_tolerance / effective_elastic_strain;
-
-      if (accurate_time_step_ratio < 1.0)
-        number_of_substeps = std::ceil(1.0 / accurate_time_step_ratio);
-    }
+    if (ratio > _substep_tolerance)
+      return std::ceil(ratio / _substep_tolerance);
+    return 1;
   }
 
-  return number_of_substeps;
+  if (_use_substepping == SubsteppingType::ERROR_BASED)
+  {
+    const Real accurate_time_step_ratio = _substep_tolerance / effective_elastic_strain;
+
+    if (accurate_time_step_ratio < 1.0)
+      return std::ceil(1.0 / accurate_time_step_ratio);
+    return 1;
+  }
+
+  mooseError("calculateNumberSubsteps should not have been called. Nofify a developer.");
 }
 
 template <bool is_ad>
@@ -297,18 +334,35 @@ RadialReturnStressUpdateTempl<true>::updateState(
 
 template <>
 void
-RadialReturnStressUpdateTempl<false>::updateStateSubstep(RankTwoTensor & strain_increment,
-                                                         RankTwoTensor & inelastic_strain_increment,
-                                                         const RankTwoTensor & rotation_increment,
-                                                         RankTwoTensor & stress_new,
-                                                         const RankTwoTensor & stress_old,
-                                                         const RankFourTensor & elasticity_tensor,
-                                                         const RankTwoTensor & elastic_strain_old,
-                                                         bool compute_full_tangent_operator,
-                                                         RankFourTensor & tangent_operator)
+RadialReturnStressUpdateTempl<true>::updateStateSubstepInternal(
+    ADRankTwoTensor & /*strain_increment*/,
+    ADRankTwoTensor & /*inelastic_strain_increment*/,
+    const ADRankTwoTensor & /*rotation_increment*/,
+    ADRankTwoTensor & /*stress_new*/,
+    const RankTwoTensor & /*stress_old*/,
+    const ADRankFourTensor & /*elasticity_tensor*/,
+    const RankTwoTensor & /*elastic_strain_old*/,
+    unsigned int /*total_number_substeps*/,
+    bool /*compute_full_tangent_operator*/,
+    RankFourTensor & /*tangent_operator*/)
 {
-  const unsigned int total_number_substeps = calculateNumberSubsteps(strain_increment);
+  mooseError("Not implemented");
+}
 
+template <>
+void
+RadialReturnStressUpdateTempl<false>::updateStateSubstepInternal(
+    RankTwoTensor & strain_increment,
+    RankTwoTensor & inelastic_strain_increment,
+    const RankTwoTensor & rotation_increment,
+    RankTwoTensor & stress_new,
+    const RankTwoTensor & stress_old,
+    const RankFourTensor & elasticity_tensor,
+    const RankTwoTensor & elastic_strain_old,
+    unsigned int total_number_substeps,
+    bool compute_full_tangent_operator,
+    RankFourTensor & tangent_operator)
+{
   // if only one substep is needed, then call the original update state method
   if (total_number_substeps == 1)
   {
@@ -391,6 +445,65 @@ RadialReturnStressUpdateTempl<false>::updateStateSubstep(RankTwoTensor & strain_
 
   // recover the original timestep
   _dt = dt_original;
+}
+
+template <>
+void
+RadialReturnStressUpdateTempl<false>::updateStateSubstep(RankTwoTensor & strain_increment,
+                                                         RankTwoTensor & inelastic_strain_increment,
+                                                         const RankTwoTensor & rotation_increment,
+                                                         RankTwoTensor & stress_new,
+                                                         const RankTwoTensor & stress_old,
+                                                         const RankFourTensor & elasticity_tensor,
+                                                         const RankTwoTensor & elastic_strain_old,
+                                                         bool compute_full_tangent_operator,
+                                                         RankFourTensor & tangent_operator)
+{
+  if (_use_substepping == SubsteppingType::ADAPTIVE)
+  {
+    unsigned int num_substeps = 1;
+    while (num_substeps < _maximum_number_substeps)
+    {
+      try
+      {
+        updateStateSubstepInternal(strain_increment,
+                                   inelastic_strain_increment,
+                                   rotation_increment,
+                                   stress_new,
+                                   stress_old,
+                                   elasticity_tensor,
+                                   elastic_strain_old,
+                                   num_substeps,
+                                   compute_full_tangent_operator,
+                                   tangent_operator);
+      }
+      catch (MooseException & e)
+      {
+        // updateStateSubstepInternal threw, so let's double the number of substeps and try again
+        num_substeps *= 2;
+        mooseInfoRepeated("Increasing amount of substeps to ", num_substeps);
+        continue;
+      }
+
+      // updateStateSubstepInternal was successful (didn't throw)
+      return;
+    }
+    mooseException("Adaptive substepping failed. Maximum number of substeps exceeded.");
+  }
+  else
+  {
+    // attempt to compute the final number of substeps
+    updateStateSubstepInternal(strain_increment,
+                               inelastic_strain_increment,
+                               rotation_increment,
+                               stress_new,
+                               stress_old,
+                               elasticity_tensor,
+                               elastic_strain_old,
+                               calculateNumberSubsteps(strain_increment),
+                               compute_full_tangent_operator,
+                               tangent_operator);
+  }
 }
 
 template <>
