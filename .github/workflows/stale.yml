@@ -17,7 +17,7 @@ jobs:
       pull-requests: write
 
     steps:
-    - uses: actions/stale@v5
+    - uses: actions/stale@v7
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
         stale-pr-message: 'This pull request has been automatically marked as stale because it has not had recent activity in the last 100 days. It will be closed in 7 days if no further activity occurs. Thank you for your contributions.'
