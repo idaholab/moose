@@ -28,6 +28,7 @@ requirements:
     - pylatexenc
     - python
     - clang-tools 12.0.1
+
 test:
   commands:
     - git clang-format -h
@@ -37,8 +38,6 @@ test:
     - pybtex
     - mock
     - pylatexenc
-    - jinja2
-    - deepdiff
 
 about:
   home: https://mooseframework.org/
