@@ -227,38 +227,26 @@ SelfShadowSideUserObject::check2DIllumination(const Point & qp, const SideIDType
   // loop over all line segments until one is found that provides shade
   for (const auto & line : _lines)
   {
+    const auto & [p1, p2, line_id] = line;
+
     // make sure a side never shades itself
-    if (std::get<2>(line) == id)
+    if (line_id == id)
       continue;
 
-    const bool max0 = std::get<0>(line)(1) > std::get<1>(line)(1);
+    const bool ordered = p1(1) <= p2(1);
 
-    Real y1, y2;
-    if (max0)
-    {
-      y1 = std::get<1>(line)(1);
-      y2 = std::get<0>(line)(1);
-    }
-    else
-    {
-      y1 = std::get<0>(line)(1);
-      y2 = std::get<1>(line)(1);
-    }
+    const auto y1 = ordered ? p1(1) : p2(1);
+    const auto y2 = ordered ? p2(1) : p1(1);
 
     if (y >= y1 && y <= y2)
     {
+      // line segment is oriented parallel to the irradiation direction
+      if (std::abs(y2 - y1) < libMesh::TOLERANCE)
+        return false;
+
       // segment is in line with the QP in radiation direction. Is it in front or behind?
-      Real x1, x2;
-      if (max0)
-      {
-        x1 = std::get<1>(line)(0);
-        x2 = std::get<0>(line)(0);
-      }
-      else
-      {
-        x1 = std::get<0>(line)(0);
-        x2 = std::get<1>(line)(0);
-      }
+      const auto x1 = ordered ? p1(0) : p2(0);
+      const auto x2 = ordered ? p2(0) : p1(0);
 
       // compute intersection location
       const auto xs = (x2 - x1) * (y - y1) / (y2 - y1) + x1;
@@ -280,17 +268,19 @@ SelfShadowSideUserObject::check3DIllumination(const Point & qp, const SideIDType
   // loop over all triangles until one is found that provides shade
   for (const auto & triangle : _triangles)
   {
+    const auto & [p1, p2, p3, triangle_id] = triangle;
+
     // make sure a side never shades itself
-    if (std::get<3>(triangle) == id)
+    if (triangle_id == id)
       continue;
 
-    const auto x1 = std::get<0>(triangle)(0);
-    const auto x2 = std::get<1>(triangle)(0);
-    const auto x3 = std::get<2>(triangle)(0);
+    const auto x1 = p1(0);
+    const auto x2 = p2(0);
+    const auto x3 = p3(0);
 
-    const auto y1 = std::get<0>(triangle)(1);
-    const auto y2 = std::get<1>(triangle)(1);
-    const auto y3 = std::get<2>(triangle)(1);
+    const auto y1 = p1(1);
+    const auto y2 = p2(1);
+    const auto y3 = p3(1);
 
     // compute barycentric coordinates
     const auto a = ((y2 - y3) * (x - x3) + (x3 - x2) * (y - y3)) /
@@ -304,8 +294,7 @@ SelfShadowSideUserObject::check3DIllumination(const Point & qp, const SideIDType
     {
       // Is the intersection it in front or behind the QP? (interpolate z using the barycentric
       // coordinates)
-      const auto zs = a * std::get<0>(triangle)(2) + b * std::get<1>(triangle)(2) +
-                      c * std::get<2>(triangle)(2);
+      const auto zs = a * p1(2) + b * p2(2) + c * p3(2);
       if (z > zs)
         return false;
     }
@@ -324,14 +313,19 @@ SelfShadowSideUserObject::rotate(MooseArray<Point> & points)
 void
 SelfShadowSideUserObject::rotate(Triangle & triangle)
 {
-  std::get<0>(triangle) = _rotation * std::get<0>(triangle);
-  std::get<1>(triangle) = _rotation * std::get<1>(triangle);
-  std::get<2>(triangle) = _rotation * std::get<2>(triangle);
+  auto & [p1, p2, p3, triangle_id] = triangle;
+
+  p1 = _rotation * p1;
+  p2 = _rotation * p2;
+  p3 = _rotation * p3;
+  libmesh_ignore(triangle_id);
 }
 
 void
 SelfShadowSideUserObject::rotate(LineSegment & line)
 {
-  std::get<0>(line) = _rotation * std::get<0>(line);
-  std::get<1>(line) = _rotation * std::get<1>(line);
+  auto & [p1, p2, line_id] = line;
+  p1 = _rotation * p1;
+  p2 = _rotation * p2;
+  libmesh_ignore(line_id);
 }
