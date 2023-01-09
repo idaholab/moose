@@ -14,10 +14,6 @@
 
 #include <mutex>
 
-// Forward Declarations
-class SolutionInvalidity;
-void dataStore(std::ostream &, SolutionInvalidity &, void *);
-
 namespace moose::internal
 {
 class SolutionInvalidityRegistry;
@@ -54,7 +50,7 @@ SolutionInvalidityRegistry & getSolutionInvalidityRegistry();
 /**
  * The place where all sections with solution invalid warnings will be stored
  */
-class SolutionInvalidityRegistry : private GeneralRegistry<std::string, SolutionInvalidityInfo>
+class SolutionInvalidityRegistry : public GeneralRegistry<std::string, SolutionInvalidityInfo>
 {
 public:
   /**
@@ -64,53 +60,11 @@ public:
    * @param message The description of the solution invalid warning
    * @return The registered ID
    */
-  InvalidSolutionID registerInvalidObject(const std::string & object_name,
-                                          const std::string & message);
-
-  /**
-   * Given a name return the SolutionID
-   * @object_name The name of the section
-   * @return the ID
-   */
-  InvalidSolutionID sectionID(const std::string & object_name) const { return id(object_name); }
-
-  /**
-   * Given a SolutionID return the SolutionInvalidityInfo
-   * @section_id The ID
-   * @return The SolutionInvalidityInfo
-   */
-  const SolutionInvalidityInfo & sectionInfo(const InvalidSolutionID section_id) const
-  {
-    return item(section_id);
-  }
-
-  /**
-   * Whether or not a section with that name has been registered
-   * @object_name The name of the section
-   * @return Whether or not it exists
-   */
-  bool sectionExists(const std::string & object_name) const { return keyExists(object_name); }
-
-  /**
-   * Whether or not a section with that id has been registered
-   * @section_id The ID
-   * @return Whether or not it exists
-   */
-  bool sectionExists(const InvalidSolutionID section_id) const { return idExists(section_id); }
-
-  /**
-   * @return number of registered sections
-   */
-  std::size_t numSections() const { return size(); }
+  InvalidSolutionID registerInvalidity(const std::string & object_name,
+                                       const std::string & message);
 
 private:
   SolutionInvalidityRegistry();
-
-  /**
-   * The internal function that actually carries out the registration
-   */
-  InvalidSolutionID actuallyRegisterSection(const std::string & object_name,
-                                            const std::string & message);
 
   /**
    * Special accessor just for SolutionInvalidity so that
@@ -132,7 +86,7 @@ private:
   /// So it can be constructed
   friend SolutionInvalidityRegistry & getSolutionInvalidityRegistry();
   /// This is only here so that SolutionInvalidity can access readSectionInfo
-  friend SolutionInvalidity;
+  friend class SolutionInvalidity;
 };
 
 }

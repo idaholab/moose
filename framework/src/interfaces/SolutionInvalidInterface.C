@@ -25,15 +25,15 @@ SolutionInvalidInterface::SolutionInvalidInterface(MooseObject * const moose_obj
 void
 SolutionInvalidInterface::flagInvalidSolutionInternal(InvalidSolutionID _invalid_solution_id)
 {
-  auto & app = _si_moose_object.getMooseApp();
+  auto & solution_invalidity = _si_moose_object.getMooseApp().solutionInvalidity();
   if (_si_problem.immediatelyPrintInvalidSolution())
-    app.solutionInvalidity().printDebug(_invalid_solution_id);
-  return app.solutionInvalidity().flagInvalidSolutionInternal(_invalid_solution_id);
+    solution_invalidity.printDebug(_invalid_solution_id);
+  return solution_invalidity.flagInvalidSolutionInternal(_invalid_solution_id);
 }
 
 InvalidSolutionID
 SolutionInvalidInterface::registerInvalidSolutionInternal(const std::string & message) const
 {
-  return moose::internal::getSolutionInvalidityRegistry().registerInvalidObject(
+  return moose::internal::getSolutionInvalidityRegistry().registerInvalidity(
       _si_moose_object.type(), message);
 }

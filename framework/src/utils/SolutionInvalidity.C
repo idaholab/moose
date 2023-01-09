@@ -77,7 +77,7 @@ SolutionInvalidity::print(const ConsoleStream & console) const
 void
 SolutionInvalidity::printDebug(InvalidSolutionID _invalid_solution_id) const
 {
-  const auto & info = _solution_invalidity_registry.sectionInfo(_invalid_solution_id);
+  const auto & info = _solution_invalidity_registry.item(_invalid_solution_id);
   _console << info._name << ": " << info._message << "\n" << std::flush;
 }
 
@@ -107,7 +107,7 @@ SolutionInvalidity::summaryTable() const
     const auto & entry = _counts[id];
     if (entry.counts > 0)
     {
-      const auto & info = _solution_invalidity_registry.sectionInfo(id);
+      const auto & info = _solution_invalidity_registry.item(id);
       vtable.addRow(info._name,            // Section
                     entry.counts,          // Current Interation Warnings
                     entry.timeiter_counts, // Current Time Interation Warnings

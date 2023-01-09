@@ -22,15 +22,8 @@ SolutionInvalidityRegistry::SolutionInvalidityRegistry()
 }
 
 InvalidSolutionID
-SolutionInvalidityRegistry::registerInvalidObject(const std::string & object_name,
-                                                  const std::string & message)
-{
-  return actuallyRegisterSection(object_name, message);
-}
-
-InvalidSolutionID
-SolutionInvalidityRegistry::actuallyRegisterSection(const std::string & object_name,
-                                                    const std::string & message)
+SolutionInvalidityRegistry::registerInvalidity(const std::string & object_name,
+                                               const std::string & message)
 {
   const auto create_item = [&object_name, &message](const std::size_t id)
   { return SolutionInvalidityInfo(id, object_name, message); };

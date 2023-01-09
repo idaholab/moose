@@ -32,6 +32,7 @@ class SolutionInvalidInterface
 public:
   SolutionInvalidInterface(MooseObject * const moose_object);
 
+protected:
   void flagInvalidSolutionInternal(InvalidSolutionID _invalid_solution_id);
 
   InvalidSolutionID registerInvalidSolutionInternal(const std::string & message) const;
