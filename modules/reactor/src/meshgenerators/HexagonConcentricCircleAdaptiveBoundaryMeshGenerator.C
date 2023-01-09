@@ -62,7 +62,8 @@ HexagonConcentricCircleAdaptiveBoundaryMeshGenerator::
                                                : std::vector<MeshGeneratorName>()))
 {
   if (_sides_to_adapt.size() != _input_names.size())
-    paramError("sides_to_adapt", "This parameter and inputs must have the same length.");
+    paramError("sides_to_adapt",
+               "This parameter and meshes_to_adapt_to must have the same length.");
   if (isParamValid("inputs") && isParamValid("meshes_to_adapt_to"))
     paramError("inputs",
                "this parameter is deprecated; it cannot be provided along with the new parameter "

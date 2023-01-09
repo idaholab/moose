@@ -57,7 +57,8 @@ CartesianConcentricCircleAdaptiveBoundaryMeshGenerator::
                      : std::vector<MeshGeneratorName>())
 {
   if (_sides_to_adapt.size() != _input_names.size())
-    paramError("sides_to_adapt", "This parameter and inputs must have the same length.");
+    paramError("sides_to_adapt",
+               "This parameter and meshes_to_adapt_to must have the same length.");
   if (isParamValid("meshes_to_adapt_to"))
     _input_ptrs = getMeshes("meshes_to_adapt_to");
   _is_control_drum_meta = getParam<bool>("is_control_drum");

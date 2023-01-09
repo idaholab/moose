@@ -66,6 +66,15 @@
         requirement ='The system shall stitch square patterned meshes to form a large mesh.'
         recover = false
     []
+    [patterned_pattern_cd]
+      type = 'Exodiff'
+      exodiff_opts = '-pedantic'
+      input = 'patterned_pattern_cd.i'
+      exodiff = 'patterned_pattern_cd.e'
+      cli_args = '--mesh-only "patterned_pattern_cd.e"'
+      requirement ='The system shall stitch square patterned meshes to form a large mesh with a control drum.'
+      recover = false
+  []
     [err_input_flat_side_up]
       type = 'RunException'
       input = 'patterned_2d.i'
