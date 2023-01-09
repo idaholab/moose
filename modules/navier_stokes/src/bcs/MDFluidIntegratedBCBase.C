@@ -58,7 +58,7 @@ MDFluidIntegratedBCBase::MDFluidIntegratedBCBase(const InputParameters & paramet
 }
 
 unsigned
-MDFluidIntegratedBCBase::map_var_number(unsigned var)
+MDFluidIntegratedBCBase::mapVarNumber(unsigned var)
 {
   // Convert the Moose numbering to:
   // 0 for pressure

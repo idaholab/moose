@@ -124,7 +124,7 @@ MDFluidEnergyKernel::computeQpJacobian()
 Real
 MDFluidEnergyKernel::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  unsigned m = this->map_var_number(jvar);
+  unsigned m = this->mapVarNumber(jvar);
 
   RealVectorValue vec_vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
   Real enthalpy = _eos.h_from_p_T(_pressure[_qp], _u[_qp]);

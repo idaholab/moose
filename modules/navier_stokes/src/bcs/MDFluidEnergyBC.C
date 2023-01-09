@@ -110,7 +110,7 @@ MDFluidEnergyBC::computeQpOffDiagJacobian(unsigned int jvar)
   }
 
   Real jac = 0;
-  unsigned m = this->map_var_number(jvar);
+  unsigned m = this->mapVarNumber(jvar);
   switch (m)
   {
     case 1:

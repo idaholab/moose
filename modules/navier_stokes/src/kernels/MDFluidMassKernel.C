@@ -81,7 +81,7 @@ Real
 MDFluidMassKernel::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // Convert the Moose numbering to internal porous medium model variable numbering.
-  unsigned m = this->map_var_number(jvar);
+  unsigned m = this->mapVarNumber(jvar);
 
   switch (m)
   {

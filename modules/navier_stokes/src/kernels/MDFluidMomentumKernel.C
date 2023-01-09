@@ -145,7 +145,7 @@ MDFluidMomentumKernel::computeQpJacobian()
 Real
 MDFluidMomentumKernel::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  unsigned m = this->map_var_number(jvar);
+  unsigned m = this->mapVarNumber(jvar);
   Real porosity = _has_porosity ? _porosity[_qp] : 1.0;
   RealVectorValue vec_vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
 

@@ -89,8 +89,8 @@ MDFluidKernelBase::MDFluidKernelBase(const InputParameters & parameters)
     _vec_g(2) = -9.8;
 }
 
-unsigned
-MDFluidKernelBase::map_var_number(unsigned var)
+unsigned int
+MDFluidKernelBase::mapVarNumber(unsigned int var) const
 {
   // Convert the Moose numbering to:
   // 0 for pressure

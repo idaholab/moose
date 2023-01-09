@@ -58,7 +58,7 @@ MDFluidMassBC::computeQpJacobian()
 Real
 MDFluidMassBC::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  unsigned m = this->map_var_number(jvar);
+  unsigned m = this->mapVarNumber(jvar);
 
   switch (m)
   {
