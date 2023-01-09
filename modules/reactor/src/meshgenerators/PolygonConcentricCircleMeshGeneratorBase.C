@@ -212,8 +212,10 @@ PolygonConcentricCircleMeshGeneratorBase::validParams()
 PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBase(
     const InputParameters & parameters)
   : PolygonMeshGeneratorBase(parameters),
-    _num_sides(isParamValid("num_sides") ? getParam<unsigned int>("num_sides")
-                                         : (unsigned int)HEXAGON_NUM_SIDES),
+    _num_sides(isParamValid("num_sides")
+                   ? getParam<unsigned int>("num_sides")
+                   : (isParamValid("hexagon_size") ? (unsigned int)HEXAGON_NUM_SIDES
+                                                   : (unsigned int)SQUARE_NUM_SIDES)),
     _ring_radii(isParamValid("ring_radii") ? getParam<std::vector<Real>>("ring_radii")
                                            : std::vector<Real>()),
     _ring_intervals(isParamValid("ring_intervals")
@@ -292,9 +294,15 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
     _polygon_size_style(
         isParamValid("polygon_size_style")
             ? getParam<MooseEnum>("polygon_size_style").template getEnum<PolygonSizeStyle>()
-            : getParam<MooseEnum>("hexagon_size_style").template getEnum<PolygonSizeStyle>()),
-    _polygon_size(isParamValid("polygon_size") ? getParam<Real>("polygon_size")
-                                               : getParam<Real>("hexagon_size")),
+            : (isParamValid("hexagon_size_style")
+                   ? getParam<MooseEnum>("hexagon_size_style").template getEnum<PolygonSizeStyle>()
+                   : getParam<MooseEnum>("square_size_style")
+                         .template getEnum<PolygonSizeStyle>())),
+    _polygon_size(isParamValid("polygon_size")
+                      ? getParam<Real>("polygon_size")
+                      : (isParamValid("hexagon_size") ? getParam<Real>("hexagon_size")
+                                                      : (getParam<Real>("square_size") /
+                                                         2.0))), // square size is twice as apothem
     _num_sectors_per_side(getParam<std::vector<unsigned int>>("num_sectors_per_side")),
     _background_intervals(getParam<unsigned int>("background_intervals")),
     // background is usually a single block; however, when there are no rings, background has two
@@ -355,8 +363,8 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
 {
   // This error message is only reserved for future derived classes. Neither of the current derived
   // classes will trigger this error.
-  if (!_sides_to_adapt.empty() && _num_sides != HEXAGON_NUM_SIDES)
-    paramError("sides_to_adapt", "If provided, the generated mesh must be a hexagon.");
+  if (!_sides_to_adapt.empty() && _num_sides != HEXAGON_NUM_SIDES && _num_sides != SQUARE_NUM_SIDES)
+    paramError("sides_to_adapt", "If provided, the generated mesh must be a hexagon or a square.");
   _pitch = 2.0 * (_polygon_size_style == PolygonSizeStyle::apothem
                       ? _polygon_size
                       : _polygon_size * std::cos(M_PI / Real(_num_sides)));
@@ -597,25 +605,32 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
   for (unsigned int mesh_index = 0; mesh_index < _num_sides; mesh_index++)
   {
     // When adaptive boundaries exist (only possible for hexagon meshes thru
-    // `HexagonConcentricCircleAdaptiveBoundaryMeshGenerator`), nodes' azimuthal angle cannot be
+    // `HexagonConcentricCircleAdaptiveBoundaryMeshGenerator` or square meshes thru
+    // `CartesianConcentricCircleAdaptiveBoundaryMeshGenerator`), nodes' azimuthal angle cannot be
     // arithmetically obtained. Instead, `azimuthalAnglesCollector() is used to get this
     // information from the mesh directly.`
     if (std::find(_sides_to_adapt.begin(), _sides_to_adapt.end(), mesh_index) !=
         _sides_to_adapt.end())
     {
-      // The following lines only work for hexagon; and only a hexagon needs such functionality.
-      Real lower_azi = (Real)mesh_index * 60.0 - 150.0;
-      Real upper_azi = (Real)((mesh_index + 1) % 6) * 60.0 - 150.0;
-      _azimuthal_angles_array.push_back(
-          azimuthalAnglesCollector(*input[mesh_input_counter], lower_azi, upper_azi));
+      // The following lines only work for hexagon and square; and only a hexagon or a square needs
+      // such functionality.
+      Real lower_azi =
+          _num_sides == 6 ? ((Real)mesh_index * 60.0 - 150.0) : ((Real)mesh_index * 90.0 - 135.0);
+      Real upper_azi = _num_sides == 6 ? ((Real)((mesh_index + 1) % 6) * 60.0 - 150.0)
+                                       : ((Real)((mesh_index + 1) % 4) * 90.0 - 135.0);
+      _azimuthal_angles_array.push_back(azimuthalAnglesCollector(
+          *input[mesh_input_counter], lower_azi, upper_azi, ANGLE_TANGENT, _num_sides));
       // loop over the _azimuthal_angles_array just collected to convert tangent to azimuthal
       // angles.
       for (unsigned int i = 1; i < _azimuthal_angles_array.back().size(); i++)
       {
         azimuthal_list.push_back(
-            (Real)mesh_index * 60.0 - 150.0 +
-            std::atan((_azimuthal_angles_array.back()[i - 1] - 1.0) / std::sqrt(3.0)) * 180.0 /
-                M_PI);
+            _num_sides == 6
+                ? ((Real)mesh_index * 60.0 - 150.0 +
+                   std::atan((_azimuthal_angles_array.back()[i - 1] - 1.0) / std::sqrt(3.0)) *
+                       180.0 / M_PI)
+                : ((Real)mesh_index * 90.0 - 135.0 +
+                   std::atan((_azimuthal_angles_array.back()[i - 1] - 1.0)) * 180.0 / M_PI));
       }
       mesh_input_counter++;
     }

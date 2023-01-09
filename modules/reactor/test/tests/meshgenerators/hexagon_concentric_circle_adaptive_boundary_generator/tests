@@ -22,9 +22,17 @@
   [err_sides_to_adpat_size]
     type = 'RunException'
     input = 'hex_2d.i'
-    cli_args = 'Mesh/gen/sides_to_adapt="0 1" Mesh/gen/inputs="fmg"
+    cli_args = 'Mesh/gen/sides_to_adapt="0 1"
                 --mesh-only "hex_2d_err.e"'
-    expect_err = 'This parameter and inputs must have the same length.'
-    requirement = "The system shall throw an error if sides_to_adapt and inputs have different sizes."
+    expect_err = 'This parameter and meshes_to_adapt_to must have the same length.'
+    requirement = "The system shall throw an error if sides_to_adapt and inputs have different sizes for the adaptive hexagonal mesh."
+  []
+  [err_deprecated]
+    type = 'RunException'
+    input = 'hex_2d.i'
+    cli_args = 'Mesh/gen/inputs="fmg"
+                --mesh-only "hex_2d_err.e"'
+    expect_err = 'this parameter is deprecated; it cannot be provided along with the new parameter'
+    requirement = "The system shall throw an error if the deprecated input parameter is provided along with the new parameter."
   []
 []

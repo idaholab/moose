@@ -1,0 +1,30 @@
+[Tests]
+  design = 'meshgenerators/CartesianConcentricCircleAdaptiveBoundaryMeshGenerator.md'
+  issues = '#22828'
+  [back_only]
+    type = 'Exodiff'
+    input = 'square_2d.i'
+    exodiff = 'square_2d_back_only.e'
+    cli_args = '--mesh-only "square_2d_back_only.e"'
+    requirement = 'The system shall generate a square mesh that adapts one boundary of a mesh loaded from an exodus file.'
+    recover = false
+    mesh_mode = 'REPLICATED'
+  []
+  [empty_inputs]
+    type = 'Exodiff'
+    input = 'square_2d_empty_inputs.i'
+    exodiff = 'square_2d_empty_inputs.e'
+    cli_args = '--mesh-only "square_2d_empty_inputs.e"'
+    requirement = 'The system shall generate a non-adaptive square mesh when inputs and sides_to_adapt are not provided.'
+    recover = false
+    mesh_mode = 'REPLICATED'
+  []
+  [err_sides_to_adpat_size]
+    type = 'RunException'
+    input = 'square_2d.i'
+    cli_args = 'Mesh/gen/sides_to_adapt="0 1"
+                --mesh-only "square_2d_err.e"'
+    expect_err = 'This parameter and meshes_to_adapt_to must have the same length.'
+    requirement = "The system shall throw an error if the vector of sides to adapts and the vector of input meshes to adapt to have different sizes for the adaptive cartesian mesh."
+  []
+[]
