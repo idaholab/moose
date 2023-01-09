@@ -58,6 +58,8 @@ protected:
   const std::vector<Real> _critical_t_series;
   /// whether the curve is a closed loop or not
   const bool _is_closed_loop;
+  /// the point-to-point distance tolerance that is used to determine whether the two points are overlapped.
+  const Real _point_overlapping_tolerance;
   /// Number of segments of the curve section that is generated to forcefully close the loop.
   const unsigned int _forced_closing_num_segments;
   /// Oversampling factor to help make node distance nearly uniform

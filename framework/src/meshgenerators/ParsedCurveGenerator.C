@@ -43,6 +43,11 @@ ParsedCurveGenerator::validParams()
       "constant_expressions",
       "Vector of values for the constants in constant_names (can be an FParser expression)");
   params.addParam<bool>("is_closed_loop", false, "Whether the curve is closed or not.");
+  params.addRangeCheckedParam<Real>("point_overlapping_tolerance",
+                                    libMesh::TOLERANCE,
+                                    "point_overlapping_tolerance>0.0",
+                                    "The point-to-point distance tolerance that is used to "
+                                    "determine whether the two points are overlapped.");
   params.addRangeCheckedParam<unsigned int>(
       "forced_closing_num_segments",
       "forced_closing_num_segments>1",
@@ -73,6 +78,7 @@ ParsedCurveGenerator::ParsedCurveGenerator(const InputParameters & parameters)
     _nums_segments(getParam<std::vector<unsigned int>>("nums_segments")),
     _critical_t_series(getParam<std::vector<Real>>("critical_t_series")),
     _is_closed_loop(getParam<bool>("is_closed_loop")),
+    _point_overlapping_tolerance(getParam<Real>("point_overlapping_tolerance")),
     _forced_closing_num_segments(isParamValid("forced_closing_num_segments")
                                      ? getParam<unsigned int>("forced_closing_num_segments")
                                      : 0),
@@ -183,7 +189,8 @@ ParsedCurveGenerator::generate()
   // For a closed loop, need to check if the first and last Points are overlapped
   if (_is_closed_loop)
   {
-    if (MooseUtils::absoluteFuzzyEqual((*nodes.back() - *nodes.front()).norm(), 0.0))
+    if (MooseUtils::absoluteFuzzyEqual(
+            (*nodes.back() - *nodes.front()).norm(), 0.0, _point_overlapping_tolerance))
     {
       // Remove the overlapped nodes for a closed loop
       mesh->delete_node(nodes.back());
