@@ -91,16 +91,4 @@ private:
   {
     mooseError("not implemented");
   }
-
-  using Moose::FunctorBase<T>::evaluateGradient;
-
-  GradientType evaluateGradient(const ElemArg &, unsigned int) const override
-  {
-    mooseError("not implemented");
-  }
-
-  GradientType evaluateGradient(const FaceArg &, unsigned int) const override
-  {
-    mooseError("not implemented");
-  }
 };

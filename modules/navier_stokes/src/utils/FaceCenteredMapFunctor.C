@@ -24,7 +24,7 @@ FaceCenteredMapFunctor<T, Map>::evaluate(const ElemArg & elem_arg, unsigned int)
   // Aguerre, Horacio J., et al. "An oscillation-free flow solver based on flux reconstruction."
   // Journal of Computational Physics 365 (2018): 135-148.
   //
-  // This basically reconstructes the cell value based on flux values as follows:
+  // This basically reconstructs the cell value based on flux values as follows:
   //
   // $\left( \sum_f n_f \outer S_f \right)^{-1} \sum_f (\phi_f \cdot S_f)n_f$
   //
@@ -32,6 +32,9 @@ FaceCenteredMapFunctor<T, Map>::evaluate(const ElemArg & elem_arg, unsigned int)
   // vector value on the field. Hence the restriction to vector values.
 
   using ValueType = typename FaceCenteredMapFunctor<T, Map>::ValueType;
+
+  // Primitive type one rank below the type of the stored data (T). If we are storing a rank two
+  // tensor, this is a vector, if we are storing a vector this is just a number
   using PrimitiveType = typename MetaPhysicL::ReplaceAlgebraicType<
       T,
       typename TensorTools::DecrementRank<typename MetaPhysicL::ValueType<T>::type>::type>::type;
@@ -44,11 +47,11 @@ FaceCenteredMapFunctor<T, Map>::evaluate(const ElemArg & elem_arg, unsigned int)
     DenseMatrix<PrimitiveType> n_x_Sf(dim, dim);
     DenseVector<PrimitiveType> sum_normal_flux(dim);
 
-    const Elem * elem = elem_arg.elem;
+    const Elem * const elem = elem_arg.elem;
 
     for (const auto side : make_range(elem->n_sides()))
     {
-      const Elem * neighbor = elem->neighbor_ptr(side);
+      const Elem * const neighbor = elem->neighbor_ptr(side);
 
       // We need to check if the faceinfo belongs to the element or the neighbor. Based on that we
       // query the faceinfo and adjust the normal to point outward of the current cell
@@ -58,26 +61,26 @@ FaceCenteredMapFunctor<T, Map>::evaluate(const ElemArg & elem_arg, unsigned int)
       const Point & normal = elem_has_fi ? fi->normal() : Point(-fi->normal());
 
       const Point area_vector = normal * fi->faceArea();
-      ValueType face_value = this->evaluate(fi);
+      const ValueType face_value = this->evaluate(fi);
 
       const auto product = Moose::outer_product(normal, area_vector);
 
       const auto flux_contrib = normal * (face_value * area_vector);
-      for (auto i : make_range(dim))
+      for (const auto i : make_range(dim))
       {
         sum_normal_flux(i) += flux_contrib(i);
-        for (auto j : make_range(dim))
+        for (const auto j : make_range(dim))
           n_x_Sf(i, j) += product(i, j);
       }
     }
 
     // We do the inversion of the surface vector matrix here. It is symmetric
-    // so we can do it using a Cholesky decomposition.
+    // and small so we can do it using a Cholesky decomposition.
     DenseVector<PrimitiveType> dense_result(dim);
     n_x_Sf.cholesky_solve(sum_normal_flux, dense_result);
 
     ValueType result;
-    for (auto i : make_range(dim))
+    for (const auto i : make_range(dim))
       result(i) = dense_result(i);
 
     return result;

@@ -3411,9 +3411,7 @@ MooseMesh::faceInfo(const Elem * elem, unsigned int side) const
 const ElemInfo &
 MooseMesh::elemInfo(const dof_id_type id) const
 {
-  mooseAssert(_elem_to_elem_info.find(id) != _elem_to_elem_info.end(),
-              "We should have found the elemInfo for the given element id!");
-  return _elem_to_elem_info[id];
+  return libmesh_map_find(_elem_to_elem_info, id);
 }
 
 void

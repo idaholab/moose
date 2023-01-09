@@ -11,6 +11,7 @@
 
 // MOOSE includes
 #include "MooseMesh.h"
+#include "Assembly.h"
 
 registerMooseObject("NavierStokesTestApp", TestFaceToCellReconstruction);
 
@@ -41,14 +42,11 @@ TestFaceToCellReconstruction::initialize()
   }
 
   // Loop over the local elements if we have distributed tests
-  auto begin = _fe_problem.mesh().getMesh().active_local_elements_begin();
-  auto end = _fe_problem.mesh().getMesh().active_local_elements_end();
-
-  for (const Elem * elem : as_range(begin, end))
+  for (const Elem * elem : _fe_problem.mesh().getMesh().active_local_element_ptr_range())
   {
     const auto elem_arg = makeElemArg(elem);
     const Point & elem_centroid = _fe_problem.mesh().elemInfo(elem->id()).centroid();
-    const Real elem_volume = _fe_problem.mesh().elemInfo(elem->id()).volume();
+    const Real elem_volume = this->_assembly.elementVolume(elem);
 
     RealVectorValue exact_value(-sin(elem_centroid(0)) * cos(elem_centroid(1)),
                                 cos(elem_centroid(0)) * sin(elem_centroid(1)),
