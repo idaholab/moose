@@ -80,7 +80,7 @@
                 Mesh/trim/center_trimming_section_boundary="center_section"
                 Mesh/inactive="pattern2 pattern_mod"
                 --mesh-only "ring_trimming.e"'
-    requirement ='The system shall be able to perform center trimming on a center-trimmable mesh with peripheral ring(s) added.'
+    requirement ='The system shall be able to perform center trimming on a center-trimmable hexagonal mesh with peripheral ring(s) added.'
     recover = false
   []
   [patterned_pattern_trimming]
@@ -148,7 +148,7 @@
                 Mesh/trim/external_boundary="external"
                 Mesh/inactive="peripheral_ring pattern_mod pattern2"'
     expect_err = 'the provided external boundary does not exist in the input mesh.'
-    requirement = "The system shall throw an error if the input mesh does not contain the provided external boundary."
+    requirement = "The system shall throw an error if the input hexagonal mesh does not contain the provided external boundary."
   []
   [err_incompatible]
     type = RunException
@@ -157,37 +157,41 @@
     expect_err = 'The input mesh is not compatible with HexagonMeshTrimmer.'
     requirement = "The system shall throw an error if the input mesh has not been marked compatible with hexagonal mesh trimming."
   []
-  [err_center_trimmible]
+  [err_center_trimmable]
     type = RunException
     input = 'err_trimmability.i'
     cli_args = 'Mesh/trim/input=peripheral_ring
                 Mesh/inactive="gmg"
                 Mesh/trim/center_trim_starting_index=0
-                Mesh/trim/center_trim_ending_index=6'
+                Mesh/trim/center_trim_ending_index=6
+                --mesh-only err.e'
     expect_err = 'The input mesh cannot be trimmed through its center.'
-    requirement = "The system shall throw an error if the input mesh cannot be center trimmed."
+    requirement = "The system shall throw an error if the input hexagonal mesh cannot be center trimmed."
   []
   [err_unneeded_center_trim_bdry]
     type = RunException
     input = 'assembly_trim.i'
-    cli_args = 'Mesh/trim/center_trimming_section_boundary="center_section"'
+    cli_args = 'Mesh/trim/center_trimming_section_boundary="center_section"
+                Mesh/inactive="pattern2 pattern_mod peripheral_ring"'
     expect_err = 'this input parameter is not used if center trimming is not performed.'
-    requirement = "The system shall throw an error if the input mesh is not to be trimmed at the center but the center trimming boundary is provided anyway."
+    requirement = "The system shall throw an error if the input hexagonal mesh is not to be trimmed at the center but the center trimming boundary is provided anyway."
   []
   [err_over_center_trim]
     type = RunException
     input = 'assembly_trim.i'
     cli_args = 'Mesh/trim/center_trim_starting_index=0
-                Mesh/trim/center_trim_ending_index=10'
+                Mesh/trim/center_trim_ending_index=10
+                Mesh/inactive="pattern2 pattern_mod peripheral_ring"'
     expect_err = 'the remaining mesh after center trimming defined by this parameter and center_trim_ending_index must be equal or smaller than half of the input mesh.'
-    requirement = "The system shall throw an error if the center trimming would yield a mesh that is over half of the input mesh, because more than half of the angular sectors are requested."
+    requirement = "The system shall throw an error if the center trimming would yield a mesh that is over half of the input hexagonal mesh, because more than half of the angular sectors are requested."
   []
   [err_incomplete_center_trim]
     type = RunException
     input = 'assembly_trim.i'
-    cli_args = 'Mesh/trim/center_trim_starting_index=0'
+    cli_args = 'Mesh/trim/center_trim_starting_index=0
+                Mesh/inactive="pattern2 pattern_mod peripheral_ring"'
     expect_err = 'this parameter must be provided along with center_trim_ending_index.'
-    requirement = "The system shall throw an error if the center trimming index parameters are not given in a pair."
+    requirement = "The system shall throw an error if the center trimming index parameters are not given in a pair for hexagonal mesh trimming."
   []
   [err_peripheral_trimmable]
     type = RunException
@@ -196,14 +200,14 @@
                 Mesh/inactive="gmg"
                 Mesh/trim/trim_peripheral_region="1 1 1 1 1 1"'
     expect_err = 'The input mesh does not have a trimmable peripheral region.'
-    requirement = "The system shall throw an error if the input mesh cannot be trimmed at the periphery."
+    requirement = "The system shall throw an error if the input hexagonal mesh cannot be trimmed at the periphery."
   []
   [err_unneeded_peripheral_trim_bdry]
     type = RunException
     input = 'assembly_trim.i'
     cli_args = 'Mesh/trim/peripheral_trimming_section_boundary="peripheral_section"'
     expect_err = 'this input parameter is not used if peripheral trimming is not performed.'
-    requirement = "The system shall throw an error if the input mesh is not to be trimmed at the periphery but the peripheral trimming boundary is provided."
+    requirement = "The system shall throw an error if the input hexagonal mesh is not to be trimmed at the periphery but the peripheral trimming boundary is provided."
   []
   [err_preexistent_tri_block_name]
     type = RunException
@@ -218,7 +222,7 @@
                 Mesh/inactive="pattern_mod peripheral_ring"
                 --mesh-only err.e'
     expect_err = 'The new subdomain name already exists in the mesh.'
-    requirement = "The system shall throw an error if the block name assigned to the newly generated TRI elements already exists in the input mesh."
+    requirement = "The system shall throw an error if the block name assigned to the newly generated TRI elements already exists in the input hexagonal mesh."
   []
   [warning_tri_block_gen]
     type = 'RunException'
@@ -227,7 +231,7 @@
                 Mesh/inactive="pattern_mod peripheral_ring pattern2"
                 --mesh-only "peripheral_trimming_partial.e"'
     expect_err = 'Degenerate QUAD elements have been converted into TRI elements with a new subdomain name'
-    requirement ='The system shall throw a warning if new blocks are created to avert degenerate elements.'
+    requirement ='The system shall throw a warning if new blocks are created in the hexagonal mesh to avert degenerate elements.'
     allow_warnings = false
   []
 []

@@ -936,7 +936,7 @@ PolygonMeshGeneratorBase::pointInterpolate(const Real pi_1_x,
                                            const unsigned int i,
                                            const unsigned int j,
                                            const unsigned int num_sectors_per_side,
-                                           const unsigned int peripheral_invervals) const
+                                           const unsigned int peripheral_intervals) const
 {
   auto position_px_inner =
       (pi_1_x * (num_sectors_per_side / 2.0 - j) + pi_2_x * j) / (num_sectors_per_side / 2.0);
@@ -946,194 +946,9 @@ PolygonMeshGeneratorBase::pointInterpolate(const Real pi_1_x,
       (d_po_1_x * (num_sectors_per_side / 2.0 - j) + d_po_2_x * j) / (num_sectors_per_side / 2.0);
   auto position_py_outer =
       (d_po_1_y * (num_sectors_per_side / 2.0 - j) + d_po_2_y * j) / (num_sectors_per_side / 2.0);
-  auto position_px = position_px_inner + position_px_outer * i / peripheral_invervals;
-  auto position_py = position_py_inner + position_py_outer * i / peripheral_invervals;
+  auto position_px = position_px_inner + position_px_outer * i / peripheral_intervals;
+  auto position_py = position_py_inner + position_py_outer * i / peripheral_intervals;
   return std::make_pair(position_px, position_py);
-}
-
-void
-PolygonMeshGeneratorBase::addPeripheralMesh(
-    ReplicatedMesh & mesh,
-    const unsigned int pattern,
-    const Real pitch,
-    const std::vector<Real> & extra_dist,
-    const std::vector<unsigned int> & num_sectors_per_side_array,
-    const std::vector<unsigned int> & peripheral_duct_intervals,
-    const Real rotation_angle,
-    const unsigned int mesh_type,
-    const bool create_interface_boundaries)
-{
-  std::vector<std::pair<Real, Real>> positions_inner;
-  std::vector<std::pair<Real, Real>> d_positions_outer;
-
-  std::vector<std::vector<unsigned int>> inner_index;
-  std::vector<std::vector<unsigned int>> outer_index;
-  std::vector<std::pair<Real, Real>> sub_positions_inner;
-  std::vector<std::pair<Real, Real>> sub_d_positions_outer;
-
-  if (mesh_type == CORNER_MESH)
-  {
-    // corner mesh has three sides that need peripheral meshes.
-    // each element has three sub-elements, representing beginning, middle, and ending azimuthal
-    // points
-    inner_index = {{0, 1, 2}, {2, 3, 4}, {4, 5, 6}};
-    outer_index = {{0, 1, 2}, {2, 3, 4}, {4, 5, 6}};
-  }
-  else
-  {
-    // side mesh has two sides that need peripheral meshes.
-    inner_index = {{0, 1, 2}, {2, 7, 8}};
-    outer_index = {{0, 1, 2}, {2, 7, 8}};
-  }
-
-  // extra_dist includes background and ducts.
-  // Loop to calculate the positions of the boundaries.
-  for (unsigned int i = 0; i < extra_dist.size(); i++)
-  {
-    positionSetup(positions_inner,
-                  d_positions_outer,
-                  i == 0 ? 0.0 : extra_dist[i - 1],
-                  extra_dist[i],
-                  pitch,
-                  i);
-
-    // Loop for all applicable sides that need peripherial mesh (3 for corner and 2 for edge)
-    for (unsigned int peripheral_index = 0; peripheral_index < inner_index.size();
-         peripheral_index++)
-    {
-      // Loop for beginning, middle and ending positions of a side
-      for (unsigned int vector_index = 0; vector_index < 3; vector_index++)
-      {
-        sub_positions_inner.push_back(positions_inner[inner_index[peripheral_index][vector_index]]);
-        sub_d_positions_outer.push_back(
-            d_positions_outer[outer_index[peripheral_index][vector_index]]);
-      }
-      auto meshp0 = buildSimplePeripheral(num_sectors_per_side_array[pattern],
-                                          peripheral_duct_intervals[i],
-                                          sub_positions_inner,
-                                          sub_d_positions_outer,
-                                          i,
-                                          create_interface_boundaries);
-      if (mesh.is_prepared()) // Need to prepare if the other is prepared to stitch
-        meshp0->prepare_for_use();
-
-      // rotate the peripheral mesh to the desired side of the hexagon.
-      MeshTools::Modification::rotate(*meshp0, rotation_angle, 0, 0);
-      mesh.stitch_meshes(*meshp0, OUTER_SIDESET_ID, OUTER_SIDESET_ID, TOLERANCE, true);
-      sub_positions_inner.resize(0);
-      sub_d_positions_outer.resize(0);
-    }
-  }
-}
-
-void
-PolygonMeshGeneratorBase::positionSetup(std::vector<std::pair<Real, Real>> & positions_inner,
-                                        std::vector<std::pair<Real, Real>> & d_positions_outer,
-                                        const Real extra_dist_in,
-                                        const Real extra_dist_out,
-                                        const Real pitch,
-                                        const unsigned int radial_index) const
-{
-  positions_inner.resize(0);
-  d_positions_outer.resize(0);
-
-  // Nine sets of positions are generated here, as shown below.
-  // CORNER MESH Peripheral {0 1 2}, {2 3 4} and {4 5 6}
-  //           3       2   1   0
-  //            \      :   :   :
-  //             \     :   :   :
-  //      4.       .       :   :
-  //         ` .               :
-  //      5.   |               |
-  //         ` |               |
-  //      6.   |               |
-  //         ` |               |
-  //               .       .
-  //                   .
-  //
-  // EDGE MESH Peripheral {0 1 2} and {2 7 8}
-  //           8   7   2   1   0
-  //           :   :   :   :   :
-  //           :   :   :   :   :
-  //           :   :       :   :
-  //           :               :
-  //           |               |
-  //           |               |
-  //           |               |
-  //           |               |
-  //               .       .
-  //                   .
-
-  positions_inner.push_back(
-      std::make_pair(-pitch / 2.0,
-                     std::sqrt(3.0) * pitch / 6.0 +
-                         (radial_index != 0 ? std::sqrt(3.0) * pitch / 6.0 + extra_dist_in : 0.0)));
-  positions_inner.push_back(std::make_pair(
-      -pitch / 4.0,
-      std::sqrt(3.0) * pitch / 4.0 +
-          (radial_index != 0 ? std::sqrt(3.0) * pitch / 12.0 + extra_dist_in : 0.0)));
-  positions_inner.push_back(std::make_pair(
-      0.0, std::sqrt(3.0) * pitch / 3.0 + (radial_index != 0 ? extra_dist_in : 0.0)));
-  positions_inner.push_back(std::make_pair(
-      pitch / 4.0 + (radial_index != 0 ? pitch / 12.0 + std::sqrt(3.0) * extra_dist_in / 3.0 : 0.0),
-      std::sqrt(3.0) * pitch / 4.0 +
-          (radial_index != 0 ? pitch * std::sqrt(3.0) / 12.0 + extra_dist_in : 0.0)));
-  positions_inner.push_back(std::make_pair(
-      pitch / 2.0 + (radial_index != 0 ? std::sqrt(3.0) * extra_dist_in / 2.0 : 0.0),
-      std::sqrt(3.0) * pitch / 6.0 + (radial_index != 0 ? extra_dist_in / 2.0 : 0.0)));
-  positions_inner.push_back(std::make_pair(
-      pitch / 2.0 + (radial_index != 0 ? pitch / 8.0 + std::sqrt(3.0) * extra_dist_in / 2.0 : 0.0),
-      0.0 + (radial_index != 0 ? std::sqrt(3.0) * pitch / 24.0 + extra_dist_in / 2.0 : 0.0)));
-  positions_inner.push_back(std::make_pair(
-      pitch / 2.0 + (radial_index != 0 ? pitch / 4.0 + std::sqrt(3.0) * extra_dist_in / 2.0 : 0.0),
-      -std::sqrt(3.0) * pitch / 6.0 +
-          (radial_index != 0 ? std::sqrt(3.0) * pitch / 12.0 + extra_dist_in / 2.0 : 0.0)));
-  positions_inner.push_back(std::make_pair(
-      pitch / 4.0,
-      std::sqrt(3.0) * pitch / 4.0 +
-          (radial_index != 0 ? std::sqrt(3.0) * pitch / 12.0 + extra_dist_in : 0.0)));
-  positions_inner.push_back(
-      std::make_pair(pitch / 2.0,
-                     std::sqrt(3.0) * pitch / 6.0 +
-                         (radial_index != 0 ? std::sqrt(3.0) * pitch / 6.0 + extra_dist_in : 0.0)));
-
-  d_positions_outer.push_back(
-      std::make_pair(0.0,
-                     std::sqrt(3.0) * pitch / 6.0 + extra_dist_out -
-                         (radial_index != 0 ? std::sqrt(3.0) * pitch / 6.0 + extra_dist_in : 0.0)));
-  d_positions_outer.push_back(std::make_pair(
-      0.0,
-      std::sqrt(3.0) * pitch / 12.0 + extra_dist_out -
-          (radial_index != 0 ? std::sqrt(3.0) * pitch / 12.0 + extra_dist_in : 0.0)));
-  d_positions_outer.push_back(
-      std::make_pair(0.0, extra_dist_out - (radial_index != 0 ? extra_dist_in : 0.0)));
-  d_positions_outer.push_back(std::make_pair(
-      pitch / 12.0 + std::sqrt(3.0) * extra_dist_out / 3.0 -
-          (radial_index != 0 ? pitch / 12.0 + std::sqrt(3.0) * extra_dist_in / 3.0 : 0.0),
-      pitch * std::sqrt(3.0) / 12.0 + extra_dist_out -
-          (radial_index != 0 ? pitch * std::sqrt(3.0) / 12.0 + extra_dist_in : 0.0)));
-  d_positions_outer.push_back(
-      std::make_pair(std::sqrt(3.0) * extra_dist_out / 2.0 -
-                         (radial_index != 0 ? std::sqrt(3.0) * extra_dist_in / 2.0 : 0.0),
-                     extra_dist_out / 2.0 - (radial_index != 0 ? extra_dist_in / 2.0 : 0.0)));
-  d_positions_outer.push_back(std::make_pair(
-      pitch / 8.0 + std::sqrt(3.0) * extra_dist_out / 2.0 -
-          (radial_index != 0 ? pitch / 8.0 + std::sqrt(3.0) * extra_dist_in / 2.0 : 0.0),
-      std::sqrt(3.0) * pitch / 24.0 + extra_dist_out / 2.0 -
-          (radial_index != 0 ? std::sqrt(3.0) * pitch / 24.0 + extra_dist_in / 2.0 : 0.0)));
-  d_positions_outer.push_back(std::make_pair(
-      pitch / 4.0 + std::sqrt(3.0) * extra_dist_out / 2.0 -
-          (radial_index != 0 ? pitch / 4.0 + std::sqrt(3.0) * extra_dist_in / 2.0 : 0.0),
-      std::sqrt(3.0) * pitch / 12.0 + extra_dist_out / 2.0 -
-          (radial_index != 0 ? std::sqrt(3.0) * pitch / 12.0 + extra_dist_in / 2.0 : 0.0)));
-  d_positions_outer.push_back(std::make_pair(
-      0.0,
-      std::sqrt(3.0) * pitch / 12.0 + extra_dist_out -
-          (radial_index != 0 ? std::sqrt(3.0) * pitch / 12.0 + extra_dist_in : 0.0)));
-  d_positions_outer.push_back(
-      std::make_pair(0.0,
-                     std::sqrt(3.0) * pitch / 6.0 + extra_dist_out -
-                         (radial_index != 0 ? std::sqrt(3.0) * pitch / 6.0 + extra_dist_in : 0.0)));
 }
 
 void
@@ -1146,13 +961,14 @@ PolygonMeshGeneratorBase::nodeCoordRotate(Real & x, Real & y, const Real theta) 
 }
 
 void
-PolygonMeshGeneratorBase::cutOffHexDeform(MeshBase & mesh,
-                                          const Real orientation,
-                                          const Real y_max_0,
-                                          const Real y_max_n,
-                                          const Real y_min,
-                                          const unsigned int mesh_type,
-                                          const Real tols) const
+PolygonMeshGeneratorBase::cutOffPolyDeform(MeshBase & mesh,
+                                           const Real orientation,
+                                           const Real y_max_0,
+                                           const Real y_max_n,
+                                           const Real y_min,
+                                           const unsigned int mesh_type,
+                                           const Real unit_angle,
+                                           const Real tols) const
 {
   for (auto & node_ptr : as_range(mesh.nodes_begin(), mesh.nodes_end()))
   {
@@ -1166,13 +982,13 @@ PolygonMeshGeneratorBase::cutOffHexDeform(MeshBase & mesh,
         y = y - y_max_0 + y_max_n;
       else if (x >= 0.0 && y >= y_min)
         y = (y - y_min) / (y_max_0 - y_min) * (y_max_n - y_min) + y_min;
-      else if (y > -x * std::sqrt(3) + tols && y > y_max_0)
+      else if (y > -x / std::tan(unit_angle / 360.0 * M_PI) + tols && y > y_max_0)
       {
         x /= y;
         y = y - y_max_0 + y_max_n;
         x *= y;
       }
-      else if (y > -x * std::sqrt(3) + tols && y >= y_min)
+      else if (y > -x / std::tan(unit_angle / 360.0 * M_PI) + tols && y >= y_min)
       {
         x /= y;
         y = (y - y_min) / (y_max_0 - y_min) * (y_max_n - y_min) + y_min;
@@ -1180,24 +996,24 @@ PolygonMeshGeneratorBase::cutOffHexDeform(MeshBase & mesh,
       }
       nodeCoordRotate(x, y, -orientation);
 
-      nodeCoordRotate(x, y, orientation - 60.0);
+      nodeCoordRotate(x, y, orientation - unit_angle);
       if (x <= 0 && y > y_max_0)
         y = y - y_max_0 + y_max_n;
       else if (x <= 0 && y >= y_min)
         y = (y - y_min) / (y_max_0 - y_min) * (y_max_n - y_min) + y_min;
-      else if (y >= x * std::sqrt(3) - tols && y > y_max_0)
+      else if (y >= x / std::tan(unit_angle / 360.0 * M_PI) - tols && y > y_max_0)
       {
         x /= y;
         y = y - y_max_0 + y_max_n;
         x *= y;
       }
-      else if (y >= x * std::sqrt(3) - tols && y >= y_min)
+      else if (y >= x / std::tan(unit_angle / 360.0 * M_PI) - tols && y >= y_min)
       {
         x /= y;
         y = (y - y_min) / (y_max_0 - y_min) * (y_max_n - y_min) + y_min;
         x *= y;
       }
-      nodeCoordRotate(x, y, 60.0 - orientation);
+      nodeCoordRotate(x, y, unit_angle - orientation);
     }
     else
     {
@@ -1240,6 +1056,7 @@ PolygonMeshGeneratorBase::azimuthalAnglesCollector(ReplicatedMesh & mesh,
                                                    const Real lower_azi,
                                                    const Real upper_azi,
                                                    const unsigned int return_type,
+                                                   const unsigned int num_sides,
                                                    const boundary_id_type bid,
                                                    const bool calculate_origin,
                                                    const Real input_origin_x,
@@ -1288,11 +1105,12 @@ PolygonMeshGeneratorBase::azimuthalAnglesCollector(ReplicatedMesh & mesh,
     if ((lower_azi <= upper_azi && (tmp_azi >= lower_azi - tol && tmp_azi <= upper_azi + tol)) ||
         (lower_azi > upper_azi && (tmp_azi >= lower_azi - tol || tmp_azi <= upper_azi + tol)))
     {
-      azi_point_pairs.push_back(std::make_pair(
-          return_type == ANGLE_DEGREE
-              ? (tmp_azi - mid_azi)
-              : (1.0 + std::sqrt(3.0) * std::tan((tmp_azi - mid_azi) / 180.0 * M_PI)),
-          bd_p_list[i]));
+      azi_point_pairs.push_back(
+          std::make_pair(return_type == ANGLE_DEGREE
+                             ? (tmp_azi - mid_azi)
+                             : (1.0 + std::cos(M_PI / num_sides) / std::sin(M_PI / num_sides) *
+                                          std::tan((tmp_azi - mid_azi) / 180.0 * M_PI)),
+                         bd_p_list[i]));
     }
   }
   std::sort(azi_point_pairs.begin(), azi_point_pairs.end());
@@ -1315,6 +1133,7 @@ PolygonMeshGeneratorBase::azimuthalAnglesCollector(ReplicatedMesh & mesh,
                                                    const Real lower_azi,
                                                    const Real upper_azi,
                                                    const unsigned int return_type,
+                                                   const unsigned int num_sides,
                                                    const boundary_id_type bid,
                                                    const bool calculate_origin,
                                                    const Real input_origin_x,
@@ -1327,6 +1146,7 @@ PolygonMeshGeneratorBase::azimuthalAnglesCollector(ReplicatedMesh & mesh,
                                   lower_azi,
                                   upper_azi,
                                   return_type,
+                                  num_sides,
                                   bid,
                                   calculate_origin,
                                   input_origin_x,

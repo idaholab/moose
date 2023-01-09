@@ -31,7 +31,7 @@
     background_intervals = 2
     hexagon_size = 25
     sides_to_adapt = '0 1 5'
-    inputs = 'pattern_1 pattern_1 pattern_1'
+    meshes_to_adapt_to = 'pattern_1 pattern_1 pattern_1'
     is_control_drum = true
   []
   [pattern_2]

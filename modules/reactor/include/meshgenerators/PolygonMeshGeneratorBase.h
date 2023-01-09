@@ -70,7 +70,8 @@ public:
 
   enum INTRINSIC_NUM_SIDES
   {
-    HEXAGON_NUM_SIDES = 6
+    HEXAGON_NUM_SIDES = 6,
+    SQUARE_NUM_SIDES = 4
   };
 
   /// Contains multiple blocks's boundary layer related parameters
@@ -496,48 +497,7 @@ protected:
                                          const unsigned int i,
                                          const unsigned int j,
                                          const unsigned int num_sectors_per_side,
-                                         const unsigned int peripheral_invervals) const;
-
-  /**
-   * Adds background and duct region mesh to stitched hexagon meshes. Note that the function works
-   * for single unit hexagon mesh (corner or edge) separately before stitching.
-   * @param mesh input mesh to add the peripheral region onto
-   * @param pattern index of the input mesh for patterning
-   * @param pitch pitch size of the input mesh
-   * @param extra_dist extra distance needed to create the peripheral region
-   * @param num_sectors_per_side_array numbers of azimuthal intervals of all input unit meshes
-   * @param peripheral_duct_intervals numbers of radial intervals of the duct regions
-   * @param rotation_angle angle that the generated mesh will be rotated by
-   * @param mesh_type whether the peripheral region is for a corner or a side hexagon mesh
-   * @param create_interface_boundaries whether interface boundary sidesets are created
-   * @return a mesh of the hexagon unit mesh with peripheral region added.
-   */
-  void addPeripheralMesh(ReplicatedMesh & mesh,
-                         const unsigned int pattern, //_pattern{i][j]
-                         const Real pitch,           // pitch_array.front()
-                         const std::vector<Real> & extra_dist,
-                         const std::vector<unsigned int> & num_sectors_per_side_array,
-                         const std::vector<unsigned int> & peripheral_duct_intervals,
-                         const Real rotation_angle,
-                         const unsigned int mesh_type,
-                         const bool create_interface_boundaries);
-
-  /**
-   * Sets up poisitions of peripheral region layer by layer before deformation due to cutoff.
-   * @param positions_inner key positions of the inner side of the peripheral region
-   * @param d_positions_outer key inremental positions of the outer side of the peripheral region
-   * @param extra_dist_in extra distance applied to the inner side
-   * @param extra_dist_out extra distance applied to the outer side
-   * @param pitch pitch size of the involved hexagon mesh
-   * @param radial_index radial layer index
-   * @return n/a
-   */
-  void positionSetup(std::vector<std::pair<Real, Real>> & positions_inner,
-                     std::vector<std::pair<Real, Real>> & d_positions_outer,
-                     const Real extra_dist_in,
-                     const Real extra_dist_out,
-                     const Real pitch,
-                     const unsigned int radial_index) const;
+                                         const unsigned int peripheral_intervals) const;
 
   /**
    * Calculates x and y coordinates after rotating by theta angle.
@@ -549,7 +509,7 @@ protected:
   void nodeCoordRotate(Real & x, Real & y, const Real theta) const;
 
   /**
-   * Deforms peripheral region when the external side of a hexagonal assembly of stitched meshes
+   * Deforms peripheral region when the external side of a polygon assembly of stitched meshes
    * cuts off the stitched meshes.
    * @param mesh input mesh to be deformed
    * @param orientation orientation angle of the input mesh (move the deformation direction to y)
@@ -558,15 +518,17 @@ protected:
    * @param y_min minimum y position that is affected by the deformation
    * @param mesh_type whether the peripheral region is for a corner or a side hexagon mesh.
    * @param tols tolerance used to determine the boundary of deformation region
+   * @param unit_angle unit angle of the geometry, which is 60.0 for hexagonal and 90.0 for square
    * @return n/a (input mesh is directly altered)
    */
-  void cutOffHexDeform(MeshBase & mesh,
-                       const Real orientation,
-                       const Real y_max_0,
-                       const Real y_max_n,
-                       const Real y_min,
-                       const unsigned int mesh_type,
-                       const Real tols = 1E-5) const;
+  void cutOffPolyDeform(MeshBase & mesh,
+                        const Real orientation,
+                        const Real y_max_0,
+                        const Real y_max_n,
+                        const Real y_min,
+                        const unsigned int mesh_type,
+                        const Real unit_angle = 60.0,
+                        const Real tols = 1E-5) const;
 
   /**
    * Finds the center of a quadrilateral based on four vertices.
@@ -589,6 +551,7 @@ protected:
    * @param lower_azi lower boundary of the azimuthal angles to be collected
    * @param upper_azi upper boundary of the azimuthal angles to be collected
    * @param return_type whether angle values or tangent values are returned
+   * @param num_sides number of sides of the input mesh (only used if return type is ANGLE_TANGENT)
    * @param bid id of the boundary of which the nodes' azimuthal angles are collected
    * @param calculate_origin whether the mesh origin is calculated based on the centroid position
    * @param input_origin_x precalculated mesh origin coordinate x
@@ -602,6 +565,7 @@ protected:
                                              const Real lower_azi = -30.0,
                                              const Real upper_azi = 30.0,
                                              const unsigned int return_type = ANGLE_TANGENT,
+                                             const unsigned int num_sides = 6,
                                              const boundary_id_type bid = OUTER_SIDESET_ID,
                                              const bool calculate_origin = true,
                                              const Real input_origin_x = 0.0,
@@ -614,6 +578,7 @@ protected:
    * @param lower_azi lower boundary of the azimuthal angles to be collected
    * @param upper_azi upper boundary of the azimuthal angles to be collected
    * @param return_type whether angle values or tangent values are returned
+   * @param num_sides number of sides of the input mesh (only used if return type is ANGLE_TANGENT)
    * @param bid id of the boundary of which the nodes' azimuthal angles are collected
    * @param calculate_origin whether the mesh origin is calculated based on the centroid position
    * @param input_origin_x precalculated mesh origin coordinate x
@@ -626,6 +591,7 @@ protected:
                                              const Real lower_azi = -30.0,
                                              const Real upper_azi = 30.0,
                                              const unsigned int return_type = ANGLE_TANGENT,
+                                             const unsigned int num_sides = 6,
                                              const boundary_id_type bid = OUTER_SIDESET_ID,
                                              const bool calculate_origin = true,
                                              const Real input_origin_x = 0.0,
