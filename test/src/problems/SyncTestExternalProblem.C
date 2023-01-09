@@ -7,23 +7,24 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "BasicExternalProblem.h"
+#include "SyncTestExternalProblem.h"
 #include "AuxiliarySystem.h"
 
-registerMooseObject("MooseTestApp", BasicExternalProblem);
+registerMooseObject("MooseTestApp", SyncTestExternalProblem);
 
 InputParameters
-BasicExternalProblem::validParams()
+SyncTestExternalProblem::validParams()
 {
   return ExternalProblem::validParams();
 }
 
-BasicExternalProblem::BasicExternalProblem(const InputParameters & params) : ExternalProblem(params)
+SyncTestExternalProblem::SyncTestExternalProblem(const InputParameters & params)
+  : ExternalProblem(params)
 {
 }
 
 void
-BasicExternalProblem::addExternalVariables()
+SyncTestExternalProblem::addExternalVariables()
 {
   auto var_params = _factory.getValidParams("MooseVariable");
   var_params.set<MooseEnum>("family") = "MONOMIAL";
@@ -34,12 +35,12 @@ BasicExternalProblem::addExternalVariables()
 }
 
 void
-BasicExternalProblem::externalSolve()
+SyncTestExternalProblem::externalSolve()
 {
 }
 
 void
-BasicExternalProblem::syncSolutions(ExternalProblem::Direction direction)
+SyncTestExternalProblem::syncSolutions(ExternalProblem::Direction direction)
 {
   switch (direction)
   {
@@ -54,7 +55,7 @@ BasicExternalProblem::syncSolutions(ExternalProblem::Direction direction)
       for (const auto elem_ptr : mesh.element_ptr_range())
       {
         auto dof_idx = elem_ptr->dof_number(sys_number, _heat_source_var, 0);
-        solution.set(dof_idx, 12345);
+        solution.set(dof_idx, 12345 * time());
       }
 
       // close the parallel solution
