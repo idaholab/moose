@@ -506,6 +506,9 @@ using GenericVariableSecond = typename Moose::GenericType<VariableSecond, is_ad>
 template <bool is_ad>
 using GenericDenseVector =
     typename std::conditional<is_ad, DenseVector<ADReal>, DenseVector<Real>>::type;
+template <bool is_ad>
+using GenericDenseMatrix =
+    typename std::conditional<is_ad, DenseMatrix<ADReal>, DenseMatrix<Real>>::type;
 
 // Should be removed with #19439
 #define defineLegacyParams(ObjectType)                                                             \
