@@ -7,69 +7,83 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ADHillElastoPlasticityStressUpdate.h"
+#include "HillElastoPlasticityStressUpdate.h"
 
 registerMooseObject("TensorMechanicsApp", ADHillElastoPlasticityStressUpdate);
+registerMooseObject("TensorMechanicsApp", HillElastoPlasticityStressUpdate);
 
+template <bool is_ad>
 InputParameters
-ADHillElastoPlasticityStressUpdate::validParams()
+HillElastoPlasticityStressUpdateTempl<is_ad>::validParams()
 {
-  InputParameters params = ADAnisotropicReturnPlasticityStressUpdateBase::validParams();
+  InputParameters params = AnisotropicReturnPlasticityStressUpdateBaseTempl<is_ad>::validParams();
   params.addClassDescription(
-      "This class uses the stress update material in a radial return isotropic power law creep "
-      "model.  This class can be used in conjunction with other creep and plasticity materials for "
+      "This class uses the generalized radial return for anisotropic elasto-plasticity model."
+      "This class can be used in conjunction with other creep and plasticity materials for "
       "more complex simulations.");
 
   params.addRequiredParam<Real>("hardening_constant",
                                 "Hardening constant (H) for anisotropic plasticity");
+  params.addParam<Real>(
+      "hardening_exponent", 1.0, "Hardening exponent (n) for anisotropic plasticity");
   params.addRequiredParam<Real>("yield_stress",
                                 "Yield stress (constant value) for anisotropic plasticity");
 
   return params;
 }
 
-ADHillElastoPlasticityStressUpdate::ADHillElastoPlasticityStressUpdate(
+template <bool is_ad>
+HillElastoPlasticityStressUpdateTempl<is_ad>::HillElastoPlasticityStressUpdateTempl(
     const InputParameters & parameters)
-  : ADAnisotropicReturnPlasticityStressUpdateBase(parameters),
+  : AnisotropicReturnPlasticityStressUpdateBaseTempl<is_ad>(parameters),
     _qsigma(0.0),
     _eigenvalues_hill(6),
     _eigenvectors_hill(6, 6),
     _anisotropic_elastic_tensor(6, 6),
-    _elasticity_tensor_name(_base_name + "elasticity_tensor"),
-    _elasticity_tensor(getADMaterialProperty<RankFourTensor>(_elasticity_tensor_name)),
-    _hardening_constant(getParam<Real>("hardening_constant")),
-    _hardening_function(isParamValid("hardening_function") ? &getFunction("hardening_function")
-                                                           : nullptr),
-    _hardening_variable(declareADProperty<Real>(_base_name + "hardening_variable")),
-    _hardening_variable_old(getMaterialPropertyOld<Real>(_base_name + "hardening_variable")),
-    _elasticity_eigenvectors(
-        declareADProperty<DenseMatrix<Real>>(_base_name + "elasticity_eigenvectors")),
-    _elasticity_eigenvalues(
-        declareADProperty<DenseVector<Real>>(_base_name + "elasticity_eigenvalues")),
-    _b_eigenvectors(declareADProperty<DenseMatrix<Real>>(_base_name + "b_eigenvectors")),
-    _b_eigenvalues(declareADProperty<DenseVector<Real>>(_base_name + "b_eigenvalues")),
-    _alpha_matrix(declareADProperty<DenseMatrix<Real>>(_base_name + "alpha_matrix")),
-    _sigma_tilde(declareADProperty<DenseVector<Real>>(_base_name + "sigma_tilde")),
-    _hardening_slope(0.0),
+    _elasticity_tensor_name(this->_base_name + "elasticity_tensor"),
+    _elasticity_tensor(
+        this->template getGenericMaterialProperty<RankFourTensor, is_ad>(_elasticity_tensor_name)),
+    _hardening_constant(this->template getParam<Real>("hardening_constant")),
+    _hardening_exponent(this->template getParam<Real>("hardening_exponent")),
+    _hardening_variable(this->template declareGenericProperty<Real, is_ad>(this->_base_name +
+                                                                           "hardening_variable")),
+    _hardening_variable_old(
+        this->template getMaterialPropertyOld<Real>(this->_base_name + "hardening_variable")),
+    _elasticity_eigenvectors(this->template declareGenericProperty<DenseMatrix<Real>, is_ad>(
+        this->_base_name + "elasticity_eigenvectors")),
+    _elasticity_eigenvalues(this->template declareGenericProperty<DenseVector<Real>, is_ad>(
+        this->_base_name + "elasticity_eigenvalues")),
+    _b_eigenvectors(this->template declareGenericProperty<DenseMatrix<Real>, is_ad>(
+        this->_base_name + "b_eigenvectors")),
+    _b_eigenvalues(this->template declareGenericProperty<DenseVector<Real>, is_ad>(
+        this->_base_name + "b_eigenvalues")),
+    _alpha_matrix(this->template declareGenericProperty<DenseMatrix<Real>, is_ad>(this->_base_name +
+                                                                                  "alpha_matrix")),
+    _sigma_tilde(this->template declareGenericProperty<DenseVector<Real>, is_ad>(this->_base_name +
+                                                                                 "sigma_tilde")),
+    _hardening_derivative(0.0),
     _yield_condition(1.0),
-    _yield_stress(getParam<Real>("yield_stress")),
-    _hill_tensor(getMaterialPropertyByName<DenseMatrix<Real>>(_base_name + "hill_tensor"))
+    _yield_stress(this->template getParam<Real>("yield_stress")),
+    _hill_tensor(this->template getMaterialPropertyByName<DenseMatrix<Real>>(this->_base_name +
+                                                                             "hill_tensor"))
 {
 }
 
+template <bool is_ad>
 void
-ADHillElastoPlasticityStressUpdate::propagateQpStatefulProperties()
+HillElastoPlasticityStressUpdateTempl<is_ad>::propagateQpStatefulProperties()
 {
   _hardening_variable[_qp] = _hardening_variable_old[_qp];
   _plasticity_strain[_qp] = _plasticity_strain_old[_qp];
-  ADAnisotropicReturnPlasticityStressUpdateBase::propagateQpStatefulProperties();
+  AnisotropicReturnPlasticityStressUpdateBaseTempl<is_ad>::propagateQpStatefulProperties();
 }
 
+template <bool is_ad>
 void
-ADHillElastoPlasticityStressUpdate::computeStressInitialize(
-    const ADDenseVector & stress_dev,
-    const ADDenseVector & stress,
-    const ADRankFourTensor & /*elasticity_tensor*/)
+HillElastoPlasticityStressUpdateTempl<is_ad>::computeStressInitialize(
+    const GenericDenseVector<is_ad> & stress_dev,
+    const GenericDenseVector<is_ad> & stress,
+    const GenericRankFourTensor<is_ad> & /*elasticity_tensor*/)
 {
   _hardening_variable[_qp] = _hardening_variable_old[_qp];
   _plasticity_strain[_qp] = _plasticity_strain_old[_qp];
@@ -91,8 +105,9 @@ ADHillElastoPlasticityStressUpdate::computeStressInitialize(
   _yield_condition = -computeResidual(stress_dev, stress, 0.0);
 }
 
+template <bool is_ad>
 void
-ADHillElastoPlasticityStressUpdate::computeElasticityTensorEigenDecomposition()
+HillElastoPlasticityStressUpdateTempl<is_ad>::computeElasticityTensorEigenDecomposition()
 {
   // Helper method to compute qp matrices required for the elasto-plasticity algorithm.
   _anisotropic_elastic_tensor(0, 0) = (_elasticity_tensor)[_qp](0, 0, 0, 0);
@@ -157,16 +172,16 @@ ADHillElastoPlasticityStressUpdate::computeElasticityTensorEigenDecomposition()
       _elasticity_eigenvectors[_qp](index_i, index_j) = v(index_i, index_j);
 
   // Compute sqrt(Delta_c) * QcT * A * Qc * sqrt(Delta_c)
-  ADDenseMatrix sqrt_Delta(6, 6);
+  GenericDenseMatrix<is_ad> sqrt_Delta(6, 6);
   for (unsigned int i = 0; i < 6; i++)
   {
     sqrt_Delta(i, i) = std::sqrt(_elasticity_eigenvalues[_qp](i));
   }
 
-  ADDenseMatrix eigenvectors_elasticity_transpose(6, 6);
+  GenericDenseMatrix<is_ad> eigenvectors_elasticity_transpose(6, 6);
   _elasticity_eigenvectors[_qp].get_transpose(eigenvectors_elasticity_transpose);
 
-  ADDenseMatrix b_matrix(6, 6);
+  GenericDenseMatrix<is_ad> b_matrix(6, 6);
   b_matrix = _hill_tensor[_qp];
 
   // Right multiply by matrix of eigenvectors transpose
@@ -236,12 +251,13 @@ ADHillElastoPlasticityStressUpdate::computeElasticityTensorEigenDecomposition()
   _alpha_matrix[_qp].left_multiply(_elasticity_eigenvectors[_qp]);
 }
 
-ADReal
-ADHillElastoPlasticityStressUpdate::computeOmega(const ADReal & delta_gamma,
-                                                 const ADDenseVector & /*stress_trial*/)
+template <bool is_ad>
+GenericReal<is_ad>
+HillElastoPlasticityStressUpdateTempl<is_ad>::computeOmega(
+    const GenericReal<is_ad> & delta_gamma, const GenericDenseVector<is_ad> & /*stress_trial*/)
 {
-  ADDenseVector K(6);
-  ADReal omega = 0.0;
+  GenericDenseVector<is_ad> K(6);
+  GenericReal<is_ad> omega = 0.0;
 
   for (unsigned int i = 0; i < 6; i++)
   {
@@ -256,21 +272,24 @@ ADHillElastoPlasticityStressUpdate::computeOmega(const ADReal & delta_gamma,
   return std::sqrt(omega);
 }
 
+template <bool is_ad>
 Real
-ADHillElastoPlasticityStressUpdate::computeReferenceResidual(
-    const ADDenseVector & /*effective_trial_stress*/,
-    const ADDenseVector & /*stress_new*/,
-    const ADReal & /*residual*/,
-    const ADReal & /*scalar_effective_inelastic_strain*/)
+HillElastoPlasticityStressUpdateTempl<is_ad>::computeReferenceResidual(
+    const GenericDenseVector<is_ad> & /*effective_trial_stress*/,
+    const GenericDenseVector<is_ad> & /*stress_new*/,
+    const GenericReal<is_ad> & /*residual*/,
+    const GenericReal<is_ad> & /*scalar_effective_inelastic_strain*/)
 {
   // Equation is already normalized.
   return 1.0;
 }
 
-ADReal
-ADHillElastoPlasticityStressUpdate::computeResidual(const ADDenseVector & /*stress_dev*/,
-                                                    const ADDenseVector & stress_sigma,
-                                                    const ADReal & delta_gamma)
+template <bool is_ad>
+GenericReal<is_ad>
+HillElastoPlasticityStressUpdateTempl<is_ad>::computeResidual(
+    const GenericDenseVector<is_ad> & /*stress_dev*/,
+    const GenericDenseVector<is_ad> & stress_sigma,
+    const GenericReal<is_ad> & delta_gamma)
 {
 
   // If in elastic regime, just return
@@ -278,65 +297,78 @@ ADHillElastoPlasticityStressUpdate::computeResidual(const ADDenseVector & /*stre
     return 0.0;
 
   // Get stress_tilde
-  ADDenseVector stress_tilde(6);
-  ADDenseMatrix alpha_temp(_alpha_matrix[_qp]);
+  GenericDenseVector<is_ad> stress_tilde(6);
+  GenericDenseMatrix<is_ad> alpha_temp(_alpha_matrix[_qp]);
   alpha_temp.lu_solve(stress_sigma, stress_tilde);
 
   // Material property used in computeStressFinalize
   _sigma_tilde[_qp] = stress_tilde;
 
-  ADReal omega = computeOmega(delta_gamma, stress_tilde);
-  _hardening_slope = computeHardeningDerivative();
+  GenericReal<is_ad> omega = computeOmega(delta_gamma, stress_tilde);
 
   // Hardening variable is \alpha isotropic hardening for now.
   _hardening_variable[_qp] = computeHardeningValue(delta_gamma, omega);
-  ADReal s_y = _hardening_slope * _hardening_variable[_qp] + _yield_stress;
 
-  ADReal residual = 0.0;
+  // A small value of 1.0e-30 is added to the hardening variable to avoid numerical issues
+  // related to hardening variable becoming negative early in the iteration leading to non-
+  // convergence. Note that std::pow(x,n) requires x to be positive if n is less than 1.
+
+  GenericReal<is_ad> s_y =
+      _hardening_constant * std::pow(_hardening_variable[_qp] + 1.0e-30, _hardening_exponent) +
+      _yield_stress;
+
+  GenericReal<is_ad> residual = 0.0;
   residual = s_y / omega - 1.0;
 
   return residual;
 }
 
-ADReal
-ADHillElastoPlasticityStressUpdate::computeDerivative(const ADDenseVector & /*stress_dev*/,
-                                                      const ADDenseVector & stress_sigma,
-                                                      const ADReal & delta_gamma)
+template <bool is_ad>
+GenericReal<is_ad>
+HillElastoPlasticityStressUpdateTempl<is_ad>::computeDerivative(
+    const GenericDenseVector<is_ad> & /*stress_dev*/,
+    const GenericDenseVector<is_ad> & stress_sigma,
+    const GenericReal<is_ad> & delta_gamma)
 {
   // If in elastic regime, return unit derivative
   if (_yield_condition <= 0.0)
     return 1.0;
 
-  ADReal omega = computeOmega(delta_gamma, stress_sigma);
-  _hardening_slope = computeHardeningDerivative();
+  GenericReal<is_ad> omega = computeOmega(delta_gamma, stress_sigma);
+  _hardening_derivative = computeHardeningDerivative();
 
-  ADReal sy = _hardening_slope * computeHardeningValue(delta_gamma, omega) + _yield_stress;
-  ADReal sy_alpha = _hardening_slope;
+  GenericReal<is_ad> hardeningVariable = computeHardeningValue(delta_gamma, omega);
+  GenericReal<is_ad> sy =
+      _hardening_constant * std::pow(hardeningVariable + 1.0e-30, _hardening_exponent) +
+      _yield_stress;
+  GenericReal<is_ad> sy_alpha = _hardening_derivative;
 
-  ADReal omega_gamma;
-  ADReal sy_gamma;
+  GenericReal<is_ad> omega_gamma;
+  GenericReal<is_ad> sy_gamma;
 
   computeDeltaDerivatives(delta_gamma, stress_sigma, sy_alpha, omega, omega_gamma, sy_gamma);
-  ADReal residual_derivative = 1 / omega * (sy_gamma - 1 / omega * omega_gamma * sy);
+  GenericReal<is_ad> residual_derivative = 1 / omega * (sy_gamma - 1 / omega * omega_gamma * sy);
 
   return residual_derivative;
 }
 
+template <bool is_ad>
 void
-ADHillElastoPlasticityStressUpdate::computeDeltaDerivatives(const ADReal & delta_gamma,
-                                                            const ADDenseVector & /*stress_trial*/,
-                                                            const ADReal & sy_alpha,
-                                                            ADReal & omega,
-                                                            ADReal & omega_gamma,
-                                                            ADReal & sy_gamma)
+HillElastoPlasticityStressUpdateTempl<is_ad>::computeDeltaDerivatives(
+    const GenericReal<is_ad> & delta_gamma,
+    const GenericDenseVector<is_ad> & /*stress_trial*/,
+    const GenericReal<is_ad> & sy_alpha,
+    GenericReal<is_ad> & omega,
+    GenericReal<is_ad> & omega_gamma,
+    GenericReal<is_ad> & sy_gamma)
 {
   omega_gamma = 0.0;
   sy_gamma = 0.0;
 
-  ADDenseVector K_deltaGamma(6);
+  GenericDenseVector<is_ad> K_deltaGamma(6);
   omega = computeOmega(delta_gamma, _sigma_tilde[_qp]);
 
-  ADDenseVector K(6);
+  GenericDenseVector<is_ad> K(6);
   for (unsigned int i = 0; i < 6; i++)
     K(i) = _b_eigenvalues[_qp](i) / Utility::pow<2>(1 + delta_gamma * _b_eigenvalues[_qp](i));
 
@@ -351,30 +383,35 @@ ADHillElastoPlasticityStressUpdate::computeDeltaDerivatives(const ADReal & delta
   sy_gamma = 2.0 * sy_alpha * (omega + delta_gamma * omega_gamma);
 }
 
-ADReal
-ADHillElastoPlasticityStressUpdate::computeHardeningValue(const ADReal & delta_gamma,
-                                                          const ADReal & omega)
+template <bool is_ad>
+GenericReal<is_ad>
+HillElastoPlasticityStressUpdateTempl<is_ad>::computeHardeningValue(
+    const GenericReal<is_ad> & delta_gamma, const GenericReal<is_ad> & omega)
 {
   return _hardening_variable_old[_qp] + 2.0 * delta_gamma * omega;
 }
 
-ADReal
-ADHillElastoPlasticityStressUpdate::computeHardeningDerivative()
+template <bool is_ad>
+Real
+HillElastoPlasticityStressUpdateTempl<is_ad>::computeHardeningDerivative()
 {
-  return _hardening_constant;
+  return _hardening_constant * _hardening_exponent *
+         MetaPhysicL::raw_value(
+             std::pow(_hardening_variable[_qp] + 1.0e-30, _hardening_exponent - 1));
 }
 
+template <bool is_ad>
 void
-ADHillElastoPlasticityStressUpdate::computeStrainFinalize(
-    ADRankTwoTensor & inelasticStrainIncrement,
-    const ADRankTwoTensor & stress,
-    const ADDenseVector & stress_dev,
-    const ADReal & delta_gamma)
+HillElastoPlasticityStressUpdateTempl<is_ad>::computeStrainFinalize(
+    GenericRankTwoTensor<is_ad> & inelasticStrainIncrement,
+    const GenericRankTwoTensor<is_ad> & stress,
+    const GenericDenseVector<is_ad> & stress_dev,
+    const GenericReal<is_ad> & delta_gamma)
 {
   // e^P = delta_gamma * hill_tensor * stress
-  ADDenseVector inelasticStrainIncrement_vector(6);
-  ADDenseVector hill_stress(6);
-  ADDenseVector stress_vector(6);
+  GenericDenseVector<is_ad> inelasticStrainIncrement_vector(6);
+  GenericDenseVector<is_ad> hill_stress(6);
+  GenericDenseVector<is_ad> stress_vector(6);
 
   stress_vector(0) = stress(0, 0);
   stress_vector(1) = stress(1, 1);
@@ -398,27 +435,28 @@ ADHillElastoPlasticityStressUpdate::computeStrainFinalize(
       inelasticStrainIncrement_vector(5) / 2.0;
 
   // Calculate equivalent plastic strain
-  ADDenseVector Mepsilon(6);
+  GenericDenseVector<is_ad> Mepsilon(6);
   _hill_tensor[_qp].vector_mult(Mepsilon, inelasticStrainIncrement_vector);
-  ADReal eq_plastic_strain_inc = Mepsilon.dot(inelasticStrainIncrement_vector);
+  GenericReal<is_ad> eq_plastic_strain_inc = Mepsilon.dot(inelasticStrainIncrement_vector);
 
   if (eq_plastic_strain_inc > 0.0)
     eq_plastic_strain_inc = std::sqrt(eq_plastic_strain_inc);
 
   _effective_inelastic_strain[_qp] = _effective_inelastic_strain_old[_qp] + eq_plastic_strain_inc;
 
-  ADAnisotropicReturnPlasticityStressUpdateBase::computeStrainFinalize(
+  AnisotropicReturnPlasticityStressUpdateBaseTempl<is_ad>::computeStrainFinalize(
       inelasticStrainIncrement, stress, stress_dev, delta_gamma);
 }
 
+template <bool is_ad>
 void
-ADHillElastoPlasticityStressUpdate::computeStressFinalize(
-    const ADRankTwoTensor & /*plastic_strain_increment*/,
-    const ADReal & delta_gamma,
-    ADRankTwoTensor & stress_new,
-    const ADDenseVector & /*stress_dev*/,
-    const ADRankTwoTensor & /*stress_old*/,
-    const ADRankFourTensor & /*elasticity_tensor*/)
+HillElastoPlasticityStressUpdateTempl<is_ad>::computeStressFinalize(
+    const GenericRankTwoTensor<is_ad> & /*plastic_strain_increment*/,
+    const GenericReal<is_ad> & delta_gamma,
+    GenericRankTwoTensor<is_ad> & stress_new,
+    const GenericDenseVector<is_ad> & /*stress_dev*/,
+    const GenericRankTwoTensor<is_ad> & /*stress_old*/,
+    const GenericRankFourTensor<is_ad> & /*elasticity_tensor*/)
 {
   // Need to compute this iteration's stress tensor based on the scalar variable
   // For deviatoric
@@ -426,7 +464,7 @@ ADHillElastoPlasticityStressUpdate::computeStressFinalize(
 
   if (_yield_condition <= 0.0)
     return;
-  ADDenseMatrix inv_matrix(6, 6);
+  GenericDenseMatrix<is_ad> inv_matrix(6, 6);
   inv_matrix.zero();
 
   for (unsigned int i = 0; i < 6; i++)
@@ -434,7 +472,7 @@ ADHillElastoPlasticityStressUpdate::computeStressFinalize(
 
   _alpha_matrix[_qp].right_multiply(inv_matrix);
 
-  ADDenseVector stress_output(6);
+  GenericDenseVector<is_ad> stress_output(6);
   _alpha_matrix[_qp].vector_mult(stress_output, _sigma_tilde[_qp]);
 
   stress_new(0, 0) = stress_output(0);
@@ -445,11 +483,15 @@ ADHillElastoPlasticityStressUpdate::computeStressFinalize(
   stress_new(0, 2) = stress_output(5);
 }
 
+template <bool is_ad>
 Real
-ADHillElastoPlasticityStressUpdate::computeStrainEnergyRateDensity(
-    const ADMaterialProperty<RankTwoTensor> & /*stress*/,
-    const ADMaterialProperty<RankTwoTensor> & /*strain_rate*/)
+HillElastoPlasticityStressUpdateTempl<is_ad>::computeStrainEnergyRateDensity(
+    const GenericMaterialProperty<RankTwoTensor, is_ad> & /*stress*/,
+    const GenericMaterialProperty<RankTwoTensor, is_ad> & /*strain_rate*/)
 {
-  mooseError("computeStrainEnergyRateDensity not implemented for anisotropic creep.");
+  mooseError("computeStrainEnergyRateDensity not implemented for anisotropic plasticity.");
   return 0.0;
 }
+
+template class HillElastoPlasticityStressUpdateTempl<false>;
+template class HillElastoPlasticityStressUpdateTempl<true>;
