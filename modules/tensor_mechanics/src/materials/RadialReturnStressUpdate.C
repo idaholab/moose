@@ -384,10 +384,8 @@ RadialReturnStressUpdateTempl<false>::updateStateSubstepInternal(
     mooseException("The number of substeps computed exceeds the maximum_number_substeps. The "
                    "system time step will be cut.");
 
-  // Store original _dt; Reset at the end of solve
-  Real dt_original = _dt;
   // cut the original timestep
-  _dt = dt_original / total_number_substeps;
+  _dt = _dt_original / total_number_substeps;
 
   // initialize the inputs
   const RankTwoTensor strain_increment_per_step = strain_increment / total_number_substeps;
@@ -442,9 +440,6 @@ RadialReturnStressUpdateTempl<false>::updateStateSubstepInternal(
   // update effective inelastic strain
   _effective_inelastic_strain[_qp] =
       _effective_inelastic_strain_old[_qp] + sub_scalar_effective_inelastic_strain;
-
-  // recover the original timestep
-  _dt = dt_original;
 }
 
 template <>
@@ -459,6 +454,9 @@ RadialReturnStressUpdateTempl<false>::updateStateSubstep(RankTwoTensor & strain_
                                                          bool compute_full_tangent_operator,
                                                          RankFourTensor & tangent_operator)
 {
+  // Store original _dt; Reset at the end of solve
+  _dt_original = _dt;
+
   if (_use_substepping == SubsteppingType::ADAPTIVE)
   {
     unsigned int num_substeps = 1;
@@ -486,6 +484,7 @@ RadialReturnStressUpdateTempl<false>::updateStateSubstep(RankTwoTensor & strain_
       }
 
       // updateStateSubstepInternal was successful (didn't throw)
+      _dt = _dt_original;
       return;
     }
     mooseException("Adaptive substepping failed. Maximum number of substeps exceeded.");
@@ -503,6 +502,9 @@ RadialReturnStressUpdateTempl<false>::updateStateSubstep(RankTwoTensor & strain_
                                calculateNumberSubsteps(strain_increment),
                                compute_full_tangent_operator,
                                tangent_operator);
+
+    // recover the original timestep
+    _dt = _dt_original;
   }
 }
 

@@ -246,6 +246,9 @@ protected:
 
   /// Maximum number of substeps. If the calculation results in a larger number, cut overall time step.
   const unsigned int _maximum_number_substeps;
+
+  /// original timestep (to be restored after substepping is completed)
+  Real _dt_original;
 };
 
 typedef RadialReturnStressUpdateTempl<false> RadialReturnStressUpdate;
