@@ -17,6 +17,7 @@
 #include "FEProblem.h"
 #include "MooseApp.h"
 #include "MooseMesh.h"
+#include "MooseObject.h"
 #include "NonlinearSystem.h"
 #include "OutputWarehouse.h"
 #include "SystemInfo.h"
@@ -410,6 +411,38 @@ insertNewline(std::stringstream & oss, std::streampos & begin, std::streampos & 
     begin = oss.tellp();
     oss << std::setw(console_field_width + 2) << ""; // "{ "
   }
+}
+
+std::string
+formatString(std::string message, const std::string & prefix)
+{
+  MooseUtils::indentMessage(prefix, message, COLOR_DEFAULT);
+  std::stringstream stream;
+  std::streampos start = stream.tellp();
+  stream << message;
+  std::streampos end = stream.tellp();
+  insertNewline(stream, start, end);
+  return stream.str();
+}
+
+std::string
+mooseObjectVectorToString(const std::vector<MooseObject *> & objs, const std::string & sep /*=""*/)
+{
+  std::string object_names = "";
+  if (objs.size())
+  {
+    // Gather all the object names
+    std::vector<std::string> names;
+    names.reserve(objs.size());
+    for (const auto & obj : objs)
+    {
+      mooseAssert(obj, "Trying to print a null object");
+      names.push_back(obj->name());
+    }
+
+    object_names = MooseUtils::join(names, sep);
+  }
+  return object_names;
 }
 
 } // ConsoleUtils namespace

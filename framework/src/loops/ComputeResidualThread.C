@@ -149,7 +149,7 @@ ComputeResidualThread::printBlockExecutionInformation()
     if (_kernels.hasActiveObjects())
     {
       console << "[DBG] Ordering of kernels:" << std::endl;
-      console << "[DBG] " << _kernels.activeObjectsToString() << std::endl;
+      console << _kernels.activeObjectsToFormattedString() << std::endl;
     }
     if (_fv_kernels.size())
     {
@@ -165,17 +165,17 @@ ComputeResidualThread::printBlockExecutionInformation()
     if (_dg_kernels.hasActiveObjects())
     {
       console << "[DBG] Ordering of DG kernels:" << std::endl;
-      console << "[DBG] " << _dg_kernels.activeObjectsToString() << std::endl;
+      console << _dg_kernels.activeObjectsToFormattedString() << std::endl;
     }
     if (_integrated_bcs.hasActiveObjects())
     {
       console << "[DBG] Ordering of boundary conditions:" << std::endl;
-      console << "[DBG] " << _integrated_bcs.activeObjectsToString() << std::endl;
+      console << _integrated_bcs.activeObjectsToFormattedString() << std::endl;
     }
     if (_interface_kernels.hasActiveObjects())
     {
       console << "[DBG] Ordering of interface kernels:" << std::endl;
-      console << "[DBG] " << _interface_kernels.activeObjectsToString() << std::endl;
+      console << _interface_kernels.activeObjectsToFormattedString() << std::endl;
     }
     _blocks_exec_printed.insert(_subdomain);
   }

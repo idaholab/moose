@@ -129,7 +129,7 @@ ComputeMarkerThread::printBlockExecutionInformation()
       return;
     auto console = _fe_problem.console();
     console << "[DBG] Execution order on block: " << _subdomain << std::endl;
-    console << "[DBG] " << _marker_whs.activeObjectsToString() << std::endl;
+    console << _marker_whs.activeObjectsToFormattedString() << std::endl;
     _blocks_exec_printed.insert(_subdomain);
   }
 }

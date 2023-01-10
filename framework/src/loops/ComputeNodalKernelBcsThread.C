@@ -108,6 +108,6 @@ ComputeNodalKernelBcsThread::printGeneralExecutionInformation() const
     console << "[DBG] Executing nodal kernels contribution to residual on nodes on " << execute_on
             << std::endl;
     console << "[DBG] Ordering of the nodal kernels on the nodes they are defined on:" << std::endl;
-    console << "[DBG] " << _nkernel_warehouse->activeObjectsToString() << std::endl;
+    console << _nkernel_warehouse->activeObjectsToFormattedString() << std::endl;
   }
 }

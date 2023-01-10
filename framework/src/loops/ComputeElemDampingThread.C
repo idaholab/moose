@@ -86,6 +86,6 @@ ComputeElemDampingThread::printGeneralExecutionInformation() const
     console << "[DBG] Beginning elemental loop to compute damping on " << execute_on << std::endl;
     // Dampers are currently not block restricted
     console << "[DBG] Ordering of dampers " << std::endl;
-    console << "[DBG] " << damper_wh.activeObjectsToString() << std::endl;
+    console << damper_wh.activeObjectsToFormattedString() << std::endl;
   }
 }

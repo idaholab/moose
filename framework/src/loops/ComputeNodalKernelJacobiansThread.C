@@ -148,6 +148,6 @@ ComputeNodalKernelJacobiansThread::printGeneralExecutionInformation() const
     auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
     console << "[DBG] Executing nodal kernels contribution to Jacobian on nodes on " << execute_on
             << std::endl;
-    console << "[DBG] " << _nkernel_warehouse->activeObjectsToString() << std::endl;
+    console << _nkernel_warehouse->activeObjectsToFormattedString() << std::endl;
   }
 }

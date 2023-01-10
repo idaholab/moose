@@ -111,6 +111,6 @@ ComputeNodalKernelsThread::printGeneralExecutionInformation() const
     console << "[DBG] Nodes at boundaries between blocks will execute lower block ID first"
             << std::endl;
     console << "[DBG] Ordering of the nodal kernels on nodes they are defined on:" << std::endl;
-    console << "[DBG] " << _nkernel_warehouse->activeObjectsToString() << std::endl;
+    console << _nkernel_warehouse->activeObjectsToFormattedString() << std::endl;
   }
 }

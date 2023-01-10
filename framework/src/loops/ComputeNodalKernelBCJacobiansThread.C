@@ -153,6 +153,6 @@ ComputeNodalKernelBCJacobiansThread::printGeneralExecutionInformation() const
                "boundary nodes on "
             << execute_on << std::endl;
     console << "[DBG] Ordering on boundaries they are defined on:" << std::endl;
-    console << "[DBG] " << _nkernel_warehouse->activeObjectsToString() << std::endl;
+    console << _nkernel_warehouse->activeObjectsToFormattedString() << std::endl;
   }
 }

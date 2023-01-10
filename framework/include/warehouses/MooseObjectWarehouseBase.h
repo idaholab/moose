@@ -176,9 +176,10 @@ public:
   THREAD_ID numThreads() const { return _num_threads; }
 
   /**
-   * Output content of the warehouse
+   * Output content of the warehouse to a string, meant to be output to the console
    */
-  std::string activeObjectsToString(THREAD_ID tid = 0) const;
+  std::string activeObjectsToFormattedString(THREAD_ID tid = 0,
+                                             const std::string & prefix = "[DBG]") const;
 
 protected:
   /// Convenience member storing the number of threads used for storage (1 or libMesh::n_threads)
@@ -750,12 +751,13 @@ MooseObjectWarehouseBase<T>::subdomainsCovered(std::set<SubdomainID> & subdomain
 
 template <typename T>
 std::string
-MooseObjectWarehouseBase<T>::activeObjectsToString(THREAD_ID tid /*=0*/) const
+MooseObjectWarehouseBase<T>::activeObjectsToFormattedString(THREAD_ID tid /*=0*/,
+                                                            const std::string & prefix) const
 {
   std::string output;
   for (const auto & object : _active_objects[tid])
     output += object->name() + " ";
-  return output;
+  return ConsoleUtils::formatString(output, prefix);
 }
 
 template <typename T>

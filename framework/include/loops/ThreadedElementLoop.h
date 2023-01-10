@@ -18,7 +18,7 @@ class SystemBase;
 
 /**
  * This mutex is used by all derived classes of the ThreadedElementLoop. It
- * is necessary to protect the creation of the strings used in the propogation
+ * is necessary to protect the creation of the strings used in the propagation
  * of the error messages.  It's possible for a thread to have acquired the
  * commonly used mutex in the Threads namespace so this one is here to
  * avoid any deadlocking.
@@ -64,10 +64,13 @@ protected:
    * @tparam T the object type
    * @param objs the vector with all the objects (should be pointers)
    * @param objects_type the name of the type of objects. Defaults to the CPP object name
-   * @param print_header whether to print a header about the timing of execution and the type of objects
+   * @param print_header whether to print a header about the timing of execution and the type of
+   * objects
    */
   template <typename T>
-  void printVectorOrdering(const std::vector<T> objs, std::string objects_type="", bool print_header=true) const;
+  void printExecutionOrdering(const std::vector<T *> objs,
+                              const bool print_header = true,
+                              const std::string & line_prefix = "[DBG]") const;
 };
 
 template <typename RangeType>
@@ -133,30 +136,22 @@ ThreadedElementLoop<RangeType>::neighborSubdomainChanged()
 template <typename RangeType>
 template <typename T>
 void
-ThreadedElementLoop<RangeType>::printVectorOrdering(const std::vector<T> objs,
-                                                    std::string objects_type,
-                                                    bool print_header) const
+ThreadedElementLoop<RangeType>::printExecutionOrdering(const std::vector<T *> objs,
+                                                       const bool print_header,
+                                                       const std::string & line_prefix) const
 {
   if (objs.size())
   {
     auto console = _fe_problem.console();
-
-    // Check for a missing name for the objects
-    if (objects_type == "")
-      objects_type = MooseUtils::prettyCppType(&objs[0]);
-
-    // Gather all the object names
-    std::vector<std::string> names;
-    names.reserve(objs.size());
-    for (const auto & obj : objs)
-      names.push_back(obj->name());
+    auto objects_type = MooseUtils::prettyCppType(objs[0]);
+    std::vector<MooseObject *> moose_objs;
+    for (auto obj_ptr : objs)
+      moose_objs.push_back(dynamic_cast<MooseObject *>(obj_ptr));
+    auto names = ConsoleUtils::mooseObjectVectorToString(moose_objs);
 
     // Print string with a DBG prefix and with sufficient line breaks
-    std::string message = print_header ?
-        "Executing " + objects_type + " on " + _fe_problem.getCurrentExecuteOnFlag().name() + "\n" : "";
-    message += "Order of execution:\n" + MooseUtils::join(names, " ");
-    MooseUtils::addLineBreaks(message, ConsoleUtils::console_line_length - 6);
-    MooseUtils::indentMessage("[DBG] ", message);
-    console << message << std::endl;
+    std::string message = print_header ? "Executing " + objects_type + " on " + +"\n" : "";
+    message += "Order of execution:\n" + names;
+    console << ConsoleUtils::formatString(message, line_prefix) << std::endl;
   }
 }

@@ -657,14 +657,6 @@ void MaterialPropertyStorageDump(
     const HashMap<const libMesh::Elem *, HashMap<unsigned int, MaterialProperties>> & props);
 
 /**
- * Adds line breaks (\n) in a string to make it fit within the desired output/console width
- *
- * @param message the message to cut/break over multiple lines
- * @param line_width how long each line should be in the message.
- */
-void addLineBreaks(std::string & message, unsigned int line_width = ConsoleUtils::console_line_length);
-
-/**
  * Indents the supplied message given the prefix and color
  * @param prefix The prefix to use for indenting
  * @param message The message that will be indented

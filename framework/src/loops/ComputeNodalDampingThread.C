@@ -82,6 +82,6 @@ ComputeNodalDampingThread::printGeneralExecutionInformation() const
     auto execute_on = _fe_problem.getCurrentExecuteOnFlag();
     console << "[DBG] Executing nodal dampers on " << execute_on << std::endl;
     console << "[DBG] Ordering of the dampers on the blocks they are defined on:" << std::endl;
-    console << "[DBG] " << damper_wh.activeObjectsToString() << std::endl;
+    console << damper_wh.activeObjectsToFormattedString() << std::endl;
   }
 }

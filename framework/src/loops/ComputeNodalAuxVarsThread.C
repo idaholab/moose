@@ -157,7 +157,7 @@ ComputeNodalAuxVarsThread<AuxKernelType>::printGeneralExecutionInformation() con
     console << "[DBG] Beginning nodal loop of nodal auxiliary kernels on " << execute_on
             << std::endl;
     console << "[DBG] Ordering of the kernels on each block they are defined on" << std::endl;
-    console << "[DBG] " << _storage.activeObjectsToString() << std::endl;
+    console << _storage.activeObjectsToFormattedString() << std::endl;
   }
 }
 

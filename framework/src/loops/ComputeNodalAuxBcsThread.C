@@ -94,7 +94,7 @@ ComputeNodalAuxBcsThread<AuxKernelType>::printGeneralExecutionInformation() cons
     console << "[DBG] Executing nodal auxiliary kernels on boundary nodes on " << execute_on
             << std::endl;
     console << "[DBG] Ordering of the kernels on each boundary they are defined on:" << std::endl;
-    console << "[DBG] " << _storage.activeObjectsToString() << std::endl;
+    console << _storage.activeObjectsToFormattedString() << std::endl;
   }
 }
 

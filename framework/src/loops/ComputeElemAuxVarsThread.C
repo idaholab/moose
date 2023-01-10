@@ -183,10 +183,12 @@ ComputeElemAuxVarsThread<AuxKernelType>::printBlockExecutionInformation()
     if (_blocks_exec_printed.count(_subdomain))
       return;
     auto console = _fe_problem.console();
-    const std::vector<std::shared_ptr<AuxKernelType>> & kernels =
-        _aux_kernels.getActiveBlockObjects(_subdomain, _tid);
+    std::vector<AuxKernelType *> kernels;
+    for (auto shared_ptr : _aux_kernels.getActiveBlockObjects(_subdomain, _tid))
+      kernels.push_back(shared_ptr.get());
+
     console << "[DBG] Ordering of AuxKernels on block " << _subdomain << std::endl;
-    printVectorOrdering(kernels, "", false);
+    ThreadedElementLoop<ConstElemRange>::printExecutionOrdering<AuxKernelType>(kernels, false);
     _blocks_exec_printed.insert(_subdomain);
   }
 }

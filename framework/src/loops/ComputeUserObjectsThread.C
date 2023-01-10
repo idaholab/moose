@@ -23,6 +23,7 @@
 #include "DomainUserObject.h"
 #include "AuxiliarySystem.h"
 #include "MooseTypes.h"
+#include "ThreadedElementLoop.h"
 
 #include "libmesh/numeric_vector.h"
 
@@ -395,18 +396,18 @@ ComputeUserObjectsThread::printBlockExecutionInformation()
         return;
       console << "[DBG] Ordering of User Objects on block " << _subdomain << std::endl;
       // Output specific ordering of objects
-      printVectorOrdering<ElementUserObject>(_element_objs, "element user objects");
-      printVectorOrdering<DomainUserObject>(_domain_objs, "domain user objects");
+      printExecutionOrdering<ElementUserObject>(_element_objs, "element user objects");
+      printExecutionOrdering<DomainUserObject>(_domain_objs, "domain user objects");
       if (_fe_problem.currentlyComputingJacobian())
-        printVectorOrdering<ShapeElementUserObject>(
+        printExecutionOrdering<ShapeElementUserObject>(
             _shape_element_objs, "element user objects contributing to the Jacobian");
-      printVectorOrdering<UserObject>(side_uos, "side user objects");
+      printExecutionOrdering<UserObject>(side_uos, "side user objects");
       if (_fe_problem.currentlyComputingJacobian())
-        printVectorOrdering<ShapeSideUserObject>(shapers,
-                                                 "side user objects contributing to the Jacobian");
-      printVectorOrdering<InternalSideUserObject>(_internal_side_objs,
-                                                  "internal side user objects");
-      printVectorOrdering<InterfaceUserObject>(_interface_user_objects, "interface user objects");
+        printExecutionOrdering<ShapeSideUserObject>(
+            shapers, "side user objects contributing to the Jacobian");
+      printExecutionOrdering<InternalSideUserObject>(_internal_side_objs,
+                                                     "internal side user objects");
+      printExecutionOrdering<InterfaceUserObject>(interface_objs, "interface user objects");
       console << "[DBG] Only user objects active on local element/sides are executed" << std::endl;
       _blocks_exec_printed.insert(_subdomain);
     }
