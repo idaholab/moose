@@ -5,45 +5,50 @@
     type = 'RunException'
     input = 'ad_power_law_creep.i'
     expect_err = 'Exceeded maximum iterations in material return mapping iterations.'
-    cli_args = 'Materials/power_law_creep/use_substep=false Executioner/dtmin=0.1 '
-               'Outputs/file_base=ad_power_law_out'
-    requirement = 'The system shall report diverged return mapping solve due to large deformation '
-                  'imposed in one step'
+    cli_args = 'Materials/power_law_creep/use_substepping=NONE Executioner/dtmin=0.1 Outputs/file_base=ad_power_law_out'
+    requirement = 'The system shall report diverged return mapping solve due to large deformation imposed in one step'
   []
   [ad_power_law_substepping]
     type = 'Exodiff'
     input = 'ad_power_law_creep.i'
-    cli_args = 'Materials/power_law_creep/use_substep=true '
-               'Materials/power_law_creep/maximum_number_substeps=500 Executioner/dtmin=0.1 '
-               'Outputs/file_base=ad_power_law_substepping_out'
+    cli_args = "Materials/power_law_creep/use_substepping=INCREMENT_BASED "
+               "Materials/power_law_creep/maximum_number_substeps=500 Executioner/dtmin=0.1 "
+               "Outputs/file_base=ad_power_law_substepping_out"
     exodiff = 'ad_power_law_substepping_out.e'
     valgrind = HEAVY
-    requirement = 'The system shall converge under large deformation owing to the help of '
-                  'substepping'
+    requirement = 'The system shall converge under large deformation owing to the help of substepping'
   []
   [power_law]
     type = 'RunException'
     input = 'power_law_creep.i'
     expect_err = 'Exceeded maximum iterations in material return mapping iterations.'
-    cli_args = 'Materials/power_law_creep/use_substep=false Executioner/dtmin=0.1 '
-               'Outputs/file_base=power_law_out'
-    requirement = 'The system shall report diverged return mapping solve due to large deformation '
-                  'imposed in one step'
+    cli_args = 'Executioner/dtmin=0.1 Outputs/file_base=power_law_out'
+    requirement = 'The system shall report diverged return mapping solve due to large deformation imposed in one step'
   []
   [power_law_substepping]
     type = 'Exodiff'
     input = 'power_law_creep.i'
-    cli_args = 'Materials/power_law_creep/use_substep=true '
-               'Materials/power_law_creep/maximum_number_substeps=500 Executioner/dtmin=0.1 '
-               'Outputs/file_base=power_law_substepping_out'
+    cli_args = "Materials/power_law_creep/use_substepping=INCREMENT_BASED "
+               "Materials/power_law_creep/maximum_number_substeps=500 Executioner/dtmin=0.1 "
+               "Outputs/file_base=power_law_substepping_out"
     exodiff = 'power_law_substepping_out.e'
-    requirement = 'The system shall converge under large deformation owing to the help of '
-                  'substepping'
+    requirement = 'The system shall converge under large deformation owing to the help of substepping'
+  []
+  [power_law_adaptive_substepping]
+    type = 'Exodiff'
+    input = 'power_law_creep.i'
+    cli_args = "Materials/power_law_creep/use_substepping=ADAPTIVE "
+               "Materials/power_law_creep/maximum_number_substeps=500 Executioner/dtmin=0.1 "
+               "Outputs/file_base=power_law_adaptive_substepping_out"
+    exodiff = 'power_law_adaptive_substepping_out.e'
+    requirement = 'The system shall converge under large deformation owing to the help of adaptive substepping'
   []
   [output]
     type = 'RunApp'
     input = 'power_law_creep.i'
-    cli_args = 'Executioner/num_steps=1 Materials/power_law_creep/internal_solve_full_iteration_history=true Materials/power_law_creep/internal_solve_output_on=always'
+    cli_args = "Materials/power_law_creep/use_substepping=INCREMENT_BASED Executioner/num_steps=1 "
+               "Materials/power_law_creep/internal_solve_full_iteration_history=true "
+               "Materials/power_law_creep/internal_solve_output_on=always"
     expect_out = "iteration=0 trial_stress="
     requirement = 'The system shall output verbose information about radial return iterations.'
   []
