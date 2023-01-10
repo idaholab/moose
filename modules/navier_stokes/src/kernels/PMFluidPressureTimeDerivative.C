@@ -15,6 +15,8 @@ InputParameters
 PMFluidPressureTimeDerivative::validParams()
 {
   InputParameters params = TimeKernel::validParams();
+  params.addClassDescription(
+      "Adds the transient term of the porous-media mass conservation equation");
   params.addRequiredCoupledVar("temperature", "coupled temperature");
   params.addRequiredCoupledVar("porosity", "porosity");
   params.addRequiredParam<UserObjectName>("eos", "The name of equation of state object to use.");

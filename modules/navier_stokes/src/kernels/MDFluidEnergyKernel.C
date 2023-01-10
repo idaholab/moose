@@ -15,6 +15,8 @@ InputParameters
 MDFluidEnergyKernel::validParams()
 {
   InputParameters params = MDFluidKernelStabilization::validParams();
+  params.addClassDescription("Adds advection, diffusion, and heat source terms to energy equation, "
+                             "potentially with stabilization");
   params.addParam<bool>("conservative_form", false, "if conservative form is used");
   params.addCoupledVar("porosity_elem", "Element averaged porosity");
   params.addCoupledVar("power_density", "volumetric heat source");

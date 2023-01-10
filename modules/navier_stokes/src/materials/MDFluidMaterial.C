@@ -19,6 +19,8 @@ MDFluidMaterial::validParams()
 {
   InputParameters params = Material::validParams();
 
+  params.addClassDescription("Computes generic material properties related to simulation of fluid "
+                             "flow");
   params.addRequiredCoupledVar("u", "velocity in x-direction");
   params.addCoupledVar("v", "velocity in y-direction"); // required in 2D/3D
   params.addCoupledVar("w", "velocity in z-direction"); // required in 3D

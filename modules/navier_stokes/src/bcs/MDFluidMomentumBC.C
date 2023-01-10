@@ -15,13 +15,14 @@ InputParameters
 MDFluidMomentumBC::validParams()
 {
   InputParameters params = MDFluidIntegratedBCBase::validParams();
+  params.addClassDescription("Specifies flow of momentum through a boundary");
   params.addRequiredParam<unsigned>("component", "0,1,or 2 for x-, y-, or z- direction");
   params.addParam<FunctionName>("p_fn", "Pressure function with time at the boundary");
   params.addParam<FunctionName>("v_fn", "Velocity function with time at the boundary");
 
   // coupled with branch pressure and density
-  // The 'branch_center' is a little bit tricky, because SAM 1D and multi-D could be in different
-  // mesh system.
+  // The 'branch_center' is a little bit tricky, because SAM 1D and multi-D could be in
+  // different mesh system.
   //   * The volume branch center is always defined in physical 3D XYZ coordinate system,
   //   * but multi-D flow could be simulated in 2D XY coordinate system,
   //   * the volume brance center needs be mapped to the 2D/3D flow mesh system

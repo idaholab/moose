@@ -15,6 +15,8 @@ InputParameters
 MDFluidMassBC::validParams()
 {
   InputParameters params = MDFluidIntegratedBCBase::validParams();
+  params.addClassDescription(
+      "Specifies flow of mass through a boundary given a velocity function or postprocessor");
   params.addParam<FunctionName>("v_fn", "Velocity function with time at the boundary");
   params.addParam<std::string>("v_pps",
                                "The Postprocessor name to setup the velocity boundary value.");

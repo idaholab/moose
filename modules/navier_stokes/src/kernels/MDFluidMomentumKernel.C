@@ -15,6 +15,8 @@ InputParameters
 MDFluidMomentumKernel::validParams()
 {
   InputParameters params = MDFluidKernelStabilization::validParams();
+  params.addClassDescription("Adds advection, viscous, pressure, friction, and gravity terms to "
+                             "the Navier-Stokes momentum equation, potentially with stabilization");
   params.addParam<bool>("conservative_form", false, "if conservative form is used");
   params.addRequiredParam<unsigned>("component", "0,1,or 2 for x-, y-, or z- direction");
   return params;

@@ -16,6 +16,8 @@ MDFluidEnergyDirichletBC::validParams()
 {
   InputParameters params = NodalBC::validParams();
 
+  params.addClassDescription(
+      "Imposes a Dirichlet condition on temperature at inlets. Is not applied at outlets");
   params.addRequiredCoupledVar("u", "velocity in x-direction");
   params.addCoupledVar("v", "velocity in y-direction"); // required in 2D/3D
   params.addCoupledVar("w", "velocity in z-direction"); // required in 3D

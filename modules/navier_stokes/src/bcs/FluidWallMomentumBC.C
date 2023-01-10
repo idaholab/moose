@@ -15,6 +15,8 @@ InputParameters
 FluidWallMomentumBC::validParams()
 {
   InputParameters params = MDFluidIntegratedBCBase::validParams();
+  params.addClassDescription("Implicitly sets normal component of velocity to zero if the "
+                             "advection term of the momentum equation is integrated by parts");
   params.addRequiredParam<unsigned>("component", "the velocity component");
   return params;
 }

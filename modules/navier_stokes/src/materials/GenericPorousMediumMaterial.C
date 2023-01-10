@@ -16,6 +16,8 @@ GenericPorousMediumMaterial::validParams()
 {
   InputParameters params = MDFluidMaterial::validParams();
 
+  params.addClassDescription("Computes generic material properties related to simulation of fluid "
+                             "flow in a porous medium");
   params.addRequiredParam<Real>("alpha", "Inertia drag coefficient");
   params.addRequiredParam<Real>("beta", "Viscous drag coefficient");
   params.addParam<Real>("pm_htc", 0, "Fluid-to-solid heat transfer coefficient in porous medium");

@@ -20,6 +20,8 @@ InputParameters
 MDMomentumFreeSlipBC::validParams()
 {
   InputParameters params = NodalNormalBC::validParams();
+  params.addClassDescription(
+      "Imposes a free slip boundary condition for the Navier-Stokes momentum equation");
   params.addRequiredCoupledVar("u", "x-component of velocity");
   params.addCoupledVar("v", "y-component of velocity");
   params.addCoupledVar("w", "z-component of velocity");

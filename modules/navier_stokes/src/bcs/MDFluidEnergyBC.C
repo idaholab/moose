@@ -15,6 +15,7 @@ InputParameters
 MDFluidEnergyBC::validParams()
 {
   InputParameters params = MDFluidIntegratedBCBase::validParams();
+  params.addClassDescription("Specifies flow of energy through a boundary");
   params.addParam<FunctionName>("v_fn", "Velocity function with time at the boundary");
   params.addParam<FunctionName>("T_fn", "Temperature function with time at the boundary");
   params.addCoupledVar("porosity_elem", "Element averaged porosity");

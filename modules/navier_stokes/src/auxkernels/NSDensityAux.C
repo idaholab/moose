@@ -18,6 +18,7 @@ NSDensityAux::validParams()
   InputParameters params = AuxKernel::validParams();
 
   // Coupled variables
+  params.addClassDescription("Computes density given pressure and temperature");
   params.addRequiredCoupledVar(NS::pressure, "Coupled fluid pressure variable");
   params.addRequiredCoupledVar(NS::temperature, "Coupled fluid temperature variable");
   params.addRequiredParam<UserObjectName>("eos", "The name of equation of state object to use.");

@@ -16,6 +16,8 @@ InputParameters
 MDFluidMassKernel::validParams()
 {
   InputParameters params = MDFluidKernelStabilization::validParams();
+  params.addClassDescription("Adds advective term of mass conservation equation along with "
+                             "pressure-stabilized Petrov-Galerkin terms");
   return params;
 }
 
