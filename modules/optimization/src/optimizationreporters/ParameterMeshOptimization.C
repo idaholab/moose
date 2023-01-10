@@ -91,9 +91,8 @@ ParameterMeshOptimization::ParameterMeshOptimization(const InputParameters & par
   _ndof = 0;
   for (const auto & i : make_range(_nparams))
   {
-    const std::string family =
-        families.size() > 1 ? std::string(families[i]) : std::string(families[0]);
-    const std::string order = orders.size() > 1 ? std::string(orders[i]) : std::string(orders[0]);
+    const std::string family = families.size() > 1 ? families[i] : families[0];
+    const std::string order = orders.size() > 1 ? orders[i] : orders[0];
     const FEType fetype(Utility::string_to_enum<Order>(order),
                         Utility::string_to_enum<FEFamily>(family));
 

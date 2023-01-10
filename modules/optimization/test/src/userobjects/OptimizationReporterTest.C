@@ -58,7 +58,7 @@ OptimizationReporterTest::initialSetup()
   _optReporter = &_fe_problem.getUserObject<OptimizationReporterBase>("OptimizationReporter");
   // Set initial conditions
   _optReporter->setInitialCondition(*_optSolverParameters.get());
-  size_t ndof = _optSolverParameters->size();
+  std::size_t ndof = _optSolverParameters->size();
   std::vector<Real> valuesToSetOnOptRepParams(
       getParam<std::vector<Real>>("values_to_set_parameters_to"));
   if (ndof != valuesToSetOnOptRepParams.size())
