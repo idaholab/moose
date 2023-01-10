@@ -56,12 +56,12 @@ protected:
   const ADReal & uOnGhost() const;
 
   /**
-   * @return the value of \p makeSidedFace with \p fi_elem = true
+   * @return an element argument corresponding to the face info elem
    */
   Moose::ElemArg elemArg(bool correct_skewness = false) const;
 
   /**
-   * @return the value of \p makeSidedFace with \p fi_elem = false
+   * @return an element argument corresponding to the face info neighbor
    */
   Moose::ElemArg neighborArg(bool correct_skewness = false) const;
 

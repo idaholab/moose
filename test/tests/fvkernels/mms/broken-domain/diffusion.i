@@ -140,10 +140,6 @@
     type = ParsedFunction
     value = '3*x^2 + 2*x + 1'
   []
-  [exact_ad]
-    type = ADParsedFunction
-    value = '3*x^2 + 2*x + 1'
-  []
   [forcing]
     type = ParsedFunction
     value = '-6'
@@ -154,7 +150,7 @@
   [error]
     type = ElementL2FunctorError
     approximate = composite
-    exact = exact_ad
+    exact = exact
     outputs = 'console csv'
   []
   [h]

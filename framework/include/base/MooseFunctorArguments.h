@@ -27,6 +27,10 @@ struct ElemArg
   const libMesh::Elem * elem;
   bool correct_skewness;
 
+  /**
+   * friend function that allows this structure to be used as keys in ordered containers like sets
+   * and maps
+   */
   friend bool operator<(const ElemArg & l, const ElemArg & r)
   {
     return std::make_tuple(l.elem, l.correct_skewness) <
@@ -44,6 +48,10 @@ struct ElemPointArg
   libMesh::Point point;
   bool correct_skewness;
 
+  /**
+   * friend function that allows this structure to be used as keys in ordered containers like sets
+   * and maps
+   */
   friend bool operator<(const ElemPointArg & l, const ElemPointArg & r)
   {
     return std::make_tuple(l.elem, l.point, l.correct_skewness) <
@@ -75,8 +83,13 @@ public:
   /// Whether to perform skew correction
   bool correct_skewness;
 
-  /// A member that can be used to indicate whether there is a sidedness to this face. If null, then
-  /// this means we're evaluating "right on" the face
+  /// A member that can be used to indicate whether there is a sidedness to this face. For example,
+  /// a block restricted diffusion kernel may use this to specify that a diffusion coefficient
+  /// should be evaluated on the elem side of the face, ignoring possible jumps in the diffusion
+  /// coefficient between the elem and neighbor sides of the face. If this is null, then a functor
+  /// that is itself block restricted may modify the value to indicate \emph its sidedness. If there
+  /// is ever a mismatch between the specified sidedness of a physics object and the sidedness of a
+  /// functor, then we will error
   const Elem * face_side;
 
   /**
@@ -89,6 +102,10 @@ public:
    */
   ElemArg makeNeighbor() const { return {fi->neighborPtr(), correct_skewness}; }
 
+  /**
+   * friend function that allows this structure to be used as keys in ordered containers like sets
+   * and maps
+   */
   friend bool operator<(const FaceArg & l, const FaceArg & r)
   {
     return std::make_tuple(
@@ -102,7 +119,7 @@ public:
  * in the argument:
  * - The element containing the quadrature point
  * - The quadrature point index, e.g. if there are \p n quadrature points, we are requesting the\n
- *   evaluation of the ith point
+ *   evaluation of the i-th point
  * - The quadrature rule that can be used to initialize the functor on the given element
  */
 using ElemQpArg = std::tuple<const libMesh::Elem *, unsigned int, const QBase *>;
@@ -113,7 +130,7 @@ using ElemQpArg = std::tuple<const libMesh::Elem *, unsigned int, const QBase *>
  * - The element
  * - The element side on which the quadrature points are located
  * - The quadrature point index, e.g. if there are \p n quadrature points, we are requesting the\n
- *   evaluation of the ith point
+ *   evaluation of the i-th point
  * - The quadrature rule that can be used to initialize the functor on the given element and side
  */
 using ElemSideQpArg = std::tuple<const libMesh::Elem *, unsigned int, unsigned int, const QBase *>;

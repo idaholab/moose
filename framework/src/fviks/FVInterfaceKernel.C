@@ -227,7 +227,7 @@ FVInterfaceKernel::computeJacobian(const FaceInfo &)
 Moose::ElemArg
 FVInterfaceKernel::elemArg(const bool correct_skewness) const
 {
-  return {&_face_info->elem(), correct_skewness};
+  return {_face_info->elemPtr(), correct_skewness};
 }
 
 Moose::ElemArg

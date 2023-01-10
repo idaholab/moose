@@ -572,14 +572,18 @@ MooseVariableFV<OutputType>::getExtrapolatedBoundaryFaceValue(
       [this, &fi, elem_to_extrapolate_from]() -> std::pair<const Elem *, bool>
   {
     if (elem_to_extrapolate_from)
-      return {elem_to_extrapolate_from, elem_to_extrapolate_from == &fi.elem()};
+      // Somebody already specified the element to extropolate from
+      return {elem_to_extrapolate_from, elem_to_extrapolate_from == fi.elemPtr()};
     else
     {
       const auto [elem_guaranteed_to_have_dofs,
                   other_elem,
                   elem_guaranteed_to_have_dofs_is_fi_elem] =
           Moose::FV::determineElemOneAndTwo(fi, *this);
+      // We only care about the element guaranteed to have degrees of freedom and current C++
+      // doesn't allow us to not assign one of the returned items like python does
       libmesh_ignore(other_elem);
+      // We will extrapolate from the element guaranteed to have degrees of freedom
       return {elem_guaranteed_to_have_dofs, elem_guaranteed_to_have_dofs_is_fi_elem};
     }
   }();

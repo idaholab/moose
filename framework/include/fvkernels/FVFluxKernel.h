@@ -97,12 +97,12 @@ protected:
   bool onBoundary(const FaceInfo & fi) const;
 
   /**
-   * @return the value of \p makeSidedFace called with the face info element
+   * @return an element argument corresponding to the face info elem
    */
   Moose::ElemArg elemArg(bool correct_skewness = false) const;
 
   /**
-   * @return the value of \p makeSidedFace called with the face info neighbor
+   * @return an element argument corresponding to the face info neighbor
    */
   Moose::ElemArg neighborArg(bool correct_skewness = false) const;
 

@@ -347,7 +347,7 @@ Moose::ElemArg
 FVFluxKernel::elemArg(const bool correct_skewness) const
 {
   mooseAssert(_face_info, "the face info should be non-null");
-  return {&_face_info->elem(), correct_skewness};
+  return {_face_info->elemPtr(), correct_skewness};
 }
 
 Moose::ElemArg

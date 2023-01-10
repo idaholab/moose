@@ -14,12 +14,13 @@
 /**
  * Computes L2 error between an 'approximate' functor and an 'exact' functor
  */
-class ElementL2FunctorError : public ElementIntegralPostprocessor
+template <bool is_ad>
+class ElementL2FunctorErrorTempl : public ElementIntegralPostprocessor
 {
 public:
   static InputParameters validParams();
 
-  ElementL2FunctorError(const InputParameters & parameters);
+  ElementL2FunctorErrorTempl(const InputParameters & parameters);
 
   Real getValue() override;
 
@@ -30,5 +31,8 @@ protected:
   const Moose::Functor<ADReal> & _approx;
 
   /// The analytical functor
-  const Moose::Functor<ADReal> & _exact;
+  const Moose::Functor<GenericReal<is_ad>> & _exact;
 };
+
+typedef ElementL2FunctorErrorTempl<false> ElementL2FunctorError;
+typedef ElementL2FunctorErrorTempl<true> ADElementL2FunctorError;

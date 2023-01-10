@@ -101,16 +101,24 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
                NS::isPorosityJumpFace(epsilon(), fi);
            is_jump)
   {
-    const Moose::FaceArg face_elem{
-        &fi, Moose::FV::LimiterType::CentralDifference, true, false, &fi.elem()};
-    const Moose::FaceArg face_neighbor{
-        &fi, Moose::FV::LimiterType::CentralDifference, true, false, fi.neighborPtr()};
+    // We are on a porosity jump face. To avoid oscillations we should not perform interpolations
+    // through a discontinuity except for quantities that we know remain continuous. In that vein,
+    // we will not use Rhie-Chow interpolation. Moreover we will not interpolate the interstitial
+    // velocities but instead evaluate it on the upwind face due to the jump in interstitial
+    // velocity that occurs at a porosity jump due to mass conservation. Conversely, because mass
+    // conservation requires that the *superficial velocity* be continuous it is safe to do a
+    // (central-difference) interpolation for the superficial velocity
 
     const auto v_face = _rc_vel_provider.getVelocity(Moose::FV::InterpMethod::Average, fi, _tid);
-    const bool fi_elem_is_upwind = v_face * fi.normal() > 0;
-    const auto & upwind_face = fi_elem_is_upwind ? face_elem : face_neighbor;
-    const auto rho_face = _rho(upwind_face);
 
+    // For a weakly compressible formulation, the density should not depend on pressure and
+    // consequently the density should not be impacted by the pressure jump that occurs at a
+    // porosity jump. Consequently we will allow evaluation of the density using both upstream and
+    // downstream information
+    const auto rho_face =
+        _rho(Moose::FaceArg{&fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr});
+
+    // We set the + and - sides of the superficial velocity equal to the interpolated value
     const auto & var_elem_face = v_face(_index);
     const auto & var_neighbor_face = v_face(_index);
 
@@ -121,12 +129,16 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
     const auto d_var_neighbor_face_d_neighbor_dof =
         var_neighbor_face.derivatives()[neighbor_dof_number];
 
+    // We allow a discontintuity in the advective momentum flux at the jump face. Mainly the
+    // advective flux is:
+    // elem side:
+    // rho * v_superficial / eps_elem * v_superficial = rho * v_interstitial_elem * v_superficial
+    // neighbor side:
+    // rho * v_superficial / eps_neigh * v_superficial = rho * v_interstitial_neigh * v_superficial
     const auto elem_coeff = _normal * v_face * rho_face / eps_elem_face;
     const auto neighbor_coeff = _normal * v_face * rho_face / eps_neighbor_face;
-
     _ae = elem_coeff * d_var_elem_face_d_elem_dof;
     _elem_residual = elem_coeff * var_elem_face;
-
     _an = -neighbor_coeff * d_var_neighbor_face_d_neighbor_dof;
     _neighbor_residual = -neighbor_coeff * var_neighbor_face;
   }

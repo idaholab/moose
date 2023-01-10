@@ -33,7 +33,7 @@ public:
   FunctorInterface(const MooseObject * moose_object);
 
   /**
-   * helper to look up a functor name through the input parameter keys
+   * Helper to look up a functor name through the input parameter keys
    * @param name The input parameter name that we are trying to deduce the functor name for
    * @param params The input parameters object that we will be checking for parameters named \p name
    * @return The functor name
@@ -42,30 +42,44 @@ public:
 
 protected:
   /**
-   * retrieves a functor from the subproblem. This method also leverages the ability to create
+   * Retrieves a functor from the subproblem. This method also leverages the ability to create
    * default functors if the user passed an integer or real in the input file
+   * @param name The name of the functor to retrieve. This should match the functor parameter name,
+   * \emph not the actual name of the functor created in the input file
+   * @return The functor
    */
   template <typename T>
   const Moose::Functor<T> & getFunctor(const std::string & name);
 
   /**
-   * retrieves a functor from the passed-in subproblem. This method also leverages the ability to
+   * Retrieves a functor from the passed-in subproblem. This method also leverages the ability to
    * create default functors if the user passed an integer or real in the input file
+   * @param name The name of the functor to retrieve. This should match the functor parameter name,
+   * \emph not the actual name of the functor created in the input file
+   * @param subproblem The subproblem to query for the functor
+   * @return The functor
    */
   template <typename T>
   const Moose::Functor<T> & getFunctor(const std::string & name, SubProblem & subproblem);
 
   /**
-   * checks the subproblem for the given functor. This will not query default functors potentially
+   * Checks the subproblem for the given functor. This will not query default functors potentially
    * stored in this object, e.g. this method will return false if the user passed an int or real to
    * the functor param in the input file
+   * @param name The name of the functor to check. This should match the functor parameter name,
+   * \emph not the actual name of the functor created in the input file
+   * @return Whether the subproblem has the specified functor
    */
   bool isFunctor(const std::string & name) const;
 
   /**
-   * checks the passed-in subproblem for the given functor. This will not query default functors
+   * Checks the passed-in subproblem for the given functor. This will not query default functors
    * potentially stored in this object, e.g. this method will return false if the user passed an int
    * or real to the functor param in the input file
+   * @param name The name of the functor to check. This should match the functor parameter name,
+   * \emph not the actual name of the functor created in the input file
+   * @param subproblem The subproblem to query for the functor
+   * @return Whether the subproblem has the specified functor
    */
   bool isFunctor(const std::string & name, const SubProblem & subproblem) const;
 

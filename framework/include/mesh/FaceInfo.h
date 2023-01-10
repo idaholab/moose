@@ -162,12 +162,6 @@ public:
    */
   void computeBoundaryCoefficients();
 
-  /**
-   * Determine whether the provided element is the face information element. This element should be
-   * either the face information element or neighbor. We will assert as much
-   */
-  bool isElem(const Elem * elem) const;
-
 private:
   /// the elem and neighbor elems
   const ElemInfo * const _elem_info;
@@ -244,12 +238,4 @@ FaceInfo::neighborVolume() const
               "The neighbor is not defined on this faceInfo! A possible explanation is that the "
               "face is a (physical/processor) boundary face.");
   return _neighbor_info->volume();
-}
-
-inline bool
-FaceInfo::isElem(const Elem * const elem) const
-{
-  mooseAssert(elem == &this->elem() || elem == neighborPtr(),
-              "The provided element should be either the elem or neighbor");
-  return elem == &this->elem();
 }

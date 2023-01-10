@@ -27,11 +27,11 @@ FaceArgConsumerInterface::checkFace(const Moose::FaceArg & face) const
     }
     else if (!hasFaceSide(*fi, false))
     {
-      ret_face.face_side = &fi->elem();
+      ret_face.face_side = fi->elemPtr();
       check_elem_def = true;
     }
   }
-  else if (elem == &fi->elem())
+  else if (elem == fi->elemPtr())
     check_elem_def = true;
   else
   {

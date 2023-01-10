@@ -12,9 +12,11 @@
 #include "metaphysicl/raw_type.h"
 
 registerMooseObject("MooseApp", ElementL2FunctorError);
+registerMooseObject("MooseApp", ADElementL2FunctorError);
 
+template <bool is_ad>
 InputParameters
-ElementL2FunctorError::validParams()
+ElementL2FunctorErrorTempl<is_ad>::validParams()
 {
   InputParameters params = ElementIntegralPostprocessor::validParams();
   params.addRequiredParam<MooseFunctorName>("approximate", "The approximate functor");
@@ -24,23 +26,29 @@ ElementL2FunctorError::validParams()
   return params;
 }
 
-ElementL2FunctorError::ElementL2FunctorError(const InputParameters & parameters)
+template <bool is_ad>
+ElementL2FunctorErrorTempl<is_ad>::ElementL2FunctorErrorTempl(const InputParameters & parameters)
   : ElementIntegralPostprocessor(parameters),
     _approx(getFunctor<ADReal>("approximate")),
-    _exact(getFunctor<ADReal>("exact"))
+    _exact(getFunctor<GenericReal<is_ad>>("exact"))
 {
 }
 
+template <bool is_ad>
 Real
-ElementL2FunctorError::getValue()
+ElementL2FunctorErrorTempl<is_ad>::getValue()
 {
   return std::sqrt(ElementIntegralPostprocessor::getValue());
 }
 
+template <bool is_ad>
 Real
-ElementL2FunctorError::computeQpIntegral()
+ElementL2FunctorErrorTempl<is_ad>::computeQpIntegral()
 {
   Moose::ElemQpArg elem_qp = {_current_elem, _qp, _qrule};
   Real diff = MetaPhysicL::raw_value(_approx(elem_qp)) - MetaPhysicL::raw_value(_exact(elem_qp));
   return diff * diff;
 }
+
+template class ElementL2FunctorErrorTempl<false>;
+template class ElementL2FunctorErrorTempl<true>;
