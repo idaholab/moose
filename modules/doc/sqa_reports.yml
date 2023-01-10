@@ -137,6 +137,8 @@ Applications:
             - framework/doc/remove.yml
         unregister:
             - framework/doc/unregister.yml
+        log_stub_files: WARNING
+        show_warning: false
 
     optimization:
         exe_directory: modules/combined
