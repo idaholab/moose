@@ -28,11 +28,8 @@ protected:
   std::unique_ptr<MeshBase> & _input;
 
   /// A point in the mirror plane from which to transform the mesh
-  RealEigenVector _mirror_point_vector;
+  const RealEigenVector _mirror_point_vector;
 
   /// The normal of the mirror plane from which to transform the mesh
   RealEigenVector _mirror_normal_vector;
-
-  /// The boundaries to stitch together
-  std::vector<std::vector<std::string>> _stitch_boundaries_pairs;
 };

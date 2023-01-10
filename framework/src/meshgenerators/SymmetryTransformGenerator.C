@@ -28,12 +28,7 @@ SymmetryTransformGenerator::validParams()
       "mirror_normal_vector",
       "A vector normal to (perpendicular/orthogonal to) the plane/line over which the "
       "reflection operation will be done");
-  params.addParam<std::vector<std::vector<std::string>>>(
-      "symmetry_stitch_sideset",
-      std::vector<std::vector<std::string>>(),
-      "Pairs of boundaries to be stitched together between the 1st mesh in inputs and each "
-      "consecutive mesh. This parameter will often be the name of the sideset on the symmetry axis"
-      ". If not provided, the stitching is not performed.");
+
   return params;
 }
 
@@ -41,18 +36,18 @@ SymmetryTransformGenerator::SymmetryTransformGenerator(const InputParameters & p
   : MeshGenerator(parameters),
     _input(getMesh("input")),
     _mirror_point_vector(getParam<RealEigenVector>("mirror_point")),
-    _mirror_normal_vector(getParam<RealEigenVector>("mirror_normal_vector")),
-    _stitch_boundaries_pairs(
-        getParam<std::vector<std::vector<std::string>>>("symmetry_stitch_sideset"))
+    _mirror_normal_vector(getParam<RealEigenVector>("mirror_normal_vector"))
 {
   // enforce 3D coordinates
   if (_mirror_point_vector.size() != 3)
-    mooseError("mirror_point should be a 3d vector, but only ",
+    paramError("mirror_point",
+               "mirror_point should be a 3d vector, but only ",
                _mirror_point_vector.size(),
                "components were specified.");
 
   if (_mirror_normal_vector.size() != 3)
-    mooseError(" mirror_normal_vector should be a 3d vector, but only ",
+    paramError("mirror_point",
+               " mirror_normal_vector should be a 3d vector, but only ",
                _mirror_normal_vector.size(),
                "components were specified.");
 
@@ -61,22 +56,6 @@ SymmetryTransformGenerator::SymmetryTransformGenerator(const InputParameters & p
   if (!MooseUtils::absoluteFuzzyEqual(norm, 1))
     mooseInfo("Input normal plane vector was not normalized, normalization was performed");
   _mirror_normal_vector = _mirror_normal_vector / norm;
-
-  // Add stitch sub mesh generator if stitching is requested
-  if (_stitch_boundaries_pairs.size() > 0)
-  {
-    auto params = _app.getFactory().getValidParams("StitchedMeshGenerator");
-
-    // order of vector elements matters for this generator
-    // here order by: original mesh first, our custom mesh second
-    params.set<std::vector<MeshGeneratorName>>("inputs") = {getParam<MeshGeneratorName>("input"),
-                                                            name()};
-    params.set<std::vector<std::vector<std::string>>>("stitch_boundaries_pairs") =
-        _stitch_boundaries_pairs;
-
-    // stitch the mirrored mesh and the original mesh
-    addMeshSubgenerator("StitchedMeshGenerator", name() + "_stitchedMeshGenerator", params);
-  }
 }
 
 std::unique_ptr<MeshBase>

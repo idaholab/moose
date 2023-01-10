@@ -5,11 +5,6 @@
 !alert note
 Only the plane or mirror symmetry is currently implemented in the `SymmetryTransformGenerator`. Point or rotational symmetries are not implemented.
 
-!alert warning
-If using the [!param](/Mesh/SymmetryTransformGenerator/symmetry_stitch_sideset) parameter,
-the name of the output mesh generator is not the name of the `SymmetryTransformGenerator`!
-It is that name suffixed with `_stitchedMeshGenerator`.
-
 ## Overview
 
 The `SymmetryTransformGenerator` makes a mirror reflection of a mesh across an arbitrary plane (or line in 2D) supplied by the user.

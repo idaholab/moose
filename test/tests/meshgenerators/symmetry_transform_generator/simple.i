@@ -1,6 +1,4 @@
 [Mesh]
-  # The stitching is performed by the SymmetryTransformGenerator
-  inactive = 'stitch'
   [file]
     type = GeneratedMeshGenerator
     dim = 2
@@ -12,7 +10,6 @@
     input = file
     mirror_point = "0 1 0"
     mirror_normal_vector = "0 1 0"
-    symmetry_stitch_sideset = "top top"
   []
   [stitch]
     type = StitchedMeshGenerator
