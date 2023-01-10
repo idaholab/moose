@@ -2837,19 +2837,23 @@ Assembly::prepareBlock(unsigned int ivar,
                        unsigned int jvar,
                        const std::vector<dof_id_type> & dof_indices)
 {
-  unsigned int icount = _sys.getVariable(_tid, ivar).count();
-  unsigned int jcount = _sys.getVariable(_tid, jvar).count();
-  if (ivar == jvar && _component_block_diagonal[ivar])
+  auto & iv = _sys.getVariable(_tid, ivar);
+  auto & jv = _sys.getVariable(_tid, jvar);
+  unsigned int ivn = iv.number();
+  unsigned int jvn = jv.number();
+  unsigned int icount = iv.count();
+  unsigned int jcount = jv.count();
+  if (ivn == jvn && _component_block_diagonal[ivn])
     jcount = 1;
 
   for (MooseIndex(_jacobian_block_used) tag = 0; tag < _jacobian_block_used.size(); tag++)
   {
-    jacobianBlock(ivar, jvar, tag).resize(dof_indices.size() * icount, dof_indices.size() * jcount);
-    jacobianBlockUsed(tag, ivar, jvar, false);
+    jacobianBlock(ivn, jvn, tag).resize(dof_indices.size() * icount, dof_indices.size() * jcount);
+    jacobianBlockUsed(tag, ivn, jvn, false);
   }
 
   for (auto & tag_Re : _sub_Re)
-    tag_Re[ivar].resize(dof_indices.size() * icount);
+    tag_Re[ivn].resize(dof_indices.size() * icount);
 }
 
 void
@@ -2858,19 +2862,23 @@ Assembly::prepareBlockNonlocal(unsigned int ivar,
                                const std::vector<dof_id_type> & idof_indices,
                                const std::vector<dof_id_type> & jdof_indices)
 {
-  unsigned int icount = _sys.getVariable(_tid, ivar).count();
-  unsigned int jcount = _sys.getVariable(_tid, jvar).count();
-  if (ivar == jvar && _component_block_diagonal[ivar])
+  auto & iv = _sys.getVariable(_tid, ivar);
+  auto & jv = _sys.getVariable(_tid, jvar);
+  unsigned int ivn = iv.number();
+  unsigned int jvn = jv.number();
+  unsigned int icount = iv.count();
+  unsigned int jcount = jv.count();
+  if (ivn == jvn && _component_block_diagonal[ivn])
     jcount = 1;
 
   for (MooseIndex(_jacobian_block_nonlocal_used) tag = 0;
        tag < _jacobian_block_nonlocal_used.size();
        tag++)
   {
-    jacobianBlockNonlocal(ivar, jvar, tag)
+    jacobianBlockNonlocal(ivn, jvn, tag)
         .resize(idof_indices.size() * icount, jdof_indices.size() * jcount);
 
-    jacobianBlockNonlocalUsed(tag, ivar, jvar, false);
+    jacobianBlockNonlocalUsed(tag, ivn, jvn, false);
   }
 }
 
@@ -4222,10 +4230,13 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian,
   if (!(*_cm)(ivar, jvar))
     return;
 
-  DenseMatrix<Number> & ke = jacobianBlock(ivar, jvar, tag);
   auto & iv = _sys.getVariable(_tid, ivar);
   auto & jv = _sys.getVariable(_tid, jvar);
   auto & scaling_factor = iv.arrayScalingFactor();
+
+  unsigned int ivn = iv.number();
+  unsigned int jvn = jv.number();
+  auto & ke = jacobianBlock(ivn, jvn, tag);
 
   // It is guaranteed by design iv.number <= ivar since iv is obtained
   // through SystemBase::getVariable with ivar.
@@ -4233,8 +4244,8 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian,
   // where ivar could be a number for a component of an array variable but calling
   // getVariable will return the array variable that has the number of the 0th component.
   // It is the same for jvar.
-  unsigned int i = ivar - iv.number();
-  unsigned int j = jvar - jv.number();
+  unsigned int i = ivar - ivn;
+  unsigned int j = jvar - jvn;
 
   // DoF indices are independently given
   auto di = dof_indices;
@@ -4244,7 +4255,7 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian,
   auto jndof = dj.size();
 
   unsigned int jj = j;
-  if (ivar == jvar && _component_block_diagonal[iv.number()])
+  if (ivar == jvar && _component_block_diagonal[ivn])
     jj = 0;
 
   auto sub = ke.sub_matrix(i * indof, indof, jj * jndof, jndof);
@@ -4275,10 +4286,13 @@ Assembly::addJacobianBlockNonlocal(SparseMatrix<Number> & jacobian,
   if (!(*_cm)(ivar, jvar))
     return;
 
-  DenseMatrix<Number> & keg = jacobianBlockNonlocal(ivar, jvar);
   auto & iv = _sys.getVariable(_tid, ivar);
   auto & jv = _sys.getVariable(_tid, jvar);
   auto & scaling_factor = iv.arrayScalingFactor();
+
+  unsigned int ivn = iv.number();
+  unsigned int jvn = jv.number();
+  auto & keg = jacobianBlockNonlocal(ivn, jvn);
 
   // It is guaranteed by design iv.number <= ivar since iv is obtained
   // through SystemBase::getVariable with ivar.
@@ -4286,8 +4300,8 @@ Assembly::addJacobianBlockNonlocal(SparseMatrix<Number> & jacobian,
   // where ivar could be a number for a component of an array variable but calling
   // getVariable will return the array variable that has the number of the 0th component.
   // It is the same for jvar.
-  unsigned int i = ivar - iv.number();
-  unsigned int j = jvar - jv.number();
+  unsigned int i = ivar - ivn;
+  unsigned int j = jvar - jvn;
 
   // DoF indices are independently given
   auto di = idof_indices;
@@ -4297,7 +4311,7 @@ Assembly::addJacobianBlockNonlocal(SparseMatrix<Number> & jacobian,
   auto jndof = dj.size();
 
   unsigned int jj = j;
-  if (ivar == jvar && _component_block_diagonal[iv.number()])
+  if (ivar == jvar && _component_block_diagonal[ivn])
     jj = 0;
 
   auto sub = keg.sub_matrix(i * indof, indof, jj * jndof, jndof);
@@ -4326,13 +4340,15 @@ Assembly::addJacobianNeighbor(SparseMatrix<Number> & jacobian,
   if (!(*_cm)(ivar, jvar))
     return;
 
-  DenseMatrix<Number> & ken = jacobianBlockNeighbor(Moose::ElementNeighbor, ivar, jvar);
-  DenseMatrix<Number> & kne = jacobianBlockNeighbor(Moose::NeighborElement, ivar, jvar);
-  DenseMatrix<Number> & knn = jacobianBlockNeighbor(Moose::NeighborNeighbor, ivar, jvar);
-
   auto & iv = _sys.getVariable(_tid, ivar);
   auto & jv = _sys.getVariable(_tid, jvar);
   auto & scaling_factor = iv.arrayScalingFactor();
+
+  unsigned int ivn = iv.number();
+  unsigned int jvn = jv.number();
+  auto & ken = jacobianBlockNeighbor(Moose::ElementNeighbor, ivn, jvn);
+  auto & kne = jacobianBlockNeighbor(Moose::NeighborElement, ivn, jvn);
+  auto & knn = jacobianBlockNeighbor(Moose::NeighborNeighbor, ivn, jvn);
 
   // It is guaranteed by design iv.number <= ivar since iv is obtained
   // through SystemBase::getVariable with ivar.
@@ -4340,8 +4356,8 @@ Assembly::addJacobianNeighbor(SparseMatrix<Number> & jacobian,
   // where ivar could be a number for a component of an array variable but calling
   // getVariable will return the array variable that has the number of the 0th component.
   // It is the same for jvar.
-  unsigned int i = ivar - iv.number();
-  unsigned int j = jvar - jv.number();
+  unsigned int i = ivar - ivn;
+  unsigned int j = jvar - jvn;
 
   // DoF indices are independently given
   auto dc = dof_indices;
@@ -4350,7 +4366,7 @@ Assembly::addJacobianNeighbor(SparseMatrix<Number> & jacobian,
   auto nndof = dn.size();
 
   unsigned int jj = j;
-  if (ivar == jvar && _component_block_diagonal[iv.number()])
+  if (ivar == jvar && _component_block_diagonal[ivn])
     jj = 0;
 
   auto suben = ken.sub_matrix(i * cndof, cndof, jj * nndof, nndof);
