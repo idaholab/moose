@@ -84,21 +84,21 @@ SolutionInvalidity::printDebug(InvalidSolutionID _invalid_solution_id) const
 SolutionInvalidity::FullTable
 SolutionInvalidity::summaryTable() const
 {
-  FullTable vtable({"Section", "Current", "Timestep", "Total", "Message"}, 4);
+  FullTable vtable({"Object", "Current", "Timestep", "Total", "Message"}, 4);
 
   vtable.setColumnFormat({
-      VariadicTableColumnFormat::AUTO, // Section Name
-      VariadicTableColumnFormat::AUTO, // Current Interation Warnings
-      VariadicTableColumnFormat::AUTO, // Current Time Interation Warnings
+      VariadicTableColumnFormat::AUTO, // Object Name
+      VariadicTableColumnFormat::AUTO, // Current Iteration Warnings
+      VariadicTableColumnFormat::AUTO, // Current Time Iteration Warnings
       VariadicTableColumnFormat::AUTO, // Total Iternation Warnings
       VariadicTableColumnFormat::AUTO, // Message
   });
 
   vtable.setColumnPrecision({
-      1, // Section Name
+      1, // Object Name
       0, // Current Iternation Warnings
       0, // Current Time Iternation Warnings
-      0, // Total Interation Warnings
+      0, // Total Iteration Warnings
       1, // Message
   });
 
@@ -108,9 +108,9 @@ SolutionInvalidity::summaryTable() const
     if (entry.counts > 0)
     {
       const auto & info = _solution_invalidity_registry.item(id);
-      vtable.addRow(info._name,            // Section
-                    entry.counts,          // Current Interation Warnings
-                    entry.timeiter_counts, // Current Time Interation Warnings
+      vtable.addRow(info._name,            // Object Name
+                    entry.counts,          // Current Iteration Warnings
+                    entry.timeiter_counts, // Current Time Iteration Warnings
                     entry.total_counts,    // Total Iternation Warnings
                     info._message          // Message
       );
