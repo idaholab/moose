@@ -35,7 +35,7 @@ class Node;
 class FaceInfo
 {
 public:
-  FaceInfo(const ElemInfo * const elem_info, const unsigned int side);
+  FaceInfo(const ElemInfo * const elem_info, const unsigned int side, const dof_id_type id);
 
   /// This enum is used to indicate which side(s) of a face a particular
   /// variable is defined on.  This is important for certain BC-related finite
@@ -51,6 +51,9 @@ public:
     ELEM,
     NEIGHBOR
   };
+
+  /// Return the ID of the face
+  dof_id_type id() const { return _id; }
 
   /// Returns the face area of face id
   Real faceArea() const { return _face_area; }
@@ -148,12 +151,6 @@ public:
   processor_id_type processor_id() const { return _processor_id; }
 
   /**
-   * @return a unique identifier of this face object. It's formed using the element id and the
-   * element's side that corresponds to this face
-   */
-  const std::pair<dof_id_type, unsigned int> & id() const { return _id; }
-
-  /**
    * Takes the ElemInfo of the neighbor cell and computes interpolation weights
    * together with other quantities used to generate spatial operators.
    */
@@ -170,11 +167,12 @@ private:
   const ElemInfo * const _elem_info;
   const ElemInfo * _neighbor_info;
 
+  const dof_id_type _id;
+
   Real _face_coord = 0;
   Point _normal;
 
   const processor_id_type _processor_id;
-  const std::pair<dof_id_type, unsigned int> _id;
 
   /// the elem local side id
   const unsigned int _elem_side_id;
