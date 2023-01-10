@@ -1,7 +1,6 @@
 # Add paths relative to repository root that should be taken into account when generating a hash
 packages:
   mpich:
-    - scripts/apptainer_generator.py
     - apptainer/mpich.def
     - conda/mpich/meta.yaml
     - conda/mpich/conda_build_config.yaml

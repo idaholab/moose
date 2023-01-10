@@ -8,7 +8,6 @@
     design = "ExternalProblem.md"
     issues = "#12024"
   []
-
   [external_transient]
     type = 'RunApp'
     input = 'external_transient.i'
@@ -19,5 +18,24 @@
     requirement = "The system shall support an code coupling interface that can trigger external solves for transient simulations."
     design = "ExternalProblem.md"
     issues = "#12024"
+  []
+  [update_ghosted_aux_soln]
+    requirement = 'The system shall be able to update the ghosted auxiliary solution from an externally defined problem such that there will be up-to-date solution values in objects like'
+    design = "ExternalProblem.md"
+    issues = "#17534"
+    [auxkernels]
+      type = 'CSVDiff'
+      input = 'update-ghosted-aux-soln.i'
+      csvdiff = 'update-ghosted-aux-soln_out.csv'
+      detail = 'auxiliary kernels'
+    []
+    [pps]
+      type = 'CSVDiff'
+      input = 'update-ghosted-aux-soln.i'
+      csvdiff = 'update-ghosted-aux-soln_out.csv'
+      detail = 'postprocessors'
+      prereq = 'update_ghosted_aux_soln/auxkernels'
+      cli_args = "AuxKernels/active='' Postprocessors/copy/variable=heat_source"
+    []
   []
 []
