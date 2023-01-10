@@ -21,6 +21,16 @@ class JSONDiff(SchemaDiff):
     def __init__(self, name, params):
         params['schemadiff'] = params['jsondiff']
         params['ignored_items'] += params['skip_keys']
+        # Add system information to ignored_items
+        if (not self.specs['keep_system_information']):
+            params['ignored_items'].extend(['app_name',
+                                            'current_time',
+                                            'executable',
+                                            'executable_time',
+                                            'moose_version',
+                                            'libmesh_version',
+                                            'petsc_version',
+                                            'slepc_version'])
         SchemaDiff.__init__(self, name, params)
 
     def prepare(self, options):
