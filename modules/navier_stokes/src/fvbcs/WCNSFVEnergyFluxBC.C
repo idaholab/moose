@@ -16,41 +16,25 @@ registerMooseObject("NavierStokesApp", WCNSFVEnergyFluxBC);
 InputParameters
 WCNSFVEnergyFluxBC::validParams()
 {
-  InputParameters params = FVFluxBC::validParams();
-  params += INSFVFlowBC::validParams();
+  InputParameters params = WCNSFVFluxBCBase::validParams();
   params.addClassDescription("Flux boundary conditions for energy advection.");
-
-  params.addParam<Real>("scaling_factor", 1, "To scale the energy flux");
 
   // Three different ways to input an advected energy flux
   // 1) Postprocessor with the energy flow rate directly
-  params.addParam<PostprocessorName>("energy_pp", "Postprocessor with the inlet energy flow rate");
-  params.addParam<PostprocessorName>("area_pp", "Postprocessor with the inlet flow area");
-
   // 2) Postprocessors for velocity and energy, functors for specific heat and density
+  // 3) Postprocessors for mass flow rate and energy, functor for specific heat
+  params.addParam<PostprocessorName>("energy_pp", "Postprocessor with the inlet energy flow rate");
   params.addParam<PostprocessorName>("temperature_pp", "Postprocessor with the inlet temperature");
   params.addParam<MooseFunctorName>(NS::cp, "specific heat capacity functor");
-
-  params.addParam<PostprocessorName>("velocity_pp", "Postprocessor with the inlet velocity norm");
-  params.addParam<MooseFunctorName>(NS::density, "Density functor");
-
-  // 3) Postprocessors for mass flow rate and energy, functor for specific heat
-  params.addParam<PostprocessorName>("mdot_pp", "Postprocessor with the inlet mass flow rate");
 
   return params;
 }
 
 WCNSFVEnergyFluxBC::WCNSFVEnergyFluxBC(const InputParameters & params)
-  : FVFluxBC(params),
-    INSFVFlowBC(params),
-    _scaling_factor(getParam<Real>("scaling_factor")),
+  : WCNSFVFluxBCBase(params),
     _temperature_pp(isParamValid("temperature_pp") ? &getPostprocessorValue("temperature_pp")
                                                    : nullptr),
     _energy_pp(isParamValid("energy_pp") ? &getPostprocessorValue("energy_pp") : nullptr),
-    _velocity_pp(isParamValid("velocity_pp") ? &getPostprocessorValue("velocity_pp") : nullptr),
-    _mdot_pp(isParamValid("mdot_pp") ? &getPostprocessorValue("mdot_pp") : nullptr),
-    _area_pp(isParamValid("area_pp") ? &getPostprocessorValue("area_pp") : nullptr),
-    _rho(isParamValid(NS::density) ? &getFunctor<ADReal>(NS::density) : nullptr),
     _cp(isParamValid(NS::cp) ? &getFunctor<ADReal>(NS::cp) : nullptr)
 {
   if (!dynamic_cast<INSFVEnergyVariable *>(&_var))
@@ -58,9 +42,9 @@ WCNSFVEnergyFluxBC::WCNSFVEnergyFluxBC(const InputParameters & params)
                "The variable argument to WCNSFVEnergyFluxBC must be of type INSFVEnergyVariable");
 
   // Density is often set as global parameters so it is not checked
-  if (_energy_pp && (_velocity_pp || _mdot_pp || _temperature_pp))
+  if (_energy_pp && (_velocity_pp || _direction_specified_by_user || _mdot_pp || _temperature_pp))
     mooseWarning("If setting the energy flow rate directly, "
-                 "no need for inlet velocity, mass flow or energy");
+                 "no need for inlet velocity (magnitude or direction), mass flow or temperature");
 
   // Need enough information if trying to use a mass flow rate postprocessor
   if (!_energy_pp)
@@ -92,10 +76,33 @@ WCNSFVEnergyFluxBC::computeQpResidual()
 
   if (_energy_pp)
     return -_scaling_factor * *_energy_pp / *_area_pp;
-  else if (_velocity_pp)
-    return -_scaling_factor * (*_rho)(singleSidedFaceArg()) * *_velocity_pp *
-           (*_cp)(singleSidedFaceArg()) * *_temperature_pp;
   else
-    return -_scaling_factor * *_mdot_pp / *_area_pp * (*_cp)(singleSidedFaceArg()) *
-           *_temperature_pp;
+  {
+    /*
+     * We assume the following orientation: The supplied mass flow and velocity magnitude need to
+     * be positive if:
+     * 1. No direction parameter is supplied and we want to define an inlet condition (similarly,
+     * if the mass flow/velocity magnitude are negative we define an outlet)
+     * 2. If the fluid flows aligns with the direction parameter specified by the user.
+     * (similarly, if the postprocessor values are negative we assume the fluid flows backwards
+     * with respect to the direction parameter)
+     */
+    if (_velocity_pp)
+    {
+      if (_face_info->neighborPtr() && !_direction_specified_by_user)
+        paramError(
+            "direction",
+            this->type(),
+            " can only be defined on an internal face if a direction parameter is supplied!");
+
+      const Point incoming_vector =
+          !_direction_specified_by_user ? _face_info->normal() : _direction;
+      const Real cos_angle = std::abs(incoming_vector * _face_info->normal());
+      return -_scaling_factor * (*_rho)(singleSidedFaceArg()) * *_velocity_pp * cos_angle *
+             (*_cp)(singleSidedFaceArg()) * *_temperature_pp;
+    }
+    else
+      return -_scaling_factor * *_mdot_pp / *_area_pp * (*_cp)(singleSidedFaceArg()) *
+             *_temperature_pp;
+  }
 }

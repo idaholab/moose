@@ -258,12 +258,12 @@
       expect_err = 'If setting the mass flow rate directly, no need for inlet velocity'
       detail = 'redundant information is provided for setting the inlet momentum flux'
     []
-    [both_temperature_and_mdot]
+    [both_energy_and_mdot]
       type = RunException
       input = 'flux_bcs_direct.i'
       ad_indexing_type = 'global'
       cli_args = 'FVBCs/inlet_T/mdot_pp=0'
-      expect_err = 'If setting the energy flow rate directly, no need for inlet velocity, mass flow or energy'
+      expect_err = 'If setting the energy flow rate directly, no need for inlet velocity \(magnitude or direction\), mass flow or temperature'
       detail = 'redundant information is provided for setting the inlet energy flux'
     []
     [both_scalar_and_mdot]
