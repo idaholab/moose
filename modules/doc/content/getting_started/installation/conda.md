@@ -5,7 +5,7 @@ application development is via Conda's myriad array of libraries. Follow these
 instructions to create an environment on your machine using Conda. At this time,
 an option to install MOOSE directly on a Windows system is not yet supported.
 On-going efforts are being made to add a conda installation option for Windows,
-and an experimental [WSL](installation/windows10.md) option is available.
+and an experimental [WSL](installation/windows.md) option is available.
 
 !include installation/install_miniconda.md
 
