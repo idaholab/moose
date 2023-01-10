@@ -311,7 +311,9 @@ class ApptainerGenerator:
             # No luck, we're still screwed
             if not alt_exists:
                 self.error(f'Alternate container dependency {uri} not found')
-        if not prod_exists and self.args.alt_dep_tag is None:
+        if (not prod_exists
+           and self.args.alt_dep_tag is None
+           and self.args.alt_dep_tag_prefix is None):
             self.error(f'Remote container dependency {uri} not found')
 
         self.print(f'Using remote dependency for {name} from {uri}')
