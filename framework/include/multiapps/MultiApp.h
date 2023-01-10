@@ -354,6 +354,11 @@ public:
    */
   static void transformBoundingBox(BoundingBox & box, const MultiAppCoordTransform & transform);
 
+  /**
+   * Sets all the app's output file bases. @see MooseApp::setOutputFileBase for usage
+   */
+  void setAppOutputFileBase();
+
 protected:
   /// function that provides cli_args to subapps
   virtual std::vector<std::string> cliArgs() const { return _cli_args; }
@@ -424,11 +429,6 @@ protected:
    *  and it is used as an initial guess for the next run
    */
   void keepSolutionDuringRestore(bool keep_solution_during_restore);
-
-  /**
-   * Sets all the app's output file bases. @see MooseApp::setOutputFileBase for usage
-   */
-  void setAppOutputFileBase();
 
   /**
    * Set the output file base of the application which corresponds to the index passed to the
@@ -581,9 +581,6 @@ protected:
   const PerfID _backup_timer;
   const PerfID _restore_timer;
   const PerfID _reset_timer;
-
-  // MooseApp for setAppOutputFileBase
-  friend class MooseApp;
 };
 
 template <>
