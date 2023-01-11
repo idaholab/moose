@@ -590,19 +590,12 @@ XFEM::markCutEdgesByState(Real time)
       if (volfrac_elem < 0.25)
         continue;
 
-    // find the first cut edge
-    unsigned int nsides = CEMElem->numEdges();
-    unsigned int orig_cut_side_id = std::numeric_limits<unsigned int>::max();
-    Real orig_cut_distance = -1.0;
-    EFANode * orig_node = nullptr;
-    EFAEdge * orig_edge = nullptr;
-
       // find the first cut edge
       unsigned int nsides = CEMElem->numEdges();
       unsigned int orig_cut_side_id = std::numeric_limits<unsigned int>::max();
       Real orig_cut_distance = -1.0;
-      EFANode * orig_node = NULL;
-      EFAEdge * orig_edge = NULL;
+      EFANode * orig_node = nullptr;
+      EFAEdge * orig_edge = nullptr;
 
       // crack tip origin coordinates and direction
       Point crack_tip_origin(0, 0, 0);
