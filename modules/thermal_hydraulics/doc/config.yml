@@ -13,7 +13,6 @@ Content:
         root_dir: modules/doc/content
         content:
           - application_usage/command_line_usage.md
-          - media/inl_blue.png
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer

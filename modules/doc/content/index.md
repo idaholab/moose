@@ -50,4 +50,4 @@ Multiphysics Object-Oriented Simulation Environment
 
 !include upcoming_training.md
 
-!media framework/inl_blue.png dark_src=framework/inl_white.png style=width:30%;display:block;margin-top:3em;margin-left:auto;margin-right:auto;
+!media large_media/framework/inl_blue.png dark_src=large_media/framework/inl_white.png style=width:30%;display:block;margin-top:3em;margin-left:auto;margin-right:auto;
