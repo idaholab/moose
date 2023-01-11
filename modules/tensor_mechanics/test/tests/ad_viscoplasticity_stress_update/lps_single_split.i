@@ -29,9 +29,9 @@
   [../]
   [./tot_effective_viscoplasticity]
     type = ParsedFunction
-    vals = 'lps_1_eff_creep_strain lps_2_eff_creep_strain'
-    vars = 'lps_1_eff_creep_strain lps_2_eff_creep_strain'
-    value = 'lps_1_eff_creep_strain+lps_2_eff_creep_strain'
+    symbol_values = 'lps_1_eff_creep_strain lps_2_eff_creep_strain'
+    symbol_names = 'lps_1_eff_creep_strain lps_2_eff_creep_strain'
+    expression = 'lps_1_eff_creep_strain+lps_2_eff_creep_strain'
   [../]
 []
 
@@ -71,9 +71,9 @@
   [../]
   [./coef]
     type = ADParsedMaterial
-    f_name = coef
+    property_name = coef
     # Example of creep power law
-    function = '0.5e-18 * exp(-4e4 / 1.987 / 1200)'
+    expression = '0.5e-18 * exp(-4e4 / 1.987 / 1200)'
   [../]
 []
 

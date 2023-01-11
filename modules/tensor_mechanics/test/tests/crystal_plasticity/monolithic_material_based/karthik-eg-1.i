@@ -59,11 +59,11 @@
 [Functions]
   [./topdisp]
     type = ParsedFunction
-    value = 0.7*t
+    expression = 0.7*t
   [../]
   [./tpress]
     type = ParsedFunction
-    value = -200*t
+    expression = -200*t
   [../]
 []
 

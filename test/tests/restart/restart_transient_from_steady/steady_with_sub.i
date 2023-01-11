@@ -18,7 +18,7 @@
 [Functions]
   [pwr_func]
     type = ParsedFunction
-    value = '1e3*x*(1-x)+5e2'
+    expression = '1e3*x*(1-x)+5e2'
   []
 []
 

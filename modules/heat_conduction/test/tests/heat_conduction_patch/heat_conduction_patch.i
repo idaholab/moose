@@ -33,7 +33,7 @@
 [Functions]
   [./temps]
     type = ParsedFunction
-    value='200*x+100*y+200*z'
+    expression ='200*x+100*y+200*z'
   [../]
 [] # Functions
 

@@ -28,11 +28,11 @@
 [Functions]
   [exact]
     type = ParsedFunction
-    value = 't^3*x*y'
+    expression = 't^3*x*y'
   []
   [force]
     type = ParsedFunction
-    value = '3*x*y*t^2'
+    expression = '3*x*y*t^2'
   []
 []
 

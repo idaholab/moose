@@ -385,11 +385,11 @@
 [Functions]
   [./ini_xx]
     type = ParsedFunction
-    value = '-0.8*2500*10E-6*(403.003-z)'
+    expression = '-0.8*2500*10E-6*(403.003-z)'
   [../]
   [./ini_zz]
     type = ParsedFunction
-    value = '-2500*10E-6*(403.003-z)'
+    expression = '-2500*10E-6*(403.003-z)'
   [../]
 []
 

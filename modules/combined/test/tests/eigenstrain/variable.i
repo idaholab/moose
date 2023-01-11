@@ -83,8 +83,8 @@
   [./var_dependence]
     type = DerivativeParsedMaterial
     block = 0
-    function = 0.5*c^2
-    args = c
+    expression = 0.5*c^2
+    coupled_variables = c
     outputs = exodus
     output_properties = 'var_dep'
     f_name = var_dep

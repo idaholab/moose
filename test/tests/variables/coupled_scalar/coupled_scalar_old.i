@@ -8,11 +8,11 @@
 [Functions]
   [./lin1_fn]
     type = ParsedFunction
-    value = t
+    expression = t
   [../]
   [./lin2_fn]
     type = ParsedFunction
-    value = 't+1'
+    expression = 't+1'
   [../]
 []
 

@@ -6,22 +6,22 @@
 [Functions]
   [./tr_x]
     type = ParsedFunction
-    value = -x*cos(pi/3)
+    expression = -x*cos(pi/3)
   [../]
 
   [./tr_y]
     type = ParsedFunction
-    value = x*sin(pi/3)
+    expression = x*sin(pi/3)
   [../]
 
   [./itr_x]
     type = ParsedFunction
-    value = -x/cos(pi/3)
+    expression = -x/cos(pi/3)
   [../]
 
   [./itr_y]
     type = ParsedFunction
-    value = 0
+    expression = 0
   [../]
 []
 

@@ -274,15 +274,15 @@
 [Functions]
   [stress11]
     type = ParsedFunction
-    value = '400*t'
+    expression = '400*t'
   []
   [strain22]
     type = ParsedFunction
-    value = '-2.0e-2*t'
+    expression = '-2.0e-2*t'
   []
   [stress12]
     type = ParsedFunction
-    value = '100*t'
+    expression = '100*t'
   []
 []
 

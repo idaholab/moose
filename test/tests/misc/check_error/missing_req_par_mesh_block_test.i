@@ -17,7 +17,7 @@
 [Functions]
   [./forcing_fn]
     type = ParsedFunction
-    value = x
+    expression = x
   [../]
 []
 

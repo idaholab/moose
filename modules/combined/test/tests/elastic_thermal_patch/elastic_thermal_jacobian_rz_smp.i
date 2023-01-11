@@ -17,19 +17,19 @@
 [Functions]
   [./ur]
     type = ParsedFunction
-    value = '0'
+    expression = '0'
   [../]
   [./uz]
     type = ParsedFunction
-    value = '0'
+    expression = '0'
   [../]
   [./body]
     type = ParsedFunction
-    value = '-400/x'
+    expression = '-400/x'
   [../]
   [./temp]
     type = ParsedFunction
-    value = '117.56+100*t'
+    expression = '117.56+100*t'
   [../]
 []
 

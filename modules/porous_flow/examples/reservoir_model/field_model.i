@@ -62,22 +62,22 @@
   [permx]
     type = ParsedAux
     variable = permx
-    args = permx_md
-    function = '9.869233e-16*permx_md'
+    coupled_variables = permx_md
+    expression = '9.869233e-16*permx_md'
     execute_on = initial
   []
   [permy]
     type = ParsedAux
     variable = permy
-    args = permy_md
-    function = '9.869233e-16*permy_md'
+    coupled_variables = permy_md
+    expression = '9.869233e-16*permy_md'
     execute_on = initial
   []
   [permz]
     type = ParsedAux
     variable = permz
-    args = permz_md
-    function = '9.869233e-16*permz_md'
+    coupled_variables = permz_md
+    expression = '9.869233e-16*permz_md'
     execute_on = initial
   []
 []

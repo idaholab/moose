@@ -32,9 +32,9 @@
 [Functions]
   [./exact]
     type = ParsedFunction
-    vars = 'ri ro ui uo'
-    vals = '0.2 1.0 300 0'
-    value = '( uo * log(ri) - ui * log(ro) + (ui-uo) * log(x) ) / log(ri/ro)'
+    symbol_names = 'ri ro ui uo'
+    symbol_values = '0.2 1.0 300 0'
+    expression = '( uo * log(ri) - ui * log(ro) + (ui-uo) * log(x) ) / log(ri/ro)'
   [../]
 []
 

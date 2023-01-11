@@ -39,22 +39,22 @@
 [Functions]
   [./xtimes]
     type = ParsedFunction
-    value = 1.1*x
+    expression = 1.1*x
   [../]
 
   [./twoxplus1]
     type = ParsedFunction
-    value = 2*x+1
+    expression = 2*x+1
   [../]
 
   [./xsquared]
     type = ParsedFunction
-    value = (x-2)*x
+    expression = (x-2)*x
   [../]
 
   [./tover2]
     type = ParsedFunction
-    value = 0.5*t
+    expression = 0.5*t
   [../]
 
   [./the_linear_combo]
@@ -65,7 +65,7 @@
 
   [./should_be_answer]
     type = ParsedFunction
-    value = 3*1.1*x-1.2*(2*x+1)+0.4*(x-2)*x+3*0.5*t
+    expression = 3*1.1*x-1.2*(2*x+1)+0.4*(x-2)*x+3*0.5*t
   [../]
 []
 

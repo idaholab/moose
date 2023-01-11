@@ -29,7 +29,7 @@
 [Functions]
   [./tempBC]
     type = ParsedFunction
-    value = '700+2*t*t'
+    expression = '700+2*t*t'
   [../]
 []
 

@@ -38,15 +38,15 @@
 [Materials]
   [./variable_mob]
     type = DerivativeParsedMaterial
-    f_name = M
-    args = 'cv'
-    function = '0.1 + (1 + cv)/2'
+    property_name = M
+    coupled_variables = 'cv'
+    expression = '0.1 + (1 + cv)/2'
   [../]
   [./free_energy]
     type = DerivativeParsedMaterial
-    f_name = F
-    args = 'cv'
-    function = '(1-cv)^2 * (1+cv)^2'
+    property_name = F
+    coupled_variables = 'cv'
+    expression = '(1-cv)^2 * (1+cv)^2'
   [../]
 []
 

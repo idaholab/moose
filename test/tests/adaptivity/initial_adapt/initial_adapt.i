@@ -18,7 +18,7 @@
 [Functions]
   [./force]
     type = ParsedFunction
-    value = t
+    expression = t
   [../]
 []
 

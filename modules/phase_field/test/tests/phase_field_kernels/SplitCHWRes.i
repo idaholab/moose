@@ -96,9 +96,9 @@
   [./free_energy]
     # equivalent to `MathFreeEnergy`
     type = DerivativeParsedMaterial
-    f_name = F
-    args = 'c1 c2'
-    function = '0.25*(1+c1)^2*(1-c1)^2 + 0.25*(1+c2)^2*(1-c2)^2'
+    property_name = F
+    coupled_variables = 'c1 c2'
+    expression = '0.25*(1+c1)^2*(1-c1)^2 + 0.25*(1+c2)^2*(1-c2)^2'
     derivative_order = 2
   [../]
 []

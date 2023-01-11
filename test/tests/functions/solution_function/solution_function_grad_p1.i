@@ -31,7 +31,7 @@
 [Functions]
   [./initial_cond_func]
     type = ParsedFunction
-    value = 2*x+4*y
+    expression = 2*x+4*y
   [../]
 []
 

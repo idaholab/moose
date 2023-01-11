@@ -34,7 +34,7 @@
 [Functions]
   [func]
     type = ParsedFunction
-    value = 'if(x >=0,(1+t),-(1+t))'
+    expression = 'if(x >=0,(1+t),-(1+t))'
   []
 []
 [Materials]

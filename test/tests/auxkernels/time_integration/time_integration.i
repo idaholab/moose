@@ -118,27 +118,27 @@
   active = 'Soln Source TopBC BottomBC RightBC LeftBC'
  [./Soln]
     type = ParsedFunction
-    value = 't*(x*x+y*y)'
+    expression = 't*(x*x+y*y)'
  [../]
  [./Source]
     type = ParsedFunction
-    value = '(x*x + y*y) - 4*t'
+    expression = '(x*x + y*y) - 4*t'
  [../]
  [./TopBC]
     type = ParsedFunction
-    value = 't*(x*x+1)'
+    expression = 't*(x*x+1)'
  [../]
  [./BottomBC]
     type = ParsedFunction
-    value = 't*x*x'
+    expression = 't*x*x'
  [../]
  [./RightBC]
    type = ParsedFunction
-   value = 't*(y*y+1)'
+   expression = 't*(y*y+1)'
  [../]
  [./LeftBC]
     type = ParsedFunction
-    value = 't*y*y'
+    expression = 't*y*y'
   [../]
 []
 [Postprocessors]

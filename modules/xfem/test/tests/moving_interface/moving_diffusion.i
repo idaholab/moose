@@ -51,7 +51,7 @@
 [Functions]
   [./ls_func]
     type = ParsedFunction
-    value = 'x-0.76+0.21*t'
+    expression = 'x-0.76+0.21*t'
   [../]
 []
 

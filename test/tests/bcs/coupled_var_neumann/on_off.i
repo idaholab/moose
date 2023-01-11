@@ -52,7 +52,7 @@
 [Functions]
   [./set_coupled_bc_var]
     type = ParsedFunction
-    value = 'y - 0.5'
+    expression = 'y - 0.5'
   [../]
 []
 

@@ -24,7 +24,7 @@
 [Functions]
   [top_pull]
     type = ParsedFunction
-    value = 1.0e-5*t
+    expression = 1.0e-5*t
   []
 []
 
@@ -65,7 +65,7 @@
 
 [Materials]
   # This input file is used to compare the MOOSE and UMAT models, activating
-  # specific ones with cli args.
+  # specific ones with cli variable_names.
 
   # 1. Active for umat calculation
   [umat]

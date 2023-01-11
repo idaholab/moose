@@ -41,7 +41,7 @@
     type = ParsedAux
     variable = power_density
     use_xyzt = true
-    function = 'if(x>0.1,100,1)'
+    expression = 'if(x>0.1,100,1)'
   []
 []
 

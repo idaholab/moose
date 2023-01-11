@@ -31,13 +31,13 @@
 [Functions]
   [./phi_initial]
     type = ParsedFunction
-    value = '1-x'
+    expression = '1-x'
   [../]
   [./phi_exact]
     type = ParsedFunction
-    vars = epsilon
-    vals = 0.05
-    value = '1 / (1+exp((x-0.5)/epsilon))'
+    symbol_names = epsilon
+    symbol_values = 0.05
+    expression = '1 / (1+exp((x-0.5)/epsilon))'
   [../]
 []
 

@@ -13,7 +13,7 @@
 [Functions]
   [sin_fn]
     type = ParsedFunction
-    value = '1000*t*sin(pi*x)'
+    expression = '1000*t*sin(pi*x)'
   []
 []
 

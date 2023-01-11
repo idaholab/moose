@@ -3,6 +3,7 @@
   dim = 2
   nx = 2
   ny = 2
+  coord_type = 'RZ'
 []
 
 [Variables]
@@ -11,10 +12,6 @@
     order = CONSTANT
     fv = true
   []
-[]
-
-[Problem]
-  coord_type = 'RZ'
 []
 
 [FVKernels]
@@ -50,11 +47,11 @@
 [Functions]
   [exact]
     type = ParsedFunction
-    value = '1.1*sin(0.9*x)*cos(1.2*y)'
+    expression = '1.1*sin(0.9*x)*cos(1.2*y)'
   []
   [forcing]
     type = ParsedFunction
-    value = '1.584*sin(0.9*x)*cos(1.2*y) - (-0.891*x*sin(0.9*x)*cos(1.2*y) + 0.99*cos(0.9*x)*cos(1.2*y))/x'
+    expression = '1.584*sin(0.9*x)*cos(1.2*y) - (-0.891*x*sin(0.9*x)*cos(1.2*y) + 0.99*cos(0.9*x)*cos(1.2*y))/x'
   []
 []
 

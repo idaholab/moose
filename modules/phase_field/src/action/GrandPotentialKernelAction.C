@@ -216,7 +216,7 @@ GrandPotentialKernelAction::act()
     params.set<bool>("use_displaced_mesh") = displaced_mesh;
     params.set<MaterialPropertyName>("kappa_name") = kappa;
     params.set<MaterialPropertyName>("mob_name") = mob_name;
-    params.set<std::vector<VariableName>>("args") = v2;
+    params.set<std::vector<VariableName>>("coupled_variables") = v2;
     kernel_name = "ACInt_" + var_name;
     _problem->addKernel("ACInterface", kernel_name, params);
 
@@ -228,7 +228,7 @@ GrandPotentialKernelAction::act()
     params.set<std::vector<MaterialPropertyName>>("Fj_names") = Fj_names;
     params.set<std::vector<MaterialPropertyName>>("hj_names") = hj;
     params.set<MaterialPropertyName>("mob_name") = mob_name;
-    params.set<std::vector<VariableName>>("args") = v0;
+    params.set<std::vector<VariableName>>("coupled_variables") = v0;
     kernel_name = "ACSwitch_" + var_name;
     _problem->addKernel("ACSwitching", kernel_name, params);
 
@@ -251,7 +251,7 @@ GrandPotentialKernelAction::act()
     InputParameters params = _factory.getValidParams("SusceptibilityTimeDerivative");
     params.set<NonlinearVariableName>("variable") = w_names[i];
     params.set<MaterialPropertyName>("f_name") = chis[i];
-    params.set<std::vector<VariableName>>("args") = v0;
+    params.set<std::vector<VariableName>>("coupled_variables") = v0;
     params.set<bool>("implicit") = implicity;
     params.set<bool>("use_displaced_mesh") = displaced_mesh;
     kernel_name = "ChiDt_" + w_names[i];
@@ -281,7 +281,7 @@ GrandPotentialKernelAction::act()
       params = _factory.getValidParams("CoupledSwitchingTimeDerivative");
       params.set<NonlinearVariableName>("variable") = w_names[i];
       params.set<std::vector<VariableName>>("v") = notarealvector;
-      params.set<std::vector<VariableName>>("args") = v0;
+      params.set<std::vector<VariableName>>("coupled_variables") = v0;
       params.set<std::vector<MaterialPropertyName>>("Fj_names") = fj_temp;
       params.set<std::vector<MaterialPropertyName>>("hj_names") = hj;
       params.set<bool>("implicit") = implicity;

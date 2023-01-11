@@ -40,7 +40,7 @@
 [Functions]
   [T_init]
     type = ParsedFunction
-    value = '290 + sin((1 - x) * pi * 1.4)'
+    expression = '290 + sin((1 - x) * pi * 1.4)'
   []
 []
 

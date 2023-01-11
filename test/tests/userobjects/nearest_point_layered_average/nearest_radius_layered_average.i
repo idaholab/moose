@@ -50,7 +50,7 @@
 [Functions]
   [func]
     type = ParsedFunction
-    value = 'sqrt(x * x + y * y) + z'
+    expression = 'sqrt(x * x + y * y) + z'
   []
 []
 

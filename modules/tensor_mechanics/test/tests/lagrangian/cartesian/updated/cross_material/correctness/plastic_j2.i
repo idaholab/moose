@@ -199,7 +199,7 @@
 [Functions]
   [pullx]
     type = ParsedFunction
-    value = 't'
+    expression = 't'
   []
 []
 

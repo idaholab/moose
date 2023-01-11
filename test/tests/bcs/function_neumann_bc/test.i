@@ -15,7 +15,7 @@
 [Functions]
   [./exact_func]
     type = ParsedFunction
-    value = x*x
+    expression = x*x
   [../]
 []
 

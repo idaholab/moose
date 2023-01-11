@@ -47,20 +47,20 @@
 [Functions]
   [u] # reaches a maximum value at (0.5, 0.6)
     type = ParsedFunction
-    value = 'sin(pi*x)*sin(pi*y/1.2)'
+    expression = 'sin(pi*x)*sin(pi*y/1.2)'
   []
-  [w] # reaches a minium value at (0.7, 0.8)
+  [w] # reaches a minium expression at (0.7, 0.8)
     type = ParsedFunction
-    value = '-sin(pi*x/1.4)*sin(pi*y/1.6)'
+    expression = '-sin(pi*x/1.4)*sin(pi*y/1.6)'
   []
 
   [v_x]
     type = ParsedFunction
-    value = 'x'
+    expression = 'x'
   []
   [v_y]
     type = ParsedFunction
-    value = 'y'
+    expression = 'y'
   []
 []
 

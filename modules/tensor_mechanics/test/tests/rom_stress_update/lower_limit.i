@@ -22,9 +22,9 @@ disp = 1.0053264195e6
 [Functions]
   [temp_weight]
     type = ParsedFunction
-    vars = 'lower_limit avg'
-    vals = '800.0160634 temp_avg'
-    value = 'val := 2 * avg / lower_limit - 1;
+    symbol_names = 'lower_limit avg'
+    symbol_values = '800.0160634 temp_avg'
+    expression = 'val := 2 * avg / lower_limit - 1;
              clamped := if(val <= -1, -0.99999, if(val >= 1, 0.99999, val));
              plus := exp(-2 / (1 + clamped));
              minus := exp(-2 / (1 - clamped));
@@ -32,9 +32,9 @@ disp = 1.0053264195e6
   []
   [stress_weight]
     type = ParsedFunction
-    vars = 'lower_limit avg'
-    vals = '2.010652839e6 vonmises_stress'
-    value = 'val := 2 * avg / lower_limit - 1;
+    symbol_names = 'lower_limit avg'
+    symbol_values = '2.010652839e6 vonmises_stress'
+    expression = 'val := 2 * avg / lower_limit - 1;
              clamped := if(val <= -1, -0.99999, if(val >= 1, 0.99999, val));
              plus := exp(-2 / (1 + clamped));
              minus := exp(-2 / (1 - clamped));
@@ -42,9 +42,9 @@ disp = 1.0053264195e6
   []
   [creep_rate_exact]
     type = ParsedFunction
-    vars = 'lower_limit_strain temp_weight stress_weight'
-    vals = '3.370764e-12       temp_weight stress_weight'
-    value = 'lower_limit_strain * temp_weight * stress_weight'
+    symbol_names = 'lower_limit_strain temp_weight stress_weight'
+    symbol_values = '3.370764e-12       temp_weight stress_weight'
+    expression = 'lower_limit_strain * temp_weight * stress_weight'
   []
 []
 

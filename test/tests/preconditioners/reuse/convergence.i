@@ -37,11 +37,11 @@
 [Functions]
   [body]
     type = ParsedFunction
-    value = 100*sin(t)
+    expression = 100*sin(t)
   []
   [arg]
     type = ParsedFunction
-    value = 'x*y*z*cos(t)+1'
+    expression = 'x*y*z*cos(t)+1'
   []
 []
 

@@ -62,7 +62,7 @@ t_transition = 2
   [./u_src]
     type = ParsedODEKernel
     variable = u
-    function = '-${u_growth}'
+    expression = '-${u_growth}'
   [../]
 
   [./v_time]
@@ -73,14 +73,14 @@ t_transition = 2
   [./v_src]
     type = ParsedODEKernel
     variable = v
-    function = '-${v_growth}'
+    expression = '-${v_growth}'
     enable = false
   [../]
   [./v_constraint]
     type = ParsedODEKernel
     variable = v
-    args = 'u'
-    function = 'v - u'
+    coupled_variables = 'u'
+    expression = 'v - u'
   [../]
 []
 

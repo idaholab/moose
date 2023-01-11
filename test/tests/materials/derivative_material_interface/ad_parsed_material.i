@@ -33,8 +33,8 @@
 [Materials]
   [./consts]
     type = ADParsedMaterial
-    args  = 'eta'
-    function ='(eta-0.5)^2'
+    coupled_variables  = 'eta'
+    expression ='(eta-0.5)^2'
     outputs = exodus
   [../]
 []

@@ -53,19 +53,19 @@ flux=10
 [Functions]
   [k_function]
     type = ADParsedFunction
-    value = 0.1*(100*y+1)
+    expression = 0.1*(100*y+1)
   []
   [kappa_function]
     type = ADParsedFunction
-    value = 0.2*(200*y+1)
+    expression = 0.2*(200*y+1)
   []
   [kappa_s_function]
     type = ADParsedFunction
-    value = 0.4*(200*y+1)
+    expression = 0.4*(200*y+1)
   []
   [k_s_function]
     type = ADParsedFunction
-    value = 0.2*(200*y+1)+2*x
+    expression = 0.2*(200*y+1)+2*x
   []
 []
 

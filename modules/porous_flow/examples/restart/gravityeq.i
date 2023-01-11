@@ -36,7 +36,7 @@
 [Functions]
   [ppic]
     type = ParsedFunction
-    value = '10e6 + 1060*9.81*(100-y)'
+    expression = '10e6 + 1060*9.81*(100-y)'
   []
 []
 

@@ -136,9 +136,9 @@
   [prefactor_material_block]
     type = DerivativeParsedMaterial
     block = '1 2'
-    f_name = prefactor_material
-    args = temp
-    function = '273/(temp)'
+    property_name = prefactor_material
+    coupled_variables = temp
+    expression = '273/(temp)'
   []
   [stress]
     type = ComputeFiniteStrainElasticStress

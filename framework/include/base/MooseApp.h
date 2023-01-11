@@ -149,7 +149,19 @@ public:
   const T & getParam(const std::string & name) const;
   ///@}
 
+  /**
+   * Retrieve a renamed parameter for the object. This helper makes sure we
+   * check both names before erroring, and that only one parameter is passed to avoid
+   * silent errors
+   * @param old_name the old name for the parameter
+   * @param new_name the new name for the parameter
+   */
+  template <typename T>
+  const T & getRenamedParam(const std::string & old_name, const std::string & new_name) const;
+
   inline bool isParamValid(const std::string & name) const { return _pars.isParamValid(name); }
+
+  inline bool isParamSetByUser(const std::string & nm) const { return _pars.isParamSetByUser(nm); }
 
   /**
    * Run the application
@@ -1328,6 +1340,31 @@ const T &
 MooseApp::getParam(const std::string & name) const
 {
   return InputParameters::getParamHelper(name, _pars, static_cast<T *>(0));
+}
+
+template <typename T>
+const T &
+MooseApp::getRenamedParam(const std::string & old_name, const std::string & new_name) const
+{
+  // this enables having a default on the new parameter but bypassing it with the old one
+  // Most important: accept new parameter
+  if (isParamSetByUser(new_name) && !isParamValid(old_name))
+    return InputParameters::getParamHelper(new_name, _pars, static_cast<T *>(0));
+  // Second most: accept old parameter
+  else if (isParamValid(old_name) && !isParamSetByUser(new_name))
+    return InputParameters::getParamHelper(old_name, _pars, static_cast<T *>(0));
+  // Third most: accept default for new parameter
+  else if (isParamValid(new_name) && !isParamValid(old_name))
+    return InputParameters::getParamHelper(new_name, _pars, static_cast<T *>(0));
+  // Refuse: no default, no value passed
+  else if (!isParamValid(old_name) && !isParamValid(new_name))
+    mooseError(_pars.blockFullpath() + ": parameter '" + new_name +
+               "' is being retrieved without being set.\n"
+               "Did you mispell it?");
+  // Refuse: both old and new parameters set by user
+  else
+    mooseError(_pars.blockFullpath() + ": parameter '" + new_name +
+               "' may not be provided alongside former parameter '" + old_name + "'");
 }
 
 template <class T>

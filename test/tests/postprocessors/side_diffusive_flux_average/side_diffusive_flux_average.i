@@ -14,7 +14,7 @@
   [./right_bc]
     # Flux BC for computing the analytical solution in the postprocessor
     type = ParsedFunction
-    value = exp(y)+1
+    expression = exp(y)+1
   [../]
 []
 

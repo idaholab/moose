@@ -22,7 +22,10 @@ CoupledSwitchingTimeDerivative::validParams()
       "Fj_names", "List of functions for each phase. Place in same order as hj_names!");
   params.addRequiredParam<std::vector<MaterialPropertyName>>(
       "hj_names", "Switching Function Materials that provide h. Place in same order as Fj_names!");
-  params.addCoupledVar("args", "Vector of arguments of Fj and hj");
+  params.addDeprecatedCoupledVar("args",
+                                 "Vector of variable arguments of Fj and hj",
+                                 "args is deprecated, use 'coupled_variables' instead");
+  params.addCoupledVar("coupled_variables", "Vector of variable arguments of Fj and hj");
   return params;
 }
 

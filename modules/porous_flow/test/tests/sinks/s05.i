@@ -102,39 +102,39 @@
 [Functions]
   [mass10]
     type = ParsedFunction
-    value = 'vol*por*dens0*exp(pp/bulk)*if(pp>=0,1,pow(1+pow(-al*pp,1.0/(1-m)),-m))'
-    vars = 'vol por dens0 pp bulk al m'
-    vals = '0.25 0.1 1.1 p10 1.3 1.1 0.5'
+    expression = 'vol*por*dens0*exp(pp/bulk)*if(pp>=0,1,pow(1+pow(-al*pp,1.0/(1-m)),-m))'
+    symbol_names = 'vol por dens0 pp bulk al m'
+    symbol_values = '0.25 0.1 1.1 p10 1.3 1.1 0.5'
   []
   [rate10]
     type = ParsedFunction
-    value = 'if(pp>center,fcn,fcn*exp(-0.5*(pp-center)*(pp-center)/sd/sd))'
-    vars = 'fcn pp  center sd'
-    vals = '6   p10 0.9    0.5'
+    expression = 'if(pp>center,fcn,fcn*exp(-0.5*(pp-center)*(pp-center)/sd/sd))'
+    symbol_names = 'fcn pp  center sd'
+    symbol_values = '6   p10 0.9    0.5'
   []
   [mass10_expect]
     type = ParsedFunction
-    value = 'mass_prev-rate*area*dt'
-    vars = 'mass_prev rate     area dt'
-    vals = 'm10_prev  m10_rate 0.5 2E-3'
+    expression = 'mass_prev-rate*area*dt'
+    symbol_names = 'mass_prev rate     area dt'
+    symbol_values = 'm10_prev  m10_rate 0.5 2E-3'
   []
   [mass11]
     type = ParsedFunction
-    value = 'vol*por*dens0*exp(pp/bulk)*if(pp>=0,1,pow(1+pow(-al*pp,1.0/(1-m)),-m))'
-    vars = 'vol por dens0 pp bulk al m'
-    vals = '0.25 0.1 1.1 p11 1.3 1.1 0.5'
+    expression = 'vol*por*dens0*exp(pp/bulk)*if(pp>=0,1,pow(1+pow(-al*pp,1.0/(1-m)),-m))'
+    symbol_names = 'vol por dens0 pp bulk al m'
+    symbol_values = '0.25 0.1 1.1 p11 1.3 1.1 0.5'
   []
   [rate11]
     type = ParsedFunction
-    value = 'if(pp>center,fcn,fcn*exp(-0.5*(pp-center)*(pp-center)/sd/sd))'
-    vars = 'fcn pp  center sd'
-    vals = '6   p11 0.9    0.5'
+    expression = 'if(pp>center,fcn,fcn*exp(-0.5*(pp-center)*(pp-center)/sd/sd))'
+    symbol_names = 'fcn pp  center sd'
+    symbol_values = '6   p11 0.9    0.5'
   []
   [mass11_expect]
     type = ParsedFunction
-    value = 'mass_prev-rate*area*dt'
-    vars = 'mass_prev rate     area dt'
-    vals = 'm11_prev  m11_rate 0.5 2E-3'
+    expression = 'mass_prev-rate*area*dt'
+    symbol_names = 'mass_prev rate     area dt'
+    symbol_values = 'm11_prev  m11_rate 0.5 2E-3'
   []
 []
 

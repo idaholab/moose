@@ -47,7 +47,7 @@
 
   [matrix]
     type = ParsedFunction
-    value = '1-x-y-z'
+    expression = '1-x-y-z'
   []
 []
 
@@ -110,7 +110,7 @@
     type = AllenCahn
     variable = gr0
     f_name = F
-    args = 'gr1 gr2 gr3'
+    coupled_variables = 'gr1 gr2 gr3'
   []
   [gr0int]
     type = ACInterface
@@ -126,7 +126,7 @@
     type = AllenCahn
     variable = gr1
     f_name = F
-    args = 'gr0 gr2 gr3'
+    coupled_variables = 'gr0 gr2 gr3'
   []
   [gr1int]
     type = ACInterface
@@ -142,7 +142,7 @@
     type = AllenCahn
     variable = gr2
     f_name = F
-    args = 'gr0 gr1 gr3'
+    coupled_variables = 'gr0 gr1 gr3'
   []
   [gr2int]
     type = ACInterface
@@ -158,7 +158,7 @@
     type = AllenCahn
     variable = gr3
     f_name = F
-    args = 'gr0 gr1 gr2'
+    coupled_variables = 'gr0 gr1 gr2'
   []
   [gr3int]
     type = ACInterface

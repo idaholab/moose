@@ -18,7 +18,7 @@
 [Functions]
   [top_pull]
     type = ParsedFunction
-    value = -t/1000
+    expression = -t/1000
   []
 []
 
@@ -113,9 +113,9 @@
   []
   [prefactor_material_block]
     type = DerivativeParsedMaterial
-    f_name = prefactor_material
-    args = 'strain_yy strain_xy'
-    function = '1.0/(1.0 + strain_yy + strain_xy)'
+    property_name = prefactor_material
+    coupled_variables = 'strain_yy strain_xy'
+    expression = '1.0/(1.0 + strain_yy + strain_xy)'
   []
   [stress]
     type = ComputeFiniteStrainElasticStress

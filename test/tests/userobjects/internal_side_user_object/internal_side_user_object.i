@@ -13,12 +13,12 @@
 [Functions]
   [./fn_exact]
     type = ParsedFunction
-    value = 'x*x+y*y'
+    expression = 'x*x+y*y'
   [../]
 
   [./ffn]
     type = ParsedFunction
-    value = -4
+    expression = -4
   [../]
 []
 

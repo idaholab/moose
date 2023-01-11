@@ -397,25 +397,25 @@
 [Functions]
   [./ini_xx]
     type = ParsedFunction
-    value = '-0.8*2500*10E-6*(403.003-z)'
+    expression = '-0.8*2500*10E-6*(403.003-z)'
   [../]
   [./ini_zz]
     type = ParsedFunction
-    value = '-2500*10E-6*(403.003-z)'
+    expression = '-2500*10E-6*(403.003-z)'
   [../]
   [./excav_sideways]
     type = ParsedFunction
-    vars = 'end_t ymin ymax  minval maxval slope'
-    vals = '1.0   0    150.0 1E-9 1 15'
+    symbol_names = 'end_t ymin ymax  minval maxval slope'
+    symbol_values = '1.0   0    150.0 1E-9 1 15'
     # excavation face at ymin+(ymax-ymin)*min(t/end_t,1)
     # slope is the distance over which the modulus reduces from maxval to minval
-    value = 'if(y<ymin+(ymax-ymin)*min(t/end_t,1),minval,if(y<ymin+(ymax-ymin)*min(t/end_t,1)+slope,minval+(maxval-minval)*(y-(ymin+(ymax-ymin)*min(t/end_t,1)))/slope,maxval))'
+    expression = 'if(y<ymin+(ymax-ymin)*min(t/end_t,1),minval,if(y<ymin+(ymax-ymin)*min(t/end_t,1)+slope,minval+(maxval-minval)*(y-(ymin+(ymax-ymin)*min(t/end_t,1)))/slope,maxval))'
   [../]
   [./density_sideways]
     type = ParsedFunction
-    vars = 'end_t ymin ymax  minval maxval'
-    vals = '1.0   0    150.0 0 2500'
-    value = 'if(y<ymin+(ymax-ymin)*min(t/end_t,1),minval,maxval)'
+    symbol_names = 'end_t ymin ymax  minval maxval'
+    symbol_values = '1.0   0    150.0 0 2500'
+    expression = 'if(y<ymin+(ymax-ymin)*min(t/end_t,1),minval,maxval)'
   [../]
 []
 

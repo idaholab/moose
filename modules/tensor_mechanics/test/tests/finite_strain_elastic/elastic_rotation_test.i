@@ -25,39 +25,39 @@
 [Functions]
   [./x_200]
     type = ParsedFunction
-    vars = 'delta t0'
-    vals = '1e-6 1.0'
-    value = 'if(t<=1.0, delta*t, (1.0+delta)*cos(pi/2*(t-t0)) - 1.0)'
+    symbol_names = 'delta t0'
+    symbol_values = '1e-6 1.0'
+    expression = 'if(t<=1.0, delta*t, (1.0+delta)*cos(pi/2*(t-t0)) - 1.0)'
   [../]
   [./y_200]
     type = ParsedFunction
-    vars = 'delta t0'
-    vals = '1e-6 1.0'
-    value = 'if(t<=1.0, 0.0, (1.0+delta)*sin(pi/2*(t-t0)))'
+    symbol_names = 'delta t0'
+    symbol_values = '1e-6 1.0'
+    expression = 'if(t<=1.0, 0.0, (1.0+delta)*sin(pi/2*(t-t0)))'
   [../]
   [./x_300]
     type = ParsedFunction
-    vars = 'delta t0'
-    vals = '1e-6 1.0'
-    value = 'if(t<=1.0, delta*t, (1.0+delta)*cos(pi/2.0*(t-t0)) - sin(pi/2.0*(t-t0)) - 1.0)'
+    symbol_names = 'delta t0'
+    symbol_values = '1e-6 1.0'
+    expression = 'if(t<=1.0, delta*t, (1.0+delta)*cos(pi/2.0*(t-t0)) - sin(pi/2.0*(t-t0)) - 1.0)'
   [../]
   [./y_300]
     type = ParsedFunction
-    vars = 'delta t0'
-    vals = '1e-6 1.0'
-    value = 'if(t<=1.0, 0.0, cos(pi/2.0*(t-t0)) + (1+delta)*sin(pi/2.0*(t-t0)) - 1.0)'
+    symbol_names = 'delta t0'
+    symbol_values = '1e-6 1.0'
+    expression = 'if(t<=1.0, 0.0, cos(pi/2.0*(t-t0)) + (1+delta)*sin(pi/2.0*(t-t0)) - 1.0)'
   [../]
   [./x_400]
     type = ParsedFunction
-    vars = 'delta t0'
-    vals = '1e-6 1.0'
-    value = 'if(t<=1.0, 0.0, -sin(pi/2.0*(t-t0)))'
+    symbol_names = 'delta t0'
+    symbol_values = '1e-6 1.0'
+    expression = 'if(t<=1.0, 0.0, -sin(pi/2.0*(t-t0)))'
   [../]
   [./y_400]
     type = ParsedFunction
-    vars = 'delta t0'
-    vals = '1e-6 1.0'
-    value = 'if(t<=1.0, 0.0, cos(pi/2.0*(t-t0)) - 1.0)'
+    symbol_names = 'delta t0'
+    symbol_values = '1e-6 1.0'
+    expression = 'if(t<=1.0, 0.0, cos(pi/2.0*(t-t0)) - 1.0)'
   [../]
 []
 

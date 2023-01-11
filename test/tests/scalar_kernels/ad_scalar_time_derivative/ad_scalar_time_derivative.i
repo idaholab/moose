@@ -20,7 +20,7 @@
   [source]
     type = ParsedODEKernel
     variable = u
-    function = '-5'
+    expression = '-5'
   []
 []
 

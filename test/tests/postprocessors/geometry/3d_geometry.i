@@ -83,31 +83,31 @@ area_correction = ${fparse alpha / sin(alpha)}
 [Functions]
   [./circle_side_area_exact]
     type = ParsedFunction
-    value = '2 * pi * ${radius} / ${perimeter_correction} * ${depth}'
+    expression = '2 * pi * ${radius} / ${perimeter_correction} * ${depth}'
   [../]
   [./inside_side_area_exact]
     type = ParsedFunction
-    value = '${inner_box_length} * ${depth} * 4'
+    expression = '${inner_box_length} * ${depth} * 4'
   [../]
   [./outside_side_area_exact]
     type = ParsedFunction
-    value = '${outer_box_length} * ${depth} * 4'
+    expression = '${outer_box_length} * ${depth} * 4'
   [../]
   [./circle_volume_exact]
     type = ParsedFunction
-    value = 'pi * ${radius}^2 * ${depth} / ${area_correction}'
+    expression = 'pi * ${radius}^2 * ${depth} / ${area_correction}'
   [../]
   [./inside_volume_exact]
     type = ParsedFunction
-    value = '${inner_box_length}^2 * ${depth} - pi * ${radius}^2 * ${depth} / ${area_correction}'
+    expression = '${inner_box_length}^2 * ${depth} - pi * ${radius}^2 * ${depth} / ${area_correction}'
   [../]
   [./outside_volume_exact]
     type = ParsedFunction
-    value = '${outer_box_length}^2 * ${depth} - ${inner_box_length}^2 * ${depth}'
+    expression = '${outer_box_length}^2 * ${depth} - ${inner_box_length}^2 * ${depth}'
   [../]
   [./total_volume_exact]
     type = ParsedFunction
-    value = '${outer_box_length}^2 * ${depth}'
+    expression = '${outer_box_length}^2 * ${depth}'
   [../]
 
 []

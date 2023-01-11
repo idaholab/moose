@@ -34,13 +34,13 @@
 [Functions]
   [./u_ic_func]
     type = ParsedFunction
-    value = '2*x'
+    expression = '2*x'
   [../]
   [./f]
     type = ParsedFunction
-    vars = f
-    vals = grad_int
-    value = f
+    symbol_names = f
+    symbol_values = grad_int
+    expression = f
   [../]
 []
 

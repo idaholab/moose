@@ -132,15 +132,15 @@
 [Functions]
   [err_T_fcn]
     type = ParsedFunction
-    vars = 'por0 rte temp rd rhc m0 fhc source'
-    vals = '0.5 0.25 t0   5  0.2 1.5 2  1'
-    value = '((1-por0)*exp(rte*temp)*rd*rhc*temp+m0*fhc*temp-source*t)/(source*t)'
+    symbol_names = 'por0 rte temp rd rhc m0 fhc source'
+    symbol_values = '0.5 0.25 t0   5  0.2 1.5 2  1'
+    expression = '((1-por0)*exp(rte*temp)*rd*rhc*temp+m0*fhc*temp-source*t)/(source*t)'
   []
   [err_pp_fcn]
     type = ParsedFunction
-    vars = 'por0 rte temp rd rhc m0 fhc source bulk pp fte'
-    vals = '0.5 0.25 t0   5  0.2 1.5 2  1      2    p0 0.5'
-    value = '(bulk*(fte*temp-log(1+(por0-1)*exp(rte*temp))+log(por0))-pp)/pp'
+    symbol_names = 'por0 rte temp rd rhc m0 fhc source bulk pp fte'
+    symbol_values = '0.5 0.25 t0   5  0.2 1.5 2  1      2    p0 0.5'
+    expression = '(bulk*(fte*temp-log(1+(por0-1)*exp(rte*temp))+log(por0))-pp)/pp'
   []
 []
 

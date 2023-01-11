@@ -107,21 +107,21 @@
 [Functions]
   [./src_func]
     type = ParsedFunction
-    value = 'rhoCp*(-200*x+200)-(0.05*200*t/1.04)'
-    vars = 'rhoCp'
-    vals = 10
+    expression = 'rhoCp*(-200*x+200)-(0.05*200*t/1.04)'
+    symbol_names = 'rhoCp'
+    symbol_values = 10
   [../]
   [./neumann_func]
     type = ParsedFunction
-    value = '((0.05/1.04)*(1-(x-0.04)-0.2*t) + 1.5)*200*t'
+    expression = '((0.05/1.04)*(1-(x-0.04)-0.2*t) + 1.5)*200*t'
   [../]
   [./k_func]
     type = ParsedFunction
-    value = '(0.05/1.04)*(1-(x-0.04)-0.2*t) + 1.5'
+    expression = '(0.05/1.04)*(1-(x-0.04)-0.2*t) + 1.5'
   [../]
   [./ls_func]
     type = ParsedFunction
-    value = '1.04 - x - 0.2*t'
+    expression = '1.04 - x - 0.2*t'
   [../]
 []
 

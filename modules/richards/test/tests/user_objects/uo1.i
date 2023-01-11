@@ -93,190 +93,190 @@
 [Functions]
   [./initial_pressure]
     type = ParsedFunction
-    value = x
+    expression = x
   [../]
 
   [./answer_RelPermPower]
     type = ParsedFunction
-    value = ((n+1)*(x^n))-(n*(x^(n+1)))
-    vars = 'n'
-    vals = '2'
+    expression = ((n+1)*(x^n))-(n*(x^(n+1)))
+    symbol_names = 'n'
+    symbol_values = '2'
   [../]
   [./answer_dRelPermPower]
     type = GradParsedFunction
     direction = '1E-4 0 0'
-    value = ((n+1)*(x^n))-(n*(x^(n+1)))
-    vars = 'n'
-    vals = '2'
+    expression = ((n+1)*(x^n))-(n*(x^(n+1)))
+    symbol_names = 'n'
+    symbol_values = '2'
   [../]
   [./answer_d2RelPermPower]
     type = Grad2ParsedFunction
     direction = '1E-3 0 0'
-    value = ((n+1)*(x^n))-(n*(x^(n+1)))
-    vars = 'n'
-    vals = '2'
+    expression = ((n+1)*(x^n))-(n*(x^(n+1)))
+    symbol_names = 'n'
+    symbol_values = '2'
   [../]
 
   [./answer_RelPermPower5]
     type = ParsedFunction
-    value = ((n+1)*(x^n))-(n*(x^(n+1)))
-    vars = 'n'
-    vals = '5'
+    expression = ((n+1)*(x^n))-(n*(x^(n+1)))
+    symbol_names = 'n'
+    symbol_values = '5'
   [../]
   [./answer_dRelPermPower5]
     type = GradParsedFunction
     direction = '1E-4 0 0'
-    value = ((n+1)*(x^n))-(n*(x^(n+1)))
-    vars = 'n'
-    vals = '5'
+    expression = ((n+1)*(x^n))-(n*(x^(n+1)))
+    symbol_names = 'n'
+    symbol_values = '5'
   [../]
   [./answer_d2RelPermPower5]
     type = Grad2ParsedFunction
     direction = '1E-5 0 0'
-    value = ((n+1)*(x^n))-(n*(x^(n+1)))
-    vars = 'n'
-    vals = '5'
+    expression = ((n+1)*(x^n))-(n*(x^(n+1)))
+    symbol_names = 'n'
+    symbol_values = '5'
   [../]
 
   [./answer_RelPermVG]
     type = ParsedFunction
-    value = (x^(0.5))*(1-(1-(x^(1.0/m)))^m)^2
-    vars = 'm'
-    vals = '0.8'
+    expression = (x^(0.5))*(1-(1-(x^(1.0/m)))^m)^2
+    symbol_names = 'm'
+    symbol_values = '0.8'
   [../]
   [./answer_dRelPermVG]
     type = GradParsedFunction
     direction = '1E-4 0 0'
-    value = (x^(0.5))*(1-(1-(x^(1.0/m)))^m)^2
-    vars = 'm'
-    vals = '0.8'
+    expression = (x^(0.5))*(1-(1-(x^(1.0/m)))^m)^2
+    symbol_names = 'm'
+    symbol_values = '0.8'
   [../]
   [./answer_d2RelPermVG]
     type = Grad2ParsedFunction
     direction = '1E-5 0 0'
-    value = (x^(0.5))*(1-(1-(x^(1.0/m)))^m)^2
-    vars = 'm'
-    vals = '0.8'
+    expression = (x^(0.5))*(1-(1-(x^(1.0/m)))^m)^2
+    symbol_names = 'm'
+    symbol_values = '0.8'
   [../]
 
   [./answer_RelPermVG1]
     type = ParsedFunction
-    value = x^3
+    expression = x^3
   [../]
   [./answer_dRelPermVG1]
     type = GradParsedFunction
     direction = '1E-4 0 0'
-    value = x^3
+    expression = x^3
   [../]
   [./answer_d2RelPermVG1]
     type = Grad2ParsedFunction
     direction = '1E-5 0 0'
-    value = x^3
+    expression = x^3
   [../]
 
   [./answer_RelPermBW]
     type = ParsedFunction
-    value = if(x>ss,1,if(x<sn,0,kn+(((x-sn)/(ss-sn))^2)*(c-1)*(ks-kn)/(c-((x-sn)/(ss-sn)))))
-    vars = 'kn ks c sn ss'
-    vals = '0 1 1.5 0.05 0.95'
+    expression = if(x>ss,1,if(x<sn,0,kn+(((x-sn)/(ss-sn))^2)*(c-1)*(ks-kn)/(c-((x-sn)/(ss-sn)))))
+    symbol_names = 'kn ks c sn ss'
+    symbol_values = '0 1 1.5 0.05 0.95'
   [../]
   [./answer_dRelPermBW]
     type = GradParsedFunction
     direction = '1E-4 0 0'
-    value = if(x>ss,1,if(x<sn,0,kn+(((x-sn)/(ss-sn))^2)*(c-1)*(ks-kn)/(c-((x-sn)/(ss-sn)))))
-    vars = 'kn ks c sn ss'
-    vals = '0 1 1.5 0.05 0.95'
+    expression = if(x>ss,1,if(x<sn,0,kn+(((x-sn)/(ss-sn))^2)*(c-1)*(ks-kn)/(c-((x-sn)/(ss-sn)))))
+    symbol_names = 'kn ks c sn ss'
+    symbol_values = '0 1 1.5 0.05 0.95'
   [../]
   [./answer_d2RelPermBW]
     type = Grad2ParsedFunction
     direction = '1E-5 0 0'
-    value = if(x>ss,1,if(x<sn,0,kn+(((x-sn)/(ss-sn))^2)*(c-1)*(ks-kn)/(c-((x-sn)/(ss-sn)))))
-    vars = 'kn ks c sn ss'
-    vals = '0 1 1.5 0.05 0.95'
+    expression = if(x>ss,1,if(x<sn,0,kn+(((x-sn)/(ss-sn))^2)*(c-1)*(ks-kn)/(c-((x-sn)/(ss-sn)))))
+    symbol_names = 'kn ks c sn ss'
+    symbol_values = '0 1 1.5 0.05 0.95'
   [../]
 
   [./answer_RelPermMonomial]
     type = ParsedFunction
-    value = x^n
-    vars = 'n'
-    vals = '3'
+    expression = x^n
+    symbol_names = 'n'
+    symbol_values = '3'
   [../]
   [./answer_dRelPermMonomial]
     type = GradParsedFunction
     direction = '1E-4 0 0'
-    value = x^n
-    vars = 'n'
-    vals = '3'
+    expression = x^n
+    symbol_names = 'n'
+    symbol_values = '3'
   [../]
   [./answer_d2RelPermMonomial]
     type = Grad2ParsedFunction
     direction = '1E-3 0 0'
-    value = x^n
-    vars = 'n'
-    vals = '3'
+    expression = x^n
+    symbol_names = 'n'
+    symbol_values = '3'
   [../]
 
   [./answer_RelPermMonomial_zero]
     type = ParsedFunction
-    value = if(x>simm,1,0)
-    vars = 'simm'
-    vals = '0.1'
+    expression = if(x>simm,1,0)
+    symbol_names = 'simm'
+    symbol_values = '0.1'
   [../]
   [./answer_dRelPermMonomial_zero]
     type = GradParsedFunction
     direction = '1E-4 0 0'
-    value = if(x>simm,1,0)
-    vars = 'simm'
-    vals = '0.1'
+    expression = if(x>simm,1,0)
+    symbol_names = 'simm'
+    symbol_values = '0.1'
   [../]
   [./answer_d2RelPermMonomial_zero]
     type = Grad2ParsedFunction
     direction = '1E-3 0 0'
-    value = if(x>simm,1,0)
-    vars = 'simm'
-    vals = '0.1'
+    expression = if(x>simm,1,0)
+    symbol_names = 'simm'
+    symbol_values = '0.1'
   [../]
 
   [./answer_RelPermPowerGas]
     type = ParsedFunction
-    value = 1-((n+1)*((1-x)^n))+(n*((1-x)^(n+1)))
-    vars = 'n'
-    vals = '5'
+    expression = 1-((n+1)*((1-x)^n))+(n*((1-x)^(n+1)))
+    symbol_names = 'n'
+    symbol_values = '5'
   [../]
   [./answer_dRelPermPowerGas]
     type = GradParsedFunction
     direction = '1E-4 0 0'
-    value = 1-((n+1)*((1-x)^n))+(n*((1-x)^(n+1)))
-    vars = 'n'
-    vals = '5'
+    expression = 1-((n+1)*((1-x)^n))+(n*((1-x)^(n+1)))
+    symbol_names = 'n'
+    symbol_values = '5'
   [../]
   [./answer_d2RelPermPowerGas]
     type = Grad2ParsedFunction
     direction = '1E-5 0 0'
-    value = 1-((n+1)*((1-x)^n))+(n*((1-x)^(n+1)))
-    vars = 'n'
-    vals = '5'
+    expression = 1-((n+1)*((1-x)^n))+(n*((1-x)^(n+1)))
+    symbol_names = 'n'
+    symbol_values = '5'
   [../]
 
   [./answer_Q2PRelPermPowerGas]
     type = ParsedFunction
-    value = 1-((n+1)*(x^n))+(n*(x^(n+1)))
-    vars = 'n'
-    vals = '5'
+    expression = 1-((n+1)*(x^n))+(n*(x^(n+1)))
+    symbol_names = 'n'
+    symbol_values = '5'
   [../]
   [./answer_dQ2PRelPermPowerGas]
     type = GradParsedFunction
     direction = '1E-4 0 0'
-    value = 1-((n+1)*(x^n))+(n*(x^(n+1)))
-    vars = 'n'
-    vals = '5'
+    expression = 1-((n+1)*(x^n))+(n*(x^(n+1)))
+    symbol_names = 'n'
+    symbol_values = '5'
   [../]
   [./answer_d2Q2PRelPermPowerGas]
     type = Grad2ParsedFunction
     direction = '1E-5 0 0'
-    value = 1-((n+1)*(x^n))+(n*(x^(n+1)))
-    vars = 'n'
-    vals = '5'
+    expression = 1-((n+1)*(x^n))+(n*(x^(n+1)))
+    symbol_names = 'n'
+    symbol_values = '5'
   [../]
 []
 

@@ -100,15 +100,15 @@
 [Functions]
   [./ic_func_eta]
     type = ParsedFunction
-    value = 'r:=sqrt(x^2+y^2+z^2);0.5*(1.0-tanh((r-r0)/delta_eta/sqrt(2.0)))'
-    vars = 'delta_eta r0'
-    vals = '6.431     100'
+    expression = 'r:=sqrt(x^2+y^2+z^2);0.5*(1.0-tanh((r-r0)/delta_eta/sqrt(2.0)))'
+    symbol_names = 'delta_eta r0'
+    symbol_values = '6.431     100'
   [../]
   [./ic_func_c]
     type = ParsedFunction
-    value = 'r:=sqrt(x^2+y^2+z^2);eta_an:=0.5*(1.0-tanh((r-r0)/delta/sqrt(2.0)));0.235*eta_an^3*(6*eta_an^2-15*eta_an+10)+0.13*(1-eta_an^3*(6*eta_an^2-15*eta_an+10))'
-    vars = 'delta r0'
-    vals = '6.431 100'
+    expression = 'r:=sqrt(x^2+y^2+z^2);eta_an:=0.5*(1.0-tanh((r-r0)/delta/sqrt(2.0)));0.235*eta_an^3*(6*eta_an^2-15*eta_an+10)+0.13*(1-eta_an^3*(6*eta_an^2-15*eta_an+10))'
+    symbol_names = 'delta r0'
+    symbol_values = '6.431 100'
   [../]
 []
 
@@ -240,9 +240,9 @@
   # Chemical free energy of the matrix
   [./fm]
     type = DerivativeParsedMaterial
-    f_name = fm
-    args = 'cm'
-    function = '6.55*(cm-0.13)^2'
+    property_name = fm
+    coupled_variables = 'cm'
+    expression = '6.55*(cm-0.13)^2'
   [../]
 # Elastic energy of the matrix
   [./elastic_free_energy_m]
@@ -254,17 +254,17 @@
 # Total free energy of the matrix
   [./Total_energy_matrix]
     type = DerivativeSumMaterial
-    f_name = f_total_matrix
+    property_name = f_total_matrix
     sum_materials = 'fm fe_m'
-    args = 'cm'
+    coupled_variables = 'cm'
   [../]
 
   # Free energy of the precipitate phase
   [./fp]
     type = DerivativeParsedMaterial
-    f_name = fp
-    args = 'cp'
-    function = '6.55*(cp-0.235)^2'
+    property_name = fp
+    coupled_variables = 'cp'
+    expression = '6.55*(cp-0.235)^2'
   [../]
 
 # Elastic energy of the precipitate
@@ -278,9 +278,9 @@
 # Total free energy of the precipitate
   [./Total_energy_ppt]
     type = DerivativeSumMaterial
-    f_name = f_total_ppt
+    property_name = f_total_ppt
     sum_materials = 'fp fe_p'
-    args = 'cp'
+    coupled_variables = 'cp'
   [../]
 
 # Total elastic energy

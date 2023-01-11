@@ -27,7 +27,7 @@
 [Functions]
   [./ramp_u]
     type = ParsedFunction
-    value = 't'
+    expression = 't'
   [../]
   [./point_value_function_u]
     type = VectorPostprocessorFunction

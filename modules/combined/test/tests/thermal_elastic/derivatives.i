@@ -39,15 +39,15 @@
 [Materials]
   [./youngs_modulus]
     type = DerivativeParsedMaterial
-    f_name = youngs_modulus
-    function = '23.1 * a^4 + 10.7 * b^2'
-    args = 'a b'
+    property_name = youngs_modulus
+    expression = '23.1 * a^4 + 10.7 * b^2'
+    coupled_variables = 'a b'
   [../]
   [./poissons_ratio]
     type = DerivativeParsedMaterial
-    f_name = poissons_ratio
-    function = '0.2 * a^2 + 0.29 * b^3'
-    args = 'a b'
+    property_name = poissons_ratio
+    expression = '0.2 * a^2 + 0.29 * b^3'
+    coupled_variables = 'a b'
   [../]
 
   [./elasticity_tensor]

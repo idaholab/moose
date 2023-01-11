@@ -17,7 +17,7 @@
       # boundary condition in the axisymmetric case in order to have
       # the "far field" flow conditions satisfy the divergence-free
       # constraint.
-      cli_args = 'Outputs/file_base=axisymmetric_out Problem/coord_type=RZ Kernels/mass/type=INSMassRZ Kernels/x_momentum_space/type=INSMomentumLaplaceFormRZ Kernels/y_momentum_space/type=INSMomentumLaplaceFormRZ Functions/vel_y_inlet/value=-2*k*y'
+      cli_args = 'Outputs/file_base=axisymmetric_out Problem/coord_type=RZ Kernels/mass/type=INSMassRZ Kernels/x_momentum_space/type=INSMomentumLaplaceFormRZ Kernels/y_momentum_space/type=INSMomentumLaplaceFormRZ Functions/vel_y_inlet/expression=-2*k*y'
       exodiff = 'axisymmetric_out.e'
       detail = 'and in 2D RZ axisymmetric simulations.'
     [../]

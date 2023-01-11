@@ -139,23 +139,23 @@
   [./weight1]
     type = DerivativeParsedMaterial
     block = 0
-    function = '0.3*c^2'
-    f_name = weight1
-    args = c
+    expression = '0.3*c^2'
+    property_name = weight1
+    coupled_variables = c
   [../]
   [./weight2]
     type = DerivativeParsedMaterial
     block = 0
-    function = '0.3*(1-c)^2'
-    f_name = weight2
-    args = c
+    expression = '0.3*(1-c)^2'
+    property_name = weight2
+    coupled_variables = c
   [../]
   [./weight3]
     type = DerivativeParsedMaterial
     block = 0
-    function = '4*(0.5-c)^2'
-    f_name = weight3
-    args = c
+    expression = '4*(0.5-c)^2'
+    property_name = weight3
+    coupled_variables = c
   [../]
 
   # matrix phase
@@ -189,9 +189,9 @@
   [./chemical_free_energy]
     type = DerivativeParsedMaterial
     block = 0
-    f_name = Fc
-    function = '4*c^2*(1-c)^2'
-    args = 'c'
+    property_name = Fc
+    expression = '4*c^2*(1-c)^2'
+    coupled_variables = 'c'
     outputs = exodus
     output_properties = Fc
   [../]
@@ -210,9 +210,9 @@
   [./free_energy]
     type = DerivativeSumMaterial
     block = 0
-    f_name = F
+    property_name = F
     sum_materials = 'Fc Fe'
-    args = 'c'
+    coupled_variables = 'c'
   [../]
 []
 

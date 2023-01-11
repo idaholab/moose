@@ -20,11 +20,11 @@
 [Functions]
   [./disp_y]
     type = ParsedFunction
-    value = 0.1*t
+    expression = 0.1*t
   [../]
   [./left_temp]
     type = ParsedFunction
-    value = 1000+t
+    expression = 1000+t
   [../]
 []
 

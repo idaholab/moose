@@ -11,7 +11,7 @@
 [Functions]
   [map]
     type = ParsedFunction
-    value = 'x^2+y^3+log(z)+acos(t)'
+    expression = 'x^2+y^3+log(z)+acos(t)'
   []
 []
 

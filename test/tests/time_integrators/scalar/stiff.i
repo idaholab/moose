@@ -69,8 +69,8 @@
   [./y1_space]
     type = ParsedODEKernel
     variable = y1
-    function = '-(${LAMBDA})*y1 - y2^${Y2_EXPONENT}'
-    args = 'y2'
+    expression = '-(${LAMBDA})*y1 - y2^${Y2_EXPONENT}'
+    coupled_variables = 'y2'
   [../]
   [./y2_time]
     type = ODETimeDerivative
@@ -79,7 +79,7 @@
   [./y2_space]
     type = ParsedODEKernel
     variable = y2
-    function = 'y2'
+    expression = 'y2'
   [../]
 []
 
@@ -101,13 +101,13 @@
 [Functions]
   [./y1_exact]
     type = ParsedFunction
-    value = '-exp(-${Y2_EXPONENT}*t)/(lambda+${Y2_EXPONENT})'
-    vars = 'lambda'
-    vals = ${LAMBDA}
+    expression = '-exp(-${Y2_EXPONENT}*t)/(lambda+${Y2_EXPONENT})'
+    symbol_names = 'lambda'
+    symbol_values = ${LAMBDA}
   [../]
   [./y2_exact]
     type = ParsedFunction
-    value = exp(-t)
+    expression = exp(-t)
   [../]
 []
 

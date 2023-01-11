@@ -13,7 +13,7 @@
   [../]
   [./exact_value]
     type = ParsedFunction
-    value = 'u := (x - 0.2) / (0.8 - 0.2);
+    expression = 'u := (x - 0.2) / (0.8 - 0.2);
              val := 6.0 * u^5 - 15 * u^4 + 10 * u^3;
              if(x < 0.2, 0, if(x > 0.8, 1, val))'
   [../]
@@ -23,7 +23,7 @@
   [../]
   [./exact_derivative]
     type = ParsedFunction
-    value = 'u := (x - 0.2) / (0.8 - 0.2);
+    expression = 'u := (x - 0.2) / (0.8 - 0.2);
              val := 30.0 * u^4 - 60 * u^3 + 30 * u^2;
              if(x < 0.2, 0, if(x > 0.8, 0, val / (0.8 - 0.2)))'
   [../]

@@ -21,8 +21,8 @@
 [Materials]
   [ad_prop]
     type = ADParsedMaterial
-    function = '-log(3)*log(3)'
-    f_name = rxn_prop
+    expression = '-log(3)*log(3)'
+    property_name = rxn_prop
   []
 []
 

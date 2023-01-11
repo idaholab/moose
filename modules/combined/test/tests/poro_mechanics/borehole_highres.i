@@ -120,10 +120,10 @@
   [../]
   [./tot_yy]
     type = ParsedAux
-    args = 'stress_yy porepressure'
+    coupled_variables = 'stress_yy porepressure'
     execute_on = timestep_end
     variable = tot_yy
-    function = 'stress_yy-0.65*porepressure'
+    expression = 'stress_yy-0.65*porepressure'
   [../]
 []
 

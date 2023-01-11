@@ -39,7 +39,7 @@
 [Functions]
   [./switch_off]
     type = ParsedFunction
-    value = 'if(t < 1.0001, 1, 0)'
+    expression = 'if(t < 1.0001, 1, 0)'
   [../]
 []
 

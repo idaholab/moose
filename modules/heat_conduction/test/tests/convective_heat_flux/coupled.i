@@ -41,21 +41,21 @@
 [Materials]
   [./T_inf]
     type = ParsedMaterial
-    f_name = T_inf
-    args = temp
-    function = 'temp + 1'
+    property_name = T_inf
+    coupled_variables = temp
+    expression = 'temp + 1'
   [../]
   [./htc]
     type = ParsedMaterial
-    f_name = htc
-    args = temp
-    function = 'temp / 100 + 1'
+    property_name = htc
+    coupled_variables = temp
+    expression = 'temp / 100 + 1'
   [../]
   [./dhtc_dT]
     type = ParsedMaterial
-    f_name = dhtc_dT
-    args = temp
-    function = '1 / 100'
+    property_name = dhtc_dT
+    coupled_variables = temp
+    expression = '1 / 100'
   [../]
 []
 

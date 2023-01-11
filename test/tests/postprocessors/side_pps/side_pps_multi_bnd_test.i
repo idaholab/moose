@@ -19,7 +19,7 @@
 [Functions]
   [./forcing_fn]
     type = ParsedFunction
-    value = x*(y+1)
+    expression = x*(y+1)
   [../]
 []
 

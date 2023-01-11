@@ -118,47 +118,47 @@
   []
   [porosity]
     type = ParsedAux
-    args = free_cm3_QuartzUnlike
-    function = '1000.0 / (1000.0 + free_cm3_QuartzUnlike)'
+    coupled_variables = free_cm3_QuartzUnlike
+    expression = '1000.0 / (1000.0 + free_cm3_QuartzUnlike)'
     variable = porosity
     execute_on = 'timestep_begin timestep_end'
   []
   [nodal_void_volume]
     type = ParsedAux
-    args = 'porosity nodal_volume'
+    coupled_variables = 'porosity nodal_volume'
     variable = nodal_void_volume
-    function = 'porosity * nodal_volume'
+    expression = 'porosity * nodal_volume'
     execute_on = 'timestep_begin'
   []
   [rate_H2O_per_1l]
     type = ParsedAux
-    args = 'pf_rate_H2O nodal_void_volume'
+    coupled_variables = 'pf_rate_H2O nodal_void_volume'
     variable = rate_H2O_per_1l
 # pf_rate = change in kg at every node
 # pf_rate * 1000 / molar_mass_in_g_per_mole = change in moles at every node
 # pf_rate * 1000 / molar_mass / (nodal_void_volume_in_m^3 * 1000) = change in moles per litre of aqueous solution
-    function = 'pf_rate_H2O / 18.0152 / nodal_void_volume'
+    expression = 'pf_rate_H2O / 18.0152 / nodal_void_volume'
     execute_on = 'timestep_begin'
   []
   [rate_Na_per_1l]
     type = ParsedAux
-    args = 'pf_rate_Na nodal_void_volume'
+    coupled_variables = 'pf_rate_Na nodal_void_volume'
     variable = rate_Na_per_1l
-    function = 'pf_rate_Na / 22.9898 / nodal_void_volume'
+    expression = 'pf_rate_Na / 22.9898 / nodal_void_volume'
     execute_on = 'timestep_begin'
   []
   [rate_Cl_per_1l]
     type = ParsedAux
-    args = 'pf_rate_Cl nodal_void_volume'
+    coupled_variables = 'pf_rate_Cl nodal_void_volume'
     variable = rate_Cl_per_1l
-    function = 'pf_rate_Cl / 35.453 / nodal_void_volume'
+    expression = 'pf_rate_Cl / 35.453 / nodal_void_volume'
     execute_on = 'timestep_begin'
   []
   [rate_SiO2_per_1l]
     type = ParsedAux
-    args = 'pf_rate_SiO2 nodal_void_volume'
+    coupled_variables = 'pf_rate_SiO2 nodal_void_volume'
     variable = rate_SiO2_per_1l
-    function = 'pf_rate_SiO2 / 60.0843 / nodal_void_volume'
+    expression = 'pf_rate_SiO2 / 60.0843 / nodal_void_volume'
     execute_on = 'timestep_begin'
   []
   [transported_H2O]
@@ -191,37 +191,37 @@
   []
   [transported_mass]
     type = ParsedAux
-    args = 'transported_H2O transported_Na transported_Cl transported_SiO2'
+    coupled_variables = 'transported_H2O transported_Na transported_Cl transported_SiO2'
     variable = transported_mass
-    function = 'transported_H2O * 18.0152 + transported_Na * 22.9898 + transported_Cl * 35.453 + transported_SiO2 * 60.0843'
+    expression = 'transported_H2O * 18.0152 + transported_Na * 22.9898 + transported_Cl * 35.453 + transported_SiO2 * 60.0843'
     execute_on = 'timestep_end'
   []
   [massfrac_H2O]
     type = ParsedAux
-    args = 'transported_H2O transported_mass'
+    coupled_variables = 'transported_H2O transported_mass'
     variable = massfrac_H2O
-    function = 'transported_H2O * 18.0152 / transported_mass'
+    expression = 'transported_H2O * 18.0152 / transported_mass'
     execute_on = 'timestep_end'
   []
   [massfrac_Na]
     type = ParsedAux
-    args = 'transported_Na transported_mass'
+    coupled_variables = 'transported_Na transported_mass'
     variable = massfrac_Na
-    function = 'transported_Na * 22.9898 / transported_mass'
+    expression = 'transported_Na * 22.9898 / transported_mass'
     execute_on = 'timestep_end'
   []
   [massfrac_Cl]
     type = ParsedAux
-    args = 'transported_Cl transported_mass'
+    coupled_variables = 'transported_Cl transported_mass'
     variable = massfrac_Cl
-    function = 'transported_Cl * 35.453 / transported_mass'
+    expression = 'transported_Cl * 35.453 / transported_mass'
     execute_on = 'timestep_end'
   []
   [massfrac_SiO2]
     type = ParsedAux
-    args = 'transported_SiO2 transported_mass'
+    coupled_variables = 'transported_SiO2 transported_mass'
     variable = massfrac_SiO2
-    function = 'transported_SiO2 * 60.0843 / transported_mass'
+    expression = 'transported_SiO2 * 60.0843 / transported_mass'
     execute_on = 'timestep_end'
   []
 []

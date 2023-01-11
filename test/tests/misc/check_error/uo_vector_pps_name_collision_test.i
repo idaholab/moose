@@ -21,12 +21,12 @@
 [Functions]
   [./forcing_fn]
     type = ParsedFunction
-    value = -2
+    expression = -2
   [../]
 
   [./exact_fn]
     type = ParsedFunction
-    value = x*x
+    expression = x*x
   [../]
 []
 

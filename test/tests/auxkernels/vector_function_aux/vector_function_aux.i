@@ -19,8 +19,8 @@
 [Functions]
   [function]
     type = ParsedVectorFunction
-    value_x = t*x
-    value_y = t*y
+    expression_x = t*x
+    expression_y = t*y
   []
 []
 

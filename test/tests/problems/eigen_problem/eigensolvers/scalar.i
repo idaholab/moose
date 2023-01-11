@@ -23,15 +23,15 @@
   [./row1]
     type = ParsedODEKernel
     variable = f1
-    function = '5*f1 + 2*f2'
-    args = 'f2'
+    expression = '5*f1 + 2*f2'
+    coupled_variables = 'f2'
   [../]
 
   [./row2]
     type = ParsedODEKernel
     variable = f2
-    function = '2*f1 + 5*f2'
-    args = 'f1'
+    expression = '2*f1 + 5*f2'
+    coupled_variables = 'f1'
   [../]
 []
 

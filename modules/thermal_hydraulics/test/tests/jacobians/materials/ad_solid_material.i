@@ -13,17 +13,17 @@
 [Functions]
   [k_fn]
     type = ParsedFunction
-    value = 't*t + 2*t'
+    expression = 't*t + 2*t'
   []
 
   [cp_fn]
     type = ParsedFunction
-    value = 't*t*t + 3*t'
+    expression = 't*t*t + 3*t'
   []
 
   [rho_fn]
     type = ParsedFunction
-    value = 't*t*t*t + 4*t'
+    expression = 't*t*t*t + 4*t'
   []
 []
 

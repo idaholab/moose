@@ -61,95 +61,95 @@
 [Functions]
   [./initial_pwater]
     type = ParsedFunction
-    value = x
+    expression = x
   [../]
   [./initial_pgas]
     type = ParsedFunction
-    value = 5.0
+    expression = 5.0
   [../]
 
   [./answer_Seff2waterVG]
     type = ParsedFunction
-    value = (1+max((-(x-5))*al,0)^(1/(1-m)))^(-m)
-    vars = 'al m'
-    vals = '0.3 0.8'
+    expression = (1+max((-(x-5))*al,0)^(1/(1-m)))^(-m)
+    symbol_names = 'al m'
+    symbol_values = '0.3 0.8'
   [../]
   [./answer_dSeff2waterVG]
     type = GradParsedFunction
     direction = '1E-5 0 0'
-    value = (1+max((-(x-5))*al,0)^(1/(1-m)))^(-m)
-    vars = 'al m'
-    vals = '0.3 0.8'
+    expression = (1+max((-(x-5))*al,0)^(1/(1-m)))^(-m)
+    symbol_names = 'al m'
+    symbol_values = '0.3 0.8'
   [../]
   [./answer_d2Seff2waterVG]
     type = Grad2ParsedFunction
     direction = '1E-4 0 0'
-    value = (1+max((-(x-5))*al,0)^(1/(1-m)))^(-m)
-    vars = 'al m'
-    vals = '0.3 0.8'
+    expression = (1+max((-(x-5))*al,0)^(1/(1-m)))^(-m)
+    symbol_names = 'al m'
+    symbol_values = '0.3 0.8'
   [../]
 
   [./answer_Seff2gasVG]
     type = ParsedFunction
-    value = 1-(1+max((-(x-5))*al,0)^(1/(1-m)))^(-m)
-    vars = 'al m'
-    vals = '0.3 0.8'
+    expression = 1-(1+max((-(x-5))*al,0)^(1/(1-m)))^(-m)
+    symbol_names = 'al m'
+    symbol_values = '0.3 0.8'
   [../]
   [./answer_dSeff2gasVG]
     type = GradParsedFunction
     direction = '1E-5 0 0'
-    value = 1-(1+max((-(x-5))*al,0)^(1/(1-m)))^(-m)
-    vars = 'al m'
-    vals = '0.3 0.8'
+    expression = 1-(1+max((-(x-5))*al,0)^(1/(1-m)))^(-m)
+    symbol_names = 'al m'
+    symbol_values = '0.3 0.8'
   [../]
   [./answer_d2Seff2gasVG]
     type = Grad2ParsedFunction
     direction = '1E-4 0 0'
-    value = 1-(1+max((-(x-5))*al,0)^(1/(1-m)))^(-m)
-    vars = 'al m'
-    vals = '0.3 0.8'
+    expression = 1-(1+max((-(x-5))*al,0)^(1/(1-m)))^(-m)
+    symbol_names = 'al m'
+    symbol_values = '0.3 0.8'
   [../]
 
   [./answer_Seff2waterVGshifted]
     type = ParsedFunction
-    value = ((1+max((-(x-5-shift))*al,0)^(1/(1-m)))^(-m))/((1+max((-(-shift))*al,0)^(1/(1-m)))^(-m))
-    vars = 'al m shift'
-    vals = '0.3 0.8 2'
+    expression = ((1+max((-(x-5-shift))*al,0)^(1/(1-m)))^(-m))/((1+max((-(-shift))*al,0)^(1/(1-m)))^(-m))
+    symbol_names = 'al m shift'
+    symbol_values = '0.3 0.8 2'
   [../]
   [./answer_dSeff2waterVGshifted]
     type = GradParsedFunction
     direction = '1E-5 0 0'
-    value = ((1+max((-(x-5-shift))*al,0)^(1/(1-m)))^(-m))/((1+max((-(-shift))*al,0)^(1/(1-m)))^(-m))
-    vars = 'al m shift'
-    vals = '0.3 0.8 2'
+    expression = ((1+max((-(x-5-shift))*al,0)^(1/(1-m)))^(-m))/((1+max((-(-shift))*al,0)^(1/(1-m)))^(-m))
+    symbol_names = 'al m shift'
+    symbol_values = '0.3 0.8 2'
   [../]
   [./answer_d2Seff2waterVGshifted]
     type = Grad2ParsedFunction
     direction = '1E-4 0 0'
-    value = ((1+max((-(x-5-shift))*al,0)^(1/(1-m)))^(-m))/((1+max((-(-shift))*al,0)^(1/(1-m)))^(-m))
-    vars = 'al m shift'
-    vals = '0.3 0.8 2'
+    expression = ((1+max((-(x-5-shift))*al,0)^(1/(1-m)))^(-m))/((1+max((-(-shift))*al,0)^(1/(1-m)))^(-m))
+    symbol_names = 'al m shift'
+    symbol_values = '0.3 0.8 2'
   [../]
 
   [./answer_Seff2gasVGshifted]
     type = ParsedFunction
-    value = 1-((1+max((-(x-5-shift))*al,0)^(1/(1-m)))^(-m))/((1+max((-(-shift))*al,0)^(1/(1-m)))^(-m))
-    vars = 'al m shift'
-    vals = '0.3 0.8 2'
+    expression = 1-((1+max((-(x-5-shift))*al,0)^(1/(1-m)))^(-m))/((1+max((-(-shift))*al,0)^(1/(1-m)))^(-m))
+    symbol_names = 'al m shift'
+    symbol_values = '0.3 0.8 2'
   [../]
   [./answer_dSeff2gasVGshifted]
     type = GradParsedFunction
     direction = '1E-5 0 0'
-    value = 1-((1+max((-(x-5-shift))*al,0)^(1/(1-m)))^(-m))/((1+max((-(-shift))*al,0)^(1/(1-m)))^(-m))
-    vars = 'al m shift'
-    vals = '0.3 0.8 2'
+    expression = 1-((1+max((-(x-5-shift))*al,0)^(1/(1-m)))^(-m))/((1+max((-(-shift))*al,0)^(1/(1-m)))^(-m))
+    symbol_names = 'al m shift'
+    symbol_values = '0.3 0.8 2'
   [../]
   [./answer_d2Seff2gasVGshifted]
     type = Grad2ParsedFunction
     direction = '1E-4 0 0'
-    value = 1-((1+max((-(x-5-shift))*al,0)^(1/(1-m)))^(-m))/((1+max((-(-shift))*al,0)^(1/(1-m)))^(-m))
-    vars = 'al m shift'
-    vals = '0.3 0.8 2'
+    expression = 1-((1+max((-(x-5-shift))*al,0)^(1/(1-m)))^(-m))/((1+max((-(-shift))*al,0)^(1/(1-m)))^(-m))
+    symbol_names = 'al m shift'
+    symbol_values = '0.3 0.8 2'
   [../]
 []
 

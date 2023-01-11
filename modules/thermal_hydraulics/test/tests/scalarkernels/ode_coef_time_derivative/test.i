@@ -46,7 +46,7 @@
   [ode1]
     type = ParsedODEKernel
     variable = n
-    function = '-4'
+    expression = '-4'
   []
 []
 

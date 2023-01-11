@@ -24,7 +24,7 @@
 [Functions]
   [pwr_func]
     type = ParsedFunction
-    value = '1e3*x*(1-x)+5e2' # increase this function to drive transient
+    expression = '1e3*x*(1-x)+5e2' # increase this function to drive transient
   []
 []
 

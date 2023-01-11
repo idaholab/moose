@@ -30,7 +30,7 @@
 [Functions]
   [./horizontal_movement]
     type = ParsedFunction
-    value = t/10.0
+    expression = t/10.0
   [../]
 []
 

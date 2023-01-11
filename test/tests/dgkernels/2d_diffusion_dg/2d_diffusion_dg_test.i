@@ -47,7 +47,7 @@
 #    function = -4.0+(x*x)+(y*y)
 #    function = x
 #    function = (x*x)-2.0
-    value = 2*pow(e,-x-(y*y))*(1-2*y*y)
+    expression = 2*pow(e,-x-(y*y))*(1-2*y*y)
 #    function = (x*x*x)-6.0*x
   [../]
 

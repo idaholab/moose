@@ -115,11 +115,11 @@ velocity = 0.1
 [Functions]
   [horizontal_movement]
     type = ParsedFunction
-    value = '${velocity} * t * cos(${theta}/180*pi)'
+    expression = '${velocity} * t * cos(${theta}/180*pi)'
   []
   [vertical_movement]
     type = ParsedFunction
-    value = '${velocity} * t * sin(${theta}/180*pi)'
+    expression = '${velocity} * t * sin(${theta}/180*pi)'
   []
 []
 

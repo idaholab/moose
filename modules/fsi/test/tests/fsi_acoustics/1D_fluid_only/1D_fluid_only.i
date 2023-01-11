@@ -62,7 +62,7 @@
 [Functions]
   [./initial_cond]
     type = ParsedFunction
-    value = 'sin(pi*x) + sin(3*pi*x) + sin(5*3.141*x) + sin(7*pi*x) + sin(9*pi*x)'
+    expression = 'sin(pi*x) + sin(3*pi*x) + sin(5*3.141*x) + sin(7*pi*x) + sin(9*pi*x)'
   [../]
 []
 

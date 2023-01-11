@@ -221,7 +221,7 @@
 [Functions]
   [./tempfunc]
     type = ParsedFunction
-    value = 'x*x+y*y'
+    expression = 'x*x+y*y'
   [../]
 []
 

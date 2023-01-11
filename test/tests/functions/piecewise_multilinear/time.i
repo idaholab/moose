@@ -49,7 +49,7 @@
   [../]
   [./time1_answer]
     type = ParsedFunction
-    value = t
+    expression = t
   [../]
 []
 

@@ -13,16 +13,16 @@
 [Functions]
   [./left_fn]
     type = ParsedFunction
-    value = 't + 1'
+    expression = 't + 1'
   [../]
 
   [./disp_x_fn]
     type = ParsedFunction
-    value = '-x'
+    expression = '-x'
   [../]
   [./disp_z_fn]
     type = ParsedFunction
-    value = 'x'
+    expression = 'x'
   [../]
 []
 

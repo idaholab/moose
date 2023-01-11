@@ -205,7 +205,7 @@ ul = '${fparse 1/D2*(D2*uR+q2*L*L/2-q2*l*l/2-l*(q2-q1)*L+l*l*(q2-q1))}'
 [Functions]
   [exact_u]
     type = ParsedFunction
-    value = 'if(x<${l}, 1/${D1}*(${fparse D1*ul+q1*l*l/2}-${fparse q1/2}*x*x),-1/${D2}*(${fparse -D2*ul-q2*l*l/2}+${fparse q2/2}*x*x-${fparse l*(q2-q1)}*x+${fparse l*l*(q2-q1)}))'
+    expression = 'if(x<${l}, 1/${D1}*(${fparse D1*ul+q1*l*l/2}-${fparse q1/2}*x*x),-1/${D2}*(${fparse -D2*ul-q2*l*l/2}+${fparse q2/2}*x*x-${fparse l*(q2-q1)}*x+${fparse l*l*(q2-q1)}))'
   []
 []
 

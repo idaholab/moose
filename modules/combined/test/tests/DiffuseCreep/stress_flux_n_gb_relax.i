@@ -151,17 +151,17 @@
   [./chemical_potential]
     type = DerivativeParsedMaterial
     block = 0
-    f_name = mu_prop
-    args = c
-    function = 'c'
+    property_name = mu_prop
+    coupled_variables = c
+    expression = 'c'
     derivative_order = 1
   [../]
   [./var_dependence]
     type = DerivativeParsedMaterial
     block = 0
-    function = 'c*(1.0-c)'
-    args = c
-    f_name = var_dep
+    expression = 'c*(1.0-c)'
+    coupled_variables = c
+    property_name = var_dep
     derivative_order = 1
   [../]
   [./mobility]
@@ -203,9 +203,9 @@
   [./gb_relax_prefactor]
     type = DerivativeParsedMaterial
     block = 0
-    function = '0.01*(c-0.15)*gb'
-    args = 'c gb'
-    f_name = gb_relax_prefactor
+    expression = '0.01*(c-0.15)*gb'
+    coupled_variables = 'c gb'
+    property_name = gb_relax_prefactor
     derivative_order = 1
   [../]
   [./gb_relax]

@@ -18,7 +18,7 @@ ParsedMaterialTempl<is_ad>::validParams()
 {
   InputParameters params = ParsedMaterialHelper<is_ad>::validParams();
   params += ParsedMaterialBase::validParams();
-  params.addClassDescription("Parsed Function Material.");
+  params.addClassDescription("Parsed expression Material.");
   return params;
 }
 

@@ -34,7 +34,7 @@
 [Functions]
   [./displ]
     type = ParsedFunction
-    value = -1/2*x*(y-0.5)
+    expression = -1/2*x*(y-0.5)
   [../]
 []
 

@@ -52,8 +52,8 @@
   []
   [total_mineral_volume_auxk]
     type = ParsedAux
-    args = 'free_cm3_Siderite free_cm3_Pyrrhotite free_cm3_Dolomite free_cm3_Illite free_cm3_Anhydrite free_cm3_Calcite free_cm3_Quartz free_cm3_Kfeldspar free_cm3_Kaolinite free_cm3_Barite free_cm3_Celestite free_cm3_Fluorite free_cm3_Albite free_cm3_Chalcedony free_cm3_Goethite'
-    function = 'free_cm3_Siderite + free_cm3_Pyrrhotite + free_cm3_Dolomite + free_cm3_Illite + free_cm3_Anhydrite + free_cm3_Calcite + free_cm3_Quartz + free_cm3_Kfeldspar + free_cm3_Kaolinite + free_cm3_Barite + free_cm3_Celestite + free_cm3_Fluorite + free_cm3_Albite + free_cm3_Chalcedony + free_cm3_Goethite'
+    coupled_variables = 'free_cm3_Siderite free_cm3_Pyrrhotite free_cm3_Dolomite free_cm3_Illite free_cm3_Anhydrite free_cm3_Calcite free_cm3_Quartz free_cm3_Kfeldspar free_cm3_Kaolinite free_cm3_Barite free_cm3_Celestite free_cm3_Fluorite free_cm3_Albite free_cm3_Chalcedony free_cm3_Goethite'
+    expression = 'free_cm3_Siderite + free_cm3_Pyrrhotite + free_cm3_Dolomite + free_cm3_Illite + free_cm3_Anhydrite + free_cm3_Calcite + free_cm3_Quartz + free_cm3_Kfeldspar + free_cm3_Kaolinite + free_cm3_Barite + free_cm3_Celestite + free_cm3_Fluorite + free_cm3_Albite + free_cm3_Chalcedony + free_cm3_Goethite'
     variable = total_mineral_volume
     execute_on = 'timestep_begin timestep_end'
   []

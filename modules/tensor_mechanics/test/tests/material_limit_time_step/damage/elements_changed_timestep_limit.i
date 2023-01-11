@@ -75,7 +75,7 @@
 [Functions]
   [damage_evolution]
     type = ParsedFunction
-    value = 'min(1.0, max(0.0, t - x * 3.0))'
+    expression = 'min(1.0, max(0.0, t - x * 3.0))'
   []
 []
 

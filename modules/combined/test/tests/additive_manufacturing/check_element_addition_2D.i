@@ -45,11 +45,11 @@
 [Functions]
   [fy]
     type = ParsedFunction
-    value = '0.2'
+    expression = '0.2'
   []
   [fx]
     type = ParsedFunction
-    value = 't'
+    expression = 't'
   []
 []
 

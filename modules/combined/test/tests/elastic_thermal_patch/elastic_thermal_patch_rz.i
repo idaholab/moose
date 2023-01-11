@@ -50,19 +50,19 @@
 [Functions]
   [./ur]
     type = ParsedFunction
-    value = '1e-3*x'
+    expression = '1e-3*x'
   [../]
   [./uz]
     type = ParsedFunction
-    value = '1e-3*(x+y)'
+    expression = '1e-3*(x+y)'
   [../]
   [./body]
     type = ParsedFunction
-    value = '-400/x'
+    expression = '-400/x'
   [../]
   [./temp]
     type = ParsedFunction
-    value = '117.56+100*t'
+    expression = '117.56+100*t'
   [../]
 []
 

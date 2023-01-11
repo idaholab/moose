@@ -102,7 +102,7 @@
  active = 'initial_pressure'
   [./initial_pressure]
     type = ParsedFunction
-    value = max((1000000-x/5*1000000)-20000,-20000)
+    expression = max((1000000-x/5*1000000)-20000,-20000)
   [../]
 []
 

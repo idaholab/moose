@@ -50,7 +50,7 @@
 # [Functions]
 #   [ls_func]
 #     type = ParsedFunction
-#     value = 'y-2.73+t'
+#     expression = 'y-2.73+t'
 #   []
 # []
 
