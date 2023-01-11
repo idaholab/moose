@@ -13,10 +13,10 @@ Specific details unique to the module are outlined in this document.
 !template! item key=dependencies-and-limitations
 The {{module}} module inherits the
 [software dependencies and limitations of the MOOSE framework](framework_sdd.md#dependencies-and-limitations),
-as well as the dependencies and limitations of the Navier-Stokes and tensor
-mechanics modules. The {{module}} module is in its relative infancy, so it may
-not have all the features desired by potential users. Currently there is
-relatively little programmatic funding at Idaho National Laboratory to support
+as well as the dependencies and limitations of the [Navier-Stokes](navier_stokes_sdd.md#dependencies-and-limitations)
+and [tensor mechanics](tensor_mechanics_sdd.md#dependencies-and-limitations) modules. The {{module}}
+module is in its relative infancy, so it may not have all the features desired by potential users.
+Currently there is relatively little programmatic funding at Idaho National Laboratory to support
 development of the {{module}} module, so this may limit they growth in capability.
 !template-end!
 
@@ -48,7 +48,7 @@ capable of running.
 !style halign=left
 The MooseApp is the top-level object used to hold all of the other objects in a simulation. In a
 normal simulation a single MooseApp object is created and "run()". This object uses its Factory
-objects to build user defined objects which are stored in a series of Warehouse objects and
+objects to build user-defined objects which are stored in a series of Warehouse objects and
 executed. The Finite Element and/or Finite Volume data is stored in the Systems and Assembly objects while the domain
 information (the Mesh) is stored in the Mesh object. A series of threaded loops are used to run
 parallel calculations on the objects created and stored within the warehouses.

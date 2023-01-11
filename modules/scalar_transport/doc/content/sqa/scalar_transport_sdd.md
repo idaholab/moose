@@ -13,8 +13,8 @@ Specific details unique to the module are outlined in this document.
 !template! item key=dependencies-and-limitations
 The {{module}} module inherits the
 [software dependencies and limitations of the MOOSE framework](framework_sdd.md#dependencies-and-limitations),
-as well as the dependencies and limitations of the chemical reactions,
-Navier-Stokes, and thermal hydraulics modules.
+as well as the dependencies and limitations of the chemical reactions, [Navier-Stokes](navier_stokes_sdd.md#dependencies-and-limitations),
+and [thermal hydraulics](thermal_hydraulics_sdd.md#dependencies-and-limitations) modules.
 !template-end!
 
 !template! item key=design-stakeholders
@@ -48,7 +48,7 @@ capable of running.
 !style halign=left
 The MooseApp is the top-level object used to hold all of the other objects in a simulation. In a
 normal simulation a single MooseApp object is created and "run()". This object uses its Factory
-objects to build user defined objects which are stored in a series of Warehouse objects and
+objects to build user-defined objects which are stored in a series of Warehouse objects and
 executed. The Finite Element and/or Finite Volume data is stored in the Systems and Assembly objects while the domain
 information (the Mesh) is stored in the Mesh object. A series of threaded loops are used to run
 parallel calculations on the objects created and stored within the warehouses.
