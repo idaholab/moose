@@ -372,6 +372,9 @@ EFAFragment2D::split(std::map<unsigned int, EFANode *> & EmbeddedNodes,
                                     // is always the final position
   bool frag0_first_cut_pos_found = false;
 
+  if (all_cut_plane_idx.size() == 1)
+    return this->split();
+
   if (all_cut_plane_idx.size() > 0) // if there are no cut planes for this element do nothing
   {
     cut_plane_id = all_cut_plane_idx.back(); // chosen cut plane id
