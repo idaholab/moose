@@ -75,15 +75,19 @@ MultiAppGeneralFieldUserObjectTransfer::evaluateInterpValuesWithUserObjects(
   dof_id_type i_pt = 0;
   for (auto & pt : incoming_points)
   {
-    // Loop until we've found the lowest-ranked app that actually contains
-    // the quadrature point.
-    // NOTE We are missing some overlap detection by accepting the first result
+    bool point_found = false;
+    if (_use_nearest_app)
+      outgoing_vals[i_pt].second = GeneralFieldTransfer::BetterOutOfMeshValue;
+
+    // Loop on all local origin problems until:
+    // - we've found the point in an app and the value at that point is valid
+    // - or if looking for conflicts between apps, we must check them all
     for (MooseIndex(_from_problems.size()) i_from = 0;
          i_from < _from_problems.size() &&
-         (outgoing_vals[i_pt].first == GeneralFieldTransfer::BetterOutOfMeshValue ||
-          _search_value_conflicts);
+         (!point_found || _search_value_conflicts || _use_nearest_app);
          ++i_from)
     {
+      // Check spatial restrictions
       if (!acceptPointInOriginMesh(i_from, local_bboxes, pt))
         continue;
       else
@@ -103,14 +107,29 @@ MultiAppGeneralFieldUserObjectTransfer::evaluateInterpValuesWithUserObjects(
             outgoing_vals[i_pt].first != GeneralFieldTransfer::BetterOutOfMeshValue)
           registerConflict(i_from, 0, pt - _from_positions[i_from], 1, true);
 
-        // Assign value
-        outgoing_vals[i_pt].first = val;
-        if (outgoing_vals[i_pt].first == GeneralFieldTransfer::BetterOutOfMeshValue)
-          outgoing_vals[i_pt].second = GeneralFieldTransfer::BetterOutOfMeshValue;
+        // No need to consider decision factors if value is invalid
+        if (val == GeneralFieldTransfer::BetterOutOfMeshValue)
+          continue;
         else
+          point_found = true;
+
+        // Assign value
+        if (!_use_nearest_app)
+        {
+          outgoing_vals[i_pt].first = val;
           outgoing_vals[i_pt].second = 1;
+        }
+        else if ((pt - _from_positions[i_from]).norm() < outgoing_vals[i_pt].second)
+        {
+          outgoing_vals[i_pt].first = val;
+          outgoing_vals[i_pt].second = (pt - _from_positions[i_from]).norm();
+        }
       }
     }
+
+    if (!point_found)
+      outgoing_vals[i_pt] = {GeneralFieldTransfer::BetterOutOfMeshValue,
+                             GeneralFieldTransfer::BetterOutOfMeshValue};
 
     // Move to next point
     i_pt++;

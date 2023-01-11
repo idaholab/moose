@@ -86,6 +86,11 @@ MultiAppGeneralFieldTransfer::validParams()
       false,
       "Whether or not to error in the case that a target point is not found in the source domain.");
   params.addParam<bool>(
+      "use_nearest_app",
+      false,
+      "When True, transfers from a child application will work by finding the nearest "
+      "(using the `location`) sub-app and query that app for the value to transfer.");
+  params.addParam<bool>(
       "from_app_must_contain_point",
       true,
       "Wether on not the origin mesh must contain the point to evaluate data at. If false, this "
@@ -100,7 +105,7 @@ MultiAppGeneralFieldTransfer::validParams()
       "to_blocks from_blocks to_boundaries from_boundaries elemental_boundary_restriction",
       "Transfer spatial restriction");
   params.addParamNamesToGroup("greedy_search error_on_miss from_app_must_contain_point "
-                              "search_value_conflicts",
+                              "use_nearest_app search_value_conflicts",
                               "Search algorithm");
   params.addParamNamesToGroup("bbox_factor fixed_bounding_box_size", "Source app bounding box");
   return params;
@@ -110,6 +115,7 @@ MultiAppGeneralFieldTransfer::MultiAppGeneralFieldTransfer(const InputParameters
   : MultiAppConservativeTransfer(parameters),
     _from_var_components(getParam<std::vector<unsigned int>>("source_variable_components")),
     _to_var_components(getParam<std::vector<unsigned int>>("target_variable_components")),
+    _use_nearest_app(getParam<bool>("use_nearest_app")),
     _source_app_must_contain_point(getParam<bool>("from_app_must_contain_point")),
     _elemental_boundary_restriction_on_sides(
         getParam<MooseEnum>("elemental_boundary_restriction") == "sides"),
@@ -231,10 +237,13 @@ MultiAppGeneralFieldTransfer::initialSetup()
   }
 
   // Cache some quantities to avoid having to get them on every transferred point
-  _to_variables.resize(_to_var_names.size());
-  for (unsigned int i_to = 0; i_to < _to_var_names.size(); ++i_to)
-    _to_variables[i_to] = &_to_problems[0]->getVariable(
-        0, _to_var_names[i_to], Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY);
+  if (_to_problems.size())
+  {
+    _to_variables.resize(_to_var_names.size());
+    for (unsigned int i_to = 0; i_to < _to_var_names.size(); ++i_to)
+      _to_variables[i_to] = &_to_problems[0]->getVariable(
+          0, _to_var_names[i_to], Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY);
+  }
 }
 
 void

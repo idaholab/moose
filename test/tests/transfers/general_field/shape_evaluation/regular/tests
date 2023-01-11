@@ -51,6 +51,18 @@
       cli_args = "Outputs/file_base=array"
       detail = "for array variables"
     []
+
+    [nearest_app]
+      type = Exodiff
+      input = main.i
+      exodiff = 'nearest_subapp.e'
+      # Only use one transfer block for each direction
+      cli_args = "Outputs/file_base=nearest_subapp Transfers/active='from_sub from_sub_elem'
+          Transfers/from_sub/use_nearest_app=true Transfers/from_sub_elem/use_nearest_app=true
+          MultiApps/sub/positions='0.000001 0 0 0.4111 0.4112 0 0.6999 0.099 0'
+          MultiApps/sub/cli_args='Mesh/xmax=0.8;Mesh/ymax=0.7'"
+      detail = "when using the closest app rather than the first valid value to chose a value"
+    []
   []
 
   [errors]

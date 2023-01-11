@@ -35,6 +35,9 @@ MultiAppGeneralFieldNearestNodeTransfer::validParams()
 
   // Nearest node is historically more an extrapolation transfer
   params.set<bool>("from_app_must_contain_point") = false;
+  // We dont keep track of both point distance to app and to nearest node
+  params.set<bool>("use_nearest_app") = false;
+  params.suppressParameter<bool>("use_nearest_app");
 
   return params;
 }
@@ -150,7 +153,7 @@ MultiAppGeneralFieldNearestNodeTransfer::evaluateInterpValuesNearestNode(
   {
     // Reset distance
     outgoing_vals[i_pt].second = std::numeric_limits<Real>::max();
-    bool value_found = false;
+    bool point_found = false;
 
     // Loop on all source problems
     for (MooseIndex(_from_problems.size()) i_from = 0; i_from < _from_problems.size(); ++i_from)
@@ -165,7 +168,7 @@ MultiAppGeneralFieldNearestNodeTransfer::evaluateInterpValuesNearestNode(
       // KD Tree can be empty if no points are within block/boundary/bounding box restrictions
       if (local_kdtrees[i_from]->numberCandidatePoints())
       {
-        value_found = true;
+        point_found = true;
         local_kdtrees[i_from]->neighborSearch(
             pt, _num_nearest_points, return_index, return_dist_sqr);
         Real val_sum = 0, dist_sum = 0;
@@ -181,7 +184,7 @@ MultiAppGeneralFieldNearestNodeTransfer::evaluateInterpValuesNearestNode(
     }
 
     // none of the source problem meshes were within the restrictions set
-    if (!value_found)
+    if (!point_found)
       outgoing_vals[i_pt] = {GeneralFieldTransfer::BetterOutOfMeshValue,
                              GeneralFieldTransfer::BetterOutOfMeshValue};
     else if (_search_value_conflicts)

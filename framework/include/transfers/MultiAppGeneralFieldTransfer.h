@@ -144,6 +144,15 @@ protected:
   /// Target array/vector variable components
   const std::vector<unsigned int> _to_var_components;
 
+  /// Whether to keep track of the distance from the requested point to the app position
+  const bool _use_nearest_app;
+  // NOTE: Keeping track of that distance is not optimal efficiency-wise, because we could find the
+  //       closest app and only query the point from there. However, if the value from the closest
+  //       app is invalid and the second closest is valid, then the results can vary in parallel
+  //       If both apps are the same rank, the closest app is used, the point has an invalid value
+  //       If each app are on a different rank, the second closest return a valid value, it gets
+  //       used
+
   /// Whether the source app mesh must actually contain the points for them to be considered or whether
   /// the bounding box is enough. If false, we can interpolate between apps
   bool _source_app_must_contain_point;
