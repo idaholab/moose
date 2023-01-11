@@ -31,9 +31,9 @@
  [Materials]
    [h]
      type = ParsedMaterial
-     args = eta
-     f_name = h
-     function = 'if(eta>0.5,1,0)'
+     coupled_variables = eta
+     property_name = h
+     expression = 'if(eta>0.5,1,0)'
    []
  []
 

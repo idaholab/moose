@@ -55,7 +55,7 @@
 [Functions]
   [pic]
     type = ParsedFunction
-    value = 1.1e5-x*1e3
+    expression = 1.1e5-x*1e3
   []
 []
 

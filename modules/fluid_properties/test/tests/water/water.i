@@ -71,11 +71,11 @@
 [Functions]
   [./tic]
     type = ParsedFunction
-    value = 'if(x<2, 300, 500)'
+    expression = 'if(x<2, 300, 500)'
   [../]
   [./pic]
     type = ParsedFunction
-    value = 'if(x<1,3e6, if(x<2, 80e6, 3e6))'
+    expression = 'if(x<1,3e6, if(x<2, 80e6, 3e6))'
   [../]
 []
 
@@ -100,8 +100,8 @@
   [../]
   [./v]
     type = ParsedAux
-    args = rho
-    function = 1/rho
+    coupled_variables = rho
+    expression = 1/rho
     variable = v
   [../]
   [./e]

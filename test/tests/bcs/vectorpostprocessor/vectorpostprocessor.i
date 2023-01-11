@@ -126,6 +126,6 @@
 [Functions]
   [./ffn]
     type = ParsedFunction
-    value = '1'
+    expression = '1'
   [../]
 []

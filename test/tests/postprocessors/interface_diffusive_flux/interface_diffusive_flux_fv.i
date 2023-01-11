@@ -29,7 +29,7 @@ postprocessor_type = InterfaceDiffusiveFluxAverage
 [Functions]
   [fn_exact]
     type = ParsedFunction
-    value = 'x*x+y*y'
+    expression = 'x*x+y*y'
   []
 []
 

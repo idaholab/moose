@@ -69,15 +69,15 @@
   # simple toy free energies
   [f1] # = fd
     type = DerivativeParsedMaterial
-    f_name = F1
-    args = 'c1'
-    function = '(0.9-c1)^2'
+    property_name = F1
+    coupled_variables = 'c1'
+    expression = '(0.9-c1)^2'
   []
   [f2] # = fm
     type = DerivativeParsedMaterial
-    f_name = F2
-    args = 'c2'
-    function = '(0.1-c2)^2'
+    property_name = F2
+    coupled_variables = 'c2'
+    expression = '(0.1-c2)^2'
   []
 
   # Switching functions for each phase
@@ -98,14 +98,14 @@
   [Dh1]
     type = DerivativeParsedMaterial
     material_property_names = 'D h1'
-    function = D*h1
-    f_name = Dh1
+    expression = D*h1
+    property_name = Dh1
   []
   [Dh2]
     type = DerivativeParsedMaterial
     material_property_names = 'D h2'
-    function = D*h2
-    f_name = Dh2
+    expression = D*h2
+    property_name = Dh2
   []
 
   # Barrier functions for each phase
@@ -162,7 +162,7 @@
     gi_name = g1
     eta_i = eta1
     wi = 0.2
-    args = 'c1 c2 eta2'
+    coupled_variables = 'c1 c2 eta2'
   []
   [ACBulkC1]
     type = KKSMultiACBulkC
@@ -171,7 +171,7 @@
     hj_names = 'h1 h2'
     cj_names = 'c1 c2'
     eta_i = eta1
-    args = 'eta2'
+    coupled_variables = 'eta2'
   []
   [ACInterface1]
     type = ACInterface
@@ -200,7 +200,7 @@
     eta_i = eta1
     wi = 0.2
     mob_name = 1
-    args = 'c1 c2 eta2 '
+    coupled_variables = 'c1 c2 eta2 '
   []
   [mult_ACBulkC_1]
     type = KKSMultiACBulkC
@@ -209,7 +209,7 @@
     hj_names = 'h1 h2'
     cj_names = 'c1 c2'
     eta_i = eta1
-    args = 'eta2 '
+    coupled_variables = 'eta2 '
     mob_name = 1
   []
   [mult_CoupledACint_1]
@@ -228,7 +228,7 @@
     eta_i = eta2
     wi = 0.2
     mob_name = 1
-    args = 'c1 c2 eta1 '
+    coupled_variables = 'c1 c2 eta1 '
   []
   [mult_ACBulkC_2]
     type = KKSMultiACBulkC
@@ -237,7 +237,7 @@
     hj_names = 'h1 h2'
     cj_names = 'c1 c2'
     eta_i = eta2
-    args = 'eta1 '
+    coupled_variables = 'eta1 '
     mob_name = 1
   []
   [mult_CoupledACint_2]

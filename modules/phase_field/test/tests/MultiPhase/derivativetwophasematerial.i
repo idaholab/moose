@@ -52,7 +52,7 @@
   [./ACBulk]
     type = AllenCahn
     variable = eta
-    args = c
+    coupled_variables = c
     f_name = F
   [../]
   [./ACInterface]
@@ -67,7 +67,7 @@
     f_name = F
     kappa_name = kappa_c
     w = w
-    args = 'eta'
+    coupled_variables = 'eta'
   [../]
   [./w_res]
     type = SplitCHWRes
@@ -114,17 +114,17 @@
 
   [./free_energy_A]
     type = DerivativeParsedMaterial
-    f_name = Fa
-    args = 'c'
-    function = '(c-0.1)^2*(c-1)^2 + c*0.01'
+    property_name = Fa
+    coupled_variables = 'c'
+    expression = '(c-0.1)^2*(c-1)^2 + c*0.01'
     derivative_order = 2
     enable_jit = true
   [../]
   [./free_energy_B]
     type = DerivativeParsedMaterial
-    f_name = Fb
-    args = 'c'
-    function = 'c^2*(c-0.9)^2 + (1-c)*0.01'
+    property_name = Fb
+    coupled_variables = 'c'
+    expression = 'c^2*(c-0.9)^2 + (1-c)*0.01'
     derivative_order = 2
     enable_jit = true
   [../]
@@ -134,7 +134,7 @@
     f_name = F
     fa_name = Fa
     fb_name = Fb
-    args = 'c'
+    coupled_variables = 'c'
     eta = eta
     derivative_order = 2
     outputs = exodus

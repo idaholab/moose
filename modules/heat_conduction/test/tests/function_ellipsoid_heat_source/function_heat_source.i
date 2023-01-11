@@ -74,15 +74,15 @@
 [Functions]
   [./path_x]
     type = ParsedFunction
-    value = 2*cos(2.0*pi*t)
+    expression = 2*cos(2.0*pi*t)
   [../]
   [./path_y]
     type = ParsedFunction
-    value = 2*sin(2.0*pi*t)
+    expression = 2*sin(2.0*pi*t)
   [../]
   [./path_z]
     type = ParsedFunction
-    value = 1.0
+    expression = 1.0
   [../]
 []
 

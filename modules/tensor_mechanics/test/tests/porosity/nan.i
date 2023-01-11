@@ -10,15 +10,15 @@
 [Functions]
   [volumetric]
     type = ParsedFunction
-    value = 't * sqrt(-1)'
-    # value = 0
-    # value =
+    expression = 't * sqrt(-1)'
+    # expression = 0
+    # expression =
   []
   [exact]
     type = ParsedFunction
-    vars = 'f'
-    vals = 'porosity_old'
-    value = '(1 - f) * 3e-3 + f'
+    symbol_names = 'f'
+    symbol_values = 'porosity_old'
+    expression = '(1 - f) * 3e-3 + f'
   []
 []
 

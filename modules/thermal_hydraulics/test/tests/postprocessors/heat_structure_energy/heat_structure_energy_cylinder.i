@@ -44,7 +44,7 @@
 [Functions]
   [T0_fn]
     type = ParsedFunction
-    value = '0.2 * x + 0.4 * (y - 2) + 0.5'
+    expression = '0.2 * x + 0.4 * (y - 2) + 0.5'
   []
 []
 

@@ -48,7 +48,7 @@
 [Functions]
   [power_density_fn]
     type = ParsedFunction
-    value = 'sin(y/3.865*pi)*sin((x-0.020652)/4.096e-3*pi/2.)*10e7*t'
+    expression = 'sin(y/3.865*pi)*sin((x-0.020652)/4.096e-3*pi/2.)*10e7*t'
   []
 []
 

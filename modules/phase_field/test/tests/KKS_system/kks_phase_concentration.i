@@ -81,15 +81,15 @@
   # simple toy free energy
   [./fa]
     type = DerivativeParsedMaterial
-    f_name = Fa
-    args = 'ca'
-    function = 'ca^2'
+    property_name = Fa
+    coupled_variables = 'ca'
+    expression = 'ca^2'
   [../]
   [./fb]
     type = DerivativeParsedMaterial
-    f_name = Fb
-    args = 'cb'
-    function = '(1-cb)^2'
+    property_name = Fb
+    coupled_variables = 'cb'
+    expression = '(1-cb)^2'
   [../]
 
   # h(eta)

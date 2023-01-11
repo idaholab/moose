@@ -38,7 +38,7 @@
     variable = c
     f_name = F
     kappa_name = kappa_c
-    args = 'eta0 eta1'
+    coupled_variables = 'eta0 eta1'
     w = w
   [../]
   [./w_res]
@@ -78,7 +78,7 @@
     type = ACInterface
     variable = eta0
     mob_name = M
-    #args = c
+    #coupled_variables = c
     kappa_name = kappa_eta
   [../]
   [./acbulk_eta0]
@@ -86,7 +86,7 @@
     variable = eta0
     mob_name = M
     f_name = F
-    args = 'c eta1'
+    coupled_variables = 'c eta1'
   [../]
   [./eta1_dot]
     type = TimeDerivative
@@ -106,7 +106,7 @@
     type = ACInterface
     variable = eta1
     mob_name = M
-    #args = c
+    #coupled_variables = c
     kappa_name = kappa_eta
   [../]
   [./acbulk_eta1]
@@ -114,7 +114,7 @@
     variable = eta1
     mob_name = M
     f_name = F
-    args = 'c eta0'
+    coupled_variables = 'c eta0'
   [../]
 []
 
@@ -126,11 +126,11 @@
   [../]
   [./free_energy]
     type = DerivativeParsedMaterial
-    f_name = F
-    args = 'c eta0 eta1'
+    property_name = F
+    coupled_variables = 'c eta0 eta1'
     constant_names = 'barr_height  cv_eq'
     constant_expressions = '0.1          1.0e-2'
-    function = 16*barr_height*(c-cv_eq)^2*(1-cv_eq-c)^2+eta0*(1-eta0)*c+eta1*(1-eta1)*c
+    expression = 16*barr_height*(c-cv_eq)^2*(1-cv_eq-c)^2+eta0*(1-eta0)*c+eta1*(1-eta1)*c
     derivative_order = 2
   [../]
   [./force_density]

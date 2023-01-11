@@ -105,11 +105,11 @@
 [Functions]
   [push_down]
     type = ParsedFunction
-    value = 'if(t < 1.5, -t, t-3.0)'
+    expression = 'if(t < 1.5, -t, t-3.0)'
   []
   [force_z]
     type = ParsedFunction
-    value = 'if(t < 0.008, 0.0, (-t)*2.0e2 -t*t*100.0)' # 4.0e5
+    expression = 'if(t < 0.008, 0.0, (-t)*2.0e2 -t*t*100.0)' # 4.0e5
   []
 []
 

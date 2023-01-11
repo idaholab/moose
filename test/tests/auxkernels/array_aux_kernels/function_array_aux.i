@@ -33,17 +33,17 @@
 [Functions]
   [func1]
     type = ParsedFunction
-    value = x*x+y*y
+    expression = x*x+y*y
   []
 
   [func2]
     type = ParsedFunction
-    value = t*((x*x)+(y*y))
+    expression = t*((x*x)+(y*y))
   []
 
   [func3]
     type = ParsedFunction
-    value = t
+    expression = t
   []
 []
 

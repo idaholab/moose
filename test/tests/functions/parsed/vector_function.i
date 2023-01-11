@@ -14,8 +14,8 @@
 [Functions]
   [./conductivity]
     type = ParsedVectorFunction
-    value_y = 0.1
-    value_x = 0.8
+    expression_y = 0.1
+    expression_x = 0.8
   [../]
 []
 

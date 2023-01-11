@@ -10,13 +10,13 @@
   [rho_mat]
     type = LinearTestMaterial
     name = rho
-    vars = 'arhoA'
+    symbol_names = 'arhoA'
     slopes = '4'
   []
   [vel_mat]
     type = LinearTestMaterial
     name = vel
-    vars = 'arhoA arhouA'
+    symbol_names = 'arhoA arhouA'
     slopes = '5 6'
   []
   [K_prime_mat]

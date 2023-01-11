@@ -97,7 +97,7 @@
 [Functions]
   [./tic]
     type = ParsedFunction
-    value = if(x<1,280,if(x<2,360,500))
+    expression = if(x<1,280,if(x<2,360,500))
   [../]
 []
 

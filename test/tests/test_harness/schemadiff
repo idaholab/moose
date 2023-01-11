@@ -1,0 +1,24 @@
+[Tests]
+  [schema_xmldiff]
+    type = XMLDiff
+    input = schema.i
+    xmldiff = schema_out.xml
+  []
+  [schema_jsondiff]
+    type = JSONDiff
+    input = schemadiff.i
+    jsondiff = schemadiff_out.json
+  []
+  [schema_invalid_json]
+    type = JSONDiff
+    input = schemadiff.i
+    jsondiff = schemadiff_out.json
+    gold_file = invalid.json
+  []
+  [schema_invalid_xml]
+    type = XMLDiff
+    input = schema.i
+    xmldiff = schema_out.xml
+    gold_file = invalid.xml
+  []
+[]

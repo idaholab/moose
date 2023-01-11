@@ -57,19 +57,19 @@
 [Functions]
   [x_exact_sln]
     type = ParsedFunction
-    value = 'cos(.5*pi*x)*sin(.5*pi*y)'
+    expression = 'cos(.5*pi*x)*sin(.5*pi*y)'
   []
   [y_exact_sln]
     type = ParsedFunction
-    value = 'sin(.5*pi*x)*cos(.5*pi*y)'
+    expression = 'sin(.5*pi*x)*cos(.5*pi*y)'
   []
   [ffx]
     type = ParsedFunction
-    value = '.5*pi*pi*cos(.5*pi*x)*sin(.5*pi*y)'
+    expression = '.5*pi*pi*cos(.5*pi*x)*sin(.5*pi*y)'
   []
   [ffy]
     type = ParsedFunction
-    value = '.5*pi*pi*sin(.5*pi*x)*cos(.5*pi*y)'
+    expression = '.5*pi*pi*sin(.5*pi*x)*cos(.5*pi*y)'
   []
 []
 

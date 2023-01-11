@@ -263,11 +263,11 @@
 [Functions]
   [func_stress]
     type = ParsedFunction
-    value = '400*t'
+    expression = '400*t'
   []
   [func_strain]
     type = ParsedFunction
-    value = '4.0e-1*t'
+    expression = '4.0e-1*t'
   []
 []
 

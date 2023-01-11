@@ -41,47 +41,47 @@ cv = ${fparse cp / gamma}
   # solutions
   [rho_fn]
     type = ParsedFunction
-    value = 'A * (sin(B*x + C*t) + 2)'
-    vars = 'A B C'
-    vals = '${A} ${B} ${C}'
+    expression = 'A * (sin(B*x + C*t) + 2)'
+    symbol_names = 'A B C'
+    symbol_values = '${A} ${B} ${C}'
   []
   [vel_fn]
     type = ParsedFunction
-    value = 'A * t * sin(pi * x)'
-    vars = 'A'
-    vals = '${A}'
+    expression = 'A * t * sin(pi * x)'
+    symbol_names = 'A'
+    symbol_values = '${A}'
   []
   [p_fn]
     type = ParsedFunction
-    value = 'A * (cos(B*x + C*t) + 2)'
-    vars = 'A B C'
-    vals = '${A} ${B} ${C}'
+    expression = 'A * (cos(B*x + C*t) + 2)'
+    symbol_names = 'A B C'
+    symbol_values = '${A} ${B} ${C}'
   []
   [T_fn]
     type = ParsedFunction
-    value = '(cos(B*x + C*t) + 2)/(cv*(gamma - 1)*(sin(B*x + C*t) + 2))'
-    vars = 'B C gamma cv'
-    vals = '${B} ${C} ${gamma} ${cv}'
+    expression = '(cos(B*x + C*t) + 2)/(cv*(gamma - 1)*(sin(B*x + C*t) + 2))'
+    symbol_names = 'B C gamma cv'
+    symbol_values = '${B} ${C} ${gamma} ${cv}'
   []
 
   # MMS sources
   [rho_src_fn]
     type = ParsedFunction
-    value = 'A^2*B*t*sin(pi*x)*cos(B*x + C*t) + pi*A^2*t*(sin(B*x + C*t) + 2)*cos(pi*x) + A*C*cos(B*x + C*t)'
-    vars = 'A B C'
-    vals = '${A} ${B} ${C}'
+    expression = 'A^2*B*t*sin(pi*x)*cos(B*x + C*t) + pi*A^2*t*(sin(B*x + C*t) + 2)*cos(pi*x) + A*C*cos(B*x + C*t)'
+    symbol_names = 'A B C'
+    symbol_values = '${A} ${B} ${C}'
   []
   [rhou_src_fn]
     type = ParsedFunction
-    value = 'A^3*B*t^2*sin(pi*x)^2*cos(B*x + C*t) + 2*pi*A^3*t^2*(sin(B*x + C*t) + 2)*sin(pi*x)*cos(pi*x) + A^2*C*t*sin(pi*x)*cos(B*x + C*t) + A^2*(sin(B*x + C*t) + 2)*sin(pi*x) - A*B*sin(B*x + C*t)'
-    vars = 'A B C'
-    vals = '${A} ${B} ${C}'
+    expression = 'A^3*B*t^2*sin(pi*x)^2*cos(B*x + C*t) + 2*pi*A^3*t^2*(sin(B*x + C*t) + 2)*sin(pi*x)*cos(pi*x) + A^2*C*t*sin(pi*x)*cos(B*x + C*t) + A^2*(sin(B*x + C*t) + 2)*sin(pi*x) - A*B*sin(B*x + C*t)'
+    symbol_names = 'A B C'
+    symbol_values = '${A} ${B} ${C}'
   []
   [rhoE_src_fn]
     type = ParsedFunction
-    value = 'A*C*(A^2*t^2*sin(pi*x)^2/2 + (cos(B*x + C*t) + 2)/((gamma - 1)*(sin(B*x + C*t) + 2)))*cos(B*x + C*t) + pi*A*t*(A*(A^2*t^2*sin(pi*x)^2/2 + (cos(B*x + C*t) + 2)/((gamma - 1)*(sin(B*x + C*t) + 2)))*(sin(B*x + C*t) + 2) + A*(cos(B*x + C*t) + 2))*cos(pi*x) + A*t*(A*B*(A^2*t^2*sin(pi*x)^2/2 + (cos(B*x + C*t) + 2)/((gamma - 1)*(sin(B*x + C*t) + 2)))*cos(B*x + C*t) - A*B*sin(B*x + C*t) + A*(sin(B*x + C*t) + 2)*(pi*A^2*t^2*sin(pi*x)*cos(pi*x) - B*sin(B*x + C*t)/((gamma - 1)*(sin(B*x + C*t) + 2)) - B*(cos(B*x + C*t) + 2)*cos(B*x + C*t)/((gamma - 1)*(sin(B*x + C*t) + 2)^2)))*sin(pi*x) + A*(sin(B*x + C*t) + 2)*(A^2*t*sin(pi*x)^2 - C*sin(B*x + C*t)/((gamma - 1)*(sin(B*x + C*t) + 2)) - C*(cos(B*x + C*t) + 2)*cos(B*x + C*t)/((gamma - 1)*(sin(B*x + C*t) + 2)^2))'
-    vars = 'A B C gamma'
-    vals = '${A} ${B} ${C} ${gamma}'
+    expression = 'A*C*(A^2*t^2*sin(pi*x)^2/2 + (cos(B*x + C*t) + 2)/((gamma - 1)*(sin(B*x + C*t) + 2)))*cos(B*x + C*t) + pi*A*t*(A*(A^2*t^2*sin(pi*x)^2/2 + (cos(B*x + C*t) + 2)/((gamma - 1)*(sin(B*x + C*t) + 2)))*(sin(B*x + C*t) + 2) + A*(cos(B*x + C*t) + 2))*cos(pi*x) + A*t*(A*B*(A^2*t^2*sin(pi*x)^2/2 + (cos(B*x + C*t) + 2)/((gamma - 1)*(sin(B*x + C*t) + 2)))*cos(B*x + C*t) - A*B*sin(B*x + C*t) + A*(sin(B*x + C*t) + 2)*(pi*A^2*t^2*sin(pi*x)*cos(pi*x) - B*sin(B*x + C*t)/((gamma - 1)*(sin(B*x + C*t) + 2)) - B*(cos(B*x + C*t) + 2)*cos(B*x + C*t)/((gamma - 1)*(sin(B*x + C*t) + 2)^2)))*sin(pi*x) + A*(sin(B*x + C*t) + 2)*(A^2*t*sin(pi*x)^2 - C*sin(B*x + C*t)/((gamma - 1)*(sin(B*x + C*t) + 2)) - C*(cos(B*x + C*t) + 2)*cos(B*x + C*t)/((gamma - 1)*(sin(B*x + C*t) + 2)^2))'
+    symbol_names = 'A B C gamma'
+    symbol_values = '${A} ${B} ${C} ${gamma}'
   []
 []
 

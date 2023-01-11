@@ -11,9 +11,9 @@
 [Functions]
   [t_func]
     type = ParsedFunction
-    value = ptime
-    vars = ptime
-    vals = ptime_pp
+    expression = ptime
+    symbol_names = ptime
+    symbol_values = ptime_pp
   []
 []
 

@@ -106,23 +106,23 @@
 [Functions]
   [p_func]
     type = ParsedFunction
-    value = '3+3+1e5 - x'
+    expression = '3+3+1e5 - x'
   []
   [T_func]
     type = ParsedFunction
-    value = '273.15 + x*y*2'
+    expression = '273.15 + x*y*2'
   []
   [vx]
     type = ParsedFunction
-    value = '14'
+    expression = '14'
   []
   [vy]
     type = ParsedFunction
-    value = '10 + x'
+    expression = '10 + x'
   []
   [vz]
     type = ParsedFunction
-    value = '12 -7*y'
+    expression = '12 -7*y'
   []
 []
 

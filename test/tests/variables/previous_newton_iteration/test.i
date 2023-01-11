@@ -17,24 +17,24 @@
 [Functions]
   [./v_fn]
     type = ParsedFunction
-    value = -4+(x*x+y*y)+1
+    expression = -4+(x*x+y*y)+1
   [../]
 
   [./left_u_bc_fn]
     type = ParsedFunction
-    value = -2*x
+    expression = -2*x
   [../]
   [./top_u_bc_fn]
     type = ParsedFunction
-    value = 2*y
+    expression = 2*y
   [../]
   [./right_u_bc_fn]
     type = ParsedFunction
-    value = 2*x
+    expression = 2*x
   [../]
   [./bottom_u_bc_fn]
     type = ParsedFunction
-    value = -2*y
+    expression = -2*y
   [../]
 []
 

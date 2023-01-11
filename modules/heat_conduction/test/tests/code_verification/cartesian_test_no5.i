@@ -26,15 +26,15 @@
 [Functions]
   [./volumetric_heat]
     type = ParsedFunction
-    vars = 'q L beta'
-    vals = '1200 1 0.1'
-    value = 'q * (1-beta*x/L)'
+    symbol_names = 'q L beta'
+    symbol_values = '1200 1 0.1'
+    expression = 'q * (1-beta*x/L)'
   [../]
   [./exact]
     type = ParsedFunction
-    vars = 'uo q k L beta'
-    vals = '300 1200 1 1 0.1'
-    value = 'uo + (0.5*q*L^2/k) * ( (1-(x/L)^2) - (1-(x/L)^3) * beta/3 )'
+    symbol_names = 'uo q k L beta'
+    symbol_values = '300 1200 1 1 0.1'
+    expression = 'uo + (0.5*q*L^2/k) * ( (1-(x/L)^2) - (1-(x/L)^3) * beta/3 )'
   [../]
 []
 

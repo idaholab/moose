@@ -111,7 +111,7 @@
 [Functions]
   [sink_strength_fcn]
     type = ParsedFunction
-    value = '-30'
+    expression = '-30'
   []
 []
 

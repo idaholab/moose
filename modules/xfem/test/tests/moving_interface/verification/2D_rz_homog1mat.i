@@ -111,23 +111,23 @@
 [Functions]
   [./src_func]
     type = ParsedFunction
-    value = '10*(-100*x-100*y+400) + 100*1.5*t/x'
+    expression = '10*(-100*x-100*y+400) + 100*1.5*t/x'
   [../]
   [./neumann_func]
     type = ParsedFunction
-    value = '1.5*100*t'
+    expression = '1.5*100*t'
   [../]
   [./dirichlet_right_func]
     type = ParsedFunction
-    value = '(-100*y+200)*t+400'
+    expression = '(-100*y+200)*t+400'
   [../]
   [./dirichlet_top_func]
     type = ParsedFunction
-    value = '(-100*x+200)*t+400'
+    expression = '(-100*x+200)*t+400'
   [../]
   [./ls_func]
     type = ParsedFunction
-    value = '-0.5*(x+y) + 2.04 - 0.2*t'
+    expression = '-0.5*(x+y) + 2.04 - 0.2*t'
   [../]
 []
 

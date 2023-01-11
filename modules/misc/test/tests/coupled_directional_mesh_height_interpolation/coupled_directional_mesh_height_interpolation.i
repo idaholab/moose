@@ -25,7 +25,7 @@
 [Functions]
   [./stretch_func]
     type = ParsedFunction
-    value = t
+    expression = t
   [../]
 []
 

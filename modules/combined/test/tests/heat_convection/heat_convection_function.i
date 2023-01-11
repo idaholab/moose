@@ -6,11 +6,11 @@
 [Functions]
   [./t_infinity]
     type = ParsedFunction
-    value = '300'
+    expression = '300'
   [../]
   [./htc]
     type = ParsedFunction
-    value = 10.0*5.7                 # convective heat transfer coefficient (w/m^2-K)[50 BTU/hr-ft^2-F]
+    expression = 10.0*5.7                 # convective heat transfer coefficient (w/m^2-K)[50 BTU/hr-ft^2-F]
   [../]
 []
 

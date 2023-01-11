@@ -21,11 +21,11 @@
 [Functions]
   [./u_IC_fn]
     type = ParsedFunction
-    value = 'x'
+    expression = 'x'
   [../]
   [./v_IC_fn]
     type = ParsedFunction
-    value = 'sin(x)'
+    expression = 'sin(x)'
   [../]
 []
 
@@ -46,7 +46,7 @@
   [./test_kernel]
     type = MaterialDerivativeTestKernel
     variable = u
-    args = 'u v'
+    coupled_variables = 'u v'
     material_property = material_derivative_test_property
   [../]
   # add a dummy kernel for v to prevent singular Jacobian

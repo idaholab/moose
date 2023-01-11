@@ -322,8 +322,8 @@
   []
   [porosity_auxk]
     type = ParsedAux
-    args = 'free_cm3_Albite free_cm3_Anhydrite free_cm3_Anorthite free_cm3_Calcite free_cm3_Chalcedony free_cm3_Clinochl7A free_cm3_Illite free_cm3_Kfeldspar free_cm3_Kaolinite free_cm3_Quartz free_cm3_Paragonite free_cm3_Phlogopite free_cm3_Zoisite free_cm3_Laumontite'
-    function = '1000.0 / (1000.0 + free_cm3_Albite + free_cm3_Anhydrite + free_cm3_Anorthite + free_cm3_Calcite + free_cm3_Chalcedony + free_cm3_Clinochl7A + free_cm3_Illite + free_cm3_Kfeldspar + free_cm3_Kaolinite + free_cm3_Quartz + free_cm3_Paragonite + free_cm3_Phlogopite + free_cm3_Zoisite + free_cm3_Laumontite)'
+    coupled_variables = 'free_cm3_Albite free_cm3_Anhydrite free_cm3_Anorthite free_cm3_Calcite free_cm3_Chalcedony free_cm3_Clinochl7A free_cm3_Illite free_cm3_Kfeldspar free_cm3_Kaolinite free_cm3_Quartz free_cm3_Paragonite free_cm3_Phlogopite free_cm3_Zoisite free_cm3_Laumontite'
+    expression = '1000.0 / (1000.0 + free_cm3_Albite + free_cm3_Anhydrite + free_cm3_Anorthite + free_cm3_Calcite + free_cm3_Chalcedony + free_cm3_Clinochl7A + free_cm3_Illite + free_cm3_Kfeldspar + free_cm3_Kaolinite + free_cm3_Quartz + free_cm3_Paragonite + free_cm3_Phlogopite + free_cm3_Zoisite + free_cm3_Laumontite)'
     variable = porosity
     execute_on = 'timestep_end'
   []
@@ -335,79 +335,79 @@
   []
   [rate_H_per_1l_auxk]
     type = ParsedAux
-    args = 'pf_rate_H nodal_void_volume'
+    coupled_variables = 'pf_rate_H nodal_void_volume'
     variable = rate_H_per_1l
-    function = 'pf_rate_H / 1.0079 / nodal_void_volume'
+    expression = 'pf_rate_H / 1.0079 / nodal_void_volume'
     execute_on = 'timestep_begin'
   []
   [rate_Na_per_1l_auxk]
     type = ParsedAux
-    args = 'pf_rate_Na nodal_void_volume'
+    coupled_variables = 'pf_rate_Na nodal_void_volume'
     variable = rate_Na_per_1l
-    function = 'pf_rate_Na / 22.9898 / nodal_void_volume'
+    expression = 'pf_rate_Na / 22.9898 / nodal_void_volume'
     execute_on = 'timestep_begin'
   []
   [rate_K_per_1l_auxk]
     type = ParsedAux
-    args = 'pf_rate_K nodal_void_volume'
+    coupled_variables = 'pf_rate_K nodal_void_volume'
     variable = rate_K_per_1l
-    function = 'pf_rate_K / 39.0983 / nodal_void_volume'
+    expression = 'pf_rate_K / 39.0983 / nodal_void_volume'
     execute_on = 'timestep_begin'
   []
   [rate_Ca_per_1l_auxk]
     type = ParsedAux
-    args = 'pf_rate_Ca nodal_void_volume'
+    coupled_variables = 'pf_rate_Ca nodal_void_volume'
     variable = rate_Ca_per_1l
-    function = 'pf_rate_Ca / 40.08 / nodal_void_volume'
+    expression = 'pf_rate_Ca / 40.08 / nodal_void_volume'
     execute_on = 'timestep_begin'
   []
   [rate_Mg_per_1l_auxk]
     type = ParsedAux
-    args = 'pf_rate_Mg nodal_void_volume'
+    coupled_variables = 'pf_rate_Mg nodal_void_volume'
     variable = rate_Mg_per_1l
-    function = 'pf_rate_Mg / 24.305 / nodal_void_volume'
+    expression = 'pf_rate_Mg / 24.305 / nodal_void_volume'
     execute_on = 'timestep_begin'
   []
   [rate_SiO2_per_1l_auxk]
     type = ParsedAux
-    args = 'pf_rate_SiO2 nodal_void_volume'
+    coupled_variables = 'pf_rate_SiO2 nodal_void_volume'
     variable = rate_SiO2_per_1l
-    function = 'pf_rate_SiO2 / 60.0843 / nodal_void_volume'
+    expression = 'pf_rate_SiO2 / 60.0843 / nodal_void_volume'
     execute_on = 'timestep_begin'
   []
   [rate_Al_per_1l_auxk]
     type = ParsedAux
-    args = 'pf_rate_Al nodal_void_volume'
+    coupled_variables = 'pf_rate_Al nodal_void_volume'
     variable = rate_Al_per_1l
-    function = 'pf_rate_Al / 26.9815 / nodal_void_volume'
+    expression = 'pf_rate_Al / 26.9815 / nodal_void_volume'
     execute_on = 'timestep_begin'
   []
   [rate_Cl_per_1l_auxk]
     type = ParsedAux
-    args = 'pf_rate_Cl nodal_void_volume'
+    coupled_variables = 'pf_rate_Cl nodal_void_volume'
     variable = rate_Cl_per_1l
-    function = 'pf_rate_Cl / 35.453 / nodal_void_volume'
+    expression = 'pf_rate_Cl / 35.453 / nodal_void_volume'
     execute_on = 'timestep_begin'
   []
   [rate_SO4_per_1l_auxk]
     type = ParsedAux
-    args = 'pf_rate_SO4 nodal_void_volume'
+    coupled_variables = 'pf_rate_SO4 nodal_void_volume'
     variable = rate_SO4_per_1l
-    function = 'pf_rate_SO4 / 96.0576 / nodal_void_volume'
+    expression = 'pf_rate_SO4 / 96.0576 / nodal_void_volume'
     execute_on = 'timestep_begin'
   []
   [rate_HCO3_per_1l_auxk]
     type = ParsedAux
-    args = 'pf_rate_HCO3 nodal_void_volume'
+    coupled_variables = 'pf_rate_HCO3 nodal_void_volume'
     variable = rate_HCO3_per_1l
-    function = 'pf_rate_HCO3 / 61.0171 / nodal_void_volume'
+    expression = 'pf_rate_HCO3 / 61.0171 / nodal_void_volume'
     execute_on = 'timestep_begin'
   []
   [rate_H2O_per_1l_auxk]
     type = ParsedAux
-    args = 'pf_rate_H2O nodal_void_volume'
+    coupled_variables = 'pf_rate_H2O nodal_void_volume'
     variable = rate_H2O_per_1l
-    function = 'pf_rate_H2O / 18.01801802 / nodal_void_volume'
+    expression = 'pf_rate_H2O / 18.01801802 / nodal_void_volume'
     execute_on = 'timestep_begin'
   []
   [transported_H_auxk]
@@ -489,86 +489,86 @@
   []
   [transported_mass_auxk]
     type = ParsedAux
-    args = ' transported_H transported_Na transported_K transported_Ca transported_Mg transported_SiO2 transported_Al transported_Cl transported_SO4 transported_HCO3 transported_H2O'
+    coupled_variables = ' transported_H transported_Na transported_K transported_Ca transported_Mg transported_SiO2 transported_Al transported_Cl transported_SO4 transported_HCO3 transported_H2O'
     variable = transported_mass
-    function = 'transported_H * 1.0079 + transported_Cl * 35.453 + transported_SO4 * 96.0576 + transported_HCO3 * 61.0171 + transported_SiO2 * 60.0843 + transported_Al * 26.9815 + transported_Ca * 40.08 + transported_Mg * 24.305 + transported_K * 39.0983 + transported_Na * 22.9898 + transported_H2O * 18.01801802'
+    expression = 'transported_H * 1.0079 + transported_Cl * 35.453 + transported_SO4 * 96.0576 + transported_HCO3 * 61.0171 + transported_SiO2 * 60.0843 + transported_Al * 26.9815 + transported_Ca * 40.08 + transported_Mg * 24.305 + transported_K * 39.0983 + transported_Na * 22.9898 + transported_H2O * 18.01801802'
     execute_on = 'timestep_end'
   []
   [massfrac_H_auxk]
     type = ParsedAux
-    args = 'transported_H transported_mass'
+    coupled_variables = 'transported_H transported_mass'
     variable = massfrac_H
-    function = 'transported_H * 1.0079 / transported_mass'
+    expression = 'transported_H * 1.0079 / transported_mass'
     execute_on = 'timestep_end'
   []
   [massfrac_Na_auxk]
     type = ParsedAux
-    args = 'transported_Na transported_mass'
+    coupled_variables = 'transported_Na transported_mass'
     variable = massfrac_Na
-    function = 'transported_Na * 22.9898 / transported_mass'
+    expression = 'transported_Na * 22.9898 / transported_mass'
     execute_on = 'timestep_end'
   []
   [massfrac_K_auxk]
     type = ParsedAux
-    args = 'transported_K transported_mass'
+    coupled_variables = 'transported_K transported_mass'
     variable = massfrac_K
-    function = 'transported_K * 39.0983 / transported_mass'
+    expression = 'transported_K * 39.0983 / transported_mass'
     execute_on = 'timestep_end'
   []
   [massfrac_Ca_auxk]
     type = ParsedAux
-    args = 'transported_Ca transported_mass'
+    coupled_variables = 'transported_Ca transported_mass'
     variable = massfrac_Ca
-    function = 'transported_Ca * 40.08 / transported_mass'
+    expression = 'transported_Ca * 40.08 / transported_mass'
     execute_on = 'timestep_end'
   []
   [massfrac_Mg_auxk]
     type = ParsedAux
-    args = 'transported_Mg transported_mass'
+    coupled_variables = 'transported_Mg transported_mass'
     variable = massfrac_Mg
-    function = 'transported_Mg * 24.305 / transported_mass'
+    expression = 'transported_Mg * 24.305 / transported_mass'
     execute_on = 'timestep_end'
   []
   [massfrac_SiO2_auxk]
     type = ParsedAux
-    args = 'transported_SiO2 transported_mass'
+    coupled_variables = 'transported_SiO2 transported_mass'
     variable = massfrac_SiO2
-    function = 'transported_SiO2 * 60.0843 / transported_mass'
+    expression = 'transported_SiO2 * 60.0843 / transported_mass'
     execute_on = 'timestep_end'
   []
   [massfrac_Al_auxk]
     type = ParsedAux
-    args = 'transported_Al transported_mass'
+    coupled_variables = 'transported_Al transported_mass'
     variable = massfrac_Al
-    function = 'transported_Al * 26.9815 / transported_mass'
+    expression = 'transported_Al * 26.9815 / transported_mass'
     execute_on = 'timestep_end'
   []
   [massfrac_Cl_auxk]
     type = ParsedAux
-    args = 'transported_Cl transported_mass'
+    coupled_variables = 'transported_Cl transported_mass'
     variable = massfrac_Cl
-    function = 'transported_Cl * 35.453 / transported_mass'
+    expression = 'transported_Cl * 35.453 / transported_mass'
     execute_on = 'timestep_end'
   []
   [massfrac_SO4_auxk]
     type = ParsedAux
-    args = 'transported_SO4 transported_mass'
+    coupled_variables = 'transported_SO4 transported_mass'
     variable = massfrac_SO4
-    function = 'transported_SO4 * 96.0576 / transported_mass'
+    expression = 'transported_SO4 * 96.0576 / transported_mass'
     execute_on = 'timestep_end'
   []
   [massfrac_HCO3_auxk]
     type = ParsedAux
-    args = 'transported_HCO3 transported_mass'
+    coupled_variables = 'transported_HCO3 transported_mass'
     variable = massfrac_HCO3
-    function = 'transported_HCO3 * 61.0171 / transported_mass'
+    expression = 'transported_HCO3 * 61.0171 / transported_mass'
     execute_on = 'timestep_end'
   []
   [massfrac_H2O_auxk]
     type = ParsedAux
-    args = 'transported_H2O transported_mass'
+    coupled_variables = 'transported_H2O transported_mass'
     variable = massfrac_H2O
-    function = 'transported_H2O * 18.01801802 / transported_mass'
+    expression = 'transported_H2O * 18.01801802 / transported_mass'
     execute_on = 'timestep_end'
   []
 []

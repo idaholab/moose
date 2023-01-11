@@ -3,7 +3,7 @@
 [Functions]
   [power_profile_fn]
     type = ParsedFunction
-    value = '1.570796326794897 * sin(x / 3.6576 * pi)'
+    expression = '1.570796326794897 * sin(x / 3.6576 * pi)'
   []
 []
 

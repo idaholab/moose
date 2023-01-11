@@ -20,7 +20,7 @@
 [Functions]
   [top_pull]
     type = ParsedFunction
-    value = -t
+    expression = -t
   []
 []
 

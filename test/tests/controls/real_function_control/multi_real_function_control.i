@@ -74,7 +74,7 @@
 [Functions]
   [./func_coef]
     type = ParsedFunction
-    value = '2*t + 0.1'
+    expression = '2*t + 0.1'
   [../]
 []
 

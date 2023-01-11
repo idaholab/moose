@@ -54,15 +54,15 @@ ay=1
 [Functions]
   [./ffn]
     type = ParsedFunction
-    value = '${ax}*(0.14*pi*y*cos(0.2*pi*x*y) + 0.2*pi*cos(0.5*pi*x)) + ${ay}*(0.14*pi*x*cos(0.2*pi*x*y) + 0.4*pi*cos(pi*y))'
+    expression = '${ax}*(0.14*pi*y*cos(0.2*pi*x*y) + 0.2*pi*cos(0.5*pi*x)) + ${ay}*(0.14*pi*x*cos(0.2*pi*x*y) + 0.4*pi*cos(pi*y))'
   [../]
   [./c_func]
     type = ParsedFunction
-    value = '0.4*sin(0.5*pi*x) + 0.4*sin(pi*y) + 0.7*sin(0.2*pi*x*y) + 0.5'
+    expression = '0.4*sin(0.5*pi*x) + 0.4*sin(pi*y) + 0.7*sin(0.2*pi*x*y) + 0.5'
   [../]
   [./cx_func]
     type = ParsedFunction
-    value = '0.14*pi*y*cos(0.2*pi*x*y) + 0.2*pi*cos(0.5*pi*x)'
+    expression = '0.14*pi*y*cos(0.2*pi*x*y) + 0.2*pi*cos(0.5*pi*x)'
   [../]
 []
 

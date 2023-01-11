@@ -101,9 +101,9 @@
   [./thcond]
     type = ParsedMaterial
     block = 0
-    args = 'c'
-    function = 'if(c>0.7,1e-8,4e-8)'
-    f_name = thermal_conductivity
+    coupled_variables = 'c'
+    expression = 'if(c>0.7,1e-8,4e-8)'
+    property_name = thermal_conductivity
     outputs = exodus
   [../]
   [./free_energy]

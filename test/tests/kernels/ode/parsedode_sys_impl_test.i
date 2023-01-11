@@ -13,17 +13,17 @@
 [Functions]
   [./f_fn]
     type = ParsedFunction
-    value = -4
+    expression = -4
   [../]
   [./bc_all_fn]
     type = ParsedFunction
-    value = x*x+y*y
+    expression = x*x+y*y
   [../]
 
   # ODEs
   [./exact_x_fn]
     type = ParsedFunction
-    value = (-1/3)*exp(-t)+(4/3)*exp(5*t)
+    expression = (-1/3)*exp(-t)+(4/3)*exp(5*t)
   [../]
 []
 
@@ -71,9 +71,9 @@
   [../]
   [./ode1]
     type = ParsedODEKernel
-    function = '-3*x - 2*y'
+    expression = '-3*x - 2*y'
     variable = x
-    args = y
+    coupled_variables = y
   [../]
 
   [./td2]
@@ -82,9 +82,9 @@
   [../]
   [./ode2]
     type = ParsedODEKernel
-    function = '-4*x - y'
+    expression = '-4*x - y'
     variable = y
-    args = x
+    coupled_variables = x
   [../]
 []
 

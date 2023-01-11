@@ -31,7 +31,7 @@
 [Functions]
   [pressure_ic_func]
     type = ParsedFunction
-    value = 2000*x*y*x*y
+    expression = 2000*x*y*x*y
   []
 []
 

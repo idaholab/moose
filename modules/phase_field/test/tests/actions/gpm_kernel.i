@@ -112,50 +112,50 @@
   [../]
   [./omegab]
     type = DerivativeParsedMaterial
-    f_name = omegab
-    args = 'w phi'
+    property_name = omegab
+    coupled_variables = 'w phi'
     material_property_names = 'Va kb cb_eq'
-    function = '-0.5*w^2/Va^2/kb - w/Va*cb_eq'
+    expression = '-0.5*w^2/Va^2/kb - w/Va*cb_eq'
     derivative_order = 2
   [../]
   [./omegam]
     type = DerivativeParsedMaterial
-    f_name = omegam
-    args = 'w eta0'
+    property_name = omegam
+    coupled_variables = 'w eta0'
     material_property_names = 'Va km cm_eq'
-    function = '-0.5*w^2/Va^2/km - w/Va*cm_eq'
+    expression = '-0.5*w^2/Va^2/km - w/Va*cm_eq'
     derivative_order = 2
   [../]
   [./chi]
     type = DerivativeParsedMaterial
-    f_name = chi
-    args = 'w'
+    property_name = chi
+    coupled_variables = 'w'
     material_property_names = 'Va hb hm kb km'
-    function = '(hm/km + hb/kb)/Va^2'
+    expression = '(hm/km + hb/kb)/Va^2'
     derivative_order = 2
   [../]
   #DENSITIES/CONCENTRATION
   [./rhob]
     type = DerivativeParsedMaterial
-    f_name = rhob
-    args = 'w'
+    property_name = rhob
+    coupled_variables = 'w'
     material_property_names = 'Va kb cb_eq'
-    function = 'w/Va^2/kb + cb_eq/Va'
+    expression = 'w/Va^2/kb + cb_eq/Va'
     derivative_order = 1
   [../]
   [./rhom]
     type = DerivativeParsedMaterial
-    f_name = rhom
-    args = 'w eta0'
+    property_name = rhom
+    coupled_variables = 'w eta0'
     material_property_names = 'Va km cm_eq(eta0)'
-    function = 'w/Va^2/km + cm_eq/Va'
+    expression = 'w/Va^2/km + cm_eq/Va'
     derivative_order = 1
   [../]
   [./concentration]
     type = ParsedMaterial
-    f_name = c
+    property_name = c
     material_property_names = 'rhom hm rhob hb Va'
-    function = 'Va*(hm*rhom + hb*rhob)'
+    expression = 'Va*(hm*rhom + hb*rhob)'
     outputs = exodus
   [../]
   [./mobility]
@@ -163,8 +163,8 @@
     material_property_names = 'chi kB'
     constant_names = 'T Em D0'
     constant_expressions = '1400 2.4 1.25e2'
-    f_name = chiD
-    function = 'chi*D0*exp(-Em/kB/T)'
+    property_name = chiD
+    expression = 'chi*D0*exp(-Em/kB/T)'
   [../]
 []
 

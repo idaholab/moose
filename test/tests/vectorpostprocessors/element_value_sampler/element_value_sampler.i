@@ -11,11 +11,11 @@
 [Functions]
   [./u_fn]
     type = ParsedFunction
-    value = '2 * x + 3 * y'
+    expression = '2 * x + 3 * y'
   [../]
   [./v_fn]
     type = ParsedFunction
-    value = 'x + y'
+    expression = 'x + y'
   [../]
 []
 

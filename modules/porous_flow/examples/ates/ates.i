@@ -452,16 +452,16 @@ cap_ver_wet_thermal_cond = ${fparse cap_ver_thermal_cond * 60 * 60 * 24} # J/day
 [Functions]
   [insitu_pressure]
     type = ParsedFunction
-    value = '(y - ${depth_centre}) * 1000 * ${gravity} + 1E5'  # approx insitu pressure in Pa
+    expression = '(y - ${depth_centre}) * 1000 * ${gravity} + 1E5'  # approx insitu pressure in Pa
   []
   [insitu_temperature]
     type = ParsedFunction
-    value = '${temp0} + (${depth_centre} - y) * ${geothermal_gradient}'
+    expression = '${temp0} + (${depth_centre} - y) * ${geothermal_gradient}'
   []
 
   [inject]
     type = ParsedFunction
-    value = 'if(t >= ${start_injection1} & t < ${end_injection1}, 1,
+    expression = 'if(t >= ${start_injection1} & t < ${end_injection1}, 1,
              if(t >= ${start_injection2} & t < ${end_injection2}, 1,
              if(t >= ${start_injection3} & t < ${end_injection3}, 1,
              if(t >= ${start_injection4} & t < ${end_injection4}, 1,
@@ -474,7 +474,7 @@ cap_ver_wet_thermal_cond = ${fparse cap_ver_thermal_cond * 60 * 60 * 24} # J/day
   []
   [produce]
     type = ParsedFunction
-    value = 'if(t >= ${start_production1} & t < ${end_production1}, 1,
+    expression = 'if(t >= ${start_production1} & t < ${end_production1}, 1,
              if(t >= ${start_production2} & t < ${end_production2}, 1,
              if(t >= ${start_production3} & t < ${end_production3}, 1,
              if(t >= ${start_production4} & t < ${end_production4}, 1,
@@ -488,28 +488,28 @@ cap_ver_wet_thermal_cond = ${fparse cap_ver_thermal_cond * 60 * 60 * 24} # J/day
 
   [injection_rate_value]
     type = ParsedFunction
-    vars = true_screen_area
-    vals = true_screen_area
-    value = '-${inject_fluid_mass}/(true_screen_area * ${inject_time})'
+    symbol_names = true_screen_area
+    symbol_values = true_screen_area
+    expression = '-${inject_fluid_mass}/(true_screen_area * ${inject_time})'
   []
   [production_rate_value]
     type = ParsedFunction
-    vars = true_screen_area
-    vals = true_screen_area
-    value = '${produce_fluid_mass}/(true_screen_area * ${produce_time})'
+    symbol_names = true_screen_area
+    symbol_values = true_screen_area
+    expression = '${produce_fluid_mass}/(true_screen_area * ${produce_time})'
   []
 
   [heat_out_in_timestep]
     type = ParsedFunction
-    vars = 'dt heat_out'
-    vals = 'dt heat_out_fromBC'
-    value = 'dt*heat_out'
+    symbol_names = 'dt heat_out'
+    symbol_values = 'dt heat_out_fromBC'
+    expression = 'dt*heat_out'
   []
   [produced_T_time_integrated]
     type = ParsedFunction
-    vars = 'dt produced_T'
-    vals = 'dt produced_T'
-    value = 'dt*produced_T / ${produce_time}'
+    symbol_names = 'dt produced_T'
+    symbol_values = 'dt produced_T'
+    expression = 'dt*produced_T / ${produce_time}'
   []
 []
 

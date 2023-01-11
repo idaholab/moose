@@ -20,7 +20,7 @@
 [Functions]
   [./func]
     type = ParsedFunction
-    value = t*x*y
+    expression = t*x*y
   [../]
 []
 

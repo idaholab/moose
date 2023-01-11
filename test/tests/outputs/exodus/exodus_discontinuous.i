@@ -42,7 +42,7 @@
 [Functions]
   [./zero_fn]
     type = ParsedFunction
-    value = 0.0
+    expression = 0.0
   [../]
 []
 

@@ -50,7 +50,7 @@
     type = SplitCHWRes
     variable = w
     mob_name = M
-    args = 'c d'
+    coupled_variables = 'c d'
   [../]
   [./time]
     type = CoupledTimeDerivative
@@ -84,9 +84,9 @@
   [../]
   [./mob]
     type = DerivativeParsedMaterial
-    f_name = M
-    args = 'c d'
-    function = 'if(d>0.001,d,0.001)*(1-0.5*c^2)'
+    property_name = M
+    coupled_variables = 'c d'
+    expression = 'if(d>0.001,d,0.001)*(1-0.5*c^2)'
     outputs = exodus
     derivative_order = 1
   [../]

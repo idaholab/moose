@@ -58,16 +58,16 @@
 [Materials]
   [./Dc]
     type = DerivativeParsedMaterial
-    f_name = Dc
-    function = '0.01+c^2+d'
-    args = 'c d'
+    property_name = Dc
+    expression = '0.01+c^2+d'
+    coupled_variables = 'c d'
     derivative_order = 1
   [../]
   [./Dd]
     type = DerivativeParsedMaterial
-    f_name = Dd
-    function = 'd^2+c+1.5'
-    args = 'c d'
+    property_name = Dd
+    expression = 'd^2+c+1.5'
+    coupled_variables = 'c d'
     derivative_order = 1
   [../]
 []

@@ -78,11 +78,11 @@
 
   [./should_be_answer_x]
     type = ParsedFunction
-    value = '3*1.1-1.2*2'
+    expression = '3*1.1-1.2*2'
   [../]
   [./should_be_answer_y]
     type = ParsedFunction
-    value = '3*1+3*(-7)'
+    expression = '3*1+3*(-7)'
   [../]
 []
 

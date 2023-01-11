@@ -143,7 +143,7 @@
 [Functions]
   [vector_func]
     type = ParsedVectorFunction
-    value_x = '-2*x + 1'
-    value_y = '-2*x + 1'
+    expression_x = '-2*x + 1'
+    expression_y = '-2*x + 1'
   []
 []

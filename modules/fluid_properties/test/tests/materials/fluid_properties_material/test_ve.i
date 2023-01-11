@@ -9,11 +9,11 @@
 [Functions]
   [fn_1]
     type = ParsedFunction
-    value = '2000 + 100*x'
+    expression = '2000 + 100*x'
   []
   [fn_2]
     type = ParsedFunction
-    value = '0.02 * (x*x+y*y)'
+    expression = '0.02 * (x*x+y*y)'
   []
 []
 

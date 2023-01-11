@@ -10,17 +10,17 @@
 [Functions]
   [./ic]
     type = ParsedFunction
-    value = 0
+    expression = 0
   [../]
 
   [./forcing_fn]
     type = ParsedFunction
-    value = x*x-2*t
+    expression = x*x-2*t
   [../]
 
   [./exact_fn]
     type = ParsedFunction
-    value = t*x*x
+    expression = t*x*x
   [../]
 []
 

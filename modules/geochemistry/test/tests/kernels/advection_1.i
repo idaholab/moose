@@ -61,9 +61,9 @@
 [Functions]
   [vel_fcn]
     type = ParsedVectorFunction
-    value_x = 1
-    value_y = 0
-    value_z = 0
+    expression_x = 1
+    expression_y = 0
+    expression_z = 0
   []
 []
 

@@ -25,16 +25,16 @@
   [./forcing_fn]
     # dudt = 3*t^2*(x^2 + y^2)
     type = ParsedFunction
-    value = 3*t*t*((x*x)+(y*y))-(4*t*t*t)
+    expression = 3*t*t*((x*x)+(y*y))-(4*t*t*t)
   [../]
   [./forcing_fn2]
     # dudt = 3*t^2*(x^2 + y^2)
     type = ParsedFunction
-    value = t*x*y
+    expression = t*x*y
   [../]
   [./exact_fn]
     type = ParsedFunction
-    value = t*t*t*((x*x)+(y*y))
+    expression = t*t*t*((x*x)+(y*y))
   [../]
 []
 

@@ -17,13 +17,13 @@
 [Functions]
   [source_real]
     type = ParsedVectorFunction
-    value_x = 'y*y - 2'
-    value_y = '2 - x*x'
+    expression_x = 'y*y - 2'
+    expression_y = '2 - x*x'
   []
   [source_imag]
     type = ParsedVectorFunction
-    value_x = '2 - y*y'
-    value_y = 'x*x - 2'
+    expression_x = '2 - y*y'
+    expression_y = 'x*x - 2'
   []
 []
 

@@ -34,11 +34,11 @@
 [Functions]
   [./init_f]
     type = ParsedFunction
-    value = max(x,0) #(x>0)
+    expression = max(x,0) #(x>0)
   [../]
   [./diff_f]
     type = ParsedFunction
-    value = max(x,0)
+    expression = max(x,0)
   [../]
 []
 

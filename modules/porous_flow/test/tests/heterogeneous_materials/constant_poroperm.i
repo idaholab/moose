@@ -205,15 +205,15 @@
 [Functions]
   [permx]
     type = ParsedFunction
-    value = '(1+x)*1e-11'
+    expression = '(1+x)*1e-11'
   []
   [permy]
     type = ParsedFunction
-    value = '(1+y)*1e-11'
+    expression = '(1+y)*1e-11'
   []
   [permz]
     type = ParsedFunction
-    value = '(1+z)*1e-11'
+    expression = '(1+z)*1e-11'
   []
 []
 

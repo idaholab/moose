@@ -62,7 +62,7 @@
     cs = SIGMA_1CR
     as = 4
     F = F_SIGMA
-    args = SIGMA_2CR
+    coupled_variables = SIGMA_2CR
   []
   [chempot2b2c]
     # This kernel ties the remaining two sublattices in the sigma phase together
@@ -72,7 +72,7 @@
     cs = SIGMA_2CR
     as = 16
     F = F_SIGMA
-    args = SIGMA_0CR
+    coupled_variables = SIGMA_0CR
   []
   [sum]
     type = SLKKSSum
@@ -88,9 +88,9 @@
   # CALPHAD free energy of the FeCr sigma phase
   [F_SIGMA]
     type = DerivativeParsedMaterial
-    f_name = F_SIGMA
+    property_name = F_SIGMA
     outputs = exodus
-    function = 'SIGMA_0FE := 1-SIGMA_0CR;
+    expression = 'SIGMA_0FE := 1-SIGMA_0CR;
                 SIGMA_1FE := 1-SIGMA_1CR;SIGMA_2FE := '
                '1-SIGMA_2CR; 8.3145*T*(10.0*if(SIGMA_0CR > 1.0e-15,SIGMA_0CR*log(SIGMA_0CR),0) + '
                '10.0*if(SIGMA_0FE > 1.0e-15,SIGMA_0FE*log(SIGMA_0FE),0) + 4.0*if(SIGMA_1CR > '
@@ -132,7 +132,7 @@
                '1811.0,77358.5*1/T - 23.5143*T*log(T) + 124.134*T - 0.00439752*T^2.0 - '
                '5.89269e-8*T^3.0 + 1225.7,0) + 173333.0))/(10.0*SIGMA_0CR + 10.0*SIGMA_0FE + '
                '4.0*SIGMA_1CR + 4.0*SIGMA_1FE + 16.0*SIGMA_2CR + 16.0*SIGMA_2FE)'
-    args = 'SIGMA_0CR SIGMA_1CR SIGMA_2CR'
+    coupled_variables = 'SIGMA_0CR SIGMA_1CR SIGMA_2CR'
     constant_names = 'T'
     constant_expressions = '1000'
   []

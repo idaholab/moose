@@ -62,7 +62,7 @@ v_growth = 2
   [./u_src]
     type = ParsedODEKernel
     variable = u
-    function = '-${u_growth}'
+    expression = '-${u_growth}'
   [../]
 
   [./v_time]
@@ -73,23 +73,23 @@ v_growth = 2
   [./v_src]
     type = ParsedODEKernel
     variable = v
-    function = '-${v_growth}'
+    expression = '-${v_growth}'
     enable = false
   [../]
   [./v_constraint]
     type = ParsedODEKernel
     variable = v
-    args = 'u'
-    function = 'v - u'
+    coupled_variables = 'u'
+    expression = 'v - u'
   [../]
 []
 
 [Functions]
   [./conditional_function]
     type = ParsedFunction
-    vars = 'u_sol'
-    vals = 'u'
-    value = 'u_sol >= ${u_threshold}'
+    symbol_names = 'u_sol'
+    symbol_values = 'u'
+    expression = 'u_sol >= ${u_threshold}'
   [../]
 []
 

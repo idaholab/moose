@@ -47,11 +47,11 @@
   [./chemical_free_energy]
     # simple double well free energy
     type = DerivativeParsedMaterial
-    f_name = Fc
-    args = 'c'
+    property_name = Fc
+    coupled_variables = 'c'
     constant_names       = 'barr_height  cv_eq'
     constant_expressions = '0.1          0'
-    function = 16*barr_height*c^2*(1-c)^2 # +0.01*(c*plog(c,0.005)+(1-c)*plog(1-c,0.005))
+    expression = 16*barr_height*c^2*(1-c)^2 # +0.01*(c*plog(c,0.005)+(1-c)*plog(1-c,0.005))
     derivative_order = 2
     outputs = exodus
   [../]
@@ -59,9 +59,9 @@
     # This is a made up toy nucleation rate it should be replaced by
     # classical nucleation theory in a real simulation.
     type = ParsedMaterial
-    f_name = P
-    args = c
-    function = 'if(c<0.21,c*1e-8,0)'
+    property_name = P
+    coupled_variables = c
+    expression = 'if(c<0.21,c*1e-8,0)'
     outputs = exodus
   [../]
   [./nucleation]
@@ -81,7 +81,7 @@
     # add the chemical and nucleation free energy contributions together
     type = DerivativeSumMaterial
     derivative_order = 2
-    args = c
+    coupled_variables = c
     sum_materials = 'Fc Fn'
   [../]
 []

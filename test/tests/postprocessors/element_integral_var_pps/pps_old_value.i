@@ -21,12 +21,12 @@
 [Functions]
   [./force_fn]
     type = ParsedFunction
-    value = '1'
+    expression = '1'
   [../]
 
   [./exact_fn]
     type = ParsedFunction
-    value = 't'
+    expression = 't'
   [../]
 []
 

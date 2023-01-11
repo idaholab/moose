@@ -22,11 +22,11 @@
 [Functions]
   [./exact_sln]
     type = ParsedFunction
-    value = y
+    expression= y
   [../]
   [./ffn]
     type = ParsedFunction
-    value = 0
+    expression= 0
   [../]
 []
 

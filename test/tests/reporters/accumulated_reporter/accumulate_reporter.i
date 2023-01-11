@@ -10,7 +10,7 @@
 
 [Functions/fun]
   type = ParsedFunction
-  value = 't * x'
+  expression = 't * x'
 []
 
 [Postprocessors/pp]

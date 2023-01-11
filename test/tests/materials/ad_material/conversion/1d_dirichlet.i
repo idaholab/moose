@@ -42,16 +42,16 @@
 [Functions]
   [sink]
     type = ParsedFunction
-    value = '3*x^3'
+    expression = '3*x^3'
   []
 []
 
 [Materials]
   [ad_coef]
     type = ADParsedMaterial
-    f_name = 'ad_coef'
-    function = '0.01 * max(v, 1)'
-    args = 'v'
+    property_name = 'ad_coef'
+    expression = '0.01 * max(v, 1)'
+    coupled_variables = 'v'
   []
   [converter_to_regular]
     type = MaterialADConverter

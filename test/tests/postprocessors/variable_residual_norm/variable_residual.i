@@ -33,12 +33,12 @@
 [Functions]
   [./leg1]
     type = ParsedFunction
-    value = 'x'
+    expression = 'x'
   [../]
 
   [./leg2]
     type = ParsedFunction
-    value = '0.5*(3.0*x*x-1.0)'
+    expression = '0.5*(3.0*x*x-1.0)'
   [../]
 []
 

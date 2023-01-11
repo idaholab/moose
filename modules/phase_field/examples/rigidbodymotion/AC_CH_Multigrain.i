@@ -61,7 +61,7 @@
   [./load_x]
     # Defines the force on the grains in the x-direction
     type = ParsedFunction
-    value = 0.005*cos(x*pi/600)
+    expression = 0.005*cos(x*pi/600)
   [../]
   [./load_y]
     # Defines the force on the grains in the y-direction
@@ -98,7 +98,7 @@
     f_name = f_loc
     w = w
     kappa_name = kappa_c
-    args = 'gr0 gr1 gr2 gr3' # Must be changed as op_num changes. Copy/paste from line 4
+    coupled_variables = 'gr0 gr1 gr2 gr3' # Must be changed as op_num changes. Copy/paste from line 4
   [../]
   [./CH_RBM]
     type = MultiGrainRigidBodyMotion
@@ -153,11 +153,11 @@
   [../]
   [./free_energy]
     type = DerivativeParsedMaterial
-    f_name = f_loc
+    property_name = f_loc
     constant_names = 'A B'
     constant_expressions = '450 1.5'
-    args = 'c gr0 gr1 gr2 gr3' #Must be changed as op_num changes. Copy/paste from line 4
-    function = 'A*c^2*(1-c)^2+B*(c^2+6*(1-c)*(gr0^2+gr1^2+gr2^2+gr3^2)
+    coupled_variables = 'c gr0 gr1 gr2 gr3' #Must be changed as op_num changes. Copy/paste from line 4
+    expression = 'A*c^2*(1-c)^2+B*(c^2+6*(1-c)*(gr0^2+gr1^2+gr2^2+gr3^2)
                 -4*(2-c)*(gr0^3+gr1^3+gr2^3+gr3^3)
                 +3*(gr0^2+gr1^2+gr2^2+gr3^2)^2)'
                                  #Copy/paste from lines 5-6

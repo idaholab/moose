@@ -13,20 +13,20 @@
 [Functions]
   [./exact_p1]
     type = ParsedFunction
-    value = t*((x*x)+(y*y))
+    expression = t*((x*x)+(y*y))
   [../]
   [./ffn_p1]
     type = ParsedFunction
-    value = (x*x+y*y)-4*t
+    expression = (x*x+y*y)-4*t
   [../]
 
   [./exact_p2]
     type = ParsedFunction
-    value = t*((x*x*x)+(y*y*y))
+    expression = t*((x*x*x)+(y*y*y))
   [../]
   [./ffn_p2]
     type = ParsedFunction
-    value = (x*x*x+y*y*y)-6*t*(x+y)
+    expression = (x*x*x+y*y*y)-6*t*(x+y)
   [../]
 []
 

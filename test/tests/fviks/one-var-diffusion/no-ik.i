@@ -78,7 +78,7 @@
 [Functions]
   [exact_u]
     type = ParsedFunction
-    value = 'if(x<1, 1 - x/3, 4/3 - 2*x/3)'
+    expression = 'if(x<1, 1 - x/3, 4/3 - 2*x/3)'
   []
 []
 

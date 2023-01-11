@@ -79,11 +79,11 @@
 [Functions]
   [./disp_x_func]
     type = ParsedFunction
-    value = 1
+    expression = 1
   [../]
   [./disp_y_func]
     type = ParsedFunction
-    value = y
+    expression = y
   [../]
 []
 

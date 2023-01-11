@@ -55,13 +55,13 @@
 [Functions]
   [./left_bc]
     type = ParsedFunction
-    value = s
-    vals = scalar
-    vars = s
+    expression = s
+    symbol_values = scalar
+    symbol_names = s
   [../]
   [./func]
     type = ParsedFunction
-    value = t
+    expression = t
   [../]
 []
 

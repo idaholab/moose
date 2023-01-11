@@ -11,7 +11,7 @@
 
 [Functions/parsed_function]
   type = ParsedFunction
-  value = 'x + sin(y)'
+  expression = 'x + sin(y)'
 []
 
 [UserObjects/study]

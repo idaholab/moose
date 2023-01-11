@@ -152,6 +152,8 @@ git submodule init
 # Add needed env vars to /etc/environment
 #-----------------------------------------------------------------------------#
 USER root
-RUN for CURR_VAR in $(env | grep 'CC\|CXX\|_DIR'); do \
+
+RUN : > /etc/environment ; \
+for CURR_VAR in $(env | grep '^CC\|^CXX\|_DIR\|^PATH'); do \
     echo "$CURR_VAR" >> /etc/environment ; \
 done

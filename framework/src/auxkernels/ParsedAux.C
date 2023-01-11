@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ParsedAux.h"
+#include "MooseApp.h"
 
 registerMooseObject("MooseApp", ParsedAux);
 
@@ -19,9 +20,17 @@ ParsedAux::validParams()
   params.addClassDescription(
       "Sets a field variable value to the evaluation of a parsed expression.");
 
-  params.addRequiredCustomTypeParam<std::string>(
-      "function", "FunctionExpression", "function expression");
-  params.addCoupledVar("args", "coupled variables");
+  params.addDeprecatedCustomTypeParam<std::string>("function",
+                                                   "FunctionExpression",
+                                                   "Parsed function expression to compute",
+                                                   "'function' is deprecated, use 'expression'");
+  // TODO Make required once deprecation is handled, see #19119
+  params.addCustomTypeParam<std::string>(
+      "expression", "FunctionExpression", "Parsed function expression to compute");
+  params.addDeprecatedCoupledVar(
+      "args", "coupled variables", "args is deprecated, use coupled_variables");
+  params.addCoupledVar("coupled_variables", "Vector of coupled variable names");
+
   params.addParam<bool>(
       "use_xyzt",
       false,
@@ -38,17 +47,21 @@ ParsedAux::validParams()
 ParsedAux::ParsedAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     FunctionParserUtils(parameters),
-    _function(getParam<std::string>("function")),
-    _nargs(coupledComponents("args")),
-    _args(coupledValues("args")),
+    _function(getRenamedParam<std::string>("function", "expression")),
+    _nargs(isCoupled("args") ? coupledComponents("args") : coupledComponents("coupled_variables")),
+    _args(isCoupled("args") ? coupledValues("args") : coupledValues("coupled_variables")),
     _use_xyzt(getParam<bool>("use_xyzt"))
 {
   // build variables argument
   std::string variables;
 
   // coupled field variables
-  for (std::size_t i = 0; i < _nargs; ++i)
-    variables += (i == 0 ? "" : ",") + getFieldVar("args", i)->name();
+  if (isCoupled("args"))
+    for (std::size_t i = 0; i < _nargs; ++i)
+      variables += (i == 0 ? "" : ",") + getFieldVar("args", i)->name();
+  else
+    for (std::size_t i = 0; i < _nargs; ++i)
+      variables += (i == 0 ? "" : ",") + getFieldVar("coupled_variables", i)->name();
 
   // "system" variables
   const std::vector<std::string> xyzt = {"x", "y", "z", "t"};

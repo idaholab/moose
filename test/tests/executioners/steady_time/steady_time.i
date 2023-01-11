@@ -33,7 +33,7 @@
 [Functions]
   [./time_function]
     type = ParsedFunction
-    value = 't+1'
+    expression = 't+1'
   [../]
 []
 

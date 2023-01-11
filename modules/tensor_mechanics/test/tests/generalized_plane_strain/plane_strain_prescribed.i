@@ -48,7 +48,7 @@
 [Functions]
   [./tempfunc]
     type = ParsedFunction
-    value = '(1-x)*t'
+    expression = '(1-x)*t'
   [../]
   [./scalar_strain_zz_func]
     type = PiecewiseLinear

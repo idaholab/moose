@@ -86,8 +86,8 @@
   [perm]
     type = ParsedAux
     variable = perm
-    args = perm_md
-    function = '9.869233e-16*perm_md'
+    coupled_variables = perm_md
+    expression = '9.869233e-16*perm_md'
     execute_on = initial
   []
 []

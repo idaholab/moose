@@ -180,8 +180,7 @@ public:
 
   /**
    * These methods add an option parameter and with a customer type to the InputParameters object.
-   * The custom
-   * type will be output in YAML dumps and can be used within the GUI application.
+   * The custom type will be output in YAML dumps and can be used within the GUI application.
    */
   template <typename T>
   void addRequiredCustomTypeParam(const std::string & name,
@@ -196,6 +195,11 @@ public:
   void addCustomTypeParam(const std::string & name,
                           const std::string & custom_type,
                           const std::string & doc_string);
+  template <typename T>
+  void addDeprecatedCustomTypeParam(const std::string & name,
+                                    const std::string & custom_type,
+                                    const std::string & doc_string,
+                                    const std::string & deprecation_msg);
 
   /**
    * These method add a parameter to the InputParameters object which can be retrieved like any
@@ -1354,6 +1358,21 @@ InputParameters::addCustomTypeParam(const std::string & name,
 {
   addParam<T>(name, doc_string);
   _params[name]._custom_type = custom_type;
+}
+
+template <typename T>
+void
+InputParameters::addDeprecatedCustomTypeParam(const std::string & name,
+                                              const std::string & custom_type,
+                                              const std::string & doc_string,
+                                              const std::string & deprecation_message)
+{
+  _show_deprecated_message = false;
+  addParam<T>(name, doc_string);
+  _params[name]._custom_type = custom_type;
+
+  _params[name]._deprecation_message = deprecation_message;
+  _show_deprecated_message = true;
 }
 
 template <typename T>

@@ -32,7 +32,7 @@
   [../]
   [./fstress]
     type = ParsedFunction
-    value = 'if(x > 0.667, 1.1e6, 1.2e6)'
+    expression = 'if(x > 0.667, 1.1e6, 1.2e6)'
   [../]
 []
 

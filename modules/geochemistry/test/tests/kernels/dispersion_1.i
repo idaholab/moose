@@ -62,8 +62,8 @@ por = 2.0 # this is the porosity.  The result should not depend on por in this e
   []
   [should_be_zero]
     type = ParsedAux
-    args = 'expected conc'
-    function = 'expected - conc'
+    coupled_variables = 'expected conc'
+    expression = 'expected - conc'
     variable = should_be_zero
   []
 []
@@ -79,7 +79,7 @@ por = 2.0 # this is the porosity.  The result should not depend on por in this e
   [erf]
     type = ParsedFunction
     # series expansion for evaluating the error function
-    value = 'xi := x / sqrt(4 * t * 0.3); expxi := exp(-xi * xi); if(x < 0.0, -1.0, if(x > 0.0, 1.0, 0.0)) * 2 / sqrt(pi) * sqrt(1 - expxi) * (sqrt(pi) / 2.0 + 31.0 * expxi / 200.0 - 341.0 * expxi * expxi / 8000.0)'
+    expression = 'xi := x / sqrt(4 * t * 0.3); expxi := exp(-xi * xi); if(x < 0.0, -1.0, if(x > 0.0, 1.0, 0.0)) * 2 / sqrt(pi) * sqrt(1 - expxi) * (sqrt(pi) / 2.0 + 31.0 * expxi / 200.0 - 341.0 * expxi * expxi / 8000.0)'
   []
 []
 

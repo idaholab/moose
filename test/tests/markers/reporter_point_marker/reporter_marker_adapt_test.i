@@ -26,7 +26,7 @@
 [Functions]
   [xfcn]
     type = ParsedFunction
-    value = t+0.01 #offset so marker is not on element edge
+    expression = t+0.01 #offset so marker is not on element edge
   []
 []
 

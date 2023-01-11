@@ -24,9 +24,9 @@ class TestContinuity(unittest.TestCase):
         lm = 1 * 1 * du_dx
 
         self.function_args = [
-            'Functions/forcing_function/value="' + mms.fparser(f) + '"',
-            'Functions/exact_soln_primal/value="' + mms.fparser(exact) + '"',
-            'Functions/exact_soln_lambda/value="' + mms.fparser(lm) + '"']
+            'Functions/forcing_function/expression="' + mms.fparser(f) + '"',
+            'Functions/exact_soln_primal/expression="' + mms.fparser(exact) + '"',
+            'Functions/exact_soln_lambda/expression="' + mms.fparser(lm) + '"']
 
         # self.gold_values = {}
         self.gold_values = {

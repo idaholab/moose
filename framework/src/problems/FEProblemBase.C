@@ -2310,7 +2310,7 @@ FEProblemBase::getFunction(const std::string & name, THREAD_ID tid)
       {
         // It parsed ok, so build a MooseParsedFunction
         InputParameters params = _factory.getValidParams("ParsedFunction");
-        params.set<std::string>("value") = name;
+        params.set<std::string>("expression") = name;
         addFunction("ParsedFunction", name, params);
       }
     }

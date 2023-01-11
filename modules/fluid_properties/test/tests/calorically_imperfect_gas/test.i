@@ -9,11 +9,11 @@
 [Functions]
   [f_fn]
     type = ParsedFunction
-    value = -4
+    expression = -4
   []
   [bc_fn]
     type = ParsedFunction
-    value = 'x*x+y*y'
+    expression = 'x*x+y*y'
   []
 
   [e_fn]

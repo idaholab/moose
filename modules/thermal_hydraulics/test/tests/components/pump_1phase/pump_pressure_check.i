@@ -38,9 +38,9 @@ volume = 0.567
 [Functions]
   [expected_pressure_rise_fcn]
     type = ParsedFunction
-    value = 'rhoV * g * head / volume'
-    vars = 'rhoV g head volume'
-    vals = 'pump:rhoV ${g} ${head} ${volume}'
+    expression = 'rhoV * g * head / volume'
+    symbol_names = 'rhoV g head volume'
+    symbol_values = 'pump:rhoV ${g} ${head} ${volume}'
   []
 []
 

@@ -118,7 +118,7 @@
 [Functions]
   [pic]
     type = ParsedFunction
-    value = 'if(x<1,12e6,if(x<2,16e6,if(x<3,20e6,24e6)))'
+    expression = 'if(x<1,12e6,if(x<2,16e6,if(x<3,20e6,24e6)))'
   []
 []
 

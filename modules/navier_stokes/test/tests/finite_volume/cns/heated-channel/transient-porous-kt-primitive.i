@@ -183,7 +183,7 @@ superficial_vel_in=${fparse u_in * eps}
 [Functions]
   [superficial_vel_in]
     type = ParsedVectorFunction
-    value_x = '${superficial_vel_in}'
+    expression_x = '${superficial_vel_in}'
   []
 []
 

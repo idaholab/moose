@@ -60,11 +60,11 @@
 [Functions]
   [./ic_func_eta]
     type = ParsedFunction
-    value = '0.5*(1.0-tanh((x)/sqrt(2.0)))'
+    expression = '0.5*(1.0-tanh((x)/sqrt(2.0)))'
   [../]
   [./ic_func_c]
     type = ParsedFunction
-    value = '0.9*(0.5*(1.0-tanh(x/sqrt(2.0))))^3*(6*(0.5*(1.0-tanh(x/sqrt(2.0))))^2-15*(0.5*(1.0-tanh(x/sqrt(2.0))))+10)+0.1*(1-(0.5*(1.0-tanh(x/sqrt(2.0))))^3*(6*(0.5*(1.0-tanh(x/sqrt(2.0))))^2-15*(0.5*(1.0-tanh(x/sqrt(2.0))))+10))'
+    expression = '0.9*(0.5*(1.0-tanh(x/sqrt(2.0))))^3*(6*(0.5*(1.0-tanh(x/sqrt(2.0))))^2-15*(0.5*(1.0-tanh(x/sqrt(2.0))))+10)+0.1*(1-(0.5*(1.0-tanh(x/sqrt(2.0))))^3*(6*(0.5*(1.0-tanh(x/sqrt(2.0))))^2-15*(0.5*(1.0-tanh(x/sqrt(2.0))))+10))'
   [../]
 []
 
@@ -86,17 +86,17 @@
   # Free energy of the liquid
   [./fl]
     type = DerivativeParsedMaterial
-    f_name = fl
-    args = 'cl'
-    function = '(0.1-cl)^2'
+    property_name = fl
+    coupled_variables = 'cl'
+    expression = '(0.1-cl)^2'
   [../]
 
   # Free energy of the solid
   [./fs]
     type = DerivativeParsedMaterial
-    f_name = fs
-    args = 'cs'
-    function = '(0.9-cs)^2'
+    property_name = fs
+    coupled_variables = 'cs'
+    expression = '(0.9-cs)^2'
   [../]
 
   # h(eta)
@@ -173,7 +173,7 @@
     fa_name  = fl
     fb_name  = fs
     w        = 1.0
-    args = 'cl cs'
+    coupled_variables = 'cl cs'
   [../]
   [./ACBulkC]
     type = KKSACBulkC

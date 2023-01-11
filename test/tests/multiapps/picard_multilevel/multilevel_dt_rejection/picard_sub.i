@@ -67,7 +67,7 @@
 [Functions]
   [func]
     type = ParsedFunction
-    value = 'if(t < 2.5, 1, 1 / t)'
+    expression = 'if(t < 2.5, 1, 1 / t)'
   []
 []
 

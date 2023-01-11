@@ -134,6 +134,6 @@
 [Functions]
   [./inlet_func]
     type = ParsedFunction
-    value = '-4 * (y - 0.5)^2 + 1'
+    expression = '-4 * (y - 0.5)^2 + 1'
   [../]
 []

@@ -362,9 +362,9 @@ INSFVRhieChowInterpolator::execute()
 
   PARALLEL_TRY
   {
-    using FVRange = StoredRange<std::vector<const FaceInfo *>::const_iterator, const FaceInfo *>;
+    using FVRange = StoredRange<MooseMesh::const_face_info_iterator, const FaceInfo *>;
     GatherRCDataFaceThread<FVRange> fvr(_fe_problem, _var_numbers);
-    FVRange faces(_fe_problem.mesh().faceInfo().begin(), _fe_problem.mesh().faceInfo().end());
+    FVRange faces(_fe_problem.mesh().ownedFaceInfoBegin(), _fe_problem.mesh().ownedFaceInfoEnd());
     Threads::parallel_reduce(faces, fvr);
   }
   PARALLEL_CATCH;

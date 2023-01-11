@@ -21,12 +21,12 @@
 [Functions]
   [./left]
     type = ParsedFunction
-    value = 'y'
+    expression = 'y'
   [../]
 
   [./right]
     type = ParsedFunction
-    value = '1+y'
+    expression = '1+y'
   [../]
 []
 

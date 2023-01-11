@@ -9,11 +9,11 @@
 [Functions]
   [./disp_x_fn]
     type = ParsedFunction
-    value = '-x'
+    expression = '-x'
   [../]
   [./disp_z_fn]
     type = ParsedFunction
-    value = 'x'
+    expression = 'x'
   [../]
 []
 

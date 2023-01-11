@@ -33,30 +33,30 @@
   # directly in the input file
   [./bc_u]
     type = ParsedFunction
-    value = sin(alpha*pi*x)
-    vars = 'alpha'
-    vals = '2'
+    expression = sin(alpha*pi*x)
+    symbol_names = 'alpha'
+    symbol_values = '2'
   [../]
 
   [./bc_v]
     type = ParsedFunction
-    value = sin(alpha*pi*y)
-    vars = 'alpha'
-    vals = '2'
+    expression = sin(alpha*pi*y)
+    symbol_names = 'alpha'
+    symbol_values = '2'
   [../]
 
   [./f_u]
     type = ParsedFunction
-    value = alpha*alpha*pi*pi*sin(alpha*pi*x)
-    vars = 'alpha'
-    vals = '2'
+    expression = alpha*alpha*pi*pi*sin(alpha*pi*x)
+    symbol_names = 'alpha'
+    symbol_values = '2'
   [../]
 
   [./f_v]
     type = ParsedFunction
-    value = alpha*alpha*pi*pi*sin(alpha*pi*y)
-    vars = 'alpha'
-    vals = '2'
+    expression = alpha*alpha*pi*pi*sin(alpha*pi*y)
+    symbol_names = 'alpha'
+    symbol_values = '2'
   [../]
 []
 

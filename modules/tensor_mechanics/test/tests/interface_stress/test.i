@@ -21,7 +21,7 @@
 [Functions]
   [./sphere]
     type = ParsedFunction
-    value = 'r:=sqrt(x^2+y^2+z^2); if(r>1,0,1-3*r^2+2*r^3)'
+    expression = 'r:=sqrt(x^2+y^2+z^2); if(r>1,0,1-3*r^2+2*r^3)'
   [../]
 []
 

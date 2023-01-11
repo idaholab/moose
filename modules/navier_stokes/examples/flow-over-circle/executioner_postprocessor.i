@@ -1,9 +1,9 @@
 [Functions]
   [inlet_function]
     type = ParsedFunction
-    value = '4*U*(y-ymin)*(ymax-y)/(ymax-ymin)/(ymax-ymin)'
-    vars = 'U ymax ymin'
-    vals = '${inlet_velocity} ${y_max} ${y_min}'
+    expression = '4*U*(y-ymin)*(ymax-y)/(ymax-ymin)/(ymax-ymin)'
+    symbol_names = 'U ymax ymin'
+    symbol_values = '${inlet_velocity} ${y_max} ${y_min}'
   []
 []
 

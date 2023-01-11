@@ -89,11 +89,11 @@
 
   [./chemical_free_energy]
     type = DerivativeParsedMaterial
-    f_name = Fc
-    args = 'eta1 eta2'
+    property_name = Fc
+    coupled_variables = 'eta1 eta2'
     constant_names = 'A2 A3 A4'
     constant_expressions = '0.2 -12.6 12.4'
-    function = 'A2/2*(eta1^2+eta2^2) + A3/3*(eta1^3+eta2^3) + A4/4*(eta1^2+eta2^2)^2'
+    expression = 'A2/2*(eta1^2+eta2^2) + A3/3*(eta1^3+eta2^3) + A4/4*(eta1^2+eta2^2)^2'
     enable_jit = true
     derivative_order = 2
   [../]
@@ -110,17 +110,17 @@
 
   [./var_dependence1]
     type = DerivativeParsedMaterial
-    f_name = var_dep1
-    args = 'eta1'
-    function = eta1
+    property_name = var_dep1
+    coupled_variables = 'eta1'
+    expression = eta1
     enable_jit = true
     derivative_order = 2
   [../]
   [./var_dependence2]
     type = DerivativeParsedMaterial
-    f_name = var_dep2
-    args = 'eta2'
-    function = eta2
+    property_name = var_dep2
+    coupled_variables = 'eta2'
+    expression = eta2
     enable_jit = true
     derivative_order = 2
   [../]
@@ -150,9 +150,9 @@
 
   [./totol_free_energy]
     type = DerivativeSumMaterial
-    f_name = F
+    property_name = F
     sum_materials = 'Fc Fe'
-    args = 'eta1 eta2'
+    coupled_variables = 'eta1 eta2'
     derivative_order = 2
   [../]
 []

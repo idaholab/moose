@@ -95,7 +95,7 @@
 [Functions]
   [./pic]
     type = ParsedFunction
-    value = 60-50*x
+    expression = 60-50*x
   [../]
 []
 

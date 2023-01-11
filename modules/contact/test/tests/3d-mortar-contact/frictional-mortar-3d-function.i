@@ -27,7 +27,7 @@ offset = 0.00
   # z: Temperature (to be implemented)
   [mu_function]
     type = ParsedFunction
-    value = '0.3 + (0.7 - 0.3) * 2.17^(-0.5/y) - x/10000'
+    expression = '0.3 + (0.7 - 0.3) * 2.17^(-0.5/y) - x/10000'
   []
 []
 

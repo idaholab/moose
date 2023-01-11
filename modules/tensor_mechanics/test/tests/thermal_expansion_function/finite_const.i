@@ -104,9 +104,9 @@
 [Functions]
   [./cte_func_mean]
     type = ParsedFunction
-    vars = 'tsf tref scale' #stress free temp, reference temp, scale factor
-    vals = '0.0 0.5  1e-4'
-    value = 'scale * (t - tsf) / (t - tref)'
+    symbol_names = 'tsf tref scale' #stress free temp, reference temp, scale factor
+    symbol_values = '0.0 0.5  1e-4'
+    expression = 'scale * (t - tsf) / (t - tref)'
   [../]
   [./cte_func_inst]
     type = PiecewiseLinear

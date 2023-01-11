@@ -63,7 +63,7 @@ theta = 0 # wave incidence angle, in degrees
   []
   [cosTheta]
     type = ParsedFunction
-    value = 'cos(${theta})'
+    expression = 'cos(${theta})'
   []
 []
 

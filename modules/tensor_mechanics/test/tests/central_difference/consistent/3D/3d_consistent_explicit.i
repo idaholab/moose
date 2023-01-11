@@ -138,11 +138,11 @@
   [../]
   [./dispy]
     type = ParsedFunction
-    value = 0.1*t*t*sin(10*t)
+    expression = 0.1*t*t*sin(10*t)
   [../]
   [./dispz]
     type = ParsedFunction
-    value = 0.1*t*t*sin(20*t)
+    expression = 0.1*t*t*sin(20*t)
   [../]
 []
 

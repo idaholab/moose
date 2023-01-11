@@ -85,11 +85,11 @@
 [Functions]
   [func_stress]
     type = ParsedFunction
-    value = '1800*t'
+    expression = '1800*t'
   []
   [func_strain]
     type = ParsedFunction
-    value = '1.0e-2*t'
+    expression = '1.0e-2*t'
   []
 []
 

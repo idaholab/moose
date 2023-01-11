@@ -151,7 +151,7 @@
 [Functions]
   [./tempramp]
     type = ParsedFunction
-    value = 't'
+    expression = 't'
   [../]
 []
 

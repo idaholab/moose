@@ -6,7 +6,7 @@
 [Functions]
   [./top_bc]
     type = ParsedFunction
-    value = 'x'
+    expression = 'x'
   [../]
 []
 

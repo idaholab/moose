@@ -84,27 +84,27 @@
 [Functions]
   [./V_exact_sln]
     type = ParsedFunction
-    value = 'cos(0.3*t)*cos(1.1*x)*cos(1.2*y)'
+    expression = 'cos(0.3*t)*cos(1.1*x)*cos(1.2*y)'
   [../]
   [./Ax_exact_sln]
     type = ParsedFunction
-    value = 'cos(0.3*t)*cos(0.4*x)*cos(0.5*y)'
+    expression = 'cos(0.3*t)*cos(0.4*x)*cos(0.5*y)'
   [../]
   [./Ay_exact_sln]
     type = ParsedFunction
-    value = 'cos(0.3*t)*cos(0.6*x)*cos(0.7*y)'
+    expression = 'cos(0.3*t)*cos(0.6*x)*cos(0.7*y)'
   [../]
   [./V_forcing_function]
     type = ParsedFunction
-    value = '0.33*sin(0.3*t)*sin(1.1*x)*cos(1.2*y) + 13.25*cos(0.3*t)*cos(1.1*x)*cos(1.2*y)'
+    expression = '0.33*sin(0.3*t)*sin(1.1*x)*cos(1.2*y) + 13.25*cos(0.3*t)*cos(1.1*x)*cos(1.2*y)'
   [../]
   [./Ax_forcing_function]
     type = ParsedFunction
-    value = '0.33*sin(0.3*t)*sin(1.1*x)*cos(1.2*y) + 1.96*cos(0.3*t)*cos(0.4*x)*cos(0.5*y)'
+    expression = '0.33*sin(0.3*t)*sin(1.1*x)*cos(1.2*y) + 1.96*cos(0.3*t)*cos(0.4*x)*cos(0.5*y)'
   [../]
   [./Ay_forcing_function]
     type = ParsedFunction
-    value = '0.36*sin(0.3*t)*sin(1.2*y)*cos(1.1*x) + 4.16*cos(0.3*t)*cos(0.6*x)*cos(0.7*y)'
+    expression = '0.36*sin(0.3*t)*sin(1.2*y)*cos(1.1*x) + 4.16*cos(0.3*t)*cos(0.6*x)*cos(0.7*y)'
   [../]
 []
 

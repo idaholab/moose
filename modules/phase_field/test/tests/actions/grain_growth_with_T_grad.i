@@ -20,7 +20,7 @@
 [Modules]
   [./PhaseField]
     [./GrainGrowth]
-      args = T
+      coupled_variables = T
       variable_mobility = true
     [../]
   [../]
@@ -30,7 +30,7 @@
 [Functions]
   [./TGradient]
     type = ParsedFunction
-    value = '450 + 0.1*x'
+    expression = '450 + 0.1*x'
   [../]
 []
 

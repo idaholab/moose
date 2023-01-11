@@ -117,12 +117,12 @@
 [Functions]
   [vector_func]
     type = ParsedVectorFunction
-    value_x = '-2*x + 1'
-    value_y = '-2*x + 1'
+    expression_x = '-2*x + 1'
+    expression_y = '-2*x + 1'
   []
   [vector_gravity_func]
     type = ParsedVectorFunction
-    value_x = '0'
-    value_y = '-9.81'
+    expression_x = '0'
+    expression_y = '-9.81'
   []
 []

@@ -161,42 +161,42 @@ velocity_interp_method = 'rc'
 [Functions]
   [exact_u]
     type = ParsedFunction
-    value = 'sin((1/2)*y*pi)*cos((1/2)*x*pi)'
+    expression = 'sin((1/2)*y*pi)*cos((1/2)*x*pi)'
   []
   [forcing_u]
     type = ADParsedFunction
-    value = '0.5*pi^2*mu*sin((1/2)*y*pi)*cos((1/2)*x*pi) - '
+    expression = '0.5*pi^2*mu*sin((1/2)*y*pi)*cos((1/2)*x*pi) - '
             '0.625*pi*rho*sin((1/4)*x*pi)*sin((1/2)*y*pi)^2*cos((1/2)*x*pi) + '
             '0.625*pi*rho*sin((1/4)*x*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi)^2 - '
             '1.25*pi*rho*sin((1/2)*x*pi)*sin((1/2)*y*pi)^2*cos((1/2)*x*pi) - '
             '0.2*pi*sin((1/4)*x*pi)*sin((3/2)*y*pi)'
-    vars = 'mu rho'
-    vals = '${mu} ${rho}'
+    symbol_names = 'mu rho'
+    symbol_values = '${mu} ${rho}'
   []
   [exact_v]
     type = ParsedFunction
-    value = 'sin((1/4)*x*pi)*cos((1/2)*y*pi)'
+    expression = 'sin((1/4)*x*pi)*cos((1/2)*y*pi)'
   []
   [forcing_v]
     type = ADParsedFunction
-    value = '0.3125*pi^2*mu*sin((1/4)*x*pi)*cos((1/2)*y*pi) - '
+    expression = '0.3125*pi^2*mu*sin((1/4)*x*pi)*cos((1/2)*y*pi) - '
             '1.25*pi*rho*sin((1/4)*x*pi)^2*sin((1/2)*y*pi)*cos((1/2)*y*pi) - '
             '0.625*pi*rho*sin((1/4)*x*pi)*sin((1/2)*x*pi)*sin((1/2)*y*pi)*cos((1/2)*y*pi) + '
             '0.3125*pi*rho*sin((1/2)*y*pi)*cos((1/4)*x*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi) + '
             '1.2*pi*cos((1/4)*x*pi)*cos((3/2)*y*pi)'
-    vars = 'mu rho'
-    vals = '${mu} ${rho}'
+    symbol_names = 'mu rho'
+    symbol_values = '${mu} ${rho}'
   []
   [exact_p]
     type = ParsedFunction
-    value = 'sin((3/2)*y*pi)*cos((1/4)*x*pi)'
+    expression = 'sin((3/2)*y*pi)*cos((1/4)*x*pi)'
   []
   [forcing_p]
     type = ParsedFunction
-    value = '-1/2*pi*rho*sin((1/4)*x*pi)*sin((1/2)*y*pi) - '
+    expression = '-1/2*pi*rho*sin((1/4)*x*pi)*sin((1/2)*y*pi) - '
             '1/2*pi*rho*sin((1/2)*x*pi)*sin((1/2)*y*pi)'
-    vars = 'rho'
-    vals = '${rho}'
+    symbol_names = 'rho'
+    symbol_values = '${rho}'
   []
 []
 

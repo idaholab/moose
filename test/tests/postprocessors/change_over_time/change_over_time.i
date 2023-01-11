@@ -52,7 +52,7 @@
 [Functions]
   [./my_function]
     type = ParsedFunction
-    value = '1 + t * t'
+    expression = '1 + t * t'
   [../]
 []
 

@@ -25,7 +25,7 @@
   [../]
   [./ode1]
     type = ParsedODEKernel
-    function = '-n'
+    expression = '-n'
     variable = n
     # implicit = false
   [../]
@@ -61,7 +61,7 @@
 [Functions]
   [./exact_solution]
     type = ParsedFunction
-    value = exp(t)
+    expression = exp(t)
   [../]
 []
 

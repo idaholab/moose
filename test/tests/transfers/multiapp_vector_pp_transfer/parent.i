@@ -28,7 +28,7 @@
 [Functions]
   [./set_v]
     type = ParsedFunction
-    value = 'x + 2 * y'
+    expression = 'x + 2 * y'
   [../]
 []
 

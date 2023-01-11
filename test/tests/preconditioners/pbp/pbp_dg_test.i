@@ -89,7 +89,7 @@
 [Functions]
   [./forcing_fn]
     type = ParsedFunction
-    value = 2*pow(e,-x-(y*y))*(1-2*y*y)
+    expression = 2*pow(e,-x-(y*y))*(1-2*y*y)
   [../]
 
   [./exact_fn]

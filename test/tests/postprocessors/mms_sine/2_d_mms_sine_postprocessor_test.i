@@ -26,9 +26,9 @@
 
   [./solution]
     type = ParsedFunction
-    value = sin(a*x*y*z*t)
-    vars = 'a'
-    vals = '3.141592653589793'
+    expression = sin(a*x*y*z*t)
+    symbol_names = 'a'
+    symbol_values = '3.141592653589793'
   [../]
 []
 

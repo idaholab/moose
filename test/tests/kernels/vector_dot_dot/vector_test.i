@@ -24,9 +24,9 @@
 [Functions]
   [a_fn]
     type = ParsedVectorFunction
-    value_x = 't * (t * x + y)'
-    value_y = 't * y'
-    value_z = 0
+    expression_x = 't * (t * x + y)'
+    expression_y = 't * y'
+    expression_z = 0
   []
 []
 

@@ -13,7 +13,7 @@ not require third order derivatives. Second-order derivatives are only required
 for the Jacobian, as discussed [here](../)).
 
 Non linear and auxiliary variables declared in the
-[!param](/Materials/DerivativeParsedMaterial/args) parameter, constants declared in
+[!param](/Materials/DerivativeParsedMaterial/coupled_variables) parameter, constants declared in
 [!param](/Materials/DerivativeParsedMaterial/constant_names) and
 [!param](/Materials/DerivativeParsedMaterial/constant_expressions), material properties
 declared in [!param](/Materials/DerivativeParsedMaterial/material_property_names), and

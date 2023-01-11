@@ -22,7 +22,7 @@
 [Functions]
   [./forcing_fn]
     type = ParsedFunction
-    value = t*x+1
+    expression = t*x+1
   [../]
 []
 

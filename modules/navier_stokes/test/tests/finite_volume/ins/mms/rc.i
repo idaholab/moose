@@ -142,45 +142,45 @@ rho=1.1
 [Functions]
   [exact_u]
     type = ParsedFunction
-    value = 'sin(y)*cos((1/2)*x*pi)'
+    expression = 'sin(y)*cos((1/2)*x*pi)'
   []
   [exact_rhou]
     type = ParsedFunction
-    value = 'rho*sin(y)*cos((1/2)*x*pi)'
-    vars = 'rho'
-    vals = '${rho}'
+    expression = 'rho*sin(y)*cos((1/2)*x*pi)'
+    symbol_names = 'rho'
+    symbol_values = '${rho}'
   []
   [forcing_u]
     type = ADParsedFunction
-    value = 'mu*sin(y)*cos((1/2)*x*pi) + (1/4)*pi^2*mu*sin(y)*cos((1/2)*x*pi) - 1/2*pi*rho*sin(x)*sin(y)*sin((1/2)*y*pi)*cos((1/2)*x*pi) + rho*sin(x)*cos(y)*cos((1/2)*x*pi)*cos((1/2)*y*pi) - pi*rho*sin(y)^2*sin((1/2)*x*pi)*cos((1/2)*x*pi) + sin(y)*cos(x)'
-    vars = 'mu rho'
-    vals = '${mu} ${rho}'
+    expression = 'mu*sin(y)*cos((1/2)*x*pi) + (1/4)*pi^2*mu*sin(y)*cos((1/2)*x*pi) - 1/2*pi*rho*sin(x)*sin(y)*sin((1/2)*y*pi)*cos((1/2)*x*pi) + rho*sin(x)*cos(y)*cos((1/2)*x*pi)*cos((1/2)*y*pi) - pi*rho*sin(y)^2*sin((1/2)*x*pi)*cos((1/2)*x*pi) + sin(y)*cos(x)'
+    symbol_names = 'mu rho'
+    symbol_values = '${mu} ${rho}'
   []
   [exact_v]
     type = ParsedFunction
-    value = 'sin(x)*cos((1/2)*y*pi)'
+    expression = 'sin(x)*cos((1/2)*y*pi)'
   []
   [exact_rhov]
     type = ParsedFunction
-    value = 'rho*sin(x)*cos((1/2)*y*pi)'
-    vars = 'rho'
-    vals = '${rho}'
+    expression = 'rho*sin(x)*cos((1/2)*y*pi)'
+    symbol_names = 'rho'
+    symbol_values = '${rho}'
   []
   [forcing_v]
     type = ADParsedFunction
-    value = 'mu*sin(x)*cos((1/2)*y*pi) + (1/4)*pi^2*mu*sin(x)*cos((1/2)*y*pi) - pi*rho*sin(x)^2*sin((1/2)*y*pi)*cos((1/2)*y*pi) - 1/2*pi*rho*sin(x)*sin(y)*sin((1/2)*x*pi)*cos((1/2)*y*pi) + rho*sin(y)*cos(x)*cos((1/2)*x*pi)*cos((1/2)*y*pi) + sin(x)*cos(y)'
-    vars = 'mu rho'
-    vals = '${mu} ${rho}'
+    expression = 'mu*sin(x)*cos((1/2)*y*pi) + (1/4)*pi^2*mu*sin(x)*cos((1/2)*y*pi) - pi*rho*sin(x)^2*sin((1/2)*y*pi)*cos((1/2)*y*pi) - 1/2*pi*rho*sin(x)*sin(y)*sin((1/2)*x*pi)*cos((1/2)*y*pi) + rho*sin(y)*cos(x)*cos((1/2)*x*pi)*cos((1/2)*y*pi) + sin(x)*cos(y)'
+    symbol_names = 'mu rho'
+    symbol_values = '${mu} ${rho}'
   []
   [exact_p]
     type = ParsedFunction
-    value = 'sin(x)*sin(y)'
+    expression = 'sin(x)*sin(y)'
   []
   [forcing_p]
     type = ParsedFunction
-    value = '-1/2*pi*rho*sin(x)*sin((1/2)*y*pi) - 1/2*pi*rho*sin(y)*sin((1/2)*x*pi)'
-    vars = 'rho'
-    vals = '${rho}'
+    expression = '-1/2*pi*rho*sin(x)*sin((1/2)*y*pi) - 1/2*pi*rho*sin(y)*sin((1/2)*x*pi)'
+    symbol_names = 'rho'
+    symbol_values = '${rho}'
   []
 []
 

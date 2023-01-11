@@ -95,13 +95,13 @@
     # Defines the function for the local free energy density as given in the
     # problem, then converts units and adds scaling factor.
     type = DerivativeParsedMaterial
-    f_name = f_loc
-    args = c
+    property_name = f_loc
+    coupled_variables = c
     constant_names = 'A   B   C   D   E   F   G  eV_J  d'
     constant_expressions = '-2.446831e+04 -2.827533e+04 4.167994e+03 7.052907e+03
                             1.208993e+04 2.568625e+03 -2.354293e+03
                             6.24150934e+18 1e-27'
-    function = 'eV_J*d*(A*c+B*(1-c)+C*c*log(c)+D*(1-c)*log(1-c)+
+    expression = 'eV_J*d*(A*c+B*(1-c)+C*c*log(c)+D*(1-c)*log(1-c)+
                 E*c*(1-c)+F*c*(1-c)*(2*c-1)+G*c*(1-c)*(2*c-1)^2)'
     derivative_order = 2
   [../]

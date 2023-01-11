@@ -20,7 +20,7 @@
 [Functions]
   [./aux_v_fn]
     type = ParsedFunction
-    value = x*(y-0.5)/5
+    expression = x*(y-0.5)/5
   [../]
 []
 

@@ -50,8 +50,8 @@
 [AuxKernels]
   [mole_change_albite]
     type = ParsedAux
-    args = moles_Albite
-    function = 'moles_Albite - 0.953387'
+    coupled_variables = moles_Albite
+    expression = 'moles_Albite - 0.953387'
     variable = mole_change_albite
   []
 []

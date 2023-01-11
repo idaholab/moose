@@ -179,11 +179,11 @@
 [Functions]
   [./initial_water]
     type = ParsedFunction
-    value = 1000000*(1-min(x/5,1))-if(x<5,0,100000)
+    expression = 1000000*(1-min(x/5,1))-if(x<5,0,100000)
   [../]
   [./initial_gas]
     type = ParsedFunction
-    value = 1000
+    expression = 1000
   [../]
 []
 

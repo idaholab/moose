@@ -60,7 +60,7 @@
 [Functions]
   [left_bc_fn]
     type = ParsedFunction
-    value = 1+5*y*y
+    expression = 1+5*y*y
   []
 []
 

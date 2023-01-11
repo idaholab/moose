@@ -8,12 +8,12 @@
 
   [./tr_x]
     type = ParsedFunction
-    value = -x
+    expression = -x
   [../]
 
   [./tr_y]
     type = ParsedFunction
-    value = y
+    expression = y
   [../]
 []
 
@@ -26,8 +26,8 @@
   [two_u]
     type = ParsedAux
     variable = two_u
-    args = 'u'
-    function = '2*u'
+    coupled_variables = 'u'
+    expression = '2*u'
   []
 []
 

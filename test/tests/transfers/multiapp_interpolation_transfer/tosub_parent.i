@@ -40,7 +40,7 @@
 [Functions]
   [./x_func]
     type = ParsedFunction
-    value = x
+    expression = x
   [../]
 []
 

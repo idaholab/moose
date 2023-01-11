@@ -27,7 +27,7 @@
 [Functions]
   [sink_func]
     type = ParsedFunction
-    value = '5e2*x*(0.5-x)+5e1'
+    expression = '5e2*x*(0.5-x)+5e1'
   []
 []
 

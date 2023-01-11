@@ -25,9 +25,9 @@
 [Functions]
   [source]
     type = ParsedFunction
-    vars = 'hours shortwave kappa'
-    vals = '9     650      40'
-    value = 'shortwave*sin(0.5*x*pi)*exp(kappa*y)*sin(1/(hours*3600)*pi*t)'
+    symbol_names = 'hours shortwave kappa'
+    symbol_values = '9     650      40'
+    expression = 'shortwave*sin(0.5*x*pi)*exp(kappa*y)*sin(1/(hours*3600)*pi*t)'
   []
 []
 

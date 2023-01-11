@@ -274,35 +274,35 @@
 [Functions]
   [strain11]
     type = ParsedFunction
-    value = '4.0e-1*t'
+    expression = '4.0e-1*t'
   []
   [strain22]
     type = ParsedFunction
-    value = '-2.0e-1*t'
+    expression = '-2.0e-1*t'
   []
   [strain12]
     type = ParsedFunction
-    value = '1.0e-1*t'
+    expression = '1.0e-1*t'
   []
   [strain21]
     type = ParsedFunction
-    value = '-1.5e-1*t'
+    expression = '-1.5e-1*t'
   []
   [stress11]
     type = ParsedFunction
-    value = '4.0e2*t'
+    expression = '4.0e2*t'
   []
   [stress22]
     type = ParsedFunction
-    value = '-2.0e2*t'
+    expression = '-2.0e2*t'
   []
   [stress12]
     type = ParsedFunction
-    value = '1.0e2*t'
+    expression = '1.0e2*t'
   []
   [stress21]
     type = ParsedFunction
-    value = '-1.5e2*t'
+    expression = '-1.5e2*t'
   []
 []
 

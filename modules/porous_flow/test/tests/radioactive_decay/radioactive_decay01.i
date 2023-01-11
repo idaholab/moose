@@ -110,9 +110,9 @@
 [Functions]
   [should_be_0]
     type = ParsedFunction
-    vars = 'm0 m rate dt'
-    vals = 'total_mass0 total_mass 2.0 1'
-    value = 'm-m0/(1.0+rate*dt)'
+    symbol_names = 'm0 m rate dt'
+    symbol_values = 'total_mass0 total_mass 2.0 1'
+    expression = 'm-m0/(1.0+rate*dt)'
   []
 []
 

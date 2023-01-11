@@ -71,20 +71,20 @@
 [Functions]
   [./ic_func_eta1]
     type = ParsedFunction
-    value = '0.5*(1.0+tanh((x-10)/sqrt(2.0))) * 0.5*(1.0+tanh((y-10)/sqrt(2.0)))'
+    expression = '0.5*(1.0+tanh((x-10)/sqrt(2.0))) * 0.5*(1.0+tanh((y-10)/sqrt(2.0)))'
   [../]
   [./ic_func_eta2]
     type = ParsedFunction
-    value = '0.5*(1.0-tanh((x-10)/sqrt(2.0)))'
+    expression = '0.5*(1.0-tanh((x-10)/sqrt(2.0)))'
   [../]
   [./ic_func_eta3]
     type = ParsedFunction
-    value = '1 - 0.5*(1.0-tanh((x-10)/sqrt(2.0)))
+    expression = '1 - 0.5*(1.0-tanh((x-10)/sqrt(2.0)))
               - 0.5*(1.0+tanh((x-10)/sqrt(2.0))) * 0.5*(1.0+tanh((y-10)/sqrt(2.0)))'
   [../]
   [./ic_func_c]
     type = ParsedFunction
-    value = '0.5 * 0.5*(1.0-tanh((x-10)/sqrt(2.0)))
+    expression = '0.5 * 0.5*(1.0-tanh((x-10)/sqrt(2.0)))
               + 0.4 * 0.5*(1.0+tanh((x-10)/sqrt(2.0))) * 0.5*(1.0+tanh((y-10)/sqrt(2.0)))
               + 0.8 * (1 - 0.5*(1.0-tanh((x-10)/sqrt(2.0)))
                         - 0.5*(1.0+tanh((x-10)/sqrt(2.0))) * 0.5*(1.0+tanh((y-10)/sqrt(2.0))))'
@@ -118,21 +118,21 @@
   # simple toy free energies
   [./f1]
     type = DerivativeParsedMaterial
-    f_name = F1
-    args = 'c1'
-    function = '20*(c1-0.4)^2'
+    property_name = F1
+    coupled_variables = 'c1'
+    expression = '20*(c1-0.4)^2'
   [../]
   [./f2]
     type = DerivativeParsedMaterial
-    f_name = F2
-    args = 'c2 T'
-    function = '20*(c2-0.5)^2 + 0.01*T'
+    property_name = F2
+    coupled_variables = 'c2 T'
+    expression = '20*(c2-0.5)^2 + 0.01*T'
   [../]
   [./f3]
     type = DerivativeParsedMaterial
-    f_name = F3
-    args = 'c3'
-    function = '20*(c3-0.8)^2'
+    property_name = F3
+    coupled_variables = 'c3'
+    expression = '20*(c3-0.8)^2'
   [../]
 
   # Switching functions for each phase
@@ -165,20 +165,20 @@
   [./Dh1]
     type = DerivativeParsedMaterial
     material_property_names = 'D h1'
-    function = D*h1
-    f_name = Dh1
+    expression = D*h1
+    property_name = Dh1
   [../]
   [./Dh2]
     type = DerivativeParsedMaterial
     material_property_names = 'D h2'
-    function = D*h2
-    f_name = Dh2
+    expression = D*h2
+    property_name = Dh2
   [../]
   [./Dh3]
     type = DerivativeParsedMaterial
     material_property_names = 'D h3'
-    function = D*h3
-    f_name = Dh3
+    expression = D*h3
+    property_name = Dh3
   [../]
 
   # Barrier functions for each phase

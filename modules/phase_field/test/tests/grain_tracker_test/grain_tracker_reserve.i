@@ -75,9 +75,9 @@
 [Materials]
   [./mask]
     type = ParsedMaterial
-    function = 'c'
-    f_name = mask
-    args = 'c'
+    expression = 'c'
+    property_name = mask
+    coupled_variables = 'c'
   [../]
 []
 

@@ -41,8 +41,8 @@
   [shear_stress]
     type = ParsedAux
     variable = shear_stress_var
-    args = 'stress_yz stress_xz'
-    function = 'sqrt(stress_yz^2 + stress_xz^2)'
+    coupled_variables = 'stress_yz stress_xz'
+    expression = 'sqrt(stress_yz^2 + stress_xz^2)'
   []
 []
 

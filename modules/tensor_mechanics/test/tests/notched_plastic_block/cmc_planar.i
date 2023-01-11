@@ -177,8 +177,8 @@
   [../]
   [./num_iters_auxk] # cannot use plastic_NR_iterations directly as this is zero, since no NR iterations are actually used, since we use a custom algorithm to do the return
     type = ParsedAux
-    args = plastic_strain
-    function = 'if(plastic_strain>0,1,0)'
+    coupled_variables = plastic_strain
+    expression = 'if(plastic_strain>0,1,0)'
     variable = num_iters
   [../]
   [./yield_fcn_auxk]

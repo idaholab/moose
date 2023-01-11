@@ -61,7 +61,7 @@
 [Functions]
   [temperature_control]
     type = ParsedFunction
-    value = '100*t'
+    expression = '100*t'
   []
 []
 

@@ -119,7 +119,7 @@
 [Functions]
   [./src_func]
     type = ParsedFunction
-    value = 'phi:=(0.75-x-0.001*t);
+    expression = 'phi:=(0.75-x-0.001*t);
         i:=(0.75-0.001*t);
         if (phi>=0,
             10*(8-x),
@@ -127,12 +127,12 @@
   [../]
   [./right_du_func]
     type = ParsedFunction
-    value = 'i:=(0.75-0.001*t);
+    expression = 'i:=(0.75-0.001*t);
         (2.0/(1-i))*(-5+5*i+i*t-2*t)'
   [../]
   [./exact_u_func]
     type = ParsedFunction
-    value = 'phi:=(0.75-x-0.001*t);
+    expression = 'phi:=(0.75-x-0.001*t);
         i:=(0.75-0.001*t);
         if (phi>=0,
             605 - 5*x + t*(8-x),
@@ -140,7 +140,7 @@
   [../]
   [./jump_flux_func]
     type = ParsedFunction
-    value = 'i:=(0.75-0.001*t);
+    expression = 'i:=(0.75-0.001*t);
         k_1:=(20.0);
         k_2:=(2.0);
         k_1*(5+t) + (k_2/(1-i))*(-5+5*i+i*t-2*t)'
@@ -148,7 +148,7 @@
 
   [./ls_func]
     type = ParsedFunction
-    value = '0.75 - x - 0.001*t'
+    expression = '0.75 - x - 0.001*t'
   [../]
 []
 

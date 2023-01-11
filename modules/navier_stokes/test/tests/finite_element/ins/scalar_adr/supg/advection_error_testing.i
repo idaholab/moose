@@ -49,11 +49,11 @@ velocity=1
 [Functions]
   [./ffn]
     type = ParsedFunction
-    value = '1-x^2'
+    expression = '1-x^2'
   [../]
   [./c_func]
     type = ParsedFunction
-    value = 'x-x^3/3'
+    expression = 'x-x^3/3'
   [../]
 []
 

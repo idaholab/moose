@@ -140,31 +140,31 @@ area_correction = ${fparse alpha / sin(alpha)}
 [Functions]
   [./circle_perimeter_exact]
     type = ParsedFunction
-    value = '2 * pi * ${radius} / ${perimeter_correction}'
+    expression = '2 * pi * ${radius} / ${perimeter_correction}'
   [../]
   [./inside_perimeter_exact]
     type = ParsedFunction
-    value = '${inner_box_length} * 4'
+    expression = '${inner_box_length} * 4'
   [../]
   [./outside_perimeter_exact]
     type = ParsedFunction
-    value = '${outer_box_length} * 4'
+    expression = '${outer_box_length} * 4'
   [../]
   [./circle_area_exact]
     type = ParsedFunction
-    value = 'pi * ${radius}^2 / ${area_correction}'
+    expression = 'pi * ${radius}^2 / ${area_correction}'
   [../]
   [./inside_area_exact]
     type = ParsedFunction
-    value = '${inner_box_length}^2 - pi * ${radius}^2 / ${area_correction}'
+    expression = '${inner_box_length}^2 - pi * ${radius}^2 / ${area_correction}'
   [../]
   [./outside_area_exact]
     type = ParsedFunction
-    value = '${outer_box_length}^2 - ${inner_box_length}^2'
+    expression = '${outer_box_length}^2 - ${inner_box_length}^2'
   [../]
   [./total_area_exact]
     type = ParsedFunction
-    value = '${outer_box_length}^2'
+    expression = '${outer_box_length}^2'
   [../]
 
 []

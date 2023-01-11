@@ -42,7 +42,7 @@
 [Functions]
   [tempfunc]
     type = ParsedFunction
-    value = 10.0*(2*x/504)
+    expression = 10.0*(2*x/504)
   []
 []
 

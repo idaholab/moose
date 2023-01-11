@@ -39,11 +39,11 @@
 [Functions]
   [./x_exact_sln]
     type = ParsedFunction
-    value = 'cos(.5*pi*x)'
+    expression = 'cos(.5*pi*x)'
   [../]
   [./ffx]
     type = ParsedFunction
-    value = '.25*pi*pi*cos(.5*pi*x)'
+    expression = '.25*pi*pi*cos(.5*pi*x)'
   [../]
 []
 

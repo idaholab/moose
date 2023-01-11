@@ -45,7 +45,7 @@
     type = ParsedAux
     variable = x_disp
     use_xyzt = true
-    function = 'x/15'
+    expression = 'x/15'
   []
 []
 
