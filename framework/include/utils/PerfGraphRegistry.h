@@ -45,9 +45,9 @@ class PerfGraphSectionInfo
 public:
   PerfGraphSectionInfo() = default;
   PerfGraphSectionInfo(const PerfID id,
-                       const std::string name,
+                       const std::string & name,
                        const unsigned int level,
-                       const std::string live_message,
+                       const std::string & live_message,
                        const bool print_dots)
     : _id(id), _name(name), _level(level), _live_message(live_message), _print_dots(print_dots)
   {
