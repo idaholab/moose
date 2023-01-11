@@ -26,6 +26,7 @@ protected:
   void computeQpProperties() override;
 
   const Real & _input_diffusivity;
+
   const Real & _threshold;
 
   MaterialProperty<Real> & _diffusivity;

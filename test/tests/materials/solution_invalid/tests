@@ -3,17 +3,28 @@
     type = 'RunException'
     input = 'solution_invalid.i'
     expect_err = 'The solution is not converged due to the solution being invalid.'
-    design = 'source/interfaces/SolutionInvalidInterface.md'
-    issues = '#22884'
+    design = 'SolutionInvalidity.md'
+    issues = '#22814'
     requirement = 'The system shall not accept a converged solution if the solution has been tagged as invalid.'
   []
 
   [allow_solution_invalid]
-    type = 'RunApp'
+    type = 'RunException'
     input = 'solution_invalid.i'
     cli_args = 'Problem/allow_invalid_solution=true'
-    design = 'source/interfaces/SolutionInvalidInterface.md'
-    issues = '#22884'
+    expect_err = 'The Solution Invalidity warnings are detected but silenced! Use Problem/allow_invalid_solution=false to activate'
+    design = 'SolutionInvalidity.md'
+    issues = '#22814'
     requirement = 'The system shall allow overriding the solution validity checks.'
+  []
+  [immediately_print_invalid_solution]
+    type = 'RunApp'
+    input = 'solution_invalid.i'
+    allow_warnings = true
+    cli_args = 'Problem/immediately_print_invalid_solution=true'
+    expect_out = 'NonsafeMaterial: The diffusivity is greater than the threshold value!'
+    design = 'SolutionInvalidity.md'
+    issues = '#22814'
+    requirement = 'The system shall print out the solution invalid warning message right after it is detected.'
   []
 []

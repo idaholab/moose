@@ -18,6 +18,7 @@
 #include "ComputeFDResidualFunctor.h"
 #include "MooseVariableScalar.h"
 #include "MooseTypes.h"
+#include "SolutionInvalidity.h"
 
 #include "libmesh/nonlinear_solver.h"
 #include "libmesh/petsc_nonlinear_solver.h"
@@ -208,6 +209,19 @@ NonlinearSystem::solve()
   // store info about the solve
   _final_residual = _nl_implicit_sys.final_nonlinear_residual();
 
+  // store the occurence of solution invalid warnings in comulative counters
+  _app.solutionInvalidity().solutionInvalidAccumulation();
+
+  // output the occurence of solution invalid in a summarry table
+  if (!_fe_problem.allowInvalidSolution() && _app.solutionInvalidity().solutionInvalid())
+    _app.solutionInvalidity().print(_console);
+  else if (_fe_problem.allowInvalidSolution() && _app.solutionInvalidity().solutionInvalid())
+    mooseWarning("The Solution Invalidity warnings are detected but silenced! "
+                 "Use Problem/allow_invalid_solution=false to activate ");
+
+  // reset solution invalid counter for time iteration
+  _app.solutionInvalidity().resetSolutionInvalidTimeIter();
+
   if (_use_coloring_finite_difference)
     MatFDColoringDestroy(&_fdcoloring);
 }
@@ -341,9 +355,10 @@ NonlinearSystem::converged()
   if (_fe_problem.hasException())
     return false;
 
-  if (!_fe_problem.allowInvalidSolution() && solutionInvalid())
+  if (!_fe_problem.allowInvalidSolution() && _app.solutionInvalidity().solutionInvalid())
   {
     mooseWarning("The solution is not converged due to the solution being invalid.");
+    _app.solutionInvalidity().resetSolutionInvalid();
     return false;
   }
 
