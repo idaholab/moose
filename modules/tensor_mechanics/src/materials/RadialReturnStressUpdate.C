@@ -31,12 +31,8 @@ RadialReturnStressUpdateTempl<is_ad>::validParams()
       "Name of the material property that stores the effective inelastic strain");
   params.addParam<bool>("use_substep", false, "Whether to use substepping");
 
-  MooseEnum substeppingType("NONE ADAPTIVE ERROR_BASED INCREMENT_BASED", "NONE");
+  MooseEnum substeppingType("NONE ERROR_BASED INCREMENT_BASED", "NONE");
   substeppingType.addDocumentation("NONE", "Do not use substepping");
-  substeppingType.addDocumentation(
-      "ADAPTIVE",
-      "Use adaptive substepping, where the number of substeps is successively doubled until the "
-      "return mapping model successfully converges or the maximum number of substeps is reached. ");
   substeppingType.addDocumentation(
       "ERROR_BASED",
       "Use substepping with a substep size that will yield, at most, the creep numerical "
@@ -47,6 +43,11 @@ RadialReturnStressUpdateTempl<is_ad>::validParams()
       "the maximum inelastic strain increment allowed in a time step.");
   params.addParam<MooseEnum>(
       "use_substepping", substeppingType, "Whether and how to use substepping");
+  params.addParam<bool>(
+      "adaptive_substepping",
+      false,
+      "Use adaptive substepping, where the number of substeps is successively doubled until the "
+      "return mapping model successfully converges or the maximum number of substeps is reached. ");
 
   params.addDeprecatedParam<bool>(
       "use_substep", false, "Whether to use substepping", "Use `use_substepping` instead");
@@ -88,8 +89,8 @@ RadialReturnStressUpdateTempl<is_ad>::RadialReturnStressUpdateTempl(
     _apply_strain(this->template getParam<bool>("apply_strain")),
     _use_substepping(
         this->template getParam<MooseEnum>("use_substepping").template getEnum<SubsteppingType>()),
+    _adaptive_substepping(this->template getParam<bool>("adaptive_substepping")),
     _maximum_number_substeps(this->template getParam<unsigned>("maximum_number_substeps"))
-
 {
   if (this->_pars.isParamSetByUser("use_substep"))
   {
@@ -111,7 +112,20 @@ RadialReturnStressUpdateTempl<is_ad>::RadialReturnStressUpdateTempl(
     this->template paramError(
         "maximum_number_substeps",
         "The parameter maximum_number_substeps can only be used when the substepping option "
-        "(use_substep) is not set to NONE");
+        "(use_substepping) is not set to NONE");
+
+  if (_adaptive_substepping && _use_substepping == SubsteppingType::NONE)
+    this->template paramError(
+        "adaptive_substepping",
+        "The parameter adaptive_substepping can only be used when the substepping option "
+        "(use_substepping) is not set to NONE");
+}
+
+template <bool is_ad>
+void
+RadialReturnStressUpdateTempl<is_ad>::timestepSetup()
+{
+  _dt_original = _dt;
 }
 
 template <bool is_ad>
@@ -437,6 +451,7 @@ RadialReturnStressUpdateTempl<false>::updateStateSubstepInternal(
 
   // update stress
   stress_new = sub_stress_new;
+
   // update effective inelastic strain
   _effective_inelastic_strain[_qp] =
       _effective_inelastic_strain_old[_qp] + sub_scalar_effective_inelastic_strain;
@@ -454,58 +469,46 @@ RadialReturnStressUpdateTempl<false>::updateStateSubstep(RankTwoTensor & strain_
                                                          bool compute_full_tangent_operator,
                                                          RankFourTensor & tangent_operator)
 {
-  // Store original _dt; Reset at the end of solve
-  _dt_original = _dt;
-
-  if (_use_substepping == SubsteppingType::ADAPTIVE)
+  unsigned int num_substeps = calculateNumberSubsteps(strain_increment);
+  while (true)
   {
-    unsigned int num_substeps = 1;
-    while (num_substeps < _maximum_number_substeps)
+    try
     {
-      try
-      {
-        updateStateSubstepInternal(strain_increment,
-                                   inelastic_strain_increment,
-                                   rotation_increment,
-                                   stress_new,
-                                   stress_old,
-                                   elasticity_tensor,
-                                   elastic_strain_old,
-                                   num_substeps,
-                                   compute_full_tangent_operator,
-                                   tangent_operator);
-      }
-      catch (MooseException & e)
-      {
-        // updateStateSubstepInternal threw, so let's double the number of substeps and try again
-        num_substeps *= 2;
-        mooseInfoRepeated("Increasing amount of substeps to ", num_substeps);
-        continue;
-      }
-
-      // updateStateSubstepInternal was successful (didn't throw)
-      _dt = _dt_original;
-      return;
+      updateStateSubstepInternal(strain_increment,
+                                 inelastic_strain_increment,
+                                 rotation_increment,
+                                 stress_new,
+                                 stress_old,
+                                 elasticity_tensor,
+                                 elastic_strain_old,
+                                 num_substeps,
+                                 compute_full_tangent_operator,
+                                 tangent_operator);
     }
-    mooseException("Adaptive substepping failed. Maximum number of substeps exceeded.");
-  }
-  else
-  {
-    // attempt to compute the final number of substeps
-    updateStateSubstepInternal(strain_increment,
-                               inelastic_strain_increment,
-                               rotation_increment,
-                               stress_new,
-                               stress_old,
-                               elasticity_tensor,
-                               elastic_strain_old,
-                               calculateNumberSubsteps(strain_increment),
-                               compute_full_tangent_operator,
-                               tangent_operator);
+    catch (MooseException & e)
+    {
+      // if we are not using adaptive substepping we just rethrow the exception
+      if (!_adaptive_substepping)
+        throw e;
 
-    // recover the original timestep
+      // otherwise we double the number of substeps and try again
+      num_substeps *= 2;
+      if (num_substeps <= _maximum_number_substeps)
+        continue;
+
+      // too meany substeps, break out of the loop
+      break;
+    }
+
+    // updateStateSubstepInternal was successful (didn't throw)
     _dt = _dt_original;
+    return;
   }
+
+  // recover the original timestep
+  _dt = _dt_original;
+
+  mooseException("Adaptive substepping failed. Maximum number of substeps exceeded.");
 }
 
 template <>

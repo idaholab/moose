@@ -34,6 +34,7 @@ public:
   static InputParameters validParams();
 
   RadialReturnStressUpdateTempl(const InputParameters & parameters);
+  virtual void timestepSetup() override;
 
   using Material::_current_elem;
   using Material::_dt;
@@ -43,7 +44,6 @@ public:
   enum class SubsteppingType
   {
     NONE,
-    ADAPTIVE,
     ERROR_BASED,
     INCREMENT_BASED
   };
@@ -243,6 +243,9 @@ protected:
 
   /// Whether user has requested the use of substepping technique to improve convergence [make const later]
   SubsteppingType _use_substepping;
+
+  /// Use adaptive substepping, cutting substep sizes until convergence is achieved
+  const bool _adaptive_substepping;
 
   /// Maximum number of substeps. If the calculation results in a larger number, cut overall time step.
   const unsigned int _maximum_number_substeps;

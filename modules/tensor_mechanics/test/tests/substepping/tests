@@ -35,12 +35,13 @@
     requirement = 'The system shall converge under large deformation owing to the help of substepping'
   []
   [power_law_adaptive_substepping]
-    type = 'Exodiff'
+    # We only check that the simulation converges with adaptive substepping
+    type = 'RunApp'
     input = 'power_law_creep.i'
-    cli_args = "Materials/power_law_creep/use_substepping=ADAPTIVE "
+    cli_args = "Materials/power_law_creep/use_substepping=INCREMENT_BASED "
+               "Materials/power_law_creep/adaptive_substepping=true "
                "Materials/power_law_creep/maximum_number_substeps=500 Executioner/dtmin=0.1 "
                "Outputs/file_base=power_law_adaptive_substepping_out"
-    exodiff = 'power_law_adaptive_substepping_out.e'
     requirement = 'The system shall converge under large deformation owing to the help of adaptive substepping'
   []
   [output]
@@ -48,7 +49,8 @@
     input = 'power_law_creep.i'
     cli_args = "Materials/power_law_creep/use_substepping=INCREMENT_BASED Executioner/num_steps=1 "
                "Materials/power_law_creep/internal_solve_full_iteration_history=true "
-               "Materials/power_law_creep/internal_solve_output_on=always"
+               "Materials/power_law_creep/internal_solve_output_on=always "
+               "Executioner/nl_rel_tol=1e-8"
     expect_out = "iteration=0 trial_stress="
     requirement = 'The system shall output verbose information about radial return iterations.'
   []

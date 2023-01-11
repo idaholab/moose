@@ -83,7 +83,7 @@ effectively limit the time step size to achieve the desired convergence or integ
 the expense of global solves and discarded time steps. An alternative to the material time step limiter is
 "substepping", which subdivides the current time step into substeps which are solved sequentially within `ComputeMultipleInelasticStress`.
 
-To enabled substepping, the user needs to set the `use_substepping` parameter to `INCREMENT_BASED`, `ERROR_BASED`, or `ADAPTIVE`. Note, not all inelastic models support substepping, but
+To enabled substepping, the user needs to set the `use_substepping` parameter to `INCREMENT_BASED` or `ERROR_BASED`. Note, not all inelastic models support substepping, but
 it is expected that this capability to be gradually extended to more models.
 
 `INCREMENT_BASED` substepping calculates the number of substeps by comparing the effective elastic strain increment to the `max_inelastic_increment` and using
@@ -109,7 +109,7 @@ allowed by substepping. A value of $1.0\cdot10^4$ will work for many cases. An e
     substep_strain_tolerance = 1.0e-4
 ```
 
-Finally, with  `ADAPTIVE` adaptive substepping, the number of substeps is successively doubled until the
+The `adaptive_substepping` parameter enables adaptive substepping, where the number of substeps is successively doubled until the
 return mapping model successfully converges or the maximum number of substeps is reached.
 
 ## Writing a New Stress Update Material
