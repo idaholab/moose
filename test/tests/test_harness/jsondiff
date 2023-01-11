@@ -1,7 +1,0 @@
-[Tests]
-  [jsondiff]
-    type = JSONDiff
-    input = jsondiff.i
-    jsondiff = jsondiff_out.json
-  []
-[]
