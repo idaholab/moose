@@ -31,6 +31,8 @@ public:
 protected:
   /// Specified mass flux
   const Real & _mass_flux;
+  /// Mass flux provided by postprocessor
+  const PostprocessorValue & _value;
   /// Cross-sectional area
   const VariableValue & _area;
 };
