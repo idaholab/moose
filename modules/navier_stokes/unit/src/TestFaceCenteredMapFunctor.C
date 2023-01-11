@@ -18,11 +18,25 @@ using namespace libMesh;
 using namespace Moose;
 using namespace FV;
 
+template <typename T, typename Map>
+class FictionalFaceCenteredMapFunctor : public FaceCenteredMapFunctor<T, Map>
+{
+public:
+  FictionalFaceCenteredMapFunctor(const MooseMesh & mesh,
+                                  const std::set<SubdomainID> & sub_ids,
+                                  const std::string & name)
+    : FaceCenteredMapFunctor<T, Map>(mesh, sub_ids, name)
+  {
+  }
+
+  bool hasBlocks(SubdomainID) const override { return true; }
+};
+
 TEST(FaceCenteredMapFunctorTest, testArgs)
 {
   const char * argv[2] = {"foo", "\0"};
 
-  // Firts we create a simple mesh
+  // First we create a simple mesh
   auto app = AppFactory::createAppShared("NavierStokesApp", 1, (char **)argv);
   auto * factory = &app->getFactory();
   std::string mesh_type = "MeshGeneratorMesh";
@@ -69,21 +83,14 @@ TEST(FaceCenteredMapFunctorTest, testArgs)
   for (auto & fi : all_fi)
   {
     const auto & face_center = fi.faceCentroid();
-    const auto face_arg = makeCDFace(fi);
-    const auto single_face_arg =
-        SingleSidedFaceArg({&fi, LimiterType::CentralDifference, true, false, INVALID_BLOCK_ID});
+    const auto face_arg =
+        Moose::FaceArg{&fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr};
 
     const auto result = u(face_arg);
 
     EXPECT_NEAR(result(0), -sin(face_center(0)) * cos(face_center(1)), 1e-14);
     EXPECT_NEAR(result(1), cos(face_center(0)) * sin(face_center(1)), 1e-14);
     EXPECT_EQ(result(2), 0);
-
-    const auto result_ssf = u(single_face_arg);
-
-    EXPECT_NEAR(result_ssf(0), -sin(face_center(0)) * cos(face_center(1)), 1e-14);
-    EXPECT_NEAR(result_ssf(1), cos(face_center(0)) * sin(face_center(1)), 1e-14);
-    EXPECT_EQ(result_ssf(2), 0);
   }
 
   // Next, we test for the error messages of not-implemented methods
@@ -119,7 +126,8 @@ TEST(FaceCenteredMapFunctorTest, testArgs)
   // Arguments for the simple error checks, we use the first face and the corresponding
   // owner element
   QGauss qrule(1, CONSTANT);
-  const auto face_arg = makeCDFace(all_fi[0]);
+  const auto face_arg =
+      Moose::FaceArg{&all_fi[0], Moose::FV::LimiterType::CentralDifference, true, false, nullptr};
   const auto elem_arg = ElemArg{all_fi[0].elemPtr(), false};
   const auto elem_qp_arg = std::make_tuple(all_fi[0].elemPtr(), 0, &qrule);
   const auto elem_side_qp_arg = std::make_tuple(all_fi[0].elemPtr(), 0, 0, &qrule);
@@ -137,12 +145,8 @@ TEST(FaceCenteredMapFunctorTest, testArgs)
       unrestricted_error_test(*mesh, "not_restricted");
   try
   {
-    unrestricted_error_test(FaceArg({&all_fi[2],
-                                     LimiterType::CentralDifference,
-                                     true,
-                                     false,
-                                     INVALID_BLOCK_ID,
-                                     INVALID_BLOCK_ID}));
+    unrestricted_error_test(
+        FaceArg{&all_fi[2], LimiterType::CentralDifference, true, false, nullptr});
     EXPECT_TRUE(false);
   }
   catch (std::runtime_error & e)
@@ -151,16 +155,12 @@ TEST(FaceCenteredMapFunctorTest, testArgs)
     EXPECT_TRUE(std::string(e.what()).find("Make sure to fill") != std::string::npos);
   }
 
-  FaceCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>>
+  FictionalFaceCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>>
       restricted_error_test(*mesh, {1}, "is_restricted");
   try
   {
-    restricted_error_test(FaceArg({&all_fi[2],
-                                   LimiterType::CentralDifference,
-                                   true,
-                                   false,
-                                   INVALID_BLOCK_ID,
-                                   INVALID_BLOCK_ID}));
+    restricted_error_test(
+        FaceArg{&all_fi[2], LimiterType::CentralDifference, true, false, nullptr});
     EXPECT_TRUE(false);
   }
   catch (std::runtime_error & e)
