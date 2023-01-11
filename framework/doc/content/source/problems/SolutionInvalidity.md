@@ -19,7 +19,7 @@ Solution Invalid Warnings:
 -------------------------------------------------------------------------------------------------------
 ```
 
-1. *Name*: shows the moose object name registered for the solution invalid detection
+1. *Object*: shows the moose object name registered for the solution invalid detection
 2. *Current*: shows the number of solution invalid warnings for the latest iteration
 3. *Timestep*: shows the number of solution invalid warnings for one time step
 4. *Total*: shows the total number of soluton invalid warnings for the solve
