@@ -248,6 +248,9 @@ protected:
   void registerConflict(unsigned int problem, dof_id_type dof_id, Point p, Real dist, bool local);
 
 private:
+  /// The target variables
+  std::vector<MooseVariableFieldBase *> _to_variables;
+
   /// A map from pid to a set of points
   typedef std::unordered_map<processor_id_type, std::vector<Point>> ProcessorToPointVec;
 

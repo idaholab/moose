@@ -229,6 +229,12 @@ MultiAppGeneralFieldTransfer::initialSetup()
                    "Component passed is larger than size of variable");
     }
   }
+
+  // Cache some quantities to avoid having to get them on every transferred point
+  _to_variables.resize(_to_var_names.size());
+  for (unsigned int i_to = 0; i_to < _to_var_names.size(); ++i_to)
+    _to_variables[i_to] = &_to_problems[0]->getVariable(
+        0, _to_var_names[i_to], Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY);
 }
 
 void
@@ -401,13 +407,11 @@ MultiAppGeneralFieldTransfer::extractOutgoingPoints(const unsigned int var_index
     // libMesh EquationSystems
     auto & es = getEquationSystem(*_to_problems[i_to], _displaced_target_mesh);
     // libMesh system that has this variable
-    // Assume var name is unique in an equation system
     System * to_sys = find_sys(es, var_name);
     auto sys_num = to_sys->number();
-    auto var_num = to_sys->variable_number(var_name);
-    // FEM type info
-    auto & fe_type = to_sys->variable_type(var_num);
-    bool is_nodal = fe_type.family == LAGRANGE;
+    auto var_num = _to_variables[var_index]->number();
+    auto & fe_type = _to_variables[var_index]->feType();
+    bool is_nodal = _to_variables[var_index]->isNodal();
 
     // Moose mesh
     const auto & to_moose_mesh = _to_problems[i_to]->mesh(_displaced_target_mesh);
@@ -524,9 +528,6 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
   mooseAssert(pointInfoVec.size() == incoming_vals.size(),
               "Number of dof objects does not equal to the number of incoming values");
 
-  // Get the variable name, with the accomodation for array/vector names
-  const auto & var_name = getToVarName(var_index);
-
   dof_id_type val_offset = 0;
   for (auto & pointinfo : pointInfoVec)
   {
@@ -534,14 +535,8 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
     const auto problem_id = pointinfo.problem_id;
     const auto dof_object_id = pointinfo.dof_object_id;
 
-    // libMesh EquationSystems
-    auto & es = getEquationSystem(*_to_problems[problem_id], _displaced_target_mesh);
-    // libMesh system
-    System * to_sys = find_sys(es, var_name);
-
-    auto var_num = to_sys->variable_number(var_name);
-    auto & fe_type = to_sys->variable_type(var_num);
-    bool is_nodal = fe_type.family == LAGRANGE;
+    auto & fe_type = _to_variables[var_index]->feType();
+    bool is_nodal = _to_variables[var_index]->isNodal();
 
     // In the higher order elemental variable case, we receive point values, not nodal or elemental
     // We use an InterpCache to store the values
@@ -550,9 +545,10 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
     if (fe_type.order > CONSTANT && !is_nodal)
     {
       // Defining only boundary values will not be enough to describe the variable, disallow it
-      if (_to_boundaries.size())
-        mooseError("Higher order elemental variables are not supported for target-boundary "
-                   "restricted transfers");
+      if (_to_boundaries.size() && (_to_variables[var_index]->getContinuity() == DISCONTINUOUS))
+        mooseError(
+            "Higher order discontinuous elemental variables are not supported for target-boundary "
+            "restricted transfers");
 
       // Cache solution on target mesh in its local frame of reference
       InterpCache & value_cache = interp_caches[problem_id];
@@ -587,9 +583,12 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
       // Use this dof object pointer, so we can handle
       // both element and node using the same code
 #ifndef NDEBUG
+      auto var_num = _to_variables[var_index]->number();
+      auto & to_sys = _to_variables[var_index]->sys();
+
       const MeshBase & to_mesh = _to_problems[problem_id]->mesh(_displaced_target_mesh).getMesh();
       const DofObject * dof_object_ptr = nullptr;
-      const auto sys_num = to_sys->number();
+      const auto sys_num = to_sys.number();
       // It is a node
       if (is_nodal)
         dof_object_ptr = to_mesh.node_ptr(dof_object_id);
@@ -835,8 +834,8 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
     auto var_num = to_sys->variable_number(var_name);
     auto sys_num = to_sys->number();
 
-    auto & fe_type = to_sys->variable_type(var_num);
-    bool is_nodal = fe_type.family == LAGRANGE;
+    auto & fe_type = _to_variables[var_index]->feType();
+    bool is_nodal = _to_variables[var_index]->isNodal();
 
     if (fe_type.order > CONSTANT && !is_nodal)
     {

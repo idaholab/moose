@@ -75,6 +75,7 @@ public:
 
   bool isNodal() const override { return false; }
   bool hasDoFsOnNodes() const override { return false; }
+  FEContinuity getContinuity() const override { return DISCONTINUOUS; }
 
   /**
    * Returns whether this data structure needs automatic differentiation calculations

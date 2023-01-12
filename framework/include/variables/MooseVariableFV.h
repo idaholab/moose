@@ -147,6 +147,8 @@ public:
 
   bool hasDoFsOnNodes() const override final { return false; }
 
+  FEContinuity getContinuity() const override final { return _element_data->getContinuity(); };
+
   virtual bool isNodalDefined() const override final { return false; }
 
   virtual void setNodalValue(const OutputType & value, unsigned int idx = 0) override;

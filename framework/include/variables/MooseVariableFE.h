@@ -145,6 +145,7 @@ public:
 
   bool isNodal() const override { return _element_data->isNodal(); }
   bool hasDoFsOnNodes() const override { return _element_data->hasDoFsOnNodes(); }
+  FEContinuity getContinuity() const override { return _element_data->getContinuity(); };
   Moose::VarFieldType fieldType() const override;
   bool isArray() const override;
   bool isVector() const override;

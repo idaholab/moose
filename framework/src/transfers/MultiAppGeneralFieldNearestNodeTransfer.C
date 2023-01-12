@@ -246,6 +246,7 @@ MultiAppGeneralFieldNearestNodeTransfer::inBlocks(const std::set<SubdomainID> & 
                                                   const Elem * elem) const
 {
   // We need to override the definition of block restriction for an element
+  // because we have to consider whether each node of an element is adjacent to a block
   for (const auto & i_node : make_range(elem->n_nodes()))
   {
     const auto & node = elem->node_ptr(i_node);

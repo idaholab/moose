@@ -62,6 +62,11 @@ public:
   virtual bool hasDoFsOnNodes() const = 0;
 
   /**
+   * Return the variable continuity
+   */
+  virtual FEContinuity getContinuity() const = 0;
+
+  /**
    * Local solution getter
    * @param state The state of the simulation: current, old, older, previous nl
    */
