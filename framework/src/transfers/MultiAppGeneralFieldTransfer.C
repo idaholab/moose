@@ -557,14 +557,14 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
       const Number val = incoming_vals[val_offset].first;
 
       // Initialize distance to be able to compare
-      if (!distance_cache.count(p))
+      if (!distance_cache.hasKey(p))
         distance_cache[p] = std::numeric_limits<Real>::max();
 
       // We should only have one closest value for each variable at any given point.
       // While there are shared Qps, on vertices for higher order variables usually,
       // the generic projector only queries each point once
       if (_search_value_conflicts && !GeneralFieldTransfer::isBetterOutOfMeshValue(val) &&
-          value_cache.count(p) != 0 && !MooseUtils::absoluteFuzzyEqual(value_cache[p], val) &&
+          value_cache.hasKey(p) != 0 && !MooseUtils::absoluteFuzzyEqual(value_cache[p], val) &&
           MooseUtils::absoluteFuzzyEqual(distance_cache[p], incoming_vals[val_offset].second))
         registerConflict(problem_id, dof_object_id, p, incoming_vals[val_offset].second, false);
 

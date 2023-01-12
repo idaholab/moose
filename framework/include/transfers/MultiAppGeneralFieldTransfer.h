@@ -10,8 +10,8 @@
 #pragma once
 
 #include "MultiAppConservativeTransfer.h"
-#include "MooseHashing.h"
 #include "KDTree.h"
+#include "PointIndexedMap.h"
 
 #include "libmesh/generic_projector.h"
 #include "libmesh/meshfree_interpolation.h"
@@ -19,37 +19,6 @@
 #include "libmesh/mesh_function.h"
 #include "libmesh/parallel_algebra.h" // for communicator send and receive stuff
 
-/**
- * Get the nearest point with all coordinates of the form m * 10^n such that:
- * - m * 1e12 is a signed integer
- * - 1e12 =< |m * 1e12| < 1e13
- * - n an integer
- */
-inline Point
-getMantissaRoundedPoint(const Point & p)
-{
-  // - get the scientific notation for the number
-  // - use round on the mantissa * 1e12
-  // - if rounding to the next power of 10, adjust the exponent
-  // - form a new point using the scientific notation
-  std::vector<int> exponents{MooseUtils::absoluteFuzzyEqual(p(0), 0) ? 0 : (int)log10(fabs(p(0))),
-                             MooseUtils::absoluteFuzzyEqual(p(1), 0) ? 0 : (int)log10(fabs(p(1))),
-                             MooseUtils::absoluteFuzzyEqual(p(2), 0) ? 0 : (int)log10(fabs(p(2)))};
-  std::vector<Real> rounded_m{round(p(0) / pow(10, exponents[0] - 12)),
-                              round(p(1) / pow(10, exponents[1] - 12)),
-                              round(p(2) / pow(10, exponents[2] - 12))};
-  for (auto i : make_range(LIBMESH_DIM))
-  {
-    if (fabs(rounded_m[i]) == 1e13)
-    {
-      exponents[i] += 1;
-      rounded_m[i] = (rounded_m[i] > 0) ? 1e12 : -1e12;
-    }
-  }
-  return Point(rounded_m[0] * pow(10, exponents[0] - 12),
-               rounded_m[1] * pow(10, exponents[1] - 12),
-               rounded_m[2] * pow(10, exponents[2] - 12));
-}
 
 /**
  * It is a general field transfer. It will do the following things
@@ -79,35 +48,6 @@ public:
 
   /// Get the target variable name, with the suffix for array/vector variables
   VariableName getToVarName(unsigned int var_index);
-
-  // This needs to be moved into libMesh according to Fande
-  // The hash helps sort the points in buckets
-  // Hashing the floats also leads to floating point comparison errors in their own way
-  // We hash a rounding of the float instead
-  struct hash_point
-  {
-    std::size_t operator()(const Point & p) const
-    {
-      std::size_t seed = 0;
-      const auto rp = getMantissaRoundedPoint(p);
-      Moose::hash_combine(seed, rp(0), rp(1), rp(2));
-      return seed;
-    }
-  };
-
-  // We cannot compare Points exactly, there will be floating point errors from
-  // operations like adjusting the position or coordinate transformations
-  // We do the next best thing and compare with a tolerance: 12 decimal digits in the
-  // scientific representation of the coordinates shall be the same
-  struct compare_point : public std::binary_function<Point, Point, bool>
-  {
-    bool operator()(const Point & p1, const Point & p2) const
-    {
-      const auto rp1 = getMantissaRoundedPoint(p1);
-      const auto rp2 = getMantissaRoundedPoint(p2);
-      return (rp1 == rp2);
-    }
-  };
 
 protected:
   /*
@@ -279,7 +219,7 @@ private:
   /// A map from Point to interpolation values
   /// NOTE: this is not an asynchronous cache. It is built to completion during the transfer
   ///       and used as a whole to reconstruct the target variable
-  typedef std::unordered_map<Point, Number, hash_point, compare_point> InterpCache;
+  typedef PointIndexedMap InterpCache;
 
   /// A vector of such caches, indexed by to_problem
   typedef std::vector<InterpCache> InterpCaches;
@@ -533,11 +473,7 @@ protected:
   typedef typename TensorTools::MakeBaseNumber<Output>::type DofValueType;
 
 public:
-  typedef std::unordered_map<Point,
-                             Output,
-                             MultiAppGeneralFieldTransfer::hash_point,
-                             MultiAppGeneralFieldTransfer::compare_point>
-      Cache;
+  typedef PointIndexedMap Cache;
 
   typedef typename TensorTools::MakeReal<Output>::type RealType;
   typedef DofValueType ValuePushType;
