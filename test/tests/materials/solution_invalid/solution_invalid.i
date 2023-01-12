@@ -46,8 +46,6 @@
 
 [Problem]
   type = FEProblem
-  allow_invalid_solution = false
-  immediately_print_invalid_solution = false
 []
 
 [Executioner]
