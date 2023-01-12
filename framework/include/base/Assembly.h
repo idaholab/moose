@@ -1629,13 +1629,20 @@ public:
                                   unsigned int jvar,
                                   const RealEigenMatrix & v) const
   {
-    unsigned int pace = ((ivar == jvar && _component_block_diagonal[ivar]) ? 0 : nphi);
-    unsigned int saved_j = j;
-    for (unsigned int k = 0; k < v.rows(); ++k, i += ntest)
+    if (ivar == jvar && _component_block_diagonal[ivar])
     {
-      j = saved_j;
-      for (unsigned int l = 0; l < v.cols(); ++l, j += pace)
-        ke(i, j) += v(k, l);
+      for (unsigned int k = 0; k < v.rows(); ++k, i += ntest)
+        ke(i, j) += v(k, k);
+    }
+    else
+    {
+      unsigned int saved_j = j;
+      for (unsigned int k = 0; k < v.rows(); ++k, i += ntest)
+      {
+        j = saved_j;
+        for (unsigned int l = 0; l < v.cols(); ++l, j += nphi)
+          ke(i, j) += v(k, l);
+      }
     }
   }
 
