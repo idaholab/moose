@@ -181,7 +181,6 @@ template <bool is_ad>
 void
 RadialReturnStressUpdateTempl<is_ad>::computeTangentOperator(Real /*effective_trial_stress*/,
                                                              RankTwoTensor & /*stress_new*/,
-                                                             bool /*compute_full_tangent_operator*/,
                                                              RankFourTensor & /*tangent_operator*/)
 {
   mooseError("computeTangentOperator called: no tangent computation is needed for AD");
@@ -191,11 +190,9 @@ template <>
 void
 RadialReturnStressUpdateTempl<false>::computeTangentOperator(Real effective_trial_stress,
                                                              RankTwoTensor & stress_new,
-                                                             bool compute_full_tangent_operator,
                                                              RankFourTensor & tangent_operator)
 {
-  if (compute_full_tangent_operator &&
-      getTangentCalculationMethod() == TangentCalculationMethod::PARTIAL)
+  if (getTangentCalculationMethod() == TangentCalculationMethod::PARTIAL)
   {
     if (MooseUtils::absoluteFuzzyEqual(_scalar_effective_inelastic_strain, 0.0))
       tangent_operator.zero();
@@ -232,84 +229,30 @@ RadialReturnStressUpdateTempl<false>::computeTangentOperator(Real effective_tria
   }
 }
 
-template <>
+template <bool is_ad>
 void
-RadialReturnStressUpdateTempl<false>::updateState(RankTwoTensor & strain_increment,
-                                                  RankTwoTensor & inelastic_strain_increment,
-                                                  const RankTwoTensor & /*rotation_increment*/,
-                                                  RankTwoTensor & stress_new,
-                                                  const RankTwoTensor & /*stress_old*/,
-                                                  const RankFourTensor & elasticity_tensor,
-                                                  const RankTwoTensor & elastic_strain_old,
-                                                  bool compute_full_tangent_operator,
-                                                  RankFourTensor & tangent_operator)
-{
-  // compute the deviatoric trial stress and trial strain from the current intermediate
-  // configuration
-  RankTwoTensor deviatoric_trial_stress = stress_new.deviatoric();
-
-  // compute the effective trial stress
-  Real dev_trial_stress_squared =
-      deviatoric_trial_stress.doubleContraction(deviatoric_trial_stress);
-  Real effective_trial_stress = std::sqrt(3.0 / 2.0 * dev_trial_stress_squared);
-
-  // Set the value of 3 * shear modulus for use as a reference residual value
-  _three_shear_modulus = 3.0 * ElasticityTensorTools::getIsotropicShearModulus(elasticity_tensor);
-
-  computeStressInitialize(effective_trial_stress, elasticity_tensor);
-
-  // Use Newton iteration to determine the scalar effective inelastic strain increment
-  _scalar_effective_inelastic_strain = 0.0;
-  if (!MooseUtils::absoluteFuzzyEqual(effective_trial_stress, 0.0))
-  {
-    returnMappingSolve(effective_trial_stress, _scalar_effective_inelastic_strain, _console);
-    if (_scalar_effective_inelastic_strain != 0.0)
-      inelastic_strain_increment =
-          deviatoric_trial_stress *
-          (1.5 * _scalar_effective_inelastic_strain / effective_trial_stress);
-    else
-      inelastic_strain_increment.zero();
-  }
-  else
-    inelastic_strain_increment.zero();
-
-  strain_increment -= inelastic_strain_increment;
-  _effective_inelastic_strain[_qp] =
-      _effective_inelastic_strain_old[_qp] + _scalar_effective_inelastic_strain;
-
-  // Use the old elastic strain here because we require tensors used by this class
-  // to be isotropic and this method natively allows for changing in time
-  // elasticity tensors
-  stress_new = elasticity_tensor * (strain_increment + elastic_strain_old);
-
-  computeStressFinalize(inelastic_strain_increment);
-
-  computeTangentOperator(
-      effective_trial_stress, stress_new, compute_full_tangent_operator, tangent_operator);
-}
-
-template <>
-void
-RadialReturnStressUpdateTempl<true>::updateState(
-    ADRankTwoTensor & strain_increment,
-    ADRankTwoTensor & inelastic_strain_increment,
-    const ADRankTwoTensor & /*rotation_increment*/,
-    ADRankTwoTensor & stress_new,
+RadialReturnStressUpdateTempl<is_ad>::updateState(
+    GenericRankTwoTensor<is_ad> & strain_increment,
+    GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
+    const GenericRankTwoTensor<is_ad> & /*rotation_increment*/,
+    GenericRankTwoTensor<is_ad> & stress_new,
     const RankTwoTensor & /*stress_old*/,
-    const ADRankFourTensor & elasticity_tensor,
+    const GenericRankFourTensor<is_ad> & elasticity_tensor,
     const RankTwoTensor & elastic_strain_old,
-    bool /*compute_full_tangent_operator = false*/,
-    RankFourTensor & /*tangent_operator = _identityTensor*/)
+    bool compute_full_tangent_operator,
+    RankFourTensor & tangent_operator)
 {
+
   // compute the deviatoric trial stress and trial strain from the current intermediate
   // configuration
-  ADRankTwoTensor deviatoric_trial_stress = stress_new.deviatoric();
+  GenericRankTwoTensor<is_ad> deviatoric_trial_stress = stress_new.deviatoric();
 
   // compute the effective trial stress
-  ADReal dev_trial_stress_squared =
+  GenericReal<is_ad> dev_trial_stress_squared =
       deviatoric_trial_stress.doubleContraction(deviatoric_trial_stress);
-  ADReal effective_trial_stress =
-      dev_trial_stress_squared == 0.0 ? 0.0 : std::sqrt(3.0 / 2.0 * dev_trial_stress_squared);
+  GenericReal<is_ad> effective_trial_stress = MetaPhysicL::raw_value(dev_trial_stress_squared)
+                                                  ? std::sqrt(3.0 / 2.0 * dev_trial_stress_squared)
+                                                  : 0.0;
 
   // Set the value of 3 * shear modulus for use as a reference residual value
   _three_shear_modulus = 3.0 * ElasticityTensorTools::getIsotropicShearModulus(elasticity_tensor);
@@ -320,7 +263,8 @@ RadialReturnStressUpdateTempl<true>::updateState(
   _scalar_effective_inelastic_strain = 0.0;
   if (!MooseUtils::absoluteFuzzyEqual(effective_trial_stress, 0.0))
   {
-    returnMappingSolve(effective_trial_stress, _scalar_effective_inelastic_strain, _console);
+    this->returnMappingSolve(
+        effective_trial_stress, _scalar_effective_inelastic_strain, this->_console);
     if (_scalar_effective_inelastic_strain != 0.0)
       inelastic_strain_increment =
           deviatoric_trial_stress *
@@ -340,38 +284,32 @@ RadialReturnStressUpdateTempl<true>::updateState(
     // Use the old elastic strain here because we require tensors used by this class
     // to be isotropic and this method natively allows for changing in time
     // elasticity tensors
-    stress_new = elasticity_tensor * (elastic_strain_old + strain_increment);
+    stress_new = elasticity_tensor * (strain_increment + elastic_strain_old);
   }
 
   computeStressFinalize(inelastic_strain_increment);
+
+  if constexpr (!is_ad)
+  {
+    if (compute_full_tangent_operator)
+      computeTangentOperator(effective_trial_stress, stress_new, tangent_operator);
+  }
+  else
+  {
+    libmesh_ignore(compute_full_tangent_operator);
+    libmesh_ignore(tangent_operator);
+  }
 }
 
-template <>
+template <bool is_ad>
 void
-RadialReturnStressUpdateTempl<true>::updateStateSubstepInternal(
-    ADRankTwoTensor & /*strain_increment*/,
-    ADRankTwoTensor & /*inelastic_strain_increment*/,
-    const ADRankTwoTensor & /*rotation_increment*/,
-    ADRankTwoTensor & /*stress_new*/,
-    const RankTwoTensor & /*stress_old*/,
-    const ADRankFourTensor & /*elasticity_tensor*/,
-    const RankTwoTensor & /*elastic_strain_old*/,
-    unsigned int /*total_number_substeps*/,
-    bool /*compute_full_tangent_operator*/,
-    RankFourTensor & /*tangent_operator*/)
-{
-  mooseError("Not implemented");
-}
-
-template <>
-void
-RadialReturnStressUpdateTempl<false>::updateStateSubstepInternal(
-    RankTwoTensor & strain_increment,
-    RankTwoTensor & inelastic_strain_increment,
-    const RankTwoTensor & rotation_increment,
-    RankTwoTensor & stress_new,
+RadialReturnStressUpdateTempl<is_ad>::updateStateSubstepInternal(
+    GenericRankTwoTensor<is_ad> & strain_increment,
+    GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
+    const GenericRankTwoTensor<is_ad> & rotation_increment,
+    GenericRankTwoTensor<is_ad> & stress_new,
     const RankTwoTensor & stress_old,
-    const RankFourTensor & elasticity_tensor,
+    const GenericRankFourTensor<is_ad> & elasticity_tensor,
     const RankTwoTensor & elastic_strain_old,
     unsigned int total_number_substeps,
     bool compute_full_tangent_operator,
@@ -389,8 +327,8 @@ RadialReturnStressUpdateTempl<false>::updateStateSubstepInternal(
                 elastic_strain_old,
                 compute_full_tangent_operator,
                 tangent_operator);
-    storeIncrementalMaterialProperties(total_number_substeps);
 
+    this->storeIncrementalMaterialProperties(total_number_substeps);
     return;
   }
 
@@ -402,29 +340,36 @@ RadialReturnStressUpdateTempl<false>::updateStateSubstepInternal(
   _dt = _dt_original / total_number_substeps;
 
   // initialize the inputs
-  const RankTwoTensor strain_increment_per_step = strain_increment / total_number_substeps;
-  RankTwoTensor sub_stress_new = elasticity_tensor * elastic_strain_old;
-
-  RankTwoTensor sub_elastic_strain_old = elastic_strain_old;
-
-  Real sub_scalar_effective_inelastic_strain = 0;
+  const GenericRankTwoTensor<is_ad> strain_increment_per_step =
+      strain_increment / total_number_substeps;
+  GenericRankTwoTensor<is_ad> sub_stress_new = elasticity_tensor * elastic_strain_old;
+  GenericRankTwoTensor<is_ad> sub_elastic_strain_old = elastic_strain_old;
 
   // clear the original inputs
   MathUtils::mooseSetToZero(strain_increment);
   MathUtils::mooseSetToZero(inelastic_strain_increment);
   MathUtils::mooseSetToZero(stress_new);
-  RankTwoTensor sub_inelastic_strain_increment = inelastic_strain_increment;
+
+  GenericReal<is_ad> sub_scalar_effective_inelastic_strain = 0.0;
+  GenericRankTwoTensor<is_ad> sub_inelastic_strain_increment = inelastic_strain_increment;
 
   for (unsigned int step = 0; step < total_number_substeps; ++step)
   {
     // set up input for this substep
-    RankTwoTensor sub_strain_increment = strain_increment_per_step;
+    GenericRankTwoTensor<is_ad> sub_strain_increment = strain_increment_per_step;
     sub_stress_new += elasticity_tensor * sub_strain_increment;
-    // compute effective_sub_stress_new
-    RankTwoTensor deviatoric_sub_stress_new = sub_stress_new.deviatoric();
-    Real dev_sub_stress_new_squared =
-        deviatoric_sub_stress_new.doubleContraction(deviatoric_sub_stress_new);
-    Real effective_sub_stress_new = std::sqrt(3.0 / 2.0 * dev_sub_stress_new_squared);
+
+    Real effective_sub_stress_new;
+    if constexpr (!is_ad)
+    {
+      // compute effective_sub_stress_new
+      const RankTwoTensor deviatoric_sub_stress_new = sub_stress_new.deviatoric();
+      const Real dev_sub_stress_new_squared =
+          deviatoric_sub_stress_new.doubleContraction(deviatoric_sub_stress_new);
+      effective_sub_stress_new = std::sqrt(3.0 / 2.0 * dev_sub_stress_new_squared);
+    }
+    else
+      libmesh_ignore(effective_sub_stress_new);
 
     // update stress and strain based on the strain increment
     updateState(sub_strain_increment,
@@ -434,19 +379,23 @@ RadialReturnStressUpdateTempl<false>::updateStateSubstepInternal(
                 stress_old, // not used in updateState
                 elasticity_tensor,
                 elastic_strain_old,
-                false, // do not compute tangent until the end of this substep
-                tangent_operator);
+                false);
+    // do not compute tangent until the end of this substep (or not at all for is_ad == true)
+
     // update strain and stress
     strain_increment += sub_strain_increment;
     inelastic_strain_increment += sub_inelastic_strain_increment;
     sub_elastic_strain_old += sub_strain_increment;
     sub_stress_new = elasticity_tensor * sub_elastic_strain_old;
+
     // accumulate scalar_effective_inelastic_strain
     sub_scalar_effective_inelastic_strain += _scalar_effective_inelastic_strain;
-    computeTangentOperator(
-        effective_sub_stress_new, sub_stress_new, compute_full_tangent_operator, tangent_operator);
+
+    if constexpr (!is_ad)
+      computeTangentOperator(effective_sub_stress_new, sub_stress_new, tangent_operator);
+
     // store incremental material properties for this step
-    storeIncrementalMaterialProperties(total_number_substeps);
+    this->storeIncrementalMaterialProperties(total_number_substeps);
   }
 
   // update stress
@@ -457,17 +406,18 @@ RadialReturnStressUpdateTempl<false>::updateStateSubstepInternal(
       _effective_inelastic_strain_old[_qp] + sub_scalar_effective_inelastic_strain;
 }
 
-template <>
+template <bool is_ad>
 void
-RadialReturnStressUpdateTempl<false>::updateStateSubstep(RankTwoTensor & strain_increment,
-                                                         RankTwoTensor & inelastic_strain_increment,
-                                                         const RankTwoTensor & rotation_increment,
-                                                         RankTwoTensor & stress_new,
-                                                         const RankTwoTensor & stress_old,
-                                                         const RankFourTensor & elasticity_tensor,
-                                                         const RankTwoTensor & elastic_strain_old,
-                                                         bool compute_full_tangent_operator,
-                                                         RankFourTensor & tangent_operator)
+RadialReturnStressUpdateTempl<is_ad>::updateStateSubstep(
+    GenericRankTwoTensor<is_ad> & strain_increment,
+    GenericRankTwoTensor<is_ad> & inelastic_strain_increment,
+    const GenericRankTwoTensor<is_ad> & rotation_increment,
+    GenericRankTwoTensor<is_ad> & stress_new,
+    const RankTwoTensor & stress_old,
+    const GenericRankFourTensor<is_ad> & elasticity_tensor,
+    const RankTwoTensor & elastic_strain_old,
+    bool compute_full_tangent_operator,
+    RankFourTensor & tangent_operator)
 {
   unsigned int num_substeps = calculateNumberSubsteps(strain_increment);
   while (true)
@@ -509,94 +459,6 @@ RadialReturnStressUpdateTempl<false>::updateStateSubstep(RankTwoTensor & strain_
   _dt = _dt_original;
 
   mooseException("Adaptive substepping failed. Maximum number of substeps exceeded.");
-}
-
-template <>
-void
-RadialReturnStressUpdateTempl<true>::updateStateSubstep(
-    ADRankTwoTensor & strain_increment,
-    ADRankTwoTensor & inelastic_strain_increment,
-    const ADRankTwoTensor & rotation_increment,
-    ADRankTwoTensor & stress_new,
-    const RankTwoTensor & stress_old,
-    const ADRankFourTensor & elasticity_tensor,
-    const RankTwoTensor & elastic_strain_old,
-    bool /*compute_full_tangent_operator*/,
-    RankFourTensor & /*tangent_operator*/)
-{
-  const unsigned int total_number_substeps = calculateNumberSubsteps(strain_increment);
-
-  // if only one substep is needed, then call the original update state method
-  if (total_number_substeps == 1)
-  {
-    updateState(strain_increment,
-                inelastic_strain_increment,
-                rotation_increment,
-                stress_new,
-                stress_old,
-                elasticity_tensor,
-                elastic_strain_old);
-
-    storeIncrementalMaterialProperties(total_number_substeps);
-
-    return;
-  }
-
-  if (total_number_substeps > _maximum_number_substeps)
-    mooseException("The number of substeps computed exceeds the maximum_number_substeps. The "
-                   "system time step will be cut.");
-
-  // Store original _dt; Reset at the end of solve
-  Real dt_original = _dt;
-  // cut the original timestep
-  _dt = dt_original / total_number_substeps;
-
-  // initialize the inputs
-  const ADRankTwoTensor strain_increment_per_step = strain_increment / total_number_substeps;
-  ADRankTwoTensor sub_stress_new = elasticity_tensor * elastic_strain_old;
-
-  ADRankTwoTensor sub_elastic_strain_old = elastic_strain_old;
-  ADRankTwoTensor sub_inelastic_strain_increment = inelastic_strain_increment;
-
-  ADReal sub_scalar_effective_inelastic_strain = 0;
-
-  // clear the original inputs
-  MathUtils::mooseSetToZero(strain_increment);
-  MathUtils::mooseSetToZero(inelastic_strain_increment);
-  MathUtils::mooseSetToZero(stress_new);
-
-  for (unsigned int step = 0; step < total_number_substeps; ++step)
-  {
-    // set up input for this substep
-    ADRankTwoTensor sub_strain_increment = strain_increment_per_step;
-    sub_stress_new += elasticity_tensor * sub_strain_increment;
-
-    // update stress and strain based on the strain increment
-    updateState(sub_strain_increment,
-                sub_inelastic_strain_increment,
-                rotation_increment, // not used in updateState
-                sub_stress_new,
-                stress_old, // not used in updateState
-                elasticity_tensor,
-                elastic_strain_old);
-    // update strain and stress
-    strain_increment += sub_strain_increment;
-    inelastic_strain_increment += sub_inelastic_strain_increment;
-    sub_elastic_strain_old += sub_strain_increment;
-    sub_stress_new = elasticity_tensor * sub_elastic_strain_old;
-    // accumulate scalar_effective_inelastic_strain
-    sub_scalar_effective_inelastic_strain += _scalar_effective_inelastic_strain;
-    // store incremental material properties for this step
-    storeIncrementalMaterialProperties(total_number_substeps);
-  }
-  // update stress
-  stress_new = sub_stress_new;
-  // update effective inelastic strain
-  _effective_inelastic_strain[_qp] =
-      _effective_inelastic_strain_old[_qp] + sub_scalar_effective_inelastic_strain;
-
-  // recover the original timestep
-  _dt = dt_original;
 }
 
 template <bool is_ad>

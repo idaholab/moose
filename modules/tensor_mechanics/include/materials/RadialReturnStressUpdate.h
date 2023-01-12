@@ -140,8 +140,8 @@ public:
 
   /**
    * Has the user requested usage of (possibly) implemented substepping capability for inelastic
-   * models. Parent classes set this to false, but RadialReturn inelastic models have the ability
-   * to implement substepping.
+   * models. Parent classes set this to false, but RadialReturn inelastic models have the
+   * ability to implement substepping.
    */
   virtual bool substeppingCapabilityRequested() override
   {
@@ -198,9 +198,7 @@ protected:
    */
   void computeTangentOperator(Real /*effective_trial_stress*/,
                               RankTwoTensor & /*stress_new*/,
-                              bool /*compute_full_tangent_operator*/,
                               RankFourTensor & /*tangent_operator*/);
-
   /// 3 * shear modulus
   GenericReal<is_ad> _three_shear_modulus;
 
