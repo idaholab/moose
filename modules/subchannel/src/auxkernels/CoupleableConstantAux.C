@@ -12,36 +12,30 @@
 /*               See COPYRIGHT for full restrictions                */
 /********************************************************************/
 
-#include "MassFlowRateAux.h"
+#include "CoupleableConstantAux.h"
 
-registerMooseObject("SubChannelApp", MassFlowRateAux);
+registerMooseObject("MooseApp", CoupleableConstantAux);
 
 InputParameters
-MassFlowRateAux::validParams()
+CoupleableConstantAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
-  params.addClassDescription(
-      "Computes mass float rate from specified mass flux and cross-sectional area");
-  params.addRequiredCoupledVar("area", "Cross sectional area [m^2]");
-  params.addParam<Real>("mass_flux",1.0, "User specified mass flux [kg/s-m^2]");
-  params.addParam<PostprocessorName>(
-    "postprocessor",1.0, "The postprocessor to use for the value of mass_flux");
-  params.declareControllable("mass_flux");
+  params.addClassDescription("Creates a constant field in the domain. Able to read value from postprocessor");
+  params.addParam<Real>("value", 1.0, "Some constant value that can be read from the input file");
+  params.addParam<PostprocessorName>("postprocessor",1.0, "The postprocessor to use for the value");
+  params.declareControllable("value");
   return params;
 }
 
-MassFlowRateAux::MassFlowRateAux(const InputParameters & parameters)
-  : AuxKernel(parameters),
-  _mass_flux(getParam<Real>("mass_flux")),
-  _value(getPostprocessorValue("postprocessor")),
-  _area(coupledValue("area"))
+CoupleableConstantAux::CoupleableConstantAux(const InputParameters & parameters)
+  : AuxKernel(parameters), _value(getParam<Real>("value")), _pvalue(getPostprocessorValue("postprocessor"))
 {
-  if (parameters.isParamSetByUser("mass_flux") && parameters.isParamSetByUser("postprocessor"))
-    mooseError(name(), ": Please provide only one user defined mass_flux");
+  if (parameters.isParamSetByUser("value") && parameters.isParamSetByUser("postprocessor"))
+    mooseError(name(), ": Please provide only one user defined value");
 }
 
 Real
-MassFlowRateAux::computeValue()
+CoupleableConstantAux::computeValue()
 {
-  return _value * _mass_flux * _area[_qp];
+  return _value * _pvalue;
 }
