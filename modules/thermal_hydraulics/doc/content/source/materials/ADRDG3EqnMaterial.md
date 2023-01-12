@@ -1,3 +1,5 @@
+# ADRDG3EqnMaterial
+
 !syntax description /Materials/ADRDG3EqnMaterial
 
 This material is responsible for computing the reconstructed solution values.

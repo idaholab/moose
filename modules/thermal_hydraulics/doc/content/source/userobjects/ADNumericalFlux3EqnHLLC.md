@@ -1,3 +1,5 @@
+# ADNumericalFlux3EqnHLLC
+
 !syntax description /UserObjects/ADNumericalFlux3EqnHLLC
 
 This class implements the HLLC Riemann solver for the 1-D, variable-area Euler
