@@ -1,5 +1,4 @@
-directories:
-    - ${MOOSE_DIR}/python
+directories: !include ${MOOSE_DIR}/python/doc/sqa_directories.yml
 specs:
     - tests
 dependencies:

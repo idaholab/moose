@@ -1,0 +1,9 @@
+- ${MOOSE_DIR}/python/mms
+- ${MOOSE_DIR}/python/MooseDocs
+- ${MOOSE_DIR}/python/moosesqa
+- ${MOOSE_DIR}/python/moosesyntax
+- ${MOOSE_DIR}/python/moosetree
+- ${MOOSE_DIR}/python/mooseutils
+- ${MOOSE_DIR}/python/postprocessing
+- ${MOOSE_DIR}/python/pyhit
+- ${MOOSE_DIR}/python/TestHarness
