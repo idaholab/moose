@@ -211,7 +211,7 @@ NonlinearSystem::solve()
 
   // store the occurence of solution invalid warnings in comulative counters
   _app.solutionInvalidity().solutionInvalidAccumulation();
-
+  _app.solutionInvalidity().sync();
   // output the occurence of solution invalid in a summarry table
   if (!_fe_problem.allowInvalidSolution() && _app.solutionInvalidity().solutionInvalid())
     _app.solutionInvalidity().print(_console);

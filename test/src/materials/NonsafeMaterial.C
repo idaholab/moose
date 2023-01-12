@@ -37,6 +37,9 @@ void
 NonsafeMaterial::computeQpProperties()
 {
   if (_input_diffusivity > _threshold)
+  {
     flagInvalidSolution("The diffusivity is greater than the threshold value!");
+    flagInvalidSolution("Extra invalid thing!");
+  }
   _diffusivity[_qp] = _input_diffusivity;
 }

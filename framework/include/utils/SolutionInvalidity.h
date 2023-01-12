@@ -23,6 +23,9 @@
 #include <future>
 #include <mutex>
 
+// libMesh Includes
+#include "libmesh/parallel_object.h"
+
 // Forward Declarations
 template <class... Ts>
 class VariadicTable;
@@ -30,7 +33,7 @@ class VariadicTable;
 /**
  * The SolutionInvalidity will contains all the solution invalid warnings info
  */
-class SolutionInvalidity : protected ConsoleStreamInterface
+class SolutionInvalidity : protected ConsoleStreamInterface, public ParallelObject
 {
 public:
   using SolutionInvalidityRegistry = moose::internal::SolutionInvalidityRegistry;
@@ -67,6 +70,8 @@ public:
    */
   void printDebug(InvalidSolutionID _invalid_solution_id) const;
 
+  void sync();
+
 private:
   /// Mutex for locking access to the invalid counts
   /// NOTE: These can be changed to shared_mutexes once we get C++17
@@ -79,6 +84,9 @@ private:
       FullTable;
 
   FullTable summaryTable() const;
+
+  void sync();
+
   /// The SolutionInvalidityRegistry
   SolutionInvalidityRegistry & _solution_invalidity_registry;
 
