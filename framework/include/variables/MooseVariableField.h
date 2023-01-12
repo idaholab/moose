@@ -368,7 +368,7 @@ protected:
   ValueType evaluate(const ElemSideQpArg & elem_side_qp, unsigned int state) const override final;
   ValueType evaluate(const ElemPointArg & elem_point, unsigned int state) const override final;
 
-  GradientType evaluateGradient(const ElemQpArg & elem_qp, unsigned int state) const override final;
+  GradientType evaluateGradient(const ElemQpArg & elem_qp, unsigned int state) const override;
   GradientType evaluateGradient(const ElemSideQpArg & elem_side_qp,
                                 unsigned int state) const override final;
 
