@@ -53,10 +53,7 @@ WCNSFVMassFluxBC::computeQpResidual()
    */
   if (_velocity_pp)
   {
-    if (_face_info->neighborPtr() && !_direction_specified_by_user)
-      paramError("direction",
-                 this->type(),
-                 " can only be defined on an internal face if a direction parameter is supplied!");
+    checkForInternalDirection();
     const Point incoming_vector = !_direction_specified_by_user ? _face_info->normal() : _direction;
     const Real cos_angle = std::abs(incoming_vector * _face_info->normal());
     return -_scaling_factor * (*_velocity_pp) * cos_angle * (*_rho)(singleSidedFaceArg());
