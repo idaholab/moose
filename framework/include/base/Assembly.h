@@ -1636,7 +1636,7 @@ public:
     }
     else
     {
-      unsigned int saved_j = j;
+      const unsigned int saved_j = j;
       for (unsigned int k = 0; k < v.rows(); ++k, i += ntest)
       {
         j = saved_j;

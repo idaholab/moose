@@ -2837,11 +2837,11 @@ Assembly::prepareBlock(unsigned int ivar,
                        unsigned int jvar,
                        const std::vector<dof_id_type> & dof_indices)
 {
-  auto & iv = _sys.getVariable(_tid, ivar);
-  auto & jv = _sys.getVariable(_tid, jvar);
-  unsigned int ivn = iv.number();
-  unsigned int jvn = jv.number();
-  unsigned int icount = iv.count();
+  const auto & iv = _sys.getVariable(_tid, ivar);
+  const auto & jv = _sys.getVariable(_tid, jvar);
+  const unsigned int ivn = iv.number();
+  const unsigned int jvn = jv.number();
+  const unsigned int icount = iv.count();
   unsigned int jcount = jv.count();
   if (ivn == jvn && _component_block_diagonal[ivn])
     jcount = 1;
@@ -2862,11 +2862,11 @@ Assembly::prepareBlockNonlocal(unsigned int ivar,
                                const std::vector<dof_id_type> & idof_indices,
                                const std::vector<dof_id_type> & jdof_indices)
 {
-  auto & iv = _sys.getVariable(_tid, ivar);
-  auto & jv = _sys.getVariable(_tid, jvar);
-  unsigned int ivn = iv.number();
-  unsigned int jvn = jv.number();
-  unsigned int icount = iv.count();
+  const auto & iv = _sys.getVariable(_tid, ivar);
+  const auto & jv = _sys.getVariable(_tid, jvar);
+  const unsigned int ivn = iv.number();
+  const unsigned int jvn = jv.number();
+  const unsigned int icount = iv.count();
   unsigned int jcount = jv.count();
   if (ivn == jvn && _component_block_diagonal[ivn])
     jcount = 1;
@@ -4234,8 +4234,8 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian,
   auto & jv = _sys.getVariable(_tid, jvar);
   auto & scaling_factor = iv.arrayScalingFactor();
 
-  unsigned int ivn = iv.number();
-  unsigned int jvn = jv.number();
+  const unsigned int ivn = iv.number();
+  const unsigned int jvn = jv.number();
   auto & ke = jacobianBlock(ivn, jvn, tag);
 
   // It is guaranteed by design iv.number <= ivar since iv is obtained
@@ -4244,8 +4244,8 @@ Assembly::addJacobianBlock(SparseMatrix<Number> & jacobian,
   // where ivar could be a number for a component of an array variable but calling
   // getVariable will return the array variable that has the number of the 0th component.
   // It is the same for jvar.
-  unsigned int i = ivar - ivn;
-  unsigned int j = jvar - jvn;
+  const unsigned int i = ivar - ivn;
+  const unsigned int j = jvar - jvn;
 
   // DoF indices are independently given
   auto di = dof_indices;
@@ -4290,8 +4290,8 @@ Assembly::addJacobianBlockNonlocal(SparseMatrix<Number> & jacobian,
   auto & jv = _sys.getVariable(_tid, jvar);
   auto & scaling_factor = iv.arrayScalingFactor();
 
-  unsigned int ivn = iv.number();
-  unsigned int jvn = jv.number();
+  const unsigned int ivn = iv.number();
+  const unsigned int jvn = jv.number();
   auto & keg = jacobianBlockNonlocal(ivn, jvn);
 
   // It is guaranteed by design iv.number <= ivar since iv is obtained
@@ -4300,8 +4300,8 @@ Assembly::addJacobianBlockNonlocal(SparseMatrix<Number> & jacobian,
   // where ivar could be a number for a component of an array variable but calling
   // getVariable will return the array variable that has the number of the 0th component.
   // It is the same for jvar.
-  unsigned int i = ivar - ivn;
-  unsigned int j = jvar - jvn;
+  const unsigned int i = ivar - ivn;
+  const unsigned int j = jvar - jvn;
 
   // DoF indices are independently given
   auto di = idof_indices;
@@ -4344,8 +4344,8 @@ Assembly::addJacobianNeighbor(SparseMatrix<Number> & jacobian,
   auto & jv = _sys.getVariable(_tid, jvar);
   auto & scaling_factor = iv.arrayScalingFactor();
 
-  unsigned int ivn = iv.number();
-  unsigned int jvn = jv.number();
+  const unsigned int ivn = iv.number();
+  const unsigned int jvn = jv.number();
   auto & ken = jacobianBlockNeighbor(Moose::ElementNeighbor, ivn, jvn);
   auto & kne = jacobianBlockNeighbor(Moose::NeighborElement, ivn, jvn);
   auto & knn = jacobianBlockNeighbor(Moose::NeighborNeighbor, ivn, jvn);
@@ -4356,9 +4356,8 @@ Assembly::addJacobianNeighbor(SparseMatrix<Number> & jacobian,
   // where ivar could be a number for a component of an array variable but calling
   // getVariable will return the array variable that has the number of the 0th component.
   // It is the same for jvar.
-  unsigned int i = ivar - ivn;
-  unsigned int j = jvar - jvn;
-
+  const unsigned int i = ivar - ivn;
+  const unsigned int j = jvar - jvn;
   // DoF indices are independently given
   auto dc = dof_indices;
   auto dn = neighbor_dof_indices;
