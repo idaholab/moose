@@ -156,7 +156,7 @@ P_out = 4.923e6 # Pa
 
 [AuxKernels]
   [T_in_bc]
-    type = ConstantAux
+    type = CoupleableConstantAux
     variable = T
     boundary = inlet
     value = ${T_in}

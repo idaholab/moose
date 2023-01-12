@@ -7,7 +7,7 @@
 
 # physics parameters
 inlet_temperature = 628.15
-outlet_pressure = 0 # gauge pressure
+outlet_pressure = 758423 # Pa # gauge pressure
 
 # geometry parameters
 pin_diameter = 8e-3
@@ -18,6 +18,7 @@ flat_to_flat = 13.598e-2
 wire_diameter = 1.03e-3
 wire_pitch = 203.2e-3
 inter_assembly_gap = 4e-3
+length = 2.6
 
 # fluid properties
 rho = 820
@@ -59,19 +60,17 @@ flow_blocks = 'interwrapper porous_flow center_porous_flow'
   show_material_props = true
 []
 
-[Modules]
-  [FluidProperties]
-    [fp]
-      type = SimpleFluidProperties
-      cp = ${cp}
-      cv = ${cp}
-      thermal_conductivity = ${k}
-      density0 = ${rho}
-      viscosity = ${mu}
-      molar_mass = ${molar_mass}
-      thermal_expansion = 0
-      bulk_modulus = 1e16
-    []
+[FluidProperties]
+  [fp]
+    type = SimpleFluidProperties
+    cp = ${cp}
+    cv = ${cp}
+    thermal_conductivity = ${k}
+    density0 = ${rho}
+    viscosity = ${mu}
+    molar_mass = ${molar_mass}
+    thermal_expansion = 0
+    bulk_modulus = 1e16
   []
 []
 
@@ -90,26 +89,26 @@ flow_blocks = 'interwrapper porous_flow center_porous_flow'
 [Functions]
   [inlet_vel_interwrapper_fn]
     type = PiecewiseLinear
-    x = '0     1'
-    y = '1e-15 0.1'
+    x = '1'
+    y = '0.1'
   []
 
   [inlet_vel_assembly_fn]
     type = PiecewiseLinear
-    x = '0     1'
-    y = '1e-15 0.5'
+    x = '1'
+    y = '0.5'
   []
 
-  [dt_fn]
-    type = PiecewiseLinear
-    x = '0    1      5 50 100'
-    y = '0.2  0.2  0.5 1  10'
-  []
+  # [dt_fn]
+  #   type = PiecewiseLinear
+  #   x = '0    1      5 50 100'
+  #   y = '0.2  0.2  0.5 1  10'
+  # []
 
   [mu_rampdown_fn]
     type = PiecewiseLinear
-    x = '0    0.5  1   5  10'
-    y = '1000 1000 100 10 1'
+    x = '10'
+    y = '1'
   []
 []
 
@@ -132,6 +131,7 @@ flow_blocks = 'interwrapper porous_flow center_porous_flow'
 []
 
 [FVKernels]
+  inactive ='solid_energy_time'
   [solid_energy_time]
     type = PINSFVEnergyTimeDerivative
     variable = T_wrapper
@@ -278,7 +278,16 @@ flow_blocks = 'interwrapper porous_flow center_porous_flow'
     type = FunctorRehmeDragCoefficients
     multipliers = '100 100 1'
     hex_lattice = fuel_hex
-    block = 'porous_flow center_porous_flow'
+    block = 'porous_flow'
+  []
+
+  [assembly_drag2]
+    type = FunctorRehmeDragCoefficientsPressureGradient
+    multipliers = '100 100 1'
+    hex_lattice = fuel_hex
+    postprocessor = report_pressure_drop
+    L = ${length}
+    block = 'center_porous_flow'
   []
 
   # get duct_surface_temperature_functor
@@ -364,31 +373,16 @@ flow_blocks = 'interwrapper porous_flow center_porous_flow'
 []
 
 [Postprocessors]
-  [inlet_average_temperature]
-    type = SideAverageValue
-    boundary = 'inlet_assembly inlet_interwrapper'
-    variable = T_fluid
-  []
-
-  [outlet_average_temperature]
-    type = SideAverageValue
-    boundary = outlet
-    variable = T_fluid
-  []
-
-  [outlet_average_pressure]
+  [outlet_average_pressure_Pr]
     type = SideAverageValue
     boundary = outlet_central_assembly
     variable = pressure
   []
 
-  [inlet_mfr]
-    type = VolumetricFlowRate
-    vel_x = superficial_vel_x
-    vel_y = superficial_vel_y
-    vel_z = superficial_vel_z
-    advected_quantity = rho
-    boundary = 'inlet_assembly inlet_interwrapper'
+  [inlet_average_pressure_Pr]
+    type = SideAverageValue
+    boundary = inlet_central_assembly
+    variable = pressure
   []
 
   [inlet_central_mfr]
@@ -400,42 +394,21 @@ flow_blocks = 'interwrapper porous_flow center_porous_flow'
     boundary = 'inlet_central_assembly'
   []
 
-  [outlet_mfr]
-    type = VolumetricFlowRate
-    vel_x = superficial_vel_x
-    vel_y = superficial_vel_y
-    vel_z = superficial_vel_z
-    advected_quantity = rho
-    boundary = outlet
-  []
-
   [central_assembly_area]
     type = AreaPostprocessor
     boundary = inlet_central_assembly
   []
 
-  [inlet_mass_flux]
+  [inlet_mass_flux_Pr]
     type = ParsedPostprocessor
     pp_names = 'inlet_central_mfr central_assembly_area'
     function = 'abs(inlet_central_mfr/central_assembly_area)'
   []
 
-  [inlet_energy]
-    type = VolumetricFlowRate
-    vel_x = superficial_vel_x
-    vel_y = superficial_vel_y
-    vel_z = superficial_vel_z
-    advected_quantity = rho_cp_T_fluid_var
-    boundary = 'inlet_assembly inlet_interwrapper'
-  []
-
-  [outlet_energy]
-    type = VolumetricFlowRate
-    vel_x = superficial_vel_x
-    vel_y = superficial_vel_y
-    vel_z = superficial_vel_z
-    advected_quantity = rho_cp_T_fluid_var
-    boundary = outlet
+  [pressure_drop_Pr]
+    type = ParsedPostprocessor
+    pp_names = 'inlet_average_pressure_Pr outlet_average_pressure_Pr'
+    function = 'inlet_average_pressure_Pr - outlet_average_pressure_Pr'
   []
 
   [report_pressure_drop]
@@ -443,44 +416,23 @@ flow_blocks = 'interwrapper porous_flow center_porous_flow'
   []
 []
 
-# [Executioner]
-#   type = Transient
-#   solve_type = 'NEWTON'
-#   petsc_options_iname = '-pc_type -ksp_gmres_restart -pc_factor_shift_type -pc_factor_shift_amount'
-#   petsc_options_value = 'lu       30                 NONZERO               1e-10   '
-#   dt = 1
-#   end_time = 10
-#   #dt = 0.1
-#   #end_time = 1e5
-#   #[TimeStepper]
-#   #  type = IterationAdaptiveDT
-#   #  dt = 0.1
-#   #  iteration_window = 2
-#   #  optimal_iterations = 6
-#   #  growth_factor = 1.25
-#   #  cutback_factor = 0.8
-#   #[]
-
-#   nl_abs_tol = 1e-4
-#   nl_max_its = 30
-# []
-
-# [Executioner]
-#   type = Steady
-#   petsc_options_iname = '-pc_type -pc_hypre_type'
-#   petsc_options_value = 'hypre boomeramg'
-#   fixed_point_max_its = 2
-#   fixed_point_min_its = 1
-#   fixed_point_rel_tol = 1e-6
-# []
-
 [Executioner]
-  type = Steady
-  solve_type = 'PJFNK'
-  petsc_options = '-snes_ksp_ew'
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
-  petsc_options_value = 'lu       superlu_dist'
-  line_search = 'none'
+  type = Transient
+  solve_type = 'NEWTON'
+  petsc_options_iname = '-pc_type -ksp_gmres_restart -pc_factor_shift_type -pc_factor_shift_amount'
+  petsc_options_value = 'lu       100                 NONZERO               1e-10   '
+  end_time = 1.0
+  l_max_its = 10
+  [TimeStepper]
+   type = IterationAdaptiveDT
+    dt = 0.01
+    iteration_window = 2
+    optimal_iterations = 6
+    growth_factor = 1.2
+    cutback_factor = 0.8
+  []
+  nl_abs_tol = 1e-3
+  nl_max_its = 15
 []
 
 [Outputs]
@@ -488,29 +440,45 @@ flow_blocks = 'interwrapper porous_flow center_porous_flow'
   #print_linear_residuals = false
 []
 
-# the only reason this multiapp is here because I cannot fucking
-# get the T_wrapper monomial variable to evaluate the fucking qdot
-# correctly. I can also not get it into a Lagrange variable either.
-# [MultiApps]
-#   [dummy]
-#     type = TransientMultiApp
-#     input_files = 'dummy.i'
-#     execute_on = 'TIMESTEP_END'
-#   []
-# []
+################################################################################
+# A multiapp that couples Pronghorn to subchannel
+################################################################################
 
-# [Transfers]
-#   [send]
-#     type = MultiAppProjectionTransfer
-#     to_multi_app = dummy
-#     variable = T_wrapper
-#     source_variable = T_wrapper
-#   []
+[MultiApps]
+  [subchannel]
+    # app_type = SubchannelApp
+    type = FullSolveMultiApp
+    input_files = 'subchannel.i'
+    execute_on = 'timestep_end'
+    positions = '0 0 0'
+    output_in_position = true
+    bounding_box_padding = '0 0 0.1'
+  []
+[]
 
-#   [receive]
-#     type = MultiAppProjectionTransfer
-#     from_multi_app = dummy
-#     variable = T_wrapper_linear
-#     source_variable = T_wrapper
-#   []
-# []
+[Transfers]
+  [pressure_drop_transfer] # Get pressure drop to pronghorn from subchannel
+    type = MultiAppPostprocessorTransfer
+    from_multi_app =  subchannel
+    from_postprocessor = total_pressure_drop_SC
+    to_postprocessor = report_pressure_drop
+    reduction_type = average
+    execute_on = 'timestep_end'
+  []
+
+  [mass_flux_tranfer] # Send mass_flux at the inlet to subchannel
+    type = MultiAppPostprocessorTransfer
+    to_multi_app = subchannel
+    from_postprocessor = inlet_mass_flux_Pr
+    to_postprocessor = report_mass_flux_inlet
+    execute_on = 'timestep_end'
+  []
+
+  [outlet_pressure_tranfer] # Send pressure at the outlet to subchannel
+    type = MultiAppPostprocessorTransfer
+    to_multi_app = subchannel
+    from_postprocessor = outlet_average_pressure_Pr
+    to_postprocessor = report_pressure_outlet
+    execute_on = 'timestep_end'
+  []
+[]
