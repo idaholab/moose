@@ -44,6 +44,7 @@ PhysicsBasedPreconditioner::validParams()
       "to stand for solving that variable's block row.  A variable may appear more "
       "than once (to create cylces if you like).");
   params.addRequiredParam<std::vector<std::string>>("preconditioner", "TODO: docstring");
+  params.addParam<bool>("view_matrix", false, "True to print the matrices on screen");
 
   return params;
 }
@@ -53,6 +54,7 @@ PhysicsBasedPreconditioner::PhysicsBasedPreconditioner(const InputParameters & p
     Preconditioner<Number>(MoosePreconditioner::_communicator),
     _nl(_fe_problem.getNonlinearSystemBase())
 {
+  const auto & libmesh_system = _nl.system();
   unsigned int num_systems = _nl.system().n_vars();
   _systems.resize(num_systems);
   _preconditioners.resize(num_systems);
@@ -77,15 +79,11 @@ PhysicsBasedPreconditioner::PhysicsBasedPreconditioner(const InputParameters & p
         (*cm)(i, i) = 1;
 
       // off-diagonal entries
-      std::vector<std::vector<unsigned int>> off_diag(n_vars);
-      for (const auto i : index_range(getParam<std::vector<NonlinearVariableName>>("off_diag_row")))
+      for (const auto & off_diag : getParam<NonlinearVariableName, NonlinearVariableName>(
+               "off_diag_row", "off_diag_column"))
       {
-        unsigned int row =
-            nl.getVariable(0, getParam<std::vector<NonlinearVariableName>>("off_diag_row")[i])
-                .number();
-        unsigned int column =
-            nl.getVariable(0, getParam<std::vector<NonlinearVariableName>>("off_diag_column")[i])
-                .number();
+        const auto row = libmesh_system.variable_number(off_diag.first);
+        const auto column = libmesh_system.variable_number(off_diag.second);
         (*cm)(row, column) = 1;
       }
 
@@ -234,6 +232,17 @@ PhysicsBasedPreconditioner::setup()
   }
 
   _fe_problem.computeJacobianBlocks(blocks);
+
+  if (getParam<bool>("view_matrix"))
+  {
+    for (unsigned int system_var = 0; system_var < num_systems; system_var++)
+      for (const auto diag : index_range(_off_diag[system_var]))
+      {
+        _console << "Row variable number: " << system_var << std::endl;
+        _console << "Column variable number: " << diag << std::endl;
+        _off_diag_mats[system_var][diag]->print_personal();
+      }
+  }
 
   // cleanup
   for (auto & block : blocks)
