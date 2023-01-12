@@ -1,3 +1,5 @@
+# BoundaryFlux3EqnBC
+
 !syntax description /BCs/BoundaryFlux3EqnBC
 
 This implements a general boundary condition for the 1-D, 1-phase, variable-area Euler
