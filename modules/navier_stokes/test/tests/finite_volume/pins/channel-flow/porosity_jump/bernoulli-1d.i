@@ -42,6 +42,18 @@ velocity_interp_method = 'rc'
   [porosity]
     type = ExtrapolateAtJumpFacesVariable
   []
+  [has_porosity_jump_face]
+    type = MooseVariableFVReal
+  []
+[]
+
+[AuxKernels]
+  [has_porosity_jump_face]
+    type = HasPorosityJumpFace
+    porosity = porosity
+    execute_on = 'initial timestep_end'
+    variable = has_porosity_jump_face
+  []
 []
 
 [ICs]

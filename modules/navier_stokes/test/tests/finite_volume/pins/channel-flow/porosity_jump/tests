@@ -112,4 +112,12 @@
       ad_indexing_type = 'global'
     []
   []
+  [has-porosity-jump-aux]
+    type = Exodiff
+    input = bernoulli-1d.i
+    exodiff = bernoulli-1d_out.e
+    ad_indexing_type = 'global'
+    requirement = 'The system shall be able to mark what elements have porosity jump faces using an auxiliary kernel.'
+    prereq = 'automatic-jump-handling/1d-average'
+  []
 []
