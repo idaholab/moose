@@ -97,10 +97,17 @@ BernoulliPressureVariable::getDirichletBoundaryFaceValue(const FaceInfo & fi,
                                                          const Elem * const elem) const
 {
   mooseAssert(isDirichletBoundaryFace(fi, elem), "This better be a Dirichlet face");
-  const auto [is_jump_face, eps_elem, eps_neighbor] = NS::isPorosityJumpFace(*_eps, fi);
 
-  if (!is_jump_face)
+  if (INSFVPressureVariable::isDirichletBoundaryFace(fi, elem))
     return INSFVPressureVariable::getDirichletBoundaryFaceValue(fi, elem);
+
+  const auto [is_jump_face, eps_elem, eps_neighbor] = NS::isPorosityJumpFace(*_eps, fi);
+#ifndef NDEBUG
+  mooseAssert(is_jump_face,
+              "If we are not a traditional Dirichlet face, then we must be a jump face");
+#else
+  libmesh_ignore(is_jump_face);
+#endif
 
   const Moose::FaceArg face_elem{
       &fi, Moose::FV::LimiterType::CentralDifference, true, false, &fi.elem()};
