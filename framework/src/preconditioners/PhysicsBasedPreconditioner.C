@@ -44,7 +44,6 @@ PhysicsBasedPreconditioner::validParams()
       "to stand for solving that variable's block row.  A variable may appear more "
       "than once (to create cylces if you like).");
   params.addRequiredParam<std::vector<std::string>>("preconditioner", "TODO: docstring");
-  params.addParam<bool>("view_matrix", false, "True to print the matrices on screen");
 
   return params;
 }
@@ -232,17 +231,6 @@ PhysicsBasedPreconditioner::setup()
   }
 
   _fe_problem.computeJacobianBlocks(blocks);
-
-  if (getParam<bool>("view_matrix"))
-  {
-    for (unsigned int system_var = 0; system_var < num_systems; system_var++)
-      for (const auto diag : index_range(_off_diag[system_var]))
-      {
-        _console << "Row variable number: " << system_var << std::endl;
-        _console << "Column variable number: " << diag << std::endl;
-        _off_diag_mats[system_var][diag]->print_personal();
-      }
-  }
 
   // cleanup
   for (auto & block : blocks)

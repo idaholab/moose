@@ -69,7 +69,6 @@
 [Preconditioning]
   [pbp]
     type = PBP
-    view_matrix = true
     solve_order = 'u_0 u_1'
     preconditioner = 'AMG AMG'
     off_diag_row = 'u_0 u_1'
@@ -80,6 +79,7 @@
 [Executioner]
   type = Steady
   solve_type = JFNK
+  petsc_options = '-mat_view'
 []
 
 [Outputs]
