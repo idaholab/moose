@@ -237,8 +237,7 @@ greenGaussGradient(const ElemArg & elem_arg,
                 "being used");
     const auto grad = greenGaussGradient(elem_arg, functor, false, mesh);
 
-    if (two_term_boundary_expansion)
-      err_stream.clear();
+    err_stream.clear();
 
     return grad;
   }
