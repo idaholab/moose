@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NonsafeMaterial.h"
-#include "MooseApp.h"
 
 registerMooseObject("MooseTestApp", NonsafeMaterial);
 
@@ -37,6 +36,6 @@ void
 NonsafeMaterial::computeQpProperties()
 {
   if (_input_diffusivity > _threshold)
-    flagInvalidSolution("The diffusivity is greater than the threshold value!");
+    setSolutionInvalid(true);
   _diffusivity[_qp] = _input_diffusivity;
 }
