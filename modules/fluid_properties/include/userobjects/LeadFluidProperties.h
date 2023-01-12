@@ -37,9 +37,9 @@ public:
   /**
    * Temperature from pressure and density
    *
-   * @param[in] p     pressure (Pa)
-   * @param[in] rho   density (kg/m$^3$)
-   * @return[out] temperature (K)
+   * @param p     pressure (Pa)
+   * @param rho   density (kg/m$^3$)
+   * @return temperature (K)
    */
   Real T_from_p_rho(Real p, Real rho) const;
   void T_from_p_rho(Real p, Real rho, Real & T, Real & dT_dp, Real & dT_drho) const;
@@ -61,8 +61,7 @@ public:
 
   using SinglePhaseFluidProperties::rho_from_p_T;
   Real rho_from_p_T(Real p, Real T) const override;
-  void rho_from_p_T(
-      Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const override;
+  void rho_from_p_T(Real p, Real T, Real & rho, Real & drho_dp, Real & drho_dT) const override;
   void rho_from_p_T(const DualReal & p,
                     const DualReal & T,
                     DualReal & rho,
@@ -71,8 +70,7 @@ public:
 
   Real v_from_p_T(Real p, Real T) const override;
 
-  void
-  v_from_p_T(Real pressure, Real temerature, Real & v, Real & dv_dp, Real & dv_dT) const override;
+  void v_from_p_T(Real p, Real T, Real & v, Real & dv_dp, Real & dv_dT) const override;
 
   Real h_from_p_T(Real p, Real T) const override;
   void h_from_p_T(Real p, Real T, Real & h, Real & dh_dp, Real & dh_dT) const override;

@@ -36,12 +36,12 @@ public:
   /**
    * Temperature from pressure and density
    *
-   * @param[in] p     pressure (Pa)
-   * @param[in] rho   (kg/m$^3$)
-   * @return[out] temperature (K)
+   * @param p     pressure (Pa)
+   * @param rho   (kg/m$^3$)
+   * @return temperature (K)
    */
   Real T_from_p_rho(Real p, Real rho) const;
-  void T_from_p_rho(Real pressure, Real rho, Real & T, Real & dT_dp, Real & dT_drho) const;
+  void T_from_p_rho(Real p, Real rho, Real & T, Real & dT_dp, Real & dT_drho) const;
 
   Real cp_from_v_e(Real v, Real e) const override;
   void cp_from_v_e(Real v, Real e, Real & cp, Real & dcp_dv, Real & dcp_de) const override;

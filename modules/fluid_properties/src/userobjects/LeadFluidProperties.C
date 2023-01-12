@@ -15,7 +15,7 @@ InputParameters
 LeadFluidProperties::validParams()
 {
   InputParameters params = SinglePhaseFluidProperties::validParams();
-  params.addParam<Real>("T_mo", 600.6, "Melting Point of Lead (K)");
+  params.addParam<Real>("T_mo", 600.6, "Melting Point (K)");
   params.addClassDescription("Fluid properties for Lead");
 
   return params;
@@ -35,7 +35,7 @@ LeadFluidProperties::fluidName() const
 Real
 LeadFluidProperties::molarMass() const
 {
-  return 207.2;
+  return 2.072e-1;
 }
 
 Real
@@ -48,15 +48,15 @@ LeadFluidProperties::bulk_modulus_from_p_T(Real /*p*/, Real T) const
 Real
 LeadFluidProperties::c_from_v_e(Real v, Real e) const
 {
-  auto temperature = T_from_v_e(v, e);
-  return 1953 - 0.246 * temperature;
+  auto T = T_from_v_e(v, e);
+  return 1953 - 0.246 * T;
 }
 
 DualReal
 LeadFluidProperties::c_from_v_e(const DualReal & v, const DualReal & e) const
 {
-  DualReal temperature = SinglePhaseFluidProperties::T_from_v_e(v, e);
-  return 1953 - 0.246 * temperature;
+  DualReal T = SinglePhaseFluidProperties::T_from_v_e(v, e);
+  return 1953 - 0.246 * T;
 }
 
 Real
@@ -79,95 +79,91 @@ LeadFluidProperties::p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Real & d
 Real
 LeadFluidProperties::mu_from_v_e(Real v, Real e) const
 {
-  Real temperature = T_from_v_e(v, e);
-  return 4.55e-4 * std::exp(1069 / temperature);
+  Real T = T_from_v_e(v, e);
+  return 4.55e-4 * std::exp(1069 / T);
 }
 
 void
 LeadFluidProperties::mu_from_v_e(Real v, Real e, Real & mu, Real & dmu_dv, Real & dmu_de) const
 {
-  Real temperature, dT_dv, dT_de;
-  T_from_v_e(v, e, temperature, dT_dv, dT_de);
+  Real T, dT_dv, dT_de;
+  T_from_v_e(v, e, T, dT_dv, dT_de);
   mu = mu_from_v_e(v, e);
-  dmu_dv = dT_dv * -1069 * 4.55e-4 * exp(1069 / temperature) / temperature / temperature;
-  dmu_de = dT_de * -1069 * 4.55e-4 * exp(1069 / temperature) / temperature / temperature;
+  dmu_dv = dT_dv * -1069 * 4.55e-4 * exp(1069 / T) / T / T;
+  dmu_de = dT_de * -1069 * 4.55e-4 * exp(1069 / T) / T / T;
 }
 
 Real
 LeadFluidProperties::k_from_v_e(Real v, Real e) const
 {
-  Real temperature = T_from_v_e(v, e);
-  return 0.011 * temperature + 9.2;
+  Real T = T_from_v_e(v, e);
+  return 0.011 * T + 9.2;
 }
 
 void
 LeadFluidProperties::k_from_v_e(Real v, Real e, Real & k, Real & dk_dv, Real & dk_de) const
 {
-  Real temperature, dT_dv, dT_de;
-  T_from_v_e(v, e, temperature, dT_dv, dT_de);
+  Real T, dT_dv, dT_de;
+  T_from_v_e(v, e, T, dT_dv, dT_de);
   k = k_from_v_e(v, e);
   dk_dv = 0.011 * dT_dv;
   dk_de = 0.011 * dT_de;
 }
 
 Real
-LeadFluidProperties::rho_from_p_T(Real /*pressure*/, Real temperature) const
+LeadFluidProperties::rho_from_p_T(Real /*p*/, Real T) const
 {
-  return 11441 - 1.2795 * temperature;
+  return 11441 - 1.2795 * T;
 }
 
 void
-LeadFluidProperties::rho_from_p_T(
-    Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const
+LeadFluidProperties::rho_from_p_T(Real p, Real T, Real & rho, Real & drho_dp, Real & drho_dT) const
 {
-  rho = rho_from_p_T(pressure, temperature);
+  rho = rho_from_p_T(p, T);
   drho_dp = 0;
   drho_dT = -1.2795;
 }
 
 void
-LeadFluidProperties::rho_from_p_T(const DualReal & pressure,
-                                  const DualReal & temperature,
+LeadFluidProperties::rho_from_p_T(const DualReal & p,
+                                  const DualReal & T,
                                   DualReal & rho,
                                   DualReal & drho_dp,
                                   DualReal & drho_dT) const
 {
-  rho = SinglePhaseFluidProperties::rho_from_p_T(pressure, temperature);
+  rho = SinglePhaseFluidProperties::rho_from_p_T(p, T);
   drho_dp = 0;
   drho_dT = -1.2795;
 }
 
 Real
-LeadFluidProperties::v_from_p_T(Real pressure, Real temperature) const
+LeadFluidProperties::v_from_p_T(Real p, Real T) const
 {
-  return 1.0 / rho_from_p_T(pressure, temperature);
+  return 1.0 / rho_from_p_T(p, T);
 }
 
 void
-LeadFluidProperties::v_from_p_T(
-    Real pressure, Real temperature, Real & v, Real & dv_dp, Real & dv_dT) const
+LeadFluidProperties::v_from_p_T(Real p, Real T, Real & v, Real & dv_dp, Real & dv_dT) const
 {
-  v = v_from_p_T(pressure, temperature);
+  v = v_from_p_T(p, T);
   dv_dp = 0;
-  dv_dT = 1.2795 / MathUtils::pow(11441 - 1.2795 * temperature, 2);
+  dv_dT = 1.2795 / MathUtils::pow(11441 - 1.2795 * T, 2);
 }
 
 Real
-LeadFluidProperties::h_from_p_T(Real /*pressure*/, Real temperature) const
+LeadFluidProperties::h_from_p_T(Real /*p*/, Real T) const
 {
   // see 2.53 in 2005 NEA Lead Handbook
   // 5.1467e-6 is replaced by 1.544e-5/3 for accuracy
-  return 176.2 * (temperature - _T_mo) - 2.4615e-2 * (temperature * temperature - _T_mo * _T_mo) +
-         (1.544e-5 / 3) * (temperature * temperature * temperature - _T_mo * _T_mo * _T_mo) +
-         1.524e+6 * (1 / temperature - 1 / _T_mo);
+  return 176.2 * (T - _T_mo) - 2.4615e-2 * (T * T - _T_mo * _T_mo) +
+         (1.544e-5 / 3) * (T * T * T - _T_mo * _T_mo * _T_mo) + 1.524e+6 * (1 / T - 1 / _T_mo);
 }
 
 void
-LeadFluidProperties::h_from_p_T(
-    Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const
+LeadFluidProperties::h_from_p_T(Real p, Real T, Real & h, Real & dh_dp, Real & dh_dT) const
 {
-  h = h_from_p_T(pressure, temperature);
-  Real cp = cp_from_p_T(pressure, temperature);
+  h = h_from_p_T(p, T);
+  Real cp = cp_from_p_T(p, T);
   dh_dp = 0;
   dh_dT = cp;
 }
@@ -175,17 +171,16 @@ LeadFluidProperties::h_from_p_T(
 Real
 LeadFluidProperties::h_from_v_e(Real v, Real e) const
 {
-  Real temperature = T_from_v_e(v, e);
-  return 176.2 * (temperature - _T_mo) - 2.4615e-2 * (temperature * temperature - _T_mo * _T_mo) +
-         (1.544e-5 / 3) * (temperature * temperature * temperature - _T_mo * _T_mo * _T_mo) +
-         1.524e+6 * (1 / temperature - 1 / _T_mo);
+  Real T = T_from_v_e(v, e);
+  return 176.2 * (T - _T_mo) - 2.4615e-2 * (T * T - _T_mo * _T_mo) +
+         (1.544e-5 / 3) * (T * T * T - _T_mo * _T_mo * _T_mo) + 1.524e+6 * (1 / T - 1 / _T_mo);
 }
 
 void
 LeadFluidProperties::h_from_v_e(Real v, Real e, Real & h, Real & dh_dv, Real & dh_de) const
 {
-  Real temperature, dT_dv, dT_de;
-  T_from_v_e(v, e, temperature, dT_dv, dT_de);
+  Real T, dT_dv, dT_de;
+  T_from_v_e(v, e, T, dT_dv, dT_de);
   h = h_from_v_e(v, e);
   Real cp = cp_from_v_e(v, e);
   dh_dv = cp * dT_dv;
@@ -221,12 +216,6 @@ LeadFluidProperties::e_from_p_rho(Real p, Real rho) const
 void
 LeadFluidProperties::e_from_p_rho(Real p, Real rho, Real & e, Real & de_dp, Real & de_drho) const
 {
-  // e = e_from_p_rho(p, rho);
-  // Real epsilon = 1e-8;
-  // Real e_p_plus = e_from_p_rho(p * (1 + epsilon), rho);
-  // Real e_rho_plus = e_from_p_rho(p, rho * (1 + epsilon));
-  // de_dp = (e_p_plus - e) / epsilon / p;
-  // de_drho = (e_rho_plus - e) / epsilon / rho;
   Real T, dT_dp, dT_drho;
   T_from_p_rho(p, rho, T, dT_dp, dT_drho);
   Real de_dp_T, de_dT;
@@ -236,16 +225,15 @@ LeadFluidProperties::e_from_p_rho(Real p, Real rho, Real & e, Real & de_dp, Real
 }
 
 Real
-LeadFluidProperties::T_from_p_rho(Real /*pressure*/, Real rho) const
+LeadFluidProperties::T_from_p_rho(Real /*p*/, Real rho) const
 {
   return (rho - 11441) / -1.2795;
 }
 
 void
-LeadFluidProperties::T_from_p_rho(
-    Real pressure, Real rho, Real & temperature, Real & dT_dp, Real & dT_drho) const
+LeadFluidProperties::T_from_p_rho(Real p, Real rho, Real & T, Real & dT_dp, Real & dT_drho) const
 {
-  temperature = T_from_p_rho(pressure, rho);
+  T = T_from_p_rho(p, rho);
   dT_dp = 0;
   dT_drho = 1 / -1.2795;
 }
@@ -260,47 +248,40 @@ void
 LeadFluidProperties::T_from_v_e(Real v, Real e, Real & T, Real & dT_dv, Real & dT_de) const
 {
   T = T_from_v_e(v, e);
-  // Returning straight derivatives since no pressure dependence
   dT_de = 0;
   dT_dv = 1. / v / v / 1.2795;
 }
 
 Real
-LeadFluidProperties::cp_from_p_T(Real /*pressure*/, Real temperature) const
+LeadFluidProperties::cp_from_p_T(Real /*p*/, Real T) const
 {
-  return 176.2 - 4.923e-2 * temperature + 1.544e-5 * temperature * temperature -
-         1.524e+6 / temperature / temperature;
+  return 176.2 - 4.923e-2 * T + 1.544e-5 * T * T - 1.524e+6 / T / T;
 }
 
 void
-LeadFluidProperties::cp_from_p_T(
-    Real pressure, Real temperature, Real & cp, Real & dcp_dp, Real & dcp_dT) const
+LeadFluidProperties::cp_from_p_T(Real p, Real T, Real & cp, Real & dcp_dp, Real & dcp_dT) const
 {
-  cp = cp_from_p_T(pressure, temperature);
+  cp = cp_from_p_T(p, T);
   dcp_dp = 0;
-  dcp_dT = -4.923e-2 + 2 * 1.544e-5 * temperature +
-           2 * 1.524e6 / temperature / temperature / temperature;
+  dcp_dT = -4.923e-2 + 2 * 1.544e-5 * T + 2 * 1.524e6 / T / T / T;
 }
 
 Real
 LeadFluidProperties::cp_from_v_e(Real v, Real e) const
 {
-  Real temperature = T_from_v_e(v, e);
-  return 176.2 - 4.923e-2 * temperature + 1.544e-5 * temperature * temperature -
-         1.524e6 / temperature / temperature;
+  Real T = T_from_v_e(v, e);
+  return 176.2 - 4.923e-2 * T + 1.544e-5 * T * T - 1.524e6 / T / T;
 }
 
 void
 LeadFluidProperties::cp_from_v_e(Real v, Real e, Real & cp, Real & dcp_dv, Real & dcp_de) const
 {
-  Real temperature, dT_dv, dT_de;
-  T_from_v_e(v, e, temperature, dT_dv, dT_de);
+  Real T, dT_dv, dT_de;
+  T_from_v_e(v, e, T, dT_dv, dT_de);
   cp = cp_from_v_e(v, e);
-  dcp_dv = -4.923e-2 * dT_dv + 2 * dT_dv * 1.544e-5 * temperature +
-           2 * dT_dv * 1.524e+6 / temperature / temperature / temperature;
+  dcp_dv = -4.923e-2 * dT_dv + 2 * dT_dv * 1.544e-5 * T + 2 * dT_dv * 1.524e+6 / T / T / T;
 
-  dcp_de = -4.923e-2 * dT_de + 2 * dT_de * 1.544e-5 * temperature +
-           2 * dT_de * 1.524e+6 / temperature / temperature / temperature;
+  dcp_de = -4.923e-2 * dT_de + 2 * dT_de * 1.544e-5 * T + 2 * dT_de * 1.524e+6 / T / T / T;
 }
 
 Real
@@ -360,31 +341,29 @@ LeadFluidProperties::cv_from_p_T(Real p, Real T, Real & cv, Real & dcv_dp, Real 
 }
 
 Real
-LeadFluidProperties::mu_from_p_T(Real /*pressure*/, Real temperature) const
+LeadFluidProperties::mu_from_p_T(Real /*p*/, Real T) const
 {
-  return 4.55e-4 * std::exp(1069 / temperature);
+  return 4.55e-4 * std::exp(1069 / T);
 }
 
 void
-LeadFluidProperties::mu_from_p_T(
-    Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const
+LeadFluidProperties::mu_from_p_T(Real p, Real T, Real & mu, Real & dmu_dp, Real & dmu_dT) const
 {
-  mu = mu_from_p_T(pressure, temperature);
+  mu = mu_from_p_T(p, T);
   dmu_dp = 0;
-  dmu_dT = -1069 * 4.55e-4 * std::exp(1069 / temperature) / temperature / temperature;
+  dmu_dT = -1069 * 4.55e-4 * std::exp(1069 / T) / T / T;
 }
 
 Real
-LeadFluidProperties::k_from_p_T(Real /*pressure*/, Real temperature) const
+LeadFluidProperties::k_from_p_T(Real /*p*/, Real T) const
 {
-  return 0.011 * temperature + 9.2;
+  return 0.011 * T + 9.2;
 }
 
 void
-LeadFluidProperties::k_from_p_T(
-    Real pressure, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const
+LeadFluidProperties::k_from_p_T(Real p, Real T, Real & k, Real & dk_dp, Real & dk_dT) const
 {
-  k = k_from_p_T(pressure, temperature);
+  k = k_from_p_T(p, T);
   dk_dp = 0;
   dk_dT = 0.011;
 }

@@ -15,7 +15,7 @@ InputParameters
 LeadBismuthFluidProperties::validParams()
 {
   InputParameters params = SinglePhaseFluidProperties::validParams();
-  params.addParam<Real>("T_mo", 398, "Melting Point of Lead Bismuth (K)");
+  params.addParam<Real>("T_mo", 398, "Melting Point (K)");
   params.addClassDescription("Fluid properties for Lead Bismuth eutectic 2LiF-BeF2");
 
   return params;
@@ -35,7 +35,7 @@ LeadBismuthFluidProperties::fluidName() const
 Real
 LeadBismuthFluidProperties::molarMass() const
 {
-  return 233.99;
+  return 2.3399e-1;
 }
 
 Real
@@ -93,23 +93,20 @@ LeadBismuthFluidProperties::T_from_v_e(Real v, Real e, Real & T, Real & dT_dv, R
 Real
 LeadBismuthFluidProperties::cp_from_v_e(Real v, Real e) const
 {
-  Real temperature = T_from_v_e(v, e);
-  return 164.8 - 3.94e-2 * temperature + 1.25e-5 * temperature * temperature -
-         4.56e+5 / temperature / temperature;
+  Real T = T_from_v_e(v, e);
+  return 164.8 - 3.94e-2 * T + 1.25e-5 * T * T - 4.56e+5 / T / T;
 }
 
 void
 LeadBismuthFluidProperties::cp_from_v_e(
     Real v, Real e, Real & cp, Real & dcp_dv, Real & dcp_de) const
 {
-  Real temperature, dT_dv, dT_de;
-  T_from_v_e(v, e, temperature, dT_dv, dT_de);
+  Real T, dT_dv, dT_de;
+  T_from_v_e(v, e, T, dT_dv, dT_de);
   cp = cp_from_v_e(v, e);
-  dcp_dv = -3.94e-2 * dT_dv + 2 * dT_dv * 1.25e-5 * temperature +
-           2 * dT_dv * 4.56e+5 / temperature / temperature / temperature;
+  dcp_dv = -3.94e-2 * dT_dv + 2 * dT_dv * 1.25e-5 * T + 2 * dT_dv * 4.56e+5 / T / T / T;
 
-  dcp_de = -3.94e-2 * dT_de + 2 * dT_de * 1.25e-5 * temperature +
-           2 * dT_de * 4.56e+5 / temperature / temperature / temperature;
+  dcp_de = -3.94e-2 * dT_de + 2 * dT_de * 1.25e-5 * T + 2 * dT_de * 4.56e+5 / T / T / T;
 }
 Real
 LeadBismuthFluidProperties::cv_from_v_e(Real v, Real e) const
@@ -172,113 +169,109 @@ LeadBismuthFluidProperties::cv_from_p_T(
 Real
 LeadBismuthFluidProperties::mu_from_v_e(Real v, Real e) const
 {
-  Real temperature = T_from_v_e(v, e);
-  return 4.94e-4 * std::exp(754.1 / temperature);
+  Real T = T_from_v_e(v, e);
+  return 4.94e-4 * std::exp(754.1 / T);
 }
 
 void
 LeadBismuthFluidProperties::mu_from_v_e(
     Real v, Real e, Real & mu, Real & dmu_dv, Real & dmu_de) const
 {
-  Real temperature, dT_dv, dT_de;
-  T_from_v_e(v, e, temperature, dT_dv, dT_de);
+  Real T, dT_dv, dT_de;
+  T_from_v_e(v, e, T, dT_dv, dT_de);
   mu = mu_from_v_e(v, e);
-  dmu_dv = dT_dv * -754.1 * 4.94e-4 * exp(754.1 / temperature) / temperature / temperature;
-  dmu_de = dT_de * -754.1 * 4.94e-4 * exp(754.1 / temperature) / temperature / temperature;
+  dmu_dv = dT_dv * -754.1 * 4.94e-4 * exp(754.1 / T) / T / T;
+  dmu_de = dT_de * -754.1 * 4.94e-4 * exp(754.1 / T) / T / T;
 }
 
 Real
 LeadBismuthFluidProperties::k_from_v_e(Real v, Real e) const
 {
-  Real temperature = T_from_v_e(v, e);
-  return 3.284 + 1.617e-2 * temperature - 2.305e-6 * temperature * temperature;
+  Real T = T_from_v_e(v, e);
+  return 3.284 + 1.617e-2 * T - 2.305e-6 * T * T;
 }
 
 void
 LeadBismuthFluidProperties::k_from_v_e(Real v, Real e, Real & k, Real & dk_dv, Real & dk_de) const
 {
-  Real temperature, dT_dv, dT_de;
-  T_from_v_e(v, e, temperature, dT_dv, dT_de);
+  Real T, dT_dv, dT_de;
+  T_from_v_e(v, e, T, dT_dv, dT_de);
   k = k_from_v_e(v, e);
-  dk_dv = 1.617e-2 * dT_dv - 2 * 2.305e-6 * dT_dv * temperature;
-  dk_de = 1.617e-2 * dT_de - 2 * 2.305e-6 * dT_de * temperature;
+  dk_dv = 1.617e-2 * dT_dv - 2 * 2.305e-6 * dT_dv * T;
+  dk_de = 1.617e-2 * dT_de - 2 * 2.305e-6 * dT_de * T;
 }
 
 Real
-LeadBismuthFluidProperties::rho_from_p_T(Real /*pressure*/, Real temperature) const
+LeadBismuthFluidProperties::rho_from_p_T(Real /*p*/, Real T) const
 {
-  return 11065 - 1.293 * temperature;
+  return 11065 - 1.293 * T;
 }
 
 void
 LeadBismuthFluidProperties::rho_from_p_T(
-    Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const
+    Real p, Real T, Real & rho, Real & drho_dp, Real & drho_dT) const
 {
-  rho = rho_from_p_T(pressure, temperature);
+  rho = rho_from_p_T(p, T);
   drho_dp = 0;
   drho_dT = -1.293;
 }
 
 void
-LeadBismuthFluidProperties::rho_from_p_T(const DualReal & pressure,
-                                         const DualReal & temperature,
+LeadBismuthFluidProperties::rho_from_p_T(const DualReal & p,
+                                         const DualReal & T,
                                          DualReal & rho,
                                          DualReal & drho_dp,
                                          DualReal & drho_dT) const
 {
-  rho = SinglePhaseFluidProperties::rho_from_p_T(pressure, temperature);
+  rho = SinglePhaseFluidProperties::rho_from_p_T(p, T);
   drho_dp = 0;
   drho_dT = -1.293;
 }
 
 Real
-LeadBismuthFluidProperties::v_from_p_T(Real pressure, Real temperature) const
+LeadBismuthFluidProperties::v_from_p_T(Real p, Real T) const
 {
-  return 1.0 / rho_from_p_T(pressure, temperature);
+  return 1.0 / rho_from_p_T(p, T);
 }
 
 void
-LeadBismuthFluidProperties::v_from_p_T(
-    Real pressure, Real temperature, Real & v, Real & dv_dp, Real & dv_dT) const
+LeadBismuthFluidProperties::v_from_p_T(Real p, Real T, Real & v, Real & dv_dp, Real & dv_dT) const
 {
-  v = v_from_p_T(pressure, temperature);
+  v = v_from_p_T(p, T);
   dv_dp = 0;
-  dv_dT = 1.293 / MathUtils::pow(11065 - 1.293 * temperature, 2);
+  dv_dT = 1.293 / MathUtils::pow(11065 - 1.293 * T, 2);
 }
 
 Real
-LeadBismuthFluidProperties::h_from_p_T(Real /*pressure*/, Real temperature) const
+LeadBismuthFluidProperties::h_from_p_T(Real /*p*/, Real T) const
 {
   // see 2.55 in 2005 NEA Lead Handbook
   // 4.167e-6 is replaced by 1.25e-5/3 for accuracy
-  return 164.8 * (temperature - _T_mo) - 1.97e-2 * (temperature * temperature - _T_mo * _T_mo) +
-         (1.25e-5 / 3) * (temperature * temperature * temperature - _T_mo * _T_mo * _T_mo) +
-         4.56e+5 * (1 / temperature - 1 / _T_mo);
+  return 164.8 * (T - _T_mo) - 1.97e-2 * (T * T - _T_mo * _T_mo) +
+         (1.25e-5 / 3) * (T * T * T - _T_mo * _T_mo * _T_mo) + 4.56e+5 * (1 / T - 1 / _T_mo);
 }
 
 void
-LeadBismuthFluidProperties::h_from_p_T(
-    Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const
+LeadBismuthFluidProperties::h_from_p_T(Real p, Real T, Real & h, Real & dh_dp, Real & dh_dT) const
 {
-  h = h_from_p_T(pressure, temperature);
+  h = h_from_p_T(p, T);
   dh_dp = 0;
-  dh_dT = cp_from_p_T(pressure, temperature);
+  dh_dT = cp_from_p_T(p, T);
 }
 
 Real
 LeadBismuthFluidProperties::h_from_v_e(Real v, Real e) const
 {
-  Real temperature = T_from_v_e(v, e);
-  return 164.8 * (temperature - _T_mo) - 1.97e-2 * (temperature * temperature - _T_mo * _T_mo) +
-         (1.25e-5 / 3) * (temperature * temperature * temperature - _T_mo * _T_mo * _T_mo) +
-         4.56e+5 * (1 / temperature - 1 / _T_mo);
+  Real T = T_from_v_e(v, e);
+  return 164.8 * (T - _T_mo) - 1.97e-2 * (T * T - _T_mo * _T_mo) +
+         (1.25e-5 / 3) * (T * T * T - _T_mo * _T_mo * _T_mo) + 4.56e+5 * (1 / T - 1 / _T_mo);
 }
 
 void
 LeadBismuthFluidProperties::h_from_v_e(Real v, Real e, Real & h, Real & dh_dv, Real & dh_de) const
 {
-  Real temperature, dT_dv, dT_de;
-  T_from_v_e(v, e, temperature, dT_dv, dT_de);
+  Real T, dT_dv, dT_de;
+  T_from_v_e(v, e, T, dT_dv, dT_de);
   h = h_from_v_e(v, e);
   Real cp = cp_from_v_e(v, e);
   dh_dv = cp * dT_dv;
@@ -313,74 +306,71 @@ LeadBismuthFluidProperties::e_from_p_rho(Real p, Real rho) const
 
 void
 LeadBismuthFluidProperties::e_from_p_rho(
-    Real pressure, Real rho, Real & e, Real & de_dp, Real & de_drho) const
+    Real p, Real rho, Real & e, Real & de_dp, Real & de_drho) const
 {
   Real T, dT_dp, dT_drho;
-  T_from_p_rho(pressure, rho, T, dT_dp, dT_drho);
+  T_from_p_rho(p, rho, T, dT_dp, dT_drho);
   Real de_dp_T, de_dT;
-  e_from_p_T(pressure, T, e, de_dp_T, de_dT);
+  e_from_p_T(p, T, e, de_dp_T, de_dT);
   de_dp = de_dp_T * 1 + de_dT * dT_dp;
   de_drho = de_dT * dT_drho;
 }
 
 Real
-LeadBismuthFluidProperties::T_from_p_rho(Real /*pressure*/, Real rho) const
+LeadBismuthFluidProperties::T_from_p_rho(Real /*p*/, Real rho) const
 {
   return (rho - 11065) / -1.293;
 }
 
 void
 LeadBismuthFluidProperties::T_from_p_rho(
-    Real pressure, Real rho, Real & temperature, Real & dT_dp, Real & dT_drho) const
+    Real p, Real rho, Real & T, Real & dT_dp, Real & dT_drho) const
 {
-  temperature = T_from_p_rho(pressure, rho);
+  T = T_from_p_rho(p, rho);
   dT_dp = 0;
   dT_drho = 1 / -1.293;
 }
 
 Real
-LeadBismuthFluidProperties::cp_from_p_T(Real /*pressure*/, Real temperature) const
+LeadBismuthFluidProperties::cp_from_p_T(Real /*p*/, Real T) const
 {
-  return 164.8 - 3.94e-2 * temperature + 1.25e-5 * temperature * temperature -
-         4.56e+5 / temperature / temperature;
+  return 164.8 - 3.94e-2 * T + 1.25e-5 * T * T - 4.56e+5 / T / T;
 }
 
 void
 LeadBismuthFluidProperties::cp_from_p_T(
-    Real pressure, Real temperature, Real & cp, Real & dcp_dp, Real & dcp_dT) const
+    Real p, Real T, Real & cp, Real & dcp_dp, Real & dcp_dT) const
 {
-  cp = cp_from_p_T(pressure, temperature);
+  cp = cp_from_p_T(p, T);
   dcp_dp = 0;
-  dcp_dT =
-      -3.94e-2 + 2 * 1.25e-5 * temperature + 2 * 4.56e+5 / temperature / temperature / temperature;
+  dcp_dT = -3.94e-2 + 2 * 1.25e-5 * T + 2 * 4.56e+5 / T / T / T;
 }
 
 Real
-LeadBismuthFluidProperties::mu_from_p_T(Real /*pressure*/, Real temperature) const
+LeadBismuthFluidProperties::mu_from_p_T(Real /*p*/, Real T) const
 {
-  return 4.94e-4 * std::exp(754.1 / temperature);
+  return 4.94e-4 * std::exp(754.1 / T);
 }
 
 void
 LeadBismuthFluidProperties::mu_from_p_T(
-    Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const
+    Real p, Real T, Real & mu, Real & dmu_dp, Real & dmu_dT) const
 {
-  mu = mu_from_p_T(pressure, temperature);
+  mu = mu_from_p_T(p, T);
   dmu_dp = 0;
-  dmu_dT = -754.1 * 4.94e-4 * exp(754.1 / temperature) / temperature / temperature;
+  dmu_dT = -754.1 * 4.94e-4 * exp(754.1 / T) / T / T;
 }
 
 Real
-LeadBismuthFluidProperties::k_from_p_T(Real /*pressure*/, Real temperature) const
+LeadBismuthFluidProperties::k_from_p_T(Real /*p*/, Real T) const
 {
-  return 3.284 + 1.617e-2 * temperature - 2.305e-6 * temperature * temperature;
+  return 3.284 + 1.617e-2 * T - 2.305e-6 * T * T;
 }
 
 void
-LeadBismuthFluidProperties::k_from_p_T(
-    Real pressure, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const
+LeadBismuthFluidProperties::k_from_p_T(Real p, Real T, Real & k, Real & dk_dp, Real & dk_dT) const
 {
-  k = k_from_p_T(pressure, temperature);
+  k = k_from_p_T(p, T);
   dk_dp = 0;
-  dk_dT = 1.617e-2 - 2 * 2.305e-6 * temperature;
+  dk_dT = 1.617e-2 - 2 * 2.305e-6 * T;
 }
