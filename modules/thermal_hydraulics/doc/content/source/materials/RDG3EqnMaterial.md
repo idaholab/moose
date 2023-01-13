@@ -1,3 +1,5 @@
+# RDG3EqnMaterial
+
 !syntax description /Materials/RDG3EqnMaterial
 
 This material is responsible for computing the reconstructed solution values.

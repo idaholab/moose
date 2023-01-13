@@ -9,6 +9,7 @@
 
 #include "OptimizeSolve.h"
 #include "OptimizationAppTypes.h"
+#include "OptimizationReporterBase.h"
 
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
@@ -56,7 +57,7 @@ OptimizeSolve::solve()
   // Grab objective function
   if (!_problem.hasUserObject("OptimizationReporter"))
     mooseError("No OptimizationReporter object found.");
-  _obj_function = &_problem.getUserObject<OptimizationReporter>("OptimizationReporter");
+  _obj_function = &_problem.getUserObject<OptimizationReporterBase>("OptimizationReporter");
 
   // Initialize solution and matrix
   _obj_function->setInitialCondition(*_parameters.get());
@@ -392,9 +393,6 @@ OptimizeSolve::variableBounds(Tao tao)
   // get bounds
   if (!_obj_function->hasBounds())
     return 0;
-  const std::vector<Real> & upper_bounds = _obj_function->getUpperBounds();
-  const std::vector<Real> & lower_bounds = _obj_function->getLowerBounds();
-
   unsigned int sz = _obj_function->getNumParams();
 
   libMesh::PetscVector<Number> xl(_my_comm, sz);
@@ -403,8 +401,8 @@ OptimizeSolve::variableBounds(Tao tao)
   // copy values from upper and lower bounds to xl and xu
   for (const auto i : make_range(sz))
   {
-    xl.set(i, lower_bounds[i]);
-    xu.set(i, upper_bounds[i]);
+    xl.set(i, _obj_function->getLowerBound(i));
+    xu.set(i, _obj_function->getUpperBound(i));
   }
   // set upper and lower bounds in tao solver
   PetscErrorCode ierr;

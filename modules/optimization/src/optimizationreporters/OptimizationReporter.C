@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "OptimizationReporter.h"
+
 #include "libmesh/int_range.h"
 
 registerMooseObject("OptimizationApp", OptimizationReporter);
@@ -15,8 +16,7 @@ registerMooseObject("OptimizationApp", OptimizationReporter);
 InputParameters
 OptimizationReporter::validParams()
 {
-  InputParameters params = OptimizationData::validParams();
-  params.registerBase("OptimizationReporter");
+  InputParameters params = OptimizationReporterBase::validParams();
   params.addClassDescription("Computes objective function, gradient and contains reporters for "
                              "communicating between optimizeSolve and subapps");
   params.addRequiredParam<std::vector<ReporterValueName>>(
@@ -35,7 +35,7 @@ OptimizationReporter::validParams()
 }
 
 OptimizationReporter::OptimizationReporter(const InputParameters & parameters)
-  : OptimizationData(parameters),
+  : OptimizationReporterBase(parameters),
     _parameter_names(getParam<std::vector<ReporterValueName>>("parameter_names")),
     _nparam(_parameter_names.size()),
     _nvalues(getParam<std::vector<dof_id_type>>("num_values")),
@@ -74,8 +74,6 @@ OptimizationReporter::OptimizationReporter(const InputParameters & parameters)
                            initial_condition.begin() + v + _nvalues[i]);
     v += _nvalues[i];
   }
-
-  _misfit_values.resize(_measurement_values.size(), 0.0);
 }
 
 void
@@ -100,27 +98,6 @@ OptimizationReporter::updateParameters(const libMesh::PetscVector<Number> & x)
       val = x(n++);
 }
 
-Real
-OptimizationReporter::computeObjective()
-{
-  // This will only be executed if measurement_values are available on the main app
-  for (const auto i : index_range(_measurement_values))
-    _misfit_values[i] = _simulation_values[i] - _measurement_values[i];
-
-  Real val = 0.0;
-  for (auto & misfit : _misfit_values)
-    val += misfit * misfit;
-
-  return val * 0.5;
-}
-
-void
-OptimizationReporter::setMisfitToSimulatedValues()
-{
-  for (const auto i : index_range(_simulation_values))
-    _misfit_values[i] = _simulation_values[i];
-}
-
 void
 OptimizationReporter::computeGradient(libMesh::PetscVector<Number> & gradient) const
 {
@@ -131,12 +108,4 @@ OptimizationReporter::computeGradient(libMesh::PetscVector<Number> & gradient) c
     gradient.set(i, _adjoint_data[i]);
 
   gradient.close();
-}
-
-// function only used for test objects
-void
-OptimizationReporter::setSimulationValuesForTesting(std::vector<Real> & data)
-{
-  _simulation_values.clear();
-  _simulation_values = data;
 }

@@ -1,3 +1,5 @@
+# ADBoundaryFlux3EqnFreeOutflow
+
 !syntax description /UserObjects/ADBoundaryFlux3EqnFreeOutflow
 
 This class implements a boundary flux corresponding to the free outflow boundary

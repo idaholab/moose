@@ -12,7 +12,7 @@
 #include "GeneralUserObject.h"
 #include "libmesh/petsc_vector.h"
 
-class OptimizationReporter;
+class OptimizationReporterBase;
 /**
  * A UserObject that tests the requesting of Reporter values
  * that are actually correct.
@@ -33,6 +33,6 @@ private:
   const Real _tol;
   /// Communicator used for operations
   const libMesh::Parallel::Communicator _my_comm;
-  OptimizationReporter * _optReporter = nullptr;
+  OptimizationReporterBase * _optReporter = nullptr;
   std::unique_ptr<libMesh::PetscVector<Number>> _optSolverParameters;
 };

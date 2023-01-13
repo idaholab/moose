@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "OptimizationReporter.h"
+#include "OptimizationReporterBase.h"
 #include "OptimizationReporterTest.h"
 #include "libmesh/petsc_vector.h"
 
@@ -55,20 +55,27 @@ OptimizationReporterTest::initialSetup()
 {
   if (!_fe_problem.hasUserObject("OptimizationReporter"))
     mooseError("No form function object found.");
-  _optReporter = &_fe_problem.getUserObject<OptimizationReporter>("OptimizationReporter");
+  _optReporter = &_fe_problem.getUserObject<OptimizationReporterBase>("OptimizationReporter");
   // Set initial conditions
   _optReporter->setInitialCondition(*_optSolverParameters.get());
-  size_t ndof = _optSolverParameters->size();
+  std::size_t ndof = _optSolverParameters->size();
   std::vector<Real> valuesToSetOnOptRepParams(
       getParam<std::vector<Real>>("values_to_set_parameters_to"));
   if (ndof != valuesToSetOnOptRepParams.size())
     mooseError("OptimizationReporter parameter size is not the same as OptimizationReporterTest "
                "values_to_set_parameters_to size.");
 
+  std::vector<Real> lower_bounds(ndof);
+  std::vector<Real> upper_bounds(ndof);
+  for (const auto & i : make_range(ndof))
+  {
+    lower_bounds[i] = _optReporter->getLowerBound(i);
+    upper_bounds[i] = _optReporter->getUpperBound(i);
+  }
+
   std::vector<Real> expectedLowerBounds = isParamValid("expected_lower_bounds")
                                               ? getParam<std::vector<Real>>("expected_lower_bounds")
                                               : std::vector<Real>(ndof, 0.0);
-  std::vector<Real> lower_bounds = _optReporter->getLowerBounds();
   Real diff = differenceBetweenTwoVectors(lower_bounds, expectedLowerBounds);
   if (diff > _tol)
     mooseError("Difference between OptimizationReporter lower_bounds and OptimizationReporterTest "
@@ -78,7 +85,6 @@ OptimizationReporterTest::initialSetup()
   std::vector<Real> expectedUpperBounds = isParamValid("expected_upper_bounds")
                                               ? getParam<std::vector<Real>>("expected_upper_bounds")
                                               : std::vector<Real>(ndof, 0.0);
-  std::vector<Real> upper_bounds = _optReporter->getUpperBounds();
   diff = differenceBetweenTwoVectors(upper_bounds, expectedUpperBounds);
   if (diff > _tol)
     mooseError("Difference between OptimizationReporter upper_bounds and OptimizationReporterTest "

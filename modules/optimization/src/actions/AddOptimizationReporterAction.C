@@ -9,9 +9,7 @@
 
 #include "AddOptimizationReporterAction.h"
 
-#include "Factory.h"
 #include "FEProblemBase.h"
-#include "OptimizationReporter.h"
 
 registerMooseAction("OptimizationApp", AddOptimizationReporterAction, "add_reporter");
 
