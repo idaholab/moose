@@ -7,6 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#pragma once
+
 #include "MooseUtils.h"
 #include "MooseHashing.h"
 #include "libmesh/point.h"
@@ -35,40 +37,6 @@ struct PointIndexedMap
     std::vector<Real> rounded_m{round(p(0) / pow(10, exponents[0] - 12)),
                                 round(p(1) / pow(10, exponents[1] - 12)),
                                 round(p(2) / pow(10, exponents[2] - 12))};
-    for (auto i : make_range(LIBMESH_DIM))
-    {
-      if (fabs(rounded_m[i]) == 1e13)
-      {
-        exponents[i] += 1;
-        rounded_m[i] = (rounded_m[i] > 0) ? 1e12 : -1e12;
-      }
-    }
-    return Point(rounded_m[0] * pow(10, exponents[0] - 12),
-                 rounded_m[1] * pow(10, exponents[1] - 12),
-                 rounded_m[2] * pow(10, exponents[2] - 12));
-  }
-
-  /**
-   * Get the nearest point with all coordinates of the form m * 10^n such that:
-   * - m * 1e12 is a signed integer
-   * - 1e12 =< |m * 1e12| < 1e13
-   * - n an integer
-   */
-  static inline Point getMantissaRoundedPoint(const Point & p,
-                                              const std::vector<int> extra_up_or_down)
-  {
-    mooseAssert(extra_up_or_down.size() == 3, "Wrong size");
-    // - get the scientific notation for the number
-    // - use round on the mantissa * 1e12
-    // - if rounding to the next power of 10, adjust the exponent
-    // - form a new point using the scientific notation
-    std::vector<int> exponents{
-        MooseUtils::absoluteFuzzyEqual(p(0), 0, 1e-15) ? 0 : (int)log10(fabs(p(0))),
-        MooseUtils::absoluteFuzzyEqual(p(1), 0, 1e-15) ? 0 : (int)log10(fabs(p(1))),
-        MooseUtils::absoluteFuzzyEqual(p(2), 0, 1e-15) ? 0 : (int)log10(fabs(p(2)))};
-    std::vector<Real> rounded_m{round(p(0) / pow(10, exponents[0] - 12) + extra_up_or_down[0]),
-                                round(p(1) / pow(10, exponents[1] - 12) + extra_up_or_down[1]),
-                                round(p(2) / pow(10, exponents[2] - 12) + extra_up_or_down[2])};
     for (auto i : make_range(LIBMESH_DIM))
     {
       if (fabs(rounded_m[i]) == 1e13)
@@ -158,74 +126,15 @@ struct PointIndexedMap
       if (rounded != base_map.end())
         return rounded;
 
-      // Search for the nearest potential rounding boundary
-      auto rounded_p = getMantissaRoundedPoint(p);
-      // Edge of the two bins (in X, Y and Z) around the rounded point
-      auto lower_p = (getMantissaRoundedPoint(p, {-1, -1, -1}) + rounded_p) / 2;
-      auto higher_p = (getMantissaRoundedPoint(p, {1, 1, 1}) + rounded_p) / 2;
-      int x_close = MooseUtils::relativeFuzzyEqual(p(0), lower_p(0), 1e-13)    ? -1
-                    : MooseUtils::relativeFuzzyEqual(p(0), higher_p(0), 1e-13) ? 1
-                                                                               : 0;
-      int y_close = MooseUtils::relativeFuzzyEqual(p(1), lower_p(1), 1e-13)    ? -1
-                    : MooseUtils::relativeFuzzyEqual(p(1), higher_p(1), 1e-13) ? 1
-                                                                               : 0;
-      int z_close = MooseUtils::relativeFuzzyEqual(p(2), lower_p(2), 1e-13)    ? -1
-                    : MooseUtils::relativeFuzzyEqual(p(2), higher_p(2), 1e-13) ? 1
-                                                                               : 0;
-
       // To store the output of tentative searches
       std::unordered_map<Point, Number, hash_point, compare_point>::const_iterator out;
 
-      if (x_close)
-      {
-        if (attempt_find(p, x_close, 0, 0, out))
-          return out;
-        if (y_close)
-        {
-          if (attempt_find(p, x_close, y_close, 0, out))
-            return out;
-          if (attempt_find(p, 0, y_close, 0, out))
-            return out;
-          if (z_close)
-          {
-            if (attempt_find(p, 0, 0, z_close, out))
+      // Search in all directions around
+      for (int i : make_range(2))
+        for (int j : make_range(2))
+          for (int k : make_range(2))
+            if (attempt_find(p, 2 * i - 1, 2 * j - 1, 2 * k - 1, out))
               return out;
-            if (attempt_find(p, x_close, 0, z_close, out))
-              return out;
-            if (attempt_find(p, 0, y_close, z_close, out))
-              return out;
-            if (attempt_find(p, x_close, y_close, z_close, out))
-              return out;
-          }
-        }
-        else if (z_close)
-        {
-          if (attempt_find(p, 0, 0, z_close, out))
-            return out;
-          if (attempt_find(p, x_close, 0, z_close, out))
-            return out;
-        }
-      }
-      else
-      {
-        if (y_close)
-        {
-          if (attempt_find(p, 0, y_close, 0, out))
-            return out;
-          if (z_close)
-          {
-            if (attempt_find(p, 0, 0, z_close, out))
-              return out;
-            if (attempt_find(p, 0, y_close, z_close, out))
-              return out;
-          }
-        }
-        else if (z_close)
-        {
-          if (attempt_find(p, 0, 0, z_close, out))
-            return out;
-        }
-      }
 
       return base_map.end();
     }
@@ -238,9 +147,9 @@ struct PointIndexedMap
       Real dz,
       std::unordered_map<Point, Number, hash_point, compare_point>::const_iterator & out) const
   {
-    // Enough to change the rounding by one bin, not enough to move two bins over
-    // The point is no further than 1e-13 away from a rounding boundary anyway
-    const auto eps = 5e-13 - 1e-20;
+    // Some epsilon to move the point by.
+    // There is no multiplicative epsilon that will reliably change the last decimal
+    const auto eps = 3e-13 - 5e-20;
     out = base_map.find(
         p + Point(std::abs(p(0)) * dx * eps, std::abs(p(1)) * dy * eps, std::abs(p(2)) * dz * eps));
     if (out != base_map.end())

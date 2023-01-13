@@ -31,8 +31,12 @@ TEST(PointIndexedMap, find)
   auto ref = 12.;
   std::vector<Point> points;
   points.push_back(Point(0, 0, 0));
+  points.push_back(Point(1e-11, 1e-11, 1e-11));
+  points.push_back(Point(5e-11, 5e-11, 5e-11));
+  points.push_back(Point(1e-5, 1e-5, 1e-5));
   points.push_back(Point(1, 1, 1));
   points.push_back(Point(10, 11, 12));
+  points.push_back(Point(10.1342343241231, 11.123453432132134455689, 12.1234356787654322));
   points.push_back(Point(1.2345678901235, 1.2345678901235, 1.2345678901235));
   points.push_back(Point(-1.2345678901235, -1.2345678901235, -1.2345678901235));
   // Offset from bin edge
@@ -43,11 +47,10 @@ TEST(PointIndexedMap, find)
   {
     PointIndexedMap map;
 
-    // 1e-13 * p0(coord) is the max distance supported. If the data is right on a bin boundary,
-    // we only examine as far as that when comparing the lookup point to the lower/upper bin boundaries
-    std::vector<Real> epsilons{1e-13, 1e-14, 1e-15};
-    for (auto eps : epsilons)
+    std::vector<Real> epsilons{1e-14, 1e-15};
+    for (auto eps_base : epsilons)
     {
+      auto eps = (p0(0) != 0) ? eps_base * p0(0) : eps_base;
       map[p0] = ref;
       EXPECT_TRUE(map.find(p0) != map.end());
       EXPECT_TRUE(map.find(p0 + Point(eps, 0, 0)) != map.end());
@@ -79,6 +82,6 @@ TEST(PointIndexedMap, find)
       EXPECT_TRUE(map.find(p0 + Point(0, -eps, -eps)) != map.end());
     }
     if (p0(2) != 0)
-      EXPECT_TRUE(map.find(p0 + Point(0, 0, 1.1e-12 * p0(2))) == map.end());
+      EXPECT_TRUE(map.find(p0 + Point(0, 0, 2e-12 * p0(2))) == map.end());
   }
 }
