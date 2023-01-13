@@ -59,18 +59,6 @@ TensorMechanicsAction::validParams()
                                               "applied to");
   params.addParamNamesToGroup("block", "Advanced");
 
-  params.addParam<bool>("new_system",
-                        false,
-                        "If true use the new "
-                        "LagrangianStressDiverence kernels.");
-
-  MooseEnum formulationType("TOTAL UPDATED", "TOTAL");
-  params.addParam<MooseEnum>("formulation",
-                             formulationType,
-                             "Select between the total Lagrangian (TOTAL) "
-                             "and updated Lagrangian (UPDATED) formulations "
-                             "for the new kernel system.");
-
   params.addParam<MultiMooseEnum>("additional_generate_output",
                                   TensorMechanicsActionBase::outputPropertiesType(),
                                   "Add scalar quantity output for stress and/or strain (will be "
@@ -152,6 +140,11 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
     _constraint_types(getParam<MultiMooseEnum>("constraint_types")),
     _targets(getParam<std::vector<FunctionName>>("targets"))
 {
+  // check for displacements
+  if (_ndisp == 0)
+    paramError("displacements",
+               "Please supply displacement variables either at the action level or action subblock "
+               "level.");
   // determine if incremental strains are to be used
   if (isParamValid("incremental"))
   {
@@ -943,10 +936,9 @@ TensorMechanicsAction::actLagrangianKernelStrain()
     params.set<std::string>("base_name") = getParam<std::string>("strain_base_name");
 
   params.set<std::vector<VariableName>>("displacements") = _coupled_displacements;
-
   params.set<std::vector<MaterialPropertyName>>("eigenstrain_names") = _eigenstrain_names;
-
   params.set<bool>("large_kinematics") = _lk_large_kinematics;
+  params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
 
   // Error if volumetric locking correction is on for higher-order elements
   if (_problem->mesh().hasSecondOrderElements() && _lk_locking)
