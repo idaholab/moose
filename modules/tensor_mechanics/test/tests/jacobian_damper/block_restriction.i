@@ -36,7 +36,6 @@
         add_variables = true
         new_system = true
         formulation = TOTAL
-        block = 0
       []
     []
   []

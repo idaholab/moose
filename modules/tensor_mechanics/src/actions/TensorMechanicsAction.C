@@ -59,18 +59,6 @@ TensorMechanicsAction::validParams()
                                               "applied to");
   params.addParamNamesToGroup("block", "Advanced");
 
-  params.addParam<bool>("new_system",
-                        false,
-                        "If true use the new "
-                        "LagrangianStressDiverence kernels.");
-
-  MooseEnum formulationType("TOTAL UPDATED", "TOTAL");
-  params.addParam<MooseEnum>("formulation",
-                             formulationType,
-                             "Select between the total Lagrangian (TOTAL) "
-                             "and updated Lagrangian (UPDATED) formulations "
-                             "for the new kernel system.");
-
   params.addParam<MultiMooseEnum>("additional_generate_output",
                                   TensorMechanicsActionBase::outputPropertiesType(),
                                   "Add scalar quantity output for stress and/or strain (will be "
@@ -943,10 +931,9 @@ TensorMechanicsAction::actLagrangianKernelStrain()
     params.set<std::string>("base_name") = getParam<std::string>("strain_base_name");
 
   params.set<std::vector<VariableName>>("displacements") = _coupled_displacements;
-
   params.set<std::vector<MaterialPropertyName>>("eigenstrain_names") = _eigenstrain_names;
-
   params.set<bool>("large_kinematics") = _lk_large_kinematics;
+  params.set<std::vector<SubdomainName>>("block") = getParam<std::vector<SubdomainName>>("block");
 
   // Error if volumetric locking correction is on for higher-order elements
   if (_problem->mesh().hasSecondOrderElements() && _lk_locking)
