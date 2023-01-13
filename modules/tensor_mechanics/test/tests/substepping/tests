@@ -6,7 +6,7 @@
     input = 'ad_power_law_creep.i'
     expect_err = 'Exceeded maximum iterations in material return mapping iterations.'
     cli_args = 'Materials/power_law_creep/use_substepping=NONE Executioner/dtmin=0.1 Outputs/file_base=ad_power_law_out'
-    requirement = 'The system shall report diverged return mapping solve due to large deformation imposed in one step'
+    requirement = 'The system shall report diverged return mapping solve due to large deformation imposed in one step using automatic differentiation'
   []
   [ad_power_law_substepping]
     type = 'Exodiff'
@@ -16,8 +16,39 @@
                "Outputs/file_base=ad_power_law_substepping_out"
     exodiff = 'ad_power_law_substepping_out.e'
     valgrind = HEAVY
-    requirement = 'The system shall converge under large deformation owing to the help of substepping'
+    requirement = 'The system shall converge under large deformation owing to the help of substepping using automatic differentiation'
   []
+  [ad_power_law_adaptive_substepping_increment]
+    # We only check that the simulation converges with adaptive substepping
+    type = 'RunException'
+    input = 'ad_power_law_creep.i'
+    cli_args = "Materials/power_law_creep/use_substepping=INCREMENT_BASED "
+               "Materials/power_law_creep/adaptive_substepping=true "
+               "Materials/power_law_creep/max_inelastic_increment=100 "
+               "Materials/power_law_creep/maximum_number_substeps=2 Executioner/dt=100 "
+               "Executioner/dtmin=100 Executioner/end_time=100 "
+               "Outputs/file_base=ad_power_law_adaptive_substepping_out"
+    expect_err = 'Adaptive substepping failed. Maximum number of substeps exceeded.'
+    requirement = "The system shall converge under large deformation owing to the help of adaptive "
+                  "substepping using automatic differentiation with an increment based substepping "
+                  "criterion"
+  []
+  [ad_power_law_adaptive_substepping_error]
+    # We only check that the simulation converges with adaptive substepping
+    type = 'RunException'
+    input = 'ad_power_law_creep.i'
+    cli_args = "Materials/power_law_creep/use_substepping=ERROR_BASED "
+               "Materials/power_law_creep/adaptive_substepping=true "
+               "Materials/power_law_creep/substep_strain_tolerance=100 "
+               "Materials/power_law_creep/maximum_number_substeps=2 Executioner/dt=100 "
+               "Executioner/dtmin=100 Executioner/end_time=100 "
+               "Outputs/file_base=ad_power_law_adaptive_substepping_out"
+    expect_err = 'Adaptive substepping failed. Maximum number of substeps exceeded.'
+    requirement = "The system shall converge under large deformation owing to the help of adaptive "
+                  "substepping using automatic differentiation with an error based substepping "
+                  "criterion"
+  []
+
   [power_law]
     type = 'RunException'
     input = 'power_law_creep.i'
@@ -34,16 +65,35 @@
     exodiff = 'power_law_substepping_out.e'
     requirement = 'The system shall converge under large deformation owing to the help of substepping'
   []
-  [power_law_adaptive_substepping]
+  [power_law_adaptive_substepping_increment]
     # We only check that the simulation converges with adaptive substepping
-    type = 'RunApp'
+    type = 'RunException'
     input = 'power_law_creep.i'
     cli_args = "Materials/power_law_creep/use_substepping=INCREMENT_BASED "
                "Materials/power_law_creep/adaptive_substepping=true "
-               "Materials/power_law_creep/maximum_number_substeps=500 Executioner/dtmin=0.1 "
+               "Materials/power_law_creep/max_inelastic_increment=100 "
+               "Materials/power_law_creep/maximum_number_substeps=2 Executioner/dt=100 "
+               "Executioner/dtmin=100 Executioner/end_time=100 "
                "Outputs/file_base=power_law_adaptive_substepping_out"
-    requirement = 'The system shall converge under large deformation owing to the help of adaptive substepping'
+    expect_err = 'Adaptive substepping failed. Maximum number of substeps exceeded.'
+    requirement = "The system shall converge under large deformation owing to the help of adaptive "
+                  "substepping with an increment based substepping criterion"
   []
+  [power_law_adaptive_substepping_error]
+    # We only check that the simulation converges with adaptive substepping
+    type = 'RunException'
+    input = 'power_law_creep.i'
+    cli_args = "Materials/power_law_creep/use_substepping=INCREMENT_BASED "
+               "Materials/power_law_creep/adaptive_substepping=true "
+               "Materials/power_law_creep/substep_strain_tolerance=100 "
+               "Materials/power_law_creep/maximum_number_substeps=2 Executioner/dt=100 "
+               "Executioner/dtmin=100 Executioner/end_time=100 "
+               "Outputs/file_base=power_law_adaptive_substepping_out"
+    expect_err = 'Adaptive substepping failed. Maximum number of substeps exceeded.'
+    requirement = "The system shall converge under large deformation owing to the help of adaptive "
+                  "substepping with an error based substepping criterion"
+  []
+
   [output]
     type = 'RunApp'
     input = 'power_law_creep.i'

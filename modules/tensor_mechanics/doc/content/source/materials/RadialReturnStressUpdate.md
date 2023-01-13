@@ -110,7 +110,7 @@ allowed by substepping. A value of $1.0\cdot10^4$ will work for many cases. An e
 ```
 
 The `adaptive_substepping` parameter enables adaptive substepping, where the number of substeps is successively doubled until the
-return mapping model successfully converges or the maximum number of substeps is reached.
+return mapping model successfully converges or the doubled number of substeps exceeds the user specified maximum number of substeps.
 
 ## Writing a New Stress Update Material
 
