@@ -45,6 +45,7 @@ SingleMatrixPreconditioner::SingleMatrixPreconditioner(const InputParameters & p
 {
   NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase();
   unsigned int n_vars = nl.nVariables();
+  const auto & libmesh_system = nl.system();
   auto cm = std::make_unique<CouplingMatrix>(n_vars);
 
   if (!getParam<bool>("full"))
@@ -57,8 +58,8 @@ SingleMatrixPreconditioner::SingleMatrixPreconditioner(const InputParameters & p
     for (const auto & off_diag :
          getParam<NonlinearVariableName, NonlinearVariableName>("off_diag_row", "off_diag_column"))
     {
-      const auto row = nl.getVariable(0, off_diag.first).number();
-      const auto column = nl.getVariable(0, off_diag.second).number();
+      const auto row = libmesh_system.variable_number(off_diag.first);
+      const auto column = libmesh_system.variable_number(off_diag.second);
       (*cm)(row, column) = 1;
     }
 
@@ -81,8 +82,8 @@ SingleMatrixPreconditioner::SingleMatrixPreconditioner(const InputParameters & p
       for (const auto j : index_range(vars))
         for (unsigned int k = j + 1; k < vars.size(); ++k)
         {
-          const auto row = nl.getVariable(0, vars[j]).number();
-          const auto column = nl.getVariable(0, vars[k]).number();
+          const auto row = libmesh_system.variable_number(vars[j]);
+          const auto column = libmesh_system.variable_number(vars[k]);
           (*cm)(row, column) = 1;
           (*cm)(column, row) = 1;
         }
