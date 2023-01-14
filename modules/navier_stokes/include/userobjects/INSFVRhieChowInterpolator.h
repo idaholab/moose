@@ -17,6 +17,7 @@
 #include "CellCenteredMapFunctor.h"
 #include "VectorComponentFunctor.h"
 #include "FaceArgInterface.h"
+#include "INSFVPressureVariable.h"
 
 #include "libmesh/vector_value.h"
 #include "libmesh/id_types.h"
@@ -85,6 +86,11 @@ public:
   void ghostADataOnBoundary(const BoundaryID boundary_id);
 
   bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const override;
+
+  /**
+   * @return The pressure variable corresponding to the provided thread ID
+   */
+  const INSFVPressureVariable & pressure(THREAD_ID tid) const;
 
 protected:
   /**
@@ -224,4 +230,11 @@ INSFVRhieChowInterpolator::addToA(const Elem * const elem,
     _elements_to_push_pull.insert(elem);
 
   _a[elem->id()](component) += value;
+}
+
+inline const INSFVPressureVariable &
+INSFVRhieChowInterpolator::pressure(const THREAD_ID tid) const
+{
+  mooseAssert(tid < _ps.size(), "Attempt to access out-of-bounds in pressure variable container");
+  return *static_cast<INSFVPressureVariable *>(_ps[tid]);
 }

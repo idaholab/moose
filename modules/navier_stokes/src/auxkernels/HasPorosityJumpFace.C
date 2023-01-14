@@ -37,7 +37,7 @@ HasPorosityJumpFace::computeValue()
     if (const Elem * const neighbor = _current_elem->neighbor_ptr(s))
     {
       const FaceInfo * const fi =
-          _current_elem->id() < neighbor->id()
+          Moose::FV::elemHasFaceInfo(*_current_elem, neighbor)
               ? _mesh.faceInfo(_current_elem, s)
               : _mesh.faceInfo(neighbor, neighbor->which_neighbor_am_i(_current_elem));
       mooseAssert(fi, "This should be non-null");

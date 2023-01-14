@@ -17,7 +17,6 @@
 #include "NS.h"
 #include "Assembly.h"
 #include "INSFVVelocityVariable.h"
-#include "INSFVPressureVariable.h"
 #include "PiecewiseByBlockLambdaFunctor.h"
 #include "VectorCompositeFunctor.h"
 #include "FVElementalKernel.h"

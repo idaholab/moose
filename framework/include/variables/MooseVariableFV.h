@@ -441,24 +441,62 @@ public:
 
 protected:
   /**
-   * @return whether \p fi is a Dirichlet boundary face for this variable
+   * Determine whether a specified face side is a Dirichlet boundary face. In the base
+   * implementation we only inspect the face information object for whether there are Dirichlet
+   * conditions. However, derived classes may allow discontinuities between + and - side face
+   * values, e.g. one side may have a Dirichlet condition and the other side may perform
+   * extrapolation to determine its value
+   * @param fi The face informatin object
+   * @param elem An element that can be used to indicate sidedness of the face
+   * @return Whether the potentially sided (as indicated by \p elem) \p fi is a Dirichlet boundary
+   * face for this variable
    */
   virtual bool isDirichletBoundaryFace(const FaceInfo & fi, const Elem * elem) const;
 
   /**
-   * @return the Dirichlet value on the boundary face associated with \p fi
+   * Retrieves a Dirichlet boundary value for the provided face. Callers of this method should be
+   * sure that \p isDirichletBoundaryFace returns true. In the base implementation we only inspect
+   * the face information object for the Dirichlet value. However, derived
+   * classes may allow discontinuities between + and - side face values, e.g. one side may have a
+   * Dirichlet condition and the other side may perform extrapolation to determine its value. This
+   * is the reason for the existence of the \p elem parameter, to indicate sidedness
+   * @param fi The face informatin object
+   * @param elem An element that can be used to indicate sidedness of the face
+   * @return The Dirichlet value on the boundary face associated with \p fi (and potentially \p
+   * elem)
    */
   virtual ADReal getDirichletBoundaryFaceValue(const FaceInfo & fi, const Elem * elem) const;
 
   /**
    * Returns whether this is an extrapolated boundary face. An extrapolated boundary face is
    * boundary face for which is not a corresponding Dirichlet condition, e.g. we need to compute
-   * some approximation for the boundary face value using the adjacent cell centroid information
+   * some approximation for the boundary face value using the adjacent cell centroid information. In
+   * the base implementation we only inspect the face information object for whether we should
+   * perform extrapolation. However, derived classes may allow discontinuities between + and - side
+   * face values, e.g. one side may have a Dirichlet condition and the other side may perform
+   * extrapolation to determine its value
+   * @param fi The face informatin object
+   * @param elem An element that can be used to indicate sidedness of the face
+   * @return Whether the potentially sided (as indicated by \p elem) \p fi is an extrapolated
+   * boundary face for this variable
    */
   bool isExtrapolatedBoundaryFace(const FaceInfo & fi, const Elem * elem) const override;
 
   /**
-   * @return the extrapolated value on the boundary face associated with \p fi
+   * Retrieves an extrapolated boundary value for the provided face. Callers of this method should
+   * be sure that \p isExtrapolatedBoundaryFace returns true. In the base implementation we only
+   * inspect the face information object for the extrapolated value. However, derived classes may
+   * allow discontinuities between + and - side face values, e.g. one side may have a Dirichlet
+   * condition and the other side may perform extrapolation to determine its value. This is the
+   * reason for the existence of the \p elem parameter, to indicate sidedness
+   * @param fi The face informatin object
+   * @param two_term_expansion Whether to use the cell gradient in addition to the cell center value
+   * to compute the extrapolated boundary face value. If this is false, then the cell center value
+   * will be used
+   * @param elem_side_to_extrapolate_from An element that can be used to indicate sidedness of the
+   * face
+   * @return The extrapolated value on the boundary face associated with \p fi (and potentially \p
+   * elem_side_to_extrapolate_from)
    */
   virtual ADReal getExtrapolatedBoundaryFaceValue(const FaceInfo & fi,
                                                   bool two_term_expansion,
