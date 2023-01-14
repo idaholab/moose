@@ -130,10 +130,7 @@ protected:
    * @param var_name The name the kernel wants to refer to the variable as.
    * @return True if the variable is actually a constant
    */
-  virtual bool isCoupledConstant(const std::string & var_name) const
-  {
-    return MooseUtils::parsesToReal(var_name);
-  }
+  virtual bool isCoupledConstant(const std::string & var_name) const;
 
   /**
    * Number of coupled components

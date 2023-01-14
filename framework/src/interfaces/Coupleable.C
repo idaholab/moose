@@ -127,6 +127,12 @@ Coupleable::isCoupled(const std::string & var_name, unsigned int i) const
   }
 }
 
+bool
+Coupleable::isCoupledConstant(const std::string & var_name) const
+{
+  return _c_parameters.hasDefaultCoupledValue(var_name);
+}
+
 unsigned int
 Coupleable::coupledComponents(const std::string & var_name) const
 {
@@ -2145,9 +2151,13 @@ Coupleable::coupledName(const std::string & var_name, unsigned int comp) const
 {
   if (getVar(var_name, comp))
     return getVar(var_name, comp)->name();
-  // For constants, we'll just return the constant as the name
-  else if (MooseUtils::parsesToReal(var_name))
-    return var_name;
+  // Detect if we are in the case where a constant was passed in lieu of a variable
+  else if (isCoupledConstant(var_name))
+    mooseError(_c_name,
+               ": a variable name was queried but a constant was passed for parameter '",
+               var_name,
+               "Either pass a true variable or contact a developer to shield the call to "
+               "'coupledName' with 'isCoupledConstant'");
   else
     mooseError(
         _c_name, ": Variable '", var_name, "' does not exist, yet its coupled name is requested");
