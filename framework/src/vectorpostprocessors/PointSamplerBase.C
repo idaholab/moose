@@ -197,7 +197,18 @@ PointSamplerBase::getLocalElemContainingPoint(const Point & p)
     }
   }
   else // continuous variables
-    elem = (*_pl)(p);
+  {
+    // Get all possible elements the point may be in
+    // We cant just locate in one element because at the edge between two process domains, it could
+    // be that both domains find the element that is not within their domain
+    std::set<const Elem *> candidate_elements;
+    (*_pl)(p, candidate_elements);
+
+    // Only keep the one that may be local
+    for (auto candidate : candidate_elements)
+      if (candidate->processor_id() == processor_id())
+        elem = candidate;
+  }
 
   if (elem && elem->processor_id() == processor_id())
     return elem;
