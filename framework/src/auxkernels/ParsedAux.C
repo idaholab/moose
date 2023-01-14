@@ -27,8 +27,7 @@ ParsedAux::validParams()
   // TODO Make required once deprecation is handled, see #19119
   params.addCustomTypeParam<std::string>(
       "expression", "FunctionExpression", "Parsed function expression to compute");
-  params.addDeprecatedCoupledVar(
-      "args", "coupled variables", "args is deprecated, use coupled_variables");
+  params.addDeprecatedCoupledVar("args", "coupled_variables", "Vector of coupled variable names");
   params.addCoupledVar("coupled_variables", "Vector of coupled variable names");
 
   params.addParam<bool>(

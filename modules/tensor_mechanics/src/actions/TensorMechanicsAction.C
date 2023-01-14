@@ -140,11 +140,6 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
     _constraint_types(getParam<MultiMooseEnum>("constraint_types")),
     _targets(getParam<std::vector<FunctionName>>("targets"))
 {
-  // check for displacements
-  if (_ndisp == 0)
-    paramError("displacements",
-               "Please supply displacement variables either at the action level or action subblock "
-               "level.");
   // determine if incremental strains are to be used
   if (isParamValid("incremental"))
   {

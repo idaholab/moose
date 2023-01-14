@@ -2,6 +2,10 @@
   kernel_coverage_check = false
 []
 
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+[]
+
 [Mesh]
   [gmg]
     type = GeneratedMeshGenerator
@@ -29,7 +33,6 @@
 [Modules]
   [TensorMechanics]
     [Master]
-      displacements = 'disp_x disp_y disp_z'
       [all]
         strain = FINITE
         add_variables = true

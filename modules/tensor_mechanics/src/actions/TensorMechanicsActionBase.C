@@ -137,7 +137,7 @@ TensorMechanicsActionBase::validParams()
 {
   InputParameters params = Action::validParams();
 
-  params.addParam<std::vector<VariableName>>(
+  params.addRequiredParam<std::vector<VariableName>>(
       "displacements", "The nonlinear displacement variables for the problem");
   params.addParam<std::vector<VariableName>>("temperature", "The temperature");
 
