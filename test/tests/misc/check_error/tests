@@ -1085,6 +1085,17 @@
     design = 'Coupleable.md'
     issues = '#11623'
   []
+  [coupled_constant_yet_needs_name]
+    type = 'RunException'
+    input = 'coupled_nodal_for_non_nodal_variable.i'
+    cli_args = 'Materials/m/type=MaterialDerivativeTestMaterial Materials/m/var1=1 Materials/m/var2=2'
+    expect_err = 'a variable name was queried but a constant'
+
+    requirement = "The system shall report an error if an object tries to get the name of a coupled constant."
+    design = 'Coupleable.md'
+    issues = '#22597'
+  []
+
   [missing_executioner]
     type = 'RunException'
     input = 'missing_executioner.i'
