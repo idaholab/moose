@@ -62,6 +62,8 @@ public:
   using typename Moose::FunctorBase<T>::GradientType;
   using typename Moose::FunctorBase<T>::FunctorReturnType;
 
+  std::tuple<bool, T, T> isDiscontinuous(const FaceInfo & fi) const override;
+
 protected:
   using ElemFn = std::function<T(const Moose::ElemArg &, const unsigned int &)>;
   using FaceFn = std::function<T(const Moose::FaceArg &, const unsigned int &)>;
@@ -297,4 +299,36 @@ PiecewiseByBlockLambdaFunctor<T>::evaluateGradient(const Moose::FaceArg & face_a
 {
   mooseAssert(state == 0, "Only current time state supported.");
   return Moose::FV::greenGaussGradient(face_arg, *this, true, _mesh);
+}
+
+template <typename T>
+std::tuple<bool, T, T>
+PiecewiseByBlockLambdaFunctor<T>::isDiscontinuous(const FaceInfo & fi) const
+{
+  if (!fi.neighborPtr())
+    return {false, T{}, T{}};
+
+  const auto elem_sub_id = fi.elem().subdomain_id();
+  const auto neighbor_sub_id = fi.neighbor().subdomain_id();
+  if (!this->hasBlocks(elem_sub_id))
+    return {false, T{}, T{}};
+  if (elem_sub_id != neighbor_sub_id && !this->hasBlocks(neighbor_sub_id))
+    return {false, T{}, T{}};
+
+  auto elem_it = _face_functor.find(elem_sub_id);
+  auto neighbor_it = _face_functor.find(neighbor_sub_id);
+
+  // If we have the same functor on either side
+  if (elem_it == neighbor_it)
+    return elem_it->isDiscontinuous(fi);
+
+  // Else we have different functors on each side. We'll use the default query
+  const Moose::FaceArg face_elem{
+      &fi, Moose::FV::LimiterType::CentralDifference, true, false, fi.elemPtr()};
+  const Moose::FaceArg face_neighbor{
+      &fi, Moose::FV::LimiterType::CentralDifference, true, false, fi.neighborPtr()};
+  const auto elem_value = (*this)(face_elem), neighbor_value = (*this)(face_neighbor);
+  return {!MooseUtils::relativeFuzzyEqual(elem_value, neighbor_value, TOLERANCE),
+          elem_value,
+          neighbor_value};
 }

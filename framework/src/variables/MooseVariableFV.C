@@ -843,6 +843,26 @@ MooseVariableFV<OutputType>::prepareAux()
   _neighbor_data->prepareAux();
 }
 
+template <typename OutputType>
+std::tuple<bool,
+           typename MooseVariableFV<OutputType>::ValueType,
+           typename MooseVariableFV<OutputType>::ValueType>
+MooseVariableFV<OutputType>::isDiscontinuous(const FaceInfo & fi) const
+{
+  if (!fi.neighborPtr())
+    return {false, 0, 0};
+
+  if (!this->hasBlocks(fi.elem().subdomain_id()) || !this->hasBlocks(fi.neighbor().subdomain_id()))
+    return {false, 0, 0};
+
+  const Moose::ElemArg face_elem{fi.elemPtr(), false};
+  const Moose::ElemArg face_neighbor{fi.neighborPtr(), false};
+  const auto elem_value = (*this)(face_elem), neighbor_value = (*this)(face_neighbor);
+  return {!MooseUtils::relativeFuzzyEqual(elem_value, neighbor_value, TOLERANCE),
+          elem_value,
+          neighbor_value};
+}
+
 template class MooseVariableFV<Real>;
 // TODO: implement vector fv variable support. This will require some template
 // specializations for various member functions in this and the FV variable

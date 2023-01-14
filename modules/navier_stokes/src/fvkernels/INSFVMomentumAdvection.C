@@ -97,8 +97,7 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
       _neighbor_residual = -coeff * u_face;
     }
   }
-  else if (const auto [is_jump, eps_elem_face, eps_neighbor_face] =
-               NS::isPorosityJumpFace(epsilon(), fi);
+  else if (const auto [is_jump, eps_elem_face, eps_neighbor_face] = epsilon().isDiscontinuous(fi);
            is_jump)
   {
     // We are on a porosity jump face. To avoid oscillations we should not perform interpolations

@@ -36,17 +36,3 @@ bool setInterpolationMethods(const MooseObject & obj,
 InputParameters interpolationParameters();
 }
 }
-
-namespace NS
-{
-/**
- * Checks to see whether the porosity value jumps from one side to the other of the provided face
- * @param porosity the porosity
- * @param fi the face to inspect for porosity jumps
- * @return a tuple where the zeroth member indicates whether there is a jump, the first member is
- * the porosity value on the "element" side of the face, and the second member is the porosity value
- * on the "neighbor" side of the face
- */
-std::tuple<bool, ADReal, ADReal> isPorosityJumpFace(const Moose::Functor<ADReal> & porosity,
-                                                    const FaceInfo & fi);
-}

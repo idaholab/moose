@@ -17,6 +17,7 @@
 #include "MooseMesh.h"
 #include "MooseTypes.h"
 #include "MooseError.h"
+#include "MooseUtils.h"
 
 #include "libmesh/remote_elem.h"
 #include "libmesh/tensor_tools.h"
@@ -138,6 +139,15 @@ public:
   virtual bool isConstant() const { return false; }
 
   bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const override;
+
+  /**
+   * Check whether this functor is discontinuous at the face
+   * @param The face to check for discontinuity
+   * @return a tuple where the zeroth member indicates whether there is a discontinuity, the first
+   * member is the functor value on the "element" side of the face, and the second member is the
+   * functor value on the "neighbor" side of the face
+   */
+  virtual std::tuple<bool, T, T> isDiscontinuous(const FaceInfo & fi) const;
 
 protected:
   /**
@@ -629,6 +639,25 @@ FunctorBase<T>::dot(const ElemPointArg & elem_point, const unsigned int state) c
 }
 
 template <typename T>
+std::tuple<bool, T, T>
+FunctorBase<T>::isDiscontinuous(const FaceInfo & fi) const
+{
+  if (!fi.neighborPtr())
+    return {false, T{}, T{}};
+
+  if (!this->hasBlocks(fi.elem().subdomain_id()) || !this->hasBlocks(fi.neighbor().subdomain_id()))
+    return {false, T{}, T{}};
+
+  const FaceArg face_elem{&fi, FV::LimiterType::CentralDifference, true, false, fi.elemPtr()};
+  const FaceArg face_neighbor{
+      &fi, FV::LimiterType::CentralDifference, true, false, fi.neighborPtr()};
+  const auto elem_value = (*this)(face_elem), neighbor_value = (*this)(face_neighbor);
+  return {!MooseUtils::relativeFuzzyEqual(elem_value, neighbor_value, TOLERANCE),
+          elem_value,
+          neighbor_value};
+}
+
+template <typename T>
 bool
 FunctorBase<T>::hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const
 {
@@ -775,9 +804,20 @@ public:
       _owned->jacobianSetup();
   }
 
+  bool isExtrapolatedBoundaryFace(const FaceInfo & fi, const Elem * const elem) const override
+  {
+    return _wrapped->isExtrapolatedBoundaryFace(fi, elem);
+  }
   bool isConstant() const override { return _wrapped->isConstant(); }
-
   bool hasBlocks(const SubdomainID id) const override { return _wrapped->hasBlocks(id); }
+  std::tuple<bool, T, T> isDiscontinuous(const FaceInfo & fi) const override
+  {
+    return _wrapped->isDiscontinuous(fi);
+  }
+  bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const override
+  {
+    return _wrapped->hasFaceSide(fi, fi_elem_side);
+  }
 
 protected:
   ///@{

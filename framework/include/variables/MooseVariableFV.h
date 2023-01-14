@@ -439,6 +439,8 @@ public:
 
   void setActiveTags(const std::set<TagID> & vtags) override;
 
+  std::tuple<bool, ValueType, ValueType> isDiscontinuous(const FaceInfo & fi) const override;
+
 protected:
   /**
    * @return whether \p fi is a Dirichlet boundary face for this variable

@@ -348,5 +348,28 @@ FunctionTempl<T>::jacobianSetup()
   FunctorBase<T>::jacobianSetup();
 }
 
+template <typename T>
+std::tuple<bool, typename FunctionTempl<T>::ValueType, typename FunctionTempl<T>::ValueType>
+FunctionTempl<T>::isDiscontinuous(const FaceInfo & fi) const
+{
+  if (!fi.neighborPtr())
+    return {false, 0, 0};
+
+  if (!this->hasBlocks(fi.elem().subdomain_id()) || !this->hasBlocks(fi.neighbor().subdomain_id()))
+    return {false, 0, 0};
+
+  const auto scale = fi.dCNMag();
+  static constexpr Real offset_tolerance = TOLERANCE * TOLERANCE;
+  const auto offset = scale * offset_tolerance * fi.normal();
+  const auto elem_point = fi.faceCentroid() - offset;
+  const auto neighbor_point = fi.faceCentroid() + offset;
+  const Moose::ElemPointArg face_elem{fi.elemPtr(), elem_point, false};
+  const Moose::ElemPointArg face_neighbor{fi.neighborPtr(), neighbor_point, false};
+  const auto elem_value = (*this)(face_elem), neighbor_value = (*this)(face_neighbor);
+  return {!MooseUtils::relativeFuzzyEqual(elem_value, neighbor_value, TOLERANCE),
+          elem_value,
+          neighbor_value};
+}
+
 template class FunctionTempl<Real>;
 template class FunctionTempl<ADReal>;

@@ -139,8 +139,10 @@ public:
 
   bool hasBlocks(SubdomainID) const override { return true; }
 
-private:
   using typename Moose::FunctorBase<T>::ValueType;
+  std::tuple<bool, ValueType, ValueType> isDiscontinuous(const FaceInfo & fi) const override;
+
+private:
   using typename Moose::FunctorBase<T>::GradientType;
   using typename Moose::FunctorBase<T>::DotType;
 
