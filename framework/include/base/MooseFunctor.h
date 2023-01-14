@@ -147,7 +147,7 @@ public:
    * member is the functor value on the "element" side of the face, and the second member is the
    * functor value on the "neighbor" side of the face
    */
-  virtual std::tuple<bool, T, T> isDiscontinuous(const FaceInfo & fi) const;
+  std::tuple<bool, T, T> isDiscontinuous(const FaceInfo & fi) const;
 
 protected:
   /**
@@ -810,10 +810,6 @@ public:
   }
   bool isConstant() const override { return _wrapped->isConstant(); }
   bool hasBlocks(const SubdomainID id) const override { return _wrapped->hasBlocks(id); }
-  std::tuple<bool, T, T> isDiscontinuous(const FaceInfo & fi) const override
-  {
-    return _wrapped->isDiscontinuous(fi);
-  }
   bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const override
   {
     return _wrapped->hasFaceSide(fi, fi_elem_side);

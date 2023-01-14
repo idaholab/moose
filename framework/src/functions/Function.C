@@ -201,7 +201,25 @@ template <typename T>
 typename FunctionTempl<T>::ValueType
 FunctionTempl<T>::evaluate(const FaceArg & face, const unsigned int state) const
 {
-  return value(getTime(state), face.fi->faceCentroid());
+  if (face.face_side && face.fi->neighborPtr() &&
+      (face.fi->elem().subdomain_id() != face.fi->neighbor().subdomain_id()))
+  {
+    // Some users like to put discontinuities in their functions at subdomain changes in which case
+    // in order to always get the proper discontinuous effect we should evaluate ever so slightly
+    // off the face. Consider evaluation of: if(x < 0, -1, 1) if the face centroid is right at x ==
+    // 0 for example. The user likely doesn't want you to return 1 if they've asked for a 0-
+    // evaluation
+    //
+    // I can't quite tell but I think the tolerance for comparing coordinates (x, y, z, t) in
+    // fparser is ~1e-9 so we need to use something larger than that. The comparison is absolute
+    static constexpr Real offset_tolerance = 1e-8;
+    auto offset = offset_tolerance * face.fi->normal();
+    if (face.face_side == face.fi->elemPtr())
+      offset *= -1;
+    return value(getTime(state), face.fi->faceCentroid() + offset);
+  }
+  else
+    return value(getTime(state), face.fi->faceCentroid());
 }
 
 template <typename T>
@@ -346,29 +364,6 @@ FunctionTempl<T>::jacobianSetup()
   _current_elem_qp_functor_elem = nullptr;
   _current_elem_side_qp_functor_elem_side = std::make_pair(nullptr, libMesh::invalid_uint);
   FunctorBase<T>::jacobianSetup();
-}
-
-template <typename T>
-std::tuple<bool, typename FunctionTempl<T>::ValueType, typename FunctionTempl<T>::ValueType>
-FunctionTempl<T>::isDiscontinuous(const FaceInfo & fi) const
-{
-  if (!fi.neighborPtr())
-    return {false, 0, 0};
-
-  if (!this->hasBlocks(fi.elem().subdomain_id()) || !this->hasBlocks(fi.neighbor().subdomain_id()))
-    return {false, 0, 0};
-
-  const auto scale = fi.dCNMag();
-  static constexpr Real offset_tolerance = TOLERANCE * TOLERANCE;
-  const auto offset = scale * offset_tolerance * fi.normal();
-  const auto elem_point = fi.faceCentroid() - offset;
-  const auto neighbor_point = fi.faceCentroid() + offset;
-  const Moose::ElemPointArg face_elem{fi.elemPtr(), elem_point, false};
-  const Moose::ElemPointArg face_neighbor{fi.neighborPtr(), neighbor_point, false};
-  const auto elem_value = (*this)(face_elem), neighbor_value = (*this)(face_neighbor);
-  return {!MooseUtils::relativeFuzzyEqual(elem_value, neighbor_value, TOLERANCE),
-          elem_value,
-          neighbor_value};
 }
 
 template class FunctionTempl<Real>;
