@@ -23,13 +23,6 @@ InputParameters
 MultiAppFieldTransfer::validParams()
 {
   InputParameters params = MultiAppTransfer::validParams();
-  params.addParam<TagName>(
-      "from_solution_tag",
-      "The tag of the solution vector to be transferred (default to the solution)");
-  params.addParam<TagName>(
-      "to_solution_tag",
-      "The tag of the solution vector to be transferred to (default to the solution)");
-
   return params;
 }
 

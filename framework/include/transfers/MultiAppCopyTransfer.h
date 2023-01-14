@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "MultiAppFieldTransfer.h"
+#include "MultiAppDofCopyTransfer.h"
 
 namespace libMesh
 {
@@ -17,16 +17,15 @@ class DofObject;
 }
 
 /**
- * Copy the fields directly from one application to another, based on degree-of-freedom indexing
+ * Copy variables directly from one application to another, based on degree-of-freedom indexing
+ * TODO: Rename to MultiAppVariableCopy or MultiAppFieldCopy
  */
-class MultiAppCopyTransfer : public MultiAppFieldTransfer
+class MultiAppCopyTransfer : public MultiAppDofCopyTransfer
 {
 public:
   static InputParameters validParams();
 
   MultiAppCopyTransfer(const InputParameters & parameters);
-
-  void initialSetup() override;
 
   /**
    * Performs the transfer of a variable (Nonlinear or Auxiliary) to/from the Multiapp.
@@ -34,21 +33,6 @@ public:
   virtual void execute() override;
 
 protected:
-  /**
-   * Performs the transfer of a variable between two problems if they have the same mesh.
-   */
-  void transfer(FEProblemBase & to_problem, FEProblemBase & from_problem);
-
-  /**
-   * Performs the transfer of values between a node or element.
-   */
-  void transferDofObject(libMesh::DofObject * to_object,
-                         libMesh::DofObject * from_object,
-                         MooseVariableFieldBase & to_var,
-                         MooseVariableFieldBase & from_var,
-                         NumericVector<Number> & to_solution,
-                         NumericVector<Number> & from_solution);
-
   virtual std::vector<VariableName> getFromVarNames() const override { return _from_var_names; }
   virtual std::vector<AuxVariableName> getToVarNames() const override { return _to_var_names; }
 
@@ -63,11 +47,4 @@ protected:
   VariableName _from_var_name;
   /// Name of variables transferring to
   AuxVariableName _to_var_name;
-
-  /// Whether block restriction is active
-  const bool _has_block_restrictions;
-  /// Subdomain IDs of the blocks to transfer from
-  std::set<SubdomainID> _from_blocks;
-  /// Subdomain IDs of the blocks to transfer to
-  std::set<SubdomainID> _to_blocks;
 };
