@@ -120,10 +120,16 @@ outputMeshInformation(FEProblemBase & problem, bool verbose)
     oss << std::setw(console_field_width)
         << "  Num Subdomains: " << static_cast<std::size_t>(mesh.n_subdomains()) << '\n';
     if (mesh.n_processors() > 1)
+    {
       oss << std::setw(console_field_width)
           << "  Num Partitions: " << static_cast<std::size_t>(mesh.n_partitions()) << '\n'
           << std::setw(console_field_width) << "  Partitioner: " << moose_mesh.partitionerName()
           << (moose_mesh.isPartitionerForced() ? " (forced) " : "") << '\n';
+      if (mesh.skip_partitioning())
+        oss << std::setw(console_field_width) << "  Skipping all partitioning!" << '\n';
+      else if (mesh.skip_noncritical_partitioning())
+        oss << std::setw(console_field_width) << "  Skipping noncritical partitioning!" << '\n';
+    }
   }
 
   oss << std::endl;
