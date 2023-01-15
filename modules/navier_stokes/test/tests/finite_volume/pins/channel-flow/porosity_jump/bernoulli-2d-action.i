@@ -49,7 +49,7 @@ mu=0
 
 [AuxVariables]
   [porosity]
-    type = ExtrapolateAtJumpFacesVariable
+    type = PiecewiseConstantVariable
   []
 []
 

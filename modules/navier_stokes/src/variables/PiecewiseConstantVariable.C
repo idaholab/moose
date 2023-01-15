@@ -7,26 +7,26 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ExtrapolateAtJumpFacesVariable.h"
+#include "PiecewiseConstantVariable.h"
 #include "NS.h"
 #include "NSFVUtils.h"
 
-registerMooseObject("NavierStokesApp", ExtrapolateAtJumpFacesVariable);
+registerMooseObject("NavierStokesApp", PiecewiseConstantVariable);
 
 InputParameters
-ExtrapolateAtJumpFacesVariable::validParams()
+PiecewiseConstantVariable::validParams()
 {
   return INSFVVariable::validParams();
 }
 
-ExtrapolateAtJumpFacesVariable::ExtrapolateAtJumpFacesVariable(const InputParameters & params)
+PiecewiseConstantVariable::PiecewiseConstantVariable(const InputParameters & params)
   : INSFVVariable(params)
 {
 }
 
 bool
-ExtrapolateAtJumpFacesVariable::isExtrapolatedBoundaryFace(const FaceInfo & fi,
-                                                           const Elem * const elem) const
+PiecewiseConstantVariable::isExtrapolatedBoundaryFace(const FaceInfo & fi,
+                                                      const Elem * const elem) const
 {
   if (isDirichletBoundaryFace(fi, elem))
     return false;

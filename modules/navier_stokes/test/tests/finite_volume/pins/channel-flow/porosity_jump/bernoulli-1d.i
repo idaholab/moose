@@ -40,7 +40,7 @@ velocity_interp_method = 'rc'
 
 [AuxVariables]
   [porosity]
-    type = ExtrapolateAtJumpFacesVariable
+    type = PiecewiseConstantVariable
   []
   [has_porosity_jump_face]
     type = MooseVariableFVReal

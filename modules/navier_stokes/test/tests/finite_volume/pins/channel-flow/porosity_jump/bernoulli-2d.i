@@ -49,7 +49,7 @@ velocity_interp_method='rc'
 
 [AuxVariables]
   [porosity]
-    type = ExtrapolateAtJumpFacesVariable
+    type = PiecewiseConstantVariable
   []
 []
 

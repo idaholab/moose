@@ -17,10 +17,10 @@ class InputParameters;
  * A special variable class for porosity which flags faces at which porosity jumps occur as
  * extrapolated boundary faces
  */
-class ExtrapolateAtJumpFacesVariable : public INSFVVariable
+class PiecewiseConstantVariable : public INSFVVariable
 {
 public:
-  ExtrapolateAtJumpFacesVariable(const InputParameters & params);
+  PiecewiseConstantVariable(const InputParameters & params);
 
   static InputParameters validParams();
 
