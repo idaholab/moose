@@ -127,4 +127,11 @@
     ad_indexing_type = 'global'
     requirement = 'The system shall be able to recognize discontinuities in parsed functions at subdomain changes and produce the correct Bernoulli pressure drop as a consequence.'
   []
+  [bernoulli-with-functor-material]
+    type = CSVDiff
+    input = bernoulli-1d-functor-material.i
+    csvdiff = bernoulli-1d-functor-material_out.csv
+    ad_indexing_type = 'global'
+    requirement = 'The system shall be able to recognize discontinuities in functor material properties and produce the correct Bernoulli pressure drop as a consequence.'
+  []
 []
