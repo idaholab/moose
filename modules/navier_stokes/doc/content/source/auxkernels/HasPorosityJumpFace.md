@@ -6,9 +6,7 @@
 
 The `HasPorosityJumpFace` object returns values of 1 or 0. The object returns 1
 if any face attached to an element has a jump in porosity value between the -
-and + sides of the face. More specifically, the object returns 1 if the passed
-in porosity functor returns true from its `isDiscontinuous` method on any given
-face attached to the element. This object only takes elemental variables for its
+and + sides of the face. This object only takes elemental variables for its
 `variable` parameter.
 
 !syntax parameters /AuxKernels/HasPorosityJumpFace

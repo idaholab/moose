@@ -103,7 +103,8 @@ INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
     const bool elem_is_upwind = MetaPhysicL::raw_value(v_face) * _normal > 0;
     const Moose::FaceArg advected_face_arg{
         &fi, limiterType(_advected_interp_method), elem_is_upwind, correct_skewness, nullptr};
-    if (const auto [is_jump, eps_elem_face, eps_neighbor_face] = epsilon().isDiscontinuous(fi);
+    if (const auto [is_jump, eps_elem_face, eps_neighbor_face] =
+            NS::isPorosityJumpFace(epsilon(), fi);
         is_jump)
     {
       // For a weakly compressible formulation, the density should not depend on pressure and

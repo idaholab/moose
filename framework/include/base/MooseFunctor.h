@@ -140,15 +140,6 @@ public:
 
   bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const override;
 
-  /**
-   * Check whether this functor is discontinuous at the face
-   * @param The face to check for discontinuity
-   * @return a tuple where the zeroth member indicates whether there is a discontinuity, the first
-   * member is the functor value on the "element" side of the face, and the second member is the
-   * functor value on the "neighbor" side of the face
-   */
-  std::tuple<bool, T, T> isDiscontinuous(const FaceInfo & fi) const;
-
 protected:
   /**
    * Evaluate the functor with a given element. Some example implementations of this method
@@ -636,25 +627,6 @@ typename FunctorBase<T>::DotType
 FunctorBase<T>::dot(const ElemPointArg & elem_point, const unsigned int state) const
 {
   return evaluateDot(elem_point, state);
-}
-
-template <typename T>
-std::tuple<bool, T, T>
-FunctorBase<T>::isDiscontinuous(const FaceInfo & fi) const
-{
-  if (!fi.neighborPtr())
-    return {false, T{}, T{}};
-
-  if (!this->hasBlocks(fi.elem().subdomain_id()) || !this->hasBlocks(fi.neighbor().subdomain_id()))
-    return {false, T{}, T{}};
-
-  const FaceArg face_elem{&fi, FV::LimiterType::CentralDifference, true, false, fi.elemPtr()};
-  const FaceArg face_neighbor{
-      &fi, FV::LimiterType::CentralDifference, true, false, fi.neighborPtr()};
-  const auto elem_value = (*this)(face_elem), neighbor_value = (*this)(face_neighbor);
-  return {!MooseUtils::relativeFuzzyEqual(elem_value, neighbor_value, TOLERANCE),
-          elem_value,
-          neighbor_value};
 }
 
 template <typename T>
