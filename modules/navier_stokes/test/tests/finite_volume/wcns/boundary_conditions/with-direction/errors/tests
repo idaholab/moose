@@ -11,6 +11,7 @@
     input = flux_bcs.i
     method = "!dbg"
     ad_indexing_type = 'global'
+    max_threads = 1
   []
   [mass-bc-wrong-direction]
     type = 'RunException'
@@ -32,6 +33,7 @@
     method = "!dbg"
     cli_args = "FVBCs/inlet_mass/direction='1 0 0'"
     ad_indexing_type = 'global'
+    max_threads = 1
   []
   [momentum-bc-wrong-direction]
     type = 'RunException'
@@ -55,6 +57,7 @@
     cli_args = "FVBCs/inlet_mass/direction='1 0 0' FVBCs/inlet_u/direction='1 0 0' "
                "FVBCs/inlet_v/direction='1 0 0'"
     ad_indexing_type = 'global'
+    max_threads = 1
   []
   [energy-bc-wrong-direction]
     type = 'RunException'
@@ -78,6 +81,7 @@
     cli_args = "FVBCs/inlet_mass/direction='1 0 0' FVBCs/inlet_u/direction='1 0 0' "
                "FVBCs/inlet_v/direction='1 0 0' FVBCs/inlet_T/direction='1 0 0'"
     ad_indexing_type = 'global'
+    max_threads = 1
   []
   [scalar-bc-wrong-direction]
     type = 'RunException'
