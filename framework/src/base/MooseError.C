@@ -41,8 +41,6 @@ mooseMsgFmt(const std::string & msg, const std::string & title, const std::strin
 [[noreturn]] void
 mooseErrorRaw(std::string msg, const std::string prefix)
 {
-  static std::atomic<bool> aborted{false};
-
   msg = mooseMsgFmt(msg, "*** ERROR ***", COLOR_RED);
 
   if (Moose::_throw_on_error)
@@ -61,34 +59,27 @@ mooseErrorRaw(std::string msg, const std::string prefix)
   msg = oss.str();
   if (!prefix.empty())
     MooseUtils::indentMessage(prefix, msg);
-  if (!aborted)
   {
-    {
-      Threads::spin_mutex::scoped_lock lock(moose_stream_lock);
-      Moose::err << msg << std::flush;
-    }
-
-    oss.str("");
-    if (Moose::show_trace && libMesh::global_n_processors() == 1)
-      print_trace(oss);
-
-    msg = oss.str();
-    if (!prefix.empty())
-      MooseUtils::indentMessage(prefix, msg);
-
-    if (!aborted)
-    {
-      {
-        Threads::spin_mutex::scoped_lock lock(moose_stream_lock);
-        Moose::err << msg << std::flush;
-      }
-
-      if (libMesh::global_n_processors() > 1)
-        libMesh::write_traceout();
-    }
+    Threads::spin_mutex::scoped_lock lock(moose_stream_lock);
+    Moose::err << msg << std::flush;
   }
 
-  aborted = true;
+  oss.str("");
+  if (Moose::show_trace && libMesh::global_n_processors() == 1)
+    print_trace(oss);
+
+  msg = oss.str();
+  if (!prefix.empty())
+    MooseUtils::indentMessage(prefix, msg);
+
+  {
+    Threads::spin_mutex::scoped_lock lock(moose_stream_lock);
+    Moose::err << msg << std::flush;
+
+    if (libMesh::global_n_processors() > 1)
+      libMesh::write_traceout();
+  }
+
   MOOSE_ABORT;
 }
 
