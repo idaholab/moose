@@ -31,7 +31,7 @@ template <bool is_ad>
 Real
 MaterialRateRealAuxTempl<is_ad>::getRealValue()
 {
-  // _prop and _qp are members of a dependent template so they need to be qualified with this->
+  // _prop and _qp are members of a dependent name so they need to be qualified with this->
   Real prop = MetaPhysicL::raw_value(this->_prop[this->_qp]);
   Real prop_old = MetaPhysicL::raw_value(this->_prop_old[this->_qp]);
   Real rate = (prop - prop_old) / this->_dt;

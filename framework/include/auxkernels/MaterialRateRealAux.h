@@ -25,11 +25,6 @@ class MaterialRateRealAuxTempl : public MaterialRateAuxBaseTempl<Real, is_ad>
 {
 public:
   static InputParameters validParams();
-
-  /**
-   * Class constructor.
-   * @param parameters Input parameters for this object
-   */
   MaterialRateRealAuxTempl(const InputParameters & parameters);
 
 protected:
