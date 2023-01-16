@@ -134,7 +134,7 @@ protected:
   std::string _error_message;
 
 private:
-  /// Whether this is the zeroth copy of this body
+  /// Whether this is the zeroth threaded copy of this body
   const bool _zeroth_copy;
 };
 

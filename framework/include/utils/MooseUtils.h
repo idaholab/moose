@@ -430,7 +430,6 @@ absoluteFuzzyLessThan(const T & var1,
  * @return true if var1 and var2 are equal within relative tol
  */
 template <typename T, typename T2, typename T3 = Real>
-
 bool
 relativeFuzzyEqual(const T & var1,
                    const T2 & var2,

@@ -19,7 +19,9 @@ InputParameters
 ElementL2FunctorErrorTempl<is_ad>::validParams()
 {
   InputParameters params = ElementIntegralPostprocessor::validParams();
-  params.addRequiredParam<MooseFunctorName>("approximate", "The approximate functor");
+  params.addRequiredParam<MooseFunctorName>("approximate",
+                                            "The approximate functor. This functor has to be an "
+                                            "ADFunctor, like a variable or an ADFunction");
   params.addRequiredParam<MooseFunctorName>("exact", "The analytic solution to compare against");
   params.addClassDescription(
       "Computes L2 error between an 'approximate' functor and an 'exact' functor");

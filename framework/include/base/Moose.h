@@ -178,16 +178,16 @@ extern bool _warnings_are_errors;
 extern bool _deprecated_is_error;
 
 /**
- * Variable to turn on exceptions during mooseError(), should only be used with MOOSE unit or when
- * about to perform threaded operations because exception throwing in threaded regions is safe while
- * aborting is inherently not when singletons are involved (e.g. what thread is responsible for
- * destruction, or what do you do about mutexes?)
+ * Variable to turn on exceptions during mooseError(), should only be used within MOOSE unit tests
+ * or when about to perform threaded operations because exception throwing in threaded regions is
+ * safe while aborting is inherently not when singletons are involved (e.g. what thread is
+ * responsible for destruction, or what do you do about mutexes?)
  */
 extern bool _throw_on_error;
 
 /**
  * Variable to turn on exceptions during mooseWarning(), should
- * only be used with MOOSE unit.
+ * only be used in MOOSE unit tests.
  */
 extern bool _throw_on_warning;
 
