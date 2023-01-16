@@ -80,5 +80,7 @@ SIMPLE::execute()
 
   _rc_uo->execute();
 
+  _problem.solve(_pressure_sys_number);
+
   _console << "This will be something smart" << std::endl;
 }

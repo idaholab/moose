@@ -45,14 +45,6 @@ momentum_tag = "non_pressure"
 []
 
 [FVKernels]
-  [mass]
-    type = INSFVMassAdvection
-    variable = pressure
-    advected_interp_method = ${advected_interp_method}
-    velocity_interp_method = ${velocity_interp_method}
-    rho = ${rho}
-  []
-
   [u_advection]
     type = INSFVMomentumAdvection
     variable = u
@@ -75,6 +67,16 @@ momentum_tag = "non_pressure"
     variable = u
     momentum_component = 'x'
     pressure = pressure
+  []
+  [p_diffusion]
+    type = FVAnisotropicDiffusion
+    variable = pressure
+    coeff = "Ainv"
+  []
+  [p_source]
+    type = FVDivergence
+    variable = pressure
+    vector_field = "HbyA"
   []
 []
 

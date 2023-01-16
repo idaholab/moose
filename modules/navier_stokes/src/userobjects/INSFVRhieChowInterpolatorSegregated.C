@@ -76,6 +76,12 @@ INSFVRhieChowInterpolatorSegregated::INSFVRhieChowInterpolatorSegregated(
         _moose_mesh,
         blockIDs()))
 {
+  // Register the elemental functors which will be queried in the pressure equation
+  for (const auto tid : make_range(libMesh::n_threads()))
+  {
+    UserObject::_subproblem.addFunctor("Ainv", _Ainv, tid);
+    UserObject::_subproblem.addFunctor("HbyA", _HbyA, tid);
+  }
 }
 
 void

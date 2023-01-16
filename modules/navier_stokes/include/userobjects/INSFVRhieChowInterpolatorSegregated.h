@@ -72,12 +72,12 @@ protected:
    * multiplied by the predicted velocity minus the source terms from the right hand side of the
    * linearized momentum predictor stem.
    */
-  CellCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>> _HbyA;
+  CellCenteredMapFunctor<ADRealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>> _HbyA;
 
   /**
    * A map from element IDs to $1/A_ij$. ADD MORE
    */
-  CellCenteredMapFunctor<RealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>> _Ainv;
+  CellCenteredMapFunctor<ADRealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>> _Ainv;
 
   /// A functor for computing the (non-RC corrected) velocity
   std::unique_ptr<PiecewiseByBlockLambdaFunctor<ADRealVectorValue>> _vel;
