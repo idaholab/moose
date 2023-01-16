@@ -7,6 +7,8 @@
     requirement = 'The system shall perform n non linear iterations before checking for non linear divergence'
     issues = '#16474'
     design = 'FEProblemSolve.md'
+    # Solver manages to converge at 10 parallel processes
+    max_parallel = 9
   [../]
   [./2d_diffusion_test]
     type = 'RunApp'

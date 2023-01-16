@@ -18,5 +18,7 @@
     requirement = 'The system shall consider a nonlinear solve diverged if the nonlinear residual exceeds the absolute divergence tolerance while iterating'
     issues = '#16474'
     design = 'FEProblemSolve.md'
+    # Solver manages to converge at 10 parallel processes
+    max_parallel = 9
   [../]
 []
