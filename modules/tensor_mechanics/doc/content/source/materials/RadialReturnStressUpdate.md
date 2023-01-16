@@ -83,32 +83,34 @@ effectively limit the time step size to achieve the desired convergence or integ
 the expense of global solves and discarded time steps. An alternative to the material time step limiter is
 "substepping", which subdivides the current time step into substeps which are solved sequentially within `ComputeMultipleInelasticStress`.
 
-To enabled substepping, the user needs to input `use_substep = true`. Note, not all inelastic models support substepping, but
+To enabled substepping, the user needs to set the `use_substepping` parameter to `INCREMENT_BASED` or `ERROR_BASED`. Note, not all inelastic models support substepping, but
 it is expected that this capability to be gradually extended to more models.
 
-The default way to calculate the number of substeps is to compare the effective elastic strain increment to the `max_inelastic_increment` and use
+`INCREMENT_BASED` substepping calculates the number of substeps by comparing the effective elastic strain increment to the `max_inelastic_increment` and using
 that ratio to determine the number of substeps. In essence:
 
 \begin{equation}
 \text{number of substeps} = \frac{\Delta \epsilon^{\text{elastic}}}{\text{max\_inelastic\_increment} \cdot \text{substep\_tolerance}}
 \end{equation}
 
-where `substep_strain_tolerance` and `max_inelastic_increment` are user parameters. Alternatively, as a criterion to select the number of substeps,
-the user can set the flag `use_substep_integration_error` to true, which will use the following formula:
+where substep_strain_tolerance` and `max_inelastic_increment` are user parameters.
+
+With `ERROR_BASED` substepping the following formula will be uses to compute the number of substeps:
 
 \begin{equation}
 \text{number of substeps} = \frac{\Delta \epsilon^{\text{elastic}}}{\text{substep\_tolerance}}
 \end{equation}
 
-This latest formula is directly based on the creep numerical integration error. The `substep_strain_tolerance` can be considered as the maximum creep numerical integration error 
+This latest formula is directly based on the creep numerical integration error. The `substep_strain_tolerance` can be considered as the maximum creep numerical integration error
 allowed by substepping. A value of $1.0\cdot10^4$ will work for many cases. An example of this option looks as follows:
 
 ```
-    use_substep = true
+    use_substepping = ERROR_BASED
     substep_strain_tolerance = 1.0e-4
-    use_substep_integration_error = true
 ```
 
+The `adaptive_substepping` parameter enables adaptive substepping, where the number of substeps is successively doubled until the
+return mapping model successfully converges or the doubled number of substeps exceeds the user specified maximum number of substeps.
 
 ## Writing a New Stress Update Material
 
