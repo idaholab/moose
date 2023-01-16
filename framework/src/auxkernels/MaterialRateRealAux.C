@@ -17,7 +17,7 @@ InputParameters
 MaterialRateRealAuxTempl<is_ad>::validParams()
 {
   InputParameters params = MaterialAuxBaseTempl<Real, is_ad>::validParams();
-  params.addClassDescription("Outputs element volume-averaged material properties rate of change");
+  params.addClassDescription("Outputs element material properties rate of change");
   return params;
 }
 
@@ -31,7 +31,6 @@ template <bool is_ad>
 Real
 MaterialRateRealAuxTempl<is_ad>::getRealValue()
 {
-  // _prop and _qp are members of a dependent name so they need to be qualified with this->
   Real prop = MetaPhysicL::raw_value(this->_prop[this->_qp]);
   Real prop_old = MetaPhysicL::raw_value(this->_prop_old[this->_qp]);
   Real rate = (prop - prop_old) / this->_dt;

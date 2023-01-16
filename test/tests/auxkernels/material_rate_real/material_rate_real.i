@@ -6,66 +6,66 @@
 []
 
 [AuxVariables]
-  [./rate]
+  [rate]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./rate]
+  [rate]
     type = MaterialRateRealAux
-    variable=rate
+    variable = rate
     property = prop
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Functions]
-  [./func]
+  [func]
     type = ParsedFunction
     expression = t*t/2
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = CoefDiffusion
     variable = u
     coef = 0.1
-  [../]
-  [./time]
+  []
+  [time]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Materials]
-  [./mat]
+  [mat]
     type = GenericFunctionMaterial
     prop_names = prop
     prop_values = func
     block = 0
-  [../]
+  []
 []
 
 [Executioner]
@@ -86,5 +86,5 @@
 []
 
 [Outputs]
-  csv=True
+  csv = True
 []

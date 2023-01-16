@@ -31,7 +31,6 @@ template <bool is_ad>
 Real
 MaterialRealAuxTempl<is_ad>::getRealValue()
 {
-  // _prop and _qp are members of a dependent name so they need to be qualified with this->
   return MetaPhysicL::raw_value(this->_prop[this->_qp]);
 }
 

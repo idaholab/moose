@@ -6,7 +6,6 @@
 
 The `MaterialRateRealAux` AuxKernel is used to output the rate of change of
 material properties as an element-level, variable.
-The computed value will be the volume-averaged quantity over the element.  
 The rate is computed by
 
 !equation

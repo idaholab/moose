@@ -12,11 +12,6 @@
 // MOOSE includes
 #include "MaterialRateAuxBase.h"
 
-// Forward Declarations
-template <bool>
-class MaterialRateRealAuxTempl;
-typedef MaterialRateRealAuxTempl<false> MaterialRateRealAux;
-
 /**
  * Object for passing a scalar, REAL material property to an AuxVariable
  */
@@ -31,5 +26,5 @@ protected:
   /// Returns the material rate property values at quadrature points
   Real getRealValue() override;
 };
-
+typedef MaterialRateRealAuxTempl<false> MaterialRateRealAux;
 typedef MaterialRateRealAuxTempl<true> ADMaterialRateRealAux;
