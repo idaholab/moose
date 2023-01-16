@@ -1569,7 +1569,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
     if (_fe_problem.haveFV())
     {
       using FVRange = StoredRange<MooseMesh::const_face_info_iterator, const FaceInfo *>;
-      ComputeFVFluxResidualThread<FVRange> fvr(_fe_problem, tags);
+      ComputeFVFluxResidualThread<FVRange> fvr(_fe_problem, this->number(), tags);
       FVRange faces(_fe_problem.mesh().ownedFaceInfoBegin(), _fe_problem.mesh().ownedFaceInfoEnd());
       Threads::parallel_reduce(faces, fvr);
     }
@@ -1787,7 +1787,7 @@ NonlinearSystemBase::computeResidualAndJacobianInternal(const std::set<TagID> & 
     if (_fe_problem.haveFV())
     {
       using FVRange = StoredRange<MooseMesh::const_face_info_iterator, const FaceInfo *>;
-      ComputeFVFluxRJThread<FVRange> fvrj(_fe_problem, vector_tags, matrix_tags);
+      ComputeFVFluxRJThread<FVRange> fvrj(_fe_problem, this->number(), vector_tags, matrix_tags);
       FVRange faces(_fe_problem.mesh().ownedFaceInfoBegin(), _fe_problem.mesh().ownedFaceInfoEnd());
       Threads::parallel_reduce(faces, fvrj);
     }
@@ -2640,7 +2640,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
       // the same loop works for both residual and jacobians because it keys
       // off of FEProblem's _currently_computing_jacobian parameter
       using FVRange = StoredRange<MooseMesh::const_face_info_iterator, const FaceInfo *>;
-      ComputeFVFluxJacobianThread<FVRange> fvj(_fe_problem, tags);
+      ComputeFVFluxJacobianThread<FVRange> fvj(_fe_problem, this->number(), tags);
       FVRange faces(_fe_problem.mesh().ownedFaceInfoBegin(), _fe_problem.mesh().ownedFaceInfoEnd());
       Threads::parallel_reduce(faces, fvj);
     }
@@ -3518,8 +3518,9 @@ NonlinearSystemBase::needInterfaceMaterialOnSide(BoundaryID bnd_id, THREAD_ID ti
   return _interface_kernels.hasActiveBoundaryObjects(bnd_id, tid);
 }
 
-bool NonlinearSystemBase::needSubdomainMaterialOnSide(SubdomainID /*subdomain_id*/,
-                                                      THREAD_ID /*tid*/) const
+bool
+NonlinearSystemBase::needSubdomainMaterialOnSide(SubdomainID /*subdomain_id*/,
+                                                 THREAD_ID /*tid*/) const
 {
   return _doing_dg;
 }

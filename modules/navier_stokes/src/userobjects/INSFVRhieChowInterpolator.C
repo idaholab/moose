@@ -79,6 +79,10 @@ INSFVRhieChowInterpolator::validParams()
       "supplied when the mesh dimension is greater than 2. It represents the on-diagonal "
       "coefficients for the 'z' component velocity, solved "
       "via the Navier-Stokes equations.");
+  params.addParam<NonlinearSystemName>("mass_momentum_system",
+                                       "0",
+                                       "The nonlinear system in which the monolithic momentum and "
+                                       "continuity equations are located.");
   return params;
 }
 
@@ -109,6 +113,7 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
     _ax(_a, 0),
     _ay(_a, 1),
     _az(_a, 2),
+    _nl_sys_number(_fe_problem.nlSysNum(getParam<NonlinearSystemName>("mass_momentum_system"))),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _example(0),
     _a_data_provided(false)
@@ -355,7 +360,7 @@ INSFVRhieChowInterpolator::execute()
 
   PARALLEL_TRY
   {
-    GatherRCDataElementThread et(_fe_problem, _var_numbers);
+    GatherRCDataElementThread et(_fe_problem, _nl_sys_number, _var_numbers);
     Threads::parallel_reduce(*_elem_range, et);
   }
   PARALLEL_CATCH;
@@ -363,7 +368,7 @@ INSFVRhieChowInterpolator::execute()
   PARALLEL_TRY
   {
     using FVRange = StoredRange<MooseMesh::const_face_info_iterator, const FaceInfo *>;
-    GatherRCDataFaceThread<FVRange> fvr(_fe_problem, _var_numbers);
+    GatherRCDataFaceThread<FVRange> fvr(_fe_problem, _nl_sys_number, _var_numbers);
     FVRange faces(_fe_problem.mesh().ownedFaceInfoBegin(), _fe_problem.mesh().ownedFaceInfoEnd());
     Threads::parallel_reduce(faces, fvr);
   }

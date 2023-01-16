@@ -26,7 +26,9 @@ public:
   using Parent = ThreadedFaceLoop<RangeType>;
   using Parent::join;
 
-  GatherRCDataFaceThread(FEProblemBase & fe_problem, const std::vector<unsigned int> & vars);
+  GatherRCDataFaceThread(FEProblemBase & fe_problem,
+                         const unsigned int nl_sys_number,
+                         const std::vector<unsigned int> & vars);
 
   // Splitting Constructor
   GatherRCDataFaceThread(GatherRCDataFaceThread & x, Threads::split split);
@@ -70,8 +72,9 @@ private:
 
 template <typename RangeType>
 GatherRCDataFaceThread<RangeType>::GatherRCDataFaceThread(FEProblemBase & fe_problem,
+                                                          const unsigned int nl_sys_number,
                                                           const std::vector<unsigned int> & vars)
-  : ThreadedFaceLoop<RangeType>(fe_problem, {}), _vars(vars)
+  : ThreadedFaceLoop<RangeType>(fe_problem, nl_sys_number, {}), _vars(vars)
 {
 }
 
@@ -120,6 +123,7 @@ GatherRCDataFaceThread<RangeType>::onBoundary(const FaceInfo & fi, BoundaryID bn
     auto queries = this->_fe_problem.theWarehouse()
                        .query()
                        .template condition<AttribSystem>("FVFluxBC")
+                       .template condition<AttribSysNum>(this->_nl_system_num)
                        .template condition<AttribThread>(this->_tid)
                        .template condition<AttribBoundaries>(bnd_id);
     getVarROs(bcs, queries);
@@ -135,6 +139,7 @@ GatherRCDataFaceThread<RangeType>::onBoundary(const FaceInfo & fi, BoundaryID bn
     auto queries = this->_fe_problem.theWarehouse()
                        .query()
                        .template condition<AttribSystem>("FVInterfaceKernel")
+                       .template condition<AttribSysNum>(this->_nl_system_num)
                        .template condition<AttribThread>(this->_tid)
                        .template condition<AttribBoundaries>(bnd_id);
     getVarROs(iks, queries);
@@ -159,6 +164,7 @@ GatherRCDataFaceThread<RangeType>::subdomainChanged()
   // dangling reference
   auto queries = this->_fe_problem.theWarehouse()
                      .query()
+                     .template condition<AttribSysNum>(this->_nl_system_num)
                      .template condition<AttribSystem>("FVFluxKernel")
                      .template condition<AttribSubdomains>(this->_subdomain)
                      .template condition<AttribThread>(this->_tid);
@@ -185,6 +191,7 @@ GatherRCDataFaceThread<RangeType>::neighborSubdomainChanged()
   // dangling reference
   auto queries = this->_fe_problem.theWarehouse()
                      .query()
+                     .template condition<AttribSysNum>(this->_nl_system_num)
                      .template condition<AttribSystem>("FVFluxKernel")
                      .template condition<AttribSubdomains>(this->_neighbor_subdomain)
                      .template condition<AttribThread>(this->_tid);
