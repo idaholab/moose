@@ -1,4 +1,4 @@
-//* This file is part of the MOOSE framework
+//*This file is part of the MOOSE framework
 //* https://www.mooseframework.org
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
@@ -31,7 +31,6 @@ template <bool is_ad>
 Real
 MaterialRealAuxTempl<is_ad>::getRealValue()
 {
-  // _prop and _qp are members of a dependent template so they need to be qualified with this->
   return MetaPhysicL::raw_value(this->_prop[this->_qp]);
 }
 

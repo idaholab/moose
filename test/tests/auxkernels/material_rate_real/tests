@@ -1,0 +1,10 @@
+[Tests]
+  design = "source/auxkernels/MaterialRateRealAux.md"
+  issues = "#23144"
+  [scalar_rate]
+    type = "CSVDiff"
+    input = "material_rate_real.i"
+    csvdiff = "material_rate_real_out.csv"
+    requirement = "The system shall compute the rate of change of a scalar material property"
+  []
+[]
