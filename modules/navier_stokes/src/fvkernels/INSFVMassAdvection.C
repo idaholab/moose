@@ -35,10 +35,7 @@ ADReal
 INSFVMassAdvection::computeQpResidual()
 {
   const auto v = _rc_vel_provider.getVelocity(_velocity_interp_method, *_face_info, _tid);
-  const auto rho_face = onBoundary(*_face_info)
-                            ? _rho(singleSidedFaceArg())
-                            : _rho(makeFace(*_face_info,
-                                            limiterType(_advected_interp_method),
-                                            MetaPhysicL::raw_value(v) * _normal > 0));
+  const auto rho_face = _rho(makeFace(
+      *_face_info, limiterType(_advected_interp_method), MetaPhysicL::raw_value(v) * _normal > 0));
   return _normal * v * rho_face;
 }

@@ -781,7 +781,7 @@ MooseVariableFV<OutputType>::evaluate(const FaceArg & face,
   {
     bool two_term_boundary_expansion = _two_term_boundary_expansion;
     if (face.limiter_type == Moose::FV::LimiterType::Upwind)
-      if ((face.elem_is_upwind && face.face_side == &fi->elem()) ||
+      if ((face.elem_is_upwind && face.face_side == fi->elemPtr()) ||
           (!face.elem_is_upwind && face.face_side == fi->neighborPtr()))
         two_term_boundary_expansion = false;
     return getExtrapolatedBoundaryFaceValue(*fi, two_term_boundary_expansion, face.face_side);
