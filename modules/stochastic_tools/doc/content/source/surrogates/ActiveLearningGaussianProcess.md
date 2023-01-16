@@ -1,4 +1,4 @@
-# Active learning Gaussian Process
+# ActiveLearningGaussianProcess
 
 !syntax description /Trainers/ActiveLearningGaussianProcess
 

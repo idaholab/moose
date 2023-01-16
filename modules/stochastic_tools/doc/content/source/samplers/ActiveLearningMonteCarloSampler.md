@@ -1,4 +1,4 @@
-# Active learning Monte Carlo sampler
+# ActiveLearningMonteCarloSampler
 
 !syntax description /Samplers/ActiveLearningMonteCarloSampler
 

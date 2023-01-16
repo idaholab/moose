@@ -1,4 +1,4 @@
-# Active learning Gaussian Process Decision
+# ActiveLearningGPDecision
 
 !syntax description /Reporters/ActiveLearningGPDecision
 
@@ -27,7 +27,7 @@ In general, active learning has two phases: (1) initial training phase for the G
 
 [!ref](al2_sch) presents the initial training phase of the GP surrogate. The [ActiveLearningMonteCarloSampler](ActiveLearningMonteCarloSampler.md) sends a batch of input samples for high-fidelity model executions to the [SamplerFullSolveMultiApp](SamplerFullSolveMultiApp.md). These high-fidelity models executions are performed in parallel using separate sets of processors. Outputs from the model executions will be collected by the `ActiveLearningGPDecision` reporter. Once a required number of training data size is reached, `ActiveLearningGPDecision` will call the [ActiveLearningGaussianProcess](ActiveLearningGaussianProcess.md) to initially train the GP model.
 
-!media ActiveLearning_training.svg style=width:75%; id=al2_sch caption=Schematic of the initial training phase of the GP surrogate.
+!media ActiveLearning_training.png style=width:75%; id=al2_sch caption=Schematic of the initial training phase of the GP surrogate.
 
 [!ref](al3_sch) presents the subsequent active learning phase. The [ActiveLearningMonteCarloSampler](ActiveLearningMonteCarloSampler.md) sends a batch of input samples to the `ActiveLearningGPDecision` reporter. Then, the [ActiveLearningGaussianProcess](ActiveLearningGaussianProcess.md) is called to make GP predictions. In addition, `ActiveLearningGPDecision` assesses the quality of the GP predictions through user-defined acquistion (or learning) functions. Some popular acquisition functions are currently available, and it is easy to include additional functions in the `ActiveLearningGPDecision` class. If one or more of the GP predictions are poor (as indicated by the acquistion function), the corresponding input samples are marked and this information is communicated to the [ActiveLearningMonteCarloSampler](ActiveLearningMonteCarloSampler.md). This process continues until a user-defined batch size is met for the maximum number of poor quality GP predictions. Once this threshold is reached, the [ActiveLearningMonteCarloSampler](ActiveLearningMonteCarloSampler.md) sends the batch of those book-marked input samples whose GP predictions are poor for high-fidelity model evaluations. The batch of high-fidelity models can be run in parallel. Then, the high-fidelity model outputs are acquired by the `ActiveLearningGPDecision` reporter where the GP model is re-trained. This process then repeats until the user-specified number of Monte Carlo samples is met.
 
