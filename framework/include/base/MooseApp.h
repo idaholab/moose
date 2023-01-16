@@ -643,7 +643,8 @@ public:
    * @return A reference to the restartable meta data value
    */
   RestartableDataValue & getRestartableMetaData(const std::string & name,
-                                                const RestartableDataMapName & metaname) const;
+                                                const RestartableDataMapName & metaname,
+                                                THREAD_ID tid) const;
 
   /**
    * Return reference to the restartable data object

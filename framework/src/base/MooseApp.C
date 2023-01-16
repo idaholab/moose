@@ -1711,9 +1711,14 @@ MooseApp::hasRestartableMetaData(const std::string & name,
 
 RestartableDataValue &
 MooseApp::getRestartableMetaData(const std::string & name,
-                                 const RestartableDataMapName & metaname) const
+                                 const RestartableDataMapName & metaname,
+                                 THREAD_ID tid) const
 {
-  // Get metadata reference from RestartableDataMap and return its value
+  if (!metaname.empty() && tid != 0)
+    mooseError(
+        "The meta data storage for '", metaname, "' is not threaded, so the tid must be zero.");
+
+  // Get metadata reference from RestartableDataMap and return a (non-const) reference to its value
   auto & restartable_data_map = getRestartableDataMap(metaname);
   auto iter = restartable_data_map.find(name);
   if (iter == restartable_data_map.end())
