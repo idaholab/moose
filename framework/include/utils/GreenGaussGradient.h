@@ -50,9 +50,12 @@ greenGaussGradient(const ElemArg & elem_arg,
   unsigned int num_ebfs = 0;
 
   // silence warnings for failed two term expansions
-  auto & err_stream = static_cast<typename OStreamProxy::streamT &>(libMesh::err);
+  libMesh::OStreamProxy::streambufT * old_buf = nullptr;
   if (two_term_boundary_expansion)
-    err_stream.setstate(std::ios_base::failbit);
+  {
+    libMesh::err.flush();
+    old_buf = libMesh::err.rdbuf(nullptr);
+  }
 
   try
   {
@@ -225,7 +228,7 @@ greenGaussGradient(const ElemArg & elem_arg,
     }
 
     if (two_term_boundary_expansion)
-      err_stream.clear();
+      libMesh::err.rdbuf(old_buf);
 
     return grad;
   }
@@ -237,7 +240,7 @@ greenGaussGradient(const ElemArg & elem_arg,
                 "being used");
     const auto grad = greenGaussGradient(elem_arg, functor, false, mesh);
 
-    err_stream.clear();
+    libMesh::err.rdbuf(old_buf);
 
     return grad;
   }

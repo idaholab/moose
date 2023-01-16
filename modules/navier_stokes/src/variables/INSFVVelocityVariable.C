@@ -143,9 +143,12 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem, bool correct_skewness)
   std::vector<std::pair<const FaceInfo *, bool>> ebf_faces;
 
   // silence warnings for failed two term expansions
-  auto & err_stream = static_cast<typename OStreamProxy::streamT &>(libMesh::err);
+  libMesh::OStreamProxy::streambufT * old_buf = nullptr;
   if (_two_term_boundary_expansion)
-    err_stream.setstate(std::ios_base::failbit);
+  {
+    libMesh::err.flush();
+    old_buf = libMesh::err.rdbuf(nullptr);
+  }
 
   try
   {
@@ -397,7 +400,7 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem, bool correct_skewness)
     }
 
     if (_two_term_boundary_expansion)
-      err_stream.clear();
+      libMesh::err.rdbuf(old_buf);
 
     if (_cache_cell_gradients && !correct_skewness)
     {
@@ -421,7 +424,7 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem, bool correct_skewness)
     // at other boundary locations
     const_cast<INSFVVelocityVariable *>(this)->_two_term_boundary_expansion = true;
 
-    err_stream.clear();
+    libMesh::err.rdbuf(old_buf);
 
     return grad;
   }
