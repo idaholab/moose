@@ -490,6 +490,7 @@ private:
   using MooseVariableField<OutputType>::evaluate;
   using MooseVariableField<OutputType>::evaluateGradient;
   using MooseVariableField<OutputType>::evaluateDot;
+  using ElemQpArg = Moose::ElemQpArg;
   using ElemArg = Moose::ElemArg;
   using ElemFromFaceArg = Moose::ElemFromFaceArg;
   using FaceArg = Moose::FaceArg;
@@ -499,6 +500,7 @@ private:
   ValueType evaluate(const ElemFromFaceArg & elem_from_face, unsigned int) const override final;
   ValueType evaluate(const FaceArg & face, unsigned int) const override final;
   ValueType evaluate(const SingleSidedFaceArg & face, unsigned int) const override final;
+  GradientType evaluateGradient(const ElemQpArg & qp_arg, unsigned int) const override final;
   GradientType evaluateGradient(const ElemArg & elem_arg, unsigned int) const override final;
   GradientType evaluateGradient(const ElemFromFaceArg & elem_from_face,
                                 unsigned int) const override final;
@@ -688,6 +690,13 @@ MooseVariableFV<OutputType>::evaluateFaceDotHelper(const FaceCallingArg & face) 
                 "either side of the face.");
     return this->dot(face.makeNeighbor());
   }
+}
+
+template <typename OutputType>
+typename MooseVariableFV<OutputType>::GradientType
+MooseVariableFV<OutputType>::evaluateGradient(const ElemQpArg & qp_arg, unsigned int) const
+{
+  return adGradSln(std::get<0>(qp_arg), false);
 }
 
 template <typename OutputType>

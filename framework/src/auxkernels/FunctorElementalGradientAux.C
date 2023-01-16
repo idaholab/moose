@@ -25,6 +25,18 @@ FunctorElementalGradientAuxTempl<is_ad>::validParams()
   params.addParam<MooseFunctorName>("factor", 1, "A factor to apply on the functor");
   params.addParam<MaterialPropertyName>(
       "factor_matprop", 1, "A (regular) material property factor to apply on the functor");
+
+  // We need some ghosting for the Finite Volume Fields (we use neighbor information to compute
+  // gradient)
+  params.addParam<unsigned short>("ghost_layers", 1, "The number of layers of elements to ghost.");
+  params.addRelationshipManager(
+      "ElementSideNeighborLayers",
+      Moose::RelationshipManagerType::GEOMETRIC | Moose::RelationshipManagerType::ALGEBRAIC,
+      [](const InputParameters & obj_params, InputParameters & rm_params)
+      {
+        rm_params.set<unsigned short>("layers") = obj_params.get<unsigned short>("ghost_layers");
+        rm_params.set<bool>("use_displaced_mesh") = obj_params.get<bool>("use_displaced_mesh");
+      });
   return params;
 }
 
