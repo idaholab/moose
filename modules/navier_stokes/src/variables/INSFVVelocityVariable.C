@@ -142,14 +142,6 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem, bool correct_skewness)
   // flow (e.g. fdf) face
   std::vector<std::pair<const FaceInfo *, bool>> ebf_faces;
 
-  // silence warnings for failed two term expansions
-  libMesh::OStreamProxy::streambufT * old_buf = nullptr;
-  if (_two_term_boundary_expansion)
-  {
-    libMesh::err.flush();
-    old_buf = libMesh::err.rdbuf(nullptr);
-  }
-
   try
   {
     VectorValue<ADReal> & grad = *value_pointer;
@@ -399,9 +391,6 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem, bool correct_skewness)
         grad(lm_dim_index) = x(lm_dim_index);
     }
 
-    if (_two_term_boundary_expansion)
-      libMesh::err.rdbuf(old_buf);
-
     if (_cache_cell_gradients && !correct_skewness)
     {
       auto pr = _elem_to_grad.emplace(elem, std::move(grad));
@@ -423,8 +412,6 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem, bool correct_skewness)
     // Two term boundary expansion should only fail at domain corners. We want to keep trying it
     // at other boundary locations
     const_cast<INSFVVelocityVariable *>(this)->_two_term_boundary_expansion = true;
-
-    libMesh::err.rdbuf(old_buf);
 
     return grad;
   }

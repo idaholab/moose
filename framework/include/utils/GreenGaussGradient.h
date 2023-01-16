@@ -49,14 +49,6 @@ greenGaussGradient(const ElemArg & elem_arg,
   // We'll count the extrapolated boundaries
   unsigned int num_ebfs = 0;
 
-  // silence warnings for failed two term expansions
-  libMesh::OStreamProxy::streambufT * old_buf = nullptr;
-  if (two_term_boundary_expansion)
-  {
-    libMesh::err.flush();
-    old_buf = libMesh::err.rdbuf(nullptr);
-  }
-
   try
   {
     VectorValue<T> grad;
@@ -227,9 +219,6 @@ greenGaussGradient(const ElemArg & elem_arg,
         grad(i) = x(i);
     }
 
-    if (two_term_boundary_expansion)
-      libMesh::err.rdbuf(old_buf);
-
     return grad;
   }
   catch (libMesh::LogicError &)
@@ -239,8 +228,6 @@ greenGaussGradient(const ElemArg & elem_arg,
                 "I believe we should only get singular systems when two-term boundary expansion is "
                 "being used");
     const auto grad = greenGaussGradient(elem_arg, functor, false, mesh);
-
-    libMesh::err.rdbuf(old_buf);
 
     return grad;
   }
