@@ -3208,7 +3208,8 @@ SubChannel1PhaseProblem::externalSolve()
       for (unsigned int iz = 0; iz < _n_cells + 1; ++iz)
       {
         auto * pin_node = _subchannel_mesh.getPinNode(i_pin, iz);
-        double sumTemp = 0.0;
+        Real sumTemp = 0.0;
+        Real rod_counter = 0.0;
         // Calculate sum of pin surface temperatures that the channels around the pin see
         for (auto i_ch : _subchannel_mesh.getPinChannels(i_pin))
         {
@@ -3225,8 +3226,9 @@ SubChannel1PhaseProblem::externalSolve()
           auto hw = Nu * k / Dh_i;
           sumTemp += (*_q_prime_soln)(pin_node) / (_subchannel_mesh.getRodDiameter() * M_PI * hw) +
                      (*_T_soln)(node);
+          rod_counter += 1.0;
         }
-        _Tpin_soln->set(pin_node, 0.25 * sumTemp);
+        _Tpin_soln->set(pin_node, sumTemp / rod_counter);
       }
     }
   }

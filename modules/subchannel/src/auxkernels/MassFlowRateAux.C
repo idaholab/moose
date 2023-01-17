@@ -21,20 +21,20 @@ MassFlowRateAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
   params.addClassDescription(
-      "Computes mass float rate from specified mass flux and cross-sectional area");
+      "Computes mass flow rate from specified mass flux and cross-sectional area");
   params.addRequiredCoupledVar("area", "Cross sectional area [m^2]");
-  params.addParam<Real>("mass_flux",1.0, "User specified mass flux [kg/s-m^2]");
+  params.addParam<Real>("mass_flux", 1.0, "User specified mass flux [kg/s-m^2]");
   params.addParam<PostprocessorName>(
-    "postprocessor",1.0, "The postprocessor to use for the value of mass_flux");
+      "postprocessor", 1.0, "The postprocessor to use for the value of mass_flux");
   params.declareControllable("mass_flux");
   return params;
 }
 
 MassFlowRateAux::MassFlowRateAux(const InputParameters & parameters)
   : AuxKernel(parameters),
-  _mass_flux(getParam<Real>("mass_flux")),
-  _value(getPostprocessorValue("postprocessor")),
-  _area(coupledValue("area"))
+    _mass_flux(getParam<Real>("mass_flux")),
+    _value(getPostprocessorValue("postprocessor")),
+    _area(coupledValue("area"))
 {
   if (parameters.isParamSetByUser("mass_flux") && parameters.isParamSetByUser("postprocessor"))
     mooseError(name(), ": Please provide only one user defined mass_flux");
