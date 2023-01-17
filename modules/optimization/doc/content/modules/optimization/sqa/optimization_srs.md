@@ -2,7 +2,7 @@
 
 !template! item key=system-purpose
 !! system-purpose-begin
-The purpose of the MOOSE Optimization module optimize model parameters such that it minimizes a defined objective. An example would be to search for material property values so that the solution matches experimental results. As such, the purpose of this module is not to provide physical model capabilities, which is typically the responsibility of other MOOSE modules and dependent applications.
+The purpose of the MOOSE Optimization module is to control model parameters such that they minimize a defined objective. An example would be to search for material property values so that the solution matches experimental results. As such, the purpose of this module is not to provide physical model capabilities, which is typically the responsibility of other MOOSE modules and dependent applications.
 !! system-purpose-finish
 !template-end!
 
@@ -15,4 +15,18 @@ The MOOSE Optimization module utilizes several MOOSE systems to perform optimiza
 - Topology optimization
 
 !! system-scope-finish
+!template-end!
+
+!template! item key=assumptions-and-dependencies
+The {{module}} module is designed with the fewest possible constraints on hardware and software.
+For more context on this point, the {{module}} module SRS defers to the framework
+[framework_srs.md#assumptions-and-dependencies]. Any physics-based or mathematics-based
+assumptions in code simulations and code objects are highlighted in their
+respective documentation pages.
+!template-end!
+
+!template! item key=reliability
+The regression test suite will cover at least 86% of all lines of code within the {{module}}
+module at all times. Known regressions will be recorded and tracked (see [#maintainability]) to an
+independent and satisfactory resolution.
 !template-end!

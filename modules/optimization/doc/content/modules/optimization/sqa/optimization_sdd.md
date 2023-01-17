@@ -13,7 +13,7 @@ Specific details unique to the module are outlined in this document.
 !template! item key=dependencies-and-limitations
 The {{module}} module inherits the
 [software dependencies of the MOOSE framework](framework_sdd.md#dependencies-and-limitations),
-with no additional dependencies. The module relies heavily on the TAO optimization package, which is available through the framework's inclusion of the PETSc. The design of this module is motivated by the
+with no additional dependencies. The module relies heavily on the TAO optimization package, which is available through the framework's inclusion of PETSc. The design of this module is motivated by the
 needs of its client applications.
 !template-end!
 
@@ -25,8 +25,9 @@ needs of its client applications.
 The {{module}} module inherits the wide range of pluggable systems from MOOSE.
 More information regarding MOOSE system design can be found in the framework
 [framework_sdd.md#system-design] section. Most of these inherited systems are
-utilized to build physics models for which the optimization is being
-performed for. Other than these, the MultiApps, Transfers, and Reporters systems
+utilized to build physics models for which optimization is being
+performed. Other than these, the [MultiApps](MultiApps/index.md),
+[Transfers](Transfers/index.md), and [Reporters](Reporters/index.md) systems
 in the framework are utilized to execute the physical model, manipulate
 optimization data, and define the optimization objective and gradient.
 Documentation for each object, data structure, and process specific to the
@@ -45,7 +46,7 @@ extendability and exists for every simulation configuration that the module is c
 
 !style halign=left
 The MooseApp is the top-level object used to hold all of the other objects in a simulation. In a
-normal simulation a single MooseApp object is created and "run()". This object uses its Factory
+normal simulation, a single MooseApp object is created and "run()". This object uses its Factory
 objects to build user-defined objects which are stored in a series of Warehouse objects and
 executed. The Finite Element data is stored in the Systems and Assembly object while the domain
 information (the Mesh) is stored in the Mesh object. A series of threaded loops are used to run
@@ -55,6 +56,5 @@ MOOSE's pluggable systems are documented on the [MOOSE website](https://moosefra
 for the {{module}} module are on this webpage, accessible through the high-level system links above.
 Each of these systems has a set of defined polymorphic interfaces and are designed to accomplish a
 specific task within the simulation. The design of these systems is solid and is managed through agile
-methods and ticket request system either on GitHub (for MOOSE) or on the defined software repository
-for this application.
+methods and ticket request system on the [MOOSE GitHub repository](https://github.com/idaholab/moose).
 !template-end!

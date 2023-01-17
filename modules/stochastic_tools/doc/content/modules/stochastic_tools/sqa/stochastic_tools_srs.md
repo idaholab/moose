@@ -24,17 +24,18 @@ in stochastic analysis.
 
 !template! item key=system-scope
 !! system-scope-begin
-The MOOSE Stochastic Tools module builds on the existing framework MultiApps
-system and provides several additional systems to address its purpose. The
-address the efficient evaluation of multiphysics models, the MultiApps systems
+The MOOSE Stochastic Tools module builds on the existing framework [MultiApps](MultiApps/index.md)
+system and provides several additional systems to address its purpose. To
+address the efficient evaluation of multiphysics models, the MultiApps system
 is extended to include a "batch" mode of execution. This mode provides a memory
 efficient way of building MooseApp instances and reusing them for different
 perturbations of input parameters. This is useful for stochastic simulations
 with many, many samples to be run without holding them in memory or
 re-initializing potentially costly data allocation. The additional systems that
-the Stochastic Tools module provides include: Distributions, Samplers, Trainers,
-and Surrogates. Distributions are functions defining the uncertainty of input
-parameters and provides and interface for computing probability density,
+the Stochastic Tools module provides include: [Distributions](Distributions/index.md),
+[Samplers](Samplers/index.md), [Trainers](Trainers/index.md), and [Surrogates](Surrogates/index.md).
+Distributions are functions defining the uncertainty of input
+parameters and provides an interface for computing probability density,
 cumulative probability, and quantiles. Samplers define the sampling scheme of
 the stochastic analysis, whether it be random or deterministic. Trainers are
 objects that build meta-models meant to be used as surrogates or reduced-order
@@ -45,4 +46,18 @@ module also provides capabilities for computing quantities related to basic
 uncertainty quantification and sensitivity analysis using the framework's
 Reporters system.
 !! system-scope-finish
+!template-end!
+
+!template! item key=assumptions-and-dependencies
+The {{module}} module is designed with the fewest possible constraints on hardware and software.
+For more context on this point, the {{module}} module SRS defers to the framework
+[framework_srs.md#assumptions-and-dependencies]. Any physics-based or mathematics-based
+assumptions in code simulations and code objects are highlighted in their
+respective documentation pages.
+!template-end!
+
+!template! item key=reliability
+The regression test suite will cover at least 88% of all lines of code within the {{module}}
+module at all times. Known regressions will be recorded and tracked (see [#maintainability]) to an
+independent and satisfactory resolution.
 !template-end!
