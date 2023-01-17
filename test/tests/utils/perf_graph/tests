@@ -25,7 +25,7 @@
       type = RunException
       input = 'perf_graph.i'
       cli_args = 'UserObjects/test/section_id_missing=true'
-      expect_err = 'Section Name Not Found: foo'
+      expect_err = "PerfGraphRegistry: Key 'foo' is not registered"
 
       detail = 'requesting the ID of a section that does not exist'
     []
@@ -33,7 +33,7 @@
       type = RunException
       input = 'perf_graph.i'
       cli_args = 'UserObjects/test/section_info_missing=true'
-      expect_err = 'ID Not Found: 1000000'
+      expect_err = "PerfGraphRegistry: ID '1000000' is not registered"
 
       detail = 'requesting the section info for a section that does not exist'
     []

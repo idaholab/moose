@@ -1525,7 +1525,8 @@ NonlinearSystemBase::residualSetup()
   _nodal_bcs.residualSetup();
 
   _fe_problem.residualSetup();
-  setSolutionInvalid(false);
+  _app.solutionInvalidity().solutionInvalidAccumulation();
+  _app.solutionInvalidity().resetSolutionInvalid();
 }
 
 void
@@ -2565,6 +2566,8 @@ NonlinearSystemBase::jacobianSetup()
   _nodal_bcs.jacobianSetup();
 
   _fe_problem.jacobianSetup();
+  _app.solutionInvalidity().solutionInvalidAccumulation();
+  _app.solutionInvalidity().resetSolutionInvalid();
 }
 
 void

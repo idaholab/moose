@@ -266,6 +266,11 @@ FEProblemBase::validParams()
       false,
       "Set to true to allow convergence even though the solution has been marked as 'invalid'");
 
+  params.addParam<bool>("immediately_print_invalid_solution",
+                        false,
+                        "Whether or not to report invalid solution warnings at the time the "
+                        "warning is produced instead of after the calculation");
+
   return params;
 }
 
@@ -356,6 +361,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _skip_nl_system_check(getParam<bool>("skip_nl_system_check")),
     _fail_next_nonlinear_convergence_check(false),
     _allow_invalid_solution(getParam<bool>("allow_invalid_solution")),
+    _immediately_print_invalid_solution(getParam<bool>("immediately_print_invalid_solution")),
     _started_initial_setup(false),
     _has_internal_edge_residual_objects(false),
     _u_dot_requested(false),
