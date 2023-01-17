@@ -13,13 +13,9 @@ inter_assembly_gap = ${fparse 0.4*scale_factor}
 duct_thickness = ${fparse 0.3*scale_factor}
 fuel_pin_pitch = ${fparse 0.904*scale_factor}
 fuel_pin_diameter= ${fparse 0.8*scale_factor}
-# wire_z_spacing = ${fparse 20.32*scale_factor}
-# wire_diameter = ${fparse 0.103*scale_factor}
 length_entry_fuel = ${fparse 60*scale_factor}
 length_heated_fuel = ${fparse 80*scale_factor}
 length_outlet_fuel = ${fparse 120*scale_factor}
-# height = ${fparse length_entry_fuel+length_heated_fuel+length_outlet_fuel}
-# orifice_plate_height = ${fparse 5*scale_factor}
 duct_outside = ${fparse fuel_element_pitch - inter_assembly_gap}
 duct_inside = ${fparse duct_outside - 2 * duct_thickness}
 n_rings = 9
@@ -35,8 +31,6 @@ n_rings = 9
     unheated_length_exit = '${fparse length_outlet_fuel}'
     rod_diameter = '${fparse fuel_pin_diameter}'
     pitch = '${fparse fuel_pin_pitch}'
-    # spacer_z = '${fparse orifice_plate_height} ${fparse length_entry_fuel}'
-    # spacer_k = '0.5 0.5'
   []
 
   [fuel_pins]
@@ -98,14 +92,6 @@ n_rings = 9
 [Outputs]
   exodus = true
 []
-
-# [Executioner]
-#   type = Transient
-#   dt = 1e8
-#   end_time = 1e4
-#   nl_rel_tol = 0.9
-#   l_tol = 0.9
-# []
 
 [Executioner]
   type = Steady

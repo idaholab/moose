@@ -33,5 +33,4 @@ protected:
   const Real & _value;
   /// Value provided by postprocessor
   const PostprocessorValue & _pvalue;
-
 };

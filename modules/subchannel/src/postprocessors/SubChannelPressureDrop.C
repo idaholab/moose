@@ -12,7 +12,7 @@
 /*               See COPYRIGHT for full restrictions                */
 /********************************************************************/
 
-#include "TriSubChannelPressureDrop.h"
+#include "SubChannelPressureDrop.h"
 #include "SolutionHandle.h"
 #include "FEProblemBase.h"
 #include "Function.h"
@@ -21,26 +21,26 @@
 #include "SubProblem.h"
 #include "libmesh/system.h"
 
-registerMooseObject("SubChannelApp", TriSubChannelPressureDrop);
+registerMooseObject("SubChannelApp", SubChannelPressureDrop);
 
 InputParameters
-TriSubChannelPressureDrop::validParams()
+SubChannelPressureDrop::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
   params.addClassDescription(
-      "Calculates an overall Total Pressure Drop for the hexagonal subchannel assembly");
+      "Calculates an overall mass-flow-averaged pressure drop for the subchannel assembly");
   return params;
 }
 
-TriSubChannelPressureDrop::TriSubChannelPressureDrop(const InputParameters & parameters)
+SubChannelPressureDrop::SubChannelPressureDrop(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
-    _mesh(dynamic_cast<TriSubChannelMesh &>(_fe_problem.mesh())),
+    _mesh(dynamic_cast<SubChannelMesh &>(_fe_problem.mesh())),
     _value(0)
 {
 }
 
 void
-TriSubChannelPressureDrop::execute()
+SubChannelPressureDrop::execute()
 {
   auto nz = _mesh.getNumOfAxialCells();
   auto n_channels = _mesh.getNumOfChannels();
@@ -62,7 +62,7 @@ TriSubChannelPressureDrop::execute()
 }
 
 Real
-TriSubChannelPressureDrop::getValue()
+SubChannelPressureDrop::getValue()
 {
   return _value;
 }

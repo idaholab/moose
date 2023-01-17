@@ -15,22 +15,22 @@
 #pragma once
 
 #include "GeneralPostprocessor.h"
-#include "TriSubChannelMesh.h"
+#include "SubChannelMesh.h"
 
 /**
  * Calculates an overall average pressure drop for the hexagonal subchannel assembly
  */
-class TriSubChannelPressureDrop : public GeneralPostprocessor
+class SubChannelPressureDrop : public GeneralPostprocessor
 {
 public:
-  TriSubChannelPressureDrop(const InputParameters & params);
+  SubChannelPressureDrop(const InputParameters & params);
   virtual void initialize() override {}
   virtual void execute() override;
   virtual void finalize() override {}
   virtual Real getValue() override;
 
 protected:
-  TriSubChannelMesh & _mesh;
+  SubChannelMesh & _mesh;
   Real _value;
 
 public:

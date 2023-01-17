@@ -1874,26 +1874,20 @@ LiquidMetalSubChannel1PhaseProblem::externalSolve()
         for (auto i_ch : _subchannel_mesh.getPinChannels(i_pin))
         {
           auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
-
           auto mu = (*_mu_soln)(node);
           auto S = (*_S_flow_soln)(node);
           auto w_perim = (*_w_perim_soln)(node);
           auto Dh_i = 4.0 * S / w_perim;
           auto Re = (((*_mdot_soln)(node) / S) * Dh_i / mu);
-
           auto k = _fp->k_from_p_T((*_P_soln)(node) + _P_out, (*_T_soln)(node));
           auto cp = _fp->cp_from_p_T((*_P_soln)(node) + _P_out, (*_T_soln)(node));
           auto Pr = (*_mu_soln)(node)*cp / k;
-
           auto Nu = 0.023 * std::pow(Re, 0.8) * std::pow(Pr, 0.4);
           auto hw = Nu * k / Dh_i;
-
           sumTemp += (*_q_prime_soln)(pin_node) / (_subchannel_mesh.getRodDiameter() * M_PI * hw) +
                      (*_T_soln)(node);
-
           rod_counter += 1.0;
         }
-
         _Tpin_soln->set(pin_node, sumTemp / rod_counter);
       }
     }
