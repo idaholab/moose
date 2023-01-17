@@ -18,6 +18,7 @@ import json
 import time
 import argparse
 import subprocess
+from datetime import datetime, timedelta
 
 def load_json(job_file):
     """ return PBS job dictionary """
@@ -89,8 +90,9 @@ def parse_args(argv):
     if len(argv) == 0:
         print_usage()
     parser = argparse.ArgumentParser(description='Check if PBS has completed all jobs')
-    parser.add_argument('-w', '--wait', action='store_true', default=False,
-                        help='When enabled, exits when all jobs have finished')
+    parser.add_argument('-w', '--wait', nargs='?', metavar='int', type=int,
+                        help='the max time to wait in seconds before giving up (a setting of'
+                        ' -1 means forever)')
     return parser.parse_known_args(argv)
 
 def print_usage():
@@ -106,15 +108,26 @@ def main(args):
     job_array = []
     for queue_file in job_list:
         job_array.append(load_json(queue_file))
-    if options.wait:
+    if options.wait == -1:
         try:
             while not_finished(job_array):
                 time.sleep(5)
         except KeyboardInterrupt:
-            return 1
+            return 'Keyboard Interrupt'
+    elif options.wait:
+        time_start = datetime.now()
+        try:
+            while (datetime.now() - time_start) < timedelta(seconds=options.wait):
+                if not_finished(job_array):
+                    time.sleep(5)
+                else:
+                    return 0
+        except KeyboardInterrupt:
+            return 'Keyboard Interrrupt'
+        return 'Allotted time exceeded'
     else:
         if not_finished(job_array):
-            return 1
+            return 'Jobs still running'
     return 0
 
 if __name__ == '__main__':
