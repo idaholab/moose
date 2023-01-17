@@ -203,8 +203,7 @@ private:
   bool _a_data_provided;
 };
 
-inline const Moose::FunctorBase<ADReal> &
-INSFVRhieChowInterpolator::epsilon(THREAD_ID) const
+inline const Moose::FunctorBase<ADReal> & INSFVRhieChowInterpolator::epsilon(THREAD_ID) const
 {
   return _unity_functor;
 }

@@ -80,7 +80,7 @@ INSFVRhieChowInterpolator::validParams()
       "coefficients for the 'z' component velocity, solved "
       "via the Navier-Stokes equations.");
   params.addParam<NonlinearSystemName>("mass_momentum_system",
-                                       "0",
+                                       "nl0",
                                        "The nonlinear system in which the monolithic momentum and "
                                        "continuity equations are located.");
   return params;
