@@ -134,6 +134,8 @@ ADShaftConnectedCompressor1PhaseUserObject::initialize()
   _delta_p = 0;
   _Rp = 0;
   _eff = 0;
+  _flow_rel_corr = 0;
+  _speed_rel_corr = 0;
 }
 
 void
@@ -179,16 +181,16 @@ ADShaftConnectedCompressor1PhaseUserObject::computeFluxesAndResiduals(const unsi
     const ADReal flow_A = rhouA_in * _rho0_rated * _c0_rated;
 
     const ADReal flow_B = _mdot_rated * rho0_in * c0_in;
-    const ADReal flow_rel_corr = flow_A / flow_B;
-    const ADReal speed_rel_corr = (_omega[0] / _omega_rated) * (_c0_rated / c0_in);
+    _flow_rel_corr = flow_A / flow_B;
+    _speed_rel_corr = (_omega[0] / _omega_rated) * (_c0_rated / c0_in);
 
-    // If speed_rel_corr == _speeds[0], then the lower index x1 is determined to be -1
-    if (speed_rel_corr == _speeds[0])
+    // If _speed_rel_corr == _speeds[0], then the lower index x1 is determined to be -1
+    if (_speed_rel_corr == _speeds[0])
     {
-      _Rp = _Rp_functions[0]->value(flow_rel_corr, ADPoint());
-      _eff = _eff_functions[0]->value(flow_rel_corr, ADPoint());
+      _Rp = _Rp_functions[0]->value(_flow_rel_corr, ADPoint());
+      _eff = _eff_functions[0]->value(_flow_rel_corr, ADPoint());
     }
-    else if (std::isnan(speed_rel_corr)) // NaN; unguarded, gives segmentation fault
+    else if (std::isnan(_speed_rel_corr)) // NaN; unguarded, gives segmentation fault
     {
       _Rp = std::nan("");
       _eff = std::nan("");
@@ -196,37 +198,37 @@ ADShaftConnectedCompressor1PhaseUserObject::computeFluxesAndResiduals(const unsi
     else // linear interpolation/extrapolation
     {
       unsigned int x1, x2;
-      if (speed_rel_corr < _speeds[0]) // extrapolation past minimum
+      if (_speed_rel_corr < _speeds[0]) // extrapolation past minimum
       {
         x1 = 0;
         x2 = 1;
       }
-      else if (speed_rel_corr > _speeds.back()) // extrapolation past maximum
+      else if (_speed_rel_corr > _speeds.back()) // extrapolation past maximum
       {
         x1 = _n_speeds - 1;
         x2 = x1 - 1;
       }
       else // interpolation
       {
-        auto x1_iter = std::lower_bound(_speeds.begin(), _speeds.end(), speed_rel_corr);
-        auto x2_iter = std::upper_bound(_speeds.begin(), _speeds.end(), speed_rel_corr);
+        auto x1_iter = std::lower_bound(_speeds.begin(), _speeds.end(), _speed_rel_corr);
+        auto x2_iter = std::upper_bound(_speeds.begin(), _speeds.end(), _speed_rel_corr);
 
-        x1 = (x1_iter - _speeds.begin()) - 1; // _speeds index for entry <= speed_rel_corr
-        x2 = (x2_iter - _speeds.begin());     // _speeds index for entry > speed_rel_corr
+        x1 = (x1_iter - _speeds.begin()) - 1; // _speeds index for entry <= _speed_rel_corr
+        x2 = (x2_iter - _speeds.begin());     // _speeds index for entry > _speed_rel_corr
       }
 
       const Real x1_spd = _speeds[x1];
       const Real x2_spd = _speeds[x2];
 
-      const ADReal y1_Rp = _Rp_functions[x1]->value(flow_rel_corr, ADPoint());
-      const ADReal y2_Rp = _Rp_functions[x2]->value(flow_rel_corr, ADPoint());
+      const ADReal y1_Rp = _Rp_functions[x1]->value(_flow_rel_corr, ADPoint());
+      const ADReal y2_Rp = _Rp_functions[x2]->value(_flow_rel_corr, ADPoint());
       const ADReal Rp_m = (y2_Rp - y1_Rp) / (x2_spd - x1_spd);
-      _Rp = y1_Rp + (speed_rel_corr - x1_spd) * Rp_m;
+      _Rp = y1_Rp + (_speed_rel_corr - x1_spd) * Rp_m;
 
-      const ADReal y1_eff = _eff_functions[x1]->value(flow_rel_corr, ADPoint());
-      const ADReal y2_eff = _eff_functions[x2]->value(flow_rel_corr, ADPoint());
+      const ADReal y1_eff = _eff_functions[x1]->value(_flow_rel_corr, ADPoint());
+      const ADReal y2_eff = _eff_functions[x2]->value(_flow_rel_corr, ADPoint());
       const ADReal eff_m = (y2_eff - y1_eff) / (x2_spd - x1_spd);
-      _eff = y1_eff + (speed_rel_corr - x1_spd) * eff_m;
+      _eff = y1_eff + (_speed_rel_corr - x1_spd) * eff_m;
     }
 
     // Apply bounds
@@ -349,6 +351,16 @@ ADShaftConnectedCompressor1PhaseUserObject::getEfficiency() const
 {
   return _eff;
 }
+ADReal
+ADShaftConnectedCompressor1PhaseUserObject::getRelativeCorrectedMassFlowRate() const
+{
+  return _flow_rel_corr;
+}
+ADReal
+ADShaftConnectedCompressor1PhaseUserObject::getRelativeCorrectedSpeed() const
+{
+  return _speed_rel_corr;
+}
 
 void
 ADShaftConnectedCompressor1PhaseUserObject::finalize()
@@ -366,6 +378,8 @@ ADShaftConnectedCompressor1PhaseUserObject::finalize()
   comm().sum(_delta_p);
   comm().sum(_Rp);
   comm().sum(_eff);
+  comm().sum(_flow_rel_corr);
+  comm().sum(_speed_rel_corr);
 }
 
 void
@@ -382,4 +396,6 @@ ADShaftConnectedCompressor1PhaseUserObject::threadJoin(const UserObject & uo)
   _delta_p += scpuo._delta_p;
   _Rp += scpuo._Rp;
   _eff += scpuo._eff;
+  _flow_rel_corr += scpuo._flow_rel_corr;
+  _speed_rel_corr += scpuo._speed_rel_corr;
 }
