@@ -546,7 +546,7 @@ inlet_vel = ${fparse -mdot / inlet_area / rho}
 
   ## set characteristic length on each block
   [characteristic_length]
-    type = PiecewiseByBlockFunctorMaterial
+    type = ADPiecewiseByBlockFunctorMaterial
     prop_name =  'characteristic_length'
     subdomain_to_prop_value = 'fuel            ${D_hydraulic_fuel}
                                coupled_fuel    ${D_hydraulic_fuel}

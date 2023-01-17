@@ -1,10 +1,8 @@
-#
 # Problems to be fixed:
-# 1. subchannel does not like to be subapp
+# 1. subchannel solver randomness might affect coupling:
+# Take too much time to converge or not solve at all. Implicit solver is more robust especially for
+# liquid metal hexagonal assemblies.
 # 2. parallel execution of subchannel
-# 3. The coupling to FV is very awkward because the machinery
-#    is designed for FEM. See 7_assemblies_plus_subchannel.i input.
-#
 
 # Following Advanced Burner Test Reactor Preconceptual Design Report
 # Vailable at: https://www.ne.anl.gov/eda/ABTR_1cv2_ws.pdf
@@ -13,35 +11,28 @@
 ###################################################
 T_in = 628.15
 P_out = 758423 # Pa
-# reactor_power = 500e6 #WTh
-# fuel_assemblies_per_power_unit = ${fparse 2.5}
-# fuel_pins_per_assembly = 217
-# pin_power = ${fparse reactor_power/(fuel_assemblies_per_power_unit*fuel_pins_per_assembly)} # Approx.
-mass_flux_in = ${fparse 2786} # kg/(m2.s)
-#mass_flux_in = ${fparse 4100} # kg/(m2.s)
+mass_flux_in = '${fparse 2786}' # kg/(m2.s)
 
 ###################################################
 # Geometric parameters
 ###################################################
-# f = ${fparse sqrt(3) / 2}
 
 # units are cm - do not forget to convert to meter
 scale_factor = 0.01
-fuel_element_pitch = ${fparse 14.598*scale_factor}
-inter_assembly_gap = ${fparse 0.4*scale_factor}
-duct_thickness = ${fparse 0.3*scale_factor}
-fuel_pin_pitch = ${fparse 0.904*scale_factor}
-fuel_pin_diameter= ${fparse 0.8*scale_factor}
-wire_z_spacing = ${fparse 20.32*scale_factor}
-wire_diameter = ${fparse 0.103*scale_factor}
+fuel_element_pitch = '${fparse 14.598*scale_factor}'
+inter_assembly_gap = '${fparse 0.4*scale_factor}'
+duct_thickness = '${fparse 0.3*scale_factor}'
+fuel_pin_pitch = '${fparse 0.904*scale_factor}'
+fuel_pin_diameter = '${fparse 0.8*scale_factor}'
+wire_z_spacing = '${fparse 20.32*scale_factor}'
+wire_diameter = '${fparse 0.103*scale_factor}'
 n_rings = 9
-length_entry_fuel = ${fparse 60*scale_factor}
-length_heated_fuel = ${fparse 80*scale_factor}
-length_outlet_fuel = ${fparse 120*scale_factor}
-# height = ${fparse length_entry_fuel+length_heated_fuel+length_outlet_fuel}
-orifice_plate_height = ${fparse 5*scale_factor}
-duct_outside = ${fparse fuel_element_pitch - inter_assembly_gap}
-duct_inside = ${fparse duct_outside - 2 * duct_thickness}
+length_entry_fuel = '${fparse 60*scale_factor}'
+length_heated_fuel = '${fparse 80*scale_factor}'
+length_outlet_fuel = '${fparse 120*scale_factor}'
+orifice_plate_height = '${fparse 5*scale_factor}'
+duct_outside = '${fparse fuel_element_pitch - inter_assembly_gap}'
+duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
 ###################################################
 
 [TriSubChannelMesh]
@@ -71,35 +62,7 @@ duct_inside = ${fparse duct_outside - 2 * duct_thickness}
     unheated_length_exit = '${fparse length_outlet_fuel}'
     pitch = '${fparse fuel_pin_pitch}'
   []
-
-  # [duct]
-  #   type = TriDuctMeshGenerator
-  #   input = fuel_pins
-  #   nrings = '${fparse n_rings}'
-  #   n_cells = 26
-  #   flat_to_flat = '${fparse duct_inside}'
-  #   unheated_length_entry = '${fparse length_entry_fuel}'
-  #   heated_length = '${fparse length_heated_fuel}'
-  #   unheated_length_exit = '${fparse length_outlet_fuel}'
-  #   pitch = '${fparse fuel_pin_pitch}'
-  # []
 []
-
-# [Functions]
-#   [axial_heat_rate]
-#     type = ParsedFunction
-#     value = 'if(z>l1 & z<l2, sin(pi * (z - l1) / (l2 - l1)), 0.0)'
-#     #'(pi/2)*sin(pi*z/L)'
-#     vars = 'l1 l2'
-#     vals = '${length_entry_fuel} ${fparse length_entry_fuel+length_heated_fuel}'
-#   []
-
-#   [dt_fn]
-#     type = PiecewiseLinear
-#     x = '0   2   10 20 100 1000'
-#     y = '0.5 0.5 2  10 100 500'
-#   []
-# []
 
 [AuxVariables]
   [mdot]
@@ -141,22 +104,13 @@ duct_inside = ${fparse duct_outside - 2 * duct_thickness}
   [mu]
     block = subchannel
   []
-  # [q_prime_duct]
-  #   block = duct
-  #   initial_condition = 0
-  # []
-  # [Tduct]
-  #   block = duct
-  # []
 []
-
 
 [FluidProperties]
   [sodium]
-      type = PBSodiumFluidProperties
+    type = PBSodiumFluidProperties
   []
 []
-
 
 [Problem]
   type = LiquidMetalSubChannel1PhaseProblem
@@ -165,7 +119,6 @@ duct_inside = ${fparse duct_outside - 2 * duct_thickness}
   beta = 0.006
   P_out = ${P_out}
   CT = 2.6
-#  enforce_uniform_pressure = false
   compute_density = true
   compute_viscosity = true
   compute_power = false
@@ -193,9 +146,8 @@ duct_inside = ${fparse duct_outside - 2 * duct_thickness}
   [q_prime_IC]
     type = TriPowerIC
     variable = q_prime
-    power = 0.0 #${pin_power} # W
+    power = 0.0
     filename = "pin_power_profile217.txt"
-    # axial_heat_rate = axial_heat_rate
   []
 
   [T_ic]
@@ -245,12 +197,6 @@ duct_inside = ${fparse duct_outside - 2 * duct_thickness}
     variable = mdot
     value = 0.0
   []
-
-  # [T_duct_ic]
-  #   type = ConstantIC
-  #   variable = Tduct
-  #   value = ${T_in}
-  # []
 []
 
 [AuxKernels]
@@ -287,7 +233,7 @@ duct_inside = ${fparse duct_outside - 2 * duct_thickness}
 
 [Postprocessors]
   [total_pressure_drop_SC]
-    type = TriSubChannelPressureDrop
+    type = SubChannelPressureDrop
     execute_on = "timestep_end"
   []
 

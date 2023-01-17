@@ -1,7 +1,6 @@
 # This model drives a multiapp setup where wrappers (solid heat conduction)
 # and interwrapper flow (fluid) are solved in this input. Intra-element flow is solved
-# by subchannel
-# heat is applied in the pin model in subchannel
+# by subchannel.
 
 # Units are SI
 
@@ -12,8 +11,6 @@ outlet_pressure = 758423 # Pa # gauge pressure
 # geometry parameters
 pin_diameter = 8e-3
 pin_pitch = 9.04e-3
-# cr_pin_diameter = 1.11e-2
-# cr_pin_pitch = 1.2476e-2
 flat_to_flat = 13.598e-2
 wire_diameter = 1.03e-3
 wire_pitch = 203.2e-3
@@ -98,12 +95,6 @@ flow_blocks = 'interwrapper porous_flow center_porous_flow'
     x = '1'
     y = '0.5'
   []
-
-  # [dt_fn]
-  #   type = PiecewiseLinear
-  #   x = '0    1      5 50 100'
-  #   y = '0.2  0.2  0.5 1  10'
-  # []
 
   [mu_rampdown_fn]
     type = PiecewiseLinear
@@ -281,7 +272,7 @@ flow_blocks = 'interwrapper porous_flow center_porous_flow'
     block = 'porous_flow'
   []
 
-  [assembly_drag2]
+  [center_assembly_drag]
     type = FunctorRehmeDragCoefficientsPressureGradient
     multipliers = '100 100 1'
     hex_lattice = fuel_hex
@@ -451,6 +442,7 @@ flow_blocks = 'interwrapper porous_flow center_porous_flow'
     input_files = 'subchannel.i'
     execute_on = 'timestep_end'
     positions = '0 0 0'
+    max_procs_per_app = 1
     output_in_position = true
     bounding_box_padding = '0 0 0.1'
   []
