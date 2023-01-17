@@ -69,7 +69,7 @@ protected:
   T & declareMeshProperty(const std::string & data_name, const T & init_value);
 
   /**
-   * Method for updating attributes to the mesh meta-data store, which can only be invoked outside 
+   * Method for updating attributes to the mesh meta-data store, which can only be invoked outside
    * of the MeshGenerator constructor after the mesh generator property has already been declared.
    */
   template <typename T>
@@ -215,8 +215,7 @@ T &
 MeshGenerator::setMeshProperty(const std::string & data_name, const T & data_value)
 {
   if (!_app.executingMeshGenerators())
-    mooseError(
-        "Updating mesh meta data cannot occur in the constructor of mesh generators");
+    mooseError("Updating mesh meta data cannot occur in the constructor of mesh generators");
 
   std::string full_name =
       std::string(MeshMetaDataInterface::SYSTEM) + "/" + name() + "/" + data_name;

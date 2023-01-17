@@ -62,12 +62,12 @@ PatternedPolygonPeripheralModifierBase::PatternedPolygonPeripheralModifierBase(
                                   : std::vector<std::string>()),
     _new_extra_id_values_to_assign(
         getParam<std::vector<dof_id_type>>("new_extra_id_values_to_assign")),
-    _pattern_pitch_meta(declareMeshProperty<Real>("pattern_pitch_meta", 0.0)),
     // Use CartesianConcentricCircleAdaptiveBoundaryMeshGenerator for cartesian control drum meshing
     // Use HexagonConcentricCircleAdaptiveBoundaryMeshGenerator for hexagonal control drum meshing
-    _is_control_drum_meta(declareMeshProperty<bool>("is_control_drum_meta", false)),
     _mesh(getMeshByName(_input_name))
 {
+  declareMeshProperty<Real>("pattern_pitch_meta", 0.0);
+  declareMeshProperty<bool>("is_control_drum_meta", false);
   if (_extra_id_names_to_modify.size() != _new_extra_id_values_to_assign.size())
     paramError("new_extra_id_values_to_assign",
                "This parameter must have the same size as extra_id_names_to_modify.");
@@ -78,7 +78,8 @@ std::unique_ptr<MeshBase>
 PatternedPolygonPeripheralModifierBase::generate()
 {
   // Transmit the Mesh Metadata
-  _pattern_pitch_meta = getMeshProperty<Real>("pattern_pitch_meta", _input_name);
+  auto pattern_pitch_meta = setMeshProperty(
+      "pattern_pitch_meta", getMeshProperty<Real>("pattern_pitch_meta", _input_name));
   // Load the input mesh as ReplicatedMesh
   auto input_mesh = dynamic_pointer_cast<ReplicatedMesh>(_mesh);
   // Load boundary information
@@ -201,11 +202,11 @@ PatternedPolygonPeripheralModifierBase::generate()
     // Setting up of the outer boundary is done by defining the two ends
     // And then use libMesh interpolation tool to make the straight line
     std::vector<Point> outer_pts;
-    const Point outer_end_1 = Point(_pattern_pitch_meta / 2.0,
-                                    -_pattern_pitch_meta / 2.0 * std::tan(M_PI / (Real)_num_sides),
+    const Point outer_end_1 = Point(pattern_pitch_meta / 2.0,
+                                    -pattern_pitch_meta / 2.0 * std::tan(M_PI / (Real)_num_sides),
                                     0.0);
-    const Point outer_end_2 = Point(_pattern_pitch_meta / 2.0,
-                                    _pattern_pitch_meta / 2.0 * std::tan(M_PI / (Real)_num_sides),
+    const Point outer_end_2 = Point(pattern_pitch_meta / 2.0,
+                                    pattern_pitch_meta / 2.0 * std::tan(M_PI / (Real)_num_sides),
                                     0.0);
 
     const std::vector<Real> input_arg{0.0, 1.0};

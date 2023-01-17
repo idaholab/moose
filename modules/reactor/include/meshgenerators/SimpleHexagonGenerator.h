@@ -44,14 +44,4 @@ protected:
   const boundary_id_type _external_boundary_id;
   /// Boundary Name of the external boundary
   const std::string _external_boundary_name;
-  /// MeshMetaData: pitch size of the hexagon
-  Real & _pitch_meta;
-  /// MeshMetaData: number of radial intervals of the background region
-  const unsigned int & _background_intervals_meta;
-  /// MeshMetaData: maximum node id of the ground region
-  const unsigned int & _node_id_background_meta;
-  /// MeshMetaData: maximum radius of the ring regions
-  const Real & _max_radius_meta;
-  /// MeshMetaData: mesh sector number of each hexagon side
-  const std::vector<unsigned int> & _num_sectors_per_side_meta;
 };
