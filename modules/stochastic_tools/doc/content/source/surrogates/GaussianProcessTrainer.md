@@ -144,7 +144,15 @@ The following options are available for tuning the hyperparameters:
 
 - +Adaptive moment estimation (Adam)+
 
-  Relies on the psuedocode provied in [!cite](kingma2014adam). Adam permits stochastic optimization, wherein, a batch of the training data can be randomly chosen at each iteration. Additionally, there is an option to regularize the hyper-params in the loss function by specifying a standard deviation value. This value corresponds to a Normal distribution centered at zero over the log of the hyper-param. By default, the standard deviation is set to a 1000 and this would have no effect on the optimization. As its value reduces, the regularization effects kicks-in.
+  Relies on the psuedocode provied in [!cite](kingma2014adam). Adam permits stochastic optimization, wherein, a batch of the training data can be randomly chosen at each iteration.
+
+## Hyperparameter priors
+
+There is an option *when using Adam optimization* to specify priors over the hyper-params in the loss function. Specifying priors can have a regularizing effect on the hyper-param optimization. This may be useful in preventing the optimizer getting stuck in a local minima and also prevent the hyper-params drop towards the minimum bounds. The following options are available for specifying hyper-param priors: 
+
+- +Normal priors over the logarithm of hyper-params+
+
+  This corresponds to a Normal distribution centered at zero over the log of the hyper-param. By default, the standard deviation is set to 1000.0 and this would have no effect on the optimization. As its value reduces, the regularization effect kicks-in.
 
 !syntax parameters /Trainers/GaussianProcessTrainer
 

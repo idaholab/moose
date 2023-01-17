@@ -102,6 +102,11 @@ GaussianProcessTrainer::GaussianProcessTrainer(const InputParameters & parameter
                "Mini-batch sampling is not compatible with the TAO optimization library. Please "
                "use Adam optimization.");
 
+  if (parameters.isParamSetByUser("prior_std") && _optimization_opts.opt_type == "tao")
+    paramError("prior_std",
+               "Specification of priors over the hyper-params is not possible with the "
+               "TAO optimization library. Please use Adam optimization.");
+
   if (parameters.isParamSetByUser("batch_size"))
     if (_sampler.getNumberOfRows() < _optimization_opts.batch_size)
       paramError("batch_size", "Batch size cannot be greater than the training data set size.");

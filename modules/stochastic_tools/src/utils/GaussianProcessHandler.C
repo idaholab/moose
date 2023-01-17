@@ -82,8 +82,8 @@ GaussianProcessHandler::setupCovarianceMatrix(const RealEigenMatrix & training_p
                         opts.iter_adam,
                         batch_size,
                         opts.learning_rate_adam,
-                        opts.show_optimization_details,
-                        opts.prior_std);
+                        opts.prior_std,
+                        opts.show_optimization_details);
 
   _K.resize(training_params.rows(), training_params.rows());
   _covariance_function->computeCovarianceMatrix(_K, training_params, training_params, true);
@@ -284,8 +284,8 @@ GaussianProcessHandler::tuneHyperParamsAdam(const RealEigenMatrix & training_par
                                             unsigned int iter,
                                             const unsigned int & batch_size,
                                             const Real & learning_rate,
-                                            const bool & show_optimization_details,
-                                            const Real & prior_std)
+                                            const Real & prior_std,
+                                            const bool & show_optimization_details)
 {
   libMesh::PetscVector<Number> theta(_tao_comm, _num_tunable);
   _batch_size = batch_size;
@@ -367,10 +367,19 @@ GaussianProcessHandler::getLossAdam(RealEigenMatrix & inputs,
   log_likelihood += -std::log(_K.determinant());
   log_likelihood -= _batch_size * std::log(2 * M_PI);
   log_likelihood = -log_likelihood / 2;
-  for (unsigned int ii = 0; ii < _num_tunable; ++ii)
-    log_likelihood += -std::log(p_std) - std::log(2.0 * M_PI) / 2.0 -
-                      Utility::pow<2>((std::log(theta(ii)) / p_std)) / 2.0;
+  log_likelihood += getRegularizationforLoss(theta, p_std);
   return log_likelihood;
+}
+
+Real
+GaussianProcessHandler::getRegularizationforLoss(libMesh::PetscVector<Number> & theta,
+                                                 const Real & p_std)
+{
+  Real regularization = 0;
+  for (unsigned int ii = 0; ii < _num_tunable; ++ii)
+    regularization += -std::log(p_std) - std::log(2.0 * M_PI) / 2.0 -
+                      Utility::pow<2>((std::log(theta(ii)) / p_std)) / 2.0;
+  return regularization;
 }
 
 std::vector<Real>
@@ -391,7 +400,7 @@ GaussianProcessHandler::getGradientAdam(RealEigenMatrix & inputs,
     {
       _covariance_function->computedKdhyper(dKdhp, inputs, hyper_param_name, ii);
       RealEigenMatrix tmp = alpha * dKdhp - _K_cho_decomp.solve(dKdhp);
-      Real grad1 = -tmp.trace() / 2.0 - std::log(theta(ii)) / Utility::pow<2>(p_std);
+      Real grad1 = -tmp.trace() / 2.0 + getRegularizationforLossGradient(theta(ii), p_std);
       if (hyper_param_name.compare("length_factor") == 0)
       {
         grad_vec[count] = grad1;
@@ -402,6 +411,14 @@ GaussianProcessHandler::getGradientAdam(RealEigenMatrix & inputs,
     }
   }
   return grad_vec;
+}
+
+Real
+GaussianProcessHandler::getRegularizationforLossGradient(const libMesh::Number & theta,
+                                                         const Real & p_std)
+{
+  Real regularization = -std::log(theta) / Utility::pow<2>(p_std);
+  return regularization;
 }
 
 void

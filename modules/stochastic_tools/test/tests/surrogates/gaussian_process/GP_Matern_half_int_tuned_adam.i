@@ -101,7 +101,6 @@
     iter_adam = 1000
     batch_size = 20
     learning_rate_adam = 0.005
-    prior_std =1000.0
   []
 []
 
@@ -127,6 +126,6 @@
   [out]
     type = CSV
     execute_on = FINAL
-    file_base ='GP_Matern_half_int_tuned_adam'
+    file_base = 'GP_Matern_half_int_tuned_adam'
   []
 []

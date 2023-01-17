@@ -156,8 +156,8 @@ public:
                            unsigned int iter,
                            const unsigned int & batch_size,
                            const Real & learning_rate,
-                           const bool & verbose,
-                           const Real & p_std);
+                           const Real & p_std,
+                           const bool & verbose);
 
   // Computes the loss function for Adam usage
   Real getLossAdam(RealEigenMatrix & inputs,
@@ -165,10 +165,16 @@ public:
                    libMesh::PetscVector<Number> & theta,
                    const Real & p_std);
 
+  // Computes the regularization term in the loss for Adam usage
+  Real getRegularizationforLoss(libMesh::PetscVector<Number> & theta, const Real & p_std);
+
   // Computes Gradient of the loss function for Adam usage
   std::vector<Real> getGradientAdam(RealEigenMatrix & inputs,
                                     libMesh::PetscVector<Number> & theta,
                                     const Real & p_std);
+
+  // Computes the regularization term in the gradient of loss for Adam usage
+  Real getRegularizationforLossGradient(const libMesh::Number & theta, const Real & p_std);
 
   /// Function used to convert the hyperparameter maps in this object to
   /// Petsc vectors
