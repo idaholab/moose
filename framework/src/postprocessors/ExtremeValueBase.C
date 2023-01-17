@@ -12,6 +12,7 @@
 #include "ElementPostprocessor.h"
 #include "ElementVariablePostprocessor.h"
 #include "NodalVariablePostprocessor.h"
+#include "SideVariablePostprocessor.h"
 
 #include <limits>
 
@@ -129,3 +130,4 @@ ExtremeValueBase<T>::threadJoin(const UserObject & y)
 template class ExtremeValueBase<ElementPostprocessor>;
 template class ExtremeValueBase<ElementVariablePostprocessor>;
 template class ExtremeValueBase<NodalVariablePostprocessor>;
+template class ExtremeValueBase<SideVariablePostprocessor>;
