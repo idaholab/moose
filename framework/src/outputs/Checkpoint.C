@@ -30,6 +30,13 @@ Checkpoint::validParams()
 {
   // Get the parameters from the base classes
   InputParameters params = FileOutput::validParams();
+
+  // Controls whether the checkpoint will actually run. Should only ever be changed by the
+  // auto-checkpoint created by the signal handler, which does not write unless a signal is
+  // received.
+  params.addPrivateParam<bool>("should_output", true);
+  params.addPrivateParam<bool>("is_autosave", false);
+
   params.addClassDescription("Output for MOOSE recovery checkpoint files.");
 
   // Typical checkpoint options
@@ -47,6 +54,8 @@ Checkpoint::validParams()
 
 Checkpoint::Checkpoint(const InputParameters & parameters)
   : FileOutput(parameters),
+    _should_output(getParam<bool>("should_output")),
+    _is_autosave(getParam<bool>("is_autosave")),
     _num_files(getParam<unsigned int>("num_files")),
     _suffix(getParam<std::string>("suffix")),
     _binary(getParam<bool>("binary")),
@@ -63,6 +72,7 @@ Checkpoint::filename()
   std::ostringstream output;
   output << directory() << "/" << std::setw(_padding) << std::setprecision(0) << std::setfill('0')
          << std::right << timeStep();
+
   return output.str();
 }
 
@@ -75,60 +85,78 @@ Checkpoint::directory() const
 void
 Checkpoint::output(const ExecFlagType & /*type*/)
 {
-  // Create the output directory
-  std::string cp_dir = directory();
-  Utility::mkdir(cp_dir.c_str());
-
-  // Create the output filename
-  std::string current_file = filename();
-
-  // Create the libMesh Checkpoint_IO object
-  MeshBase & mesh = _es_ptr->get_mesh();
-  CheckpointIO io(mesh, _binary);
-
-  // Set libHilbert renumbering flag to false.  We don't support
-  // N-to-M restarts regardless, and if we're *never* going to do
-  // N-to-M restarts then libHilbert is just unnecessary computation
-  // and communication.
-  const bool renumber = false;
-
-  // Create checkpoint file structure
-  CheckpointFileNames curr_file_struct;
-
-  curr_file_struct.checkpoint = current_file + getMeshFileSuffix(_binary);
-  curr_file_struct.system = current_file + _restartable_data_io.getESFileExtension(_binary);
-  curr_file_struct.restart = current_file + _restartable_data_io.getRestartableDataExt();
-
-  // Write the checkpoint file
-  io.write(curr_file_struct.checkpoint);
-
-  // Write out the restartable mesh meta data if there is any (only on processor zero)
-  if (processor_id() == 0)
+  // Check if we should write the autosave checkpoint. The only time _should_output will
+  // be false is if this Checkpoint object is created through AutoCheckpointAction, and if it
+  // is false, then we check if the signal handler has set the flag for us to write it out.
+  if (!_should_output)
   {
-    for (auto & map_pair :
-         libMesh::as_range(_app.getRestartableDataMapBegin(), _app.getRestartableDataMapEnd()))
-    {
-      const RestartableDataMap & meta_data = map_pair.second.first;
-      const std::string & suffix = map_pair.second.second;
-      const std::string filename(curr_file_struct.checkpoint + "/meta_data" + suffix +
-                                 _restartable_data_io.getRestartableDataExt());
-
-      curr_file_struct.restart_meta_data.emplace(filename);
-      _restartable_data_io.writeRestartableData(filename, meta_data);
-    }
+    comm().max(Moose::autosave_flag);
+    _should_output = Moose::autosave_flag;
   }
 
-  // Write the system data, using ENCODE vs WRITE based on ascii vs binary format
-  _es_ptr->write(curr_file_struct.system,
-                 EquationSystems::WRITE_DATA | EquationSystems::WRITE_ADDITIONAL_DATA |
-                     EquationSystems::WRITE_PARALLEL_FILES,
-                 renumber);
+  if (_should_output)
+  {
+    // Create the output directory
+    std::string cp_dir = directory();
+    Utility::mkdir(cp_dir.c_str());
 
-  // Write the restartable data
-  _restartable_data_io.writeRestartableDataPerProc(curr_file_struct.restart, _restartable_data);
+    // Create the output filename
+    std::string current_file = filename();
 
-  // Remove old checkpoint files
-  updateCheckpointFiles(curr_file_struct);
+    // Create the libMesh Checkpoint_IO object
+    MeshBase & mesh = _es_ptr->get_mesh();
+    CheckpointIO io(mesh, _binary);
+
+    // Set libHilbert renumbering flag to false.  We don't support
+    // N-to-M restarts regardless, and if we're *never* going to do
+    // N-to-M restarts then libHilbert is just unnecessary computation
+    // and communication.
+    const bool renumber = false;
+
+    // Create checkpoint file structure
+    CheckpointFileNames curr_file_struct;
+
+    curr_file_struct.checkpoint = current_file + getMeshFileSuffix(_binary);
+    curr_file_struct.system = current_file + _restartable_data_io.getESFileExtension(_binary);
+    curr_file_struct.restart = current_file + _restartable_data_io.getRestartableDataExt();
+
+    // Write the checkpoint file
+    io.write(curr_file_struct.checkpoint);
+
+    // Write out the restartable mesh meta data if there is any (only on processor zero)
+    if (processor_id() == 0)
+    {
+      for (auto & map_pair :
+           libMesh::as_range(_app.getRestartableDataMapBegin(), _app.getRestartableDataMapEnd()))
+      {
+        const RestartableDataMap & meta_data = map_pair.second.first;
+        const std::string & suffix = map_pair.second.second;
+        const std::string filename(curr_file_struct.checkpoint + "/meta_data" + suffix +
+                                   _restartable_data_io.getRestartableDataExt());
+        curr_file_struct.restart_meta_data.emplace(filename);
+        _restartable_data_io.writeRestartableData(filename, meta_data);
+      }
+    }
+
+    // Write the system data, using ENCODE vs WRITE based on ascii vs binary format
+    _es_ptr->write(curr_file_struct.system,
+                   EquationSystems::WRITE_DATA | EquationSystems::WRITE_ADDITIONAL_DATA |
+                       EquationSystems::WRITE_PARALLEL_FILES,
+                   renumber);
+
+    // Write the restartable data
+    _restartable_data_io.writeRestartableDataPerProc(curr_file_struct.restart, _restartable_data);
+
+    // Remove old checkpoint files
+    updateCheckpointFiles(curr_file_struct);
+
+    // Stop outputting the checkpoint if this is a signaled/autosave checkpoint
+    if (Moose::autosave_flag and _is_autosave)
+    {
+      _should_output = false;
+      Moose::autosave_flag = 0;
+    }
+  }
 }
 
 void

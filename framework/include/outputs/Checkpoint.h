@@ -78,6 +78,9 @@ protected:
 private:
   void updateCheckpointFiles(CheckpointFileNames file_struct);
 
+  bool _should_output;
+
+  bool _is_autosave;
   /// Max no. of output files to store
   unsigned int _num_files;
 

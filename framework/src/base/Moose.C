@@ -233,6 +233,8 @@ addActionTypes(Syntax & syntax)
   registerTask("create_problem_custom", false);
   registerTask("create_problem_complete", false);
 
+  // Action for setting up the signal-based checkpoint
+  registerTask("auto_checkpoint_action", true);
   /**************************/
   /****** Dependencies ******/
   /**************************/
@@ -328,6 +330,7 @@ addActionTypes(Syntax & syntax)
                            "(init_problem)"
                            "(add_control)"
                            "(check_output)"
+                           "(auto_checkpoint_action)"
                            "(check_integrity)");
   // clang-format on
 }
@@ -572,6 +575,7 @@ bool _warnings_are_errors = false;
 bool _deprecated_is_error = false;
 bool _throw_on_error = false;
 bool _throw_on_warning = false;
+int autosave_flag = 0;
 bool show_trace = true;
 bool show_multiple = false;
 

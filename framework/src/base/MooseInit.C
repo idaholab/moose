@@ -21,6 +21,22 @@
 #include <omp.h>
 #endif
 
+#include <unistd.h>
+#include <signal.h>
+
+void
+my_sig_handler(int signum)
+{
+  Moose::autosave_flag = signum;
+  return;
+}
+
+void
+register_sig_handler()
+{
+  signal(SIGUSR1, my_sig_handler);
+}
+
 MooseInit::MooseInit(int argc, char * argv[], MPI_Comm COMM_WORLD_IN)
   : LibMeshInit(argc, argv, COMM_WORLD_IN)
 {
@@ -35,4 +51,6 @@ MooseInit::MooseInit(int argc, char * argv[], MPI_Comm COMM_WORLD_IN)
 
   // Make sure that any calls to the global random number generator are consistent among processes
   MooseRandom::seed(0);
+
+  register_sig_handler();
 }
