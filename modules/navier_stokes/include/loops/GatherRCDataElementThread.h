@@ -23,7 +23,9 @@ class INSFVMomentumResidualObject;
 class GatherRCDataElementThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  GatherRCDataElementThread(FEProblemBase & fe_problem, const std::vector<unsigned int> & vars);
+  GatherRCDataElementThread(FEProblemBase & fe_problem,
+                            const unsigned int _nl_sys_number,
+                            const std::vector<unsigned int> & vars);
 
   // Splitting Constructor
   GatherRCDataElementThread(GatherRCDataElementThread & x, Threads::split split);
@@ -33,6 +35,8 @@ public:
 protected:
   void subdomainChanged() override final;
   void onElement(const Elem * elem) override final;
+
+  const unsigned int _nl_system_num;
 
 private:
   /// The velocity variable numbers

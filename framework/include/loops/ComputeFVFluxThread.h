@@ -72,7 +72,9 @@ template <typename RangeType>
 class ThreadedFaceLoop
 {
 public:
-  ThreadedFaceLoop(FEProblemBase & fe_problem, const std::set<TagID> & tags);
+  ThreadedFaceLoop(FEProblemBase & fe_problem,
+                   const unsigned int nl_system_num,
+                   const std::set<TagID> & tags);
 
   ThreadedFaceLoop(ThreadedFaceLoop & x, Threads::split split);
 
@@ -114,6 +116,7 @@ protected:
   MooseMesh & _mesh;
   const std::set<TagID> & _tags;
   THREAD_ID _tid;
+  const unsigned int _nl_system_num;
 
   /// The subdomain for the current element
   SubdomainID _subdomain;
@@ -130,14 +133,15 @@ protected:
 
 template <typename RangeType>
 ThreadedFaceLoop<RangeType>::ThreadedFaceLoop(FEProblemBase & fe_problem,
+                                              const unsigned int nl_system_num,
                                               const std::set<TagID> & tags)
-  : _fe_problem(fe_problem), _mesh(fe_problem.mesh()), _tags(tags)
+  : _fe_problem(fe_problem), _mesh(fe_problem.mesh()), _tags(tags), _nl_system_num(nl_system_num)
 {
 }
 
 template <typename RangeType>
 ThreadedFaceLoop<RangeType>::ThreadedFaceLoop(ThreadedFaceLoop & x, Threads::split /*split*/)
-  : _fe_problem(x._fe_problem), _mesh(x._mesh), _tags(x._tags)
+  : _fe_problem(x._fe_problem), _mesh(x._mesh), _tags(x._tags), _nl_system_num(x._nl_system_num)
 {
 }
 
@@ -163,6 +167,7 @@ ThreadedFaceLoop<RangeType>::operator()(const RangeType & range, bool bypass_thr
   std::vector<FVKernel *> kernels;
   _fe_problem.theWarehouse()
       .query()
+      .template condition<AttribSysNum>(_nl_system_num)
       .template condition<AttribSystem>("FVFluxKernel")
       .queryInto(kernels);
   if (kernels.size() == 0)
@@ -242,7 +247,9 @@ template <typename RangeType, typename AttributeTagType>
 class ComputeFVFluxThread : public ThreadedFaceLoop<RangeType>
 {
 public:
-  ComputeFVFluxThread(FEProblemBase & fe_problem, const std::set<TagID> & tags);
+  ComputeFVFluxThread(FEProblemBase & fe_problem,
+                      const unsigned int nl_system_num,
+                      const std::set<TagID> & tags);
 
   ComputeFVFluxThread(ComputeFVFluxThread & x, Threads::split split);
 
@@ -282,6 +289,7 @@ protected:
   using ThreadedFaceLoop<RangeType>::_mesh;
   using ThreadedFaceLoop<RangeType>::_tid;
   using ThreadedFaceLoop<RangeType>::_tags;
+  using ThreadedFaceLoop<RangeType>::_nl_system_num;
   using ThreadedFaceLoop<RangeType>::_subdomain;
   using ThreadedFaceLoop<RangeType>::_neighbor_subdomain;
 
@@ -319,8 +327,9 @@ private:
 
 template <typename RangeType, typename AttributeTagType>
 ComputeFVFluxThread<RangeType, AttributeTagType>::ComputeFVFluxThread(FEProblemBase & fe_problem,
+                                                                      unsigned int nl_system_num,
                                                                       const std::set<TagID> & tags)
-  : ThreadedFaceLoop<RangeType>(fe_problem, tags),
+  : ThreadedFaceLoop<RangeType>(fe_problem, nl_system_num, tags),
     _scaling_jacobian(fe_problem.computingScalingJacobian()),
     _scaling_residual(fe_problem.computingScalingResidual())
 {
@@ -407,6 +416,7 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::onBoundary(const FaceInfo & fi
   std::vector<FVFluxBC *> bcs;
   _fe_problem.theWarehouse()
       .query()
+      .template condition<AttribSysNum>(_nl_system_num)
       .template condition<AttribSystem>("FVFluxBC")
       .template condition<AttribThread>(_tid)
       .template condition<AttributeTagType>(_tags)
@@ -419,6 +429,7 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::onBoundary(const FaceInfo & fi
   std::vector<FVInterfaceKernel *> iks;
   _fe_problem.theWarehouse()
       .query()
+      .template condition<AttribSysNum>(_nl_system_num)
       .template condition<AttribSystem>("FVInterfaceKernel")
       .template condition<AttribThread>(_tid)
       .template condition<AttributeTagType>(_tags)
@@ -607,6 +618,7 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::subdomainChanged()
   std::vector<FVFluxKernel *> kernels;
   _fe_problem.theWarehouse()
       .query()
+      .template condition<AttribSysNum>(_nl_system_num)
       .template condition<AttribSystem>("FVFluxKernel")
       .template condition<AttribSubdomains>(_subdomain)
       .template condition<AttribThread>(_tid)
@@ -665,6 +677,7 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::neighborSubdomainChanged()
   std::vector<FVFluxKernel *> kernels;
   _fe_problem.theWarehouse()
       .query()
+      .template condition<AttribSysNum>(_nl_system_num)
       .template condition<AttribSystem>("FVFluxKernel")
       .template condition<AttribSubdomains>(_neighbor_subdomain)
       .template condition<AttribThread>(_tid)
@@ -704,6 +717,7 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::pre()
   std::vector<FVFluxBC *> bcs;
   _fe_problem.theWarehouse()
       .query()
+      .template condition<AttribSysNum>(_nl_system_num)
       .template condition<AttribSystem>("FVFluxBC")
       .template condition<AttribThread>(_tid)
       .template condition<AttributeTagType>(_tags)
@@ -712,6 +726,7 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::pre()
   std::vector<FVInterfaceKernel *> iks;
   _fe_problem.theWarehouse()
       .query()
+      .template condition<AttribSysNum>(_nl_system_num)
       .template condition<AttribSystem>("FVInterfaceKernel")
       .template condition<AttribThread>(_tid)
       .template condition<AttributeTagType>(_tags)
@@ -720,6 +735,7 @@ ComputeFVFluxThread<RangeType, AttributeTagType>::pre()
   std::vector<FVFluxKernel *> kernels;
   _fe_problem.theWarehouse()
       .query()
+      .template condition<AttribSysNum>(_nl_system_num)
       .template condition<AttribSystem>("FVFluxKernel")
       .template condition<AttribThread>(_tid)
       .template condition<AttributeTagType>(_tags)
@@ -757,13 +773,16 @@ template <typename RangeType>
 class ComputeFVFluxResidualThread : public ComputeFVFluxThread<RangeType, AttribVectorTags>
 {
 public:
-  ComputeFVFluxResidualThread(FEProblemBase & fe_problem, const std::set<TagID> & tags);
+  ComputeFVFluxResidualThread(FEProblemBase & fe_problem,
+                              const unsigned int nl_system_num,
+                              const std::set<TagID> & tags);
 
   ComputeFVFluxResidualThread(ComputeFVFluxResidualThread & x, Threads::split split);
 
 protected:
   using ComputeFVFluxThread<RangeType, AttribVectorTags>::_fe_problem;
   using ComputeFVFluxThread<RangeType, AttribVectorTags>::_tid;
+  using ComputeFVFluxThread<RangeType, AttribVectorTags>::_nl_system_num;
   using ComputeFVFluxThread<RangeType, AttribVectorTags>::_num_cached;
 
   void postFace(const FaceInfo & fi) override;
@@ -773,9 +792,9 @@ protected:
 };
 
 template <typename RangeType>
-ComputeFVFluxResidualThread<RangeType>::ComputeFVFluxResidualThread(FEProblemBase & fe_problem,
-                                                                    const std::set<TagID> & tags)
-  : ComputeFVFluxThread<RangeType, AttribVectorTags>(fe_problem, tags)
+ComputeFVFluxResidualThread<RangeType>::ComputeFVFluxResidualThread(
+    FEProblemBase & fe_problem, const unsigned int nl_system_num, const std::set<TagID> & tags)
+  : ComputeFVFluxThread<RangeType, AttribVectorTags>(fe_problem, nl_system_num, tags)
 {
 }
 
@@ -802,7 +821,9 @@ template <typename RangeType>
 class ComputeFVFluxJacobianThread : public ComputeFVFluxThread<RangeType, AttribMatrixTags>
 {
 public:
-  ComputeFVFluxJacobianThread(FEProblemBase & fe_problem, const std::set<TagID> & tags);
+  ComputeFVFluxJacobianThread(FEProblemBase & fe_problem,
+                              const unsigned int nl_system_num,
+                              const std::set<TagID> & tags);
 
   ComputeFVFluxJacobianThread(ComputeFVFluxJacobianThread & x, Threads::split split);
 
@@ -818,9 +839,9 @@ protected:
 };
 
 template <typename RangeType>
-ComputeFVFluxJacobianThread<RangeType>::ComputeFVFluxJacobianThread(FEProblemBase & fe_problem,
-                                                                    const std::set<TagID> & tags)
-  : ComputeFVFluxThread<RangeType, AttribMatrixTags>(fe_problem, tags)
+ComputeFVFluxJacobianThread<RangeType>::ComputeFVFluxJacobianThread(
+    FEProblemBase & fe_problem, const unsigned int nl_system_num, const std::set<TagID> & tags)
+  : ComputeFVFluxThread<RangeType, AttribMatrixTags>(fe_problem, nl_system_num, tags)
 {
 }
 
@@ -852,6 +873,7 @@ class ComputeFVFluxRJThread : public ComputeFVFluxThread<RangeType, AttribVector
 {
 public:
   ComputeFVFluxRJThread(FEProblemBase & fe_problem,
+                        const unsigned int nl_system_num,
                         const std::set<TagID> & vector_tags,
                         const std::set<TagID> & /*matrix_tags*/);
 
@@ -877,9 +899,10 @@ protected:
 
 template <typename RangeType>
 ComputeFVFluxRJThread<RangeType>::ComputeFVFluxRJThread(FEProblemBase & fe_problem,
+                                                        const unsigned int nl_system_num,
                                                         const std::set<TagID> & vector_tags,
                                                         const std::set<TagID> & /*matrix_tags*/)
-  : ComputeFVFluxThread<RangeType, AttribVectorTags>(fe_problem, vector_tags)
+  : ComputeFVFluxThread<RangeType, AttribVectorTags>(fe_problem, nl_system_num, vector_tags)
 {
 }
 
