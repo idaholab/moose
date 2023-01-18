@@ -69,8 +69,9 @@ protected:
   T & declareMeshProperty(const std::string & data_name, const T & init_value);
 
   /**
-   * Method for updating attributes to the mesh meta-data store, which can only be invoked outside
-   * of the MeshGenerator constructor after the mesh generator property has already been declared.
+   * Method for updating attributes to the mesh meta-data store, which can only be invoked in
+   * the MeshGenerator generate routine only if the mesh generator property has already been
+   * declared.
    */
   template <typename T>
   T & setMeshProperty(const std::string & data_name, const T & data_value);
@@ -220,7 +221,10 @@ MeshGenerator::setMeshProperty(const std::string & data_name, const T & data_val
   std::string full_name =
       std::string(MeshMetaDataInterface::SYSTEM) + "/" + name() + "/" + data_name;
 
-  auto & restartable_data_ref = static_cast<RestartableData<T> &>(
+  if (_app.getRestartableMetaData(full_name, MooseApp::MESH_META_DATA, 0).type() !=
+      MooseUtils::prettyCppType(&data_value))
+    mooseError("Data type of metadata value must match the original data type of the metadata");
+  auto & restartable_data_ref = dynamic_cast<RestartableData<T> &>(
       _app.getRestartableMetaData(full_name, MooseApp::MESH_META_DATA, 0));
   T & data = restartable_data_ref.set();
   data = data_value;
