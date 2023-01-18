@@ -1,6 +1,10 @@
-# ScalarLMKernel
+# KernelScalarBase
 
-This Kernel implements all of the terms from the equation that enforces the constraint of
+Mention AD version provided, and with warning for global only.
+describe the parameters like the kernel system
+say what loops are added, primary and other scalars
+
+This Kernel implements part of the equation that enforces the constraint of
 
 \begin{equation}
  \int_{\Omega} \phi = V_0
@@ -12,16 +16,13 @@ where $V_0$ is a given constant, using a Lagrange multiplier approach. The resid
   F^{(\phi)}_i \equiv \lambda^h \int_{\Omega} \varphi_i \;\text{d}\Omega \label{eq:eq1}
 \end{equation}
 
-This kernel is an alternative to the combination of slmk, avc, and a user object. It shows how to derive from the scalar kernel base and assemble with a scalar variable.
-Currently, a Null Scalar Kernel is required to activate the dependency of the scalar variable within the block or subdomain of this object.
-
 In particular, this Kernel implements the residual contribution from
 the $\lambda$ in [eq:eq1] , and their Jacobian contributions. See also [AverageValueConstraint.md] for the residual of the Lagrange multiplier variable.
 
 The detailed description of the derivation can be found at [scalar_constraint_kernel](https://github.com/idaholab/large_media/blob/master/framework/scalar_constraint_kernel.pdf).
 
-!syntax parameters /Kernels/ScalarLMKernel
+!syntax parameters /Kernels/KernelScalarBase
 
-!syntax inputs /Kernels/ScalarLMKernel
+!syntax inputs /Kernels/KernelScalarBase
 
-!syntax children /Kernels/ScalarLMKernel
+!syntax children /Kernels/KernelScalarBase

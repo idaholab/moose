@@ -26,12 +26,17 @@ KernelScalarBase::validParams()
   // This name is fixed and required to be equal to the previous parameter; need to add error
   // checks...
   params.addCoupledVar("coupled_scalar", "Repeat name of scalar variable to ensure dependency");
+  params.addParam<bool>("compute_scalar_residuals", true, "Whether to compute scalar residuals");
+  params.addParam<bool>(
+      "compute_field_residuals", true, "Whether to compute residuals for the field variable.");
   return params;
 }
 
 KernelScalarBase::KernelScalarBase(const InputParameters & parameters)
   : Kernel(parameters),
     _use_scalar(isParamValid("scalar_variable") ? true : false),
+    _compute_scalar_residuals(!_use_scalar ? false : getParam<bool>("compute_scalar_residuals")),
+    _compute_field_residuals(getParam<bool>("compute_field_residuals")),
     _kappa_dummy(),
     _kappa_var_ptr(
         _use_scalar ? &_sys.getScalarVariable(_tid, parameters.get<VariableName>("scalar_variable"))
@@ -47,32 +52,38 @@ KernelScalarBase::KernelScalarBase(const InputParameters & parameters)
 void
 KernelScalarBase::computeResidual()
 {
-  Kernel::computeResidual(); // compute and assemble regular variable contributions
+  if (_compute_field_residuals)
+    Kernel::computeResidual(); // compute and assemble regular variable contributions
 
-  if (_use_scalar)
+  if (_compute_scalar_residuals)
+    computeScalarResidual();
+}
+
+void
+KernelScalarBase::computeScalarResidual()
+{
+  std::vector<Real> scalar_residuals(_k_order);
+
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
-    std::vector<Real> scalar_residuals(_k_order);
-
-    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-    {
-      initScalarQpResidual();
-      for (_h = 0; _h < _k_order; _h++)
-        scalar_residuals[_h] += _JxW[_qp] * _coord[_qp] * computeScalarQpResidual();
-    }
-
-    _assembly.processResiduals(scalar_residuals,
-                               _kappa_var_ptr->dofIndices(),
-                               _vector_tags,
-                               _kappa_var_ptr->scalingFactor());
+    initScalarQpResidual();
+    for (_h = 0; _h < _k_order; _h++)
+      scalar_residuals[_h] += _JxW[_qp] * _coord[_qp] * computeScalarQpResidual();
   }
+
+  _assembly.processResiduals(scalar_residuals,
+                             _kappa_var_ptr->dofIndices(),
+                             _vector_tags,
+                             _kappa_var_ptr->scalingFactor());
 }
 
 void
 KernelScalarBase::computeJacobian()
 {
-  Kernel::computeJacobian();
+  if (_compute_field_residuals)
+    Kernel::computeJacobian();
 
-  if (_use_scalar)
+  if (_compute_scalar_residuals)
     computeScalarJacobian();
 }
 
@@ -104,8 +115,10 @@ KernelScalarBase::computeOffDiagJacobian(const unsigned int jvar_num)
   {
     if (jvar_num == variable().number()) // column for this kernel's variable
     {
-      Kernel::computeJacobian();              // d-_var-residual / d-_var
-      computeScalarOffDiagJacobian(jvar_num); // d-_kappa-residual / d-_var
+      if (_compute_field_residuals)
+        Kernel::computeJacobian(); // d-_var-residual / d-_var
+      if (_compute_scalar_residuals)
+        computeScalarOffDiagJacobian(jvar_num); // d-_kappa-residual / d-_var
     }
     else if (jvar_num == _kappa_var) // column for this kernel's scalar variable
     {
@@ -114,19 +127,23 @@ KernelScalarBase::computeOffDiagJacobian(const unsigned int jvar_num)
     }
     else // some other column for regular variable
     {
-      Kernel::computeOffDiagJacobian(jvar_num); // d-_var-residual / d-jvar
-      computeScalarOffDiagJacobian(jvar_num);   // d-_kappa-residual / d-jvar
+      if (_compute_field_residuals)
+        Kernel::computeOffDiagJacobian(jvar_num); // d-_var-residual / d-jvar
+      if (_compute_scalar_residuals)
+        computeScalarOffDiagJacobian(jvar_num); // d-_kappa-residual / d-jvar
     }
   }
   else
   {
     if (jvar_num == variable().number()) // column for this kernel's variable
     {
-      Kernel::computeJacobian(); // d-_var-residual / d-_var
+      if (_compute_field_residuals)
+        Kernel::computeJacobian(); // d-_var-residual / d-_var
     }
     else // some other column for regular variable
     {
-      Kernel::computeOffDiagJacobian(jvar_num); // d-_var-residual / d-jvar
+      if (_compute_field_residuals)
+        Kernel::computeOffDiagJacobian(jvar_num); // d-_var-residual / d-jvar
     }
   }
 }
@@ -198,20 +215,27 @@ KernelScalarBase::computeOffDiagJacobianScalar(const unsigned int svar_num)
     }
     else if (svar_num == _kappa_var) // column for this kernel's scalar variable
     {
-      // Perform assembly using method in Kernel
+      // Perform assembly using method in Kernel; works for simple cases but not general
       // Kernel::computeOffDiagJacobianScalar(svar_num); // d-_var-residual / d-_kappa
-      // Perform assembly using DenseMatrix like d-_kappa_var-residual / d-_var
-      computeOffDiagJacobianScalarLocal(svar_num); // d-_var-residual / d-_kappa
-      computeScalarJacobian();                     // d-_kappa-residual / d-_kappa
+      // Perform assembly using local_ke like d-_kappa_var-residual / d-_var
+      if (_compute_field_residuals)
+        computeOffDiagJacobianScalarLocal(svar_num); // d-_var-residual / d-_kappa
+      if (_compute_scalar_residuals)
+        computeScalarJacobian(); // d-_kappa-residual / d-_kappa
     }
     else // some other column for scalar variable
     {
-      Kernel::computeOffDiagJacobianScalar(svar_num); // d-_var-residual / d-jvar
-      computeScalarOffDiagJacobianScalar(svar_num);   // d-_kappa-residual / d-jvar
+      // Perform assembly using method in Kernel; works for simple cases but not general
+      // Kernel::computeOffDiagJacobianScalar(svar_num); // d-_var-residual / d-jvar
+      // Perform assembly using local_ke like d-_kappa_var-residual / d-_var
+      if (_compute_field_residuals)
+        computeOffDiagJacobianScalarLocal(svar_num); // d-_var-residual / d-svar
+      if (_compute_scalar_residuals)
+        computeScalarOffDiagJacobianScalar(svar_num); // d-_kappa-residual / d-svar
     }
   }
-  else
-    Kernel::computeOffDiagJacobianScalar(svar_num); // d-_var-residual / d-jvar
+  else if (_compute_field_residuals)
+    Kernel::computeOffDiagJacobianScalar(svar_num); // d-_var-residual / d-svar
 }
 
 void

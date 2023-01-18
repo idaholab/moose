@@ -78,7 +78,14 @@ PenaltyPeriodicSegmentalConstraint::computeQpResidual(const Moose::MortarType mo
   /// Compute penalty parameter times x-jump times average heat flux
 
   RealVectorValue dx(_phys_points_primary[_qp] - _phys_points_secondary[_qp]);
-  RealVectorValue kappa_vec(_kappa[0], _kappa[1], 0);
+  RealVectorValue kappa_vec(_kappa[0], 0, 0);
+  if (_k_order == 2)
+    kappa_vec(1) = _kappa[1];
+  else if (_k_order == 3)
+  {
+    kappa_vec(1) = _kappa[1];
+    kappa_vec(2) = _kappa[2];
+  }
   Real r = _tau_s * (kappa_vec * dx);
 
   switch (mortar_type)
@@ -107,8 +114,20 @@ PenaltyPeriodicSegmentalConstraint::computeScalarQpResidual()
 
   r *= -dx(_h);
 
-  RealVectorValue kappa_vec(_kappa[0], _kappa[1], 0);
-  RealVectorValue kappa_aux_vec(_kappa_aux[0], _kappa_aux[1], 0);
+  RealVectorValue kappa_vec(_kappa[0], 0, 0);
+  RealVectorValue kappa_aux_vec(_kappa_aux[0], 0, 0);
+  if (_k_order == 2)
+  {
+    kappa_vec(1) = _kappa[1];
+    kappa_aux_vec(1) = _kappa_aux[1];
+  }
+  else if (_k_order == 3)
+  {
+    kappa_vec(1) = _kappa[1];
+    kappa_vec(2) = _kappa[2];
+    kappa_aux_vec(1) = _kappa_aux[1];
+    kappa_aux_vec(2) = _kappa_aux[2];
+  }
 
   r += dx(_h) * _tau_s * (kappa_vec * dx);
   r -= dx(_h) * (kappa_aux_vec * _normals[_qp]);

@@ -43,11 +43,16 @@ public:
   virtual void computeOffDiagJacobian(unsigned int jvar_num) override;
   /**
    * Computes jacobian block with respect to a scalar variable
-   * @param jvar, the number of the (other) scalar variable
+   * @param svar, the number of the (other) scalar variable
    */
   void computeOffDiagJacobianScalar(unsigned int svar_num) override;
 
 protected:
+  /**
+   * Method for computing the scalar part of residual
+   */
+  virtual void computeScalarResidual();
+
   /**
    * Method for computing the scalar part of residual at quadrature points
    */
@@ -67,18 +72,18 @@ protected:
   /**
    * Method for computing an off-diagonal jacobian component d-_kappa-residual / d-jvar
    */
-  void computeScalarOffDiagJacobian(const unsigned int jvar_num);
+  virtual void computeScalarOffDiagJacobian(const unsigned int jvar_num);
 
   /**
    * Method for computing an off-diagonal jacobian component at quadrature points.
    */
   virtual Real computeScalarQpOffDiagJacobian(const unsigned int /*jvar_num*/) { return 0; }
 
-  void computeOffDiagJacobianScalarLocal(const unsigned int svar_num);
+  virtual void computeOffDiagJacobianScalarLocal(const unsigned int svar_num);
   /**
    * Method for computing an off-diagonal jacobian component d-_kappa-residual / d-scalar
    */
-  void computeScalarOffDiagJacobianScalar(const unsigned int svar_num);
+  virtual void computeScalarOffDiagJacobianScalar(const unsigned int svar_num);
 
   /**
    * Method for computing an off-diagonal jacobian component at quadrature points.
@@ -101,8 +106,14 @@ protected:
    */
   virtual void initScalarQpOffDiagJacobian(const MooseVariableFEBase &) {}
 
-  /// Whether to compute scalar contributions
+  /// Whether a scalar variable is declared for this kernel
   const bool _use_scalar;
+
+  /// Whether to compute scalar contributions for this instance
+  const bool _compute_scalar_residuals;
+
+  /// Whether to compute field contributions for this instance
+  const bool _compute_field_residuals;
 
   /// A dummy object useful for constructing _kappa when not using scalars
   const VariableValue _kappa_dummy;

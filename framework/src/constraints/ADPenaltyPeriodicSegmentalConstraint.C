@@ -73,9 +73,20 @@ ADPenaltyPeriodicSegmentalConstraint::computeQpResidual(const Moose::MortarType 
   /// Compute penalty parameter times x-jump times average heat flux
 
   RealVectorValue dx(_phys_points_primary[_qp] - _phys_points_secondary[_qp]);
-  ADRealVectorValue kappa_vec(_kappa[0], _kappa[1], 0);
+  ADRealVectorValue kappa_vec(_kappa[0], 0, 0);
   Moose::derivInsert(kappa_vec(0).derivatives(), _kappa_var_ptr->dofIndices()[0], 1);
-  Moose::derivInsert(kappa_vec(1).derivatives(), _kappa_var_ptr->dofIndices()[1], 1);
+  if (_k_order == 2)
+  {
+    kappa_vec(1) = _kappa[1];
+    Moose::derivInsert(kappa_vec(1).derivatives(), _kappa_var_ptr->dofIndices()[1], 1);
+  }
+  else if (_k_order == 3)
+  {
+    kappa_vec(1) = _kappa[1];
+    kappa_vec(2) = _kappa[2];
+    Moose::derivInsert(kappa_vec(1).derivatives(), _kappa_var_ptr->dofIndices()[1], 1);
+    Moose::derivInsert(kappa_vec(2).derivatives(), _kappa_var_ptr->dofIndices()[2], 1);
+  }
   ADReal r = _tau_s * (kappa_vec * dx);
 
   switch (mortar_type)
@@ -104,10 +115,24 @@ ADPenaltyPeriodicSegmentalConstraint::computeScalarQpResidual()
 
   r *= -dx(_h);
 
-  ADRealVectorValue kappa_vec(_kappa[0], _kappa[1], 0);
+  ADRealVectorValue kappa_vec(_kappa[0], 0, 0);
+  RealVectorValue kappa_aux_vec(_kappa_aux[0], 0, 0);
   Moose::derivInsert(kappa_vec(0).derivatives(), _kappa_var_ptr->dofIndices()[0], 1);
-  Moose::derivInsert(kappa_vec(1).derivatives(), _kappa_var_ptr->dofIndices()[1], 1);
-  RealVectorValue kappa_aux_vec(_kappa_aux[0], _kappa_aux[1], 0);
+  if (_k_order == 2)
+  {
+    kappa_vec(1) = _kappa[1];
+    Moose::derivInsert(kappa_vec(1).derivatives(), _kappa_var_ptr->dofIndices()[1], 1);
+    kappa_aux_vec(1) = _kappa_aux[1];
+  }
+  else if (_k_order == 3)
+  {
+    kappa_vec(1) = _kappa[1];
+    kappa_vec(2) = _kappa[2];
+    Moose::derivInsert(kappa_vec(1).derivatives(), _kappa_var_ptr->dofIndices()[1], 1);
+    Moose::derivInsert(kappa_vec(2).derivatives(), _kappa_var_ptr->dofIndices()[2], 1);
+    kappa_aux_vec(1) = _kappa_aux[1];
+    kappa_aux_vec(2) = _kappa_aux[2];
+  }
 
   r += dx(_h) * _tau_s * (kappa_vec * dx);
   r -= dx(_h) * (kappa_aux_vec * _normals[_qp]);

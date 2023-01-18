@@ -25,12 +25,14 @@ ADMortarScalarBase::validParams()
   // This name is fixed and required to be equal to the previous parameter; need to add error
   // checks...
   params.addCoupledVar("coupled_scalar", "Repeat name of scalar variable to ensure dependency");
+  params.addParam<bool>("compute_scalar_residuals", true, "Whether to compute scalar residuals");
   return params;
 }
 
 ADMortarScalarBase::ADMortarScalarBase(const InputParameters & parameters)
   : ADMortarConstraint(parameters),
     _use_scalar(isParamValid("scalar_variable") ? true : false),
+    _compute_scalar_residuals(!_use_scalar ? false : getParam<bool>("compute_scalar_residuals")),
     _kappa_dummy(),
     _kappa_var_ptr(
         _use_scalar ? &_sys.getScalarVariable(_tid, parameters.get<VariableName>("scalar_variable"))
@@ -47,7 +49,7 @@ ADMortarScalarBase::computeResidual()
 {
   ADMortarConstraint::computeResidual();
 
-  if (_use_scalar)
+  if (_compute_scalar_residuals)
   {
     std::vector<Real> scalar_residuals(_k_order);
     for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
@@ -71,7 +73,7 @@ ADMortarScalarBase::computeJacobian()
   // d-_var-residual / d-_var and d-_var-residual / d-jvar
   ADMortarConstraint::computeJacobian();
 
-  if (_use_scalar)
+  if (_compute_scalar_residuals)
   {
     std::vector<ADReal> scalar_residuals;
     scalar_residuals.resize(_k_order, 0);

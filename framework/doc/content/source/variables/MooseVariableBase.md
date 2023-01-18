@@ -1,5 +1,7 @@
 # MooseVariableBase
 
+Make first words below link to the variable type
+
 !syntax description /Variables/MooseVariableBase
 
 The current class hierarchy for Moose variables is shown below:

@@ -24,12 +24,14 @@ MortarScalarBase::validParams()
   // This name is fixed and required to be equal to the previous parameter; need to add error
   // checks...
   params.addCoupledVar("coupled_scalar", "Repeat name of scalar variable to ensure dependency");
+  params.addParam<bool>("compute_scalar_residuals", true, "Whether to compute scalar residuals");
   return params;
 }
 
 MortarScalarBase::MortarScalarBase(const InputParameters & parameters)
   : MortarConstraint(parameters),
     _use_scalar(isParamValid("scalar_variable") ? true : false),
+    _compute_scalar_residuals(!_use_scalar ? false : getParam<bool>("compute_scalar_residuals")),
     _kappa_dummy(),
     _kappa_var_ptr(
         _use_scalar ? &_sys.getScalarVariable(_tid, parameters.get<VariableName>("scalar_variable"))
@@ -47,7 +49,7 @@ MortarScalarBase::computeResidual()
 {
   MortarConstraintBase::computeResidual();
 
-  if (_use_scalar)
+  if (_compute_scalar_residuals)
   {
     std::vector<Real> scalar_residuals(_k_order);
     for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
@@ -98,42 +100,45 @@ MortarScalarBase::computeJacobian()
           // Compute the jacobian for the lower dimensional LM dofs (if we even have an LM variable)
           computeOffDiagJacobianScalar(Moose::MortarType::Lower, jvariable->number());
 
-    // Handle ALL d-_kappa-residual / d-_var and d-_kappa-residual / d-jvar columns
-    auto & ce = _assembly.scalarFieldCouplingEntries();
-    for (const auto & it : ce)
+    if (_compute_scalar_residuals)
     {
-      MooseVariableScalar & ivariable = *(it.first);
-      MooseVariableFEBase & jvariable = *(it.second);
-
-      unsigned int ivar = ivariable.number();
-      unsigned int jvar_num = jvariable.number();
-
-      if (ivar != _kappa_var) // only do the row for _kappa_var in this object
-        continue;
-
-      if (_compute_primal_residuals)
+      // Handle ALL d-_kappa-residual / d-_var and d-_kappa-residual / d-jvar columns
+      auto & ce = _assembly.scalarFieldCouplingEntries();
+      for (const auto & it : ce)
       {
-        // Compute the jacobian for the secondary interior primal dofs
-        computeScalarOffDiagJacobian(Moose::MortarType::Secondary, jvar_num);
-        // Compute the jacobian for the primary interior primal dofs.
-        computeScalarOffDiagJacobian(Moose::MortarType::Primary, jvar_num);
+        MooseVariableScalar & ivariable = *(it.first);
+        MooseVariableFEBase & jvariable = *(it.second);
+
+        unsigned int ivar = ivariable.number();
+        unsigned int jvar_num = jvariable.number();
+
+        if (ivar != _kappa_var) // only do the row for _kappa_var in this object
+          continue;
+
+        if (_compute_primal_residuals)
+        {
+          // Compute the jacobian for the secondary interior primal dofs
+          computeScalarOffDiagJacobian(Moose::MortarType::Secondary, jvar_num);
+          // Compute the jacobian for the primary interior primal dofs.
+          computeScalarOffDiagJacobian(Moose::MortarType::Primary, jvar_num);
+        }
+        if (_compute_lm_residuals)
+          // Compute the jacobian for the lower dimensional LM dofs (if we even have an LM variable)
+          computeScalarOffDiagJacobian(Moose::MortarType::Lower, jvar_num);
       }
-      if (_compute_lm_residuals)
-        // Compute the jacobian for the lower dimensional LM dofs (if we even have an LM variable)
-        computeScalarOffDiagJacobian(Moose::MortarType::Lower, jvar_num);
-    }
 
-    // Do: d-_kappa-residual / d-_kappa and d-_kappa-residual / d-jvar,
-    // only want to process only nl-variables (not aux ones)
-    for (const auto & jvariable : coupled_scalar_vars)
-    {
-      if (_sys.hasScalarVariable(jvariable->name()))
+      // Do: d-_kappa-residual / d-_kappa and d-_kappa-residual / d-jvar,
+      // only want to process only nl-variables (not aux ones)
+      for (const auto & jvariable : coupled_scalar_vars)
       {
-        const unsigned int jvar_num = jvariable->number();
-        if (jvar_num == _kappa_var)
-          computeScalarJacobian(); // d-_kappa-residual / d-_kappa
-        else
-          computeScalarOffDiagJacobianScalar(jvar_num); // d-_kappa-residual / d-jvar
+        if (_sys.hasScalarVariable(jvariable->name()))
+        {
+          const unsigned int jvar_num = jvariable->number();
+          if (jvar_num == _kappa_var)
+            computeScalarJacobian(); // d-_kappa-residual / d-_kappa
+          else
+            computeScalarOffDiagJacobianScalar(jvar_num); // d-_kappa-residual / d-jvar
+        }
       }
     }
   }
