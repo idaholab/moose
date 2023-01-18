@@ -63,29 +63,34 @@
     order = SECOND
     family = LAGRANGE
   []
-  [kappa]
+  [epsilon]
     order = SECOND
     family = SCALAR
   []
-  [./lm]
+  [./lm1]
     order = FIRST
     family = LAGRANGE
-    block = 'secondary_left secondary_bottom'
+    block = secondary_left
+  [../]
+  [./lm2]
+    order = FIRST
+    family = LAGRANGE
+    block = secondary_bottom
   [../]
 []
 
 [AuxVariables]
-  [kappa_aux]
+  [sigma]
     order = SECOND
     family = SCALAR
   []
 []
 
 [AuxScalarKernels]
-  [kappa]
+  [sigma]
     type = FunctionScalarAux
-    variable = kappa_aux
-    function = '1 1'
+    variable = sigma
+    function = '1 2'
     execute_on = initial #timestep_end
   []
 []
@@ -120,7 +125,7 @@
     primary_subdomain = 'primary_right'
     secondary_subdomain = 'secondary_left'
     secondary_variable = u
-    variable = lm
+    variable = lm1
     correct_edge_dropping = true
   []
   [periodiclr]
@@ -130,10 +135,10 @@
     primary_subdomain = 'primary_right'
     secondary_subdomain = 'secondary_left'
     secondary_variable = u
-    kappa = kappa
-    coupled_scalar = kappa
-    kappa_aux = kappa_aux
-    variable = lm
+    epsilon = epsilon
+    coupled_scalar = epsilon
+    sigma = sigma
+    variable = lm1
     correct_edge_dropping = true
   []
   [mortarbt]
@@ -143,7 +148,7 @@
     primary_subdomain = 'primary_top'
     secondary_subdomain = 'secondary_bottom'
     secondary_variable = u
-    variable = lm
+    variable = lm2
     correct_edge_dropping = true
   []
   [periodicbt]
@@ -153,10 +158,10 @@
     primary_subdomain = 'primary_top'
     secondary_subdomain = 'secondary_bottom'
     secondary_variable = u
-    kappa = kappa
-    coupled_scalar = kappa
-    kappa_aux = kappa_aux
-    variable = lm
+    epsilon = epsilon
+    coupled_scalar = epsilon
+    sigma = sigma
+    variable = lm2
     correct_edge_dropping = true
   []
 []

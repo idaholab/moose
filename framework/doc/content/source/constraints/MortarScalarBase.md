@@ -7,10 +7,3 @@ The `MortarScalarBase` is the automatic differentiation version of [`PenaltyPeri
 
 Mention AD version provided, and with warning for global only.
 
-!syntax description /Constraints/MortarScalarBase
-
-!syntax parameters /Constraints/MortarScalarBase
-
-!syntax inputs /Constraints/MortarScalarBase
-
-!syntax children /Constraints/MortarScalarBase

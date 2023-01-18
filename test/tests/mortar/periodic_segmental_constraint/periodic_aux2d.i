@@ -6,9 +6,9 @@
     xmax = 1.0
     ymin = -1.0
     ymax = 1.0
-    nx = 2
-    ny = 2
-    elem_type = QUAD4
+    nx = 4
+    ny = 4
+    elem_type = QUAD9
   []
   [left_block_sidesets]
     type = RenameBoundaryGenerator
@@ -60,17 +60,27 @@
 
 [Variables]
   [u]
-    order = FIRST
+    order = SECOND
     family = LAGRANGE
   []
-  [epsilon]
-    order = SECOND
-    family = SCALAR
-  []
+  [./lm1]
+    order = FIRST
+    family = LAGRANGE
+    block = secondary_left
+  [../]
+  [./lm2]
+    order = FIRST
+    family = LAGRANGE
+    block = secondary_bottom
+  [../]
 []
 
 [AuxVariables]
   [sigma]
+    order = SECOND
+    family = SCALAR
+  []
+  [epsilon]
     order = SECOND
     family = SCALAR
   []
@@ -80,14 +90,20 @@
   [sigma]
     type = FunctionScalarAux
     variable = sigma
-    function = '1 2'
+    function = '1 1'
+    execute_on = initial #timestep_end
+  []
+  [epsilon]
+    type = FunctionScalarAux
+    variable = epsilon
+    function = '-1 -1'
     execute_on = initial #timestep_end
   []
 []
 
 [Kernels]
   [diff1]
-    type = ADDiffusion
+    type = Diffusion
     variable = u
     block = 1
   []
@@ -109,17 +125,17 @@
 
 [Constraints]
   [mortarlr]
-    type = ADPenaltyEqualValueConstraint
+    type = EqualValueConstraint
     primary_boundary = '11'
     secondary_boundary = '13'
     primary_subdomain = 'primary_right'
     secondary_subdomain = 'secondary_left'
     secondary_variable = u
+    variable = lm1
     correct_edge_dropping = true
-    penalty_value = 1.e2
   []
   [periodiclr]
-    type = ADPenaltyPeriodicSegmentalConstraint
+    type = PeriodicSegmentalConstraint
     primary_boundary = '11'
     secondary_boundary = '13'
     primary_subdomain = 'primary_right'
@@ -128,21 +144,22 @@
     epsilon = epsilon
     coupled_scalar = epsilon
     sigma = sigma
+    variable = lm1
     correct_edge_dropping = true
-    penalty_value = 1.e2
+    compute_scalar_residuals = false
   []
   [mortarbt]
-    type = ADPenaltyEqualValueConstraint
+    type = EqualValueConstraint
     primary_boundary = '12'
     secondary_boundary = '10'
     primary_subdomain = 'primary_top'
     secondary_subdomain = 'secondary_bottom'
     secondary_variable = u
+    variable = lm2
     correct_edge_dropping = true
-    penalty_value = 1.e2
   []
   [periodicbt]
-    type = ADPenaltyPeriodicSegmentalConstraint
+    type = PeriodicSegmentalConstraint
     primary_boundary = '12'
     secondary_boundary = '10'
     primary_subdomain = 'primary_top'
@@ -151,19 +168,26 @@
     epsilon = epsilon
     coupled_scalar = epsilon
     sigma = sigma
+    variable = lm2
     correct_edge_dropping = true
-    penalty_value = 1.e2
+    compute_scalar_residuals = false
+  []
+[]
+
+[Preconditioning]
+  [smp]
+    full = true
+    type = SMP
   []
 []
 
 [Executioner]
   type = Steady
-  solve_type = 'PJFNK'
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
+  petsc_options_value = 'lu superlu_dist'
+  solve_type = NEWTON
 []
 
 [Outputs]
-#  exodus = true
   csv = true
 []

@@ -33,7 +33,11 @@ public:
   /**
    * The scalar variable that this kernel operates on.
    */
-  const MooseVariableScalar & scalarVariable() const { return *_kappa_var_ptr; }
+  const MooseVariableScalar & scalarVariable() const
+  {
+    mooseAssert(_kappa_var_ptr, "kappa pointer should have been set in the constructor");
+    return *_kappa_var_ptr;
+  }
 
   virtual void computeResidual() override;
   virtual void computeJacobian() override;

@@ -241,6 +241,7 @@ HomogenizedTotalLagrangianStressDivergenceS::computeOffDiagJacobianScalarLocal(
 Real
 HomogenizedTotalLagrangianStressDivergenceS::computeQpOffDiagJacobianScalar(unsigned int svar_num)
 {
+  // Just in case, skip any other scalar variables
   if (svar_num == _kappa_var)
     return _dpk1[_qp].contractionKl(_m, _n, gradTest(_alpha));
   else
@@ -250,6 +251,8 @@ HomogenizedTotalLagrangianStressDivergenceS::computeQpOffDiagJacobianScalar(unsi
 Real
 HomogenizedTotalLagrangianStressDivergenceS::computeScalarQpOffDiagJacobian(unsigned int jvar_num)
 {
+  // ONLY assemble the contribution from _alpha component, which is connected with _var
+  // The other components are handled by other kernel instances with other _alpha
   if (jvar_num == _var.number())
   {
     if (_ctype == HomogenizationS::ConstraintType::Stress)

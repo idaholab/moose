@@ -16,7 +16,7 @@ setPeriodicSegParam(const InputParameters & params_in)
 {
   // Reset the scalar_variable parameter to a relevant name for this physics
   InputParameters & ret = const_cast<InputParameters &>(params_in);
-  ret.set<VariableName>("scalar_variable") = {params_in.get<VariableName>("kappa")};
+  ret.set<VariableName>("scalar_variable") = {params_in.get<VariableName>("epsilon")};
   return ret;
 }
 }
@@ -31,17 +31,17 @@ PeriodicSegmentalConstraint::validParams()
       "PeriodicSegmentalConstraint enforces macro-micro periodic conditions between "
       "secondary and primary sides of a mortar interface using Lagrange multipliers."
       "Must be used alongside EqualValueConstraint.");
-  params.addRequiredParam<VariableName>("kappa", "Primary coupled scalar variable");
-  params.addRequiredCoupledVar("kappa_aux", "Controlled scalar averaging variable");
+  params.addRequiredParam<VariableName>("epsilon", "Primary coupled scalar variable");
+  params.addRequiredCoupledVar("sigma", "Controlled scalar averaging variable");
 
   return params;
 }
 
 PeriodicSegmentalConstraint::PeriodicSegmentalConstraint(const InputParameters & parameters)
   : DerivativeMaterialInterface<MortarScalarBase>(setPeriodicSegParam(parameters)),
-    _kappa_aux_var(coupledScalar("kappa_aux")),
-    _ka_order(getScalarVar("kappa_aux", 0)->order()),
-    _kappa_aux(coupledScalarValue("kappa_aux"))
+    _kappa_aux_var(coupledScalar("sigma")),
+    _ka_order(getScalarVar("sigma", 0)->order()),
+    _kappa_aux(coupledScalarValue("sigma"))
 {
 }
 
@@ -49,7 +49,14 @@ Real
 PeriodicSegmentalConstraint::computeQpResidual(const Moose::MortarType mortar_type)
 {
   RealVectorValue dx(_phys_points_primary[_qp] - _phys_points_secondary[_qp]);
-  RealVectorValue kappa_vec(_kappa[0], _kappa[1], 0);
+  RealVectorValue kappa_vec(_kappa[0], 0, 0);
+  if (_k_order == 2)
+    kappa_vec(1) = _kappa[1];
+  else if (_k_order == 3)
+  {
+    kappa_vec(1) = _kappa[1];
+    kappa_vec(2) = _kappa[2];
+  }
   Real r = -(kappa_vec * dx);
 
   switch (mortar_type)
@@ -71,7 +78,16 @@ PeriodicSegmentalConstraint::computeScalarQpResidual()
   RealVectorValue dx(_phys_points_primary[_qp] - _phys_points_secondary[_qp]);
   Real r = -dx(_h) * _lambda[_qp];
 
-  RealVectorValue kappa_aux_vec(_kappa_aux[0], _kappa_aux[1], 0);
+  RealVectorValue kappa_aux_vec(_kappa_aux[0], 0, 0);
+  if (_k_order == 2)
+  {
+    kappa_aux_vec(1) = _kappa_aux[1];
+  }
+  else if (_k_order == 3)
+  {
+    kappa_aux_vec(1) = _kappa_aux[1];
+    kappa_aux_vec(2) = _kappa_aux[2];
+  }
 
   r -= dx(_h) * (kappa_aux_vec * _normals[_qp]);
 
@@ -122,10 +138,8 @@ PeriodicSegmentalConstraint::computeScalarQpOffDiagJacobian(const Moose::MortarT
 
   switch (mortar_type)
   {
-    case Moose::MortarType::Lower: // Residual_sign -1  ddeltaU_ddisp sign 1;
-                                   // This assumes Galerkin, i.e. (*_phi)[_i][_qp] =
-                                   // _test_secondary[_i][_qp]
-      jac *= _test[_i][_qp];
+    case Moose::MortarType::Lower:
+      jac *= (*_phi)[_j][_qp];
       break;
     default:
       return 0;

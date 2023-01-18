@@ -208,15 +208,11 @@ TestPeriodicSole::computeScalarQpOffDiagJacobian(const Moose::MortarType mortar_
 
   switch (mortar_type)
   {
-    case Moose::MortarType::Secondary: // Residual_sign -1  ddeltaU_ddisp sign 1;
-                                       // This assumes Galerkin, i.e. (*_phi)[_i][_qp] =
-                                       // _test_secondary[_i][_qp]
-      jac *= _test_secondary[_i][_qp] * dx(_alpha);
+    case Moose::MortarType::Secondary:
+      jac *= (*_phi)[_j][_qp] * dx(_alpha);
       break;
-    case Moose::MortarType::Primary: // Residual_sign -1  ddeltaU_ddisp sign -1;
-                                     // This assumes Galerkin, i.e. (*_phi)[_i][_qp] =
-                                     // _test_primary[_i][_qp]
-      jac *= -_test_primary[_i][_qp] * dx(_alpha);
+    case Moose::MortarType::Primary:
+      jac *= -(*_phi)[_j][_qp] * dx(_alpha);
       break;
 
     default:

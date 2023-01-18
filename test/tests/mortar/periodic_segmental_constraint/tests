@@ -14,6 +14,27 @@
     requirement = "The system shall include assemble lower variable mortar constraints coupled to scalar variables."
     min_ad_size = 100
   [../]
+  [./penalty_periodic_simple3d]
+    type = 'CSVDiff'
+    input = 'penalty_periodic_simple3d.i'
+    csvdiff = 'penalty_periodic_simple3d_out.csv'
+    requirement = "Also assemble primary/secondary mortar constraints coupled to 3d scalar variables."
+    min_ad_size = 100
+  [../]
+  [./periodic_simple3d]
+    type = 'CSVDiff'
+    input = 'periodic_simple3d.i'
+    csvdiff = 'periodic_simple3d_out.csv'
+    requirement = "Also assemble lower variable mortar constraints coupled to 3d scalar variables."
+    min_ad_size = 100
+  [../]
+  [./periodic_aux2d]
+    type = 'CSVDiff'
+    input = 'periodic_aux2d.i'
+    csvdiff = 'periodic_aux2d_out.csv'
+    requirement = "Allowing the scalar variable for mortar surfaces to be aux for debugging."
+    min_ad_size = 100
+  [../]
   [./penalty_periodic_checker2d]
     type = 'CSVDiff'
     input = 'penalty_periodic_checker2d.i'

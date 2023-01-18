@@ -123,12 +123,12 @@ At present, either the `secondary_variable` or `primary_variable` parameter must
 
 If the weak form has contributions from scalar variables, then this contribution can be
 treated similarly as coupling from other spatial variables. See the
-[`Coupleable`](/source/interfaces/Coupleable.md) interface for how to obtain the variable
+[`Coupleable`](source/interfaces/Coupleable.md) interface for how to obtain the variable
 values. Residual contributions are simply added to the `computeQpResidual()` function.
 
 Because mortar-versions of `UserObjects` are not yet implemented, the only way to add
 contributions to the Jacobian, as well as the contribution of the mortar spatial variables
-to the scalar variable, is through deriving from the intermediate scalar base class
+to the scalar variable, is through deriving from the scalar augmentation class
 [`MortarScalarBase`](source/constraints/MortarScalarBase.md). This class provides
 standard interfaces for quadrature point contributions to primary, secondary, lower, and
 scalar variables in the residual and Jacobian. Additional discussion can be found at

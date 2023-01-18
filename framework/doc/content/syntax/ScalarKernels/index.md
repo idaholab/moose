@@ -20,7 +20,7 @@ optionally be overridden:
 - `computeJacobian()`
 - `computeOffDiagJacobianScalar()`
 
-## Coupling with Spatial Variables
+## Coupling with Spatial Variables id=couple-spatial
 
 For systems of coupled partial differential equations (PDEs) and ODEs, typically
 integration over domains and manifolds are needed within the coupling terms of the
@@ -36,18 +36,16 @@ other object classes:
    [AverageValueConstraint.md] and the [ScalarLagrangeMultiplier.md] objects, respectively.
 
 2. Compute all integrals for the residual and Jacobian entries for the spatial and
-   scalar variables using intermediate scalar base classes that derive from the
+   scalar variables using scalar augmentation classes that derive from the
    respective spatial variable residual object class. This approach is described below.
 
-+REVISE+:
-
-The idea of each of these intermediate scalar base classes is that they add standard
+The principal purpose of these scalar augmentation classes is to add standard
 quadrature loops and assembly routines to handle the contributions from a single added
-scalar variable to that object, the entire row of the Jacobian. Lists of interfaces for
+scalar variable to that object, including the entire row of the Jacobian. Lists of interfaces for
 the quadrature point routines are given in the links below. This system is currently being
 developed and will extend to the other residual objects.
 
-| Object | Intermediate Scalar Base Class | Example Derived Class |
+| Object | Scalar Augmentation Class | Example Derived Class |
 | :- | :- | :- |
 | Kernel\\ +ADKernel+ | [`KernelScalarBase`](source/kernels/KernelScalarBase.md) | [`ScalarLMKernel`](source/kernels/ScalarLMKernel.md) |
 | IntegratedBC | Under Development |  |

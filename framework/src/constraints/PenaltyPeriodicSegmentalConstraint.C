@@ -16,7 +16,7 @@ setPenaltyPeriodicSegParam(const InputParameters & params_in)
 {
   // Reset the scalar_variable parameter to a relevant name for this physics
   InputParameters & ret = const_cast<InputParameters &>(params_in);
-  ret.set<VariableName>("scalar_variable") = {params_in.get<VariableName>("kappa")};
+  ret.set<VariableName>("scalar_variable") = {params_in.get<VariableName>("epsilon")};
   return ret;
 }
 }
@@ -31,8 +31,8 @@ PenaltyPeriodicSegmentalConstraint::validParams()
       "PenaltyPeriodicSegmentalConstraint enforces macro-micro periodic conditions between "
       "secondary and primary sides of a mortar interface using a penalty approach "
       "(no Lagrange multipliers needed). Must be used alongside PenaltyEqualValueConstraint.");
-  params.addRequiredParam<VariableName>("kappa", "Primary coupled scalar variable");
-  params.addRequiredCoupledVar("kappa_aux", "Controlled scalar averaging variable");
+  params.addRequiredParam<VariableName>("epsilon", "Primary coupled scalar variable");
+  params.addRequiredCoupledVar("sigma", "Controlled scalar averaging variable");
   params.addParam<Real>(
       "penalty_value",
       1.0,
@@ -46,9 +46,9 @@ PenaltyPeriodicSegmentalConstraint::PenaltyPeriodicSegmentalConstraint(
   : DerivativeMaterialInterface<MortarScalarBase>(setPenaltyPeriodicSegParam(parameters)),
     _temp_jump_global(),
     _tau_s(),
-    _kappa_aux_var(coupledScalar("kappa_aux")),
-    _ka_order(getScalarVar("kappa_aux", 0)->order()),
-    _kappa_aux(coupledScalarValue("kappa_aux")),
+    _kappa_aux_var(coupledScalar("sigma")),
+    _ka_order(getScalarVar("sigma", 0)->order()),
+    _kappa_aux(coupledScalarValue("sigma")),
     _pen_scale(getParam<Real>("penalty_value"))
 {
 }
@@ -200,15 +200,11 @@ PenaltyPeriodicSegmentalConstraint::computeScalarQpOffDiagJacobian(
 
   switch (mortar_type)
   {
-    case Moose::MortarType::Secondary: // Residual_sign -1  ddeltaU_ddisp sign 1;
-                                       // This assumes Galerkin, i.e. (*_phi)[_i][_qp] =
-                                       // _test_secondary[_i][_qp]
-      jac *= _test_secondary[_i][_qp] * dx(_h);
+    case Moose::MortarType::Secondary:
+      jac *= (*_phi)[_j][_qp] * dx(_h);
       break;
-    case Moose::MortarType::Primary: // Residual_sign -1  ddeltaU_ddisp sign -1;
-                                     // This assumes Galerkin, i.e. (*_phi)[_i][_qp] =
-                                     // _test_primary[_i][_qp]
-      jac *= -_test_primary[_i][_qp] * dx(_h);
+    case Moose::MortarType::Primary:
+      jac *= -(*_phi)[_j][_qp] * dx(_h);
       break;
 
     default:

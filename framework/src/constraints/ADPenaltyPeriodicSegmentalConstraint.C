@@ -16,7 +16,7 @@ setADPenaltyPeriodicSegParam(const InputParameters & params_in)
 {
   // Reset the scalar_variable parameter to a relevant name for this physics
   InputParameters & ret = const_cast<InputParameters &>(params_in);
-  ret.set<VariableName>("scalar_variable") = {params_in.get<VariableName>("kappa")};
+  ret.set<VariableName>("scalar_variable") = {params_in.get<VariableName>("epsilon")};
   return ret;
 }
 }
@@ -31,8 +31,8 @@ ADPenaltyPeriodicSegmentalConstraint::validParams()
       "ADPenaltyPeriodicSegmentalConstraint enforces macro-micro periodic conditions between "
       "secondary and primary sides of a mortar interface using a penalty approach "
       "(no Lagrange multipliers needed). Must be used alongside PenaltyEqualValueConstraint.");
-  params.addRequiredParam<VariableName>("kappa", "Primary coupled scalar variable");
-  params.addRequiredCoupledVar("kappa_aux", "Controlled scalar averaging variable");
+  params.addRequiredParam<VariableName>("epsilon", "Primary coupled scalar variable");
+  params.addRequiredCoupledVar("sigma", "Controlled scalar averaging variable");
   params.addParam<Real>(
       "penalty_value",
       1.0,
@@ -46,9 +46,9 @@ ADPenaltyPeriodicSegmentalConstraint::ADPenaltyPeriodicSegmentalConstraint(
   : DerivativeMaterialInterface<ADMortarScalarBase>(setADPenaltyPeriodicSegParam(parameters)),
     _temp_jump_global(),
     _tau_s(),
-    _kappa_aux_var(coupledScalar("kappa_aux")),
-    _ka_order(getScalarVar("kappa_aux", 0)->order()),
-    _kappa_aux(coupledScalarValue("kappa_aux")),
+    _kappa_aux_var(coupledScalar("sigma")),
+    _ka_order(getScalarVar("sigma", 0)->order()),
+    _kappa_aux(coupledScalarValue("sigma")),
     _pen_scale(getParam<Real>("penalty_value"))
 {
 }

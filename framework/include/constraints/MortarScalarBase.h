@@ -39,7 +39,11 @@ public:
   /**
    * The scalar variable that this kernel operates on.
    */
-  const MooseVariableScalar & scalarVariable() const { return *_kappa_var_ptr; }
+  const MooseVariableScalar & scalarVariable() const
+  {
+    mooseAssert(_kappa_var_ptr, "kappa pointer should have been set in the constructor");
+    return *_kappa_var_ptr;
+  }
 
   /**
    * Computes _var-residuals as well as _kappa-residual
@@ -71,8 +75,7 @@ protected:
   /**
    * Method for computing an off-diagonal jacobian component d-_kappa-residual / d-jvar
    */
-  void computeScalarOffDiagJacobian(const Moose::MortarType mortar_type,
-                                    const unsigned int jvar_num);
+  void computeScalarOffDiagJacobian();
 
   /**
    * Method for computing an off-diagonal jacobian component at quadrature points.

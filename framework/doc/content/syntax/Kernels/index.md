@@ -179,7 +179,7 @@ return _test[_i][_qp] * _phi[_j][_qp] * _du_dot_du[_qp];
 
 If the weak form has contributions from scalar variables, then this contribution can be
 treated similarly as coupling from other spatial variables. See the
-[`Coupleable`](/source/interfaces/Coupleable.md) interface for how to obtain the variable
+[`Coupleable`](source/interfaces/Coupleable.md) interface for how to obtain the variable
 values. Residual contributions are simply added to the `computeQpResidual()` function.
 Jacobian terms from the test spatial variable and incremental scalar variable are added by
 overriding the function `computeQpOffDiagJacobianScalar()`.

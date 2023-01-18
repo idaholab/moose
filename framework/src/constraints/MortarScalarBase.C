@@ -33,9 +33,9 @@ MortarScalarBase::MortarScalarBase(const InputParameters & parameters)
     _use_scalar(isParamValid("scalar_variable") ? true : false),
     _compute_scalar_residuals(!_use_scalar ? false : getParam<bool>("compute_scalar_residuals")),
     _kappa_dummy(),
-    _kappa_var_ptr(
-        _use_scalar ? &_sys.getScalarVariable(_tid, parameters.get<VariableName>("scalar_variable"))
-                    : nullptr),
+    _kappa_var_ptr(_use_scalar ? &_fe_problem.getScalarVariable(
+                                     _tid, parameters.get<VariableName>("scalar_variable"))
+                               : nullptr),
     _kappa_var(_use_scalar ? _kappa_var_ptr->number() : 0),
     _k_order(_use_scalar ? _kappa_var_ptr->order() : 0),
     _kappa(_use_scalar ? (_is_implicit ? _kappa_var_ptr->sln() : _kappa_var_ptr->slnOld())
@@ -82,62 +82,40 @@ MortarScalarBase::computeJacobian()
     if (_compute_primal_residuals)
     {
       // Do: dvar / dscalar_var, only want to process only nl-variables (not aux ones)
-      for (const auto & jvariable : coupled_scalar_vars)
+      for (const auto & svariable : coupled_scalar_vars)
       {
-        if (_sys.hasScalarVariable(jvariable->name()))
+        if (_sys.hasScalarVariable(svariable->name()))
         {
           // Compute the jacobian for the secondary interior primal dofs
-          computeOffDiagJacobianScalar(Moose::MortarType::Secondary, jvariable->number());
+          computeOffDiagJacobianScalar(Moose::MortarType::Secondary, svariable->number());
           // Compute the jacobian for the primary interior primal dofs.
-          computeOffDiagJacobianScalar(Moose::MortarType::Primary, jvariable->number());
+          computeOffDiagJacobianScalar(Moose::MortarType::Primary, svariable->number());
         }
       }
     }
     if (_compute_lm_residuals)
       // Do: dvar / dscalar_var, only want to process only nl-variables (not aux ones)
-      for (const auto & jvariable : coupled_scalar_vars)
-        if (_sys.hasScalarVariable(jvariable->name()))
+      for (const auto & svariable : coupled_scalar_vars)
+        if (_sys.hasScalarVariable(svariable->name()))
           // Compute the jacobian for the lower dimensional LM dofs (if we even have an LM variable)
-          computeOffDiagJacobianScalar(Moose::MortarType::Lower, jvariable->number());
+          computeOffDiagJacobianScalar(Moose::MortarType::Lower, svariable->number());
 
     if (_compute_scalar_residuals)
     {
       // Handle ALL d-_kappa-residual / d-_var and d-_kappa-residual / d-jvar columns
-      auto & ce = _assembly.scalarFieldCouplingEntries();
-      for (const auto & it : ce)
-      {
-        MooseVariableScalar & ivariable = *(it.first);
-        MooseVariableFEBase & jvariable = *(it.second);
-
-        unsigned int ivar = ivariable.number();
-        unsigned int jvar_num = jvariable.number();
-
-        if (ivar != _kappa_var) // only do the row for _kappa_var in this object
-          continue;
-
-        if (_compute_primal_residuals)
-        {
-          // Compute the jacobian for the secondary interior primal dofs
-          computeScalarOffDiagJacobian(Moose::MortarType::Secondary, jvar_num);
-          // Compute the jacobian for the primary interior primal dofs.
-          computeScalarOffDiagJacobian(Moose::MortarType::Primary, jvar_num);
-        }
-        if (_compute_lm_residuals)
-          // Compute the jacobian for the lower dimensional LM dofs (if we even have an LM variable)
-          computeScalarOffDiagJacobian(Moose::MortarType::Lower, jvar_num);
-      }
+      computeScalarOffDiagJacobian();
 
       // Do: d-_kappa-residual / d-_kappa and d-_kappa-residual / d-jvar,
       // only want to process only nl-variables (not aux ones)
-      for (const auto & jvariable : coupled_scalar_vars)
+      for (const auto & svariable : coupled_scalar_vars)
       {
-        if (_sys.hasScalarVariable(jvariable->name()))
+        if (_sys.hasScalarVariable(svariable->name()))
         {
-          const unsigned int jvar_num = jvariable->number();
-          if (jvar_num == _kappa_var)
+          const unsigned int svar_num = svariable->number();
+          if (svar_num == _kappa_var)
             computeScalarJacobian(); // d-_kappa-residual / d-_kappa
           else
-            computeScalarOffDiagJacobianScalar(jvar_num); // d-_kappa-residual / d-jvar
+            computeScalarOffDiagJacobianScalar(svar_num); // d-_kappa-residual / d-svar
         }
       }
     }
@@ -165,55 +143,102 @@ MortarScalarBase::computeScalarJacobian()
 }
 
 void
-MortarScalarBase::computeScalarOffDiagJacobian(Moose::MortarType mortar_type, unsigned int jvar_num)
+MortarScalarBase::computeScalarOffDiagJacobian()
 {
+  typedef Moose::MortarType MType;
+  std::array<MType, 3> mortar_types = {{MType::Secondary, MType::Primary, MType::Lower}};
 
-  // Assumes all coupling variables have same test functions as var/primary/secondary
-
-  unsigned int test_space_size = 0;
-  std::vector<dof_id_type> dof_indices;
-  switch (mortar_type)
+  auto & ce = _assembly.scalarFieldCouplingEntries();
+  for (const auto & it : ce)
   {
-    case Moose::MortarType::Secondary:
-      test_space_size = _test_secondary.size();
-      dof_indices = _secondary_var.dofIndices();
-      break;
+    MooseVariableScalar & ivariable = *(it.first);
+    MooseVariableFEBase & jvariable = *(it.second);
 
-    case Moose::MortarType::Primary:
-      test_space_size = _test_primary.size();
-      dof_indices = _primary_var.dofIndicesNeighbor();
-      break;
+    const unsigned int ivar_num = ivariable.number();
+    const unsigned int jvar_num = jvariable.number();
 
-    case Moose::MortarType::Lower:
-      mooseAssert(_var, "LM variable is null");
-      test_space_size = _test.size();
-      dof_indices = _var->dofIndicesLower();
-      break;
-  }
+    if (ivar_num != _kappa_var) // only do the row for _kappa_var in this object
+      continue;
 
-  _local_ke.resize(_k_order, test_space_size);
-
-  for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
-  {
-    initScalarQpOffDiagJacobian(mortar_type, jvar_num);
-    const Real dV = _JxW_msm[_qp] * _coord[_qp];
-    for (_h = 0; _h < _k_order; _h++)
+    // Load shape functions of different types for easy access; identical to MortarConstraint.C
+    std::array<size_t, 3> shape_space_sizes{{jvariable.dofIndices().size(),
+                                             jvariable.dofIndicesNeighbor().size(),
+                                             jvariable.dofIndicesLower().size()}};
+    std::array<const VariablePhiValue *, 3> phis;
+    std::array<const VariablePhiGradient *, 3> grad_phis;
+    std::array<const VectorVariablePhiValue *, 3> vector_phis;
+    std::array<const VectorVariablePhiGradient *, 3> vector_grad_phis;
+    if (jvariable.isVector())
     {
-      for (_i = 0; _i < test_space_size; _i++)
-      { // This assumes Galerkin, i.e. the test and trial functions are the
-        // same
-        _j = _i;
-        _local_ke(_h, _i) += computeScalarQpOffDiagJacobian(mortar_type, jvar_num) * dV;
+      const auto & temp_var = static_cast<MooseVariableFE<RealVectorValue> &>(jvariable);
+      vector_phis = {{&temp_var.phiFace(), &temp_var.phiFaceNeighbor(), &temp_var.phiLower()}};
+      vector_grad_phis = {
+          {&temp_var.gradPhiFace(), &temp_var.gradPhiFaceNeighbor(), &temp_var.gradPhiLower()}};
+    }
+    else
+    {
+      const auto & temp_var = static_cast<MooseVariableFE<Real> &>(jvariable);
+      phis = {{&temp_var.phiFace(), &temp_var.phiFaceNeighbor(), &temp_var.phiLower()}};
+      grad_phis = {
+          {&temp_var.gradPhiFace(), &temp_var.gradPhiFaceNeighbor(), &temp_var.gradPhiLower()}};
+    }
+
+    // Loop over 3 types of spatial variables, find out what jvar_num is
+    for (MooseIndex(3) type_index = 0; type_index < 3; ++type_index)
+    {
+      const auto mortar_type = mortar_types[type_index];
+      const auto shape_space_size = shape_space_sizes[type_index];
+      std::vector<dof_id_type> dof_indices;
+      switch (mortar_type)
+      {
+        case MType::Secondary:
+          dof_indices = jvariable.dofIndices();
+          break;
+
+        case MType::Primary:
+          dof_indices = jvariable.dofIndicesNeighbor();
+          break;
+
+        case MType::Lower:
+          dof_indices = jvariable.dofIndicesLower();
+          break;
       }
+
+      /// Set the proper phis
+      if (jvariable.isVector())
+      {
+        _vector_phi = vector_phis[type_index];
+        _vector_grad_phi = vector_grad_phis[type_index];
+      }
+      else
+      {
+        _phi = phis[type_index];
+        _grad_phi = grad_phis[type_index];
+      }
+
+      _local_ke.resize(_k_order, shape_space_size);
+
+      for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
+      {
+        initScalarQpOffDiagJacobian(mortar_type, jvar_num);
+        const Real dV = _JxW_msm[_qp] * _coord[_qp];
+        for (_h = 0; _h < _k_order; _h++)
+        {
+          for (_j = 0; _j < shape_space_size; _j++)
+          {
+            _local_ke(_h, _j) += computeScalarQpOffDiagJacobian(mortar_type, jvar_num) * dV;
+          }
+        }
+      }
+
+      for (const auto & matrix_tag : _matrix_tags)
+        _assembly.cacheJacobianBlock(_local_ke,
+                                     _kappa_var_ptr->dofIndices(),
+                                     dof_indices,
+                                     _kappa_var_ptr->scalingFactor(),
+                                     matrix_tag);
     }
   }
-
-  for (const auto & matrix_tag : _matrix_tags)
-    _assembly.cacheJacobianBlock(_local_ke,
-                                 _kappa_var_ptr->dofIndices(),
-                                 dof_indices,
-                                 _kappa_var_ptr->scalingFactor(),
-                                 matrix_tag);
 }
 
 void
