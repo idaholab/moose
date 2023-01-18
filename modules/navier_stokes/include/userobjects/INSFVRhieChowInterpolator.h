@@ -157,6 +157,9 @@ protected:
   VectorComponentFunctor<ADReal> _az;
   ///@}
 
+  /// The number of the nonlinear system in which the monolithic momentum and continuity equations are located
+  const unsigned int _nl_sys_number;
+
 private:
   /**
    * Fills the _a_read data member at construction time with the appropriate functors. _a_read will

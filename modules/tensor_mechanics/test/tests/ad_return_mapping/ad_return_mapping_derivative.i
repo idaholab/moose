@@ -80,7 +80,7 @@
     activation_energy = 0.0
     temperature = temp
     # options for using substepping
-    use_substep = true
+    use_substepping = INCREMENT_BASED
     substep_strain_tolerance = 0.1
     max_inelastic_increment = 0.01
     automatic_differentiation_return_mapping = true

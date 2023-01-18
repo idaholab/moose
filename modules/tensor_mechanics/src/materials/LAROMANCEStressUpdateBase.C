@@ -298,7 +298,7 @@ template <bool is_ad>
 bool
 LAROMANCEStressUpdateBaseTempl<is_ad>::substeppingCapabilityEnabled()
 {
-  return this->template getParam<bool>("use_substep");
+  return this->_use_substepping != RadialReturnStressUpdateTempl<is_ad>::SubsteppingType::NONE;
 }
 
 template <bool is_ad>
