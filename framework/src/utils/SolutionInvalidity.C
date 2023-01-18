@@ -17,6 +17,7 @@
 // System Includes
 #include <chrono>
 #include <memory>
+#include <timpi/parallel_sync.h>
 
 // libMesh Includes
 #include "libmesh/parallel_algebra.h"
@@ -92,7 +93,13 @@ void
 SolutionInvalidity::sync()
 {
   // to do: also send the object name, and the other two values of counts
-  std::map<processor_id_type, std::vector<std::tuple<InvalidSolutionID, std::string, unsigned int>>>
+  std::map<processor_id_type,
+           std::vector<std::tuple<InvalidSolutionID,
+                                  std::string,
+                                  std::string,
+                                  unsigned int,
+                                  unsigned int,
+                                  unsigned int>>>
       data_to_send;
   if (processor_id() != 0)
     for (const auto id : index_range(_counts))
@@ -101,19 +108,32 @@ SolutionInvalidity::sync()
       if (entry.counts)
       {
         const auto & info = _solution_invalidity_registry.item(id);
-        data_to_send[0].emplace_back(id, info._name, entry.counts);
+        data_to_send[0].emplace_back(
+            id, info._name, info._message, entry.counts, entry.timeiter_counts, entry.total_counts);
       }
     }
 
   // to do: act on the data
-  const auto receive_data = [this](const processor_id_type pid, const auto & data)
+  const auto receive_data = [this](const processor_id_type libmesh_dbg_var(pid), const auto & data)
   {
-    for (const auto & [id, name, counts] : data)
+    mooseAssert(pid != 0, "Should not be used except processor 0");
+    for (const auto & [id, name, message, counts, timeiter_counts, total_counts] : data)
     {
+      InvalidSolutionID masterId = 0;
+      if (_solution_invalidity_registry.keyExists(name))
+        masterId = _solution_invalidity_registry.id(name);
+      else
+        masterId =
+            moose::internal::getSolutionInvalidityRegistry().registerInvalidity(name, message);
+
+      _counts[masterId].counts += counts;
+      _counts[masterId].timeiter_counts += timeiter_counts;
+      _counts[masterId].total_counts += total_counts;
     }
   };
 
-  Parallel::push_parallel_vector_data(comm(), data_to_send, receive_data);
+  TIMPI::push_parallel_vector_data(comm(), data_to_send, receive_data);
+  //  TIMPI::push_parallel_packed_range(comm(), data_to_send, (void *)nullptr, receive_data);
 }
 
 void

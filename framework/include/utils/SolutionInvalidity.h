@@ -85,8 +85,6 @@ private:
 
   FullTable summaryTable() const;
 
-  void sync();
-
   /// The SolutionInvalidityRegistry
   SolutionInvalidityRegistry & _solution_invalidity_registry;
 

@@ -17,10 +17,10 @@
 // Forward declarations
 class MooseObject;
 
-#define flagInvalidSolution(message)                                                               \
+#define flagInvalidSolution(prefix, message)                                                       \
   do                                                                                               \
   {                                                                                                \
-    static const auto __invalid_id = this->registerInvalidSolutionInternal(message);               \
+    static const auto __invalid_id = this->registerInvalidSolutionInternal(prefix, message);       \
     this->flagInvalidSolutionInternal(__invalid_id);                                               \
   } while (0)
 
@@ -32,10 +32,13 @@ class SolutionInvalidInterface
 public:
   SolutionInvalidInterface(MooseObject * const moose_object);
 
+  SolutionInvalidInterface(MooseObject * const moose_object, const std::string & prefix);
+
 protected:
   void flagInvalidSolutionInternal(InvalidSolutionID _invalid_solution_id);
 
-  InvalidSolutionID registerInvalidSolutionInternal(const std::string & message) const;
+  InvalidSolutionID registerInvalidSolutionInternal(const std::string & prefix,
+                                                    const std::string & message) const;
 
 private:
   /// The MooseObject that owns this interface
@@ -43,4 +46,7 @@ private:
 
   /// A reference to FEProblem base
   FEProblemBase & _si_problem;
+
+  /// A prefix to use for all objects
+  const std::string _prefix;
 };

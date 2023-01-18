@@ -43,35 +43,6 @@ public:
   std::string _message;
 };
 
-class SolutionInvalidityKey
-{
-public:
-  SolutionInvalidityKey(const std::string & name, const std::string & message)
-    : _name(name), _message(message)
-  {
-  }
-
-  std::string _name;
-  std::string _message;
-};
-}
-
-namespace std
-{
-template <>
-struct hash<moose::internal::SolutionInvalidityKey>
-{
-  inline size_t operator()(const moose::internal::SolutionInvalidityKey & key) const
-  {
-    size_t seed = 0;
-    Moose::hash_combine(seed, key._name, key._message);
-    return seed;
-  }
-};
-}
-
-namespace moose::internal
-{
 /**
  * Get the global SolutionInvalidityRegistry singleton.
  */
@@ -80,8 +51,7 @@ SolutionInvalidityRegistry & getSolutionInvalidityRegistry();
 /**
  * The place where all sections with solution invalid warnings will be stored
  */
-class SolutionInvalidityRegistry
-  : public GeneralRegistry<SolutionInvalidityKey, SolutionInvalidityInfo>
+class SolutionInvalidityRegistry : public GeneralRegistry<std::string, SolutionInvalidityInfo>
 {
 public:
   /**
@@ -121,4 +91,4 @@ private:
 };
 }
 
-std::ostream & operator<<(std::ostream & os, const moose::internal::SolutionInvalidityKey & key);
+// std::ostream & operator<<(std::ostream & os, const moose::internal::SolutionInvalidityKey & key);
