@@ -14,8 +14,8 @@ Specific details unique to the module are outlined in this document.
 The {{module}} module inherits the
 [software dependencies and limitations of the MOOSE framework](framework_sdd.md#dependencies-and-limitations),
 as well as the dependencies and limitations of the [Heat Conduction](heat_conduction_sdd.md#dependencies-and-limitations) module
-when performing coupled heat transfer simulations, the [Fluid Properties](tensor_mechanics_sdd.md#dependencies-and-limitations) module
-when using the specific fluid properties in this module, and the [rDG](rdgc_sdd.md#dependencies-and-limitations) module
+when performing coupled heat transfer simulations, the [Fluid Properties](tensor_mechanics_sdd.md#dependencies-and-limitations optional=True) module
+when using the specific fluid properties in this module, and the [rDG](rdg_sdd.md#dependencies-and-limitations) module
 when using a discretization from the reconstructed Discontinuous Galerkin family.
 
 While the {{module}} module has received significant development and numerous studies were performed with its service,
