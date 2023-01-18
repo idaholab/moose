@@ -123,13 +123,6 @@ RadialReturnStressUpdateTempl<is_ad>::RadialReturnStressUpdateTempl(
 
 template <bool is_ad>
 void
-RadialReturnStressUpdateTempl<is_ad>::timestepSetup()
-{
-  _dt_original = _dt;
-}
-
-template <bool is_ad>
-void
 RadialReturnStressUpdateTempl<is_ad>::initQpStatefulProperties()
 {
   _effective_inelastic_strain[_qp] = 0.0;
@@ -420,6 +413,7 @@ RadialReturnStressUpdateTempl<is_ad>::updateStateSubstep(
     RankFourTensor & tangent_operator)
 {
   unsigned int num_substeps = calculateNumberSubsteps(strain_increment);
+  _dt_original = _dt;
   while (true)
   {
     try

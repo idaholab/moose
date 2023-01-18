@@ -34,7 +34,6 @@ public:
   static InputParameters validParams();
 
   RadialReturnStressUpdateTempl(const InputParameters & parameters);
-  virtual void timestepSetup() override;
 
   using Material::_current_elem;
   using Material::_dt;
