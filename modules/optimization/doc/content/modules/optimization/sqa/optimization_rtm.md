@@ -5,5 +5,5 @@
 !template-end!
 
 !template! item key=system-scope
-!include optimization_srs.md start=system-scope-begin end==system-scope-finish
+!include optimization_srs.md start=system-scope-begin end=system-scope-finish
 !template-end!

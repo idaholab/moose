@@ -5,5 +5,5 @@
 !template-end!
 
 !template! item key=system-scope
-!include stochastic_tools_srs.md start=system-scope-begin end==system-scope-finish
+!include stochastic_tools_srs.md start=system-scope-begin end=system-scope-finish
 !template-end!
