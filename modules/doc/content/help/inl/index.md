@@ -1,4 +1,4 @@
-# INL HPC Remote Access
+# INL HPC Services
 
 [!ac](INL) builds and maintains a wide range of MOOSE-based applications as well as [!ac](HPC)
 support for these applications. The following links will aid researchers learning more about the
@@ -10,7 +10,7 @@ available codes and how to utilize the [!ac](INL) resources to run applications.
 - [inl/hpc_ondemand.md]
 
 
-## Requesting Access id=access
+# Requesting Access id=access
 
 INL applications may be obtained by outside institutions and individuals for execution and/or
 development. Currently, the following access methods are available for certain applications.
@@ -30,5 +30,5 @@ development. Currently, the following access methods are available for certain a
   application and contributing directly to the project.
 
 
-The request access to an [!ac](INL) developed code, please contact follow the instructions
-on [INL Modeling and Simulation Software](https://modsimcode.inl.gov/SitePages/Home.aspx) website.
+To request access to an [!ac](INL) developed code, please contact follow the instructions
+on [INL's Nuclear Computational Resource Center](https://inl.gov/ncrc/) website.

@@ -1,5 +1,12 @@
 # Binary Access with INL-HPC
 
+WIP (defer users to HPC OnDemand, re-word some of this document as Optional: for advanced users)
+
+
+
+
+
+
 The following information is provided for those with "HPC Binary Access" for an application and
 aims to get you up and running.
 

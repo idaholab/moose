@@ -2,6 +2,9 @@
 
 NCRC distributes a number of NEAMS-developed applications. The following sections highlight some of the codes available through the NCRC.
 
+!alert tip title=Existing HPCGitLab Users
+Existing users using [hpcgitlab.hpc.inl.gov](https://hpcgitlab.hpc.inl.gov), please see the [Transitional Guide](https://github.com/idaholab/moose/wiki/NCRC-github.inl.gov-transition-guide),
+for help on accessing the new home for NCRC source code (level 4): [github.inl.gov](https://github.inl.gov). New Users can safely ignore this notice.
 
 ## BISON
 
@@ -9,10 +12,11 @@ NCRC distributes a number of NEAMS-developed applications. The following section
 
 - [Documentation](https://mooseframework.org/bison)
 - [Discussion Forum](https://bison-discourse.hpcondemand.inl.gov)
+- [Build Status](https://civet.inl.gov/repo/875/)
 - [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_bison_ondemand.md)
 - [Level 1 - HPC Binary Execution](ncrc/applications/hpc_bison.md)
 - [Level 2 - Local Binary Installation](ncrc/applications/conda_bison.md)
-- [Level 4 - Source Access](https://hpcgitlab.hpcondemand.inl.gov/idaholab/bison)
+- [Level 4 - Source Access](ncrc/applications/ncrc_bison_level4.md)
 
 !row!
 !col small=12 medium=8 large=8
@@ -27,10 +31,11 @@ BISON is a finite element-based nuclear fuel performance code. It is applicable 
 !media application_logos/blue_crab.png style=width:8%;align:top;
 
 - [Documentation](https://bluecrab-dev.hpcondemand.inl.gov)
+- [Build Status](https://civet.inl.gov/repo/882/)
 - [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_bluecrab_ondemand.md)
 - [Level 1 - HPC Binary Execution](ncrc/applications/hpc_bluecrab.md)
 - [Level 2 - Local Binary Installation](ncrc/applications/conda_bluecrab.md)
-- [Level 4 - Source Access](https://hpcgitlab.hpcondemand.inl.gov/idaholab/blue_crab)
+- [Level 4 - Source Access](ncrc/applications/ncrc_bluecrab_level4.md)
 
 !row!
 !col small=12 medium=8 large=8
@@ -43,10 +48,11 @@ Blue Crab is a combination (coupling) of other NCRC Applications: Bison, Griffin
 
 !media application_logos/dire_wolf.png style=width:8%;align:top;
 
+- [Build Status](https://civet.inl.gov/repo/887/)
 - [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_direwolf_ondemand.md)
 - [Level 1 - HPC Binary Execution](ncrc/applications/hpc_direwolf.md)
 - [Level 2 - Local Binary Installation](ncrc/applications/conda_direwolf.md)
-- [Level 4 - Source Access](https://hpcgitlab.hpcondemand.inl.gov/idaholab/dire_wolf)
+- [Level 4 - Source Access](ncrc/applications/ncrc_direwolf_level4.md)
 
 !row!
 !col small=12 medium=8 large=8
@@ -62,10 +68,11 @@ Dire Wolf is a combination (coupling) of other NCRC Applications: Bison, Griffin
 
 - [Documentation](https://griffin-docs.hpcondemand.inl.gov/latest/)
 - [Discussion Forum](https://griffin-discourse.hpcondemand.inl.gov)
+- [Build Status](https://civet.inl.gov/repo/822/)
 - [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_griffin_ondemand.md)
 - [Level 1 - HPC Binary Execution](ncrc/applications/hpc_griffin.md)
 - [Level 2 - Local Binary Installation](ncrc/applications/conda_griffin.md)
-- [Level 4 - Source Access](https://github.inl.gov/ncrc/griffin)
+- [Level 4 - Source Access](ncrc/applications/ncrc_griffin_level4.md)
 
 !row!
 !col small=12 medium=8 large=8
@@ -81,9 +88,10 @@ Griffin is a finite element-based reactor multiphysics application. It is suitab
 
 - [Documentation](https://grizzly-docs.hpcondemand.inl.gov/latest/)
 - [Discussion Forum](https://grizzly-discourse.hpcondemand.inl.gov)
+- [Build Status](https://civet.inl.gov/repo/856/)
 - [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_grizzly_ondemand.md)
 - [Level 1 - HPC Binary Execution](ncrc/applications/hpc_grizzly.md)
-- [Level 4 - Source Access](https://hpcgitlab.hpcondemand.inl.gov/idaholab/grizzly)
+- [Level 4 - Source Access](ncrc/applications/ncrc_grizzly_level4.md)
 
 !row!
 !col small=12 medium=8 large=8
@@ -99,10 +107,11 @@ Grizzly models the degradation due to normal operating conditions of nuclear pow
 
 - [Documentation](https://marmot-docs.hpcondemand.inl.gov/latest/)
 - [Discussion Forum](https://marmot-discourse.hpcondemand.inl.gov)
+- [Build Status](https://civet.inl.gov/repo/851/)
 - [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_marmot_ondemand.md)
 - [Level 1 - HPC Binary Execution](ncrc/applications/hpc_marmot.md)
 - [Level 2 - Local Binary Installation](ncrc/applications/conda_marmot.md)
-- [Level 4 - Source Access](https://hpcgitlab.hpcondemand.inl.gov/idaholab/marmot)
+- [Level 4 - Source Access](ncrc/applications/ncrc_marmot_level4.md)
 
 !row!
 !col small=12 medium=8 large=8
@@ -118,10 +127,11 @@ MARMOT is a mesoscale fuel performance code. As such, it can predict the evoluti
 
 - [Documentation](https://pronghorn-docs.hpcondemand.inl.gov/latest/)
 - [Discussion Forum](https://pronghorn-discourse.hpcondemand.inl.gov)
+- [Build Status](https://civet.inl.gov/repo/871/)
 - [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_pronghorn_ondemand.md)
 - [Level 1 - HPC Binary Execution](ncrc/applications/hpc_pronghorn.md)
 - [Level 2 - Local Binary Installation](ncrc/applications/conda_pronghorn.md)
-- [Level 4 - Source Access](https://hpcgitlab.hpcondemand.inl.gov/idaholab/pronghorn)
+- [Level 4 - Source Access](ncrc/applications/ncrc_pronghorn_level4.md)
 
 !row!
 !col small=12 medium=8 large=8
@@ -147,10 +157,11 @@ RELAP5-3D is the latest released code in the RELAP5 series. Developed at Idaho N
 
 - [Documentation](https://relap7-docs.hpcondemand.inl.gov/latest/)
 - [Discussion Forum](https://relap7-discourse.hpcondemand.inl.gov)
+- [Build Status](https://civet.inl.gov/repo/852/)
 - [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_relap7_ondemand.md)
 - [Level 1 - HPC Binary Execution](ncrc/applications/hpc_relap7.md)
 - [Level 2 - Local Binary Installation](ncrc/applications/conda_relap7.md)
-- [Level 4 - Source Access](https://hpcgitlab.hpcondemand.inl.gov/idaholab/relap-7)
+- [Level 4 - Source Access](ncrc/applications/ncrc_relap7_level4.md)
 
 !row!
 !col small=12 medium=8 large=8
@@ -169,7 +180,7 @@ RELAP-7 is a two-phase thermal systems code based on MOOSE's thermal hydraulics 
 - [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_sabertooth_ondemand.md)
 - [Level 1 - HPC Binary Execution](ncrc/applications/hpc_sabertooth.md)
 - [Level 2 - Local Binary Installation](ncrc/applications/conda_sabertooth.md)
-- [Level 4 - Source Access](https://hpcgitlab.hpcondemand.inl.gov/idaholab/sabertooth)
+- [Level 4 - Source Access](ncrc/applications/ncrc_sabertooth_level4.md)
 
 !row!
 !col small=12 medium=8 large=8
@@ -180,9 +191,10 @@ Sabertooth is a combination (coupling) of other NCRC Applications: Bison, Griffi
 
 ## SAM
 
+- [Build Status](https://civet.inl.gov/repo/620/)
 - [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_sam_ondemand.md)
 - [Level 1 - HPC Binary Execution](ncrc/applications/hpc_sam.md)
-- [Level 4 - Source Access](https://hpcgitlab.hpcondemand.inl.gov/idaholab/sam)
+- [Level 4 - Source Access](ncrc/applications/ncrc_sam_level4.md)
 
 !row!
 !col small=12 medium=8 large=8
@@ -197,10 +209,11 @@ System Analysis Module (SAM) is a fast-running, whole-plant transient analysis c
 
 - [Documentation](https://sockeye-docs.hpcondemand.inl.gov/latest/)
 - [Discussion Forum](https://sockeye-discourse.hpcondemand.inl.gov)
+- [Build Status](https://civet.inl.gov/repo/837/)
 - [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_sockeye_ondemand.md)
 - [Level 1 - HPC Binary Execution](ncrc/applications/hpc_sockeye.md)
 - [Level 2 - Local Binary Installation](ncrc/applications/conda_sockeye.md)
-- [Level 4 - Source Access](https://hpcgitlab.hpcondemand.inl.gov/idaholab/sockeye)
+- [Level 4 - Source Access](ncrc/applications/ncrc_sockeye_level4.md)
 
 !row!
 !col small=12 medium=8 large=8

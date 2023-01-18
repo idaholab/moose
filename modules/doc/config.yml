@@ -45,7 +45,7 @@ Extensions:
                 Creating an Application: getting_started/new_users.md
                 Examples and Tutorials: getting_started/examples_and_tutorials/index.md
                 Supplemental Resources: getting_started/supplemental_resources/index.md
-                INL HPC Remote Access: help/inl/index.md
+                INL HPC Services: help/inl/index.md
             Documentation:
                 Application Usage: application_usage/index.md
                 Application Development: application_development/index.md
