@@ -291,7 +291,7 @@ public:
    * then we will compute the gradient if necessary to help us interpolate from the element centroid
    * value to the face
    */
-  ADReal getBoundaryFaceValue(const FaceInfo & fi, const Elem * elem = nullptr) const;
+  ADReal getBoundaryFaceValue(const FaceInfo & fi) const;
 
   const ADTemplateVariableSecond<OutputType> & adSecondSln() const override
   {

@@ -10,13 +10,10 @@
 #pragma once
 
 #include "MooseFunctor.h"
-#include "CellCenteredMapFunctor.h"
-#include "GreenGaussGradient.h"
-#include "MathFVUtils.h"
-#include "libmesh/utility.h"
-#include "libmesh/type_tensor.h"
-#include "libmesh/compare_types.h"
-#include "libmesh/threads.h"
+#include "MooseMesh.h"
+#include "MooseError.h"
+
+#include <set>
 
 /**
  * A functor whose evaluation relies on querying a map where the keys are face info ids

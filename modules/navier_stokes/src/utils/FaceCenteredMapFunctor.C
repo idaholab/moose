@@ -8,6 +8,35 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "FaceCenteredMapFunctor.h"
+#include "FaceInfo.h"
+#include "FVUtils.h"
+#include "libmesh/compare_types.h"
+#include "libmesh/type_tensor.h"
+#include "libmesh/tensor_tools.h"
+#include "libmesh/dense_matrix.h"
+#include "libmesh/elem.h"
+#include "libmesh/point.h"
+
+namespace Moose
+{
+template <typename T, typename T2, typename std::enable_if<ScalarTraits<T>::value, int>::type = 0>
+inline TypeVector<typename CompareTypes<T, T2>::supertype>
+outer_product(const T & a, const TypeVector<T2> & b)
+{
+  TypeVector<typename CompareTypes<T, T2>::supertype> ret;
+  for (const auto i : make_range(Moose::dim))
+    ret(i) = a * b(i);
+
+  return ret;
+}
+
+template <typename T, typename T2>
+inline TypeTensor<typename CompareTypes<T, T2>::supertype>
+outer_product(const TypeVector<T> & a, const TypeVector<T2> & b)
+{
+  return libMesh::outer_product(a, b);
+}
+}
 
 template <typename T, typename Map>
 typename FaceCenteredMapFunctor<T, Map>::ValueType

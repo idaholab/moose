@@ -17,27 +17,6 @@
 #include "libmesh/compare_types.h"
 #include "libmesh/threads.h"
 
-namespace Moose
-{
-template <typename T, typename T2, typename std::enable_if<ScalarTraits<T>::value, int>::type = 0>
-inline TypeVector<typename CompareTypes<T, T2>::supertype>
-outer_product(const T & a, const TypeVector<T2> & b)
-{
-  TypeVector<typename CompareTypes<T, T2>::supertype> ret;
-  for (const auto i : make_range(Moose::dim))
-    ret(i) = a * b(i);
-
-  return ret;
-}
-
-template <typename T, typename T2>
-inline TypeTensor<typename CompareTypes<T, T2>::supertype>
-outer_product(const TypeVector<T> & a, const TypeVector<T2> & b)
-{
-  return libMesh::outer_product(a, b);
-}
-}
-
 /**
  * A functor whose evaluation relies on querying a map where the keys are element ids and the values
  * correspond to the element/cell values. This is a very useful data type for storing the result of
@@ -236,28 +215,5 @@ template <typename T, typename Map>
 typename CellCenteredMapFunctor<T, Map>::GradientType
 CellCenteredMapFunctor<T, Map>::evaluateGradient(const FaceArg & face, unsigned int) const
 {
-  const auto & fi = *face.fi;
-  const bool defined_on_elem = hasBlocks(&fi.elem());
-  const bool defined_on_neighbor = hasBlocks(fi.neighborPtr());
-  if (defined_on_elem && defined_on_neighbor)
-  {
-    const auto elem_arg = face.makeElem();
-    const auto elem_gradient = this->gradient(elem_arg);
-    const auto neighbor_arg = face.makeNeighbor();
-    const auto linear_interp_gradient =
-        fi.gC() * elem_gradient + (1 - fi.gC()) * this->gradient(neighbor_arg);
-    return linear_interp_gradient +
-           Moose::outer_product(((*this)(neighbor_arg) - (*this)(elem_arg)) / fi.dCNMag() -
-                                    linear_interp_gradient * fi.eCN(),
-                                fi.eCN());
-  }
-
-  // One term expansion
-  if (defined_on_elem)
-    return this->gradient(face.makeElem());
-  else
-  {
-    mooseAssert(defined_on_neighbor, "We should be defined on one of the sides");
-    return this->gradient(face.makeNeighbor());
-  }
+  return Moose::FV::greenGaussGradient(face, *this, true, _mesh);
 }

@@ -604,8 +604,7 @@ MooseVariableFV<OutputType>::getExtrapolatedBoundaryFaceValue(
 
 template <typename OutputType>
 ADReal
-MooseVariableFV<OutputType>::getBoundaryFaceValue(const FaceInfo & fi,
-                                                  const Elem * const elem) const
+MooseVariableFV<OutputType>::getBoundaryFaceValue(const FaceInfo & fi) const
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("MooseVariableFV::getBoundaryFaceValue only supported for global AD indexing");
@@ -614,10 +613,10 @@ MooseVariableFV<OutputType>::getBoundaryFaceValue(const FaceInfo & fi,
   mooseAssert(!this->isInternalFace(fi),
               "A boundary face value has been requested on an internal face.");
 
-  if (isDirichletBoundaryFace(fi, elem))
-    return getDirichletBoundaryFaceValue(fi, elem);
-  else if (isExtrapolatedBoundaryFace(fi, elem))
-    return getExtrapolatedBoundaryFaceValue(fi, _two_term_boundary_expansion, elem);
+  if (isDirichletBoundaryFace(fi, nullptr))
+    return getDirichletBoundaryFaceValue(fi, nullptr);
+  else if (isExtrapolatedBoundaryFace(fi, nullptr))
+    return getExtrapolatedBoundaryFaceValue(fi, _two_term_boundary_expansion, nullptr);
 
   mooseError("Unknown boundary face type!");
 }

@@ -36,7 +36,7 @@ namespace Moose
  * evaluations
  */
 template <typename T>
-class FunctorBase : public FaceArgConsumerInterface
+class FunctorBase : public FaceArgInterface
 {
 public:
   using FunctorType = FunctorBase<T>;
@@ -139,6 +139,18 @@ public:
   virtual bool isConstant() const { return false; }
 
   bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const override;
+
+  /**
+   * Examines the incoming face argument. If the face argument producer (residual object,
+   * postprocessor, etc.) did not indicate a sidedness to the face, e.g. if the \p face_side member
+   * of the \p FaceArg is \p nullptr, then we may "modify" the sidedness of the argument if we are
+   * only defined on one side of the face. If the face argument producer \emph has indicated a
+   * sidedness and we are not defined on that side, then we will error
+   * @param face The face argument created by the face argument producer, likely a residual object
+   * @return A face with possibly changed sidedness depending on whether we aren't defined on both
+   * sides of the face
+   */
+  Moose::FaceArg checkFace(const Moose::FaceArg & face) const;
 
 protected:
   /**
@@ -500,6 +512,51 @@ void
 FunctorBase<T>::setCacheClearanceSchedule(const std::set<ExecFlagType> & clearance_schedule)
 {
   _clearance_schedule = clearance_schedule;
+}
+
+template <typename T>
+FaceArg
+FunctorBase<T>::checkFace(const Moose::FaceArg & face) const
+{
+  const Elem * const elem = face.face_side;
+  const FaceInfo * const fi = face.fi;
+  mooseAssert(fi, "face info should be non-null");
+  auto ret_face = face;
+  bool check_elem_def = false;
+  bool check_neighbor_def = false;
+  if (!elem)
+  {
+    if (!hasFaceSide(*fi, true))
+    {
+      ret_face.face_side = fi->neighborPtr();
+      check_neighbor_def = true;
+    }
+    else if (!hasFaceSide(*fi, false))
+    {
+      ret_face.face_side = fi->elemPtr();
+      check_elem_def = true;
+    }
+  }
+  else if (elem == fi->elemPtr())
+    check_elem_def = true;
+  else
+  {
+    mooseAssert(elem == fi->neighborPtr(), "This has to match something");
+    check_neighbor_def = true;
+  }
+
+  if (check_elem_def && !hasFaceSide(*fi, true))
+    mooseError(
+        _functor_name,
+        " is not defined on the element side of the face information, but a face argument producer "
+        "(e.g. residual object, postprocessor, etc.) has requested evaluation there");
+  if (check_neighbor_def && !hasFaceSide(*fi, false))
+    mooseError(
+        _functor_name,
+        " is not defined on the neighbor side of the face information, but a face argument "
+        "producer (e.g. residual object, postprocessor, etc.) has requested evaluation there");
+
+  return ret_face;
 }
 
 template <typename T>

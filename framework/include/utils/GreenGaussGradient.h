@@ -283,8 +283,12 @@ greenGaussGradient(const FaceArg & face_arg,
       const auto & grad_neighbor =
           greenGaussGradient(neighbor_arg, functor, two_term_boundary_expansion, mesh);
 
-      Moose::FV::interpolate(
-          Moose::FV::InterpMethod::Average, face_gradient, grad_elem, grad_neighbor, fi, true);
+      Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
+                             interpolated_gradient,
+                             grad_elem,
+                             grad_neighbor,
+                             fi,
+                             true);
 
       face_gradient += interpolated_gradient - (interpolated_gradient * fi.eCN()) * fi.eCN();
     }

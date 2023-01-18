@@ -25,24 +25,6 @@ public:
 };
 
 /**
- * An interface for consumers of functor face arguments, e.g. the functors themselves
- */
-class FaceArgConsumerInterface : public FaceArgInterface
-{
-public:
-  /**
-   * Examines the incoming face argument. If the producer did not indicate a sidedness to the face,
-   * e.g. if the \p face_side member of the \p FaceArg is \p nullptr, then we may "modify" the
-   * sidedness of the argument if we are only defined on one side of the face. If the producer \emph
-   * has indicated a sidedness and we are not defined on that side, then we will error
-   * @param face The face argument created by the producer, likely a residual object
-   * @return a face with possibly changed sidedness depending on whether we aren't defined on both
-   * sides of the face
-   */
-  Moose::FaceArg checkFace(const Moose::FaceArg & face) const;
-};
-
-/**
  * An interface for producers of functor face arguments, e.g. objects such as residual objects and
  * postprocessors
  */
