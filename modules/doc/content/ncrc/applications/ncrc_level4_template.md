@@ -59,8 +59,11 @@ Then paste the contents you earlier copied into the 'key' field.
 
 # Cloning the Repo
 
-Once you have added your SSH key, you should be able to clone your fork:
+Once you have added your SSH key, you should be able to clone your fork. At this time, choose a
+location you wish to operate from. Such as `~/projects`, and clone {{ApplicationName}}:
 
 ```bash
+mkdir -p ~/projects
+cd ~/projects
 git clone git@github.inl.gov:first_name-last_name/{{binary}}.git
 ```
