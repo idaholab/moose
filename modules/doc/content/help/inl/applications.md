@@ -1,9 +1,10 @@
 # NCRC Distributed Applications
 
-NCRC distributes a number of NEAMS-developed applications. The following sections highlight some of the codes available through the NCRC.
+[!ac](NCRC) distributes a number of [!ac](NEAMS)-developed applications. The following sections highlight some of the codes available through the NCRC.
 
 !alert tip title=Existing HPC GitLab Users
-Existing users using [hpcgitlab.hpc.inl.gov](https://hpcgitlab.hpc.inl.gov), please see the [Transitional Guide](https://github.com/idaholab/moose/wiki/NCRC-github.inl.gov-transition-guide),
+For existing users who access codes via [hpcgitlab.hpc.inl.gov](https://hpcgitlab.hpc.inl.gov),
+please see the [Transitional Guide](https://github.com/idaholab/moose/wiki/NCRC-github.inl.gov-transition-guide)
 for help on accessing the new home for NCRC source code (level 4): [github.inl.gov](https://github.inl.gov). New users can safely ignore this notice.
 
 ## BISON
@@ -20,7 +21,7 @@ for help on accessing the new home for NCRC source code (level 4): [github.inl.g
 
 !row!
 !col small=12 medium=8 large=8
-BISON is a finite element-based nuclear fuel performance code. It is applicable to light water reactor fuel rods, TRISO particle fuel, metallic rod and plate fuel, and other fuel forms. BISON solves thermomechanics and species diffusion equations for 1D, 2D and 3D geometries, with fuel models that describe temperature properties, fission product swelling and other material aspects. Because it is based on the MOOSE framework, Bison can solve problems efficiently using standard workstations or very large high-performance computers. Bison is available witin our NCRC Conda channel.
+BISON is a finite element-based nuclear fuel performance code. It is applicable to light water reactor fuel rods, TRISO particle fuel, metallic rod and plate fuel, and other fuel forms. BISON solves thermomechanics and species diffusion equations for 1D, 2D and 3D geometries, with fuel models that describe temperature properties, fission product swelling and other material aspects. Because it is based on the MOOSE framework, Bison can solve problems efficiently using standard workstations or very large high-performance computers. Bison is available witin our [!ac](NCRC) Conda channel.
 
 !col small=8 medium=4 large=4
 !media xfem/image21.gif style=width:100%;align:bottom;
@@ -39,7 +40,7 @@ BISON is a finite element-based nuclear fuel performance code. It is applicable 
 
 !row!
 !col small=12 medium=8 large=8
-Blue Crab is a combination (coupling) of other NCRC Applications: Bison, Griffin, Pronghorn and SAM.
+Blue Crab is a combination (coupling) of other [!ac](NCRC) Applications: Bison, Griffin, Pronghorn and SAM.
 
 !col small=8 medium=4 large=4
 !row-end!
@@ -56,7 +57,7 @@ Blue Crab is a combination (coupling) of other NCRC Applications: Bison, Griffin
 
 !row!
 !col small=12 medium=8 large=8
-Dire Wolf is a combination (coupling) of other NCRC Applications: Bison, Griffin and Sockeye.
+Dire Wolf is a combination (coupling) of other [!ac](NCRC) Applications: Bison, Griffin and Sockeye.
 
 !col small=8 medium=4 large=4
 !row-end!
@@ -148,7 +149,7 @@ Pronghorn is a multi-dimensional, coarse-mesh, thermal-hydraulics code for advan
 
 !row!
 !col small=12 medium=8 large=8
-RELAP5-3D is the latest released code in the RELAP5 series. Developed at Idaho National Laboratory, the RELAP5 family aids the analysis of transients and accidents in water-cooled nuclear power plants and related systems. The software can also analyze advanced reactor designs. RELAP5-3D differs from earlier code in the series because it offers fully integrated and multi-dimensional thermal-hydraulic and kinetic modeling. It runs on both Linux and Windows operating systems, with training and users group available.
+RELAP5-3D is the latest released code in the RELAP5 series. Developed at Idaho National Laboratory, the RELAP5 family aids in the analysis of transients and accidents in water-cooled nuclear power plants and related systems. The software can also analyze advanced reactor designs. RELAP5-3D differs from earlier code in the series because it offers fully integrated and multi-dimensional thermal-hydraulic and kinetic modeling. It runs on both Linux and Windows operating systems, with training and users group available.
 
 !col small=8 medium=4 large=4
 !row-end!

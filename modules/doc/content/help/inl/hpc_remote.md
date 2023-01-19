@@ -49,8 +49,8 @@ ProxyCommand ssh -q -x hpclogin.inl.gov -W %h:%p
 ### SSH Tunnel
 
 Create a tunnel into the HPC environment and leave it running while you require access to HPC
-resources not available/or those not wishing to use HPC OnDemand. If you close this window, you will
-loose your connection to these resources.
+resources when [inl/hpc_ondemand.md] is not available or not desired for use. If you close this
+window, you will lose your connection to these resources.
 
 ```bash
 ssh <your hpc user id>@hpclogin
@@ -62,7 +62,9 @@ domain name in your command above because of the "Host" setting in your SSH conf
 
 ### SOCKS Proxy id=socks-proxy
 
-To access common HPC resources (NCRC Application Documentation, Discourse, etc) within a web browser, traffic can either be routed through a SOCKS proxy, or you can authenticate . This can be achieved by using a PAC (Proxy-Auto Configuration) file:
+To access common HPC resources (NCRC Application Documentation, Discourse, etc) within a web
+browser, traffic can either be routed through a SOCKS proxy or you can authenticate. This can be
+achieved by using a PAC (Proxy-Auto Configuration) file:
 
 !listing moose/scripts/hpc_proxy.pac
 

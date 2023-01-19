@@ -28,5 +28,5 @@ development. Currently, the following access methods are available for certain a
   application and contributing directly to the project.
 
 
-To request access to an [!ac](INL) developed code, please contact follow the instructions
+To request access to an [!ac](INL) developed code, please follow the instructions
 on [INL's Nuclear Computational Resource Center](https://inl.gov/ncrc/) website.

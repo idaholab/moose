@@ -35,7 +35,7 @@ a "testing" folder in your remote home directory:
 mkdir ~/testing
 ```
 
-You will need to use a terminal editor to create the file such as `emacs`, `vi`, or `vim`. Please
+You will need to use a terminal editor to create the file, such as `emacs`, `vi`, or `vim`. Please
 search the internet for how to use these tools, if unfamiliar.
 
 Alternatively, you can create the file on your local machine using your favorite editor, and copying
@@ -43,8 +43,8 @@ it to the remote by running `scp` or `rsync` commands.
 
 !alert note title=Copying files from your local machine
 Copying files from your local machine to an HPC cluster first requires that you follow the
-instructions: [inl/hpc_remote.md]. It is for advanced users, comfertable with modifying their SSH
-settings, and being familiar with their terminal in general.
+instructions: [inl/hpc_remote.md]. This workflow is for advanced users, comfortable with modifying
+their SSH settings, and familiar with their terminal in general.
 
 Example commands you would use with a terminal opened on your machine to copy files to HPC:
 
@@ -112,13 +112,25 @@ before your 'Visualization Job' becomes available. When it does, simply click on
 presented within your web browser, your GUI Desktop. From here, you can open visualization
 applications (such as Paraview), and open your results file.
 
+To use Paraview, open a terminal by: Clicking `Applications` at the top left, then click
+`Terminal Emulator`. A terminal window will open. Enter the following commands:
+
+```bash
+module load paraview
+paraview
+```
+
+Paraview should open. From here, you can select `File`, `Open`, and navigate to the `testing` folder
+you created earlier. You should see your results file listed (`input_out.e`). Double click this file
+and enjoy!
+
 However, in many cases it is more desirable to view the results on your local machine. This is done
 by copying the results file from the remote machine to your local machine using `scp` or `rsnyc`.
 
 !alert note title=Copying files from remote HPC machine to your machine
 Copying files from an HPC cluster to your machine first requires that you follow the instructions:
-[inl/hpc_remote.md]. It is for advanced users, comfortable with modifying their SSH settings, and
-being familiar with their terminal in general.
+[inl/hpc_remote.md]. This workflow is for advanced users, comfortable with modifying their SSH
+settings, and familiar with their terminal in general.
 
 Example commands you would use with a terminal opened on your machine to copy files from HPC:
 
@@ -130,7 +142,7 @@ scp <your hpc user id>@hpclogin:~/testing/input_out.e /path/to/the/local/destina
 
 This section will provide you with a basic example of using [!ac](PBS) for scheduling jobs to run
 using INL resources. For detailed information regarding using [!ac](PBS) please visit
-[INL-HPC PBS](https://hpcweb.hpc.inl.gov/home/pbs).
+[INL-HPC PBS](https://hpcweb.hpcondemand.inl.gov/home/pbs).
 
 In general, scheduling jobs requires two steps:
 
@@ -139,7 +151,7 @@ In general, scheduling jobs requires two steps:
 
 ### (1) Create [!ac](PBS) Script
 
-Lets use the same example input file from above to create a simple script for scheduling. The top
+Let's use the same example input file from above to create a simple script for scheduling. The top
 portion of the script provides [!ac](PBS) directives that are passed to scheduler. Notice that these
 lines are simply the arguments that are being passed to the scheduler, as was done via the
 command line in the interactive job above.
@@ -169,7 +181,7 @@ The [!ac](PBS) directives for this script include:
    48 cores and run with 48 mpi processes;
 1. `-l walltime=5:00` allocates 5 minutes of time for the simulation; and
 1. `-P moose` dictates that the job should part of the MOOSE queue. For a complete list
-   of queues available see [HPC PBS page](https://hpcweb.hpc.inl.gov/home/pbs).
+   of queues available see [HPC PBS page](https://hpcweb.hpcondemand.inl.gov/home/pbs).
 
 !alert note title=The number of cores differ on each machine
 The below table displays the possible number of cores for each available cluster
