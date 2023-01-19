@@ -122,10 +122,10 @@ On an internal cell (let's say on cell C):
 
 !style! fontsize=80%
 - $\left(\nabla u\right)_f \cdot \hat{n}$ for orthogonal scenario: $\frac{u_N-u_C}{\delta_{CN}}$ (cheap and accurate)
-- $\left(\nabla u\right)_f \cdot \hat{n}$ for nonorthogonal scenario: $\frac{u_N-u_C}{\delta_{CN}}|\Delta_f|+\hat{k}_f\cdot \left(\nabla u\right)_f$  
+- $\left(\nabla u\right)_f \cdot \hat{n}$ for nonorthogonal scenario: $\frac{u_N-u_C}{\delta_{CN}}|\Delta_f|+\hat{k}_f\cdot \left(\nabla u\right)_f$
 
   - The surface normal ($\hat{n}$) is expanded into a $\delta_{CN}$-parallel ($\hat{\Delta}_f$) and a remaining vector ($\hat{k}_f$): $\hat{n}_f=\hat{\Delta}_f + \hat{k}_f$
-  - $\left(\nabla u\right)_f$ on the right hand side is computed using the interpolation of cell gradients (next slide)  
+  - $\left(\nabla u\right)_f$ on the right hand side is computed using the interpolation of cell gradients (next slide)
 
 !style-end!
 
@@ -165,7 +165,7 @@ At the same time:
 \int_{\Omega_i}\nabla u ~dV = \int_{\partial\Omega_i}u \hat{n} dS \approx \sum_f u_f \hat{n}_f |S_f|
 
 !style fontsize=80%
-From the two equations:  
+From the two equations:
 
 !equation
 (\nabla u)_i = \frac{1}{V_i} \sum_f u_f \hat{n}_f |S_f|
@@ -216,6 +216,27 @@ Common interpolation method for $u_f$:
 !col-end!
 
 !row-end!
+
+!---
+
+## The MOOSE Functor System
+
+!style! fontsize=70%
+
+- Unifies the evaluation of Functions, Variables, and certain Materials on faces, elements, quadrature points, etc.
+- Can be used to easily evaluate gradients on elements/faces as well.
+- They require an argument that contains information on the way the value should be obtained:
+
+  - `ElemArg`: used to evaluate on an element, contains a link to the underlying element in `libMesh`
+  - `FaceArg`: used to evaluate on a face, has to contains information about the face, surrounding elements and the interpolation method
+
+!listing unit/src/MooseFunctorTest.C line=auto elem_arg
+
+!listing unit/src/MooseFunctorTest.C re=auto face[\s\S]*?\;
+
+!listing unit/src/MooseFunctorTest.C line=test_gradient(face)
+
+!style-end!
 
 !---
 
