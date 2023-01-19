@@ -17,17 +17,7 @@
 SolutionInvalidInterface::SolutionInvalidInterface(MooseObject * const moose_object)
   : _si_moose_object(*moose_object),
     _si_problem(
-        *_si_moose_object.parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
-    _prefix(moose_object->type())
-{
-}
-
-SolutionInvalidInterface::SolutionInvalidInterface(MooseObject * const moose_object,
-                                                   const std::string & prefix)
-  : _si_moose_object(*moose_object),
-    _si_problem(
-        *_si_moose_object.parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
-    _prefix(prefix)
+        *_si_moose_object.parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
 {
 }
 
@@ -42,10 +32,17 @@ SolutionInvalidInterface::flagInvalidSolutionInternal(InvalidSolutionID _invalid
 }
 
 InvalidSolutionID
-SolutionInvalidInterface::registerInvalidSolutionInternal(const std::string & prefix,
-                                                          const std::string & message) const
+SolutionInvalidInterface::registerInvalidSolutionInternal(const std::string & message) const
 {
-  if (_prefix != "")
+  return moose::internal::getSolutionInvalidityRegistry().registerInvalidity(
+      _si_moose_object.type(), message);
+}
+
+InvalidSolutionID
+SolutionInvalidInterface::registerInvalidSolutionInternal(const std::string & message,
+                                                          const std::string & prefix) const
+{
+  if (prefix != "")
     return moose::internal::getSolutionInvalidityRegistry().registerInvalidity(
         _si_moose_object.type() + "::" + prefix, message);
   else
