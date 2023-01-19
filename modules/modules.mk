@@ -74,11 +74,6 @@ ifeq ($(CONTACT),yes)
         TENSOR_MECHANICS            := yes
 endif
 
-ifeq ($(OPTIMIZATION),yes)
-        HEAT_CONDUCTION             := yes
-        STOCHASTIC_TOOLS            := yes
-endif
-
 ifeq ($(HEAT_CONDUCTION),yes)
         RAY_TRACING                 := yes
 endif
