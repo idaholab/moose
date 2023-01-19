@@ -1,26 +1,49 @@
 # {{ApplicationName}} Source
 
+!alert tip title=Existing {{ApplicationName}} HPC GitLab Users
+Existing users using [hpcgitlab.hpc.inl.gov](https://hpcgitlab.hpc.inl.gov), please see the [Transitional Guide](https://github.com/idaholab/moose/wiki/NCRC-github.inl.gov-transition-guide),
+for help on accessing the new home for [NCRC/{{ApplicationName}}](https://github.inl.gov/ncrc/{{binary}}). New users can safely ignore this notice.
+
+
 Source code for {{ApplicationName}} can be found at [https://github.inl.gov/ncrc/{{binary}}](https://github.inl.gov/ncrc/{{binary}})
 
-## SSH Keys
+While logged in to [ncrc/{{binary}}](https://github.inl.gov/ncrc/{{binary}}) you should at
+this time create a fork of the repository. This is only required once, and is accomplished by
+clicking 'Fork' at the top right. You will be presented with a new page asking how you would like
+{{ApplicationName}} forked:
 
-Create your SSH public/private key and install it on GitHub. Instructions for doing so can be found
-on GitHub at: [Add SSH Keys](https://github.inl.gov/settings/keys). If you are unsure how to log
-into [https://github.inl.gov](https://github.inl.gov), please peruse through the
-[Transitional Guide](https://github.com/idaholab/moose/wiki/NCRC-github.inl.gov-transition-guide).
+| Owner* | Repository name* |
+| :- | :- |
+| ^Select an owner | {{binary}} |
 
-## Cloning the Repo
+Click 'Select an owner' and choose yourself. Take note of how GitHub identifies you
+(`first-last` name). Then click 'Create fork' near the bottom. GitHub will begin creating a
+personalized fork of {{ApplicationName}}. When finished GitHub will bring you to your fork of
+{{ApplicationName}}.
 
-Once you have added your SSH key, you can clone the repository in the following ways:
+# SSH Keys
 
-- You do not wish to use a fork:
+Before you can clone your fork, you must create your SSH public/private key. Detailed instructions
+for doing so can be found on GitHub at:
+[Generating a new SSH key](https://docs.github.com/en/enterprise-server@3.6/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent#generating-a-new-ssh-key).
+
+The gist of creating a key is as follows:
+
+- Open a terminal
+- Enter the following command
 
   ```bash
-  git clone git@github.inl.gov:ncrc/{{binary}}.git
+  ssh-keygen -t ed25519
   ```
+- Hit Enter for every question, thus creating a passphrase-less key
 
-- You created a fork:
+Entering a passphrase (or a blank response) is your preference. You'll need to enter this passphrase
+each time you perform a push/pull operation with your fork.
 
-  ```bash
-  git clone git@github.inl.gov:<your user id>/{{binary}}.git
-  ```
+# Cloning the Repo
+
+Once you have added your SSH key, you should be able to clone your fork:
+
+```bash
+git clone git@github.inl.gov:first_name-last_name/{{binary}}.git
+```

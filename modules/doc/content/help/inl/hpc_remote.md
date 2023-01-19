@@ -1,12 +1,13 @@
 # Remote Access Primer
 
-WIP
+!alert note title=Optional Instructions below
+The following sections are for advanced users, comfortable and familiar with their computer and
+their terminal. These instructions are entirely avoidable by using [inl/hpc_ondemand.md] web based
+services.
 
-## Native Shell/Tunneling Access (Optional: for advanced users)
-
-The following instructions are for advanced users wishing to use their native terminal to access
-[!ac](INL) [!ac](HPC) resources while operating from a machine outside of [!ac](INL). As well as for
-those wishing not to use [inl/hpc_ondemand.md].
+The following instructions are for those wishing to use their native local machine's
+terminal to access [!ac](INL) [!ac](HPC) resources while operating from a machine outside of
+[!ac](INL). As well as for those wishing not to use [inl/hpc_ondemand.md].
 
 ### SSH Config id=ssh-config
 

@@ -21,15 +21,15 @@ The Jobs menu allows you to create simple bash scripts to be executed on a selec
 !alert note
 This is not to be confused with Portable Batch System (PBS) jobs.
 
-## Clusters
+## Clusters id=clusters
 
 Clicking any item in this menu will launch an interactive shell terminal for that HPC machine. From here, you will be able to do anything you normally would with a native shell.
 
-- #### Interactive Shell
+- #### Interactive Shell id=interactive-shell
 
   One of the more exciting features of HPC OnDemand, is having a terminal-like window using a web browser:
 
-  !media large_media/hpc/hpcondemand_terminal.png style=filter:drop-shadow(0 0 0.25rem black);
+  !media large_media/hpc/hpcondemand_terminal.png style=filter:drop-shadow(0 0 0.25rem black);width:90%;
 
   With this prompt, you can launch jobs, build MOOSE, obtain a Civet-like testing environment (see below) and more.
 

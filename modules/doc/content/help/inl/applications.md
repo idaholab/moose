@@ -2,9 +2,9 @@
 
 NCRC distributes a number of NEAMS-developed applications. The following sections highlight some of the codes available through the NCRC.
 
-!alert tip title=Existing HPCGitLab Users
+!alert tip title=Existing HPC GitLab Users
 Existing users using [hpcgitlab.hpc.inl.gov](https://hpcgitlab.hpc.inl.gov), please see the [Transitional Guide](https://github.com/idaholab/moose/wiki/NCRC-github.inl.gov-transition-guide),
-for help on accessing the new home for NCRC source code (level 4): [github.inl.gov](https://github.inl.gov). New Users can safely ignore this notice.
+for help on accessing the new home for NCRC source code (level 4): [github.inl.gov](https://github.inl.gov). New users can safely ignore this notice.
 
 ## BISON
 
@@ -169,24 +169,6 @@ RELAP-7 is a two-phase thermal systems code based on MOOSE's thermal hydraulics 
 
 !col small=8 medium=4 large=4
 !media application_logos/relap-7_description.png style=width:100%;
-!row-end!
-
-## Sabertooth
-
-!media application_logos/sabertooth.png style=width:8%;align:top;
-
-- [Documentation](https://sabertooth-docs.hpcondemand.inl.gov/latest/)
-- [Discussion Forum](https://sabertooth-discourse.hpcondemand.inl.gov)
-- [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_sabertooth_ondemand.md)
-- [Level 1 - HPC Binary Execution](ncrc/applications/hpc_sabertooth.md)
-- [Level 2 - Local Binary Installation](ncrc/applications/conda_sabertooth.md)
-- [Level 4 - Source Access](ncrc/applications/ncrc_sabertooth_level4.md)
-
-!row!
-!col small=12 medium=8 large=8
-Sabertooth is a combination (coupling) of other NCRC Applications: Bison, Griffin, and Relap-7.
-
-!col small=8 medium=4 large=4
 !row-end!
 
 ## SAM

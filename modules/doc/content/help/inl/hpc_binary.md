@@ -1,54 +1,18 @@
 # Binary Access with INL-HPC
 
-WIP (defer users to HPC OnDemand, re-word some of this document as Optional: for advanced users)
-
-
-
-
-
-
 The following information is provided for those with "HPC Binary Access" for an application and
 aims to get you up and running.
 
-These instructions assume some comfort with running commands on a terminal. To aid in having the
-instructions on this page be clear, there is a convention used for the code blocks. Blocks with dark
-blue backgrounds are commands executed on a local machine and those with a black background
-are being executed on a remote INL machine.
-
-```bash style=background-color:#151B54
-# commands with a dark blue background are executed on your local machine
-```
-
-```bash
-# commands with a black background are executed on a remote machine
-```
-
-!alert note title=Internal INL-HPC Website Access
-This page provides various links to the internal INL-HPC website:
-[https://hpcweb.hpc.inl.gov](https://hpcweb.hpc.inl.gov).  To access this site you will need to have
-a browser setup with the correct settings, see [hpc_remote.md#socks-proxy].
-
-
-## Login to INL-HPC
-
-1. Setup is to connect to the INL-HPC, this is accomplished by first configuring your local
-   machine (see [hpc_remote.md#ssh-config]). This step only needs to be completed once for each
-   machine you will be using to access INL-HPC resources.
-
-2. Login into INL-HPC.
-
-   ```bash  style=background-color:#151B54
-   ssh <your hpc user id>@hpclogin
-   ```
+Familiarize yourself with the interactive shell available with [inl/hpc_ondemand.md], and return
+here with such a shell on the machine you wish to run your application. Most users will want to
+operate on Sawtooth, although the following site details all available clusters for use
+[https://hpcweb.hpcondemand.inl.gov](https://hpcweb.hpcondemand.inl.gov) (Click Systems, from the
+top menu, and select one of the general use clusters).
 
 ## Connect to an INL-HPC Machine
 
-When you login to "hpclogin" you will then need to connect to an HPC machine such as Sawtooth, for
-a complete list of machines please refer to the internal INL HPC website:
-[hpcweb.hpc.inl.gov](https://hpcweb.hpc.inl.gov).
-
 Assuming you want to work on Sawtooth, you can access it by logging into one of the two
-available login nodes: "sawtooth1" or "sawtooth2".
+available login nodes: "sawtooth1" or "sawtooth2". Select that cluster
 
 ```bash
 ssh sawtooth2

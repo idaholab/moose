@@ -5,10 +5,8 @@ support for these applications. The following links will aid researchers learnin
 available codes and how to utilize the [!ac](INL) resources to run applications.
 
 - [inl/applications.md]
-- [inl/hpc_remote.md]
-- [inl/hpc_binary.md]
 - [inl/hpc_ondemand.md]
-
+- [inl/hpc_remote.md]
 
 # Requesting Access id=access
 
