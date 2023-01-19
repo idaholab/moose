@@ -1,6 +1,6 @@
 # pyhit package
 
-The [input file syntax](input_syntax.md) MOOSE uses the [!ac](HIT) format. The "pyhit" package
+The [input file syntax](input_syntax.md optional=True) MOOSE uses the [!ac](HIT) format. The "pyhit" package
 provides tools for reading, writing, and manipulating these files from within python. The package
 uses the same underlying C library used by MOOSE. It also relies on the
 ["moosetree"](python/moosetree/index.md) package.

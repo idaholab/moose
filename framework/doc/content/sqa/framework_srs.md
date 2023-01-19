@@ -1,4 +1,4 @@
-!template load file=srs.md.template project=Framework
+!template load file=srs.md.template project=Framework category=framework
 
 !template! item key=system-purpose
 !include sqa/system_purpose.md
@@ -88,16 +88,16 @@ behaviors of each user-defined object.
 !template-end!
 
 !template item key=functional-requirements
-!sqa requirements link=False collections=FUNCTIONAL category=framework
+!sqa requirements link=False collections=FUNCTIONAL category={{category}}
 
 !template item key=usability-requirements
-!sqa requirements link=False collections=USABILITY category=framework
+!sqa requirements link=False collections=USABILITY category={{category}}
 
 !template item key=performance-requirements
-!sqa requirements link=False collections=PERFORMANCE category=framework
+!sqa requirements link=False collections=PERFORMANCE category={{category}}
 
 !template item key=system-interfaces-requirements
-!sqa requirements link=False collections=SYSTEM category=framework
+!sqa requirements link=False collections=SYSTEM category={{category}}
 
 !template! item key=human-system-integration
 !! human-system-integration-begin

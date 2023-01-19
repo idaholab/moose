@@ -35,7 +35,7 @@ during translation allowing different pages to use different readers, renderers,
 extensions, which provides an extraordinary amount of flexibility about how your website is built.
 
 As a good example of how to resolve content conflicts, consider the main
-[MOOSE website](index.md exact=True) along with the [workshop/index.md alternative=missing_config.md].
+MOOSE website along with the [workshop/index.md alternative=missing_config.md].
 It is possible to build the [main site configuration](modules/doc/config.yml language=yaml) by
 itself by running the following commands:
 

@@ -219,4 +219,20 @@ I_{\text{compressor}} = I_{\text{coeff}}[0] + I_{\text{coeff}}[1] \mid \alpha \m
 
 !template load file=volume_junction_1phase_formulation_formloss.md.template name=ShaftConnectedCompressor1Phase
 
+## Output
+
+In addition to the junction variables, this component creates the following post-processors and auxillary scalar variables:
+
+| Post-processor/variable name | Description |Notation |Unit|
+| - | :- | - | -|
+| `comp_name:delta_p` | Pressure difference across the compressor component  | $\Delta p_0$ | \[Pa\] |
+| `comp_name:dissipation_torque` | Dissipation torque  | - | \[Nm\]
+| `comp_name:isentropic_torque` | Isentropic torque  | - | \[Nm\]
+| `comp_name:friction_torque` | Friction torque | $\tau_{\text{friction}}$ | \[Nm\]
+| `comp_name:moment_of_inertia` | Moment of inertia |  $I_{\text{compressor}}$ | \[kg-m^2\]
+| `comp_name:efficiency` | Efficiency  | $\eta$ | \[-\]
+| `comp_name:pressure_ratio` | Pressure ratio | $r_p$  | \[-\]
+| `comp_name:rel_corrected_flow` | Relative corrected mass flow rate | $\alpha$ | \[-\]
+| `comp_name:rel_corrected_speed` | Relative corrected shaft speed | $\nu$ | \[-\]
+
 !bibtex bibliography

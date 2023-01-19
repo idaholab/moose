@@ -7,7 +7,7 @@ InputParameters
 ShaftConnectedCompressor1PhasePostprocessor::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
-  MooseEnum quantity("pressure_ratio efficiency");
+  MooseEnum quantity("pressure_ratio efficiency rel_corrected_flow rel_corrected_speed");
   params.addRequiredParam<MooseEnum>("quantity", quantity, "Quantity to get");
   params.addRequiredParam<UserObjectName>("compressor_uo", "Compressor user object name");
   params.addClassDescription("Gets various quantities for a ShaftConnectedCompressor1Phase");
@@ -43,6 +43,12 @@ ShaftConnectedCompressor1PhasePostprocessor::getValue()
       break;
     case Quantity::EFFICIENCY:
       return MetaPhysicL::raw_value(_compressor_uo.getEfficiency());
+      break;
+    case Quantity::REL_CORRECTED_FLOW:
+      return MetaPhysicL::raw_value(_compressor_uo.getRelativeCorrectedMassFlowRate());
+      break;
+    case Quantity::REL_CORRECTED_SPEED:
+      return MetaPhysicL::raw_value(_compressor_uo.getRelativeCorrectedSpeed());
       break;
     default:
       mooseError("Invalid 'quantity' parameter.");

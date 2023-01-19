@@ -8,7 +8,7 @@ These documentation pages aid in running MOOSE-based applications.  For developm
 
 [Input File Syntax](input_syntax.md)
 
-[Peacock](peacock.md) - Graphical user interface and results visualization
+[Peacock](python/peacock.md) - Graphical user interface and results visualization
 
 [Tracked Apps](tracked_apps.md) - A list of applications being developed
 
@@ -17,4 +17,3 @@ These documentation pages aid in running MOOSE-based applications.  For developm
 [Restart and Recovery](restart_recover.md)
 
 [Hypre/BoomerAMG Preconditioning](hypre.md) - In-depth discussion of using Hypre's algebraic multigrid preconditioner: BoomerAMG
-

@@ -45,6 +45,10 @@ public:
   ADReal getPressureRatio() const;
   /// Gets the efficiency
   ADReal getEfficiency() const;
+  /// Gets the relative corrected mass flow rate
+  ADReal getRelativeCorrectedMassFlowRate() const;
+  /// Gets the elative corrected shaft speed
+  ADReal getRelativeCorrectedSpeed() const;
 
   virtual void finalize() override;
   virtual void threadJoin(const UserObject & uo) override;
@@ -110,6 +114,10 @@ protected:
   ADReal _Rp;
   /// Efficiency
   ADReal _eff;
+  /// relative corrected mass flow rate
+  ADReal _flow_rel_corr;
+  /// relative corrected shaft speed
+  ADReal _speed_rel_corr;
 
   /// Jacobian entries of junction variables wrt shaft variables
   std::vector<DenseMatrix<Real>> _residual_jacobian_omega_var;
