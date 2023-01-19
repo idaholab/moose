@@ -1,1 +1,1 @@
-!template load file=sqa/app_sdd.md.template category=python app=MOOSE Tools
+!template load file=sqa/sdd.md.template category=python app=MOOSE Tools
