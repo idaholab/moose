@@ -19,74 +19,75 @@
 [Variables]
   active = 'u'
 
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./aux_elem]
+  [aux_elem]
     order = CONSTANT
     family = MONOMIAL
-  [../]
+  []
 
-  [./aux_nodal]
+  [aux_nodal]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./aux_elem]
+  [aux_elem]
     type = CoupledAux
     variable = aux_elem
     operator = '*'
     value = 1
     coupled = u
-  [../]
+  []
 
-  [./aux_nodal]
+  [aux_nodal]
     type = CoupledAux
     variable = aux_nodal
     operator = '*'
     value = 1
     coupled = u
-  [../]
+  []
 []
 
 [Kernels]
   active = 'diff'
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+    block = block_1
+  []
 []
 
 [BCs]
   active = 'left right'
 
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
-    boundary = 1
+    boundary = bottom
     value = 0
-  [../]
+  []
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
-    boundary = 2
+    boundary = top
     value = 1
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./elem_avg]
+  [elem_avg]
     type = ElementAverageValue
     variable = u
-  [../]
+  []
 []
 
 [Executioner]
