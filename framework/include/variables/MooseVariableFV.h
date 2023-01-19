@@ -157,9 +157,6 @@ public:
 
   virtual void prepareIC() override;
 
-  const std::set<SubdomainID> & activeSubdomains() const override;
-  bool activeOnSubdomain(SubdomainID subdomain) const override;
-
   Moose::VarFieldType fieldType() const override;
   bool isArray() const override;
   bool isVector() const override;
@@ -435,56 +432,75 @@ public:
    */
   ADReal getElemValue(const Elem * elem) const;
 
-  /**
-   * Compute or retrieve from cache the solution value on an internal face using linear
-   * interpolation.
-   * @param fi The face information object
-   * @return The face value on the internal face associated with \p fi
-   */
-  ADReal getInternalFaceValue(const FaceInfo & fi, const bool correct_skewness = false) const;
-
   using FunctorArg = typename Moose::ADType<OutputType>::type;
   using typename Moose::FunctorBase<FunctorArg>::ValueType;
   using typename Moose::FunctorBase<FunctorArg>::DotType;
   using typename Moose::FunctorBase<FunctorArg>::GradientType;
 
-  /**
-   * This method gets forwarded calls to \p evaluate for \p FaceArg and \p SingleSidedFaceArg
-   * spatial argument types and returns an internal face evaluation
-   */
-  template <typename FaceCallingArg>
-  ADReal getInternalFaceValue(const FaceCallingArg & face) const;
-
   void setActiveTags(const std::set<TagID> & vtags) override;
-
-  /**
-   * @return whether \p fi is an internal face for this variable
-   */
-  bool isInternalFace(const FaceInfo & fi) const override;
 
 protected:
   /**
-   * @return whether \p fi is a Dirichlet boundary face for this variable
+   * Determine whether a specified face side is a Dirichlet boundary face. In the base
+   * implementation we only inspect the face information object for whether there are Dirichlet
+   * conditions. However, derived classes may allow discontinuities between + and - side face
+   * values, e.g. one side may have a Dirichlet condition and the other side may perform
+   * extrapolation to determine its value
+   * @param fi The face informatin object
+   * @param elem An element that can be used to indicate sidedness of the face
+   * @return Whether the potentially sided (as indicated by \p elem) \p fi is a Dirichlet boundary
+   * face for this variable
    */
-  virtual bool isDirichletBoundaryFace(const FaceInfo & fi) const;
+  virtual bool isDirichletBoundaryFace(const FaceInfo & fi, const Elem * elem) const;
 
   /**
-   * @return the Dirichlet value on the boundary face associated with \p fi
+   * Retrieves a Dirichlet boundary value for the provided face. Callers of this method should be
+   * sure that \p isDirichletBoundaryFace returns true. In the base implementation we only inspect
+   * the face information object for the Dirichlet value. However, derived
+   * classes may allow discontinuities between + and - side face values, e.g. one side may have a
+   * Dirichlet condition and the other side may perform extrapolation to determine its value. This
+   * is the reason for the existence of the \p elem parameter, to indicate sidedness
+   * @param fi The face informatin object
+   * @param elem An element that can be used to indicate sidedness of the face
+   * @return The Dirichlet value on the boundary face associated with \p fi (and potentially \p
+   * elem)
    */
-  virtual ADReal getDirichletBoundaryFaceValue(const FaceInfo & fi) const;
+  virtual ADReal getDirichletBoundaryFaceValue(const FaceInfo & fi, const Elem * elem) const;
 
   /**
    * Returns whether this is an extrapolated boundary face. An extrapolated boundary face is
    * boundary face for which is not a corresponding Dirichlet condition, e.g. we need to compute
-   * some approximation for the boundary face value using the adjacent cell centroid information
+   * some approximation for the boundary face value using the adjacent cell centroid information. In
+   * the base implementation we only inspect the face information object for whether we should
+   * perform extrapolation. However, derived classes may allow discontinuities between + and - side
+   * face values, e.g. one side may have a Dirichlet condition and the other side may perform
+   * extrapolation to determine its value
+   * @param fi The face informatin object
+   * @param elem An element that can be used to indicate sidedness of the face
+   * @return Whether the potentially sided (as indicated by \p elem) \p fi is an extrapolated
+   * boundary face for this variable
    */
-  std::pair<bool, const Elem *> isExtrapolatedBoundaryFace(const FaceInfo & fi) const override;
+  bool isExtrapolatedBoundaryFace(const FaceInfo & fi, const Elem * elem) const override;
 
   /**
-   * @return the extrapolated value on the boundary face associated with \p fi
+   * Retrieves an extrapolated boundary value for the provided face. Callers of this method should
+   * be sure that \p isExtrapolatedBoundaryFace returns true. In the base implementation we only
+   * inspect the face information object for the extrapolated value. However, derived classes may
+   * allow discontinuities between + and - side face values, e.g. one side may have a Dirichlet
+   * condition and the other side may perform extrapolation to determine its value. This is the
+   * reason for the existence of the \p elem parameter, to indicate sidedness
+   * @param fi The face informatin object
+   * @param two_term_expansion Whether to use the cell gradient in addition to the cell center value
+   * to compute the extrapolated boundary face value. If this is false, then the cell center value
+   * will be used
+   * @param elem_side_to_extrapolate_from An element that can be used to indicate sidedness of the
+   * face
+   * @return The extrapolated value on the boundary face associated with \p fi (and potentially \p
+   * elem_side_to_extrapolate_from)
    */
   virtual ADReal getExtrapolatedBoundaryFaceValue(const FaceInfo & fi,
-                                                  bool two_term_expansion) const;
+                                                  bool two_term_expansion,
+                                                  const Elem * elem_side_to_extrapolate_from) const;
 
 private:
   using MooseVariableField<OutputType>::evaluate;
@@ -492,23 +508,14 @@ private:
   using MooseVariableField<OutputType>::evaluateDot;
   using ElemQpArg = Moose::ElemQpArg;
   using ElemArg = Moose::ElemArg;
-  using ElemFromFaceArg = Moose::ElemFromFaceArg;
   using FaceArg = Moose::FaceArg;
-  using SingleSidedFaceArg = Moose::SingleSidedFaceArg;
 
   ValueType evaluate(const ElemArg & elem, unsigned int) const override final;
-  ValueType evaluate(const ElemFromFaceArg & elem_from_face, unsigned int) const override final;
   ValueType evaluate(const FaceArg & face, unsigned int) const override final;
-  ValueType evaluate(const SingleSidedFaceArg & face, unsigned int) const override final;
   GradientType evaluateGradient(const ElemQpArg & qp_arg, unsigned int) const override final;
   GradientType evaluateGradient(const ElemArg & elem_arg, unsigned int) const override final;
-  GradientType evaluateGradient(const ElemFromFaceArg & elem_from_face,
-                                unsigned int) const override final;
   GradientType evaluateGradient(const FaceArg & face, unsigned int) const override final;
-  GradientType evaluateGradient(const SingleSidedFaceArg & face, unsigned int) const override final;
   DotType evaluateDot(const ElemArg & elem, unsigned int) const override final;
-  DotType evaluateDot(const FaceArg & face, unsigned int) const override final;
-  DotType evaluateDot(const SingleSidedFaceArg & face, unsigned int) const override final;
 
 public:
   const MooseArray<OutputType> & nodalValueArray() const override
@@ -619,14 +626,6 @@ protected:
   /// face interpolation. Other options are not taken into account here,
   /// but at higher, kernel-based levels.
   Moose::FV::InterpMethod _face_interp_method;
-
-private:
-  /**
-   * A helper function for evaluating this variable's time derivative with face arguments. This is
-   * leveraged by both \p FaceArg and \p SingleSidedFaceArg evaluateDot overloads
-   */
-  template <typename FaceCallingArg>
-  DotType evaluateFaceDotHelper(const FaceCallingArg & face) const;
 };
 
 template <typename OutputType>
@@ -641,55 +640,6 @@ typename MooseVariableFV<OutputType>::ValueType
 MooseVariableFV<OutputType>::evaluate(const ElemArg & elem_arg, unsigned int) const
 {
   return getElemValue(elem_arg.elem);
-}
-
-template <typename OutputType>
-template <typename FaceCallingArg>
-ADReal
-MooseVariableFV<OutputType>::getInternalFaceValue(const FaceCallingArg & face) const
-{
-  const FaceInfo * const fi = face.fi;
-  mooseAssert(fi, "The face information must be non-null");
-  mooseAssert(face.limiter_type == Moose::FV::LimiterType::CentralDifference,
-              "This method currently only supports central differencing.");
-
-  return getInternalFaceValue(*fi, face.correct_skewness);
-}
-
-template <typename OutputType>
-template <typename FaceCallingArg>
-typename MooseVariableFV<OutputType>::DotType
-MooseVariableFV<OutputType>::evaluateFaceDotHelper(const FaceCallingArg & face) const
-{
-  const FaceInfo * const fi = face.fi;
-  mooseAssert(fi, "The face information must be non-null");
-  if (isInternalFace(*fi))
-  {
-    auto limiter = Moose::FV::Limiter<ADReal>::build(face.limiter_type);
-    mooseAssert(limiter->constant(),
-                "Cannot do interpolation of time derivatives with non-constant limiting functions "
-                "because we have not implementation computation of gradients of time derivatives.");
-    const bool elem_is_upwind = face.elem_is_upwind;
-
-    const auto elem_dot = this->dot(face.makeElem());
-    mooseAssert(fi->neighborPtr(), "We're supposed to be on an internal face.");
-    const auto neighbor_dot = this->dot(face.makeNeighbor());
-    const auto & upwind_dot = elem_is_upwind ? elem_dot : neighbor_dot;
-    const auto & downwind_dot = elem_is_upwind ? neighbor_dot : elem_dot;
-
-    return Moose::FV::interpolate(
-        *limiter, upwind_dot, downwind_dot, (ADRealVectorValue *)nullptr, *fi, elem_is_upwind);
-  }
-  else
-  {
-    if (this->hasBlocks(fi->elem().subdomain_id()))
-      // Use element centroid evaluation as face evaluation
-      return this->dot(face.makeElem());
-    mooseAssert(fi->neighborPtr() && this->hasBlocks(fi->neighbor().subdomain_id()),
-                "We should not be evaluating this variable when the variable doesn't exist on "
-                "either side of the face.");
-    return this->dot(face.makeNeighbor());
-  }
 }
 
 template <typename OutputType>
@@ -712,29 +662,6 @@ MooseVariableFV<OutputType>::evaluateGradient(const FaceArg & face, unsigned int
 {
   mooseAssert(face.fi, "We must have a non-null face information");
   return adGradSln(*face.fi, face.correct_skewness);
-}
-
-template <typename OutputType>
-typename MooseVariableFV<OutputType>::GradientType
-MooseVariableFV<OutputType>::evaluateGradient(const SingleSidedFaceArg & face, unsigned int) const
-{
-  const auto * const fi = face.fi;
-  mooseAssert(fi, "We must have a non-null face information");
-  return adGradSln(*fi, face.correct_skewness);
-}
-
-template <typename OutputType>
-typename MooseVariableFV<OutputType>::DotType
-MooseVariableFV<OutputType>::evaluateDot(const FaceArg & face, unsigned int) const
-{
-  return evaluateFaceDotHelper(face);
-}
-
-template <typename OutputType>
-typename MooseVariableFV<OutputType>::DotType
-MooseVariableFV<OutputType>::evaluateDot(const SingleSidedFaceArg & face, unsigned int) const
-{
-  return evaluateFaceDotHelper(face);
 }
 
 template <typename OutputType>

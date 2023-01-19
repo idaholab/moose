@@ -82,7 +82,7 @@ public:
 
   virtual void operator()(const RangeType & range, bool bypass_threading = false);
 
-  void join(const ThreadedFaceLoop & /*y*/) {}
+  void join(const ThreadedFaceLoop & y);
 
   virtual void onFace(const FaceInfo & fi) = 0;
   /// This is called once for each face after all face and boundary callbacks have been
@@ -129,25 +129,62 @@ protected:
 
   /// The subdomain for the last neighbor
   SubdomainID _old_neighbor_subdomain;
+
+  /// Holds caught runtime error messages
+  std::string _error_message;
+
+private:
+  /// Whether this is the zeroth threaded copy of this body
+  const bool _zeroth_copy;
+
+  /// The value of \p Moose::_throw_on_error at the time of construction. This data member only has
+  /// meaning and will only be read if this is the thread 0 copy of the class
+  const bool _incoming_throw_on_error;
 };
 
 template <typename RangeType>
 ThreadedFaceLoop<RangeType>::ThreadedFaceLoop(FEProblemBase & fe_problem,
                                               const unsigned int nl_system_num,
                                               const std::set<TagID> & tags)
-  : _fe_problem(fe_problem), _mesh(fe_problem.mesh()), _tags(tags), _nl_system_num(nl_system_num)
+  : _fe_problem(fe_problem),
+    _mesh(fe_problem.mesh()),
+    _tags(tags),
+    _nl_system_num(nl_system_num),
+    _zeroth_copy(true),
+    _incoming_throw_on_error(Moose::_throw_on_error)
 {
+  Moose::_throw_on_error = true;
 }
 
 template <typename RangeType>
 ThreadedFaceLoop<RangeType>::ThreadedFaceLoop(ThreadedFaceLoop & x, Threads::split /*split*/)
-  : _fe_problem(x._fe_problem), _mesh(x._mesh), _tags(x._tags), _nl_system_num(x._nl_system_num)
+  : _fe_problem(x._fe_problem),
+    _mesh(x._mesh),
+    _tags(x._tags),
+    _nl_system_num(x._nl_system_num),
+    _zeroth_copy(false),
+    _incoming_throw_on_error(false)
 {
 }
 
 template <typename RangeType>
 ThreadedFaceLoop<RangeType>::~ThreadedFaceLoop()
 {
+  if (_zeroth_copy)
+  {
+    Moose::_throw_on_error = _incoming_throw_on_error;
+
+    if (!_error_message.empty())
+      mooseError(_error_message);
+  }
+}
+
+template <typename RangeType>
+void
+ThreadedFaceLoop<RangeType>::join(const ThreadedFaceLoop<RangeType> & y)
+{
+  if (_error_message.empty() && !y._error_message.empty())
+    _error_message = y._error_message;
 }
 
 // TODO: ensure the vector<faceinfo> data structure needs to be built such
@@ -237,6 +274,10 @@ ThreadedFaceLoop<RangeType>::operator()(const RangeType & range, bool bypass_thr
   catch (MooseException & e)
   {
     caughtMooseException(e);
+  }
+  catch (std::runtime_error & e)
+  {
+    _error_message = e.what();
   }
 }
 

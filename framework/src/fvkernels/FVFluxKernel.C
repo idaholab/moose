@@ -343,42 +343,29 @@ FVFluxKernel::gradUDotNormal() const
       side_one_value, side_two_value, *_face_info, _var, correct_skewness);
 }
 
-Moose::ElemFromFaceArg
-FVFluxKernel::elemFromFace(const bool correct_skewness) const
+Moose::ElemArg
+FVFluxKernel::elemArg(const bool correct_skewness) const
 {
   mooseAssert(_face_info, "the face info should be non-null");
-  return Moose::FV::elemFromFace(*this, *_face_info, correct_skewness);
+  return {_face_info->elemPtr(), correct_skewness};
 }
 
-Moose::ElemFromFaceArg
-FVFluxKernel::neighborFromFace(const bool correct_skewness) const
+Moose::ElemArg
+FVFluxKernel::neighborArg(const bool correct_skewness) const
 {
   mooseAssert(_face_info, "the face info should be non-null");
-  return Moose::FV::neighborFromFace(*this, *_face_info, correct_skewness);
+  return {_face_info->neighborPtr(), correct_skewness};
 }
 
-std::pair<SubdomainID, SubdomainID>
-FVFluxKernel::faceArgSubdomains(const FaceInfo * face_info) const
-{
-  if (!face_info)
-    face_info = _face_info;
-
-  mooseAssert(face_info, "the face info should be non-null");
-
-  return Moose::FV::faceArgSubdomains(*this, *face_info);
-}
-
-Moose::SingleSidedFaceArg
+Moose::FaceArg
 FVFluxKernel::singleSidedFaceArg(const FaceInfo * fi,
                                  const Moose::FV::LimiterType limiter_type,
                                  const bool correct_skewness) const
 {
   if (!fi)
     fi = _face_info;
-  const bool use_elem = fi->faceType(_var.name()) == FaceInfo::VarFaceNeighbors::ELEM;
-  const auto sub_id = use_elem ? fi->elem().subdomain_id() : fi->neighborPtr()->subdomain_id();
 
-  return {fi, limiter_type, true, correct_skewness, sub_id};
+  return makeFace(*fi, limiter_type, true, correct_skewness);
 }
 
 bool
@@ -432,4 +419,13 @@ void
 FVFluxKernel::computeResidualAndJacobian()
 {
   mooseError("FVFluxKernel residual/Jacobian evaluation requires a face information object");
+}
+
+bool
+FVFluxKernel::hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const
+{
+  if (fi_elem_side)
+    return hasBlocks(fi.elem().subdomain_id());
+  else
+    return fi.neighborPtr() && hasBlocks(fi.neighbor().subdomain_id());
 }

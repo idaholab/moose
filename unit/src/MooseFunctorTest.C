@@ -33,11 +33,11 @@ public:
 
   TestFunctor() : FunctorBase<T>("test"){};
 
+  bool hasBlocks(SubdomainID) const override { return true; }
+
 private:
   ValueType evaluate(const ElemArg &, unsigned int) const override final { return 0; }
-  ValueType evaluate(const ElemFromFaceArg &, unsigned int) const override final { return 0; }
   ValueType evaluate(const FaceArg &, unsigned int) const override final { return 0; }
-  ValueType evaluate(const SingleSidedFaceArg &, unsigned int) const override final { return 0; }
   ValueType evaluate(const ElemQpArg &, unsigned int) const override final { return 0; }
   ValueType evaluate(const ElemSideQpArg &, unsigned int) const override final { return 0; }
   ValueType evaluate(const ElemPointArg &, unsigned int) const override final { return 0; }
@@ -51,9 +51,9 @@ public:
 
   WithGradientTestFunctor(const MooseMesh & mesh) : _mesh(mesh) {}
 
-  std::pair<bool, const Elem *> isExtrapolatedBoundaryFace(const FaceInfo & fi) const override
+  bool isExtrapolatedBoundaryFace(const FaceInfo & fi, const Elem *) const override
   {
-    return std::make_pair(!fi.neighborPtr(), &fi.elem());
+    return !fi.neighborPtr();
   }
 
 private:
@@ -69,6 +69,23 @@ private:
   }
 
   const MooseMesh & _mesh;
+};
+
+template <typename T>
+class BypassFaceError : public PiecewiseByBlockLambdaFunctor<T>
+{
+public:
+  template <typename PolymorphicLambda>
+  BypassFaceError(const std::string & name,
+                  PolymorphicLambda my_lammy,
+                  const std::set<ExecFlagType> & clearance_schedule,
+                  const MooseMesh & mesh,
+                  const std::set<SubdomainID> & block_ids)
+    : PiecewiseByBlockLambdaFunctor<T>(name, my_lammy, clearance_schedule, mesh, block_ids)
+  {
+  }
+
+  bool hasFaceSide(const FaceInfo &, bool) const override { return true; }
 };
 
 TEST(MooseFunctorTest, testArgs)
@@ -96,11 +113,7 @@ TEST(MooseFunctorTest, testArgs)
   QGauss qrule(1, CONSTANT);
 
   auto elem_arg = ElemArg{elem.get(), false};
-  auto face = FaceArg(
-      {&fi, LimiterType::CentralDifference, true, false, INVALID_BLOCK_ID, INVALID_BLOCK_ID});
-  auto single_face =
-      SingleSidedFaceArg({&fi, LimiterType::CentralDifference, true, false, INVALID_BLOCK_ID});
-  auto elem_from_face = ElemFromFaceArg({elem.get(), &fi, false, INVALID_BLOCK_ID});
+  auto face = FaceArg({&fi, LimiterType::CentralDifference, true, false, nullptr});
   auto elem_qp = std::make_tuple(elem.get(), 0, &qrule);
   auto elem_side_qp = std::make_tuple(elem.get(), 0, 0, &qrule);
   auto elem_point = ElemPointArg({elem.get(), Point(0), false});
@@ -122,8 +135,6 @@ TEST(MooseFunctorTest, testArgs)
 
     test_dot(elem_arg);
     test_dot(face);
-    test_dot(single_face);
-    test_dot(elem_from_face);
     test_dot(elem_qp);
     test_dot(elem_side_qp);
     test_dot(elem_point);
@@ -143,8 +154,6 @@ TEST(MooseFunctorTest, testArgs)
 
     test_gradient(elem_arg);
     test_gradient(face);
-    test_gradient(single_face);
-    test_gradient(elem_from_face);
     test_gradient(elem_qp);
     test_gradient(elem_side_qp);
     test_gradient(elem_point);
@@ -161,28 +170,19 @@ TEST(MooseFunctorTest, testArgs)
   {
     ConstantFunctor<Real> cf(2);
     EXPECT_EQ(cf(elem_arg), 2);
-    EXPECT_EQ(cf(elem_from_face), 2);
     EXPECT_EQ(cf(face), 2);
-    EXPECT_EQ(cf(single_face), 2);
-    EXPECT_EQ(cf(elem_from_face), 2);
     EXPECT_EQ(cf(elem_qp), 2);
     EXPECT_EQ(cf(elem_side_qp), 2);
     EXPECT_EQ(cf(elem_point), 2);
 
     zero_gradient_test(cf, elem_arg);
-    zero_gradient_test(cf, elem_from_face);
     zero_gradient_test(cf, face);
-    zero_gradient_test(cf, single_face);
-    zero_gradient_test(cf, elem_from_face);
     zero_gradient_test(cf, elem_qp);
     zero_gradient_test(cf, elem_side_qp);
     zero_gradient_test(cf, elem_point);
 
     EXPECT_EQ(cf.dot(elem_arg), 0);
-    EXPECT_EQ(cf.dot(elem_from_face), 0);
     EXPECT_EQ(cf.dot(face), 0);
-    EXPECT_EQ(cf.dot(single_face), 0);
-    EXPECT_EQ(cf.dot(elem_from_face), 0);
     EXPECT_EQ(cf.dot(elem_qp), 0);
     EXPECT_EQ(cf.dot(elem_side_qp), 0);
     EXPECT_EQ(cf.dot(elem_point), 0);
@@ -228,10 +228,7 @@ TEST(MooseFunctorTest, testArgs)
     WithGradientTestFunctor<RealVectorValue> vec_test_func(*mesh);
     VectorComponentFunctor<Real> vec_comp(vec_test_func, 0);
     EXPECT_EQ(vec_comp(elem_arg), 0);
-    EXPECT_EQ(vec_comp(elem_from_face), 0);
     EXPECT_EQ(vec_comp(face), 0);
-    EXPECT_EQ(vec_comp(single_face), 0);
-    EXPECT_EQ(vec_comp(elem_from_face), 0);
     EXPECT_EQ(vec_comp(elem_qp), 0);
     EXPECT_EQ(vec_comp(elem_side_qp), 0);
     EXPECT_EQ(vec_comp(elem_point), 0);
@@ -242,13 +239,7 @@ TEST(MooseFunctorTest, testArgs)
       if (!mesh_fi.neighborPtr())
         continue;
 
-      auto vec_face_arg =
-          FaceArg({&mesh_fi,
-                   LimiterType::CentralDifference,
-                   true,
-                   false,
-                   mesh_fi.elem().subdomain_id(),
-                   mesh_fi.neighborPtr() ? mesh_fi.neighbor().subdomain_id() : INVALID_BLOCK_ID});
+      auto vec_face_arg = FaceArg({&mesh_fi, LimiterType::CentralDifference, true, false, nullptr});
       const auto vec_elem_arg = vec_face_arg.makeElem();
       const auto vec_neighbor_arg = vec_face_arg.makeNeighbor();
       zero_gradient_test(vec_comp, vec_elem_arg);
@@ -280,8 +271,6 @@ TEST(MooseFunctorTest, testArgs)
 
     test_null_error(elem_arg);
     test_null_error(face);
-    test_null_error(single_face);
-    test_null_error(elem_from_face);
     test_null_error(elem_qp);
     test_null_error(elem_side_qp);
     test_null_error(elem_point);
@@ -292,9 +281,8 @@ TEST(MooseFunctorTest, testArgs)
     // Test subdomain error
     {
       auto dummy_lammy = [](const auto &, const auto &) -> Real { return 2; };
-      PiecewiseByBlockLambdaFunctor<Real> errorful(
-          "errorful", dummy_lammy, {EXEC_ALWAYS}, *mesh, {});
-      PiecewiseByBlockLambdaFunctor<Real> errorfree(
+      BypassFaceError<Real> errorful("errorful", dummy_lammy, {EXEC_ALWAYS}, *mesh, {});
+      BypassFaceError<Real> errorfree(
           "errorfree", dummy_lammy, {EXEC_ALWAYS}, *mesh, mesh->meshSubdomains());
 
       auto test_sub_error = [&errorful](const auto & arg)
@@ -314,9 +302,9 @@ TEST(MooseFunctorTest, testArgs)
       };
 
       test_sub_error(elem_arg);
+      face.face_side = elem.get();
       test_sub_error(face);
-      test_sub_error(single_face);
-      test_sub_error(elem_from_face);
+      face.face_side = nullptr;
       test_sub_error(elem_qp);
       test_sub_error(elem_side_qp);
       test_sub_error(elem_point);
@@ -336,7 +324,7 @@ TEST(MooseFunctorTest, testArgs)
       }
 
       for (const auto & mesh_fi : all_fi)
-        EXPECT_TRUE(zero.isExtrapolatedBoundaryFace(mesh_fi).first == !(mesh_fi.neighborPtr()));
+        EXPECT_TRUE(zero.isExtrapolatedBoundaryFace(mesh_fi, nullptr) == !(mesh_fi.neighborPtr()));
     }
   }
 }

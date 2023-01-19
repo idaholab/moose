@@ -25,7 +25,7 @@ FVDirichletBC::FVDirichletBC(const InputParameters & parameters)
 {
 }
 
-Real
+ADReal
 FVDirichletBC::boundaryValue(const FaceInfo & /*fi*/) const
 {
   return _val;

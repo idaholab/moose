@@ -25,7 +25,6 @@ INSFVAdvectionKernel::validParams()
   // We currently do not have a need for this, boundary conditions tell us where to execute
   // advection kernels
   params.suppressParameter<bool>("force_boundary_execution");
-  params.suppressParameter<std::vector<BoundaryName>>("boundaries_to_force");
 
   return params;
 }
@@ -60,7 +59,6 @@ INSFVAdvectionKernel::INSFVAdvectionKernel(const InputParameters & params)
   };
 
   param_check("force_boundary_execution");
-  param_check("boundaries_to_force");
 }
 
 void
@@ -79,6 +77,11 @@ INSFVAdvectionKernel::skipForBoundary(const FaceInfo & fi) const
   // We're not on a boundary, so technically we're not skipping a boundary
   if (!onBoundary(fi))
     return false;
+
+  // Selected boundaries to force
+  for (const auto bnd_to_force : _boundaries_to_force)
+    if (fi.boundaryIDs().count(bnd_to_force))
+      return false;
 
   // If we have flux bcs then we do skip
   const auto & flux_pr = _var.getFluxBCs(fi);

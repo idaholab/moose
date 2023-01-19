@@ -1110,7 +1110,7 @@ public:
    * Cache \p elem and \p neighbor dof indices information for variables in all the local \p
    * FaceInfo objects to save computational expense
    */
-  void cacheVarIndicesByFace(const std::vector<const MooseVariableBase *> & moose_vars);
+  void cacheVarIndicesByFace(const std::vector<const MooseVariableFieldBase *> & moose_vars);
 
   /**
    * Compute the face coordinate value for all \p FaceInfo objects. 'Coordinate' here means a

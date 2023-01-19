@@ -40,8 +40,11 @@ FVFunctorConvectiveHeatFluxBC::FVFunctorConvectiveHeatFluxBC(const InputParamete
 ADReal
 FVFunctorConvectiveHeatFluxBC::computeQpResidual()
 {
-  const auto ssf = singleSidedFaceArg();
-  const auto flux = _htc(ssf) * (_T_bulk(ssf) - _T_solid(ssf));
+  // Allow the functors to pick their side evaluation since either T_bulk or T_solid is likely not
+  // defined on this boundary condition's side
+  const Moose::FaceArg face{
+      _face_info, Moose::FV::LimiterType::CentralDifference, true, false, nullptr};
+  const auto flux = _htc(face) * (_T_bulk(face) - _T_solid(face));
   if (_is_solid)
     return -flux;
   else

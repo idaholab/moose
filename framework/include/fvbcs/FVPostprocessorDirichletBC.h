@@ -18,7 +18,7 @@ public:
 
   static InputParameters validParams();
 
-  Real boundaryValue(const FaceInfo & fi) const override;
+  ADReal boundaryValue(const FaceInfo & fi) const override;
 
 private:
   /// The value for this BC

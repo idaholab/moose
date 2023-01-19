@@ -6,7 +6,7 @@
     requirement = "The system shall throw an error when the mass flux boundary (with velocity) is "
                   "defined on an internal face without explicitly specifying the direction of the "
                   "flow."
-    expect_err = "WCNSFVMassFluxBC can only be defined on an internal face if a direction parameter "
+    expect_err = "WCNSFVMassFluxBC can only be defined on an internal face if the 'direction' parameter "
                  "is supplied!"
     input = flux_bcs.i
     method = "!dbg"
@@ -26,7 +26,7 @@
     type = 'RunException'
     requirement = "The system shall throw an error when the momentum flux boundary is defined on an "
                   "internal face without explicitly specifying the direction of the flow."
-    expect_err = "WCNSFVMomentumFluxBC can only be defined on an internal face if a direction "
+    expect_err = "WCNSFVMomentumFluxBC can only be defined on an internal face if the 'direction' "
                  "parameter is supplied!"
     input = flux_bcs.i
     method = "!dbg"
@@ -48,7 +48,7 @@
     requirement = "The system shall throw an error when the energy flux boundary (with velocity) is "
                   "defined on an internal face without explicitly specifying the direction of the "
                   "flow."
-    expect_err = "WCNSFVEnergyFluxBC can only be defined on an internal face if a direction "
+    expect_err = "WCNSFVEnergyFluxBC can only be defined on an internal face if the 'direction' "
                  "parameter is supplied!"
     input = flux_bcs.i
     method = "!dbg"
@@ -71,7 +71,7 @@
     type = 'RunException'
     requirement = "The system shall throw an error when the passive scalar flux boundary is defined "
                   "on an internal face without explicitly specifying the direction of the flow."
-    expect_err = "WCNSFVScalarFluxBC can only be defined on an internal face if a direction "
+    expect_err = "WCNSFVScalarFluxBC can only be defined on an internal face if the 'direction' "
                  "parameter is supplied!"
     input = flux_bcs.i
     method = "!dbg"

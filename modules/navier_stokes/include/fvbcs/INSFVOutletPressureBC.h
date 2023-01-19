@@ -22,7 +22,7 @@ public:
   static InputParameters validParams();
   INSFVOutletPressureBC(const InputParameters & params);
 
-  Real boundaryValue(const FaceInfo & /* fi */) const override;
+  ADReal boundaryValue(const FaceInfo & /* fi */) const override;
 
 private:
   /// AD Functor that gives the distribution of pressure on the boundary

@@ -10,13 +10,10 @@
 #pragma once
 
 #include "MooseFunctor.h"
-#include "CellCenteredMapFunctor.h"
-#include "GreenGaussGradient.h"
-#include "MathFVUtils.h"
-#include "libmesh/utility.h"
-#include "libmesh/type_tensor.h"
-#include "libmesh/compare_types.h"
-#include "libmesh/threads.h"
+#include "MooseMesh.h"
+#include "MooseError.h"
+
+#include <set>
 
 /**
  * A functor whose evaluation relies on querying a map where the keys are face info ids
@@ -32,26 +29,18 @@ public:
   using typename Moose::FunctorBase<T>::GradientType;
   using typename Moose::FunctorBase<T>::DotType;
   using ElemArg = Moose::ElemArg;
-  using ElemFromFaceArg = Moose::ElemFromFaceArg;
   using FaceArg = Moose::FaceArg;
-  using SingleSidedFaceArg = Moose::SingleSidedFaceArg;
   using ElemQpArg = Moose::ElemQpArg;
   using ElemSideQpArg = Moose::ElemSideQpArg;
   using ElemPointArg = Moose::ElemPointArg;
 
-  FaceCenteredMapFunctor(const MooseMesh & mesh, const std::string & name)
-    : Moose::FunctorBase<T>(name), _mesh(mesh)
-  {
-  }
+  FaceCenteredMapFunctor(const MooseMesh & mesh, const std::string & name);
 
   FaceCenteredMapFunctor(const MooseMesh & mesh,
                          const std::set<SubdomainID> & sub_ids,
-                         const std::string & name)
-    : Moose::FunctorBase<T>(name),
-      _mesh(mesh),
-      _sub_ids(sub_ids == mesh.meshSubdomains() ? std::set<SubdomainID>() : sub_ids)
-  {
-  }
+                         const std::string & name);
+
+  bool hasBlocks(SubdomainID sub_id) const override;
 
 private:
   /// The mesh that this functor lives on
@@ -62,33 +51,54 @@ private:
   const std::set<SubdomainID> _sub_ids;
 
   ValueType evaluate(const ElemArg & elem_arg, unsigned int state) const override final;
-
   ValueType evaluate(const FaceArg & face, unsigned int state) const override final;
-
   ValueType evaluate(const FaceInfo * const fi) const;
-
-  ValueType evaluate(const ElemFromFaceArg &, unsigned int) const override
-  {
-    mooseError("not implemented");
-  }
-
-  ValueType evaluate(const ElemPointArg &, const unsigned int) const override
-  {
-    mooseError("not implemented");
-  }
-
-  ValueType evaluate(const SingleSidedFaceArg & ssf, unsigned int) const override
-  {
-    return (*this)(Moose::FV::makeCDFace(*ssf.fi));
-  }
-
-  ValueType evaluate(const ElemQpArg &, unsigned int) const override
-  {
-    mooseError("not implemented");
-  }
-
-  ValueType evaluate(const ElemSideQpArg &, unsigned int) const override
-  {
-    mooseError("not implemented");
-  }
+  ValueType evaluate(const ElemPointArg &, const unsigned int) const override;
+  ValueType evaluate(const ElemQpArg &, unsigned int) const override;
+  ValueType evaluate(const ElemSideQpArg &, unsigned int) const override;
 };
+
+template <typename T, typename Map>
+FaceCenteredMapFunctor<T, Map>::FaceCenteredMapFunctor(const MooseMesh & mesh,
+                                                       const std::string & name)
+  : Moose::FunctorBase<T>(name), _mesh(mesh)
+{
+}
+
+template <typename T, typename Map>
+FaceCenteredMapFunctor<T, Map>::FaceCenteredMapFunctor(const MooseMesh & mesh,
+                                                       const std::set<SubdomainID> & sub_ids,
+                                                       const std::string & name)
+  : Moose::FunctorBase<T>(name),
+    _mesh(mesh),
+    _sub_ids(sub_ids == mesh.meshSubdomains() ? std::set<SubdomainID>() : sub_ids)
+{
+}
+
+template <typename T, typename Map>
+bool
+FaceCenteredMapFunctor<T, Map>::hasBlocks(const SubdomainID sub_id) const
+{
+  return _sub_ids.empty() || _sub_ids.count(sub_id);
+}
+
+template <typename T, typename Map>
+typename FaceCenteredMapFunctor<T, Map>::ValueType
+FaceCenteredMapFunctor<T, Map>::evaluate(const ElemPointArg &, const unsigned int) const
+{
+  mooseError("not implemented");
+}
+
+template <typename T, typename Map>
+typename FaceCenteredMapFunctor<T, Map>::ValueType
+FaceCenteredMapFunctor<T, Map>::evaluate(const ElemQpArg &, unsigned int) const
+{
+  mooseError("not implemented");
+}
+
+template <typename T, typename Map>
+typename FaceCenteredMapFunctor<T, Map>::ValueType
+FaceCenteredMapFunctor<T, Map>::evaluate(const ElemSideQpArg &, unsigned int) const
+{
+  mooseError("not implemented");
+}

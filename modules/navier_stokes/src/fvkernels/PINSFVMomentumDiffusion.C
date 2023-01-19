@@ -50,8 +50,8 @@ PINSFVMomentumDiffusion::computeStrongResidual()
   const bool has_neighbor = (_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ||
                              _face_type == FaceInfo::VarFaceNeighbors::BOTH);
 
-  const auto elem_face = elemFromFace();
-  const auto neighbor_face = neighborFromFace();
+  const auto elem_face = elemArg();
+  const auto neighbor_face = neighborArg();
 
   // Compute the diffusion driven by the velocity gradient
   // Interpolate viscosity divided by porosity on the face
@@ -72,8 +72,7 @@ PINSFVMomentumDiffusion::computeStrongResidual()
   }
 
   // Compute face superficial velocity gradient
-  auto dudn =
-      _var.gradient(Moose::FV::makeCDFace(*_face_info, faceArgSubdomains())) * _face_info->normal();
+  auto dudn = _var.gradient(makeCDFace(*_face_info)) * _face_info->normal();
 
   if (has_elem)
   {
@@ -96,21 +95,23 @@ PINSFVMomentumDiffusion::computeStrongResidual()
   // Get the face porosity gradient separately
   const auto & grad_eps_face =
       (has_elem && has_neighbor)
-          ? MetaPhysicL::raw_value(_eps.gradient(Moose::FV::makeCDFace(*_face_info)))
+          ? MetaPhysicL::raw_value(_eps.gradient(makeCDFace(*_face_info)))
           : MetaPhysicL::raw_value(_eps.gradient(
                 makeElemArg(has_elem ? &_face_info->elem() : _face_info->neighborPtr())));
 
   // Interpolate to get the face value
   ADReal coeff_face;
-  const auto coeff_elem = mu_elem / eps_elem * _var(elem_face);
+  const auto coeff_one_side = has_elem ? mu_elem / eps_elem * _var(elem_face)
+                                       : mu_neighbor / eps_neighbor * _var(neighbor_face);
   if (onBoundary(*_face_info))
-    coeff_face = coeff_elem;
+    coeff_face = coeff_one_side;
   else
   {
+    mooseAssert(has_elem, "We should be defined on the element side if we're not on a boundary");
     const auto coeff_neighbor = mu_neighbor / eps_neighbor * _var(neighbor_face);
     interpolate(Moose::FV::InterpMethod::Average,
                 coeff_face,
-                coeff_elem,
+                coeff_one_side,
                 coeff_neighbor,
                 *_face_info,
                 true);
