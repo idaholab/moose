@@ -27,12 +27,6 @@
   using Material::_current_subdomain_id;                                                           \
   using Material::_current_side
 
-// forward declarations
-class Material;
-
-template <>
-InputParameters validParams<Material>();
-
 /**
  * Materials compute MaterialProperties.
  */
