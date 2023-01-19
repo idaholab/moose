@@ -22,7 +22,7 @@ public:
 
 private:
   /// Function used as a basis for the periodic function
-  const Function * _base_function;
+  const Function & _base_function;
 
   /// Period for repetition of the base function in time
   const Real _period_time;

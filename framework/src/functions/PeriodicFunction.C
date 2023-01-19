@@ -47,7 +47,7 @@ PeriodicFunction::validParams()
 PeriodicFunction::PeriodicFunction(const InputParameters & parameters)
   : Function(parameters),
     FunctionInterface(this),
-    _base_function(&getFunctionByName(getParam<FunctionName>("base_function"))),
+    _base_function(getFunctionByName(getParam<FunctionName>("base_function"))),
     _period_time(getParam<Real>("period_time")),
     _period_x(getParam<Real>("period_x")),
     _period_y(getParam<Real>("period_y")),
@@ -58,23 +58,23 @@ PeriodicFunction::PeriodicFunction(const InputParameters & parameters)
 Real
 PeriodicFunction::value(Real t, const Point & p) const
 {
-  Real t_base = fmod(t, _period_time);
+  Real t_base = std::fmod(t, _period_time);
   if (t_base < 0.0)
     t_base += _period_time;
 
-  Real x_base = fmod(p(0), _period_x);
+  Real x_base = std::fmod(p(0), _period_x);
   if (x_base < 0.0)
     x_base += _period_x;
 
-  Real y_base = fmod(p(1), _period_y);
+  Real y_base = std::fmod(p(1), _period_y);
   if (y_base < 0.0)
     y_base += _period_y;
 
-  Real z_base = fmod(p(2), _period_z);
+  Real z_base = std::fmod(p(2), _period_z);
   if (z_base < 0.0)
     z_base += _period_z;
 
   Point p_base(x_base, y_base, z_base);
 
-  return _base_function->value(t_base, p_base);
+  return _base_function.value(t_base, p_base);
 }
