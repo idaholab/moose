@@ -18,7 +18,9 @@ public:
   static InputParameters validParams();
   PeriodicFunction(const InputParameters & parameters);
 
+  using Function::value;
   virtual Real value(Real t, const Point & p) const override;
+  virtual ADReal value(const ADReal & t, const ADPoint & p) const override;
 
 private:
   /// Function used as a basis for the periodic function
@@ -35,4 +37,13 @@ private:
 
   /// Period for repetition of the base function in the z direction
   const Real _period_z;
+
+  /**
+   * Templated function where the actual computation of the value as a
+   * function of time and spatial coordinates is done.
+   * @param t The time
+   * @param p The point in space (x,y,z)
+   */
+  template <typename T, typename P>
+  T valueInternal(const T & t, const P & p) const;
 };

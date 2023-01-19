@@ -58,23 +58,36 @@ PeriodicFunction::PeriodicFunction(const InputParameters & parameters)
 Real
 PeriodicFunction::value(Real t, const Point & p) const
 {
-  Real t_base = std::fmod(t, _period_time);
+  return valueInternal(t, p);
+}
+
+ADReal
+PeriodicFunction::value(const ADReal & t, const ADPoint & p) const
+{
+  return valueInternal(t, p);
+}
+
+template <typename T, typename P>
+T
+PeriodicFunction::valueInternal(const T & t, const P & p) const
+{
+  T t_base = std::fmod(t, _period_time);
   if (t_base < 0.0)
     t_base += _period_time;
 
-  Real x_base = std::fmod(p(0), _period_x);
+  T x_base = std::fmod(p(0), _period_x);
   if (x_base < 0.0)
     x_base += _period_x;
 
-  Real y_base = std::fmod(p(1), _period_y);
+  T y_base = std::fmod(p(1), _period_y);
   if (y_base < 0.0)
     y_base += _period_y;
 
-  Real z_base = std::fmod(p(2), _period_z);
+  T z_base = std::fmod(p(2), _period_z);
   if (z_base < 0.0)
     z_base += _period_z;
 
-  Point p_base(x_base, y_base, z_base);
+  P p_base(x_base, y_base, z_base);
 
   return _base_function.value(t_base, p_base);
 }
