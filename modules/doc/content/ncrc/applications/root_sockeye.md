@@ -1,0 +1,19 @@
+## Sockeye
+
+!media application_logos/sockeye.png style=width:10%;align:top;
+
+- [Documentation](https://sockeye-docs.hpcondemand.inl.gov/latest/)
+- [Discussion Forum](https://sockeye-discourse.hpcondemand.inl.gov)
+- [Build Status](https://civet.inl.gov/repo/837/)
+- [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_sockeye_ondemand.md)
+- [Level 1 - HPC Binary Execution](ncrc/applications/hpc_sockeye.md)
+- [Level 2 - Local Binary Installation](ncrc/applications/conda_sockeye.md)
+- [Level 4 - Source Access](ncrc/applications/ncrc_sockeye_level4.md)
+
+!row!
+!col small=12 medium=8 large=8
+Sockeye is a heat pipe analysis application geared towards heat pipes of interest in heat-pipe-cooled microreactors. Sockeye provides various transient heat pipe modeling capabilities, including a 1D, two-phase flow model and a 2D effective thermal conductivity model based on heat conduction, which leverages analytic expressions of operational limits.
+
+!col small=8 medium=4 large=4
+!media application_logos/sockeye_description.png style=width:100%;
+!row-end!
