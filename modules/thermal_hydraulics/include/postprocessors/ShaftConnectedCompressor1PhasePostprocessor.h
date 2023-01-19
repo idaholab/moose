@@ -21,7 +21,9 @@ protected:
   enum class Quantity
   {
     PRESSURE_RATIO,
-    EFFICIENCY
+    EFFICIENCY,
+    REL_CORRECTED_FLOW,
+    REL_CORRECTED_SPEED
   };
   /// Quantity to get
   const Quantity _quantity;

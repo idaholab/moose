@@ -240,4 +240,30 @@ ShaftConnectedCompressor1Phase::addMooseObjects()
     getTHMProblem().addPostprocessor(
         class_name, Component::genName(name(), "pressure_ratio"), params);
   }
+  {
+    const std::string class_name = "ShaftConnectedCompressor1PhasePostprocessor";
+    InputParameters params = _factory.getValidParams(class_name);
+    params.set<MooseEnum>("quantity") = "efficiency";
+    params.set<UserObjectName>("compressor_uo") = getShaftConnectedUserObjectName();
+    params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
+    getTHMProblem().addPostprocessor(class_name, Component::genName(name(), "efficiency"), params);
+  }
+  {
+    const std::string class_name = "ShaftConnectedCompressor1PhasePostprocessor";
+    InputParameters params = _factory.getValidParams(class_name);
+    params.set<MooseEnum>("quantity") = "rel_corrected_flow";
+    params.set<UserObjectName>("compressor_uo") = getShaftConnectedUserObjectName();
+    params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
+    getTHMProblem().addPostprocessor(
+        class_name, Component::genName(name(), "rel_corrected_flow"), params);
+  }
+  {
+    const std::string class_name = "ShaftConnectedCompressor1PhasePostprocessor";
+    InputParameters params = _factory.getValidParams(class_name);
+    params.set<MooseEnum>("quantity") = "rel_corrected_speed";
+    params.set<UserObjectName>("compressor_uo") = getShaftConnectedUserObjectName();
+    params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
+    getTHMProblem().addPostprocessor(
+        class_name, Component::genName(name(), "rel_corrected_speed"), params);
+  }
 }
