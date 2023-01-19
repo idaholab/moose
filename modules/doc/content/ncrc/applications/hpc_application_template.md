@@ -21,9 +21,9 @@ At this point you should be able to run {{binary}}. For this example, {{Applicat
 
 ## Create a Test Input File
 
-To demonstrate the use of the binary and to verify that it is operating correctly, create a
+To demonstrate the use of {{ApplicationName}} and to verify that it is operating correctly, create a
 test input file. For example, the following input file models steady-state diffusion and
-works with any MOOSE-based application.
+works with any MOOSE-based application:
 
 !listing moose/test/tests/kernels/simple_diffusion/simple_diffusion.i
 
