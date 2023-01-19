@@ -20,7 +20,7 @@ card command are listed in [card-settings].
                caption=Example use of the 'card' command.
 !card level_set/vortex_out.mp4 title=Vortex Benchmark style=width:50%;
 The level set equation is commonly used to for interface tracking, especially when the interface
-velocity is known. MOOSE contains a level set module, for more information see [level_set/index.md].
+velocity is known.
 !devel-end!
 
 !devel settings module=MooseDocs.extensions.gallery

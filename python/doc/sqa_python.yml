@@ -1,0 +1,7 @@
+directories: !include ${MOOSE_DIR}/python/doc/sqa_directories.yml
+specs:
+    - tests
+dependencies:
+    - framework
+repo: moose
+reports: !include ${MOOSE_DIR}/python/doc/sqa_reports.yml

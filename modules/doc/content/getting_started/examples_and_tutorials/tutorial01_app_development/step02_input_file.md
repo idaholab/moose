@@ -70,7 +70,7 @@ This will open the Peacock window and display the mesh used for the [simple diff
 Peacock is a python application. As such, during the initial execution binary files are cached, which often takes a few minutes. Subsequent executions of Peacock should be quicker.
 
 !alert note title=Bash alias for Peacock
-The command-line syntax for running Peacock can be simplified by creating a bash alias for it. Be sure to visit the [application_usage/peacock.md] page to learn how to do this.
+The command-line syntax for running Peacock can be simplified by creating a bash alias for it. Be sure to visit the [python/peacock.md] page to learn how to do this.
 
 ## Demonstration id=demo
 

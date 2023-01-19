@@ -1,6 +1,6 @@
 [Tests]
   issues = '#18137'
-  design = subsite/index.md
+  design = MooseDocs/index.md
 
   [build]
     type = RunCommand

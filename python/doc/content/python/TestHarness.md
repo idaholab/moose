@@ -4,7 +4,7 @@ The TestHarness is the Python code behind the `run_tests` script in MOOSE and ev
 application.  It is responsible for finding tests and running them.  Here we describe how to use
 the `run_tests` script and how to create your own tests.
 
-The ideas behind testing are described over the in the [MOOSE Test System](test_system.md)
+The ideas behind testing are described over the in the [MOOSE Test System](test_system.md optional=True)
 documentation.
 
 ## run_tests
@@ -17,8 +17,8 @@ files.
 
 ## Basic Usage
 
-To run the tests for any application, make sure the executable is built (generally by running `make`
-see the [Build System](build_system.md)) and then do:
+To run the tests for any application, make sure the executable is built (generally by running `make`)
+and then do:
 
 ```bash
 ./run_tests -j 8

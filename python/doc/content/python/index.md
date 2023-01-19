@@ -18,6 +18,7 @@ with MOOSE and [python/source/index.md] links to the source code documentation.
 | [moosesqa/index.md] | Tools for managing SQA documentation. |
 | [ReporterReader.md] | Tool for reading [JSON](JSONOutput.md) output of [Reporter](Reporters/index.md) data |
 | [module_hash.md] | Tool for generating a hash suffix for our contribution modules. |
+| [MooseDocs/index.md] | Tool for creating documentation. |
 
 ## Setup
 

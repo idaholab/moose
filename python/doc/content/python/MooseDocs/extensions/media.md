@@ -24,7 +24,7 @@ The "style" setting may be used, as in the example below, to control the placeme
 image.
 
 !devel! example id=example-media caption=Example of the media command with an image.
-!media media/inl_blue.png style=width:25%;float:right;margin-left:30px;
+!media large_media/framework/inl_blue.png style=width:25%;float:right;margin-left:30px;
 
 INL is part of the U.S. Department of Energy's complex of national laboratories. The laboratory
 performs work in each of the strategic goal areas of DOE: energy, national security, science and
@@ -70,7 +70,7 @@ possible to create numbered images that may be referenced, as shown in [example-
 The "id" and "caption" settings are available for both images and videos.
 
 !devel! example id=example-image-float caption=Example image with caption and numbered prefix.
-!media media/inl_blue.png
+!media large_media/framework/inl_blue.png
        id=inl-logo
        caption=The Idaho National Laboratory logo.
        style=width:50%;padding:20px;
