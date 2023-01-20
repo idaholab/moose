@@ -32,7 +32,7 @@ administrator, and use their recommended compiler stack. It will need to constra
 !alert tip title=Conda on HPC?
 It is possible to use our Conda packages within any [!ac](HPC) environment. However you will be
 doing yourself a disservice. [!ac](HPC) administrators spend lots of time and money on
-optimizations, while Conda trades optimizations for the ability to work on most all machines.
+optimizations, while Conda trades optimizations for the ability to work on most machines.
 
 ## Clone {{ApplicationName}} id=clone
 
@@ -41,8 +41,8 @@ Instructions for obtaining a proper clone of {{ApplicationName}} can be found at
 
 ## Support Libraries
 
-Most MOOSE-based applications require additional support libraries available in form of submodules.
-Obtaining these submodules is a common step everyone must follow:
+Most MOOSE-based applications require additional support libraries available in the form of
+submodules. Obtaining these submodules is a common step everyone must follow:
 
 ```bash
 cd ~/projects/{{binary}}
@@ -79,8 +79,8 @@ Conda packages or build the requirements from source.
 ## Build {{ApplicationName}} id=build
 
 Building {{ApplicationName}} starts with entering the directory, bringing in any updates from our
-upstream remote and finally running `make`. Before we begin, I want you to burn the next two
-warnings into your brain:
+upstream remote and finally running `make`. Before we begin, +burn the next two warnings into your
+brain+:
 
 !alert warning title=You performed a submodule update?
 `Then you should perform a Conda update` (if you are using Conda).
@@ -93,7 +93,7 @@ MOOSE repository. So any updates to MOOSE (the `{{binary}}/moose` submodule) req
 top of any Conda updates, or rebuilding PETSc and libMesh.
 
 If this is your first time following these instructions there should be no updates (you have a brand
-new fork/clone/conda install). Still, we will perform an update to walk you through the process.
+new fork/clone/conda install). We will perform an update to familiarize yourself with the process:
 
 ```bash
 cd ~/projects/{{binary}}
@@ -102,17 +102,24 @@ git branch   # take note of the results
 ```
 
 `git fetch upstream` updates your local references with that of the remote's. It does not 'modify'
-your files. It will return nothing if there was nothing new to fetch on the `upstream` remote.
+any source files. It will return nothing if there was nothing new to fetch on the `upstream` remote.
 
 `git branch` reports what branch you have checked out. It is impossible to write a document for
 every application's branch naming schemes. So whatever was reported with `git branch`, use that for
 the next command.
 
+Next, we will perform a `rebase`. This will make changes to your repository, if there are changes to
+be made:
+
 ```bash
 git rebase -i upstream/branch   # replace 'branch' with the results from `git branch`
 ```
 
-The {{binary}} repository is now up to date, and knows how to update it's submodules.
+If there were errors during the rebase process, that means you have changes which either need
+committing, or conflicts which need addressing.
+
+The {{binary}} repository is now up to date, and understands how to update it's submodules. Do that
+now:
 
 ```bash
 git submodule update --init
@@ -148,6 +155,6 @@ make -j 6
 ```
 
 `make clobberall` deletes the stale oject/library files left behind from a previous build. While not
-always necessary, please get into the habit of perform this operation before running `make`.
+always necessary, please get into the habit of performing this operation before running `make`.
 
 !include ncrc/applications/ncrc_runtest_{{ApplicationLower}}.md
