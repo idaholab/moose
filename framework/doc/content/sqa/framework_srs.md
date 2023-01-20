@@ -10,12 +10,12 @@
 
 !template! item key=system-context
 !! system-context-begin
-[!ac](MOOSE) is a command-line driven application. This is typical for a high-performance software
+[!ac](MOOSE) is a command-line driven application. This is typical for high-performance software
 that is designed to run across several nodes of a cluster system. As such, all of the usage
 of the software is through any standard terminal program generally available on all supported
 operating systems. Similarly, for the purpose of interacting through the software, there is only
 a single user, "the user", which interacts with the software through the command-line. MOOSE does
-not maintain any back-end database or interact with any system daemons. It is a executable,
+not maintain any back-end database or interact with any system daemons. It is an executable,
 which may be launched from the command line and writes out various result files as it runs.
 
 !media media/sqa/usage_diagram_uml.svg
@@ -120,7 +120,7 @@ which may be disabled.
 !template-end!
 
 
-!template item key=reliability
+!template! item key=reliability
 !! reliability-begin
 The regression test suite will cover at least 80% of all lines of code at all times. Known
 regressions will be recorded and tracked (see [#maintainability]) to an independent and
@@ -128,7 +128,7 @@ satisfactory resolution.
 !! reliability-finish
 !template-end!
 
-!template item key=information-management
+!template! item key=information-management
 !! information-management-begin
 The core framework in its entirety will be made publicly available on an appropriate repository
 hosting site. Day-to-day backups and security services will be provided by the hosting service. More
@@ -137,7 +137,7 @@ on the following page: [sqa/github_backup.md]
 !! information-management-finish
 !template-end!
 
-!template item key=verification
+!template! item key=verification
 !! verification-begin
 The regression test suite will employ several verification tests using comparison against known
 analytical solutions, the method of manufactured solutions, and convergence rate analysis.
@@ -184,7 +184,7 @@ Not Applicable
 
 !template! item key=system-security
 !! system-security-begin
-[!ac](MOOSE) based applications have no requirements or special needs related to system-security. The framework
+[!ac](MOOSE) based applications have no requirements or special needs related to system security. The framework
 is designed to run completely in user-space with no elevated privileges required nor recommended.
 !! system-security-finish
 !template-end!
