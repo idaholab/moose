@@ -44,7 +44,7 @@ behaviors of each user-defined object.
 - +Developers+: A Scientist or Engineer that utilizes the framework to build his or her own
   application. This user will typically have a background in modeling and simulation techniques
   and/or numerical analysis but may only have a limited skill-set when it comes to object-oriented
-  coding and the C++ language. This is our primary focus group.  In many cases these developers will
+  coding and the C++ language. This is our primary focus group. In many cases these developers will
   be encouraged to give their code back to the framework maintainers.
 
 - +Analysts+: These are users that will run the code and perform various analysis on the simulations
@@ -76,13 +76,7 @@ behaviors of each user-defined object.
 !template! item key=minimum-requirements
 !! minimum-requirements-begin
 
-- A [!ac](POSIX) compliant Unix including the two most recent versions of MacOS and most current
-  versions of Linux.
-- 4 GB of RAM for optimized compilation (8 GB for debug compilation), 2 GB per core execution
-- 100 GB disk space
-- C++17 compatible compiler (GCC, Clang)
-- Python 3.7+
-- Git
+!include sqa/minimum_requirements.md start=### Minimum System Requirements include-start=False
 
 !! minimum-requirements-finish
 !template-end!
