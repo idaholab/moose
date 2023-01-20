@@ -5,7 +5,7 @@ MOOSE and MOOSE-based applications are designed to operate as a library of funct
 each library may be tailored for solving a certain set of equations, the ability to create arbitrary
 simulations exists. This flexibility exists by design within the framework, modules, and applications.
 With respect to performing failure analysis, the flexibility is detrimental since there lacks
-a will defined problem to asses. To minimize the possibility of failure for a simulation various
+a well-defined problem to assess. To minimize the possibility of failure for a simulation, various
 automated methods exist for developers. This document discusses these features and includes a
 list of requirements associated with software failure analysis.
 !template-end!
