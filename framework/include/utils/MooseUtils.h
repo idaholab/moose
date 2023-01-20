@@ -129,7 +129,14 @@ std::vector<std::string> rsplit(const std::string & str,
  * Python like join function for strings.
  */
 template <typename T>
-std::string join(const T & strings, const std::string & delimiter);
+std::string
+join(const T & strings, const std::string & delimiter)
+{
+  std::ostringstream oss;
+  std::copy(
+      strings.begin(), strings.end(), infix_ostream_iterator<std::string>(oss, delimiter.c_str()));
+  return oss.str();
+}
 
 /**
  * Check the file size.

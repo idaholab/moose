@@ -1073,24 +1073,6 @@ rsplit(const std::string & str, const std::string & delimiter, std::size_t max_c
   return output;
 }
 
-template <typename T>
-std::string
-join(const T & strings, const std::string & delimiter)
-{
-  std::ostringstream oss;
-  std::copy(
-      strings.begin(), strings.end(), infix_ostream_iterator<std::string>(oss, delimiter.c_str()));
-  return oss.str();
-}
-template std::string join<std::vector<std::string>>(const std::vector<std::string> &,
-                                                    const std::string &);
-template std::string join<std::set<std::string>>(const std::set<std::string> &,
-                                                 const std::string &);
-template std::string join<std::vector<MooseEnumItem>>(const std::vector<MooseEnumItem> &,
-                                                      const std::string &);
-template std::string join<std::set<MooseEnumItem>>(const std::set<MooseEnumItem> &,
-                                                   const std::string &);
-
 void
 createSymlink(const std::string & target, const std::string & link)
 {

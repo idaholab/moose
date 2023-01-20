@@ -203,6 +203,18 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     mooseError("Ghosting patch size parameter has to be set in the mesh block "
                "only when 'iteration' patch update strategy is used.");
 
+  if (isParamValid("coord_block"))
+  {
+    if (isParamValid("block"))
+      paramWarning("block",
+                   "You set both 'Mesh/block' and 'Mesh/coord_block'. The value of "
+                   "'Mesh/coord_block' will be used.");
+
+    _provided_coord_blocks = getParam<std::vector<SubdomainName>>("coord_block");
+  }
+  else if (isParamValid("block"))
+    _provided_coord_blocks = getParam<std::vector<SubdomainName>>("block");
+
   determineUseDistributedMesh();
 }
 
@@ -235,7 +247,8 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _need_ghost_ghosted_boundaries(other_mesh._need_ghost_ghosted_boundaries),
     _coord_sys(other_mesh._coord_sys),
     _rz_coord_axis(other_mesh._rz_coord_axis),
-    _coord_system_set(other_mesh._coord_system_set)
+    _coord_system_set(other_mesh._coord_system_set),
+    _provided_coord_blocks(other_mesh._provided_coord_blocks)
 {
   // Note: this calls BoundaryInfo::operator= without changing the
   // ownership semantics of either Mesh's BoundaryInfo object.
@@ -364,8 +377,7 @@ MooseMesh::prepare(bool)
   }
 
   if (!_coord_system_set)
-    setCoordSystem(getParam<std::vector<SubdomainName>>("block"),
-                   getParam<MultiMooseEnum>("coord_type"));
+    setCoordSystem(_provided_coord_blocks, getParam<MultiMooseEnum>("coord_type"));
   else if (_pars.isParamSetByUser("coord_type"))
     mooseError(
         "Trying to set coordinate system type information based on the user input file, but "
@@ -3523,72 +3535,62 @@ MooseMesh::setCoordSystem(const std::vector<SubdomainName> & blocks,
                           const MultiMooseEnum & coord_sys)
 {
   TIME_SECTION("setCoordSystem", 5, "Setting Coordinate System");
-  if (_pars.isParamSetByUser("block") && getParam<std::vector<SubdomainName>>("block") != blocks)
-    mooseError("Supplied blocks in the 'setCoordSystem' method do not match the value of the "
-               "'Mesh/block' parameter. Did you provide different parameter values for 'block' to "
-               "'Mesh' and 'Problem'?");
-  if (_pars.isParamSetByUser("coord_type") && getParam<MultiMooseEnum>("coord_type") != coord_sys)
-    mooseError("Supplied coordinate systems in the 'setCoordSystem' method do not match the  value "
-               "of the  'Mesh/coord_type' parameter. Did you provide different parameter values "
-               "for 'coord_type' to 'Mesh' and 'Problem'?");
-
-  const std::set<SubdomainID> & subdomains = meshSubdomains();
-  if (blocks.size() == 0)
+  if (!_provided_coord_blocks.empty() && (_provided_coord_blocks != blocks))
   {
-    // no blocks specified -> assume the whole domain
-    Moose::CoordinateSystemType coord_type = Moose::COORD_XYZ; // all is going to be XYZ by default
-    if (coord_sys.size() == 0)
-      ; // relax, do nothing
-    else if (coord_sys.size() == 1)
-      coord_type = Moose::stringToEnum<Moose::CoordinateSystemType>(
-          coord_sys[0]); // one system specified, the whole domain is going to have that system
-    else
-      mooseError("Multiple coordinate systems specified, but no blocks given.");
+    const std::string param_name = isParamValid("coord_block") ? "coord_block" : "block";
+    mooseWarning("Supplied blocks in the 'setCoordSystem' method do not match the value of the "
+                 "'Mesh/",
+                 param_name,
+                 "' parameter. Did you provide different parameter values for 'Mesh/",
+                 param_name,
+                 "' and 'Problem/block'?. We will honor the parameter value from 'Mesh/",
+                 param_name,
+                 "'");
+    mooseAssert(_coord_system_set,
+                "If we are arriving here due to a bad specification in the Problem block, then we "
+                "should have already set our coordinate system subdomains from the Mesh block");
+    return;
+  }
+  if (_pars.isParamSetByUser("coord_type") && getParam<MultiMooseEnum>("coord_type") != coord_sys)
+    mooseError("Supplied coordinate systems in the 'setCoordSystem' method do not match the value "
+               "of the 'Mesh/coord_type' parameter. Did you provide different parameter values for "
+               "'coord_type' to 'Mesh' and 'Problem'?");
 
-    for (const auto & sbd : subdomains)
-      _coord_sys[sbd] = coord_type;
+  auto subdomains = meshSubdomains();
+  // It's possible that a user has called this API before the mesh is prepared and consequently we
+  // don't yet have the subdomains in meshSubdomains()
+  for (const auto & sub_name : blocks)
+  {
+    const auto sub_id = getSubdomainID(sub_name);
+    subdomains.insert(sub_id);
+  }
+
+  if (coord_sys.size() <= 1)
+  {
+    // We will specify the same coordinate system for all blocks
+    const auto coord_type = coord_sys.size() == 0
+                                ? Moose::COORD_XYZ
+                                : Moose::stringToEnum<Moose::CoordinateSystemType>(coord_sys[0]);
+    for (const auto sid : subdomains)
+      _coord_sys[sid] = coord_type;
   }
   else
   {
-    // user specified 'blocks' but not coordinate systems
-    if (coord_sys.size() == 0)
+    if (blocks.size() != coord_sys.size())
+      mooseError("Number of blocks and coordinate systems does not match.");
+
+    for (const auto i : index_range(blocks))
     {
-      // set all blocks to cartesian coordinate system
-      for (const auto & block : blocks)
-      {
-        SubdomainID sid = getSubdomainID(block);
-        _coord_sys[sid] = Moose::COORD_XYZ;
-      }
-    }
-    else if (coord_sys.size() == 1)
-    {
-      // set all blocks to the coordinate system specified by `coord_sys[0]`
+      SubdomainID sid = getSubdomainID(blocks[i]);
       Moose::CoordinateSystemType coord_type =
-          Moose::stringToEnum<Moose::CoordinateSystemType>(coord_sys[0]);
-      for (const auto & block : blocks)
-      {
-        SubdomainID sid = getSubdomainID(block);
-        _coord_sys[sid] = coord_type;
-      }
+          Moose::stringToEnum<Moose::CoordinateSystemType>(coord_sys[i]);
+      _coord_sys[sid] = coord_type;
     }
-    else
-    {
-      if (blocks.size() != coord_sys.size())
-        mooseError("Number of blocks and coordinate systems does not match.");
 
-      for (unsigned int i = 0; i < blocks.size(); i++)
-      {
-        SubdomainID sid = getSubdomainID(blocks[i]);
-        Moose::CoordinateSystemType coord_type =
-            Moose::stringToEnum<Moose::CoordinateSystemType>(coord_sys[i]);
-        _coord_sys[sid] = coord_type;
-      }
-
-      for (const auto & sid : subdomains)
-        if (_coord_sys.find(sid) == _coord_sys.end())
-          mooseError("Subdomain '" + Moose::stringify(sid) +
-                     "' does not have a coordinate system specified.");
-    }
+    for (const auto & sid : subdomains)
+      if (_coord_sys.find(sid) == _coord_sys.end())
+        mooseError("Subdomain '" + Moose::stringify(sid) +
+                   "' does not have a coordinate system specified.");
   }
 
   _coord_system_set = true;

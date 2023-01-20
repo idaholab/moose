@@ -580,12 +580,12 @@ public:
   /**
    * Getter for the ghosting_patch_size parameter.
    */
-  unsigned int getGhostingPatchSize() const { return _ghosting_patch_size; };
+  unsigned int getGhostingPatchSize() const { return _ghosting_patch_size; }
 
   /**
    * Getter for the maximum leaf size parameter.
    */
-  unsigned int getMaxLeafSize() const { return _max_leaf_size; };
+  unsigned int getMaxLeafSize() const { return _max_leaf_size; }
 
   /**
    * Set the patch size update strategy
@@ -1580,6 +1580,9 @@ private:
 
   /// Whether the coordinate system has been set
   bool _coord_system_set;
+
+  /// Set for holding user-provided coordinate system type block names
+  std::vector<SubdomainName> _provided_coord_blocks;
 
   template <typename T>
   struct MeshType;
