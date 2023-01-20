@@ -29,10 +29,3 @@ SolutionInvalidityRegistry::registerInvalidity(const std::string & object_name,
 }
 
 }
-
-// std::ostream &
-// operator<<(std::ostream & os, const moose::internal::SolutionInvalidityKey & key)
-// {
-//   os << key._name << ": " << key._message;
-//   return os;
-// }

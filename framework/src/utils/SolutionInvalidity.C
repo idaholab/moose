@@ -133,7 +133,6 @@ SolutionInvalidity::sync()
   };
 
   TIMPI::push_parallel_vector_data(comm(), data_to_send, receive_data);
-  //  TIMPI::push_parallel_packed_range(comm(), data_to_send, (void *)nullptr, receive_data);
 }
 
 void

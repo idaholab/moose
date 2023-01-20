@@ -160,7 +160,7 @@ private:
    * thread will be registering sections and only
    * the main thread will be running PerfGraph routines
    *
-   * @return the PerfGraphPerfGraphSectionInfo associated with the section_id
+   * @return the PerfGraphSectionInfo associated with the section_id
    */
   const PerfGraphSectionInfo & readSectionInfo(PerfID section_id) const
   {
