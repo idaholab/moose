@@ -1,0 +1,31 @@
+## Running Tests
+
+With {{ApplicationName}} built, we can now run tests, to verify a working binary (and environment).
+
+- +Personal Machine+:
+
+  Be sure to have your `moose` environment loaded:
+
+  ```bash
+  mamba activate moose
+  ```
+
+- +[!ac](INL) [!ac](HPC) Sawtooth or Lemhi+ (required each time you log in):
+
+  Be sure to have the following modules loaded:
+
+  ```bash
+  module load use.moose moose-dev
+  ```
+
+You're all set to run tests:
+
+```bash
+cd ~/projects/{{binary}}
+./run_tests.py -j 6
+```
+
+This operation can take some time to complete. There are more ways to test {{ApplicationName}} than
+the above example. Vist our [TestHarness](python/TestHarness.md) page to learn more about this
+system, available influential environment variables, modifying how the output is displayed, and
+more.

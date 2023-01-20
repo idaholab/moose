@@ -19,7 +19,7 @@ we just want to make you aware of this option.
 
 !alert note
 Pre-built binaries are only available after access has been requested for the relevant applications through the
-[NCRC](ncrc/ncrc_ondemand.md).
+[NCRC](help/inl/index.md).
 
 ## Option 2: Modules + source-based installation (medium, for developers)
 
@@ -36,7 +36,7 @@ install again. We take every achievable step to avoid this, but it is at times u
 
 MOOSE may be classically obtained from its [GitHub repository](https://github.com/idaholab/moose).
 Many open-source MOOSE applications may also be obtained from GitHub, while others will require
-officially requesting source code access through the [NCRC](ncrc/ncrc_ondemand.md).
+officially requesting source code access through the [NCRC](help/inl/index.md).
 
 MOOSE and the application you want should be installed on the scratch storage space. This file system
 is much faster than the file system that hosts your home directory. For example to download MOOSE:

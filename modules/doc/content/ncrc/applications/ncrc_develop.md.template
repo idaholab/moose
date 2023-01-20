@@ -1,0 +1,153 @@
+# {{ApplicationName}} Development
+
+If you have already built {{ApplicationName}}, click on
+[Build {{ApplicationName}}](ncrc_develop_{{ApplicationLower}}.md#build) again, (which will run you
+through an update process when performed multiple times).
+
+Proper development of {{ApplicationName}} requires a compiler, additional support libraries, and
+source code. The following instructions aim at preparing your machine or environment for such
+development.
+
+If you encounter any errors during any of these steps, you need to stop, and figure out a solution
+before continuing. Please see our [Troubleshooting](help/troubleshooting.md) guide, which also
+contains information on how to reach us.
+
+## Compiler Stack id=compiler
+
+If you plan on using your personal machine we recommend using our Conda installation method. If
+you are instead operating on one of our [!ac](INL) [!ac](HPC) clusters, you need only load a couple
+of modules.
+
+- +Personal Machine+: [Conda Installation](installation/install_miniconda.md)
+- +[!ac](INL) [!ac](HPC) Sawtooth or Lemhi+ (required each time you log in):
+
+  ```bash
+  module load use.moose moose-dev
+  ```
+
+For those operating on other [!ac](HPC) clusters, you'll want to get in touch with that system's
+administrator, and use their recommended compiler stack. It will need to constrain to our
+[minimum requirements](sqa/minimum_requirements.md).
+
+!alert tip title=Conda on HPC?
+It is possible to use our Conda packages within any [!ac](HPC) environment. However you will be
+doing yourself a disservice. [!ac](HPC) administrators spend lots of time and money on
+optimizations, while Conda trades optimizations for the ability to work on most all machines.
+
+## Clone {{ApplicationName}} id=clone
+
+Instructions for obtaining a proper clone of {{ApplicationName}} can be found at
+[NCRC/{{ApplicationName}}](ncrc/applications/ncrc_level4_{{ApplicationLower}}.md).
+
+## Support Libraries
+
+Most MOOSE-based applications require additional support libraries available in form of submodules.
+Obtaining these submodules is a common step everyone must follow:
+
+```bash
+cd ~/projects/{{binary}}
+git submodule update --init
+```
+
+Depending on your preferred environment (Personal Machine or [!ac](HPC)) you will need to install
+Conda packages or build the requirements from source.
+
+- +Personal Machine (Conda)+:
+
+  ```bash
+  mamba create -n moose moose-tools moose-libmesh
+  ```
+
+- +[!ac](INL) [!ac](HPC) Sawtooth or Lemhi+:
+
+  It will be necessary to build PETSc and libMesh using the supplied build scripts in
+  `moose/scripts`. The time it takes to build both PETSc and libMesh can be hours. You may (should)
+  have already loaded the right modules. We list it here, again, for completeness.
+
+  ```bash
+  module load use.moose moose-dev
+  export MOOSE_JOBS=6 METHODS=opt
+  cd ~/projects/{{binary}}/moose
+  scripts/update_and_rebuild_petsc.sh
+  scripts/update_and_rebuild_libmesh.sh
+  ```
+
+  !alert tip title=MOOSE_JOBS? METHODS?
+  Go to [MOOSE Build System](application_development/build_system.md) for more information on
+  available methods. MOOSE_JOBS controls how many cores to use during the use of our scripts.
+
+## Build {{ApplicationName}} id=build
+
+Building {{ApplicationName}} starts with entering the directory, bringing in any updates from our
+upstream remote and finally running `make`. Before we begin, I want you to burn the next two
+warnings into your brain:
+
+!alert warning title=You performed a submodule update?
+`Then you should perform a Conda update` (if you are using Conda).
+
+!alert warning title=You updated Conda?
+`Then you should perform a submodule update`.
+
+The symmetry importance comes from our Conda packages being version controlled by and within the
+MOOSE repository. So any updates to MOOSE (the `{{binary}}/moose` submodule) requires you to stay on
+top of any Conda updates, or rebuilding PETSc and libMesh.
+
+If this is your first time following these instructions there should be no updates (you have a brand
+new fork/clone/conda install). Still, we will perform an update to walk you through the process.
+
+```bash
+cd ~/projects/{{binary}}
+git fetch upstream
+git branch   # take note of the results
+```
+
+`git fetch upstream` updates your local references with that of the remote's. It does not 'modify'
+your files. It will return nothing if there was nothing new to fetch on the `upstream` remote.
+
+`git branch` reports what branch you have checked out. It is impossible to write a document for
+every application's branch naming schemes. So whatever was reported with `git branch`, use that for
+the next command.
+
+```bash
+git rebase -i upstream/branch   # replace 'branch' with the results from `git branch`
+```
+
+The {{binary}} repository is now up to date, and knows how to update it's submodules.
+
+```bash
+git submodule update --init
+```
+
+If you whitness any updates to `{{binary}}/moose`, now is the time to apply those two earlier
+warnings about also needing to update your Conda packages or rebuilding PETSc and libMesh:
+
+- +Personal Machine (Conda)+:
+
+  ```bash
+  mamba activate moose
+  mamba update --all
+  ```
+
+- +[!ac](INL) [!ac](HPC) Sawtooth or Lemhi+:
+
+  ```bash
+  module load use.moose moose-dev    # a reminder to have these loaded
+  export MOOSE_JOBS=6 METHODS=opt    # a reminder to set these
+  cd ~/projects/{{binary}}/moose
+  scripts/update_and_rebuild_petsc.sh
+  scripts/update_and_rebuild_libmesh.sh
+  ```
+
+With everything up to date, we can now clean out an old build of {{ApplicationName}}, and begin
+anew:
+
+```bash
+cd ~/projects/{{binary}}
+make clobberall
+make -j 6
+```
+
+`make clobberall` deletes the stale oject/library files left behind from a previous build. While not
+always necessary, please get into the habit of perform this operation before running `make`.
+
+!include ncrc/applications/ncrc_runtest_{{ApplicationLower}}.md
