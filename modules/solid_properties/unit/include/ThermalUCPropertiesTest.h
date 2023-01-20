@@ -6,10 +6,7 @@
 class ThermalUCPropertiesTest : public MooseObjectUnitTest
 {
 public:
-  ThermalUCPropertiesTest() : MooseObjectUnitTest("SolidPropertiesApp")
-  {
-    buildObjects();
-  }
+  ThermalUCPropertiesTest() : MooseObjectUnitTest("SolidPropertiesApp") { buildObjects(); }
 
 protected:
   void buildObjects()
