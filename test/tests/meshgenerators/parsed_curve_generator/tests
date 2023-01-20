@@ -29,7 +29,7 @@
     type = 'Exodiff'
     input = 'parsed_curve_closed.i'
     exodiff = 'parsed_curve_closed_forced_in.e'
-    cli_args = 'Mesh/pcg/critical_t_series="0 5"
+    cli_args = 'Mesh/pcg/section_bounding_t_values="0 5"
                 Mesh/pcg/nums_segments=10
                 --mesh-only parsed_curve_closed_forced_in.e'
     requirement ='The system shall generate a closed loop curve mesh with starting and ending points separated.'
@@ -39,7 +39,7 @@
     type = 'Exodiff'
     input = 'parsed_curve_closed.i'
     exodiff = 'parsed_curve_closed_forced_ms_in.e'
-    cli_args = 'Mesh/pcg/critical_t_series="0 5"
+    cli_args = 'Mesh/pcg/section_bounding_t_values="0 5"
                 Mesh/pcg/nums_segments=10
                 Mesh/pcg/forced_closing_num_segments=5
                 --mesh-only parsed_curve_closed_forced_ms_in.e'
@@ -65,7 +65,7 @@
     type = 'RunException'
     input = 'parsed_curve_3d.i'
     cli_args = 'Mesh/pcg/z_formula=0
-                Mesh/pcg/critical_t_series="0 6.2"
+                Mesh/pcg/section_bounding_t_values="0 6.2"
                 --mesh-only err.e'
     expect_err = 'Maximum oversampling points number has been exceeded.'
     requirement = 'The system shall throw an error if the oversampling algorithm exceeds its designated maximum sampling number.'
@@ -73,10 +73,10 @@
   [err_repeated_t_series]
     type = 'RunException'
     input = 'parsed_curve_closed.i'
-    cli_args = 'Mesh/pcg/critical_t_series="0.0 1.0 1.0"
+    cli_args = 'Mesh/pcg/section_bounding_t_values="0.0 1.0 1.0"
                 --mesh-only err.e'
     expect_err = 'elements must be unique.'
-    requirement ='The system shall throw an error if the elements in critical_t_series are not unique.'
+    requirement ='The system shall throw an error if the elements in section_bounding_t_values are not unique.'
   []
   [err_unneeded_forced_closed_num_segments_1]
     type = 'RunException'
@@ -89,29 +89,29 @@
   [err_unneeded_forced_closed_num_segments_2]
     type = 'RunException'
     input = 'parsed_curve_closed.i'
-    cli_args = 'Mesh/pcg/critical_t_series="0 5"
+    cli_args = 'Mesh/pcg/section_bounding_t_values="0 5"
                 Mesh/pcg/is_closed_loop=false
                 Mesh/pcg/nums_segments=10
                 Mesh/pcg/forced_closing_num_segments=5
                 --mesh-only err.e'
-    expect_err = 'this parameter is not needed is the curve to be generated is not a closed loop.'
+    expect_err = 'this parameter is not needed if the curve to be generated is not a closed loop.'
     requirement ='The system shall throw an error if forced_closed_num_segments is provided but the curve to be generated is open.'
   []
   [err_unsorted_t_series]
     type = 'RunException'
     input = 'parsed_curve_closed.i'
-    cli_args = 'Mesh/pcg/critical_t_series="0.0 2.0 1.0"
+    cli_args = 'Mesh/pcg/section_bounding_t_values="0.0 2.0 1.0"
                 --mesh-only err.e'
     expect_err = 'elements must change monotonically.'
-    requirement ='The system shall throw an error if elements in critical_t_series do not change monotonically.'
+    requirement ='The system shall throw an error if elements in section_bounding_t_values do not change monotonically.'
   []
   [err_bad_nums_segments]
     type = 'RunException'
     input = 'parsed_curve_closed.i'
     cli_args = 'Mesh/pcg/nums_segments=10
                 --mesh-only err.e'
-    expect_err = 'The size of this parameter must be one less than size of critical_t_series.'
-    requirement ='The system shall throw an error if size of nums_segments is not consistent with size of critical_t_series.'
+    expect_err = 'The size of this parameter must be one less than size of section_bounding_t_values.'
+    requirement ='The system shall throw an error if size of nums_segments is not consistent with size of section_bounding_t_values.'
   []
   [err_failed_parsing_x]
     type = 'RunException'

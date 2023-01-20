@@ -32,11 +32,14 @@ ParsedCurveGenerator::validParams()
   params.addRequiredRangeCheckedParam<std::vector<unsigned int>>(
       "nums_segments",
       "nums_segments>=1",
-      "Numbers of segments of segments of the curve to be generated.");
+      "Numbers of segments (EDGE2 elements) of each section of the curve to be generated. The "
+      "number of entries in this parameter should be equal to one less than the number of entries "
+      "in 'section_bounding_t_values'");
   params.addRequiredParam<std::vector<Real>>(
-      "critical_t_series",
-      "Critical values of the parameter 't' that will be sampled; Starting and ending values must "
-      "be included.");
+      "section_bounding_t_values",
+      "The 't' values that bound the sections of the curve. Start and end points must be included. "
+      "The number of entries in 'nums_segments' should be equal to one less than the number of "
+      "entries in this parameter.");
   params.addParam<std::vector<std::string>>(
       "constant_names", "Vector of constants used in the parsed function (use this for kB etc.)");
   params.addParam<std::vector<std::string>>(
@@ -51,7 +54,8 @@ ParsedCurveGenerator::validParams()
   params.addRangeCheckedParam<unsigned int>(
       "forced_closing_num_segments",
       "forced_closing_num_segments>1",
-      "Number of segments of the curve section that is generated to forcefully close the loop.");
+      "Number of segments (EDGE2 elements) of the curve section that is generated to forcefully "
+      "close the loop.");
   params.addRangeCheckedParam<Real>("oversample_factor",
                                     10.0,
                                     "oversample_factor>2.0",
@@ -76,7 +80,7 @@ ParsedCurveGenerator::ParsedCurveGenerator(const InputParameters & parameters)
     _function_y(getParam<std::string>("y_formula")),
     _function_z(getParam<std::string>("z_formula")),
     _nums_segments(getParam<std::vector<unsigned int>>("nums_segments")),
-    _critical_t_series(getParam<std::vector<Real>>("critical_t_series")),
+    _section_bounding_t_values(getParam<std::vector<Real>>("section_bounding_t_values")),
     _is_closed_loop(getParam<bool>("is_closed_loop")),
     _point_overlapping_tolerance(getParam<Real>("point_overlapping_tolerance")),
     _forced_closing_num_segments(isParamValid("forced_closing_num_segments")
@@ -85,15 +89,16 @@ ParsedCurveGenerator::ParsedCurveGenerator(const InputParameters & parameters)
     _oversample_factor(getParam<Real>("oversample_factor")),
     _max_oversample_number_factor(getParam<unsigned int>("max_oversample_number_factor"))
 {
-  if (std::adjacent_find(_critical_t_series.begin(), _critical_t_series.end()) !=
-      _critical_t_series.end())
-    paramError("critical_t_series", "elements must be unique.");
-  if (!std::is_sorted(_critical_t_series.begin(), _critical_t_series.end()) &&
-      !std::is_sorted(_critical_t_series.rbegin(), _critical_t_series.rend()))
-    paramError("critical_t_series", "elements must change monotonically.");
-  if (_nums_segments.size() != _critical_t_series.size() - 1)
-    paramError("nums_segments",
-               "The size of this parameter must be one less than size of critical_t_series.");
+  if (std::adjacent_find(_section_bounding_t_values.begin(), _section_bounding_t_values.end()) !=
+      _section_bounding_t_values.end())
+    paramError("section_bounding_t_values", "elements must be unique.");
+  if (!std::is_sorted(_section_bounding_t_values.begin(), _section_bounding_t_values.end()) &&
+      !std::is_sorted(_section_bounding_t_values.rbegin(), _section_bounding_t_values.rend()))
+    paramError("section_bounding_t_values", "elements must change monotonically.");
+  if (_nums_segments.size() != _section_bounding_t_values.size() - 1)
+    paramError(
+        "nums_segments",
+        "The size of this parameter must be one less than size of section_bounding_t_values.");
   _func_Fx = std::make_shared<SymFunction>();
   _func_Fy = std::make_shared<SymFunction>();
   _func_Fz = std::make_shared<SymFunction>();
@@ -141,7 +146,7 @@ ParsedCurveGenerator::ParsedCurveGenerator(const InputParameters & parameters)
 
   if (!_is_closed_loop && _forced_closing_num_segments > 0)
     paramError("forced_closing_num_segments",
-               "this parameter is not needed is the curve to be generated is not a closed loop.");
+               "this parameter is not needed if the curve to be generated is not a closed loop.");
 }
 
 std::unique_ptr<MeshBase>
@@ -149,13 +154,13 @@ ParsedCurveGenerator::generate()
 {
   auto mesh = buildReplicatedMesh(2);
 
-  // Do oversampling for each section of the curve as defined by "critical_t_series"
+  // Do oversampling for each section of the curve as defined by "section_bounding_t_values"
   for (unsigned int i = 0; i < _nums_segments.size(); i++)
   {
     std::vector<Real> t_sect_space;
     std::vector<Real> dis_sect_space;
-    tSectionSpaceDefiner(_critical_t_series[i],
-                         _critical_t_series[i + 1],
+    tSectionSpaceDefiner(_section_bounding_t_values[i],
+                         _section_bounding_t_values[i + 1],
                          t_sect_space,
                          dis_sect_space,
                          _nums_segments[i],
@@ -245,7 +250,8 @@ ParsedCurveGenerator::tSectionSpaceDefiner(const Real t_start,
           ? euclideanDistance(pt_sect_space.front(), pointCalculator((t_start + t_end) / 2.0))
           : euclideanDistance(pt_sect_space.front(), pt_sect_space.back());
   if (MooseUtils::absoluteFuzzyEqual(total_distance, 0.0))
-    paramError("critical_t_series", "The curve has at least one cross, which is not supported.");
+    paramError("section_bounding_t_values",
+               "The curve has at least one cross, which is not supported.");
   const Real target_fine_interval = total_distance / (Real)num_segments / oversample_factor;
   unsigned int t_space_id = 0;
   dis_sect_space.push_back(0.0);
@@ -272,9 +278,10 @@ ParsedCurveGenerator::tSectionSpaceDefiner(const Real t_start,
     }
   }
   if (binary_search_counter > max_binary_search)
-    paramError("max_oversample_number_factor",
-               "Maximum oversampling points number has been exceeded. Please consider add more t "
-               "values into critical_t_series or increase max_oversample_number_factor.");
+    paramError(
+        "max_oversample_number_factor",
+        "Maximum oversampling points number has been exceeded. Please consider adding more t "
+        "values into 'section_bounding_t_values' or increase 'max_oversample_number_factor'.");
   const Real total_dis_seg = dis_sect_space.back();
   // Normalization to make the normalized length of the curve equals to number of segments
   for (auto & dist : dis_sect_space)

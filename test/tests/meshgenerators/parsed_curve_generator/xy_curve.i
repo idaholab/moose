@@ -5,7 +5,7 @@
     y_formula = 'y1:=r*sin(t);
                  y2:=b*sin(t);
                  if(t<pi,y1,y2)'
-    critical_t_series = '${fparse 0.0} ${fparse pi} ${fparse 2.0*pi}'
+    section_bounding_t_values = '${fparse 0.0} ${fparse pi} ${fparse 2.0*pi}'
     constant_names = 'pi r b'
     constant_expressions = '${fparse pi} 1.0 1.5'
     nums_segments = '10 10'
@@ -21,7 +21,7 @@
     y_formula = 'x0:=a*cos(t);
                  y0:=b*sin(t);
                  sin(th)*x0+cos(th)*y0+ys'
-    critical_t_series = '0.0 ${fparse 2.0*pi}'
+    section_bounding_t_values = '0.0 ${fparse 2.0*pi}'
     nums_segments = 18
     is_closed_loop = true
   []
@@ -35,7 +35,7 @@
     y_formula = 'x0:=a*(1+cos(t))*cos(t);
                  y0:=a*(1+cos(t))*sin(t);
                  sin(th)*x0+cos(th)*y0+ys'
-    critical_t_series = '0 ${fparse pi} ${fparse 2.0*pi}'
+    section_bounding_t_values = '0 ${fparse pi} ${fparse 2.0*pi}'
     nums_segments = '9 9'
     is_closed_loop = true
   []

@@ -3,7 +3,7 @@
     type = ParsedCurveGenerator
     x_formula = 't'
     y_formula = 'log10(1+9*t)'
-    critical_t_series = '0 1'
+    section_bounding_t_values = '0 1'
     nums_segments = 8
   []
 []
