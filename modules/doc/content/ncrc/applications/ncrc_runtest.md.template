@@ -1,21 +1,17 @@
 ## Running Tests id=runtests
 
-With {{ApplicationName}} built, we can now run tests, to verify a working binary (and environment).
+With {{ApplicationName}} built, we can now run tests to verify a working binary (and environment).
 
 - +Personal Machine+:
 
-  Be sure to have your `moose` environment loaded:
-
   ```bash
-  mamba activate moose
+  mamba activate moose   # a reminder to have this active
   ```
 
 - +[!ac](INL) [!ac](HPC) Sawtooth or Lemhi+ (required each time you log in):
 
-  Be sure to have the following modules loaded:
-
   ```bash
-  module load use.moose moose-dev
+  module load use.moose moose-dev   # a reminder to have these loaded
   ```
 
 You're all set to run tests:

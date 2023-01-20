@@ -6,7 +6,7 @@ please see the [Transitional Guide](https://github.com/idaholab/moose/wiki/NCRC-
 for help on accessing the new home for [NCRC/{{ApplicationName}}](https://github.inl.gov/ncrc/{{binary}}). New users can safely ignore this notice.
 
 
-Source code for {{ApplicationName}} can be found at [https://github.inl.gov/ncrc/{{binary}}](https://github.inl.gov/ncrc/{{binary}})
+Source code for {{ApplicationName}} is hosted at [https://github.inl.gov/ncrc/{{binary}}](https://github.inl.gov/ncrc/{{binary}})
 
 While logged in to [ncrc/{{binary}}](https://github.inl.gov/ncrc/{{binary}}) you should at
 this time create a fork of the repository. This is only required once, and is accomplished by

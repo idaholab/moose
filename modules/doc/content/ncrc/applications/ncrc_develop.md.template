@@ -61,12 +61,11 @@ Conda packages or build the requirements from source.
 - +[!ac](INL) [!ac](HPC) Sawtooth or Lemhi+:
 
   It will be necessary to build PETSc and libMesh using the supplied build scripts in
-  `moose/scripts`. The time it takes to build both PETSc and libMesh can be hours. You may (should)
-  have already loaded the right modules. We list it here, again, for completeness.
+  `moose/scripts`. The time it takes to build both PETSc and libMesh can be hours:
 
   ```bash
-  module load use.moose moose-dev
-  export MOOSE_JOBS=6 METHODS=opt
+  module load use.moose moose-dev    # a reminder to have these loaded
+  export MOOSE_JOBS=6 METHODS=opt    # a reminder to set these
   cd ~/projects/{{binary}}/moose
   scripts/update_and_rebuild_petsc.sh
   scripts/update_and_rebuild_libmesh.sh
@@ -105,7 +104,7 @@ git branch   # take note of the results
 any source files. It will return nothing if there was nothing new to fetch on the `upstream` remote.
 
 `git branch` reports what branch you have checked out. It is impossible to write a document for
-every application's branch naming schemes. So whatever was reported with `git branch`, use that for
+every application's branch naming schemes, so whatever was reported with `git branch`, use that for
 the next command.
 
 Next, we will perform a `rebase`. This will make changes to your repository, if there are changes to
