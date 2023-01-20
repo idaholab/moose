@@ -10,6 +10,7 @@
 #include "PeriodicFunction.h"
 #include "MooseUtils.h"
 #include <iostream>
+#include <limits>
 
 registerMooseObject("MooseApp", PeriodicFunction);
 

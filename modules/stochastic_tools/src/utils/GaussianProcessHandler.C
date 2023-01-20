@@ -16,7 +16,7 @@
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
 
-#include <math.h>
+#include <cmath>
 
 #include "MooseRandom.h"
 #include "Shuffle.h"

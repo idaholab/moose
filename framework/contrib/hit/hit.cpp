@@ -637,7 +637,7 @@ typedef struct
 #if defined(WIN32) || defined(MS_WINDOWS)
 #define _USE_MATH_DEFINES
 #endif
-#include <math.h>
+#include <cmath>
 #ifdef NAN
 #define __PYX_NAN() ((float)NAN)
 #else

@@ -12,7 +12,7 @@
 #include "INSFVRhieChowInterpolator.h"
 #include "NSFVUtils.h"
 
-#include <math.h>
+#include <cmath>
 
 registerMooseObject("NavierStokesApp", VolumetricFlowRate);
 

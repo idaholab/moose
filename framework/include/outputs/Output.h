@@ -202,6 +202,9 @@ protected:
   /// The output time step interval
   const unsigned int _interval;
 
+  /// Minimum simulation time between outputs
+  const Real _minimum_time_interval;
+
   /// Sync times for this outputter
   std::set<Real> _sync_times;
 
@@ -234,6 +237,9 @@ protected:
   // access to this data from the Console object for displaying
   // the output settings.
   OutputOnWarehouse _advanced_execute_on;
+
+  /// last simulation time an output has occured
+  Real & _last_output_time;
 
   friend class OutputWarehouse;
 };
