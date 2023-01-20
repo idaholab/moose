@@ -27,6 +27,8 @@ Here we give a brief tabular summary of the Navier-Stokes implementations:
 | ------     | --------   | -------------------- | ------------------ | ----------------  | ------ | ------------------                |
 | INS        | Hand-coded | incompressible       | None               | Not porous        | CGFE   | SUPG                              |
 | INSAD      | AD         | incompressible       | Smagorinsky        | Not porous        | CGFE   | SUPG                              |
+| MD         | Hand-coded | incompressible       | None               | Not porous        | CGFE   | SUPG                              |
+| PM         | Hand-coded | incompressible       | None               | porous            | CGFE   | SUPG                              |
 | NS         | Hand-coded | compressible         | None               | Not porous        | CGFE   | SUPG                              |
 | INSFV      | AD         | incompressible       | mixing length      | Not porous        | FV     | RC, CD velocity; limited advected |
 | WCNSFV     | AD         | weakly compressible  | mixing length      | Not porous        | FV     | RC, CD velocity; limited advected |
@@ -37,7 +39,11 @@ Here we give a brief tabular summary of the Navier-Stokes implementations:
 
 Table definitions:
 
+- INS: incompressible Navier-Stokes
 - AD: automatic differentiation
+- PM: porous medium
+- CNS: compressible Navier-Stokes
+- PINS or PCNS: porous incompressible Navier-Stokes or porous compressible Navier-Stokes
 - SUPG: Streamline-Upwind Petrov-Galerkin
 - RC: Rhie-Chow interpolation
 - CD: central differencing interpolation; equivalent to average interpolation
@@ -46,6 +52,14 @@ Table definitions:
 - limited: different limiters can be applied when interpolating cell-centered
   data to faces. A summary of limiter options can be found in
   [Limiters/index.md]
+
+Note that the INS and MD kernel sets are redundant in terms of targeted
+functionality. Historically, the INS kernel set was developed in this module and
+the MD kernel set was developed in the SAM application [!citep](hu2021sam). With
+the Nuclear Energy Advanced Modeling and Simulation (NEAMS) program dedicated
+to consolidating fluid dynamics modeling, SAM capabilities are being migrated
+upstream as appropriate into the common module layer. In the not-too-distant
+future these kernel sets will be consolidated into a single set.
 
 For an introductory slideshow on the use of the Navier Stokes Finite Volume solvers in MOOSE, we refer the visitor to the [Navier Stokes Workshop Slides](slides/index.md optional=True).
 
