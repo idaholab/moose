@@ -1,1 +1,1 @@
-!template load file=sqa/sll.md.template category=python project=MOOSE Tools
+!template load file=sqa/sll.md.template project=MOOSE Tools

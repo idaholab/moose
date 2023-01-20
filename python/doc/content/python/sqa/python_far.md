@@ -1,4 +1,4 @@
-!template load file=sqa/far.md.template category=python project=MOOSE Tools
+!template load file=sqa/far.md.template project=MOOSE Tools
 
 !template! item key=introduction
 {{project}}, as a collection of utilities, is designed to operate as a library of functionality. While

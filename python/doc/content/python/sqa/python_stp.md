@@ -1,4 +1,4 @@
-!template load file=sqa/stp.md.template category=python app=MOOSE Tools project=MOOSE Tools
+!template load file=sqa/stp.md.template project=MOOSE Tools
 
 !template! item key=test-scope
 This plan details the testing implemented for the development of [!ac](MOOSE) Tools that leads to a

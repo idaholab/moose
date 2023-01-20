@@ -1,4 +1,4 @@
-!template load file=sqa/rtm.md.template category=python project=MOOSE Tools
+!template load file=sqa/rtm.md.template project=MOOSE Tools
 
 !template! item key=minimum_requirements
 !include sqa/minimum_requirements.md

@@ -1,4 +1,4 @@
-!template load file=sqa/srs.md.template category=python project=MOOSE Tools
+!template load file=sqa/srs.md.template project=MOOSE Tools
 
 !template! item key=system-context
 [!ac](MOOSE) Tools utilities are command-line driven applications. This is typical for high-performance
