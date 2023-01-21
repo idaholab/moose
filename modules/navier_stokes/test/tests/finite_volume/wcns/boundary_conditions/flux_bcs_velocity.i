@@ -258,7 +258,7 @@ inlet_velocity = 0.001
     type = Receiver
     default = ${inlet_velocity}
   []
-  [surface_inlet]
+  [area_pp_left]
     type = AreaPostprocessor
     boundary = 'left'
     execute_on = 'INITIAL'

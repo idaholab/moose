@@ -25,7 +25,7 @@
 
   [./func]
     type = ParsedFunction
-    value = 2.0*t
+    expression = 2.0*t
   [../]
 []
 

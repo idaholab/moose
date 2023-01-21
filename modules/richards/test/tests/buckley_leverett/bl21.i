@@ -192,11 +192,11 @@
 [Functions]
   [./initial_water]
     type = ParsedFunction
-    value = 1000000*(1-min(x/5,1))-100000*(max(x-5,0)/max(abs(x-5),1E-10))
+    expression = 1000000*(1-min(x/5,1))-100000*(max(x-5,0)/max(abs(x-5),1E-10))
   [../]
   [./initial_gas]
     type = ParsedFunction
-    value = max(1000000*(1-x/5),0)+1000
+    expression = max(1000000*(1-x/5),0)+1000
   [../]
 []
 

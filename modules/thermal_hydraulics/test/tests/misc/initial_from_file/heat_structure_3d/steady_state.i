@@ -9,7 +9,7 @@
 [Functions]
   [Ts_init]
     type = ParsedFunction
-    value = '2*sin(x*pi/2)+2*sin(pi*y) +507'
+    expression = '2*sin(x*pi/2)+2*sin(pi*y) +507'
   []
 []
 

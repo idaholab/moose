@@ -28,21 +28,21 @@
 [Functions]
   [./ic_func_eta1]
     type = ParsedFunction
-    value = '0.5*(1.0-tanh((x)*sqrt(m/kappa/2.0)))'
-    vars = 'm kappa'
-    vals = '0.26514 331.414'
+    expression = '0.5*(1.0-tanh((x)*sqrt(m/kappa/2.0)))'
+    symbol_names = 'm kappa'
+    symbol_values = '0.26514 331.414'
   [../]
   [./ic_func_eta2]
     type = ParsedFunction
-    value = '0.5*(1.0+tanh((x)*sqrt(m/kappa/2.0)))*0.5*(1.0-tanh((x-500)*sqrt(m/kappa/2.0)))'
-    vars = 'm kappa'
-    vals = '0.26514 331.414'
+    expression = '0.5*(1.0+tanh((x)*sqrt(m/kappa/2.0)))*0.5*(1.0-tanh((x-500)*sqrt(m/kappa/2.0)))'
+    symbol_names = 'm kappa'
+    symbol_values = '0.26514 331.414'
   [../]
   [./ic_func_eta3]
     type = ParsedFunction
-    value = '0.5*(1.0+tanh((x-500)*sqrt(m/kappa/2.0)))'
-    vars = 'm kappa'
-    vals = '0.26514 331.414'
+    expression = '0.5*(1.0+tanh((x-500)*sqrt(m/kappa/2.0)))'
+    symbol_names = 'm kappa'
+    symbol_values = '0.26514 331.414'
   [../]
 []
 

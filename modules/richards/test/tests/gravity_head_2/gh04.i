@@ -179,15 +179,15 @@
 [Functions]
   [./fcn_error_water]
     type = ParsedFunction
-    value = 'abs((-b*log(-(gdens0*xval+(-b*exp(-p0/b)))/b)-p1)/p1)'
-    vars = 'b gdens0 p0 xval p1'
-    vals = '1E2 -1 pw_left 1 pw_right'
+    expression = 'abs((-b*log(-(gdens0*xval+(-b*exp(-p0/b)))/b)-p1)/p1)'
+    symbol_names = 'b gdens0 p0 xval p1'
+    symbol_values = '1E2 -1 pw_left 1 pw_right'
   [../]
   [./fcn_error_gas]
     type = ParsedFunction
-    value = 'abs((-b*log(-(gdens0*xval+(-b*exp(-p0/b)))/b)-p1)/p1)'
-    vars = 'b gdens0 p0 xval p1'
-    vals = '0.5E2 -0.5 pg_left 1 pg_right'
+    expression = 'abs((-b*log(-(gdens0*xval+(-b*exp(-p0/b)))/b)-p1)/p1)'
+    symbol_names = 'b gdens0 p0 xval p1'
+    symbol_values = '0.5E2 -0.5 pg_left 1 pg_right'
   [../]
 []
 

@@ -42,6 +42,7 @@ requirements:
     - packaging
     - pyflakes
     - python
+    - xmltodict
 
 test:
   commands:
@@ -63,6 +64,7 @@ test:
     - tabulate
     - git
     - pyflakes
+    - xmltodict
 
 about:
   home: https://mooseframework.org/

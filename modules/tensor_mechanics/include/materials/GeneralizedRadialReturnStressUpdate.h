@@ -148,6 +148,17 @@ protected:
                           const GenericRankFourTensor<is_ad> & /*elasticity_tensor*/) = 0;
 
   /**
+   * Calculate the derivative of the strain increment with respect to the updated stress.
+   * @param effective_trial_stress Effective trial stress
+   * @param scalar                 Inelastic strain increment magnitude being solved for
+   */
+  virtual GenericReal<is_ad> computeStressDerivative(const Real /*effective_trial_stress*/,
+                                                     const Real /*scalar*/)
+  {
+    return 0.0;
+  }
+
+  /**
    * Perform any necessary steps to finalize state after return mapping iterations
    * @param inelasticStrainIncrement Inelastic strain increment
    * @param delta_gamma Plastic multiplier
@@ -183,6 +194,17 @@ protected:
 
   void outputIterationSummary(std::stringstream * iter_output,
                               const unsigned int total_it) override;
+
+  /**
+   * Calculate the tangent_operator.
+   */
+  void computeTangentOperator(Real /*effective_trial_stress*/,
+                              RankTwoTensor & /*stress_new*/,
+                              bool /*compute_full_tangent_operator*/,
+                              RankFourTensor & /*tangent_operator*/);
+
+  /// 3 * shear modulus
+  GenericReal<is_ad> _three_shear_modulus;
 
   /// Equivalent creep/plastic strain
   GenericMaterialProperty<Real, is_ad> & _effective_inelastic_strain;

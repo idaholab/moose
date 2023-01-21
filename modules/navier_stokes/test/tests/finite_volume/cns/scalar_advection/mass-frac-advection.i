@@ -165,8 +165,8 @@ v_in=1
 [Functions]
   [ud_in]
     type = ParsedVectorFunction
-    value_x = '0'
-    value_y = '${v_in}'
+    expression_x = '0'
+    expression_y = '${v_in}'
   []
 []
 

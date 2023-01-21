@@ -61,19 +61,19 @@
 [Functions]
   [./x_ffn]
     type = ParsedFunction
-    value = '(2*pi*pi + 1)*cos(pi*x)*sin(pi*y)'
+    expression = '(2*pi*pi + 1)*cos(pi*x)*sin(pi*y)'
   [../]
   [./y_ffn]
     type = ParsedFunction
-    value = '-(2*pi*pi + 1)*sin(pi*x)*cos(pi*y)'
+    expression = '-(2*pi*pi + 1)*sin(pi*x)*cos(pi*y)'
   [../]
   [./x_sln]
     type = ParsedFunction
-    value = 'cos(pi*x)*sin(pi*y)'
+    expression = 'cos(pi*x)*sin(pi*y)'
   [../]
   [./y_sln]
     type = ParsedFunction
-    value = '-sin(pi*x)*cos(pi*y)'
+    expression = '-sin(pi*x)*cos(pi*y)'
   [../]
 []
 

@@ -209,8 +209,8 @@
 [AuxKernels]
   [effective_fluid_pressure]
     type = ParsedAux
-    args = 'pwater pgas swater sgas'
-    function = 'pwater * swater + pgas * sgas'
+    coupled_variables = 'pwater pgas swater sgas'
+    expression = 'pwater * swater + pgas * sgas'
     variable = effective_fluid_pressure
   []
   [swater]
@@ -502,9 +502,9 @@
 [Functions]
   [constrain_effective_fluid_pressure]
     type = ParsedFunction
-    vars = effective_fluid_pressure_at_wellbore
-    vals = effective_fluid_pressure_at_wellbore
-    value = 'max(effective_fluid_pressure_at_wellbore, 20E6)'
+    symbol_names = effective_fluid_pressure_at_wellbore
+    symbol_values = effective_fluid_pressure_at_wellbore
+    expression = 'max(effective_fluid_pressure_at_wellbore, 20E6)'
   []
 []
 

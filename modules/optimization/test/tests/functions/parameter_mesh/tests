@@ -1,0 +1,57 @@
+[Tests]
+  issues = '#22995'
+  design = 'ParameterMeshFunction.md'
+  [parameter_mesh]
+    requirement = 'The system shall be able to evaluate a mesh-based interpolation function by '
+    [create]
+      type = CheckFiles
+      input = create_mesh.i
+      check_files = 'create_mesh_out.e create_mesh_out_param_vec_0001.csv'
+      detail = 'creating first-order mesh and '
+    []
+    [evaluate]
+      type = Exodiff
+      input = parameter_mesh.i
+      allow_test_objects = True
+      prereq = parameter_mesh/create
+      exodiff = parameter_mesh_out.e
+      detail = 'evaluating the first-order parameter values;'
+    []
+    [create_second]
+      type = CheckFiles
+      input = create_mesh_second.i
+      check_files = 'create_mesh_second_out.e create_mesh_second_out_param_vec_0001.csv'
+      detail = 'creating second-order mesh and '
+    []
+    [evaluate_second]
+      type = Exodiff
+      input = parameter_mesh_second.i
+      allow_test_objects = True
+      prereq = parameter_mesh/create_second
+      exodiff = parameter_mesh_second_out.e
+      detail = 'evaluating the second-order parameter values;'
+    []
+    [create_dg]
+      type = CheckFiles
+      input = create_mesh_dg.i
+      check_files = 'create_mesh_dg_out.e create_mesh_dg_out_param_vec_0001.csv'
+      detail = 'creating piece-wise constant mesh and '
+    []
+    [evaluate_dg]
+      type = Exodiff
+      input = parameter_mesh_dg.i
+      allow_test_objects = True
+      prereq = parameter_mesh/create_dg
+      exodiff = parameter_mesh_dg_out.e
+      detail = 'evaluating the piece-wise constant parameter values;'
+    []
+    [evaluate_transient]
+      type = Exodiff
+      input = parameter_mesh_transient.i
+      allow_test_objects = True
+      prereq = parameter_mesh/create
+      exodiff = parameter_mesh_transient_out.e
+      detail = 'evaluating transient parameter values;'
+    []
+  []
+[]

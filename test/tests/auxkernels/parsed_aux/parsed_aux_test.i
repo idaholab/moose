@@ -78,8 +78,8 @@
   [u_bounds]
     type = ParsedAux
     variable = parsed
-    args = 'u v'
-    function = '(u-0.5)^3*v'
+    coupled_variables = 'u v'
+    expression = '(u-0.5)^3*v'
   []
 []
 

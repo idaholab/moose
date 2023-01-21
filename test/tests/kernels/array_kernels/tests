@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#6881 #14057'
+  issues = '#6881 #14057 #23123'
   design = '/variables/ArrayMooseVariable.md'
   [test]
     type = 'Exodiff'
@@ -61,5 +61,16 @@
     input = 'array_body_force.i'
     exodiff = 'array_body_force_out.e'
     requirement = 'The system shall provide array body-force kernels on an array variable.'
+  []
+
+  [test_array_custom_coupling]
+    type = 'RunApp'
+    input = 'array_custom_coupling_test.i'
+    max_parallel = 1
+    # This test is to match the values of the assembled Jacobian.
+    # Before fixing the second bug reportted in #23123 the last row for u_1 is:
+    # row 63: (44, 0.)  (45, 0.)  (46, 0.0833333)  (47, 0.166667)  (56, -0.0833333)  (57, -0.666667)  (58, -1.33333)  (59, -0.166667)  (60, 0.336458)  (61, -0.331771)  (62, 0.169792)  (63, 2.33958)
+    expect_out = 'row 63\: \(44\, 0.\)  \(45\, 0.\)  \(46\, 0.083333\d+\)  \(47\, 0.16666\d+\)  \(56\, -0.083333\d+\)  \(57\, -0.66666\d+\)  \(58\, -1.3333\d+\)  \(59\, -0.16666\d+\)  \(60\, 0.33680\d+\)  \(61\, -0.33159\d+\)  \(62\, 0.17013\d+\)  \(63\, 2.3402\d+\)'
+    requirement = 'The system shall assemble the Jacobian properly with array variables.'
   []
 []

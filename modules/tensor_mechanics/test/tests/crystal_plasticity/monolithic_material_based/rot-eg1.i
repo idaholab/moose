@@ -81,27 +81,27 @@
 [Functions]
   [./side2uxfunc]
     type = ParsedFunction
-    value = cos(pi/2*t)-1
+    expression = cos(pi/2*t)-1
   [../]
   [./side2uyfunc]
     type = ParsedFunction
-    value = sin(pi/2*t)
+    expression = sin(pi/2*t)
   [../]
   [./side3uxfunc]
     type = ParsedFunction
-    value = cos(pi/2*t)-sin(pi/2*t)-1
+    expression = cos(pi/2*t)-sin(pi/2*t)-1
   [../]
   [./side3uyfunc]
     type = ParsedFunction
-    value = cos(pi/2*t)+sin(pi/2*t)-1
+    expression = cos(pi/2*t)+sin(pi/2*t)-1
   [../]
   [./side4uxfunc]
     type = ParsedFunction
-    value = -sin(pi/2*t)
+    expression = -sin(pi/2*t)
   [../]
   [./side4uyfunc]
     type = ParsedFunction
-    value = cos(pi/2*t)-1
+    expression = cos(pi/2*t)-1
   [../]
 []
 

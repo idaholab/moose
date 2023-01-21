@@ -124,7 +124,7 @@
     type = CahnHilliard
     variable = c
     f_name = F
-    args = 'eta1 eta2 eta3'
+    coupled_variables = 'eta1 eta2 eta3'
   [../]
   [./time]
     type = TimeDerivative
@@ -148,7 +148,7 @@
   [./ACBulk1]
     type = AllenCahn
     variable = eta1
-    args = 'eta2 eta3 c'
+    coupled_variables = 'eta2 eta3 c'
     mob_name = L1
     f_name = F
   [../]
@@ -176,7 +176,7 @@
   [./ACBulk2]
     type = AllenCahn
     variable = eta2
-    args = 'eta1 eta3 c'
+    coupled_variables = 'eta1 eta3 c'
     mob_name = L2
     f_name = F
   [../]
@@ -204,7 +204,7 @@
   [./ACBulk3]
     type = AllenCahn
     variable = eta3
-    args = 'eta1 eta2 c'
+    coupled_variables = 'eta1 eta2 c'
     mob_name = L3
     f_name = F
   [../]
@@ -246,10 +246,9 @@
   # (see GlobalParams section above) and can be used to check the constraint enforcement.
   [./etasummat]
     type = ParsedMaterial
-    f_name = etasum
-    args = 'eta1 eta2 eta3'
+    property_name = etasum
     material_property_names = 'h1 h2 h3'
-    function = 'h1+h2+h3'
+    expression = 'h1+h2+h3'
   [../]
 
   # The phase contribution factors for each material point are computed using the
@@ -289,21 +288,21 @@
   # by custom kernels).
   [./phase_free_energy_1]
     type = DerivativeParsedMaterial
-    f_name = F1
-    function = '(c-1)^2'
-    args = 'c'
+    property_name = F1
+    expression = '(c-1)^2'
+    coupled_variables = 'c'
   [../]
   [./phase_free_energy_2]
     type = DerivativeParsedMaterial
-    f_name = F2
-    function = '(c-0.5)^2'
-    args = 'c'
+    property_name = F2
+    expression = '(c-0.5)^2'
+    coupled_variables = 'c'
   [../]
   [./phase_free_energy_3]
     type = DerivativeParsedMaterial
-    f_name = F3
-    function = 'c^2'
-    args = 'c'
+    property_name = F3
+    expression = 'c^2'
+    coupled_variables = 'c'
   [../]
 
   # The DerivativeMultiPhaseMaterial ties the phase free energies together into a global free energy.
@@ -315,7 +314,7 @@
     fi_names = 'F1  F2  F3'
     hi_names = 'h1  h2  h3'
     etas     = 'eta1 eta2 eta3'
-    args = 'c'
+    coupled_variables = 'c'
     W = 1
   [../]
 []

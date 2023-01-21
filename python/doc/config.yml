@@ -1,0 +1,25 @@
+Content:
+    - framework/doc/content
+    - python/doc/content
+
+Renderer:
+    type: MooseDocs.base.MaterializeRenderer
+
+Extensions:
+    MooseDocs.extensions.appsyntax: disable
+    MooseDocs.extensions.navigation:
+        name: MOOSE Tools
+        repo: https://github.com/idaholab/moose
+        home: /python/index.md
+    MooseDocs.extensions.common:
+        shortcuts: !include framework/doc/globals.yml
+    MooseDocs.extensions.acronym:
+        acronyms: !include framework/doc/acronyms.yml
+    MooseDocs.extensions.template:
+        active: True
+    MooseDocs.extensions.sqa:
+        active: True
+        reports: !include python/doc/sqa_reports.yml
+        categories:
+            framework: !include framework/doc/sqa_framework.yml
+            python: !include python/doc/sqa_python.yml

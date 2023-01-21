@@ -40,6 +40,6 @@
     type = MaterialDerivativeTestKernel
     variable = rhoA
     material_property = f_D
-    args = 'rhoA rhouA rhoEA'
+    coupled_variables = 'rhoA rhouA rhoEA'
   []
 []

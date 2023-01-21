@@ -27,6 +27,7 @@
 #include "TwoMaterialPropertyInterface.h"
 #include "FunctorInterface.h"
 #include "FVFaceResidualObject.h"
+#include "FaceArgInterface.h"
 
 #include <set>
 
@@ -56,7 +57,8 @@ class FVInterfaceKernel : public MooseObject,
                           public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
                           public TwoMaterialPropertyInterface,
                           public FunctorInterface,
-                          public FVFaceResidualObject
+                          public FVFaceResidualObject,
+                          public FaceArgProducerInterface
 {
 public:
   /**
@@ -76,6 +78,8 @@ public:
   void computeResidual(const FaceInfo & fi) override;
   void computeJacobian(const FaceInfo & fi) override;
   void computeResidualAndJacobian(const FaceInfo & fi) override;
+
+  bool hasFaceSide(const FaceInfo & fi, bool fi_elem_side) const override;
 
 protected:
   /**
@@ -139,16 +143,16 @@ protected:
 #endif
 
   /**
-   * @return A structure that contains information about the face info element, face info, skewness
-   * correction and element subdomain id for use with functors
+   * @return A structure that contains information about the face info element and skewness
+   * correction for use with functors
    */
-  Moose::ElemFromFaceArg elemFromFace(bool correct_skewness = false) const;
+  Moose::ElemArg elemArg(bool correct_skewness = false) const;
 
   /**
-   * @return A structure that contains information about the face info neighbor, the face info,
-   * skewness correction and the face info neighbor subdomain id for use with functors
+   * @return A structure that contains information about the face info neighbor and skewness
+   * correction for use with functors
    */
-  Moose::ElemFromFaceArg neighborFromFace(bool correct_skenewss = false) const;
+  Moose::ElemArg neighborArg(bool correct_skenewss = false) const;
 
   /**
    * Determine the single sided face argument when evaluating a functor on a face.
@@ -159,7 +163,7 @@ protected:
    *        interpolation is required for the parameters of the functor
    * @param correct_skewness whether to perform skew correction at the face
    */
-  Moose::SingleSidedFaceArg singleSidedFaceArg(
+  Moose::FaceArg singleSidedFaceArg(
       const MooseVariableFV<Real> & variable,
       const FaceInfo * fi = nullptr,
       Moose::FV::LimiterType limiter_type = Moose::FV::LimiterType::CentralDifference,

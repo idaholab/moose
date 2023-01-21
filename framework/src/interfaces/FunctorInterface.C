@@ -19,7 +19,7 @@ FunctorInterface::validParams()
 FunctorInterface::FunctorInterface(const MooseObject * const moose_object)
   : _fi_params(moose_object->parameters()),
     _fi_name(_fi_params.get<std::string>("_object_name")),
-    _fi_subproblem(*_fi_params.getCheckedPointerParam<SubProblem *>("_subproblem")),
+    _fi_subproblem(_fi_params.get<SubProblem *>("_subproblem")),
     _fi_tid(_fi_params.get<THREAD_ID>("_tid"))
 {
 }
@@ -99,12 +99,19 @@ FunctorInterface::defaultFunctor(const std::string & name)
 }
 
 bool
-FunctorInterface::isFunctor(const std::string & name) const
+FunctorInterface::isFunctor(const std::string & name, const SubProblem & subproblem) const
 {
   // Check if the supplied parameter is a valid input parameter key
   std::string functor_name = deduceFunctorName(name);
 
-  return _fi_subproblem.hasFunctor(functor_name, _fi_tid);
+  return subproblem.hasFunctor(functor_name, _fi_tid);
+}
+
+bool
+FunctorInterface::isFunctor(const std::string & name) const
+{
+  mooseAssert(_fi_subproblem, "This must be non-null");
+  return isFunctor(name, *_fi_subproblem);
 }
 
 Moose::ElemArg

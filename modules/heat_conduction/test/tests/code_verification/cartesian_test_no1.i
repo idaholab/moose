@@ -25,9 +25,9 @@
 [Functions]
   [./exact]
     type = ParsedFunction
-    vars = 'q L k ui uo'
-    vals = '1200 1 12 100 0'
-    value = 'ui + (uo-ui)*x/L + (q/k) * x * (L-x) / 2'
+    symbol_names = 'q L k ui uo'
+    symbol_values = '1200 1 12 100 0'
+    expression = 'ui + (uo-ui)*x/L + (q/k) * x * (L-x) / 2'
   [../]
 []
 

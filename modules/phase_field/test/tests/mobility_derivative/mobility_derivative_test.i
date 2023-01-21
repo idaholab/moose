@@ -38,7 +38,7 @@
     type = SplitCHWRes
     variable = w
     mob_name = M
-    args = c
+    coupled_variables = c
   [../]
   [./time]
     type = CoupledTimeDerivative
@@ -63,9 +63,9 @@
   [../]
   [./mob]
     type = DerivativeParsedMaterial
-    f_name = M
-    args = c
-    function = '1-0.9*c^2'
+    property_name = M
+    coupled_variables = c
+    expression = '1-0.9*c^2'
     outputs = exodus
     derivative_order = 1
   [../]

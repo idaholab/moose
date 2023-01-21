@@ -171,7 +171,7 @@ mooseWarningStream(S & oss, Args &&... args)
   std::ostringstream ss;
   mooseStreamAll(ss, args...);
   std::string msg = mooseMsgFmt(ss.str(), "*** Warning ***", COLOR_YELLOW);
-  if (Moose::_throw_on_error)
+  if (Moose::_throw_on_warning)
     throw std::runtime_error(msg);
 
   {
@@ -187,7 +187,7 @@ mooseUnusedStream(S & oss, Args &&... args)
   std::ostringstream ss;
   mooseStreamAll(ss, args...);
   std::string msg = mooseMsgFmt(ss.str(), "*** Warning ***", COLOR_YELLOW);
-  if (Moose::_throw_on_error)
+  if (Moose::_throw_on_warning)
     throw std::runtime_error(msg);
 
   {

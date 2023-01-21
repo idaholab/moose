@@ -114,7 +114,8 @@ testReconstruction(const Moose::CoordinateSystemType coord_type)
     {
       auto moukalled_reconstruct = [&fi](auto & functor, auto & container)
       {
-        auto face = Moose::FV::makeCDFace(fi);
+        auto face =
+            Moose::FaceArg({&fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr});
         const RealVectorValue uf(functor(face));
         const Point surface_vector = fi.normal() * fi.faceArea();
         auto product = (uf * fi.dCN()) * surface_vector;
@@ -128,14 +129,8 @@ testReconstruction(const Moose::CoordinateSystemType coord_type)
       moukalled_reconstruct(u, up_moukalled);
     }
 
-    struct AllBlocks
-    {
-      bool hasBlocks(SubdomainID) const { return true; }
-    };
-
-    AllBlocks consumer;
-    Moose::FV::interpolateReconstruct(up_weller, u, 1, true, faces, consumer);
-    Moose::FV::interpolateReconstruct(up_tano, u, 1, false, faces, consumer);
+    Moose::FV::interpolateReconstruct(up_weller, u, 1, true, faces);
+    Moose::FV::interpolateReconstruct(up_tano, u, 1, false, faces);
 
     Real error = 0;
     Real weller_error = 0;
@@ -175,7 +170,7 @@ testReconstruction(const Moose::CoordinateSystemType coord_type)
     tano_errors.push_back(tano_error);
 
     up_tano.clear();
-    Moose::FV::interpolateReconstruct(up_tano, u, 2, false, faces, consumer);
+    Moose::FV::interpolateReconstruct(up_tano, u, 2, false, faces);
 
     tano_error = 0;
     for (auto * const elem : lm_mesh.active_element_ptr_range())

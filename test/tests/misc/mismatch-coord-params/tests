@@ -6,7 +6,7 @@
     [block]
       type = RunException
       input = mismatch.i
-      expect_err = "Did you provide different parameter values for 'block' to 'Mesh' and 'Problem'"
+      expect_err = "Did you provide different parameter values for.*Mesh.*block.*and.*Problem.*block"
       detail = 'subdomain blocks'
     []
     [coord_type]

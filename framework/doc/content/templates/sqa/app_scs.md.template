@@ -3,4 +3,4 @@
 ## Introduction id=introduction
 
 !template field key=introduction required=False
-The [!ac](SCS) provides detailed information about the software code practics for {{app}}.
+The [!ac](SCS) provides detailed information about the software code practices for {{app}}.

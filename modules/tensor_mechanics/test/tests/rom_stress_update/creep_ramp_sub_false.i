@@ -108,9 +108,8 @@
 [Functions]
   [shear_function]
     type = ParsedFunction
-    value = 'timeToDoubleInHours := 10;
-            if(t<=28*60*60, 15.0e6, '
-            '15.0e6*(t-28*3600)/3600/timeToDoubleInHours+15.0e6)'
+    expression = 'timeToDoubleInHours := 10;
+            if(t<=28*60*60, 15.0e6, 15.0e6*(t-28*3600)/3600/timeToDoubleInHours+15.0e6)'
   []
 []
 
@@ -138,7 +137,7 @@
     initial_cell_dislocation_density = 6.0e12
     initial_wall_dislocation_density = 4.4e11
 
-    use_substep = false
+    use_substepping = NONE
     max_inelastic_increment = 0.0001
 
     stress_input_window_low_failure = WARN

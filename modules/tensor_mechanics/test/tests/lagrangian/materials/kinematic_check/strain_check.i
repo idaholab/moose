@@ -25,11 +25,11 @@
 [Functions]
   [tdisp]
     type = ParsedFunction
-    value = '0.5 * t'
+    expression = '0.5 * t'
   []
   [tdisp_quer]
     type = ParsedFunction
-    value = '0.5 * y * t'
+    expression = '0.5 * y * t'
   []
 []
 

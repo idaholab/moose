@@ -29,7 +29,7 @@
 [Functions]
   [./vertical_movement]
     type = ParsedFunction
-    value = -t
+    expression = -t
   [../]
 []
 

@@ -12,6 +12,7 @@
 #include "FVUtils.h"
 #include "INSFVRhieChowInterpolator.h"
 #include "SystemBase.h"
+#include "NSFVUtils.h"
 
 registerMooseObject("NavierStokesApp", INSFVMomentumAdvection);
 
@@ -54,52 +55,175 @@ INSFVMomentumAdvection::initialSetup()
 ADReal
 INSFVMomentumAdvection::computeQpResidual()
 {
+  mooseError("Should never be called");
+}
+
+void
+INSFVMomentumAdvection::computeResidualsAndAData(const FaceInfo & fi)
+{
+  mooseAssert(!skipForBoundary(fi),
+              "We shouldn't get in here if we're supposed to skip for a boundary");
+
+  _face_info = &fi;
+  _normal = fi.normal();
+  _face_type = fi.faceType(_var.name());
+
   using namespace Moose::FV;
 
   const bool correct_skewness = _advected_interp_method == InterpMethod::SkewCorrectedAverage;
-  const auto v = _rc_vel_provider.getVelocity(_velocity_interp_method, *_face_info, _tid);
 
-  if (onBoundary(*_face_info))
+  _elem_residual = 0, _neighbor_residual = 0, _ae = 0, _an = 0;
+
+  const auto v_face = _rc_vel_provider.getVelocity(_velocity_interp_method, fi, _tid);
+
+  if (onBoundary(fi))
   {
     const auto ssf = singleSidedFaceArg();
-    const Elem * const sided_elem = ssf.makeSidedElem().elem;
+    const Elem * const sided_elem = ssf.face_side;
     const auto dof_number = sided_elem->dof_number(_sys.number(), _var.number(), 0);
-    const auto rhof = _rho(ssf);
-    const auto epsf = epsilon()(ssf);
-    const auto uf = _var(ssf);
-    const Real duf_du = uf.derivatives()[dof_number];
-    const auto coeff = _normal * v * rhof / epsf;
+    const auto rho_face = _rho(ssf);
+    const auto eps_face = epsilon()(ssf);
+    const auto u_face = _var(ssf);
+    const Real d_u_face_d_dof = u_face.derivatives()[dof_number];
+    const auto coeff = _normal * v_face * rho_face / eps_face;
 
-    if (sided_elem == &_face_info->elem())
-      _ae = coeff * duf_du;
+    if (sided_elem == &fi.elem())
+    {
+      _ae = coeff * d_u_face_d_dof;
+      _elem_residual = coeff * u_face;
+    }
     else
-      _an = -coeff * duf_du;
-
-    return coeff * uf;
+    {
+      _an = -coeff * d_u_face_d_dof;
+      _neighbor_residual = -coeff * u_face;
+    }
   }
-  else
+  else // we are an internal fluid flow face
   {
-    const auto [interp_coeffs, advected] =
-        interpCoeffsAndAdvected(*_rho_u,
-                                makeFace(*_face_info,
-                                         limiterType(_advected_interp_method),
-                                         MetaPhysicL::raw_value(v) * _normal > 0,
-                                         faceArgSubdomains(),
-                                         correct_skewness));
+    const bool elem_is_upwind = MetaPhysicL::raw_value(v_face) * _normal > 0;
+    const Moose::FaceArg advected_face_arg{
+        &fi, limiterType(_advected_interp_method), elem_is_upwind, correct_skewness, nullptr};
+    if (const auto [is_jump, eps_elem_face, eps_neighbor_face] =
+            NS::isPorosityJumpFace(epsilon(), fi);
+        is_jump)
+    {
+      // For a weakly compressible formulation, the density should not depend on pressure and
+      // consequently the density should not be impacted by the pressure jump that occurs at a
+      // porosity jump. Consequently we will allow evaluation of the density using both upstream and
+      // downstream information
+      const auto rho_face = _rho(advected_face_arg);
 
-    const auto elem_face = elemFromFace();
-    const auto neighbor_face = neighborFromFace();
+      // We set the + and - sides of the superficial velocity equal to the interpolated value
+      const auto & var_elem_face = v_face(_index);
+      const auto & var_neighbor_face = v_face(_index);
 
-    const auto rho_elem = _rho(elem_face), rho_neighbor = _rho(neighbor_face);
-    const auto eps_elem = epsilon()(elem_face), eps_neighbor = epsilon()(neighbor_face);
-    const auto var_elem = advected.first / rho_elem * eps_elem,
-               var_neighbor = advected.second / rho_neighbor * eps_neighbor;
+      const auto elem_dof_number = fi.elem().dof_number(_sys.number(), _var.number(), 0);
+      const auto neighbor_dof_number = fi.neighbor().dof_number(_sys.number(), _var.number(), 0);
 
-    _ae = _normal * v * rho_elem / eps_elem * interp_coeffs.first;
-    // Minus sign because we apply a minus sign to the residual in computeResidual
-    _an = -_normal * v * rho_neighbor / eps_neighbor * interp_coeffs.second;
+      const auto d_var_elem_face_d_elem_dof = var_elem_face.derivatives()[elem_dof_number];
+      const auto d_var_neighbor_face_d_neighbor_dof =
+          var_neighbor_face.derivatives()[neighbor_dof_number];
 
-    return _ae * var_elem - _an * var_neighbor;
+      // We allow a discontintuity in the advective momentum flux at the jump face. Mainly the
+      // advective flux is:
+      // elem side:
+      // rho * v_superficial / eps_elem * v_superficial = rho * v_interstitial_elem * v_superficial
+      // neighbor side:
+      // rho * v_superficial / eps_neigh * v_superficial = rho * v_interstitial_neigh *
+      // v_superficial
+      const auto elem_coeff = _normal * v_face * rho_face / eps_elem_face;
+      const auto neighbor_coeff = _normal * v_face * rho_face / eps_neighbor_face;
+      _ae = elem_coeff * d_var_elem_face_d_elem_dof;
+      _elem_residual = elem_coeff * var_elem_face;
+      _an = -neighbor_coeff * d_var_neighbor_face_d_neighbor_dof;
+      _neighbor_residual = -neighbor_coeff * var_neighbor_face;
+    }
+    else
+    {
+      const auto [interp_coeffs, advected] = interpCoeffsAndAdvected(*_rho_u, advected_face_arg);
+
+      const auto elem_arg = elemArg();
+      const auto neighbor_arg = neighborArg();
+
+      const auto rho_elem = _rho(elem_arg), rho_neighbor = _rho(neighbor_arg);
+      const auto eps_elem = epsilon()(elem_arg), eps_neighbor = epsilon()(neighbor_arg);
+      const auto var_elem = advected.first / rho_elem * eps_elem,
+                 var_neighbor = advected.second / rho_neighbor * eps_neighbor;
+
+      _ae = _normal * v_face * rho_elem / eps_elem * interp_coeffs.first;
+      // Minus sign because we apply a minus sign to the residual in computeResidual
+      _an = -_normal * v_face * rho_neighbor / eps_neighbor * interp_coeffs.second;
+
+      _elem_residual = _ae * var_elem - _an * var_neighbor;
+      _neighbor_residual = -_elem_residual;
+    }
+  }
+
+  _ae *= fi.faceArea() * fi.faceCoord();
+  _an *= fi.faceArea() * fi.faceCoord();
+  _elem_residual *= fi.faceArea() * fi.faceCoord();
+  _neighbor_residual *= fi.faceArea() * fi.faceCoord();
+}
+
+void
+INSFVMomentumAdvection::computeResidual(const FaceInfo & fi)
+{
+  if (skipForBoundary(fi))
+    return;
+
+  computeResidualsAndAData(fi);
+
+  if (_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
+      _face_type == FaceInfo::VarFaceNeighbors::BOTH)
+  {
+    // residual contribution of this kernel to the elem element
+    prepareVectorTag(_assembly, _var.number());
+    _local_re(0) = MetaPhysicL::raw_value(_elem_residual);
+    accumulateTaggedLocalResidual();
+  }
+
+  if (_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ||
+      _face_type == FaceInfo::VarFaceNeighbors::BOTH)
+  {
+    // residual contribution of this kernel to the neighbor element
+    prepareVectorTagNeighbor(_assembly, _var.number());
+    _local_re(0) = MetaPhysicL::raw_value(_neighbor_residual);
+    accumulateTaggedLocalResidual();
+  }
+}
+
+void
+INSFVMomentumAdvection::computeJacobian(const FaceInfo & fi)
+{
+  if (skipForBoundary(fi))
+    return;
+
+  computeResidualsAndAData(fi);
+
+  if (_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
+      _face_type == FaceInfo::VarFaceNeighbors::BOTH)
+  {
+    mooseAssert(_var.dofIndices().size() == 1, "We're currently built to use CONSTANT MONOMIALS");
+
+    _assembly.processResidualAndJacobian(
+        _elem_residual, _var.dofIndices()[0], _vector_tags, _matrix_tags);
+  }
+
+  if (_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ||
+      _face_type == FaceInfo::VarFaceNeighbors::BOTH)
+  {
+    mooseAssert((_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR) ==
+                    (_var.dofIndices().size() == 0),
+                "If the variable is only defined on the neighbor hand side of the face, then that "
+                "means it should have no dof indices on the elem element. Conversely if "
+                "the variable is defined on both sides of the face, then it should have a non-zero "
+                "number of degrees of freedom on the elem element");
+
+    mooseAssert(_var.dofIndicesNeighbor().size() == 1,
+                "We're currently built to use CONSTANT MONOMIALS");
+
+    _assembly.processResidualAndJacobian(
+        _neighbor_residual, _var.dofIndicesNeighbor()[0], _vector_tags, _matrix_tags);
   }
 }
 
@@ -109,20 +233,16 @@ INSFVMomentumAdvection::gatherRCData(const FaceInfo & fi)
   if (skipForBoundary(fi))
     return;
 
-  _face_info = &fi;
-  _normal = fi.normal();
-  _face_type = fi.faceType(_var.name());
-
   const auto saved_velocity_interp_method = _velocity_interp_method;
   _velocity_interp_method = Moose::FV::InterpMethod::Average;
-  // Fill-in the coefficients _ae and _an (but without multiplication by A)
-  computeQpResidual();
+  // Fill-in the coefficients _ae and _an
+  computeResidualsAndAData(fi);
   _velocity_interp_method = saved_velocity_interp_method;
 
   if (_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
       _face_type == FaceInfo::VarFaceNeighbors::BOTH)
-    _rc_uo.addToA(&fi.elem(), _index, _ae * (fi.faceArea() * fi.faceCoord()));
+    _rc_uo.addToA(&fi.elem(), _index, _ae);
   if (_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR ||
       _face_type == FaceInfo::VarFaceNeighbors::BOTH)
-    _rc_uo.addToA(fi.neighborPtr(), _index, _an * (fi.faceArea() * fi.faceCoord()));
+    _rc_uo.addToA(fi.neighborPtr(), _index, _an);
 }

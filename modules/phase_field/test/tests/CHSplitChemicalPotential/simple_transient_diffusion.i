@@ -36,16 +36,16 @@
 [Materials]
   [./chemical_potential]
     type = DerivativeParsedMaterial
-    f_name = mu_prop
-    args = c
-    function = 'c'
+    property_name = mu_prop
+    coupled_variables = c
+    expression = 'c'
     derivative_order = 1
   [../]
   [./var_dependence]
     type = DerivativeParsedMaterial
-    function = '0.1'
-    args = c
-    f_name = var_dep
+    expression = '0.1'
+    coupled_variables = c
+    property_name = var_dep
     derivative_order = 1
   [../]
   [./mobility_tensor]
@@ -58,7 +58,7 @@
     M_name = mobility_prop
     tensors = mobility_tensor
     weights = var_dep
-    args = c
+    coupled_variables = c
   [../]
 []
 

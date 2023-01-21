@@ -67,8 +67,8 @@ PINSFVMomentumFrictionCorrection::gatherRCData(const FaceInfo & fi)
 #ifdef MOOSE_GLOBAL_AD_INDEXING
   using namespace Moose::FV;
 
-  const auto elem_face = elemFromFace();
-  const auto neighbor_face = neighborFromFace();
+  const auto elem_face = elemArg();
+  const auto neighbor_face = neighborArg();
 
   Point _face_centroid = _face_info->faceCentroid();
   Point _elem_centroid = _face_info->elemCentroid();
@@ -112,10 +112,8 @@ PINSFVMomentumFrictionCorrection::gatherRCData(const FaceInfo & fi)
   // If not, we use the extrapolated values of the functors on the face
   else
   {
-    const auto face = makeFace(*_face_info,
-                               Moose::FV::limiterType(Moose::FV::InterpMethod::Average),
-                               true,
-                               faceArgSubdomains());
+    const auto face =
+        makeFace(*_face_info, Moose::FV::limiterType(Moose::FV::InterpMethod::Average), true);
     if (_use_Darcy_friction_model)
       friction_term_elem += (*_cL)(face)(_index)*_rho(face) / _eps(face);
     if (_use_Forchheimer_friction_model)
@@ -128,8 +126,7 @@ PINSFVMomentumFrictionCorrection::gatherRCData(const FaceInfo & fi)
   }
 
   // Compute face superficial velocity gradient
-  auto dudn =
-      _var.gradient(Moose::FV::makeCDFace(*_face_info, faceArgSubdomains())) * _face_info->normal();
+  auto dudn = _var.gradient(makeCDFace(*_face_info)) * _face_info->normal();
 
   if (_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
       _face_type == FaceInfo::VarFaceNeighbors::BOTH)

@@ -209,8 +209,8 @@ class QueueManager(Scheduler):
 
         return command
 
-    def hasTimedOutOrFailed(self, job_data):
-        """ return bool on exceeding walltime """
+    def hasQueuingFailed(self, job_data):
+        """ Determine if the third party scheduler killed the job prematurely """
         return False
 
     def _isProcessReady(self, job_data):
@@ -237,7 +237,7 @@ class QueueManager(Scheduler):
                 pass
 
             # ask derived scheduler if this job has failed
-            elif self.hasTimedOutOrFailed(job_data):
+            elif self.hasQueuingFailed(job_data):
                 for job in job_data.jobs.getJobs():
                     job.setStatus(job.error)
                 is_ready = False

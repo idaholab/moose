@@ -187,11 +187,11 @@
     # of the mesh spacing.
   [./lid_function0]
     type = ParsedFunction
-    value = '4*x*(1-x)'
+    expression = '4*x*(1-x)'
   [../]
   [./lid_function1]
     type = ParsedFunction
-    value = '4*(x-1)*(2-x)'
+    expression = '4*(x-1)*(2-x)'
   [../]
 []
 

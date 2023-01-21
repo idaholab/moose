@@ -210,6 +210,25 @@ protected:
                                    bool in_global,
                                    GlobalParamsAction * global_block);
 
+  /**
+   * Template method for setting vector of several multivalue "scalar" type parameter read from the
+   * input file or command line.  Examples include vectors of several "Point"s and
+   * "RealVectorValue"s such as (a three-element vector; each element is several "Point"s):
+   * points_values = '0 0 0
+   *                  0 0 1;
+   *                  0 1 0;
+   *                  1 0 0
+   *                  1 1 0
+   *                  1 1 1'
+   */
+  template <typename T>
+  void
+  setVectorVectorComponentParameter(const std::string & full_name,
+                                    const std::string & short_name,
+                                    InputParameters::Parameter<std::vector<std::vector<T>>> * param,
+                                    bool in_global,
+                                    GlobalParamsAction * global_block);
+
   std::unique_ptr<hit::Node> _cli_root = nullptr;
   std::unique_ptr<hit::Node> _root = nullptr;
   std::vector<std::string> _secs_need_first;

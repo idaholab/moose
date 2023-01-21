@@ -67,27 +67,17 @@ TEST_F(ParsedFunctionTest, basicConstructor)
   dot_functor = f_wrapped.dot(elem_arg, 0);
   test_eq();
 
-  const Elem * neighbor = nullptr;
   unsigned int side = libMesh::invalid_uint;
   for (const auto s : elem->side_index_range())
     if (elem->neighbor_ptr(s))
     {
-      neighbor = elem->neighbor_ptr(s);
       side = s;
       break;
     }
 
-  // Test elem_from_face overloads
-  const FaceInfo * const fi = _mesh->faceInfo(elem, side);
-  const auto elem_from_face = Moose::ElemFromFaceArg{elem, fi, false, elem->subdomain_id()};
-  f_functor = f_wrapped(elem_from_face, 0);
-  gradient_functor = f_wrapped.gradient(elem_from_face, 0);
-  dot_functor = f_wrapped.dot(elem_from_face, 0);
-  test_eq();
-
   // Test face overloads
-  auto face =
-      Moose::FV::makeCDFace(*fi, std::make_pair(elem->subdomain_id(), neighbor->subdomain_id()));
+  const FaceInfo * const fi = _mesh->faceInfo(elem, side);
+  auto face = Moose::FaceArg({fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr});
   f_traditional = f.value(0, fi->faceCentroid());
   f_functor = f_wrapped(face, 0);
   gradient_traditional = f.gradient(0, fi->faceCentroid());

@@ -11,11 +11,11 @@
 [Functions]
   [T_bc_fn]
     type = ParsedFunction
-    value = '300+t*x*10'
+    expression = '300+t*x*10'
   []
   [T_ffn]
     type = ParsedFunction
-    value = 'x*10'
+    expression = 'x*10'
   []
 []
 

@@ -24,17 +24,17 @@
 
   [./forcing_func]
     type = ParsedFunction
-    value = alpha*alpha*pi*pi*sin(alpha*pi*x)
-    vars = 'alpha'
-    vals = '4'
+    expression = alpha*alpha*pi*pi*sin(alpha*pi*x)
+    symbol_names = 'alpha'
+    symbol_values = '4'
   [../]
 
   [./u_func]
     type = ParsedGradFunction
     value = sin(alpha*pi*x)
     grad_x   = alpha*pi*sin(alpha*pi*x)
-    vars = 'alpha'
-    vals = '4'
+    symbol_names = 'alpha'
+    symbol_values = '4'
   [../]
 []
 

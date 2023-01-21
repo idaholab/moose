@@ -31,12 +31,12 @@
 [Functions]
   [./exact_fn]
     type = ParsedFunction
-    value = sin(2*pi*x)*sin(2*pi*y)
+    expression = sin(2*pi*x)*sin(2*pi*y)
   [../]
 
   [./forcing_fn]
     type = ParsedFunction
-    value = 8*pi^2*sin(2*pi*x)*sin(2*pi*y)
+    expression = 8*pi^2*sin(2*pi*x)*sin(2*pi*y)
   [../]
 []
 

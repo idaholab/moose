@@ -14,11 +14,11 @@
   # ODEs
   [./exact_x_fn]
     type = ParsedFunction
-    value = (-1/3)*exp(-t)+(4/3)*exp(5*t)
+    expression = (-1/3)*exp(-t)+(4/3)*exp(5*t)
   [../]
   [./exact_y_fn]
     type = ParsedFunction
-    value = (2/3)*exp(-t)+(4/3)*exp(5*t)
+    expression = (2/3)*exp(-t)+(4/3)*exp(5*t)
   [../]
 []
 

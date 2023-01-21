@@ -29,7 +29,7 @@
 [Functions]
   [WaveNumberSquared]
     type = ParsedFunction
-    value = '(2*pi*1e9/3e8)*(2*pi*1e9/3e8)'
+    expression = '(2*pi*1e9/3e8)*(2*pi*1e9/3e8)'
   []
 []
 

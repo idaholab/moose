@@ -64,7 +64,7 @@
 [Functions]
   [./pressure]
     type = ParsedFunction
-    value = 'sqrt(t)'
+    expression = 'sqrt(t)'
   [../]
 
   [./dts]

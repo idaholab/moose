@@ -278,7 +278,7 @@ def formatStatusMessage(job, status, message, options):
 def formatResult(job, options, result='', color=True, **kwargs):
     # Support only one instance of a format identifier, but obey the order
     terminal_format = list(OrderedDict.fromkeys(list(TERM_FORMAT)))
-    status, message, message_color, exit_code = job.getJointStatus()
+    status, message, message_color, exit_code, sort_value = job.getJointStatus()
 
     color_opts = {'code' : options.code, 'colored' : options.colored}
 

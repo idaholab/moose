@@ -48,15 +48,15 @@
 [Functions]
   [pullx]
     type = ParsedFunction
-    value = '0.4 * t'
+    expression = '0.4 * t'
   []
   [pully]
     type = ParsedFunction
-    value = '-0.2 * t'
+    expression = '-0.2 * t'
   []
   [pullz]
     type = ParsedFunction
-    value = '0.3 * t'
+    expression = '0.3 * t'
   []
 []
 

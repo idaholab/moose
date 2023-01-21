@@ -29,6 +29,7 @@ main(int argc, char ** argv)
   MooseInit init(argc, argv);
   registerApp(GeochemistryApp);
   Moose::_throw_on_error = true;
+  Moose::_throw_on_warning = true;
 
   return RUN_ALL_TESTS();
 }

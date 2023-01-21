@@ -18,21 +18,21 @@
 [Functions]
   [./bc_fnl]
     type = ParsedFunction
-    value = -1
+    expression = -1
   [../]
   [./bc_fnr]
     type = ParsedFunction
-    value = 1
+    expression = 1
   [../]
 
   [./forcing_fn]
     type = ParsedFunction
-    value = x
+    expression = x
   [../]
 
   [./solution]
     type = ParsedGradFunction
-    value = x
+    expression = x
     grad_x = 1
   [../]
 []

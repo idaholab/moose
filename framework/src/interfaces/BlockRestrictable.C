@@ -207,7 +207,7 @@ BlockRestrictable::hasBlocks(const std::vector<SubdomainName> & names) const
 }
 
 bool
-BlockRestrictable::hasBlocks(const SubdomainID & id) const
+BlockRestrictable::hasBlocks(const SubdomainID id) const
 {
   if (_blk_ids.empty() || _blk_ids.find(Moose::ANY_BLOCK_ID) != _blk_ids.end())
     return true;

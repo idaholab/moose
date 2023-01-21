@@ -30,7 +30,7 @@ class TestSQA(unittest.TestCase):
                              'module_far.md.template', 'module_rtm.md.template', 'module_sdd.md.template',
                              'module_srs.md.template', 'module_stp.md.template', 'module_vvr.md.template',
                              'module_sll.md.template']
-        cls.DOC_FILE = os.path.join(cls.ROOT_DIR, 'modules', 'doc', 'content', 'python', 'MooseDocs', 'extensions', 'sqa.md')
+        cls.DOC_FILE = os.path.join(cls.ROOT_DIR, 'python', 'doc', 'content', 'python', 'MooseDocs', 'extensions', 'sqa.md')
         cls.COLLECTIONS = {'FUNCTIONAL', 'USABILITY', 'PERFORMANCE', 'SYSTEM', 'FAILURE_ANALYSIS'}
 
     def testTemplatesFiles(self):

@@ -84,16 +84,16 @@ pout = 7e6
 [Functions]
   [compute_outlet_temperature_fn]
     type = ParsedFunction
-    vals = 'core_inlet_mdot core_inlet_temperature  1000'
-    vars = 'mdot            Tin                     Q'
-    value = 'Tin + Q / mdot'
+    symbol_values = 'core_inlet_mdot core_inlet_temperature  1000'
+    symbol_names = 'mdot            Tin                     Q'
+    expression = 'Tin + Q / mdot'
   []
 
   [compute_inlet_pressure_fn]
     type = ParsedFunction
-    vals = 'core_inlet_mdot core_outlet_pressure  5000'
-    vars = 'mdot            pout                     C'
-    value = 'pout + C * mdot'
+    symbol_values = 'core_inlet_mdot core_outlet_pressure  5000'
+    symbol_names = 'mdot            pout                     C'
+    expression = 'pout + C * mdot'
   []
 []
 

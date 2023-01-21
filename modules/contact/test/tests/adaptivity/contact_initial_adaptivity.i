@@ -23,7 +23,7 @@
 [Functions]
   [./negramp]
     type = ParsedFunction
-    value = -t/10
+    expression = -t/10
   [../]
 []
 

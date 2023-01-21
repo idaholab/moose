@@ -159,9 +159,9 @@ TEST_F(TabulatedBicubicFluidPropertiesTest, fromFileVE)
   Real pert = 1.0e-7;
 
   // Read the data file
-  Moose::_throw_on_error = false;
+  Moose::_throw_on_warning = false;
   const_cast<TabulatedBicubicFluidProperties *>(_tab_fp_ve)->initialSetup();
-  Moose::_throw_on_error = true;
+  Moose::_throw_on_warning = true;
 
   // round trip p,T -> v,e -> p,T
   {

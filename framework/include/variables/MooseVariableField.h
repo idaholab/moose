@@ -40,7 +40,6 @@ template <typename OutputType>
 class MooseVariableField : public MooseVariableFieldBase,
                            public Moose::FunctorBase<typename Moose::ADType<OutputType>::type>,
                            public MeshChangedInterface
-
 {
 public:
   // type for gradient, second and divergence of template class OutputType
@@ -340,6 +339,7 @@ public:
   void residualSetup() override;
   void jacobianSetup() override;
 
+  using MooseVariableFieldBase::hasBlocks;
   /*
    * Returns whether a variable is defined on a block as a functor.
    * This makes the link between functor block restriction and the
@@ -347,9 +347,7 @@ public:
    * @param id subdomain id we want to know whether the variable is defined on
    * @return whether the variable is defined on this domain
    */
-  bool hasBlocks(const SubdomainID & id) const override { return BlockRestrictable::hasBlocks(id); }
-  // The five other definitions of hasBlocks should not be hidden
-  using BlockRestrictable::hasBlocks;
+  bool hasBlocks(const SubdomainID id) const override { return BlockRestrictable::hasBlocks(id); }
 
 protected:
   using FunctorArg = typename Moose::ADType<OutputType>::type;
@@ -368,7 +366,7 @@ protected:
   ValueType evaluate(const ElemSideQpArg & elem_side_qp, unsigned int state) const override final;
   ValueType evaluate(const ElemPointArg & elem_point, unsigned int state) const override final;
 
-  GradientType evaluateGradient(const ElemQpArg & elem_qp, unsigned int state) const override final;
+  GradientType evaluateGradient(const ElemQpArg & elem_qp, unsigned int state) const override;
   GradientType evaluateGradient(const ElemSideQpArg & elem_side_qp,
                                 unsigned int state) const override final;
 

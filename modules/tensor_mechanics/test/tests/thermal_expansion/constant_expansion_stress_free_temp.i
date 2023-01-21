@@ -57,7 +57,7 @@
 [Functions]
   [./temperature_load]
     type = ParsedFunction
-    value = t*(5000.0)+300.0
+    expression = t*(5000.0)+300.0
   [../]
 []
 

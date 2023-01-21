@@ -8,8 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PINSFVMassAdvection.h"
-#include "PINSFVSuperficialVelocityVariable.h"
 #include "NS.h"
+#include "NSFVUtils.h"
 
 registerMooseObject("NavierStokesApp", PINSFVMassAdvection);
 

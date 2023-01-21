@@ -10,21 +10,21 @@
 [Functions]
   [./bc_fnl]
     type = ParsedFunction
-    value = -3*x*x
+    expression = -3*x*x
   [../]
   [./bc_fnr]
     type = ParsedFunction
-    value = 3*x*x
+    expression = 3*x*x
   [../]
 
   [./forcing_fn]
     type = ParsedFunction
-    value = -6*x+(x*x*x)
+    expression = -6*x+(x*x*x)
   [../]
 
   [./solution]
     type = ParsedGradFunction
-    value = x*x*x
+    expression = x*x*x
     grad_x = 3*x*x
   [../]
 []

@@ -63,9 +63,9 @@
 [Functions]
   [injection_rate]
     type = ParsedFunction
-    vals = injection_area
-    vars = area
-    value = '-0.1/area'
+    symbol_values = injection_area
+    symbol_names = area
+    expression = '-0.1/area'
   []
 []
 

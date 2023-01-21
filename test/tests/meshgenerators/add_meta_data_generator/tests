@@ -1,0 +1,223 @@
+[Tests]
+  issues = '#23135'
+  design = 'meshgenerators/AddMetaDataGenerator.md'
+  [add_mesh_meta_data]
+    type = 'RunApp'
+    input = 'meshmetadata_assign.i'
+    cli_args = '--mesh-only'
+    recover = false
+    requirement = 'The system shall add some specific scalar and vector mesh meta data to the input mesh.'
+  []
+
+  [err_diff_real_scalar_size]
+    type = 'RunException'
+    input = 'meshmetadata_assign.i'
+    cli_args = 'Mesh/amdg/real_scalar_metadata_names="rs_1"
+                --mesh-only err.e'
+    expect_err = 'Length of this parameter must be the same as that of real_scalar_metadata_names'
+    requirement = 'The system shall throw an error if real_scalar_metadata_names and real_scalar_metadata_values are different in size.'
+  []
+  [err_diff_uint_scalar_size]
+    type = 'RunException'
+    input = 'meshmetadata_assign.i'
+    cli_args = 'Mesh/amdg/uint_scalar_metadata_names="uis_1 uis_2"
+                --mesh-only err.e'
+    expect_err = 'Length of this parameter must be the same as that of uint_scalar_metadata_names'
+    requirement = 'The system shall throw an error if uint_scalar_metadata_names and uint_scalar_metadata_values are different in size.'
+  [] 
+  [err_diff_int_scalar_size]
+    type = 'RunException'
+    input = 'meshmetadata_assign.i'
+    cli_args = 'Mesh/amdg/int_scalar_metadata_names="is_1 is_2"
+                --mesh-only err.e'
+    expect_err = 'Length of this parameter must be the same as that of int_scalar_metadata_names'
+    requirement = 'The system shall throw an error if int_scalar_metadata_names and int_scalar_metadata_values are different in size.'
+  [] 
+  [err_diff_dof_id_type_scalar_size]
+    type = 'RunException'
+    input = 'meshmetadata_assign.i'
+    cli_args = 'Mesh/amdg/dof_id_type_scalar_metadata_names="ds_1"
+                --mesh-only err.e'
+    expect_err = 'Length of this parameter must be the same as that of dof_id_type_scalar_metadata_names'
+    requirement = 'The system shall throw an error if dof_id_type_scalar_metadata_names and dof_id_type_scalar_metadata_values are different in size.'
+  []
+  [err_diff_subdomain_id_type_scalar_size]
+    type = 'RunException'
+    input = 'meshmetadata_assign.i'
+    cli_args = 'Mesh/amdg/subdomain_id_type_scalar_metadata_names="ss_1"
+                --mesh-only err.e'
+    expect_err = 'Length of this parameter must be the same as that of subdomain_id_type_scalar_metadata_names'
+    requirement = 'The system shall throw an error if subdomain_id_type_scalar_metadata_names and subdomain_id_type_scalar_metadata_values are different in size.'
+  []
+  [err_diff_boolean_scalar_size]
+    type = 'RunException'
+    input = 'meshmetadata_assign.i'
+    cli_args = 'Mesh/amdg/boolean_scalar_metadata_names="bs_1 bs_2"
+                --mesh-only err.e'
+    expect_err = 'Length of this parameter must be the same as that of boolean_scalar_metadata_names'
+    requirement = 'The system shall throw an error if boolean_scalar_metadata_names and boolean_scalar_metadata_values are different in size.'
+  []
+  [err_diff_point_scalar_size]
+    type = 'RunException'
+    input = 'meshmetadata_assign.i'
+    cli_args = 'Mesh/amdg/point_scalar_metadata_names="ps_1"
+                --mesh-only err.e'
+    expect_err = 'Length of this parameter must be the same as that of point_scalar_metadata_names'
+    requirement = 'The system shall throw an error if point_scalar_metadata_names and point_scalar_metadata_values are different in size.'
+  [] 
+
+  [err_diff_real_vector_size]
+    type = 'RunException'
+    input = 'meshmetadata_assign.i'
+    cli_args = 'Mesh/amdg/real_vector_metadata_names="rv_1"
+                --mesh-only err.e'
+    expect_err = 'Length of this parameter must be the same as that of real_vector_metadata_names'
+    requirement = 'The system shall throw an error if real_vector_metadata_names and real_vector_metadata_values are different in size.'
+  []
+  [err_diff_uint_vector_size]
+    type = 'RunException'
+    input = 'meshmetadata_assign.i'
+    cli_args = 'Mesh/amdg/uint_vector_metadata_names="uiv_1 uiv_2"
+                --mesh-only err.e'
+    expect_err = 'Length of this parameter must be the same as that of uint_vector_metadata_names'
+    requirement = 'The system shall throw an error if uint_vector_metadata_names and uint_vector_metadata_values are different in size.'
+  [] 
+  [err_diff_int_vector_size]
+    type = 'RunException'
+    input = 'meshmetadata_assign.i'
+    cli_args = 'Mesh/amdg/int_vector_metadata_names="iv_1 iv_2"
+                --mesh-only err.e'
+    expect_err = 'Length of this parameter must be the same as that of int_vector_metadata_names'
+    requirement = 'The system shall throw an error if int_vector_metadata_names and int_vector_metadata_values are different in size.'
+  [] 
+  [err_diff_dof_id_type_vector_size]
+    type = 'RunException'
+    input = 'meshmetadata_assign.i'
+    cli_args = 'Mesh/amdg/dof_id_type_vector_metadata_names="dv_1"
+                --mesh-only err.e'
+    expect_err = 'Length of this parameter must be the same as that of dof_id_type_vector_metadata_names'
+    requirement = 'The system shall throw an error if dof_id_type_vector_metadata_names and dof_id_type_vector_metadata_values are different in size.'
+  []
+  [err_diff_subdomain_id_type_vector_size]
+    type = 'RunException'
+    input = 'meshmetadata_assign.i'
+    cli_args = 'Mesh/amdg/subdomain_id_type_vector_metadata_names="sv_1"
+                --mesh-only err.e'
+    expect_err = 'Length of this parameter must be the same as that of subdomain_id_type_vector_metadata_names'
+    requirement = 'The system shall throw an error if subdomain_id_type_vector_metadata_names and subdomain_id_type_vector_metadata_values are different in size.'
+  []
+  [err_diff_point_vector_size]
+    type = 'RunException'
+    input = 'meshmetadata_assign.i'
+    cli_args = 'Mesh/amdg/point_vector_metadata_names="pv_1"
+                --mesh-only err.e'
+    expect_err = 'Length of this parameter must be the same as that of point_vector_metadata_names'
+    requirement = 'The system shall throw an error if point_vector_metadata_names and point_vector_metadata_values are different in size.'
+  []
+
+  [err_dup_real_scalar_name]
+    type = 'RunException'
+    input = 'meshmetadata_assign.i'
+    cli_args = 'Mesh/amdg/real_scalar_metadata_names="rs_1 rs_1"
+                --mesh-only err.e'
+    expect_err = 'Elements of this parameter must be unique.'
+    requirement = 'The system shall throw an error if real_scalar_metadata_names contains non-unique elements.'
+  []
+  [err_dup_uint_scalar_name]
+    type = 'RunException'
+    input = 'meshmetadata_assign.i'
+    cli_args = 'Mesh/amdg/uint_scalar_metadata_names="uis_1 uis_1"
+                --mesh-only err.e'
+    expect_err = 'Elements of this parameter must be unique.'
+    requirement = 'The system shall throw an error if uint_scalar_metadata_names contains non-unique elements.'
+  []
+  [err_dup_int_scalar_name]
+    type = 'RunException'
+    input = 'meshmetadata_assign.i'
+    cli_args = 'Mesh/amdg/int_scalar_metadata_names="is_1 is_1"
+                --mesh-only err.e'
+    expect_err = 'Elements of this parameter must be unique.'
+    requirement = 'The system shall throw an error if int_scalar_metadata_names contains non-unique elements.'
+  []
+  [err_dup_dof_id_type_scalar_name]
+    type = 'RunException'
+    input = 'meshmetadata_assign.i'
+    cli_args = 'Mesh/amdg/dof_id_type_scalar_metadata_names="ds_1 ds_1"
+                --mesh-only err.e'
+    expect_err = 'Elements of this parameter must be unique.'
+    requirement = 'The system shall throw an error if dof_id_type_scalar_metadata_names contains non-unique elements.'
+  []
+  [err_dup_subdomain_id_type_scalar_name]
+    type = 'RunException'
+    input = 'meshmetadata_assign.i'
+    cli_args = 'Mesh/amdg/subdomain_id_type_scalar_metadata_names="ss_1 ss_1"
+                --mesh-only err.e'
+    expect_err = 'Elements of this parameter must be unique.'
+    requirement = 'The system shall throw an error if subdomain_id_type_scalar_metadata_names contains non-unique elements.'
+  []
+  [err_dup_boolean_scalar_name]
+    type = 'RunException'
+    input = 'meshmetadata_assign.i'
+    cli_args = 'Mesh/amdg/boolean_scalar_metadata_names="bs_1 bs_1"
+                --mesh-only err.e'
+    expect_err = 'Elements of this parameter must be unique.'
+    requirement = 'The system shall throw an error if boolean_scalar_metadata_names contains non-unique elements.'
+  []
+  [err_dup_point_scalar_name]
+    type = 'RunException'
+    input = 'meshmetadata_assign.i'
+    cli_args = 'Mesh/amdg/point_scalar_metadata_names="ps_1 ps_1"
+                --mesh-only err.e'
+    expect_err = 'Elements of this parameter must be unique.'
+    requirement = 'The system shall throw an error if point_scalar_metadata_names contains non-unique elements.'
+  []
+
+  [err_dup_real_vector_name]
+    type = 'RunException'
+    input = 'meshmetadata_assign.i'
+    cli_args = 'Mesh/amdg/real_vector_metadata_names="rv_1 rv_1"
+                --mesh-only err.e'
+    expect_err = 'Elements of this parameter must be unique.'
+    requirement = 'The system shall throw an error if real_vector_metadata_names contains non-unique elements.'
+  []
+  [err_dup_uint_vector_name]
+    type = 'RunException'
+    input = 'meshmetadata_assign.i'
+    cli_args = 'Mesh/amdg/uint_vector_metadata_names="uiv_1 uiv_1"
+                --mesh-only err.e'
+    expect_err = 'Elements of this parameter must be unique.'
+    requirement = 'The system shall throw an error if uint_vector_metadata_names contains non-unique elements.'
+  []
+  [err_dup_int_vector_name]
+    type = 'RunException'
+    input = 'meshmetadata_assign.i'
+    cli_args = 'Mesh/amdg/int_vector_metadata_names="iv_1 iv_1"
+                --mesh-only err.e'
+    expect_err = 'Elements of this parameter must be unique.'
+    requirement = 'The system shall throw an error if int_vector_metadata_names contains non-unique elements.'
+  []
+  [err_dup_dof_id_type_vector_name]
+    type = 'RunException'
+    input = 'meshmetadata_assign.i'
+    cli_args = 'Mesh/amdg/dof_id_type_vector_metadata_names="dv_1 dv_1"
+                --mesh-only err.e'
+    expect_err = 'Elements of this parameter must be unique.'
+    requirement = 'The system shall throw an error if dof_id_type_vector_metadata_names contains non-unique elements.'
+  []
+  [err_dup_subdomain_id_type_vector_name]
+    type = 'RunException'
+    input = 'meshmetadata_assign.i'
+    cli_args = 'Mesh/amdg/subdomain_id_type_vector_metadata_names="sv_1 sv_1"
+                --mesh-only err.e'
+    expect_err = 'Elements of this parameter must be unique.'
+    requirement = 'The system shall throw an error if subdomain_id_type_vector_metadata_names contains non-unique elements.'
+  []
+  [err_dup_point_vector_name]
+    type = 'RunException'
+    input = 'meshmetadata_assign.i'
+    cli_args = 'Mesh/amdg/point_vector_metadata_names="pv_1 pv_1"
+                --mesh-only err.e'
+    expect_err = 'Elements of this parameter must be unique.'
+    requirement = 'The system shall throw an error if point_vector_metadata_names contains non-unique elements.'
+  []
+[]

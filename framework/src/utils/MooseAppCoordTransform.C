@@ -190,7 +190,14 @@ MooseAppCoordTransform::validParams()
   ///    be set for the whole domain
   /// 2. _blocks.size() > 0 and no coordinate system was specified, then the whole domain will be XYZ.
   /// 3. _blocks.size() > 0 and one coordinate system was specified, then the whole domain will be that system.
-  params.addParam<std::vector<SubdomainName>>("block", "Block IDs for the coordinate systems");
+  params.addDeprecatedParam<std::vector<SubdomainName>>(
+      "block",
+      "Block IDs for the coordinate systems.",
+      "Please use the 'coord_block' parameter instead.");
+  params.addParam<std::vector<SubdomainName>>(
+      "coord_block",
+      "Block IDs for the coordinate systems. If this parameter is specified, then it must "
+      "encompass all the subdomains on the mesh.");
   MultiMooseEnum coord_types("XYZ RZ RSPHERICAL", "XYZ");
   MooseEnum rz_coord_axis("X=0 Y=1", "Y");
   params.addParam<MultiMooseEnum>(

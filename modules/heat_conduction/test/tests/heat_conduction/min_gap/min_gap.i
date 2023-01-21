@@ -84,11 +84,11 @@
 [Functions]
   [./disp_x]
     type = ParsedFunction
-    value = -3+t
+    expression = -3+t
   [../]
   [./left_temp]
     type = ParsedFunction
-    value = 1000+t
+    expression = 1000+t
   [../]
 []
 

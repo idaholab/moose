@@ -43,7 +43,7 @@
 
   [./ode1]
     type = ParsedODEKernel
-    function = '-n'
+    expression = '-n'
     variable = n
     extra_matrix_tags = 'mat_tag1'
     extra_vector_tags = 'vec_tag1'
@@ -51,7 +51,7 @@
 
   [./ode2]
     type = ParsedODEKernel
-    function = '-n'
+    expression = '-n'
     variable = n
     vector_tags = 'vec_tag2'
     matrix_tags = 'mat_tag2'
@@ -107,7 +107,7 @@
 [Functions]
   [./exact_solution]
     type = ParsedFunction
-    value = exp(t)
+    expression = exp(t)
   [../]
 []
 

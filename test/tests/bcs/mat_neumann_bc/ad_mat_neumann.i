@@ -28,7 +28,7 @@
 [Functions]
   [./ic_func_phi]
     type = ParsedFunction
-    value = '0.5 * (1 - tanh((x - 5) / 0.8))'
+    expression = '0.5 * (1 - tanh((x - 5) / 0.8))'
   [../]
 []
 
@@ -56,9 +56,9 @@
 [Materials]
   [./hm]
     type = ADParsedMaterial
-    f_name = hm
-    args = 'phi'
-    function = '3*phi^2 - 2*phi^3'
+    property_name = hm
+    coupled_variables = 'phi'
+    expression = '3*phi^2 - 2*phi^3'
     outputs = exodus
   [../]
 []

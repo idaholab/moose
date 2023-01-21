@@ -25,6 +25,7 @@
 #include "TaggingInterface.h"
 #include "MooseVariableDependencyInterface.h"
 #include "FunctorInterface.h"
+#include "FaceArgInterface.h"
 
 // Forward declerations
 template <typename>
@@ -54,7 +55,8 @@ class FVBoundaryCondition : public MooseObject,
                             public TaggingInterface,
                             public MooseVariableInterface<Real>,
                             public MooseVariableDependencyInterface,
-                            public FunctorInterface
+                            public FunctorInterface,
+                            public FaceArgProducerInterface
 {
 public:
   /**
@@ -74,6 +76,8 @@ public:
 
   const MooseVariableFV<Real> & variable() const { return _var; }
 
+  bool hasFaceSide(const FaceInfo & fi, bool fi_elem_side) const override;
+
 protected:
   /**
    * Determine the single sided face argument when evaluating a functor on a face.
@@ -84,7 +88,7 @@ protected:
    *        interpolation is required for the parameters of the functor
    * @param correct_skewness whether to perform skew correction at the face
    */
-  Moose::SingleSidedFaceArg singleSidedFaceArg(
+  Moose::FaceArg singleSidedFaceArg(
       const FaceInfo * fi = nullptr,
       Moose::FV::LimiterType limiter_type = Moose::FV::LimiterType::CentralDifference,
       bool correct_skewness = false) const;

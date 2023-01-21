@@ -130,7 +130,7 @@
     # space so that the Dirichlet conditions are the same regardless
     # of the mesh spacing.
     type = ParsedFunction
-    value = '4*x*(1-x)'
+    expression = '4*x*(1-x)'
   [../]
 []
 

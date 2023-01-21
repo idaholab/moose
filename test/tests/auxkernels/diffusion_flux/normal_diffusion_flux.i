@@ -24,7 +24,7 @@
 [Functions]
   [./T]
     type = ParsedFunction
-    value = 'x*x*y*y+1'
+    expression = 'x*x*y*y+1'
   [../]
 []
 

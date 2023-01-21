@@ -31,15 +31,15 @@
 [Functions]
   [./tfunc]
     type = ParsedFunction
-    value = t
+    expression = t
   [../]
   [./void_prop_func]
     type = ParsedFunction
-    value = 'rad:=0.2;m:=50;r:=sqrt(x^2+y^2);1-exp(-(r/rad)^m)+1e-8'
+    expression = 'rad:=0.2;m:=50;r:=sqrt(x^2+y^2);1-exp(-(r/rad)^m)+1e-8'
   [../]
   [./gb_prop_func]
     type = ParsedFunction
-    value = 'rad:=0.2;thk:=0.05;m:=50;sgnx:=1-exp(-(x/rad)^m);v:=sgnx*exp(-(y/thk)^m);0.005*(1-v)+0.001*v'
+    expression = 'rad:=0.2;thk:=0.05;m:=50;sgnx:=1-exp(-(x/rad)^m);v:=sgnx*exp(-(y/thk)^m);0.005*(1-v)+0.001*v'
   [../]
 []
 
@@ -99,14 +99,14 @@
   [./define_mobility]
     type = ParsedMaterial
     material_property_names = 'gc_prop visco'
-    f_name = L
-    function = '1.0/(gc_prop * visco)'
+    property_name = L
+    expression = '1.0/(gc_prop * visco)'
   [../]
   [./define_kappa]
     type = ParsedMaterial
     material_property_names = 'gc_prop l'
-    f_name = kappa_op
-    function = 'gc_prop * l'
+    property_name = kappa_op
+    expression = 'gc_prop * l'
   [../]
   [./damage_stress]
     type = ComputeLinearElasticPFFractureStress
@@ -118,27 +118,27 @@
   [../]
   [./degradation]
     type = DerivativeParsedMaterial
-    f_name = degradation
-    args = 'c'
-    function = '(1.0-c)^2*(1.0 - eta) + eta'
+    property_name = degradation
+    coupled_variables = 'c'
+    expression = '(1.0-c)^2*(1.0 - eta) + eta'
     constant_names       = 'eta'
     constant_expressions = '0.0'
     derivative_order = 2
   [../]
   [./fracture_energy]
     type = DerivativeParsedMaterial
-    f_name = fracture_energy
-    args = 'c'
+    property_name = fracture_energy
+    coupled_variables = 'c'
     material_property_names = 'gc_prop l'
-    function = 'c^2 * gc_prop / 2 / l'
+    expression = 'c^2 * gc_prop / 2 / l'
     derivative_order = 2
   [../]
   [./fracture_driving_energy]
     type = DerivativeSumMaterial
-    args = c
+    coupled_variables = c
     sum_materials = 'elastic_energy fracture_energy'
     derivative_order = 2
-    f_name = F
+    property_name = F
   [../]
 []
 

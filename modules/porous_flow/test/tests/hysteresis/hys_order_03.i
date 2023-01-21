@@ -113,7 +113,7 @@
 [Functions]
   [sink_strength_fcn]
     type = ParsedFunction
-    value = '30 * if(t <= 8, -1, if(t <= 15, 1, if(t <= 20, -1, if(t <= 24, 1, if(t <= 27, -1, if(t <= 30, 1, -1))))))'
+    expression = '30 * if(t <= 8, -1, if(t <= 15, 1, if(t <= 20, -1, if(t <= 24, 1, if(t <= 27, -1, if(t <= 30, 1, -1))))))'
   []
 []
 

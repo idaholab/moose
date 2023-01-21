@@ -32,10 +32,8 @@ public:
   {
   }
 
-  std::pair<bool, const Elem *> isExtrapolatedBoundaryFace(const FaceInfo & fi) const override
-  {
-    return _vector.isExtrapolatedBoundaryFace(fi);
-  }
+  bool isExtrapolatedBoundaryFace(const FaceInfo & fi, const Elem * elem) const override;
+  bool hasBlocks(SubdomainID sub_id) const override { return _vector.hasBlocks(sub_id); }
 
 private:
   /// The parent vector functor
@@ -49,19 +47,7 @@ private:
     return _vector(elem, state)(_component);
   }
 
-  ValueType evaluate(const Moose::ElemFromFaceArg & elem_from_face,
-                     const unsigned int state) const override final
-  {
-    return _vector(elem_from_face, state)(_component);
-  }
-
   ValueType evaluate(const Moose::FaceArg & face, const unsigned int state) const override final
-  {
-    return _vector(face, state)(_component);
-  }
-
-  ValueType evaluate(const Moose::SingleSidedFaceArg & face,
-                     const unsigned int state) const override final
   {
     return _vector(face, state)(_component);
   }
@@ -97,3 +83,10 @@ private:
     return _vector.gradient(face, state).row(_component);
   }
 };
+
+template <typename T>
+bool
+VectorComponentFunctor<T>::isExtrapolatedBoundaryFace(const FaceInfo & fi, const Elem * elem) const
+{
+  return _vector.isExtrapolatedBoundaryFace(fi, elem);
+}

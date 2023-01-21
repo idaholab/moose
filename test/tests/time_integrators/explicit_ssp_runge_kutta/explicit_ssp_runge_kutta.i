@@ -28,7 +28,7 @@
   [./source_part1]
     type = ParsedODEKernel
     variable = u
-    function = 'u'
+    expression = 'u'
   [../]
   [./source_part2]
     type = PostprocessorSinkScalarKernel
@@ -40,7 +40,7 @@
 [Functions]
   [./sink_fn]
     type = ParsedFunction
-    value = '-t^3 - 3*t^2'
+    expression = '-t^3 - 3*t^2'
   [../]
 []
 

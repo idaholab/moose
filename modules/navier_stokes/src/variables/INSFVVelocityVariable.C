@@ -68,19 +68,38 @@ INSFVVelocityVariable::INSFVVelocityVariable(const InputParameters & params) : I
 
 ADReal
 INSFVVelocityVariable::getExtrapolatedBoundaryFaceValue(const FaceInfo & fi,
-                                                        bool two_term_expansion) const
+                                                        bool two_term_expansion,
+                                                        const Elem * elem_to_extrapolate_from) const
 {
   ADReal boundary_value;
+  bool elem_to_extrapolate_from_is_fi_elem;
+  std::tie(elem_to_extrapolate_from, elem_to_extrapolate_from_is_fi_elem) =
+      [this, &fi, elem_to_extrapolate_from]() -> std::pair<const Elem *, bool>
+  {
+    if (elem_to_extrapolate_from)
+      return {elem_to_extrapolate_from, elem_to_extrapolate_from == &fi.elem()};
+    else
+    {
+      const auto [elem_guaranteed_to_have_dofs,
+                  other_elem,
+                  elem_guaranteed_to_have_dofs_is_fi_elem] =
+          Moose::FV::determineElemOneAndTwo(fi, *this);
+      libmesh_ignore(other_elem);
+      return {elem_guaranteed_to_have_dofs, elem_guaranteed_to_have_dofs_is_fi_elem};
+    }
+  }();
+
   if (_two_term_boundary_expansion && isFullyDevelopedFlowFace(fi))
   {
-    const auto & tup = Moose::FV::determineElemOneAndTwo(fi, *this);
-    const Elem * const elem = std::get<0>(tup);
-    const Point vector_to_face = std::get<2>(tup) ? (fi.faceCentroid() - fi.elemCentroid())
-                                                  : (fi.faceCentroid() - fi.neighborCentroid());
-    boundary_value = uncorrectedAdGradSln(fi) * vector_to_face + getElemValue(elem);
+    const Point vector_to_face = elem_to_extrapolate_from_is_fi_elem
+                                     ? (fi.faceCentroid() - fi.elemCentroid())
+                                     : (fi.faceCentroid() - fi.neighborCentroid());
+    boundary_value =
+        uncorrectedAdGradSln(fi) * vector_to_face + getElemValue(elem_to_extrapolate_from);
   }
   else
-    boundary_value = INSFVVariable::getExtrapolatedBoundaryFaceValue(fi, two_term_expansion);
+    boundary_value = INSFVVariable::getExtrapolatedBoundaryFaceValue(
+        fi, two_term_expansion, elem_to_extrapolate_from);
 
   return boundary_value;
 }
@@ -203,7 +222,7 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem, bool correct_skewness)
       mooseAssert(elem == &functor_elem,
                   "Just a sanity check that the element being passed in is the one we passed out.");
 
-      if (isExtrapolatedBoundaryFace(*fi).first)
+      if (isExtrapolatedBoundaryFace(*fi, &functor_elem))
       {
         if (_two_term_boundary_expansion)
         {
@@ -244,11 +263,14 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem, bool correct_skewness)
           grad_b += surface_vector * elem_value;
       }
       else if (isInternalFace(*fi))
-        grad_b += surface_vector * getInternalFaceValue(*fi, correct_skewness);
+        grad_b +=
+            surface_vector *
+            (*this)(Moose::FaceArg(
+                {fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, nullptr}));
       else
       {
-        mooseAssert(isDirichletBoundaryFace(*fi), "We've run out of face types");
-        grad_b += surface_vector * getDirichletBoundaryFaceValue(*fi);
+        mooseAssert(isDirichletBoundaryFace(*fi, &functor_elem), "We've run out of face types");
+        grad_b += surface_vector * getDirichletBoundaryFaceValue(*fi, &functor_elem);
       }
 
       if (!volume_set)
@@ -390,6 +412,7 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem, bool correct_skewness)
     // Two term boundary expansion should only fail at domain corners. We want to keep trying it
     // at other boundary locations
     const_cast<INSFVVelocityVariable *>(this)->_two_term_boundary_expansion = true;
+
     return grad;
   }
 }

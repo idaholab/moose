@@ -11,7 +11,7 @@
 [Functions]
   [./fred]
     type = ParsedFunction
-    value='200'
+    expression='200'
   [../]
 [] # Functions
 

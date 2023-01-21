@@ -12,12 +12,12 @@
 [Functions]
   [./exact_fn]
     type = ParsedFunction
-    value = (sin(pi*t))
+    expression = (sin(pi*t))
   [../]
 
   [./forcing_fn]
     type = ParsedFunction
-    value = sin(pi*t)
+    expression = sin(pi*t)
   [../]
 []
 

@@ -203,6 +203,18 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     mooseError("Ghosting patch size parameter has to be set in the mesh block "
                "only when 'iteration' patch update strategy is used.");
 
+  if (isParamValid("coord_block"))
+  {
+    if (isParamValid("block"))
+      paramWarning("block",
+                   "You set both 'Mesh/block' and 'Mesh/coord_block'. The value of "
+                   "'Mesh/coord_block' will be used.");
+
+    _provided_coord_blocks = getParam<std::vector<SubdomainName>>("coord_block");
+  }
+  else if (isParamValid("block"))
+    _provided_coord_blocks = getParam<std::vector<SubdomainName>>("block");
+
   determineUseDistributedMesh();
 }
 
@@ -235,7 +247,8 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
     _need_ghost_ghosted_boundaries(other_mesh._need_ghost_ghosted_boundaries),
     _coord_sys(other_mesh._coord_sys),
     _rz_coord_axis(other_mesh._rz_coord_axis),
-    _coord_system_set(other_mesh._coord_system_set)
+    _coord_system_set(other_mesh._coord_system_set),
+    _provided_coord_blocks(other_mesh._provided_coord_blocks)
 {
   // Note: this calls BoundaryInfo::operator= without changing the
   // ownership semantics of either Mesh's BoundaryInfo object.
@@ -364,8 +377,7 @@ MooseMesh::prepare(bool)
   }
 
   if (!_coord_system_set)
-    setCoordSystem(getParam<std::vector<SubdomainName>>("block"),
-                   getParam<MultiMooseEnum>("coord_type"));
+    setCoordSystem(_provided_coord_blocks, getParam<MultiMooseEnum>("coord_type"));
   else if (_pars.isParamSetByUser("coord_type"))
     mooseError(
         "Trying to set coordinate system type information based on the user input file, but "
@@ -1165,6 +1177,24 @@ MooseMesh::getNodeBlockIds(const Node & node) const
     mooseError("Unable to find node: ", node.id(), " in any block list.");
 
   return it->second;
+}
+
+MooseMesh::face_info_iterator
+MooseMesh::ownedFaceInfoBegin()
+{
+  return face_info_iterator(
+      _face_info.begin(),
+      _face_info.end(),
+      libMesh::Predicates::pid<std::vector<const FaceInfo *>::iterator>(this->processor_id()));
+}
+
+MooseMesh::face_info_iterator
+MooseMesh::ownedFaceInfoEnd()
+{
+  return face_info_iterator(
+      _face_info.end(),
+      _face_info.end(),
+      libMesh::Predicates::pid<std::vector<const FaceInfo *>::iterator>(this->processor_id()));
 }
 
 // default begin() accessor
@@ -3301,8 +3331,9 @@ MooseMesh::buildFiniteVolumeInfo() const
   // We prepare a map connecting the Elem* and the corresponding ElemInfo
   // for the active elements.
   for (const Elem * elem : as_range(begin, end))
-    _elem_to_elem_info.emplace(elem, elem);
+    _elem_to_elem_info.emplace(elem->id(), elem);
 
+  dof_id_type face_index = 0;
   for (const Elem * elem : as_range(begin, end))
   {
     for (unsigned int side = 0; side < elem->n_sides(); ++side)
@@ -3320,7 +3351,7 @@ MooseMesh::buildFiniteVolumeInfo() const
                     "be active.");
 
         // We construct the faceInfo using the elementinfo and side index
-        _all_face_info.emplace_back(&_elem_to_elem_info[elem], side);
+        _all_face_info.emplace_back(&_elem_to_elem_info[elem->id()], side, face_index++);
 
         auto & fi = _all_face_info.back();
 
@@ -3335,7 +3366,7 @@ MooseMesh::buildFiniteVolumeInfo() const
         if (!neighbor || neighbor == remote_elem)
           fi.computeBoundaryCoefficients();
         else
-          fi.computeInternalCoefficients(&_elem_to_elem_info[neighbor]);
+          fi.computeInternalCoefficients(&_elem_to_elem_info[neighbor->id()]);
 
         auto lit = side_map.find(Keytype(&fi.elem(), fi.elemSideID()));
         if (lit != side_map.end())
@@ -3364,7 +3395,11 @@ MooseMesh::buildFiniteVolumeInfo() const
 #endif
         _elem_side_to_face_info.emplace(std::make_pair(elem, side), &fi);
     mooseAssert(pair_it.second, "We should be adding unique FaceInfo objects.");
-    if (fi.processor_id() == this->processor_id())
+
+    // We will add the faces on processor boundaries to the list of face infos on each
+    // associated processor.
+    if (fi.elem().processor_id() == this->processor_id() ||
+        (fi.neighborPtr() && (fi.neighborPtr()->processor_id() == this->processor_id())))
       _face_info.push_back(&fi);
   }
 }
@@ -3383,6 +3418,12 @@ MooseMesh::faceInfo(const Elem * elem, unsigned int side) const
     mooseAssert(it->second, "For some reason, the FaceInfo object is NULL!");
     return it->second;
   }
+}
+
+const ElemInfo &
+MooseMesh::elemInfo(const dof_id_type id) const
+{
+  return libmesh_map_find(_elem_to_elem_info, id);
 }
 
 void
@@ -3418,8 +3459,8 @@ MooseMesh::allowRemoteElementRemoval(const bool allow_remote_element_removal)
     _mesh->allow_remote_element_removal(allow_remote_element_removal);
 
   if (!allow_remote_element_removal)
-    // If we're not allowing remote element removal now, then we will need deletion later after late
-    // geoemetric ghosting functors have been added (late geometric ghosting functor addition
+    // If we're not allowing remote element removal now, then we will need deletion later after
+    // late geoemetric ghosting functors have been added (late geometric ghosting functor addition
     // happens when algebraic ghosting functors are added)
     _need_delete = true;
 }
@@ -3437,7 +3478,7 @@ MooseMesh::deleteRemoteElements()
 }
 
 void
-MooseMesh::cacheVarIndicesByFace(const std::vector<const MooseVariableBase *> & moose_vars)
+MooseMesh::cacheVarIndicesByFace(const std::vector<const MooseVariableFieldBase *> & moose_vars)
 {
   buildFiniteVolumeInfo();
 
@@ -3450,7 +3491,7 @@ MooseMesh::cacheVarIndicesByFace(const std::vector<const MooseVariableBase *> & 
     for (unsigned int j = 0; j < moose_vars.size(); ++j)
     {
       // get the variable, its name, and its domain of definition
-      const MooseVariableBase * const var = moose_vars[j];
+      const MooseVariableFieldBase * const var = moose_vars[j];
       const auto & var_name = var->name();
       std::set<SubdomainID> var_subdomains = var->blockIDs();
 
@@ -3494,74 +3535,62 @@ MooseMesh::setCoordSystem(const std::vector<SubdomainName> & blocks,
                           const MultiMooseEnum & coord_sys)
 {
   TIME_SECTION("setCoordSystem", 5, "Setting Coordinate System");
-  if (_pars.isParamSetByUser("block") && getParam<std::vector<SubdomainName>>("block") != blocks)
-    mooseError("Supplied blocks in the 'setCoordSystem' method do not match the value of the "
-               "'Mesh/block' parameter. Did you provide different parameter values for 'block' to "
-               "'Mesh' and 'Problem'?");
-  if (_pars.isParamSetByUser("coord_type") && getParam<MultiMooseEnum>("coord_type") != coord_sys)
-    mooseError(
-        "Supplied coordinate systems in the 'setCoordSystem' method do not match the value of the "
-        "'Mesh/coord_type' parameter. Did you provide different parameter values for 'coord_type' "
-        "to "
-        "'Mesh' and 'Problem'?");
-
-  const std::set<SubdomainID> & subdomains = meshSubdomains();
-  if (blocks.size() == 0)
+  if (!_provided_coord_blocks.empty() && (_provided_coord_blocks != blocks))
   {
-    // no blocks specified -> assume the whole domain
-    Moose::CoordinateSystemType coord_type = Moose::COORD_XYZ; // all is going to be XYZ by default
-    if (coord_sys.size() == 0)
-      ; // relax, do nothing
-    else if (coord_sys.size() == 1)
-      coord_type = Moose::stringToEnum<Moose::CoordinateSystemType>(
-          coord_sys[0]); // one system specified, the whole domain is going to have that system
-    else
-      mooseError("Multiple coordinate systems specified, but no blocks given.");
+    const std::string param_name = isParamValid("coord_block") ? "coord_block" : "block";
+    mooseWarning("Supplied blocks in the 'setCoordSystem' method do not match the value of the "
+                 "'Mesh/",
+                 param_name,
+                 "' parameter. Did you provide different parameter values for 'Mesh/",
+                 param_name,
+                 "' and 'Problem/block'?. We will honor the parameter value from 'Mesh/",
+                 param_name,
+                 "'");
+    mooseAssert(_coord_system_set,
+                "If we are arriving here due to a bad specification in the Problem block, then we "
+                "should have already set our coordinate system subdomains from the Mesh block");
+    return;
+  }
+  if (_pars.isParamSetByUser("coord_type") && getParam<MultiMooseEnum>("coord_type") != coord_sys)
+    mooseError("Supplied coordinate systems in the 'setCoordSystem' method do not match the value "
+               "of the 'Mesh/coord_type' parameter. Did you provide different parameter values for "
+               "'coord_type' to 'Mesh' and 'Problem'?");
 
-    for (const auto & sbd : subdomains)
-      _coord_sys[sbd] = coord_type;
+  auto subdomains = meshSubdomains();
+  // It's possible that a user has called this API before the mesh is prepared and consequently we
+  // don't yet have the subdomains in meshSubdomains()
+  for (const auto & sub_name : blocks)
+  {
+    const auto sub_id = getSubdomainID(sub_name);
+    subdomains.insert(sub_id);
+  }
+
+  if (coord_sys.size() <= 1)
+  {
+    // We will specify the same coordinate system for all blocks
+    const auto coord_type = coord_sys.size() == 0
+                                ? Moose::COORD_XYZ
+                                : Moose::stringToEnum<Moose::CoordinateSystemType>(coord_sys[0]);
+    for (const auto sid : subdomains)
+      _coord_sys[sid] = coord_type;
   }
   else
   {
-    // user specified 'blocks' but not coordinate systems
-    if (coord_sys.size() == 0)
+    if (blocks.size() != coord_sys.size())
+      mooseError("Number of blocks and coordinate systems does not match.");
+
+    for (const auto i : index_range(blocks))
     {
-      // set all blocks to cartesian coordinate system
-      for (const auto & block : blocks)
-      {
-        SubdomainID sid = getSubdomainID(block);
-        _coord_sys[sid] = Moose::COORD_XYZ;
-      }
-    }
-    else if (coord_sys.size() == 1)
-    {
-      // set all blocks to the coordinate system specified by `coord_sys[0]`
+      SubdomainID sid = getSubdomainID(blocks[i]);
       Moose::CoordinateSystemType coord_type =
-          Moose::stringToEnum<Moose::CoordinateSystemType>(coord_sys[0]);
-      for (const auto & block : blocks)
-      {
-        SubdomainID sid = getSubdomainID(block);
-        _coord_sys[sid] = coord_type;
-      }
+          Moose::stringToEnum<Moose::CoordinateSystemType>(coord_sys[i]);
+      _coord_sys[sid] = coord_type;
     }
-    else
-    {
-      if (blocks.size() != coord_sys.size())
-        mooseError("Number of blocks and coordinate systems does not match.");
 
-      for (unsigned int i = 0; i < blocks.size(); i++)
-      {
-        SubdomainID sid = getSubdomainID(blocks[i]);
-        Moose::CoordinateSystemType coord_type =
-            Moose::stringToEnum<Moose::CoordinateSystemType>(coord_sys[i]);
-        _coord_sys[sid] = coord_type;
-      }
-
-      for (const auto & sid : subdomains)
-        if (_coord_sys.find(sid) == _coord_sys.end())
-          mooseError("Subdomain '" + Moose::stringify(sid) +
-                     "' does not have a coordinate system specified.");
-    }
+    for (const auto & sid : subdomains)
+      if (_coord_sys.find(sid) == _coord_sys.end())
+        mooseError("Subdomain '" + Moose::stringify(sid) +
+                   "' does not have a coordinate system specified.");
   }
 
   _coord_system_set = true;

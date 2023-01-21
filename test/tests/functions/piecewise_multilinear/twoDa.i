@@ -48,7 +48,7 @@
   [../]
   [./bilinear1_answer]
     type = ParsedFunction
-    value = 1+2*x+3*y
+    expression = 1+2*x+3*y
   [../]
 []
 

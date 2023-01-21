@@ -198,8 +198,8 @@
   [eqm_const_auxk]
     type = ParsedAux
     variable = eqm_const
-    args = temp
-    function = '(358 - temp) / (358 - 294)'
+    coupled_variables = temp
+    expression = '(358 - temp) / (358 - 294)'
   []
   [porosity_auxk]
     type = PorousFlowPropertyAux
@@ -214,7 +214,7 @@
 # Ka * (rho C)_a = 10056886.914
 # h = 11
     type = ParsedFunction
-    value = 'sqrt(10056886.914/t)/11.0'
+    expression = 'sqrt(10056886.914/t)/11.0'
   []
 []
 

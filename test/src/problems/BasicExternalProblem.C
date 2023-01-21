@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #include "BasicExternalProblem.h"
 #include "AuxiliarySystem.h"
 
@@ -42,17 +51,17 @@ BasicExternalProblem::syncSolutions(ExternalProblem::Direction direction)
       const auto sys_number = _aux->number();
       const auto & mesh = _mesh.getMesh();
 
-      for (unsigned int e = 0; e < mesh.n_elem(); ++e)
+      for (const auto elem_ptr : mesh.element_ptr_range())
       {
-        auto elem_ptr = mesh.query_elem_ptr(e);
-        if (elem_ptr)
-        {
-          auto dof_idx = elem_ptr->dof_number(sys_number, _heat_source_var, 0);
-          solution.set(dof_idx, 12345);
-        }
+        auto dof_idx = elem_ptr->dof_number(sys_number, _heat_source_var, 0);
+        solution.set(dof_idx, 12345);
       }
 
+      // close the parallel solution
       solution.close();
+      // Make sure to update the ghosted current_local_solution (from the parallel solution) which
+      // is the thing everyone actually uses
+      _aux->system().update();
       break;
     }
     default:

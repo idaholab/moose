@@ -156,9 +156,9 @@
   [./chemical_potential]
     type = DerivativeParsedMaterial
     block = 0
-    f_name = mu_prop
-    args = c
-    function = 'c'
+    property_name = mu_prop
+    coupled_variables = c
+    expression = 'c'
     derivative_order = 1
   [../]
   [./mechanical_potential]
@@ -171,17 +171,17 @@
   [./total_potential]
     type = DerivativeSumMaterial
     block = 0
-    f_name = total_potential
+    property_name = total_potential
     sum_materials = 'mu_prop mech_prop'
-    args = 'c'
+    coupled_variables = 'c'
     derivative_order = 2
   [../]
   [./var_dependence]
     type = DerivativeParsedMaterial
     block = 0
-    function = 'c*(1.0-c)'
-    args = c
-    f_name = var_dep
+    expression = 'c*(1.0-c)'
+    coupled_variables = c
+    property_name = var_dep
     derivative_order = 1
   [../]
   [./mobility]

@@ -35,15 +35,15 @@
 [Functions]
   [./first]
     type = ParsedFunction
-    value = 1+2*x+2*y
+    expression = 1+2*x+2*y
   [../]
   [./second]
     type = ParsedFunction
-    value = 1+2*x+4*x*x+2*y+4*y*y+4*x*y
+    expression = 1+2*x+4*x*x+2*y+4*y*y+4*x*y
   [../]
   [./third]
     type = ParsedFunction
-    value = 1+2*x+4*x*x+8*x*x*x+2*y+4*y*y+8*y*y*y+4*x*y+8*x*x*y
+    expression = 1+2*x+4*x*x+8*x*x*x+2*y+4*y*y+8*y*y*y+4*x*y+8*x*x*y
   [../]
 []
 

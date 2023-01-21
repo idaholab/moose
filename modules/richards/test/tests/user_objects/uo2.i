@@ -64,105 +64,105 @@
 [Functions]
   [./initial_pressure]
     type = ParsedFunction
-    value = x
+    expression = x
   [../]
   [./answer_DensityConstBulk]
     type = ParsedFunction
-    value = dens0*exp(x/bulk_mod)
-    vars = 'dens0 bulk_mod'
-    vals = '1000 2E6'
+    expression = dens0*exp(x/bulk_mod)
+    symbol_names = 'dens0 bulk_mod'
+    symbol_values = '1000 2E6'
   [../]
   [./answer_dDensityConstBulk]
     type = GradParsedFunction
     direction = '1 0 0'
-    value = dens0*exp(x/bulk_mod)
-    vars = 'dens0 bulk_mod'
-    vals = '1000 2E6'
+    expression = dens0*exp(x/bulk_mod)
+    symbol_names = 'dens0 bulk_mod'
+    symbol_values = '1000 2E6'
   [../]
   [./answer_d2DensityConstBulk]
     type = Grad2ParsedFunction
     direction = '1 0 0'
-    value = dens0*exp(x/bulk_mod)
-    vars = 'dens0 bulk_mod'
-    vals = '1000 2E6'
+    expression = dens0*exp(x/bulk_mod)
+    symbol_names = 'dens0 bulk_mod'
+    symbol_values = '1000 2E6'
   [../]
 
   [./answer_DensityIdeal]
     type = ParsedFunction
-    value = slope*(x-p0)
-    vars = 'p0 slope'
-    vals = '33333 1.1E-2'
+    expression = slope*(x-p0)
+    symbol_names = 'p0 slope'
+    symbol_values = '33333 1.1E-2'
   [../]
   [./answer_dDensityIdeal]
     type = GradParsedFunction
     direction = '1 0 0'
-    value = slope*(x-p0)
-    vars = 'p0 slope'
-    vals = '33333 1.1E-2'
+    expression = slope*(x-p0)
+    symbol_names = 'p0 slope'
+    symbol_values = '33333 1.1E-2'
   [../]
   [./answer_d2DensityIdeal]
     type = Grad2ParsedFunction
     direction = '1 0 0'
-    value = slope*(x-p0)
-    vars = 'p0 slope'
-    vals = '33333 1.1E-2'
+    expression = slope*(x-p0)
+    symbol_names = 'p0 slope'
+    symbol_values = '33333 1.1E-2'
   [../]
 
   [./answer_DensityMethane20degC]
     type = ParsedFunction
-    value = if(x>0,(0.00654576947608E-3*x+1.04357716547E-13*x^2),0)+if(x<0,0.1*(e^(6.54576947608E-5*x)-1),0)
+    expression = if(x>0,(0.00654576947608E-3*x+1.04357716547E-13*x^2),0)+if(x<0,0.1*(e^(6.54576947608E-5*x)-1),0)
   [../]
   [./answer_dDensityMethane20degC]
     type = GradParsedFunction
     direction = '1 0 0'
-    value = if(x>0,(0.00654576947608E-3*x+1.04357716547E-13*x^2),0)+if(x<0,0.1*(e^(6.54576947608E-5*x)-1),0)
+    expression = if(x>0,(0.00654576947608E-3*x+1.04357716547E-13*x^2),0)+if(x<0,0.1*(e^(6.54576947608E-5*x)-1),0)
   [../]
   [./answer_d2DensityMethane20degC]
     type = Grad2ParsedFunction
     direction = '1 0 0'
-    value = if(x>0,(0.00654576947608E-3*x+1.04357716547E-13*x^2),0)+if(x<0,0.1*(e^(6.54576947608E-5*x)-1),0)
+    expression = if(x>0,(0.00654576947608E-3*x+1.04357716547E-13*x^2),0)+if(x<0,0.1*(e^(6.54576947608E-5*x)-1),0)
   [../]
 
   [./answer_DensityVDW]
     type = ParsedFunction
-    value = if(x>0,-(molar_mass*(-2+(2*pow(2,0.3333333333333333)*(a-3*b*(b*x+rt)))/pow(-2*pow(a,3)+9*pow(a,2)*b*(-2*b*x+rt)+pow(pow(a,3)*(a*pow(2*a+9*b*(2*b*x-rt),2)-4*pow(a-3*b*(b*x+rt),3)),0.5),0.3333333333333333)+(pow(2,0.6666666666666666)*pow(-2*pow(a,3)+9*pow(a,2)*b*(-2*b*x+rt)+pow(pow(a,3)*(a*pow(2*a+9*b*(2*b*x-rt),2)-4*pow(a-3*b*(b*x+rt),3)),0.5),0.3333333333333333))/a))/(6.*b)+(molar_mass*(-2+(2*pow(2,0.3333333333333333)*(a-3*b*(b*0+rt)))/pow(-2*pow(a,3)+9*pow(a,2)*b*(-2*b*0+rt)+pow(pow(a,3)*(a*pow(2*a+9*b*(2*b*0-rt),2)-4*pow(a-3*b*(b*0+rt),3)),0.5),0.3333333333333333)+(pow(2,0.6666666666666666)*pow(-2*pow(a,3)+9*pow(a,2)*b*(-2*b*0+rt)+pow(pow(a,3)*(a*pow(2*a+9*b*(2*b*0-rt),2)-4*pow(a-3*b*(b*0+rt),3)),0.5),0.3333333333333333))/a))/(6.*b),infinityratio*molar_mass*(e^(slope0*x)-1))
-    vars = 'a b rt molar_mass infinityratio slope0'
-    vals = '0.2303 0.000431 2436.1403 0.01604246 10 4.10485e-05'
+    expression = if(x>0,-(molar_mass*(-2+(2*pow(2,0.3333333333333333)*(a-3*b*(b*x+rt)))/pow(-2*pow(a,3)+9*pow(a,2)*b*(-2*b*x+rt)+pow(pow(a,3)*(a*pow(2*a+9*b*(2*b*x-rt),2)-4*pow(a-3*b*(b*x+rt),3)),0.5),0.3333333333333333)+(pow(2,0.6666666666666666)*pow(-2*pow(a,3)+9*pow(a,2)*b*(-2*b*x+rt)+pow(pow(a,3)*(a*pow(2*a+9*b*(2*b*x-rt),2)-4*pow(a-3*b*(b*x+rt),3)),0.5),0.3333333333333333))/a))/(6.*b)+(molar_mass*(-2+(2*pow(2,0.3333333333333333)*(a-3*b*(b*0+rt)))/pow(-2*pow(a,3)+9*pow(a,2)*b*(-2*b*0+rt)+pow(pow(a,3)*(a*pow(2*a+9*b*(2*b*0-rt),2)-4*pow(a-3*b*(b*0+rt),3)),0.5),0.3333333333333333)+(pow(2,0.6666666666666666)*pow(-2*pow(a,3)+9*pow(a,2)*b*(-2*b*0+rt)+pow(pow(a,3)*(a*pow(2*a+9*b*(2*b*0-rt),2)-4*pow(a-3*b*(b*0+rt),3)),0.5),0.3333333333333333))/a))/(6.*b),infinityratio*molar_mass*(e^(slope0*x)-1))
+    symbol_names = 'a b rt molar_mass infinityratio slope0'
+    symbol_values = '0.2303 0.000431 2436.1403 0.01604246 10 4.10485e-05'
   [../]
   [./answer_dDensityVDW]
     type = GradParsedFunction
     direction = '1 0 0'
-    value = if(x>0,-(molar_mass*(-2+(2*pow(2,0.3333333333333333)*(a-3*b*(b*x+rt)))/pow(-2*pow(a,3)+9*pow(a,2)*b*(-2*b*x+rt)+pow(pow(a,3)*(a*pow(2*a+9*b*(2*b*x-rt),2)-4*pow(a-3*b*(b*x+rt),3)),0.5),0.3333333333333333)+(pow(2,0.6666666666666666)*pow(-2*pow(a,3)+9*pow(a,2)*b*(-2*b*x+rt)+pow(pow(a,3)*(a*pow(2*a+9*b*(2*b*x-rt),2)-4*pow(a-3*b*(b*x+rt),3)),0.5),0.3333333333333333))/a))/(6.*b),infinityratio*molar_mass*(e^(slope0*x)-1))
-    vars = 'a b rt molar_mass infinityratio slope0'
-    vals = '0.2303 0.000431 2436.1403 0.01604246 10 4.10485e-05'
+    expression = if(x>0,-(molar_mass*(-2+(2*pow(2,0.3333333333333333)*(a-3*b*(b*x+rt)))/pow(-2*pow(a,3)+9*pow(a,2)*b*(-2*b*x+rt)+pow(pow(a,3)*(a*pow(2*a+9*b*(2*b*x-rt),2)-4*pow(a-3*b*(b*x+rt),3)),0.5),0.3333333333333333)+(pow(2,0.6666666666666666)*pow(-2*pow(a,3)+9*pow(a,2)*b*(-2*b*x+rt)+pow(pow(a,3)*(a*pow(2*a+9*b*(2*b*x-rt),2)-4*pow(a-3*b*(b*x+rt),3)),0.5),0.3333333333333333))/a))/(6.*b),infinityratio*molar_mass*(e^(slope0*x)-1))
+    symbol_names = 'a b rt molar_mass infinityratio slope0'
+    symbol_values = '0.2303 0.000431 2436.1403 0.01604246 10 4.10485e-05'
   [../]
   [./answer_d2DensityVDW]
     type = Grad2ParsedFunction
     direction = '1 0 0'
-    value = if(x>0,-(molar_mass*(-2+(2*pow(2,0.3333333333333333)*(a-3*b*(b*x+rt)))/pow(-2*pow(a,3)+9*pow(a,2)*b*(-2*b*x+rt)+pow(pow(a,3)*(a*pow(2*a+9*b*(2*b*x-rt),2)-4*pow(a-3*b*(b*x+rt),3)),0.5),0.3333333333333333)+(pow(2,0.6666666666666666)*pow(-2*pow(a,3)+9*pow(a,2)*b*(-2*b*x+rt)+pow(pow(a,3)*(a*pow(2*a+9*b*(2*b*x-rt),2)-4*pow(a-3*b*(b*x+rt),3)),0.5),0.3333333333333333))/a))/(6.*b),infinityratio*molar_mass*(e^(slope0*x)-1))
-    vars = 'a b rt molar_mass infinityratio slope0'
-    vals = '0.2303 0.000431 2436.1403 0.01604246 10 4.10485e-05'
+    expression = if(x>0,-(molar_mass*(-2+(2*pow(2,0.3333333333333333)*(a-3*b*(b*x+rt)))/pow(-2*pow(a,3)+9*pow(a,2)*b*(-2*b*x+rt)+pow(pow(a,3)*(a*pow(2*a+9*b*(2*b*x-rt),2)-4*pow(a-3*b*(b*x+rt),3)),0.5),0.3333333333333333)+(pow(2,0.6666666666666666)*pow(-2*pow(a,3)+9*pow(a,2)*b*(-2*b*x+rt)+pow(pow(a,3)*(a*pow(2*a+9*b*(2*b*x-rt),2)-4*pow(a-3*b*(b*x+rt),3)),0.5),0.3333333333333333))/a))/(6.*b),infinityratio*molar_mass*(e^(slope0*x)-1))
+    symbol_names = 'a b rt molar_mass infinityratio slope0'
+    symbol_values = '0.2303 0.000431 2436.1403 0.01604246 10 4.10485e-05'
   [../]
 
   [./answer_DensityConstBulkCut]
     type = ParsedFunction
-    value = if(x<zero_pt,0,if(x>cut_limit,dens0*exp(x/bulk_mod),(3*cut_limit-2*x-zero_pt)*(x-zero_pt)*(x-zero_pt)*dens0*exp(x/bulk_mod)/(cut_limit-zero_pt)/(cut_limit-zero_pt)/(cut_limit-zero_pt)))
-    vars = 'dens0 bulk_mod zero_pt cut_limit'
-    vals = '1000 2E6 -1E6 1E6'
+    expression = if(x<zero_pt,0,if(x>cut_limit,dens0*exp(x/bulk_mod),(3*cut_limit-2*x-zero_pt)*(x-zero_pt)*(x-zero_pt)*dens0*exp(x/bulk_mod)/(cut_limit-zero_pt)/(cut_limit-zero_pt)/(cut_limit-zero_pt)))
+    symbol_names = 'dens0 bulk_mod zero_pt cut_limit'
+    symbol_values = '1000 2E6 -1E6 1E6'
   [../]
   [./answer_dDensityConstBulkCut]
     type = GradParsedFunction
     direction = '1 0 0'
-    value = if(x<zero_pt,0,if(x>cut_limit,dens0*exp(x/bulk_mod),(3*cut_limit-2*x-zero_pt)*(x-zero_pt)*(x-zero_pt)*dens0*exp(x/bulk_mod)/(cut_limit-zero_pt)/(cut_limit-zero_pt)/(cut_limit-zero_pt)))
-    vars = 'dens0 bulk_mod zero_pt cut_limit'
-    vals = '1000 2E6 -1E6 1E6'
+    expression = if(x<zero_pt,0,if(x>cut_limit,dens0*exp(x/bulk_mod),(3*cut_limit-2*x-zero_pt)*(x-zero_pt)*(x-zero_pt)*dens0*exp(x/bulk_mod)/(cut_limit-zero_pt)/(cut_limit-zero_pt)/(cut_limit-zero_pt)))
+    symbol_names = 'dens0 bulk_mod zero_pt cut_limit'
+    symbol_values = '1000 2E6 -1E6 1E6'
   [../]
   [./answer_d2DensityConstBulkCut]
     type = Grad2ParsedFunction
     direction = '1 0 0'
-    value = if(x<zero_pt,0,if(x>cut_limit,dens0*exp(x/bulk_mod),(3*cut_limit-2*x-zero_pt)*(x-zero_pt)*(x-zero_pt)*dens0*exp(x/bulk_mod)/(cut_limit-zero_pt)/(cut_limit-zero_pt)/(cut_limit-zero_pt)))
-    vars = 'dens0 bulk_mod zero_pt cut_limit'
-    vals = '1000 2E6 -1E6 1E6'
+    expression = if(x<zero_pt,0,if(x>cut_limit,dens0*exp(x/bulk_mod),(3*cut_limit-2*x-zero_pt)*(x-zero_pt)*(x-zero_pt)*dens0*exp(x/bulk_mod)/(cut_limit-zero_pt)/(cut_limit-zero_pt)/(cut_limit-zero_pt)))
+    symbol_names = 'dens0 bulk_mod zero_pt cut_limit'
+    symbol_values = '1000 2E6 -1E6 1E6'
   [../]
 []
 

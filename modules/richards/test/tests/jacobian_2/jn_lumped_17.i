@@ -109,7 +109,7 @@
 [Functions]
   [./init_p]
     type = ParsedFunction
-    value = x+0.6*y+0.3*z
+    expression = x+0.6*y+0.3*z
   [../]
 []
 

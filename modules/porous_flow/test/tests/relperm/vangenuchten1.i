@@ -69,7 +69,7 @@
 [Functions]
   [s1]
     type = ParsedFunction
-    value = x
+    expression = x
   []
 []
 

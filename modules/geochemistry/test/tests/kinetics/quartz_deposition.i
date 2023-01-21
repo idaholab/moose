@@ -63,8 +63,8 @@
   []
   [diss_rate]
     type = ParsedAux
-    args = mol_change_Quartz
-    function = '-mol_change_Quartz / 0.02' # 0.02 = timestep size
+    coupled_variables = mol_change_Quartz
+    expression = '-mol_change_Quartz / 0.02' # 0.02 = timestep size
     variable = diss_rate
   []
 []

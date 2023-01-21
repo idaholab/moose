@@ -17,6 +17,6 @@
     type = MaterialDerivativeTestKernel
     variable = u
     material_property = mymatprop
-    args = ''
+    coupled_variables = ''
   []
 []

@@ -29,12 +29,12 @@
 [Functions]
   [./exact_fn]
     type = ParsedFunction
-    value = x*x+y*y
+    expression = x*x+y*y
   [../]
 
   [./f_fn]
     type = ParsedFunction
-    value = -4*3+x*x+y*y
+    expression = -4*3+x*x+y*y
   [../]
 []
 

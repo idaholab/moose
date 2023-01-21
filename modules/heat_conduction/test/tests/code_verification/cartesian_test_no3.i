@@ -25,9 +25,9 @@
 [Functions]
   [./exact]
     type = ParsedFunction
-    vars = 'q L beta uo ko'
-    vals = '1200 1 1e-3 0 1'
-    value = 'uo+(1/beta)*( ( 1 + (1-(x/L)^2) * (beta*q*L^2) / ko )^0.5  - 1)'
+    symbol_names = 'q L beta uo ko'
+    symbol_values = '1200 1 1e-3 0 1'
+    expression = 'uo+(1/beta)*( ( 1 + (1-(x/L)^2) * (beta*q*L^2) / ko )^0.5  - 1)'
   [../]
 []
 
@@ -66,9 +66,9 @@
   [../]
   [./thermal_conductivity]
     type = ParsedMaterial
-    f_name = 'thermal_conductivity'
-    args = u
-    function = '1 * (1 + 1e-3*u)'
+    property_name = 'thermal_conductivity'
+    coupled_variables = u
+    expression = '1 * (1 + 1e-3*u)'
   [../]
 []
 

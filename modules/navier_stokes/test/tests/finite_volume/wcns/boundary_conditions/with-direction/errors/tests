@@ -1,0 +1,94 @@
+[Tests]
+  issues = '#23060'
+  design = 'WCNSFVMassFluxBC.md WCNSFVMomentumFluxBC.md WCNSFVEnergyFluxBC.md WCNSFVScalarFluxBC.md'
+  [mass-bc]
+    type = 'RunException'
+    requirement = "The system shall throw an error when the mass flux boundary (with velocity) is "
+                  "defined on an internal face without explicitly specifying the direction of the "
+                  "flow."
+    expect_err = "WCNSFVMassFluxBC can only be defined on an internal face if the 'direction' parameter "
+                 "is supplied!"
+    input = flux_bcs.i
+    method = "!dbg"
+    ad_indexing_type = 'global'
+  []
+  [mass-bc-wrong-direction]
+    type = 'RunException'
+    requirement = "The system shall throw an error when the mass flux boundary is defined with an "
+                  "incorrect direction vector."
+    expect_err = "The direction should be a unit vector with a tolerance of 1e-6!"
+    cli_args = "FVBCs/inlet_mass/direction='2 0 0'"
+    input = flux_bcs.i
+    method = "!dbg"
+    ad_indexing_type = 'global'
+  []
+  [momentum-bc]
+    type = 'RunException'
+    requirement = "The system shall throw an error when the momentum flux boundary is defined on an "
+                  "internal face without explicitly specifying the direction of the flow."
+    expect_err = "WCNSFVMomentumFluxBC can only be defined on an internal face if the 'direction' "
+                 "parameter is supplied!"
+    input = flux_bcs.i
+    method = "!dbg"
+    cli_args = "FVBCs/inlet_mass/direction='1 0 0'"
+    ad_indexing_type = 'global'
+  []
+  [momentum-bc-wrong-direction]
+    type = 'RunException'
+    requirement = "The system shall throw an error when the momentum flux boundary is defined with "
+                  "an incorrect direction vector."
+    expect_err = "The direction should be a unit vector with a tolerance of 1e-6!"
+    cli_args = "FVBCs/inlet_mass/direction='1 0 0' FVBCs/inlet_u/direction='2 0 0' "
+    input = flux_bcs.i
+    method = "!dbg"
+    ad_indexing_type = 'global'
+  []
+  [energy-bc]
+    type = 'RunException'
+    requirement = "The system shall throw an error when the energy flux boundary (with velocity) is "
+                  "defined on an internal face without explicitly specifying the direction of the "
+                  "flow."
+    expect_err = "WCNSFVEnergyFluxBC can only be defined on an internal face if the 'direction' "
+                 "parameter is supplied!"
+    input = flux_bcs.i
+    method = "!dbg"
+    cli_args = "FVBCs/inlet_mass/direction='1 0 0' FVBCs/inlet_u/direction='1 0 0' "
+               "FVBCs/inlet_v/direction='1 0 0'"
+    ad_indexing_type = 'global'
+  []
+  [energy-bc-wrong-direction]
+    type = 'RunException'
+    requirement = "The system shall throw an error when the energy flux boundary is defined with an "
+                  "incorrect direction vector."
+    expect_err = "The direction should be a unit vector with a tolerance of 1e-6!"
+    cli_args = "FVBCs/inlet_mass/direction='1 0 0' FVBCs/inlet_u/direction='1 0 0' "
+               "FVBCs/inlet_v/direction='1 0 0' FVBCs/inlet_T/direction='2 0 0'"
+    input = flux_bcs.i
+    method = "!dbg"
+    ad_indexing_type = 'global'
+  []
+  [scalar-bc]
+    type = 'RunException'
+    requirement = "The system shall throw an error when the passive scalar flux boundary is defined "
+                  "on an internal face without explicitly specifying the direction of the flow."
+    expect_err = "WCNSFVScalarFluxBC can only be defined on an internal face if the 'direction' "
+                 "parameter is supplied!"
+    input = flux_bcs.i
+    method = "!dbg"
+    cli_args = "FVBCs/inlet_mass/direction='1 0 0' FVBCs/inlet_u/direction='1 0 0' "
+               "FVBCs/inlet_v/direction='1 0 0' FVBCs/inlet_T/direction='1 0 0'"
+    ad_indexing_type = 'global'
+  []
+  [scalar-bc-wrong-direction]
+    type = 'RunException'
+    requirement = "The system shall throw an error when the passive scalar flux boundary (with is "
+                  "defined with an incorrect direction vector."
+    expect_err = "The direction should be a unit vector with a tolerance of 1e-6!"
+    cli_args = "FVBCs/inlet_mass/direction='1 0 0' FVBCs/inlet_u/direction='1 0 0' "
+               "FVBCs/inlet_v/direction='1 0 0' FVBCs/inlet_T/direction='1 0 0' "
+               "FVBCs/inlet_scalar/direction='2 0 0'"
+    input = flux_bcs.i
+    method = "!dbg"
+    ad_indexing_type = 'global'
+  []
+[]

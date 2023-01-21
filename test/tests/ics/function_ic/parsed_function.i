@@ -25,11 +25,11 @@
 [Functions]
   [./parsed_function]
     type = ParsedFunction
-    value = 'sin(x)-cos(y/2)'
+    expression = 'sin(x)-cos(y/2)'
   [../]
   [./parsed_grad_function]
     type =ParsedGradFunction
-    value = 'sin(x)-cos(y/2)'
+    expression = 'sin(x)-cos(y/2)'
     grad_x = 'cos(x)'
     grad_y = 'sin(y/2)/2'
   [../]

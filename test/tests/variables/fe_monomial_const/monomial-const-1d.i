@@ -10,7 +10,7 @@
 [Functions]
   [./bc_fn]
     type=ParsedFunction
-    value=0
+    expression=0
   [../]
 
   [./forcing_fn]

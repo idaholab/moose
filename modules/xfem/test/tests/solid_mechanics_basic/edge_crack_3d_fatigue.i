@@ -43,21 +43,21 @@
 [Functions]
   [./growth_func_x]
     type = ParsedFunction
-    value = 1
+    expression = 1
   [../]
   [./growth_func_y]
     type = ParsedFunction
-    value = 0
+    expression = 0
   [../]
   [./growth_func_z]
     type = ParsedFunction
-    value = 0
+    expression = 0
   [../]
   [./growth_func_v]
     type = ParsedFunction
-    vars = 'dN'
-    vals = 'fatigue'
-    value = dN
+    symbol_names = 'dN'
+    symbol_values = 'fatigue'
+    expression = dN
   [../]
 []
 

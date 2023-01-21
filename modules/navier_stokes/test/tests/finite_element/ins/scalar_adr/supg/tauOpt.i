@@ -47,7 +47,7 @@ velocity=1
 [Functions]
   [./ffn]
     type = ParsedFunction
-    value = 'if(x < 6, 1 - .25 * x, if(x < 8, -2 + .25 * x, 0))'
+    expression = 'if(x < 6, 1 - .25 * x, if(x < 8, -2 + .25 * x, 0))'
   [../]
 []
 

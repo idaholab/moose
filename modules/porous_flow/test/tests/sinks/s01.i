@@ -119,21 +119,21 @@
 [Functions]
   [mass00]
     type = ParsedFunction
-    value = 'vol*por*dens0*exp(pp/bulk)'
-    vars = 'vol por dens0 pp bulk'
-    vals = '0.25 0.1 1.1 p00 1.3'
+    expression = 'vol*por*dens0*exp(pp/bulk)'
+    symbol_names = 'vol por dens0 pp bulk'
+    symbol_values = '0.25 0.1 1.1 p00 1.3'
   []
   [mass01]
     type = ParsedFunction
-    value = 'vol*por*dens0*exp(pp/bulk)'
-    vars = 'vol por dens0 pp bulk'
-    vals = '0.25 0.1 1.1 p01 1.3'
+    expression = 'vol*por*dens0*exp(pp/bulk)'
+    symbol_names = 'vol por dens0 pp bulk'
+    symbol_values = '0.25 0.1 1.1 p01 1.3'
   []
   [expected_mass_change00]
     type = ParsedFunction
-    value = 'fcn*perm*dens0*exp(pp/bulk)/visc*area*dt'
-    vars = 'fcn perm dens0 pp bulk visc area dt'
-    vals = '6   1    1      0  1.3  1  0.5  1E-3'
+    expression = 'fcn*perm*dens0*exp(pp/bulk)/visc*area*dt'
+    symbol_names = 'fcn perm dens0 pp bulk visc area dt'
+    symbol_values = '6   1    1      0  1.3  1  0.5  1E-3'
   []
 []
 

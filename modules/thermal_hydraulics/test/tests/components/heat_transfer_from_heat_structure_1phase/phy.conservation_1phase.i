@@ -37,7 +37,7 @@
 [Functions]
   [T0_fn]
     type = ParsedFunction
-    value = '290 + 20 * (y - 1)'
+    expression = '290 + 20 * (y - 1)'
   []
 []
 

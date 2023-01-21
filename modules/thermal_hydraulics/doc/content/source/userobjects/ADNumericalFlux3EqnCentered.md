@@ -1,3 +1,5 @@
+# ADNumericalFlux3EqnCentered
+
 !syntax description /UserObjects/ADNumericalFlux3EqnCentered
 
 This class implements a centered numerical flux for the 1-D, 1-phase, variable-area Euler

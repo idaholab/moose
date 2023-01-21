@@ -1,3 +1,5 @@
+# ADBoundaryFlux3EqnGhostMassFlowRateTemperature
+
 !syntax description /UserObjects/ADBoundaryFlux3EqnGhostMassFlowRateTemperature
 
 !include euler_1d_var_area_boundary_flux_ghost.md

@@ -33,7 +33,7 @@ public:
   FunctorInterface(const MooseObject * moose_object);
 
   /**
-   * helper to look up a functor name through the input parameter keys
+   * Helper to look up a functor name through the input parameter keys
    * @param name The input parameter name that we are trying to deduce the functor name for
    * @param params The input parameters object that we will be checking for parameters named \p name
    * @return The functor name
@@ -42,18 +42,46 @@ public:
 
 protected:
   /**
-   * retrieves a functor from the subproblem. This method also leverages the ability to create
+   * Retrieves a functor from the subproblem. This method also leverages the ability to create
    * default functors if the user passed an integer or real in the input file
+   * @param name The name of the functor to retrieve. This should match the functor parameter name,
+   * \emph not the actual name of the functor created in the input file
+   * @return The functor
    */
   template <typename T>
   const Moose::Functor<T> & getFunctor(const std::string & name);
 
   /**
-   * checks the subproblem for the given functor. This will not query default functors potentially
+   * Retrieves a functor from the passed-in subproblem. This method also leverages the ability to
+   * create default functors if the user passed an integer or real in the input file
+   * @param name The name of the functor to retrieve. This should match the functor parameter name,
+   * \emph not the actual name of the functor created in the input file
+   * @param subproblem The subproblem to query for the functor
+   * @return The functor
+   */
+  template <typename T>
+  const Moose::Functor<T> & getFunctor(const std::string & name, SubProblem & subproblem);
+
+  /**
+   * Checks the subproblem for the given functor. This will not query default functors potentially
    * stored in this object, e.g. this method will return false if the user passed an int or real to
    * the functor param in the input file
+   * @param name The name of the functor to check. This should match the functor parameter name,
+   * \emph not the actual name of the functor created in the input file
+   * @return Whether the subproblem has the specified functor
    */
   bool isFunctor(const std::string & name) const;
+
+  /**
+   * Checks the passed-in subproblem for the given functor. This will not query default functors
+   * potentially stored in this object, e.g. this method will return false if the user passed an int
+   * or real to the functor param in the input file
+   * @param name The name of the functor to check. This should match the functor parameter name,
+   * \emph not the actual name of the functor created in the input file
+   * @param subproblem The subproblem to query for the functor
+   * @return Whether the subproblem has the specified functor
+   */
+  bool isFunctor(const std::string & name, const SubProblem & subproblem) const;
 
   /**
    * Small helper to look up a functor name through the input parameter keys
@@ -80,8 +108,8 @@ private:
   /// The name of the object that this interface belongs to
   const std::string _fi_name;
 
-  /// Reference to the subproblem
-  SubProblem & _fi_subproblem;
+  /// Pointer to subproblem if the subproblem pointer parameter was set
+  SubProblem * const _fi_subproblem;
 
   /// Current threaded it
   const THREAD_ID _fi_tid;
@@ -95,7 +123,7 @@ private:
 
 template <typename T>
 const Moose::Functor<T> &
-FunctorInterface::getFunctor(const std::string & name)
+FunctorInterface::getFunctor(const std::string & name, SubProblem & subproblem)
 {
   // Check if the supplied parameter is a valid input parameter key
   std::string functor_name = deduceFunctorName(name);
@@ -105,7 +133,15 @@ FunctorInterface::getFunctor(const std::string & name)
   if (default_functor)
     return *default_functor;
 
-  return _fi_subproblem.getFunctor<T>(functor_name, _fi_tid, _fi_name);
+  return subproblem.getFunctor<T>(functor_name, _fi_tid, _fi_name);
+}
+
+template <typename T>
+const Moose::Functor<T> &
+FunctorInterface::getFunctor(const std::string & name)
+{
+  mooseAssert(_fi_subproblem, "This must be non-null");
+  return getFunctor<T>(name, *_fi_subproblem);
 }
 
 template <>

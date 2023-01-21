@@ -105,9 +105,9 @@
 [Functions]
   [./should_be_zero_fcn]
     type = ParsedFunction
-    value = 'if(a<1E-3,0,a)'
-    vars = 'a'
-    vals = 'yield_fcn_at_zero'
+    expression = 'if(a<1E-3,0,a)'
+    symbol_names = 'a'
+    symbol_values = 'yield_fcn_at_zero'
   [../]
 []
 

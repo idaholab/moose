@@ -138,7 +138,7 @@ public:
   /// get a reference to the input data
   const InputVector & getInputData() const { return _input_data; }
 
-  /// check if teh output is fully computed and ready to be fetched
+  /// check if the output is fully computed and ready to be fetched
   bool outputReady() const { return _output_ready; }
 
   /// get the index for the first qp of a specified element (other qps are at the following indices)

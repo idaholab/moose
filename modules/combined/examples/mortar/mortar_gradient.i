@@ -45,12 +45,12 @@
   [./init_slope]
     # slope with a concentration spike close to the lower interface
     type = ParsedFunction
-    value = 'if(x>0.4 & x<0.6 & y>0.1 & y<0.3, 3+y, y)'
+    expression = 'if(x>0.4 & x<0.6 & y>0.1 & y<0.3, 3+y, y)'
   [../]
   [./init_flat]
     # no-slope and the same spike
     type = ParsedFunction
-    value = 'if(x>0.4 & x<0.6 & y>0.1 & y<0.3, 3, 0)'
+    expression = 'if(x>0.4 & x<0.6 & y>0.1 & y<0.3, 3, 0)'
   [../]
 []
 
@@ -253,8 +253,8 @@
   [./diff_constraint]
     type = ParsedAux
     variable = diff_constraint
-    function = 'c-v'
-    args = 'c v'
+    expression = 'c-v'
+    coupled_variables = 'c v'
     block = 0
   [../]
 
@@ -266,8 +266,8 @@
   [./diff_periodic]
     type = ParsedAux
     variable = diff_periodic
-    function = 'c-p-slope'
-    args = 'c p slope'
+    expression = 'c-p-slope'
+    coupled_variables = 'c p slope'
     block = 0
   [../]
 
@@ -276,8 +276,8 @@
   [./diff_slope]
     type = ParsedAux
     variable = diff_slope
-    function = 'c-slope'
-    args = 'c slope'
+    expression = 'c-slope'
+    coupled_variables = 'c slope'
     block = 0
   [../]
 []

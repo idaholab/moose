@@ -23,8 +23,7 @@ public:
   WCNSFVInletVelocityBC(const InputParameters & params);
 
 protected:
-  // FIXME: this should be an ADReal
-  Real boundaryValue(const FaceInfo & fi) const override;
+  ADReal boundaryValue(const FaceInfo & fi) const override;
 
   /// Scaling factor
   const Real _scaling_factor;

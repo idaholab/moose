@@ -54,24 +54,24 @@
     variable = eta
     kappa_name = 1
     variable_L = true
-    args = chi
+    coupled_variables = chi
   [../]
 []
 
 [Materials]
   [./L]
     type = DerivativeParsedMaterial
-    f_name = L
-    args = 'eta chi'
-    function = '0.1 * eta^2 + chi^2'
+    property_name = L
+    coupled_variables = 'eta chi'
+    expression = '0.1 * eta^2 + chi^2'
     derivative_order = 2
   [../]
 
   [./free_energy]
     type = DerivativeParsedMaterial
-    f_name = F
-    args = 'eta'
-    function = '2 * eta^2 * (1-eta)^2 - 0.2*eta'
+    property_name = F
+    coupled_variables = 'eta'
+    expression = '2 * eta^2 * (1-eta)^2 - 0.2*eta'
     derivative_order = 2
   [../]
 []

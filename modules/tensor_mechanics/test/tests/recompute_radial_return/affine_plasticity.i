@@ -93,8 +93,8 @@
     # The paper gives -95.26 MPa as the stress at yield, but -95.26279441628823 is the exact value.
     # The paper gives 12.33 as the factor in the exponential, but 12.332921390339125 is the exact value.
     # 189.409039923814000, 0.170423791206825, -0.003242011311945, 1.711645501845780E-05 - exact values
-    vars = 'timeAtYield stressAtYield expFac a b c d'
-    vals = '0.20097635952803425 -95.26279441628823 12.332921390339125 189.409039923814000 0.170423791206825 -0.003242011311945 1.711645501845780E-05'
+    symbol_names = 'timeAtYield stressAtYield expFac a b c d'
+    symbol_values = '0.20097635952803425 -95.26279441628823 12.332921390339125 189.409039923814000 0.170423791206825 -0.003242011311945 1.711645501845780E-05'
     value = '1e6*
              if(t<=timeAtYield, -474*t,
              if(t<=1, stressAtYield,
@@ -106,8 +106,8 @@
     # the paper gives -95.26 MPa as the stress at yield, but -95.26279441628823 is the exact value.
     # The paper gives 12.33 as the factor in the exponential, but 12.332921390339125 is the exact value.
     # -76.867432297315000, -1.442488120272900, 0.001315697947301, 1.711645501845780E-05 - exact values
-    vars = 'timeAtYield stressAtYield expFac a b c d'
-    vals = '0.20097635952803425 -95.26279441628823 12.332921390339125 -76.867432297315000 -1.442488120272900 0.001315697947301 1.711645501845780E-05'
+    symbol_names = 'timeAtYield stressAtYield expFac a b c d'
+    symbol_values = '0.20097635952803425 -95.26279441628823 12.332921390339125 -76.867432297315000 -1.442488120272900 0.001315697947301 1.711645501845780E-05'
     value = '1e6*
              if(t<=timeAtYield, -474*t,
              if(t<=1, stressAtYield,
@@ -119,8 +119,8 @@
     # the paper gives 190.5 MPa as the stress at yield, but 190.52558883257645 is the exact value.
     # The paper gives 12.33 as the factor in the exponential, but 12.332921390339125 is the exact value.
     # -112.541607626499000, 1.272064329066080, 0.001926313364644, 1.711645501845780E-05 - exact values
-    vars = 'timeAtYield stressAtYield expFac a b c d'
-    vals = '0.20097635952803425 190.52558883257645 12.332921390339125 -112.541607626499000 1.272064329066080 0.001926313364644 1.711645501845780E-05'
+    symbol_names = 'timeAtYield stressAtYield expFac a b c d'
+    symbol_values = '0.20097635952803425 190.52558883257645 12.332921390339125 -112.541607626499000 1.272064329066080 0.001926313364644 1.711645501845780E-05'
     value = '1e6*
              if(t<=timeAtYield, 948*t,
              if(t<=1, stressAtYield,

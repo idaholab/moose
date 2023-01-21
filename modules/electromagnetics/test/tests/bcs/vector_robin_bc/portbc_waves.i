@@ -14,14 +14,14 @@
 [Functions]
   [mms_real] # Manufactured solution, real component
     type = ParsedVectorFunction
-    value_x = 'cos(pi*x)*sin(pi*y)'
-    value_y = '-cos(pi*x)*sin(pi*y)'
+    expression_x = 'cos(pi*x)*sin(pi*y)'
+    expression_y = '-cos(pi*x)*sin(pi*y)'
     curl_z = 'pi*sin(pi*x)*sin(pi*y) - pi*cos(pi*x)*cos(pi*y)'
   []
   [mms_imaginary] # Manufactured solution, imaginary component
     type = ParsedVectorFunction
-    value_x = 'cos(pi*x + pi/2)*sin(pi*y)'
-    value_y = '-cos(pi*x + pi/2)*sin(pi*x)'
+    expression_x = 'cos(pi*x + pi/2)*sin(pi*y)'
+    expression_y = '-cos(pi*x + pi/2)*sin(pi*x)'
     curl_z = 'pi*sin(pi*x)*cos(pi*y) + pi*sin(pi*y)*cos(pi*x)'
   []
 []

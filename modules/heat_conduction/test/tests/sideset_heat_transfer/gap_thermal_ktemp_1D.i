@@ -75,7 +75,7 @@
   # Defining temperature dependent fucntion for conductivity across side set
   [kgap]
     type = ParsedFunction
-    value = 't / 200'
+    expression = 't / 200'
   []
   [bc_func]
     type = ConstantFunction
@@ -83,7 +83,7 @@
   []
   [exact]
     type = ParsedFunction
-    value = '
+    expression = '
             A := if(x < 1, -0.5, -0.25);
             B := if(x < 1, -0.293209850655001, 0.0545267662299068);
             C := if(x < 1, 300.206790149345, 300.19547323377);

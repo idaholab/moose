@@ -20,7 +20,7 @@
 
 [Functions/function]
   type = ParsedFunction
-  value = 2*x
+  expression = 2*x
 []
 
 [BCs]

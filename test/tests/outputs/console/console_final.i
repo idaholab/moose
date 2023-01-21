@@ -25,17 +25,17 @@
 [Functions]
   [./ffn]
     type = ParsedFunction
-    value = -4
+    expression = -4
   [../]
 
   [./exactfn]
     type = ParsedFunction
-    value = x*x+y*y
+    expression = x*x+y*y
   [../]
 
   [./aux_exact_fn]
     type = ParsedFunction
-    value = t*(x*x+y*y)
+    expression = t*(x*x+y*y)
   [../]
 []
 

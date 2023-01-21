@@ -46,15 +46,15 @@
 [Functions]
   [./xDispFunc]
     type = ParsedFunction
-    value = 5e-5*(2*x+y+z)
+    expression = 5e-5*(2*x+y+z)
   [../]
   [./yDispFunc]
     type = ParsedFunction
-    value = 5e-5*(x+2*y+z)
+    expression = 5e-5*(x+2*y+z)
   [../]
   [./zDispFunc]
     type = ParsedFunction
-    value = 5e-5*(x+y+2*z)
+    expression = 5e-5*(x+y+2*z)
   [../]
 [] # Functions
 

@@ -19,7 +19,7 @@
 [Functions]
   [./sphere]
     type = ParsedFunction
-    value = 'r:=sqrt(x^2+y^2+z^2); R:=(4.0-r)/2.0; if(R>1,1,if(R<0,0,3*R^2-2*R^3))'
+    expression = 'r:=sqrt(x^2+y^2+z^2); R:=(4.0-r)/2.0; if(R>1,1,if(R<0,0,3*R^2-2*R^3))'
   [../]
 []
 
@@ -42,9 +42,9 @@
 [Materials]
   [./ym]
     type = DerivativeParsedMaterial
-    f_name = ym
-    function = (1-eta)*7+0.5
-    args = eta
+    property_name = ym
+    expression = (1-eta)*7+0.5
+    coupled_variables = eta
   [../]
   [./elasticity]
     type = ComputeVariableIsotropicElasticityTensor

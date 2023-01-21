@@ -3,7 +3,7 @@
 The following pages describe some infrastructure that supports the development
 of MOOSE and MOOSE-based applications:
 
-- [Peacock](application_usage/peacock.md): The MOOSE graphical user interface
+- [Peacock](python/peacock.md): The MOOSE graphical user interface
 - [VSCode](help/development/VSCode.md)
 - [MooseDocs](MooseDocs/index.md): The MOOSE documentation system
 - [Python Tools](python/index.md)

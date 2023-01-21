@@ -86,15 +86,15 @@
 [Functions]
   [./forcing_func]
     type = ParsedFunction
-    value = '1'
+    expression = '1'
   [../]
   [./boundary_left_func]
     type = ParsedFunction
-    value = '0'
+    expression = '0'
   [../]
   [./k_func]
     type = ParsedFunction
-    value = '1 + x'
+    expression = '1 + x'
   [../]
 []
 

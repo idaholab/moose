@@ -615,7 +615,7 @@ class TestHarness:
         elif not job.isSilent():
             # Print results and perform any desired post job processing
             if job.isFinished():
-                status, message, color, status_code = job.getJointStatus()
+                status, message, color, status_code, sort_value = job.getJointStatus()
                 self.error_code = self.error_code | status_code
 
                 # perform printing of application output if so desired
@@ -627,8 +627,7 @@ class TestHarness:
                 timing = job.getTiming()
 
                 # Save these results for 'Final Test Result' summary
-                self.test_table.append( (job, status_code, timing) )
-
+                self.test_table.append( (job, sort_value, timing) )
                 self.postRun(job.specs, timing)
 
                 if job.isSkip():
@@ -662,7 +661,7 @@ class TestHarness:
 
         if (self.options.verbose or (self.num_failed != 0 and not self.options.quiet)) and not self.options.dry_run:
             print(('\n\nFinal Test Results:\n' + ('-' * (util.TERM_COLS))))
-            for (job, status_code, timing) in sorted(self.test_table, key=lambda x: x[1]):
+            for (job, sort_value, timing) in sorted(self.test_table, key=lambda x: x[1]):
                 print((util.formatResult(job, self.options, caveats=True)))
 
         time = clock() - self.start_time
@@ -804,7 +803,7 @@ class TestHarness:
                 if job.isSilent() and self.options.queueing:
                     continue
 
-                status, message, message_color, status_code = job.getJointStatus()
+                status, message, message_color, status_code, sort_value = job.getJointStatus()
 
                 # Create empty key based on TestDir, or re-inialize with existing data so we can append to it
                 self.options.results_storage[job.getTestDir()] = self.options.results_storage.get(job.getTestDir(), {})
@@ -865,7 +864,7 @@ class TestHarness:
                 or (self.options.fail_files and self.num_failed)):
                 for job_group in all_jobs:
                     for job in job_group:
-                        status, message, message_color, status_code = job.getJointStatus()
+                        status, message, message_color, status_code, sort_value = job.getJointStatus()
 
                         if self.options.output_dir:
                             output_dir = self.options.output_dir

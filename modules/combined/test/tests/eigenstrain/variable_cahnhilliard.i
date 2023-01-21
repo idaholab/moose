@@ -98,11 +98,11 @@
   [./chemical_free_energy]
     type = DerivativeParsedMaterial
     block = 0
-    f_name = Fc
-    args = 'c'
+    property_name = Fc
+    coupled_variables = 'c'
     constant_names       = 'barr_height  cv_eq'
     constant_expressions = '0.1          1.0e-2'
-    function = 16*barr_height*(c-cv_eq)^2*(1-cv_eq-c)^2
+    expression = 16*barr_height*(c-cv_eq)^2*(1-cv_eq-c)^2
     enable_jit = true
     derivative_order = 2
   [../]
@@ -119,9 +119,9 @@
   [./var_dependence]
     type = DerivativeParsedMaterial
     block = 0
-    function = 0.1*c
-    args = c
-    f_name = var_dep
+    expression = 0.1*c
+    coupled_variables = c
+    property_name = var_dep
     enable_jit = true
     derivative_order = 2
   [../]
@@ -149,9 +149,9 @@
   [./free_energy]
     type = DerivativeSumMaterial
     block = 0
-    f_name = F
+    property_name = F
     sum_materials = 'Fc Fe'
-    args = 'c'
+    coupled_variables = 'c'
     derivative_order = 2
   [../]
 []

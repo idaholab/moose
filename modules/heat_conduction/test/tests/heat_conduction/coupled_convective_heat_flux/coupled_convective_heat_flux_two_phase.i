@@ -8,28 +8,28 @@
 [Functions]
   [./alpha_liquid_fn]
     type = ParsedFunction
-    value = 'sin(pi*y)'
+    expression = 'sin(pi*y)'
   [../]
   [./T_infinity_liquid_fn]
     type = ParsedFunction
-    value = '(x*x+y*y)+500'
+    expression = '(x*x+y*y)+500'
   [../]
   [./Hw_liquid_fn]
     type = ParsedFunction
-    value = '((1-x)*(1-x)+(1-y)*(1-y))+1000'
+    expression = '((1-x)*(1-x)+(1-y)*(1-y))+1000'
   [../]
 
   [./alpha_vapor_fn]
     type = ParsedFunction
-    value = '1-sin(pi*y)'
+    expression = '1-sin(pi*y)'
   [../]
   [./T_infinity_vapor_fn]
     type = ParsedFunction
-    value = '(x*x+y*y)+5'
+    expression = '(x*x+y*y)+5'
   [../]
   [./Hw_vapor_fn]
     type = ParsedFunction
-    value = '((1-x)*(1-x)+(1-y)*(1-y))+10'
+    expression = '((1-x)*(1-x)+(1-y)*(1-y))+10'
   [../]
 []
 

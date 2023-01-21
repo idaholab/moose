@@ -1,3 +1,5 @@
+# ADBoundaryFlux3EqnGhostWall
+
 !syntax description /UserObjects/ADBoundaryFlux3EqnGhostWall
 
 !include euler_1d_var_area_boundary_flux_ghost.md

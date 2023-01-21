@@ -29,11 +29,11 @@
 [Functions]
   [./discontinuous_function]
     type = ParsedFunction
-    value = 'if(x<0.5,3,5)'
+    expression = 'if(x<0.5,3,5)'
   [../]
   [./continuous_function]
     type = ParsedFunction
-    value = 'if(x<0.5,x,2*x-0.5)'
+    expression = 'if(x<0.5,x,2*x-0.5)'
   [../]
 []
 

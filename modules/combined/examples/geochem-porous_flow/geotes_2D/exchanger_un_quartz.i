@@ -110,33 +110,33 @@
   []
   [transported_mass]
     type = ParsedAux
-    args = 'transported_H2O transported_Na transported_Cl transported_SiO2'
+    coupled_variables = 'transported_H2O transported_Na transported_Cl transported_SiO2'
     variable = transported_mass
-    function = 'transported_H2O * 18.0152 + transported_Na * 22.9898 + transported_Cl * 35.453 + transported_SiO2 * 60.0843'
+    expression = 'transported_H2O * 18.0152 + transported_Na * 22.9898 + transported_Cl * 35.453 + transported_SiO2 * 60.0843'
   []
   [massfrac_H2O]
     type = ParsedAux
-    args = 'transported_mass transported_H2O'
+    coupled_variables = 'transported_mass transported_H2O'
     variable = massfrac_H2O
-    function = '18.0152 * transported_H2O / transported_mass'
+    expression = '18.0152 * transported_H2O / transported_mass'
   []
   [massfrac_Na]
     type = ParsedAux
-    args = 'transported_mass transported_Na'
+    coupled_variables = 'transported_mass transported_Na'
     variable = massfrac_Na
-    function = '22.9898 * transported_Na / transported_mass'
+    expression = '22.9898 * transported_Na / transported_mass'
   []
   [massfrac_Cl]
     type = ParsedAux
-    args = 'transported_mass transported_Cl'
+    coupled_variables = 'transported_mass transported_Cl'
     variable = massfrac_Cl
-    function = '35.453 * transported_Cl / transported_mass'
+    expression = '35.453 * transported_Cl / transported_mass'
   []
   [massfrac_SiO2]
     type = ParsedAux
-    args = 'transported_mass transported_SiO2'
+    coupled_variables = 'transported_mass transported_SiO2'
     variable = massfrac_SiO2
-    function = '60.0843 * transported_SiO2 / transported_mass'
+    expression = '60.0843 * transported_SiO2 / transported_mass'
   []
   [dumped_quartz]
     type = GeochemistryQuantityAux

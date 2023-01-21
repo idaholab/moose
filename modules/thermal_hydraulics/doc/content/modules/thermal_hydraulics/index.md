@@ -91,4 +91,4 @@ Please use the [migration guide](howto/thm_ad_migration_guide.md) to update your
 
 ### Developed by class=center style=font-size:90%;margin-bottom:0.5em;font-weight:100
 
-!media media/inl_blue.png style=width:20%;display:block;margin-left:auto;margin-right:auto;
+!media large_media/framework/inl_blue.png style=width:20%;display:block;margin-left:auto;margin-right:auto;

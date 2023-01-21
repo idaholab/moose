@@ -24,7 +24,7 @@ RecomputeMaterial::validParams()
       "f_prime_name",
       "The name of the property that holds the value to of the derivative of the function");
   params.addRequiredParam<std::string>("p_name",
-                                       "The name of the independant variable for the function");
+                                       "The name of the independent variable for the function");
   params.addParam<Real>("constant", 0, "The constant to add to the f equation.");
   params.set<bool>("compute") = false;
   return params;

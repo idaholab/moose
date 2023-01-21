@@ -1,6 +1,6 @@
 [Tests]
   issues = '#13181'
-  design = 'mms.md'
+  design = 'python/mms.md'
   [spatial]
     type = CheckFiles
     command = mms_spatial.py

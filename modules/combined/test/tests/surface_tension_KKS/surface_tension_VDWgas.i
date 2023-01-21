@@ -102,21 +102,21 @@
 [Functions]
   [./ic_func_eta]
     type = ParsedFunction
-    value = 'r:=sqrt(x^2+y^2+z^2);0.5*(1.0-tanh((r-r0)/delta_eta/sqrt(2.0)))'
-    vars = 'delta_eta r0'
-    vals = '0.321     15'
+    expression = 'r:=sqrt(x^2+y^2+z^2);0.5*(1.0-tanh((r-r0)/delta_eta/sqrt(2.0)))'
+    symbol_names = 'delta_eta r0'
+    symbol_values = '0.321     15'
   [../]
   [./ic_func_cv]
     type = ParsedFunction
-    value = 'r:=sqrt(x^2+y^2+z^2);eta_an:=0.5*(1.0-tanh((r-r0)/delta/sqrt(2.0)));cvbubinit*eta_an^3*(6*eta_an^2-15*eta_an+10)+cvmatrixinit*(1-eta_an^3*(6*eta_an^2-15*eta_an+10))'
-    vars = 'delta r0  cvbubinit cvmatrixinit'
-    vals = '0.321 15  0.7286    2.25e-11'
+    expression = 'r:=sqrt(x^2+y^2+z^2);eta_an:=0.5*(1.0-tanh((r-r0)/delta/sqrt(2.0)));cvbubinit*eta_an^3*(6*eta_an^2-15*eta_an+10)+cvmatrixinit*(1-eta_an^3*(6*eta_an^2-15*eta_an+10))'
+    symbol_names = 'delta r0  cvbubinit cvmatrixinit'
+    symbol_values = '0.321 15  0.7286    2.25e-11'
   [../]
   [./ic_func_cg]
     type = ParsedFunction
-    value = 'r:=sqrt(x^2+y^2+z^2);eta_an:=0.5*(1.0-tanh((r-r0)/delta/sqrt(2.0)));cgbubinit*eta_an^3*(6*eta_an^2-15*eta_an+10)+cgmatrixinit*(1-eta_an^3*(6*eta_an^2-15*eta_an+10))'
-    vars = 'delta r0  cgbubinit cgmatrixinit'
-    vals = '0.321 15  0.2714    1.01e-31'
+    expression = 'r:=sqrt(x^2+y^2+z^2);eta_an:=0.5*(1.0-tanh((r-r0)/delta/sqrt(2.0)));cgbubinit*eta_an^3*(6*eta_an^2-15*eta_an+10)+cgmatrixinit*(1-eta_an^3*(6*eta_an^2-15*eta_an+10))'
+    symbol_names = 'delta r0  cgbubinit cgmatrixinit'
+    symbol_values = '0.321 15  0.2714    1.01e-31'
   [../]
 []
 
@@ -252,10 +252,10 @@
   # Chemical free energy of the matrix
   [./fm]
     type = DerivativeParsedMaterial
-    f_name = fm
-    args = 'cvm cgm'
+    property_name = fm
+    coupled_variables = 'cvm cgm'
     material_property_names = 'kvmatrix kgmatrix cvmatrixeq cgmatrixeq'
-    function = '0.5*kvmatrix*(cvm-cvmatrixeq)^2 + 0.5*kgmatrix*(cgm-cgmatrixeq)^2'
+    expression = '0.5*kvmatrix*(cvm-cvmatrixeq)^2 + 0.5*kgmatrix*(cgm-cgmatrixeq)^2'
   [../]
 # Elastic energy of the matrix
   [./elastic_free_energy_m]
@@ -267,18 +267,18 @@
 # Total free energy of the matrix
   [./Total_energy_matrix]
     type = DerivativeSumMaterial
-    f_name = f_total_matrix
+    property_name = f_total_matrix
     sum_materials = 'fm fe_m'
-    args = 'cvm cgm'
+    coupled_variables = 'cvm cgm'
   [../]
 
   # Free energy of the bubble phase
   [./fb]
     type = DerivativeParsedMaterial
-    f_name = fb
-    args = 'cvb cgb'
+    property_name = fb
+    coupled_variables = 'cvb cgb'
     material_property_names = 'kToverV nQ Va b f0 kpen kgbub kvbub cvbubeq cgbubeq'
-    function = '0.5*kgbub*(cvb-cvbubeq)^2 + 0.5*kvbub*(cgb-cgbubeq)^2'
+    expression = '0.5*kgbub*(cvb-cvbubeq)^2 + 0.5*kvbub*(cgb-cgbubeq)^2'
   [../]
 
 # Elastic energy of the bubble
@@ -292,10 +292,10 @@
 # Total free energy of the bubble
   [./Total_energy_bub]
     type = DerivativeSumMaterial
-    f_name = f_total_bub
+    property_name = f_total_bub
     sum_materials = 'fb fe_b'
     # sum_materials = 'fb'
-    args = 'cvb cgb'
+    coupled_variables = 'cvb cgb'
   [../]
 
   # h(eta)
@@ -320,35 +320,35 @@
   [../]
   [./cvmatrixeq]
     type = ParsedMaterial
-    f_name = cvmatrixeq
+    property_name = cvmatrixeq
     material_property_names = 'T'
     constant_names        = 'kB           Efv'
     constant_expressions  = '8.6173324e-5 1.69'
-    function = 'exp(-Efv/(kB*T))'
+    expression = 'exp(-Efv/(kB*T))'
   [../]
   [./cgmatrixeq]
     type = ParsedMaterial
-    f_name = cgmatrixeq
+    property_name = cgmatrixeq
     material_property_names = 'T'
     constant_names        = 'kB           Efg'
     constant_expressions  = '8.6173324e-5 4.92'
-    function = 'exp(-Efg/(kB*T))'
+    expression = 'exp(-Efg/(kB*T))'
   [../]
   [./kToverV]
     type = ParsedMaterial
-    f_name = kToverV
+    property_name = kToverV
     material_property_names = 'T Va'
     constant_names        = 'k          C44dim' #k in J/K and dimensional C44 in J/m^3
     constant_expressions  = '1.38e-23   63e9'
-    function = 'k*T*1e27/Va/C44dim'
+    expression = 'k*T*1e27/Va/C44dim'
   [../]
   [./nQ]
     type = ParsedMaterial
-    f_name = nQ
+    property_name = nQ
     material_property_names = 'T'
     constant_names        = 'k          Pi      M         hbar' #k in J/K, M is Xe atomic mass in kg, hbar in J s
     constant_expressions  = '1.38e-23   3.14159 2.18e-25  1.05459e-34'
-    function = '(M*k*T/2/Pi/hbar^2)^1.5 * 1e-27' #1e-27 converts from #/m^3 to #/nm^3
+    expression = '(M*k*T/2/Pi/hbar^2)^1.5 * 1e-27' #1e-27 converts from #/m^3 to #/nm^3
   [../]
 
   #Mechanical properties

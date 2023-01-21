@@ -40,6 +40,13 @@ public:
   using Material::_q_point;
   using Material::_qp;
 
+  enum class SubsteppingType
+  {
+    NONE,
+    ERROR_BASED,
+    INCREMENT_BASED
+  };
+
   /**
    * A radial return (J2) mapping method is performed with return mapping
    * iterations.
@@ -64,6 +71,18 @@ public:
       const RankTwoTensor & elastic_strain_old,
       bool compute_full_tangent_operator = false,
       RankFourTensor & tangent_operator = StressUpdateBaseTempl<is_ad>::_identityTensor) override;
+
+  virtual void updateStateSubstepInternal(
+      GenericRankTwoTensor<is_ad> & /*strain_increment*/,
+      GenericRankTwoTensor<is_ad> & /*inelastic_strain_increment*/,
+      const GenericRankTwoTensor<is_ad> & /*rotation_increment*/,
+      GenericRankTwoTensor<is_ad> & /*stress_new*/,
+      const RankTwoTensor & /*stress_old*/,
+      const GenericRankFourTensor<is_ad> & /*elasticity_tensor*/,
+      const RankTwoTensor & /*elastic_strain_old*/,
+      unsigned int total_number_substeps,
+      bool compute_full_tangent_operator = false,
+      RankFourTensor & tangent_operator = StressUpdateBaseTempl<is_ad>::_identityTensor);
 
   /**
    * Similar to the updateState function, this method updates the strain and stress for one substep
@@ -120,10 +139,13 @@ public:
 
   /**
    * Has the user requested usage of (possibly) implemented substepping capability for inelastic
-   * models. Parent classes set this to false, but RadialReturn inelastic models have the ability
-   * to implement substepping.
+   * models. Parent classes set this to false, but RadialReturn inelastic models have the
+   * ability to implement substepping.
    */
-  virtual bool substeppingCapabilityRequested() override { return _use_substep; }
+  virtual bool substeppingCapabilityRequested() override
+  {
+    return _use_substepping != SubsteppingType::NONE;
+  }
 
 protected:
   virtual void initQpStatefulProperties() override;
@@ -175,9 +197,7 @@ protected:
    */
   void computeTangentOperator(Real /*effective_trial_stress*/,
                               RankTwoTensor & /*stress_new*/,
-                              bool /*compute_full_tangent_operator*/,
                               RankFourTensor & /*tangent_operator*/);
-
   /// 3 * shear modulus
   GenericReal<is_ad> _three_shear_modulus;
 
@@ -218,17 +238,17 @@ protected:
   /// Debugging option to enable specifying instead of calculating strain
   const bool _apply_strain;
 
-  /// Whether user has requested the use of substepping technique to improve convergence
-  const bool _use_substep;
+  /// Whether user has requested the use of substepping technique to improve convergence [make const later]
+  SubsteppingType _use_substepping;
 
-  /**
-   * Used to calculate the number of substeps taken in the radial return algorithm,
-   * when substepping is enabled, based on the maximum creep numerical integration error
-   */
-  bool _use_substep_integration_error;
+  /// Use adaptive substepping, cutting substep sizes until convergence is achieved
+  const bool _adaptive_substepping;
 
   /// Maximum number of substeps. If the calculation results in a larger number, cut overall time step.
   const unsigned int _maximum_number_substeps;
+
+  /// original timestep (to be restored after substepping is completed)
+  Real _dt_original;
 };
 
 typedef RadialReturnStressUpdateTempl<false> RadialReturnStressUpdate;

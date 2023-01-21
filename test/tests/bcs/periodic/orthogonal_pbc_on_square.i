@@ -14,19 +14,19 @@
 [Functions]
   [./tr_x]
     type = ParsedFunction
-    value = 0
+    expression = 0
   [../]
   [./tr_y]
     type = ParsedFunction
-    value = x
+    expression = x
   [../]
   [./itr_x]
     type = ParsedFunction
-    value = y
+    expression = y
   [../]
   [./itr_y]
     type = ParsedFunction
-    value = 0
+    expression = 0
   [../]
 []
 

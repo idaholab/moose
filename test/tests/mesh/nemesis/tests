@@ -1,8 +1,8 @@
 [Tests]
   design = 'Mesh/index.md outputs/Nemesis.md'
-  issues = '#2520'
+  issues = '#2520 #23006'
 
-  [./nemesis_test]
+  [nemesis_test]
     type = 'Exodiff'
     input = 'nemesis_test.i'
     exodiff = 'out.e.4.0 out.e.4.1 out.e.4.2 out.e.4.3'
@@ -12,9 +12,9 @@
     group = 'requirements nemesis'
 
     requirement = 'The system shall support writing solution data in the Nemesis parallel file format.'
-  [../]
+  []
 
-  [./nemesis_repartitioning_test]
+  [nemesis_repartitioning_test]
     type = 'CSVDiff'
     input = 'nemesis_repartitioning_test.i'
     csvdiff = 'nemesis_repartitioning_test_out.csv'
@@ -26,5 +26,5 @@
     rel_err = '1e-1'
 
     requirement = "The system shall support the re-partitioning of mesh files input using the Nemesis format."
-  [../]
+  []
 []

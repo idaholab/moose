@@ -14,7 +14,7 @@
   [../]
   [./constant_exact]
     type = ParsedFunction
-    value = '1'
+    expression = '1'
   [../]
   [./quadratic]
     type = PolyTestFunction
@@ -22,7 +22,7 @@
   [../]
   [./quadratic_exact]
     type = ParsedFunction
-    value = '2 * x * x'
+    expression = '2 * x * x'
   [../]
   [./tenth]
     type = PolyTestFunction
@@ -30,7 +30,7 @@
   [../]
   [./tenth_exact]
     type = ParsedFunction
-    value = '-0.1 + 0.1 * x - 0.2 * x^2 + 0.3 * x^3 - 0.4 * x^4 + 0.5 * x^5 - 0.6 * x^6 + 0.7 * x^7 - 0.8 * x^8 + 0.9 * x^9 - 1.0 * x^10'
+    expression = '-0.1 + 0.1 * x - 0.2 * x^2 + 0.3 * x^3 - 0.4 * x^4 + 0.5 * x^5 - 0.6 * x^6 + 0.7 * x^7 - 0.8 * x^8 + 0.9 * x^9 - 1.0 * x^10'
   [../]
   [./tenth_derivative]
     type = PolyTestFunction
@@ -39,7 +39,7 @@
   [../]
   [./tenth_derivative_exact]
     type = ParsedFunction
-    value = '0.1 - 2.0 * 0.2 * x^1 + 3.0 * 0.3 * x^2 - 4.0 * 0.4 * x^3 + 5.0 * 0.5 * x^4 - 6.0 * 0.6 * x^5 + 7.0 * 0.7 * x^6 - 8.0 * 0.8 * x^7 + 9.0 * 0.9 * x^8 - 10.0 * 1.0 * x^9'
+    expression = '0.1 - 2.0 * 0.2 * x^1 + 3.0 * 0.3 * x^2 - 4.0 * 0.4 * x^3 + 5.0 * 0.5 * x^4 - 6.0 * 0.6 * x^5 + 7.0 * 0.7 * x^6 - 8.0 * 0.8 * x^7 + 9.0 * 0.9 * x^8 - 10.0 * 1.0 * x^9'
   [../]
 []
 

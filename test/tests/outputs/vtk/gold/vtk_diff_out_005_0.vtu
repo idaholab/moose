@@ -7,9 +7,9 @@
           0 0 0 0 0 0
           0 0 0
         </DataArray>
-        <DataArray type="Float64" Name="u" format="ascii" RangeMin="0" RangeMax="0.99999999998">
-          0 0.074429857959 0.074429858084 0 0.99999999998 0.99999999998
-          0.074429858088 0 0.99999999998
+        <DataArray type="Float64" Name="u" format="ascii" RangeMin="0" RangeMax="1">
+          0 0.07442985800218971 0.07442985792135698 0 1 1
+          0.07442985810255076 0 1
         </DataArray>
       </PointData>
       <CellData>
@@ -24,12 +24,20 @@
         </DataArray>
       </CellData>
       <Points>
-        <DataArray type="Float64" Name="Points" NumberOfComponents="3" format="ascii" RangeMin="0" RangeMax="1.4142135624">
+        <DataArray type="Float64" Name="Points" NumberOfComponents="3" format="ascii" RangeMin="0" RangeMax="1.4142135623730951">
           0 0 0 0.5 0 0
           0.5 0.5 0 0 0.5 0
           1 0 0 1 0.5 0
           0.5 1 0 0 1 0
           1 1 0
+          <InformationKey name="L2_NORM_RANGE" location="vtkDataArray" length="2">
+            <Value index="0">
+              0
+            </Value>
+            <Value index="1">
+              1.4142135624
+            </Value>
+          </InformationKey>
         </DataArray>
       </Points>
       <Cells>

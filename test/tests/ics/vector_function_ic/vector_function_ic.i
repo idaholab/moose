@@ -23,9 +23,9 @@
 
 [Functions/func]
   type = ParsedVectorFunction
-  value_x = '2*x'
-  value_y = '3*y'
-  value_z = 'z*z'
+  expression_x = '2*x'
+  expression_y = '3*y'
+  expression_z = 'z*z'
 []
 
 [Executioner]

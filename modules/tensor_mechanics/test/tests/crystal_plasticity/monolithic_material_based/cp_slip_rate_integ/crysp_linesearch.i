@@ -43,7 +43,7 @@
 [Functions]
   [./tdisp]
     type = ParsedFunction
-    value = 0.0001*t
+    expression = 0.0001*t
   [../]
 []
 

@@ -97,11 +97,11 @@
   [../]
   [./lapu_func]
     type   = ParsedFunction
-    value  = '4*c*(c*(x^2+y^2) - 1)*exp(-c*(x^2+y^2))'
+    expression  = '4*c*(c*(x^2+y^2) - 1)*exp(-c*(x^2+y^2))'
   [../]
   [./forcing_func]
     type   = ParsedFunction
-    value  = '16*c^2*(c^2*(x^2+y^2)^2 - 4*c*(x^2+y^2) + 2)*exp(-c*(x^2+y^2))'
+    expression  = '16*c^2*(c^2*(x^2+y^2)^2 - 4*c*(x^2+y^2) + 2)*exp(-c*(x^2+y^2))'
   [../]
 []
 

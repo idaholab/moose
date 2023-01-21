@@ -17,12 +17,12 @@
 [Functions]
   [./disp_x_fn]
     type = ParsedFunction
-    value = t
+    expression = t
   [../]
 
   [./disp_y_fn]
     type = ParsedFunction
-    value = 0
+    expression = 0
   [../]
 []
 

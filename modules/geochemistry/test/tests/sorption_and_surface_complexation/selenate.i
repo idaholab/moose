@@ -25,8 +25,8 @@
 [AuxKernels]
   [mol_sorbed_selenate_per_g_dry_soil]
     type = ParsedAux
-    args = molal_SorbedSelenate
-    function = 'molal_SorbedSelenate / 500.0'
+    coupled_variables = molal_SorbedSelenate
+    expression = 'molal_SorbedSelenate / 500.0'
     variable = mol_sorbed_selenate_per_g_dry_soil
   []
 []

@@ -16,7 +16,7 @@
 [Functions]
   [T_fn]
     type = ParsedFunction
-    value = '300 + 10 * (cos(2*pi*x + pi))'
+    expression = '300 + 10 * (cos(2*pi*x + pi))'
   []
 []
 

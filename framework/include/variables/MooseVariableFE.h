@@ -140,9 +140,6 @@ public:
    */
   bool computingCurl() const override final;
 
-  const std::set<SubdomainID> & activeSubdomains() const override;
-  bool activeOnSubdomain(SubdomainID subdomain) const override;
-
   bool isNodal() const override { return _element_data->isNodal(); }
   bool hasDoFsOnNodes() const override { return _element_data->hasDoFsOnNodes(); }
   Moose::VarFieldType fieldType() const override;
@@ -682,26 +679,15 @@ protected:
 private:
   using MooseVariableField<OutputType>::evaluate;
   using ElemArg = Moose::ElemArg;
-  using ElemFromFaceArg = Moose::ElemFromFaceArg;
   using ElemQpArg = Moose::ElemQpArg;
   using ElemSideQpArg = Moose::ElemSideQpArg;
   using FaceArg = Moose::FaceArg;
-  using SingleSidedFaceArg = Moose::SingleSidedFaceArg;
 
   ValueType evaluate(const ElemArg &, unsigned int) const override final
   {
     mooseError("Elem functor overload not yet implemented for finite element variables");
   }
-  ValueType evaluate(const ElemFromFaceArg &, unsigned int) const override final
-  {
-    mooseError(
-        "Elem-and-face-info functor overload not yet implemented for finite element variables");
-  }
   ValueType evaluate(const FaceArg &, unsigned int) const override final
-  {
-    mooseError("Face info functor overload not yet implemented for finite element variables");
-  }
-  ValueType evaluate(const SingleSidedFaceArg &, unsigned int) const override final
   {
     mooseError("Face info functor overload not yet implemented for finite element variables");
   }

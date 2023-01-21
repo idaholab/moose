@@ -2,6 +2,10 @@
   kernel_coverage_check = false
 []
 
+[GlobalParams]
+  displacements = 'disp_x disp_y disp_z'
+[]
+
 [Mesh]
   [gmg]
     type = GeneratedMeshGenerator
@@ -29,9 +33,7 @@
 [Modules]
   [TensorMechanics]
     [Master]
-      displacements = 'disp_x disp_y disp_z'
       [all]
-        displacements = 'disp_x disp_y disp_z'
         strain = FINITE
         add_variables = true
         new_system = true
@@ -81,6 +83,12 @@
     type = ComputeLagrangianLinearElasticStress
     large_kinematics = true
     block = 0
+  []
+  [dummy]
+    type = GenericConstantMaterial
+    prop_names = dummy
+    prop_values = 0
+    block = 10
   []
 []
 

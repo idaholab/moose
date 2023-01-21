@@ -47,7 +47,7 @@
 [Functions]
   [./tempfunc]
     type = ParsedFunction
-    value = '(1-y)*t'
+    expression = '(1-y)*t'
   [../]
 []
 

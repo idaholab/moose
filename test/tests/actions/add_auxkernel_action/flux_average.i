@@ -26,7 +26,7 @@
 [Functions]
   [bc_func]
     type = ParsedFunction
-    value = y+1
+    expression = y+1
   []
 []
 

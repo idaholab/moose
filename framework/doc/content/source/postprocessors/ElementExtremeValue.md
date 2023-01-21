@@ -7,7 +7,7 @@ which will change the behavior of this postprocessor to
 find the quadrature point at which the proxy variable reaches the max/min value,
 and then return the value of the specified variable at that point.
 
-The corresponding postprocessor that find extreme values of nodal variables
+The corresponding postprocessor that finds extreme values of nodal variables
 evaluated at nodes is [NodalExtremeValue](NodalExtremeValue.md)
 
 ## Example Input File Syntax

@@ -58,7 +58,7 @@
   [../]
   [./ls_func]
     type = ParsedFunction
-    value = 'x-0.5'
+    expression = 'x-0.5'
   [../]
 []
 

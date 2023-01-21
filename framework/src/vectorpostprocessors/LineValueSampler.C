@@ -100,7 +100,10 @@ LineValueSampler::getValue(const Point & p) const
     if (MooseUtils::absoluteFuzzyEqual(_id[vec_pos], position * _line_vector_norm))
       value = _vpp_value[vec_pos];
     else
+    {
+      mooseWarning("Value requested outside of sampled points");
       value = (_vpp_value[vec_pos - 1] + _vpp_value[vec_pos]) * 0.5;
+    }
   }
 
   return value;

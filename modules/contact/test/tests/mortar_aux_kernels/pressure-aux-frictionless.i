@@ -127,7 +127,7 @@
 [Functions]
   [horizontal_movement]
     type = ParsedFunction
-    value = '0.1 * t'
+    expression = '0.1 * t'
   []
   [vertical_movement]
     type = ConstantFunction

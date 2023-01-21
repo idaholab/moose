@@ -127,7 +127,7 @@ ADMultiplePowerLawCreepStressUpdate::computeStrainEnergyRateDensity(
 bool
 ADMultiplePowerLawCreepStressUpdate::substeppingCapabilityEnabled()
 {
-  return getParam<bool>("use_substep");
+  return this->_use_substepping != ADRadialReturnStressUpdate::SubsteppingType::NONE;
 }
 
 std::size_t

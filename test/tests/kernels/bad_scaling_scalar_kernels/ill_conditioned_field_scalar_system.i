@@ -43,7 +43,7 @@
 [ScalarKernels]
   [reaction]
     type = ParsedODEKernel
-    function = '10^20 * v'
+    expression = '10^20 * v'
     variable = v
   []
   [time]

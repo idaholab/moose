@@ -107,15 +107,15 @@
   [../]
   [./weight1]
     type = DerivativeParsedMaterial
-    function = 0.02*c^2
-    f_name = weight1
-    args = c
+    expression = 0.02*c^2
+    property_name = weight1
+    coupled_variables = c
   [../]
   [./weight2]
     type = DerivativeParsedMaterial
-    function = 0.02*(1-c)^2
-    f_name = weight2
-    args = c
+    expression = 0.02*(1-c)^2
+    property_name = weight2
+    coupled_variables = c
   [../]
 
   [./eigenstrain]

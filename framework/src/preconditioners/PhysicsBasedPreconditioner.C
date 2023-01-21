@@ -53,6 +53,7 @@ PhysicsBasedPreconditioner::PhysicsBasedPreconditioner(const InputParameters & p
     Preconditioner<Number>(MoosePreconditioner::_communicator),
     _nl(_fe_problem.getNonlinearSystemBase())
 {
+  const auto & libmesh_system = _nl.system();
   unsigned int num_systems = _nl.system().n_vars();
   _systems.resize(num_systems);
   _preconditioners.resize(num_systems);
@@ -77,15 +78,11 @@ PhysicsBasedPreconditioner::PhysicsBasedPreconditioner(const InputParameters & p
         (*cm)(i, i) = 1;
 
       // off-diagonal entries
-      std::vector<std::vector<unsigned int>> off_diag(n_vars);
-      for (const auto i : index_range(getParam<std::vector<NonlinearVariableName>>("off_diag_row")))
+      for (const auto & off_diag : getParam<NonlinearVariableName, NonlinearVariableName>(
+               "off_diag_row", "off_diag_column"))
       {
-        unsigned int row =
-            nl.getVariable(0, getParam<std::vector<NonlinearVariableName>>("off_diag_row")[i])
-                .number();
-        unsigned int column =
-            nl.getVariable(0, getParam<std::vector<NonlinearVariableName>>("off_diag_column")[i])
-                .number();
+        const auto row = libmesh_system.variable_number(off_diag.first);
+        const auto column = libmesh_system.variable_number(off_diag.second);
         (*cm)(row, column) = 1;
       }
 

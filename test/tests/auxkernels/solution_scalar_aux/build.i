@@ -21,7 +21,7 @@
 [Functions]
   [./a_fn]
     type = ParsedFunction
-    value = '4 - t'
+    expression = '4 - t'
   [../]
 []
 

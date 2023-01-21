@@ -36,7 +36,7 @@
 [Functions]
   [eigfunc]
     type = ParsedFunction
-    value = 1.35e-5*10.0*(2*x/504)
+    expression = 1.35e-5*10.0*(2*x/504)
   []
 []
 

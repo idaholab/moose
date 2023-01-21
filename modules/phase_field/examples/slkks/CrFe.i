@@ -117,10 +117,10 @@
   # CALPHAD free energies
   [F_BCC_A2]
     type = DerivativeParsedMaterial
-    f_name = F_BCC_A2
+    property_name = F_BCC_A2
     outputs = exodus
     output_properties = F_BCC_A2
-    function = 'BCC_FE:=1-BCC_CR; G := 8.3145*T*(1.0*if(BCC_CR > 1.0e-15,BCC_CR*log(BCC_CR),0) + '
+    expression = 'BCC_FE:=1-BCC_CR; G := 8.3145*T*(1.0*if(BCC_CR > 1.0e-15,BCC_CR*log(BCC_CR),0) + '
                '1.0*if(BCC_FE > 1.0e-15,BCC_FE*plog(BCC_FE,eps),0) + 3.0*if(BCC_VA > '
                '1.0e-15,BCC_VA*log(BCC_VA),0))/(BCC_CR + BCC_FE) + 8.3145*T*if(T < '
                '548.2*BCC_CR*BCC_FE*BCC_VA*(BCC_CR - BCC_FE) - 932.5*BCC_CR*BCC_FE*BCC_VA + '
@@ -185,17 +185,17 @@
                '+ BCC_FE) + 1.0*(BCC_CR*BCC_FE*BCC_VA*(500.0 - 1.5*T)*(BCC_CR - BCC_FE) + '
                'BCC_CR*BCC_FE*BCC_VA*(24600.0 - 14.98*T) + BCC_CR*BCC_FE*BCC_VA*(9.15*T - '
                '14000.0)*(BCC_CR - BCC_FE)^2)/(BCC_CR + BCC_FE); G/100000'
-    args = 'BCC_CR'
+    coupled_variables = 'BCC_CR'
     constant_names = 'BCC_VA T eps'
     constant_expressions = '1 1000 0.01'
   []
 
   [F_SIGMA]
     type = DerivativeParsedMaterial
-    f_name = F_SIGMA
+    property_name = F_SIGMA
     outputs = exodus
     output_properties = F_SIGMA
-    function = 'SIGMA_0FE := 1-SIGMA_0CR; SIGMA_1FE := 1-SIGMA_1CR; SIGMA_2FE := 1-SIGMA_2CR; G := '
+    expression = 'SIGMA_0FE := 1-SIGMA_0CR; SIGMA_1FE := 1-SIGMA_1CR; SIGMA_2FE := 1-SIGMA_2CR; G := '
                '8.3145*T*(10.0*if(SIGMA_0CR > 1.0e-15,SIGMA_0CR*plog(SIGMA_0CR,eps),0) + '
                '10.0*if(SIGMA_0FE > 1.0e-15,SIGMA_0FE*plog(SIGMA_0FE,eps),0) + 4.0*if(SIGMA_1CR > '
                '1.0e-15,SIGMA_1CR*plog(SIGMA_1CR,eps),0) + 4.0*if(SIGMA_1FE > '
@@ -251,7 +251,7 @@
                '1811.0 & T < 6000.0,2.2960305e+31*T^(-9.0) - 46.0*T*log(T) + 299.31255*T - '
                '25383.581,0)) + 173333.0))/(10.0*SIGMA_0CR + 10.0*SIGMA_0FE + 4.0*SIGMA_1CR + '
                '4.0*SIGMA_1FE + 16.0*SIGMA_2CR + 16.0*SIGMA_2FE); G/100000'
-    args = 'SIGMA_0CR SIGMA_1CR SIGMA_2CR'
+    coupled_variables = 'SIGMA_0CR SIGMA_1CR SIGMA_2CR'
     constant_names = 'T eps'
     constant_expressions = '1000 0.01'
   []
@@ -295,33 +295,33 @@
   [Dh1]
     type = DerivativeParsedMaterial
     material_property_names = 'D h1(eta1)'
-    function = D*h1
-    f_name = Dh1
-    args = eta1
+    expression = D*h1
+    property_name = Dh1
+    coupled_variables = eta1
     derivative_order = 1
   []
   [Dh2a]
     type = DerivativeParsedMaterial
     material_property_names = 'D h2(eta2)'
-    function = D*h2*10/30
-    f_name = Dh2a
-    args = eta2
+    expression = D*h2*10/30
+    property_name = Dh2a
+    coupled_variables = eta2
     derivative_order = 1
   []
   [Dh2b]
     type = DerivativeParsedMaterial
     material_property_names = 'D h2(eta2)'
-    function = D*h2*4/30
-    f_name = Dh2b
-    args = eta2
+    expression = D*h2*4/30
+    property_name = Dh2b
+    coupled_variables = eta2
     derivative_order = 1
   []
   [Dh2c]
     type = DerivativeParsedMaterial
     material_property_names = 'D h2(eta2)'
-    function = D*h2*16/30
-    f_name = Dh2c
-    args = eta2
+    expression = D*h2*16/30
+    property_name = Dh2c
+    coupled_variables = eta2
     derivative_order = 1
   []
 []
@@ -337,28 +337,28 @@
     variable = cCr
     diffusivity = Dh1
     v = BCC_CR
-    args = eta1
+    coupled_variables = eta1
   []
   [diff_c2a]
     type = MatDiffusion
     variable = cCr
     diffusivity = Dh2a
     v = SIGMA_0CR
-    args = eta2
+    coupled_variables = eta2
   []
   [diff_c2b]
     type = MatDiffusion
     variable = cCr
     diffusivity = Dh2b
     v = SIGMA_1CR
-    args = eta2
+    coupled_variables = eta2
   []
   [diff_c2c]
     type = MatDiffusion
     variable = cCr
     diffusivity = Dh2c
     v = SIGMA_2CR
-    args = eta2
+    coupled_variables = eta2
   []
 
   # enforce pointwise equality of chemical potentials
@@ -381,7 +381,7 @@
     cs = SIGMA_1CR
     as = 4
     F = F_SIGMA
-    args = 'SIGMA_2CR'
+    coupled_variables = 'SIGMA_2CR'
   []
   [chempot2b2c]
     # This kernel ties the remaining two sublattices in the sigma phase together
@@ -391,7 +391,7 @@
     cs = SIGMA_2CR
     as = 16
     F = F_SIGMA
-    args = 'SIGMA_0CR'
+    coupled_variables = 'SIGMA_0CR'
   []
 
   [phaseconcentration]
@@ -419,7 +419,7 @@
     gi_name = g1
     eta_i = eta1
     wi = 0.1
-    args = 'BCC_CR SIGMA_0CR SIGMA_1CR SIGMA_2CR eta2'
+    coupled_variables = 'BCC_CR SIGMA_0CR SIGMA_1CR SIGMA_2CR eta2'
   []
   [ACBulkC1]
     type = SLKKSMultiACBulkC
@@ -442,7 +442,7 @@
     variable = eta1
     h_name = h1
     lambda = lambda
-    args = 'eta2'
+    coupled_variables = 'eta2'
   []
 
   # Kernels for Allen-Cahn equation for eta1
@@ -458,7 +458,7 @@
     gi_name = g2
     eta_i = eta2
     wi = 0.1
-    args = 'BCC_CR SIGMA_0CR SIGMA_1CR SIGMA_2CR eta1'
+    coupled_variables = 'BCC_CR SIGMA_0CR SIGMA_1CR SIGMA_2CR eta1'
   []
   [ACBulkC2]
     type = SLKKSMultiACBulkC
@@ -481,7 +481,7 @@
     variable = eta2
     h_name = h2
     lambda = lambda
-    args = 'eta1'
+    coupled_variables = 'eta1'
   []
 
   # Lagrange-multiplier constraint kernel for lambda

@@ -33,11 +33,11 @@ class TestGapConductance(unittest.TestCase):
         mms_primary = flux_primary + lm
 
         self.function_args = [
-            "Functions/forcing_function/value=\'" + mms.fparser(f) + "\'",
-            "Functions/exact_soln_primal/value=\'" + mms.fparser(exact) + "\'",
-            "Functions/exact_soln_lambda/value=\'" + mms.fparser(lm) + "\'",
-            "Functions/mms_secondary/value=\'" + mms.fparser(mms_secondary) + "\'",
-            "Functions/mms_primary/value=\'" + mms.fparser(mms_primary) + "\'"]
+            "Functions/forcing_function/expression=\'" + mms.fparser(f) + "\'",
+            "Functions/exact_soln_primal/expression=\'" + mms.fparser(exact) + "\'",
+            "Functions/exact_soln_lambda/expression=\'" + mms.fparser(lm) + "\'",
+            "Functions/mms_secondary/expression=\'" + mms.fparser(mms_secondary) + "\'",
+            "Functions/mms_primary/expression=\'" + mms.fparser(mms_primary) + "\'"]
 
         self.gold_values = {
             'p2p2-2-to-2-u_same' : 2.9822564691564524,

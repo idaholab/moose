@@ -116,7 +116,7 @@ Run the following commands to visualize the solution with PEACOCK:
          replace=['<d>', 'problems',
                   '<e>', 'pressure_diffusion_out']
 
-Since no numerical changes were made here, the results should be identical to the [previous step](tutorial01_app_development/step05_kernel_object.md#result-demo). Note that the above command uses the `peacock` alias so you'll need to set the `$PATH` environment variable in your bash profile (see the [application_usage/peacock.md] page). This syntax shall henceforth be used exclusively whenever executing PEACOCK.
+Since no numerical changes were made here, the results should be identical to the [previous step](tutorial01_app_development/step05_kernel_object.md#result-demo). Note that the above command uses the `peacock` alias so you'll need to set the `$PATH` environment variable in your bash profile (see the [python/peacock.md] page). This syntax shall henceforth be used exclusively whenever executing PEACOCK.
 
 ### Commit id=commit-demo
 

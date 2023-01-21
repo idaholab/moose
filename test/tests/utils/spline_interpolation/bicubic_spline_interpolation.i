@@ -11,11 +11,11 @@
 [Functions]
   [./yx1]
     type = ParsedFunction
-    value = '3*x^2'
+    expression = '3*x^2'
   [../]
   [./yx2]
     type = ParsedFunction
-    value = '6*y^2'
+    expression = '6*y^2'
   [../]
   [./spline_fn]
     type = BicubicSplineFunction
@@ -31,11 +31,11 @@
   [../]
   [./u_func]
     type = ParsedFunction
-    value = 'x^3 + 2*y^3'
+    expression = 'x^3 + 2*y^3'
   [../]
   [./u2_forcing_func]
     type = ParsedFunction
-    value = '-6*x - 12*y'
+    expression = '-6*x - 12*y'
   [../]
 []
 

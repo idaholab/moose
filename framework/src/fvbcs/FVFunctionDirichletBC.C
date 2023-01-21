@@ -28,7 +28,7 @@ FVFunctionDirichletBC::FVFunctionDirichletBC(const InputParameters & parameters)
 {
 }
 
-Real
+ADReal
 FVFunctionDirichletBC::boundaryValue(const FaceInfo & fi) const
 {
   return _function.value(_t, fi.faceCentroid());

@@ -63,7 +63,7 @@
     variable = eta
     kappa_name = 1
     mob_name = L
-    args = w
+    coupled_variables = w
   [../]
 # MatGradSquareCoupled kernel
   [./nabla_eta]
@@ -77,16 +77,16 @@
 [Materials]
   [./mobility]
     type = DerivativeParsedMaterial
-    f_name  = L
-    args = 'eta w'
-    function = '(1.5-eta)^2+(1.5-w)^2'
+    property_name  = L
+    coupled_variables = 'eta w'
+    expression = '(1.5-eta)^2+(1.5-w)^2'
     derivative_order = 2
   [../]
   [./free_energy]
     type = DerivativeParsedMaterial
-    f_name = F
-    args = 'eta'
-    function = 'eta^2 * (1-eta)^2'
+    property_name = F
+    coupled_variables = 'eta'
+    expression = 'eta^2 * (1-eta)^2'
     derivative_order = 2
   [../]
 []

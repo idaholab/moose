@@ -16,7 +16,7 @@
 [Functions]
   [linear_x]
     type = ADParsedFunction
-    value = 'x'
+    expression = 'x'
   []
   [piecewise_linear_x]
     type = ADPiecewiseLinear

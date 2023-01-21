@@ -20,7 +20,7 @@
 [Functions]
   [./TGradient]
     type = ParsedFunction
-    value = '450 + 0.1*x'
+    expression = '450 + 0.1*x'
   [../]
 []
 
@@ -50,7 +50,7 @@
 [Kernels]
   [./PolycrystalKernel]
     variable_mobility = true
-    args = 'T'
+    coupled_variables = 'T'
   [../]
 []
 

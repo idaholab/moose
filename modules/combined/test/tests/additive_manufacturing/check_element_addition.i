@@ -48,15 +48,15 @@
 [Functions]
   [fx]
     type = ParsedFunction
-    value = '5.25'
+    expression = '5.25'
   []
   [fy]
     type = ParsedFunction
-    value = '2.5*t'
+    expression = '2.5*t'
   []
   [fz]
     type = ParsedFunction
-    value = '0.25'
+    expression = '0.25'
   []
 []
 

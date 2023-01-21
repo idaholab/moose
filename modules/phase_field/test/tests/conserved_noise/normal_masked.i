@@ -13,7 +13,7 @@
 [Functions]
   [./mask_func]
     type = ParsedFunction
-    value = 'r:=sqrt((x-5)^2+(y-5)^2); if (r<3, 1.0, 0.0)'
+    expression = 'r:=sqrt((x-5)^2+(y-5)^2); if (r<3, 1.0, 0.0)'
   [../]
 []
 

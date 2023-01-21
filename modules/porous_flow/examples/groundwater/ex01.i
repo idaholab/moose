@@ -73,29 +73,29 @@
 [Functions]
   [upper_aquifer_head]
     type = ParsedFunction
-    value = '10 + x / 200'
+    expression = '10 + x / 200'
   []
   [lower_aquifer_head]
     type = ParsedFunction
-    value = '20'
+    expression = '20'
   []
   [insitu_head]
     type = ParsedFunction
-    vals = 'lower_aquifer_head upper_aquifer_head'
-    vars = 'low up'
-    value = 'if(z <= -90, low, if(z >= -80, up, (up * (z + 90) - low * (z + 80)) / (10.0)))'
+    symbol_values = 'lower_aquifer_head upper_aquifer_head'
+    symbol_names = 'low up'
+    expression = 'if(z <= -90, low, if(z >= -80, up, (up * (z + 90) - low * (z + 80)) / (10.0)))'
   []
   [insitu_pp]
     type = ParsedFunction
-    vals = 'insitu_head'
-    vars = 'h'
-    value = '(h - z) * 1E4'
+    symbol_values = 'insitu_head'
+    symbol_names = 'h'
+    expression = '(h - z) * 1E4'
   []
   [l_rate]
     type = ParsedFunction
-    vals = 'm3_produced dt'
-    vars = 'm3_produced dt'
-    value = '1000 * m3_produced / dt'
+    symbol_values = 'm3_produced dt'
+    symbol_names = 'm3_produced dt'
+    expression = '1000 * m3_produced / dt'
   []
 []
 
@@ -114,9 +114,9 @@
   []
   [head_change]
     type = ParsedAux
-    args = 'pp insitu_head'
+    coupled_variables = 'pp insitu_head'
     use_xyzt = true
-    function = 'pp / 1E4 + z - insitu_head'
+    expression = 'pp / 1E4 + z - insitu_head'
     variable = head_change
   []
 []

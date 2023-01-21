@@ -310,39 +310,39 @@
 [Functions]
   [stress11]
     type = ParsedFunction
-    value = '4.0e2*t'
+    expression = '4.0e2*t'
   []
   [stress22]
     type = ParsedFunction
-    value = '-2.0e2*t'
+    expression = '-2.0e2*t'
   []
   [stress33]
     type = ParsedFunction
-    value = '8.0e2*t'
+    expression = '8.0e2*t'
   []
   [stress23]
     type = ParsedFunction
-    value = '2.0e2*t'
+    expression = '2.0e2*t'
   []
   [stress13]
     type = ParsedFunction
-    value = '-7.0e2*t'
+    expression = '-7.0e2*t'
   []
   [stress12]
     type = ParsedFunction
-    value = '1.0e2*t'
+    expression = '1.0e2*t'
   []
   [stress32]
     type = ParsedFunction
-    value = '1.0e2*t'
+    expression = '1.0e2*t'
   []
   [stress31]
     type = ParsedFunction
-    value = '2.0e2*t'
+    expression = '2.0e2*t'
   []
   [stress21]
     type = ParsedFunction
-    value = '-1.5e2*t'
+    expression = '-1.5e2*t'
   []
   [zero]
     type = ConstantFunction

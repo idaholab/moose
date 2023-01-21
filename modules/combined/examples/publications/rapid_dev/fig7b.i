@@ -27,9 +27,9 @@
 [Functions]
   [./diff]
     type = ParsedFunction
-    value = '${RADIUS}-pos_c'
-    vars = pos_c
-    vals = pos_c
+    expression = '${RADIUS}-pos_c'
+    symbol_names = pos_c
+    symbol_values = pos_c
   [../]
 []
 
@@ -159,8 +159,8 @@
   # forcing function mask
   [./mask]
     type = ParsedMaterial
-    f_name = mask
-    function = grad/dt
+    property_name = mask
+    expression = grad/dt
     material_property_names = 'grad dt'
   [../]
   [./grad]
@@ -206,16 +206,16 @@
   # chemical free energies
   [./chemical_free_energy_1]
     type = DerivativeParsedMaterial
-    f_name = Fc1
-    function = 'c^2'
-    args = 'c'
+    property_name = Fc1
+    expression = 'c^2'
+    coupled_variables = 'c'
     derivative_order = 2
   [../]
   [./chemical_free_energy_2]
     type = DerivativeParsedMaterial
-    f_name = Fc2
-    function = '(1-c)^2'
-    args = 'c'
+    property_name = Fc2
+    expression = '(1-c)^2'
+    coupled_variables = 'c'
     derivative_order = 2
   [../]
 
@@ -242,9 +242,9 @@
   # free energy
   [./free_energy]
     type = DerivativeSumMaterial
-    f_name = F
+    property_name = F
     sum_materials = 'Fc Fe'
-    args = 'c eta'
+    coupled_variables = 'c eta'
     derivative_order = 2
   [../]
 []

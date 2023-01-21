@@ -13,6 +13,9 @@
 
 #include "FEProblemBase.h"
 
+#include "metaphysicl/parallel_dualnumber.h"
+#include "metaphysicl/parallel_semidynamicsparsenumberarray.h"
+
 #include "timpi/parallel_sync.h"
 #include "timpi/communicator.h"
 

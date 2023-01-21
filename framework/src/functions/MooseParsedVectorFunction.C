@@ -17,10 +17,17 @@ MooseParsedVectorFunction::validParams()
 {
   InputParameters params = Function::validParams();
   params += MooseParsedFunctionBase::validParams();
-  params.addClassDescription("Return a vector component values based on a string function.");
-  params.addParam<std::string>("value_x", "0", "x-component of function.");
-  params.addParam<std::string>("value_y", "0", "y-component of function.");
-  params.addParam<std::string>("value_z", "0", "z-component of function.");
+  params.addClassDescription(
+      "Return a vector component values based on string functions for each component.");
+  params.addDeprecatedParam<std::string>(
+      "value_x", "x-component of function.", "value_x is deprecated, use expression_x");
+  params.addDeprecatedParam<std::string>(
+      "value_y", "y-component of function.", "value_y is deprecated, use expression_y");
+  params.addDeprecatedParam<std::string>(
+      "value_z", "z-component of function.", "value_z is deprecated, use expression_z");
+  params.addParam<std::string>("expression_x", "0", "x-component of function.");
+  params.addParam<std::string>("expression_y", "0", "y-component of function.");
+  params.addParam<std::string>("expression_z", "0", "z-component of function.");
   params.addParam<std::string>("curl_x", "0", "x-component of curl of function.");
   params.addParam<std::string>("curl_y", "0", "y-component of curl of function.");
   params.addParam<std::string>("curl_z", "0", "z-component of curl of function.");
@@ -30,9 +37,10 @@ MooseParsedVectorFunction::validParams()
 MooseParsedVectorFunction::MooseParsedVectorFunction(const InputParameters & parameters)
   : Function(parameters),
     MooseParsedFunctionBase(parameters),
-    _vector_value(verifyFunction(std::string("{") + getParam<std::string>("value_x") + "}{" +
-                                 getParam<std::string>("value_y") + "}{" +
-                                 getParam<std::string>("value_z") + "}")),
+    _vector_value(verifyFunction(std::string("{") +
+                                 getRenamedParam<std::string>("value_x", "expression_x") + "}{" +
+                                 getRenamedParam<std::string>("value_y", "expression_y") + "}{" +
+                                 getRenamedParam<std::string>("value_z", "expression_z") + "}")),
     _curl_value(verifyFunction(std::string("{") + getParam<std::string>("curl_x") + "}{" +
                                getParam<std::string>("curl_y") + "}{" +
                                getParam<std::string>("curl_z") + "}"))

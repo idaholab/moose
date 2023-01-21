@@ -59,8 +59,8 @@
   [./diff]
     type = ParsedAux
     variable = diff
-    function = 'constant - constant_ref'
-    args = 'constant constant_ref'
+    expression = 'constant - constant_ref'
+    coupled_variables = 'constant constant_ref'
   [../]
 []
 
@@ -74,7 +74,7 @@
 
   [./const_ref]
     type = ParsedFunction
-    value = '
+    expression = '
             ix := if(x < 0.5, 0, if(x < 1, 1, 2));
             iy := if(y > 0, 2, if(y > -0.5, 1, 0));
             iy * 3 + ix

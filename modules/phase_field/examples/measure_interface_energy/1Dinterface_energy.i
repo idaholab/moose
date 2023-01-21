@@ -65,15 +65,15 @@
 [Functions]
   [./Int_energy]
     type = ParsedFunction
-    vals = 'total_solute Cleft Cright Fleft Fright volume'
-    value = '((total_solute-Cleft*volume)/(Cright-Cleft))*Fright+(volume-(total_solute-Cleft*volume)/(Cright-Cleft))*Fleft'
-    vars = 'total_solute Cleft Cright Fleft Fright volume'
+    symbol_values = 'total_solute Cleft Cright Fleft Fright volume'
+    expression = '((total_solute-Cleft*volume)/(Cright-Cleft))*Fright+(volume-(total_solute-Cleft*volume)/(Cright-Cleft))*Fleft'
+    symbol_names = 'total_solute Cleft Cright Fleft Fright volume'
   [../]
   [./Diff]
     type = ParsedFunction
-    vals = 'total_free_energy total_no_int'
-    vars = 'total_free_energy total_no_int'
-    value = total_free_energy-total_no_int
+    symbol_values = 'total_free_energy total_no_int'
+    symbol_names = 'total_free_energy total_no_int'
+    expression = total_free_energy-total_no_int
   [../]
 []
 
@@ -85,9 +85,9 @@
   [../]
   [./Free_energy]
     type = DerivativeParsedMaterial
-    f_name = F
-    function = 'c^2*(c-1)^2'
-    args = c
+    property_name = F
+    expression = 'c^2*(c-1)^2'
+    coupled_variables = c
     derivative_order = 2
   [../]
 []

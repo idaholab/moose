@@ -6,7 +6,7 @@
     input = 'ad_coupled_convection.i'
     exodiff = 'ad_coupled_convection_out.e'
     expect_out = 'MOOSE Preconditioner:\s+SMP'
-    requirement = "The system shall support the disabling of an automatically created preconditioning object when preforming a Newton solve."
+    requirement = "The system shall support the disabling of an automatically created preconditioning object when performing a Newton solve."
   []
   [auto]
     type = 'Exodiff'
@@ -14,14 +14,14 @@
     exodiff = 'ad_coupled_convection_out.e'
     cli_args = "Preconditioning/active='' Executioner/auto_preconditioning=true"
     expect_out = 'MOOSE Preconditioner:\s+SMP\s+\(auto\)'
-    requirement = "The system shall automatically create the correct preconditioning object when preforming a Newton solve."
+    requirement = "The system shall automatically create the correct preconditioning object when performing a Newton solve."
     prereq = manual
   []
   [fail]
     type = 'RunApp'
     input = 'ad_coupled_convection.i'
     cli_args = "Preconditioning/active='' Executioner/auto_preconditioning=false Outputs/exodus=false"
-    requirement = "The system shall not automatically create a preconditioning object when preforming a Newton solve if the auto preconditioning capability is disabled."
+    requirement = "The system shall not automatically create a preconditioning object when performing a Newton solve if the auto preconditioning capability is disabled."
     expect_out = "Solve Did NOT Converge"
     ad_indexing_type = 'local' # It's currently not possible to tell AD with global indexing not to build a perfect, beautiful Jacobian
   []

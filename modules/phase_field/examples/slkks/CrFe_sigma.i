@@ -144,8 +144,8 @@
   # CALPHAD free energy of the FeCr sigma phase
   [F_SIGMA]
     type = DerivativeParsedMaterial
-    f_name = F_SIGMA
-    function = 'SIGMA_0FE := 1-SIGMA_0CR;
+    property_name = F_SIGMA
+    expression = 'SIGMA_0FE := 1-SIGMA_0CR;
                 SIGMA_1FE := 1-SIGMA_1CR;
                 '
                'SIGMA_2FE := 1-SIGMA_2CR; 8.3145*T*(10.0*if(SIGMA_0CR > '
@@ -204,7 +204,7 @@
                '1811.0 & T < 6000.0,2.2960305e+31*T^(-9.0) - 46.0*T*log(T) + 299.31255*T - '
                '25383.581,0)) + 173333.0))/(10.0*SIGMA_0CR + 10.0*SIGMA_0FE + 4.0*SIGMA_1CR + '
                '4.0*SIGMA_1FE + 16.0*SIGMA_2CR + 16.0*SIGMA_2FE)'
-    args = 'SIGMA_0CR SIGMA_1CR SIGMA_2CR'
+    coupled_variables = 'SIGMA_0CR SIGMA_1CR SIGMA_2CR'
     constant_names = 'T'
     constant_expressions = '1000'
   []
@@ -212,8 +212,8 @@
   # single sublattice BCC phase (no sublattice concentration solve necessary)
   [F_BCC_A2]
     type = DerivativeParsedMaterial
-    f_name = F_BCC_A2
-    function = 'BCC_CR:=cCr; BCC_FE:=1-BCC_CR; 8.3145*T*(1.0*if(BCC_CR > '
+    property_name = F_BCC_A2
+    expression = 'BCC_CR:=cCr; BCC_FE:=1-BCC_CR; 8.3145*T*(1.0*if(BCC_CR > '
                '1.0e-15,BCC_CR*log(BCC_CR),0) + 1.0*if(BCC_FE > 1.0e-15,BCC_FE*log(BCC_FE),0) + '
                '3.0*if(BCC_VA > 1.0e-15,BCC_VA*log(BCC_VA),0))/(BCC_CR + BCC_FE) + 8.3145*T*if(T < '
                '548.2*BCC_CR*BCC_FE*BCC_VA*(BCC_CR - BCC_FE) - 932.5*BCC_CR*BCC_FE*BCC_VA + '
@@ -279,7 +279,7 @@
                'BCC_CR*BCC_FE*BCC_VA*(24600.0 - 14.98*T) + BCC_CR*BCC_FE*BCC_VA*(9.15*T - '
                '14000.0)*(BCC_CR - BCC_FE)^2)/(BCC_CR + BCC_FE)'
 
-    args = 'cCr'
+    coupled_variables = 'cCr'
     constant_names = 'BCC_VA T'
     constant_expressions = '1 1000'
   []
