@@ -5,7 +5,7 @@
 Kim-Kim-Suzuki (KKS) nested solve kernel (2 of 3) for multiphase models. An Allen-Cahn kernel for the terms without a direct composition dependence.
 
 ### Residual
-$/eta_p$ is the nonlinear variable of this kernel. For a model with $N$ phases:
+$\eta_p$ is the nonlinear variable of this kernel. For a model with $N$ phases:
 
 \begin{equation}
 R = \sum_{j=1}^N\frac{\partial h(\eta_j)}{\partial \eta_p}F_j + w_p\frac{dg_p}{d\eta_p}
