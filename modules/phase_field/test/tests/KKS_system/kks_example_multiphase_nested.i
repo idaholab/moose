@@ -252,7 +252,7 @@
     global_cs = 'c'
     w = mu
     ca_names = 'c1'
-    fa_name = F1
+    Fa_name = F1
     args = 'eta1 eta2 eta3 mu'
   [../]
   [./ckernel]
