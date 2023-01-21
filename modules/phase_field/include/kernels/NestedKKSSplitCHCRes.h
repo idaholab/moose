@@ -18,10 +18,6 @@
  * This takes advantage of the KKS identity
  *
  * \f$ \frac{\partial F}{\partial c} = \frac{\partial F_i}{\partial c_i} \f$
- *
- * The non-linear variable for this Kernel is the concentration 'c'.
- * The user picks one phase free energy \f$ F_1 \f$ (f_base) and its
- * corresponding phase concentration \f$ c_1 \f$
  */
 class NestedKKSSplitCHCRes : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>
 {

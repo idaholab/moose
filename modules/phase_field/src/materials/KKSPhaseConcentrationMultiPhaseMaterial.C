@@ -26,7 +26,7 @@ KKSPhaseConcentrationMultiPhaseMaterial::validParams()
   params.addRequiredParam<std::vector<MaterialPropertyName>>(
       "hj_names", "Switching functions in the same order as all_etas.");
   params.addRequiredParam<std::vector<MaterialName>>(
-      "Fj_material", "Free energy material objects in the same order as all_etas.");
+      "Fj_names", "Free energy material objects in the same order as all_etas.");
   params.addRequiredParam<std::vector<MaterialPropertyName>>(
       "ci_names",
       "Phase concentrations. They must have the same order as Fj_names and global_cs, for "
@@ -49,7 +49,7 @@ KKSPhaseConcentrationMultiPhaseMaterial::KKSPhaseConcentrationMultiPhaseMaterial
     _num_j(coupledComponents("all_etas")),
     _hj_names(getParam<std::vector<MaterialPropertyName>>("hj_names")),
     _prop_hj(_num_j),
-    _Fj_names(getParam<std::vector<MaterialName>>("Fj_material")),
+    _Fj_names(getParam<std::vector<MaterialName>>("Fj_names")),
     _prop_Fi(_num_j),
     _Fi_copy(_num_j),
     _ci_names(getParam<std::vector<MaterialPropertyName>>("ci_names")),

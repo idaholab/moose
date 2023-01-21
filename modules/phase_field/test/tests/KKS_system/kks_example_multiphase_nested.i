@@ -140,7 +140,7 @@
     hj_names = 'h1 h2 h3'
     ci_names = 'c1 c2 c3'
     ci_IC = '0.2 0.5 0.8'
-    Fj_material = 'F1 F2 F3'
+    Fj_names = 'F1 F2 F3'
     min_iterations = 1
     max_iterations = 1000
     absolute_tolerance = 1e-11
@@ -150,7 +150,7 @@
     type = KKSPhaseConcentrationMultiPhaseDerivatives
     global_cs = 'c'
     all_etas = 'eta1 eta2 eta3'
-    Fj_material = 'F1 F2 F3'
+    Fj_names = 'F1 F2 F3'
     hj_names = 'h1 h2 h3'
     ci_names = 'c1 c2 c3'
   [../]
@@ -252,7 +252,7 @@
     global_cs = 'c'
     w = mu
     ca_names = 'c1'
-    Fa_name = F1
+    fa_name = F1
     args = 'eta1 eta2 eta3 mu'
   [../]
   [./ckernel]

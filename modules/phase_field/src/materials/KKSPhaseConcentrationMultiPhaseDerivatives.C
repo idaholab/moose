@@ -27,7 +27,7 @@ KKSPhaseConcentrationMultiPhaseDerivatives::validParams()
       "Phase concentrations. They must have the same order as Fj_names and global_cs, for "
       "example, c1, c2, b1, b2.");
   params.addRequiredParam<std::vector<MaterialName>>(
-      "Fj_material", "Free energy material objects in the same order as all_etas.");
+      "Fj_names", "Free energy material objects in the same order as all_etas.");
   params.addRequiredParam<std::vector<MaterialPropertyName>>(
       "hj_names", "witching functions in the same order as all_etas.");
   return params;
@@ -44,7 +44,7 @@ KKSPhaseConcentrationMultiPhaseDerivatives::KKSPhaseConcentrationMultiPhaseDeriv
     _ci_names(getParam<std::vector<MaterialPropertyName>>("ci_names")),
     _dcidetaj(_num_c),
     _dcidb(_num_c),
-    _Fj_names(getParam<std::vector<MaterialName>>("Fj_material")),
+    _Fj_names(getParam<std::vector<MaterialName>>("Fj_names")),
     _d2Fidcidbi(_num_j),
     _hj_names(getParam<std::vector<MaterialPropertyName>>("hj_names")),
     _prop_hj(_num_j),
