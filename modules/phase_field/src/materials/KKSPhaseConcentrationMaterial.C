@@ -234,7 +234,7 @@ KKSPhaseConcentrationMaterial::computeQpProperties()
     case 0:
       _nested_solve.nonlinear(solution, compute);
       break;
-    
+
     case 1:
       _nested_solve.nonlinear(solution,
                               compute,
