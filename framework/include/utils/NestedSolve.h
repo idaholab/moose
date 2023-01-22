@@ -416,6 +416,31 @@ NestedSolve::nonlinear(V & guess,
     return false;
   };
 
+  // lambda to check if ci is within bounds
+  auto condition = [&]()
+  {
+    // check independent ci
+    for (unsigned int i = 0; i < _num_eta * _num_c; ++i)
+    {
+      if (guess[i] < ci_lower_bounds[i] || guess[i] == ci_lower_bounds[i] ||
+          guess[i] > ci_upper_bounds[i] || guess[i] == ci_upper_bounds[i])
+        return false;
+    }
+
+    // check dependent ci
+    for (unsigned int m = 0; m < _num_eta; ++m)
+    {
+      Real _sum_independent = 0;
+      for (unsigned int n = 0; n < _num_c; ++n)
+        _sum_independent += guess[n * _num_eta + m];
+
+      if (_sum_independent > 1 || _sum_independent == 1 || _sum_independent < 0 ||
+          _sum_independent == 0)
+        return false;
+    }
+    return true;
+  };
+
   // perform non-linear iterations
   while (_n_iterations < _max_iterations)
   {
@@ -428,31 +453,6 @@ NestedSolve::nonlinear(V & guess,
 
     guess_prev = guess;
     guess = guess_prev - delta;
-
-    // lambda to check if ci is within bounds
-    auto condition = [&]()
-    {
-      // check independent ci
-      for (unsigned int i = 0; i < _num_eta * _num_c; ++i)
-      {
-        if (guess[i] < ci_lower_bounds[i] || guess[i] == ci_lower_bounds[i] ||
-            guess[i] > ci_upper_bounds[i] || guess[i] == ci_upper_bounds[i])
-          return false;
-      }
-
-      // check dependent ci
-      for (unsigned int m = 0; m < _num_eta; ++m)
-      {
-        Real _sum_independent = 0;
-        for (unsigned int n = 0; n < _num_c; ++n)
-          _sum_independent += guess[n * _num_eta + m];
-
-        if (_sum_independent > 1 || _sum_independent == 1 || _sum_independent < 0 ||
-            _sum_independent == 0)
-          return false;
-      }
-      return true;
-    };
 
     if (!condition())
     {
