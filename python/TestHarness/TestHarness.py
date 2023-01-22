@@ -927,7 +927,7 @@ class TestHarness:
         exec_suffix = 'Windows' if platform.system() == 'Windows' else ''
         self.executable = app_name + '-' + self.options.method + exec_suffix
         # if the executable has a slash - assume it is a file path
-        if '/' in app_name:
+        if '/' or './' in app_name:
             self.executable = os.path.abspath(self.executable)
         # look for executable in PATH - if not there, check other places.
         elif shutil.which(self.executable) is None:
