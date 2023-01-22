@@ -48,7 +48,7 @@
     variable = w
     mob_name = M
     f_name = fbulk
-    args = T
+    coupled_variables = T
   [../]
   [./T_dot]
     type = TimeDerivative
@@ -69,11 +69,11 @@
 [Materials]
   [./free_energy]
     type = DerivativeParsedMaterial
-    f_name = fbulk
-    args = 'w T'
+    property_name = fbulk
+    coupled_variables = 'w T'
     constant_names = pi
     constant_expressions = 4*atan(1)
-    function = 'm:=0.9 * atan(10 * (1 - T)) / pi; 1/4*w^4 - (1/2 - m/3) * w^3 + (1/4 - m/2) * w^2'
+    expression = 'm:=0.9 * atan(10 * (1 - T)) / pi; 1/4*w^4 - (1/2 - m/3) * w^3 + (1/4 - m/2) * w^2'
     derivative_order = 2
     outputs = exodus
   [../]

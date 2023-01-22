@@ -40,7 +40,7 @@
 [Functions]
   [pull]
     type = ParsedFunction
-    value = '200 * t'
+    expression = '200 * t'
   []
 []
 

@@ -23,7 +23,7 @@
 
 [Functions/func]
   type = ParsedFunction
-  value = '2*x'
+  expression = '2*x'
 []
 
 [Executioner]

@@ -127,7 +127,7 @@ cd ~/projects/problems/verification
 ```
 
 When complete an output file will be produced with the name "2d_main_out.e", this file
-can be viewed using [Paraview](https://www.paraview.org/) or [application_usage/peacock.md].
+can be viewed using [Paraview](https://www.paraview.org/) or [python/peacock.md].
 [tutorial03-snow-results] show the change in temperature across the domain with time. A key
 feature is that the surface remains cool as the heat source warms the snow internally, creating large
 temperature gradient at the surface.

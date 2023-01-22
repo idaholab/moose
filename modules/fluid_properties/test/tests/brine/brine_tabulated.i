@@ -78,15 +78,15 @@
 [Functions]
   [./pic]
     type = ParsedFunction
-    value = 'if(x<2,20e6, 40e6)'
+    expression = 'if(x<2,20e6, 40e6)'
   [../]
   [./tic]
     type = ParsedFunction
-    value = 'if(x<1, 323.15, 473.15)'
+    expression = 'if(x<1, 323.15, 473.15)'
   [../]
   [./xic]
     type = ParsedFunction
-    value = 'if(x<2,0.1047, 0.2261)'
+    expression = 'if(x<2,0.1047, 0.2261)'
   [../]
 []
 

@@ -38,7 +38,7 @@
 [Functions]
   [./set_d]
     type = ParsedFunction
-    value = 'r := sqrt(x * x + y * y); r'
+    expression = 'r := sqrt(x * x + y * y); r'
   [../]
 []
 

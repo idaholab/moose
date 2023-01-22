@@ -111,19 +111,19 @@
 [Functions]
   [./src_func]
     type = ParsedFunction
-    value = '10*(-200*x+400) + (1/x)*(310*t - (10/1.02)*x*t - (1/1.02)*t^2)'
+    expression = '10*(-200*x+400) + (1/x)*(310*t - (10/1.02)*x*t - (1/1.02)*t^2)'
   [../]
   [./neumann_func]
     type = ParsedFunction
-    value = '((0.05/2.04)*(2.04-x-0.2*t) + 1.5)*200*t'
+    expression = '((0.05/2.04)*(2.04-x-0.2*t) + 1.5)*200*t'
   [../]
   [./k_func]
     type = ParsedFunction
-    value = '(0.05/2.04)*(2.04-x-0.2*t) + 1.5'
+    expression = '(0.05/2.04)*(2.04-x-0.2*t) + 1.5'
   [../]
   [./ls_func]
     type = ParsedFunction
-    value = '2.04 - x -0.2*t'
+    expression = '2.04 - x -0.2*t'
   [../]
 []
 

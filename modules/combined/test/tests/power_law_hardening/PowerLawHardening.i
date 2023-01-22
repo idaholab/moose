@@ -29,7 +29,7 @@
 [Functions]
   [./top_pull]
     type = ParsedFunction
-    value = t*(0.1)
+    expression = t*(0.1)
   [../]
 []
 

@@ -26,7 +26,7 @@ R_i = 1.0
 [Functions]
   [T_fn]
     type = ParsedFunction
-    value = 'x * y'
+    expression = 'x * y'
   []
 []
 

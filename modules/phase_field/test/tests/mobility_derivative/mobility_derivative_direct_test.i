@@ -62,9 +62,9 @@
   [../]
   [./mob]
     type = DerivativeParsedMaterial
-    f_name = M
-    args = c
-    function = 'if(c<-1,0.1,if(c>1,0.1,1-.9*c^2))'
+    property_name = M
+    coupled_variables = c
+    expression = 'if(c<-1,0.1,if(c>1,0.1,1-.9*c^2))'
     outputs = exodus
     derivative_order = 2
   [../]

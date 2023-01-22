@@ -25,7 +25,7 @@
 [Functions]
   [./top_pull]
     type = ParsedFunction
-    value = t*(0.0625)
+    expression = t*(0.0625)
   [../]
   [./hf]
     type = PiecewiseLinear

@@ -44,8 +44,8 @@
   []
   [parsed_grad_function]
     type = ParsedVectorFunction
-    value_x = 'cos(x)'
-    value_y = 'sin(y/2)/2'
+    expression_x = 'cos(x)'
+    expression_y = 'sin(y/2)/2'
   []
   [parsed_gradx_function]
     type = ParsedFunction

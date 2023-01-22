@@ -15,13 +15,13 @@
 [Functions]
   [./conductivity_1]
     type = ParsedVectorFunction
-    value_y = '0.1+x'
-    value_x = '0.5*(1+x*y)'
+    expression_y = '0.1+x'
+    expression_x = '0.5*(1+x*y)'
   [../]
   [./conductivity_2]
     type = ParsedVectorFunction
-    value_y = '0.1+2*x'
-    value_x = '0.2+x*y'
+    expression_y = '0.1+2*x'
+    expression_x = '0.2+x*y'
   [../]
   [./conductivity]
     type = LinearCombinationFunction # yields value_y=0.1, value_x=0.8

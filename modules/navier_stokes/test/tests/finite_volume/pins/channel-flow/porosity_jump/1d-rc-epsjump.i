@@ -69,7 +69,7 @@ velocity_interp_method = 'rc'
 [Functions]
   [smooth_jump]
     type = ParsedFunction
-    value = '1 - 0.5 * 1 / (1 + exp(-30*(x-1)))'
+    expression = '1 - 0.5 * 1 / (1 + exp(-30*(x-1)))'
   []
 []
 

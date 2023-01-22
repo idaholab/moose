@@ -34,7 +34,12 @@ PolycrystalKernelAction::validParams()
                         "The mobility is a function of any MOOSE variable (if "
                         "this is set to false, L must be constant over the "
                         "entire domain!)");
-  params.addParam<std::vector<VariableName>>("args", "Vector of variable arguments L depends on");
+  params.addDeprecatedCoupledVar("args",
+                                 "Vector of nonlinear variable arguments that L depends on",
+                                 "args is deprecated, use 'coupled_variables' instead");
+  params.addCoupledVar("coupled_variables",
+                       "Vector of nonlinear variable arguments that L depends on");
+
   return params;
 }
 

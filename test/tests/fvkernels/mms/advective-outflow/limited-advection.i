@@ -52,15 +52,15 @@ a=1.1
 [Functions]
   [exact]
     type = ParsedFunction
-    value = 'cos(x)'
+    expression = 'cos(x)'
   []
   [advection]
     type = ParsedFunction
-    value = '${a} * cos(x)'
+    expression = '${a} * cos(x)'
   []
   [forcing]
     type = ParsedFunction
-    value = '-${a} * sin(x)'
+    expression = '-${a} * sin(x)'
   []
 []
 

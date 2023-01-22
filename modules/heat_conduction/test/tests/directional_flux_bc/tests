@@ -1,0 +1,139 @@
+[Tests]
+  issues = '#23093'
+  design = 'DirectionalFluxBC.md SelfShadowSideUserObject.md'
+  [2d]
+    type = Exodiff
+    input = 2d.i
+    exodiff = 2d_out.e
+    requirement = 'The system shall be able to apply a directed flux to the surface of a 2d geometry with and without self shadowing'
+  []
+
+  [3d]
+    type = Exodiff
+    input = 3d.i
+    exodiff = 3d_out.e
+    requirement = 'The system shall be able to apply a directed flux to the surface of a 3d geometry with and without self shadowing'
+    recover = false # outputs only on FINAL; recover is fully tested through the 2d case
+  []
+
+  [elem_type]
+    requirement = 'Self shadow calculations shall support mesh element type '
+
+    [quad4]
+      type = CSVDiff
+      input = 2d_elem.i
+      csvdiff = 2d_quad4.csv
+      cli_args = 'GlobalParams/elem_type=quad4 Outputs/file_base=2d_quad4'
+      detail = 'QUAD4'
+    []
+    [quad8]
+      type = CSVDiff
+      input = 2d_elem.i
+      csvdiff = 2d_quad8.csv
+      cli_args = 'GlobalParams/elem_type=quad8 GlobalParams/order=second Outputs/file_base=2d_quad8'
+      detail = 'QUAD8'
+    []
+    [quad9]
+      type = CSVDiff
+      input = 2d_elem.i
+      csvdiff = 2d_quad9.csv
+      cli_args = 'GlobalParams/elem_type=quad9 GlobalParams/order=second Outputs/file_base=2d_quad9'
+      detail = 'QUAD9'
+    []
+
+    [tri3]
+      type = CSVDiff
+      input = 2d_elem.i
+      csvdiff = 2d_tri3.csv
+      cli_args = 'GlobalParams/elem_type=tri3 Outputs/file_base=2d_tri3'
+      detail = 'TRI3'
+    []
+    [tri6]
+      type = CSVDiff
+      input = 2d_elem.i
+      csvdiff = 2d_tri6.csv
+      cli_args = 'GlobalParams/elem_type=tri6 GlobalParams/order=second Outputs/file_base=2d_tri6'
+      detail = 'TRI6'
+    []
+
+    [tet4]
+      type = CSVDiff
+      input = 3d_elem.i
+      csvdiff = 3d_tet4.csv
+      cli_args = 'GlobalParams/elem_type=tet4 Outputs/file_base=3d_tet4'
+      detail = 'TET4'
+    []
+    [tet10]
+      type = CSVDiff
+      input = 3d_elem.i
+      csvdiff = 3d_tet10.csv
+      cli_args = 'GlobalParams/elem_type=tet10 GlobalParams/order=second Outputs/file_base=3d_tet10'
+      detail = 'TET10'
+      heavy = true
+    []
+
+    [hex8]
+      type = CSVDiff
+      input = 3d_elem.i
+      csvdiff = 3d_hex8.csv
+      cli_args = 'GlobalParams/elem_type=hex8 Outputs/file_base=3d_hex8'
+      detail = 'HEX8'
+    []
+    [hex20]
+      type = CSVDiff
+      input = 3d_elem.i
+      csvdiff = 3d_hex20.csv
+      cli_args = 'GlobalParams/elem_type=hex20 GlobalParams/order=second Outputs/file_base=3d_hex20'
+      detail = 'HEX20'
+    []
+    [hex27]
+      type = CSVDiff
+      input = 3d_elem.i
+      csvdiff = 3d_hex27.csv
+      cli_args = 'GlobalParams/elem_type=hex20 GlobalParams/order=second Outputs/file_base=3d_hex27'
+      detail = 'HEX27'
+    []
+
+    # prism and pyramid elements will work as their sides are supported, I'm just doing a RunApp here to ensure there
+    # is no regression with unsupported side types, which would result in a mooseError
+    [prism6]
+      type = RunApp
+      input = 3d_elem.i
+      cli_args = 'GlobalParams/elem_type=prism6 Outputs/file_base=3d_prism6'
+      detail = 'PRISM6'
+    []
+    [prism15]
+      type = RunApp
+      input = 3d_elem.i
+      cli_args = 'GlobalParams/elem_type=prism15 GlobalParams/order=second  Outputs/file_base=3d_prism15'
+      detail = 'PRISM15'
+    []
+    [prism18]
+      type = RunApp
+      input = 3d_elem.i
+      cli_args = 'GlobalParams/elem_type=prism18 GlobalParams/order=second  Outputs/file_base=3d_prism18'
+      detail = 'PRISM18'
+    []
+
+    [pyramid5]
+      type = RunApp
+      input = 3d_elem.i
+      cli_args = 'GlobalParams/elem_type=pyramid5 Outputs/file_base=3d_pyramid5'
+      detail = 'PYRAMID5'
+    []
+    [pyramid13]
+      type = RunApp
+      input = 3d_elem.i
+      cli_args = 'GlobalParams/elem_type=pyramid13 GlobalParams/order=second  Outputs/file_base=3d_pyramid13'
+      detail = 'PYRAMID13'
+      heavy = true
+    []
+    [pyramid14]
+      type = RunApp
+      input = 3d_elem.i
+      cli_args = 'GlobalParams/elem_type=pyramid14 GlobalParams/order=second  Outputs/file_base=3d_pyramid14'
+      detail = 'PYRAMID14'
+      heavy = true
+    []
+  []
+[]

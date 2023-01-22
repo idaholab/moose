@@ -310,23 +310,6 @@ A typedef defining a "face" evaluation calling argument. This is composed of
   passed-in subdomain IDs will both correspond to the subdomain ID that the flux kernel is
   defined on
 
-### ElemFromFaceArg
-
-People should think of this geometric argument as corresponding to the location in space of the
-provided element centroid, *not* as corresonding to the location of the provided face
-information. Summary of data in this argument:
-
-- an element, whose centroid we should think of as the evaluation point. It is possible that
-  the element will be a nullptr in which case, the evaluation point should be thought of as
-  the location of a ghosted element centroid
-- a face information object. When the provided element is null or for instance when the
-  functoris a variable that does not exist on the provided element subdomain, this face
-  information object will be used to help construct a ghost value evaluation
-- a subdomain ID. This is useful when the functor is a material property and the user wants
-  to indicate which material property definition should be used to evaluate the functor. For
-  instance if we are using a flux kernel that is not defined on one side of the face, the
-  subdomain ID will allow us to compute a ghost material property evaluation
-
 ### ElemQpArg
 
 Argument for requesting functor evaluation at a quadrature point location in an element. Data

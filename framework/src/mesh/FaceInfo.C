@@ -16,11 +16,11 @@
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/remote_elem.h"
 
-FaceInfo::FaceInfo(const ElemInfo * elem_info, unsigned int side)
+FaceInfo::FaceInfo(const ElemInfo * elem_info, unsigned int side, const dof_id_type id)
   : _elem_info(elem_info),
     _neighbor_info(nullptr),
+    _id(id),
     _processor_id(_elem_info->elem()->processor_id()),
-    _id(std::make_pair(_elem_info->elem()->id(), side)),
     _elem_side_id(side),
     _neighbor_side_id(libMesh::invalid_uint),
     _gc(0.5)

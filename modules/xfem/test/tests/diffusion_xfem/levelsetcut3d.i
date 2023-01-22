@@ -46,7 +46,7 @@
   [../]
   [./ls_func]
     type = ParsedFunction
-    value = 'sqrt(x*x + y*y + z*z) - 0.5'
+    expression = 'sqrt(x*x + y*y + z*z) - 0.5'
   [../]
 []
 

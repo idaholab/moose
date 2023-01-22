@@ -686,7 +686,7 @@ TransientMultiApp::setupApp(unsigned int i, Real /*time*/) // FIXME: Should we b
     libmesh_aux_system.add_vector("transfer", false);
   }
 
-  // Call initialization method of Executioner (Note, this preforms the output of the initial time
+  // Call initialization method of Executioner (Note, this performs the output of the initial time
   // step, if desired)
   ex->init();
 

@@ -27,11 +27,11 @@
 [Functions]
   [./fn_x]
     type = ParsedFunction
-    value = x
+    expression = x
   [../]
   [./fn_y]
     type = ParsedFunction
-    value = y
+    expression = y
   [../]
 []
 

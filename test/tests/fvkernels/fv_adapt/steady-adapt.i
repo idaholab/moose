@@ -20,7 +20,7 @@
 [Functions]
   [exact]
     type = ParsedFunction
-    value = x
+    expression = x
   []
 []
 

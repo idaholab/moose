@@ -89,7 +89,7 @@
 [Functions]
   [./cte_func_mean]
     type = ParsedFunction
-    value = '1e-6 + 1e-8 * t + 1e-8 * t^2 + exp(t) * 1e-2'
+    expression = '1e-6 + 1e-8 * t + 1e-8 * t^2 + exp(t) * 1e-2'
   [../]
 []
 

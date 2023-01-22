@@ -12,11 +12,11 @@
 [Functions]
   [./v1_func]
     type = ParsedFunction
-    value = (1-x)/2
+    expression = (1-x)/2
   [../]
   [./v2_func]
     type = ParsedFunction
-    value = (1+x)/2
+    expression = (1+x)/2
   [../]
 []
 
@@ -70,8 +70,8 @@
   [./lc-aux]
     type = ParsedAux
     variable = lc
-    function = 'v1*w1+v2*w2'
-    args = 'v1 w1 v2 w2'
+    expression = 'v1*w1+v2*w2'
+    coupled_variables = 'v1 w1 v2 w2'
     execute_on = 'timestep_end'
   [../]
 []

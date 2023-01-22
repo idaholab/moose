@@ -185,7 +185,7 @@
 # Ka * (rho C)_a = 10056886.914
 # h = 11
     type = ParsedFunction
-    value = 'sqrt(10056886.914/t)/11.0'
+    expression = 'sqrt(10056886.914/t)/11.0'
   []
 []
 

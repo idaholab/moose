@@ -24,7 +24,7 @@
 [Functions]
   [inc_y]
     type = ParsedFunction
-    value = 'sin(pi * y / 10)'
+    expression = 'sin(pi * y / 10)'
   []
 []
 
@@ -127,8 +127,8 @@
 [Materials]
   [kSquared]
     type = ADParsedMaterial
-    f_name = kSquared
-    function = '0.4188790204786391^2'
+    property_name = kSquared
+    expression = '0.4188790204786391^2'
   []
 []
 

@@ -13,7 +13,7 @@
 [Functions]
   [./initial_func]
     type = ParsedFunction
-    value = sin(pi*x)*sin(pi*y)
+    expression = sin(pi*x)*sin(pi*y)
   [../]
 []
 

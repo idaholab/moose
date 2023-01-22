@@ -40,7 +40,7 @@
 [Functions]
   [function]
     type = ParsedFunction
-      value = 'if(t > 100.0, 0.0, t)'
+      expression = 'if(t > 100.0, 0.0, t)'
   []
 []
 

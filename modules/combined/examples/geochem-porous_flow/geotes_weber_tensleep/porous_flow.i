@@ -862,123 +862,123 @@ production_rate = 0.02 # kg/s/m, this is about the maximum that can be sustained
 [Functions]
   [moles_H]
     type = ParsedFunction
-    vars = 'kg_H dt'
-    vals = 'kg_H_produced_this_timestep dt'
-    value = 'kg_H * 1000 / 1.0079 / dt'
+    symbol_names = 'kg_H dt'
+    symbol_values = 'kg_H_produced_this_timestep dt'
+    expression = 'kg_H * 1000 / 1.0079 / dt'
   []
   [moles_Cl]
     type = ParsedFunction
-    vars = 'kg_Cl dt'
-    vals = 'kg_Cl_produced_this_timestep dt'
-    value = 'kg_Cl * 1000 / 35.453 / dt'
+    symbol_names = 'kg_Cl dt'
+    symbol_values = 'kg_Cl_produced_this_timestep dt'
+    expression = 'kg_Cl * 1000 / 35.453 / dt'
   []
   [moles_SO4]
     type = ParsedFunction
-    vars = 'kg_SO4 dt'
-    vals = 'kg_SO4_produced_this_timestep dt'
-    value = 'kg_SO4 * 1000 / 96.0576 / dt'
+    symbol_names = 'kg_SO4 dt'
+    symbol_values = 'kg_SO4_produced_this_timestep dt'
+    expression = 'kg_SO4 * 1000 / 96.0576 / dt'
   []
   [moles_HCO3]
     type = ParsedFunction
-    vars = 'kg_HCO3 dt'
-    vals = 'kg_HCO3_produced_this_timestep dt'
-    value = 'kg_HCO3 * 1000 / 61.0171 / dt'
+    symbol_names = 'kg_HCO3 dt'
+    symbol_values = 'kg_HCO3_produced_this_timestep dt'
+    expression = 'kg_HCO3 * 1000 / 61.0171 / dt'
   []
   [moles_SiO2aq]
     type = ParsedFunction
-    vars = 'kg_SiO2aq dt'
-    vals = 'kg_SiO2aq_produced_this_timestep dt'
-    value = 'kg_SiO2aq * 1000 / 60.0843 / dt'
+    symbol_names = 'kg_SiO2aq dt'
+    symbol_values = 'kg_SiO2aq_produced_this_timestep dt'
+    expression = 'kg_SiO2aq * 1000 / 60.0843 / dt'
   []
   [moles_Al]
     type = ParsedFunction
-    vars = 'kg_Al dt'
-    vals = 'kg_Al_produced_this_timestep dt'
-    value = 'kg_Al * 1000 / 26.9815 / dt'
+    symbol_names = 'kg_Al dt'
+    symbol_values = 'kg_Al_produced_this_timestep dt'
+    expression = 'kg_Al * 1000 / 26.9815 / dt'
   []
   [moles_Ca]
     type = ParsedFunction
-    vars = 'kg_Ca dt'
-    vals = 'kg_Ca_produced_this_timestep dt'
-    value = 'kg_Ca * 1000 / 40.08 / dt'
+    symbol_names = 'kg_Ca dt'
+    symbol_values = 'kg_Ca_produced_this_timestep dt'
+    expression = 'kg_Ca * 1000 / 40.08 / dt'
   []
   [moles_Mg]
     type = ParsedFunction
-    vars = 'kg_Mg dt'
-    vals = 'kg_Mg_produced_this_timestep dt'
-    value = 'kg_Mg * 1000 / 24.305 / dt'
+    symbol_names = 'kg_Mg dt'
+    symbol_values = 'kg_Mg_produced_this_timestep dt'
+    expression = 'kg_Mg * 1000 / 24.305 / dt'
   []
   [moles_Fe]
     type = ParsedFunction
-    vars = 'kg_Fe dt'
-    vals = 'kg_Fe_produced_this_timestep dt'
-    value = 'kg_Fe * 1000 / 55.847 / dt'
+    symbol_names = 'kg_Fe dt'
+    symbol_values = 'kg_Fe_produced_this_timestep dt'
+    expression = 'kg_Fe * 1000 / 55.847 / dt'
   []
   [moles_K]
     type = ParsedFunction
-    vars = 'kg_K dt'
-    vals = 'kg_K_produced_this_timestep dt'
-    value = 'kg_K * 1000 / 39.0983 / dt'
+    symbol_names = 'kg_K dt'
+    symbol_values = 'kg_K_produced_this_timestep dt'
+    expression = 'kg_K * 1000 / 39.0983 / dt'
   []
   [moles_Na]
     type = ParsedFunction
-    vars = 'kg_Na dt'
-    vals = 'kg_Na_produced_this_timestep dt'
-    value = 'kg_Na * 1000 / 22.9898 / dt'
+    symbol_names = 'kg_Na dt'
+    symbol_values = 'kg_Na_produced_this_timestep dt'
+    expression = 'kg_Na * 1000 / 22.9898 / dt'
   []
   [moles_Sr]
     type = ParsedFunction
-    vars = 'kg_Sr dt'
-    vals = 'kg_Sr_produced_this_timestep dt'
-    value = 'kg_Sr * 1000 / 87.62 / dt'
+    symbol_names = 'kg_Sr dt'
+    symbol_values = 'kg_Sr_produced_this_timestep dt'
+    expression = 'kg_Sr * 1000 / 87.62 / dt'
   []
   [moles_F]
     type = ParsedFunction
-    vars = 'kg_F dt'
-    vals = 'kg_F_produced_this_timestep dt'
-    value = 'kg_F * 1000 / 18.9984 / dt'
+    symbol_names = 'kg_F dt'
+    symbol_values = 'kg_F_produced_this_timestep dt'
+    expression = 'kg_F * 1000 / 18.9984 / dt'
   []
   [moles_BOH]
     type = ParsedFunction
-    vars = 'kg_BOH dt'
-    vals = 'kg_BOH_produced_this_timestep dt'
-    value = 'kg_BOH * 1000 / 61.8329 / dt'
+    symbol_names = 'kg_BOH dt'
+    symbol_values = 'kg_BOH_produced_this_timestep dt'
+    expression = 'kg_BOH * 1000 / 61.8329 / dt'
   []
   [moles_Br]
     type = ParsedFunction
-    vars = 'kg_Br dt'
-    vals = 'kg_Br_produced_this_timestep dt'
-    value = 'kg_Br * 1000 / 79.904 / dt'
+    symbol_names = 'kg_Br dt'
+    symbol_values = 'kg_Br_produced_this_timestep dt'
+    expression = 'kg_Br * 1000 / 79.904 / dt'
   []
   [moles_Ba]
     type = ParsedFunction
-    vars = 'kg_Ba dt'
-    vals = 'kg_Ba_produced_this_timestep dt'
-    value = 'kg_Ba * 1000 / 137.33 / dt'
+    symbol_names = 'kg_Ba dt'
+    symbol_values = 'kg_Ba_produced_this_timestep dt'
+    expression = 'kg_Ba * 1000 / 137.33 / dt'
   []
   [moles_Li]
     type = ParsedFunction
-    vars = 'kg_Li dt'
-    vals = 'kg_Li_produced_this_timestep dt'
-    value = 'kg_Li * 1000 / 6.941 / dt'
+    symbol_names = 'kg_Li dt'
+    symbol_values = 'kg_Li_produced_this_timestep dt'
+    expression = 'kg_Li * 1000 / 6.941 / dt'
   []
   [moles_NO3]
     type = ParsedFunction
-    vars = 'kg_NO3 dt'
-    vals = 'kg_NO3_produced_this_timestep dt'
-    value = 'kg_NO3 * 1000 / 62.0049 / dt'
+    symbol_names = 'kg_NO3 dt'
+    symbol_values = 'kg_NO3_produced_this_timestep dt'
+    expression = 'kg_NO3 * 1000 / 62.0049 / dt'
   []
   [moles_O2aq]
     type = ParsedFunction
-    vars = 'kg_O2aq dt'
-    vals = 'kg_O2aq_produced_this_timestep dt'
-    value = 'kg_O2aq * 1000 / 31.9988 / dt'
+    symbol_names = 'kg_O2aq dt'
+    symbol_values = 'kg_O2aq_produced_this_timestep dt'
+    expression = 'kg_O2aq * 1000 / 31.9988 / dt'
   []
   [moles_H2O]
     type = ParsedFunction
-    vars = 'kg_H2O dt'
-    vals = 'kg_H2O_produced_this_timestep dt'
-    value = 'kg_H2O * 1000 / 18.01801802 / dt'
+    symbol_names = 'kg_H2O dt'
+    symbol_values = 'kg_H2O_produced_this_timestep dt'
+    expression = 'kg_H2O * 1000 / 18.01801802 / dt'
   []
 []
 

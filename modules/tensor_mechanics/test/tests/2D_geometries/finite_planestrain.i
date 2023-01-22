@@ -24,7 +24,7 @@
 [Functions]
   [./pull]
     type = ParsedFunction
-    value ='0.005 * t'
+    expression ='0.005 * t'
   [../]
 []
 

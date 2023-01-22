@@ -95,17 +95,17 @@
   # Free energy of the matrix
   [./fm]
     type = DerivativeParsedMaterial
-    f_name = fm
-    args = 'cm'
-    function = '(0.1-cm)^2'
+    property_name = fm
+    coupled_variables = 'cm'
+    expression = '(0.1-cm)^2'
   [../]
 
   # Free energy of the delta phase
   [./fd]
     type = DerivativeParsedMaterial
-    f_name = fd
-    args = 'cd'
-    function = '(0.9-cd)^2+0.5'
+    property_name = fd
+    coupled_variables = 'cd'
+    expression = '(0.9-cd)^2+0.5'
   [../]
 
   # h(eta)
@@ -182,7 +182,7 @@
     variable = eta
     fa_name  = fm
     fb_name  = fd
-    args     = 'cm cd'
+    coupled_variables     = 'cm cd'
     w        = 0.4
   [../]
   [./ACBulkC]

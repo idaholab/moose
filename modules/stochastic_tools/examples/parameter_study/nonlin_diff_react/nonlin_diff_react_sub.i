@@ -1,7 +1,7 @@
 [Functions]
   [source]
     type = ParsedFunction
-    value = "100 * sin(2 * pi * x) * sin(2 * pi * y)"
+    expression = "100 * sin(2 * pi * x) * sin(2 * pi * y)"
   []
 []
 

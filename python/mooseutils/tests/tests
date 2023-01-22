@@ -70,14 +70,6 @@
     issues = "#15996"
     requirement = "The system shall include a utility running an executable."
   []
-  [jsondiff]
-    type = PythonUnitTest
-    input = test_jsondiff.py
-    required_python_packages = deepdiff
-
-    requirement = "MOOSE python utilities shall include a tool for reading compared JSON files."
-    issues = '#11323'
-  []
   [civet_results]
     type = PythonUnitTest
     input = test_civet_results.py

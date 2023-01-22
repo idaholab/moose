@@ -1,3 +1,5 @@
+# NumericalFlux3EqnDGKernel
+
 !syntax description /DGKernels/NumericalFlux3EqnDGKernel
 
 This DG kernel implements the side flux contributions for the 1-D, 1-phase, variable-area

@@ -8,6 +8,8 @@
       input = 'parent_uo_transfer.i'
       exodiff = 'parent_uo_transfer_out.e'
       detail = 'using MultiAppUserObjectTransfer.'
+      # Beam moves and line value sampler ends up getting values outside of sampled points
+      allow_warnings = true
     [../]
     [./error_1]
       type = RunException
@@ -42,6 +44,8 @@
       detail = 'and LineValueSampler shall report an return value of infinity'
                     ' when the projection of the queried point onto the line'
                     ' segment lies outside the limits of the line segment.'
+      # Beam moves and line value sampler ends up getting values outside of sampled points
+      allow_warnings = true
     [../]
   [../]
 []

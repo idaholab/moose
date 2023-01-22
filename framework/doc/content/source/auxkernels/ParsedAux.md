@@ -4,7 +4,7 @@
 
 The parsed expression may contain:
 
-- variables (`args` parameter)
+- variables (`coupled_variables` parameter)
 
 - coordinates in space and time (`use_xyzt` parameter)
 

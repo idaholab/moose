@@ -18,11 +18,11 @@
 [Functions]
   [./exact_v]
     type = ParsedFunction
-    value = sin(pi*x)*sin(pi*y)
+    expression = sin(pi*x)*sin(pi*y)
   [../]
   [./force_fn_v]
     type = ParsedFunction
-    value = 2*pi*pi*sin(pi*x)*sin(pi*y)
+    expression = 2*pi*pi*sin(pi*x)*sin(pi*y)
   [../]
 []
 

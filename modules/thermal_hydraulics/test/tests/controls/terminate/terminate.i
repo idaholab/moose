@@ -50,8 +50,8 @@
   [threshold]
     type = UnitTripControl
     condition = 'dt_pp > 3'
-    vars = 'dt_pp'
-    vals = 'dt_pp'
+    symbol_names = 'dt_pp'
+    symbol_values = 'dt_pp'
   []
 
   [terminate]
@@ -64,7 +64,7 @@
 [Functions]
   [dt_fn]
     type = ParsedFunction
-    value = '1 + t'
+    expression = '1 + t'
   []
 []
 

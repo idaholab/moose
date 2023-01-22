@@ -14,15 +14,16 @@
 #include "FVTimeKernel.h"
 
 GatherRCDataElementThread::GatherRCDataElementThread(FEProblemBase & fe_problem,
+                                                     const unsigned int nl_sys_number,
                                                      const std::vector<unsigned int> & vars)
-  : ThreadedElementLoop<ConstElemRange>(fe_problem), _vars(vars)
+  : ThreadedElementLoop<ConstElemRange>(fe_problem), _nl_system_num(nl_sys_number), _vars(vars)
 {
 }
 
 // Splitting Constructor
 GatherRCDataElementThread::GatherRCDataElementThread(GatherRCDataElementThread & x,
                                                      Threads::split split)
-  : ThreadedElementLoop<ConstElemRange>(x, split), _vars(x._vars)
+  : ThreadedElementLoop<ConstElemRange>(x, split), _nl_system_num(x._nl_system_num), _vars(x._vars)
 {
 }
 
@@ -36,6 +37,7 @@ GatherRCDataElementThread::subdomainChanged()
   auto queries = _fe_problem.theWarehouse()
                      .query()
                      .template condition<AttribSystem>("FVElementalKernel")
+                     .template condition<AttribSysNum>(this->_nl_system_num)
                      .template condition<AttribThread>(_tid)
                      .template condition<AttribSubdomains>(_subdomain);
 

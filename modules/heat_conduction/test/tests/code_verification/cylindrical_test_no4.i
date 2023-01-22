@@ -32,9 +32,9 @@
 [Functions]
   [./exact]
     type = ParsedFunction
-    vars = 'qin q k ri ro uf h'
-    vals = '100 1200 1.0 0.2 1 100 10'
-    value = 'uf+ (0.25*q/k) * ( 2*k*(ro^2-ri^2)/(h*ro) + ro^2-x^2 + 2*ri^2*log(x/ro)) + (k/(h*ro) - log(x/ro)) * qin * ri / k'
+    symbol_names = 'qin q k ri ro uf h'
+    symbol_values = '100 1200 1.0 0.2 1 100 10'
+    expression = 'uf+ (0.25*q/k) * ( 2*k*(ro^2-ri^2)/(h*ro) + ro^2-x^2 + 2*ri^2*log(x/ro)) + (k/(h*ro) - log(x/ro)) * qin * ri / k'
   [../]
 []
 

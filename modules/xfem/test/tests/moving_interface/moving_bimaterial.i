@@ -75,7 +75,7 @@
 [Functions]
   [./ls_func]
     type = ParsedFunction
-    value = 'y-3.153 + t'
+    expression = 'y-3.153 + t'
   [../]
 []
 

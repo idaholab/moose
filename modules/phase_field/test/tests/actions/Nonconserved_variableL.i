@@ -40,17 +40,17 @@
 [Materials]
   [./mobility]
     type = DerivativeParsedMaterial
-    f_name = variable_L
-    args = 'eta'
-    function = '0.5 * eta + 1.5 * (1 - eta)'
+    property_name = variable_L
+    coupled_variables = 'eta'
+    expression = '0.5 * eta + 1.5 * (1 - eta)'
     derivative_order = 1
     outputs = exodus
   [../]
   [./free_energy]
     type = DerivativeParsedMaterial
-    f_name = F
-    args = 'eta'
-    function = '2 * eta^2 * (1-eta)^2 - 0.2*eta'
+    property_name = F
+    coupled_variables = 'eta'
+    expression = '2 * eta^2 * (1-eta)^2 - 0.2*eta'
     derivative_order = 2
   [../]
 []

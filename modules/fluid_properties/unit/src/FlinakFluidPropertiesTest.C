@@ -111,8 +111,7 @@ TEST_F(FlinakFluidPropertiesTest, specificInternalEnergy)
   ABS_TEST(_fp->e_from_p_T(p, T), e, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_fp->e_from_p_T, p, T, REL_TOL_DERIVATIVE);
 
-  ABS_TEST(
-      _fp->e_from_p_rho(p, _fp->rho_from_p_T(p, T)), e, REL_TOL_SAVED_VALUE);
+  ABS_TEST(_fp->e_from_p_rho(p, _fp->rho_from_p_T(p, T)), e, REL_TOL_SAVED_VALUE);
 }
 
 /**

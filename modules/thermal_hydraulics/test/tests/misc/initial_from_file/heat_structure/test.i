@@ -16,7 +16,7 @@
 [Functions]
   [Ts_bc]
     type = ParsedFunction
-    value = '2*sin(x*pi)+507'
+    expression = '2*sin(x*pi)+507'
   []
 []
 

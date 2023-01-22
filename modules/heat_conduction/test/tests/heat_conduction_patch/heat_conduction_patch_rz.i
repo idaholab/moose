@@ -29,7 +29,7 @@
 [Functions]
   [./temps]
     type = ParsedFunction
-    value='-2e5+200*x+100*y'
+    expression ='-2e5+200*x+100*y'
   [../]
 [] # Functions
 

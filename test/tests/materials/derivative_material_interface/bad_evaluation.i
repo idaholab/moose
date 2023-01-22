@@ -26,9 +26,9 @@
 
   [./F]
     type = DerivativeParsedMaterial
-    f_name = F
+    property_name = F
     material_property_names = 'time'
-    function = 'if (time < 1.9, 1, log(-1))'
+    expression = 'if (time < 1.9, 1, log(-1))'
     disable_fpoptimizer = true
     enable_jit = false
     evalerror_behavior = nan

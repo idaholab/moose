@@ -109,19 +109,19 @@
 [Functions]
   [forcing_rho]
     type = ParsedFunction
-    value = '-1.331*sin(1.1*x)^2 + 1.331*sin(1.1*x) + 1.331*cos(1.1*x)^2'
+    expression = '-1.331*sin(1.1*x)^2 + 1.331*sin(1.1*x) + 1.331*cos(1.1*x)^2'
   []
   [exact_rho]
     type = ParsedFunction
-    value = '1.1*sin(1.1*x)'
+    expression = '1.1*sin(1.1*x)'
   []
   [forcing_vel]
     type = ParsedFunction
-    value = '-2.9282*sin(1.1*x)^2*cos(1.1*x) + 1.4641*cos(1.1*x)^3 + 1.331*cos(1.1*x)'
+    expression = '-2.9282*sin(1.1*x)^2*cos(1.1*x) + 1.4641*cos(1.1*x)^3 + 1.331*cos(1.1*x)'
   []
   [exact_vel]
     type = ParsedFunction
-    value = '1.1*cos(1.1*x)'
+    expression = '1.1*cos(1.1*x)'
   []
 []
 

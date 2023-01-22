@@ -20,20 +20,48 @@ however, you might find yourself with a huge number of remotes that you don't re
 
 ## Git completion
 
-To enable bash completion for git (so you can tab-complete 'git co' or 'git br' commands) download [git_completion.sh](http://mooseframework.org/static/media/uploads/files/git_completion.sh) to your home directory, and append the following line to the end of your ~/.bash_profile (or ~/.bashrc)
+#### Using the bash shell
+
+To enable bash completion for git (so you can tab-complete 'git co' or 'git br' commands) download the [git-completion.bash](https://github.com/git/git/blob/master/contrib/completion/git-completion.bash) to your home directory
 
 ```bash
-source ~/git_completion.sh
+curl -o git-completion.bash https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash
 ```
 
-If you would like to have the name of the current branch in your prompt, download [git_prompt.sh](http://mooseframework.org/static/media/uploads/files/git_prompt.sh) to your home directory, and append the following lines to the end of your ~/.bash_profile (or ~/.bashrc)
+then append the following line to the end of your ~/.bash_profile (or ~/.bashrc)
 
 ```bash
-source ~/git_prompt.sh
+source ~/git-completion.bash
+```
+
+If you would like to have the name of the current branch in your prompt, download [git-prompt.sh](https://github.com/git/git/blob/master/contrib/completion/git-prompt.sh) to your home directory, and append the following lines to the end of your ~/.bash_profile (or ~/.bashrc)
+
+```bash
+source ~/git-prompt.sh
 export PS1='$(__git_ps1 "(%s)")$ '
 ```
 
 Assuming your prompt is just '$ ', adding this line to your `.bash_profile` will cause it to look like `(master)$` whenever you `cd` into a directory containing a git repo in where the `master` branch is checked out.
+
+#### Using the zsh shell
+
+If your machine uses the zsh shell, two files are required for bash completition. Within the `~/.zsh` directory, download both the git bash completion script and the zsh completion wrapper
+
+```zsh
+curl -o git-completion.bash https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash
+curl -o _git https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.zsh
+```
+
+Once these two files are downloaded, modify your `~/.zshrc` file by adding the following lines to the end of the file:
+
+```zsh
+# add git autocompletion
+zstyle ':completion:*:*:git:*' script ~/.zsh/git-completion.bash
+fpath=(~/.zsh $fpath)
+autoload -Uz compinit && compinit
+```
+
+To add the git prompt functionality to your zsh shell, follow the bash shell instructions to download the `git-prompt.sh` file. Add the same lines given for the bash shell to the end of your `~/.zshrc` file.
 
 
 ## Git Config

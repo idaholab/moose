@@ -35,7 +35,7 @@ P_hf = ${fparse 0.6 * sin (pi/24)}
 [Functions]
   [T_init]
     type = ParsedFunction
-    value = '1000*y+300+30*z'
+    expression = '1000*y+300+30*z'
   []
 []
 

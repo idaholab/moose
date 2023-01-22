@@ -101,14 +101,14 @@
   [./define_mobility]
     type = ParsedMaterial
     material_property_names = 'gc_prop visco'
-    f_name = L
-    function = '1.0/(gc_prop * visco)'
+    property_name = L
+    expression = '1.0/(gc_prop * visco)'
   [../]
   [./define_kappa]
     type = ParsedMaterial
     material_property_names = 'gc_prop l'
-    f_name = kappa_op
-    function = 'gc_prop * l'
+    property_name = kappa_op
+    expression = 'gc_prop * l'
   [../]
   [./damage_stress]
     type = ComputeLinearElasticPFFractureStress
@@ -121,27 +121,27 @@
   [../]
   [./degradation]
     type = DerivativeParsedMaterial
-    f_name = degradation
-    args = 'c'
-    function = '(1.0-c)^2*(1.0 - eta) + eta'
+    property_name = degradation
+    coupled_variables = 'c'
+    expression = '(1.0-c)^2*(1.0 - eta) + eta'
     constant_names       = 'eta'
     constant_expressions = '1.0e-6'
     derivative_order = 2
   [../]
   [./local_fracture_energy]
     type = DerivativeParsedMaterial
-    f_name = local_fracture_energy
-    args = 'c'
+    property_name = local_fracture_energy
+    coupled_variables = 'c'
     material_property_names = 'gc_prop l'
-    function = 'c^2 * gc_prop / 2 / l'
+    expression = 'c^2 * gc_prop / 2 / l'
     derivative_order = 2
   [../]
   [./fracture_driving_energy]
     type = DerivativeSumMaterial
-    args = c
+    coupled_variables = c
     sum_materials = 'elastic_energy local_fracture_energy'
     derivative_order = 2
-    f_name = F
+    property_name = F
   [../]
 []
 

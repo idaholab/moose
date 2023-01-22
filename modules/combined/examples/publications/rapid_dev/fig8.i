@@ -260,10 +260,10 @@ PR=2
   # ideally it should be 0 everywhere, if the constraint is fully enforced
   [./etasummat]
     type = ParsedMaterial
-    f_name = etasum
-    args = 'eta1 eta2 eta3'
+    property_name = etasum
+    coupled_variables = 'eta1 eta2 eta3'
     material_property_names = 'h1 h2 h3'
-    function = 'h1+h2+h3-1'
+    expression = 'h1+h2+h3-1'
     outputs = exodus
   [../]
 
@@ -271,9 +271,9 @@ PR=2
   # It will be 0 for phase 1, -1 for phase 2, and 1 for phase 3
   [./phasemap]
     type = ParsedMaterial
-    f_name = phase
-    args = 'eta2 eta3'
-    function = 'if(eta3>0.5,1,0)-if(eta2>0.5,1,0)'
+    property_name = phase
+    coupled_variables = 'eta2 eta3'
+    expression = 'if(eta3>0.5,1,0)-if(eta2>0.5,1,0)'
     outputs = exodus
   [../]
 
@@ -334,23 +334,23 @@ PR=2
   # chemical free energies
   [./chemical_free_energy_1]
     type = DerivativeParsedMaterial
-    f_name = Fc1
-    function = '4*c^2'
-    args = 'c'
+    property_name = Fc1
+    expression = '4*c^2'
+    coupled_variables = 'c'
     derivative_order = 2
   [../]
   [./chemical_free_energy_2]
     type = DerivativeParsedMaterial
-    f_name = Fc2
-    function = '(c-0.9)^2-0.4'
-    args = 'c'
+    property_name = Fc2
+    expression = '(c-0.9)^2-0.4'
+    coupled_variables = 'c'
     derivative_order = 2
   [../]
   [./chemical_free_energy_3]
     type = DerivativeParsedMaterial
-    f_name = Fc3
-    function = '(c-0.9)^2-0.5'
-    args = 'c'
+    property_name = Fc3
+    expression = '(c-0.9)^2-0.5'
+    coupled_variables = 'c'
     derivative_order = 2
   [../]
 
@@ -361,7 +361,7 @@ PR=2
     fi_names = 'Fc1  Fc2  Fc3'
     hi_names = 'h1  h2  h3'
     etas     = 'eta1 eta2 eta3'
-    args = 'c'
+    coupled_variables = 'c'
     W = 3
   [../]
 
@@ -378,9 +378,9 @@ PR=2
   # Penalize phase 2 and 3 coexistence
   [./multi_phase_penalty]
     type = DerivativeParsedMaterial
-    f_name = Fp
-    function = '50*(eta2*eta3)^2'
-    args = 'eta2 eta3'
+    property_name = Fp
+    expression = '50*(eta2*eta3)^2'
+    coupled_variables = 'eta2 eta3'
     derivative_order = 2
     outputs = exodus
     output_properties = Fp
@@ -389,9 +389,9 @@ PR=2
   # free energy
   [./free_energy]
     type = DerivativeSumMaterial
-    f_name = F
+    property_name = F
     sum_materials = 'Fc Fe Fp'
-    args = 'c eta1 eta2 eta3'
+    coupled_variables = 'c eta1 eta2 eta3'
     derivative_order = 2
   [../]
 []

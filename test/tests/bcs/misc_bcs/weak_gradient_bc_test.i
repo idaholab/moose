@@ -12,7 +12,7 @@
 [Functions]
   [./initial_value]
     type = ParsedFunction
-    value = 'x'
+    expression = 'x'
   [../]
 []
 

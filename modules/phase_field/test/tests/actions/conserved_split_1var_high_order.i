@@ -41,9 +41,9 @@
 [Materials]
   [./free_energy]
     type = DerivativeParsedMaterial
-    f_name = F
-    args = 'cv'
-    function = '(1-cv)^2 * (1+cv)^2'
+    property_name = F
+    coupled_variables = 'cv'
+    expression = '(1-cv)^2 * (1+cv)^2'
   [../]
 []
 

@@ -25,7 +25,7 @@
   [../]
   [./ode1]
     type = ParsedODEKernel
-    function = '-mytime'
+    expression = '-mytime'
     postprocessors = mytime
     variable = x
   [../]

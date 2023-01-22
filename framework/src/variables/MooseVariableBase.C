@@ -15,6 +15,7 @@
 #include "MooseMesh.h"
 #include "MooseApp.h"
 #include "InputParameterWarehouse.h"
+#include "BlockRestrictable.h"
 
 #include "libmesh/variable.h"
 #include "libmesh/dof_map.h"

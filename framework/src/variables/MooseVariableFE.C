@@ -77,13 +77,6 @@ MooseVariableFE<OutputType>::MooseVariableFE(const InputParameters & parameters)
 }
 
 template <typename OutputType>
-const std::set<SubdomainID> &
-MooseVariableFE<OutputType>::activeSubdomains() const
-{
-  return this->_sys.system().variable(_var_num).active_subdomains();
-}
-
-template <typename OutputType>
 Moose::VarFieldType
 MooseVariableFE<OutputType>::fieldType() const
 {
@@ -95,13 +88,6 @@ MooseVariableFE<OutputType>::fieldType() const
     return Moose::VarFieldType::VAR_FIELD_ARRAY;
   else
     mooseError("Unknown variable field type");
-}
-
-template <typename OutputType>
-bool
-MooseVariableFE<OutputType>::activeOnSubdomain(SubdomainID subdomain) const
-{
-  return this->_sys.system().variable(_var_num).active_on_subdomain(subdomain);
 }
 
 template <typename OutputType>

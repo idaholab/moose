@@ -44,8 +44,8 @@
   [ode_x]
     type = ParsedODEKernel
     variable = x
-    args = y
-    function = '-3*x - 2*y'
+    coupled_variables = y
+    expression = '-3*x - 2*y'
   []
   [dt_y]
     type = ODETimeDerivative
@@ -54,7 +54,7 @@
   [ode_y ]
     type = ParsedODEKernel
     variable = y
-    function = '10*y'
+    expression = '10*y'
   []
 []
 

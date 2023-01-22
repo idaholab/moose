@@ -13,32 +13,32 @@
 [Functions]
   [./exact_fn]
     type = ParsedFunction
-    value = 'x*x+y*y'
+    expression = 'x*x+y*y'
   [../]
 
   [./ffn]
     type = ParsedFunction
-    value = -4
+    expression = -4
   [../]
 
   [./bottom_bc_fn]
     type = ParsedFunction
-    value = -2*y
+    expression = -2*y
   [../]
 
   [./right_bc_fn]
     type = ParsedFunction
-    value =  2*x
+    expression =  2*x
   [../]
 
   [./top_bc_fn]
     type = ParsedFunction
-    value =  2*y
+    expression =  2*y
   [../]
 
   [./left_bc_fn]
     type = ParsedFunction
-    value = -2*x
+    expression = -2*x
   [../]
 []
 

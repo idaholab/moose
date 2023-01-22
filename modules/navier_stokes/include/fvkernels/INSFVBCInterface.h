@@ -80,7 +80,7 @@ INSFVBCInterface::initialSetup(T & insfv_fk)
   const auto & blk_ids = insfv_fk.blockRestricted() ? insfv_fk.blockIDs() : mesh.meshSubdomains();
   for (const auto blk_id : blk_ids)
   {
-    const auto & connected_boundaries = mesh.getSubdomainBoundaryIds(blk_id);
+    const auto & connected_boundaries = mesh.getSubdomainInterfaceBoundaryIds(blk_id);
     for (const auto bnd_id : connected_boundaries)
       all_connected_boundaries.insert(bnd_id);
   }

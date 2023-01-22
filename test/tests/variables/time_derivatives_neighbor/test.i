@@ -9,7 +9,7 @@
 [Functions]
   [a_fn]
     type = ParsedFunction
-    value = 't*(t+x)'
+    expression = 't*(t+x)'
   []
 []
 

@@ -26,7 +26,7 @@
   [./source]
     type = ParsedODEKernel
     variable = u
-    function = -2
+    expression = -2
   [../]
 []
 

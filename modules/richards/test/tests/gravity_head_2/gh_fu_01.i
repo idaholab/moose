@@ -219,27 +219,27 @@
 [Functions]
   [./fcn_mass_error_w]
     type = ParsedFunction
-    value = 'abs(0.5*(mi-mf)/(mi+mf))'
-    vars = 'mi mf'
-    vals = 'mwater_init mwater_fin'
+    expression = 'abs(0.5*(mi-mf)/(mi+mf))'
+    symbol_names = 'mi mf'
+    symbol_values = 'mwater_init mwater_fin'
   [../]
   [./fcn_mass_error_g]
     type = ParsedFunction
-    value = 'abs(0.5*(mi-mf)/(mi+mf))'
-    vars = 'mi mf'
-    vals = 'mgas_init mgas_fin'
+    expression = 'abs(0.5*(mi-mf)/(mi+mf))'
+    symbol_names = 'mi mf'
+    symbol_values = 'mgas_init mgas_fin'
   [../]
   [./fcn_error_water]
     type = ParsedFunction
-    value = 'abs((p0-p1)/p1)'
-    vars = 'b gdens0 p0 xval p1'
-    vals = '1E2 -1 pw_left 1 pw_right'
+    expression = 'abs((p0-p1)/p1)'
+    symbol_names = 'b gdens0 p0 xval p1'
+    symbol_values = '1E2 -1 pw_left 1 pw_right'
   [../]
   [./fcn_error_gas]
     type = ParsedFunction
-    value = 'abs((p0-p1)/p1)'
-    vars = 'b gdens0 p0 xval p1'
-    vals = '0.5E2 -0.5 pg_left 1 pg_right'
+    expression = 'abs((p0-p1)/p1)'
+    symbol_names = 'b gdens0 p0 xval p1'
+    symbol_values = '0.5E2 -0.5 pg_left 1 pg_right'
   [../]
 []
 

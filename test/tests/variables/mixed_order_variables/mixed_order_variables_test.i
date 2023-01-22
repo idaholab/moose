@@ -16,17 +16,17 @@
 [Functions]
   [./force_fn]
     type = ParsedFunction
-    value = -4
+    expression = -4
   [../]
 
   [./exact_fn]
     type = ParsedFunction
-    value = (x*x)+(y*y)
+    expression = (x*x)+(y*y)
   [../]
 
   [./aux_fn]
     type = ParsedFunction
-    value = (1-x*x)*(1-y*y)
+    expression = (1-x*x)*(1-y*y)
   [../]
 []
 

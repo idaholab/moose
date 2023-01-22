@@ -67,7 +67,11 @@ MaterialDerivativeTestKernelBase<T>::validParams()
   params.addClassDescription("Class used for testing derivatives of a material property.");
   params.addRequiredParam<MaterialPropertyName>(
       "material_property", "Name of material property for which derivatives are to be tested.");
-  params.addRequiredCoupledVar("args", "List of variables the material property depends on");
+  params.addDeprecatedCoupledVar("args",
+                                 "List of variables the material property depends on",
+                                 "args is deprecated, use 'coupled_variables' instead");
+  // TODO Make required once deprecation is handled, see #19119
+  params.addCoupledVar("coupled_variables", "List of variables the material property depends on");
   params.addParam<std::vector<SymbolName>>(
       "derivative",
       "Select derivative to test derivatives of (leave empty for checking "

@@ -36,12 +36,12 @@
 [Functions]
   [u_ic_fn]
     type = ParsedFunction
-    value = 'if(x<5,5,6)'
+    expression = 'if(x<5,5,6)'
   []
 
   [u_exact_fn]
     type = ParsedFunction
-    value = 'if(x<5,3,2)'
+    expression = 'if(x<5,3,2)'
   []
 []
 

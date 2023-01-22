@@ -36,11 +36,11 @@
 [Functions]
   [constant]
     type = ParsedFunction
-    value = '1'
+    expression = '1'
   []
   [ramp]
     type = ParsedFunction
-    value = 't'
+    expression = 't'
   []
 []
 

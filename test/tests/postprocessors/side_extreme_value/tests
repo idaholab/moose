@@ -1,0 +1,32 @@
+[Tests]
+  [g]
+    design = 'SideExtremeValue.md'
+    issues = '#23179'
+    requirement = 'The system shall compute the extreme (min/max) values over a side'
+    [nonlinear_variable]
+      type = 'CSVDiff'
+      input = 'nonlinear_variable.i'
+      csvdiff = 'nonlinear_variable_out.csv'
+      detail = 'for a nonlinear variable.'
+    []
+    [nonlinear_variable_proxy]
+      type = 'CSVDiff'
+      input = 'nonlinear_variable_proxy.i'
+      csvdiff = 'nonlinear_variable_proxy_out.csv'
+      detail = 'for a nonlinear variable using a proxy variable.'
+    []
+    [aux_nodal]
+      type = 'CSVDiff'
+      input = 'aux_nodal.i'
+      csvdiff = 'aux_nodal_out.csv'
+      detail = 'for a aux nodal variable.'
+    []
+    [aux_elemental]
+      type = 'CSVDiff'
+      input = 'aux_nodal.i'
+      csvdiff = 'aux_elemental_out.csv'
+      cli_args = 'AuxVariables/aux/family=MONOMIAL Outputs/file_base=aux_elemental_out'
+      detail = 'for a aux elemental variable.'
+    []
+  []
+[]

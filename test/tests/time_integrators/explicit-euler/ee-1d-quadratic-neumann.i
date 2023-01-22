@@ -14,26 +14,26 @@
 [Functions]
   [./ic]
     type = ParsedFunction
-    value = 0
+    expression = 0
   [../]
 
   [./forcing_fn]
     type = ParsedFunction
-    value = x*x-2*t+t*x*x
+    expression = x*x-2*t+t*x*x
   [../]
 
   [./exact_fn]
     type = ParsedFunction
-    value = t*x*x
+    expression = t*x*x
   [../]
 
   [./left_bc_fn]
     type = ParsedFunction
-    value = -t*2*x
+    expression = -t*2*x
   [../]
   [./right_bc_fn]
     type = ParsedFunction
-    value = t*2*x
+    expression = t*2*x
   [../]
 []
 

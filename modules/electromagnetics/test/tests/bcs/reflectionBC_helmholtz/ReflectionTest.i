@@ -31,25 +31,25 @@
 [Functions]
   [cos]
     type = ParsedFunction
-    value = 'cos(0.5)'
+    expression = 'cos(0.5)'
   []
 []
 
 [Materials]
   [ASquaredMinusBSquared]
     type = ADParsedMaterial
-    f_name = ASquaredMinusBSquared
-    function = '(15*15 - 7*7)'
+    property_name = ASquaredMinusBSquared
+    expression = '(15*15 - 7*7)'
   []
   [2TimesAB]
     type = ADParsedMaterial
-    f_name = 2TimesAB
-    function = '2*15*7'
+    property_name = 2TimesAB
+    expression = '2*15*7'
   []
   [negative_2TimesAB]
     type = ADParsedMaterial
-    f_name = negative_2TimesAB
-    function = '-2*15*7'
+    property_name = negative_2TimesAB
+    expression = '-2*15*7'
   []
 []
 

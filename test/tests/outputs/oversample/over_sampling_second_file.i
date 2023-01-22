@@ -11,12 +11,12 @@
 [Functions]
   [./exact_fn]
     type = ParsedFunction
-    value = t*((x*x)+(y*y))
+    expression = t*((x*x)+(y*y))
   [../]
 
   [./forcing_fn]
     type = ParsedFunction
-    value = -4+(x*x+y*y)
+    expression = -4+(x*x+y*y)
   [../]
 []
 

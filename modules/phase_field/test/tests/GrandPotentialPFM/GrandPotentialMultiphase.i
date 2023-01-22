@@ -59,15 +59,15 @@
 [Functions]
   [./ic_func_etaa0]
     type = ParsedFunction
-    value = 'r:=sqrt(x^2+y^2);0.5*(1.0-tanh((r-10.0)/sqrt(2.0)))'
+    expression = 'r:=sqrt(x^2+y^2);0.5*(1.0-tanh((r-10.0)/sqrt(2.0)))'
   [../]
   [./ic_func_etab0]
     type = ParsedFunction
-    value = 'r:=sqrt(x^2+y^2);0.5*(1.0+tanh((r-10)/sqrt(2.0)))*0.5*(1.0+tanh((y)/sqrt(2.0)))'
+    expression = 'r:=sqrt(x^2+y^2);0.5*(1.0+tanh((r-10)/sqrt(2.0)))*0.5*(1.0+tanh((y)/sqrt(2.0)))'
   [../]
   [./ic_func_etab1]
     type = ParsedFunction
-    value = 'r:=sqrt(x^2+y^2);0.5*(1.0+tanh((r-10)/sqrt(2.0)))*0.5*(1.0-tanh((y)/sqrt(2.0)))'
+    expression = 'r:=sqrt(x^2+y^2);0.5*(1.0+tanh((r-10)/sqrt(2.0)))*0.5*(1.0-tanh((y)/sqrt(2.0)))'
   [../]
 []
 
@@ -88,7 +88,7 @@
     variable = etaa0
     Fj_names  = 'omegaa omegab'
     hj_names  = 'ha     hb'
-    args = 'etab0 etab1 w'
+    coupled_variables = 'etab0 etab1 w'
   [../]
   [./ACa0_int]
     type = ACInterface
@@ -111,7 +111,7 @@
     variable = etab0
     Fj_names  = 'omegaa omegab'
     hj_names  = 'ha     hb'
-    args = 'etaa0 etab1 w'
+    coupled_variables = 'etaa0 etab1 w'
   [../]
   [./ACb0_int]
     type = ACInterface
@@ -134,7 +134,7 @@
     variable = etab1
     Fj_names  = 'omegaa omegab'
     hj_names  = 'ha     hb'
-    args = 'etaa0 etab0 w'
+    coupled_variables = 'etaa0 etab0 w'
   [../]
   [./ACb1_int]
     type = ACInterface
@@ -150,7 +150,7 @@
     type = SusceptibilityTimeDerivative
     variable = w
     f_name = chi
-    args = '' # in this case chi (the susceptibility) is simply a constant
+    coupled_variables = '' # in this case chi (the susceptibility) is simply a constant
   [../]
   [./Diffusion]
     type = MatDiffusion
@@ -164,7 +164,7 @@
     v = etaa0
     Fj_names = 'rhoa rhob'
     hj_names = 'ha   hb'
-    args = 'etaa0 etab0 etab1'
+    coupled_variables = 'etaa0 etab0 etab1'
   [../]
   [./coupled_etab0dot]
     type = CoupledSwitchingTimeDerivative
@@ -172,7 +172,7 @@
     v = etab0
     Fj_names = 'rhoa rhob'
     hj_names = 'ha   hb'
-    args = 'etaa0 etab0 etab1'
+    coupled_variables = 'etaa0 etab0 etab1'
   [../]
   [./coupled_etab1dot]
     type = CoupledSwitchingTimeDerivative
@@ -180,7 +180,7 @@
     v = etab1
     Fj_names = 'rhoa rhob'
     hj_names = 'ha   hb'
-    args = 'etaa0 etab0 etab1'
+    coupled_variables = 'etaa0 etab0 etab1'
   [../]
 []
 
@@ -210,37 +210,37 @@
   [../]
   [./omegaa]
     type = DerivativeParsedMaterial
-    args = 'w'
-    f_name = omegaa
+    coupled_variables = 'w'
+    property_name = omegaa
     material_property_names = 'Vm ka caeq'
-    function = '-0.5*w^2/Vm^2/ka-w/Vm*caeq'
+    expression = '-0.5*w^2/Vm^2/ka-w/Vm*caeq'
     derivative_order = 2
     enable_jit = false
   [../]
   [./omegab]
     type = DerivativeParsedMaterial
-    args = 'w'
-    f_name = omegab
+    coupled_variables = 'w'
+    property_name = omegab
     material_property_names = 'Vm kb cbeq'
-    function = '-0.5*w^2/Vm^2/kb-w/Vm*cbeq'
+    expression = '-0.5*w^2/Vm^2/kb-w/Vm*cbeq'
     derivative_order = 2
     enable_jit = false
   [../]
   [./rhoa]
     type = DerivativeParsedMaterial
-    args = 'w'
-    f_name = rhoa
+    coupled_variables = 'w'
+    property_name = rhoa
     material_property_names = 'Vm ka caeq'
-    function = 'w/Vm^2/ka + caeq/Vm'
+    expression = 'w/Vm^2/ka + caeq/Vm'
     derivative_order = 2
     enable_jit = false
   [../]
   [./rhob]
     type = DerivativeParsedMaterial
-    args = 'w'
-    f_name = rhob
+    coupled_variables = 'w'
+    property_name = rhob
     material_property_names = 'Vm kb cbeq'
-    function = 'w/Vm^2/kb + cbeq/Vm'
+    expression = 'w/Vm^2/kb + cbeq/Vm'
     derivative_order = 2
     enable_jit = false
   [../]
@@ -251,9 +251,9 @@
   [../]
   [./Mobility]
     type = DerivativeParsedMaterial
-    f_name = Dchi
+    property_name = Dchi
     material_property_names = 'D chi'
-    function = 'D*chi'
+    expression = 'D*chi'
     derivative_order = 2
     enable_jit = false
   [../]

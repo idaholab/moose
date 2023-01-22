@@ -76,7 +76,7 @@
     variable = etaa0
     Fj_names  = 'omegaa omegab'
     hj_names  = 'ha     hb'
-    args = 'etab0 w'
+    coupled_variables = 'etab0 w'
   [../]
   [./ACa0_int1]
     type = ACInterface2DMultiPhase1
@@ -108,7 +108,7 @@
     variable = etab0
     Fj_names  = 'omegaa omegab'
     hj_names  = 'ha     hb'
-    args = 'etaa0 w'
+    coupled_variables = 'etaa0 w'
   [../]
   [./ACb0_int1]
     type = ACInterface2DMultiPhase1
@@ -133,7 +133,7 @@
     type = SusceptibilityTimeDerivative
     variable = w
     f_name = chi
-    args = '' # in this case chi (the susceptibility) is simply a constant
+    coupled_variables = '' # in this case chi (the susceptibility) is simply a constant
   [../]
   [./Diffusion]
     type = MatDiffusion
@@ -147,7 +147,7 @@
     v = etaa0
     Fj_names = 'rhoa rhob'
     hj_names = 'ha   hb'
-    args = 'etaa0 etab0'
+    coupled_variables = 'etaa0 etab0'
   [../]
   [./coupled_etab0dot]
     type = CoupledSwitchingTimeDerivative
@@ -155,7 +155,7 @@
     v = etab0
     Fj_names = 'rhoa rhob'
     hj_names = 'ha   hb'
-    args = 'etaa0 etab0'
+    coupled_variables = 'etaa0 etab0'
   [../]
   [./coupled_etaa0dot_int]
     type = AntitrappingCurrent
@@ -186,40 +186,40 @@
   [../]
   [./omegaa]
     type = DerivativeParsedMaterial
-    args = 'w'
-    f_name = omegaa
+    coupled_variables = 'w'
+    property_name = omegaa
     material_property_names = 'Vm ka caeq'
-    function = '-0.5*w^2/Vm^2/ka-w/Vm*caeq'
+    expression = '-0.5*w^2/Vm^2/ka-w/Vm*caeq'
   [../]
   [./omegab]
     type = DerivativeParsedMaterial
-    args = 'w'
-    f_name = omegab
+    coupled_variables = 'w'
+    property_name = omegab
     material_property_names = 'Vm kb cbeq'
-    function = '-0.5*w^2/Vm^2/kb-w/Vm*cbeq'
+    expression = '-0.5*w^2/Vm^2/kb-w/Vm*cbeq'
   [../]
   [./rhoa]
     type = DerivativeParsedMaterial
-    args = 'w'
-    f_name = rhoa
+    coupled_variables = 'w'
+    property_name = rhoa
     material_property_names = 'Vm ka caeq'
-    function = 'w/Vm^2/ka + caeq/Vm'
+    expression = 'w/Vm^2/ka + caeq/Vm'
   [../]
   [./rhob]
     type = DerivativeParsedMaterial
-    args = 'w'
-    f_name = rhob
+    coupled_variables = 'w'
+    property_name = rhob
     material_property_names = 'Vm kb cbeq'
-    function = 'w/Vm^2/kb + cbeq/Vm'
+    expression = 'w/Vm^2/kb + cbeq/Vm'
   [../]
   [./int]
     type = DerivativeParsedMaterial
-    args = 'w'
-    f_name = rhodiff
+    coupled_variables = 'w'
+    property_name = rhodiff
     material_property_names = 'rhoa rhob'
     constant_names = 'int_width'
     constant_expressions = '0.8'
-    function = 'int_width*(rhob-rhoa)'
+    expression = 'int_width*(rhob-rhoa)'
   [../]
   [./kappaa]
     type = InterfaceOrientationMultiphaseMaterial
@@ -244,9 +244,9 @@
   [../]
   [./Mobility]
     type = ParsedMaterial
-    f_name = Dchi
+    property_name = Dchi
     material_property_names = 'D chi'
-    function = 'D*chi'
+    expression = 'D*chi'
   [../]
 []
 

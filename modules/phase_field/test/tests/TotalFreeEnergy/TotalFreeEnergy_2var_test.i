@@ -55,7 +55,7 @@
     type = AllenCahn
     variable = gr0
     f_name = F
-    args = gr1
+    coupled_variables = gr1
   [../]
   [./gr0int]
     type = ACInterface
@@ -70,7 +70,7 @@
     type = AllenCahn
     variable = gr1
     f_name = F
-    args = gr0
+    coupled_variables = gr0
   [../]
   [./gr1int]
     type = ACInterface
@@ -111,9 +111,9 @@
   [../]
   [./free_energy]
     type = DerivativeParsedMaterial
-    args = 'gr0 gr1'
+    coupled_variables = 'gr0 gr1'
     material_property_names = 'mu gamma_asymm'
-    function = 'mu*( gr0^4/4.0 - gr0^2/2.0 + gr1^4/4.0 - gr1^2/2.0 + gamma_asymm*gr0^2*gr1^2) + 1.0/4.0'
+    expression = 'mu*( gr0^4/4.0 - gr0^2/2.0 + gr1^4/4.0 - gr1^2/2.0 + gamma_asymm*gr0^2*gr1^2) + 1.0/4.0'
     derivative_order = 2
     enable_jit = true
   [../]

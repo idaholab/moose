@@ -201,7 +201,7 @@ public:
   /**
    * Get the ThermalHydraulicsApp
    */
-  ThermalHydraulicsApp & getApp() { return _app; }
+  ThermalHydraulicsApp & getApp() { return _thm_app; }
 
   /**
    * Check the integrity of the simulation
@@ -251,7 +251,7 @@ public:
     ControlData<T> * data = nullptr;
     if (_control_data.find(name) == _control_data.end())
     {
-      data = new ControlData<T>(_app, name);
+      data = new ControlData<T>(_thm_app, name);
       _control_data[name] = data;
     }
     else
@@ -335,16 +335,16 @@ protected:
     std::set<SubdomainName> _subdomain;
     Real _scaling_factor;
   };
-  THMMesh & _mesh;
+  THMMesh & _thm_mesh;
 
   /// Pointer to FEProblem representing this simulation
   FEProblemBase & _fe_problem;
 
   /// The application this is associated with
-  ThermalHydraulicsApp & _app;
+  ThermalHydraulicsApp & _thm_app;
 
   /// The Factory associated with the MooseApp
-  Factory & _factory;
+  Factory & _thm_factory;
 
   /// List of components in this simulation
   std::vector<std::shared_ptr<Component>> _components;
@@ -374,7 +374,7 @@ protected:
   std::map<std::string, ICInfo> _ics;
 
   /// "Global" of this simulation
-  const InputParameters & _pars;
+  const InputParameters & _thm_pars;
 
   /// finite element type for the flow in the simulation
   FEType _flow_fe_type;

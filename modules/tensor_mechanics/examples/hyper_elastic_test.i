@@ -23,7 +23,7 @@
 [Functions]
   [./top_displacement]
     type = ParsedFunction
-    value = t
+    expression = t
   [../]
 []
 

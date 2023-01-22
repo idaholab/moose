@@ -28,17 +28,17 @@
 [Functions]
   [./pp_fn]
     type = ParsedFunction
-    value = '2*(t+1)'
+    expression = '2*(t+1)'
   [../]
   [./cos_fn]
     type = ParsedFunction
-    value = 'cos(pi*x)'
+    expression = 'cos(pi*x)'
   [../]
   [./fn]
     type = ParsedFunction
-    value = 'scalar_value * func / pp'
-    vars = 'scalar_value func   pp'
-    vals = 'sv           cos_fn pp'
+    expression = 'scalar_expression * func / pp'
+    symbol_names = 'scalar_expression func   pp'
+    symbol_values = 'sv           cos_fn pp'
   [../]
 []
 

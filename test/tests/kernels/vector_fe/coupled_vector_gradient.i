@@ -138,27 +138,27 @@
 [Functions]
   [./x_exact]
     type = ParsedFunction
-    value = 't'
+    expression = 't'
   [../]
   [./y_exact]
     type = ParsedFunction
-    value = 't'
+    expression = 't'
   [../]
   [./x_exact_old]
     type = ParsedFunction
-    value = 'if(t < 1, 0, t - 1)'
+    expression = 'if(t < 1, 0, t - 1)'
   [../]
   [./y_exact_old]
     type = ParsedFunction
-    value = 'if(t < 1, 0, t - 1)'
+    expression = 'if(t < 1, 0, t - 1)'
   [../]
   [./x_exact_older]
     type = ParsedFunction
-    value = 'if(t < 2, 0, t - 2)'
+    expression = 'if(t < 2, 0, t - 2)'
   [../]
   [./y_exact_older]
     type = ParsedFunction
-    value = 'if(t < 2, 0, t - 2)'
+    expression = 'if(t < 2, 0, t - 2)'
   [../]
 []
 

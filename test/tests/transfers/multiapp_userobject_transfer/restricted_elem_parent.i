@@ -44,7 +44,7 @@ num_layers = 2
     type = ParsedAux
     variable = s
     use_xyzt = true
-    function = 'x+(z*z)'
+    expression = 'x+(z*z)'
   []
 []
 

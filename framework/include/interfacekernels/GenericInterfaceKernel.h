@@ -37,24 +37,26 @@ public:
 template <bool is_ad>
 using GenericInterfaceKernel = GenericInterfaceKernelTempl<Real, is_ad>;
 
-#define usingGenericInterfaceKernelMembers                                                         \
+#define usingGenericInterfaceKernelTemplMembers(T)                                                 \
   usingFunctionInterfaceMembers;                                                                   \
   usingPostprocessorInterfaceMembers;                                                              \
   usingMooseObjectMembers;                                                                         \
   usingTransientInterfaceMembers;                                                                  \
   usingTaggingInterfaceMembers;                                                                    \
-  using GenericInterfaceKernel<is_ad>::_qp;                                                        \
-  using GenericInterfaceKernel<is_ad>::_i;                                                         \
-  using GenericInterfaceKernel<is_ad>::_j;                                                         \
-  using GenericInterfaceKernel<is_ad>::_u;                                                         \
-  using GenericInterfaceKernel<is_ad>::_phi;                                                       \
-  using GenericInterfaceKernel<is_ad>::_test;                                                      \
-  using GenericInterfaceKernel<is_ad>::_q_point;                                                   \
-  using GenericInterfaceKernel<is_ad>::_var;                                                       \
-  using GenericInterfaceKernel<is_ad>::_name;                                                      \
-  using GenericInterfaceKernel<is_ad>::_neighbor_value;                                            \
-  using GenericInterfaceKernel<is_ad>::_test_neighbor;                                             \
-  using GenericInterfaceKernel<is_ad>::_phi_neighbor;                                              \
+  using GenericInterfaceKernelTempl<T, is_ad>::_qp;                                                \
+  using GenericInterfaceKernelTempl<T, is_ad>::_i;                                                 \
+  using GenericInterfaceKernelTempl<T, is_ad>::_j;                                                 \
+  using GenericInterfaceKernelTempl<T, is_ad>::_u;                                                 \
+  using GenericInterfaceKernelTempl<T, is_ad>::_phi;                                               \
+  using GenericInterfaceKernelTempl<T, is_ad>::_test;                                              \
+  using GenericInterfaceKernelTempl<T, is_ad>::_q_point;                                           \
+  using GenericInterfaceKernelTempl<T, is_ad>::_var;                                               \
+  using GenericInterfaceKernelTempl<T, is_ad>::_name;                                              \
+  using GenericInterfaceKernelTempl<T, is_ad>::_neighbor_value;                                    \
+  using GenericInterfaceKernelTempl<T, is_ad>::_test_neighbor;                                     \
+  using GenericInterfaceKernelTempl<T, is_ad>::_phi_neighbor;                                      \
   using Coupleable::getVar;                                                                        \
   using Coupleable::coupled;                                                                       \
   using Coupleable::coupledComponents
+
+#define usingGenericInterfaceKernelMembers usingGenericInterfaceKernelTemplMembers(Real)

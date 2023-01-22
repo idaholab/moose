@@ -21,7 +21,7 @@
 [Functions]
   [./forcing_v]
     type = ParsedFunction
-    value = 'x * y * z'
+    expression = 'x * y * z'
   [../]
 []
 

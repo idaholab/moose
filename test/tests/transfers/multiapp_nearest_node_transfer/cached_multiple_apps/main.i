@@ -50,7 +50,7 @@
   [Location_Based]
     type = ParsedAux
     variable = Temperature
-    function = 'x+y+z'
+    expression = 'x+y+z'
     use_xyzt = true
   []
   [Layered_Average_User_Object]

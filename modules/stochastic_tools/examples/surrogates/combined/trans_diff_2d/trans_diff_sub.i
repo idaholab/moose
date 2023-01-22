@@ -1,9 +1,9 @@
 [Functions]
   [src_func]
     type = ParsedFunction
-    value = "1000*sin(f*t)"
-    vars = 'f'
-    vals = '20'
+    expression = "1000*sin(f*t)"
+    symbol_names = 'f'
+    symbol_values = '20'
   []
 []
 
@@ -53,11 +53,11 @@
 [Materials]
   [diff_coeff]
     type = ParsedMaterial
-    f_name = diff_coeff
-    args = 'T'
+    property_name = diff_coeff
+    coupled_variables = 'T'
     constant_names = 'C'
     constant_expressions = 0.02
-    function = 'C * pow(300/T, 2)'
+    expression = 'C * pow(300/T, 2)'
   []
 []
 

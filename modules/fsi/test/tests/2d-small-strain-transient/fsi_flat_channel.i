@@ -291,6 +291,6 @@
 [Functions]
   [./inlet_func]
     type = ParsedFunction
-    value = '(-16 * (y - 0.25)^2 + 1) * (1 + cos(t))'
+    expression = '(-16 * (y - 0.25)^2 + 1) * (1 + cos(t))'
   [../]
 []

@@ -74,8 +74,8 @@
   [disp_mag]
     type = ParsedAux
     variable = disp_mag
-    args = 'disp_x disp_y disp_z'
-    function = 'sqrt(disp_x^2+disp_y^2+disp_z^2)'
+    coupled_variables = 'disp_x disp_y disp_z'
+    expression = 'sqrt(disp_x^2+disp_y^2+disp_z^2)'
   []
 []
 
@@ -136,9 +136,9 @@
 [Functions]
   [./freq2]
     type = ParsedFunction
-    vars = density
-    vals = 2.7e3 #Al kg/m3
-    value = '-t*t*density'
+    symbol_names = density
+    symbol_values = 2.7e3 #Al kg/m3
+    expression = '-t*t*density'
   [../]
 []
 

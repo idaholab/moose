@@ -69,16 +69,16 @@
   []
   [./hb]
     type = DerivativeParsedMaterial
-    f_name = hb
-    args = 'c'
-    function = 'c * c * c * (6 * c * c - 15 * c + 10)'
+    property_name = hb
+    coupled_variables = 'c'
+    expression = 'c * c * c * (6 * c * c - 15 * c + 10)'
   [../]
   [./hm]
     type = DerivativeParsedMaterial
-    f_name = hm
-    args = 'c'
+    property_name = hm
+    coupled_variables = 'c'
     material_property_names = 'hb'
-    function =  '(1-hb)'
+    expression =  '(1-hb)'
   [../]
 []
 

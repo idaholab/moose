@@ -61,12 +61,12 @@ a=1.1
 [Functions]
   [exact]
     type = ParsedFunction
-    value = '3*x^2 + 2*x + 1'
+    expression = '3*x^2 + 2*x + 1'
   []
   [forcing]
     type = ParsedFunction
-    value = '-${diff}*6 + ${a} * (6*x + 2)'
-    # value = '-${diff}*6'
+    expression = '-${diff}*6 + ${a} * (6*x + 2)'
+    # expression = '-${diff}*6'
   []
 []
 

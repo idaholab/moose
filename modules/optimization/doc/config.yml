@@ -28,7 +28,7 @@ Extensions:
   MooseDocs.extensions.template:
         active: True
   MooseDocs.extensions.sqa:
-      active: False
+      active: True
       reports: !include modules/optimization/doc/sqa_reports.yml
       categories:
           framework: !include framework/doc/sqa_framework.yml

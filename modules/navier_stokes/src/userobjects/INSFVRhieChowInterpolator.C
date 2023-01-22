@@ -17,10 +17,10 @@
 #include "NS.h"
 #include "Assembly.h"
 #include "INSFVVelocityVariable.h"
-#include "INSFVPressureVariable.h"
 #include "PiecewiseByBlockLambdaFunctor.h"
 #include "VectorCompositeFunctor.h"
 #include "FVElementalKernel.h"
+#include "NSFVUtils.h"
 
 #include "libmesh/mesh_base.h"
 #include "libmesh/elem_range.h"
@@ -79,6 +79,10 @@ INSFVRhieChowInterpolator::validParams()
       "supplied when the mesh dimension is greater than 2. It represents the on-diagonal "
       "coefficients for the 'z' component velocity, solved "
       "via the Navier-Stokes equations.");
+  params.addParam<NonlinearSystemName>("mass_momentum_system",
+                                       "nl0",
+                                       "The nonlinear system in which the monolithic momentum and "
+                                       "continuity equations are located.");
   return params;
 }
 
@@ -109,6 +113,7 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
     _ax(_a, 0),
     _ay(_a, 1),
     _az(_a, 2),
+    _nl_sys_number(_fe_problem.nlSysNum(getParam<NonlinearSystemName>("mass_momentum_system"))),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _example(0),
     _a_data_provided(false)
@@ -355,16 +360,16 @@ INSFVRhieChowInterpolator::execute()
 
   PARALLEL_TRY
   {
-    GatherRCDataElementThread et(_fe_problem, _var_numbers);
+    GatherRCDataElementThread et(_fe_problem, _nl_sys_number, _var_numbers);
     Threads::parallel_reduce(*_elem_range, et);
   }
   PARALLEL_CATCH;
 
   PARALLEL_TRY
   {
-    using FVRange = StoredRange<std::vector<const FaceInfo *>::const_iterator, const FaceInfo *>;
-    GatherRCDataFaceThread<FVRange> fvr(_fe_problem, _var_numbers);
-    FVRange faces(_fe_problem.mesh().faceInfo().begin(), _fe_problem.mesh().faceInfo().end());
+    using FVRange = StoredRange<MooseMesh::const_face_info_iterator, const FaceInfo *>;
+    GatherRCDataFaceThread<FVRange> fvr(_fe_problem, _nl_sys_number, _var_numbers);
+    FVRange faces(_fe_problem.mesh().ownedFaceInfoBegin(), _fe_problem.mesh().ownedFaceInfoEnd());
     Threads::parallel_reduce(faces, fvr);
   }
   PARALLEL_CATCH;
@@ -494,25 +499,28 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
 
   if (Moose::FV::onBoundary(*this, fi))
   {
-    const auto sub_id =
-        hasBlocks(elem->subdomain_id()) ? elem->subdomain_id() : neighbor->subdomain_id();
-    const Moose::SingleSidedFaceArg boundary_face{
-        &fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, sub_id};
+    const Elem * const boundary_elem = hasBlocks(elem->subdomain_id()) ? elem : neighbor;
+    const Moose::FaceArg boundary_face{
+        &fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, boundary_elem};
     return vel(boundary_face);
   }
 
   VectorValue<ADReal> velocity;
 
+  Moose::FaceArg face{
+      &fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, nullptr};
   // Create the average face velocity (not corrected using RhieChow yet)
-  velocity(0) = u->getInternalFaceValue(fi, correct_skewness);
+  velocity(0) = (*u)(face);
   if (v)
-    velocity(1) = v->getInternalFaceValue(fi, correct_skewness);
+    velocity(1) = (*v)(face);
   if (w)
-    velocity(2) = w->getInternalFaceValue(fi, correct_skewness);
+    velocity(2) = (*w)(face);
 
-  // Return if Rhie-Chow was not requested
-  if (m == Moose::FV::InterpMethod::Average)
+  // Return if Rhie-Chow was not requested or if we have a porosity jump
+  if (m == Moose::FV::InterpMethod::Average ||
+      std::get<0>(NS::isPorosityJumpFace(epsilon(tid), fi)))
     return velocity;
+
   mooseAssert(((m == Moose::FV::InterpMethod::RhieChow) &&
                (_velocity_interp_method == Moose::FV::InterpMethod::RhieChow)) ||
                   _a_data_provided,
@@ -576,9 +584,6 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
                                                     : Moose::FV::InterpMethod::Average;
   Moose::FV::interpolate(coeff_interp_method, face_D, elem_D, neighbor_D, fi, true);
 
-  const auto face =
-      Moose::FV::makeCDFace(fi, Moose::FV::faceArgSubdomains(*this, fi), correct_skewness);
-
   // evaluate face porosity, see (18) in Hanimann 2021 or (11) in Nordlund 2016
   const auto face_eps = epsilon(tid)(face);
 
@@ -589,4 +594,13 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
     velocity(i) -= face_D(i) * face_eps * (grad_p(i) - unc_grad_p(i));
 
   return velocity;
+}
+
+bool
+INSFVRhieChowInterpolator::hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const
+{
+  if (fi_elem_side)
+    return hasBlocks(fi.elem().subdomain_id());
+  else
+    return fi.neighborPtr() && hasBlocks(fi.neighbor().subdomain_id());
 }

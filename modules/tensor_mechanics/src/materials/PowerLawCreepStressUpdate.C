@@ -123,8 +123,9 @@ template <bool is_ad>
 bool
 PowerLawCreepStressUpdateTempl<is_ad>::substeppingCapabilityEnabled()
 {
-  return this->template getParam<bool>("use_substep");
+  return this->_use_substepping != RadialReturnStressUpdateTempl<is_ad>::SubsteppingType::NONE;
 }
+
 template class PowerLawCreepStressUpdateTempl<false>;
 template class PowerLawCreepStressUpdateTempl<true>;
 template Real PowerLawCreepStressUpdateTempl<false>::computeResidualInternal<Real>(const Real &,

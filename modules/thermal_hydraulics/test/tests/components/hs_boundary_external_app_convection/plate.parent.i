@@ -35,7 +35,7 @@ htc = 100
 [Functions]
   [source_term]
     type = ParsedFunction
-    value = '20 * x * x - 40 * x + 20 - 40 * t'
+    expression = '20 * x * x - 40 * x + 20 - 40 * t'
   []
 []
 [ICs]

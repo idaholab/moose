@@ -177,7 +177,7 @@ FEProblemBase::validParams()
   /// 2. _blocks.size() > 0 and no coordinate system was specified, then the whole domain will be XYZ.
   /// 3. _blocks.size() > 0 and one coordinate system was specified, then the whole domain will be that system.
   params.addDeprecatedParam<std::vector<SubdomainName>>(
-      "block", "Block IDs for the coordinate systems", "Please use 'Mesh/block' instead");
+      "block", "Block IDs for the coordinate systems", "Please use 'Mesh/coord_block' instead");
   MultiMooseEnum coord_types("XYZ RZ RSPHERICAL", "XYZ");
   MooseEnum rz_coord_axis("X=0 Y=1", "Y");
   params.addDeprecatedParam<MultiMooseEnum>("coord_type",
@@ -2310,7 +2310,7 @@ FEProblemBase::getFunction(const std::string & name, THREAD_ID tid)
       {
         // It parsed ok, so build a MooseParsedFunction
         InputParameters params = _factory.getValidParams("ParsedFunction");
-        params.set<std::string>("value") = name;
+        params.set<std::string>("expression") = name;
         addFunction("ParsedFunction", name, params);
       }
     }

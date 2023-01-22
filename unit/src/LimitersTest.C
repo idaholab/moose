@@ -36,10 +36,11 @@ TEST(LimitersTest, limitVector)
   MeshTools::Generation::build_square(mesh, 2, 2);
   ElemInfo ei(mesh.elem_ptr(0));
 
+  dof_id_type counter = 0;
   for (const auto s : ei.elem()->side_index_range())
     if (ei.elem()->neighbor_ptr(s))
     {
-      FaceInfo fi(&ei, s);
+      FaceInfo fi(&ei, s, counter++);
       ElemInfo ni(ei.elem()->neighbor_ptr(s));
       fi.computeInternalCoefficients(&ni);
       auto result = interpolate(limiter, upwind, downwind, &grad, fi, true);

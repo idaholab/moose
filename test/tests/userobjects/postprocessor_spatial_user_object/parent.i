@@ -8,7 +8,7 @@
 [Functions]
   [./ic_fn]
     type = ParsedFunction
-    value = 'x * y'
+    expression = 'x * y'
   [../]
 []
 

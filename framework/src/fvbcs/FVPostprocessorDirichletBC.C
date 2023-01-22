@@ -26,7 +26,7 @@ FVPostprocessorDirichletBC::FVPostprocessorDirichletBC(const InputParameters & p
 {
 }
 
-Real
+ADReal
 FVPostprocessorDirichletBC::boundaryValue(const FaceInfo & /*fi*/) const
 {
   return _postprocessor_value;

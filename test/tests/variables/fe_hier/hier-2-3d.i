@@ -20,37 +20,37 @@
 [Functions]
   [./bc_fnt]
     type = ParsedFunction
-    value = 2*y
+    expression = 2*y
   [../]
   [./bc_fnb]
     type = ParsedFunction
-    value = -2*y
+    expression = -2*y
   [../]
   [./bc_fnl]
     type = ParsedFunction
-    value = -2*x
+    expression = -2*x
   [../]
   [./bc_fnr]
     type = ParsedFunction
-    value = 2*x
+    expression = 2*x
   [../]
   [./bc_fnf]
     type = ParsedFunction
-    value = 2*z
+    expression = 2*z
   [../]
   [./bc_fnk]
     type = ParsedFunction
-    value = -2*z
+    expression = -2*z
   [../]
 
   [./forcing_fn]
     type = ParsedFunction
-    value = -6+x*x+y*y+z*z
+    expression = -6+x*x+y*y+z*z
   [../]
 
   [./solution]
     type = ParsedGradFunction
-    value = x*x+y*y+z*z
+    expression = x*x+y*y+z*z
     grad_x = 2*x
     grad_y = 2*y
     grad_z = 2*z

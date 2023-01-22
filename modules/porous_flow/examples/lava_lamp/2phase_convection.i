@@ -283,9 +283,9 @@
 [Functions]
   [flux]
     type = ParsedFunction
-    vals = 'delta_xco2 dt'
-    vars = 'dx dt'
-    value = 'dx/dt'
+    symbol_values = 'delta_xco2 dt'
+    symbol_names = 'dx dt'
+    expression = 'dx/dt'
   []
 []
 

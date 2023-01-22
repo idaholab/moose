@@ -14,8 +14,8 @@
 /**
  * Interface kernel for interfacing diffusion between two variables on adjacent blocks
  */
-template <bool is_ad>
-class PenaltyInterfaceDiffusionTempl : public GenericInterfaceKernel<is_ad>
+template <typename T, bool is_ad>
+class PenaltyInterfaceDiffusionTempl : public GenericInterfaceKernelTempl<T, is_ad>
 {
 public:
   static InputParameters validParams();
@@ -29,10 +29,12 @@ protected:
   const Real _penalty;
 
   std::string _jump_prop_name;
-  const GenericMaterialProperty<Real, is_ad> * const _jump;
+  const GenericMaterialProperty<T, is_ad> * const _jump;
 
-  usingGenericInterfaceKernelMembers;
+  usingGenericInterfaceKernelTemplMembers(T);
 };
 
-typedef PenaltyInterfaceDiffusionTempl<false> PenaltyInterfaceDiffusion;
-typedef PenaltyInterfaceDiffusionTempl<true> ADPenaltyInterfaceDiffusion;
+typedef PenaltyInterfaceDiffusionTempl<Real, false> PenaltyInterfaceDiffusion;
+typedef PenaltyInterfaceDiffusionTempl<Real, true> ADPenaltyInterfaceDiffusion;
+typedef PenaltyInterfaceDiffusionTempl<RealVectorValue, false> VectorPenaltyInterfaceDiffusion;
+typedef PenaltyInterfaceDiffusionTempl<RealVectorValue, true> ADVectorPenaltyInterfaceDiffusion;

@@ -182,43 +182,43 @@ two_term_boundary_expansion=true
 [Functions]
   [exact_u]
     type = ParsedFunction
-    value = '0.25*sqrt(2)*(1.0 - 1/2*(-x + y)^2)/mu'
-    vars = 'mu'
-    vals = '${mu}'
+    expression = '0.25*sqrt(2)*(1.0 - 1/2*(-x + y)^2)/mu'
+    symbol_names = 'mu'
+    symbol_values = '${mu}'
   []
   [exact_rhou]
     type = ParsedFunction
-    value = '0.25*sqrt(2)*rho*(1.0 - 1/2*(-x + y)^2)/mu'
-    vars = 'mu rho'
-    vals = '${mu} ${rho}'
+    expression = '0.25*sqrt(2)*rho*(1.0 - 1/2*(-x + y)^2)/mu'
+    symbol_names = 'mu rho'
+    symbol_values = '${mu} ${rho}'
   []
   [forcing_u]
     type = ADParsedFunction
-    value = '0'
+    expression = '0'
   []
   [exact_v]
     type = ParsedFunction
-    value = '0.25*sqrt(2)*(1.0 - 1/2*(-x + y)^2)/mu'
-    vars = 'mu'
-    vals = '${mu}'
+    expression = '0.25*sqrt(2)*(1.0 - 1/2*(-x + y)^2)/mu'
+    symbol_names = 'mu'
+    symbol_values = '${mu}'
   []
   [exact_rhov]
     type = ParsedFunction
-    value = '0.25*sqrt(2)*rho*(1.0 - 1/2*(-x + y)^2)/mu'
-    vars = 'mu rho'
-    vals = '${mu} ${rho}'
+    expression = '0.25*sqrt(2)*rho*(1.0 - 1/2*(-x + y)^2)/mu'
+    symbol_names = 'mu rho'
+    symbol_values = '${mu} ${rho}'
   []
   [forcing_v]
     type = ADParsedFunction
-    value = '0'
+    expression = '0'
   []
   [exact_p]
     type = ParsedFunction
-    value = '-1/2*sqrt(2)*(x + y) + 10.0'
+    expression = '-1/2*sqrt(2)*(x + y) + 10.0'
   []
   [forcing_p]
     type = ParsedFunction
-    value = '0'
+    expression = '0'
   []
 []
 

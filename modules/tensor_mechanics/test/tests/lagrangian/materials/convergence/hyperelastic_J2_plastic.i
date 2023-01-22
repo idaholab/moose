@@ -85,8 +85,8 @@ nu = 0.25
   []
   [flow_stress]
     type = DerivativeParsedMaterial
-    f_name = flow_stress
-    function = '320+688*effective_plastic_strain'
+    property_name = flow_stress
+    expression = '320+688*effective_plastic_strain'
     material_property_names = 'effective_plastic_strain'
     additional_derivative_symbols = 'effective_plastic_strain'
     derivative_order = 2

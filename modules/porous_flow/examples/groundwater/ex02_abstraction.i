@@ -85,15 +85,15 @@
   []
   [baseflow_rate]
     type = ParsedFunction
-    vars = 'baseflow_kg dt'
-    vals = 'baseflow_kg dt'
-    value = 'baseflow_kg / dt * 24.0 * 3600.0 / 400.0'
+    symbol_names = 'baseflow_kg dt'
+    symbol_values = 'baseflow_kg dt'
+    expression = 'baseflow_kg / dt * 24.0 * 3600.0 / 400.0'
   []
   [abstraction_rate]
     type = ParsedFunction
-    vars = 'abstraction_kg dt'
-    vals = 'abstraction_kg dt'
-    value = 'abstraction_kg / dt * 24.0 * 3600.0'
+    symbol_names = 'abstraction_kg dt'
+    symbol_values = 'abstraction_kg dt'
+    expression = 'abstraction_kg / dt * 24.0 * 3600.0'
   []
 []
 
@@ -114,8 +114,8 @@
   [pp_change]
     type = ParsedAux
     variable = pp_change
-    args = 'pp ini_pp'
-    function = 'pp - ini_pp'
+    coupled_variables = 'pp ini_pp'
+    expression = 'pp - ini_pp'
   []
 []
 

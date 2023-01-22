@@ -67,7 +67,7 @@
 [Functions]
   [./exact_solution_function]
     type = ParsedFunction
-    value = (1.0/4.0)*(16*t+t*t*t*t)
+    expression = (1.0/4.0)*(16*t+t*t*t*t)
   [../]
 []
 

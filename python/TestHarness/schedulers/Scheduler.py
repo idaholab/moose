@@ -144,7 +144,8 @@ class Scheduler(MooseObject):
     def maxFailures(self):
         """ Boolean for hitting max failures """
         return ((self.options.valgrind_mode and self.__failures >= self.options.valgrind_max_fails)
-                or self.__failures >= self.options.max_fails)
+                or self.__failures >= self.options.max_fails
+                and not self.options.pbs)
 
     def run(self, job):
         """ Call derived run method """
@@ -341,7 +342,14 @@ class Scheduler(MooseObject):
 
                     # this job will be reported as 'RUNNING'
                     elif clock() - self.last_reported_time >= self.min_report_time:
-                        job.addCaveats('FINISHED')
+                        # prevent 'finished' caveat with options expecting to take lengthy amounts of time
+                        if (not self.options.sep_files
+                           and not self.options.ok_files
+                           and not self.options.fail_files
+                           and not self.options.pbs
+                           and not self.options.heavy_tests
+                           and not self.options.valgrind_mode):
+                            job.addCaveats('FINISHED')
 
                         with self.activity_lock:
                             self.jobs_reported.add(job)

@@ -25,7 +25,7 @@
 [Functions]
   [./u]
     type = ParsedFunction
-    value = 't'
+    expression = 't'
   [../]
 []
 

@@ -571,6 +571,7 @@ setColorConsole(bool use_color, bool force)
 bool _warnings_are_errors = false;
 bool _deprecated_is_error = false;
 bool _throw_on_error = false;
+bool _throw_on_warning = false;
 bool show_trace = true;
 bool show_multiple = false;
 

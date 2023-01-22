@@ -110,15 +110,15 @@
 [Functions]
   [./src_func]
     type = ParsedFunction
-    value = '10*(-200*x+400) + 200*1.5*t/x'
+    expression = '10*(-200*x+400) + 200*1.5*t/x'
   [../]
   [./neumann_func]
     type = ParsedFunction
-    value = '1.5*200*t'
+    expression = '1.5*200*t'
   [../]
   [./ls_func]
     type = ParsedFunction
-    value = '2.04 - x - 0.2*t'
+    expression = '2.04 - x - 0.2*t'
   [../]
 []
 

@@ -13,7 +13,10 @@ InputParameters
 ParsedMaterialBase::validParams()
 {
   InputParameters params = emptyInputParameters();
-  params.addCoupledVar("args", "Arguments of F() - use vector coupling");
+  params.addDeprecatedCoupledVar("args",
+                                 "Arguments of F() - use vector coupling",
+                                 "args is deprecated, use coupled_variables");
+  params.addCoupledVar("coupled_variables", "Vector of variables used in the parsed function");
 
   // Constants and their values
   params.addParam<std::vector<std::string>>(
@@ -48,8 +51,16 @@ ParsedMaterialBase::validParams()
       "Vector of postprocessor names used in the parsed function");
 
   // Function expression
-  params.addRequiredCustomTypeParam<std::string>(
-      "function", "FunctionExpression", "FParser function expression for the parsed material");
+  params.addDeprecatedCustomTypeParam<std::string>(
+      "function",
+      "FunctionExpression",
+      "Parsed function (see FParser) expression for the parsed material",
+      "'function' is deprecated, use 'expression' instead");
+  // TODO Make required once deprecation is handled, see #19119
+  params.addCustomTypeParam<std::string>(
+      "expression",
+      "FunctionExpression",
+      "Parsed function (see FParser) expression for the parsed material");
 
   return params;
 }
@@ -57,7 +68,8 @@ ParsedMaterialBase::validParams()
 ParsedMaterialBase::ParsedMaterialBase(const InputParameters & parameters)
 {
   // get function expression
-  _function = parameters.get<std::string>("function");
+  _function = parameters.isParamValid("function") ? parameters.get<std::string>("function")
+                                                  : parameters.get<std::string>("expression");
 
   // get constant vectors
   _constant_names = parameters.get<std::vector<std::string>>("constant_names");

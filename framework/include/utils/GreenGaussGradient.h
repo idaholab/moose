@@ -105,7 +105,7 @@ greenGaussGradient(const ElemArg & elem_arg,
       mooseAssert(elem_arg.elem == &functor_elem,
                   "Just a sanity check that the element being passed in is the one we passed out.");
 
-      if (functor.isExtrapolatedBoundaryFace(*fi).first)
+      if (functor.isExtrapolatedBoundaryFace(*fi, elem_arg.elem))
       {
         if (two_term_boundary_expansion)
         {
@@ -127,7 +127,11 @@ greenGaussGradient(const ElemArg & elem_arg,
           grad_b += surface_vector * elem_value;
       }
       else
-        grad_b += surface_vector * functor(makeCDFace(*fi, elem_arg.correct_skewness));
+        grad_b += surface_vector * functor(Moose::FaceArg{fi,
+                                                          Moose::FV::LimiterType::CentralDifference,
+                                                          true,
+                                                          elem_arg.correct_skewness,
+                                                          elem_arg.elem});
 
       if (!volume_set)
       {
@@ -208,6 +212,9 @@ greenGaussGradient(const ElemArg & elem_arg,
       }
 
       A.lu_solve(b, x);
+      // libMesh is generous about what it considers nonsingular. Let's check a little more strictly
+      if (MooseUtils::absoluteFuzzyEqual(MetaPhysicL::raw_value(A(sys_dim - 1, sys_dim - 1)), 0))
+        throw libMesh::LogicError("Matrix A is singular!");
       for (const auto i : make_range(Moose::dim))
         grad(i) = x(i);
     }
@@ -250,9 +257,10 @@ greenGaussGradient(const FaceArg & face_arg,
   const auto & fi = *(face_arg.fi);
   const auto & elem_arg = face_arg.makeElem();
   const auto & neighbor_arg = face_arg.makeNeighbor();
-  const auto [is_extrapolated, defined_elem] = functor.isExtrapolatedBoundaryFace(fi);
+  const bool defined_on_elem = functor.hasBlocks(fi.elemSubdomainID());
+  const bool defined_on_neighbor = fi.neighborPtr() && functor.hasBlocks(fi.neighborSubdomainID());
 
-  if (!is_extrapolated)
+  if (defined_on_elem && defined_on_neighbor)
   {
     const auto & value_elem = functor(elem_arg);
     const auto & value_neighbor = functor(neighbor_arg);
@@ -275,20 +283,24 @@ greenGaussGradient(const FaceArg & face_arg,
       const auto & grad_neighbor =
           greenGaussGradient(neighbor_arg, functor, two_term_boundary_expansion, mesh);
 
-      Moose::FV::interpolate(
-          Moose::FV::InterpMethod::Average, face_gradient, grad_elem, grad_neighbor, fi, true);
+      Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
+                             interpolated_gradient,
+                             grad_elem,
+                             grad_neighbor,
+                             fi,
+                             true);
 
       face_gradient += interpolated_gradient - (interpolated_gradient * fi.eCN()) * fi.eCN();
     }
 
     return face_gradient;
   }
-
-  // One term expansion
-  if (&fi.elem() == defined_elem)
+  else if (defined_on_elem)
     return functor.gradient(elem_arg);
-  else
+  else if (defined_on_neighbor)
     return functor.gradient(neighbor_arg);
+  else
+    mooseError("The functor must be defined on one of the sides");
 }
 
 template <typename T>

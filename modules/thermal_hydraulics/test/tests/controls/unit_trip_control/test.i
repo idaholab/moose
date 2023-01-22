@@ -7,7 +7,7 @@
 [Functions]
   [fn]
     type = ParsedFunction
-    value = 'sin(pi*t)'
+    expression = 'sin(pi*t)'
   []
 []
 
@@ -64,8 +64,8 @@
   [trip_ctrl]
     type = UnitTripControl
     condition = 'a > 0.6'
-    vars = 'a'
-    vals = 'a'
+    symbol_names = 'a'
+    symbol_values = 'a'
   []
 []
 

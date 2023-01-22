@@ -29,11 +29,11 @@
 [Functions]
   [sinx]
     type = ParsedFunction
-    value = sin(x)
+    expression = sin(x)
   []
   [siny]
     type = ParsedFunction
-    value = sin(y)
+    expression = sin(y)
   []
 []
 

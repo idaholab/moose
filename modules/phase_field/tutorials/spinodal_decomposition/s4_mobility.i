@@ -83,8 +83,8 @@
   [./mobility]               # Mobility (nm^2 mol/eV/s)
     # NOTE: This is a fitted equation, so only 'Conv' has units
     type = DerivativeParsedMaterial
-    f_name = M
-    args = c
+    property_name = M
+    coupled_variables = c
     constant_names =       'Acr    Bcr    Ccr    Dcr
                             Ecr    Fcr    Gcr
                             Afe    Bfe    Cfe    Dfe
@@ -95,7 +95,7 @@
                             -31.687117 -26.0291774 0.2286581   24.3633544
                             44.3334237 8.72990497  20.956768
                             1e+09      6.24150934e+18          1e-27'
-    function = 'nm_m^2/eV_J/d*((1-c)^2*c*10^
+    expression = 'nm_m^2/eV_J/d*((1-c)^2*c*10^
                 (Acr*c+Bcr*(1-c)+Ccr*c*log(c)+Dcr*(1-c)*log(1-c)+
                 Ecr*c*(1-c)+Fcr*c*(1-c)*(2*c-1)+Gcr*c*(1-c)*(2*c-1)^2)
                 +c^2*(1-c)*10^
@@ -106,21 +106,21 @@
   [../]
   [./local_energy]           # Local free energy function (eV/mol)
     type = DerivativeParsedMaterial
-    f_name = f_loc
-    args = c
+    property_name = f_loc
+    coupled_variables = c
     constant_names = 'A   B   C   D   E   F   G  eV_J  d'
     constant_expressions = '-2.446831e+04 -2.827533e+04 4.167994e+03 7.052907e+03
                             1.208993e+04 2.568625e+03 -2.354293e+03
                             6.24150934e+18 1e-27'
-    function = 'eV_J*d*(A*c+B*(1-c)+C*c*log(c)+D*(1-c)*log(1-c)+
+    expression = 'eV_J*d*(A*c+B*(1-c)+C*c*log(c)+D*(1-c)*log(1-c)+
                 E*c*(1-c)+F*c*(1-c)*(2*c-1)+G*c*(1-c)*(2*c-1)^2)'
     derivative_order = 2
   [../]
   [./precipitate_indicator]  # Returns 1/625 if precipitate
     type = ParsedMaterial
-    f_name = prec_indic
-    args = c
-    function = if(c>0.6,0.0016,0)
+    property_name = prec_indic
+    coupled_variables = c
+    expression = if(c>0.6,0.0016,0)
   [../]
 []
 

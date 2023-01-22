@@ -26,4 +26,29 @@
       detail = 'adjoint solve;'
     []
   []
+
+  [transient_mesh]
+    design = "ParameterMeshOptimization.md ElementOptimizationSourceFunctionInnerProduct.md ParameterMeshFunction.md  ReporterTimePointSource.md"
+    issues = '#22995'
+    requirement = 'The sytem shall be able to perform force-inversion optimization with time-dependent parameter and outputs with spatial linear interpolation by '
+    [source_mesh]
+      type = CheckFiles
+      input = source_mesh.i
+      cli_args = '--mesh-only'
+      check_files = 'source_mesh_in.e'
+      heavy = true
+      method = OPT
+      detail = 'creating a source mesh and '
+    []
+    [optimization]
+      type = Exodiff
+      input = main_mesh.i
+      exodiff = main_mesh_out_forward0.e
+      prereq = transient_mesh/source_mesh
+      rel_err = 1e-4
+      heavy = true
+      method = OPT
+      detail = 'performing the optimization.'
+    []
+  []
 []

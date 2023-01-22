@@ -39,12 +39,12 @@
 [Functions]
   [./twoxplus1]
     type = ParsedFunction
-    value = 2*x+1
+    expression = 2*x+1
   [../]
 
   [./xsquared]
     type = ParsedFunction
-    value = x*x
+    expression = x*x
   [../]
 
   [./the_linear_combo]
@@ -55,7 +55,7 @@
 
   [./should_be_answer]
     type = ParsedFunction
-    value = 0.5*x+5*(2*x+1)*0.4*x*x+0.3*7
+    expression = 0.5*x+5*(2*x+1)*0.4*x*x+0.3*7
   [../]
 []
 

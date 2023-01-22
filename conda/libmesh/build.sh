@@ -66,12 +66,14 @@ make -j $CORES
 make install
 sed_replace
 
-# Set LIBMESH_DIR environment variable for those that need it
+# Set LIBMESH_DIR, Eigen3_DIR
 mkdir -p "${PREFIX}/etc/conda/activate.d" "${PREFIX}/etc/conda/deactivate.d"
 cat <<EOF > "${PREFIX}/etc/conda/activate.d/activate_${PKG_NAME}.sh"
 export LIBMESH_DIR=${PREFIX}/libmesh
+export Eigen3_DIR=${PREFIX}/libmesh/include/Eigen
 EOF
+# Unset previously set variables
 cat <<EOF > "${PREFIX}/etc/conda/deactivate.d/deactivate_${PKG_NAME}.sh"
 unset LIBMESH_DIR
-unset MOOSE_NO_CODESIGN
+unset Eigen3_DIR
 EOF

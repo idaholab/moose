@@ -172,21 +172,21 @@
 [Functions]
   [./should_be_zero0_fcn]
     type = ParsedFunction
-    value = 'if(a<1E-1,0,a)'
-    vars = 'a'
-    vals = 'raw_f0'
+    expression = 'if(a<1E-1,0,a)'
+    symbol_names = 'a'
+    symbol_values = 'raw_f0'
   [../]
   [./should_be_zero1_fcn]
     type = ParsedFunction
-    value = 'if(a<1E-1,0,a)'
-    vars = 'a'
-    vals = 'raw_f1'
+    expression = 'if(a<1E-1,0,a)'
+    symbol_names = 'a'
+    symbol_values = 'raw_f1'
   [../]
   [./should_be_zero2_fcn]
     type = ParsedFunction
-    value = 'if(a<1E-1,0,a)'
-    vars = 'a'
-    vals = 'raw_f2'
+    expression = 'if(a<1E-1,0,a)'
+    symbol_names = 'a'
+    symbol_values = 'raw_f2'
   [../]
 []
 

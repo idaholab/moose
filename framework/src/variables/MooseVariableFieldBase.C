@@ -8,8 +8,9 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MooseVariableFieldBase.h"
-
 #include "SubProblem.h"
+#include "SystemBase.h"
+#include "libmesh/system.h"
 
 InputParameters
 MooseVariableFieldBase::validParams()
@@ -32,4 +33,24 @@ MooseVariableFieldBase::componentName(const unsigned int comp) const
     return this->_subproblem.arrayVariableComponent(_var_name, comp);
   else
     return _var_name;
+}
+
+const std::set<SubdomainID> &
+MooseVariableFieldBase::activeSubdomains() const
+{
+  return this->_sys.system().variable(_var_num).active_subdomains();
+}
+
+bool
+MooseVariableFieldBase::activeOnSubdomain(SubdomainID subdomain) const
+{
+  return this->_sys.system().variable(_var_num).active_on_subdomain(subdomain);
+}
+
+bool
+MooseVariableFieldBase::activeOnSubdomains(const std::set<SubdomainID> & subdomains) const
+{
+  const auto & active_subs = activeSubdomains();
+  return std::includes(
+      active_subs.begin(), active_subs.end(), subdomains.begin(), subdomains.end());
 }

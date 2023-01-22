@@ -227,14 +227,24 @@ TensorMechanicsActionBase::validParams()
                               "Output");
   params.addParam<bool>("verbose", false, "Display extra information.");
 
+  params.addParam<bool>("new_system",
+                        false,
+                        "If true use the new "
+                        "LagrangianStressDiverence kernels.");
+
+  MooseEnum formulationType("TOTAL UPDATED", "TOTAL");
+  params.addParam<MooseEnum>("formulation",
+                             formulationType,
+                             "Select between the total Lagrangian (TOTAL) "
+                             "and updated Lagrangian (UPDATED) formulations "
+                             "for the new kernel system.");
+
   return params;
 }
 
 TensorMechanicsActionBase::TensorMechanicsActionBase(const InputParameters & parameters)
   : Action(parameters), _use_ad(getParam<bool>("use_automatic_differentiation"))
 {
-  // FIXME: suggest to use action of action to add this to avoid changing the input parameters in
-  // the warehouse.
   const auto & params = _app.getInputParameterWarehouse().getInputParameters();
   InputParameters & pars(*(params.find(uniqueActionName())->second.get()));
 

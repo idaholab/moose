@@ -269,11 +269,11 @@ user_limiter='upwind'
 [Functions]
   [ud_in]
     type = ParsedVectorFunction
-    value_x = '${u_in}'
+    expression_x = '${u_in}'
   []
   [eps]
     type = ParsedFunction
-    value = 'if(x < 2, 1,
+    expression = 'if(x < 2, 1,
              if(x < 4, 1 - .5 / 2 * (x - 2),
              if(x < 6, .5,
              if(x < 8, .5 - .25 / 2 * (x - 6),

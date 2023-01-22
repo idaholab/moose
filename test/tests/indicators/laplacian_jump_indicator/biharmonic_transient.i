@@ -92,7 +92,7 @@
   [../]
   [./forcing_func]
     type   = ParsedFunction
-    value  = '16*c^2*(c^2*(x^2+y^2)^2 - 4*c*(x^2+y^2) + 2)*exp(-c*(x^2+y^2))*exp(-t)'
+    expression  = '16*c^2*(c^2*(x^2+y^2)^2 - 4*c*(x^2+y^2) + 2)*exp(-c*(x^2+y^2))*exp(-t)'
   [../]
 []
 

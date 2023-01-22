@@ -243,16 +243,16 @@
   [./Fa]
     type = DerivativeParsedMaterial
     block = 0
-    f_name = Fa
-    function = c^2
-    args = c
+    property_name = Fa
+    expression = c^2
+    coupled_variables = c
   [../]
   [./Fb]
     type = DerivativeParsedMaterial
     block = 0
-    f_name = Fb
-    function = (1-c)^3
-    args = c
+    property_name = Fb
+    expression = (1-c)^3
+    coupled_variables = c
   [../]
   [./C]
     type = CompositeElasticityTensor

@@ -25,7 +25,12 @@ SLKKSChemicalPotential::validParams()
   params.addRequiredParam<Real>("a", "sublattice site fraction for the kernel variable");
   params.addRequiredParam<Real>("as", "other sublattice site fraction in the same phase");
   params.addRequiredParam<MaterialPropertyName>("F", "Base name of the free energy function");
-  params.addCoupledVar("args", "Vector of further parameters to F");
+  params.addDeprecatedCoupledVar("args",
+                                 "Vector of variable arguments to the free energy function",
+                                 "args is deprecated, use 'coupled_variables' instead");
+  params.addCoupledVar("coupled_variables",
+                       "Vector of variable arguments to the free energy function");
+
   return params;
 }
 

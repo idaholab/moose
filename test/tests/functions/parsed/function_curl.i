@@ -20,17 +20,17 @@
   # Simple "clockwise rotating" field in XY plane. curl(u) = (0, 0, -2)
   [./field]
     type = ParsedVectorFunction
-    value_x = 'y'
-    value_y = '-x'
+    expression_x = 'y'
+    expression_y = '-x'
     curl_z = '-2'
   [../]
   [./ffn_x]
     type = ParsedFunction
-    value = 'y'
+    expression = 'y'
   [../]
   [./ffn_y]
     type = ParsedFunction
-    value = '-x'
+    expression = '-x'
   [../]
 []
 

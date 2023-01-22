@@ -154,7 +154,7 @@ FunctionParserUtils<is_ad>::addFParserConstants(
       if (!expression->AddConstant(constant_names[j], constant_values[j]))
         mooseError("Invalid constant name in ParsedMaterialHelper");
 
-    // build the temporary comnstant expression function
+    // build the temporary constant expression function
     if (expression->Parse(constant_expressions[i], "") >= 0)
       mooseError("Invalid constant expression\n",
                  constant_expressions[i],

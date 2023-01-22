@@ -13,12 +13,12 @@
 [Functions]
   [./exact_fn]
     type = ParsedFunction
-    value = t*t*(x*x+y*y)
+    expression = t*t*(x*x+y*y)
   [../]
 
   [./forcing_fn]
     type = ParsedFunction
-    value = 2*t*(x*x+y*y)-4*t*t
+    expression = 2*t*(x*x+y*y)-4*t*t
   [../]
 []
 
@@ -85,7 +85,7 @@
     type = FullSolveMultiApp
     execute_on = initial
     positions = '0 0 0'
-    # input file will come from cli-args
+    # input file will come from cli-coupled_variables
   [../]
 []
 
@@ -100,6 +100,6 @@
 []
 
 [Outputs]
-  #file_base will come from cli-args
+  #file_base will come from cli-coupled_variables
   exodus = true
 []

@@ -13,7 +13,7 @@
   [./parsed_func_error_check]
     type = 'RunException'
     input = 'forcing_function_error_check.i'
-    expect_err = 'The value in ParsedFunction contains quotes'
+    expect_err = 'The expression in ParsedFunction contains quotes'
 
     requirement = 'The system shall report an error when a parsed function expression contains quote characters.'
   [../]

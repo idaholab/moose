@@ -100,7 +100,7 @@
 [Functions]
   [./sliding_fn]
     type = ParsedFunction
-    value = 't'
+    expression = 't'
   [../]
 []
 

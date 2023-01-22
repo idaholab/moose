@@ -173,15 +173,15 @@ g = 9.81
 [Functions]
   [S_energy_fcn]
     type = ParsedFunction
-    value = 'rhouV * g * head * A / volume'
-    vars = 'rhouV g head A volume'
-    vals = 'pump:rhouV ${g} ${head} ${A} ${volume}'
+    expression = 'rhouV * g * head * A / volume'
+    symbol_names = 'rhouV g head A volume'
+    symbol_values = 'pump:rhouV ${g} ${head} ${A} ${volume}'
   []
   [E_conservation_fcn]
     type = ParsedFunction
-    value = '(E_change - S_energy * dt) / E_tot'
-    vars = 'E_change S_energy dt E_tot'
-    vals = 'E_change S_energy ${dt} E_tot'
+    expression = '(E_change - S_energy * dt) / E_tot'
+    symbol_names = 'E_change S_energy dt E_tot'
+    symbol_values = 'E_change S_energy ${dt} E_tot'
   []
 []
 

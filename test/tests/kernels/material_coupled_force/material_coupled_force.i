@@ -34,12 +34,12 @@
 [Functions]
   [./v2_func]
     type = ParsedFunction
-    value = 'x + 2 * y'
+    expression = 'x + 2 * y'
   [../]
 
   [./reference]
     type = ParsedFunction
-    value = '3 * (-1) * 3.5 + (x + 2 * y) * 15 * 1.2'
+    expression = '3 * (-1) * 3.5 + (x + 2 * y) * 15 * 1.2'
   [../]
 []
 

@@ -17,7 +17,7 @@
 [Functions]
   [./solution]
     type = ParsedFunction
-    value = 0.5*(1+tanh(x/2^0.5))
+    expression = 0.5*(1+tanh(x/2^0.5))
   [../]
 []
 
@@ -49,17 +49,17 @@
   [./diff]
     type = ParsedAux
     variable = diff
-    function = c-ca
-    args = 'c ca'
+    expression = c-ca
+    coupled_variables = 'c ca'
   [../]
 []
 
 [Materials]
   [./F]
     type = DerivativeParsedMaterial
-    f_name = F
-    function = 'c^2*(1-c)^2'
-    args = c
+    property_name = F
+    expression = 'c^2*(1-c)^2'
+    coupled_variables = c
   [../]
 []
 

@@ -32,19 +32,19 @@
 [Functions]
   [./left_bc_func]
     type = ParsedFunction
-    value = '1+y*y'
+    expression = '1+y*y'
   [../]
   [./top_bc_func]
     type = ParsedFunction
-    value = '1+x*x'
+    expression = '1+x*x'
   [../]
   [./bottom_bc_func]
     type = ParsedFunction
-    value = '1+x*x'
+    expression = '1+x*x'
   [../]
   [./force_fn]
     type = ParsedFunction
-    value = -4
+    expression = -4
   [../]
 []
 

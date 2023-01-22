@@ -16,7 +16,7 @@
 [Functions]
   [./bc_fn]
     type = ParsedFunction
-    value = x
+    expression = x
   [../]
 []
 

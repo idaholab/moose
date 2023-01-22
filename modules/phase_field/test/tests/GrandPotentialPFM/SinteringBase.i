@@ -104,17 +104,17 @@
   # Free energy coefficients for parabolic curves
   [./ks]
     type = ParsedMaterial
-    f_name = ks
-    args = 'T'
+    property_name = ks
+    coupled_variables = 'T'
     constant_names = 'a b'
     constant_expressions = '-0.0025 157.16'
-    function = 'a*T + b'
+    expression = 'a*T + b'
   [../]
   [./kv]
     type = ParsedMaterial
-    f_name = kv
+    property_name = kv
     material_property_names = 'ks'
-    function = '10*ks'
+    expression = '10*ks'
   [../]
   # Diffusivity and mobilities
   [./chiD]
@@ -138,11 +138,11 @@
   # Equilibrium vacancy concentration
   [./cs_eq]
     type = DerivativeParsedMaterial
-    f_name = cs_eq
-    args = 'gr0 gr1 gr2 gr3 T'
+    property_name = cs_eq
+    coupled_variables = 'gr0 gr1 gr2 gr3 T'
     constant_names = 'Ef c_GB kB'
     constant_expressions = '2.69 0.189 8.617343e-5'
-    function = 'bnds:=gr0^2 + gr1^2 + gr2^2 + gr3^2; exp(-Ef/kB/T) + 4.0 * c_GB * (1 - bnds)^2'
+    expression = 'bnds:=gr0^2 + gr1^2 + gr2^2 + gr3^2; exp(-Ef/kB/T) + 4.0 * c_GB * (1 - bnds)^2'
   [../]
   # Everything else
   [./sintering]

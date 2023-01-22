@@ -45,7 +45,7 @@
     type = SusceptibilityTimeDerivative
     variable = w
     f_name = chi
-    args = '' # in this case chi (the susceptibility) is simply a constant
+    coupled_variables = '' # in this case chi (the susceptibility) is simply a constant
   [../]
   [./Diffusion]
     type = MatDiffusion
@@ -58,13 +58,13 @@
     variable = w
     v = eta
     f_name = ft
-    args = 'eta'
+    coupled_variables = 'eta'
   [../]
   [./AC_bulk]
     type = AllenCahn
     variable = eta
     f_name = F
-    args = 'w'
+    coupled_variables = 'w'
   [../]
   [./AC_int]
     type = ACInterface
@@ -85,16 +85,16 @@
 
   [./liquid_GrandPotential]
     type = DerivativeParsedMaterial
-    function = '-0.5 * w^2/A - cleq * w'
-    args = 'w'
-    f_name = f1
+    expression = '-0.5 * w^2/A - cleq * w'
+    coupled_variables = 'w'
+    property_name = f1
     material_property_names = 'cleq A'
   [../]
   [./solid_GrandPotential]
     type = DerivativeParsedMaterial
-    function = '-0.5 * w^2/A - cseq * w'
-    args = 'w'
-    f_name = f2
+    expression = '-0.5 * w^2/A - cseq * w'
+    coupled_variables = 'w'
+    property_name = f2
     material_property_names = 'cseq A'
   [../]
   [./switching_function]
@@ -108,23 +108,23 @@
   [../]
   [./cs]
     type = DerivativeParsedMaterial
-    args = 'w'
-    f_name = cs
+    coupled_variables = 'w'
+    property_name = cs
     material_property_names = 'A cseq'
-    function = 'w/A + cseq' # since w = A*(c-cseq)
+    expression = 'w/A + cseq' # since w = A*(c-cseq)
     derivative_order = 2
   [../]
   [./cl]
     type = DerivativeParsedMaterial
-    args = 'w'
-    f_name = cl
+    coupled_variables = 'w'
+    property_name = cl
     material_property_names = 'A cleq'
-    function = 'w/A + cleq' # since w = A*(c-cleq)
+    expression = 'w/A + cleq' # since w = A*(c-cleq)
     derivative_order = 2
   [../]
   [./total_GrandPotential]
     type = DerivativeTwoPhaseMaterial
-    args = 'w'
+    coupled_variables = 'w'
     eta = eta
     fa_name = f1
     fb_name = f2
@@ -133,9 +133,9 @@
   [../]
   [./coupled_eta_function]
     type = DerivativeParsedMaterial
-    function = '(cs - cl) * dh'
-    args = 'eta w'
-    f_name = ft
+    expression = '(cs - cl) * dh'
+    coupled_variables = 'eta w'
+    property_name = ft
     material_property_names = 'cs cl dh:=D[h,eta]'
     derivative_order = 1
     outputs = exodus
@@ -143,9 +143,9 @@
 
   [./concentration]
     type = ParsedMaterial
-    f_name = c
+    property_name = c
     material_property_names = 'dF:=D[F,w]'
-    function = '-dF'
+    expression = '-dF'
     outputs = exodus
   [../]
 []

@@ -30,10 +30,8 @@ public:
   {
   }
 
-  std::pair<bool, const Elem *> isExtrapolatedBoundaryFace(const FaceInfo & fi) const override
-  {
-    return _array.isExtrapolatedBoundaryFace(fi);
-  }
+  bool isExtrapolatedBoundaryFace(const FaceInfo & fi, const Elem * elem) const override;
+  bool hasBlocks(SubdomainID sub_id) const override { return _array.hasBlocks(sub_id); }
 
 private:
   /// The parent array functor
@@ -47,19 +45,7 @@ private:
     return _array(elem, state)[_component];
   }
 
-  ValueType evaluate(const Moose::ElemFromFaceArg & elem_from_face,
-                     const unsigned int state) const override final
-  {
-    return _array(elem_from_face, state)[_component];
-  }
-
   ValueType evaluate(const Moose::FaceArg & face, const unsigned int state) const override final
-  {
-    return _array(face, state)[_component];
-  }
-
-  ValueType evaluate(const Moose::SingleSidedFaceArg & face,
-                     const unsigned int state) const override final
   {
     return _array(face, state)[_component];
   }
@@ -89,3 +75,11 @@ private:
     return _array.gradient(elem, state)[_component];
   }
 };
+
+template <typename T, typename ArrayTypeFunctor>
+bool
+ArrayComponentFunctor<T, ArrayTypeFunctor>::isExtrapolatedBoundaryFace(
+    const FaceInfo & fi, const Elem * const elem) const
+{
+  return _array.isExtrapolatedBoundaryFace(fi, elem);
+}

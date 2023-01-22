@@ -5,7 +5,7 @@
 [Functions]
   [tdisp]
     type = ParsedFunction
-    value = '0.025 * t'
+    expression = '0.025 * t'
   []
 []
 

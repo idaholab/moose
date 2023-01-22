@@ -83,7 +83,7 @@
   [../]
   [./f_w]
     type = ParsedFunction
-    value = '1.515e-7 * x'
+    expression = '1.515e-7 * x'
   [../]
 []
 
@@ -91,17 +91,17 @@
   # Free energy coefficients for parabolic curve
   [./ks]
     type = ParsedMaterial
-    f_name = ks
-    args = 'T'
+    property_name = ks
+    coupled_variables = 'T'
     constant_names = 'a b'
     constant_expressions = '-0.0025 157.16'
-    function = 'a*T + b'
+    expression = 'a*T + b'
   [../]
   [./kv]
     type = ParsedMaterial
-    f_name = kv
+    property_name = kv
     material_property_names = 'ks'
-    function = '10 * ks'
+    expression = '10 * ks'
   [../]
   # Diffusivity and mobilities
   [./chiD]
@@ -124,11 +124,11 @@
   # Equilibrium vacancy concentration
   [./cs_eq]
     type = DerivativeParsedMaterial
-    f_name = cs_eq
-    args = 'gr0 gr1 T'
+    property_name = cs_eq
+    coupled_variables = 'gr0 gr1 T'
     constant_names = 'Ef Egb kB'
     constant_expressions = '2.69 2.1 8.617343e-5'
-    function = 'bnds:=gr0^2 + gr1^2; cb:=exp(-Ef/kB/T); cgb:=exp(-(Ef-Egb)/kB/T);
+    expression = 'bnds:=gr0^2 + gr1^2; cb:=exp(-Ef/kB/T); cgb:=exp(-(Ef-Egb)/kB/T);
                 cb + 4.0*(cgb-cb)*(1.0 - bnds)^2'
   [../]
   # Everything else
@@ -148,11 +148,11 @@
   # Concentration is only meant for output
   [./c]
     type = ParsedMaterial
-    f_name = c
+    property_name = c
     material_property_names = 'hs rhos hv rhov'
     constant_names = 'Va'
     constant_expressions = '0.04092'
-    function = 'Va*(hs*rhos + hv*rhov)'
+    expression = 'Va*(hs*rhos + hv*rhov)'
     outputs = exodus
   [../]
 []

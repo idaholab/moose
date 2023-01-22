@@ -224,6 +224,41 @@ style=font-size:26pt
 
 !---
 
+# Rhie-Chow Interpolation
+style=font-size:26pt
+
+- When using linear interpolation for the advecting velocity and the pressure gradient, we
+  encounter a checker-boarding effect for the pressure field. Neighboring cell center solution
+  values are decoupled, which is undesirable.
+
+- +Solution for this issue:+ Rhie-Chow interpolation for
+  the advecting velocity. For more information on the issue and the derivation of the interpolation
+  method, see [!cite](moukalled2016finite).
+
+
+
+!style! halign=center
+
+!row!
+
+!col! width=30%
+!media navier_stokes/rc_bad.png style=width:100%;background:white;
+!col-end!
+
+!col! width=40%
+$\Large\xrightarrow[\mathrm{Rhie-Chow~Interpolation}]{\vec{u}_{RC,f} = \vec{u}_{AVG,f} - \left(\frac{1}{a}\right)_f\left(\nabla p_f - \overline{\nabla p}_f\right)}$
+!col-end!
+
+!col! width=30%
+!media navier_stokes/rc_good.png style=width:100%;background:white;
+!col-end!
+
+!row-end!
+
+!style-end!
+
+!---
+
 # The Navier-Stokes Finite Volume Action
 style=font-size:26pt
 

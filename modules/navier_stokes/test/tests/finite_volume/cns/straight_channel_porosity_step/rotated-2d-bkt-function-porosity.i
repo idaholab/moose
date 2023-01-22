@@ -287,12 +287,12 @@ friction_coeff=10
 [Functions]
   [ud_in]
     type = ParsedVectorFunction
-    value_x = '0'
-    value_y = '${u_in}'
+    expression_x = '0'
+    expression_y = '${u_in}'
   []
   [eps]
     type = ParsedFunction
-    value = 'if(y < 2.8, 1,
+    expression = 'if(y < 2.8, 1,
              if(y < 3.2, 1 - .5 / .4 * (y - 2.8),
              if(y < 6.8, .5,
              if(y < 7.2, .5 - .25 / .4 * (y - 6.8),

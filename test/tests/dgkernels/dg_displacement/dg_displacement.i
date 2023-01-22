@@ -23,17 +23,17 @@
 [Functions]
   [./forcing_fn]
     type = ParsedFunction
-    value = 2*pow(e,-x-(y*y))*(1-2*y*y)
+    expression = 2*pow(e,-x-(y*y))*(1-2*y*y)
   [../]
   [./exact_fn]
     type = ParsedGradFunction
-    value = pow(e,-x-(y*y))
+    expression = pow(e,-x-(y*y))
     grad_x = -pow(e,-x-(y*y))
     grad_y = -2*y*pow(e,-x-(y*y))
   [../]
   [./disp_func]
     type = ParsedFunction
-    value = x
+    expression = x
   [../]
 []
 

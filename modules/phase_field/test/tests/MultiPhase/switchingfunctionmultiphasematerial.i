@@ -101,10 +101,10 @@
 #    f_name = F
 #    kappa_name = kappa_c
 #    w = w
-#    args = 'eta1 eta2 eta3 eta0'
+#    coupled_variables = 'eta1 eta2 eta3 eta0'
 #  [../]
 #  [./w_res]
-#    # args = 'c'
+#    # coupled_variables = 'c'
 #    type = SplitCHWRes
 #    variable = w
 #    mob_name = M
@@ -113,7 +113,7 @@
 #    type = AllenCahn
 #    variable = eta1
 #    f_name = F
-#    args = 'c eta2 eta3 eta0'
+#    coupled_variables = 'c eta2 eta3 eta0'
 #  [../]
 #  [./AC1_int]
 #    type = ACInterface
@@ -128,7 +128,7 @@
 #    type = AllenCahn
 #    variable = eta2
 #    f_name = F
-#    args = 'c eta1 eta3 eta0'
+#    coupled_variables = 'c eta1 eta3 eta0'
 #  [../]
 #  [./AC2_int]
 #    type = ACInterface
@@ -142,7 +142,7 @@
 #    type = AllenCahn
 #    variable = eta3
 #    f_name = F
-#    args = 'c eta2 eta1 eta0'
+#    coupled_variables = 'c eta2 eta1 eta0'
 #  [../]
 #  [./AC3_int]
 #    type = ACInterface
@@ -156,7 +156,7 @@
 #    type = AllenCahn
 #    variable = eta0
 #    f_name = F
-#    args = 'c eta2 eta3 eta1'
+#    coupled_variables = 'c eta2 eta3 eta1'
 #  [../]
 #  [./AC4_int]
 #    type = ACInterface
@@ -185,29 +185,29 @@
   [../]
   #[./ha]
   #  type = DerivativeParsedMaterial
-  #  args = 'eta1 eta2 eta3 eta0'
-  #  f_name = ha_parsed
-  #  function = 'eta1^2/(eta1^2+eta2^2+eta3^2+eta0^2)'
+  #  coupled_variables = 'eta1 eta2 eta3 eta0'
+  #  property_name = ha_parsed
+  #  expression = 'eta1^2/(eta1^2+eta2^2+eta3^2+eta0^2)'
   #  derivative_order = 2
   #  outputs = exodus
   #[../]
   #[./hb]
   #  type = DerivativeParsedMaterial
-  #  args = 'eta1 eta2 eta3 eta0'
-  #  f_name = hb_parsed
-  #  function = '(eta2^2+eta3^2+eta0^2)/(eta1^2+eta2^2+eta3^2+eta0^2)'
+  #  coupled_variables = 'eta1 eta2 eta3 eta0'
+  #  property_name = hb_parsed
+  #  expression = '(eta2^2+eta3^2+eta0^2)/(eta1^2+eta2^2+eta3^2+eta0^2)'
   #  derivative_order = 2
   #  outputs = exodus
   #[../]
 
   #[./FreeEng]
   #  type = DerivativeParsedMaterial
-  #  args = 'c eta1 eta2 eta3 eta0'
-  #  f_name = F
+  #  coupled_variables = 'c eta1 eta2 eta3 eta0'
+  #  property_name = F
   #  constant_names = 'c1 c2 s g d e h z'
   #  constant_expressions = '1.0 0.0 1.5 1.5 1.0 1.0 1 1.0'
   #  material_property_names = 'ha(eta1,eta2,eta3,eta0) hb(eta1,eta2,eta3,eta0)'
-  #  function = 'a:=eta1^2/(eta1^2+eta2^2+eta3^2+eta0^2);f1:=ha*(c-c1)^2;b:=(eta2^2+eta3^2+eta0^2)/(eta1^2+eta2^2+eta3^2+eta0^2);f2:=hb*(c-c2)^2
+  #  expression = 'a:=eta1^2/(eta1^2+eta2^2+eta3^2+eta0^2);f1:=ha*(c-c1)^2;b:=(eta2^2+eta3^2+eta0^2)/(eta1^2+eta2^2+eta3^2+eta0^2);f2:=hb*(c-c2)^2
   #  ;f3:=1/4*eta1^4-1/2*eta1^2+1/4*eta2^4-1/2*eta2^2+1/4*eta3^4-1/2*eta3^2+1/4*eta0^4-1/2*eta0^2
   #  ;f4:=z*s*(eta1^2*eta2^2+eta1^2*eta3^2+eta1^2*eta0^2)+g*(eta2^2*eta3^2+eta2^2*eta0^2+eta3^2*eta0^2);f:=1/4+e*f1+d*f2+h*(f3+f4);f'
   #  derivative_order = 2

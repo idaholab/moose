@@ -32,34 +32,34 @@
   [./v_left_bc]
     # Left-side boundary condition for v equation, v(0,y,t) = u(0.5,y,t). This is accomplished using a PointValue postprocessor, which is what this input file was designed to test.
     type = ParsedFunction
-    value = a
-    vals = u_midpoint
-    vars = a
+    expression = a
+    symbol_values = u_midpoint
+    symbol_names = a
   [../]
   [./u_mms_func]
     # MMS Forcing function for the u equation.
     type = ParsedFunction
-    value = ' 20*exp(20*t)*x*x*x-6*exp(20*t)*x-(2-0.125*exp(20*t))*sin(5/2*x*pi)-0.125*exp(20*t)-1
+    expression = ' 20*exp(20*t)*x*x*x-6*exp(20*t)*x-(2-0.125*exp(20*t))*sin(5/2*x*pi)-0.125*exp(20*t)-1
 '
   [../]
   [./v_mms_func]
     # MMS forcing function for the v equation.
     type = ParsedFunction
-    value = -2.5*exp(20*t)*sin(5/2*x*pi)+2.5*exp(20*t)+25/4*(2-0.125*exp(20*t))*sin(5/2*x*pi)*pi*pi
+    expression = -2.5*exp(20*t)*sin(5/2*x*pi)+2.5*exp(20*t)+25/4*(2-0.125*exp(20*t))*sin(5/2*x*pi)*pi*pi
   [../]
   [./u_right_bc]
     type = ParsedFunction
-    value = 3*exp(20*t) # \nabla{u}|_{x=1} = 3\exp(20*t)
+    expression = 3*exp(20*t) # \nabla{u}|_{x=1} = 3\exp(20*t)
   [../]
   [./u_exact]
     # Exact solution for the MMS function for the u variable.
     type = ParsedFunction
-    value = exp(20*t)*pow(x,3)+1
+    expression = exp(20*t)*pow(x,3)+1
   [../]
   [./v_exact]
     # Exact MMS solution for v.
     type = ParsedFunction
-    value = (2-0.125*exp(20*t))*sin(5/2*pi*x)+0.125*exp(20*t)+1
+    expression = (2-0.125*exp(20*t))*sin(5/2*pi*x)+0.125*exp(20*t)+1
   [../]
 []
 

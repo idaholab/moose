@@ -70,7 +70,10 @@ This mesh generator forces the number of nodes on a hexagonal mesh to match a us
 
 ## Handling Reporting IDs
 
-If the input mesh contains extra element integers (reporting IDs), the `PatternedHexPeripheralModifier` provides options to retain or reassign these reporting IDs (see [Figure 4](#reporting_id_example)). By default, all the extra element integers existing on the input mesh are retained. Due to the nature of the transition layer which creates a new set of elements, the original boundaries between different reporting ID values have to be slightly shifted after modification. When `PatternedHexPeripheralModifier` assigns reporting ID values to a new element in the transition layer, it utilizes the reporting ID values of the original element that is nearest to the new element (based on centroid positions) to retain the setting of the input mesh. Alternatively, users can specify the names of reporting IDs to be reassigned through [!param](/Mesh/PatternedHexPeripheralModifier/extra_id_names_to_modify). The customized reporting ID values can then be set by providing the parameter [!param](/Mesh/PatternedHexPeripheralModifier/new_extra_id_values_to_assign).
+If the input mesh contains extra element integers (reporting IDs), the `PatternedHexPeripheralModifier` provides options to retain or reassign these reporting IDs (see [Figure 4](#reporting_id_example)). By default, all the extra element integers existing on the input mesh are retained. Due to the nature of the transition layer which creates a new set of elements, the original boundaries between different reporting ID values have to be slightly shifted after modification. When `PatternedHexPeripheralModifier` assigns reporting ID values to a new element in the transition layer, it utilizes the reporting ID values of the original element that is nearest to the new element (based on centroid positions) to retain the setting of the input mesh.
+
+!alert note
+The extra element IDs from the original peripheral region are conserved. They may be modified using the [!param](/Mesh/PatternedHexPeripheralModifier/extra_id_names_to_modify) and [!param](/Mesh/PatternedHexPeripheralModifier/new_extra_id_values_to_assign) parameters.
 
 !media reactor/meshgenerators/peripheral_modifier_reporting_id.png
       style=display: block;margin-left:auto;margin-right:auto;width:95%;

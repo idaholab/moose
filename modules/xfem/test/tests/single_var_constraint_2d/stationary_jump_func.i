@@ -52,7 +52,7 @@
 [Functions]
   [./jump_func]
     type = ParsedFunction
-    value = '0.5'
+    expression = '0.5'
   [../]
 []
 

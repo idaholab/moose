@@ -20,7 +20,7 @@
 [Functions]
   [./ramp1]
     type = ParsedFunction
-    value = 't'
+    expression = 't'
   [../]
 []
 

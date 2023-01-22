@@ -57,7 +57,7 @@ Note, the use of "file_base" anywhere in the `[Outputs]` block disables all defa
 
 [output-types] provides a list of the most common output types, including the short-cut syntax
 as well as the type to be used when creating a sub-block. A complete list of all available
-output objects is given is provided below in [#output-objects].
+output objects is provided below.
 
 !table id=output-types caption=List of common output objects included in core MOOSE framework
 !include output_types.md

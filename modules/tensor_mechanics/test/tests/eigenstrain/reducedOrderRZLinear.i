@@ -36,15 +36,15 @@
 [Functions]
   [./tempLinear]
     type = ParsedFunction
-    value = '715-5*x'
+    expression = '715-5*x'
   [../]
   [./tempQuadratic]
     type = ParsedFunction
-    value = '2.5*x*x-15*x+722.5'
+    expression = '2.5*x*x-15*x+722.5'
   [../]
   [./tempCubic]
     type = ParsedFunction
-    value = '-1.25*x*x*x+11.25*x*x-33.75*x+733.75'
+    expression = '-1.25*x*x*x+11.25*x*x-33.75*x+733.75'
   [../]
 []
 

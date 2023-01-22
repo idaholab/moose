@@ -47,6 +47,6 @@
     type = MaterialDerivativeTestKernel
     variable = beta
     material_property = Re
-    args = 'beta arhoA arhouA arhoEA'
+    coupled_variables = 'beta arhoA arhouA arhoEA'
   []
 []

@@ -22,7 +22,7 @@
 [Functions]
   [u_ic_fn]
     type = ParsedFunction
-    value = 'x'
+    expression = 'x'
   []
 []
 

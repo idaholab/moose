@@ -1,0 +1,56 @@
+[Tests]
+  design = 'TensorMechanicsPlasticOrthotropic.md'
+  issues = '#16016'
+
+  [ad_aniso_plasticity_x_one_ref]
+    type = 'CSVDiff'
+    input = 'ad_aniso_plasticity_x_one_ref.i'
+    csvdiff = 'ad_aniso_plasticity_x_one_ref_out.csv'
+    heavy = true
+    requirement = 'Anisotropic plasticity and anisotropic elastoplasticity must give almost '
+                  'identical results if elastic behavior is isotropic -- plastic anisotropy'
+  []
+
+  [ad_aniso_plasticity_x_one]
+    type = 'CSVDiff'
+    input = 'ad_aniso_plasticity_x_one.i'
+    csvdiff = 'ad_aniso_plasticity_x_one_out.csv'
+    heavy = true
+    requirement = 'Anisotropic plasticity and anisotropic elastoplasticity must give almost '
+                  'identical results if elastic behavior is isotropic -- elastoplastic anisotropy'
+  []
+
+  # Solution accuracy and correctness is tested in the heavy tests. This light test
+  # follows the same code paths to register code coverage.
+  [ad_aniso_plasticity_x_one_light]
+    type = 'RunApp'
+    input = 'ad_aniso_plasticity_x_one.i'
+    # rush through purely elastic phase to achieve inelastic deformation in the reduced test time
+    cli_args = 'Executioner/num_steps=3 Executioner/TimeStepper/dt=1.0e-4 '
+               'Executioner/TimeStepper/time_t=\'0 3.43e-5 10\' '
+               'Executioner/TimeStepper/time_dt=\'1.0e-4 1.0e-7 1.0e-7\''
+    requirement = 'The system shall be able to solve anisotropic plasticity and anisotropic '
+                  'elastoplasticity problems with elastoplastic anisotropy'
+  []
+  [ad_uniaxial_x_linear]
+    type = 'CSVDiff'
+    input = 'ad_uniaxial_x.i'
+    csvdiff = 'ad_uniaxial_x_out.csv'
+    heavy = true
+    requirement = 'Uniaxial tensile test run in x direction with anisotropic elasticity and linear strain hardening with automatic differentiation'
+  []
+  [ad_uniaxial_y_linear]
+    type = 'CSVDiff'
+    input = 'ad_uniaxial_y.i'
+    csvdiff = 'ad_uniaxial_y_out.csv'
+    heavy = true
+    requirement = 'Uniaxial tensile test run in y direction with anisotropic elasticity and linear strain hardening with automatic differentiation'
+  []
+  [ad_uniaxial_x_non_linear]
+    type = 'CSVDiff'
+    input = 'ad_uniaxial_x_non_linear.i'
+    csvdiff = 'ad_uniaxial_x_non_linear_out.csv'
+    heavy = true
+    requirement = 'Uniaxial tensile test run in x direction with anisotropic elasticity and non-linear strain hardening with automatic differentiation'
+  []
+[]

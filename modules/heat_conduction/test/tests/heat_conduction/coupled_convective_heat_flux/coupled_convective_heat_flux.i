@@ -8,11 +8,11 @@
 [Functions]
   [./T_infinity_fn]
     type = ParsedFunction
-    value = (x*x+y*y)+500
+    expression = (x*x+y*y)+500
   [../]
   [./Hw_fn]
     type = ParsedFunction
-    value = ((1-x)*(1-x)+(1-y)*(1-y))+1000
+    expression = ((1-x)*(1-x)+(1-y)*(1-y))+1000
   [../]
 []
 

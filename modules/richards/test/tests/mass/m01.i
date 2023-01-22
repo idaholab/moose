@@ -56,7 +56,7 @@
 [Functions]
   [./initial_pressure]
     type = ParsedFunction
-    value = x
+    expression = x
   [../]
 []
 

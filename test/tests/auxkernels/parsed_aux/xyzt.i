@@ -43,25 +43,25 @@
     type = ParsedAux
     variable = xvar
     use_xyzt = true
-    function = 'x+1'
+    expression = 'x+1'
   []
   [yvar]
     type = ParsedAux
     variable = yvar
     use_xyzt = true
-    function = 'y+2'
+    expression = 'y+2'
   []
   [zvar]
     type = ParsedAux
     variable = zvar
     use_xyzt = true
-    function = 'z+3'
+    expression = 'z+3'
   []
   [tvar]
     type = ParsedAux
     variable = tvar
     use_xyzt = true
-    function = 't+0.1*(x+y+z)'
+    expression = 't+0.1*(x+y+z)'
     execute_on = 'INITIAL TIMESTEP_END'
   []
 []

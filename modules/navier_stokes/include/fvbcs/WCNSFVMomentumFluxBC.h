@@ -9,14 +9,13 @@
 
 #pragma once
 
-#include "FVFluxBC.h"
-#include "INSFVFlowBC.h"
+#include "WCNSFVFluxBCBase.h"
 #include "INSFVMomentumResidualObject.h"
 
 /**
- * Flux boundary conditions for the weakly compressible boundary equation
+ * Flux boundary conditions for the weakly compressible momentum equation
  */
-class WCNSFVMomentumFluxBC : public FVFluxBC, public INSFVFlowBC, public INSFVMomentumResidualObject
+class WCNSFVMomentumFluxBC : public WCNSFVFluxBCBase, public INSFVMomentumResidualObject
 {
 public:
   static InputParameters validParams();
@@ -30,19 +29,4 @@ public:
 
 protected:
   ADReal computeQpResidual() override;
-
-  /// Scaling factor
-  const Real _scaling_factor;
-
-  /// Postprocessor with the inlet velocity
-  const PostprocessorValue * const _velocity_pp;
-
-  /// Postprocessor with the inlet mass flow rate
-  const PostprocessorValue * const _mdot_pp;
-
-  /// Postprocessor with the inlet area
-  const PostprocessorValue * const _area_pp;
-
-  /// Fluid density functor
-  const Moose::Functor<ADReal> * const _rho;
 };

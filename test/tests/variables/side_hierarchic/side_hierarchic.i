@@ -28,11 +28,11 @@
 [Functions]
   [./nl_var]
     type = ParsedFunction
-    value = 'x+y+1'
+    expression = 'x+y+1'
   [../]
   [./aux_var]
     type = ParsedFunction
-    value = 'x-y+10'
+    expression = 'x-y+10'
   [../]
 []
 

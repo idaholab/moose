@@ -241,9 +241,9 @@ scale_Fe = ${fparse 1.0 / eqm_Fe}
 [Functions]
   [vel_fcn]
     type = ParsedVectorFunction
-    value_x = 33.333333
-    value_y = 0
-    value_z = 0
+    expression_x = 33.333333
+    expression_y = 0
+    expression_z = 0
   []
 []
 

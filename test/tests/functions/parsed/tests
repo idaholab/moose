@@ -43,7 +43,7 @@
     type = Exodiff
     input = combined.i
     exodiff = 'combined_out.e'
-    requirement = "The ParsedFunction object shall support the use of functions, scalar values and postprocessor values specified by their names in its expression at the same time."
+    requirement = "The ParsedFunction object shall support the use of functions, scalar expressions and postprocessor expressions specified by their names in its expression at the same time."
     issues = '#12179'
   [../]
 
@@ -67,7 +67,7 @@
   [./nl_vars]
     type = RunException
     input = 'combined.i'
-    cli_args = "Functions/fn/vars='f sv' Functions/fn/vals='f sv'"
+    cli_args = "Functions/fn/symbol_names='f sv' Functions/fn/symbol_values='f sv'"
     expect_err = "The only variables supported by ParsedFunction are scalar variables, and var 'f' is not scalar."
     requirement = "The system should error if a field variable is passed into a parsed function object, as this capability is currently not supported."
     issues = '#15523'

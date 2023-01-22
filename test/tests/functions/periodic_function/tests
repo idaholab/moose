@@ -1,0 +1,10 @@
+[Tests]
+  design = 'PeriodicFunction.md'
+  [periodic_function]
+    type = 'Exodiff'
+    input = 'periodic_function.i'
+    exodiff = 'periodic_function_out.e'
+    requirement = "The Function system shall provide the ability to take a base function and periodically repeat that function according to a user-defined period in time or in the x, y, or z direction, or a combination of those"
+    issues = '#23202'
+  [../]
+[]

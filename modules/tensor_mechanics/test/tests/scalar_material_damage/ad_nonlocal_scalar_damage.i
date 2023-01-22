@@ -53,7 +53,7 @@
 [Functions]
   [func]
     type = ParsedFunction
-    value = 'if(x>=0,0.5*t, t)'
+    expression = 'if(x>=0,0.5*t, t)'
   []
 []
 

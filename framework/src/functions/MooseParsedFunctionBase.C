@@ -18,23 +18,38 @@ InputParameters
 MooseParsedFunctionBase::validParams()
 {
   InputParameters params = emptyInputParameters();
-  params.addParam<std::vector<std::string>>(
+  params.addDeprecatedParam<std::vector<std::string>>(
       "vars",
       "Variables (excluding t,x,y,z) that are bound to the values provided by the corresponding "
+      "items in the vals vector.",
+      "vars is deprecated, use symbol_names instead");
+  params.addDeprecatedParam<std::vector<std::string>>(
+      "vals",
+      "Constant numeric values, postprocessor names, "
+      "function names, and scalar variables for vars.",
+      "vals is deprecated, use symbol_values instead");
+  params.addParam<std::vector<std::string>>(
+      "symbol_names",
+      "Symbols (excluding t,x,y,z) that are bound to the values provided by the corresponding "
       "items in the vals vector.");
-  params.addParam<std::vector<std::string>>("vals",
+  params.addParam<std::vector<std::string>>("symbol_values",
                                             "Constant numeric values, postprocessor names, "
-                                            "function names, and scalar variables for vars.");
+                                            "function names, and scalar variables corresponding to"
+                                            " the symbols in symbol_names.");
   return params;
 }
 
 MooseParsedFunctionBase::MooseParsedFunctionBase(const InputParameters & parameters)
   : _pfb_feproblem(*parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
-    _vars(parameters.get<std::vector<std::string>>("vars")),
-    _vals(parameters.get<std::vector<std::string>>("vals"))
+    _vars(parameters.isParamValid("vars")
+              ? parameters.get<std::vector<std::string>>("vars")
+              : parameters.get<std::vector<std::string>>("symbol_names")),
+    _vals(parameters.isParamValid("vals")
+              ? parameters.get<std::vector<std::string>>("vals")
+              : parameters.get<std::vector<std::string>>("symbol_values"))
 {
   if (_vars.size() != _vals.size())
-    mooseError("Number of vars must match the number of vals for a MooseParsedFunction!");
+    mooseError("Number of symbol_names must match the number of symbol_values!");
 
   // Loop through the variables assigned by the user and give an error if x,y,z,t are used
   for (const auto & var : _vars)
@@ -50,7 +65,7 @@ MooseParsedFunctionBase::verifyFunction(const std::string & function_str)
 {
   // Throws an error if quotes are found
   if (function_str.find("\"") != std::string::npos)
-    mooseError("The value in ParsedFunction contains quotes(\") which cannot be properly parsed");
+    mooseError("The expression in ParsedFunction contains quotes which cannot be properly parsed");
 
   // Return the input equation (no error)
   return function_str;
