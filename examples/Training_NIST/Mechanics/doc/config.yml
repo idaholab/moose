@@ -5,6 +5,8 @@ Content:
         root_dir: ${ROOT_DIR}/examples/Training_NIST/Mechanics/doc/figures
     simple_inputs:
         root_dir: ${ROOT_DIR}/examples/Training_NIST/Mechanics/simple_inputs
+    input_plates:
+        root_dir: ${ROOT_DIR}/examples/Training_NIST/Mechanics/input_plates
     moose:
         root_dir: ${MOOSE_DIR}/framework/doc/content
         content:
