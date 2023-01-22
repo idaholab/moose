@@ -94,7 +94,7 @@
     input = 'kks_example_multiphase_nested.i'
     exodiff = 'kks_example_multiphase_nested.e'
     issues = '#21358'
-    design = 'KKSPhaseConcentrationMultiPhaseMaterial.md KKSPhaseConcentrationMultiPhaseDerivatives.md NestKKSMultiACBulkC.md NestKKSMultiACBulkF.md NestKKSSplitCHCRes.md'
+    design = 'KKSPhaseConcentrationMultiPhaseMaterial.md KKSPhaseConcentrationMultiPhaseDerivatives.md NestedKKSMultiACBulkC.md NestedKKSMultiACBulkF.md NestedKKSSplitCHCRes.md'
     requirement = 'The nested solve of multiphase Kim-Kim-Suzuki models shall yield the correct results with non-linear phase free energies'
   []
 []
