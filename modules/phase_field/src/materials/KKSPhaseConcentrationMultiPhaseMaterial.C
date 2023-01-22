@@ -194,12 +194,6 @@ KKSPhaseConcentrationMultiPhaseMaterial::computeQpProperties()
         residual((m + 1) * _num_j - 1) += (*_prop_hj[l])[_qp] * (*_prop_ci[m * _num_j + l])[_qp];
     }
 
-    // // initialize all terms in jacobian to be zero
-    // for (unsigned int m = 0; m < _num_j * _num_c; ++m)
-    // {
-    //   for (unsigned int n = 0; n < _num_j * _num_c; ++n)
-    //     jacobian(m, n) = 0;
-    // }
     jacobian.setZero();
 
     // fill in the non-zero terms in jacobian
