@@ -60,7 +60,7 @@ public:
   template <typename R, typename J>
   void nonlinear(RealVectorValue & guess, R computeResidual, J computeJacobian);
 
-  enum damped_newton
+  enum class DampedNewton
   {
     DAMP_ONCE,
     DAMP_LOOP
@@ -73,7 +73,7 @@ public:
                  B ci_upper_bounds,
                  unsigned int _num_eta,
                  unsigned int _num_c,
-                 unsigned int damped_newton);
+                 DampedNewton damped_newton);
 
   ///@{ default values
   static Real relativeToleranceDefault() { return 1e-8; }
@@ -379,7 +379,7 @@ NestedSolve::nonlinear(V & guess,
                        B ci_upper_bounds,
                        unsigned int _num_eta,
                        unsigned int _num_c,
-                       unsigned int damped_newton)
+                       DampedNewton damped_newton)
 {
   V delta;
   V residual;
@@ -430,8 +430,7 @@ NestedSolve::nonlinear(V & guess,
     guess = guess_prev - delta;
 
     // lambda to check if ci is within bounds
-    auto condition =
-        [&]()
+    auto condition = [&]()
     {
       // check independent ci
       for (unsigned int i = 0; i < _num_eta * _num_c; ++i)
@@ -458,24 +457,21 @@ NestedSolve::nonlinear(V & guess,
     if (!condition())
     {
       Real _alpha = 1;
-      switch (damped_newton)
+      if (damped_newton == DampedNewton::DAMP_ONCE)
       {
-        case DAMP_ONCE:
+        _alpha = _alpha * _damping_factor;
+        guess = guess_prev - _alpha * delta;
+      }
+      else if (damped_newton == DampedNewton::DAMP_LOOP)
+      {
+        while (!condition())
+        {
           _alpha = _alpha * _damping_factor;
           guess = guess_prev - _alpha * delta;
-          break;
-
-        case DAMP_LOOP:
-          while (!condition())
-          {
-            _alpha = _alpha * _damping_factor;
-            guess = guess_prev - _alpha * delta;
-          }
-          break;
-
-        default:
-          mooseError("Damped_newton does not match the given options.");
+        }
       }
+      else
+        mooseError("Damped_newton does not match the given options.");
     }
 
     _n_iterations++;

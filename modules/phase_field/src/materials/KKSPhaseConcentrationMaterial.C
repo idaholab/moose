@@ -243,7 +243,7 @@ KKSPhaseConcentrationMaterial::computeQpProperties()
                               _ci_upper_bounds,
                               2,
                               _num_c,
-                              0);
+                              NestedSolve::DampedNewton::DAMP_ONCE);
       break;
 
     case 2:
@@ -254,7 +254,7 @@ KKSPhaseConcentrationMaterial::computeQpProperties()
                               _ci_upper_bounds,
                               2,
                               _num_c,
-                              1);
+                              NestedSolve::DampedNewton::DAMP_LOOP);
       break;
 
     default:
