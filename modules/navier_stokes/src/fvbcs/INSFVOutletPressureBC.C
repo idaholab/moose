@@ -46,11 +46,11 @@ INSFVOutletPressureBC::INSFVOutletPressureBC(const InputParameters & params)
                "pressure");
 }
 
-Real
+ADReal
 INSFVOutletPressureBC::boundaryValue(const FaceInfo & fi) const
 {
   if (_functor)
-    return (*_functor)(singleSidedFaceArg(&fi)).value();
+    return (*_functor)(singleSidedFaceArg(&fi));
   else if (_function)
     return _function->value(_t, fi.faceCentroid());
   else

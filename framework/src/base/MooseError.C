@@ -41,14 +41,10 @@ mooseMsgFmt(const std::string & msg, const std::string & title, const std::strin
 [[noreturn]] void
 mooseErrorRaw(std::string msg, const std::string prefix)
 {
-  msg = mooseMsgFmt(msg, "*** ERROR ***", COLOR_RED);
-
   if (Moose::_throw_on_error)
-  {
-    if (!prefix.empty())
-      MooseUtils::indentMessage(prefix, msg);
     throw std::runtime_error(msg);
-  }
+
+  msg = mooseMsgFmt(msg, "*** ERROR ***", COLOR_RED);
 
   std::ostringstream oss;
   oss << msg << "\n";

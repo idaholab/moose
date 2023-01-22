@@ -20,137 +20,12 @@
 
 template <typename>
 class MooseVariableFV;
+class FaceArgInterface;
 
 namespace Moose
 {
 namespace FV
 {
-/**
- * This creates a structure with info on : an element, \p FaceInfo, skewness correction and
- * subdomain ID. The element returned will correspond to the method argument. The \p FaceInfo part
- * of the structure will simply correspond to the current \p _face_info. The subdomain ID part of
- * the structure will correspond to the subdomain ID of the method's element argument except in the
- * case in which that subdomain ID does not correspond to a subdomain ID that the \p obj is defined
- * on. In that case the subdomain ID of the structure will correspond to the subdomain ID of the
- * element across the face, on which the \p obj *is* defined
- */
-template <typename SubdomainRestrictable>
-ElemFromFaceArg
-makeSidedFace(const SubdomainRestrictable & obj,
-              const Elem * const elem,
-              const FaceInfo & fi,
-              const bool correct_skewness = false)
-{
-  if (elem && obj.hasBlocks(elem->subdomain_id()))
-    return {elem, &fi, correct_skewness, elem->subdomain_id()};
-  else
-  {
-    const Elem * const elem_across = (elem == &fi.elem()) ? fi.neighborPtr() : &fi.elem();
-    mooseAssert(elem_across && obj.hasBlocks(elem_across->subdomain_id()),
-                "How are there no elements with subs on here!");
-    return {elem, &fi, correct_skewness, elem_across->subdomain_id()};
-  }
-}
-
-/**
- * @return the value of \p makeSidedFace called with the face info element
- */
-template <typename SubdomainRestrictable>
-ElemFromFaceArg
-elemFromFace(const SubdomainRestrictable & obj,
-             const FaceInfo & fi,
-             const bool correct_skewness = false)
-{
-  return makeSidedFace(obj, &fi.elem(), fi, correct_skewness);
-}
-
-/**
- * @return the value of \p makeSidedFace called with the face info neighbor
- */
-template <typename SubdomainRestrictable>
-ElemFromFaceArg
-neighborFromFace(const SubdomainRestrictable & obj,
-                 const FaceInfo & fi,
-                 const bool correct_skewness = false)
-{
-  return makeSidedFace(obj, fi.neighborPtr(), fi, correct_skewness);
-}
-
-/**
- * Determine the subdomain ID pair that should be used when creating a face argument for a
- * functor. As explained in the doxygen for \p makeSidedFace these
- * subdomain IDs do not simply correspond to the subdomain IDs of the face information element pair;
- * they must respect the block restriction of the \p obj
- */
-template <typename SubdomainRestrictable>
-std::pair<SubdomainID, SubdomainID>
-faceArgSubdomains(const SubdomainRestrictable & obj, const FaceInfo & fi)
-{
-  return std::make_pair(makeSidedFace(obj, &fi.elem(), fi).sub_id,
-                        makeSidedFace(obj, fi.neighborPtr(), fi).sub_id);
-}
-
-/**
- * Create a functor face argument from provided component arguments
- * @param fi the face information object
- * @param limiter_type the limiter that defines how to perform interpolations to the faces
- * @param elem_is_upwind whether the face information element is the upwind element (the value of
- * this doesn't matter when the limiter type is CentralDifference)
- * @param subs the two subdomain ids that should go into the face argument. These may not always
- * correspond to the face information element and neighbor subdomain ids (for instance if we are on
- * a boundary)
- * @param correct_skewness whether to apply skew correction
- * @return the functor face argument
- */
-inline FaceArg
-makeFace(const FaceInfo & fi,
-         const LimiterType limiter_type,
-         const bool elem_is_upwind,
-         const std::pair<SubdomainID, SubdomainID> & subs,
-         const bool correct_skewness = false)
-{
-  return {&fi, limiter_type, elem_is_upwind, correct_skewness, subs.first, subs.second};
-}
-
-/**
- * Make a functor face argument with a central differencing limiter, e.g. compose a face argument
- * that will tell functors to perform (possibly skew-corrected) linear interpolations from cell
- * center values to faces
- * @param fi the face information
- * @param subs the two subdomains that should go into the face argument. The first member of this
- * pair will be the "element" subdomain id and the second member of the pair will be the "neighbor"
- * subdomain id
- * @param correct_skewness whether to apply skew correction
- * @return a face argument for functors
- */
-inline FaceArg
-makeCDFace(const FaceInfo & fi,
-           const std::pair<SubdomainID, SubdomainID> & subs,
-           const bool correct_skewness = false)
-{
-  return makeFace(fi, LimiterType::CentralDifference, true, subs, correct_skewness);
-}
-
-/**
- * Make a functor face argument with a central differencing limiter, e.g. compose a face argument
- * that will tell functors to perform (possibly skew-corrected) linear interpolations from cell
- * center values to faces. The subdomain ids for the face argument will be created from the face
- * information object's \p elem() and \p neighbor() subdomain ids. If the latter is null, then an
- * invalid subdomain ID will be used
- * @param fi the face information
- * @param apply_gradient_so_skewness whether to apply skew correction
- * @return a face argument for functors
- */
-inline FaceArg
-makeCDFace(const FaceInfo & fi, const bool correct_skewness = false)
-{
-  return makeCDFace(
-      fi,
-      std::make_pair(fi.elem().subdomain_id(),
-                     fi.neighborPtr() ? fi.neighbor().subdomain_id() : Moose::INVALID_BLOCK_ID),
-      correct_skewness);
-}
-
 /// This codifies a set of available ways to interpolate with elem+neighbor
 /// solution information to calculate values (e.g. solution, material
 /// properties, etc.) at the face (centroid).  These methods are used in the
@@ -397,8 +272,8 @@ linearInterpolation(const FunctorBase<T> & functor, const FaceArg & face)
   mooseAssert(face.fi,
               "We must have a non-null face_info in order to prepare our ElemFromFace tuples");
 
-  const auto elem_from_face = face.elemFromFace();
-  const auto neighbor_from_face = face.neighborFromFace();
+  const auto elem_arg = face.makeElem();
+  const auto neighbor_arg = face.makeNeighbor();
 
   if (face.correct_skewness)
   {
@@ -411,11 +286,10 @@ linearInterpolation(const FunctorBase<T> & functor, const FaceArg & face)
     const auto surface_gradient = functor.gradient(new_face);
 
     return skewCorrectedLinearInterpolation(
-        functor(elem_from_face), functor(neighbor_from_face), surface_gradient, *face.fi, true);
+        functor(elem_arg), functor(neighbor_arg), surface_gradient, *face.fi, true);
   }
   else
-    return linearInterpolation(
-        functor(elem_from_face), functor(neighbor_from_face), *face.fi, true);
+    return linearInterpolation(functor(elem_arg), functor(neighbor_arg), *face.fi, true);
 }
 
 /**
@@ -634,8 +508,8 @@ interpCoeffsAndAdvected(const FunctorBase<T> & functor, const FaceArg & face)
   mooseAssert(face.fi, "this must be non-null");
   const auto limiter = Limiter<typename LimiterValueType<T>::value_type>::build(face.limiter_type);
 
-  const auto upwind_arg = face.elem_is_upwind ? face.elemFromFace() : face.neighborFromFace();
-  const auto downwind_arg = face.elem_is_upwind ? face.neighborFromFace() : face.elemFromFace();
+  const auto upwind_arg = face.elem_is_upwind ? face.makeElem() : face.makeNeighbor();
+  const auto downwind_arg = face.elem_is_upwind ? face.makeNeighbor() : face.makeElem();
   auto phi_upwind = functor(upwind_arg);
   auto phi_downwind = functor(downwind_arg);
 
@@ -682,8 +556,8 @@ interpolate(const FunctorBase<VectorValue<T>> & functor, const FaceArg & face)
   mooseAssert(face.fi, "this must be non-null");
   const auto limiter = Limiter<typename LimiterValueType<T>::value_type>::build(face.limiter_type);
 
-  const auto upwind_arg = face.elem_is_upwind ? face.elemFromFace() : face.neighborFromFace();
-  const auto downwind_arg = face.elem_is_upwind ? face.neighborFromFace() : face.elemFromFace();
+  const auto upwind_arg = face.elem_is_upwind ? face.makeElem() : face.makeNeighbor();
+  const auto downwind_arg = face.elem_is_upwind ? face.makeNeighbor() : face.makeElem();
   auto phi_upwind = functor(upwind_arg);
   auto phi_downwind = functor(downwind_arg);
 
@@ -732,8 +606,8 @@ containerInterpolate(const FunctorBase<T> & functor, const FaceArg & face)
   mooseAssert(face.fi, "this must be non-null");
   const auto limiter = Limiter<typename T::value_type>::build(face.limiter_type);
 
-  const auto upwind_arg = face.elem_is_upwind ? face.elemFromFace() : face.neighborFromFace();
-  const auto downwind_arg = face.elem_is_upwind ? face.neighborFromFace() : face.elemFromFace();
+  const auto upwind_arg = face.elem_is_upwind ? face.makeElem() : face.makeNeighbor();
+  const auto downwind_arg = face.elem_is_upwind ? face.makeNeighbor() : face.makeElem();
   const auto phi_upwind = functor(upwind_arg);
   const auto phi_downwind = functor(downwind_arg);
 

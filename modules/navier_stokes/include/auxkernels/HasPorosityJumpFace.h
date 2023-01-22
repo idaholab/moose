@@ -9,19 +9,21 @@
 
 #pragma once
 
-#include "FVFluxKernel.h"
+#include "AuxKernel.h"
 
-class FVGradAndDotFunctorFluxKernel : public FVFluxKernel
+/**
+ * Shows whether an element has any attached porosity jump faces
+ */
+class HasPorosityJumpFace : public AuxKernel
 {
 public:
   static InputParameters validParams();
-  FVGradAndDotFunctorFluxKernel(const InputParameters & params);
+
+  HasPorosityJumpFace(const InputParameters & parameters);
 
 protected:
-  virtual ADReal computeQpResidual() override;
+  Real computeValue() override;
 
-  const Moose::Functor<ADReal> & _value;
-  const Moose::Functor<ADRealVectorValue> & _gradient;
-  const Moose::Functor<ADReal> & _dot;
-  const RealVectorValue _velocity;
+  /// The porosity
+  const Moose::Functor<ADReal> & _eps;
 };

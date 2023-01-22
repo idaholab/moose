@@ -10,9 +10,11 @@
 #include "FVFunctorDirichletBC.h"
 
 registerMooseObject("MooseApp", FVFunctorDirichletBC);
+registerMooseObject("MooseApp", FVADFunctorDirichletBC);
 
+template <bool is_ad>
 InputParameters
-FVFunctorDirichletBC::validParams()
+FVFunctorDirichletBCTempl<is_ad>::validParams()
 {
   InputParameters params = FVDirichletBCBase::validParams();
   params.addClassDescription("Uses the value of a functor to set a Dirichlet boundary value.");
@@ -21,13 +23,15 @@ FVFunctorDirichletBC::validParams()
   return params;
 }
 
-FVFunctorDirichletBC::FVFunctorDirichletBC(const InputParameters & parameters)
-  : FVDirichletBCBase(parameters), _functor(getFunctor<Real>("functor"))
+template <bool is_ad>
+FVFunctorDirichletBCTempl<is_ad>::FVFunctorDirichletBCTempl(const InputParameters & parameters)
+  : FVDirichletBCBase(parameters), _functor(getFunctor<GenericReal<is_ad>>("functor"))
 {
 }
 
-Real
-FVFunctorDirichletBC::boundaryValue(const FaceInfo & fi) const
+template <bool is_ad>
+ADReal
+FVFunctorDirichletBCTempl<is_ad>::boundaryValue(const FaceInfo & fi) const
 {
   return _functor(singleSidedFaceArg(&fi));
 }

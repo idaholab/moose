@@ -11,16 +11,20 @@
 
 #include "FVDirichletBCBase.h"
 
-class FVFunctorDirichletBC : public FVDirichletBCBase
+template <bool is_ad>
+class FVFunctorDirichletBCTempl : public FVDirichletBCBase
 {
 public:
-  FVFunctorDirichletBC(const InputParameters & parameters);
+  FVFunctorDirichletBCTempl(const InputParameters & parameters);
 
   static InputParameters validParams();
 
-  Real boundaryValue(const FaceInfo & fi) const override;
+  ADReal boundaryValue(const FaceInfo & fi) const override;
 
 private:
   /// The value for this BC
-  const Moose::Functor<Real> & _functor;
+  const Moose::Functor<GenericReal<is_ad>> & _functor;
 };
+
+typedef FVFunctorDirichletBCTempl<false> FVFunctorDirichletBC;
+typedef FVFunctorDirichletBCTempl<true> FVADFunctorDirichletBC;

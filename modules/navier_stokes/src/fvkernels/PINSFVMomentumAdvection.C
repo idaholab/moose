@@ -12,6 +12,7 @@
 #include "MathFVUtils.h"
 #include "NS.h"
 #include "INSFVRhieChowInterpolator.h"
+#include "BernoulliPressureVariable.h"
 
 registerMooseObject("NavierStokesApp", PINSFVMomentumAdvection);
 
@@ -28,4 +29,7 @@ PINSFVMomentumAdvection::validParams()
 PINSFVMomentumAdvection::PINSFVMomentumAdvection(const InputParameters & params)
   : INSFVMomentumAdvection(params), _eps(getFunctor<ADReal>(NS::porosity))
 {
+  const auto & pressure_var = _rc_vel_provider.pressure(_tid);
+  if (dynamic_cast<const BernoulliPressureVariable *>(&pressure_var) && _tid == 0)
+    adjustRMGhostLayers(std::max((unsigned short)(3), _pars.get<unsigned short>("ghost_layers")));
 }

@@ -247,42 +247,14 @@ FVFluxBC::uOnGhost() const
     return _u[_qp];
 }
 
-Moose::ElemFromFaceArg
-FVFluxBC::makeSidedFace(const bool fi_elem, const bool correct_skewness) const
+Moose::ElemArg
+FVFluxBC::elemArg(const bool correct_skewness) const
 {
-  const auto ft = _face_info->faceType(_var.name());
-  const Elem * const elem = fi_elem ? &_face_info->elem() : _face_info->neighborPtr();
-
-  // Are we are on the side that the variable is defined on?
-  if (fi_elem == (ft == FaceInfo::VarFaceNeighbors::ELEM))
-  {
-    mooseAssert(elem, "This should be non-null");
-    return {elem, _face_info, correct_skewness, elem->subdomain_id()};
-  }
-  else
-  {
-    const Elem * const elem_across = fi_elem ? _face_info->neighborPtr() : &_face_info->elem();
-    mooseAssert(elem_across,
-                "The elem across should be non-null and the element across should have dof indices "
-                "for this variable defined on it");
-    return {elem, _face_info, correct_skewness, elem_across->subdomain_id()};
-  }
+  return {&_face_info->elem(), correct_skewness};
 }
 
-Moose::ElemFromFaceArg
-FVFluxBC::elemFromFace(const bool correct_skewness) const
+Moose::ElemArg
+FVFluxBC::neighborArg(const bool correct_skewness) const
 {
-  return makeSidedFace(true, correct_skewness);
-}
-
-Moose::ElemFromFaceArg
-FVFluxBC::neighborFromFace(const bool correct_skewness) const
-{
-  return makeSidedFace(false, correct_skewness);
-}
-
-std::pair<SubdomainID, SubdomainID>
-FVFluxBC::faceArgSubdomains() const
-{
-  return std::make_pair(elemFromFace().sub_id, neighborFromFace().sub_id);
+  return {_face_info->neighborPtr(), correct_skewness};
 }

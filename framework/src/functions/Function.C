@@ -199,25 +199,27 @@ FunctionTempl<T>::evaluate(const ElemArg & elem_arg, const unsigned int state) c
 
 template <typename T>
 typename FunctionTempl<T>::ValueType
-FunctionTempl<T>::evaluate(const ElemFromFaceArg & elem_from_face, const unsigned int state) const
-{
-  const auto * const elem = elem_from_face.elem;
-  const auto * const fi = elem_from_face.fi;
-  mooseAssert(fi, "We must have a non-null face information pointer");
-  return value(getTime(state), (elem == &fi->elem()) ? fi->elemCentroid() : fi->neighborCentroid());
-}
-
-template <typename T>
-typename FunctionTempl<T>::ValueType
 FunctionTempl<T>::evaluate(const FaceArg & face, const unsigned int state) const
 {
-  return value(getTime(state), face.fi->faceCentroid());
-}
-template <typename T>
-typename FunctionTempl<T>::ValueType
-FunctionTempl<T>::evaluate(const SingleSidedFaceArg & face, const unsigned int state) const
-{
-  return value(getTime(state), face.fi->faceCentroid());
+  if (face.face_side && face.fi->neighborPtr() &&
+      (face.fi->elem().subdomain_id() != face.fi->neighbor().subdomain_id()))
+  {
+    // Some users like to put discontinuities in their functions at subdomain changes in which case
+    // in order to always get the proper discontinuous effect we should evaluate ever so slightly
+    // off the face. Consider evaluation of: if(x < 0, -1, 1) if the face centroid is right at x ==
+    // 0 for example. The user likely doesn't want you to return 1 if they've asked for a 0-
+    // evaluation
+    //
+    // I can't quite tell but I think the tolerance for comparing coordinates (x, y, z, t) in
+    // fparser is ~1e-9 so we need to use something larger than that. The comparison is absolute
+    static constexpr Real offset_tolerance = 1e-8;
+    auto offset = offset_tolerance * face.fi->normal();
+    if (face.face_side == face.fi->elemPtr())
+      offset *= -1;
+    return value(getTime(state), face.fi->faceCentroid() + offset);
+  }
+  else
+    return value(getTime(state), face.fi->faceCentroid());
 }
 
 template <typename T>
@@ -258,26 +260,7 @@ FunctionTempl<T>::evaluateGradient(const ElemArg & elem_arg, const unsigned int 
 
 template <typename T>
 typename FunctionTempl<T>::GradientType
-FunctionTempl<T>::evaluateGradient(const ElemFromFaceArg & elem_from_face,
-                                   const unsigned int state) const
-{
-  const auto * const elem = elem_from_face.elem;
-  const auto * const fi = elem_from_face.fi;
-  mooseAssert(fi, "We must have a non-null face information pointer");
-  return gradient(getTime(state),
-                  (elem == &fi->elem()) ? fi->elemCentroid() : fi->neighborCentroid());
-}
-
-template <typename T>
-typename FunctionTempl<T>::GradientType
 FunctionTempl<T>::evaluateGradient(const FaceArg & face, const unsigned int state) const
-{
-  return gradient(getTime(state), face.fi->faceCentroid());
-}
-
-template <typename T>
-typename FunctionTempl<T>::GradientType
-FunctionTempl<T>::evaluateGradient(const SingleSidedFaceArg & face, const unsigned int state) const
 {
   return gradient(getTime(state), face.fi->faceCentroid());
 }
@@ -322,26 +305,7 @@ FunctionTempl<T>::evaluateDot(const ElemArg & elem_arg, const unsigned int state
 
 template <typename T>
 typename FunctionTempl<T>::DotType
-FunctionTempl<T>::evaluateDot(const ElemFromFaceArg & elem_from_face,
-                              const unsigned int state) const
-{
-  const auto * const elem = elem_from_face.elem;
-  const auto * const fi = elem_from_face.fi;
-  mooseAssert(fi, "We must have a non-null face information pointer");
-  return timeDerivative(getTime(state),
-                        (elem == &fi->elem()) ? fi->elemCentroid() : fi->neighborCentroid());
-}
-
-template <typename T>
-typename FunctionTempl<T>::DotType
 FunctionTempl<T>::evaluateDot(const FaceArg & face, const unsigned int state) const
-{
-  return timeDerivative(getTime(state), face.fi->faceCentroid());
-}
-
-template <typename T>
-typename FunctionTempl<T>::DotType
-FunctionTempl<T>::evaluateDot(const SingleSidedFaceArg & face, const unsigned int state) const
 {
   return timeDerivative(getTime(state), face.fi->faceCentroid());
 }

@@ -70,4 +70,68 @@
     ad_indexing_type = 'global'
     requirement = 'The system shall error if the user attempts to create a reconstructed field from a variable.'
   []
+  [automatic-jump-handling]
+    requirement = 'The system shall be able to automatically impose a change in pressure in line with the Bernoulli equation at porosity jumps in'
+    [1d]
+      type = CSVDiff
+      input = 'bernoulli-1d.i'
+      csvdiff = 'bernoulli-1d_out.csv'
+      detail = 'one dimension, using upwinding for advection and a Rhie-Chow interpolation of velocity'
+      ad_indexing_type = 'global'
+    []
+    [1d-average]
+      type = CSVDiff
+      input = 'bernoulli-1d.i'
+      csvdiff = 'bernoulli-1d_out.csv'
+      detail = 'one dimension, using central differencing for advection and velocity'
+      ad_indexing_type = 'global'
+      cli_args = "advected_interp_method='average' velocity_interp_method='average'"
+      prereq = 'automatic-jump-handling/1d'
+    []
+    [2d]
+      type = CSVDiff
+      input = 'bernoulli-2d.i'
+      csvdiff = 'bernoulli-2d_out.csv'
+      detail = 'two dimensions, using upwinding for advection and a Rhie-Chow interpolation of velocity'
+      ad_indexing_type = 'global'
+    []
+    [2d-average]
+      type = CSVDiff
+      input = 'bernoulli-2d.i'
+      csvdiff = 'bernoulli-2d_out.csv'
+      detail = 'two dimensions, using central differencing for advection and velocity'
+      ad_indexing_type = 'global'
+      cli_args = "advected_interp_method='average' velocity_interp_method='average'"
+      prereq = 'automatic-jump-handling/2d'
+    []
+    [2d-action]
+      type = CSVDiff
+      input = 'bernoulli-2d-action.i'
+      csvdiff = 'bernoulli-2d-action_out.csv'
+      detail = 'two dimensions using compact action syntax, upwinding for advection, and a Rhie-Chow interpolation of velocity'
+      ad_indexing_type = 'global'
+    []
+  []
+  [has-porosity-jump-aux]
+    type = Exodiff
+    input = bernoulli-1d.i
+    exodiff = bernoulli-1d_out.e
+    ad_indexing_type = 'global'
+    requirement = 'The system shall be able to mark what elements have porosity jump faces using an auxiliary kernel.'
+    prereq = 'automatic-jump-handling/1d-average'
+  []
+  [bernoulli-with-parsed-function]
+    type = CSVDiff
+    input = bernoulli-1d-parsed-function.i
+    csvdiff = bernoulli-1d-parsed-function_out.csv
+    ad_indexing_type = 'global'
+    requirement = 'The system shall be able to recognize discontinuities in parsed functions at subdomain changes and produce the correct Bernoulli pressure drop as a consequence.'
+  []
+  [bernoulli-with-functor-material]
+    type = CSVDiff
+    input = bernoulli-1d-functor-material.i
+    csvdiff = bernoulli-1d-functor-material_out.csv
+    ad_indexing_type = 'global'
+    requirement = 'The system shall be able to recognize discontinuities in functor material properties and produce the correct Bernoulli pressure drop as a consequence.'
+  []
 []

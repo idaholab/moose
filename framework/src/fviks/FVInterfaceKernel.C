@@ -224,33 +224,34 @@ FVInterfaceKernel::computeJacobian(const FaceInfo &)
 }
 #endif
 
-Moose::ElemFromFaceArg
-FVInterfaceKernel::elemFromFace(const bool correct_skewness) const
+Moose::ElemArg
+FVInterfaceKernel::elemArg(const bool correct_skewness) const
 {
-  return {&_face_info->elem(), _face_info, correct_skewness, _face_info->elem().subdomain_id()};
+  return {_face_info->elemPtr(), correct_skewness};
 }
 
-Moose::ElemFromFaceArg
-FVInterfaceKernel::neighborFromFace(const bool correct_skewness) const
+Moose::ElemArg
+FVInterfaceKernel::neighborArg(const bool correct_skewness) const
 {
-  return {_face_info->neighborPtr(),
-          _face_info,
-          correct_skewness,
-          _face_info->neighborPtr()->subdomain_id()};
+  return {_face_info->neighborPtr(), correct_skewness};
 }
 
-Moose::SingleSidedFaceArg
-FVInterfaceKernel::singleSidedFaceArg(const MooseVariableFV<Real> & variable,
+Moose::FaceArg
+FVInterfaceKernel::singleSidedFaceArg(const MooseVariableFV<Real> & /*variable*/,
                                       const FaceInfo * fi,
                                       const Moose::FV::LimiterType limiter_type,
                                       const bool correct_skewness) const
 {
   if (!fi)
     fi = _face_info;
-  const bool use_elem = fi->faceType(variable.name()) == FaceInfo::VarFaceNeighbors::ELEM;
+  return makeFace(*fi, limiter_type, true, correct_skewness);
+}
 
-  if (use_elem)
-    return {fi, limiter_type, true, correct_skewness, fi->elem().subdomain_id()};
-  else
-    return {fi, limiter_type, true, correct_skewness, fi->neighborPtr()->subdomain_id()};
+bool
+FVInterfaceKernel::hasFaceSide(const FaceInfo &, bool) const
+{
+  // Our default interface kernel treats elem and neighbor sides equivalently so we will assume for
+  // now that we will happily consume functor evaluations on either side of a face and any
+  // interpolation between said evaluations
+  return true;
 }

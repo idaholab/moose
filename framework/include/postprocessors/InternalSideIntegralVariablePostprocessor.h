@@ -11,6 +11,7 @@
 
 #include "InternalSideIntegralPostprocessor.h"
 #include "MooseVariableInterface.h"
+#include "FaceArgInterface.h"
 
 /**
  * This postprocessor computes an integral on internal mesh sides of
@@ -20,12 +21,15 @@
  * class and overriding computeQpIntegral().
  */
 class InternalSideIntegralVariablePostprocessor : public InternalSideIntegralPostprocessor,
-                                                  public MooseVariableInterface<Real>
+                                                  public MooseVariableInterface<Real>,
+                                                  public FaceArgProducerInterface
 {
 public:
   static InputParameters validParams();
 
   InternalSideIntegralVariablePostprocessor(const InputParameters & parameters);
+
+  bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const override;
 
 protected:
   Real computeQpIntegral() override;

@@ -3389,7 +3389,6 @@ Assembly::processResidual(Real value, const dof_id_type dof, const std::set<TagI
   }
 }
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
 void
 Assembly::processResidualAndJacobian(const ADReal & residual,
                                      const dof_id_type row_index,
@@ -3405,7 +3404,6 @@ Assembly::processResidualAndJacobian(const ADReal & residual,
   if (computingJacobian())
     processJacobian(residual, row_index, matrix_tags);
 }
-#endif
 
 void
 Assembly::cacheResidualContribution(dof_id_type dof, Real value, TagID tag_id)

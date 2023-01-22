@@ -23,6 +23,12 @@ public:
   WCNSFVFluxBCBase(const InputParameters & params);
 
 protected:
+  /**
+   * check for improper use on an internal face, e.g. for specific postprocessors used if a user
+   * imposes this object on an internal face then the 'direction' parameter must be supplied
+   */
+  void checkForInternalDirection() const;
+
   /// Scaling factor
   const Real _scaling_factor;
 
@@ -46,3 +52,12 @@ protected:
   /// Flag to store if the flow direction is specified by the user
   const bool _direction_specified_by_user;
 };
+
+inline void
+WCNSFVFluxBCBase::checkForInternalDirection() const
+{
+  if (_face_info->neighborPtr() && !_direction_specified_by_user)
+    mooseError(
+        type(),
+        " can only be defined on an internal face if the 'direction' parameter is supplied!");
+}

@@ -129,7 +129,14 @@ std::vector<std::string> rsplit(const std::string & str,
  * Python like join function for strings.
  */
 template <typename T>
-std::string join(const T & strings, const std::string & delimiter);
+std::string
+join(const T & strings, const std::string & delimiter)
+{
+  std::ostringstream oss;
+  std::copy(
+      strings.begin(), strings.end(), infix_ostream_iterator<std::string>(oss, delimiter.c_str()));
+  return oss.str();
+}
 
 /**
  * Check the file size.
@@ -429,21 +436,51 @@ absoluteFuzzyLessThan(const T & var1,
  * @param tol The relative tolerance to be used
  * @return true if var1 and var2 are equal within relative tol
  */
-template <typename T,
-          typename T2,
-          typename T3 = T,
-          typename std::enable_if<ScalarTraits<T>::value && ScalarTraits<T2>::value &&
-                                      ScalarTraits<T3>::value,
-                                  int>::type = 0>
+template <typename T, typename T2, typename T3 = Real>
 bool
 relativeFuzzyEqual(const T & var1,
                    const T2 & var2,
                    const T3 & tol = libMesh::TOLERANCE * libMesh::TOLERANCE)
 {
-  return (absoluteFuzzyEqual(
-      var1,
-      var2,
-      tol * (std::abs(MetaPhysicL::raw_value(var1)) + std::abs(MetaPhysicL::raw_value(var2)))));
+  if constexpr (libMesh::ScalarTraits<T>::value ||
+                libMesh::TensorTools::MathWrapperTraits<T>::value)
+  {
+    static_assert(libMesh::TensorTools::TensorTraits<T>::rank ==
+                      libMesh::TensorTools::TensorTraits<T2>::rank,
+                  "Mathematical types must be same for arguments to relativelyFuzzEqual");
+    if constexpr (libMesh::TensorTools::TensorTraits<T>::rank == 0)
+      return absoluteFuzzyEqual(
+          var1,
+          var2,
+          tol * (std::abs(MetaPhysicL::raw_value(var1)) + std::abs(MetaPhysicL::raw_value(var2))));
+    else if constexpr (libMesh::TensorTools::TensorTraits<T>::rank == 1)
+    {
+      for (const auto i : make_range(Moose::dim))
+        if (!relativeFuzzyEqual(var1(i), var2(i), tol))
+          return false;
+
+      return true;
+    }
+    else if constexpr (libMesh::TensorTools::TensorTraits<T>::rank == 2)
+    {
+      for (const auto i : make_range(Moose::dim))
+        for (const auto j : make_range(Moose::dim))
+          if (!relativeFuzzyEqual(var1(i, j), var2(i, j), tol))
+            return false;
+
+      return true;
+    }
+  }
+  else
+  {
+    // We dare to dream
+    mooseAssert(var1.size() == var2.size(), "These must be the same size");
+    for (const auto i : index_range(var1))
+      if (!relativeFuzzyEqual(var1(i), var2(i), tol))
+        return false;
+
+    return true;
+  }
 }
 
 /**

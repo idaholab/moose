@@ -11,6 +11,7 @@
 
 #include "InterfaceIntegralPostprocessor.h"
 #include "MooseVariableInterface.h"
+#include "FaceArgInterface.h"
 
 /**
  * This postprocessor computes a weighted (by area) integral of the specified variable.
@@ -19,12 +20,15 @@
  * class and overriding computeQpIntegral().
  */
 class InterfaceIntegralVariableValuePostprocessor : public InterfaceIntegralPostprocessor,
-                                                    public MooseVariableInterface<Real>
+                                                    public MooseVariableInterface<Real>,
+                                                    public FaceArgProducerInterface
 {
 public:
   static InputParameters validParams();
 
   InterfaceIntegralVariableValuePostprocessor(const InputParameters & parameters);
+
+  bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const override;
 
 protected:
   /// Holds the solution at current quadrature points
