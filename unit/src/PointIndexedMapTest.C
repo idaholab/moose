@@ -82,6 +82,8 @@ TEST(PointIndexedMap, find)
       EXPECT_TRUE(map.find(p0 + Point(0, -eps, -eps)) != map.end());
     }
     if (p0(2) != 0)
+    {
       EXPECT_TRUE(map.find(p0 + Point(0, 0, 2e-12 * p0(2))) == map.end());
+    }
   }
 }
