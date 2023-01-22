@@ -60,9 +60,11 @@ public:
   template <typename R, typename J>
   void nonlinear(RealVectorValue & guess, R computeResidual, J computeJacobian);
 
-  template <typename V, typename B>
-  bool condition(
-      V & guess, B ci_lower_bounds, B ci_upper_bounds, unsigned int _num_eta, unsigned int _num_c);
+  enum damped_newton
+  {
+    DAMP_ONCE,
+    DAMP_LOOP
+  };
   template <typename V, typename T, typename B>
   void nonlinear(V & guess,
                  T compute,
@@ -71,7 +73,7 @@ public:
                  B ci_upper_bounds,
                  unsigned int _num_eta,
                  unsigned int _num_c,
-                 std::string _damped_newton);
+                 unsigned int damped_newton);
 
   ///@{ default values
   static Real relativeToleranceDefault() { return 1e-8; }
@@ -368,33 +370,6 @@ NestedSolve::nonlinear(V & guess, T compute)
     _state = State::NOT_CONVERGED;
 }
 
-template <typename V, typename B>
-bool
-NestedSolve::condition(
-    V & guess, B ci_lower_bounds, B ci_upper_bounds, unsigned int _num_eta, unsigned int _num_c)
-{
-  // check independent ci
-  for (unsigned int i = 0; i < _num_eta * _num_c; ++i)
-  {
-    if (guess[i] < ci_lower_bounds[i] || guess[i] == ci_lower_bounds[i] ||
-        guess[i] > ci_upper_bounds[i] || guess[i] == ci_upper_bounds[i])
-      return false;
-  }
-
-  // check dependent ci
-  for (unsigned int m = 0; m < _num_eta; ++m)
-  {
-    Real _sum_independent = 0;
-    for (unsigned int n = 0; n < _num_c; ++n)
-      _sum_independent += guess[n * _num_eta + m];
-
-    if (_sum_independent > 1 || _sum_independent == 1 || _sum_independent < 0 ||
-        _sum_independent == 0)
-      return false;
-  }
-  return true;
-}
-
 template <typename V, typename T, typename B>
 void
 NestedSolve::nonlinear(V & guess,
@@ -404,11 +379,12 @@ NestedSolve::nonlinear(V & guess,
                        B ci_upper_bounds,
                        unsigned int _num_eta,
                        unsigned int _num_c,
-                       std::string _damped_newton)
+                       unsigned int damped_newton)
 {
   V delta;
   V residual;
   V guess_prev;
+  // bool condition;
   CorrespondingJacobian<V> jacobian;
   sizeItems(guess, residual, jacobian);
 
@@ -453,27 +429,53 @@ NestedSolve::nonlinear(V & guess,
     guess_prev = guess;
     guess = guess_prev - delta;
 
-    if (!condition(guess, ci_lower_bounds, ci_upper_bounds, _num_eta, _num_c))
+    // lambda to check if ci is within bounds
+    auto condition =
+        [&]()
     {
-      // damp once
-      if (_damped_newton == "damp_once")
+      // check independent ci
+      for (unsigned int i = 0; i < _num_eta * _num_c; ++i)
       {
-        Real _alpha = 1;
-        _alpha = _alpha * _damping_factor;
-        guess = guess_prev - _alpha * delta;
+        if (guess[i] < ci_lower_bounds[i] || guess[i] == ci_lower_bounds[i] ||
+            guess[i] > ci_upper_bounds[i] || guess[i] == ci_upper_bounds[i])
+          return false;
       }
-      // damp till ci is within bounds
-      else if (_damped_newton == "damp_loop")
+
+      // check dependent ci
+      for (unsigned int m = 0; m < _num_eta; ++m)
       {
-        Real _alpha = 1;
-        while (!condition(guess, ci_lower_bounds, ci_upper_bounds, _num_eta, _num_c))
-        {
+        Real _sum_independent = 0;
+        for (unsigned int n = 0; n < _num_c; ++n)
+          _sum_independent += guess[n * _num_eta + m];
+
+        if (_sum_independent > 1 || _sum_independent == 1 || _sum_independent < 0 ||
+            _sum_independent == 0)
+          return false;
+      }
+      return true;
+    };
+
+    if (!condition())
+    {
+      Real _alpha = 1;
+      switch (damped_newton)
+      {
+        case DAMP_ONCE:
           _alpha = _alpha * _damping_factor;
           guess = guess_prev - _alpha * delta;
-        }
+          break;
+
+        case DAMP_LOOP:
+          while (!condition())
+          {
+            _alpha = _alpha * _damping_factor;
+            guess = guess_prev - _alpha * delta;
+          }
+          break;
+
+        default:
+          mooseError("Damped_newton does not match the given options.");
       }
-      else
-        mooseError("Internal error");
     }
 
     _n_iterations++;
