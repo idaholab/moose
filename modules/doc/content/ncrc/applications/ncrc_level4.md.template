@@ -5,7 +5,6 @@ For existing users who access code via [hpcgitlab.hpc.inl.gov](https://hpcgitlab
 please see the [Transitional Guide](https://github.com/idaholab/moose/wiki/NCRC-github.inl.gov-transition-guide)
 for help on accessing the new home for [NCRC/{{ApplicationName}}](https://github.inl.gov/ncrc/{{binary}}). New users can safely ignore this notice.
 
-
 Source code for {{ApplicationName}} is hosted at [https://github.inl.gov/ncrc/{{binary}}](https://github.inl.gov/ncrc/{{binary}})
 
 While logged in to [ncrc/{{binary}}](https://github.inl.gov/ncrc/{{binary}}) you should at
@@ -40,7 +39,6 @@ The gist of creating a key is as follows:
 
 Entering a passphrase (or a blank response) is your preference. You'll need to enter this passphrase
 each time you perform a push/pull operation with your fork.
-
 
 With your key created, and the terminal window still open, copy the contents of your public key:
 
