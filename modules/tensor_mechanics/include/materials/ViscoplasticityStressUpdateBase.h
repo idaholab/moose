@@ -118,7 +118,9 @@ protected:
   using ViscoplasticityStressUpdateBaseTempl<is_ad>::_porosity_old;                                \
   using ViscoplasticityStressUpdateBaseTempl<is_ad>::updateIntermediatePorosity;                   \
   using ViscoplasticityStressUpdateBaseTempl<is_ad>::computeStressFinalize;                        \
-  using ViscoplasticityStressUpdateBaseTempl<is_ad>::computeStressInitialize;
+  using ViscoplasticityStressUpdateBaseTempl<is_ad>::computeStressInitialize;                      \
+  using ViscoplasticityStressUpdateBaseTempl<is_ad>::computeResidual;                              \
+  using ViscoplasticityStressUpdateBaseTempl<is_ad>::computeDerivative
 
 typedef ViscoplasticityStressUpdateBaseTempl<false> ViscoplasticityStressUpdateBase;
 typedef ViscoplasticityStressUpdateBaseTempl<true> ADViscoplasticityStressUpdateBase;
