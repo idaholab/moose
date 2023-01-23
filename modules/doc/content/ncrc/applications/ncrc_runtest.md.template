@@ -2,13 +2,13 @@
 
 With {{ApplicationName}} built, we can now run tests to verify a working binary (and environment).
 
-- +Personal Machine+:
+- If +Personal Machine+:
 
   ```bash
   mamba activate moose   # a reminder to have this active
   ```
 
-- +[!ac](INL) [!ac](HPC) Sawtooth or Lemhi+ (required each time you log in):
+- If +[!ac](INL) [!ac](HPC) Sawtooth or Lemhi+ (required each time you log in):
 
   ```bash
   module load use.moose moose-dev   # a reminder to have these loaded
