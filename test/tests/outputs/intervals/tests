@@ -2,7 +2,6 @@
   issues = '#1927 #23212'
   design = 'syntax/Outputs/index.md'
   [time_step]
-    #
     type = 'Exodiff'
     input = 'intervals.i'
     exodiff = 'intervals_out.e'
@@ -48,7 +47,6 @@
                   "synchronization times specified."
   []
   [minimum_time_interval]
-    #
     type = 'CSVDiff'
     input = 'minimum_time_interval.i'
     csvdiff = 'minimum_time_interval_out.csv'

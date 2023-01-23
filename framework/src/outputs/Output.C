@@ -221,7 +221,7 @@ Output::onInterval()
     output = true;
 
   // check if enough time has passed between outputs
-  if (_time > _last_output_time && _last_output_time + _minimum_time_interval > _time)
+  if (_time > _last_output_time && _last_output_time + _minimum_time_interval > _time + _t_tol)
     return false;
 
   // Return the output status
