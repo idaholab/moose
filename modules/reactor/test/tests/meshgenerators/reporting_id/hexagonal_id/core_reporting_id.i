@@ -20,7 +20,7 @@
     polygon_size = 0.5
   []
   [assembly1]
-    type = HexIDPatternedMeshGenerator
+    type = PatternedHexMeshGenerator
     inputs = 'pin1 pin2'
     pattern_boundary = hexagon
     pattern = '  1 0 1;
@@ -35,7 +35,7 @@
     assign_type = 'cell'
   []
   [assembly2]
-    type = HexIDPatternedMeshGenerator
+    type = PatternedHexMeshGenerator
     inputs = 'pin1 pin2'
     pattern_boundary = hexagon
     pattern = '  0 0 0;
@@ -50,7 +50,7 @@
     assign_type = 'cell'
   []
   [core]
-    type = HexIDPatternedMeshGenerator
+    type = PatternedHexMeshGenerator
     inputs = 'assembly1 assembly2'
     pattern_boundary = none
     pattern = '1 1;

@@ -13,7 +13,7 @@
   []
 
   [core]
-    type = HexIDPatternedMeshGenerator
+    type = PatternedHexMeshGenerator
     inputs = 'assembly dummy'
     pattern_boundary = none
     pattern = '  1 0 1;
