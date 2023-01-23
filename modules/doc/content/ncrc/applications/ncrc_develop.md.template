@@ -153,7 +153,7 @@ make clobberall
 make -j 6
 ```
 
-`make clobberall` deletes the stale oject/library files left behind from a previous build. While not
+`make clobberall` deletes the stale object/library files left behind from a previous build. While not
 always necessary, please get into the habit of performing this operation before running `make`.
 
 !include ncrc/applications/ncrc_runtest_{{ApplicationLower}}.md
