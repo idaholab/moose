@@ -1,16 +1,16 @@
 [Mesh]
   [pcg1]
     type = ParsedCurveGenerator
-    x_formulus = 't'
-    y_formulus = 'log10(1+9*t)'
-    critical_t_series = '0 1.5'
+    x_formula = 't'
+    y_formula = 'log10(1+9*t)'
+    section_bounding_t_values = '0 1.5'
     nums_segments = 7
   []
   [pcg2]
     type = ParsedCurveGenerator
-    x_formulus = 'cos(t)+1.0'
-    y_formulus = 'sin(t)'
-    critical_t_series = '${fparse -pi/2.0} ${fparse 0.0}'
+    x_formula = 'cos(t)+1.0'
+    y_formula = 'sin(t)'
+    section_bounding_t_values = '${fparse -pi/2.0} ${fparse 0.0}'
     nums_segments = 5
   []
   [fbcg]

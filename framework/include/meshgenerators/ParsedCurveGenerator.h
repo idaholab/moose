@@ -52,14 +52,20 @@ protected:
   const std::string _function_y;
   /// function expression for z(t)
   const std::string _function_z;
-  /// numbers of side segments of each section defined by critical_t_series
+  /// numbers of side segments of each section defined by section_bounding_t_values
   const std::vector<unsigned int> _nums_segments;
   /// critical t values that define the sections of the curve
-  const std::vector<Real> _critical_t_series;
+  const std::vector<Real> _section_bounding_t_values;
   /// whether the curve is a closed loop or not
   const bool _is_closed_loop;
+  /// the point-to-point distance tolerance that is used to determine whether the two points are overlapped.
+  const Real _point_overlapping_tolerance;
+  /// Number of segments of the curve section that is generated to forcefully close the loop.
+  const unsigned int _forced_closing_num_segments;
   /// Oversampling factor to help make node distance nearly uniform
   const Real _oversample_factor;
+  /// A factor used to calculate the maximum oversampling points number in each section
+  const unsigned int _max_oversample_number_factor;
   /// t values that are sampled for curve points
   std::vector<Real> _t_space;
   /// cumulative distances of the curve points from the starting ppint
