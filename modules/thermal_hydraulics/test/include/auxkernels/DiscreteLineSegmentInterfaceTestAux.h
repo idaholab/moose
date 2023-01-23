@@ -23,6 +23,9 @@ public:
 protected:
   virtual Real computeValue() override;
 
+  /// Which interface to test
+  const MooseEnum & _test_type;
+
 public:
   static InputParameters validParams();
 };
