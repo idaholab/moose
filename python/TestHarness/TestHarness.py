@@ -923,28 +923,28 @@ class TestHarness:
         # Create the scheduler
         self.scheduler = self.factory.create(scheduler_plugin, self, plugin_params)
 
-        ## Save executable-under-test name to self.executable
+        # Save executable-under-test name to self.executable
         exec_suffix = 'Windows' if platform.system() == 'Windows' else ''
         self.executable = app_name + '-' + self.options.method + exec_suffix
+
         # if the executable has a slash - assume it is a file path
         if '/' in app_name:
             self.executable = os.path.abspath(self.executable)
         # look for executable in PATH - if not there, check other places.
-        elif shutil.which(self.executable) is None:
-            if os.path.exists(os.getcwd() + '/' + self.executable):
-                # it's in the current working directory
-                self.executable = os.getcwd() + '/' + self.executable
-            elif os.path.exists(os.path.join(self._rootdir, self.executable)):
-                # it's in the testroot file's directory
-                self.executable = self.executable
-                # we may be hopping around between multiple (module)
-                # subdirectories of tests - so the executable needs to be an
-                # absolute path.
-                self.executable = os.path.abspath(os.path.join(self._rootdir, self.executable))
-            else:
-                # it's (hopefully) in an installed location
-                mydir = os.path.dirname(os.path.realpath(__file__))
-                self.executable = os.path.join(mydir, '../../../..', 'bin', self.executable)
+        elif os.path.exists(os.path.join(os.getcwd(), self.executable)):
+            # it's in the current working directory
+            self.executable = os.getcwd() + '/' + self.executable
+        elif os.path.exists(os.path.join(self._rootdir, self.executable)):
+            # it's in the testroot file's directory
+            self.executable = self.executable
+            # we may be hopping around between multiple (module)
+            # subdirectories of tests - so the executable needs to be an
+            # absolute path.
+            self.executable = os.path.abspath(os.path.join(self._rootdir, self.executable))
+        else:
+            # it's (hopefully) in an installed location
+            mydir = os.path.dirname(os.path.realpath(__file__))
+            self.executable = os.path.join(mydir, '../../../..', 'bin', self.executable)
 
         # Save the output dir since the current working directory changes during tests
         self.output_dir = os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), self.options.output_dir)
