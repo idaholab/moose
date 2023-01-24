@@ -368,21 +368,9 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
     }
   }
 
-  // Pass mesh meta-data from subgenerator to this MeshGenerator
+  // Pass mesh meta-data defined in subgenerator constructor to this MeshGenerator
   if (hasMeshProperty("pitch_meta", name() + "_2D"))
     declareMeshProperty("pitch_meta", getMeshProperty<Real>("pitch_meta", name() + "_2D"));
-  if (hasMeshProperty("background_intervals_meta", name() + "_2D"))
-    declareMeshProperty("background_intervals_meta",
-                        getMeshProperty<unsigned int>("background_intervals_meta", name() + "_2D"));
-  if (hasMeshProperty("node_id_background_meta", name() + "_2D"))
-    declareMeshProperty("node_id_background_meta",
-                        getMeshProperty<unsigned int>("node_id_background_meta", name() + "_2D"));
-  if (hasMeshProperty("pattern_pitch_meta", name() + "_2D"))
-    declareMeshProperty("pattern_pitch_meta",
-                        getMeshProperty<Real>("pattern_pitch_meta", name() + "_2D"));
-  if (hasMeshProperty("azimuthal_angle_meta", name() + "_2D"))
-    declareMeshProperty("azimuthal_angle_meta",
-                        getMeshProperty<std::vector<Real>>("azimuthal_angle_meta", name() + "_2D"));
   if (hasMeshProperty("num_sectors_per_side_meta", name() + "_2D"))
     declareMeshProperty(
         "num_sectors_per_side_meta",
@@ -390,6 +378,15 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
   if (hasMeshProperty("max_radius_meta", name() + "_2D"))
     declareMeshProperty("max_radius_meta",
                         getMeshProperty<Real>("max_radius_meta", name() + "_2D"));
+  if (hasMeshProperty("background_intervals_meta", name() + "_2D"))
+    declareMeshProperty("background_intervals_meta",
+                        getMeshProperty<unsigned int>("background_intervals_meta", name() + "_2D"));
+  if (hasMeshProperty("node_id_background_meta", name() + "_2D"))
+    declareMeshProperty("node_id_background_meta",
+                        getMeshProperty<dof_id_type>("node_id_background_meta", name() + "_2D"));
+  if (hasMeshProperty("pattern_pitch_meta", name() + "_2D"))
+    declareMeshProperty("pattern_pitch_meta",
+                        getMeshProperty<Real>("pattern_pitch_meta", name() + "_2D"));
 
   // Store pin region ids and block names for id swap after extrusion if needed
   // by future mesh generators
@@ -478,6 +475,26 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
 std::unique_ptr<MeshBase>
 PinMeshGenerator::generate()
 {
+  // Update metadata at this point since values for these metadata only get set by PCCMG
+  // at generate() stage
+  if (hasMeshProperty("max_radius_meta", name() + "_2D"))
+  {
+    const auto max_radius_meta = getMeshProperty<Real>("max_radius_meta", name() + "_2D");
+    setMeshProperty("max_radius_meta", max_radius_meta);
+  }
+  if (hasMeshProperty("background_intervals_meta", name() + "_2D"))
+  {
+    const auto background_intervals_meta =
+        getMeshProperty<unsigned int>("background_intervals_meta", name() + "_2D");
+    setMeshProperty("background_intervals_meta", background_intervals_meta);
+  }
+  if (hasMeshProperty("node_id_background_meta", name() + "_2D"))
+  {
+    const auto node_id_background_meta =
+        getMeshProperty<dof_id_type>("node_id_background_meta", name() + "_2D");
+    setMeshProperty("node_id_background_meta", node_id_background_meta);
+  }
+
   // This generate() method will be called once the subgenerators that we depend on
   // have been called. This is where we reassign subdomain ids/names according to what
   // the user has provided, and also where we set region_id, pin_type_id, and radial_id

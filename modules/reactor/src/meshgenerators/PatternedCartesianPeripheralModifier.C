@@ -22,19 +22,19 @@ PatternedCartesianPeripheralModifier::validParams()
 
 PatternedCartesianPeripheralModifier::PatternedCartesianPeripheralModifier(
     const InputParameters & parameters)
-  : PatternedPolygonPeripheralModifierBase(parameters),
-    _square_peripheral_trimmability(
-        declareMeshProperty<bool>("square_peripheral_trimmability", false)),
-    _square_center_trimmability(declareMeshProperty<bool>("square_center_trimmability", false))
+  : PatternedPolygonPeripheralModifierBase(parameters)
 {
   _num_sides = SQUARE_NUM_SIDES;
+  declareMeshProperty<bool>("square_peripheral_trimmability", false);
+  declareMeshProperty<bool>("square_center_trimmability", false);
 }
 
 std::unique_ptr<MeshBase>
 PatternedCartesianPeripheralModifier::generate()
 {
   if (hasMeshProperty("square_center_trimmability", _input_name))
-    _square_center_trimmability = getMeshProperty<bool>("square_center_trimmability", _input_name);
+    setMeshProperty("square_center_trimmability",
+                    getMeshProperty<bool>("square_center_trimmability", _input_name));
 
   // Check if the input mesh is compatible
   if (!getMeshProperty<bool>("peripheral_modifier_compatible", _input_name))

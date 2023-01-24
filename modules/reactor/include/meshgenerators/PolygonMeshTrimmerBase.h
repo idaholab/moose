@@ -50,12 +50,6 @@ protected:
   std::unique_ptr<MeshBase> & _input;
   /// Number of polygon sides
   unsigned int _num_sides;
-  /// MeshMetaData: updated pattern pitch after trimming
-  Real & _pattern_pitch_meta;
-  /// MeshMetaData: passing input pitch from input
-  Real & _input_pitch_meta;
-  /// MeshMetaData: passing control drum flag from input
-  bool & _is_control_drum_meta;
 
   /**
    * Performs center trimming on the input mesh.

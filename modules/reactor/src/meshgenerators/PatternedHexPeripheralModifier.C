@@ -21,20 +21,19 @@ PatternedHexPeripheralModifier::validParams()
 }
 
 PatternedHexPeripheralModifier::PatternedHexPeripheralModifier(const InputParameters & parameters)
-  : PatternedPolygonPeripheralModifierBase(parameters),
-    _hexagon_peripheral_trimmability(
-        declareMeshProperty<bool>("hexagon_peripheral_trimmability", false)),
-    _hexagon_center_trimmability(declareMeshProperty<bool>("hexagon_center_trimmability", false))
+  : PatternedPolygonPeripheralModifierBase(parameters)
 {
   _num_sides = HEXAGON_NUM_SIDES;
+  declareMeshProperty<bool>("hexagon_peripheral_trimmability", false);
+  declareMeshProperty<bool>("hexagon_center_trimmability", false);
 }
 
 std::unique_ptr<MeshBase>
 PatternedHexPeripheralModifier::generate()
 {
   if (hasMeshProperty("hexagon_center_trimmability", _input_name))
-    _hexagon_center_trimmability =
-        getMeshProperty<bool>("hexagon_center_trimmability", _input_name);
+    setMeshProperty("hexagon_center_trimmability",
+                    getMeshProperty<bool>("hexagon_center_trimmability", _input_name));
 
   // Check if the input mesh is compatible
   if (!getMeshProperty<bool>("peripheral_modifier_compatible", _input_name))

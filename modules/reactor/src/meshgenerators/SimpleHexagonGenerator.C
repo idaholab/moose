@@ -63,18 +63,16 @@ SimpleHexagonGenerator::SimpleHexagonGenerator(const InputParameters & parameter
                               : 0),
     _external_boundary_name(isParamValid("external_boundary_name")
                                 ? getParam<std::string>("external_boundary_name")
-                                : std::string()),
-    _pitch_meta(declareMeshProperty<Real>("pitch_meta", 0.0)),
-    _background_intervals_meta(declareMeshProperty<unsigned int>("background_intervals_meta", 1)),
-    _node_id_background_meta(declareMeshProperty<unsigned int>("node_id_background_meta", 6)),
-    _max_radius_meta(declareMeshProperty<Real>("max_radius_meta", 0.0)),
-    _num_sectors_per_side_meta(declareMeshProperty<std::vector<unsigned int>>(
-        "num_sectors_per_side_meta", {1, 1, 1, 1, 1, 1}))
+                                : std::string())
 {
   _pitch = 2.0 * (_hexagon_size_style == PolygonSizeStyle::apothem
                       ? _hexagon_size
                       : _hexagon_size * std::cos(M_PI / (Real)HEXAGON_NUM_SIDES));
-  _pitch_meta = _pitch;
+  declareMeshProperty<unsigned int>("background_intervals_meta", 1);
+  declareMeshProperty<unsigned int>("node_id_background_meta", 6);
+  declareMeshProperty<Real>("max_radius_meta", 0.0);
+  declareMeshProperty<std::vector<unsigned int>>("num_sectors_per_side_meta", {1, 1, 1, 1, 1, 1});
+  declareMeshProperty<Real>("pitch_meta", _pitch);
 }
 
 std::unique_ptr<MeshBase>

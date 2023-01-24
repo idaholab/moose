@@ -51,12 +51,12 @@ AzimuthalBlockSplitGenerator::AzimuthalBlockSplitGenerator(const InputParameters
     _preserve_volumes(getParam<bool>("preserve_volumes")),
     _start_angle(getParam<Real>("start_angle") + 90.0),
     _angle_range(getParam<Real>("angle_range")),
-    _pattern_pitch_meta(declareMeshProperty<Real>("pattern_pitch_meta", 0.0)),
-    _is_control_drum_meta(declareMeshProperty<bool>("is_control_drum_meta", true)),
     _azimuthal_angle_meta(
         declareMeshProperty<std::vector<Real>>("azimuthal_angle_meta", std::vector<Real>())),
     _input(getMeshByName(_input_name))
 {
+  declareMeshProperty<Real>("pattern_pitch_meta", 0.0);
+  declareMeshProperty<bool>("is_control_drum_meta", true);
   if (!_new_block_names.empty() && _new_block_names.size() != _new_block_ids.size())
     paramError("new_block_names",
                "This parameter, if provided, must have the same size as new_block_ids.");
@@ -102,8 +102,9 @@ AzimuthalBlockSplitGenerator::generate()
   MeshTools::Modification::rotate(mesh, 90.0, 0.0, 0.0);
   _azimuthal_angle_meta = azimuthalAnglesCollector(mesh, -180.0, 180.0, ANGLE_DEGREE);
   // So that this class works for both derived classes of PolygonMeshGeneratorBase
-  _pattern_pitch_meta = std::max(getMeshProperty<Real>("pitch_meta", _input_name),
-                                 getMeshProperty<Real>("pattern_pitch_meta", _input_name));
+  auto pattern_pitch_meta = std::max(getMeshProperty<Real>("pitch_meta", _input_name),
+                                     getMeshProperty<Real>("pattern_pitch_meta", _input_name));
+  setMeshProperty("pattern_pitch_meta", pattern_pitch_meta);
 
   Real radiusCorrectionFactor_original =
       _preserve_volumes ? radiusCorrectionFactor(_azimuthal_angle_meta) : 1.0;

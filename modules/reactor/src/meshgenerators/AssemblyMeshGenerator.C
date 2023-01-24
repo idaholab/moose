@@ -309,29 +309,13 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
       _build_mesh =
           &addMeshSubgenerator("HexIDPatternedMeshGenerator", name() + "_pattern", params);
 
+      // Pass mesh meta-data defined in subgenerator constructor to this MeshGenerator
       if (hasMeshProperty("pitch_meta", name() + "_pattern"))
         declareMeshProperty("pitch_meta", getMeshProperty<Real>("pitch_meta", name() + "_pattern"));
-      if (hasMeshProperty("background_intervals_meta", name() + "_pattern"))
-        declareMeshProperty(
-            "background_intervals_meta",
-            getMeshProperty<unsigned int>("background_intervals_meta", name() + "_pattern"));
-      if (hasMeshProperty("node_id_background_meta", name() + "_pattern"))
-        declareMeshProperty(
-            "node_id_background_meta",
-            getMeshProperty<unsigned int>("node_id_background_meta", name() + "_pattern"));
-      if (hasMeshProperty("pattern_pitch_meta", name() + "_pattern"))
-        declareMeshProperty("pattern_pitch_meta", getReactorParam<Real>("assembly_pitch"));
-      if (hasMeshProperty("azimuthal_angle_meta", name() + "_pattern"))
-        declareMeshProperty(
-            "azimuthal_angle_meta",
-            getMeshProperty<std::vector<Real>>("azimuthal_angle_meta", name() + "_pattern"));
       if (hasMeshProperty("num_sectors_per_side_meta", name() + "_pattern"))
         declareMeshProperty("num_sectors_per_side_meta",
                             getMeshProperty<std::vector<unsigned int>>("num_sectors_per_side_meta",
                                                                        name() + "_pattern"));
-      if (hasMeshProperty("max_radius_meta", name() + "_pattern"))
-        declareMeshProperty("max_radius_meta",
-                            getMeshProperty<Real>("max_radius_meta", name() + "_pattern"));
       if (hasMeshProperty("is_control_drum_meta", name() + "_pattern"))
         declareMeshProperty("is_control_drum_meta",
                             getMeshProperty<bool>("is_control_drum_meta", name() + "_pattern"));
@@ -351,6 +335,9 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
         declareMeshProperty(
             "position_file_name",
             getMeshProperty<std::string>("position_file_name", name() + "_pattern"));
+      if (hasMeshProperty("pattern_pitch_meta", name() + "_pattern"))
+        declareMeshProperty("pattern_pitch_meta",
+                            getMeshProperty<Real>("pattern_pitch_meta", name() + "_pattern"));
 
       declareMeshProperty("background_region_ids", _background_region_id);
       declareMeshProperty("duct_region_ids", _duct_region_ids);
@@ -458,6 +445,15 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
 std::unique_ptr<MeshBase>
 AssemblyMeshGenerator::generate()
 {
+  // Update metadata at this point since values for these metadata only get set by PCCMG
+  // at generate() stage
+  if (hasMeshProperty("pattern_pitch_meta", name() + "_pattern"))
+  {
+    const auto pattern_pitch_meta =
+        getMeshProperty<Real>("pattern_pitch_meta", name() + "_pattern");
+    setMeshProperty("pattern_pitch_meta", pattern_pitch_meta);
+  }
+
   // This generate() method will be called once the subgenerators that we depend on are
   // called. This is where we reassign subdomain ids/name in case they were merged when
   // stitching pins into an assembly. This is also where we set region_id and

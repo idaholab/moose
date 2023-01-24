@@ -45,10 +45,6 @@ protected:
   const std::vector<std::string> _extra_id_names_to_modify;
   /// Customized values to be used to reassign the extra element integers in the transition layer
   const std::vector<dof_id_type> _new_extra_id_values_to_assign;
-  /// MeshMetaData of the assembly pitch size
-  Real & _pattern_pitch_meta;
-  /// MeshMetaData: whether the generated mesh is a control drum
-  const bool & _is_control_drum_meta;
   /// The main mesh used in this class
   std::unique_ptr<MeshBase> & _mesh;
   /// Boundary ID of the external boundary of the input mesh

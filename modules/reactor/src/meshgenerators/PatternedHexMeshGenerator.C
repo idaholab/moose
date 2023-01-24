@@ -146,24 +146,20 @@ PatternedHexMeshGenerator::PatternedHexMeshGenerator(const InputParameters & par
     _create_interface_boundaries(getParam<bool>("create_interface_boundaries")),
     _hexagon_size_style(
         getParam<MooseEnum>("hexagon_size_style").template getEnum<PolygonSizeStyle>()),
-    _deform_non_circular_region(getParam<bool>("deform_non_circular_region")),
-    _pattern_pitch_meta(declareMeshProperty("pattern_pitch_meta", 0.0)),
-    _input_pitch_meta(declareMeshProperty("input_pitch_meta", 0.0)),
-    _is_control_drum_meta(declareMeshProperty<bool>("is_control_drum_meta", false)),
-    _control_drum_positions(
-        declareMeshProperty<std::vector<Point>>("control_drum_positions", std::vector<Point>())),
-    _control_drum_angles(
-        declareMeshProperty<std::vector<Real>>("control_drum_angles", std::vector<Real>())),
-    _control_drums_azimuthal_meta(declareMeshProperty<std::vector<std::vector<Real>>>(
-        "control_drums_azimuthal_meta", std::vector<std::vector<Real>>())),
-    _position_file_name(declareMeshProperty<std::string>("position_file_name",
-                                                         getParam<std::string>("position_file"))),
-    _hexagon_peripheral_trimmability(
-        declareMeshProperty<bool>("hexagon_peripheral_trimmability", !_generate_core_metadata)),
-    _hexagon_center_trimmability(declareMeshProperty<bool>("hexagon_center_trimmability", true)),
-    _peripheral_modifier_compatible(
-        declareMeshProperty<bool>("peripheral_modifier_compatible", _pattern_boundary == "hexagon"))
+    _deform_non_circular_region(getParam<bool>("deform_non_circular_region"))
 {
+  declareMeshProperty("pattern_pitch_meta", 0.0);
+  declareMeshProperty("input_pitch_meta", 0.0);
+  declareMeshProperty<bool>("is_control_drum_meta", false);
+  declareMeshProperty<std::vector<Point>>("control_drum_positions", std::vector<Point>());
+  declareMeshProperty<std::vector<Real>>("control_drum_angles", std::vector<Real>());
+  declareMeshProperty<std::vector<std::vector<Real>>>("control_drums_azimuthal_meta",
+                                                      std::vector<std::vector<Real>>());
+  declareMeshProperty<std::string>("position_file_name", getParam<std::string>("position_file"));
+  declareMeshProperty<bool>("hexagon_peripheral_trimmability", !_generate_core_metadata);
+  declareMeshProperty<bool>("hexagon_center_trimmability", true);
+  declareMeshProperty<bool>("peripheral_modifier_compatible", _pattern_boundary == "hexagon");
+
   const unsigned int n_pattern_layers = _pattern.size();
   declareMeshProperty("pattern_size", n_pattern_layers);
   if (n_pattern_layers % 2 == 0)
@@ -301,7 +297,7 @@ PatternedHexMeshGenerator::generate()
     else
     {
       _pattern_pitch = pattern_pitch_array.front();
-      _input_pitch_meta = _pattern_pitch;
+      setMeshProperty("input_pitch_meta", _pattern_pitch);
     }
   }
   else
@@ -349,7 +345,7 @@ PatternedHexMeshGenerator::generate()
       mooseError("In PatternedHexMeshGenerator ",
                  _name,
                  ": pitch metadata values of all input mesh generators must be identical.");
-    _input_pitch_meta = pitch_array.front();
+    setMeshProperty("input_pitch_meta", pitch_array.front());
     if (*std::max_element(num_sectors_per_side_array.begin(), num_sectors_per_side_array.end()) !=
         *std::min_element(num_sectors_per_side_array.begin(), num_sectors_per_side_array.end()))
       mooseError(
@@ -409,7 +405,7 @@ PatternedHexMeshGenerator::generate()
     }
   }
 
-  _pattern_pitch_meta = _pattern_pitch;
+  setMeshProperty("pattern_pitch_meta", _pattern_pitch);
 
   int x_mov = 0;
 
@@ -710,13 +706,19 @@ PatternedHexMeshGenerator::generate()
                           i + 1)); // control drum index to help sort control_drum_id
     }
     std::sort(control_drum_tmp.begin(), control_drum_tmp.end());
+    std::vector<Point> control_drum_positions;
+    std::vector<Real> control_drum_angles;
+    std::vector<std::vector<Real>> control_drums_azimuthal_meta;
     for (unsigned int i = 0; i < control_drum_tmp.size(); ++i)
     {
-      _control_drum_positions.push_back(std::get<1>(control_drum_tmp[i]));
-      _control_drum_angles.push_back(std::get<0>(control_drum_tmp[i]));
-      _control_drums_azimuthal_meta.push_back(std::get<2>(control_drum_tmp[i]));
+      control_drum_positions.push_back(std::get<1>(control_drum_tmp[i]));
+      control_drum_angles.push_back(std::get<0>(control_drum_tmp[i]));
+      control_drums_azimuthal_meta.push_back(std::get<2>(control_drum_tmp[i]));
       control_drum_id_sorted.push_back(std::get<3>(control_drum_tmp[i]));
     }
+    setMeshProperty("control_drum_positions", control_drum_positions);
+    setMeshProperty("control_drum_angles", control_drum_angles);
+    setMeshProperty("control_drums_azimuthal_meta", control_drums_azimuthal_meta);
 
     if (_assign_control_drum_id)
     {
@@ -736,10 +738,10 @@ PatternedHexMeshGenerator::generate()
 
     if (_generate_control_drum_positions_file)
     {
-      std::ofstream pos_file(_position_file_name);
-      for (unsigned int i = 0; i < _control_drum_positions.size(); ++i)
-        pos_file << _control_drum_positions[i](0) << " " << _control_drum_positions[i](1)
-                 << " 0.0\n";
+      std::string position_file_name = getMeshProperty<std::string>("position_file_name", name());
+      std::ofstream pos_file(position_file_name);
+      for (unsigned int i = 0; i < control_drum_positions.size(); ++i)
+        pos_file << control_drum_positions[i](0) << " " << control_drum_positions[i](1) << " 0.0\n";
       pos_file.close();
     }
   }

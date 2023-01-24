@@ -345,22 +345,19 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
     _quad_center_elements(getParam<bool>("quad_center_elements")),
     _center_quad_factor(isParamValid("center_quad_factor") ? getParam<Real>("center_quad_factor")
                                                            : 0.0),
-    _flat_side_up(declareMeshProperty<bool>("flat_side_up", getParam<bool>("flat_side_up"))),
     _smoothing_max_it(getParam<unsigned int>("smoothing_max_it")),
     _sides_to_adapt(isParamValid("sides_to_adapt")
                         ? getParam<std::vector<unsigned int>>("sides_to_adapt")
                         : std::vector<unsigned int>()),
-    _pitch_meta(declareMeshProperty<Real>("pitch_meta", 0.0)),
-    _background_intervals_meta(declareMeshProperty<unsigned int>("background_intervals_meta", 0)),
     _node_id_background_meta(declareMeshProperty<dof_id_type>("node_id_background_meta", 0)),
-    _pattern_pitch_meta(declareMeshProperty<Real>("pattern_pitch_meta", 0.0)),
-    _azimuthal_angle_meta(
-        declareMeshProperty<std::vector<Real>>("azimuthal_angle_meta", std::vector<Real>())),
-    _is_control_drum_meta(declareMeshProperty<bool>("is_control_drum_meta", false)),
-    _max_radius_meta(declareMeshProperty<Real>("max_radius_meta", 0.0)),
-    _quad_center_block_id(declareMeshProperty<subdomain_id_type>(
-        "quad_center_block_id", libMesh::Elem::invalid_subdomain_id))
+    _is_control_drum_meta(declareMeshProperty<bool>("is_control_drum_meta", false))
 {
+  declareMeshProperty<bool>("flat_side_up", getParam<bool>("flat_side_up"));
+  declareMeshProperty<unsigned int>("background_intervals_meta", 0);
+  declareMeshProperty<Real>("pattern_pitch_meta", 0.0);
+  declareMeshProperty<std::vector<Real>>("azimuthal_angle_meta", std::vector<Real>());
+  declareMeshProperty<Real>("max_radius_meta", 0.0);
+
   // This error message is only reserved for future derived classes. Neither of the current derived
   // classes will trigger this error.
   if (!_sides_to_adapt.empty() && _num_sides != HEXAGON_NUM_SIDES && _num_sides != SQUARE_NUM_SIDES)
@@ -368,7 +365,7 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
   _pitch = 2.0 * (_polygon_size_style == PolygonSizeStyle::apothem
                       ? _polygon_size
                       : _polygon_size * std::cos(M_PI / Real(_num_sides)));
-  _pitch_meta = _pitch;
+  declareMeshProperty<Real>("pitch_meta", _pitch);
   if (!_create_interface_boundaries &&
       (_interface_boundary_names.size() > 0 || _interface_boundary_id_shift != 0))
     paramError("create_interface_boundaries",
@@ -403,8 +400,7 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
   for (auto it = _num_sectors_per_side.begin(); it != _num_sectors_per_side.end(); ++it)
     if (*it % 2 == 1)
       paramError("num_sectors_per_side", "This parameter must be even.");
-  _num_sectors_per_side_meta =
-      declareMeshProperty("num_sectors_per_side_meta", _num_sectors_per_side);
+  declareMeshProperty("num_sectors_per_side_meta", _num_sectors_per_side);
   // Rings related error messages
   if (_ring_radii.size() != _ring_intervals.size())
     paramError("ring_radii", "This parameter and ring_intervals must have the same length.");
@@ -581,8 +577,12 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
     paramError("center_quad_factor",
                "this parameter is only applicable if quad_center_elements is set true.");
   if (_quad_center_elements)
-    _quad_center_block_id =
-        _ring_block_ids.empty() ? _background_block_ids.front() : _ring_block_ids.front();
+    declareMeshProperty<subdomain_id_type>("quad_center_block_id",
+                                           _ring_block_ids.empty() ? _background_block_ids.front()
+                                                                   : _ring_block_ids.front());
+  else
+    declareMeshProperty<subdomain_id_type>("quad_center_block_id",
+                                           libMesh::Elem::invalid_subdomain_id);
 }
 
 std::unique_ptr<MeshBase>
@@ -662,7 +662,7 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
       paramError("ring_radii",
                  "Elements of this parameter must be smaller than polygon apothem (after volume "
                  "preserve correction if applicable).");
-    _max_radius_meta = ring_radii_corr.back();
+    setMeshProperty("max_radius_meta", ring_radii_corr.back());
   }
   // build the first slice of the polygon.
   auto mesh0 = buildSimpleSlice(ring_radii_corr,
@@ -735,8 +735,9 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
 
   if (!_is_general_polygon)
   {
-    _azimuthal_angle_meta = azimuthalAnglesCollector(*mesh0, -180.0, 180.0, ANGLE_DEGREE);
-    _pattern_pitch_meta = _pitch;
+    setMeshProperty("azimuthal_angle_meta",
+                    azimuthalAnglesCollector(*mesh0, -180.0, 180.0, ANGLE_DEGREE));
+    setMeshProperty("pattern_pitch_meta", _pitch);
   }
 
   // Move nodes on the external boundary for force uniform spacing.
@@ -787,7 +788,7 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
     MeshTools::Modification::rotate(*mesh0, (270.0 - 360.0 / (Real)_num_sides), 0.0, 0.0);
   }
 
-  _background_intervals_meta = _background_intervals;
+  setMeshProperty("background_intervals_meta", _background_intervals);
 
   if (!_has_ducts && _sides_to_adapt.empty())
   {
@@ -920,7 +921,8 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
                     getParam<MooseEnum>("ring_id_assign_type") == "ring_wise",
                     _quad_center_elements);
 
-  if (_flat_side_up)
+  bool flat_side_up = getMeshProperty<bool>("flat_side_up", name());
+  if (flat_side_up)
     MeshTools::Modification::rotate(*mesh0, 180.0 / (Real)_num_sides, 0.0, 0.0);
   return dynamic_pointer_cast<MeshBase>(mesh0);
 }

@@ -99,8 +99,6 @@ protected:
   const bool _quad_center_elements;
   /// A fractional radius factor used to determine the radial positions of transition nodes in the center region meshed by quad elements (default is 1.0 - 1.0/div_num)
   const Real _center_quad_factor;
-  /// Whether to rotate the generated polygon mesh to ensure that one flat side faces up
-  const bool & _flat_side_up;
   /// Maximum smooth iteration number
   const unsigned int _smoothing_max_it;
   /// Indices of the hexagon sides that need to adapt
@@ -109,26 +107,12 @@ protected:
   std::vector<std::unique_ptr<MeshBase> *> _input_ptrs;
   /// MeshMetaData: whether this produced mesh is a general polygon (or a hexagon)
   bool _is_general_polygon;
-  /// MeshMetaData: pitch size of the produced mesh
-  Real & _pitch_meta;
-  /// MeshMetaData: number of radial intervals of the background region
-  unsigned int & _background_intervals_meta;
   /// MeshMetaData: maximum node id of the background region
   dof_id_type & _node_id_background_meta;
-  /// Pitch size of the produced polygon
-  Real _pitch;
-  /// MeshMetaData: mesh sector number of each polygon side
-  std::vector<unsigned int> _num_sectors_per_side_meta;
-  /// Azimuthal angles of all radial nodes for volume preservation
-  std::vector<std::vector<Real>> _azimuthal_angles_array;
-  /// MeshMetaData: pitch size to be used when stitching with assembly meshes
-  Real & _pattern_pitch_meta;
-  /// MeshMetaData: azimuthal angles of all nodes
-  std::vector<Real> & _azimuthal_angle_meta;
   /// MeshMetaData: whether this produced mesh is a control drum
   bool & _is_control_drum_meta;
-  /// Metadata of the maximum radius of ring regions
-  Real & _max_radius_meta;
-  /// MeshMetaData: ID of the cental quad elements block if it exists
-  subdomain_id_type & _quad_center_block_id;
+  /// Pitch size of the produced polygon
+  Real _pitch;
+  /// Azimuthal angles of all radial nodes for volume preservation
+  std::vector<std::vector<Real>> _azimuthal_angles_array;
 };
