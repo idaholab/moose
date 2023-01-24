@@ -1,8 +1,7 @@
 # INL HPC Services
 
-[!ac](INL) builds and maintains a wide range of MOOSE-based applications as well as [!ac](HPC)
-support for these applications. The following links will aid researchers learning more about the
-available codes and how to utilize the [!ac](INL) resources to run applications.
+The [!ac](NCRC) manages a wide range of applications and access to those applications to meet the
+needs of researchers around the world.
 
 - [inl/applications.md]
 - [inl/hpc_ondemand.md]
@@ -10,7 +9,7 @@ available codes and how to utilize the [!ac](INL) resources to run applications.
 
 # Requesting Access id=access
 
-INL applications may be obtained by outside institutions and individuals for execution and/or
+NCRC applications may be obtained by outside institutions and individuals for execution and/or
 development. Currently, the following access methods are available for certain applications.
 
 - +HPC Binary Access+\\
@@ -28,5 +27,5 @@ development. Currently, the following access methods are available for certain a
   application and contributing directly to the project.
 
 
-To request access to an [!ac](INL) developed code, please follow the instructions
+To request access to an [!ac](NCRC) developed code, please follow the instructions
 on [INL's Nuclear Computational Resource Center](https://inl.gov/ncrc/) website.

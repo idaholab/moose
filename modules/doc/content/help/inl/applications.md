@@ -1,4 +1,4 @@
-# NCRC Distributed Applications
+# NCRC Applications
 
 [!ac](NCRC) distributes a number of [!ac](NEAMS)-developed applications. The following sections highlight some of the codes available through the NCRC.
 
