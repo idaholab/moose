@@ -20,6 +20,13 @@ public:
 
   static InputParameters validParams();
 
+  // The INSFV system relies on on-the-fly functor evaluation and does not need any pre-init'd data
+  void computeFaceValues(const FaceInfo &) override {}
+  void computeElemValues() override { _element_data->setGeometry(Moose::Volume); }
+  void computeElemValuesFace() override {}
+  void computeNeighborValuesFace() override {}
+  void computeNeighborValues() override {}
+
 protected:
   /**
    * Returns whether the passed-in \p FaceInfo corresponds to a fully-developed flow face
