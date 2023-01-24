@@ -15,7 +15,7 @@ information.
 
 Developers should read all sections; users can find [#KSB-parameters] described at the bottom.
 
-## Creation of Kernel Scalar Coupling Classes
+## Creation of Kernel Scalar Coupling Classes id=KSB-coupling
 
 Each `Kernel` object has a focus field variable or spatial variable; its job is to contribute to the
 residual as well as the row of the Jacobian matrix. Herein, as in the source code of `Kernels`, this
@@ -28,28 +28,32 @@ referred to as `_kappa` to the `Kernel` object so that all terms in the coupled 
 This philosophy is similar to how the lower dimensional variable `_lambda` is added to the element faces
 of `Kernel` and `IntegratedBC` objects associated with the hybrid finite element method (HFEM). Documentation for that approach can be found [HFEMDiffusion](source/dgkernels/HFEMDiffusion.md) and [HFEMDirichletBC](source/bcs/HFEMDirichletBC.md) along with the base classes `DGLowerDKernel` and `LowerDIntegratedBC`.
 
-In a `KernelScalarBase` subclass, a naming system for the quadrature point methods of the two
+In a `KernelScalarBase` subclass, a naming scheme is established for the quadrature point methods of the two
 variable types: methods contributing to the test function of `_kappa` have "Scalar" near the front
 and methods contributing to the trial function of scalar variables in the Jacobian have "Scalar"
 at the end. The `computeScalarQpResidual()` function +should+ be overridden (see [#KSB-parameters]
 for cases where the scalar should be suppressed). The `computeQpResidual()` function +must+ be
 overridden as usual for `Kernels`, although it may return zero.
 
-For non-AD objects, several
-contributions to the Jacobian matrix can be optionally overridden for use in
-Newton-type nonlinear solvers.
-Depending on the 'job' of this kernel scalar object, it may need to do just the row for the scalar,
-or it may also need to do the column of the Jacobian that couples the scalar and the spatial variable.
-mention jvar and svar loops. over all coupled objects
+For non-AD objects, several contributions to the Jacobian matrix can be optionally overridden for use in
+Newton-type nonlinear solvers. As mentioned later, the developer should choose and document which terms
+(rows) of the residual and terms (rows and columns) of the Jacobian will be attributed to an instance of
+the developed class. These choices can be motivated by whether some terms in the weak form can be or have
+already been implemented within other MOOSE classes.
 
-- `computeQpJacobian()`: Jacobian component d-_var-residual / d-_var
-- `computeQpOffDiagJacobian(jvar_num)`: off-diagonal Jacobian component d-_var-residual / d-jvar
-- `computeQpOffDiagJacobianScalar(svar_num)`: off-diagonal Jacobian component d-_var-residual / d-_svar
-- `computeScalarQpJacobian()`: off-diagonal Jacobian component d-_kappa-residual / d-_kappa
-- `computeScalarQpOffDiagJacobian()`: off-diagonal Jacobian component d-_kappa-residual / d-jvar
-- `computeScalarQpOffDiagJacobianScalar()`: off-diagonal Jacobian component d-_kappa-residual / d-svar
+- `computeQpJacobian()`: Jacobian component d-`_var`-residual / d-`_var`
+- `computeQpOffDiagJacobian(jvar_num)`: off-diagonal Jacobian component d-`_var`-residual / d-`jvar`
+- `computeQpOffDiagJacobianScalar(svar_num)`: off-diagonal Jacobian component d-`_var`-residual / d-`svar`
+- `computeScalarQpJacobian()`: Jacobian component d-`_kappa`-residual / d-`_kappa`
+- `computeScalarQpOffDiagJacobian()`: off-diagonal Jacobian component d-`_kappa`-residual / d-`jvar`
+- `computeScalarQpOffDiagJacobianScalar()`: off-diagonal Jacobian component d-`_kappa`-residual / d-`svar`
 
-Examples are shown below. Also there are some pre-compute functions.
+Examples of some of these methods are shown below in [#KSB-examples]. Loops over the coupled variables wrap around these quadrature loops. The integer for the spatial variable is `jvar_num` and the integer for the
+scalar variable is `svar_num`. 
+
+Also, there are some pre-calculation routines that are called
+within the quadrature loop once before the loop over spatial variable test and shape functions and 
+before the loop over scalar components. These methods are useful for material or stabilization calculations.
 
 - `initScalarQpResidual()`: evaluations depending on qp but independent of test functions
 - `initScalarQpJacobian(jvar_num)`: evaluations depending on qp but independent of test and shape functions
@@ -70,38 +74,72 @@ value. Examples of the source codes below demonstrate this fact.
 !alert warning title=AD global indexing required
 `ADKernelScalarBase` only works with MOOSE configured with global AD indexing (the default).
 
-Shorten this note, if I actually do the heavy testing; only the scalar-scalar term would benefit
-say that the user object version is probably faster because you're not accessing the global variables so often. But for objects that need the coupling, then this would be the easy way to go.
-maybe for timing comparison, I should give an option in that kernel thing to in the drive class that does that constraint, to not do the scalar variable residual. Then you can run it on a big problem and compare the timing of doing the user object and the assembly locally.
-and then you can let them discuss that, that would be my thought about asking if this is the most optimal way.
-I would need to add this test case as well.
-look and see if I can find what the heavy tests are and how you can skip that. So then we could have the timing test be stored in the framework.
+!alert note title=Parallelization of scalar contributions
+While these quadrature loops are convenient for implementation in a single object, the speed of 
+parallel execution may be slower due to the sequential assembly needed from each element assemblying
+to the same scalar variable `_kappa`. For greater speed, the developer may instead implement the
+terms for `computeScalarQpResidual()` and `computeScalarQpJacobian()` through a derived class of `ElementIntegralUserObject` as discussed at [ScalarKernels/index.md#couple-spatial].
 
-## Examples from Source Code
+## Examples from Source Code id=KSB-examples
 
-Reminder about _var and _kappa; maybe about svar and javr.
+As mentioned, the `computeScalarQpResidual` method +should+ be overridden for both flavors of kernels, non-AD
+and AD. As an example, consider the scalar residual weak form term of the 
+[`ScalarLMKernel`](/ScalarLMKernel.md) class:
 
-As mentioned, the `computeQpResidual` method must be overridden for both flavors of kernels non-AD
-and AD. The `computeQpResidual` method for the non-AD version, [`Diffusion`](/Diffusion.md), is
-provided in [non-ad-residual].
+\begin{equation}
+  F^{(\lambda)} \equiv \int_{\Omega} \phi^h \;\text{d}\Omega - V_0 = 0 \label{eq:eq1}
+\end{equation}
 
-!listing framework/src/kernels/Diffusion.C id=non-ad-residual
-         re=Real\nDiffusion::computeQpResidual.*?}
-         caption=The C++ weak-form residual statement of  as implemented in the Diffusion kernel.
+The `computeScalarQpResidual` method for the non-AD version of this class is
+provided in [scalar-kernel-non-ad-residual], where `_value/_pp_value` is equal to $V_0$.
 
-This object also overrides the `computeQpJacobian` method to define Jacobian term of [jacobian] as
-shown in [non-ad-jacobian].
+!listing framework/src/kernels/ScalarLMKernel.C id=scalar-kernel-non-ad-residual
+         re=Real\nScalarLMKernel::computeScalarQpResidual.*?}
+         caption=The C++ weak-form residual statement of [eq:eq1].
 
+Meanwhile, the contribution to the spatial variable residual of this object is associated with [eq:eq2]
+and implemented in [kernel-non-ad-residual] (note that the scalar variable `_kappa` is termed as 
+$\lambda^h$ in this weak form).
 
-!listing framework/src/kernels/Diffusion.C id=non-ad-jacobian
-         re=Real\nDiffusion::computeQpJacobian.*?}
-         caption=The C++ weak-form Jacobian statement of [jacobian] as implemented in the Diffusion kernel.
+\begin{equation}
+  F^{(\phi)}_i \equiv \lambda^h \int_{\Omega} \varphi_i \;\text{d}\Omega \label{eq:eq2}
+\end{equation}
 
-The AD version of this object, [`ADDiffusion`](/ADDiffusion.md), relies on an optimized kernel object, as such it overrides `precomputeQpResidual` as follows.
+!listing framework/src/kernels/ScalarLMKernel.C id=kernel-non-ad-residual
+         re=Real\nScalarLMKernel::computeQpResidual.*?}
+         caption=The C++ weak-form residual statement of [eq:eq2].
 
-!listing framework/src/kernels/ADDiffusion.C id=ad-residual
-         re=ADDiffusion::precomputeQpResidual.*?}
-         caption=The C++ pre-computed portions of the weak-form residual statement of  as implemented in the ADDiffusion kernel.
+This object also overrides the `computeScalarQpOffDiagJacobian` method to define the Jacobian term related
+to [eq:eq1] as shown in [non-ad-s-v-jacobian].
+
+!listing framework/src/kernels/ScalarLMKernel.C id=non-ad-s-v-jacobian
+         re=Real\nScalarLMKernel::computeScalarQpOffDiagJacobian.*?}
+         caption=The C++ weak-form Jacobian for d-`_kappa`-residual / d-`jvar`.
+
+Notice that there is a conditional to confirm that the coupled `jvar` is the focus variable `_var`, otherwise it returns zero.
+
+Similarly, it also overrides the `computeQpOffDiagJacobianScalar` method to define the Jacobian term related
+to [eq:eq2] as shown in [non-ad-v-s-jacobian].
+
+!listing framework/src/kernels/ScalarLMKernel.C id=non-ad-v-s-jacobian
+         re=Real\nScalarLMKernel::computeQpOffDiagJacobianScalar.*?}
+         caption=The C++ weak-form Jacobian for d-`_var`-residual / d-`svar`.
+
+Also notice the conditional that confirms the coupled `svar` is the focus scalar `_kappa`, otherwise it returns zero.
+
+The AD version of this object, [`ADScalarLMKernel`](/ADScalarLMKernel.md), only requires the residual
+implementation; as such it overrides `computeScalarQpResidual` and `computeQpResidual` as follows.
+
+!listing framework/src/kernels/ADScalarLMKernel.C id=ad-s-residual
+         re=ADScalarLMKernel::computeScalarQpResidual.*?}
+         caption=The C++ AD weak-form residual statement of [eq:eq1].
+
+!listing framework/src/kernels/ADScalarLMKernel.C id=kernel-ad-residual
+         re=ADScalarLMKernel::computeQpResidual.*?}
+         caption=The C++ AD weak-form residual statement of [eq:eq2].
+
+Depending upon the weak form and its coupling terms between spatial and scalar variables, not all of the
+methods listed in [#KSB-coupling] need to be overridden.
 
 The scalar augmentation system is designed such that multiple scalar variables can be coupled to
 an instance of the Kernel class, each focusing on one scalar from the list. This approach is similar
@@ -111,7 +149,7 @@ and off-diagonal Jacobian terms in a logical way and document this for the user.
 for decomposing the coupling terms and having multiple scalar variables are contained in the source files
 of the Tensor Mechanics module test directory located at `modules/tensor_mechanics/test/include/kernels/`.
 The input files `2dscalar.i` and `2dsole.i` are located in `modules/tensor_mechanics/test/tests/lagrangian/cartesian/total/homogenization/scalar_kernel/`. The comments within these source files should be consulted
-to visualize how the rows and columns of the relevant reseidual and Jacobian contributions are handled.
+to visualize how the rows and columns of the relevant residual and Jacobian contributions are handled.
 
 !alert note title=Displaced mesh features untested
 The displaced mesh features are not yet tested for the scalar augmentation system.
@@ -121,10 +159,10 @@ The displaced mesh features are not yet tested for the scalar augmentation syste
 There are two required parameters the user must supply for a kernel derived
 from `KernelScalarBase`:
 
-- `scalar_variable`: the primary scalar variable of the kernel, for which assembly
+- `scalar_variable`: the focus scalar variable of the kernel, for which assembly
   of the residual and Jacobian contributions will occur. It must be a `MooseScalarVariable`.
   This parameter may be renamed in a derived class to be more physically meaningful.
-- `coupled_scalar`: the name of the primary scalar variable, provided a second time
+- `coupled_scalar`: the name of the focus scalar variable, provided a second time
   to ensure that the dependency of the `Kernel` on this variable is detected. This
   parameter cannot be renamed.
 

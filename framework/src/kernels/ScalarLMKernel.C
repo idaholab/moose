@@ -74,9 +74,9 @@ ScalarLMKernel::computeScalarQpJacobian()
 }
 
 Real
-ScalarLMKernel::computeQpOffDiagJacobianScalar(unsigned int jvar)
+ScalarLMKernel::computeQpOffDiagJacobianScalar(unsigned int svar)
 {
-  if (jvar == _kappa_var)
+  if (svar == _kappa_var)
     return _test[_i][_qp];
   else
     return 0.;

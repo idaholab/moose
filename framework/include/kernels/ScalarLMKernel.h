@@ -57,7 +57,7 @@ protected:
   /**
    * Method for computing d-_var-residual / d-_kappa at quadrature points.
    */
-  virtual Real computeQpOffDiagJacobianScalar(const unsigned int jvar) override;
+  virtual Real computeQpOffDiagJacobianScalar(const unsigned int svar) override;
 
   /**
    * Method for computing d-_kappa-residual / d-_var at quadrature points.
