@@ -7,5 +7,6 @@
     requirement = 'The system shall be able to solve the Burgers equation in 1D using the FV method'
     design = 'fv_design.md'
     issues = '#14549'
+    ad_indexing_type = 'global'
   [../]
 []

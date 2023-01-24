@@ -24,13 +24,10 @@ FVTimeKernel::validParams()
   return params;
 }
 
-FVTimeKernel::FVTimeKernel(const InputParameters & parameters)
-  : FVElementalKernel(parameters), _u_dot(_var.adUDot())
-{
-}
+FVTimeKernel::FVTimeKernel(const InputParameters & parameters) : FVElementalKernel(parameters) {}
 
 ADReal
 FVTimeKernel::computeQpResidual()
 {
-  return _u_dot[_qp];
+  return _var.dot(makeElemArg(_current_elem));
 }

@@ -178,6 +178,13 @@ public:
    */
   bool isArray() const { return _is_array; }
 
+  /**
+   * Request that quadrature point data be pre-computed. This is always done for finite element
+   * variables, but finite volume variables may not pre-compute quadrature point data unless this
+   * API is called
+   */
+  virtual void requireQpComputations() {}
+
 protected:
   /// System this variable is part of
   SystemBase & _sys;

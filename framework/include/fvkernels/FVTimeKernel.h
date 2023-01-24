@@ -19,6 +19,4 @@ public:
 
 protected:
   ADReal computeQpResidual() override;
-
-  const ADVariableValue & _u_dot;
 };

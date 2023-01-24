@@ -26,6 +26,7 @@ public:
   void computeElemValuesFace() override;
   void computeNeighborValuesFace() override;
   void computeNeighborValues() override;
+  void requireQpComputations() override { _qp_calculations = true; }
 
 protected:
   /**
@@ -36,7 +37,7 @@ protected:
 private:
   /// Whether to pre-initialize variable data for use in traditional MOOSE quadrature point based
   /// objects
-  const bool _qp_calculations;
+  bool _qp_calculations;
 };
 
 inline void

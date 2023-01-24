@@ -246,10 +246,16 @@ Coupleable::getFEVar(const std::string & var_name, unsigned int comp) const
   return getFieldVar(var_name, comp);
 }
 
+MooseVariableFieldBase *
+Coupleable::getFieldVar(const std::string & var_name, unsigned int comp)
+{
+  return getVarHelper<MooseVariableFieldBase>(var_name, comp);
+}
+
 const MooseVariableFieldBase *
 Coupleable::getFieldVar(const std::string & var_name, unsigned int comp) const
 {
-  return getVarHelper<MooseVariableFieldBase>(var_name, comp);
+  return const_cast<Coupleable *>(this)->getFieldVar(var_name, comp);
 }
 
 MooseVariable *

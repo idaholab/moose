@@ -32,6 +32,7 @@ ElementIntegralVariablePostprocessor::ElementIntegralVariablePostprocessor(
     _grad_u(coupledGradient("variable"))
 {
   addMooseVariableDependency(&mooseVariableField());
+  mooseVariableField().requireQpComputations();
 }
 
 Real

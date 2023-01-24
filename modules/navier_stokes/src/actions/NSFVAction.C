@@ -336,9 +336,9 @@ NSFVAction::validParams()
       std::vector<MooseFunctorName>(),
       "Functor names for the sources used for the passive scalar fields.");
 
-  params.addParam<std::vector<CoupledName>>(
+  params.addParam<std::vector<std::vector<MooseFunctorName>>>(
       "passive_scalar_coupled_source",
-      std::vector<CoupledName>(),
+      std::vector<std::vector<MooseFunctorName>>(),
       "Coupled variable names for the sources used for the passive scalar fields. If multiple "
       "sources for each equation are specified, major (outer) ordering by equation.");
 
@@ -599,7 +599,7 @@ NSFVAction::NSFVAction(const InputParameters & parameters)
     _passive_scalar_schmidt_number(getParam<std::vector<Real>>("passive_scalar_schmidt_number")),
     _passive_scalar_source(getParam<std::vector<MooseFunctorName>>("passive_scalar_source")),
     _passive_scalar_coupled_source(
-        getParam<std::vector<CoupledName>>("passive_scalar_coupled_source")),
+        getParam<std::vector<std::vector<MooseFunctorName>>>("passive_scalar_coupled_source")),
     _passive_scalar_coupled_source_coeff(
         getParam<std::vector<std::vector<Real>>>("passive_scalar_coupled_source_coeff")),
     _passive_scalar_inlet_types(getParam<MultiMooseEnum>("passive_scalar_inlet_types")),
@@ -942,7 +942,7 @@ NSFVAction::addINSVariables()
           create_me = false;
 
       if (create_me)
-        _problem->addVariable("MooseVariableFVReal", _passive_scalar_names[name_i], params);
+        _problem->addVariable("INSFVScalarFieldVariable", _passive_scalar_names[name_i], params);
     }
   }
 }
@@ -1699,7 +1699,7 @@ NSFVAction::addScalarCoupledSourceKernels()
       InputParameters params = _factory.getValidParams(kernel_type);
       params.set<NonlinearVariableName>("variable") = _passive_scalar_names[name_eq];
       assignBlocks(params, _blocks);
-      params.set<CoupledName>("v") = {_passive_scalar_coupled_source[name_eq][i]};
+      params.set<MooseFunctorName>("v") = _passive_scalar_coupled_source[name_eq][i];
       params.set<Real>("coef") = _passive_scalar_coupled_source_coeff[name_eq][i];
 
       _problem->addFVKernel(kernel_type,
