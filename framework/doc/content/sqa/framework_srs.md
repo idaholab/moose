@@ -146,7 +146,7 @@ analytical solutions, the method of manufactured solutions, and convergence rate
 
 !template! item key=system-modes
 !! system-modes-begin
-[!ac](MOOSE) applications normally run in normal execution  mode when an input file is supplied. However
+[!ac](MOOSE) applications normally run in normal execution  mode when an input file is supplied. However,
 there are a few other modes that can be triggered with various command line flags as indicated here:
 
 | Command Line Flag | Description of mode |

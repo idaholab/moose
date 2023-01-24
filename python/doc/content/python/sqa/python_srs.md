@@ -94,6 +94,16 @@ The regression test suite will cover a sufficient amount of [!ac](MOOSE) Tools c
 utility functionality is maintained at all times. Known regressions will be recorded and tracked
 (see [#maintainability]) to an independent and satisfactory resolution.
 
+!template! item key=system-modes
+[!ac](MOOSE) Tools utilities are typically used within other scripts or codes to facilitate particular
+functionality. Some, like the [python/MooseDocs/index.md] take command line arguments and run in normal
+execution mode when a configuration file is supplied. However, due to the nature of [!ac](MOOSE) Tools
+being a collection of utilities, each of them have their own modes and states of operation. Thus, the
+best resource is their design and operation documentation, which can be shown below in [python-packages].
+
+!include python/index.md start=!table id=python-packages end=## Setup
+!template-end!
+
 !template! item key=physical-characteristics
 [!ac](MOOSE) Tools is software only with no associated physical media. See [#system-requirements] for
 a description of the minimum required hardware necessary for running a [!ac](MOOSE) Tools (as well as
