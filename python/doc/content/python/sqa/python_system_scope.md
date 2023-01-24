@@ -7,7 +7,7 @@ found on the [main documentation page](python/index.md).
 
 ### MooseDocs
 
-The [python/MooseDocs.md] facilitates documentation of the [!ac](MOOSE) and [!ac](MOOSE) Tools code
+The [python/MooseDocs/index.md] facilitates documentation of the [!ac](MOOSE) and [!ac](MOOSE) Tools code
 bases, as well as supports the [!ac](MOOSE) [!ac](SQA) practices. It contains many extensions for website
 rendering, navigation, linking, bibliographic references, and support for integration of code and input
 file snippets (among many more features), as well as capabilities for development of training and

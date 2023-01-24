@@ -5,11 +5,15 @@
 !template-end!
 
 !template! item key=system-purpose
-!include python/sqa/system_purpose.md
+!include python/sqa/python_system_purpose.md
 !template-end!
 
 !template! item key=system-scope
-!include python/sqa/system_scope.md
+!include python/sqa/python_system_scope.md
+!template-end!
+
+!template! item key=assumptions-and-dependencies
+!include python/sqa/python_assumptions_and_dependencies.md
 !template-end!
 
 !template! item key=pre-test

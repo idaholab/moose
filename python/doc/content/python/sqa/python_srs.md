@@ -1,11 +1,11 @@
 !template load file=sqa/srs.md.template project=MOOSE Tools
 
 !template! item key=system-purpose
-!include python/sqa/system_purpose.md
+!include python/sqa/python_system_purpose.md
 !template-end!
 
 !template! item key=system-scope
-!include python/sqa/system_scope.md
+!include python/sqa/python_system_scope.md
 !template-end!
 
 !template! item key=system-context
@@ -52,6 +52,10 @@ behaviors of each system and extension.
   and reporting bugs found and will typically make heavy use of the pre-built scripts, configuration
   files, and the MooseDown file format.
 
+!template-end!
+
+!template! item key=assumptions-and-dependencies
+!include python/sqa/python_assumptions_and_dependencies.md
 !template-end!
 
 !template! item key=definitions
