@@ -7,7 +7,7 @@ standard necessitates reviews and approvals for each release. This plan describe
 fulfills obligatory testing of the software and how the Project Lead can leverage this information
 when performing a release.
 
-{{project}} uses an agile development method that tests all proposed changes prior to integration into
+[!ac](MOOSE) Tools uses an agile development method that tests all proposed changes prior to integration into
 the main repository. This allows developers to exercise proposed changes as they are written and
 ensure that existing code is not impacted in adverse ways. Testing is an integral part of the normal
 development process, as such the necessary testing and reviews to satisfy the [!ac](NQA-1) standard
@@ -21,7 +21,7 @@ subject to a complete release review.
 !template-end!
 
 !template! item key=test-objectives
-All test types, as detailed in [#test-types], for {{project}} have a single objective: that when executed
+All test types, as detailed in [#test-types], for [!ac](MOOSE) Tools have a single objective: that when executed
 with the prescribed input the software shall produce the expected output. The type of test indicates
 the type of output that shall be considered, which can range from numerical verification to error
 testing. The overall object is to provide the necessary confidence that the software will perform as
@@ -35,29 +35,29 @@ controlled.
 !template-end!
 
 !template! item key=assumptions
-{{project}} are assumed to be command-line UNIX (POSIX) compatible Python executables and scripts run on
-the target system. The utilities within {{project}} are assumed to be stateless, reading all inputs from
+[!ac](MOOSE) Tools are assumed to be command-line UNIX (POSIX) compatible Python executables and scripts run on
+the target system. The utilities within [!ac](MOOSE) Tools are assumed to be stateless, reading all inputs from
 local or network mounted file-systems.  When deployed for parallel testing or use, standard [!ac](MPI)
-networking is expected to function among cluster compute nodes. {{project}} does not require any special
+networking is expected to function among cluster compute nodes. [!ac](MOOSE) Tools does not require any special
 file system (i.e., parallel file systems), however high performance file systems can improve performance
 of large utiliries and also the speed at which the automated testing system can launch, run, and inspect
 test results.
 !template-end!
 
 !template item key=constraints
-{{project}} are designed to be executed in-situ on the end-use machine. There is no requirement for separate
+[!ac](MOOSE) Tools are designed to be executed in-situ on the end-use machine. There is no requirement for separate
 testing or acceptance environments, as each independent invocation of a utility maintains its own
 environment. Acceptance testing may be performed at full-scale provided resources are available.
-Therefore, there are no constraints on testing of {{project}}.
+Therefore, there are no constraints on testing of [!ac](MOOSE) Tools.
 
 !template! item key=test-types
 It is possible to categorize test cases in many ways such as "system", "integration", "performance",
-or "acceptance" testing. {{project}} does not categorize test cases; they are simply defined and executed
+or "acceptance" testing. [!ac](MOOSE) Tools does not categorize test cases; they are simply defined and executed
 as a complete set and automatically executed as defined in [#test-automation].
 
 ### Required tests and test sequence
 
-All tests defined within {{project}} utilities must be executed and pass for all revisions and releases
+All tests defined within [!ac](MOOSE) Tools utilities must be executed and pass for all revisions and releases
 of the software. All test cases within one test specification (a "tests" file) are expected to run in
 the order defined. The specifications may be executed in any order.
 
@@ -69,12 +69,12 @@ to the extent necessary for the proposed change.
 
 ### Identification of the stages at which testing is required
 
-Testing for {{project}} shall include the levels of testing as defined in [fig:civet_flow]. The testing
+Testing for [!ac](MOOSE) Tools shall include the levels of testing as defined in [fig:civet_flow]. The testing
 is automated to the extent possible and the "Next" and "Devel" branch testing may be combined at the
 discretion of the application.
 
 !media civet_flow.png id=fig:civet_flow caption=Required stages for testing of [!ac](MOOSE), MOOSE-based
-                         applications, and {{project}}. The "Next" and "Devel" branch testing may be combined
+                         applications, and [!ac](MOOSE) Tools. The "Next" and "Devel" branch testing may be combined
                          at the discretion of the application.
 
 ### Requirement for testing logic branches
@@ -85,7 +85,7 @@ proposed change.
 
 ### Requirements for hardware integration
 
-The hardware and software configurations tested for {{project}} are at the discretion of the Project Lead.
+The hardware and software configurations tested for [!ac](MOOSE) Tools are at the discretion of the Project Lead.
 Upon release the hardware and software configurations utilized shall be included in the release.
 
 ### Anticipated output values
@@ -115,7 +115,7 @@ see [#test-automation] for details.
 !include framework_stp.md start=approval-requirements-begin end=approval-requirements-end
 
 !template! item key=test-iteration
-{{project}} utilities are stateless, deterministic software for a given input. Therefore, a single testing
+[!ac](MOOSE) Tools utilities are stateless, deterministic software for a given input. Therefore, a single testing
 iteration on each identified configuration is sufficient for completing the required tests necessary
 for deployment.
 !template-end!
@@ -129,7 +129,7 @@ all phases of MOOSE development from initial development, the change request pro
 and finally end-use in-situ testing. The Test Harness is even suitable for testing on large deployment
 clusters and supports the "PBS" queuing system.
 
-The Test Harness includes a suite of "Tester" types to enable complete testing of {{project}}. For each
+The Test Harness includes a suite of "Tester" types to enable complete testing of [!ac](MOOSE) Tools. For each
 of the types. The Test Harness is able to execute the application with a developer designed input and
 verify the correct result automatically. A complete list of the built-in Testers is included here:
 
@@ -137,7 +137,7 @@ verify the correct result automatically. A complete list of the built-in Testers
 !template-end!
 
 !template! item key=human-resources
-Testing for {{project}} utilities requires minimal human resources. A system engineer is required to ensure
+Testing for [!ac](MOOSE) Tools utilities requires minimal human resources. A system engineer is required to ensure
 the proper end-user environment is setup with proper system prerequisites. The Project Lead is needed
 to verify the automated test system operated correctly prior to release.
 !template-end!
@@ -148,14 +148,14 @@ supplied to the system engineer to prepare that environment. Alternatively, if r
 access is available to the end-user system, the system engineer may be granted proper
 permissions to assist in setting up the environment on the customer's system.
 
-If no specific customer is required for a specific release, {{project}} will be tested under the standard
+If no specific customer is required for a specific release, [!ac](MOOSE) Tools will be tested under the standard
 supported build system configuration(s). These systems are generally modern Linux and macOS distributions
 with recent versions of Python. Specific information on the tested environments for a release is stored
 in the release.
 !template-end!
 
 !template item key=services-applications
-{{project}} generally does not require any additional resources beyond the end-use system once the software
+[!ac](MOOSE) Tools generally does not require any additional resources beyond the end-use system once the software
 is installed. During installation either an Internet connection or media containing the software must
 be available to install the software. Internet connectivity is not required after installation on the
 end-use system.
