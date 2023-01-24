@@ -1,5 +1,13 @@
 !template load file=sqa/srs.md.template project=MOOSE Tools
 
+!template! item key=system-purpose
+!include python/sqa/system_purpose.md
+!template-end!
+
+!template! item key=system-scope
+!include python/sqa/system_scope.md
+!template-end!
+
 !template! item key=system-context
 [!ac](MOOSE) Tools utilities are command-line driven applications. This is typical for high-performance
 software that is designed to run across several nodes of a cluster system. As such, all of the usage

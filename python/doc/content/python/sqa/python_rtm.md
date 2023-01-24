@@ -4,6 +4,14 @@
 !include sqa/minimum_requirements.md
 !template-end!
 
+!template! item key=system-purpose
+!include python/sqa/system_purpose.md
+!template-end!
+
+!template! item key=system-scope
+!include python/sqa/system_scope.md
+!template-end!
+
 !template! item key=pre-test
 !include framework_rtm.md start=pre-test-begin end=pre-test-finish replace=['framework_stp.md', 'python_stp.md']
 !template-end!
