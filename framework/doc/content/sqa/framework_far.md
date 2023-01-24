@@ -26,8 +26,8 @@ This testing method is detailed in the [#failure-testing] section.
 
 ### Input File Failure
 
-The input file parsing [(see Parser)](Parser.md) automatically handles syntax mistakes are reports
-errors. For example, consider the following input file that contains a missing closing
+The input file parsing [(see Parser)](Parser.md) system automatically handles syntax mistakes and
+reports them as errors. For example, consider the following input file that contains a missing closing
 bracket.
 
 !listing parser/hit_error/hit_error.i
