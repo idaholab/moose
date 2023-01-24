@@ -26,8 +26,8 @@ KKSPhaseConcentrationDerivatives::validParams()
       "ci_names",
       "Phase concentrations. The order must match Fa, Fb, and global_cs, for example, c1, "
       "c2, b1, b2, etc");
-  params.addRequiredParam<MaterialName>("Fa_material", "Fa material object.");
-  params.addRequiredParam<MaterialName>("Fb_material", "Fb material object.");
+  params.addRequiredParam<MaterialName>("fa_name", "Fa material object.");
+  params.addRequiredParam<MaterialName>("fb_name", "Fb material object.");
   params.addParam<MaterialPropertyName>("h_name", "h", "Switching function h(eta).");
   return params;
 }
@@ -42,8 +42,8 @@ KKSPhaseConcentrationDerivatives::KKSPhaseConcentrationDerivatives(
     _prop_ci(_num_c * 2),
     _dcidb(_num_c),
     _dcideta(_num_c),
-    _Fa_name(getParam<MaterialName>("Fa_material")),
-    _Fb_name(getParam<MaterialName>("Fb_material")),
+    _Fa_name(getParam<MaterialName>("fa_name")),
+    _Fb_name(getParam<MaterialName>("fb_name")),
     _d2Fidcidbi(2),
     _prop_h(getMaterialProperty<Real>("h_name")),
     _prop_dh(getMaterialPropertyDerivative<Real>("h_name", _eta_name))

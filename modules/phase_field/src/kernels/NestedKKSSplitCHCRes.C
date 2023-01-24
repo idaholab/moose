@@ -25,7 +25,7 @@ NestedKKSSplitCHCRes::validParams()
       "ca_names",
       "Phase concentrations in the frist phase of all_etas. The order must match global_cs, for "
       "example, c1, b1, etc.");
-  params.addParam<MaterialPropertyName>("Fa_name", "Free energy of the first phase in all_etas.");
+  params.addParam<MaterialPropertyName>("fa_name", "Free energy of the first phase in all_etas.");
   return params;
 }
 
@@ -41,7 +41,7 @@ NestedKKSSplitCHCRes::NestedKKSSplitCHCRes(const InputParameters & parameters)
     _w_var(coupled("w")),
     _w(coupledValue("w")),
     _ca_names(getParam<std::vector<MaterialPropertyName>>("ca_names")),
-    _Fa_name(getParam<MaterialPropertyName>("Fa_name")),
+    _Fa_name(getParam<MaterialPropertyName>("fa_name")),
     _dFadca(_num_c),
     _d2Fadcadba(_num_c),
     _dcadb(_num_c),

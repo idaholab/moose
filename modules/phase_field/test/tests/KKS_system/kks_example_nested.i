@@ -104,8 +104,8 @@
     global_cs = 'c'
     ci_names = 'cm cd'
     ci_IC = '0 0'
-    Fa_material = fm
-    Fb_material = fd
+    fa_name = fm
+    fb_name = fd
     h_name = h
     min_iterations = 1
     max_iterations = 100
@@ -121,8 +121,8 @@
     global_cs = 'c'
     eta = eta
     ci_names = 'cm cd'
-    Fa_material = fm
-    Fb_material = fd
+    fa_name = fm
+    fb_name = fd
     h_name = h
   [../]
 
@@ -162,7 +162,7 @@
     w        = w
     all_etas = eta
     ca_names = 'cm cd'
-    Fa_name = fm
+    fa_name = fm
     args = 'eta w'
   [../]
   [./dcdt]

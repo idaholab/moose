@@ -28,8 +28,8 @@ KKSPhaseConcentrationMaterial::validParams()
       "b2, etc.");
   params.addRequiredParam<std::vector<Real>>("ci_IC",
                                              "Initial values of ci in the same order as ci_names.");
-  params.addRequiredParam<MaterialName>("Fa_material", "Fa material object.");
-  params.addRequiredParam<MaterialName>("Fb_material", "Fb material object.");
+  params.addRequiredParam<MaterialName>("fa_name", "Fa material object.");
+  params.addRequiredParam<MaterialName>("fb_name", "Fb material object.");
   params.addParam<MaterialPropertyName>(
       "nested_iterations",
       "The output number of nested Newton iterations at each quadrature point.");
@@ -47,8 +47,8 @@ KKSPhaseConcentrationMaterial::KKSPhaseConcentrationMaterial(const InputParamete
     _prop_ci(_num_c * 2),
     _ci_old(_num_c * 2),
     _ci_IC(getParam<std::vector<Real>>("ci_IC")),
-    _Fa_name(getParam<MaterialName>("Fa_material")),
-    _Fb_name(getParam<MaterialName>("Fb_material")),
+    _Fa_name(getParam<MaterialName>("fa_name")),
+    _Fb_name(getParam<MaterialName>("fb_name")),
     _prop_Fi(2),
     _Fi_copy(2),
     _dFidci(_num_c * 2),
@@ -161,8 +161,8 @@ KKSPhaseConcentrationMaterial::initQpStatefulProperties()
 void
 KKSPhaseConcentrationMaterial::initialSetup()
 {
-  _Fa = &getMaterial("Fa_material");
-  _Fb = &getMaterial("Fb_material");
+  _Fa = &getMaterial("fa_name");
+  _Fb = &getMaterial("fb_name");
 }
 
 void
