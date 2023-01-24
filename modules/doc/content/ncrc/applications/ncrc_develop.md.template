@@ -46,9 +46,9 @@ Instructions for obtaining a proper clone of {{ApplicationName}} can be found at
 
 ## Building {{ApplicationName}} id=build
 
-Building {{ApplicationName}} begins with entering the directory, applying upstream changes, updating
-your submodules and/or Conda packages, and finally running `make`. Before we begin, +remember these
-two important warnings+:
+Building {{ApplicationName}} begins with applying upstream changes, updating your submodules and/or
+Conda packages, and finally running `make`. Before we begin, +remember these two important
+warnings+:
 
 !alert warning title=You updated Conda?
 `Then you should also perform a submodule update`.
@@ -61,13 +61,13 @@ by and within the MOOSE repository. Updates to MOOSE (the `{{binary}}/moose` sub
 to stay on top of any Conda updates (if Personal Machine), or rebuilding PETSc and libMesh (if using
 [!ac](HPC) resources).
 
-### Updating {{ApplicationName}}
+### Applying Upstream Changes
 
 If this is your first time following these instructions there should be no updates. However, we will
 perform an update to familiarize yourself with the entire process.
 
-{{ApplicationName}} developers will expect them to have performed the following sections, whenever
-someone says "I have updated {{ApplicationName}}".
+{{ApplicationName}} developers will expect users to have performed the following sections, whenever
+they says "I have updated {{ApplicationName}}".
 
 ```bash
 cd ~/projects/{{binary}}
@@ -93,7 +93,7 @@ git rebase upstream/branch   # replace 'branch' with the discovered branch name
 
 With {{binary}} updated, we can update its submodules.
 
-### Updating Submodules
+### Updating Submodules and Conda Packages
 
 Most MOOSE-based applications require additional support libraries available in the form of
 git submodules. To update submodules, perform the following:
@@ -103,7 +103,7 @@ cd ~/projects/{{binary}}
 git submodule update --init
 ```
 
-Remember the cyclical warnings ealier? By performing a submodule update, you should now perform
+Remember the cyclical warnings earlier? By performing a submodule update, you should now perform
 either a Conda update, or rebuilding PETSc/libMesh:
 
 - If +Personal Machine (Conda)+:
@@ -129,6 +129,8 @@ either a Conda update, or rebuilding PETSc/libMesh:
   !alert tip title=MOOSE_JOBS? METHODS?
   Go to [MOOSE Build System](application_development/build_system.md) for more information on
   available methods. MOOSE_JOBS controls how many cores to use during the use of our scripts.
+
+### Running Make
 
 With everything up to date, we should clean out any previous build of {{ApplicationName}}, and build
 anew:
