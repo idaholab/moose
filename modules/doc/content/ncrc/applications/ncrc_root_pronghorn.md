@@ -4,12 +4,11 @@
 
 - [Documentation](https://pronghorn-docs.hpcondemand.inl.gov/latest/)
 - [Discussion Forum](https://pronghorn-discourse.hpcondemand.inl.gov)
-- [Development (Building and Running)](ncrc/applications/ncrc_develop_pronghorn.md)
 - [Build Status](https://civet.inl.gov/repo/871/)
 - [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_ondemand_pronghorn.md)
 - [Level 1 - HPC Binary Execution](ncrc/applications/ncrc_hpc_pronghorn.md)
 - [Level 2 - Local Binary Installation](ncrc/applications/ncrc_conda_pronghorn.md)
-- [Level 4 - Source Access](ncrc/applications/ncrc_level4_pronghorn.md)
+- [Level 4 - Source Access](ncrc/applications/ncrc_develop_pronghorn.md)
 
 !row!
 !col small=12 medium=8 large=8

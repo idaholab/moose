@@ -1,24 +1,24 @@
 # {{ApplicationName}} Development
 
-If you have already built {{ApplicationName}}, click on
-[Building {{ApplicationName}}](ncrc_develop_{{ApplicationLower}}.md#build) again, (which will run
-you through an update process when performed multiple times).
+Proper development of {{ApplicationName}} requires a compiler, a clone of the {{ApplicationName}}
+repository, and any additional support libraries in the form of submodules. The following
+instructions aim at preparing your machine or environment for such development.
 
-Proper development of {{ApplicationName}} requires a compiler, the {{bison}} repository, and
-additional support libraries. The following instructions aim at preparing your machine or
-environment for such development.
-
-If you encounter any errors during any of these steps, you need to stop, and figure out a solution
+If you encounter errors during any of these steps, you need to stop, and figure out a solution
 before continuing. Please see our [Troubleshooting](help/troubleshooting.md) guide, which also
 contains information on how to reach us in the event troubleshooting fails.
 
+If you need to update {{ApplicationName}}, know that by following through the
+'[Building {{ApplicationName}}](ncrc_develop_{{ApplicationLower}}.md#build)' steps again,
+effectively performs an update each time.
+
 ## Compiler Stack id=compiler
 
-If you plan on using your personal machine we recommend using our Conda installation method. If
-you are instead operating on one of our [!ac](INL) [!ac](HPC) clusters, you need only load a couple
-of modules.
+If you plan on using your personal machine we recommend using our Conda packages. If you are instead
+operating on one of our [!ac](INL) [!ac](HPC) clusters, you need only load a couple of modules.
 
-- If +Personal Machine+: Follow the [Conda Installation](installation/install_miniconda.md) instructions and then perform the following:
+- If +Personal Machine+: Follow the [Conda Installation](installation/install_miniconda.md)
+  instructions and then install our MOOSE Conda packages:
 
   ```bash
   mamba create -n moose moose-tools moose-libmesh
@@ -34,7 +34,7 @@ For those operating on other [!ac](HPC) clusters, you should contact that system
 and use their recommended compiler stack. It will need to satisfy to our
 [minimum requirements](sqa/minimum_requirements.md).
 
-!alert warning title=Conda packages may be suboptimal on HPC
+!alert warning title=Conda packages may be suboptimal on HPC machines
 Conda packages have the advantage of being able to work on most machines, but on [!ac](HPC)
 clusters, this flexibility potentially comes at the cost of the optimizations developed by
 [!ac](HPC) administrators.
@@ -46,8 +46,8 @@ Instructions for obtaining a proper clone of {{ApplicationName}} can be found at
 
 ## Building {{ApplicationName}} id=build
 
-Building {{ApplicationName}} begins with applying upstream changes, updating your submodules and/or
-Conda packages, and finally running `make`. Before we begin, +remember these two important
+Building {{ApplicationName}} involves applying upstream changes, updating your submodules and/or
+Conda packages, and finally running make. Before we begin, +remember these two important
 warnings+:
 
 !alert warning title=You updated Conda?
@@ -63,11 +63,11 @@ to stay on top of any Conda updates (if Personal Machine), or rebuilding PETSc a
 
 ### Applying Upstream Changes
 
-If this is your first time following these instructions there should be no updates. However, we will
-perform an update to familiarize yourself with the entire process.
+Changes being made by other developers become available to you via the upstream remote. This section
+will show you how to apply these changes to your local {{ApplicationName}} repository.
 
 {{ApplicationName}} developers will expect users to have performed the following sections, whenever
-they says "I have updated {{ApplicationName}}".
+someone says "I have updated {{ApplicationName}}".
 
 ```bash
 cd ~/projects/{{binary}}
@@ -75,11 +75,14 @@ git fetch upstream
 ```
 
 `git fetch upstream` updates your local references with that of the remote. It does not actually
-modify any source files. It will return nothing if there is nothing new to update.
+modify any source files. It will return nothing if there is nothing new to update. If you have built
+{{ApplicationName}} once before, you are finished and can safely exit this documentation. First time
+users will of course need to continue.
 
-You need to know your upstream head branch. This will be the branch you will want to continuously
-rebase against. That is, keeping your local {{binary}} repository up to date. The following command
-will reveal the upstream head branch name:
+You need to know your upstream head branch. This will be the branch you want to continuously rebase
+against. That is, keeping your local {{binary}} repository up to date.
+
+The following command will reveal the upstream head branch name:
 
 ```bash
 git remote show upstream | grep "HEAD branch" | sed 's/.*: //'
@@ -141,7 +144,7 @@ make clobberall
 make -j 6
 ```
 
-`make clobberall` deletes the stale object/library files left behind from a previous build. While not
-always necessary, please get into the habit of performing this operation before running `make`.
+`make clobberall` deletes the stale object/library files left behind from a previous build. While
+not always necessary, please get into the habit of performing this operation before running `make`.
 
 !include ncrc/applications/ncrc_runtest_{{ApplicationLower}}.md

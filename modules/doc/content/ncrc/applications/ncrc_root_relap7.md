@@ -2,12 +2,11 @@
 
 - [Documentation](https://relap7-docs.hpcondemand.inl.gov/latest/)
 - [Discussion Forum](https://relap7-discourse.hpcondemand.inl.gov)
-- [Development (Building and Running)](ncrc/applications/ncrc_develop_relap7.md)
 - [Build Status](https://civet.inl.gov/repo/852/)
 - [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_ondemand_relap7.md)
 - [Level 1 - HPC Binary Execution](ncrc/applications/ncrc_hpc_relap7.md)
 - [Level 2 - Local Binary Installation](ncrc/applications/ncrc_conda_relap7.md)
-- [Level 4 - Source Access](ncrc/applications/ncrc_level4_relap7.md)
+- [Level 4 - Source Access](ncrc/applications/ncrc_develop_relap7.md)
 
 !row!
 !col small=12 medium=8 large=8

@@ -4,11 +4,10 @@
 
 - [Documentation](https://grizzly-docs.hpcondemand.inl.gov/latest/)
 - [Discussion Forum](https://grizzly-discourse.hpcondemand.inl.gov)
-- [Development (Building and Running)](ncrc/applications/ncrc_develop_grizzly.md)
 - [Build Status](https://civet.inl.gov/repo/856/)
 - [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_ondemand_grizzly.md)
 - [Level 1 - HPC Binary Execution](ncrc/applications/ncrc_hpc_grizzly.md)
-- [Level 4 - Source Access](ncrc/applications/ncrc_level4_grizzly.md)
+- [Level 4 - Source Access](ncrc/applications/ncrc_develop_grizzly.md)
 
 !row!
 !col small=12 medium=8 large=8

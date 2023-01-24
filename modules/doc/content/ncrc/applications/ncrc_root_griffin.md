@@ -4,12 +4,11 @@
 
 - [Documentation](https://griffin-docs.hpcondemand.inl.gov/latest/)
 - [Discussion Forum](https://griffin-discourse.hpcondemand.inl.gov)
-- [Development (Building and Running)](ncrc/applications/ncrc_develop_griffin.md)
 - [Build Status](https://civet.inl.gov/repo/822/)
 - [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_ondemand_griffin.md)
 - [Level 1 - HPC Binary Execution](ncrc/applications/ncrc_hpc_griffin.md)
 - [Level 2 - Local Binary Installation](ncrc/applications/ncrc_conda_griffin.md)
-- [Level 4 - Source Access](ncrc/applications/ncrc_level4_griffin.md)
+- [Level 4 - Source Access](ncrc/applications/ncrc_develop_griffin.md)
 
 !row!
 !col small=12 medium=8 large=8

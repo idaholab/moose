@@ -1,10 +1,9 @@
 ## SAM
 
-- [Development (Building and Running)](ncrc/applications/ncrc_develop_sam.md)
 - [Build Status](https://civet.inl.gov/repo/620/)
 - [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_ondemand_sam.md)
 - [Level 1 - HPC Binary Execution](ncrc/applications/ncrc_hpc_sam.md)
-- [Level 4 - Source Access](ncrc/applications/ncrc_level4_sam.md)
+- [Level 4 - Source Access](ncrc/applications/ncrc_develop_sam.md)
 
 !row!
 !col small=12 medium=8 large=8

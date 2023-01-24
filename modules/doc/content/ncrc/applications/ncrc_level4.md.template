@@ -72,3 +72,6 @@ Enter the {{binary}} directory, and add the upstream remote (needed for proper d
 cd {{binary}}
 git remote add upstream git@github.inl.gov:ncrc/{{binary}}.git
 ```
+
+Head to [Level 4 - Source Access](ncrc/applications/ncrc_develop_{{ApplicationLower}}.md#cloning) to
+continue with building {{ApplicationName}}.

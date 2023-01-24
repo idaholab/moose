@@ -4,12 +4,11 @@
 
 - [Documentation](https://sockeye-docs.hpcondemand.inl.gov/latest/)
 - [Discussion Forum](https://sockeye-discourse.hpcondemand.inl.gov)
-- [Development (Building and Running)](ncrc/applications/ncrc_develop_sockeye.md)
 - [Build Status](https://civet.inl.gov/repo/837/)
 - [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_ondemand_sockeye.md)
 - [Level 1 - HPC Binary Execution](ncrc/applications/ncrc_hpc_sockeye.md)
 - [Level 2 - Local Binary Installation](ncrc/applications/ncrc_conda_sockeye.md)
-- [Level 4 - Source Access](ncrc/applications/ncrc_level4_sockeye.md)
+- [Level 4 - Source Access](ncrc/applications/ncrc_develop_sockeye.md)
 
 !row!
 !col small=12 medium=8 large=8
