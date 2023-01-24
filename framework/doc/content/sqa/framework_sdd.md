@@ -3,11 +3,10 @@
 !template! item key=introduction
 !! introduction-begin
 Frameworks are a software development construct aiming to simplify the creation of specific classes
-of applications through abstraction of low-level details. The main object of creating a framework is
+of applications through abstraction of low-level details. The main objective of creating a framework is
 to provide an interface to application developers that saves time and provides advanced capabilities
-not attainable otherwise. The [!ac](MOOSE), mission is
-just that: provide a framework for engineers and scientists to build state-of-the-art,
-computationally scalable finite element based simulation tools.
+not attainable otherwise. The [!ac](MOOSE) mission is just that: provide a framework for engineers and
+scientists to build state-of-the-art, computationally scalable finite element based simulation tools.
 
 [!ac](MOOSE) was conceived with one major objective: to be as easy and straightforward to use by
 scientists and engineers as possible. [!ac](MOOSE) is meant to be approachable by non-computational
@@ -18,7 +17,7 @@ be successful with the framework.  The pursuit of this goal has led to many of t
 [!ac](MOOSE):
 
 - A streamlined build system
-- An API aimed at extensible
+- An API aimed at extensibility
 - Straightforward APIs providing sensible default information
 - Integrated, automatic, and rigorous testing
 - Rapid, continuous integration development cycle
@@ -189,7 +188,7 @@ parallel calculations on the objects created and stored within the warehouses.
 MOOSE's pluggable systems are documented on https://mooseframework.inl.gov. Each of these systems
 has a set of defined polymorphic interfaces and are designed to accomplish a specific task within the
 simulation. The design of these systems is fluid and is managed through agile methods and ticket
-request system on the Github.org website.
+request system on the [MOOSE repository website](https://github.com/idaholab/moose).
 !! system-structure-finish
 !template-end!
 
