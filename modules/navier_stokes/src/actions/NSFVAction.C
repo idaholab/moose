@@ -59,6 +59,11 @@ NSFVAction::validParams()
       "LATEST",
       "Gives the timestep (or \"LATEST\") for which to read a solution from a file "
       "for a given variable. (Default: LATEST)");
+  params.addParam<bool>(
+      "qp_calculations",
+      false,
+      "If creating variables, this parameter describes whether to pre-initialize variable data for "
+      "use in traditional MOOSE quadrature point based objects.");
 
   MooseEnum turbulence_type("mixing-length none", "none");
   params.addParam<MooseEnum>(
@@ -273,7 +278,7 @@ NSFVAction::validParams()
       std::vector<MooseFunctorName>(),
       "The ambient temperature for each block in 'ambient_convection_blocks'.");
 
-  params.addParam<CoupledName>(
+  params.addParam<MooseFunctorName>(
       "external_heat_source",
       "The name of a functor which contains the external heat source for the energy equation.");
   params.addParam<Real>(
@@ -848,6 +853,7 @@ NSFVAction::addINSVariables()
     params.set<std::vector<Real>>("scaling") = {_momentum_scaling};
     params.set<MooseEnum>("face_interp_method") = _momentum_face_interpolation;
     params.set<bool>("two_term_boundary_expansion") = _momentum_two_term_bc_expansion;
+    params.set<bool>("qp_calculations") = getParam<bool>("qp_calculations");
 
     for (unsigned int d = 0; d < _dim; ++d)
       _problem->addVariable(variable_type, _velocity_name[d], params);
@@ -866,6 +872,7 @@ NSFVAction::addINSVariables()
     params.set<std::vector<Real>>("scaling") = {_mass_scaling};
     params.set<MooseEnum>("face_interp_method") = _pressure_face_interpolation;
     params.set<bool>("two_term_boundary_expansion") = _pressure_two_term_bc_expansion;
+    params.set<bool>("qp_calculations") = getParam<bool>("qp_calculations");
     if (using_pinsfv_pressure_var)
     {
       params.set<MooseFunctorName>("u") = _velocity_name[0];
@@ -911,6 +918,7 @@ NSFVAction::addINSVariables()
       params.set<std::vector<Real>>("scaling") = {_energy_scaling};
       params.set<MooseEnum>("face_interp_method") = _energy_face_interpolation;
       params.set<bool>("two_term_boundary_expansion") = _energy_two_term_bc_expansion;
+      params.set<bool>("qp_calculations") = getParam<bool>("qp_calculations");
 
       _problem->addVariable("INSFVEnergyVariable", _fluid_temperature_name, params);
     }
@@ -919,11 +927,12 @@ NSFVAction::addINSVariables()
   // Add passive scalar variables is needed
   if (_has_scalar_equation)
   {
-    auto params = _factory.getValidParams("MooseVariableFVReal");
+    auto params = _factory.getValidParams("INSFVScalarFieldVariable");
     assignBlocks(params, _blocks);
     params.set<std::vector<Real>>("scaling") = {_passive_scalar_scaling};
     params.set<MooseEnum>("face_interp_method") = _passive_scalar_face_interpolation;
     params.set<bool>("two_term_boundary_expansion") = _passive_scalar_two_term_bc_expansion;
+    params.set<bool>("qp_calculations") = getParam<bool>("qp_calculations");
 
     for (unsigned int name_i = 0; name_i < _passive_scalar_names.size(); ++name_i)
     {
@@ -1598,7 +1607,7 @@ NSFVAction::addINSEnergyExternalHeatSource()
   InputParameters params = _factory.getValidParams(kernel_type);
   params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
   assignBlocks(params, _blocks);
-  params.set<CoupledName>("v") = getParam<CoupledName>("external_heat_source");
+  params.set<MooseFunctorName>("v") = getParam<MooseFunctorName>("external_heat_source");
   params.set<Real>("coef") = getParam<Real>("external_heat_source_coeff");
 
   _problem->addFVKernel(kernel_type, "external_heat_source", params);

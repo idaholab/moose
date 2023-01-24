@@ -17,6 +17,7 @@ rho = 1
 [Modules]
   [NavierStokesFV]
     compressibility = 'incompressible'
+    qp_calculations = true
 
     density = ${rho}
     dynamic_viscosity = ${mu}

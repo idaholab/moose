@@ -58,7 +58,7 @@ PINSFVEnergyTimeDerivative::computeQpResidual()
   else
   {
     auto elem_arg = makeElemArg(_current_elem);
-    auto time_derivative = _rho(elem_arg) * _cp(elem_arg) * FVTimeKernel::computeQpResidual();
+    auto time_derivative = _rho(elem_arg) * _cp(elem_arg) * _var.dot(elem_arg);
     if (_rho_dot)
       time_derivative += (*_rho_dot)(elem_arg)*_cp(elem_arg) * _var(elem_arg);
 

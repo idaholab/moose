@@ -252,13 +252,13 @@ cp = 1
 
 [Postprocessors]
   [max_T]
-    type = ElementExtremeValue
-    variable = T
+    type = ADElementExtremeFunctorValue
+    functor = T
     block = 0
   []
   [max_Ts]
-    type = ElementExtremeValue
-    variable = Ts
+    type = ADElementExtremeFunctorValue
+    functor = Ts
     block = 1
   []
   [mdot_out]

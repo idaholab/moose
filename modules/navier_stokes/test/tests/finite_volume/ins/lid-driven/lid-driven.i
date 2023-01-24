@@ -23,9 +23,11 @@ rho = 1
 [Variables]
   [vel_x]
     type = INSFVVelocityVariable
+    qp_calculations = true
   []
   [vel_y]
     type = INSFVVelocityVariable
+    qp_calculations = true
   []
   [pressure]
     type = INSFVPressureVariable

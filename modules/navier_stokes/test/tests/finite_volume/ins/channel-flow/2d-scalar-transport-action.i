@@ -22,10 +22,12 @@ cp = 1
   [vel_x]
     type = 'INSFVVelocityVariable'
     initial_condition = 1
+    qp_calculations = true
   []
   [vel_y]
     type = 'INSFVVelocityVariable'
     initial_condition = 1
+    qp_calculations = true
   []
   [pressure]
     type = 'INSFVPressureVariable'

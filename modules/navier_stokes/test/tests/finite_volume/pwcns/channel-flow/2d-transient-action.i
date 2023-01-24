@@ -78,6 +78,7 @@ top_side_temperature = 150
 
     ambient_convection_alpha = 'h_cv'
     ambient_temperature = 'T_solid'
+    qp_calculations = true
   []
 []
 

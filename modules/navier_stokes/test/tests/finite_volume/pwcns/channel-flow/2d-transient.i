@@ -51,10 +51,12 @@ velocity_interp_method = 'rc'
   [superficial_vel_x]
     type = PINSFVSuperficialVelocityVariable
     initial_condition = ${u_inlet}
+    qp_calculations = true
   []
   [superficial_vel_y]
     type = PINSFVSuperficialVelocityVariable
     initial_condition = 1e-6
+    qp_calculations = true
   []
   [pressure]
     type = INSFVPressureVariable

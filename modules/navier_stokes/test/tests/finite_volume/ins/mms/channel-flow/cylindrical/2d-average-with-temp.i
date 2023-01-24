@@ -295,30 +295,30 @@ velocity_interp_method='average'
     execute_on = 'timestep_end'
   []
   [./L2u]
-    type = ElementL2Error
-    variable = u
-    function = exact_u
+    type = ElementL2FunctorError
+    approximate = u
+    exact = exact_u
     outputs = 'console csv'
     execute_on = 'timestep_end'
   [../]
   [./L2v]
-    type = ElementL2Error
-    variable = v
-    function = exact_v
+    type = ElementL2FunctorError
+    approximate = v
+    exact = exact_v
     outputs = 'console csv'
     execute_on = 'timestep_end'
   [../]
   [./L2p]
-    variable = pressure
-    function = exact_p
-    type = ElementL2Error
+    approximate = pressure
+    exact = exact_p
+    type = ElementL2FunctorError
     outputs = 'console csv'
     execute_on = 'timestep_end'
   [../]
   [./L2t]
-    variable = temperature
-    function = exact_t
-    type = ElementL2Error
+    approximate = temperature
+    exact = exact_t
+    type = ElementL2FunctorError
     outputs = 'console csv'
     execute_on = 'timestep_end'
   [../]

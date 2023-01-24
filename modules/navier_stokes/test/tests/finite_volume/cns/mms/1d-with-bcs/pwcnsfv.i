@@ -238,16 +238,16 @@ cp=${fparse gamma*R_specific/(gamma-1)}
     execute_on = 'timestep_end'
   []
   [L2pressure]
-    type = ElementL2Error
-    variable = pressure
-    function = exact_p
+    type = ElementL2FunctorError
+    approximate = pressure
+    exact = exact_p
     outputs = 'console csv'
     execute_on = 'timestep_end'
   []
   [L2sup_vel_x]
-    variable = sup_vel_x
-    function = exact_sup_vel_x
-    type = ElementL2Error
+    approximate = sup_vel_x
+    exact = exact_sup_vel_x
+    type = ElementL2FunctorError
     outputs = 'console csv'
     execute_on = 'timestep_end'
   []
