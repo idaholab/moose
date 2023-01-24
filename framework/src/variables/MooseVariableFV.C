@@ -75,6 +75,7 @@ MooseVariableFV<OutputType>::MooseVariableFV(const InputParameters & parameters)
     _phi_neighbor(this->_assembly.template fePhiNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
     _grad_phi_neighbor(
         this->_assembly.template feGradPhiNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
+    _face_to_diri(nullptr, nullptr),
     _two_term_boundary_expansion(this->isParamValid("two_term_boundary_expansion")
                                      ? this->template getParam<bool>("two_term_boundary_expansion")
                                      :
@@ -425,6 +426,10 @@ template <typename OutputType>
 std::pair<bool, const FVDirichletBCBase *>
 MooseVariableFV<OutputType>::getDirichletBC(const FaceInfo & fi) const
 {
+  if (_face_to_diri.first == &fi)
+    // Cached result
+    return std::make_pair(_face_to_diri.second, _face_to_diri.second);
+
   std::vector<FVDirichletBCBase *> bcs;
 
   this->_subproblem.getMooseApp()
@@ -438,16 +443,19 @@ MooseVariableFV<OutputType>::getDirichletBC(const FaceInfo & fi) const
       .queryInto(bcs);
   mooseAssert(bcs.size() <= 1, "cannot have multiple dirichlet BCs on the same boundary");
 
-  bool has_dirichlet_bc = bcs.size() > 0;
+  const bool has_dirichlet_bc = bcs.size() > 0;
 
   if (has_dirichlet_bc)
   {
     mooseAssert(bcs[0], "The FVDirichletBC is null!");
-
+    _face_to_diri = std::make_pair(&fi, bcs[0]);
     return std::make_pair(true, bcs[0]);
   }
   else
+  {
+    _face_to_diri = std::make_pair(&fi, nullptr);
     return std::make_pair(false, nullptr);
+  }
 }
 
 template <typename OutputType>

@@ -610,6 +610,9 @@ private:
   const FieldVariablePhiValue & _phi_neighbor;
   const FieldVariablePhiGradient & _grad_phi_neighbor;
 
+  /// A member for caching retrieved Dirichlet conditions
+  mutable std::pair<const FaceInfo *, const FVDirichletBCBase *> _face_to_diri;
+
 protected:
   /// A cache for storing gradients on elements
   mutable std::unordered_map<const Elem *, VectorValue<ADReal>> _elem_to_grad;
