@@ -74,11 +74,11 @@ PolygonMeshTrimmerBase::PolygonMeshTrimmerBase(const InputParameters & parameter
     _tri_elem_subdomain_shift(isParamValid("tri_elem_subdomain_shift")
                                   ? getParam<subdomain_id_type>("tri_elem_subdomain_shift")
                                   : Moose::INVALID_BLOCK_ID),
-    _input(getMeshByName(_input_name)),
-    _pattern_pitch_meta(declareMeshProperty("pattern_pitch_meta", 0.0)),
-    _input_pitch_meta(declareMeshProperty("input_pitch_meta", 0.0)),
-    _is_control_drum_meta(declareMeshProperty("is_control_drum_meta", false))
+    _input(getMeshByName(_input_name))
 {
+  declareMeshProperty("pattern_pitch_meta", 0.0);
+  declareMeshProperty("input_pitch_meta", 0.0);
+  declareMeshProperty("is_control_drum_meta", false);
   if (std::accumulate(_trim_peripheral_region.begin(), _trim_peripheral_region.end(), 0) == 0 &&
       !_peripheral_trimming_section_boundary.empty())
     paramError("peripheral_trimming_section_boundary",
@@ -96,9 +96,10 @@ PolygonMeshTrimmerBase::generate()
 
   // Passing metadata
   if (hasMeshProperty("input_pitch_meta", _input_name))
-    _input_pitch_meta = getMeshProperty<Real>("input_pitch_meta", _input_name);
+    setMeshProperty("input_pitch_meta", getMeshProperty<Real>("input_pitch_meta", _input_name));
   if (hasMeshProperty("is_control_drum_meta", _input_name))
-    _is_control_drum_meta = getMeshProperty<bool>("is_control_drum_meta", _input_name);
+    setMeshProperty("is_control_drum_meta",
+                    getMeshProperty<bool>("is_control_drum_meta", _input_name));
 
   const boundary_id_type external_boundary_id =
       _external_boundary_name.empty()
@@ -127,7 +128,7 @@ PolygonMeshTrimmerBase::generate()
         _peripheral_trimming_section_boundary;
   }
   else if (hasMeshProperty("pattern_pitch_meta", _input_name))
-    _pattern_pitch_meta = getMeshProperty<Real>("pattern_pitch_meta", _input_name);
+    setMeshProperty("pattern_pitch_meta", getMeshProperty<Real>("pattern_pitch_meta", _input_name));
 
   if (_center_trim_sector_number < _num_sides * 2)
   {
@@ -202,7 +203,7 @@ PolygonMeshTrimmerBase::peripheralTrimmer(
   const Real multiplier = ((Real)getMeshProperty<unsigned int>("pattern_size", _input_name) - 1.0) *
                           (num_sides == 6 ? 0.75 : 1.0);
   const Real ch_length = multiplier * unit_length;
-  _pattern_pitch_meta = ch_length * 2.0;
+  setMeshProperty("pattern_pitch_meta", ch_length * 2.0);
 
   std::vector<std::vector<Real>> bdry_pars;
   if (num_sides == 6)

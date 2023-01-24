@@ -25,10 +25,4 @@ public:
   PatternedCartesianPeripheralModifier(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
-
-protected:
-  /// MeshMetaData: whether the peripheral area of the generated mesh can be trimmed by PolygonMeshTrimmer
-  const bool & _square_peripheral_trimmability;
-  /// MeshMetaData: whether the generated mesh can be trimmed through its center by PolygonMeshTrimmer
-  bool & _square_center_trimmability;
 };

@@ -59,20 +59,8 @@ protected:
   const std::string _pin_id_name;
   /// Values of extra integer ID to be assigned to each of the three pin domains
   const std::vector<dof_id_type> _pin_id_values;
-  /// MeshMetaData: pitch size of the produced mesh (as a pin)
-  const Real & _pitch_meta;
-  /// MeshMetaData: pitch size of the produced mesh (as an assembly)
-  const Real & _pattern_pitch_meta;
-  /// MeshMetaData: whether the mesh is a control drum
-  const bool & _is_control_drum_meta;
-  /// MeshMetaData: number of radial intervals of the background region
-  const unsigned int & _background_intervals_meta;
   /// MeshMetaData: maximum node id of the background region
   dof_id_type & _node_id_background_meta;
-  /// MeshMetaData: dummy metadata for this mesh generator
-  const Real & _max_radius_meta;
-  /// MeshMetaData: number of sectors on each side if the hexagonal mesh
-  const std::vector<unsigned int> & _num_sectors_per_side_meta;
   /// Whether the generated mesh contains ring regions
   std::vector<bool> _has_rings;
 

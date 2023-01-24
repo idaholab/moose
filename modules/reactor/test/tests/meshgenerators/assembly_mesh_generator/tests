@@ -51,4 +51,29 @@
     exodiff = 'assembly_ductIDs_in.e'
     recover = false
   []
+  [hex_metadata_transfer]
+    requirement = 'The system shall generate a 2D hexagonal assembly mesh that transfers metadata correctly across RGMB mesh generators'
+    type = 'Exodiff'
+    input = 'assembly_only.i'
+    cli_args = "Mesh/inactive='pin2'
+                Mesh/rmp/dim=2
+                Mesh/rmp/geom=Hex
+                Mesh/rmp/assembly_pitch=3.7884
+                Mesh/rmp/radial_boundary_id=200
+                Mesh/pin1/pitch=1.3425
+                Mesh/pin1/ring_radii=0.4404
+                Mesh/pin1/duct_halfpitch=0.5404
+                Mesh/pin1/region_ids='1 2 3'
+                Mesh/amg/inputs=pin1
+                Mesh/amg/pattern='0 0; 0 0 0; 0 0'
+                Mesh/amg/background_intervals=1
+                Mesh/amg/background_region_id=4
+                Mesh/amg/duct_halfpitch=1.7703
+                Mesh/amg/duct_intervals=1
+                Mesh/amg/duct_region_ids=5
+                Mesh/amg/extrude=false
+                Outputs/file_base=assembly_metadata_transfer"
+    exodiff = 'assembly_metadata_transfer.e'
+    recover = false
+  []
 []

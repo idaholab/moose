@@ -39,10 +39,6 @@ protected:
   Real _start_angle;
   /// Angular range of the modified azimuthal blocks
   const Real _angle_range;
-  /// MeshMetaData: pitch size parameter of the hexagon
-  Real & _pattern_pitch_meta;
-  /// MeshMetaData: whether this mesh represents a control drum
-  const bool _is_control_drum_meta;
   /// MeshMetaData: vector of all nodes' azimuthal angles
   std::vector<Real> & _azimuthal_angle_meta;
   /// Reference to input mesh pointer

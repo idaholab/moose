@@ -68,26 +68,6 @@ protected:
   const bool _deform_non_circular_region;
   /// Pitch size of the input assembly mesh
   Real _pattern_pitch;
-  /// MeshMetaData of the assembly pitch size
-  Real & _pattern_pitch_meta;
-  /// MeshMetaData of input square's pitch
-  Real & _input_pitch_meta;
-  /// MeshMetaData: whether the generated mesh is a control drum
-  const bool _is_control_drum_meta;
-  /// MeshMetaData: positions of the control drums within the generated core mesh
-  std::vector<Point> & _control_drum_positions;
-  /// MeshMetaData: azimuthal angles of the control drum centers within the generated core mesh
-  std::vector<Real> & _control_drum_angles;
-  /// MetaMeshData: azimuthal angles of all the nodes of each control drum within the generated core mesh
-  std::vector<std::vector<Real>> & _control_drums_azimuthal_meta;
-  /// Filename of the text file containing the control drum positions
-  const std::string _position_file_name;
-  /// MeshMetaData: whether the peripheral area of the generated mesh can be trimmed by PolygonMeshTrimmer
-  const bool & _square_peripheral_trimmability;
-  /// MeshMetaData: whether the generated mesh can be trimmed through its center by PolygonMeshTrimmer
-  const bool & _square_center_trimmability;
-  /// a Boolean flag to tell PeripheralModifyGenerator that the input is valid
-  const bool & _peripheral_modifier_compatible;
   /// Subdomain IDs of the peripheral regions
   std::vector<subdomain_id_type> _peripheral_block_ids;
   /// Subdomain Names of the peripheral regions
