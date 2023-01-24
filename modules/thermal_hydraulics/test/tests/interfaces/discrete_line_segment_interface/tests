@@ -5,12 +5,38 @@
   [compute_axial_coordinate]
     type = Exodiff
     input = 'discrete_line_segment_interface.i'
-    exodiff = 'discrete_line_segment_interface_out.e'
+    exodiff = 'axial_coord.e'
     allow_test_objects = true
     # 0 time steps taken
     recover = false
 
     requirement = 'The system shall provide an interface to compute an axial coordinate from an arbitrary spatial point.'
+  []
+  [compute_radial_coordinate]
+    type = Exodiff
+    input = 'discrete_line_segment_interface.i'
+    cli_args = "
+      AuxKernels/testvar_aux/test_type=radial_coord
+      Outputs/file_base=radial_coord"
+    exodiff = 'radial_coord.e'
+    allow_test_objects = true
+    # 0 time steps taken
+    recover = false
+
+    requirement = 'The system shall provide an interface to compute a radial coordinate from an arbitrary spatial point.'
+  []
+  [get_axial_index]
+    type = Exodiff
+    input = 'discrete_line_segment_interface.i'
+    cli_args = "
+      AuxKernels/testvar_aux/test_type=axial_index
+      Outputs/file_base=axial_index"
+    exodiff = 'axial_index.e'
+    allow_test_objects = true
+    # 0 time steps taken
+    recover = false
+
+    requirement = 'The system shall provide an interface to get the axial index for an arbitrary spatial point.'
   []
 
   [error_reporting]
@@ -19,8 +45,8 @@
     [compute_axial_coordinate_invalid_axial_coord]
       type = RunException
       input = 'discrete_line_segment_interface.i'
-      cli_args = "AuxKernels/ax_coord_aux/length=5.0"
-      expect_err = "ax_coord_aux: The point \(x,y,z\)=\(.*\) has an invalid axial coordinate \(.*\). Valid axial coordinates are in the range \(0,5\)."
+      cli_args = "AuxKernels/testvar_aux/length=5.0"
+      expect_err = "testvar_aux: The point \(x,y,z\)=\(.*\) has an invalid axial coordinate \(.*\). Valid axial coordinates are in the range \(0,5\)."
       allow_test_objects = true
 
       detail = 'if an invalid axial coordinate is provided.'

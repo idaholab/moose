@@ -40,12 +40,14 @@ DiscreteLineSegmentInterface::DiscreteLineSegmentInterface(const MooseObject * m
     _n_elems(moose_object->parameters().get<std::vector<unsigned int>>("n_elems")),
     _n_elem(std::accumulate(_n_elems.begin(), _n_elems.end(), 0)),
     _n_sections(_lengths.size()),
+    _section_end(_n_sections),
     _R(computeDirectionTransformationTensor(_dir)),
     _Rx(computeXRotationTransformationTensor(_rotation)),
     _R_inv(_R.inverse()),
     _Rx_inv(_Rx.inverse()),
     _moose_object_name_dlsi(moose_object->name())
 {
+  std::partial_sum(_lengths.begin(), _lengths.end(), _section_end.begin());
 }
 
 RealVectorValue
@@ -98,6 +100,24 @@ DiscreteLineSegmentInterface::computeAxialCoordinate(const Point & p) const
                ").");
   else
     return ax_coord;
+}
+
+Real
+DiscreteLineSegmentInterface::computeRadialCoordinate(const Point & p) const
+{
+  const RealVectorValue v = (p - _position);
+  return v.cross(_dir).norm();
+}
+
+unsigned int
+DiscreteLineSegmentInterface::getAxialSectionIndex(const Point & p) const
+{
+  const Real axial_coordinate = computeAxialCoordinate(p);
+  for (unsigned int i = 0; i < _n_sections; ++i)
+    if (MooseUtils::absoluteFuzzyLessEqual(axial_coordinate, _section_end[i]))
+      return i;
+
+  mooseError("No axial section index was found.");
 }
 
 Point
