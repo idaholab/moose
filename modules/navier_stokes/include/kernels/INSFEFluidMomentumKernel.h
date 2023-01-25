@@ -9,18 +9,18 @@
 
 #pragma once
 
-#include "MDFluidKernelStabilization.h"
+#include "INSFEFluidKernelStabilization.h"
 
 /**
  * The spatial part of the 3D momentum conservation for fluid flow
  */
-class MDFluidMomentumKernel : public MDFluidKernelStabilization
+class INSFEFluidMomentumKernel : public INSFEFluidKernelStabilization
 {
 public:
   static InputParameters validParams();
 
-  MDFluidMomentumKernel(const InputParameters & parameters);
-  virtual ~MDFluidMomentumKernel() {}
+  INSFEFluidMomentumKernel(const InputParameters & parameters);
+  virtual ~INSFEFluidMomentumKernel() {}
 
 protected:
   virtual Real computeQpResidual() override;

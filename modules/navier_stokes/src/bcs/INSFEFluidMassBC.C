@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MDFluidMassBC.h"
+#include "INSFEFluidMassBC.h"
 
-registerMooseObject("NavierStokesApp", MDFluidMassBC);
+registerMooseObject("NavierStokesApp", INSFEFluidMassBC);
 
 InputParameters
-MDFluidMassBC::validParams()
+INSFEFluidMassBC::validParams()
 {
-  InputParameters params = MDFluidIntegratedBCBase::validParams();
+  InputParameters params = INSFEFluidIntegratedBCBase::validParams();
   params.addClassDescription(
       "Specifies flow of mass through a boundary given a velocity function or postprocessor");
   params.addParam<FunctionName>("v_fn", "Velocity function with time at the boundary");
@@ -24,19 +24,19 @@ MDFluidMassBC::validParams()
   return params;
 }
 
-MDFluidMassBC::MDFluidMassBC(const InputParameters & parameters)
-  : MDFluidIntegratedBCBase(parameters),
+INSFEFluidMassBC::INSFEFluidMassBC(const InputParameters & parameters)
+  : INSFEFluidIntegratedBCBase(parameters),
     _has_vfn(parameters.isParamValid("v_fn")),
     _has_vpps(parameters.isParamValid("v_pps")),
     _velocity_fn(_has_vfn ? &getFunction("v_fn") : NULL),
     _v_pps_name(_has_vpps ? getParam<std::string>("v_pps") : "")
 {
   if (_has_vfn && _has_vpps)
-    mooseError("'v_fn' and 'v_pps' cannot be BOTH specified in MDFluidMassBC.");
+    mooseError("'v_fn' and 'v_pps' cannot be BOTH specified in INSFEFluidMassBC.");
 }
 
 Real
-MDFluidMassBC::computeQpResidual()
+INSFEFluidMassBC::computeQpResidual()
 {
   RealVectorValue vec_vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
 
@@ -52,13 +52,13 @@ MDFluidMassBC::computeQpResidual()
 }
 
 Real
-MDFluidMassBC::computeQpJacobian()
+INSFEFluidMassBC::computeQpJacobian()
 {
   return 0;
 }
 
 Real
-MDFluidMassBC::computeQpOffDiagJacobian(unsigned int jvar)
+INSFEFluidMassBC::computeQpOffDiagJacobian(unsigned int jvar)
 {
   unsigned m = this->mapVarNumber(jvar);
 

@@ -7,22 +7,22 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "FluidWallMomentumBC.h"
+#include "INSFEFluidWallMomentumBC.h"
 
-registerMooseObject("NavierStokesApp", FluidWallMomentumBC);
+registerMooseObject("NavierStokesApp", INSFEFluidWallMomentumBC);
 
 InputParameters
-FluidWallMomentumBC::validParams()
+INSFEFluidWallMomentumBC::validParams()
 {
-  InputParameters params = MDFluidIntegratedBCBase::validParams();
+  InputParameters params = INSFEFluidIntegratedBCBase::validParams();
   params.addClassDescription("Implicitly sets normal component of velocity to zero if the "
                              "advection term of the momentum equation is integrated by parts");
   params.addRequiredParam<unsigned>("component", "the velocity component");
   return params;
 }
 
-FluidWallMomentumBC::FluidWallMomentumBC(const InputParameters & parameters)
-  : MDFluidIntegratedBCBase(parameters),
+INSFEFluidWallMomentumBC::INSFEFluidWallMomentumBC(const InputParameters & parameters)
+  : INSFEFluidIntegratedBCBase(parameters),
     _mu(getMaterialProperty<Real>("dynamic_viscosity")),
     _mu_t(getMaterialProperty<Real>("turbulence_viscosity")),
     _component(getParam<unsigned>("component"))
@@ -30,7 +30,7 @@ FluidWallMomentumBC::FluidWallMomentumBC(const InputParameters & parameters)
 }
 
 Real
-FluidWallMomentumBC::computeQpResidual()
+INSFEFluidWallMomentumBC::computeQpResidual()
 {
   Real porosity = _has_porosity ? _porosity[_qp] : 1.0;
   Real tau_w = (porosity > 0.99)
@@ -41,7 +41,7 @@ FluidWallMomentumBC::computeQpResidual()
 }
 
 Real
-FluidWallMomentumBC::computeQpJacobian()
+INSFEFluidWallMomentumBC::computeQpJacobian()
 {
   Real porosity = _has_porosity ? _porosity[_qp] : 1.0;
   Real jac = (porosity > 0.99) ? -(_mu[_qp] + _mu_t[_qp]) * _grad_phi[_j][_qp](_component) *
@@ -52,7 +52,7 @@ FluidWallMomentumBC::computeQpJacobian()
 }
 
 Real
-FluidWallMomentumBC::computeQpOffDiagJacobian(unsigned int jvar)
+INSFEFluidWallMomentumBC::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _pressure_var_number)
   {

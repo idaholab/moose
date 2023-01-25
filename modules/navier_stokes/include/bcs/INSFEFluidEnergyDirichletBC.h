@@ -15,13 +15,13 @@
 /**
  * A conditional Dirichlet BC for the energy (temperature) equation
  */
-class MDFluidEnergyDirichletBC : public NodalBC
+class INSFEFluidEnergyDirichletBC : public NodalBC
 {
 public:
   static InputParameters validParams();
 
-  MDFluidEnergyDirichletBC(const InputParameters & parameters);
-  virtual ~MDFluidEnergyDirichletBC() {}
+  INSFEFluidEnergyDirichletBC(const InputParameters & parameters);
+  virtual ~INSFEFluidEnergyDirichletBC() {}
 
 protected:
   virtual Real computeQpResidual() override;

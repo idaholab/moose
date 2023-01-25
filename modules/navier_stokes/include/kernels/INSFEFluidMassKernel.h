@@ -9,17 +9,17 @@
 
 #pragma once
 
-#include "MDFluidKernelStabilization.h"
+#include "INSFEFluidKernelStabilization.h"
 
 /**
  * The spatial part of the 3D mass conservation for fluid flow
  */
-class MDFluidMassKernel : public MDFluidKernelStabilization
+class INSFEFluidMassKernel : public INSFEFluidKernelStabilization
 {
 public:
   static InputParameters validParams();
 
-  MDFluidMassKernel(const InputParameters & parameters);
+  INSFEFluidMassKernel(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;

@@ -16,13 +16,13 @@
  * This class couples together all the variables for the 3D fluid equations to allow them to be used
  * in derived IntegratedBC classes.
  */
-class MDFluidIntegratedBCBase : public IntegratedBC
+class INSFEFluidIntegratedBCBase : public IntegratedBC
 {
 public:
   static InputParameters validParams();
 
-  MDFluidIntegratedBCBase(const InputParameters & parameters);
-  virtual ~MDFluidIntegratedBCBase() {}
+  INSFEFluidIntegratedBCBase(const InputParameters & parameters);
+  virtual ~INSFEFluidIntegratedBCBase() {}
 
 protected:
   // Coupled variables

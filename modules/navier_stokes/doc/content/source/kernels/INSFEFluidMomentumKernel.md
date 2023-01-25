@@ -1,23 +1,23 @@
-# MDFluidMomentumKernel
+# INSFEFluidMomentumKernel
 
 !alert construction title=Undocumented Class
-The MDFluidMomentumKernel has not been documented. The content listed below should be used as a starting point for
+The INSFEFluidMomentumKernel has not been documented. The content listed below should be used as a starting point for
 documenting the class, which includes the typical automatic documentation associated with a
 MooseObject; however, what is contained is ultimately determined by what is necessary to make the
 documentation clear for users.
 
-!syntax description /Kernels/MDFluidMomentumKernel
+!syntax description /Kernels/INSFEFluidMomentumKernel
 
 ## Overview
 
-!! Replace these lines with information regarding the MDFluidMomentumKernel object.
+!! Replace these lines with information regarding the INSFEFluidMomentumKernel object.
 
 ## Example Input File Syntax
 
-!! Describe and include an example of how to use the MDFluidMomentumKernel object.
+!! Describe and include an example of how to use the INSFEFluidMomentumKernel object.
 
-!syntax parameters /Kernels/MDFluidMomentumKernel
+!syntax parameters /Kernels/INSFEFluidMomentumKernel
 
-!syntax inputs /Kernels/MDFluidMomentumKernel
+!syntax inputs /Kernels/INSFEFluidMomentumKernel
 
-!syntax children /Kernels/MDFluidMomentumKernel
+!syntax children /Kernels/INSFEFluidMomentumKernel

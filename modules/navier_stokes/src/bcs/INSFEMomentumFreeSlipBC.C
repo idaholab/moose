@@ -7,17 +7,17 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MDMomentumFreeSlipBC.h"
+#include "INSFEMomentumFreeSlipBC.h"
 #include "MooseMesh.h"
 #include "MooseVariable.h"
 #include "SystemBase.h"
 #include "FEProblemBase.h"
 #include "libmesh/numeric_vector.h"
 
-registerMooseObject("NavierStokesApp", MDMomentumFreeSlipBC);
+registerMooseObject("NavierStokesApp", INSFEMomentumFreeSlipBC);
 
 InputParameters
-MDMomentumFreeSlipBC::validParams()
+INSFEMomentumFreeSlipBC::validParams()
 {
   InputParameters params = NodalNormalBC::validParams();
   params.addClassDescription(
@@ -29,7 +29,7 @@ MDMomentumFreeSlipBC::validParams()
   return params;
 }
 
-MDMomentumFreeSlipBC::MDMomentumFreeSlipBC(const InputParameters & parameters)
+INSFEMomentumFreeSlipBC::INSFEMomentumFreeSlipBC(const InputParameters & parameters)
   : NodalNormalBC(parameters),
     _mesh_dimension(_mesh.dimension()),
     _u_vel(coupledValue("u")),
@@ -38,17 +38,17 @@ MDMomentumFreeSlipBC::MDMomentumFreeSlipBC(const InputParameters & parameters)
 {
 }
 
-MDMomentumFreeSlipBC::~MDMomentumFreeSlipBC() {}
+INSFEMomentumFreeSlipBC::~INSFEMomentumFreeSlipBC() {}
 
 bool
-MDMomentumFreeSlipBC::shouldApply()
+INSFEMomentumFreeSlipBC::shouldApply()
 {
   // this prevents zeroing out the row
   return !_fe_problem.currentlyComputingJacobian();
 }
 
 Real
-MDMomentumFreeSlipBC::computeQpResidual()
+INSFEMomentumFreeSlipBC::computeQpResidual()
 {
   for (auto tag : _vector_tags)
     if (_sys.hasVector(tag) && _var.isNodalDefined())
@@ -57,7 +57,7 @@ MDMomentumFreeSlipBC::computeQpResidual()
 
       if (_mesh_dimension == 1)
       {
-        mooseError("MDMomentumFreeSlipBC is not applicable for one-dimensional mesh.");
+        mooseError("INSFEMomentumFreeSlipBC is not applicable for one-dimensional mesh.");
       }
       else if (_mesh_dimension == 2)
       {
@@ -81,7 +81,7 @@ MDMomentumFreeSlipBC::computeQpResidual()
         residual.set(v_vel_dof_idx, v_vel_val);
       }
       else if (_mesh_dimension == 3)
-        mooseError("MDMomentumFreeSlipBC has not been implemented for three-dimensional mesh.");
+        mooseError("INSFEMomentumFreeSlipBC has not been implemented for three-dimensional mesh.");
       else
         mooseError("Mesh dimension not supported.");
     }

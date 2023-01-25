@@ -9,18 +9,18 @@
 
 #pragma once
 
-#include "MDFluidKernelBase.h"
+#include "INSFEFluidKernelBase.h"
 
 /**
  * Base class for stabilization kernels.
  */
-class MDFluidKernelStabilization : public MDFluidKernelBase
+class INSFEFluidKernelStabilization : public INSFEFluidKernelBase
 {
 public:
   static InputParameters validParams();
 
-  MDFluidKernelStabilization(const InputParameters & parameters);
-  virtual ~MDFluidKernelStabilization() {}
+  INSFEFluidKernelStabilization(const InputParameters & parameters);
+  virtual ~INSFEFluidKernelStabilization() {}
 
 protected:
   virtual void precalculateResidual();

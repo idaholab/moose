@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MDFluidKernelBase.h"
+#include "INSFEFluidKernelBase.h"
 #include "MooseMesh.h"
 #include "SystemBase.h"
 
 InputParameters
-MDFluidKernelBase::validParams()
+INSFEFluidKernelBase::validParams()
 {
   InputParameters params = Kernel::validParams();
 
@@ -33,7 +33,7 @@ MDFluidKernelBase::validParams()
   return params;
 }
 
-MDFluidKernelBase::MDFluidKernelBase(const InputParameters & parameters)
+INSFEFluidKernelBase::INSFEFluidKernelBase(const InputParameters & parameters)
   : Kernel(parameters),
     _second_u(_var.secondSln()),
     // Coupled variables
@@ -90,7 +90,7 @@ MDFluidKernelBase::MDFluidKernelBase(const InputParameters & parameters)
 }
 
 unsigned int
-MDFluidKernelBase::mapVarNumber(unsigned int var) const
+INSFEFluidKernelBase::mapVarNumber(unsigned int var) const
 {
   // Convert the Moose numbering to:
   // 0 for pressure

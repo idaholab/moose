@@ -9,20 +9,20 @@
 
 #pragma once
 
-#include "MDFluidKernelStabilization.h"
+#include "INSFEFluidKernelStabilization.h"
 
 #include "Function.h"
 
 /**
  * The spatial part of the 3D energy conservation for fluid flow
  */
-class MDFluidEnergyKernel : public MDFluidKernelStabilization
+class INSFEFluidEnergyKernel : public INSFEFluidKernelStabilization
 {
 public:
   static InputParameters validParams();
 
-  MDFluidEnergyKernel(const InputParameters & parameters);
-  virtual ~MDFluidEnergyKernel() {}
+  INSFEFluidEnergyKernel(const InputParameters & parameters);
+  virtual ~INSFEFluidEnergyKernel() {}
 
 protected:
   virtual Real computeQpResidual() override;

@@ -1,23 +1,23 @@
-# MDFluidEnergyBC
+# INSFEFluidEnergyBC
 
 !alert construction title=Undocumented Class
-The MDFluidEnergyBC has not been documented. The content listed below should be used as a starting point for
+The INSFEFluidEnergyBC has not been documented. The content listed below should be used as a starting point for
 documenting the class, which includes the typical automatic documentation associated with a
 MooseObject; however, what is contained is ultimately determined by what is necessary to make the
 documentation clear for users.
 
-!syntax description /BCs/MDFluidEnergyBC
+!syntax description /BCs/INSFEFluidEnergyBC
 
 ## Overview
 
-!! Replace these lines with information regarding the MDFluidEnergyBC object.
+!! Replace these lines with information regarding the INSFEFluidEnergyBC object.
 
 ## Example Input File Syntax
 
-!! Describe and include an example of how to use the MDFluidEnergyBC object.
+!! Describe and include an example of how to use the INSFEFluidEnergyBC object.
 
-!syntax parameters /BCs/MDFluidEnergyBC
+!syntax parameters /BCs/INSFEFluidEnergyBC
 
-!syntax inputs /BCs/MDFluidEnergyBC
+!syntax inputs /BCs/INSFEFluidEnergyBC
 
-!syntax children /BCs/MDFluidEnergyBC
+!syntax children /BCs/INSFEFluidEnergyBC

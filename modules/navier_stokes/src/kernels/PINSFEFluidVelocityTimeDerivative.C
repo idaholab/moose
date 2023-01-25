@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PMFluidVelocityTimeDerivative.h"
+#include "PINSFEFluidVelocityTimeDerivative.h"
 
-registerMooseObject("NavierStokesApp", PMFluidVelocityTimeDerivative);
+registerMooseObject("NavierStokesApp", PINSFEFluidVelocityTimeDerivative);
 
 InputParameters
-PMFluidVelocityTimeDerivative::validParams()
+PINSFEFluidVelocityTimeDerivative::validParams()
 {
   InputParameters params = TimeDerivative::validParams();
   params.addParam<bool>("conservative_form", false, "if conservative form is used");
@@ -23,7 +23,8 @@ PMFluidVelocityTimeDerivative::validParams()
   return params;
 }
 
-PMFluidVelocityTimeDerivative::PMFluidVelocityTimeDerivative(const InputParameters & parameters)
+PINSFEFluidVelocityTimeDerivative::PINSFEFluidVelocityTimeDerivative(
+    const InputParameters & parameters)
   : TimeDerivative(parameters),
     _conservative_form(getParam<bool>("conservative_form")),
     _pressure(coupledValue("pressure")),
@@ -35,7 +36,7 @@ PMFluidVelocityTimeDerivative::PMFluidVelocityTimeDerivative(const InputParamete
 }
 
 Real
-PMFluidVelocityTimeDerivative::computeQpResidual()
+PINSFEFluidVelocityTimeDerivative::computeQpResidual()
 {
   Real res = _rho[_qp] * TimeDerivative::computeQpResidual();
   if (_conservative_form)
@@ -50,7 +51,7 @@ PMFluidVelocityTimeDerivative::computeQpResidual()
 }
 
 Real
-PMFluidVelocityTimeDerivative::computeQpJacobian()
+PINSFEFluidVelocityTimeDerivative::computeQpJacobian()
 {
   Real jac = _rho[_qp] * TimeDerivative::computeQpJacobian();
   if (_conservative_form)

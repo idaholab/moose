@@ -7,22 +7,22 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MDFluidMassKernel.h"
+#include "INSFEFluidMassKernel.h"
 #include "MooseMesh.h"
 
-registerMooseObject("NavierStokesApp", MDFluidMassKernel);
+registerMooseObject("NavierStokesApp", INSFEFluidMassKernel);
 
 InputParameters
-MDFluidMassKernel::validParams()
+INSFEFluidMassKernel::validParams()
 {
-  InputParameters params = MDFluidKernelStabilization::validParams();
+  InputParameters params = INSFEFluidKernelStabilization::validParams();
   params.addClassDescription("Adds advective term of mass conservation equation along with "
                              "pressure-stabilized Petrov-Galerkin terms");
   return params;
 }
 
-MDFluidMassKernel::MDFluidMassKernel(const InputParameters & parameters)
-  : MDFluidKernelStabilization(parameters),
+INSFEFluidMassKernel::INSFEFluidMassKernel(const InputParameters & parameters)
+  : INSFEFluidKernelStabilization(parameters),
     _u_vel_second(_u_var.secondSln()),
     _v_vel_second(_v_var.secondSln()),
     _w_vel_second(_mesh.dimension() == 3 ? _w_var.secondSln() : _second_zero)
@@ -30,7 +30,7 @@ MDFluidMassKernel::MDFluidMassKernel(const InputParameters & parameters)
 }
 
 Real
-MDFluidMassKernel::computeQpResidual()
+INSFEFluidMassKernel::computeQpResidual()
 {
   RealVectorValue vec_vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
   Real masseq_part = -_rho[_qp] * vec_vel * _grad_test[_i][_qp];
@@ -73,14 +73,14 @@ MDFluidMassKernel::computeQpResidual()
 }
 
 Real
-MDFluidMassKernel::computeQpJacobian()
+INSFEFluidMassKernel::computeQpJacobian()
 {
   Real porosity = _has_porosity ? _porosity[_qp] : 1.0;
   return porosity * _tauc[_qp] * _grad_test[_i][_qp] * _grad_phi[_j][_qp];
 }
 
 Real
-MDFluidMassKernel::computeQpOffDiagJacobian(unsigned int jvar)
+INSFEFluidMassKernel::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // Convert the Moose numbering to internal porous medium model variable numbering.
   unsigned m = this->mapVarNumber(jvar);

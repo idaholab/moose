@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MDFluidEnergyKernel.h"
+#include "INSFEFluidEnergyKernel.h"
 
-registerMooseObject("NavierStokesApp", MDFluidEnergyKernel);
+registerMooseObject("NavierStokesApp", INSFEFluidEnergyKernel);
 
 InputParameters
-MDFluidEnergyKernel::validParams()
+INSFEFluidEnergyKernel::validParams()
 {
-  InputParameters params = MDFluidKernelStabilization::validParams();
+  InputParameters params = INSFEFluidKernelStabilization::validParams();
   params.addClassDescription("Adds advection, diffusion, and heat source terms to energy equation, "
                              "potentially with stabilization");
   params.addParam<bool>("conservative_form", false, "if conservative form is used");
@@ -26,8 +26,8 @@ MDFluidEnergyKernel::validParams()
   return params;
 }
 
-MDFluidEnergyKernel::MDFluidEnergyKernel(const InputParameters & parameters)
-  : MDFluidKernelStabilization(parameters),
+INSFEFluidEnergyKernel::INSFEFluidEnergyKernel(const InputParameters & parameters)
+  : INSFEFluidKernelStabilization(parameters),
     _conservative_form(getParam<bool>("conservative_form")),
     _k_elem(getMaterialProperty<Real>("k_fluid_elem")),
     _cp(getMaterialProperty<Real>("cp_fluid")),
@@ -44,15 +44,15 @@ MDFluidEnergyKernel::MDFluidEnergyKernel(const InputParameters & parameters)
   // Input sanity check: cannot have both 'power_density' and 'pke_power_var'
   if (_has_qv && _has_pke)
     mooseError(
-        "'power_density' and 'pke_power_var' cannot be both provided in 'MDFluidEnergyKernel'.");
+        "'power_density' and 'pke_power_var' cannot be both provided in 'INSFEFluidEnergyKernel'.");
 
   if (_has_pke && (_power_shape_function == NULL))
     mooseError("'power_shape_function' is required if 'pke_power_var' is provided in "
-               "'MDFluidEnergyKernel'.");
+               "'INSFEFluidEnergyKernel'.");
 }
 
 Real
-MDFluidEnergyKernel::computeQpResidual()
+INSFEFluidEnergyKernel::computeQpResidual()
 {
   Real porosity = _has_porosity ? _porosity[_qp] : 1.0;
   Real porosity_elem = (_has_porosity_elem || _has_porosity) ? _porosity_elem[_qp] : 1.0;
@@ -90,7 +90,7 @@ MDFluidEnergyKernel::computeQpResidual()
 }
 
 Real
-MDFluidEnergyKernel::computeQpJacobian()
+INSFEFluidEnergyKernel::computeQpJacobian()
 {
   Real porosity = _has_porosity ? _porosity[_qp] : 1.0;
   Real porosity_elem = (_has_porosity_elem || _has_porosity) ? _porosity_elem[_qp] : 1.0;
@@ -124,7 +124,7 @@ MDFluidEnergyKernel::computeQpJacobian()
 }
 
 Real
-MDFluidEnergyKernel::computeQpOffDiagJacobian(unsigned int jvar)
+INSFEFluidEnergyKernel::computeQpOffDiagJacobian(unsigned int jvar)
 {
   unsigned m = this->mapVarNumber(jvar);
 

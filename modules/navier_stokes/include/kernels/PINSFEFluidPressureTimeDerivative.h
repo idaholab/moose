@@ -15,13 +15,13 @@
 /**
  * The transient term of the porous-media mass conservation equation
  */
-class PMFluidPressureTimeDerivative : public TimeKernel
+class PINSFEFluidPressureTimeDerivative : public TimeKernel
 {
 public:
   static InputParameters validParams();
 
-  PMFluidPressureTimeDerivative(const InputParameters & parameters);
-  virtual ~PMFluidPressureTimeDerivative() {}
+  PINSFEFluidPressureTimeDerivative(const InputParameters & parameters);
+  virtual ~PINSFEFluidPressureTimeDerivative() {}
 
 protected:
   virtual Real computeQpResidual() override;

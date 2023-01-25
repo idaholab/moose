@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MDFluidMomentumBC.h"
+#include "INSFEFluidMomentumBC.h"
 
-registerMooseObject("NavierStokesApp", MDFluidMomentumBC);
+registerMooseObject("NavierStokesApp", INSFEFluidMomentumBC);
 
 InputParameters
-MDFluidMomentumBC::validParams()
+INSFEFluidMomentumBC::validParams()
 {
-  InputParameters params = MDFluidIntegratedBCBase::validParams();
+  InputParameters params = INSFEFluidIntegratedBCBase::validParams();
   params.addClassDescription("Specifies flow of momentum through a boundary");
   params.addRequiredParam<unsigned>("component", "0,1,or 2 for x-, y-, or z- direction");
   params.addParam<FunctionName>("p_fn", "Pressure function with time at the boundary");
@@ -35,8 +35,8 @@ MDFluidMomentumBC::validParams()
   return params;
 }
 
-MDFluidMomentumBC::MDFluidMomentumBC(const InputParameters & parameters)
-  : MDFluidIntegratedBCBase(parameters),
+INSFEFluidMomentumBC::INSFEFluidMomentumBC(const InputParameters & parameters)
+  : INSFEFluidIntegratedBCBase(parameters),
     _component(getParam<unsigned>("component")),
     _mu(getMaterialProperty<Real>("dynamic_viscosity")),
     _mu_t(getMaterialProperty<Real>("turbulence_viscosity")),
@@ -50,11 +50,11 @@ MDFluidMomentumBC::MDFluidMomentumBC(const InputParameters & parameters)
     _rho_branch(_has_pbranch ? coupledScalarValue("rho_branch") : _zero)
 {
   if ((_has_pbc || _has_pbranch) && _has_vbc)
-    mooseError("Pressure and velocity cannot be BOTH specified in MDFluidMomentumBC.");
+    mooseError("Pressure and velocity cannot be BOTH specified in INSFEFluidMomentumBC.");
   //
   if (_has_pbc && _has_pbranch)
     mooseError(
-        "Pressure function and branch pressure cannot be BOTH specified in MDFluidMomentumBC.");
+        "Pressure function and branch pressure cannot be BOTH specified in INSFEFluidMomentumBC.");
   //
   if (_has_pbranch)
   {
@@ -71,7 +71,7 @@ MDFluidMomentumBC::MDFluidMomentumBC(const InputParameters & parameters)
 }
 
 Real
-MDFluidMomentumBC::computeQpResidual()
+INSFEFluidMomentumBC::computeQpResidual()
 {
   Real porosity = _has_porosity ? _porosity[_qp] : 1;
   RealVectorValue vec_vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
@@ -101,7 +101,7 @@ MDFluidMomentumBC::computeQpResidual()
 }
 
 Real
-MDFluidMomentumBC::computeQpJacobian()
+INSFEFluidMomentumBC::computeQpJacobian()
 {
   Real porosity = _has_porosity ? _porosity[_qp] : 1;
   RealVectorValue vec_vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
@@ -123,7 +123,7 @@ MDFluidMomentumBC::computeQpJacobian()
 }
 
 Real
-MDFluidMomentumBC::computeQpOffDiagJacobian(unsigned int jvar)
+INSFEFluidMomentumBC::computeQpOffDiagJacobian(unsigned int jvar)
 {
   unsigned m = this->mapVarNumber(jvar);
   RealVectorValue vec_vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);

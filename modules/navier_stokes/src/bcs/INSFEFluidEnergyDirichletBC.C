@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MDFluidEnergyDirichletBC.h"
+#include "INSFEFluidEnergyDirichletBC.h"
 
-registerMooseObject("NavierStokesApp", MDFluidEnergyDirichletBC);
+registerMooseObject("NavierStokesApp", INSFEFluidEnergyDirichletBC);
 
 InputParameters
-MDFluidEnergyDirichletBC::validParams()
+INSFEFluidEnergyDirichletBC::validParams()
 {
   InputParameters params = NodalBC::validParams();
 
@@ -30,7 +30,7 @@ MDFluidEnergyDirichletBC::validParams()
   return params;
 }
 
-MDFluidEnergyDirichletBC::MDFluidEnergyDirichletBC(const InputParameters & parameters)
+INSFEFluidEnergyDirichletBC::INSFEFluidEnergyDirichletBC(const InputParameters & parameters)
   : NodalBC(parameters),
     _out_norm(getParam<VectorValue<Real>>("out_norm")),
     _u_vel(coupledValueOld("u")),
@@ -44,7 +44,7 @@ MDFluidEnergyDirichletBC::MDFluidEnergyDirichletBC(const InputParameters & param
 }
 
 bool
-MDFluidEnergyDirichletBC::isInlet()
+INSFEFluidEnergyDirichletBC::isInlet()
 {
   RealVectorValue vec_vel(_u_vel[0], _v_vel[0], _w_vel[0]);
 
@@ -61,13 +61,13 @@ MDFluidEnergyDirichletBC::isInlet()
 }
 
 bool
-MDFluidEnergyDirichletBC::shouldApply()
+INSFEFluidEnergyDirichletBC::shouldApply()
 {
   return isInlet();
 }
 
 Real
-MDFluidEnergyDirichletBC::computeQpResidual()
+INSFEFluidEnergyDirichletBC::computeQpResidual()
 {
   if (isInlet())
     return _u[_qp] - _temperature_fn->value(_t, *_current_node);
@@ -76,13 +76,13 @@ MDFluidEnergyDirichletBC::computeQpResidual()
 }
 
 Real
-MDFluidEnergyDirichletBC::computeQpJacobian()
+INSFEFluidEnergyDirichletBC::computeQpJacobian()
 {
   return isInlet() ? 1.0 : 0.0;
 }
 
 Real
-MDFluidEnergyDirichletBC::computeQpOffDiagJacobian(unsigned int /*jvar*/)
+INSFEFluidEnergyDirichletBC::computeQpOffDiagJacobian(unsigned int /*jvar*/)
 {
   return 0.0;
 }

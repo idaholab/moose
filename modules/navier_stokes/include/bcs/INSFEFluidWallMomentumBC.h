@@ -9,14 +9,14 @@
 
 #pragma once
 
-#include "MDFluidIntegratedBCBase.h"
+#include "INSFEFluidIntegratedBCBase.h"
 
-class FluidWallMomentumBC : public MDFluidIntegratedBCBase
+class INSFEFluidWallMomentumBC : public INSFEFluidIntegratedBCBase
 {
 public:
   static InputParameters validParams();
 
-  FluidWallMomentumBC(const InputParameters & parameters);
+  INSFEFluidWallMomentumBC(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

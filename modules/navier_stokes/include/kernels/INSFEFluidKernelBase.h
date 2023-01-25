@@ -17,13 +17,13 @@
  * This class couples together all the variables for the 3D fluid equations to allow them to be used
  * in derived Kernel classes.
  */
-class MDFluidKernelBase : public Kernel
+class INSFEFluidKernelBase : public Kernel
 {
 public:
   static InputParameters validParams();
 
-  MDFluidKernelBase(const InputParameters & parameters);
-  virtual ~MDFluidKernelBase() {}
+  INSFEFluidKernelBase(const InputParameters & parameters);
+  virtual ~INSFEFluidKernelBase() {}
 
 protected:
   Real velocityDiv() { return _grad_u_vel[_qp](0) + _grad_v_vel[_qp](1) + _grad_w_vel[_qp](2); }
@@ -83,7 +83,7 @@ protected:
 };
 
 inline RealVectorValue
-MDFluidKernelBase::velocityDot() const
+INSFEFluidKernelBase::velocityDot() const
 {
   RealVectorValue vec_vel_dot(_u_vel_dot[_qp], _v_vel_dot[_qp], _w_vel_dot[_qp]);
   return vec_vel_dot;

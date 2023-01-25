@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PMFluidTemperatureTimeDerivative.h"
+#include "PINSFEFluidTemperatureTimeDerivative.h"
 
-registerMooseObject("NavierStokesApp", PMFluidTemperatureTimeDerivative);
+registerMooseObject("NavierStokesApp", PINSFEFluidTemperatureTimeDerivative);
 
 InputParameters
-PMFluidTemperatureTimeDerivative::validParams()
+PINSFEFluidTemperatureTimeDerivative::validParams()
 {
   InputParameters params = TimeDerivative::validParams();
   params.addParam<bool>("conservative_form", false, "if conservative form is used");
@@ -23,7 +23,7 @@ PMFluidTemperatureTimeDerivative::validParams()
   return params;
 }
 
-PMFluidTemperatureTimeDerivative::PMFluidTemperatureTimeDerivative(
+PINSFEFluidTemperatureTimeDerivative::PINSFEFluidTemperatureTimeDerivative(
     const InputParameters & parameters)
   : TimeDerivative(parameters),
     _conservative_form(getParam<bool>("conservative_form")),
@@ -36,7 +36,7 @@ PMFluidTemperatureTimeDerivative::PMFluidTemperatureTimeDerivative(
 }
 
 Real
-PMFluidTemperatureTimeDerivative::computeQpResidual()
+PINSFEFluidTemperatureTimeDerivative::computeQpResidual()
 {
   Real res = _porosity[_qp] * _rho[_qp] * _cp[_qp] * _u_dot[_qp] * _test[_i][_qp];
   if (_conservative_form)
@@ -51,7 +51,7 @@ PMFluidTemperatureTimeDerivative::computeQpResidual()
 }
 
 Real
-PMFluidTemperatureTimeDerivative::computeQpJacobian()
+PINSFEFluidTemperatureTimeDerivative::computeQpJacobian()
 {
   Real jac = _porosity[_qp] * _rho[_qp] * _cp[_qp] * TimeDerivative::computeQpJacobian();
   if (_conservative_form)

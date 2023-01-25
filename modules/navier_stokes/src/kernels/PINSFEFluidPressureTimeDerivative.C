@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PMFluidPressureTimeDerivative.h"
+#include "PINSFEFluidPressureTimeDerivative.h"
 
-registerMooseObject("NavierStokesApp", PMFluidPressureTimeDerivative);
+registerMooseObject("NavierStokesApp", PINSFEFluidPressureTimeDerivative);
 
 InputParameters
-PMFluidPressureTimeDerivative::validParams()
+PINSFEFluidPressureTimeDerivative::validParams()
 {
   InputParameters params = TimeKernel::validParams();
   params.addClassDescription(
@@ -24,7 +24,8 @@ PMFluidPressureTimeDerivative::validParams()
   return params;
 }
 
-PMFluidPressureTimeDerivative::PMFluidPressureTimeDerivative(const InputParameters & parameters)
+PINSFEFluidPressureTimeDerivative::PINSFEFluidPressureTimeDerivative(
+    const InputParameters & parameters)
   : TimeKernel(parameters),
     _temperature(coupledValue("temperature")),
     _temperature_dot(coupledDot("temperature")),
@@ -36,7 +37,7 @@ PMFluidPressureTimeDerivative::PMFluidPressureTimeDerivative(const InputParamete
 }
 
 Real
-PMFluidPressureTimeDerivative::computeQpResidual()
+PINSFEFluidPressureTimeDerivative::computeQpResidual()
 {
   Real rho, drho_dp, drho_dT;
   _eos.rho_from_p_T(_u[_qp], _temperature[_qp], rho, drho_dp, drho_dT);
@@ -45,7 +46,7 @@ PMFluidPressureTimeDerivative::computeQpResidual()
 }
 
 Real
-PMFluidPressureTimeDerivative::computeQpJacobian()
+PINSFEFluidPressureTimeDerivative::computeQpJacobian()
 {
   Real rho, drho_dp, drho_dT;
   _eos.rho_from_p_T(_u[_qp], _temperature[_qp], rho, drho_dp, drho_dT);
@@ -53,7 +54,7 @@ PMFluidPressureTimeDerivative::computeQpJacobian()
 }
 
 Real
-PMFluidPressureTimeDerivative::computeQpOffDiagJacobian(unsigned int jvar)
+PINSFEFluidPressureTimeDerivative::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _temperature_var_number)
   {

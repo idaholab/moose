@@ -95,42 +95,42 @@
 [Kernels]
   # mass balance (continuity) equation
   [mass_time]
-    type = PMFluidPressureTimeDerivative
+    type = PINSFEFluidPressureTimeDerivative
     variable = p
   []
   [mass_space]
-    type = MDFluidMassKernel
+    type = INSFEFluidMassKernel
     variable = p
   []
 
   # momentum equations for x- and y- velocities
   [x_momentum_time]
-    type = PMFluidVelocityTimeDerivative
+    type = PINSFEFluidVelocityTimeDerivative
     variable = vel_x
   []
   [x_momentum_space]
-    type = MDFluidMomentumKernel
+    type = INSFEFluidMomentumKernel
     variable = vel_x
     component = 0
   []
 
   [y_momentum_time]
-    type = PMFluidVelocityTimeDerivative
+    type = PINSFEFluidVelocityTimeDerivative
     variable = vel_y
   []
   [y_momentum_space]
-    type = MDFluidMomentumKernel
+    type = INSFEFluidMomentumKernel
     variable = vel_y
     component = 1
   []
 
   # fluid energy equation
   [temperature_time]
-    type = PMFluidTemperatureTimeDerivative
+    type = PINSFEFluidTemperatureTimeDerivative
     variable = T
   []
   [temperature_space]
-    type = MDFluidEnergyKernel
+    type = INSFEFluidEnergyKernel
     variable = T
     power_density = vol_heat
   []
@@ -147,13 +147,13 @@
   # BCs for mass equation
   # Inlet
   [mass_inlet]
-    type = MDFluidMassBC
+    type = INSFEFluidMassBC
     variable = p
     boundary = '1'
   []
   # Outlet
   [mass_out]
-    type = MDFluidMassBC
+    type = INSFEFluidMassBC
     variable = p
     boundary = '2'
   []
@@ -161,7 +161,7 @@
   # BCs for x-momentum equation
   # Inlet
   [vx_in]
-    type = MDFluidMomentumBC
+    type = INSFEFluidMomentumBC
     variable = vel_x
     boundary = '1'
     component   = 0
@@ -170,7 +170,7 @@
   []
   # Outlet
   [vx_out]
-    type = MDFluidMomentumBC
+    type = INSFEFluidMomentumBC
     variable = vel_x
     boundary = '2'
     component   = 0
@@ -178,7 +178,7 @@
   []
   # Walls (left and right walls)
   [vx_wall]
-    type = FluidWallMomentumBC
+    type = INSFEFluidWallMomentumBC
     variable = vel_x
     boundary = '3 4'
     component = 0
@@ -187,7 +187,7 @@
   # BCs for y-momentum equation
   # Inlet
   [vy_in]
-    type = MDFluidMomentumBC
+    type = INSFEFluidMomentumBC
     variable = vel_y
     boundary = '1'
     component   = 1
@@ -195,7 +195,7 @@
   []
   # Outlet
   [vy_out]
-    type = MDFluidMomentumBC
+    type = INSFEFluidMomentumBC
     variable = vel_y
     boundary = '2'
     component   = 1
@@ -203,7 +203,7 @@
   []
   # Walls (left and right walls)
   [vy_wall]
-    type = FluidWallMomentumBC
+    type = INSFEFluidWallMomentumBC
     variable = vel_y
     boundary = '3 4'
     component = 1
@@ -211,7 +211,7 @@
 
   # Special slip-wall BCs for both x- and y- velocities
   [slipwall]
-    type = MDMomentumFreeSlipBC
+    type = INSFEMomentumFreeSlipBC
     boundary = '3 4'
     variable = vel_x
     u = vel_x
@@ -221,14 +221,14 @@
   # BCs for fluid energy equation
   # Inlet
   [T_in]
-    type = MDFluidEnergyBC
+    type = INSFEFluidEnergyBC
     variable = T
     boundary = '1'
     T_fn = 630
   []
   # Outlet
   [T_out]
-    type = MDFluidEnergyBC
+    type = INSFEFluidEnergyBC
     variable = T
     boundary = '2'
     T_fn = 630

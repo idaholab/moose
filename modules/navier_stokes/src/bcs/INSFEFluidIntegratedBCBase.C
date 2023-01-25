@@ -7,11 +7,11 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MDFluidIntegratedBCBase.h"
+#include "INSFEFluidIntegratedBCBase.h"
 #include "MooseMesh.h"
 
 InputParameters
-MDFluidIntegratedBCBase::validParams()
+INSFEFluidIntegratedBCBase::validParams()
 {
   InputParameters params = IntegratedBC::validParams();
 
@@ -28,7 +28,7 @@ MDFluidIntegratedBCBase::validParams()
   return params;
 }
 
-MDFluidIntegratedBCBase::MDFluidIntegratedBCBase(const InputParameters & parameters)
+INSFEFluidIntegratedBCBase::INSFEFluidIntegratedBCBase(const InputParameters & parameters)
   : IntegratedBC(parameters),
     // Coupled variables
     _u_vel(coupledValue("u")),
@@ -58,7 +58,7 @@ MDFluidIntegratedBCBase::MDFluidIntegratedBCBase(const InputParameters & paramet
 }
 
 unsigned
-MDFluidIntegratedBCBase::mapVarNumber(unsigned var)
+INSFEFluidIntegratedBCBase::mapVarNumber(unsigned var)
 {
   // Convert the Moose numbering to:
   // 0 for pressure

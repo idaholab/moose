@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MDFluidEnergyBC.h"
+#include "INSFEFluidEnergyBC.h"
 
-registerMooseObject("NavierStokesApp", MDFluidEnergyBC);
+registerMooseObject("NavierStokesApp", INSFEFluidEnergyBC);
 
 InputParameters
-MDFluidEnergyBC::validParams()
+INSFEFluidEnergyBC::validParams()
 {
-  InputParameters params = MDFluidIntegratedBCBase::validParams();
+  InputParameters params = INSFEFluidIntegratedBCBase::validParams();
   params.addClassDescription("Specifies flow of energy through a boundary");
   params.addParam<FunctionName>("v_fn", "Velocity function with time at the boundary");
   params.addParam<FunctionName>("T_fn", "Temperature function with time at the boundary");
@@ -23,8 +23,8 @@ MDFluidEnergyBC::validParams()
   return params;
 }
 
-MDFluidEnergyBC::MDFluidEnergyBC(const InputParameters & parameters)
-  : MDFluidIntegratedBCBase(parameters),
+INSFEFluidEnergyBC::INSFEFluidEnergyBC(const InputParameters & parameters)
+  : INSFEFluidIntegratedBCBase(parameters),
     _cp(getMaterialProperty<Real>("cp_fluid")),
     _has_vbc(parameters.isParamValid("v_fn")),
     _has_Tbc(parameters.isParamValid("T_fn")),
@@ -42,12 +42,12 @@ MDFluidEnergyBC::MDFluidEnergyBC(const InputParameters & parameters)
     mooseError("For an inlet condition ('v_fn' is given), a boundary temperature ('T_fn') is also "
                "needed.");
   if (_has_Tbc && _has_Tbranch)
-    mooseError(
-        "Temperature function and branch temperature cannot be BOTH specified in MDFluidEnergyBC.");
+    mooseError("Temperature function and branch temperature cannot be BOTH specified in "
+               "INSFEFluidEnergyBC.");
 }
 
 Real
-MDFluidEnergyBC::computeQpResidual()
+INSFEFluidEnergyBC::computeQpResidual()
 {
   RealVectorValue vec_vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
 
@@ -72,7 +72,7 @@ MDFluidEnergyBC::computeQpResidual()
 }
 
 Real
-MDFluidEnergyBC::computeQpJacobian()
+INSFEFluidEnergyBC::computeQpJacobian()
 {
   RealVectorValue vec_vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
   Real v_bc = _has_vbc ? -_v_fn->value(_t, _q_point[_qp]) : vec_vel * _normals[_qp];
@@ -97,7 +97,7 @@ MDFluidEnergyBC::computeQpJacobian()
 }
 
 Real
-MDFluidEnergyBC::computeQpOffDiagJacobian(unsigned int jvar)
+INSFEFluidEnergyBC::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // this is jocabian term w.r.t branch temperature
   if (jvar == _T_branch_var_number)

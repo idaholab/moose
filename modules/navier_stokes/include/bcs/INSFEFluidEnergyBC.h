@@ -9,19 +9,19 @@
 
 #pragma once
 
-#include "MDFluidIntegratedBCBase.h"
+#include "INSFEFluidIntegratedBCBase.h"
 #include "Function.h"
 
 /**
  * An integral BC for the energy (temperature) equation
  */
-class MDFluidEnergyBC : public MDFluidIntegratedBCBase
+class INSFEFluidEnergyBC : public INSFEFluidIntegratedBCBase
 {
 public:
   static InputParameters validParams();
 
-  MDFluidEnergyBC(const InputParameters & parameters);
-  virtual ~MDFluidEnergyBC() {}
+  INSFEFluidEnergyBC(const InputParameters & parameters);
+  virtual ~INSFEFluidEnergyBC() {}
 
 protected:
   virtual Real computeQpResidual() override;

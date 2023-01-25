@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MDFluidMomentumKernel.h"
+#include "INSFEFluidMomentumKernel.h"
 
-registerMooseObject("NavierStokesApp", MDFluidMomentumKernel);
+registerMooseObject("NavierStokesApp", INSFEFluidMomentumKernel);
 
 InputParameters
-MDFluidMomentumKernel::validParams()
+INSFEFluidMomentumKernel::validParams()
 {
-  InputParameters params = MDFluidKernelStabilization::validParams();
+  InputParameters params = INSFEFluidKernelStabilization::validParams();
   params.addClassDescription("Adds advection, viscous, pressure, friction, and gravity terms to "
                              "the Navier-Stokes momentum equation, potentially with stabilization");
   params.addParam<bool>("conservative_form", false, "if conservative form is used");
@@ -22,8 +22,8 @@ MDFluidMomentumKernel::validParams()
   return params;
 }
 
-MDFluidMomentumKernel::MDFluidMomentumKernel(const InputParameters & parameters)
-  : MDFluidKernelStabilization(parameters),
+INSFEFluidMomentumKernel::INSFEFluidMomentumKernel(const InputParameters & parameters)
+  : INSFEFluidKernelStabilization(parameters),
     _grad_eps(coupledGradient("porosity")),
     _conservative_form(getParam<bool>("conservative_form")),
     _component(getParam<unsigned>("component"))
@@ -31,7 +31,7 @@ MDFluidMomentumKernel::MDFluidMomentumKernel(const InputParameters & parameters)
 }
 
 Real
-MDFluidMomentumKernel::computeQpResidual()
+INSFEFluidMomentumKernel::computeQpResidual()
 {
   Real porosity = _has_porosity ? _porosity[_qp] : 1.0;
   RealVectorValue vec_vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
@@ -97,7 +97,7 @@ MDFluidMomentumKernel::computeQpResidual()
 }
 
 Real
-MDFluidMomentumKernel::computeQpJacobian()
+INSFEFluidMomentumKernel::computeQpJacobian()
 {
   Real porosity = _has_porosity ? _porosity[_qp] : 1.0;
   RealVectorValue vec_vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
@@ -145,7 +145,7 @@ MDFluidMomentumKernel::computeQpJacobian()
 }
 
 Real
-MDFluidMomentumKernel::computeQpOffDiagJacobian(unsigned int jvar)
+INSFEFluidMomentumKernel::computeQpOffDiagJacobian(unsigned int jvar)
 {
   unsigned m = this->mapVarNumber(jvar);
   Real porosity = _has_porosity ? _porosity[_qp] : 1.0;

@@ -70,7 +70,7 @@
     initial_condition = 800
   []
   [porosity]
-    # nothing really depends on porosity, but PMFluidPressureTimeDerivative requires it
+    # nothing really depends on porosity, but PINSFEFluidPressureTimeDerivative requires it
     # need make it conditional
     initial_condition = 1
   []
@@ -85,32 +85,32 @@
 [Kernels]
   # mass eqn
   [mass_time]
-    type = PMFluidPressureTimeDerivative
+    type = PINSFEFluidPressureTimeDerivative
     variable = p
   []
   [mass_space]
-    type = MDFluidMassKernel
+    type = INSFEFluidMassKernel
     variable = p
   []
 
   # x-momentum eqn
   [x_momentum_time]
-    type = PMFluidVelocityTimeDerivative
+    type = PINSFEFluidVelocityTimeDerivative
     variable = vel_x
   []
   [x_momentum_space]
-    type = MDFluidMomentumKernel
+    type = INSFEFluidMomentumKernel
     variable = vel_x
     component = 0
   []
 
   # y-momentum eqn
   [y_momentum_time]
-    type = PMFluidVelocityTimeDerivative
+    type = PINSFEFluidVelocityTimeDerivative
     variable = vel_y
   []
   [y_momentum_space]
-    type = MDFluidMomentumKernel
+    type = INSFEFluidMomentumKernel
     variable = vel_y
     component = 1
   []

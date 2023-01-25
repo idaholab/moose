@@ -1,23 +1,23 @@
-# PMFluidVelocityTimeDerivative
+# PINSFEFluidVelocityTimeDerivative
 
 !alert construction title=Undocumented Class
-The PMFluidVelocityTimeDerivative has not been documented. The content listed below should be used as a starting point for
+The PINSFEFluidVelocityTimeDerivative has not been documented. The content listed below should be used as a starting point for
 documenting the class, which includes the typical automatic documentation associated with a
 MooseObject; however, what is contained is ultimately determined by what is necessary to make the
 documentation clear for users.
 
-!syntax description /Kernels/PMFluidVelocityTimeDerivative
+!syntax description /Kernels/PINSFEFluidVelocityTimeDerivative
 
 ## Overview
 
-!! Replace these lines with information regarding the PMFluidVelocityTimeDerivative object.
+!! Replace these lines with information regarding the PINSFEFluidVelocityTimeDerivative object.
 
 ## Example Input File Syntax
 
-!! Describe and include an example of how to use the PMFluidVelocityTimeDerivative object.
+!! Describe and include an example of how to use the PINSFEFluidVelocityTimeDerivative object.
 
-!syntax parameters /Kernels/PMFluidVelocityTimeDerivative
+!syntax parameters /Kernels/PINSFEFluidVelocityTimeDerivative
 
-!syntax inputs /Kernels/PMFluidVelocityTimeDerivative
+!syntax inputs /Kernels/PINSFEFluidVelocityTimeDerivative
 
-!syntax children /Kernels/PMFluidVelocityTimeDerivative
+!syntax children /Kernels/PINSFEFluidVelocityTimeDerivative

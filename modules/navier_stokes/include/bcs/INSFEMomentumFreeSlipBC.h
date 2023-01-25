@@ -17,13 +17,13 @@
  * which acts on conservative variables such as rhou and rhov, while this class acts on
  * primitive variables such as u and v.
  */
-class MDMomentumFreeSlipBC : public NodalNormalBC
+class INSFEMomentumFreeSlipBC : public NodalNormalBC
 {
 public:
   static InputParameters validParams();
 
-  MDMomentumFreeSlipBC(const InputParameters & parameters);
-  virtual ~MDMomentumFreeSlipBC();
+  INSFEMomentumFreeSlipBC(const InputParameters & parameters);
+  virtual ~INSFEMomentumFreeSlipBC();
 
   virtual bool shouldApply() override;
 

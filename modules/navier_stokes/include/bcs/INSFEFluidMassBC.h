@@ -9,19 +9,19 @@
 
 #pragma once
 
-#include "MDFluidIntegratedBCBase.h"
+#include "INSFEFluidIntegratedBCBase.h"
 #include "Function.h"
 
 /**
  * A specific BC for the mass (pressure) equation
  */
-class MDFluidMassBC : public MDFluidIntegratedBCBase
+class INSFEFluidMassBC : public INSFEFluidIntegratedBCBase
 {
 public:
   static InputParameters validParams();
 
-  MDFluidMassBC(const InputParameters & parameters);
-  virtual ~MDFluidMassBC() {}
+  INSFEFluidMassBC(const InputParameters & parameters);
+  virtual ~INSFEFluidMassBC() {}
 
 protected:
   virtual Real computeQpResidual() override;

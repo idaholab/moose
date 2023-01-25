@@ -12,12 +12,12 @@
 #include "TimeDerivative.h"
 #include "SinglePhaseFluidProperties.h"
 
-class PMFluidTemperatureTimeDerivative : public TimeDerivative
+class PINSFEFluidTemperatureTimeDerivative : public TimeDerivative
 {
 public:
   static InputParameters validParams();
 
-  PMFluidTemperatureTimeDerivative(const InputParameters & parameters);
+  PINSFEFluidTemperatureTimeDerivative(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;

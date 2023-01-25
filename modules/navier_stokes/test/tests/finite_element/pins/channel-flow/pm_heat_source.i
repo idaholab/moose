@@ -98,40 +98,40 @@
 
 [Kernels]
   [mass_time]
-    type = PMFluidPressureTimeDerivative
+    type = PINSFEFluidPressureTimeDerivative
     variable = p
   []
   [mass_space]
-    type = MDFluidMassKernel
+    type = INSFEFluidMassKernel
     variable = p
   []
 
   [x_momentum_time]
-    type = PMFluidVelocityTimeDerivative
+    type = PINSFEFluidVelocityTimeDerivative
     variable = vel_x
   []
   [x_momentum_space]
-    type = MDFluidMomentumKernel
+    type = INSFEFluidMomentumKernel
     variable = vel_x
     component = 0
   []
 
   [y_momentum_time]
-    type = PMFluidVelocityTimeDerivative
+    type = PINSFEFluidVelocityTimeDerivative
     variable = vel_y
   []
   [y_momentum_space]
-    type = MDFluidMomentumKernel
+    type = INSFEFluidMomentumKernel
     variable = vel_y
     component = 1
   []
 
   [temperature_time]
-    type = PMFluidTemperatureTimeDerivative
+    type = PINSFEFluidTemperatureTimeDerivative
     variable = T
   [../]
   [temperature_space]
-    type = MDFluidEnergyKernel
+    type = INSFEFluidEnergyKernel
     variable = T
     power_density = vol_heat
   []
@@ -148,7 +148,7 @@
   # BCs for mass equation
   # Inlet
   [mass_inlet]
-    type = MDFluidMassBC
+    type = INSFEFluidMassBC
     variable = p
     boundary = 'left'
     v_fn = v_in

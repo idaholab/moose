@@ -7,18 +7,18 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MDFluidKernelStabilization.h"
+#include "INSFEFluidKernelStabilization.h"
 #include "libmesh/quadrature.h"
 
 InputParameters
-MDFluidKernelStabilization::validParams()
+INSFEFluidKernelStabilization::validParams()
 {
-  InputParameters params = MDFluidKernelBase::validParams();
+  InputParameters params = INSFEFluidKernelBase::validParams();
   return params;
 }
 
-MDFluidKernelStabilization::MDFluidKernelStabilization(const InputParameters & parameters)
-  : MDFluidKernelBase(parameters),
+INSFEFluidKernelStabilization::INSFEFluidKernelStabilization(const InputParameters & parameters)
+  : INSFEFluidKernelBase(parameters),
     _u_dot(_bTransient ? _var.uDot() : _zero),
     _du_dot_du(_bTransient ? _var.duDotDu() : _zero),
     _tauc(getMaterialProperty<Real>("tauc")),
@@ -28,7 +28,7 @@ MDFluidKernelStabilization::MDFluidKernelStabilization(const InputParameters & p
 }
 
 void
-MDFluidKernelStabilization::precalculateResidual()
+INSFEFluidKernelStabilization::precalculateResidual()
 {
   _vel_elem = RealVectorValue(0, 0, 0);
   // calculating element average velocity
