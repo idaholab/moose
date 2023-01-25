@@ -1,7 +1,7 @@
 ## Sockeye
 
 - [Documentation](https://sockeye-docs.hpcondemand.inl.gov/latest/)
-- [Discussion Forum](https://sockeye-discourse.hpcondemand.inl.gov)
+- [Support Forum (Discourse)](https://sockeye-discourse.hpcondemand.inl.gov)
 - [Build Status](https://civet.inl.gov/repo/837/)
 - [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_ondemand_sockeye.md)
 - [Level 1 - HPC Binary Execution](ncrc/applications/ncrc_hpc_sockeye.md)
