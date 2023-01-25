@@ -1,6 +1,6 @@
 ## Pronghorn
 
-- [Documentation](https://pronghorn-docs.hpcondemand.inl.gov/latest/)
+- [Documentation](https://pronghorn-docs.hpcondemand.inl.gov/)
 - [Support Forum (Discourse)](https://pronghorn-discourse.hpcondemand.inl.gov)
 - [Build Status](https://civet.inl.gov/repo/871/)
 - [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_ondemand_pronghorn.md)

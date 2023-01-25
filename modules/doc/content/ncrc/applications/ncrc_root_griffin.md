@@ -1,7 +1,7 @@
 ## Griffin
 
 
-- [Documentation](https://griffin-docs.hpcondemand.inl.gov/latest/)
+- [Documentation](https://griffin-docs.hpcondemand.inl.gov/)
 - [Support Forum (Discourse)](https://griffin-discourse.hpcondemand.inl.gov)
 - [Build Status](https://civet.inl.gov/repo/822/)
 - [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_ondemand_griffin.md)

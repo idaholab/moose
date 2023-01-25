@@ -1,6 +1,6 @@
 ## Grizzly
 
-- [Documentation](https://grizzly-docs.hpcondemand.inl.gov/latest/)
+- [Documentation](https://grizzly-docs.hpcondemand.inl.gov/)
 - [Support Forum (Discourse)](https://grizzly-discourse.hpcondemand.inl.gov)
 - [Build Status](https://civet.inl.gov/repo/856/)
 - [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_ondemand_grizzly.md)
