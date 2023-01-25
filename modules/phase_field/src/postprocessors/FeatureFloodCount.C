@@ -771,6 +771,20 @@ FeatureFloodCount::scatterAndUpdateRanks()
         largest_global_index = global_index;
   }
 
+  // communicate the boundary intersection state
+  std::map<unsigned int, int> intersection_state;
+  for (auto & feature : _feature_sets)
+    intersection_state[feature._id] |= static_cast<int>(feature._boundary_intersection);
+  std::vector<std::map<unsigned int, int>> all_intersection_states;
+  _communicator.allgather(intersection_state, all_intersection_states);
+  for (auto & feature : _feature_sets)
+    for (const auto & state : all_intersection_states)
+    {
+      const auto it = state.find(feature._id);
+      if (it != state.end())
+        feature._boundary_intersection |= static_cast<BoundaryIntersection>(it->second);
+    }
+
   buildFeatureIdToLocalIndices(largest_global_index);
 }
 
@@ -820,8 +834,6 @@ FeatureFloodCount::getFeatureVar(unsigned int feature_id) const
 bool
 FeatureFloodCount::doesFeatureIntersectBoundary(unsigned int feature_id) const
 {
-  // TODO: This information is not parallel consistent when using FeatureFloodCounter
-
   // Some processors don't contain the largest feature id, in that case we just return invalid_id
   if (feature_id >= _feature_id_to_local_index.size())
     return false;
@@ -842,8 +854,6 @@ FeatureFloodCount::doesFeatureIntersectBoundary(unsigned int feature_id) const
 bool
 FeatureFloodCount::doesFeatureIntersectSpecifiedBoundary(unsigned int feature_id) const
 {
-  // TODO: This information is not parallel consistent when using FeatureFloodCounter
-
   // Some processors don't contain the largest feature id, in that case we just return invalid_id
   if (feature_id >= _feature_id_to_local_index.size())
     return false;
@@ -866,8 +876,6 @@ FeatureFloodCount::doesFeatureIntersectSpecifiedBoundary(unsigned int feature_id
 bool
 FeatureFloodCount::isFeaturePercolated(unsigned int feature_id) const
 {
-  // TODO: This information is not parallel consistent when using FeatureFloodCounter
-
   // Some processors don't contain the largest feature id, in that case we just return invalid_id
   if (feature_id >= _feature_id_to_local_index.size())
     return false;
