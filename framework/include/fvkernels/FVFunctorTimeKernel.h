@@ -9,19 +9,17 @@
 
 #pragma once
 
-#include "FVFunctorTimeKernel.h"
+#include "FVElementalKernel.h"
 
-class INSFVEnergyTimeDerivative : public FVFunctorTimeKernel
+class FVFunctorTimeKernel : public FVElementalKernel
 {
 public:
   static InputParameters validParams();
-  INSFVEnergyTimeDerivative(const InputParameters & params);
+  FVFunctorTimeKernel(const InputParameters & parameters);
 
 protected:
   ADReal computeQpResidual() override;
 
-  /// the density
-  const Moose::Functor<ADReal> & _rho;
-  /// the heat conductivity
-  const Moose::Functor<ADReal> & _cp;
+  /// The functor to query for the time derivative
+  const Moose::FunctorBase<ADReal> & _functor;
 };

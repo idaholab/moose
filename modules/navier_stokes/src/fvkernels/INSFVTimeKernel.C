@@ -16,13 +16,13 @@
 InputParameters
 INSFVTimeKernel::validParams()
 {
-  auto params = FVTimeKernel::validParams();
+  auto params = FVFunctorTimeKernel::validParams();
   params += INSFVMomentumResidualObject::validParams();
   return params;
 }
 
 INSFVTimeKernel::INSFVTimeKernel(const InputParameters & params)
-  : FVTimeKernel(params), INSFVMomentumResidualObject(*this)
+  : FVFunctorTimeKernel(params), INSFVMomentumResidualObject(*this)
 {
 }
 

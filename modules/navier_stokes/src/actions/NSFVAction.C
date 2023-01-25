@@ -1112,7 +1112,7 @@ NSFVAction::addScalarTimeKernels()
 {
   for (const auto & vname : _passive_scalar_names)
   {
-    const std::string kernel_type = "FVTimeKernel";
+    const std::string kernel_type = "FVFunctorTimeKernel";
     InputParameters params = _factory.getValidParams(kernel_type);
     assignBlocks(params, _blocks);
     params.set<NonlinearVariableName>("variable") = vname;
