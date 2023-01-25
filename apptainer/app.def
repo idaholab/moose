@@ -45,6 +45,10 @@ From: {{ APPTAINER_FROM }}
     if [[ $MOOSE_RELATIVE_PATH = ..* ]]; then
         mkdir ${MOOSE_BUILD_DIR}
         cp -r ${MOOSE_DIR}/. ${MOOSE_BUILD_DIR}
+    # MOOSE_DIR is the application (combined-opt)
+    elif [[ '{{ BINARY_NAME }}' == 'moose_combined' ]]; then
+        # do nothing
+        :
     # MOOSE_DIR is in the application, setup a symlink
     else
         ln -s ./${APPLICATION_NAME}/${MOOSE_RELATIVE_PATH} ${MOOSE_BUILD_DIR}
@@ -98,7 +102,11 @@ From: {{ APPTAINER_FROM }}
     ./configure --prefix=$MOOSE_PREFIX ${MOOSE_OPTIONS}
 
     # Build and install
+{%- if BINARY_NAME is 'moose_combined' %}
+    cd ${APPLICATION_DIR}/modules
+{%- else %}
     cd ${APPLICATION_DIR}
+{%- endif %}
     make -j ${MOOSE_JOBS} METHOD=${METHOD}
     make install -j ${MOOSE_JOBS} MOOSE_SKIP_DOCS=${MOOSE_SKIP_DOCS} MOOSE_DOCS_FLAGS="${MOOSE_DOCS_FLAGS}" METHOD=${METHOD}
 
@@ -110,6 +118,12 @@ From: {{ APPTAINER_FROM }}
     mamba uninstall -yq ${EXTRA_DOC_PACKAGES}
 {%- endif %}
 
+# Create moose-opt symlink to combined-opt
+{%- if BINARY_NAME is 'moose_combined' %}
+    cd /opt/moose/bin
+    ln combined-opt moose-opt
+{%- endif %}
+
     # Install moose-tools from moose-base container
     source /root/install_moose_tools.sh
 
@@ -118,7 +132,11 @@ From: {{ APPTAINER_FROM }}
 
 %test
     # Load jinja vars
+{%- if BINARY_NAME is 'moose_combined' %}
+    BINARY_NAME=combined
+{%- else %}
     BINARY_NAME={{ BINARY_NAME }}
+{%- endif %}
     METHOD={{ METHOD or "opt" }}
     TEST_DIRS={{ TEST_DIRS or "tests" }}
 

@@ -212,10 +212,6 @@ class Versioner:
     @staticmethod
     def get_app():
         """ gets the current application name/dir/commit the cwd is in, if any """
-        # If we're nested within MOOSE_DIR, we're not within an app
-        if (os.getcwd() + os.sep).startswith(MOOSE_DIR + os.sep):
-            return None, None, None
-
         # If we're not within a git rep, we're not within an app
         tree_command = ['git', 'rev-parse', '--is-inside-work-tree']
         process = subprocess.run(tree_command, stdout=subprocess.PIPE,
@@ -226,6 +222,10 @@ class Versioner:
         root_command = ['git', 'rev-parse', '--show-toplevel']
         git_root = subprocess.check_output(root_command, encoding='utf-8').rstrip()
         app_name = os.path.basename(git_root).rstrip().lower()
+
+        # If we're nested within MOOSE_DIR, we're moose_combined app
+        if app_name == 'moose':
+            app_name = 'moose_combined'
 
         hash_command = ['git', 'rev-parse', 'HEAD']
         git_hash = subprocess.check_output(hash_command, encoding='utf-8').rstrip()[0:7]
