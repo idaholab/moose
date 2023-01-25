@@ -131,8 +131,11 @@
 
 [AuxKernels]
   [rho_aux]
-    type = NSDensityAux
+    type = FluidDensityAux
     variable = rho
+    p = p
+    T = T
+    fp = eos
   []
 []
 
