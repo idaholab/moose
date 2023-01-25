@@ -1,14 +1,25 @@
 # INL HPC Services
 
-The [!ac](NCRC) manages a wide range of applications and access to those applications to meet the
-needs of researchers around the world.
+[!ac](INL) [!ac](HPC) maintains a significant number of computing resources that are available
+for use. These resources are available to industry, universities, national laboratories, and
+federal agencies to support research and development. See [inl.gov/hpc](https://inl.gov/hpc)
+for more information.
 
-HPC ONDemand is an exciting new way to access HPC resources using your favorite web browser.
+## Requesting HPC Access id=access
 
-- [inl/applications.md]
-- [inl/hpc_ondemand.md]
+HPC access is controlled via the [!ac](NCRC). Please visit [inl.gov/ncrc](https://inl.gov/ncrc)
+to request access.
 
-# Requesting Access id=access
+## HPC OnDemand
 
-To request access to [!ac](INL) [!ac](HPC) resources, please follow the instructions
-on [INL's HPC](https://inl.gov/hpc) website.
+HPC ONDemand is a convenient way to access HPC resources (files, submitting jobs, virtual sessions, etc)
+through a web browser on the public internet. See [inl/hpc_ondemand.md] for more information.
+
+## NCRC
+
+In addition to HPC account management, the [!ac](NCRC) distributes a wide range of applications and access
+to those applications to meet the needs of researchers around the world. For more information,
+see [inl.gov/ncrc](https://inl.gov/ncrc).
+
+The NCRC distributes the majority of the controlled, INL-developed MOOSE-based applications. For information, see
+[inl/applications.md].
