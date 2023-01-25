@@ -1,16 +1,16 @@
 [Tests]
-  issues = '#1927'
+  issues = '#1927 #23212'
   design = 'syntax/Outputs/index.md'
-  [./time_step]
-    #
+  [time_step]
     type = 'Exodiff'
     input = 'intervals.i'
     exodiff = 'intervals_out.e'
     cli_args = 'Outputs/out/interval=5'
 
-    requirement = "The system shall support specifying an output interval for an output input file block."
-  [../]
-  [./common_time_step]
+    requirement = "The system shall support specifying an output interval for an output input file "
+                  "block."
+  []
+  [common_time_step]
     type = 'Exodiff'
     input = 'intervals.i'
     exodiff = 'intervals_out.e'
@@ -18,8 +18,8 @@
     prereq = 'time_step'
 
     requirement = "The system shall support specifying an output interval for all outputs."
-  [../]
-  [./output_final]
+  []
+  [output_final]
     type = 'Exodiff'
     input = 'output_final.i'
     exodiff = 'output_final_out.e'
@@ -29,44 +29,56 @@
     recover = false
 
     requirement = "The system shall support limiting output to the final timestep of a simulation."
-  [../]
-  [./sync_times]
+  []
+  [sync_times]
     type = 'Exodiff'
     input = 'sync_times.i'
     exodiff = 'sync_times_out.e'
 
     requirement = "The system shall support output at specific simulation times."
-  [../]
-  [./multiple_sync_times]
+  []
+  [multiple_sync_times]
     # Tests the use of different sync times for outputs
     type = 'Exodiff'
     input = 'multiple_sync_times.i'
     exodiff = 'multiple_sync_times_out_3.e multiple_sync_times_out_5.e multiple_sync_times_sync_0.e multiple_sync_times_sync_1.e'
 
-    requirement = "The system shall support multiple output objects that have different simulation synchronization times specified."
-  [../]
-  [./no_output]
+    requirement = "The system shall support multiple output objects that have different simulation "
+                  "synchronization times specified."
+  []
+  [minimum_time_interval]
+    type = 'CSVDiff'
+    input = 'minimum_time_interval.i'
+    csvdiff = 'minimum_time_interval_out.csv'
+    requirement = "The system shall support specifying an minimum time difference between successive outputs."
+  []
+
+  [no_output]
     type = RunException
     input = no_output.i
-#    check_not_exists = no_output_out.e
-    expect_err = "The current settings results in only the input file and no variables being output to the Exodus file, this is not supported."
+    #    check_not_exists = no_output_out.e
+    expect_err = "The current settings results in only the input file and no variables being output "
+                 "to the Exodus file, this is not supported."
 
-    requirement = "The system shall support the disabling of an output object by restricting the execution settings."
-  [../]
-  [./no_intermediate]
+    requirement = "The system shall support the disabling of an output object by restricting the "
+                  "execution settings."
+  []
+  [no_intermediate]
     # Test that intermediate steps may be disabled
     type = Exodiff
     input = no_intermediate.i
     exodiff = no_intermediate_out.e
 
-    requirement = "The system shall support the ability to limit output objects only at the beginning and end of a simulation."
-  [../]
-  [./no_final_repeat]
+    requirement = "The system shall support the ability to limit output objects only at the "
+                  "beginning and end of a simulation."
+  []
+  [no_final_repeat]
     # Test that the final time step is not repeated
     type = Exodiff
     input = no_final_repeat.i
     exodiff = no_final_repeat_out.e
 
-    requirement = "The system shall not output the same information multiple times when an output object is defined to operate on the end of each timestep and the final timestep."
-  [../]
+    requirement = "The system shall not output the same information multiple times when an output "
+                  "object is defined to operate on the end of each timestep and the final timestep."
+  []
 []
