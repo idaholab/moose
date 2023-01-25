@@ -103,8 +103,10 @@ MultiAppGeneralFieldUserObjectTransfer::evaluateInterpValuesWithUserObjects(
         // case we accept the first value from the lowest ranked process
         // NOTE: There is no guarantee this will be the final value used among all problems
         //       but we register an overlap as soon as two values are possible from this rank
-        if (_search_value_conflicts && val != GeneralFieldTransfer::BetterOutOfMeshValue &&
-            outgoing_vals[i_pt].first != GeneralFieldTransfer::BetterOutOfMeshValue)
+        if (detectConflict(val,
+                           outgoing_vals[i_pt].first,
+                           _use_nearest_app ? (pt - _from_positions[i_from]).norm() : 1,
+                           outgoing_vals[i_pt].second))
           registerConflict(i_from, 0, pt - _from_positions[i_from], 1, true);
 
         // No need to consider decision factors if value is invalid

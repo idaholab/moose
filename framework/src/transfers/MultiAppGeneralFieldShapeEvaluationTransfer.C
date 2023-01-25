@@ -108,6 +108,7 @@ MultiAppGeneralFieldShapeEvaluationTransfer::evaluateInterpValuesWithMeshFunctio
     // Loop on all local origin problems until:
     // - we've found the point in an app and the value at that point is valid
     // - or if looking for conflicts between apps, we must check them all
+    // - or if looking for the nearest app, we also check them all
     for (MooseIndex(_from_problems.size()) i_from = 0;
          i_from < _from_problems.size() &&
          (!point_found || _search_value_conflicts || _use_nearest_app);
@@ -125,8 +126,10 @@ MultiAppGeneralFieldShapeEvaluationTransfer::evaluateInterpValuesWithMeshFunctio
         // case we accept the first value from the lowest ranked process
         // NOTE: There is no guarantee this will be the final value used among all problems
         //       but for shape evaluation we really do expect only one value to even be valid
-        if (_search_value_conflicts && val != GeneralFieldTransfer::BetterOutOfMeshValue &&
-            outgoing_vals[i_pt].first != GeneralFieldTransfer::BetterOutOfMeshValue)
+        if (detectConflict(val,
+                           outgoing_vals[i_pt].first,
+                           _use_nearest_app ? (pt - _from_positions[i_from]).norm() : 1,
+                           outgoing_vals[i_pt].second))
           registerConflict(i_from, 0, pt - _from_positions[i_from], 1, true);
 
         // No need to consider decision factors if value is invalid

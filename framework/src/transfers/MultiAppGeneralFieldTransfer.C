@@ -577,7 +577,7 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
           MooseUtils::absoluteFuzzyEqual(distance_cache[p], incoming_vals[val_offset].second))
         registerConflict(problem_id, dof_object_id, p, incoming_vals[val_offset].second, false);
 
-      if (!GeneralFieldTransfer::isBetterOutOfMeshValue(val) &&
+      if ((!GeneralFieldTransfer::isBetterOutOfMeshValue(val) || _use_nearest_app) &&
           MooseUtils::absoluteFuzzyGreaterThan(distance_cache[p], incoming_vals[val_offset].second))
       {
         // NOTE: We store the distance as well as the value. We really only need the
@@ -643,9 +643,10 @@ MultiAppGeneralFieldTransfer::cacheIncomingInterpVals(
               MooseUtils::absoluteFuzzyEqual(val.distance, incoming_vals[val_offset].second))))
         {
           // Keep track of overlaps
-          if (_search_value_conflicts &&
-              MooseUtils::absoluteFuzzyEqual(val.distance, incoming_vals[val_offset].second) &&
-              !MooseUtils::absoluteFuzzyEqual(val.interp, incoming_vals[val_offset].first))
+          if (detectConflict(val.interp,
+                             incoming_vals[val_offset].first,
+                             val.distance,
+                             incoming_vals[val_offset].second))
           {
             // Keep track of distance and value
             const auto p = point_requests[val_offset] - _to_positions[problem_id];
@@ -1212,4 +1213,22 @@ MultiAppGeneralFieldTransfer::getToVarName(unsigned int var_index)
   if (_to_var_components.size())
     var_name += "_" + std::to_string(_to_var_components[var_index]);
   return var_name;
+}
+
+bool
+MultiAppGeneralFieldTransfer::detectConflict(Real current_value,
+                                             Real new_value,
+                                             Real current_distance,
+                                             Real new_distance) const
+{
+  // No conflict if we're not looking for them
+  if (_search_value_conflicts)
+    // Only consider conflicts if the values are valid and different
+    if (current_value != GeneralFieldTransfer::BetterOutOfMeshValue &&
+        new_value != GeneralFieldTransfer::BetterOutOfMeshValue &&
+        !MooseUtils::absoluteFuzzyEqual(current_value, new_value))
+      // Conflict only occurs if the origin points are equidistant
+      if (MooseUtils::absoluteFuzzyEqual(current_distance, new_distance))
+        return true;
+  return false;
 }

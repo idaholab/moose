@@ -183,6 +183,17 @@ protected:
   const bool _search_value_conflicts;
 
   /**
+   * @brief Detects whether two source values are valid and equidistant for a desired target
+   * location
+   * @param value_1 value from the first value source / subapp
+   * @param value_2 value from the second value source / subapp
+   * @param distance_1 distance from the first source
+   * @param distance_2 distance from the second source
+   * @return true if the values are different and distances from the source points/apps are the same
+   */
+  bool detectConflict(Real value_1, Real value_2, Real distance_1, Real distance_2) const;
+
+  /**
    * Register a potential value conflict, e.g. two or more equidistant source points for a single
    * target point, with different values possible
    * @param problem problem ID for the point of interest.
