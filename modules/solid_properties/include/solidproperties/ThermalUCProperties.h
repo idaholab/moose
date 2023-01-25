@@ -23,10 +23,9 @@ public:
   virtual Real rho_from_T(const Real & T) const override;
 
   virtual void rho_from_T(const Real & T, Real & rho, Real & drho_dT) const override;
-};
 
 protected:
-/// (constant) density
-const Real & _rho_const;
-
+  /// (constant) density
+  const Real & _rho_const;
+};
 #pragma GCC diagnostic pop
