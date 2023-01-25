@@ -439,6 +439,8 @@ public:
 
   void setActiveTags(const std::set<TagID> & vtags) override;
 
+  void meshChanged() override;
+
 protected:
   /**
    * Determine whether a specified face side is a Dirichlet boundary face. In the base
@@ -611,6 +613,10 @@ private:
   /// A member for caching retrieved Dirichlet conditions
   mutable std::pair<const FaceInfo *, const FVDirichletBCBase *> _face_to_diri;
 
+  /// A member used to help determine when we can return cached data as opposed to computing new
+  /// data
+  mutable const Elem * _prev_elem;
+
 protected:
   /// A cache for storing gradients on elements
   mutable std::unordered_map<const Elem *, VectorValue<ADReal>> _elem_to_grad;
@@ -629,6 +635,8 @@ protected:
   /// face interpolation. Other options are not taken into account here,
   /// but at higher, kernel-based levels.
   Moose::FV::InterpMethod _face_interp_method;
+
+  friend void Moose::initDofIndices<>(MooseVariableFV<OutputType> &, const Elem &);
 };
 
 template <typename OutputType>
@@ -681,6 +689,15 @@ MooseVariableFV<OutputType>::dofIndicesLower() const
 {
   static const std::vector<dof_id_type> empty;
   return empty;
+}
+
+template <typename OutputType>
+void
+MooseVariableFV<OutputType>::meshChanged()
+{
+  _face_to_diri = std::make_pair(nullptr, nullptr);
+  _prev_elem = nullptr;
+  MooseVariableField<OutputType>::meshChanged();
 }
 
 template <>

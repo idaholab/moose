@@ -76,6 +76,7 @@ MooseVariableFV<OutputType>::MooseVariableFV(const InputParameters & parameters)
     _grad_phi_neighbor(
         this->_assembly.template feGradPhiNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
     _face_to_diri(nullptr, nullptr),
+    _prev_elem(nullptr),
     _two_term_boundary_expansion(this->isParamValid("two_term_boundary_expansion")
                                      ? this->template getParam<bool>("two_term_boundary_expansion")
                                      :
@@ -373,10 +374,9 @@ template <typename OutputType>
 OutputType
 MooseVariableFV<OutputType>::getValue(const Elem * elem) const
 {
-  std::vector<dof_id_type> dof_indices;
-  this->_dof_map.dof_indices(elem, dof_indices, _var_num);
-  mooseAssert(dof_indices.size() == 1, "Wrong size for dof indices");
-  OutputType value = (*this->_sys.currentSolution())(dof_indices[0]);
+  Moose::initDofIndices(const_cast<MooseVariableFV<OutputType> &>(*this), *elem);
+  mooseAssert(_dof_indices.size() == 1, "Wrong size for dof indices");
+  OutputType value = (*this->_sys.currentSolution())(_dof_indices[0]);
   return value;
 }
 
@@ -500,14 +500,13 @@ MooseVariableFV<OutputType>::getElemValue(const Elem * const elem) const
           Moose::stringify(this->activeSubdomains()) + " the subdomain of the element " +
           std::to_string(elem->subdomain_id()));
 
-  std::vector<dof_id_type> dof_indices;
-  this->_dof_map.dof_indices(elem, dof_indices, _var_num);
+  Moose::initDofIndices(const_cast<MooseVariableFV<OutputType> &>(*this), *elem);
 
   mooseAssert(
-      dof_indices.size() == 1,
+      _dof_indices.size() == 1,
       "There should only be one dof-index for a constant monomial variable on any given element");
 
-  dof_id_type index = dof_indices[0];
+  const dof_id_type index = _dof_indices[0];
 
   ADReal value = (*_solution)(index);
 
@@ -821,14 +820,13 @@ MooseVariableFV<Real>::evaluateDot(const ElemArg & elem_arg,
               "A time derivative is being requested but we do not have a time integrator so we'll "
               "have no idea how to compute it");
 
-  std::vector<dof_id_type> dof_indices;
-  this->_dof_map.dof_indices(elem, dof_indices, _var_num);
+  Moose::initDofIndices(const_cast<MooseVariableFV<Real> &>(*this), *elem);
 
   mooseAssert(
-      dof_indices.size() == 1,
+      _dof_indices.size() == 1,
       "There should only be one dof-index for a constant monomial variable on any given element");
 
-  const dof_id_type dof_index = dof_indices[0];
+  const dof_id_type dof_index = _dof_indices[0];
 
   if (_var_kind == Moose::VAR_NONLINEAR)
   {
