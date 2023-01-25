@@ -27,8 +27,8 @@ Here we give a brief tabular summary of the Navier-Stokes implementations:
 | ------     | --------   | -------------------- | ------------------ | ----------------  | ------ | ------------------                |
 | INS        | Hand-coded | incompressible       | None               | Not porous        | CGFE   | SUPG                              |
 | INSAD      | AD         | incompressible       | Smagorinsky        | Not porous        | CGFE   | SUPG                              |
-| MD         | Hand-coded | incompressible       | None               | Not porous        | CGFE   | SUPG                              |
-| PM         | Hand-coded | incompressible       | None               | porous            | CGFE   | SUPG                              |
+| INSFE      | Hand-coded | incompressible       | None               | Not porous        | CGFE   | SUPG                              |
+| PINSFE     | Hand-coded | incompressible       | None               | porous            | CGFE   | SUPG                              |
 | NS         | Hand-coded | compressible         | None               | Not porous        | CGFE   | SUPG                              |
 | INSFV      | AD         | incompressible       | mixing length      | Not porous        | FV     | RC, CD velocity; limited advected |
 | WCNSFV     | AD         | weakly compressible  | mixing length      | Not porous        | FV     | RC, CD velocity; limited advected |
@@ -41,7 +41,6 @@ Table definitions:
 
 - INS: incompressible Navier-Stokes
 - AD: automatic differentiation
-- PM: porous medium
 - CNS: compressible Navier-Stokes
 - PINS or PCNS: porous incompressible Navier-Stokes or porous compressible Navier-Stokes
 - SUPG: Streamline-Upwind Petrov-Galerkin
@@ -53,9 +52,10 @@ Table definitions:
   data to faces. A summary of limiter options can be found in
   [Limiters/index.md]
 
-Note that the INS and MD kernel sets are redundant in terms of targeted
+Note that the INS and INSFE kernel sets are redundant in terms of targeted
 functionality. Historically, the INS kernel set was developed in this module and
-the MD kernel set was developed in the SAM application [!citep](hu2021sam). With
+the INSFE kernel set was developed in the SAM application (where there it was
+prefixed with "MD") [!citep](hu2021sam). With
 the Nuclear Energy Advanced Modeling and Simulation (NEAMS) program dedicated
 to consolidating fluid dynamics modeling, SAM capabilities are being migrated
 upstream as appropriate into the common module layer. In the not-too-distant
