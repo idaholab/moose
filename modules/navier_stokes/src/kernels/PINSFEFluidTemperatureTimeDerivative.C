@@ -10,6 +10,10 @@
 #include "PINSFEFluidTemperatureTimeDerivative.h"
 
 registerMooseObject("NavierStokesApp", PINSFEFluidTemperatureTimeDerivative);
+registerMooseObjectRenamed("NavierStokesApp",
+                           PMFluidTemperatureTimeDerivative,
+                           "02/01/2024 00:00",
+                           PINSFEFluidTemperatureTimeDerivative);
 
 InputParameters
 PINSFEFluidTemperatureTimeDerivative::validParams()

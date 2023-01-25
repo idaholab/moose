@@ -11,6 +11,10 @@
 #include "MooseMesh.h"
 
 registerMooseObject("NavierStokesApp", INSFEFluidMassKernel);
+registerMooseObjectRenamed("NavierStokesApp",
+                           MDFluidMassKernel,
+                           "02/01/2024 00:00",
+                           INSFEFluidMassKernel);
 
 InputParameters
 INSFEFluidMassKernel::validParams()

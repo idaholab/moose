@@ -10,6 +10,10 @@
 #include "INSFEFluidWallMomentumBC.h"
 
 registerMooseObject("NavierStokesApp", INSFEFluidWallMomentumBC);
+registerMooseObjectRenamed("NavierStokesApp",
+                           FluidWallMomentumBC,
+                           "02/01/2024 00:00",
+                           INSFEFluidWallMomentumBC);
 
 InputParameters
 INSFEFluidWallMomentumBC::validParams()

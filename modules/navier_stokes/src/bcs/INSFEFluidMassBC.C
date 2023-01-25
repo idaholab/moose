@@ -10,6 +10,7 @@
 #include "INSFEFluidMassBC.h"
 
 registerMooseObject("NavierStokesApp", INSFEFluidMassBC);
+registerMooseObjectRenamed("NavierStokesApp", MDFluidMassBC, "02/01/2024 00:00", INSFEFluidMassBC);
 
 InputParameters
 INSFEFluidMassBC::validParams()

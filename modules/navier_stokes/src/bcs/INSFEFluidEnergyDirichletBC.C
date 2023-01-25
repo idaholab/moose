@@ -10,6 +10,10 @@
 #include "INSFEFluidEnergyDirichletBC.h"
 
 registerMooseObject("NavierStokesApp", INSFEFluidEnergyDirichletBC);
+registerMooseObjectRenamed("NavierStokesApp",
+                           MDFluidEnergyDirichletBC,
+                           "02/01/2024 00:00",
+                           INSFEFluidEnergyDirichletBC);
 
 InputParameters
 INSFEFluidEnergyDirichletBC::validParams()

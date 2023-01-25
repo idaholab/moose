@@ -10,6 +10,10 @@
 #include "INSFEFluidEnergyBC.h"
 
 registerMooseObject("NavierStokesApp", INSFEFluidEnergyBC);
+registerMooseObjectRenamed("NavierStokesApp",
+                           MDFluidEnergyBC,
+                           "02/01/2024 00:00",
+                           INSFEFluidEnergyBC);
 
 InputParameters
 INSFEFluidEnergyBC::validParams()
