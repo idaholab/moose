@@ -1,6 +1,5 @@
 ## Griffin
 
-!media application_logos/griffin.png style=width:8%;align:top;
 
 - [Documentation](https://griffin-docs.hpcondemand.inl.gov/latest/)
 - [Discussion Forum](https://griffin-discourse.hpcondemand.inl.gov)

@@ -1,7 +1,5 @@
 ## Sockeye
 
-!media application_logos/sockeye.png style=width:10%;align:top;
-
 - [Documentation](https://sockeye-docs.hpcondemand.inl.gov/latest/)
 - [Discussion Forum](https://sockeye-discourse.hpcondemand.inl.gov)
 - [Build Status](https://civet.inl.gov/repo/837/)

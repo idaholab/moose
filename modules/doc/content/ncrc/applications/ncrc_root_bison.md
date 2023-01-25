@@ -1,7 +1,5 @@
 ## BISON
 
-!media application_logos/bison.png style=width:8%;align:top;
-
 - [Documentation](https://mooseframework.org/bison)
 - [Discussion Forum](https://bison-discourse.hpcondemand.inl.gov)
 - [Build Status](https://civet.inl.gov/repo/875/)

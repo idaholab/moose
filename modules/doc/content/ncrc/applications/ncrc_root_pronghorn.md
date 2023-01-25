@@ -1,7 +1,5 @@
 ## Pronghorn
 
-!media application_logos/pronghorn.png style=width:8%;align:bottom;
-
 - [Documentation](https://pronghorn-docs.hpcondemand.inl.gov/latest/)
 - [Discussion Forum](https://pronghorn-discourse.hpcondemand.inl.gov)
 - [Build Status](https://civet.inl.gov/repo/871/)

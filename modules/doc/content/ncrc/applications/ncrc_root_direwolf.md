@@ -1,7 +1,5 @@
 ## Dire Wolf
 
-!media application_logos/dire_wolf.png style=width:8%;align:top;
-
 - [Build Status](https://civet.inl.gov/repo/887/)
 - [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_ondemand_direwolf.md)
 - [Level 1 - HPC Binary Execution](ncrc/applications/ncrc_hpc_direwolf.md)

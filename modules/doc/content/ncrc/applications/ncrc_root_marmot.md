@@ -1,7 +1,5 @@
 ## MARMOT
 
-!media application_logos/marmot.png style=width:8%;align:top;
-
 - [Documentation](https://marmot-docs.hpcondemand.inl.gov/latest/)
 - [Discussion Forum](https://marmot-discourse.hpcondemand.inl.gov)
 - [Build Status](https://civet.inl.gov/repo/851/)

@@ -1,7 +1,5 @@
 ## Blue Crab
 
-!media application_logos/blue_crab.png style=width:8%;align:top;
-
 - [Documentation](https://bluecrab-dev.hpcondemand.inl.gov)
 - [Build Status](https://civet.inl.gov/repo/882/)
 - [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_ondemand_bluecrab.md)

@@ -1,7 +1,5 @@
 ## Grizzly
 
-!media application_logos/grizzly.png style=width:8%;align:top;
-
 - [Documentation](https://grizzly-docs.hpcondemand.inl.gov/latest/)
 - [Discussion Forum](https://grizzly-discourse.hpcondemand.inl.gov)
 - [Build Status](https://civet.inl.gov/repo/856/)
