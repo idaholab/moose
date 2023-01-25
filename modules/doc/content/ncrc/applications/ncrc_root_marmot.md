@@ -1,7 +1,6 @@
 ## MARMOT
 
 - [Documentation](https://marmot-docs.hpcondemand.inl.gov/latest/)
-- [Support Forum (Discourse)](https://marmot-discourse.hpcondemand.inl.gov)
 - [Build Status](https://civet.inl.gov/repo/851/)
 - [Level 1 - HPC OnDemand Execution](ncrc/applications/ncrc_ondemand_marmot.md)
 - [Level 1 - HPC Binary Execution](ncrc/applications/ncrc_hpc_marmot.md)
