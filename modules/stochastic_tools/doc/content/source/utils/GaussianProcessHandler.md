@@ -23,7 +23,7 @@ either be done using the `initialize` function as in [GaussianProcessTrainer.md]
 
 Or by linking it directly as in [GaussianProcess.md]:
 
-!listing GaussianProcess.C line=linkCovarianceFunction
+!listing /surrogates/GaussianProcess.C line=linkCovarianceFunction
 
 ### Creating a covariance matrix
 
@@ -36,7 +36,7 @@ create a covariance matrix by either using `setupCovarianceMatrix` as in
 
 Or by simply calling the covariance matrix builder as in [GaussianProcess.md]:
 
-!listing GaussianProcess.C line=computeCovarianceMatrix
+!listing /surrogates/GaussianProcess.C line=computeCovarianceMatrix
 
 ### Optimizing hyper parameters
 
