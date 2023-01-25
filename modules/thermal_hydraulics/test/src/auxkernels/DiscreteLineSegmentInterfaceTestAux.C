@@ -17,13 +17,16 @@ DiscreteLineSegmentInterfaceTestAux::validParams()
   InputParameters params = AuxKernel::validParams();
   params += DiscreteLineSegmentInterface::validParams();
 
+  MooseEnum test_type("axial_coord radial_coord axial_index");
+  params.addRequiredParam<MooseEnum>("test_type", test_type, "Type of test");
+
   params.addClassDescription("Tests DiscreteLineSegmentInterface.");
 
   return params;
 }
 
 DiscreteLineSegmentInterfaceTestAux::DiscreteLineSegmentInterfaceTestAux(const InputParameters & params)
-  : AuxKernel(params), DiscreteLineSegmentInterface(this)
+  : AuxKernel(params), DiscreteLineSegmentInterface(this), _test_type(getParam<MooseEnum>("test_type"))
 {
 }
 
@@ -31,5 +34,13 @@ Real
 DiscreteLineSegmentInterfaceTestAux::computeValue()
 {
   const Point p = isNodal() ? *_current_node : _q_point[_qp];
-  return computeAxialCoordinate(p);
+
+  if (_test_type == "axial_coord")
+    return computeAxialCoordinate(p);
+  else if (_test_type == "radial_coord")
+    return computeRadialCoordinate(p);
+  else if (_test_type == "axial_index")
+    return getAxialSectionIndex(p);
+  else
+    mooseError("Invalid 'test_type'.");
 }
