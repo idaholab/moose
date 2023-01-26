@@ -225,7 +225,7 @@ class Versioner:
 
         # If we're nested within MOOSE_DIR, we're moose_combined app
         if app_name == 'moose':
-            app_name = 'moose_combined'
+            app_name = 'moose-combined'
 
         hash_command = ['git', 'rev-parse', 'HEAD']
         git_hash = subprocess.check_output(hash_command, encoding='utf-8').rstrip()[0:7]

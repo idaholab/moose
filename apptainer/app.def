@@ -46,7 +46,7 @@ From: {{ APPTAINER_FROM }}
         mkdir ${MOOSE_BUILD_DIR}
         cp -r ${MOOSE_DIR}/. ${MOOSE_BUILD_DIR}
     # MOOSE_DIR is the application (combined-opt)
-    elif [[ '{{ BINARY_NAME }}' == 'moose_combined' ]]; then
+    elif [[ '{{ BINARY_NAME }}' == 'moose-combined' ]]; then
         # do nothing
         :
     # MOOSE_DIR is in the application, setup a symlink
@@ -61,8 +61,11 @@ From: {{ APPTAINER_FROM }}
 {%- endif %}
 
 %environment
+{%- if BINARY_NAME == 'moose-combined' %}
+    export PATH=/opt/moose/bin:$PATH
+{%- else %}
     export PATH=/opt/{{ BINARY_NAME }}/bin:$PATH
-
+{%- endif %}
 %post
     # Load jinja vars
     APPLICATION_NAME=$(basename {{ APPLICATION_DIR }})
@@ -96,12 +99,16 @@ From: {{ APPTAINER_FROM }}
 {%- endif %}
 
     # Setup install
+{%- if BINARY_NAME == 'moose-combined' %}
+    MOOSE_PREFIX=/opt/moose
+{%- else %}
     MOOSE_PREFIX=/opt/${BINARY_NAME}
+{%- endif %}
     cd ${MOOSE_DIR}
     ./configure --prefix=$MOOSE_PREFIX ${MOOSE_OPTIONS}
 
     # Build and install
-{%- if BINARY_NAME == 'moose_combined' %}
+{%- if BINARY_NAME == 'moose-combined' %}
     cd ${APPLICATION_DIR}/modules
 {%- else %}
     cd ${APPLICATION_DIR}
@@ -117,10 +124,10 @@ From: {{ APPTAINER_FROM }}
     mamba uninstall -yq ${EXTRA_DOC_PACKAGES}
 {%- endif %}
 
-{%- if BINARY_NAME == 'moose_combined' %}
+{%- if BINARY_NAME == 'moose-combined' %}
     # Create moose-opt symlink to combined-opt
-    cd /opt/moose_combined/bin
-    ln combined-opt moose-opt
+    cd /opt/moose/bin
+    ln -s combined-opt moose-opt
 {%- endif %}
 
     # Install moose-tools from moose-base container
@@ -131,7 +138,7 @@ From: {{ APPTAINER_FROM }}
 
 %test
     # Load jinja vars
-{%- if BINARY_NAME == 'moose_combined' %}
+{%- if BINARY_NAME == 'moose-combined' %}
     BINARY_NAME=combined
 {%- else %}
     BINARY_NAME={{ BINARY_NAME }}
