@@ -360,6 +360,9 @@ PatternedCartesianMeshGenerator::generate()
       else
         _pattern_pitch = getParam<Real>("square_size");
     }
+    else if (isParamValid("square_size"))
+      _pattern_pitch = getParam<Real>("square_size");
+
     for (MooseIndex(_input_names) i = 0; i < _input_names.size(); ++i)
     {
       // throw an error message if the input mesh does not contain the required meta data
