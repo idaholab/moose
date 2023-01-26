@@ -2,7 +2,7 @@
 
 !alert tip title=Existing {{ApplicationName}} HPC GitLab Users
 For existing users who access code via [hpcgitlab.hpc.inl.gov](https://hpcgitlab.hpc.inl.gov),
-please see the [Transitional Guide](https://github.com/idaholab/moose/wiki/NCRC-github.inl.gov-transition-guide)
+please see the [Transition Guide](https://github.com/idaholab/moose/wiki/NCRC-github.inl.gov-transition-guide)
 for help on accessing the new home for [NCRC/{{ApplicationName}}](https://github.inl.gov/ncrc/{{binary}}). New users can safely ignore this notice.
 
 Source code for {{ApplicationName}} is hosted at [https://github.inl.gov/ncrc/{{binary}}](https://github.inl.gov/ncrc/{{binary}})
@@ -16,8 +16,8 @@ clicking 'Fork' at the top right. You will be presented with a new page asking h
 | :- | :- |
 | ^Select an owner | {{binary}} |
 
-Click 'Select an owner' and choose yourself. Take note of how GitHub identifies you
-(`first-last` name). Then click 'Create fork' near the bottom. GitHub will begin creating a
+Click 'Select an owner' and choose yourself. Take note of how GitHub identifies you.
+Then click 'Create fork' near the bottom. GitHub will begin creating a
 personalized fork of {{ApplicationName}}. When finished, GitHub will bring you to your fork of
 {{ApplicationName}}.
 
@@ -25,7 +25,9 @@ personalized fork of {{ApplicationName}}. When finished, GitHub will bring you t
 
 Before you can clone your fork, you must create your SSH public/private key. Detailed instructions
 for doing so can be found on GitHub at:
-[Generating a new SSH key](https://docs.github.com/en/enterprise-server@3.6/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent#generating-a-new-ssh-key).
+[Generating a new SSH key](https://docs.github.com/en/enterprise-server@3.6/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent#generating-a-new-ssh-key). This process only
+needs to be done once per device, that is, you do not need to do it for each NCRC application
+on the same computer.
 
 The gist of creating a key is as follows:
 
@@ -33,7 +35,7 @@ The gist of creating a key is as follows:
 - Enter the following command
 
   ```bash
-  ssh-keygen -t ed25519
+  ssh-keygen -t rsa
   ```
 - Hit Enter for every question, thus creating a passphrase-less key
 
@@ -43,13 +45,13 @@ each time you perform a push/pull operation with your fork.
 With your key created, and the terminal window still open, copy the contents of your public key:
 
 ```bash
-cat ~/.ssh/id_ed25519.pub
+cat ~/.ssh/id_rsa.pub
 ```
 
 !alert tip
 Only copy the results of the command. Do not include the command, or the following prompt.
 
-Head on over to [GitHub.inl.gov](https://github.inl.gov/settings/keys) and click 'New SSH key'.
+Enter the key at [github.inl.gov/settings/keys](https://github.inl.gov/settings/keys) by clicking 'New SSH key'.
 Enter any title you wish. Most enter something that identifies the computer which generated the key
 (e.g. workstation) or something similar.
 
@@ -58,12 +60,13 @@ Then paste the contents you earlier copied into the 'key' field.
 # Cloning the Repo
 
 Once you have added your SSH key, you should be able to clone your fork. At this time, choose a
-location you wish to operate from. Such as `~/projects`, and clone {{ApplicationName}}:
+location you wish to operate from (here we use `~/projects`), and clone {{ApplicationName}}, where
+you must replace `<YOUR_USERNAME>` with your username on [github.inl.gov](https://github.inl.gov):
 
 ```bash
 mkdir -p ~/projects
 cd ~/projects
-git clone git@github.inl.gov:first_name-last_name/{{binary}}.git
+git clone git@github.inl.gov:<YOUR_USERNAME>/{{binary}}.git
 ```
 
 Enter the {{binary}} directory, and add the upstream remote (needed for proper development):
@@ -71,7 +74,8 @@ Enter the {{binary}} directory, and add the upstream remote (needed for proper d
 ```bash
 cd {{binary}}
 git remote add upstream git@github.inl.gov:ncrc/{{binary}}.git
+git fetch upstream
 ```
 
-Head to [Level 4 - Source Access](ncrc/applications/ncrc_develop_{{ApplicationLower}}.md#cloning) to
+Continue to [Level 4 - Source Access](ncrc/applications/ncrc_develop_{{ApplicationLower}}.md#cloning) to
 continue with building {{ApplicationName}}.
