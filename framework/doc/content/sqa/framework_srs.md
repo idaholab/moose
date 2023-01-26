@@ -41,7 +41,7 @@ behaviors of each user-defined object.
   for following and enforcing the appropriate software development standards. They will be
   responsible for designing, implementing and maintaining the software.
 
-- +Developers+: A Scientist or Engineer that utilizes the framework to build his or her own
+- +Developers+: A Scientist or Engineer that utilizes the framework to build their own
   application. This user will typically have a background in modeling and simulation techniques
   and/or numerical analysis but may only have a limited skill-set when it comes to object-oriented
   coding and the C++ language. This is our primary focus group. In many cases these developers will
@@ -110,7 +110,7 @@ which may be disabled.
   test suite) shall be publicly available at all times through the repository host provider.
 - Flaws identified in the system shall be reported and tracked in a ticket or issue based system. The
   technical lead will determine the severity and priority of all reported issues and assign resources
-  at his or her discretion to resolve identified issues.
+  at their discretion to resolve identified issues.
 - The software maintainers will entertain all proposed changes to the system in a timely manner
   (within two business days).
 - The core framework in its entirety will be made publicly available under the [!ac](LGPL)

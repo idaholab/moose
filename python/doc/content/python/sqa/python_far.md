@@ -1,7 +1,7 @@
 !template load file=sqa/far.md.template project=MOOSE Tools
 
 !template! item key=introduction
-[!ac](MOOSE) Tools, as a collection of utilities, is designed to operate as a library of functionality.
+[!ac](MOOSE) Tools, as a collection of utilities, is designed to operate as a library of functionalities.
 While each utility is tailored to perform a specific set of functions, the code can be arbitrarily expanded
 and built upon to create extended capability. This flexibility exists by design within the utilities,
 where they are often created with a central core set of code framework surrounded by extensions built

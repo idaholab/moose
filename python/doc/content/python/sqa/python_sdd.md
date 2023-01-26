@@ -92,7 +92,7 @@ combined by a Developer to support a specific code base, application, or simulat
 this design goal, [!ac](MOOSE) Tools utilities generally use a particular design pattern, consisting
 of a central core of common functionality extended by code designed for specific tasks. Users needing
 to extend or create new [!ac](MOOSE) Tools utilities may, in many cases, use the main code as Python
-packages and specialize or modify it to provide an implementation meeting his or her needs. The
+packages and specialize or modify it to provide an implementation meeting their needs. The
 design of each of these systems is documented on the [MOOSE homepage](https://mooseframework.inl.gov).
 Additionally, up-to-date documentation extracted from the source is maintained on the same documentation
 site after every successful merge to MOOSE's stable branch.
@@ -113,7 +113,7 @@ on the [MOOSE repository website](https://github.com/idaholab/moose).
 At a high level, the system is designed to process configuration input, source code documentation, and
 other support files in order to facilitate its design (supporting the [!ac](MOOSE) framework and
 [!ac](MOOSE)-based applications). Some components of the utilities may in turn load other file-based
-resources to complete the its processes. Examples include secondary configuration files or data files.
+resources to complete its processes. Examples include secondary configuration files or data files.
 The system will then assemble its pre-requisites and perform its function using the libraries
 of the [Code Platform](#dependencies-and-limitations). The system can then output various outputs
 associated with its design function -- a website, test results, manufactured solution, translated
@@ -126,7 +126,7 @@ code extension systems.
 !template! item key=human-machine-interface-design
 [!ac](MOOSE) Tools utilities are command-line driven programs. All interaction with MOOSE and MOOSE-based
 codes and data is ultimately done through the command line. This is typical for [!ac](HPC) applications
-that use the [!ac](MPI) interface for running on super computing clusters.
+that use the [!ac](MPI) interface for running on computing clusters.
 !template-end!
 
 !template! item key=system-design-interface

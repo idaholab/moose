@@ -61,7 +61,7 @@
   [expect]
     type = PythonUnitTest
     input = test_Expect.py
-    requirement = "The system shall report a failure if expected output is not report"
+    requirement = "The system shall report a failure if expected output is not reported"
     issues = "#9933"
     collections = 'FAILURE_ANALYSIS'
   []
@@ -167,7 +167,7 @@
   [duplicate_test_names]
     type = PythonUnitTest
     input = test_DuplicateTestNames.py
-    requirement = "The system shall skip tests having the same name contained in the tests file"
+    requirement = "The system shall allow the test scheduler to gracefully skip tests having the same name contained within the same tests file for further checks against the test file parser."
     issues = '#10424'
   []
   [arbitrary_tests]
@@ -216,7 +216,7 @@
   [failed_tests]
     type = PythonUnitTest
     input = test_FailedTests.py
-    requirement = "The system shall run only tests which previously has failed"
+    requirement = "The system shall run only tests which previously have failed"
     issues = '#14512'
   []
   [python_version]
@@ -228,7 +228,7 @@
   [csvvalidationtester]
     type = PythonUnitTest
     input = test_CSVValidationTester.py
-    requirement = "The system shall be able to compare computed values against measured data using mean value and std. deviation"
+    requirement = "The system shall be able to compare computed values against measured data using mean value and standard deviation"
     issues = '#14511'
   []
   [working_directory]

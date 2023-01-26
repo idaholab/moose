@@ -39,7 +39,7 @@ behaviors of each system and extension.
   for following and enforcing the appropriate software development standards. They will be
   responsible for designing, implementing and maintaining the software.
 
-- +Developers+: A Scientist or Engineer that utilizes [!ac](MOOSE) Tools to build his or her own
+- +Developers+: A Scientist or Engineer that utilizes [!ac](MOOSE) Tools to build their own
   tools, extensions, or scripts to assist in the development of a project - either [!ac](MOOSE) or
   MOOSE-based applications or custom code to which [!ac](MOOSE) Tools has been adapted. This user will
   typically have a background in modeling and simulation techniques and/or numerical analysis but may
@@ -50,7 +50,7 @@ behaviors of each system and extension.
 - +Analysts+: These are users that will run the code and perform various analysis and testing on the
   simulations they perform. These users may interact with developers of the system requesting new features
   and reporting bugs found and will typically make heavy use of the pre-built scripts, configuration
-  files, and the MooseDown file format.
+  files, and the [MooseDown](python/MooseDocs/specification.md) file format.
 
 !template-end!
 
@@ -84,7 +84,7 @@ behaviors of each system and extension.
 !template item key=human-system-integration
 [!ac](MOOSE) Tools contains command line driven applications which conform to all standard terminal
 behaviors. Specific human system interaction accommodations shall be a function of the end-user's
-terminal. Optional accomodations will be outlined in utility design documents.
+terminal. Optional accommodations will be outlined in utility design documents.
 
 !template item key=maintainability
 !include framework_srs.md start=maintainability-begin end=maintainability-finish

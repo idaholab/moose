@@ -6,7 +6,8 @@ Frameworks are a software development construct aiming to simplify the creation 
 of applications through abstraction of low-level details. The main objective of creating a framework is
 to provide an interface to application developers that saves time and provides advanced capabilities
 not attainable otherwise. The [!ac](MOOSE) mission is just that: provide a framework for engineers and
-scientists to build state-of-the-art, computationally scalable finite element based simulation tools.
+scientists to build state-of-the-art, computationally scalable finite element or finite volume based
+simulation tools.
 
 [!ac](MOOSE) was conceived with one major objective: to be as easy and straightforward to use by
 scientists and engineers as possible. [!ac](MOOSE) is meant to be approachable by non-computational
@@ -161,7 +162,7 @@ The MOOSE framework itself is composed of a wide range of pluggable systems. Eac
 composed of a single or small set of C++ objects intended to be specialized by a Developer to solve a
 specific problem. To accomplish this design goal, MOOSE uses several modern object-oriented design
 patterns. The primary overarching pattern is the "Factory Pattern". Users needing to extend MOOSE
-may inherit from one of MOOSE's systems to providing an implementation meeting his or her needs. The
+may inherit from one of MOOSE's systems to providing an implementation meeting their needs. The
 design of each of these systems is documented on the [MOOSE homepage](https://mooseframework.inl.gov).
 Additionally, up-to-date documentation extracted from the source is maintained on the same documentation
 site after every successful merge to MOOSE's stable branch. After these objects are created, they can be

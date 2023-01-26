@@ -108,10 +108,10 @@ All tests have a pass/fail acceptance criteria based on the anticipated output a
 "Tester", see [#test-automation]. If the execution output matches the anticipated output than the
 test is accepted (pass), otherwise it is rejected (fail).
 
-In addition, test coverage reports will be created for all proposed changes. The overall line
-coverage is required to increase or remain constant (it may not decrease). Additionally, the
-independent reviewer is expected to use these reports to ensure that the proposed changes are
-tested at an appropriate level at the discretion of the reviewer.
+In addition, test coverage reports will be created for all proposed changes. Ideally, the overall line
+coverage should increase or remain constant at the discretion of the reviewer, but coverage should
+never drop below the level of 80%. Additionally, the independent reviewer is expected to use the
+coverage reports to ensure that the proposed changes are tested at an appropriate level.
 
 ### Reports, records, standard formatting, and conventions
 
@@ -231,7 +231,7 @@ A tested designed to run Python scripts within the MOOSE test suite, generally c
 !template item key=human-resources
 Testing for [!ac](MOOSE) and MOOSE-based applications requires minimal human resources. A system engineer
 is required to ensure the proper end-user environment is setup with proper system prerequisites. The
-Project Lead is needed to verify the automated test system operated correctly prior to release.
+Project Lead is should verify that the automated test system operated correctly prior to release.
 
 !template! item key=hardware-software-resources
 If a specific end-user environment is required by a customer, those specifications must be

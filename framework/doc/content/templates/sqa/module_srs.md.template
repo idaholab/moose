@@ -88,7 +88,7 @@ within the terminal's ability to display color, which may be disabled.
   test suite) shall be publicly available at all times through the repository host provider.
 - Flaws identified in the system shall be reported and tracked in a ticket or issue based system. The
   technical lead will determine the severity and priority of all reported issues and assign resources
-  at his or her discretion to resolve identified issues.
+  at their discretion to resolve identified issues.
 - The software maintainers will entertain all proposed changes to the system in a timely manner
   (within two business days).
 - The core software in its entirety will be made available under the terms of a designated software
