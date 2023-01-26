@@ -9,7 +9,7 @@
 
 !row!
 !col small=12 medium=8 large=8
-RELAP-7 is a two-phase thermal systems code based on MOOSE's thermal hydraulics module. RELAP-7 provides two-phase components suitable for LWRs provides closures for two-phase water from TRACE.
+RELAP-7 is a two-phase thermal systems code based on the MOOSE thermal hydraulics module. RELAP-7 provides two-phase components suitable for LWRs provides closures for two-phase water from TRACE.
 
 !col small=8 medium=4 large=4
 !media application_logos/relap-7_description.png style=width:100%;

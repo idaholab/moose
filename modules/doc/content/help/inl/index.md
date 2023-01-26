@@ -12,7 +12,7 @@ to request access.
 
 ## HPC OnDemand
 
-HPC ONDemand is a convenient way to access HPC resources (files, submitting jobs, virtual sessions, etc)
+HPC OnDemand is a convenient way to access HPC resources (files, submitting jobs, virtual sessions, etc)
 through a web browser on the public internet. See [inl/hpc_ondemand.md] for more information.
 
 ## NCRC

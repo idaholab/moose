@@ -37,7 +37,7 @@ By default, your submission of this form creates a basic submission command that
 {{binary_method}} --timing -i /home/user/input.i
 ```
 
-You are allowed to put more than one in this box. Everything that you put in this box will be entered between  `{{binary_method}}` and your input file `-i /home/user/input.i`.
+You are allowed to put more than one in this box. Everything that you put there will be entered between  `{{binary_method}}` and your input file `-i /home/user/input.i`.
 
 To get a full list and more explanation on these command line options, please see the [command line usage documentation](https://mooseframework.inl.gov/application_usage/command_line_usage.html).
 

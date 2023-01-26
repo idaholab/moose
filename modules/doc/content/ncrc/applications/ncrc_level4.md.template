@@ -25,7 +25,7 @@ The repository for {{ApplicationName}} is located at
 The preferred method for cloning (pulling onto your local machine) repositories is via SSH.
 With this, we will describe how to add SSH keys to [github.inl.gov](https://github.inl.gov)
 that will serve as the authentication method for cloning repsitories. This process only
-needs to be done once per device, that is, you do not need to do it for each NCRC application
+needs to be done once per device; that is, you do not need to do it for each NCRC application
 on the same computer.
 
 ### Generating the Key
@@ -62,7 +62,7 @@ to authenticate you. To read the contents of your public key, run the following 
 cat ~/.ssh/id_rsa.pub
 ```
 
-and copy the contents of said file. +Only+  copy the results of the command, do not include
+and copy the contents of said file. +Only+ copy the results of the command, do not include
 the command.
 
 Proceed to [github.inl.gov/settings/keys](https://github.inl.gov/settings/keys) and click 'New SSH key'.
