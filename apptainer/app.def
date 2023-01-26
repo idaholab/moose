@@ -71,9 +71,8 @@ From: {{ APPTAINER_FROM }}
     MOOSE_DOCS_FLAGS="{{ MOOSE_DOCS_FLAGS }}"
     export MOOSE_JOBS={{ MOOSE_JOBS or "1" }}
     MOOSE_OPTIONS="{{ MOOSE_OPTIONS }}"
-    MOOSE_SKIP_DOCS={{ MOOSE_SKIP_DOCS }}
+    export MOOSE_SKIP_DOCS={{ MOOSE_SKIP_DOCS }}
     TEMP_LOC={{ ROOT_BUILD_DIR }}
-
     APPLICATION_DIR=${TEMP_LOC}/${APPLICATION_NAME}
     export MOOSE_DIR=${TEMP_LOC}/moose
 
@@ -102,7 +101,7 @@ From: {{ APPTAINER_FROM }}
     ./configure --prefix=$MOOSE_PREFIX ${MOOSE_OPTIONS}
 
     # Build and install
-{%- if BINARY_NAME is 'moose_combined' %}
+{%- if BINARY_NAME == 'moose_combined' %}
     cd ${APPLICATION_DIR}/modules
 {%- else %}
     cd ${APPLICATION_DIR}
@@ -118,9 +117,9 @@ From: {{ APPTAINER_FROM }}
     mamba uninstall -yq ${EXTRA_DOC_PACKAGES}
 {%- endif %}
 
-# Create moose-opt symlink to combined-opt
-{%- if BINARY_NAME is 'moose_combined' %}
-    cd /opt/moose/bin
+{%- if BINARY_NAME == 'moose_combined' %}
+    # Create moose-opt symlink to combined-opt
+    cd /opt/moose_combined/bin
     ln combined-opt moose-opt
 {%- endif %}
 
@@ -132,7 +131,7 @@ From: {{ APPTAINER_FROM }}
 
 %test
     # Load jinja vars
-{%- if BINARY_NAME is 'moose_combined' %}
+{%- if BINARY_NAME == 'moose_combined' %}
     BINARY_NAME=combined
 {%- else %}
     BINARY_NAME={{ BINARY_NAME }}

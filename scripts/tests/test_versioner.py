@@ -103,9 +103,8 @@ class Test(unittest.TestCase):
 
     def testGetApp(self):
         app_name, git_root, git_hash = Versioner.get_app()
-        self.assertEqual(None, app_name)
-        self.assertEqual(None, git_root)
-        self.assertEqual(None, git_hash)
+        self.assertEqual('moose_combined', app_name)
+        self.assertEqual(MOOSE_DIR, git_root)
 
         # still need to test _in_ an app
 
