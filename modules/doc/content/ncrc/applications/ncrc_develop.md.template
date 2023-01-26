@@ -12,7 +12,7 @@ If you need to update {{ApplicationName}}, know that by following through the
 '[Building {{ApplicationName}}](ncrc_develop_{{ApplicationLower}}.md#build)' steps again,
 effectively performs an update each time.
 
-## Compiler Stack id=compiler
+## Environment
 
 If you plan on using your personal machine we recommend using our Conda packages. If you are instead
 operating on one of our [!ac](INL) [!ac](HPC) clusters, you need only load a couple of modules.
@@ -73,7 +73,7 @@ cd ~/projects/{{binary}}
 git fetch upstream
 ```
 
-`fetch upstream` updates your local references with that of the upstream remote. It does not modify
+The `fetch upstream` git command updates your local references with that of the upstream remote. It does not modify
 any source files. If nothing returns, then there are no upstream updates. If you have built
 {{ApplicationName}} once before, you are finished and can safely exit this documentation. First time
 users will of course need to continue.
@@ -108,7 +108,7 @@ git submodule update --init
 !alert note title=Some applications require more
 There are some applications which require additional submodules inside those submodules to be
 updated (recursive submodules is unfortunately beyond the scope of this document). Please refer to
-[{{ApplicationName}} Documentation](https://{{ApplicationLower}}-docs.hpcondemand.inl.gov/latest/),
+[{{ApplicationName}} Documentation](https://{{ApplicationLower}}-docs.hpcondemand.inl.gov/),
 *if* these instructions fail during the '+Running Make+' step below.
 
 Remember the cyclical warnings earlier? By performing a submodule update, you should now perform
@@ -134,13 +134,13 @@ either a Conda update, or rebuild PETSc/libMesh:
   scripts/update_and_rebuild_libmesh.sh
   ```
 
-  For more information on METHODS (and other influential environment variables) check out:
-  [MOOSE Build System](application_development/build_system.md). MOOSE_JOBS controls how many cores
+  For more information on the `METHODS` variable (and other influential environment variables) check out:
+  [MOOSE Build System](application_development/build_system.md). `MOOSE_JOBS` controls how many cores
   to use during the use of our scripts.
 
 ### Running Make
 
-With everything up to date, we can now run make:
+With everything up to date, we can now build the application:
 
 ```bash
 cd ~/projects/{{binary}}
