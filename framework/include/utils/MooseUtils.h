@@ -287,6 +287,11 @@ std::string baseName(const std::string & name);
 std::string hostname();
 
 /**
+ * Returns the width of the terminal using sys/ioctl
+ */
+unsigned short getTermWidth(bool use_environment);
+
+/**
  * @returns A cleaner representation of the c++ type \p cpp_type.
  */
 std::string prettyCppType(const std::string & cpp_type);

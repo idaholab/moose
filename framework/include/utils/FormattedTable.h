@@ -250,11 +250,6 @@ protected:
                       std::vector<std::string>::iterator & col_end) const;
 
   /**
-   * Returns the width of the terminal using sys/ioctl
-   */
-  unsigned short getTermWidth(bool use_environment) const;
-
-  /**
    * Data structure for the console table:
    * The first part of the pair tracks the independent variable (normally time) and is associated
    * with the second part of the table which is the map of dependent variables and their associated
