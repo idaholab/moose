@@ -3185,21 +3185,9 @@ SubChannel1PhaseProblem::externalSolve()
   }
   // update old crossflow matrix
   _Wij_old = _Wij;
-  auto power_in = 0.0;
-  auto power_out = 0.0;
-  auto mass_flow_in = 0.0;
-  auto mass_flow_out = 0.0;
-  for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
-  {
-    auto * node_in = _subchannel_mesh.getChannelNode(i_ch, 0);
-    auto * node_out = _subchannel_mesh.getChannelNode(i_ch, _n_cells);
-    power_in += (*_mdot_soln)(node_in) * (*_h_soln)(node_in);
-    power_out += (*_mdot_soln)(node_out) * (*_h_soln)(node_out);
-    mass_flow_in += (*_mdot_soln)(node_in);
-    mass_flow_out += (*_mdot_soln)(node_out);
-  }
-  _console << "Power added to coolant is: " << power_out - power_in << " Watt" << std::endl;
-  _console << "Mass balance is: " << mass_flow_out - mass_flow_in << " Kg/sec" << std::endl;
+  _console << "Finished executing subchannel solver\n";
+
+  /// Assigning temperature to the fuel pins
   if (_pin_mesh_exist)
   {
     _console << "Commencing calculation of Pin surface temperature \n";
@@ -3232,8 +3220,75 @@ SubChannel1PhaseProblem::externalSolve()
       }
     }
   }
+
+  /// Assigning temperatures to duct
+  if (_duct_mesh_exist)
+  {
+    _console << "Commencing calculation of duct surface temperature " << std::endl;
+    /// TODO: looping over the channels omits the corners - should check later
+    //    for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
+    //    {
+    //      for (unsigned int iz = 0; iz < _n_cells + 1; ++iz)
+    //        {
+    //          auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
+    //          if (subch_type == EChannelType::EDGE || subch_type == EChannelType::CORNER)
+    //          {
+    //            //auto dz = _z_grid[iz] - _z_grid[iz - 1];
+    //            auto * node_chan = _subchannel_mesh.getChannelNode(i_ch, iz);
+    //            auto * node_duct = _subchannel_mesh.getDuctNodeFromChannel(node_chan);
+    //            auto T_chan = (*_T_soln)(node_chan);
+    //            //_console << "T_chan: " << T_chan << std::endl;
+    //            _Tduct_soln->set(node_duct, T_chan);
+    //          }
+    //        }
+    //    }
+    auto duct_nodes = _subchannel_mesh.getDuctNodes();
+    for (Node * dn : duct_nodes)
+    {
+      auto * node_chan = _subchannel_mesh.getChannelNodeFromDuct(dn);
+      auto mu = (*_mu_soln)(node_chan);
+      auto S = (*_S_flow_soln)(node_chan);
+      auto w_perim = (*_w_perim_soln)(node_chan);
+      auto Dh_i = 4.0 * S / w_perim;
+      auto Re = (((*_mdot_soln)(node_chan) / S) * Dh_i / mu);
+      auto k = _fp->k_from_p_T((*_P_soln)(node_chan) + _P_out, (*_T_soln)(node_chan));
+      auto cp = _fp->cp_from_p_T((*_P_soln)(node_chan) + _P_out, (*_T_soln)(node_chan));
+      auto Pr = (*_mu_soln)(node_chan)*cp / k;
+      auto Nu = 0.023 * std::pow(Re, 0.8) * std::pow(Pr, 0.4);
+      auto hw = Nu * k / Dh_i;
+      auto T_chan = (*_q_prime_duct_soln)(dn) / (_subchannel_mesh.getRodDiameter() * M_PI * hw) +
+                    (*_T_soln)(node_chan);
+      _Tduct_soln->set(dn, T_chan);
+    }
+  }
   _aux->solution().close();
   _aux->update();
-}
 
+  auto power_in = 0.0;
+  auto power_out = 0.0;
+  auto Total_surface_area = 0.0;
+  auto mass_flow_in = 0.0;
+  auto mass_flow_out = 0.0;
+  for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
+  {
+    auto * node_in = _subchannel_mesh.getChannelNode(i_ch, 0);
+    auto * node_out = _subchannel_mesh.getChannelNode(i_ch, _n_cells);
+    Total_surface_area += (*_S_flow_soln)(node_in);
+    power_in += (*_mdot_soln)(node_in) * (*_h_soln)(node_in);
+    power_out += (*_mdot_soln)(node_out) * (*_h_soln)(node_out);
+    mass_flow_in += (*_mdot_soln)(node_in);
+    mass_flow_out += (*_mdot_soln)(node_out);
+  }
+  auto h_bulk_out = power_out / mass_flow_out;
+  auto T_bulk_out = _fp->T_from_p_h(_P_out, h_bulk_out);
+
+  if (_verbose_subchannel)
+  {
+    _console << " ============================ " << std::endl;
+    _console << "Bulk coolant temperature at the bundle outlet :" << T_bulk_out << std::endl;
+    _console << "Power added to coolant is: " << power_out - power_in << " Watt" << std::endl;
+    _console << "Mass balance is: " << mass_flow_out - mass_flow_in << " Kg/sec" << std::endl;
+    _console << " ============================ " << std::endl;
+  }
+}
 void SubChannel1PhaseProblem::syncSolutions(Direction /*direction*/) {}

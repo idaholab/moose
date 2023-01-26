@@ -4,7 +4,7 @@ mass_flux_in = ${fparse 1e+6 * 17.00 / 3600.}
 P_out = 4.923e6 # Pa
 
 [QuadSubChannelMesh]
-  [sub_channel]
+  [subchannel]
     type = QuadSubChannelMeshGenerator
     nx = 6
     ny = 6
@@ -18,11 +18,9 @@ P_out = 4.923e6 # Pa
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [water]
-      type = Water97FluidProperties
-    []
+[FluidProperties]
+  [water]
+    type = Water97FluidProperties
   []
 []
 
@@ -43,6 +41,7 @@ P_out = 4.923e6 # Pa
   monolithic_thermal = false
   # interpolation_scheme = 'exponential'
   # P_tol = 1e-11
+  verbose_subchannel = true
 []
 
 [ICs]
@@ -113,21 +112,30 @@ P_out = 4.923e6 # Pa
 []
 
 [AuxKernels]
+  [P_out_bc]
+    type = PostprocessorConstantAux
+    variable = P
+    boundary = outlet
+    postprocessor = report_pressure_outlet
+    execute_on = 'timestep_begin'
+    block = subchannel
+  []
   [T_in_bc]
     type = ConstantAux
     variable = T
     boundary = inlet
     value = ${T_in}
     execute_on = 'timestep_begin'
+    block = subchannel
   []
   [mdot_in_bc]
-    type = BlockedMassFlowRateAux
+    type = PostprocessorMassFlowRateAux
     variable = mdot
     boundary = inlet
-    # index_blockage = ' 0 '
     area = S
-    mass_flux = ${mass_flux_in}
+    postprocessor = report_mass_flux_inlet
     execute_on = 'timestep_begin'
+    block = subchannel
   []
 []
 
@@ -170,6 +178,16 @@ P_out = 4.923e6 # Pa
     iy = 5
     execute_on ='final timestep_end'
     height = 3.0
+  []
+
+  [report_mass_flux_inlet]
+    type = Receiver
+    default = ${mass_flux_in}
+  []
+
+  [report_pressure_outlet]
+    type = Receiver
+    default = ${P_out}
   []
 []
 

@@ -12,33 +12,31 @@
 /*               See COPYRIGHT for full restrictions                */
 /********************************************************************/
 
-#include "CoupleableConstantAux.h"
-registerMooseObject("MooseApp", CoupleableConstantAux);
+#include "PostprocessorMassFlowRateAux.h"
+
+registerMooseObject("SubChannelApp", PostprocessorMassFlowRateAux);
 
 InputParameters
-CoupleableConstantAux::validParams()
+PostprocessorMassFlowRateAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
-  params.addClassDescription(
-      "Creates a constant field in the domain. Able to read value from postprocessor");
-  params.addParam<Real>("value", 1.0, "Some constant value that can be read from the input file");
-  params.addParam<PostprocessorName>(
-      "postprocessor", 1.0, "The postprocessor to use for the value");
-  params.declareControllable("value");
+  params.addClassDescription("Computes mass flow rate from specified mass flux and cross-sectional "
+                             "area. Reads postprocessor value");
+  params.addRequiredCoupledVar("area", "Cross sectional area [m^2]");
+  params.addRequiredParam<PostprocessorName>("postprocessor",
+                                             "The postprocessor to use for the value of mass_flux");
   return params;
 }
 
-CoupleableConstantAux::CoupleableConstantAux(const InputParameters & parameters)
+PostprocessorMassFlowRateAux::PostprocessorMassFlowRateAux(const InputParameters & parameters)
   : AuxKernel(parameters),
-    _value(getParam<Real>("value")),
-    _pvalue(getPostprocessorValue("postprocessor"))
+    _pvalue(getPostprocessorValue("postprocessor")),
+    _area(coupledValue("area"))
 {
-  if (parameters.isParamSetByUser("value") && parameters.isParamSetByUser("postprocessor"))
-    mooseError(name(), ": Please provide only one user defined value");
 }
 
 Real
-CoupleableConstantAux::computeValue()
+PostprocessorMassFlowRateAux::computeValue()
 {
-  return _value * _pvalue;
+  return _pvalue * _area[_qp];
 }

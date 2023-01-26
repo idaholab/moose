@@ -201,7 +201,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
 
 [AuxKernels]
   [P_out_bc]
-    type = CoupleableConstantAux
+    type = PostprocessorConstantAux
     variable = P
     boundary = outlet
     postprocessor = report_pressure_outlet
@@ -209,7 +209,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
     block = subchannel
   []
   [T_in_bc]
-    type = CoupleableConstantAux
+    type = ConstantAux
     variable = T
     boundary = inlet
     value = ${T_in}
@@ -217,7 +217,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
     block = subchannel
   []
   [mdot_in_bc]
-    type = MassFlowRateAux
+    type = PostprocessorMassFlowRateAux
     variable = mdot
     boundary = inlet
     area = S
