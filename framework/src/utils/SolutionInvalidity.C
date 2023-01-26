@@ -43,6 +43,8 @@ SolutionInvalidity::flagInvalidSolutionInternal(InvalidSolutionID _invalid_solut
 bool
 SolutionInvalidity::solutionInvalid() const
 {
+  libmesh_parallel_only(comm());
+
   bool is_invalid = false;
   for (auto & entry : _counts)
   {

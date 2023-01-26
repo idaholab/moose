@@ -96,7 +96,8 @@ NonlinearSystem::NonlinearSystem(FEProblemBase & fe_problem, const std::string &
     _nl_residual_functor(_fe_problem),
     _fd_residual_functor(_fe_problem),
     _resid_and_jac_functor(_fe_problem),
-    _use_coloring_finite_difference(false)
+    _use_coloring_finite_difference(false),
+    _solution_is_invalid(false)
 {
   nonlinearSolver()->residual_object = &_nl_residual_functor;
   nonlinearSolver()->jacobian = Moose::compute_jacobian;
@@ -209,15 +210,25 @@ NonlinearSystem::solve()
   // store info about the solve
   _final_residual = _nl_implicit_sys.final_nonlinear_residual();
 
-  // store the occurence of solution invalid warnings in comulative counters
+  // store the occurence of solution invalid warnings in local comulative counters
   _app.solutionInvalidity().solutionInvalidAccumulation();
+
+  // determine whether solution invalid occures in the converged solution
+  _solution_is_invalid = _app.solutionInvalidity().solutionInvalid();
+
+  // sync all solution invalid counts to master process
   _app.solutionInvalidity().sync();
-  // output the occurence of solution invalid in a summarry table
-  if (!_fe_problem.allowInvalidSolution() && _app.solutionInvalidity().solutionInvalid())
-    _app.solutionInvalidity().print(_console);
-  else if (_fe_problem.allowInvalidSolution() && _app.solutionInvalidity().solutionInvalid())
-    mooseWarning("The Solution Invalidity warnings are detected but silenced! "
-                 "Use Problem/allow_invalid_solution=false to activate ");
+
+  // output the solution invalid summary
+  if (_solution_is_invalid)
+  {
+    if (_fe_problem.allowInvalidSolution())
+      mooseWarning("The Solution Invalidity warnings are detected but silenced! "
+                   "Use Problem/allow_invalid_solution=false to activate ");
+    else
+      // output the occurence of solution invalid in a summarry table
+      _app.solutionInvalidity().print(_console);
+  }
 
   // reset solution invalid counter for time iteration
   _app.solutionInvalidity().resetSolutionInvalidTimeIter();
@@ -354,14 +365,8 @@ NonlinearSystem::converged()
 {
   if (_fe_problem.hasException())
     return false;
-
-  if (!_fe_problem.allowInvalidSolution() && _app.solutionInvalidity().solutionInvalid())
-  {
-    mooseWarning("The solution is not converged due to the solution being invalid.");
-    _app.solutionInvalidity().resetSolutionInvalid();
+  if (!_fe_problem.allowInvalidSolution() && _solution_is_invalid)
     return false;
-  }
-
   return _nl_implicit_sys.nonlinear_solver->converged;
 }
 
