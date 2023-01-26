@@ -19,18 +19,16 @@
 /**
  * Constant auxiliary value
  */
-class CoupleableConstantAux : public AuxKernel
+class PostprocessorConstantAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  CoupleableConstantAux(const InputParameters & parameters);
+  PostprocessorConstantAux(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue() override;
 
-  /// The value being set for the current node/element
-  const Real & _value;
   /// Value provided by postprocessor
   const PostprocessorValue & _pvalue;
 };

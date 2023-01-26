@@ -17,20 +17,21 @@
 #include "AuxKernel.h"
 
 /**
- * Computes mass float rate from specified uniform mass flux and cross-sectional area
+ * Computes mass float rate from specified uniform mass flux and cross-sectional area.
+ * Reads mass flux value from postprocessor.
  */
-class MassFlowRateAux : public AuxKernel
+class PostprocessorMassFlowRateAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  MassFlowRateAux(const InputParameters & parameters);
+  PostprocessorMassFlowRateAux(const InputParameters & parameters);
 
   virtual Real computeValue() override;
 
 protected:
-  /// Specified mass flux
-  const Real & _mass_flux;
+  /// Mass flux provided by postprocessor
+  const PostprocessorValue & _pvalue;
   /// Cross-sectional area
   const VariableValue & _area;
 };
