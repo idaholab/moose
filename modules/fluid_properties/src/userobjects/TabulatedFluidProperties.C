@@ -17,7 +17,7 @@
 // C++ includes
 #include <fstream>
 #include <ctime>
-#include <math.h>
+#include <cmath>
 
 InputParameters
 TabulatedFluidProperties::validParams()

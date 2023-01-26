@@ -129,6 +129,16 @@ as detailed below, does not get inherited.
 Developers may refer to [CommonOutputAction.md] for more information about implementing new
 common output parameters.
 
+## Controlling output frequency
+
+Several parameters are available common to all output objects to control the frequency with which
+output occurs.
+
+- `interval = N` will cause output objects to output only every _Nth_ simulation step
+- if `start_time` and/or `end_time` are specified, outputs will only happen after the given start time and/or before the given end time
+- `sync_times = 't1 t2 t3 ... tN` will cause MOOSE to hit each listed simulation time _t1 .. tN_ exactly. With `sync_only = true` outputs will _only_ happen at the specified sync times.
+- `minimum_time_interval = dt` will suppress any output if the previous output happened at an earlier time that is more recent than _dt_ time units ago (specifically this means that outputs during linear iterations are not suppressed, as they are happening at the _same_ simulation time, and output from failed, cut steps do not lead to output suppression in repeated steps as they happened in the future)
+
 ## Outputs and execute_on
 
 Outputs utilize the "execute_on" parameter like other systems in MOOSE, by default:

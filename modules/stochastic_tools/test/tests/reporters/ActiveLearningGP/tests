@@ -1,0 +1,54 @@
+[Tests]
+  issues = "#22280"
+  design = "ActiveLearningMonteCarloSampler.md ActiveLearningGPDecision.md ActiveLearningGaussianProcess.md"
+  [sampling]
+    requirement = 'The system shall be able to perform Monte Carlo sampling with active learning with'
+    [SingleProc_SingleRow_Ufunction]
+      type = 'JSONDiff'
+      input = main_adam.i
+      jsondiff = 'single_proc_single_row_ufunction.json'
+      detail = 'a single row in the sampler using the U learning function;'
+    []
+    [MultipleProc_MultipleRow_Ufunction]
+      type = 'JSONDiff'
+      input = main_adam.i
+      min_parallel = 2
+      jsondiff = 'multiple_proc_multiple_row_ufunction.json'
+      cli_args = "Samplers/mc/num_batch=2 Outputs/file_base='multiple_proc_multiple_row_ufunction'"
+      detail = 'multiple rows in the sampler using the U learning function;'
+    []
+    [COV_squared_exp]
+      type = 'JSONDiff'
+      input = main_adam.i
+      jsondiff = 'cov_squared_exp.json'
+      cli_args = "Reporters/conditional/learning_function='COV' Reporters/conditional/learning_function_threshold=0.025 Outputs/file_base='cov_squared_exp'"
+      detail = 'a single row in the sampler using the COV learning function;'
+    []
+    [SingleProc_SingleRow_Ufunction_tao]
+      type = 'JSONDiff'
+      input = main_tao.i
+      jsondiff = 'ufunction_tao.json'
+      rel_err = 1e-3
+      abs_zero = 1e-3
+      detail = 'TAO optimization;'
+    []
+  []
+
+  [errors]
+    requirement = 'The system shall throw an error when performing active learning when '
+    [batch_with_tao]
+      type = RunException
+      input = main_tao.i
+      cli_args = "Trainers/GP_al_trainer/batch_size=5"
+      detail = 'mini-batching is requested with the TAO optimization library;'
+      expect_err = "Mini-batch sampling is not compatible with the TAO optimization library. Please use Adam optimization."
+    []
+    [adam_wrong_batch_size]
+      type = RunException
+      input = main_adam.i
+      cli_args = "Trainers/GP_al_trainer/batch_size=500"
+      detail = 'the batch size is greater than the training data set size for Adam optimization;'
+      expect_err = "Batch size cannot be greater than the training data set size."
+    []
+  []
+[]

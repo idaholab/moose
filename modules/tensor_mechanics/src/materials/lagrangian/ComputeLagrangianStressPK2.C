@@ -20,7 +20,7 @@ ComputeLagrangianStressPK2::ComputeLagrangianStressPK2(const InputParameters & p
   : ComputeLagrangianStressPK1(parameters),
     _E(declareProperty<RankTwoTensor>(_base_name + "green_lagrange_strain")),
     _S(declareProperty<RankTwoTensor>(_base_name + "pk2_stress")),
-    _C(declareProperty<RankFourTensor>(_base_name + "pk2_jaobian"))
+    _C(declareProperty<RankFourTensor>(_base_name + "pk2_jacobian"))
 {
 }
 

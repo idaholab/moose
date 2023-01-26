@@ -8,7 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // Standard includes
-#include <math.h>
+#include <cmath>
+#include <limits>
 
 // MOOSE includes
 #include "Output.h"
@@ -38,6 +39,8 @@ Output::validParams()
   // Output intervals and timing
   params.addParam<unsigned int>(
       "interval", 1, "The interval at which time steps are output to the solution file");
+  params.addParam<Real>(
+      "minimum_time_interval", 0.0, "The minimum simulation time between output steps");
   params.addParam<std::vector<Real>>("sync_times",
                                      "Times at which the output and solution is forced to occur");
   params.addParam<bool>("sync_only", false, "Only export results at sync times");
@@ -61,7 +64,7 @@ Output::validParams()
 
   // 'Timing' group
   params.addParamNamesToGroup("time_tolerance interval sync_times sync_only start_time end_time "
-                              "start_step end_step ",
+                              "start_step end_step minimum_time_interval",
                               "Timing and frequency");
 
   // Add a private parameter for indicating if it was created with short-cut syntax
@@ -104,6 +107,7 @@ Output::Output(const InputParameters & parameters)
     _dt_old(_problem_ptr->dtOld()),
     _num(0),
     _interval(getParam<unsigned int>("interval")),
+    _minimum_time_interval(getParam<Real>("minimum_time_interval")),
     _sync_times(std::set<Real>(getParam<std::vector<Real>>("sync_times").begin(),
                                getParam<std::vector<Real>>("sync_times").end())),
     _start_time(isParamValid("start_time") ? getParam<Real>("start_time")
@@ -118,7 +122,9 @@ Output::Output(const InputParameters & parameters)
     _sync_only(getParam<bool>("sync_only")),
     _allow_output(true),
     _is_advanced(false),
-    _advanced_execute_on(_execute_on, parameters)
+    _advanced_execute_on(_execute_on, parameters),
+    _last_output_time(
+        declareRestartableData<Real>("last_output_time", std::numeric_limits<Real>::lowest()))
 {
   if (_use_displaced)
   {
@@ -172,6 +178,9 @@ Output::outputStep(const ExecFlagType & type)
   if (type != EXEC_FINAL && !onInterval())
     return;
 
+  // store current simulation time
+  _last_output_time = _time;
+
   // Call the output method
   if (shouldOutput(type))
   {
@@ -210,6 +219,10 @@ Output::onInterval()
   // If sync times are not skipped, return true if the current time is a sync_time
   if (_sync_times.find(_time) != _sync_times.end())
     output = true;
+
+  // check if enough time has passed between outputs
+  if (_time > _last_output_time && _last_output_time + _minimum_time_interval > _time + _t_tol)
+    return false;
 
   // Return the output status
   return output;

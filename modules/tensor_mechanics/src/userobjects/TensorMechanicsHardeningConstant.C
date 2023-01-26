@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "TensorMechanicsHardeningConstant.h"
-#include <math.h> // for M_PI
 
 registerMooseObject("TensorMechanicsApp", TensorMechanicsHardeningConstant);
 
@@ -33,7 +32,7 @@ TensorMechanicsHardeningConstant::validParams()
 TensorMechanicsHardeningConstant::TensorMechanicsHardeningConstant(
     const InputParameters & parameters)
   : TensorMechanicsHardeningModel(parameters),
-    _val(getParam<bool>("convert_to_radians") ? getParam<Real>("value") * M_PI / 180.0
+    _val(getParam<bool>("convert_to_radians") ? getParam<Real>("value") * libMesh::pi / 180.0
                                               : getParam<Real>("value"))
 {
 }

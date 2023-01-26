@@ -16,7 +16,7 @@
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
 
-#include <math.h>
+#include <cmath>
 
 #include "MooseRandom.h"
 #include "Shuffle.h"
@@ -64,10 +64,8 @@ GaussianProcessHandler::setupCovarianceMatrix(const RealEigenMatrix & training_p
                                               const RealEigenMatrix & training_data,
                                               const GPOptimizerOptions & opts)
 {
-  if (opts.batch_size > 0)
-    _K.resize(opts.batch_size, opts.batch_size);
-  else
-    _K.resize(training_params.rows(), training_params.rows());
+  const unsigned int batch_size = opts.batch_size > 0 ? opts.batch_size : training_params.rows();
+  _K.resize(batch_size, batch_size);
 
   if (opts.opt_type == "tao")
   {
@@ -79,7 +77,7 @@ GaussianProcessHandler::setupCovarianceMatrix(const RealEigenMatrix & training_p
     tuneHyperParamsAdam(training_params,
                         training_data,
                         opts.iter_adam,
-                        opts.batch_size,
+                        batch_size,
                         opts.learning_rate_adam,
                         opts.show_optimization_details);
 
