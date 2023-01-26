@@ -56,6 +56,17 @@ RedistributeProperties::operator>=(const RelationshipManager & rhs) const
 }
 
 void
+RedistributeProperties::addMaterialPropertyStorage(MaterialPropertyStorage & mat_props)
+{
+  _mat_prop_storages.push_back(&mat_props);
+}
+
+void
 RedistributeProperties::redistribute()
 {
+  for (auto mat_props : _mat_prop_storages)
+    if (mat_props->hasStatefulProperties())
+    {
+      libMesh::out << "redistributing mat_props at " << mat_props << std::endl;
+    }
 }

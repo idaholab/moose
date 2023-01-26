@@ -41,6 +41,8 @@ public:
 
   virtual void redistribute() override;
 
+  void addMaterialPropertyStorage(MaterialPropertyStorage & mat_props);
+
 private:
-  MaterialPropertyStorage * _mat_prop_storage;
+  std::vector<MaterialPropertyStorage *> _mat_prop_storages;
 };
