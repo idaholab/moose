@@ -93,13 +93,9 @@ void
 SolutionInvalidity::sync()
 {
   // to do: also send the object name, and the other two values of counts
-  std::map<processor_id_type,
-           std::vector<std::tuple<InvalidSolutionID,
-                                  std::string,
-                                  std::string,
-                                  unsigned int,
-                                  unsigned int,
-                                  unsigned int>>>
+  std::map<
+      processor_id_type,
+      std::vector<std::tuple<std::string, std::string, unsigned int, unsigned int, unsigned int>>>
       data_to_send;
   if (processor_id() != 0)
     for (const auto id : index_range(_counts))
@@ -109,7 +105,7 @@ SolutionInvalidity::sync()
       {
         const auto & info = _solution_invalidity_registry.item(id);
         data_to_send[0].emplace_back(
-            id, info._name, info._message, entry.counts, entry.timeiter_counts, entry.total_counts);
+            info._name, info._message, entry.counts, entry.timeiter_counts, entry.total_counts);
       }
     }
 
@@ -117,7 +113,7 @@ SolutionInvalidity::sync()
   const auto receive_data = [this](const processor_id_type libmesh_dbg_var(pid), const auto & data)
   {
     mooseAssert(pid != 0, "Should not be used except processor 0");
-    for (const auto & [id, name, message, counts, timeiter_counts, total_counts] : data)
+    for (const auto & [name, message, counts, timeiter_counts, total_counts] : data)
     {
       InvalidSolutionID masterId = 0;
       if (_solution_invalidity_registry.keyExists(name))
