@@ -60,8 +60,9 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
 }
 
 std::string
-MaterialPropertyInterface::deducePropertyName(const std::string & name) const
+MaterialPropertyInterface::deducePropertyName(const std::string & name_in) const
 {
+  const auto name = _mi_params.checkForRename(name_in);
   if (_mi_params.have_parameter<MaterialPropertyName>(name) && _mi_params.isParamValid(name))
     return _mi_params.get<MaterialPropertyName>(name);
   else

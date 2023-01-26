@@ -25,8 +25,10 @@ FunctorInterface::FunctorInterface(const MooseObject * const moose_object)
 }
 
 std::string
-FunctorInterface::deduceFunctorName(const std::string & name, const InputParameters & params)
+FunctorInterface::deduceFunctorName(const std::string & name_in, const InputParameters & params)
 {
+  const auto name = params.checkForRename(name_in);
+
   if (params.isParamValid(name))
   {
     if (params.have_parameter<MooseFunctorName>(name))
