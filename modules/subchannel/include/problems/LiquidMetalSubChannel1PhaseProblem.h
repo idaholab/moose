@@ -43,20 +43,18 @@ protected:
   /// computeMassFlowForDPDZ(double dpdz, int i_ch) and enforceUniformDPDZAtInlet()
   /// are overriden to define the sodium friction factor
   virtual double computeMassFlowForDPDZ(double dpdz, int i_ch);
+  /**
+   * solver with iterative option to enforce uniform inlet
+   * pressure distribution option
+   */
   virtual void enforceUniformDPDZAtInlet();
   virtual void computeWijPrime(int iblock) override;
-  ///
   virtual void computeh(int iblock) override;
   /**
    * computeInletMassFlowDist corrects the inlet mass flow rate distribution
    * in order to satisfy the uniform inlet pressure condition, iteratively.
    */
   virtual void computeInletMassFlowDist();
-  /**
-   * solver with iterative option to enforce uniform inlet
-   * pressure distribution option
-   */
-  virtual void externalSolve() override;
   /// average relative error in pressure drop of channels
   Real _dpz_error;
   TriSubChannelMesh & _tri_sch_mesh;

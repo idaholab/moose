@@ -12,25 +12,27 @@
 /*               See COPYRIGHT for full restrictions                */
 /********************************************************************/
 
-#pragma once
+#include "PostprocessorConstantAux.h"
+registerMooseObject("MooseApp", PostprocessorConstantAux);
 
-#include "AuxKernel.h"
-
-/**
- * Computes mass float rate from specified uniform mass flux and cross-sectional area
- */
-class MassFlowRateAux : public AuxKernel
+InputParameters
+PostprocessorConstantAux::validParams()
 {
-public:
-  static InputParameters validParams();
+  InputParameters params = AuxKernel::validParams();
+  params.addClassDescription(
+      "Creates a constant field in the domain. Reads value from postprocessor");
+  params.addRequiredParam<PostprocessorName>("postprocessor",
+                                             "The postprocessor to use for the value");
+  return params;
+}
 
-  MassFlowRateAux(const InputParameters & parameters);
+PostprocessorConstantAux::PostprocessorConstantAux(const InputParameters & parameters)
+  : AuxKernel(parameters), _pvalue(getPostprocessorValue("postprocessor"))
+{
+}
 
-  virtual Real computeValue() override;
-
-protected:
-  /// Specified mass flux
-  const Real & _mass_flux;
-  /// Cross-sectional area
-  const VariableValue & _area;
-};
+Real
+PostprocessorConstantAux::computeValue()
+{
+  return _pvalue;
+}
