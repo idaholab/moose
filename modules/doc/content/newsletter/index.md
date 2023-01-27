@@ -5,6 +5,10 @@ major changes to the project monthly highlights will be produced. These highligh
 monthly to the [MOOSE users](contact_us.md) and [MOOSE announcement](contact_us.md) lists as well as
 provided below.
 
+## 2023
+
+- [January, 2023](2023_01.md)
+
 ## 2022
 
 - [December, 2022](2022_12.md)
