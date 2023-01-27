@@ -893,11 +893,21 @@ public:
   /**
    * A wrapper around the \p Parameters base class method. Checks for parameter rename before
    * calling the base class method
-   * @param name The name to check for whether it was renamed
+   * @param name The name to query the parameter values map with
    * @return The parameter value corresponding to the (possibly renamed) name
    */
   template <typename T>
   const T & get(std::string_view name) const;
+
+  /**
+   * A wrapper around the \p Parameters base class method. Checks for parameter rename before
+   * calling the base class method
+   * @param name The name to query the parameter values map with
+   * @return Whether there is a key in the parameter values map corresponding to the (possibly
+   * renamed) name
+   */
+  template <typename T>
+  bool have_parameter(std::string_view name) const;
 
 private:
   // Private constructor so that InputParameters can only be created in certain places.
@@ -1808,6 +1818,15 @@ InputParameters::get(std::string_view name_in) const
   const auto name = checkForRename(std::string(name_in));
 
   return Parameters::get<T>(name);
+}
+
+template <typename T>
+bool
+InputParameters::have_parameter(std::string_view name_in) const
+{
+  const auto name = checkForRename(std::string(name_in));
+
+  return Parameters::have_parameter<T>(name);
 }
 
 namespace moose
