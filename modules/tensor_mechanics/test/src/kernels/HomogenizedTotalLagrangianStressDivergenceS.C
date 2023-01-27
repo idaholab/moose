@@ -15,26 +15,13 @@
 
 registerMooseObject("TensorMechanicsTestApp", HomogenizedTotalLagrangianStressDivergenceS);
 
-namespace
-{
-const InputParameters &
-setHTLSDSParam(const InputParameters & params_in)
-{
-  // Reset the scalar_variable parameter to a relevant name for this physics
-  InputParameters & ret = const_cast<InputParameters &>(params_in);
-  ret.set<VariableName>("scalar_variable") = {params_in.get<VariableName>("macro_var")};
-  return ret;
-}
-}
-
 InputParameters
 HomogenizedTotalLagrangianStressDivergenceS::validParams()
 {
   InputParameters params = TotalLagrangianStressDivergenceS::validParams();
   params.addClassDescription("Total Lagrangian stress equilibrium kernel with "
                              "homogenization constraint Jacobian terms");
-  params.addRequiredParam<VariableName>("macro_var",
-                                        "Optional scalar field with the macro gradient");
+  params.renameCoupledVar("scalar_variable", "macro_var", "Optional scalar field with the macro gradient");
   params.addRequiredParam<MultiMooseEnum>(
       "constraint_types",
       HomogenizationS::constraintType,
@@ -48,7 +35,7 @@ HomogenizedTotalLagrangianStressDivergenceS::validParams()
 
 HomogenizedTotalLagrangianStressDivergenceS::HomogenizedTotalLagrangianStressDivergenceS(
     const InputParameters & parameters)
-  : TotalLagrangianStressDivergenceS(setHTLSDSParam(parameters))
+  : TotalLagrangianStressDivergenceS(parameters)
 {
   // Constraint types
   auto types = getParam<MultiMooseEnum>("constraint_types");

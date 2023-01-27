@@ -112,7 +112,6 @@
     type = HomogenizedTotalLagrangianStressDivergenceS
     variable = disp_x
     component = 0
-    coupled_scalar = hvar
     macro_var = hvar
     constraint_types = ${constraint_types}
     targets = ${targets}
@@ -121,22 +120,15 @@
     type = HomogenizedTotalLagrangianStressDivergenceS
     variable = disp_y
     component = 1
-    coupled_scalar = hvar
     macro_var = hvar
     constraint_types = ${constraint_types}
     targets = ${targets}
   []
 []
 
-# This seems to be needed so that the scalar variable is
-# 'detected' and added to the system. Otherwise this message:
-# *** ERROR ***
-# Variable 'scalar_variable' does not exist in this system
-[ScalarKernels]
-  [null]
-    type = NullScalarKernel
-    variable = hvar
-  []
+[Problem]
+  kernel_coverage_check = false
+  error_on_jacobian_nonzero_reallocation = true
 []
 
 [Functions]

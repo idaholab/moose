@@ -21,26 +21,13 @@
 
 registerMooseObject("TensorMechanicsTestApp", HomogenizedTotalLagrangianStressDivergenceR);
 
-namespace
-{
-const InputParameters &
-setHTLSDRParam(const InputParameters & params_in)
-{
-  // Reset the scalar_variable parameter to a relevant name for this physics
-  InputParameters & ret = const_cast<InputParameters &>(params_in);
-  ret.set<VariableName>("scalar_variable") = {params_in.get<VariableName>("macro_var")};
-  return ret;
-}
-}
-
 InputParameters
 HomogenizedTotalLagrangianStressDivergenceR::validParams()
 {
   InputParameters params = TotalLagrangianStressDivergenceS::validParams();
   params.addClassDescription("Total Lagrangian stress equilibrium kernel with "
                              "homogenization constraint Jacobian terms");
-  params.addRequiredParam<VariableName>("macro_var",
-                                        "Optional scalar field with the macro gradient");
+  params.renameCoupledVar("scalar_variable", "macro_var", "Optional scalar field with the macro gradient");
   params.addRequiredCoupledVar("macro_other", "Other components of coupled scalar variable");
   params.addRequiredParam<unsigned int>("prime_scalar", "Either 0=_var or 1=_other scalar");
   params.addRequiredParam<MultiMooseEnum>(
@@ -56,7 +43,7 @@ HomogenizedTotalLagrangianStressDivergenceR::validParams()
 
 HomogenizedTotalLagrangianStressDivergenceR::HomogenizedTotalLagrangianStressDivergenceR(
     const InputParameters & parameters)
-  : TotalLagrangianStressDivergenceS(setHTLSDRParam(parameters)),
+  : TotalLagrangianStressDivergenceS(parameters),
     _beta(getParam<unsigned int>("prime_scalar")),
     _kappao_var_ptr(getScalarVar("macro_other", 0)),
     _kappao_var(coupledScalar("macro_other")),
