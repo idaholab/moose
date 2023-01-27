@@ -890,6 +890,15 @@ public:
    */
   std::string checkForRename(const std::string & name) const;
 
+  /**
+   * A wrapper around the \p Parameters base class method. Checks for parameter rename before
+   * calling the base class method
+   * @param name The name to check for whether it was renamed
+   * @return The parameter value corresponding to the (possibly renamed) name
+   */
+  template <typename T>
+  const T & get(std::string_view name) const;
+
 private:
   // Private constructor so that InputParameters can only be created in certain places.
   InputParameters();
@@ -1790,6 +1799,15 @@ InputParameters::renameParam(const std::string & old_name,
   _old_to_new_name.emplace(old_name, new_name);
   // invalidate the cache
   _last_checked_rename.first.clear();
+}
+
+template <typename T>
+const T &
+InputParameters::get(std::string_view name_in) const
+{
+  const auto name = checkForRename(std::string(name_in));
+
+  return Parameters::get<T>(name);
 }
 
 namespace moose
