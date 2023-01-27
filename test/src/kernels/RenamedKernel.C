@@ -17,10 +17,9 @@ RenamedKernel::validParams()
 {
   InputParameters params = Reaction::validParams();
   params.addParam<Real>("coefficient", 1.0, "Coefficient of the term");
-  params.renameParam<Real>(
-      "rate",
-      "base_coeff",
-      "The base coefficient multiplying the concentration in the Reaction kernel.");
+  params.renameParam("rate",
+                     "base_coeff",
+                     "The base coefficient multiplying the concentration in the Reaction kernel.");
   return params;
 }
 
