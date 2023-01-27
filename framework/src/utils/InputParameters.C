@@ -1229,32 +1229,6 @@ InputParameters::varName(const std::string & var_param_name,
 }
 
 void
-InputParameters::renameParam(const std::string & old_name,
-                             const std::string & new_name,
-                             const std::string & new_docstring)
-{
-  auto params_it = _params.find(old_name);
-  if (params_it == _params.end())
-    mooseError("Requested to rename parameter '",
-               old_name,
-               "' but that parameter name doesn't exist in the parameters object.");
-
-  auto new_metadata = std::move(params_it->second);
-  new_metadata._doc_string = new_docstring;
-  _params.emplace(new_name, std::move(new_metadata));
-  _params.erase(params_it);
-
-  auto values_it = _values.find(old_name);
-  auto new_value = std::move(values_it->second);
-  _values.emplace(new_name, std::move(new_value));
-  _values.erase(values_it);
-
-  _old_to_new_name.emplace(old_name, new_name);
-  // invalidate the cache
-  _last_checked_rename.first.clear();
-}
-
-void
 InputParameters::renameCoupledVar(const std::string & old_name,
                                   const std::string & new_name,
                                   const std::string & new_docstring)
@@ -1268,7 +1242,7 @@ InputParameters::renameCoupledVar(const std::string & old_name,
   _coupled_vars.insert(new_name);
   _coupled_vars.erase(coupled_vars_it);
 
-  renameParam(old_name, new_name, new_docstring);
+  renameParam<std::vector<VariableName>>(old_name, new_name, new_docstring);
 }
 
 std::string

@@ -15,10 +15,11 @@ InputParameters
 RenamedPostprocessorDiffusion::validParams()
 {
   InputParameters params = DefaultPostprocessorDiffusion::validParams();
-  params.renameParam("pps_name",
-                     "diffusion_postprocessor",
-                     "The name of the postprocessor we are going to use, if the name is not "
-                     "found a default value of 0.1 is utilized for the postprocessor value");
+  params.renameParam<PostprocessorName>(
+      "pps_name",
+      "diffusion_postprocessor",
+      "The name of the postprocessor we are going to use, if the name is not "
+      "found a default value of 0.1 is utilized for the postprocessor value");
   return params;
 }
 

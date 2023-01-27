@@ -16,7 +16,7 @@ RenamedCoeffFVDiffusion::validParams()
 {
   InputParameters params = FVDiffusion::validParams();
   params.addClassDescription("Computes residual for diffusion operator for finite volume method.");
-  params.renameParam("coeff", "diffusion_coeff", "The diffusion coefficient.");
+  params.renameParam<MooseFunctorName>("coeff", "diffusion_coeff", "The diffusion coefficient.");
   return params;
 }
 

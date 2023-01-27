@@ -15,7 +15,8 @@ InputParameters
 RenamedMatReaction::validParams()
 {
   InputParameters params = MatReaction::validParams();
-  params.renameParam("mob_name", "reaction_coefficient", "The reaction rate used with the kernel");
+  params.renameParam<MaterialPropertyName>(
+      "mob_name", "reaction_coefficient", "The reaction rate used with the kernel");
   return params;
 }
 
