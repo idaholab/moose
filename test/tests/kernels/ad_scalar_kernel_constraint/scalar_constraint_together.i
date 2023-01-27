@@ -68,14 +68,12 @@
   [./sk_lm]
     type = ADScalarLMKernel
     variable = u
-    coupled_scalar = lambda
     kappa = lambda
     pp_name = pp
     value = 2.666666666666666
   [../]
 []
 
-# With above block, not needed, and results in Petsc error messages
 [Problem]
   kernel_coverage_check = false
   error_on_jacobian_nonzero_reallocation = true

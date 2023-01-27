@@ -22,10 +22,7 @@ KernelScalarBase::validParams()
 {
   InputParameters params = Kernel::validParams();
   // This parameter can get renamed in derived class to a more relevant variable name
-  params.addParam<VariableName>("scalar_variable", "Primary coupled scalar variable");
-  // This name is fixed and required to be equal to the previous parameter; need to add error
-  // checks...
-  params.addCoupledVar("coupled_scalar", "Repeat name of scalar variable to ensure dependency");
+  params.addCoupledVar("scalar_variable", "Primary coupled scalar variable");
   params.addParam<bool>("compute_scalar_residuals", true, "Whether to compute scalar residuals");
   params.addParam<bool>(
       "compute_field_residuals", true, "Whether to compute residuals for the field variable.");
@@ -38,9 +35,7 @@ KernelScalarBase::KernelScalarBase(const InputParameters & parameters)
     _compute_scalar_residuals(!_use_scalar ? false : getParam<bool>("compute_scalar_residuals")),
     _compute_field_residuals(getParam<bool>("compute_field_residuals")),
     _kappa_dummy(),
-    _kappa_var_ptr(_use_scalar ? &_fe_problem.getScalarVariable(
-                                     _tid, parameters.get<VariableName>("scalar_variable"))
-                               : nullptr),
+    _kappa_var_ptr(_use_scalar ? getScalarVar("scalar_variable", 0) : nullptr),
     _kappa_var(_use_scalar ? _kappa_var_ptr->number() : 0),
     _k_order(_use_scalar ? _kappa_var_ptr->order() : 0),
     _kappa(_use_scalar ? (_is_implicit ? _kappa_var_ptr->sln() : _kappa_var_ptr->slnOld())

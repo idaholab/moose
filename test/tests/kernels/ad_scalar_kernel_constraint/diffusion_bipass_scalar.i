@@ -70,7 +70,6 @@
   [./sk_lm]
     type = ADScalarLMKernel
     variable = u
-    coupled_scalar = lambda
     kappa = lambda
     pp_name = pp
     value = 2.666666666666666

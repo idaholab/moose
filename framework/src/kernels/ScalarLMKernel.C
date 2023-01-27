@@ -17,18 +17,6 @@
 
 #include "libmesh/quadrature.h"
 
-namespace
-{
-const InputParameters &
-setScalarLMKParam(const InputParameters & params_in)
-{
-  // Reset the scalar_variable parameter to a relevant name for this physics
-  InputParameters & ret = const_cast<InputParameters &>(params_in);
-  ret.set<VariableName>("scalar_variable") = {params_in.get<VariableName>("kappa")};
-  return ret;
-}
-}
-
 registerMooseObject("MooseApp", ScalarLMKernel);
 
 InputParameters
@@ -37,7 +25,7 @@ ScalarLMKernel::validParams()
   InputParameters params = KernelScalarBase::validParams();
   params.addClassDescription("This class is used to enforce integral of phi = V_0 with a "
                              "Lagrange multiplier approach.");
-  params.addRequiredParam<VariableName>("kappa", "Primary coupled scalar variable");
+  params.renameCoupledVar("scalar_variable", "kappa", "Primary coupled scalar variable");
   params.addRequiredParam<PostprocessorName>(
       "pp_name", "Name of the Postprocessor containing the volume of the domain.");
   params.addRequiredParam<Real>(
@@ -47,7 +35,7 @@ ScalarLMKernel::validParams()
 }
 
 ScalarLMKernel::ScalarLMKernel(const InputParameters & parameters)
-  : KernelScalarBase(setScalarLMKParam(parameters)),
+  : KernelScalarBase(parameters),
     _value(getParam<Real>("value")),
     _pp_value(getPostprocessorValue("pp_name"))
 {

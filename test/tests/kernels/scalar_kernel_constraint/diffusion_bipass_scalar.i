@@ -70,29 +70,16 @@
   [./sk_lm]
     type = ScalarLMKernel
     variable = u
-    coupled_scalar = lambda
     kappa = lambda
     pp_name = pp
     value = 2.666666666666666
   [../]
 []
 
-# This seems to be needed so that the scalar variable is
-# 'detected' and added to the system. Otherwise this message:
-# *** ERROR ***
-# Variable 'scalar_variable' does not exist in this system
-[ScalarKernels]
-  [./null]
-    type = NullScalarKernel
-    variable = lambda
-  [../]
+[Problem]
+  kernel_coverage_check = false
+  error_on_jacobian_nonzero_reallocation = true
 []
-
-# With above block, not needed, and results in Petsc error messages
-# [Problem]
-#   kernel_coverage_check = false
-#   error_on_jacobian_nonzero_reallocation = true
-# []
 
 [BCs]
   [./bottom]
