@@ -30,6 +30,7 @@ class FunctionParserBase
 
 #include <tuple>
 #include <unordered_map>
+#include <mutex>
 
 // Forward declarations
 class Action;
@@ -1060,6 +1061,9 @@ private:
   friend class Parser;
   // for the printInputFile function in the action warehouse
   friend class ActionWarehouse;
+
+  /// A mutex to prevent concurrent read/write of cache variables
+  mutable std::mutex _cache_mutex;
 };
 
 template <typename T>

@@ -1274,6 +1274,8 @@ InputParameters::renameCoupledVar(const std::string & old_name,
 std::string
 InputParameters::checkForRename(const std::string & name_in) const
 {
+  std::scoped_lock lock(_cache_mutex);
+
   if (name_in == _last_checked_rename.first)
     return _last_checked_rename.second;
 
