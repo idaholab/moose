@@ -1,4 +1,4 @@
-# MOOSE Python Tools
+# MOOSE Tools
 
 The MOOSE code itself is written in C++, but everything around it that supports it is written in
 Python.  [python-packages] is a list of the tools/scripts developed in Python that are distributed

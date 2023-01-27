@@ -6,7 +6,10 @@ In general, the following is required for MOOSE-based development:
 
   - Note: Intel compilers are not supported.
 
-- Memory: 16 GBs (debug builds)
-- Processor: 64-bit x86
+- Memory: 8 GBs of RAM for optimized compilation (16 GBs for debug compilation), 2 GB per core execution
+- Processor: 64-bit x86 or ARM64 (specifically, Apple Silicon)
 - Disk: 30GB
-- Many flavors of modern Linux and the two most recent versions of MacOS
+- A [!ac](POSIX) compliant Unix-like operating system, including the two most recent versions of MacOS
+  and most current versions of Linux.
+- Git version control system
+- Python @ [!package!minimum_python] or greater

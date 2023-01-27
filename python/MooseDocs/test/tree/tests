@@ -4,26 +4,26 @@
   [./base]
     type = PythonUnitTest
     input = test_base.py
-    requirement = "MooseDocs shall include a tree node object with arbitrary property creation."
+    requirement = "The system shall include a tree node object with arbitrary property creation."
   [../]
   [./tokens]
     type = PythonUnitTest
     input = test_tokens.py
-    requirement = "MooseDocs shall include tree object suitable for abstract syntax trees."
+    requirement = "The system shall include tree object suitable for abstract syntax trees."
   [../]
   [./html]
     type = PythonUnitTest
     input = test_html.py
-    requirement = "MooseDocs shall include tree object suitable for HTML."
+    requirement = "The system shall include tree object suitable for HTML."
   [../]
   [./latex]
     type = PythonUnitTest
     input = test_latex.py
-    requirement = "MooseDocs shall include tree object suitable for latex."
+    requirement = "The system shall include tree object suitable for latex."
   [../]
   [./page]
     type = PythonUnitTest
     input = test_page.py
-    requirement = "MooseDocs shall include tree object suitable for file structures."
+    requirement = "The system shall include tree object suitable for file structures."
   [../]
 []

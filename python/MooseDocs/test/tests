@@ -3,7 +3,7 @@
 
   [verify]
     issues = '#6699'
-    requirement = "MooseDocs shall be able to use each of the available Executioner types (serial, "
+    requirement = "The system shall be able to use each of the available Executioner types (serial, "
                   "queue-based parallel, barrier-based parallel, and pipe-based parallel schemes) "
                   "to translate markdown syntax to:"
 
@@ -80,7 +80,7 @@
 
   [multiconfig_build]
     issues = '#18137'
-    requirement = "MooseDocs shall be able to successfully translate multiple configurations by "
+    requirement = "The system shall be able to successfully translate multiple configurations by "
                   "using the build command with the `--config` option such that"
 
     [site_subsite]
