@@ -156,25 +156,27 @@ The displaced mesh features are not yet tested for the scalar augmentation syste
 
 ## Parameters id=KSB-parameters
 
-There are two required parameters the user must supply for a kernel derived
+There is one required parameters the user must supply for a kernel derived
 from `KernelScalarBase`:
 
 - `scalar_variable`: the focus scalar variable of the kernel, for which assembly
   of the residual and Jacobian contributions will occur. It must be a `MooseScalarVariable`.
   This parameter may be renamed in a derived class to be more physically meaningful.
-- `coupled_scalar`: the name of the focus scalar variable, provided a second time
-  to ensure that the dependency of the `Kernel` on this variable is detected. This
-  parameter cannot be renamed.
 
 If the `scalar_variable` parameter is not specified, then the derived class will behave
 identically to a regular `Kernel`, namely without any scalar functionality. This feature
 is useful if the scalar augmentation in inserted into a class structure with several
 levels and not all derived members use scalar variables.
 
-As an example, the duplicate parameter listing is shown below for the `ScalarLMKernel` object
+As an example, the parameter listing is shown below for the `ScalarLMKernel` object
 with the `scalar_variable` parameter renamed to `kappa`:
 
 !listing test/tests/kernels/scalar_kernel_constraint/scalar_constraint_kernel.i block=Kernels
+
+Note: to avoid an error message "Variable 'kappa' does not exist in this system", the following
+block should be added to the input file:
+
+!listing test/tests/kernels/scalar_kernel_constraint/scalar_constraint_kernel.i block=Problem
 
 There are also some optional parameters that can be supplied to
 `KernelScalarBase` classes. They are:
