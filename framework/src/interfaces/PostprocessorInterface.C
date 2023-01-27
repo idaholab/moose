@@ -190,11 +190,10 @@ PostprocessorInterface::getPostprocessorName(const std::string & param_name,
 
 const PostprocessorName &
 PostprocessorInterface::getPostprocessorNameInternal(
-    const std::string & param_name_in,
+    const std::string & param_name,
     const unsigned int index,
     const bool allow_default_value /* = true */) const
 {
-  const auto param_name = _ppi_params.checkForRename(param_name_in);
   checkParam(param_name, index);
 
   const auto & name = _ppi_params.isType<PostprocessorName>(param_name)
