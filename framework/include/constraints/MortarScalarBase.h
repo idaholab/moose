@@ -139,9 +139,6 @@ protected:
   /// Whether to compute scalar contributions for this instance
   const bool _compute_scalar_residuals;
 
-  /// A dummy object useful for constructing _kappa when not using scalars
-  const VariableValue _kappa_dummy;
-
   /// (Pointer to) Scalar variable this kernel operates on
   const MooseVariableScalar * const _kappa_var_ptr;
 
