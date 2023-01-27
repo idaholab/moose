@@ -195,7 +195,6 @@
     secondary_subdomain = 'secondary_left'
     secondary_variable = u
     epsilon = epsilon
-    coupled_scalar = epsilon
     sigma = sigma
     correct_edge_dropping = true
     penalty_value = 1.e2
@@ -218,7 +217,6 @@
     secondary_subdomain = 'secondary_bottom'
     secondary_variable = u
     epsilon = epsilon
-    coupled_scalar = epsilon
     sigma = sigma
     correct_edge_dropping = true
     penalty_value = 1.e2
