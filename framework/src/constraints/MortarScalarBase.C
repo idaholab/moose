@@ -19,6 +19,7 @@ InputParameters
 MortarScalarBase::validParams()
 {
   InputParameters params = MortarConstraint::validParams();
+  // This parameter can get renamed in derived class to a more relevant variable name
   params.addCoupledVar("scalar_variable", "Primary coupled scalar variable");
   params.addParam<bool>("compute_scalar_residuals", true, "Whether to compute scalar residuals");
   return params;

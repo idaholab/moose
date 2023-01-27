@@ -14,13 +14,9 @@
 #include "MooseVariableScalar.h"
 #include "Assembly.h"
 
-/// Base class for implementing Variational Multiscale Nitsche (VMN)
-/// Thermal (T) mechanics periodic boundary conditions 2D, and 3D.
-/// Constructed in the spirit of the "Heat Diffusion" kernel.
-///
-/// This class provides the base for computing the residual that couples
-/// the macro heat flux and the boundary temperature jump, and the off-
-/// diagonal Jacobian terms
+/// Test object to illustrate coupling between mortar spatial variables
+/// and two separate scalar variables, kappa and kappa_other. The solution
+/// is equivalent to PenaltyPeriodicSegmentalConstraint.
 ///
 
 class TestPeriodicSole : public DerivativeMaterialInterface<MortarScalarBase>

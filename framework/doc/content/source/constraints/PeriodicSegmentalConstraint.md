@@ -40,7 +40,7 @@ The corresponding weak form is (using inner-product notation):
 !equation id=weak-form
 \begin{aligned}
   (\nabla w, D \nabla u)_\Omega - \langle \llbracket w \rrbracket,\lambda \rangle _{\Gamma^+} = 0\\
-  -\langle \mu , \llbracket u \rrbracket \rangle _{\Gamma^+} + \langle \mu , \vec{\epsilon} \cdot \llbracket \vec{x} \rrbracket _{\Gamma^+} = 0\\
+  -\langle \mu , \llbracket u \rrbracket \rangle _{\Gamma^+} + \langle \mu , \vec{\epsilon} \cdot \llbracket \vec{x} \rrbracket \rangle _{\Gamma^+} = 0\\
   \langle \vec{\kappa} \cdot \llbracket \vec{x} \rrbracket, \lambda \rangle _{\Gamma^+} = \langle \vec{\kappa} \cdot \llbracket \vec{x} \rrbracket, \vec{\sigma} \cdot \hat{n} \rangle _{\Gamma^+}
 \end{aligned}
 

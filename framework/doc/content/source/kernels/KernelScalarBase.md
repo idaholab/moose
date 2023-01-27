@@ -26,7 +26,7 @@ The philosphy of the scalar augmentation class `KernelScalarBase` is to add a fo
 referred to as `_kappa` to the `Kernel` object so that all terms in the coupled weak form that involve
 `_var`, `_kappa`, and/or their test functions can be assembled in one or multiple class instances.
 This philosophy is similar to how the lower dimensional variable `_lambda` is added to the element faces
-of `Kernel` and `IntegratedBC` objects associated with the hybrid finite element method (HFEM). Documentation for that approach can be found [HFEMDiffusion](source/dgkernels/HFEMDiffusion.md) and [HFEMDirichletBC](source/bcs/HFEMDirichletBC.md) along with the base classes `DGLowerDKernel` and `LowerDIntegratedBC`.
+of `DGKernel` and `IntegratedBC` objects associated with the hybrid finite element method (HFEM). Documentation for that approach can be found [HFEMDiffusion](source/dgkernels/HFEMDiffusion.md) and [HFEMDirichletBC](source/bcs/HFEMDirichletBC.md) along with the base classes `DGLowerDKernel` and `LowerDIntegratedBC`.
 
 In a `KernelScalarBase` subclass, a naming scheme is established for the quadrature point methods of the two
 variable types: methods contributing to the test function of `_kappa` have "Scalar" near the front
@@ -45,14 +45,14 @@ already been implemented within other MOOSE classes.
 - `computeQpOffDiagJacobian(jvar_num)`: off-diagonal Jacobian component d-`_var`-residual / d-`jvar`
 - `computeQpOffDiagJacobianScalar(svar_num)`: off-diagonal Jacobian component d-`_var`-residual / d-`svar`
 - `computeScalarQpJacobian()`: Jacobian component d-`_kappa`-residual / d-`_kappa`
-- `computeScalarQpOffDiagJacobian()`: off-diagonal Jacobian component d-`_kappa`-residual / d-`jvar`
-- `computeScalarQpOffDiagJacobianScalar()`: off-diagonal Jacobian component d-`_kappa`-residual / d-`svar`
+- `computeScalarQpOffDiagJacobian(jvar_num)`: off-diagonal Jacobian component d-`_kappa`-residual / d-`jvar`
+- `computeScalarQpOffDiagJacobianScalar(svar_num)`: off-diagonal Jacobian component d-`_kappa`-residual / d-`svar`
 
 Examples of some of these methods are shown below in [#KSB-examples]. Loops over the coupled variables wrap around these quadrature loops. The integer for the spatial variable is `jvar_num` and the integer for the
 scalar variable is `svar_num`. 
 
 Also, there are some pre-calculation routines that are called
-within the quadrature loop once before the loop over spatial variable test and shape functions and 
+within the quadrature loop once before the loop over spatial variable test and shape functions as well as 
 before the loop over scalar components. These methods are useful for material or stabilization calculations.
 
 - `initScalarQpResidual()`: evaluations depending on qp but independent of test functions

@@ -166,7 +166,6 @@
     secondary_subdomain = 'secondary_left'
     secondary_variable = u
     kappa = kappa_x
-    coupled_scalar = kappa_x
     kappa_aux = kappa_aux
     component = 0
     kappa_other = kappa_y
@@ -181,7 +180,6 @@
     secondary_subdomain = 'secondary_left'
     secondary_variable = u
     kappa = kappa_y
-    coupled_scalar = kappa_y
     kappa_aux = kappa_aux
     component = 1
     kappa_other = kappa_x
@@ -206,7 +204,6 @@
     secondary_subdomain = 'secondary_bottom'
     secondary_variable = u
     kappa = kappa_x
-    coupled_scalar = kappa_x
     kappa_aux = kappa_aux
     component = 0
     kappa_other = kappa_y
@@ -221,7 +218,6 @@
     secondary_subdomain = 'secondary_bottom'
     secondary_variable = u
     kappa = kappa_y
-    coupled_scalar = kappa_y
     kappa_aux = kappa_aux
     component = 1
     kappa_other = kappa_x

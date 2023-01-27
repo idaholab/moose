@@ -9,25 +9,13 @@
 
 #include "ADTestPeriodicSole.h"
 
-namespace
-{
-const InputParameters &
-setADTestPeriodicSoleParam(const InputParameters & params_in)
-{
-  // Reset the scalar_variable parameter to a relevant name for this physics
-  InputParameters & ret = const_cast<InputParameters &>(params_in);
-  ret.set<VariableName>("scalar_variable") = {params_in.get<VariableName>("kappa")};
-  return ret;
-}
-}
-
 registerMooseObject("MooseTestApp", ADTestPeriodicSole);
 
 InputParameters
 ADTestPeriodicSole::validParams()
 {
   InputParameters params = ADMortarScalarBase::validParams();
-  params.addRequiredParam<VariableName>("kappa", "Primary coupled scalar variable");
+  params.renameCoupledVar("scalar_variable", "kappa", "Primary coupled scalar variable");
   params.addRequiredCoupledVar("kappa_aux", "Controlled scalar averaging variable");
   params.addRequiredCoupledVar("kappa_other", "Other component of coupled scalar variable");
   params.addRequiredParam<unsigned int>("component", "Which direction this kernel acts in");
@@ -37,7 +25,7 @@ ADTestPeriodicSole::validParams()
 }
 
 ADTestPeriodicSole::ADTestPeriodicSole(const InputParameters & parameters)
-  : DerivativeMaterialInterface<ADMortarScalarBase>(setADTestPeriodicSoleParam(parameters)),
+  : DerivativeMaterialInterface<ADMortarScalarBase>(parameters),
     _temp_jump_global(),
     _tau_s(),
     _kappa_aux_var(coupledScalar("kappa_aux")),

@@ -9,18 +9,6 @@
 
 #include "ADPeriodicSegmentalConstraint.h"
 
-namespace
-{
-const InputParameters &
-setADPeriodicSegParam(const InputParameters & params_in)
-{
-  // Reset the scalar_variable parameter to a relevant name for this physics
-  InputParameters & ret = const_cast<InputParameters &>(params_in);
-  ret.set<VariableName>("scalar_variable") = {params_in.get<VariableName>("epsilon")};
-  return ret;
-}
-}
-
 registerMooseObject("MooseApp", ADPeriodicSegmentalConstraint);
 
 InputParameters
@@ -31,14 +19,14 @@ ADPeriodicSegmentalConstraint::validParams()
       "ADPeriodicSegmentalConstraint enforces macro-micro periodic conditions between "
       "secondary and primary sides of a mortar interface using Lagrange multipliers."
       "Must be used alongside EqualValueConstraint.");
-  params.addRequiredParam<VariableName>("epsilon", "Primary coupled scalar variable");
+  params.renameCoupledVar("scalar_variable", "epsilon", "Primary coupled scalar variable");
   params.addRequiredCoupledVar("sigma", "Controlled scalar averaging variable");
 
   return params;
 }
 
 ADPeriodicSegmentalConstraint::ADPeriodicSegmentalConstraint(const InputParameters & parameters)
-  : DerivativeMaterialInterface<ADMortarScalarBase>(setADPeriodicSegParam(parameters)),
+  : DerivativeMaterialInterface<ADMortarScalarBase>(parameters),
     _kappa_aux_var(coupledScalar("sigma")),
     _ka_order(getScalarVar("sigma", 0)->order()),
     _kappa_aux(coupledScalarValue("sigma"))

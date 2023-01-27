@@ -9,18 +9,6 @@
 
 #include "ADPenaltyPeriodicSegmentalConstraint.h"
 
-namespace
-{
-const InputParameters &
-setADPenaltyPeriodicSegParam(const InputParameters & params_in)
-{
-  // Reset the scalar_variable parameter to a relevant name for this physics
-  InputParameters & ret = const_cast<InputParameters &>(params_in);
-  ret.set<VariableName>("scalar_variable") = {params_in.get<VariableName>("epsilon")};
-  return ret;
-}
-}
-
 registerMooseObject("MooseApp", ADPenaltyPeriodicSegmentalConstraint);
 
 InputParameters
@@ -31,7 +19,7 @@ ADPenaltyPeriodicSegmentalConstraint::validParams()
       "ADPenaltyPeriodicSegmentalConstraint enforces macro-micro periodic conditions between "
       "secondary and primary sides of a mortar interface using a penalty approach "
       "(no Lagrange multipliers needed). Must be used alongside PenaltyEqualValueConstraint.");
-  params.addRequiredParam<VariableName>("epsilon", "Primary coupled scalar variable");
+  params.renameCoupledVar("scalar_variable", "epsilon", "Primary coupled scalar variable");
   params.addRequiredCoupledVar("sigma", "Controlled scalar averaging variable");
   params.addParam<Real>(
       "penalty_value",
@@ -43,7 +31,7 @@ ADPenaltyPeriodicSegmentalConstraint::validParams()
 
 ADPenaltyPeriodicSegmentalConstraint::ADPenaltyPeriodicSegmentalConstraint(
     const InputParameters & parameters)
-  : DerivativeMaterialInterface<ADMortarScalarBase>(setADPenaltyPeriodicSegParam(parameters)),
+  : DerivativeMaterialInterface<ADMortarScalarBase>(parameters),
     _temp_jump_global(),
     _tau_s(),
     _kappa_aux_var(coupledScalar("sigma")),
