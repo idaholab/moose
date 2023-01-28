@@ -107,6 +107,7 @@ public:
     HALOS,
     CENTROID,
     ACTIVE_BOUNDS,
+    INTERSECTS_SPECIFIED_BOUNDARY,
   };
 
   // Retrieve field information

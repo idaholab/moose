@@ -1009,6 +1009,14 @@ FeatureFloodCount::getEntityValue(dof_id_type entity_id,
       return 0;
     }
 
+    case FieldType::INTERSECTS_SPECIFIED_BOUNDARY:
+    {
+      auto ids = getVarToFeatureVector(entity_id);
+      if (ids.size() != 0)
+        return doesFeatureIntersectSpecifiedBoundary(ids[0]);
+      return 0;
+    }
+
     default:
       return 0;
   }
