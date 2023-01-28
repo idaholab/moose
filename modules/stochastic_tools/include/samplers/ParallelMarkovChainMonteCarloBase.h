@@ -29,6 +29,11 @@ public:
   dof_id_type getNumberOfConfigParams() const;
 
   /**
+   * Return the step-size for Affine Invariant sampler.
+   */
+  std::vector<Real> getAffineStepSize() const;
+
+  /**
    * Return the number of parallel proposals.
    */
   dof_id_type getNumParallelProposals() const;
@@ -78,6 +83,8 @@ protected:
 
   /// Initialize a certain number of random seeds. Change from the default only if you have to.
   std::vector<std::vector<Real>> _new_samples;
+
+  std::vector<Real> _step_size_sto;
 
 private:
 

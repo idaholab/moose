@@ -30,12 +30,14 @@ public:
   /**
    * Compute the transition probability vector
    */
-  void computeTransitionVector(std::vector<Real> & tv, std::vector<const Distribution *> priors, std::vector<const Likelihood *> likelihoods, const DenseMatrix<Real> & inputs, const std::vector<Real> & outputs, const dof_id_type & num_confg); //  const = 0
+  // void computeTransitionVector(std::vector<Real> & tv, std::vector<const Distribution *> priors, std::vector<const Likelihood *> likelihoods, const DenseMatrix<Real> & inputs, const std::vector<Real> & outputs, const dof_id_type & num_confg); //  const = 0
+  void computeTransitionVector(std::vector<Real> & tv, std::vector<const Distribution *> priors, std::vector<const Likelihood *> likelihoods, const DenseMatrix<Real> & inputs, const std::vector<Real> & outputs, const dof_id_type & num_confg, const DenseMatrix<Real> & prev_inputs, const std::vector<Real> & prev_outputs); //  const = 0
   // virtual 
 
   /**
    * Resample inputs given weights
    */
+  // void resample(const DenseMatrix<Real> & given_inputs, const std::vector<Real> & weights, std::vector<Real> & req_inputs, const dof_id_type & num_confg); //  const = 0
   void resample(const DenseMatrix<Real> & given_inputs, const std::vector<Real> & weights, std::vector<Real> & req_inputs, const dof_id_type & num_confg); //  const = 0
   // virtual
 
@@ -90,7 +92,9 @@ private:
   std::vector<Real> _output_comm;
 
   /// Storage for previous inputs
-  DenseMatrix<Real> data_prev;
+  DenseMatrix<Real> _data_prev;
+
+  std::vector<Real> _output_prev;
 
   std::vector<std::vector<Real>> _inputs_sto;
   
