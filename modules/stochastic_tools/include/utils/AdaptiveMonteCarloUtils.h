@@ -88,4 +88,13 @@ std::vector<Real> computeVectorABS(const std::vector<Real> & data);
  */
 unsigned int weightedResample(const std::vector<Real> & weights, Real rnd);
 
+/**
+ * return a random index between 0 and an upper bound. Resample if the index 
+ * equals a value to be excluded.
+ *
+ * @param the upper bound
+ * @param the value to be excluded
+ */
+unsigned int randomIndex(const unsigned int & ub, const unsigned int & exclude);
+
 } // namespace AdaptiveMonteCarloUtils

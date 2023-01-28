@@ -10,6 +10,7 @@
 #include "AdaptiveMonteCarloUtils.h"
 #include "IndirectSort.h"
 #include "libmesh/int_range.h"
+#include "MooseRandom.h"
 
 /* AdaptiveMonteCarloUtils contains functions that are used across the Adaptive Monte
  Carlo set of algorithms.*/
@@ -104,6 +105,15 @@ weightedResample(const std::vector<Real> & weights, Real rnd)
     }
     rnd -= weights[i];
   }
+  return req_index;
+}
+
+unsigned int
+randomIndex(const unsigned int & ub, const unsigned int & exclude)
+{
+  unsigned int req_index = exclude;
+  while (req_index == exclude)
+    req_index = std::rand() % (ub);
   return req_index;
 }
 

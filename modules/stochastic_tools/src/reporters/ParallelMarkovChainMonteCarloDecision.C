@@ -14,6 +14,7 @@
 #include "StochasticToolsUtils.h"
 #include "MooseRandom.h"
 #include "Likelihood.h"
+// #include "Uniform.h"
 
 registerMooseObjectAliased("StochasticToolsApp", ParallelMarkovChainMonteCarloDecision, "PMCMCDecision");
 
@@ -76,41 +77,130 @@ ParallelMarkovChainMonteCarloDecision::ParallelMarkovChainMonteCarloDecision(con
     _inputs[i].resize(cols);
 
   _outputs.resize(_sampler.getNumberOfRows());
-  _tpm.resize(_pmcmc->getNumParallelProposals() + 1);
+  _tpm.resize(_pmcmc->getNumParallelProposals());
 
   _seed_inputs.resize(cols);
 
   _proposal_std.resize(cols);
 
+  _output_prev.resize(_pmcmc->getNumParallelProposals() * _pmcmc->getNumberOfConfigParams());
+
   // _output_value.resize(rows);
   _inputs_sto.resize(cols);
 }
 
+// void 
+// ParallelMarkovChainMonteCarloDecision::computeTransitionVector(std::vector<Real> & tv, std::vector<const Distribution *> priors, std::vector<const Likelihood *> likelihoods, const DenseMatrix<Real> & inputs, const std::vector<Real> & outputs, const dof_id_type & num_confg)
+// {
+//   Real sum1 = 0.0;
+//   Real quant1;
+//   std::vector<Real> out1(num_confg);
+//   std::vector<Real> out2(num_confg);
+//   for (unsigned int j = 0; j < num_confg; ++j)
+//     out2[j] = outputs[j + (tv.size() - 1) * num_confg];
+//   dof_id_type count1 = 0;
+//   for (unsigned int i = 0; i < tv.size()-1; ++i)
+//   {
+//     quant1 = 0.0;
+//     for (unsigned int j = 0; j < priors.size(); ++j)
+//         quant1 += (std::log(priors[j]->pdf(inputs(count1, j))) - std::log(priors[j]->pdf(inputs(tv.size() * num_confg - 1, j))));
+//     for (unsigned int j = 0; j < num_confg; ++j)
+//         out1[j] = outputs[j + count1];
+//     for (unsigned int j = 0; j < likelihoods.size(); ++j)
+//         quant1 += (likelihoods[j]->function(out1) - likelihoods[j]->function(out2));
+//     quant1 = (1.0 / (tv.size() - 1)) * std::exp(std::min(quant1, 0.0));
+//     tv[i] = quant1;
+//     sum1 += quant1;
+//     count1 += num_confg;
+//   }
+//   tv[tv.size() - 1] = 1 - sum1;
+// }
+
+// void
+// ParallelMarkovChainMonteCarloDecision::resample(const DenseMatrix<Real> & given_inputs, const std::vector<Real> & weights, std::vector<Real> & req_inputs, const dof_id_type & num_confg)
+// {  
+//   Real rnd = MooseRandom::rand();
+//   dof_id_type req_index = AdaptiveMonteCarloUtils::weightedResample(weights, rnd);
+//   for (unsigned int i = 0; i < req_inputs.size(); ++i)
+//     req_inputs[i] = given_inputs(req_index * num_confg, i);
+// }
+
+// void
+// ParallelMarkovChainMonteCarloDecision::execute()
+// {
+//     DenseMatrix<Real> data_in(_sampler.getNumberOfRows(), _sampler.getNumberOfCols());
+//     for (dof_id_type ss = _sampler.getLocalRowBegin(); ss < _sampler.getLocalRowEnd(); ++ss)
+//     {
+//     const auto data = _sampler.getNextLocalRow();
+//     for (unsigned int j = 0; j < _sampler.getNumberOfCols(); ++j)
+//         data_in(ss, j) = data[j];
+//     }
+//     _local_comm.sum(data_in.get_values());
+//     _output_comm = _output_value;
+//     _local_comm.allgather(_output_comm);
+//     _outputs = _output_comm;
+
+//     if (_step > 1)
+//     {
+//       // std::cout << "Outputs " << Moose::stringify(_output_comm) << std::endl;
+//       // std::vector<Real> tmp1;
+//       // tmp1.resize(_sampler.getNumberOfCols());
+//       // for (unsigned int i = 0; i < _sampler.getNumberOfRows(); ++i)
+//       // {
+//       //   for (unsigned int j = 0; j < _sampler.getNumberOfCols(); ++j)
+//       //     tmp1[j] = data_in(i, j);
+//       //   std::cout << "Inputs row " << i << ": " << Moose::stringify(tmp1) << std::endl;
+//       // }
+
+//       std::vector<Real> tpm;
+//       tpm.resize(_pmcmc->getNumParallelProposals() + 1);
+//       computeTransitionVector(tpm, _priors, _likelihoods, data_in, _output_comm, _pmcmc->getNumberOfConfigParams()); // _data_prev
+//       std::cout << "TPM " << Moose::stringify(tpm) << std::endl;
+//       _tpm = tpm;
+//       std::vector<Real> req_inputs(_sampler.getNumberOfCols());
+//       for (unsigned int i = 0; i < _pmcmc->getNumParallelProposals(); ++i)
+//       {
+//         resample(data_in, tpm, req_inputs, _pmcmc->getNumberOfConfigParams()); // _data_prev
+//         _inputs[i] = req_inputs;
+//         for (unsigned int j = 0; j < _sampler.getNumberOfCols(); ++j)
+//           _inputs_sto[j].push_back(req_inputs[j]);
+//       }
+//       resample(data_in, tpm, _seed_inputs, _pmcmc->getNumberOfConfigParams()); // _data_prev
+//       for (unsigned int i = 0; i < _sampler.getNumberOfCols(); ++i)
+//         _proposal_std[i] = AdaptiveMonteCarloUtils::computeSTD(_inputs_sto[i], 0);
+//       std::cout << "Proposal std " << Moose::stringify(_proposal_std) << std::endl;
+//     }
+//     _data_prev = data_in;
+// }
+
+// Affine invariant
+
 void 
-ParallelMarkovChainMonteCarloDecision::computeTransitionVector(std::vector<Real> & tv, std::vector<const Distribution *> priors, std::vector<const Likelihood *> likelihoods, const DenseMatrix<Real> & inputs, const std::vector<Real> & outputs, const dof_id_type & num_confg)
+ParallelMarkovChainMonteCarloDecision::computeTransitionVector(std::vector<Real> & tv, std::vector<const Distribution *> priors, std::vector<const Likelihood *> likelihoods, const DenseMatrix<Real> & inputs, const std::vector<Real> & outputs, const dof_id_type & num_confg, const DenseMatrix<Real> & prev_inputs, const std::vector<Real> & prev_outputs)
 {
-  Real sum1 = 0.0;
   Real quant1;
   std::vector<Real> out1(num_confg);
   std::vector<Real> out2(num_confg);
-  for (unsigned int j = 0; j < num_confg; ++j)
-    out2[j] = outputs[j + (tv.size() - 1) * num_confg];
+  std::vector<Real> z = _pmcmc->getAffineStepSize();
+  // for (unsigned int j = 0; j < num_confg; ++j)
+  //   out2[j] = outputs[j + (tv.size() - 1) * num_confg];
   dof_id_type count1 = 0;
-  for (unsigned int i = 0; i < tv.size()-1; ++i)
+  for (unsigned int i = 0; i < tv.size(); ++i)
   {
     quant1 = 0.0;
     for (unsigned int j = 0; j < priors.size(); ++j)
-        quant1 += (std::log(priors[j]->pdf(inputs(count1, j))) - std::log(priors[j]->pdf(inputs(tv.size() * num_confg - 1, j))));
+      quant1 += (std::log(priors[j]->pdf(inputs(count1, j))) - std::log(priors[j]->pdf(prev_inputs(count1, j))));
     for (unsigned int j = 0; j < num_confg; ++j)
-        out1[j] = outputs[j + count1];
+    {
+      out1[j] = outputs[j + count1];
+      out2[j] = prev_outputs[j + count1];
+    }
     for (unsigned int j = 0; j < likelihoods.size(); ++j)
-        quant1 += (likelihoods[j]->function(out1) - likelihoods[j]->function(out2));
-    quant1 = (1.0 / (tv.size() - 1)) * std::exp(std::min(quant1, 0.0));
+      quant1 += (likelihoods[j]->function(out1) - likelihoods[j]->function(out2));
+    quant1 = std::exp(std::min((priors.size()-1) * std::log(z[count1]) + quant1, 0.0)); // std::min(std::pow(z[count1], priors.size()-1) * std::exp(quant1), 1.0); // 
     tv[i] = quant1;
-    sum1 += quant1;
     count1 += num_confg;
   }
-  tv[tv.size() - 1] = 1 - sum1;
 }
 
 void
@@ -128,9 +218,9 @@ ParallelMarkovChainMonteCarloDecision::execute()
     DenseMatrix<Real> data_in(_sampler.getNumberOfRows(), _sampler.getNumberOfCols());
     for (dof_id_type ss = _sampler.getLocalRowBegin(); ss < _sampler.getLocalRowEnd(); ++ss)
     {
-    const auto data = _sampler.getNextLocalRow();
-    for (unsigned int j = 0; j < _sampler.getNumberOfCols(); ++j)
-        data_in(ss, j) = data[j];
+      const auto data = _sampler.getNextLocalRow();
+      for (unsigned int j = 0; j < _sampler.getNumberOfCols(); ++j)
+          data_in(ss, j) = data[j];
     }
     _local_comm.sum(data_in.get_values());
     _output_comm = _output_value;
@@ -150,22 +240,55 @@ ParallelMarkovChainMonteCarloDecision::execute()
       // }
 
       std::vector<Real> tpm;
-      tpm.resize(_pmcmc->getNumParallelProposals() + 1);
-      computeTransitionVector(tpm, _priors, _likelihoods, data_in, _output_comm, _pmcmc->getNumberOfConfigParams()); // data_prev
+      tpm.resize(_pmcmc->getNumParallelProposals());
+      computeTransitionVector(tpm, _priors, _likelihoods, data_in, _output_comm, _pmcmc->getNumberOfConfigParams(), _data_prev, _output_prev); // _data_prev
       std::cout << "TPM " << Moose::stringify(tpm) << std::endl;
       _tpm = tpm;
-      std::vector<Real> req_inputs(_sampler.getNumberOfCols());
+      dof_id_type count1 = 0;
+      // std::vector<Real> req_inputs(_sampler.getNumberOfCols());
       for (unsigned int i = 0; i < _pmcmc->getNumParallelProposals(); ++i)
       {
-        resample(data_in, tpm, req_inputs, _pmcmc->getNumberOfConfigParams()); // data_prev
-        _inputs[i] = req_inputs;
-        for (unsigned int j = 0; j < _sampler.getNumberOfCols(); ++j)
-          _inputs_sto[j].push_back(req_inputs[j]);
+        if (tpm[i] >= MooseRandom::rand())
+        {
+          for (unsigned int j = 0; j < _sampler.getNumberOfCols(); ++j)
+            _inputs[i][j] = data_in(count1, j);
+          std::cout << "Accept!" << std::endl;
+        }
+        else
+        {
+          for (unsigned int j = 0; j < _sampler.getNumberOfCols(); ++j)
+          {
+            _inputs[i][j] = _data_prev(count1, j);
+            for (unsigned int k = count1; k < (_pmcmc->getNumberOfConfigParams()+count1); ++k)
+              data_in(k, j) = _data_prev(k, j);
+          }
+          std::cout << "Reject!" << std::endl;
+        }
+        // resample(data_in, tpm, req_inputs, _pmcmc->getNumberOfConfigParams()); // _data_prev
+        // _inputs[i] = req_inputs;
+        // for (unsigned int j = 0; j < _sampler.getNumberOfCols(); ++j)
+        //   _inputs_sto[j].push_back(req_inputs[j]);
+        count1 += _pmcmc->getNumberOfConfigParams();
       }
-      resample(data_in, tpm, _seed_inputs, _pmcmc->getNumberOfConfigParams()); // data_prev
-      for (unsigned int i = 0; i < _sampler.getNumberOfCols(); ++i)
-        _proposal_std[i] = AdaptiveMonteCarloUtils::computeSTD(_inputs_sto[i], 0);
-      std::cout << "Proposal std " << Moose::stringify(_proposal_std) << std::endl;
+      // resample(data_in, tpm, _seed_inputs, _pmcmc->getNumberOfConfigParams()); // _data_prev
+      // for (unsigned int i = 0; i < _sampler.getNumberOfCols(); ++i)
+      //   _proposal_std[i] = AdaptiveMonteCarloUtils::computeSTD(_inputs_sto[i], 0);
+      // std::cout << "Proposal std " << Moose::stringify(_proposal_std) << std::endl;
     }
-    data_prev = data_in;
+    else
+    {
+      for (unsigned int i = 0; i < _pmcmc->getNumParallelProposals(); ++i)
+      {
+        for (unsigned int j = 0; j < _sampler.getNumberOfCols(); ++j)
+        {
+          _inputs[i][j] = 0.05;
+          data_in(i, j) = 0.05;
+        }
+          
+      }
+    }
+    for (unsigned int i = 0; i < _pmcmc->getNumParallelProposals(); ++i)
+      std::cout << "Accpeted samples: " << Moose::stringify(_inputs[i]) << std::endl; //
+    _data_prev = data_in;
+    _output_prev = _outputs;
 }

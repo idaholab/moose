@@ -24,9 +24,9 @@ ParallelMarkovChainMonteCarloBase::validParams()
   params.addRequiredParam<std::vector<DistributionName>>(
       "prior_distributions",
       "The prior distributions of the parameters to be calibrated.");
-  params.addParam<ReporterName>("seed_inputs", "seed_inputs", 
+  params.addRequiredParam<ReporterName>("seed_inputs",
                                         "Reporter with seed inputs values for the next proposals.");
-  params.addParam<ReporterName>("proposal_std", "proposal_std", 
+  params.addRequiredParam<ReporterName>("proposal_std",
                                 "Reporter with proposal stds for the next proposals.");
   params.addRequiredParam<unsigned int>("num_parallel_proposals",
                                         "Number of proposals to made and corresponding subApps executed in "
@@ -84,6 +84,8 @@ ParallelMarkovChainMonteCarloBase::ParallelMarkovChainMonteCarloBase(const Input
   for (unsigned int i = 0; i < ((_num_parallel_proposals + 1) * _confg_values.size()); ++i)
     _new_samples[i].resize(_priors.size()+1);
   
+  _step_size_sto.resize(_num_parallel_proposals * _confg_values.size());
+  
   setNumberOfRandomSeeds(_num_random_seeds);
 
   _check_step = 0;
@@ -117,6 +119,12 @@ dof_id_type
 ParallelMarkovChainMonteCarloBase::getNumberOfConfigParams() const
 {
   return _confg_values.size();
+}
+
+std::vector<Real>
+ParallelMarkovChainMonteCarloBase::getAffineStepSize() const
+{
+  return _step_size_sto;
 }
 
 dof_id_type
@@ -166,7 +174,7 @@ ParallelMarkovChainMonteCarloBase::sampleSetUp(const SampleMode /*mode*/)
   else
   {
     // Real std_tmp;
-    // std::cout << "_seed_inputs " << Moose::stringify(_seed_inputs) << std::endl;
+    std::cout << "_seed_inputs " << Moose::stringify(_seed_inputs) << std::endl;
     for (unsigned int j = 0; j < _num_parallel_proposals; ++j)
     {
       for (unsigned int i = 0; i < _priors.size(); ++i)
@@ -205,7 +213,8 @@ ParallelMarkovChainMonteCarloBase::computeSample(dof_id_type row_index, dof_id_t
 
   std::vector<Real> init;
   // init = {1e-9, 1e4, 1e-9, 1e4, 1e-9, 1e4, 643};
-  init = {-20.723, 11.0, -20.723, 11.0, -20.723, 11.0, 643};
+  // init = {-20.723, 11.0, -20.723, 11.0, -20.723, 11.0, 643};
+  init = {0.05, 0.05, 8};
 
   // std::cout << Moose::stringify(_new_samples[row_index]) << std::endl;  
 // std::cout << "Here *****" << std::endl;
