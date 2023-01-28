@@ -7,6 +7,8 @@ BCs: boundary conditions
 BVP: boundary value problem
 CCB: Change Control Board
 CCI: Communication and Contact Information
+CD: continuous deployment
+CI: continuous integration
 CIVET: Continuous Integration for Verification, Enhancement, and Testing
 CMP: Configuration Management Plan
 CSV: comma-separated values

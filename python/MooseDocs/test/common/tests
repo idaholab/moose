@@ -4,57 +4,57 @@
   [storage]
     type = PythonUnitTest
     input = test_storage.py
-    requirement = "MooseDocs shall have a storage structure for holding ordered items by name."
+    requirement = "The system shall have a storage structure for holding ordered items by name."
   []
   [parse_settings]
     type = PythonUnitTest
     input = test_parse_settings.py
-    requirement = "MooseDocs shall include utility for parsing key, value pairs from a string."
+    requirement = "The system shall include utility for parsing key, value pairs from a string."
   []
   [exceptions]
     type = PythonUnitTest
     input = test_exceptions.py
-    requirement = "MooseDocs shall include special exceptions for use during tokenization and rendering."
+    requirement = "The system shall include special exceptions for use during tokenization and rendering."
   []
   [box]
     type = PythonUnitTest
     input = test_box.py
-    requirement = "MooseDocs shall include a utility for creating text boxes suitable for terminal output."
+    requirement = "The system shall include a utility for creating text boxes suitable for terminal output."
   []
   [mixins]
     type = PythonUnitTest
     input = test_mixins.py
-    requirement = "MooseDocs shall include mixin classes for creating objects that require configuration data, translator objects, or component objects."
+    requirement = "The system shall include mixin classes for creating objects that require configuration data, translator objects, or component objects."
   []
   [load_extensions]
     type = PythonUnitTest
     input = test_load_extensions.py
-    requirement = "MooseDocs shall include the ability to load extensions dynamically."
+    requirement = "The system shall include the ability to load extensions dynamically."
   []
   [load_config]
     type = PythonUnitTest
     input = test_load_config.py
-    requirement = "MooseDocs shall include a YAML based configuration."
+    requirement = "The system shall include a YAML based configuration."
   []
   [class_database]
     type = PythonUnitTest
     input = test_database.py
-    requirement = "MooseDocs shall include a database object for storing information regarding source files."
+    requirement = "The system shall include a database object for storing information regarding source files."
   []
   [get_pages]
     type = PythonUnitTest
     input = test_get_pages.py
-    requirement = "MooseDocs shall include the ability to build a file tree from markdown files."
+    requirement = "The system shall include the ability to build a file tree from markdown files."
   []
   [project_find]
     type = PythonUnitTest
     input = test_project_find.py
-    requirement = "MooseDocs shall include a utility for locating filenames using a fuzzy search."
+    requirement = "The system shall include a utility for locating filenames using a fuzzy search."
   []
   [check_filenames]
     type = PythonUnitTest
     input = test_check_filenames.py
-    requirement = "MooseDocs shall include a utility to locate a filename using a fuzzy search and error if none or multiple are located."
+    requirement = "The system shall include a utility to locate a filename using a fuzzy search and error if none or multiple are located."
   []
   [has_tokens]
     type = PythonUnitTest

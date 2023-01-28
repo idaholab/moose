@@ -14,7 +14,7 @@ an integral part of the normal development process, as such the necessary testin
 satisfy the [!ac](NQA-1) standard are natural for contributors to the project.
 
 All testing performed is "dynamic" that attempt to identify defects by executing the software. All
-testing for revision is performed automatically using [!ac](CIVET). After automated testing has
+testing for each revision is performed automatically using [!ac](CIVET). After automated testing has
 successfully completed and a technical review is performed, an automated merge is made into a
 "stable" revision. Each revision is eligible for release at the discretion of the Project Lead and
 subject to a complete release review.
@@ -33,34 +33,33 @@ itself, or in combination with other functions.
 By the nature of the software as a library it is not possible to guarantee the functionality
 of the software from an end-user perspective, since the input provided by the user cannot be
 controlled.
-
 !template-end!
 
 !template! item key=assumptions
 [!ac](MOOSE) and MOOSE-based applications are assumed to be dynamically-linked command-line
 UNIX (POSIX) compatible executable built on the target system. Being [!ac](HPC) software, and
-the fact that our normal configuration relies on shared-libraries. It generally not
-advisable to build MOOSE on one system and execute it on another system (with the exception
+the fact that our normal configuration relies on shared-libraries, it is generally not
+advisable to build [!ac](MOOSE) on one system and execute it on another system (with the exception
 of a homogeneous cluster environment).
 
 [!ac](MOOSE) and MOOSE-based applications are assumed to be stateless, reading all inputs from local
 or network mounted file-systems.  When deployed for parallel testing or use, standard [!ac](MPI)
 networking is expected to function among cluster compute nodes. [!ac](MOOSE) or MOOSE-based
-applications doe not require any special file system (i.e., parallel file systems), however high
+applications does not require any special file system (i.e., parallel file systems), however high
 performance file systems can improve performance of large simulations and also the speed at which the
 automated testing system can launch, run, and inspect test results.
 !template-end!
 
 !template item key=constraints
 [!ac](MOOSE) and MOOSE-based applications are designed to be built and executed in-situ on the
-end-use machine. There is no requirement for separate testing or acceptance environments. As each
+end-use machine. There is no requirement for separate testing or acceptance environments, as each
 independent invocation of a simulation maintains its own environment. Acceptance testing
-may be performed at full-scale provided resources are available. Therefore there are no constraints
+may be performed at full-scale provided resources are available. Therefore, there are no constraints
 on testing of [!ac](MOOSE) and MOOSE-based applications.
 
 !template! item key=test-types
 It is possible to categorize test cases in many ways such as "system", "integration", "performance",
-or "acceptance" testing. [!ac](MOOSE) and MOOSE-based applications do not categorize test cases,
+or "acceptance" testing. [!ac](MOOSE) and MOOSE-based applications do not categorize test cases;
 they are simply defined and executed as a complete set and automatically executed as defined in
 [#test-automation].
 
@@ -82,9 +81,9 @@ Testing for [!ac](MOOSE) and MOOSE-based applications shall include the levels o
 in [fig:civet_flow]. The testing is automated to the extent possible and the "Next" and "Devel" branch
 testing may be combined at the discretion of the application.
 
-!media civet_flow.png id=fig:civet_flow caption=Required stages for testing of [!ac](MOOSE) and
-                      MOOSE-based applications, the "Next" and "Devel" branch testing may be
-                      combined at the discretion of the application.
+!media civet_flow.png id=fig:civet_flow caption=Required stages for testing of [!ac](MOOSE), MOOSE-based
+                         applications, and {{app}}. The "Next" and "Devel" branch testing may be combined
+                         at the discretion of the application.
 
 ### Requirement for testing logic branches
 
@@ -109,10 +108,10 @@ All tests have a pass/fail acceptance criteria based on the anticipated output a
 "Tester", see [#test-automation]. If the execution output matches the anticipated output than the
 test is accepted (pass), otherwise it is rejected (fail).
 
-In addition, test coverage reports will be created for all proposed changes. The overall line
-coverage is required to increase or remain constant (it may not decrease). Additionally, the
-independent reviewer is expected to use these reports to ensure that the proposed changes are
-tested at an appropriate level at the discretion of the reviewer.
+In addition, test coverage reports will be created for all proposed changes. Ideally, the overall line
+coverage should increase or remain constant at the discretion of the reviewer, but coverage should
+never drop below the level of 80%. Additionally, the independent reviewer is expected to use the
+coverage reports to ensure that the proposed changes are tested at an appropriate level.
 
 ### Reports, records, standard formatting, and conventions
 
@@ -122,9 +121,11 @@ see [#test-automation] for details.
 !template-end!
 
 !template item key=approval-requirements
+!! approval-requirements-begin
 All test cases are created by contributors during the development process and approved by independent
-reviewer. The creation of the tests cases follows the change control process. These tests cases can
-be in response to a bug fixes or as a part of an enhancement.
+reviewer. The creation of the test cases follows the change control process. These test cases can
+be in response to bug fixes or as a part of an enhancement.
+!! approval-requirements-end
 
 
 !template item key=test-iteration
@@ -142,9 +143,11 @@ request process, deployment testing, and finally end-use in-situ testing. The Te
 suitable for testing on large deployment clusters and supports the "PBS" queuing system.
 
 The Test Harness includes a suite of "Tester" types to enable complete testing of [!ac](MOOSE) and
-MOOSE-based applications .For each of the types. The Test Harness is able to execute the application
+MOOSE-based applications. For each of the types, the Test Harness is able to execute the application
 with a developer designed input and verify the correct result automatically.  A complete list of the
 built-in Testers is included here:
+
+!! testers-begin
 
 +RunApp+\\
 A tester designed to assemble common command line arguments for executing MOOSE-based application
@@ -215,21 +218,28 @@ simulation.\\
 *Anticipated Output*: A return code of 0 or 1.\\
 *Acceptance Criteria*: If the simulation values match the finite-difference the result is acceptable (pass).\\
 *Reports and Records*: Upon failure, a report detailing the differences between the Jacobians.
+
++PythonUnitTest+\\
+A tested designed to run Python scripts within the MOOSE test suite, generally containing unit tests.\\
+*Anticipated Output*: A script return code of 0 or 1.\\
+*Acceptance Criteria*: A 0 return code (meaning the script completed successfully) is acceptable (pass).\\
+*Reports and Records*: Upon failure, a report detailing the failures experienced within the test script.
+
+!! testers-end
 !template-end!
 
 !template item key=human-resources
-Testing for [!ac](MOOSE) and MOOSE-based applications requires minimal
-human resources. A system engineer is required to ensure the proper end-user environment
-is setup with proper system prerequisites. The Project Lead is needed to verified the automated test
-system operated correctly prior to release.
+Testing for [!ac](MOOSE) and MOOSE-based applications requires minimal human resources. A system engineer
+is required to ensure the proper end-user environment is setup with proper system prerequisites. The
+Project Lead is should verify that the automated test system operated correctly prior to release.
 
 !template! item key=hardware-software-resources
 If a specific end-user environment is required by a customer, those specifications must be
 supplied to the system engineer to prepare that environment. Alternatively, if remote
-access is available to the end-user system. The system engineer may be granted proper
+access is available to the end-user system, the system engineer may be granted proper
 permissions to assist in setting up the environment on the customer's system.
 
-If no specific customer is required for a specific release. [!ac](MOOSE) and MOOSE-based applications
+If no specific customer is required for a specific release, [!ac](MOOSE) and MOOSE-based applications
 will be tested under the standard supported build system configuration(s). These systems
 are generally modern Linux and macOS distributions with recent compilers. Specific
 information on the tested environments for a release is stored in the release.
@@ -242,6 +252,7 @@ either an Internet connection or media containing the software must be available
 the software. Internet connectivity is not required after installation on the end-use system.
 
 !template! item key=task-responsibilities
+!! task-responsibilities-begin
 The creation and execution of the test cases is part of the change control process, as such the
 associated roles and reponsibilties are minimal.
 
@@ -251,4 +262,5 @@ associated roles and reponsibilties are minimal.
 | 2. | Review test cases and automated results | Independent reviewer |
 | 3. | Review and approve final results for release | Project lead |
 
+!! task-responsibilities-end
 !template-end!

@@ -10,12 +10,12 @@
 
 !template! item key=system-context
 !! system-context-begin
-[!ac](MOOSE) is a command-line driven application. This is typical for a high-performance software
+[!ac](MOOSE) is a command-line driven application. This is typical for high-performance software
 that is designed to run across several nodes of a cluster system. As such, all of the usage
 of the software is through any standard terminal program generally available on all supported
 operating systems. Similarly, for the purpose of interacting through the software, there is only
 a single user, "the user", which interacts with the software through the command-line. MOOSE does
-not maintain any back-end database or interact with any system daemons. It is a executable,
+not maintain any back-end database or interact with any system daemons. It is an executable,
 which may be launched from the command line and writes out various result files as it runs.
 
 !media media/sqa/usage_diagram_uml.svg
@@ -41,10 +41,10 @@ behaviors of each user-defined object.
   for following and enforcing the appropriate software development standards. They will be
   responsible for designing, implementing and maintaining the software.
 
-- +Developers+: A Scientist or Engineer that utilizes the framework to build his or her own
+- +Developers+: A Scientist or Engineer that utilizes the framework to build their own
   application. This user will typically have a background in modeling and simulation techniques
   and/or numerical analysis but may only have a limited skill-set when it comes to object-oriented
-  coding and the C++ language. This is our primary focus group.  In many cases these developers will
+  coding and the C++ language. This is our primary focus group. In many cases these developers will
   be encouraged to give their code back to the framework maintainers.
 
 - +Analysts+: These are users that will run the code and perform various analysis on the simulations
@@ -76,13 +76,7 @@ behaviors of each user-defined object.
 !template! item key=minimum-requirements
 !! minimum-requirements-begin
 
-- A [!ac](POSIX) compliant Unix including the two most recent versions of MacOS and most current
-  versions of Linux.
-- 4 GB of RAM for optimized compilation (8 GB for debug compilation), 2 GB per core execution
-- 100 GB disk space
-- C++17 compatible compiler (GCC, Clang)
-- Python 3.7+
-- Git
+!include sqa/minimum_requirements.md start=### Minimum System Requirements include-start=False
 
 !! minimum-requirements-finish
 !template-end!
@@ -116,7 +110,7 @@ which may be disabled.
   test suite) shall be publicly available at all times through the repository host provider.
 - Flaws identified in the system shall be reported and tracked in a ticket or issue based system. The
   technical lead will determine the severity and priority of all reported issues and assign resources
-  at his or her discretion to resolve identified issues.
+  at their discretion to resolve identified issues.
 - The software maintainers will entertain all proposed changes to the system in a timely manner
   (within two business days).
 - The core framework in its entirety will be made publicly available under the [!ac](LGPL)
@@ -126,7 +120,7 @@ which may be disabled.
 !template-end!
 
 
-!template item key=reliability
+!template! item key=reliability
 !! reliability-begin
 The regression test suite will cover at least 80% of all lines of code at all times. Known
 regressions will be recorded and tracked (see [#maintainability]) to an independent and
@@ -134,7 +128,7 @@ satisfactory resolution.
 !! reliability-finish
 !template-end!
 
-!template item key=information-management
+!template! item key=information-management
 !! information-management-begin
 The core framework in its entirety will be made publicly available on an appropriate repository
 hosting site. Day-to-day backups and security services will be provided by the hosting service. More
@@ -143,7 +137,7 @@ on the following page: [sqa/github_backup.md]
 !! information-management-finish
 !template-end!
 
-!template item key=verification
+!template! item key=verification
 !! verification-begin
 The regression test suite will employ several verification tests using comparison against known
 analytical solutions, the method of manufactured solutions, and convergence rate analysis.
@@ -152,7 +146,7 @@ analytical solutions, the method of manufactured solutions, and convergence rate
 
 !template! item key=system-modes
 !! system-modes-begin
-[!ac](MOOSE) applications normally run in normal execution  mode when an input file is supplied. However
+[!ac](MOOSE) applications normally run in normal execution  mode when an input file is supplied. However,
 there are a few other modes that can be triggered with various command line flags as indicated here:
 
 | Command Line Flag | Description of mode |
@@ -190,7 +184,7 @@ Not Applicable
 
 !template! item key=system-security
 !! system-security-begin
-[!ac](MOOSE) based applications have no requirements or special needs related to system-security. The framework
+[!ac](MOOSE) based applications have no requirements or special needs related to system security. The framework
 is designed to run completely in user-space with no elevated privileges required nor recommended.
 !! system-security-finish
 !template-end!
