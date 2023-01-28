@@ -190,18 +190,15 @@ similar to how Tensor Mechanics module classes operator on one component variabl
 field and are coupled to the other components. The developer can decide how to organize the coupling
 and off-diagonal Jacobian terms in a logical way and document this for the user.
 
-Revise the rest of section; figure out if I assemble the row for each variable, what alpha does, component
+An example for decomposing the coupling terms and having multiple scalar variables are
+contained in the source files of the framework test directory as well as input file
+`testperiodicsole.i`, with listings below. The comments within these header and source files
+should be consulted to visualize how the rows and columns of the relevant residual and Jacobian
+contributions are handled.
 
-Examples of two schemes
-for decomposing the coupling terms and having multiple scalar variables are contained in the source files
-of the Tensor Mechanics module test directory located at `modules/tensor_mechanics/test/include/kernels/`.
-The input files `2dscalar.i` and `2dsole.i` are located in `modules/tensor_mechanics/test/tests/lagrangian/cartesian/total/homogenization/scalar_kernel/`. The comments within these source files should be consulted
-to visualize how the rows and columns of the relevant residual and Jacobian contributions are handled.
-TestPeriodicSole
-
-!listing test/src/constraints/TestPeriodicSole.C id=TPS-residual
-         re=TestPeriodicSole::computeScalarQpOffDiagJacobianScalar.*?}
-         caption=Example of a call to `computeScalarQpOffDiagJacobianScalar``.
+!listing test/include/constraints/TestPeriodicSole.h id=TPS-residual
+         re=/// Test object to illustrate.*?}
+         caption=Decomposition of spatial and scalar variable contributions by x and y components.
 
 !listing test/tests/mortar/periodic_segmental_constraint/testperiodicsole.i block=Constraints
 

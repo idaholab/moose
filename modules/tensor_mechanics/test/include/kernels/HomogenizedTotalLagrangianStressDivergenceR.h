@@ -64,7 +64,7 @@ typedef std::map<std::pair<unsigned int, unsigned int>, std::pair<ConstraintType
 /// In this manner, the full R and J are obtained with NO duplication of jobs:
 /// R = [Rx,  Ry,  Rz,  Rh,  Ra ]^T
 /// J = [Jxx, Jxy, Jxz, Jxh, Jxa
-///      Jxy, Jyy, Jyz, Jyh, Jya
+///      Jyx, Jyy, Jyz, Jyh, Jya
 ///      Jzx, Jzy, Jzz, Jzh, Jza
 ///      Jhx, Jhy, Jhz, Jhh, Jha
 ///      Jax, Jay, Jaz, Jah, Jaa]

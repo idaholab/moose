@@ -65,51 +65,6 @@
   []
 []
 
-[AuxKernels]
-  [sxx]
-    type = RankTwoAux
-    variable = sxx
-    rank_two_tensor = pk1_stress
-    index_i = 0
-    index_j = 0
-  []
-  [syy]
-    type = RankTwoAux
-    variable = syy
-    rank_two_tensor = pk1_stress
-    index_i = 1
-    index_j = 1
-  []
-  [sxy]
-    type = RankTwoAux
-    variable = sxy
-    rank_two_tensor = pk1_stress
-    index_i = 0
-    index_j = 1
-  []
-  [exx]
-    type = RankTwoAux
-    variable = exx
-    rank_two_tensor = mechanical_strain
-    index_i = 0
-    index_j = 0
-  []
-  [eyy]
-    type = RankTwoAux
-    variable = eyy
-    rank_two_tensor = mechanical_strain
-    index_i = 1
-    index_j = 1
-  []
-  [exy]
-    type = RankTwoAux
-    variable = exy
-    rank_two_tensor = mechanical_strain
-    index_i = 0
-    index_j = 1
-  []
-[]
-
 [Kernels]
   [sdx]
     type = HomogenizedTotalLagrangianStressDivergenceR
@@ -164,6 +119,51 @@
 [Problem]
   kernel_coverage_check = false
   error_on_jacobian_nonzero_reallocation = true
+[]
+
+[AuxKernels]
+  [sxx]
+    type = RankTwoAux
+    variable = sxx
+    rank_two_tensor = pk1_stress
+    index_i = 0
+    index_j = 0
+  []
+  [syy]
+    type = RankTwoAux
+    variable = syy
+    rank_two_tensor = pk1_stress
+    index_i = 1
+    index_j = 1
+  []
+  [sxy]
+    type = RankTwoAux
+    variable = sxy
+    rank_two_tensor = pk1_stress
+    index_i = 0
+    index_j = 1
+  []
+  [exx]
+    type = RankTwoAux
+    variable = exx
+    rank_two_tensor = mechanical_strain
+    index_i = 0
+    index_j = 0
+  []
+  [eyy]
+    type = RankTwoAux
+    variable = eyy
+    rank_two_tensor = mechanical_strain
+    index_i = 1
+    index_j = 1
+  []
+  [exy]
+    type = RankTwoAux
+    variable = exy
+    rank_two_tensor = mechanical_strain
+    index_i = 0
+    index_j = 1
+  []
 []
 
 [Functions]

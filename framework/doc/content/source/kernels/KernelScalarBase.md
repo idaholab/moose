@@ -145,11 +145,25 @@ The scalar augmentation system is designed such that multiple scalar variables c
 an instance of the Kernel class, each focusing on one scalar from the list. This approach is similar
 to how Tensor Mechanics module classes operator on one component variable of the displacement vector
 field and are coupled to the other components. The developer can decide how to organize the coupling
-and off-diagonal Jacobian terms in a logical way and document this for the user. Examples of two schemes
-for decomposing the coupling terms and having multiple scalar variables are contained in the source files
-of the Tensor Mechanics module test directory located at `modules/tensor_mechanics/test/include/kernels/`.
-The input files `2dscalar.i` and `2dsole.i` are located in `modules/tensor_mechanics/test/tests/lagrangian/cartesian/total/homogenization/scalar_kernel/`. The comments within these source files should be consulted
-to visualize how the rows and columns of the relevant residual and Jacobian contributions are handled.
+and off-diagonal Jacobian terms in a logical way and document this for the user.
+
+Examples of two schemes for decomposing the coupling terms and having multiple scalar variables are
+contained in the source files of the Tensor Mechanics module test directory as well as input files
+`2drow.i` and `2dsole.i`, with listings below. The comments within these header and source files
+should be consulted to visualize how the rows and columns of the relevant residual and Jacobian
+contributions are handled.
+
+!listing modules/tensor_mechanics/test/include/kernels/HomogenizedTotalLagrangianStressDivergenceR.h id=HTLSDR-header
+         re=/// Total Lagrangian formulation.*?}
+         caption=Organization of spatial and scalar variable contributions by row.
+
+!listing modules/tensor_mechanics/test/tests/lagrangian/cartesian/total/homogenization/scalar_kernel/2drow.i block=Kernels
+
+!listing modules/tensor_mechanics/test/include/kernels/HomogenizedTotalLagrangianStressDivergenceA.h id=HTLSDA-header
+         re=/// Total Lagrangian formulation.*?}
+         caption=Organization of spatial and scalar variable contributions by symmetric pairs.
+
+!listing modules/tensor_mechanics/test/tests/lagrangian/cartesian/total/homogenization/scalar_kernel/2dsole.i block=Kernels
 
 !alert note title=Displaced mesh features untested
 The displaced mesh features are not yet tested for the scalar augmentation system.
