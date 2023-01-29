@@ -772,18 +772,26 @@ FeatureFloodCount::scatterAndUpdateRanks()
   }
 
   // communicate the boundary intersection state
-  std::map<unsigned int, int> intersection_state;
+  std::vector<std::pair<unsigned int, int>> intersection_state;
   for (auto & feature : _feature_sets)
-    intersection_state[feature._id] |= static_cast<int>(feature._boundary_intersection);
-  std::vector<std::map<unsigned int, int>> all_intersection_states;
-  _communicator.allgather(intersection_state, all_intersection_states);
+    intersection_state.emplace_back(feature._id, static_cast<int>(feature._boundary_intersection));
+
+  // gather on root
+  _communicator.gather(0, intersection_state);
+
+  // consolidate
+  std::map<unsigned int, int> consolidated_intersection_state;
+  if (_is_primary)
+    for (const auto & [id, state] : intersection_state)
+      consolidated_intersection_state[id] |= state;
+
+  // broadcast result
+  _communicator.broadcast(consolidated_intersection_state, 0);
+
+  // apply broadcast changes
   for (auto & feature : _feature_sets)
-    for (const auto & state : all_intersection_states)
-    {
-      const auto it = state.find(feature._id);
-      if (it != state.end())
-        feature._boundary_intersection |= static_cast<BoundaryIntersection>(it->second);
-    }
+    feature._boundary_intersection |=
+        static_cast<BoundaryIntersection>(consolidated_intersection_state[feature._id]);
 
   buildFeatureIdToLocalIndices(largest_global_index);
 }
