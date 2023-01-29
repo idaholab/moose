@@ -288,4 +288,10 @@ protected:
   /// should probably be true. If taking very 'large' timesteps in an attempt to reach a
   /// steady-state, this member should probably be be false.
   const bool _normalize_solution_diff_norm_by_dt;
+
+private:
+  /// Constrain the timestep dt_cur by looking at the timesteps for the MultiApps on execute_on
+  void constrainDTFromMultiApp(Real & dt_cur,
+                               std::ostringstream & diag,
+                               const ExecFlagType & execute_on) const;
 };
