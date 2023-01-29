@@ -17,6 +17,7 @@ DOFs: degrees-of-freedom
 EA: Enterprise Architecture
 FE: finite element
 FEM: Finite Element Method
+FVM: Finite Volume Method
 GMRES: Generalized Minimum Residual Method
 GUI: graphical user interface
 HIT: Hierarchical Input Text
