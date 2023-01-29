@@ -18,13 +18,9 @@ downstream applications interested in modeling multiphysics problems involving f
 !template! item key=system-purpose
 !! system-purpose-begin
 The purpose of this software is to allow simulation of fluid flow in regular and porous media.
-It should be able to determine the pressure field and velocity fields in the fluid domain, as well
-as the temperature field in the case of conjugate heat transfer simulations. It aims to also be able to
+It should be able to determine the pressure, velocity, and fluid temperature fields, as well
+as the solid temperature field in the case of conjugate heat transfer simulations. It aims to also be able to
 transport scalar species in the flow fields determined.
-
-This software is intended as a coarse mesh computational fluid dynamics simulation tool and to be the
-numerical backbone of the Pronghorn software. Its goals include the simulation of coolant flow in
-advanced nuclear reactors such as Molten Salt Reactors and Pebble Bed Reactors.
 !! system-purpose-finish
 !template-end!
 

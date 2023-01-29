@@ -1,4 +1,4 @@
-!template load file=sqa/module_sdd.md.template category=Ray module=Ray Tracing
+!template load file=sqa/module_sdd.md.template category=ray_tracing module=Ray Tracing
 
 !template! item key=introduction
 The [!ac](MOOSE) {{module}} module is based on the MOOSE framework and thus inherits

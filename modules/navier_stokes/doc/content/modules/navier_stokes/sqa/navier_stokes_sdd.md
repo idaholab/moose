@@ -15,7 +15,7 @@ The {{module}} module inherits the
 [software dependencies and limitations of the MOOSE framework](framework_sdd.md#dependencies-and-limitations),
 as well as the dependencies and limitations of the [Heat Conduction](heat_conduction_sdd.md#dependencies-and-limitations) module
 when performing coupled heat transfer simulations, the [Fluid Properties](tensor_mechanics_sdd.md#dependencies-and-limitations optional=True) module
-when using the specific fluid properties in this module, and the [rDG](rdg_sdd.md#dependencies-and-limitations) module
+when using the specific fluid properties in this module, and the [rDG](rdg_sdd.md#dependencies-and-limitations optional=True) module
 when using a discretization from the reconstructed Discontinuous Galerkin family.
 
 While the {{module}} module has received significant development and numerous studies were performed with its service,
@@ -53,7 +53,7 @@ are commonly used for different flow regimes and some of these flow regimes are 
 The module is designed to be able to handle both, with utilities to perform conversions from one to the
 other as appropriate. The module is not currently designed to handle transitions between the two variable sets at a fluid interface.
 
-Each major class of discretizations has its own index page, notable the [continuous Galerkin finite element](navier_stokes/cgfe.md),
+Each major class of discretizations has its own index page, notably the [continuous Galerkin finite element](navier_stokes/cgfe.md),
 the [incompressible finite volume](navier_stokes/insfv.md), the [weakly compressible finite volume](navier_stokes/wcnsfv.md)
 and the [incompressible finite volume porous media](navier_stokes/pinsfv.md) discretizations.
 Documentation for each object, data structure, and process specific to the
