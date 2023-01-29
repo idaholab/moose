@@ -304,8 +304,8 @@ MultiAppGeneralFieldTransfer::transferVariable(unsigned int i)
   };
 
   DofobjectToInterpValVec dofobject_to_valsvec(_to_problems.size());
-  InterpCaches interp_caches(_to_problems.size());
-  InterpCaches distance_caches(_to_problems.size());
+  InterpCaches interp_caches(_to_problems.size(), getMaxToProblemsBBoxDimensions());
+  InterpCaches distance_caches(_to_problems.size(), getMaxToProblemsBBoxDimensions());
 
   // Copy data out to incoming_vals_ids
   auto action_functor = [this, &i, &dofobject_to_valsvec, &interp_caches, &distance_caches](
@@ -1213,6 +1213,24 @@ MultiAppGeneralFieldTransfer::getToVarName(unsigned int var_index)
   if (_to_var_components.size())
     var_name += "_" + std::to_string(_to_var_components[var_index]);
   return var_name;
+}
+
+Point
+MultiAppGeneralFieldTransfer::getMaxToProblemsBBoxDimensions() const
+{
+  Point max_dimension = {std::numeric_limits<Real>::min(),
+                         std::numeric_limits<Real>::min(),
+                         std::numeric_limits<Real>::min()};
+
+  for (auto & to_mesh : _to_meshes)
+  {
+    const auto bbox = to_mesh->getInflatedProcessorBoundingBox();
+    for (auto dim : make_range(LIBMESH_DIM))
+      max_dimension(dim) = std::max(
+          max_dimension(dim), std::max(std::abs(bbox.first(dim)), std::abs(bbox.second(dim))));
+  }
+
+  return max_dimension;
 }
 
 bool

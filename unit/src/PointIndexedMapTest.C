@@ -12,7 +12,7 @@
 
 TEST(PointIndexedMap, bracket)
 {
-  PointIndexedMap map;
+  PointIndexedMap map(Point(1, 1, 3));
   Point p0(0, 0, 1);
   map[p0] = 12;
   EXPECT_EQ(map[p0], 12);
@@ -20,7 +20,7 @@ TEST(PointIndexedMap, bracket)
 
 TEST(PointIndexedMap, hasKey)
 {
-  PointIndexedMap map;
+  PointIndexedMap map(Point(1, 1, 3));
   Point p0(0, 0, 1);
   map[p0] = 12;
   EXPECT_TRUE(map.hasKey(p0));
@@ -43,9 +43,11 @@ TEST(PointIndexedMap, find)
   points.push_back(Point(1.2345678901235233, 1.2345678901235341, 1.2345678901235653));
   points.push_back(Point(-1.2345678901235233, -1.2345678901235341, -1.2345678901235653));
 
+  const Real mesh_size_z = 21;
+
   for (auto p0 : points)
   {
-    PointIndexedMap map;
+    PointIndexedMap map(Point(20, 20, mesh_size_z));
 
     std::vector<Real> epsilons{1e-14, 1e-15};
     for (auto eps_base : epsilons)
@@ -81,9 +83,10 @@ TEST(PointIndexedMap, find)
       EXPECT_TRUE(map.find(p0 + Point(0, -eps, eps)) != map.end());
       EXPECT_TRUE(map.find(p0 + Point(0, -eps, -eps)) != map.end());
     }
-    if (p0(2) != 0)
+    // We should be beyond the tolerance of the map search
+    if (p0(2) != 0 && p0(2) * 1e-9 > 1e-12 * mesh_size_z)
     {
-      EXPECT_TRUE(map.find(p0 + Point(0, 0, 2e-12 * p0(2))) == map.end());
+      EXPECT_TRUE(map.find(p0 + Point(0, 0, 1e-9 * p0(2))) == map.end());
     }
   }
 }

@@ -350,6 +350,12 @@ private:
   Real bboxMaxDistance(const Point & p, const BoundingBox & bbox);
 
   /**
+   * @brief Obtains the max dimensions to scale all points in the mesh
+   * @return the maximum dimension in each coordinate axis of all target problems
+   */
+  Point getMaxToProblemsBBoxDimensions() const;
+
+  /**
    * Get from bounding boxes for given domains and boundaries
    */
   std::vector<BoundingBox> getRestrictedFromBoundingBoxes();
