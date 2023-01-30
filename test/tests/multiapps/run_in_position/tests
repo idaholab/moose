@@ -1,0 +1,48 @@
+[Tests]
+  issues = '#19121'
+  design = 'syntax/MultiApps/index.md'
+
+  [group]
+    requirement = "The system shall support executing sub-applications in a specified position and/or with the specified frame of reference transformation"
+
+    [multi-app]
+      type = Exodiff
+      input = main-app.i
+      exodiff = main-app_out.e
+      cli_args = 'MultiApps/sub/run_in_position=true'
+      detail = 'with a scaled, rotated, translated child application'
+    []
+    [transform-main-multi-app]
+      type = Exodiff
+      input = transform-main-main-app.i
+      exodiff = transform-main-main-app_out.e
+      cli_args = 'MultiApps/sub/run_in_position=true'
+      detail = 'with a scaled, rotated, translated parent application exchanging information with a translated child application'
+    []
+  []
+
+  [errors]
+    requirement = "The system shall error if"
+    [output_and_run_in_position]
+      type = RunException
+      input = 'main-app.i'
+      cli_args = 'MultiApps/sub/run_in_position=true MultiApps/sub/output_in_position=true'
+      expect_err = 'Sub-apps are already displaced, so they are already output in position'
+      detail = 'both outputting in position and displacing applications are requested at the same time, as displaced apps are already output in position'
+    []
+    [invalid_frame_for_translation]
+      type = RunException
+      input = 'transform-main-main-app.i'
+      cli_args = 'MultiApps/sub/run_in_position=true MultiApps/sub/cli_args=Mesh/coord_type=RZ'
+      expect_err = 'Running MultiApps \'in position\' is only supported for XYZ coordinate systems'
+      detail = 'a translation is requested on a spherical or cylindrical coordinate mesh, as this is not expected to be a valid transformation'
+    []
+    [move_apps_not_supported]
+      type = RunException
+      input = 'transform-main-main-app.i'
+      cli_args = "MultiApps/sub/run_in_position=true Executioner/type=Transient MultiApps/sub/move_time=0.9 MultiApps/sub/move_apps=0 MultiApps/sub/move_positions='0 1 1'"
+      expect_err = 'Moving apps and running apps in position is not supported'
+      detail = 'displacing applications and moving applications at a certain time are both requested as this combination of features is not implemented'
+    []
+  []
+[]
