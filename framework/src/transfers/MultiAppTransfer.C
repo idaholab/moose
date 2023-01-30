@@ -345,7 +345,7 @@ MultiAppTransfer::getAppInfo()
         auto & transform = transforms[i];
         transform->skipCoordinateCollapsing(skip_coordinate_collapsing);
         if (multiapp->usingPositions())
-          transform->setTranslationVector(multiapp->position(i));
+          transform->targetAppTransform()->setTranslationVector(multiapp->position(i));
       }
     }
   };

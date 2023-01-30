@@ -425,12 +425,14 @@ MooseAppCoordTransform::transformMesh(MooseMesh & mesh)
   if (_coord_type != Moose::COORD_XYZ)
     mooseError("Running MultiApps 'in position' is only supported for XYZ coordinate systems");
   if (_mesh_transformed)
-    mooseError("Child app mesh is being transformed twice");
+    mooseError("App mesh is being transformed twice");
 
   // Apply all the transformation to the mesh
+  if (_scale)
+    MeshTools::Modification::scale(mesh, (*_scale)(0, 0), (*_scale)(1, 1), (*_scale)(2, 2));
+  if (_rotate)
+    MeshTools::Modification::rotate(mesh, _euler_angles[0], _euler_angles[1], _euler_angles[2]);
   MeshTools::Modification::translate(mesh, _translation(0), _translation(1), _translation(2));
-  MeshTools::Modification::rotate(mesh, _euler_angles[0], _euler_angles[1], _euler_angles[2]);
-  MeshTools::Modification::scale(mesh, (*_scale)(0, 0), (*_scale)(1, 1), (*_scale)(2, 2));
 
   // Translation, scaling and rotation need not be applied anymore when performing coordinate
   // transforms

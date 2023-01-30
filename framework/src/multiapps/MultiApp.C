@@ -557,6 +557,7 @@ MultiApp::preTransfer(Real /*dt*/, Real target_time)
         for (const auto & app_ptr : _apps)
           app_ptr->getExecutioner()->feProblem().coordTransform().transformMesh(
               app_ptr->getExecutioner()->feProblem().mesh());
+      }
 
       // If the time step covers multiple reset times, set them all as having 'happened'
       for (unsigned int j = i; j < _reset_times.size(); j++)
@@ -916,7 +917,8 @@ MultiApp::moveApp(unsigned int global_app, Point p)
       if (_output_in_position)
         _apps[local_app]->setOutputPosition(p);
       if (_run_in_position)
-        paramError("run_in_position", "Moving apps is not supported");
+        paramError("run_in_position",
+                   "Sub-apps are already displaced, so they are already output in position");
     }
   }
 }
