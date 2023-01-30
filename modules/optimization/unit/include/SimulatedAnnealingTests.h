@@ -16,9 +16,6 @@
 
 using namespace std;
 
-// traveling salesman simulated annealing object
-sa_comb_type ts_simanneal;
-
 // number of customers
 int num_customers=20;
 
@@ -33,3 +30,6 @@ double path_len(int * a);
 
 //distance between two customers
 double dist(double *loc1, double *loc2);
+
+// continuous functions to optimize over
+double comb_func(double *x);
