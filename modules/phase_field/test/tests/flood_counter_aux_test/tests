@@ -1,48 +1,104 @@
 [Tests]
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'flood_aux.i'
     exodiff = 'out.e'
     allow_test_objects = true
     max_parallel = 1 # See #9886
-  [../]
+    issues = '#5077'
+    design = 'FeatureFloodCount.md'
+    requirement = "The feature flood counter system shall be able to track contiguous regions in a "
+                  "simulation domain, based on a vaiable value"
+  []
 
-  [./test_elemental]
+  [test_elemental]
     type = 'Exodiff'
     input = 'flood_aux_elemental.i'
     exodiff = 'flood_aux_elemental_out.e'
     allow_test_objects = true
-  [../]
+    issues = '#5077'
+    design = 'FeatureFloodCount.md'
+    requirement = "The feature flood counter system shall be able to track multiple variables at "
+                  "once, with features being sets of elements."
+  []
 
-  [./simple]
+  [simple]
     type = 'Exodiff'
     input = 'simple.i'
     exodiff = 'simple_out.e'
     #max_parallel = 4                     # Only 4 elements
     max_parallel = 1 # See #9886
-  [../]
+    issues = '#5077'
+    design = 'FeatureFloodCount.md'
+    requirement = "The feature flood counter system shall be able to track multiple variables at "
+                  "once, with features being sets of nodes."
+  []
 
-  [./two_var]
+  [simple_error]
+    type = 'RunException'
+    input = 'simple.i'
+    expect_err = 'must be on variable types that match the entity mode of the FeatureFloodCounter'
+    cli_args = 'AuxVariables/bubble_map0/family=MONOMIAL'
+    #max_parallel = 4                     # Only 4 elements
+    max_parallel = 1 # See #9886
+    issues = '#5077'
+    design = 'FeatureFloodCountAux.md'
+    requirement = "The feature flood counter aux kernel shall throw an error when acting on a "
+                  "variable that is incompatible with the flood counter mode."
+  []
+
+  [two_var]
     type = 'Exodiff'
     input = 'nodal_flood_periodic_2var.i'
     exodiff = 'out_2var.e'
     allow_test_objects = true
     max_parallel = 1 # See #9886
-  [../]
+    issues = '#5077'
+    design = 'FeatureFloodCount.md'
+    requirement = "The feature flood counter system shall be able to track multiple variables at "
+                  "once with periodic boundary conditions."
+  []
 
-  [./bound_restrict_single]
+  [bound_restrict_single]
     type = 'CSVDiff'
     input = 'flood_counter_boundary_restrictable.i'
     csvdiff = 'boundary_single.csv'
     cli_args = 'Postprocessors/bubbles/boundary=top Outputs/file_base=boundary_single'
     allow_test_objects = true
-  [../]
+    issues = '#11813'
+    design = 'FeatureFloodCount.md'
+    requirement = "The feature flood counter system shall be restrictable to a boundary."
+  []
 
-  [./bound_restrict_all]
+  [bound_restrict_all]
     type = 'CSVDiff'
     input = 'flood_counter_boundary_restrictable.i'
     csvdiff = 'boundary_all.csv'
     cli_args = 'Outputs/file_base=boundary_all'
     allow_test_objects = true
-  [../]
+    issues = '#11813'
+    design = 'FeatureFloodCount.md'
+    requirement = "The feature flood counter system shall be restrictable to multiple boundaries."
+  []
+
+  [boundary_intersection]
+    type = 'CSVDiff'
+    input = 'boundary_intersection.i'
+    csvdiff = 'boundary_intersection_out.csv'
+    issues = '#23246'
+    requirement = "The system shall be able to set an elemental aux variable on elements belonging "
+                  "to a tracked feature to indicate whether the feature intersects a sepcified "
+                  "boundary."
+    design = 'FeatureFloodCount.md FeatureFloodCountAux.md'
+  []
+  [boundary_intersection_error]
+    type = 'RunException'
+    expect_err = 'The selected option is only available for elemental aux variables'
+    cli_args = 'AuxVariables/v/family=LAGRANGE AuxVariables/v/order=FIRST'
+    input = 'boundary_intersection.i'
+    issues = '#23246'
+    requirement = "The system shall error out if a nodal variable is specified as the target for the "
+                  "intersection status."
+    design = 'FeatureFloodCount.md FeatureFloodCountAux.md'
+  []
 []
