@@ -83,22 +83,18 @@ class sa_cont_type: public sa_type_base{
         void get_neigh(double *s_curr, double *s_neigh, double damping, double smax, double smin, int num_perturb, int size_state);
 };
 
+// function to set the cooling schedule
 void set_cooling(sa_type_base &my_sa);
 
+// optional cooling schedules
 double lin_mult_cool(sa_type_base &my_sa, int k);
-
 double exp_mult_cool(sa_type_base &my_sa, int k);
-
 double log_mult_cool(sa_type_base &my_sa, int k);
-
 double quad_mult_cool(sa_type_base &my_sa, int k);
-
 double lin_add_cool(sa_type_base &my_sa, int k);
-
 double quad_add_cool(sa_type_base &my_sa, int k);
-
 double exp_add_cool(sa_type_base &my_sa, int k);
-
 double trig_add_cool(sa_type_base &my_sa, int k);
 
+//acceptance probability
 double accept_prob(double e_current,double e_neigh,double t_current);
