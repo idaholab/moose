@@ -1,0 +1,29 @@
+[Tests]
+  [ss_mesh]
+    design = "ParameterMeshOptimization.md ElementOptimizationDiffusionCoefFunctionInnerProduct.md ParameterMeshFunction.md"
+    issues = '#23294'
+    requirement = 'The sytem shall be able to perform material-inversion optimization with with spatial interpolation by '
+    [parameter_mesh]
+      type = CheckFiles
+      input = parameter_mesh.i
+      cli_args = '--mesh-only'
+      check_files = 'parameter_mesh_in.e'
+      method = OPT
+      recover = false
+      max_threads = 1
+      detail = 'creating a source mesh and '
+    []
+    [optimization]
+      type = CSVDiff
+      input = main.i
+      csvdiff =main_out_OptimizationReporter_0001.csv 
+      prereq = ss_mesh/parameter_mesh
+      abs_zero = 1e-2
+      rel_err = 1e-4
+      method = OPT
+      recover = false
+      max_threads = 1
+      detail = 'performing the optimization.'
+    []
+  []
+[]
