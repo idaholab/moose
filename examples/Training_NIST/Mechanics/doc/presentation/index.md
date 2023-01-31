@@ -33,3 +33,7 @@ BISON Documentation: [https://mooseframework.inl.gov/bison/](https://mooseframew
 !---
 
 !include hands_on.md
+
+!---
+
+!bibtex bibliography title-level=1

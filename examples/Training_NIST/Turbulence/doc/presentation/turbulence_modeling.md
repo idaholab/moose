@@ -82,7 +82,7 @@ where $\kappa=0.41$ is the Von Karman constant (meassured for boundary layer flo
 
 !---
 
-# Intuition behind the mixing length model
+## Intuition behind the mixing length model
 
 - As flow develops over a boundary layer and the flow preserves 2D-like characteristic, we know that $\overline{u'v'} = \kappa^2 y^2 \left| \frac{\partial u}{\partial y} \right|^2$ and hence $\ell_m = \kappa y$. Boundary layer turbulence theory is one of the few things that we know about turbulence.
 

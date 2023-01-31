@@ -1,0 +1,47 @@
+Content:
+    presentation:
+        root_dir: '${ROOT_DIR}/examples/Training_NIST/Neutronics/doc/presentation'
+    figures:
+        root_dir: ${ROOT_DIR}/examples/Training_NIST/Neutronics/doc/figures
+    moose:
+        root_dir: ${MOOSE_DIR}/framework/doc/content
+        content:
+            - large_media/testing/*
+            - large_media/tutorials/INL_Hex_Light_Presentation_Background_Thin.png
+            - contrib/**
+            - css/**
+            - js/**
+
+Executioner:
+    type: MooseDocs.base.Serial
+
+Renderer:
+    type: MooseDocs.base.RevealRenderer
+
+Extensions:
+    disable_defaults: True
+    MooseDocs.extensions.comment: default
+    MooseDocs.extensions.command: default
+    MooseDocs.extensions.core: default
+    MooseDocs.extensions.config: default
+    MooseDocs.extensions.media: default
+    MooseDocs.extensions.floats: default
+    MooseDocs.extensions.include: default
+    MooseDocs.extensions.bibtex: default
+    MooseDocs.extensions.katex: default
+    MooseDocs.extensions.style: default
+    MooseDocs.extensions.autolink: default
+    MooseDocs.extensions.materialicon: default
+    MooseDocs.extensions.heading: default
+    MooseDocs.extensions.shortcut: default
+    MooseDocs.extensions.table: default
+    MooseDocs.extensions.layout: default
+    MooseDocs.extensions.content: default
+    MooseDocs.extensions.modal: default
+    MooseDocs.extensions.acronym: default
+    MooseDocs.extensions.listing:
+        modal-link: False
+    MooseDocs.extensions.reveal:
+        translate: presentation/index.md
+        background_image: INL_Hex_Light_Presentation_Background_Thin.png
+    MooseDocs.extensions.datetime: default

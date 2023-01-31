@@ -13,7 +13,8 @@
 
 #include "INSFVVelocityVariable.h"
 /**
- * Computes wall y+ based on wall functions.
+ * Computes the turbuent viscosity for the k-Epsilon model.
+ * Implements two near-wall treatements: equilibrium and non-equilibrium wall functions.
  */
 class kEpsilonViscosity : public AuxKernel
 {

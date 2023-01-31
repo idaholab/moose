@@ -119,7 +119,7 @@ conduction equation with a source term.
 
 !style! fontsize=80%
 
-!listing heat_cond_simple.i
+!listing heat_cond_simmple.i
          block=Mesh Variables Kernels Materials
 
 !style-end!
@@ -138,7 +138,7 @@ $~$
 
 !style! fontsize=80%
 
-!listing heat_cond_simple.i
+!listing heat_cond_simmple.i
          block=BCs Executioner Outputs Postprocessors
 
 !style-end!
@@ -167,7 +167,7 @@ $~$
 
 !col! width=45%
 
-!listing heat_cond_simple.i
+!listing heat_cond_simmple.i
          block=Mesh
 
 !col-end!
@@ -197,7 +197,7 @@ $~$
 
 - A user-selected unique name is assigned for each variable.
 
-!listing heat_cond_simple.i
+!listing heat_cond_simmple.i
          block=Variables
 
 !---
@@ -216,7 +216,7 @@ $~$
 
 $~$
 
-!listing heat_cond_simple.i
+!listing heat_cond_simmple.i
          block=Kernels
 
 !---
@@ -229,7 +229,7 @@ $~$
 - Here, thermal conductivity is defined to for use by the
   `HeatConduction` kernel.
 
-!listing heat_cond_simple.i
+!listing heat_cond_simmple.i
          block=Materials
 
 !---
@@ -245,7 +245,7 @@ Define temperature on boundary
 - For this simple example, the temperature is set on the left and
   right sides of the domain.
 
-!listing heat_cond_simple.i
+!listing heat_cond_simmple.i
          block=BCs
 
 !---
@@ -257,7 +257,7 @@ Define temperature on boundary
 - The parameters `solve_type` and `petsc_options` will be discussed
   later.
 
-!listing heat_cond_simple.i
+!listing heat_cond_simmple.i
          block=Executioner
 
 !---
@@ -271,7 +271,7 @@ Define temperature on boundary
 
 - Performance logs are also defined.
 
-!listing heat_cond_simple.i
+!listing heat_cond_simmple.i
          block=Outputs
 
 !---
@@ -288,7 +288,7 @@ Define temperature on boundary
 
 - Documentation of Postprocessors will be shown later.
 
-!listing heat_cond_simple.i
+!listing heat_cond_simmple.i
          block=Postprocessors
 
 !---
@@ -302,13 +302,13 @@ Define temperature on boundary
 - To run with the MOOSE combined modules executable, run:
 
   ```bash
-  ~/projects/moose/modules/combined/combined-opt -i heat_cond_simple.i
+  ~/projects/moose/modules/combined/combined-opt -i heat_cond_simmple.i
   ```
 
 - To run with an application (BISON example shown here), run:
 
   ```bash
-  ~/projects/bison/bison-opt -i heat_cond_simple.i
+  ~/projects/bison/bison-opt -i heat_cond_simmple.i
   ```
 
 - These examples assume your code is in the `~/projects`
@@ -466,7 +466,7 @@ F=\nabla x=\nabla u + I = RU
 
 - With $\mathbf{\hat{F}}$, we next compute a strain increment that
   represents the rotation-free deformation from the configuration at
-  $n$ to the configuration at $n+1$. Following [!cite](rashid93), we seek
+  $n$ to the configuration at $n+1$. We seek
   the stretching rate $\mathbf{D}$:
 
 !equation

@@ -465,12 +465,12 @@ public:
   // Increment function for damping
   const FieldVariableValue & increment() const { return _element_data->increment(); }
 
-protected:
   /**
    * @return whether \p fi is an internal face for this variable
    */
   bool isInternalFace(const FaceInfo & fi) const override;
 
+protected:
   /**
    * @return whether \p fi is a Dirichlet boundary face for this variable
    */

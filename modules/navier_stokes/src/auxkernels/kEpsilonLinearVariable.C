@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "kEpsilonLinearVariable.h"
-#include "INSFVMethods.h"
+#include "NavierStokesMethods.h"
 
 registerMooseObject("NavierStokesApp", kEpsilonLinearVariable);
 
@@ -22,19 +22,22 @@ kEpsilonLinearVariable::validParams()
   params.addCoupledVar("v", "The velocity in the y direction.");
   params.addCoupledVar("w", "The velocity in the z direction.");
   params.addRequiredParam<MooseFunctorName>("k", "Coupled turbulent kinetic energy.");
-  params.addRequiredParam<MooseFunctorName>("epsilon", "Coupled turbulent kinetic energy dissipation rate.");
+  params.addRequiredParam<MooseFunctorName>("epsilon",
+                                            "Coupled turbulent kinetic energy dissipation rate.");
   params.addRequiredParam<MooseFunctorName>(NS::density, "Density");
   params.addRequiredParam<MooseFunctorName>("mu", "Dynamic viscosity.");
   params.addRequiredParam<MooseFunctorName>("C_mu", "Coupled turbulent kinetic energy closure.");
   params.addRequiredParam<std::vector<BoundaryName>>("walls",
                                                      "Boundaries that correspond to solid walls.");
-  params.addParam<bool>("linearized_yplus",
-                        false, 
-                        "Boolean to indicate if yplus must be estimate locally for the blending functions.");
+  params.addParam<bool>(
+      "linearized_yplus",
+      false,
+      "Boolean to indicate if yplus must be estimate locally for the blending functions.");
 
   params.addParam<Real>("max_mixing_length",
                         10.0,
-                        "Maximum mixing legth allowed for the domain - adjust if seeking for realizable k-epsilon answer.");
+                        "Maximum mixing legth allowed for the domain - adjust if seeking for "
+                        "realizable k-epsilon answer.");
   return params;
 }
 
@@ -112,27 +115,31 @@ kEpsilonLinearVariable::computeValue()
       velocity(2) = _w_var->getElemValue(&elem);
 
     // Compute the velocity and direction of the velocity component that is parallel to the wall
-    ADReal parallel_speed  = (velocity - velocity * loc_normal * loc_normal).norm();
+    ADReal parallel_speed = (velocity - velocity * loc_normal * loc_normal).norm();
 
     ADReal u_star;
     if (_linearized_yplus)
     {
-      const ADReal a_c = 1/karman_cte;
-      const ADReal b_c = 1/karman_cte * (std::log(E*min_wall_dist/_mu(makeElemArg(_current_elem))) + 1.0);
+      const ADReal a_c = 1 / karman_cte;
+      const ADReal b_c =
+          1 / karman_cte * (std::log(E * min_wall_dist / _mu(makeElemArg(_current_elem))) + 1.0);
       const ADReal c_c = parallel_speed;
-      u_star = (-b_c + std::sqrt(std::pow(b_c,2)+4.0*a_c*c_c))/(2.0 * a_c);
+      u_star = (-b_c + std::sqrt(std::pow(b_c, 2) + 4.0 * a_c * c_c)) / (2.0 * a_c);
     }
     else
-      u_star = findUStar(_mu(makeElemArg(&elem)), _rho(makeElemArg(_current_elem)), parallel_speed, min_wall_dist);
+      u_star = NS::findUStar(
+          _mu(makeElemArg(&elem)), _rho(makeElemArg(_current_elem)), parallel_speed, min_wall_dist);
 
-    return (karman_cte * min_wall_dist / (u_star * std::sqrt(_C_mu(makeElemArg(_current_elem))))).value();
+    return (karman_cte * min_wall_dist / (u_star * std::sqrt(_C_mu(makeElemArg(_current_elem)))))
+        .value();
   }
   else
   {
     //  Return Bulk value
     constexpr Real protection_k = 1e-15;
     auto current_argument = makeElemArg(_current_elem);
-    // auto limiting_value = _C_mu(current_argument) * std::sqrt(_k(current_argument)) / _max_mixing_length; // Realizable constraint
+    // auto limiting_value = _C_mu(current_argument) * std::sqrt(_k(current_argument)) /
+    // _max_mixing_length; // Realizable constraint
 
     // auto residual = std::max(_epsilon(current_argument) / (_k(current_argument) + protection_k),
     //                          limiting_value);
@@ -140,7 +147,8 @@ kEpsilonLinearVariable::computeValue()
     auto k_value = std::max(_k(makeElemArg(_current_elem)), 1e-10);
     auto epsilon_value = std::max(_epsilon(makeElemArg(_current_elem)), 1e-10);
 
-    auto residual = std::min(_epsilon(current_argument) / (_k(current_argument) + protection_k), 1e6);
+    auto residual =
+        std::min(_epsilon(current_argument) / (_k(current_argument) + protection_k), 1e6);
 
     return residual.value();
   }

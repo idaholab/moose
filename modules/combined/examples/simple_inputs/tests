@@ -1,0 +1,46 @@
+[Tests]
+  [heat_cond]
+    type = Exodiff
+    input = 'heat_cond.i'
+    exodiff = 'heat_cond_out.e'
+  []
+  [heat_cond_solid_mech]
+    type = Exodiff
+    input = 'heat_cond_solid_mech.i'
+    exodiff = 'heat_cond_solid_mech_out.e'
+    abs_zero = 1e-8
+    valgrind = none
+  []
+  [heat_cond_solid_mech_contact]
+    type = Exodiff
+    input = 'heat_cond_solid_mech_contact.i'
+    exodiff = 'heat_cond_solid_mech_contact_out.e'
+    heavy = true
+    abs_zero = 1e-8
+    valgrind = none
+  []
+  [heat_cond_solid_mech_contact_therm]
+    type = Exodiff
+    input = 'heat_cond_solid_mech_contact_therm.i'
+    exodiff = 'heat_cond_solid_mech_contact_therm_out.e'
+    heavy = true
+    abs_zero = 1e-8
+    valgrind = none
+  []
+  [heat_cond_solid_mech_contact_mg]
+    type = Exodiff
+    input = 'heat_cond_solid_mech_contact_mg.i'
+    exodiff = 'heat_cond_solid_mech_contact_mg_out.e'
+    heavy = true
+    abs_zero = 1e-8
+    valgrind = none
+  []
+  [heat_cond_solid_mech_contact_therm_mg]
+    type = Exodiff
+    input = 'heat_cond_solid_mech_contact_therm_mg.i'
+    exodiff = 'heat_cond_solid_mech_contact_therm_mg_out.e'
+    heavy = true
+    abs_zero = 1e-8
+    valgrind = none
+  []
+[]

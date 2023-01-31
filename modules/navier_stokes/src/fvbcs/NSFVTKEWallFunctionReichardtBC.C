@@ -25,7 +25,7 @@ NSFVTKEWallFunctionReichardtBC::validParams()
   params.addRequiredParam<MooseFunctorName>("mu", "Dynamic viscosity.");
   params.addRequiredParam<MooseFunctorName>("C_mu", "Coupled turbulent kinetic energy closure.");
   params.addParam<bool>("linearized_yplus",
-                        false, 
+                        false,
                         "Boolean to indicate if yplus must be estimate locally for the blending functions.");
   params.addParam<Real>("min_mixing_length",
                         1.0,
@@ -78,7 +78,7 @@ NSFVTKEWallFunctionReichardtBC::boundaryValue(const FaceInfo & fi) const
       u_star = (-b_c + std::sqrt(std::pow(b_c,2)+4.0*a_c*c_c))/(2.0 * a_c);
     }
     else
-      u_star = findUStar(_mu(makeElemArg(&_current_elem)), _rho(makeElemArg(&_current_elem)), parallel_speed, dist);
+      u_star = NS::findUStar(_mu(makeElemArg(&_current_elem)), _rho(makeElemArg(&_current_elem)), parallel_speed, dist);
 
     // Realizable constraint
     ADReal ralizable_constraint = std::pow(u_star / dist, 2);

@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "kEpsilonViscosity.h"
-#include "INSFVMethods.h"
+#include "NavierStokesMethods.h"
 
 registerMooseObject("NavierStokesApp", kEpsilonViscosity);
 
@@ -22,28 +22,31 @@ kEpsilonViscosity::validParams()
   params.addCoupledVar("v", "The velocity in the y direction.");
   params.addCoupledVar("w", "The velocity in the z direction.");
   params.addRequiredParam<MooseFunctorName>("k", "Coupled turbulent kinetic energy.");
-  params.addRequiredParam<MooseFunctorName>("epsilon", "Coupled turbulent kinetic energy dissipation rate.");
+  params.addRequiredParam<MooseFunctorName>("epsilon",
+                                            "Coupled turbulent kinetic energy dissipation rate.");
   params.addRequiredParam<MooseFunctorName>(NS::density, "Density");
   params.addRequiredParam<MooseFunctorName>("mu", "Dynamic viscosity.");
   params.addRequiredParam<MooseFunctorName>("C_mu", "Coupled turbulent kinetic energy closure.");
   params.addRequiredParam<std::vector<BoundaryName>>("walls",
                                                      "Boundaries that correspond to solid walls.");
-  params.addParam<bool>("linearized_yplus",
-                        false, 
-                        "Boolean to indicate if yplus must be estimate locally for the blending functions.");
-  params.addParam<unsigned int>("n_iters_activate",
-                                1,
-                                "Relaxation iterations after which the k-epsilon model is activated.");
+  params.addParam<bool>(
+      "linearized_yplus",
+      false,
+      "Boolean to indicate if yplus must be estimate locally for the blending functions.");
+
+  params.addParam<unsigned int>(
+      "n_iters_activate", 1, "Relaxation iterations after which the k-epsilon model is activated.");
 
   params.addParam<Real>("max_mixing_length",
                         10.0,
-                        "Maximum mixing legth allowed for the domain - adjust if seeking for realizable k-epsilon answer.");
-  params.addParam<bool>("wall_treatement",
-                        true,
-                        "Activate wall treatement by adding wall functions.");
-  params.addParam<bool>("non_equilibrium_treatement",
-                        false,
-                        "Use non-equilibrium wall treatement (faster than standard wall treatement)");
+                        "Maximum mixing legth allowed for the domain - adjust if seeking for "
+                        "realizable k-epsilon answer.");
+  params.addParam<bool>(
+      "wall_treatement", true, "Activate wall treatement by adding wall functions.");
+  params.addParam<bool>(
+      "non_equilibrium_treatement",
+      false,
+      "Use non-equilibrium wall treatement (faster than standard wall treatement)");
   return params;
 }
 
@@ -84,7 +87,7 @@ kEpsilonViscosity::computeValue()
   Real min_wall_dist = 0.0;
   Point loc_normal;
 
-  if (elem == (*(* _mesh.activeLocalElementsBegin())))
+  if (elem == (*(*_mesh.activeLocalElementsBegin())))
   {
     _n_kernel_iters += 1;
     if (_n_kernel_iters == (_n_iters_activate + 2)) //+2 since we need to consider assembly passes
@@ -93,8 +96,10 @@ kEpsilonViscosity::computeValue()
     }
   }
 
-  if (_n_kernel_iters < (_n_iters_activate+2)) //+2 since we need to consider assembly passes
-    return 0.1; /// TODO: need to compute this value dynamically based in the condition number of the problem
+  if (_n_kernel_iters < (_n_iters_activate + 2)) //+2 since we need to consider assembly passes
+    return 100.0 +
+           _mu(current_argument)
+               .value(); /// TODO: need to compute this value dynamically based in the condition number of the problem
 
   for (unsigned int i_side = 0; i_side < elem.n_sides(); ++i_side)
   {
@@ -137,71 +142,77 @@ kEpsilonViscosity::computeValue()
       velocity(2) = _w_var->getElemValue(&elem);
 
     // Compute the velocity and direction of the velocity component that is parallel to the wall
-    ADReal parallel_speed  = (velocity - velocity * loc_normal * loc_normal).norm();
+    ADReal parallel_speed = (velocity - velocity * loc_normal * loc_normal).norm();
 
     ADReal y_plus;
     if (_non_equilibrium_treatement)
     {
-      ADReal y_plus = _rho(current_argument) * 
-                      std::pow(_C_mu(current_argument),0.25) * 
-                      std::pow(_k(current_argument), 0.5) * 
-                      min_wall_dist / 
-                      _mu(current_argument);
+      ADReal y_plus = _rho(current_argument) * std::pow(_C_mu(current_argument), 0.25) *
+                      std::pow(_k(current_argument), 0.5) * min_wall_dist / _mu(current_argument);
     }
     else
     {
       ADReal u_star;
       if (_linearized_yplus)
       {
-        const ADReal a_c = 1/karman_cte;
-        const ADReal b_c = 1/karman_cte * (std::log(E*min_wall_dist/_mu(current_argument)) + 1.0);
+        const ADReal a_c = 1 / karman_cte;
+        const ADReal b_c =
+            1 / karman_cte * (std::log(E * min_wall_dist / _mu(current_argument)) + 1.0);
         const ADReal c_c = parallel_speed;
-        u_star = (-b_c + std::sqrt(std::pow(b_c,2)+4.0*a_c*c_c))/(2.0 * a_c);
+        u_star = (-b_c + std::sqrt(std::pow(b_c, 2) + 4.0 * a_c * c_c)) / (2.0 * a_c);
       }
       else
-        u_star = findUStar(_mu(current_argument), _rho(current_argument), parallel_speed, min_wall_dist);
-        
+        u_star = NS::findUStar(
+            _mu(current_argument), _rho(current_argument), parallel_speed, min_wall_dist);
+
       y_plus = min_wall_dist * u_star * _rho(current_argument) / _mu(current_argument);
     }
 
-    if (y_plus <= 5.0) //sub-laminar layer
+    if (y_plus <= 5.0) // sub-laminar layer
     {
-      return 0.0; // Formulation corresponding to Von Karman sublaminar layer description
-      // TODO: Not sure how to model the sublaminar layer with upwind turbulent production conditions
-      // OpenFOAM and Star-CCM+ treatements suck. Fluent does not provide enough details
+      return 0.0 + _mu(current_argument).value(); // Formulation corresponding to Von Karman
+                                                  // sublaminar layer description
+      // TODO: Not sure how to model the sublaminar layer with upwind turbulent production
+      // conditions OpenFOAM and Star-CCM+ treatements suck. Fluent does not provide enough details
     }
-    else if(y_plus >= 30.0) // log-layer (actaully potential layer regarding modern research - change later)
+    else if (y_plus >=
+             30.0) // log-layer (actaully potential layer regarding modern research - change later)
     {
-      auto von_karman_value = (1/karman_cte + std::log(E*y_plus));
+      auto von_karman_value = (1 / karman_cte + std::log(E * y_plus));
       ADReal new_u_tau_squared;
       if (_non_equilibrium_treatement)
       {
-        new_u_tau_squared = std::pow(_C_mu(current_argument), 0.25) * std::pow(_k(current_argument), 0.5) * parallel_speed / von_karman_value;
+        new_u_tau_squared = std::pow(_C_mu(current_argument), 0.25) *
+                            std::pow(_k(current_argument), 0.5) * parallel_speed / von_karman_value;
       }
       else
       {
         new_u_tau_squared = std::pow(parallel_speed / von_karman_value, 2);
       }
       auto wall_val = new_u_tau_squared * _rho(current_argument) * min_wall_dist / parallel_speed;
-      return wall_val.value();
+      return wall_val.value() + _mu(current_argument).value();
     }
     else // my experimental blending function
     {
-      auto von_karman_value = (1/karman_cte + std::log(E*y_plus));
+      auto von_karman_value = (1 / karman_cte + std::log(E * y_plus));
       ADReal new_u_tau_squared;
       if (_non_equilibrium_treatement)
       {
-        new_u_tau_squared = std::pow(_C_mu(current_argument), 0.25) * std::pow(_k(current_argument), 0.5) * parallel_speed / von_karman_value;
+        new_u_tau_squared = std::pow(_C_mu(current_argument), 0.25) *
+                            std::pow(_k(current_argument), 0.5) * parallel_speed / von_karman_value;
       }
       else
       {
         new_u_tau_squared = std::pow(parallel_speed / von_karman_value, 2);
       }
       auto blending_function = (y_plus - 5.0) / 25.0;
-      auto wall_val = (new_u_tau_squared  * _rho(current_argument)  * min_wall_dist / parallel_speed) * blending_function;
-      return wall_val.value();
-      // Note: ideally the user should not include values in the buffer layer as intermittency does not allow to define the wall function properly and bla bla
-      // However, we are allowing for values in the buffer layer as otherwise it is cumbersome for the user
+      auto wall_val =
+          (new_u_tau_squared * _rho(current_argument) * min_wall_dist / parallel_speed) *
+          blending_function;
+      return wall_val.value() + _mu(current_argument).value();
+      // Note: ideally the user should not include values in the buffer layer as intermittency does
+      // not allow to define the wall function properly and bla bla However, we are allowing for
+      // values in the buffer layer as otherwise it is cumbersome for the user
       // TODO: raise warning if some of the cell values lie in the buffer layer
     }
   }
@@ -215,20 +226,19 @@ kEpsilonViscosity::computeValue()
     auto k_value = std::max(_k(current_argument), 1e-10);
     auto epsilon_value = std::max(_epsilon(current_argument), 1e-10);
 
-    // ADReal local_mixing_length;
-    // if ((_C_mu(current_argument) * std::pow(_k(current_argument), 1.5)) < 
-    //     (_epsilon(current_argument) * _max_mixing_length))
-    //     local_mixing_length = _rho(makeElemArg(_current_elem))
-    //                           * _C_mu(makeElemArg(_current_elem))
-    //                           * std::pow(k_value, 1.5)
-    //                           / (epsilon_value + protection_epsilon);
-    // else
-    //     local_mixing_length = _max_mixing_length;
+    ADReal local_mixing_length = (_rho(current_argument) * _C_mu(current_argument) *
+                                  std::pow(k_value, 2) / (epsilon_value + protection_epsilon))
+                                     .value();
 
-    // return (std::max(local_mixing_length * std::pow(k_value, 0.5),
-    //                  Launder_Sharma_bulk_limit))
-    //                  .value();
+    bool mixing_length_cond = (_C_mu(current_argument) * std::pow(_k(current_argument), 1.5)) <
+                              (_epsilon(current_argument) * _max_mixing_length);
+    local_mixing_length = (mixing_length_cond) ? local_mixing_length : _max_mixing_length;
 
-    return (_rho(current_argument) * _C_mu(current_argument) * std::pow(k_value, 2) / (epsilon_value + protection_epsilon)).value();
+    return (local_mixing_length * std::pow(k_value, 0.5)).value() + _mu(current_argument).value();
+
+    // return (_rho(current_argument) * _C_mu(current_argument) * std::pow(k_value, 2) /
+    //         (epsilon_value + protection_epsilon))
+    //            .value() +
+    //        _mu(current_argument).value();
   }
 }

@@ -22,7 +22,8 @@ PINSFVTurbulentDiffusion::validParams()
                              "fluid energy equations :  $-div(eps * k / turb_coef * grad(T))$");
   params.addRequiredParam<MooseFunctorName>("mu_t", "Thermal conductivity");
   params.addRequiredParam<MooseFunctorName>(NS::porosity, "Porosity");
-  params.addRequiredParam<MooseFunctorName>("turb_coef", "Normalization Coefficient Turbulent Diffusion");
+  params.addRequiredParam<MooseFunctorName>("turb_coef",
+                                            "Normalization Coefficient Turbulent Diffusion");
   params.addParam<bool>(
       "effective_diffusivity",
       false,
@@ -55,23 +56,33 @@ PINSFVTurbulentDiffusion::computeQpResidual()
 {
   // Interpolate thermal conductivity times porosity on the face
   ADReal diffusion_face;
-  const auto face_elem = elemFromFace();
-  const auto face_neighbor = neighborFromFace();
 
-  if (!_porosity_factored_in)
-    Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
-                           diffusion_face,
-                           _mu_t(face_elem) * _eps(face_elem) / _turb_coef(face_elem),
-                           _mu_t(face_neighbor) * _eps(face_neighbor) / _turb_coef(face_elem),
-                           *_face_info,
-                           true);
+  if (onBoundary(*_face_info))
+  {
+    const auto ssf = singleSidedFaceArg();
+    diffusion_face = _porosity_factored_in ? _mu_t(ssf) * _eps(ssf) / _turb_coef(ssf)
+                                           : _mu_t(ssf) / _turb_coef(ssf);
+  }
   else
-    Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
-                           diffusion_face,
-                           _mu_t(face_elem) / _turb_coef(face_elem),
-                           _mu_t(face_neighbor) / _turb_coef(face_elem),
-                           *_face_info,
-                           true);
+  {
+    const auto face_elem = elemFromFace();
+    const auto face_neighbor = neighborFromFace();
+
+    if (!_porosity_factored_in)
+      Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
+                             diffusion_face,
+                             _mu_t(face_elem) * _eps(face_elem) / _turb_coef(face_elem),
+                             _mu_t(face_neighbor) * _eps(face_neighbor) / _turb_coef(face_elem),
+                             *_face_info,
+                             true);
+    else
+      Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
+                             diffusion_face,
+                             _mu_t(face_elem) / _turb_coef(face_elem),
+                             _mu_t(face_neighbor) / _turb_coef(face_elem),
+                             *_face_info,
+                             true);
+  }
 
   // Compute the gradient dotted with the surface normal
   auto dVardn = gradUDotNormal();

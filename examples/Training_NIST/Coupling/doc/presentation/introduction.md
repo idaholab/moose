@@ -1,4 +1,4 @@
-# Phsyics Coupling in MOOSE
+# Physics Coupling in MOOSE
 
 !---
 
@@ -8,15 +8,15 @@ As we have seen, the ```MultiApp``` systems allows us to couple phsyics appicati
 
 Coupling analyses are needed when:
 
-- The behaviour of the system cannot be characterized by *freezing* some of the physics, e.g., there is a considerable power shift with temperature, which, in turn, affects he thermal fields.
+- The behavior of the system cannot be characterized by *freezing* some of the physics, e.g., there is a considerable power shift with temperature, which, in turn, affects he thermal fields.
 
 - It is unclear what are the conservative conditions during a transient, e.g., in a loss of flow transient it may be not clear at what time in the transient the maximum temperature in the fuel is reached.
 
-- The analyst seeks to resuce uncertainties in the analysis coming from the multiphysics coupling of the fields.
+- The analyst seeks to resude uncertainties in the analysis coming from the multiphysics coupling of the fields.
 
 !---
 
-## MOOSE approach to Mutliphysics Coupling
+## MOOSE approach to Multiphysics Coupling
 
 - In general, multiphysics coupling is desirable as less approximations must be made by the analyst.
 
@@ -30,18 +30,18 @@ Coupling analyses are needed when:
 
 !---
 
-## MOOSE approach to Mutliphysics Coupling (Cntd.)
+## MOOSE approach to Multiphysics Coupling (Cntd.)
 
 - For this purpose:
 
-  - All phsyics in MOOSE are implemented across the same memory structures
-  - The coupling process can be tailored and controled via the native ```MultoApp``` system
-  - MOOSE supports distributed mesh parallelism when coupling physcis
+  - All physics in MOOSE are implemented across the same memory structures
+  - The coupling process can be tailored and controlled via the native ```MultoApp``` system
+  - MOOSE supports distributed mesh parallelism when coupling physics
 
 !---
 
 ## Coupling physics for the flow between plates example
 
-- The first part of the hands on session will deal with coupling the TH to the TM model
+- The first part of the hands-on session will deal with coupling the TH to the TM model
 
 - Then, in the second part of the hands-on session, we will couple neutronics to the TH + TM model

@@ -1,0 +1,5 @@
+[Mesh]
+  [gmg]
+    type = GeneratedMeshGenerator
+  []
+[]

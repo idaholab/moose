@@ -1,8 +1,8 @@
-mu=1
-rho=1
-k=1e-3
-cp=1
-alpha=1
+mu = 1
+rho = 1
+k = 1e-3
+cp = 1
+alpha = 1
 
 [Mesh]
   [gen]
@@ -34,17 +34,17 @@ alpha=1
   [vel_x]
     type = 'INSFVVelocityVariable'
     initial_condition = 1
-    block=1
+    block = 1
   []
   [vel_y]
     type = 'INSFVVelocityVariable'
     initial_condition = 1
-    block=1
+    block = 1
   []
   [pressure]
     type = 'INSFVPressureVariable'
     initial_condition = 0
-    block=1
+    block = 1
   []
   [T_fluid]
     type = 'INSFVEnergyVariable'

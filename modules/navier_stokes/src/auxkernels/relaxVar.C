@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "relaxVar.h"
-#include "INSFVMethods.h"
+#include "NavierStokesMethods.h"
 
 registerMooseObject("NavierStokesApp", relaxVar);
 
@@ -16,8 +16,7 @@ InputParameters
 relaxVar::validParams()
 {
   InputParameters params = AuxKernel::validParams();
-  params.addClassDescription(
-      "Relax variable.");
+  params.addClassDescription("Relax variable.");
   params.addRequiredParam<MooseFunctorName>("var_to_relax", "Coupled turbulent kinetic energy.");
   params.addRangeCheckedParam<Real>(
       "relaxation_factor", 0, "0<=relaxation_factor<=1", "Relaxation factor.");
@@ -35,6 +34,6 @@ Real
 relaxVar::computeValue()
 {
 
-  return _var_to_relax(makeElemArg(_current_elem),1).value() * _relaxation_factor
-         + _var_to_relax(makeElemArg(_current_elem),2).value() * (1.0 - _relaxation_factor);
+  return _var_to_relax(makeElemArg(_current_elem), 1).value() * _relaxation_factor +
+         _var_to_relax(makeElemArg(_current_elem), 2).value() * (1.0 - _relaxation_factor);
 }
