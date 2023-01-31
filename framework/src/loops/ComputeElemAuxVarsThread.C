@@ -19,6 +19,9 @@
 #include "libmesh/threads.h"
 
 template <typename AuxKernelType>
+Threads::spin_mutex ComputeElemAuxVarsThread<AuxKernelType>::writable_variable_mutex;
+
+template <typename AuxKernelType>
 ComputeElemAuxVarsThread<AuxKernelType>::ComputeElemAuxVarsThread(
     FEProblemBase & problem,
     const MooseObjectWarehouse<AuxKernelType> & storage,
@@ -91,16 +94,17 @@ ComputeElemAuxVarsThread<AuxKernelType>::subdomainChanged()
   _fe_problem.prepareMaterials(_subdomain, _tid);
   _fe_problem.setActiveFEVariableCoupleableMatrixTags(needed_fe_var_matrix_tags, _tid);
   _fe_problem.setActiveFEVariableCoupleableVectorTags(needed_fe_var_vector_tags, _tid);
+
+  _active_kernels = &_aux_kernels.getActiveBlockObjects(_subdomain, _tid);
+  _has_active_kernels = _aux_kernels.hasActiveBlockObjects(_subdomain, _tid);
 }
 
 template <typename AuxKernelType>
 void
 ComputeElemAuxVarsThread<AuxKernelType>::onElement(const Elem * elem)
 {
-  if (_aux_kernels.hasActiveBlockObjects(_subdomain, _tid))
+  if (_has_active_kernels)
   {
-    const std::vector<std::shared_ptr<AuxKernelType>> & kernels =
-        _aux_kernels.getActiveBlockObjects(_subdomain, _tid);
     _fe_problem.prepare(elem, _tid);
     _fe_problem.reinitElem(elem, _tid);
 
@@ -111,8 +115,28 @@ ComputeElemAuxVarsThread<AuxKernelType>::onElement(const Elem * elem)
     if (_need_materials)
       _fe_problem.reinitMaterials(elem->subdomain_id(), _tid);
 
-    for (const auto & aux : kernels)
+    for (const auto & aux : *_active_kernels)
+    {
       aux->compute();
+
+      // update the aux solution vector if writable coupled variables are used
+      if (aux->hasWritableCoupledVariables())
+      {
+        Threads::spin_mutex::scoped_lock lock(writable_variable_mutex);
+        for (auto * var : aux->getWritableCoupledVariables())
+        {
+          std::cerr << aux->name() << " var " << var->name() << '\n';
+          // insert into the global solution vector
+          var->insert(_aux_sys.solution());
+          var->prepareAux();
+        }
+
+        // make solution values available for dependent AuxKernels
+        // aux->variable().insert(_aux_sys.solution());
+        // aux->variable().prepareAux();
+        _fe_problem.reinitElem(elem, _tid);
+      }
+    }
 
     // update the solution vector
     {

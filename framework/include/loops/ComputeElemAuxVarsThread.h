@@ -47,4 +47,9 @@ protected:
   const std::vector<std::vector<MooseVariableFEBase *>> & _aux_vars;
 
   bool _need_materials;
+
+  const std::vector<std::shared_ptr<AuxKernelType>> * _active_kernels;
+  bool _has_active_kernels;
+
+  static Threads::spin_mutex writable_variable_mutex;
 };

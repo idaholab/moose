@@ -48,4 +48,6 @@ protected:
   const std::vector<std::vector<MooseVariableFEBase *>> _aux_vars;
 
   std::set<SubdomainID> _block_ids;
+
+  static Threads::spin_mutex writable_variable_mutex;
 };

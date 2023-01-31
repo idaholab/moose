@@ -14,18 +14,18 @@
 /**
  * Aux kernel that updated values of coupled variables
  */
-class MultipleUpdateAux : public AuxKernel
+class MultipleUpdateAuxDeprecated : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  MultipleUpdateAux(const InputParameters & parameters);
-  virtual ~MultipleUpdateAux();
+  MultipleUpdateAuxDeprecated(const InputParameters & parameters);
+  virtual ~MultipleUpdateAuxDeprecated();
 
 protected:
   virtual Real computeValue();
 
   const VariableValue & _nl_u;
-  MooseVariable & _var1;
-  MooseVariable & _var2;
+  VariableValue & _var1;
+  VariableValue & _var2;
 };

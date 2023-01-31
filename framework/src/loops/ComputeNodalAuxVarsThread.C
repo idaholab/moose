@@ -18,6 +18,9 @@
 #include "libmesh/threads.h"
 
 template <typename AuxKernelType>
+Threads::spin_mutex ComputeNodalAuxVarsThread<AuxKernelType>::writable_variable_mutex;
+
+template <typename AuxKernelType>
 ComputeNodalAuxVarsThread<AuxKernelType>::ComputeNodalAuxVarsThread(
     FEProblemBase & fe_problem,
     const MooseObjectWarehouse<AuxKernelType> & storage,
@@ -99,7 +102,24 @@ ComputeNodalAuxVarsThread<AuxKernelType>::onNode(ConstNodeRange::const_iterator 
 
     if (iter != block_kernels.end())
       for (const auto & aux : iter->second)
+      {
         aux->compute();
+
+        // update the aux solution vector if writable coupled variables are used
+        if (aux->hasWritableCoupledVariables())
+        {
+          Threads::spin_mutex::scoped_lock lock(writable_variable_mutex);
+          for (auto * var : aux->getWritableCoupledVariables())
+          {
+            // insert into the global solution vector
+            var->insert(_aux_sys.solution());
+            var->prepareAux();
+          }
+
+          // make solution values available for dependent AuxKernels
+          _fe_problem.reinitNode(node, _tid);
+        }
+      }
   }
 
   // We are done, so update the solution vector

@@ -15,9 +15,8 @@ InputParameters
 MultipleUpdateElemAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
-
-  params.addRequiredCoupledVar("vars", "unknown (nl-variable)");
-
+  params.addRequiredCoupledVar("vars",
+                               "Coupled variables that will be written to by the test object.");
   return params;
 }
 
@@ -25,13 +24,7 @@ MultipleUpdateElemAux::MultipleUpdateElemAux(const InputParameters & parameters)
   : AuxKernel(parameters), _n_vars(coupledComponents("vars"))
 {
   for (unsigned int i = 0; i < _n_vars; i++)
-  {
-    _vars.push_back(dynamic_cast<MooseVariable *>(getVar("vars", i)));
-    if (_vars[i]->isNodal())
-      mooseError("variables have to be elemental");
-  }
-  if (isNodal())
-    mooseError("variable have to be elemental");
+    _vars.push_back(&writableVariable("vars", i));
 }
 
 MultipleUpdateElemAux::~MultipleUpdateElemAux() {}
@@ -46,13 +39,14 @@ MultipleUpdateElemAux::compute()
   for (unsigned int i = 0; i < _n_vars; i++)
     _vars[i]->setNodalValue(values[i]);
 
-  _var.setNodalValue(0.0);
+  _var.setNodalValue(100.0);
 }
 
 Real
 MultipleUpdateElemAux::computeValue()
 {
-  return 0.0;
+  // never executed
+  return 100.0;
 }
 
 void

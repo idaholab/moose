@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MultipleUpdateAux.h"
+#include "MultipleUpdateAuxDeprecated.h"
 
-registerMooseObject("MooseTestApp", MultipleUpdateAux);
+registerMooseObject("MooseTestApp", MultipleUpdateAuxDeprecated);
 
 InputParameters
-MultipleUpdateAux::validParams()
+MultipleUpdateAuxDeprecated::validParams()
 {
   InputParameters params = AuxKernel::validParams();
 
@@ -23,20 +23,20 @@ MultipleUpdateAux::validParams()
   return params;
 }
 
-MultipleUpdateAux::MultipleUpdateAux(const InputParameters & parameters)
+MultipleUpdateAuxDeprecated::MultipleUpdateAuxDeprecated(const InputParameters & parameters)
   : AuxKernel(parameters),
     _nl_u(coupledValue("u")),
-    _var1(writableVariable("var1")),
-    _var2(writableVariable("var2"))
+    _var1(writableCoupledValue("var1")),
+    _var2(writableCoupledValue("var2"))
 {
 }
 
-MultipleUpdateAux::~MultipleUpdateAux() {}
+MultipleUpdateAuxDeprecated::~MultipleUpdateAuxDeprecated() {}
 
 Real
-MultipleUpdateAux::computeValue()
+MultipleUpdateAuxDeprecated::computeValue()
 {
-  _var1.setNodalValue(_nl_u[_qp] + 10.0, _qp);
-  _var2.setNodalValue(_nl_u[_qp] + 200.0, _qp);
+  _var1[_qp] = _nl_u[_qp] + 10.0;
+  _var2[_qp] = _nl_u[_qp] + 200.0;
   return -3.33;
 }

@@ -110,6 +110,16 @@ public:
     return _fe_coupleable_matrix_tags;
   }
 
+  /**
+   * Checks whether the object has any writable coupled variables
+   */
+  bool hasWritableCoupledVariables() { return !_writable_coupled_variables[_c_tid].empty(); }
+
+  /**
+   * returns a reference to the set of writable coupled variables
+   */
+  auto & getWritableCoupledVariables() { return _writable_coupled_variables[_c_tid]; }
+
 protected:
   /**
    * A call-back function provided by the derived object for actions before coupling a variable
@@ -459,6 +469,19 @@ protected:
    * @return Vector of ArrayVariableValue pointers for each component of \p var_name
    */
   std::vector<const ArrayVariableValue *> coupledArrayValues(const std::string & var_name) const;
+
+  /**
+   * Returns a *writable* MooseVariable object for a nodal or elemental variable. Use
+   * var.setNodalValue(val[, idx]) in both cases (!) to set the solution DOF values. Only one object
+   * can obtain a writable reference in a simulation. Note that the written values will not ba
+   * available in the same system loop! E.g. values written using this API by a nodal AuxKernel will
+   * not be updated for other nodal AuxKernels during the same iteration over all nodes.
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a MooseVariable for the coupled variable
+   * @see Kernel::value
+   */
+  MooseVariable & writableVariable(const std::string & var_name, unsigned int comp = 0);
 
   /**
    * Returns a *writable* reference to a coupled variable for writing to multiple
@@ -1622,7 +1645,7 @@ private:
                                                    Moose::OLDER_SOLUTION_TAG};
 
   /// keep a set of allocated writable variable references to make sure only one object can obtain them per thread
-  std::vector<std::set<std::string>> _writable_copled_variables;
+  std::vector<std::set<MooseVariable *>> _writable_coupled_variables;
 };
 
 template <typename T>
