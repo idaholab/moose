@@ -2,7 +2,7 @@
   issues = '#13988'
   design = 'python/index.md'
   [combine_csv]
-    requirement = "MOOSE python postprocessor class shall combine CSV files together."
+    requirement = "The system shall contain a python postprocessor class to combine CSV files together."
     type = PythonUnitTest
     input = test_combine_csv.py
   []

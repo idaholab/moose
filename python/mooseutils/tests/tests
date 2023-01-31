@@ -5,53 +5,53 @@
     type = PythonUnitTest
     input = test_mooseMessage.py
     buffer = True
-    requirement = "MOOSE python utilities shall include messaging interface."
+    requirement = "The system shall contain python utilities that include a messaging interface."
   []
   [mooseMessageDialog]
     type = PythonUnitTest
     input = test_mooseMessageDialog.py
     display_required = True
-    requirement = "MOOSE python utilities shall include messaging interface capable of creating a dialog window."
+    requirement = "The system shall contain python utilities that include a messaging interface capable of creating a dialog window."
   []
   [moose_data_frame]
     type = PythonUnitTest
     input = test_MooseDataFrame.py
-    requirement = "MOOSE python utilities shall include tools for reading CSV data via pandas.DataFrame."
+    requirement = "The system shall contain python utilities for reading CSV data via pandas.DataFrame."
   []
   [postprocessors]
     type = PythonUnitTest
     input = test_PostprocessorReader.py
     buffer = True
-    requirement = "MOOSE python utilities shall include tools for reading postprocessor data."
+    requirement = "The system shall contain python utilities for reading postprocessor data."
   []
   [vector_postprocessors]
     type = PythonUnitTest
     input = test_VectorPostprocessorReader.py
     separate = True
-    requirement = "MOOSE python utilities shall include tools for reading vector postprocessor data."
+    requirement = "The system shall contain python utilities for reading vector postprocessor data."
   []
   [reporters]
     type = PythonUnitTest
     input = test_ReporterReader.py
     separate = True
-    requirement = "MOOSE python utilities shall include tools for reading reporter data."
+    requirement = "The system shall contain python utilities for reading reporter data."
     issues = "#17391"
   []
   [camel]
     type = PythonUnitTest
     input = test_camel_to_space.py
-    requirement = "MOOSE python utilities shall include tools for converting camel case text to underscore separated text."
+    requirement = "The system shall contain python utilities for converting camel case text to underscore separated text."
   []
   [yaml_load]
     type = PythonUnitTest
     input = test_yaml_load.py
-    requirement = "MOOSE python utilities shall include a tool for reading YAML files."
+    requirement = "The system shall contain python utilities for reading YAML files."
     required_python_packages = yaml
   []
   [make_chunks]
     type = PythonUnitTest
     input = test_make_chunks.py
-    requirement = "MOOSE python utilities shall include a tool for breaking a list of items into a specified number of chunks."
+    requirement = "The system shall contain python utilities for breaking a list of items into a specified number of chunks."
   []
   [find_moose_executable]
     type = PythonUnitTest
@@ -73,20 +73,19 @@
   [civet_results]
     type = PythonUnitTest
     input = test_civet_results.py
-
     requirement = "The system shall include a tool for accessing CIVET testing results."
   []
   [perfgraph]
     type = PythonUnitTest
     input = test_PerfGraphReporterReader.py
     separate = True
-    requirement = "MOOSE python utilities shall include tools for reading PerfGraphReporter data."
+    requirement = "The system shall contain python utilities for reading PerfGraphReporter data."
     issues = "#16256"
   []
   [csvdiff]
     type = PythonUnitTest
     input = test_csvdiff.py
-    requirement = "MOOSE python utilities shall include a tool for reading compared csv files."
+    requirement = "The system shall contain python utilities for reading compared csv files."
     issues = '#20032'
   []
 []
