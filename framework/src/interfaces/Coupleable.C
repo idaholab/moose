@@ -17,6 +17,10 @@
 #include "MooseObject.h"
 #include "SystemBase.h"
 
+#include "AuxKernel.h"
+#include "ElementUserObject.h"
+#include "NodalUserObject.h"
+
 Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv)
   : _c_parameters(moose_object->parameters()),
     _c_name(_c_parameters.get<std::string>("_object_name")),
@@ -49,9 +53,11 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv)
                              : false),
     _coupleable_max_qps(Moose::constMaxQpsPerElem),
     _is_fv(is_fv),
-    _obj(moose_object)
+    _obj(moose_object),
+    _writable_copled_variables(libMesh::n_threads())
 {
   SubProblem & problem = *_c_parameters.getCheckedPointerParam<SubProblem *>("_subproblem");
+  _obj->getMooseApp().registerInterfaceObject(*this);
 
   unsigned int optional_var_index_counter = 0;
 
@@ -828,6 +834,52 @@ Coupleable::coupledArrayValues(const std::string & var_name) const
 VariableValue &
 Coupleable::writableCoupledValue(const std::string & var_name, unsigned int comp)
 {
+  // make sure only one object can access a variable
+
+  for (const auto & ci : _obj->getMooseApp().getInterfaceObjects<Coupleable>())
+    if (ci != this && ci->_writable_copled_variables[_c_tid].count(var_name))
+      mooseError("'",
+                 ci->_obj->name(),
+                 "' already obtained a writable reference to '",
+                 var_name,
+                 "'. Only one object can obtain such a reference per variable in a simulation.");
+
+  // check that the variable type (elemental/nodal) is compatible with the object type
+  const auto * aux = dynamic_cast<const AuxKernel *>(this);
+  const auto * euo = dynamic_cast<const ElementUserObject *>(this);
+  const auto * nuo = dynamic_cast<const NodalUserObject *>(this);
+
+  if (!aux && !euo && !nuo)
+    mooseError("writableCoupledvalue() can only be called from AuxKernels, ElementUserObjects, or "
+               "NodalUserObjects. '",
+               _obj->name(),
+               "' is neither of those.");
+
+  const auto * var = getVar(var_name, comp);
+  if (!var)
+    mooseError(
+        "Unable to create a writable reference to '", var_name, "', is it a constant expression?");
+
+  if (aux && aux->isNodal() != var->isNodal())
+    mooseError("The AuxKernel '",
+               _obj->name(),
+               "' and the variable '",
+               var_name,
+               "' must both either be nodal or elemental.");
+  if (euo && var->isNodal())
+    mooseError("The ElementUserObject '",
+               _obj->name(),
+               "' cannot obtain a writable reference to the nodal variable '",
+               var_name,
+               "'.");
+  if (nuo && !var->isNodal())
+    mooseError("The NodalUserObject '",
+               _obj->name(),
+               "' cannot obtain a writable reference to the elemental variable '",
+               var_name,
+               "'.");
+
+  _writable_copled_variables[_c_tid].insert(var_name);
   return const_cast<VariableValue &>(coupledValue(var_name, comp));
 }
 

@@ -461,10 +461,9 @@ protected:
   std::vector<const ArrayVariableValue *> coupledArrayValues(const std::string & var_name) const;
 
   /**
-   * Returns a *writable* reference to a coupled variable.  Note: you
-   * should not have to use this very often (use coupledValue()
-   * instead) but there are situations, such as writing to multiple
-   * AuxVariables from a single AuxKernel, where it is required.
+   * Returns a *writable* reference to a coupled variable for writing to multiple
+   * AuxVariables from a single AuxKernel or a UserObject. Only one object can obtain
+   * a writable reference in a simulation.
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
    * @return Reference to a VariableValue for the coupled variable
@@ -1621,6 +1620,9 @@ private:
   /// vector tag names for which we need to request older solution states from the system
   const std::set<std::string> _older_state_tags = {Moose::OLD_SOLUTION_TAG,
                                                    Moose::OLDER_SOLUTION_TAG};
+
+  /// keep a set of allocated writable variable references to make sure only one object can obtain them per thread
+  std::vector<std::set<std::string>> _writable_copled_variables;
 };
 
 template <typename T>
