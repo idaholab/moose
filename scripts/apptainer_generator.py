@@ -357,13 +357,11 @@ class ApptainerGenerator:
         then the contents therein will be either replaced, or exchanged
         where appropriate
         """
-        app_apptainer = os.path.join(app_root, 'apptainer')
-        if os.path.exists(app_apptainer):
-            sections = ['environment', 'post', 'test']
-            for a_section in sections:
-                if os.path.exists(os.path.join(app_apptainer, f'{a_section}.sh')):
-                    with open(os.path.join(app_apptainer, f'{a_section}.sh'), 'r') as s_file:
-                        jinja_data[f'SECTION_{a_section.upper()}'] = s_file.read()
+        for a_section in ['environment.sh', 'post.sh', 'test.sh']:
+            section_file = os.path.join(app_root, 'apptainer', a_section)
+            if os.path.exists(section_file):
+                with open(section_file, 'r') as s_file:
+                    jinja_data[f'SECTION_{a_section.upper()}'] = s_file.read()
 
     def add_definition_vars(self, jinja_data):
         """
