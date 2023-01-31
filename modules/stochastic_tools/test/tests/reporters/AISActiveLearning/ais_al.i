@@ -104,14 +104,14 @@
     # show_optimization_details = true
   []
 []
-  
+
 [Surrogates]
   [GP_eval]
     type = GaussianProcess
     trainer = GP_al_trainer
   []
 []
-  
+
 [Covariance]
   [covar]
     type= SquaredExponentialCovariance

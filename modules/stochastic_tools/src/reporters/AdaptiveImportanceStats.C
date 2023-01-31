@@ -37,7 +37,9 @@ AdaptiveImportanceStats::validParams()
 
 AdaptiveImportanceStats::AdaptiveImportanceStats(const InputParameters & parameters)
   : GeneralReporter(parameters),
-    _output_value(isParamValid("flag_sample") ? getReporterValue<std::vector<Real>>("output_value") : getReporterValue<std::vector<Real>>("output_value", REPORTER_MODE_DISTRIBUTED)),
+    _output_value(isParamValid("flag_sample") ? getReporterValue<std::vector<Real>>("output_value")
+                                              : getReporterValue<std::vector<Real>>(
+                                                    "output_value", REPORTER_MODE_DISTRIBUTED)),
     _mu_imp(declareValue<std::vector<Real>>("mu_imp")),
     _std_imp(declareValue<std::vector<Real>>("std_imp")),
     _pf(declareValue<std::vector<Real>>("pf")),
@@ -67,7 +69,8 @@ AdaptiveImportanceStats::execute()
     return;
   }
 
-  const bool gp_flag = isParamValid("flag_sample") ? getReporterValue<std::vector<bool>>("flag_sample")[0] : false;
+  const bool gp_flag =
+      isParamValid("flag_sample") ? getReporterValue<std::vector<bool>>("flag_sample")[0] : false;
   // Compute AdaptiveImportanceSampler statistics at each sample during the evaluation phase only.
   if (_step > _ais.getNumSamplesTrain() && !gp_flag)
   {
@@ -85,7 +88,7 @@ AdaptiveImportanceStats::execute()
     {
       input_tmp = Normal::quantile(_distributions_store[ss]->cdf(input1[ss]), 0.0, 1.0);
       prod1 = prod1 * (Normal::pdf(input_tmp, 0.0, 1.0) /
-                      Normal::pdf(input_tmp, _mu_imp[ss], _factor * _std_imp[ss]));
+                       Normal::pdf(input_tmp, _mu_imp[ss], _factor * _std_imp[ss]));
     }
     _pf_sum += prod1;
     _var_sum += Utility::pow<2>(prod1);

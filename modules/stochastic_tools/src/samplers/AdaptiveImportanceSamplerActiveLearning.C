@@ -9,7 +9,9 @@
 
 #include "AdaptiveImportanceSamplerActiveLearning.h"
 
-registerMooseObjectAliased("StochasticToolsApp", AdaptiveImportanceSamplerActiveLearning, "AISActiveLearning");
+registerMooseObjectAliased("StochasticToolsApp",
+                           AdaptiveImportanceSamplerActiveLearning,
+                           "AISActiveLearning");
 
 InputParameters
 AdaptiveImportanceSamplerActiveLearning::validParams()
@@ -19,7 +21,8 @@ AdaptiveImportanceSamplerActiveLearning::validParams()
   return params;
 }
 
-AdaptiveImportanceSamplerActiveLearning::AdaptiveImportanceSamplerActiveLearning(const InputParameters & parameters)
+AdaptiveImportanceSamplerActiveLearning::AdaptiveImportanceSamplerActiveLearning(
+    const InputParameters & parameters)
   : AdaptiveImportanceSampler(parameters)
 {
 }

@@ -22,5 +22,4 @@ public:
   static InputParameters validParams();
 
   AdaptiveImportanceSamplerActiveLearning(const InputParameters & parameters);
-
 };

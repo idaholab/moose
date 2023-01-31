@@ -35,7 +35,9 @@ AdaptiveMonteCarloDecision::validParams()
 
 AdaptiveMonteCarloDecision::AdaptiveMonteCarloDecision(const InputParameters & parameters)
   : GeneralReporter(parameters),
-    _output_value(isParamValid("gp_decision") ? getReporterValue<std::vector<Real>>("output_value") : getReporterValue<std::vector<Real>>("output_value", REPORTER_MODE_DISTRIBUTED)),
+    _output_value(isParamValid("gp_decision") ? getReporterValue<std::vector<Real>>("output_value")
+                                              : getReporterValue<std::vector<Real>>(
+                                                    "output_value", REPORTER_MODE_DISTRIBUTED)),
     _output_required(declareValue<std::vector<Real>>("output_required")),
     _inputs(declareValue<std::vector<std::vector<Real>>>("inputs")),
     _step(getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")->timeStep()),
@@ -103,17 +105,18 @@ AdaptiveMonteCarloDecision::execute()
     const Real tmp = _ais->getUseAbsoluteValue() ? std::abs(_output_value[0]) : _output_value[0];
     bool output_limit_reached;
 
-    /* Checking whether a GP surrogate is used. If it is used, importance sampling is not performed 
+    /* Checking whether a GP surrogate is used. If it is used, importance sampling is not performed
     during the training phase of the GP and all proposed samples are accepted until the training
     phase is completed. Once the training is completed, the importance sampling starts.
-    
+
     If a GP surrogate is not used, the standard proposal and acceptance/rejection is performed as
-    part of the importance sampling. */ 
+    part of the importance sampling. */
     bool restart_gp = 0;
     output_limit_reached = tmp >= _output_limit;
     if (isParamValid("gp_decision"))
     {
-      const int training_samples = getUserObject<ActiveLearningGPDecision>("gp_decision").getTrainingSamples();
+      const int training_samples =
+          getUserObject<ActiveLearningGPDecision>("gp_decision").getTrainingSamples();
       restart_gp = _step == training_samples;
       output_limit_reached = 1.0;
       if (restart_gp)
