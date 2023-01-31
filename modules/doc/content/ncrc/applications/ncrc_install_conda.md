@@ -1,4 +1,4 @@
-!include conda/install_miniconda.md
+!include getting_started/installation/install_miniconda.md
 
 Before we continue, we first need to initialize mamba. Execute the following command and +restart your terminal session+.
 

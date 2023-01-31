@@ -138,7 +138,7 @@ Leave this module loaded for the remainder of the instructions (PETSc requiremen
 
 !include getting_started/installation/manual_petsc.md
 
-!include conda/manual_miniconda.md
+!include getting_started/installation/manual_miniconda.md
 
 ## Clean Up and Chown
 

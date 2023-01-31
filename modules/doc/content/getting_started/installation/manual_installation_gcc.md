@@ -14,7 +14,7 @@
 
 !include manual_mpich_gcc.md
 
-!include conda/manual_miniconda.md
+!include getting_started/installation/manual_miniconda.md
 
 ## bash_profile
 
