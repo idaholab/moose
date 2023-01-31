@@ -52,6 +52,8 @@ public:
   void computeOffDiagJacobianScalar(unsigned int svar_num) override;
 
 protected:
+  virtual void precalculateOffDiagJacobianScalar(unsigned int /* svar_num */) {}
+
   /**
    * Method for computing the scalar part of residual
    */
@@ -102,7 +104,7 @@ protected:
   /**
    * Put necessary evaluations depending on qp but independent of test and shape functions here
    */
-  virtual void initScalarQpJacobian(const unsigned int /*jvar_num*/) {}
+  virtual void initScalarQpJacobian(const unsigned int /*svar_num*/) {}
 
   /**
    * Put necessary evaluations depending on qp but independent of test and shape functions here for

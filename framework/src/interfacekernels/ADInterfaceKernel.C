@@ -86,8 +86,11 @@ ADInterfaceKernelTempl<T>::computeElemNeighResidual(Moose::DGResidualType type)
     prepareVectorTagNeighbor(_assembly, _neighbor_var.number());
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+  {
+    initQpResidual(type);
     for (_i = 0; _i < test_space.size(); _i++)
       _local_re(_i) += raw_value(_ad_JxW[_qp] * _ad_coord[_qp] * computeQpResidual(type));
+  }
 
   accumulateTaggedLocalResidual();
 }
@@ -108,6 +111,8 @@ ADInterfaceKernelTempl<T>::computeResidual()
   if (!_var.activeOnSubdomain(_current_elem->subdomain_id()) ||
       !_neighbor_var.activeOnSubdomain(_neighbor_elem->subdomain_id()))
     return;
+
+  precalculateResidual();
 
   // Compute the residual for this element
   computeElemNeighResidual(Moose::Element);
@@ -153,8 +158,11 @@ ADInterfaceKernelTempl<T>::computeElemNeighJacobian(Moose::DGJacobianType type)
   }
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+  {
+    initQpResidual(resid_type);
     for (_i = 0; _i < test_space.size(); _i++)
       residuals[_i] += _ad_JxW[_qp] * _ad_coord[_qp] * computeQpResidual(resid_type);
+  }
 
   auto local_functor = [&](const std::vector<ADReal> & input_residuals,
                            const std::vector<dof_id_type> &,
@@ -215,6 +223,8 @@ ADInterfaceKernelTempl<T>::computeJacobian()
       !_neighbor_var.activeOnSubdomain(_neighbor_elem->subdomain_id()))
     return;
 
+  precalculateJacobian();
+
   computeElemNeighJacobian(Moose::ElementElement);
   computeElemNeighJacobian(Moose::NeighborNeighbor);
 }
@@ -245,8 +255,11 @@ ADInterfaceKernelTempl<T>::computeOffDiagElemNeighJacobian(Moose::DGJacobianType
   std::vector<ADReal> residuals(test_space.size(), 0);
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+  {
+    initQpResidual(resid_type);
     for (_i = 0; _i < test_space.size(); _i++)
       residuals[_i] += _ad_JxW[_qp] * _ad_coord[_qp] * computeQpResidual(resid_type);
+  }
 
   auto local_functor = [&](const std::vector<ADReal> & input_residuals,
                            const std::vector<dof_id_type> &,
@@ -333,6 +346,8 @@ ADInterfaceKernelTempl<T>::computeElementOffDiagJacobian(unsigned int jvar)
     // at once
     return;
 
+  precalculateOffDiagJacobian(jvar);
+
   // Again AD does Jacobians all at once so we only need to call with ElementElement
   computeOffDiagElemNeighJacobian(Moose::ElementElement, jvar);
 }
@@ -358,6 +373,8 @@ ADInterfaceKernelTempl<T>::computeNeighborOffDiagJacobian(unsigned int jvar)
     // We only need to do these computations a single time because AD computes all the derivatives
     // at once
     return;
+
+  precalculateOffDiagJacobian(jvar);
 
   // Again AD does Jacobians all at once so we only need to call with NeighborNeighbor
   computeOffDiagElemNeighJacobian(Moose::NeighborNeighbor, jvar);

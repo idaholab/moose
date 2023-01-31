@@ -199,6 +199,7 @@ KernelScalarBase::computeOffDiagJacobianScalarLocal(const unsigned int svar_num)
 void
 KernelScalarBase::computeOffDiagJacobianScalar(const unsigned int svar_num)
 {
+  precalculateOffDiagJacobianScalar(svar_num);
   if (_use_scalar)
   {
     if (svar_num == variable().number()) // column for this kernel's variable
@@ -241,7 +242,7 @@ KernelScalarBase::computeScalarOffDiagJacobianScalar(const unsigned int svar_num
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
-    initScalarQpJacobian(_kappa_var);
+    initScalarQpJacobian(svar_num);
     for (_h = 0; _h < _k_order; _h++)
       for (_l = 0; _l < s_order; _l++)
         _local_ke(_h, _l) +=
