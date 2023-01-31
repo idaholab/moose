@@ -108,5 +108,6 @@
     input = 'diffusion_override_scalar.i'
     expect_err = 'A scalar_variable has been set and compute_scalar_residuals=true, but the computeScalarQpResidual method was not overridden. Accidental call of base class?'
     requirement = 'User can only assign scalars and compute residuals if the AD Qp class is overridden.'
+    ad_indexing_type = 'global'
   [../]
 []
