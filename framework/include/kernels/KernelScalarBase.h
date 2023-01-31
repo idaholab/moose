@@ -139,7 +139,8 @@ protected:
 inline Real
 KernelScalarBase::computeScalarQpResidual()
 {
-  mooseError("A scalar_variable has been set and compute_scalar_residuals=true, ",
-  "but the computeScalarQpResidual method was not overridden. Accidental call of base class?");
+  mooseError(
+      "A scalar_variable has been set and compute_scalar_residuals=true, ",
+      "but the computeScalarQpResidual method was not overridden. Accidental call of base class?");
   return 0;
 }
