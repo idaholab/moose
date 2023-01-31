@@ -5,8 +5,11 @@ links provided detailed information on the theory and use of the level set modul
 
 - [Theory Manual](level_set/theory.md)
 
-!include modules/level_set/level_set_examples.md
+## Examples
 
+!include modules/level_set/level_set_examples.md start=example-list-begin end=example-list-end
+
+!alert note
 For reference the following tables list the objects contained within the level set module and a brief
 description of their purpose; each object may be selected to navigate to a detailed page.
 

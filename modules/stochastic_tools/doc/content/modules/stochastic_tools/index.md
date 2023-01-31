@@ -1,4 +1,4 @@
-# Stochastic Tools
+# Stochastic Tools Module
 
 The stochastic tools module is a toolbox designed for performing stochastic analysis for MOOSE-based
 applications. The following sections detail the various aspects of this module that can be
@@ -6,7 +6,7 @@ used independently or in combination to meet the needs of the application develo
 
 ## Examples
 
-!include modules/stochastic_tools/stochastic_tools_examples.md
+!include modules/stochastic_tools/examples/index.md start=example-lists-begin end=example-lists-end
 
 ## Performance
 

@@ -43,7 +43,7 @@ Extensions:
             Getting Started:
                 Installing MOOSE: getting_started/installation/index.md
                 Creating an Application: getting_started/new_users.md
-                Tutorials: getting_started/examples_and_tutorials/index.md
+                Examples and Tutorials: getting_started/examples_and_tutorials/index.md
                 Supplemental Resources: getting_started/supplemental_resources/index.md
                 INL HPC Remote Access: help/inl/index.md
             Documentation:

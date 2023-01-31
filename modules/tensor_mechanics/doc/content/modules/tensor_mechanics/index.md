@@ -96,18 +96,19 @@ introductory theory pages on the various models:
 - [Shell elements](tensor_mechanics/ShellElements.md)
 - [Reduced Order Models](/LAROMANCE.md)
 - [Frequency Domain Dynamics](/1d_elastic_waves.md)
+- [Isogeometric Analysis](tensor_mechanics/examples/cframe_iga.md)
 !col-end!
 !row-end!
 
 ## New Mechanics Kernels
 
-The Tensor Mechanics module currently has two, partially interoperable 
+The Tensor Mechanics module currently has two, partially interoperable
 underlying systems:
 
 - The current system based on the [StressDivergenceTensors](/StressDivergenceTensors.md) and related kernels.
 - A newer system based on the [TotalLagrangianStressDivergence](/TotalLagrangianStressDivergence.md) and [UpdatedLagrangianStressDivergence](/UpdatedLagrangianStressDivergence.md) kernels.
 
-The current system may suffer from convergence issues caused by non-exact Jacobians for large deformations problems when not used with the Automatic Differentiation variants of the kernels and underlying materials. 
+The current system may suffer from convergence issues caused by non-exact Jacobians for large deformations problems when not used with the Automatic Differentiation variants of the kernels and underlying materials.
 The newer system (referred to in the documentation as the *Lagrangian* kernels) has exact Jacobians and also includes:
 
 - A [common interface](tensor_mechanics/LagrangianKernelTheory.md) for running small or large deformation problems that simplifies how input files are setup and makes it easier to switch between different kinematic and material models.
@@ -119,11 +120,11 @@ The newer system (referred to in the documentation as the *Lagrangian* kernels) 
 The newer kernels are compatible with the existing MOOSE materials via the [ComputeLagrangianWrappedStress](/ComputeLagrangianWrappedStress.md) object.  This object maps the output from the existing MOOSE material system into the format expected
 by the Lagrangian kernels.
 
-The Lagrangian kernels are feature-complete with the original kernels -- all simulations using the original kernels should be able to be converted to use the 
+The Lagrangian kernels are feature-complete with the original kernels -- all simulations using the original kernels should be able to be converted to use the
 Lagrangian kernels.  However, users should be aware that modules that couple to `"stress"` for the Cauchy stress using the original kernels should now either couple to `"cauchy_stress"` or `"pk1_stress"`, as appropriate, in the Lagrangian kernels.
 
 Users should consider using the new system
-for problems where numerical convergence is critical -- for example problems with large material or geometric nonlinearities -- or 
+for problems where numerical convergence is critical -- for example problems with large material or geometric nonlinearities -- or
 for problems where the stress update provided by the constitutive model is very expensive, as the new kernels will achieve convergence
 in many fewer nonlinear iterations, when compared to the older system.
 
