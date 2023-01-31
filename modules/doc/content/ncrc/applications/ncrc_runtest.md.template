@@ -20,8 +20,3 @@ You're all set to run tests:
 cd ~/projects/{{binary}}
 ./run_tests -j 6
 ```
-
-This operation can take some time to complete. There are more ways to test {{ApplicationName}} than
-the above example. Vist our [TestHarness](python/TestHarness.md) page to learn more about this
-system, available influential environment variables, modifying how the output is displayed, and
-more.

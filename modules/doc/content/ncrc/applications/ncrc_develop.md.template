@@ -5,7 +5,8 @@ repository, and any additional support libraries in the form of submodules. The 
 instructions aim at preparing your machine or environment for such development.
 
 If you encounter errors during any of these steps, you need to stop and figure out a solution before
-continuing. Please see our [Troubleshooting](help/troubleshooting.md) guide, which also contains
+continuing. Please see MOOSE's
+[Troubleshooting](https://mooseframework.org/help/troubleshooting.html) guide, which also contains
 information on how to reach us in the event troubleshooting fails.
 
 If you need to update {{ApplicationName}}, know that by following through the
@@ -17,7 +18,7 @@ effectively performs an update each time.
 If you plan on using your personal machine we recommend using our Conda packages. If you are instead
 operating on one of our [!ac](INL) [!ac](HPC) clusters, you need only load a couple of modules.
 
-- If +Personal Machine+: Follow the [Conda Installation](installation/install_miniconda.md)
+- If +Personal Machine+: Follow the [Conda Installation](ncrc/applications/ncrc_install_conda.md)
   instructions and then install our MOOSE Conda packages:
 
   ```bash

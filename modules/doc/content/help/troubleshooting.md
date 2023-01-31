@@ -4,7 +4,7 @@ The content you find here, is a collection of issues commonly experienced by all
 
 !include help/faq/discussion_forum.md
 
-!include help/faq/conda_issues.md
+!include conda/conda_issues.md
 
 !include help/faq/build_issues.md
 

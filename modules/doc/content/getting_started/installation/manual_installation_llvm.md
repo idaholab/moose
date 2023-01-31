@@ -34,7 +34,7 @@ export LD_LIBRARY_PATH=$PACKAGES_DIR/llvm-__LLVM__/lib:$LD_LIBRARY_PATH
 
 !include manual_mpich_llvm.md
 
-!include manual_miniconda.md
+!include conda/manual_miniconda.md
 
 ## bash_profile
 
