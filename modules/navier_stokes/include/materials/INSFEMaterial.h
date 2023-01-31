@@ -16,12 +16,12 @@
 /**
  * Fluid materials for 3D fluid model
  */
-class MDFluidMaterial : public Material
+class INSFEMaterial : public Material
 {
 public:
   static InputParameters validParams();
 
-  MDFluidMaterial(const InputParameters & parameters);
+  INSFEMaterial(const InputParameters & parameters);
 
 protected:
   virtual void computeProperties() override;
@@ -72,7 +72,7 @@ protected:
   Real _k_elem_val;
 
 protected:
-  void compute_fluid_properties();
-  void compute_hsupg();
-  void compute_tau();
+  void computeFluidProperties();
+  void computeHSUPG();
+  void computeTau();
 };

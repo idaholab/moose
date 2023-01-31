@@ -9,14 +9,17 @@
 
 #pragma once
 
-#include "MDFluidMaterial.h"
+#include "INSFEMaterial.h"
 
-class GenericPorousMediumMaterial : public MDFluidMaterial
+/**
+ * Computes material properties relevant to simulation of fluid flow in a porous medium
+ */
+class PINSFEMaterial : public INSFEMaterial
 {
 public:
   static InputParameters validParams();
 
-  GenericPorousMediumMaterial(const InputParameters & parameters);
+  PINSFEMaterial(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties() override;

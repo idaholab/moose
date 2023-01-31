@@ -7,14 +7,18 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "GenericPorousMediumMaterial.h"
+#include "PINSFEMaterial.h"
 
-registerMooseObject("NavierStokesApp", GenericPorousMediumMaterial);
+registerMooseObject("NavierStokesApp", PINSFEMaterial);
+registerMooseObjectRenamed("NavierStokesApp",
+                           GenericPorousMediumMaterial,
+                           "02/01/2024 00:00",
+                           PINSFEMaterial);
 
 InputParameters
-GenericPorousMediumMaterial::validParams()
+PINSFEMaterial::validParams()
 {
-  InputParameters params = MDFluidMaterial::validParams();
+  InputParameters params = INSFEMaterial::validParams();
 
   params.addClassDescription("Computes generic material properties related to simulation of fluid "
                              "flow in a porous medium");
@@ -26,8 +30,8 @@ GenericPorousMediumMaterial::validParams()
   return params;
 }
 
-GenericPorousMediumMaterial::GenericPorousMediumMaterial(const InputParameters & parameters)
-  : MDFluidMaterial(parameters),
+PINSFEMaterial::PINSFEMaterial(const InputParameters & parameters)
+  : INSFEMaterial(parameters),
     _alpha(getParam<Real>("alpha")),
     _beta(getParam<Real>("beta")),
     _pm_htc_const(getParam<Real>("pm_htc")),
@@ -38,9 +42,9 @@ GenericPorousMediumMaterial::GenericPorousMediumMaterial(const InputParameters &
 }
 
 void
-GenericPorousMediumMaterial::computeQpProperties()
+PINSFEMaterial::computeQpProperties()
 {
-  MDFluidMaterial::computeQpProperties();
+  INSFEMaterial::computeQpProperties();
 
   _inertia_resistance_coeff[_qp](0, 0) = _alpha;
   _inertia_resistance_coeff[_qp](1, 1) = _alpha;

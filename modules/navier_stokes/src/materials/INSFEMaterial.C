@@ -7,15 +7,16 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MDFluidMaterial.h"
+#include "INSFEMaterial.h"
 #include "MooseMesh.h"
 #include "Steady.h"
 #include "libmesh/quadrature.h"
 
-registerMooseObject("NavierStokesApp", MDFluidMaterial);
+registerMooseObject("NavierStokesApp", INSFEMaterial);
+registerMooseObjectRenamed("NavierStokesApp", MDFluidMaterial, "02/01/2024 00:00", INSFEMaterial);
 
 InputParameters
-MDFluidMaterial::validParams()
+INSFEMaterial::validParams()
 {
   InputParameters params = Material::validParams();
 
@@ -39,7 +40,7 @@ MDFluidMaterial::validParams()
   return params;
 }
 
-MDFluidMaterial::MDFluidMaterial(const InputParameters & parameters)
+INSFEMaterial::INSFEMaterial(const InputParameters & parameters)
   : Material(parameters),
     _mesh_dimension(_mesh.dimension()),
     _u_vel(coupledValue("u")),
@@ -93,7 +94,7 @@ MDFluidMaterial::MDFluidMaterial(const InputParameters & parameters)
 }
 
 void
-MDFluidMaterial::computeProperties()
+INSFEMaterial::computeProperties()
 {
   // calculating element average velocity
   _u_elem = 0;
@@ -118,9 +119,9 @@ MDFluidMaterial::computeProperties()
 }
 
 void
-MDFluidMaterial::computeQpProperties()
+INSFEMaterial::computeQpProperties()
 {
-  compute_fluid_properties();
+  computeFluidProperties();
 
   // Viscous Stress Tensor
   RealTensorValue grad_vel(_grad_u[_qp], _grad_v[_qp], _grad_w[_qp]);
@@ -163,12 +164,12 @@ MDFluidMaterial::computeQpProperties()
   _viscous_resistance_coeff[_qp] = RealTensorValue(0, 0, 0, 0, 0, 0, 0, 0, 0);
 
   // Compute stabilization parameters:
-  compute_hsupg();
-  compute_tau();
+  computeHSUPG();
+  computeTau();
 }
 
 void
-MDFluidMaterial::compute_fluid_properties()
+INSFEMaterial::computeFluidProperties()
 {
   _dynamic_viscosity[_qp] = _eos.mu_from_p_T(_pressure[_qp], _temperature[_qp]);
   _k[_qp] = _eos.k_from_p_T(_pressure[_qp], _temperature[_qp]);
@@ -177,14 +178,14 @@ MDFluidMaterial::compute_fluid_properties()
 }
 
 void
-MDFluidMaterial::compute_hsupg()
+INSFEMaterial::computeHSUPG()
 {
   // Just use hmin for the element!
   _hsupg[_qp] = _current_elem->hmin();
 }
 
 void
-MDFluidMaterial::compute_tau()
+INSFEMaterial::computeTau()
 {
   // element-based stabilization parameters
   Real h2 = _hsupg[_qp] * _hsupg[_qp];

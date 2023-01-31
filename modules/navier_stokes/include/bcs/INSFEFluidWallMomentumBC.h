@@ -11,6 +11,10 @@
 
 #include "INSFEFluidIntegratedBCBase.h"
 
+/**
+ * Implicitly sets normal component of velocity to zero if the advection term of the momentum
+ * equation is integrated by parts
+ */
 class INSFEFluidWallMomentumBC : public INSFEFluidIntegratedBCBase
 {
 public:
@@ -19,9 +23,9 @@ public:
   INSFEFluidWallMomentumBC(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
   const MaterialProperty<Real> & _mu;
   const MaterialProperty<Real> & _mu_t;

@@ -6,7 +6,7 @@
     exodiff = 'expansion-channel-slip-wall_out.e'
     abs_zero = 1e-6
     issues = '#23121'
-    requirement = 'We shall be able to solve a porous flow using slip-wall boundary condition.'
+    requirement = 'The system shall be able to solve a porous flow using slip-wall boundary condition.'
     allow_warnings = true
   []
 []

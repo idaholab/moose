@@ -6,7 +6,7 @@
     exodiff = 'pm_friction_out.e'
     abs_zero = 1e-6
     issues = '#23121'
-    requirement = 'We shall be able to solve a porous flow with pressure drop due to viscous and inertia frictions.'
+    requirement = 'The system shall be able to solve a porous flow with pressure drop due to viscous and inertia frictions.'
   [../]
   [./pm_heat_source]
     type = 'Exodiff'
@@ -14,7 +14,7 @@
     exodiff = 'pm_heat_source_out.e'
     abs_zero = 1e-6
     issues = '#23121'
-    requirement = 'We shall be able to solve a porous flow with internal heating source.'
+    requirement = 'The system shall be able to solve a porous flow with internal heating source.'
   [../]
   [./pm_reverse_flow]
     type = 'Exodiff'
@@ -22,6 +22,6 @@
     exodiff = 'pm_reverse_flow_out.e'
     abs_zero = 1e-6
     issues = '#23121'
-    requirement = 'We shall be able to solve a porous flow when reverse flow happens.'
+    requirement = 'The system shall be able to solve a porous flow when reverse flow happens.'
   [../]
 []

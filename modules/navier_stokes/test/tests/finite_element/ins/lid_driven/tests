@@ -14,7 +14,7 @@
     exodiff = 'lid_driven_md_out.e'
     custom_cmp = 'lid_driven.cmp'
     issues = '#23121'
-    requirement = 'We shall be able to solve a canonical lid-driven problem using same order variables and the PSPG/SUPG stabilization scheme.'
+    requirement = 'The system shall be able to solve a canonical lid-driven problem using same order variables and the PSPG/SUPG stabilization scheme.'
   [../]
   [./ad_lid_driven]
     type = 'Exodiff'

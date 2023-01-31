@@ -27,12 +27,12 @@ Here we give a brief tabular summary of the Navier-Stokes implementations:
 | ------     | --------   | -------------------- | ------------------ | ----------------  | ------ | ------------------                |
 | INS        | Hand-coded | incompressible       | None               | Not porous        | CGFE   | SUPG                              |
 | INSAD      | AD         | incompressible       | Smagorinsky        | Not porous        | CGFE   | SUPG                              |
-| INSFE      | Hand-coded | incompressible       | None               | Not porous        | CGFE   | SUPG                              |
-| PINSFE     | Hand-coded | incompressible       | None               | porous            | CGFE   | SUPG                              |
+| INSFE      | Hand-coded | incompressible       | mixing length      | Not porous        | CGFE   | SUPG                              |
+| PINSFE     | Hand-coded | incompressible       | mixing length      | porous            | CGFE   | SUPG                              |
 | NS         | Hand-coded | compressible         | None               | Not porous        | CGFE   | SUPG                              |
 | INSFV      | AD         | incompressible       | mixing length      | Not porous        | FV     | RC, CD velocity; limited advected |
 | WCNSFV     | AD         | weakly compressible  | mixing length      | Not porous        | FV     | RC, CD velocity; limited advected |
-| PINSFV     | AD         | incompressible       | None               | Darcy, Forcheimer | FV     | RC, CD velocity; limited advected |
+| PINSFV     | AD         | incompressible       | mixing length      | Darcy, Forcheimer | FV     | RC, CD velocity; limited advected |
 | CNSFVHLLC  | AD         | compressible         | None               | Not porous        | FV     | HLLC, piecewise constant data     |
 | PCNSFVHLLC | AD         | compressible         | None               | Darcy, Forcheimer | FV     | HLLC, piecewise constant data     |
 | PCNSFVKT   | AD         | compressible         | None               | Darcy, Forcheimer | FV     | Kurganov-Tadmor, limited data     |

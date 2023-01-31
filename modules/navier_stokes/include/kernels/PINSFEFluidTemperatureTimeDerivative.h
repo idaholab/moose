@@ -12,6 +12,11 @@
 #include "TimeDerivative.h"
 #include "SinglePhaseFluidProperties.h"
 
+/**
+ * Implements the time derivative term for fluid energy in a porous medium. This class allows for
+ * variation of density with pressure and temperature and, through chain rule multiplication of
+ * partial derivatives, includes the time variation of density
+ */
 class PINSFEFluidTemperatureTimeDerivative : public TimeDerivative
 {
 public:

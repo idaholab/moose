@@ -12,6 +12,12 @@
 #include "INSFEFluidIntegratedBCBase.h"
 #include "Function.h"
 
+/**
+ * Specifies flow of momentum out of a boundary. This class assumes that the convection term has
+ * been integrated by parts. Either a pressure or velocity boundary condition may be supplied
+ * through functions; branch pressure and density may be supplied, instead of a pressure function,
+ * for gravity head calculations
+ */
 class INSFEFluidMomentumBC : public INSFEFluidIntegratedBCBase
 {
 public:

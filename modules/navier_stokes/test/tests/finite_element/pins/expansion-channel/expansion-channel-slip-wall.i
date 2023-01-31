@@ -85,7 +85,7 @@
 
 [Materials]
   [mat]
-    type = GenericPorousMediumMaterial
+    type = PINSFEMaterial
     alpha = 1e3
     beta = 100
   []

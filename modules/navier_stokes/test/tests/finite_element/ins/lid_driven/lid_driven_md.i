@@ -78,7 +78,7 @@
 
 [Materials]
   [flow_mat]
-    type = MDFluidMaterial
+    type = INSFEMaterial
   []
 []
 
