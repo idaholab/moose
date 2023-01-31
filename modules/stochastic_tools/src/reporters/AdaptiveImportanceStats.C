@@ -29,13 +29,15 @@ AdaptiveImportanceStats::validParams()
   params.addParam<ReporterValueName>("pf", "pf", "Failure probability estimate.");
   params.addParam<ReporterValueName>(
       "cov_pf", "cov_pf", "Coefficient of variation of failure probability.");
+  params.addParam<ReporterName>("flag_sample",
+                                "Flag samples if the surrogate prediction was inadequate.");
   params.addRequiredParam<SamplerName>("sampler", "The sampler object.");
   return params;
 }
 
 AdaptiveImportanceStats::AdaptiveImportanceStats(const InputParameters & parameters)
   : GeneralReporter(parameters),
-    _output_value(getReporterValue<std::vector<Real>>("output_value", REPORTER_MODE_DISTRIBUTED)),
+    _output_value(isParamValid("flag_sample") ? getReporterValue<std::vector<Real>>("output_value") : getReporterValue<std::vector<Real>>("output_value", REPORTER_MODE_DISTRIBUTED)),
     _mu_imp(declareValue<std::vector<Real>>("mu_imp")),
     _std_imp(declareValue<std::vector<Real>>("std_imp")),
     _pf(declareValue<std::vector<Real>>("pf")),
@@ -65,8 +67,9 @@ AdaptiveImportanceStats::execute()
     return;
   }
 
+  const bool gp_flag = isParamValid("flag_sample") ? getReporterValue<std::vector<bool>>("flag_sample")[0] : false;
   // Compute AdaptiveImportanceSampler statistics at each sample during the evaluation phase only.
-  if (_step > _ais.getNumSamplesTrain())
+  if (_step > _ais.getNumSamplesTrain() && !gp_flag)
   {
     // Get the statistics of the importance distributions in the standard Normal space.
     _mu_imp = _ais.getImportanceVectorMean();
@@ -82,7 +85,7 @@ AdaptiveImportanceStats::execute()
     {
       input_tmp = Normal::quantile(_distributions_store[ss]->cdf(input1[ss]), 0.0, 1.0);
       prod1 = prod1 * (Normal::pdf(input_tmp, 0.0, 1.0) /
-                       Normal::pdf(input_tmp, _mu_imp[ss], _factor * _std_imp[ss]));
+                      Normal::pdf(input_tmp, _mu_imp[ss], _factor * _std_imp[ss]));
     }
     _pf_sum += prod1;
     _var_sum += Utility::pow<2>(prod1);

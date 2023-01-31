@@ -12,6 +12,7 @@
 #include "GeneralReporter.h"
 #include "AdaptiveImportanceSampler.h"
 #include "ParallelSubsetSimulation.h"
+#include "ActiveLearningGPDecision.h"
 
 /**
  * AdaptiveMonteCarloDecision will help make sample accept/reject decisions in adaptive Monte Carlo
@@ -37,6 +38,12 @@ protected:
   std::vector<std::vector<Real>> & _inputs;
 
 private:
+  /**
+   * This reinitializes the Markov chain to the starting value
+   * until the Gaussian process training is completed.
+   */
+  void reinitChain();
+
   /// Track the current step of the main App
   const int & _step;
 

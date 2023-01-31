@@ -45,6 +45,8 @@ AdaptiveImportanceSampler::validParams()
       "num_random_seeds",
       100000,
       "Initialize a certain number of random seeds. Change from the default only if you have to.");
+  params.addParam<ReporterName>("flag_sample",
+                                "Flag samples if the surrogate prediction was inadequate.");
   return params;
 }
 
@@ -59,6 +61,7 @@ AdaptiveImportanceSampler::AdaptiveImportanceSampler(const InputParameters & par
     _use_absolute_value(getParam<bool>("use_absolute_value")),
     _num_random_seeds(getParam<unsigned int>("num_random_seeds")),
     _is_sampling_completed(false),
+    // _flag_sample(isParamValid("flag_sample") ? getReporterValue<std::vector<bool>>("flag_sample")[0] : false),
     _step(getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")->timeStep()),
     _inputs(getReporterValue<std::vector<std::vector<Real>>>("inputs_reporter"))
 {
@@ -111,15 +114,16 @@ AdaptiveImportanceSampler::computeSample(dof_id_type /*row_index*/, dof_id_type 
     mooseError("Internal bug: the adaptive sampling is supposed to be completed but another sample "
                "has been requested.");
 
+  const bool gp_flag = isParamValid("flag_sample") ? getReporterValue<std::vector<bool>>("flag_sample")[0] : false;
   if (_step <= _num_samples_train)
   {
     /* This is the importance distribution training step. Markov Chains are set up
-       to sample from the importance region or the failure region using the Metropolis
-       algorithm. Given that the previous sample resulted in a model failure, the next
-       sample is proposed such that it is very likely to result in a model failure as well.
-       The `initial_values` and `proposal_std` parameters provided by the user affects the
-       formation of the importance distribution. */
-    if (sample)
+      to sample from the importance region or the failure region using the Metropolis
+      algorithm. Given that the previous sample resulted in a model failure, the next
+      sample is proposed such that it is very likely to result in a model failure as well.
+      The `initial_values` and `proposal_std` parameters provided by the user affects the
+      formation of the importance distribution. */
+    if (sample && !gp_flag)
     {
       for (dof_id_type j = 0; j < _distributions.size(); ++j)
         _prev_value[j] = Normal::quantile(_distributions[j]->cdf(_inputs[j][0]), 0.0, 1.0);
@@ -141,11 +145,11 @@ AdaptiveImportanceSampler::computeSample(dof_id_type /*row_index*/, dof_id_type 
         _prev_value[i] = Normal::quantile(getRand(_step), _inputs_sto[i].back(), _proposal_std[i]);
     }
   }
-  else if (sample)
+  else if (sample && !gp_flag)
   {
     /* This is the importance sampling step using the importance distribution created
-       in the previous step. Once the importance distribution is known, sampling from
-       it is similar to a regular Monte Carlo sampling. */
+      in the previous step. Once the importance distribution is known, sampling from
+      it is similar to a regular Monte Carlo sampling. */
     for (dof_id_type i = 0; i < _distributions.size(); ++i)
     {
       if (_step == _num_samples_train + 1)
@@ -160,7 +164,6 @@ AdaptiveImportanceSampler::computeSample(dof_id_type /*row_index*/, dof_id_type 
     if (_step >= _num_samples_train + _num_importance_sampling_steps)
       _is_sampling_completed = true;
   }
-
   _check_step = _step;
   return _distributions[col_index]->quantile(Normal::cdf(_prev_value[col_index], 0.0, 1.0));
 }

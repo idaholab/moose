@@ -21,6 +21,9 @@ public:
   static InputParameters validParams();
   ActiveLearningGPDecision(const InputParameters & parameters);
 
+  // Access the number of training samples
+  const int & getTrainingSamples() const { return _n_train; }
+
 protected:
   /**
    * This is where most of the computations happen:
