@@ -59,7 +59,7 @@ protected:
   /**
    * Method for computing the scalar part of residual at quadrature points
    */
-  virtual ADReal computeScalarQpResidual() { return 0; }
+  virtual ADReal computeScalarQpResidual();
 
   /**
    * Put necessary evaluations depending on qp but independent of test functions here
@@ -87,3 +87,11 @@ protected:
   /// Used internally to iterate over each scalar component
   unsigned int _h;
 };
+
+inline ADReal
+ADMortarScalarBase::computeScalarQpResidual()
+{
+  mooseError("A scalar_variable has been set and compute_scalar_residuals=true, ",
+  "but the computeScalarQpResidual method was not overridden. Accidental call of base class?");
+  return 0;
+}

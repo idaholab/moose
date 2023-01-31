@@ -29,4 +29,11 @@
     max_parallel = 4
     requirement = 'The system shall support the ability to include the scalar wrapper but not actually using a scalar variable.'
   [../]
+
+  [./override]
+    type = RunException
+    input = 'diffusion_override_scalar.i'
+    expect_err = 'A scalar_variable has been set and compute_scalar_residuals=true, but the computeScalarQpResidual method was not overridden. Accidental call of base class?'
+    requirement = 'User can only assign scalars and compute residuals if the Qp class is overridden.'
+  [../]
 []

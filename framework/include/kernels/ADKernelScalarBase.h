@@ -60,7 +60,7 @@ protected:
   /**
    * Method for computing the scalar part of residual at quadrature points
    */
-  virtual ADReal computeScalarQpResidual() { return 0; }
+  virtual ADReal computeScalarQpResidual();
 
   /**
    * compute the \p _scalar_residuals member for filling the Jacobian. We want to calculate these
@@ -116,3 +116,11 @@ protected:
   //       const std::vector<std::pair<MooseVariableScalar *, MooseVariableScalar *>> &
   //           coupling_entries);
 };
+
+inline ADReal
+ADKernelScalarBase::computeScalarQpResidual()
+{
+  mooseError("A scalar_variable has been set and compute_scalar_residuals=true, ",
+  "but the computeScalarQpResidual method was not overridden. Accidental call of base class?");
+  return 0;
+}

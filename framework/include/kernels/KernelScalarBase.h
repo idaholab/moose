@@ -60,7 +60,7 @@ protected:
   /**
    * Method for computing the scalar part of residual at quadrature points
    */
-  virtual Real computeScalarQpResidual() { return 0; }
+  virtual Real computeScalarQpResidual();
 
   /**
    * Method for computing the scalar variable part of Jacobian
@@ -135,3 +135,11 @@ protected:
   unsigned int _h;
   unsigned int _l;
 };
+
+inline Real
+KernelScalarBase::computeScalarQpResidual()
+{
+  mooseError("A scalar_variable has been set and compute_scalar_residuals=true, ",
+  "but the computeScalarQpResidual method was not overridden. Accidental call of base class?");
+  return 0;
+}
