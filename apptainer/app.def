@@ -14,6 +14,11 @@
 {#- TEST_DIRS: Directories to test in the %test section; defaults to just "tests"             -#}
 {#- EXTRA_MAMBA_PACKAGES: Extra mamba packages to install                                     -#}
 
+{#- Optional Application specific jinja arguments                                             -#}
+{#- SECTION_ENVIRONMENT: Adds additional environment variables set upon entering container    -#}
+{#- SECTION_POST: Partially replaces %post (make, make install, section)                      -#}
+{#- SECTION_TEST: Partially replaces %test (for loop section)                                 -#}
+
 {#- The within-container build directory to use                                               -#}
 {%- set ROOT_BUILD_DIR = '/root/build' -%}
 
@@ -66,6 +71,9 @@ From: {{ APPTAINER_FROM }}
 {%- else %}
     export PATH=/opt/{{ BINARY_NAME }}/bin:$PATH
 {%- endif %}
+{%- if SECTION_ENVIRONMENT is defined %}
+    {{ SECTOIN_ENVIRONMENT }}
+{%- endif %}
 %post
     # Load jinja vars
     APPLICATION_NAME=$(basename {{ APPLICATION_DIR }})
@@ -113,9 +121,12 @@ From: {{ APPTAINER_FROM }}
 {%- else %}
     cd ${APPLICATION_DIR}
 {%- endif %}
+{%- if SECTION_POST is not defined %}
     make -j ${MOOSE_JOBS} METHOD=${METHOD}
     make install -j ${MOOSE_JOBS} MOOSE_SKIP_DOCS=${MOOSE_SKIP_DOCS} MOOSE_DOCS_FLAGS="${MOOSE_DOCS_FLAGS}" METHOD=${METHOD}
-
+{%- else %}
+    {{ SECTION_POST }}
+{%- endif %}
     # Fix permissions for installed application
     chmod -R o=u-w,g=u-w ${MOOSE_PREFIX}
 
@@ -152,6 +163,7 @@ From: {{ APPTAINER_FROM }}
     trap "if [ -e $TEMP_LOC ]; then rm -rf $TEMP_LOC; fi" EXIT HUP INT TERM
 
     # Copy and run each subset of tests
+{%- if SECTION_TEST is not defined %}
     for TEST_DIR in ${TEST_DIRS}; do
         mkdir $TEMP_LOC
         cd $TEMP_LOC
@@ -164,3 +176,6 @@ From: {{ APPTAINER_FROM }}
           exit ${TEST_RETURN_CODE}
         fi
     done
+{%- else %}
+    {{ SECTION_TEST }}
+{%- endif %}

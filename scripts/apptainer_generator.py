@@ -346,6 +346,25 @@ class ApptainerGenerator:
             definition += f'    {name}.job {civet_server}/job/{civet_job_id}\n'
         return definition
 
+    @staticmethod
+    def add_application_additions(app_root, jinja_data):
+        """
+        Add application specific sections if found to jinja data
+        Example, if found:
+            app_root/apptainer/environment.sh
+            app_root/apptainer/post.sh
+            app_root/apptainer/test.sh
+        then the contents therein will be either replaced, or exchanged
+        where appropriate
+        """
+        app_apptainer = os.path.join(app_root, 'apptainer')
+        if os.path.exists(app_apptainer):
+            sections = ['environment', 'post', 'test']
+            for a_section in sections:
+                if os.path.exists(os.path.join(app_apptainer, f'{a_section}.sh')):
+                    with open(os.path.join(app_apptainer, f'{a_section}.sh'), 'r') as s_file:
+                        jinja_data[f'SECTION_{a_section.upper()}'] = s_file.read()
+
     def add_definition_vars(self, jinja_data):
         """
         Adds conditional apptainer definition vars to jinja data
@@ -356,6 +375,8 @@ class ApptainerGenerator:
             jinja_data['APPLICATION_DIR'] = app_root
             jinja_data['APPLICATION_NAME'] = os.path.basename(app_root)
             jinja_data['BINARY_NAME'] = app_name
+            self.add_application_additions(app_root, jinja_data)
+
         # Set MOOSE_[TOOLS, TEST_TOOLS]_VERSION
         if self.args.library == 'moose':
             for package in ['tools', 'test-tools']:
