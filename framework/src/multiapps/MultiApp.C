@@ -917,8 +917,7 @@ MultiApp::moveApp(unsigned int global_app, Point p)
       if (_output_in_position)
         _apps[local_app]->setOutputPosition(p);
       if (_run_in_position)
-        paramError("run_in_position",
-                   "Sub-apps are already displaced, so they are already output in position");
+        paramError("run_in_position", "Moving apps and running apps in position is not supported");
     }
   }
 }
@@ -1007,6 +1006,9 @@ MultiApp::createApp(unsigned int i, Real start_time)
 
   if (_use_positions && getParam<bool>("output_in_position"))
     app->setOutputPosition(_app.getOutputPosition() + _positions[_first_local_app + i]);
+  if (_output_in_position && _run_in_position)
+    paramError("run_in_position",
+               "Sub-apps are already displaced, so they are already output in position");
 
   // Update the MultiApp level for the app that was just created
   app->setupOptions();
@@ -1034,6 +1036,16 @@ MultiApp::createApp(unsigned int i, Real start_time)
   auto fixed_point_solve = &(_apps[i]->getExecutioner()->fixedPointSolve());
   if (fixed_point_solve)
     fixed_point_solve->allocateStorage(false);
+
+  // Transform the app mesh if requested
+  if (_run_in_position)
+  {
+    if (usingPositions())
+      app->getExecutioner()->feProblem().coordTransform().setTranslationVector(
+          _positions[_first_local_app + i]);
+    app->getExecutioner()->feProblem().coordTransform().transformMesh(
+        app->getExecutioner()->feProblem().mesh());
+  }
 }
 
 std::string

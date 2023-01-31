@@ -344,8 +344,6 @@ MultiAppTransfer::getAppInfo()
         transforms.push_back(std::make_unique<MultiAppCoordTransform>(moose_app_transform));
         auto & transform = transforms[i];
         transform->skipCoordinateCollapsing(skip_coordinate_collapsing);
-        if (multiapp->usingPositions())
-          transform->targetAppTransform()->setTranslationVector(multiapp->position(i));
       }
     }
   };
