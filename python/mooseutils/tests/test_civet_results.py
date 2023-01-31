@@ -14,7 +14,7 @@ import platform
 import mooseutils
 import mooseutils.civet_results as cr
 
-SITE = 'https://civet.inl.gov'
+SITE = 'https://mooseframework.inl.gov/docs/civettest'
 REPO = 'idaholab/moose'
 SHAS = ['681ba2f4274dc8465bb2a54e1353cfa24765a5c1', 'febe3476040fe6af1df1d67e8cc8c04c4760afb6']
 
