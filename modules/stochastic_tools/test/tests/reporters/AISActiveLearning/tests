@@ -1,0 +1,13 @@
+[Tests]
+  issues = "#23142"
+  design = "AdaptiveImportanceSamplerActiveLearning.md"
+  [sampling]
+    requirement = 'The system shall be able to perform importance sampling with active learning while'
+    [ais_al]
+      type = 'JSONDiff'
+      input = ais_al.i
+      jsondiff = 'ais_al.json'
+      detail = 'using the U learning function.'
+    []
+  []
+[]
