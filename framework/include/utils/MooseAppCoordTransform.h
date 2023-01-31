@@ -277,6 +277,15 @@ public:
   void setDestinationCoordTransform(const MooseAppCoordTransform & destination_coord_transform);
 
   /**
+   * Set how much our domain should be translated in order to match a reference frame. In practice
+   * we choose the parent application to be the reference frame with respect to translation, e.g.
+   * the parent application origin is the reference frame origin, and we set the translation vectors
+   * of child applications to the multiapp positions parameter. Similarly to the \p setRotation with
+   * angles API, this represents a forward transformation from our domain to the reference domain
+   */
+  void setTranslationVector(const Point & translation);
+
+  /**
    * @return whether the coordinate transformation object modifies an incoming point, e.g. whether
    * the transformation is anything other than the identity matrix
    */
@@ -318,8 +327,16 @@ private:
   /// A pointer to the \p MooseAppCoordTransform object that describes scaling, rotation, and
   /// coordinate system transformations from the destination domain to the reference domain,
   /// e.g. transformations that occur irrespective of the existence of other applications
+  /// This attribute is currently mostly providing only the coordinate system for conversions
+  /// and sanity checking. The actual transformation of destination app points in transfers is done
+  /// by the MultiAppCoordTransform for the other direction
   const MooseAppCoordTransform * _destination_app_transform;
 
   /// whether coordinate collapsing operations should be skipped
   bool _skip_coordinate_collapsing;
+
+  /// Describes a forward translation transformation from our domain to the reference frame domain
+  Point _translation;
+  // TODO: remove the duplicate _translation attribute in MooseAppCoord (used for mesh
+  // transformation) and here (used for transfers).
 };

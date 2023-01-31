@@ -187,8 +187,7 @@ MooseAppCoordTransform::setTranslationVector(const Point & translation)
 {
   if (_translation != Point(0, 0, 0))
     mooseWarning(
-        "Application transformation is being overwritten. We do not support using the positions "
-        "parameter in a MultiApp and the translation parameter in the child app mesh");
+        "Translation vector, usually set from MultiApps positions argument, is being overwritten");
   _translation = translation;
 }
 
@@ -215,7 +214,6 @@ MooseAppCoordTransform::validParams()
       "coord_type", coord_types, "Type of the coordinate system per block param");
   params.addParam<MooseEnum>(
       "rz_coord_axis", rz_coord_axis, "The rotation axis (X | Y) for axisymetric coordinates");
-  params.addParam<Point>("translation", "Translation vector. Override by the app position");
   params.addParam<std::string>(
       "length_unit",
       "How much distance one mesh length unit represents, e.g. 1 cm, 1 nm, 1 ft, 5inches");
@@ -250,7 +248,7 @@ MooseAppCoordTransform::validParams()
       "parameters.");
   params.addParamNamesToGroup("block coord_type rz_coord_axis", "Coordinate system");
   params.addParamNamesToGroup(
-      "translation length_unit alpha_rotation beta_rotation gamma_rotation up_direction",
+      "length_unit alpha_rotation beta_rotation gamma_rotation up_direction",
       "Transformations relative to parent application frame of reference");
   return params;
 }
@@ -302,8 +300,7 @@ MooseAppCoordTransform::MooseAppCoordTransform(const MooseMesh & mesh)
   //
   // Translation
   //
-  if (params.isParamValid("translation"))
-    setTranslationVector(params.get<Point>("translation"));
+  setTranslationVector(Point(0, 0, 0));
 }
 
 MooseAppCoordTransform::MooseAppCoordTransform()
@@ -341,18 +338,17 @@ MooseAppCoordTransform::MooseAppCoordTransform(const MinimalData & minimal_data)
     _z_axis(static_cast<Direction>(std::get<7>(minimal_data))),
     _has_different_coord_sys(std::get<8>(minimal_data)),
     _length_unit(std::string("1*m")),
-    _translation(std::get<5>(minimal_data)),
+    _translation(Point(
+        std::get<4>(minimal_data)[0], std::get<4>(minimal_data)[1], std::get<4>(minimal_data)[2])),
+    _euler_angles(std::get<3>(minimal_data)),
     _mesh_transformed(std::get<9>(minimal_data))
 {
   if (std::get<0>(minimal_data))
     setLengthUnit(MooseUnits(std::to_string(std::get<1>(minimal_data)) + "*m"));
   if (std::get<2>(minimal_data))
-  {
-    const auto & euler_angles = std::get<3>(minimal_data);
     _rotate = std::make_unique<RealTensorValue>(RealTensorValue::extrinsic_rotation_matrix(
-        euler_angles[0], euler_angles[1], euler_angles[2]));
-    computeRS();
-  }
+        _euler_angles[0], _euler_angles[1], _euler_angles[2]));
+  computeRS();
 }
 
 MooseAppCoordTransform::MinimalData
@@ -432,7 +428,8 @@ MooseAppCoordTransform::transformMesh(MooseMesh & mesh)
     MeshTools::Modification::scale(mesh, (*_scale)(0, 0), (*_scale)(1, 1), (*_scale)(2, 2));
   if (_rotate)
     MeshTools::Modification::rotate(mesh, _euler_angles[0], _euler_angles[1], _euler_angles[2]);
-  MeshTools::Modification::translate(mesh, _translation(0), _translation(1), _translation(2));
+  if (_translation != Point(0, 0, 0))
+    MeshTools::Modification::translate(mesh, _translation(0), _translation(1), _translation(2));
 
   // Translation, scaling and rotation need not be applied anymore when performing coordinate
   // transforms
@@ -462,7 +459,7 @@ MultiAppCoordTransform::operator()(const Point & point) const
     ret = (*_our_app_transform._rs) * ret;
 
   // If this shows up in profiling we can make _translation a pointer
-  ret += _our_app_transform._translation;
+  ret += _translation;
 
   if (_skip_coordinate_collapsing)
     return ret;
@@ -524,7 +521,7 @@ MultiAppCoordTransform::mapBack(const Point & point) const
     return ret;
 
   // inverse translate
-  ret -= _our_app_transform._translation;
+  ret -= _translation;
 
   // inverse rotate and then inverse scale
   if (_our_app_transform._rs_inverse)
@@ -617,4 +614,10 @@ void
 MultiAppCoordTransform::skipCoordinateCollapsing(const bool skip_coordinate_collapsing)
 {
   _skip_coordinate_collapsing = skip_coordinate_collapsing;
+}
+
+void
+MultiAppCoordTransform::setTranslationVector(const Point & translation)
+{
+  _translation = translation;
 }
