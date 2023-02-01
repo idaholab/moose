@@ -15,22 +15,22 @@
 #pragma once
 
 #include "GeneralPostprocessor.h"
-#include "TriSubChannelMesh.h"
+#include "SubChannelMesh.h"
 
 /**
  * Calculates a user selected variable at a user selected point in the assembly
  */
-class TriSubChannelPointValue : public GeneralPostprocessor
+class SubChannelPointValue : public GeneralPostprocessor
 {
 public:
-  TriSubChannelPointValue(const InputParameters & params);
+  SubChannelPointValue(const InputParameters & params);
   virtual void initialize() override {}
   virtual void execute() override;
   virtual void finalize() override {}
   virtual Real getValue() override;
 
 protected:
-  TriSubChannelMesh & _mesh;
+  SubChannelMesh & _mesh;
   const Real & _height;
   const int & _i_ch;
   Point _point;

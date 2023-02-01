@@ -57,6 +57,16 @@ DetailedQuadSubChannelMeshGenerator::DetailedQuadSubChannelMeshGenerator(
   for (unsigned int i = 0; i < _n_cells + 1; i++)
     _z_grid.push_back(dz * i);
 
+  _subchannel_position.resize(_n_channels);
+  for (unsigned int i = 0; i < _n_channels; i++)
+  {
+    _subchannel_position[i].reserve(3);
+    for (unsigned int j = 0; j < 3; j++)
+    {
+      _subchannel_position.at(i).push_back(0.0);
+    }
+  }
+
   _subch_type.resize(_n_channels);
   for (unsigned int iy = 0; iy < _ny; iy++)
   {
@@ -73,6 +83,12 @@ DetailedQuadSubChannelMeshGenerator::DetailedQuadSubChannelMeshGenerator(
         _subch_type[i_ch] = EChannelType::EDGE;
       else
         _subch_type[i_ch] = EChannelType::CENTER;
+
+      // set the subchannel positions
+      Real offset_x = (_nx - 1) * _pitch / 2.0;
+      Real offset_y = (_ny - 1) * _pitch / 2.0;
+      _subchannel_position[i_ch][0] = _pitch * ix - offset_x;
+      _subchannel_position[i_ch][1] = _pitch * iy - offset_y;
     }
   }
 }

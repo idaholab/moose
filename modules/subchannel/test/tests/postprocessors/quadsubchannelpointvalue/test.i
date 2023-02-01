@@ -34,10 +34,9 @@ T_in = 359.15
 
 [Postprocessors]
   [T]
-    type = QuadSubChannelPointValue
+    type = SubChannelPointValue
     variable = T
-    ix = 1
-    iy = 1
+    index = 4
     execute_on = 'initial timestep_end'
     height = 0.5
   []

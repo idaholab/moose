@@ -182,6 +182,16 @@ QuadSubChannelMeshGenerator::QuadSubChannelMeshGenerator(const InputParameters &
   _pin_to_chan_map.resize(_n_pins);
   _sign_id_crossflow_map.resize(_n_channels);
   _gij_map.resize(_n_gaps);
+  _subchannel_position.resize(_n_channels);
+
+  for (unsigned int i = 0; i < _n_channels; i++)
+  {
+    _subchannel_position[i].reserve(3);
+    for (unsigned int j = 0; j < 3; j++)
+    {
+      _subchannel_position.at(i).push_back(0.0);
+    }
+  }
 
   // Defining the signs for positive and negative flows
   double positive_flow = 1.0;
@@ -332,6 +342,12 @@ QuadSubChannelMeshGenerator::QuadSubChannelMeshGenerator(const InputParameters &
         _chan_to_pin_map[i_ch].push_back((_nx - 1) * (iy - 1) + ix);
         _chan_to_pin_map[i_ch].push_back((_nx - 1) * (iy - 1) + ix - 1);
       }
+
+      // set the subchannel positions
+      Real offset_x = (_nx - 1) * _pitch / 2.0;
+      Real offset_y = (_ny - 1) * _pitch / 2.0;
+      _subchannel_position[i_ch][0] = _pitch * ix - offset_x;
+      _subchannel_position[i_ch][1] = _pitch * iy - offset_y;
     }
   }
 
@@ -442,6 +458,7 @@ QuadSubChannelMeshGenerator::generate()
   sch_mesh->_pin_to_chan_map = _pin_to_chan_map;
   sch_mesh->_sign_id_crossflow_map = _sign_id_crossflow_map;
   sch_mesh->_gij_map = _gij_map;
+  sch_mesh->_subchannel_position = _subchannel_position;
   sch_mesh->_subch_type = _subch_type;
 
   return mesh_base;
