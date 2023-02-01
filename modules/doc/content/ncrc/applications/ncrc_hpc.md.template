@@ -1,0 +1,229 @@
+# {{ApplicationName}} Binary Access with INL-HPC
+
+Familiarize yourself with [inl/hpc_ondemand.md], and return here with an interactive shell for the
+machine you wish to run your application on. NCRC Application binaries are only available on
+Sawtooth and Lemhi.
+
+## Load {{ApplicationName}} Environment
+
+Logged into either Sawtooth or Lemhi, load the {{ApplicationName}} environment:
+
+```bash
+module load use.moose moose-apps {{ApplicationLower}}
+```
+
+At this point you should be able to run {{binary}}. For this example, {{ApplicationName}}'s
+`--help` can be displayed by running the following command:
+
+```bash
+{{binary}} --help
+```
+
+## Create a Test Input File
+
+To demonstrate the use of {{ApplicationName}} and to verify that it is operating correctly, create a
+test input file. For example, the following input file models steady-state diffusion and
+works with any MOOSE-based application:
+
+!listing moose/test/tests/kernels/simple_diffusion/simple_diffusion.i
+
+This file can be created in your INL-HPC home directory or copied via `scp` from your local machine.
+In both cases, first create a location for the file. For example, the following creates
+a "testing" folder in your remote home directory:
+
+```bash
+mkdir ~/testing
+```
+
+You will need to use a terminal editor to create the file, such as `emacs`, `vi`, or `vim`. Please
+search the internet for how to use these tools, if unfamiliar.
+
+Alternatively, you can create the file on your local machine using your favorite editor, and copying
+it to the remote by running `scp` or `rsync` commands.
+
+!alert note title=Copying files from your local machine
+Copying files from your local machine to an HPC cluster first requires that you follow the
+instructions: [inl/hpc_remote.md]. This workflow is for advanced users, comfortable with modifying
+their SSH settings, and familiar with their terminal in general.
+
+Example commands you would use with a terminal opened on your machine to copy files to HPC:
+
+```bash
+scp /path/to/the/local/input.i <your hpc user id>@hpclogin.inl.gov:~/testing/input.i
+# or
+rsync /path/to/the/local/input.i <your hpc user id>@hpclogin.inl.gov:~/testing/input.i
+```
+
+## Running Test Simulation
+
+### (1) Start-up an interactive job
+
+Simulations should not be executed on the login nodes. While this example is extremely lightweight,
+we will start an interactive job to get you in the habit of doing so.
+
+Start by requesting a single processor for one hour within the "moose" project queue:
+
+```bash
+qsub -I -l select=1:ncpus=1 -l walltime=01:00:00 -P moose
+```
+
+This command will likely take a few seconds or even minutes to execute depending the activity
+on the machine. When it completes you should see a message similar to the following:
+
+```bash
+qsub: waiting for job 141541.sawtoothpbs to start
+qsub: job 141541.sawtoothpbs ready
+```
+
+When running on an interactive node, you will need to load the application environment once more:
+
+```bash
+module load use.moose moose-apps {{ApplicationLower}}
+```
+
+### (2) Run the simulation
+
+In the previous section a test input file was created in your INL-HPC home directory within
+the "testing" folder. MOOSE-based applications are designed to be executed from the location
+of the input file, so start by navigating to this location:
+
+```bash
+cd ~/testing
+```
+
+Next, execute the application with the `-i` argument followed by the input filename:
+
+```bash
+{{binary}} -i input.i
+```
+
+!alert note title=Permission Denied?
+The available applications such as {{ApplicationName}} will depend on being granted access to the
+specific application. Please refer to [inl/index.md] for information about requesting access and the
+different levels available.
+
+### (3) Viewing Results id=viewing-results
+
+You can use HPC OnDemand to view your results remotely. Head on over to
+[HPC OnDemand Dashboard](https://hpcondemand.inl.gov/pun/sys/dashboard), and select 'Interactive
+Apps' dropdown menu, and then click 'Linux Desktop with Visualization'. Select your cluster (such as
+Sawtooth), the amount of time you believe you need, and then click Launch. It may take some time
+before your 'Visualization Job' becomes available. When it does, simply click on it, and you will be
+presented within your web browser, your GUI Desktop. From here, you can open visualization
+applications (such as Paraview), and open your results file.
+
+To use Paraview, open a terminal by: Clicking `Applications` at the top left, then click
+`Terminal Emulator`. A terminal window will open. Enter the following commands:
+
+```bash
+module load paraview
+paraview
+```
+
+Paraview should open. From here, you can select `File`, `Open`, and navigate to the `testing` folder
+you created earlier. You should see your results file listed (`input_out.e`). Double click this file
+and enjoy!
+
+However, in many cases it is more desirable to view the results on your local machine. This is done
+by copying the results file from the remote machine to your local machine using `scp` or `rsnyc`.
+
+!alert note title=Copying files from remote HPC machine to your machine
+Copying files from an HPC cluster to your machine first requires that you follow the instructions:
+[inl/hpc_remote.md]. This workflow is for advanced users, comfortable with modifying their SSH
+settings, and familiar with their terminal in general.
+
+Example commands you would use with a terminal opened on your machine to copy files from HPC:
+
+```bash
+scp <your hpc user id>@hpclogin:~/testing/input_out.e /path/to/the/local/destination
+```
+
+## Scheduling Jobs with PBS
+
+This section will provide you with a basic example of using [!ac](PBS) for scheduling jobs to run
+using INL resources. For detailed information regarding using [!ac](PBS) please visit
+[INL-HPC PBS](https://hpcweb.hpcondemand.inl.gov/home/pbs).
+
+In general, scheduling jobs requires two steps:
+
+1. create a [!ac](PBS) script that describes the required resources and the commands to execute and
+1. submit the script to the scheduler.
+
+### (1) Create [!ac](PBS) Script
+
+Let's use the same example input file from above to create a simple script for scheduling. The top
+portion of the script provides [!ac](PBS) directives that are passed to scheduler. Notice that these
+lines are simply the arguments that are being passed to the scheduler, as was done via the
+command line in the interactive job above.
+
+```bash
+#!/bin/bash
+#PBS -N test_run
+#PBS -l select=1:ncpus=48:mpiprocs=48
+#PBS -l walltime=5:00
+#PBS -P moose
+
+cd $PBS_O_WORKDIR
+source /etc/profile.d/modules.sh
+module load use.moose moose-apps {{ApplicationLower}}
+
+mpirun {{binary}} -i input.i Mesh/uniform_refine=7
+```
+
+It is recommend that this script exists in the same location where the input file resides. This
+will ensure that the associated output from the simulation ends up in the same location. For this
+example the script is located in the testing folder: `~/testing/test.sh`.
+
+The [!ac](PBS) directives for this script include:
+
+1. `-N test_run` to set the job name;
+1. `-l select=1:ncpus=48:mpiprocs=48` indicates to utilize one compute (`select=1`), utilizing all
+   48 cores and run with 48 mpi processes;
+1. `-l walltime=5:00` allocates 5 minutes of time for the simulation; and
+1. `-P moose` dictates that the job should part of the MOOSE queue. For a complete list
+   of queues available see [HPC PBS page](https://hpcweb.hpcondemand.inl.gov/home/pbs).
+
+!alert note title=The number of cores differ on each machine
+The below table displays the possible number of cores for each available cluster
+
+!include ncrc/hpc_cluster_information.md
+
+The second portion provides the commands to be executed. The `cd $PBS_O_WORKDIR` changes to the
+directory that was used when the job was submitted (the environment variables is defined with the
+leter "O"). The commands that follow enable the "module" command and then load the required modules
+for the simulation. Finally, the "mpirun" command is followed by the application executable and the
+input file to simulate. The example file is very simple, so we are passing a refinement option to
+{{ApplicationName}} to make the simulation a bit more suited for 48 cores.
+
+### (2) Submit Script
+
+Submitting the job to the scheduler is trivial. First, be sure to log in to one the desired machines
+login nodes (e.g., using [inl/hpc_ondemand.md] to aquire an Interactive Shell). Change directories
+to the location of the script and associated input files and then use the "qsub" command.
+
+```bash
+cd ~/testing
+qsub test.sh
+```
+
+Running this command will return the job id (e.g., `141861.sawtoothpbs`). The `qstat` command
+can be used to check the status of the jobs.
+
+```
+$ qstat -u <your hpc user id>
+
+sawtoothpbs:
+                                                            Req'd  Req'd   Elap
+Job ID          Username Queue    Jobname    SessID NDS TSK Memory Time  S Time
+--------------- -------- -------- ---------- ------ --- --- ------ ----- - -----
+141861.sawtooth slauae   short    test_run      --    2 192  725gb 00:05 Q   --
+```
+
+For more information about monitoring job status
+please refer to the [INL Job Status](https://hpcweb.hpcondemand.inl.gov/home/pbs#Job_Status) page for
+more information on the `qstat` command. There also are comprehensive status websites for each
+machine: [hpcweb/status](https://hpcweb.hpcondemand.inl.gov/status/).
+
+When the job completes the expected output files will be available in the same location as the
+input file (`~/testing`). Refer to [#viewing-results] in the previous example for more information
+regarding visualization.

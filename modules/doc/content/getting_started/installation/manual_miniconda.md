@@ -36,3 +36,4 @@ Next, we need to use `pip` to install additional libraries not supplied by conda
 !package! code
 PATH=$PACKAGES_DIR/miniconda/bin:$PATH pip install --no-cache-dir pybtex livereload daemonlite pylint lxml pylatexenc anytree
 !package-end!
+
