@@ -30,6 +30,7 @@ protected:
 
   bool _conservative_form;
   const VariableValue & _pressure;
+  const VariableValue & _pressure_dot;
   const VariableValue & _porosity;
   const MaterialProperty<Real> & _rho;
   const MaterialProperty<Real> & _cp;

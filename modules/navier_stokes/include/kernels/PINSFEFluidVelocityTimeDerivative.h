@@ -32,6 +32,7 @@ protected:
   const VariableValue & _pressure;
   const VariableValue & _temperature;
   const VariableValue & _temperature_dot;
+  const VariableValue & _pressure_dot;
   const MaterialProperty<Real> & _rho;
   const SinglePhaseFluidProperties & _eos;
 };

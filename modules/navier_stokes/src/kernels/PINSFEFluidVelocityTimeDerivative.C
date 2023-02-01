@@ -34,6 +34,7 @@ PINSFEFluidVelocityTimeDerivative::PINSFEFluidVelocityTimeDerivative(
     _pressure(coupledValue("pressure")),
     _temperature(coupledValue("temperature")),
     _temperature_dot(coupledDot("temperature")),
+    _pressure_dot(coupledDot("pressure")),
     _rho(getMaterialProperty<Real>("rho_fluid")),
     _eos(getUserObject<SinglePhaseFluidProperties>("eos"))
 {
@@ -47,7 +48,7 @@ PINSFEFluidVelocityTimeDerivative::computeQpResidual()
   {
     Real rho, drho_dp, drho_dT;
     _eos.rho_from_p_T(_pressure[_qp], _temperature[_qp], rho, drho_dp, drho_dT);
-    Real drho_dt = drho_dT * _temperature_dot[_qp] + drho_dp * _u_dot[_qp];
+    Real drho_dt = drho_dT * _temperature_dot[_qp] + drho_dp * _pressure_dot[_qp];
     res += _u[_qp] * drho_dt * _test[_i][_qp];
   }
 
@@ -62,7 +63,7 @@ PINSFEFluidVelocityTimeDerivative::computeQpJacobian()
   {
     Real rho, drho_dp, drho_dT;
     _eos.rho_from_p_T(_pressure[_qp], _temperature[_qp], rho, drho_dp, drho_dT);
-    Real drho_dt = drho_dT * _temperature_dot[_qp] + drho_dp * _u_dot[_qp];
+    Real drho_dt = drho_dT * _temperature_dot[_qp] + drho_dp * _pressure_dot[_qp];
     jac += _phi[_j][_qp] * drho_dt * _test[_i][_qp];
   }
 
