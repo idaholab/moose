@@ -146,6 +146,10 @@ protected:
   bool _incremental;
   /// Whether to convert the J-integral to a stress intensity factor (K) --deprecated
   bool _convert_J_to_K;
+  /// Whether the crack is a bimaterial crack
+  const bool _bimaterial_crack;
+  /// Beta material variable name that defines the transition of material properties
+  VariableName _beta_material;
   /// Whether to create automatic differentiation objects from the action
   const bool _use_ad;
 };

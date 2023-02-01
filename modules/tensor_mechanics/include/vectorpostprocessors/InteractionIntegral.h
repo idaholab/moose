@@ -94,8 +94,12 @@ protected:
   std::vector<const VariableGradient *> _grad_disp;
   /// Whether the temperature variable is coupled
   const bool _has_temp;
+  /// Whether the beta_material auxiliary variable for bimaterial crack is coupled
+  const bool _has_beta;
   /// Gradient of temperature
   const VariableGradient & _grad_temp;
+  /// Beta material variable that defines the transition of material properties
+  const VariableValue & _beta_material;
   /// Conversion factor applied to convert interaction integral to stress intensity factor K
   Real _K_factor;
   /// Whether the crack plane is also a symmetry plane in the model
@@ -104,6 +108,8 @@ protected:
   Real _poissons_ratio;
   /// Young's modulus of the material
   Real _youngs_modulus;
+  /// Whether to consider interaction integral and material properties for bimaterial crack
+  const bool _bimaterial_crack;
   /// Index of the ring for the integral computed by this object
   std::size_t _ring_index;
   /// Derivative of the total eigenstrain with respect to temperature

@@ -2,7 +2,6 @@
   design = 'syntax/DomainIntegral/index.md'
   issues = '#2717'
   [j_ellip]
-    design = 'syntax/DomainIntegral/index.md'
     type = 'CSVDiff'
     input = 'j_int_surfbreak_ellip_crack_sym_mm.i'
     csvdiff = 'j_int_surfbreak_ellip_crack_sym_mm_out_J_1_0001.csv '
@@ -85,4 +84,15 @@
                   'differentiation.'
     rel_err = 1.0e-4
   []
+  [j_int_bimaterial_sif]
+    type = 'CSVDiff'
+    input = 'j_int_bimaterial_sif.i'
+    csvdiff = 'j_int_bimaterial_sif_out.csv'
+    max_parallel = 1
+    requirement = 'The Domain Integral Action shall compute stress intensity factors from the '
+                  'interaction integral, with an added term stemming for spatially varying '
+                  'properties, that accounts for the crack perpendicularity to a bimaterial '
+                  'interface.'
+  []
+
 []

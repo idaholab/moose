@@ -65,6 +65,10 @@ DomainIntegralAction::validParams()
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
   params.addParam<VariableName>("temperature", "", "The temperature");
+  params.addParam<VariableName>(
+      "beta_material",
+      "",
+      "A beta parameter for exponential transition between materials for a bimaterial crack.");
   MooseEnum position_type("Angle Distance", "Distance");
   params.addParam<MooseEnum>(
       "position_type",
@@ -97,6 +101,10 @@ DomainIntegralAction::validParams()
   params.addParam<MaterialPropertyName>("eigenstrain_gradient",
                                         "Material defining gradient of eigenstrain tensor");
   params.addParam<MaterialPropertyName>("body_force", "Material defining body force");
+  params.addParam<bool>(
+      "bimaterial_crack",
+      false,
+      "Whether the crack is perpendicular to the interface between two materials.");
   params.addParam<bool>("use_automatic_differentiation",
                         false,
                         "Flag to use automatic differentiation (AD) objects when possible");
@@ -135,8 +143,17 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
     _output_q(getParam<bool>("output_q")),
     _incremental(getParam<bool>("incremental")),
     _convert_J_to_K(isParamValid("convert_J_to_K") ? getParam<bool>("convert_J_to_K") : false),
+    _bimaterial_crack(getParam<bool>("bimaterial_crack")),
     _use_ad(getParam<bool>("use_automatic_differentiation"))
 {
+  if (_bimaterial_crack && getParam<VariableName>("beta_material") == "")
+    paramError("bimaterial_crack",
+               "For bimaterial cracks, an auxiliary variable capturing the transition between "
+               "elasticity modulus needs to be provided.");
+
+  if (_bimaterial_crack)
+    _beta_material = getParam<VariableName>("beta_material");
+
   if (_q_function_type == GEOMETRY)
   {
     if (isParamValid("radius_inner") && isParamValid("radius_outer"))
@@ -665,6 +682,11 @@ DomainIntegralAction::act()
       params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
       if (_has_symmetry_plane)
         params.set<unsigned int>("symmetry_plane") = _symmetry_plane;
+
+      params.set<bool>("bimaterial_crack") = _bimaterial_crack;
+      if (_bimaterial_crack)
+        params.set<std::vector<VariableName>>("beta_material") = {_beta_material};
+
       params.set<Real>("poissons_ratio") = _poissons_ratio;
       params.set<Real>("youngs_modulus") = _youngs_modulus;
       params.set<std::vector<VariableName>>("displacements") = _displacements;
