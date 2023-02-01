@@ -106,7 +106,7 @@ specified. [example-listing-input] demonstrates proper use of the `block` and `r
 
 !alert note title=The "block" and "remove" settings apply to all HIT formatted files.
 The settings given in [hit-listing-settings] are available to all [!ac](HIT) formatted listings, including
-[test specification files](python/TestHarness.md).
+[test specification files](TestHarness.md).
 
 !devel settings module=MooseDocs.extensions.listing
                 object=InputListingCommand

@@ -32,10 +32,7 @@ and geomechanics.
 
 ### Tutorial and examples class=center style=font-weight:200;
 
-- [Getting started](porous_flow/getting_started_with_pf.md)
-- [PorousFlow tutorial](porous_flow/tutorial_00.md)
-
-!include modules/porous_flow/porous_flow_examples.md
+!include modules/porous_flow/porous_flow_examples.md start=example-list-begin end=example-list-end
 
 !col-end!
 

@@ -1,5 +1,5 @@
 [!ac](MOOSE) Tools is a set of Python utilities designed to support the [!ac](MOOSE) framework.
-[!ac](MOOSE) Tools contains two main utilities -- [python/MooseDocs/index.md] and [python/TestHarness.md]
+[!ac](MOOSE) Tools contains two main utilities -- [python/MooseDocs/index.md] and [TestHarness.md]
 -- that facilitate [!ac](MOOSE) documentation (e.g., website and presentation building) and code testing.
 While tied to the framework most directly (and housed within the
 [MOOSE code repository](https://github.com/idaholab/moose)), [!ac](MOOSE) Tools can be used in a more

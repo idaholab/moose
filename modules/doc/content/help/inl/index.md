@@ -1,34 +1,25 @@
-# INL HPC Remote Access
+# INL HPC Services
 
-[!ac](INL) builds and maintains a wide range of MOOSE-based applications as well as [!ac](HPC)
-support for these applications. The following links will aid researchers learning more about the
-available codes and how to utilize the [!ac](INL) resources to run applications.
+[!ac](INL) [!ac](HPC) maintains a significant number of computing resources that are available
+for use. These resources are available to industry, universities, national laboratories, and
+federal agencies to support research and development. See [inl.gov/hpc](https://inl.gov/hpc)
+for more information.
 
-- [inl/applications.md]
-- [inl/hpc_remote.md]
-- [inl/hpc_binary.md]
-- [inl/hpc_ondemand.md]
+## Requesting HPC Access id=access
 
+HPC access is controlled via the [!ac](NCRC). Please visit [inl.gov/ncrc](https://inl.gov/ncrc)
+to request access.
 
-## Requesting Access id=access
+## HPC OnDemand
 
-INL applications may be obtained by outside institutions and individuals for execution and/or
-development. Currently, the following access methods are available for certain applications.
+HPC OnDemand is a convenient way to access HPC resources (files, submitting jobs, virtual sessions, etc)
+through a web browser on the public internet. See [inl/hpc_ondemand.md] for more information.
 
-- +HPC Binary Access+\\
-  Users in the category will be provided an INL-HPC account that includes a binary version of
-  the desired application ready for use on INL-HPC resources.
+## NCRC
 
-- +Binary Access+\\
-  Users in this category will be provided with access to a binary version of the desired
-  application that is executable on non-INL systems, such as a personal workstation or institution
-  cluster.
+In addition to HPC account management, the [!ac](NCRC) distributes a wide range of applications and access
+to those applications to meet the needs of researchers around the world. For more information,
+see [inl.gov/ncrc](https://inl.gov/ncrc).
 
-- +Source Code Access+\\
-  Users in this category will be provided with complete source code access to an application. This
-  level of access is reserved for individuals that will be developing new capabilities for the
-  application and contributing directly to the project.
-
-
-The request access to an [!ac](INL) developed code, please contact follow the instructions
-on [INL Modeling and Simulation Software](https://modsimcode.inl.gov/SitePages/Home.aspx) website.
+The NCRC distributes the majority of the controlled, INL-developed MOOSE-based applications. For information, see
+[inl/applications.md].

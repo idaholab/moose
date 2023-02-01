@@ -1,0 +1,22 @@
+## Running Tests id=runtests
+
+With {{ApplicationName}} built, we can now run tests to verify a working binary (and environment).
+
+- If +Personal Machine+:
+
+  ```bash
+  mamba activate moose
+  ```
+
+- If +[!ac](INL) [!ac](HPC) Sawtooth or Lemhi+ (required each time you log in):
+
+  ```bash
+  module load use.moose moose-dev
+  ```
+
+You're all set to run tests:
+
+```bash
+cd ~/projects/{{binary}}
+./run_tests -j 6
+```

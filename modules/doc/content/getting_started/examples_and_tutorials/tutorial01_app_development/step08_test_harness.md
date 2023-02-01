@@ -26,7 +26,7 @@ Test specification files are [!ac](HIT) formatted ones that define the tests to 
          link=False
          remove=Tests/issues Tests/design Tests/test/requirement
 
-The `type` parameter specifies one of the available test methods. In the above case, the `Exodiff` object is used, which requires an input file be specified with the `input` parameter and an ExodusII formatted gold file be specified with the `exodiff` parameter. The [#demo] section will show how to use the `Exodiff` and `RunException` testers on the `DarcyPressure` class. For a complete list of test objects, please see the discussion about [testers](python/TestHarness.md#testers).
+The `type` parameter specifies one of the available test methods. In the above case, the `Exodiff` object is used, which requires an input file be specified with the `input` parameter and an ExodusII formatted gold file be specified with the `exodiff` parameter. The [#demo] section will show how to use the `Exodiff` and `RunException` testers on the `DarcyPressure` class. For a complete list of test objects, please see the discussion about [testers](TestHarness.md#testers).
 
 !alert tip title=Tests should be simple and cheap.
 Although it is important that regression tests be comprehensive, ideally, they should also be as simple as possible and not have to process any unnecessary source code. The input file should create as few objects as possible beyond one for the class being tested. MOOSE developers abide by the "2 second rule," i.e., a test should complete in no more than two seconds.
@@ -40,14 +40,14 @@ The [`run_tests`](tutorials/tutorial01_app_development/step08_test_harness/run_t
 This will execute the [`simple_diffusion.i`](tutorials/tutorial01_app_development/step08_test_harness/test/tests/kernels/simple_diffusion/simple_diffusion.i) file and conduct the `Exodiff` procedure. When the [#test-demo] section introduces two new specifications, it will be shown that the above command will cause those tests to run as well.
 
 !alert! note title=Tests can be executed in parallel (in a variety of ways).
-The `run_tests` script has several command-line options that can be useful to developers (see [python/TestHarness.md#moreoptions]). The most common is the "`-j <n>`" argument for specifying the number of tests to run simultaneously. When used, each of the `n` processors will independently run one of the test specifications, which decreases the total time it takes to run all tests.
+The `run_tests` script has several command-line options that can be useful to developers (see [TestHarness.md#moreoptions]). The most common is the "`-j <n>`" argument for specifying the number of tests to run simultaneously. When used, each of the `n` processors will independently run one of the test specifications, which decreases the total time it takes to run all tests.
 
 A given test specification can also be made to run in parallel and/or with multithreading in the manner discussed in the [previous step](tutorial01_app_development/step07_parallel.md). So in addition to running multiple unique tests simultaneously by specifying the `-j` argument, each can invoke [!ac](MPI) using `-p <n>` and/or threads using `--n-threads <n>` (or `--n-threads=<n>`). For example, the command below will run four test jobs on two processors and two threads each.
 
 !include commands/run_tests.md
          replace=['-j4', '-j4 -p2 --n-threads\=2']
 
-Regression tests are usually cheap, and so individual parallelism generally won't increase overall testing speed. But besides possibly increasing performance, using the `-p` command is also a test in itself, since it ought to be confirmed that the application is capable of producing the expected results in parallel. See the discussion about [parallel test execution](python/TestHarness.md#parallel) for more information.
+Regression tests are usually cheap, and so individual parallelism generally won't increase overall testing speed. But besides possibly increasing performance, using the `-p` command is also a test in itself, since it ought to be confirmed that the application is capable of producing the expected results in parallel. See the discussion about [parallel test execution](TestHarness.md#parallel) for more information.
 !alert-end!
 
 ## Demonstration id=demo

@@ -134,5 +134,9 @@ From: {{ APPTAINER_FROM }}
         ${BINARY_NAME}-${METHOD} --copy-inputs $TEST_DIR
         cd ${BINARY_NAME}/${TEST_DIR}
         ${BINARY_NAME}-${METHOD} --run -j ${MOOSE_JOBS:-1} -t
+        TEST_RETURN_CODE=$?
         rm -rf $TEMP_LOC
+        if [ ${TEST_RETURN_CODE} != 0 ]; then
+          exit ${TEST_RETURN_CODE}
+        fi
     done

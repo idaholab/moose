@@ -15,7 +15,7 @@ presentation slides and reports.
 
 ### TestHarness
 
-The [python/TestHarness.md] system is responsible for finding tests and running them. The extended
+The [TestHarness.md] system is responsible for finding tests and running them. The extended
 philosophy behind MOOSE testing can be found in the [application_development/test_system.md]
 documentation page,  and this philsophy has driven the creation and design choices of the TestHarness
 system.
