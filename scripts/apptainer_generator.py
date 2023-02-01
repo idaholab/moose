@@ -75,6 +75,8 @@ class ApptainerGenerator:
                 parser.add_argument('--oras-url', type=str, default=oras_url_default,
                                     help='The ORAS URL to use; ' +
                                         f'defaults to {oras_url_default}')
+                parser.add_argument('--disable-cache', action='store_true',
+                                    help='Disable the apptainer cache')
 
         exists_parser = action_parser.add_parser('exists', parents=[parent],
                                                  help='Checks if a container exists'
@@ -195,6 +197,10 @@ class ApptainerGenerator:
         command = ['apptainer', 'pull']
         if args is not None:
             command += args
+        if (hasattr(self.args, 'disable_cache') and
+            self.args.disable_cache and
+            '--disable-cache' not in command):
+            command += ['--disable-cache']
         command += [file, oras_uri]
         self.run(command)
         return file
@@ -229,6 +235,10 @@ class ApptainerGenerator:
         command = ['apptainer', 'build', '--fakeroot']
         if args is not None:
             command += args
+        if (hasattr(self.args, 'disable_cache') and
+            self.args.disable_cache and
+            '--disable-cache' not in command):
+            command += ['--disable-cache']
         command += [file, def_file]
         self.run(command)
 
