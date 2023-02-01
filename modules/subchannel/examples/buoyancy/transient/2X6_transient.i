@@ -17,13 +17,11 @@ P_out = 101325 # Pa
   []
 []
 
-[Modules]
   [FluidProperties]
     [water]
       type = Water97FluidProperties
     []
   []
-[]
 
 [SubChannel]
   type = LiquidWaterSubChannel1PhaseProblem
@@ -144,19 +142,17 @@ P_out = 101325 # Pa
 
 [Postprocessors]
   [mdot]
-    type = QuadSubChannelPointValue
+    type = SubChannelPointValue
     variable = mdot
-    ix = 3
-    iy = 1
+    index = 4
     execute_on = 'initial timestep_end'
     height = 0.4953
   []
 
   [mdot2]
-    type = QuadSubChannelPointValue
+    type = SubChannelPointValue
     variable = mdot
-    ix = 3
-    iy = 1
+    index = 4
     execute_on = 'initial timestep_end'
     height = 0.0
   []

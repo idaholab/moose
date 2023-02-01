@@ -12,7 +12,7 @@
 /*               See COPYRIGHT for full restrictions                */
 /********************************************************************/
 
-#include "TriSubChannelPointValue.h"
+#include "SubChannelPointValue.h"
 #include "FEProblemBase.h"
 #include "Function.h"
 #include "MooseMesh.h"
@@ -20,23 +20,23 @@
 #include "SubProblem.h"
 #include "libmesh/system.h"
 
-registerMooseObject("SubChannelApp", TriSubChannelPointValue);
+registerMooseObject("SubChannelApp", SubChannelPointValue);
 
 InputParameters
-TriSubChannelPointValue::validParams()
+SubChannelPointValue::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
   params.addRequiredParam<VariableName>("variable", "Variable you want the value of");
   params.addRequiredParam<Real>("height", "Axial location of point [m]");
   params.addRequiredParam<int>("index", "Index of subchannel");
   params.addClassDescription(
-      "Prints out a user selected value of specified subchannel at a user selected axial height");
+      "Prints out a user selected value of a specified subchannel at a user selected axial height");
   return params;
 }
 
-TriSubChannelPointValue::TriSubChannelPointValue(const InputParameters & parameters)
+SubChannelPointValue::SubChannelPointValue(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
-    _mesh(dynamic_cast<TriSubChannelMesh &>(_fe_problem.mesh())),
+    _mesh(dynamic_cast<SubChannelMesh &>(_fe_problem.mesh())),
     _height(getParam<Real>("height")),
     _i_ch(getParam<int>("index")),
     _var_number(_subproblem
@@ -53,7 +53,7 @@ TriSubChannelPointValue::TriSubChannelPointValue(const InputParameters & paramet
 }
 
 void
-TriSubChannelPointValue::execute()
+SubChannelPointValue::execute()
 {
   _value = _system.point_value(_var_number, _point, false);
 
@@ -70,7 +70,7 @@ TriSubChannelPointValue::execute()
 }
 
 Real
-TriSubChannelPointValue::getValue()
+SubChannelPointValue::getValue()
 {
   return _value;
 }

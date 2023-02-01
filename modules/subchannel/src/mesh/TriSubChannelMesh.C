@@ -32,7 +32,6 @@ TriSubChannelMesh::TriSubChannelMesh(const InputParameters & params)
 
 TriSubChannelMesh::TriSubChannelMesh(const TriSubChannelMesh & other_mesh)
   : SubChannelMesh(other_mesh),
-    _subchannel_position(other_mesh._subchannel_position),
     _n_rings(other_mesh._n_rings),
     _n_channels(other_mesh._n_channels),
     _flat_to_flat(other_mesh._flat_to_flat),
@@ -61,6 +60,7 @@ TriSubChannelMesh::TriSubChannelMesh(const TriSubChannelMesh & other_mesh)
     _pin_mesh_exist(other_mesh._pin_mesh_exist),
     _duct_mesh_exist(other_mesh._duct_mesh_exist)
 {
+  _subchannel_position = other_mesh._subchannel_position;
 }
 
 std::unique_ptr<MooseMesh>

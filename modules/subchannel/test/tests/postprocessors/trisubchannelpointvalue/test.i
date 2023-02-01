@@ -35,7 +35,7 @@ T_in = 359.15
 
 [Postprocessors]
   [T]
-    type = TriSubChannelPointValue
+    type = SubChannelPointValue
     variable = T
     index = 0
     execute_on = 'initial timestep_end'

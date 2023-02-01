@@ -276,7 +276,7 @@ flow_blocks = 'interwrapper porous_flow center_porous_flow'
     type = FunctorRehmeDragCoefficientsPressureGradient
     multipliers = '100 100 1'
     hex_lattice = fuel_hex
-    postprocessor = report_pressure_drop
+    pressure_drop_postprocessor = report_pressure_drop
     L = ${length}
     block = 'center_porous_flow'
   []

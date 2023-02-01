@@ -727,7 +727,7 @@ TriSubChannelMeshGenerator::TriSubChannelMeshGenerator(const InputParameters & p
       _subchannel_position[i][0] = (a2 * x1 - a1 * x0) / (a2 - a1);
       _subchannel_position[i][1] = (a2 * y1 - a1 * y0) / (a2 - a1);
     }
-  } // i
+  }
   // Reduce reserved memory in the channel-to-gap map.
   for (auto & gap : _chan_to_gap_map)
   {

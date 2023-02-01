@@ -85,6 +85,8 @@ protected:
   std::vector<std::vector<double>> _sign_id_crossflow_map;
   /// Vector to store gap size
   std::vector<double> _gij_map;
+  /// x,y coordinates of the subchannel centroid
+  std::vector<std::vector<Real>> _subchannel_position;
   /// Subchannel type
   std::vector<EChannelType> _subch_type;
 

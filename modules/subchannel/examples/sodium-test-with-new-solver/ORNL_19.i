@@ -50,11 +50,9 @@ P_out = 2.0e5 # Pa
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [sodium]
-       type = PBSodiumFluidProperties
-    []
+[FluidProperties]
+  [sodium]
+      type = PBSodiumFluidProperties
   []
 []
 
@@ -94,7 +92,7 @@ P_out = 2.0e5 # Pa
     type = TriPowerIC
     variable = q_prime
     power = ${fparse 16975/(0.5334+0.4046+0.0762)} # W/m
-    filename = "pin_power_profile_19.txt"
+    filename = "pin_power_profile19.txt"
   []
 
   [T_ic]
@@ -185,6 +183,13 @@ P_out = 2.0e5 # Pa
   [total_pressure_drop]
     type = SubChannelPressureDrop
     execute_on = "timestep_end"
+  []
+  [T]
+    type = SubChannelPointValue
+    variable = T
+    index = 36
+    execute_on = "timestep_end"
+    height = 0.7
   []
 []
 ################################################################################
