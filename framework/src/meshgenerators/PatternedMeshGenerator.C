@@ -76,8 +76,21 @@ PatternedMeshGenerator::generate()
   // Reserve spaces for all the meshes
   _meshes.reserve(_input_names.size());
 
+  // Getting the boundaries provided by the user
+  const std::vector<BoundaryName> boundary_names = {getParam<BoundaryName>("left_boundary"),
+                                              getParam<BoundaryName>("right_boundary"),
+                                              getParam<BoundaryName>("top_boundary"),
+                                              getParam<BoundaryName>("bottom_boundary")};
+
+  boundary_id_type left_id = -123, right_id = -123, top_id = -123, bottom_id = -123;
+  std::vector<boundary_id_type> left_ids(_input_names.size()), right_ids(_input_names.size()),
+      top_ids(_input_names.size()), bottom_ids(_input_names.size());
+  bool have_common_ids = true;
+
+  std::set<boundary_id_type> used_boundary_ids;
+
   // Read in all of the meshes
-  for (MooseIndex(_input_names) i = 0; i < _input_names.size(); ++i)
+  for (const auto i : index_range(_input_names))
   {
     std::unique_ptr<ReplicatedMesh> mesh = dynamic_pointer_cast<ReplicatedMesh>(*_mesh_ptrs[i]);
     if (!mesh)
@@ -88,35 +101,35 @@ PatternedMeshGenerator::generate()
                  type(),
                  " only works with inputs that are replicated.\n\n",
                  "Try running without distributed mesh.");
-    _meshes.push_back(std::move(mesh));
+    _meshes[i] = dynamic_pointer_cast<ReplicatedMesh>(mesh->clone());
+
+    const auto ids =
+        MooseMeshUtils::getBoundaryIDs(*_meshes[i], boundary_names, true);
+    mooseAssert(ids.size() == boundary_names.size(),
+                "Unexpected number of ids returned for MooseMeshUtils::getBoundaryIDs");
+
+    // Keep track of used IDs so we can find IDs that are unused across all meshes
+    used_boundary_ids.insert(ids.begin(), ids.end());
+
+    left_id = ids[0], right_id = ids[1], top_id = ids[2], bottom_id = ids[3];
+
+    // Check if all the boundaries have been initialized
+    if (left_id == -123)
+      mooseError("The left boundary has not been initialized properly.");
+    if (right_id == -123)
+      mooseError("The right boundary has not been initialized properly.");
+    if (top_id == -123)
+      mooseError("The top boundary has not been initialized properly.");
+    if (bottom_id == -123)
+      mooseError("The bottom boundary has not been initialized properly.");
+
+    left_ids[i] = left_id, right_ids[i] = right_id, top_ids[i] = top_id, bottom_ids[i] = bottom_id;
+
+    // Check if boundary ids are same accross all meshes
+    if (i > 0 && (left_id != left_ids[i - 1] || right_id != right_ids[i - 1] ||
+                  top_id != top_ids[i - 1] || bottom_id != bottom_ids[i - 1]))
+      have_common_ids = false;
   }
-
-  // Data structure that holds each row
-  _row_meshes.resize(_pattern.size());
-
-  // Getting the boundaries provided by the user
-  std::vector<BoundaryName> boundary_names = {getParam<BoundaryName>("left_boundary"),
-                                              getParam<BoundaryName>("right_boundary"),
-                                              getParam<BoundaryName>("top_boundary"),
-                                              getParam<BoundaryName>("bottom_boundary")};
-
-  std::vector<boundary_id_type> ids =
-      MooseMeshUtils::getBoundaryIDs(*_meshes[0], boundary_names, true);
-
-  mooseAssert(ids.size() == boundary_names.size(),
-              "Unexpected number of ids returned for MooseMeshUtils::getBoundaryIDs");
-
-  boundary_id_type left = ids[0], right = ids[1], top = ids[2], bottom = ids[3];
-
-  // Check if all the boundaries have been initialized
-  if (left == -123)
-    mooseError("The left boundary has not been initialized properly.");
-  if (right == -123)
-    mooseError("The right boundary has not been initialized properly.");
-  if (top == -123)
-    mooseError("The top boundary has not been initialized properly.");
-  if (bottom == -123)
-    mooseError("The bottom boundary has not been initialized properly.");
 
   // Check if the user has provided the x, y and z widths.
   // If not (their value is 0 by default), compute them
@@ -127,6 +140,26 @@ PatternedMeshGenerator::generate()
     _y_width = bbox.max()(1) - bbox.min()(1);
   if (_z_width == 0)
     _z_width = bbox.max()(2) - bbox.min()(2);
+
+  std::vector<boundary_id_type> stitch_bids;
+  if (have_common_ids)
+    stitch_bids = input_bids[0];
+  else
+    for (boundary_id_type id = 0; id != Moose::INVALID_BOUNDARY_ID; ++id)
+      if (!used_boundary_ids.count(id))
+      {
+        stitch_bids.push_back(id);
+        if (stitch_bids.size() == 4)
+          break;
+      }
+
+    for (const auto i : index_range(_meshes))
+      for (const auto side : make_range(4))
+        MeshTools::Modification::change_boundary_id(*_meshes[i], input_bids[i][side], stitch_bids[side]);
+  }
+
+  // Data structure that holds each row
+  _row_meshes.resize(_pattern.size());
 
   // Build each row mesh
   for (MooseIndex(_pattern) i = 0; i < _pattern.size(); ++i)
@@ -158,8 +191,8 @@ PatternedMeshGenerator::generate()
       mergeSubdomainNameMaps(main_subdomain_map, increment_subdomain_map);
 
       _row_meshes[i]->stitch_meshes(cell_mesh,
-                                    right,
-                                    left,
+                                    right_id,
+                                    left_id,
                                     TOLERANCE,
                                     /*clear_stitched_boundary_ids=*/true);
 
@@ -180,7 +213,16 @@ PatternedMeshGenerator::generate()
     mergeSubdomainNameMaps(main_subdomain_map, increment_subdomain_map);
 
     _row_meshes[0]->stitch_meshes(
-        *_row_meshes[i], bottom, top, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
+        *_row_meshes[i], bottom_id, top_id, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
+  }
+
+  // Change boundary ids back to those of meshes[0] to not surprise user
+  if (!have_common_ids)
+  {
+    MeshTools::Modification::change_boundary_id(*_row_meshes[0], left_id, left_ids[0]);
+    MeshTools::Modification::change_boundary_id(*_row_meshes[0], right_id, right_ids[0]);
+    MeshTools::Modification::change_boundary_id(*_row_meshes[0], top_id, top_ids[0]);
+    MeshTools::Modification::change_boundary_id(*_row_meshes[0], bottom_id, bottom_ids[0]);
   }
 
   return dynamic_pointer_cast<MeshBase>(_row_meshes[0]);
