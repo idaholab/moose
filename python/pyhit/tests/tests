@@ -4,7 +4,7 @@
   [parser]
     type = PythonUnitTest
     input = test_parser.py
-    requirement = "MOOSE python utilities shall include a tool for parsing HIT files."
+    requirement = "The system shall contain a python utility for parsing hierarchical input text (HIT) files."
   []
 
   [tokenize]
@@ -12,7 +12,7 @@
     input = test_tokenize.py
 
     issues = '#15889'
-    requirement = "MOOSE python utilities shall include a tool for tokenizing HIT files."
+    requirement = "The system shall contain a python utility for tokenizing hierarchical input text (HIT) files."
   []
 
   [examples]
