@@ -84,7 +84,7 @@ protected:
   std::vector<std::vector<Real>> _sign_id_crossflow_map;
   /// gap size
   std::vector<Real> _gij_map;
-  /// x,y coordinates of the subchannels
+  /// x,y coordinates of the subchannel centroids
   std::vector<std::vector<Real>> _subchannel_position;
   /// x,y coordinates of the fuel rods
   std::vector<Point> _rod_position;

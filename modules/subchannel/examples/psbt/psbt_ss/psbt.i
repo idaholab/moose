@@ -172,10 +172,9 @@ P_out = 4.923e6 # Pa
 
 [Postprocessors]
   [T]
-    type = QuadSubChannelPointValue
+    type = SubChannelPointValue
     variable = T
-    ix = 5
-    iy = 5
+    index = 5
     execute_on ='final timestep_end'
     height = 3.0
   []

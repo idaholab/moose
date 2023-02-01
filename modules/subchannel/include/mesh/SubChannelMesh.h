@@ -230,6 +230,8 @@ protected:
   unsigned int _n_cells;
 
 public:
+  /// x,y coordinates of the subchannel centroids
+  std::vector<std::vector<Real>> _subchannel_position;
   static InputParameters validParams();
 
   /**

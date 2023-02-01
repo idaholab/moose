@@ -51,6 +51,7 @@ QuadSubChannelMesh::QuadSubChannelMesh(const QuadSubChannelMesh & other_mesh)
     _gij_map(other_mesh._gij_map),
     _pin_mesh_exist(other_mesh._pin_mesh_exist)
 {
+  _subchannel_position = other_mesh._subchannel_position;
   if (_nx < 2 && _ny < 2)
     mooseError(name(),
                ": The number of subchannels cannot be less than 2 in both directions (x and y). "

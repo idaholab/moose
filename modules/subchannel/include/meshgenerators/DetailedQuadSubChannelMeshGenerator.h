@@ -28,6 +28,7 @@ public:
 
 protected:
   EChannelType getSubchannelType(unsigned int index) const { return _subch_type[index]; }
+  std::vector<Real> getSubchannelPosition(unsigned int i) { return _subchannel_position[i]; }
 
   /// unheated length of the fuel rod at the entry of the assembly
   Real _unheated_length_entry;
@@ -53,6 +54,8 @@ protected:
   Real _gap;
   /// Subchannel type
   std::vector<EChannelType> _subch_type;
+  /// x,y coordinates of the subchannel centroids
+  std::vector<std::vector<Real>> _subchannel_position;
   /// Subdomain ID used for the mesh block
   const unsigned int & _block_id;
 
