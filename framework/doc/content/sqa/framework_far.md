@@ -5,7 +5,7 @@ MOOSE and MOOSE-based applications are designed to operate as a library of funct
 each library may be tailored for solving a certain set of equations, the ability to create arbitrary
 simulations exists. This flexibility exists by design within the framework, modules, and applications.
 With respect to performing failure analysis, the flexibility is detrimental since there lacks
-a will defined problem to asses. To minimize the possibility of failure for a simulation various
+a well-defined problem to assess. To minimize the possibility of failure for a simulation, various
 automated methods exist for developers. This document discusses these features and includes a
 list of requirements associated with software failure analysis.
 !template-end!
@@ -26,8 +26,8 @@ This testing method is detailed in the [#failure-testing] section.
 
 ### Input File Failure
 
-The input file parsing [(see Parser)](Parser.md) automatically handles syntax mistakes are reports
-errors. For example, consider the following input file that contains a missing closing
+The input file parsing [(see Parser)](Parser.md) system automatically handles syntax mistakes and
+reports them as errors. For example, consider the following input file that contains a missing closing
 bracket.
 
 !listing parser/hit_error/hit_error.i

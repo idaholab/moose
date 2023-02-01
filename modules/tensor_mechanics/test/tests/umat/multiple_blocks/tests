@@ -1,0 +1,35 @@
+[Tests]
+  issues = '#14974'
+  design = 'AbaqusUMATStress.md'
+  [multiple_blocks]
+    type = 'Exodiff'
+    input = 'multiple_blocks.i'
+    exodiff = 'multiple_blocks_out.e'
+    library_mode = 'DYNAMIC'
+    valgrind = 'NONE'
+    requirement = 'The system shall provide an interface to use Abaqus UMAT materials as '
+                  'constitutive models, with the ability to provide different parameters for '
+                  'different blocks using the same interface plug-in.'
+  []
+  [multiple_blocks_two_materials]
+    type = 'Exodiff'
+    input = 'multiple_blocks_two_materials.i'
+    exodiff = 'multiple_blocks_two_materials_out.e'
+    library_mode = 'DYNAMIC'
+    valgrind = 'NONE'
+    requirement = 'The system shall provide an interface to use Abaqus UMAT materials as '
+                  'constitutive models, with the ability to provide different parameters for '
+                  'different blocks using distinct interface plug-ins.'
+  []
+  [multiple_blocks_two_materials_parallel]
+    type = 'Exodiff'
+    input = 'multiple_blocks_two_materials_parallel.i'
+    exodiff = 'multiple_blocks_two_materials_parallel_out.e'
+    library_mode = 'DYNAMIC'
+    valgrind = 'NONE'
+    requirement = 'The system shall provide an interface to use Abaqus UMAT materials as '
+                  'constitutive models, with the ability to provide different parameters for '
+                  'different blocks using distinct interface plug-ins in multi processor runs.'
+  []
+
+[]

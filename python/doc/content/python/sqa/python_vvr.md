@@ -1,1 +1,1 @@
-!template load file=sqa/app_vvr.md.template category=python app=MOOSE Tools
+!template load file=sqa/vvr.md.template category=python project=MOOSE Tools

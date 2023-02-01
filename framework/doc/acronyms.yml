@@ -7,6 +7,8 @@ BCs: boundary conditions
 BVP: boundary value problem
 CCB: Change Control Board
 CCI: Communication and Contact Information
+CD: continuous deployment
+CI: continuous integration
 CIVET: Continuous Integration for Verification, Enhancement, and Testing
 CMP: Configuration Management Plan
 CSV: comma-separated values
@@ -17,6 +19,7 @@ DOFs: degrees-of-freedom
 EA: Enterprise Architecture
 FE: finite element
 FEM: Finite Element Method
+FVM: Finite Volume Method
 GMRES: Generalized Minimum Residual Method
 GUI: graphical user interface
 HIT: Hierarchical Input Text
@@ -34,6 +37,8 @@ MWR: Method of Mean Weighted Residuals
 MPI: Message Passing Interface
 MOOSE: Multiphysics Object Oriented Simulation Environment
 NE: Nuclear Energy
+NEAMS: Nuclear Energy Advanced Modeling and Simulation
+NCRC: Nuclear Computational Resource Center
 NQA-1: Nuclear Quality Assurance Level 1
 PETSc: Portable, Extensible Toolkit for Scientific Computation
 POSIX: Portable Operating System Interface

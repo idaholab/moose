@@ -1,0 +1,115 @@
+# {{ApplicationName}} Source
+
+!alert tip title=Existing {{ApplicationName}} HPC GitLab Users
+For existing users who access code via [hpcgitlab.hpc.inl.gov](https://hpcgitlab.hpc.inl.gov),
+please see the [Transition Guide](https://github.com/idaholab/moose/wiki/NCRC-github.inl.gov-transition-guide)
+for help on accessing the new home for [NCRC/{{ApplicationName}}](https://github.inl.gov/ncrc/{{binary}}). New users can safely ignore this notice.
+
+## INL GitHub
+
+Source code for NCRC applications is located at [github.inl.gov](https://github.inl.gov).
+This service is public facing and does not require a proxy to access. To login, proceed to
+[github.inl.gov](https://github.inl.gov) and follow the instructions depending on your status:
+
+- +INL employee:+ If in the office or on VPN: Enter your INL e-mail address at the login screen.
+  If not on VPN (home network, etc): Sign in with your badge (Click 'Sign in with PIV / CAC card')
+- +External (non-INL) user:+ Enter your HPC e-mail address, your HPC password, and then your
+  HPC RSA PIN + token. You must have a RSA token issued by HPC to use this service. Contact HPC
+  support if you do not have one to obtain one.
+
+The repository for {{ApplicationName}} is located at
+[github.inl.gov/ncrc/{{binary}}](https://github.inl.gov/ncrc/{{binary}}).
+
+## SSH Keys
+
+The preferred method for cloning (pulling onto your local machine) repositories is via SSH.
+With this, we will describe how to add SSH keys to [github.inl.gov](https://github.inl.gov)
+that will serve as the authentication method for cloning repsitories. This process only
+needs to be done once per device; that is, you do not need to do it for each NCRC application
+on the same computer.
+
+### Generating the Key
+
+Detailed instructions for this process can be found at
+[Generating a new SSH key](https://docs.github.com/en/enterprise-server@3.6/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent#generating-a-new-ssh-key), but we will
+simplify these instructions here.
+
+First, make sure that you have not already generated a RSA SSH key by running the following:
+
+```bash
+cat ~/.ssh/id_rsa.pub
+```
+
+If the contents of a file are displayed (you do not see error that says such a file does not exist),
+continue to the instructions in [#adding-the-key].
+
+At this point, you do not have a key and need to generate one. Execute the following:
+
+```bash
+ssh-keygen -t rsa
+```
+
+and hit enter for every question, thus creating a passphrase-less key. Entering a passphrase
+(or a blank response) is your preference. You'll need to enter this passphrase
+each time you perform a push/pull operation.
+
+### Adding the Key
+
+At this point, you have a key located at `~/.ssh/id_rsa.pub` that needs to be added to GitHub
+to authenticate you. To read the contents of your public key, run the following again:
+
+```bash
+cat ~/.ssh/id_rsa.pub
+```
+
+and copy the contents of said file. +Only+ copy the results of the command, do not include
+the command.
+
+Proceed to [github.inl.gov/settings/keys](https://github.inl.gov/settings/keys) and click 'New SSH key'.
+Enter any title you wish. Most enter something that identifies the computer which generated the key
+(e.g. workstation) or something similar. Paste the results of the `cat` command (the public key contents)
+above in the 'key' field on the webpage.
+
+## Creating a Fork
+
+The instructions that follow will describe how to "fork" a repository, which is our preferred
+development strategy for all applications. A repository fork is a copy of a repository that is
+owned by you as an individual, and should be used as the location for pushing source code in
+development.
+
+While logged in to [ncrc/{{binary}}](https://github.inl.gov/ncrc/{{binary}}) you should at
+this time create a fork of the repository. This is only required once, and is accomplished by
+clicking 'Fork' at the top right. You will be presented with a new page asking how you would like
+{{ApplicationName}} forked:
+
+| Owner* | Repository name* |
+| :- | :- |
+| ^Select an owner | {{binary}} |
+
+Click 'Select an owner' and choose yourself. Take note of how GitHub identifies you.
+This is your username and will be used in later steps. Next, click 'Create fork' near the bottom.
+GitHub will begin creating a personalized fork of {{ApplicationName}}. When finished, GitHub
+will bring you to your fork of {{ApplicationName}}.
+
+## Cloning the Repo
+
+Once you have added your SSH key, you should be able to clone your fork. At this time, choose a
+location you wish to operate from (here we use `~/projects`), and clone {{ApplicationName}}, where
+you must replace `<YOUR_USERNAME>` with your username on [github.inl.gov](https://github.inl.gov):
+
+```bash
+mkdir -p ~/projects
+cd ~/projects
+git clone git@github.inl.gov:<YOUR_USERNAME>/{{binary}}.git
+```
+
+Enter the {{binary}} directory, and add the upstream remote (needed for proper development):
+
+```bash
+cd {{binary}}
+git remote add upstream git@github.inl.gov:ncrc/{{binary}}.git
+git fetch upstream
+```
+
+Continue to [Level 4 - Source Access](ncrc/applications/ncrc_develop_{{ApplicationLower}}.md#cloning) to
+continue with building {{ApplicationName}}.

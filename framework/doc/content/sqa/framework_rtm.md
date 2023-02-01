@@ -19,7 +19,7 @@
 !template! item key=pre-test
 !! pre-test-begin
 Ideally all testing should be performed on a clean test machine following
-one of the supported configurations setup by the test system engineer. Testing
+one of the supported configurations set up by the test system engineer. Testing
 may be performed on local workstations and cluster systems containing supported
 operating systems.
 

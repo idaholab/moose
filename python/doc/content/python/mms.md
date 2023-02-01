@@ -214,7 +214,7 @@ first and second order finite difference schemes used for time integration.
 ## Creating Test(s)
 
 After creating the aforementioned scripts for running the spatial and temporal convergence studies
-it is desirable to convert these scripts into actual tests (see [python/TestHarness.md]). This is easily
+it is desirable to convert these scripts into actual tests (see [TestHarness.md]). This is easily
 achieved using by creating a "tests" file within the test directory of an application.
 
 For example, the following "tests" file is contained within MOOSE for executing the scripts

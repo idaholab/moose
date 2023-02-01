@@ -1007,10 +1007,10 @@ div.moose-mega-menu-content{
 
 /* Text and background color for dark mode */
 @media (prefers-color-scheme: dark), (prefers-dark-interface) {
- body, table, li.list-group-item, .navbar, ol.breadcrumb, div.row, .well, .form-control {
-   background: var(--darkmode-back);
-   color: var(--darkmode-fore);
- }
+  body, table, li.list-group-item, .navbar, ol.breadcrumb, div.row, .well, .form-control, .sidenav, .sidenav > li a {
+    background: var(--darkmode-back);
+    color: var(--darkmode-fore);
+  }
 
  .dropdown-content, .dropdown-content li > a, .dropdown-content li > span {
   background-color: var(--darkmode-navigator);
@@ -1207,4 +1207,144 @@ div.moose-algorithm {
     padding-left:10px;
     padding-right:10px;
     line-height:15px;
+}
+
+/* Portrait Mobile Devices */
+@media only screen
+  and (min-device-width: 320px)
+  and (max-device-width: 480px)
+  and (-webkit-min-device-pixel-ratio: 2)
+  and (orientation: portrait) {
+      header, main, footer {
+          font-size: 38px;
+      }
+      a {
+          font-size: 38px;
+      }
+      .moose-content-next {
+        margin-top: 8px;
+      }
+      .material-icons {
+        font-size: 60px !important;
+      }
+      .github-mark, .github-logo {
+          height: 76px;
+      }
+      nav, nav .nav-wrapper i, nav a.sidenav-trigger, nav a.sidenav-trigger i {
+        height: 86px;
+        line-height: 86px;
+        padding-right: 30px;
+      }
+      .sidenav li > a {
+        font-size: 50px;
+        /*padding: 30px;*/
+        /*height: 60px;*/
+      }
+      .sidenav {
+        width: 80%;
+        /*margin-top: 86px;*/
+      }
+      .sidenav li > a > i, .sidenav li > a > [class^="mdi-"], .sidenav li > a li > a > [class*="mdi-"], .sidenav li > a > i.material-icons {
+        /*margin: -57px 824px 0px 0px;*/
+        color: white;
+      }
+      .sidenav > li {
+        padding-bottom: 25px;
+      }
+      .sidenav > li > ul > li {
+        padding-bottom: 40px;
+      }
+      .row .col.m4 {
+        width: 100%;
+      }
+      .row .col.m8 {
+        width: 100%;
+      }
+      .card .card-title {
+        font-weight: 100;
+        font-size: 90%;
+      }
+      .container {
+        width: 100%;
+      }
+      .btn, .btn-large, .btn-small, .btn-flat {
+        height: 50px;
+        line-height: 50px;
+        font-size: 35px;
+      }
+      .btn-floating {
+        font-size: 20px;
+      }
+      .moose-content-next, .moose-content-previous {
+        font-size: 36px !important;
+      }
+}
+
+/* Landscape Mode  Mobile Devices */
+@media only screen
+  and (min-device-width: 320px)
+  and (max-device-width: 1000px)
+  and (orientation: landscape)
+  and (-webkit-min-device-pixel-ratio: 2) {
+    header, main, footer {
+        font-size: 20px;
+    }
+    a {
+        font-size: 20px;
+    }
+    .moose-content-next {
+      margin-top: 0px;
+    }
+    .material-icons {
+      font-size: 40px !important;
+    }
+    .github-mark, .github-logo {
+        height: 40px;
+    }
+    nav, nav .nav-wrapper i, nav a.sidenav-trigger, nav a.sidenav-trigger i {
+      height: 60px;
+      line-height: 60px;
+      padding-right: 30px;
+    }
+    .sidenav li > a {
+      font-size: 40px;
+    }
+    .sidenav {
+      width: 80%;
+    }
+    .sidenav li > a > i, .sidenav li > a > [class^="mdi-"], .sidenav li > a li > a > [class*="mdi-"], .sidenav li > a > i.material-icons {
+      /*margin: -57px 824px 0px 0px;*/
+      color: white;
+    }
+    .sidenav > li {
+      padding-bottom: 25px;
+    }
+    .sidenav > li > ul > li {
+      padding-bottom: 30px;
+    }
+    .sidenav > li > ul > li > a {
+      margin-left: 10px;
+    }
+    .dropdown-content {
+      width: 80% !important;
+    }
+    .dropdown-content > li {
+      margin-left: 30px !important;
+    }
+    .row .col.m4 {
+      width: 33%;
+    }
+    .row .col.m8 {
+      width: 33%;
+    }
+    .card .card-title {
+      font-weight: 100;
+      font-size: 90%;
+    }
+    .container {
+      width: 100%;
+    }
+    .drag-target {
+      width: 100px;
+    }
 }

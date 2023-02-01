@@ -5,7 +5,7 @@
   [build]
     type = RunCommand
     command = 'python moosedocs.py build'
-    requirement = "MooseDocs shall be able to successfully translate the standalone form of the "
+    requirement = "The system shall be able to successfully translate the standalone form of the "
                   "subsite test configuration by using the default build command."
   []
 []

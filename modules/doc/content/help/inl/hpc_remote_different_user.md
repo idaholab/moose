@@ -22,7 +22,7 @@ Host hpclogin
   DynamicForward 5555
 
 ## Forwarding
-Host sawtooth1 sawtooth2 falcon1 falcon2 lemhi1 lemhi2 rod moosebuild.hpc.inl.gov hpcgitlab.hpc.inl.gov hpcsc.hpc.inl.gov
+Host sawtooth1 sawtooth2 lemhi1 lemhi2 rod hoodoo1 viz1
   User doejohn
   ProxyJump hpclogin
 ```

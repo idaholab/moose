@@ -1,21 +1,21 @@
 !template load file=sqa/module_srs.md.template category=fsi module=Fluid Structure Interaction
 
-!template! item key=system-purpose
-!! system-purpose-begin
+!template! item key=system-scope
+!! system-scope-begin
 The [!ac](MOOSE) Fluid Structure Interaction module provides interface kernels
 for simulating the interactions between neighboring fluid and solid
 subdomains. It can be used as a standalone application or can be included in
 downstream applications interested in modeling fluid structure interactions.
-!! system-purpose-finish
+!! system-scope-finish
 !template-end!
 
-!template! item key=system-scope
-!! system-scope-begin
+!template! item key=system-purpose
+!! system-purpose-begin
 The purpose of this software is to allow simulation of interfacial interactions between
 fluid and solid domains. Both acoustic and full Navier-Stokes models of the
 fluid domain are supported; small and finite strain models from the tensor
 mechanics module may be used for the solid domain.
-!! system-scope-finish
+!! system-purpose-finish
 !template-end!
 
 !template! item key=assumptions-and-dependencies

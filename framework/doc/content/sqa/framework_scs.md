@@ -164,7 +164,7 @@ All non-system includes should use quotes with a single space between `include` 
 Where possible, follow the above rules for Python.  The only modifications are:
 
 1. Four spaces are used for indenting and
-2. Member variables should be names as follows:
+2. Member variables should be named as follows:
 
 ```python
 class MyClass:
@@ -186,5 +186,5 @@ class MyClass:
 - Every destructor must be virtual.
 - All function definitions should be in *.C files.
     - The only exceptions are for inline functions for speed and templates.
-- Thou shalt not commit accidental insertion in a std::map by using brackets in a right-hand side operator unless prove is provided that it can't fail.
+- Thou shalt not commit accidental insertion in a std::map by using brackets in a right-hand side operator unless proof is provided that it can't fail.
 - Thou shalt use range-based loops or `MooseIndex()` based loops for iteration.

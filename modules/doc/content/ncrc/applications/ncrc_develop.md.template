@@ -1,0 +1,155 @@
+# {{ApplicationName}} Development
+
+Proper development of {{ApplicationName}} requires a compiler, a clone of the {{ApplicationName}}
+repository, and any additional support libraries in the form of submodules. The following
+instructions aim at preparing your machine or environment for such development.
+
+If you encounter errors during any of these steps, you need to stop and figure out a solution before
+continuing. Please see MOOSE's
+[Troubleshooting](https://mooseframework.org/help/troubleshooting.html) guide, which also contains
+information on how to reach us in the event troubleshooting fails.
+
+If you need to update {{ApplicationName}}, know that by following through the
+'[Building {{ApplicationName}}](ncrc_develop_{{ApplicationLower}}.md#build)' steps again,
+effectively performs an update each time.
+
+## Environment
+
+If you plan on using your personal machine we recommend using our Conda packages. If you are instead
+operating on one of our [!ac](INL) [!ac](HPC) clusters, you need only load a couple of modules.
+
+- If +Personal Machine+: Follow the [Conda Installation](ncrc/applications/ncrc_install_conda.md)
+  instructions and then install our MOOSE Conda packages:
+
+  ```bash
+  mamba create -n moose moose-tools moose-libmesh
+  ```
+
+- If +[!ac](INL) [!ac](HPC) Sawtooth or Lemhi+ (required each time you log in):
+
+  ```bash
+  module load use.moose moose-dev
+  ```
+
+For those operating on other [!ac](HPC) clusters, you should contact that system's administrator,
+and use their recommended compiler stack. It will need to satisfy to our
+[minimum requirements](sqa/minimum_requirements.md).
+
+!alert warning title=Conda packages may be suboptimal on HPC machines
+Conda packages have the advantage of being able to work on most machines, but on [!ac](HPC)
+clusters, this flexibility potentially comes at the cost of the optimizations developed by
+[!ac](HPC) administrators.
+
+## Cloning {{ApplicationName}} id=cloning
+
+Instructions for obtaining a proper clone of {{ApplicationName}} can be found at
+[NCRC/{{ApplicationName}}](ncrc/applications/ncrc_level4_{{ApplicationLower}}.md).
+
+## Building {{ApplicationName}} id=build
+
+Building {{ApplicationName}} involves applying upstream changes, updating your submodules and/or
+Conda packages, and finally running make. Before we begin, +remember these two important
+warnings+:
+
+!alert warning title=If you updated Conda
+`Then you should also perform a submodule update`.
+
+!alert warning title=If you performed a submodule update
+`Then you should also perform a Conda update or rebuild PETSc/libMesh`.
+
+The symmetry importance comes from our Conda packages and support libraries being version controlled
+by and within the MOOSE repository. Updates to MOOSE (the `{{binary}}/moose` submodule) requires you
+to stay on top of any Conda updates (if Personal Machine), or rebuilding PETSc and libMesh (if using
+[!ac](HPC) resources).
+
+### Applying Upstream Changes
+
+Changes being made by other developers become available to you via the upstream remote. This section
+will show you how to apply these changes to your local {{ApplicationName}} repository.
+
+First, perform a fetch operation:
+
+```bash
+cd ~/projects/{{binary}}
+git fetch upstream
+```
+
+The `fetch upstream` git command updates your local references with that of the upstream remote. It does not modify
+any source files. If nothing returns, then there are no upstream updates. If you have built
+{{ApplicationName}} once before, you are finished and can safely exit this documentation. First time
+users will of course need to continue.
+
+You need to know your upstream head branch. This will be the branch to continuously rebase on. That
+is, keeping your local {{binary}} repository up to date with upstream.
+
+The following command will reveal the upstream head branch name:
+
+```bash
+git remote show upstream | grep "HEAD branch" | sed 's/.*: //'
+```
+
+Now knowing the branch name, perform a `rebase` on that branch:
+
+```bash
+git rebase upstream/branch    # replace 'branch' with discovered branch name above
+```
+
+With {{ApplicationName}} updated, we can update its submodules.
+
+### Updating Submodules and Conda Packages
+
+Most MOOSE-based applications require additional support libraries available in the form of git
+submodules. To update submodules, perform the following:
+
+```bash
+cd ~/projects/{{binary}}
+git submodule update --init
+```
+
+!alert note title=Some applications require more
+There are some applications which require additional submodules inside those submodules to be
+updated (recursive submodules is unfortunately beyond the scope of this document). Please refer to
+[{{ApplicationName}} Documentation](https://{{ApplicationLower}}-docs.hpcondemand.inl.gov/),
+*if* these instructions fail during the '+Running Make+' step below.
+
+Remember the cyclical warnings earlier? By performing a submodule update, you should now perform
+either a Conda update, or rebuild PETSc/libMesh:
+
+- If +Personal Machine (Conda)+:
+
+  ```bash
+  mamba activate moose
+  mamba update --all
+  ```
+
+- If +[!ac](INL) [!ac](HPC) Sawtooth or Lemhi+:
+
+  It will be necessary to build PETSc and libMesh using the supplied build scripts in
+  `moose/scripts`. The time it takes to build both PETSc and libMesh can be hours:
+
+  ```bash
+  module load use.moose moose-dev
+  export MOOSE_JOBS=6 METHODS=opt
+  cd ~/projects/{{binary}}/moose
+  scripts/update_and_rebuild_petsc.sh
+  scripts/update_and_rebuild_libmesh.sh
+  ```
+
+  For more information on the `METHODS` variable (and other influential environment variables) check out:
+  [MOOSE Build System](application_development/build_system.md). `MOOSE_JOBS` controls how many cores
+  to use during the use of our scripts.
+
+### Running Make
+
+With everything up to date, we can now build the application:
+
+```bash
+cd ~/projects/{{binary}}
+make -j 6
+```
+
+!alert note title=If you are here updating and `make` fails above
+Try: `make clobberall` and then run `make` again. +clobberall+ deletes the stale object/library
+files left behind from a previous build, which is sometimes necessary for a successful build.
+
+!include ncrc/applications/ncrc_runtest_{{ApplicationLower}}.md
