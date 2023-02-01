@@ -8,6 +8,10 @@ used independently or in combination to meet the needs of the application develo
 
 !include modules/stochastic_tools/examples/index.md start=example-lists-begin end=example-lists-end
 
+## Workshops
+
+- Introduction to STM: [intro_slides/index.md optional=True]
+
 ## Performance
 
 The stochastic tools module is optimized in two ways for memory use. First, sub-applications can be
