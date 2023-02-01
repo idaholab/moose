@@ -320,7 +320,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       params.set<std::string>("external_boundary_name") = boundary_name;
       bool flat_side_up = (_mesh_geometry == "Square");
       params.set<bool>("flat_side_up") = flat_side_up;
-      params.set<bool>("create_interface_boundaries") = false;
+      params.set<bool>("create_outward_interface_boundaries") = false;
 
       const auto num_sides = (_mesh_geometry == "Square") ? 4 : 6;
       params.set<unsigned int>("num_sides") = num_sides;

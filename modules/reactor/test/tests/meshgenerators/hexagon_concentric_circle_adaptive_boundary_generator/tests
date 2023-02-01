@@ -3,6 +3,7 @@
   issues = '#18628'
   [back_only]
     type = 'Exodiff'
+    exodiff_opts = '-pedantic'
     input = 'hex_2d.i'
     exodiff = 'hex_2d_back_only.e'
     cli_args = '--mesh-only "hex_2d_back_only.e"'
@@ -12,6 +13,7 @@
   []
   [empty_inputs]
     type = 'Exodiff'
+    exodiff_opts = '-pedantic'
     input = 'hex_2d_empty_inputs.i'
     exodiff = 'hex_2d_empty_inputs.e'
     cli_args = '--mesh-only "hex_2d_empty_inputs.e"'

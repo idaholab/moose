@@ -275,7 +275,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
       params.set<Real>("hexagon_size") = getReactorParam<Real>("assembly_pitch") / 2.0;
       params.set<MooseEnum>("hexagon_size_style") = "apothem";
       params.set<unsigned int>("background_intervals") = _background_intervals;
-      params.set<bool>("create_interface_boundaries") = false;
+      params.set<bool>("create_outward_interface_boundaries") = false;
       // Initial block id used to define peripheral regions of assembly
       unsigned int assembly_block_id_start = 20000;
 

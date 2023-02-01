@@ -62,8 +62,10 @@ protected:
   const boundary_id_type _external_boundary_id;
   /// Boundary name of mesh's external boundary
   const std::string _external_boundary_name;
-  /// Whether interface boundaries are created
-  const bool _create_interface_boundaries;
+  /// Whether inward interface boundaries are created
+  const bool _create_inward_interface_boundaries;
+  /// Whether outward interface boundaries are created
+  const bool _create_outward_interface_boundaries;
   /// Style of the polygon size parameter
   const PolygonSizeStyle _hexagon_size_style;
   /// Whether the non-circular region (outside the rings) can be deformed
@@ -87,7 +89,8 @@ protected:
    * @param peripheral_duct_intervals numbers of radial intervals of the duct regions
    * @param rotation_angle angle that the generated mesh will be rotated by
    * @param mesh_type whether the peripheral region is for a corner or a side hexagon mesh
-   * @param create_interface_boundaries whether interface boundary sidesets are created
+   * @param create_inward_interface_boundaries whether inward interface boundary sidesets are created
+   * @param create_outward_interface_boundaries whether outward interface boundary sidesets are created
    * @return a mesh of the hexagon unit mesh with peripheral region added.
    */
   void addPeripheralMesh(ReplicatedMesh & mesh,
@@ -98,7 +101,8 @@ protected:
                          const std::vector<unsigned int> & peripheral_duct_intervals,
                          const Real rotation_angle,
                          const unsigned int mesh_type,
-                         const bool create_interface_boundaries);
+                         const bool create_inward_interface_boundaries,
+                         const bool create_outward_interface_boundaries);
 
   /**
    * Computes the inner and outer node positions of the peripheral region for a single layer.

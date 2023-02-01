@@ -149,7 +149,7 @@
     type = 'RunException'
     input = 'core_ring.i'
     cli_args = 'Mesh/fmg/file=input_mesh_err.e
-                Mesh/pr/input_mesh_external_boundary=30500
+                Mesh/pr/input_mesh_external_boundary=30501
                 Mesh/inactive=tg
                 --mesh-only'
     expect_err = 'The boundary provided is not an external boundary.'

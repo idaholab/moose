@@ -92,8 +92,12 @@ PatternedCartesianMeshGenerator::validParams()
   params.addRangeCheckedParam<boundary_id_type>("external_boundary_id",
                                                 "external_boundary_id>0",
                                                 "Optional customized external boundary id.");
-  params.addParam<bool>(
-      "create_interface_boundaries", true, "Whether the interface boundary sidesets are created.");
+  params.addParam<bool>("create_inward_interface_boundaries",
+                        false,
+                        "Whether the inward interface boundary sidesets are created.");
+  params.addParam<bool>("create_outward_interface_boundaries",
+                        true,
+                        "Whether the outward interface boundary sidesets are created.");
   params.addParam<std::string>(
       "external_boundary_name", std::string(), "Optional customized external boundary name.");
   params.addParam<bool>("deform_non_circular_region",
@@ -101,7 +105,8 @@ PatternedCartesianMeshGenerator::validParams()
                         "Whether the non-circular region (outside the rings) can be deformed.");
   params.addParamNamesToGroup(
       "pattern_boundary background_block_id background_block_name duct_block_ids duct_block_names "
-      "external_boundary_id external_boundary_name",
+      "external_boundary_id external_boundary_name create_inward_interface_boundaries "
+      "create_outward_interface_boundaries",
       "Customized Subdomain/Boundary");
   params.addParamNamesToGroup(
       "generate_control_drum_positions_file assign_control_drum_id position_file", "Control Drum");
@@ -143,7 +148,8 @@ PatternedCartesianMeshGenerator::PatternedCartesianMeshGenerator(const InputPara
                               ? getParam<boundary_id_type>("external_boundary_id")
                               : 0),
     _external_boundary_name(getParam<std::string>("external_boundary_name")),
-    _create_interface_boundaries(getParam<bool>("create_interface_boundaries")),
+    _create_inward_interface_boundaries(getParam<bool>("create_inward_interface_boundaries")),
+    _create_outward_interface_boundaries(getParam<bool>("create_outward_interface_boundaries")),
     _deform_non_circular_region(getParam<bool>("deform_non_circular_region"))
 {
   declareMeshProperty("pattern_pitch_meta", 0.0);
@@ -513,7 +519,8 @@ PatternedCartesianMeshGenerator::generate()
                             peripheral_duct_intervals,
                             rotation_angle,
                             mesh_type,
-                            _create_interface_boundaries);
+                            _create_inward_interface_boundaries,
+                            _create_outward_interface_boundaries);
 
           if (extra_dist_shift != 0)
             cutOffPolyDeform(
@@ -766,7 +773,8 @@ PatternedCartesianMeshGenerator::addPeripheralMesh(
     const std::vector<unsigned int> & peripheral_duct_intervals,
     const Real rotation_angle,
     const unsigned int mesh_type,
-    const bool create_interface_boundaries)
+    const bool create_inward_interface_boundaries,
+    const bool create_outward_interface_boundaries)
 {
   std::vector<std::pair<Real, Real>> positions_inner;
   std::vector<std::pair<Real, Real>> d_positions_outer;
@@ -810,7 +818,9 @@ PatternedCartesianMeshGenerator::addPeripheralMesh(
                                           sub_positions_inner,
                                           sub_d_positions_outer,
                                           i,
-                                          create_interface_boundaries);
+                                          create_inward_interface_boundaries,
+                                          (i != extra_dist.size() - 1) &&
+                                              create_outward_interface_boundaries);
       if (mesh.is_prepared()) // Need to prepare if the other is prepared to stitch
         meshp0->prepare_for_use();
 

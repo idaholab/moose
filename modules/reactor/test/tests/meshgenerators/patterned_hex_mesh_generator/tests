@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/PatternedHexMeshGenerator.md'
-  issues = '#18628 #20148 #20514'
+  issues = '#18628 #20148 #20514 #23367'
   [hexagon_boundary]
     type = 'Exodiff'
     exodiff_opts = '-pedantic'
@@ -49,6 +49,7 @@
   []
   [none_boundary]
     type = 'Exodiff'
+    exodiff_opts = '-pedantic'
     input = 'patterned_2d.i'
     exodiff = 'patterned_none.e'
     cli_args = 'Mesh/pattern/pattern_boundary=none --mesh-only "patterned_none.e"'
@@ -57,6 +58,7 @@
   []
   [patterned_pattern]
     type = 'Exodiff'
+    exodiff_opts = '-pedantic'
     input = 'patterned_pattern.i'
     exodiff = 'patterned_pattern.e'
     cli_args = '--mesh-only "patterned_pattern.e"'
@@ -65,6 +67,7 @@
   []
   [patterned_pattern_cd]
     type = 'Exodiff'
+    exodiff_opts = '-pedantic'
     input = 'patterned_pattern_cd.i'
     exodiff = 'patterned_pattern_cd.e'
     cli_args = '--mesh-only "patterned_pattern_cd.e"'

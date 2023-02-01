@@ -83,16 +83,20 @@ protected:
   const bool _preserve_volumes;
   /// Shift in default subdomain IDs to avert potential conflicts
   const subdomain_id_type _block_id_shift;
-  /// Whether interface boundaries are created
-  const bool _create_interface_boundaries;
+  /// Whether inward interface boundaries are created
+  const bool _create_inward_interface_boundaries;
+  /// Whether outward interface boundaries are created
+  const bool _create_outward_interface_boundaries;
   /// Shift in default boundary IDs of interfaces to avert potential conflicts
   const boundary_id_type _interface_boundary_id_shift;
   /// Boundary ID of the mesh's external boundary
   const boundary_id_type _external_boundary_id;
   /// Boundary Name of the mesh's external boundary
   const std::string _external_boundary_name;
-  /// Boundary Names of the mesh's interface boundaries
-  const std::vector<std::string> _interface_boundary_names;
+  /// Boundary Names of the mesh's inward interface boundaries
+  const std::vector<std::string> _inward_interface_boundary_names;
+  /// Boundary Names of the mesh's outward interface boundaries
+  const std::vector<std::string> _outward_interface_boundary_names;
   /// Whether the nodes on the external boundary needs to be uniformly distributed
   const bool _uniform_mesh_on_sides;
   /// Whether the central elements need to be QUAD4

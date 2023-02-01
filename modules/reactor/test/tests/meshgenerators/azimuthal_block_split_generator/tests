@@ -5,6 +5,7 @@
     requirement = 'The system should modify the azimuthal blocks '
     [block_id_in]
       type = 'Exodiff'
+      exodiff_opts = '-pedantic'
       input = 'azi_block_id_mod.i'
       exodiff = 'azi_block_id_mod_id_in.e'
       cli_args = '--mesh-only "azi_block_id_mod_id_in.e"'
@@ -13,6 +14,7 @@
     []
     [block_id_in_quad]
       type = 'Exodiff'
+      exodiff_opts = '-pedantic'
       input = 'azi_block_id_mod.i'
       exodiff = 'azi_block_id_mod_id_in_quad.e'
       cli_args = 'Mesh/cd/quad_center_elements="true"
@@ -28,6 +30,7 @@
     []
     [block_id_ext]
       type = 'Exodiff'
+      exodiff_opts = '-pedantic'
       input = 'azi_block_id_mod.i'
       exodiff = 'azi_block_id_mod_id_ext.e'
       cli_args = 'Mesh/cd_azi_define/old_blocks="10 15 30"
@@ -37,6 +40,7 @@
     []
     [block_name_in]
       type = 'Exodiff'
+      exodiff_opts = '-pedantic'
       input = 'azi_block_id_mod.i'
       exodiff = 'azi_block_id_mod_name_in.e'
       cli_args = 'Mesh/cd_azi_define/old_blocks="center_tri center cd_ring"
