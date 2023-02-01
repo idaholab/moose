@@ -32,7 +32,7 @@ ThermalFractureIntegral::ThermalFractureIntegral(const InputParameters & paramet
     _total_deigenstrain_dT(declareProperty<RankTwoTensor>("total_deigenstrain_dT"))
 {
   // Get the materials containing the derivatives of the eigenstrains wrt temperature
-  VariableName temp_name = getVar("temperature", 0)->name();
+  VariableName temp_name = coupledName("temperature", 0);
   if (_eigenstrain_names.size() == 0)
     mooseWarning("No 'eigenstrain_names' specified for ThermalFractureIntegral when 'temperature' "
                  "is specified");

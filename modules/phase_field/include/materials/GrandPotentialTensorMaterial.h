@@ -30,7 +30,7 @@ protected:
   /// mobility tensor
   std::string _chiD_name;
   MaterialProperty<RealTensorValue> & _chiD;
-  MaterialProperty<RealTensorValue> & _dchiDdc;
+  MaterialProperty<RealTensorValue> * _dchiDdc;
 
   /// grain boundary mobility
   std::string _Ls_name;

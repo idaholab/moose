@@ -56,9 +56,9 @@ GrandPotentialSinteringMaterial::GrandPotentialSinteringMaterial(const InputPara
     _eta(_neta),
     _eta_name(_neta),
     _w(coupledValue("chemical_potential")),
-    _w_name(getVar("chemical_potential", 0)->name()),
+    _w_name(coupledName("chemical_potential", 0)),
     _phi(coupledValue("void_op")),
-    _phi_name(getVar("void_op", 0)->name()),
+    _phi_name(coupledName("void_op", 0)),
     _cs_eq_name(getParam<MaterialPropertyName>("equilibrium_vacancy_concentration")),
     _cs_eq(getMaterialProperty<Real>(_cs_eq_name)),
     _dcs_eq(_neta),
@@ -121,7 +121,7 @@ GrandPotentialSinteringMaterial::GrandPotentialSinteringMaterial(const InputPara
   for (unsigned int i = 0; i < _neta; ++i)
   {
     _eta[i] = &coupledValue("etas", i);
-    _eta_name[i] = getVar("etas", i)->name();
+    _eta_name[i] = coupledName("etas", i);
     _dcs_eq[i] = &getMaterialPropertyDerivativeByName<Real>(_cs_eq_name, _eta_name[i]);
     _d2cs_eq[i].resize(_neta);
     _drhos[i] = &declarePropertyDerivative<Real>("rhos", _eta_name[i]);

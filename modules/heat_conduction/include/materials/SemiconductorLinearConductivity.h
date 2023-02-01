@@ -41,5 +41,5 @@ private:
 
   const std::string _base_name;
   MaterialProperty<Real> & _electric_conductivity;
-  MaterialProperty<Real> & _delectric_conductivity_dT;
+  MaterialProperty<Real> * _delectric_conductivity_dT;
 };

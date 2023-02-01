@@ -44,11 +44,10 @@ SwitchingFunctionConstraintEta::SwitchingFunctionConstraintEta(const InputParame
   for (std::size_t i = 0; i < _d2ha.size(); ++i)
   {
     if (isCoupled("args"))
-      _d2ha[i] =
-          &getMaterialPropertyDerivative<Real>("h_name", _eta_name, getVar("args", i)->name());
+      _d2ha[i] = &getMaterialPropertyDerivative<Real>("h_name", _eta_name, coupledName("args", i));
     else
       _d2ha[i] = &getMaterialPropertyDerivative<Real>(
-          "h_name", _eta_name, getVar("coupled_variables", i)->name());
+          "h_name", _eta_name, coupledName("coupled_variables", i));
   }
 }
 

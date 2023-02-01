@@ -36,9 +36,10 @@ ComputeThermalExpansionEigenstrainBaseTempl<is_ad>::ComputeThermalExpansionEigen
     _use_old_temperature(this->template getParam<bool>("use_old_temperature")),
     _temperature_old(this->_fe_problem.isTransient() ? this->coupledValueOld("temperature")
                                                      : this->_zero),
-    _deigenstrain_dT(is_ad ? nullptr
-                           : &this->template declarePropertyDerivative<RankTwoTensor>(
-                                 _eigenstrain_name, this->getVar("temperature", 0)->name())),
+    _deigenstrain_dT((is_ad || this->isCoupledConstant("temperature"))
+                         ? nullptr
+                         : &this->template declarePropertyDerivative<RankTwoTensor>(
+                               _eigenstrain_name, this->coupledName("temperature"))),
     _stress_free_temperature(this->coupledValue("stress_free_temperature")),
     _temperature_prop(this->template coupledGenericValue<is_ad>("temperature")),
     _mean_thermal_expansion_coefficient(
@@ -115,9 +116,12 @@ ComputeThermalExpansionEigenstrainBaseTempl<is_ad>::computeQpEigenstrain()
         (*_mean_thermal_expansion_coefficient)[_qp] =
             thermal_strain.value() / (_temperature[_qp].value() - _stress_free_temperature[_qp]);
     }
-    (*_deigenstrain_dT)[_qp].zero();
-    if (!_use_old_temperature)
-      (*_deigenstrain_dT)[_qp].addIa(thermal_strain.derivatives());
+    if (_deigenstrain_dT)
+    {
+      (*_deigenstrain_dT)[_qp].zero();
+      if (!_use_old_temperature)
+        (*_deigenstrain_dT)[_qp].addIa(thermal_strain.derivatives());
+    }
   }
 }
 

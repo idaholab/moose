@@ -47,7 +47,7 @@ DerivativeTwoPhaseMaterial::validParams()
 DerivativeTwoPhaseMaterial::DerivativeTwoPhaseMaterial(const InputParameters & parameters)
   : DerivativeFunctionMaterialBase(parameters),
     _eta(coupledValue("eta")),
-    _eta_name(getVar("eta", 0)->name()),
+    _eta_name(coupledName("eta", 0)),
     _eta_var(coupled("eta")),
     _h(getMaterialProperty<Real>("h")),
     _dh(getMaterialPropertyDerivative<Real>("h", _eta_name)),

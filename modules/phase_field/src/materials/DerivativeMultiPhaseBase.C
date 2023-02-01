@@ -66,7 +66,7 @@ DerivativeMultiPhaseBase::DerivativeMultiPhaseBase(const InputParameters & param
   // get order parameter names and libmesh variable names, set barrier function derivatives
   for (unsigned int i = 0; i < _num_etas; ++i)
   {
-    _eta_names[i] = getVar("etas", i)->name();
+    _eta_names[i] = coupledName("etas", i);
     _eta_vars[i] = coupled("etas", i);
 
     // for each coupled variable we need to know if it was coupled through "etas"

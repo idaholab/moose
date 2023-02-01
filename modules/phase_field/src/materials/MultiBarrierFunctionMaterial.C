@@ -43,9 +43,12 @@ MultiBarrierFunctionMaterial::MultiBarrierFunctionMaterial(const InputParameters
   // declare derivative properties, fetch eta values
   for (unsigned int i = 0; i < _num_eta; ++i)
   {
-    const VariableName & eta_name = getVar("etas", i)->name();
-    _prop_dg[i] = &declarePropertyDerivative<Real>(_function_name, eta_name);
-    _prop_d2g[i] = &declarePropertyDerivative<Real>(_function_name, eta_name, eta_name);
+    const VariableName & eta_name = coupledName("etas", i);
+    if (!isCoupledConstant(eta_name))
+    {
+      _prop_dg[i] = &declarePropertyDerivative<Real>(_function_name, eta_name);
+      _prop_d2g[i] = &declarePropertyDerivative<Real>(_function_name, eta_name, eta_name);
+    }
   }
 }
 
@@ -58,7 +61,7 @@ MultiBarrierFunctionMaterial::computeQpProperties()
   {
     const Real n = (*_eta[i])[_qp];
 
-    if (_well_only && n >= 0.0 && n <= 1.0)
+    if (_well_only && n >= 0.0 && n <= 1.0 && _prop_dg[i])
     {
       (*_prop_dg[i])[_qp] = 0.0;
       (*_prop_d2g[i])[_qp] = 0.0;
@@ -69,8 +72,11 @@ MultiBarrierFunctionMaterial::computeQpProperties()
     {
       case 0: // SIMPLE
         g += n * n * (1.0 - n) * (1.0 - n);
-        (*_prop_dg[i])[_qp] = 2.0 * n * (n - 1.0) * (2.0 * n - 1.0);
-        (*_prop_d2g[i])[_qp] = 12.0 * (n * n - n) + 2.0;
+        if (_prop_dg[i])
+        {
+          (*_prop_dg[i])[_qp] = 2.0 * n * (n - 1.0) * (2.0 * n - 1.0);
+          (*_prop_d2g[i])[_qp] = 12.0 * (n * n - n) + 2.0;
+        }
         break;
     }
   }

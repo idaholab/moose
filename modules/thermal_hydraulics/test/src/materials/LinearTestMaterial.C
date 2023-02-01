@@ -45,7 +45,8 @@ LinearTestMaterial::LinearTestMaterial(const InputParameters & parameters)
   for (unsigned int i = 0; i < _n_vars; ++i)
   {
     _vars[i] = &coupledValue("vars", i);
-    _y_derivatives[i] = &declarePropertyDerivative<Real>(_y_name, getVar("vars", i)->name());
+    if (!isCoupledConstant("vars"))
+      _y_derivatives[i] = &declarePropertyDerivative<Real>(_y_name, coupledName("vars", i));
   }
 }
 
@@ -56,6 +57,7 @@ LinearTestMaterial::computeQpProperties()
   for (unsigned int i = 0; i < _n_vars; ++i)
   {
     _y[_qp] += _slopes[i] * (*_vars[i])[_qp];
-    (*_y_derivatives[i])[_qp] = _slopes[i];
+    if (_y_derivatives[i])
+      (*_y_derivatives[i])[_qp] = _slopes[i];
   }
 }
