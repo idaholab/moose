@@ -193,7 +193,15 @@ FileMeshComponent::buildMesh()
 
   // Generate and set the boundary name
   for (const auto & id_and_name : new_ids_to_names)
-    boundary_info.sideset_name(id_and_name.first) = genName(_name, id_and_name.second);
+  {
+    const std::string sideset_name = genName(_name, id_and_name.second);
+    boundary_info.sideset_name(id_and_name.first) = sideset_name;
+    boundary_info.nodeset_name(id_and_name.first) = sideset_name;
+  }
+
+  // This appears to be necessary to get the nodesets named correctly, despite
+  // the fact that it gets called later.
+  boundary_info.build_node_list_from_side_list();
 
   return subdomain_names;
 }

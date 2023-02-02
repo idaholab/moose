@@ -14,7 +14,7 @@ component, the component name is prepended to the block and boundary names:
 - Blocks become `component_name:block_name`, where `component_name` is the name
   of the component and `block_name` is the original block name.
 - Boundaries become `component_name:boundary_name`, where `component_name` is the name
-  of the component and `block_name` is the original boundary name.
+  of the component and `boundary_name` is the original boundary name.
 
 The parameter [!param](/Components/FileMeshComponent/position) specifies a
 translation vector $\mathbf{p}$ for the points in the mesh file; the node positions for this component

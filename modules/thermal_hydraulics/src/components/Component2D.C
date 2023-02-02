@@ -413,8 +413,8 @@ Component2D::buildMesh()
 }
 
 bool
-Component2D::hasBoundaryInVector(const BoundaryName & boundary_name,
-                                 const std::vector<BoundaryName> & boundary_name_vector) const
+Component2D::isBoundaryInVector(const BoundaryName & boundary_name,
+                                const std::vector<BoundaryName> & boundary_name_vector) const
 {
   return std::find(boundary_name_vector.begin(), boundary_name_vector.end(), boundary_name) !=
          boundary_name_vector.end();
@@ -423,16 +423,16 @@ Component2D::hasBoundaryInVector(const BoundaryName & boundary_name,
 bool
 Component2D::hasBoundary(const BoundaryName & boundary_name) const
 {
-  return hasBoundaryInVector(boundary_name, _boundary_names_inner) ||
-         hasBoundaryInVector(boundary_name, _boundary_names_axial_inner) ||
-         hasBoundaryInVector(boundary_name, _boundary_names_outer) ||
-         hasBoundaryInVector(boundary_name, _boundary_names_axial_outer) ||
-         hasBoundaryInVector(boundary_name, _boundary_names_start) ||
-         hasBoundaryInVector(boundary_name, _boundary_names_radial_start) ||
-         hasBoundaryInVector(boundary_name, _boundary_names_end) ||
-         hasBoundaryInVector(boundary_name, _boundary_names_radial_end) ||
-         hasBoundaryInVector(boundary_name, _boundary_names_interior_axial_per_radial_section) ||
-         hasBoundaryInVector(boundary_name, _boundary_names_inner_radial);
+  return isBoundaryInVector(boundary_name, _boundary_names_inner) ||
+         isBoundaryInVector(boundary_name, _boundary_names_axial_inner) ||
+         isBoundaryInVector(boundary_name, _boundary_names_outer) ||
+         isBoundaryInVector(boundary_name, _boundary_names_axial_outer) ||
+         isBoundaryInVector(boundary_name, _boundary_names_start) ||
+         isBoundaryInVector(boundary_name, _boundary_names_radial_start) ||
+         isBoundaryInVector(boundary_name, _boundary_names_end) ||
+         isBoundaryInVector(boundary_name, _boundary_names_radial_end) ||
+         isBoundaryInVector(boundary_name, _boundary_names_interior_axial_per_radial_section) ||
+         isBoundaryInVector(boundary_name, _boundary_names_inner_radial);
 }
 
 const std::vector<std::tuple<dof_id_type, unsigned short int>> &

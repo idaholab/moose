@@ -19,7 +19,7 @@ HeatStructureFromFile3D::validParams()
   InputParameters params = FileMeshComponent::validParams();
   params += HeatStructureInterface::validParams();
 
-  params.addClassDescription("Heat structure component that loads the mesh from an ExodusII file");
+  params.addClassDescription("Heat structure component that loads a 3D mesh from an ExodusII file");
 
   return params;
 }

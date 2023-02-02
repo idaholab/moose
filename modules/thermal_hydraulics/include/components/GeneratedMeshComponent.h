@@ -18,6 +18,8 @@
 class GeneratedMeshComponent : public GeometricalComponent, public DiscreteLineSegmentInterface
 {
 public:
+  static InputParameters validParams();
+
   GeneratedMeshComponent(const InputParameters & parameters);
 
 protected:
@@ -40,13 +42,34 @@ protected:
   std::vector<Real> _node_locations;
 
 private:
+  /**
+   * Generates axial node locations and stores in \c _node_locations
+   */
   void generateNodeLocations();
+
+  /**
+   * Computes the number of axial nodes from the number of elements
+   *
+   * @param[in] n_elems  The number of axial elements
+   */
   unsigned int computeNumberOfNodes(unsigned int n_elems);
+
+  /**
+   * Computes the local positions of axial nodes for an axial section
+   *
+   * @param[in] length  Length of the axial section
+   * @param[in] n_nodes  Number of axial nodes in the axial section
+   */
   std::vector<Real> getUniformNodeLocations(Real length, unsigned int n_nodes);
+
+  /**
+   * Puts local positions of axial nodes for an axial section into \c _node_locations
+   *
+   * @param[in] start_length  Start position for the axial section
+   * @param[in] start_node  Start node index for the axial section
+   * @param[in] local_node_locations  Local positions of axial nodes for the axial section
+   */
   void placeLocalNodeLocations(Real start_length,
                                unsigned int start_node,
                                std::vector<Real> & local_node_locations);
-
-public:
-  static InputParameters validParams();
 };

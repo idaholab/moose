@@ -177,33 +177,33 @@ HeatStructureBase::getBoundaryInfo(const HeatStructureSideType & side) const
 bool
 HeatStructureBase::hasHeatStructureSideType(const BoundaryName & boundary_name) const
 {
-  return hasBoundaryInVector(boundary_name, _boundary_names_inner) ||
-         hasBoundaryInVector(boundary_name, _boundary_names_axial_inner) ||
-         hasBoundaryInVector(boundary_name, _boundary_names_outer) ||
-         hasBoundaryInVector(boundary_name, _boundary_names_axial_outer) ||
-         hasBoundaryInVector(boundary_name, _boundary_names_start) ||
-         hasBoundaryInVector(boundary_name, _boundary_names_radial_start) ||
-         hasBoundaryInVector(boundary_name, _boundary_names_end) ||
-         hasBoundaryInVector(boundary_name, _boundary_names_radial_end);
+  return isBoundaryInVector(boundary_name, _boundary_names_inner) ||
+         isBoundaryInVector(boundary_name, _boundary_names_axial_inner) ||
+         isBoundaryInVector(boundary_name, _boundary_names_outer) ||
+         isBoundaryInVector(boundary_name, _boundary_names_axial_outer) ||
+         isBoundaryInVector(boundary_name, _boundary_names_start) ||
+         isBoundaryInVector(boundary_name, _boundary_names_radial_start) ||
+         isBoundaryInVector(boundary_name, _boundary_names_end) ||
+         isBoundaryInVector(boundary_name, _boundary_names_radial_end);
 }
 
 HeatStructureSideType
 HeatStructureBase::getHeatStructureSideType(const BoundaryName & boundary_name) const
 {
-  if (hasBoundaryInVector(boundary_name, _boundary_names_inner) ||
-      hasBoundaryInVector(boundary_name, _boundary_names_axial_inner))
+  if (isBoundaryInVector(boundary_name, _boundary_names_inner) ||
+      isBoundaryInVector(boundary_name, _boundary_names_axial_inner))
     return HeatStructureSideType::INNER;
-  else if (hasBoundaryInVector(boundary_name, _boundary_names_outer) ||
-           hasBoundaryInVector(boundary_name, _boundary_names_axial_outer))
+  else if (isBoundaryInVector(boundary_name, _boundary_names_outer) ||
+           isBoundaryInVector(boundary_name, _boundary_names_axial_outer))
     return HeatStructureSideType::OUTER;
-  else if (hasBoundaryInVector(boundary_name, _boundary_names_start) ||
-           hasBoundaryInVector(boundary_name, _boundary_names_radial_start))
+  else if (isBoundaryInVector(boundary_name, _boundary_names_start) ||
+           isBoundaryInVector(boundary_name, _boundary_names_radial_start))
     return HeatStructureSideType::START;
-  else if (hasBoundaryInVector(boundary_name, _boundary_names_end) ||
-           hasBoundaryInVector(boundary_name, _boundary_names_radial_end))
+  else if (isBoundaryInVector(boundary_name, _boundary_names_end) ||
+           isBoundaryInVector(boundary_name, _boundary_names_radial_end))
     return HeatStructureSideType::END;
-  else if (hasBoundaryInVector(boundary_name, _boundary_names_interior_axial_per_radial_section) ||
-           hasBoundaryInVector(boundary_name, _boundary_names_inner_radial))
+  else if (isBoundaryInVector(boundary_name, _boundary_names_interior_axial_per_radial_section) ||
+           isBoundaryInVector(boundary_name, _boundary_names_inner_radial))
     mooseError("The boundary '", boundary_name, "' is an interior boundary.");
   else
     mooseError("No heat structure side type was found for the boundary '", boundary_name, "'.");

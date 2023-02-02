@@ -46,10 +46,10 @@ public:
   const std::vector<Real> & getVolumes() const { return _volume; }
 
   /**
-   * Returns true if this component has the supplied boundary in the given vector
+   * Returns true if the supplied boundary is in the given vector
    */
-  bool hasBoundaryInVector(const BoundaryName & boundary_name,
-                           const std::vector<BoundaryName> & boundary_name_vector) const;
+  bool isBoundaryInVector(const BoundaryName & boundary_name,
+                          const std::vector<BoundaryName> & boundary_name_vector) const;
 
   /**
    * Returns true if this component has the supplied boundary
