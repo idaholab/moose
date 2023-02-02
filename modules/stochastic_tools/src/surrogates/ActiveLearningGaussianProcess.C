@@ -40,6 +40,11 @@ ActiveLearningGaussianProcess::validParams()
       "tao_options", "", "Command line options for PETSc/TAO hyperparameter optimization");
   params.addParam<bool>(
       "show_optimization_details", false, "Switch to show TAO or Adam solver results");
+  params.addRangeCheckedParam<Real>(
+      "prior_std",
+      1000.0,
+      "prior_std>0.0",
+      "The standard deviation of a Normal prior over the log of hyper-params");
   params.addParam<std::vector<std::string>>("tune_parameters",
                                             "Select hyperparameters to be tuned");
   params.addParam<std::vector<Real>>(
@@ -63,12 +68,18 @@ ActiveLearningGaussianProcess::ActiveLearningGaussianProcess(const InputParamete
         getParam<bool>("show_optimization_details"),
         getParam<unsigned int>("iter_adam"),
         getParam<unsigned int>("batch_size"),
-        getParam<Real>("learning_rate_adam")))
+        getParam<Real>("learning_rate_adam"),
+        getParam<Real>("prior_std")))
 {
   if (getParam<unsigned int>("batch_size") > 0 && _optimization_opts.opt_type == "tao")
     paramError("batch_size",
                "Mini-batch sampling is not compatible with the TAO optimization library. Please "
                "use Adam optimization.");
+
+  if (parameters.isParamSetByUser("prior_std") && _optimization_opts.opt_type == "tao")
+    paramError("prior_std",
+               "Specification of priors over the hyper-params is not possible with the "
+               "TAO optimization library. Please use Adam optimization.");
 
   _gp_handler.initialize(
       getCovarianceFunctionByName(getParam<UserObjectName>("covariance_function")),

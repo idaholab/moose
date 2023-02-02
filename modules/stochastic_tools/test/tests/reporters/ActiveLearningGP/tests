@@ -32,6 +32,14 @@
       abs_zero = 1e-3
       detail = 'TAO optimization;'
     []
+    [SingleProc_SingleRow_Ufunction_prior_std]
+      type = 'JSONDiff'
+      input = main_adam.i
+      jsondiff = 'single_proc_single_row_ufunction_priorstd.json'
+      cli_args = "Trainers/GP_al_trainer/prior_std=1.0 Outputs/file_base='single_proc_single_row_ufunction_priorstd'"
+      allow_test_objects = true
+      detail = 'a single row in the sampler using the U learning function and specified prior on hyper-params;'
+    []
   []
 
   [errors]
@@ -49,6 +57,13 @@
       cli_args = "Trainers/GP_al_trainer/batch_size=500"
       detail = 'the batch size is greater than the training data set size for Adam optimization;'
       expect_err = "Batch size cannot be greater than the training data set size."
+    []
+    [al_optimization_tao_priors]
+      type = RunException
+      input = main_tao.i
+      cli_args = "Trainers/GP_al_trainer/prior_std=1.0"
+      detail = 'hyper-param priors requested with the TAO optimization library. '
+      expect_err = "Specification of priors over the hyper-params is not possible with the TAO optimization library. Please use Adam optimization."
     []
   []
 []
