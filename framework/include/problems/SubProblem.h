@@ -81,6 +81,7 @@ public:
   virtual EquationSystems & es() = 0;
   virtual MooseMesh & mesh() = 0;
   virtual const MooseMesh & mesh() const = 0;
+  virtual const MooseMesh & mesh(bool use_displaced) const = 0;
 
   virtual bool checkNonlocalCouplingRequirement() { return _requires_nonlocal_coupling; }
 

@@ -1,0 +1,146 @@
+[Tests]
+  issues = '#16427 #16429'
+  design = 'transfers/MultiAppGeneralFieldShapeEvaluationTransfer.md'
+
+  [2d_overlay]
+    requirement = "The system shall be able to transfer variables by evaluating shape functions in the origin problem"
+    [same_var_type]
+      type = 'Exodiff'
+      input = 'main.i'
+      exodiff = 'main_out.e main_out_sub0_out.e main_out_sub1_out.e main_out_sub2_out.e'
+      detail = "for variables of the same type,"
+    []
+
+    [projection_needed_receiving]
+      type = 'Exodiff'
+      input = 'main.i'
+      exodiff = 'projection_receive.e projection_receive_sub0_out.e projection_receive_sub1_out.e projection_receive_sub2_out.e'
+      # Set various types of finite element families to the received variables in both apps
+      cli_args = "Outputs/file_base=projection_receive Mesh/second_order=true
+                  AuxVariables/from_sub/order=SECOND AuxVariables/from_sub_elem/order=SECOND
+                  MultiApps/sub/cli_args='Mesh/second_order=true;AuxVariables/from_main/order=SECOND;AuxVariables/from_main_elem/order=FIRST'"
+      detail = "for variables of arbitrary types with higher order on the receiving app,"
+    []
+
+    [projection_needed_sending]
+      type = 'Exodiff'
+      input = 'main.i'
+      exodiff = 'projection_send.e projection_send_sub0_out.e projection_send_sub1_out.e projection_send_sub2_out.e'
+      # Set various types of finite element families to the transfered variables in both apps
+      cli_args = "Outputs/file_base=projection_send Mesh/second_order=true
+                  AuxVariables/to_sub/order=SECOND AuxVariables/to_sub_elem/order=SECOND
+                  MultiApps/sub/cli_args='Mesh/second_order=true;AuxVariables/to_main/order=FIRST;AuxVariables/to_main_elem/order=SECOND'"
+      detail = "for variables of arbitrary types with higher order on the sending app,"
+    []
+
+    [multiple_variables_each_transfer]
+      type = Exodiff
+      input = main.i
+      exodiff = 'main_out.e main_out_sub0_out.e main_out_sub1_out.e main_out_sub2_out.e'
+      # Only use one transfer block for each direction
+      cli_args = "Transfers/active='from_sub to_sub'
+                  Transfers/from_sub/source_variable='to_main to_main_elem' Transfers/from_sub/variable='from_sub from_sub_elem'
+                  Transfers/to_sub/source_variable='to_sub to_sub_elem' Transfers/to_sub/variable='from_main from_main_elem'"
+      detail = "when specifying multiple variables in a single transfer"
+    []
+
+    [array_variables]
+      type = Exodiff
+      input = main_array.i
+      exodiff = 'array.e array_sub0_out.e array_sub1_out.e array_sub2_out.e'
+      cli_args = "Outputs/file_base=array"
+      detail = "for array variables"
+    []
+
+    [nearest_app]
+      type = Exodiff
+      input = main.i
+      exodiff = 'nearest_subapp.e'
+      # Only makes sense for receiving from multiple subapps, other transfers are inactive
+      cli_args = "Outputs/file_base=nearest_subapp Transfers/active='from_sub from_sub_elem'
+          Transfers/from_sub/use_nearest_app=true Transfers/from_sub_elem/use_nearest_app=true
+          MultiApps/sub/positions='0.000001 0.0001 0 0.4111111 0.41120101 0 0.699932 0.099993 0'
+          MultiApps/sub/cli_args='Mesh/xmax=0.8;Mesh/ymax=0.7'"
+      detail = "when using the closest app rather than the first valid value to chose a value"
+    []
+  []
+
+  [errors]
+    requirement = "The system shall return an error if"
+    [wrong_variable_numbers]
+      type = RunException
+      input = main.i
+      cli_args = "Transfers/active='from_sub'
+                  Transfers/from_sub/source_variable='to_main to_main_elem' Transfers/from_sub/variable='from_sub_elem'"
+      expect_err = "The number of variables to transfer to and from should be equal"
+      detail = 'a different number of variables is specified for the source and target variables of the transfer.'
+    []
+    [forgot_source_array_component]
+      type = RunException
+      input = main_array.i
+      cli_args = "Transfers/from_sub/source_variable_components=''"
+      expect_err = "Component must be passed for an array variable"
+      detail = 'the user forgot to input the component to transfer for the source array variable'
+    []
+    [forgot_target_array_component]
+      type = RunException
+      input = main_array.i
+      cli_args = "Transfers/from_sub/target_variable_components=''"
+      expect_err = "Component must be passed for an array variable"
+      detail = 'the user forgot to input the component to transfer for the target array variable'
+    []
+    [too_big_source_component]
+      type = RunException
+      input = main_array.i
+      cli_args = "Transfers/from_sub/source_variable_components='10 10'"
+      expect_err = "Component passed is larger than size of variable"
+      detail = 'the user specified a source variable component to transfer that is larger than the variable size'
+    []
+    [too_big_target_component]
+      type = RunException
+      input = main_array.i
+      cli_args = "Transfers/from_sub/target_variable_components='10 10'"
+      expect_err = "Component passed is larger than size of variable"
+      detail = 'the user specified a target variable component to transfer to that is larger than the variable size'
+    []
+  []
+
+  [overlap]
+    requirement = "The system shall be able to detect indetermination in a transfer due to"
+    [origin_mesh]
+      type = RunException
+      input = main.i
+      # We offset them a little, because overlaps when the transferred value is the same are not counted as overlaps
+      cli_args = "Transfers/active='from_sub' Transfers/from_sub/search_value_conflicts=true MultiApps/sub/positions='0 0 0 0.0001 0 0'"
+      expect_err = "multiple valid values from equidistant points were "
+      detail = 'overlapping origin child application, causing multiple shape evaluations to be valid'
+      # Both apps need to be on the same process
+      max_parallel = 1
+    []
+
+    [multiple_received_values]
+      type = RunException
+      input = main.i
+      # The child apps overlap and send multiple valid points for each target point on the destination app (parent)
+      cli_args = "Transfers/active='from_sub' Transfers/from_sub/search_value_conflicts=true MultiApps/sub/positions='0 0 0 0.01 0 0'"
+      expect_err = "multiple valid values from equidistant points were received"
+      detail = 'multiple source problems sending valid values for a given target point'
+      # One app per process
+      min_parallel = 2
+    []
+
+    [nearest_app]
+      type = RunException
+      input = main.i
+      # The element variable has point evaluations at 0.05 0.05 0. This is within both subapps' domain
+      # and equidistant from 0 0 0 and 0.1 0 0, the subapp positions
+      cli_args = "Outputs/file_base=nearest_subapp Transfers/active='from_sub from_sub_elem'
+          Transfers/from_sub/use_nearest_app=true Transfers/from_sub_elem/use_nearest_app=true
+          MultiApps/sub/positions='0 0 0 0.1 0 0'
+          Transfers/from_sub/search_value_conflicts=true Transfers/from_sub_elem/search_value_conflicts=true
+          MultiApps/sub/cli_args='Mesh/xmin=-0.4;Mesh/xmax=0.8;Mesh/ymax=0.7'"
+      expect_err = "multiple valid values from equidistant points were "
+      detail = "when using the closest app rather than the first valid value to chose a value"
+    []
+  []
+[]

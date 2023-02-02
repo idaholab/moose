@@ -9,6 +9,9 @@ at the target location.
 This transfer does not support extrapolation, the evaluation of nodes/elements in the target mesh that do not map back to the origin mesh.
 Please use [MultiAppGeometricInterpolationTransfer.md] or [MultiAppNearestNodeTransfer.md]
 
+!alert note
+This transfer has been re-implemented to be more flexible. Please consider using [MultiAppGeneralFieldShapeEvaluationTransfer.md]
+
 ## Example Input File Syntax
 
 The following examples demonstrate the use the `MultiAppShapeEvaluationTransfer` for transferring data

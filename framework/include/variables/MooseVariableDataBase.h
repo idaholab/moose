@@ -16,6 +16,7 @@
 #include "libmesh/vector_value.h"
 #include "libmesh/tensor_value.h"
 #include "libmesh/type_n_tensor.h"
+#include "libmesh/enum_fe_family.h"
 
 #include <vector>
 
@@ -60,6 +61,11 @@ public:
    * Whether this data is associated with a variable that has DoFs on nodes
    */
   virtual bool hasDoFsOnNodes() const = 0;
+
+  /**
+   * Return the variable continuity
+   */
+  virtual FEContinuity getContinuity() const = 0;
 
   /**
    * Local solution getter

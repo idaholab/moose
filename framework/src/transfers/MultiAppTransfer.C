@@ -449,11 +449,8 @@ MultiAppTransfer::transformBoundingBox(BoundingBox & box, const MultiAppCoordTra
   MultiApp::transformBoundingBox(box, transform);
 }
 
-namespace
-{
-template <typename T>
 void
-extendBoundingBoxes(const Real factor, T & bboxes)
+MultiAppTransfer::extendBoundingBoxes(const Real factor, std::vector<BoundingBox> & bboxes) const
 {
   const auto extension_factor = factor - 1;
 
@@ -480,7 +477,6 @@ extendBoundingBoxes(const Real factor, T & bboxes)
     box.second += width * extension_factor;
     box.first -= width * extension_factor;
   }
-}
 }
 
 std::vector<BoundingBox>

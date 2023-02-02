@@ -1141,6 +1141,12 @@ public:
   Moose::CoordinateSystemType getCoordSystem(SubdomainID sid) const;
 
   /**
+   * Get the coordinate system from the mesh, it must be the same in all subdomains otherwise this
+   * will error
+   */
+  Moose::CoordinateSystemType getUniqueCoordSystem() const;
+
+  /**
    * Get the map from subdomain ID to coordinate system type, e.g. xyz, rz, or r-spherical
    */
   const std::map<SubdomainID, Moose::CoordinateSystemType> & getCoordSystem() const;

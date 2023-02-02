@@ -1,0 +1,72 @@
+[Tests]
+  issues = '#16427 #16429'
+  design = 'transfers/MultiAppGeneralFieldUserObjectTransfer.md'
+
+  [3d_boxes]
+    requirement = "The system shall be able to transfer user-defined spatial data on the origin mesh,"
+
+    [target_boundaries]
+      type = 'Exodiff'
+      input = 'main.i'
+      exodiff = 'target.e target_sub0_out.e target_sub1_out.e target_sub2_out.e'
+      detail = "limiting the transfer to certain target boundaries, for variables of the same type,"
+      cli_args = "Outputs/file_base=target
+                  Transfers/from_sub/to_boundaries='front bottom left' Transfers/from_sub_elem/to_boundaries='front bottom left'
+                  Transfers/to_sub/to_boundaries='front bottom left' Transfers/to_sub_elem/to_boundaries='front bottom left'"
+    []
+
+    [projection_needed_receiving]
+      type = 'Exodiff'
+      input = 'main.i'
+      exodiff = 'projection_receive.e projection_receive_sub0_out.e projection_receive_sub1_out.e projection_receive_sub2_out.e'
+      # Set various types of finite element families to the received variables in both apps
+      # Higher order element variables with target boundaries restriction is not supported
+      cli_args = "Outputs/file_base=projection_receive
+                  Transfers/from_sub/to_boundaries='front bottom left' Transfers/from_sub_elem/to_boundaries='front bottom left'
+                  Transfers/to_sub/to_boundaries='front bottom left' Transfers/to_sub_elem/to_boundaries='front bottom left'
+                  Mesh/second_order=true AuxVariables/from_sub/order=SECOND
+                  MultiApps/sub/cli_args='Mesh/second_order=true;AuxVariables/from_main/order=SECOND'"
+      detail = "for variables of arbitrary types with higher order on the receiving app,"
+    []
+
+    [internal_boundaries]
+      type = 'Exodiff'
+      input = 'main.i'
+      exodiff = 'internal.e internal_sub0_out.e internal_sub1_out.e internal_sub2_out.e'
+      # Keep second order variable to test that
+      cli_args = "Outputs/file_base=internal
+                  Transfers/from_sub/to_boundaries=internal Transfers/from_sub_elem/to_boundaries=internal Transfers/to_sub/to_boundaries=internal Transfers/to_sub_elem/to_boundaries=internal
+                  Mesh/second_order=true AuxVariables/to_sub/order=SECOND
+                  MultiApps/sub/cli_args='Mesh/second_order=true;AuxVariables/to_main/order=FIRST;'"
+      detail = 'for internal boundaries,'
+    []
+
+    [internal_boundaries_nodes_for_elem_boundary_restriction]
+      type = 'Exodiff'
+      input = 'main.i'
+      exodiff = 'internal_nodes.e internal_nodes_sub0_out.e internal_nodes_sub1_out.e internal_nodes_sub2_out.e'
+      # Keep second order variable to test that
+      cli_args = "Outputs/file_base=internal_nodes
+                  Outputs/out/hide='to_sub from_sub to_sub_elem'
+                  Transfers/from_sub_elem/to_boundaries=internal Transfers/to_sub_elem/to_boundaries=internal
+                  Transfers/from_sub_elem/elemental_boundary_restriction=nodes Transfers/to_sub_elem/elemental_boundary_restriction=nodes"
+      detail = 'for internal boundaries using element nodes to detect whether an element is part of a boundary,'
+    []
+
+    [block_restricted_as_well]
+      type = 'Exodiff'
+      input = 'main.i'
+      exodiff = 'block_restricted.e block_restricted_sub0_out.e block_restricted_sub1_out.e block_restricted_sub2_out.e'
+      # We replace the 2nd app to also touch the block transition in the main app to make it more interesting
+      # The 3rd app is well away from the origin blocks so it wont receive any data
+      # The subapp send block 0 to have more data sent (block 1 is smaller), opposite for the main app sends
+      cli_args = "Outputs/file_base=block_restricted
+                  MultiApps/sub/positions='0.2222 0 0 0.00111 0.0011 0.81111 0.8666 0.711111 0.11111'
+                  Transfers/from_sub/to_boundaries='front bottom left' Transfers/from_sub_elem/to_boundaries='front bottom left'
+                  Transfers/to_sub/to_boundaries='front bottom left' Transfers/to_sub_elem/to_boundaries='front bottom left'
+                  Transfers/from_sub/from_blocks='0' Transfers/from_sub_elem/from_blocks='0'
+                  Transfers/to_sub/from_blocks='1' Transfers/to_sub_elem/from_blocks='1'"
+      detail = 'limiting the transfer to certain blocks as well'
+    []
+  []
+[]

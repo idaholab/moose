@@ -246,17 +246,10 @@ MultiAppShapeEvaluationTransfer::transferVariable(unsigned int i)
     unsigned int from_var_num = from_sys.variable_number(from_var.name());
 
     std::shared_ptr<MeshFunction> from_func;
-    // TODO: make MultiAppTransfer give me the right es
-    if (_displaced_source_mesh && from_problem.getDisplacedProblem())
-      from_func.reset(new MeshFunction(from_problem.getDisplacedProblem()->es(),
-                                       *from_sys.current_local_solution,
-                                       from_sys.get_dof_map(),
-                                       from_var_num));
-    else
-      from_func.reset(new MeshFunction(from_problem.es(),
-                                       *from_sys.current_local_solution,
-                                       from_sys.get_dof_map(),
-                                       from_var_num));
+    from_func.reset(new MeshFunction(getEquationSystem(from_problem, _displaced_source_mesh),
+                                     *from_sys.current_local_solution,
+                                     from_sys.get_dof_map(),
+                                     from_var_num));
     from_func->init();
     from_func->enable_out_of_mesh_mode(OutOfMeshValue);
     local_meshfuns.push_back(from_func);
