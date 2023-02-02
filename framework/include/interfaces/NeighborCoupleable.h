@@ -46,6 +46,19 @@ public:
                                                          unsigned int comp = 0) const;
 
   /**
+   * Retrieve the coupled neighbor variable value whether AD or not
+   */
+  template <bool is_ad>
+  const auto & genericCoupledNeighborValue(const std::string & var_name,
+                                           unsigned int comp = 0) const
+  {
+    if constexpr (is_ad)
+      return adCoupledNeighborValue(var_name, comp);
+    else
+      return coupledNeighborValue(var_name, comp);
+  }
+
+  /**
    * Get the time derivative of the coupled neighbor variable value for \p var_name with derivative
    * information for automatic differentiation objects
    */
