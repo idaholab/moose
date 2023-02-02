@@ -35,30 +35,37 @@ ThermalUCProperties::cp_from_T(const Real & T, Real & cp, Real & dcp_dT) const
 Real
 ThermalUCProperties::k_from_T(const Real & T) const
 {
-
-  if ((323 < T) && (T < 924))
+  if ((50 < T) && (T < 651))
   {
-    return 21.7 - 3.04e-3 * (T - 273) + 3.61e-6 * Utility::pow<2>(T - 273);
+    return 21.7 - 3.04e-3 * T + 3.61e-6 * Utility::pow<2>(T);
   }
-  if ((924 < T) && (T < 2573))
+  else if ((651 < T) && (T < 2300))
   {
-    return 20.2 + 1.48e-3 * (T - 273);
+    return 20.2 + 1.48e-3 * T;
+  }
+  else
+  {
+    return 21.0;
   }
 }
 
 void
 ThermalUCProperties::k_from_T(const Real & T, Real & k, Real & dk_dT) const
 {
-
-  if ((323 < T) && (T < 924))
+  if ((50 < T) && (T < 651))
   {
     k = k_from_T(T);
-    dk_dT = -3.04e-3 + 7.22e-6 * (T - 273);
+    dk_dT = -3.04e-3 + 7.22e-6 * T;
   }
-  if ((924 < T) && (T < 2573))
+  else if ((651 < T) && (T < 2300))
   {
     k = k_from_T(T);
     dk_dT = 1.48e-3;
+  }
+  else
+  {
+    k = k_from_T(T);
+    dk_dT = 0.0;
   }
 }
 
