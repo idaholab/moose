@@ -10,11 +10,11 @@ TEST_F(ThermalUCPropertiesTest, k)
   Real T;
 
   T = 800.0;
-  REL_TEST(_sp1->k_from_T(T), 21.3840, REL_TOL_SAVED_VALUE);
+  REL_TEST(_sp1->k_from_T(T), 21.100522, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_sp1->k_from_T, T, REL_TOL_DERIVATIVE);
 
   T = 500.0;
-  REL_TEST(_sp1->k_from_T(T), 21.0825, REL_TOL_SAVED_VALUE);
+  REL_TEST(_sp1->k_from_T(T), 21.1959, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_sp1->k_from_T, T, REL_TOL_DERIVATIVE);
 }
 
