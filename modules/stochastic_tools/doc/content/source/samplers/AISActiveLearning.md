@@ -1,6 +1,6 @@
-# AdaptiveImportanceSamplerActiveLearning
+# AISActiveLearning
 
-!syntax description /Samplers/AdaptiveImportanceSamplerActiveLearning
+!syntax description /Samplers/AISActiveLearning
 
 ## Description
 
@@ -19,16 +19,16 @@ uncertainty are used to assess the prediction quality with the aid of active lea
 prediction quality is good, we simply move onto a new input sample. Otherwise, we call the full model for
 which the GP prediction quality is bad and re-train the GP for improved future predictive performance. 
 
-## Interaction between `AdaptiveImportanceSamplerActiveLearning`, `ActiveLearningGPDecision`, and `AdaptiveMonteCarloDecision`
+## Interaction between `AISActiveLearning`, `ActiveLearningGPDecision`, and `AdaptiveMonteCarloDecision`
 
-Active learning in AIS primarily relies on three objects: `AdaptiveImportanceSamplerActiveLearning`,
+Active learning in AIS primarily relies on three objects: `AISActiveLearning`,
 [ActiveLearningGPDecision](ActiveLearningGPDecision.md), and [AdaptiveMonteCarloDecision](AdaptiveMonteCarloDecision.md).
 The interaction between these objects is presented in [!ref](alais_sch) and is further discussed below.
 
-!media ActiveLearning_consolidated.svg style=width:75%; id=alais_sch caption=Schematic of active learning in Adaptive Importance Sampling. The interaction between the three objects, `AdaptiveImportanceSamplerActiveLearning`, `ActiveLearningGPDecision`, and `AdaptiveMonteCarloDecision`, is presented.
+!media ActiveLearning_consolidated.svg style=width:75%; id=alais_sch caption=Schematic of active learning in Adaptive Importance Sampling. The interaction between the three objects, `AISActiveLearning`, `ActiveLearningGPDecision`, and `AdaptiveMonteCarloDecision`, is presented.
 
 The interaction between these three objects is straightforward to understand. Once the GP is trained, 
-`AdaptiveImportanceSamplerActiveLearning` proposes a new input sample, either using MCMC or Monte Carlo. 
+`AISActiveLearning` proposes a new input sample, either using MCMC or Monte Carlo. 
 By default, [ActiveLearningGPDecision](ActiveLearningGPDecision.md) uses a GP to predict the model output
 and also assesses the prediction quality. If the GP prediction is good, [AdaptiveMonteCarloDecision](AdaptiveMonteCarloDecision.md)
 then makes the decision to accept or reject the proposed input sample. If the GP prediction is bad, the full model
@@ -44,8 +44,8 @@ The importance sampling using MCMC does not start until the GP initial training 
 
 Once the interaction between the three objects is understood, the input file syntax is easy to follow.
 
-The `AdaptiveImportanceSamplerActiveLearning` samplers block is largely similar to [AdaptiveImportanceSampler](AdaptiveImportanceSampler.md).
-One difference is that the [!param](/Samplers/AdaptiveImportanceSamplerActiveLearning/flag_sample) parameter 
+The `AISActiveLearning` samplers block is largely similar to [AdaptiveImportanceSampler](AdaptiveImportanceSampler.md).
+One difference is that the [!param](/Samplers/AISActiveLearning/flag_sample) parameter 
 is requested to identify whether the GP prediction is good or bad. This dictates the next input proposal.
 
 !listing modules/stochastic_tools/test/tests/reporters/AISActiveLearning/ais_al.i block=Samplers
@@ -69,8 +69,8 @@ The syntax is show below.
 
 ## Output format
 
-!syntax parameters /Samplers/AdaptiveImportanceSamplerActiveLearning
+!syntax parameters /Samplers/AISActiveLearning
 
-!syntax inputs /Samplers/AdaptiveImportanceSamplerActiveLearning
+!syntax inputs /Samplers/AISActiveLearning
 
-!syntax children /Samplers/AdaptiveImportanceSamplerActiveLearning
+!syntax children /Samplers/AISActiveLearning

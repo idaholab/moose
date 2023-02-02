@@ -5,7 +5,7 @@
 ## Description
 
 This Reporter class computes the statistics associated with the [AdaptiveImportanceSampler](AdaptiveImportanceSampler.md)
- and [AdaptiveImportanceSamplerActiveLearning](AdaptiveImportanceSamplerActiveLearning).
+ and [AISActiveLearning](AISActiveLearning).
 
 ## Available statistics
 

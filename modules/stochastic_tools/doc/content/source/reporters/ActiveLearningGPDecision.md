@@ -82,7 +82,7 @@ The following samplers are also supported with the `ActiveLearningGPDecision` re
 
 - +Active Learning in Adaptive Importance Sampling (AIS-AL)+
 
-  See [AdaptiveImportanceSamplerActiveLearning](AdaptiveImportanceSamplerActiveLearning.md) for more information.
+  See [AISActiveLearning](AISActiveLearning.md) for more information.
 
 !syntax parameters /Reporters/ActiveLearningGPDecision
 
