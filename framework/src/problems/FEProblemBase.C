@@ -5780,12 +5780,19 @@ FEProblemBase::computeResidual(const NumericVector<Number> & soln,
                                const unsigned int nl_sys_num)
 {
   setCurrentNonlinearSystem(nl_sys_num);
+
+  // We associate the residual tag with the given residual vector to make sure we
+  // don't filter it out below
+  _current_nl_sys->associateVectorToTag(residual, _current_nl_sys->residualVectorTag());
   const auto & residual_vector_tags = getVectorTags(Moose::VECTOR_TAG_RESIDUAL);
 
   _fe_vector_tags.clear();
 
   for (const auto & residual_vector_tag : residual_vector_tags)
-    _fe_vector_tags.insert(residual_vector_tag._id);
+    // We filter out tags which do not have associated vectors in the current nonlinear
+    // system. This is essential to be able to use system-dependent residual tags.
+    if (_current_nl_sys->hasVector(residual_vector_tag._id))
+      _fe_vector_tags.insert(residual_vector_tag._id);
 
   computeResidualInternal(soln, residual, _fe_vector_tags);
 }
