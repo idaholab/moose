@@ -24,6 +24,7 @@ InputParameters
 ADIntegratedBCTempl<T>::validParams()
 {
   InputParameters params = IntegratedBCBase::validParams();
+  params += ADFunctorInterface::validParams();
   return params;
 }
 
@@ -36,6 +37,7 @@ ADIntegratedBCTempl<T>::ADIntegratedBCTempl(const InputParameters & parameters)
                               Moose::VarKindType::VAR_NONLINEAR,
                               std::is_same<T, Real>::value ? Moose::VarFieldType::VAR_FIELD_STANDARD
                                                            : Moose::VarFieldType::VAR_FIELD_VECTOR),
+    ADFunctorInterface(this),
     _var(*this->mooseVariable()),
     _normals(_assembly.adNormals()),
     _ad_q_points(_assembly.adQPointsFace()),

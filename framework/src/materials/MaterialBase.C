@@ -25,7 +25,7 @@ MaterialBase::validParams()
   params += BoundaryRestrictable::validParams();
   params += TransientInterface::validParams();
   params += RandomInterface::validParams();
-  params += FunctorInterface::validParams();
+  params += ADFunctorInterface::validParams();
 
   params.addParam<bool>("use_displaced_mesh",
                         false,
@@ -91,7 +91,7 @@ MaterialBase::MaterialBase(const InputParameters & parameters)
                     false),
     ElementIDInterface(this),
     GeometricSearchInterface(this),
-    FunctorInterface(this),
+    ADFunctorInterface(this),
     SolutionInvalidInterface(this),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
