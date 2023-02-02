@@ -225,11 +225,14 @@ mooseDeprecatedStream(S & oss, bool expired, Args &&... args)
 
   std::ostringstream ss;
   mooseStreamAll(ss, args...);
-  std::string msg =
-      mooseMsgFmt(ss.str(),
-                  "*** Warning, This code is deprecated and will be removed in future versions:",
-                  expired ? COLOR_RED : COLOR_YELLOW);
-  oss << msg;
+  auto color = expired ? COLOR_RED : COLOR_YELLOW;
+  mooseDoOnce(
+      oss << "\n"
+          << color
+          << "*** Warning, The following code is deprecated and will be removed in future versions:"
+          << COLOR_DEFAULT;);
+
+  oss << "\n" << color << ss.str() << COLOR_DEFAULT << "\n";
   ss.str("");
 
   if (Moose::show_trace)

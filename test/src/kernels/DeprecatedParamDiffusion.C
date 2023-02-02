@@ -11,7 +11,6 @@
 
 registerMooseObject("MooseTestApp", DeprecatedParamDiffusion);
 
-// MooseDocs::start
 InputParameters
 DeprecatedParamDiffusion::validParams()
 {
@@ -21,7 +20,6 @@ DeprecatedParamDiffusion::validParams()
       "E", 1, "The E diffusivity coefficient.", "This is also deprecated");
   return params;
 }
-// MooseDocs::end
 
 DeprecatedParamDiffusion::DeprecatedParamDiffusion(const InputParameters & parameters)
   : Diffusion(parameters), _D(getParam<Real>("D"))
