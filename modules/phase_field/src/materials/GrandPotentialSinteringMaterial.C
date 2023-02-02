@@ -102,11 +102,6 @@ GrandPotentialSinteringMaterial::GrandPotentialSinteringMaterial(const InputPara
     _dkappa(declarePropertyDerivative<Real>("kappa", _phi_name)),
     _d2kappa(declarePropertyDerivative<Real>("kappa", _phi_name, _phi_name)),
     _gamma(declareProperty<Real>("gamma")),
-    _bodyforcev(declareProperty<Real>("BFv")),
-    _bodyforces(declareProperty<Real>("BFs")),
-    _matreactv(declareProperty<Real>("MRv")),
-    _matreacts(declareProperty<Real>("MRs")),
-    _mob_conc_w(declareProperty<Real>("Lcw")),
 
     _sigma_s(getParam<Real>("surface_energy")),
     _sigma_gb(getParam<Real>("grainboundary_energy")),
@@ -322,11 +317,4 @@ GrandPotentialSinteringMaterial::computeQpProperties()
   _d2mu[_qp] = (_mu_s - _mu_gb) * d2f;
   _d2kappa[_qp] = (_kappa_s - _kappa_gb) * d2f;
   _gamma[_qp] = 1.5;
-
-  // bodyforce and matreact coefficients for strict mass conservation case
-  _bodyforcev[_qp] = _hv[_qp] * 1.0;
-  _bodyforces[_qp] = _hs[_qp] * _cs_eq[_qp];
-  _matreactv[_qp] = _hv[_qp] / (_Va * _kv[_qp]);
-  _matreacts[_qp] = _hs[_qp] / (_Va * _ks[_qp]);
-  _mob_conc_w[_qp] = -1.0;
 } // void GrandPotentialSinteringMaterial::computeQpProperties()

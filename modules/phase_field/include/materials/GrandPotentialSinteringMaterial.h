@@ -111,17 +111,6 @@ protected:
   /// interface profile coefficient
   MaterialProperty<Real> & _gamma;
 
-  /// Body Force for mass conservation in conc and chempot coupling
-  MaterialProperty<Real> & _bodyforcev;
-  MaterialProperty<Real> & _bodyforces;
-
-  /// MatReaction Force for mass conservation in conc and chempot coupling
-  MaterialProperty<Real> & _matreactv;
-  MaterialProperty<Real> & _matreacts;
-  
-  /// mobility between c and w coupling
-  MaterialProperty<Real> & _mob_conc_w;
-
   /// surface energy
   const Real _sigma_s;
 
