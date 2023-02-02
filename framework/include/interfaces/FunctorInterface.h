@@ -94,7 +94,6 @@ protected:
    */
   Moose::ElemArg makeElemArg(const Elem * elem, bool correct_skewnewss = false) const;
 
-private:
   /**
    * Helper function to parse default functor values. This is implemented
    * as a specialization for supported types and returns NULL in all other cases.
@@ -114,6 +113,7 @@ private:
   /// Current threaded it
   const THREAD_ID _fi_tid;
 
+private:
   /// Storage vector for Moose::Functor<Real> default objects
   std::vector<std::unique_ptr<Moose::Functor<Real>>> _default_real_functors;
 

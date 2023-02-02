@@ -138,7 +138,7 @@ public:
    */
   virtual bool isConstant() const { return false; }
 
-  bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const override;
+  virtual bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const override;
 
   /**
    * Examines the incoming face argument. If the face argument producer (residual object,
@@ -796,12 +796,12 @@ public:
   /**
    * @return whether this object wraps a null functor
    */
-  bool wrapsNull() const override { return wrapsType<NullFunctor<T>>(); }
+  virtual bool wrapsNull() const override { return wrapsType<NullFunctor<T>>(); }
 
   /**
    * @return a string representation of the return type of this functor
    */
-  std::string returnType() const override { return libMesh::demangle(typeid(T).name()); }
+  virtual std::string returnType() const override { return libMesh::demangle(typeid(T).name()); }
 
   /**
    * @return whether the wrapped object is of the requested type
@@ -812,34 +812,35 @@ public:
     return dynamic_cast<const T2 *>(_wrapped);
   }
 
-  void timestepSetup() override
+  virtual void timestepSetup() override
   {
     if (_owned)
       _owned->timestepSetup();
   }
-  void customSetup(const ExecFlagType & exec_type) override
+  virtual void customSetup(const ExecFlagType & exec_type) override
   {
     if (_owned)
       _owned->customSetup(exec_type);
   }
-  void residualSetup() override
+  virtual void residualSetup() override
   {
     if (_owned)
       _owned->residualSetup();
   }
-  void jacobianSetup() override
+  virtual void jacobianSetup() override
   {
     if (_owned)
       _owned->jacobianSetup();
   }
 
-  bool isExtrapolatedBoundaryFace(const FaceInfo & fi, const Elem * const elem) const override
+  virtual bool isExtrapolatedBoundaryFace(const FaceInfo & fi,
+                                          const Elem * const elem) const override
   {
     return _wrapped->isExtrapolatedBoundaryFace(fi, elem);
   }
-  bool isConstant() const override { return _wrapped->isConstant(); }
-  bool hasBlocks(const SubdomainID id) const override { return _wrapped->hasBlocks(id); }
-  bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const override
+  virtual bool isConstant() const override { return _wrapped->isConstant(); }
+  virtual bool hasBlocks(const SubdomainID id) const override { return _wrapped->hasBlocks(id); }
+  virtual bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const override
   {
     return _wrapped->hasFaceSide(fi, fi_elem_side);
   }
@@ -849,66 +850,68 @@ protected:
   /**
    * Forward calls to wrapped object
    */
-  ValueType evaluate(const ElemArg & elem, unsigned int state = 0) const override
+  virtual ValueType evaluate(const ElemArg & elem, unsigned int state = 0) const override
   {
     return _wrapped->operator()(elem, state);
   }
-  ValueType evaluate(const FaceArg & face, unsigned int state = 0) const override
+  virtual ValueType evaluate(const FaceArg & face, unsigned int state = 0) const override
   {
     return _wrapped->operator()(face, state);
   }
-  ValueType evaluate(const ElemQpArg & qp, unsigned int state = 0) const override
+  virtual ValueType evaluate(const ElemQpArg & qp, unsigned int state = 0) const override
   {
     return _wrapped->operator()(qp, state);
   }
-  ValueType evaluate(const ElemSideQpArg & qp, unsigned int state = 0) const override
+  virtual ValueType evaluate(const ElemSideQpArg & qp, unsigned int state = 0) const override
   {
     return _wrapped->operator()(qp, state);
   }
-  ValueType evaluate(const ElemPointArg & elem_point, unsigned int state = 0) const override
+  virtual ValueType evaluate(const ElemPointArg & elem_point, unsigned int state = 0) const override
   {
     return _wrapped->operator()(elem_point, state);
   }
 
-  GradientType evaluateGradient(const ElemArg & elem, unsigned int state = 0) const override
+  virtual GradientType evaluateGradient(const ElemArg & elem, unsigned int state = 0) const override
   {
     return _wrapped->gradient(elem, state);
   }
-  GradientType evaluateGradient(const FaceArg & face, unsigned int state = 0) const override
+  virtual GradientType evaluateGradient(const FaceArg & face, unsigned int state = 0) const override
   {
     return _wrapped->gradient(face, state);
   }
-  GradientType evaluateGradient(const ElemQpArg & qp, unsigned int state = 0) const override
+  virtual GradientType evaluateGradient(const ElemQpArg & qp, unsigned int state = 0) const override
   {
     return _wrapped->gradient(qp, state);
   }
-  GradientType evaluateGradient(const ElemSideQpArg & qp, unsigned int state = 0) const override
+  virtual GradientType evaluateGradient(const ElemSideQpArg & qp,
+                                        unsigned int state = 0) const override
   {
     return _wrapped->gradient(qp, state);
   }
-  GradientType evaluateGradient(const ElemPointArg & elem_point,
-                                unsigned int state = 0) const override
+  virtual GradientType evaluateGradient(const ElemPointArg & elem_point,
+                                        unsigned int state = 0) const override
   {
     return _wrapped->gradient(elem_point, state);
   }
 
-  DotType evaluateDot(const ElemArg & elem, unsigned int state = 0) const override
+  virtual DotType evaluateDot(const ElemArg & elem, unsigned int state = 0) const override
   {
     return _wrapped->dot(elem, state);
   }
-  DotType evaluateDot(const FaceArg & face, unsigned int state = 0) const override
+  virtual DotType evaluateDot(const FaceArg & face, unsigned int state = 0) const override
   {
     return _wrapped->dot(face, state);
   }
-  DotType evaluateDot(const ElemQpArg & qp, unsigned int state = 0) const override
+  virtual DotType evaluateDot(const ElemQpArg & qp, unsigned int state = 0) const override
   {
     return _wrapped->dot(qp, state);
   }
-  DotType evaluateDot(const ElemSideQpArg & qp, unsigned int state = 0) const override
+  virtual DotType evaluateDot(const ElemSideQpArg & qp, unsigned int state = 0) const override
   {
     return _wrapped->dot(qp, state);
   }
-  DotType evaluateDot(const ElemPointArg & elem_point, unsigned int state = 0) const override
+  virtual DotType evaluateDot(const ElemPointArg & elem_point,
+                              unsigned int state = 0) const override
   {
     return _wrapped->dot(elem_point, state);
   }

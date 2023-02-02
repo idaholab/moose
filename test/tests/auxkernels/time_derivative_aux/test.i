@@ -85,7 +85,7 @@
   # Time derivative of an aux variable is not currently supported
   # in the Auxiliary system (only in nonlinear)
   [var_derivative]
-    type = ADTimeDerivativeAux
+    type = TimeDerivativeAux
     variable = variable_derivative
     functor = u
     factor = 10
@@ -95,7 +95,7 @@
   # let's output a warning
   inactive = 'var_derivative_to_fv'
   [var_derivative_to_fv]
-    type = ADTimeDerivativeAux
+    type = TimeDerivativeAux
     variable = variable_derivative_fv
     functor = u
   []
