@@ -1,4 +1,4 @@
-!template load file=sqa/module_rtm.md.template app=Optimization category=optimization stp_filename=optimization_stp.md
+!template load file=sqa/module_rtm.md.template module=Optimization category=optimization stp_filename=optimization_stp.md
 
 !template item key=system-purpose
 !include optimization_srs.md start=system-purpose-begin end=system-purpose-finish
