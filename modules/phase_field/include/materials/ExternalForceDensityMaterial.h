@@ -47,7 +47,7 @@ private:
   /// force density material
   MaterialProperty<std::vector<RealGradient>> & _dF;
   /// first order derivative of force density material w.r.t c
-  MaterialProperty<std::vector<RealGradient>> & _dFdc;
+  MaterialProperty<std::vector<RealGradient>> * _dFdc;
 
   std::vector<MaterialProperty<std::vector<RealGradient>> *> _dFdeta;
 };

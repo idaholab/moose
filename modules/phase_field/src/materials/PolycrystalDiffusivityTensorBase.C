@@ -38,10 +38,12 @@ PolycrystalDiffusivityTensorBase::PolycrystalDiffusivityTensorBase(
     _T(coupledValue("T")),
     _c(coupledValue("c")),
     _grad_c(coupledGradient("c")),
-    _c_name(getVar("c", 0)->name()),
+    _c_name(coupledName("c", 0)),
     _diffusivity_name(getParam<std::string>("diffusivity_name")),
     _D(declareProperty<RealTensorValue>(_diffusivity_name)),
-    _dDdc(declarePropertyDerivative<RealTensorValue>(_diffusivity_name, _c_name)),
+    _dDdc(isCoupledConstant("_c_name")
+              ? nullptr
+              : &declarePropertyDerivative<RealTensorValue>(_diffusivity_name, _c_name)),
     _D0(getParam<Real>("D0")),
     _Em(getParam<Real>("Em")),
     _s_index(getParam<Real>("surfindex")),
@@ -120,6 +122,7 @@ PolycrystalDiffusivityTensorBase::computeProperties()
 
     // Compute diffusion tensor
     _D[_qp] = _Dbulk * (_b_index * mult_bulk * I + _gb_index * Dgb + _s_index * Dsurf);
-    _dDdc[_qp] = _Dbulk * (_b_index * dmult_bulk * I + _s_index * dDsurfdc);
+    if (_dDdc)
+      (*_dDdc)[_qp] = _Dbulk * (_b_index * dmult_bulk * I + _s_index * dDsurfdc);
   }
 }

@@ -29,9 +29,9 @@ SLKKSMultiACBulkC::validParams()
 
 SLKKSMultiACBulkC::SLKKSMultiACBulkC(const InputParameters & parameters)
   : SLKKSMultiPhaseBase(parameters),
-    _c_name(getVar("c", 0)->name()),
+    _c_name(coupledName("c", 0)),
     _lagrange(isCoupled("eta_i")),
-    _etai_name(_lagrange ? getVar("eta_i", 0)->name() : _var.name()),
+    _etai_name(_lagrange ? coupledName("eta_i", 0) : _var.name()),
     _etai_var(_lagrange ? coupled("eta_i") : _var.number()),
     _cs_names(_ncs),
     _prop_dFdc(getMaterialPropertyDerivative<Real>("F", _c_name)),
@@ -45,7 +45,7 @@ SLKKSMultiACBulkC::SLKKSMultiACBulkC(const InputParameters & parameters)
   // Determine position of the selected concentration variable
   for (std::size_t i = 0; i < _ncs; ++i)
   {
-    _cs_names[i] = getVar("cs", i)->name();
+    _cs_names[i] = coupledName("cs", i);
     if (coupled("cs", i) == _c_var)
       _l_cs = i;
   }

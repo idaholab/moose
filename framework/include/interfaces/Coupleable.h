@@ -126,12 +126,32 @@ protected:
   virtual bool isCoupled(const std::string & var_name, unsigned int i = 0) const;
 
   /**
+   * Returns true if a variable passed as a coupled value is really a constant
+   * @param var_name The name the kernel wants to refer to the variable as.
+   * @return True if the variable is actually a constant
+   */
+  virtual bool isCoupledConstant(const std::string & var_name) const;
+
+  /**
    * Number of coupled components
    * @param var_name Name of the variable
    * @return number of components this variable has (usually 1)
    */
   unsigned int coupledComponents(const std::string & var_name) const;
 
+  /**
+   * Names of the variable in the Coupleable interface
+   * @param var_name Name of the variable
+   * @param comp the component of the variable
+   * @return name the variable has been coupled as. For constants, returns the constant
+   */
+  VariableName coupledName(const std::string & var_name, unsigned int comp = 0) const;
+
+  /**
+   * Names of the variables in the Coupleable interface
+   * @param var_name Names of the variables
+   * @return names the variables have been coupled as
+   */
   std::vector<VariableName> coupledNames(const std::string & var_name) const;
 
   /**

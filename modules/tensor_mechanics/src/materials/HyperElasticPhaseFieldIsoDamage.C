@@ -46,13 +46,13 @@ HyperElasticPhaseFieldIsoDamage::HyperElasticPhaseFieldIsoDamage(const InputPara
     _c(coupledValue("c")),
     _save_state(false),
     _dstress_dc(
-        declarePropertyDerivative<RankTwoTensor>(_base_name + "stress", getVar("c", 0)->name())),
+        declarePropertyDerivative<RankTwoTensor>(_base_name + "stress", coupledName("c", 0))),
     _etens(LIBMESH_DIM),
     _F(declareProperty<Real>(getParam<MaterialPropertyName>("F_name"))),
     _dFdc(declarePropertyDerivative<Real>(getParam<MaterialPropertyName>("F_name"),
-                                          getVar("c", 0)->name())),
+                                          coupledName("c", 0))),
     _d2Fdc2(declarePropertyDerivative<Real>(
-        getParam<MaterialPropertyName>("F_name"), getVar("c", 0)->name(), getVar("c", 0)->name())),
+        getParam<MaterialPropertyName>("F_name"), coupledName("c", 0), coupledName("c", 0))),
     _d2Fdcdstrain(declareProperty<RankTwoTensor>("d2Fdcdstrain")),
     _hist(declareProperty<Real>("hist")),
     _hist_old(getMaterialPropertyOld<Real>("hist"))

@@ -127,6 +127,12 @@ Coupleable::isCoupled(const std::string & var_name, unsigned int i) const
   }
 }
 
+bool
+Coupleable::isCoupledConstant(const std::string & var_name) const
+{
+  return _c_parameters.hasDefaultCoupledValue(var_name);
+}
+
 unsigned int
 Coupleable::coupledComponents(const std::string & var_name) const
 {
@@ -199,7 +205,7 @@ Coupleable::checkVar(const std::string & var_name, unsigned int comp, unsigned i
 
   auto vars_vector_it = _coupled_vars.find(var_name);
   if (vars_vector_it == _coupled_vars.end())
-    mooseError("Trying to get a coupled var ", var_name, " that doesn't exist");
+    mooseError(_c_name, ": Trying to get a coupled var ", var_name, " that doesn't exist");
 
   const auto & vars_vector = vars_vector_it->second;
 
@@ -259,7 +265,7 @@ Coupleable::getVectorVar(const std::string & var_name, unsigned int comp)
       const_cast<VectorMooseVariable *>(getVarHelper<VectorMooseVariable>(var_name, comp));
 
   if (_c_nodal && var && var->feType().family != LAGRANGE_VEC)
-    mooseError("Only LAGRANGE_VEC vector variables are defined at nodes");
+    mooseError(_c_name, ": Only LAGRANGE_VEC vector variables are defined at nodes");
 
   return var;
 }
@@ -282,7 +288,7 @@ Coupleable::getVectorVar(const std::string & var_name, unsigned int comp) const
   const auto * const var = getVarHelper<VectorMooseVariable>(var_name, comp);
 
   if (_c_nodal && var && var->feType().family != LAGRANGE_VEC)
-    mooseError("Only LAGRANGE_VEC vector variables are defined at nodes");
+    mooseError(_c_name, ": Only LAGRANGE_VEC vector variables are defined at nodes");
 
   return var;
 }
@@ -534,7 +540,7 @@ Coupleable::coupledValueLower(const std::string & var_name, const unsigned int c
   checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
 
   if (_coupleable_neighbor)
-    mooseError("coupledValueLower cannot be called in a coupleable neighbor object");
+    mooseError(_c_name, ":coupledValueLower cannot be called in a coupleable neighbor object");
 
   if (_c_nodal)
     return (_c_is_implicit) ? var->dofValues() : var->dofValuesOld();
@@ -2140,10 +2146,27 @@ Coupleable::coupledIndices(const std::string & var_name) const
   return coupledVectorHelper<unsigned int>(var_name, func);
 }
 
+VariableName
+Coupleable::coupledName(const std::string & var_name, unsigned int comp) const
+{
+  if (getVar(var_name, comp))
+    return getVar(var_name, comp)->name();
+  // Detect if we are in the case where a constant was passed in lieu of a variable
+  else if (isCoupledConstant(var_name))
+    mooseError(_c_name,
+               ": a variable name was queried but a constant was passed for parameter '",
+               var_name,
+               "Either pass a true variable or contact a developer to shield the call to "
+               "'coupledName' with 'isCoupledConstant'");
+  else
+    mooseError(
+        _c_name, ": Variable '", var_name, "' does not exist, yet its coupled name is requested");
+}
+
 std::vector<VariableName>
 Coupleable::coupledNames(const std::string & var_name) const
 {
-  auto func = [this, &var_name](unsigned int comp) { return getVar(var_name, comp)->name(); };
+  auto func = [this, &var_name](unsigned int comp) { return coupledName(var_name, comp); };
   return coupledVectorHelper<VariableName>(var_name, func);
 }
 

@@ -43,7 +43,7 @@ SwitchingFunctionPenalty::SwitchingFunctionPenalty(const InputParameters & param
   for (unsigned int i = 0; i < _num_h; ++i)
   {
     _h[i] = &getMaterialPropertyByName<Real>(_h_names[i]);
-    _dh[i] = &getMaterialPropertyDerivative<Real>(_h_names[i], getVar("etas", i)->name());
+    _dh[i] = &getMaterialPropertyDerivative<Real>(_h_names[i], coupledName("etas", i));
 
     // generate the lookup table from j_var -> eta index
     unsigned int num = coupled("etas", i);

@@ -32,13 +32,13 @@ StressBasedChemicalPotential::StressBasedChemicalPotential(const InputParameters
     _stress_old(getMaterialPropertyOld<RankTwoTensor>("stress_name")),
     _direction_tensor(getMaterialProperty<RealTensorValue>("direction_tensor_name")),
     _prefactor(getMaterialProperty<Real>("prefactor_name")),
-    _has_coupled_c(isCoupled("c"))
+    _has_coupled_c(isCoupled("c") && !isCoupledConstant("c"))
 {
   if (_has_coupled_c)
   {
     _dchemical_potential = &declarePropertyDerivative<Real>(
-        getParam<MaterialPropertyName>("property_name"), getVar("c", 0)->name());
-    _dprefactor_dc = &getMaterialPropertyDerivative<Real>("prefactor_name", getVar("c", 0)->name());
+        getParam<MaterialPropertyName>("property_name"), coupledName("c", 0));
+    _dprefactor_dc = &getMaterialPropertyDerivative<Real>("prefactor_name", coupledName("c", 0));
   }
 }
 

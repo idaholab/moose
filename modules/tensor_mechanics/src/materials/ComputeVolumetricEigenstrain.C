@@ -47,13 +47,13 @@ ComputeVolumetricEigenstrain::ComputeVolumetricEigenstrain(const InputParameters
     _d2volumetric_materials[i].resize(_num_args);
     for (unsigned int j = 0; j < _num_args; ++j)
     {
-      const VariableName & jname = getVar("args", j)->name();
+      const VariableName & jname = coupledName("args", j);
       _dvolumetric_materials[i][j] = &getMaterialPropertyDerivative<Real>(vol_matl_name, jname);
       _d2volumetric_materials[i][j].resize(_num_args);
 
       for (unsigned int k = j; k < _num_args; ++k)
       {
-        const VariableName & kname = getVar("args", k)->name();
+        const VariableName & kname = coupledName("args", k);
         _d2volumetric_materials[i][j][k] =
             &getMaterialPropertyDerivative<Real>("prefactor", jname, kname);
       }
@@ -62,14 +62,14 @@ ComputeVolumetricEigenstrain::ComputeVolumetricEigenstrain(const InputParameters
 
   for (unsigned int j = 0; j < _num_args; ++j)
   {
-    const VariableName & jname = getVar("args", j)->name();
+    const VariableName & jname = coupledName("args", j);
     _delastic_strain[j] =
         &declarePropertyDerivative<RankTwoTensor>(_base_name + "elastic_strain", jname);
     _d2elastic_strain[j].resize(_num_args);
 
     for (unsigned int k = j; k < _num_args; ++k)
     {
-      const VariableName & kname = getVar("args", k)->name();
+      const VariableName & kname = coupledName("args", k);
       _d2elastic_strain[j][k] =
           &declarePropertyDerivative<RankTwoTensor>(_base_name + "elastic_strain", jname, kname);
     }
@@ -84,7 +84,7 @@ ComputeVolumetricEigenstrain::initialSetup()
 
   for (unsigned int i = 0; i < _num_args; ++i)
   {
-    const VariableName & iname = getVar("args", i)->name();
+    const VariableName & iname = coupledName("args", i);
     if (_fe_problem.isMatPropRequested(
             derivativePropertyNameFirst(_base_name + "elastic_strain", iname)))
       mooseError("Derivative of elastic_strain requested, but not yet implemented");
@@ -92,7 +92,7 @@ ComputeVolumetricEigenstrain::initialSetup()
       _delastic_strain[i] = nullptr;
     for (unsigned int j = 0; j < _num_args; ++j)
     {
-      const VariableName & jname = getVar("args", j)->name();
+      const VariableName & jname = coupledName("args", j);
       if (_fe_problem.isMatPropRequested(
               derivativePropertyNameSecond(_base_name + "elastic_strain", iname, jname)))
         mooseError("Second Derivative of elastic_strain requested, but not yet implemented");
