@@ -111,7 +111,11 @@ PINSFVRhieChowInterpolator::pinsfvSetup()
 
   const auto saved_do_derivatives = ADReal::do_derivatives;
   ADReal::do_derivatives = true;
-  Moose::FV::interpolateReconstruct(_smoothed_eps, _eps, _smoothing_layers, false, _geometric_fi);
+  Moose::FV::interpolateReconstruct(_smoothed_eps,
+                                    static_cast<const Moose::FunctorBase<ADReal> &>(_eps),
+                                    _smoothing_layers,
+                                    false,
+                                    _geometric_fi);
   ADReal::do_derivatives = saved_do_derivatives;
 
   // Assign the new functor to all

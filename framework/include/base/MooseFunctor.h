@@ -726,20 +726,26 @@ public:
  * FunctorBase. Implementation motivated by https://stackoverflow.com/a/65455485/4493669
  */
 template <typename T>
-class FunctorEnvelope final : public FunctorBase<T>, public FunctorEnvelopeBase
+class FunctorEnvelope final : public FunctorEnvelopeBase
 {
 public:
-  using typename Moose::FunctorBase<T>::ValueType;
-  using typename Moose::FunctorBase<T>::GradientType;
-  using typename Moose::FunctorBase<T>::DotType;
+  using ValueType = T;
+  /// This rigmarole makes it so that a user can create functors that return containers (std::vector,
+  /// std::array). This logic will make it such that if a user requests a functor type T that is a
+  /// container of algebraic types, for example Reals, then the GradientType will be a container of
+  /// the gradients of those algebraic types, in this example VectorValue<Reals>. So if T is
+  /// std::vector<Real>, then GradientType will be std::vector<VectorValue<Real>>. As another
+  /// example: T = std::array<VectorValue<Real>, 1> -> GradientType = std::array<TensorValue<Real>,
+  /// 1>
+  using GradientType = typename MetaPhysicL::ReplaceAlgebraicType<
+      T,
+      typename TensorTools::IncrementRank<typename MetaPhysicL::ValueType<T>::type>::type>::type;
+  using DotType = ValueType;
 
   /**
    * @param wrapped The functor to wrap. We will *not* not own the wrapped object
    */
-  FunctorEnvelope(const FunctorBase<T> & wrapped)
-    : FunctorBase<T>("wraps_" + wrapped.functorName()), FunctorEnvelopeBase(), _wrapped(&wrapped)
-  {
-  }
+  FunctorEnvelope(const FunctorBase<T> & wrapped) : FunctorEnvelopeBase(), _wrapped(&wrapped) {}
 
   /**
    * @param wrapped A unique pointer around the functor to wrap. We *will* own the wrapped object,
@@ -747,10 +753,7 @@ public:
    * will be destructed
    */
   FunctorEnvelope(std::unique_ptr<FunctorBase<T>> && wrapped)
-    : FunctorBase<T>("wraps_" + wrapped->functorName()),
-      FunctorEnvelopeBase(),
-      _owned(std::move(wrapped)),
-      _wrapped(_owned.get())
+    : FunctorEnvelopeBase(), _owned(std::move(wrapped)), _wrapped(_owned.get())
   {
   }
 
@@ -833,86 +836,108 @@ public:
       _owned->jacobianSetup();
   }
 
-  bool isExtrapolatedBoundaryFace(const FaceInfo & fi, const Elem * const elem) const override
+  bool isConstant() const override { return _wrapped->isConstant(); }
+
+  MooseFunctorName functorName() const { return "wraps_" + _wrapped->functorName(); }
+
+  void setCacheClearanceSchedule(const std::set<ExecFlagType> & clearance_schedule)
+  {
+    _wrapped->setCacheClearanceSchedule(clearance_schedule);
+  }
+
+  bool hasBlocks(SubdomainID sub_id) const { return _wrapped->hasBlocks(sub_id); }
+
+  bool isExtrapolatedBoundaryFace(const FaceInfo & fi, const Elem * elem) const
   {
     return _wrapped->isExtrapolatedBoundaryFace(fi, elem);
   }
-  bool isConstant() const override { return _wrapped->isConstant(); }
-  bool hasBlocks(const SubdomainID id) const override { return _wrapped->hasBlocks(id); }
-  bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const override
+
+  bool isInternalFace(const FaceInfo & fi) const { return _wrapped->isInternalFace(fi); }
+
+  bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const
   {
     return _wrapped->hasFaceSide(fi, fi_elem_side);
   }
 
-protected:
-  ///@{
-  /**
-   * Forward calls to wrapped object
-   */
-  ValueType evaluate(const ElemArg & elem, unsigned int state = 0) const override
+  Moose::FaceArg checkFace(const Moose::FaceArg & face) const { return _wrapped->checkFace(face); }
+
+  ValueType operator()(const ElemArg & elem, unsigned int state = 0) const
   {
-    return _wrapped->operator()(elem, state);
-  }
-  ValueType evaluate(const FaceArg & face, unsigned int state = 0) const override
-  {
-    return _wrapped->operator()(face, state);
-  }
-  ValueType evaluate(const ElemQpArg & qp, unsigned int state = 0) const override
-  {
-    return _wrapped->operator()(qp, state);
-  }
-  ValueType evaluate(const ElemSideQpArg & qp, unsigned int state = 0) const override
-  {
-    return _wrapped->operator()(qp, state);
-  }
-  ValueType evaluate(const ElemPointArg & elem_point, unsigned int state = 0) const override
-  {
-    return _wrapped->operator()(elem_point, state);
+    return (*_wrapped)(elem, state);
   }
 
-  GradientType evaluateGradient(const ElemArg & elem, unsigned int state = 0) const override
+  ValueType operator()(const FaceArg & face, unsigned int state = 0) const
+  {
+    return (*_wrapped)(face, state);
+  }
+
+  ValueType operator()(const ElemQpArg & qp, unsigned int state = 0) const
+  {
+    return (*_wrapped)(qp, state);
+  }
+
+  ValueType operator()(const ElemSideQpArg & qp, unsigned int state = 0) const
+  {
+    return (*_wrapped)(qp, state);
+  }
+
+  ValueType operator()(const ElemPointArg & elem_point, unsigned int state = 0) const
+  {
+    return (*_wrapped)(elem_point, state);
+  }
+
+  GradientType gradient(const ElemArg & elem, unsigned int state = 0) const
   {
     return _wrapped->gradient(elem, state);
   }
-  GradientType evaluateGradient(const FaceArg & face, unsigned int state = 0) const override
+
+  GradientType gradient(const FaceArg & face, unsigned int state = 0) const
   {
     return _wrapped->gradient(face, state);
   }
-  GradientType evaluateGradient(const ElemQpArg & qp, unsigned int state = 0) const override
+
+  GradientType gradient(const ElemQpArg & qp, unsigned int state = 0) const
   {
     return _wrapped->gradient(qp, state);
   }
-  GradientType evaluateGradient(const ElemSideQpArg & qp, unsigned int state = 0) const override
+
+  GradientType gradient(const ElemSideQpArg & qp, unsigned int state = 0) const
   {
     return _wrapped->gradient(qp, state);
   }
-  GradientType evaluateGradient(const ElemPointArg & elem_point,
-                                unsigned int state = 0) const override
+
+  GradientType gradient(const ElemPointArg & elem_point, unsigned int state = 0) const
   {
     return _wrapped->gradient(elem_point, state);
   }
 
-  DotType evaluateDot(const ElemArg & elem, unsigned int state = 0) const override
+  DotType dot(const ElemArg & elem, unsigned int state = 0) const
   {
     return _wrapped->dot(elem, state);
   }
-  DotType evaluateDot(const FaceArg & face, unsigned int state = 0) const override
+
+  DotType dot(const FaceArg & face, unsigned int state = 0) const
   {
     return _wrapped->dot(face, state);
   }
-  DotType evaluateDot(const ElemQpArg & qp, unsigned int state = 0) const override
+
+  DotType dot(const ElemQpArg & qp, unsigned int state = 0) const
   {
     return _wrapped->dot(qp, state);
   }
-  DotType evaluateDot(const ElemSideQpArg & qp, unsigned int state = 0) const override
+
+  DotType dot(const ElemSideQpArg & qp, unsigned int state = 0) const
   {
     return _wrapped->dot(qp, state);
   }
-  DotType evaluateDot(const ElemPointArg & elem_point, unsigned int state = 0) const override
+
+  DotType dot(const ElemPointArg & elem_point, unsigned int state = 0) const
   {
     return _wrapped->dot(elem_point, state);
   }
-  ///@}
+
+  operator FunctorBase<T> &() { return *_wrapped; }
+  operator const FunctorBase<T> &() const { return *_wrapped; }
 
 private:
   /// Our wrapped object

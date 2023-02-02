@@ -239,11 +239,13 @@ INSFVRhieChowInterpolator::fillARead()
     {
       const Moose::FunctorBase<ADReal> *v_comp, *w_comp;
       if (_dim > 1)
-        v_comp = &UserObject::_subproblem.getFunctor<ADReal>(deduceFunctorName("a_v"), tid, name());
+        v_comp = &static_cast<const Moose::FunctorBase<ADReal> &>(
+            UserObject::_subproblem.getFunctor<ADReal>(deduceFunctorName("a_v"), tid, name()));
       else
         v_comp = &_zero_functor;
       if (_dim > 2)
-        w_comp = &UserObject::_subproblem.getFunctor<ADReal>(deduceFunctorName("a_w"), tid, name());
+        w_comp = &static_cast<const Moose::FunctorBase<ADReal> &>(
+            UserObject::_subproblem.getFunctor<ADReal>(deduceFunctorName("a_w"), tid, name()));
       else
         w_comp = &_zero_functor;
 
