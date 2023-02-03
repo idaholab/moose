@@ -264,7 +264,7 @@ AddVariableAction::addVariable(const std::string & var_name)
   if (scale_factor.size() != _components)
     mooseError("Size of 'scaling' is not consistent");
 
-  _problem_add_var_method(*_problem, _type, _name, _moose_object_pars);
+  _problem_add_var_method(*_problem, _type, var_name, _moose_object_pars);
 
   if (_moose_object_pars.get<bool>("eigen"))
   {
