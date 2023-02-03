@@ -30,7 +30,7 @@ ComputeElasticityTensorCP::ComputeElasticityTensorCP(const InputParameters & par
                                ? &getUserObject<PropertyReadFile>("read_prop_user_object")
                                : nullptr),
     _Euler_angles_mat_prop(declareProperty<RealVectorValue>("Euler_angles")),
-    _crysrot(declareProperty<RankTwoTensor>("crysrot")),
+    _crysrot(declareProperty<RankTwoTensor>(_base_name + "crysrot")),
     _R(_Euler_angles)
 {
   // the base class guarantees constant in time, but in this derived class the
@@ -56,14 +56,24 @@ ComputeElasticityTensorCP::assignEulerAngles()
 }
 
 void
+ComputeElasticityTensorCP::initQpStatefulProperties()
+{
+  // Properties assigned at the beginning of every call to material calculation
+  assignEulerAngles();
+  _R.update(_Euler_angles_mat_prop[_qp]);
+
+  _crysrot[_qp] = _R.transpose();
+}
+
+void
 ComputeElasticityTensorCP::computeQpElasticityTensor()
 {
   // Properties assigned at the beginning of every call to material calculation
   assignEulerAngles();
-
   _R.update(_Euler_angles_mat_prop[_qp]);
 
   _crysrot[_qp] = _R.transpose();
+
   _elasticity_tensor[_qp] = _Cijkl;
   _elasticity_tensor[_qp].rotate(_crysrot[_qp]);
 }
