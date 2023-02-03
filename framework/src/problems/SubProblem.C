@@ -70,6 +70,8 @@ SubProblem::SubProblem(const InputParameters & parameters)
   _active_sc_var_coupleable_vector_tags.resize(n_threads);
 
   _functors.resize(n_threads);
+  _pbblf_functors.resize(n_threads);
+  _functor_to_request_info.resize(n_threads);
 }
 
 SubProblem::~SubProblem() {}
@@ -1074,6 +1076,13 @@ SubProblem::timestepSetup()
 {
   for (auto & map : _functors)
     for (auto & pr : map)
+    {
+      std::get<1>(pr.second)->timestepSetup();
+      std::get<2>(pr.second)->timestepSetup();
+    }
+
+  for (auto & map : _pbblf_functors)
+    for (auto & pr : map)
       pr.second->timestepSetup();
 }
 
@@ -1081,6 +1090,13 @@ void
 SubProblem::customSetup(const ExecFlagType & exec_type)
 {
   for (auto & map : _functors)
+    for (auto & pr : map)
+    {
+      std::get<1>(pr.second)->customSetup(exec_type);
+      std::get<2>(pr.second)->customSetup(exec_type);
+    }
+
+  for (auto & map : _pbblf_functors)
     for (auto & pr : map)
       pr.second->customSetup(exec_type);
 }
@@ -1090,6 +1106,13 @@ SubProblem::residualSetup()
 {
   for (auto & map : _functors)
     for (auto & pr : map)
+    {
+      std::get<1>(pr.second)->residualSetup();
+      std::get<2>(pr.second)->residualSetup();
+    }
+
+  for (auto & map : _pbblf_functors)
+    for (auto & pr : map)
       pr.second->residualSetup();
 }
 
@@ -1097,6 +1120,13 @@ void
 SubProblem::jacobianSetup()
 {
   for (auto & map : _functors)
+    for (auto & pr : map)
+    {
+      std::get<1>(pr.second)->jacobianSetup();
+      std::get<2>(pr.second)->jacobianSetup();
+    }
+
+  for (auto & map : _pbblf_functors)
     for (auto & pr : map)
       pr.second->jacobianSetup();
 }
@@ -1112,12 +1142,16 @@ SubProblem::initialSetup()
 
   for (const auto & functors : _functors)
     for (const auto & pr : functors)
-      if (pr.second->wrapsNull())
+    {
+      mooseAssert(std::get<1>(pr.second)->wrapsNull() == std::get<2>(pr.second)->wrapsNull(),
+                  "These must agree");
+      if (std::get<1>(pr.second)->wrapsNull())
         mooseError("No functor ever provided with name '",
                    removeSubstring(pr.first, "wraps_"),
                    "', which was requested by '",
                    MooseUtils::join(libmesh_map_find(_functor_to_requestors, pr.first), ","),
                    "'.");
+    }
 }
 
 void

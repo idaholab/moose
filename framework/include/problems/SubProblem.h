@@ -16,6 +16,8 @@
 #include "VectorTag.h"
 #include "MooseError.h"
 #include "FunctorMaterialProperty.h"
+#include "RawValueFunctor.h"
+#include "ADifyFunctor.h"
 
 #include "libmesh/coupling_matrix.h"
 #include "libmesh/parameters.h"
@@ -806,11 +808,14 @@ public:
    * @param name The name of the functor to retrieve
    * @param tid The thread ID that we are retrieving the functor property for
    * @param requestor_name The name of the object that is requesting this functor property
+   * @param requestor_is_ad Whether the requesting object is an AD object
    * @return a constant reference to the functor
    */
   template <typename T>
-  const Moose::Functor<T> &
-  getFunctor(const std::string & name, THREAD_ID tid, const std::string & requestor_name);
+  const Moose::Functor<T> & getFunctor(const std::string & name,
+                                       THREAD_ID tid,
+                                       const std::string & requestor_name,
+                                       bool requestor_is_ad);
 
   /**
    * checks whether we have a functor corresponding to \p name on the thread id \p tid
@@ -843,7 +848,7 @@ public:
    * @return The added functor
    */
   template <typename T, typename PolymorphicLambda>
-  const Moose::Functor<T> &
+  const Moose::FunctorBase<T> &
   addPiecewiseByBlockLambdaFunctor(const std::string & name,
                                    PolymorphicLambda my_lammy,
                                    const std::set<ExecFlagType> & clearance_schedule,
@@ -869,6 +874,14 @@ public:
    * @return the current nonlinear system number
    */
   virtual unsigned int currentNlSysNum() const = 0;
+
+  /**
+   * Register an unfulfilled functor request
+   */
+  template <typename T>
+  void registerUnfilledFunctorRequest(T * functor_interface,
+                                      const std::string & functor_name,
+                                      THREAD_ID tid);
 
 protected:
   /**
@@ -982,8 +995,24 @@ private:
   virtual std::pair<bool, unsigned int>
   determineNonlinearSystem(const std::string & var_name, bool error_if_not_found = false) const = 0;
 
-  /// A container holding pointers to all the functors in our problem
-  std::vector<std::multimap<std::string, std::unique_ptr<Moose::FunctorEnvelopeBase>>> _functors;
+  enum class TrueFunctorIs
+  {
+    UNSET,
+    NONAD,
+    AD
+  };
+
+  /// A container holding pointers to all the functors in our problem. We hold a pair where the
+  /// first member of the apair is a wrapper of a non-AD functor, and the second member of the pair
+  /// is a wrapper of an AD functor
+  std::vector<std::multimap<std::string,
+                            std::tuple<TrueFunctorIs,
+                                       std::unique_ptr<Moose::FunctorEnvelopeBase>,
+                                       std::unique_ptr<Moose::FunctorEnvelopeBase>>>>
+      _functors;
+
+  /// Container to hold PiecewiseByBlockLambdaFunctors
+  std::vector<std::map<std::string, std::unique_ptr<Moose::FunctorAbstract>>> _pbblf_functors;
 
   /// Lists all functors in the problem
   void showFunctors() const;
@@ -994,6 +1023,10 @@ private:
   /// The requestors of functors where the key is the prop name and the value is a set of names of
   /// requestors
   std::map<std::string, std::set<std::string>> _functor_to_requestors;
+
+  /// A multimap from unfilled functor requests to whether the requests were for AD functors and
+  /// whether the requestor was an AD object
+  std::vector<std::multimap<std::string, std::pair<bool, bool>>> _functor_to_request_info;
 
   /// Whether to output a list of the functors used and requested (currently only at initialSetup)
   bool _output_functors;
@@ -1040,41 +1073,100 @@ template <typename T>
 const Moose::Functor<T> &
 SubProblem::getFunctor(const std::string & name,
                        const THREAD_ID tid,
-                       const std::string & requestor_name)
+                       const std::string & requestor_name,
+                       const bool requestor_is_ad)
 {
   mooseAssert(tid < _functors.size(), "Too large a thread ID");
 
   // Log the requestor
   _functor_to_requestors["wraps_" + name].insert(requestor_name);
 
+  constexpr bool requested_functor_is_ad =
+      !std::is_same<T, typename MetaPhysicL::RawType<T>::value_type>::value;
+
+  auto & functor_to_request_info = _functor_to_request_info[tid];
+
   // Get the requested functor if we already have it
   auto & functors = _functors[tid];
-  auto find_ret = functors.find("wraps_" + name);
-  if (find_ret != functors.end())
+  if (auto find_ret = functors.find("wraps_" + name); find_ret != functors.end())
   {
     if (functors.count("wraps_" + name) > 1)
       mooseError("Attempted to get a functor with the name '",
                  name,
                  "' but multiple functors match. Make sure that you do not have functor material "
                  "properties, functions, and variables with the same names");
-    auto * const functor = dynamic_cast<Moose::Functor<T> *>(find_ret->second.get());
+
+    auto & [true_functor_is, non_ad_functor, ad_functor] = find_ret->second;
+    auto & functor_wrapper = requested_functor_is_ad ? *ad_functor : *non_ad_functor;
+
+    auto * const functor = dynamic_cast<Moose::Functor<T> *>(&functor_wrapper);
     if (!functor)
       mooseError("A call to SubProblem::getFunctor requested a functor named '",
                  name,
                  "' that returns the type: '",
                  libMesh::demangle(typeid(T).name()),
                  "'. However, that functor already exists and returns a different type: '",
-                 find_ret->second->returnType(),
+                 functor_wrapper.returnType(),
                  "'");
+
+    if (functor->template wrapsType<Moose::NullFunctor<T>>())
+      // Store for future checking when the actual functor gets added
+      functor_to_request_info.emplace(name,
+                                      std::make_pair(requested_functor_is_ad, requestor_is_ad));
+    else
+    {
+      // We already have the actual functor
+      if (true_functor_is == SubProblem::TrueFunctorIs::UNSET)
+        mooseError("We already have the functor; it should not be unset");
+
+      // Check for whether this is a valid request
+      if (!requested_functor_is_ad && requestor_is_ad &&
+          true_functor_is == SubProblem::TrueFunctorIs::AD)
+        mooseError("We are requesting a non-AD functor from an AD object, but the true functor is "
+                   "AD. This "
+                   "means we could be dropping important derivatives. We will not allow this");
+    }
+
     return *functor;
   }
-  // We don't have the functor yet but we could have it in the future. We'll create a null-functor
-  // for now
-  auto emplace_ret = functors.emplace(std::make_pair(
-      "wraps_" + name,
-      std::make_unique<Moose::Functor<T>>(std::make_unique<Moose::NullFunctor<T>>())));
 
-  return static_cast<Moose::Functor<T> &>(*emplace_ret->second);
+  // We don't have the functor yet but we could have it in the future. We'll create null functors
+  // for now
+  functor_to_request_info.emplace(name, std::make_pair(requested_functor_is_ad, requestor_is_ad));
+  if constexpr (requested_functor_is_ad)
+  {
+    typedef typename MetaPhysicL::RawType<T>::value_type NonADType;
+    typedef T ADType;
+
+    auto emplace_ret =
+        functors.emplace("wraps_" + name,
+                         std::make_tuple(SubProblem::TrueFunctorIs::UNSET,
+                                         std::make_unique<Moose::Functor<NonADType>>(
+                                             std::make_unique<Moose::NullFunctor<NonADType>>()),
+                                         std::make_unique<Moose::Functor<ADType>>(
+                                             std::make_unique<Moose::NullFunctor<ADType>>())));
+
+    return static_cast<Moose::Functor<T> &>(*(requested_functor_is_ad
+                                                  ? std::get<2>(emplace_ret->second)
+                                                  : std::get<1>(emplace_ret->second)));
+  }
+  else
+  {
+    typedef T NonADType;
+    typedef typename Moose::ADType<T>::type ADType;
+
+    auto emplace_ret =
+        functors.emplace("wraps_" + name,
+                         std::make_tuple(SubProblem::TrueFunctorIs::UNSET,
+                                         std::make_unique<Moose::Functor<NonADType>>(
+                                             std::make_unique<Moose::NullFunctor<NonADType>>()),
+                                         std::make_unique<Moose::Functor<ADType>>(
+                                             std::make_unique<Moose::NullFunctor<ADType>>())));
+
+    return static_cast<Moose::Functor<T> &>(*(requested_functor_is_ad
+                                                  ? std::get<2>(emplace_ret->second)
+                                                  : std::get<1>(emplace_ret->second)));
+  }
 }
 
 template <typename T>
@@ -1085,14 +1177,18 @@ SubProblem::hasFunctorWithType(const std::string & name, const THREAD_ID tid) co
   auto & functors = _functors[tid];
 
   const auto & it = functors.find("wraps_" + name);
+  constexpr bool requested_functor_is_ad =
+      !std::is_same<T, typename MetaPhysicL::RawType<T>::value_type>::value;
+
   if (it == functors.end())
     return false;
   else
-    return dynamic_cast<Moose::Functor<T> *>(it->second.get());
+    return dynamic_cast<Moose::Functor<T> *>(
+        requested_functor_is_ad ? std::get<2>(it->second).get() : std::get<1>(it->second).get());
 }
 
 template <typename T, typename PolymorphicLambda>
-const Moose::Functor<T> &
+const Moose::FunctorBase<T> &
 SubProblem::addPiecewiseByBlockLambdaFunctor(const std::string & name,
                                              PolymorphicLambda my_lammy,
                                              const std::set<ExecFlagType> & clearance_schedule,
@@ -1100,27 +1196,32 @@ SubProblem::addPiecewiseByBlockLambdaFunctor(const std::string & name,
                                              const std::set<SubdomainID> & block_ids,
                                              const THREAD_ID tid)
 {
-  auto & wrapper = const_cast<Moose::Functor<T> &>(getFunctor<T>(name, tid, "subproblem"));
-  if (wrapper.template wrapsType<Moose::NullFunctor<T>>())
-    wrapper.assign(std::make_unique<PiecewiseByBlockLambdaFunctor<T>>(
-        name, my_lammy, clearance_schedule, mesh, block_ids));
-  else if (wrapper.template wrapsType<PiecewiseByBlockLambdaFunctor<T>>())
+  auto & pbblf_functors = _pbblf_functors[tid];
+
+  auto [it, first_time_added] =
+      pbblf_functors.emplace(name,
+                             std::make_unique<PiecewiseByBlockLambdaFunctor<T>>(
+                                 name, my_lammy, clearance_schedule, mesh, block_ids));
+
+  auto * functor = dynamic_cast<PiecewiseByBlockLambdaFunctor<T> *>(it->second.get());
+  if (!functor)
   {
-    mooseAssert(wrapper._owned,
-                "This API is for creating functors that are owned by the subproblem. If you are "
-                "calling this once for '"
-                    << name
-                    << "', then hopefully you have not used the non-owning functor API additions "
-                       "for the same functor name.");
-    static_cast<PiecewiseByBlockLambdaFunctor<T> *>(wrapper._owned.get())
-        ->setFunctor(mesh, block_ids, my_lammy);
+    if (first_time_added)
+      mooseError("This should be impossible. If this was the first time we added the functor, then "
+                 "the dynamic cast absolutely should have succeeded");
+    else
+      mooseError("Attempted to add a lambda functor with the name '",
+                 name,
+                 "' but another lambda functor of that name returns a different type");
   }
+
+  if (first_time_added)
+    addFunctor(name, *functor, tid);
   else
-    mooseError("Attempted to add a lambda functor with the name '",
-               name,
-               "' but another functor of different type has that name. Make sure that you do not "
-               "have functor material properties, functions, and variables with the same names");
-  return wrapper;
+    // The functor already exists
+    functor->setFunctor(mesh, block_ids, my_lammy);
+
+  return *functor;
 }
 
 template <typename T>
@@ -1129,25 +1230,94 @@ SubProblem::addFunctor(const std::string & name,
                        const Moose::FunctorBase<T> & functor,
                        const THREAD_ID tid)
 {
+  constexpr bool added_functor_is_ad =
+      !std::is_same<T, typename MetaPhysicL::RawType<T>::value_type>::value;
+
   mooseAssert(tid < _functors.size(), "Too large a thread ID");
 
+  auto & functor_to_request_info = _functor_to_request_info[tid];
   auto & functors = _functors[tid];
   auto it = functors.find("wraps_" + name);
   if (it != functors.end())
   {
     // We have this functor already. If it's a null functor, we want to replace it with the valid
     // functor we have now. If it's not then we'll add a new entry into the multimap and then we'll
-    // error later if a user requests a functor because their request is ambiguous
-    auto * const existing_wrapper = dynamic_cast<Moose::Functor<T> *>(it->second.get());
+    // error later if a user requests a functor because their request is ambiguous. This is the
+    // reason that the functors container is a multimap: for nice error messages
+    auto * const existing_wrapper_base =
+        added_functor_is_ad ? std::get<2>(it->second).get() : std::get<1>(it->second).get();
+    auto * const existing_wrapper = dynamic_cast<Moose::Functor<T> *>(existing_wrapper_base);
     if (existing_wrapper && existing_wrapper->template wrapsType<Moose::NullFunctor<T>>())
     {
+      // Sanity check
+      auto [request_info_it, request_info_end_it] = functor_to_request_info.equal_range(name);
+      if (request_info_it == request_info_end_it)
+        mooseError("We are wrapping a NullFunctor but we don't have any unfilled functor request "
+                   "info. This doesn't make sense.");
+
+      // Check for valid requests
+      while (request_info_it != request_info_end_it)
+      {
+        auto & [requested_functor_is_ad, requestor_is_ad] = request_info_it->second;
+        if (!requested_functor_is_ad && requestor_is_ad && added_functor_is_ad)
+          mooseError("We are requesting a non-AD functor from an AD object, but the true functor "
+                     "is AD. This means we could be dropping important derivatives. We will not "
+                     "allow this");
+        request_info_it = functor_to_request_info.erase(request_info_it);
+      }
+
+      // Ok we didn't have the functor before, so we will add it now
+      std::get<0>(it->second) =
+          added_functor_is_ad ? SubProblem::TrueFunctorIs::AD : SubProblem::TrueFunctorIs::NONAD;
       existing_wrapper->assign(functor);
+      if constexpr (added_functor_is_ad)
+      {
+        typedef typename MetaPhysicL::RawType<T>::value_type NonADType;
+        auto * const existing_non_ad_wrapper_base = std::get<1>(it->second).get();
+        auto * const existing_non_ad_wrapper =
+            dynamic_cast<Moose::Functor<NonADType> *>(existing_non_ad_wrapper_base);
+        mooseAssert(existing_non_ad_wrapper->template wrapsType<Moose::NullFunctor<NonADType>>(),
+                    "Both members of pair should have been wrapping a NullFunctor");
+        existing_non_ad_wrapper->assign(
+            std::make_unique<Moose::RawValueFunctor<NonADType>>(functor));
+      }
+      else
+      {
+        typedef typename Moose::ADType<T>::type ADType;
+        auto * const existing_ad_wrapper_base = std::get<2>(it->second).get();
+        auto * const existing_ad_wrapper =
+            dynamic_cast<Moose::Functor<ADType> *>(existing_ad_wrapper_base);
+        mooseAssert(existing_ad_wrapper->template wrapsType<Moose::NullFunctor<ADType>>(),
+                    "Both members of pair should have been wrapping a NullFunctor");
+        existing_ad_wrapper->assign(std::make_unique<Moose::ADifyFunctor<ADType>>(functor));
+      }
       return;
     }
   }
 
-  auto new_wrapper = std::make_unique<Moose::Functor<T>>(functor);
-  _functors[tid].emplace(std::make_pair("wraps_" + name, std::move(new_wrapper)));
+  // We are a new functor
+  if constexpr (added_functor_is_ad)
+  {
+    typedef typename MetaPhysicL::RawType<T>::value_type NonADType;
+    auto new_non_ad_wrapper = std::make_unique<Moose::Functor<NonADType>>(
+        std::make_unique<Moose::RawValueFunctor<NonADType>>(functor));
+    auto new_ad_wrapper = std::make_unique<Moose::Functor<T>>(functor);
+    _functors[tid].emplace("wraps_" + name,
+                           std::make_tuple(SubProblem::TrueFunctorIs::AD,
+                                           std::move(new_non_ad_wrapper),
+                                           std::move(new_ad_wrapper)));
+  }
+  else
+  {
+    typedef typename Moose::ADType<T>::type ADType;
+    auto new_non_ad_wrapper = std::make_unique<Moose::Functor<T>>((functor));
+    auto new_ad_wrapper = std::make_unique<Moose::Functor<ADType>>(
+        std::make_unique<Moose::ADifyFunctor<ADType>>(functor));
+    _functors[tid].emplace("wraps_" + name,
+                           std::make_tuple(SubProblem::TrueFunctorIs::NONAD,
+                                           std::move(new_non_ad_wrapper),
+                                           std::move(new_ad_wrapper)));
+  }
 }
 
 inline const bool &

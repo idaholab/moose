@@ -30,13 +30,25 @@
 namespace Moose
 {
 /**
+ * Abstract base class that can be used to hold collections of functors
+ */
+class FunctorAbstract : public FaceArgInterface
+{
+public:
+  virtual void residualSetup() = 0;
+  virtual void jacobianSetup() = 0;
+  virtual void timestepSetup() = 0;
+  virtual void customSetup(const ExecFlagType & exec_type) = 0;
+};
+
+/**
  * Base class template for functor objects. This class template defines various \p operator()
  * overloads that allow a user to evaluate the functor at arbitrary geometric locations. This
  * template is meant to enable highly flexible on-the-fly variable and material property
  * evaluations
  */
 template <typename T>
-class FunctorBase : public FaceArgInterface
+class FunctorBase : public FunctorAbstract
 {
 public:
   using FunctorType = FunctorBase<T>;
@@ -100,10 +112,10 @@ public:
   DotType dot(const ElemPointArg & elem_point, unsigned int state = 0) const;
   ///@}
 
-  virtual void residualSetup();
-  virtual void jacobianSetup();
-  virtual void timestepSetup();
-  virtual void customSetup(const ExecFlagType & exec_type);
+  virtual void residualSetup() override;
+  virtual void jacobianSetup() override;
+  virtual void timestepSetup() override;
+  virtual void customSetup(const ExecFlagType & exec_type) override;
 
   /**
    * Set how often to clear the functor evaluation cache
