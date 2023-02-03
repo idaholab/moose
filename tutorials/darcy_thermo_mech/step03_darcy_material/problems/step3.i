@@ -7,6 +7,8 @@
     xmax = 0.304 # Length of test chamber
     ymax = 0.0257 # Test chamber radius
   []
+  coord_type = RZ
+  rz_coord_axis = X
 []
 
 [Variables/pressure]
@@ -42,8 +44,6 @@
 
 [Problem]
   type = FEProblem
-  coord_type = RZ
-  rz_coord_axis = X
 []
 
 [Executioner]
