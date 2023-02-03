@@ -15,7 +15,7 @@
 
 #include "MooseError.h"
 
-template <typename Key, typename Item>
+template <class Key, class Item, class KeyHash = std::hash<Key>>
 class GeneralRegistry
 {
 public:
@@ -72,7 +72,7 @@ protected:
   const std::string _name;
 
   /// Map of keys to IDs
-  std::unordered_map<Key, std::size_t> _key_to_id;
+  std::unordered_map<Key, std::size_t, KeyHash> _key_to_id;
   /// Vector of IDs to Items
   std::vector<Item> _id_to_item;
 
@@ -84,22 +84,22 @@ protected:
   mutable std::mutex _id_to_item_mutex;
 };
 
-template <typename Key, typename Item>
-GeneralRegistry<Key, Item>::GeneralRegistry(const std::string & name) : _name(name)
+template <class Key, class Item, class KeyHash>
+GeneralRegistry<Key, Item, KeyHash>::GeneralRegistry(const std::string & name) : _name(name)
 {
 }
 
-template <typename Key, typename Item>
+template <class Key, class Item, class KeyHash>
 std::size_t
-GeneralRegistry<Key, Item>::size() const
+GeneralRegistry<Key, Item, KeyHash>::size() const
 {
   std::lock_guard<std::mutex> lock(_id_to_item_mutex);
   return _id_to_item.size();
 }
 
-template <typename Key, typename Item>
+template <class Key, class Item, class KeyHash>
 std::size_t
-GeneralRegistry<Key, Item>::id(const Key & key) const
+GeneralRegistry<Key, Item, KeyHash>::id(const Key & key) const
 {
   std::lock_guard<std::mutex> lock(_key_to_id_mutex);
   const auto it = _key_to_id.find(key);
@@ -108,43 +108,43 @@ GeneralRegistry<Key, Item>::id(const Key & key) const
   return it->second;
 }
 
-template <typename Key, typename Item>
+template <class Key, class Item, class KeyHash>
 bool
-GeneralRegistry<Key, Item>::keyExists(const Key & key) const
+GeneralRegistry<Key, Item, KeyHash>::keyExists(const Key & key) const
 {
   std::lock_guard<std::mutex> lock(_key_to_id_mutex);
   return _key_to_id.count(key);
 }
 
-template <typename Key, typename Item>
+template <class Key, class Item, class KeyHash>
 bool
-GeneralRegistry<Key, Item>::idExists(const std::size_t id) const
+GeneralRegistry<Key, Item, KeyHash>::idExists(const std::size_t id) const
 {
   std::lock_guard<std::mutex> lock(_id_to_item_mutex);
   return id < _id_to_item.size();
 }
 
-template <typename Key, typename Item>
+template <class Key, class Item, class KeyHash>
 const Item &
-GeneralRegistry<Key, Item>::item(const std::size_t id) const
+GeneralRegistry<Key, Item, KeyHash>::item(const std::size_t id) const
 {
   std::lock_guard<std::mutex> lock(_id_to_item_mutex);
   return itemNonLocking(id);
 }
 
-template <typename Key, typename Item>
+template <class Key, class Item, class KeyHash>
 const Item &
-GeneralRegistry<Key, Item>::itemNonLocking(const std::size_t id) const
+GeneralRegistry<Key, Item, KeyHash>::itemNonLocking(const std::size_t id) const
 {
   if (id >= _id_to_item.size())
     mooseError(_name, ": ID '", id, "' is not registered");
   return _id_to_item[id];
 }
 
-template <typename Key, typename Item>
+template <class Key, class Item, class KeyHash>
 template <typename CreateItem>
 std::size_t
-GeneralRegistry<Key, Item>::registerItem(const Key & key, CreateItem & create_item)
+GeneralRegistry<Key, Item, KeyHash>::registerItem(const Key & key, CreateItem & create_item)
 {
   std::lock_guard<std::mutex> lock_key(_key_to_id_mutex);
 
@@ -161,9 +161,9 @@ GeneralRegistry<Key, Item>::registerItem(const Key & key, CreateItem & create_it
   return id;
 }
 
-template <typename Key, typename Item>
+template <class Key, class Item, class KeyHash>
 void
-GeneralRegistry<Key, Item>::reserve(const std::size_t size)
+GeneralRegistry<Key, Item, KeyHash>::reserve(const std::size_t size)
 {
   std::lock_guard<std::mutex> lock(_id_to_item_mutex);
   _id_to_item.reserve(size);
