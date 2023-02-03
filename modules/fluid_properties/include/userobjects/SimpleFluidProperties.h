@@ -111,6 +111,10 @@ public:
                           DualReal & dT_dv,
                           DualReal & dT_de) const override;
 
+  virtual Real T_from_v_h(Real v, Real h) const;
+
+  virtual void T_from_v_h(Real v, Real h, Real & T, Real & dT_dv, Real & dT_dh) const;
+
   virtual Real T_from_p_rho(Real p, Real rho) const;
 
   virtual void T_from_p_rho(Real p, Real rho, Real & T, Real & dT_dp, Real & dT_drho) const;
@@ -127,6 +131,10 @@ public:
                           DualReal & dp_dv,
                           DualReal & dp_de) const override;
 
+  virtual Real p_from_v_h(Real v, Real h) const;
+
+  virtual void p_from_v_h(Real v, Real h, Real & p, Real & dp_dv, Real & dp_dh) const;
+
   virtual Real c_from_v_e(Real v, Real e) const override;
 
   virtual void c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Real & dc_de) const override;
@@ -140,6 +148,10 @@ public:
 
   virtual void
   e_from_p_rho(Real p, Real rho, Real & e, Real & de_dp, Real & de_drho) const override;
+
+  virtual Real e_from_v_h(Real v, Real h) const override;
+
+  virtual void e_from_v_h(Real p, Real v, Real & h, Real & de_dv, Real & de_dh) const override;
 
   virtual Real mu_from_p_T(Real pressure, Real temperature) const override;
 
