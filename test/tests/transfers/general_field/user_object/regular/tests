@@ -1,0 +1,51 @@
+[Tests]
+  issues = '#16427 #16429'
+  design = 'transfers/MultiAppGeneralFieldUserObjectTransfer.md'
+
+  [2d_overlay]
+    requirement = "The system shall be able to transfer user-defined spatial data on the origin problem"
+    [base_test]
+      type = 'Exodiff'
+      input = 'main.i'
+      exodiff = 'main_out.e main_out_sub0_out.e main_out_sub1_out.e main_out_sub2_out.e'
+      detail = "for variables of the same type,"
+    []
+
+    [projection_needed_receiving]
+      type = 'Exodiff'
+      input = 'main.i'
+      exodiff = 'projection_receive.e projection_receive_sub0_out.e projection_receive_sub1_out.e projection_receive_sub2_out.e'
+      # Set various types of finite element families to the received variables in both apps
+      cli_args = "Outputs/file_base=projection_receive Mesh/second_order=true
+                  AuxVariables/from_sub/order=SECOND AuxVariables/from_sub_elem/order=SECOND
+                  MultiApps/sub/cli_args='Mesh/second_order=true;AuxVariables/from_main/order=SECOND;AuxVariables/from_main_elem/order=FIRST'"
+      detail = "for variables of arbitrary types with higher order on the receiving app,"
+    []
+  []
+
+  [errors]
+    requirement = "The system shall return an error if"
+    [too_many_vars]
+      type = RunException
+      input = main.i
+      cli_args = "Transfers/active='from_sub'
+                  Transfers/from_sub/variable='from_sub from_sub_elem'"
+      expect_err = "Only one variable at a time is supported by this transfer"
+      detail = 'more than one variable are specified as the transfer only takes.'
+    []
+  []
+
+  [overlap]
+    requirement = "The system shall be able to detect indetermination in a transfer due to"
+    [origin_mesh]
+      type = RunException
+      input = main.i
+      # We offset them a little, because overlaps when the transferred value is the same are not counted as overlaps
+      cli_args = "Transfers/active='from_sub' Transfers/from_sub/search_value_conflicts=true MultiApps/sub/positions='0 0 0 0.01 0 0'"
+      expect_err = "multiple valid values from equidistant points were "
+      detail = 'overlapping origin child application, causing multiple shape evaluations to be valid'
+      # In serial, the overlap will be found in the local conflicts
+      # In paralle, it will be found in the received conflicts
+    []
+  []
+[]

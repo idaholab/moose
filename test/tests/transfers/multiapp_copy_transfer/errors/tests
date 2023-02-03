@@ -6,7 +6,7 @@
     type = RunException
     input = parent.i
     cli_args = Mesh/nx=12
-    expect_err = 'The meshes must be identical to utilize MultiAppCopyTransfer'
+    expect_err = 'The meshes must be identical to utilize MultiAppDofCopyTransfer::transfer'
 
     requirement = 'The system shall error when the MultiAppCopyTransfer object is used on non-identical meshes.'
   [../]

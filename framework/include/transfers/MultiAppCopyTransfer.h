@@ -9,12 +9,18 @@
 
 #pragma once
 
-#include "MultiAppFieldTransfer.h"
+#include "MultiAppDofCopyTransfer.h"
+
+namespace libMesh
+{
+class DofObject;
+}
 
 /**
- * Copy the fields directly from one application to another, based on degree-of-freedom indexing
+ * Copy variables directly from one application to another, based on degree-of-freedom indexing
+ * TODO: Rename to MultiAppVariableCopy or MultiAppFieldCopy
  */
-class MultiAppCopyTransfer : public MultiAppFieldTransfer
+class MultiAppCopyTransfer : public MultiAppDofCopyTransfer
 {
 public:
   static InputParameters validParams();
@@ -31,14 +37,14 @@ protected:
   virtual std::vector<AuxVariableName> getToVarNames() const override { return _to_var_names; }
 
   // These attributes are used if a derived class supports transferring multiple variables
-  /// Name of variables transfering from
+  /// Name of variables transferring from
   const std::vector<VariableName> _from_var_names;
-  /// Name of variables transfering to
+  /// Name of variables transferring to
   const std::vector<AuxVariableName> _to_var_names;
 
   // These attributes are used if a derived class only supports one variable
-  /// Name of variables transfering from
+  /// Name of variables transferring from
   VariableName _from_var_name;
-  /// Name of variables transfering to
+  /// Name of variables transferring to
   AuxVariableName _to_var_name;
 };

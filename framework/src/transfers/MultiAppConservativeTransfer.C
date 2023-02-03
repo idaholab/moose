@@ -42,10 +42,6 @@ MultiAppConservativeTransfer::validParams()
                               "to_postprocessors_to_be_preserved allow_skipped_adjustment",
                               "Conservative transfer");
 
-  // Block restriction not implemented for all downstream classes
-  params.suppressParameter<std::vector<SubdomainName>>("from_blocks");
-  params.suppressParameter<std::vector<SubdomainName>>("to_blocks");
-
   return params;
 }
 

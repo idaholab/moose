@@ -20,7 +20,7 @@
 #include "libmesh/elem.h"
 #include "libmesh/quadrature.h"
 #include "libmesh/dense_vector.h"
-#include "libmesh/dense_vector.h"
+#include "libmesh/enum_fe_family.h"
 
 template <typename>
 class MooseVariableFV;
@@ -146,6 +146,8 @@ public:
   virtual bool isNodal() const override final { return false; }
 
   bool hasDoFsOnNodes() const override final { return false; }
+
+  FEContinuity getContinuity() const override final { return _element_data->getContinuity(); };
 
   virtual bool isNodalDefined() const override final { return false; }
 

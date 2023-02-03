@@ -1,0 +1,107 @@
+[Tests]
+  design = 'transfers/MultiAppGeneralFieldNearestNodeTransfer.md'
+
+  [./tosub]
+    type = 'Exodiff'
+    input = 'tosub_parent.i'
+    exodiff = 'tosub_parent_out_sub0.e'
+    issues = '#1866 #12245'
+    requirement = "The system shall be able to transfer both nodal and elemental fields to a SubApp from the Master App."
+  [../]
+
+  [./fromsub]
+    type = 'Exodiff'
+    input = 'fromsub_parent.i'
+    exodiff = 'fromsub_parent_out.e'
+    issues = '#1866 #12245'
+    requirement = "The system shall be able to transfer both nodal and elemental fields from SubApps to the Master App."
+  [../]
+
+  [./fromsub_displaced]
+    type = 'Exodiff'
+    input = 'fromsub_displaced_parent.i'
+    exodiff = 'fromsub_displaced_parent_out.e'
+    issues = '#1868'
+    requirement = "The system shall be able to transfer values from SubApps which set the displaced_source_mesh flag to true."
+  [../]
+
+  [./tosub_displaced]
+    type = 'Exodiff'
+    input = 'tosub_displaced_parent.i'
+    exodiff = 'tosub_displaced_parent_out_sub0.e'
+    deleted = 'Not yet implemented properly!'
+    issues = '#1868'
+    requirement = "The system shall be able to transfer values from SubApps which set the displaced_target_mesh flag to true."
+  [../]
+
+  [./boundary_tosub]
+    type = 'Exodiff'
+    input = 'boundary_tosub_parent.i'
+    exodiff = 'boundary_tosub_parent_out_sub0.e'
+    issues = '#6156'
+    requirement = "The system shall be able to transfer values to multiple SubApps from the Master App's boundary."
+  [../]
+
+  [./boundary_toparent]
+    type = 'Exodiff'
+    input = 'boundary_toparent_parent.i'
+    exodiff = 'boundary_toparent_parent_out.e'
+    issues = '#6156'
+    requirement = "The system shall be able to transfer values from a SubApp boundary to the Master App."
+  [../]
+
+  [./multiple_target_boundaries]
+    type = 'Exodiff'
+    input = 'to_multiple_boundaries_parent.i'
+    exodiff = 'to_multiple_boundaries_parent_out.e to_multiple_boundaries_parent_out_sub0.e'
+    issues = '#18467'
+    requirement = "The system shall be able to transfer values to multiple target boundaries in both the Master and Sub App."
+    # KNN search fails
+    max_parallel = 7
+  [../]
+
+  [./two_way_many_apps]
+    type = 'Exodiff'
+    input = 'two_way_many_apps_parent.i'
+    exodiff = 'two_way_many_apps_parent_out.e two_way_many_apps_parent_out_sub0.e two_way_many_apps_parent_out_sub4.e'
+    issues = '#5360'
+    requirement = "The system shall be able to transfer between an app and multiple SubApps."
+  [../]
+
+  [./parallel]
+    type = 'Exodiff'
+    input = 'parallel_parent.i'
+    exodiff = 'parallel_parent_out.e'
+    min_parallel = 2
+    max_parallel = 2
+    issues = '#8004'
+    requirement = "The system shall be able to transfer in parallel between meshes with different spatial dimensions."
+  [../]
+
+  [./target_boundary]
+    type = 'Exodiff'
+    input = 'target_boundary_parent.i'
+    exodiff = 'target_boundary_parent_out.e target_boundary_parent_out_sub0.e target_boundary_parent_out_sub1.e'
+    cli_args = 'Transfers/target_boundary/bbox_factor=1.1'
+    issues = '#18730'
+    requirement = "The system shall be able to support target boundary-restriction for transfer"
+  [../]
+
+  [./source_boundary]
+    type = 'Exodiff'
+    input = 'source_boundary_parent.i'
+    exodiff = 'source_boundary_parent_out.e source_boundary_parent_out_sub0.e source_boundary_parent_out_sub1.e'
+    issues = '#18730'
+    requirement = "The system shall be able to support source boundary-restriction for transfers"
+  [../]
+
+  [./source_target_boundary]
+    type = 'Exodiff'
+    input = 'source_boundary_parent.i'
+    exodiff = 'source_target_boundary.e source_target_boundary_sub0.e source_target_boundary_sub1.e'
+    issues = '#18730'
+    cli_args = 'Transfers/source_boundary/to_boundaries="right" Outputs/file_base="source_target_boundary"'
+    prereq = 'source_boundary'
+    requirement = "The system shall be able to support source-and-target boundary-restriction for transfer"
+  [../]
+[]

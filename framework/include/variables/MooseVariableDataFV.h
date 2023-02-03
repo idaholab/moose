@@ -20,6 +20,7 @@
 #include "libmesh/type_n_tensor.h"
 #include "libmesh/fe_type.h"
 #include "libmesh/dof_map.h"
+#include "libmesh/enum_fe_family.h"
 #include "DualRealOps.h"
 #include "SubProblem.h"
 
@@ -75,6 +76,7 @@ public:
 
   bool isNodal() const override { return false; }
   bool hasDoFsOnNodes() const override { return false; }
+  FEContinuity getContinuity() const override { return DISCONTINUOUS; }
 
   /**
    * Returns whether this data structure needs automatic differentiation calculations
