@@ -57,6 +57,12 @@
   petsc_options_value = 'lu superlu_dist'
 []
 
-[Outputs]
-  exodus = false
+[Reporters/solution_invalidity]
+  type = SolutionInvalidityReporter
+  execute_on = FINAL
+[]
+
+[Outputs/json]
+  type = JSON
+  execute_on = 'FINAL'
 []

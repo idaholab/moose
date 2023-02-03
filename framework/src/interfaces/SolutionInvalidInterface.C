@@ -37,15 +37,3 @@ SolutionInvalidInterface::registerInvalidSolutionInternal(const std::string & me
   return moose::internal::getSolutionInvalidityRegistry().registerInvalidity(
       _si_moose_object.type(), message);
 }
-
-InvalidSolutionID
-SolutionInvalidInterface::registerInvalidSolutionInternal(const std::string & message,
-                                                          const std::string & prefix) const
-{
-  if (prefix != "")
-    return moose::internal::getSolutionInvalidityRegistry().registerInvalidity(
-        _si_moose_object.type() + "::" + prefix, message);
-  else
-    return moose::internal::getSolutionInvalidityRegistry().registerInvalidity(
-        _si_moose_object.type(), message);
-}

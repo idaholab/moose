@@ -48,14 +48,13 @@ SolutionInvalidity::solutionInvalid() const
   bool is_invalid = false;
   for (auto & entry : _counts)
   {
-    if (entry.counts)
+    if (entry.counts || entry.timeiter_counts)
     {
       is_invalid = true;
       break;
     }
   }
 
-  // unsigned int invalid = is_invalid;
   comm().max(is_invalid);
   return is_invalid > 0;
 }
@@ -94,7 +93,6 @@ SolutionInvalidity::print(const ConsoleStream & console) const
 void
 SolutionInvalidity::sync()
 {
-  // to do: also send the object name, and the other two values of counts
   std::map<
       processor_id_type,
       std::vector<std::tuple<std::string, std::string, unsigned int, unsigned int, unsigned int>>>
@@ -114,7 +112,6 @@ SolutionInvalidity::sync()
       }
     }
 
-  // to do: act on the data
   const auto receive_data = [this](const processor_id_type libmesh_dbg_var(pid), const auto & data)
   {
     mooseAssert(pid != 0, "Should not be used except processor 0");
@@ -147,12 +144,12 @@ SolutionInvalidity::printDebug(InvalidSolutionID _invalid_solution_id) const
 SolutionInvalidity::FullTable
 SolutionInvalidity::summaryTable() const
 {
-  FullTable vtable({"Object", "Current", "Timestep", "Total", "Message"}, 4);
+  FullTable vtable({"Object", "Latest", "Timestep", "Total", "Message"}, 4);
 
   vtable.setColumnFormat({
       VariadicTableColumnFormat::AUTO, // Object Type
-      VariadicTableColumnFormat::AUTO, // Current Iteration Warnings
-      VariadicTableColumnFormat::AUTO, // Current Time Iteration Warnings
+      VariadicTableColumnFormat::AUTO, // Latest Iteration Warnings
+      VariadicTableColumnFormat::AUTO, // Latest Time Iteration Warnings
       VariadicTableColumnFormat::AUTO, // Total Iternation Warnings
       VariadicTableColumnFormat::AUTO, // Message
   });
@@ -160,8 +157,8 @@ SolutionInvalidity::summaryTable() const
   vtable.setColumnPrecision({
       1, // Object Name
 
-      0, // Current Iternation Warnings
-      0, // Current Time Iternation Warnings
+      0, // Latest Iternation Warnings
+      0, // Latest Time Iternation Warnings
       0, // Total Iteration Warnings
       1, // Message
   });
@@ -169,12 +166,12 @@ SolutionInvalidity::summaryTable() const
   for (const auto id : index_range(_counts))
   {
     const auto & entry = _counts[id];
-    if (entry.counts > 0)
+    if (entry.counts > 0 || entry.timeiter_counts > 0)
     {
       const auto & info = _solution_invalidity_registry.item(id);
       vtable.addRow(info.object_type,      // Object Type
-                    entry.counts,          // Current Iteration Warnings
-                    entry.timeiter_counts, // Current Time Iteration Warnings
+                    entry.counts,          // Latest Iteration Warnings
+                    entry.timeiter_counts, // Latest Time Iteration Warnings
                     entry.total_counts,    // Total Iternation Warnings
                     info.message           // Message
       );

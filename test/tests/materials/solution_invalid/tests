@@ -17,14 +17,26 @@
     issues = '#22814'
     requirement = 'The system shall allow overriding the solution validity checks.'
   []
+
   [immediately_print_invalid_solution]
     type = 'RunApp'
     input = 'solution_invalid.i'
     allow_warnings = true
     cli_args = 'Problem/immediately_print_invalid_solution=true'
-    expect_out = 'NonsafeMaterial::Diffusivity check: The diffusivity is greater than the threshold value!'
+    expect_out = 'NonsafeMaterial: The diffusivity is greater than the threshold value!'
     design = 'SolutionInvalidity.md'
     issues = '#22814'
     requirement = 'The system shall print out the solution invalid warning message right after it is detected.'
+  []
+
+  [solution_invalid_json]
+    requirement = "The system shall report the solution invalid summary:"
+
+      type = JSONDiff
+      allow_warnings = true
+      input = solution_invalid.i
+      jsondiff = 'solution_invalid_json.json'
+      design = 'SolutionInvalidity.md'
+      issues = '#22814'
   []
 []

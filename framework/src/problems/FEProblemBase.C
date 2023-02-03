@@ -271,6 +271,9 @@ FEProblemBase::validParams()
                         "Whether or not to report invalid solution warnings at the time the "
                         "warning is produced instead of after the calculation");
 
+  params.addParamNamesToGroup("allow_invalid_solution immediately_print_invalid_solution",
+                              "SolutionInvalidity Output Control");
+
   return params;
 }
 

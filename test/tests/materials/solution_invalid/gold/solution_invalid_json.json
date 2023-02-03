@@ -1,0 +1,42 @@
+{
+    "app_name": "main",
+    "current_time": "Wed Feb  8 14:22:42 2023",
+    "executable": "/Users/lim2/Research/MOOSE/mengnan/moose/test/moose_test-opt",
+    "executable_time": "Wed Feb  8 12:56:02 2023",
+    "libmesh_version": "",
+    "moose_version": "git commit f3323b3adb on 2023-02-03",
+    "petsc_version": "3.16.6",
+    "reporters": {
+        "solution_invalidity": {
+            "type": "SolutionInvalidityReporter",
+            "values": {
+                "solution_invalidity": {
+                    "type": "SolutionInvalidity const*"
+                }
+            }
+        }
+    },
+    "slepc_version": "3.16.2",
+    "time_steps": [
+        {
+            "solution_invalidity": {
+                "solution_invalidity": [
+                    {
+                        "latest_counts": 0,
+                        "object_type": "NonsafeMaterial",
+                        "timestep_counts": 64,
+                        "total_counts": 64
+                    },
+                    {
+                        "latest_counts": 0,
+                        "object_type": "NonsafeMaterial",
+                        "timestep_counts": 64,
+                        "total_counts": 64
+                    }
+                ]
+            },
+            "time": 1.0,
+            "time_step": 1
+        }
+    ]
+}

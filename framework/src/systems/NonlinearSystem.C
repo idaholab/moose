@@ -195,6 +195,8 @@ NonlinearSystem::solve()
 
   if (_time_integrator)
   {
+    // reset solution invalid counter for time iteration
+    _app.solutionInvalidity().resetSolutionInvalidTimeIter();
     _time_integrator->solve();
     _time_integrator->postSolve();
     _n_iters = _time_integrator->getNumNonlinearIterations();
@@ -210,7 +212,7 @@ NonlinearSystem::solve()
   // store info about the solve
   _final_residual = _nl_implicit_sys.final_nonlinear_residual();
 
-  // store the occurence of solution invalid warnings in local comulative counters
+  // store the occurence of solution invalid warnings in local cumulative counters
   _app.solutionInvalidity().solutionInvalidAccumulation();
 
   // determine whether solution invalid occures in the converged solution
@@ -229,9 +231,6 @@ NonlinearSystem::solve()
       // output the occurence of solution invalid in a summarry table
       _app.solutionInvalidity().print(_console);
   }
-
-  // reset solution invalid counter for time iteration
-  _app.solutionInvalidity().resetSolutionInvalidTimeIter();
 
   if (_use_coloring_finite_difference)
     MatFDColoringDestroy(&_fdcoloring);

@@ -58,6 +58,17 @@ public:
   /// Pass the number of solution invalid occurrences from current iteration to comulative counters
   void solutionInvalidAccumulation();
 
+  /// Struct used in _counts for storing invalid occurrences
+  struct InvalidCounts
+  {
+    unsigned int counts;
+    unsigned int timeiter_counts;
+    unsigned int total_counts;
+  };
+
+  /// Access the private solution invalidity counts
+  const std::vector<InvalidCounts> & counts() const { return _counts; }
+
   /**
    * Print the summary table of Solution Invalid warnings
    *  @param console The output stream to output to
@@ -87,14 +98,6 @@ private:
 
   /// The SolutionInvalidityRegistry
   SolutionInvalidityRegistry & _solution_invalidity_registry;
-
-  /// Struct used in _counts for storing invalid occurrences
-  struct InvalidCounts
-  {
-    unsigned int counts;
-    unsigned int timeiter_counts;
-    unsigned int total_counts;
-  };
 
   std::vector<InvalidCounts> _counts;
 };
