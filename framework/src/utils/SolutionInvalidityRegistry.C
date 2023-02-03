@@ -15,17 +15,25 @@ getSolutionInvalidityRegistry()
 }
 
 SolutionInvalidityRegistry::SolutionInvalidityRegistry()
-  : GeneralRegistry<std::string, SolutionInvalidityInfo>("SolutionInvalidityRegistry")
+  : GeneralRegistry<SolutionInvalidityName, SolutionInvalidityInfo, SoltionInvalidityNameHash>(
+        "SolutionInvalidityRegistry")
 {
 }
 
 InvalidSolutionID
-SolutionInvalidityRegistry::registerInvalidity(const std::string & object_name,
+SolutionInvalidityRegistry::registerInvalidity(const std::string & object_type,
                                                const std::string & message)
 {
-  const auto create_item = [&object_name, &message](const std::size_t id)
-  { return SolutionInvalidityInfo(id, object_name, message); };
-  return registerItem(object_name, create_item);
+  const SolutionInvalidityName name(object_type, message);
+  const auto create_item = [&object_type, &message](const std::size_t id)
+  { return SolutionInvalidityInfo(object_type, message, id); };
+  return registerItem(name, create_item);
 }
 
+std::ostream &
+operator<<(std::ostream & os, const SolutionInvalidityName & name)
+{
+  os << name.object_type << ": " << name.message;
+  return os;
+}
 }

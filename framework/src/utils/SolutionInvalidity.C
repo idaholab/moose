@@ -106,8 +106,11 @@ SolutionInvalidity::sync()
       if (entry.counts)
       {
         const auto & info = _solution_invalidity_registry.item(id);
-        data_to_send[0].emplace_back(
-            info._name, info._message, entry.counts, entry.timeiter_counts, entry.total_counts);
+        data_to_send[0].emplace_back(info.object_type,
+                                     info.message,
+                                     entry.counts,
+                                     entry.timeiter_counts,
+                                     entry.total_counts);
       }
     }
 
@@ -115,14 +118,15 @@ SolutionInvalidity::sync()
   const auto receive_data = [this](const processor_id_type libmesh_dbg_var(pid), const auto & data)
   {
     mooseAssert(pid != 0, "Should not be used except processor 0");
-    for (const auto & [name, message, counts, timeiter_counts, total_counts] : data)
+    for (const auto & [object_type, message, counts, timeiter_counts, total_counts] : data)
     {
       InvalidSolutionID masterId = 0;
+      const moose::internal::SolutionInvalidityName name(object_type, message);
       if (_solution_invalidity_registry.keyExists(name))
         masterId = _solution_invalidity_registry.id(name);
       else
-        masterId =
-            moose::internal::getSolutionInvalidityRegistry().registerInvalidity(name, message);
+        masterId = moose::internal::getSolutionInvalidityRegistry().registerInvalidity(object_type,
+                                                                                       message);
 
       _counts[masterId].counts += counts;
       _counts[masterId].timeiter_counts += timeiter_counts;
@@ -137,7 +141,7 @@ void
 SolutionInvalidity::printDebug(InvalidSolutionID _invalid_solution_id) const
 {
   const auto & info = _solution_invalidity_registry.item(_invalid_solution_id);
-  _console << info._name << ": " << info._message << "\n" << std::flush;
+  _console << info.object_type << ": " << info.message << "\n" << std::flush;
 }
 
 SolutionInvalidity::FullTable
@@ -146,7 +150,7 @@ SolutionInvalidity::summaryTable() const
   FullTable vtable({"Object", "Current", "Timestep", "Total", "Message"}, 4);
 
   vtable.setColumnFormat({
-      VariadicTableColumnFormat::AUTO, // Object Name
+      VariadicTableColumnFormat::AUTO, // Object Type
       VariadicTableColumnFormat::AUTO, // Current Iteration Warnings
       VariadicTableColumnFormat::AUTO, // Current Time Iteration Warnings
       VariadicTableColumnFormat::AUTO, // Total Iternation Warnings
@@ -155,6 +159,7 @@ SolutionInvalidity::summaryTable() const
 
   vtable.setColumnPrecision({
       1, // Object Name
+
       0, // Current Iternation Warnings
       0, // Current Time Iternation Warnings
       0, // Total Iteration Warnings
@@ -167,11 +172,11 @@ SolutionInvalidity::summaryTable() const
     if (entry.counts > 0)
     {
       const auto & info = _solution_invalidity_registry.item(id);
-      vtable.addRow(info._name,            // Object Name
+      vtable.addRow(info.object_type,      // Object Type
                     entry.counts,          // Current Iteration Warnings
                     entry.timeiter_counts, // Current Time Iteration Warnings
                     entry.total_counts,    // Total Iternation Warnings
-                    info._message          // Message
+                    info.message           // Message
       );
     }
   }

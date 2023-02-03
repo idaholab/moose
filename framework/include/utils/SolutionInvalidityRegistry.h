@@ -18,30 +18,6 @@
 namespace moose::internal
 {
 class SolutionInvalidityRegistry;
-class SolutionInvalidityInfo;
-/**
- * Used to hold metadata about the registered sections
- * Note: this is a class instead of a struct because structs
- * are not able to be created in place using emplace_back in
- * C++11.  This will be fixed in C++20.
- */
-class SolutionInvalidityInfo
-{
-public:
-  SolutionInvalidityInfo(InvalidSolutionID id,
-                         const std::string & name,
-                         const std::string & message)
-    : _id(id), _name(name), _message(message)
-  {
-  }
-
-  /// Unique ID
-  InvalidSolutionID _id;
-  /// The name
-  std::string _name;
-  /// The message
-  std::string _message;
-};
 
 /**
  * Get the global SolutionInvalidityRegistry singleton.
@@ -49,40 +25,76 @@ public:
 SolutionInvalidityRegistry & getSolutionInvalidityRegistry();
 
 /**
+ * Helper class that stores the name associated with an invalid solution
+ */
+class SolutionInvalidityName
+{
+public:
+  SolutionInvalidityName(const std::string & object_type, const std::string & message)
+    : object_type(object_type), message(message)
+  {
+  }
+
+  bool operator==(const SolutionInvalidityName & other) const
+  {
+    return object_type == other.object_type && message == other.message;
+  }
+
+  /// The type of the object
+  std::string object_type;
+  /// The invalid message
+  std::string message;
+};
+
+struct SoltionInvalidityNameHash
+{
+  inline size_t operator()(const SolutionInvalidityName & name) const
+  {
+    size_t seed = 0;
+    Moose::hash_combine(seed, name.object_type, name.message);
+    return seed;
+  }
+};
+
+std::ostream & operator<<(std::ostream & os, const SolutionInvalidityName & name);
+
+/**
+ * Helper class that stores the info associated with an invalid solution
+ */
+class SolutionInvalidityInfo : public SolutionInvalidityName
+{
+public:
+  SolutionInvalidityInfo(const std::string & object_type,
+                         const std::string & message,
+                         const InvalidSolutionID id)
+    : SolutionInvalidityName(object_type, message), id(id)
+  {
+  }
+
+  /// The solution ID
+  InvalidSolutionID id;
+};
+
+/**
  * The place where all sections with solution invalid warnings will be stored
  */
-class SolutionInvalidityRegistry : public GeneralRegistry<std::string, SolutionInvalidityInfo>
+class SolutionInvalidityRegistry : public GeneralRegistry<SolutionInvalidityName,
+                                                          SolutionInvalidityInfo,
+                                                          SoltionInvalidityNameHash>
 {
 public:
   /**
    * Call to register an invalid calculation
    *
-   * @param object_name The name of the object doing the registration
+   * @param object_type The type of the object doing the registration
    * @param message The description of the solution invalid warning
    * @return The registered ID
    */
-  InvalidSolutionID registerInvalidity(const std::string & object_name,
+  InvalidSolutionID registerInvalidity(const std::string & object_type,
                                        const std::string & message);
 
 private:
   SolutionInvalidityRegistry();
-
-  /**
-   * Special accessor just for SolutionInvalidity so that
-   * no locking is needed in SolutionInvalidity.  This could
-   * probably be removed once we have C++17 with shared_mutex
-   *
-   * This function is NOT threadsafe - but it is ok
-   * for SolutionInvalidity to call it because only the main
-   * thread will be registering sections and only
-   * the main thread will be running SolutionInvalidity routines
-   *
-   * @return the SolutionInvalidityInfo associated with the section_id
-   */
-  const SolutionInvalidityInfo & readSectionInfo(InvalidSolutionID section_id) const
-  {
-    return itemNonLocking(section_id);
-  };
 
   /// So it can be constructed
   friend SolutionInvalidityRegistry & getSolutionInvalidityRegistry();
@@ -90,5 +102,3 @@ private:
   friend class SolutionInvalidity;
 };
 }
-
-// std::ostream & operator<<(std::ostream & os, const moose::internal::SolutionInvalidityKey & key);
