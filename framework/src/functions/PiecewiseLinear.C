@@ -10,25 +10,19 @@
 #include "PiecewiseLinear.h"
 
 registerMooseObject("MooseApp", PiecewiseLinear);
-registerMooseObject("MooseApp", ADPiecewiseLinear);
 
-template <typename BaseClass>
 InputParameters
-PiecewiseLinearTempl<BaseClass>::validParams()
+PiecewiseLinear::validParams()
 {
-  InputParameters params = BaseClass::validParams();
+  InputParameters params = PiecewiseLinearBase::validParams();
   params.addParam<bool>(
       "extrap", false, "If true, extrapolates when sample point is outside of abscissa range");
   params.addClassDescription("Linearly interpolates between pairs of x-y data");
   return params;
 }
 
-template <typename BaseClass>
-PiecewiseLinearTempl<BaseClass>::PiecewiseLinearTempl(const InputParameters & parameters)
-  : BaseClass(parameters)
+PiecewiseLinear::PiecewiseLinear(const InputParameters & parameters)
+  : PiecewiseLinearBase(parameters)
 {
   this->buildInterpolation(this->template getParam<bool>("extrap"));
 }
-
-template class PiecewiseLinearTempl<PiecewiseLinearBase>;
-template class PiecewiseLinearTempl<ADPiecewiseLinearBase>;

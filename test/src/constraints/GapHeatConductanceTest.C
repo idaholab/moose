@@ -42,8 +42,8 @@ GapHeatConductanceTest::GapHeatConductanceTest(const InputParameters & parameter
   : ADMortarConstraint(parameters),
     _secondary_gap_conductance(getADMaterialProperty<Real>("secondary_gap_conductance")),
     _primary_gap_conductance(getNeighborADMaterialProperty<Real>("primary_gap_conductance")),
-    _secondary_mms_function(getFunction<Real>("secondary_mms_function")),
-    _primary_mms_function(getFunctionByName<Real>(getParam<FunctionName>("primary_mms_function"))),
+    _secondary_mms_function(getFunction("secondary_mms_function")),
+    _primary_mms_function(getFunctionByName(getParam<FunctionName>("primary_mms_function"))),
     _functor_evals_for_primal(getParam<bool>("functor_evals_for_primal"))
 {
 }

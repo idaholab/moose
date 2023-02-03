@@ -37,26 +37,3 @@ FunctionInterface::getFunctionByName(const FunctionName & name) const
 {
   return _fni_feproblem.getFunction(name, _fni_tid);
 }
-
-template <typename T>
-const FunctionTempl<T> &
-FunctionInterface::getFunction(const std::string & name) const
-{
-  return _fni_feproblem.getFunction<T>(_fni_params.get<FunctionName>(name), _fni_tid);
-}
-
-template <typename T>
-const FunctionTempl<T> &
-FunctionInterface::getFunctionByName(const FunctionName & name) const
-{
-  return _fni_feproblem.getFunction<T>(name, _fni_tid);
-}
-
-template const FunctionTempl<Real> &
-FunctionInterface::getFunction<Real>(const std::string & name) const;
-template const FunctionTempl<ADReal> &
-FunctionInterface::getFunction<ADReal>(const std::string & name) const;
-template const FunctionTempl<Real> &
-FunctionInterface::getFunctionByName<Real>(const FunctionName & name) const;
-template const FunctionTempl<ADReal> &
-FunctionInterface::getFunctionByName<ADReal>(const FunctionName & name) const;
