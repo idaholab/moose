@@ -16,6 +16,7 @@
 #include "FEProblemBase.h"
 
 registerMooseObjectAliased("MooseApp", MooseParsedFunction, "ParsedFunction");
+registerMooseObjectRenamed("MooseApp", ADParsedFunction, "02/03/2024 00:00", MooseParsedFunction);
 
 InputParameters
 MooseParsedFunction::validParams()
