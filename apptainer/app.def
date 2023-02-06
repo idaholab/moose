@@ -72,7 +72,7 @@ From: {{ APPTAINER_FROM }}
     export PATH=/opt/{{ BINARY_NAME }}/bin:$PATH
 {%- endif %}
 {%- if SECTION_ENVIRONMENT is defined %}
-    {{ SECTOIN_ENVIRONMENT }}
+    {{ SECTION_ENVIRONMENT }}
 {%- endif %}
 %post
     # Load jinja vars
