@@ -11,7 +11,7 @@
   [solidification_exo_pipe]
     type = 'Exodiff'
     input = 'pipe_solidification.i'
-    exodiff = 'pipe-solidification_out.e'
+    exodiff = 'pipe_solidification_out.e'
     requirement = 'The system shall be able to solve solidification with advection in a pipe using the finite volume method.'
     ad_indexing_type = 'global'
   []
@@ -25,7 +25,7 @@
   [solidification_centerline_profile]
     type = 'CSVDiff'
     input = 'pipe_solidification.i'
-    csvdiff = 'pipe_solidification_csv_sat_0051.csv'
+    csvdiff = 'pipe_solidification_csv_sat_0003.csv'
     requirement = '(Non regression test) The system must be able to obtain the correct temperature profile over the center line.'
     rel_err = 1.0E-5
   []

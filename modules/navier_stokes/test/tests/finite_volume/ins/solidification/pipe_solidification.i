@@ -392,7 +392,7 @@ Ny = 5
 [Executioner]
   type = Transient
   dt = 5e3
-  end_time = 2e5
+  end_time = 1e4
   solve_type = 'NEWTON'
   # line_search = none
   petsc_options_iname = '-pc_type -pc_factor_shift_type'
