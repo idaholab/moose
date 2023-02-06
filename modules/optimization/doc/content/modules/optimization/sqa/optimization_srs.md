@@ -1,4 +1,4 @@
-!template load file=sqa/module_srs.md.template app=Optimization category=optimization
+!template load file=sqa/module_srs.md.template module=Optimization category=optimization
 
 !template! item key=system-purpose
 !! system-purpose-begin

@@ -5,6 +5,8 @@
     nx = 10
     ny = 10
   []
+  coord_type = RZ
+  rz_coord_axis = X
 []
 
 [Variables]
@@ -36,8 +38,6 @@
 
 [Problem]
   type = FEProblem
-  coord_type = RZ
-  rz_coord_axis = X
 []
 
 [Executioner]

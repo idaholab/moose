@@ -1,4 +1,4 @@
-!template load file=sqa/module_sdd.md.template app=Optimization category=optimization
+!template load file=sqa/module_sdd.md.template module=Optimization category=optimization
 
 !template! item key=introduction
 The [!ac](MOOSE) {{module}} module is based on the MOOSE framework and thus inherits
