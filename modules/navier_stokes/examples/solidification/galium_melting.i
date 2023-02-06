@@ -1,3 +1,9 @@
+##########################################################
+# Simulation of Galium Melting Experiment
+# Ref: Gau, C., & Viskanta, R. (1986). Melting and solidification of a pure metal on a vertical wall.
+# Key phsics: melting/solidification, convective heat transfer, natural convection
+##########################################################
+
 mu = 1.81e-3
 rho_solid = 6093
 rho_liquid = 6093
