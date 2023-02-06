@@ -5,6 +5,7 @@ To install the MOOSE Framework, click the link below that corresponds to your op
 - [Linux and MacOS](installation/conda.md)
 - [installation/windows.md]
 - [installation/docker.md]
+- [installation/inl_hpc_prebuilt_moose.md]
 - Advanced Instructions:
 
   - [installation/hpc_install_moose.md]
