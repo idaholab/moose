@@ -32,6 +32,8 @@ public:
   virtual ~FeatureFloodCountAux() {}
 
 protected:
+  using FieldType = FeatureFloodCount::FieldType;
+
   virtual Real computeValue() override;
   virtual void precalculateValue() override;
 
@@ -39,10 +41,8 @@ protected:
   const FeatureFloodCount & _flood_counter;
 
   const std::size_t _var_idx;
-  const MooseEnum _field_display;
+  const FieldType _field_type;
   bool _var_coloring;
-
-  const FeatureFloodCount::FieldType _field_type;
 
   /// precalculated element value
   Real _value;

@@ -107,6 +107,7 @@ public:
     HALOS,
     CENTROID,
     ACTIVE_BOUNDS,
+    INTERSECTS_SPECIFIED_BOUNDARY,
   };
 
   // Retrieve field information
@@ -306,7 +307,7 @@ public:
     /// The status of a feature (used mostly in derived classes like the GrainTracker)
     Status _status;
 
-    /// Enumaration indicating boundary intersection status
+    /// Enumeration indicating boundary intersection status
     BoundaryIntersection _boundary_intersection;
 
     FeatureData duplicate() const { return FeatureData(*this); }
