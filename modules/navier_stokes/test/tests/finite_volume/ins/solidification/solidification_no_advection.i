@@ -142,31 +142,6 @@ N = 10
   steady_state_detection = true
 []
 
-[Postprocessors]
-  # [average_T]
-  #   type = ElementAverageValue
-  #   variable = T
-  #   outputs = csv
-  #   execute_on = FINAL
-  # []
-[]
-
-[VectorPostprocessors]
-  # [sat]
-  #   type = LineValueSampler
-  #   warn_discontinuous_face_values = false
-  #   start_point = '4.5 ${fparse 0.5/Ny/2.0} 0'
-  #   end_point = '4.5 ${fparse 0.5 - 0.5/Ny/2.0} 0'
-  #   num_points = '${Ny}'
-  #   sort_by = y
-  #   variable = 'T'
-  # []
-[]
-
 [Outputs]
   exodus = true
-  [csv]
-    type = CSV
-    execute_on = 'FINAL'
-  []
 []

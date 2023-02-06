@@ -1,20 +1,22 @@
-mu = 1.81e-3
-rho_solid = 6093
-rho_liquid = 6093
-k_solid = 32
-k_liquid = 32
-cp_solid = 381.5
-cp_liquid = 381.5
-L = 80160
-alpha_b = 1.2e-4
-T_liquidus = '${fparse 302.93+0.1}'
-T_solidus = 302.93
+mu = 8.8871e-4
+rho_solid = 997.561
+rho_liquid = 997.561
+k_solid = '${fparse 0.6203}'
+k_liquid = '${fparse 0.6203}'
+cp_solid = 4181.72
+cp_liquid = 4181.72
+L = 3e5
+T_liquidus = 285
+T_solidus = 280
+
 advected_interp_method = 'average'
 velocity_interp_method = 'rc'
-T_cold = 301.15
-T_hot = 311.15
-Nx = 20
-Ny = 20
+
+U_inlet = '${fparse 0.5 * mu / rho_liquid / 0.5}'
+T_inlet = 300.0
+T_cold = 200.0
+Nx = 30
+Ny = 5
 
 [GlobalParams]
   rhie_chow_user_object = 'rc'
@@ -35,16 +37,49 @@ Ny = 20
 []
 
 [Mesh]
-  coord_type = 'XYZ'
+  coord_type = 'RZ'
+  rz_coord_axis = 'X'
   [gen]
     type = GeneratedMeshGenerator
     dim = 2
     xmin = 0
-    xmax = 88.9e-3
+    xmax = 10
     ymin = 0
-    ymax = 63.5e-3
+    ymax = '${fparse 0.5 * 1.0}'
     nx = ${Nx}
     ny = ${Ny}
+    bias_y = '${fparse 1 / 1.2}'
+  []
+  [rename1]
+    type = RenameBoundaryGenerator
+    input = gen
+    old_boundary = 'left'
+    new_boundary = 'inlet'
+  []
+  [rename2]
+    type = RenameBoundaryGenerator
+    input = rename1
+    old_boundary = 'right'
+    new_boundary = 'outlet'
+  []
+  [rename3]
+    type = RenameBoundaryGenerator
+    input = rename2
+    old_boundary = 'bottom'
+    new_boundary = 'symmetry'
+  []
+  [rename4]
+    type = RenameBoundaryGenerator
+    input = rename3
+    old_boundary = 'top'
+    new_boundary = 'wall'
+  []
+  [rename5]
+    type = ParsedGenerateSideset
+    input = rename4
+    normal = '0 1 0'
+    combinatorial_geometry = 'x>2.0 & x<8.0'
+    new_sideset_name = 'cooled_wall'
   []
 []
 
@@ -56,7 +91,7 @@ Ny = 20
   []
   [fl]
     type = MooseVariableFVReal
-    initial_condition = 0.0
+    initial_condition = 1.0
   []
   [density]
     order = CONSTANT
@@ -139,18 +174,15 @@ Ny = 20
   [pressure]
     type = INSFVPressureVariable
   []
-  [lambda]
-    family = SCALAR
-    order = FIRST
-  []
   [T]
     type = INSFVEnergyVariable
-    initial_condition = '${T_cold}'
+    initial_condition = '${T_inlet}'
     scaling = 1.0
   []
 []
 
 [FVKernels]
+
   #inactive = 'u_time v_time T_time'
 
   [mass]
@@ -159,12 +191,6 @@ Ny = 20
     advected_interp_method = ${advected_interp_method}
     velocity_interp_method = ${velocity_interp_method}
     rho = rho_mixture
-  []
-  [mean_zero_pressure]
-    type = FVIntegralValueConstraint
-    variable = pressure
-    lambda = lambda
-    phi0 = 0.0
   []
 
   [u_time]
@@ -200,22 +226,6 @@ Ny = 20
     linear_coef_name = 'Darcy_coefficient'
     quadratic_coef_name = 'Forchheimer_coefficient'
   []
-  [u_buoyancy]
-    type = INSFVMomentumBoussinesq
-    variable = vel_x
-    T_fluid = T
-    gravity = '0 -9.81 0'
-    rho = '${rho_liquid}'
-    ref_temperature = ${T_cold}
-    momentum_component = 'x'
-  []
-  [u_gravity]
-    type = INSFVMomentumGravity
-    variable = vel_x
-    gravity = '0 -9.81 0'
-    rho = '${rho_liquid}'
-    momentum_component = 'x'
-  []
 
   [v_time]
     type = INSFVMomentumTimeDerivative
@@ -250,22 +260,6 @@ Ny = 20
     linear_coef_name = 'Darcy_coefficient'
     quadratic_coef_name = 'Forchheimer_coefficient'
   []
-  [v_buoyancy]
-    type = INSFVMomentumBoussinesq
-    variable = vel_y
-    T_fluid = T
-    gravity = '0 -9.81 0'
-    rho = '${rho_liquid}'
-    ref_temperature = ${T_cold}
-    momentum_component = 'y'
-  []
-  [v_gravity]
-    type = INSFVMomentumGravity
-    variable = vel_y
-    gravity = '0 -9.81 0'
-    rho = '${rho_liquid}'
-    momentum_component = 'y'
-  []
 
   [T_time]
     type = INSFVEnergyTimeDerivative
@@ -293,37 +287,87 @@ Ny = 20
     T_solidus = ${T_solidus}
     rho = 'rho_mixture'
   []
-
 []
 
 [FVBCs]
+  [inlet-u]
+    type = INSFVInletVelocityBC
+    boundary = 'inlet'
+    variable = vel_x
+    function = '${U_inlet}'
+  []
+  [sym_u]
+    type = INSFVSymmetryVelocityBC
+    boundary = 'symmetry'
+    variable = vel_x
+    u = vel_x
+    v = vel_y
+    mu = ${mu}
+    momentum_component = 'x'
+  []
+  [inlet-v]
+    type = INSFVInletVelocityBC
+    boundary = 'inlet'
+    variable = vel_y
+    function = 0
+  []
   [walls-u]
     type = INSFVNoSlipWallBC
-    boundary = 'left right top bottom'
+    boundary = 'wall'
     variable = vel_x
     function = 0
   []
   [walls-v]
     type = INSFVNoSlipWallBC
-    boundary = 'left right top bottom'
+    boundary = 'wall'
     variable = vel_y
     function = 0
   []
-  [hot_wall]
-    type = FVDirichletBC
-    variable = T
-    value = '${T_hot}'
-    boundary = 'left'
+  [sym_v]
+    type = INSFVSymmetryVelocityBC
+    boundary = 'symmetry'
+    variable = vel_y
+    u = vel_x
+    v = vel_y
+    mu = ${mu}
+    momentum_component = y
   []
-  [cold_wall]
-    type = FVDirichletBC
+  [outlet_p]
+    type = INSFVOutletPressureBC
+    boundary = 'outlet'
+    variable = pressure
+    function = 0
+  []
+  [sym_p]
+    type = INSFVSymmetryPressureBC
+    boundary = 'symmetry'
+    variable = pressure
+  []
+  # [inlet_T]
+  #   type = FVDirichletBC
+  #   boundary = 'inlet'
+  #   variable = T
+  #   value = 400.0
+  # []
+  [sym_T]
+    type = INSFVSymmetryScalarBC
     variable = T
-    value = '${T_cold}'
-    boundary = 'right'
+    boundary = 'symmetry'
+  []
+  [cooled_wall]
+    type = FVFunctorDirichletBC
+    variable = T
+    functor = '${T_cold}'
+    boundary = 'cooled_wall'
   []
 []
 
 [Materials]
+  # [const]
+  #   type = ADGenericFunctorMaterial
+  #   prop_names = 'cp'
+  #   prop_values = '${cp}'
+  # []
   [ins_fv]
     type = INSFVEnthalpyMaterial
     rho = rho_mixture
@@ -343,26 +387,12 @@ Ny = 20
     mu = '${mu}'
     rho_l = '${rho_liquid}'
   []
-  [const_functor]
-    type = ADGenericFunctorMaterial
-    prop_names = 'alpha_b'
-    prop_values = '${alpha_b}'
-  []
 []
 
 [Executioner]
   type = Transient
-
-  # Time-stepping parameters
-  start_time = 0.0
-  end_time = 1000.0
-
-  [TimeStepper]
-    type = IterationAdaptiveDT
-    optimal_iterations = 10
-    dt = 0.1
-  []
-
+  dt = 5e3
+  end_time = 2e5
   solve_type = 'NEWTON'
   # line_search = none
   petsc_options_iname = '-pc_type -pc_factor_shift_type'
@@ -372,31 +402,31 @@ Ny = 20
 []
 
 [Postprocessors]
-  # [average_T]
-  #   type = ElementAverageValue
-  #   variable = T
-  #   outputs = csv
-  #   execute_on = FINAL
-  # []
+  [average_T]
+    type = ElementAverageValue
+    variable = T
+    outputs = csv
+    execute_on = FINAL
+  []
 []
 
 [VectorPostprocessors]
-  # [sat]
-  #   type = LineValueSampler
-  #   warn_discontinuous_face_values = false
-  #   start_point = '4.5 ${fparse 0.5/Ny/2.0} 0'
-  #   end_point = '4.5 ${fparse 0.5 - 0.5/Ny/2.0} 0'
-  #   num_points = '${Ny}'
-  #   sort_by = y
-  #   variable = 'T'
-  # []
+  [sat]
+    type = LineValueSampler
+    warn_discontinuous_face_values = false
+    start_point = '0.0 0 0'
+    end_point = '10.0 0 0'
+    num_points = '${Nx}'
+    sort_by = x
+    variable = 'T'
+    execute_on = FINAL
+  []
 []
 
 [Outputs]
   exodus = true
-  csv = false
-  # [csv]
-  #   type = CSV
-  #   execute_on = 'FINAL'
-  # []
+  [csv]
+    type = CSV
+    execute_on = 'FINAL'
+  []
 []

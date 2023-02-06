@@ -1,0 +1,32 @@
+[Tests]
+  # design = 'navier_stokes/index.md NSFVAction.md'
+  # issues = '#15640 #19472'
+  [solidification_exo_no_advection]
+    type = 'Exodiff'
+    input = 'solidification_no_advection.i'
+    exodiff = 'solidification_no_advection_out.e'
+    requirement = 'The system shall be able to solve solidification without advection using the finite volume method.'
+    ad_indexing_type = 'global'
+  []
+  [solidification_exo_pipe]
+    type = 'Exodiff'
+    input = 'pipe_solidification.i'
+    exodiff = 'pipe-solidification_out.e'
+    requirement = 'The system shall be able to solve solidification with advection in a pipe using the finite volume method.'
+    ad_indexing_type = 'global'
+  []
+  [solidification_enthalpy_balance]
+    type = 'CSVDiff'
+    input = 'pipe_solidification.i'
+    csvdiff = 'pipe_solidification_csv.csv'
+    requirement = 'The system shall be able to conserve energy during solidification.'
+    rel_err = 1.0E-5
+  []
+  [solidification_centerline_profile]
+    type = 'CSVDiff'
+    input = 'pipe_solidification.i'
+    csvdiff = 'pipe_solidification_csv_sat_0051.csv'
+    requirement = '(Non regression test) The system must be able to obtain the correct temperature profile over the center line.'
+    rel_err = 1.0E-5
+  []
+[]
