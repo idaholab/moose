@@ -194,6 +194,14 @@ protected:
                                                       void * context);
 
 protected:
+  /**
+   * Gets the name of a piece of restartable data given a data name, adding
+   * the system name and object name prefix.
+   *
+   * This should only be used in this interface and in testing.
+   */
+  std::string restartableName(const std::string & data_name) const;
+
   /// Reference to the application
   MooseApp & _restartable_app;
 
@@ -238,7 +246,7 @@ template <typename T>
 T &
 Restartable::declareRestartableDataWithContext(const std::string & data_name, void * context)
 {
-  std::string full_name = _restartable_system_name + "/" + _restartable_name + "/" + data_name;
+  const auto full_name = restartableName(data_name);
   auto data_ptr = std::make_unique<RestartableData<T>>(full_name, context);
 
   // See comment in overloaded version of this function with "init_value"
@@ -254,7 +262,7 @@ Restartable::declareRestartableDataWithContext(const std::string & data_name,
                                                const T & init_value,
                                                void * context)
 {
-  std::string full_name = _restartable_system_name + "/" + _restartable_name + "/" + data_name;
+  const auto full_name = restartableName(data_name);
 
   // Here we will create the RestartableData even though we may not use this instance.
   // If it's already in use, the App will return a reference to the existing instance and we'll
@@ -297,7 +305,7 @@ template <typename T>
 T &
 Restartable::declareRecoverableData(const std::string & data_name)
 {
-  std::string full_name = _restartable_system_name + "/" + _restartable_name + "/" + data_name;
+  const auto full_name = restartableName(data_name);
 
   registerRestartableNameWithFilterOnApp(full_name, Moose::RESTARTABLE_FILTER::RECOVERABLE);
 
@@ -308,7 +316,7 @@ template <typename T>
 T &
 Restartable::declareRecoverableData(const std::string & data_name, const T & init_value)
 {
-  std::string full_name = _restartable_system_name + "/" + _restartable_name + "/" + data_name;
+  const auto full_name = restartableName(data_name);
 
   registerRestartableNameWithFilterOnApp(full_name, Moose::RESTARTABLE_FILTER::RECOVERABLE);
 
