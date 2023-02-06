@@ -79,7 +79,7 @@
         Materials/mat/prop_names='density specific_heat thermal_conductivity'
         Materials/mat/prop_values='1 1 1'
         Components/hs_coupling_1_2/primary_heat_structure=hs4"
-      expect_err = "The type of the heat structure 'hs4' is not 'HeatStructurePlate' or inherited from 'HeatStructureCylindricalBase'"
+      expect_err = "The component 'hs4' is not of type 'HeatStructureBase'"
 
       detail = 'the types of either coupled heat structure is invalid.'
     []

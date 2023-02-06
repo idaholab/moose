@@ -13,11 +13,11 @@
 InputParameters
 Component1D::validParams()
 {
-  InputParameters params = GeometricalComponent::validParams();
+  InputParameters params = GeneratedMeshComponent::validParams();
   return params;
 }
 
-Component1D::Component1D(const InputParameters & parameters) : GeometricalComponent(parameters) {}
+Component1D::Component1D(const InputParameters & parameters) : GeneratedMeshComponent(parameters) {}
 
 void
 Component1D::buildMeshNodes()

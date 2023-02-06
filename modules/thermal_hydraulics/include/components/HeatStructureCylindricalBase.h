@@ -20,7 +20,6 @@ public:
   HeatStructureCylindricalBase(const InputParameters & params);
 
   virtual void setupMesh() override;
-  virtual void addMooseObjects() override;
   virtual Real getUnitPerimeter(const HeatStructureSideType & side) const override;
 
   /**
@@ -31,6 +30,8 @@ public:
   virtual Real getInnerRadius() const { return _inner_radius; }
 
 protected:
+  virtual bool useCylindricalTransformation() const override { return true; }
+
   /// Inner radius of the heat structure
   Real _inner_radius;
 

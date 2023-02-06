@@ -9,6 +9,7 @@
 
 #include "HSBoundaryHeatFlux.h"
 #include "HeatConductionModel.h"
+#include "HeatStructureInterface.h"
 #include "HeatStructureCylindricalBase.h"
 
 registerMooseObject("ThermalHydraulicsApp", HSBoundaryHeatFlux);
@@ -51,7 +52,7 @@ HSBoundaryHeatFlux::check() const
 void
 HSBoundaryHeatFlux::addMooseObjects()
 {
-  const HeatStructureBase & hs = getComponent<HeatStructureBase>("hs");
+  const HeatStructureInterface & hs = getComponent<HeatStructureInterface>("hs");
   const HeatStructureCylindricalBase * hs_cyl =
       dynamic_cast<const HeatStructureCylindricalBase *>(&hs);
   const bool is_cylindrical = hs_cyl != nullptr;
@@ -64,8 +65,8 @@ HSBoundaryHeatFlux::addMooseObjects()
     pars.set<FunctionName>("function") = _q_fn_name;
     if (is_cylindrical)
     {
-      pars.set<Point>("axis_point") = hs.getPosition();
-      pars.set<RealVectorValue>("axis_dir") = hs.getDirection();
+      pars.set<Point>("axis_point") = hs_cyl->getPosition();
+      pars.set<RealVectorValue>("axis_dir") = hs_cyl->getDirection();
       pars.set<Real>("offset") = hs_cyl->getInnerRadius() - hs_cyl->getAxialOffset();
     }
     if (isParamValid("scale_pp"))
@@ -81,8 +82,8 @@ HSBoundaryHeatFlux::addMooseObjects()
     InputParameters pars = _factory.getValidParams(class_name);
     pars.set<std::vector<BoundaryName>>("boundary") = _boundary;
     pars.set<FunctionName>("function") = _q_fn_name;
-    pars.set<Point>("axis_point") = hs.getPosition();
-    pars.set<RealVectorValue>("axis_dir") = hs.getDirection();
+    pars.set<Point>("axis_point") = hs_cyl->getPosition();
+    pars.set<RealVectorValue>("axis_dir") = hs_cyl->getDirection();
     pars.set<Real>("offset") = hs_cyl->getInnerRadius() - hs_cyl->getAxialOffset();
     pars.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
     getTHMProblem().addPostprocessor(class_name, genSafeName(name(), "integral"), pars);
