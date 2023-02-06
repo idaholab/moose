@@ -160,7 +160,7 @@ MultiAppShapeEvaluationTransfer::transferVariable(unsigned int i)
 
         points.clear();
         point_ids.clear();
-        // grap sample points
+        // grab sample points
         // for constant shape function, we take the element centroid
         if (is_constant)
         {

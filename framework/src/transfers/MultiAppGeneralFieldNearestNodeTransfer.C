@@ -35,6 +35,8 @@ MultiAppGeneralFieldNearestNodeTransfer::validParams()
 
   // Nearest node is historically more an extrapolation transfer
   params.set<bool>("from_app_must_contain_point") = false;
+  params.set<Real>("extrapolation_constant") = GeneralFieldTransfer::BetterOutOfMeshValue;
+  params.suppressParameter<Real>("extrapolation_constant");
   // We dont keep track of both point distance to app and to nearest node
   params.set<bool>("use_nearest_app") = false;
   params.suppressParameter<bool>("use_nearest_app");

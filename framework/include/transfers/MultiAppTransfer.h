@@ -118,7 +118,7 @@ public:
    * This method will fill information into the convenience member variables
    * (_to_problems, _from_meshes, etc.)
    */
-  void getAppInfo();
+  virtual void getAppInfo();
 
 protected:
   /**
