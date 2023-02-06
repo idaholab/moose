@@ -749,6 +749,14 @@ public:
   std::vector<std::string> getMeshGeneratorNames() const;
 
   /**
+   * Whether not a mesh generator exists with the given name
+   * Note: This function should be called after all mesh generators are added with the
+   * 'add_mesh_generator' task. Otherwise, this will only check if a generator with the given
+   * name has been constructed _so far_.
+   */
+  bool hasMeshGenerator(const std::string & name) const;
+
+  /**
    * Get a refernce to a pointer that will be the output of the
    * MeshGenerator named name
    */

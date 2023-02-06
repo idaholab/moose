@@ -2027,6 +2027,15 @@ MooseApp::getMeshGeneratorNames() const
   return names;
 }
 
+bool
+MooseApp::hasMeshGenerator(const std::string & name) const
+{
+  return std::find_if(_mesh_generators.begin(),
+                      _mesh_generators.end(),
+                      [&name](const auto & pair)
+                      { return pair.first == name; }) != _mesh_generators.end();
+}
+
 std::unique_ptr<MeshBase> &
 MooseApp::getMeshGeneratorOutput(const std::string & name)
 {
