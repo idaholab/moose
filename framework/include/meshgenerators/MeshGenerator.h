@@ -219,8 +219,7 @@ MeshGenerator::setMeshProperty(const std::string & data_name, const T & data_val
   if (!_app.executingMeshGenerators())
     mooseError("Updating mesh meta data cannot occur in the constructor of mesh generators");
 
-  std::string full_name =
-      std::string(MeshMetaDataInterface::SYSTEM) + "/" + name() + "/" + data_name;
+  const auto full_name = MeshMetaDataInterface::meshPropertyName(name(), data_name);
 
   if (_app.getRestartableMetaData(full_name, MooseApp::MESH_META_DATA, 0).type() !=
       MooseUtils::prettyCppType(&data_value))
