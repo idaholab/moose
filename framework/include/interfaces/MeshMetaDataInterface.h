@@ -59,6 +59,9 @@ protected:
    */
   bool hasMeshProperty(const std::string & data_name, const std::string & prefix) const;
 
+  /**
+   * @returns The full name for mesh property data.
+   */
   static std::string meshPropertyName(const std::string & prefix, const std::string & data_name);
 
 private:
@@ -75,7 +78,7 @@ const T &
 MeshMetaDataInterface::getMeshProperty(const std::string & data_name, const std::string & prefix)
 
 {
-  std::string full_name = std::string(SYSTEM) + "/" + prefix + "/" + data_name;
+  const auto full_name = meshPropertyName(prefix, data_name);
   auto data_ptr = std::make_unique<RestartableData<T>>(full_name, nullptr);
 
   // Here we will create the RestartableData even though we may not use this instance.
