@@ -83,6 +83,9 @@ PatternedMeshGenerator::generate()
                                                     getParam<BoundaryName>("bottom_boundary")};
   const std::vector<std::string> boundary_param_names = {
       "left_boundary", "right_boundary", "top_boundary", "bottom_boundary"};
+  const std::set<std::string> boundary_names_set(boundary_names.begin(), boundary_names.end());
+  if (boundary_names_set.size() != 4)
+    mooseError("The (left/right/top/bottom) boundary names provided are not unique.");
 
   // IDs for each input (indexed by input mesh and then left/right/top/bottom)
   std::vector<std::vector<boundary_id_type>> input_bids(
@@ -149,6 +152,7 @@ PatternedMeshGenerator::generate()
   if (have_common_ids)
     stitch_bids = input_bids[0];
   else
+  {
     for (boundary_id_type id = 0; id != Moose::INVALID_BOUNDARY_ID; ++id)
       if (!used_boundary_ids.count(id))
       {
@@ -157,10 +161,12 @@ PatternedMeshGenerator::generate()
           break;
       }
 
-  for (const auto i : index_range(_meshes))
-    for (const auto side : make_range(4))
-      MeshTools::Modification::change_boundary_id(
-          *_meshes[i], input_bids[i][side], stitch_bids[side]);
+    // Make all inputs have common boundary ids
+    for (const auto i : index_range(_meshes))
+      for (const auto side : make_range(4))
+        MeshTools::Modification::change_boundary_id(
+            *_meshes[i], input_bids[i][side], stitch_bids[side]);
+  }
 
   // Data structure that holds each row
   _row_meshes.resize(_pattern.size());
