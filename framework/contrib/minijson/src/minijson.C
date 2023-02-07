@@ -252,7 +252,7 @@ Json::serializeString() const noexcept
         if (static_cast<unsigned char>(e) < 0x20)
         {
           char buf[7];
-          sprintf(buf, "\\u%04X", e);
+          snprintf(buf, 7, "\\u%04X", e);
           res += buf;
         }
         else
