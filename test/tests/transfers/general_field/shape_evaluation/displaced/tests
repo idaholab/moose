@@ -1,0 +1,10 @@
+[Tests]
+    issues = '#16427 #16429'
+    design = 'transfers/MultiAppGeneralFieldShapeEvaluationTransfer.md'
+    [same_var_type]
+        type = 'Exodiff'
+        input = 'parent.i'
+        exodiff = 'parent_out.e'
+        requirement = "The system shall be able to transfer from a source application that is being displaced."
+    []
+[]
