@@ -36,7 +36,7 @@ The declareRestartableData method is used to tell MOOSE that you would like to s
 object. This method is templated and declared here:
 
 !listing framework/include/restart/Restartable.h
-  re=([^\n]+\n)*[^\n]+declareRestartableData[^,\n]*;
+  re=([^\n]+\n)*[^\n]+declareRestartableData[^\n]*;
 
 This method is templated, so MOOSE will return a reference to the type that you request and manage the data storage for you. For
 all built-in types and combinations of containers and built-in types. This is all that needs to be done. If your type or

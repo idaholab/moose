@@ -19,7 +19,7 @@ DiscreteNucleationInserterBase::validParams()
 
 DiscreteNucleationInserterBase::DiscreteNucleationInserterBase(const InputParameters & parameters)
   : ElementUserObject(parameters),
-    _global_nucleus_list(declareRestartableData("global_nucleus_list", NucleusList(0))),
+    _global_nucleus_list(declareRestartableData<NucleusList>("global_nucleus_list", 0)),
     _changes_made(0, 0),
     _update_required(_app.isRecovering() || _app.isRestarting())
 {
