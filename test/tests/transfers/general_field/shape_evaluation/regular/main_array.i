@@ -75,6 +75,7 @@
     source_variable_components = '1 0'
     variable = 'from_main from_main'
     target_variable_components = '0 1'
+    extrapolation_constant = -1
   []
 
   [to_sub_elem]
@@ -84,6 +85,7 @@
     source_variable_components = '1 0'
     variable = 'from_main_elem from_main_elem'
     target_variable_components = '0 1'
+    extrapolation_constant = -1
   []
 
   [from_sub]
@@ -93,6 +95,7 @@
     source_variable_components = '1 0'
     variable = 'from_sub from_sub'
     target_variable_components = '0 1'
+    extrapolation_constant = -1
   []
 
   [from_sub_elem]
@@ -102,5 +105,6 @@
     source_variable_components = '1 0'
     variable = 'from_sub_elem from_sub_elem'
     target_variable_components = '0 1'
+    extrapolation_constant = -1
   []
 []
