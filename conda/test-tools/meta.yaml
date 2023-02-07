@@ -3,7 +3,7 @@
 #   template/ (must contain any python major.minor version this
 #              package is building. Usually the latest version.)
 {% set build = 0 %}
-{% set version = "2022.12.05" %}
+{% set version = "2023.02.07" %}
 
 package:
   name: moose-test-tools
@@ -37,6 +37,7 @@ requirements:
     - pylint
     - psycopg2
     - pycobertura
+    - requests
     - tabulate
     - gitpython
     - packaging
@@ -61,6 +62,7 @@ test:
     - pylint
     - psycopg2
     - pycobertura
+    - requests
     - tabulate
     - git
     - pyflakes

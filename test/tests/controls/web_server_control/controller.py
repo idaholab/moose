@@ -1,4 +1,3 @@
-# Will need to "conda install requests"
 import requests
 import time
 
