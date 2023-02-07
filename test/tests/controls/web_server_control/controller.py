@@ -54,6 +54,3 @@ for i in range(0, 10):
     setControllable(i)
     getPostprocessorValue("coef")
     continueSolve()
-
-
-    
