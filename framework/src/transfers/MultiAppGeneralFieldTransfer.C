@@ -108,9 +108,10 @@ MultiAppGeneralFieldTransfer::validParams()
   params.addParamNamesToGroup(
       "to_blocks from_blocks to_boundaries from_boundaries elemental_boundary_restriction",
       "Transfer spatial restriction");
-  params.addParamNamesToGroup("greedy_search error_on_miss from_app_must_contain_point "
-                              "use_nearest_app search_value_conflicts",
+  params.addParamNamesToGroup("greedy_search use_nearest_app search_value_conflicts",
                               "Search algorithm");
+  params.addParamNamesToGroup("error_on_miss from_app_must_contain_point extrapolation_constant",
+                              "Extrapolation behavior");
   params.addParamNamesToGroup("bbox_factor fixed_bounding_box_size", "Source app bounding box");
   return params;
 }
