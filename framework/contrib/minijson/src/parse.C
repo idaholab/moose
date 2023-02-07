@@ -86,6 +86,8 @@ Parser::parseRawString()
         return str;
       case '\0':
         error("MISS QUOTATION MARK");
+        break;
+        return std::string();
       default:
         if (static_cast<unsigned char>(*_curr) < 0x20)
           error("INVALID STRING CHAR");
@@ -168,6 +170,7 @@ Parser::parseValue()
       return parseObject();
     case '\0':
       error("EXPECT VALUE");
+      return parseLiteral("null");
     default:
       return parseNumber();
   }
