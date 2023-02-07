@@ -17,9 +17,9 @@ Load the following modules:
 module load use.moose moose-apps moose
 ```
 
-!alert note
+!alert warning
 If you receive an error about modules not known, please make sure you are logged into either
-Sawtooth or Lemhi. We only make a pre-built copies available on these two clusters.
+Sawtooth or Lemhi.
 
 Once loaded, `moose-opt` becomes available. You need now only provide input files to run
 simulations. Example input files are available within the MOOSE repository (next section).
@@ -46,7 +46,7 @@ ex01_out.e
 You can use HPC OnDemand to view the results file remotely. Head on over to
 [HPC OnDemand Dashboard](https://hpcondemand.inl.gov/pun/sys/dashboard), and select:
 `Interactive Apps` and then `Linux Desktop with Visualization`. Next, select your cluster (such as
-Sawtooth), the amount of time you believe you need, and then click Launch.
+Sawtooth), the amount of time you believe you need, and then click `Launch`.
 
 It may take some time before your 'Visualization Job' becomes available. When it does, simply click
 on it, and you will be presented within your web browser, your GUI Desktop. From here, you can open
@@ -84,7 +84,3 @@ Downloads folder:
 cd ~/Downloads
 scp <your hpc user id>@hpclogin:~/projects/moose/examples/ex01_inputfile/ex01_out.e .
 ```
-
-!alert tip
-The `.` at the end is special. Which means "the current directory you are in". The above `.` can be
-replaced with `~/Downloads`, to achieve the same goal.

@@ -14,7 +14,25 @@
 
 !include manual_mpich_gcc.md
 
-!include getting_started/installation/manual_miniconda.md
+## Python (possibly optional)
+
+Building MOOSE requires having Python headers (python-devel) and the Python package: `packaging`
+available. If you know you have this requirement satisfied, and you do not plan on also using
+Peacock (next section) you can skip this section.
+
+These requirements are easily installed via Conda.
+
+!include getting_started/installation/install_miniconda.md
+
+Next, install the necessary `packaging` module:
+
+```bash
+mamba install packaging
+```
+
+## Peacock (optional)
+
+!include installation/install_peacock.md
 
 ## bash_profile
 
@@ -40,6 +58,7 @@ export CC=mpicc
 export CXX=mpicxx
 export FC=mpif90
 export F90=mpif90
+mamba activate peacock  # if you choose to optionally install Peacock
 !package-end!
 
 Thats it! Now you can either source this file manually each time you need to work on a MOOSE based
