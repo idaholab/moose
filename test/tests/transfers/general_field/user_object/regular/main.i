@@ -84,6 +84,7 @@
     to_multi_app = sub
     source_user_object = to_sub
     variable = from_main
+    extrapolation_constant = -1
   []
 
   [to_sub_elem]
@@ -91,6 +92,7 @@
     to_multi_app = sub
     source_user_object = to_sub_elem
     variable = from_main_elem
+    extrapolation_constant = -1
   []
 
   [from_sub]
@@ -98,6 +100,7 @@
     from_multi_app = sub
     source_user_object = to_main
     variable = from_sub
+    extrapolation_constant = -1
   []
 
   [from_sub_elem]
@@ -105,5 +108,6 @@
     from_multi_app = sub
     source_user_object = to_main_elem
     variable = from_sub_elem
+    extrapolation_constant = -1
   []
 []

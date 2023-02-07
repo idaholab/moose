@@ -45,6 +45,10 @@ MultiAppGeneralFieldTransfer::validParams()
       "fixed_bounding_box_size >= 0",
       "Override source app bounding box size(s) for searches. App bounding boxes will still be  "
       "centered on the same coordinates. Only non-zero components passed will override.");
+  params.addParam<Real>(
+      "extrapolation_constant",
+      0,
+      "Constant to use when no source app can provide a valid value for a target location.");
 
   // Block restrictions
   params.addParam<std::vector<SubdomainName>>(
@@ -92,7 +96,7 @@ MultiAppGeneralFieldTransfer::validParams()
       "(using the `location`) sub-app and query that app for the value to transfer.");
   params.addParam<bool>(
       "from_app_must_contain_point",
-      true,
+      false,
       "Wether on not the origin mesh must contain the point to evaluate data at. If false, this "
       "allows for interpolation between origin app meshes. Origin app bounding boxes are still "
       "considered so you may want to increase them with 'fixed_bounding_box_size'");
@@ -104,9 +108,10 @@ MultiAppGeneralFieldTransfer::validParams()
   params.addParamNamesToGroup(
       "to_blocks from_blocks to_boundaries from_boundaries elemental_boundary_restriction",
       "Transfer spatial restriction");
-  params.addParamNamesToGroup("greedy_search error_on_miss from_app_must_contain_point "
-                              "use_nearest_app search_value_conflicts",
+  params.addParamNamesToGroup("greedy_search use_nearest_app search_value_conflicts",
                               "Search algorithm");
+  params.addParamNamesToGroup("error_on_miss from_app_must_contain_point extrapolation_constant",
+                              "Extrapolation behavior");
   params.addParamNamesToGroup("bbox_factor fixed_bounding_box_size", "Source app bounding box");
   return params;
 }
@@ -122,6 +127,7 @@ MultiAppGeneralFieldTransfer::MultiAppGeneralFieldTransfer(const InputParameters
     _greedy_search(getParam<bool>("greedy_search")),
     _search_value_conflicts(getParam<bool>("search_value_conflicts")),
     _error_on_miss(getParam<bool>("error_on_miss")),
+    _default_extrapolation_value(getParam<Real>("extrapolation_constant")),
     _bbox_factor(getParam<Real>("bbox_factor")),
     _fixed_bbox_size(isParamValid("fixed_bounding_box_size")
                          ? getParam<std::vector<Real>>("fixed_bounding_box_size")
@@ -192,16 +198,6 @@ MultiAppGeneralFieldTransfer::initialSetup()
     }
   }
 
-  // Create the point locators to locate evaluation points in the origin mesh(es)
-  _from_point_locators.resize(_from_problems.size());
-  for (unsigned int i_from = 0; i_from < _from_problems.size(); ++i_from)
-  {
-    const auto & from_moose_mesh = _from_problems[i_from]->mesh(_displaced_source_mesh);
-    _from_point_locators[i_from] =
-        PointLocatorBase::build(TREE_LOCAL_ELEMENTS, from_moose_mesh.getMesh());
-    _from_point_locators[i_from]->enable_out_of_mesh_mode();
-  }
-
   // Check if components are set correctly if using an array variable
   for (unsigned int i_from = 0; i_from < _from_problems.size(); ++i_from)
   {
@@ -243,6 +239,22 @@ MultiAppGeneralFieldTransfer::initialSetup()
     for (unsigned int i_to = 0; i_to < _to_var_names.size(); ++i_to)
       _to_variables[i_to] = &_to_problems[0]->getVariable(
           0, _to_var_names[i_to], Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY);
+  }
+}
+
+void
+MultiAppGeneralFieldTransfer::getAppInfo()
+{
+  MultiAppFieldTransfer::getAppInfo();
+
+  // Create the point locators to locate evaluation points in the origin mesh(es)
+  _from_point_locators.resize(_from_problems.size());
+  for (unsigned int i_from = 0; i_from < _from_problems.size(); ++i_from)
+  {
+    const auto & from_moose_mesh = _from_problems[i_from]->mesh(_displaced_source_mesh);
+    _from_point_locators[i_from] =
+        PointLocatorBase::build(TREE_LOCAL_ELEMENTS, from_moose_mesh.getMesh());
+    _from_point_locators[i_from]->enable_out_of_mesh_mode();
   }
 }
 
@@ -854,7 +866,8 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
       MeshFunction to_func(es, *to_sys->current_local_solution, to_sys->get_dof_map(), var_num);
       to_func.init();
 
-      GeneralFieldTransfer::CachedData<Number> f(interp_caches[problem_id], to_func);
+      GeneralFieldTransfer::CachedData<Number> f(
+          interp_caches[problem_id], to_func, _default_extrapolation_value);
       libMesh::VectorSetAction<Number> setter(*to_sys->solution);
       const std::vector<unsigned int> varvec(1, var_num);
 
@@ -903,9 +916,16 @@ MultiAppGeneralFieldTransfer::setSolutionVectorValues(
                 "Element ", dof_object_id, " for app ", problem_id, " could not be located ");
         }
 
-        // We should not put garbage into solution vector
+        // We should not put garbage into our solution vector
+        // but it can be that we want to set it to a different value than what was already there
+        // for example: the source app has been displaced and was sending an indicator of its
+        // position
         if (GeneralFieldTransfer::isBetterOutOfMeshValue(val))
+        {
+          if (!GeneralFieldTransfer::isBetterOutOfMeshValue(_default_extrapolation_value))
+            to_sys->solution->set(dof, _default_extrapolation_value);
           continue;
+        }
 
         to_sys->solution->set(dof, val);
       }
