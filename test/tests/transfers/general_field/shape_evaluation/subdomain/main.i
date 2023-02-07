@@ -83,6 +83,7 @@
     variable = from_main
     from_blocks = 1
     to_blocks = 1
+    extrapolation_constant = -1
   []
 
   [to_sub_elem]
@@ -92,6 +93,7 @@
     variable = from_main_elem
     from_blocks = 1
     to_blocks = 1
+    extrapolation_constant = -1
   []
 
   [from_sub]
@@ -101,6 +103,7 @@
     variable = from_sub
     from_blocks = 1
     to_blocks = 1
+    extrapolation_constant = -1
   []
 
   [from_sub_elem]
@@ -110,5 +113,6 @@
     variable = from_sub_elem
     from_blocks = 1
     to_blocks = 1
+    extrapolation_constant = -1
   []
 []

@@ -34,6 +34,7 @@
     to_multi_app = ma2
     source_user_object = sent_nodal
     variable = received_nodal
+    extrapolation_constant = -1
   []
   [app2_to_1_nodal_nodal]
     type = MultiAppGeneralFieldUserObjectTransfer
@@ -41,6 +42,7 @@
     to_multi_app = ma1
     source_user_object = sent_nodal
     variable = received_nodal
+    extrapolation_constant = -1
   []
 
   # Elemental to elemental variables
@@ -50,6 +52,7 @@
     to_multi_app = ma2
     source_user_object = sent_elem
     variable = received_elem
+    extrapolation_constant = -1
   []
   [app2_to_1_elem_elem]
     type = MultiAppGeneralFieldUserObjectTransfer
@@ -57,6 +60,7 @@
     to_multi_app = ma1
     source_user_object = sent_elem
     variable = received_elem
+    extrapolation_constant = -1
   []
 
   # Elemental to nodal variables
@@ -66,6 +70,7 @@
     to_multi_app = ma2
     source_user_object = sent_elem
     variable = received_nodal
+    extrapolation_constant = -1
   []
   [app2_to_1_elem_nodal]
     type = MultiAppGeneralFieldUserObjectTransfer
@@ -73,6 +78,7 @@
     to_multi_app = ma1
     source_user_object = sent_elem
     variable = received_nodal
+    extrapolation_constant = -1
   []
 
   # Nodal to elemental variables
@@ -82,6 +88,7 @@
     to_multi_app = ma2
     source_user_object = sent_nodal
     variable = received_elem
+    extrapolation_constant = -1
   []
   [app2_to_1_nodal_elem]
     type = MultiAppGeneralFieldUserObjectTransfer
@@ -89,6 +96,7 @@
     to_multi_app = ma1
     source_user_object = sent_nodal
     variable = received_elem
+    extrapolation_constant = -1
   []
 []
 
