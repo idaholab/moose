@@ -18,6 +18,7 @@
 #include "UserObjectInterface.h"
 #include "PostprocessorInterface.h"
 #include "VectorPostprocessorInterface.h"
+#include "PerfGraphInterface.h"
 
 class FEProblemBase;
 class InputParameterWarehouse;
@@ -30,6 +31,7 @@ class InputParameterWarehouse;
  * in all other MooseObjects.
  */
 class Control : public MooseObject,
+                protected PerfGraphInterface,
                 public TransientInterface,
                 public SetupInterface,
                 public FunctionInterface,
