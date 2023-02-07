@@ -723,12 +723,12 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
     MeshTools::Modification::rotate(other_mesh, 360.0 / _num_sides * mesh_index, 0, 0);
     mesh0->prepare_for_use();
     other_mesh.prepare_for_use();
-    mesh0->stitch_meshes(other_mesh, SLICE_BEGIN, SLICE_END, TOLERANCE, true);
+    mesh0->stitch_meshes(other_mesh, SLICE_BEGIN, SLICE_END, TOLERANCE, true, true, true, true);
     other_mesh.clear();
   }
 
   // An extra step to stich the first and last slices together
-  mesh0->stitch_surfaces(SLICE_BEGIN, SLICE_END, TOLERANCE, true);
+  mesh0->stitch_surfaces(SLICE_BEGIN, SLICE_END, TOLERANCE, true, true, true, true);
 
   if (!_has_rings && !_has_ducts && _background_intervals == 1)
     MooseMesh::changeBoundaryId(*mesh0, 1 + _interface_boundary_id_shift, OUTER_SIDESET_ID, false);

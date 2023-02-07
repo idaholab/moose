@@ -403,7 +403,8 @@ XYDelaunayGenerator::generate()
                           TOLERANCE,
                           /*clear_stitched_bcids*/ true,
                           _verbose_stitching,
-                          use_binary_search);
+                          use_binary_search,
+                          true);
     }
   }
   return mesh;

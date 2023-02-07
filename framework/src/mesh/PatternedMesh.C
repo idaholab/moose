@@ -138,7 +138,10 @@ PatternedMesh::buildMesh()
                                    right,
                                    left,
                                    TOLERANCE,
-                                   /*clear_stitched_boundary_ids=*/true);
+                                   /*clear_stitched_boundary_ids=*/true,
+                                   true,
+                                   true,
+                                   true);
 
       // Undo the translation
       MeshTools::Modification::translate(cell_mesh, -deltax, deltay, 0);
@@ -147,6 +150,12 @@ PatternedMesh::buildMesh()
   // Now stitch together the rows
   // We're going to stitch them all to row 0 (which is the real mesh)
   for (MooseIndex(_pattern) i = 1; i < _pattern.size(); i++)
-    row_meshes[0]->stitch_meshes(
-        *row_meshes[i], bottom, top, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
+    row_meshes[0]->stitch_meshes(*row_meshes[i],
+                                 bottom,
+                                 top,
+                                 TOLERANCE,
+                                 /*clear_stitched_boundary_ids=*/true,
+                                 true,
+                                 true,
+                                 true);
 }

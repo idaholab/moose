@@ -128,7 +128,10 @@ TiledMesh::buildMesh()
                                    right,
                                    left,
                                    TOLERANCE,
-                                   /*clear_stitched_boundary_ids=*/true);
+                                   /*clear_stitched_boundary_ids=*/true,
+                                   true,
+                                   true,
+                                   true);
       }
     }
     {
@@ -142,7 +145,10 @@ TiledMesh::buildMesh()
                                    top,
                                    bottom,
                                    TOLERANCE,
-                                   /*clear_stitched_boundary_ids=*/true);
+                                   /*clear_stitched_boundary_ids=*/true,
+                                   true,
+                                   true,
+                                   true);
       }
     }
     {
@@ -156,7 +162,10 @@ TiledMesh::buildMesh()
                                    front,
                                    back,
                                    TOLERANCE,
-                                   /*clear_stitched_boundary_ids=*/true);
+                                   /*clear_stitched_boundary_ids=*/true,
+                                   true,
+                                   true,
+                                   true);
       }
     }
   }

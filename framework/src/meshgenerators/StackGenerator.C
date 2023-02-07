@@ -138,8 +138,14 @@ StackGenerator::generate()
         MeshTools::Modification::translate(*_meshes[i], 0, 0, heights[i]);
         break;
     }
-    mesh->stitch_meshes(
-        *_meshes[i], first, second, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
+    mesh->stitch_meshes(*_meshes[i],
+                        first,
+                        second,
+                        TOLERANCE,
+                        /*clear_stitched_boundary_ids=*/true,
+                        true,
+                        true,
+                        true);
   }
 
   return dynamic_pointer_cast<MeshBase>(mesh);

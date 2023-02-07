@@ -161,7 +161,10 @@ PatternedMeshGenerator::generate()
                                     right,
                                     left,
                                     TOLERANCE,
-                                    /*clear_stitched_boundary_ids=*/true);
+                                    /*clear_stitched_boundary_ids=*/true,
+                                    true,
+                                    true,
+                                    true);
 
       // Undo the translation
       MeshTools::Modification::translate(cell_mesh, -deltax, deltay, 0);
@@ -179,8 +182,14 @@ PatternedMeshGenerator::generate()
     const auto & increment_subdomain_map = _row_meshes[i]->get_subdomain_name_map();
     mergeSubdomainNameMaps(main_subdomain_map, increment_subdomain_map);
 
-    _row_meshes[0]->stitch_meshes(
-        *_row_meshes[i], bottom, top, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
+    _row_meshes[0]->stitch_meshes(*_row_meshes[i],
+                                  bottom,
+                                  top,
+                                  TOLERANCE,
+                                  /*clear_stitched_boundary_ids=*/true,
+                                  true,
+                                  true,
+                                  true);
   }
 
   return dynamic_pointer_cast<MeshBase>(_row_meshes[0]);

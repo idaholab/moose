@@ -108,7 +108,10 @@ TiledMeshGenerator::generate()
                           right,
                           left,
                           TOLERANCE,
-                          /*clear_stitched_boundary_ids=*/true);
+                          /*clear_stitched_boundary_ids=*/true,
+                          true,
+                          true,
+                          true);
     }
   }
 
@@ -123,7 +126,10 @@ TiledMeshGenerator::generate()
                           top,
                           bottom,
                           TOLERANCE,
-                          /*clear_stitched_boundary_ids=*/true);
+                          /*clear_stitched_boundary_ids=*/true,
+                          true,
+                          true,
+                          true);
     }
   }
 
@@ -138,7 +144,10 @@ TiledMeshGenerator::generate()
                           front,
                           back,
                           TOLERANCE,
-                          /*clear_stitched_boundary_ids=*/true);
+                          /*clear_stitched_boundary_ids=*/true,
+                          true,
+                          true,
+                          true);
     }
   }
 

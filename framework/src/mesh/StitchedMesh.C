@@ -106,6 +106,6 @@ StitchedMesh::buildMesh()
     BoundaryID second = getBoundaryID(boundary_pair.second);
 
     _original_mesh->stitch_meshes(
-        *_meshes[i], first, second, TOLERANCE, _clear_stitched_boundary_ids);
+        *_meshes[i], first, second, TOLERANCE, _clear_stitched_boundary_ids, true, true, true);
   }
 }

@@ -378,7 +378,8 @@ PeripheralRingMeshGenerator::generate()
     MooseMesh::changeBoundaryId(*input_mesh, _input_mesh_external_bid, OUTER_SIDESET_ID, false);
   mesh->prepare_for_use();
   // Use input_mesh here to retain the subdomain name map
-  input_mesh->stitch_meshes(*mesh, OUTER_SIDESET_ID, OUTER_SIDESET_ID_ALT, TOLERANCE, true);
+  input_mesh->stitch_meshes(
+      *mesh, OUTER_SIDESET_ID, OUTER_SIDESET_ID_ALT, TOLERANCE, true, true, true, true);
 
   // Assign subdomain name to the new block if applicable
   if (isParamValid("peripheral_ring_block_name"))

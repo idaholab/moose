@@ -328,7 +328,10 @@ TriPinHexAssemblyGenerator::generate()
                                OUTER_SIDESET_ID,
                                OUTER_SIDESET_ID,
                                TOLERANCE,
-                               /*clear_stitched_boundary_ids=*/true);
+                               /*clear_stitched_boundary_ids=*/true,
+                               true,
+                               true,
+                               true);
     }
   }
 
@@ -514,7 +517,10 @@ TriPinHexAssemblyGenerator::buildSinglePinSection(
                        SLICE_BEGIN,
                        SLICE_END,
                        TOLERANCE,
-                       /*clear_stitched_boundary_ids=*/true);
+                       /*clear_stitched_boundary_ids=*/true,
+                       true,
+                       true,
+                       true);
   MooseMesh::changeBoundaryId(*mesh0, SLICE_BEGIN, SLICE_END, true);
 
   auto mesh2 = dynamic_pointer_cast<ReplicatedMesh>(mesh0->clone());
@@ -523,7 +529,10 @@ TriPinHexAssemblyGenerator::buildSinglePinSection(
                        SLICE_END,
                        SLICE_END,
                        TOLERANCE,
-                       /*clear_stitched_boundary_ids=*/true);
+                       /*clear_stitched_boundary_ids=*/true,
+                       true,
+                       true,
+                       true);
   MeshTools::Modification::translate(*mesh0, side_length / 2.0 + ring_offset, 0, 0);
 
   for (const auto & elem : mesh0->element_ptr_range())

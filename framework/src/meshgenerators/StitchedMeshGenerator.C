@@ -135,7 +135,8 @@ StitchedMeshGenerator::generate()
                         TOLERANCE,
                         _clear_stitched_boundary_ids,
                         /*verbose = */ true,
-                        use_binary_search);
+                        use_binary_search,
+                        true);
   }
 
   return dynamic_pointer_cast<MeshBase>(mesh);
