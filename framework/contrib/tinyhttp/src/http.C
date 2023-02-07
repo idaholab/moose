@@ -120,9 +120,9 @@ HttpRequest::parse(std::shared_ptr<IClientStream> stream)
 
   /*
   if (query.empty())
-      std::cout << methodString << " " << path << std::endl;
+      std::co ut << methodString << " " << path << std::endl;
   else
-      std::cout << methodString << " " << path << " (Query: " << query << ")" << std::endl;
+      std::co ut << methodString << " " << path << " (Query: " << query << ")" << std::endl;
   */
 
   while (true)
@@ -138,7 +138,7 @@ HttpRequest::parse(std::shared_ptr<IClientStream> stream)
 
     std::string key = line.substr(0, sep), val = line.substr(sep + 2);
     (*this)[key] = val;
-    // std::cout << "HEADER: <" << key << "> set to <" << val << ">" << std::endl;
+    // std::co ut << "HEADER: <" << key << "> set to <" << val << ">" << std::endl;
   }
 
   std::string contentLength = (*this)["Content-Length"];
@@ -165,7 +165,7 @@ HttpRequest::parse(std::shared_ptr<IClientStream> stream)
       std::string error;
       mContentJson = miniJson::Json::parse(mContent, error);
       if (!error.empty())
-        std::cerr << "Content type was JSON but we couldn't parse it! " << error << std::endl;
+        std:: cerr << "Content type was JSON but we couldn't parse it! " << error << std::endl;
     }
 #endif
   }
@@ -332,7 +332,7 @@ HttpServer::startListening(uint16_t port)
           }
           catch (std::exception & e)
           {
-            std::cerr << "Exception in HTTP client handler (" << e.what() << ")\n";
+            std:: cerr << "Exception in HTTP client handler (" << e.what() << ")\n";
           }
 
           stream->close();
