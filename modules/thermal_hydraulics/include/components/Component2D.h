@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "GeometricalComponent.h"
+#include "GeneratedMeshComponent.h"
 
-class Component2D : public GeometricalComponent
+class Component2D : public GeneratedMeshComponent
 {
 public:
   Component2D(const InputParameters & params);
@@ -44,6 +44,12 @@ public:
    * Gets the volumes of the transverse regions
    */
   const std::vector<Real> & getVolumes() const { return _volume; }
+
+  /**
+   * Returns true if the supplied boundary is in the given vector
+   */
+  bool isBoundaryInVector(const BoundaryName & boundary_name,
+                          const std::vector<BoundaryName> & boundary_name_vector) const;
 
   /**
    * Returns true if this component has the supplied boundary

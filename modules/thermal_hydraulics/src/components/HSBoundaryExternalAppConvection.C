@@ -54,8 +54,9 @@ HSBoundaryExternalAppConvection::check() const
 void
 HSBoundaryExternalAppConvection::addVariables()
 {
-  const HeatStructureBase & hs = getComponent<HeatStructureBase>("hs");
-  const std::vector<SubdomainName> & subdomain_names = hs.getSubdomainNames();
+  const HeatStructureInterface & hs = getComponent<HeatStructureInterface>("hs");
+  const std::vector<SubdomainName> & subdomain_names =
+      hs.getGeometricalComponent().getSubdomainNames();
 
   getTHMProblem().addSimVariable(
       false, _T_ext_var_name, HeatConductionModel::feType(), subdomain_names);
@@ -66,7 +67,7 @@ HSBoundaryExternalAppConvection::addVariables()
 void
 HSBoundaryExternalAppConvection::addMooseObjects()
 {
-  const HeatStructureBase & hs = getComponent<HeatStructureBase>("hs");
+  const HeatStructureInterface & hs = getComponent<HeatStructureInterface>("hs");
   const HeatStructureCylindricalBase * hs_cyl =
       dynamic_cast<const HeatStructureCylindricalBase *>(&hs);
   const bool is_cylindrical = hs_cyl != nullptr;
@@ -81,8 +82,8 @@ HSBoundaryExternalAppConvection::addMooseObjects()
     pars.set<std::vector<VariableName>>("htc_ext") = {_htc_ext_var_name};
     if (is_cylindrical)
     {
-      pars.set<Point>("axis_point") = hs.getPosition();
-      pars.set<RealVectorValue>("axis_dir") = hs.getDirection();
+      pars.set<Point>("axis_point") = hs_cyl->getPosition();
+      pars.set<RealVectorValue>("axis_dir") = hs_cyl->getDirection();
       pars.set<Real>("offset") = hs_cyl->getInnerRadius() - hs_cyl->getAxialOffset();
     }
     if (isParamValid("scale_pp"))
@@ -100,8 +101,8 @@ HSBoundaryExternalAppConvection::addMooseObjects()
     pars.set<std::vector<VariableName>>("T") = {HeatConductionModel::TEMPERATURE};
     pars.set<std::vector<VariableName>>("T_ext") = {_T_ext_var_name};
     pars.set<std::vector<VariableName>>("htc_ext") = {_htc_ext_var_name};
-    pars.set<Point>("axis_point") = hs.getPosition();
-    pars.set<RealVectorValue>("axis_dir") = hs.getDirection();
+    pars.set<Point>("axis_point") = hs_cyl->getPosition();
+    pars.set<RealVectorValue>("axis_dir") = hs_cyl->getDirection();
     pars.set<Real>("offset") = hs_cyl->getInnerRadius() - hs_cyl->getAxialOffset();
     pars.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
     getTHMProblem().addPostprocessor(class_name, genSafeName(name(), "integral"), pars);

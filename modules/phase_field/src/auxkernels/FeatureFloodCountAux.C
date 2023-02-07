@@ -29,9 +29,9 @@ FeatureFloodCountAux::validParams()
   params.addParam<unsigned int>("map_index",
                                 "The index of which map to retrieve values from when "
                                 "using FeatureFloodCount with multiple maps.");
-  MooseEnum field_display(
-      "UNIQUE_REGION VARIABLE_COLORING GHOSTED_ENTITIES HALOS CENTROID ACTIVE_BOUNDS",
-      "UNIQUE_REGION");
+  MooseEnum field_display("UNIQUE_REGION VARIABLE_COLORING GHOSTED_ENTITIES HALOS CENTROID "
+                          "ACTIVE_BOUNDS INTERSECTS_SPECIFIED_BOUNDARY",
+                          "UNIQUE_REGION");
   params.addParam<MooseEnum>("field_display",
                              field_display,
                              "Determines how the auxilary field should be colored. "
@@ -48,40 +48,38 @@ FeatureFloodCountAux::FeatureFloodCountAux(const InputParameters & parameters)
     _flood_counter(getUserObject<FeatureFloodCount>("flood_counter")),
     _var_idx(isParamValid("map_index") ? getParam<unsigned int>("map_index")
                                        : std::numeric_limits<std::size_t>::max()),
-    _field_display(getParam<MooseEnum>("field_display")),
-    _var_coloring(_field_display == "VARIABLE_COLORING"),
-    _field_type(_field_display.getEnum<FeatureFloodCount::FieldType>())
+    _field_type(getParam<MooseEnum>("field_display").getEnum<FieldType>()),
+    _var_coloring(_field_type == FeatureFloodCount::FieldType::VARIABLE_COLORING)
 {
   if (_flood_counter.isElemental() == isNodal() &&
-      (_field_display == "UNIQUE_REGION" || _field_display == "VARIABLE_COLORING" ||
-       _field_display == "GHOSTED_ENTITIES" || _field_display == "HALOS"))
-    mooseError("UNIQUE_REGION, VARIABLE_COLORING, GHOSTED_ENTITIES and HALOS must be on variable "
+      (_field_type == FieldType::UNIQUE_REGION || _field_type == FieldType::VARIABLE_COLORING ||
+       _field_type == FieldType::GHOSTED_ENTITIES || _field_type == FieldType::HALOS))
+    paramError("field_display",
+               "UNIQUE_REGION, VARIABLE_COLORING, GHOSTED_ENTITIES and HALOS must be on variable "
                "types that match the entity mode of the FeatureFloodCounter");
 
-  if (isNodal())
-  {
-    if (_field_display == "ACTIVE_BOUNDS")
-      mooseError("ACTIVE_BOUNDS is only available for elemental aux variables");
-
-    if (_field_display == "CENTROID")
-      mooseError("CENTROID is only available for elemental aux variables");
-  }
+  if (isNodal() && (_field_type == FieldType::ACTIVE_BOUNDS || _field_type == FieldType::CENTROID ||
+                    _field_type == FieldType::INTERSECTS_SPECIFIED_BOUNDARY))
+    paramError("field_display",
+               "The selected option is only available for elemental aux variables");
 }
 
 void
 FeatureFloodCountAux::precalculateValue()
 {
-  switch (_field_display)
+  switch (_field_type)
   {
-    case 0: // UNIQUE_REGION
-    case 1: // VARIABLE_COLORING
-    case 2: // GHOSTED_ENTITIES
-    case 3: // HALOS
-    case 4: // CENTROID
+    case FieldType::UNIQUE_REGION:
+    case FieldType::VARIABLE_COLORING:
+    case FieldType::GHOSTED_ENTITIES:
+    case FieldType::HALOS:
+    case FieldType::CENTROID:
+    case FieldType::INTERSECTS_SPECIFIED_BOUNDARY:
       _value = _flood_counter.getEntityValue(
           (isNodal() ? _current_node->id() : _current_elem->id()), _field_type, _var_idx);
       break;
-    case 5: // ACTIVE_BOUNDS
+
+    case FieldType::ACTIVE_BOUNDS:
     {
       const auto & var_to_features = _flood_counter.getVarToFeatureVector(_current_elem->id());
       _value = std::count_if(var_to_features.begin(),
@@ -91,8 +89,9 @@ FeatureFloodCountAux::precalculateValue()
 
       break;
     }
+
     default:
-      mooseError("Unimplemented \"field_display\" type");
+      paramError("field_display", "Unimplemented type");
   }
 }
 
