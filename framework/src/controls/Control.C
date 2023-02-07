@@ -35,6 +35,7 @@ Control::validParams()
 
 Control::Control(const InputParameters & parameters)
   : MooseObject(parameters),
+    PerfGraphInterface(this),
     TransientInterface(this),
     SetupInterface(this),
     FunctionInterface(this),

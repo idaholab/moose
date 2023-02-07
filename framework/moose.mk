@@ -19,6 +19,9 @@ APPLICATION_DIR := $(FRAMEWORK_DIR)
 moose_SRC_DIRS := $(FRAMEWORK_DIR)/src
 moose_SRC_DIRS += $(FRAMEWORK_DIR)/contrib/mtwist
 moose_SRC_DIRS += $(FRAMEWORK_DIR)/contrib/pugixml
+moose_SRC_DIRS += $(FRAMEWORK_DIR)/contrib/minijson
+moose_SRC_DIRS += $(FRAMEWORK_DIR)/contrib/tinyhttp
+
 #
 # pcre
 #
@@ -426,6 +429,8 @@ sa: $(moose_analyzer)
 -include $(wildcard $(FRAMEWORK_DIR)/contrib/gtest/*.d)
 -include $(wildcard $(FRAMEWORK_DIR)/contrib/hit/*.d)
 -include $(wildcard $(FRAMEWORK_DIR)/contrib/pugixml/src/*.d)
+-include $(wildcard $(FRAMEWORK_DIR)/contrib/tinyhttp/src/*.d)
+-include $(wildcard $(FRAMEWORK_DIR)/contrib/minijson/src/*.d)
 
 #
 # exodiff
