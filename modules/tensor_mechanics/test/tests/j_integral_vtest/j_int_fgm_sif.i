@@ -25,6 +25,8 @@
   []
   [elastic_mod_material]
   []
+  [elastic_mod_material_derivative]
+  []
 []
 
 [Functions]
@@ -49,8 +51,9 @@
   symmetry_plane = 2
   incremental = true
 
-  bimaterial_crack = true
-  beta_material = beta_material
+  functionally_graded_material_crack = true
+  space_dependent_youngs_modulus = elastic_mod_material_derivative
+  youngs_modulus_derivative = elastic_mod_material
 
   youngs_modulus = 20680
   poissons_ratio = 0.3
@@ -88,6 +91,14 @@
     expression = 'if(y < 229, 20680, if(y>279, 206800, 20680*exp(0.0460517019*(y-229))))'
     # expression = '20680'
     variable = elastic_mod_material
+  []
+  [elastic_mod_material_derivative]
+    type = ParsedAux
+    # beta: 1/50 * ln (E2/E1). 50 refers to the area of transition: 279-229
+    use_xyzt = true
+    expression = 'if(y < 229, 0.0, if(y>279, 0, 20680*0460517019*exp(0.0460517019*(y-229))))'
+    # expression = '20680'
+    variable = elastic_mod_material_derivative
   []
 []
 

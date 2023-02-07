@@ -65,8 +65,11 @@ protected:
    * defined by the combination of _r and _theta)
    * @param aux_stress Auxiliary stress -- computed in this method
    * @param grad_disp Gradient of auxiliary displacement -- computed in this method
+   * @param grad_disp Auxiliary strain (FGM) -- computed in this method
    */
-  void computeAuxFields(RankTwoTensor & aux_stress, RankTwoTensor & grad_disp);
+  void computeAuxFields(RankTwoTensor & aux_stress,
+                        RankTwoTensor & grad_disp,
+                        RankTwoTensor & aux_strain);
   /**
    * Compute the auxiliary fields, including the auxiliary stress and the
    * gradient of the auxiliary displacement for the current point (as
@@ -94,12 +97,16 @@ protected:
   std::vector<const VariableGradient *> _grad_disp;
   /// Whether the temperature variable is coupled
   const bool _has_temp;
-  /// Whether the beta_material auxiliary variable for bimaterial crack is coupled
-  const bool _has_beta;
+  /// Whether the elastic modulus derivative variable for crack in functionally graded material (FGM) is coupled
+  const bool _has_youngs_modulus_derivative;
+  /// Whether the spatial elasticity modulus variable for FGM is coupled
+  const bool _has_space_dependent_youngs_modulus;
   /// Gradient of temperature
   const VariableGradient & _grad_temp;
   /// Beta material variable that defines the transition of material properties
-  const VariableValue & _beta_material;
+  const VariableValue & _youngs_modulus_derivative;
+  /// Spatial elasticity modulus variable for FGM
+  const VariableValue & _space_dependent_youngs_modulus;
   /// Conversion factor applied to convert interaction integral to stress intensity factor K
   Real _K_factor;
   /// Whether the crack plane is also a symmetry plane in the model
@@ -108,8 +115,8 @@ protected:
   Real _poissons_ratio;
   /// Young's modulus of the material
   Real _youngs_modulus;
-  /// Whether to consider interaction integral and material properties for bimaterial crack
-  const bool _bimaterial_crack;
+  /// Whether to consider interaction integral and material properties for a crack in functionally graded material
+  const bool _fgm_crack;
   /// Index of the ring for the integral computed by this object
   std::size_t _ring_index;
   /// Derivative of the total eigenstrain with respect to temperature

@@ -146,10 +146,12 @@ protected:
   bool _incremental;
   /// Whether to convert the J-integral to a stress intensity factor (K) --deprecated
   bool _convert_J_to_K;
-  /// Whether the crack is a bimaterial crack
-  const bool _bimaterial_crack;
-  /// Beta material variable name that defines the transition of material properties
-  VariableName _beta_material;
+  /// Whether the crack lives in a functionally-graded material
+  const bool _fgm_crack;
+  /// Variable containing the Youngs modulus derivative for functionally graded materials
+  VariableName _youngs_modulus_derivative;
+  /// Variable containing the spatially-dependent Youngs modulus for functionally graded materials
+  VariableName _space_dependent_youngs_modulus;
   /// Whether to create automatic differentiation objects from the action
   const bool _use_ad;
 };

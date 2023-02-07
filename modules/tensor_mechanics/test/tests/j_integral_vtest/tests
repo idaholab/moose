@@ -84,15 +84,23 @@
                   'differentiation.'
     rel_err = 1.0e-4
   []
-  [j_int_bimaterial_sif]
+  [j_int_fgm_sif]
     type = 'CSVDiff'
-    input = 'j_int_bimaterial_sif.i'
-    csvdiff = 'j_int_bimaterial_sif_out.csv'
-    max_parallel = 1
+    issues = '#23313'
+    input = 'j_int_fgm_sif.i'
+    csvdiff = 'j_int_fgm_sif_out.csv'
+    requirement = 'The Domain Integral Action shall compute stress intensity factors from the '
+                  'interaction integral for a crack perpendicular to a bi-material interface, '
+                  'treating the interface as a functionally-graded material.'
+  []
+  [fgm_5]
+    issues = '#23313'
+    type = 'CSVDiff'
+    input = 'fgm_5.i'
+    csvdiff = 'fgm_5_out.csv'
     requirement = 'The Domain Integral Action shall compute stress intensity factors from the '
                   'interaction integral, with an added term stemming for spatially varying '
-                  'properties, that accounts for the crack perpendicularity to a bimaterial '
-                  'interface.'
+                  'properties, that accounts for the crack perpendicularity to the property grading '
+                  'and yield verified results.'
   []
-
 []
