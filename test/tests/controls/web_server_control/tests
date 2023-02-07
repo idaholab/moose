@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#23359'
+  design = 'syntax/Controls/index.md source/controls/WebServerControl.md'
+
+# Can't currently test this
+#  [./single]
+#    type = 'CSVDiff'#
+#    input = 'real_function_control.i'
+#    csvdiff = 'real_function_control_out.csv'
+#    requirement = "The Control system shall allow a scalar parameter to be controlled with a function."
+#  [../]
+[]
