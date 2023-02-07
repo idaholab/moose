@@ -88,8 +88,10 @@ protected:
    * @param peripheral_duct_intervals numbers of radial intervals of the duct regions
    * @param rotation_angle angle that the generated mesh will be rotated by
    * @param mesh_type whether the peripheral region is for a corner or a side of a patterned mesh
-   * @param create_inward_interface_boundaries whether inward interface boundary sidesets are created
-   * @param create_outward_interface_boundaries whether outward interface boundary sidesets are created
+   * @param create_inward_interface_boundaries whether inward interface boundary sidesets are
+   * created
+   * @param create_outward_interface_boundaries whether outward interface boundary sidesets are
+   * created
    * @return a mesh of the cartesian pattern mesh with peripheral region added.
    */
   void addPeripheralMesh(ReplicatedMesh & mesh,

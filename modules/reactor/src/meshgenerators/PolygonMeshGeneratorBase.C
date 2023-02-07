@@ -811,9 +811,9 @@ PolygonMeshGeneratorBase::quadElemDef(ReplicatedMesh & mesh,
         if (m == 0 && create_inward_interface_boundaries)
         {
           if (subdomain_rings[0] == 0)
-              boundary_info.add_side(elem_Quad4, 0, k * 2 + 1 + boundary_id_shift);
-            else
-              boundary_info.add_side(elem_Quad4, 0, k * 2 + 2 + boundary_id_shift);
+            boundary_info.add_side(elem_Quad4, 0, k * 2 + 1 + boundary_id_shift);
+          else
+            boundary_info.add_side(elem_Quad4, 0, k * 2 + 2 + boundary_id_shift);
         }
         if (m == (subdomain_rings[k] - 1))
         {
