@@ -182,11 +182,12 @@ From: {{ APPTAINER_FROM }}
     TEMP_LOC=$(mktemp -u -d /tmp/${BINARY_NAME}test.XXXXXX)
     # Really make sure that we nuke the temp location in all circumstances
     trap "if [ -e $TEMP_LOC ]; then rm -rf $TEMP_LOC; fi" EXIT HUP INT TERM
-
+{%- if SECTION_TEST_PRE_TEST is defined %}
+    {{ SECTION_TEST_PRE_TEST }}
+{%- endif %}
     # Copy and run each subset of tests
-{%- if SECTION_TEST is not defined %}
     for TEST_DIR in ${TEST_DIRS}; do
-        mkdir $TEMP_LOC
+        mkdir -p $TEMP_LOC
         cd $TEMP_LOC
         ${BINARY_NAME}-${METHOD} --copy-inputs $TEST_DIR
         cd ${BINARY_NAME}/${TEST_DIR}
@@ -197,9 +198,6 @@ From: {{ APPTAINER_FROM }}
           exit ${TEST_RETURN_CODE}
         fi
     done
-{%- else %}
-    {{ SECTION_TEST }}
-{%- endif %}
 {%- if SECTION_TEST_POST is defined %}
     {{ SECTION_TEST_POST }}
 {%- endif %}

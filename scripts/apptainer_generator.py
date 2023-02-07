@@ -401,7 +401,7 @@ class ApptainerGenerator:
         # Add your sections here (be sure to modify apptainer/app.def to match)
         section_meta = {'environment': [],
                         'post': ['configure', 'make', 'makeinstall'],
-                        'test': []}
+                        'test': ['test']}
         for section_key, actions in section_meta.items():
             file_list = self.create_filename(app_root, section_key, actions)
             for (a_section, file_path) in file_list:
