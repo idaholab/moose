@@ -11,10 +11,11 @@
     requirement = 'The system shall have the ability to stitch multiple input meshes together into a new mesh based upon a user-defined pattern.'
   []
 
-  [boundary_rename_test]
+  [different_boundary_ids_test]
     type = 'Exodiff'
-    input = 'boundary_rename.i'
-    exodiff = 'boundary_rename_out.e'
+    input = 'different_boundary_ids.i'
+    cli_args = "--mesh-only"
+    exodiff = 'different_boundary_ids_in.e'
     mesh_mode = 'REPLICATED'
     recover = false
     requirement = 'The system shall have the ability to stitch multiple input meshes with differing boundary ids together into a new mesh based upon a user-defined pattern.'
@@ -22,15 +23,6 @@
 
   [errors]
     requirement = 'The system shall report a reasonable error when stitching meshes together from a user-defined pattern when'
-
-    [non_unique_boundary]
-      type = 'RunException'
-      input = 'patterned_mesh_generator.i'
-      cli_args = 'Mesh/pmg/right_boundary=1'
-      expect_err = 'boundary names provided are not unique'
-      detail = 'the stitching interfaces are not unique'
-      mesh_mode = 'REPLICATED'
-    []
 
     [non_existent_boundary]
       type = 'RunException'
