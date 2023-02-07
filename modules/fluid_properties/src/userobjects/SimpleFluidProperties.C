@@ -259,7 +259,29 @@ SimpleFluidProperties::rho_from_p_T(const DualReal & pressure,
 Real
 SimpleFluidProperties::T_from_v_e(Real /*v*/, Real e) const
 {
+  // NOTE: while e = _cv * T, h is not equal to _cp * T
   return e / _cv;
+}
+
+Real
+SimpleFluidProperties::T_from_v_h(Real v, Real h) const
+{
+  return (std::log(1. / _density0 / v) - h / v / _bulk_modulus) / -_thermal_expansion /
+         (1 + _cv / v / _thermal_expansion / _bulk_modulus);
+}
+
+void
+SimpleFluidProperties::T_from_v_h(Real v, Real h, Real & T, Real & dT_dv, Real & dT_dh) const
+{
+  T = T_from_v_h(v, h);
+  dT_dv =
+      (1 / -_thermal_expansion) *
+      ((-1. / v + h / v / v / _bulk_modulus) * (1 + _cv / v / _thermal_expansion / _bulk_modulus) -
+       (std::log(1. / _density0 / v) - h / v / _bulk_modulus) *
+           (-_cv / v / v / _thermal_expansion / _bulk_modulus)) /
+      Utility::pow<2>(1 + _cv / v / _thermal_expansion / _bulk_modulus);
+  dT_dh = (-1 / v / _bulk_modulus) / -_thermal_expansion /
+          (1 + _cv / v / _thermal_expansion / _bulk_modulus);
 }
 
 void
@@ -331,6 +353,23 @@ SimpleFluidProperties::p_from_v_e(
 }
 
 Real
+SimpleFluidProperties::p_from_v_h(Real v, Real h) const
+{
+  Real T = T_from_v_h(v, h);
+  return _bulk_modulus * (_thermal_expansion * T + std::log(1 / (v * _density0)));
+}
+
+void
+SimpleFluidProperties::p_from_v_h(Real v, Real h, Real & p, Real & dp_dv, Real & dp_dh) const
+{
+  Real T, dT_dv, dT_dh;
+  T_from_v_h(v, h, T, dT_dv, dT_dh);
+  p = _bulk_modulus * (_thermal_expansion * T + std::log(1 / (v * _density0)));
+  dp_dv = _bulk_modulus * (_thermal_expansion * dT_dv - 1. / v);
+  dp_dh = _bulk_modulus * (_thermal_expansion * dT_dh);
+}
+
+Real
 SimpleFluidProperties::e_from_p_T(Real /*pressure*/, Real temperature) const
 {
   return _cv * temperature;
@@ -364,6 +403,28 @@ SimpleFluidProperties::e_from_p_rho(Real p, Real rho, Real & e, Real & de_dp, Re
   e_from_p_T(p, T, e, de_dp, de_dT);
   de_dp = de_dT * dT_dp + de_dp;
   de_drho = de_dT * dT_drho + de_dp * dT_dp;
+}
+
+Real
+SimpleFluidProperties::e_from_v_h(Real v, Real h) const
+{
+  Real T = T_from_v_h(v, h);
+  Real p = p_from_v_h(v, h);
+  return e_from_p_T(p, T);
+}
+
+void
+SimpleFluidProperties::e_from_v_h(Real v, Real h, Real & e, Real & de_dv, Real & de_dh) const
+{
+  Real T, dT_dv, dT_dh;
+  Real p, dp_dv, dp_dh;
+  T_from_v_h(v, h, T, dT_dv, dT_dh);
+  p_from_v_h(v, h, p, dp_dv, dp_dh);
+
+  Real de_dp, de_dT;
+  e_from_p_T(p, T, e, de_dp, de_dT);
+  de_dv = de_dp * dp_dv + de_dT * dT_dv;
+  de_dh = de_dp * dp_dh + de_dT * dT_dh;
 }
 
 Real SimpleFluidProperties::mu_from_p_T(Real /*pressure*/, Real /*temperature*/) const
