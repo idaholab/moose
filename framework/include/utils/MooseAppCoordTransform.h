@@ -42,17 +42,15 @@ public:
    * 1: a value describing the scaling
    * 2: whether a rotation matrix exists
    * 3: the Euler angles describing the rotation
-   * 4: the translation vector
-   * 5: the coordinate system type
-   * 6: the r-axis direction
-   * 7: the z-axis direction
-   * 8: whether there are multiple coordinate system types on the mesh
-   * 9: whether the mesh has been transformed using the transform
+   * 4: the coordinate system type
+   * 5: the r-axis direction
+   * 6: the z-axis direction
+   * 7: whether there are multiple coordinate system types on the mesh
+   * 8: whether the mesh has been transformed using the transform
    */
   typedef std::tuple<short int,
                      Real,
                      short int,
-                     std::array<Real, 3>,
                      std::array<Real, 3>,
                      int,
                      unsigned int,
@@ -179,8 +177,9 @@ public:
    * Transforms the entire mesh with the coordinate transform
    * This can be done to output in position, or to avoid transforming on every data point
    * @param mesh the mesh to modify, usually the child app mesh
+   * @param translation the translation to apply to the mesh, often the app position
    */
-  void transformMesh(MooseMesh & mesh);
+  void transformMesh(MooseMesh & mesh, Point translation);
 
 private:
   /**
@@ -218,9 +217,6 @@ private:
 
   /// How much distance one mesh length unit represents, e.g. 1 cm, 1 nm, 1 ft, 5 inches
   MooseUnits _length_unit;
-
-  /// Describes a forward translation transformation from our domain to the reference frame domain
-  libMesh::Point _translation;
 
   /// The Euler angles describing rotation
   std::array<Real, 3> _euler_angles;
@@ -337,6 +333,4 @@ private:
 
   /// Describes a forward translation transformation from our domain to the reference frame domain
   Point _translation;
-  // TODO: remove the duplicate _translation attribute in MooseAppCoord (used for mesh
-  // transformation) and here (used for transfers).
 };

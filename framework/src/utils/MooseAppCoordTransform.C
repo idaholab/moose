@@ -182,15 +182,6 @@ MooseAppCoordTransform::setCoordinateSystem(const MooseMesh & mesh)
   _has_different_coord_sys = coord_types.size() > 1;
 }
 
-void
-MooseAppCoordTransform::setTranslationVector(const Point & translation)
-{
-  if (_translation != Point(0, 0, 0))
-    mooseWarning(
-        "Translation vector, usually set from MultiApps positions argument, is being overwritten");
-  _translation = translation;
-}
-
 InputParameters
 MooseAppCoordTransform::validParams()
 {
@@ -296,11 +287,6 @@ MooseAppCoordTransform::MooseAppCoordTransform(const MooseMesh & mesh)
   //
   if (params.isParamValid("length_unit"))
     setLengthUnit(MooseUnits(params.get<std::string>("length_unit")));
-
-  //
-  // Translation
-  //
-  setTranslationVector(Point(0, 0, 0));
 }
 
 MooseAppCoordTransform::MooseAppCoordTransform()
@@ -309,7 +295,6 @@ MooseAppCoordTransform::MooseAppCoordTransform()
     _z_axis(INVALID),
     _has_different_coord_sys(false),
     _length_unit(std::string("1*m")),
-    _translation(),
     _euler_angles(),
     _mesh_transformed(false)
 {
@@ -321,7 +306,6 @@ MooseAppCoordTransform::MooseAppCoordTransform(const MooseAppCoordTransform & ot
     _z_axis(other._z_axis),
     _has_different_coord_sys(other._has_different_coord_sys),
     _length_unit(other._length_unit),
-    _translation(other._translation),
     _euler_angles(other._euler_angles),
     _mesh_transformed(other._mesh_transformed)
 {
@@ -333,15 +317,13 @@ MooseAppCoordTransform::MooseAppCoordTransform(const MooseAppCoordTransform & ot
 }
 
 MooseAppCoordTransform::MooseAppCoordTransform(const MinimalData & minimal_data)
-  : _coord_type(static_cast<Moose::CoordinateSystemType>(std::get<5>(minimal_data))),
-    _r_axis(static_cast<Direction>(std::get<6>(minimal_data))),
-    _z_axis(static_cast<Direction>(std::get<7>(minimal_data))),
-    _has_different_coord_sys(std::get<8>(minimal_data)),
+  : _coord_type(static_cast<Moose::CoordinateSystemType>(std::get<4>(minimal_data))),
+    _r_axis(static_cast<Direction>(std::get<5>(minimal_data))),
+    _z_axis(static_cast<Direction>(std::get<6>(minimal_data))),
+    _has_different_coord_sys(std::get<7>(minimal_data)),
     _length_unit(std::string("1*m")),
-    _translation(Point(
-        std::get<4>(minimal_data)[0], std::get<4>(minimal_data)[1], std::get<4>(minimal_data)[2])),
     _euler_angles(std::get<3>(minimal_data)),
-    _mesh_transformed(std::get<9>(minimal_data))
+    _mesh_transformed(std::get<8>(minimal_data))
 {
   if (std::get<0>(minimal_data))
     setLengthUnit(MooseUnits(std::to_string(std::get<1>(minimal_data)) + "*m"));
@@ -359,7 +341,6 @@ MooseAppCoordTransform::minimalDataDescription() const
           scale_factor,
           static_cast<short int>(bool(_rotate)),
           _euler_angles,
-          {_translation(0), _translation(1), _translation(2)},
           static_cast<int>(_coord_type),
           static_cast<unsigned int>(_r_axis),
           static_cast<unsigned int>(_z_axis),
@@ -375,7 +356,6 @@ MooseAppCoordTransform::operator=(const MooseAppCoordTransform & other)
   _z_axis = other._z_axis;
   _has_different_coord_sys = other._has_different_coord_sys;
   _length_unit = other._length_unit;
-  _translation = other._translation;
   _euler_angles = other._euler_angles;
   _mesh_transformed = other._mesh_transformed;
 
@@ -415,7 +395,7 @@ MooseAppCoordTransform::computeRS()
 }
 
 void
-MooseAppCoordTransform::transformMesh(MooseMesh & mesh)
+MooseAppCoordTransform::transformMesh(MooseMesh & mesh, Point translation)
 {
   // Transforming a RZ or R-spherical mesh doesnt always make sense, disallow it
   if (_coord_type != Moose::COORD_XYZ)
@@ -428,8 +408,8 @@ MooseAppCoordTransform::transformMesh(MooseMesh & mesh)
     MeshTools::Modification::scale(mesh, (*_scale)(0, 0), (*_scale)(1, 1), (*_scale)(2, 2));
   if (_rotate)
     MeshTools::Modification::rotate(mesh, _euler_angles[0], _euler_angles[1], _euler_angles[2]);
-  if (_translation != Point(0, 0, 0))
-    MeshTools::Modification::translate(mesh, _translation(0), _translation(1), _translation(2));
+  if (translation != Point(0, 0, 0))
+    MeshTools::Modification::translate(mesh, translation(0), translation(1), translation(2));
 
   // Translation, scaling and rotation need not be applied anymore when performing coordinate
   // transforms
@@ -604,7 +584,7 @@ MultiAppCoordTransform::isIdentity() const
     return false;
 
   for (const auto i : make_range(Moose::dim))
-    if (!MooseUtils::absoluteFuzzyEqual(_our_app_transform._translation(i), 0))
+    if (!MooseUtils::absoluteFuzzyEqual(_translation(i), 0))
       return false;
 
   return true;

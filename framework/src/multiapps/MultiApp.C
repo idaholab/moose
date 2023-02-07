@@ -554,9 +554,16 @@ MultiApp::preTransfer(Real /*dt*/, Real target_time)
       // Similarly we need to transform the mesh again
       if (_run_in_position)
       {
-        for (const auto & app_ptr : _apps)
-          app_ptr->getExecutioner()->feProblem().coordTransform().transformMesh(
-              app_ptr->getExecutioner()->feProblem().mesh());
+        for (const auto & i : make_range(_my_num_apps))
+        {
+          auto app_ptr = _apps[i];
+          if (usingPositions())
+            app_ptr->getExecutioner()->feProblem().coordTransform().transformMesh(
+                app_ptr->getExecutioner()->feProblem().mesh(), _positions[_first_local_app + i]);
+          else
+            app_ptr->getExecutioner()->feProblem().coordTransform().transformMesh(
+                app_ptr->getExecutioner()->feProblem().mesh(), Point(0, 0, 0));
+        }
       }
 
       // If the time step covers multiple reset times, set them all as having 'happened'
@@ -1041,10 +1048,11 @@ MultiApp::createApp(unsigned int i, Real start_time)
   if (_run_in_position)
   {
     if (usingPositions())
-      app->getExecutioner()->feProblem().coordTransform().setTranslationVector(
-          _positions[_first_local_app + i]);
-    app->getExecutioner()->feProblem().coordTransform().transformMesh(
-        app->getExecutioner()->feProblem().mesh());
+      app->getExecutioner()->feProblem().coordTransform().transformMesh(
+          app->getExecutioner()->feProblem().mesh(), _positions[_first_local_app + i]);
+    else
+      app->getExecutioner()->feProblem().coordTransform().transformMesh(
+          app->getExecutioner()->feProblem().mesh(), Point(0, 0, 0));
   }
 }
 
