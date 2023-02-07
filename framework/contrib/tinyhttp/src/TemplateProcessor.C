@@ -163,7 +163,7 @@ TemplateProcessor::processCommand()
       return;
   }
 
-  // std::cout << "\n| command [" << _s << "], modifier [" << (char)modifierChar << "]\n\n";
+  // std::co ut << "\n| command [" << _s << "], modifier [" << (char)modifierChar << "]\n\n";
 }
 
 void
@@ -202,7 +202,7 @@ TemplateProcessor::interpretPreprocessorCommand(const std::string & s)
     return;
   }
 
-  // std::cout << parts.size() << std::endl;
+  // std::co ut << parts.size() << std::endl;
 }
 
 bool

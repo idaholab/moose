@@ -332,7 +332,7 @@ void WebsockHandlerBuilder::acceptHandover(short& serverSock, IClientStream& cli
             }
         }
     } catch (std::exception& e) {
-        std::cerr << "WebSocket closed due to an exception (" << e.what() << ")\n";
+        std:: cerr << "WebSocket closed due to an exception (" << e.what() << ")\n";
     }
 
     theClient->onDisconnect();
@@ -403,7 +403,7 @@ void WebsockClientHandler::sendRaw(uint8_t opcode, const void* data, size_t leng
         try {
             mClient->send(packetBuffer, lengthToSend + headerPosition);
         } catch (std::runtime_error& e) {
-            std::cerr << "WebSocket send failed (" << e.what() << ")" << std::endl;
+            std:: cerr << "WebSocket send failed (" << e.what() << ")" << std::endl;
             onDisconnect();
             mClient->mErrorFlag = true;
             goto cleanup;
