@@ -194,10 +194,10 @@ FixedPointSolve::solve()
 
   // need to back up multi-apps even when not doing fixed point iteration for recovering from failed
   // multiapp solve
-  _problem.backupMultiApps(EXEC_FIXED_POINT_BEGIN);
+  _problem.backupMultiApps(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
   _problem.backupMultiApps(EXEC_TIMESTEP_BEGIN);
   _problem.backupMultiApps(EXEC_TIMESTEP_END);
-  _problem.backupMultiApps(EXEC_FIXED_POINT_END);
+  _problem.backupMultiApps(EXEC_MULTIAPP_FIXED_POINT_END);
 
   // Prepare to relax variables as a main app
   std::set<dof_id_type> transformed_dofs;
@@ -259,10 +259,10 @@ FixedPointSolve::solve()
       else
       {
         // For every iteration other than the first, we need to restore the state of the MultiApps
-        _problem.restoreMultiApps(EXEC_FIXED_POINT_BEGIN);
+        _problem.restoreMultiApps(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
         _problem.restoreMultiApps(EXEC_TIMESTEP_BEGIN);
         _problem.restoreMultiApps(EXEC_TIMESTEP_END);
-        _problem.restoreMultiApps(EXEC_FIXED_POINT_END);
+        _problem.restoreMultiApps(EXEC_MULTIAPP_FIXED_POINT_END);
       }
 
       _console << COLOR_MAGENTA << "Beginning fixed point iteration " << _fixed_point_it
@@ -308,14 +308,14 @@ FixedPointSolve::solve()
     if (converged)
     {
       // Fixed point iteration loop ends right above
-      _problem.execute(EXEC_FIXED_POINT_END);
-      _problem.execTransfers(EXEC_FIXED_POINT_END);
-      if (!_problem.execMultiApps(EXEC_FIXED_POINT_END, autoAdvance()))
+      _problem.execute(EXEC_MULTIAPP_FIXED_POINT_END);
+      _problem.execTransfers(EXEC_MULTIAPP_FIXED_POINT_END);
+      if (!_problem.execMultiApps(EXEC_MULTIAPP_FIXED_POINT_END, autoAdvance()))
       {
         _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_FAILED_MULTIAPP;
         return false;
       }
-      _problem.outputStep(EXEC_FIXED_POINT_END);
+      _problem.outputStep(EXEC_MULTIAPP_FIXED_POINT_END);
     }
 
     _problem.dt() =
@@ -374,14 +374,14 @@ FixedPointSolve::solveStep(Real & begin_norm,
 
   if (_fixed_point_it == 0)
   {
-    _problem.execute(EXEC_FIXED_POINT_BEGIN);
-    _problem.execTransfers(EXEC_FIXED_POINT_BEGIN);
-    if (!_problem.execMultiApps(EXEC_FIXED_POINT_BEGIN, autoAdvance()))
+    _problem.execute(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
+    _problem.execTransfers(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
+    if (!_problem.execMultiApps(EXEC_MULTIAPP_FIXED_POINT_BEGIN, autoAdvance()))
     {
       _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_FAILED_MULTIAPP;
       return false;
     }
-    _problem.outputStep(EXEC_FIXED_POINT_BEGIN);
+    _problem.outputStep(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
   }
 
   if (!_problem.execMultiApps(EXEC_TIMESTEP_BEGIN, auto_advance))

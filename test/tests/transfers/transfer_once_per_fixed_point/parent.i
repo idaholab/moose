@@ -25,7 +25,7 @@
 []
 
 [MultiApps]
-  # This app is used to trigger fixed point iteration when sub is executed on FIXED_POINT_BEGIN/END
+  # This app is used to trigger fixed point iteration when sub is executed on MULTIAPP_FIXED_POINT_BEGIN/END
   [side_app]
     type = TransientMultiApp
     input_files = sub.i
@@ -47,7 +47,7 @@
     to_postprocessor = parent_fp_its
     to_multi_app = sub
     check_multiapp_execute_on = false
-    execute_on = 'FIXED_POINT_BEGIN'
+    execute_on = 'MULTIAPP_FIXED_POINT_BEGIN'
   []
   [from_sub]
     type = MultiAppPostprocessorTransfer
@@ -55,7 +55,7 @@
     to_postprocessor = subapp_fp_its
     from_multi_app = sub
     check_multiapp_execute_on = false
-    execute_on = 'FIXED_POINT_BEGIN'
+    execute_on = 'MULTIAPP_FIXED_POINT_BEGIN'
     reduction_type = 'sum'
   []
 []
@@ -69,12 +69,12 @@
   [num_fixed_point_begin]
     type = TestPostprocessor
     test_type = 'grow'
-    execute_on = 'FIXED_POINT_BEGIN'
+    execute_on = 'MULTIAPP_FIXED_POINT_BEGIN'
   []
   [num_fixed_point_end]
     type = TestPostprocessor
     test_type = 'grow'
-    execute_on = 'FIXED_POINT_END'
+    execute_on = 'MULTIAPP_FIXED_POINT_END'
   []
   [subapp_fp_its]
     type = Receiver
@@ -84,11 +84,11 @@
 [Outputs]
   [fp_begin]
     type = CSV
-    execute_on = 'FIXED_POINT_BEGIN'
+    execute_on = 'MULTIAPP_FIXED_POINT_BEGIN'
   []
   [fp_end]
     type = CSV
     file_base = 'fp_end'
-    execute_on = 'FIXED_POINT_END'
+    execute_on = 'MULTIAPP_FIXED_POINT_END'
   []
 []

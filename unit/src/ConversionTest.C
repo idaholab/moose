@@ -53,8 +53,8 @@ TEST(Conversion, ExecFlagType)
                                      EXEC_NONLINEAR,
                                      EXEC_TIMESTEP_END,
                                      EXEC_TIMESTEP_BEGIN,
-                                     EXEC_FIXED_POINT_BEGIN,
-                                     EXEC_FIXED_POINT_END,
+                                     EXEC_MULTIAPP_FIXED_POINT_BEGIN,
+                                     EXEC_MULTIAPP_FIXED_POINT_END,
                                      EXEC_CUSTOM,
                                      EXEC_FINAL,
                                      EXEC_FORCED,
@@ -63,16 +63,16 @@ TEST(Conversion, ExecFlagType)
                                      EXEC_NONE};
 
   EXPECT_EQ(Moose::stringify(flags, ", "),
-            "INITIAL, LINEAR, NONLINEAR, TIMESTEP_END, TIMESTEP_BEGIN, FIXED_POINT_BEGIN, "
-            "FIXED_POINT_END, CUSTOM, FINAL, FORCED, FAILED, SUBDOMAIN, NONE");
+            "INITIAL, LINEAR, NONLINEAR, TIMESTEP_END, TIMESTEP_BEGIN, MULTIAPP_FIXED_POINT_BEGIN, "
+            "MULTIAPP_FIXED_POINT_END, CUSTOM, FINAL, FORCED, FAILED, SUBDOMAIN, NONE");
 
   EXPECT_EQ(Moose::stringify(EXEC_INITIAL), "INITIAL");
   EXPECT_EQ(Moose::stringify(EXEC_LINEAR), "LINEAR");
   EXPECT_EQ(Moose::stringify(EXEC_NONLINEAR), "NONLINEAR");
   EXPECT_EQ(Moose::stringify(EXEC_TIMESTEP_END), "TIMESTEP_END");
   EXPECT_EQ(Moose::stringify(EXEC_TIMESTEP_BEGIN), "TIMESTEP_BEGIN");
-  EXPECT_EQ(Moose::stringify(EXEC_FIXED_POINT_BEGIN), "FIXED_POINT_BEGIN");
-  EXPECT_EQ(Moose::stringify(EXEC_FIXED_POINT_END), "FIXED_POINT_END");
+  EXPECT_EQ(Moose::stringify(EXEC_MULTIAPP_FIXED_POINT_BEGIN), "MULTIAPP_FIXED_POINT_BEGIN");
+  EXPECT_EQ(Moose::stringify(EXEC_MULTIAPP_FIXED_POINT_END), "MULTIAPP_FIXED_POINT_END");
   EXPECT_EQ(Moose::stringify(EXEC_CUSTOM), "CUSTOM");
   EXPECT_EQ(Moose::stringify(EXEC_FINAL), "FINAL");
   EXPECT_EQ(Moose::stringify(EXEC_FINAL), "FINAL");
