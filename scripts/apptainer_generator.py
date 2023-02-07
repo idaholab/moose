@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""
+Manipulate Apptainer/Harbor containers based on version/hashes of MOOSE repository
+"""
 import os
 import sys
 import argparse
@@ -347,21 +350,70 @@ class ApptainerGenerator:
         return definition
 
     @staticmethod
-    def add_application_additions(app_root, jinja_data):
+    def create_filename(app_root, section_key, actions):
+        """
+        Build and return a list of (sections, file_path) tuples
+        Returns:
+            [('SECTION_METHOD_ACTION','approot/apptainer/section_method_action.sh')]
+        """
+        file_list = []
+        # Support sections that have neither method or action (like environment.sh)
+        if os.path.exists(os.path.join(app_root,
+                                       'apptainer',
+                                       f'{section_key}.sh')):
+            file_list = [(f'SECTION_{section_key.upper()}',
+                         os.path.join(app_root, 'apptainer', f'{section_key}.sh'))]
+
+        for method in ['pre', 'post']:
+            # Support sections that have no action (like post_pre.sh)
+            if os.path.exists(os.path.join(app_root,
+                                           'apptainer',
+                                           f'{section_key}_{method}.sh')):
+                file_list.append((f'SECTION_{section_key.upper()}_{method.upper()}',
+                                  os.path.join(app_root,
+                                               'apptainer',
+                                               f'{section_key}_{method}.sh')))
+
+            for action in actions:
+                file_path = os.path.join(app_root,
+                                        'apptainer',
+                                        f'{section_key}_{method}_{action}.sh')
+                # Support sections that have method and an action (post_pre_configure.sh)
+                if os.path.exists(file_path):
+                    file_list.append((f'SECTION_{section_key.upper()}_'
+                                      f'{method.upper()}_{action.upper()}',
+                                      file_path))
+        return file_list
+
+    def add_application_additions(self, app_root, jinja_data):
         """
         Add application specific sections if found to jinja data
         Example, if found:
+            app_root/apptainer/post_pre_configure.sh
+            app_root/apptainer/post_pre.sh
             app_root/apptainer/environment.sh
-            app_root/apptainer/post.sh
-            app_root/apptainer/test.sh
-        then the contents therein will be either replaced, or exchanged
-        where appropriate
+            etc
+        then the contents therein will be exchanged where appropriate.
+
+        File naming syntax:
+            <section>_<method>_<action>.sh
         """
-        for a_section in ['environment', 'post', 'test']:
-            section_file = os.path.join(app_root, 'apptainer', a_section)
-            if os.path.exists(f'{section_file}.sh'):
-                with open(f'{section_file}.sh', 'r') as s_file:
-                    jinja_data[f'SECTION_{a_section.upper()}'] = s_file.read()
+        # Add your sections here (be sure to modify apptainer/app.def to match)
+        section_meta = {'environment': [],
+                        'post': ['configure', 'make', 'makeinstall'],
+                        'test': []}
+        for section_key, actions in section_meta.items():
+            file_list = self.create_filename(app_root, section_key, actions)
+            for (a_section, file_path) in file_list:
+                with open(file_path, 'r') as section_file:
+                    multi_lines = []
+                    for i, a_line in enumerate(section_file.readlines()):
+                        # next line items need indentation
+                        if i != 0:
+                            multi_lines.append(f'    {a_line}')
+                        else:
+                            multi_lines.append(a_line)
+                    jinja_data[a_section] = ''.join(multi_lines)
 
     def add_definition_vars(self, jinja_data):
         """
