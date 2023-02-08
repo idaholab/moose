@@ -3284,11 +3284,14 @@ SubChannel1PhaseProblem::externalSolve()
 
   if (_verbose_subchannel)
   {
-    _console << " ============================ " << std::endl;
-    _console << "Bulk coolant temperature at the bundle outlet :" << T_bulk_out << std::endl;
+    _console << " ======================================= " << std::endl;
+    _console << " ======== Subchannel Print Outs ======== " << std::endl;
+    _console << " ======================================= " << std::endl;
+    _console << "Total Surface Area :" << Total_surface_area << " m^2" << std::endl;
+    _console << "Bulk coolant temperature at outlet :" << T_bulk_out << " K" << std::endl;
     _console << "Power added to coolant is: " << power_out - power_in << " Watt" << std::endl;
-    _console << "Mass balance is: " << mass_flow_out - mass_flow_in << " Kg/sec" << std::endl;
-    _console << " ============================ " << std::endl;
+    _console << "Mass balance is: " << mass_flow_out - mass_flow_in << " kg/sec" << std::endl;
+    _console << " ======================================= " << std::endl;
   }
 }
 void SubChannel1PhaseProblem::syncSolutions(Direction /*direction*/) {}
