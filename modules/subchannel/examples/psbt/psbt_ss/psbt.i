@@ -39,9 +39,9 @@ P_out = 4.923e6 # Pa
   segregated = false
   staggered_pressure = false
   monolithic_thermal = false
-  # interpolation_scheme = 'exponential'
+  interpolation_scheme = 'upwind'
   # P_tol = 1e-11
-  verbose_subchannel = true
+  verbose_subchannel = false
 []
 
 [ICs]

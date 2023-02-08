@@ -36,6 +36,8 @@ protected:
   // computeFrictionFactor(double Re, int i_ch) is currently not used for sodium coolant
   virtual double computeFrictionFactor(double Re) override;
   virtual double computeFrictionFactor(double Re, int i_ch) override;
+  /// Computes added heat for channel i_ch and cell iz
+  virtual Real computeAddedHeatPin(unsigned int i_ch, unsigned int iz) override;
   /// Function that computes the heat flux added by the duct
   virtual Real computeAddedHeatDuct(unsigned int i_ch, unsigned int iz);
   /// computeDP(int iz) is defined/overridden in order to use the friction factor for sodium

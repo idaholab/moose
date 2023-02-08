@@ -75,6 +75,7 @@ P_out = 2.0e5 # Pa
   monolithic_thermal = false
   verbose_multiapps = true
   verbose_subchannel = false
+  interpolation_scheme = 'upwind'
 []
 
 [ICs]
@@ -91,7 +92,7 @@ P_out = 2.0e5 # Pa
    [q_prime_IC]
     type = TriPowerIC
     variable = q_prime
-    power = ${fparse 16975/(0.5334+0.4046+0.0762)} # W/m
+    power = 16975 #${fparse 16975/(0.5334+0.4046+0.0762)} # W/m
     filename = "pin_power_profile19.txt"
   []
 

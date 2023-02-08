@@ -299,6 +299,60 @@ LiquidMetalSubChannel1PhaseProblem::computeFrictionFactor(
 }
 
 Real
+LiquidMetalSubChannel1PhaseProblem::computeAddedHeatPin(unsigned int i_ch, unsigned int iz)
+{
+  auto dz = _z_grid[iz] - _z_grid[iz - 1];
+  auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
+  // If pin mesh exists, then project pin power to subchannel
+  if (_pin_mesh_exist)
+  {
+    auto heat_rate_in = 0.0;
+    auto heat_rate_out = 0.0;
+    if (subch_type == EChannelType::CENTER)
+    {
+      for (unsigned int j = 0; j < 3; j++)
+      {
+        auto i_pin = _subchannel_mesh.getChannelPins(i_ch)[j];
+        auto * node_in = _subchannel_mesh.getPinNode(i_pin, iz - 1);
+        auto * node_out = _subchannel_mesh.getPinNode(i_pin, iz);
+        heat_rate_out += (*_q_prime_soln)(node_out);
+        heat_rate_in += (*_q_prime_soln)(node_in);
+      }
+      return 1.0 / 6.0 * (heat_rate_in + heat_rate_out) * dz / 2.0;
+    }
+    else if (subch_type == EChannelType::EDGE)
+    {
+      for (unsigned int j = 0; j < 2; j++)
+      {
+        auto i_pin = _subchannel_mesh.getChannelPins(i_ch)[j];
+        auto * node_in = _subchannel_mesh.getPinNode(i_pin, iz - 1);
+        auto * node_out = _subchannel_mesh.getPinNode(i_pin, iz);
+        heat_rate_out += (*_q_prime_soln)(node_out);
+        heat_rate_in += (*_q_prime_soln)(node_in);
+      }
+      return 1.0 / 4.0 * (heat_rate_in + heat_rate_out) * dz / 2.0;
+    }
+    else
+    {
+      auto i_pin = _subchannel_mesh.getChannelPins(i_ch)[0];
+      auto * node_in = _subchannel_mesh.getPinNode(i_pin, iz - 1);
+      auto * node_out = _subchannel_mesh.getPinNode(i_pin, iz);
+      heat_rate_out += (*_q_prime_soln)(node_out);
+      heat_rate_in += (*_q_prime_soln)(node_in);
+      return 1.0 / 6.0 * (heat_rate_in + heat_rate_out) * dz / 2.0;
+    }
+  }
+  // If pin mesh does not exist, then apply power to subchannel directly
+  // Note: this power was already set by  TriPowerIC
+  else
+  {
+    auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
+    auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
+    return ((*_q_prime_soln)(node_out) + (*_q_prime_soln)(node_in)) * dz / 2.0;
+  }
+}
+
+Real
 LiquidMetalSubChannel1PhaseProblem::computeAddedHeatDuct(unsigned int i_ch, unsigned int iz)
 {
   if (_duct_mesh_exist)
@@ -1664,22 +1718,7 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
     MatAssemblyEnd(_hc_sweep_enthalpy_mat, MAT_FINAL_ASSEMBLY);
     MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
-    // Matrix
-    // #if !PETSC_VERSION_LESS_THAN(3, 15, 0)
-    //   MatAXPY(_hc_sys_h_mat, 1.0, _hc_time_derivative_mat, UNKNOWN_NONZERO_PATTERN);
-    //   MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
-    //   MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
-    //   MatAXPY(_hc_sys_h_mat, 1.0, _hc_advective_derivative_mat, UNKNOWN_NONZERO_PATTERN);
-    //   MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
-    //   MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
-    //   MatAXPY(_hc_sys_h_mat, 1.0, _hc_cross_derivative_mat, UNKNOWN_NONZERO_PATTERN);
-    //   MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
-    //   MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
-    //   MatAXPY(_hc_sys_h_mat, 1.0, _hc_axial_heat_conduction_mat, UNKNOWN_NONZERO_PATTERN);
-    //   MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
-    //   MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
-    //   MatAXPY(_hc_sys_h_mat, 1.0, _hc_radial_heat_conduction_mat, UNKNOWN_NONZERO_PATTERN);
-    // #else
+    /// Add all matrices together
     MatAXPY(_hc_sys_h_mat, 1.0, _hc_time_derivative_mat, DIFFERENT_NONZERO_PATTERN);
     MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
@@ -1696,7 +1735,6 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
     MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
     MatAXPY(_hc_sys_h_mat, 1.0, _hc_sweep_enthalpy_mat, DIFFERENT_NONZERO_PATTERN);
-    // #endif
     MatAssemblyBegin(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(_hc_sys_h_mat, MAT_FINAL_ASSEMBLY);
     if (_verbose_subchannel)
@@ -1709,9 +1747,6 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
     VecAXPY(_hc_sys_h_rhs, 1.0, _hc_axial_heat_conduction_rhs);
     VecAXPY(_hc_sys_h_rhs, 1.0, _hc_radial_heat_conduction_rhs);
     VecAXPY(_hc_sys_h_rhs, 1.0, _hc_sweep_enthalpy_rhs);
-
-    // MatView(_hc_sys_h_mat, PETSC_VIEWER_STDOUT_WORLD);
-    // VecView(_hc_sys_h_rhs, PETSC_VIEWER_STDOUT_WORLD);
 
     if (_segregated_bool || (!_monolithic_thermal_bool))
     {

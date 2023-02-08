@@ -139,37 +139,53 @@ TriPowerIC::value(const Point & p)
   auto heated_length = _mesh.getHeatedLength();
   auto unheated_length_entry = _mesh.getHeatedLengthEntry();
   Point p1(0, 0, unheated_length_entry);
+  Point P = p - p1;
+  auto pin_mesh_exist = _mesh.pinMeshExist();
 
-  // if we are adjacent to the heated part of the fuel rod
-  if (p(2) >= unheated_length_entry && p(2) <= unheated_length_entry + heated_length)
+  if (pin_mesh_exist)
   {
-    if (subch_type == EChannelType::CENTER)
+    // project axial heat rate on pins
+    auto i_pin = _mesh.getPinIndexFromPoint(p);
     {
-      for (unsigned int j = 0; j < 3; j++)
-      {
-        auto rod_idx = _mesh.getRodIndex(i, j);
-        heat_rate += 1.0 / 6.0 * _ref_qprime(rod_idx) * _pin_power_correction(rod_idx) *
-                     _axial_heat_rate.value(_t, p);
-      }
-      return heat_rate;
-    }
-    else if (subch_type == EChannelType::EDGE)
-    {
-      for (unsigned int j = 0; j < 2; j++)
-      {
-        auto rod_idx = _mesh.getRodIndex(i, j);
-        heat_rate += 1.0 / 4.0 * _ref_qprime(rod_idx) * _pin_power_correction(rod_idx) *
-                     _axial_heat_rate.value(_t, p);
-      }
-      return heat_rate;
-    }
-    else if (subch_type == EChannelType::CORNER)
-    {
-      auto rod_idx = _mesh.getRodIndex(i, 0);
-      heat_rate += 1.0 / 6.0 * _ref_qprime(rod_idx) * _pin_power_correction(rod_idx) *
-                   _axial_heat_rate.value(_t, p);
-      return heat_rate;
+      if (p(2) >= unheated_length_entry && p(2) <= unheated_length_entry + heated_length)
+        return _ref_qprime(i_pin) * _pin_power_correction(i_pin) * _axial_heat_rate.value(_t, P);
+      else
+        return 0.0;
     }
   }
-  return 0.;
+  else
+  {
+    // project axial heat rate on subchannels
+    if (p(2) >= unheated_length_entry && p(2) <= unheated_length_entry + heated_length)
+    {
+      if (subch_type == EChannelType::CENTER)
+      {
+        for (unsigned int j = 0; j < 3; j++)
+        {
+          auto rod_idx = _mesh.getRodIndex(i, j);
+          heat_rate += 1.0 / 6.0 * _ref_qprime(rod_idx) * _pin_power_correction(rod_idx) *
+                       _axial_heat_rate.value(_t, P);
+        }
+        return heat_rate;
+      }
+      else if (subch_type == EChannelType::EDGE)
+      {
+        for (unsigned int j = 0; j < 2; j++)
+        {
+          auto rod_idx = _mesh.getRodIndex(i, j);
+          heat_rate += 1.0 / 4.0 * _ref_qprime(rod_idx) * _pin_power_correction(rod_idx) *
+                       _axial_heat_rate.value(_t, P);
+        }
+        return heat_rate;
+      }
+      else if (subch_type == EChannelType::CORNER)
+      {
+        auto rod_idx = _mesh.getRodIndex(i, 0);
+        heat_rate += 1.0 / 6.0 * _ref_qprime(rod_idx) * _pin_power_correction(rod_idx) *
+                     _axial_heat_rate.value(_t, P);
+        return heat_rate;
+      }
+    }
+    return 0.;
+  }
 }
