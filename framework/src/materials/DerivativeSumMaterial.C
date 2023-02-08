@@ -24,12 +24,8 @@ DerivativeSumMaterialTempl<is_ad>::validParams()
                                             "Base name of the parsed sum material property");
 
   // All arguments of the parsed expression (free energy) being summed
-  params.addDeprecatedCoupledVar(
-      "args",
-      "Arguments of the free energy functions being summed - use vector coupling",
-      "args is deprecated, use coupled_variables instead");
-  // TODO Make required once deprecation is handled, see #19119
-  params.addCoupledVar("coupled_variables", "Vector of names of variables being summed");
+  params.addRequiredCoupledVar("args", "Vector of names of variables being summed");
+  params.deprecateCoupledVar("args", "coupled_variables", "02/07/2024");
 
   params.addCoupledVar("displacement_gradients",
                        "Vector of displacement gradient variables (see "

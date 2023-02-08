@@ -879,6 +879,14 @@ public:
                         const std::string & new_name,
                         const std::string & new_docstring);
 
+  void deprecateParam(const std::string & old_name,
+                      const std::string & new_name,
+                      const std::string & removal_data);
+
+  void deprecateCoupledVar(const std::string & old_name,
+                           const std::string & new_name,
+                           const std::string & removal_date);
+
   /**
    * Checks whether the provided name is a renamed parameter name. If so we return the 'new' name.
    * If not we return the incoming name
@@ -905,6 +913,8 @@ public:
    */
   template <typename T>
   bool have_parameter(std::string_view name) const;
+
+  std::vector<std::string> paramAliases(const std::string & param_name) const;
 
 private:
   // Private constructor so that InputParameters can only be created in certain places.
@@ -935,6 +945,16 @@ private:
    * Private method for setting deprecated coupled variable documentation strings
    */
   void setDeprecatedVarDocString(const std::string & new_name, const std::string & doc_string);
+
+  void renameParamInternal(const std::string & old_name,
+                           const std::string & new_name,
+                           const std::string & docstring,
+                           const std::string & removal_date);
+
+  void renameCoupledVarInternal(const std::string & old_name,
+                                const std::string & new_name,
+                                const std::string & docstring,
+                                const std::string & removal_date);
 
   struct Metadata
   {
@@ -981,14 +1001,16 @@ private:
     bool _ignore = false;
   };
 
-  Metadata & at(const std::string & param)
+  Metadata & at(const std::string & param_name)
   {
+    const auto param = checkForRename(param_name);
     if (_params.count(param) == 0)
       mooseError("param '", param, "' not present in InputParams");
     return _params[param];
   }
-  const Metadata & at(const std::string & param) const
+  const Metadata & at(const std::string & param_name) const
   {
+    const auto param = checkForRename(param_name);
     if (_params.count(param) == 0)
       mooseError("param '", param, "' not present in InputParams");
     return _params.at(param);
@@ -1064,15 +1086,8 @@ private:
   /// A map from deprecated coupled variable names to the new blessed name
   std::unordered_map<std::string, std::string> _new_to_deprecated_coupled_vars;
 
-  /// A map from parameter name to renamed parameter name. This container is used when derived
-  /// object developers wish to rename parameters from the base class, e.g. to give general names
-  /// more specific names relevant to physics
-  std::map<std::string, std::string> _old_to_new_name;
-
-  /// A cache data member that can help avoid querying the \p _old_to_new_name map if someone
-  /// repeatedly calls \p checkForRename with the same name. The first member is the query name and
-  /// the second member is the return name
-  mutable std::pair<std::string, std::string> _last_checked_rename;
+  std::map<std::string, std::pair<std::string, std::string>> _old_to_new_name_and_dep;
+  std::multimap<std::string, std::string> _new_to_old_names;
 
   // These are the only objects allowed to _create_ InputParameters
   friend InputParameters emptyInputParameters();
@@ -1080,9 +1095,6 @@ private:
   friend class Parser;
   // for the printInputFile function in the action warehouse
   friend class ActionWarehouse;
-
-  /// A mutex to prevent concurrent read/write of cache variables
-  mutable std::mutex _cache_mutex;
 };
 
 template <typename T>
@@ -1096,7 +1108,9 @@ template <typename T>
 T &
 InputParameters::set(const std::string & name_in, bool quiet_mode)
 {
+  const bool is_function = name_in == "function";
   const auto name = checkForRename(name_in);
+  libmesh_ignore(is_function);
 
   checkParamName(name);
   checkConsistentType<T>(name);
