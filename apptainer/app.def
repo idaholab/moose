@@ -14,6 +14,9 @@
 {#- TEST_DIRS: Directories to test in the %test section; defaults to just "tests"             -#}
 {#- EXTRA_MAMBA_PACKAGES: Extra mamba packages to install                                     -#}
 
+{#- Civet Specific jinja arguments                                                            -#}
+{#- allowed_to_fail: BOOL, specific to Civet. Only available in %post, %test section          -#}
+
 {#- Optional Application specific jinja arguments                                             -#}
 {#- SECTION_ENVIRONMENT: Adds additional environment variables set upon entering container    -#}
 {#- SECTION_POST: Partially replaces %post (make, make install, section)                      -#}
@@ -116,6 +119,10 @@ From: {{ APPTAINER_FROM }}
     MOOSE_PREFIX=/opt/${BINARY_NAME}
 {%- endif %}
     cd ${MOOSE_DIR}
+{%- if allowed_to_fail is defined %}
+    # CIVET allowed_to_fail is True
+    set +e
+{%- endif %}
 {%- if SECTION_POST_PRE_CONFIGURE is defined %}
     {{ SECTION_POST_PRE_CONFIGURE }}
 {%- endif %}
@@ -143,6 +150,11 @@ From: {{ APPTAINER_FROM }}
 {%- if SECTION_POST_POST_MAKEINSTALL is defined %}
     {{ SECTION_POST_POST_MAKEINSTALL }}
 {%- endif %}
+{%- if allowed_to_fail is defined %}
+    # CIVET allowed_to_fail not allowed for remainder steps
+{%- endif %}
+    # force error shell behavior for remainder steps
+    set -e
     # Fix permissions for installed application
     chmod -R o=u-w,g=u-w ${MOOSE_PREFIX}
 
@@ -166,6 +178,8 @@ From: {{ APPTAINER_FROM }}
     rm -rf $TEMP_LOC
 
 %test
+    # Force error shell behavior
+    set -e
     # Load jinja vars
 {%- if SECTION_TEST_PRE is defined %}
     {{ SECTION_TEST_PRE }}
@@ -191,12 +205,17 @@ From: {{ APPTAINER_FROM }}
         cd $TEMP_LOC
         ${BINARY_NAME}-${METHOD} --copy-inputs $TEST_DIR
         cd ${BINARY_NAME}/${TEST_DIR}
+{%- if allowed_to_fail is defined %}
+        # CIVET allowed_to_fail is True
+        set +e
+{%- endif %}
         ${BINARY_NAME}-${METHOD} --run -j ${MOOSE_JOBS:-1} -t
-        TEST_RETURN_CODE=$?
+{%- if allowed_to_fail is defined %}
+        # CIVET allowed_to_fail not allowed for remainder steps
+{%- endif %}
+        # force error shell behavior for remainder steps
+        set -e
         rm -rf $TEMP_LOC
-        if [ ${TEST_RETURN_CODE} != 0 ]; then
-          exit ${TEST_RETURN_CODE}
-        fi
     done
 {%- if SECTION_TEST_POST is defined %}
     {{ SECTION_TEST_POST }}
