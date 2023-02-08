@@ -1,7 +1,7 @@
 # Install MOOSE
 
 To install the MOOSE Framework, click the link below that corresponds to your operating
-system/platform or your desired method and follow the instructions:
+system, platform, or your desired method and follow the instructions:
 
 - [Linux and MacOS](installation/conda.md)
 - [installation/windows.md]

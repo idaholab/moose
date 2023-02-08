@@ -31,7 +31,7 @@ With Mambaforge installed in your home directory, export PATH so that it may be 
 export PATH=$HOME/mambaforge3/bin:$PATH
 ```
 
-Now that we can execute `mamba`, initailize it and then exit the terminal:
+Now that we can execute `mamba`, initialize it and then exit the terminal:
 
 ```bash
 mamba init

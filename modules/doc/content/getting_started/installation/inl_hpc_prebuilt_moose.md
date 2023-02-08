@@ -1,7 +1,7 @@
 # INL HPC Pre-Built MOOSE
 
-While operating on one of our [!ac](INL) [!ac](HPC) clusters, there exists the option of using pre
-built versions of MOOSE. To request access to these clusters, please follow the instructions on
+While operating on one of the [!ac](INL) [!ac](HPC) clusters, there exists the option of using
+pre-built versions of MOOSE. To request access to these clusters, please follow the instructions on
 [INL's Nuclear Computational Resource Center](https://inl.gov/ncrc/) website.
 
 Once access has been granted, log into Sawtooth or Lemhi using either [inl/hpc_ondemand.md]
@@ -18,7 +18,7 @@ module load use.moose moose-apps moose
 ```
 
 !alert warning
-If you receive an error about modules not known, please make sure you are logged into either
+If you receive an error about modules not being known, please make sure you are logged into either
 Sawtooth or Lemhi.
 
 Once loaded, `moose-opt` becomes available. You need now only provide input files to run
@@ -49,10 +49,10 @@ You can use HPC OnDemand to view the results file remotely. Head on over to
 Sawtooth), the amount of time you believe you need, and then click `Launch`.
 
 It may take some time before your 'Visualization Job' becomes available. When it does, simply click
-on it, and you will be presented within your web browser, your GUI Desktop. From here, you can open
-visualization applications (such as Paraview), and open your results file.
+on it, and you will be presented a [!ac](GUI) desktop within your web browser. From here, you can
+open visualization applications (such as Paraview), and open your results file.
 
-To use Paraview, open a terminal by: Clicking `Applications` at the top left, then click
+To use Paraview, open a terminal by clicking `Applications` at the top left, then click
 `Terminal Emulator`. A terminal window will open. Enter the following commands:
 
 ```bash

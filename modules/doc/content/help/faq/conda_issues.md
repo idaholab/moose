@@ -1,7 +1,7 @@
 ## Conda Issues id=condaissues
 
 Conda issues can be the root cause for just about any issue on this page. Scroll through this
-section, for what may look familiar, and follow those instructions:
+section for what may look familiar, and follow those instructions:
 
 - #### 404 error, The channel is not accessible or is invalid.
 
@@ -76,7 +76,7 @@ section, for what may look familiar, and follow those instructions:
   installed (perhaps with sudo rights, or as another user). You should look into removing this
   installation of conda, and starting over with our
   [Getting Started](getting_started/installation/conda.md) instructions. Failures of this nature can
-  also mean your conda resource file (~/.condarc) is in bad shape. We have no way of diagnosing this
+  also mean your conda resource file (`~/.condarc`) is in bad shape. We have no way of diagnosing this
   in a troubleshooting fashion, as this file can contain more than just moose-related configs. For
   reference, the bare minimum should resemble the following:
 
@@ -102,7 +102,7 @@ section, for what may look familiar, and follow those instructions:
 
 - #### Your issue not listed
 
-  The quick fix-attempt, is to delete the faulty environment and re-install it again:
+  The quick fix-attempt, is to delete the faulty environment and re-install it:
 
   ```bash
   mamba activate base

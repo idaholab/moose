@@ -34,25 +34,7 @@ export LD_LIBRARY_PATH=$PACKAGES_DIR/llvm-__LLVM__/lib:$LD_LIBRARY_PATH
 
 !include manual_mpich_llvm.md
 
-## Python (possibly optional)
-
-Building MOOSE requires having Python headers (python-devel) and the Python package: `packaging`
-available. If you know you have this requirement satisfied, and you do not plan on also using
-Peacock (next section) you can skip this section.
-
-These requirements are easily installed via Conda.
-
-!include getting_started/installation/install_miniconda.md
-
-Next, install the necessary `packaging` module:
-
-```bash
-mamba install packaging
-```
-
-## Peacock (optional)
-
-!include installation/install_peacock.md
+!include optional_python_and_peacock.md
 
 ## bash_profile
 
@@ -91,7 +73,6 @@ source /path/to/moose-environment.sh
 
 Or you can permanently have it loaded each time you open a terminal by adding the above `source`
 command in your ~/.bash_profile (or ~/.bashrc which ever your system uses).
-
 
 ## Compiler Stack Finished
 

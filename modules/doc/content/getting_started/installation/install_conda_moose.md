@@ -1,6 +1,6 @@
 ## Install MOOSE Conda Packages id=moosepackages
 
-Create a unique conda environment for moose, named `moose`, and install the moose dependency
+Create a unique conda environment for [!ac](MOOSE), named `moose`, and install the MOOSE dependency
 packages:
 
 ```bash
