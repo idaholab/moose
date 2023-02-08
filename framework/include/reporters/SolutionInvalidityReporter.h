@@ -31,4 +31,4 @@ private:
   const SolutionInvalidity * const & _solution_invalidity;
 };
 
-void to_json(nlohmann::json & json, const SolutionInvalidity & solution_invalidity);
+void to_json(nlohmann::json & json, const SolutionInvalidity * const & solution_invalidity);

@@ -30,13 +30,13 @@
   []
 
   [solution_invalid_json]
+    allow_warnings = true
+    recover = false
+    type = JSONDiff
+    input = solution_invalid.i
+    jsondiff = 'solution_invalid_json.json'
+    design = 'SolutionInvalidity.md'
+    issues = '#22814'
     requirement = "The system shall report the solution invalid summary:"
-
-      type = JSONDiff
-      allow_warnings = true
-      input = solution_invalid.i
-      jsondiff = 'solution_invalid_json.json'
-      design = 'SolutionInvalidity.md'
-      issues = '#22814'
   []
 []

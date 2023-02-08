@@ -18,9 +18,6 @@ SolutionInvalidityReporter::validParams()
 {
   InputParameters params = GeneralReporter::validParams();
   params.addClassDescription("Reports the Summary Table of Solution Invalid Counts.");
-
-  // params.set<bool>("_always_store") = false;
-
   return params;
 }
 

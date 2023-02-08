@@ -48,7 +48,7 @@ SolutionInvalidity::solutionInvalid() const
   bool is_invalid = false;
   for (auto & entry : _counts)
   {
-    if (entry.counts || entry.timeiter_counts)
+    if (entry.counts)
     {
       is_invalid = true;
       break;
@@ -166,7 +166,7 @@ SolutionInvalidity::summaryTable() const
   for (const auto id : index_range(_counts))
   {
     const auto & entry = _counts[id];
-    if (entry.counts > 0 || entry.timeiter_counts > 0)
+    if (entry.counts > 0)
     {
       const auto & info = _solution_invalidity_registry.item(id);
       vtable.addRow(info.object_type,      // Object Type
