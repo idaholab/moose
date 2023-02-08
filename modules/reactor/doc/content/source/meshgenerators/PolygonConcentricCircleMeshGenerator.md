@@ -91,7 +91,11 @@ The external boundary has a default boundary id of 10000. The user may instead s
 
 ### Interface Boundaries
 
-The user can also decide whether the interface boundaries are generated or not. There are two types of interface boundaries, "inward interface boundaries" and "outward interface boundaries". The "inward" and "outward" here refer to the direction of the boundary's normal vector. As a sideset must be defined on the sides of elements, which belong to one or multiple subdomains, an interface boundary can be defined either on the subdomain immediately inside the interface (i.e., with an "outward" normal vector) or on the subdomain immediately outside the interface (i.e., with an "inward" normal factor). The user can set [!param](/Mesh/PolygonConcentricCircleMeshGenerator/create_inward_interface_boundaries) and [!param](/Mesh/PolygonConcentricCircleMeshGenerator/create_outward_interface_boundaries) to control which interface boundaries will be created. The interface boundary names can also be specified through [!param](/Mesh/PolygonConcentricCircleMeshGenerator/inward_interface_boundary_names) and [!param](/Mesh/PolygonConcentricCircleMeshGenerator/outward_interface_boundary_names).
+The user can also decide whether the interface boundaries are generated or not.
+
+There are two types of interface boundaries, "inward interface boundaries" and "outward interface boundaries". The "inward" and "outward" here refer to the direction of the boundary's normal vector. As a sideset must be defined on the sides of elements, which belong to one or multiple subdomains, an interface boundary can be defined either on the subdomain immediately inside the interface (i.e., with an "outward" normal vector) or on the subdomain immediately outside the interface (i.e., with an "inward" normal vector).
+
+The user can set [!param](/Mesh/PolygonConcentricCircleMeshGenerator/create_inward_interface_boundaries) and [!param](/Mesh/PolygonConcentricCircleMeshGenerator/create_outward_interface_boundaries) to control which interface boundaries will be created. The interface boundary names can also be specified through [!param](/Mesh/PolygonConcentricCircleMeshGenerator/inward_interface_boundary_names) and [!param](/Mesh/PolygonConcentricCircleMeshGenerator/outward_interface_boundary_names).
 
 ## Example Syntax
 

@@ -40,7 +40,11 @@ These `MeshMetaData` as well as `control_drum_id` can be used by other MOOSE obj
 
 ## Interface Boundaries
 
-The user can also decide whether the interface boundaries are generated or not in the peripheral region. There are two types of interface boundaries, "inward interface boundaries" and "outward interface boundaries". The "inward" and "outward" here refer to the direction of the boundary's normal vector. As a sideset must be defined on the sides of elements, which belong to one or multiple subdomains, an interface boundary can be defined either on the subdomain immediately inside the interface (i.e., with an "outward" normal vector) or on the subdomain immediately outside the interface (i.e., with an "inward" normal factor). The user can set [!param](/Mesh/PatternedHexMeshGenerator/create_inward_interface_boundaries) and [!param](/Mesh/PatternedHexMeshGenerator/create_outward_interface_boundaries) to control which interface boundaries will be created.
+The user can also decide whether the interface boundaries are generated or not in the peripheral region.
+
+!include /PolygonConcentricCircleMeshGenerator.md start=There are two types end=The user can set
+
+The user can set [!param](/Mesh/PatternedHexMeshGenerator/create_inward_interface_boundaries) and [!param](/Mesh/PatternedHexMeshGenerator/create_outward_interface_boundaries) to control which interface boundaries will be created.
 
 ## Example Syntax
 
