@@ -850,11 +850,6 @@ public:
   bool isType(const std::string & name) const;
 
   /**
-   * @returns True if these parameters were constructed using the legacy method.
-   **/
-  bool fromLegacyConstruction() const { return _from_legacy_construction; }
-
-  /**
    * Determine the actual variable name from the given variable \emph parameter name
    * @param var_param_name the name of the variable parameter, e.g. 'variable'
    * @param moose_object_with_var_param_name the name of the moose object holding the variable
@@ -1018,9 +1013,6 @@ private:
   /// A flag for toggling the error message in the copy constructor.
   bool _allow_copy;
 
-  /// Whether or not these parameters were constructed using legacy contruction (remove with #19440)
-  bool _from_legacy_construction;
-
   /// A map from deprecated coupled variable names to the new blessed name
   std::unordered_map<std::string, std::string> _new_to_deprecated_coupled_vars;
 
@@ -1030,10 +1022,6 @@ private:
   friend class Parser;
   // for the printInputFile function in the action warehouse
   friend class ActionWarehouse;
-
-  // For setting _from_legacy_construction (remove with #19440)
-  template <typename T>
-  friend InputParameters validParams();
 };
 
 template <typename T>
@@ -1685,42 +1673,18 @@ InputParameters::isType(const std::string & name) const
   return have_parameter<T>(name);
 }
 
-template <class T>
-InputParameters
-validParams()
-{
-  // If users forgot to make their (old) validParams, they screwed up and
-  // should get an error - so it is okay for us to try to call the new
-  // validParams static function - which will error if they didn't implement
-  // the new function
-  auto params = T::validParams();
-
-  // If calling the static member method worked, we didn't build these parameters
-  // using the legacy method. Therefore, we won't throw an error for this object
-  // in CheckLegacyParamsAction. This should be removed with the closure of #19439.
-  params._from_legacy_construction = false;
-
-  return params;
-}
-
 namespace moose
 {
 namespace internal
 {
 /**
  * Calls the valid parameter method for the object of type T.
- *
- * This isn't necessary anymore, but is hanging around until we finally
- * get rid of all mention of the legacy parameter construction. Once
- * #19439 is closed, we can replace
- * moose::internal::callValidParams<T>() -> T::validParams(), and we
- * should return T::validParams() here instead.
  */
 template <typename T>
 InputParameters
 callValidParams()
 {
-  return validParams<T>();
+  return T::validParams();
 }
 }
 }

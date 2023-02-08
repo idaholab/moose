@@ -510,14 +510,6 @@ template <bool is_ad>
 using GenericDenseMatrix =
     typename std::conditional<is_ad, DenseMatrix<ADReal>, DenseMatrix<Real>>::type;
 
-// Should be removed with #19439
-#define defineLegacyParams(ObjectType)                                                             \
-  static_assert(false,                                                                             \
-                "defineLegacyParams is no longer supported as legacy input parameter "             \
-                "construction is no longer supported; see "                                        \
-                "mooseframework.org/newsletter/2021_11.html#legacy-input-parameter-deprecation "   \
-                "for more information");
-
 namespace Moose
 {
 extern const processor_id_type INVALID_PROCESSOR_ID;
