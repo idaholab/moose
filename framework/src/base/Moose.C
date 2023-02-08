@@ -419,6 +419,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("CreateDisplacedProblemAction", "Mesh");
   registerSyntax("DisplayGhostingAction", "Mesh");
   registerSyntax("AddMeshGeneratorAction", "Mesh/*");
+  registerSyntax("ElementIDOutputAction", "Mesh");
   syntax.registerSyntaxType("Mesh/*", "MeshGeneratorName");
 
   registerSyntax("AddFunctionAction", "Functions/*");
