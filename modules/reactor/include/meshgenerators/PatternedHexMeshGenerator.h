@@ -89,10 +89,6 @@ protected:
    * @param peripheral_duct_intervals numbers of radial intervals of the duct regions
    * @param rotation_angle angle that the generated mesh will be rotated by
    * @param mesh_type whether the peripheral region is for a corner or a side hexagon mesh
-   * @param create_inward_interface_boundaries whether inward interface boundary sidesets are
-   * created
-   * @param create_outward_interface_boundaries whether outward interface boundary sidesets are
-   * created
    * @return a mesh of the hexagon unit mesh with peripheral region added.
    */
   void addPeripheralMesh(ReplicatedMesh & mesh,
@@ -102,9 +98,7 @@ protected:
                          const std::vector<unsigned int> & num_sectors_per_side_array,
                          const std::vector<unsigned int> & peripheral_duct_intervals,
                          const Real rotation_angle,
-                         const unsigned int mesh_type,
-                         const bool create_inward_interface_boundaries,
-                         const bool create_outward_interface_boundaries);
+                         const unsigned int mesh_type);
 
   /**
    * Computes the inner and outer node positions of the peripheral region for a single layer.

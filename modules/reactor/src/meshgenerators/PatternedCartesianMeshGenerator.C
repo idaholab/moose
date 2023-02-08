@@ -518,9 +518,7 @@ PatternedCartesianMeshGenerator::generate()
                             num_sectors_per_side_array,
                             peripheral_duct_intervals,
                             rotation_angle,
-                            mesh_type,
-                            _create_inward_interface_boundaries,
-                            _create_outward_interface_boundaries);
+                            mesh_type);
 
           if (extra_dist_shift != 0)
             cutOffPolyDeform(
@@ -772,9 +770,7 @@ PatternedCartesianMeshGenerator::addPeripheralMesh(
     const std::vector<unsigned int> & num_sectors_per_side_array,
     const std::vector<unsigned int> & peripheral_duct_intervals,
     const Real rotation_angle,
-    const unsigned int mesh_type,
-    const bool create_inward_interface_boundaries,
-    const bool create_outward_interface_boundaries)
+    const unsigned int mesh_type)
 {
   std::vector<std::pair<Real, Real>> positions_inner;
   std::vector<std::pair<Real, Real>> d_positions_outer;
@@ -818,9 +814,9 @@ PatternedCartesianMeshGenerator::addPeripheralMesh(
                                           sub_positions_inner,
                                           sub_d_positions_outer,
                                           i,
-                                          create_inward_interface_boundaries,
+                                          _create_inward_interface_boundaries,
                                           (i != extra_dist.size() - 1) &&
-                                              create_outward_interface_boundaries);
+                                              _create_outward_interface_boundaries);
       if (mesh.is_prepared()) // Need to prepare if the other is prepared to stitch
         meshp0->prepare_for_use();
 
