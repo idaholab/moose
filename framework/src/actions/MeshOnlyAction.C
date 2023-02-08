@@ -14,6 +14,7 @@
 #include "Exodus.h"
 
 #include "libmesh/exodusII_io.h"
+#include "libmesh/exodusII_io_helper.h"
 #include "libmesh/checkpoint_io.h"
 
 registerMooseAction("MooseApp", MeshOnlyAction, "mesh_only");
@@ -29,7 +30,8 @@ MeshOnlyAction::MeshOnlyAction(const InputParameters & params) : Action(params) 
 void
 MeshOnlyAction::act()
 {
-  auto mesh_file = _app.parameters().get<std::string>("mesh_only");
+  bool output_eeid_to_exodus = _app.isParamValid("initialize_only");
+  std::string mesh_file = output_eeid_to_exodus ? _app.parameters().get<std::string>("initialize_only") : _app.parameters().get<std::string>("mesh_only");
   auto & mesh_ptr = _app.actionWarehouse().mesh();
 
   // Print information about the mesh
@@ -67,7 +69,8 @@ MeshOnlyAction::act()
   {
     TIME_SECTION("act", 1, "Writing Exodus");
 
-    ExodusII_IO exio(mesh_ptr->getMesh());
+    auto & output_mesh = mesh_ptr->getMesh();
+    ExodusII_IO exio(output_mesh);
 
     Exodus::setOutputDimensionInExodusWriter(exio, *mesh_ptr);
 
@@ -75,6 +78,34 @@ MeshOnlyAction::act()
     exio.set_hdf5_writing(false);
 
     exio.write(mesh_file);
+
+    unsigned int n_eeid = output_mesh.n_elem_integers();
+    if (output_eeid_to_exodus && n_eeid > 0)
+    {
+      // Invoke ExodusII_IO_Helper to output extra element ids to Exodus file
+      auto & exio_helper = exio.get_exio_helper();
+
+      // Output empty timestep to Exodus file
+      int empty_timestep = 1;
+      Real default_time = 1.0;
+      exio_helper.write_timestep(empty_timestep, default_time);
+
+      // Retrieve extra element id names and associated data
+      std::vector<std::string> eeid_vars;
+      std::vector<Number> eeid_soln;
+      for (unsigned int i = 0; i < n_eeid; i++)
+      {
+        eeid_vars.push_back(output_mesh.get_elem_integer_name(i));
+        for (auto & elem : output_mesh.element_ptr_range())
+          eeid_soln.push_back(elem->get_extra_integer(i));
+      }
+
+      // Write extra element id data to Exodus file
+      std::vector<std::set<subdomain_id_type>> vars_active_subdomains;
+      vars_active_subdomains.resize(n_eeid);
+      exio_helper.initialize_element_variables(eeid_vars, vars_active_subdomains);
+      exio_helper.write_element_values(output_mesh, eeid_soln, empty_timestep, vars_active_subdomains);
+    }
   }
   else if (mesh_file.find(".cpr") + 4 == mesh_file.size())
   {
