@@ -101,6 +101,7 @@ ElementSubdomainModifier::initialize()
   _moved_elems.clear();
   _moved_displaced_elems.clear();
   _moved_nodes.clear();
+  _cached_subdomain_assignments.clear();
 }
 
 void
@@ -124,11 +125,11 @@ ElementSubdomainModifier::execute()
     for (unsigned int i = 0; i < elem->n_nodes(); ++i)
       _moved_nodes.insert(elem->node_id(i));
 
-    elem->subdomain_id() = subdomain_id;
+    _cached_subdomain_assignments.emplace_back(elem, subdomain_id);
     _moved_elems.push_back(elem);
     if (displaced_elem)
     {
-      displaced_elem->subdomain_id() = subdomain_id;
+      _cached_subdomain_assignments.emplace_back(displaced_elem, subdomain_id);
       _moved_displaced_elems.push_back(displaced_elem);
     }
   }
@@ -147,11 +148,18 @@ ElementSubdomainModifier::threadJoin(const UserObject & in_uo)
                                 uo._moved_displaced_elems.end());
 
   _moved_nodes.insert(uo._moved_nodes.begin(), uo._moved_nodes.end());
+  _cached_subdomain_assignments.insert(_cached_subdomain_assignments.end(),
+                                       uo._cached_subdomain_assignments.begin(),
+                                       uo._cached_subdomain_assignments.end());
 }
 
 void
 ElementSubdomainModifier::finalize()
 {
+  // apply cached subdomain changes
+  for (auto & [elem, subdomain_id] : _cached_subdomain_assignments)
+    elem->subdomain_id() = subdomain_id;
+
   /*
     Synchronize ghost element subdomain ID
     Note: this needs to be done before updating boundary info because
