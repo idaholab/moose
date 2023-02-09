@@ -368,7 +368,6 @@ NonlinearSystem::converged()
   if (!_fe_problem.allowInvalidSolution() && _solution_is_invalid)
   {
     mooseWarning("The solution is not converged due to the solution being invalid.");
-    // _app.solutionInvalidity().resetSolutionInvalid();
     return false;
   }
   return _nl_implicit_sys.nonlinear_solver->converged;

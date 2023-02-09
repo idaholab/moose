@@ -8,6 +8,10 @@ The [/SolutionInvalidity.md] holds solution invalid warning information for MOOS
 2. *latest_counts*: shows the number of solution invalid warnings for the latest iteration
 3. *timestep_counts*: shows the number of solution invalid warnings for the latest time step
 4. *total_counts*: shows the total number of solution invalid warnings for the entire simulation
+5. *Message*: shows the description of the solution invalidity
 
+!syntax parameters /Reporters/SolutionInvalidityReporter
 
+!syntax inputs /Reporters/SolutionInvalidityReporter
 
+!syntax children /Reporters/SolutionInvalidityReporter
