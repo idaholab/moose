@@ -1,13 +1,6 @@
 ## Install MOOSE Conda Packages id=moosepackages
 
-Before we create our virtual conda environment, we first need to initialize mamba.
-For this, execute the following command and +restart your terminal session+.
-
-```bash
-mamba init
-```
-
-Next, create a unique conda environment for moose, named `moose`, and install the moose dependency
+Create a unique conda environment for [!ac](MOOSE), named `moose`, and install the MOOSE dependency
 packages:
 
 ```bash
