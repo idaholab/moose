@@ -31,7 +31,9 @@ void
 MeshOnlyAction::act()
 {
   bool output_eeid_to_exodus = _app.isParamValid("initialize_only");
-  std::string mesh_file = output_eeid_to_exodus ? _app.parameters().get<std::string>("initialize_only") : _app.parameters().get<std::string>("mesh_only");
+  std::string mesh_file = output_eeid_to_exodus
+                              ? _app.parameters().get<std::string>("initialize_only")
+                              : _app.parameters().get<std::string>("mesh_only");
   auto & mesh_ptr = _app.actionWarehouse().mesh();
 
   // Print information about the mesh
@@ -104,7 +106,8 @@ MeshOnlyAction::act()
       std::vector<std::set<subdomain_id_type>> vars_active_subdomains;
       vars_active_subdomains.resize(n_eeid);
       exio_helper.initialize_element_variables(eeid_vars, vars_active_subdomains);
-      exio_helper.write_element_values(output_mesh, eeid_soln, empty_timestep, vars_active_subdomains);
+      exio_helper.write_element_values(
+          output_mesh, eeid_soln, empty_timestep, vars_active_subdomains);
     }
   }
   else if (mesh_file.find(".cpr") + 4 == mesh_file.size())

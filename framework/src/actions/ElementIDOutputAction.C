@@ -11,6 +11,7 @@
 #include "ElementIDOutputAction.h"
 #include "MooseMesh.h"
 #include "FEProblemBase.h"
+#include "AddOutputAction.h"
 
 registerMooseAction("MooseApp", ElementIDOutputAction, "add_aux_kernel");
 
@@ -23,10 +24,7 @@ ElementIDOutputAction::validParams()
   return params;
 }
 
-ElementIDOutputAction::ElementIDOutputAction(const InputParameters & params)
-  : Action(params)
-{
-}
+ElementIDOutputAction::ElementIDOutputAction(const InputParameters & params) : Action(params) {}
 
 void
 ElementIDOutputAction::act()
@@ -52,8 +50,7 @@ ElementIDOutputAction::act()
         bool has_element_id_names = params.isParamValid("show_extra_element_ids");
         std::vector<std::string> element_id_names;
         if (has_element_id_names)
-          element_id_names =
-              params.get<std::vector<std::string>>("show_extra_element_ids");
+          element_id_names = params.get<std::vector<std::string>>("show_extra_element_ids");
 
         unsigned int n = _mesh->getMesh().n_elem_integers();
         auto var_params = _factory.getValidParams("MooseVariableConstMonomial");
@@ -62,7 +59,9 @@ ElementIDOutputAction::act()
         for (unsigned int i = 0; i < n; ++i)
         {
           auto & var_name = _mesh->getMesh().get_elem_integer_name(i);
-          if (!has_element_id_names || (std::find(element_id_names.begin(), element_id_names.end(), var_name) != element_id_names.end()))
+          if (!has_element_id_names ||
+              (std::find(element_id_names.begin(), element_id_names.end(), var_name) !=
+               element_id_names.end()))
           {
             // Create aux variables based on the extra element id name
             _problem->addAuxVariable("MooseVariableConstMonomial", var_name, var_params);

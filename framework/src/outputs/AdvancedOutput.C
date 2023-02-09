@@ -701,9 +701,10 @@ AdvancedOutput::addValidParams(InputParameters & params, const MultiMooseEnum & 
     params.addParamNamesToGroup("output_material_properties show_material_properties", "Materials");
 
     // Add mesh extra element id control, which are output via elemental variables
-    params.addParam<bool>("output_extra_element_ids",
-                          false,
-                          "Flag indicating if extra element ids defined on the mesh should be outputted");
+    params.addParam<bool>(
+        "output_extra_element_ids",
+        false,
+        "Flag indicating if extra element ids defined on the mesh should be outputted");
     params.addParam<std::vector<std::string>>(
         "show_extra_element_ids",
         "List of extra element ids defined on the mesh that should be written to the output");
