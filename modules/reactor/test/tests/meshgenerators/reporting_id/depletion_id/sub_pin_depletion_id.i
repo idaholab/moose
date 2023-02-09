@@ -71,40 +71,11 @@
   solve = false
 []
 
-[AuxVariables]
-  [sector_id]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [ring_id]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [depletion_id]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-[]
-
-[AuxKernels]
-  [set_sector_id]
-    type = ExtraElementIDAux
-    variable = sector_id
-    extra_id_name = sector_id
-  []
-  [set_ring_id]
-    type = ExtraElementIDAux
-    variable = ring_id
-    extra_id_name = ring_id
-  []
-  [set_depletion_id]
-    type = ExtraElementIDAux
-    variable = depletion_id
-    extra_id_name = depletion_id
-  []
-[]
-
 [Outputs]
-  exodus = true
-  execute_on = timestep_end
+  [out]
+    type = Exodus
+    execute_on = timestep_end
+    output_extra_element_ids = true
+    show_extra_element_ids = 'sector_id ring_id depletion_id'
+  []
 []

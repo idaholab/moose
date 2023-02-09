@@ -19,46 +19,17 @@
   []
 []
 
-[AuxVariables]
-  [pin_type_id]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [assembly_type_id]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-  [region_id]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-[]
-
-[AuxKernels]
-  [pin_type_id]
-    type = ExtraElementIDAux
-    variable = pin_type_id
-    extra_id_name = pin_type_id
-  []
-  [assembly_type_id]
-    type = ExtraElementIDAux
-    variable = assembly_type_id
-    extra_id_name = assembly_type_id
-  []
-  [region_id]
-    type = ExtraElementIDAux
-    variable = region_id
-    extra_id_name = region_id
-  []
-[]
-
 [Problem]
   solve = false
 []
 
 [Outputs]
-  exodus = true
-  execute_on = timestep_end
+  [out]
+    type = Exodus
+    execute_on = timestep_end
+    output_extra_element_ids = true
+    show_extra_element_ids = 'region_id'
+  []
 []
 
 [Executioner]

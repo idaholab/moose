@@ -58,6 +58,10 @@
 []
 
 [Outputs]
-  exodus = true
-  execute_on = timestep_end
+  [out]
+    type = Exodus
+    execute_on = timestep_end
+    output_extra_element_ids = true
+    show_extra_element_ids = 'assembly_id'
+  []
 []

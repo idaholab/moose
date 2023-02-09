@@ -43,21 +43,6 @@
   []
 []
 
-[AuxVariables]
-  [region_id]
-    family = MONOMIAL
-    order = CONSTANT
-  []
-[]
-
-[AuxKernels]
-  [region_id]
-    type = ExtraElementIDAux
-    variable = region_id
-    extra_id_name = region_id
-  []
-[]
-
 [Executioner]
   type = Steady
 []
@@ -67,6 +52,10 @@
 []
 
 [Outputs]
-  exodus = true
-  execute_on = timestep_end
+  [out]
+    type = Exodus
+    execute_on = timestep_end
+    output_extra_element_ids = true
+    show_extra_element_ids = 'region_id'
+  []
 []
