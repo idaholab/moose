@@ -440,6 +440,7 @@ public:
   void setActiveTags(const std::set<TagID> & vtags) override;
 
   void meshChanged() override;
+  void initialSetup() override;
 
 protected:
   /**
@@ -610,12 +611,13 @@ private:
   const FieldVariablePhiValue & _phi_neighbor;
   const FieldVariablePhiGradient & _grad_phi_neighbor;
 
-  /// A member for caching retrieved Dirichlet conditions
-  mutable std::pair<const FaceInfo *, const FVDirichletBCBase *> _face_to_diri;
-
   /// A member used to help determine when we can return cached data as opposed to computing new
   /// data
   mutable const Elem * _prev_elem;
+
+  /// Map from boundary ID to Dirichlet boundary conditions. Added to speed up Dirichlet BC lookups
+  /// in \p getDirichletBC
+  std::unordered_map<BoundaryID, const FVDirichletBCBase *> _boundary_id_to_dirichlet_bc;
 
 protected:
   /// A cache for storing gradients on elements
@@ -695,7 +697,6 @@ template <typename OutputType>
 void
 MooseVariableFV<OutputType>::meshChanged()
 {
-  _face_to_diri = std::make_pair(nullptr, nullptr);
   _prev_elem = nullptr;
   MooseVariableField<OutputType>::meshChanged();
 }

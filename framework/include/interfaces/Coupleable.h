@@ -1438,7 +1438,7 @@ protected:
   /*
    * Extract pointer to a base coupled field variable. Could be either a finite volume or finite
    * element variable
-   * @param var_name Name of parameter desired
+   * @param var_name Name of variable desired
    * @param comp Component number of multiple coupled variables
    * @return Pointer to the desired variable
    */
@@ -1451,7 +1451,7 @@ protected:
   const T * getVarHelper(const std::string & var_name, unsigned int comp) const;
 
   /**
-   * Helper that that be used to retrieve a variable of arbitrary type \p T
+   * Helper that can be used to retrieve a variable of arbitrary type \p T
    */
   template <typename T>
   T * getVarHelper(const std::string & var_name, unsigned int comp);

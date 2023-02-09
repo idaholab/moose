@@ -477,7 +477,7 @@ template <typename OutputType>
 const ADTemplateVariableValue<OutputType> &
 MooseVariableDataFV<OutputType>::adUDotDot() const
 {
-  // Generally speaking, we Need u dot information when computing u dot dot
+  // Generally speaking, we need u dot information when computing u dot dot
   adUDot();
 
   _need_ad = _need_ad_u_dotdot = true;

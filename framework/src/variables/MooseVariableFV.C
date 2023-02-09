@@ -75,7 +75,6 @@ MooseVariableFV<OutputType>::MooseVariableFV(const InputParameters & parameters)
     _phi_neighbor(this->_assembly.template fePhiNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
     _grad_phi_neighbor(
         this->_assembly.template feGradPhiNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
-    _face_to_diri(nullptr, nullptr),
     _prev_elem(nullptr),
     _two_term_boundary_expansion(this->isParamValid("two_term_boundary_expansion")
                                      ? this->template getParam<bool>("two_term_boundary_expansion")
@@ -426,36 +425,12 @@ template <typename OutputType>
 std::pair<bool, const FVDirichletBCBase *>
 MooseVariableFV<OutputType>::getDirichletBC(const FaceInfo & fi) const
 {
-  if (_face_to_diri.first == &fi)
-    // Cached result
-    return std::make_pair(_face_to_diri.second, _face_to_diri.second);
+  for (const auto bnd_id : fi.boundaryIDs())
+    if (auto it = _boundary_id_to_dirichlet_bc.find(bnd_id);
+        it != _boundary_id_to_dirichlet_bc.end())
+      return {true, it->second};
 
-  std::vector<FVDirichletBCBase *> bcs;
-
-  this->_subproblem.getMooseApp()
-      .theWarehouse()
-      .query()
-      .template condition<AttribSystem>("FVDirichletBC")
-      .template condition<AttribThread>(_tid)
-      .template condition<AttribBoundaries>(fi.boundaryIDs())
-      .template condition<AttribVar>(_var_num)
-      .template condition<AttribSysNum>(this->_sys.number())
-      .queryInto(bcs);
-  mooseAssert(bcs.size() <= 1, "cannot have multiple dirichlet BCs on the same boundary");
-
-  const bool has_dirichlet_bc = bcs.size() > 0;
-
-  if (has_dirichlet_bc)
-  {
-    mooseAssert(bcs[0], "The FVDirichletBC is null!");
-    _face_to_diri = std::make_pair(&fi, bcs[0]);
-    return std::make_pair(true, bcs[0]);
-  }
-  else
-  {
-    _face_to_diri = std::make_pair(&fi, nullptr);
-    return std::make_pair(false, nullptr);
-  }
+  return {false, nullptr};
 }
 
 template <typename OutputType>
@@ -846,6 +821,38 @@ MooseVariableFV<OutputType>::prepareAux()
 {
   _element_data->prepareAux();
   _neighbor_data->prepareAux();
+}
+
+template <typename OutputType>
+void
+MooseVariableFV<OutputType>::initialSetup()
+{
+  _boundary_id_to_dirichlet_bc.clear();
+  std::vector<FVDirichletBCBase *> bcs;
+
+  // I believe because query() returns by value but condition returns by reference that binding to a
+  // const lvalue reference results in the query() getting destructed and us holding onto a dangling
+  // reference. I think that condition returned by value we would be able to bind to a const lvalue
+  // reference here. But as it is we'll bind to a regular lvalue
+  const auto base_query = this->_subproblem.getMooseApp()
+                              .theWarehouse()
+                              .query()
+                              .template condition<AttribSystem>("FVDirichletBC")
+                              .template condition<AttribThread>(_tid)
+                              .template condition<AttribVar>(_var_num)
+                              .template condition<AttribSysNum>(this->_sys.number());
+
+  for (const auto bnd_id : this->_mesh.getBoundaryIDs())
+  {
+    auto base_query_copy = base_query;
+    base_query_copy.template condition<AttribBoundaries>(std::set<BoundaryID>({bnd_id}))
+        .queryInto(bcs);
+    mooseAssert(bcs.size() <= 1, "cannot have multiple dirichlet BCs on the same boundary");
+    if (!bcs.empty())
+      _boundary_id_to_dirichlet_bc.emplace(bnd_id, bcs[0]);
+  }
+
+  MooseVariableField<OutputType>::initialSetup();
 }
 
 template class MooseVariableFV<Real>;
