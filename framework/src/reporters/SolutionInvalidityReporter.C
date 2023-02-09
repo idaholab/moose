@@ -31,7 +31,7 @@ SolutionInvalidityReporter::SolutionInvalidityReporter(const InputParameters & p
 void
 to_json(nlohmann::json & json, const SolutionInvalidity * const & solution_invalidity)
 {
-
+  mooseAssert(solution_invalidity.processor_id() == 0, "should only be called on rank 0");
   mooseAssert(solution_invalidity, "solution_invalidity is not set");
 
   const auto & solution_registry = moose::internal::getSolutionInvalidityRegistry();
