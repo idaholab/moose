@@ -102,9 +102,8 @@ SolutionInvalidity::print(const ConsoleStream & console) const
 void
 SolutionInvalidity::sync()
 {
-  std::map<
-      processor_id_type,
-      std::vector<std::tuple<std::string, std::string, unsigned int, unsigned int, unsigned int>>>
+  std::map<processor_id_type,
+           std::vector<std::tuple<std::string, std::string, unsigned int, unsigned int>>>
       data_to_send;
   if (processor_id() != 0)
     for (const auto id : index_range(_counts))
@@ -113,18 +112,16 @@ SolutionInvalidity::sync()
       if (entry.counts)
       {
         const auto & info = _solution_invalidity_registry.item(id);
-        data_to_send[0].emplace_back(info.object_type,
-                                     info.message,
-                                     entry.counts,
-                                     entry.timeiter_counts,
-                                     entry.total_counts);
+        data_to_send[0].emplace_back(
+            info.object_type, info.message, entry.counts, entry.timeiter_counts);
       }
     }
 
   const auto receive_data = [this](const processor_id_type libmesh_dbg_var(pid), const auto & data)
   {
     mooseAssert(pid != 0, "Should not be used except processor 0");
-    for (const auto & [object_type, message, counts, timeiter_counts, total_counts] : data)
+
+    for (const auto & [object_type, message, counts, timeiter_counts] : data)
     {
       InvalidSolutionID masterId = 0;
       const moose::internal::SolutionInvalidityName name(object_type, message);
@@ -136,7 +133,7 @@ SolutionInvalidity::sync()
 
       _counts[masterId].counts += counts;
       _counts[masterId].timeiter_counts += timeiter_counts;
-      _counts[masterId].total_counts += total_counts;
+      _counts[masterId].total_counts += timeiter_counts;
     }
   };
 
