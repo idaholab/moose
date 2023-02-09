@@ -18,7 +18,6 @@ NSEnergyInviscidSpecifiedNormalFlowBC::validParams()
 {
   InputParameters params = NSEnergyInviscidBC::validParams();
   params.addRequiredCoupledVar(NS::pressure, "pressure");
-  params.addDeprecatedCoupledVar("p", NS::pressure, "1/1/2022");
   params.addRequiredParam<Real>("un", "The specified value of u.n for this boundary");
   return params;
 }
