@@ -18,7 +18,7 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   [subchannel]
     type = DetailedTriSubChannelMeshGenerator
     nrings = '${n_rings}'
-    n_cells = 34
+    n_cells = 50
     flat_to_flat = '${inner_duct_in}'
     unheated_length_exit = '${unheated_length_exit}'
     heated_length = '${heated_length}'
@@ -26,16 +26,16 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
     pitch = '${fuel_pin_pitch}'
   []
 
-  # [fuel_pins]
-  #   type = DetailedTriPinMeshGenerator
-  #   input = subchannel
-  #   nrings = '${n_rings}'
-  #   n_cells = 34
-  #   unheated_length_exit = '${unheated_length_exit}'
-  #   heated_length = '${heated_length}'
-  #   rod_diameter = '${fuel_pin_diameter}'
-  #   pitch = '${fuel_pin_pitch}'
-  # []
+  [fuel_pins]
+    type = DetailedTriPinMeshGenerator
+    input = subchannel
+    nrings = '${n_rings}'
+    n_cells = 50
+    unheated_length_exit = '${unheated_length_exit}'
+    heated_length = '${heated_length}'
+    rod_diameter = '${fuel_pin_diameter}'
+    pitch = '${fuel_pin_pitch}'
+  []
 []
 
 [AuxVariables]
@@ -70,10 +70,10 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
     block = subchannel
   []
   [q_prime]
-    # block = fuel_pins
+    block = fuel_pins
   []
   [Tpin]
-    # block = fuel_pins
+    block = fuel_pins
   []
 []
 
@@ -86,7 +86,19 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
+
+  start_time = -1.0
+  end_time = 900.0
+  [TimeStepper]
+    type = IterationAdaptiveDT
+     dt = 0.1
+     iteration_window = 2
+     optimal_iterations = 6
+     growth_factor = 2.0
+     cutback_factor = 0.5
+   []
+
   nl_rel_tol = 0.9
   l_tol = 0.9
 []
