@@ -78,8 +78,17 @@ SolutionInvalidity::solutionInvalidAccumulation()
 {
   for (auto & entry : _counts)
   {
-    entry.timeiter_counts += entry.counts;
     entry.total_counts += entry.counts;
+    entry.timeiter_counts += entry.counts;
+  }
+}
+
+void
+SolutionInvalidity::solutionInvalidAccumulationTimeIter()
+{
+  for (auto & entry : _counts)
+  {
+    entry.timeiter_counts += entry.counts;
   }
 }
 

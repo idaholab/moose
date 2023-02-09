@@ -62,7 +62,10 @@
   execute_on = FINAL
 []
 
-[Outputs/json]
+[Outputs]
+  file_base = 'solution_invalid'
+  [out]
   type = JSON
   execute_on = 'FINAL'
+  []
 []

@@ -34,9 +34,21 @@
     recover = false
     type = JSONDiff
     input = solution_invalid.i
-    jsondiff = 'solution_invalid_json.json'
+    jsondiff = 'solution_invalid.json'
     design = 'SolutionInvalidity.md'
     issues = '#22814'
-    requirement = "The system shall be able to output detailed reasons and occurrences as to why a solution is invalid to file"
+    requirement = 'The system shall be able to output detailed reasons and occurrences as to why a solution is invalid to file'
+  []
+
+  [solution_invalid_transient]
+    allow_warnings = true
+    recover = false
+    type = JSONDiff
+    input = solution_invalid.i
+    cli_args = "Executioner/type=Transient Executioner/num_steps=1 Executioner/error_on_dtmin=false Outputs/file_base='solution_invalid_transient' "
+    jsondiff = 'solution_invalid_transient.json'
+    design = 'SolutionInvalidity.md'
+    issues = '#22814'
+    requirement = 'The system shall be able to output detailed info to file in transient'
   []
 []

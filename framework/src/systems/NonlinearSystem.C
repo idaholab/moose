@@ -196,12 +196,13 @@ NonlinearSystem::solve()
   if (_time_integrator)
   {
     // reset solution invalid counter for time iteration
-    _app.solutionInvalidity().resetSolutionInvalid();
     _app.solutionInvalidity().resetSolutionInvalidTimeIter();
     _time_integrator->solve();
     _time_integrator->postSolve();
     _n_iters = _time_integrator->getNumNonlinearIterations();
     _n_linear_iters = _time_integrator->getNumLinearIterations();
+    // Accumulate only the occurence of solution invalid warnings for time iteration counters
+    _app.solutionInvalidity().solutionInvalidAccumulationTimeIter();
   }
   else
   {
@@ -212,9 +213,6 @@ NonlinearSystem::solve()
 
   // store info about the solve
   _final_residual = _nl_implicit_sys.final_nonlinear_residual();
-
-  // store the occurence of solution invalid warnings in local cumulative counters
-  _app.solutionInvalidity().solutionInvalidAccumulation();
 
   // determine whether solution invalid occures in the converged solution
   _solution_is_invalid = _app.solutionInvalidity().solutionInvalid();

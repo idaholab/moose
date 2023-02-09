@@ -58,6 +58,9 @@ public:
   /// Pass the number of solution invalid occurrences from current iteration to comulative counters
   void solutionInvalidAccumulation();
 
+  /// Pass the number of solution invalid occurrences from current iteration to comulative counters
+  void solutionInvalidAccumulationTimeIter();
+
   /// Struct used in _counts for storing invalid occurrences
   struct InvalidCounts
   {

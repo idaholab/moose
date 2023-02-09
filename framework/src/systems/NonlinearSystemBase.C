@@ -1525,7 +1525,6 @@ NonlinearSystemBase::residualSetup()
   _nodal_bcs.residualSetup();
 
   _fe_problem.residualSetup();
-  _app.solutionInvalidity().solutionInvalidAccumulation();
   _app.solutionInvalidity().resetSolutionInvalid();
 }
 
@@ -1724,6 +1723,9 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
     PARALLEL_CATCH;
     _Re_non_time->close();
   }
+
+  // Accumulate the occurence of solution invalid warnings for local comulative counters
+  _app.solutionInvalidity().solutionInvalidAccumulation();
 }
 
 void
@@ -2566,7 +2568,6 @@ NonlinearSystemBase::jacobianSetup()
   _nodal_bcs.jacobianSetup();
 
   _fe_problem.jacobianSetup();
-  _app.solutionInvalidity().solutionInvalidAccumulation();
   _app.solutionInvalidity().resetSolutionInvalid();
 }
 
@@ -2877,6 +2878,9 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
 
   if (hasDiagSaveIn())
     _fe_problem.getAuxiliarySystem().update();
+
+  // Accumulate the occurence of solution invalid warnings for local comulative counters
+  _app.solutionInvalidity().solutionInvalidAccumulation();
 }
 
 void
