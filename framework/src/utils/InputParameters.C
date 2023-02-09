@@ -850,11 +850,13 @@ InputParameters::applyParameter(const InputParameters & common,
   // of messages
   _show_deprecated_message = false;
 
+  const auto local_name = checkForRename(common_name);
+
   // Extract the properties from the local parameter for the current common parameter name
-  const bool local_exist = _values.find(common_name) != _values.end();
-  const bool local_set = _params.count(common_name) > 0 && !_params[common_name]._set_by_add_param;
-  const bool local_priv = allow_private ? false : isPrivate(common_name);
-  const bool local_valid = isParamValid(common_name);
+  const bool local_exist = _values.find(local_name) != _values.end();
+  const bool local_set = _params.count(local_name) > 0 && !_params[local_name]._set_by_add_param;
+  const bool local_priv = allow_private ? false : isPrivate(local_name);
+  const bool local_valid = isParamValid(local_name);
 
   // Extract the properties from the common parameter
   const bool common_exist = common._values.find(common_name) != common._values.end();
@@ -870,10 +872,10 @@ InputParameters::applyParameter(const InputParameters & common,
   if (local_exist && common_exist && common_valid && (!local_valid || !local_set) &&
       (!common_priv || !local_priv))
   {
-    remove(common_name);
-    _values[common_name] = common._values.find(common_name)->second->clone();
-    set_attributes(common_name, false);
-    _params[common_name]._set_by_add_param =
+    remove(local_name);
+    _values[local_name] = common._values.find(common_name)->second->clone();
+    set_attributes(local_name, false);
+    _params[local_name]._set_by_add_param =
         libmesh_map_find(common._params, common_name)._set_by_add_param;
   }
 
