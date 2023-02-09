@@ -1,0 +1,844 @@
+{
+    "reporters": {
+        "conditional": {
+            "type": "ActiveLearningGPDecision",
+            "values": {
+                "flag_sample": {
+                    "type": "std::vector<bool>"
+                },
+                "gp_mean": {
+                    "type": "std::vector<double>"
+                },
+                "gp_std": {
+                    "type": "std::vector<double>"
+                },
+                "inputs": {
+                    "type": "std::vector<std::vector<double>>"
+                },
+                "need_sample": {
+                    "row_begin": 0,
+                    "row_end": 1,
+                    "type": "std::vector<bool>"
+                },
+                "reporter_transfer:avg:value": {
+                    "row_begin": 0,
+                    "row_end": 1,
+                    "type": "std::vector<double>"
+                },
+                "reporter_transfer:converged": {
+                    "row_begin": 0,
+                    "row_end": 1,
+                    "type": "std::vector<bool>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "conditional": {
+                "flag_sample": [
+                    false
+                ],
+                "gp_mean": [
+                    0.0
+                ],
+                "gp_std": [
+                    0.0
+                ],
+                "inputs": [
+                    [
+                        0.0,
+                        0.0,
+                        0.0
+                    ]
+                ],
+                "need_sample": [
+                    false
+                ],
+                "reporter_transfer:avg:value": [
+                    0.0
+                ],
+                "reporter_transfer:converged": [
+                    false
+                ]
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "conditional": {
+                "flag_sample": [
+                    false
+                ],
+                "gp_mean": [
+                    0.0
+                ],
+                "gp_std": [
+                    0.0
+                ],
+                "inputs": [
+                    [
+                        10.373668009756534,
+                        7952.4708332700675,
+                        312.93596878136873
+                    ]
+                ],
+                "need_sample": [
+                    true
+                ],
+                "reporter_transfer:avg:value": [
+                    317.29002106206
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 1.0,
+            "time_step": 1
+        },
+        {
+            "conditional": {
+                "flag_sample": [
+                    false
+                ],
+                "gp_mean": [
+                    0.0
+                ],
+                "gp_std": [
+                    0.0
+                ],
+                "inputs": [
+                    [
+                        19.70719769257827,
+                        9710.232417088218,
+                        289.54843796695934
+                    ]
+                ],
+                "need_sample": [
+                    true
+                ],
+                "reporter_transfer:avg:value": [
+                    292.3469594884085
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 2.0,
+            "time_step": 2
+        },
+        {
+            "conditional": {
+                "flag_sample": [
+                    false
+                ],
+                "gp_mean": [
+                    0.0
+                ],
+                "gp_std": [
+                    0.0
+                ],
+                "inputs": [
+                    [
+                        8.90768247398513,
+                        9539.431472447868,
+                        256.38384784920254
+                    ]
+                ],
+                "need_sample": [
+                    true
+                ],
+                "reporter_transfer:avg:value": [
+                    262.46634150010806
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 3.0,
+            "time_step": 3
+        },
+        {
+            "conditional": {
+                "flag_sample": [
+                    false
+                ],
+                "gp_mean": [
+                    0.0
+                ],
+                "gp_std": [
+                    0.0
+                ],
+                "inputs": [
+                    [
+                        10.99214923269085,
+                        10612.007249802331,
+                        296.797065939905
+                    ]
+                ],
+                "need_sample": [
+                    true
+                ],
+                "reporter_transfer:avg:value": [
+                    302.2803257152282
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 4.0,
+            "time_step": 4
+        },
+        {
+            "conditional": {
+                "flag_sample": [
+                    false
+                ],
+                "gp_mean": [
+                    0.0
+                ],
+                "gp_std": [
+                    0.0
+                ],
+                "inputs": [
+                    [
+                        10.780112795199855,
+                        11320.001550249475,
+                        322.5631202711744
+                    ]
+                ],
+                "need_sample": [
+                    true
+                ],
+                "reporter_transfer:avg:value": [
+                    328.52724998983854
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 5.0,
+            "time_step": 5
+        },
+        {
+            "conditional": {
+                "flag_sample": [
+                    false
+                ],
+                "gp_mean": [
+                    0.0
+                ],
+                "gp_std": [
+                    0.0
+                ],
+                "inputs": [
+                    [
+                        15.875901480845355,
+                        8711.567397237377,
+                        262.72939129915284
+                    ]
+                ],
+                "need_sample": [
+                    true
+                ],
+                "reporter_transfer:avg:value": [
+                    265.8459966006429
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 6.0,
+            "time_step": 6
+        },
+        {
+            "conditional": {
+                "flag_sample": [
+                    true
+                ],
+                "gp_mean": [
+                    324.21529537970974
+                ],
+                "gp_std": [
+                    10.397211288995923
+                ],
+                "inputs": [
+                    [
+                        10.295299898771203,
+                        7402.57479591254,
+                        340.4211008872761
+                    ]
+                ],
+                "need_sample": [
+                    true
+                ],
+                "reporter_transfer:avg:value": [
+                    344.50493132497314
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 7.0,
+            "time_step": 7
+        },
+        {
+            "conditional": {
+                "flag_sample": [
+                    false
+                ],
+                "gp_mean": [
+                    344.4838960594956
+                ],
+                "gp_std": [
+                    0.40326476788817744
+                ],
+                "inputs": [
+                    [
+                        10.295299898771203,
+                        7402.57479591254,
+                        340.4211008872761
+                    ]
+                ],
+                "need_sample": [
+                    false
+                ],
+                "reporter_transfer:avg:value": [
+                    344.4838960594956
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 8.0,
+            "time_step": 8
+        },
+        {
+            "conditional": {
+                "flag_sample": [
+                    false
+                ],
+                "gp_mean": [
+                    257.4765689936423
+                ],
+                "gp_std": [
+                    1.3701207586638067
+                ],
+                "inputs": [
+                    [
+                        18.576699681233535,
+                        8315.236574299484,
+                        252.46830531400036
+                    ]
+                ],
+                "need_sample": [
+                    false
+                ],
+                "reporter_transfer:avg:value": [
+                    257.4765689936423
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 9.0,
+            "time_step": 9
+        },
+        {
+            "conditional": {
+                "flag_sample": [
+                    false
+                ],
+                "gp_mean": [
+                    314.87049306604985
+                ],
+                "gp_std": [
+                    1.7644765504683169
+                ],
+                "inputs": [
+                    [
+                        6.721579022212303,
+                        11427.983801809452,
+                        307.83608279827945
+                    ]
+                ],
+                "need_sample": [
+                    false
+                ],
+                "reporter_transfer:avg:value": [
+                    314.87049306604985
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 10.0,
+            "time_step": 10
+        },
+        {
+            "conditional": {
+                "flag_sample": [
+                    true
+                ],
+                "gp_mean": [
+                    344.5712241533437
+                ],
+                "gp_std": [
+                    4.230950274496599
+                ],
+                "inputs": [
+                    [
+                        18.605023465709458,
+                        7765.900685942804,
+                        343.84992996814435
+                    ]
+                ],
+                "need_sample": [
+                    true
+                ],
+                "reporter_transfer:avg:value": [
+                    346.22067860446913
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 11.0,
+            "time_step": 11
+        },
+        {
+            "conditional": {
+                "flag_sample": [
+                    false
+                ],
+                "gp_mean": [
+                    346.2114345856405
+                ],
+                "gp_std": [
+                    0.42917193934899356
+                ],
+                "inputs": [
+                    [
+                        18.605023465709458,
+                        7765.900685942804,
+                        343.84992996814435
+                    ]
+                ],
+                "need_sample": [
+                    false
+                ],
+                "reporter_transfer:avg:value": [
+                    346.2114345856405
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 12.0,
+            "time_step": 12
+        },
+        {
+            "conditional": {
+                "flag_sample": [
+                    false
+                ],
+                "gp_mean": [
+                    314.0602751363084
+                ],
+                "gp_std": [
+                    0.6517612021185032
+                ],
+                "inputs": [
+                    [
+                        8.862925334267981,
+                        7083.532345455417,
+                        310.1135881430045
+                    ]
+                ],
+                "need_sample": [
+                    false
+                ],
+                "reporter_transfer:avg:value": [
+                    314.0602751363084
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 13.0,
+            "time_step": 13
+        },
+        {
+            "conditional": {
+                "flag_sample": [
+                    false
+                ],
+                "gp_mean": [
+                    316.93684970035406
+                ],
+                "gp_std": [
+                    0.5489645994554697
+                ],
+                "inputs": [
+                    [
+                        18.592499903899302,
+                        9363.019505479466,
+                        313.3162361271599
+                    ]
+                ],
+                "need_sample": [
+                    false
+                ],
+                "reporter_transfer:avg:value": [
+                    316.93684970035406
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 14.0,
+            "time_step": 14
+        },
+        {
+            "conditional": {
+                "flag_sample": [
+                    false
+                ],
+                "gp_mean": [
+                    337.5257187074447
+                ],
+                "gp_std": [
+                    0.5118520831361009
+                ],
+                "inputs": [
+                    [
+                        17.416556102901737,
+                        8647.261170180062,
+                        333.95085376130174
+                    ]
+                ],
+                "need_sample": [
+                    false
+                ],
+                "reporter_transfer:avg:value": [
+                    337.5257187074447
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 15.0,
+            "time_step": 15
+        },
+        {
+            "conditional": {
+                "flag_sample": [
+                    false
+                ],
+                "gp_mean": [
+                    307.63215835148185
+                ],
+                "gp_std": [
+                    1.7093967450412593
+                ],
+                "inputs": [
+                    [
+                        19.507843648080943,
+                        12952.841675492324,
+                        302.18744202365394
+                    ]
+                ],
+                "need_sample": [
+                    false
+                ],
+                "reporter_transfer:avg:value": [
+                    307.63215835148185
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 16.0,
+            "time_step": 16
+        },
+        {
+            "conditional": {
+                "flag_sample": [
+                    true
+                ],
+                "gp_mean": [
+                    342.49372763042953
+                ],
+                "gp_std": [
+                    1.402921204965066
+                ],
+                "inputs": [
+                    [
+                        7.025862393807914,
+                        12795.683003407505,
+                        337.188238623776
+                    ]
+                ],
+                "need_sample": [
+                    true
+                ],
+                "reporter_transfer:avg:value": [
+                    347.5322200547952
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 17.0,
+            "time_step": 17
+        },
+        {
+            "conditional": {
+                "flag_sample": [
+                    true
+                ],
+                "gp_mean": [
+                    347.3900455831677
+                ],
+                "gp_std": [
+                    0.4394344612220636
+                ],
+                "inputs": [
+                    [
+                        7.025862393807914,
+                        12795.683003407505,
+                        337.188238623776
+                    ]
+                ],
+                "need_sample": [
+                    true
+                ],
+                "reporter_transfer:avg:value": [
+                    347.5322200547952
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 18.0,
+            "time_step": 18
+        },
+        {
+            "conditional": {
+                "flag_sample": [
+                    true
+                ],
+                "gp_mean": [
+                    347.4525997875137
+                ],
+                "gp_std": [
+                    0.3857164814325833
+                ],
+                "inputs": [
+                    [
+                        7.025862393807914,
+                        12795.683003407505,
+                        337.188238623776
+                    ]
+                ],
+                "need_sample": [
+                    true
+                ],
+                "reporter_transfer:avg:value": [
+                    347.5322200547952
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 19.0,
+            "time_step": 19
+        },
+        {
+            "conditional": {
+                "flag_sample": [
+                    false
+                ],
+                "gp_mean": [
+                    347.47591223281336
+                ],
+                "gp_std": [
+                    0.3632230258805531
+                ],
+                "inputs": [
+                    [
+                        7.025862393807914,
+                        12795.683003407505,
+                        337.188238623776
+                    ]
+                ],
+                "need_sample": [
+                    false
+                ],
+                "reporter_transfer:avg:value": [
+                    347.47591223281336
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 20.0,
+            "time_step": 20
+        },
+        {
+            "conditional": {
+                "flag_sample": [
+                    false
+                ],
+                "gp_mean": [
+                    271.0729737371495
+                ],
+                "gp_std": [
+                    0.5078656624038345
+                ],
+                "inputs": [
+                    [
+                        8.722904768738061,
+                        8765.89867421334,
+                        265.5148620275883
+                    ]
+                ],
+                "need_sample": [
+                    false
+                ],
+                "reporter_transfer:avg:value": [
+                    271.0729737371495
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 21.0,
+            "time_step": 21
+        },
+        {
+            "conditional": {
+                "flag_sample": [
+                    false
+                ],
+                "gp_mean": [
+                    271.5903622567914
+                ],
+                "gp_std": [
+                    0.702299758970081
+                ],
+                "inputs": [
+                    [
+                        6.791347483524582,
+                        8671.555142460234,
+                        264.78643170114225
+                    ]
+                ],
+                "need_sample": [
+                    false
+                ],
+                "reporter_transfer:avg:value": [
+                    271.5903622567914
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 22.0,
+            "time_step": 22
+        },
+        {
+            "conditional": {
+                "flag_sample": [
+                    false
+                ],
+                "gp_mean": [
+                    353.8631643024798
+                ],
+                "gp_std": [
+                    0.4883522018471989
+                ],
+                "inputs": [
+                    [
+                        5.5588819856336675,
+                        12330.693621006189,
+                        342.70678631798955
+                    ]
+                ],
+                "need_sample": [
+                    false
+                ],
+                "reporter_transfer:avg:value": [
+                    353.8631643024798
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 23.0,
+            "time_step": 23
+        },
+        {
+            "conditional": {
+                "flag_sample": [
+                    false
+                ],
+                "gp_mean": [
+                    272.4861087613758
+                ],
+                "gp_std": [
+                    1.2117991946049986
+                ],
+                "inputs": [
+                    [
+                        6.401378307817383,
+                        12508.896150180852,
+                        262.75953055409235
+                    ]
+                ],
+                "need_sample": [
+                    false
+                ],
+                "reporter_transfer:avg:value": [
+                    272.4861087613758
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 24.0,
+            "time_step": 24
+        },
+        {
+            "conditional": {
+                "flag_sample": [
+                    false
+                ],
+                "gp_mean": [
+                    311.4999170823113
+                ],
+                "gp_std": [
+                    0.5336550367976571
+                ],
+                "inputs": [
+                    [
+                        16.19625949242271,
+                        7696.14828381449,
+                        309.0558874819535
+                    ]
+                ],
+                "need_sample": [
+                    false
+                ],
+                "reporter_transfer:avg:value": [
+                    311.4999170823113
+                ],
+                "reporter_transfer:converged": [
+                    true
+                ]
+            },
+            "time": 25.0,
+            "time_step": 25
+        }
+    ]
+}
