@@ -117,7 +117,7 @@ ActiveLearningGPDecision::preNeedSample()
     setupData(_inputs, _outputs_global);
 
     // Retrain if we are outside the training phase
-    if (_step >= _n_train)
+    if (_step > _n_train)
       _al_gp.reTrain(_inputs_batch, _outputs_batch);
   }
 
@@ -125,7 +125,7 @@ ActiveLearningGPDecision::preNeedSample()
   _inputs = _inputs_global;
 
   // Evaluate GP and decide if we need more data if outside training phase
-  if (_step >= _n_train)
+  if (_step > _n_train)
     _decision = facilitateDecision();
 }
 

@@ -69,7 +69,7 @@
     inputs = 'inputs'
     gp_mean = 'gp_mean'
     gp_std = 'gp_std'
-    n_train = 7
+    n_train = 6
     al_gp = GP_al_trainer
     gp_evaluator = GP_eval
     learning_function='Ufunction'
