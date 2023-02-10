@@ -57,9 +57,9 @@ pyhit_srcfiles  := $(HIT_DIR)/hit.cpp $(HIT_DIR)/lex.cc $(HIT_DIR)/parse.cc $(HI
 #
 # wasp
 #
-wasp_DIR := $(MOOSE_DIR)/wasp/install
-wasp_INC := $(wasp_DIR)/include
-wasp_LIB := $(wildcard $(wasp_DIR)/lib/*wasp*) -Wl,-rpath,$(wasp_DIR)/lib
+WASP_DIR ?= $(MOOSE_DIR)/wasp/install
+wasp_INC := $(WASP_DIR)/include
+wasp_LIB := $(wildcard $(WASP_DIR)/lib/*wasp*) -Wl,-rpath,$(WASP_DIR)/lib
 
 #
 # Conditional parts if the user wants to compile MOOSE with torchlib
