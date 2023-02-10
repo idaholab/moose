@@ -58,6 +58,15 @@ ReferenceResidualProblem::ReferenceResidualProblem(const InputParameters & param
     _reference_vector(nullptr),
     _converge_on(getParam<std::vector<NonlinearVariableName>>("converge_on"))
 {
+  // Create reference residual tag
+  const TagName tagname = "reference_residual_tag";
+  auto tag = addVectorTag(tagname);
+  for (unsigned int nl_sys_num = 0; nl_sys_num < _num_nl_sys; ++nl_sys_num)
+  {
+    auto nl = &getNonlinearSystem(nl_sys_num);
+    nl[nl_sys_num].addVector(tag, false, GHOSTED);
+  }
+
   if (params.isParamValid("solution_variables"))
   {
     if (params.isParamValid("reference_vector"))
@@ -349,13 +358,28 @@ ReferenceResidualProblem::updateReferenceResidual()
     const auto resid =
         Utility::pow<2>(s.calculate_norm(nonlinear_sys.RHS(), _soln_vars[i], DISCRETE_L2));
     const auto group = _variable_group_num_index[i];
+    if (_local_norm)
+    {
+      mooseAssert(nonlinear_sys.RHS().size() == (*_reference_vector).size(),
+                  "Sizes of nonlinear RHS and reference vector should be the same.");
+      mooseAssert((*_reference_vector).size(), "Reference vector must be provided.");
+      auto div = nonlinear_sys.RHS().clone();
+      *div /= *_reference_vector;
+      // Do magic to prevent 0/0, throw error if not zero divided by 0 occurs
+      resid = Utility::pow<2>(s.calculate_norm(*div, _soln_vars[i], DISCRETE_L2));
+    }
+    else
+    {
+      resid = Utility::pow<2>(s.calculate_norm(nonlinear_sys.RHS(), _soln_vars[i], DISCRETE_L2));
+      if (_reference_vector)
+      {
+        const auto ref_resid = s.calculate_norm(*_reference_vector, _soln_vars[i], DISCRETE_L2);
+        _group_ref_resid[group] += Utility::pow<2>(ref_resid);
+      }
+    }
+
     _group_resid[group] += _converge_on_var[i] ? resid : 0;
     _group_output_resid[group] += resid;
-    if (_reference_vector)
-    {
-      const auto ref_resid = s.calculate_norm(*_reference_vector, _soln_vars[i], DISCRETE_L2);
-      _group_ref_resid[group] += Utility::pow<2>(ref_resid);
-    }
   }
 
   if (!_reference_vector)

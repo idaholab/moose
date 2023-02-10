@@ -52,4 +52,11 @@
     requirement = 'The system shall support wildcards for choosing the variables to base convergence '
                   'on.'
   []
+  [tag]
+    type = 'Exodiff'
+    input = 'tag.i'
+    exodiff = 'tag_out.e'
+    requirement = 'The system shall have the ability to base convergence on the comparison of '
+                  'individual variables to the sum of the residual contributions of those variables.'
+  []
 []

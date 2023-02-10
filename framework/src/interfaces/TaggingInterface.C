@@ -80,6 +80,16 @@ TaggingInterface::TaggingInterface(const MooseObject * moose_object)
     _vector_tags.insert(vector_tag_id);
   }
 
+  if (_subproblem.type() == "ReferenceResidualProblem")
+  {
+    const TagID vector_tag_id = _subproblem.getVectorTagID("reference_residual_tag");
+    if (_subproblem.vectorTagType(vector_tag_id) != Moose::VECTOR_TAG_RESIDUAL)
+      mooseError("Reference residual tag for Kernel '",
+                 _moose_object.name(),
+                 "' is not a residual vector tag");
+    _reference_residual_tags.insert(vector_tag_id);
+  }
+
   auto & matrix_tag_names = _tag_params.get<MultiMooseEnum>("matrix_tags");
 
   if (!matrix_tag_names.isValid())
@@ -94,6 +104,7 @@ TaggingInterface::TaggingInterface(const MooseObject * moose_object)
     _matrix_tags.insert(_subproblem.getMatrixTagID(matrix_tag_name));
 
   _re_blocks.resize(_vector_tags.size());
+  _ref_blocks.resize(_reference_residual_tags.size());
   _ke_blocks.resize(_matrix_tags.size());
 }
 
@@ -146,6 +157,15 @@ TaggingInterface::prepareVectorTag(Assembly & assembly, unsigned int ivar)
   }
 
   _local_re.resize(_re_blocks[0]->size());
+
+  _ref_blocks.resize(_reference_residual_tags.size());
+  auto ref_vector_tag = _reference_residual_tags.begin();
+  for (MooseIndex(_reference_residual_tags) i = 0; i < _reference_residual_tags.size();
+       i++, ++ref_vector_tag)
+  {
+    const VectorTag & tag = _subproblem.getVectorTag(*ref_vector_tag);
+    _ref_blocks[i] = &assembly.residualBlock(ivar, tag._type_id);
+  }
 }
 
 void
@@ -160,6 +180,15 @@ TaggingInterface::prepareVectorTagNeighbor(Assembly & assembly, unsigned int iva
     _re_blocks[i] = &assembly.residualBlockNeighbor(ivar, tag._type_id);
   }
   _local_re.resize(_re_blocks[0]->size());
+
+  _ref_blocks.resize(_reference_residual_tags.size());
+  auto ref_vector_tag = _reference_residual_tags.begin();
+  for (MooseIndex(_reference_residual_tags) i = 0; i < _reference_residual_tags.size();
+       i++, ++ref_vector_tag)
+  {
+    const VectorTag & tag = _subproblem.getVectorTag(*ref_vector_tag);
+    _ref_blocks[i] = &assembly.residualBlockNeighbor(ivar, tag._type_id);
+  }
 }
 
 void
@@ -173,8 +202,16 @@ TaggingInterface::prepareVectorTagLower(Assembly & assembly, unsigned int ivar)
     const VectorTag & tag = _subproblem.getVectorTag(*vector_tag);
     _re_blocks[i] = &assembly.residualBlockLower(ivar, tag._type_id);
   }
-
   _local_re.resize(_re_blocks[0]->size());
+
+  _ref_blocks.resize(_reference_residual_tags.size());
+  auto ref_vector_tag = _reference_residual_tags.begin();
+  for (MooseIndex(_reference_residual_tags) i = 0; i < _reference_residual_tags.size();
+       i++, ++ref_vector_tag)
+  {
+    const VectorTag & tag = _subproblem.getVectorTag(*ref_vector_tag);
+    _ref_blocks[i] = &assembly.residualBlockLower(ivar, tag._type_id);
+  }
 }
 
 void
@@ -224,6 +261,9 @@ TaggingInterface::accumulateTaggedLocalResidual()
 {
   for (auto & re : _re_blocks)
     *re += _local_re;
+  for (auto & ref : _ref_blocks)
+    for (const auto i : index_range(_local_re))
+      (*ref)(i) += std::abs(_local_re(i) + std::numeric_limits<Number>::min());
 }
 
 void
@@ -231,6 +271,9 @@ TaggingInterface::assignTaggedLocalResidual()
 {
   for (auto & re : _re_blocks)
     *re = _local_re;
+  for (auto & ref : _ref_blocks)
+    for (const auto i : index_range(_local_re))
+      (*ref)(i) = std::abs(_local_re(i));
 }
 
 void
