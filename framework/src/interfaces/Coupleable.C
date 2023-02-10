@@ -81,7 +81,13 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv)
           else if (auto * tmp_var = dynamic_cast<ArrayMooseVariable *>(moose_var))
             _coupled_array_moose_vars.push_back(tmp_var);
           else if (auto * tmp_var = dynamic_cast<MooseVariableFV<Real> *>(moose_var))
+          {
+            // We are using a finite volume variable through add*CoupledVar as opposed to getFunctor
+            // so we can be reasonably confident that the variable values will be obtained using
+            // traditional pre-evaluation and quadrature point indexing
+            tmp_var->requireQpComputations();
             _coupled_standard_fv_moose_vars.push_back(tmp_var);
+          }
           else
             _obj->paramError(name, "provided c++ type for variable parameter is not supported");
         }

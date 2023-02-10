@@ -32,15 +32,6 @@ VectorMagnitudeAux::VectorMagnitudeAux(const InputParameters & parameters)
     _y(_mesh.dimension() >= 2 ? coupledValue("y") : _zero),
     _z(_mesh.dimension() >= 3 ? coupledValue("z") : _zero)
 {
-  auto require_qp_calcs = [this](const auto & var_name)
-  {
-    if (isCoupled(var_name))
-      getFieldVar(var_name, 0)->requireQpComputations();
-  };
-
-  require_qp_calcs("x");
-  require_qp_calcs("y");
-  require_qp_calcs("z");
 }
 
 Real

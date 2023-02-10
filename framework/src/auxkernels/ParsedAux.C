@@ -59,14 +59,12 @@ ParsedAux::ParsedAux(const InputParameters & parameters)
     for (std::size_t i = 0; i < _nargs; ++i)
     {
       auto * const field_var = getFieldVar("args", i);
-      field_var->requireQpComputations();
       variables += (i == 0 ? "" : ",") + field_var->name();
     }
   else
     for (std::size_t i = 0; i < _nargs; ++i)
     {
       auto * const field_var = getFieldVar("coupled_variables", i);
-      field_var->requireQpComputations();
       variables += (i == 0 ? "" : ",") + field_var->name();
     }
 
