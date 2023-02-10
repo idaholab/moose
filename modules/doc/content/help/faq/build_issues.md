@@ -5,11 +5,11 @@ Build issues are normally caused by an invalid environment, or perhaps an update
 - Verify the Conda Environment is active and up to date, with the latest version of our moose packages:
 
   ```bash
-  conda activate moose
-  conda update --all
+  mamba activate moose
+  mamba update --all
   ```
 
-  if `conda activate moose` failed, see [Conda Issues](troubleshooting.md#condaissues) above.
+  if `mamba activate moose` failed, see [Conda Issues](troubleshooting.md#condaissues) above.
 
   !alert note
   When ever an update is performed in Conda, it is a good idea to re-build MOOSE and your application. While specific updates to moose-libmesh and/or moose-petsc may not have occurred, there are several other libraries out of our control which may have been upgraded, requiring you to rebuild.
@@ -85,7 +85,7 @@ Build issues are normally caused by an invalid environment, or perhaps an update
   mpicxx -fopenmp hello.C
   ```
 
-  If the above build fails, and you have the correct Conda environment loaded (`conda activate moose`), then something is failing beyond the scope of this document, and you should now contact us via the [disussion forum](faq/discussion_forum.md).
+  If the above build fails, and you have the correct Conda environment loaded (`mamba activate moose`), then something is failing beyond the scope of this document, and you should now contact us via the [disussion forum](faq/discussion_forum.md).
 
   If the build was successfull, attempt to execute the hello word example:
 

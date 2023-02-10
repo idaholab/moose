@@ -2,6 +2,10 @@
 
 Peacock is a graphical front end for the MOOSE input file syntax. Peacock allows the user to build or modify an input file, execute the application and view the results all within one package.
 
+## Conda Packages
+
+!include installation/install_peacock.md
+
 ## Environment
 
 Adding Peacock to yout PATH will allow you to launch it from your application or "tests" directory. Peacock will search up through the filesystem directory tree until it finds your application, obviating the need th specify your application as an argument, and simplifying Peacock usage.
@@ -224,4 +228,8 @@ If you get the following error:
 ImportError: No module named vtk
 ```
 
-Then either you don't have VTK installed, or it's not installed correctly. Use the MOOSE redistributable package and its included VTK, or carefully compile your own.
+Then either you don't have VTK installed, or it's not installed correctly. Use the `moose-peacock`
+Conda package, or carefully compile your own. If you are using the `moose-peacock` package, chances
+are that your machine has other libraries being made available causing conflicts in ways Python
+errors can not detect. There are plenty of posts surrounding the subject on our
+[Discussions](https://github.com/idaholab/moose/discussions) site.

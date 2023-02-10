@@ -1,16 +1,6 @@
+## Install Conda
+
 !include getting_started/installation/install_miniconda.md
-
-Before we continue, we first need to initialize mamba. Execute the following command and +restart your terminal session+.
-
-```bash
-$ ~> mamba init
-```
-
-Upon restarting your terminal, you should see your prompt prefixed with (base). This indicates you are in the base environment, and Conda is ready for operation:
-
-```bash
-$ (base) ~>
-```
 
 ## Install NCRC Client
 
