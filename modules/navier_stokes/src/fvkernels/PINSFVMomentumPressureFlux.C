@@ -23,8 +23,7 @@ PINSFVMomentumPressureFlux::validParams()
                              "incompressible Navier-Stokes momentum equation. This kernel "
                              "is also executed on boundaries.");
   params.addRequiredParam<MooseFunctorName>(NS::porosity, "Porosity functor");
-  params.addRequiredCoupledVar(NS::pressure, "Pressure variable");
-  params.addDeprecatedCoupledVar("p", NS::pressure, "1/1/2022");
+  params.addRequiredParam<MooseFunctorName>(NS::pressure, "The pressure");
   MooseEnum momentum_component("x=0 y=1 z=2");
   params.addRequiredParam<MooseEnum>("momentum_component",
                                      momentum_component,
@@ -38,7 +37,7 @@ PINSFVMomentumPressureFlux::PINSFVMomentumPressureFlux(const InputParameters & p
   : FVFluxKernel(params),
     INSFVMomentumResidualObject(*this),
     _eps(getFunctor<ADReal>(NS::porosity)),
-    _p_var(dynamic_cast<const MooseVariableFVReal *>(getFieldVar(NS::pressure, 0))),
+    _p(getFunctor<ADReal>(NS::pressure)),
     _index(getParam<MooseEnum>("momentum_component"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
@@ -49,9 +48,6 @@ PINSFVMomentumPressureFlux::PINSFVMomentumPressureFlux(const InputParameters & p
   if (!dynamic_cast<PINSFVSuperficialVelocityVariable *>(&_var))
     mooseError("PINSFVMomentumPressureFlux may only be used with a superficial velocity, "
                "of variable type PINSFVSuperficialVelocityVariable.");
-
-  if (!_p_var)
-    paramError(NS::pressure, "p must be a finite volume variable");
 }
 
 ADReal
@@ -67,7 +63,7 @@ PINSFVMomentumPressureFlux::computeQpResidual()
   const auto & elem = makeElemArg(elem_ptr);
 
   if (onBoundary(*_face_info))
-    eps_p_interface = _eps(elem) * (*_p_var)(singleSidedFaceArg());
+    eps_p_interface = _eps(elem) * _p(singleSidedFaceArg());
   else
   {
     const auto * neighbor_ptr = use_elem ? _face_info->neighborPtr() : &_face_info->elem();
@@ -75,8 +71,8 @@ PINSFVMomentumPressureFlux::computeQpResidual()
 
     Moose::FV::interpolate(Moose::FV::InterpMethod::Average,
                            eps_p_interface,
-                           _eps(elem) * (*_p_var)(elem),
-                           _eps(neighbor) * (*_p_var)(neighbor),
+                           _eps(elem) * _p(elem),
+                           _eps(neighbor) * _p(neighbor),
                            *_face_info,
                            true);
   }

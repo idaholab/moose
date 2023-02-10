@@ -25,9 +25,12 @@ public:
 protected:
   ADReal computeQpResidual() override;
 
-  /// The pressure variable
-  const MooseVariableFVReal * const _p_var;
+  /// The pressure
+  const Moose::Functor<ADReal> & _p;
 
   /// index x|y|z
   const unsigned int _index;
+
+  /// Whether to correct for mesh skewness in face calculations
+  const bool _correct_skewness;
 };

@@ -1248,7 +1248,7 @@ NSFVAction::addINSMomentumMixingLengthKernels()
 
   params.set<UserObjectName>("rhie_chow_user_object") = rhie_chow_name;
   for (unsigned int dim_i = 0; dim_i < _dim; ++dim_i)
-    params.set<CoupledName>(u_names[dim_i]) = {_velocity_name[dim_i]};
+    params.set<MooseFunctorName>(u_names[dim_i]) = _velocity_name[dim_i];
 
   for (unsigned int d = 0; d < _dim; ++d)
   {
@@ -1293,7 +1293,9 @@ NSFVAction::addINSMomentumPressureKernels()
   InputParameters params = _factory.getValidParams(kernel_type);
   assignBlocks(params, _blocks);
   params.set<UserObjectName>("rhie_chow_user_object") = rhie_chow_name;
-  params.set<CoupledName>("pressure") = {_pressure_name};
+  params.set<MooseFunctorName>("pressure") = _pressure_name;
+  params.set<bool>("correct_skewness") =
+      getParam<MooseEnum>("pressure_face_interpolation") == "skewness-corrected";
   if (_porous_medium_treatment)
     params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
 
@@ -1640,10 +1642,10 @@ NSFVAction::addScalarMixingLengthKernels()
   const std::string kernel_type = "INSFVMixingLengthScalarDiffusion";
   InputParameters params = _factory.getValidParams(kernel_type);
   assignBlocks(params, _blocks);
-  params.set<CoupledName>(NS::mixing_length) = {NS::mixing_length};
+  params.set<MooseFunctorName>(NS::mixing_length) = NS::mixing_length;
 
   for (unsigned int dim_i = 0; dim_i < _dim; ++dim_i)
-    params.set<CoupledName>(u_names[dim_i]) = {_velocity_name[dim_i]};
+    params.set<MooseFunctorName>(u_names[dim_i]) = _velocity_name[dim_i];
 
   for (unsigned int name_i = 0; name_i < _passive_scalar_names.size(); ++name_i)
   {
@@ -1931,7 +1933,7 @@ NSFVAction::addINSOutletBC()
         params.set<MooseFunctorName>(NS::density) = _density_name;
 
         for (unsigned int i = 0; i < _dim; ++i)
-          params.set<CoupledName>(u_names[i]) = {_velocity_name[i]};
+          params.set<MooseFunctorName>(u_names[i]) = _velocity_name[i];
 
         for (unsigned int d = 0; d < _dim; ++d)
         {
@@ -1950,7 +1952,7 @@ NSFVAction::addINSOutletBC()
         params.set<MooseFunctorName>(NS::density) = _density_name;
 
         for (unsigned int i = 0; i < _dim; ++i)
-          params.set<CoupledName>(u_names[i]) = {_velocity_name[i]};
+          params.set<MooseFunctorName>(u_names[i]) = _velocity_name[i];
 
         for (unsigned int d = 0; d < _dim; ++d)
         {
@@ -1982,7 +1984,7 @@ NSFVAction::addINSOutletBC()
       params.set<std::vector<BoundaryName>>("boundary") = {_outlet_boundaries[bc_ind]};
 
       for (unsigned int d = 0; d < _dim; ++d)
-        params.set<CoupledName>(u_names[d]) = {_velocity_name[d]};
+        params.set<MooseFunctorName>(u_names[d]) = _velocity_name[d];
 
       _problem->addFVBC(bc_type, _pressure_name + "_" + _outlet_boundaries[bc_ind], params);
     }
@@ -2024,7 +2026,7 @@ NSFVAction::addINSWallBC()
         params.set<UserObjectName>("rhie_chow_user_object") = "ins_rhie_chow_interpolator";
 
       for (unsigned int d = 0; d < _dim; ++d)
-        params.set<CoupledName>(u_names[d]) = {_velocity_name[d]};
+        params.set<MooseFunctorName>(u_names[d]) = _velocity_name[d];
 
       for (unsigned int d = 0; d < _dim; ++d)
       {
@@ -2214,12 +2216,12 @@ NSFVAction::addWCNSEnergyMixingLengthKernels()
   assignBlocks(params, _blocks);
   params.set<MooseFunctorName>(NS::density) = _density_name;
   params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
-  params.set<CoupledName>(NS::mixing_length) = {NS::mixing_length};
+  params.set<MooseFunctorName>(NS::mixing_length) = NS::mixing_length;
   params.set<Real>("schmidt_number") = getParam<Real>("turbulent_prandtl");
   params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
 
   for (unsigned int dim_i = 0; dim_i < _dim; ++dim_i)
-    params.set<CoupledName>(u_names[dim_i]) = {_velocity_name[dim_i]};
+    params.set<MooseFunctorName>(u_names[dim_i]) = _velocity_name[dim_i];
 
   if (_porous_medium_treatment)
     _problem->addFVKernel(kernel_type, "pins_energy_mixing_length_diffusion", params);
@@ -2261,9 +2263,9 @@ NSFVAction::addMixingLengthMaterial()
   assignBlocks(params, _blocks);
 
   for (unsigned int d = 0; d < _dim; ++d)
-    params.set<CoupledName>(u_names[d]) = {_velocity_name[d]};
+    params.set<MooseFunctorName>(u_names[d]) = _velocity_name[d];
 
-  params.set<CoupledName>(NS::mixing_length) = {NS::mixing_length};
+  params.set<MooseFunctorName>(NS::mixing_length) = NS::mixing_length;
 
   params.set<MooseFunctorName>(NS::density) = _density_name;
   params.set<MooseFunctorName>(NS::mu) = _dynamic_viscosity_name;
