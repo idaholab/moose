@@ -395,7 +395,7 @@ MooseAppCoordTransform::computeRS()
 }
 
 void
-MooseAppCoordTransform::transformMesh(MooseMesh & mesh, Point translation)
+MooseAppCoordTransform::transformMesh(MooseMesh & mesh, const Point & translation)
 {
   // Transforming a RZ or R-spherical mesh doesnt always make sense, disallow it
   if (_coord_type != Moose::COORD_XYZ)

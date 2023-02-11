@@ -179,7 +179,7 @@ public:
    * @param mesh the mesh to modify, usually the child app mesh
    * @param translation the translation to apply to the mesh, often the app position
    */
-  void transformMesh(MooseMesh & mesh, Point translation);
+  void transformMesh(MooseMesh & mesh, const libMesh::Point & translation);
 
 private:
   /**
@@ -262,6 +262,15 @@ public:
   libMesh::Point mapBack(const libMesh::Point & point) const;
 
   /**
+   * Set how much our domain should be translated in order to match a reference frame. In practice
+   * we choose the parent application to be the reference frame with respect to translation, e.g.
+   * the parent application origin is the reference frame origin, and we set the translation vectors
+   * of child applications to the multiapp positions parameter. Similarly to the \p setRotation with
+   * angles API, this represents a forward transformation from our domain to the reference domain
+   */
+  void setTranslationVector(const libMesh::Point & translation);
+
+  /**
    * Set the destination coordinate system and destination radial and symmetry axes as appropriate
    * for RZ or RSPHERICAL simulations. Depending on the coordinate system type of the provided
    * coordinate transform we may perform additional transformations. For instance if the destination
@@ -271,15 +280,6 @@ public:
    * 2pi rotation around the symmetry axis
    */
   void setDestinationCoordTransform(const MooseAppCoordTransform & destination_coord_transform);
-
-  /**
-   * Set how much our domain should be translated in order to match a reference frame. In practice
-   * we choose the parent application to be the reference frame with respect to translation, e.g.
-   * the parent application origin is the reference frame origin, and we set the translation vectors
-   * of child applications to the multiapp positions parameter. Similarly to the \p setRotation with
-   * angles API, this represents a forward transformation from our domain to the reference domain
-   */
-  void setTranslationVector(const Point & translation);
 
   /**
    * @return whether the coordinate transformation object modifies an incoming point, e.g. whether
@@ -328,9 +328,9 @@ private:
   /// by the MultiAppCoordTransform for the other direction
   const MooseAppCoordTransform * _destination_app_transform;
 
+  /// Describes a forward translation transformation from our domain to the reference frame domain
+  libMesh::Point _translation;
+
   /// whether coordinate collapsing operations should be skipped
   bool _skip_coordinate_collapsing;
-
-  /// Describes a forward translation transformation from our domain to the reference frame domain
-  Point _translation;
 };
