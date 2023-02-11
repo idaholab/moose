@@ -344,8 +344,12 @@ Transient::execute()
      */
     if (!_fixed_point_solve->autoAdvance())
     {
+      _problem.finishMultiAppStep(EXEC_MULTIAPP_FIXED_POINT_BEGIN,
+                                  /*recurse_through_multiapp_levels=*/true);
       _problem.finishMultiAppStep(EXEC_TIMESTEP_BEGIN, /*recurse_through_multiapp_levels=*/true);
       _problem.finishMultiAppStep(EXEC_TIMESTEP_END, /*recurse_through_multiapp_levels=*/true);
+      _problem.finishMultiAppStep(EXEC_MULTIAPP_FIXED_POINT_END,
+                                  /*recurse_through_multiapp_levels=*/true);
     }
   }
 
@@ -400,8 +404,10 @@ Transient::incrementStepOrReject()
        */
       if (!_fixed_point_solve->autoAdvance())
       {
+        _problem.finishMultiAppStep(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
         _problem.finishMultiAppStep(EXEC_TIMESTEP_BEGIN);
         _problem.finishMultiAppStep(EXEC_TIMESTEP_END);
+        _problem.finishMultiAppStep(EXEC_MULTIAPP_FIXED_POINT_END);
       }
 
       /*
@@ -409,14 +415,18 @@ Transient::incrementStepOrReject()
        * when dt selection is made in the master application, we are using
        * the correct time step information
        */
+      _problem.incrementMultiAppTStep(EXEC_MULTIAPP_FIXED_POINT_BEGIN);
       _problem.incrementMultiAppTStep(EXEC_TIMESTEP_BEGIN);
       _problem.incrementMultiAppTStep(EXEC_TIMESTEP_END);
+      _problem.incrementMultiAppTStep(EXEC_MULTIAPP_FIXED_POINT_END);
     }
   }
   else
   {
+    _problem.restoreMultiApps(EXEC_MULTIAPP_FIXED_POINT_BEGIN, true);
     _problem.restoreMultiApps(EXEC_TIMESTEP_BEGIN, true);
     _problem.restoreMultiApps(EXEC_TIMESTEP_END, true);
+    _problem.restoreMultiApps(EXEC_MULTIAPP_FIXED_POINT_END, true);
     _time_stepper->rejectStep();
     _time = _time_old;
   }
@@ -559,27 +569,31 @@ Transient::computeConstrainedDT()
   }
 
   // Constrain by what the multi apps are doing
-  Real multi_app_dt = _problem.computeMultiAppsDT(EXEC_TIMESTEP_BEGIN);
-  if (_use_multiapp_dt || multi_app_dt < dt_cur)
-  {
-    dt_cur = multi_app_dt;
-    _at_sync_point = false;
-    diag << "Limiting dt for MultiApps: " << std::setw(9) << std::setprecision(6)
-         << std::setfill('0') << std::showpoint << std::left << dt_cur << std::endl;
-  }
-  multi_app_dt = _problem.computeMultiAppsDT(EXEC_TIMESTEP_END);
-  if (multi_app_dt < dt_cur)
-  {
-    dt_cur = multi_app_dt;
-    _at_sync_point = false;
-    diag << "Limiting dt for MultiApps: " << std::setw(9) << std::setprecision(6)
-         << std::setfill('0') << std::showpoint << std::left << dt_cur << std::endl;
-  }
+  constrainDTFromMultiApp(dt_cur, diag, EXEC_MULTIAPP_FIXED_POINT_BEGIN);
+  constrainDTFromMultiApp(dt_cur, diag, EXEC_TIMESTEP_BEGIN);
+  constrainDTFromMultiApp(dt_cur, diag, EXEC_TIMESTEP_END);
+  constrainDTFromMultiApp(dt_cur, diag, EXEC_MULTIAPP_FIXED_POINT_END);
 
   if (_verbose)
     _console << diag.str();
 
   return dt_cur;
+}
+
+void
+Transient::constrainDTFromMultiApp(Real & dt_cur,
+                                   std::ostringstream & diag,
+                                   const ExecFlagType & execute_on) const
+{
+  Real multi_app_dt = _problem.computeMultiAppsDT(execute_on);
+  if (_use_multiapp_dt || multi_app_dt < dt_cur)
+  {
+    dt_cur = multi_app_dt;
+    _at_sync_point = false;
+    diag << "Limiting dt for MultiApps on " << execute_on.name() << ": " << std::setw(9)
+         << std::setprecision(6) << std::setfill('0') << std::showpoint << std::left << dt_cur
+         << std::endl;
+  }
 }
 
 Real

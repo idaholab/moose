@@ -30,6 +30,10 @@ const ExecFlagType EXEC_LINEAR = registerDefaultExecFlag("LINEAR");
 const ExecFlagType EXEC_NONLINEAR = registerDefaultExecFlag("NONLINEAR");
 const ExecFlagType EXEC_TIMESTEP_END = registerDefaultExecFlag("TIMESTEP_END");
 const ExecFlagType EXEC_TIMESTEP_BEGIN = registerDefaultExecFlag("TIMESTEP_BEGIN");
+const ExecFlagType EXEC_MULTIAPP_FIXED_POINT_END =
+    registerDefaultExecFlag("MULTIAPP_FIXED_POINT_END");
+const ExecFlagType EXEC_MULTIAPP_FIXED_POINT_BEGIN =
+    registerDefaultExecFlag("MULTIAPP_FIXED_POINT_BEGIN");
 const ExecFlagType EXEC_FINAL = registerDefaultExecFlag("FINAL");
 const ExecFlagType EXEC_FORCED = registerExecFlag("FORCED");
 const ExecFlagType EXEC_FAILED = registerExecFlag("FAILED");
