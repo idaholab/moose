@@ -38,12 +38,10 @@ AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string &
     _fe_problem(subproblem),
     _sys(subproblem.es().add_system<ExplicitSystem>(name)),
     _current_solution(_sys.current_local_solution.get()),
-    _serialized_solution(*NumericVector<Number>::build(_fe_problem.comm()).release()),
     _u_dot(NULL),
     _u_dotdot(NULL),
     _u_dot_old(NULL),
     _u_dotdot_old(NULL),
-    _need_serialized_solution(false),
     _aux_scalar_storage(_app.getExecuteOnEnum()),
     _nodal_aux_storage(_app.getExecuteOnEnum()),
     _mortar_nodal_aux_storage(_app.getExecuteOnEnum()),
@@ -70,7 +68,7 @@ AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string &
   }
 }
 
-AuxiliarySystem::~AuxiliarySystem() { delete &_serialized_solution; }
+AuxiliarySystem::~AuxiliarySystem() = default;
 
 void
 AuxiliarySystem::addDotVectors()
@@ -406,26 +404,28 @@ AuxiliarySystem::reinitElemFace(const Elem * /*elem*/,
 NumericVector<Number> &
 AuxiliarySystem::serializedSolution()
 {
-  if (!_serialized_solution.initialized())
-    _serialized_solution.init(_sys.n_dofs(), false, SERIAL);
+  if (!_serialized_solution.get())
+  {
+    _serialized_solution = NumericVector<Number>::build(_fe_problem.comm());
+    _serialized_solution->init(_sys.n_dofs(), false, SERIAL);
+  }
 
-  _need_serialized_solution = true;
-  return _serialized_solution;
+  return *_serialized_solution;
 }
 
 void
 AuxiliarySystem::serializeSolution()
 {
-  if (_need_serialized_solution &&
+  if (_serialized_solution.get() &&
       _sys.n_dofs() > 0) // libMesh does not like serializing of empty vectors
   {
-    if (!_serialized_solution.initialized() || _serialized_solution.size() != _sys.n_dofs())
+    if (!_serialized_solution->initialized() || _serialized_solution->size() != _sys.n_dofs())
     {
-      _serialized_solution.clear();
-      _serialized_solution.init(_sys.n_dofs(), false, SERIAL);
+      _serialized_solution->clear();
+      _serialized_solution->init(_sys.n_dofs(), false, SERIAL);
     }
 
-    solution().localize(_serialized_solution);
+    solution().localize(*_serialized_solution);
   }
 }
 
@@ -467,7 +467,7 @@ AuxiliarySystem::compute(ExecFlagType type)
       _time_integrator->computeTimeDerivatives();
   }
 
-  if (_need_serialized_solution)
+  if (_serialized_solution.get())
     serializeSolution();
 }
 

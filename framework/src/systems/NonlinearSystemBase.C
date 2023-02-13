@@ -118,8 +118,6 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _compute_initial_residual_before_preset_bcs(true),
     _current_solution(NULL),
     _residual_ghosted(NULL),
-    _serialized_solution(*NumericVector<Number>::build(_communicator).release()),
-    _residual_copy(*NumericVector<Number>::build(_communicator).release()),
     _u_dot(NULL),
     _u_dotdot(NULL),
     _u_dot_old(NULL),
@@ -141,8 +139,6 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _use_field_split_preconditioner(false),
     _add_implicit_geometric_coupling_entries_to_jacobian(false),
     _assemble_constraints_separately(false),
-    _need_serialized_solution(false),
-    _need_residual_copy(false),
     _need_residual_ghosted(false),
     _debugging_residuals(false),
     _doing_dg(false),
@@ -183,11 +179,7 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
   }
 }
 
-NonlinearSystemBase::~NonlinearSystemBase()
-{
-  delete &_serialized_solution;
-  delete &_residual_copy;
-}
+NonlinearSystemBase::~NonlinearSystemBase() = default;
 
 void
 NonlinearSystemBase::init()
@@ -199,11 +191,11 @@ NonlinearSystemBase::init()
 
   _current_solution = _sys.current_local_solution.get();
 
-  if (_need_serialized_solution)
-    _serialized_solution.init(_sys.n_dofs(), false, SERIAL);
+  if (_serialized_solution.get())
+    _serialized_solution->init(_sys.n_dofs(), false, SERIAL);
 
-  if (_need_residual_copy)
-    _residual_copy.init(_sys.n_dofs(), false, SERIAL);
+  if (_residual_copy.get())
+    _residual_copy->init(_sys.n_dofs(), false, SERIAL);
 }
 
 void
@@ -1682,10 +1674,10 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
 
   mortarConstraints(Moose::ComputeType::Residual);
 
-  if (_need_residual_copy)
+  if (_residual_copy.get())
   {
     _Re_non_time->close();
-    _Re_non_time->localize(_residual_copy);
+    _Re_non_time->localize(*_residual_copy);
   }
 
   if (_need_residual_ghosted)
@@ -3171,8 +3163,10 @@ NonlinearSystemBase::computeDiracContributions(const std::set<TagID> & tags, boo
 NumericVector<Number> &
 NonlinearSystemBase::residualCopy()
 {
-  _need_residual_copy = true;
-  return _residual_copy;
+  if (!_residual_copy.get())
+    _residual_copy = NumericVector<Number>::build(_communicator);
+
+  return *_residual_copy;
 }
 
 NumericVector<Number> &
@@ -3248,15 +3242,15 @@ NonlinearSystemBase::augmentSparsity(SparsityPattern::Graph & sparsity,
 void
 NonlinearSystemBase::serializeSolution()
 {
-  if (_need_serialized_solution)
+  if (_serialized_solution.get())
   {
-    if (!_serialized_solution.initialized() || _serialized_solution.size() != _sys.n_dofs())
+    if (!_serialized_solution->initialized() || _serialized_solution->size() != _sys.n_dofs())
     {
-      _serialized_solution.clear();
-      _serialized_solution.init(_sys.n_dofs(), false, SERIAL);
+      _serialized_solution->clear();
+      _serialized_solution->init(_sys.n_dofs(), false, SERIAL);
     }
 
-    _current_solution->localize(_serialized_solution);
+    _current_solution->localize(*_serialized_solution);
   }
 }
 
@@ -3268,7 +3262,7 @@ NonlinearSystemBase::setSolution(const NumericVector<Number> & soln)
   auto tag = _subproblem.getVectorTagID(Moose::SOLUTION_TAG);
   associateVectorToTag(const_cast<NumericVector<Number> &>(soln), tag);
 
-  if (_need_serialized_solution)
+  if (_serialized_solution.get())
     serializeSolution();
 }
 
@@ -3299,11 +3293,13 @@ NonlinearSystemBase::setSolutionUDotDotOld(const NumericVector<Number> & u_dotdo
 NumericVector<Number> &
 NonlinearSystemBase::serializedSolution()
 {
-  if (!_serialized_solution.initialized())
-    _serialized_solution.init(_sys.n_dofs(), false, SERIAL);
+  if (!_serialized_solution.get())
+  {
+    _serialized_solution = NumericVector<Number>::build(_communicator);
+    _serialized_solution->init(_sys.n_dofs(), false, SERIAL);
+  }
 
-  _need_serialized_solution = true;
-  return _serialized_solution;
+  return *_serialized_solution;
 }
 
 void
