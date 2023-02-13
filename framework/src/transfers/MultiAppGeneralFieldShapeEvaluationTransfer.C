@@ -72,11 +72,11 @@ MultiAppGeneralFieldShapeEvaluationTransfer::buildMeshFunctions(
     System & from_sys = from_var.sys().system();
     unsigned int from_var_num = from_sys.variable_number(getFromVarName(var_index));
 
-    std::shared_ptr<MeshFunction> from_func;
-    from_func.reset(new MeshFunction(getEquationSystem(from_problem, _displaced_source_mesh),
-                                     *from_sys.current_local_solution,
-                                     from_sys.get_dof_map(),
-                                     from_var_num));
+    std::shared_ptr<MeshFunction> from_func =
+        std::make_shared<MeshFunction>(getEquationSystem(from_problem, _displaced_source_mesh),
+                                       *from_sys.current_local_solution,
+                                       from_sys.get_dof_map(),
+                                       from_var_num);
     from_func->init();
     from_func->enable_out_of_mesh_mode(GeneralFieldTransfer::BetterOutOfMeshValue);
     local_meshfuns.push_back(from_func);
