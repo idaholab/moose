@@ -345,7 +345,7 @@ MooseApp::MooseApp(InputParameters parameters)
     _start_time_set(false),
     _start_time(0.0),
     _global_time_offset(0.0),
-    _input_parameter_warehouse(new InputParameterWarehouse()),
+    _input_parameter_warehouse(std::make_unique<InputParameterWarehouse>()),
     _action_factory(*this),
     _action_warehouse(*this, _syntax, _action_factory),
     _output_warehouse(*this),
@@ -603,7 +603,8 @@ MooseApp::~MooseApp()
   _executioner.reset();
   _the_warehouse.reset();
 
-  delete _input_parameter_warehouse;
+  // Don't wait for implicit destruction of input parameter storage
+  _input_parameter_warehouse.reset();
 
 #ifdef LIBMESH_HAVE_DLOPEN
   // Close any open dynamic libraries

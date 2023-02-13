@@ -1009,8 +1009,9 @@ protected:
   /// Syntax of the input file
   Syntax _syntax;
 
-  /// Input parameter storage structure (this is a raw pointer so the destruction time can be explicitly controlled)
-  InputParameterWarehouse * _input_parameter_warehouse;
+  /// Input parameter storage structure; unique_ptr so we can control
+  /// its destruction order
+  std::unique_ptr<InputParameterWarehouse> _input_parameter_warehouse;
 
   /// The Factory responsible for building Actions
   ActionFactory _action_factory;
