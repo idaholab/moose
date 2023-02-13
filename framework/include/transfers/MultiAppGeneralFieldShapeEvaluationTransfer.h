@@ -35,8 +35,7 @@ private:
    * @param[in] var_name the variable to build the mesh functions for
    * @param[out] the mesh functions
    */
-  void buildMeshFunctions(const unsigned int var_index,
-                          std::vector<std::shared_ptr<MeshFunction>> & local_meshfuns);
+  void buildMeshFunctions(const unsigned int var_index, std::vector<MeshFunction> & local_meshfuns);
 
   /*
    * Evaluate interpolation values for incoming points
@@ -45,11 +44,10 @@ private:
    * @param[in] the points to evaluate the variable shape functions at
    * @param[out] the values of the variables
    */
-  void evaluateInterpValuesWithMeshFunctions(
-      const std::vector<BoundingBox> & local_bboxes,
-      const std::vector<std::shared_ptr<MeshFunction>> & local_meshfuns,
-      const std::vector<Point> & incoming_points,
-      std::vector<std::pair<Real, Real>> & outgoing_vals);
+  void evaluateInterpValuesWithMeshFunctions(const std::vector<BoundingBox> & local_bboxes,
+                                             std::vector<MeshFunction> & local_meshfuns,
+                                             const std::vector<Point> & incoming_points,
+                                             std::vector<std::pair<Real, Real>> & outgoing_vals);
 
   /*
    * Bounding boxes
@@ -58,5 +56,5 @@ private:
   /*
    * Local mesh functions
    */
-  std::vector<std::shared_ptr<MeshFunction>> _local_meshfuns;
+  std::vector<MeshFunction> _local_meshfuns;
 };
