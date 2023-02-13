@@ -1,0 +1,41 @@
+[Tests]
+  issues = '#22143'
+  design = 'Transfers/index.md'
+  [transfer_on_fp_begin]
+    type = CSVDiff
+    input = parent.i
+    cli_args = 'MultiApps/active=sub MultiApps/sub/cli_args=Outputs/fp/execute_on=MULTIAPP_FIXED_POINT_END
+                Outputs/file_base=transfer_fp_begin Outputs/fp_end/file_base=transfer_fp_begin_on_fp_end'
+    csvdiff = 'transfer_fp_begin.csv transfer_fp_begin_on_fp_end.csv transfer_fp_begin_sub0_fp.csv'
+    requirement = "The system shall support transferring data between applications at the beginning of the fixed point iterations."
+  []
+  [transfer_on_fp_end]
+    type = CSVDiff
+    input = parent.i
+    cli_args = 'Outputs/file_base=transfer_fp_end Outputs/fp_end/file_base=transfer_fp_end_on_fp_end
+                MultiApps/active=sub MultiApps/sub/cli_args=Outputs/fp/execute_on=MULTIAPP_FIXED_POINT_END
+                Transfers/from_sub/execute_on=MULTIAPP_FIXED_POINT_END Transfers/to_sub/execute_on=MULTIAPP_FIXED_POINT_END'
+    csvdiff = 'transfer_fp_end.csv transfer_fp_end_on_fp_end.csv transfer_fp_end_sub0_fp.csv'
+    requirement = "The system shall support transferring data between applications at the end of the fixed point iterations."
+  []
+  [multiapp_on_fp_begin]
+    type = CSVDiff
+    input = parent.i
+    cli_args = 'Outputs/file_base=multiapp_fp_begin Outputs/fp_end/file_base=multiapp_fp_begin_on_fp_end
+                Transfers/from_sub/execute_on=MULTIAPP_FIXED_POINT_BEGIN Transfers/to_sub/execute_on=MULTIAPP_FIXED_POINT_BEGIN
+                MultiApps/sub/cli_args=Outputs/fp/execute_on=MULTIAPP_FIXED_POINT_BEGIN
+                MultiApps/sub/execute_on=MULTIAPP_FIXED_POINT_BEGIN'
+    csvdiff = 'multiapp_fp_begin.csv multiapp_fp_begin_on_fp_end.csv multiapp_fp_begin_sub0_fp.csv'
+    requirement = "The system shall be able to transfer data to and from an application executed at the beginning of the fixed point iterations."
+  []
+  [multiapp_on_fp_end]
+    type = CSVDiff
+    input = parent.i
+    cli_args = 'Outputs/file_base=multiapp_fp_end Outputs/fp_end/file_base=multiapp_fp_end_on_fp_end
+                Transfers/from_sub/execute_on=MULTIAPP_FIXED_POINT_END Transfers/to_sub/execute_on=MULTIAPP_FIXED_POINT_END
+                MultiApps/sub/cli_args=Outputs/fp/execute_on=MULTIAPP_FIXED_POINT_END
+                MultiApps/sub/execute_on=MULTIAPP_FIXED_POINT_END'
+    csvdiff = 'multiapp_fp_end.csv multiapp_fp_end_on_fp_end.csv multiapp_fp_end_sub0_fp.csv'
+    requirement = "The system shall be able to transfer data to and from an application executed at the end of the fixed point iterations."
+  []
+[]
