@@ -4,7 +4,6 @@
     design = 'UserObjects/index.md'
     issues = '#21687'
     input = 'side-uo-with-lower-d-use.i'
-    mesh_mode = 'replicated'
     mumps = true
     type = RunApp
   []

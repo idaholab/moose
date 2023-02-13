@@ -466,16 +466,13 @@ MooseMesh::buildLowerDMesh()
       bool build_side = false;
       if (!neig)
         build_side = true;
-      else if (!neig->is_remote())
+      else
       {
-        if (mesh.is_replicated() || elem->processor_id() == comm().rank() ||
-            neig->processor_id() == comm().rank())
-        {
-          if (!neig->active())
-            build_side = true;
-          else if (neig->level() == elem->level() && elem->id() < neig->id())
-            build_side = true;
-        }
+        mooseAssert(!neig->is_remote(), "We error if the mesh is not serial");
+        if (!neig->active())
+          build_side = true;
+        else if (neig->level() == elem->level() && elem->id() < neig->id())
+          build_side = true;
       }
 
       if (build_side)
