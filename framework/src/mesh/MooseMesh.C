@@ -215,6 +215,10 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
   else if (isParamValid("block"))
     _provided_coord_blocks = getParam<std::vector<SubdomainName>>("block");
 
+  if (getParam<bool>("build_all_side_lowerd_mesh"))
+    // Do not initially allow removal of remote elements
+    allowRemoteElementRemoval(false);
+
   determineUseDistributedMesh();
 }
 
