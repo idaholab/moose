@@ -74,7 +74,7 @@ PetscExternalPartitioner::preLinearPartition(MeshBase & mesh)
   // Temporarily cache the old partition method
   auto old_partitioner = std::move(mesh.partitioner());
   // Create a linear partitioner
-  mesh.partitioner().reset(new LinearPartitioner);
+  mesh.partitioner() = std::make_unique<LinearPartitioner>();
   // Partition mesh
   mesh.partition(n_processors());
   // Restore the old partition
