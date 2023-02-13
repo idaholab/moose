@@ -14,6 +14,14 @@
 {#- TEST_DIRS: Directories to test in the %test section; defaults to just "tests"             -#}
 {#- EXTRA_MAMBA_PACKAGES: Extra mamba packages to install                                     -#}
 
+{#- Civet Specific jinja arguments                                                            -#}
+{#- allowed_to_fail: BOOL, specific to Civet. Only available in %post, %test section          -#}
+
+{#- Optional Application specific jinja arguments                                             -#}
+{#- SECTION_ENVIRONMENT: Adds additional environment variables set upon entering container    -#}
+{#- SECTION_POST: Partially replaces %post (make, make install, section)                      -#}
+{#- SECTION_TEST: Partially replaces %test (for loop section)                                 -#}
+
 {#- The within-container build directory to use                                               -#}
 {%- set ROOT_BUILD_DIR = '/root/build' -%}
 
@@ -45,6 +53,10 @@ From: {{ APPTAINER_FROM }}
     if [[ $MOOSE_RELATIVE_PATH = ..* ]]; then
         mkdir ${MOOSE_BUILD_DIR}
         cp -r ${MOOSE_DIR}/. ${MOOSE_BUILD_DIR}
+    # MOOSE_DIR is the application (combined-opt)
+    elif [[ '{{ BINARY_NAME }}' == 'moose-combined' ]]; then
+        # do nothing
+        :
     # MOOSE_DIR is in the application, setup a symlink
     else
         ln -s ./${APPLICATION_NAME}/${MOOSE_RELATIVE_PATH} ${MOOSE_BUILD_DIR}
@@ -57,19 +69,27 @@ From: {{ APPTAINER_FROM }}
 {%- endif %}
 
 %environment
+{%- if BINARY_NAME == 'moose-combined' %}
+    export PATH=/opt/moose/bin:$PATH
+{%- else %}
     export PATH=/opt/{{ BINARY_NAME }}/bin:$PATH
-
+{%- endif %}
+{%- if SECTION_ENVIRONMENT is defined %}
+    {{ SECTION_ENVIRONMENT }}
+{%- endif %}
 %post
     # Load jinja vars
+{%- if SECTION_POST_PRE is defined %}
+    {{ SECTION_POST_PRE }}
+{%- endif %}
     APPLICATION_NAME=$(basename {{ APPLICATION_DIR }})
     BINARY_NAME={{ BINARY_NAME }}
     METHOD={{ METHOD or "opt" }}
     MOOSE_DOCS_FLAGS="{{ MOOSE_DOCS_FLAGS }}"
     export MOOSE_JOBS={{ MOOSE_JOBS or "1" }}
     MOOSE_OPTIONS="{{ MOOSE_OPTIONS }}"
-    MOOSE_SKIP_DOCS={{ MOOSE_SKIP_DOCS }}
+    export MOOSE_SKIP_DOCS={{ MOOSE_SKIP_DOCS }}
     TEMP_LOC={{ ROOT_BUILD_DIR }}
-
     APPLICATION_DIR=${TEMP_LOC}/${APPLICATION_NAME}
     export MOOSE_DIR=${TEMP_LOC}/moose
 
@@ -93,15 +113,48 @@ From: {{ APPTAINER_FROM }}
 {%- endif %}
 
     # Setup install
+{%- if BINARY_NAME == 'moose-combined' %}
+    MOOSE_PREFIX=/opt/moose
+{%- else %}
     MOOSE_PREFIX=/opt/${BINARY_NAME}
+{%- endif %}
     cd ${MOOSE_DIR}
+{%- if allowed_to_fail is defined %}
+    # CIVET allowed_to_fail is True
+    set +e
+{%- endif %}
+{%- if SECTION_POST_PRE_CONFIGURE is defined %}
+    {{ SECTION_POST_PRE_CONFIGURE }}
+{%- endif %}
     ./configure --prefix=$MOOSE_PREFIX ${MOOSE_OPTIONS}
-
+{%- if SECTION_POST_POST_CONFIGURE is defined %}
+    {{ SECTION_POST_POST_CONFIGURE }}
+{%- endif %}
     # Build and install
+{%- if BINARY_NAME == 'moose-combined' %}
+    cd ${APPLICATION_DIR}/modules
+{%- else %}
     cd ${APPLICATION_DIR}
+{%- endif %}
+{%- if SECTION_POST_PRE_MAKE is defined %}
+    {{ SECTION_POST_PRE_MAKE }}
+{%- endif %}
     make -j ${MOOSE_JOBS} METHOD=${METHOD}
+{%- if SECTION_POST_POST_MAKE is defined %}
+    {{ SECTION_POST_POST_MAKE }}
+{%- endif %}
+{%- if SECTION_POST_PRE_MAKEINSTALL is defined %}
+    {{ SECTION_POST_PRE_MAKEINSTALL }}
+{%- endif %}
     make install -j ${MOOSE_JOBS} MOOSE_SKIP_DOCS=${MOOSE_SKIP_DOCS} MOOSE_DOCS_FLAGS="${MOOSE_DOCS_FLAGS}" METHOD=${METHOD}
-
+{%- if SECTION_POST_POST_MAKEINSTALL is defined %}
+    {{ SECTION_POST_POST_MAKEINSTALL }}
+{%- endif %}
+{%- if allowed_to_fail is defined %}
+    # CIVET allowed_to_fail not allowed for remainder steps
+{%- endif %}
+    # force error shell behavior for remainder steps
+    set -e
     # Fix permissions for installed application
     chmod -R o=u-w,g=u-w ${MOOSE_PREFIX}
 
@@ -110,15 +163,32 @@ From: {{ APPTAINER_FROM }}
     mamba uninstall -yq ${EXTRA_DOC_PACKAGES}
 {%- endif %}
 
+{%- if BINARY_NAME == 'moose-combined' %}
+    # Create moose-opt symlink to combined-opt
+    cd /opt/moose/bin
+    ln -s combined-opt moose-opt
+{%- endif %}
+
     # Install moose-tools from moose-base container
     source /root/install_moose_tools.sh
-
+{%- if SECTION_POST_POST is defined %}
+    {{ SECTION_POST_POST }}
+{%- endif %}
     # Cleanup
     rm -rf $TEMP_LOC
 
 %test
+    # Force error shell behavior
+    set -e
     # Load jinja vars
+{%- if SECTION_TEST_PRE is defined %}
+    {{ SECTION_TEST_PRE }}
+{%- endif %}
+{%- if BINARY_NAME == 'moose-combined' %}
+    BINARY_NAME=combined
+{%- else %}
     BINARY_NAME={{ BINARY_NAME }}
+{%- endif %}
     METHOD={{ METHOD or "opt" }}
     TEST_DIRS={{ TEST_DIRS or "tests" }}
 
@@ -126,17 +196,27 @@ From: {{ APPTAINER_FROM }}
     TEMP_LOC=$(mktemp -u -d /tmp/${BINARY_NAME}test.XXXXXX)
     # Really make sure that we nuke the temp location in all circumstances
     trap "if [ -e $TEMP_LOC ]; then rm -rf $TEMP_LOC; fi" EXIT HUP INT TERM
-
+{%- if SECTION_TEST_PRE_TEST is defined %}
+    {{ SECTION_TEST_PRE_TEST }}
+{%- endif %}
     # Copy and run each subset of tests
     for TEST_DIR in ${TEST_DIRS}; do
-        mkdir $TEMP_LOC
+        mkdir -p $TEMP_LOC
         cd $TEMP_LOC
         ${BINARY_NAME}-${METHOD} --copy-inputs $TEST_DIR
         cd ${BINARY_NAME}/${TEST_DIR}
+{%- if allowed_to_fail is defined %}
+        # CIVET allowed_to_fail is True
+        set +e
+{%- endif %}
         ${BINARY_NAME}-${METHOD} --run -j ${MOOSE_JOBS:-1} -t
-        TEST_RETURN_CODE=$?
+{%- if allowed_to_fail is defined %}
+        # CIVET allowed_to_fail not allowed for remainder steps
+{%- endif %}
+        # force error shell behavior for remainder steps
+        set -e
         rm -rf $TEMP_LOC
-        if [ ${TEST_RETURN_CODE} != 0 ]; then
-          exit ${TEST_RETURN_CODE}
-        fi
     done
+{%- if SECTION_TEST_POST is defined %}
+    {{ SECTION_TEST_POST }}
+{%- endif %}

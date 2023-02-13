@@ -261,3 +261,7 @@ modules/reactor/test/tests/meshgenerators/patterned_hex_mesh_generator/positions
 
 # Ignore share directory
 share/
+
+# Ignore vscode local parameters
+.vscode/*
+

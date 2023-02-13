@@ -121,6 +121,10 @@ MultiApp::validParams()
       "output_in_position",
       false,
       "If true this will cause the output from the MultiApp to be 'moved' by its position vector");
+  params.addParam<bool>(
+      "run_in_position",
+      false,
+      "If true this will cause the mesh from the MultiApp to be 'moved' by its position vector");
 
   params.addParam<Real>("global_time_offset",
                         0,
@@ -249,6 +253,7 @@ MultiApp::MultiApp(const InputParameters & parameters)
     _backups(declareRestartableDataWithContext<SubAppBackups>("backups", this)),
     _cli_args(getParam<std::vector<std::string>>("cli_args")),
     _keep_solution_during_restore(getParam<bool>("keep_solution_during_restore")),
+    _run_in_position(getParam<bool>("run_in_position")),
     _solve_step_timer(registerTimedSection("solveStep", 3, "Executing MultiApps", false)),
     _init_timer(registerTimedSection("init", 3, "Initializing MultiApp")),
     _backup_timer(registerTimedSection("backup", 3, "Backing Up MultiApp")),
@@ -545,6 +550,19 @@ MultiApp::preTransfer(Real /*dt*/, Real target_time)
       // in the associated transfer classes
       for (auto * const transfer : _associated_transfers)
         transfer->getAppInfo();
+
+      // Similarly we need to transform the mesh again
+      if (_run_in_position)
+        for (const auto i : make_range(_my_num_apps))
+        {
+          auto app_ptr = _apps[i];
+          if (usingPositions())
+            app_ptr->getExecutioner()->feProblem().coordTransform().transformMesh(
+                app_ptr->getExecutioner()->feProblem().mesh(), _positions[_first_local_app + i]);
+          else
+            app_ptr->getExecutioner()->feProblem().coordTransform().transformMesh(
+                app_ptr->getExecutioner()->feProblem().mesh(), Point(0, 0, 0));
+        }
 
       // If the time step covers multiple reset times, set them all as having 'happened'
       for (unsigned int j = i; j < _reset_times.size(); j++)
@@ -903,6 +921,8 @@ MultiApp::moveApp(unsigned int global_app, Point p)
 
       if (_output_in_position)
         _apps[local_app]->setOutputPosition(p);
+      if (_run_in_position)
+        paramError("run_in_position", "Moving apps and running apps in position is not supported");
     }
   }
 }
@@ -991,6 +1011,9 @@ MultiApp::createApp(unsigned int i, Real start_time)
 
   if (_use_positions && getParam<bool>("output_in_position"))
     app->setOutputPosition(_app.getOutputPosition() + _positions[_first_local_app + i]);
+  if (_output_in_position && _run_in_position)
+    paramError("run_in_position",
+               "Sub-apps are already displaced, so they are already output in position");
 
   // Update the MultiApp level for the app that was just created
   app->setupOptions();
@@ -1018,6 +1041,17 @@ MultiApp::createApp(unsigned int i, Real start_time)
   auto fixed_point_solve = &(_apps[i]->getExecutioner()->fixedPointSolve());
   if (fixed_point_solve)
     fixed_point_solve->allocateStorage(false);
+
+  // Transform the app mesh if requested
+  if (_run_in_position)
+  {
+    if (usingPositions())
+      app->getExecutioner()->feProblem().coordTransform().transformMesh(
+          app->getExecutioner()->feProblem().mesh(), _positions[_first_local_app + i]);
+    else
+      app->getExecutioner()->feProblem().coordTransform().transformMesh(
+          app->getExecutioner()->feProblem().mesh(), Point(0, 0, 0));
+  }
 }
 
 std::string
