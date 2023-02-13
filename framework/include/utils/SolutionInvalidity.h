@@ -88,8 +88,10 @@ public:
 
 private:
   /// Mutex for locking access to the invalid counts
-  /// NOTE: These can be changed to shared_mutexes once we get C++17
+  /// TODO: These can be changed to shared_mutexes once we get C++17
   mutable std::mutex _invalid_mutex;
+
+  // Build a VariadicTable for solution invalidity
   typedef VariadicTable<std::string,
                         unsigned long int,
                         unsigned long int,
@@ -99,8 +101,9 @@ private:
 
   FullTable summaryTable() const;
 
-  /// The SolutionInvalidityRegistry
+  /// Create a registry to keep track of the names and occurrences of the solution invalidity
   SolutionInvalidityRegistry & _solution_invalidity_registry;
 
+  /// Store the solution invalidity counts
   std::vector<InvalidCounts> _counts;
 };

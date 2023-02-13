@@ -31,4 +31,5 @@ private:
   const SolutionInvalidity * const & _solution_invalidity;
 };
 
+// Store solution invalid warnings to a json file
 void to_json(nlohmann::json & json, const SolutionInvalidity * const & solution_invalidity);

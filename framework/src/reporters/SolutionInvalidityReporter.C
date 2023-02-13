@@ -40,7 +40,7 @@ to_json(nlohmann::json & json, const SolutionInvalidity * const & solution_inval
     nlohmann::json entry;
     entry["object_type"] = solution_registry.item(id).object_type;
     entry["message"] = solution_registry.item(id).message;
-    entry["latest_counts"] = count[id].counts;
+    entry["converged_counts"] = count[id].counts;
     entry["timestep_counts"] = count[id].timeiter_counts;
     entry["total_counts"] = count[id].total_counts;
     json.push_back(entry);

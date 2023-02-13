@@ -1724,7 +1724,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
     _Re_non_time->close();
   }
 
-  // Accumulate the occurence of solution invalid warnings for local comulative counters
+  // Accumulate the occurrence of solution invalid warnings for local cumulative counters
   _app.solutionInvalidity().solutionInvalidAccumulation();
 }
 
@@ -2879,7 +2879,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
   if (hasDiagSaveIn())
     _fe_problem.getAuxiliarySystem().update();
 
-  // Accumulate the occurence of solution invalid warnings for local comulative counters
+  // Accumulate the occurrence of solution invalid warnings for local cumulative counters
   _app.solutionInvalidity().solutionInvalidAccumulation();
 }
 

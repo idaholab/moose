@@ -49,6 +49,6 @@
     jsondiff = 'solution_invalid_transient.json'
     design = 'SolutionInvalidity.md'
     issues = '#22814'
-    requirement = 'The system shall be able to output detailed info to file in transient'
+    requirement = 'The system shall be able to output detailed information about why a solution is invalid to a file in transient simulations'
   []
 []

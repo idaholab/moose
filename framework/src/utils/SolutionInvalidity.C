@@ -123,17 +123,17 @@ SolutionInvalidity::sync()
 
     for (const auto & [object_type, message, counts, timeiter_counts] : data)
     {
-      InvalidSolutionID masterId = 0;
+      InvalidSolutionID mainId = 0;
       const moose::internal::SolutionInvalidityName name(object_type, message);
       if (_solution_invalidity_registry.keyExists(name))
-        masterId = _solution_invalidity_registry.id(name);
+        mainId = _solution_invalidity_registry.id(name);
       else
-        masterId = moose::internal::getSolutionInvalidityRegistry().registerInvalidity(object_type,
-                                                                                       message);
+        mainId = moose::internal::getSolutionInvalidityRegistry().registerInvalidity(object_type,
+                                                                                     message);
 
-      _counts[masterId].counts += counts;
-      _counts[masterId].timeiter_counts += timeiter_counts;
-      _counts[masterId].total_counts += timeiter_counts;
+      _counts[mainId].counts += counts;
+      _counts[mainId].timeiter_counts += timeiter_counts;
+      _counts[mainId].total_counts += timeiter_counts;
     }
   };
 
@@ -150,21 +150,20 @@ SolutionInvalidity::printDebug(InvalidSolutionID _invalid_solution_id) const
 SolutionInvalidity::FullTable
 SolutionInvalidity::summaryTable() const
 {
-  FullTable vtable({"Object", "Latest", "Timestep", "Total", "Message"}, 4);
+  FullTable vtable({"Object", "Converged", "Timestep", "Total", "Message"}, 4);
 
   vtable.setColumnFormat({
       VariadicTableColumnFormat::AUTO, // Object Type
-      VariadicTableColumnFormat::AUTO, // Latest Iteration Warnings
+      VariadicTableColumnFormat::AUTO, // Converged Iteration Warnings
       VariadicTableColumnFormat::AUTO, // Latest Time Iteration Warnings
-      VariadicTableColumnFormat::AUTO, // Total Iternation Warnings
+      VariadicTableColumnFormat::AUTO, // Total Iteration Warnings
       VariadicTableColumnFormat::AUTO, // Message
   });
 
   vtable.setColumnPrecision({
       1, // Object Name
-
-      0, // Latest Iternation Warnings
-      0, // Latest Time Iternation Warnings
+      0, // Converged Iteration Warnings
+      0, // Latest Time Iteration Warnings
       0, // Total Iteration Warnings
       1, // Message
   });
@@ -176,9 +175,9 @@ SolutionInvalidity::summaryTable() const
     {
       const auto & info = _solution_invalidity_registry.item(id);
       vtable.addRow(info.object_type,      // Object Type
-                    entry.counts,          // Latest Iteration Warnings
+                    entry.counts,          // Converged Iteration Warnings
                     entry.timeiter_counts, // Latest Time Iteration Warnings
-                    entry.total_counts,    // Total Iternation Warnings
+                    entry.total_counts,    // Total Iteration Warnings
                     info.message           // Message
       );
     }

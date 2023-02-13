@@ -272,7 +272,7 @@ FEProblemBase::validParams()
                         "warning is produced instead of after the calculation");
 
   params.addParamNamesToGroup("allow_invalid_solution immediately_print_invalid_solution",
-                              "SolutionInvalidity Output Control");
+                              "Solution validity control");
 
   return params;
 }

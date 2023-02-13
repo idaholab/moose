@@ -46,6 +46,9 @@ public:
   std::string message;
 };
 
+/**
+ * Helper class that hash the name associated with an invalid solution
+ */
 struct SoltionInvalidityNameHash
 {
   inline size_t operator()(const SolutionInvalidityName & name) const
