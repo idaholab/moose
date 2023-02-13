@@ -17,11 +17,11 @@
 #include <cctype>
 
 SyntaxTree::SyntaxTree(bool use_long_names)
-  : SyntaxFormatterInterface(), _root(NULL), _use_long_names(use_long_names)
+  : SyntaxFormatterInterface(), _use_long_names(use_long_names)
 {
 }
 
-SyntaxTree::~SyntaxTree() { delete (_root); }
+SyntaxTree::~SyntaxTree() = default;
 
 void
 SyntaxTree::insertNode(std::string syntax,
@@ -29,8 +29,8 @@ SyntaxTree::insertNode(std::string syntax,
                        bool is_action_params,
                        InputParameters * params)
 {
-  if (_root == NULL)
-    _root = new TreeNode("", *this);
+  if (!_root)
+    _root = std::make_unique<TreeNode>("", *this);
 
   _root->insertNode(syntax, action, is_action_params, params);
 }

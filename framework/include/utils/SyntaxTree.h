@@ -11,9 +11,10 @@
 
 #include "SyntaxFormatterInterface.h"
 
-#include <string>
 #include <map>
+#include <memory>
 #include <set>
+#include <string>
 
 // Forward declarations
 class InputParameters;
@@ -72,7 +73,7 @@ protected:
 
   bool isLongNames() const;
 
-  TreeNode * _root;
+  std::unique_ptr<TreeNode> _root;
   bool _use_long_names;
 
 private:
