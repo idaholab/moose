@@ -89,15 +89,16 @@ MultiAppPostprocessorInterpolationTransfer::execute()
     }
     case FROM_MULTIAPP:
     {
-      InverseDistanceInterpolation<LIBMESH_DIM> * idi;
+      std::unique_ptr<InverseDistanceInterpolation<LIBMESH_DIM>> idi;
 
       switch (_interp_type)
       {
         case 0:
-          idi = new InverseDistanceInterpolation<LIBMESH_DIM>(_communicator, _num_points, _power);
+          idi = std::make_unique<InverseDistanceInterpolation<LIBMESH_DIM>>(
+              _communicator, _num_points, _power);
           break;
         case 1:
-          idi = new RadialBasisInterpolation<LIBMESH_DIM>(_communicator, _radius);
+          idi = std::make_unique<RadialBasisInterpolation<LIBMESH_DIM>>(_communicator, _radius);
           break;
         default:
           mooseError("Unknown interpolation type!");
@@ -196,8 +197,6 @@ MultiAppPostprocessorInterpolationTransfer::execute()
       }
 
       getFromMultiApp()->problemBase().es().update();
-
-      delete idi;
 
       break;
     }
