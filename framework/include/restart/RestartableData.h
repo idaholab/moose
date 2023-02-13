@@ -22,9 +22,6 @@
 // JSON object
 #include "nlohmann/json.h"
 
-// Forward declarations
-class RestartableDataValue;
-
 /**
  * Abstract definition of a RestartableData value.
  */
@@ -36,7 +33,7 @@ public:
    * @param name The full (unique) name for this piece of data.
    * @param context 'typeless' pointer to user-specific data.
    */
-  RestartableDataValue(std::string name, void * context) : _name(name), _context(context) {}
+  RestartableDataValue(std::string name, void * context);
 
   /**
    * Destructor.
@@ -59,6 +56,16 @@ public:
    */
   void * context() { return _context; }
 
+  /**
+   * Whether or not this data has been declared
+   */
+  bool declared() const { return _declared; }
+
+  /**
+   * Sets that this restartable value has been declared
+   */
+  void setDeclared();
+
   virtual void swap(RestartableDataValue * rhs) = 0;
 
   // save/restore in a file
@@ -71,10 +78,14 @@ public:
 
 protected:
   /// The full (unique) name of this particular piece of data.
-  std::string _name;
+  const std::string _name;
 
   /// A context pointer for helping with load and store
-  void * _context;
+  void * const _context;
+
+private:
+  /// Whether or not this data has been declared (true) or only retreived (false)
+  bool _declared;
 };
 
 /**
@@ -208,21 +219,7 @@ RestartableData<T>::fromJSON(const nlohmann::json & /*json*/)
   // loadHelper(json, tmp, _context);
 }
 
-/**
- * Struct and Aliases for Restartable/Recoverable structures
- */
-struct RestartableDataValuePair
-{
-  RestartableDataValuePair(std::unique_ptr<RestartableDataValue> v, bool d)
-    : value(std::move(v)), declared(d)
-  {
-  }
-
-  std::unique_ptr<RestartableDataValue> value;
-  bool declared;
-};
-
-using RestartableDataMap = std::unordered_map<std::string, RestartableDataValuePair>;
+using RestartableDataMap = std::unordered_map<std::string, std::unique_ptr<RestartableDataValue>>;
 using RestartableDataMaps = std::vector<RestartableDataMap>;
 
 using DataNames = std::unordered_set<std::string>;

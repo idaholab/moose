@@ -1691,29 +1691,24 @@ MooseApp::registerRestartableData(const std::string & name,
   auto & data_ref =
       metaname.empty() ? _restartable_data[tid] : _restartable_meta_data[metaname].first;
 
-  // https://en.cppreference.com/w/cpp/container/unordered_map/emplace
-  // The element may be constructed even if there already is an element with the key in the
-  // container, in which case the newly constructed element will be destroyed immediately.
-  auto insert_pair = data_ref.emplace(name, RestartableDataValuePair(std::move(data), !read_only));
-
-  // Does the storage for this data already exist?
-  if (!insert_pair.second)
+  auto data_it = data_ref.find(name);
+  if (data_it == data_ref.end())
   {
-    auto & data = insert_pair.first->second;
-
-    // Are we really declaring or just trying to get a reference to the data?
-    if (!read_only)
-    {
-      if (data.declared)
-        mooseError("Attempted to declare restartable mesh meta data twice with the same name: ",
-                   name);
-      else
-        // The data wasn't previously declared, but now it is!
-        data.declared = true;
-    }
+    auto insert_pair = data_ref.emplace(name, std::move(data));
+    mooseAssert(insert_pair.second, "Insert didn't happen");
+    data_it = insert_pair.first;
   }
 
-  return *insert_pair.first->second.value;
+  auto & value = *data_it->second;
+  if (!read_only)
+  {
+    if (value.declared())
+      mooseError("Attempted to declare restartable mesh meta data twice with the same name: ",
+                 name);
+    value.setDeclared();
+  }
+
+  return value;
 }
 
 bool
@@ -1746,7 +1741,7 @@ MooseApp::getRestartableMetaData(const std::string & name,
     mooseError("Unable to find RestartableDataValue object with name " + name +
                " in RestartableDataMap");
 
-  return *iter->second.value;
+  return *iter->second;
 }
 
 void
@@ -2792,7 +2787,7 @@ MooseApp::checkMetaDataIntegrity() const
     std::vector<std::string> not_declared;
 
     for (const auto & pair : meta_data)
-      if (!pair.second.declared)
+      if (!pair.second->declared())
         not_declared.push_back(pair.first);
 
     if (!not_declared.empty())
