@@ -8,7 +8,7 @@ These routines will assist with representing weak form terms in a partial differ
 scalar variables integrated over the surface of a non-conforming interface (mortar surface). As usual,
 this piece of physics is referred to
 as the "residual" and is evaluated at integration quadrature points along that interface.
-To implement your own physics in MOOSE, you create your own kernel by subclassing the MOOSE `MortarScalarBase` class.
+To implement your own physics in MOOSE, you create your own mortar constraint by subclassing the MOOSE `MortarScalarBase` class.
 
 The Mortar scalar augmentation system supports the use of [!ac](AD) for residual calculations, as such
 there are two options for creating field-scalar coupling objects:
@@ -89,7 +89,7 @@ you have access to several member variables inside your `MortarScalarBase` class
 residual and Jacobian values in the above mentioned functions:
 
 - `_h`, `_l`: indices for the current test and trial scalar component respectively.
-- `_kappa`: value of the scalar variable this Kernel operates on; indexed by `_h` (i.e. `_kappa[_h]`).
+- `_kappa`: value of the scalar variable this `MortarConstraint` operates on; indexed by `_h` (i.e. `_kappa[_h]`).
 - `_kappa_var`: ID number of this scalar variable; useful to differentiate from others.
 - `_k_order`: order (number of components) of the scalar variable.
 
@@ -207,10 +207,10 @@ The displaced mesh features are not yet tested for the scalar augmentation syste
 
 ## Parameters id=MSB-parameters
 
-There is one required parameters the user must supply for a kernel derived
+There is one required parameters the user must supply for a mortar constraint derived
 from `MortarScalarBase`:
 
-- `scalar_variable`: the focus scalar variable of the kernel, for which assembly
+- `scalar_variable`: the focus scalar variable of the mortar constraint, for which assembly
   of the residual and Jacobian contributions will occur. It must be a `MooseScalarVariable`.
   This parameter may be renamed in a derived class to be more physically meaningful.
 
@@ -227,7 +227,7 @@ with the `scalar_variable` parameter renamed to `epsilon`:
 Note: to avoid an error message "Variable 'kappa' does not exist in this system", the following
 block should be added to the input file:
 
-!listing test/tests/kernels/scalar_kernel_constraint/scalar_constraint_kernel.i block=Problem
+!listing test/tests/mortar/periodic_segmental_constraint/periodic_simple2d.i block=Problem
 
 There is one optional parameters that can be supplied to`MortarScalarBase` classes:
 
