@@ -3,7 +3,7 @@
 #   template/ (must contain any python major.minor version this
 #              package is building. Usually the latest version.)
 {% set build = 0 %}
-{% set version = "2022.12.05" %}
+{% set version = "2023.02.13" %}
 
 package:
   name: moose-test-tools
@@ -43,6 +43,7 @@ requirements:
     - pyflakes
     - python
     - xmltodict
+    - moose-wasp
 
 test:
   commands:
