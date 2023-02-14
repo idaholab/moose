@@ -34,23 +34,18 @@ InputParameters::InputParameters()
     _collapse_nesting(false),
     _moose_object_syntax_visibility(true),
     _show_deprecated_message(true),
-    _allow_copy(true),
-    _from_legacy_construction(true)
+    _allow_copy(true)
 {
 }
 
 InputParameters::InputParameters(const InputParameters & rhs)
-  : Parameters(),
-    _show_deprecated_message(true),
-    _allow_copy(true),
-    _from_legacy_construction(rhs._from_legacy_construction)
-
+  : Parameters(), _show_deprecated_message(true), _allow_copy(true)
 {
   *this = rhs;
 }
 
 InputParameters::InputParameters(const Parameters & rhs)
-  : _show_deprecated_message(true), _allow_copy(true), _from_legacy_construction(true)
+  : _show_deprecated_message(true), _allow_copy(true)
 {
   _params.clear();
   Parameters::operator=(rhs);
@@ -69,7 +64,6 @@ InputParameters::clear()
   _moose_object_syntax_visibility = true;
   _show_deprecated_message = true;
   _allow_copy = true;
-  _from_legacy_construction = true;
   _block_fullpath = "";
   _block_location = "";
 }
