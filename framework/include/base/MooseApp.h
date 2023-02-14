@@ -787,8 +787,11 @@ public:
 
   /**
    * Whether this app is constructing mesh generators
+   *
+   * This is virtual to allow MooseUnitApp to override it so that we can
+   * construct MeshGenerators in unit tests
    */
-  bool constructingMeshGenerators() const;
+  virtual bool constructingMeshGenerators() const;
 
   /**
    * Whether this app is executing mesh generators
