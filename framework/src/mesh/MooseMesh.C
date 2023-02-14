@@ -215,6 +215,10 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
   else if (isParamValid("block"))
     _provided_coord_blocks = getParam<std::vector<SubdomainName>>("block");
 
+  if (getParam<bool>("build_all_side_lowerd_mesh"))
+    // Do not initially allow removal of remote elements
+    allowRemoteElementRemoval(false);
+
   determineUseDistributedMesh();
 }
 
@@ -466,16 +470,13 @@ MooseMesh::buildLowerDMesh()
       bool build_side = false;
       if (!neig)
         build_side = true;
-      else if (!neig->is_remote())
+      else
       {
-        if (mesh.is_replicated() || elem->processor_id() == comm().rank() ||
-            neig->processor_id() == comm().rank())
-        {
-          if (!neig->active())
-            build_side = true;
-          else if (neig->level() == elem->level() && elem->id() < neig->id())
-            build_side = true;
-        }
+        mooseAssert(!neig->is_remote(), "We error if the mesh is not serial");
+        if (!neig->active())
+          build_side = true;
+        else if (neig->level() == elem->level() && elem->id() < neig->id())
+          build_side = true;
       }
 
       if (build_side)
@@ -2499,10 +2500,10 @@ MooseMesh::init()
     // Re-enable partitioning so the splitter can partition!
     if (_app.isSplitMesh())
       getMesh().skip_partitioning(false);
-  }
 
-  if (getParam<bool>("build_all_side_lowerd_mesh"))
-    buildLowerDMesh();
+    if (getParam<bool>("build_all_side_lowerd_mesh"))
+      buildLowerDMesh();
+  }
 }
 
 unsigned int

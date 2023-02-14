@@ -6,7 +6,6 @@
     input = 'dirichlet.i'
     exodiff = 'dirichlet_out.e'
     requirement = 'The system shall support hybrid finite element method (HFEM) calculations with Dirichlet boundary conditions using standard variables.'
-    mesh_mode = replicated
     mumps = true
   []
   [array_dirichlet]
@@ -14,7 +13,6 @@
     input = 'array_dirichlet.i'
     exodiff = 'array_dirichlet_out.e'
     requirement = 'The system shall support hybrid finite element method (HFEM) calculations with Dirichlet boundary conditions using array variables.'
-    mesh_mode = replicated
     mumps = true
   []
   [array_dirichlet_pjfnk]
@@ -22,7 +20,6 @@
     input = 'array_dirichlet_pjfnk.i'
     exodiff = 'array_dirichlet_pjfnk_out.e'
     requirement = 'The system shall support hybrid finite element method (HFEM) calculations with preconditioner only using the block diagonal Jacobian.'
-    mesh_mode = replicated
     issues = '#20029'
   []
   [array_dirichlet_transform]
@@ -30,7 +27,6 @@
     input = 'array_dirichlet_transform.i'
     exodiff = 'array_dirichlet_transform_out.e'
     requirement = 'The system shall support hybrid finite element method (HFEM) calculations with coupling of components of array variables on internal sides.'
-    mesh_mode = replicated
     mumps = true
     issues = '#20029'
   []
@@ -39,7 +35,6 @@
     input = 'array_dirichlet_transform_bc.i'
     exodiff = 'array_dirichlet_transform_bc_out.e'
     requirement = 'The system shall support hybrid finite element method (HFEM) calculations with coupling of components of array variables on boundary sides.'
-    mesh_mode = replicated
     mumps = true
     issues = '#20029'
   []
@@ -48,7 +43,6 @@
     input = 'neumann.i'
     exodiff = 'neumann_out.e'
     requirement = 'The system shall support hybrid finite element method (HFEM) calculations with Neumann boundary conditions using standard variables.'
-    mesh_mode = replicated
     mumps = true
   []
   [array_neumann]
@@ -56,7 +50,6 @@
     input = 'array_neumann.i'
     exodiff = 'array_neumann_out.e'
     requirement = 'The system shall support hybrid finite element method (HFEM) calculations with Neumann boundary conditions using array variables.'
-    mesh_mode = replicated
     mumps = true
   []
   [robin]
@@ -64,7 +57,6 @@
     input = 'robin.i'
     exodiff = 'robin_out.e'
     requirement = 'The system shall support hybrid finite element method (HFEM) calculations with Robin boundary conditions using standard variables.'
-    mesh_mode = replicated
     mumps = true
   []
   [array_robin]
@@ -72,7 +64,6 @@
     input = 'array_robin.i'
     exodiff = 'array_robin_out.e'
     requirement = 'The system shall support hybrid finite element method (HFEM) calculations with Robin boundary conditions using array variables.'
-    mesh_mode = replicated
     mumps = true
   []
   [high_order]
@@ -81,7 +72,6 @@
     cli_args = 'Variables/u/order=FOURTH Variables/lambda/order=FIRST Outputs/file_base=high_order_out'
     exodiff = 'high_order_out.e'
     requirement = 'The system shall support hybrid finite element method (HFEM) calculations with high order shape functions.'
-    mesh_mode = replicated
     mumps = true
   []
   [variable_robin]
@@ -89,7 +79,6 @@
     input = 'variable_robin.i'
     exodiff = 'variable_robin_out.e'
     requirement = 'The system shall support hybrid finite element method (HFEM) calculations with Robin boundary conditions through Lagrange multipliers.'
-    mesh_mode = replicated
     mumps = true
   []
   [robin_displaced]
@@ -97,7 +86,6 @@
     input = 'robin_displaced.i'
     exodiff = 'robin_displaced_out.e'
     requirement = 'The system shall support hybrid finite element method (HFEM) calculations with displaced meshes.'
-    mesh_mode = replicated
     mumps = true
   []
   [robin_adpatation]
@@ -105,7 +93,6 @@
     input = 'robin_adapt.i'
     expect_err = 'HFEM does not support mesh adaptivity currently'
     requirement = 'The system shall issue an error for unsupported mesh adaptation with hybrid finite element method (HFEM) calculations.'
-    mesh_mode = replicated
     mumps = true
   []
   [variable_dirichlet]
@@ -113,14 +100,6 @@
     input = 'variable_dirichlet.i'
     exodiff = 'variable_dirichlet_out.e'
     requirement = 'The system shall support hybrid finite element method (HFEM) calculations with Dirichlet boundary conditions with boundary values specified by variables.'
-    mesh_mode = replicated
-    mumps = true
-  []
-  [robin_distributed_mesh]
-    type = 'RunException'
-    input = 'robin_dist.i'
-    expect_err = 'Hybrid finite element method must use replicated mesh'
-    requirement = 'The system shall issue an error for not fully supported distributed mesh with hybrid finite element method (HFEM) calculations.'
     mumps = true
   []
 
@@ -133,7 +112,6 @@
       exodiff = 'lower-d-volumes_out.e'
       detail = 'two'
       mumps = true
-      mesh_mode = replicated
     []
     [3d]
       type = 'Exodiff'
@@ -141,7 +119,6 @@
       exodiff = '3d-lower-d-volumes_out.e'
       detail = 'three'
       mumps = true
-      mesh_mode = replicated
     []
   []
 []
