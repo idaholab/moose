@@ -309,12 +309,6 @@ public:
   std::string getFileName(bool stripLeadingPath = true) const;
 
   /**
-   * Set a flag so that the parser will either warn or error when unused variables are seen after
-   * parsing is complete.
-   */
-  void setCheckUnusedFlag(bool warn_is_error = false);
-
-  /**
    * Set a flag so that the parser will throw an error if overridden parameters are detected
    */
   void setErrorOverridden();
@@ -1192,6 +1186,12 @@ private:
    * []
    */
   void createMinimalApp();
+
+  /**
+   * Set a flag so that the parser will either warn or error when unused variables are seen after
+   * parsing is complete.
+   */
+  void setCheckUnusedFlag(bool warn_is_error = false);
 
   /**
    * Create the ordered mesh generators from all mesh generators

@@ -30,7 +30,6 @@ main(int argc, char * argv[])
   std::shared_ptr<MooseApp> app =
       AppFactory::createAppShared("ChemicalReactionsTestApp", argc, argv);
 
-  app->setCheckUnusedFlag(true);
   app->setErrorOverridden();
 
   // Execute the application
