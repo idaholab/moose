@@ -1,0 +1,13 @@
+[Tests]
+  [test]
+    type = CSVDiff
+    input = 'element_integral_material_property_rz.i'
+    csvdiff = 'element_integral_material_property_rz.csv'
+    rel_err = 0
+    abs_zero = 1e-12
+
+    requirement = 'This system shall compute an RZ integral of a material property.'
+    design = 'ADElementIntegralMaterialPropertyRZ.md'
+    issues = '#23420'
+  []
+[]
