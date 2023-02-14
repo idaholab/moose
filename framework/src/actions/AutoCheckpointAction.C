@@ -18,14 +18,21 @@ AutoCheckpointAction::act()
 {
   if (_app.isUltimateMaster())
   {
+    // if there's already a checkpoint object, we don't need to worry about creating a new
+    // checkpoint
     if (!_app.getOutputWarehouse().getOutputs<Checkpoint>().empty())
-      // if there's already a checkpoint object, we don't need to worry about creating a new
-      // checkpoint
-      return;
+    {
 
+      // Take the first checkpoint object, since we only need to/should make one object the autosave
+      _app.getOutputWarehouse().getOutputs<Checkpoint>()[0]->set_autosave_flag(
+          AUTOSAVE_TYPE::MODIFIED_EXISTING);
+      return;
+    }
+
+    // If there isn't an existing one, init a new one
     auto cp_params = _factory.getValidParams("Checkpoint");
-    cp_params.setParameters("should_output", false);
-    cp_params.setParameters("is_autosave", true);
+    cp_params.setParameters("is_autosave", AUTOSAVE_TYPE::SYSTEM_AUTOSAVE);
+    cp_params.setParameters("file_base", std::string("autosave"));
     _problem->addOutput("Checkpoint", "autosave", cp_params);
   }
 }

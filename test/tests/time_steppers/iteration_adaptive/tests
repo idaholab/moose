@@ -54,10 +54,9 @@
 
   [./adapt_tstep_grow_dtfunc_restart]
     type = 'CSVDiff'
-    input = 'adapt_tstep_grow_dtfunc.i'
+    input = 'adapt_tstep_grow_dtfunc_restart.i'
     csvdiff = 'adapt_tstep_grow_dtfunc_restart_out.csv'
     prereq = 'adapt_tstep_grow_dtfunc'
-    cli_args = 'Problem/restart_file_base=adapt_tstep_grow_dtfunc_ckp_cp/0003 Outputs/file_base=adapt_tstep_grow_dtfunc_restart_out Outputs/checkpoint=false'
     recover = false
     requirement = "The system shall support the ability to grow the time step size
     when specifying the values of t and dt in the TimeStepper after a restart."
