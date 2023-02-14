@@ -2500,10 +2500,10 @@ MooseMesh::init()
     // Re-enable partitioning so the splitter can partition!
     if (_app.isSplitMesh())
       getMesh().skip_partitioning(false);
-  }
 
-  if (getParam<bool>("build_all_side_lowerd_mesh"))
-    buildLowerDMesh();
+    if (getParam<bool>("build_all_side_lowerd_mesh"))
+      buildLowerDMesh();
+  }
 }
 
 unsigned int
