@@ -1,6 +1,6 @@
 [Tests]
-  # design = 'navier_stokes/index.md NSFVAction.md'
-  # issues = '#15640 #19472'
+  design = 'NSComputeLiquidFraction.md NSFVPhaseChangeSource.md NSFVMixtureMaterial.md'
+  issues = '#23357'
   [solidification_exo_no_advection]
     type = 'Exodiff'
     input = 'solidification_no_advection.i'
