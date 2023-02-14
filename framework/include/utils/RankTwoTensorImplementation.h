@@ -838,10 +838,11 @@ RankTwoTensor::syev(const char * calculation_type,
   LAPACKsyev_(calculation_type, "U", &nd, &a[0], &nd, &eigvals[0], &work[0], &lwork, &info);
 
   if (info != 0)
-    mooseError("In computing the eigenvalues and eigenvectors for the symmetric rank-2 tensor (",
-               Moose::stringify(a),
-               "), the PETSC LAPACK syev routine returned error code ",
-               info);
+    mooseException(
+        "In computing the eigenvalues and eigenvectors for the symmetric rank-2 tensor (",
+        Moose::stringify(a),
+        "), the PETSC LAPACK syev routine returned error code ",
+        info);
 }
 
 template <typename T>
@@ -1016,9 +1017,10 @@ RankTwoTensor::getRUDecompositionRotation(RankTwoTensor & rot) const
   LAPACKsyev_("V", "U", &nd, &cmat[0][0], &nd, w, work, &lwork, &info);
 
   if (info != 0)
-    mooseError("In computing the eigenvalues and eigenvectors of a symmetric rank-2 tensor, the "
-               "PETSC LAPACK syev routine returned error code ",
-               info);
+    mooseException(
+        "In computing the eigenvalues and eigenvectors of a symmetric rank-2 tensor, the "
+        "PETSC LAPACK syev routine returned error code ",
+        info);
 
   diag.zero();
 
