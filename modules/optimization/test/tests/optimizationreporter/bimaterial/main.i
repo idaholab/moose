@@ -114,7 +114,7 @@
     type = MultiAppReporterTransfer
     from_multi_app = adjoint
     from_reporters = 'gradvec/inner_product'
-    to_reporters = 'OptimizationReporter/adjoint'
+    to_reporters = 'OptimizationReporter/grad_diffusivity_values'
   []
 []
 

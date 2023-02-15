@@ -13,6 +13,31 @@
 
 registerMooseObject("OptimizationApp", OptimizationReporter);
 
+namespace // unnamed namespace
+{
+void
+copyReporterIntoPetscVector(const std::vector<std::vector<Real> *> reporterVectors,
+                            libMesh::PetscVector<Number> & x)
+{
+  dof_id_type n = 0;
+  for (const auto & data : reporterVectors)
+    for (const auto & val : *data)
+      x.set(n++, val);
+
+  x.close();
+}
+
+void
+copyPetscVectorIntoReporter(const libMesh::PetscVector<Number> & x,
+                            std::vector<std::vector<Real> *> reporterVectors)
+{
+  dof_id_type n = 0;
+  for (auto & data : reporterVectors)
+    for (auto & val : *data)
+      val = x(n++);
+}
+}
+
 InputParameters
 OptimizationReporter::validParams()
 {
@@ -37,24 +62,23 @@ OptimizationReporter::validParams()
 OptimizationReporter::OptimizationReporter(const InputParameters & parameters)
   : OptimizationReporterBase(parameters),
     _parameter_names(getParam<std::vector<ReporterValueName>>("parameter_names")),
-    _nparam(_parameter_names.size()),
-    _nvalues(getParam<std::vector<dof_id_type>>("num_values")),
-    _ndof(std::accumulate(_nvalues.begin(), _nvalues.end(), 0)),
+    _nparams(_parameter_names.size()),
+    _parameters(_nparams),
+    _gradients(_nparams),
     _lower_bounds(getParam<std::vector<Real>>("lower_bounds")),
     _upper_bounds(getParam<std::vector<Real>>("upper_bounds")),
-    _adjoint_data(declareValueByName<std::vector<Real>>("adjoint", REPORTER_MODE_REPLICATED))
+    _nvalues(getParam<std::vector<dof_id_type>>("num_values")),
+    _ndof(std::accumulate(_nvalues.begin(), _nvalues.end(), 0))
 {
   if (_parameter_names.size() != _nvalues.size())
     paramError("num_parameters",
                "There should be a number in 'num_parameters' for each name in 'parameter_names'.");
-
   std::vector<Real> initial_condition = isParamValid("initial_condition")
                                             ? getParam<std::vector<Real>>("initial_condition")
                                             : std::vector<Real>(_ndof, 0.0);
   if (initial_condition.size() != _ndof)
     paramError("initial_condition",
                "Initial condition must be same length as the total number of parameter values.");
-
   if (_upper_bounds.size() > 0 && _upper_bounds.size() != _ndof)
     paramError("upper_bounds", "Upper bound data is not equal to the total number of parameters.");
   else if (_lower_bounds.size() > 0 && _lower_bounds.size() != _ndof)
@@ -63,15 +87,17 @@ OptimizationReporter::OptimizationReporter(const InputParameters & parameters)
     paramError((_lower_bounds.size() == 0 ? "upper_bounds" : "lower_bounds"),
                "Both upper and lower bounds must be specified if bounds are used");
 
-  _parameters.reserve(_nparam);
   unsigned int v = 0;
-
-  for (const auto i : index_range(_parameter_names))
+  for (const auto & i : make_range(_nparams))
   {
-    _parameters.push_back(
-        &declareValueByName<std::vector<Real>>(_parameter_names[i], REPORTER_MODE_REPLICATED));
+    _parameters[i] =
+        &declareValueByName<std::vector<Real>>(_parameter_names[i], REPORTER_MODE_REPLICATED);
+
     _parameters[i]->assign(initial_condition.begin() + v,
                            initial_condition.begin() + v + _nvalues[i]);
+    _gradients[i] = &declareValueByName<std::vector<Real>>("grad_" + _parameter_names[i],
+                                                           REPORTER_MODE_REPLICATED);
+    _gradients[i]->resize(_nvalues[i]);
     v += _nvalues[i];
   }
 }
@@ -80,32 +106,27 @@ void
 OptimizationReporter::setInitialCondition(libMesh::PetscVector<Number> & x)
 {
   x.init(_ndof);
-
-  dof_id_type n = 0;
-  for (const auto & param : _parameters)
-    for (const auto & val : *param)
-      x.set(n++, val);
-
-  x.close();
+  copyReporterIntoPetscVector(_parameters, x);
 }
 
 void
 OptimizationReporter::updateParameters(const libMesh::PetscVector<Number> & x)
 {
-  dof_id_type n = 0;
-  for (auto & param : _parameters)
-    for (auto & val : *param)
-      val = x(n++);
+  copyPetscVectorIntoReporter(x, _parameters);
 }
 
 void
 OptimizationReporter::computeGradient(libMesh::PetscVector<Number> & gradient) const
 {
-  if (_adjoint_data.size() != _ndof)
-    mooseError("Adjoint data is not equal to the total number of parameters.");
+  for (const auto & p : make_range(_nparams))
+    if (_gradients[p]->size() != _nvalues[p])
+      mooseError("The gradient for parameter ",
+                 _parameter_names[p],
+                 " has changed, expected ",
+                 _nvalues[p],
+                 " versus ",
+                 _gradients[p]->size(),
+                 ".");
 
-  for (const auto i : make_range(_ndof))
-    gradient.set(i, _adjoint_data[i]);
-
-  gradient.close();
+  copyReporterIntoPetscVector(_gradients, gradient);
 }
