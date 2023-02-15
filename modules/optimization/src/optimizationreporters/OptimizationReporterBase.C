@@ -9,17 +9,70 @@
 
 #include "OptimizationReporterBase.h"
 
+namespace // unnamed namespace
+{
+void
+copyReporterIntoPetscVector(const std::vector<std::vector<Real> *> reporterVectors,
+                            libMesh::PetscVector<Number> & x)
+{
+  dof_id_type n = 0;
+  for (const auto & data : reporterVectors)
+    for (const auto & val : *data)
+      x.set(n++, val);
+
+  x.close();
+}
+
+void
+copyPetscVectorIntoReporter(const libMesh::PetscVector<Number> & x,
+                            std::vector<std::vector<Real> *> reporterVectors)
+{
+  dof_id_type n = 0;
+  for (auto & data : reporterVectors)
+    for (auto & val : *data)
+      val = x(n++);
+}
+}
+
 InputParameters
 OptimizationReporterBase::validParams()
 {
   InputParameters params = OptimizationData::validParams();
   params.registerBase("OptimizationReporterBase");
+  params.addRequiredParam<std::vector<ReporterValueName>>(
+      "parameter_names", "List of parameter names, one for each group of parameters.");
+  params.addParam<std::vector<Real>>(
+      "lower_bounds", std::vector<Real>(), "Constant lower bound for each group of parameters.");
+  params.addParam<std::vector<Real>>(
+      "upper_bounds", std::vector<Real>(), "Constant upper bound for each group of parameters.");
+  params.registerBase("OptimizationReporterBase");
   return params;
 }
 
 OptimizationReporterBase::OptimizationReporterBase(const InputParameters & parameters)
-  : OptimizationData(parameters)
+  : OptimizationData(parameters),
+    _parameter_names(getParam<std::vector<ReporterValueName>>("parameter_names")),
+    _nparams(_parameter_names.size()),
+    _parameters(_nparams),
+    _gradients(_nparams),
+    _lower_bounds(getParam<std::vector<Real>>("lower_bounds")),
+    _upper_bounds(getParam<std::vector<Real>>("upper_bounds"))
 {
+  if (!_lower_bounds.empty() && _lower_bounds.size() != _nparams)
+    paramError("lower_bounds", "There must be a lower bound associated with each parameter.");
+  else if (!_upper_bounds.empty() && _upper_bounds.size() != _nparams)
+    paramError("upper_bounds", "There must be an upper bound associated with each parameter.");
+  else if (_lower_bounds.size() != _upper_bounds.size())
+    paramError((_lower_bounds.size() == 0 ? "upper_bounds" : "lower_bounds"),
+               "Both upper and lower bounds must be specified if bounds are used.");
+
+  for (const auto & i : make_range(_nparams))
+  {
+    _parameters[i] =
+        &declareValueByName<std::vector<Real>>(_parameter_names[i], REPORTER_MODE_REPLICATED);
+    _gradients[i] = &declareValueByName<std::vector<Real>>("grad_" + _parameter_names[i],
+                                                           REPORTER_MODE_REPLICATED);
+  }
 }
 
 Real
@@ -51,19 +104,57 @@ OptimizationReporterBase::setSimulationValuesForTesting(std::vector<Real> & data
 }
 
 void
-OptimizationReporterBase::computeGradient(libMesh::PetscVector<Number> &) const
+OptimizationReporterBase::computeGradient(libMesh::PetscVector<Number> & gradient) const
 {
-  mooseError(type(), " does not have an implemented gradient computation.");
+  for (const auto & p : make_range(_nparams))
+    if (_gradients[p]->size() != _nvalues[p])
+      mooseError("The gradient for parameter ",
+                 _parameter_names[p],
+                 " has changed, expected ",
+                 _nvalues[p],
+                 " versus ",
+                 _gradients[p]->size(),
+                 ".");
+  copyReporterIntoPetscVector(_gradients, gradient);
 }
 
-Real OptimizationReporterBase::getUpperBound(dof_id_type) const
+void
+OptimizationReporterBase::setInitialCondition(libMesh::PetscVector<Number> & x)
 {
-  mooseError(type(), " does not have an implemented upper bound.");
-  return 0;
+  x.init(_ndof);
+  copyReporterIntoPetscVector(_parameters, x);
 }
 
-Real OptimizationReporterBase::getLowerBound(dof_id_type) const
+void
+OptimizationReporterBase::updateParameters(const libMesh::PetscVector<Number> & x)
 {
-  mooseError(type(), " does not have an implemented lower bound.");
+  copyPetscVectorIntoReporter(x, _parameters);
+}
+
+Real
+OptimizationReporterBase::getLowerBound(dof_id_type i) const
+{
+  return _lower_bounds.empty() ? std::numeric_limits<Real>::lowest()
+                               : _lower_bounds[getParameterIndex(i)];
+}
+
+Real
+OptimizationReporterBase::getUpperBound(dof_id_type i) const
+{
+  return _upper_bounds.empty() ? std::numeric_limits<Real>::max()
+                               : _upper_bounds[getParameterIndex(i)];
+}
+
+unsigned int
+OptimizationReporterBase::getParameterIndex(dof_id_type i) const
+{
+  dof_id_type dof = 0;
+  for (unsigned int p = 0; p < _nparams; ++p)
+  {
+    dof += _nvalues[p];
+    if (i < dof)
+      return p;
+  }
+  mooseError("DoF index ", i, " is outside of expected paramter vector of size ", _ndof, ".");
   return 0;
 }
