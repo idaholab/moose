@@ -2141,7 +2141,7 @@ FEProblemBase::reinitElemNeighborAndLowerD(const Elem * elem, unsigned int side,
       std::vector<Point> reference_points;
       FEInterface::inverse_map(
           lower_d_elem_neighbor->dim(), FEType(), lower_d_elem_neighbor, qps, reference_points);
-      reinitLowerDElem(lower_d_elem_neighbor, tid, &qps);
+      reinitLowerDElem(lower_d_elem_neighbor, tid, &reference_points);
     }
   }
 
