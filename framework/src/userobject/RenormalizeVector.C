@@ -16,29 +16,6 @@
 
 registerMooseObject("MooseApp", RenormalizeVector);
 
-class RenormalizeVectorThread : public ParallelObject
-{
-public:
-  RenormalizeVectorThread(FEProblemBase & problem,
-                          const std::vector<VariableName> & vars,
-                          const Real norm);
-  // Splitting Constructor
-  RenormalizeVectorThread(RenormalizeVectorThread & x, Threads::split split);
-  // destructor to close the solution once more
-  ~RenormalizeVectorThread();
-
-  void operator()(const ConstElemRange & range);
-  void join(const RenormalizeVectorThread &) {}
-
-protected:
-  FEProblemBase & _problem;
-  System * _sys;
-  std::vector<unsigned int> _var_numbers;
-  const Real _target_norm;
-
-  THREAD_ID _tid;
-};
-
 InputParameters
 RenormalizeVector::validParams()
 {
@@ -53,106 +30,46 @@ RenormalizeVector::validParams()
 RenormalizeVector::RenormalizeVector(const InputParameters & parameters)
   : GeneralUserObject(parameters),
     _mesh(_fe_problem.mesh()),
-    _vars(getParam<std::vector<VariableName>>("v")),
-    _target_norm(getParam<Real>("norm"))
+    _var_names(getParam<std::vector<VariableName>>("v")),
+    _target_norm(getParam<Real>("norm")),
+    _nl_sys(_fe_problem.getNonlinearSystemBase()),
+    _sys(_nl_sys.system())
 {
+  for (const auto & var_name : _var_names)
+  {
+    auto & var = _fe_problem.getVariable(0, var_name);
+    if (_sys.number() != var.sys().system().number())
+      paramError("v", "Variables must be all in the non-linear system.");
+
+    if (var.isArray())
+    {
+      const auto & array_var = _fe_problem.getArrayVariable(0, var_name);
+      for (unsigned int p = 0; p < var.count(); ++p)
+        _var_numbers.push_back(_sys.variable_number(array_var.componentName(p)));
+    }
+    else
+      _var_numbers.push_back(_sys.variable_number(var_name));
+  }
 }
 
 void
 RenormalizeVector::initialize()
 {
+  // do one solution.close to get updated
+  _sys.solution->close();
 }
 
 void
 RenormalizeVector::execute()
 {
-  RenormalizeVectorThread renorm(_fe_problem, _vars, _target_norm);
-  ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-  Threads::parallel_reduce(elem_range, renorm);
-}
-
-void
-RenormalizeVector::finalize()
-{
-}
-
-// Thread worker implementation follows
-
-RenormalizeVectorThread::RenormalizeVectorThread(FEProblemBase & problem,
-                                                 const std::vector<VariableName> & varnames,
-                                                 const Real norm)
-  : ParallelObject(problem.comm()), _problem(problem), _sys(nullptr), _target_norm(norm)
-{
-  for (const auto & varname : varnames)
-  {
-    auto & var = _problem.getVariable(0, varname);
-    if (_sys)
-    {
-      if (_sys != &var.sys().system())
-        mooseError("Variables passed in RenormalizeVectorThread must be all in the same system.");
-    }
-    else
-      _sys = &var.sys().system();
-
-    if (var.isArray())
-    {
-      const auto & array_var = _problem.getArrayVariable(0, varname);
-      for (unsigned int p = 0; p < var.count(); ++p)
-        _var_numbers.push_back(_sys->variable_number(array_var.componentName(p)));
-    }
-    else
-      _var_numbers.push_back(_sys->variable_number(varname));
-  }
-
-  // get the non linear system
-  const auto & nl_sys = _problem.getNonlinearSystemBase();
-
-  if (&(nl_sys.solutionState(0)) != _sys->solution.get())
-    mooseError("Specify variables from the non-linear system");
-
-  // do one solution.close to get updated
-  _sys->solution->close();
-}
-
-RenormalizeVectorThread::~RenormalizeVectorThread()
-{
-  auto & nl_sys = _problem.getNonlinearSystemBase();
-  for (const auto s : make_range(3))
-    if (nl_sys.hasSolutionState(s))
-      nl_sys.solutionState(s).close();
-
-  _sys->update();
-}
-
-// Splitting Constructor
-RenormalizeVectorThread::RenormalizeVectorThread(RenormalizeVectorThread & x,
-                                                 Threads::split /*split*/)
-  : ParallelObject(x._problem.comm()),
-    _problem(x._problem),
-    _sys(x._sys),
-    _var_numbers(x._var_numbers),
-    _target_norm(x._target_norm)
-{
-}
-
-void
-RenormalizeVectorThread::operator()(const ConstElemRange & range)
-{
-  ParallelUniqueId puid;
-  _tid = puid.id;
-
-  // get the non linear system
-  auto & nl_sys = _problem.getNonlinearSystemBase();
-
-  mooseAssert(_sys, "We should have a system, did you forget to specify any variable in vars?");
-  auto & dof_map = _sys->get_dof_map();
+  auto & dof_map = _sys.get_dof_map();
   const auto local_dof_begin = dof_map.first_dof();
   const auto local_dof_end = dof_map.end_dof();
 
   std::vector<std::vector<dof_id_type>> dof_indices(_var_numbers.size());
   std::vector<Real> cache(_var_numbers.size());
 
-  for (const auto & elem : range)
+  for (const auto & elem : *_mesh.getActiveLocalElementRange())
   {
     // prepare variable dofs
     for (const auto i : index_range(_var_numbers))
@@ -166,9 +83,9 @@ RenormalizeVectorThread::operator()(const ConstElemRange & range)
 
     // iterate over current, old, and older solutions
     for (const auto s : make_range(3))
-      if (nl_sys.hasSolutionState(s))
+      if (_nl_sys.hasSolutionState(s))
       {
-        auto & solution = nl_sys.solutionState(s);
+        auto & solution = _nl_sys.solutionState(s);
 
         // loop over all DOFs
         for (const auto j : index_range(dof_indices[0]))
@@ -193,4 +110,14 @@ RenormalizeVectorThread::operator()(const ConstElemRange & range)
         }
       }
   }
+}
+
+void
+RenormalizeVector::finalize()
+{
+  for (const auto s : make_range(3))
+    if (_nl_sys.hasSolutionState(s))
+      _nl_sys.solutionState(s).close();
+
+  _sys.update();
 }

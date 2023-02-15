@@ -35,9 +35,18 @@ protected:
   /// reference to the mesh
   MooseMesh & _mesh;
 
-  /// variables to renormalize as a vector
-  const std::vector<VariableName> & _vars;
+  /// names of the variables to renormalize
+  const std::vector<VariableName> & _var_names;
+
+  // internal ID numbers of the variables to renormalize
+  std::vector<unsigned int> _var_numbers;
 
   /// desired norm
   const Real _target_norm;
+
+  // MOOSE Nonlinear system
+  NonlinearSystemBase & _nl_sys;
+
+  /// libMesh System pointer
+  System & _sys;
 };
