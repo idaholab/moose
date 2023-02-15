@@ -291,19 +291,20 @@ journal = {Computational Mechanics},
 
 ### Reactor
 
-The following technical report documents functionalities and demonstration of the MOOSE Reactor module.
+The following paper documents functionalities and demonstration of the MOOSE Reactor module.
 
 ```
-@TechReport{shemon2021moose,
-  author      = {Shemon, E. and Jung, Y. S. and Kumar, S. and Miao, Y. and Mo, K. and Oaks, A. and Richards, S.},
-  institution = {Argonne National Laboratory, ANL/NSE-21/43},
-  title       = {MOOSE Framework Meshing Enhancements to Support Reactor Analysis},
-  year        = {2021},
-  month       = sep,
-  type        = {techreport},
-  doi         = {10.2172/1821454},
-  place       = {United States},
-  url         = {https://www.osti.gov/biblio/1821454},
+@article{shemon2023reactor,
+ author = {Emily Shemon and Yinbin Miao and Shikhar Kumar and Kun Mo and Yeon Sang Jung and Aaron Oaks and Scott Richards and Guillaume Giudicelli and Logan Harbour and Roy Stogner},
+  title = {MOOSE Reactor Module: An Open-Source Capability for Meshing Nuclear Reactor Geometries},
+journal = {Nuclear Science and Engineering},
+ volume = {0},
+ number = {0},
+  pages = {1-25},
+  year  = {2023},
+    doi = {10.1080/00295639.2022.2149231},
+    URL = {https://doi.org/10.1080/00295639.2022.2149231},
+ eprint = {https://doi.org/10.1080/00295639.2022.2149231}
 }
 ```
 
