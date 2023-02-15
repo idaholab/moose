@@ -2277,15 +2277,7 @@ DMSetFromOptions_Moose(PetscOptions * /*options*/, DM dm) // >= 3.6.0
                           &dmm->_print_embedding,
                           LIBMESH_PETSC_NULLPTR);
   CHKERRQ(ierr);
-  /**
-   * Unused value warning for GCC was introduced for the PetscOptionsEnd() macro in PETSc 3.17.0
-   * via PETSc MR !4889. Fixed up in PETSc 3.18.0 via PETSc MR !5069, so these pragmas can be
-   * removed when we update to that release.
-   */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-value"
   PetscOptionsEnd();
-#pragma GCC diagnostic pop
   ierr = DMSetUp_Moose_Pre(dm);
   CHKERRQ(ierr); /* Need some preliminary set up because, strangely enough, DMView() is called in
                     DMSetFromOptions(). */
