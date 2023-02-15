@@ -94,6 +94,7 @@ ActiveLearningMonteCarloSampler::sampleSetUp(const Sampler::SampleMode /*mode*/)
 
   _check_step = _step;
 
+  // check if we have finished the sampling
   if (_step >= _num_samples + _retraining_steps)
     _is_sampling_completed = true;
 }
