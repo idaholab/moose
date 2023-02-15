@@ -12,8 +12,8 @@
 #include "FunctorMaterial.h"
 
 /**
- * This is the material class used to compute enthalpy for the incompressible/weakly-compressible
- * finite-volume implementation of the Navier-Stokes equations
+ * This is the material class used to compute the drag coefficients in mushy
+ * (porous) regions during phase change
  */
 class NSMushyPorousFrictionMaterial : public FunctorMaterial
 {
@@ -33,8 +33,8 @@ protected:
   const Moose::Functor<ADReal> & _dendrite_spacing_scaling;
 
   /// Main closures parameters
-  ADReal _c = 180;
-  ADReal _s = 100;
-  ADReal _fs_crit = 0.27;
-  ADReal _forchheimer_coef = 0.55;
+  const ADReal _c = 180;
+  const ADReal _s = 100;
+  const ADReal _fs_crit = 0.27;
+  const ADReal _forchheimer_coef = 0.55;
 };

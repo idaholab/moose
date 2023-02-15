@@ -85,38 +85,26 @@ Ny = 5
 
 [AuxVariables]
   [U]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+    type = MooseVariableFVReal
   []
   [fl]
     type = MooseVariableFVReal
     initial_condition = 1.0
   []
   [density]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+    type = MooseVariableFVReal
   []
   [th_cond]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+    type = MooseVariableFVReal
   []
   [cp_var]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+    type = MooseVariableFVReal
   []
   [darcy_coef]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+    type = MooseVariableFVReal
   []
   [fch_coef]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+    type = MooseVariableFVReal
   []
 []
 
@@ -182,8 +170,6 @@ Ny = 5
 []
 
 [FVKernels]
-
-  #inactive = 'u_time v_time T_time'
 
   [mass]
     type = INSFVMassAdvection
@@ -343,12 +329,6 @@ Ny = 5
     boundary = 'symmetry'
     variable = pressure
   []
-  # [inlet_T]
-  #   type = FVDirichletBC
-  #   boundary = 'inlet'
-  #   variable = T
-  #   value = 400.0
-  # []
   [sym_T]
     type = INSFVSymmetryScalarBC
     variable = T
@@ -363,11 +343,6 @@ Ny = 5
 []
 
 [Materials]
-  # [const]
-  #   type = ADGenericFunctorMaterial
-  #   prop_names = 'cp'
-  #   prop_values = '${cp}'
-  # []
   [ins_fv]
     type = INSFVEnthalpyMaterial
     rho = rho_mixture
@@ -394,7 +369,6 @@ Ny = 5
   dt = 5e3
   end_time = 1e4
   solve_type = 'NEWTON'
-  # line_search = none
   petsc_options_iname = '-pc_type -pc_factor_shift_type'
   petsc_options_value = 'lu NONZERO'
   nl_abs_tol = 1e-8

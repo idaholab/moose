@@ -13,7 +13,7 @@
 #include "INSFVMomentumResidualObject.h"
 
 /**
- * Body force that contributes to the Rhie-Chow interpolation
+ * Heat source coming from the melting/solidification of materials
  */
 class NSFVPhaseChangeSource : public FVElementalKernel
 {

@@ -17,13 +17,13 @@ NSFVMixtureMaterial::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
   params.addClassDescription(
-      "Compute the harmonics-mean average of material properties according to a phase fraction.");
+      "Compute the arithmetic mean of material properties according using a phase fraction.");
   params.addRequiredParam<std::vector<MooseFunctorName>>(
       "phase_1_names", "The names of the properties for phase 1.");
   params.addRequiredParam<std::vector<MooseFunctorName>>(
       "phase_2_names", "The names of the properties for phase 2.");
   params.addRequiredParam<std::vector<MooseFunctorName>>(
-      "prop_names", "The name of the mixture properties outputing from the material.");
+      "prop_names", "The name of the mixture properties output from the material.");
   params.addRequiredParam<MooseFunctorName>("phase_1_fraction", "Phase 1 fraction.");
   return params;
 }

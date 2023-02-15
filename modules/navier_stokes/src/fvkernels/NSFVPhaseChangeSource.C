@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NSFVPhaseChangeSource.h"
+#include "NS.h"
 
 registerMooseObject("NavierStokesApp", NSFVPhaseChangeSource);
 
@@ -40,16 +41,15 @@ NSFVPhaseChangeSource::computeQpResidual()
 
   const auto elem_arg = makeElemArg(_current_elem);
 
-  auto T_sol = _T_solidus(elem_arg);
-  auto T_liq = _T_liquidus(elem_arg);
-  auto T = _var(elem_arg);
+  const auto T_sol = _T_solidus(elem_arg);
+  const auto T_liq = _T_liquidus(elem_arg);
+  const auto T = _var(elem_arg);
 
   // This is necessary to have a continuous derivative
   // Otherwise the nonlinear solve won't converge!
-  auto fl = (T - T_sol) / (T_liq - T_sol);
-  // ADReal limit = (fl * (1 - fl)) > (ADReal)0 ? (ADReal)1 : (ADReal)0;
-  ADReal source_index = std::max(6.0 * fl * (1 - fl), (ADReal)0);
-  ADReal pre_factor = (_L(elem_arg) * _rho(elem_arg)) / (T_liq - T_sol);
+  const auto fl = (T - T_sol) / (T_liq - T_sol);
+  const ADReal source_index = std::max(6.0 * fl * (1 - fl), (ADReal)0);
+  const ADReal pre_factor = (_L(elem_arg) * _rho(elem_arg)) / (T_liq - T_sol);
 
   return source_index * pre_factor * _var.dot(elem_arg);
 }

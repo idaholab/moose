@@ -18,9 +18,11 @@ where $T_{liquidus}$ and $T_{solidus} < T_{liquidus}$ are the liquidus and solid
 The liquidus and solidus temperature must be defined by the user.
 The larger the difference between these two temperatures, the more stable the numerical behavior of the code but the more diffusive the solutions obtained.
 
-*Note 1*: there is no need to define the solid fraction ($f_s$), this one gets defined internally in the solidification objects as $1 - f_l$.
+!alert note
+There is no need to define the solid fraction ($f_s$), this one gets defined internally in the solidification objects as $1 - f_l$.
 
-*Note 2*: the capping of the liquid fraction is done via a smooth function in `MOOSE` to avoid issues with the Jacobian at discontinuities.
+!alert note
+The capping of the liquid fraction is done via a smooth function in `MOOSE` to avoid issues with the Jacobian at discontinuities.
 
 !syntax parameters /AuxKernels/NSComputeLiquidFraction
 

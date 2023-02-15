@@ -18,7 +18,6 @@ N = 10
 []
 
 [Mesh]
-  coord_type = 'XYZ'
   [gen]
     type = GeneratedMeshGenerator
     dim = 2
@@ -33,19 +32,13 @@ N = 10
     initial_condition = 1.0
   []
   [density]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+    type = MooseVariableFVReal
   []
   [th_cond]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+    type = MooseVariableFVReal
   []
   [cp_var]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+    type = MooseVariableFVReal
   []
 []
 

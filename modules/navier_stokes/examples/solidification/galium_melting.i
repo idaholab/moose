@@ -41,7 +41,6 @@ Ny = 50
 []
 
 [Mesh]
-  coord_type = 'XYZ'
   [gen]
     type = GeneratedMeshGenerator
     dim = 2
@@ -56,38 +55,26 @@ Ny = 50
 
 [AuxVariables]
   [U]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+    type = MooseVariableFVReal
   []
   [fl]
     type = MooseVariableFVReal
     initial_condition = 0.0
   []
   [density]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+    type = MooseVariableFVReal
   []
   [th_cond]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+    type = MooseVariableFVReal
   []
   [cp_var]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+    type = MooseVariableFVReal
   []
   [darcy_coef]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+    type = MooseVariableFVReal
   []
   [fch_coef]
-    order = CONSTANT
-    family = MONOMIAL
-    fv = true
+    type = MooseVariableFVReal
   []
 []
 
@@ -157,8 +144,6 @@ Ny = 50
 []
 
 [FVKernels]
-  #inactive = 'u_time v_time T_time'
-
   [mass]
     type = INSFVMassAdvection
     variable = pressure
@@ -371,7 +356,6 @@ Ny = 50
   []
 
   solve_type = 'NEWTON'
-  # line_search = none
   petsc_options_iname = '-pc_type -pc_factor_shift_type'
   petsc_options_value = 'lu NONZERO'
   nl_rel_tol = 1e-2

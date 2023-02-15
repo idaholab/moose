@@ -39,7 +39,7 @@ NSMushyPorousFrictionMaterial::NSMushyPorousFrictionMaterial(const InputParamete
       "Darcy_coefficient",
       [this](const auto & r, const auto & t) -> ADReal
       {
-        constexpr Real epsilon = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
+        const Real epsilon = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
 
         const auto fs = (ADReal)1.0 - _fl(r, t);
         const auto cs = _c / Utility::pow<2>(_dendrite_spacing_scaling(r, t));
@@ -53,7 +53,7 @@ NSMushyPorousFrictionMaterial::NSMushyPorousFrictionMaterial(const InputParamete
       "Forchheimer_coefficient",
       [this](const auto & r, const auto & t) -> ADReal
       {
-        constexpr Real epsilon = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
+        const Real epsilon = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
 
         const auto fs = (ADReal)1.0 - _fl(r, t);
         const auto cs = _c / Utility::pow<2>(_dendrite_spacing_scaling(r, t));
