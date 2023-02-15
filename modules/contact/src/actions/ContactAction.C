@@ -138,6 +138,12 @@ ContactAction::validParams()
       "the value of c effectively depends on element size since in the constraint we compare nodal "
       "Lagrange Multiplier values to integrated gap values (LM nodal value is independent of "
       "element size, where integrated values are dependent on element size).");
+  params.addParam<bool>(
+      "automatic_c",
+      false,
+      "Whether to normalize c by weighting function norm and caching contact pressure values from "
+      "previous steps. Normalization takes place in the previous step, so this value is constant "
+      "throughout the time step iterations.");
   params.addClassDescription("Sets up all objects needed for mechanical contact enforcement");
   params.addParam<bool>(
       "use_dual",
@@ -598,6 +604,7 @@ ContactAction::addMortarContact()
       params.set<std::vector<VariableName>>("disp_x") = {displacements[0]};
       params.set<bool>("interpolate_normals") = getParam<bool>("interpolate_normals");
       params.set<bool>("normalize_c") = getParam<bool>("normalize_c");
+      params.set<bool>("automatic_c") = getParam<bool>("automatic_c");
       params.set<Real>("c") = getParam<Real>("c_normal");
 
       if (ndisp > 1)
@@ -645,6 +652,7 @@ ContactAction::addMortarContact()
       params.set<Real>("c") = getParam<Real>("c_normal");
       params.set<bool>("interpolate_normals") = getParam<bool>("interpolate_normals");
       params.set<bool>("normalize_c") = getParam<bool>("normalize_c");
+      params.set<bool>("automatic_c") = getParam<bool>("automatic_c");
       params.set<bool>("compute_primal_residuals") = false;
 
       params.set<std::vector<VariableName>>("disp_x") = {displacements[0]};

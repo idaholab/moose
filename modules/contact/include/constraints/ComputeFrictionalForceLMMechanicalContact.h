@@ -22,6 +22,7 @@ public:
 
   ComputeFrictionalForceLMMechanicalContact(const InputParameters & parameters);
   void residualSetup() override;
+  void timestepSetup() override;
   void post() override;
 
   /**
@@ -68,6 +69,9 @@ protected:
 
   /// A map from node to two weighted tangential velocities
   std::unordered_map<const DofObject *, std::array<ADReal, 2>> _dof_to_weighted_tangential_velocity;
+
+  /// A map from node to two weighted tangential velocities from previous step (used for automatic c_t)
+  std::unordered_map<const DofObject *, std::array<ADReal, 2>> _dof_to_old_real_tangential_velocity;
 
   /// A map from node to two interpolated, physical tangential velocities
   std::unordered_map<const DofObject *, std::array<ADReal, 2>> _dof_to_real_tangential_velocity;
@@ -125,4 +129,7 @@ protected:
 
   /// Automatic flag to determine whether we are doing three-dimensional work
   bool _3d;
+
+  /// Smallest slip as a proxy to have automatic c_t
+  const Real _smallest_slip;
 };

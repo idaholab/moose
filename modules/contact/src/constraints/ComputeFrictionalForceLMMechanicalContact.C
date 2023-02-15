@@ -40,6 +40,11 @@ ComputeFrictionalForceLMMechanicalContact::validParams()
       "epsilon",
       1.0e-7,
       "Minimum value of contact pressure that will trigger frictional enforcement");
+  params.addParam<Real>(
+      "smallest_slip",
+      1.0e-9,
+      "Smallest slip value to prescribe the automatically selected c_t. If slip is zero, the "
+      "optimal c_t may tend to infinity, which will pose numerical issues.");
   params.addRangeCheckedParam<Real>(
       "mu", "mu > 0", "The friction coefficient for the Coulomb friction law");
   return params;
@@ -61,8 +66,8 @@ ComputeFrictionalForceLMMechanicalContact::ComputeFrictionalForceLMMechanicalCon
     _function_friction(isParamValid("function_friction") ? &getFunction("function_friction")
                                                          : nullptr),
     _has_friction_function(isParamValid("function_friction")),
-    _3d(_has_disp_z)
-
+    _3d(_has_disp_z),
+    _smallest_slip(getParam<Real>("smallest_slip"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError(
@@ -97,6 +102,17 @@ ComputeFrictionalForceLMMechanicalContact::ComputeFrictionalForceLMMechanicalCon
       paramError(
           "friction_lm",
           "Frictional contact constraints only support elemental variables of CONSTANT order");
+}
+
+void
+ComputeFrictionalForceLMMechanicalContact::timestepSetup()
+{
+  ComputeWeightedGapLMMechanicalContact::timestepSetup();
+
+  _dof_to_old_real_tangential_velocity.clear();
+
+  for (auto & map_pr : _dof_to_real_tangential_velocity)
+    _dof_to_old_real_tangential_velocity.emplace(map_pr);
 }
 
 void
@@ -316,8 +332,44 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(const DofObj
   }
 
   // Get normalized c and c_t values (if normalization specified
-  const Real c = _normalize_c ? _c / *_normalization_ptr : _c;
-  const Real c_t = _normalize_c ? _c_t / *_normalization_ptr : _c_t;
+  const auto dof_index = dof->dof_number(_sys.number(), _var->number(), 0);
+
+  // Compute automatic c, c_t
+  Real c;
+  Real c_t;
+
+  if (!_automatic_c)
+  {
+    c = _normalize_c ? _c / *_normalization_ptr : _c;
+    c_t = _normalize_c ? _c_t / *_normalization_ptr : _c_t;
+  }
+  else
+  {
+    if (_sys.solutionOld()(normal_dof_index) > TOLERANCE * TOLERANCE * _c)
+    {
+      // Try out with last time step's tangential velocity
+      Real slip =
+          std::sqrt(MetaPhysicL::raw_value(_dof_to_old_real_tangential_velocity[dof][0] *
+                                               _dof_to_old_real_tangential_velocity[dof][0] +
+                                           _dof_to_old_real_tangential_velocity[dof][1] *
+                                               _dof_to_old_real_tangential_velocity[dof][1]));
+      slip *= _dt;
+
+      Real c_t_adjusted;
+      c_t_adjusted = 1 / slip / *_normalization_ptr;
+
+      if (slip < _smallest_slip)
+        c_t_adjusted = _smallest_slip / *_normalization_ptr;
+
+      c = _sys.solutionOld()(normal_dof_index) / *_normalization_ptr;
+      c_t = std::abs(_sys.solutionOld()(dof_index)) * c_t_adjusted;
+    }
+    else
+    {
+      c = _c / *_normalization_ptr;
+      c_t = _c_t / *_normalization_ptr;
+    }
+  }
 
   // Compute the friction coefficient (constant or function)
   ADReal mu_ad = computeFrictionValue(contact_pressure,
@@ -388,10 +440,40 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof(const DofObjec
   ADReal contact_pressure = (*_sys.currentSolution())(normal_dof_index);
   Moose::derivInsert(contact_pressure.derivatives(), normal_dof_index, 1.);
 
-  // Get normalized c and c_t values (if normalization specified
-  const Real c = _normalize_c ? _c / *_normalization_ptr : _c;
-  const Real c_t = _normalize_c ? _c_t / *_normalization_ptr : _c_t;
+  // Get normalized c and c_t values
+  Real c;
+  Real c_t;
+  {
+    NonlinearSystemBase & nonlinear_sys = _fe_problem.getNonlinearSystemBase();
 
+    if (!_automatic_c)
+    {
+      c = _normalize_c ? _c / *_normalization_ptr : _c;
+      c_t = _normalize_c ? _c_t / *_normalization_ptr : _c_t;
+    }
+    else
+    {
+      if (nonlinear_sys.solutionOld()(normal_dof_index) > TOLERANCE * TOLERANCE * _c)
+      {
+        Real slip = std::abs(MetaPhysicL::raw_value(_dof_to_old_real_tangential_velocity[dof][0]));
+        slip *= _dt;
+
+        Real c_t_adjusted;
+        c_t_adjusted = 1 / slip / *_normalization_ptr;
+
+        if (slip < _smallest_slip)
+          c_t_adjusted = _smallest_slip / *_normalization_ptr;
+
+        c = nonlinear_sys.solutionOld()(normal_dof_index) / *_normalization_ptr;
+        c_t = std::abs(nonlinear_sys.solutionOld()(friction_dof_index)) * c_t_adjusted;
+      }
+      else
+      {
+        c = _c / *_normalization_ptr;
+        c_t = _c_t / *_normalization_ptr;
+      }
+    }
+  }
   // Compute the friction coefficient (constant or function)
   ADReal mu_ad =
       computeFrictionValue(contact_pressure, _dof_to_real_tangential_velocity[dof][0], 0.0);

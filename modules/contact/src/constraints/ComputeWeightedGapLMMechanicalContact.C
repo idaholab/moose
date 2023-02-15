@@ -57,6 +57,12 @@ ComputeWeightedGapLMMechanicalContact::validParams()
       "the value of c effectively depends on element size since in the constraint we compare nodal "
       "Lagrange Multiplier values to integrated gap values (LM nodal value is independent of "
       "element size, where integrated values are dependent on element size).");
+  params.addParam<bool>(
+      "automatic_c",
+      false,
+      "Whether to normalize c by weighting function norm and caching contact pressure values from "
+      "previous steps. Normalization takes place in the previous step, so this value is constant "
+      "throughout the time step iterations.");
   params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
@@ -73,6 +79,7 @@ ComputeWeightedGapLMMechanicalContact::ComputeWeightedGapLMMechanicalContact(
     _primary_disp_z(_has_disp_z ? &adCoupledNeighborValue("disp_z") : nullptr),
     _c(getParam<Real>("c")),
     _normalize_c(getParam<bool>("normalize_c")),
+    _automatic_c(getParam<bool>("automatic_c")),
     _nodal(getVar("disp_x", 0)->feType().family == LAGRANGE),
     _disp_x_var(getVar("disp_x", 0)),
     _disp_y_var(getVar("disp_y", 0)),
@@ -82,6 +89,11 @@ ComputeWeightedGapLMMechanicalContact::ComputeWeightedGapLMMechanicalContact(
   mooseError("ComputeWeightedGapLMMechanicalContact relies on use of the global indexing container "
              "in order to make its implementation feasible");
 #endif
+
+  if (_normalize_c && _automatic_c)
+    paramError("normalize_c",
+               "Both options 'normalize_c' and 'automatic_c' cannot be true. Please select only "
+               "one normalization option");
 
   if (!getParam<bool>("use_displaced_mesh"))
     paramError(
@@ -96,6 +108,11 @@ ComputeWeightedGapLMMechanicalContact::ComputeWeightedGapLMMechanicalContact(
 ADReal ComputeWeightedGapLMMechanicalContact::computeQpResidual(Moose::MortarType)
 {
   mooseError("We should never call computeQpResidual for ComputeWeightedGapLMMechanicalContact");
+}
+
+void
+ComputeWeightedGapLMMechanicalContact::timestepSetup()
+{
 }
 
 void
@@ -166,7 +183,7 @@ ComputeWeightedGapLMMechanicalContact::computeQpIProperties()
   else
     _dof_to_weighted_gap[dof].first += _test[_i][_qp] * _qp_gap_nodal * _normals[_i];
 
-  if (_normalize_c)
+  if (_normalize_c || _automatic_c)
     _dof_to_weighted_gap[dof].second += _test[_i][_qp] * _qp_factor;
 }
 
@@ -234,6 +251,7 @@ void
 ComputeWeightedGapLMMechanicalContact::incorrectEdgeDroppingPost(
     const std::unordered_set<const Node *> & inactive_lm_nodes)
 {
+  // We'll have to communicate whatever we do here.
 #ifdef MOOSE_SPARSE_AD
   Moose::Mortar::Contact::communicateGaps(
       _dof_to_weighted_gap, this->processor_id(), _mesh, _nodal, _normalize_c, _communicator);
@@ -256,9 +274,22 @@ void
 ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(const DofObject * const dof)
 {
   const auto & weighted_gap = *_weighted_gap_ptr;
-  const Real c = _normalize_c ? _c / *_normalization_ptr : _c;
-
   const auto dof_index = dof->dof_number(_sys.number(), _var->number(), 0);
+  Real c;
+
+  NonlinearSystemBase & nonlinear_sys = _fe_problem.getNonlinearSystemBase();
+
+  if (!_automatic_c)
+    c = _normalize_c ? _c / *_normalization_ptr : _c;
+  else
+  {
+    // Account for first time step without old values.
+
+    if (nonlinear_sys.solutionOld()(dof_index) > TOLERANCE * TOLERANCE * _c)
+      c = nonlinear_sys.solutionOld()(dof_index) * *_normalization_ptr;
+    else
+      c = _c / *_normalization_ptr;
+  }
   ADReal lm_value = (*_sys.currentSolution())(dof_index);
   Moose::derivInsert(lm_value.derivatives(), dof_index, 1.);
 

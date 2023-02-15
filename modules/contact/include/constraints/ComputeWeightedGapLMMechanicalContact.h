@@ -28,6 +28,7 @@ public:
   using ADMortarConstraint::computeJacobian;
   void computeJacobian(Moose::MortarType mortar_type) override;
   void residualSetup() override;
+  void timestepSetup() override;
   void jacobianSetup() override final;
   void post() override;
 
@@ -88,6 +89,9 @@ protected:
 
   /// Whether to normalize weighted gap by weighting function norm
   bool _normalize_c;
+
+  /// Whether to choose c_n based on previous nodal states
+  bool _automatic_c;
 
   /// Whether the dof objects are nodal; if they're not, then they're elemental
   const bool _nodal;
