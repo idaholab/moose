@@ -294,7 +294,7 @@ journal = {Computational Mechanics},
 The following paper documents functionalities and demonstration of the MOOSE Reactor module.
 
 ```
-@article{doi:10.1080/00295639.2022.2149231,
+@article{shemon2023reactor,
  author = {Emily Shemon and Yinbin Miao and Shikhar Kumar and Kun Mo and Yeon Sang Jung and Aaron Oaks and Scott Richards and Guillaume Giudicelli and Logan Harbour and Roy Stogner},
   title = {MOOSE Reactor Module: An Open-Source Capability for Meshing Nuclear Reactor Geometries},
 journal = {Nuclear Science and Engineering},
