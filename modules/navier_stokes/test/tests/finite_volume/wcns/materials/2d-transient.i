@@ -38,12 +38,10 @@ inlet_v = 0.001
   [u]
     type = INSFVVelocityVariable
     initial_condition = ${inlet_v}
-    qp_calculations = true
   []
   [v]
     type = INSFVVelocityVariable
     initial_condition = 1e-15
-    qp_calculations = true
   []
   [pressure]
     type = INSFVPressureVariable

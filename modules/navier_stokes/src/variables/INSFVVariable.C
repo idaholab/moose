@@ -20,16 +20,11 @@
 InputParameters
 INSFVVariable::validParams()
 {
-  auto params = MooseVariableFVReal::validParams();
-  params.addParam<bool>("qp_calculations",
-                        false,
-                        "Whether to pre-initialize variable data for use in traditional MOOSE "
-                        "quadrature point based objects.");
-  return params;
+  return MooseVariableFVReal::validParams();
 }
 
 INSFVVariable::INSFVVariable(const InputParameters & params)
-  : MooseVariableFVReal(params), _qp_calculations(getParam<bool>("qp_calculations"))
+  : MooseVariableFVReal(params), _qp_calculations(false)
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "

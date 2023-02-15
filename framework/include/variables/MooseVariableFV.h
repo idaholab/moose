@@ -442,6 +442,13 @@ public:
   void meshChanged() override;
   void initialSetup() override;
 
+  /**
+   * Request that quadrature point data be (pre)computed. Quadrature point data is (pre)computed by
+   * default for this base class but derived variable classes may choose not to unless this API is
+   * called
+   */
+  virtual void requireQpComputations() {}
+
 protected:
   /**
    * Determine whether a specified face side is a Dirichlet boundary face. In the base

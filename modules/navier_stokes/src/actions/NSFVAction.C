@@ -59,11 +59,6 @@ NSFVAction::validParams()
       "LATEST",
       "Gives the timestep (or \"LATEST\") for which to read a solution from a file "
       "for a given variable. (Default: LATEST)");
-  params.addParam<bool>(
-      "qp_calculations",
-      false,
-      "If creating variables, this parameter describes whether to pre-initialize variable data for "
-      "use in traditional MOOSE quadrature point based objects.");
 
   MooseEnum turbulence_type("mixing-length none", "none");
   params.addParam<MooseEnum>(
@@ -853,7 +848,6 @@ NSFVAction::addINSVariables()
     params.set<std::vector<Real>>("scaling") = {_momentum_scaling};
     params.set<MooseEnum>("face_interp_method") = _momentum_face_interpolation;
     params.set<bool>("two_term_boundary_expansion") = _momentum_two_term_bc_expansion;
-    params.set<bool>("qp_calculations") = getParam<bool>("qp_calculations");
 
     for (unsigned int d = 0; d < _dim; ++d)
       _problem->addVariable(variable_type, _velocity_name[d], params);
@@ -872,7 +866,6 @@ NSFVAction::addINSVariables()
     params.set<std::vector<Real>>("scaling") = {_mass_scaling};
     params.set<MooseEnum>("face_interp_method") = _pressure_face_interpolation;
     params.set<bool>("two_term_boundary_expansion") = _pressure_two_term_bc_expansion;
-    params.set<bool>("qp_calculations") = getParam<bool>("qp_calculations");
     if (using_pinsfv_pressure_var)
     {
       params.set<MooseFunctorName>("u") = _velocity_name[0];
@@ -918,7 +911,6 @@ NSFVAction::addINSVariables()
       params.set<std::vector<Real>>("scaling") = {_energy_scaling};
       params.set<MooseEnum>("face_interp_method") = _energy_face_interpolation;
       params.set<bool>("two_term_boundary_expansion") = _energy_two_term_bc_expansion;
-      params.set<bool>("qp_calculations") = getParam<bool>("qp_calculations");
 
       _problem->addVariable("INSFVEnergyVariable", _fluid_temperature_name, params);
     }
@@ -932,7 +924,6 @@ NSFVAction::addINSVariables()
     params.set<std::vector<Real>>("scaling") = {_passive_scalar_scaling};
     params.set<MooseEnum>("face_interp_method") = _passive_scalar_face_interpolation;
     params.set<bool>("two_term_boundary_expansion") = _passive_scalar_two_term_bc_expansion;
-    params.set<bool>("qp_calculations") = getParam<bool>("qp_calculations");
 
     for (unsigned int name_i = 0; name_i < _passive_scalar_names.size(); ++name_i)
     {
