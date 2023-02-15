@@ -11,9 +11,11 @@
 #include "InterfaceValueTools.h"
 
 registerMooseObject("MooseTestApp", InterfaceValueMaterial);
+registerMooseObject("MooseTestApp", ADInterfaceValueMaterial);
 
+template <bool is_ad>
 InputParameters
-InterfaceValueMaterial::validParams()
+InterfaceValueMaterialTempl<is_ad>::validParams()
 {
   InputParameters params = InterfaceMaterial::validParams();
   params.addClassDescription("Calculates a variable's jump value across an interface.");
@@ -46,14 +48,15 @@ InterfaceValueMaterial::validParams()
   return params;
 }
 
-InterfaceValueMaterial::InterfaceValueMaterial(const InputParameters & parameters)
+template <bool is_ad>
+InterfaceValueMaterialTempl<is_ad>::InterfaceValueMaterialTempl(const InputParameters & parameters)
   : InterfaceMaterial(parameters),
     _mp_primary_name(getParam<std::string>("mat_prop_primary")),
     _mp_secondary_name(getParam<std::string>("mat_prop_secondary")),
     _mp_primary(getMaterialPropertyByName<Real>(_mp_primary_name)),
     _mp_secondary(getNeighborMaterialPropertyByName<Real>(_mp_secondary_name)),
-    _var_primary(coupledValue("var_primary")),
-    _var_secondary(coupledNeighborValue("var_secondary")),
+    _var_primary(coupledGenericValue<is_ad>("var_primary")),
+    _var_secondary(coupledGenericNeighborValue<is_ad>("var_secondary")),
     _nl_var_primary(coupledValue("nl_var_primary")),
     _nl_var_secondary(coupledNeighborValue("nl_var_secondary")),
     _couple_old_values_and_properties(getParam<bool>("couple_old_values_and_properties")),
@@ -90,8 +93,9 @@ InterfaceValueMaterial::InterfaceValueMaterial(const InputParameters & parameter
 {
 }
 
+template <bool is_ad>
 void
-InterfaceValueMaterial::computeQpProperties()
+InterfaceValueMaterialTempl<is_ad>::computeQpProperties()
 {
   mooseAssert(_neighbor_elem, "Neighbor elem is NULL!");
   mooseAssert(_mp_primary[_qp] == _var_primary[_qp],
@@ -101,8 +105,10 @@ InterfaceValueMaterial::computeQpProperties()
 
   _interface_value[_qp] =
       InterfaceValueTools::getQuantity(_interface_value_type, _mp_primary[_qp], _mp_secondary[_qp]);
-  _interface_value_2[_qp] = InterfaceValueTools::getQuantity(
-      _interface_value_type, _var_primary[_qp], _var_secondary[_qp]);
+  _interface_value_2[_qp] =
+      InterfaceValueTools::getQuantity(_interface_value_type,
+                                       MetaPhysicL::raw_value(_var_primary[_qp]),
+                                       MetaPhysicL::raw_value(_var_secondary[_qp]));
   _jump[_qp] = _nl_var_primary[_qp] - _nl_var_secondary[_qp];
 
   if (_couple_old_values_and_properties)
@@ -116,10 +122,14 @@ InterfaceValueMaterial::computeQpProperties()
   }
 }
 
+template <bool is_ad>
 void
-InterfaceValueMaterial::initQpStatefulProperties()
+InterfaceValueMaterialTempl<is_ad>::initQpStatefulProperties()
 {
   mooseAssert(_neighbor_elem, "Neighbor elem is NULL!");
   _interface_value[_qp] = 0;
   _interface_value_2[_qp] = 0;
 }
+
+template class InterfaceValueMaterialTempl<false>;
+template class InterfaceValueMaterialTempl<true>;
