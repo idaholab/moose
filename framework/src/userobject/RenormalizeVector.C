@@ -43,7 +43,8 @@ InputParameters
 RenormalizeVector::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
-  params.addClassDescription("Renormalize the solution of a set of variables comprising a vector");
+  params.addClassDescription(
+      "Pointwise renormalize the solution of a set of variables comprising a vector");
   params.addCoupledVar("v", "Variables comprising the vector");
   params.addParam<Real>("norm", 1.0, "Desired norm for the coupled variable vector");
   return params;

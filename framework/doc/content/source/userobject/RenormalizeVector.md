@@ -2,7 +2,7 @@
 
 !syntax description /UserObjects/RenormalizeVector
 
-This user object can renormalize the solution for a set of variables, taking each variable as the component of a vector and scaling the variables to obtain the user specified L2-norm.
+This user object can pointwise renormalize the solution for a set of variables, taking each variable as the component of a vector and scaling the variables to obtain the user specified L2-norm.
 
 ## Applications
 
