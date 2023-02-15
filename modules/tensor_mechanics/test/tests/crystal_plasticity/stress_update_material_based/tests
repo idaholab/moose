@@ -172,4 +172,57 @@
     issues = '#21036'
     design = '/ComputeMultipleCrystalPlasticityStress.md'
   []
+  [rotation_matrix_update_euler_angle_111_orientation]
+    type = 'CSVDiff'
+    input = 'rotation_matrix_update_euler_angle_111_orientation.i'
+    csvdiff = 'rotation_matrix_update_euler_angle_111_orientation_out.csv'
+    requirement = 'The system shall produce the initial Euler angles phi1=0, psi=54.7356103, '
+                  'and phi2=45 when supplied with the associated rotation matrix and '
+                  'shall calculate a relatively higher 2nd Piola Kirchoff stress in '
+                  'agreement with the low Schmid factor for this loading orientation.'
+    issues = '#23451'
+    design = '/ComputeElasticityTensorCP.md '
+             '/ComputeUpdatedEulerAngle.md '
+  []
+  [rotation_matrix_update_euler_angle_011_orientation]
+    type = 'CSVDiff'
+    input = 'rotation_matrix_update_euler_angle_111_orientation.i'
+    csvdiff = 'rotation_matrix_update_euler_angle_011_orientation_out.csv'
+    cli_args = 'Materials/elasticity_tensor/rotation_matrix="0.5 0.5   0.707106781 -0.5 -0.5 0.707106781 0.707106781 0.0 0.0" '
+               'Outputs/file_base=rotation_matrix_update_euler_angle_011_orientation_out'
+    allow_warnings = true
+    requirement = 'The system shall produce the initial Euler angles of phi1=45, psi=90, '
+                  'and phi2=45, which shall quickly update as the crystal rotates, when '
+                  'supplied with the associated rotation matrix. The system shall calculate '
+                  'a relatively low 2nd Piola Kirchoff stress in the z-direction in agreement '
+                  'with the high Schmid factor for this loading orientation'
+    issues = '#23451'
+    design = '/ComputeElasticityTensorCP.md '
+             '/ComputeUpdatedEulerAngle.md '
+  []
+  [rotation_matrix_update_euler_angle_112_orientation]
+    type = 'CSVDiff'
+    input = 'rotation_matrix_update_euler_angle_111_orientation.i'
+    csvdiff = 'rotation_matrix_update_euler_angle_112_orientation_out.csv'
+    cli_args = 'Materials/elasticity_tensor/rotation_matrix="-0.612372436 0.707106781 0.353553391 -0.612372436 -0.707106781 0.353553391 0.5 0.0 0.866025404" '
+               'Outputs/file_base=rotation_matrix_update_euler_angle_112_orientation_out'
+    allow_warnings = true
+    requirement = 'The system shall produce the initial Euler angles of phi1=90, psi=30, '
+                  'and phi2=35, when supplied with the associated rotation matrix, and the '
+                  'updated Euler angles values as the crystal under goes rotation during deformation.'
+    issues = '#23451'
+    design = '/ComputeElasticityTensorCP.md '
+             '/ComputeUpdatedEulerAngle.md '
+  []
+  [rotation_matrix_and_euler_angles_error]
+    type = RunException
+    input = 'rotation_matrix_update_euler_angle_111_orientation.i'
+    cli_args = 'Materials/elasticity_tensor/euler_angle_2=50'
+    expect_err = 'Bunge Euler angle information and the rotation_matrix cannot both be specified. '
+                 'Provide only one type of orientation information in the input file.'
+    requirement = 'The system shall not allow specification of both the rotation matrix '
+                  'and the Bunge Euler angles within the same input file.'
+    issues ='#23451'
+    design = '/ComputeElasticityTensorCP.md'
+  []
 []

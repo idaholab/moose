@@ -11,9 +11,9 @@ plasticity simulations.  This material builds an orthotropic elasticity tensor u
 Euler angles are provided, and at the start of each timestep.
 
 !alert warning title=Crystal Plasticity Simulations use Active Rotation
-The rotation matrix used in this class,`ComputeElasticityTensorCP`, is the transpose of the rotation matrix created from the Bunge Euler
-angles in the base class, [ComputeElasticityTensor](/ComputeElasticityTensor.md). This difference in the rotation matrix is
-because of the active rotation convention used in crystal plasticity simulations.
+The rotation matrix used in this class,`ComputeElasticityTensorCP`, is the transpose of the rotation
+matrix created from the Bunge Euler angles in the base class, [ComputeElasticityTensor](/ComputeElasticityTensor.md). This difference in the rotation matrix is because of the active rotation convention used in
+crystal plasticity simulations.
 
 The fill method `symmetric9` is appropriate for materials with three orthotropic planes of symmetry
 [!citep](malvern1969introduction), and is used for simulations of anistropic materials such as cubic
@@ -64,6 +64,10 @@ the crystal system is rotated into the sample (loading) coordinate system. Gener
 angles are used to describe a passive rotation: rotating the sample coordinate system into the
 crystal coordinate system. As a result, the rotation tensor applied is the transpose of the rotation
 tensor given in [eq:rotation_tensor] as noted in [eq:cp_elasticity_tensor_rotation].
+
+As in the base class [ComputeElasticityTensor](/ComputeElasticityTensor.md), `ComputeElasticityTensorCP`
+can also accept the rotation matrix, given as a series of nine entries. As with the Euler angle input
+parameter values, note that this crystal plasticity class uses the "passive" rotation convention.
 
 ## Example Input File Syntax
 
