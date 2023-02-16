@@ -69,21 +69,6 @@ DiracKernelBase::DiracKernelBase(const InputParameters & parameters)
   statefulPropertiesAllowed(false);
 }
 
-void
-DiracKernelBase::computeResidual()
-{
-}
-
-void
-DiracKernelBase::computeJacobian()
-{
-}
-
-void
-DiracKernelBase::computeOffDiagJacobian(const unsigned int /*jvar*/)
-{
-}
-
 Real
 DiracKernelBase::computeQpJacobian()
 {
@@ -323,12 +308,6 @@ DiracKernelBase::addPointWithValidId(Point p, unsigned id)
   }
 
   return return_elem;
-}
-
-unsigned
-DiracKernelBase::currentPointCachedID()
-{
-  return 0;
 }
 
 bool

@@ -36,12 +36,12 @@ public:
   /**
    * Computes the residual for the current element.
    */
-  virtual void computeResidual() override;
+  virtual void computeResidual() override = 0;
 
   /**
    * Computes the jacobian for the current element.
    */
-  virtual void computeJacobian() override;
+  virtual void computeJacobian() override = 0;
 
   /**
    * This gets called by computeOffDiagJacobian() at each quadrature point.
@@ -51,7 +51,7 @@ public:
   /**
    * Computes the off-diagonal Jacobian for variable jvar.
    */
-  virtual void computeOffDiagJacobian(unsigned int jvar) override;
+  virtual void computeOffDiagJacobian(unsigned int jvar) override = 0;
 
   /**
    * This is where the DiracKernel should call addPoint() for each point it needs to have a
@@ -112,7 +112,7 @@ protected:
    * the computeQpResidual() function to determine the cached ID of
    * the current point, in case this information is relevant.
    */
-  unsigned currentPointCachedID();
+  virtual unsigned currentPointCachedID() = 0;
 
   /// Coordinate system
   const Moose::CoordinateSystemType & _coord_sys;

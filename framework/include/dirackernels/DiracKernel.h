@@ -69,13 +69,13 @@ public:
    * This is where the DiracKernel should call addPoint() for each point it needs to have a
    * value distributed at.
    */
-  virtual void addPoints() override;
+  virtual void addPoints() override = 0;
 
 protected:
   /**
    * This is the virtual that derived classes should override for computing the residual.
    */
-  virtual Real computeQpResidual() override;
+  virtual Real computeQpResidual() override = 0;
 
   /**
    * This is the virtual that derived classes should override for computing the Jacobian.
@@ -88,7 +88,7 @@ protected:
    * the computeQpResidual() function to determine the cached ID of
    * the current point, in case this information is relevant.
    */
-  unsigned currentPointCachedID();
+  virtual unsigned currentPointCachedID() override;
 
   /// Variable this kernel acts on
   MooseVariableField<T> & _var;

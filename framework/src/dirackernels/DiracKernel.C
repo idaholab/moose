@@ -188,19 +188,6 @@ DiracKernelTempl<T>::currentPointCachedID()
   return libMesh::invalid_uint;
 }
 
-template <typename T>
-void
-DiracKernelTempl<T>::addPoints()
-{
-  mooseError("Need to override add points");
-}
-template <typename T>
-Real
-DiracKernelTempl<T>::computeQpResidual()
-{
-  mooseError("Need to override computeQpResidual");
-}
-
 // Explicitly instantiates the two versions of the DiracKernelTempl class
 template class DiracKernelTempl<Real>;
 template class DiracKernelTempl<RealVectorValue>;
