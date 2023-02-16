@@ -59,12 +59,9 @@ shallowCopyDataBack(const std::vector<unsigned int> & stateful_prop_ids,
 MaterialPropertyStorage::MaterialPropertyStorage()
   : _has_stateful_props(false), _has_older_prop(false)
 {
-  _props_elem =
-      std::make_unique<HashMap<const Elem *, HashMap<unsigned int, MaterialProperties>>>();
-  _props_elem_old =
-      std::make_unique<HashMap<const Elem *, HashMap<unsigned int, MaterialProperties>>>();
-  _props_elem_older =
-      std::make_unique<HashMap<const Elem *, HashMap<unsigned int, MaterialProperties>>>();
+  _props_elem = std::make_unique<PropsType>();
+  _props_elem_old = std::make_unique<PropsType>();
+  _props_elem_older = std::make_unique<PropsType>();
 }
 
 MaterialPropertyStorage::~MaterialPropertyStorage() { releaseProperties(); }
