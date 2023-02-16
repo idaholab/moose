@@ -1,6 +1,6 @@
-# NSComputeLiquidFraction
+# NSFVLiquidFraction
 
-!syntax description /AuxKernels/NSComputeLiquidFraction
+!syntax description /AuxKernels/NSFVLiquidFraction
 
 The liquid fraction is defined as follows:
 
@@ -25,8 +25,8 @@ There is no need to define the solid fraction ($f_s$); it is defined internally 
 !alert note
 The capping of the liquid fraction is done via a smooth function in `MOOSE` to avoid issues with the Jacobian at discontinuities.
 
-!syntax parameters /AuxKernels/NSComputeLiquidFraction
+!syntax parameters /AuxKernels/NSFVLiquidFraction
 
-!syntax inputs /AuxKernels/NSComputeLiquidFraction
+!syntax inputs /AuxKernels/NSFVLiquidFraction
 
-!syntax children /AuxKernels/NSComputeLiquidFraction
+!syntax children /AuxKernels/NSFVLiquidFraction

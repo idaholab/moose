@@ -39,7 +39,7 @@ N = 10
 
 [AuxKernels]
   [compute_fl]
-    type = NSComputeLiquidFraction
+    type = NSFVLiquidFraction
     variable = fl
     temperature = T
     T_liquidus = '${T_liquidus}'
@@ -110,7 +110,7 @@ N = 10
 
 [Materials]
   [eff_cp]
-    type = NSMixtureMaterial
+    type = NSFVMixtureMaterial
     phase_2_names = '${cp_solid} ${k_solid} ${rho_solid}'
     phase_1_names = '${cp_liquid} ${k_liquid} ${rho_liquid}'
     prop_names = 'cp_mixture k_mixture rho_mixture'

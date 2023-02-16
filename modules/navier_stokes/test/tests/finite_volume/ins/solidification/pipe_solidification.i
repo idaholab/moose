@@ -73,7 +73,7 @@ Ny = 5
     type = ParsedGenerateSideset
     input = rename4
     normal = '0 1 0'
-    combinatorial_geometry = 'x>2.0 & x<8.0'
+    combinatorial_geometry = 'x>2.0 & x<8.0 & y>0.49999'
     new_sideset_name = 'cooled_wall'
   []
 []
@@ -111,7 +111,7 @@ Ny = 5
     y = vel_y
   []
   [compute_fl]
-    type = NSComputeLiquidFraction
+    type = NSFVLiquidFraction
     variable = fl
     temperature = T
     T_liquidus = '${T_liquidus}'
@@ -344,14 +344,14 @@ Ny = 5
     temperature = 'T'
   []
   [eff_cp]
-    type = NSMixtureMaterial
+    type = NSFVMixtureMaterial
     phase_2_names = '${cp_solid} ${k_solid} ${rho_solid}'
     phase_1_names = '${cp_liquid} ${k_liquid} ${rho_liquid}'
     prop_names = 'cp_mixture k_mixture rho_mixture'
     phase_1_fraction = fl
   []
   [mushy_zone_resistance]
-    type = NSMushyPorousFrictionMaterial
+    type = NSFVMushyPorousFrictionMaterial
     liquid_fraction = 'fl'
     mu = '${mu}'
     rho_l = '${rho_liquid}'

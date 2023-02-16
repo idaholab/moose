@@ -16,7 +16,7 @@ InputParameters
 NSFVPhaseChangeSource::validParams()
 {
   auto params = FVElementalKernel::validParams();
-  params.addClassDescription("Computes the power source due to solidification/melting.");
+  params.addClassDescription("Computes the energy source due to solidification/melting.");
   params.addRequiredParam<MooseFunctorName>("liquid_fraction", "Liquid Fraction Functor.");
   params.addRequiredParam<MooseFunctorName>("L", "Latent heat.");
   params.addRequiredParam<MooseFunctorName>(NS::density, "The mixture density.");
@@ -38,15 +38,19 @@ NSFVPhaseChangeSource::NSFVPhaseChangeSource(const InputParameters & parameters)
 ADReal
 NSFVPhaseChangeSource::computeQpResidual()
 {
+  using namespace MetaPhysicL;
+
   const auto elem_arg = makeElemArg(_current_elem);
 
   const auto T_sol = _T_solidus(elem_arg);
   const auto T_liq = _T_liquidus(elem_arg);
   const auto T = _var(elem_arg);
 
-  // This is necessary to have a continuous derivative
+  // This is necessary to have a bounded derivative
   // Otherwise the nonlinear solve won't converge!
   const auto fl = (T - T_sol) / (T_liq - T_sol);
+
+  // The (6.0) comes from the integral of x*(1-x) between 0 and 1.
   const auto source_index = std::max(6.0 * fl * (1 - fl), (ADReal)0);
   const auto pre_factor = (_L(elem_arg) * _rho(elem_arg)) / (T_liq - T_sol);
 

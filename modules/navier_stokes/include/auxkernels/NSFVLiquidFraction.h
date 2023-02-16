@@ -14,12 +14,12 @@
 /**
  * Computes liquid fraction based on temperature fields
  */
-class NSComputeLiquidFraction : public AuxKernel
+class NSFVLiquidFraction : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  NSComputeLiquidFraction(const InputParameters & parameters);
+  NSFVLiquidFraction(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue();
