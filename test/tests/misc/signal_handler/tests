@@ -36,6 +36,7 @@
     cli_args = 'Executioner/num_steps=70'
     method='opt'
     max_threads=1
+    recover=false
   []
   [test_signal_parallel_recover]
     type = RunApp

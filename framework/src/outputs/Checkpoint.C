@@ -34,7 +34,7 @@ Checkpoint::validParams()
   // Controls whether the checkpoint will actually run. Should only ever be changed by the
   // auto-checkpoint created by AutoCheckpointAction, which does not write unless a signal
   // is received.
-  params.addPrivateParam<AUTOSAVE_TYPE>("is_autosave", NONE);
+  params.addPrivateParam<AutosaveType>("is_autosave", NONE);
 
   params.addClassDescription("Output for MOOSE recovery checkpoint files.");
 
@@ -53,7 +53,7 @@ Checkpoint::validParams()
 
 Checkpoint::Checkpoint(const InputParameters & parameters)
   : FileOutput(parameters),
-    _is_autosave(getParam<AUTOSAVE_TYPE>("is_autosave")),
+    _is_autosave(getParam<AutosaveType>("is_autosave")),
     _num_files(getParam<unsigned int>("num_files")),
     _suffix(getParam<std::string>("suffix")),
     _binary(getParam<bool>("binary")),
@@ -102,43 +102,23 @@ Checkpoint::outputStep(const ExecFlagType & type)
 bool
 Checkpoint::shouldOutput(const ExecFlagType & type)
 {
-  switch (AUTOSAVE_TYPE(_is_autosave))
+  // Check if the checkpoint should "normally" output, i.e. if it was created
+  // through checkpoint=true
+  bool shouldOutput = (onInterval() || type == EXEC_FINAL) ? FileOutput::shouldOutput(type) : false;
+
+  // If this is either a auto-created checkpoint, or if its an existing checkpoint acting
+  // as the autosave and that checkpoint isn't on its interval, then output.
+  if (_is_autosave == SYSTEM_AUTOSAVE || (_is_autosave == MODIFIED_EXISTING && !shouldOutput))
   {
-    case NONE:
-      // Only call for onInterval now if it isn't an autosave.
-      if (onInterval() || type == EXEC_FINAL)
-        return Output::shouldOutput(type);
-      return false;
-
-    case SYSTEM_AUTOSAVE:
-      // if this is a pure system-created autosave through AutoCheckpointAction,
-      // then sync across processes and only output one time per signal received.
-      comm().max(Moose::autosave_flag);
-      if (Moose::autosave_flag)
-      {
-        Moose::autosave_flag = 0;
-        return true;
-      }
-      return false;
-
-    case MODIFIED_EXISTING:
-      // First, check if it is a normal time the checkpoint should output.
-      // If it is, we're done here, and we do the normal checks.
-      if (onInterval() || type == EXEC_FINAL)
-        return Output::shouldOutput(type);
-
-      // only run and check comm().max if it isn't a normal output,
-      // i.e. we are running on a non-interval timestep
-      comm().max(Moose::autosave_flag);
-      if (Moose::autosave_flag)
-      {
-        Moose::autosave_flag = 0;
-        return true;
-      }
-      return false;
+    // If this is a pure system-created autosave through AutoCheckpointAction,
+    // then sync across processes and only output one time per signal received.
+    comm().max(Moose::interrupt_signal_number);
+    shouldOutput = (Moose::interrupt_signal_number != 0);
+    if (shouldOutput)
+      _console << "Unix signal SIGUSR1 detected. Outputting checkpoint file. \n";
+    Moose::interrupt_signal_number = 0;
   }
-  // avoid technical possibility of no return in control
-  return false;
+  return shouldOutput;
 }
 
 void

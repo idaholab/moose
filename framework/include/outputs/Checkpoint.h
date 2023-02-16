@@ -21,7 +21,7 @@
  * MODIFIED_EXISTING: We took an existing checkpoint and enabled autosave checks on it.
  * SYSTEM_AUTOSAVE: These checkpoints run in the background and output only when sent a signal.
  */
-enum AUTOSAVE_TYPE : unsigned short
+enum AutosaveType : unsigned short
 {
   NONE,
   MODIFIED_EXISTING,
@@ -85,7 +85,7 @@ public:
   virtual void outputStep(const ExecFlagType & type) override;
 
   /// Sets the autosave flag manually if the object has already been initialized.
-  void set_autosave_flag(AUTOSAVE_TYPE flag) { _is_autosave = flag; }
+  void setAutosaveFlag(AutosaveType flag) { _is_autosave = flag; }
 
 protected:
   /**
@@ -101,7 +101,7 @@ private:
   void updateCheckpointFiles(CheckpointFileNames file_struct);
 
   /// Determines if this checkpoint is an autosave, and what kind of autosave it is.
-  AUTOSAVE_TYPE _is_autosave;
+  AutosaveType _is_autosave;
 
   /// Max no. of output files to store
   unsigned int _num_files;

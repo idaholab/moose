@@ -5,7 +5,7 @@
 - +Restart+: Running a simulation that uses data from a previous simulation. Data in this context is very broad, it can mean spatial field data, non-spatial variables or postprocessors, or stateful object data. Usually the previous and new simulations use different input files.
 - +Recover+: Resuming an existing simulation either due to a fault or other premature termination.
 - +Solution File+: A mesh format containing field data in addition to the mesh (i.e. a normal output file).
-- +Checkpoint+: A snapshot of the simulation data including all meshes, solutions, and stateful object data. Typically one checkpoint is stored in several different files. A checkpoint is always created at every test, but isn't written to by default.
+- +Checkpoint+: A snapshot of the simulation data including all meshes, solutions, and stateful object data. Typically one checkpoint is stored in several different files.
 - +N to N+: In a restart context, this means the number of processors for the previous and current simulations must match.
 - +N to M+: In a restart context, different numbers of processors may be used for the previous and current simulations.
 
@@ -67,7 +67,7 @@ For a complete list see the Doxygen page for Checkpoint. * You should always set
 []
 ```
 
-MOOSE also automatically creates a checkpoint object in the background that can manually write out a checkpoint file at any time in case of emergency, i.e. a long test that must be aborted due to external circumstances. To do this, find the process ID by running `ps` in another terminal window, and searching for your currently running MOOSE instance. Once you have located this PID, type `kill -s USR1 <yourPIDhere>` into the same window that you ran `ps`. On the next time step, MOOSE will output its current progress into a checkpoint file that can be used later to restart the test from the same position.
+MOOSE also automatically creates a checkpoint object in the background that can manually write out a checkpoint file at any time in case of emergency, i.e. a long test that must be aborted due to external circumstances. To do this, find the process ID by running `ps` in another terminal window, and searching for your currently running MOOSE instance. Once you have located this PID, enter `kill -s USR1 <yourPIDhere>`. On the next time step, MOOSE will output its current progress into a checkpoint file that can be used later to restart the test from the same position.
 
 Note that while this command is called `kill`, it does not actually terminate the MOOSE process if used with this syntax, it will merely trigger the MOOSE instance to write out to a checkpoint.
 

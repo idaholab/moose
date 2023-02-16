@@ -25,16 +25,16 @@
 #include <signal.h>
 
 void
-my_sig_handler(int signum)
+SigHandler(int signum)
 {
-  Moose::autosave_flag = signum;
+  Moose::interrupt_signal_number = signum;
   return;
 }
 
 void
-register_sig_handler()
+RegisterSigHandler()
 {
-  signal(SIGUSR1, my_sig_handler);
+  signal(SIGUSR1, SigHandler);
 }
 
 MooseInit::MooseInit(int argc, char * argv[], MPI_Comm COMM_WORLD_IN)
@@ -52,5 +52,5 @@ MooseInit::MooseInit(int argc, char * argv[], MPI_Comm COMM_WORLD_IN)
   // Make sure that any calls to the global random number generator are consistent among processes
   MooseRandom::seed(0);
 
-  register_sig_handler();
+  RegisterSigHandler();
 }
