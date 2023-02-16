@@ -53,7 +53,12 @@ MeshGenerator::getMeshGeneratorNameFromParam(const std::string & param_name,
   }
   else if (!valid_param)
     return nullptr;
-  return &getParam<MeshGeneratorName>(param_name);
+
+  const auto & name = getParam<MeshGeneratorName>(param_name);
+  if (!std::as_const(_app).hasMeshGenerator(name))
+    paramError(param_name, "Requested MeshGenerator with name '", name, "' was not found");
+
+  return &name;
 }
 
 const std::vector<MeshGeneratorName> &
@@ -72,15 +77,22 @@ MeshGenerator::getMeshGeneratorNamesFromParam(const std::string & param_name) co
                "\" is not an expected type for getting MeshGenerators (should be of type "
                "\"std::vector<MeshGeneratorName>\")");
 
-  return getParam<std::vector<MeshGeneratorName>>(param_name);
+  const auto & names = getParam<std::vector<MeshGeneratorName>>(param_name);
+  for (const auto & name : names)
+    if (!std::as_const(_app).hasMeshGenerator(name))
+      paramError(param_name, "The requested MeshGenerator '", name, "' was not found");
+
+  return names;
 }
 
 void
-MeshGenerator::checkGetMesh(const MeshGeneratorName & libmesh_dbg_var(mesh_generator_name)) const
+MeshGenerator::checkGetMesh(const MeshGeneratorName & mesh_generator_name) const
 {
   mooseAssert(!mesh_generator_name.empty(), "Empty name");
   if (!_app.constructingMeshGenerators())
     mooseError("Cannot get a mesh outside of construction");
+  if (!std::as_const(_app).hasMeshGenerator(mesh_generator_name))
+    mooseError("The requested MeshGenerator '", mesh_generator_name, "' was not found");
 }
 
 std::unique_ptr<MeshBase> &
