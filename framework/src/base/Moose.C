@@ -128,6 +128,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_scalar_kernel",            ScalarKernel,           false);
   registerMooseObjectTask("add_aux_scalar_kernel",        AuxScalarKernel,        false);
   registerMooseObjectTask("add_dirac_kernel",             DiracKernel,            false);
+  appendMooseObjectTask  ("add_dirac_kernel",             VectorDiracKernel);
   registerMooseObjectTask("add_dg_kernel",                DGKernel,               false);
   registerMooseObjectTask("add_fv_kernel",                FVKernel,               false);
   registerMooseObjectTask("add_fv_bc",                    FVBoundaryCondition,    false);

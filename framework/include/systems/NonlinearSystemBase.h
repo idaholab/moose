@@ -38,7 +38,7 @@ class ADDirichletBCBase;
 class DGKernelBase;
 class InterfaceKernelBase;
 class ScalarKernelBase;
-class DiracKernel;
+class DiracKernelBase;
 class NodalKernelBase;
 class Split;
 class KernelBase;
@@ -589,7 +589,7 @@ public:
   {
     return _interface_kernels;
   }
-  MooseObjectTagWarehouse<DiracKernel> & getDiracKernelWarehouse() { return _dirac_kernels; }
+  MooseObjectTagWarehouse<DiracKernelBase> & getDiracKernelWarehouse() { return _dirac_kernels; }
   MooseObjectTagWarehouse<IntegratedBCBase> & getIntegratedBCWarehouse() { return _integrated_bcs; }
   const MooseObjectWarehouse<ElementDamper> & getElementDamperWarehouse() const
   {
@@ -844,7 +844,7 @@ protected:
   ///@}
 
   /// Dirac Kernel storage for each thread
-  MooseObjectTagWarehouse<DiracKernel> _dirac_kernels;
+  MooseObjectTagWarehouse<DiracKernelBase> _dirac_kernels;
 
   /// Element Dampers for each thread
   MooseObjectWarehouse<ElementDamper> _element_dampers;
