@@ -44,22 +44,22 @@ public:
    * String identifying the type of parameter stored.
    * Must be reimplemented in derived classes.
    */
-  virtual std::string type() const = 0;
+  [[nodiscard]] virtual std::string type() const = 0;
 
   /**
    * The full (unique) name of this particular piece of data.
    */
-  const std::string & name() const { return _name; }
+  [[nodiscard]] const std::string & name() const { return _name; }
 
   /**
    * A context pointer for helping with load / store.
    */
-  void * context() { return _context; }
+  [[nodiscard]] void * context() { return _context; }
 
   /**
    * Whether or not this data has been declared
    */
-  bool declared() const { return _declared; }
+  [[nodiscard]] bool declared() const { return _declared; }
 
   /**
    * Sets that this restartable value has been declared
@@ -112,17 +112,17 @@ public:
   /**
    * @returns a read-only reference to the parameter value.
    */
-  const T & get() const;
+  [[nodiscard]] const T & get() const;
 
   /**
    * @returns a writable reference to the parameter value.
    */
-  T & set();
+  [[nodiscard]] T & set();
 
   /**
    * String identifying the type of parameter stored.
    */
-  virtual std::string type() const override;
+  [[nodiscard]] virtual std::string type() const override final;
 
   /**
    * Swap

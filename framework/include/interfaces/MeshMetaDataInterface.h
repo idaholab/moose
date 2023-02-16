@@ -51,9 +51,10 @@ protected:
    * store. This method will throw an error if the property does not exist.
    */
   template <typename T>
-  const T & getMeshProperty(const std::string & data_name, const std::string & prefix);
+  [[nodiscard]] const T & getMeshProperty(const std::string & data_name,
+                                          const std::string & prefix);
   template <typename T>
-  const T & getMeshProperty(const std::string & data_name)
+  [[nodiscard]] const T & getMeshProperty(const std::string & data_name)
   {
     return getMeshProperty<T>(data_name, defaultMeshPropertyPrefix());
   }
@@ -61,19 +62,21 @@ protected:
   /**
    * @returns Whether or not a mesh meta-data exists.
    */
-  bool hasMeshProperty(const std::string & data_name, const std::string & prefix) const;
+  [[nodiscard]] bool hasMeshProperty(const std::string & data_name,
+                                     const std::string & prefix) const;
   /**
    * @returns Whether or not a mesh meta-data exists with the given type.
    */
   template <typename T>
-  bool hasMeshProperty(const std::string & data_name, const std::string & prefix) const;
+  [[nodiscard]] bool hasMeshProperty(const std::string & data_name,
+                                     const std::string & prefix) const;
 
-  bool hasMeshProperty(const std::string & data_name) const
+  [[nodiscard]] bool hasMeshProperty(const std::string & data_name) const
   {
     return hasMeshProperty(data_name, defaultMeshPropertyPrefix());
   }
   template <typename T>
-  bool hasMeshProperty(const std::string & data_name) const
+  [[nodiscard]] bool hasMeshProperty(const std::string & data_name) const
   {
     return hasMeshProperty<T>(data_name, defaultMeshPropertyPrefix());
   }
@@ -81,12 +84,13 @@ protected:
   /**
    * @returns The full name for mesh property data.
    */
-  static std::string meshPropertyName(const std::string & data_name, const std::string & prefix);
+  [[nodiscard]] static std::string meshPropertyName(const std::string & data_name,
+                                                    const std::string & prefix);
 
   /**
    * @returns The default mesh property name for mesh property data
    */
-  std::string meshPropertyName(const std::string & data_name) const
+  [[nodiscard]] std::string meshPropertyName(const std::string & data_name) const
   {
     return meshPropertyName(data_name, defaultMeshPropertyPrefix());
   }
@@ -99,12 +103,12 @@ private:
   virtual std::string defaultMeshPropertyPrefix() const;
 
   /// Helper function for actually registering the restartable data.
-  RestartableDataValue & registerMetaDataOnApp(const std::string & name,
-                                               std::unique_ptr<RestartableDataValue> data);
+  [[nodiscard]] RestartableDataValue &
+  registerMetaDataOnApp(const std::string & name, std::unique_ptr<RestartableDataValue> data);
 
   /// Helper for getting a mesh property
-  const RestartableDataValue & getMeshPropertyInternal(const std::string & data_name,
-                                                       const std::string & prefix) const;
+  [[nodiscard]] const RestartableDataValue &
+  getMeshPropertyInternal(const std::string & data_name, const std::string & prefix) const;
 
   /// Reference to the application
   MooseApp & _meta_data_app;

@@ -43,7 +43,7 @@ void
 MeshMetaDataDependenceAction::act()
 {
   if (getParam<bool>("test_request_invalid_property"))
-    getMeshProperty<Real>("nonexistent_property", _generator_prefix);
+    static_cast<void>(getMeshProperty<Real>("nonexistent_property", _generator_prefix));
 
   const auto num_elements_x_prop =
       getMeshProperty<unsigned int>("num_elements_x", _generator_prefix);
