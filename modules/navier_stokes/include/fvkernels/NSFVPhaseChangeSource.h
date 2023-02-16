@@ -10,7 +10,6 @@
 #pragma once
 
 #include "FVElementalKernel.h"
-#include "INSFVMomentumResidualObject.h"
 
 /**
  * Heat source coming from the melting/solidification of materials

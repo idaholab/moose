@@ -17,7 +17,7 @@ InputParameters
 NSComputeLiquidFraction::validParams()
 {
   InputParameters params = AuxKernel::validParams();
-  params.addClassDescription("Computes liquid fraction f_L given the temperature.");
+  params.addClassDescription("Computes liquid fraction $f_l$ given the temperature.");
   params.addRequiredParam<MooseFunctorName>(NS::temperature, "The temperature.");
   params.addRequiredParam<MooseFunctorName>("T_solidus", "The solidus temperature.");
   params.addRequiredParam<MooseFunctorName>("T_liquidus", "The liquidus temperature.");
@@ -35,10 +35,12 @@ NSComputeLiquidFraction::NSComputeLiquidFraction(const InputParameters & paramet
 Real
 NSComputeLiquidFraction::computeValue()
 {
+  using namespace MetaPhysicL;
+
   const auto elem_arg = makeElemArg(_current_elem);
 
   if (raw_value(_T_liquidus(elem_arg)) < raw_value(_T_solidus(elem_arg)))
-    paramError("The specified liquidus temperature is smaller than the solidus one.");
+    mooseError("The specified liquidus temperature is smaller than the solidus temperature.");
 
   Real fl = raw_value((_T(elem_arg) - _T_solidus(elem_arg)) /
                       (_T_liquidus(elem_arg) - _T_solidus(elem_arg)));

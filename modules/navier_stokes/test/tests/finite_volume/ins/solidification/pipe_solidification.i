@@ -1,8 +1,8 @@
 mu = 8.8871e-4
 rho_solid = 997.561
 rho_liquid = 997.561
-k_solid = '${fparse 0.6203}'
-k_liquid = '${fparse 0.6203}'
+k_solid = 0.6203
+k_liquid = 0.6203
 cp_solid = 4181.72
 cp_liquid = 4181.72
 L = 3e5
@@ -20,11 +20,6 @@ Ny = 5
 
 [GlobalParams]
   rhie_chow_user_object = 'rc'
-[]
-
-[Problem]
-  kernel_coverage_check = false
-  fv_bcs_integrity_check = false
 []
 
 [UserObjects]
@@ -170,7 +165,6 @@ Ny = 5
 []
 
 [FVKernels]
-
   [mass]
     type = INSFVMassAdvection
     variable = pressure
@@ -350,7 +344,7 @@ Ny = 5
     temperature = 'T'
   []
   [eff_cp]
-    type = NSFVMixtureMaterial
+    type = NSMixtureMaterial
     phase_2_names = '${cp_solid} ${k_solid} ${rho_solid}'
     phase_1_names = '${cp_liquid} ${k_liquid} ${rho_liquid}'
     prop_names = 'cp_mixture k_mixture rho_mixture'

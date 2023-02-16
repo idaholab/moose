@@ -39,11 +39,11 @@ NSMushyPorousFrictionMaterial::NSMushyPorousFrictionMaterial(const InputParamete
       "Darcy_coefficient",
       [this](const auto & r, const auto & t) -> ADReal
       {
-        const Real epsilon = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
+        constexpr Real epsilon = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
 
-        const auto fs = (ADReal)1.0 - _fl(r, t);
+        const auto fs = 1.0 - _fl(r, t);
         const auto cs = _c / Utility::pow<2>(_dendrite_spacing_scaling(r, t));
-        const auto Fk = (ADReal)0.5 + std::atan(_s * (fs - _fs_crit)) / (ADReal)pi;
+        const auto Fk = 0.5 + std::atan(_s * (fs - _fs_crit)) / pi;
         const auto K =
             Utility::pow<3>(_fl(r, t)) / ((Utility::pow<2>(fs) + epsilon) * Fk * cs) + epsilon;
         return _mu(r, t) / K;
@@ -53,11 +53,11 @@ NSMushyPorousFrictionMaterial::NSMushyPorousFrictionMaterial(const InputParamete
       "Forchheimer_coefficient",
       [this](const auto & r, const auto & t) -> ADReal
       {
-        const Real epsilon = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
+        constexpr Real epsilon = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
 
-        const auto fs = (ADReal)1.0 - _fl(r, t);
+        const auto fs = 1.0 - _fl(r, t);
         const auto cs = _c / Utility::pow<2>(_dendrite_spacing_scaling(r, t));
-        const auto Fk = (ADReal)0.5 + std::atan(_s * (fs - _fs_crit)) / (ADReal)pi;
+        const auto Fk = 0.5 + std::atan(_s * (fs - _fs_crit)) / pi;
         const auto K =
             Utility::pow<3>(_fl(r, t)) / ((Utility::pow<2>(fs) + epsilon) * Fk * cs) + epsilon;
         return _forchheimer_coef * _rho_l(r, t) / std::sqrt(K);

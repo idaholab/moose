@@ -13,13 +13,14 @@ f_l = 1, \text{ if } T > T_{liquidus}, \\
 \end{cases}
 \end{equation}
 
-where $T_{liquidus}$ and $T_{solidus} < T_{liquidus}$ are the liquidus and solidus temperatures.
+where $T_{liquidus}$ and $T_{solidus}$ are the liquidus and solidus temperatures respectively;
+note that $T_{solidus}$ must be less than $T_{liquidus}$.
 
 The liquidus and solidus temperature must be defined by the user.
 The larger the difference between these two temperatures, the more stable the numerical behavior of the code but the more diffusive the solutions obtained.
 
 !alert note
-There is no need to define the solid fraction ($f_s$), this one gets defined internally in the solidification objects as $1 - f_l$.
+There is no need to define the solid fraction ($f_s$); it is defined internally in the solidification objects as $1 - f_l$.
 
 !alert note
 The capping of the liquid fraction is done via a smooth function in `MOOSE` to avoid issues with the Jacobian at discontinuities.

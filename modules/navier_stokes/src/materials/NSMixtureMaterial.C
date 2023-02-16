@@ -7,17 +7,17 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NSFVMixtureMaterial.h"
+#include "NSMixtureMaterial.h"
 #include "NS.h"
 
-registerMooseObject("NavierStokesApp", NSFVMixtureMaterial);
+registerMooseObject("NavierStokesApp", NSMixtureMaterial);
 
 InputParameters
-NSFVMixtureMaterial::validParams()
+NSMixtureMaterial::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
   params.addClassDescription(
-      "Compute the arithmetic mean of material properties according using a phase fraction.");
+      "Compute the arithmetic mean of material properties using a phase fraction.");
   params.addRequiredParam<std::vector<MooseFunctorName>>(
       "phase_1_names", "The names of the properties for phase 1.");
   params.addRequiredParam<std::vector<MooseFunctorName>>(
@@ -28,7 +28,7 @@ NSFVMixtureMaterial::validParams()
   return params;
 }
 
-NSFVMixtureMaterial::NSFVMixtureMaterial(const InputParameters & parameters)
+NSMixtureMaterial::NSMixtureMaterial(const InputParameters & parameters)
   : FunctorMaterial(parameters),
     _phase_1_names(getParam<std::vector<MooseFunctorName>>("phase_1_names")),
     _phase_2_names(getParam<std::vector<MooseFunctorName>>("phase_2_names")),

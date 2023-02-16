@@ -1,7 +1,7 @@
 ##########################################################
 # Simulation of Galium Melting Experiment
 # Ref: Gau, C., & Viskanta, R. (1986). Melting and solidification of a pure metal on a vertical wall.
-# Key phsics: melting/solidification, convective heat transfer, natural convection
+# Key physics: melting/solidification, convective heat transfer, natural convection
 ##########################################################
 
 mu = 1.81e-3
@@ -13,8 +13,8 @@ cp_solid = 381.5
 cp_liquid = 381.5
 L = 80160
 alpha_b = 1.2e-4
-T_liquidus = '${fparse 302.93+0.1}'
 T_solidus = 302.93
+T_liquidus = '${fparse T_solidus + 0.1}'
 advected_interp_method = 'upwind'
 velocity_interp_method = 'rc'
 T_cold = 301.15
@@ -24,11 +24,6 @@ Ny = 50
 
 [GlobalParams]
   rhie_chow_user_object = 'rc'
-[]
-
-[Problem]
-  kernel_coverage_check = false
-  fv_bcs_integrity_check = false
 []
 
 [UserObjects]
@@ -322,7 +317,7 @@ Ny = 50
     temperature = 'T'
   []
   [eff_cp]
-    type = NSFVMixtureMaterial
+    type = NSMixtureMaterial
     phase_2_names = '${cp_solid} ${k_solid} ${rho_solid}'
     phase_1_names = '${cp_liquid} ${k_liquid} ${rho_liquid}'
     prop_names = 'cp_mixture k_mixture rho_mixture'

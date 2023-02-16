@@ -1,5 +1,5 @@
 [Tests]
-  design = 'NSComputeLiquidFraction.md NSFVPhaseChangeSource.md NSFVMixtureMaterial.md'
+  design = 'NSComputeLiquidFraction.md NSFVPhaseChangeSource.md NSMixtureMaterial.md'
   issues = '#23357'
   [solidification_exo_no_advection]
     type = 'Exodiff'
@@ -31,7 +31,7 @@
     type = 'CSVDiff'
     input = 'pipe_solidification.i'
     csvdiff = 'pipe_solidification_csv_sat_0003.csv'
-    requirement = '(Non regression test) The system must be able to obtain the correct temperature profile over the center line.'
+    requirement = 'The system must be able to obtain the correct temperature profile over the center line in a solidification problem.'
     rel_err = 1.0E-5
     ad_indexing_type = 'global'
     mesh_mode = REPLICATED # because the parsed sideset generator doesn't work with distributed

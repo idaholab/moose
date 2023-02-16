@@ -2,7 +2,7 @@
 
 !syntax description /Materials/NSMushyPorousFrictionMaterial
 
-This material computes the `Darcy_coefficient` and the `Forchheimer_coefficient` for a solidificiation problem.
+This material computes the `Darcy_coefficient` and the `Forchheimer_coefficient` for a solidification problem.
 The model uses a mushy-zone approach to compute the friction coefficients.
 
 The coefficients are defined as follows:

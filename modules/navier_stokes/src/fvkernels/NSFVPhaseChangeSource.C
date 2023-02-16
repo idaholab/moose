@@ -38,7 +38,6 @@ NSFVPhaseChangeSource::NSFVPhaseChangeSource(const InputParameters & parameters)
 ADReal
 NSFVPhaseChangeSource::computeQpResidual()
 {
-
   const auto elem_arg = makeElemArg(_current_elem);
 
   const auto T_sol = _T_solidus(elem_arg);
@@ -48,8 +47,8 @@ NSFVPhaseChangeSource::computeQpResidual()
   // This is necessary to have a continuous derivative
   // Otherwise the nonlinear solve won't converge!
   const auto fl = (T - T_sol) / (T_liq - T_sol);
-  const ADReal source_index = std::max(6.0 * fl * (1 - fl), (ADReal)0);
-  const ADReal pre_factor = (_L(elem_arg) * _rho(elem_arg)) / (T_liq - T_sol);
+  const auto source_index = std::max(6.0 * fl * (1 - fl), (ADReal)0);
+  const auto pre_factor = (_L(elem_arg) * _rho(elem_arg)) / (T_liq - T_sol);
 
   return source_index * pre_factor * _var.dot(elem_arg);
 }

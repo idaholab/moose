@@ -1,5 +1,5 @@
 [Tests]
-  design = 'NSComputeLiquidFraction.md NSFVPhaseChangeSource.md NSFVMixtureMaterial.md'
+  design = 'NSComputeLiquidFraction.md NSFVPhaseChangeSource.md NSMixtureMaterial.md'
   issues = '#23357'
   [galium_melting]
     type = RunApp

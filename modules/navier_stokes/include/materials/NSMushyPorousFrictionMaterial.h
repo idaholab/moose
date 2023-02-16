@@ -33,8 +33,10 @@ protected:
   const Moose::Functor<ADReal> & _dendrite_spacing_scaling;
 
   /// Main closures parameters
-  const ADReal _c = 180;
-  const ADReal _s = 100;
-  const ADReal _fs_crit = 0.27;
-  const ADReal _forchheimer_coef = 0.55;
+  ///@{
+  inline static const ADReal _c = 180;
+  inline static const ADReal _s = 100;
+  inline static const ADReal _fs_crit = 0.27;
+  inline static const ADReal _forchheimer_coef = 0.55;
+  ///@}
 };
