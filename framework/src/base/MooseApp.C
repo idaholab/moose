@@ -389,7 +389,6 @@ MooseApp::MooseApp(InputParameters parameters)
                                : nullptr),
     _execute_flags(moose::internal::getExecFlagRegistry().getFlags()),
     _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling")),
-    _executing_mesh_generators(false),
     _popped_final_mesh_generator(false)
 {
 #ifdef HAVE_GPERFTOOLS
@@ -2180,8 +2179,6 @@ MooseApp::executeMeshGenerators()
   if (_mesh_generators.empty())
     return;
 
-  _executing_mesh_generators = true;
-
   createMeshGeneratorOrder();
 
   // set the final generator name
@@ -2226,14 +2223,9 @@ MooseApp::executeMeshGenerators()
       // Once we hit the generator we want, we'll terminate the loops (this might be the last
       // iteration anyway)
       if (_final_generator_name == name)
-      {
-        _executing_mesh_generators = false;
         return;
-      }
     }
   }
-
-  _executing_mesh_generators = false;
 }
 
 void
@@ -2857,4 +2849,25 @@ MooseApp::createRecoverableSolutionInvalidity()
              registerRestartableData(
                  "solution_invalidity", std::move(solution_invalidity), 0, false))
       .set();
+}
+
+bool
+MooseApp::constructedMeshGenerators() const
+{
+  return _action_warehouse.isTaskComplete("add_mesh_generator") &&
+         (_action_warehouse.hasTask("append_mesh_generator") &&
+          _action_warehouse.isTaskComplete("append_mesh_generator"));
+}
+
+bool
+MooseApp::constructingMeshGenerators() const
+{
+  return _action_warehouse.getCurrentTaskName() == "add_mesh_generator" ||
+         _action_warehouse.getCurrentTaskName() == "append_mesh_generator";
+}
+
+bool
+MooseApp::executingMeshGenerators() const
+{
+  return _action_warehouse.getCurrentTaskName() == "execute_mesh_generators";
 }

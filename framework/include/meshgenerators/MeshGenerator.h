@@ -174,6 +174,12 @@ protected:
                                                   InputParameters & params);
 
 private:
+  /**
+   * The default prefix to use for meshPropertyName(), the name
+   * of this MeshGenerator.
+   */
+  virtual std::string defaultMeshPropertyPrefix() const override final { return name(); }
+
   /// A list of generators that are required to run before this generator may run
   std::vector<std::string> _depends_on;
 

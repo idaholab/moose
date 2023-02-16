@@ -11,12 +11,11 @@
 
 #include "MooseError.h"
 #include "RestartableData.h"
+#include "MooseObject.h"
 
 #include <string>
 
-class MooseApp;
 class MeshGenerator;
-class MooseObject;
 
 /**
  * The Interface used to retrieve mesh meta data (attributes) set by the MeshGenerator system.
@@ -53,24 +52,73 @@ protected:
    */
   template <typename T>
   const T & getMeshProperty(const std::string & data_name, const std::string & prefix);
+  template <typename T>
+  const T & getMeshProperty(const std::string & data_name)
+  {
+    return getMeshProperty<T>(data_name, defaultMeshPropertyPrefix());
+  }
 
   /**
-   * Whether or not a mesh meta-data exists.
+   * @returns Whether or not a mesh meta-data exists.
    */
   bool hasMeshProperty(const std::string & data_name, const std::string & prefix) const;
+  /**
+   * @returns Whether or not a mesh meta-data exists with the given type.
+   */
+  template <typename T>
+  bool hasMeshProperty(const std::string & data_name, const std::string & prefix) const;
+
+  bool hasMeshProperty(const std::string & data_name) const
+  {
+    return hasMeshProperty(data_name, defaultMeshPropertyPrefix());
+  }
+  template <typename T>
+  bool hasMeshProperty(const std::string & data_name) const
+  {
+    return hasMeshProperty<T>(data_name, defaultMeshPropertyPrefix());
+  }
 
   /**
    * @returns The full name for mesh property data.
    */
-  static std::string meshPropertyName(const std::string & prefix, const std::string & data_name);
+  static std::string meshPropertyName(const std::string & data_name, const std::string & prefix);
+
+  /**
+   * @returns The default mesh property name for mesh property data
+   */
+  std::string meshPropertyName(const std::string & data_name) const
+  {
+    return meshPropertyName(data_name, defaultMeshPropertyPrefix());
+  }
 
 private:
+  /**
+   * The default prefix to use for meshPropertyName(), the name
+   * of the final MeshGenerator
+   */
+  virtual std::string defaultMeshPropertyPrefix() const;
+
   /// Helper function for actually registering the restartable data.
   RestartableDataValue & registerMetaDataOnApp(const std::string & name,
                                                std::unique_ptr<RestartableDataValue> data);
 
+  /// Helper for getting a mesh property
+  const RestartableDataValue & getMeshPropertyInternal(const std::string & data_name,
+                                                       const std::string & prefix) const;
+
   /// Reference to the application
   MooseApp & _meta_data_app;
+
+  /// The MooseObject (if any); used for better error handling
+  const MooseObject * const _meta_data_object;
+
+  template <typename... Args>
+  [[noreturn]] void mooseErrorInternal(Args &&... args) const
+  {
+    if (_meta_data_object)
+      _meta_data_object->mooseError(std::forward<Args>(args)...);
+    mooseError(std::forward<Args>(args)...);
+  }
 };
 
 template <typename T>
@@ -88,5 +136,13 @@ MeshMetaDataInterface::getMeshProperty(const std::string & data_name, const std:
   auto & restartable_data_ref =
       static_cast<RestartableData<T> &>(registerMetaDataOnApp(full_name, std::move(data_ptr)));
 
-  return restartable_data_ref.get();
+template <typename T>
+bool
+MeshMetaDataInterface::hasMeshProperty(const std::string & data_name,
+                                       const std::string & prefix) const
+{
+  if (!hasMeshProperty(data_name, prefix))
+    return false;
+  const auto & value = getMeshPropertyInternal(data_name, prefix);
+  return dynamic_cast<const RestartableData<T> *>(&value) != nullptr;
 }
