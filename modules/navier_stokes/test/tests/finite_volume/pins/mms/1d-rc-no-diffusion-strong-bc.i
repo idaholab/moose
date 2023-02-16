@@ -167,32 +167,22 @@ velocity_interp_method='rc'
 []
 
 [Postprocessors]
-  [inlet_p]
-    type = SideAverageValue
-    variable = 'pressure'
-    boundary = 'left'
-  []
-  [outlet-u]
-    type = SideIntegralVariablePostprocessor
-    variable = u
-    boundary = 'right'
-  []
   [h]
     type = AverageElementSize
     outputs = 'console csv'
     execute_on = 'timestep_end'
   []
   [L2u]
-    type = ElementL2Error
-    variable = u
-    function = exact_u
+    type = ElementL2FunctorError
+    approximate = u
+    exact = exact_u
     outputs = 'console csv'
     execute_on = 'timestep_end'
   []
   [L2p]
-    variable = pressure
-    function = exact_p
-    type = ElementL2Error
+    approximate = pressure
+    exact = exact_p
+    type = ElementL2FunctorError
     outputs = 'console csv'
     execute_on = 'timestep_end'
   []

@@ -18,10 +18,10 @@ INSFVMixingLengthScalarDiffusion::validParams()
   InputParameters params = FVFluxKernel::validParams();
   params.addClassDescription("Computes the turbulent diffusive flux that appears in "
                              "Reynolds-averaged fluid conservation equations.");
-  params.addRequiredCoupledVar("u", "The velocity in the x direction.");
-  params.addCoupledVar("v", "The velocity in the y direction.");
-  params.addCoupledVar("w", "The velocity in the z direction.");
-  params.addRequiredCoupledVar("mixing_length", "The turbulent mixing length.");
+  params.addRequiredParam<MooseFunctorName>("u", "The velocity in the x direction.");
+  params.addParam<MooseFunctorName>("v", "The velocity in the y direction.");
+  params.addParam<MooseFunctorName>("w", "The velocity in the z direction.");
+  params.addRequiredParam<MooseFunctorName>("mixing_length", "The turbulent mixing length.");
   params.addRequiredParam<Real>(
       "schmidt_number",
       "The turbulent Schmidt number (or turbulent Prandtl number if the passive scalar is energy) "
@@ -33,12 +33,10 @@ INSFVMixingLengthScalarDiffusion::validParams()
 INSFVMixingLengthScalarDiffusion::INSFVMixingLengthScalarDiffusion(const InputParameters & params)
   : FVFluxKernel(params),
     _dim(_subproblem.mesh().dimension()),
-    _u_var(dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("u", 0))),
-    _v_var(isParamValid("v") ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("v", 0))
-                             : nullptr),
-    _w_var(isParamValid("w") ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("w", 0))
-                             : nullptr),
-    _mixing_len(*getVarHelper<MooseVariableFV<Real>>("mixing_length", 0)),
+    _u(getFunctor<ADReal>("u")),
+    _v(isParamValid("v") ? &getFunctor<ADReal>("v") : nullptr),
+    _w(isParamValid("w") ? &getFunctor<ADReal>("w") : nullptr),
+    _mixing_len(getFunctor<ADReal>("mixing_length")),
     _schmidt_number(getParam<Real>("schmidt_number"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
@@ -47,18 +45,11 @@ INSFVMixingLengthScalarDiffusion::INSFVMixingLengthScalarDiffusion(const InputPa
              "'--with-ad-indexing-type=global'");
 #endif
 
-  if (!_u_var)
-    paramError("u", "the u velocity must be an INSFVVelocityVariable.");
-
-  if (_dim >= 2 && !_v_var)
-    paramError("v",
-               "In two or more dimensions, the v velocity must be supplied and it must be an "
-               "INSFVVelocityVariable.");
-
-  if (_dim >= 3 && !_w_var)
-    paramError("w",
-               "In three-dimensions, the w velocity must be supplied and it must be an "
-               "INSFVVelocityVariable.");
+  if (_dim >= 2 && !_v)
+    mooseError(
+        "In two or more dimensions, the v velocity must be supplied using the 'v' parameter");
+  if (_dim >= 3 && !_w)
+    mooseError("In threedimensions, the w velocity must be supplied using the 'w' parameter");
 }
 
 ADReal
@@ -67,16 +58,18 @@ INSFVMixingLengthScalarDiffusion::computeQpResidual()
 #ifdef MOOSE_GLOBAL_AD_INDEXING
   constexpr Real offset = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
 
-  const auto & grad_u = _u_var->adGradSln(*_face_info);
+  auto face = makeCDFace(*_face_info);
+
+  const auto grad_u = _u.gradient(face);
   ADReal symmetric_strain_tensor_norm = 2.0 * Utility::pow<2>(grad_u(0));
   if (_dim >= 2)
   {
-    const auto & grad_v = _v_var->adGradSln(*_face_info);
+    const auto grad_v = _v->gradient(face);
     symmetric_strain_tensor_norm +=
         2.0 * Utility::pow<2>(grad_v(1)) + Utility::pow<2>(grad_v(0) + grad_u(1));
     if (_dim >= 3)
     {
-      const auto & grad_w = _w_var->adGradSln(*_face_info);
+      const auto grad_w = _w->gradient(face);
       symmetric_strain_tensor_norm += 2.0 * Utility::pow<2>(grad_w(2)) +
                                       Utility::pow<2>(grad_u(2) + grad_w(0)) +
                                       Utility::pow<2>(grad_v(2) + grad_w(1));
@@ -86,7 +79,7 @@ INSFVMixingLengthScalarDiffusion::computeQpResidual()
   symmetric_strain_tensor_norm = std::sqrt(symmetric_strain_tensor_norm + offset);
 
   // Interpolate the mixing length to the face
-  ADReal mixing_len = _mixing_len(makeCDFace(*_face_info));
+  ADReal mixing_len = _mixing_len(face);
 
   // Compute the eddy diffusivity for momentum
   ADReal eddy_diff = symmetric_strain_tensor_norm * mixing_len * mixing_len;

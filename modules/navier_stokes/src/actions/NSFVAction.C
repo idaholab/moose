@@ -273,7 +273,7 @@ NSFVAction::validParams()
       std::vector<MooseFunctorName>(),
       "The ambient temperature for each block in 'ambient_convection_blocks'.");
 
-  params.addParam<CoupledName>(
+  params.addParam<MooseFunctorName>(
       "external_heat_source",
       "The name of a functor which contains the external heat source for the energy equation.");
   params.addParam<Real>(
@@ -331,9 +331,9 @@ NSFVAction::validParams()
       std::vector<MooseFunctorName>(),
       "Functor names for the sources used for the passive scalar fields.");
 
-  params.addParam<std::vector<CoupledName>>(
+  params.addParam<std::vector<std::vector<MooseFunctorName>>>(
       "passive_scalar_coupled_source",
-      std::vector<CoupledName>(),
+      std::vector<std::vector<MooseFunctorName>>(),
       "Coupled variable names for the sources used for the passive scalar fields. If multiple "
       "sources for each equation are specified, major (outer) ordering by equation.");
 
@@ -594,7 +594,7 @@ NSFVAction::NSFVAction(const InputParameters & parameters)
     _passive_scalar_schmidt_number(getParam<std::vector<Real>>("passive_scalar_schmidt_number")),
     _passive_scalar_source(getParam<std::vector<MooseFunctorName>>("passive_scalar_source")),
     _passive_scalar_coupled_source(
-        getParam<std::vector<CoupledName>>("passive_scalar_coupled_source")),
+        getParam<std::vector<std::vector<MooseFunctorName>>>("passive_scalar_coupled_source")),
     _passive_scalar_coupled_source_coeff(
         getParam<std::vector<std::vector<Real>>>("passive_scalar_coupled_source_coeff")),
     _passive_scalar_inlet_types(getParam<MultiMooseEnum>("passive_scalar_inlet_types")),
@@ -919,7 +919,7 @@ NSFVAction::addINSVariables()
   // Add passive scalar variables is needed
   if (_has_scalar_equation)
   {
-    auto params = _factory.getValidParams("MooseVariableFVReal");
+    auto params = _factory.getValidParams("INSFVScalarFieldVariable");
     assignBlocks(params, _blocks);
     params.set<std::vector<Real>>("scaling") = {_passive_scalar_scaling};
     params.set<MooseEnum>("face_interp_method") = _passive_scalar_face_interpolation;
@@ -933,7 +933,7 @@ NSFVAction::addINSVariables()
           create_me = false;
 
       if (create_me)
-        _problem->addVariable("MooseVariableFVReal", _passive_scalar_names[name_i], params);
+        _problem->addVariable("INSFVScalarFieldVariable", _passive_scalar_names[name_i], params);
     }
   }
 }
@@ -1103,7 +1103,7 @@ NSFVAction::addScalarTimeKernels()
 {
   for (const auto & vname : _passive_scalar_names)
   {
-    const std::string kernel_type = "FVTimeKernel";
+    const std::string kernel_type = "FVFunctorTimeKernel";
     InputParameters params = _factory.getValidParams(kernel_type);
     assignBlocks(params, _blocks);
     params.set<NonlinearVariableName>("variable") = vname;
@@ -1239,7 +1239,7 @@ NSFVAction::addINSMomentumMixingLengthKernels()
 
   params.set<UserObjectName>("rhie_chow_user_object") = rhie_chow_name;
   for (unsigned int dim_i = 0; dim_i < _dim; ++dim_i)
-    params.set<CoupledName>(u_names[dim_i]) = {_velocity_name[dim_i]};
+    params.set<MooseFunctorName>(u_names[dim_i]) = _velocity_name[dim_i];
 
   for (unsigned int d = 0; d < _dim; ++d)
   {
@@ -1284,7 +1284,9 @@ NSFVAction::addINSMomentumPressureKernels()
   InputParameters params = _factory.getValidParams(kernel_type);
   assignBlocks(params, _blocks);
   params.set<UserObjectName>("rhie_chow_user_object") = rhie_chow_name;
-  params.set<CoupledName>("pressure") = {_pressure_name};
+  params.set<MooseFunctorName>("pressure") = _pressure_name;
+  params.set<bool>("correct_skewness") =
+      getParam<MooseEnum>("pressure_face_interpolation") == "skewness-corrected";
   if (_porous_medium_treatment)
     params.set<MooseFunctorName>(NS::porosity) = _flow_porosity_functor_name;
 
@@ -1598,7 +1600,7 @@ NSFVAction::addINSEnergyExternalHeatSource()
   InputParameters params = _factory.getValidParams(kernel_type);
   params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
   assignBlocks(params, _blocks);
-  params.set<CoupledName>("v") = getParam<CoupledName>("external_heat_source");
+  params.set<MooseFunctorName>("v") = getParam<MooseFunctorName>("external_heat_source");
   params.set<Real>("coef") = getParam<Real>("external_heat_source_coeff");
 
   _problem->addFVKernel(kernel_type, "external_heat_source", params);
@@ -1631,10 +1633,10 @@ NSFVAction::addScalarMixingLengthKernels()
   const std::string kernel_type = "INSFVMixingLengthScalarDiffusion";
   InputParameters params = _factory.getValidParams(kernel_type);
   assignBlocks(params, _blocks);
-  params.set<CoupledName>(NS::mixing_length) = {NS::mixing_length};
+  params.set<MooseFunctorName>(NS::mixing_length) = NS::mixing_length;
 
   for (unsigned int dim_i = 0; dim_i < _dim; ++dim_i)
-    params.set<CoupledName>(u_names[dim_i]) = {_velocity_name[dim_i]};
+    params.set<MooseFunctorName>(u_names[dim_i]) = _velocity_name[dim_i];
 
   for (unsigned int name_i = 0; name_i < _passive_scalar_names.size(); ++name_i)
   {
@@ -1690,7 +1692,7 @@ NSFVAction::addScalarCoupledSourceKernels()
       InputParameters params = _factory.getValidParams(kernel_type);
       params.set<NonlinearVariableName>("variable") = _passive_scalar_names[name_eq];
       assignBlocks(params, _blocks);
-      params.set<CoupledName>("v") = {_passive_scalar_coupled_source[name_eq][i]};
+      params.set<MooseFunctorName>("v") = _passive_scalar_coupled_source[name_eq][i];
       params.set<Real>("coef") = _passive_scalar_coupled_source_coeff[name_eq][i];
 
       _problem->addFVKernel(kernel_type,
@@ -1922,7 +1924,7 @@ NSFVAction::addINSOutletBC()
         params.set<MooseFunctorName>(NS::density) = _density_name;
 
         for (unsigned int i = 0; i < _dim; ++i)
-          params.set<CoupledName>(u_names[i]) = {_velocity_name[i]};
+          params.set<MooseFunctorName>(u_names[i]) = _velocity_name[i];
 
         for (unsigned int d = 0; d < _dim; ++d)
         {
@@ -1941,7 +1943,7 @@ NSFVAction::addINSOutletBC()
         params.set<MooseFunctorName>(NS::density) = _density_name;
 
         for (unsigned int i = 0; i < _dim; ++i)
-          params.set<CoupledName>(u_names[i]) = {_velocity_name[i]};
+          params.set<MooseFunctorName>(u_names[i]) = _velocity_name[i];
 
         for (unsigned int d = 0; d < _dim; ++d)
         {
@@ -1973,7 +1975,7 @@ NSFVAction::addINSOutletBC()
       params.set<std::vector<BoundaryName>>("boundary") = {_outlet_boundaries[bc_ind]};
 
       for (unsigned int d = 0; d < _dim; ++d)
-        params.set<CoupledName>(u_names[d]) = {_velocity_name[d]};
+        params.set<MooseFunctorName>(u_names[d]) = _velocity_name[d];
 
       _problem->addFVBC(bc_type, _pressure_name + "_" + _outlet_boundaries[bc_ind], params);
     }
@@ -2015,7 +2017,7 @@ NSFVAction::addINSWallBC()
         params.set<UserObjectName>("rhie_chow_user_object") = "ins_rhie_chow_interpolator";
 
       for (unsigned int d = 0; d < _dim; ++d)
-        params.set<CoupledName>(u_names[d]) = {_velocity_name[d]};
+        params.set<MooseFunctorName>(u_names[d]) = _velocity_name[d];
 
       for (unsigned int d = 0; d < _dim; ++d)
       {
@@ -2205,12 +2207,12 @@ NSFVAction::addWCNSEnergyMixingLengthKernels()
   assignBlocks(params, _blocks);
   params.set<MooseFunctorName>(NS::density) = _density_name;
   params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
-  params.set<CoupledName>(NS::mixing_length) = {NS::mixing_length};
+  params.set<MooseFunctorName>(NS::mixing_length) = NS::mixing_length;
   params.set<Real>("schmidt_number") = getParam<Real>("turbulent_prandtl");
   params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
 
   for (unsigned int dim_i = 0; dim_i < _dim; ++dim_i)
-    params.set<CoupledName>(u_names[dim_i]) = {_velocity_name[dim_i]};
+    params.set<MooseFunctorName>(u_names[dim_i]) = _velocity_name[dim_i];
 
   if (_porous_medium_treatment)
     _problem->addFVKernel(kernel_type, "pins_energy_mixing_length_diffusion", params);
@@ -2252,9 +2254,9 @@ NSFVAction::addMixingLengthMaterial()
   assignBlocks(params, _blocks);
 
   for (unsigned int d = 0; d < _dim; ++d)
-    params.set<CoupledName>(u_names[d]) = {_velocity_name[d]};
+    params.set<MooseFunctorName>(u_names[d]) = _velocity_name[d];
 
-  params.set<CoupledName>(NS::mixing_length) = {NS::mixing_length};
+  params.set<MooseFunctorName>(NS::mixing_length) = NS::mixing_length;
 
   params.set<MooseFunctorName>(NS::density) = _density_name;
   params.set<MooseFunctorName>(NS::mu) = _dynamic_viscosity_name;

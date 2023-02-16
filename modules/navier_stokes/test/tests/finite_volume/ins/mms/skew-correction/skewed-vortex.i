@@ -2,7 +2,6 @@ mu = 1.0
 rho = 1.0
 
 [Problem]
-  coord_type = 'XYZ'
   error_on_jacobian_nonzero_reallocation = true
 []
 
@@ -11,6 +10,7 @@ rho = 1.0
     type = FileMeshGenerator
     file = skewed.msh
   []
+  coord_type = 'XYZ'
 []
 
 [GlobalParams]
@@ -183,23 +183,23 @@ rho = 1.0
     execute_on = 'timestep_end'
   []
   [L2u]
-    type = ElementL2Error
-    variable = vel_x
-    function = exact_u
+    type = ElementL2FunctorError
+    approximate = vel_x
+    exact = exact_u
     outputs = 'console csv'
     execute_on = 'timestep_end'
   []
   [L2v]
-    type = ElementL2Error
-    variable = vel_y
-    function = exact_v
+    type = ElementL2FunctorError
+    approximate = vel_y
+    exact = exact_v
     outputs = 'console csv'
     execute_on = 'timestep_end'
   []
   [L2p]
-    variable = pressure
-    function = exact_p
-    type = ElementL2Error
+    approximate = pressure
+    exact = exact_p
+    type = ElementL2FunctorError
     outputs = 'console csv'
     execute_on = 'timestep_end'
   []

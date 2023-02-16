@@ -39,11 +39,11 @@ protected:
   const unsigned int _axis_index;
 
   /// x-velocity
-  const INSFVVelocityVariable * const _u_var;
+  const Moose::Functor<ADReal> & _u;
   /// y-velocity
-  const INSFVVelocityVariable * const _v_var;
+  const Moose::Functor<ADReal> * const _v;
   /// z-velocity
-  const INSFVVelocityVariable * const _w_var;
+  const Moose::Functor<ADReal> * const _w;
 
   /// Density
   const Moose::Functor<ADReal> & _rho;

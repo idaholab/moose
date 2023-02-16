@@ -19,44 +19,33 @@ INSFVMomentumPressure::validParams()
   params += INSFVMomentumResidualObject::validParams();
   params.addClassDescription(
       "Introduces the coupled pressure term into the Navier-Stokes momentum equation.");
-  params.addRequiredCoupledVar(NS::pressure, "The pressure");
-  params.addDeprecatedCoupledVar("p", NS::pressure, "1/1/2022");
+  params.addRequiredParam<MooseFunctorName>(NS::pressure, "The pressure");
   MooseEnum momentum_component("x=0 y=1 z=2");
   params.addRequiredParam<MooseEnum>(
       "momentum_component",
       momentum_component,
       "The component of the momentum equation that this kernel applies to.");
+  params.addParam<bool>(
+      "correct_skewness", false, "Whether to correct for mesh skewness in face calculations.");
   return params;
 }
 
 INSFVMomentumPressure::INSFVMomentumPressure(const InputParameters & params)
   : FVElementalKernel(params),
     INSFVMomentumResidualObject(*this),
-    _p_var(dynamic_cast<const MooseVariableFVReal *>(getFieldVar(NS::pressure, 0))),
-    _index(getParam<MooseEnum>("momentum_component"))
+    _p(getFunctor<ADReal>(NS::pressure)),
+    _index(getParam<MooseEnum>("momentum_component")),
+    _correct_skewness(getParam<bool>("correct_skewness"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
              "configure script in the root MOOSE directory with the configure option "
              "'--with-ad-indexing-type=global'");
 #endif
-
-  if (!_p_var)
-    paramError(NS::pressure, "p must be a finite volume variable");
 }
 
 ADReal
 INSFVMomentumPressure::computeQpResidual()
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
-             "configure script in the root MOOSE directory with the configure option "
-             "'--with-ad-indexing-type=global'");
-#else
-  bool correct_skewness =
-      (_p_var->faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
-
-  return _p_var->adGradSln(_current_elem, correct_skewness)(_index);
-
-#endif
+  return _p.gradient(Moose::ElemArg{_current_elem, _correct_skewness})(_index);
 }

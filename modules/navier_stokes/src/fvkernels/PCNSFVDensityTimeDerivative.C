@@ -24,6 +24,7 @@ PCNSFVDensityTimeDerivative::validParams()
 
 PCNSFVDensityTimeDerivative::PCNSFVDensityTimeDerivative(const InputParameters & parameters)
   : FVTimeKernel(parameters),
+    _u_dot(_var.adUDot()),
     _eps(getMaterialProperty<Real>(NS::porosity)),
     _rho_dot(adCoupledDot(NS::density)),
     _rho(adCoupledValue(NS::density))

@@ -117,11 +117,9 @@ public:
     mooseError("phiLowerSize not supported by MooseVariableFVBase");
   }
 
-  virtual void computeElemValuesFace() override final;
-  virtual void computeNeighborValuesFace() override final;
-
-  virtual void computeNeighborValues() override final;
-
+  virtual void computeElemValuesFace() override;
+  virtual void computeNeighborValuesFace() override;
+  virtual void computeNeighborValues() override;
   virtual void computeLowerDValues() override final
   {
     // mooseError("computeLowerDValues not supported by MooseVariableFVBase");
@@ -441,6 +439,16 @@ public:
 
   void setActiveTags(const std::set<TagID> & vtags) override;
 
+  void meshChanged() override;
+  void initialSetup() override;
+
+  /**
+   * Request that quadrature point data be (pre)computed. Quadrature point data is (pre)computed by
+   * default for this base class but derived variable classes may choose not to unless this API is
+   * called
+   */
+  virtual void requireQpComputations() {}
+
 protected:
   /**
    * Determine whether a specified face side is a Dirichlet boundary face. In the base
@@ -610,6 +618,14 @@ private:
   const FieldVariablePhiValue & _phi_neighbor;
   const FieldVariablePhiGradient & _grad_phi_neighbor;
 
+  /// A member used to help determine when we can return cached data as opposed to computing new
+  /// data
+  mutable const Elem * _prev_elem;
+
+  /// Map from boundary ID to Dirichlet boundary conditions. Added to speed up Dirichlet BC lookups
+  /// in \p getDirichletBC
+  std::unordered_map<BoundaryID, const FVDirichletBCBase *> _boundary_id_to_dirichlet_bc;
+
 protected:
   /// A cache for storing gradients on elements
   mutable std::unordered_map<const Elem *, VectorValue<ADReal>> _elem_to_grad;
@@ -628,6 +644,8 @@ protected:
   /// face interpolation. Other options are not taken into account here,
   /// but at higher, kernel-based levels.
   Moose::FV::InterpMethod _face_interp_method;
+
+  friend void Moose::initDofIndices<>(MooseVariableFV<OutputType> &, const Elem &);
 };
 
 template <typename OutputType>
@@ -680,6 +698,14 @@ MooseVariableFV<OutputType>::dofIndicesLower() const
 {
   static const std::vector<dof_id_type> empty;
   return empty;
+}
+
+template <typename OutputType>
+void
+MooseVariableFV<OutputType>::meshChanged()
+{
+  _prev_elem = nullptr;
+  MooseVariableField<OutputType>::meshChanged();
 }
 
 template <>

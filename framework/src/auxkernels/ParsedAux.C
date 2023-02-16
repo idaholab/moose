@@ -57,10 +57,16 @@ ParsedAux::ParsedAux(const InputParameters & parameters)
   // coupled field variables
   if (isCoupled("args"))
     for (std::size_t i = 0; i < _nargs; ++i)
-      variables += (i == 0 ? "" : ",") + getFieldVar("args", i)->name();
+    {
+      auto * const field_var = getFieldVar("args", i);
+      variables += (i == 0 ? "" : ",") + field_var->name();
+    }
   else
     for (std::size_t i = 0; i < _nargs; ++i)
-      variables += (i == 0 ? "" : ",") + getFieldVar("coupled_variables", i)->name();
+    {
+      auto * const field_var = getFieldVar("coupled_variables", i);
+      variables += (i == 0 ? "" : ",") + field_var->name();
+    }
 
   // "system" variables
   const std::vector<std::string> xyzt = {"x", "y", "z", "t"};

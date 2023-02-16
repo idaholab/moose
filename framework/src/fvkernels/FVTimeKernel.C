@@ -27,6 +27,7 @@ FVTimeKernel::validParams()
 FVTimeKernel::FVTimeKernel(const InputParameters & parameters)
   : FVElementalKernel(parameters), _u_dot(_var.adUDot())
 {
+  _var.requireQpComputations();
 }
 
 ADReal

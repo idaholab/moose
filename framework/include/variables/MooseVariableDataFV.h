@@ -40,6 +40,20 @@ namespace libMesh
 class QBase;
 }
 
+namespace Moose
+{
+template <typename T>
+void
+initDofIndices(T & data, const Elem & elem)
+{
+  if (data._prev_elem != &elem)
+  {
+    data._dof_map.dof_indices(&elem, data._dof_indices, data._var_num);
+    data._prev_elem = &elem;
+  }
+}
+}
+
 template <typename OutputType>
 class MooseVariableDataFV : public MooseVariableDataBase<OutputType>, public MeshChangedInterface
 {
@@ -419,6 +433,8 @@ private:
   using MooseVariableDataBase<OutputType>::_nodal_value_dot_old;
   using MooseVariableDataBase<OutputType>::_nodal_value_dotdot_old;
   using MooseVariableDataBase<OutputType>::_required_vector_tags;
+
+  friend void Moose::initDofIndices<>(MooseVariableDataFV<OutputType> &, const Elem &);
 };
 
 /////////////////////// General template definitions //////////////////////////////////////
@@ -461,6 +477,9 @@ template <typename OutputType>
 const ADTemplateVariableValue<OutputType> &
 MooseVariableDataFV<OutputType>::adUDotDot() const
 {
+  // Generally speaking, we need u dot information when computing u dot dot
+  adUDot();
+
   _need_ad = _need_ad_u_dotdot = true;
 
   if (!safeToComputeADUDot())
