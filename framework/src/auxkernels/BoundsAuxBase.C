@@ -10,6 +10,7 @@
 #include "BoundsAuxBase.h"
 #include "SystemBase.h"
 #include "PetscSupport.h"
+#include "AuxiliarySystem.h"
 
 InputParameters
 BoundsAuxBase::validParams()
@@ -33,23 +34,48 @@ BoundsAuxBase::BoundsAuxBase(const InputParameters & parameters)
     _bounded_var_name(parameters.get<NonlinearVariableName>("bounded_variable")),
     _var(_subproblem.getStandardVariable(_tid, _bounded_var_name))
 {
-  if (!isNodal())
-    mooseError("BoundsAuxBase must be used on a nodal auxiliary variable!");
   if (!Moose::PetscSupport::isSNESVI(*dynamic_cast<FEProblemBase *>(&_subproblem)))
     mooseDoOnce(mooseWarning(
         "A variational inequalities solver must be used in conjunction with BoundsAux"));
+
+  // Check that the bounded variable is of a supported type
+  if (!_var.isNodal() && (_var.feType().order != CONSTANT))
+    paramError("bounded_variable", "Bounded variable must be nodal or of a CONSTANT order!");
+
+  auto & dummy =
+      _aux_sys.getActualFieldVariable<Real>(_tid, parameters.get<AuxVariableName>("variable"));
+
+  // Check that the dummy variable matches the bounded variable
+  if (dummy.feType() != _var.feType())
+    paramError(
+        "variable",
+        "Dummy bound aux. variable and bounded variable must both finite element order and family");
 }
 
 Real
 BoundsAuxBase::computeValue()
 {
-  if (_current_node->n_dofs(_nl_sys.number(), _bounded_var.number()) > 0)
+  if (isNodal())
   {
-    // The zero is for the component, this will only work for Lagrange variables!
-    dof_id_type dof = _current_node->dof_number(_nl_sys.number(), _bounded_var.number(), 0);
+    if (_current_node->n_dofs(_nl_sys.number(), _bounded_var.number()) > 0)
+    {
+      // The zero is for the component, this will only work for Lagrange variables
+      dof_id_type dof = _current_node->dof_number(_nl_sys.number(), _bounded_var.number(), 0);
 
-    Real bound = getBound();
-    _bounded_vector.set(dof, bound);
+      Real bound = getBound();
+      _bounded_vector.set(dof, bound);
+    }
+  }
+  else
+  {
+    if (_current_elem->n_dofs(_nl_sys.number(), _bounded_var.number()) > 0)
+    {
+      // The zero is for the component, this will only work for CONSTANT variables
+      dof_id_type dof = _current_elem->dof_number(_nl_sys.number(), _bounded_var.number(), 0);
+
+      Real bound = getBound();
+      _bounded_vector.set(dof, bound);
+    }
   }
 
   return 0.0;
