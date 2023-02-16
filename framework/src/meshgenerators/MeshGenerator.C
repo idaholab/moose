@@ -165,6 +165,9 @@ MeshGenerator::buildDistributedMesh(unsigned int dim)
 std::unique_ptr<MeshBase>
 MeshGenerator::generateInternal()
 {
+  libmesh_parallel_only(comm());
+  mooseAssert(comm().verify(type() + name()), "Inconsistent execution ordering");
+
   auto mesh = generate();
 
   if (getParam<bool>("show_info"))

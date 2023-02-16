@@ -33,6 +33,17 @@ class MeshGenerator : public MooseObject, public MeshMetaDataInterface
 {
 public:
   /**
+   * Comparator for MeshGenerators that sorts by name
+   */
+  struct Comparator
+  {
+    bool operator()(const MeshGenerator * const & a, const MeshGenerator * const & b) const
+    {
+      return a->name() < b->name();
+    }
+  };
+
+  /**
    * Constructor
    *
    * @param parameters The parameters object holding data for the class to use.
@@ -96,21 +107,21 @@ public:
   /**
    * Gets the MeshGenerators that are parents to this MeshGenerator.
    */
-  [[nodiscard]] const std::set<const MeshGenerator *> & getParentMeshGenerators() const
+  [[nodiscard]] const std::set<const MeshGenerator *, Comparator> & getParentMeshGenerators() const
   {
     return _parent_mesh_generators;
   }
   /**
    * Gets the MeshGenerators that are children to this MeshGenerator.
    */
-  [[nodiscard]] const std::set<const MeshGenerator *> & getChildMeshGenerators() const
+  [[nodiscard]] const std::set<const MeshGenerator *, Comparator> & getChildMeshGenerators() const
   {
     return _child_mesh_generators;
   }
   /**
    * Gets the MeshGenerators that are children to this MeshGenerator.
    */
-  [[nodiscard]] const std::set<const MeshGenerator *> & getSubMeshGenerators() const
+  [[nodiscard]] const std::set<const MeshGenerator *, Comparator> & getSubMeshGenerators() const
   {
     return _sub_mesh_generators;
   }
@@ -313,11 +324,11 @@ private:
   std::unique_ptr<MeshBase> _null_mesh = nullptr;
 
   /// The MeshGenerators that are parents to this MeshGenerator
-  std::set<const MeshGenerator *> _parent_mesh_generators;
+  std::set<const MeshGenerator *, Comparator> _parent_mesh_generators;
   /// The MeshGenerators that are children to this MeshGenerator
-  std::set<const MeshGenerator *> _child_mesh_generators;
+  std::set<const MeshGenerator *, Comparator> _child_mesh_generators;
   /// The sub MeshGenerators constructed by this MeshGenerator
-  std::set<const MeshGenerator *> _sub_mesh_generators;
+  std::set<const MeshGenerator *, Comparator> _sub_mesh_generators;
 };
 
 template <typename T, typename... Args>
