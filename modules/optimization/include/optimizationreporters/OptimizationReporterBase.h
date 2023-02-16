@@ -15,6 +15,12 @@
 #include "OptimizeSolve.h"
 #include "OptimizationReporterTest.h"
 
+namespace libMesh
+{
+template <typename Number>
+class PetscVector;
+}
+
 /**
  * Base class for optimization objects, implements routines for calculating misfit. Derived classes
  * are responsible for parameter members and gradient computation.

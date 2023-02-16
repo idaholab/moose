@@ -8,31 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "OptimizationReporterBase.h"
-
-namespace // unnamed namespace
-{
-void
-copyReporterIntoPetscVector(const std::vector<std::vector<Real> *> reporterVectors,
-                            libMesh::PetscVector<Number> & x)
-{
-  dof_id_type n = 0;
-  for (const auto & data : reporterVectors)
-    for (const auto & val : *data)
-      x.set(n++, val);
-
-  x.close();
-}
-
-void
-copyPetscVectorIntoReporter(const libMesh::PetscVector<Number> & x,
-                            std::vector<std::vector<Real> *> reporterVectors)
-{
-  dof_id_type n = 0;
-  for (auto & data : reporterVectors)
-    for (auto & val : *data)
-      val = x(n++);
-}
-}
+#include "OptUtils.h"
 
 InputParameters
 OptimizationReporterBase::validParams()
@@ -115,20 +91,20 @@ OptimizationReporterBase::computeGradient(libMesh::PetscVector<Number> & gradien
                  " versus ",
                  _gradients[p]->size(),
                  ".");
-  copyReporterIntoPetscVector(_gradients, gradient);
+  OptUtils::copyReporterIntoPetscVector(_gradients, gradient);
 }
 
 void
 OptimizationReporterBase::setInitialCondition(libMesh::PetscVector<Number> & x)
 {
   x.init(_ndof);
-  copyReporterIntoPetscVector(_parameters, x);
+  OptUtils::copyReporterIntoPetscVector(_parameters, x);
 }
 
 void
 OptimizationReporterBase::updateParameters(const libMesh::PetscVector<Number> & x)
 {
-  copyPetscVectorIntoReporter(x, _parameters);
+  OptUtils::copyPetscVectorIntoReporter(x, _parameters);
 }
 
 Real

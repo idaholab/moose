@@ -56,7 +56,7 @@ ParameterMeshOptimization::validParams()
 ParameterMeshOptimization::ParameterMeshOptimization(const InputParameters & parameters)
   : OptimizationReporterBase(parameters)
 {
-  _nvalues.resize(_nparams, 0); // fixme lynn this is different from optimization reporter
+  _nvalues.resize(_nparams, 0);
 
   const auto & meshes = getParam<std::vector<FileName>>("parameter_meshes");
   const auto & families = getParam<MultiMooseEnum>("parameter_families");
