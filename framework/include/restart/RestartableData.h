@@ -47,12 +47,12 @@ public:
    * String identifying the type of parameter stored.
    * Must be reimplemented in derived classes.
    */
-  virtual std::string type() = 0;
+  virtual std::string type() const = 0;
 
   /**
    * The full (unique) name of this particular piece of data.
    */
-  std::string name() { return _name; }
+  const std::string & name() const { return _name; }
 
   /**
    * A context pointer for helping with load / store.
@@ -101,17 +101,17 @@ public:
   /**
    * @returns a read-only reference to the parameter value.
    */
-  const T & get() const { return *_value_ptr; }
+  const T & get() const;
 
   /**
    * @returns a writable reference to the parameter value.
    */
-  T & set() { return *_value_ptr; }
+  T & set();
 
   /**
    * String identifying the type of parameter stored.
    */
-  virtual std::string type() override;
+  virtual std::string type() const override;
 
   /**
    * Swap
@@ -146,8 +146,24 @@ private:
 // ------------------------------------------------------------
 // RestartableData<> class inline methods
 template <typename T>
+const T &
+RestartableData<T>::get() const
+{
+  mooseAssert(_value_ptr, "Value not initialized");
+  return *_value_ptr;
+}
+
+template <typename T>
+T &
+RestartableData<T>::set()
+{
+  mooseAssert(_value_ptr, "Value not initialized");
+  return *_value_ptr;
+}
+
+template <typename T>
 inline std::string
-RestartableData<T>::type()
+RestartableData<T>::type() const
 {
   return MooseUtils::prettyCppType<T>();
 }
@@ -164,15 +180,14 @@ template <typename T>
 inline void
 RestartableData<T>::store(std::ostream & stream)
 {
-  T & tmp = *_value_ptr;
-  storeHelper(stream, tmp, _context);
+  storeHelper(stream, set(), _context);
 }
 
 template <typename T>
 inline void
 RestartableData<T>::load(std::istream & stream)
 {
-  loadHelper(stream, *_value_ptr, _context);
+  loadHelper(stream, set(), _context);
 }
 
 template <typename T>
