@@ -211,7 +211,7 @@ MeshGenerator::generateInternal()
   return mesh;
 }
 
-std::unique_ptr<MeshBase> &
+void
 MeshGenerator::addMeshSubgenerator(const std::string & type,
                                    const std::string & name,
                                    InputParameters & params)
@@ -224,7 +224,6 @@ MeshGenerator::addMeshSubgenerator(const std::string & type,
 
   _app.addMeshGenerator(type, name, params);
   _sub_mesh_generators.insert(&std::as_const(_app).getMeshGenerator(name));
-  return this->getMeshByName(name);
 }
 
 RestartableDataValue &

@@ -784,7 +784,7 @@ public:
    * Get a refernce to a pointer that will be the output of the
    * MeshGenerator named name
    */
-  std::unique_ptr<MeshBase> & getMeshGeneratorOutput(const std::string & name);
+  [[nodiscard]] std::unique_ptr<MeshBase> & getMeshGeneratorOutput(const MeshGeneratorName & name);
 
   /**
    * Append a mesh generator that will act on the final mesh generator in the system
@@ -1393,6 +1393,7 @@ private:
   const MooseMesh * const _master_displaced_mesh;
 
   /// The MeshGenerators declared using addMeshGenerator(), cleared after createMeshGenerators()
+  /// Key is the name, pair contains the type and the params
   std::unordered_map<std::string, std::pair<std::string, InputParameters>> _mesh_generator_params;
 
   /// Holds the mesh generators until they are executed, then this structure is cleared
