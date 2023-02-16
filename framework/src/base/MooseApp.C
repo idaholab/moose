@@ -2186,6 +2186,8 @@ MooseApp::createMeshGenerator(const std::string & generator_name)
 
   mooseAssert(!_mesh_generators.count(generator_name), "Already created");
   _mesh_generators.emplace(generator_name, mg);
+  mooseAssert(!_mesh_generator_outputs.count(generator_name), "Already exists");
+  _mesh_generator_outputs[generator_name];
   _mesh_generator_params.erase(find_params);
 
   return mg;
@@ -2220,13 +2222,14 @@ MooseApp::hasMeshGenerator(const MeshGeneratorName & name) const
 }
 
 std::unique_ptr<MeshBase> &
-MooseApp::getMeshGeneratorOutput(const std::string & name)
+MooseApp::getMeshGeneratorOutput(const MeshGeneratorName & name)
 {
-  auto & outputs = _mesh_generator_outputs[name];
+  mooseAssert(constructingMeshGenerators() || executingMeshGenerators(), "Incorrect call time");
 
-  outputs.push_back(nullptr);
-
-  return outputs.back();
+  auto it = _mesh_generator_outputs.find(name);
+  mooseAssert(it != _mesh_generator_outputs.end(), "Not initialized");
+  it->second.push_back(nullptr);
+  return it->second.back();
 }
 
 void
