@@ -266,7 +266,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
       params.set<std::vector<BoundaryName>>("new_boundary") = {
           "tmp_left", "tmp_right", "tmp_top", "tmp_bottom"};
 
-      _build_mesh = &addMeshSubgenerator("SideSetsFromNormalsGenerator", name() + "_bds", params);
+      addMeshSubgenerator("SideSetsFromNormalsGenerator", name() + "_bds", params);
     }
     {
       auto params = _app.getFactory().getValidParams("RenameBoundaryGenerator");
@@ -277,7 +277,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
       params.set<std::vector<BoundaryName>>("new_boundary") =
           std::vector<BoundaryName>(4, "outer_core");
 
-      _build_mesh = &addMeshSubgenerator("RenameBoundaryGenerator", name() + "_pattern", params);
+      addMeshSubgenerator("RenameBoundaryGenerator", name() + "_pattern", params);
     }
     //***Add assembly duct around PatternedMesh
   }
@@ -338,8 +338,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
       params.set<boundary_id_type>("external_boundary_id") = radial_boundary;
       params.set<std::string>("external_boundary_name") = "outer_core";
 
-      _build_mesh =
-          &addMeshSubgenerator("HexIDPatternedMeshGenerator", name() + "_pattern", params);
+      addMeshSubgenerator("HexIDPatternedMeshGenerator", name() + "_pattern", params);
     }
   }
   if (_empty_pos)
@@ -350,8 +349,11 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
     params.set<MeshGeneratorName>("input") = name() + "_pattern";
     params.set<BoundaryName>("new_boundary") = "outer_core";
 
-    _build_mesh = &addMeshSubgenerator("BlockDeletionGenerator", name() + "_deleted", params);
+    addMeshSubgenerator("BlockDeletionGenerator", name() + "_deleted", params);
   }
+
+  std::string build_mesh_name;
+
   // Remove outer assembly sidesets created during assembly generation
   {
     // Get outer boundaries of all constituent assemblies based on assembly_type,
@@ -375,7 +377,8 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
     params.set<MeshGeneratorName>("input") = _empty_pos ? name() + "_deleted" : name() + "_pattern";
     params.set<std::vector<BoundaryName>>("boundary_names") = boundaries_to_delete;
 
-    _build_mesh = &addMeshSubgenerator("BoundaryDeletionGenerator", name() + "_delbds", params);
+    build_mesh_name = name() + "_delbds";
+    addMeshSubgenerator("BoundaryDeletionGenerator", build_mesh_name, params);
   }
 
   for (auto assembly : _inputs)
@@ -480,7 +483,8 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
     }
 
     // finish periphery input
-    _build_mesh = &addMeshSubgenerator(periphery_mg_name, name() + "_periphery", params);
+    build_mesh_name = name() + "_periphery";
+    addMeshSubgenerator(periphery_mg_name, build_mesh_name, params);
   }
 
   if (_extrude && _mesh_dimensions == 3)
@@ -534,11 +538,14 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
       std::string plane_id_name = "plane_id";
       params.set<std::string>("id_name") = "plane_id";
 
-      _build_mesh = &addMeshSubgenerator("PlaneIDMeshGenerator", name() + "_extrudedIDs", params);
+      build_mesh_name = name() + "_extrudedIDs";
+      addMeshSubgenerator("PlaneIDMeshGenerator", build_mesh_name, params);
     }
   }
   else
     declareMeshProperty("extruded", false);
+
+  _build_mesh = &getMeshByName(build_mesh_name);
 }
 
 std::unique_ptr<MeshBase>

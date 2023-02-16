@@ -59,8 +59,7 @@ PeripheralTriangleMeshGenerator::PeripheralTriangleMeshGenerator(const InputPara
                                     : (SubdomainName) ""),
     _external_boundary_name(isParamValid("external_boundary_name")
                                 ? getParam<std::string>("external_boundary_name")
-                                : std::string()),
-    _input(getMeshByName(_input_name))
+                                : std::string())
 {
   // Calculate outer boundary points
 
@@ -85,12 +84,12 @@ PeripheralTriangleMeshGenerator::PeripheralTriangleMeshGenerator(const InputPara
     params.set<std::vector<Point>>("points") = outer_polyline;
     params.set<unsigned int>("num_edges_between_points") = 1;
     params.set<bool>("loop") = true;
-    _build_mesh =
-        &addMeshSubgenerator("PolyLineMeshGenerator", _input_name + "_periphery_polyline", params);
+    addMeshSubgenerator("PolyLineMeshGenerator", _input_name + "_periphery_polyline", params);
   }
 
   // Generate periphery region
   {
+    getMeshForSub("input");
     auto params = _app.getFactory().getValidParams("XYDelaunayGenerator");
     params.set<MeshGeneratorName>("boundary") =
         (MeshGeneratorName)_input_name + "_periphery_polyline";
@@ -104,7 +103,8 @@ PeripheralTriangleMeshGenerator::PeripheralTriangleMeshGenerator(const InputPara
     params.set<std::vector<bool>>("stitch_holes") = std::vector<bool>{true};
     params.set<BoundaryName>("output_boundary") = _external_boundary_name;
     params.set<SubdomainName>("output_subdomain_name") = _peripheral_ring_block_name;
-    _build_mesh = &addMeshSubgenerator("XYDelaunayGenerator", _input_name + "_periphery", params);
+    addMeshSubgenerator("XYDelaunayGenerator", _input_name + "_periphery", params);
+    _build_mesh = &getMeshByName(_input_name + "_periphery");
   }
 }
 
