@@ -62,7 +62,6 @@ PeripheralTriangleMeshGenerator::PeripheralTriangleMeshGenerator(const InputPara
                                 : std::string()),
     _input(getMeshByName(_input_name))
 {
-
   // Calculate outer boundary points
 
   std::vector<libMesh::Point> outer_polyline;

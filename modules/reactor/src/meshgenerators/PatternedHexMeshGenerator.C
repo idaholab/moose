@@ -287,14 +287,13 @@ PatternedHexMeshGenerator::PatternedHexMeshGenerator(const InputParameters & par
 std::unique_ptr<MeshBase>
 PatternedHexMeshGenerator::generate()
 {
-  std::vector<ReplicatedMesh *> meshes(_input_names.size(), nullptr);
-  for (MooseIndex(_input_names) i = 0; i < _input_names.size(); ++i)
+  std::vector<std::unique_ptr<ReplicatedMesh>> meshes(_input_names.size());
+  for (const auto i : index_range(_input_names))
   {
-    mooseAssert(_mesh_ptrs[i] && (*_mesh_ptrs[i]).get(), "nullptr mesh");
-    if (ReplicatedMesh * replicated_mesh = dynamic_cast<ReplicatedMesh *>((*_mesh_ptrs[i]).get()))
-      meshes[i] = replicated_mesh;
-    else
+    meshes[i] = dynamic_pointer_cast<ReplicatedMesh>(std::move(*_mesh_ptrs[i]));
+    if (!meshes[i])
       paramError("inputs", "Mesh '", _input_names[i], "' is not a replicated mesh but it must be");
+
     // throw an error message if the input mesh has a flat side up
     if (hasMeshProperty("flat_side_up", _input_names[i]))
       if (getMeshProperty<bool>("flat_side_up", _input_names[i]))

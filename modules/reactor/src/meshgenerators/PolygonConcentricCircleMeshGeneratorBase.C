@@ -648,14 +648,12 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
 std::unique_ptr<MeshBase>
 PolygonConcentricCircleMeshGeneratorBase::generate()
 {
-  std::vector<ReplicatedMesh *> input;
-  for (const auto & mesh : _input_ptrs)
+  std::vector<std::unique_ptr<ReplicatedMesh>> input(_input_ptrs.size());
+  for (const auto i : index_range(_input_ptrs))
   {
-    mooseAssert(mesh && (*mesh).get(), "nullptr mesh");
-    auto replicated_mesh = dynamic_cast<ReplicatedMesh *>((*mesh).get());
-    if (!replicated_mesh)
+    input[i] = dynamic_pointer_cast<ReplicatedMesh>(std::move(*_input_ptrs[i]));
+    if (!input[i])
       mooseError("A non-replicated mesh input was supplied but replicated meshes are required.");
-    input.push_back(replicated_mesh);
   }
 
   unsigned int mesh_input_counter = 0;

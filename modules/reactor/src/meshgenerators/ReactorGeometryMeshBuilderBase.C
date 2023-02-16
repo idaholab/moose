@@ -30,7 +30,8 @@ ReactorGeometryMeshBuilderBase::initializeReactorMeshParams(const std::string re
   _reactor_params = reactor_param_name;
 
   // Ensure that the user has supplied a valid ReactorMeshParams object
-  if (getMeshByName(_reactor_params) != nullptr)
+  _reactor_params_mesh = &getMeshByName(reactor_param_name);
+  if (*_reactor_params_mesh)
     mooseError("The reactor_params mesh is not of the correct type");
 
   if (!hasMeshProperty("mesh_dimensions", _reactor_params) ||
@@ -40,6 +41,12 @@ ReactorGeometryMeshBuilderBase::initializeReactorMeshParams(const std::string re
 
   // Set reactor_params_name metadata for use by future mesh generators
   declareMeshProperty("reactor_params_name", std::string(_reactor_params));
+}
+
+void
+ReactorGeometryMeshBuilderBase::freeReactorMeshParams()
+{
+  _reactor_params_mesh->reset();
 }
 
 bool

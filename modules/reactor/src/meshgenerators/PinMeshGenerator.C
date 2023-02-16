@@ -475,6 +475,9 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
 std::unique_ptr<MeshBase>
 PinMeshGenerator::generate()
 {
+  // Must be called to free the ReactorMeshParams mesh
+  freeReactorMeshParams();
+
   // Update metadata at this point since values for these metadata only get set by PCCMG
   // at generate() stage
   if (hasMeshProperty("max_radius_meta", name() + "_2D"))

@@ -447,6 +447,9 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
 std::unique_ptr<MeshBase>
 AssemblyMeshGenerator::generate()
 {
+  // Must be called to free the ReactorMeshParams mesh
+  freeReactorMeshParams();
+
   // Update metadata at this point since values for these metadata only get set by PCCMG
   // at generate() stage
   if (hasMeshProperty("pattern_pitch_meta", name() + "_pattern"))

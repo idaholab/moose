@@ -26,9 +26,13 @@ public:
 
   std::unique_ptr<MeshBase> generate() override;
 
-protected:
+private:
   /// The input meshes
+  /// This needs to be private because HexIDPatternedMeshGenerator
+  /// (derives from this) needs its own copy
   const std::vector<std::unique_ptr<MeshBase> *> _mesh_ptrs;
+
+protected:
   /// Names of input meshes
   const std::vector<MeshGeneratorName> & _input_names;
   /// 2D vector of the hexagonal pattern
