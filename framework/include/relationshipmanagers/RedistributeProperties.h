@@ -11,6 +11,8 @@
 
 #include "RelationshipManager.h"
 
+// MOOSE Forward Declares
+class MaterialData;
 class MaterialPropertyStorage;
 
 /**
@@ -41,8 +43,10 @@ public:
 
   virtual void redistribute() override;
 
-  void addMaterialPropertyStorage(MaterialPropertyStorage & mat_props);
+  void addMaterialPropertyStorage(std::vector<std::shared_ptr<MaterialData>> & mat_data,
+                                  MaterialPropertyStorage & mat_props);
 
 private:
-  std::vector<MaterialPropertyStorage *> _mat_prop_storages;
+  std::vector<std::pair<std::vector<std::shared_ptr<MaterialData>> *, MaterialPropertyStorage *>>
+      _materials;
 };
