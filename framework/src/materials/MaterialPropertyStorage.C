@@ -25,7 +25,7 @@ std::map<std::string, unsigned int> MaterialPropertyStorage::_prop_ids;
  * @param data_from Source data
  */
 void
-shallowCopyData(const std::vector<unsigned int> & stateful_prop_ids,
+shallowSwapData(const std::vector<unsigned int> & stateful_prop_ids,
                 MaterialProperties & data,
                 MaterialProperties & data_from)
 {
@@ -41,7 +41,7 @@ shallowCopyData(const std::vector<unsigned int> & stateful_prop_ids,
 }
 
 void
-shallowCopyDataBack(const std::vector<unsigned int> & stateful_prop_ids,
+shallowSwapDataBack(const std::vector<unsigned int> & stateful_prop_ids,
                     MaterialProperties & data,
                     MaterialProperties & data_from)
 {
@@ -332,10 +332,10 @@ MaterialPropertyStorage::swap(MaterialData & material_data, const Elem & elem, u
 {
   Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
 
-  shallowCopyData(_stateful_prop_id_to_prop_id, material_data.props(), props(&elem, side));
-  shallowCopyData(_stateful_prop_id_to_prop_id, material_data.propsOld(), propsOld(&elem, side));
+  shallowSwapData(_stateful_prop_id_to_prop_id, material_data.props(), props(&elem, side));
+  shallowSwapData(_stateful_prop_id_to_prop_id, material_data.propsOld(), propsOld(&elem, side));
   if (hasOlderProperties())
-    shallowCopyData(
+    shallowSwapData(
         _stateful_prop_id_to_prop_id, material_data.propsOlder(), propsOlder(&elem, side));
 }
 
@@ -346,11 +346,11 @@ MaterialPropertyStorage::swapBack(MaterialData & material_data,
 {
   Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
 
-  shallowCopyDataBack(_stateful_prop_id_to_prop_id, props(&elem, side), material_data.props());
-  shallowCopyDataBack(
+  shallowSwapDataBack(_stateful_prop_id_to_prop_id, props(&elem, side), material_data.props());
+  shallowSwapDataBack(
       _stateful_prop_id_to_prop_id, propsOld(&elem, side), material_data.propsOld());
   if (hasOlderProperties())
-    shallowCopyDataBack(
+    shallowSwapDataBack(
         _stateful_prop_id_to_prop_id, propsOlder(&elem, side), material_data.propsOlder());
 }
 
