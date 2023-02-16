@@ -47,36 +47,46 @@ BoundsAuxBase::BoundsAuxBase(const InputParameters & parameters)
 
   // Check that the dummy variable matches the bounded variable
   if (dummy.feType() != _var.feType())
-    paramError(
-        "variable",
-        "Dummy bound aux. variable and bounded variable must both finite element order and family");
+    paramError("variable",
+               "Dummy bound aux. variable and bounded variable must use the same finite element "
+               "order and family");
 }
 
 Real
 BoundsAuxBase::computeValue()
 {
+  dof_id_type dof = getDoFIndex();
+
+  if (dof != std::numeric_limits<dof_id_type>::max())
+  {
+    Real bound = getBound();
+    _bounded_vector.set(dof, bound);
+  }
+
+  return 0.0;
+}
+
+dof_id_type
+BoundsAuxBase::getDoFIndex()
+{
   if (isNodal())
   {
     if (_current_node->n_dofs(_nl_sys.number(), _bounded_var.number()) > 0)
     {
+      mooseAssert(_current_node->n_dofs(_nl_sys.number(), _bounded_var.number()) == 1,
+                  "Bounds are only set on one DOF value per node currently");
       // The zero is for the component, this will only work for Lagrange variables
-      dof_id_type dof = _current_node->dof_number(_nl_sys.number(), _bounded_var.number(), 0);
-
-      Real bound = getBound();
-      _bounded_vector.set(dof, bound);
+      return _current_node->dof_number(_nl_sys.number(), _bounded_var.number(), 0);
     }
   }
   else
-  {
     if (_current_elem->n_dofs(_nl_sys.number(), _bounded_var.number()) > 0)
     {
-      // The zero is for the component, this will only work for CONSTANT variables
-      dof_id_type dof = _current_elem->dof_number(_nl_sys.number(), _bounded_var.number(), 0);
-
-      Real bound = getBound();
-      _bounded_vector.set(dof, bound);
+    mooseAssert(_current_elem->n_dofs(_nl_sys.number(), _bounded_var.number()) == 1,
+                "Bounds are only set on one DOF value per element currently");
+    // The zero is for the component, this will only work for CONSTANT variables
+    return _current_elem->dof_number(_nl_sys.number(), _bounded_var.number(), 0);
     }
-  }
-
-  return 0.0;
+    // No local dof for the bounded variable
+    return std::numeric_limits<dof_id_type>::max();
 }

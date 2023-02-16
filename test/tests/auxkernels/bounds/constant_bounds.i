@@ -110,6 +110,8 @@
   type = Steady
 
   solve_type = 'PJFNK'
+  petsc_options_iname = '-snes_type'
+  petsc_options_value = 'vinewtonrsls'
 []
 
 [Outputs]

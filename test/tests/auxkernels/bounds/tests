@@ -6,7 +6,6 @@
     scale_refine = 3
     design = 'ConstantBoundsAux.md'
     issues = '#951 #14946'
-    cli_args = '-snes_type vinewtonrsls'
     requirement = "The system shall include the ability to compute a nodal field variable with a constant upper and lower bounds."
   []
   [old_value_bounds]
@@ -16,7 +15,6 @@
     scale_refine = 3
     design = 'ConstantBoundsAux.md'
     issues = '#951 #14946'
-    cli_args = '-snes_type vinewtonrsls'
     requirement = "The system shall include the ability to compute a field variable with a lower bound given by variable's old value."
   []
   [constant_bounds_elem]
@@ -26,7 +24,6 @@
     scale_refine = 3
     design = 'ConstantBoundsAux.md'
     issues = '#951 #14946'
-    cli_args = '-snes_type vinewtonrsls'
     requirement = "The system shall include the ability to compute an constant monomial field variable with a constant upper and lower bounds."
   []
 
@@ -39,20 +36,21 @@
       input = 'constant_bounds.i'
       expect_out = "A variational inequalities solver must be used in conjunction with BoundsAux"
       allow_warnings = true
+      cli_args = "Executioner/petsc_options_iname='' Executioner/petsc_options_value=''"
       detail = 'emit a warning if a variational inequalities (VI) solver is not found when BoundsAux is provided.'
     []
     [bounded_variable_type]
       type = 'RunException'
       input = 'constant_bounds_elem.i'
       expect_err = "Bounded variable must be nodal or of a CONSTANT order!"
-      cli_args = '-snes_type vinewtonrsls Variables/u/order=SECOND'
+      cli_args = 'Variables/u/order=SECOND'
       detail = 'error if an unsupported variable type is provided to the constant bounds kernel'
     []
     [mismatch_dummy]
       type = 'RunException'
       input = 'constant_bounds_elem.i'
-      expect_err = "Dummy bound aux. variable and bounded variable must both finite element order and family"
-      cli_args = '-snes_type vinewtonrsls AuxVariables/bounds_dummy/order=SECOND'
+      expect_err = "Dummy bound aux. variable and bounded variable must use the same finite element order and family"
+      cli_args = 'AuxVariables/bounds_dummy/order=SECOND'
       detail = 'error if an unsupported variable type is provided to the constant bounds kernel'
     []
   []
