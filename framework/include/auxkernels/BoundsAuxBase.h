@@ -52,5 +52,5 @@ protected:
 
 private:
   /// Return the current DOF index to apply the bound on
-  dof_id_type getDoFIndex();
+  dof_id_type getDoFIndex() const;
 };

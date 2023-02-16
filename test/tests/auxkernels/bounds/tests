@@ -24,11 +24,11 @@
     scale_refine = 3
     design = 'ConstantBoundsAux.md'
     issues = '#951 #14946'
-    requirement = "The system shall include the ability to compute an constant monomial field variable with a constant upper and lower bounds."
+    requirement = "The system shall include the ability to compute a constant monomial field variable with constant upper and lower bounds."
   []
 
   [exceptions]
-    requirement = "The system shall "
+    requirement = "The system shall"
     issues = '#14946'
     design = 'ConstantBoundsAux.md'
     [solver]
@@ -37,7 +37,7 @@
       expect_out = "A variational inequalities solver must be used in conjunction with BoundsAux"
       allow_warnings = true
       cli_args = "Executioner/petsc_options_iname='' Executioner/petsc_options_value=''"
-      detail = 'emit a warning if a variational inequalities (VI) solver is not found when BoundsAux is provided.'
+      detail = 'emit a warning if a variational inequalities (VI) solver is not found when the bounds system is used.'
     []
     [bounded_variable_type]
       type = 'RunException'
@@ -49,9 +49,9 @@
     [mismatch_dummy]
       type = 'RunException'
       input = 'constant_bounds_elem.i'
-      expect_err = "Dummy bound aux. variable and bounded variable must use the same finite element order and family"
+      expect_err = "Dummy bounds aux variable and bounded variable must use the same finite element order and family"
       cli_args = 'AuxVariables/bounds_dummy/order=SECOND'
-      detail = 'error if an unsupported variable type is provided to the constant bounds kernel'
+      detail = 'error if the type of the dummy auxiliary variable does not match the bounded variable.'
     []
   []
 []

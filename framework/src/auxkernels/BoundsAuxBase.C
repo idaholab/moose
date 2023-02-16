@@ -42,13 +42,13 @@ BoundsAuxBase::BoundsAuxBase(const InputParameters & parameters)
   if (!_var.isNodal() && (_var.feType().order != CONSTANT))
     paramError("bounded_variable", "Bounded variable must be nodal or of a CONSTANT order!");
 
-  auto & dummy =
+  const auto & dummy =
       _aux_sys.getActualFieldVariable<Real>(_tid, parameters.get<AuxVariableName>("variable"));
 
   // Check that the dummy variable matches the bounded variable
   if (dummy.feType() != _var.feType())
     paramError("variable",
-               "Dummy bound aux. variable and bounded variable must use the same finite element "
+               "Dummy bounds aux variable and bounded variable must use the same finite element "
                "order and family");
 }
 
@@ -67,7 +67,7 @@ BoundsAuxBase::computeValue()
 }
 
 dof_id_type
-BoundsAuxBase::getDoFIndex()
+BoundsAuxBase::getDoFIndex() const
 {
   if (isNodal())
   {
@@ -79,14 +79,15 @@ BoundsAuxBase::getDoFIndex()
       return _current_node->dof_number(_nl_sys.number(), _bounded_var.number(), 0);
     }
   }
-  else
-    if (_current_elem->n_dofs(_nl_sys.number(), _bounded_var.number()) > 0)
-    {
+  else if (_current_elem->n_dofs(_nl_sys.number(), _bounded_var.number()) > 0)
+  {
     mooseAssert(_current_elem->n_dofs(_nl_sys.number(), _bounded_var.number()) == 1,
                 "Bounds are only set on one DOF value per element currently");
     // The zero is for the component, this will only work for CONSTANT variables
     return _current_elem->dof_number(_nl_sys.number(), _bounded_var.number(), 0);
-    }
-    // No local dof for the bounded variable
-    return std::numeric_limits<dof_id_type>::max();
+  }
+  // No local dof for the bounded variable. This can happen for example if:
+  // - block restriction of dummy is different from bounded variable
+  // - we have a first order variable on a second order mesh
+  return std::numeric_limits<dof_id_type>::max();
 }
