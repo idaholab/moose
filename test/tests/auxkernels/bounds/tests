@@ -1,5 +1,5 @@
 [Tests]
-  [./constant_bounds]
+  [constant_bounds]
     type = 'Exodiff'
     input = 'constant_bounds.i'
     exodiff = 'constant_bounds_out.e'
@@ -7,18 +7,9 @@
     design = 'ConstantBoundsAux.md'
     issues = '#951 #14946'
     cli_args = '-snes_type vinewtonrsls'
-    requirement = "The system shall include the ability to compute a field variable with a constant upper and lower bounds."
-  [../]
-  [./constant_bounds_warning]
-    type = 'RunApp'
-    input = 'constant_bounds.i'
-    expect_out = "A variational inequalities solver must be used in conjunction with BoundsAux"
-    allow_warnings = true
-    design = 'ConstantBoundsAux.md'
-    issues = '#14946'
-    requirement = "The system shall error if a variational inequalities (VI) solver is not found when BoundsAux is provided."
-  [../]
-  [./old_value_bounds]
+    requirement = "The system shall include the ability to compute a nodal field variable with a constant upper and lower bounds."
+  []
+  [old_value_bounds]
     type = 'Exodiff'
     input = 'old_value_bounds.i'
     exodiff = 'old_value_bounds_out.e'
@@ -27,5 +18,42 @@
     issues = '#951 #14946'
     cli_args = '-snes_type vinewtonrsls'
     requirement = "The system shall include the ability to compute a field variable with a lower bound given by variable's old value."
-  [../]
+  []
+  [constant_bounds_elem]
+    type = 'Exodiff'
+    input = 'constant_bounds_elem.i'
+    exodiff = 'constant_bounds_elem_out.e'
+    scale_refine = 3
+    design = 'ConstantBoundsAux.md'
+    issues = '#951 #14946'
+    cli_args = '-snes_type vinewtonrsls'
+    requirement = "The system shall include the ability to compute an constant monomial field variable with a constant upper and lower bounds."
+  []
+
+  [exceptions]
+    requirement = "The system shall "
+    issues = '#14946'
+    design = 'ConstantBoundsAux.md'
+    [solver]
+      type = 'RunApp'
+      input = 'constant_bounds.i'
+      expect_out = "A variational inequalities solver must be used in conjunction with BoundsAux"
+      allow_warnings = true
+      detail = 'emit a warning if a variational inequalities (VI) solver is not found when BoundsAux is provided.'
+    []
+    [bounded_variable_type]
+      type = 'RunException'
+      input = 'constant_bounds_elem.i'
+      expect_err = "Bounded variable must be nodal or of a CONSTANT order!"
+      cli_args = '-snes_type vinewtonrsls Variables/u/order=SECOND'
+      detail = 'error if an unsupported variable type is provided to the constant bounds kernel'
+    []
+    [mismatch_dummy]
+      type = 'RunException'
+      input = 'constant_bounds_elem.i'
+      expect_err = "Dummy bound aux. variable and bounded variable must both finite element order and family"
+      cli_args = '-snes_type vinewtonrsls AuxVariables/bounds_dummy/order=SECOND'
+      detail = 'error if an unsupported variable type is provided to the constant bounds kernel'
+    []
+  []
 []
