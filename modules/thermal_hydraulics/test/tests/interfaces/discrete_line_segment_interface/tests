@@ -25,18 +25,35 @@
 
     requirement = 'The system shall provide an interface to compute a radial coordinate from an arbitrary spatial point.'
   []
-  [get_axial_index]
+  [get_axial_section_index]
     type = Exodiff
     input = 'discrete_line_segment_interface.i'
     cli_args = "
-      AuxKernels/testvar_aux/test_type=axial_index
-      Outputs/file_base=axial_index"
-    exodiff = 'axial_index.e'
+      AuxKernels/testvar_aux/test_type=axial_section_index
+      Outputs/file_base=axial_section_index"
+    exodiff = 'axial_section_index.e'
     allow_test_objects = true
     # 0 time steps taken
     recover = false
 
-    requirement = 'The system shall provide an interface to get the axial index for an arbitrary spatial point.'
+    requirement = 'The system shall provide an interface to get the axial section index for an arbitrary spatial point.'
+  []
+  [get_axial_element_index]
+    type = Exodiff
+    input = 'discrete_line_segment_interface.i'
+    cli_args = "
+      AuxVariables/testvar/family=MONOMIAL
+      AuxVariables/testvar/order=CONSTANT
+      AuxKernels/testvar_aux/test_type=axial_element_index
+      Executioner/Quadrature/type=MONOMIAL
+      Executioner/Quadrature/order=CONSTANT
+      Outputs/file_base=axial_element_index"
+    exodiff = 'axial_element_index.e'
+    allow_test_objects = true
+    # 0 time steps taken
+    recover = false
+
+    requirement = 'The system shall provide an interface to get the axial element index for an arbitrary spatial point.'
   []
 
   [error_reporting]
