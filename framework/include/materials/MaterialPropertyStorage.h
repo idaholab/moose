@@ -302,6 +302,9 @@ private:
 
   // Need to be able to eraseProperty from here
   friend class ProjectMaterialProperties;
+
+  // Need to be able to initProps from here
+  friend class RedistributeProperties;
 };
 
 template <>
