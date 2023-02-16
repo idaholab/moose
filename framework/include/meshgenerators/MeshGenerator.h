@@ -319,6 +319,9 @@ private:
   std::set<MeshGeneratorName> _requested_mesh_generators;
   /// The names of the MeshGenerators that were requested in the getMeshForSub methods
   std::set<MeshGeneratorName> _requested_mesh_generators_for_sub;
+  /// The meshes that were requested by this MeshGenerator; used to verify that
+  /// any input meshes that are requested are properly released after generation
+  std::vector<std::pair<std::string, std::unique_ptr<MeshBase> *>> _requested_meshes;
 
   /// A nullptr to use for when inputs aren't specified
   std::unique_ptr<MeshBase> _null_mesh = nullptr;

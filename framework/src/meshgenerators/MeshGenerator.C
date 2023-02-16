@@ -115,7 +115,9 @@ MeshGenerator::getMeshByName(const MeshGeneratorName & mesh_generator_name)
 {
   checkGetMesh(mesh_generator_name);
   _requested_mesh_generators.insert(mesh_generator_name);
-  return _app.getMeshGeneratorOutput(mesh_generator_name);
+  auto & mesh = _app.getMeshGeneratorOutput(mesh_generator_name);
+  _requested_meshes.emplace_back(mesh_generator_name, &mesh);
+  return mesh;
 }
 
 std::vector<std::unique_ptr<MeshBase> *>
@@ -181,6 +183,15 @@ MeshGenerator::generateInternal()
   mooseAssert(comm().verify(type() + name()), "Inconsistent execution ordering");
 
   auto mesh = generate();
+  mooseAssert(mesh, "Invalid mesh");
+
+  for (const auto & [requested_name, requested_mesh] : _requested_meshes)
+    if (*requested_mesh)
+      mooseError("The mesh from input ",
+                 std::as_const(_app).getMeshGenerator(requested_name).type(),
+                 " '",
+                 std::as_const(_app).getMeshGenerator(requested_name).name(),
+                 "' was not taken ownership of.");
 
   if (getParam<bool>("show_info"))
   {
