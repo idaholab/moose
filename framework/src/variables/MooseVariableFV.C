@@ -825,7 +825,7 @@ MooseVariableFV<OutputType>::prepareAux()
 
 template <typename OutputType>
 void
-MooseVariableFV<OutputType>::initialSetup()
+MooseVariableFV<OutputType>::determineBoundaryToDirichletBCMap()
 {
   _boundary_id_to_dirichlet_bc.clear();
   std::vector<FVDirichletBCBase *> bcs;
@@ -851,7 +851,13 @@ MooseVariableFV<OutputType>::initialSetup()
     if (!bcs.empty())
       _boundary_id_to_dirichlet_bc.emplace(bnd_id, bcs[0]);
   }
+}
 
+template <typename OutputType>
+void
+MooseVariableFV<OutputType>::initialSetup()
+{
+  determineBoundaryToDirichletBCMap();
   MooseVariableField<OutputType>::initialSetup();
 }
 
