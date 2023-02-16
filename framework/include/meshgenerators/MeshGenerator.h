@@ -189,8 +189,7 @@ MeshGenerator::declareMeshProperty(const std::string & data_name)
     mooseError(
         "Declaration of mesh meta data can only happen within the constructor of mesh generators");
 
-  std::string full_name =
-      std::string(MeshMetaDataInterface::SYSTEM) + "/" + name() + "/" + data_name;
+  const auto full_name = meshPropertyName(name(), data_name);
 
   // Here we will create the RestartableData even though we may not use this instance.
   // If it's already in use, the App will return a reference to the existing instance and we'll

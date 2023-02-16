@@ -59,6 +59,8 @@ protected:
    */
   bool hasMeshProperty(const std::string & data_name, const std::string & prefix) const;
 
+  static std::string meshPropertyName(const std::string & prefix, const std::string & data_name);
+
 private:
   /// Helper function for actually registering the restartable data.
   RestartableDataValue & registerMetaDataOnApp(const std::string & name,
