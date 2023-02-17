@@ -50,7 +50,7 @@
 /modules/optimization @zachmprince @dschwen
 /modules/ray_tracing @loganharbour
 /modules/rdg @joshuahansel @lindsayad
-/modules/reactor @GiudGiud @roystgnr
+/modules/reactor @GiudGiud @loganharbour @roystgnr
 /modules/scalar_transport @lindsayad
 /modules/solid_properties @joshuahansel
 /modules/stochastic_tools @zachmprince
