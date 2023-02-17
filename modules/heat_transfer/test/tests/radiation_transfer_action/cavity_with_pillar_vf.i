@@ -132,11 +132,18 @@
 [GrayDiffuseRadiation]
   [cavity]
     sidesets = '6 7 8 9 10 11 12 13 14 15 16'
-    emissivity = '0.8 0.8 0.8 0.8 0.8 0.8 0.8 0.8 0.8 0.8 0.8'
+    emissivity = '0.8 0.8 0.8 0.8 0.8 eps_fn 0.8 0.8 0.8 0.8 0.8'
     n_patches = '5 5 5 5 5 5 5 5 5 5 5'
     partitioners = 'metis metis metis metis metis metis metis metis metis metis metis'
     temperature = temperature
     ray_tracing_face_order = SECOND
+  []
+[]
+
+[Functions]
+  [eps_fn]
+    type = ConstantFunction
+    value = 0.8
   []
 []
 
