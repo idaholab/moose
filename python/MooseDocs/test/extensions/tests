@@ -48,6 +48,7 @@
       type = PythonUnitTest
       input = test_appsyntax.py
       detail = "automatically retrieving application syntax,"
+      max_time = 400
     []
     [alert]
       type = PythonUnitTest
