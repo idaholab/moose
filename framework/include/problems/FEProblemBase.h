@@ -215,35 +215,31 @@ public:
 
   /**
    * Check for convergence of the nonlinear solution
-   * @param msg            Error message that gets sent back to the solver
-   * @param it             Iteration counter
-   * @param xnorm          Norm of the solution vector
-   * @param snorm          Norm of the change in the solution vector
-   * @param fnorm          Norm of the residual vector
-   * @param rtol           Relative residual convergence tolerance
-   * @param divtol         Relative residual divergence tolerance
-   * @param stol           Solution change convergence tolerance
-   * @param abstol         Absolute residual convergence tolerance
-   * @param nfuncs         Number of function evaluations
-   * @param max_funcs      Maximum Number of function evaluations
-   * @param initial_residual_before_preset_bcs      Residual norm prior to imposition of preset BCs
-   * values on solution vector
-   * @param div_threshold  Maximum value of residual before triggering divergence check
+   * @param msg Error message that gets sent back to the solver
+   * @param it Iteration counter
+   * @param xnorm Norm of the solution vector
+   * @param snorm Norm of the change in the solution vector
+   * @param fnorm Norm of the residual vector
+   * @param rtol Relative residual convergence tolerance
+   * @param divtol Relative residual divergence tolerance
+   * @param stol Solution change convergence tolerance
+   * @param abstol Absolute residual convergence tolerance
+   * @param nfuncs Number of function evaluations
+   * @param max_funcs Maximum Number of function evaluations
+   * @param div_threshold Maximum value of residual before triggering divergence check
    */
-  virtual MooseNonlinearConvergenceReason
-  checkNonlinearConvergence(std::string & msg,
-                            const PetscInt it,
-                            const Real xnorm,
-                            const Real snorm,
-                            const Real fnorm,
-                            const Real rtol,
-                            const Real divtol,
-                            const Real stol,
-                            const Real abstol,
-                            const PetscInt nfuncs,
-                            const PetscInt max_funcs,
-                            const Real initial_residual_before_preset_bcs,
-                            const Real div_threshold);
+  virtual MooseNonlinearConvergenceReason checkNonlinearConvergence(std::string & msg,
+                                                                    const PetscInt it,
+                                                                    const Real xnorm,
+                                                                    const Real snorm,
+                                                                    const Real fnorm,
+                                                                    const Real rtol,
+                                                                    const Real divtol,
+                                                                    const Real stol,
+                                                                    const Real abstol,
+                                                                    const PetscInt nfuncs,
+                                                                    const PetscInt max_funcs,
+                                                                    const Real div_threshold);
 
   /// Perform steps required before checking nonlinear convergence
   virtual void nonlinearConvergenceSetup() {}

@@ -113,10 +113,7 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     PerfGraphInterface(fe_problem.getMooseApp().perfGraph(), "NonlinearSystemBase"),
     _sys(sys),
     _last_nl_rnorm(0.),
-    _initial_residual_before_preset_bcs(0.),
-    _initial_residual_after_preset_bcs(0.),
     _current_nl_its(0),
-    _compute_initial_residual_before_preset_bcs(true),
     _residual_ghosted(NULL),
     _Re_time_tag(-1),
     _Re_time(NULL),
@@ -141,6 +138,9 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _n_residual_evaluations(0),
     _final_residual(0.),
     _computing_initial_residual(false),
+    _pre_smo_residual(0),
+    _initial_residual(0),
+    _use_pre_smo_residual(false),
     _print_all_var_norms(false),
     _has_save_in(false),
     _has_diag_save_in(false),
@@ -691,6 +691,48 @@ NonlinearSystemBase::getSplit(const std::string & name)
   return _splits.getActiveObject(name);
 }
 
+bool
+NonlinearSystemBase::shouldEvaluatePreSMOResidual() const
+{
+  // The legacy behavior (#10464) _always_ performs the pre-SMO residual evaluation
+  // regardless of whether it is needed.
+  //
+  // This is not ideal and has been fixed by #23472. This legacy option ensures a smooth transition
+  // to the new behavior. Modules and Apps that want to migrate to the new behavior should set this
+  // parameter to false.
+  if (_app.parameters().get<bool>("use_legacy_initial_residual_evaluation_bahavior"))
+    return true;
+
+  return _use_pre_smo_residual;
+}
+
+Real
+NonlinearSystemBase::referenceResidual() const
+{
+  return usePreSMOResidual() ? preSMOResidual() : initialResidual();
+}
+
+Real
+NonlinearSystemBase::preSMOResidual() const
+{
+  if (!shouldEvaluatePreSMOResidual())
+    mooseError("pre-SMO residual is requested but not evaluated.");
+
+  return _pre_smo_residual;
+}
+
+Real
+NonlinearSystemBase::initialResidual() const
+{
+  return _initial_residual;
+}
+
+void
+NonlinearSystemBase::setInitialResidual(Real r)
+{
+  _initial_residual = r;
+}
+
 void
 NonlinearSystemBase::zeroVectorForResidual(const std::string & vector_name)
 {
@@ -851,12 +893,17 @@ NonlinearSystemBase::setInitialSolution()
   deactiveAllMatrixTags();
 
   NumericVector<Number> & initial_solution(solution());
-  if (_predictor.get() && _predictor->shouldApply())
+  if (_predictor.get())
   {
-    TIME_SECTION("applyPredictor", 2, "Applying Predictor");
+    if (_predictor->shouldApply())
+    {
+      TIME_SECTION("applyPredictor", 2, "Applying Predictor");
 
-    _predictor->apply(initial_solution);
-    _fe_problem.predictorCleanup(initial_solution);
+      _predictor->apply(initial_solution);
+      _fe_problem.predictorCleanup(initial_solution);
+    }
+    else
+      _console << " Skipping predictor this step" << std::endl;
   }
 
   // do nodal BC
@@ -1840,6 +1887,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
 
   // Accumulate the occurrence of solution invalid warnings for the current iteration cumulative
   // counters
+  _app.solutionInvalidity().sync();
   _app.solutionInvalidity().solutionInvalidAccumulation();
 }
 
@@ -3016,6 +3064,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
 
   // Accumulate the occurrence of solution invalid warnings for the current iteration cumulative
   // counters
+  _app.solutionInvalidity().sync();
   _app.solutionInvalidity().solutionInvalidAccumulation();
 }
 
@@ -3622,9 +3671,8 @@ NonlinearSystemBase::needInterfaceMaterialOnSide(BoundaryID bnd_id, THREAD_ID ti
   return _interface_kernels.hasActiveBoundaryObjects(bnd_id, tid);
 }
 
-bool
-NonlinearSystemBase::needSubdomainMaterialOnSide(SubdomainID /*subdomain_id*/,
-                                                 THREAD_ID /*tid*/) const
+bool NonlinearSystemBase::needSubdomainMaterialOnSide(SubdomainID /*subdomain_id*/,
+                                                      THREAD_ID /*tid*/) const
 {
   return _doing_dg;
 }

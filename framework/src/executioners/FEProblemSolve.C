@@ -87,11 +87,21 @@ FEProblemSolve::validParams()
       "Specifies whether or not to reuse the base vector for matrix-free calculation");
   params.addParam<bool>(
       "skip_exception_check", false, "Specifies whether or not to skip exception check");
+  params.addDeprecatedParam<bool>("compute_initial_residual_before_preset_bcs",
+                                  false,
+                                  "Use the residual norm computed *before* preset BCs are imposed "
+                                  "in relative convergence check.",
+                                  "This parameter is deprecated in favor of 'use_pre_SMO_residual' "
+                                  "and is recommended to stay false.");
+  params.deprecateParam(
+      "compute_initial_residual_before_preset_bcs", "use_pre_SMO_residual", "12/31/2025");
   params.addParam<bool>(
-      "compute_initial_residual_before_preset_bcs",
+      "use_pre_SMO_residual",
       false,
-      "Use the residual norm computed *before* preset BCs are imposed in relative "
-      "convergence check");
+      "Compute the pre-SMO residual norm and use it in the relative convergence check. The "
+      "pre-SMO residual is computed at the begining of the time step before solution-modifying "
+      "objects are executed. Solution-modifying objects include preset BCs, constraints, "
+      "predictors, etc.");
   params.addParam<bool>("automatic_scaling", "Whether to use automatic scaling for the variables.");
   params.addParam<bool>(
       "compute_scaling_once",
@@ -145,12 +155,11 @@ FEProblemSolve::validParams()
   params.addParamNamesToGroup("l_tol l_abs_tol l_max_its reuse_preconditioner "
                               "reuse_preconditioner_max_linear_its",
                               "Linear Solver");
-  params.addParamNamesToGroup("solve_type nl_max_its nl_forced_its nl_max_funcs "
-                              "nl_abs_tol nl_rel_tol nl_abs_step_tol nl_rel_step_tol "
-                              "snesmf_reuse_base compute_initial_residual_before_preset_bcs "
-                              "num_grids nl_div_tol nl_abs_div_tol residual_and_jacobian_together "
-                              "n_max_nonlinear_pingpong",
-                              "Nonlinear Solver");
+  params.addParamNamesToGroup(
+      "solve_type nl_max_its nl_forced_its nl_max_funcs nl_abs_tol nl_rel_tol nl_abs_step_tol "
+      "nl_rel_step_tol snesmf_reuse_base use_pre_SMO_residual num_grids nl_div_tol nl_abs_div_tol "
+      "residual_and_jacobian_together n_max_nonlinear_pingpong",
+      "Nonlinear Solver");
   params.addParamNamesToGroup(
       "automatic_scaling compute_scaling_once off_diagonals_in_auto_scaling "
       "scaling_group_variables resid_vs_jac_scaling_param ignore_variables_for_autoscaling",
@@ -208,9 +217,6 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
   es.parameters.set<unsigned int>("reuse preconditioner maximum linear iterations") =
       getParam<unsigned int>("reuse_preconditioner_max_linear_its");
 
-  _nl._compute_initial_residual_before_preset_bcs =
-      getParam<bool>("compute_initial_residual_before_preset_bcs");
-
   _problem.setSNESMFReuseBase(getParam<bool>("snesmf_reuse_base"),
                               _pars.isParamSetByUser("snesmf_reuse_base"));
 
@@ -223,6 +229,8 @@ FEProblemSolve::FEProblemSolve(Executioner & ex)
   _problem.setNonlinearAbsoluteDivergenceTolerance(getParam<Real>("nl_abs_div_tol"));
 
   _nl.setDecomposition(_splitting);
+
+  _nl.usePreSMOResidual() = getParam<bool>("use_pre_SMO_residual");
 
   if (getParam<bool>("residual_and_jacobian_together"))
     _nl.residualAndJacobianTogether();

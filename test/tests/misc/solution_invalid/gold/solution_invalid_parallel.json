@@ -25,15 +25,15 @@
                         "converged_counts": 4,
                         "message": "The diffusivity is greater than the threshold value!",
                         "object_type": "NonsafeMaterial",
-                        "timestep_counts": 16,
-                        "total_counts": 16
+                        "timestep_counts": 12,
+                        "total_counts": 12
                     },
                     {
                         "converged_counts": 4,
                         "message": "Extra invalid thing!",
                         "object_type": "NonsafeMaterial",
-                        "timestep_counts": 16,
-                        "total_counts": 16
+                        "timestep_counts": 12,
+                        "total_counts": 12
                     }
                 ]
             },

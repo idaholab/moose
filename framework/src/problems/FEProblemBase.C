@@ -8047,7 +8047,6 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
                                          const Real abstol,
                                          const PetscInt nfuncs,
                                          const PetscInt max_funcs,
-                                         const Real initial_residual_before_preset_bcs,
                                          const Real div_threshold)
 {
   TIME_SECTION("checkNonlinearConvergence", 5, "Checking Nonlinear Convergence");
@@ -8065,13 +8064,12 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
   MooseNonlinearConvergenceReason reason = MooseNonlinearConvergenceReason::ITERATING;
 
   Real fnorm_old;
-  // This is the first residual before any iterations have been done,
-  // but after preset BCs (if any) have been imposed on the solution
-  // vector.  We save it, and use it to detect convergence if
-  // compute_initial_residual_before_preset_bcs=false.
+  // This is the first residual before any iterations have been done, but after solution-modifying
+  // objects (if any) have been imposed on the solution vector.  We save it, and use it to detect
+  // convergence if system.usePreSMOResidual() == false.
   if (it == 0)
   {
-    system._initial_residual_after_preset_bcs = fnorm;
+    system.setInitialResidual(fnorm);
     fnorm_old = fnorm;
     _n_nl_pingpong = 0;
   }
@@ -8111,12 +8109,9 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
 
   if ((it >= _nl_forced_its) && it && reason == MooseNonlinearConvergenceReason::ITERATING)
   {
-    // If compute_initial_residual_before_preset_bcs==false, then use the
-    // first residual computed by PETSc to determine convergence.
-    Real the_residual = system._compute_initial_residual_before_preset_bcs
-                            ? initial_residual_before_preset_bcs
-                            : system._initial_residual_after_preset_bcs;
-    if (checkRelativeConvergence(it, fnorm, the_residual, rtol, abstol, oss))
+    // Set the reference residual depending on what the user asks us to use.
+    const auto ref_residual = system.referenceResidual();
+    if (checkRelativeConvergence(it, fnorm, ref_residual, rtol, abstol, oss))
       reason = MooseNonlinearConvergenceReason::CONVERGED_FNORM_RELATIVE;
     else if (snorm < stol * xnorm)
     {
@@ -8124,10 +8119,10 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
           << '\n';
       reason = MooseNonlinearConvergenceReason::CONVERGED_SNORM_RELATIVE;
     }
-    else if (divtol > 0 && fnorm > the_residual * divtol)
+    else if (divtol > 0 && fnorm > ref_residual * divtol)
     {
-      oss << "Diverged due to initial residual " << the_residual << " > divergence tolerance "
-          << divtol << " * initial residual " << the_residual << '\n';
+      oss << "Diverged due to residual " << fnorm << " > divergence tolerance " << divtol
+          << " * initial residual " << ref_residual << '\n';
       reason = MooseNonlinearConvergenceReason::DIVERGED_DTOL;
     }
     else if (_nl_abs_div_tol > 0 && fnorm > _nl_abs_div_tol)
@@ -8156,14 +8151,14 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
 bool
 FEProblemBase::checkRelativeConvergence(const PetscInt /*it*/,
                                         const Real fnorm,
-                                        const Real the_residual,
+                                        const Real ref_residual,
                                         const Real rtol,
                                         const Real /*abstol*/,
                                         std::ostringstream & oss)
 {
   if (_fail_next_nonlinear_convergence_check)
     return false;
-  if (fnorm <= the_residual * rtol)
+  if (fnorm <= ref_residual * rtol)
   {
     oss << "Converged due to function norm " << fnorm << " < relative tolerance (" << rtol << ")\n";
     return true;

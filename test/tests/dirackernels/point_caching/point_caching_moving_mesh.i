@@ -15,86 +15,88 @@
 []
 
 [Functions]
-  [./disp_x_fn]
+  [disp_x_fn]
     type = ParsedFunction
     expression = t
-  [../]
+  []
 
-  [./disp_y_fn]
+  [disp_y_fn]
     type = ParsedFunction
     expression = 0
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./disp_x]
+  [disp_x]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
-  [./disp_y]
+  [disp_y]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./time_derivative]
+  [time_derivative]
     type = TimeDerivative
     variable = u
-  [../]
+  []
 
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./disp_x_auxk]
+  [disp_x_auxk]
     type = FunctionAux
     variable = disp_x
     function = disp_x_fn
-  [../]
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
+  []
 
-  [./disp_y_auxk]
+  [disp_y_auxk]
     type = FunctionAux
     variable = disp_y
     function = disp_y_fn
-  [../]
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
+  []
 []
 
 [DiracKernels]
-  [./point_source]
+  [point_source]
     type = CachingPointSource
     variable = u
     # This is appropriate for this test, since we want the Dirac
     # points to be found in elements on the displaced Mesh.
     use_displaced_mesh = true
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 0
-  [../]
+  []
 
-  [./right]
+  [right]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
