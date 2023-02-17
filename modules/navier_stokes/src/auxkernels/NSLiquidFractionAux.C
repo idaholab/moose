@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NSFVLiquidFraction.h"
+#include "NSLiquidFractionAux.h"
 #include "MooseMesh.h"
 #include "NS.h"
 
-registerMooseObject("NavierStokesApp", NSFVLiquidFraction);
+registerMooseObject("NavierStokesApp", NSLiquidFractionAux);
 
 InputParameters
-NSFVLiquidFraction::validParams()
+NSLiquidFractionAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Computes liquid fraction $f_l$ given the temperature.");
@@ -24,7 +24,7 @@ NSFVLiquidFraction::validParams()
   return params;
 }
 
-NSFVLiquidFraction::NSFVLiquidFraction(const InputParameters & parameters)
+NSLiquidFractionAux::NSLiquidFractionAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _T(getFunctor<ADReal>(NS::temperature)),
     _T_solidus(getFunctor<ADReal>("T_solidus")),
@@ -33,7 +33,7 @@ NSFVLiquidFraction::NSFVLiquidFraction(const InputParameters & parameters)
 }
 
 Real
-NSFVLiquidFraction::computeValue()
+NSLiquidFractionAux::computeValue()
 {
   using namespace MetaPhysicL;
 

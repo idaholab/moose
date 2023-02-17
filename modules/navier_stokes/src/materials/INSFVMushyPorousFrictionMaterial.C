@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NSFVMushyPorousFrictionMaterial.h"
+#include "INSFVMushyPorousFrictionMaterial.h"
 #include "MooseMesh.h"
 #include "NS.h"
 
-registerMooseObject("NavierStokesApp", NSFVMushyPorousFrictionMaterial);
+registerMooseObject("NavierStokesApp", INSFVMushyPorousFrictionMaterial);
 
 InputParameters
-NSFVMushyPorousFrictionMaterial::validParams()
+INSFVMushyPorousFrictionMaterial::validParams()
 {
   InputParameters params = FunctorMaterial::validParams();
   params.addClassDescription(
@@ -27,7 +27,8 @@ NSFVMushyPorousFrictionMaterial::validParams()
   return params;
 }
 
-NSFVMushyPorousFrictionMaterial::NSFVMushyPorousFrictionMaterial(const InputParameters & parameters)
+INSFVMushyPorousFrictionMaterial::INSFVMushyPorousFrictionMaterial(
+    const InputParameters & parameters)
   : FunctorMaterial(parameters),
     _fl(getFunctor<ADReal>("liquid_fraction")),
     _mu(getFunctor<ADReal>(NS::mu)),
@@ -40,8 +41,9 @@ NSFVMushyPorousFrictionMaterial::NSFVMushyPorousFrictionMaterial(const InputPara
       [this](const auto & r, const auto & t) -> ADReal
       {
         constexpr Real epsilon = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
-
         const auto fs = 1.0 - _fl(r, t);
+        mooseAssert(_dendrite_spacing_scaling(r, t) > 0,
+                    "Dendrite spacing scaling should be positive!");
         const auto cs = _c / Utility::pow<2>(_dendrite_spacing_scaling(r, t));
         const auto Fk = 0.5 + std::atan(_s * (fs - _fs_crit)) / pi;
         const auto K =
@@ -54,8 +56,9 @@ NSFVMushyPorousFrictionMaterial::NSFVMushyPorousFrictionMaterial(const InputPara
       [this](const auto & r, const auto & t) -> ADReal
       {
         constexpr Real epsilon = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
-
         const auto fs = 1.0 - _fl(r, t);
+        mooseAssert(_dendrite_spacing_scaling(r, t) > 0,
+                    "Dendrite spacing scaling should be positive!");
         const auto cs = _c / Utility::pow<2>(_dendrite_spacing_scaling(r, t));
         const auto Fk = 0.5 + std::atan(_s * (fs - _fs_crit)) / pi;
         const auto K =

@@ -1,5 +1,5 @@
 [Tests]
-  design = 'NSFVLiquidFraction.md NSFVPhaseChangeSource.md NSFVMixtureMaterial.md'
+  design = 'NSLiquidFractionAux.md NSFVPhaseChangeSource.md NSFVMixtureMaterial.md'
   issues = '#23357'
   [solidification_exo_no_advection]
     type = 'Exodiff'

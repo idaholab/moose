@@ -1,0 +1,11 @@
+[Tests]
+  design = 'NSFVMixtureMaterial.md'
+  issues = '#23357'
+  [function-mixture]
+    requirement = 'The system shall be able to compute phase-averaged quantities using a material.'
+    type = CSVDiff
+    input = mixture.i
+    csvdiff = "mixture_out_cp_0001.csv mixture_out_k_0001.csv"
+    ad_indexing_type = 'global'
+  []
+[]

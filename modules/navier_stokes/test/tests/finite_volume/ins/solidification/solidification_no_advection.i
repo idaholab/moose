@@ -39,7 +39,7 @@ N = 10
 
 [AuxKernels]
   [compute_fl]
-    type = NSFVLiquidFraction
+    type = NSLiquidFractionAux
     variable = fl
     temperature = T
     T_liquidus = '${T_liquidus}'

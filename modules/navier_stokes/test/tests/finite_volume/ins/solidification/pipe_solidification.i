@@ -111,7 +111,7 @@ Ny = 5
     y = vel_y
   []
   [compute_fl]
-    type = NSFVLiquidFraction
+    type = NSLiquidFractionAux
     variable = fl
     temperature = T
     T_liquidus = '${T_liquidus}'
@@ -351,7 +351,7 @@ Ny = 5
     phase_1_fraction = fl
   []
   [mushy_zone_resistance]
-    type = NSFVMushyPorousFrictionMaterial
+    type = INSFVMushyPorousFrictionMaterial
     liquid_fraction = 'fl'
     mu = '${mu}'
     rho_l = '${rho_liquid}'

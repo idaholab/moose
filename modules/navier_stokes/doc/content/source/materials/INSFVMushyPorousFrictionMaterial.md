@@ -1,6 +1,6 @@
-# NSFVMushyPorousFrictionMaterial
+# INSFVMushyPorousFrictionMaterial
 
-!syntax description /Materials/NSFVMushyPorousFrictionMaterial
+!syntax description /Materials/INSFVMushyPorousFrictionMaterial
 
 This material computes the `Darcy_coefficient` and the `Forchheimer_coefficient` for a solidification problem.
 The model uses a mushy-zone approach to compute the friction coefficients.
@@ -30,8 +30,14 @@ F = C_F \frac{\rho_l}{\sqrt{K}} \,,
 
 where the Ergun coefficient is $C_F = 0.55$ and $\rho_l$ is the density of the liquid phase.
 
-!syntax parameters /Materials/NSFVMushyPorousFrictionMaterial
+!alert note
+This material is compatible with [INSFVMomentumFriction.md] which multiplies the
+incoming Forchheimer coefficient by the velocity magnitude; it is *incompatible*
+with [PINSFVMomentumFriction.md] which assumes the incoming Forchheimer
+coefficient already includes multiplication by the velocity magnitude.
 
-!syntax inputs /Materials/NSFVMushyPorousFrictionMaterial
+!syntax parameters /Materials/INSFVMushyPorousFrictionMaterial
 
-!syntax children /Materials/NSFVMushyPorousFrictionMaterial
+!syntax inputs /Materials/INSFVMushyPorousFrictionMaterial
+
+!syntax children /Materials/INSFVMushyPorousFrictionMaterial
