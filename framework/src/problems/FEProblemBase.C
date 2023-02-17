@@ -7722,7 +7722,7 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
                                          const Real abstol,
                                          const PetscInt nfuncs,
                                          const PetscInt max_funcs,
-                                         const Real initial_residual_before_preset_bcs,
+                                         const Real fnorm0_before_smo,
                                          const Real div_threshold)
 {
   TIME_SECTION("checkNonlinearConvergence", 5, "Checking Nonlinear Convergence");
@@ -7743,10 +7743,10 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
   // This is the first residual before any iterations have been done,
   // but after preset BCs (if any) have been imposed on the solution
   // vector.  We save it, and use it to detect convergence if
-  // compute_initial_residual_before_preset_bcs=false.
+  // system.shouldEvaluateFNormBeforeSMO() == false.
   if (it == 0)
   {
-    system._initial_residual_after_preset_bcs = fnorm;
+    system._fnorm0_after_smo = fnorm;
     fnorm_old = fnorm;
     _n_nl_pingpong = 0;
   }
@@ -7786,11 +7786,9 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
 
   if ((it >= _nl_forced_its) && it && reason == MooseNonlinearConvergenceReason::ITERATING)
   {
-    // If compute_initial_residual_before_preset_bcs==false, then use the
-    // first residual computed by PETSc to determine convergence.
-    Real the_residual = system._compute_initial_residual_before_preset_bcs
-                            ? initial_residual_before_preset_bcs
-                            : system._initial_residual_after_preset_bcs;
+    // Set the initial residual depending on what the user asks us to use.
+    Real the_residual =
+        system.shouldEvaluateFNormBeforeSMO() ? fnorm0_before_smo : system._fnorm0_after_smo;
     if (checkRelativeConvergence(it, fnorm, the_residual, rtol, abstol, oss))
       reason = MooseNonlinearConvergenceReason::CONVERGED_FNORM_RELATIVE;
     else if (snorm < stol * xnorm)

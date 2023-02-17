@@ -553,6 +553,22 @@ public:
   Moose::MooseKSPNormType getMooseKSPNormType() { return _ksp_norm; }
 
   /**
+   * We offer the option to check convergence against the residual norm \em prior to executing
+   * solution modifying objects. This method handles the logic as to whether we should perform such
+   * residual evaluation.
+   *
+   * \return A boolean indicating whether we should evaluate the initial residual before solution
+   * modifying objects.
+   */
+  bool shouldEvaluateFNormBeforeSMO() const;
+
+  /**
+   * \return A boolean indicating whether this nonlinear system has active solution-modifying
+   * objects?
+   */
+  bool hasActiveSolutionModifyingObjects() const;
+
+  /**
    * Indicated whether this system needs material properties on boundaries.
    * @return Boolean if IntegratedBCs are active
    */
@@ -678,11 +694,14 @@ public:
   System & _sys;
   // FIXME: make these protected and create getters/setters
   Real _last_nl_rnorm;
-  Real _initial_residual_before_preset_bcs;
-  Real _initial_residual_after_preset_bcs;
+  /// The initial residual _before_ executing solution modifying objects
+  Real _fnorm0_before_smo;
+  /// The initial residual _after_ executing solution modifying objects
+  Real _fnorm0_after_smo;
   std::vector<unsigned int> _current_l_its;
   unsigned int _current_nl_its;
-  bool _compute_initial_residual_before_preset_bcs;
+  /// Whether to use the pre-initial residual in the relative convergence check
+  bool _use_fnorm0_before_smo;
 
 protected:
   /**

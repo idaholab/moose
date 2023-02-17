@@ -19,6 +19,10 @@
 #include "MooseVariableScalar.h"
 #include "MooseTypes.h"
 #include "SolutionInvalidity.h"
+#include "DirichletBCBase.h"
+#include "ADDirichletBCBase.h"
+#include "Constraint.h"
+#include "Predictor.h"
 
 #include "libmesh/nonlinear_solver.h"
 #include "libmesh/petsc_nonlinear_solver.h"
@@ -139,7 +143,11 @@ NonlinearSystem::solve()
       _fe_problem.needsPreviousNewtonIteration())
     _nl_implicit_sys.nonlinear_solver->postcheck = Moose::compute_postcheck;
 
-  if (_fe_problem.solverParams()._type != Moose::ST_LINEAR)
+  // reset solution invalid counter for the time step
+  if (_time_integrator)
+    _app.solutionInvalidity().resetSolutionInvalidTimeStep();
+
+  if (shouldEvaluateFNormBeforeSMO())
   {
     TIME_SECTION("nlInitialResidual", 3, "Computing Initial Residual");
     // Calculate the initial residual for use in the convergence criterion.
@@ -147,10 +155,7 @@ NonlinearSystem::solve()
     _fe_problem.computeResidualSys(_nl_implicit_sys, *_current_solution, *_nl_implicit_sys.rhs);
     _computing_initial_residual = false;
     _nl_implicit_sys.rhs->close();
-    _initial_residual_before_preset_bcs = _nl_implicit_sys.rhs->l2_norm();
-    if (_compute_initial_residual_before_preset_bcs)
-      _console << "Initial residual before setting preset BCs: "
-               << _initial_residual_before_preset_bcs << std::endl;
+    _fnorm0_before_smo = _nl_implicit_sys.rhs->l2_norm();
   }
 
   // Clear the iteration counters
@@ -193,14 +198,10 @@ NonlinearSystem::solve()
 
   if (_time_integrator)
   {
-    // reset solution invalid counter for the time step
-    _app.solutionInvalidity().resetSolutionInvalidTimeStep();
     _time_integrator->solve();
     _time_integrator->postSolve();
     _n_iters = _time_integrator->getNumNonlinearIterations();
     _n_linear_iters = _time_integrator->getNumLinearIterations();
-    // Accumulate only the occurence of solution invalid warnings for the current time step counters
-    _app.solutionInvalidity().solutionInvalidAccumulationTimeStep();
   }
   else
   {
@@ -212,15 +213,15 @@ NonlinearSystem::solve()
   // store info about the solve
   _final_residual = _nl_implicit_sys.final_nonlinear_residual();
 
+  // Accumulate only the occurence of solution invalid warnings
+  _app.solutionInvalidity().solutionInvalidAccumulationTimeStep();
+
   // determine whether solution invalid occurs in the converged solution
   _solution_is_invalid = _app.solutionInvalidity().solutionInvalid();
 
   // output the solution invalid summary
   if (_solution_is_invalid)
   {
-    // sync all solution invalid counts to rank 0 process
-    _app.solutionInvalidity().sync();
-
     if (_fe_problem.allowInvalidSolution())
       mooseWarning("The Solution Invalidity warnings are detected but silenced! "
                    "Use Problem/allow_invalid_solution=false to activate ");
