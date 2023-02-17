@@ -527,6 +527,11 @@ private:
   GradientType evaluateGradient(const FaceArg & face, unsigned int) const override final;
   DotType evaluateDot(const ElemArg & elem, unsigned int) const override final;
 
+  /**
+   * Setup the boundary to Dirichlet BC map
+   */
+  void determineBoundaryToDirichletBCMap();
+
 public:
   const MooseArray<OutputType> & nodalValueArray() const override
   {
@@ -705,6 +710,7 @@ void
 MooseVariableFV<OutputType>::meshChanged()
 {
   _prev_elem = nullptr;
+  determineBoundaryToDirichletBCMap();
   MooseVariableField<OutputType>::meshChanged();
 }
 
