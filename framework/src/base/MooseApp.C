@@ -1700,12 +1700,7 @@ MooseApp::registerRestartableData(const std::string & name,
 
   auto & value = *data_it->second;
   if (!read_only)
-  {
-    if (value.declared())
-      mooseError("Attempted to declare restartable mesh meta data twice with the same name: ",
-                 name);
     value.setDeclared();
-  }
 
   return value;
 }
