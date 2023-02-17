@@ -102,10 +102,6 @@ private:
    */
   virtual std::string defaultMeshPropertyPrefix() const;
 
-  /// Helper function for actually registering the restartable data.
-  [[nodiscard]] RestartableDataValue &
-  registerMetaDataOnApp(const std::string & name, std::unique_ptr<RestartableDataValue> data);
-
   /// Helper for getting a mesh property
   [[nodiscard]] const RestartableDataValue &
   getMeshPropertyInternal(const std::string & data_name, const std::string & prefix) const;

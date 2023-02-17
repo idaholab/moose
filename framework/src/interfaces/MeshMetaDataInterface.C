@@ -21,14 +21,6 @@ MeshMetaDataInterface::MeshMetaDataInterface(MooseApp & moose_app)
 {
 }
 
-RestartableDataValue &
-MeshMetaDataInterface::registerMetaDataOnApp(const std::string & name,
-                                             std::unique_ptr<RestartableDataValue> data)
-{
-  return _meta_data_app.registerRestartableData(
-      name, std::move(data), 0, true, MooseApp::MESH_META_DATA);
-}
-
 bool
 MeshMetaDataInterface::hasMeshProperty(const std::string & data_name,
                                        const std::string & prefix) const
