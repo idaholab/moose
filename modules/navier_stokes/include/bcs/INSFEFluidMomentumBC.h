@@ -13,8 +13,11 @@
 #include "Function.h"
 
 /**
- * Specifies flow of momentum out of a boundary. This class assumes that the convection term has
- * been integrated by parts. Either a pressure or velocity boundary condition may be supplied
+ * Specifies flow of momentum out of a boundary. For the convection term, the formula could be
+ * in the conservative form, therefore requires integration by parts, or in the primitive form,
+ * therefore integration by parts is not applied.
+ * For the pressure gradient term, integration by parts is also optional.
+ * Either a pressure or velocity boundary condition may be supplied
  * through functions; branch pressure and density may be supplied, instead of a pressure function,
  * for gravity head calculations
  */
@@ -31,6 +34,8 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
 private:
+  bool _conservative_form;
+  bool _p_int_by_parts;
   unsigned int _component;
   const MaterialProperty<Real> & _mu;
   const MaterialProperty<Real> & _mu_t;

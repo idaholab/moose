@@ -29,5 +29,6 @@ protected:
 
   const VariableGradient & _grad_eps;
   bool _conservative_form;
+  bool _p_int_by_parts;
   unsigned _component;
 };
