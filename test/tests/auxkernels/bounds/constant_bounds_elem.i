@@ -1,34 +1,26 @@
 [Mesh]
   type = GeneratedMesh
-
-  dim = 2
-
+  dim = 1
   xmin = 0
   xmax = 1
-
-  ymin = 0
-  ymax = 1
-
   nx = 10
-  ny = 10
 []
 
 [Variables]
   [u]
-    order = FIRST
-    family = LAGRANGE
+    order = CONSTANT
+    family = MONOMIAL
   []
-
   [v]
-    order = FIRST
-    family = LAGRANGE
+    order = CONSTANT
+    family = MONOMIAL
   []
 []
 
 [AuxVariables]
   [bounds_dummy]
-    order = FIRST
-    family = LAGRANGE
+    order = CONSTANT
+    family = MONOMIAL
   []
 []
 
@@ -37,40 +29,65 @@
     type = Diffusion
     variable = u
   []
-
+  [reaction_u]
+    type = Reaction
+    variable = u
+  []
   [diff_v]
     type = Diffusion
     variable = v
+  []
+  [reaction_v]
+    type = Reaction
+    variable = v
+  []
+[]
+
+[DGKernels]
+  [dg_diff_u]
+    type = ADDGDiffusion
+    variable = u
+    epsilon = -1
+    sigma = 6
+    diff = 3
+  []
+  [dg_diff_v]
+    type = ADDGDiffusion
+    variable = v
+    epsilon = -1
+    sigma = 6
+    diff = 4
   []
 []
 
 [BCs]
   [left_u]
-    type = DirichletBC
+    type = DGFunctionDiffusionDirichletBC
     variable = u
-    boundary = 3
-    value = 0
+    boundary = '0'
+    function = -0.5
+    epsilon = -1
+    sigma = 6
   []
-
   [right_u]
-    type = DirichletBC
+    type = NeumannBC
     variable = u
     boundary = 1
-    value = 1
+    value = 30
   []
-
   [left_v]
-    type = DirichletBC
+    type = DGFunctionDiffusionDirichletBC
     variable = v
-    boundary = 3
-    value = 0
+    boundary = '0'
+    function = 4
+    epsilon = -1
+    sigma = 6
   []
-
   [right_v]
-    type = DirichletBC
+    type = NeumannBC
     variable = v
     boundary = 1
-    value = 1
+    value = -40
   []
 []
 
@@ -89,7 +106,6 @@
     bound_type = lower
     bound_value = 0
   []
-
   [v_upper_bound]
     type = ConstantBoundsAux
     variable = bounds_dummy
@@ -108,7 +124,6 @@
 
 [Executioner]
   type = Steady
-
   solve_type = 'PJFNK'
   petsc_options_iname = '-snes_type'
   petsc_options_value = 'vinewtonrsls'
