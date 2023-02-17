@@ -56,7 +56,7 @@ protected:
   template <typename T>
   [[nodiscard]] const T & getMeshProperty(const std::string & data_name)
   {
-    return getMeshProperty<T>(data_name, defaultMeshPropertyPrefix());
+    return getMeshProperty<T>(data_name, meshPropertyPrefix(data_name));
   }
 
   /**
@@ -73,12 +73,12 @@ protected:
 
   [[nodiscard]] bool hasMeshProperty(const std::string & data_name) const
   {
-    return hasMeshProperty(data_name, defaultMeshPropertyPrefix());
+    return hasMeshProperty(data_name, meshPropertyPrefix(data_name));
   }
   template <typename T>
   [[nodiscard]] bool hasMeshProperty(const std::string & data_name) const
   {
-    return hasMeshProperty<T>(data_name, defaultMeshPropertyPrefix());
+    return hasMeshProperty<T>(data_name, meshPropertyPrefix(data_name));
   }
 
   /**
@@ -92,15 +92,17 @@ protected:
    */
   [[nodiscard]] std::string meshPropertyName(const std::string & data_name) const
   {
-    return meshPropertyName(data_name, defaultMeshPropertyPrefix());
+    return meshPropertyName(data_name, meshPropertyPrefix(data_name));
   }
 
 private:
   /**
-   * The default prefix to use for meshPropertyName(), the name
-   * of the final MeshGenerator
+   * The default prefix to use for getting/seeing if mesh properties exist.
+   *
+   * For now, this is not supported except in MeshGenerators. In the future, we will
+   * automate looking for mesh properties.
    */
-  virtual std::string defaultMeshPropertyPrefix() const;
+  [[nodiscard]] virtual std::string meshPropertyPrefix(const std::string & data_name) const;
 
   /// Helper for getting a mesh property
   [[nodiscard]] const RestartableDataValue &

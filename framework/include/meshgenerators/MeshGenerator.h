@@ -304,10 +304,12 @@ protected:
 
 private:
   /**
-   * The default prefix to use for meshPropertyName(), the name
-   * of this MeshGenerator.
+   * Override of the default prefix to use when getting mesh properties.
+   *
+   * Until we support getting mesh properties from other mesh generators (which is coming),
+   * we will default to properties returned by this generator.
    */
-  [[nodiscard]] virtual std::string defaultMeshPropertyPrefix() const override final
+  [[nodiscard]] virtual std::string meshPropertyPrefix(const std::string &) const override final
   {
     return name();
   }

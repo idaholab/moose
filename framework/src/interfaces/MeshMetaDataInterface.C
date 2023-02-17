@@ -36,10 +36,10 @@ MeshMetaDataInterface::meshPropertyName(const std::string & data_name, const std
 }
 
 std::string
-MeshMetaDataInterface::defaultMeshPropertyPrefix() const
+MeshMetaDataInterface::meshPropertyPrefix(const std::string &) const
 {
-  mooseAssert(_meta_data_app.finalMeshGeneratorName().size(), "Not set");
-  return _meta_data_app.finalMeshGeneratorName();
+  mooseError("This object does not support obtaining a mesh property without a prefix.\n\nThis "
+             "capability is upcoming.");
 }
 
 const RestartableDataValue &
