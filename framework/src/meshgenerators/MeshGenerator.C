@@ -182,8 +182,13 @@ MeshGenerator::generateInternal()
   libmesh_parallel_only(comm());
   mooseAssert(comm().verify(type() + name()), "Inconsistent execution ordering");
 
+#ifndef NDEBUG
+  for (const auto & [name, mesh] : _requested_meshes)
+    mooseAssert(*mesh, "Null output from " + name);
+#endif
+
   auto mesh = generate();
-  mooseAssert(mesh, "Invalid mesh");
+  mooseAssert(mesh, "Null output");
 
   for (const auto & [requested_name, requested_mesh] : _requested_meshes)
     if (*requested_mesh)
