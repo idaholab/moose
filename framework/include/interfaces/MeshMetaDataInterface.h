@@ -143,7 +143,7 @@ MeshMetaDataInterface::getMeshProperty(const std::string & data_name, const std:
                        data_name,
                        "' with type '",
                        MooseUtils::prettyCppType<T>(),
-                       "',\nthe property was found with type '",
+                       "',\nthe property exists with different type '",
                        value->type(),
                        "'");
   return T_value->get();
