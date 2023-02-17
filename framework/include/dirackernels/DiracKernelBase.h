@@ -34,16 +34,6 @@ public:
   DiracKernelBase(const InputParameters & parameters);
 
   /**
-   * Computes the residual for the current element.
-   */
-  virtual void computeResidual() override = 0;
-
-  /**
-   * Computes the jacobian for the current element.
-   */
-  virtual void computeJacobian() override = 0;
-
-  /**
    * This gets called by computeOffDiagJacobian() at each quadrature point.
    */
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
@@ -83,16 +73,6 @@ public:
 
 protected:
   /**
-   * This is the virtual that derived classes should override for computing the residual.
-   */
-  virtual Real computeQpResidual() = 0;
-
-  /**
-   * This is the virtual that derived classes should override for computing the Jacobian.
-   */
-  virtual Real computeQpJacobian();
-
-  /**
    * Add the physical x,y,z point located in the element "elem" to the list of points
    * this DiracKernel will be asked to evaluate a value at.
    */
@@ -112,7 +92,10 @@ protected:
    * the computeQpResidual() function to determine the cached ID of
    * the current point, in case this information is relevant.
    */
-  virtual unsigned currentPointCachedID() = 0;
+  unsigned currentPointCachedID();
+
+  ///< Current element
+  const Elem * const & _current_elem;
 
   /// Coordinate system
   const Moose::CoordinateSystemType & _coord_sys;

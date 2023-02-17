@@ -15,13 +15,6 @@
 #include "DiracKernelBase.h"
 
 // forward declarations
-#define TemplateVariableValue typename OutputTools<T>::VariableValue
-#define TemplateVariableGradient typename OutputTools<T>::VariableGradient
-#define TemplateVariablePhiValue typename OutputTools<T>::VariablePhiValue
-#define TemplateVariablePhiGradient typename OutputTools<T>::VariablePhiGradient
-#define TemplateVariableTestValue typename OutputTools<T>::VariableTestValue
-#define TemplateVariableTestGradient typename OutputTools<T>::VariableTestGradient
-
 template <typename>
 class DiracKernelTempl;
 
@@ -75,45 +68,34 @@ protected:
   /**
    * This is the virtual that derived classes should override for computing the residual.
    */
-  virtual Real computeQpResidual() override = 0;
+  virtual Real computeQpResidual() = 0;
 
   /**
    * This is the virtual that derived classes should override for computing the Jacobian.
    */
-  virtual Real computeQpJacobian() override;
-
-  /**
-   * Returns the user-assigned ID of the current Dirac point if it
-   * exits, and libMesh::invalid_uint otherwise.  Can be used e.g. in
-   * the computeQpResidual() function to determine the cached ID of
-   * the current point, in case this information is relevant.
-   */
-  virtual unsigned currentPointCachedID() override;
+  virtual Real computeQpJacobian();
 
   /// Variable this kernel acts on
   MooseVariableField<T> & _var;
 
-  ///< Current element
-  const Elem * const & _current_elem;
-
   // shape functions
 
   /// Values of shape functions at QPs
-  const TemplateVariablePhiValue & _phi;
+  const typename OutputTools<T>::VariablePhiValue & _phi;
   /// Gradients of shape functions at QPs
-  const TemplateVariablePhiGradient & _grad_phi;
+  const typename OutputTools<T>::VariablePhiGradient & _grad_phi;
 
   // test functions
 
   /// Values of test functions at QPs
-  const TemplateVariableTestValue & _test;
+  const typename OutputTools<T>::VariableTestValue & _test;
   /// Gradients of test functions at QPs
-  const TemplateVariableTestGradient & _grad_test;
+  const typename OutputTools<T>::VariableTestGradient & _grad_test;
 
   /// Holds the solution at current quadrature points
-  const TemplateVariableValue & _u;
+  const typename OutputTools<T>::VariableValue & _u;
   /// Holds the solution gradient at the current quadrature points
-  const TemplateVariableGradient & _grad_u;
+  const typename OutputTools<T>::VariableGradient & _grad_u;
 
   /// drop duplicate points or consider them in residual and Jacobian
   const bool _drop_duplicate_points;

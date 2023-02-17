@@ -55,6 +55,7 @@ DiracKernelBase::DiracKernelBase(const InputParameters & parameters)
     MaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, Moose::EMPTY_BOUNDARY_IDS),
     GeometricSearchInterface(this),
     BlockRestrictable(this),
+    _current_elem(_assembly.elem()),
     _coord_sys(_assembly.coordSystem()),
     _dirac_kernel_info(_subproblem.diracKernelInfo()),
     _q_point(_assembly.qPoints()),
@@ -67,12 +68,6 @@ DiracKernelBase::DiracKernelBase(const InputParameters & parameters)
 {
   // Stateful material properties are not allowed on DiracKernels
   statefulPropertiesAllowed(false);
-}
-
-Real
-DiracKernelBase::computeQpJacobian()
-{
-  return 0;
 }
 
 Real
@@ -380,4 +375,27 @@ DiracKernelBase::updateCaches(const Elem * old_elem, const Elem * new_elem, Poin
     reverse_cache_t::mapped_type & points = _reverse_point_cache[new_elem];
     points.push_back(std::make_pair(p, id));
   }
+}
+
+unsigned
+DiracKernelBase::currentPointCachedID()
+{
+  reverse_cache_t::iterator it = _reverse_point_cache.find(_current_elem);
+
+  // If the current Elem is not in the cache, return invalid_uint
+  if (it == _reverse_point_cache.end())
+    return libMesh::invalid_uint;
+
+  // Do a linear search in the (hopefully small) vector of Points for this Elem
+  reverse_cache_t::mapped_type & points = it->second;
+
+  for (const auto & points_it : points)
+  {
+    // If the current_point equals the cached point, return the associated id
+    if (_current_point.relative_fuzzy_equals(points_it.first))
+      return points_it.second;
+  }
+
+  // If we made it here, we didn't find the cached point, so return invalid_uint
+  return libMesh::invalid_uint;
 }

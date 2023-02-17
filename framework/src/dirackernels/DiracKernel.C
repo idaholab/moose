@@ -43,7 +43,6 @@ DiracKernelTempl<T>::DiracKernelTempl(const InputParameters & parameters)
                               std::is_same<T, Real>::value ? Moose::VarFieldType::VAR_FIELD_STANDARD
                                                            : Moose::VarFieldType::VAR_FIELD_VECTOR),
     _var(this->mooseVariableField()),
-    _current_elem(_var.currentElem()),
     _phi(_assembly.phi(_var)),
     _grad_phi(_assembly.gradPhi(_var)),
     _test(_var.phi()),
@@ -162,30 +161,6 @@ Real
 DiracKernelTempl<T>::computeQpOffDiagJacobian(unsigned int /*jvar*/)
 {
   return 0;
-}
-
-template <typename T>
-unsigned
-DiracKernelTempl<T>::currentPointCachedID()
-{
-  reverse_cache_t::iterator it = _reverse_point_cache.find(_current_elem);
-
-  // If the current Elem is not in the cache, return invalid_uint
-  if (it == _reverse_point_cache.end())
-    return libMesh::invalid_uint;
-
-  // Do a linear search in the (hopefully small) vector of Points for this Elem
-  reverse_cache_t::mapped_type & points = it->second;
-
-  for (const auto & points_it : points)
-  {
-    // If the current_point equals the cached point, return the associated id
-    if (_current_point.relative_fuzzy_equals(points_it.first))
-      return points_it.second;
-  }
-
-  // If we made it here, we didn't find the cached point, so return invalid_uint
-  return libMesh::invalid_uint;
 }
 
 // Explicitly instantiates the two versions of the DiracKernelTempl class
