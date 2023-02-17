@@ -198,11 +198,14 @@ MeshGenerator::generateInternal()
 
   for (const auto & [requested_name, requested_mesh] : _requested_meshes)
     if (*requested_mesh)
-      mooseError("The mesh from input ",
-                 std::as_const(_app).getMeshGenerator(requested_name).type(),
-                 " '",
-                 std::as_const(_app).getMeshGenerator(requested_name).name(),
-                 "' was not taken ownership of.");
+      mooseError(
+          "The mesh from input ",
+          std::as_const(_app).getMeshGenerator(requested_name).type(),
+          " '",
+          std::as_const(_app).getMeshGenerator(requested_name).name(),
+          "' was not moved.\n\nThe MeshGenerator system requires that the memory from all input "
+          "meshes\nare managed by the requesting MeshGenerator during the generate phase.\n\nThis "
+          "is achieved with a std::move() operation.");
 
   if (getParam<bool>("show_info"))
   {
