@@ -13,8 +13,8 @@
   [right]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 3
-    ny = 3
+    nx = 100
+    ny = 100
     xmin = 3
     xmax = 6
     ymin = -5
