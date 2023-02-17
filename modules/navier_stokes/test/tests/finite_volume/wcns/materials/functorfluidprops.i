@@ -37,19 +37,19 @@ inlet_v = 4
 
 [FVKernels]
   [u_time]
-    type = FVTimeKernel
+    type = FVFunctorTimeKernel
     variable = u
   []
   [v_time]
-    type = FVTimeKernel
+    type = FVFunctorTimeKernel
     variable = v
   []
   [p_time]
-    type = FVTimeKernel
+    type = FVFunctorTimeKernel
     variable = pressure
   []
   [T_time]
-    type = FVTimeKernel
+    type = FVFunctorTimeKernel
     variable = T
   []
 []

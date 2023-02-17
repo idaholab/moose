@@ -45,6 +45,8 @@ BernoulliPressureVariable::initialSetup()
   _w = &getFunctor<ADReal>("w", _subproblem);
   _eps = &getFunctor<ADReal>(NS::porosity, _subproblem);
   _rho = &getFunctor<ADReal>(NS::density, _subproblem);
+
+  INSFVPressureVariable::initialSetup();
 }
 
 std::pair<bool, ADRealVectorValue>

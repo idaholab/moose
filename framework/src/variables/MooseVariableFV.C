@@ -75,6 +75,7 @@ MooseVariableFV<OutputType>::MooseVariableFV(const InputParameters & parameters)
     _phi_neighbor(this->_assembly.template fePhiNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
     _grad_phi_neighbor(
         this->_assembly.template feGradPhiNeighbor<OutputShape>(FEType(CONSTANT, MONOMIAL))),
+    _prev_elem(nullptr),
     _two_term_boundary_expansion(this->isParamValid("two_term_boundary_expansion")
                                      ? this->template getParam<bool>("two_term_boundary_expansion")
                                      :
@@ -372,10 +373,9 @@ template <typename OutputType>
 OutputType
 MooseVariableFV<OutputType>::getValue(const Elem * elem) const
 {
-  std::vector<dof_id_type> dof_indices;
-  this->_dof_map.dof_indices(elem, dof_indices, _var_num);
-  mooseAssert(dof_indices.size() == 1, "Wrong size for dof indices");
-  OutputType value = (*this->_sys.currentSolution())(dof_indices[0]);
+  Moose::initDofIndices(const_cast<MooseVariableFV<OutputType> &>(*this), *elem);
+  mooseAssert(_dof_indices.size() == 1, "Wrong size for dof indices");
+  OutputType value = (*this->_sys.currentSolution())(_dof_indices[0]);
   return value;
 }
 
@@ -425,29 +425,12 @@ template <typename OutputType>
 std::pair<bool, const FVDirichletBCBase *>
 MooseVariableFV<OutputType>::getDirichletBC(const FaceInfo & fi) const
 {
-  std::vector<FVDirichletBCBase *> bcs;
+  for (const auto bnd_id : fi.boundaryIDs())
+    if (auto it = _boundary_id_to_dirichlet_bc.find(bnd_id);
+        it != _boundary_id_to_dirichlet_bc.end())
+      return {true, it->second};
 
-  this->_subproblem.getMooseApp()
-      .theWarehouse()
-      .query()
-      .template condition<AttribSystem>("FVDirichletBC")
-      .template condition<AttribThread>(_tid)
-      .template condition<AttribBoundaries>(fi.boundaryIDs())
-      .template condition<AttribVar>(_var_num)
-      .template condition<AttribSysNum>(this->_sys.number())
-      .queryInto(bcs);
-  mooseAssert(bcs.size() <= 1, "cannot have multiple dirichlet BCs on the same boundary");
-
-  bool has_dirichlet_bc = bcs.size() > 0;
-
-  if (has_dirichlet_bc)
-  {
-    mooseAssert(bcs[0], "The FVDirichletBC is null!");
-
-    return std::make_pair(true, bcs[0]);
-  }
-  else
-    return std::make_pair(false, nullptr);
+  return {false, nullptr};
 }
 
 template <typename OutputType>
@@ -492,14 +475,13 @@ MooseVariableFV<OutputType>::getElemValue(const Elem * const elem) const
           Moose::stringify(this->activeSubdomains()) + " the subdomain of the element " +
           std::to_string(elem->subdomain_id()));
 
-  std::vector<dof_id_type> dof_indices;
-  this->_dof_map.dof_indices(elem, dof_indices, _var_num);
+  Moose::initDofIndices(const_cast<MooseVariableFV<OutputType> &>(*this), *elem);
 
   mooseAssert(
-      dof_indices.size() == 1,
+      _dof_indices.size() == 1,
       "There should only be one dof-index for a constant monomial variable on any given element");
 
-  dof_id_type index = dof_indices[0];
+  const dof_id_type index = _dof_indices[0];
 
   ADReal value = (*_solution)(index);
 
@@ -813,14 +795,13 @@ MooseVariableFV<Real>::evaluateDot(const ElemArg & elem_arg,
               "A time derivative is being requested but we do not have a time integrator so we'll "
               "have no idea how to compute it");
 
-  std::vector<dof_id_type> dof_indices;
-  this->_dof_map.dof_indices(elem, dof_indices, _var_num);
+  Moose::initDofIndices(const_cast<MooseVariableFV<Real> &>(*this), *elem);
 
   mooseAssert(
-      dof_indices.size() == 1,
+      _dof_indices.size() == 1,
       "There should only be one dof-index for a constant monomial variable on any given element");
 
-  const dof_id_type dof_index = dof_indices[0];
+  const dof_id_type dof_index = _dof_indices[0];
 
   if (_var_kind == Moose::VAR_NONLINEAR)
   {
@@ -840,6 +821,44 @@ MooseVariableFV<OutputType>::prepareAux()
 {
   _element_data->prepareAux();
   _neighbor_data->prepareAux();
+}
+
+template <typename OutputType>
+void
+MooseVariableFV<OutputType>::determineBoundaryToDirichletBCMap()
+{
+  _boundary_id_to_dirichlet_bc.clear();
+  std::vector<FVDirichletBCBase *> bcs;
+
+  // I believe because query() returns by value but condition returns by reference that binding to a
+  // const lvalue reference results in the query() getting destructed and us holding onto a dangling
+  // reference. I think that condition returned by value we would be able to bind to a const lvalue
+  // reference here. But as it is we'll bind to a regular lvalue
+  const auto base_query = this->_subproblem.getMooseApp()
+                              .theWarehouse()
+                              .query()
+                              .template condition<AttribSystem>("FVDirichletBC")
+                              .template condition<AttribThread>(_tid)
+                              .template condition<AttribVar>(_var_num)
+                              .template condition<AttribSysNum>(this->_sys.number());
+
+  for (const auto bnd_id : this->_mesh.getBoundaryIDs())
+  {
+    auto base_query_copy = base_query;
+    base_query_copy.template condition<AttribBoundaries>(std::set<BoundaryID>({bnd_id}))
+        .queryInto(bcs);
+    mooseAssert(bcs.size() <= 1, "cannot have multiple dirichlet BCs on the same boundary");
+    if (!bcs.empty())
+      _boundary_id_to_dirichlet_bc.emplace(bnd_id, bcs[0]);
+  }
+}
+
+template <typename OutputType>
+void
+MooseVariableFV<OutputType>::initialSetup()
+{
+  determineBoundaryToDirichletBCMap();
+  MooseVariableField<OutputType>::initialSetup();
 }
 
 template class MooseVariableFV<Real>;

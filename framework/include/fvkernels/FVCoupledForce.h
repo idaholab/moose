@@ -25,6 +25,8 @@ protected:
   ADReal computeQpResidual() override;
 
 protected:
-  const ADVariableValue & _v;
+  /// The coupled functor applying the force
+  const Moose::Functor<ADReal> & _v;
+  /// An optional coefficient multiplying the coupled force
   const Real _coef;
 };

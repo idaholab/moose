@@ -369,12 +369,21 @@ IterationAdaptiveDT::limitDTToPostprocessorValue(Real & limitedDT) const
   if (_pps_value.size() != 0 && _t_step > 1)
   {
     Real limiting_pps_value = *_pps_value[0];
+    unsigned int i_min = 0;
     for (size_t i = 1; i < _pps_value.size(); ++i)
       if (*_pps_value[i] < limiting_pps_value)
+      {
         limiting_pps_value = *_pps_value[i];
+        i_min = i;
+      }
 
     if (limitedDT > limiting_pps_value)
     {
+      if (limiting_pps_value < 0)
+        mooseWarning(
+            "Negative timestep limiting postprocessor '" +
+            getParam<std::vector<PostprocessorName>>("timestep_limiting_postprocessor")[i_min] +
+            "': " + std::to_string(limiting_pps_value));
       limitedDT = std::max(_dt_min, limiting_pps_value);
 
       if (_verbose)

@@ -121,7 +121,7 @@ template <typename T>
 unsigned int
 ShapeUserObject<T>::coupled(const std::string & var_name, unsigned int comp) const
 {
-  const auto * var = Coupleable::getVarHelper<MooseVariable>(var_name, comp);
+  const auto * var = this->template getVarHelper<MooseVariable>(var_name, comp);
 
   // add to the set of variables for which executeJacobian will be called
   if (_compute_jacobians && var->kind() == Moose::VAR_NONLINEAR)

@@ -1435,11 +1435,26 @@ protected:
    */
   const MooseVariableFieldBase * getFieldVar(const std::string & var_name, unsigned int comp) const;
 
+  /*
+   * Extract pointer to a base coupled field variable. Could be either a finite volume or finite
+   * element variable
+   * @param var_name Name of variable desired
+   * @param comp Component number of multiple coupled variables
+   * @return Pointer to the desired variable
+   */
+  MooseVariableFieldBase * getFieldVar(const std::string & var_name, unsigned int comp);
+
   /**
    * Helper that that be used to retrieve a variable of arbitrary type \p T
    */
   template <typename T>
   const T * getVarHelper(const std::string & var_name, unsigned int comp) const;
+
+  /**
+   * Helper that can be used to retrieve a variable of arbitrary type \p T
+   */
+  template <typename T>
+  T * getVarHelper(const std::string & var_name, unsigned int comp);
 
   /**
    * Extract pointer to a coupled variable
@@ -1609,8 +1624,8 @@ private:
 };
 
 template <typename T>
-const T *
-Coupleable::getVarHelper(const std::string & var_name, unsigned int comp) const
+T *
+Coupleable::getVarHelper(const std::string & var_name, unsigned int comp)
 {
   auto name_to_use = var_name;
 
@@ -1659,4 +1674,11 @@ Coupleable::getVarHelper(const std::string & var_name, unsigned int comp) const
     mooseError(
         "Variable '", name_to_use, "' is of a different C++ type than you tried to fetch it as.");
   }
+}
+
+template <typename T>
+const T *
+Coupleable::getVarHelper(const std::string & var_name, unsigned int comp) const
+{
+  return const_cast<Coupleable *>(this)->getVarHelper<T>(var_name, comp);
 }

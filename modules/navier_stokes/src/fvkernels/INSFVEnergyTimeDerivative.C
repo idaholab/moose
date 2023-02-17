@@ -17,7 +17,7 @@ registerMooseObject("NavierStokesApp", INSFVEnergyTimeDerivative);
 InputParameters
 INSFVEnergyTimeDerivative::validParams()
 {
-  InputParameters params = FVTimeKernel::validParams();
+  InputParameters params = FVFunctorTimeKernel::validParams();
   params.addClassDescription(
       "Adds the time derivative term to the incompressible Navier-Stokes energy equation.");
   params.addRequiredParam<MooseFunctorName>(NS::density, "Density");
@@ -26,7 +26,7 @@ INSFVEnergyTimeDerivative::validParams()
 }
 
 INSFVEnergyTimeDerivative::INSFVEnergyTimeDerivative(const InputParameters & params)
-  : FVTimeKernel(params),
+  : FVFunctorTimeKernel(params),
     _rho(getFunctor<ADReal>(getParam<MooseFunctorName>(NS::density))),
     _cp(getFunctor<ADReal>(getParam<MooseFunctorName>(NS::cp)))
 {
@@ -38,5 +38,5 @@ ADReal
 INSFVEnergyTimeDerivative::computeQpResidual()
 {
   const auto & elem_arg = makeElemArg(_current_elem);
-  return _rho(elem_arg) * _cp(elem_arg) * FVTimeKernel::computeQpResidual();
+  return _rho(elem_arg) * _cp(elem_arg) * _var.dot(elem_arg);
 }

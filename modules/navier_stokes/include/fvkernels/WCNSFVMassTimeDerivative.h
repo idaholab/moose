@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "FVTimeKernel.h"
+#include "FVFunctorTimeKernel.h"
 
 /**
  * Computes the mass time derivative for the weakly compressible formulation of the mass
  * equation, using functor material properties
  */
-class WCNSFVMassTimeDerivative : public FVTimeKernel
+class WCNSFVMassTimeDerivative : public FVFunctorTimeKernel
 {
 public:
   static InputParameters validParams();

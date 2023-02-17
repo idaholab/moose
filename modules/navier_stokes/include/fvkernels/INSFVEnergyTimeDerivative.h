@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include "FVTimeKernel.h"
+#include "FVFunctorTimeKernel.h"
 
-class INSFVEnergyTimeDerivative : public FVTimeKernel
+class INSFVEnergyTimeDerivative : public FVFunctorTimeKernel
 {
 public:
   static InputParameters validParams();

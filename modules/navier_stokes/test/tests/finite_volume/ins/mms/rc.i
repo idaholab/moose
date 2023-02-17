@@ -203,23 +203,23 @@ rho=1.1
     execute_on = 'timestep_end'
   []
   [./L2u]
-    type = ElementL2Error
-    variable = u
-    function = exact_u
+    type = ElementL2FunctorError
+    approximate = u
+    exact = exact_u
     outputs = 'console csv'
     execute_on = 'timestep_end'
   [../]
   [./L2v]
-    variable = v
-    function = exact_v
-    type = ElementL2Error
+    approximate = v
+    exact = exact_v
+    type = ElementL2FunctorError
     outputs = 'console csv'
     execute_on = 'timestep_end'
   [../]
   [./L2p]
-    variable = pressure
-    function = exact_p
-    type = ElementL2Error
+    approximate = pressure
+    exact = exact_p
+    type = ElementL2FunctorError
     outputs = 'console csv'
     execute_on = 'timestep_end'
   [../]

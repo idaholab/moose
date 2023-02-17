@@ -61,7 +61,7 @@ ADReal
 FVPointValueConstraint::computeQpResidual()
 {
   if (_current_elem == _my_elem)
-    return _u[_qp] - _phi0;
+    return _var(makeElemArg(_current_elem)) - _phi0;
   else
     return 0;
 }

@@ -35,11 +35,11 @@ protected:
   virtual const Moose::FunctorBase<ADReal> & epsFunctor() const { return _unity_functor; }
 
   /// x-velocity
-  const INSFVVelocityVariable * const _u_var;
+  const Moose::Functor<ADReal> & _u;
   /// y-velocity
-  const INSFVVelocityVariable * const _v_var;
+  const Moose::Functor<ADReal> * const _v;
   /// z-velocity
-  const INSFVVelocityVariable * const _w_var;
+  const Moose::Functor<ADReal> * const _w;
 
   /// the dimension of the simulation
   const unsigned int _dim;

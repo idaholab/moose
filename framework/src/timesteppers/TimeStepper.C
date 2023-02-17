@@ -90,6 +90,9 @@ TimeStepper::computeStep()
     else
       _current_dt = computeFailedDT();
   }
+  if (_current_dt < -TOLERANCE)
+    mooseError("Negative time step detected :" + std::to_string(_current_dt) +
+               " Investigate the TimeStepper to resolve this error");
 }
 
 bool
