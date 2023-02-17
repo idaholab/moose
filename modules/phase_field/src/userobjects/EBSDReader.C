@@ -88,7 +88,7 @@ EBSDReader::readFile()
       for (auto & mgn : meshgenerator_names)
       {
         const EBSDMeshGenerator * emg =
-            dynamic_cast<const EBSDMeshGenerator *>(&std::as_const(_app).getMeshGenerator(mgn));
+            dynamic_cast<const EBSDMeshGenerator *>(&_app.getMeshGenerator(mgn));
         if (emg)
         {
           if (!ebsd_meshgenerator_name.empty())
@@ -106,8 +106,8 @@ EBSDReader::readFile()
     }
 
     // get the selected or detected mesh generator
-    const EBSDMeshGenerator * emg = dynamic_cast<const EBSDMeshGenerator *>(
-        &std::as_const(_app).getMeshGenerator(ebsd_meshgenerator_name));
+    const EBSDMeshGenerator * emg =
+        dynamic_cast<const EBSDMeshGenerator *>(&_app.getMeshGenerator(ebsd_meshgenerator_name));
     if (!emg)
       paramError("ebsd_meshgenerator", "No valid EBSDMeshGenerator object found.");
 

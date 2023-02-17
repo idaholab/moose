@@ -527,7 +527,7 @@ RadiationTransferAction::addMeshGenerator()
 unsigned int
 RadiationTransferAction::nPatch(unsigned int j) const
 {
-  const MeshGenerator * mg = &std::as_const(_app).getMeshGenerator(meshGeneratorName(j));
+  const MeshGenerator * mg = &_app.getMeshGenerator(meshGeneratorName(j));
   const PatchSidesetGenerator * psg = dynamic_cast<const PatchSidesetGenerator *>(mg);
   if (!psg)
     mooseError("Failed to convert mesh generator ", mg->name(), " to PatchSidesetGenerator.");

@@ -1344,9 +1344,13 @@ private:
   bool runInputs() const;
 
   /**
-   * Get a mesh generator with its name
+   * Get a MeshGenerator with the name \p name.
+   *
+   * We add the "internal" here so that we allow objects that have non-const access to
+   * MooseApp to call getMeshGenerator without a const_cast. If the name was the same,
+   * you'd get an error about trying to access a private method.
    */
-  MeshGenerator & getMeshGenerator(const std::string & name)
+  MeshGenerator & getMeshGeneratorInternal(const std::string & name)
   {
     return const_cast<MeshGenerator &>(std::as_const(*this).getMeshGenerator(name));
   }
