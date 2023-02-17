@@ -1996,20 +1996,207 @@ MooseApp::header() const
 }
 
 void
-MooseApp::addMeshGenerator(const std::string & generator_name,
+MooseApp::addMeshGenerator(const std::string & type,
                            const std::string & name,
-                           InputParameters parameters)
+                           const InputParameters & params)
 {
-  std::shared_ptr<MeshGenerator> mesh_generator =
-      _factory.create<MeshGenerator>(generator_name, name, parameters);
+  mooseAssert(!_mesh_generator_params.count(name), "Already exists");
+  _mesh_generator_params.emplace(
+      std::piecewise_construct, std::forward_as_tuple(name), std::forward_as_tuple(type, params));
 
-  _mesh_generators.insert(std::make_pair(MooseUtils::shortName(name), mesh_generator));
+  // This is a sub mesh generator
+  if (constructingMeshGenerators())
+    createMeshGenerator(name);
+}
+
+std::vector<std::pair<std::string, MeshGeneratorName>>
+MooseApp::getMeshGeneratorParamDependencies(const InputParameters & params) const
+{
+  std::vector<std::pair<std::string, MeshGeneratorName>> dependencies;
+
+  auto add_dependency = [&dependencies](const auto & param_name, const auto & dependency)
+  {
+    if (dependency.size())
+      dependencies.emplace_back(param_name, dependency);
+  };
+
+  for (const auto & [name, param] : params)
+    if (const auto dependency =
+            dynamic_cast<const Parameters::Parameter<MeshGeneratorName> *>(param.get()))
+      add_dependency(name, dependency->get());
+    else if (const auto dependencies =
+                 dynamic_cast<const Parameters::Parameter<std::vector<MeshGeneratorName>> *>(
+                     param.get()))
+      for (const auto & dependency : dependencies->get())
+        add_dependency(name, dependency);
+
+  return dependencies;
+}
+
+void
+MooseApp::createAddedMeshGenerators()
+{
+  mooseAssert(!constructedMeshGenerators(), "Should not run now");
+
+  DependencyResolver<std::string> resolver;
+
+  // Define the dependencies known so far
+  for (const auto & [name, type_params_pair] : _mesh_generator_params)
+  {
+    resolver.addItem(name);
+    for (const auto & param_dependency_pair :
+         getMeshGeneratorParamDependencies(type_params_pair.second))
+      resolver.addEdge(param_dependency_pair.second, name);
+  }
+
+  std::vector<std::vector<std::string>> ordered_generators;
+  try
+  {
+    ordered_generators = resolver.getSortedValuesSets();
+  }
+  catch (CyclicDependencyException<std::string> & e)
+  {
+    mooseError("Cyclic dependencies detected in mesh generation: ",
+               MooseUtils::join(e.getCyclicDependencies(), " <- "));
+  }
+
+  // Construct all of the mesh generators that we know exist
+  for (const auto & generator_names : ordered_generators)
+    for (const auto & generator_name : generator_names)
+      if (_mesh_generator_params.count(generator_name))
+        createMeshGenerator(generator_name);
+
+  mooseAssert(_mesh_generator_params.empty(), "Should be empty");
+}
+
+std::shared_ptr<MeshGenerator>
+MooseApp::createMeshGenerator(const std::string & generator_name)
+{
+  mooseAssert(constructingMeshGenerators(), "Should not run now");
+
+  const auto find_params = _mesh_generator_params.find(generator_name);
+  mooseAssert(find_params != _mesh_generator_params.end(), "Not added");
+  const auto & [type, params] = find_params->second;
+
+  std::shared_ptr<MeshGenerator> mg = _factory.create<MeshGenerator>(type, generator_name, params);
+
+  // Check for existance of all of the dependencies (by name) and setup
+  // the tree structure (add parents and children)
+  for (const auto & dependency : mg->getRequestedMeshGenerators())
+  {
+    if (!hasMeshGenerator(dependency))
+      mg->mooseError("Dependent MeshGenerator '", dependency, "' does not exist");
+    auto & dependency_mg = getMeshGenerator(dependency);
+    mg->addParentMeshGenerator(dependency_mg, MeshGenerator::AddParentChildKey());
+    dependency_mg.addChildMeshGenerator(*mg, MeshGenerator::AddParentChildKey());
+  }
+
+  // Loop through all of the MeshGeneratorName and std::vector<MeshGeneratorName>
+  // parameters (meshes that we should depend on), and make sure that either:
+  // - We directly depend on them and requested a mesh them
+  // - We created a sub generator that depends on them and we declared it
+  for (const auto & param_dependency_pair : getMeshGeneratorParamDependencies(mg->parameters()))
+  {
+    const auto & param_name = param_dependency_pair.first;
+    const auto & dependency_name = param_dependency_pair.second;
+
+    // True if this dependency was requested and is a parent
+    if (mg->isParentMeshGenerator(dependency_name))
+    {
+      mooseAssert(mg->getRequestedMeshGenerators().count(dependency_name), "Wasn't requested");
+      continue;
+    }
+
+    // Whether or not this is a dependency of at least one SubGenerator
+    auto find_sub_dependency = std::find_if(mg->getSubMeshGenerators().begin(),
+                                            mg->getSubMeshGenerators().end(),
+                                            [&dependency_name](const auto & mg)
+                                            { return mg->isParentMeshGenerator(dependency_name); });
+    const auto is_sub_dependency = find_sub_dependency != mg->getSubMeshGenerators().end();
+
+    // This should be used by a sub generator
+    if (mg->getRequestedMeshGeneratorsForSub().count(dependency_name))
+    {
+      if (!is_sub_dependency)
+        mg->mooseError("The sub MeshGenerator dependency declared in parameter '",
+                       param_name,
+                       "' was not used.");
+    }
+    // This was used by a sub generator but wasn't declared
+    else if (is_sub_dependency)
+      mg->mooseError("The ",
+                     getMeshGenerator(dependency_name).type(),
+                     " '",
+                     dependency_name,
+                     "' was referenced in the parameter '",
+                     param_name,
+                     "'\nand used in the sub ",
+                     (*find_sub_dependency)->type(),
+                     " '",
+                     (*find_sub_dependency)->name(),
+                     "',\nbut was not declared as a sub dependency.\n\nTo correct this, declare "
+                     "the mesh in the parameter '",
+                     param_name,
+                     "'\nas a sub dependency with getMeshForSub().");
+    // Doesn't exist at all
+    else if (!hasMeshGenerator(dependency_name))
+      mg->mooseError("The MeshGenerator '",
+                     dependency_name,
+                     "' referenced in the parameter '",
+                     param_name,
+                     "'\ndoes not exist.");
+    // Does exist but wasn't used at all
+    else
+      mg->mooseError(
+          "Failed to request the generated mesh(es) for the parameter '",
+          param_name,
+          "'.\n\nIn specific, the mesh from ",
+          getMeshGenerator(dependency_name).type(),
+          " '",
+          dependency_name,
+          "' was not requested.\n\nTo correct this, you should remove the parameter if the "
+          "mesh(es) are not needed, or request the mesh(es) with getMesh()/getMeshes().");
+  }
+
+  // Make sure that sub mesh generators follow a very explicit dependency chain. We only
+  // want independent chains that branch off from the MeshGenerator that create them
+  for (const auto & sub_mg : mg->getSubMeshGenerators())
+    for (const auto & sub_mg_parent : sub_mg->getParentMeshGenerators())
+    {
+      if (!mg->getRequestedMeshGeneratorsForSub().count(sub_mg_parent->name()) &&
+          !mg->getSubMeshGenerators().count(sub_mg_parent) &&
+          !sub_mg->getSubMeshGenerators().count(sub_mg_parent) &&
+          !sub_mg_parent->getParentMeshGenerators().empty())
+      {
+        mg->mooseError(
+            "The dependency ",
+            sub_mg_parent->type(),
+            " '",
+            sub_mg_parent->name(),
+            "'\nof sub generator ",
+            sub_mg->type(),
+            " '",
+            sub_mg->name(),
+            "'\nis not a supported dependency.\n\nSub generators may only have as dependencies the "
+            "MeshGenerator that creates them and\nother subgenerators created in the same chain.");
+      }
+    }
+
+  mooseAssert(!_mesh_generators.count(generator_name), "Already created");
+  _mesh_generators.emplace(generator_name, mg);
+  _mesh_generator_params.erase(find_params);
+
+  return mg;
 }
 
 const MeshGenerator &
 MooseApp::getMeshGenerator(const std::string & name) const
 {
-  return *_mesh_generators.find(MooseUtils::shortName(name))->second.get();
+  const auto it = _mesh_generators.find(name);
+  if (it == _mesh_generators.end())
+    mooseError("Failed to find a MeshGenerator with the name '", name, "'");
+  mooseAssert(it->second, "Invalid shared pointer");
+  return *it->second;
 }
 
 std::vector<std::string>
@@ -2022,7 +2209,7 @@ MooseApp::getMeshGeneratorNames() const
 }
 
 bool
-MooseApp::hasMeshGenerator(const std::string & name) const
+MooseApp::hasMeshGenerator(const MeshGeneratorName & name) const
 {
   return std::find_if(_mesh_generators.begin(),
                       _mesh_generators.end(),
@@ -2043,39 +2230,26 @@ MooseApp::getMeshGeneratorOutput(const std::string & name)
 void
 MooseApp::createMeshGeneratorOrder()
 {
-  // we only need to create the order once
-  if (_ordered_generators.size() > 0)
-    return;
+  mooseAssert(appendingMeshGenerators() || executingMeshGenerators(), "Incorrect call time");
+  TIME_SECTION("createMeshGeneratorOrder", 1, "Ordering Mesh Generators");
 
-  TIME_SECTION("executeMeshGenerators", 1, "Executing Mesh Generators");
+  _ordered_mesh_generators.clear();
 
-  DependencyResolver<std::shared_ptr<MeshGenerator>> resolver;
+  DependencyResolver<MeshGenerator *> resolver;
 
-  // Add all of the dependencies into the resolver and sort them
+  // Add all of the dependencies into the resolver
   for (const auto & it : _mesh_generators)
   {
-    // Make sure an item with no dependencies comes out too!
-    resolver.addItem(it.second);
-
-    std::vector<std::string> & generators = it.second->getDependencies();
-    for (const auto & depend_name : generators)
-    {
-      auto depend_it = _mesh_generators.find(depend_name);
-
-      if (depend_it == _mesh_generators.end())
-        mooseError("The MeshGenerator \"",
-                   depend_name,
-                   "\" was not created, did you make a "
-                   "spelling mistake or forget to include it "
-                   "in your input file?");
-
-      resolver.addEdge(depend_it->second, it.second);
-    }
+    MeshGenerator * mg = it.second.get();
+    resolver.addItem(mg);
+    for (const auto & dep_mg : mg->getParentMeshGenerators())
+      resolver.addEdge(&getMeshGenerator(dep_mg->name()), mg);
   }
 
+  // ...and sort them
   try
   {
-    _ordered_generators = resolver.getSortedValuesSets();
+    _ordered_mesh_generators = resolver.getSortedValuesSets();
   }
   catch (CyclicDependencyException<std::shared_ptr<MeshGenerator>> & e)
   {
@@ -2089,87 +2263,90 @@ MooseApp::createMeshGeneratorOrder()
                MooseUtils::join(names, " <- "));
   }
 
-  if (_ordered_generators.size())
+  if (_final_generator_name.size())
   {
-    auto & final_generators = _ordered_generators.back();
+    if (!hasMeshGenerator(_final_generator_name))
+      mooseError("The forced final MeshGenerator '", _final_generator_name, "' does not exist");
+  }
+  else if (_ordered_mesh_generators.size())
+  {
+    auto & final_generators = _ordered_mesh_generators.back();
+    _final_generator_name = final_generators.back()->name();
 
-    if (_final_generator_name.empty())
+    // See if we have multiple independent trees of generators
+    const auto ancestor_list = resolver.getAncestors(final_generators.back());
+    if (ancestor_list.size() != resolver.size())
     {
-      // If the _final_generated_mesh wasn't set from MeshGeneratorMesh, set it now
-      _final_generator_name = final_generators.back()->name();
+      // Need to remove duplicates and possibly perform a difference so we'll import out list
+      // into a set for these operations.
+      std::set<MeshGenerator *> ancestors(ancestor_list.begin(), ancestor_list.end());
+      // Get all of the items from the resolver so we can compare against the tree from the
+      // final generator we just pulled.
+      const auto & allValues = resolver.getSortedValues();
+      decltype(ancestors) all(allValues.begin(), allValues.end());
 
-      // See if we have multiple independent trees of generators
-      const auto ancestor_list = resolver.getAncestors(final_generators.back());
-      if (ancestor_list.size() != resolver.size())
+      decltype(ancestors) ind_tree;
+      std::set_difference(all.begin(),
+                          all.end(),
+                          ancestors.begin(),
+                          ancestors.end(),
+                          std::inserter(ind_tree, ind_tree.end()));
+
+      std::ostringstream oss;
+      oss << "Your MeshGenerator tree contains multiple possible generator outputs :\n\""
+          << final_generators.back()->name()
+          << " and one or more of the following from an independent set: \"";
+      bool first = true;
+      for (const auto & gen : ind_tree)
       {
-        // Need to remove duplicates and possibly perform a difference so we'll import out list
-        // into a set for these operations.
-        std::set<std::shared_ptr<MeshGenerator>> ancestors(ancestor_list.begin(),
-                                                           ancestor_list.end());
-        // Get all of the items from the resolver so we can compare against the tree from the
-        // final generator we just pulled.
-        const auto & allValues = resolver.getSortedValues();
-        decltype(ancestors) all(allValues.begin(), allValues.end());
+        if (!first)
+          oss << ", ";
+        else
+          first = false;
 
-        decltype(ancestors) ind_tree;
-        std::set_difference(all.begin(),
-                            all.end(),
-                            ancestors.begin(),
-                            ancestors.end(),
-                            std::inserter(ind_tree, ind_tree.end()));
-
-        std::ostringstream oss;
-        oss << "Your MeshGenerator tree contains multiple possible generator outputs :\n\""
-            << _final_generator_name
-            << " and one or more of the following from an independent set: \"";
-        bool first = true;
-        for (const auto & gen : ind_tree)
-        {
-          if (!first)
-            oss << ", ";
-          else
-            first = false;
-
-          oss << gen->name();
-        }
-        oss << "\"\n\nThis may be due to a missing dependency or may be intentional. Please "
-               "select the final MeshGenerator in\nthe [Mesh] block with the \"final_generator\" "
-               "parameter or add additional dependencies to remove the ambiguity.";
-        mooseError(oss.str());
+        oss << gen->name();
       }
+      oss << "\"\n\nThis may be due to a missing dependency or may be intentional. Please "
+             "select the final MeshGenerator in\nthe [Mesh] block with the \"final_generator\" "
+             "parameter or add additional dependencies to remove the ambiguity.";
+      mooseError(oss.str());
     }
   }
 }
 
-void
-MooseApp::appendMeshGenerator(const std::string & generator_name,
+const MeshGenerator &
+MooseApp::appendMeshGenerator(const std::string & type,
                               const std::string & name,
-                              InputParameters parameters)
+                              InputParameters params)
 {
-  if (_mesh_generators.empty())
-    mooseError("Cannot append a mesh generator because no mesh generators exist");
+  if (!appendingMeshGenerators())
+    mooseError(
+        "Can only call MooseApp::appendMeshGenerator() during the append_mesh_generator task");
 
-  if (!parameters.have_parameter<MeshGeneratorName>("input"))
-    mooseError("Cannot append a mesh generator that does not take input mesh generators");
+  if (!params.have_parameter<MeshGeneratorName>("input"))
+    mooseError("While adding ",
+               type,
+               " '",
+               name,
+               "' via MooseApp::appendMeshGenerator():\n\nCannot append a mesh generator that does "
+               "not take input mesh generators via an 'input' parameter");
 
-  createMeshGeneratorOrder();
-
-  auto & final_generators = _ordered_generators.back();
-
-  // set the final generator as the input
+  // If no final generator is set, we need to make sure that we have one
   if (_final_generator_name.empty())
-    parameters.set<MeshGeneratorName>("input") = final_generators.back()->name();
-  else
-  {
-    parameters.set<MeshGeneratorName>("input") = _final_generator_name;
-    _final_generator_name = name;
-  }
+    createMeshGeneratorOrder();
 
-  std::shared_ptr<MeshGenerator> mesh_generator =
-      _factory.create<MeshGenerator>(generator_name, name, parameters);
+  // Set the final generator as the input
+  params.set<MeshGeneratorName>("input") = _final_generator_name;
 
-  final_generators.push_back(mesh_generator);
-  _mesh_generators.insert(std::make_pair(MooseUtils::shortName(name), mesh_generator));
+  // Keep track of the new final generator
+  _final_generator_name = name;
+
+  // Need to add this to the param map so that createMeshGenerator can use it
+  mooseAssert(!_mesh_generator_params.count(name), "Already exists");
+  _mesh_generator_params.emplace(
+      std::piecewise_construct, std::forward_as_tuple(name), std::forward_as_tuple(type, params));
+
+  return *createMeshGenerator(name);
 }
 
 void
@@ -2179,10 +2356,10 @@ MooseApp::executeMeshGenerators()
   if (_mesh_generators.empty())
     return;
 
+  // Order the generators
   createMeshGeneratorOrder();
 
-  // set the final generator name
-  auto & final_generators = _ordered_generators.back();
+  const auto & final_generators = _ordered_mesh_generators.back();
   if (_final_generator_name.empty())
     _final_generator_name = final_generators.back()->name();
 
@@ -2194,7 +2371,7 @@ MooseApp::executeMeshGenerators()
     _final_generated_meshes.emplace_back(&getMeshGeneratorOutput(_final_generator_name));
 
   // Run the MeshGenerators in the proper order
-  for (const auto & generator_set : _ordered_generators)
+  for (const auto & generator_set : _ordered_mesh_generators)
   {
     for (const auto & generator : generator_set)
     {
@@ -2229,16 +2406,11 @@ MooseApp::executeMeshGenerators()
 }
 
 void
-MooseApp::setFinalMeshGeneratorName(const std::string & generator_name)
+MooseApp::setFinalMeshGeneratorName(const std::string & generator_name,
+                                    const SetFinalMeshGeneratorNameKey)
 {
+  mooseAssert(_final_generator_name.empty(), "Already set");
   _final_generator_name = generator_name;
-}
-
-void
-MooseApp::clearMeshGenerators()
-{
-  _ordered_generators.clear();
-  _mesh_generators.clear();
 }
 
 std::unique_ptr<MeshBase>
@@ -2854,16 +3026,21 @@ MooseApp::createRecoverableSolutionInvalidity()
 bool
 MooseApp::constructedMeshGenerators() const
 {
-  return _action_warehouse.isTaskComplete("add_mesh_generator") &&
-         (_action_warehouse.hasTask("append_mesh_generator") &&
-          _action_warehouse.isTaskComplete("append_mesh_generator"));
+  return _action_warehouse.isTaskComplete("create_added_mesh_generators") &&
+         _action_warehouse.isTaskComplete("append_mesh_generator");
 }
 
 bool
 MooseApp::constructingMeshGenerators() const
 {
-  return _action_warehouse.getCurrentTaskName() == "add_mesh_generator" ||
-         _action_warehouse.getCurrentTaskName() == "append_mesh_generator";
+  return _action_warehouse.getCurrentTaskName() == "create_added_mesh_generators" ||
+         appendingMeshGenerators();
+}
+
+bool
+MooseApp::appendingMeshGenerators() const
+{
+  return _action_warehouse.getCurrentTaskName() == "append_mesh_generator";
 }
 
 bool

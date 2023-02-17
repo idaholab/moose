@@ -723,17 +723,44 @@ public:
   const MooseMesh * masterDisplacedMesh() const { return _master_displaced_mesh; }
 
   /**
-   * Set final mesh generator name
+   * Class that is used as a parameter to setFinalMeshGeneratorName()
+   *  that allows only MeshGeneratorMesh methods to call this methods
    */
-  void setFinalMeshGeneratorName(const std::string & generator_name);
+  class SetFinalMeshGeneratorNameKey
+  {
+    friend class MeshGeneratorMesh;
+    SetFinalMeshGeneratorNameKey() {}
+    SetFinalMeshGeneratorNameKey(const SetFinalMeshGeneratorNameKey &) {}
+  };
+
+  /**
+   * Set final mesh generator name
+   *
+   * Guarded by the SetFinalMeshGeneartorNameKey so that it can only be called
+   * by MeshGeneratorMesh.
+   */
+  void setFinalMeshGeneratorName(const std::string & generator_name,
+                                 const SetFinalMeshGeneratorNameKey);
 
   /**
    * Add a mesh generator that will act on the meshes in the system
+   *
+   * @param type The type of MeshGenerator
+   * @param name The name of the MeshGenerator
+   * @param params The params used to construct the MeshGenerator
+   *
+   * Internally, this will store the parameters for future construction
+   * during the "add_mesh_generator" task. When called during the
+   * "create_mesh_generator" task (i.e., when creating mesh subgenerators),
+   * it will also construct the generator.
+   *
+   * We don't construct them yet because we want to create them in order
+   * during createMeshGenerators() as much as possible so that we don't
+   * need lazy construction for things like mesh properties.
    */
-  void addMeshGenerator(const std::string & generator_name,
+  void addMeshGenerator(const std::string & type,
                         const std::string & name,
-                        InputParameters parameters);
-
+                        const InputParameters & params);
   /**
    * Get a mesh generator with its name
    */
@@ -750,11 +777,8 @@ public:
 
   /**
    * Whether not a mesh generator exists with the given name
-   * Note: This function should be called after all mesh generators are added with the
-   * 'add_mesh_generator' task. Otherwise, this will only check if a generator with the given
-   * name has been constructed _so far_.
    */
-  bool hasMeshGenerator(const std::string & name) const;
+  bool hasMeshGenerator(const MeshGeneratorName & name) const;
 
   /**
    * Get a refernce to a pointer that will be the output of the
@@ -764,16 +788,18 @@ public:
 
   /**
    * Append a mesh generator that will act on the final mesh generator in the system
-   * Note: This function must be called after add_mesh_generator task.
+   *
+   * @param type The type of MeshGenerator
+   * @param name The name of the MeshGenerator
+   * @param params The params used to construct the MeshGenerator
+   *
+   * This MeshGenerator must have a parameter "input" of type MeshGeneratorName
+   * for this to work, as said parameter is set to the current final generator
+   *
+   * Note: This function must be called during the append_mesh_generator task.
    */
-  void appendMeshGenerator(const std::string & generator_name,
-                           const std::string & name,
-                           InputParameters parameters);
-
-  /**
-   * Clear all mesh modifers
-   */
-  void clearMeshGenerators();
+  const MeshGenerator &
+  appendMeshGenerator(const std::string & type, const std::string & name, InputParameters params);
 
   /**
    * Execute and clear the Mesh Generators data structure
@@ -781,7 +807,17 @@ public:
   void executeMeshGenerators();
 
   /**
-   * Whether this app has constructed its mesh generators
+   * Creates (constructs) all of the MeshGenerators that been
+   * declared using addMeshGenerator().
+   *
+   * Should only be called by the CreateAddedMeshGenerators during
+   * the create_added_mesh_generators task.
+   */
+  void createAddedMeshGenerators();
+
+  /**
+   * Whether this app has constructed its mesh generators (has finished the
+   * create_added_mesh_generators and append_mesh_generator tasks)
    */
   bool constructedMeshGenerators() const;
 
@@ -794,7 +830,12 @@ public:
   virtual bool constructingMeshGenerators() const;
 
   /**
-   * Whether this app is executing mesh generators
+   * Whether or not this app is appending mesh generators (append_mesh_generator task)
+   */
+  bool appendingMeshGenerators() const;
+
+  /**
+   * Whether this app is executing mesh generators (execute_mesh_generators task)
    */
   bool executingMeshGenerators() const;
 
@@ -1227,7 +1268,7 @@ private:
   void setCheckUnusedFlag(bool warn_is_error = false);
 
   /**
-   * Create the ordered mesh generators from all mesh generators
+   * Order all of the _mesh_generators into _ordered_mesh_generators
    */
   void createMeshGeneratorOrder();
 
@@ -1302,6 +1343,29 @@ private:
    */
   bool runInputs() const;
 
+  /**
+   * Get a mesh generator with its name
+   */
+  MeshGenerator & getMeshGenerator(const std::string & name)
+  {
+    return const_cast<MeshGenerator &>(std::as_const(*this).getMeshGenerator(name));
+  }
+
+  /**
+   * Gets the MeshGeneratorNames that are referenced in an object's parameters.
+   *
+   * The result is returned as a pair of param name -> MeshGeneratorName in order
+   * to provide context.
+   */
+  std::vector<std::pair<std::string, MeshGeneratorName>>
+  getMeshGeneratorParamDependencies(const InputParameters & params) const;
+
+  /**
+   * Internal method for actually constructing a mesh generator after it
+   * has been delcared externally in addMeshGenerator (in Actions).
+   */
+  std::shared_ptr<MeshGenerator> createMeshGenerator(const std::string & name);
+
   /// General storage for custom RestartableData that can be added to from outside applications
   std::unordered_map<RestartableDataMapName, std::pair<RestartableDataMap, std::string>>
       _restartable_meta_data;
@@ -1328,11 +1392,14 @@ private:
   /// The displaced mesh from master app
   const MooseMesh * const _master_displaced_mesh;
 
-  /// Holds the mesh generators until they have completed, then this structure is cleared
+  /// The MeshGenerators declared using addMeshGenerator(), cleared after createMeshGenerators()
+  std::unordered_map<std::string, std::pair<std::string, InputParameters>> _mesh_generator_params;
+
+  /// Holds the mesh generators until they are executed, then this structure is cleared
   std::map<std::string, std::shared_ptr<MeshGenerator>> _mesh_generators;
 
-  /// Holds the ordered mesh generators until they have completed, then this structure is cleared
-  std::vector<std::vector<std::shared_ptr<MeshGenerator>>> _ordered_generators;
+  /// Holds the ordered mesh generators from createMeshGeneratorOrder() until they are executed
+  std::vector<std::vector<MeshGenerator *>> _ordered_mesh_generators;
 
   /// Holds the output for each mesh generator - including duplicates needed downstream
   std::map<std::string, std::list<std::unique_ptr<MeshBase>>> _mesh_generator_outputs;
@@ -1351,9 +1418,6 @@ private:
 
   /// Whether to turn on automatic scaling by default
   const bool _automatic_automatic_scaling;
-
-  /// Whether the app is executing all mesh generators
-  bool _executing_mesh_generators;
 
   /// Whether the mesh generator MeshBase has been popped off its storage container and is no
   /// longer accessible

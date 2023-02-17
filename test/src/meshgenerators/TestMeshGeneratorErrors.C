@@ -31,12 +31,13 @@ TestMeshGeneratorErrors::validParams()
 TestMeshGeneratorErrors::TestMeshGeneratorErrors(const InputParameters & parameters)
   : MeshGenerator(parameters)
 {
+  // static casts here are needed because getMesh is [[nodiscard]]
   if (getParam<bool>("get_mesh_invalid"))
-    getMesh("invalid");
+    static_cast<void>(getMesh("invalid"));
   if (getParam<bool>("get_mesh_wrong_type"))
-    getMesh("dummy");
+    static_cast<void>(getMesh("dummy"));
   if (getParam<bool>("get_meshes_by_name_invalid"))
-    getMeshes("invalid");
+    static_cast<void>(getMeshes("invalid"));
   if (getParam<bool>("get_meshes_by_name_wrong_type"))
-    getMeshes("dummy");
+    static_cast<void>(getMeshes("dummy"));
 }

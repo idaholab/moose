@@ -24,7 +24,7 @@ CoreMeshGenerator::validParams()
   params.addRequiredParam<std::vector<MeshGeneratorName>>(
       "inputs", "The AssemblyMeshGenerators that form the components of the assembly.");
 
-  params.addParam<MeshGeneratorName>(
+  params.addParam<std::string>(
       "dummy_assembly_name",
       "dummy",
       "The place holder name in \"inputs\" that indicates an empty position.");
@@ -96,7 +96,7 @@ CoreMeshGenerator::validParams()
 CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
   : ReactorGeometryMeshBuilderBase(parameters),
     _inputs(getParam<std::vector<MeshGeneratorName>>("inputs")),
-    _empty_key(getParam<MeshGeneratorName>("dummy_assembly_name")),
+    _empty_key(getParam<std::string>("dummy_assembly_name")),
     _pattern(getParam<std::vector<std::vector<unsigned int>>>("pattern")),
     _extrude(getParam<bool>("extrude")),
     _mesh_periphery(getParam<bool>("mesh_periphery")),
@@ -109,6 +109,8 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
     _desired_area(getParam<Real>("desired_area")),
     _desired_area_func(getParam<std::string>("desired_area_func"))
 {
+  getMeshesForSub("inputs");
+
   // periphery meshing input checking
   if (_mesh_periphery)
   {

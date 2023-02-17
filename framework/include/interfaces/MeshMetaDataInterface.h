@@ -126,15 +126,24 @@ const T &
 MeshMetaDataInterface::getMeshProperty(const std::string & data_name, const std::string & prefix)
 
 {
-  const auto full_name = meshPropertyName(prefix, data_name);
-  auto data_ptr = std::make_unique<RestartableData<T>>(full_name, nullptr);
+  if (!hasMeshProperty(data_name, prefix))
+    mooseErrorInternal("Failed to get mesh property '", prefix, "/", data_name, "'");
 
-  // Here we will create the RestartableData even though we may not use this instance.
-  // If it's already in use, the App will return a reference to the existing instance and we'll
-  // return that one instead. We might refactor this to have the app create the RestartableData
-  // at a later date.
-  auto & restartable_data_ref =
-      static_cast<RestartableData<T> &>(registerMetaDataOnApp(full_name, std::move(data_ptr)));
+  auto value = &getMeshPropertyInternal(data_name, prefix);
+  mooseAssert(value->declared(), "Value has not been declared");
+  const RestartableData<T> * T_value = dynamic_cast<const RestartableData<T> *>(value);
+  if (!T_value)
+    mooseErrorInternal("While retreiving mesh property '",
+                       prefix,
+                       "/",
+                       data_name,
+                       "' with type '",
+                       MooseUtils::prettyCppType<T>(),
+                       "',\nthe property was found with type '",
+                       value->type(),
+                       "'");
+  return T_value->get();
+}
 
 template <typename T>
 bool

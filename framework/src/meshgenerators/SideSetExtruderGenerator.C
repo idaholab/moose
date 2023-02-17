@@ -36,6 +36,9 @@ SideSetExtruderGenerator::SideSetExtruderGenerator(const InputParameters & param
     _num_layers(getParam<unsigned int>("num_layers")),
     _sideset_name(getParam<BoundaryName>("sideset"))
 {
+  // Used by the first sub generator
+  getMeshForSub("input");
+
   const SubdomainName extruded_block_name = "extruded_block_" + name();
   const BoundaryName sideset_to_stitch = "to_be_stitched_" + name();
 

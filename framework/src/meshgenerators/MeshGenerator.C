@@ -31,8 +31,9 @@ MeshGenerator::MeshGenerator(const InputParameters & parameters)
 {
 }
 
-std::unique_ptr<MeshBase> &
-MeshGenerator::getMesh(const std::string & param_name, const bool allow_invalid /* = false */)
+const MeshGeneratorName *
+MeshGenerator::getMeshGeneratorNameFromParam(const std::string & param_name,
+                                             const bool allow_invalid) const
 {
   const auto valid_param = isParamValid(param_name);
   if (!allow_invalid)
@@ -51,13 +52,12 @@ MeshGenerator::getMesh(const std::string & param_name, const bool allow_invalid 
                  "\"MeshGeneratorName\")");
   }
   else if (!valid_param)
-    return _null_mesh;
-
-  return getMeshByName(getParam<MeshGeneratorName>(param_name));
+    return nullptr;
+  return &getParam<MeshGeneratorName>(param_name);
 }
 
-std::vector<std::unique_ptr<MeshBase> *>
-MeshGenerator::getMeshes(const std::string & param_name)
+const std::vector<MeshGeneratorName> &
+MeshGenerator::getMeshGeneratorNamesFromParam(const std::string & param_name) const
 {
   if (!isParamValid(param_name))
     mooseError("Failed to get a parameter with the name \"",
@@ -72,13 +72,37 @@ MeshGenerator::getMeshes(const std::string & param_name)
                "\" is not an expected type for getting MeshGenerators (should be of type "
                "\"std::vector<MeshGeneratorName>\")");
 
-  return getMeshesByName(getParam<std::vector<MeshGeneratorName>>(param_name));
+  return getParam<std::vector<MeshGeneratorName>>(param_name);
+}
+
+void
+MeshGenerator::checkGetMesh(const MeshGeneratorName & libmesh_dbg_var(mesh_generator_name)) const
+{
+  mooseAssert(!mesh_generator_name.empty(), "Empty name");
+  if (!_app.constructingMeshGenerators())
+    mooseError("Cannot get a mesh outside of construction");
+}
+
+std::unique_ptr<MeshBase> &
+MeshGenerator::getMesh(const std::string & param_name, const bool allow_invalid /* = false */)
+{
+  const MeshGeneratorName * name = getMeshGeneratorNameFromParam(param_name, allow_invalid);
+  if (!name)
+    return _null_mesh;
+  return getMeshByName(*name);
+}
+
+std::vector<std::unique_ptr<MeshBase> *>
+MeshGenerator::getMeshes(const std::string & param_name)
+{
+  return getMeshesByName(getMeshGeneratorNamesFromParam(param_name));
 }
 
 std::unique_ptr<MeshBase> &
 MeshGenerator::getMeshByName(const MeshGeneratorName & mesh_generator_name)
 {
-  _depends_on.push_back(mesh_generator_name);
+  checkGetMesh(mesh_generator_name);
+  _requested_mesh_generators.insert(mesh_generator_name);
   return _app.getMeshGeneratorOutput(mesh_generator_name);
 }
 
@@ -89,6 +113,32 @@ MeshGenerator::getMeshesByName(const std::vector<MeshGeneratorName> & mesh_gener
   for (const auto & name : mesh_generator_names)
     meshes.push_back(&getMeshByName(name));
   return meshes;
+}
+
+void
+MeshGenerator::getMeshForSub(const std::string & param_name)
+{
+  getMeshForSubByName(*getMeshGeneratorNameFromParam(param_name, false));
+}
+
+void
+MeshGenerator::getMeshesForSub(const std::string & param_name)
+{
+  getMeshesForSubByName(getMeshGeneratorNamesFromParam(param_name));
+}
+
+void
+MeshGenerator::getMeshForSubByName(const MeshGeneratorName & mesh_generator_name)
+{
+  checkGetMesh(mesh_generator_name);
+  _requested_mesh_generators_for_sub.insert(mesh_generator_name);
+}
+
+void
+MeshGenerator::getMeshesForSubByName(const std::vector<MeshGeneratorName> & mesh_generator_names)
+{
+  for (const auto & name : mesh_generator_names)
+    getMeshForSubByName(name);
 }
 
 std::unique_ptr<MeshBase>
@@ -136,14 +186,44 @@ MeshGenerator::generateInternal()
 }
 
 std::unique_ptr<MeshBase> &
-MeshGenerator::addMeshSubgenerator(const std::string & generator_name,
+MeshGenerator::addMeshSubgenerator(const std::string & type,
                                    const std::string & name,
                                    InputParameters & params)
 {
+  if (!_app.constructingMeshGenerators())
+    mooseError("Can only call addMeshSubgenerator() during MeshGenerator construction");
+
   // In case the user forgot it
   params.set<MooseApp *>("_moose_app") = &_app;
 
-  _app.addMeshGenerator(generator_name, name, params);
-
+  _app.addMeshGenerator(type, name, params);
+  _sub_mesh_generators.insert(&std::as_const(_app).getMeshGenerator(name));
   return this->getMeshByName(name);
+}
+
+RestartableDataValue &
+MeshGenerator::setMeshPropertyHelper(const std::string & data_name)
+{
+  return _app.getRestartableMetaData(meshPropertyName(data_name), MooseApp::MESH_META_DATA, 0);
+}
+
+void
+MeshGenerator::addParentMeshGenerator(const MeshGenerator & mg, const AddParentChildKey)
+{
+  _parent_mesh_generators.insert(&mg);
+}
+
+void
+MeshGenerator::addChildMeshGenerator(const MeshGenerator & mg, const AddParentChildKey)
+{
+  _child_mesh_generators.insert(&mg);
+}
+
+bool
+MeshGenerator::isParentMeshGenerator(const MeshGeneratorName & name) const
+{
+  return std::find_if(getParentMeshGenerators().begin(),
+                      getParentMeshGenerators().end(),
+                      [&name](const auto & mg)
+                      { return mg->name() == name; }) != getParentMeshGenerators().end();
 }
