@@ -662,9 +662,15 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
 
         // MPIAIJ for PETSc 3.12.0: -matptap_via
         // MAIJ for PETSc 3.12.0: -matmaijptap_via
-        // MPIAIJ for PETSc 3.13 or higher: -matptap_via, -matproduct_ptap_via
-        // MAIJ for PETSc 3.13 or higher: -matproduct_ptap_via
-#if !PETSC_VERSION_LESS_THAN(3, 13, 0)
+        // MPIAIJ for PETSc 3.13 to 3.16: -matptap_via, -matproduct_ptap_via
+        // MAIJ for PETSc 3.13 to 3.16: -matproduct_ptap_via
+        // MPIAIJ for PETSc 3.17 and higher: -matptap_via, -mat_product_algorithm
+        // MAIJ for PETSc 3.17 and higher: -mat_product_algorithm
+#if !PETSC_VERSION_LESS_THAN(3, 17, 0)
+      if (hmg_found && (option.first == "-matptap_via" || option.first == "-matmaijptap_via" ||
+                        option.first == "-matproduct_ptap_via"))
+        new_options.emplace_back("-mat_product_algorithm", option.second);
+#elif !PETSC_VERSION_LESS_THAN(3, 13, 0)
       if (hmg_found && (option.first == "-matptap_via" || option.first == "-matmaijptap_via"))
         new_options.emplace_back("-matproduct_ptap_via", option.second);
 #else
@@ -676,7 +682,7 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
 #endif
 
       if (option.first == "-matptap_via" || option.first == "-matmaijptap_via" ||
-          option.first == "-matproduct_ptap_via")
+          option.first == "-matproduct_ptap_via" || option.first == "-mat_product_algorithm")
         matptap_found = true;
 
       // For 3D problems, we need to set this 0.7
@@ -743,7 +749,9 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
   // Let us switch to use new algorithm
   if (hmg_found && !matptap_found)
   {
-#if !PETSC_VERSION_LESS_THAN(3, 13, 0)
+#if !PETSC_VERSION_LESS_THAN(3, 17, 0)
+    po.pairs.emplace_back("-mat_product_algorithm", "allatonce");
+#elif !PETSC_VERSION_LESS_THAN(3, 13, 0)
     po.pairs.emplace_back("-matproduct_ptap_via", "allatonce");
 #else
     po.pairs.emplace_back("-matptap_via", "allatonce");
