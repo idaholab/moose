@@ -43,12 +43,16 @@ UserObject::validParams()
   params.addParam<bool>("force_postaux", false, "Forces the UserObject to be executed in POSTAUX");
   params.addParam<bool>(
       "force_preic", false, "Forces the UserObject to be executed in PREIC during initial setup");
+  params.addParam<int>("execution_order_group",
+                       0,
+                       "All user objects in the same execution order group are executed "
+                       "simultaneously. Groups with a lower number are executed first.");
 
   params.registerBase("UserObject");
   params.registerSystemAttributeName("UserObject");
 
   params.addParamNamesToGroup("use_displaced_mesh allow_duplicate_execution_on_initial "
-                              "force_preaux force_postaux force_preic",
+                              "force_preaux force_postaux force_preic execution_order_group",
                               "Advanced");
   return params;
 }

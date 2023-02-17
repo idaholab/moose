@@ -247,6 +247,27 @@ private:
   THREAD_ID _val = 0;
 };
 
+class AttribExecutionOrderGroup : public Attribute
+{
+public:
+  typedef int Key;
+  void setFrom(Key k) { _val = k; }
+
+  AttribExecutionOrderGroup(TheWarehouse & w) : Attribute(w, "execution_order_group") {}
+  AttribExecutionOrderGroup(TheWarehouse & w, Key p)
+    : Attribute(w, "execution_order_group"), _val(p)
+  {
+  }
+  virtual void initFrom(const MooseObject * obj) override;
+  virtual bool isMatch(const Attribute & other) const override;
+  virtual bool isEqual(const Attribute & other) const override;
+  hashfunc(_val);
+  clonefunc(AttribExecutionOrderGroup);
+
+private:
+  THREAD_ID _val = 0;
+};
+
 /**
  * Tracks the libmesh system number that a \p MooseObject is associated with
  */
