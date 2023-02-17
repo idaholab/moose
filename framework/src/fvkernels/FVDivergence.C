@@ -39,24 +39,6 @@ FVDivergence::FVDivergence(const InputParameters & params)
 ADReal
 FVDivergence::computeQpResidual()
 {
-  using namespace Moose::FV;
-
-  ADRealVectorValue face_value;
-
-  // If we are on internal faces, we interpolate the vector field as usual
-  if (_var.isInternalFace(*_face_info))
-    interpolate(Moose::FV::InterpMethod::SkewCorrectedAverage,
-                face_value,
-                _vector_field(elemFromFace()),
-                _vector_field(neighborFromFace()),
-                *_face_info,
-                true);
-  // Else we just use the boundary values
-  else
-  {
-    const auto face = singleSidedFaceArg();
-    face_value = _vector_field(face);
-  }
-
-  return face_value * _face_info->normal();
+  const auto face = makeFace(*_face_info, limiterType(Moose::FV::InterpMethod::Average), false);
+  return _vector_field(face) * _face_info->normal();
 }

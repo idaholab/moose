@@ -74,6 +74,10 @@ RhieChowInterpolatorBase::RhieChowInterpolatorBase(const InputParameters & param
     _w(isParamValid("w") ? dynamic_cast<INSFVVelocityVariable *>(
                                &UserObject::_subproblem.getVariable(0, getParam<VariableName>("w")))
                          : nullptr),
+    _ps(libMesh::n_threads(), nullptr),
+    _us(libMesh::n_threads(), nullptr),
+    _vs(libMesh::n_threads(), nullptr),
+    _ws(libMesh::n_threads(), nullptr),
     _sub_ids(blockRestricted() ? blockIDs() : _moose_mesh.meshSubdomains()),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys"))
 {
@@ -161,6 +165,42 @@ RhieChowInterpolatorBase::RhieChowInterpolatorBase(const InputParameters & param
     _var_numbers.push_back(_w->number());
   }
 
+  auto fill_container = [this](const auto & name, auto & container)
+  {
+    for (const auto tid : make_range(libMesh::n_threads()))
+    {
+      auto * const var = static_cast<MooseVariableFVReal *>(
+          &UserObject::_subproblem.getVariable(tid, getParam<VariableName>(name)));
+      container[tid] = var;
+    }
+  };
+
+  fill_container(NS::pressure, _ps);
+  fill_container("u", _us);
+
+  if (_dim >= 2)
+  {
+    fill_container("v", _vs);
+    if (_v->faceInterpolationMethod() != _u->faceInterpolationMethod())
+      mooseError("x and y velocity component face interpolation methods do not match");
+  }
+
+  if (_dim >= 3)
+  {
+    fill_container("w", _ws);
+    if (_w->faceInterpolationMethod() != _u->faceInterpolationMethod())
+      mooseError("x and z velocity component face interpolation methods do not match");
+  }
+
   if (&(UserObject::_subproblem) != &(TaggingInterface::_subproblem))
     mooseError("Different subproblems in RhieChowInterpolatorBase!");
+}
+
+bool
+RhieChowInterpolatorBase::hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const
+{
+  if (fi_elem_side)
+    return hasBlocks(fi.elem().subdomain_id());
+  else
+    return fi.neighborPtr() && hasBlocks(fi.neighbor().subdomain_id());
 }

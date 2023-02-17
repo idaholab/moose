@@ -12,6 +12,8 @@
 #include "GeneralUserObject.h"
 #include "TaggingInterface.h"
 #include "BlockRestrictable.h"
+#include "FaceArgInterface.h"
+#include "INSFVPressureVariable.h"
 #include "ADReal.h"
 #include "MooseTypes.h"
 #include "ADFunctorInterface.h"
@@ -32,7 +34,8 @@ class MeshBase;
 class RhieChowInterpolatorBase : public GeneralUserObject,
                                  public TaggingInterface,
                                  public BlockRestrictable,
-                                 public ADFunctorInterface
+                                 public ADFunctorInterface,
+                                 public FaceArgInterface
 {
 public:
   static InputParameters validParams();
@@ -61,8 +64,15 @@ public:
                                           THREAD_ID tid,
                                           Moose::FV::InterpMethod m) const = 0;
 
+  /**
+   * @return The pressure variable corresponding to the provided thread ID
+   */
+  const INSFVPressureVariable & pressure(THREAD_ID tid) const;
+
   /// Bool of the Rhie Chow user object is used in monolithic/segregated approaches
   virtual bool segregated() const { return false; };
+
+  bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const override;
 
 protected:
   /**
@@ -91,6 +101,18 @@ protected:
   /// The thread 0 copy of the z-velocity variable (null if the problem is not 3D)
   INSFVVelocityVariable * const _w;
 
+  /// All the thread copies of the pressure variable
+  std::vector<MooseVariableFVReal *> _ps;
+
+  /// All the thread copies of the x-velocity variable
+  std::vector<MooseVariableFVReal *> _us;
+
+  /// All the thread copies of the y-velocity variable
+  std::vector<MooseVariableFVReal *> _vs;
+
+  /// All the thread copies of the z-velocity variable
+  std::vector<MooseVariableFVReal *> _ws;
+
   /// The subdomain ids this object operates on
   const std::set<SubdomainID> _sub_ids;
 
@@ -108,4 +130,11 @@ private:
 inline const Moose::FunctorBase<ADReal> & RhieChowInterpolatorBase::epsilon(THREAD_ID) const
 {
   return _unity_functor;
+}
+
+inline const INSFVPressureVariable &
+RhieChowInterpolatorBase::pressure(const THREAD_ID tid) const
+{
+  mooseAssert(tid < _ps.size(), "Attempt to access out-of-bounds in pressure variable container");
+  return *static_cast<INSFVPressureVariable *>(_ps[tid]);
 }

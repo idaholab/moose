@@ -6,6 +6,7 @@
 
 [Problem]
   nl_sys_names = 'u v'
+  error_on_jacobian_nonzero_reallocation = true
 []
 
 [Variables]

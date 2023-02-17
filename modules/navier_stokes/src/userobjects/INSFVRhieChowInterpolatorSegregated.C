@@ -123,15 +123,14 @@ INSFVRhieChowInterpolatorSegregated::getVelocity(const FaceInfo & fi,
 {
   if (Moose::FV::onBoundary(*this, fi))
   {
-    const Elem * const elem = &fi.elem();
-    const Elem * const neighbor = fi.neighborPtr();
+    const Elem * const boundary_elem =
+        hasBlocks(fi.elemPtr()->subdomain_id()) ? fi.elemPtr() : fi.neighborPtr();
+
     const bool correct_skewness =
         (_u->faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
 
-    const auto sub_id =
-        hasBlocks(elem->subdomain_id()) ? elem->subdomain_id() : neighbor->subdomain_id();
-    const Moose::SingleSidedFaceArg boundary_face{
-        &fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, sub_id};
+    const Moose::FaceArg boundary_face{
+        &fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, boundary_elem};
 
     _console << "returning: " << (*_vel)(boundary_face)(0) << std::endl;
     return (*_vel)(boundary_face);

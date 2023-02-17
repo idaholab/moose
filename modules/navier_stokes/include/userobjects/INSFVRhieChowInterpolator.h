@@ -12,13 +12,7 @@
 #include "RhieChowInterpolatorBase.h"
 #include "CellCenteredMapFunctor.h"
 #include "VectorComponentFunctor.h"
-#include "FaceArgInterface.h"
-#include "INSFVPressureVariable.h"
-#include "ADFunctorInterface.h"
 
-#include "libmesh/vector_value.h"
-#include "libmesh/id_types.h"
-#include "libmesh/stored_range.h"
 #include <unordered_map>
 #include <set>
 #include <unordered_set>
@@ -94,13 +88,6 @@ public:
    */
   void ghostADataOnBoundary(const BoundaryID boundary_id);
 
-  bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const override;
-
-  /**
-   * @return The pressure variable corresponding to the provided thread ID
-   */
-  const INSFVPressureVariable & pressure(THREAD_ID tid) const;
-
   /**
    * Whether to pull all 'a' coefficient data from the owning process for all nonlocal elements we
    * have access to (e.g. all of our nonlocal elements we have pointers to)
@@ -118,18 +105,6 @@ protected:
 
   /// The interpolation method to use for the velocity
   Moose::FV::InterpMethod _velocity_interp_method;
-
-  /// All the thread copies of the pressure variable
-  std::vector<MooseVariableFVReal *> _ps;
-
-  /// All the thread copies of the x-velocity variable
-  std::vector<MooseVariableFVReal *> _us;
-
-  /// All the thread copies of the y-velocity variable
-  std::vector<MooseVariableFVReal *> _vs;
-
-  /// All the thread copies of the z-velocity variable
-  std::vector<MooseVariableFVReal *> _ws;
 
   /// All the active and elements local to this process that exist on this object's subdomains
   std::unique_ptr<ConstElemRange> _elem_range;
@@ -215,13 +190,6 @@ INSFVRhieChowInterpolator::addToA(const Elem * const elem,
     _elements_to_push_pull.insert(elem);
 
   _a[elem->id()](component) += value;
-}
-
-inline const INSFVPressureVariable &
-INSFVRhieChowInterpolator::pressure(const THREAD_ID tid) const
-{
-  mooseAssert(tid < _ps.size(), "Attempt to access out-of-bounds in pressure variable container");
-  return *static_cast<INSFVPressureVariable *>(_ps[tid]);
 }
 
 inline bool

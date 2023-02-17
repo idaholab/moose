@@ -113,47 +113,15 @@ INSFVRhieChowInterpolator::validParams()
 INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & params)
   : RhieChowInterpolatorBase(params),
     _vel(libMesh::n_threads()),
-    _ps(libMesh::n_threads(), nullptr),
-    _us(libMesh::n_threads(), nullptr),
-    _vs(libMesh::n_threads(), nullptr),
-    _ws(libMesh::n_threads(), nullptr),
     _a(_moose_mesh, _sub_ids, "a"),
     _ax(_a, 0),
     _ay(_a, 1),
     _az(_a, 2),
     _nl_sys_number(_fe_problem.nlSysNum(getParam<NonlinearSystemName>("mass_momentum_system"))),
-    _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _example(0),
     _a_data_provided(false),
     _pull_all_nonlocal(getParam<bool>("pull_all_nonlocal_a"))
 {
-  auto fill_container = [this](const auto & name, auto & container)
-  {
-    for (const auto tid : make_range(libMesh::n_threads()))
-    {
-      auto * const var = static_cast<MooseVariableFVReal *>(
-          &UserObject::_subproblem.getVariable(tid, getParam<VariableName>(name)));
-      container[tid] = var;
-    }
-  };
-
-  fill_container(NS::pressure, _ps);
-  fill_container("u", _us);
-
-  if (_dim >= 2)
-  {
-    fill_container("v", _vs);
-    if (_v->faceInterpolationMethod() != _u->faceInterpolationMethod())
-      mooseError("x and y velocity component face interpolation methods do not match");
-  }
-
-  if (_dim >= 3)
-  {
-    fill_container("w", _ws);
-    if (_w->faceInterpolationMethod() != _u->faceInterpolationMethod())
-      mooseError("x and z velocity component face interpolation methods do not match");
-  }
-
   for (const auto tid : make_range(libMesh::n_threads()))
   {
     _vel[tid] = std::make_unique<PiecewiseByBlockLambdaFunctor<ADRealVectorValue>>(
@@ -601,73 +569,4 @@ INSFVRhieChowInterpolator::getVelocity(const FaceInfo & fi,
     velocity(i) -= face_D(i) * face_eps * (grad_p(i) - unc_grad_p(i));
 
   return velocity;
-}
-
-bool
-INSFVRhieChowInterpolator::hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const
-{
-  if (fi_elem_side)
-    return hasBlocks(fi.elem().subdomain_id());
-  else
-    return fi.neighborPtr() && hasBlocks(fi.neighbor().subdomain_id());
-}
-
-void
-INSFVRhieChowInterpolator::computeHbyA()
-{
-  NonlinearSystemBase & sys = _fe_problem.getNonlinearSystemBase(
-      _fe_problem.nlSysNum(getParam<NonlinearSystemName>("momentum_system")));
-
-  NonlinearImplicitSystem & momentum_system = dynamic_cast<NonlinearImplicitSystem &>(sys.system());
-
-  PetscMatrix<Number> * pmat = dynamic_cast<PetscMatrix<Number> *>(momentum_system.matrix);
-  PetscVector<Number> * solution =
-      dynamic_cast<PetscVector<Number> *>(momentum_system.solution.get());
-
-  std::unique_ptr<NumericVector<Number>> Ainv = solution->zero_clone();
-  std::unique_ptr<NumericVector<Number>> HbyA = solution->zero_clone();
-  std::unique_ptr<NumericVector<Number>> working_vector = solution->zero_clone();
-
-  // We compute the right hand side with a zero vector for starters
-  _fe_problem.computeResidualSys(momentum_system, *working_vector, *HbyA);
-
-  // Wpuld be cool to add asserts here
-  PetscVector<Number> * Ainv_petsc = dynamic_cast<PetscVector<Number> *>(Ainv.get());
-  PetscVector<Number> * HbyA_petsc = dynamic_cast<PetscVector<Number> *>(HbyA.get());
-  PetscVector<Number> * working_vector_petsc =
-      dynamic_cast<PetscVector<Number> *>(working_vector.get());
-
-  VecScale(HbyA_petsc->vec(), -1.0);
-
-  MatGetDiagonal(pmat->mat(), Ainv_petsc->vec());
-
-  // Now the hard part, let's get H*u and add it to the rhs
-  MatMult(pmat->mat(), solution->vec(), working_vector_petsc->vec());
-  VecAXPY(HbyA_petsc->vec(), 1.0, working_vector_petsc->vec());
-
-  // We subtract the diagonal component because we didn't want to modify the matrix
-  VecPointwiseMult(working_vector_petsc->vec(), Ainv_petsc->vec(), solution->vec());
-  VecAXPY(HbyA_petsc->vec(), -1.0, working_vector_petsc->vec());
-
-  // Now we invert the diagonal
-  VecSet(working_vector_petsc->vec(), 1.0);
-  VecPointwiseDivide(Ainv_petsc->vec(), working_vector_petsc->vec(), Ainv_petsc->vec());
-
-  // And divide H by the diagonal
-  VecPointwiseMult(HbyA_petsc->vec(), HbyA_petsc->vec(), Ainv_petsc->vec());
-
-  auto evaluable_begin = _mesh.evaluable_elements_begin(sys.dofMap());
-  auto evaluable_end = _mesh.evaluable_elements_end(sys.dofMap());
-
-  for (auto it = evaluable_begin; it != evaluable_end; ++it)
-  {
-    const Elem * elem = *it;
-
-    for (unsigned int var_index = 0; var_index < _var_numbers.size(); var_index++)
-    {
-      dof_id_type dof_index = elem->dof_number(sys.number(), _var_numbers[var_index], 0);
-      _HbyA[elem->id()](var_index) = HbyA_petsc->el(dof_index);
-      _Ainv[elem->id()](var_index) = Ainv_petsc->el(dof_index);
-    }
-  }
 }

@@ -21,6 +21,7 @@ public:
 
 protected:
   ADReal computeQpResidual() override;
+
   /// Darcy coefficient
   const Moose::Functor<ADRealVectorValue> * const _cL;
   /// Forchheimer coefficient
