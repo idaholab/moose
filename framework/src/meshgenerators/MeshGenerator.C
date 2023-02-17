@@ -11,6 +11,12 @@
 #include "MooseMesh.h"
 #include "MooseApp.h"
 
+#include "Exodus.h"
+
+#include "libmesh/exodusII_io.h"
+#include "libmesh/checkpoint_io.h"
+#include <libmesh/nemesis_io.h>
+
 InputParameters
 MeshGenerator::validParams()
 {
@@ -21,6 +27,8 @@ MeshGenerator::validParams()
                         "Whether or not to show mesh info after generating the mesh "
                         "(bounding box, element types, sidesets, nodesets, subdomains, etc)");
 
+  params.addParam<bool>(
+      "output", false, "Whether or not to output the mesh file after generating the mesh");
   params.registerBase("MeshGenerator");
 
   return params;
@@ -130,6 +138,27 @@ MeshGenerator::generateInternal()
         oss << COLOR_CYAN << "" << type() << " '" << name() << "': " << COLOR_DEFAULT << split[i]
             << std::endl;
     _console << oss.str() << std::flush;
+  }
+
+  if (getParam<bool>("output"))
+  {
+    if (mesh->is_replicated())
+    {
+      ExodusII_IO exio(*mesh);
+
+      if (mesh->mesh_dimension() == 1)
+        exio.write_as_dimension(3);
+
+      // Default to non-HDF5 output for wider compatibility
+      exio.set_hdf5_writing(false);
+
+      exio.write(name() + "_in.e");
+    }
+    else
+    {
+      Nemesis_IO nemesis_io(*mesh);
+      nemesis_io.write(name() + "_in.e");
+    }
   }
 
   return mesh;
