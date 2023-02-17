@@ -28,6 +28,10 @@ SidesetsEncloseBlocks::validParams()
   params.addParam<std::vector<BoundaryName>>("boundary",
                                              "The name of the boundaries enclosing the ");
   params.addParam<BoundaryName>("new_boundary", "The name of the boundary to create");
+  params.addParam<bool>(
+      "allow_sideset_on_neighbor",
+      false,
+      "If true the mesh generator searches the neighbor side for a sideset as well");
   params.addClassDescription(
       "MeshGenerator that checks if a set of blocks is enclosed by a set of sidesets."
       "It can either add sides that are not covered by a sideset by a new sidesets or"
@@ -37,7 +41,9 @@ SidesetsEncloseBlocks::validParams()
 }
 
 SidesetsEncloseBlocks::SidesetsEncloseBlocks(const InputParameters & parameters)
-  : MeshGenerator(parameters), _input(getMesh("input"))
+  : MeshGenerator(parameters),
+    _input(getMesh("input")),
+    _neighbor_sideset(getParam<bool>("allow_sideset_on_neighbor"))
 {
 }
 
@@ -112,6 +118,16 @@ SidesetsEncloseBlocks::generate()
           // is empty then this side is NOT convered
           std::vector<boundary_id_type> side_boundary_ids_vec;
           boundary_info.raw_boundary_ids(elem, j, side_boundary_ids_vec);
+
+          // in case there is a neighbor, boundaries defined on the other side
+          // may also count
+          if (neigh && _neighbor_sideset)
+          {
+            std::vector<boundary_id_type> add_sides;
+            boundary_info.raw_boundary_ids(neigh, neigh->which_neighbor_am_i(elem), add_sides);
+            side_boundary_ids_vec.insert(
+                side_boundary_ids_vec.end(), add_sides.begin(), add_sides.end());
+          }
 
           std::set<boundary_id_type> intersection;
           std::set_intersection(side_boundary_ids_vec.begin(),

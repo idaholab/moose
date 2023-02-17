@@ -28,4 +28,7 @@ public:
 protected:
   /// the mesh that is passed from the meshgen executed before this meshgen
   std::unique_ptr<MeshBase> & _input;
+
+  /// if mesh generator looks for sidesets on the neighbor elems
+  bool _neighbor_sideset;
 };
