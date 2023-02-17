@@ -55,7 +55,7 @@ MeshGenerator::getMeshGeneratorNameFromParam(const std::string & param_name,
     return nullptr;
 
   const auto & name = getParam<MeshGeneratorName>(param_name);
-  if (!std::as_const(_app).hasMeshGenerator(name))
+  if (!std::as_const(_app).hasMeshGenerator(name) && !isNullMeshName(name))
     paramError(param_name, "Requested MeshGenerator with name '", name, "' was not found");
 
   return &name;
@@ -79,7 +79,7 @@ MeshGenerator::getMeshGeneratorNamesFromParam(const std::string & param_name) co
 
   const auto & names = getParam<std::vector<MeshGeneratorName>>(param_name);
   for (const auto & name : names)
-    if (!std::as_const(_app).hasMeshGenerator(name))
+    if (!std::as_const(_app).hasMeshGenerator(name) && !isNullMeshName(name))
       paramError(param_name, "The requested MeshGenerator '", name, "' was not found");
 
   return names;
@@ -113,6 +113,9 @@ MeshGenerator::getMeshes(const std::string & param_name)
 std::unique_ptr<MeshBase> &
 MeshGenerator::getMeshByName(const MeshGeneratorName & mesh_generator_name)
 {
+  if (isNullMeshName(mesh_generator_name))
+    return _null_mesh;
+
   checkGetMesh(mesh_generator_name);
   _requested_mesh_generators.insert(mesh_generator_name);
   auto & mesh = _app.getMeshGeneratorOutput(mesh_generator_name);
@@ -144,6 +147,9 @@ MeshGenerator::getMeshesForSub(const std::string & param_name)
 void
 MeshGenerator::getMeshForSubByName(const MeshGeneratorName & mesh_generator_name)
 {
+  if (isNullMeshName(mesh_generator_name))
+    return;
+
   checkGetMesh(mesh_generator_name);
   _requested_mesh_generators_for_sub.insert(mesh_generator_name);
 }
@@ -256,4 +262,12 @@ MeshGenerator::isParentMeshGenerator(const MeshGeneratorName & name) const
                       getParentMeshGenerators().end(),
                       [&name](const auto & mg)
                       { return mg->name() == name; }) != getParentMeshGenerators().end();
+}
+
+void
+MeshGenerator::declareNullMeshName(const MeshGeneratorName & name)
+{
+  mooseAssert(_app.constructingMeshGenerators(), "Should only be called at construction");
+  mooseAssert(!_null_mesh_names.count(name), "Already declared");
+  _null_mesh_names.insert(name);
 }

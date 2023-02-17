@@ -132,6 +132,17 @@ public:
    */
   bool isParentMeshGenerator(const MeshGeneratorName & name) const;
 
+  /**
+   * @returns Whether or not the name \p name is registered as a "null" mesh, that is,
+   * a MeshGenerator that will not represent an input mesh when requested via getMesh.
+   *
+   * See declareNullMeshName().
+   */
+  [[nodiscard]] bool isNullMeshName(const MeshGeneratorName & name) const
+  {
+    return _null_mesh_names.count(name);
+  }
+
 protected:
   /**
    * Methods for writing out attributes to the mesh meta-data store, which can be retrieved from
@@ -278,6 +289,16 @@ protected:
   void
   addMeshSubgenerator(const std::string & type, const std::string & name, InputParameters & params);
 
+  /**
+   * Registeres the name \p name as a "null" mesh, which is a MeshGenerator used in
+   * InputParameters that will not represent an input mesh when requested via getMesh.
+   *
+   * An example use case for this is when you as a developer want users to represent a hole
+   * in a mesh pattern that is defined in input.
+   *
+   */
+  void declareNullMeshName(const MeshGeneratorName & name);
+
   /// References to the mesh and displaced mesh (currently in the ActionWarehouse)
   std::shared_ptr<MooseMesh> & _mesh;
 
@@ -330,6 +351,9 @@ private:
   std::set<const MeshGenerator *, Comparator> _child_mesh_generators;
   /// The sub MeshGenerators constructed by this MeshGenerator
   std::set<const MeshGenerator *, Comparator> _sub_mesh_generators;
+
+  /// The declared "null" mesh names that will not represent a mesh in input; see declareNullMeshName()
+  std::set<std::string> _null_mesh_names;
 };
 
 template <typename T, typename... Args>

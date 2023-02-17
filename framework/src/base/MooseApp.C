@@ -2102,6 +2102,9 @@ MooseApp::createMeshGenerator(const std::string & generator_name)
     const auto & param_name = param_dependency_pair.first;
     const auto & dependency_name = param_dependency_pair.second;
 
+    if (mg->isNullMeshName(dependency_name))
+      continue;
+
     // True if this dependency was requested and is a parent
     if (mg->isParentMeshGenerator(dependency_name))
     {
