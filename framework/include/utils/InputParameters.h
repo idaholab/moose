@@ -881,7 +881,7 @@ public:
 
   void deprecateParam(const std::string & old_name,
                       const std::string & new_name,
-                      const std::string & removal_data);
+                      const std::string & removal_date);
 
   void deprecateCoupledVar(const std::string & old_name,
                            const std::string & new_name,
@@ -914,6 +914,18 @@ public:
   template <typename T>
   bool have_parameter(std::string_view name) const;
 
+  /**
+   * Return all the aliased names associated with \p param_name. The returned container will always
+   * contain \p param_name itself. Other aliases in addition to \p param_name will include the base
+   * class parameter name if \p param_name is the derived class parameter name, or deprecated names
+   * that \p param_name is meant to replace.
+   * @param param_name The name of the parameter that we want to lookup aliases for. This parameter
+   * name must exist in our metadata and parameter names to values map, e.g. this parameter must
+   * represent the derived class parameter name if a base class parameter has been renamed or the
+   * blessed parameter name in situations where associated parameter names have been deprecated
+   * @return All aliases which logically resolve-to/are-associated-with \p param_name, including \p
+   * param_name itself
+   */
   std::vector<std::string> paramAliases(const std::string & param_name) const;
 
 private:
@@ -1086,7 +1098,14 @@ private:
   /// A map from deprecated coupled variable names to the new blessed name
   std::unordered_map<std::string, std::string> _new_to_deprecated_coupled_vars;
 
+  /// A map from base-class/deprecated parameter names to derived-class/blessed parameter names and
+  /// the deprecation messages in the case that the "old" parameter name is a deprecated parameter
+  /// name. The deprecation message will be empty if the "old" parameter name represents a base
+  /// class parameter name
   std::map<std::string, std::pair<std::string, std::string>> _old_to_new_name_and_dep;
+
+  /// A map from derived-class/blessed parameter names to associated base-class/deprecated parameter
+  /// names
   std::multimap<std::string, std::string> _new_to_old_names;
 
   // These are the only objects allowed to _create_ InputParameters
@@ -1108,9 +1127,7 @@ template <typename T>
 T &
 InputParameters::set(const std::string & name_in, bool quiet_mode)
 {
-  const bool is_function = name_in == "function";
   const auto name = checkForRename(name_in);
-  libmesh_ignore(is_function);
 
   checkParamName(name);
   checkConsistentType<T>(name);
