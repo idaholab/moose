@@ -31,13 +31,21 @@ TestMeshGenerator::validParams()
   params.addParam<bool>(
       "get_mesh_outside_construct", false, "Tests getting a mesh outside of construction");
   params.addParam<bool>(
+      "declare_mesh_prop_outside_construct", false, "Declare a mesh property out of construction");
+  params.addParam<bool>(
       "sub_outside_construct", false, "Tests building a subgenerator outside of construction");
   params.addParam<std::string>("null_mesh_name", "Declares a null mesh with this name");
+  params.addParam<bool>(
+      "mesh_prop_double_declare", false, "Tests declaring the same mesh property twice");
+  params.addParam<bool>("sub_no_declare_input",
+                        false,
+                        "Tests getting an input from a sub generator but not declaring it");
   params.addParam<bool>("input_not_moved", false, "Tests when an input mesh is not moved");
   params.addParam<bool>("request_input", false, "Request the mesh in 'input'");
   params.addParam<bool>("request_inputs", false, "Request the meshes in 'input'");
   params.addParam<bool>("request_input_by_name", false, "Request the mesh in 'input' by name");
   params.addParam<bool>("request_inputs_by_name", false, "Request the meshes in 'inputs' by name");
+  params.addParam<bool>("request_sub_input", false, "Request the mesh in 'input' for a sub");
   return params;
 }
 
@@ -59,6 +67,13 @@ TestMeshGenerator::TestMeshGenerator(const InputParameters & parameters) : MeshG
     static_cast<void>(getMeshByName(getParam<MeshGeneratorName>("input")));
   if (getParam<bool>("request_inputs_by_name"))
     static_cast<void>(getMeshesByName(getParam<std::vector<MeshGeneratorName>>("inputs")));
+  if (getParam<bool>("request_sub_input"))
+    getMeshForSub("input");
+  if (getParam<bool>("mesh_prop_double_declare"))
+  {
+    static_cast<void>(declareMeshProperty<bool>("foo"));
+    static_cast<void>(declareMeshProperty<bool>("foo"));
+  }
 
   if (isParamValid("null_mesh_name"))
   {
@@ -81,6 +96,14 @@ TestMeshGenerator::TestMeshGenerator(const InputParameters & parameters) : MeshG
     getMeshesForSubByName({null_mesh_name});
   }
 
+  if (getParam<bool>("sub_no_declare_input"))
+  {
+    auto params = _app.getFactory().getValidParams("RenameBlockGenerator");
+    params.set<MeshGeneratorName>("input") = getParam<MeshGeneratorName>("input");
+    params.set<std::vector<SubdomainName>>("old_block") = {"0"};
+    params.set<std::vector<SubdomainName>>("new_block") = {"1"};
+    addMeshSubgenerator("RenameBlockGenerator", name() + "_rbg", params);
+  }
   // So that we have something to return
   {
     auto params = _app.getFactory().getValidParams("GeneratedMeshGenerator");
@@ -100,5 +123,7 @@ TestMeshGenerator::generate()
     auto params = _app.getFactory().getValidParams("GeneratedMeshGenerator");
     addMeshSubgenerator("GeneratedMeshGenerator", "foobar", params);
   }
+  if (getParam<bool>("declare_mesh_prop_outside_construct"))
+    static_cast<void>(declareMeshProperty<bool>("foo"));
   return std::move(*_return_mesh);
 }

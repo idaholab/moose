@@ -47,6 +47,13 @@
       cli_args = 'Mesh/test/sub_outside_construct=true'
       expect_err = 'Can only call addMeshSubgenerator\(\) during MeshGenerator construction'
     []
+    [declare_mesh_prop_outside_construct]
+      type = RunException
+      input = 'mesh_generator_test.i'
+      detail = 'declaring a property on the mesh at an unallowed time'
+      cli_args = 'Mesh/test/declare_mesh_prop_outside_construct=true'
+      expect_err = 'Can only call declareMeshProperty\(\) during MeshGenerator construction'
+    []
     [get_mesh_not_found]
       type = RunException
       input = 'mesh_generator_test.i'
@@ -79,11 +86,42 @@
       type = RunException
       input = 'mesh_generator_test.i'
       detail = 'failing to properly manage the memory of an input mesh generator'
-      cli_args = 'Mesh/gmg/type=GeneratedMeshGenerator
-                  Mesh/gmg/dim=1
+      cli_args = 'Mesh/active="gmg test"
                   Mesh/test/request_input=true
                   Mesh/test/input=gmg'
       expect_err = "The mesh from input GeneratedMeshGenerator 'gmg' was not moved."
+    []
+    [mesh_prop_double_declare]
+      type = RunException
+      input = 'mesh_generator_test.i'
+      detail = 'declaring a property on the mesh multiple times'
+      cli_args = 'Mesh/test/mesh_prop_double_declare=true'
+      expect_err = "While declaring mesh property 'foo' with type 'bool',\nsaid property has already been declared with type 'bool'"
+    []
+    [unused_sub_input]
+      type = RunException
+      input = 'mesh_generator_test.i'
+      detail = 'coupling an input mesh generator in a parameter but not using said mesh generator'
+      cli_args = 'Mesh/active="gmg test"
+                  Mesh/test/input=gmg
+                  Mesh/test/request_sub_input=true'
+      expect_err = "The sub generator dependency declared from MeshGenerator 'gmg' from the parameter 'input' was not used."
+    []
+    [sub_no_declare_input]
+      type = RunException
+      input = 'mesh_generator_test.i'
+      detail = 'coupling an input mesh generator in a sub generator but not declaring it as a dependency'
+      cli_args = 'Mesh/active="gmg test"
+                  Mesh/test/input=gmg
+                  Mesh/test/sub_no_declare_input=true'
+      expect_err = "The MeshGenerator 'gmg' was referenced in the parameter 'input' and used in the sub RenameBlockGenerator 'test_rbg', but was not declared as a sub dependency."
+    []
+    [unused_param_input]
+      type = RunException
+      input = 'mesh_generator_test.i'
+      detail = 'coupling an input mesh generator in a parameter but not using said mesh generator'
+      cli_args = 'Mesh/test/input=foo'
+      expect_err = "You failed to request the generated mesh\(es\) for the parameter 'input'.\n\nIn specific, the mesh from MeshGenerator 'foo' was not requested"
     []
   []
 
