@@ -1,6 +1,6 @@
 [Mesh]
   [test]
-    type = TestMeshGeneratorErrors
+    type = TestMeshGenerator
   []
 []
 

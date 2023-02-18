@@ -11,12 +11,15 @@
 
 #include "MeshGenerator.h"
 
-class TestMeshGeneratorErrors : public MeshGenerator
+class TestMeshGenerator : public MeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  TestMeshGeneratorErrors(const InputParameters & parameters);
+  TestMeshGenerator(const InputParameters & parameters);
 
-  std::unique_ptr<MeshBase> generate() override { return nullptr; }
+  std::unique_ptr<MeshBase> generate() override;
+
+private:
+  std::unique_ptr<MeshBase> * _return_mesh;
 };
