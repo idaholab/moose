@@ -234,7 +234,7 @@ MeshGenerator::generateInternal()
 void
 MeshGenerator::addMeshSubgenerator(const std::string & type,
                                    const std::string & name,
-                                   InputParameters & params)
+                                   InputParameters params)
 {
   if (!_app.constructingMeshGenerators())
     mooseError("Can only call addMeshSubgenerator() during MeshGenerator construction");
