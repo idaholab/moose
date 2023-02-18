@@ -9,7 +9,7 @@
 
 #include "RestartableData.h"
 
-RestartableDataValue::RestartableDataValue(std::string name, void * context)
+RestartableDataValue::RestartableDataValue(const std::string & name, void * const context)
   : _name(name), _context(context), _declared(false)
 {
 }
