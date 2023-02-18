@@ -81,7 +81,9 @@ HexagonMeshTrimmer::generate()
       paramError("input", "The input mesh cannot be trimmed through its center.");
   }
   else
-    paramError("input", "The input mesh is not compatible with HexagonMeshTrimmer.");
+    paramError("input",
+               "The input mesh is not compatible with HexagonMeshTrimmer because "
+               "the trimmability mesh meta data are absent.");
 
   return PolygonMeshTrimmerBase::generate();
 }

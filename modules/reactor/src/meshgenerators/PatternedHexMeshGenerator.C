@@ -272,14 +272,18 @@ PatternedHexMeshGenerator::generate()
         mooseError("In PatternedHexMeshGenerator ",
                    _name,
                    ": the unit hexagonal input mesh does not contain appropriate meta data "
-                   "required for generating a core mesh.");
+                   "required for generating a core mesh. Involved input mesh: ",
+                   _input_names[i],
+                   "; metadata issue: 'pattern_pitch_meta' is missing.");
       pattern_pitch_array.push_back(getMeshProperty<Real>("pattern_pitch_meta", _input_names[i]));
       // throw an error message if the input mesh contains non-sense meta data
       if (pattern_pitch_array.back() == 0.0)
         mooseError("In PatternedHexMeshGenerator ",
                    _name,
                    ": the unit hexagonal input mesh does not contain appropriate meta data "
-                   "required for generating a core mesh.");
+                   "required for generating a core mesh. Involved input mesh: ",
+                   _input_names[i],
+                   "; metadata issue: 'pattern_pitch_meta' is zero.");
       is_control_drum_array.push_back(
           getMeshProperty<bool>("is_control_drum_meta", _input_names[i]));
       control_drum_azimuthal_array.push_back(
@@ -319,7 +323,9 @@ PatternedHexMeshGenerator::generate()
         mooseError("In PatternedHexMeshGenerator ",
                    _name,
                    ": the unit hexagonal input mesh does not contain appropriate meta data "
-                   "required for generating an assembly.");
+                   "required for generating an assembly. Involved input mesh: ",
+                   _input_names[i],
+                   "; metadata issue: 'pitch_meta' is missing");
       pitch_array.push_back(getMeshProperty<Real>("pitch_meta", _input_names[i]));
 
       num_sectors_per_side_array_tmp =
