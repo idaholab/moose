@@ -2077,12 +2077,13 @@ MooseApp::createMeshGenerator(const std::string & generator_name)
 
   std::shared_ptr<MeshGenerator> mg = _factory.create<MeshGenerator>(type, generator_name, params);
 
-  // Check for existance of all of the dependencies (by name) and setup
-  // the tree structure (add parents and children)
+  // Setup the children and parents
   for (const auto & dependency : mg->getRequestedMeshGenerators())
   {
-    if (!hasMeshGenerator(dependency))
-      mg->mooseError("Dependent MeshGenerator '", dependency, "' does not exist");
+    // We _shouldn't_ hit this; now that we enforce construction ordering we do
+    // all of this error checking at construction time because the info is available
+    mooseAssert(hasMeshGenerator(dependency), "Missing dependency");
+
     auto & dependency_mg = getMeshGeneratorInternal(dependency);
     mg->addParentMeshGenerator(dependency_mg, MeshGenerator::AddParentChildKey());
     dependency_mg.addChildMeshGenerator(*mg, MeshGenerator::AddParentChildKey());
