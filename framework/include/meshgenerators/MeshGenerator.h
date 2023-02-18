@@ -364,15 +364,17 @@ T &
 MeshGenerator::declareMeshProperty(const std::string & data_name, Args &&... args)
 {
   if (!_app.constructingMeshGenerators())
-    mooseError("Mesh properties can only be declared within a MeshGenerator constructor");
+    mooseError("Can only call declareMeshProperty() during MeshGenerator construction");
 
   // We sort construction ordering so that we _must_ declare before retreiving
   if (hasMeshProperty(data_name))
     mooseError("While declaring mesh property '",
                data_name,
-               "' with type ",
+               "' with type '",
                MooseUtils::prettyCppType<T>(),
-               ",\nsaid property has already been declared");
+               "',\nsaid property has already been declared with type '",
+               setMeshPropertyHelper(data_name).type(),
+               "'");
 
   const auto full_name = meshPropertyName(data_name);
   auto new_T_value =
