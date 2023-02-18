@@ -317,7 +317,8 @@ private:
   /**
    * Helper for performing error checking in the getMesh methods.
    */
-  void checkGetMesh(const MeshGeneratorName & mesh_generator_name) const;
+  void checkGetMesh(const MeshGeneratorName & mesh_generator_name,
+                    const std::string & param_name) const;
 
   /**
    * Helper for getting a MeshGeneratorName parameter

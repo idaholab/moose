@@ -55,8 +55,7 @@ MeshGenerator::getMeshGeneratorNameFromParam(const std::string & param_name,
     return nullptr;
 
   const auto & name = getParam<MeshGeneratorName>(param_name);
-  if (!_app.hasMeshGenerator(name) && !isNullMeshName(name))
-    paramError(param_name, "Requested MeshGenerator with name '", name, "' was not found");
+  checkGetMesh(name, param_name);
 
   return &name;
 }
@@ -79,20 +78,27 @@ MeshGenerator::getMeshGeneratorNamesFromParam(const std::string & param_name) co
 
   const auto & names = getParam<std::vector<MeshGeneratorName>>(param_name);
   for (const auto & name : names)
-    if (!_app.hasMeshGenerator(name) && !isNullMeshName(name))
-      paramError(param_name, "The requested MeshGenerator '", name, "' was not found");
+    checkGetMesh(name, param_name);
 
   return names;
 }
 
 void
-MeshGenerator::checkGetMesh(const MeshGeneratorName & mesh_generator_name) const
+MeshGenerator::checkGetMesh(const MeshGeneratorName & mesh_generator_name,
+                            const std::string & param_name) const
 {
   mooseAssert(!mesh_generator_name.empty(), "Empty name");
   if (!_app.constructingMeshGenerators())
     mooseError("Cannot get a mesh outside of construction");
-  if (!_app.hasMeshGenerator(mesh_generator_name))
-    mooseError("The requested MeshGenerator '", mesh_generator_name, "' was not found");
+  if (!_app.hasMeshGenerator(mesh_generator_name) && !isNullMeshName(mesh_generator_name))
+  {
+    std::stringstream error;
+    error << "The requested MeshGenerator with name '" << mesh_generator_name << "' was not found";
+    if (param_name.size())
+      paramError(param_name, error.str());
+    else
+      mooseError(error.str());
+  }
 }
 
 std::unique_ptr<MeshBase> &
@@ -113,10 +119,10 @@ MeshGenerator::getMeshes(const std::string & param_name)
 std::unique_ptr<MeshBase> &
 MeshGenerator::getMeshByName(const MeshGeneratorName & mesh_generator_name)
 {
+  checkGetMesh(mesh_generator_name, "");
   if (isNullMeshName(mesh_generator_name))
     return _null_mesh;
 
-  checkGetMesh(mesh_generator_name);
   _requested_mesh_generators.insert(mesh_generator_name);
   auto & mesh = _app.getMeshGeneratorOutput(mesh_generator_name);
   _requested_meshes.emplace_back(mesh_generator_name, &mesh);
@@ -147,10 +153,10 @@ MeshGenerator::getMeshesForSub(const std::string & param_name)
 void
 MeshGenerator::getMeshForSubByName(const MeshGeneratorName & mesh_generator_name)
 {
+  checkGetMesh(mesh_generator_name, "");
   if (isNullMeshName(mesh_generator_name))
     return;
 
-  checkGetMesh(mesh_generator_name);
   _requested_mesh_generators_for_sub.insert(mesh_generator_name);
 }
 
