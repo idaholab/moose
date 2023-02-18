@@ -1,0 +1,12 @@
+[Tests]
+  design = 'NSLiquidFractionAux.md NSFVPhaseChangeSource.md NSFVMixtureMaterial.md'
+  issues = '#23357'
+  [galium_melting]
+    type = RunApp
+    input = 'galium_melting.i'
+    cli_args = "Nx=20 Ny=10"
+    ad_indexing_type = 'global'
+    requirement = 'The system shall be able to simulate the melting of galium.'
+    heavy = true
+  []
+[]
