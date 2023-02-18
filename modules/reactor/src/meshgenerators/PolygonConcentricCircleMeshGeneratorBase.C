@@ -409,12 +409,19 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
   if (!_ring_block_ids.empty() &&
       _ring_block_ids.size() !=
           (_ring_intervals.size() + (unsigned int)(_ring_intervals.front() != 1)))
-    paramError("ring_block_ids",
-               "This parameter must have the appropriate size if it is provided.");
+    paramError(
+        "ring_block_ids",
+        "This parameter must have the appropriate size if it is provided. The size should be the "
+        "same as the size of 'ring_intervals' if the innermost ring interval is unity; otherwise "
+        "the size should be greater than the size of 'ring_intervals' by one.");
   if (!_ring_block_names.empty() &&
       _ring_block_names.size() !=
           (_ring_intervals.size() + (unsigned int)(_ring_intervals.front() != 1)))
-    paramError("ring_block_names", "This parameter must have the appropriate size if it is set.");
+    paramError(
+        "ring_block_names",
+        "This parameter must have the appropriate size if it is set. The size should be the "
+        "same as the size of 'ring_intervals' if the innermost ring interval is unity; otherwise "
+        "the size should be greater than the size of 'ring_intervals' by one.");
   for (unsigned int i = 1; i < _ring_intervals.size(); i++)
     if (_ring_radii[i] <= _ring_radii[i - 1])
       paramError("ring_radii", "This parameter must be strictly ascending.");

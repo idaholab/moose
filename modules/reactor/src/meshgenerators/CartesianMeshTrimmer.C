@@ -81,7 +81,8 @@ CartesianMeshTrimmer::generate()
   }
   else
     paramError("input",
-               "The input mesh's meta data is not compatible with the CartesianMeshTrimmer.");
+               "The input mesh's meta data is not compatible with the CartesianMeshTrimmer because "
+               "the trimmability mesh meta data are absent.");
 
   return PolygonMeshTrimmerBase::generate();
 }
