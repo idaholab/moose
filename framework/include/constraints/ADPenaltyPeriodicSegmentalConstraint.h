@@ -27,7 +27,6 @@
  * diffusivity. The volume integral of the gradient of the primary field will be equal to these
  * imposed values.
  */
-
 class ADPenaltyPeriodicSegmentalConstraint : public DerivativeMaterialInterface<ADMortarScalarBase>
 {
 public:

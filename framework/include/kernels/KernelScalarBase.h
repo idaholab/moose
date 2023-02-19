@@ -20,15 +20,12 @@
  * This variable is "scalar_variable" in the input file and "kappa"
  * within the source code.
  */
-
 class KernelScalarBase : public Kernel
 {
 public:
   static InputParameters validParams();
 
   KernelScalarBase(const InputParameters & parameters);
-
-  virtual const MooseVariable & variable() const override { return _var; }
 
   /**
    * The scalar variable that this kernel operates on.

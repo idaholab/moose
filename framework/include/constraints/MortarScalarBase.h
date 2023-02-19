@@ -20,7 +20,6 @@
  * This variable is "scalar_variable" in the input file and "kappa"
  * within the source code.
  */
-
 class MortarScalarBase : public MortarConstraint
 {
 public:

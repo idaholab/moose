@@ -20,7 +20,6 @@
  * This variable is "scalar_variable" in the input file and "kappa"
  * within the source code.
  */
-
 class ADKernelScalarBase : public ADKernel
 {
 public:
@@ -101,20 +100,6 @@ protected:
   unsigned int _h;
   unsigned int _l;
   std::vector<ADReal> _scalar_residuals;
-
-  // private:
-  //   /**
-  //    * Add the Jacobian contribution for the provided variable
-  //    */
-  //   void addScalarJacobian(const MooseVariableScalar & jvariable);
-
-  //   /**
-  //    * compute all the Jacobian entries, but for non-global indexing only add the matrix coupling
-  //    * entries specified by \p coupling_entries
-  //    */
-  //   void computeADScalarJacobian(
-  //       const std::vector<std::pair<MooseVariableScalar *, MooseVariableScalar *>> &
-  //           coupling_entries);
 };
 
 inline ADReal
