@@ -93,7 +93,14 @@ MeshGenerator::checkGetMesh(const MeshGeneratorName & mesh_generator_name,
   if (!_app.hasMeshGenerator(mesh_generator_name) && !isNullMeshName(mesh_generator_name))
   {
     std::stringstream error;
-    error << "The requested MeshGenerator with name '" << mesh_generator_name << "' was not found";
+    error << "The requested MeshGenerator with name '" << mesh_generator_name << "' ";
+    if (_app.hasMeshGeneratorParams(mesh_generator_name))
+      error << "was found, but has not been constructed yet.\n\nThis can occur when your "
+               "dependencies are not properly defined and we cannot infer the proper construction "
+               "order of your MeshGenerators.\n\nThe most likely case is a sub generator whose "
+               "input(s) are not declared as a sub dependency in the generator creating them.";
+    else
+      error << "was not found.";
     if (param_name.size())
       paramError(param_name, error.str());
     else

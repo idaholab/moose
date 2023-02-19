@@ -2151,30 +2151,6 @@ MooseApp::createMeshGenerator(const std::string & generator_name)
           "mesh(es)\nare not needed, or request the mesh(es) with getMesh()/getMeshes().");
   }
 
-  // Make sure that sub mesh generators follow a very explicit dependency chain. We only
-  // want independent chains that branch off from the MeshGenerator that create them
-  for (const auto & sub_mg : mg->getSubMeshGenerators())
-    for (const auto & sub_mg_parent : sub_mg->getParentMeshGenerators())
-    {
-      if (!mg->getRequestedMeshGeneratorsForSub().count(sub_mg_parent->name()) &&
-          !mg->getSubMeshGenerators().count(sub_mg_parent) &&
-          !sub_mg->getSubMeshGenerators().count(sub_mg_parent) &&
-          !sub_mg_parent->getParentMeshGenerators().empty())
-      {
-        mg->mooseError(
-            "The dependency ",
-            sub_mg_parent->type(),
-            " '",
-            sub_mg_parent->name(),
-            "'\nof sub generator ",
-            sub_mg->type(),
-            " '",
-            sub_mg->name(),
-            "'\nis not a supported dependency.\n\nSub generators may only have as dependencies the "
-            "MeshGenerator that creates them and\nother subgenerators created in the same chain.");
-      }
-    }
-
   mooseAssert(!_mesh_generators.count(generator_name), "Already created");
   _mesh_generators.emplace(generator_name, mg);
   mooseAssert(!_mesh_generator_outputs.count(generator_name), "Already exists");
@@ -2206,10 +2182,13 @@ MooseApp::getMeshGeneratorNames() const
 bool
 MooseApp::hasMeshGenerator(const MeshGeneratorName & name) const
 {
-  return std::find_if(_mesh_generators.begin(),
-                      _mesh_generators.end(),
-                      [&name](const auto & pair)
-                      { return pair.first == name; }) != _mesh_generators.end();
+  return _mesh_generators.count(name);
+}
+
+bool
+MooseApp::hasMeshGeneratorParams(const MeshGeneratorName & name) const
+{
+  return _mesh_generator_params.count(name);
 }
 
 std::unique_ptr<MeshBase> &
@@ -2248,13 +2227,20 @@ MooseApp::createMeshGeneratorOrder()
   {
     _ordered_mesh_generators = resolver.getSortedValuesSets();
   }
+  // It is _quite_ hard to trigger this to test it. I've tried to no avail.
+  // Now that we...
+  // - check and sort up front
+  // - know if dependencies exist at the time of requesing them
+  // - require that sub generators depend only on other sub generators in an object's
+  //   tree + input dependencies that we explicitly declare
+  // I don't think it's possible. But we'll leave it here anyway and it
+  // definitely will not be covered
   catch (CyclicDependencyException<MeshGenerator *, MeshGenerator::Comparator> & e)
   {
     const auto & cycle = e.getCyclicDependencies();
-    std::vector<std::string> names;
-    names.reserve(cycle.size());
-    for (const auto & mg : cycle)
-      names.push_back(mg->name());
+    std::vector<std::string> names(cycle.size());
+    for (const auto i : index_range(cycle))
+      names[i] = cycle[i]->name();
 
     mooseError("Cyclic dependencies detected in mesh generation: ",
                MooseUtils::join(names, " <- "));

@@ -781,6 +781,16 @@ public:
   bool hasMeshGenerator(const MeshGeneratorName & name) const;
 
   /**
+   * Whether or not we know about the parameters for a MeshGenerator with the given name
+   *
+   * This is primarily for error checking. If MeshGenerator dependencies are screwed up,
+   * someone could be looking for a MeshGenerator that hasn't been constructed yet.
+   * With this, at least we can give the user some context that we know the generator
+   * exists, just that the dependencies are hosed.
+   */
+  bool hasMeshGeneratorParams(const MeshGeneratorName & name) const;
+
+  /**
    * Get a refernce to a pointer that will be the output of the
    * MeshGenerator named name
    */
