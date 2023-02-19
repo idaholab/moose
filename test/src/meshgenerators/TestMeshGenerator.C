@@ -46,6 +46,9 @@ TestMeshGenerator::validParams()
   params.addParam<bool>("request_input_by_name", false, "Request the mesh in 'input' by name");
   params.addParam<bool>("request_inputs_by_name", false, "Request the meshes in 'inputs' by name");
   params.addParam<bool>("request_sub_input", false, "Request the mesh in 'input' for a sub");
+  params.addParam<bool>("missing_get", false, "Tests getting a missing meshgenerator from the app");
+  params.addParam<std::string>("add_sub_input", "Adds this input as an input to a sub generator");
+
   return params;
 }
 
@@ -74,6 +77,8 @@ TestMeshGenerator::TestMeshGenerator(const InputParameters & parameters) : MeshG
     static_cast<void>(declareMeshProperty<bool>("foo"));
     static_cast<void>(declareMeshProperty<bool>("foo"));
   }
+  if (getParam<bool>("missing_get"))
+    _app.getMeshGenerator("foo");
 
   if (isParamValid("null_mesh_name"))
   {
@@ -96,14 +101,18 @@ TestMeshGenerator::TestMeshGenerator(const InputParameters & parameters) : MeshG
     getMeshesForSubByName({null_mesh_name});
   }
 
-  if (getParam<bool>("sub_no_declare_input"))
+  if (getParam<bool>("sub_no_declare_input") || isParamValid("add_sub_input"))
   {
     auto params = _app.getFactory().getValidParams("RenameBlockGenerator");
-    params.set<MeshGeneratorName>("input") = getParam<MeshGeneratorName>("input");
+    if (getParam<bool>("sub_no_declare_input"))
+      params.set<MeshGeneratorName>("input") = getParam<MeshGeneratorName>("input");
+    else
+      params.set<MeshGeneratorName>("input") = getParam<std::string>("add_sub_input");
     params.set<std::vector<SubdomainName>>("old_block") = {"0"};
     params.set<std::vector<SubdomainName>>("new_block") = {"1"};
     addMeshSubgenerator("RenameBlockGenerator", name() + "_rbg", params);
   }
+
   // So that we have something to return
   {
     auto params = _app.getFactory().getValidParams("GeneratedMeshGenerator");

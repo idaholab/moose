@@ -123,6 +123,28 @@
       cli_args = 'Mesh/test/input=foo'
       expect_err = "You failed to request the generated mesh\(es\) for the parameter 'input'.\n\nIn specific, the mesh from MeshGenerator 'foo' was not requested"
     []
+    [missing_get]
+      type = RunException
+      input = 'mesh_generator_test.i'
+      detail = 'getting a mesh generator that does not exist'
+      cli_args = 'Mesh/test/missing_get=true'
+      expect_err = "Failed to find a MeshGenerator with the name 'foo'"
+    []
+    [missing_final]
+      type = RunException
+      input = 'mesh_generator_test.i'
+      detail = 'forcibly setting the final mesh when said mesh does not exist'
+      cli_args = 'Mesh/final_generator=foo'
+      expect_err = "The forced final MeshGenerator 'foo' does not exist"
+    []
+    [not_constructed_yet]
+      type = RunException
+      input = 'mesh_generator_test.i'
+      detail = 'an input mesh is not found because its dependencies are not properly declared'
+      cli_args = 'Mesh/active="gmg test"
+                  Mesh/test/add_sub_input=gmg'
+      expect_err = "The requested MeshGenerator with name 'gmg' was found, but has not been constructed yet"
+    []
   []
 
   [null_mesh]
