@@ -63,7 +63,7 @@ already been implemented within other MOOSE classes.
 - `computeQpOffDiagJacobianScalar(mortar_type, svar_num)`: Jacobian component d-`var`-residual / d-`svar`
 - `computeScalarQpJacobian()`: Jacobian component d-`_kappa`-residual / d-`_kappa`
 - `computeScalarQpOffDiagJacobian(mortar_type, jvar_num)`: Jacobian component d-`_kappa`-residual / d-`jvar`
-- `computeScalarQpOffDiagJacobianScalar(mortar_type, svar_num)`: Jacobian component d-`_kappa`-residual / d-`svar`
+- `computeScalarQpOffDiagJacobianScalar(svar_num)`: Jacobian component d-`_kappa`-residual / d-`svar`
 
 Similar to the `mortar_type` flag
 mentioned above, the `jacobian_type` flag is used to distinguish the couplings between the test and trial

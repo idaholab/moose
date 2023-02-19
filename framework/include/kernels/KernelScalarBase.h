@@ -44,11 +44,14 @@ public:
   virtual void computeOffDiagJacobian(unsigned int jvar_num) override;
   /**
    * Computes jacobian block with respect to a scalar variable
-   * @param svar, the number of the (other) scalar variable
+   * @param svar_num, the number of the (other) scalar variable
    */
   void computeOffDiagJacobianScalar(unsigned int svar_num) override;
 
 protected:
+  /**
+   * Add precalculate method like precalculateResidual(), etc.
+   */
   virtual void precalculateOffDiagJacobianScalar(unsigned int /* svar_num */) {}
 
   /**
@@ -82,7 +85,12 @@ protected:
    */
   virtual Real computeScalarQpOffDiagJacobian(const unsigned int /*jvar_num*/) { return 0; }
 
+  /**
+   * Method for computing an off-diagonal jacobian component d-_var-residual / d-scalar
+   * Revised version of Kernel::computeOffDiagJacobianScalar
+   */
   virtual void computeOffDiagJacobianScalarLocal(const unsigned int svar_num);
+
   /**
    * Method for computing an off-diagonal jacobian component d-_kappa-residual / d-scalar
    */
