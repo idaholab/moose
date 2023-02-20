@@ -217,12 +217,12 @@ NonlinearSystem::solve()
   // determine whether solution invalid occures in the converged solution
   _solution_is_invalid = _app.solutionInvalidity().solutionInvalid();
 
-  // sync all solution invalid counts to rank 0 process
-  _app.solutionInvalidity().sync();
-
   // output the solution invalid summary
   if (_solution_is_invalid)
   {
+    // sync all solution invalid counts to rank 0 process
+    _app.solutionInvalidity().sync();
+
     if (_fe_problem.allowInvalidSolution())
       mooseWarning("The Solution Invalidity warnings are detected but silenced! "
                    "Use Problem/allow_invalid_solution=false to activate ");

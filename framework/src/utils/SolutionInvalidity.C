@@ -131,6 +131,8 @@ SolutionInvalidity::sync()
       else
         mainId = moose::internal::getSolutionInvalidityRegistry().registerInvalidity(object_type,
                                                                                      message);
+      if (_counts.size() <= mainId)
+        _counts.resize(mainId + 1);
 
       _counts[mainId].counts += counts;
       _counts[mainId].timeiter_counts += timeiter_counts;
@@ -169,18 +171,21 @@ SolutionInvalidity::summaryTable() const
       1, // Message
   });
 
-  for (const auto id : index_range(_counts))
+  if (processor_id() == 0)
   {
-    const auto & entry = _counts[id];
-    if (entry.counts > 0)
+    for (const auto id : index_range(_counts))
     {
-      const auto & info = _solution_invalidity_registry.item(id);
-      vtable.addRow(info.object_type,      // Object Type
-                    entry.counts,          // Converged Iteration Warnings
-                    entry.timeiter_counts, // Latest Time Iteration Warnings
-                    entry.total_counts,    // Total Iteration Warnings
-                    info.message           // Message
-      );
+      const auto & entry = _counts[id];
+      if (entry.counts > 0)
+      {
+        const auto & info = _solution_invalidity_registry.item(id);
+        vtable.addRow(info.object_type,      // Object Type
+                      entry.counts,          // Converged Iteration Warnings
+                      entry.timeiter_counts, // Latest Time Iteration Warnings
+                      entry.total_counts,    // Total Iteration Warnings
+                      info.message           // Message
+        );
+      }
     }
   }
 

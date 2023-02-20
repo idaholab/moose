@@ -60,8 +60,8 @@
     cli_args = "Materials/filter/test_different_procs=true Outputs/file_base='solution_invalid_parallel'"
     jsondiff = 'solution_invalid_parallel.json'
     design = 'SolutionInvalidity.md'
-    min_parallel = 2
-    max_parallel = 2
+    min_parallel = 3
+    max_parallel = 3
     issues = '#22814'
     requirement = 'The system shall be able to handle a solution invalidity happening on just one processor in a parallel run'
   []

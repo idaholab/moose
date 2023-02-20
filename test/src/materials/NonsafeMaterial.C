@@ -50,7 +50,7 @@ NonsafeMaterial::computeQpProperties()
   {
     if (!_test_different_procs || processor_id() == 0)
       flagInvalidSolution("The diffusivity is greater than the threshold value!");
-    if (!_test_different_procs || comm().size() > 0 || processor_id() > 0)
+    if (!_test_different_procs || comm().size() == 1 || processor_id() == 1)
       flagInvalidSolution("Extra invalid thing!");
   }
   _diffusivity[_qp] = _test_diffusivity;
