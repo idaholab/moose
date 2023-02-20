@@ -25,6 +25,7 @@ NonsafeMaterial::validParams()
   params.addParam<bool>("test_different_procs",
                         false,
                         "True to test setting invalid solutions on different processors");
+  params.addParam<bool>("test_invalid_recover", false, "True to test invalid solutions recover");
   return params;
 }
 
@@ -33,19 +34,25 @@ NonsafeMaterial::NonsafeMaterial(const InputParameters & parameters)
     _input_diffusivity(getParam<Real>("diffusivity")),
     _threshold(getParam<Real>("threshold")),
     _diffusivity(declareProperty<Real>("diffusivity")),
-    _test_different_procs(getParam<bool>("test_different_procs"))
+    _test_different_procs(getParam<bool>("test_different_procs")),
+    _test_invalid_recover(getParam<bool>("test_invalid_recover"))
 {
 }
 
 void
 NonsafeMaterial::computeQpProperties()
 {
-  if (_input_diffusivity > _threshold)
+  Real _test_diffusivity = _input_diffusivity;
+  // Gradually modify diffusivity value to test solution invalid recover
+  if (_fe_problem.dt() < 1 && _test_invalid_recover)
+    _test_diffusivity /= 2;
+  if (_test_diffusivity > _threshold)
   {
     if (!_test_different_procs || processor_id() == 0)
       flagInvalidSolution("The diffusivity is greater than the threshold value!");
     if (!_test_different_procs || comm().size() > 0 || processor_id() > 0)
       flagInvalidSolution("Extra invalid thing!");
   }
-  _diffusivity[_qp] = _input_diffusivity;
+
+  _diffusivity[_qp] = _test_diffusivity;
 }

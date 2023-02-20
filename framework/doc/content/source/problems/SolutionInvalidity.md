@@ -6,7 +6,7 @@ The [/SolutionInvalidity.md] object holds solution invalid warning information f
 
 To declare a solution as "invalid", use the macro in the following code to mark it. The user can provide a message to describe the reason for invalidity:
 
-!listing /test/src/materials/NonsafeMaterial.C  re=\s+if \(_input_diffusivity > _threshold\).*?\}
+!listing /test/src/materials/NonsafeMaterial.C  re=\s+if \(_test_diffusivity > _threshold\).*?\}
 
 !alert tip
 It is recommended to have a unique message for each invalidity, especially when you want to mark multiple types of invalid solutions within one object.

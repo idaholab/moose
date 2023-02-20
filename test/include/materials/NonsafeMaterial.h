@@ -32,4 +32,6 @@ protected:
   MaterialProperty<Real> & _diffusivity;
 
   const bool _test_different_procs;
+
+  const bool _test_invalid_recover;
 };

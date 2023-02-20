@@ -17,7 +17,7 @@
   [filter]
     type = NonsafeMaterial
     diffusivity = 0.5
-    threshold = 0.0
+    threshold = 0.3
   []
 []
 
