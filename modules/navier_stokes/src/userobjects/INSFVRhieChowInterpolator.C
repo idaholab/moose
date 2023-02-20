@@ -671,7 +671,7 @@ INSFVRhieChowInterpolator::getVelocity(const Moose::FV::InterpMethod m,
   // evaluate face porosity, see (18) in Hanimann 2021 or (11) in Nordlund 2016
   const auto face_eps = epsilon(tid)(face, time);
 
-  const auto coeff = Utility::pow<2>(fi.dCNMag()) / (_cL * _cs * _rho(face) + _mu(face));
+  const auto coeff = Utility::pow<2>(fi.dCNMag()) / (fi.dCNMag() * _cs * _rho(face) + _mu(face));
 
   // Perform the pressure correction. We don't use skewness-correction on the pressure since
   // it only influences the averaged cell gradients which cancel out in the correction
