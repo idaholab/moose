@@ -4150,7 +4150,7 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
 
   // query everything first to obtain a list of execution groups
   std::vector<UserObject *> uos;
-  primary_query.clone().condition<AttribInterfaces>(Interfaces::UserObject).queryInto(uos);
+  primary_query.clone().queryIntoUnsorted(uos);
   std::set<int> execution_groups;
   for (const auto & uo : uos)
     execution_groups.insert(uo->getParam<int>("execution_order_group"));

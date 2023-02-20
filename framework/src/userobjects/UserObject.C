@@ -43,10 +43,13 @@ UserObject::validParams()
   params.addParam<bool>("force_postaux", false, "Forces the UserObject to be executed in POSTAUX");
   params.addParam<bool>(
       "force_preic", false, "Forces the UserObject to be executed in PREIC during initial setup");
-  params.addParam<int>("execution_order_group",
-                       0,
-                       "All user objects in the same execution order group are executed "
-                       "simultaneously. Groups with a lower number are executed first.");
+  params.addParam<int>(
+      "execution_order_group",
+      0,
+      "Execution order groups are executed in increasing order (e.g., the lowest "
+      "number is executed first). Note that negative group numbers may be used to execute groups "
+      "before the default (0) group. Please refer to the user object documentation "
+      "for ordering of user object within a group.");
 
   params.registerBase("UserObject");
   params.registerSystemAttributeName("UserObject");
