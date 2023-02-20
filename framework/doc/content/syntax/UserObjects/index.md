@@ -37,6 +37,60 @@ and use the interface without the use of dynamic casts.
 - +DomainUserObject+: this object is capable of executing all the operations of
   a +ElementUserObject+, +InternalSideUserObject+, +SideUserObject+ and +InterfaceUserObject+.
 
+# Execution order
+
+User objects are executed in the following order
+
+1. `residualSetup` / `jacobianSetup`
+
+   If the current `execute_on` flag is either `EXEC_LINEAR` or `EXEC_NONLINEAR` the `residualSetup`
+   and `jacobianSetup` are called respectively in the following order
+
+   1. for objects derived from `ElementUserObject`,  `SideUserObject`, `InternalSideUserObject`
+      `InterfaceUserObject`, and  `DomainUserObject`.
+   2. for objects derived from `NodalUserObject`.
+   3. for objects derived from `ThreadedGeneralUserObject`.
+   4. for objects derived from `GeneralUserObject`.
+
+2. `initialize` is called for objects derived from `ElementUserObject`,  `SideUserObject`,
+   `InternalSideUserObject` `InterfaceUserObject`, and  `DomainUserObject`.
+
+3. All active local elements are iterated over and objects derived from `ElementUserObject`,
+   `SideUserObject`, `InternalSideUserObject` `InterfaceUserObject`, and  `DomainUserObject` are
+   executed on elements, boundaries, internal sides, and on subdomain changes (here the order
+   within each type group is determined through dependency resolution).
+
+4. `threadJoin` and `finalize` are called in the following order
+
+   1. for objects derived `SideUserObject`
+   2. for objects derived `InternalSideUserObject`
+   3. for objects derived `InterfaceUserObject`
+   4. for objects derived `ElementUserObject`
+   5. for objects derived `DomainUserObject`
+
+5. `initialize` is called for objects derived from `NodalUserObject`.
+
+6. `NodalUserObject` are looped over all local nodes and executed on each node (here the order
+   is determined through dependency resolution).
+
+7. `threadJoin` and `finalize` are called for `NodalUserObject`s.
+
+8. `initialize` is called for objects derived from `ThreadedGeneralUserObject`.
+
+9. `execute` is called for objects derived from `ThreadedGeneralUserObject` in a threaded way.
+
+10. `threadJoin` and `finalize` ar called for `ThreadedGeneralUserObject`s.
+
+12. `initialize`, `execute`, and `finalize` are called for each `GeneralUserObject`.
+
+For additional control over the user object execution order every user object has a `execution_order_group`
+parameter of type integer. This parameter can be used to force multiple execution rounds of the
+above order. All objects with the same `execution_order_group` parameter value are executed in the
+same round, and groups with a lower number are executed first. The default `execution_order_group`
+is 0 (zero). Negative values can be specified to force user object execution _before_ the default group, and
+positive values can be uses to create execution groups that run _after_ the default group. Execution
+order groups apply to all `execute_on` flags specified for a given object.
+
 ## Restartable Data
 
 Since UserObjects often create and store large data structures, the developer of a UserObject
