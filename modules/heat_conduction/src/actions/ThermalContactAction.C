@@ -99,10 +99,11 @@ ThermalContactAction::validParams()
   params.addParam<bool>(
       "check_boundary_restricted",
       true,
-      "Whether to pass the option with this name to the AuxKernels that are used "
-      "for output to allow simulations to run in cases where multiple faces of an "
-      "element are in a contact surface. Output will only account for the contribution "
-      "from one of the faces in that case.");
+      "Whether to check for multiple element sides on the boundary for the boundary restricted, "
+      "element aux variable set up for thermal contact enforcement. Setting this to false will "
+      "allow contribution to a single element's elemental value(s) from multiple boundary sides "
+      "on the same element (example: when the restricted boundary exists on two or more sides "
+      "of an element, such as at a corner of a mesh");
 
   params += GapConductance::actionParameters();
   params += GapConductanceConstant::actionParameters();

@@ -179,9 +179,9 @@
     type = RunException
     input = 'corner_wrap.i'
     cli_args = ThermalContact/thermal_contact/check_boundary_restricted=true
-    requirement = "When the 'check_boundary_restricted' option is set to true, the thermal contact "
-                  "system shall generate an error when multiple faces of an element are in one of "
-                  "the contact surfaces."
+    requirement = "When the 'check_boundary_restricted' option is set to true, the AuxKernels set "
+                  "up by the ThermalContact system shall generate an error when multiple faces of "
+                  "an element are in one of the contact surfaces."
     expect_err = "Boundary restricted auxiliary kernel 'gap_value_thermal_contact_0' has element "
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#23058'
@@ -191,8 +191,8 @@
     type = RunException
     input = 'corner_wrap.i'
     cli_args = ThermalContact/thermal_contact/quadrature=false
-    requirement = "If 'quadrature=false' the thermal contact system shall generate an error when "
-                  "multiple faces of an element are in one of the contact surfaces."
+    requirement = "If 'quadrature=false' the thermal contact system shall generate an error if "
+                  "the user also sets 'check_boundary_restricted=true'."
     expect_err = "This parameter cannot be 'false' when 'quadrature=false'"
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#23058'
