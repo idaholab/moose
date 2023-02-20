@@ -1,17 +1,17 @@
 [Tests]
   [intermediate_mesh_output]
-  design = 'MeshGenerator.md'
-  issues = '#23486'
-  requirement = 'The system shall support the file output of intermediate generated meshes in'
+    design = 'MeshGenerator.md'
+    issues = '#23486'
+    requirement = 'The system shall support the file output of intermediate generated meshes in'
 
     [exodus]
-        type = 'Exodiff'
-        input = 'output_intermediate_mesh.i'
-        exodiff = 'left_in.e'
-        cli_args = "--mesh-only"
-        recover = false
+      type = 'Exodiff'
+      input = 'output_intermediate_mesh.i'
+      exodiff = 'left_in.e'
+      cli_args = "--mesh-only"
+      recover = false
 
-        detail = "the exodus file format"
+      detail = "the exodus file format"
     []
     [nemesis]
       type = 'Exodiff'
