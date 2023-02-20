@@ -224,11 +224,7 @@ public:
    * Override the selection of the output file base name.
    * Note: This method is supposed to be called by MultiApp only.
    */
-  void setOutputFileBase(const std::string & output_file_base)
-  {
-    _output_file_base = output_file_base;
-    _file_base_set_by_user = true;
-  }
+  void setOutputFileBase(const std::string & output_file_base);
 
   /**
    * Get the output file base name.

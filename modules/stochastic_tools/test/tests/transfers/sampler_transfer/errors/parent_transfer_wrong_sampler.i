@@ -40,7 +40,6 @@
     to_multi_app = sub
     sampler = wrong
     parameters = 'BCs/left/value BCs/right/value'
-    to_control = 'stochasticsub'
   []
 []
 

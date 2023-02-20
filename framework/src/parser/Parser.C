@@ -572,6 +572,8 @@ Parser::hitCLIFilter(std::string appname, const std::vector<std::string> & argv)
         ; // cli param is ":" prefixed meaning global for all main+subapps
       else if (pos == std::string::npos) // param is for main app - skip
         continue;
+      else if (arg.find(":", pos + 1) != std::string::npos) // param is for a nested multiapp - skip
+        continue;
       else if (arg.substr(0, pos) != appname &&
                arg.substr(0, pos) != name) // param is for different multiapp - skip
       {

@@ -30,7 +30,6 @@
     to_multi_app = sub
     sampler = sample
     parameters = 'BCs/left/value'
-    to_control = stm
   []
 []
 

@@ -28,15 +28,18 @@ public:
 
 protected:
   /**
-   * Update the parameter names and associated values.
+   * Update the parameters and associated values via _parameters and _values.
+   *
+   * @param param_values Map between the parameter name and its value. Real-type parameters will
+   * have a single value.
    */
-  void transfer(const std::vector<std::string> & names, const std::vector<Real> & values);
+  void transfer(const std::map<std::string, std::vector<Real>> & param_values);
 
   /// Parameter names to modify
   std::vector<std::string> _parameters;
 
   /// Values to use when modifying parameters
-  std::vector<Real> _values;
+  std::vector<std::vector<Real>> _values;
 
   /// Allows the SamplerParameterTransfer to call the transfer method, which
   /// should only be called by that object so making it public is dangerous.

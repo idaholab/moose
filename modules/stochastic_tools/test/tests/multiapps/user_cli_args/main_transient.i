@@ -22,7 +22,6 @@
     to_multi_app = sub
     sampler = sample
     parameters = 'Functions/fun/value Postprocessors/function_val/scale_factor'
-    to_control = receiver
   []
   [data]
     type = SamplerReporterTransfer

@@ -42,7 +42,6 @@
     to_multi_app = quad_sub
     sampler = quadrature
     parameters = 'Materials/diffusivity/prop_values Materials/xs/prop_values'
-    to_control = 'stochastic'
   []
   [data]
     type = SamplerReporterTransfer

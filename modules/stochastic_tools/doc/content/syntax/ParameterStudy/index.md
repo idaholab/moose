@@ -109,7 +109,7 @@ While the execution mode can be explicitly specifyied using the [!param](/Parame
 
 ## Outputs
 
-The `ParameterStudy` syntax provides ways to output the results of the study in CSV and/or JSON format. The sampler matrix (the values of the perturbed parameters) can be outputted by setting the [!param](/ParameterStudy/sampler_output_type) parameter to `csv` and/or `json`. The resutling QoI values can be outputted by setting the [!param](/ParameterStudy/qoi_output_type) to `csv` or `json`. However, the CSV output will not contain vector-type QoIs, like those from vector-postprocessors. The default for both of these parameters is `json`. A JSON output is automatically created if QoI statistics are computed.
+The `ParameterStudy` syntax provides ways to output the results of the study in CSV and/or JSON format. The sampler matrix (the values of the perturbed parameters) and the resulting QoI values can be output by setting the [!param](/ParameterStudy/output_type) parameter to `csv` and/or `json`. However, the CSV output will not contain vector-type QoIs, like those from vector-postprocessors. The default for both of this parameter is `json`. A JSON output is automatically created if QoI statistics are computed.
 
 ## List of Objects
 
@@ -127,21 +127,19 @@ All the objects built with [ParameterStudyAction.md] can be shown on console usi
 | [Control](Controls/index.md) | [MultiAppSamplerControl.md] | `study_multiapp_control`$^b$ |
 | [Transfer](Transfers/index.md) | [SamplerParameterTransfer.md] | `study_parameter_transfer`$^c$ |
 | [Transfer](Transfers/index.md) | [SamplerReporterTransfer.md] | `study_qoi_transfer`$^d$ |
-| [VectorPostprocessor](VectorPostprocessors/index.md) | [SamplerData.md] | `study_samples`$^e$ |
-| [Reporter](Reporters/index.md) | [StochasticReporter.md] | `study_qoi`$^d$ |
-| [Reporter](Reporters/index.md) | [StatisticsReporter.md] | `study_statistics`$^{d,f}$ |
-| [Output](syntax/Outputs/index.md) | [CSV.md] | `csv`$^g$ |
-| [Output](syntax/Outputs/index.md) | [JSONOutput.md] | `json`$^h$ |
+| [Reporter](Reporters/index.md) | [StochasticMatrix.md] | `study_results`|
+| [Reporter](Reporters/index.md) | [StatisticsReporter.md] | `study_statistics`$^{d,e}$ |
+| [Output](syntax/Outputs/index.md) | [CSV.md] | `csv`$^f$ |
+| [Output](syntax/Outputs/index.md) | [JSONOutput.md] | `json`$^g$ |
 
 !style fontsize=small
 $^a$ `<i>` corresponds to the index of the distribution in [!param](/ParameterStudy/distributions);\\
 $^b$ If [!param](/ParameterStudy/multiapp_mode) is `normal` or `batch-reset`;\\
 $^c$ If [!param](/ParameterStudy/multiapp_mode) is `batch-restore`, `batch-keep-solution`, or `batch-no-restore`;\\
 $^d$ If [!param](/ParameterStudy/quantities_of_interest) is specified;\\
-$^e$ If [!param](/ParameterStudy/sampler_output_type) is not `none`;\\
-$^f$ If [!param](/ParameterStudy/compute_statistics) is `true`;\\
-$^g$ If [!param](/ParameterStudy/sampler_output_type) or [!param](/ParameterStudy/qoi_output_type) contains `csv`;\\
-$^h$ If [!param](/ParameterStudy/sampler_output_type) or [!param](/ParameterStudy/qoi_output_type) contains `csv` or [!param](/ParameterStudy/compute_statistics) is `true`;
+$^e$ If [!param](/ParameterStudy/compute_statistics) is `true`;\\
+$^f$ If [!param](/ParameterStudy/output_type) contains `csv`;\\
+$^g$ If [!param](/ParameterStudy/output_type) contains `json` or [!param](/ParameterStudy/compute_statistics) is `true`;
 
 ## Example Input Syntax
 

@@ -27,7 +27,7 @@
 [MultiApps]
   [sub]
     type = SamplerTransientMultiApp
-    input_files = sub_wrong_control.i
+    input_files = sub.i
     sampler = sample
   []
 []
@@ -37,8 +37,7 @@
     type = SamplerParameterTransfer
     to_multi_app = sub
     sampler = sample
-    parameters = 'BCs/left/value BCs/right/value'
-    to_control = 'stochastic'
+    parameters = 'BCs/left/value[0] BCs/right/value[0,1]'
   []
 []
 

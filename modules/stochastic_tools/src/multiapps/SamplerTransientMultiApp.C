@@ -147,21 +147,30 @@ SamplerTransientMultiApp::solveStepBatch(Real dt, Real target_time, bool auto_ad
       for (MooseIndex(_my_num_apps) j = 0; j < _my_num_apps; j++)
         _apps[j]->restore(_batch_backup[_local_batch_app_index][j]);
 
-    for (auto & transfer : to_transfers)
+    SamplerFullSolveMultiApp::execBatchTransfers(to_transfers,
+                                                 i,
+                                                 _row_data,
+                                                 MultiAppTransfer::TO_MULTIAPP,
+                                                 _fe_problem.verboseMultiApps(),
+                                                 _console);
+
+    // Set the file base based on the current row
+    for (unsigned int ai = 0; ai < _my_num_apps; ++ai)
     {
-      transfer->setGlobalRowIndex(i);
-      transfer->setCurrentRow(_row_data);
-      transfer->executeToMultiapp();
+      const std::string mname = getMultiAppName(name(), i, _number_of_sampler_rows);
+      _apps[ai]->setOutputFileBase(_app.getOutputFileBase() + "_" + mname);
     }
 
-    last_solve_converged = TransientMultiApp::solveStep(dt, target_time, auto_advance);
+    const bool curr_last_solve_converged =
+        TransientMultiApp::solveStep(dt, target_time, auto_advance);
+    last_solve_converged = last_solve_converged && curr_last_solve_converged;
 
-    for (auto & transfer : from_transfers)
-    {
-      transfer->setGlobalRowIndex(i);
-      transfer->setCurrentRow(_row_data);
-      transfer->executeFromMultiapp();
-    }
+    SamplerFullSolveMultiApp::execBatchTransfers(from_transfers,
+                                                 i,
+                                                 _row_data,
+                                                 MultiAppTransfer::FROM_MULTIAPP,
+                                                 _fe_problem.verboseMultiApps(),
+                                                 _console);
 
     incrementTStep(target_time);
 

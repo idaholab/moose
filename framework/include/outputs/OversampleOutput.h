@@ -53,6 +53,9 @@ protected:
    */
   virtual void updateOversample();
 
+  /// Appends the base class's file base string
+  virtual void setFileBaseInternal(const std::string & file_base) override;
+
   /// The number of oversampling refinements
   const unsigned int _refinements;
 

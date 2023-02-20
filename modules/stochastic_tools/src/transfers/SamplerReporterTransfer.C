@@ -36,6 +36,7 @@ SamplerReporterTransfer::validParams()
                                "name rather than the transfer name.");
 
   params.suppressParameter<MultiMooseEnum>("direction");
+  params.suppressParameter<MultiAppName>("multi_app");
   return params;
 }
 
