@@ -237,6 +237,8 @@ addActionTypes(Syntax & syntax)
   registerTask("create_problem_custom", false);
   registerTask("create_problem_complete", false);
 
+  // Action for setting up the signal-based checkpoint
+  registerTask("auto_checkpoint_action", true);
   /**************************/
   /****** Dependencies ******/
   /**************************/
@@ -313,6 +315,7 @@ addActionTypes(Syntax & syntax)
                            "(add_master_action_material)"
                            "(add_output_aux_variables)"
                            "(add_output)"
+                           "(auto_checkpoint_action)"
                            "(add_postprocessor)"
                            "(add_vector_postprocessor)" // MaterialVectorPostprocessor requires this
                                                         // to be after material objects are created.
@@ -576,6 +579,7 @@ bool _warnings_are_errors = false;
 bool _deprecated_is_error = false;
 bool _throw_on_error = false;
 bool _throw_on_warning = false;
+int interrupt_signal_number = 0;
 bool show_trace = true;
 bool show_multiple = false;
 

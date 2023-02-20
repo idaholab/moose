@@ -147,6 +147,12 @@ static_assert(LIBMESH_DIM == 3,
 static constexpr std::size_t dim = LIBMESH_DIM;
 
 /**
+ * Used by the signal handler to determine if we should write a checkpoint file out at any point
+ * during operation.
+ */
+extern int interrupt_signal_number;
+
+/**
  * Set to true (the default) to print the stack trace with error and warning
  * messages - false to omit it.
  */
