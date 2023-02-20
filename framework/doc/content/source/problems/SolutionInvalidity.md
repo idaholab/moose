@@ -32,7 +32,7 @@ Solution Invalid Warnings:
 When the solution is converged, the number of solution invalid warnings is reported for the latest iteration (linear/nonlinear), the last time step (over all solver iterations) and the entire simulation.
 SolutionInvalidity warnings can come from numerous objects, some executed once and some executed on every quadrature point. The number of occurrences reported reflects this.
 
-This Solution Invalid Warnings table can be silenced by setting [!param](/Problem/FEProblem/allow_invalid_solution) to 'true'. Then the converged solution will be accepted even if there are still solution invalid warnings, but a message will be generated in the end of the calculation as a reminder:
+This Solution Invalid Warnings table can be silenced by setting [!param](/Problem/FEProblem/allow_invalid_solution) to 'true'. Then the converged solution will be accepted even if there are still solution invalid warnings, but a message will be generated at the end of the calculation as a reminder:
 
 ```
 *** Warning ***

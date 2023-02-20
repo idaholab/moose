@@ -74,7 +74,7 @@ public:
 
   /**
    * Print the summary table of Solution Invalid warnings
-   *  @param console The output stream to output to
+   * @param console The output stream to output to
    */
   void print(const ConsoleStream & console) const;
 
@@ -88,7 +88,7 @@ public:
 
 private:
   /// Mutex for locking access to the invalid counts
-  /// TODO: These can be changed to shared_mutexes once we get C++17
+  /// TODO: These can be changed to shared_mutexes
   mutable std::mutex _invalid_mutex;
 
   // Build a VariadicTable for solution invalidity

@@ -66,7 +66,7 @@
     requirement = 'The system shall be able to handle a solution invalidity happening on just one processor in a parallel run'
   []
 
-  [solution_invalid_recover]
+  [solution_valid_again_by_cutting_step]
     allow_warnings = true
     recover = false
     type = RunApp
