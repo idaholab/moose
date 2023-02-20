@@ -15,6 +15,12 @@
 #include "OptimizeSolve.h"
 #include "OptimizationReporterTest.h"
 
+namespace libMesh
+{
+template <typename Number>
+class PetscVector;
+}
+
 /**
  * Base class for optimization objects, implements routines for calculating misfit. Derived classes
  * are responsible for parameter members and gradient computation.
@@ -30,31 +36,6 @@ public:
   void finalize() override final {}
 
   /**
-   * Function to initialize petsc vectors from vpp data
-   */
-  virtual void setInitialCondition(libMesh::PetscVector<Number> & param) = 0;
-
-  /**
-   * Function to override misfit values with the simulated values from the matrix free hessian
-   * forward solve
-   */
-  void setMisfitToSimulatedValues();
-
-  /**
-   * Functions to check if bounds are set
-   */
-  virtual bool hasBounds() const = 0;
-
-  /**
-   * Upper and lower bounds for each parameter being controlled
-   *
-   * @param i Parameter index
-   * @return The upper/lower bound for parameter i
-   */
-  virtual Real getUpperBound(dof_id_type i) const;
-  virtual Real getLowerBound(dof_id_type i) const;
-
-  /**
    * Function to compute objective.
    * This is the last function called in objective routine
    */
@@ -67,17 +48,68 @@ public:
   virtual void computeGradient(libMesh::PetscVector<Number> & gradient) const;
 
   /**
+   * Function to initialize petsc vectors from vpp data
+   */
+  void setInitialCondition(libMesh::PetscVector<Number> & param);
+
+  /**
+   * Function to override misfit values with the simulated values from the matrix free hessian
+   * forward solve
+   */
+  void setMisfitToSimulatedValues();
+
+  /**
+   * Functions to check if bounds are set
+   */
+  bool hasBounds() const { return _upper_bounds.size() && _lower_bounds.size(); }
+
+  /**
+   * Upper and lower bounds for each parameter being controlled
+   *
+   * @param i Parameter index
+   * @return The upper/lower bound for parameter i
+   */
+  Real getUpperBound(dof_id_type i) const;
+  Real getLowerBound(dof_id_type i) const;
+
+  /**
    * Function to get the total number of parameters
    * @return total number of parameters
    */
-  virtual dof_id_type getNumParams() const = 0;
+  dof_id_type getNumParams() const { return _ndof; }
 
 protected:
   /**
    * Function to set parameters.
    * This is the first function called in objective/gradient/hessian routine
    */
-  virtual void updateParameters(const libMesh::PetscVector<Number> & x) = 0;
+  virtual void updateParameters(const libMesh::PetscVector<Number> & x);
+  /**
+   * Helper function to get index of the list of parameters from the dof index
+   *
+   * @param i The DoF index in the optimization vector
+   * @return unsigned int The index of the parameter the DoF is representing
+   */
+  virtual unsigned int getParameterIndex(dof_id_type i) const;
+
+  /// Parameter names
+  const std::vector<ReporterValueName> & _parameter_names;
+  /// Number of parameter vectors
+  const unsigned int _nparams;
+
+  /// Parameter values declared as reporter data
+  std::vector<std::vector<Real> *> _parameters;
+  /// Gradient values declared as reporter data
+  std::vector<std::vector<Real> *> _gradients;
+
+  /// Bounds of the parameters
+  const std::vector<Real> & _lower_bounds;
+  const std::vector<Real> & _upper_bounds;
+
+  /// Number of values for each parameter
+  std::vector<dof_id_type> _nvalues;
+  /// Total number of parameters
+  dof_id_type _ndof;
 
 private:
   friend class OptimizeSolve;

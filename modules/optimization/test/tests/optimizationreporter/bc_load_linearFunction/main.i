@@ -19,8 +19,8 @@
 
 [OptimizationReporter]
   type = OptimizationReporter
-  parameter_names = 'p'
-  num_values = '2'
+  parameter_names = 'left right'
+  num_values = '2 1'
   measurement_file = 'measurementData.csv'
   file_xcoord = 'coordx'
   file_ycoord ='y'
@@ -32,29 +32,14 @@
   #                       0.2 1.4 0
   #                       0.8 1.8 0'
   # measurement_values = '207 204 185 125'
+  outputs=none
 []
 
 [Executioner]
   type = Optimize
-  # tao_solver = taobncg
-  # petsc_options_iname = '-tao_gatol'
-  # petsc_options_value = '1e-4'
-
   tao_solver = taonls
   petsc_options_iname = '-tao_gttol -tao_nls_pc_type -tao_nls_ksp_type'
   petsc_options_value = '1e-5 none cg'
-
-  # tao_solver = taonm
-  # petsc_options_iname = '-tao_max_it -tao_gatol'
-  # petsc_options_value = '10000 1e-4'
-
-  # tao_solver = taoblmvm
-  # petsc_options_iname = '-tao_max_it -tao_gatol'
-  # petsc_options_value = '10000 1e-4'
-
-  # petsc_options_iname = '-tao_fd_gradient -tao_fd_delta -tao_gatol'
-  # petsc_options_value = 'true 0.0001 1e-4'
-
   verbose = true
 []
 
@@ -88,13 +73,15 @@
                       OptimizationReporter/measurement_zcoord
                       OptimizationReporter/measurement_time
                       OptimizationReporter/measurement_values
-                      OptimizationReporter/p'
+                      OptimizationReporter/left
+                      OptimizationReporter/right'
     to_reporters = 'measure_data/measurement_xcoord
                     measure_data/measurement_ycoord
                     measure_data/measurement_zcoord
                     measure_data/measurement_time
                     measure_data/measurement_values
-                    params/vals'
+                    params_left/vals
+                    params_right/vals'
   []
   [fromForward]
     type = MultiAppReporterTransfer
@@ -110,19 +97,23 @@
                       OptimizationReporter/measurement_zcoord
                       OptimizationReporter/measurement_time
                       OptimizationReporter/misfit_values
-                      OptimizationReporter/p'
+                      OptimizationReporter/left
+                      OptimizationReporter/right'
     to_reporters = 'misfit/measurement_xcoord
                     misfit/measurement_ycoord
                     misfit/measurement_zcoord
                     misfit/measurement_time
                     misfit/misfit_values
-                    params/vals'
+                    params_left/vals
+                    params_right/vals'
   []
   [fromadjoint]
     type = MultiAppReporterTransfer
     from_multi_app = adjoint
-    from_reporters = 'adjoint_bc/inner_product'
-    to_reporters = 'OptimizationReporter/adjoint'
+    from_reporters = 'grad_bc_left/inner_product
+                      grad_bc_right/inner_product'
+    to_reporters = 'OptimizationReporter/grad_left
+                    OptimizationReporter/grad_right'
   []
 
   # HESSIAN transfers.  Same as forward.
@@ -134,13 +125,15 @@
                       OptimizationReporter/measurement_zcoord
                       OptimizationReporter/measurement_time
                       OptimizationReporter/measurement_values
-                      OptimizationReporter/p'
+                      OptimizationReporter/left
+                      OptimizationReporter/right'
     to_reporters = 'measure_data/measurement_xcoord
                     measure_data/measurement_ycoord
                     measure_data/measurement_zcoord
                     measure_data/measurement_time
                     measure_data/measurement_values
-                    params/vals'
+                    params_left/vals
+                    params_right/vals'
   []
   [fromHomogeneousForward]
     type = MultiAppReporterTransfer

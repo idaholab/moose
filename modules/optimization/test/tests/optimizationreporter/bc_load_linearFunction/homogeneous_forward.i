@@ -22,10 +22,10 @@
     function = left_function
   []
   [right]
-    type = NeumannBC
+    type = FunctionNeumannBC
     variable = temperature
     boundary = right
-    value = 0
+    function = right_function
   []
   [bottom]
     type = DirichletBC
@@ -46,7 +46,13 @@
     type = ParsedOptimizationFunction
     expression = 'a + b*y'
     param_symbol_names = 'a b'
-    param_vector_name = 'params/vals'
+    param_vector_name = 'params_left/vals'
+  []
+  [right_function]
+    type = ParsedOptimizationFunction
+    expression = 'a'
+    param_symbol_names = 'a'
+    param_vector_name = 'params_right/vals'
   []
 []
 
@@ -92,10 +98,15 @@
     type = OptimizationData
     variable = temperature
   []
-  [params]
+  [params_left]
     type = ConstantReporter
     real_vector_names = 'vals'
     real_vector_values = '0 0' # Dummy
+  []
+  [params_right]
+    type = ConstantReporter
+    real_vector_names = 'vals'
+    real_vector_values = '0' # Dummy
   []
 []
 

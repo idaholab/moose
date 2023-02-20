@@ -1,4 +1,4 @@
-adjoint,measurement_time,measurement_values,measurement_xcoord,measurement_ycoord,measurement_zcoord,misfit_values,result1,result2,result3,simulation_values
-0,0,0,0,0,0,0,1,4,6,0
-0,0,0,0,0,0,0,2,5,7,0
-0,0,0,0,0,0,0,3,0,0,0
+grad_result1,grad_result2,grad_result3,measurement_time,measurement_values,measurement_xcoord,measurement_ycoord,measurement_zcoord,misfit_values,result1,result2,result3,simulation_values
+0,0,0,0,0,0,0,0,0,1,4,6,0
+0,0,0,0,0,0,0,0,0,2,5,7,0
+0,0,0,0,0,0,0,0,0,3,0,0,0

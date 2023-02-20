@@ -1,4 +1,4 @@
-adjoint,measurement_values,measurement_xcoord,measurement_ycoord,measurement_zcoord,misfit_values,parameter_results,simulation_values,measurement_time
+grad_parameter_results,measurement_values,measurement_xcoord,measurement_ycoord,measurement_zcoord,misfit_values,parameter_results,simulation_values,measurement_time
 0,270,0.2,0.2,0,0,1000,270,0
 0,339,0.8,0.6,0,0,0,339,0
 0,321,0.2,1.4,0,0,0,321,0
