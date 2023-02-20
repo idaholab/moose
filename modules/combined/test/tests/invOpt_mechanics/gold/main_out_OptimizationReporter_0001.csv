@@ -1,2 +1,2 @@
-adjoint,fy_right,measurement_values,measurement_xcoord,measurement_ycoord,measurement_zcoord,misfit_values,simulation_values,measurement_time
+grad_fy_right,fy_right,measurement_values,measurement_xcoord,measurement_ycoord,measurement_zcoord,misfit_values,simulation_values,measurement_time
 0,2000,80.9,5,1,0,0,80.9,0

@@ -29,10 +29,15 @@
   [misfit]
     type = OptimizationData
   []
-  [params]
+  [params_left]
     type = ConstantReporter
     real_vector_names = 'vals'
     real_vector_values = '0 0' # Dummy
+  []
+  [params_right]
+    type = ConstantReporter
+    real_vector_names = 'vals'
+    real_vector_values = '0' # Dummy
   []
 []
 
@@ -86,21 +91,33 @@
     type = ParsedOptimizationFunction
     expression = 'a + b*y'
     param_symbol_names = 'a b'
-    param_vector_name = 'params/vals'
+    param_vector_name = 'params_left/vals'
+  []
+  [right_function]
+    type = ParsedOptimizationFunction
+    expression = 'a'
+    param_symbol_names = 'a'
+    param_vector_name = 'params_right/vals'
   []
 []
 
 [VectorPostprocessors]
-  [adjoint_bc]
+  [grad_bc_left]
     type = SideOptimizationNeumannFunctionInnerProduct
     variable = adjoint_T
     function = left_function
     boundary = left
   []
+  [grad_bc_right]
+    type = SideOptimizationNeumannFunctionInnerProduct
+    variable = adjoint_T
+    function = right_function
+    boundary = right
+  []
 []
 
 [Outputs]
-  console = true
+  console = false
   exodus = false
   file_base = 'adjoint'
 []

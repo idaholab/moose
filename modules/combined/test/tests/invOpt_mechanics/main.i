@@ -94,7 +94,7 @@
     type = MultiAppReporterTransfer
     from_multi_app = adjoint
     from_reporters = 'adjoint_pt/inner_product'
-    to_reporters = 'OptimizationReporter/adjoint'
+    to_reporters = 'OptimizationReporter/grad_fy_right'
   []
 
   [toHomogeneousForward_measument]

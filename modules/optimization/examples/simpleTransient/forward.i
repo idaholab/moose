@@ -21,6 +21,7 @@
     type = CSVReader
     csv_file = source_params.csv
     header = true
+    outputs = none
   []
 []
 
@@ -78,8 +79,10 @@
   end_time = 1
 
   solve_type = NEWTON
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
+  reuse_preconditioner=true
+  reuse_preconditioner_max_linear_its=50
 []
 
 [Reporters]
@@ -93,10 +96,38 @@
     file_value = u
     variable = u
     execute_on = timestep_end
-    outputs = csv
+    outputs = none
+  []
+[]
+
+[Postprocessors]
+  [topRight_pp]
+    type = PointValue
+    point = '0.5 0.5 0'
+    variable = u
+    execute_on = TIMESTEP_END
+  []
+  [bottomRight_pp]
+    type = PointValue
+    point = '-0.5 0.5 0'
+    variable = u
+    execute_on = TIMESTEP_END
+  []
+  [bottomLeft_pp]
+    type = PointValue
+    point = '-0.5 -0.5 0'
+    variable = u
+    execute_on = TIMESTEP_END
+  []
+  [topLeft_pp]
+    type = PointValue
+    point = '0.5 -0.5 0'
+    variable = u
+    execute_on = TIMESTEP_END
   []
 []
 
 [Outputs]
+  csv=true
   console = false
 []
