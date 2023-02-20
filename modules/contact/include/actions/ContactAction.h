@@ -111,7 +111,7 @@ private:
    */
   void addNodeFaceContact();
   /**
-   * Add single contact pressure kernel for various contact action objects
+   * Add single contact pressure auxiliary kernel for various contact action objects
    */
   void addContactPressureAuxKernel();
 };

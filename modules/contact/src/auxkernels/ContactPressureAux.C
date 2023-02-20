@@ -21,8 +21,10 @@ ContactPressureAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
   params.addRequiredCoupledVar("nodal_area", "The nodal area");
-  params.addRequiredParam<std::vector<BoundaryName>>("paired_boundary",
-                                                     "The boundary to be penetrated");
+  params.addRequiredParam<std::vector<BoundaryName>>(
+      "paired_boundary",
+      "The set of boundaries in contact with those specified in 'boundary'. Ordering must be "
+      "consistent with that in 'boundary'.");
   params.set<ExecFlagEnum>("execute_on") = EXEC_NONLINEAR;
   MooseEnum orders("FIRST SECOND THIRD FOURTH", "FIRST");
   params.addParam<MooseEnum>("order", orders, "The finite element order: " + orders.getRawNames());
@@ -66,7 +68,7 @@ ContactPressureAux::computeValue()
       penetration_info = it->second;
 
     if (penetration_info && area != 0)
-      value += -(penetration_info->_contact_force * penetration_info->_normal) / area;
+      value -= (penetration_info->_contact_force * penetration_info->_normal) / area;
 
     penetration_info = nullptr;
   }

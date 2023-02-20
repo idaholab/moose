@@ -8,16 +8,15 @@
     abs_zero = 1.0e-8
     rel_err = 1.0e-5
     cli_args = "Postprocessors/active=''"
-    requirement = 'Contact module action shall allow for multiple contact pairs when selecting '
-                  'node-face formulation.'
+    requirement = 'The system shall set up node-face interactions between multiple surface pairs '
+                  'using the Contact action.'
   []
   [three_hexagons_coarse]
     type = 'Exodiff'
     input = 'three_hexagons_coarse.i'
     exodiff = 'three_hexagons_coarse_out.e'
-    requirement = 'The system shall be able to assign and accumulate a single contact pressure '
-                  'auxiliary variable for all contact pairs supplied to a single contact action '
-                  'object.'
+    requirement = 'The system shall assign and accumulate a single contact pressure auxiliary '
+                  'variable for all contact pairs supplied to a single contact action object.'
     abs_zero = 1.0e-4
     rel_err = 1.0e-4
     allow_warnings = true
@@ -26,9 +25,8 @@
     type = 'Exodiff'
     input = 'three_hexagons_coarse_various_actions.i'
     exodiff = 'three_hexagons_coarse_various_actions_out.e'
-    requirement = 'The system shall be able to assign and accumulate a single contact pressure '
-                  'auxiliary variable for all contact pairs supplied to a distinct contact action '
-                  'object.'
+    requirement = 'The system shall assign and accumulate a single contact pressure auxiliary '
+                  'variable for all contact pairs supplied to a distinct contact action object.'
     abs_zero = 1.0e-4
     rel_err = 1.0e-4
     allow_warnings = true
