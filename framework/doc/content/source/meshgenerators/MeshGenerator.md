@@ -143,7 +143,7 @@ GeneratedMeshGenerator 'gmg':    Bounding box delta: (x,y,z)=(       1,        1
 GeneratedMeshGenerator 'gmg':   Global mesh volume = 1
 ```
 
-The parameter [!param](/Mesh/GeneratedMeshGenerator/output) output a mesh file immediately after it is generated. It can be used to quickly view the intermediate mesh block during mesh generation.
+The parameter [!param](/Mesh/GeneratedMeshGenerator/output) output a mesh file immediately after it is generated. It can be used to view the intermediate mesh block during mesh generation.
 
 Take the simple example:
 
