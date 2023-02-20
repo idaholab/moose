@@ -26,9 +26,6 @@ public:
   void initialize() override {}
   void finalize() override {}
   void execute() override {}
-
-private:
-  const SolutionInvalidity * const & _solution_invalidity;
 };
 
 // Store solution invalid warnings to a json file

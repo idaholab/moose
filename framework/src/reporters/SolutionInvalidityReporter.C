@@ -22,10 +22,10 @@ SolutionInvalidityReporter::validParams()
 }
 
 SolutionInvalidityReporter::SolutionInvalidityReporter(const InputParameters & parameters)
-  : GeneralReporter(parameters),
-    _solution_invalidity(declareValueByName<const SolutionInvalidity *>(
-        "solution_invalidity", REPORTER_MODE_ROOT, &_app.solutionInvalidity()))
+  : GeneralReporter(parameters)
 {
+  declareValueByName<const SolutionInvalidity *>(
+      "solution_invalidity", REPORTER_MODE_ROOT, &_app.solutionInvalidity());
 }
 
 void

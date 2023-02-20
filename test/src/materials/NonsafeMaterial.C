@@ -53,6 +53,5 @@ NonsafeMaterial::computeQpProperties()
     if (!_test_different_procs || comm().size() > 0 || processor_id() > 0)
       flagInvalidSolution("Extra invalid thing!");
   }
-
   _diffusivity[_qp] = _test_diffusivity;
 }
