@@ -3,7 +3,7 @@
   issues = '#19285 #23447'
 
   [errors]
-    requirement = 'The mesh generation system shall error when'
+    requirement = 'The system shall report a reasonable error generating meshes when'
 
     [get_mesh_invalid]
       type = RunException
@@ -148,11 +148,9 @@
   []
 
   [null_mesh]
-    [test]
-      type = RunApp
-      input = 'mesh_generator_test.i'
-      cli_args = 'Mesh/test/null_mesh_name=null_thing Mesh/test/input=null_thing'
-      requirement = 'The mesh generation system shall support the declaration of a name that can be used as an unused name for input meshes'
-    []
+    type = RunApp
+    input = 'mesh_generator_test.i'
+    cli_args = 'Mesh/test/null_mesh_name=null_thing Mesh/test/input=null_thing'
+    requirement = 'The system shall support declaration of a name that can be used as an unused name for input meshes when generating meshes'
   []
 []

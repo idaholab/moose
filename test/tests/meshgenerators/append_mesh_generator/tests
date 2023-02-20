@@ -1,5 +1,5 @@
 [Tests]
-  design = 'source/MeshGenerator.md'
+  design = 'MeshGenerator.md'
   issues = '#15121 #23447'
 
   [test]
