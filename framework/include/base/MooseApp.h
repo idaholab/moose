@@ -20,7 +20,6 @@
 #include "ConsoleStreamInterface.h"
 #include "PerfGraph.h"
 #include "PerfGraphInterface.h"
-#include "SolutionInvalidity.h"
 #include "TheWarehouse.h"
 #include "RankMap.h"
 
@@ -46,6 +45,8 @@ class InputParameterWarehouse;
 class SystemInfo;
 class CommandLine;
 class RelationshipManager;
+class SolutionInvalidity;
+
 namespace libMesh
 {
 class ExodusII_IO;
@@ -1047,7 +1048,7 @@ protected:
   PerfGraph & _perf_graph;
 
   /// The SolutionInvalidity object for this application
-  SolutionInvalidity _solution_invalidity;
+  SolutionInvalidity & _solution_invalidity;
 
   /// The RankMap is a useful object for determining how the processes are laid out on the physical hardware
   const RankMap _rank_map;
@@ -1243,6 +1244,14 @@ private:
    * are required to declare it).
    */
   PerfGraph & createRecoverablePerfGraph();
+
+  /**
+   * Creates a recoverable SolutionInvalidity.
+   *
+   * This is a separate method so that it can be used in the constructor (multiple calls
+   * are required to declare it).
+   */
+  SolutionInvalidity & createRecoverableSolutionInvalidity();
 
   /**
    * Prints a message showing the installable inputs for a given application (if

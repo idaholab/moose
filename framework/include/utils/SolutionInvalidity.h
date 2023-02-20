@@ -86,6 +86,14 @@ public:
 
   void sync();
 
+  /**
+   * Updates the solution invalid info for all currently running nodes
+   */
+  void update();
+
+  friend void dataStore(std::ostream &, SolutionInvalidity &, void *);
+  friend void dataLoad(std::istream &, SolutionInvalidity &, void *);
+
 private:
   /// Mutex for locking access to the invalid counts
   /// TODO: These can be changed to shared_mutexes
@@ -107,3 +115,7 @@ private:
   /// Store the solution invalidity counts
   std::vector<InvalidCounts> _counts;
 };
+
+// datastore and dataload for recover
+void dataStore(std::ostream & stream, SolutionInvalidity & solution_invalidity, void * context);
+void dataLoad(std::istream & stream, SolutionInvalidity & solution_invalidity, void * context);

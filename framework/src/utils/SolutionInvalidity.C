@@ -107,6 +107,7 @@ SolutionInvalidity::sync()
       data_to_send;
 
   if (processor_id() != 0)
+  {
     for (const auto id : index_range(_counts))
     {
       const auto & entry = _counts[id];
@@ -115,8 +116,10 @@ SolutionInvalidity::sync()
         const auto & info = _solution_invalidity_registry.item(id);
         data_to_send[0].emplace_back(
             info.object_type, info.message, entry.counts, entry.timeiter_counts);
+        _counts[id].total_counts = 0;
       }
     }
+  }
 
   const auto receive_data = [this](const processor_id_type libmesh_dbg_var(pid), const auto & data)
   {
@@ -141,6 +144,18 @@ SolutionInvalidity::sync()
   };
 
   TIMPI::push_parallel_vector_data(comm(), data_to_send, receive_data);
+}
+
+void
+SolutionInvalidity::update()
+{
+  // Zero out the entries
+  for (auto & entry : _counts)
+  {
+    entry.counts = 0;
+    entry.timeiter_counts = 0;
+    entry.total_counts = 0;
+  }
 }
 
 void
@@ -190,4 +205,63 @@ SolutionInvalidity::summaryTable() const
   }
 
   return vtable;
+}
+
+// Store data structure for recover
+void
+dataStore(std::ostream & stream, SolutionInvalidity & solution_invalidity, void * context)
+{
+  // Sync data to processor 0
+  solution_invalidity.sync();
+
+  // Build data structure for store
+  auto size = solution_invalidity._counts.size();
+  dataStore(stream, size, context);
+
+  for (const auto id : index_range(solution_invalidity._counts))
+  {
+    const auto & entry = solution_invalidity._counts[id];
+    const auto & info = solution_invalidity._solution_invalidity_registry.item(id);
+    std::string type = info.object_type;
+    std::string message = info.message;
+    dataStore(stream, type, context);
+    dataStore(stream, message, context);
+    dataStore(stream, entry.counts, context);
+    dataStore(stream, entry.timeiter_counts, context);
+    dataStore(stream, entry.total_counts, context);
+  }
+}
+
+// Load data structure for recover
+void
+dataLoad(std::istream & stream, SolutionInvalidity & solution_invalidity, void * context)
+{
+  std::size_t num_counts;
+  // load data block size
+  dataLoad(stream, num_counts, context);
+
+  std::string object_type, message;
+  InvalidSolutionID id;
+
+  // loop over and load stored data
+  for (size_t i = 0; i < num_counts; i++)
+  {
+    dataLoad(stream, object_type, context);
+    dataLoad(stream, message, context);
+
+    const moose::internal::SolutionInvalidityName name(object_type, message);
+    if (solution_invalidity._solution_invalidity_registry.keyExists(name))
+      id = solution_invalidity._solution_invalidity_registry.id(name);
+    else
+      id =
+          moose::internal::getSolutionInvalidityRegistry().registerInvalidity(object_type, message);
+
+    if (solution_invalidity._counts.size() <= id)
+      solution_invalidity._counts.resize(id + 1);
+
+    const auto & entry = solution_invalidity._counts[id];
+    dataLoad(stream, entry.counts, context);
+    dataLoad(stream, entry.timeiter_counts, context);
+    dataLoad(stream, entry.total_counts, context);
+  }
 }

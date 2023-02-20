@@ -71,10 +71,38 @@
     recover = false
     type = RunApp
     input = solution_invalid.i
-    cli_args = "Materials/filter/test_invalid_recover=true Executioner/type=Transient Executioner/num_steps=2 Outputs/file_base='solution_invalid_recover'"
+    cli_args = "Materials/filter/test_invalid_recover=true Executioner/type=Transient Executioner/num_steps=2 Outputs/file_base='solution_invalid_again'"
     expect_out = "Solve Converged!"
     design = 'SolutionInvalidity.md'
     issues = '#22814'
     requirement = 'The system shall be able to handle a solution invalidity occurs in the previous time step and recover in the next time step'
+  []
+
+  [test]
+    requirement = 'The system shall be able to support '
+    [solution_valid_checkpoint]
+      allow_warnings = true
+      recover = false
+      type = RunApp
+      input = solution_invalid_recover.i
+      cli_args = "Outputs/file_base='solution_invalid_checkpoint' Outputs/checkpoint=true"
+      design = 'SolutionInvalidity.md'
+      issues = '#22814'
+      detail = 'outputting of checkpoint files'
+    []
+
+    [solution_valid_recover]
+      allow_warnings = true
+      recover = false
+      delete_output_before_running = false
+      type = JSONDiff
+      input = solution_invalid_recover.i
+      cli_args = "--recover solution_invalid_checkpoint_cp/0003 Executioner/num_steps=4"
+      jsondiff = 'solution_invalid_checkpoint.json'
+      prereq = 'test/solution_valid_checkpoint'
+      design = 'SolutionInvalidity.md'
+      issues = '#22814'
+      detail = 'restarting from the output data'
+    []
   []
 []

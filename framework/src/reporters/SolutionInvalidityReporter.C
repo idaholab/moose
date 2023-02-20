@@ -34,15 +34,20 @@ to_json(nlohmann::json & json, const SolutionInvalidity * const & solution_inval
   mooseAssert(solution_invalidity->processor_id() == 0, "should only be called on rank 0");
 
   const auto & solution_registry = moose::internal::getSolutionInvalidityRegistry();
-  auto count = solution_invalidity->counts();
-  for (const auto id : index_range(count))
-  {
-    nlohmann::json entry;
-    entry["object_type"] = solution_registry.item(id).object_type;
-    entry["message"] = solution_registry.item(id).message;
-    entry["converged_counts"] = count[id].counts;
-    entry["timestep_counts"] = count[id].timeiter_counts;
-    entry["total_counts"] = count[id].total_counts;
-    json.push_back(entry);
-  }
+  const auto & counts = solution_invalidity->counts();
+  if (counts.size() == 0)
+    // Create an empty array
+    json = nlohmann::json::array();
+  else
+    // Output data to json
+    for (const auto id : index_range(solution_invalidity->counts()))
+    {
+      nlohmann::json entry;
+      entry["object_type"] = solution_registry.item(id).object_type;
+      entry["message"] = solution_registry.item(id).message;
+      entry["converged_counts"] = counts[id].counts;
+      entry["timestep_counts"] = counts[id].timeiter_counts;
+      entry["total_counts"] = counts[id].total_counts;
+      json.push_back(entry);
+    }
 }

@@ -52,6 +52,7 @@
 #include "CastUniquePointer.h"
 #include "NullExecutor.h"
 #include "ExecFlagRegistry.h"
+#include "SolutionInvalidity.h"
 
 // Regular expression includes
 #include "pcrecpp.h"
@@ -353,7 +354,7 @@ MooseApp::MooseApp(InputParameters parameters)
     _parser(*this, _action_warehouse),
     _restartable_data(libMesh::n_threads()),
     _perf_graph(createRecoverablePerfGraph()),
-    _solution_invalidity(*this),
+    _solution_invalidity(createRecoverableSolutionInvalidity()),
     _rank_map(*_comm, _perf_graph),
     _use_executor(parameters.get<bool>("use_executor")),
     _null_executor(NULL),
@@ -2819,5 +2820,19 @@ MooseApp::createRecoverablePerfGraph()
 
   return dynamic_cast<RestartableData<PerfGraph> &>(
              registerRestartableData("perf_graph", std::move(perf_graph), 0, false))
+      .set();
+}
+
+SolutionInvalidity &
+MooseApp::createRecoverableSolutionInvalidity()
+{
+  registerRestartableNameWithFilter("solution_invalidity", Moose::RESTARTABLE_FILTER::RECOVERABLE);
+
+  auto solution_invalidity =
+      std::make_unique<RestartableData<SolutionInvalidity>>("solution_invalidity", nullptr, *this);
+
+  return dynamic_cast<RestartableData<SolutionInvalidity> &>(
+             registerRestartableData(
+                 "solution_invalidity", std::move(solution_invalidity), 0, false))
       .set();
 }

@@ -15,6 +15,10 @@
 
 #include <mutex>
 
+// Forward Declarations
+class SolutionInvalidity;
+void dataStore(std::ostream &, SolutionInvalidity &, void *);
+
 namespace moose::internal
 {
 class SolutionInvalidityRegistry;
@@ -102,6 +106,6 @@ private:
   /// So it can be constructed
   friend SolutionInvalidityRegistry & getSolutionInvalidityRegistry();
   /// This is only here so that SolutionInvalidity can access readSectionInfo
-  friend class SolutionInvalidity;
+  friend SolutionInvalidity;
 };
 }

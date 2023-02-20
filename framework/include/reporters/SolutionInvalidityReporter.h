@@ -30,3 +30,18 @@ public:
 
 // Store solution invalid warnings to a json file
 void to_json(nlohmann::json & json, const SolutionInvalidity * const & solution_invalidity);
+
+/**
+ * Store and load methods for const SolutionInvalidity *, used in the SolutionInvalidityReporter,
+ * which does nothing.
+ */
+///@{
+void
+dataStore(std::ostream &, const SolutionInvalidity *&, void *)
+{
+}
+void
+dataLoad(std::istream &, const SolutionInvalidity *&, void *)
+{
+}
+///@}
