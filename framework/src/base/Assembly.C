@@ -70,6 +70,7 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
     _subproblem(_sys.subproblem()),
     _displaced(dynamic_cast<DisplacedSystem *>(&sys) ? true : false),
     _nonlocal_cm(_subproblem.nonlocalCouplingMatrix(_sys.number())),
+    _computing_residual(_subproblem.currentlyComputingResidual()),
     _computing_jacobian(_subproblem.currentlyComputingJacobian()),
     _computing_residual_and_jacobian(_subproblem.currentlyComputingResidualAndJacobian()),
     _dof_map(_sys.dofMap()),

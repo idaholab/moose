@@ -410,17 +410,16 @@ InterfaceKernelTempl<T>::computeResidualAndJacobian()
 {
   computeResidual();
 
-  const auto & ce = _fe_problem.couplingEntries(_tid);
-  for (const auto & it : ce)
+  if (!isImplicit())
+    return;
+
+  for (const auto & [ivariable, jvariable] : _fe_problem.couplingEntries(_tid))
   {
-    MooseVariableFieldBase & ivariable = *(it.first);
-    MooseVariableFieldBase & jvariable = *(it.second);
-
-    unsigned int ivar = ivariable.number();
-    unsigned int jvar = jvariable.number();
-
-    if (!isImplicit())
+    if (ivariable->isFV())
       continue;
+
+    unsigned int ivar = ivariable->number();
+    unsigned int jvar = jvariable->number();
 
     prepareShapes(jvar);
     prepareNeighborShapes(jvar);

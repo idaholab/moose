@@ -666,7 +666,7 @@ public:
   /**
    * Returns true if the problem is in the process of computing the residual
    */
-  bool currentlyComputingResidual() const { return _currently_computing_residual; }
+  const bool & currentlyComputingResidual() const { return _currently_computing_residual; }
 
   /**
    * Set whether or not the problem is in the process of computing the residual
