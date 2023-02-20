@@ -60,6 +60,19 @@ INSFVMomentumDiffusion::INSFVMomentumDiffusion(const InputParameters & params)
   if ((_var.faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage) &&
       (_tid == 0))
     adjustRMGhostLayers(std::max((unsigned short)(3), _pars.get<unsigned short>("ghost_layers")));
+
+  if (_complete_expansion && !_u_var)
+    paramError("u", "The u velocity must be defined when 'complete_expansion=true'.");
+
+  if (_complete_expansion && _dim >= 2 && !_v_var)
+    paramError("v",
+               "The v velocity must be defined when 'complete_expansion=true'"
+               "and problem dimension is larger or equal to 2.");
+
+  if (_complete_expansion && _dim >= 3 && !_w_var)
+    paramError("w",
+               "The w velocity must be defined when 'complete_expansion=true'"
+               "and problem dimension is larger or equal to three.");
 }
 
 ADReal

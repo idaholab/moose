@@ -17,10 +17,6 @@ total_len = '${fparse 40 * D}'
 rho = 1
 bulk_u = 1
 
-# With those parameters set, the viscosity is then computed in order to reach
-# the desired Reynolds number.
-mu = '${fparse rho * bulk_u * D / Re}'
-
 # Here the DeltaP will be evaluted by using a postprocessor to find the pressure
 # at a point that is 10 diameters away from the outlet. (The outlet pressure is
 # set to zero.)
@@ -40,11 +36,16 @@ mu_wall = '${fparse rho * pow(u_tau,2) * y_dist_wall / bulk_u}'
 
 # Crafted bulk viscosity
 turbulent_intensity = 0.1
-c_mu = 0.09
+C_mu = 0.09
 mixing_length = '${fparse D * 0.07}'
 k_bulk = '${fparse 3/2 * pow(bulk_u*turbulent_intensity, 2)}'
-eps_bulk = '${fparse pow(c_mu, 0.75) * pow(k_bulk, 1.5) / mixing_length}'
-mu_bulk = '${fparse c_mu * pow(k_bulk, 2) / eps_bulk}'
+eps_bulk = '${fparse pow(C_mu, 0.75) * pow(k_bulk, 1.5) / mixing_length}'
+mu_bulk = '${fparse C_mu * pow(k_bulk, 2) / eps_bulk}'
+
+# sigma_k = 1.0
+# sigma_eps = 1.3
+# C1_eps = 1.44
+# C2_eps = 1.92
 
 [Mesh]
   coord_type = 'RZ'
@@ -122,6 +123,12 @@ mu_bulk = '${fparse c_mu * pow(k_bulk, 2) / eps_bulk}'
   [pressure]
     type = INSFVPressureVariable
   []
+  [TKE]
+    type = INSFVEnergyVariable
+  []
+  [TKED]
+    type = INSFVEnergyVariable
+  []
 []
 
 [AuxVariables]
@@ -149,7 +156,10 @@ mu_bulk = '${fparse c_mu * pow(k_bulk, 2) / eps_bulk}'
     type = INSFVMomentumDiffusion
     variable = u
     mu = 'mu'
+    complete_expansion = true
     momentum_component = 'x'
+    u = u
+    v = v
   []
   [u_pressure]
     type = INSFVMomentumPressure
@@ -169,12 +179,35 @@ mu_bulk = '${fparse c_mu * pow(k_bulk, 2) / eps_bulk}'
     variable = v
     mu = 'mu'
     momentum_component = 'y'
+    complete_expansion = true
+    u = u
+    v = v
   []
   [v_pressure]
     type = INSFVMomentumPressure
     variable = v
     momentum_component = 'y'
     pressure = pressure
+  []
+
+  [TKE_advection]
+    type = INSFVScalarFieldAdvection
+    variable = TKE
+  []
+  [TKE_diffusion]
+    type = FVDiffusion
+    variable = TKE
+    coeff = 'mu'
+  []
+
+  [TKED_advection]
+    type = INSFVScalarFieldAdvection
+    variable = TKED
+  []
+  [TKED_diffusion]
+    type = FVDiffusion
+    variable = TKED
+    coeff = 'mu'
   []
 []
 
@@ -242,7 +275,7 @@ mu_bulk = '${fparse c_mu * pow(k_bulk, 2) / eps_bulk}'
     variable = u
     u = u
     v = v
-    mu = ${mu}
+    mu = 'mu'
     momentum_component = x
   []
   [sym_v]
@@ -251,7 +284,7 @@ mu_bulk = '${fparse c_mu * pow(k_bulk, 2) / eps_bulk}'
     variable = v
     u = u
     v = v
-    mu = ${mu}
+    mu = 'mu'
     momentum_component = y
   []
   [sym_p]
@@ -264,6 +297,30 @@ mu_bulk = '${fparse c_mu * pow(k_bulk, 2) / eps_bulk}'
     boundary = 'outlet'
     variable = pressure
     function = '0'
+  []
+  [inlet_TKE]
+    type = FVDirichletBC
+    variable = TKE
+    value = ${k_bulk}
+    boundary = 'inlet'
+  []
+  [wall_TKE]
+    type = FVDirichletBC
+    variable = TKE
+    value = ${k_bulk}
+    boundary = 'wall'
+  []
+  [inlet_TKED]
+    type = FVDirichletBC
+    variable = TKED
+    value = ${eps_bulk}
+    boundary = 'inlet'
+  []
+  [wall_TKED]
+    type = FVDirichletBC
+    variable = TKED
+    value = ${eps_bulk}
+    boundary = 'wall'
   []
 []
 
