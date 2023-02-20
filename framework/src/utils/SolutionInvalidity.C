@@ -124,19 +124,19 @@ SolutionInvalidity::sync()
 
     for (const auto & [object_type, message, counts, timeiter_counts] : data)
     {
-      InvalidSolutionID mainId = 0;
+      InvalidSolutionID main_id = 0;
       const moose::internal::SolutionInvalidityName name(object_type, message);
       if (_solution_invalidity_registry.keyExists(name))
-        mainId = _solution_invalidity_registry.id(name);
+        main_id = _solution_invalidity_registry.id(name);
       else
-        mainId = moose::internal::getSolutionInvalidityRegistry().registerInvalidity(object_type,
-                                                                                     message);
-      if (_counts.size() <= mainId)
-        _counts.resize(mainId + 1);
+        main_id = moose::internal::getSolutionInvalidityRegistry().registerInvalidity(object_type,
+                                                                                      message);
+      if (_counts.size() <= main_id)
+        _counts.resize(main_id + 1);
 
-      _counts[mainId].counts += counts;
-      _counts[mainId].timeiter_counts += timeiter_counts;
-      _counts[mainId].total_counts += timeiter_counts;
+      _counts[main_id].counts += counts;
+      _counts[main_id].timeiter_counts += timeiter_counts;
+      _counts[main_id].total_counts += timeiter_counts;
     }
   };
 
