@@ -1,13 +1,39 @@
 [Tests]
-  [./append_mesh_generator_test]
+  design = 'source/MeshGenerator.md'
+  issues = '#15121 #23447'
+
+  [test]
     type = 'Exodiff'
     input = 'append_mesh_generator.i'
     cli_args = '--mesh-only'
     exodiff = 'append_mesh_generator_in.e'
     requirement = 'The system shall support the ability to add additional mesh generators from a user accessible programmatic interface.'
-    design = 'actions/Action.md'
-    issues = '#15121'
     mesh_mode = 'REPLICATED'
     recover = false
-  [../]
+  []
+
+  [errors]
+    requirement = 'The system shall only support the ability to add additional mesh generators from a user accessible programmatic interface when'
+    [no_input]
+      type = 'RunException'
+      input = 'append_mesh_generator.i'
+      cli_args = 'ModifyMesh/gmg/type=GeneratedMeshGenerator ModifyMesh/gmg/dim=1 --mesh-only'
+      expect_err = "Cannot append a mesh generator that does not take input mesh generators via an 'input' parameter"
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = 'such mesh generators take an input'
+    []
+
+    [wrong_time]
+      type = 'RunException'
+      input = 'append_mesh_generator.i'
+      cli_args = 'ModifyMesh/test/type=TestMeshGenerator --mesh-only'
+      expect_err = 'Can only call MooseApp::appendMeshGenerator\(\) during the append_mesh_generator task'
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = 'other mesh generators have been added to be appended to'
+    []
+  []
 []
