@@ -1,0 +1,26 @@
+[Tests]
+  requirement = 'The system shall be capable of output and check the intermediate mesh object besides the final mesh file'
+  'domain in'
+  design = 'meshgenerators.md'
+  issues = '#23486'
+  [REPLICATED]
+      type = 'Exodiff'
+      input = 'output_intermediate_mesh.i'
+      exodiff = 'left_in.e'
+      cli_args = "--mesh-only"
+      recover = false
+      mesh_mode = 'REPLICATED'
+      detail = "Output only the left mesh block in a seperate mesh file"
+  []
+  [Distributed]
+    type = 'Exodiff'
+    input = 'output_intermediate_mesh.i'
+    exodiff = 'left_in.e.2.0 left_in.e.2.1'
+    cli_args = "Mesh/left/parallel_type=distributed --mesh-only"
+    recover = false
+    mesh_mode = 'DISTRIBUTED'
+    min_parallel = 2
+    max_parallel = 2
+    detail = "Output only the left mesh block in a seperate mesh file"
+  []
+[]

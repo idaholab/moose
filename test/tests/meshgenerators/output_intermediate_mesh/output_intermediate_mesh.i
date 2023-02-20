@@ -26,8 +26,6 @@
     type = MeshCollectionGenerator
     inputs = 'left right'
   [../]
-
-  parallel_type = distributed
 []
 
 [Outputs]

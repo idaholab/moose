@@ -140,6 +140,7 @@ MeshGenerator::generateInternal()
     _console << oss.str() << std::flush;
   }
 
+  // output the current mesh block to file
   if (getParam<bool>("output"))
   {
     if (mesh->is_replicated())
