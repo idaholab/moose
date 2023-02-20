@@ -30,13 +30,32 @@ INSFVMomentumDiffusion::validParams()
                              "Switch that can select face interpolation method for the viscosity.");
 
   params.set<unsigned short>("ghost_layers") = 2;
+  params.addParam<bool>(
+      "complete_expansion",
+      false,
+      "Boolean parameter to use complete momentum expansion is the diffusion term.");
+  params.addCoupledVar("u", "The velocity in the x direction.");
+  params.addCoupledVar("v", "The velocity in the y direction.");
+  params.addCoupledVar("w", "The velocity in the z direction.");
   return params;
 }
 
 INSFVMomentumDiffusion::INSFVMomentumDiffusion(const InputParameters & params)
   : INSFVFluxKernel(params),
     _mu(getFunctor<ADReal>(NS::mu)),
-    _mu_interp_method(Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("mu_interp_method")))
+    _mu_interp_method(
+        Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("mu_interp_method"))),
+    _u_var(params.isParamValid("u")
+               ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("u", 0))
+               : nullptr),
+    _v_var(params.isParamValid("v")
+               ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("v", 0))
+               : nullptr),
+    _w_var(params.isParamValid("w")
+               ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("w", 0))
+               : nullptr),
+    _complete_expansion(getParam<bool>("complete_expansion")),
+    _dim(_subproblem.mesh().dimension())
 {
   if ((_var.faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage) &&
       (_tid == 0))
@@ -80,7 +99,53 @@ INSFVMomentumDiffusion::computeStrongResidual(const bool populate_a_coeffs)
     }
   }
 
-  return -face_mu * dudn;
+  ADReal dudn_transpose = 0.0;
+  if (_complete_expansion)
+  {
+    // Computing the gradient from coupled variables
+    // Normally, we can do this with `_var.gradient(face)` but we will need the transpose gradient
+    // So, we compute all at once
+    Moose::FaceArg face;
+    const bool skewness_correction =
+        (_var.faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
+    if (onBoundary(*_face_info))
+      face = singleSidedFaceArg();
+    else
+      face = makeCDFace(*_face_info, skewness_correction);
+
+    ADRealTensorValue gradient;
+    if (_dim == 1)
+    {
+      // const auto & grad_u = _u_var->adGradSln(face_info, skewness_correction);
+      const auto & grad_u = _u_var->gradient(face);
+      gradient = ADRealTensorValue(grad_u, ADRealVectorValue(0, 0, 0), ADRealVectorValue(0, 0, 0));
+    }
+    else if (_dim == 2)
+    {
+      // const auto & grad_u = _u_var->adGradSln(face_info, skewness_correction);
+      // const auto & grad_v = _v_var->adGradSln(face_info, skewness_correction);
+      const auto & grad_u = _u_var->gradient(face);
+      const auto & grad_v = _v_var->gradient(face);
+      gradient = ADRealTensorValue(grad_u, grad_v, ADRealVectorValue(0, 0, 0));
+    }
+    else // if (_dim == 3)
+    {
+      // const auto & grad_u = _u_var->adGradSln(face_info, skewness_correction);
+      // const auto & grad_v = _v_var->adGradSln(face_info, skewness_correction);
+      // const auto & grad_w = _w_var->adGradSln(face_info, skewness_correction);
+      const auto & grad_u = _u_var->gradient(face);
+      const auto & grad_v = _v_var->gradient(face);
+      const auto & grad_w = _w_var->gradient(face);
+      gradient = ADRealTensorValue(grad_u, grad_v, grad_w);
+    }
+
+    // Getting transpose of the gradient matrix
+    auto gradient_transpose = gradient.transpose();
+
+    dudn_transpose += gradient_transpose.row(_index) * _face_info->normal();
+  }
+
+  return -face_mu * (dudn + dudn_transpose);
 }
 
 void

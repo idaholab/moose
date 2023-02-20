@@ -41,4 +41,17 @@ protected:
 
   /// The a coefficient for the neighbor
   ADReal _an = 0;
+
+  /// x-velocity
+  const INSFVVelocityVariable * const _u_var;
+  /// y-velocity
+  const INSFVVelocityVariable * const _v_var;
+  /// z-velocity
+  const INSFVVelocityVariable * const _w_var;
+
+  /// Boolean parameter to include the complete momentum exmapnsion
+  const bool _complete_expansion;
+
+  /// dimension
+  const unsigned int _dim;
 };
