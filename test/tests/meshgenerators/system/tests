@@ -22,7 +22,7 @@
     [get_meshes_by_name_invalid]
       type = RunException
       input = 'mesh_generator_test.i'
-      detail = 'requesting an input mesh generator by parameter and the parameter is not valid'
+      detail = 'requesting an input mesh generator by name and the name is not valid'
       cli_args = 'Mesh/test/get_meshes_by_name_invalid=true'
       expect_err = 'Failed to get a parameter with the name "invalid"'
     []
@@ -101,7 +101,7 @@
     [unused_sub_input]
       type = RunException
       input = 'mesh_generator_test.i'
-      detail = 'coupling an input mesh generator in a parameter but not using said mesh generator'
+      detail = 'coupling an input mesh generator in a parameter for a sub generator but not using said dependency'
       cli_args = 'Mesh/active="gmg test"
                   Mesh/test/input=gmg
                   Mesh/test/request_sub_input=true'
