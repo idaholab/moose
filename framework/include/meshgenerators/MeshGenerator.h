@@ -393,7 +393,7 @@ template <typename T, typename... Args>
 T &
 MeshGenerator::setMeshProperty(const std::string & data_name, Args &&... args)
 {
-  if (!_app.executingMeshGenerators())
+  if (_app.actionWarehouse().getCurrentTaskName() != "execute_mesh_generators")
     mooseError("Updating mesh meta data with setMeshProperty() can only be called during "
                "MeshGenerator::generate()");
 

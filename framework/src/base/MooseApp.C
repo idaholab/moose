@@ -2031,7 +2031,8 @@ MooseApp::getMeshGeneratorParamDependencies(const InputParameters & params) cons
 void
 MooseApp::createAddedMeshGenerators()
 {
-  mooseAssert(!constructedMeshGenerators(), "Should not run now");
+  mooseAssert(_action_warehouse.getCurrentTaskName() == "create_added_mesh_generators",
+              "Should not run now");
 
   DependencyResolver<std::string> resolver;
 
@@ -2194,7 +2195,9 @@ MooseApp::hasMeshGeneratorParams(const MeshGeneratorName & name) const
 std::unique_ptr<MeshBase> &
 MooseApp::getMeshGeneratorOutput(const MeshGeneratorName & name)
 {
-  mooseAssert(constructingMeshGenerators() || executingMeshGenerators(), "Incorrect call time");
+  mooseAssert(constructingMeshGenerators() ||
+                  _action_warehouse.getCurrentTaskName() == "execute_mesh_generators",
+              "Incorrect call time");
 
   auto it = _mesh_generator_outputs.find(name);
   mooseAssert(it != _mesh_generator_outputs.end(), "Not initialized");
@@ -2205,7 +2208,10 @@ MooseApp::getMeshGeneratorOutput(const MeshGeneratorName & name)
 void
 MooseApp::createMeshGeneratorOrder()
 {
-  mooseAssert(appendingMeshGenerators() || executingMeshGenerators(), "Incorrect call time");
+  mooseAssert(constructingMeshGenerators() ||
+                  _action_warehouse.getCurrentTaskName() == "execute_mesh_generators",
+              "Incorrect call time");
+
   TIME_SECTION("createMeshGeneratorOrder", 1, "Ordering Mesh Generators");
 
   _ordered_mesh_generators.clear();
@@ -3009,13 +3015,6 @@ MooseApp::createRecoverableSolutionInvalidity()
 }
 
 bool
-MooseApp::constructedMeshGenerators() const
-{
-  return _action_warehouse.isTaskComplete("create_added_mesh_generators") &&
-         _action_warehouse.isTaskComplete("append_mesh_generator");
-}
-
-bool
 MooseApp::constructingMeshGenerators() const
 {
   return _action_warehouse.getCurrentTaskName() == "create_added_mesh_generators" ||
@@ -3026,10 +3025,4 @@ bool
 MooseApp::appendingMeshGenerators() const
 {
   return _action_warehouse.getCurrentTaskName() == "append_mesh_generator";
-}
-
-bool
-MooseApp::executingMeshGenerators() const
-{
-  return _action_warehouse.getCurrentTaskName() == "execute_mesh_generators";
 }
