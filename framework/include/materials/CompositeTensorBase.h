@@ -106,12 +106,8 @@ CompositeTensorBase<T, U>::validParams()
   InputParameters params = U::validParams();
   params.addRequiredParam<std::vector<MaterialPropertyName>>("tensors", "Component tensors");
   params.addRequiredParam<std::vector<MaterialPropertyName>>("weights", "Component weights");
-  params.addDeprecatedCoupledVar("args",
-                                 "variable dependencies for the prefactor",
-                                 "args is deprecated, use 'coupled_variables' instead");
-  // TODO Make required once deprecation is handled, see #19119
-  params.addCoupledVar("coupled_variables", "variable dependencies for the prefactor");
-
+  params.addRequiredCoupledVar("args", "variable dependencies for the prefactor");
+  params.deprecateCoupledVar("args", "coupled_variables", "02/07/2024");
   return params;
 }
 
@@ -123,18 +119,14 @@ CompositeTensorBase<T, U>::initializeDerivativeProperties(const std::string name
   for (unsigned int j = 0; j < _num_args; ++j)
   {
     const VariableName & jname =
-        this->DerivativeMaterialInterface<U>::isCoupled("args")
-            ? this->DerivativeMaterialInterface<U>::getVar("args", j)->name()
-            : this->DerivativeMaterialInterface<U>::getVar("coupled_variables", j)->name();
+        this->DerivativeMaterialInterface<U>::getVar("coupled_variables", j)->name();
     _dM[j] = &this->template declarePropertyDerivative<T>(name, jname);
     _d2M[j].resize(j + 1);
 
     for (unsigned int k = 0; k <= j; ++k)
     {
       const VariableName & kname =
-          this->DerivativeMaterialInterface<U>::isCoupled("args")
-              ? this->DerivativeMaterialInterface<U>::getVar("args", k)->name()
-              : this->DerivativeMaterialInterface<U>::getVar("coupled_variables", k)->name();
+          this->DerivativeMaterialInterface<U>::getVar("coupled_variables", k)->name();
 
       _d2M[j][k] = &this->template declarePropertyDerivative<T>(name, jname, kname);
     }
@@ -154,9 +146,7 @@ CompositeTensorBase<T, U>::initializeDerivativeProperties(const std::string name
     for (unsigned int j = 0; j < _num_args; ++j)
     {
       const VariableName & jname =
-          this->DerivativeMaterialInterface<U>::isCoupled("args")
-              ? this->DerivativeMaterialInterface<U>::getVar("args", j)->name()
-              : this->DerivativeMaterialInterface<U>::getVar("coupled_variables", j)->name();
+          this->DerivativeMaterialInterface<U>::getVar("coupled_variables", j)->name();
 
       _dtensors[i][j] =
           &this->template getMaterialPropertyDerivativeByName<T>(_tensor_names[i], jname);
@@ -169,9 +159,7 @@ CompositeTensorBase<T, U>::initializeDerivativeProperties(const std::string name
       for (unsigned int k = 0; k <= j; ++k)
       {
         const VariableName & kname =
-            this->DerivativeMaterialInterface<U>::isCoupled("args")
-                ? this->DerivativeMaterialInterface<U>::getVar("args", k)->name()
-                : this->DerivativeMaterialInterface<U>::getVar("coupled_variables", k)->name();
+            this->DerivativeMaterialInterface<U>::getVar("coupled_variables", k)->name();
 
         _d2tensors[i][j][k] =
             &this->template getMaterialPropertyDerivativeByName<T>(_tensor_names[i], jname, kname);

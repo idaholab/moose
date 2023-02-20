@@ -50,7 +50,7 @@
     design = 'InputParameters.md'
     issues = '#15497'
     no_error_deprecated = True
-    expect_out = "The coupled variable parameter 'stupid_name' has been deprecated and will be removed never because this is a dummy test\. Please use the 'source' coupled variable parameter instead\."
+    expect_out = "'stupid_name' has been deprecated and will be removed .*never because this is a dummy test\. Please use 'source' instead"
   []
 
   [blessed_coupled_var]

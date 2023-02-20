@@ -23,7 +23,6 @@ NSStagnationPressureBC::validParams()
   InputParameters params = NSStagnationBC::validParams();
   params.addClassDescription("This Dirichlet condition imposes the condition p_0 = p_0_desired.");
   params.addRequiredCoupledVar(NS::pressure, "pressure");
-  params.addDeprecatedCoupledVar("p", NS::pressure, "1/1/2022");
   params.addRequiredParam<Real>("desired_stagnation_pressure", "");
   return params;
 }
