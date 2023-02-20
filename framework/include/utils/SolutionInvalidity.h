@@ -55,10 +55,10 @@ public:
   /// Reset the number of solution invalid occurrences back to zero
   void resetSolutionInvalid();
 
-  /// Pass the number of solution invalid occurrences from current iteration to comulative counters
+  /// Pass the number of solution invalid occurrences from current iteration to cumulative counters
   void solutionInvalidAccumulation();
 
-  /// Pass the number of solution invalid occurrences from current iteration to comulative time iteration counters
+  /// Pass the number of solution invalid occurrences from current iteration to cumulative time iteration counters
   void solutionInvalidAccumulationTimeIter();
 
   /// Struct used in _counts for storing invalid occurrences

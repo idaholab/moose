@@ -105,6 +105,7 @@ SolutionInvalidity::sync()
   std::map<processor_id_type,
            std::vector<std::tuple<std::string, std::string, unsigned int, unsigned int>>>
       data_to_send;
+
   if (processor_id() != 0)
     for (const auto id : index_range(_counts))
     {

@@ -22,6 +22,9 @@ NonsafeMaterial::validParams()
       "threshold",
       0,
       "This value sets the upper limit for the validity of the material property value.");
+  params.addParam<bool>("test_different_procs",
+                        false,
+                        "True to test setting invalid solutions on different processors");
   return params;
 }
 
@@ -29,7 +32,8 @@ NonsafeMaterial::NonsafeMaterial(const InputParameters & parameters)
   : Material(parameters),
     _input_diffusivity(getParam<Real>("diffusivity")),
     _threshold(getParam<Real>("threshold")),
-    _diffusivity(declareProperty<Real>("diffusivity"))
+    _diffusivity(declareProperty<Real>("diffusivity")),
+    _test_different_procs(getParam<bool>("test_different_procs"))
 {
 }
 
@@ -38,8 +42,10 @@ NonsafeMaterial::computeQpProperties()
 {
   if (_input_diffusivity > _threshold)
   {
-    flagInvalidSolution("The diffusivity is greater than the threshold value!");
-    flagInvalidSolution("Extra invalid thing!");
+    if (!_test_different_procs || processor_id() == 0)
+      flagInvalidSolution("The diffusivity is greater than the threshold value!");
+    if (!_test_different_procs || comm().size() > 0 || processor_id() > 0)
+      flagInvalidSolution("Extra invalid thing!");
   }
   _diffusivity[_qp] = _input_diffusivity;
 }
