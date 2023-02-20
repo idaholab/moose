@@ -2640,7 +2640,7 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
           // will actually determine the couplings or to pass in the MeshBase object that is
           // inconsistent with the System DofMap that we are adding the coupling functor for! Let's
           // err on the side of *libMesh* consistency and pass properly paired MeshBase-DofMap
-          undisp_nl_dof_map.add_coupling_functor(
+          problem.addCouplingGhostingFunctor(
               createRMFromTemplateAndInit(*rm, undisp_mesh, &undisp_nl_dof_map),
               /*to_mesh = */ false);
 
@@ -2657,7 +2657,7 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
       else // undisplaced
       {
         if (rm_type == Moose::RelationshipManagerType::COUPLING)
-          undisp_nl_dof_map.add_coupling_functor(
+          problem.addCouplingGhostingFunctor(
               createRMFromTemplateAndInit(*rm, undisp_mesh, &undisp_nl_dof_map),
               /*to_mesh = */ false);
 

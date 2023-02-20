@@ -728,11 +728,22 @@ private:
    * nonlinear system algebraic ghosting functor), initializes the clone with the appropriate
    * DofMap, and then adds the clone to said DofMap
    * @param algebraic_gf the (nonlinear system's) algebraic ghosting functor to clone
-   * @param to_mesh whether the clone should be added to the corresponding DofMap's underyling
+   * @param to_mesh whether the clone should be added to the corresponding DofMap's underlying
    * MeshBase (the underlying MeshBase will be the same for every system held by this object's
    * EquationSystems object)
    */
   void cloneAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf, bool to_mesh = true);
+
+  /**
+   * Creates (n_sys - 1) clones of the provided coupling ghosting functor (corresponding to the
+   * nonlinear system coupling ghosting functor), initializes the clone with the appropriate
+   * DofMap, and then adds the clone to said DofMap
+   * @param coupling_gf the (nonlinear system's) coupling ghosting functor to clone
+   * @param to_mesh whether the clone should be added to the corresponding DofMap's underlying
+   * MeshBase (the underlying MeshBase will be the same for every system held by this object's
+   * EquationSystems object)
+   */
+  void cloneCouplingGhostingFunctor(GhostingFunctor & coupling_gf, bool to_mesh = true);
 
 public:
   /**
@@ -741,10 +752,9 @@ public:
   void addAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf, bool to_mesh = true);
 
   /**
-   * Add an algebraic ghosting functor to this problem's DofMaps
+   * Add a coupling functor to this problem's DofMaps
    */
-  void addAlgebraicGhostingFunctor(std::shared_ptr<GhostingFunctor> algebraic_gf,
-                                   bool to_mesh = true);
+  void addCouplingGhostingFunctor(GhostingFunctor & coupling_gf, bool to_mesh = true);
 
   /**
    * Remove an algebraic ghosting functor from this problem's DofMaps
@@ -1016,6 +1026,12 @@ private:
   /// 0
   std::unordered_map<GhostingFunctor *, std::vector<std::shared_ptr<GhostingFunctor>>>
       _root_alg_gf_to_sys_clones;
+
+  /// A map from a root coupling ghosting functor, e.g. the ghosting functor passed into \p
+  /// removeCouplingGhostingFunctor, to its clones in other systems, e.g. systems other than system
+  /// 0
+  std::unordered_map<GhostingFunctor *, std::vector<std::shared_ptr<GhostingFunctor>>>
+      _root_coupling_gf_to_sys_clones;
 
   friend class Restartable;
 };
