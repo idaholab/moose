@@ -17,12 +17,12 @@ class NonlinearSystemBase;
 /**
  * Renormalization of a vector variable (i.e. a set of variables comprising a vector)
  */
-class RenormalizeVector : public GeneralUserObject
+class PointwiseRenormalizeVector : public GeneralUserObject
 {
 public:
   static InputParameters validParams();
 
-  RenormalizeVector(const InputParameters & parameters);
+  PointwiseRenormalizeVector(const InputParameters & parameters);
 
   void initialize() override;
   void execute() override;

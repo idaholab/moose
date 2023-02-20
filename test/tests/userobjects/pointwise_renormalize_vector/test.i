@@ -48,7 +48,7 @@
 
 [UserObjects]
   [renormalize]
-    type = RenormalizeVector
+    type = PointwiseRenormalizeVector
     v = 'v_x v_y'
     execute_on = TIMESTEP_END
   []

@@ -7,17 +7,17 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "RenormalizeVector.h"
+#include "PointwiseRenormalizeVector.h"
 #include "MooseError.h"
 #include "NonlinearSystemBase.h"
 
 #include "libmesh/numeric_vector.h"
 #include "libmesh/int_range.h"
 
-registerMooseObject("MooseApp", RenormalizeVector);
+registerMooseObject("MooseApp", PointwiseRenormalizeVector);
 
 InputParameters
-RenormalizeVector::validParams()
+PointwiseRenormalizeVector::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
   params.addClassDescription(
@@ -27,7 +27,7 @@ RenormalizeVector::validParams()
   return params;
 }
 
-RenormalizeVector::RenormalizeVector(const InputParameters & parameters)
+PointwiseRenormalizeVector::PointwiseRenormalizeVector(const InputParameters & parameters)
   : GeneralUserObject(parameters),
     _mesh(_fe_problem.mesh()),
     _var_names(getParam<std::vector<VariableName>>("v")),
@@ -35,9 +35,22 @@ RenormalizeVector::RenormalizeVector(const InputParameters & parameters)
     _nl_sys(_fe_problem.getNonlinearSystemBase()),
     _sys(_nl_sys.system())
 {
+  const MooseVariableFieldBase * first_var = nullptr;
   for (const auto & var_name : _var_names)
   {
     auto & var = _fe_problem.getVariable(0, var_name);
+    if (!first_var)
+      first_var = &var;
+    else
+    {
+      // check order and family for consistency
+      if (first_var->feType() != var.feType())
+        paramError("v", "All supplied variables must be of the same order and family.");
+      // check block restriction for consistency
+      if (!first_var->hasBlocks(var.blocks()) || !var.hasBlocks(first_var->blocks()))
+        paramError("v", "All supplied variables must have the same block restriction.");
+    }
+
     if (_sys.number() != var.sys().system().number())
       paramError("v", "Variables must be all in the non-linear system.");
 
@@ -53,14 +66,14 @@ RenormalizeVector::RenormalizeVector(const InputParameters & parameters)
 }
 
 void
-RenormalizeVector::initialize()
+PointwiseRenormalizeVector::initialize()
 {
   // do one solution.close to get updated
   _sys.solution->close();
 }
 
 void
-RenormalizeVector::execute()
+PointwiseRenormalizeVector::execute()
 {
   auto & dof_map = _sys.get_dof_map();
   const auto local_dof_begin = dof_map.first_dof();
@@ -113,7 +126,7 @@ RenormalizeVector::execute()
 }
 
 void
-RenormalizeVector::finalize()
+PointwiseRenormalizeVector::finalize()
 {
   for (const auto s : make_range(3))
     if (_nl_sys.hasSolutionState(s))
