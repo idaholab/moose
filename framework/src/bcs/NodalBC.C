@@ -169,14 +169,10 @@ NodalBC::computeResidualAndJacobian()
 {
   computeResidual();
 
-  auto & ce = _fe_problem.couplingEntries(_tid);
-  for (const auto & it : ce)
+  for (const auto & [ivariable, jvariable] : _fe_problem.couplingEntries(_tid))
   {
-    MooseVariableFieldBase & ivariable = *(it.first);
-    MooseVariableFieldBase & jvariable = *(it.second);
-
-    unsigned int ivar = ivariable.number();
-    unsigned int jvar = jvariable.number();
+    const unsigned int ivar = ivariable->number();
+    const unsigned int jvar = jvariable->number();
 
     if (ivar != _var.number())
       continue;

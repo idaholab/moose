@@ -418,8 +418,8 @@ InterfaceKernelTempl<T>::computeResidualAndJacobian()
     if (ivariable->isFV())
       continue;
 
-    unsigned int ivar = ivariable->number();
-    unsigned int jvar = jvariable->number();
+    const unsigned int ivar = ivariable->number();
+    const unsigned int jvar = jvariable->number();
 
     prepareShapes(jvar);
     prepareNeighborShapes(jvar);
