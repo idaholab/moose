@@ -1,0 +1,18 @@
+[Tests]
+  design = 'THMSetupOutputAction.md'
+  issues = '#23498'
+
+  [disable]
+    type = RunApp
+    input = 'disable_scalars_in_console.i'
+    absent_out = 'Scalar Variable Values:'
+    requirement = 'The system shall be able to disable the output of scalar variables to the console.'
+  []
+  [allow]
+    type = RunApp
+    input = 'disable_scalars_in_console.i'
+    cli_args = 'Outputs/disable_scalars_in_console=false'
+    expect_out = 'Scalar Variable Values:'
+    requirement = 'The system shall be able to allow the output of scalar variables to the console.'
+  []
+[]
