@@ -232,7 +232,7 @@
       cli_args = 'Mesh/gen/outward_interface_boundary_names="int1"
                   --mesh-only "poly_2d_err.e"'
       expect_err = 'If provided, the length of this parameter must be identical to the total number of interfaces.'
-      detail = "outward interface_boundary_names has an incorrect length."
+      detail = "the number of outward interface boundary names is different from the number of outward interfaces."
     []
     [err_background_block_ids_1]
       type = 'RunException'
@@ -547,7 +547,7 @@
                   Mesh/gen/create_outward_interface_boundaries=false
                   --mesh-only "poly_2d_err.e"'
       expect_err = 'If set false, outward_interface_boundary_names should not be set as they are not used.'
-      detail ='outward interface boundaries related parameters are provided but create_outward_interface_boundaries is set false.'
+      detail ='outward interface boundaries related parameters are provided while outward interface boundaries are not set to be created.'
     []
     [err_unneeded_inward_interface_params]
       type = 'RunException'
@@ -560,7 +560,7 @@
                   Mesh/gen/create_inward_interface_boundaries=false
                   --mesh-only "poly_2d_err.e"'
       expect_err = 'If set false, inward_interface_boundary_names should not be set as they are not used.'
-      detail ='inward interface boundaries related parameters are provided but create_inward_interface_boundaries is set false.'
+      detail ='inward interface boundaries related parameters are provided but inward interface boundaries are not set to be created.'
     []
     [err_unneeded_interface_params]
       type = 'RunException'
