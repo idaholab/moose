@@ -38,6 +38,13 @@ In addition, [!param](/Mesh/PatternedHexMeshGenerator/assign_control_drum_id) ca
 
 These `MeshMetaData` as well as `control_drum_id` can be used by other MOOSE objects such as [`MultiControlDrumFunction`](/MultiControlDrumFunction.md) to simulate control drums rotation during power transients.
 
+## Interface Boundaries
+
+The user can also decide whether the interface boundaries are generated or not in the peripheral region.
+
+!include /PolygonConcentricCircleMeshGenerator.md start=There are two types end=The user can set
+
+The user can set [!param](/Mesh/PatternedHexMeshGenerator/create_inward_interface_boundaries) and [!param](/Mesh/PatternedHexMeshGenerator/create_outward_interface_boundaries) to control which interface boundaries will be created. If generated, the outward interface boundaries will be assigned ids using sequential odd numbers (i.e., 1, 3, 5, 7, ...) shifted by `INTRINSIC_SIDESET_ID::SLICE_ALT`=30500 from center to periphery, while the inward interface boundaries will be assigned ids using sequential even numbers (i.e., 0, 2, 4, 6, ...) shifted by `INTRINSIC_SIDESET_ID::SLICE_ALT` similarly. 
 
 ## Example Syntax
 

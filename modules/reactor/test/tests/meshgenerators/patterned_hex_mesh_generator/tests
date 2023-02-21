@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/PatternedHexMeshGenerator.md'
-  issues = '#18628 #20148 #20514'
+  issues = '#18628 #20148 #20514 #23367'
   [hexagon_boundary]
     type = 'Exodiff'
     exodiff_opts = '-pedantic'
@@ -38,7 +38,6 @@
   []
   [hexagon_boundary_no_deform]
     type = 'Exodiff'
-    exodiff_opts = '-pedantic'
     input = 'patterned_2d.i'
     exodiff = 'patterned_hex_no_deform.e'
     cli_args = 'Mesh/pattern/hexagon_size=15

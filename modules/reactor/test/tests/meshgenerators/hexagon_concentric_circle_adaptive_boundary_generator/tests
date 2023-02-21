@@ -12,6 +12,7 @@
   []
   [empty_inputs]
     type = 'Exodiff'
+    exodiff_opts = '-pedantic'
     input = 'hex_2d_empty_inputs.i'
     exodiff = 'hex_2d_empty_inputs.e'
     cli_args = '--mesh-only "hex_2d_empty_inputs.e"'
