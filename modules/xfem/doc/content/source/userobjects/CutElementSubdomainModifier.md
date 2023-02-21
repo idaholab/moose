@@ -4,7 +4,7 @@
 
 ## Overview
 
-`CutElementSubdomainModifier` switches the element subdomain ID based on the `CutSubdomainID` marked by geometric cut userobjects. This object extends the capabilities described in [`CoupledVarThresholdElementSubdomainModifier`](userobject/CoupledVarThresholdElementSubdomainModifier.md) to allow subdomains to be defined based on XFEM interfaces.
+`CutElementSubdomainModifier` switches the element subdomain ID based on the `CutSubdomainID` marked by geometric cut userobjects. This object extends the capabilities described in [`CoupledVarThresholdElementSubdomainModifier`](userobjects/CoupledVarThresholdElementSubdomainModifier.md) to allow subdomains to be defined based on XFEM interfaces.
 
 ## Example Input File Syntax
 
