@@ -210,9 +210,13 @@ MultiApp::validParams()
   params.declareControllable("cli_args", {EXEC_PRE_MULTIAPP_SETUP});
   params.registerBase("MultiApp");
 
+  params.addParamNamesToGroup("positions positions_file run_in_position output_in_position",
+                              "Positions / transformations of the MultiApp frame of reference");
+  params.addParamNamesToGroup("min_procs_per_app max_procs_per_app", "Parallelism");
   params.addParamNamesToGroup("reset_time reset_apps", "Reset MultiApp");
   params.addParamNamesToGroup("move_time move_apps move_positions", "Timed move of MultiApps");
-  params.addParamNamesToGroup("relaxation_factor transformed_variables transformed_postprocessors",
+  params.addParamNamesToGroup("relaxation_factor transformed_variables transformed_postprocessors "
+                              "keep_solution_during_restore",
                               "Fixed point acceleration of MultiApp quantities");
   params.addParamNamesToGroup("library_name library_path", "Dynamic loading");
   params.addParamNamesToGroup("cli_args cli_args_files", "Passing command line argument");
