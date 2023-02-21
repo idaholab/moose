@@ -101,28 +101,28 @@ function configure_petsc()
   fi
 
   cd $PETSC_DIR
-  python3 ./configure --download-hypre=1 \
+  python3 ./configure --with-64-bit-indices \
+      --with-cxx-dialect=C++11 \
+      --with-debugging=no \
+      --with-fortran-bindings=0 \
+      --with-mpi=1 \
+      --with-openmp=1 \
       --with-shared-libraries=1 \
+      --with-sowing=0 \
+      --download-fblaslapack=1 \
+      --download-hypre=1 \
+      --download-metis=1 \
+      --download-mumps=1 \
+      --download-ptscotch=1 \
+      --download-parmetis=1 \
+      --download-scalapack=1 \
+      --download-slepc=1 \
+      --download-strumpack=1 \
+      --download-superlu_dist=1 \
       $HDF5_STR \
       $HDF5_FORTRAN_STR \
       $MAKE_NP_STR \
       $MUMPS_ARM_STR \
-      --with-debugging=no \
-      --download-fblaslapack=1 \
-      --download-metis=1 \
-      --download-ptscotch=1 \
-      --download-parmetis=1 \
-      --download-superlu_dist=1 \
-      --download-mumps=1 \
-      --download-strumpack=1 \
-      --download-scalapack=1 \
-      --download-slepc=1 \
-      --with-mpi=1 \
-      --with-openmp=1 \
-      --with-cxx-dialect=C++11 \
-      --with-fortran-bindings=0 \
-      --with-sowing=0 \
-      --with-64-bit-indices \
       "$@"
 
   return $?
