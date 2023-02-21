@@ -50,7 +50,8 @@ SimpleHexagonGenerator::validParams()
                               "Customized Subdomain/Boundary");
   params.addClassDescription(
       "This SimpleHexagonGenerator object is designed to generate a simple hexagonal mesh that "
-      "only contains six simple azimuthal sectors or two quadrilateral elements.");
+      "only contains six simple azimuthal triangular elements, two quadrilateral elements, or six "
+      "central azimuthal triangular elements plus a several layers of quadrilateral elements.");
 
   return params;
 }
@@ -136,6 +137,7 @@ SimpleHexagonGenerator::generate()
   if (_element_type != ElemType::QUAD)
   {
     // loop to create outer layer QUAD elements
+    // Note that the direction is from outer to inner
     for (unsigned int j = 0; j < _radial_intervals - 1; j++)
     {
       // loop to create the six QUAD elements for each layer
@@ -164,7 +166,7 @@ SimpleHexagonGenerator::generate()
           nodes[HEXAGON_NUM_SIDES * (_radial_intervals - 1) + (i + 1) % HEXAGON_NUM_SIDES];
       // Assign the default external boundary id if applicable so that the mesh can be used as input
       // of `PatterneHexMeshGenerator`.
-      if (_radial_intervals == 1)
+      if (_element_type != ElemType::HYBRID)
         boundary_info.add_side(elem, 1, OUTER_SIDESET_ID);
       // Default subdomain id
       elem->subdomain_id() = 1;

@@ -40,7 +40,7 @@
       cli_args = 'Mesh/shg/radial_intervals=3
                   --mesh-only err.e'
       expect_err = 'value is only supported when'
-      detail = "if 'radial_intervals' is provided when 'element_type' is not HYBRID."
+      detail = "if the radial element layer number is provided but a non-hybrid mesh is to be generated."
     []
     [err_wrong_block_id_size_tri]
       type = 'RunException'
@@ -48,7 +48,7 @@
       cli_args = 'Mesh/shg/block_id="100 200"
                   --mesh-only err.e'
       expect_err = 'if provided, the size of this parameter must be one'
-      detail = "if 'block_id' has the incorrect size as 'element_type' is TRI/QUAD."
+      detail = "if excessive subdomain ids are provided."
     []
     [err_wrong_block_id_size_hybrid]
       type = 'RunException'
@@ -56,7 +56,7 @@
       cli_args = 'Mesh/shg/element_type=HYBRID
                   --mesh-only err.e'
       expect_err = 'if provided, the size of this parameter must be two'
-      detail = "if 'block_id' has the incorrect size as 'element_type' is HYBRID."
+      detail = "if insufficient subdomain ids are provided."
     [] 
     [err_wrong_block_name_size]
       type = 'RunException'
@@ -65,7 +65,7 @@
                   Mesh/shg/block_id="100 200"
                   --mesh-only err.e'
       expect_err = 'if provided, this parameter must have the same size as'
-      detail = "if 'block_name' and 'block_id' have inconsistent sizes."
+      detail = "if the custom subdomain ids and names provided have inconsistent sizes."
     [] 
   []
 []
