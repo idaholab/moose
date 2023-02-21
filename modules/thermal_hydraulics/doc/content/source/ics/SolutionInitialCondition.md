@@ -1,18 +1,23 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
-# ScalarSolutionInitialCondition
+# SolutionInitialCondition
 
 !alert construction title=Undocumented Class
-The ScalarSolutionInitialCondition has not been documented. The content contained on this page includes the
-typical automatic documentation associated with a MooseObject; however, what is contained is
-ultimately determined by what is necessary to make the documentation clear for users.
+The SolutionInitialCondition has not been documented. The content listed below should be used as a starting point for
+documenting the class, which includes the typical automatic documentation associated with a
+MooseObject; however, what is contained is ultimately determined by what is necessary to make the
+documentation clear for users.
 
-!syntax description /ICs/ScalarSolutionInitialCondition
+!syntax description /ICs/SolutionInitialCondition
 
-!syntax parameters /ICs/ScalarSolutionInitialCondition
+## Overview
 
-!syntax inputs /ICs/ScalarSolutionInitialCondition
+!! Replace these lines with information regarding the SolutionInitialCondition object.
 
-!syntax children /ICs/ScalarSolutionInitialCondition
+## Example Input File Syntax
 
-!bibtex bibliography
+!! Describe and include an example of how to use the SolutionInitialCondition object.
+
+!syntax parameters /ICs/SolutionInitialCondition
+
+!syntax inputs /ICs/SolutionInitialCondition
+
+!syntax children /ICs/SolutionInitialCondition
