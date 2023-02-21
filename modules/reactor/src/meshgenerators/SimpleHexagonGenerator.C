@@ -33,7 +33,7 @@ SimpleHexagonGenerator::validParams()
   params.addRangeCheckedParam<unsigned int>(
       "radial_intervals",
       "radial_intervals>1",
-      "Number of radial meshing intervals (only applicable when 'element_type' is 'HYBRID').");
+      "Number of pin radial meshing rings (only applicable when 'element_type' is 'HYBRID').");
   params.addRangeCheckedParam<std::vector<subdomain_id_type>>(
       "block_id",
       "block_id>=0",
@@ -83,7 +83,7 @@ SimpleHexagonGenerator::SimpleHexagonGenerator(const InputParameters & parameter
   _pitch = 2.0 * (_hexagon_size_style == PolygonSizeStyle::apothem
                       ? _hexagon_size
                       : _hexagon_size * std::cos(M_PI / (Real)HEXAGON_NUM_SIDES));
-  if ((_block_id.size() != 0 && _block_id.size() != 1) && _element_type != ElemType::HYBRID)
+  if ((_block_id.size() > 1) && _element_type != ElemType::HYBRID)
     paramError(
         "block_id",
         "if provided, the size of this parameter must be one if 'element_type' is TRI or QUAD.");
