@@ -37,7 +37,8 @@ FlowChannel1Phase::validParams()
       "Scaling factors for each single phase variable (rhoA, rhouA, rhoEA)");
 
   params.declareControllable("initial_p initial_T initial_vel D_h");
-
+  params.addParamNamesToGroup("initial_p initial_T initial_vel", "Variable initialization");
+  params.addParamNamesToGroup("rdg_slope_reconstruction scaling_factor_1phase", "Numerical scheme");
   params.addClassDescription("1-phase 1D flow channel");
 
   return params;
