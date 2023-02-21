@@ -13,6 +13,7 @@
 #include "MooseError.h"
 #include "libmesh/string_to_enum.h"
 #include "MooseMesh.h"
+#include "MooseEnum.h"
 #include "libmesh/face_tri3.h"
 #include "libmesh/edge_edge2.h"
 #include "libmesh/serial_mesh.h"
@@ -29,12 +30,15 @@ CrackMeshCut3DUserObject::validParams()
   params.addRequiredParam<MeshFileName>(
       "mesh_file",
       "Mesh file for the XFEM geometric cut; currently only the xda type is supported");
-  params.addParam<std::string>(
-      "growth_dir_method", "function", "choose from function, max_hoop_stress");
-  params.addParam<std::string>("growth_speed_method", "function", "choose from function, fatigue");
+  MooseEnum growthDirection("MAX_HOOP_STRESS FUNCTION", "FUNCTION");
+  params.addParam<MooseEnum>(
+      "growth_dir_method", growthDirection, "choose from FUNCTION, MAX_HOOP_STRESS");
+  MooseEnum growthSpeed("FATIGUE FUNCTION", "FUNCTION");
+  params.addParam<MooseEnum>("growth_speed_method", growthSpeed, "choose from FUNCTION, FATIGUE");
   params.addParam<FunctionName>("function_x", "Growth function for x direction");
   params.addParam<FunctionName>("function_y", "Growth function for y direction");
   params.addParam<FunctionName>("function_z", "Growth function for z direction");
+
   params.addParam<FunctionName>("function_v", "Growth speed function");
   params.addParam<Real>(
       "size_control", 0, "Criterion for refining elements while growing the crack");
@@ -50,8 +54,8 @@ CrackMeshCut3DUserObject::validParams()
 CrackMeshCut3DUserObject::CrackMeshCut3DUserObject(const InputParameters & parameters)
   : GeometricCutUserObject(parameters),
     _mesh(_subproblem.mesh()),
-    _growth_dir_method(getParam<std::string>("growth_dir_method")),
-    _growth_speed_method(getParam<std::string>("growth_speed_method")),
+    _growth_dir_method(getParam<MooseEnum>("growth_dir_method").getEnum<GrowthDirectionEnum>()),
+    _growth_speed_method(getParam<MooseEnum>("growth_speed_method").getEnum<GrowthSpeedEnum>()),
     _n_step_growth(getParam<unsigned int>("n_step_growth")),
     _is_mesh_modified(false),
     _func_x(parameters.isParamValid("function_x") ? &getFunction("function_x") : NULL),
@@ -68,13 +72,14 @@ CrackMeshCut3DUserObject::CrackMeshCut3DUserObject(const InputParameters & param
 
     _size_control = getParam<Real>("size_control");
 
-    if (_growth_dir_method == "function" && (_func_x == NULL || _func_y == NULL || _func_z == NULL))
+    if (_growth_dir_method == GrowthDirectionEnum::FUNCTION &&
+        (_func_x == NULL || _func_y == NULL || _func_z == NULL))
       mooseError("function is not specified for the function method that defines growth direction");
 
-    if (_growth_speed_method == "function" && _func_v == NULL)
+    if (_growth_dir_method == GrowthDirectionEnum::FUNCTION && _func_v == NULL)
       mooseError("function is not specified for the function method that defines growth speed");
 
-    if (_growth_speed_method == "fatigue" && _func_v == NULL)
+    if (_growth_dir_method == GrowthDirectionEnum::FUNCTION && _func_v == NULL)
       mooseError("function with a variable is not specified for the fatigue method that defines "
                  "growth speed");
 
@@ -88,7 +93,9 @@ CrackMeshCut3DUserObject::CrackMeshCut3DUserObject(const InputParameters & param
       _cfd = false;
   }
 
-  if ((_growth_dir_method == "max_hoop_stress" || _growth_speed_method == "fatigue") && !_cfd)
+  if ((_growth_dir_method == GrowthDirectionEnum::MAX_HOOP_STRESS ||
+       _growth_speed_method == GrowthSpeedEnum::FATIGUE) &&
+      !_cfd)
     mooseError("'crack_front_nodes' is not specified to use crack growth criteria!");
 
   // only the xda type is currently supported
@@ -123,7 +130,7 @@ CrackMeshCut3DUserObject::initialSetup()
     sortBoundaryNodes();
   }
 
-  if (_growth_speed_method == "fatigue")
+  if (_growth_speed_method == GrowthSpeedEnum::FATIGUE)
   {
     _dn.clear();
     _n.clear();
@@ -720,7 +727,7 @@ CrackMeshCut3DUserObject::findActiveBoundaryDirection()
       i2 = _active_boundary[i].size();
     }
 
-    if (_growth_dir_method == "function")
+    if (_growth_dir_method == GrowthDirectionEnum::FUNCTION)
       // loop over active front points
       for (unsigned int j = i1; j < i2; ++j)
       {
@@ -733,9 +740,8 @@ CrackMeshCut3DUserObject::findActiveBoundaryDirection()
 
         temp.push_back(dir);
       }
-
     // determine growth direction based on KI and KII at the crack front
-    else if (_growth_dir_method == "max_hoop_stress")
+    else if (_growth_dir_method == GrowthDirectionEnum::MAX_HOOP_STRESS)
     {
       const VectorPostprocessorValue & k1 = getVectorPostprocessorValueByName("II_KI_1", "II_KI_1");
       const VectorPostprocessorValue & k2 =
@@ -769,7 +775,6 @@ CrackMeshCut3DUserObject::findActiveBoundaryDirection()
         temp.push_back(dir);
       }
     }
-
     else
       mooseError("This growth_dir_method is not pre-defined!");
 
@@ -826,14 +831,13 @@ CrackMeshCut3DUserObject::growFront()
 
       Point x;
 
-      if (_growth_speed_method == "function")
+      if (_growth_speed_method == GrowthSpeedEnum::FUNCTION)
         for (unsigned int k = 0; k < 3; ++k)
         {
           Real velo = _func_v->value(0, Point(0, 0, 0));
           x(k) = this_point(k) + dir(k) * velo;
         }
-
-      else if (_growth_speed_method == "fatigue")
+      else if (_growth_speed_method == GrowthSpeedEnum::FATIGUE)
       {
         // get the number of loading cycles for this growth increament
         if (j == i1)
@@ -844,11 +848,9 @@ CrackMeshCut3DUserObject::growFront()
         }
 
         Real growth_size = _growth_size[j];
-
         for (unsigned int k = 0; k < 3; ++k)
           x(k) = this_point(k) + dir(k) * growth_size;
       }
-
       else
         mooseError("This growth_speed_method is not pre-defined!");
 
