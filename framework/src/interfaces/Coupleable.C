@@ -859,12 +859,7 @@ Coupleable::writableVariable(const std::string & var_name, unsigned int comp)
                "' cannot obtain a writable reference to the nodal variable '",
                var->name(),
                "'.");
-  if (nuo && !var->isNodal())
-    mooseError("The NodalUserObject '",
-               _obj->name(),
-               "' cannot obtain a writable reference to the elemental variable '",
-               var->name(),
-               "'.");
+  // if (nuo && !var->isNodal()) is handled by checkVar already
 
   // make sure only one object can access a variable
   for (const auto & ci : _obj->getMooseApp().getInterfaceObjects<Coupleable>())

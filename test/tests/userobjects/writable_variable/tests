@@ -1,0 +1,25 @@
+[Tests]
+  [nodal]
+    type = Exodiff
+    input = nodal.i
+    exodiff = nodal_out.e
+  []
+  [elemental]
+    type = Exodiff
+    input = elemental.i
+    exodiff = elemental_out.e
+  []
+
+  [nodal_error]
+    type = RunException
+    input = nodal.i
+    cli_args = 'AuxVariables/v/family=MONOMIAL AuxVariables/v/order=CONSTANT'
+    expect_err = 'nodal: cannot couple elemental variables into nodal objects'
+  []
+  [elemental_error]
+    type = RunException
+    input = elemental.i
+    cli_args = 'AuxVariables/v/family=LAGRANGE AuxVariables/v/order=FIRST'
+    expect_err = "The ElementUserObject 'elemental' cannot obtain a writable reference to the nodal variable 'v'."
+  []
+[]

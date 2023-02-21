@@ -57,6 +57,14 @@
                   "auxiliary variables within a single AuxKernel object."
   []
 
+  [multi_update_elem_family_error]
+    type = 'RunException'
+    input = 'multi_update_elem_var_test.i'
+    cli_args = 'AuxVariables/ten/order=FIRST AuxVariables/ten/family=LAGRANGE'
+    expect_err = "The AuxKernel 'all' and the variable 'ten' must both either be nodal or elemental."
+    requirement = "The MOOSE auxiliary system shall check compatibility between primary and writable coupled variables."
+  []
+
   [ts_test]
     type = 'Exodiff'
     input = 'nodal_aux_ts_test.i'

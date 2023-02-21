@@ -91,6 +91,15 @@ ComputeNodalUserObjectsThread::onNode(ConstNodeRange::const_iterator & node_it)
       if (!uo->isUniqueNodeExecute() || computed.count(uo) == 0)
       {
         uo->execute();
+
+        // update the aux solution vector if writable coupled variables are used
+        if (uo->hasWritableCoupledVariables())
+        {
+          Threads::spin_mutex::scoped_lock lock(writable_variable_mutex);
+          for (auto * var : uo->getWritableCoupledVariables())
+            var->insert(_aux_sys.solution());
+        }
+
         computed.insert(uo);
       }
   }
