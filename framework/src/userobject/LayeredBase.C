@@ -68,7 +68,10 @@ LayeredBase::validParams()
                         "Minimum coordinate along 'direction' that bounds the layers");
   params.addParam<Real>("direction_max",
                         "Maximum coordinate along 'direction' that bounds the layers");
-
+  params.addParamNamesToGroup("direction num_layers bounds direction_min direction_max",
+                              "Layers extent and definition");
+  params.addParamNamesToGroup("sample_type average_radius cumulative positive_cumulative_direction",
+                              "Value sampling / aggregating");
   return params;
 }
 
