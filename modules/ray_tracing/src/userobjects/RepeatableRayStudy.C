@@ -57,7 +57,7 @@ RepeatableRayStudy::validParams()
       "for each Ray defined by 'names'. The data for each Ray should be separated by ';'.");
 
   params.addParamNamesToGroup(
-      "ray_data_names initial_ray_data ray_aux_data_names initial_ray_aux_data", "Data");
+      "ray_data_names initial_ray_data ray_aux_data_names initial_ray_aux_data", "Ray Data");
 
   return params;
 }
