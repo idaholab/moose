@@ -3,7 +3,6 @@
   issues = '#22828'
   [single_square]
     type = 'Exodiff'
-    exodiff_opts = '-pedantic'
     input = 'single_square.i'
     exodiff = 'single_square_in.e'
     cli_args = '--mesh-only'

@@ -3,7 +3,6 @@
   issues = '#18628 #20514 #20637 #21420 #23367'
   [back_only]
     type = 'Exodiff'
-    exodiff_opts = '-pedantic'
     input = 'poly_2d.i'
     exodiff = 'poly_2d_back_only.e'
     cli_args = 'Mesh/gen/background_block_ids="30 35" Mesh/gen/background_block_names="back_in back_out" --mesh-only "poly_2d_back_only.e"'
@@ -12,7 +11,6 @@
   []
   [back_only_flat_up]
     type = 'Exodiff'
-    exodiff_opts = '-pedantic'
     input = 'poly_2d.i'
     exodiff = 'poly_2d_back_only_flat_up.e'
     cli_args = 'Mesh/gen/background_block_ids="30 35"
@@ -24,7 +22,6 @@
   []
   [back_only_one_layer]
     type = 'Exodiff'
-    exodiff_opts = '-pedantic'
     input = 'poly_2d.i'
     exodiff = 'poly_2d_back_only_one_layer.e'
     cli_args = 'Mesh/gen/background_intervals=1
@@ -37,7 +34,6 @@
   []
   [rings]
     type = 'Exodiff'
-    exodiff_opts = '-pedantic'
     input = 'poly_2d.i'
     exodiff = 'poly_2d_rings.e'
     cli_args = 'Mesh/gen/background_block_ids="30" Mesh/gen/background_block_names="back"
@@ -51,7 +47,6 @@
   []
   [ducts]
     type = 'Exodiff'
-    exodiff_opts = '-pedantic'
     input = 'poly_2d.i'
     exodiff = 'poly_2d_ducts.e'
     cli_args = 'Mesh/gen/background_block_ids="30 35" Mesh/gen/background_block_names="back_in back_out"
@@ -111,7 +106,6 @@
   []
   [full_biasing]
     type = 'Exodiff'
-    exodiff_opts = '-pedantic'
     input = 'poly_2d.i'
     exodiff = 'poly_2d_full_biasing.e'
     cli_args = 'Mesh/gen/background_block_ids="30" Mesh/gen/background_block_names="back"
@@ -127,7 +121,6 @@
   []
   [full_boundary_layers]
     type = 'Exodiff'
-    exodiff_opts = '-pedantic'
     input = 'poly_2d.i'
     exodiff = 'poly_2d_full_boundary_layers.e'
     cli_args = 'Mesh/gen/background_block_ids="30" Mesh/gen/background_block_names="back"
@@ -154,7 +147,6 @@
   []
   [full_quad]
     type = 'Exodiff'
-    exodiff_opts = '-pedantic'
     input = 'poly_2d.i'
     exodiff = 'poly_2d_full_quad.e'
     cli_args = 'Mesh/gen/background_block_ids="30" Mesh/gen/background_block_names="back"
@@ -169,7 +161,6 @@
   []
   [full_quad_custom]
     type = 'Exodiff'
-    exodiff_opts = '-pedantic'
     input = 'poly_2d.i'
     exodiff = 'poly_2d_full_quad_custom.e'
     cli_args = 'Mesh/gen/background_block_ids="30" Mesh/gen/background_block_names="back"

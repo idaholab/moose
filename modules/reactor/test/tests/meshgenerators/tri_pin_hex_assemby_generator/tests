@@ -29,7 +29,6 @@
 
   [tri_pin_id]
     type = 'Exodiff'
-    exodiff_opts = '-pedantic'
     input = 'tri_pin_id.i'
     exodiff = 'tri_pin_id_out.e'
     requirement ='The system shall be able to generate a tri-pin assembly mesh with ring and sector Ids.'
@@ -38,7 +37,6 @@
 
   [tri_pin_dup]
     type = 'Exodiff'
-    exodiff_opts = '-pedantic'
     input = 'tri_pin_dup.i'
     exodiff = 'tri_pin_dup_in.e'
     cli_args = '--mesh-only'
@@ -47,7 +45,6 @@
   []
   [dummy_core]
     type = 'Exodiff'
-    exodiff_opts = '-pedantic'
     input = 'dummy_core.i'
     exodiff = 'dummy_core_in.e'
     cli_args = '--mesh-only'

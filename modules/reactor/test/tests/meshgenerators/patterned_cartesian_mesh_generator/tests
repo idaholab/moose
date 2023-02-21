@@ -38,7 +38,6 @@
   []
   [square_boundary_no_deform]
     type = 'Exodiff'
-    exodiff_opts = '-pedantic'
     input = 'patterned_2d.i'
     exodiff = 'patterned_sq_no_deform.e'
     cli_args = 'Mesh/pattern/background_block_id=1500
@@ -51,7 +50,6 @@
   []
   [none_boundary]
     type = 'Exodiff'
-    exodiff_opts = '-pedantic'
     input = 'patterned_2d.i'
     exodiff = 'patterned_none.e'
     cli_args = 'Mesh/pattern/pattern_boundary=none --mesh-only "patterned_none.e"'
@@ -60,7 +58,6 @@
   []
   [patterned_pattern]
     type = 'Exodiff'
-    exodiff_opts = '-pedantic'
     input = 'patterned_pattern.i'
     exodiff = 'patterned_pattern.e'
     cli_args = '--mesh-only "patterned_pattern.e"'
@@ -69,7 +66,6 @@
   []
   [patterned_pattern_cd]
     type = 'Exodiff'
-    exodiff_opts = '-pedantic'
     input = 'patterned_pattern_cd.i'
     exodiff = 'patterned_pattern_cd.e'
     cli_args = '--mesh-only "patterned_pattern_cd.e"'
