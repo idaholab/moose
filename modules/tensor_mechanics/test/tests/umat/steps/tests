@@ -1,0 +1,15 @@
+[Tests]
+  issues = '#14974'
+  design = 'AbaqusUMATStress.md'
+  [elastic_temperature_steps]
+    type = 'Exodiff'
+    input = 'elastic_temperature_steps.i'
+    exodiff = 'elastic_temperature_steps_out.e'
+    library_mode = 'DYNAMIC'
+    valgrind = 'NONE'
+    requirement = 'The system shall provide an interface to use Abaqus UMAT materials as '
+                  'constitutive models, with support for finite strain elastic material models and '
+                  'temperature dependence with the ability to switch boundary conditions according '
+                  'to loading steps.'
+  []
+[]

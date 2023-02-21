@@ -79,6 +79,16 @@ A subroutine that acts on `PNEWDT` is chosen in the regression test:
 
 !listing modules/tensor_mechanics/test/tests/umat/time_step/elastic_timestep.i block=Materials/umat
 
+## UMAT Loading steps
+
+When setting up an input file, it can be useful to organize it in terms of the loading and boundary
+conditions that the structural component will undergo throughout the numerical simulation. For
+example, a user may want to apply natural boundary conditions as a first step (Step 1), then apply
+gradually a permanent or long-term load, e.g. the internal pressure in a vessel (Step 2). Finally,
+other loads, such as those originated by wind, can be added to the existing step to obtain the
+desired final numerical results (Step 3). In MOOSE, one can use the `Controls`[Ref needed] system to
+
+
 
 ## Example input file
 
