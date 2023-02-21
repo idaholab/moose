@@ -52,7 +52,7 @@ AddVariableAction::validParams()
   params.addParam<std::vector<Real>>("scaling",
                                      "Specifies a scaling factor to apply to this variable");
   params.addParam<std::vector<Real>>("initial_condition",
-                                     "Specifies the initial condition for this variable");
+                                     "Specifies a constant initial condition for this variable");
   return params;
 }
 
