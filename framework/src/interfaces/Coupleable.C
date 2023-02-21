@@ -861,6 +861,15 @@ Coupleable::writableVariable(const std::string & var_name, unsigned int comp)
                "'.");
   // if (nuo && !var->isNodal()) is handled by checkVar already
 
+  // check block restrictions for compatibility
+  const auto * br = dynamic_cast<const BlockRestrictable *>(this);
+  if (!var->hasBlocks(br->blocks()))
+    mooseError("The variable '",
+               var->name(),
+               "' must be defined on all blocks '",
+               _obj->name(),
+               "' is defined on");
+
   // make sure only one object can access a variable
   for (const auto & ci : _obj->getMooseApp().getInterfaceObjects<Coupleable>())
     if (ci != this && ci->_writable_coupled_variables[_c_tid].count(var))

@@ -142,3 +142,22 @@ DOFs all the user to perform their own integration or other evaluation without g
 process. These functions can be found here:
 
 !listing framework/include/interfaces/Coupleable.h start=coupled-dof-values-begin end=coupled-dof-values-end include-start=false
+
+## Writing directly to coupled variables
+
+Element- and nodal user objects as well AuxKernels may obtain a writable reference to a MOOSE field variable
+through the `Coupleable::writableVariable` function. The returned variable reference provides a `setNodalValue`
+method that can be used to set the nodal or elemental DOF value(s) of the variable.
+
+`Coupleable::writableVariable` enforces compatibility between the calling object type and the family of the
+requested variable. I.e. nodal user objects and AuxKernels may only obtain references to nodal variables, and
+element user objects and elemental AuxKernels may only obtain references to elemental variables.
+
+The block restrictins of the variables are also checked not to exceed the block restrictions of the calling object.
+MOOSE keeps track of all variables to which a reference was obtained through `Coupleable::writableVariable`. Each
+variable in the system may at most be written to by a single object (this might be relaxed in the future to permit
+multiple object with non overlapping block restrictions to obtain a writable reference).
+
+The user object and aux kernel thread loops check if an executed object has any writable variable references, and
+if so, will insert those variables into the aux solution vector. This obviates the need for using the
+[`SelfAux`](SelfAux.md) kernel.

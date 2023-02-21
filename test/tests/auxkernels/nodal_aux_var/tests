@@ -1,6 +1,6 @@
 [Tests]
-  issues = '16769b212846275cd8b12e5a89b9e98f3ab7ca83'
-  design = 'syntax/AuxKernels/index.md'
+  issues = '16769b212846275cd8b12e5a89b9e98f3ab7ca83 #22563'
+  design = 'syntax/AuxKernels/index.md Coupleable.md'
   [init_test]
     type = 'Exodiff'
     input = 'nodal_aux_init_test.i'
@@ -38,6 +38,7 @@
     input = 'multi_update_var_deprecated_test.i'
     exodiff = 'out_multi_var.e'
     issues = '#2099'
+    allow_deprecated = true
     requirement = "The AuxKernel objects shall be capable of wriyting to to multiple coupled "
                   "variables using the deprecated writeCoupledValue method."
   []
@@ -46,7 +47,8 @@
     input = 'multi_update_elem_var_test.i'
     exodiff = 'out_multi_elem_var.e'
     requirement = "The MOOSE auxiliary system shall be capable of updating multiple elemental "
-                  "auxiliary variables within a single AuxKernel object."
+                  "auxiliary variables within a single AuxKernel object, including the kernel "
+                  "variable itsef using the setNodalValue method."
   []
   [multi_update_elem_test_coupled_value]
     type = 'Exodiff'
@@ -62,7 +64,8 @@
     input = 'multi_update_elem_var_test.i'
     cli_args = 'AuxVariables/ten/order=FIRST AuxVariables/ten/family=LAGRANGE'
     expect_err = "The AuxKernel 'all' and the variable 'ten' must both either be nodal or elemental."
-    requirement = "The MOOSE auxiliary system shall check compatibility between primary and writable coupled variables."
+    requirement = "The MOOSE auxiliary system shall check compatibility between primary and writable "
+                  "coupled variables."
   []
 
   [ts_test]
