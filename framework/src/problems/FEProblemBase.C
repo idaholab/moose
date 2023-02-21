@@ -247,7 +247,7 @@ FEProblemBase::validParams()
   params.addParam<bool>("previous_nl_solution_required",
                         false,
                         "True to indicate that this calculation requires a solution vector for "
-                        "storing the prvious nonlinear iteration.");
+                        "storing the previous nonlinear iteration.");
 
   params.addParam<std::vector<NonlinearSystemName>>(
       "nl_sys_names", std::vector<NonlinearSystemName>{"nl0"}, "The nonlinear system names");
@@ -265,12 +265,24 @@ FEProblemBase::validParams()
       "allow_invalid_solution",
       false,
       "Set to true to allow convergence even though the solution has been marked as 'invalid'");
-
   params.addParam<bool>("immediately_print_invalid_solution",
                         false,
                         "Whether or not to report invalid solution warnings at the time the "
                         "warning is produced instead of after the calculation");
 
+  params.addParamNamesToGroup(
+      "skip_nl_system_check kernel_coverage_check boundary_restricted_node_integrity_check "
+      "boundary_restricted_elem_integrity_check material_coverage_check fv_bcs_integrity_check "
+      "material_dependency_check",
+      "Simulation checks");
+  params.addParamNamesToGroup("restart_file_base force_restart skip_additional_restart_data",
+                              "Restart");
+  params.addParamNamesToGroup("verbose_multiapps parallel_barrier_messaging", "Verbosity");
+  params.addParamNamesToGroup(
+      "null_space_dimension transpose_null_space_dimension near_null_space_dimension",
+      "Null space removal");
+  params.addParamNamesToGroup("extra_tag_vectors extra_tag_matrices extra_tag_solutions",
+                              "Tagging");
   params.addParamNamesToGroup("allow_invalid_solution immediately_print_invalid_solution",
                               "Solution validity control");
 
