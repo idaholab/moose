@@ -42,17 +42,14 @@
     []
   []
 
-  [step]
+  [steps]
     type = 'RunApp'
-    input = 'utility_functions.i'
+    input = 'utility_functions_steps.i'
     library_mode = 'DYNAMIC'
     valgrind = 'NONE'
-    cli_args = 'UserObjects/uexternaldb/abaqus_step=12345678 '
-               'UserObjects/uexternaldb/execute_on=INITIAL'
-    expect_out = 'UEXTERNALDB           0           0   0.0000000000000000        0.0000000000000000 '
-                 '       0.0000000000000000         12345678           0'
-    requirement = 'The Abaqus UEXTERNALDB interface shall be able to pass in a custom Abaqus step '
-                  'number.'
+    expect_out = 'Loading step is           1'
+    requirement = 'The Abaqus UEXTERNALDB interface shall interface with a general user object to '
+                  'obtain the proper loading step and pass it to the user routine.'
   []
 
   [getoutdir]

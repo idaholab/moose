@@ -16,7 +16,8 @@ A description of the input and output parameters of the UEXTERNALDB user subrout
 can be found in the Abaqus user manual.
 
 !alert note
-MOOSE steps need to be passed to Abaqus UMAT to take effect in `AbaqusUExternalDB`.
+MOOSE steps need to be defined in a [StepUserObject](/StepUserObject.md) and passed to
+the `AbaqusUExternalDB` user object to correctly inform user routines.
 
 !syntax parameters /UserObjects/AbaqusUExternalDB
 

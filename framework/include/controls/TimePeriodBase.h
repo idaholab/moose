@@ -10,12 +10,12 @@
 #pragma once
 
 // MOOSE includes
-#include "TimePeriodBase.h"
+#include "ConditionalEnableControl.h"
 
 /**
- * A basic control for disabling objects for a portion of the simulation.
+ * Base class for basic control for disabling objects for a portion of the simulation.
  */
-class TimePeriod : public TimePeriodBase
+class TimePeriodBase : public ConditionalEnableControl
 {
 public:
   /**
@@ -24,7 +24,7 @@ public:
    */
   static InputParameters validParams();
 
-  TimePeriod(const InputParameters & parameters);
+  TimePeriodBase(const InputParameters & parameters);
 
 protected:
   /**
@@ -32,5 +32,16 @@ protected:
    */
   void initialSetup() override;
 
+  /**
+   * Helper base method to set start and end times for controls.
+   */
+  void setupTimes();
+
   virtual bool conditionMet(const unsigned int & i) override;
+
+  /// The time to begin enabling the supplied object tags (defaults to the simulation start time)
+  std::vector<Real> _start_time;
+
+  /// The time to stop enabling the supplied object tags (defaults to the end of the simulation)
+  std::vector<Real> _end_time;
 };

@@ -9,6 +9,7 @@
 
 #include "AbaqusUExternalDB.h"
 #include "AbaqusUtils.h"
+#include "StepUserObject.h"
 
 #define QUOTE(macro) stringifyName(macro)
 
@@ -21,10 +22,9 @@ AbaqusUExternalDB::validParams()
   params.addClassDescription("Coupling user object to use Abaqus UEXTERNALDB subroutines in MOOSE");
   params.addRequiredParam<FileName>(
       "plugin", "The path to the compiled dynamic library for the plugin you want to use");
-  params.addParam<int>("abaqus_step",
-                       0,
-                       "Abaqus step number. This is not the same as the increment number, which "
-                       "corresponds to the MOOSE time step and is computed automatically.");
+  params.addParam<UserObjectName>(
+      "step_user_object", "The StepUserObject that provides times from simulation loading steps.");
+
   return params;
 }
 
@@ -37,8 +37,11 @@ AbaqusUExternalDB::AbaqusUExternalDB(const InputParameters & parameters)
     _plugin(getParam<FileName>("plugin")),
     _library(_plugin + std::string("-") + QUOTE(METHOD) + ".plugin"),
     _uexternaldb(_library.getFunction<uexternaldb_t>("uexternaldb_")),
-    _aqSTEP(getParam<int>("abaqus_step")),
-    _current_execute_on_flag(_fe_problem.getCurrentExecuteOnFlag())
+    _aqSTEP(0),
+    _current_execute_on_flag(_fe_problem.getCurrentExecuteOnFlag()),
+    _step_user_object(isParamSetByUser("step_user_object")
+                          ? &getUserObject<StepUserObject>("step_user_object")
+                          : nullptr)
 {
   AbaqusUtils::setInputFile(_app.getInputFileName());
   AbaqusUtils::setCommunicator(&_communicator);
@@ -47,6 +50,10 @@ AbaqusUExternalDB::AbaqusUExternalDB(const InputParameters & parameters)
 void
 AbaqusUExternalDB::execute()
 {
+  // Obtain step number if user object was coupled (beginning of increment)
+  if (_step_user_object)
+    _aqSTEP = _step_user_object->getStep(_t - _dt);
+
   if (_current_execute_on_flag == EXEC_INITIAL)
     callPlugin(0);
 

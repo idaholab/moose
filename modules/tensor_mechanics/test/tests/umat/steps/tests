@@ -10,6 +10,17 @@
     requirement = 'The system shall provide an interface to use Abaqus UMAT materials as '
                   'constitutive models, with support for finite strain elastic material models and '
                   'temperature dependence with the ability to switch boundary conditions according '
-                  'to loading steps.'
+                  'to the controls system.'
+  []
+  [elastic_temperature_steps_uo]
+    type = 'Exodiff'
+    input = 'elastic_temperature_steps_uo.i'
+    exodiff = 'elastic_temperature_steps_uo_out.e'
+    library_mode = 'DYNAMIC'
+    valgrind = 'NONE'
+    requirement = 'The system shall provide an interface to use Abaqus UMAT materials as '
+                  'constitutive models, with support for finite strain elastic material models and '
+                  'temperature dependence with the ability to switch boundary conditions according '
+                  'to the controls system using loading steps from a general user object.'
   []
 []

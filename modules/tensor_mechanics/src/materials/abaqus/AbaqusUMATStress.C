@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "AbaqusUMATStress.h"
+#include "StepUserObject.h"
 #include "Factory.h"
 #include "MooseMesh.h"
 #include "RankTwoTensor.h"
@@ -44,6 +45,8 @@ AbaqusUMATStress::validParams()
   params.addParam<MooseEnum>("decomposition_method",
                              ComputeFiniteStrain::decompositionType(),
                              "Method to calculate the strain kinematics.");
+  params.addParam<UserObjectName>(
+      "step_user_object", "The StepUserObject that provides times from simulation loading steps.");
   return params;
 }
 
@@ -85,7 +88,10 @@ AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
     _external_properties_old(_number_external_properties),
     _use_one_based_indexing(getParam<bool>("use_one_based_indexing")),
     _decomposition_method(
-        getParam<MooseEnum>("decomposition_method").getEnum<ComputeFiniteStrain::DecompMethod>())
+        getParam<MooseEnum>("decomposition_method").getEnum<ComputeFiniteStrain::DecompMethod>()),
+    _step_user_object(isParamSetByUser("step_user_object")
+                          ? &getUserObject<StepUserObject>("step_user_object")
+                          : nullptr)
 {
   if (!_use_one_based_indexing)
     mooseDeprecated(
@@ -153,9 +159,18 @@ AbaqusUMATStress::computeProperties()
   // characteristic element length
   _aqCELENT = std::pow(_current_elem->volume(), 1.0 / _current_elem->dim());
 
-  // For now, total time and step time mean the exact same thing
-  // Value of step time at the beginning of the current increment
-  _aqTIME[0] = _t - _dt;
+  if (!_step_user_object)
+  {
+    // Value of total time at the beginning of the current increment
+    _aqTIME[0] = _t - _dt;
+  }
+  else
+  {
+    const unsigned int start_time_step = _step_user_object->getStep(_t - _dt);
+    const Real step_time = _step_user_object->getInitTime(start_time_step);
+    // Value of step time at the beginning of the current increment
+    _aqTIME[0] = step_time;
+  }
   // Value of total time at the beginning of the current increment
   _aqTIME[1] = _t - _dt;
 

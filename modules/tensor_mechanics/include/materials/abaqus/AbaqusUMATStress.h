@@ -13,6 +13,8 @@
 #include "DynamicLibraryLoader.h"
 #include "ComputeFiniteStrain.h"
 
+class StepUserObject;
+
 /**
  * Coupling material to use Abaqus UMAT models in MOOSE
  */
@@ -246,4 +248,7 @@ protected:
 private:
   /// Method being used to compute strain and rotation increments
   const ComputeFiniteStrain::DecompMethod _decomposition_method;
+
+  /// User object that determines step number
+  const StepUserObject * _step_user_object;
 };

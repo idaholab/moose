@@ -12,6 +12,8 @@
 #include "ThreadedGeneralUserObject.h"
 #include "DynamicLibraryLoader.h"
 
+class StepUserObject;
+
 /**
  * Coupling user object to use Abaqus UEXTERNALDB subroutines in MOOSE
  */
@@ -49,4 +51,7 @@ protected:
   int _aqSTEP;
 
   const ExecFlagType & _current_execute_on_flag;
+
+  /// User object that determines the step number
+  const StepUserObject * _step_user_object;
 };
