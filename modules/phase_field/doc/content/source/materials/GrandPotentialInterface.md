@@ -45,7 +45,7 @@ g_{\alpha i \beta j} &= \frac{\sigma_{\alpha i \beta j}}{\sqrt{\mu\kappa}}  \\
 The material propertied provided by this class are directly used by the
 [`ACGrGrMulti`](/ACGrGrMulti.md) and [`ACInterface`](/ACInterface.md) objects
 and indirectly used by the
-[GrandPotentialKernelAction](/action/GrandPotentialKernelAction.md).
+[GrandPotentialKernelAction](/actions/GrandPotentialKernelAction.md).
 
 !syntax parameters /Materials/GrandPotentialInterface
 
