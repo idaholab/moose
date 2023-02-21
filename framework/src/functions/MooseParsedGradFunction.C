@@ -19,7 +19,7 @@ MooseParsedGradFunction::validParams()
   params.addClassDescription("Defines a function and its gradient using input file parameters.");
   params += MooseParsedFunctionBase::validParams();
   params.addDeprecatedParam<std::string>(
-      "value", "User defined function.", "value is deprecated, use expression instead");
+      "value", "User defined function.", "Use 'expression' instead.");
   // TODO Make required once deprecation is handled + add 0 default, see #19119
   params.addParam<std::string>("expression", "User defined function.");
   params.addParam<std::string>("grad_x", "0", "Partial derivative with respect to x.");
