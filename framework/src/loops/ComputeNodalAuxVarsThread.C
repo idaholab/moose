@@ -117,6 +117,8 @@ ComputeNodalAuxVarsThread<AuxKernelType>::onNode(ConstNodeRange::const_iterator 
           }
 
           // make solution values available for dependent AuxKernels
+          aux->variable().insert(_aux_sys.solution());
+          aux->variable().prepareAux();
           _fe_problem.reinitNode(node, _tid);
         }
       }

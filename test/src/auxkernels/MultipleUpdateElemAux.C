@@ -17,11 +17,14 @@ MultipleUpdateElemAux::validParams()
   InputParameters params = AuxKernel::validParams();
   params.addRequiredCoupledVar("vars",
                                "Coupled variables that will be written to by the test object.");
+  params.addParam<bool>("use_compute_value", false, "Use computeValue() instead of setNodalValue");
   return params;
 }
 
 MultipleUpdateElemAux::MultipleUpdateElemAux(const InputParameters & parameters)
-  : AuxKernel(parameters), _n_vars(coupledComponents("vars"))
+  : AuxKernel(parameters),
+    _n_vars(coupledComponents("vars")),
+    _use_compute_value(getParam<bool>("use_compute_value"))
 {
   for (unsigned int i = 0; i < _n_vars; i++)
     _vars.push_back(&writableVariable("vars", i));
@@ -39,14 +42,17 @@ MultipleUpdateElemAux::compute()
   for (unsigned int i = 0; i < _n_vars; i++)
     _vars[i]->setNodalValue(values[i]);
 
-  _var.setNodalValue(100.0);
+  if (_use_compute_value)
+    AuxKernel::compute();
+  else
+    _var.setNodalValue(0.0);
 }
 
 Real
 MultipleUpdateElemAux::computeValue()
 {
-  // never executed
-  return 100.0;
+  // executed if _use_compute_value == true
+  return 0.0;
 }
 
 void

@@ -125,15 +125,14 @@ ComputeElemAuxVarsThread<AuxKernelType>::onElement(const Elem * elem)
         Threads::spin_mutex::scoped_lock lock(writable_variable_mutex);
         for (auto * var : aux->getWritableCoupledVariables())
         {
-          std::cerr << aux->name() << " var " << var->name() << '\n';
           // insert into the global solution vector
           var->insert(_aux_sys.solution());
           var->prepareAux();
         }
 
         // make solution values available for dependent AuxKernels
-        // aux->variable().insert(_aux_sys.solution());
-        // aux->variable().prepareAux();
+        aux->variable().insert(_aux_sys.solution());
+        aux->variable().prepareAux();
         _fe_problem.reinitElem(elem, _tid);
       }
     }

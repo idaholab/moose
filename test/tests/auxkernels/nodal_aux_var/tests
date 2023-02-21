@@ -48,6 +48,14 @@
     requirement = "The MOOSE auxiliary system shall be capable of updating multiple elemental "
                   "auxiliary variables within a single AuxKernel object."
   []
+  [multi_update_elem_test_coupled_value]
+    type = 'Exodiff'
+    input = 'multi_update_elem_var_test.i'
+    cli_args = 'AuxKernels/all/use_compute_value=true'
+    exodiff = 'out_multi_elem_var.e'
+    requirement = "The MOOSE auxiliary system shall be capable of updating multiple elemental "
+                  "auxiliary variables within a single AuxKernel object."
+  []
 
   [ts_test]
     type = 'Exodiff'

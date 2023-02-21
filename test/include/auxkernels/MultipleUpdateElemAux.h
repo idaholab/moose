@@ -29,4 +29,6 @@ protected:
 
   unsigned int _n_vars;
   std::vector<MooseVariable *> _vars;
+
+  const bool _use_compute_value;
 };
