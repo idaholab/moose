@@ -1,0 +1,15 @@
+[Tests]
+  [test]
+    type = 'Exodiff'
+    input = 'overlay_mesh_generator.i'
+    cli_args = '--mesh-only'
+    exodiff = 'overlay_mesh_generator_in.e'
+    requirement = 'The system shall be able to create a distributedrectilinear mesh overlaying with the given mesh.'
+    design = 'meshgenerators/OverlayMeshGenerator.md'
+    issues = '#0'
+    mesh_mode = 'REPLICATED'
+    recover = false
+
+    detail = 'The refinement of the generated mesh is different from the given mesh.'
+  []
+[]
