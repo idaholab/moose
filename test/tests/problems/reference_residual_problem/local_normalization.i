@@ -7,7 +7,8 @@
 
 [Problem]
   type = ReferenceResidualProblem
-  reference_vector = 'reference_residual_tag'
+  reference_vector = 'ref'
+  extra_tag_vectors = 'ref'
   local_residual_normalization = true
 []
 
@@ -29,6 +30,7 @@
   [u_dt]
     type = TimeDerivative
     variable = u
+    reference_residual_tags = 'ref'
   []
   [u_diff]
     type = MatDiffusion
@@ -40,11 +42,13 @@
     variable = u
     v = v
     coef = 1e-6
+    reference_residual_tags = 'ref'
   []
 
   [v_dt]
     type = TimeDerivative
     variable = v
+    reference_residual_tags = 'ref'
   []
   [v_diff]
     type = MatDiffusion
@@ -56,6 +60,7 @@
     variable = v
     value = 1e6
     function = ramp
+    reference_residual_tags = 'ref'
   []
 []
 

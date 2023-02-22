@@ -49,6 +49,11 @@ ReferenceResidualProblem::validParams()
   params.addParam<std::vector<NonlinearVariableName>>(
       "converge_on",
       "If supplied, use only these variables in the individual variable convergence check");
+  params.addParam<bool>(
+      "local_residual_normalization",
+      false,
+      "Flag to optionally perform local normalization of the residual by the reference "
+      "residual dof by dof before the L2 norm is computed");
   return params;
 }
 
@@ -56,7 +61,8 @@ ReferenceResidualProblem::ReferenceResidualProblem(const InputParameters & param
   : FEProblem(params),
     _use_group_variables(false),
     _reference_vector(nullptr),
-    _converge_on(getParam<std::vector<NonlinearVariableName>>("converge_on"))
+    _converge_on(getParam<std::vector<NonlinearVariableName>>("converge_on")),
+    _local_norm(getParam<bool>("local_residual_normalization"))
 {
   // Create reference residual tag
   const TagName tagname = "reference_residual_tag";
@@ -82,6 +88,10 @@ ReferenceResidualProblem::ReferenceResidualProblem(const InputParameters & param
         "For `ReferenceResidualProblem` you can specify either the `reference_residual_variables` "
         "or `reference_vector` parameter, not both. `reference_residual_variables` is deprecated "
         "so we recommend using `reference_vector`");
+
+  if (_local_norm && !params.isParamValid("reference_vector"))
+    paramError("local_residual_normalization",
+               "If local_residual_normalization is true, a reference_vector must be provided.");
 
   if (params.isParamValid("reference_residual_variables"))
   {
@@ -346,26 +356,24 @@ ReferenceResidualProblem::updateReferenceResidual()
   System & s = nonlinear_sys.system();
   auto & as = aux_sys.sys();
 
-  for (unsigned int i = 0; i < _group_resid.size(); ++i)
-  {
-    _group_resid[i] = 0.0;
-    _group_output_resid[i] = 0.0;
-    _group_ref_resid[i] = 0.0;
-  }
+  std::fill(_group_resid.begin(), _group_resid.end(), 0.0);
+  std::fill(_group_output_resid.begin(), _group_output_resid.end(), 0.0);
+  if (_local_norm)
+    std::fill(_group_ref_resid.begin(), _group_ref_resid.end(), 1.0);
+  else
+    std::fill(_group_ref_resid.begin(), _group_ref_resid.end(), 0.0);
 
   for (unsigned int i = 0; i < _soln_vars.size(); ++i)
   {
-    const auto resid =
-        Utility::pow<2>(s.calculate_norm(nonlinear_sys.RHS(), _soln_vars[i], DISCRETE_L2));
+    Real resid = 0.0;
     const auto group = _variable_group_num_index[i];
     if (_local_norm)
     {
       mooseAssert(nonlinear_sys.RHS().size() == (*_reference_vector).size(),
                   "Sizes of nonlinear RHS and reference vector should be the same.");
-      mooseAssert((*_reference_vector).size(), "Reference vector must be provided.");
+      mooseAssert(_reference_vector.size(), "Reference vector must be provided.");
       auto div = nonlinear_sys.RHS().clone();
       *div /= *_reference_vector;
-      // Do magic to prevent 0/0, throw error if not zero divided by 0 occurs
       resid = Utility::pow<2>(s.calculate_norm(*div, _soln_vars[i], DISCRETE_L2));
     }
     else
@@ -436,16 +444,21 @@ ReferenceResidualProblem::checkNonlinearConvergence(std::string & msg,
 
     for (unsigned int i = 0; i < _group_soln_var_names.size(); ++i)
     {
-      auto ref_var_name =
-          _reference_vector ? _group_soln_var_names[i] + "_ref" : _group_ref_resid_var_names[i];
-      _console << "   " << std::setw(maxwsv + 2) << std::left << _group_soln_var_names[i] + ":";
+      _console << "   " << std::setw(maxwsv + (_local_norm ? 5 : 2)) << std::left
+               << (_local_norm ? "norm " : "") + _group_soln_var_names[i] + ": ";
 
       if (_group_output_resid[i] == _group_resid[i])
         _console << _group_output_resid[i];
       else
         _console << _group_resid[i] << " (" << _group_output_resid[i] << ')';
-      _console << "  " << std::setw(maxwrv + 2) << ref_var_name + ":" << _group_ref_resid[i]
-               << '\n';
+
+      if (!_local_norm)
+      {
+        const auto ref_var_name =
+            _reference_vector ? _group_soln_var_names[i] + "_ref" : _group_ref_resid_var_names[i];
+        _console << "  " << std::setw(maxwrv + 2) << ref_var_name + ":" << _group_ref_resid[i];
+      }
+      _console << '\n';
     }
 
     _console << std::flush;

@@ -118,6 +118,9 @@ protected:
 
   std::vector<NonlinearVariableName> _converge_on;
   std::vector<bool> _converge_on_var;
+
+  /// Flag to optionally perform normalization of residual by reference residual before or after L2 norm is computed
+  const bool _local_norm;
 };
 
 template <typename T>

@@ -52,11 +52,20 @@
     requirement = 'The system shall support wildcards for choosing the variables to base convergence '
                   'on.'
   []
-  [tag]
-    type = 'Exodiff'
-    input = 'tag.i'
-    exodiff = 'tag_out.e'
+  [abs_ref]
+    type = 'CSVDiff'
+    input = 'abs_ref.i'
+    csvdiff = 'abs_ref_out.csv'
     requirement = 'The system shall have the ability to base convergence on the comparison of '
-                  'individual variables to the sum of the residual contributions of those variables.'
+                  'individual variables to the sum of the absolute value of the residual contributions '
+                  'of those variables.'
+  []
+  [local_normalization]
+    type = 'CSVDiff'
+    input = 'local_normalization.i'
+    csvdiff = 'local_normalization_out.csv'
+    requirement = 'The system shall have the ability to base convergence on the comparison of '
+                  'individual variables to the sum of the residual value locally normalized by '
+                  'the absolute value of the residual contributions of those variables.'
   []
 []
