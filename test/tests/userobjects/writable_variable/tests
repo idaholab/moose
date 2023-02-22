@@ -44,4 +44,26 @@
     expect_err = "The variable 'v' must be defined on all blocks 'elemental' is defined on"
     requirement = "The system shall enforce that all variables an object obtains a writable reference to are defined on all of the object's blocks"
   []
+
+  [block2]
+    type = Exodiff
+    input = block2.i
+    exodiff = block2_out.e
+    cli_args = 'UserObjects/elemental1/block=1 UserObjects/elemental2/block=2'
+    requirement = "The system shall permit multiple objects to access a variable for writing if the objects have non-overlapping block restrictions"
+  []
+  [block2_error]
+    type = RunException
+    input = block2.i
+    expect_err = "'elemental1' already obtained a writable reference to 'v'. Only one object can obtain such a reference per variable and subdomain in a simulation."
+    cli_args = 'UserObjects/elemental1/block=1 UserObjects/elemental2/block="1 2"'
+    requirement = "The system shall error out if multiple objects with overlapping block restrictions try to access a variable for writing"
+  []
+  [block2_error2]
+    type = RunException
+    input = block2.i
+    expect_err = "'elemental1' already obtained a writable reference to 'v'. Only one object can obtain such a reference per variable and subdomain in a simulation."
+    cli_args = 'UserObjects/elemental1/block=1'
+    requirement = "The system shall error out if multiple objects, of which at least one is not block restricted, try to access a variable for writing"
+  []
 []

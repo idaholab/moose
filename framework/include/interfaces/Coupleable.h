@@ -495,6 +495,11 @@ protected:
   virtual VariableValue & writableCoupledValue(const std::string & var_name, unsigned int comp = 0);
 
   /**
+   * Checks that the passed in variable is only accessed writable by one object in a given subdomain
+   */
+  void checkWritableVar(MooseVariable * var);
+
+  /**
    * Returns an old value from previous time step  of a coupled variable
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables

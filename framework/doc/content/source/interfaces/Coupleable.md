@@ -155,8 +155,7 @@ element user objects and elemental AuxKernels may only obtain references to elem
 
 The block restrictins of the variables are also checked not to exceed the block restrictions of the calling object.
 MOOSE keeps track of all variables to which a reference was obtained through `Coupleable::writableVariable`. Each
-variable in the system may at most be written to by a single object (this might be relaxed in the future to permit
-multiple object with non overlapping block restrictions to obtain a writable reference).
+variable in the system may at most be written to by a single object on any given subdomain.
 
 The user object and aux kernel thread loops check if an executed object has any writable variable references, and
 if so, will insert those variables into the aux solution vector. This obviates the need for using the

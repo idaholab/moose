@@ -861,28 +861,9 @@ Coupleable::writableVariable(const std::string & var_name, unsigned int comp)
                "'.");
   // if (nuo && !var->isNodal()) is handled by checkVar already
 
-  // check block restrictions for compatibility
-  const auto * br = dynamic_cast<const BlockRestrictable *>(this);
-  if (!var->hasBlocks(br->blocks()))
-    mooseError("The variable '",
-               var->name(),
-               "' must be defined on all blocks '",
-               _obj->name(),
-               "' is defined on");
-
   // make sure only one object can access a variable
-  for (const auto & ci : _obj->getMooseApp().getInterfaceObjects<Coupleable>())
-    if (ci != this && ci->_writable_coupled_variables[_c_tid].count(var))
-      mooseError("'",
-                 ci->_obj->name(),
-                 "' already obtained a writable reference to '",
-                 var->name(),
-                 "'. Only one object can obtain such a reference per variable in a simulation.");
+  checkWritableVar(var);
 
-  // var is unique across threads, so we could forego having a separate set per thread, but we
-  // need qucik access to the list of all variables that need to be inserted into the solution
-  // vector by a given thread.
-  _writable_coupled_variables[_c_tid].insert(var);
   return *var;
 }
 
@@ -919,19 +900,46 @@ Coupleable::writableCoupledValue(const std::string & var_name, unsigned int comp
                "' must both either be nodal or elemental.");
 
   // make sure only one object can access a variable
+  checkWritableVar(var);
+
+  return const_cast<VariableValue &>(coupledValue(var_name, comp));
+}
+
+void
+Coupleable::checkWritableVar(MooseVariable * var)
+{
+  // check block restrictions for compatibility
+  const auto * br = dynamic_cast<const BlockRestrictable *>(this);
+  if (!var->hasBlocks(br->blockIDs()))
+    mooseError("The variable '",
+               var->name(),
+               "' must be defined on all blocks '",
+               _obj->name(),
+               "' is defined on");
+
+  // make sure only one object can access a variable
   for (const auto & ci : _obj->getMooseApp().getInterfaceObjects<Coupleable>())
     if (ci != this && ci->_writable_coupled_variables[_c_tid].count(var))
+    {
+      // if both this and ci are block restrictable then we check if the block restrictions
+      // are not overlapping. If they don't we permit the call.
+      const auto * br_other = dynamic_cast<const BlockRestrictable *>(ci);
+      if (br && br_other && br->blockRestricted() && br_other->blockRestricted() &&
+          !MooseUtils::setsIntersect(br->blockIDs(), br_other->blockIDs()))
+        continue;
+
       mooseError("'",
                  ci->_obj->name(),
                  "' already obtained a writable reference to '",
                  var->name(),
-                 "'. Only one object can obtain such a reference per variable in a simulation.");
+                 "'. Only one object can obtain such a reference per variable and subdomain in a "
+                 "simulation.");
+    }
 
   // var is unique across threads, so we could forego having a separate set per thread, but we
   // need qucik access to the list of all variables that need to be inserted into the solution
   // vector by a given thread.
   _writable_coupled_variables[_c_tid].insert(var);
-  return const_cast<VariableValue &>(coupledValue(var_name, comp));
 }
 
 const VariableValue &
