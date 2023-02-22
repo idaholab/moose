@@ -94,17 +94,16 @@ ComputeElemAuxVarsThread<AuxKernelType>::subdomainChanged()
   _fe_problem.prepareMaterials(_subdomain, _tid);
   _fe_problem.setActiveFEVariableCoupleableMatrixTags(needed_fe_var_matrix_tags, _tid);
   _fe_problem.setActiveFEVariableCoupleableVectorTags(needed_fe_var_vector_tags, _tid);
-
-  _active_kernels = &_aux_kernels.getActiveBlockObjects(_subdomain, _tid);
-  _has_active_kernels = _aux_kernels.hasActiveBlockObjects(_subdomain, _tid);
 }
 
 template <typename AuxKernelType>
 void
 ComputeElemAuxVarsThread<AuxKernelType>::onElement(const Elem * elem)
 {
-  if (_has_active_kernels)
+  if (_aux_kernels.hasActiveBlockObjects(_subdomain, _tid))
   {
+    const std::vector<std::shared_ptr<AuxKernelType>> & kernels =
+        _aux_kernels.getActiveBlockObjects(_subdomain, _tid);
     _fe_problem.prepare(elem, _tid);
     _fe_problem.reinitElem(elem, _tid);
 
@@ -115,7 +114,7 @@ ComputeElemAuxVarsThread<AuxKernelType>::onElement(const Elem * elem)
     if (_need_materials)
       _fe_problem.reinitMaterials(elem->subdomain_id(), _tid);
 
-    for (const auto & aux : *_active_kernels)
+    for (const auto & aux : kernels)
     {
       aux->compute();
 

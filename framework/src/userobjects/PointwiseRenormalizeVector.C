@@ -47,7 +47,7 @@ PointwiseRenormalizeVector::PointwiseRenormalizeVector(const InputParameters & p
       if (first_var->feType() != var.feType())
         paramError("v", "All supplied variables must be of the same order and family.");
       // check block restriction for consistency
-      if (!first_var->hasBlocks(var.blocks()) || !var.hasBlocks(first_var->blocks()))
+      if (!first_var->hasBlocks(var.blockIDs()) || !var.hasBlocks(first_var->blockIDs()))
         paramError("v", "All supplied variables must have the same block restriction.");
     }
 
