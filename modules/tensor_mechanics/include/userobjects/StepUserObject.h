@@ -35,7 +35,4 @@ protected:
 
   // Times at which steps start/end
   const std::vector<Real> _times;
-
-  // Total number of loading steps
-  const unsigned int _number_steps;
 };

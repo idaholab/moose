@@ -13,8 +13,7 @@
 [UserObjects]
   [step_uo]
    type = StepUserObject
-   number_steps = 4
-   times = '-1 0 0.2 0.4'
+   step_start_times = '-1 0 0.2 0.4'
   []
   [uexternaldb]
     type = AbaqusUExternalDB

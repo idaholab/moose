@@ -62,7 +62,7 @@ TimePeriodBase::initialSetup()
 bool
 TimePeriodBase::conditionMet(const unsigned int & /*i*/)
 {
-  mooseError("Internal error: TimePeriodBase::initialSetup() should not be called");
+  mooseError("Internal error: TimePeriodBase::conditionMet() should not be called");
 
   return false;
 }

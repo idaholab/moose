@@ -23,4 +23,16 @@
                   'temperature dependence with the ability to switch boundary conditions according '
                   'to the controls system using loading steps from a general user object.'
   []
+  [elastic_temperature_steps_uo_input]
+    type = 'Exodiff'
+    input = 'elastic_temperature_steps_uo.i'
+    exodiff = 'elastic_temperature_steps_uo_input_out.e'
+    cli_args = 'Materials/umat/step_user_object=step_uo Outputs/file_base=elastic_temperature_steps_uo_input_out'
+    library_mode = 'DYNAMIC'
+    valgrind = 'NONE'
+    requirement = 'The system shall provide an interface to use Abaqus UMAT materials as '
+                  'constitutive models, with support for finite strain elastic material models and '
+                  'temperature dependence with the ability to switch boundary conditions according '
+                  'to the controls system using loading steps from a general user object.'
+  []
 []

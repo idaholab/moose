@@ -22,6 +22,8 @@ AbaqusUExternalDB::validParams()
   params.addClassDescription("Coupling user object to use Abaqus UEXTERNALDB subroutines in MOOSE");
   params.addRequiredParam<FileName>(
       "plugin", "The path to the compiled dynamic library for the plugin you want to use");
+  params.addParam<UserObjectName>(
+      "step_user_object", "The StepUserObject that provides times from simulation loading steps.");
   return params;
 }
 
@@ -46,27 +48,33 @@ AbaqusUExternalDB::initialSetup()
 {
   // Let's automatically detect uos and identify the one we are interested in.
   // If there is more than one, we assume something is off and error out.
-  std::vector<const UserObject *> uos;
-  _fe_problem.theWarehouse().query().condition<AttribSystem>("UserObject").queryInto(uos);
 
-  std::vector<const StepUserObject *> step_uos;
-  for (const auto & uo : uos)
+  if (!isParamSetByUser("step_user_object"))
   {
-    const StepUserObject * possible_step_uo = dynamic_cast<const StepUserObject *>(uo);
-    if (possible_step_uo)
-      step_uos.push_back(possible_step_uo);
+    std::vector<const UserObject *> uos;
+    _fe_problem.theWarehouse().query().condition<AttribSystem>("UserObject").queryIntoUnsorted(uos);
+    std::vector<const StepUserObject *> step_uos;
+    for (const auto & uo : uos)
+    {
+      const StepUserObject * possible_step_uo = dynamic_cast<const StepUserObject *>(uo);
+      if (possible_step_uo)
+        step_uos.push_back(possible_step_uo);
+    }
+
+    if (step_uos.size() > 1)
+      mooseError(
+          "Your input file has multiple StepUserObjects. MOOSE currently only support one in "
+          "AbaqusUExternalDB.");
+    else if (step_uos.size() == 1)
+      mooseInfo("A StepUserObject, ",
+                step_uos[0]->name(),
+                ", has been identified and will be used to drive stepping behavior in "
+                "AbaqusUExternalDB.");
+
+    _step_user_object = step_uos.size() == 1 ? step_uos[0] : nullptr;
   }
-
-  if (step_uos.size() > 1)
-    mooseError("Your input file has multiple StepUserObjects. MOOSE currently only support one in "
-               "AbaqusUExternalDB.");
-  else if (step_uos.size() == 1)
-    mooseInfo(
-        "A StepUserObject, ",
-        step_uos[0]->name(),
-        ", has been identified and will be used to drive stepping behavior in AbaqusUExternalDB.");
-
-  _step_user_object = step_uos.size() == 1 ? step_uos[0] : nullptr;
+  else
+    _step_user_object = &getUserObject<StepUserObject>("step_user_object");
 }
 
 void
