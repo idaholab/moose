@@ -74,11 +74,12 @@ momentum_tag = "non_pressure"
     coeff = "Ainv"
     coeff_interp_method = 'average'
   []
-  # [p_source]
-  #   type = FVDivergence
-  #   variable = pressure
-  #   vector_field = "HbyA"
-  # []
+  [p_source]
+    type = FVDivergence
+    variable = pressure
+    vector_field = "HbyA"
+    force_boundary_execution = true
+  []
 []
 
 [FVBCs]

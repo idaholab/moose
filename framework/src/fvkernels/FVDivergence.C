@@ -16,9 +16,10 @@ FVDivergence::validParams()
 {
   InputParameters params = FVFluxKernel::validParams();
   params.addClassDescription(
-      "Computes the residual coming from the divergence of a vector field "
+      "Computes the residual coming from the divergence of a vector field"
       "that can be represented as a functor. Furthermore, we assume that this vector field does "
-      "not depend on the solution, therefore the derivatives are not propagated.");
+      "not depend on the solution, therefore the derivatives are not propagated and this term can "
+      "only be used as a source term on a right hand side.");
   params.addRequiredParam<MooseFunctorName>(
       "vector_field", "The name of the vector field whose divergence is added to the residual.");
   return params;
@@ -40,5 +41,7 @@ ADReal
 FVDivergence::computeQpResidual()
 {
   const auto face = makeFace(*_face_info, limiterType(Moose::FV::InterpMethod::Average), false);
-  return _vector_field(face) * _face_info->normal();
+  // We use this on the right hand side as a source so in the residual this will be a sink (ffactor
+  // of -1)
+  return -1.0 * (_vector_field(face) * _normal);
 }

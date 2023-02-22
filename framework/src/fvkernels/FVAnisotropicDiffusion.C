@@ -69,6 +69,9 @@ FVAnisotropicDiffusion::computeQpResidual()
     coeff = _coeff(face, state);
   }
 
+  _console << "Face " << _face_info->faceCentroid() << " Coeff " << raw_value(coeff) << " dpdx "
+           << raw_value(grad_T) << std::endl;
+
   ADReal r = 0;
   for (const auto i : make_range(Moose::dim))
     r += _normal(i) * coeff(i) * grad_T(i);

@@ -17,6 +17,7 @@
 #include "INSFVMomentumPressure.h"
 
 #include "libmesh/equation_systems.h"
+#include "libmesh/petsc_vector.h"
 
 registerMooseObject("NavierStokesApp", SIMPLE);
 
@@ -81,6 +82,13 @@ SIMPLE::execute()
   _rc_uo->execute();
 
   _problem.solve(_pressure_sys_number);
+
+  NonlinearImplicitSystem & pressure_system =
+      dynamic_cast<NonlinearImplicitSystem &>(_pressure_sys.system());
+  PetscVector<Number> * solution =
+      dynamic_cast<PetscVector<Number> *>(pressure_system.current_local_solution.get());
+
+  solution->print();
 
   _console << "This will be something smart" << std::endl;
 }
