@@ -1,12 +1,13 @@
 [Tests]
+  method = "opt"
   issues = '#23359'
   design = 'syntax/Controls/index.md source/controls/WebServerControl.md'
 
-# Can't currently test this
-#  [./single]
-#    type = 'CSVDiff'#
-#    input = 'real_function_control.i'
-#    csvdiff = 'real_function_control_out.csv'
-#    requirement = "The Control system shall allow a scalar parameter to be controlled with a function."
-#  [../]
+  [./single]
+    type = 'CSVDiff'
+    input = 'web_server_control.i'
+    csvdiff = 'web_server_control_out.csv'
+    command = "../../../moose_test-opt -i web_server_control.i & python controller.py"
+    requirement = "The Control system shall allow external control through a REST API."
+  [../]
 []
