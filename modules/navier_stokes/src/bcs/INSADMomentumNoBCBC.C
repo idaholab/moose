@@ -22,7 +22,6 @@ INSADMomentumNoBCBC::validParams()
   params.addClassDescription("This class implements the 'No BC' boundary condition based on the "
                              "'Laplace' form of the viscous stress tensor.");
   params.addRequiredCoupledVar(NS::pressure, "pressure");
-  params.addDeprecatedCoupledVar("p", NS::pressure, "1/1/2022");
   params.addParam<bool>("integrate_p_by_parts",
                         true,
                         "Allows simulations to be run with pressure BC if set to false");

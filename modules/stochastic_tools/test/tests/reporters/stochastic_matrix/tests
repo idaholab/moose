@@ -1,0 +1,55 @@
+[Tests]
+  issues = '#22827'
+  design = 'StochasticMatrix.md'
+
+  [sample_only]
+    requirement = 'The system shall be able to ouptut samples from a sampler with '
+    [serial]
+      type = JSONDiff
+      input = sample_only.i
+      jsondiff = sample_only_out.json
+      detail = 'serialized output;'
+    []
+    [parallel]
+      type = JSONDiff
+      input = sample_only.i
+      cli_args = 'Reporters/matrix/parallel_type=distributed Outputs/file_base=sample_only_dist'
+      min_parallel = 3
+      max_parallel = 3
+      jsondiff = 'sample_only_dist.json sample_only_dist.json.1 sample_only_dist.json.2'
+      detail = 'distributed output;'
+    []
+    [names]
+      type = JSONDiff
+      input = sample_only.i
+      cli_args = 'Reporters/matrix/sampler_column_names=\'foo bar fah lala\' Outputs/file_base=sample_only_names'
+      jsondiff = sample_only_names.json
+      detail = 'specified column names;'
+    []
+  []
+
+  [simulation]
+    type = CSVDiff
+    input = stochastic_matrix.i
+    csvdiff = stochastic_matrix_out_matrix_0001.csv
+    requirement = 'The system shall be able to output samples from a sampler along side stochastic simulation results.'
+  []
+
+  [errors]
+    requirement = 'The system shall throw an error when attempting to output samples from a sampler when '
+    [wrong_num_names]
+      type = RunException
+      input = sample_only.i
+      cli_args = 'Reporters/matrix/sampler_column_names=foobar'
+      expect_err = 'The number of column names specified \(1\) does not match the number of sampler columns \(4\)\.'
+      detail = 'inputting the wrong number of column names;'
+    []
+    [wrong_sampler]
+      type = RunException
+      input = stochastic_matrix.i
+      cli_args = 'Samplers/wrong/type=InputMatrix Samplers/wrong/matrix=\'1 2 3 4\' Reporters/matrix/sampler=wrong'
+      expect_err = 'Attempting to create a stochastic vector with a different sampler \(sample\) than the one specified at input \(wrong\)\.'
+      detail = 'using a different sampler than the transfer\'s;'
+    []
+  []
+[]

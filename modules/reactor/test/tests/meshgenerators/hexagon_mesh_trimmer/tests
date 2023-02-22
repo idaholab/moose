@@ -5,7 +5,6 @@
     type = 'Exodiff'
     input = 'assembly_trim.i'
     exodiff = 'peripheral_trimming_full.e'
-    exodiff_opts = '-pedantic'
     cli_args = 'Mesh/trim/trim_peripheral_region="1 1 1 1 1 1"
                 Mesh/trim/peripheral_trimming_section_boundary="peripheral_section"
                 Mesh/inactive="peripheral_ring pattern_mod pattern2"
@@ -17,7 +16,6 @@
     type = 'Exodiff'
     input = 'assembly_trim.i'
     exodiff = 'peripheral_trimming_partial.e'
-    exodiff_opts = '-pedantic'
     cli_args = 'Mesh/trim/trim_peripheral_region="1 0 1 0 0 1"
                 Mesh/trim/peripheral_trimming_section_boundary="peripheral_section"
                 Mesh/inactive="peripheral_ring pattern_mod pattern2"
@@ -30,7 +28,6 @@
     type = 'Exodiff'
     input = 'assembly_trim.i'
     exodiff = 'center_trimming.e'
-    exodiff_opts = '-pedantic'
     cli_args = 'Mesh/trim/center_trim_starting_index=5
                 Mesh/trim/center_trim_ending_index=11
                 Mesh/trim/center_trimming_section_boundary="center_section"
@@ -43,7 +40,6 @@
     type = 'Exodiff'
     input = 'assembly_trim.i'
     exodiff = 'mod_center_trimming.e'
-    exodiff_opts = '-pedantic'
     cli_args = 'Mesh/trim/input=pattern_mod
                 Mesh/trim/center_trim_starting_index=6
                 Mesh/trim/center_trim_ending_index=11
@@ -58,7 +54,6 @@
     type = 'Exodiff'
     input = 'assembly_trim.i'
     exodiff = 'double_trimming.e'
-    exodiff_opts = '-pedantic'
     cli_args = 'Mesh/trim/center_trim_starting_index=5
                 Mesh/trim/center_trim_ending_index=11
                 Mesh/trim/center_trimming_section_boundary="center_section"
@@ -73,7 +68,6 @@
     type = 'Exodiff'
     input = 'assembly_trim.i'
     exodiff = 'ring_trimming.e'
-    exodiff_opts = '-pedantic'
     cli_args = 'Mesh/trim/input=peripheral_ring
                 Mesh/trim/center_trim_starting_index=4
                 Mesh/trim/center_trim_ending_index=6
@@ -87,7 +81,6 @@
     type = 'Exodiff'
     input = 'assembly_trim.i'
     exodiff = 'patterned_pattern_trimming.e'
-    exodiff_opts = '-pedantic'
     cli_args = 'Mesh/trim/input=pattern2
                 Mesh/trim/center_trim_starting_index=6
                 Mesh/trim/center_trim_ending_index=9
@@ -101,7 +94,6 @@
     type = 'Exodiff'
     input = 'assembly_trim.i'
     exodiff = 'mod_patterned_pattern_trimming.e'
-    exodiff_opts = '-pedantic'
     cli_args = 'Mesh/pattern2/inputs=pattern_mod
                 Mesh/trim/input=pattern2
                 Mesh/trim/center_trim_starting_index=6
@@ -116,7 +108,6 @@
     type = 'Exodiff'
     input = 'assembly_trim.i'
     exodiff = 'patterned_pattern_trimming_tri.e'
-    exodiff_opts = '-pedantic'
     cli_args = 'Mesh/trim/input=pattern2
                 Mesh/trim/center_trim_starting_index=4
                 Mesh/trim/center_trim_ending_index=6
@@ -134,7 +125,6 @@
     type = 'Exodiff'
     input = 'patterned_trimmed.i'
     exodiff = 'patterned_trimmed_in.e'
-    exodiff_opts = '-pedantic'
     cli_args = '--mesh-only'
     requirement ='The system shall be able to stitch together hexagonal assembly meshes after peripheral trimming.'
     recover = false

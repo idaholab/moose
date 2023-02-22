@@ -35,6 +35,16 @@
       detail = 'around multiple subdomains within a larger domain,'
     []
 
+    [external_only]
+      type = 'Exodiff'
+      input = 'external_only.i'
+      cli_args = 'Mesh/interface/external_only=true --mesh-only'
+      exodiff = 'external_only_in.e'
+      recover = false
+
+      detail = 'around multiple subdomains but only along external boundaries,'
+    []
+
     [two_inside]
       type = 'Exodiff'
       input = 'around.i'

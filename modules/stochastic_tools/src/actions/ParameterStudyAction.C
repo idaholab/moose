@@ -20,7 +20,6 @@ registerMooseAction("StochasticToolsApp", ParameterStudyAction, "add_sampler");
 registerMooseAction("StochasticToolsApp", ParameterStudyAction, "add_multi_app");
 registerMooseAction("StochasticToolsApp", ParameterStudyAction, "add_transfer");
 registerMooseAction("StochasticToolsApp", ParameterStudyAction, "add_output");
-registerMooseAction("StochasticToolsApp", ParameterStudyAction, "add_vector_postprocessor");
 registerMooseAction("StochasticToolsApp", ParameterStudyAction, "add_reporter");
 registerMooseAction("StochasticToolsApp", ParameterStudyAction, "add_control");
 
@@ -148,11 +147,15 @@ ParameterStudyAction::validParams()
   // Outputting parameters
   MultiMooseEnum out_type("none=0 csv=1 json=2", "json");
   params.addParam<MultiMooseEnum>(
-      "sampler_output_type", out_type, "Method in which to output sampling matrix.");
-  params.addParam<MultiMooseEnum>("qoi_output_type",
-                                  out_type,
-                                  "Method in which to output quantities of interest. Warning: "
-                                  "'csv' output will not include vector-type quantities.");
+      "output_type",
+      out_type,
+      "Method in which to output sampler matrix and quantities of interest. Warning: "
+      "'csv' output will not include vector-type quantities.");
+  params.addParam<std::vector<ReporterValueName>>(
+      "sampler_column_names",
+      "Names of the sampler columns for outputting the sampling matrix. If 'parameters' are not "
+      "bracketed, the default is based on these values. Otherwise, the default is based on the "
+      "sampler name.");
 
   // Debug parameters
   params.addParam<bool>("show_study_objects",
@@ -163,6 +166,7 @@ ParameterStudyAction::validParams()
 
 ParameterStudyAction::ParameterStudyAction(const InputParameters & parameters)
   : Action(parameters),
+    _parameters(getParam<std::vector<std::string>>("parameters")),
     _sampling_type(getParam<MooseEnum>("sampling_type")),
     _distributions(isParamValid("distributions") ? getParam<MultiMooseEnum>("distributions")
                                                  : MultiMooseEnum("")),
@@ -463,9 +467,7 @@ ParameterStudyAction::act()
       auto params = _factory.getValidParams("SamplerParameterTransfer");
       params.set<MultiAppName>("to_multi_app") = multiappName();
       params.set<SamplerName>("sampler") = samplerName();
-      params.set<std::string>("to_control") = samplerReceiverName();
-      params.set<std::vector<std::string>>("parameters") =
-          getParam<std::vector<std::string>>("parameters");
+      params.set<std::vector<std::string>>("parameters") = _parameters;
       _problem->addTransfer("SamplerParameterTransfer", parameterTransferName(), params);
       if (_show_objects)
         showObject("SamplerParameterTransfer", parameterTransferName(), params);
@@ -488,11 +490,10 @@ ParameterStudyAction::act()
   }
   else if (_current_task == "add_output")
   {
-    const auto & sampler_output = getParam<MultiMooseEnum>("sampler_output_type");
-    const auto & qoi_output = getParam<MultiMooseEnum>("qoi_output_type");
+    const auto & output = getParam<MultiMooseEnum>("output_type");
 
     // Add csv output
-    if (sampler_output.contains("csv") || qoi_output.contains("csv"))
+    if (output.contains("csv"))
     {
       auto params = _factory.getValidParams("CSV");
       params.set<ExecFlagEnum>("execute_on") = {EXEC_TIMESTEP_END};
@@ -502,58 +503,64 @@ ParameterStudyAction::act()
     }
 
     // Add json output
-    if (sampler_output.contains("json") || qoi_output.contains("json") || _compute_stats)
+    if (output.contains("json") || _compute_stats)
     {
       auto params = _factory.getValidParams("JSON");
-      if (sampler_output.contains("json"))
-        params.set<bool>("vectorpostprocessors_as_reporters") = true;
       params.set<ExecFlagEnum>("execute_on") = {EXEC_TIMESTEP_END};
       _problem->addOutput("JSON", outputName("json"), params);
       if (_show_objects)
         showObject("JSON", outputName("json"), params);
     }
   }
-  else if (_current_task == "add_vector_postprocessor")
-  {
-    const auto & sampler_output = getParam<MultiMooseEnum>("sampler_output_type");
-    if (!sampler_output.contains("none"))
-    {
-      auto params = _factory.getValidParams("SamplerData");
-      params.set<SamplerName>("sampler") = samplerName();
-      auto & outputs = params.set<std::vector<OutputName>>("outputs");
-      if (sampler_output.contains("csv"))
-        outputs.push_back(outputName("csv"));
-      if (sampler_output.contains("json"))
-        outputs.push_back(outputName("json"));
-      params.set<ExecFlagEnum>("execute_on") = {EXEC_TIMESTEP_END};
-      _problem->addVectorPostprocessor("SamplerData", samplesName(), params);
-      if (_show_objects)
-        showObject("SamplerData", samplesName(), params);
-    }
-  }
   else if (_current_task == "add_reporter")
   {
-    // Add stochastic reporter object if QoIs are specified
-    if (isParamValid("quantities_of_interest"))
+    // Add stochastic reporter object
+    auto params = _factory.getValidParams("StochasticMatrix");
+
+    // Ideally this would be based on the number of samples since gathering
+    // data onto a single processor can be memory and run-time expensive,
+    // but most people want everything in one output file
+    params.set<MooseEnum>("parallel_type") = "ROOT";
+
+    // Supply the sampler for output
+    params.set<SamplerName>("sampler") = samplerName();
+
+    // Set the column names if supplied or identifiable with "parameters"
+    auto & names = params.set<std::vector<ReporterValueName>>("sampler_column_names");
+    if (isParamValid("sampler_column_names"))
+      names = getParam<std::vector<ReporterValueName>>("sampler_column_names");
+    else
     {
-      const auto & qoi_output = getParam<MultiMooseEnum>("qoi_output_type");
-      auto params = _factory.getValidParams("StochasticReporter");
-      // Ideally this would be based on the number of samples since gathering
-      // data onto a single processor can be memory and run-time expensive,
-      // but most people want everything in one output file
-      params.set<MooseEnum>("parallel_type") = "ROOT";
-      auto & outputs = params.set<std::vector<OutputName>>("outputs");
-      if (qoi_output.contains("csv"))
-        outputs.push_back(outputName("csv"));
-      if (qoi_output.contains("json"))
-        outputs.push_back(outputName("json"));
-      if (qoi_output.contains("none"))
-        outputs = {"none"};
-      params.set<ExecFlagEnum>("execute_on") = {EXEC_TIMESTEP_END};
-      _problem->addReporter("StochasticReporter", stochasticReporterName(), params);
-      if (_show_objects)
-        showObject("StochasticReporter", stochasticReporterName(), params);
+      // There isn't a guaranteed mapping if using brackets
+      bool has_bracket = false;
+      for (const auto & param : _parameters)
+        if (param.find("[") != std::string::npos)
+          has_bracket = true;
+
+      // If no brackets, then there is mapping, so use parameter names
+      if (!has_bracket)
+        for (auto param : _parameters)
+        {
+          // Reporters don't like '/' in the name, so replace those with '_'
+          std::replace(param.begin(), param.end(), '/', '_');
+          names.push_back(param);
+        }
     }
+
+    // Specify output objects
+    const auto & output_type = getParam<MultiMooseEnum>("output_type");
+    auto & outputs = params.set<std::vector<OutputName>>("outputs");
+    if (output_type.contains("csv"))
+      outputs.push_back(outputName("csv"));
+    if (output_type.contains("json"))
+      outputs.push_back(outputName("json"));
+    if (output_type.contains("none"))
+      outputs = {"none"};
+
+    params.set<ExecFlagEnum>("execute_on") = {EXEC_TIMESTEP_END};
+    _problem->addReporter("StochasticMatrix", stochasticReporterName(), params);
+    if (_show_objects)
+      showObject("StochasticReporter", stochasticReporterName(), params);
 
     // Add statistics object
     if (_compute_stats)
@@ -581,8 +588,7 @@ ParameterStudyAction::act()
       auto params = _factory.getValidParams("MultiAppSamplerControl");
       params.set<MultiAppName>("multi_app") = multiappName();
       params.set<SamplerName>("sampler") = samplerName();
-      params.set<std::vector<std::string>>("param_names") =
-          getParam<std::vector<std::string>>("parameters");
+      params.set<std::vector<std::string>>("param_names") = _parameters;
       auto control =
           _factory.create<Control>("MultiAppSamplerControl", multiappControlName(), params);
       _problem->getControlWarehouse().addObject(control);
@@ -693,15 +699,14 @@ ParameterStudyAction::inferMultiAppMode()
   if (isParamValid("multiapp_mode"))
     return getParam<MooseEnum>("multiapp_mode");
 
-  const auto & params = getParam<std::vector<std::string>>("parameters");
   const unsigned int default_mode = 1;
 
   // First obvious thing is if it is a parsed parameter, indicated by the lack of '/'
-  for (const auto & param : params)
+  for (const auto & param : _parameters)
     if (param.find("/") == std::string::npos)
       return default_mode;
   // Next we'll see if there is a GlobalParam
-  for (const auto & param : params)
+  for (const auto & param : _parameters)
     if (param.find("GlobalParams") != std::string::npos)
       return default_mode;
 
@@ -714,7 +719,7 @@ ParameterStudyAction::inferMultiAppMode()
   hit::explode(root.get());
 
   // Walk through the input and see if every param is controllable
-  AreParametersControllableWalker control_walker(params, _app);
+  AreParametersControllableWalker control_walker(_parameters, _app);
   root->walk(&control_walker, hit::NodeType::Section);
   if (!control_walker.areControllable())
     return default_mode;

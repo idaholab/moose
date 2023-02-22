@@ -29,90 +29,53 @@ void
 SamplerReceiver::execute()
 {
   // Send parameters from root
-  _communicator.allgather(_parameters);
-  _communicator.allgather(_values);
-
-  std::size_t value_position = 0;
+  _communicator.broadcast(_parameters);
+  _communicator.broadcast(_values);
+  if (_parameters.size() != _values.size())
+    mooseError("Internal error: Number of parameters does not match number of values.");
 
   // Loop through all the parameters and set the controllable values for each parameter.
-  for (const std::string & param_name : _parameters)
+  for (const auto & i : index_range(_parameters))
   {
+    const std::string & param_name = _parameters[i];
+    const std::vector<Real> & value = _values[i];
+
     ControllableParameter control_param = getControllableParameterByName(param_name);
 
     // Real
     if (control_param.check<Real>())
     {
       // There must be enough data to populate the controlled parameter
-      if (value_position >= _values.size())
-        mooseError("The supplied vector of Real values is not sized correctly, the "
-                   "Real parameter '",
+      if (value.size() != 1)
+        mooseError("The Real parameter '",
                    param_name,
-                   " requires a value but no more values are available in "
-                   "the supplied values which have a size of ",
-                   _values.size(),
+                   "' expects a single value, but the vector supplying its values has a size of ",
+                   value.size(),
                    ".");
-      control_param.set<Real>(_values[value_position++]);
+      control_param.set<Real>(value[0]);
     }
-
     else if (control_param.check<std::vector<Real>>())
-    {
-      std::vector<std::vector<Real>> values = control_param.get<std::vector<Real>>();
-      mooseAssert(values.size() != 0,
-                  "ControllableParameter must not be empty."); // should not be possible
-      std::size_t n = values[0].size();                        // size of vector to changed
-
-      // All vectors being controlled must be the same size
-      for (const std::vector<Real> & value : values)
-        if (value.size() != n)
-          mooseError(
-              "The std::vector<Real> parameters being controlled must all be the same size:\n",
-              control_param.dump());
-
-      // There must be enough data to populate the controlled parameter
-      if (value_position + n > _values.size())
-        mooseError("The supplied vector of Real values is not sized correctly, the "
-                   "std::vector<Real> parameter '",
-                   param_name,
-                   " requires ",
-                   n,
-                   " values but only ",
-                   _values.size() - value_position,
-                   " are available in the supplied vector.");
-
-      // Set the value
-      std::vector<Real> value(_values.begin() + value_position,
-                              _values.begin() + value_position + n);
-      value_position += n;
       control_param.set<std::vector<Real>>(value);
-    }
-
     else
-
       // If the loop gets here it failed to find what it was looking for
       mooseError("Unable to locate a Real or std::vector<Real> parameter with the name '",
                  param_name,
                  ".'");
   }
-
-  // Error if there is un-used values
-  if (value_position != _values.size())
-    mooseError("The number of values supplied (",
-               _values.size(),
-               ") does not match the number of values consumed by setting parameter values (",
-               value_position,
-               ").");
-
-  // Clear parameters that aren't on root processor (to avoid duplication of allgather)
-  if (processor_id() != 0)
-  {
-    _parameters.clear();
-    _values.clear();
-  }
 }
 
 void
-SamplerReceiver::transfer(const std::vector<std::string> & names, const std::vector<Real> & values)
+SamplerReceiver::transfer(const std::map<std::string, std::vector<Real>> & param_values)
 {
-  _parameters = names;
-  _values = values;
+  // We'll only transfer on the root processor and gather later
+  if (processor_id() == 0)
+  {
+    _parameters.clear();
+    _values.clear();
+    for (const auto & pv : param_values)
+    {
+      _parameters.push_back(pv.first);
+      _values.push_back(pv.second);
+    }
+  }
 }

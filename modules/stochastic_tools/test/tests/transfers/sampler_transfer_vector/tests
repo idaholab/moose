@@ -7,49 +7,26 @@
     input = parent.i
     csvdiff = 'parent_out_sub0.csv parent_out_sub1.csv parent_out_sub2.csv parent_out_sub3.csv '
               'parent_out_sub4.csv'
-
     requirement = "The system shall be capable of transferring vector data to sub-applications for "
                   "each row of the stochastic data."
-
   []
 
   [errors]
-
     requirement = "The system shall error if the transferred vector to a sub-application"
-
-    [not_enough_data]
-      type = RunException
-      input = parent_not_enough_data.i
-      expect_err = "The supplied vector of Real values is not sized correctly, the std::vector<Real> "
-                   "parameter 'Materials/mat/prop_values requires 2 values but only 1 are available "
-                   "in the supplied vector."
-
-      detail = "is not sized correctly for stochastic data,"
-    []
-    [size_mismatch]
-      type = RunException
-      input = parent_size_mismatch.i
-      expect_err = "The std::vector<Real> parameters being controlled must all be the same size:"
-
-      detail = "is not sized uniformily across sub-applications,"
-    []
     [invalid_name]
       type = RunException
       input = parent.i
-      cli_args = "Transfers/sub/parameters=foo :Outputs/csv=false"
-      expect_err = "The desired parameter 'foo' was not located for the 'stochastic' object, it "
+      cli_args = "Transfers/sub/parameters='foo bar fah lala' :Outputs/csv=false"
+      expect_err = "The desired parameter '\w+' was not located for the 'stochastic' object, it "
                    "either does not exist or has not been declared as controllable."
-
-      detail = "if the vector parameter does not exist, and"
+      detail = "if the vector parameter does not exist;"
     []
     [extra_data]
       type = RunException
       input = parent.i
       cli_args = "Transfers/sub/parameters='BCs/left/value' :Outputs/csv=false"
-      expect_err = "The number of values supplied \(4\) does not match the number of values consumed "
-                   "by setting parameter values \(1\)."
-
-      detail = "if the sub-application does not consume all of the supplied data."
+      expect_err = "Number of command line arguments does not match number of sampler columns."
+      detail = "if the sub-application does not consume all of the supplied data;"
     []
   []
 []

@@ -7,6 +7,5 @@
   linear_space_items = '100 25   5
                         1   0.25 5'
 
-  sampler_output_type = 'csv'
-  qoi_output_type = 'csv'
+  output_type = 'csv'
 []

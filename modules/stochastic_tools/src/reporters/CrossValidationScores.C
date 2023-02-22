@@ -9,7 +9,7 @@
 
 #include "CrossValidationScores.h"
 
-registerMooseObject("StochasticToolsTestApp", CrossValidationScores);
+registerMooseObject("StochasticToolsApp", CrossValidationScores);
 
 InputParameters
 CrossValidationScores::validParams()

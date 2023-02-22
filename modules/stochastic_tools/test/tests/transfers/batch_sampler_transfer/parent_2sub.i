@@ -50,14 +50,12 @@
     to_multi_app = runner0
     sampler = mc0
     parameters = 'BCs/left/value'
-    to_control = 'stochastic'
   []
   [runner1]
     type = SamplerParameterTransfer
     to_multi_app = runner1
     sampler = mc1
     parameters = 'BCs/right/value'
-    to_control = 'stochastic'
   []
   [data0]
     type = SamplerPostprocessorTransfer

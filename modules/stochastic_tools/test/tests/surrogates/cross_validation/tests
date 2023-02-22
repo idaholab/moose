@@ -14,7 +14,6 @@
     [cv_vector_real]
       type = JSONDiff
       input = poly_reg_vec.i
-      allow_test_objects = true
       jsondiff = 'poly_reg_vec_out.json'
       detail = ' and std::vector<Real> response types.'
     []

@@ -56,6 +56,7 @@ SamplerPostprocessorTransfer::validParams()
                         "If false, NaN will be transferred.");
 
   params.suppressParameter<MultiMooseEnum>("direction");
+  params.suppressParameter<MultiAppName>("multi_app");
   return params;
 }
 

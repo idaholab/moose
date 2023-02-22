@@ -939,16 +939,14 @@ void
 MultiApp::createApp(unsigned int i, Real start_time)
 {
   // Define the app name
-  std::ostringstream multiapp_name;
+  const std::string multiapp_name = getMultiAppName(name(), _first_local_app + i, _total_num_apps);
   std::string full_name;
-  multiapp_name << name() << std::setw(std::ceil(std::log10(_total_num_apps)))
-                << std::setprecision(0) << std::setfill('0') << std::right << _first_local_app + i;
 
-  // Only add parent name if it the parent is not the main app
+  // Only add parent name if the parent is not the main app
   if (_app.multiAppLevel() > 0)
-    full_name = _app.name() + "_" + multiapp_name.str();
+    full_name = _app.name() + "_" + multiapp_name;
   else
-    full_name = multiapp_name.str();
+    full_name = multiapp_name;
 
   InputParameters app_params = AppFactory::instance().getValidParams(_app_type);
   app_params.set<FEProblemBase *>("_parent_fep") = &_fe_problem;
@@ -957,8 +955,6 @@ MultiApp::createApp(unsigned int i, Real start_time)
   // the copy is required so that the addArgument command below doesn't accumulate more and more
   // of the same cli_args, which is important when running in batch mode.
   std::shared_ptr<CommandLine> app_cli = std::make_shared<CommandLine>(*_app.commandLine());
-  app_cli->initForMultiApp(full_name);
-  app_params.set<std::shared_ptr<CommandLine>>("_command_line") = app_cli;
 
   if (cliArgs().size() > 0 || _cli_args_from_file.size() > 0)
   {
@@ -966,9 +962,11 @@ MultiApp::createApp(unsigned int i, Real start_time)
     {
       std::ostringstream oss;
       oss << full_name << ":" << str;
-      app_params.get<std::shared_ptr<CommandLine>>("_command_line")->addArgument(oss.str());
+      app_cli->addArgument(oss.str());
     }
   }
+  app_cli->initForMultiApp(full_name);
+  app_params.set<std::shared_ptr<CommandLine>>("_command_line") = app_cli;
 
   if (_fe_problem.verboseMultiApps())
     _console << COLOR_CYAN << "Creating MultiApp " << name() << " of type " << _app_type
@@ -1023,7 +1021,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
   // output base of the parent app problem and appending the name of the multiapp plus a number to
   // it
   if (app->getOutputFileBase().empty())
-    app->setOutputFileBase(_app.getOutputFileBase() + "_" + multiapp_name.str());
+    setAppOutputFileBase(i);
   preRunInputFile();
 
   // Transfer coupling relaxation information to the subapps
@@ -1207,4 +1205,28 @@ void
 MultiApp::addAssociatedTransfer(MultiAppTransfer & transfer)
 {
   _associated_transfers.push_back(&transfer);
+}
+
+void
+MultiApp::setAppOutputFileBase()
+{
+  for (unsigned int i = 0; i < _my_num_apps; ++i)
+    setAppOutputFileBase(i);
+}
+
+void
+MultiApp::setAppOutputFileBase(unsigned int index)
+{
+  const std::string multiapp_name =
+      getMultiAppName(name(), _first_local_app + index, _total_num_apps);
+  _apps[index]->setOutputFileBase(_app.getOutputFileBase() + "_" + multiapp_name);
+}
+
+std::string
+MultiApp::getMultiAppName(const std::string & base_name, dof_id_type index, dof_id_type total)
+{
+  std::ostringstream multiapp_name;
+  multiapp_name << base_name << std::setw(std::ceil(std::log10(total))) << std::setprecision(0)
+                << std::setfill('0') << std::right << index;
+  return multiapp_name.str();
 }

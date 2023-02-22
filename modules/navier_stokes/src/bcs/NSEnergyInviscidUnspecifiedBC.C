@@ -18,7 +18,6 @@ NSEnergyInviscidUnspecifiedBC::validParams()
 {
   InputParameters params = NSEnergyInviscidBC::validParams();
   params.addRequiredCoupledVar(NS::pressure, "pressure");
-  params.addDeprecatedCoupledVar("p", NS::pressure, "1/1/2022");
   return params;
 }
 

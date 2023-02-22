@@ -39,6 +39,16 @@ public:
   virtual void backup() override;
   virtual void restore(bool force = true) override;
 
+protected:
+  /**
+   * This function is called after each sub-application solve and is meant to display
+   * information about the solve. It can be overridden. In this class, it simply
+   * displays whether or not the sub-application solve was successful.
+   *
+   * @param i Sub-application index
+   */
+  virtual void showStatusMessage(unsigned int i) const;
+
 private:
   /// Switch to tell executioner to keep going despite app solve not converging
   const bool _ignore_diverge;

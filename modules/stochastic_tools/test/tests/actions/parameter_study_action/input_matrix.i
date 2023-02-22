@@ -20,6 +20,5 @@
                   101.19782414531 1.0860643394602;
                   179.64063932210 1.2011262703265'
 
-  sampler_output_type = 'csv'
-  qoi_output_type = 'csv'
+  output_type = 'csv'
 []

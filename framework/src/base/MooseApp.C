@@ -1031,6 +1031,22 @@ MooseApp::getOutputFileBase(bool for_non_moose_build_output) const
 }
 
 void
+MooseApp::setOutputFileBase(const std::string & output_file_base)
+{
+  _output_file_base = output_file_base;
+
+  // Reset the file base in the outputs
+  _output_warehouse.resetFileBase();
+
+  // Reset the file base in multiapps (if they have been constructed yet)
+  if (getExecutioner())
+    for (auto & multi_app : feProblem().getMultiAppWarehouse().getObjects())
+      multi_app->setAppOutputFileBase();
+
+  _file_base_set_by_user = true;
+}
+
+void
 MooseApp::runInputFile()
 {
   TIME_SECTION("runInputFile", 3);
@@ -1579,6 +1595,8 @@ MooseApp::getCheckpointDirectories() const
 
   // Add the directories added with Outputs/checkpoint=true input syntax
   checkpoint_dirs.push_back(getOutputFileBase() + "_cp");
+  // Add the directories added with the autosave checkpoint input syntax
+  checkpoint_dirs.push_back("autosave_cp");
 
   // Add the directories from any existing checkpoint output objects
   const auto & actions = _action_warehouse.getActionListByName("add_output");
@@ -1593,7 +1611,6 @@ MooseApp::getCheckpointDirectories() const
     if (moose_object_action->getParam<std::string>("type") == "Checkpoint")
       checkpoint_dirs.push_back(params.get<std::string>("file_base") + "_cp");
   }
-
   return checkpoint_dirs;
 }
 

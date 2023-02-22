@@ -113,8 +113,10 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv)
 }
 
 bool
-Coupleable::isCoupled(const std::string & var_name, unsigned int i) const
+Coupleable::isCoupled(const std::string & var_name_in, unsigned int i) const
 {
+  const auto var_name = _c_parameters.checkForRename(var_name_in);
+
   auto it = _coupled_vars.find(var_name);
   if (it != _coupled_vars.end())
     return (i < it->second.size());
@@ -140,8 +142,10 @@ Coupleable::isCoupledConstant(const std::string & var_name) const
 }
 
 unsigned int
-Coupleable::coupledComponents(const std::string & var_name) const
+Coupleable::coupledComponents(const std::string & var_name_in) const
 {
+  const auto var_name = _c_parameters.checkForRename(var_name_in);
+
   if (isCoupled(var_name))
   {
     mooseAssert(_coupled_vars.find(var_name) != _coupled_vars.end(),
@@ -189,8 +193,11 @@ Coupleable::checkFuncType(const std::string var_name, VarType t, FuncAge age) co
 }
 
 bool
-Coupleable::checkVar(const std::string & var_name, unsigned int comp, unsigned int comp_bound) const
+Coupleable::checkVar(const std::string & var_name_in,
+                     unsigned int comp,
+                     unsigned int comp_bound) const
 {
+  const auto var_name = _c_parameters.checkForRename(var_name_in);
   auto it = _c_coupled_scalar_vars.find(var_name);
   if (it != _c_coupled_scalar_vars.end())
   {

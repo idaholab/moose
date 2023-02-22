@@ -354,6 +354,11 @@ public:
    */
   static void transformBoundingBox(BoundingBox & box, const MultiAppCoordTransform & transform);
 
+  /**
+   * Sets all the app's output file bases. @see MooseApp::setOutputFileBase for usage
+   */
+  void setAppOutputFileBase();
+
 protected:
   /// function that provides cli_args to subapps
   virtual std::vector<std::string> cliArgs() const { return _cli_args; }
@@ -424,6 +429,25 @@ protected:
    *  and it is used as an initial guess for the next run
    */
   void keepSolutionDuringRestore(bool keep_solution_during_restore);
+
+  /**
+   * Set the output file base of the application which corresponds to the index passed to the
+   * function.
+   *
+   * @param index The sub-application index
+   */
+  void setAppOutputFileBase(unsigned int index);
+
+  /**
+   * Helper for constructing the name of the multiapp
+   *
+   * @param base_name The base name of the multiapp, usually name()
+   * @param index The index of the app
+   * @param total The total number of apps, which is used to pad the name with zeros
+   * @return std::string The name of the multiapp
+   */
+  static std::string
+  getMultiAppName(const std::string & base_name, dof_id_type index, dof_id_type total);
 
   /// The FEProblemBase this MultiApp is part of
   FEProblemBase & _fe_problem;
