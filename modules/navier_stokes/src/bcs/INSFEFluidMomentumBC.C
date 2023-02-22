@@ -22,7 +22,7 @@ INSFEFluidMomentumBC::validParams()
   params.addClassDescription("Specifies flow of momentum through a boundary");
   params.addParam<bool>("conservative_form", false, "Whether the conservative form is used");
   params.addParam<bool>(
-      "p_int_by_parts", false, "if integration by parts is applied to the pressure term");
+      "p_int_by_parts", false, "Whether integration by parts is applied to the pressure term");
   params.addRequiredParam<unsigned>("component", "0,1,or 2 for x-, y-, or z- direction");
   params.addParam<FunctionName>("p_fn", "Pressure function with time at the boundary");
   params.addParam<FunctionName>("v_fn", "Velocity function with time at the boundary");
