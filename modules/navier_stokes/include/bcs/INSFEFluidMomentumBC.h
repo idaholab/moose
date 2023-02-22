@@ -34,21 +34,36 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
 private:
-  bool _conservative_form;
-  bool _p_int_by_parts;
-  unsigned int _component;
+  /// Whether conservative form to be used for the convection term
+  const bool _conservative_form;
+  /// Whether integration by parts to be used for the pressure gradient term
+  const bool _p_int_by_parts;
+  /// The component (x=0, y=1, z=2) of the momentum equation this kernel is applied
+  const unsigned _component;
+  /// Fluid dynamic viscosity
   const MaterialProperty<Real> & _mu;
+  /// Turbulent viscosity
   const MaterialProperty<Real> & _mu_t;
-  bool _has_pbc;
-  bool _has_vbc;
+  /// Whether boundary pressure is specified
+  const bool _has_pbc;
+  /// Whether boundary velocity is specified
+  const bool _has_vbc;
+  /// The function that specifies the boundary pressure
   const Function * _p_fn;
+  /// The function that specifies the boundary velocity
   const Function * _v_fn;
 
   // variables for branch pressure and density
+  /// Whether a (SAM) branch component is connected
   bool _has_pbranch;
+  /// The pressure of the connected branch component
   const VariableValue & _p_branch;
+  /// The var number of the branch pressure
   unsigned int _p_branch_var_number;
+  /// The fluid density of the connected branch component
   const VariableValue & _rho_branch;
+  /// Gravity vector
   RealVectorValue _vec_g;
+  /// The location of the center (a reference point) of the connected branch
   Point _branch_center;
 };

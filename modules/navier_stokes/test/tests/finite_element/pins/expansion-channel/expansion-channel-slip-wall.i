@@ -3,7 +3,6 @@
 
 [GlobalParams]
   gravity = '0 -9.8 0'
-  block = 1
 
   order = FIRST
   family = LAGRANGE

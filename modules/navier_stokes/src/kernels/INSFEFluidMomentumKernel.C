@@ -21,9 +21,9 @@ INSFEFluidMomentumKernel::validParams()
   InputParameters params = INSFEFluidKernelStabilization::validParams();
   params.addClassDescription("Adds advection, viscous, pressure, friction, and gravity terms to "
                              "the Navier-Stokes momentum equation, potentially with stabilization");
-  params.addParam<bool>("conservative_form", false, "if conservative form is used");
+  params.addParam<bool>("conservative_form", false, "Whether conservative form is used");
   params.addParam<bool>(
-      "p_int_by_parts", false, "if integration by parts is applied to the pressure term");
+      "p_int_by_parts", false, "Whether integration by parts is applied to the pressure term");
   params.addRequiredParam<unsigned>("component", "0,1,or 2 for x-, y-, or z- direction");
   return params;
 }

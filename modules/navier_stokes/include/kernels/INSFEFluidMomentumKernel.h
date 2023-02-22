@@ -27,8 +27,12 @@ protected:
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
+  /// Gradient of porosity
   const VariableGradient & _grad_eps;
-  bool _conservative_form;
-  bool _p_int_by_parts;
-  unsigned _component;
+  /// Whether conservative form to be used for the convection term
+  const bool _conservative_form;
+  /// Whether integration by parts to be used for the pressure gradient term
+  const bool _p_int_by_parts;
+  /// The component (x=0, y=1, z=2) of the momentum equation this kernel is applied
+  const unsigned _component;
 };

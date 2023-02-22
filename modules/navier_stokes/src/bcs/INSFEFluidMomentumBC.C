@@ -140,8 +140,12 @@ INSFEFluidMomentumBC::computeQpOffDiagJacobian(unsigned int jvar)
   unsigned m = this->mapVarNumber(jvar);
   RealVectorValue vec_vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
   Real porosity = _has_porosity ? _porosity[_qp] : 1;
-  Real jac = 0;
 
+  // this is the jacobian w.r.t branch pressure
+  if (jvar == _p_branch_var_number)
+    return _p_int_by_parts ? porosity * _normals[_qp](_component) * _test[_i][_qp] : 0;
+
+  Real jac = 0;
   switch (m)
   {
     case 0:
@@ -150,24 +154,20 @@ INSFEFluidMomentumBC::computeQpOffDiagJacobian(unsigned int jvar)
                   ? porosity * _phi[_j][_qp] * _normals[_qp](_component) * _test[_i][_qp]
                   : 0;
       break;
+
     case 1:
     case 2:
     case 3:
-    {
       if (m != (_component + 1))
         jac = _conservative_form ? _rho[_qp] / porosity * _phi[_j][_qp] * _test[_i][_qp] * _u[_qp] *
                                        _normals[_qp](m - 1)
                                  : 0;
       break;
-    }
+
     case 4:
     default:
       jac = 0;
   }
-
-  // this is the jacobian w.r.t branch pressure
-  if (jvar == _p_branch_var_number)
-    jac = _p_int_by_parts ? porosity * _normals[_qp](_component) * _test[_i][_qp] : 0;
 
   return jac;
 }
