@@ -56,6 +56,9 @@
 
 [Executioner]
   type = Transient
+  solve_type = NEWTON
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
   dt = 0.01
   num_steps = 10
 []
