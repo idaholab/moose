@@ -40,7 +40,7 @@ StepUserObject::StepUserObject(const InputParameters & parameters)
 }
 
 Real
-StepUserObject::getInitTime(const unsigned int & step) const
+StepUserObject::getStartTime(const unsigned int & step) const
 {
   if (_times.size() < step)
     mooseError("StepUserObject was called with a wrong step number");

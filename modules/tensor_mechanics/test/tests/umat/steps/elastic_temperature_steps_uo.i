@@ -120,7 +120,6 @@
     num_state_vars = 0
     temperature = temperature
     use_one_based_indexing = true
-    step_user_object = step_uo
   []
 []
 

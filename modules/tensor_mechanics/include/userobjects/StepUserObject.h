@@ -21,8 +21,8 @@ public:
 
   StepUserObject(const InputParameters & parameters);
 
-  // Get time
-  Real getInitTime(const unsigned int & step) const;
+  // Get start time
+  Real getStartTime(const unsigned int & step) const;
   // Get end time
   Real getEndTime(const unsigned int & step) const;
   // Get step given current time

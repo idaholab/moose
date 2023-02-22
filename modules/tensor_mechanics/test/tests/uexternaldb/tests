@@ -82,7 +82,7 @@
       input = 'utility_functions.i'
       library_mode = 'DYNAMIC'
       valgrind = 'NONE'
-      cli_args = 'UserObjects/uexternaldb/abaqus_step=1 UserObjects/uexternaldb/execute_on=INITIAL'
+      cli_args = 'UserObjects/uexternaldb/execute_on=INITIAL'
       expect_out = '\*\* Abaqus Info \*\*\nInline message 1 2 0.100000 0.200000 0.300000 ONE      '
                    'TWO     !'
       detail = 'info level.'
@@ -92,7 +92,8 @@
       input = 'utility_functions.i'
       library_mode = 'DYNAMIC'
       valgrind = 'NONE'
-      cli_args = 'UserObjects/uexternaldb/abaqus_step=2 UserObjects/uexternaldb/execute_on=INITIAL'
+      cli_args = "UserObjects/step_uo/number_steps=3 UserObjects/step_uo/times='0.0 0.1 0.2' "
+                 "UserObjects/uexternaldb/execute_on=TIMESTEP_END"
       expect_out = '\*\* Abaqus Warning \*\*\nInline message 1 2 0.100000 0.200000 0.300000 ONE      '
                    'TWO     !'
       detail = 'warning level.'
@@ -102,7 +103,8 @@
       input = 'utility_functions.i'
       library_mode = 'DYNAMIC'
       valgrind = 'NONE'
-      cli_args = 'UserObjects/uexternaldb/abaqus_step=3 UserObjects/uexternaldb/execute_on=INITIAL'
+      cli_args = "UserObjects/step_uo/number_steps=4 UserObjects/step_uo/times='0.0 0.1 0.2 0.3' "
+                 "UserObjects/uexternaldb/execute_on=TIMESTEP_END"
       expect_out = '\*\* Abaqus Non-fatal Error \*\*\nInline message 1 2 0.100000 0.200000 0.300000 '
                    'ONE      TWO     !'
       detail = 'non-fatal error level.'
@@ -112,7 +114,8 @@
       input = 'utility_functions.i'
       library_mode = 'DYNAMIC'
       valgrind = 'NONE'
-      cli_args = 'UserObjects/uexternaldb/abaqus_step=4 UserObjects/uexternaldb/execute_on=INITIAL'
+      cli_args = "UserObjects/step_uo/number_steps=5 UserObjects/step_uo/times='0.0 0.1 0.2 0.3 0.4' "
+                 "UserObjects/uexternaldb/execute_on=TIMESTEP_END"
       expect_err = '\*\*\* ERROR \*\*\*\nInline message 1 2 0.100000 0.200000 0.300000 ONE      TWO  '
                    '   !'
       detail = 'fatal error level.'

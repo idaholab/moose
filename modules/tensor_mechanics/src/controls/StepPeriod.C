@@ -14,7 +14,7 @@
 #include "Transient.h"
 #include "MooseUtils.h"
 
-registerMooseObject("MooseApp", StepPeriod);
+registerMooseObject("TensorMechanicsApp", StepPeriod);
 
 InputParameters
 StepPeriod::validParams()
@@ -39,7 +39,7 @@ StepPeriod::StepPeriod(const InputParameters & parameters)
   _end_time.resize(1);
 
   // Set start time
-  _start_time[0] = _step_user_object.getInitTime(getParam<unsigned int>("step_number"));
+  _start_time[0] = _step_user_object.getStartTime(getParam<unsigned int>("step_number"));
 
   // Set end time
   _end_time[0] = _step_user_object.getEndTime(getParam<unsigned int>("step_number"));

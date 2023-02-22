@@ -19,7 +19,6 @@
   [uexternaldb]
     type = AbaqusUExternalDB
     plugin = ../../plugins/utility_functions
-    step_user_object = step_uo
     execute_on = 'INITIAL TIMESTEP_END TIMESTEP_BEGIN FINAL'
   []
 []

@@ -25,6 +25,7 @@ public:
   AbaqusUExternalDB(const InputParameters & parameters);
 
   virtual void initialize() override {}
+  virtual void initialSetup() override;
   /// the UEXTERNALDB subroutine gets called here
   virtual void execute() override;
   virtual void threadJoin(const UserObject &) override {}
