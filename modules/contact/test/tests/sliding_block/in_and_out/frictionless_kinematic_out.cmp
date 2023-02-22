@@ -36,7 +36,7 @@ NODAL VARIABLES absolute 3.e-6 floor 0.0
 	disp_y                # min:               0 @ t1,n1	max:              15 @ t16,n217
 	inc_slip_x            # min:               0 @ t1,n1	max:               0 @ t1,n1
 	inc_slip_y            # min:               0 @ t1,n1	max:               0 @ t1,n1
-	nodal_area_leftright  # min:               0 @ t1,n1	max:      0.20116372 @ t3,n223
+	nodal_area            # min:               0 @ t1,n1	max:      0.20116372 @ t3,n223
 	penetration           # min:               0 @ t1,n1	max:     0.069671154 @ t10,n220
 
 # No ELEMENT VARIABLES
