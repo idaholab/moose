@@ -41,6 +41,9 @@ def continueSolve():
     else:
         return False
 
+# Wait for MOOSE to start up
+time.sleep(10)
+
 # on_initial
 waitForMOOSE()
 setControllable(0)
