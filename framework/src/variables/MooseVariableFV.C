@@ -374,8 +374,8 @@ OutputType
 MooseVariableFV<OutputType>::getValue(const Elem * elem) const
 {
   Moose::initDofIndices(const_cast<MooseVariableFV<OutputType> &>(*this), *elem);
-  mooseAssert(_dof_indices.size() == 1, "Wrong size for dof indices");
-  OutputType value = (*this->_sys.currentSolution())(_dof_indices[0]);
+  mooseAssert(this->_dof_indices.size() == 1, "Wrong size for dof indices");
+  OutputType value = (*this->_sys.currentSolution())(this->_dof_indices[0]);
   return value;
 }
 
@@ -478,10 +478,10 @@ MooseVariableFV<OutputType>::getElemValue(const Elem * const elem) const
   Moose::initDofIndices(const_cast<MooseVariableFV<OutputType> &>(*this), *elem);
 
   mooseAssert(
-      _dof_indices.size() == 1,
+      this->_dof_indices.size() == 1,
       "There should only be one dof-index for a constant monomial variable on any given element");
 
-  const dof_id_type index = _dof_indices[0];
+  const dof_id_type index = this->_dof_indices[0];
 
   ADReal value = (*_solution)(index);
 
@@ -798,10 +798,10 @@ MooseVariableFV<Real>::evaluateDot(const ElemArg & elem_arg,
   Moose::initDofIndices(const_cast<MooseVariableFV<Real> &>(*this), *elem);
 
   mooseAssert(
-      _dof_indices.size() == 1,
+      this->_dof_indices.size() == 1,
       "There should only be one dof-index for a constant monomial variable on any given element");
 
-  const dof_id_type dof_index = _dof_indices[0];
+  const dof_id_type dof_index = this->_dof_indices[0];
 
   if (_var_kind == Moose::VAR_NONLINEAR)
   {
