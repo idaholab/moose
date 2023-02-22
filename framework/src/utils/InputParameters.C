@@ -98,14 +98,17 @@ InputParameters::set_attributes(const std::string & name_in, bool inserted_only)
 
     if (_show_deprecated_message)
     {
-      auto emit_deprecation_message = [&name](const auto & deprecation_message)
-      { mooseDeprecated("The parameter '", name, "' is deprecated.\n", deprecation_message); };
+      auto emit_deprecation_message = [](const auto & deprecated_name,
+                                         const auto & deprecation_message) {
+        mooseDeprecated(
+            "The parameter '", deprecated_name, "' is deprecated.\n", deprecation_message);
+      };
 
       if (_params.count(name) && !libmesh_map_find(_params, name)._deprecation_message.empty())
-        emit_deprecation_message(libmesh_map_find(_params, name)._deprecation_message);
+        emit_deprecation_message(name, libmesh_map_find(_params, name)._deprecation_message);
       else if (auto it = _old_to_new_name_and_dep.find(name_in);
                it != _old_to_new_name_and_dep.end() && !it->second.second.empty())
-        emit_deprecation_message(it->second.second);
+        emit_deprecation_message(name_in, it->second.second);
     }
   }
 }
