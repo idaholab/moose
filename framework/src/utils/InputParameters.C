@@ -1264,7 +1264,7 @@ InputParameters::renameParamInternal(const std::string & old_name,
   std::string deprecation_message;
   if (!removal_date.empty())
     deprecation_message = "'" + old_name + "' has been deprecated and will be removed on " +
-                          removal_date + ". Please use '" + new_name + "' instead";
+                          removal_date + ". Please use '" + new_name + "' instead.";
 
   _old_to_new_name_and_dep.emplace(old_name, std::make_pair(new_name, deprecation_message));
   _new_to_old_names.emplace(new_name, old_name);
