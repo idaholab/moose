@@ -30,6 +30,8 @@
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
+  nl_abs_tol = 1e-15
+  nl_rel_tol = 1e-12
   residual_and_jacobian_together = true
 []
 
