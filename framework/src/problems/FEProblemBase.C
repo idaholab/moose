@@ -4231,6 +4231,16 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
       joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::DomainUserObject));
     }
 
+    // if any userobject may have written to variables we need to close the aux solution
+    for (const auto & uo : userobjs)
+      if (auto euo = dynamic_cast<const ElementUserObject *>(uo);
+          euo && euo->hasWritableCoupledVariables())
+      {
+        _aux->solution().close();
+        _aux->system().update();
+        break;
+      }
+
     // Execute NodalUserObjects
     // BISON has an axial reloc elemental user object that has a finalize func that depends on a
     // nodal user object's prev value. So we can't initialize this until after elemental objects
@@ -4243,6 +4253,16 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
       Threads::parallel_reduce(*_mesh.getLocalNodeRange(), cnppt);
       joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::NodalUserObject));
     }
+
+    // if any userobject may have written to variables we need to close the aux solution
+    for (const auto & uo : nodal)
+      if (auto nuo = dynamic_cast<const NodalUserObject *>(uo);
+          nuo && nuo->hasWritableCoupledVariables())
+      {
+        _aux->solution().close();
+        _aux->system().update();
+        break;
+      }
 
     // Execute threaded general user objects
     for (auto obj : tgobjs)

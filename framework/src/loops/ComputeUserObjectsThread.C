@@ -21,6 +21,7 @@
 #include "FEProblem.h"
 #include "MaterialBase.h"
 #include "DomainUserObject.h"
+#include "AuxiliarySystem.h"
 
 #include "libmesh/numeric_vector.h"
 
@@ -129,9 +130,6 @@ ComputeUserObjectsThread::onElement(const Elem * elem)
 
   for (const auto & uo : _element_objs)
   {
-    // for (auto * var : uo->getWritableCoupledVariables())
-    //   var->prepareAux();
-
     uo->execute();
 
     // update the aux solution vector if writable coupled variables are used

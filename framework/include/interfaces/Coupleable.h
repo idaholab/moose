@@ -113,12 +113,12 @@ public:
   /**
    * Checks whether the object has any writable coupled variables
    */
-  bool hasWritableCoupledVariables() { return !_writable_coupled_variables[_c_tid].empty(); }
+  bool hasWritableCoupledVariables() const { return !_writable_coupled_variables[_c_tid].empty(); }
 
   /**
    * returns a reference to the set of writable coupled variables
    */
-  auto & getWritableCoupledVariables() { return _writable_coupled_variables[_c_tid]; }
+  auto & getWritableCoupledVariables() const { return _writable_coupled_variables[_c_tid]; }
 
 protected:
   /**

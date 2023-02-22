@@ -13,6 +13,7 @@
 #include "FEProblem.h"
 #include "MooseMesh.h"
 #include "NodalUserObject.h"
+#include "AuxiliarySystem.h"
 
 #include "libmesh/threads.h"
 
