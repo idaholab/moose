@@ -6,43 +6,34 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
-
-#include "BlockCartesianGenerator.h"
+#include "OverlayMeshGenerator.h"
 #include "CastUniquePointer.h"
-
 // libMesh includes
 #include "libmesh/mesh_generation.h"
 #include "libmesh/unstructured_mesh.h"
 #include "libmesh/replicated_mesh.h"
-#include "libmesh/mesh_communication.h"
-#include "libmesh/remote_elem.h"
-#include "libmesh/partitioner.h"
-#include "libmesh/string_to_enum.h"
-#include "libmesh/periodic_boundaries.h"
-#include "libmesh/periodic_boundary_base.h"
+#include "libmesh/mesh_modification.h"
+#include "libmesh/mesh_tools.h"
 
-registerMooseObject("MooseApp", BlockCartesianGenerator);
-
+registerMooseObject("MooseApp", OverlayMeshGenerator);
 InputParameters
-BlockCartesianGenerator::validParams()
+OverlayMeshGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
-  params.addClassDescription("This BlockCartesianGenerator creates a Cartesian mesh using "
+  params.addClassDescription("This OverlayMeshGenerator creates a Cartesian mesh using "
                              "DistributedRectilinearMeshGenerator in "
                              "the mesh block region.");
-  params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
+  params.addRequiredParam<MeshGeneratorName>("input", "The base mesh we want to overlay");
   MooseEnum dims("1=1 2 3");
-  params.addRequiredParam<MooseEnum>("dim", dims, "The dimension of the mesh to be generated");
-
+  params.addRequiredParam<MooseEnum>(
+      "dim", dims, "The dimension of the mesh to be generated"); // Make this parameter required
   params.addParam<dof_id_type>("nx", 1, "Number of elements in the X direction");
   params.addParam<dof_id_type>("ny", 1, "Number of elements in the Y direction");
   params.addParam<dof_id_type>("nz", 1, "Number of elements in the Z direction");
-
   params.addParam<processor_id_type>(
       "num_cores_for_partition",
       0,
       "Number of cores for partitioning the graph (dafaults to the number of MPI ranks)");
-
   params.addRangeCheckedParam<unsigned>(
       "num_side_layers",
       2,
@@ -75,70 +66,58 @@ BlockCartesianGenerator::validParams()
       1.,
       "bias_z>=0.5 & bias_z<=2",
       "The amount by which to grow (or shrink) the cells in the z-direction.");
-
-  params.addParamNamesToGroup("dim", "Main");
-
   return params;
 }
 
-BlockCartesianGenerator::BlockCartesianGenerator(const InputParameters & parameters)
-  : MeshGenerator(parameters),
-    _dim(getParam<MooseEnum>("dim")),
-    _nx(declareMeshProperty("num_elements_x", getParam<dof_id_type>("nx"))),
-    _ny(declareMeshProperty("num_elements_y", getParam<dof_id_type>("ny"))),
-    _nz(declareMeshProperty("num_elements_z", getParam<dof_id_type>("nz"))),
-    // _num_cores_for_partition(getParam<processor_id_type>("num_cores_for_partition")),
-    _bias_x(getParam<Real>("bias_x")),
-    _bias_y(getParam<Real>("bias_y")),
-    _bias_z(getParam<Real>("bias_z")),
-    //  _num_parts_per_compute_node(getParam<processor_id_type>("num_cores_per_compute_node")),
-    _partition_method(getParam<MooseEnum>("partition")),
-    _num_side_layers(getParam<unsigned>("num_side_layers")),
-    _mesh_input(getMesh("input"))
+OverlayMeshGenerator::OverlayMeshGenerator(const InputParameters & parameters)
+  : MeshGenerator(parameters), _dim(getParam<MooseEnum>("dim")), _mesh_input(getMesh("input"))
 {
-  auto bbox_input = MeshTools::create_bounding_box(*_mesh_input);
-  Real xmin = bbox_input.min()(0);
-  Real ymin = bbox_input.min()(1);
-  Real zmin = bbox_input.min()(2);
-  Real xmax = bbox_input.max()(0);
-  Real ymax = bbox_input.max()(1);
-  Real zmax = bbox_input.max()(2);
-
   auto params = _app.getFactory().getValidParams("DistributedRectilinearMeshGenerator");
-
   params.set<MooseEnum>("dim") = _dim;
-  params.set<Real>("xmin") = xmin;
-  params.set<Real>("ymin") = ymin;
-  params.set<Real>("zmin") = zmin;
-  params.set<Real>("xmax") = xmax;
-  params.set<Real>("ymax") = ymax;
-  params.set<Real>("zmax") = zmax;
 
-  params.set<dof_id_type>("num_elements_x") = _nx;
-  params.set<dof_id_type>("num_elements_y") = _ny;
-  params.set<dof_id_type>("num_elements_z") = _nz;
+  params.set<dof_id_type>("nx") = getParam<dof_id_type>("nx");
+  params.set<dof_id_type>("ny") = getParam<dof_id_type>("ny");
+  params.set<dof_id_type>("nz") = getParam<dof_id_type>("nz");
 
-  // params.set<processor_id_type>("num_cores_for_partition") = _num_cores_for_partition;
+  params.set<Real>("xmin") = 0;
+  params.set<Real>("ymin") = 0;
+  params.set<Real>("zmin") = 0;
+  params.set<Real>("xmax") = 1;
+  params.set<Real>("ymax") = 1;
+  params.set<Real>("zmax") = 1;
 
-  // generate lower dimensional mesh from the given sideset
+  params.set<Real>("bias_x") = getParam<Real>("bias_x");
+  params.set<Real>("bias_y") = getParam<Real>("bias_y");
+  params.set<Real>("bias_z") = getParam<Real>("bias_z");
+
+  params.set<unsigned>("num_side_layers") = getParam<unsigned>("num_side_layers");
+  params.set<processor_id_type>("num_cores_for_partition") =
+      getParam<processor_id_type>("num_cores_for_partition");
+
+  params.set<MooseEnum>("partition") = getParam<MooseEnum>("partition");
+  params.set<MooseEnum>("elem_type") = getParam<MooseEnum>("elem_type");
+
   _build_mesh = &addMeshSubgenerator("DistributedRectilinearMeshGenerator",
-                                     name() + "_DistributedRectilinearmeshgenerator",
+                                     name() + "_distributedrectilinearmeshgenerator",
                                      params);
 }
-
 std::unique_ptr<MeshBase>
-BlockCartesianGenerator::generate()
+OverlayMeshGenerator::generate()
 {
-  // auto bbox_input = MeshTools::create_bounding_box(*_mesh_input);
-  //  auto bbox = MeshTools::create_bounding_box(_build_mesh);
+  auto bbox_input = MeshTools::create_bounding_box(*_mesh_input);
 
-  // Real diff = 0;
-  // for (auto i = 0; i < _dim; i++)
-  // {
-  //   diff = std::abs(bbox_input.max()(i) - bbox_input.min()(i) - bbox.max()(i) + bbox.min()(i));
-  //   if (diff > TOLERANCE)
-  //     mooseError("The Intervals in ", i, "th dimension doesn't match!");
-  // }
+  RealVectorValue scale_factor;
+  scale_factor = bbox_input.max() - bbox_input.min();
+
+  if (scale_factor(0) != 1 || scale_factor(1) != 1 || scale_factor(2) != 1)
+    MeshTools::Modification::scale(
+        *(*_build_mesh), scale_factor(0), scale_factor(1), scale_factor(2));
+
+  RealVectorValue translate_factor;
+  translate_factor = bbox_input.min();
+  if (translate_factor(0) != 0 || translate_factor(1) != 0 || translate_factor(2) != 0)
+    MeshTools::Modification::translate(
+        *(*_build_mesh), translate_factor(0), translate_factor(1), translate_factor(2));
 
   return std::move(*_build_mesh);
 }

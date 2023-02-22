@@ -4,13 +4,15 @@
     dim = 2
     nx = 3
     ny = 3
-    xmin = 0
+    xmin = -1
     xmax = 4
-    ymin = 0
+    ymin = -1
     ymax = 2.2
+    nemesis = true
+    output = true
   []
   [bcg]
-    type = BlockCartesianGenerator
+    type = OverlayMeshGenerator
     input = 'gmg'
     dim = 2
     nx = 6
