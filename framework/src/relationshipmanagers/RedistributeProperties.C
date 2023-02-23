@@ -153,6 +153,7 @@ RedistributeProperties::redistribute()
 
                 for (PropertyValue * prop : prop_vals)
                 {
+                  libmesh_assert(prop);
                   n_q_points = std::max(n_q_points, prop->size());
                 }
 
