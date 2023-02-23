@@ -1,10 +1,10 @@
 {
     "app_name": "main",
-    "current_time": "Thu Feb 23 11:36:36 2023",
-    "executable": "/Users/lim2/Research/MOOSE/mengnan/moose/test/tests/materials/solution_invalid/../../../moose_test-devel",
-    "executable_time": "Thu Feb 23 11:33:52 2023",
+    "current_time": "Thu Feb 23 15:24:07 2023",
+    "executable": "/Users/lim2/Research/MOOSE/mengnan/moose/test/tests/misc/solution_invalid/../../../moose_test-opt",
+    "executable_time": "Thu Feb 23 15:22:01 2023",
     "libmesh_version": "",
-    "moose_version": "git commit 45b2db9cfe on 2023-02-22",
+    "moose_version": "git commit 0340ad9b29 on 2023-02-23",
     "petsc_version": "3.16.6",
     "reporters": {
         "solution_invalidity": {

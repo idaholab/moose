@@ -213,6 +213,8 @@ dataStore(std::ostream & stream, SolutionInvalidity & solution_invalidity, void 
 {
   // Sync data to processor 0
   solution_invalidity.sync();
+  if (solution_invalidity.processor_id() != 0)
+    return;
 
   // Build data structure for store
   auto size = solution_invalidity._counts.size();
@@ -236,6 +238,9 @@ dataStore(std::ostream & stream, SolutionInvalidity & solution_invalidity, void 
 void
 dataLoad(std::istream & stream, SolutionInvalidity & solution_invalidity, void * context)
 {
+  if (solution_invalidity.processor_id() != 0)
+    return;
+
   std::size_t num_counts;
   // load data block size
   dataLoad(stream, num_counts, context);
