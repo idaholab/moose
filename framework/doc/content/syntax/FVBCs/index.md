@@ -47,10 +47,10 @@ over the extent of an element adjacent to the left boundary and Gauss' theorem i
 
 \begin{equation}
   -\int_{\Omega} \nabla \cdot D \nabla v dV =
-  -\int_{\partial \Omega_l} \nabla \cdot D \nabla v dV
-  -\int_{\partial \Omega \setminus \partial \Omega_l} \nabla \cdot D \nabla v dV
+  -\int_{\partial \Omega_l} D \nabla v \cdot \vec{n} dA
+  -\int_{\partial \Omega \setminus \partial \Omega_l} D \nabla v \cdot \vec{n} dA
   = 5 A_{\partial \Omega_l}
-  -\int_{\partial \Omega \setminus \partial \Omega_l} \nabla \cdot D \nabla v dV=0,
+  -\int_{\partial \Omega \setminus \partial \Omega_l} D \nabla v \cdot \vec{n} dA=0,
 \end{equation}
 
 where $\Omega$ is the element volume, $\partial \Omega_l$ are all faces that belong to the left sideset, $\partial \Omega$ are all faces, and $A_{\partial \Omega_l}$ is the area of face.
@@ -59,8 +59,8 @@ Flux boundary conditions are applied by replacing appropriate terms in the FVM b
 Dirichlet boundary conditions are applied differently. Let us first write a balance equation for an element that is adjacent to the right boundary:
 
 \begin{equation}
-  -\int_{\partial \Omega_r} \nabla \cdot D \nabla v dV
-  -\int_{\partial \Omega \setminus \partial \Omega_r} \nabla \cdot D \nabla v dV  =0,
+  -\int_{\partial \Omega_r} D \nabla v \cdot \vec{n} dA
+  -\int_{\partial \Omega \setminus \partial \Omega_r} D \nabla v \cdot \vec{n} dA  =0,
 \end{equation}
 
 MOOSE uses the ghost element method to apply Dirichlet boundary conditions for FVM.

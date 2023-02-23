@@ -124,7 +124,7 @@ no actuall mesh cell.  Other necessary cell properties are also
 reflected/mirrored from the existing cell.  A design was chosen that allows
 handling ghost-element creation and use by existing flux kernels automatically
 for enforcement of Dirichlet BCs.  This procedure results in the Dirichlet BC
-objects not actually being respondible for calculating residual contributions.
+objects not actually being responsible for calculating residual contributions.
 They instead inform the ghost-element initialization while the normal flux BCs
 are used to calculate boundary residual contributions.  This and other
 differences motivated the creation of a separate FV BC system.
