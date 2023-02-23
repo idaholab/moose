@@ -12,26 +12,23 @@
 /*               See COPYRIGHT for full restrictions                */
 /********************************************************************/
 
-#include "QPrimeDuctAux.h"
+#pragma once
 
-registerMooseObject("MooseApp", QPrimeDuctAux);
+#include "DiffusionFluxFVAux.h"
 
-InputParameters
-QPrimeDuctAux::validParams()
+/**
+ * Computes linear heat rate
+ */
+class QPrimeDuctFVAux : public DiffusionFluxFVAux
 {
-  InputParameters params = DiffusionFluxAux::validParams();
-  params.addClassDescription("Axial heat rate on duct surface");
-  params.addRequiredParam<Real>("flat_to_flat", "[m]");
-  return params;
-}
+public:
+  static InputParameters validParams();
 
-QPrimeDuctAux::QPrimeDuctAux(const InputParameters & parameters)
-  : DiffusionFluxAux(parameters), _flat_to_flat(getParam<Real>("flat_to_flat"))
-{
-}
+  QPrimeDuctFVAux(const InputParameters & parameters);
 
-Real
-QPrimeDuctAux::computeValue()
-{
-  return DiffusionFluxAux::computeValue() * 6 * _flat_to_flat / std::sqrt(3);
-}
+  virtual Real computeValue() override;
+
+protected:
+  /// flat-to-flat distance
+  const Real & _flat_to_flat;
+};

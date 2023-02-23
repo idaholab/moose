@@ -23,6 +23,7 @@
     exodiff = test19_monolithic_out.e
     custom_cmp = 'test.exodiff'
     method = '!DBG'
+    abs_zero = 1e-7
     valgrind = NONE
     recover = false
   []

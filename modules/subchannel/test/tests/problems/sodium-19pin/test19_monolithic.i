@@ -19,32 +19,58 @@ P_out = 2.0e5 # Pa
     spacer_z = '0.0'
     spacer_k = '0.0'
   []
+
+  [fuel_pins]
+    type = TriPinMeshGenerator
+    input = subchannel
+    nrings = 3
+    n_cells = 50
+    heated_length = 0.5334
+    unheated_length_entry = 0.4064
+    unheated_length_exit = 0.0762
+    pitch = 7.26e-3
+  []
 []
 
 [AuxVariables]
   [mdot]
+    block = subchannel
   []
   [SumWij]
+    block = subchannel
   []
   [P]
+    block = subchannel
   []
   [DP]
+    block = subchannel
   []
   [h]
+    block = subchannel
   []
   [T]
+    block = subchannel
   []
   [rho]
+    block = subchannel
   []
   [S]
+    block = subchannel
   []
   [Sij]
+    block = subchannel
   []
   [w_perim]
-  []
-  [q_prime]
+    block = subchannel
   []
   [mu]
+    block = subchannel
+  []
+  [q_prime]
+    block = fuel_pins
+  []
+  [Tpin]
+    block = fuel_pins
   []
 []
 

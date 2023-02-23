@@ -1699,6 +1699,7 @@ LiquidMetalSubChannel1PhaseProblem::computeh(int iblock)
           added_enthalpy = computeAddedHeatPin(i_ch, iz);
         else
           added_enthalpy = 0.0;
+        added_enthalpy += computeAddedHeatDuct(i_ch, iz);
         PetscInt row_vec_ht = i_ch + _n_channels * iz_ind;
         VecSetValues(_hc_added_heat_rhs, 1, &row_vec_ht, &added_enthalpy, ADD_VALUES);
       }
