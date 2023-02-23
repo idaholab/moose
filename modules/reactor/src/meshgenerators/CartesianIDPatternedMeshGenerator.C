@@ -26,6 +26,7 @@ CartesianIDPatternedMeshGenerator::validParams()
       "User-defined element IDs. A double-indexed array starting with the upper-left corner");
   params.addClassDescription("Generate Certesian lattice meshes with reporting ID assignment that "
                              "indentifies individual components of lattice.");
+
   return params;
 }
 

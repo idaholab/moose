@@ -76,8 +76,35 @@ PatternedMeshGenerator::generate()
   // Reserve spaces for all the meshes
   _meshes.reserve(_input_names.size());
 
+  // Getting the boundaries provided by the user
+  const std::vector<BoundaryName> boundary_names = {getParam<BoundaryName>("left_boundary"),
+                                                    getParam<BoundaryName>("right_boundary"),
+                                                    getParam<BoundaryName>("top_boundary"),
+                                                    getParam<BoundaryName>("bottom_boundary")};
+  const std::vector<std::string> boundary_param_names = {
+      "left_boundary", "right_boundary", "top_boundary", "bottom_boundary"};
+
+  // IDs for each input (indexed by input mesh and then left/right/top/bottom)
+  std::vector<std::vector<boundary_id_type>> input_bids(
+      _input_names.size(), std::vector<boundary_id_type>(4, Moose::INVALID_BOUNDARY_ID));
+  bool have_common_ids = true;
+
+  // Using a vector of vectors instead of vector of sets to preserve insertion order
+  std::vector<std::vector<boundary_id_type>> input_bids_unique(_input_names.size());
+
+  // For an error check on the number of uniquely named boundaries to stitch
+  size_t set_length = 0;
+
+  // Given a boundary name (i.e., 'left_boundary'), this will give the correct
+  // index to get the correct boundary id to later use for boundary stitching
+  std::map<std::string, size_t> boundary_name_to_index_map;
+
+  // Keep track of used boundary ids to generate new, unused ones later (if needed)
+  std::set<boundary_id_type> all_boundary_ids;
+
   // Read in all of the meshes
-  for (MooseIndex(_input_names) i = 0; i < _input_names.size(); ++i)
+  _meshes.resize(_input_names.size());
+  for (const auto i : index_range(_input_names))
   {
     std::unique_ptr<ReplicatedMesh> mesh = dynamic_pointer_cast<ReplicatedMesh>(*_mesh_ptrs[i]);
     if (!mesh)
@@ -88,35 +115,72 @@ PatternedMeshGenerator::generate()
                  type(),
                  " only works with inputs that are replicated.\n\n",
                  "Try running without distributed mesh.");
-    _meshes.push_back(std::move(mesh));
+    _meshes[i] = dynamic_pointer_cast<ReplicatedMesh>(mesh);
+
+    // List of boundary ids corresponsind to left/right/top/bottom boundary names
+    const auto ids = MooseMeshUtils::getBoundaryIDs(*_meshes[i], boundary_names, false);
+    mooseAssert(ids.size() == boundary_names.size(),
+                "Unexpected number of ids returned for MooseMeshUtils::getBoundaryIDs");
+
+    // Keep track of indices of first instance of each unique boundary id
+    std::map<boundary_id_type, size_t> seen_bid_to_index_map;
+
+    size_t index = 0;
+    for (const auto side : make_range(4))
+    {
+      // Check if the boundary has been initialized
+      if (ids[side] == Moose::INVALID_BOUNDARY_ID)
+        paramError("inputs",
+                   "The '",
+                   boundary_param_names[side],
+                   "' parameter with value '",
+                   boundary_names[side],
+                   "' does not exist in input mesh '",
+                   _input_names[i],
+                   "'");
+
+      input_bids[i][side] = ids[side];
+
+      // We only do this when i == 0 because all input meshes should have the
+      // same index map. Allowing different index maps for different input
+      // meshes results in undefined behaviour when stitching
+      if (i == 0)
+      {
+        if (std::count(input_bids_unique[i].begin(), input_bids_unique[i].end(), ids[side]) == 0)
+        {
+          input_bids_unique[i].push_back(ids[side]);
+          seen_bid_to_index_map[ids[side]] = index;
+          boundary_name_to_index_map[boundary_param_names[side]] = index++;
+        }
+        else
+          boundary_name_to_index_map[boundary_param_names[side]] = seen_bid_to_index_map[ids[side]];
+      }
+
+      else // i > 0
+      {
+        if (ids[side] != input_bids[i - 1][side])
+          have_common_ids = false;
+
+        if (std::count(input_bids_unique[i].begin(), input_bids_unique[i].end(), ids[side]) == 0)
+          input_bids_unique[i].push_back(ids[side]);
+      }
+    }
+
+    // Error check on lengths of input_bids_unique
+    if (i > 0 && set_length != input_bids_unique.size())
+      mooseError(
+          "Input meshes have incompatible boundary ids. This can occur when input meshes have "
+          "the same boundary id for multiple boundaries, but in a way that is different "
+          "between the meshes. Try assigning each left/right/top/bottom to its own boundary id.");
+
+    set_length = input_bids_unique.size();
+
+    // List of all boundary ids used in _meshes[i] so we don't reuse any existing boundary ids.
+    const auto all_ids = _meshes[i]->get_boundary_info().get_boundary_ids();
+
+    // Keep track of used IDs so we can later find IDs that are unused across all meshes
+    all_boundary_ids.insert(all_ids.begin(), all_ids.end());
   }
-
-  // Data structure that holds each row
-  _row_meshes.resize(_pattern.size());
-
-  // Getting the boundaries provided by the user
-  std::vector<BoundaryName> boundary_names = {getParam<BoundaryName>("left_boundary"),
-                                              getParam<BoundaryName>("right_boundary"),
-                                              getParam<BoundaryName>("top_boundary"),
-                                              getParam<BoundaryName>("bottom_boundary")};
-
-  std::vector<boundary_id_type> ids =
-      MooseMeshUtils::getBoundaryIDs(*_meshes[0], boundary_names, true);
-
-  mooseAssert(ids.size() == boundary_names.size(),
-              "Unexpected number of ids returned for MooseMeshUtils::getBoundaryIDs");
-
-  boundary_id_type left = ids[0], right = ids[1], top = ids[2], bottom = ids[3];
-
-  // Check if all the boundaries have been initialized
-  if (left == -123)
-    mooseError("The left boundary has not been initialized properly.");
-  if (right == -123)
-    mooseError("The right boundary has not been initialized properly.");
-  if (top == -123)
-    mooseError("The top boundary has not been initialized properly.");
-  if (bottom == -123)
-    mooseError("The bottom boundary has not been initialized properly.");
 
   // Check if the user has provided the x, y and z widths.
   // If not (their value is 0 by default), compute them
@@ -127,6 +191,41 @@ PatternedMeshGenerator::generate()
     _y_width = bbox.max()(1) - bbox.min()(1);
   if (_z_width == 0)
     _z_width = bbox.max()(2) - bbox.min()(2);
+
+  // stitch_bids will hold boundary ids passed to mesh stitcher
+  std::vector<boundary_id_type> stitch_bids;
+
+  if (have_common_ids) // No need to change existing boundary ids
+    stitch_bids = input_bids_unique[0];
+
+  else // Need to make boundary ids common accross all inputs
+  {
+    // Generate previously unused boundary ids
+    for (boundary_id_type id = 0; id != Moose::INVALID_BOUNDARY_ID; ++id)
+      if (!all_boundary_ids.count(id))
+      {
+        stitch_bids.push_back(id);
+        // It is okay to only use the 0th index here, since we ensure all entries in
+        // input_bids_unique have the same size through the above error check.
+        if (stitch_bids.size() == input_bids_unique[0].size())
+          break;
+      }
+
+    // Make all inputs have common boundary ids
+    for (const auto i : index_range(_meshes))
+      for (const auto side : index_range(stitch_bids))
+        MeshTools::Modification::change_boundary_id(
+            *_meshes[i], input_bids_unique[i][side], stitch_bids[side]);
+  }
+
+  // Data structure that holds each row
+  _row_meshes.resize(_pattern.size());
+
+  // Aliases
+  const boundary_id_type &left_bid(stitch_bids[boundary_name_to_index_map["left_boundary"]]),
+      right_bid(stitch_bids[boundary_name_to_index_map["right_boundary"]]),
+      top_bid(stitch_bids[boundary_name_to_index_map["top_boundary"]]),
+      bottom_bid(stitch_bids[boundary_name_to_index_map["bottom_boundary"]]);
 
   // Build each row mesh
   for (MooseIndex(_pattern) i = 0; i < _pattern.size(); ++i)
@@ -158,8 +257,8 @@ PatternedMeshGenerator::generate()
       mergeSubdomainNameMaps(main_subdomain_map, increment_subdomain_map);
 
       _row_meshes[i]->stitch_meshes(cell_mesh,
-                                    right,
-                                    left,
+                                    right_bid,
+                                    left_bid,
                                     TOLERANCE,
                                     /*clear_stitched_boundary_ids=*/true);
 
@@ -179,9 +278,18 @@ PatternedMeshGenerator::generate()
     const auto & increment_subdomain_map = _row_meshes[i]->get_subdomain_name_map();
     mergeSubdomainNameMaps(main_subdomain_map, increment_subdomain_map);
 
-    _row_meshes[0]->stitch_meshes(
-        *_row_meshes[i], bottom, top, TOLERANCE, /*clear_stitched_boundary_ids=*/true);
+    _row_meshes[0]->stitch_meshes(*_row_meshes[i],
+                                  bottom_bid,
+                                  top_bid,
+                                  TOLERANCE,
+                                  /*clear_stitched_boundary_ids=*/true);
   }
+
+  // Change boundary ids back to those of meshes[0] to not surprise user
+  if (!have_common_ids)
+    for (const auto side : index_range(stitch_bids))
+      MeshTools::Modification::change_boundary_id(
+          *_row_meshes[0], stitch_bids[side], input_bids_unique[0][side]);
 
   return dynamic_pointer_cast<MeshBase>(_row_meshes[0]);
 }
