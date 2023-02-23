@@ -724,7 +724,7 @@ public:
 
   /**
    * Class that is used as a parameter to setFinalMeshGeneratorName()
-   *  that allows only MeshGeneratorMesh methods to call this methods
+   * that allows only MeshGeneratorMesh methods to call this methods
    */
   class SetFinalMeshGeneratorNameKey
   {
@@ -737,7 +737,9 @@ public:
    * Set final mesh generator name
    *
    * Guarded by the SetFinalMeshGeneartorNameKey so that it can only be called
-   * by MeshGeneratorMesh.
+   * by MeshGeneratorMesh. This works because the copy construction of the
+   * key class happens within the caller, where the copy constructor
+   * is private and access given via a friend.
    */
   void setFinalMeshGeneratorName(const std::string & generator_name,
                                  const SetFinalMeshGeneratorNameKey);
