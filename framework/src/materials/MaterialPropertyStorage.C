@@ -422,12 +422,16 @@ MaterialPropertyStorage::initProps(MaterialData & material_data,
   if (material_data.isOnlyResizeIfSmaller())
     n_qpoints = material_data.nQPoints();
 
-  if (props(elem, side).size() < n)
-    props(elem, side).resize(n, nullptr);
-  if (propsOld(elem, side).size() < n)
-    propsOld(elem, side).resize(n, nullptr);
-  if (propsOlder(elem, side).size() < n)
-    propsOlder(elem, side).resize(n, nullptr);
+  auto & mat_props = (*_props_elem)[elem][side];
+  auto & mat_props_old = (*_props_elem_old)[elem][side];
+  auto & mat_props_older = (*_props_elem_older)[elem][side];
+
+  if (mat_props.size() < n)
+    mat_props.resize(n, nullptr);
+  if (mat_props_old.size() < n)
+    mat_props_old.resize(n, nullptr);
+  if (mat_props_older.size() < n)
+    mat_props_older.resize(n, nullptr);
 
   // init properties (allocate memory. etc)
   for (unsigned int i = 0; i < n; i++)
@@ -436,11 +440,11 @@ MaterialPropertyStorage::initProps(MaterialData & material_data,
     // duplicate the stateful property in property storage (all three states - we will reuse the
     // allocated memory there)
     // also allocating the right amount of memory, so we do not have to resize, etc.
-    if (props(elem, side)[i] == nullptr)
-      props(elem, side)[i] = material_data.props()[prop_id]->init(n_qpoints);
-    if (propsOld(elem, side)[i] == nullptr)
-      propsOld(elem, side)[i] = material_data.propsOld()[prop_id]->init(n_qpoints);
+    if (mat_props[i] == nullptr)
+      mat_props[i] = material_data.props()[prop_id]->init(n_qpoints);
+    if (mat_props_old[i] == nullptr)
+      mat_props_old[i] = material_data.propsOld()[prop_id]->init(n_qpoints);
     if (hasOlderProperties() && propsOlder(elem, side)[i] == nullptr)
-      propsOlder(elem, side)[i] = material_data.propsOlder()[prop_id]->init(n_qpoints);
+      mat_props_older[i] = material_data.propsOlder()[prop_id]->init(n_qpoints);
   }
 }

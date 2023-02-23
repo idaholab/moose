@@ -211,14 +211,20 @@ public:
   const PropsType & propsOlder() const { return *_props_elem_older; }
   MaterialProperties & props(const Elem * elem, unsigned int side)
   {
+    libmesh_assert(_props_elem->contains(elem));
+    libmesh_assert((*_props_elem)[elem].contains(side));
     return (*_props_elem)[elem][side];
   }
   MaterialProperties & propsOld(const Elem * elem, unsigned int side)
   {
+    libmesh_assert(_props_elem_old->contains(elem));
+    libmesh_assert((*_props_elem_old)[elem].contains(side));
     return (*_props_elem_old)[elem][side];
   }
   MaterialProperties & propsOlder(const Elem * elem, unsigned int side)
   {
+    libmesh_assert(_props_elem_older->contains(elem));
+    libmesh_assert((*_props_elem_older)[elem].contains(side));
     return (*_props_elem_older)[elem][side];
   }
   ///@}
