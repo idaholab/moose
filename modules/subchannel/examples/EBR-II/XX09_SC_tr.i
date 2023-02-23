@@ -1,19 +1,18 @@
 # Following Benchmark Specifications and Data Requirements for EBR-II Shutdown Heat Removal Tests SHRT-17 and SHRT-45R
 # Available at: https://publications.anl.gov/anlpubs/2012/06/73647.pdf
+# Transient Subchannel calculation
 ###################################################
 # Thermal-hydraulics parameters
 ###################################################
-T_in = 624.70556 #Kelvin
+T_in = 616.4 #Kelvin
 Total_Surface_Area = 0.000854322 #m3
-mass_flux_in = ${fparse 2.6923 / Total_Surface_Area} #${fparse 2.450 / Total_Surface_Area}
+mass_flux_in = ${fparse 2.427 / Total_Surface_Area}
 #P_out = 43850.66 # Pa plus 4.778 meters of Na to the free surface in pool or Plus 0.57 meters of Na to core outlet.
 P_out = 2.0e5
-Power_initial = 486200 #W (Page 26,35 of ANL document)
+Power_initial = 379800 #W (Page 26,35 of ANL document)
 ###################################################
 # Geometric parameters
 ###################################################
-
-# units are cm - do not forget to convert to meter
 scale_factor = 0.01
 fuel_pin_pitch = ${fparse 0.5664*scale_factor}
 fuel_pin_diameter = ${fparse 0.4419*scale_factor}
@@ -86,6 +85,12 @@ unheated_length_exit = ${fparse 26.9*scale_factor}
   [mu]
     block = subchannel
   []
+  [q_prime_init]
+    block = fuel_pins
+  []
+  [power_history_field]
+    block = fuel_pins
+  []
   [q_prime]
     block = fuel_pins
   []
@@ -110,8 +115,8 @@ unheated_length_exit = ${fparse 26.9*scale_factor}
   compute_density = true
   compute_viscosity = true
   compute_power = true
-  P_tol = 1.0e-4
-  T_tol = 1.0e-4
+  P_tol = 1.0e-5
+  T_tol = 1.0e-5
   implicit = true
   segregated = false
   interpolation_scheme = 'upwind'
@@ -130,9 +135,9 @@ unheated_length_exit = ${fparse 26.9*scale_factor}
 
   [q_prime_IC]
     type = TriPowerIC
-    variable = q_prime
+    variable = q_prime_init
     power = ${Power_initial}
-    filename = "pin_power_profile61.txt"
+    filename = "pin_power_profile61_uniform.txt"
   []
 
   [T_ic]
@@ -164,7 +169,7 @@ unheated_length_exit = ${fparse 26.9*scale_factor}
   [rho_ic]
     type = RhoFromPressureTemperatureIC
     variable = rho
-    p = ${P_out}
+    p = P
     T = T
     fp = sodium
   []
@@ -172,7 +177,7 @@ unheated_length_exit = ${fparse 26.9*scale_factor}
   [h_ic]
     type = SpecificEnthalpyFromPressureTemperatureIC
     variable = h
-    p = ${P_out}
+    p = P
     T = T
     fp = sodium
   []
@@ -184,7 +189,45 @@ unheated_length_exit = ${fparse 26.9*scale_factor}
   []
 []
 
+[Functions]
+  [power_func]
+    type = PiecewiseLinear
+    data_file = 'power_history_SHRT45.csv'
+    format = "columns"
+    scale_factor = 1.0
+  []
+  [mass_flux_in]
+    type = PiecewiseLinear
+    data_file = 'massflow_SHRT45.csv'
+    format = "columns"
+    scale_factor = ${fparse mass_flux_in / 2.427}
+  []
+
+  [time_step_limiting]
+    type = PiecewiseLinear
+    xy_data = '0.1 0.1
+               10.0 10.0'
+  []
+[]
+
+[Controls]
+  [mass_flux_ctrl]
+    type = RealFunctionControl
+    parameter = 'AuxKernels/mdot_in_bc/mass_flux'
+    function = 'mass_flux_in'
+    execute_on = 'initial timestep_begin'
+  []
+[]
+
 [AuxKernels]
+  [P_out_bc]
+    type = PostprocessorConstantAux
+    variable = P
+    boundary = outlet
+    postprocessor = report_pressure_outlet
+    execute_on = 'timestep_begin'
+    block = subchannel
+  []
   [T_in_bc]
     type = ConstantAux
     variable = T
@@ -198,8 +241,21 @@ unheated_length_exit = ${fparse 26.9*scale_factor}
     variable = mdot
     boundary = inlet
     area = S
-    mass_flux = ${mass_flux_in}
+    mass_flux = 0.0
     execute_on = 'timestep_begin'
+  []
+  [populate_power_history]
+    type = FunctionAux
+    variable = power_history_field
+    function = 'power_func'
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
+  []
+  [change_q_prime]
+    type = ParsedAux
+    variable = q_prime
+    args = 'q_prime_init power_history_field'
+    function = 'q_prime_init*power_history_field'
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
 []
 
@@ -209,136 +265,42 @@ unheated_length_exit = ${fparse 26.9*scale_factor}
 []
 
 [Postprocessors]
-  # [TTC-27]
-  #   type = SubChannelPointValue
-  #   variable = T
-  #   index = 91
-  #   execute_on = 'TIMESTEP_END'
-  #   height = 0.322
-  # []
-  # [TTC-28]
-  #   type = SubChannelPointValue
-  #   variable = T
-  #   index = 50
-  #   execute_on = 'TIMESTEP_END'
-  #   height = 0.322
-  # []
-  # [TTC-29]
-  #   type = SubChannelPointValue
-  #   variable = T
-  #   index = 21
-  #   execute_on = 'TIMESTEP_END'
-  #   height = 0.322
-  # []
-  # [TTC-30]
-  #   type = SubChannelPointValue
-  #   variable = T
-  #   index = 4
-  #   execute_on = 'TIMESTEP_END'
-  #   height = 0.322
-  # []
-  # [TTC-31]
-  #   type = SubChannelPointValue
-  #   variable = T
-  #   index = 2
-  #   execute_on = 'TIMESTEP_END'
-  #   height = 0.322
-  # []
-  # [TTC-32]
-  #   type = SubChannelPointValue
-  #   variable = T
-  #   index = 16
-  #   execute_on = 'TIMESTEP_END'
-  #   height = 0.322
-  # []
-  # [TTC-33]
-  #   type = SubChannelPointValue
-  #   variable = T
-  #   index = 42
-  #   execute_on = 'TIMESTEP_END'
-  #   height = 0.322
-  # []
-  # [TTC-34]
-  #   type = SubChannelPointValue
-  #   variable = T
-  #   index = 80
-  #   execute_on = 'TIMESTEP_END'
-  #   height = 0.322
-  # []
-  # [TTC-35]
-  #   type = SubChannelPointValue
-  #   variable = T
-  #   index = 107
-  #   execute_on = 'TIMESTEP_END'
-  #   height = 0.322
-  # []
-  # [MTC-20]
-  # type = SubChannelPointValue
-  # variable = T
-  # index = 33
-  # execute_on = 'TIMESTEP_END'
-  # height = 0.172
-  # []
-  # [MTC-22]
-  #   type = SubChannelPointValue
-  #   variable = T
-  #   index = 3
-  #   execute_on = 'TIMESTEP_END'
-  #   height = 0.172
-  # []
-  # [MTC-24]
-  #   type = SubChannelPointValue
-  #   variable = T
-  #   index = 28
-  #   execute_on = 'TIMESTEP_END'
-  #   height = 0.172
-  # []
-  # [MTC-25]
-  #   type = SubChannelPointValue
-  #   variable = T
-  #   index = 60
-  #   execute_on = 'TIMESTEP_END'
-  #   height = 0.172
-  # []
-  # [MTC-26]
-  #   type = SubChannelPointValue
-  #   variable = T
-  #   index = 106
-  #   execute_on = 'TIMESTEP_END'
-  #   height = 0.172
-  # []
-  [14TC-37]
-    type = SubChannelPointValue
-    variable = T
-    index = 52
-    execute_on = 'TIMESTEP_END'
-    height = 0.480
+  [report_pressure_outlet]
+    type = Receiver
+    default = ${P_out}
   []
-  [14TC-39]
+
+  [TTC-31]
     type = SubChannelPointValue
     variable = T
-    index = 6
-    execute_on = 'TIMESTEP_END'
-    height = 0.480
+    index = 0
+    execute_on = 'initial timestep_end'
+    height = 0.322
   []
-  [14TC-41]
-    type = SubChannelPointValue
-    variable = T
-    index = 40
-    execute_on = 'TIMESTEP_END'
-    height = 0.480
-  []
-  [14TC-43]
-    type = SubChannelPointValue
-    variable = T
-    index = 105
-    execute_on = 'TIMESTEP_END'
-    height = 0.480
+
+  [post_func]
+    type = ElementIntegralVariablePostprocessor
+    block = fuel_pins
+    variable = q_prime
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
+
+  start_time = -1.0
+  end_time = 900.0
+  [TimeStepper]
+    type = IterationAdaptiveDT
+     dt = 0.1
+     iteration_window = 5
+     optimal_iterations = 6
+     growth_factor = 1.2
+     cutback_factor = 0.8
+     timestep_limiting_function = 'time_step_limiting'
+   []
+   dtmax = 20
   nl_rel_tol = 0.9
   l_tol = 0.9
 []
@@ -348,9 +310,10 @@ unheated_length_exit = ${fparse 26.9*scale_factor}
 ################################################################################
 [MultiApps]
   [viz]
-    type = FullSolveMultiApp
-    input_files = '3d_SC_ss.i'
-    execute_on = 'FINAL'
+    type = TransientMultiApp
+    input_files = '3d_SC_tr.i'
+    execute_on = 'INITIAL TIMESTEP_END'
+    catch_up = true
   []
 []
 

@@ -1,9 +1,8 @@
 # a Pronghorn mesh for an EBRT-2 assembly
-
+# A file to test mesh generation. Creates only one subassembly.
 # sqrt(3) / 2 is by how much flat to flat is smaller than corer to corner
 f = ${fparse sqrt(3) / 2}
 
-# units are cm - do not forget to convert to meter
 outer_duct_out = 5.8166
 outer_duct_in = 5.5854
 inner_duct_out = 4.8437

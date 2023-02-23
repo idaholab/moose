@@ -1,6 +1,6 @@
 # Following Advanced Burner Test Reactor Preconceptual Design Report
-# Vailable at: https://www.ne.anl.gov/eda/ABTR_1cv2_ws.pdf
-
+# Vailable at: https://www.ne.anl.gov/eda/ABTR_1cv2_ws.
+# This file creates the 3D mesh where subchannel projects to
 ###################################################
 # Geometric parameters
 ###################################################
@@ -87,18 +87,9 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
 
 [Executioner]
   type = Transient
-
   start_time = -1.0
+  dt = 100.0
   end_time = 900.0
-  [TimeStepper]
-    type = IterationAdaptiveDT
-     dt = 0.1
-     iteration_window = 2
-     optimal_iterations = 6
-     growth_factor = 2.0
-     cutback_factor = 0.5
-   []
-
   nl_rel_tol = 0.9
   l_tol = 0.9
 []
