@@ -209,19 +209,37 @@ public:
   const PropsType & props() const { return *_props_elem; }
   const PropsType & propsOld() const { return *_props_elem_old; }
   const PropsType & propsOlder() const { return *_props_elem_older; }
-  MaterialProperties & props(const Elem * elem, unsigned int side)
+  const MaterialProperties & props(const Elem * elem, unsigned int side) const
+  {
+    libmesh_assert(props().contains(elem));
+    libmesh_assert(props().find(elem)->second.contains(side));
+    return props().find(elem)->second.find(side)->second;
+  }
+  const MaterialProperties & propsOld(const Elem * elem, unsigned int side) const
+  {
+    libmesh_assert(propsOld().contains(elem));
+    libmesh_assert(propsOld().find(elem)->second.contains(side));
+    return propsOld().find(elem)->second.find(side)->second;
+  }
+  const MaterialProperties & propsOlder(const Elem * elem, unsigned int side) const
+  {
+    libmesh_assert(propsOlder().contains(elem));
+    libmesh_assert(propsOlder().find(elem)->second.contains(side));
+    return propsOlder().find(elem)->second.find(side)->second;
+  }
+  MaterialProperties & setProps(const Elem * elem, unsigned int side)
   {
     libmesh_assert(_props_elem->contains(elem));
     libmesh_assert((*_props_elem)[elem].contains(side));
     return (*_props_elem)[elem][side];
   }
-  MaterialProperties & propsOld(const Elem * elem, unsigned int side)
+  MaterialProperties & setPropsOld(const Elem * elem, unsigned int side)
   {
     libmesh_assert(_props_elem_old->contains(elem));
     libmesh_assert((*_props_elem_old)[elem].contains(side));
     return (*_props_elem_old)[elem][side];
   }
-  MaterialProperties & propsOlder(const Elem * elem, unsigned int side)
+  MaterialProperties & setPropsOlder(const Elem * elem, unsigned int side)
   {
     libmesh_assert(_props_elem_older->contains(elem));
     libmesh_assert((*_props_elem_older)[elem].contains(side));

@@ -332,11 +332,11 @@ MaterialPropertyStorage::swap(MaterialData & material_data, const Elem & elem, u
 {
   Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
 
-  shallowSwapData(_stateful_prop_id_to_prop_id, material_data.props(), props(&elem, side));
-  shallowSwapData(_stateful_prop_id_to_prop_id, material_data.propsOld(), propsOld(&elem, side));
+  shallowSwapData(_stateful_prop_id_to_prop_id, material_data.props(), setProps(&elem, side));
+  shallowSwapData(_stateful_prop_id_to_prop_id, material_data.propsOld(), setPropsOld(&elem, side));
   if (hasOlderProperties())
     shallowSwapData(
-        _stateful_prop_id_to_prop_id, material_data.propsOlder(), propsOlder(&elem, side));
+        _stateful_prop_id_to_prop_id, material_data.propsOlder(), setPropsOlder(&elem, side));
 }
 
 void
@@ -346,12 +346,12 @@ MaterialPropertyStorage::swapBack(MaterialData & material_data,
 {
   Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
 
-  shallowSwapDataBack(_stateful_prop_id_to_prop_id, props(&elem, side), material_data.props());
+  shallowSwapDataBack(_stateful_prop_id_to_prop_id, setProps(&elem, side), material_data.props());
   shallowSwapDataBack(
-      _stateful_prop_id_to_prop_id, propsOld(&elem, side), material_data.propsOld());
+      _stateful_prop_id_to_prop_id, setPropsOld(&elem, side), material_data.propsOld());
   if (hasOlderProperties())
     shallowSwapDataBack(
-        _stateful_prop_id_to_prop_id, propsOlder(&elem, side), material_data.propsOlder());
+        _stateful_prop_id_to_prop_id, setPropsOlder(&elem, side), material_data.propsOlder());
 }
 
 bool
@@ -444,7 +444,7 @@ MaterialPropertyStorage::initProps(MaterialData & material_data,
       mat_props[i] = material_data.props()[prop_id]->init(n_qpoints);
     if (mat_props_old[i] == nullptr)
       mat_props_old[i] = material_data.propsOld()[prop_id]->init(n_qpoints);
-    if (hasOlderProperties() && propsOlder(elem, side)[i] == nullptr)
+    if (hasOlderProperties() && mat_props_older[i] == nullptr)
       mat_props_older[i] = material_data.propsOlder()[prop_id]->init(n_qpoints);
   }
 }
