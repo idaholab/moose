@@ -1,5 +1,4 @@
 # a Pronghorn mesh for 7 EBRT-II assemblies
-
 # sqrt(3) / 2 is by how much flat to flat is smaller than corer to corner
 f = ${fparse sqrt(3) / 2}
 
@@ -10,99 +9,104 @@ inner_duct_out = 4.8437
 inner_duct_in = 4.64
 inter_wrapper_width = 0.3
 height = 61.2
-n_ax = 34
+
+# discretization
+n_ax = 16
+ns = 6
+duct_intervals_center =    '4 6 4 3' # '2 4 2 4' #
+duct_intervals_perishperic =  '4 4' # '2 2' #
 
 [Mesh]
   [XX09]
     type = PolygonConcentricCircleMeshGenerator
     num_sides = 6
-    num_sectors_per_side = '4 4 4 4 4 4'
+    num_sectors_per_side = '${ns} ${ns} ${ns} ${ns} ${ns} ${ns}'
     background_intervals = 1
     background_block_ids = '12'
     polygon_size = ${fparse outer_duct_out / 2 + inter_wrapper_width / 2}
     duct_sizes = '${fparse inner_duct_in / f /2} ${fparse inner_duct_out / f /2} ${fparse outer_duct_in / f /2} ${fparse outer_duct_out / f / 2}'
-    duct_intervals = '4    8    4    3'
+    duct_intervals = ${duct_intervals_center}
     duct_block_ids = '1003 1004 1005 1006'
-    interface_boundary_names = 'inner_wall_in inner_wall_out outer_wall_in outer_wall_out'
+    outward_interface_boundary_names = 'inner_wall_in inner_wall_out outer_wall_in outer_wall_out'
     interface_boundary_id_shift = 100
   []
 
   [hfd]
     type = PolygonConcentricCircleMeshGenerator
     num_sides = 6
-    num_sectors_per_side = '4 4 4 4 4 4'
+    num_sectors_per_side = '${ns} ${ns} ${ns} ${ns} ${ns} ${ns}'
     background_intervals = 1
     background_block_ids = '13'
     polygon_size = ${fparse outer_duct_out / 2 + inter_wrapper_width / 2}
     duct_sizes = '${fparse 5.6134 / f /2} ${fparse outer_duct_out / f / 2}'
-    duct_intervals = '8    3'
+    duct_intervals = ${duct_intervals_perishperic}
     duct_block_ids = '1003  1006'
-    interface_boundary_names = 'wall_in wall_out'
+    outward_interface_boundary_names = 'wall_in wall_out'
   []
 
   [Partial_Driver]
     type = PolygonConcentricCircleMeshGenerator
     num_sides = 6
-    num_sectors_per_side = '4 4 4 4 4 4'
+    num_sectors_per_side = '${ns} ${ns} ${ns} ${ns} ${ns} ${ns}'
     background_intervals = 1
     background_block_ids = '14'
     polygon_size = ${fparse outer_duct_out / 2 + inter_wrapper_width / 2}
     duct_sizes = '${fparse 5.6134 / f /2} ${fparse outer_duct_out / f / 2}'
-    duct_intervals = '8    3'
+    duct_intervals = ${duct_intervals_perishperic}
     duct_block_ids = '1003  1006'
-    interface_boundary_names = 'wall_in wall_out'
+    outward_interface_boundary_names = 'wall_in wall_out'
   []
 
   [Driver1]
     type = PolygonConcentricCircleMeshGenerator
     num_sides = 6
-    num_sectors_per_side = '4 4 4 4 4 4'
+    num_sectors_per_side = '${ns} ${ns} ${ns} ${ns} ${ns} ${ns}'
     background_intervals = 1
     background_block_ids = '15'
     polygon_size = ${fparse outer_duct_out / 2 + inter_wrapper_width / 2}
     duct_sizes = '${fparse 5.6134 / f /2} ${fparse outer_duct_out / f / 2}'
-    duct_intervals = '8    3'
+    duct_intervals = ${duct_intervals_perishperic}
     duct_block_ids = '1003  1006'
-    interface_boundary_names = 'wall_in wall_out'
+    outward_interface_boundary_names = 'wall_in wall_out'
   []
 
   [Driver2]
     type = PolygonConcentricCircleMeshGenerator
     num_sides = 6
-    num_sectors_per_side = '4 4 4 4 4 4'
+    num_sectors_per_side = '${ns} ${ns} ${ns} ${ns} ${ns} ${ns}'
     background_intervals = 1
     background_block_ids = '16'
     polygon_size = ${fparse outer_duct_out / 2 + inter_wrapper_width / 2}
     duct_sizes = '${fparse 5.6134 / f /2} ${fparse outer_duct_out / f / 2}'
-    duct_intervals = '8    3'
+    duct_intervals = ${duct_intervals_perishperic}
     duct_block_ids = '1003  1006'
-    interface_boundary_names = 'wall_in wall_out'
+    outward_interface_boundary_names = 'wall_in wall_out'
   []
 
   [K011]
     type = PolygonConcentricCircleMeshGenerator
     num_sides = 6
-    num_sectors_per_side = '4 4 4 4 4 4'
+    num_sectors_per_side = '${ns} ${ns} ${ns} ${ns} ${ns} ${ns}'
     background_intervals = 1
     background_block_ids = '17'
     polygon_size = ${fparse outer_duct_out / 2 + inter_wrapper_width / 2}
     duct_sizes = '${fparse 5.6134 / f /2} ${fparse outer_duct_out / f / 2}'
-    duct_intervals = '8    3'
+    duct_intervals = ${duct_intervals_perishperic}
     duct_block_ids = '1003  1006'
-    interface_boundary_names = 'wall_in wall_out'
+    outward_interface_boundary_names = 'wall_in wall_out'
   []
 
   [X402]
     type = PolygonConcentricCircleMeshGenerator
     num_sides = 6
-    num_sectors_per_side = '4 4 4 4 4 4'
+    num_sectors_per_side = '${ns} ${ns} ${ns} ${ns} ${ns} ${ns}'
     background_intervals = 1
     background_block_ids = '18'
     polygon_size = ${fparse outer_duct_out / 2 + inter_wrapper_width / 2}
     duct_sizes = '${fparse 5.6134 / f /2} ${fparse outer_duct_out / f / 2}'
-    duct_intervals = '8    3'
+    duct_intervals = ${duct_intervals_perishperic}
     duct_block_ids = '1003  1006'
-    interface_boundary_names = 'wall_in wall_out'
+    outward_interface_boundary_names = 'wall_in wall_out'
   []
 
   [pattern]
@@ -267,5 +271,13 @@ n_ax = 34
     vector_value = '0.01 0.01 0.01'
     transform = SCALE
     input = rotate
+  []
+
+  [new_inner_wall_boundary]
+    type = SideSetsBetweenSubdomainsGenerator
+    input = scale
+    new_boundary = 'prsb_interface'
+    primary_block = 'wall'
+    paired_block = 'center_porous_flow'
   []
 []

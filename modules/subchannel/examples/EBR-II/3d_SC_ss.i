@@ -1,10 +1,9 @@
 # Following Advanced Burner Test Reactor Preconceptual Design Report
 # Vailable at: https://www.ne.anl.gov/eda/ABTR_1cv2_ws.pdf
-
+# This file creates the 3D mesh where subchannel projects to
 ###################################################
 # Geometric parameters
-###################################################
-# units are cm - do not forget to convert to meter
+##################################################
 scale_factor = 0.01
 fuel_pin_pitch = '${fparse 0.5664*scale_factor}'
 fuel_pin_diameter = '${fparse 0.4419*scale_factor}'

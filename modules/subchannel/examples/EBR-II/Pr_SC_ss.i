@@ -1,6 +1,5 @@
-# This model drives a multiapp setup where wrappers (solid heat conduction)
-# and interwrapper flow (fluid) and interwall flow (fluid) are solved in this input.
-# by subchannel.
+# This Pronghorn model drives a multiapp setup where wrappers (solid heat conduction)
+# and interwrapper flow (fluid) and interwall flow (fluid) and main porous flow are solved in this input.
 
 # Units are SI
 
@@ -19,7 +18,7 @@ pin_diameter = ${fparse 0.4419*scale_factor}
 wire_pitch = ${fparse 15.24*scale_factor}
 wire_diameter = ${fparse 0.1244*scale_factor}
 flat_to_flat = ${fparse 4.64*scale_factor}
-n_rings = 5
+# n_rings = 5
 heated_length = ${fparse 34.3*scale_factor}
 unheated_length_exit = ${fparse 26.9*scale_factor}
 length = ${fparse heated_length + unheated_length_exit}
@@ -61,7 +60,7 @@ k = ${fparse A48 + A49 * inlet_temperature + A50 * inlet_temperature * inlet_tem
 molar_mass = 22.989769e-3
 
 # wrapper properties
-k_wrapper = 20
+k_wrapper = 15
 cp_wrapper = 300
 rho_wrapper = 7800
 
@@ -74,6 +73,7 @@ wrapper_blocks = 'wall'
 flow_blocks = 'inter_wrapper interwall center_porous_flow
                porous_flow_hfd porous_flow_p porous_flow_d1 porous_flow_d2 porous_flow_k011 porous_flow_x402'
 porous_flow = 'porous_flow_hfd porous_flow_p porous_flow_d1 porous_flow_d2 porous_flow_k011 porous_flow_x402'
+ramp_time = 1.0
 
 [Mesh]
   [fmesh]
@@ -89,18 +89,19 @@ porous_flow = 'porous_flow_hfd porous_flow_p porous_flow_d1 porous_flow_d2 porou
 
 [GlobalParams]
   mu_rampdown = mu_rampdown_fn
-  rhie_chow_user_object = pins_rhie_chow_interpolator
+  # rhie_chow_user_object = pins_rhie_chow_interpolator
 []
 
 [Debug]
   show_material_props = true
+  show_var_residual_norms = true
 []
 
 [FluidProperties]
   [fp]
     type = SimpleFluidProperties
     cp = ${cp}
-    cv = ${cp}
+    cv = ${cp} # Cv is not equal to Cp if the flow is not strictly incompressible
     thermal_conductivity = ${k}
     density0 = ${rho}
     viscosity = ${mu}
@@ -140,10 +141,64 @@ porous_flow = 'porous_flow_hfd porous_flow_p porous_flow_d1 porous_flow_d2 porou
 []
 
 [Functions]
+  [Power]
+    type = ParsedFunction
+    value = 'if (z < ${heated_length}, 1, 0)'
+  []
+  ### Ramp time needed to help with convergance.
   [mu_rampdown_fn]
     type = PiecewiseLinear
-    x = '10'
-    y = ${mu}
+    x = '0 10'
+    y = '${fparse 30*mu} ${mu}'
+  []
+
+  [XX09_power]
+    type = ParsedFunction
+    vars = 'V_XX09 Power'
+    symbol_values = 'V_XX09 Power'
+    value = 'if (t < ${ramp_time}, abs(Power*486.2e3/V_XX09/0.45846977) * t / ${ramp_time}, abs(Power*486.2e3/V_XX09/0.45846977))'
+  []
+
+  [P_power]
+    type = ParsedFunction
+    vars = 'V_o Power'
+    symbol_values = 'V_o Power'
+    value = 'if (t < ${ramp_time}, abs(Power*371.9e3/V_o/0.447848479) * t / ${ramp_time}, abs(Power*371.9e3/V_o/0.447848479))'
+  []
+
+  [HFD_power]
+    type = ParsedFunction
+    vars = 'V_o Power'
+    symbol_values = 'V_o Power'
+    value = 'if (t < ${ramp_time}, abs(Power*663.9e3/V_o/0.447848479) * t / ${ramp_time}, abs(Power*663.9e3/V_o/0.447848479))'
+  []
+
+  [D1_power]
+    type = ParsedFunction
+    vars = 'V_o Power'
+    symbol_values = 'V_o Power'
+    value = 'if (t < ${ramp_time}, abs(Power*755.9e3/V_o/0.447848479) * t / ${ramp_time}, abs(Power*755.9e3/V_o/0.447848479))'
+  []
+
+  [D2_power]
+    type = ParsedFunction
+    vars = 'V_o Power'
+    symbol_values = 'V_o Power'
+    value = 'if (t < ${ramp_time}, abs(Power*781.5e3/V_o/0.447848479) * t / ${ramp_time}, abs(Power*781.5e3/V_o/0.447848479))'
+  []
+
+  [K011_power]
+    type = ParsedFunction
+    vars = 'V_o Power'
+    symbol_values = 'V_o Power'
+    value = 'if (t < ${ramp_time}, abs(Power*19.93e3/V_o/0.156633069) * t / ${ramp_time}, abs(Power*19.93e3/V_o/0.156633069))'
+  []
+
+  [X402_power]
+    type = ParsedFunction
+    vars = 'V_o Power'
+    symbol_values = 'V_o Power'
+    value = 'if (t < ${ramp_time}, abs(Power*675.3e3/V_o/0.447848479) * t / ${ramp_time}, abs(Power*675.3e3/V_o/0.447848479))'
   []
 []
 
@@ -160,7 +215,7 @@ porous_flow = 'porous_flow_hfd porous_flow_p porous_flow_d1 porous_flow_d2 porou
     type = FVFunctorDirichletBC
     variable = T_wrapper
     functor = duct_surface_temperature_functor
-    boundary = 'inner_wall_in'
+    boundary = inner_wall_in
   []
 []
 
@@ -184,7 +239,7 @@ porous_flow = 'porous_flow_hfd porous_flow_p porous_flow_d1 porous_flow_d2 porou
 []
 
 [FVInterfaceKernels]
-  [conjugate_ht]
+  [conjugate_ht_wall_inner]
     type = FVConvectionCorrelationInterface
     wall_cell_is_bulk = true
     variable1 = T_fluid
@@ -194,7 +249,20 @@ porous_flow = 'porous_flow_hfd porous_flow_p porous_flow_d1 porous_flow_d2 porou
     T_fluid = T_fluid
     T_solid = T_wrapper
     h = wall_htc
-    boundary = 'inner_wall_in'
+    boundary = inner_wall_in
+  []
+
+  [conjugate_ht_walls_out]
+    type = FVConvectionCorrelationInterface
+    wall_cell_is_bulk = true
+    variable1 = T_fluid
+    subdomain1 = ${flow_blocks}
+    variable2 = T_wrapper
+    subdomain2 = ${wrapper_blocks}
+    T_fluid = T_fluid
+    T_solid = T_wrapper
+    h = wall_htc
+    boundary = 'inner_wall_out outer_wall_in outer_wall_out wall_in wall_out'
   []
 []
 
@@ -220,13 +288,13 @@ porous_flow = 'porous_flow_hfd porous_flow_p porous_flow_d1 porous_flow_d2 porou
     # material properties
     density = 'rho'
     dynamic_viscosity = 'mu'
-    thermal_conductivity = 'k k k'
+    thermal_conductivity = 'k k k k'
     # defined on all flow blocks
-    thermal_conductivity_blocks = 'inter_wrapper; ${porous_flow}; center_porous_flow'
+    thermal_conductivity_blocks = 'inter_wrapper; interwall; ${porous_flow}; center_porous_flow'
     specific_heat = 'cp'
 
     # initial conditions
-    initial_velocity = '0 0 1e-4'
+    initial_velocity = '0.0 0.0 1e-10'
     initial_temperature = '${inlet_temperature}'
     initial_pressure = '${outlet_pressure}'
 
@@ -251,15 +319,15 @@ porous_flow = 'porous_flow_hfd porous_flow_p porous_flow_d1 porous_flow_d2 porou
                             flux-mass
                             flux-mass'
 
-    flux_inlet_pps  = 'interwall_mass_flux
-                       interwall_mass_flux
-                       XX09_mass_flux
-                       HFD_mass_flux
-                       P_mass_flux
-                       D1_mass_flux
-                       D2_mass_flux
-                       K011_mass_flux
-                       X402_mass_flux'
+    flux_inlet_pps  = 'interwrapper_mfr
+                       interwall_mfr
+                       XX09_mfr
+                       HFD_mfr
+                       P_mfr
+                       D1_mfr
+                       D2_mfr
+                       K011_mfr
+                       X402_mfr'
 
     energy_inlet_types = 'fixed-temperature
                           fixed-temperature
@@ -281,14 +349,16 @@ porous_flow = 'porous_flow_hfd porous_flow_p porous_flow_d1 porous_flow_d2 porou
                              ${inlet_temperature}
                              ${inlet_temperature}'
 
-    wall_boundaries = 'inner_wall_in inner_wall_out wall_in wall_out'
-    momentum_wall_types = 'slip slip slip slip'
-    energy_wall_types = 'heatflux heatflux heatflux heatflux'
-    energy_wall_function = '0 0 0 0'
+    wall_boundaries = 'inner_wall_in inner_wall_out outer_wall_in outer_wall_out wall_in wall_out'
+    momentum_wall_types = 'slip slip slip slip slip slip'
+    energy_wall_types = 'heatflux heatflux heatflux heatflux heatflux heatflux'
+    energy_wall_function = '0 0 0 0 0 0'
+    external_heat_source = 'power_source'
 
     outlet_boundaries = 'outlet_interwrapper outlet_interwall outlet_central_assembly outlet_porous_flow'
     momentum_outlet_types = 'fixed-pressure fixed-pressure fixed-pressure fixed-pressure'
     pressure_function = '${outlet_pressure} ${outlet_pressure} ${outlet_pressure} ${outlet_pressure}'
+    energy_face_interpolation = 'skewness-corrected'
   []
 []
 
@@ -327,7 +397,7 @@ porous_flow = 'porous_flow_hfd porous_flow_p porous_flow_d1 porous_flow_d2 porou
                                porous_flow_p   0.447848479
                                porous_flow_d1  0.447848479
                                porous_flow_d2  0.447848479
-                               porous_flow_k011  0.156633069
+                               porous_flow_k011 0.156633069
                                porous_flow_x402  0.447848479
                                center_porous_flow 0.45846977'
     block = ${flow_blocks}
@@ -336,6 +406,7 @@ porous_flow = 'porous_flow_hfd porous_flow_p porous_flow_d1 porous_flow_d2 porou
   ## wall heat transfer coefficient uses Lyon-Martinelli
   [wall_htc]
     type = FunctorLyonMartinelliWallHTC
+    A = 0.4
     block = ${flow_blocks}
   []
 
@@ -376,11 +447,9 @@ porous_flow = 'porous_flow_hfd porous_flow_p porous_flow_d1 porous_flow_d2 porou
   []
 
   [center_assembly_drag]
-    type = FunctorRehmeDragCoefficientsPressureGradient
+    type = FunctorRehmeDragCoefficients
     multipliers = '100 100 1'
     hex_lattice = XX09_hex
-    pressure_drop_postprocessor = report_pressure_drop
-    L = ${length}
     block = 'center_porous_flow'
   []
 
@@ -389,21 +458,43 @@ porous_flow = 'porous_flow_hfd porous_flow_p porous_flow_d1 porous_flow_d2 porou
     ad_props_in = 'duct_surface_temperature'
     reg_props_out = 'duct_surface_temperature_functor'
   []
+
+  [heat_source]
+    type = PiecewiseByBlockFunctorMaterial
+    prop_name =  'heat_source'
+    subdomain_to_prop_value = 'inter_wrapper 0.0
+                               interwall     0.0
+                               porous_flow_hfd  HFD_power
+                               porous_flow_p  P_power
+                               porous_flow_d1  D1_power
+                               porous_flow_d2  D2_power
+                               porous_flow_k011  K011_power
+                               porous_flow_x402  X402_power
+                               center_porous_flow XX09_power'
+    block = ${flow_blocks}
+  []
 []
 
 [AuxVariables]
   [duct_surface_temperature]
     type = MooseVariableFVReal
+    initial_condition = ${inlet_temperature}
   []
 
   [q_prime_duct]
     type = MooseVariableFVReal
-    # block = ${wrapper_blocks}
+    block = ${wrapper_blocks}
+    initial_condition = 0
+  []
+
+  [q_prime_duct_transfer]
+    type = MooseVariableFVReal
+    block = ${wrapper_blocks}
     initial_condition = 0
   []
 
   [T_wrapper_linear]
-    # block = ${wrapper_blocks}
+    block = ${wrapper_blocks}
     initial_condition = ${inlet_temperature}
   []
 
@@ -421,18 +512,30 @@ porous_flow = 'porous_flow_hfd porous_flow_p porous_flow_d1 porous_flow_d2 porou
     type = MooseVariableFVReal
     block = ${flow_blocks}
   []
+
+  [power_source]
+    type = MooseVariableFVReal
+    block = ${flow_blocks}
+  []
 []
 
 [AuxKernels]
   [QPrime]
-    type = QPrimeDuctAux
+    type = QPrimeDuctFVAux
     diffusivity = ${k_wrapper}
     flat_to_flat = ${flat_to_flat}
     variable = q_prime_duct
-    diffusion_variable = T_wrapper_linear
+    diffusion_variable = T_wrapper
     component = normal
-    boundary = 'inner_wall_in'
-    execute_on = 'timestep_end'
+    boundary = 'prsb_interface'
+    execute_on = 'initial timestep_end'
+  []
+
+  [QPrime_normal_switch]
+    type = ParsedAux
+    variable = q_prime_duct_transfer
+    coupled_variables = q_prime_duct
+    expression = '-q_prime_duct'
   []
 
   [rho_var_aux]
@@ -452,9 +555,15 @@ porous_flow = 'porous_flow_hfd porous_flow_p porous_flow_d1 porous_flow_d2 porou
   [rho_cp_T_fluid_var_aux]
     type = ParsedAux
     variable = rho_cp_T_fluid_var
-    args = 'rho_var cp_var T_fluid'
-    function = 'rho_var * cp_var * T_fluid'
+    coupled_variables = 'rho_var cp_var T_fluid'
+    expression = 'rho_var * cp_var * T_fluid'
     block = ${flow_blocks}
+  []
+
+  [populate_power_source]
+    type = FunctorElementalAux
+    variable = 'power_source'
+    functor = 'heat_source'
   []
 []
 
@@ -474,95 +583,130 @@ porous_flow = 'porous_flow_hfd porous_flow_p porous_flow_d1 porous_flow_d2 porou
   [interwall_area]
     type = AreaPostprocessor
     boundary = inlet_interwall
+    execute_on = 'INITIAL'
   []
 
   [inter_wrapper_area]
     type = AreaPostprocessor
     boundary = inlet_interwrapper
+    execute_on = 'INITIAL'
   []
 
   [XX09_area]
     type = AreaPostprocessor
     boundary = inlet_central_assembly
+    execute_on = 'INITIAL'
   []
 
   [P_area]
     type = AreaPostprocessor
     boundary = inlet_porous_flow_p
+    execute_on = 'INITIAL'
   []
 
   [hfd_area]
     type = AreaPostprocessor
     boundary = inlet_porous_flow_hfd
+    execute_on = 'INITIAL'
   []
 
   [D1_area]
     type = AreaPostprocessor
     boundary = inlet_porous_flow_d1
+    execute_on = 'INITIAL'
   []
 
   [D2_area]
     type = AreaPostprocessor
     boundary = inlet_porous_flow_d2
+    execute_on = 'INITIAL'
   []
 
   [K011_area]
     type = AreaPostprocessor
     boundary = inlet_porous_flow_k011
+    execute_on = 'INITIAL'
   []
 
   [X402_area]
     type = AreaPostprocessor
     boundary = inlet_porous_flow_x402
+    execute_on = 'INITIAL'
   []
 
   ##########################################
-  [interwall_mass_flux]
+  [interwall_mfr]
     type = ParsedPostprocessor
     pp_names = 'interwall_area'
-    function = 'abs(0.2423/interwall_area)'
+    use_t = true
+    function = 'if (t < ${ramp_time}, 0.2423 * t / ${ramp_time}, 0.2423)'
+    # function = 'if (t < ${ramp_time}, 0.00001 * t / ${ramp_time}, 0.00001)'
+    execute_on = 'INITIAL TIMESTEP_END'
   []
 
-  [XX09_mass_flux]
+  [interwrapper_mfr]
+    type = ParsedPostprocessor
+    pp_names = 'interwall_area'
+    use_t = true
+    # function = 'if (t < ${ramp_time}, 0.2423 * t / ${ramp_time}, 0.2423)'
+    function = 'if (t < ${ramp_time}, 0.00001 * t / ${ramp_time}, 0.00001)'
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+
+  [XX09_mfr]
     type = ParsedPostprocessor
     pp_names = 'XX09_area'
-    function = 'abs(2.45/XX09_area)'
+    use_t = true
+    function = 'if (t < ${ramp_time}, 2.45 * t / ${ramp_time}, 2.45)'
+    execute_on = 'INITIAL TIMESTEP_END'
   []
 
-  [D1_mass_flux]
+  [D1_mfr]
     type = ParsedPostprocessor
     pp_names = 'D1_area'
-    function = 'abs(4.62/D1_area)'
+    use_t = true
+    function = 'if (t < ${ramp_time}, 4.62 * t / ${ramp_time}, 4.62)'
+    execute_on = 'INITIAL TIMESTEP_END'
   []
 
-  [D2_mass_flux]
+  [D2_mfr]
     type = ParsedPostprocessor
     pp_names = 'D2_area'
-    function = 'abs(4.618/D2_area)'
+    use_t = true
+    function = 'if (t < ${ramp_time}, 4.618 * t / ${ramp_time}, 4.618)'
+    execute_on = 'INITIAL TIMESTEP_END'
   []
 
-  [K011_mass_flux]
+  [K011_mfr]
     type = ParsedPostprocessor
     pp_names = 'K011_area'
-    function = 'abs(0.63136/K011_area)'
+    use_t = true
+    function = 'if (t < ${ramp_time}, 0.645 * t / ${ramp_time}, 0.645)'
+    execute_on = 'INITIAL TIMESTEP_END'
   []
 
-  [X402_mass_flux]
+  [X402_mfr]
     type = ParsedPostprocessor
     pp_names = 'X402_area'
-    function = 'abs(3.5264/X402_area)'
+    use_t = true
+    function = 'if (t < ${ramp_time}, 3.527 * t / ${ramp_time}, 3.527)'
+    execute_on = 'INITIAL TIMESTEP_END'
   []
 
-  [HFD_mass_flux]
+  [HFD_mfr]
     type = ParsedPostprocessor
     pp_names = 'hfd_area'
-    function = 'abs(3.5264/hfd_area)'
+    use_t = true
+    function = 'if (t < ${ramp_time}, 3.527 * t / ${ramp_time}, 3.527)'
+    execute_on = 'INITIAL TIMESTEP_END'
   []
 
-  [P_mass_flux]
+  [P_mfr]
     type = ParsedPostprocessor
     pp_names = 'P_area'
-    function = 'abs(2.916/P_area)'
+    use_t = true
+    function = 'if (t < ${ramp_time}, 2.916 * t / ${ramp_time}, 2.916)'
+    execute_on = 'INITIAL TIMESTEP_END'
   []
 
   ###########################################
@@ -576,72 +720,102 @@ porous_flow = 'porous_flow_hfd porous_flow_p porous_flow_d1 porous_flow_d2 porou
   [report_pressure_drop]
     type = Receiver
   []
+
+  ############################################
+
+  [V_XX09]
+    type = ParsedPostprocessor
+    pp_names = 'XX09_area'
+    function = 'XX09_area * ${length}'
+    execute_on = 'INITIAL'
+  []
+
+  [V_o]
+    type = VolumePostprocessor
+    block = 'porous_flow_p' # Representative neighbor assembly
+    execute_on = 'INITIAL'
+  []
 []
 
 [Executioner]
   type = Transient
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -ksp_gmres_restart -pc_factor_shift_type -pc_factor_shift_amount'
-  petsc_options_value = 'lu       100                 NONZERO               1e-10   '
-  end_time = 0.04
-  l_max_its = 10
+  petsc_options_value = 'lu       50                 NONZERO               1e-10   '
+  end_time = 10.0
+  l_max_its = 20
   [TimeStepper]
    type = IterationAdaptiveDT
-    dt = 0.01
+    dt = 0.2
     iteration_window = 2
-    optimal_iterations = 6
+    optimal_iterations = 10
     growth_factor = 1.2
     cutback_factor = 0.8
   []
   nl_abs_tol = 1e-3
-  nl_max_its = 15
+  nl_rel_tol = 1e-8
+  nl_max_its = 25
 []
 
 [Outputs]
   exodus = true
-  #print_linear_residuals = false
+  csv = true
+  print_linear_residuals = false
 []
 
-################################################################################
-# A multiapp that couples Pronghorn to subchannel
-################################################################################
+###############################################################################
+#####    A multiapp that couples Pronghorn to subchannel via duct interface
+###############################################################################
 
-# [MultiApps]
-#   [subchannel]
-#     # app_type = SubchannelApp
-#     type = FullSolveMultiApp
-#     input_files = 'subchannel.i'
-#     execute_on = 'timestep_end'
-#     positions = '0 0 0'
-#     max_procs_per_app = 1
-#     output_in_position = true
-#     bounding_box_padding = '0 0 0.1'
-#   []
-# []
+[MultiApps]
+  [subchannel]
+    type = FullSolveMultiApp
+    input_files = 'XX09_SC_SS.i'
+    execute_on = 'FINAL'
+    positions = '0 0 0'
+    max_procs_per_app = 1
+    output_in_position = true
+    bounding_box_padding = '0 0 0.1'
+  []
+[]
 
-# [Transfers]
-#   [pressure_drop_transfer] # Get pressure drop to pronghorn from subchannel
-#     type = MultiAppPostprocessorTransfer
-#     from_multi_app =  subchannel
-#     from_postprocessor = total_pressure_drop_SC
-#     to_postprocessor = report_pressure_drop
-#     reduction_type = average
-#     execute_on = 'timestep_end'
-#   []
+[Transfers]
+  [q_prime_duct] # Recover q_prime from Pronghorn solve
+    type = MultiAppNearestNodeTransfer
+    to_multi_app = subchannel
+    source_variable = q_prime_duct_transfer
+    variable = q_prime_duct
+  []
 
-#   [mass_flux_tranfer] # Send mass_flux at the inlet to subchannel
-#     type = MultiAppPostprocessorTransfer
-#     to_multi_app = subchannel
-#     from_postprocessor = inlet_mass_flux_Pr
-#     to_postprocessor = report_mass_flux_inlet
-#     execute_on = 'timestep_end'
-#   []
+  # [T_duct] # Recover T_duct from SC solve
+  #   type = MultiAppNearestNodeTransfer
+  #   from_multi_app = subchannel
+  #   source_variable = Tduct
+  #   variable = duct_surface_temperature
+  # []
 
-#   [outlet_pressure_tranfer] # Send pressure at the outlet to subchannel
-#     type = MultiAppPostprocessorTransfer
-#     to_multi_app = subchannel
-#     from_postprocessor = outlet_average_pressure_Pr
-#     to_postprocessor = report_pressure_outlet
-#     execute_on = 'timestep_end'
-#   []
-# []
+  # [pressure_drop_transfer] # Get pressure drop to pronghorn from subchannel
+  #   type = MultiAppPostprocessorTransfer
+  #   from_multi_app =  subchannel
+  #   from_postprocessor = total_pressure_drop_SC
+  #   to_postprocessor = report_pressure_drop
+  #   reduction_type = average
+  #   execute_on = 'timestep_end'
+  # []
+
+  # [mass_flux_tranfer] # Send mass_flux at the inlet to subchannel
+  #   type = MultiAppPostprocessorTransfer
+  #   to_multi_app = subchannel
+  #   from_postprocessor = inlet_mass_flux_Pr
+  #   to_postprocessor = report_mass_flux_inlet
+  #   execute_on = 'timestep_end'
+  # []
+
+  # [outlet_pressure_tranfer] # Send pressure at the outlet to subchannel
+  #   type = MultiAppPostprocessorTransfer
+  #   to_multi_app = subchannel
+  #   from_postprocessor = outlet_average_pressure_Pr
+  #   to_postprocessor = report_pressure_outlet
+  #   execute_on = 'timestep_end'
+  # []
+[]
