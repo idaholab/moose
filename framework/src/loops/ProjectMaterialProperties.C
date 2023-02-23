@@ -86,6 +86,7 @@ ProjectMaterialProperties::onElement(const Elem * elem)
         _mesh.getRefinementMap(*elem, -1, -1, -1);
 
     _material_props.prolongStatefulProps(
+        _mesh.processor_id(),
         refinement_map,
         *_assembly[_tid][0]->qRule(),
         *_assembly[_tid][0]->qRuleFace(),
@@ -128,6 +129,7 @@ ProjectMaterialProperties::onBoundary(const Elem * elem,
           _mesh.getRefinementMap(*elem, side, -1, side);
 
       _bnd_material_props.prolongStatefulProps(
+          _mesh.processor_id(),
           refinement_map,
           *_assembly[_tid][0]->qRule(),
           *_assembly[_tid][0]->qRuleFace(),
@@ -172,6 +174,7 @@ ProjectMaterialProperties::onInternalSide(const Elem * elem, unsigned int /*side
               _mesh.getRefinementMap(*elem, -1, child, side);
 
           _bnd_material_props.prolongStatefulProps(
+              _mesh.processor_id(),
               refinement_map,
               *_assembly[_tid][0]->qRule(),
               *_assembly[_tid][0]->qRuleFace(),

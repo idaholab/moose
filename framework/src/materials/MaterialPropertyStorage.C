@@ -104,6 +104,7 @@ MaterialPropertyStorage::eraseProperty(const Elem * elem)
 
 void
 MaterialPropertyStorage::prolongStatefulProps(
+    processor_id_type pid,
     const std::vector<std::vector<QpMap>> & refinement_map,
     const QBase & qrule,
     const QBase & qrule_face,
@@ -150,6 +151,11 @@ MaterialPropertyStorage::prolongStatefulProps(
       continue;
 
     const Elem * child_elem = elem.child_ptr(child);
+
+    // If it's not a local child then it'll be prolonged where it is
+    // local
+    if (child_elem->processor_id() != pid)
+      continue;
 
     mooseAssert(child < refinement_map.size(), "Refinement_map vector not initialized");
     const std::vector<QpMap> & child_map = refinement_map[child];

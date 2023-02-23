@@ -63,6 +63,7 @@ public:
    *    Call on boundary MaterialPropertyStorage and pass volume MaterialPropertyStorage for
    * parent_material_props
    *
+   * @param pid - processor id of children to prolong to
    * @param refinement_map - 2D array of QpMap objects
    * @param qrule The current quadrature rule
    * @param qrule_face The current face qrule
@@ -73,7 +74,8 @@ public:
    * @param input_child - the number of the child
    * @param input_child_side - the side on the child where material properties will be prolonged
    */
-  void prolongStatefulProps(const std::vector<std::vector<QpMap>> & refinement_map,
+  void prolongStatefulProps(processor_id_type pid,
+                            const std::vector<std::vector<QpMap>> & refinement_map,
                             const QBase & qrule,
                             const QBase & qrule_face,
                             MaterialPropertyStorage & parent_material_props,
