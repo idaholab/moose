@@ -336,7 +336,7 @@ MaterialPropertyStorage::copy(MaterialData & material_data,
 void
 MaterialPropertyStorage::swap(MaterialData & material_data, const Elem & elem, unsigned int side)
 {
-  Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+  Threads::spin_mutex::scoped_lock lock(this->spin_mutex);
 
   shallowSwapData(_stateful_prop_id_to_prop_id, material_data.props(), setProps(&elem, side));
   shallowSwapData(_stateful_prop_id_to_prop_id, material_data.propsOld(), setPropsOld(&elem, side));
@@ -350,7 +350,7 @@ MaterialPropertyStorage::swapBack(MaterialData & material_data,
                                   const Elem & elem,
                                   unsigned int side)
 {
-  Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+  Threads::spin_mutex::scoped_lock lock(this->spin_mutex);
 
   shallowSwapDataBack(_stateful_prop_id_to_prop_id, setProps(&elem, side), material_data.props());
   shallowSwapDataBack(

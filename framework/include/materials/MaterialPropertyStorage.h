@@ -325,6 +325,8 @@ private:
                  unsigned int side,
                  unsigned int n_qpoints);
 
+  libMesh::Threads::spin_mutex spin_mutex;
+
   // Need to be able to eraseProperty from here
   friend class ProjectMaterialProperties;
 
