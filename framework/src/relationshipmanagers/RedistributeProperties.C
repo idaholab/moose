@@ -89,7 +89,9 @@ RedistributeProperties::redistribute()
       MaterialData & my_mat_data = *((*mat_data)[/*_tid*/ 0]); // Not threaded
 
       std::array<MaterialPropertyStorage::PropsType *, 3> props_maps{
-          &mat_prop_store->props(), &mat_prop_store->propsOld(), &mat_prop_store->propsOlder()};
+          mat_prop_store->_props_elem.get(),
+          mat_prop_store->_props_elem_old.get(),
+          mat_prop_store->_props_elem_older.get()};
 
       for (auto * props_map_ptr : props_maps)
       {

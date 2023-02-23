@@ -201,12 +201,11 @@ public:
 
   ///@{
   /**
-   * Access methods to the stored material property data
+   * Const access methods to the stored material property data.
    *
+   * We used to have non-const accessors too, but the violation of
+   * encapsulation there was too much.
    */
-  PropsType & props() { return *_props_elem; }
-  PropsType & propsOld() { return *_props_elem_old; }
-  PropsType & propsOlder() { return *_props_elem_older; }
   const PropsType & props() const { return *_props_elem; }
   const PropsType & propsOld() const { return *_props_elem_old; }
   const PropsType & propsOlder() const { return *_props_elem_older; }
@@ -305,26 +304,30 @@ private:
 
   // Need to be able to initProps from here
   friend class RedistributeProperties;
+
+  // Need non-const props from here
+  friend void dataLoad<MaterialPropertyStorage>(std::istream &, MaterialPropertyStorage &, void *);
+  friend void dataStore<MaterialPropertyStorage>(std::ostream &, MaterialPropertyStorage &, void *);
 };
 
 template <>
 inline void
 dataStore(std::ostream & stream, MaterialPropertyStorage & storage, void * context)
 {
-  dataStore(stream, storage.props(), context);
-  dataStore(stream, storage.propsOld(), context);
+  dataStore(stream, *storage._props_elem, context);
+  dataStore(stream, *storage._props_elem_old, context);
 
   if (storage.hasOlderProperties())
-    dataStore(stream, storage.propsOlder(), context);
+    dataStore(stream, *storage._props_elem_older, context);
 }
 
 template <>
 inline void
 dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * context)
 {
-  dataLoad(stream, storage.props(), context);
-  dataLoad(stream, storage.propsOld(), context);
+  dataLoad(stream, *storage._props_elem, context);
+  dataLoad(stream, *storage._props_elem_old, context);
 
   if (storage.hasOlderProperties())
-    dataLoad(stream, storage.propsOlder(), context);
+    dataLoad(stream, *storage._props_elem_older, context);
 }
