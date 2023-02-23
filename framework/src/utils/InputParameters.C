@@ -407,8 +407,9 @@ InputParameters::declareControllable(const std::string & input_names,
 {
   std::vector<std::string> names;
   MooseUtils::tokenize<std::string>(input_names, names, 1, " ");
-  for (auto & name : names)
+  for (auto & name_in : names)
   {
+    const auto name = checkForRename(name_in);
     auto map_iter = _params.find(name);
     if (map_iter != _params.end()) // error is handled by checkParams method
     {

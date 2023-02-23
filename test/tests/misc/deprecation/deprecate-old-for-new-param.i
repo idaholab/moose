@@ -25,7 +25,7 @@
   [diff]
     type = VectorMatDiffusion
     variable = u
-    coeff = diffusion
+    coef = diffusion
   []
   [td]
     type = TimeDerivative
