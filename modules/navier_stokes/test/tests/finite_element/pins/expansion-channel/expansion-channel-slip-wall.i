@@ -3,7 +3,6 @@
 
 [GlobalParams]
   gravity = '0 -9.8 0'
-  block = 1
 
   order = FIRST
   family = LAGRANGE
@@ -16,6 +15,7 @@
   eos = eos
 
   conservative_form = true
+  p_int_by_parts = true
 []
 
 [Mesh]

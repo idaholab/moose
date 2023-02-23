@@ -21,7 +21,9 @@ INSFEFluidMomentumKernel::validParams()
   InputParameters params = INSFEFluidKernelStabilization::validParams();
   params.addClassDescription("Adds advection, viscous, pressure, friction, and gravity terms to "
                              "the Navier-Stokes momentum equation, potentially with stabilization");
-  params.addParam<bool>("conservative_form", false, "if conservative form is used");
+  params.addParam<bool>("conservative_form", false, "Whether conservative form is used");
+  params.addParam<bool>(
+      "p_int_by_parts", false, "Whether integration by parts is applied to the pressure term");
   params.addRequiredParam<unsigned>("component", "0,1,or 2 for x-, y-, or z- direction");
   return params;
 }
@@ -30,6 +32,7 @@ INSFEFluidMomentumKernel::INSFEFluidMomentumKernel(const InputParameters & param
   : INSFEFluidKernelStabilization(parameters),
     _grad_eps(coupledGradient("porosity")),
     _conservative_form(getParam<bool>("conservative_form")),
+    _p_int_by_parts(getParam<bool>("p_int_by_parts")),
     _component(getParam<unsigned>("component"))
 {
 }
@@ -45,7 +48,7 @@ INSFEFluidMomentumKernel::computeQpResidual()
                              ? -_rho[_qp] / porosity * _u[_qp] * vec_vel * _grad_test[_i][_qp]
                              : _rho[_qp] / porosity * vec_vel * _grad_u[_qp] * _test[_i][_qp];
   Real gravity_part = -porosity * _rho[_qp] * _vec_g(_component) * _test[_i][_qp];
-  Real pressure_part = _conservative_form
+  Real pressure_part = _p_int_by_parts
                            ? -porosity * _pressure[_qp] * _grad_test[_i][_qp](_component) -
                                  _pressure[_qp] * _grad_eps[_qp](_component) * _test[_i][_qp]
                            : porosity * _grad_pressure[_qp](_component) * _test[_i][_qp];
@@ -93,7 +96,7 @@ INSFEFluidMomentumKernel::computeQpResidual()
 
   // Assemble weak form and SUPG contributions
   Real res = normal_part + supg_part;
-  if (_conservative_form && (_component == 0) &&
+  if (_p_int_by_parts && (_component == 0) &&
       (_fe_problem.getCoordSystem(_current_elem->subdomain_id()) == Moose::COORD_RZ))
     res -= porosity * _pressure[_qp] / _q_point[_qp](0) * _test[_i][_qp];
 
@@ -161,10 +164,10 @@ INSFEFluidMomentumKernel::computeQpOffDiagJacobian(unsigned int jvar)
   switch (m)
   {
     case 0:
-      jac = _conservative_form ? -porosity * _phi[_j][_qp] * _grad_test[_i][_qp](_component) -
-                                     _phi[_j][_qp] * _grad_eps[_qp](_component) * _test[_i][_qp]
-                               : porosity * _grad_phi[_j][_qp](_component) * _test[_i][_qp];
-      if (_conservative_form && (_component == 0) &&
+      jac = _p_int_by_parts ? -porosity * _phi[_j][_qp] * _grad_test[_i][_qp](_component) -
+                                  _phi[_j][_qp] * _grad_eps[_qp](_component) * _test[_i][_qp]
+                            : porosity * _grad_phi[_j][_qp](_component) * _test[_i][_qp];
+      if (_p_int_by_parts && (_component == 0) &&
           (_fe_problem.getCoordSystem(_current_elem->subdomain_id()) == Moose::COORD_RZ))
         jac -= porosity * _phi[_j][_qp] / _q_point[_qp](0) * _test[_i][_qp];
       break;
