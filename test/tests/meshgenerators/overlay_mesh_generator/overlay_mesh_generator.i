@@ -8,7 +8,6 @@
     xmax = 4
     ymin = -1
     ymax = 2.2
-    nemesis = true
     output = true
   []
   [bcg]
@@ -21,6 +20,7 @@
 []
 
 [Outputs]
-
+ exodus = true
 []
+
 
