@@ -371,7 +371,7 @@ ReferenceResidualProblem::updateReferenceResidual()
     {
       mooseAssert(nonlinear_sys.RHS().size() == (*_reference_vector).size(),
                   "Sizes of nonlinear RHS and reference vector should be the same.");
-      mooseAssert(_reference_vector.size(), "Reference vector must be provided.");
+      mooseAssert((*_reference_vector).size(), "Reference vector must be provided.");
       auto div = nonlinear_sys.RHS().clone();
       *div /= *_reference_vector;
       resid = Utility::pow<2>(s.calculate_norm(*div, _soln_vars[i], DISCRETE_L2));
@@ -409,21 +409,15 @@ ReferenceResidualProblem::updateReferenceResidual()
   }
 }
 
-MooseNonlinearConvergenceReason
-ReferenceResidualProblem::checkNonlinearConvergence(std::string & msg,
-                                                    const PetscInt it,
-                                                    const Real xnorm,
-                                                    const Real snorm,
-                                                    const Real fnorm,
-                                                    const Real rtol,
-                                                    const Real /*divtol*/,
-                                                    const Real stol,
-                                                    const Real abstol,
-                                                    const PetscInt nfuncs,
-                                                    const PetscInt max_funcs,
-                                                    const Real initial_residual_before_preset_bcs,
-                                                    const Real /*div_threshold*/)
+bool
+ReferenceResidualProblem::checkRelativeConvergence(const PetscInt it,
+                                                   const Real fnorm,
+                                                   const Real the_residual,
+                                                   const Real rtol,
+                                                   const Real abstol,
+                                                   std::ostringstream & oss)
 {
+  // Do all the necessary setups
   updateReferenceResidual();
 
   if (_group_soln_var_names.size() > 0)
@@ -464,72 +458,33 @@ ReferenceResidualProblem::checkNonlinearConvergence(std::string & msg,
     _console << std::flush;
   }
 
-  NonlinearSystemBase & system = getNonlinearSystemBase();
-  MooseNonlinearConvergenceReason reason = MooseNonlinearConvergenceReason::ITERATING;
-  std::stringstream oss;
-
-  if (fnorm != fnorm)
+  // Now check for convergence
+  if (checkConvergenceIndividVars(fnorm, abstol, rtol, the_residual))
   {
-    oss << "Failed to converge, function norm is NaN\n";
-    reason = MooseNonlinearConvergenceReason::DIVERGED_FNORM_NAN;
+    if (_group_resid.size() > 0)
+      oss << "Converged due to function norm " << fnorm << " < relative tolerance (" << rtol
+          << ") or absolute tolerance (" << abstol << ") for all solution variables\n";
+    else
+      oss << "Converged due to function norm " << fnorm << " < relative tolerance (" << rtol
+          << ")\n";
+    return true;
   }
-  else if (it >= _nl_forced_its && fnorm < abstol)
+  else if (it >= _accept_iters &&
+           checkConvergenceIndividVars(
+               fnorm, abstol * _accept_mult, rtol * _accept_mult, the_residual))
   {
-    oss << "Converged due to function norm " << fnorm << " < " << abstol << std::endl;
-    reason = MooseNonlinearConvergenceReason::CONVERGED_FNORM_ABS;
-  }
-  else if (nfuncs >= max_funcs)
-  {
-    oss << "Exceeded maximum number of function evaluations: " << nfuncs << " > " << max_funcs
-        << std::endl;
-    reason = MooseNonlinearConvergenceReason::DIVERGED_FUNCTION_COUNT;
-  }
-
-  if (it >= _nl_forced_its && reason == MooseNonlinearConvergenceReason::ITERATING)
-  {
-    if (checkConvergenceIndividVars(fnorm, abstol, rtol, initial_residual_before_preset_bcs))
-    {
-      if (_group_resid.size() > 0)
-        oss << "Converged due to function norm "
-            << " < "
-            << " (relative tolerance) or (absolute tolerance) for all solution variables"
-            << std::endl;
-      else
-        oss << "Converged due to function norm " << fnorm << " < "
-            << " (relative tolerance)" << std::endl;
-      reason = MooseNonlinearConvergenceReason::CONVERGED_FNORM_RELATIVE;
-    }
-    else if (it >= _accept_iters && checkConvergenceIndividVars(fnorm,
-                                                                abstol * _accept_mult,
-                                                                rtol * _accept_mult,
-                                                                initial_residual_before_preset_bcs))
-    {
-      if (_group_resid.size() > 0)
-        oss << "Converged due to function norm "
-            << " < "
-            << " (acceptable relative tolerance) or (acceptable absolute tolerance) for all "
-               "solution variables"
-            << std::endl;
-      else
-        oss << "Converged due to function norm " << fnorm << " < "
-            << " (acceptable relative tolerance)" << std::endl;
-      _console << "ACCEPTABLE" << std::endl;
-      reason = MooseNonlinearConvergenceReason::CONVERGED_FNORM_RELATIVE;
-    }
-
-    else if (snorm < stol * xnorm)
-    {
-      oss << "Converged due to small update length: " << snorm << " < " << stol << " * " << xnorm
-          << std::endl;
-      reason = MooseNonlinearConvergenceReason::CONVERGED_SNORM_RELATIVE;
-    }
+    if (_group_resid.size() > 0)
+      oss << "Converged due to function norm " << fnorm << " < acceptable relative tolerance ("
+          << rtol * _accept_mult << ") or acceptable absolute tolerance (" << abstol * _accept_mult
+          << ") for all solution variables\n";
+    else
+      oss << "Converged due to function norm " << fnorm << " < acceptable relative tolerance ("
+          << rtol * _accept_mult << ")\n";
+    _console << "ACCEPTABLE" << std::endl;
+    return true;
   }
 
-  system._last_nl_rnorm = fnorm;
-  system._current_nl_its = static_cast<unsigned int>(it);
-
-  msg = oss.str();
-  return reason;
+  return false;
 }
 
 bool

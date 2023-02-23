@@ -238,6 +238,21 @@ public:
                             const Real initial_residual_before_preset_bcs,
                             const Real div_threshold);
 
+  /**
+   * Check the relative convergence of the nonlinear solution
+   * @param fnorm          Norm of the residual vector
+   * @param the_residual   The residual to check
+   * @param rtol           Relative tolerance
+   * @param abstol         Absolute tolerance
+   * @return               Bool signifying convergence
+   */
+  virtual bool checkRelativeConvergence(const PetscInt it,
+                                        const Real fnorm,
+                                        const Real the_residual,
+                                        const Real rtol,
+                                        const Real abstol,
+                                        std::ostringstream & oss);
+
   virtual bool hasVariable(const std::string & var_name) const override;
   using SubProblem::getVariable;
   virtual const MooseVariableFieldBase &

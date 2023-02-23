@@ -23,21 +23,15 @@ public:
   ReferenceResidualProblem(const InputParameters & params);
 
   virtual void initialSetup() override;
+
   void updateReferenceResidual();
-  virtual MooseNonlinearConvergenceReason
-  checkNonlinearConvergence(std::string & msg,
-                            const PetscInt it,
-                            const Real xnorm,
-                            const Real snorm,
-                            const Real fnorm,
-                            const Real rtol,
-                            const Real divtol,
-                            const Real stol,
-                            const Real abstol,
-                            const PetscInt nfuncs,
-                            const PetscInt max_funcs,
-                            const Real initial_residual_before_preset_bcs,
-                            const Real div_threshold) override;
+
+  virtual bool checkRelativeConvergence(const PetscInt it,
+                                        const Real fnorm,
+                                        const Real the_residual,
+                                        const Real rtol,
+                                        const Real abstol,
+                                        std::ostringstream & oss) override;
 
   /**
    * Check the convergence by comparing the norm of each variable separately against
