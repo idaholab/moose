@@ -97,9 +97,10 @@ OverlayMeshGenerator::OverlayMeshGenerator(const InputParameters & parameters)
   params.set<MooseEnum>("partition") = getParam<MooseEnum>("partition");
   params.set<MooseEnum>("elem_type") = getParam<MooseEnum>("elem_type");
 
-  _build_mesh = &addMeshSubgenerator("DistributedRectilinearMeshGenerator",
-                                     name() + "_distributedrectilinearmeshgenerator",
-                                     params);
+  addMeshSubgenerator("DistributedRectilinearMeshGenerator",
+                      name() + "_distributedrectilinearmeshgenerator",
+                      params);
+  _build_mesh = &getMeshByName(name() + "_distributedrectilinearmeshgenerator");
 }
 std::unique_ptr<MeshBase>
 OverlayMeshGenerator::generate()
