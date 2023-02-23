@@ -238,6 +238,9 @@ public:
                             const Real initial_residual_before_preset_bcs,
                             const Real div_threshold);
 
+  /// Perform steps required before checking nonlinear convergence
+  virtual void nonlinearConvergenceSetup() {}
+
   /**
    * Check the relative convergence of the nonlinear solution
    * @param fnorm          Norm of the residual vector

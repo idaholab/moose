@@ -7381,6 +7381,8 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
   TIME_SECTION("checkNonlinearConvergence", 5, "Checking Nonlinear Convergence");
   mooseAssert(_current_nl_sys, "This should be non-null");
 
+  nonlinearConvergenceSetup();
+
   if (_fail_next_nonlinear_convergence_check)
   {
     _fail_next_nonlinear_convergence_check = false;

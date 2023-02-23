@@ -26,6 +26,8 @@ public:
 
   void updateReferenceResidual();
 
+  virtual void nonlinearConvergenceSetup() override;
+
   virtual bool checkRelativeConvergence(const PetscInt it,
                                         const Real fnorm,
                                         const Real the_residual,

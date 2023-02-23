@@ -409,15 +409,9 @@ ReferenceResidualProblem::updateReferenceResidual()
   }
 }
 
-bool
-ReferenceResidualProblem::checkRelativeConvergence(const PetscInt it,
-                                                   const Real fnorm,
-                                                   const Real the_residual,
-                                                   const Real rtol,
-                                                   const Real abstol,
-                                                   std::ostringstream & oss)
+void
+ReferenceResidualProblem::nonlinearConvergenceSetup()
 {
-  // Do all the necessary setups
   updateReferenceResidual();
 
   if (_group_soln_var_names.size() > 0)
@@ -457,8 +451,16 @@ ReferenceResidualProblem::checkRelativeConvergence(const PetscInt it,
 
     _console << std::flush;
   }
+}
 
-  // Now check for convergence
+bool
+ReferenceResidualProblem::checkRelativeConvergence(const PetscInt it,
+                                                   const Real fnorm,
+                                                   const Real the_residual,
+                                                   const Real rtol,
+                                                   const Real abstol,
+                                                   std::ostringstream & oss)
+{
   if (checkConvergenceIndividVars(fnorm, abstol, rtol, the_residual))
   {
     if (_group_resid.size() > 0)
