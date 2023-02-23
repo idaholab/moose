@@ -28,7 +28,7 @@
     type = Exodus
     execute_on = timestep_end
     output_extra_element_ids = true
-    show_extra_element_ids = 'region_id'
+    extra_element_ids_to_output = 'region_id'
   []
 []
 

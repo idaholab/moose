@@ -35,14 +35,25 @@
   solve = false
 []
 
+[AuxVariables]
+  [coarse_elem_id]
+    family = MONOMIAL
+    order = CONSTANT
+  []
+[]
+
+[AuxKernels]
+  [coarse_elem_id]
+    type = ExtraElementIDAux
+    variable = coarse_elem_id
+    extra_id_name = coarse_elem_id
+  []
+[]
+
 [Executioner]
   type = Steady
 []
 
 [Outputs]
-  [out]
-    type = Exodus
-    output_extra_element_ids = true
-    show_extra_element_ids = 'coarse_elem_id'
-  []
+  exodus = true
 []

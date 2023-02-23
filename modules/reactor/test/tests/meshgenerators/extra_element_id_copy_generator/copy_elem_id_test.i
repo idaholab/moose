@@ -70,14 +70,61 @@
   solve = false
 []
 
+[AuxVariables]
+  [test_id]
+    family = MONOMIAL
+    order = CONSTANT
+  []
+  [test_id1]
+    family = MONOMIAL
+    order = CONSTANT
+  []
+  [test_id2]
+    family = MONOMIAL
+    order = CONSTANT
+  []
+  [test_id3]
+    family = MONOMIAL
+    order = CONSTANT
+  []
+  [test_id4]
+    family = MONOMIAL
+    order = CONSTANT
+  []
+[]
+
+[AuxKernels]
+  [test_id]
+    type = ExtraElementIDAux
+    variable = test_id
+    extra_id_name = test_id
+  []
+  [test_id1]
+    type = ExtraElementIDAux
+    variable = test_id1
+    extra_id_name = test_id1
+  []
+  [test_id2]
+    type = ExtraElementIDAux
+    variable = test_id2
+    extra_id_name = test_id2
+  []
+  [test_id3]
+    type = ExtraElementIDAux
+    variable = test_id3
+    extra_id_name = test_id3
+  []
+  [test_id4]
+    type = ExtraElementIDAux
+    variable = test_id4
+    extra_id_name = test_id4
+  []
+[]
+
 [Executioner]
   type = Steady
 []
 
 [Outputs]
-  [out]
-    type = Exodus
-    output_extra_element_ids = true
-    show_extra_element_ids = 'test_id test_id1 test_id2 test_id3 test_id4'
-  []
+  exodus = true
 []

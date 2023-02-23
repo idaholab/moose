@@ -7,3 +7,9 @@ This action is triggered when [!param](/Outputs/Exodus/output_extra_element_ids)
 !listing test/tests/outputs/exodus/exodus_elem_id.i block=Outputs
 
 More information can be found on the [Exodus output documentation page](outputs/Exodus.md).
+
+!syntax parameters /Mesh/ElementIDOutputAction
+
+!syntax inputs /Mesh/ElementIDOutputAction
+
+!syntax children /Mesh/ElementIDOutputAction

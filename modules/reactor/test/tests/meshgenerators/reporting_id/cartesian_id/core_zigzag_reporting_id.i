@@ -92,6 +92,6 @@
     type = Exodus
     execute_on = timestep_end
     output_extra_element_ids = true
-    show_extra_element_ids = 'pin_id assembly_id'
+    extra_element_ids_to_output = 'pin_id assembly_id'
   []
 []

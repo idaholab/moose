@@ -77,7 +77,7 @@
     type = Exodus
     execute_on = timestep_end
     output_extra_element_ids = true
-    show_extra_element_ids = 'assembly_id assembly_type_id plane_id pin_id pin_type_id region_id'
+    extra_element_ids_to_output = 'assembly_id assembly_type_id plane_id pin_id pin_type_id region_id'
   []
   file_base = core_in
 []

@@ -28,7 +28,7 @@
   [out]
     type = Exodus
     output_extra_element_ids = true
-    show_extra_element_ids = 'ring_id sector_id'
+    extra_element_ids_to_output = 'ring_id sector_id'
     execute_on = timestep_end
   []
 []

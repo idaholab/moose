@@ -58,14 +58,34 @@
     requirement = 'The system shall support writing parallel checkpoint files with --mesh-only'
   []
 
-  [initialize_only]
+  [mesh_only_with_extra_elem_ids]
     type = 'Exodiff'
-    input = 'initialize_only.i'
-    cli_args = '--initialize-only'
-    exodiff = 'initialize_only_in.e'
+    input = 'mesh_only_with_elem_ids.i'
+    cli_args = '--mesh-only'
+    exodiff = 'mesh_only_with_elem_ids_in.e'
     recover = false
     method = '!dbg'
     issues = '#23386'
     requirement = 'The system shall allow writing out the mesh with extra element ids without running a simulation.'
+  []
+  [mesh_only_with_restricted_elem_ids]
+    type = 'Exodiff'
+    input = 'mesh_only_with_elem_ids.i'
+    cli_args = '--mesh-only mesh_only_with_elem_ids_in.e Outputs/out/output_extra_element_ids=true Outputs/out/extra_element_ids_to_output="pin_id"'
+    exodiff = 'mesh_only_with_elem_ids_in.e'
+    recover = false
+    method = '!dbg'
+    issues = '#23386'
+    requirement = 'The system shall allow writing out the mesh with extra element ids without running a simulation and user-provided id names.'
+  []
+  [mesh_only_with_unrecognized_elem_ids]
+    type = 'RunException'
+    input = 'mesh_only_with_elem_ids.i'
+    cli_args = '--mesh-only mesh_only_without_elem_ids_in.e Outputs/out/output_extra_element_ids=true Outputs/out/extra_element_ids_to_output="assembly_id"'
+    expect_err = "set to true but no extra element ids are being outputted."
+    recover = false
+    method = '!dbg'
+    issues = '#23386'
+    requirement = 'The system shall throw a warning if user-provided extra element id names do not exist on mesh.'
   []
 []

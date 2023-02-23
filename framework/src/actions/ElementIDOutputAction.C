@@ -47,16 +47,15 @@ ElementIDOutputAction::act()
       if (params.isParamValid("output_extra_element_ids") &&
           params.get<bool>("output_extra_element_ids"))
       {
-        bool has_element_id_names = params.isParamValid("show_extra_element_ids");
+        bool has_element_id_names = params.isParamValid("extra_element_ids_to_output");
         std::vector<std::string> element_id_names;
         if (has_element_id_names)
-          element_id_names = params.get<std::vector<std::string>>("show_extra_element_ids");
+          element_id_names = params.get<std::vector<std::string>>("extra_element_ids_to_output");
 
-        unsigned int n = _mesh->getMesh().n_elem_integers();
         auto var_params = _factory.getValidParams("MooseVariableConstMonomial");
         auto kernel_params = _factory.getValidParams("ExtraElementIDAux");
         kernel_params.set<ExecFlagEnum>("execute_on") = EXEC_INITIAL;
-        for (unsigned int i = 0; i < n; ++i)
+        for (unsigned int i = 0; i < _mesh->getMesh().n_elem_integers(); ++i)
         {
           auto & var_name = _mesh->getMesh().get_elem_integer_name(i);
           if (!has_element_id_names ||
@@ -69,7 +68,7 @@ ElementIDOutputAction::act()
             // Create aux kernels based on the extra element id name
             kernel_params.set<AuxVariableName>("variable") = var_name;
             kernel_params.set<std::vector<ExtraElementIDName>>("extra_id_name") = {var_name};
-            _problem->addAuxKernel("ExtraElementIDAux", "_aux_" + var_name, kernel_params);
+            _problem->addAuxKernel("ExtraElementIDAux", "_output_" + var_name, kernel_params);
           }
         }
       }

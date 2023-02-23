@@ -47,13 +47,13 @@
     enable = false
     execute_on = TIMESTEP_END
     output_extra_element_ids = true
-    show_extra_element_ids = 'pin_id'
+    extra_element_ids_to_output = 'pin_id'
   []
   [exodus_2]
     type = Exodus
     enable = false
     execute_on = TIMESTEP_END
     output_extra_element_ids = true
-    show_extra_element_ids = 'pin_id'
+    extra_element_ids_to_output = 'pin_id'
   []
 []

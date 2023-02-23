@@ -25,6 +25,6 @@
     type = Exodus
     execute_on = timestep_end
     output_extra_element_ids = true
-    show_extra_element_ids = 'depletion_id'
+    extra_element_ids_to_output = 'depletion_id'
   []
 []

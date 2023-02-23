@@ -107,7 +107,7 @@
   [output_elem_id_restrict]
     type = 'Exodiff'
     input = 'exodus_elem_id.i'
-    cli_args = 'Outputs/out/show_extra_element_ids=pin_id'
+    cli_args = 'Outputs/out/extra_element_ids_to_output=pin_id'
     exodiff = 'exodus_elem_id_out.e'
 
     issues = '#23386'

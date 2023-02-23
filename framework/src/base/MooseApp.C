@@ -105,10 +105,6 @@ MooseApp::validParams()
       "mesh_only",
       "--mesh-only [mesh_file_name]",
       "Setup and Output the input mesh only (Default: \"<input_file_name>_in.e\")");
-  params.addCommandLineParam<std::string>("initialize_only",
-                                          "--initialize-only [mesh_file_name]",
-                                          "Setup and Output the input mesh with extra element "
-                                          "integers only (Default: \"<input_file_name>_in.e\")");
 
   params.addCommandLineParam<bool>("show_input",
                                    "--show-input",
@@ -962,7 +958,7 @@ MooseApp::setupOptions()
 
     _parser.parse(_input_filenames);
 
-    if (isParamValid("mesh_only") || isParamValid("initialize_only"))
+    if (isParamValid("mesh_only"))
     {
       _syntax.registerTaskName("mesh_only", true);
       _syntax.addDependency("mesh_only", "setup_mesh_complete");
@@ -1063,7 +1059,7 @@ MooseApp::runInputFile()
 
   _action_warehouse.executeAllActions();
 
-  if (isParamValid("mesh_only") || isParamValid("split_mesh") || isParamValid("initialize_only"))
+  if (isParamValid("mesh_only") || isParamValid("split_mesh"))
     _ready_to_exit = true;
   else if (getParam<bool>("list_constructed_objects"))
   {

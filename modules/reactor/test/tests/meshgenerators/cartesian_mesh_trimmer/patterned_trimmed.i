@@ -89,3 +89,10 @@
                5 6 7'
   []
 []
+
+[Outputs]
+  [out]
+    type = Exodus
+    output_extra_element_ids = false
+  []
+[]

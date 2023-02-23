@@ -706,9 +706,9 @@ AdvancedOutput::addValidParams(InputParameters & params, const MultiMooseEnum & 
         false,
         "Flag indicating if extra element ids defined on the mesh should be outputted");
     params.addParam<std::vector<std::string>>(
-        "show_extra_element_ids",
-        "List of extra element ids defined on the mesh that should be written to the output");
-    params.addParamNamesToGroup("output_extra_element_ids show_extra_element_ids", "Mesh");
+        "extra_element_ids_to_output",
+        "List of extra element ids defined on the mesh that should be written to the output.");
+    params.addParamNamesToGroup("output_extra_element_ids extra_element_ids_to_output", "Mesh");
   }
 
   // Scalar variable output

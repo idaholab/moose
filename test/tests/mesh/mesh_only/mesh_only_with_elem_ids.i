@@ -56,5 +56,11 @@
   []
 []
 
-# This input file is intended to be run with the "--initialize-only" option so
+[Outputs]
+  [out]
+    type = Exodus
+  []
+[]
+
+# This input file is intended to be run with the "--mesh-only" option so
 # no other sections are required

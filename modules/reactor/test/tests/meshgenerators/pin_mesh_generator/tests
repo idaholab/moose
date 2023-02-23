@@ -106,7 +106,7 @@
                 Mesh/pin1/homogenized=true
                 Mesh/pin1/quad_center_elements=true
                 Outputs/file_base=hex_pin_homogenized_quad
-                Outputs/out/show_extra_element_ids='region_id pin_type_id'"
+                Outputs/out/extra_element_ids_to_output='region_id pin_type_id'"
     exodiff = 'hex_pin_homogenized_quad.e'
     recover = false
   []
@@ -118,7 +118,7 @@
                 Mesh/pin1/region_ids='1'
                 Mesh/pin1/homogenized=true
                 Outputs/file_base=hex_pin_homogenized_tri
-                Outputs/out/show_extra_element_ids='region_id pin_type_id'"
+                Outputs/out/extra_element_ids_to_output='region_id pin_type_id'"
     exodiff = 'hex_pin_homogenized_tri.e'
     recover = false
   []
@@ -135,7 +135,7 @@
                 Mesh/pin1/quad_center_elements=true
                 Mesh/pin1/extrude=true
                 Outputs/file_base=hex_pin_homogenized_3d
-                Outputs/out/show_extra_element_ids='region_id pin_type_id'"
+                Outputs/out/extra_element_ids_to_output='region_id pin_type_id'"
     exodiff = 'hex_pin_homogenized_3d.e'
     recover = false
   []
@@ -150,7 +150,7 @@
                 Mesh/pin1/pitch=7.10315
                 Mesh/pin1/quad_center_elements=true
                 Outputs/file_base=hex_single_assembly_homogenized
-                Outputs/out/show_extra_element_ids='region_id pin_type_id assembly_type_id'"
+                Outputs/out/extra_element_ids_to_output='region_id pin_type_id assembly_type_id'"
     exodiff = 'hex_single_assembly_homogenized.e'
     recover = false
   []
@@ -169,7 +169,7 @@
                 Mesh/pin1/mesh_intervals='1 1 1'
                 Mesh/pin1/quad_center_elements=true
                 Outputs/file_base=hex_single_assembly_ducted
-                Outputs/out/show_extra_element_ids='region_id pin_type_id assembly_type_id'"
+                Outputs/out/extra_element_ids_to_output='region_id pin_type_id assembly_type_id'"
     exodiff = 'hex_single_assembly_ducted.e'
     recover = false
   []
@@ -187,7 +187,7 @@
                 Mesh/pin1/mesh_intervals='1 1 1'
                 Mesh/pin1/quad_center_elements=true
                 Outputs/file_base=cart_single_assembly_ducted
-                Outputs/out/show_extra_element_ids='region_id pin_type_id assembly_type_id'"
+                Outputs/out/extra_element_ids_to_output='region_id pin_type_id assembly_type_id'"
     exodiff = 'cart_single_assembly_ducted.e'
     recover = false
   []
