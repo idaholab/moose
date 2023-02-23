@@ -32,7 +32,7 @@ public:
     return std::unordered_map<Key, T>::erase(k);
   }
 
-  inline bool contains(const Key & key) { return this->find(key) != this->end(); }
+  inline bool contains(const Key & key) const { return this->find(key) != this->end(); }
 
 private:
   libMesh::Threads::spin_mutex spin_mutex;
