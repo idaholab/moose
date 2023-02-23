@@ -42,5 +42,9 @@ void
 MeshGeneratorMesh::buildMesh()
 {
   if (!hasMeshBase())
-    _mesh = _app.getMeshGeneratorMesh();
+  {
+    _mesh = _app.getSavedMeshes(_app.mainMeshGeneratorName());
+    if (_app.)
+      _saved_meshes = _app.getSavedMeshes();
+  }
 }

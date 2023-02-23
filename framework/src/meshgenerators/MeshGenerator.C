@@ -29,13 +29,20 @@ MeshGenerator::validParams()
 
   params.addParam<bool>(
       "output", false, "Whether or not to output the mesh file after generating the mesh");
+
+  params.addParam<std::string>(
+      "save_with_name", "", "Save the current mesh with user-defined name");
+
   params.registerBase("MeshGenerator");
 
   return params;
 }
 
 MeshGenerator::MeshGenerator(const InputParameters & parameters)
-  : MooseObject(parameters), MeshMetaDataInterface(this), _mesh(_app.actionWarehouse().mesh())
+  : MooseObject(parameters),
+    MeshMetaDataInterface(this),
+    _mesh(_app.actionWarehouse().mesh()),
+    _save_with_name(getParam<std::string>("save_with_name"))
 {
 }
 
@@ -176,4 +183,25 @@ MeshGenerator::addMeshSubgenerator(const std::string & generator_name,
   _app.addMeshGenerator(generator_name, name, params);
 
   return this->getMeshByName(name);
+}
+
+bool
+MeshGenerator::saveMesh()
+{
+  if (_save_with_name != "")
+    return true;
+
+  return false;
+}
+
+const std::string
+MeshGenerator::getSavedMeshName()
+{
+  if (_save_with_name == _app.mainMeshGeneratorName() ||
+      _save_with_name == _app.mainDisplacedMeshGeneratorName())
+  {
+    return (_app.name() + _save_with_name);
+  }
+
+  return _save_with_name;
 }
