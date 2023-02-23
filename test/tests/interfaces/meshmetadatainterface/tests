@@ -7,7 +7,7 @@
     input = 'mmdi.i'
     cli_args = 'UserObjects/test/has_property="foo addmd"'
 
-    requirement = 'The system shall provide an interface to check whether or no a mesh property exists'
+    requirement = 'The system shall provide an interface to check whether or not a mesh property exists'
   []
 
   [get_wrong_type]
@@ -16,6 +16,6 @@
     cli_args = 'UserObjects/test/get_wrong_type="foo addmd"'
     expect_err = "the property exists with different type 'double'"
 
-    requirement = 'The system shall report a reasonable error when retreiving a property of the mesh when the underlying types differ'
+    requirement = 'The system shall report a reasonable error when retrieving a property of the mesh when the underlying types differ'
   []
 []

@@ -369,7 +369,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
     params.set<MeshGeneratorName>("input") = name() + "_pattern";
     params.set<std::vector<BoundaryName>>("boundary_names") = boundaries_to_delete;
 
-    addMeshSubgenerator("BoundaryDeletionGenerator", name() + "_delbds", params);
+    addMeshSubgenerator("BoundaryDeletionGenerator", build_mesh_name, params);
   }
 
   for (auto pinMG : _inputs)

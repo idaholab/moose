@@ -776,7 +776,7 @@ public:
   std::vector<std::string> getMeshGeneratorNames() const;
 
   /**
-   * Whether not a mesh generator exists with the given name
+   * Whether or not a mesh generator exists with the given name
    */
   bool hasMeshGenerator(const MeshGeneratorName & name) const;
 

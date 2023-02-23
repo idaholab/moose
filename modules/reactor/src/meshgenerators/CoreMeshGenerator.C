@@ -109,8 +109,10 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
     _desired_area(getParam<Real>("desired_area")),
     _desired_area_func(getParam<std::string>("desired_area_func"))
 {
-  // This allows the use of the MeshGeneratorName defined by _empty_key to be used in input
-  // and with getMesh()/getMeshForSub() without triggering an error.
+  // This sets it so that any mesh that is input with the name _empty_key is considered a "null"
+  // mesh, that is, whenever we try to get it with the standard getMesh() API we get a nullptr
+  // mesh instead. In the specific case of the CoreMeshGenerator, we use said "null" mesh to
+  // represent an empty position
   declareNullMeshName(_empty_key);
 
   // Declare that all of the meshes in the "inputs" parameter are to be used by

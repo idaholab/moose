@@ -36,7 +36,9 @@ SideSetExtruderGenerator::SideSetExtruderGenerator(const InputParameters & param
     _num_layers(getParam<unsigned int>("num_layers")),
     _sideset_name(getParam<BoundaryName>("sideset"))
 {
-  // Used by the first sub generator
+  // The input "input" is used by the first sub generator; this allows us to declare
+  // that this dependency is not a dependency of SideSetExtruderGenerator but instead
+  // the LowerDBlockFromSidesetGenerator below
   getMeshForSub("input");
 
   const SubdomainName extruded_block_name = "extruded_block_" + name();
