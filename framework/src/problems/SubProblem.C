@@ -967,15 +967,38 @@ SubProblem::addAlgebraicGhostingFunctor(GhostingFunctor & algebraic_gf, bool to_
 }
 
 void
-SubProblem::addAlgebraicGhostingFunctor(std::shared_ptr<GhostingFunctor> algebraic_gf, bool to_mesh)
+SubProblem::cloneCouplingGhostingFunctor(GhostingFunctor & coupling_gf, bool to_mesh)
 {
-  EquationSystems & eq = es();
-  const auto n_sys = eq.n_systems();
-  if (!n_sys)
+  const auto num_nl_sys = numNonlinearSystems();
+
+  auto pr = _root_coupling_gf_to_sys_clones.emplace(
+      &coupling_gf, std::vector<std::shared_ptr<GhostingFunctor>>(num_nl_sys - 1));
+  mooseAssert(pr.second, "We are adding a duplicate coupling functor");
+  auto & clones_vec = pr.first->second;
+
+  for (MooseIndex(num_nl_sys) i = 1; i < num_nl_sys; ++i)
+  {
+    DofMap & dof_map = systemBaseNonlinear(i).system().get_dof_map();
+    std::shared_ptr<GhostingFunctor> clone_coupling_gf = coupling_gf.clone();
+    std::dynamic_pointer_cast<RelationshipManager>(clone_coupling_gf)
+        ->init(*coupling_gf.get_mesh(), &dof_map);
+    dof_map.add_coupling_functor(clone_coupling_gf, to_mesh);
+    clones_vec[i - 1] = clone_coupling_gf;
+  }
+}
+
+void
+SubProblem::addCouplingGhostingFunctor(GhostingFunctor & coupling_gf, bool to_mesh)
+{
+  const auto num_nl_sys = numNonlinearSystems();
+  if (!num_nl_sys)
     return;
 
-  eq.get_system(0).get_dof_map().add_algebraic_ghosting_functor(algebraic_gf, to_mesh);
-  cloneAlgebraicGhostingFunctor(*algebraic_gf, to_mesh);
+  systemBaseNonlinear(0).system().get_dof_map().add_coupling_functor(coupling_gf, to_mesh);
+  if (num_nl_sys == 1)
+    return;
+
+  cloneCouplingGhostingFunctor(coupling_gf, to_mesh);
 }
 
 void

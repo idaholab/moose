@@ -9,7 +9,7 @@ NODAL VARIABLES relative 1.e-5 floor 1e-10
 	contact_pressure  # min:               0 @ t1,n1	max:        9991.7939 @ t11,n4
 	disp_x            # min:               0 @ t1,n1	max:      0.02937928 @ t11,n14
 	disp_y            # min:               0 @ t1,n1	max:     0.044828721 @ t11,n10
-	nodal_area_mech   # min:               0 @ t1,n2	max:       0.50738456 @ t11,n4
+	nodal_area        # min:               0 @ t1,n2	max:       0.50738456 @ t11,n4
 	penetration       floor 1e-9 # min:    0 @ t1,n1	max:       0.016005443 @ t2,n1
 	temp              # min:               0 @ t1,n1	max:               2 @ t11,n10
 
