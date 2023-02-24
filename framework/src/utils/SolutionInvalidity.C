@@ -211,8 +211,6 @@ SolutionInvalidity::summaryTable() const
 void
 dataStore(std::ostream & stream, SolutionInvalidity & solution_invalidity, void * context)
 {
-  // Sync data to processor 0
-  solution_invalidity.sync();
   if (solution_invalidity.processor_id() != 0)
     return;
 
