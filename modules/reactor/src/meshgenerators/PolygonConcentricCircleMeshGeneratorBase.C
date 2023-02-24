@@ -403,24 +403,36 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
     paramError("outward_interface_boundary_names",
                "If provided, the length of this parameter must be identical to the total number of "
                "interfaces.");
-  if ((_has_rings || _background_intervals == 1) && _background_block_ids.size() > 1)
+  const unsigned int num_total_background_layers =
+      _background_intervals + _background_inner_boundary_layer_params.intervals +
+      _background_outer_boundary_layer_params.intervals;
+  if ((_has_rings || num_total_background_layers == 1) && _background_block_ids.size() > 1)
     paramError("background_block_ids",
                "This parameter must be either unset or have a unity length when ring_radii is "
-               "provided or background_intervals is unity.");
-  if ((_has_rings || _background_intervals == 1) && _background_block_names.size() > 1)
+               "provided or background intervals (including boundary layers) is unity.");
+  if ((_has_rings || num_total_background_layers == 1) && _background_block_names.size() > 1)
     paramError("background_block_names",
                "This parameter must be either unset or have a unity length when ring_radii is "
-               "provided or background_intervals is unity.");
+               "provided or background intervals (including boundary layers) is unity.");
+  if (!_has_rings && num_total_background_layers > 1 && _quad_center_elements &&
+      _background_block_ids.size() == 1)
+    _background_block_ids.insert(_background_block_ids.begin(), _background_block_ids.front());
   if ((!_has_rings && _background_intervals > 1) &&
       (!_background_block_ids.empty() && _background_block_ids.size() != 2))
     paramError("background_block_ids",
                "This parameter must be either unset or have a length of two when ring_radii is not "
-               "provided and background_intervals is not unity.");
+               "provided and background intervals (including boundary layers) is not unity. It can "
+               "optionally to have a unity length if `quad_center_elements` is enabled.");
+  if (!_has_rings && num_total_background_layers > 1 && _quad_center_elements &&
+      _background_block_names.size() == 1)
+    _background_block_names.insert(_background_block_names.begin(),
+                                   _background_block_names.front());
   if ((!_has_rings && _background_intervals > 1) &&
       (!_background_block_names.empty() && _background_block_names.size() != 2))
     paramError("background_block_names",
                "This parameter must be either unset or have a length of two when ring_radii is not "
-               "provided and background_intervals is not unity.");
+               "provided and background intervals (including boundary layers) is not unity. It can "
+               "optionally to have a unity length if `quad_center_elements` is enabled.");
   if (_num_sectors_per_side.size() != _num_sides)
     paramError("num_sectors_per_side",
                "This parameter must have a length that is consistent with num_sides.");
@@ -433,22 +445,6 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
     paramError("ring_radii", "This parameter and ring_intervals must have the same length.");
   if (_ring_radii.size() != _ring_radial_biases.size())
     paramError("ring_radii", "This parameter and ring_radial_biases must have the same length.");
-  if (!_ring_block_ids.empty() &&
-      _ring_block_ids.size() !=
-          (_ring_intervals.size() + (unsigned int)(_ring_intervals.front() != 1)))
-    paramError(
-        "ring_block_ids",
-        "This parameter must have the appropriate size if it is provided. The size should be the "
-        "same as the size of 'ring_intervals' if the innermost ring interval is unity; otherwise "
-        "the size should be greater than the size of 'ring_intervals' by one.");
-  if (!_ring_block_names.empty() &&
-      _ring_block_names.size() !=
-          (_ring_intervals.size() + (unsigned int)(_ring_intervals.front() != 1)))
-    paramError(
-        "ring_block_names",
-        "This parameter must have the appropriate size if it is set. The size should be the "
-        "same as the size of 'ring_intervals' if the innermost ring interval is unity; otherwise "
-        "the size should be greater than the size of 'ring_intervals' by one.");
   for (unsigned int i = 1; i < _ring_intervals.size(); i++)
     if (_ring_radii[i] <= _ring_radii[i - 1])
       paramError("ring_radii", "This parameter must be strictly ascending.");
@@ -463,6 +459,34 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
                "ring_radii.");
   if (_has_rings)
   {
+    const unsigned int num_innermost_ring_layers =
+        _ring_inner_boundary_layer_params.intervals.front() + _ring_intervals.front() +
+        _ring_outer_boundary_layer_params.intervals.front();
+    if (!_ring_block_ids.empty() && _quad_center_elements && num_innermost_ring_layers > 1 &&
+        _ring_block_ids.size() == _ring_intervals.size())
+      _ring_block_ids.insert(_ring_block_ids.begin(), _ring_block_ids.front());
+    if (!_ring_block_ids.empty() &&
+        _ring_block_ids.size() !=
+            (_ring_intervals.size() + (unsigned int)(num_innermost_ring_layers != 1)))
+      paramError("ring_block_ids",
+                 "This parameter must have the appropriate size if it is provided. The size should "
+                 "be the same as the size of 'ring_intervals' if the innermost ring interval "
+                 "(including boundary layers) is unity; otherwise the size should be greater than "
+                 "the size of 'ring_intervals' by one. If 'quad_center_elements' is true, it is "
+                 "optional to only provide this parameter with the same size as 'ring_intervals'");
+    if (!_ring_block_names.empty() && _quad_center_elements && num_innermost_ring_layers > 1 &&
+        _ring_block_names.size() == _ring_intervals.size())
+      _ring_block_names.insert(_ring_block_names.begin(), _ring_block_names.front());
+    if (!_ring_block_names.empty() &&
+        _ring_block_names.size() !=
+            (_ring_intervals.size() + (unsigned int)(num_innermost_ring_layers != 1)))
+      paramError(
+          "ring_block_names",
+          "This parameter must have the appropriate size if it is set. The size should be the "
+          "same as the size of 'ring_intervals' if the innermost ring interval (including "
+          "boundary layers) is unity; otherwise the size should be greater than the size of "
+          "'ring_intervals' by one. If 'quad_center_elements' is true, it is optional to only "
+          "provide this parameter with the same size as 'ring_intervals'");
     for (unsigned int i = 0; i < _ring_radii.size(); i++)
     {
       const Real layer_width = _ring_radii[i] - (i == 0 ? 0.0 : _ring_radii[i - 1]);

@@ -38,9 +38,9 @@ protected:
   /// Widths, fractions, radial sectors and growth factors of the outer boundary layers of the ring regions
   multiBdryLayerParams _ring_outer_boundary_layer_params;
   /// Subdomain IDs of the ring regions
-  const std::vector<subdomain_id_type> _ring_block_ids;
+  std::vector<subdomain_id_type> _ring_block_ids;
   /// Subdomain Names of the ting regions
-  const std::vector<SubdomainName> _ring_block_names;
+  std::vector<SubdomainName> _ring_block_names;
   /// Thickness of each enclosing duct
   const PolygonSizeStyle _duct_sizes_style;
   /// Size parameters of the duct regions
@@ -76,9 +76,9 @@ protected:
   /// Width, fraction, radiation sectors and growth factor of the outer boundary layer of the background region
   singleBdryLayerParams _background_outer_boundary_layer_params;
   /// Subdomain IDs of the background regions
-  const std::vector<subdomain_id_type> _background_block_ids;
+  std::vector<subdomain_id_type> _background_block_ids;
   /// Subdomain Names of the background regions
-  const std::vector<SubdomainName> _background_block_names;
+  std::vector<SubdomainName> _background_block_names;
   /// Volume preserving function is optional
   const bool _preserve_volumes;
   /// Shift in default subdomain IDs to avert potential conflicts

@@ -1,12 +1,20 @@
 [Tests]
   design = 'meshgenerators/PolygonConcentricCircleMeshGenerator.md'
-  issues = '#18628 #20514 #20637 #21420 #23367'
+  issues = '#18628 #20514 #20637 #21420 #23367 #23520'
   [back_only]
     type = 'Exodiff'
     input = 'poly_2d.i'
     exodiff = 'poly_2d_back_only.e'
     cli_args = 'Mesh/gen/background_block_ids="30 35" Mesh/gen/background_block_names="back_in back_out" --mesh-only "poly_2d_back_only.e"'
     requirement ='The system shall generate a hexagon mesh without rings and ducts.'
+    recover = false
+  []
+  [back_only_single_block]
+    type = 'Exodiff'
+    input = 'poly_2d.i'
+    exodiff = 'poly_2d_back_only_sb.e'
+    cli_args = 'Mesh/gen/quad_center_elements=true Mesh/gen/background_block_ids="30" Mesh/gen/background_block_names="back" --mesh-only "poly_2d_back_only_sb.e"'
+    requirement ='The system shall generate a hexagon mesh without rings and ducts and with a multilayer QUAD background using a single set of block id and name.'
     recover = false
   []
   [back_only_flat_up]
@@ -43,6 +51,20 @@
                 Mesh/gen/outward_interface_boundary_names="int1 int2"
                 --mesh-only "poly_2d_rings.e"'
     requirement ='The system shall generate a hexagon mesh with rings.'
+    recover = false
+  []
+  [rings_single_block]
+    type = 'Exodiff'
+    input = 'poly_2d.i'
+    exodiff = 'poly_2d_rings_sb.e'
+    cli_args = 'Mesh/gen/quad_center_elements=true
+                Mesh/gen/background_block_ids="30" Mesh/gen/background_block_names="back"
+                Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2"
+                Mesh/gen/ring_block_ids="10 20" Mesh/gen/ring_block_names="center outer_ring"
+                Mesh/gen/uniform_mesh_on_sides=true
+                Mesh/gen/outward_interface_boundary_names="int1 int2"
+                --mesh-only "poly_2d_rings_sb.e"'
+    requirement ='The system shall generate a hexagon mesh with rings, with the innermost ring having multilayer QUAD elements and being assigned by a single set of block id and name.'
     recover = false
   []
   [ducts]
@@ -240,7 +262,7 @@
       cli_args = 'Mesh/gen/background_block_ids="20 30"
                   Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2"
                   --mesh-only "poly_2d_err.e"'
-      expect_err = 'This parameter must be either unset or have a unity length when ring_radii is provided or background_intervals is unity.'
+      expect_err = 'This parameter must be either unset or have a unity length'
       detail = "background_block_ids has more than one element when the mesh has ring(s)."
     []
     [err_background_block_names_1]
@@ -249,7 +271,7 @@
       cli_args = 'Mesh/gen/background_block_names="back1 back2"
                   Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2"
                   --mesh-only "poly_2d_err.e"'
-      expect_err = 'This parameter must be either unset or have a unity length when ring_radii is provided or background_intervals is unity.'
+      expect_err = 'This parameter must be either unset or have a unity length'
       detail = "background_block_names has more than one element when the mesh has ring(s)."
     []
     [err_background_block_ids_2]
@@ -257,16 +279,16 @@
       input = 'poly_2d.i'
       cli_args = 'Mesh/gen/background_block_ids="20"
                   --mesh-only "poly_2d_err.e"'
-      expect_err = 'This parameter must be either unset or have a length of two when ring_radii is not provided and background_intervals is not unity.'
-      detail = "background_block_ids has a length other than zero or two when the mesh does not have rings and background_intervals does not equal one."
+      expect_err = 'This parameter must be either unset or have a length of two'
+      detail = "background_block_ids has a length other than zero or two when the mesh does not have rings and total background intervals does not equal one."
     []
     [err_background_block_names_2]
       type = 'RunException'
       input = 'poly_2d.i'
       cli_args = 'Mesh/gen/background_block_names="back1"
                   --mesh-only "poly_2d_err.e"'
-      expect_err = 'This parameter must be either unset or have a length of two when ring_radii is not provided and background_intervals is not unity.'
-      detail = "background_block_names has a length other than zero or two when the mesh does not have rings and background_intervals does not equal one."
+      expect_err = 'This parameter must be either unset or have a length of two'
+      detail = "background_block_names has a length other than zero or two when the mesh does not have rings and total background intervals does not equal one."
     []
     [err_block_ids_with_one_name]
       type = 'RunException'
