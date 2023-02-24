@@ -48,7 +48,6 @@ AbaqusUExternalDB::initialSetup()
 {
   // Let's automatically detect uos and identify the one we are interested in.
   // If there is more than one, we assume something is off and error out.
-
   if (!isParamSetByUser("step_user_object"))
   {
     std::vector<const UserObject *> uos;

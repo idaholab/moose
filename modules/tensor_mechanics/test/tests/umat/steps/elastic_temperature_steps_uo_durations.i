@@ -103,7 +103,7 @@
 [UserObjects]
   [step_uo]
    type = StepUserObject
-   step_start_times = '0 5'
+   step_durations = '5'
   []
 []
 

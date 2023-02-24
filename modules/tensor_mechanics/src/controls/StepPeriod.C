@@ -23,34 +23,63 @@ StepPeriod::validParams()
   params.addClassDescription(
       "Control the enabled/disabled state of objects with user-provided simulation steps.");
   params.addParam<bool>(
-      "set_sync_times", false, "Set the start and end time as execute sync times.");
-  params.addRequiredParam<UserObjectName>(
+      "set_sync_times", true, "Set the start and end time as execute sync times.");
+  params.addParam<UserObjectName>(
       "step_user_object", "The StepUserObject that provides times from simulation loading steps.");
   params.addRequiredParam<unsigned int>("step_number",
                                         "Step number on which this control object applies.");
-
   return params;
 }
 
-StepPeriod::StepPeriod(const InputParameters & parameters)
-  : TimePeriodBase(parameters), _step_user_object(getUserObject<StepUserObject>("step_user_object"))
-{
-  _start_time.resize(1);
-  _end_time.resize(1);
-
-  // Set start time
-  _start_time[0] = _step_user_object.getStartTime(getParam<unsigned int>("step_number"));
-
-  // Set end time
-  _end_time[0] = _step_user_object.getEndTime(getParam<unsigned int>("step_number"));
-
-  // Call base method to populate control times.
-  TimePeriodBase::setupTimes();
-}
+StepPeriod::StepPeriod(const InputParameters & parameters) : TimePeriodBase(parameters) {}
 
 void
 StepPeriod::initialSetup()
 {
+  // Let's automatically detect uos and identify the one we are interested in.
+  // If there is more than one, we assume something is off and error out.
+  if (!isParamSetByUser("step_user_object"))
+  {
+    std::vector<const UserObject *> uos;
+    _fe_problem.theWarehouse().query().condition<AttribSystem>("UserObject").queryIntoUnsorted(uos);
+
+    std::vector<const StepUserObject *> step_uos;
+    for (const auto & uo : uos)
+    {
+      const StepUserObject * possible_step_uo = dynamic_cast<const StepUserObject *>(uo);
+      if (possible_step_uo)
+        step_uos.push_back(possible_step_uo);
+    }
+
+    if (step_uos.size() > 1)
+      mooseError(
+          "Your input file has multiple StepUserObjects. MOOSE currently only support one in ",
+          name(),
+          ". \n");
+    else if (step_uos.size() == 1)
+      mooseInfo("A StepUserObject, ",
+                step_uos[0]->name(),
+                ", has been identified and will be used to drive stepping behavior in ",
+                name(),
+                ".");
+
+    _step_user_object = step_uos.size() == 1 ? step_uos[0] : nullptr;
+  }
+  else
+    _step_user_object = &getUserObject<StepUserObject>("step_user_object");
+
+  _start_time.resize(1);
+  _end_time.resize(1);
+
+  // Set start time
+  _start_time[0] = _step_user_object->getStartTime(getParam<unsigned int>("step_number"));
+
+  // Set end time
+  _end_time[0] = _step_user_object->getEndTime(getParam<unsigned int>("step_number"));
+
+  // Call base method to populate control times.
+  TimePeriodBase::setupTimes();
+
   if (getParam<bool>("set_sync_times"))
   {
     std::set<Real> & sync_times = _app.getOutputWarehouse().getSyncTimes();

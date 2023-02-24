@@ -12,7 +12,7 @@
 #include "GeneralUserObject.h"
 
 /**
- * User object that provides simulation steps given times of the transient simulation.
+ * User object that provides simulation steps given user input
  */
 class StepUserObject : public GeneralUserObject
 {
@@ -33,6 +33,15 @@ protected:
   void execute() override;
   void finalize() override;
 
-  // Times at which steps start/end
-  const std::vector<Real> _times;
+  // Step start times
+  std::vector<Real> _times;
+
+  // Step durations that define loading steps
+  std::vector<Real> _step_durations;
+
+  // Total time interval that's divided into equally sized steps
+  Real _total_time_interval;
+
+  // Number of steps to divide the total_time_interval
+  unsigned int _number_steps;
 };

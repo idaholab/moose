@@ -152,13 +152,15 @@ AbaqusUMATStress::initialSetup()
 
     if (step_uos.size() > 1)
       mooseError(
-          "Your input file has multiple StepUserObjects. MOOSE currently only support one in "
-          "AbaqusUMATStress.");
+          "Your input file has multiple StepUserObjects. MOOSE currently only support one in ",
+          name(),
+          ". \n");
     else if (step_uos.size() == 1)
-      mooseInfo(
-          "A StepUserObject, ",
-          step_uos[0]->name(),
-          ", has been identified and will be used to drive stepping behavior in AbaqusUMATStress.");
+      mooseInfo("A StepUserObject, ",
+                step_uos[0]->name(),
+                ", has been identified and will be used to drive stepping behavior in ",
+                name(),
+                ".");
 
     _step_user_object = step_uos.size() == 1 ? step_uos[0] : nullptr;
   }

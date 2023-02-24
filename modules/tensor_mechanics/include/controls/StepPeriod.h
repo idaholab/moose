@@ -36,5 +36,5 @@ protected:
 
   virtual bool conditionMet(const unsigned int & i) override;
 
-  const StepUserObject & _step_user_object;
+  const StepUserObject * _step_user_object;
 };
