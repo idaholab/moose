@@ -203,10 +203,9 @@ MortarConstraintBase::zeroInactiveLMDofs(const std::unordered_set<const Node *> 
         continue;
 
       const auto dof_index = node->dof_number(sn, vn, 0);
-      if (_subproblem.currentlyComputingJacobian() ||
-          _subproblem.currentlyComputingResidualAndJacobian())
+      if (_assembly.computingJacobian())
         _assembly.cacheJacobian(dof_index, dof_index, 1., _matrix_tags);
-      if (!_subproblem.currentlyComputingJacobian())
+      if (_assembly.computingResidual())
       {
         Real lm_value = _var->getNodalValue(*node);
         _assembly.cacheResidual(dof_index, lm_value, _vector_tags);

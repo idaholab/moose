@@ -1449,10 +1449,10 @@ FEProblemBase::prepare(const Elem * elem, THREAD_ID tid)
 
     // This method is called outside of residual/Jacobian callbacks during initial condition
     // evaluation
-    if ((!_has_jacobian || !_const_jacobian) && _currently_computing_jacobian)
+    if ((!_has_jacobian || !_const_jacobian) && currentlyComputingJacobian())
       _assembly[tid][i]->prepareJacobianBlock();
     _assembly[tid][i]->prepareResidual();
-    if (_has_nonlocal_coupling && _currently_computing_jacobian)
+    if (_has_nonlocal_coupling && currentlyComputingJacobian())
       _assembly[tid][i]->prepareNonlocal();
   }
   _aux->prepare(tid);
@@ -5862,9 +5862,15 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
     for (const auto & it : _random_data_objects)
       it.second->updateSeeds(EXEC_LINEAR);
 
-    _currently_computing_residual_and_jacobian = true;
+    setCurrentlyComputingResidual(true);
+    setCurrentlyComputingJacobian(true);
+    setCurrentlyComputingResidualAndJacobian(true);
     if (_displaced_problem)
+    {
+      _displaced_problem->setCurrentlyComputingResidual(true);
+      _displaced_problem->setCurrentlyComputingJacobian(true);
       _displaced_problem->setCurrentlyComputingResidualAndJacobian(true);
+    }
 
     execTransfers(EXEC_LINEAR);
 
@@ -5955,9 +5961,15 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
     _current_nl_sys->disassociateMatrixFromTag(jacobian, _current_nl_sys->systemMatrixTag());
     _current_nl_sys->disassociateVectorFromTag(residual, _current_nl_sys->residualVectorTag());
 
-    _currently_computing_residual_and_jacobian = false;
+    setCurrentlyComputingResidual(false);
+    setCurrentlyComputingJacobian(false);
+    setCurrentlyComputingResidualAndJacobian(false);
     if (_displaced_problem)
+    {
+      _displaced_problem->setCurrentlyComputingResidual(false);
+      _displaced_problem->setCurrentlyComputingJacobian(false);
       _displaced_problem->setCurrentlyComputingResidualAndJacobian(false);
+    }
   }
   catch (MooseException & e)
   {

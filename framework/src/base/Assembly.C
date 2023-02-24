@@ -70,6 +70,7 @@ Assembly::Assembly(SystemBase & sys, THREAD_ID tid)
     _subproblem(_sys.subproblem()),
     _displaced(dynamic_cast<DisplacedSystem *>(&sys) ? true : false),
     _nonlocal_cm(_subproblem.nonlocalCouplingMatrix(_sys.number())),
+    _computing_residual(_subproblem.currentlyComputingResidual()),
     _computing_jacobian(_subproblem.currentlyComputingJacobian()),
     _computing_residual_and_jacobian(_subproblem.currentlyComputingResidualAndJacobian()),
     _dof_map(_sys.dofMap()),
@@ -3395,9 +3396,6 @@ Assembly::processResidualAndJacobian(const ADReal & residual,
                                      const std::set<TagID> & vector_tags,
                                      const std::set<TagID> & matrix_tags)
 {
-  mooseAssert(!(_computing_jacobian && _computing_residual_and_jacobian),
-              "These should never be true at the same time");
-
   if (computingResidual())
     processResidual(MetaPhysicL::raw_value(residual), row_index, vector_tags);
 
