@@ -28,6 +28,9 @@ public:
   /// Computes d-residual / d-jvar... storing the result in Ke.
   virtual void computeOffDiagJacobian(unsigned int jvar) override;
 
+  /// Compute the residual and Jacobian together
+  virtual void computeResidualAndJacobian() override;
+
   /**
    * Computes jacobian block with respect to a scalar variable
    * @param jvar The number of the scalar variable

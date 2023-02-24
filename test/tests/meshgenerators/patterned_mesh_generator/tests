@@ -1,13 +1,36 @@
 [Tests]
-  [./patterned_mesh_generator_test]
+  design = 'meshgenerators/PatternedMeshGenerator.md'
+  issues = '#11640 #23312'
+
+  [patterned_mesh_generator_test]
     type = 'Exodiff'
     input = 'patterned_mesh_generator.i'
     exodiff = 'patterned_mesh_generator_out.e'
     mesh_mode = 'REPLICATED'
     recover = false
+    requirement = 'The system shall have the ability to stitch multiple input meshes together into a new mesh based upon a user-defined pattern.'
+  []
 
-    requirement = 'The system shall have the ability to stetch multiple input meshes together into a new mesh based upon a user-defined pattern.'
-    design = 'meshgenerators/PatternedMeshGenerator.md'
-    issues = '#11640'
-  [../]
+  [different_boundary_ids_test]
+    type = 'Exodiff'
+    input = 'different_boundary_ids.i'
+    cli_args = "--mesh-only"
+    exodiff = 'different_boundary_ids_in.e'
+    mesh_mode = 'REPLICATED'
+    recover = false
+    requirement = 'The system shall have the ability to stitch multiple input meshes with differing boundary ids together into a new mesh based upon a user-defined pattern.'
+  []
+
+  [errors]
+    requirement = 'The system shall report a reasonable error when stitching meshes together from a user-defined pattern when'
+
+    [non_existent_boundary]
+      type = 'RunException'
+      input = 'patterned_mesh_generator.i'
+      cli_args = 'Mesh/pmg/right_boundary="fake_boundary"'
+      expect_err = 'does not exist in input mesh'
+      detail = 'the boundary name does not exist'
+      mesh_mode = 'REPLICATED'
+    []
+  []
 []

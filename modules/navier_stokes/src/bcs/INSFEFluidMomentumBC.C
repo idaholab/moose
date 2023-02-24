@@ -20,6 +20,9 @@ INSFEFluidMomentumBC::validParams()
 {
   InputParameters params = INSFEFluidIntegratedBCBase::validParams();
   params.addClassDescription("Specifies flow of momentum through a boundary");
+  params.addParam<bool>("conservative_form", false, "Whether the conservative form is used");
+  params.addParam<bool>(
+      "p_int_by_parts", false, "Whether integration by parts is applied to the pressure term");
   params.addRequiredParam<unsigned>("component", "0,1,or 2 for x-, y-, or z- direction");
   params.addParam<FunctionName>("p_fn", "Pressure function with time at the boundary");
   params.addParam<FunctionName>("v_fn", "Velocity function with time at the boundary");
@@ -41,6 +44,8 @@ INSFEFluidMomentumBC::validParams()
 
 INSFEFluidMomentumBC::INSFEFluidMomentumBC(const InputParameters & parameters)
   : INSFEFluidIntegratedBCBase(parameters),
+    _conservative_form(getParam<bool>("conservative_form")),
+    _p_int_by_parts(getParam<bool>("p_int_by_parts")),
     _component(getParam<unsigned>("component")),
     _mu(getMaterialProperty<Real>("dynamic_viscosity")),
     _mu_t(getMaterialProperty<Real>("turbulence_viscosity")),
@@ -98,10 +103,10 @@ INSFEFluidMomentumBC::computeQpResidual()
   Real viscous_part = (porosity > 0.99)
                           ? -(_mu[_qp] + _mu_t[_qp]) * _grad_u[_qp] * _normals[_qp] * _test[_i][_qp]
                           : 0;
+  Real p_part = _p_int_by_parts ? porosity * p_bc * _normals[_qp](_component) * _test[_i][_qp] : 0;
+  Real conv_part = _conservative_form ? _rho[_qp] * _u[_qp] * v_bc / porosity * _test[_i][_qp] : 0;
 
-  return (porosity * p_bc * _normals[_qp](_component) + _rho[_qp] * _u[_qp] * v_bc / porosity) *
-             _test[_i][_qp] +
-         viscous_part;
+  return p_part + conv_part + viscous_part;
 }
 
 Real
@@ -111,19 +116,22 @@ INSFEFluidMomentumBC::computeQpJacobian()
   RealVectorValue vec_vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
   Real v_bc = _has_vbc ? -_v_fn->value(_t, _q_point[_qp]) : vec_vel * _normals[_qp];
 
-  Real convection_part = 0;
-  if (_has_vbc)
-    convection_part = _rho[_qp] * _phi[_j][_qp] * v_bc / porosity * _test[_i][_qp];
-  else
-    convection_part =
-        _rho[_qp] * _phi[_j][_qp] * v_bc / porosity * _test[_i][_qp] +
-        _rho[_qp] * _u[_qp] * _phi[_j][_qp] * _normals[_qp](_component) / porosity * _test[_i][_qp];
+  Real conv_part = 0;
+  if (_conservative_form)
+  {
+    if (_has_vbc)
+      conv_part = _rho[_qp] * _phi[_j][_qp] * v_bc / porosity * _test[_i][_qp];
+    else
+      conv_part = _rho[_qp] * _phi[_j][_qp] * v_bc / porosity * _test[_i][_qp] +
+                  _rho[_qp] * _u[_qp] * _phi[_j][_qp] * _normals[_qp](_component) / porosity *
+                      _test[_i][_qp];
+  }
   Real viscous_part = (porosity > 0.99)
                           ? -(_mu[_qp] + _mu_t[_qp]) * _grad_phi[_j][_qp](_component) *
                                 _normals[_qp](_component) * _test[_i][_qp]
                           : 0;
 
-  return convection_part + viscous_part;
+  return conv_part + viscous_part;
 }
 
 Real
@@ -135,29 +143,31 @@ INSFEFluidMomentumBC::computeQpOffDiagJacobian(unsigned int jvar)
 
   // this is the jacobian w.r.t branch pressure
   if (jvar == _p_branch_var_number)
-  {
-    return porosity * _normals[_qp](_component) * _test[_i][_qp];
-  }
-  //
-  Real jac = 0.;
+    return _p_int_by_parts ? porosity * _normals[_qp](_component) * _test[_i][_qp] : 0;
+
+  Real jac = 0;
   switch (m)
   {
     case 0:
       if (!(_has_pbc || _has_pbranch))
-        jac = porosity * _phi[_j][_qp] * _normals[_qp](_component) * _test[_i][_qp];
+        jac = _p_int_by_parts
+                  ? porosity * _phi[_j][_qp] * _normals[_qp](_component) * _test[_i][_qp]
+                  : 0;
       break;
+
     case 1:
     case 2:
     case 3:
-    {
       if (m != (_component + 1))
-        jac =
-            _rho[_qp] / porosity * _phi[_j][_qp] * _test[_i][_qp] * _u[_qp] * _normals[_qp](m - 1);
+        jac = _conservative_form ? _rho[_qp] / porosity * _phi[_j][_qp] * _test[_i][_qp] * _u[_qp] *
+                                       _normals[_qp](m - 1)
+                                 : 0;
       break;
-    }
+
     case 4:
     default:
-      jac = 0.;
+      jac = 0;
   }
+
   return jac;
 }

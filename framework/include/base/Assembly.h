@@ -1801,15 +1801,19 @@ public:
   void modifyArbitraryWeights(const std::vector<Real> & weights);
 
   /**
-   * @return whether we are computing a residual. In practice this will return true whenever we are
-   * not computing a Jacobian
+   * @return whether we are computing a residual
    */
-  bool computingResidual() const { return !_computing_jacobian; }
+  bool computingResidual() const { return _computing_residual; }
 
   /**
    * @return whether we are computing a Jacobian
    */
-  bool computingJacobian() const { return _computing_jacobian || _computing_residual_and_jacobian; }
+  bool computingJacobian() const { return _computing_jacobian; }
+
+  /**
+   * @return whether we are computing a residual and a Jacobian simultaneously
+   */
+  bool computingResidualAndJacobian() const { return _computing_residual_and_jacobian; }
 
 protected:
   /**
@@ -2130,6 +2134,9 @@ private:
   /// Coupling matrices
   const CouplingMatrix * _cm;
   const CouplingMatrix & _nonlocal_cm;
+
+  /// Whether we are currently computing the residual
+  const bool & _computing_residual;
 
   /// Whether we are currently computing the Jacobian
   const bool & _computing_jacobian;

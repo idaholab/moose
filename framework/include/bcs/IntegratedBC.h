@@ -35,6 +35,7 @@ public:
    * @param jvar The number of the scalar variable
    */
   void computeOffDiagJacobianScalar(unsigned int jvar) override;
+  virtual void computeResidualAndJacobian() override;
 
 protected:
   /**

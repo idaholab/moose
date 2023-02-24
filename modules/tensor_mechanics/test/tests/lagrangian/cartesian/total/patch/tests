@@ -1,18 +1,28 @@
 [Tests]
   issues = '#17472'
   design = 'source/kernels/lagrangian/TotalLagrangianStressDivergence.md'
-  [./small]
+  [small]
     type = Exodiff
     input = 'small_patch.i'
     exodiff = 'small_patch_out.e'
     requirement = "Small strain uniaxial patch test passes"
     abs_zero = 1e-6
-  [../]
-  [./large]
+  []
+  [large]
     type = Exodiff
     input = 'large_patch.i'
     exodiff = 'large_patch_out.e'
     requirement = "Large strain uniaxial patch test passes"
     abs_zero = 1e-6
-  [../]
+  []
+  [residual_jacobian_together]
+    type = Exodiff
+    prereq = large
+    input = 'large_patch.i'
+    exodiff = 'large_patch_out.e'
+    cli_args = 'Executioner/residual_and_jacobian_together=true'
+    requirement = "The new system shall produce the correct results if residual and jacobian are "
+                  "computed together."
+    abs_zero = 1e-6
+  []
 []

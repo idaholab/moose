@@ -8,6 +8,14 @@
     issues = '#23121'
     requirement = 'The system shall be able to solve a porous flow with pressure drop due to viscous and inertia frictions.'
   [../]
+  [./pressure_gradient]
+    type = 'Exodiff'
+    input = 'pressure_gradient.i'
+    exodiff = 'pressure_gradient_out.e'
+    abs_zero = 1e-6
+    issues = '#23121'
+    requirement = 'The system shall be able to solve a pressure gradient driven porous flow.'
+  [../]
   [./pm_heat_source]
     type = 'Exodiff'
     input = 'pm_heat_source.i'

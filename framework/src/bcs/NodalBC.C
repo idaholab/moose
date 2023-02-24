@@ -163,3 +163,23 @@ NodalBC::computeQpOffDiagJacobian(unsigned int /*jvar*/)
 {
   return 0.;
 }
+
+void
+NodalBC::computeResidualAndJacobian()
+{
+  computeResidual();
+
+  for (const auto & [ivariable, jvariable] : _fe_problem.couplingEntries(_tid))
+  {
+    const unsigned int ivar = ivariable->number();
+    const unsigned int jvar = jvariable->number();
+
+    if (ivar != _var.number())
+      continue;
+
+    if (_is_implicit)
+      computeOffDiagJacobian(jvar);
+  }
+
+  /// TODO: add nonlocal Jacobians and scalar Jacobians
+}
