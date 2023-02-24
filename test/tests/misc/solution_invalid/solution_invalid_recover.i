@@ -66,5 +66,4 @@
 
 [Outputs]
   file_base = 'solution_invalid_recover'
-  json = true
 []

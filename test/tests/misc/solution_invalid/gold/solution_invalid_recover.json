@@ -1,0 +1,36 @@
+{
+    "reporters": {
+        "solution_invalidity": {
+            "type": "SolutionInvalidityReporter",
+            "values": {
+                "solution_invalidity": {
+                    "type": "SolutionInvalidity const*"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "solution_invalidity": {
+                "solution_invalidity": [
+                    {
+                        "converged_counts": 16,
+                        "message": "The diffusivity is greater than the threshold value!",
+                        "object_type": "NonsafeMaterial",
+                        "timestep_counts": 32,
+                        "total_counts": 128
+                    },
+                    {
+                        "converged_counts": 16,
+                        "message": "Extra invalid thing!",
+                        "object_type": "NonsafeMaterial",
+                        "timestep_counts": 32,
+                        "total_counts": 128
+                    }
+                ]
+            },
+            "time": 4.0,
+            "time_step": 4
+        }
+    ]
+}

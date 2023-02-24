@@ -80,14 +80,14 @@
 
   [test]
     requirement = 'The system shall be able to support '
+    design = 'SolutionInvalidity.md'
+    issues = '#22814'
     [solution_valid_checkpoint]
       allow_warnings = true
       recover = false
       type = RunApp
       input = solution_invalid_recover.i
       cli_args = "Outputs/file_base='solution_invalid_checkpoint' Outputs/checkpoint=true"
-      design = 'SolutionInvalidity.md'
-      issues = '#22814'
       detail = 'outputting of checkpoint files'
     []
 
@@ -97,11 +97,9 @@
       delete_output_before_running = false
       type = JSONDiff
       input = solution_invalid_recover.i
-      cli_args = "--recover solution_invalid_checkpoint_cp/0003 Executioner/num_steps=4"
-      jsondiff = 'solution_invalid_checkpoint.json'
+      cli_args = "--recover solution_invalid_checkpoint_cp/0003 Outputs/file_base='solution_invalid_recover' Executioner/num_steps=4 Outputs/json=true"
+      jsondiff = 'solution_invalid_recover.json'
       prereq = 'test/solution_valid_checkpoint'
-      design = 'SolutionInvalidity.md'
-      issues = '#22814'
       detail = 'restarting from the output data'
     []
   []
