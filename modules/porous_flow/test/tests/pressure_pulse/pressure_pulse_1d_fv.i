@@ -49,15 +49,13 @@
   []
 []
 
-[Modules]
-  [FluidProperties]
-    [simple_fluid]
-      type = SimpleFluidProperties
-      bulk_modulus = 2e9
-      density0 = 1000
-      thermal_expansion = 0
-      viscosity = 1e-3
-    []
+[FluidProperties]
+  [simple_fluid]
+    type = SimpleFluidProperties
+    bulk_modulus = 2e9
+    density0 = 1000
+    thermal_expansion = 0
+    viscosity = 1e-3
   []
 []
 
@@ -96,10 +94,12 @@
 
 [FVBCs]
   [left]
-    type = FVDirichletBC
+    type = FVPorousFlow1PhaseAdvectiveFluxBC
     boundary = left
-    value = 3E6
+    porepressure_value = 3E6
     variable = pp
+    gravity = '0 0 0'
+    fluid_component = 0
   []
 []
 

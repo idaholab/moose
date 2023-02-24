@@ -1921,7 +1921,16 @@ public:
                                      const std::vector<Real> * const weights = nullptr,
                                      THREAD_ID tid = 0) override;
 
+  /**
+   * @return whether to perform a boundary condition integrity check for finite volume
+   */
   bool fvBCsIntegrityCheck() const { return _fv_bcs_integrity_check; }
+
+  /**
+   * @param fv_bcs_integrity_check Whether to perform a boundary condition integrity check for
+   * finite volume
+   */
+  void fvBCsIntegrityCheck(bool fv_bcs_integrity_check);
 
   /**
    * Get the materials and variables potentially needed for FV
@@ -2286,7 +2295,7 @@ protected:
   bool _material_coverage_check;
 
   /// Whether to check overlapping Dirichlet and Flux BCs and/or multiple DirichletBCs per sideset
-  const bool _fv_bcs_integrity_check;
+  bool _fv_bcs_integrity_check;
 
   /// Determines whether a check to verify material dependencies on every subdomain
   const bool _material_dependency_check;
@@ -2542,4 +2551,14 @@ FEProblemBase::setCurrentNonlinearSystem(const unsigned int nl_sys_num)
   mooseAssert(nl_sys_num < _nl.size(),
               "System number greater than the number of nonlinear systems");
   _current_nl_sys = _nl[nl_sys_num].get();
+}
+
+inline void
+FEProblemBase::fvBCsIntegrityCheck(const bool fv_bcs_integrity_check)
+{
+  if (!_fv_bcs_integrity_check)
+    // the user has requested that we don't check integrity so we will honor that
+    return;
+
+  _fv_bcs_integrity_check = fv_bcs_integrity_check;
 }
