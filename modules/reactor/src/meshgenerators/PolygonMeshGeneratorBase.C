@@ -330,24 +330,38 @@ PolygonMeshGeneratorBase::buildSlice(
               corner_to_corner,
               azimuthal_tangent);
 
+  // See if the central region is the only part of the innermost region
+  bool is_central_region_independent;
+  if (ring_layers.empty())
+    is_central_region_independent = background_inner_boundary_layer_params.intervals +
+                                        background_intervals +
+                                        background_outer_boundary_layer_params.intervals ==
+                                    1;
+  else
+    is_central_region_independent = ring_layers[0] + ring_inner_boundary_layer_params.intervals[0] +
+                                        ring_outer_boundary_layer_params.intervals[0] ==
+                                    1;
+
   // Assign elements, boundaries, and subdomains;
   // Add Tri3 or Quad4 mesh into innermost (central) region
   if (quad_center_elements)
     cenQuadElemDef(*mesh,
                    div_num,
                    block_id_shift,
-                   create_outward_interface_boundaries,
+                   create_outward_interface_boundaries && is_central_region_independent,
                    boundary_id_shift,
                    nodes,
                    (!has_rings) && (!has_ducts) && (background_intervals == 1),
+                   // Note here, has_ring means either there are ring regions or background inner
+                   // boundary layer; has_ducts means either there are duct regions or background
+                   // outer boundary layer. Same in cenTriElemDef()
                    side_index);
   else
     cenTriElemDef(*mesh,
                   num_sectors_per_side,
                   azimuthal_tangent,
                   block_id_shift,
-                  create_outward_interface_boundaries ||
-                      ((!has_rings) && (!has_ducts) && (background_intervals == 1)),
+                  create_outward_interface_boundaries && is_central_region_independent,
                   boundary_id_shift,
                   (!has_rings) && (!has_ducts) && (background_intervals == 1),
                   side_index);
@@ -728,10 +742,13 @@ PolygonMeshGeneratorBase::cenQuadElemDef(ReplicatedMesh & mesh,
     if (i == div_num * div_num - 2)
       boundary_info.add_side(elem_Quad4, 1, SLICE_END);
     if (assign_external_boundary)
+    {
+      boundary_info.add_side(elem_Quad4, 2, OUTER_SIDESET_ID);
       boundary_info.add_side(
           elem_Quad4,
           2,
           (i < div_num * (div_num - 1) ? OUTER_SIDESET_ID : OUTER_SIDESET_ID_ALT) + side_index);
+    }
   }
 }
 
@@ -763,8 +780,11 @@ PolygonMeshGeneratorBase::cenTriElemDef(ReplicatedMesh & mesh,
     else if (i == angle_number)
       boundary_info.add_side(elem, 0, SLICE_END);
     if (assign_external_boundary)
+    {
+      boundary_info.add_side(elem, 1, OUTER_SIDESET_ID);
       boundary_info.add_side(
           elem, 1, (i <= angle_number / 2 ? OUTER_SIDESET_ID : OUTER_SIDESET_ID_ALT) + side_index);
+    }
   }
 }
 
@@ -808,13 +828,8 @@ PolygonMeshGeneratorBase::quadElemDef(ReplicatedMesh & mesh,
         else
           elem_Quad4->subdomain_id() = k + 2 + block_id_shift;
 
-        if (m == 0 && create_inward_interface_boundaries)
-        {
-          if (subdomain_rings[0] == 0)
-            boundary_info.add_side(elem_Quad4, 0, k * 2 + 1 + boundary_id_shift);
-          else
-            boundary_info.add_side(elem_Quad4, 0, k * 2 + 2 + boundary_id_shift);
-        }
+        if (m == 0 && create_inward_interface_boundaries && k > 0)
+          boundary_info.add_side(elem_Quad4, 0, k * 2 + boundary_id_shift);
         if (m == (subdomain_rings[k] - 1))
         {
           if (k == (subdomain_rings.size() - 1))
@@ -826,12 +841,7 @@ PolygonMeshGeneratorBase::quadElemDef(ReplicatedMesh & mesh,
               boundary_info.add_side(elem_Quad4, 2, OUTER_SIDESET_ID_ALT + side_index);
           }
           else if (create_outward_interface_boundaries)
-          {
-            if (subdomain_rings[0] == 0)
-              boundary_info.add_side(elem_Quad4, 2, k * 2 + 2 + boundary_id_shift);
-            else
-              boundary_info.add_side(elem_Quad4, 2, k * 2 + 3 + boundary_id_shift);
-          }
+            boundary_info.add_side(elem_Quad4, 2, k * 2 + 1 + boundary_id_shift);
         }
       }
       j++;

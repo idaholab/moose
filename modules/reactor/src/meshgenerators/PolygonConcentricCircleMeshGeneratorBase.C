@@ -931,29 +931,21 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
   }
   if (!_inward_interface_boundary_names.empty())
   {
-    unsigned int interface_id_shift =
-        _has_rings ? (_ring_intervals.front() > 1 ? 2 : 1) : (_background_intervals > 1 ? 2 : 1);
     for (unsigned int i = 0; i < _inward_interface_boundary_names.size(); i++)
     {
-      mesh0->get_boundary_info().sideset_name(i + interface_id_shift +
-                                              _interface_boundary_id_shift) =
+      mesh0->get_boundary_info().sideset_name(i * 2 + 2 + _interface_boundary_id_shift) =
           _inward_interface_boundary_names[i];
-      mesh0->get_boundary_info().nodeset_name(i + interface_id_shift +
-                                              _interface_boundary_id_shift) =
+      mesh0->get_boundary_info().nodeset_name(i * 2 + 2 + _interface_boundary_id_shift) =
           _inward_interface_boundary_names[i];
     }
   }
   if (!_outward_interface_boundary_names.empty())
   {
-    unsigned int interface_id_shift =
-        _has_rings ? (_ring_intervals.front() > 1 ? 2 : 1) : (_background_intervals > 1 ? 2 : 1);
     for (unsigned int i = 0; i < _outward_interface_boundary_names.size(); i++)
     {
-      mesh0->get_boundary_info().sideset_name(i + interface_id_shift +
-                                              _interface_boundary_id_shift) =
+      mesh0->get_boundary_info().sideset_name(i * 2 + 1 + _interface_boundary_id_shift) =
           _outward_interface_boundary_names[i];
-      mesh0->get_boundary_info().nodeset_name(i + interface_id_shift +
-                                              _interface_boundary_id_shift) =
+      mesh0->get_boundary_info().nodeset_name(i * 2 + 1 + _interface_boundary_id_shift) =
           _outward_interface_boundary_names[i];
     }
   }
