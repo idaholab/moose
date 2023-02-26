@@ -1,6 +1,6 @@
 [Tests]
   issues = "#23315"
-  design = "BFActiveLearningGPDecision.md"
+  design = "BiFidelityActiveLearningGPDecision.md"
   [sampling_bf]
     requirement = 'The system shall be able to perform Monte Carlo sampling with bi-fidelity active learning with'
     [SingleProc_SingleRow_Ufunction]
