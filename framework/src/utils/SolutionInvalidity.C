@@ -60,7 +60,7 @@ SolutionInvalidity::solutionInvalid() const
 }
 
 void
-SolutionInvalidity::resetSolutionInvalid()
+SolutionInvalidity::resetSolutionInvalidCurrentIteration()
 {
   for (auto & entry : _counts)
     entry.counts = 0;
@@ -173,16 +173,16 @@ SolutionInvalidity::summaryTable() const
   vtable.setColumnFormat({
       VariadicTableColumnFormat::AUTO, // Object Type
       VariadicTableColumnFormat::AUTO, // Converged Iteration Warnings
-      VariadicTableColumnFormat::AUTO, // Latest Time Iteration Warnings
-      VariadicTableColumnFormat::AUTO, // Total Iteration Warnings
+      VariadicTableColumnFormat::AUTO, // Latest Time Step Warnings
+      VariadicTableColumnFormat::AUTO, // Total Simulation Warnings
       VariadicTableColumnFormat::AUTO, // Message
   });
 
   vtable.setColumnPrecision({
       1, // Object Name
       0, // Converged Iteration Warnings
-      0, // Latest Time Iteration Warnings
-      0, // Total Iteration Warnings
+      0, // Latest Time Step Warnings
+      0, // Total Simulation Warnings
       1, // Message
   });
 
@@ -207,7 +207,6 @@ SolutionInvalidity::summaryTable() const
   return vtable;
 }
 
-// Store data structure for recover
 void
 dataStore(std::ostream & stream, SolutionInvalidity & solution_invalidity, void * context)
 {
@@ -232,7 +231,6 @@ dataStore(std::ostream & stream, SolutionInvalidity & solution_invalidity, void 
   }
 }
 
-// Load data structure for recover
 void
 dataLoad(std::istream & stream, SolutionInvalidity & solution_invalidity, void * context)
 {

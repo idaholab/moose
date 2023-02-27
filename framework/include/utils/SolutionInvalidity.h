@@ -31,7 +31,7 @@ template <class... Ts>
 class VariadicTable;
 
 /**
- * The SolutionInvalidity will contains all the solution invalid warnings info
+ * The SolutionInvalidity will contain all the information about the occurrence(s) of solution invalidity
  */
 class SolutionInvalidity : protected ConsoleStreamInterface, public ParallelObject
 {
@@ -49,8 +49,8 @@ public:
   /// Loop over all the tracked objects and determine whether solution invalid is detected
   bool solutionInvalid() const;
 
-  /// Reset the number of solution invalid occurrences back to zero for each time iteration
-  void resetSolutionInvalidTimeIter();
+  /// Reset the number of solution invalid occurrences back to zero for the current time step
+  void resetSolutionInvalidTimeStep();
 
   /// Reset the number of solution invalid occurrences back to zero
   void resetSolutionInvalid();
@@ -59,7 +59,7 @@ public:
   void solutionInvalidAccumulation();
 
   /// Pass the number of solution invalid occurrences from current iteration to cumulative time iteration counters
-  void solutionInvalidAccumulationTimeIter();
+  void solutionInvalidAccumulationTimeStep();
 
   /// Struct used in _counts for storing invalid occurrences
   struct InvalidCounts
@@ -80,7 +80,6 @@ public:
 
   /**
    * Immediately print the section and message for debug purpose
-   *  @param console The output stream to output to
    */
   void printDebug(InvalidSolutionID _invalid_solution_id) const;
 
@@ -99,7 +98,6 @@ private:
   /// TODO: These can be changed to shared_mutexes
   mutable std::mutex _invalid_mutex;
 
-  // Build a VariadicTable for solution invalidity
   typedef VariadicTable<std::string,
                         unsigned long int,
                         unsigned long int,
@@ -107,6 +105,7 @@ private:
                         std::string>
       FullTable;
 
+  /// Build a VariadicTable for solution invalidity
   FullTable summaryTable() const;
 
   /// Create a registry to keep track of the names and occurrences of the solution invalidity
