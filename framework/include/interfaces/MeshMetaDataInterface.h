@@ -114,6 +114,10 @@ private:
   /// The MooseObject (if any); used for better error handling
   const MooseObject * const _meta_data_object;
 
+  /**
+   * Helper for forwarding a mooseError to an object's mooseError if it is available (said error
+   * will provide more context: object name and type)
+   */
   template <typename... Args>
   [[noreturn]] void mooseErrorInternal(Args &&... args) const
   {
@@ -135,7 +139,7 @@ MeshMetaDataInterface::getMeshProperty(const std::string & data_name, const std:
   mooseAssert(value->declared(), "Value has not been declared");
   const RestartableData<T> * T_value = dynamic_cast<const RestartableData<T> *>(value);
   if (!T_value)
-    mooseErrorInternal("While retreiving mesh property '",
+    mooseErrorInternal("While retrieving mesh property '",
                        prefix,
                        "/",
                        data_name,

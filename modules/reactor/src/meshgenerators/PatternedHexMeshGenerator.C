@@ -292,7 +292,10 @@ PatternedHexMeshGenerator::generate()
   {
     meshes[i] = dynamic_pointer_cast<ReplicatedMesh>(std::move(*_mesh_ptrs[i]));
     if (!meshes[i])
-      paramError("inputs", "Mesh '", _input_names[i], "' is not a replicated mesh but it must be");
+      paramError("inputs",
+                 "Mesh '",
+                 _input_names[i],
+                 "' is not a replicated mesh. Only replicated meshes are supported");
 
     // throw an error message if the input mesh has a flat side up
     if (hasMeshProperty("flat_side_up", _input_names[i]))

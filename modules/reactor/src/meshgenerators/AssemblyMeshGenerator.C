@@ -438,8 +438,8 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
       std::string plane_id_name = "plane_id";
       params.set<std::string>("id_name") = "plane_id";
 
-      addMeshSubgenerator("PlaneIDMeshGenerator", name() + "_extrudedIDs", params);
       build_mesh_name = name() + "_extrudedIDs";
+      addMeshSubgenerator("PlaneIDMeshGenerator", build_mesh_name, params);
     }
   }
   else

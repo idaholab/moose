@@ -162,7 +162,7 @@ private:
 
   /**
    * Internal method for actually constructing a mesh generator after it
-   * has been delcared externally in addMeshGenerator (in Actions).
+   * has been declared externally in addMeshGenerator (in Actions).
    */
   std::shared_ptr<MeshGenerator> createMeshGenerator(const std::string & name);
 
@@ -192,7 +192,7 @@ private:
   /// Map of MeshGenerator -> name
   std::map<std::string, std::shared_ptr<MeshGenerator>> _mesh_generators;
 
-  /// Holds the ordered mesh generators from createMeshGeneratorOrder() until they are executed
+  /// Holds the ordered mesh generators from createMeshGeneratorOrder() until they are executed in executeMeshGenerators()
   std::vector<std::vector<MeshGenerator *>> _ordered_mesh_generators;
 
   /// Holds the output for each mesh generator - including duplicates needed downstream

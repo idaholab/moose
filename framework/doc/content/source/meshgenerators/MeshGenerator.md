@@ -66,11 +66,11 @@ Your mesh generator can instantiate subgenerators itself, to create existing mes
 
 If you wish to use an input mesh from the primary generator as an input to a sub generator, you must first call `MeshGenerator::getMeshForSub()` or `MeshGenerator::getMeshForSubByName()` to declare said input as a dependency for the sub generator instead of the generator that creates the sub generator.
 
-### Declaring a Null Input
+### Declaring a Null or Dummy Input
 
 By default, the MeshGenerator system assumes that all parameters of type `MeshGeneratorName` or `std::vector<MeshGeneratorName>` are to be used as mesh inputs. If one of said names is not found, an error will be reported stating that the input mesh cannot be found. There exist cases where you want to allow the user to provide a "null" or dummy value for an input. An example is letting the user define a hole in a mesh pattern.
 
-You may do this by using the `MeshGenerator::declareNullMeshName()` API. This API takes a name that is to be considered unused as an input mesh. Any inputs with this name will not be searched for as existing MeshGenerator meshes and will return an uninitialized mesh when using the input mesh getters (`MeshGenerator::getMesh()`, etc).
+You may do this by using the `MeshGenerator::declareNullMeshName()` API. This API takes a name that is to be considered unused as an input mesh. Any input with this name will not be searched for as an existing MeshGenerator mesh and will return an uninitialized mesh when using the input mesh getters (`MeshGenerator::getMesh()`, etc).
 
 ## Showing Mesh Information
 
