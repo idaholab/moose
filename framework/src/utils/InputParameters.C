@@ -98,14 +98,28 @@ InputParameters::set_attributes(const std::string & name_in, bool inserted_only)
 
     if (_show_deprecated_message)
     {
-      auto emit_deprecation_message = [&name](const auto & deprecation_message)
-      { mooseDeprecated("The parameter '", name, "' is deprecated.\n", deprecation_message); };
+      auto emit_deprecation_message =
+          [this](const auto & deprecated_name, const auto & deprecation_message)
+      {
+        const auto current_show_trace = Moose::show_trace;
+        Moose::show_trace = false;
+        moose::internal::mooseDeprecatedStream(Moose::out,
+                                               false,
+                                               false,
+                                               errorPrefix(deprecated_name),
+                                               ":\n",
+                                               deprecation_message,
+                                               "\n");
+        Moose::show_trace = current_show_trace;
+      };
 
       if (_params.count(name) && !libmesh_map_find(_params, name)._deprecation_message.empty())
-        emit_deprecation_message(libmesh_map_find(_params, name)._deprecation_message);
+        emit_deprecation_message(name,
+                                 "The parameter '" + name + "' is deprecated.\n" +
+                                     libmesh_map_find(_params, name)._deprecation_message);
       else if (auto it = _old_to_new_name_and_dep.find(name_in);
                it != _old_to_new_name_and_dep.end() && !it->second.second.empty())
-        emit_deprecation_message(it->second.second);
+        emit_deprecation_message(name_in, it->second.second);
     }
   }
 }
@@ -393,8 +407,9 @@ InputParameters::declareControllable(const std::string & input_names,
 {
   std::vector<std::string> names;
   MooseUtils::tokenize<std::string>(input_names, names, 1, " ");
-  for (auto & name : names)
+  for (auto & name_in : names)
   {
+    const auto name = checkForRename(name_in);
     auto map_iter = _params.find(name);
     if (map_iter != _params.end()) // error is handled by checkParams method
     {
@@ -1261,7 +1276,7 @@ InputParameters::renameParamInternal(const std::string & old_name,
   std::string deprecation_message;
   if (!removal_date.empty())
     deprecation_message = "'" + old_name + "' has been deprecated and will be removed on " +
-                          removal_date + ". Please use '" + new_name + "' instead";
+                          removal_date + ". Please use '" + new_name + "' instead.";
 
   _old_to_new_name_and_dep.emplace(old_name, std::make_pair(new_name, deprecation_message));
   _new_to_old_names.emplace(new_name, old_name);

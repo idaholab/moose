@@ -218,7 +218,7 @@ public:
   template <typename... Args>
   void mooseDeprecated(Args &&... args) const
   {
-    moose::internal::mooseDeprecatedStream(_console, false, std::forward<Args>(args)...);
+    moose::internal::mooseDeprecatedStream(_console, false, true, std::forward<Args>(args)...);
   }
 
   template <typename... Args>
