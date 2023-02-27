@@ -9,23 +9,22 @@
 
 #pragma once
 
-#include "AuxKernel.h"
+#include "Kernel.h"
 
 /**
- * Aux kernel that updated values of coupled variables
+ * Kernel that tries to obtain a writable reference to a variable, but fails immediately because
+ * only AuxKernels, ElementUserObjects, and NodalUserObjects are permitted to get a writable
+ * reference.
  */
-class MultipleUpdateAux : public AuxKernel
+class MultipleUpdateErrorKernel : public Kernel
 {
 public:
   static InputParameters validParams();
 
-  MultipleUpdateAux(const InputParameters & parameters);
-  virtual ~MultipleUpdateAux();
+  MultipleUpdateErrorKernel(const InputParameters & parameters);
 
 protected:
-  virtual Real computeValue();
-
-  const VariableValue & _nl_u;
+  Real computeQpResidual() override;
 
   /// use deprecated API
   const bool _deprecated;

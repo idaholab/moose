@@ -842,33 +842,23 @@ Coupleable::writableVariable(const std::string & var_name, unsigned int comp)
   const auto * nuo = dynamic_cast<const NodalUserObject *>(this);
 
   if (!aux && !euo && !nuo)
-    mooseError("writableCoupledvalue() can only be called from AuxKernels, ElementUserObjects, or "
+    mooseError("writableVariable() can only be called from AuxKernels, ElementUserObjects, or "
                "NodalUserObjects. '",
                _obj->name(),
                "' is neither of those.");
 
-  if (aux && aux->isNodal() != var->isNodal())
-    mooseError("The AuxKernel '",
+  if (aux && !aux->isNodal() && var->isNodal())
+    mooseError("The elemental AuxKernel '",
                _obj->name(),
-               "' and the variable '",
+               "' cannot obtain a writable reference to the nodal variable '",
                var->name(),
-               "' must both either be nodal or elemental.");
+               "'.");
   if (euo && var->isNodal())
     mooseError("The ElementUserObject '",
                _obj->name(),
                "' cannot obtain a writable reference to the nodal variable '",
                var->name(),
                "'.");
-  // if (nuo && !var->isNodal()) is handled by checkVar already
-
-  // check block restrictions for compatibility
-  const auto * br = dynamic_cast<const BlockRestrictable *>(this);
-  if (!var->hasBlocks(br->blockIDs()))
-    mooseError("The variable '",
-               var->name(),
-               "' must be defined on all blocks '",
-               _obj->name(),
-               "' is defined on");
 
   // make sure only one object can access a variable
   checkWritableVar(var);
@@ -897,16 +887,16 @@ Coupleable::writableCoupledValue(const std::string & var_name, unsigned int comp
   const auto * aux = dynamic_cast<const AuxKernel *>(this);
 
   if (!aux)
-    mooseError("writableCoupledvalue() can only be called from AuxKernels, but '",
+    mooseError("writableCoupledValue() can only be called from AuxKernels, but '",
                _obj->name(),
                "' is not an AuxKernel.");
 
-  if (aux->isNodal() != var->isNodal())
-    mooseError("The AuxKernel '",
+  if (!aux->isNodal() && var->isNodal())
+    mooseError("The elemental AuxKernel '",
                _obj->name(),
-               "' and the variable '",
+               "' cannot obtain a writable reference to the nodal variable '",
                var->name(),
-               "' must both either be nodal or elemental.");
+               "'.");
 
   // make sure only one object can access a variable
   checkWritableVar(var);

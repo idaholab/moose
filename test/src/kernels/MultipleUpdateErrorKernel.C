@@ -7,26 +7,22 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MultipleUpdateAux.h"
+#include "MultipleUpdateErrorKernel.h"
 
-registerMooseObject("MooseTestApp", MultipleUpdateAux);
+registerMooseObject("MooseTestApp", MultipleUpdateErrorKernel);
 
 InputParameters
-MultipleUpdateAux::validParams()
+MultipleUpdateErrorKernel::validParams()
 {
-  InputParameters params = AuxKernel::validParams();
-
-  params.addRequiredCoupledVar("u", "unknown (nl-variable)");
+  InputParameters params = Kernel::validParams();
   params.addRequiredCoupledVar("var1", "an aux variable to update");
   params.addRequiredCoupledVar("var2", "another aux variable to update");
   params.addParam<bool>("use_deprecated_api", false, "Test the deprecated API");
   return params;
 }
 
-MultipleUpdateAux::MultipleUpdateAux(const InputParameters & parameters)
-  : AuxKernel(parameters),
-    _nl_u(coupledValue("u")),
-    _deprecated(getParam<bool>("use_deprecated_api"))
+MultipleUpdateErrorKernel::MultipleUpdateErrorKernel(const InputParameters & parameters)
+  : Kernel(parameters), _deprecated(getParam<bool>("use_deprecated_api"))
 {
   if (_deprecated)
   {
@@ -40,20 +36,8 @@ MultipleUpdateAux::MultipleUpdateAux(const InputParameters & parameters)
   }
 }
 
-MultipleUpdateAux::~MultipleUpdateAux() {}
-
 Real
-MultipleUpdateAux::computeValue()
+MultipleUpdateErrorKernel::computeQpResidual()
 {
-  if (_deprecated)
-  {
-    (*_dvar1)[_qp] = _nl_u[_qp] + 10.0;
-    (*_dvar2)[_qp] = _nl_u[_qp] + 200.0;
-  }
-  else
-  {
-    _var1->setNodalValue(_nl_u[_qp] + 10.0, _qp);
-    _var2->setNodalValue(_nl_u[_qp] + 200.0, _qp);
-  }
-  return -3.33;
+  mooseError("This should never be reached");
 }

@@ -56,7 +56,8 @@
 
   [./all]
     variable = tt
-    type = MultipleUpdateAuxDeprecated
+    type = MultipleUpdateAux
+    use_deprecated_api = true
     u = u
     var1 = ten
     var2 = 2k

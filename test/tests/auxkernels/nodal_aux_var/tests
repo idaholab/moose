@@ -32,6 +32,16 @@
     requirement = "The AuxKernel objects shall be capable of wriyting to to multiple coupled "
                   "variables."
   []
+  [multi_update_error]
+    type = RunException
+    input = multi_update_var_error.i
+    expect_err = "writableVariable\(\) can only be called from AuxKernels, ElementUserObjects, or "
+                 "NodalUserObjects\. 'all' is neither of those\."
+    issues = '#22563'
+    allow_deprecated = true
+    requirement = "The writableVariable API shall be limited to use from AuxKernels, "
+                  "ElementUserObjects, or NodalUserObjects."
+  []
 
   [multi_update_deprecated_test]
     type = 'Exodiff'
@@ -42,6 +52,46 @@
     requirement = "The AuxKernel objects shall be capable of wriyting to to multiple coupled "
                   "variables using the deprecated writeCoupledValue method."
   []
+  [multi_update_deprecated_error]
+    type = RunException
+    input = multi_update_var_error.i
+    cli_args = "Kernels/all/use_deprecated_api=true"
+    expect_err = "writableCoupledValue\(\) can only be called from AuxKernels, but 'all' is not an "
+                 "AuxKernel\."
+    issues = '#22563'
+    allow_deprecated = true
+    requirement = "The writableCoupledValue API shall be limited to use from AuxKernels, "
+                  "ElementUserObjects, or NodalUserObjects."
+  []
+  [multi_update_deprecated_error2]
+    type = RunException
+    input = multi_update_var_deprecated_test.i
+    cli_args = "AuxVariables/tt/family=MONOMIAL"
+    expect_err = "The elemental AuxKernel 'all' cannot obtain a writable reference to the nodal variable 'ten'\."
+    issues = '#22563'
+    allow_deprecated = true
+    requirement = "The writableCoupledValue API shall enforce nodal/elemental consistency between "
+                  "the kernel variable and the writable variables."
+  []
+  [multi_update_deprecated_error3]
+    type = RunException
+    input = multi_update_var_deprecated_test.i
+    cli_args = "Variables/ten2/family=LAGRANGE AuxKernels/all/var1=ten2"
+    expect_err = "'ten2' must be an auxiliary variable in Coupleable::writableCoupledValue"
+    issues = '#22563'
+    allow_deprecated = true
+    requirement = "The writableCoupledValue API can only act on AuxVariables."
+  []
+  [multi_update_deprecated_error4]
+    type = RunException
+    input = multi_update_var_deprecated_test.i
+    cli_args = "AuxKernels/all/var1=1"
+    expect_err = "Unable to create a writable reference for 'var1', is it a constant expression\?"
+    issues = '#22563'
+    allow_deprecated = true
+    requirement = "The writableCoupledValue API shall error out if a constant value is passed in as variable name."
+  []
+
   [multi_update_elem_test]
     type = 'Exodiff'
     input = 'multi_update_elem_var_test.i'
@@ -57,15 +107,17 @@
     exodiff = 'out_multi_elem_var.e'
     requirement = "The MOOSE auxiliary system shall be capable of updating multiple elemental "
                   "auxiliary variables within a single AuxKernel object."
+    issues = '#22563'
   []
 
   [multi_update_elem_family_error]
     type = 'RunException'
     input = 'multi_update_elem_var_test.i'
     cli_args = 'AuxVariables/ten/order=FIRST AuxVariables/ten/family=LAGRANGE'
-    expect_err = "The AuxKernel 'all' and the variable 'ten' must both either be nodal or elemental."
+    expect_err = "The elemental AuxKernel 'all' cannot obtain a writable reference to the nodal variable 'ten'\."
     requirement = "The MOOSE auxiliary system shall check compatibility between primary and writable "
                   "coupled variables."
+    issues = '#22563'
   []
 
   [ts_test]
