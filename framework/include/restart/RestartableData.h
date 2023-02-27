@@ -40,22 +40,22 @@ public:
    * String identifying the type of parameter stored.
    * Must be reimplemented in derived classes.
    */
-  [[nodiscard]] virtual std::string type() const = 0;
+  virtual std::string type() const = 0;
 
   /**
    * The full (unique) name of this particular piece of data.
    */
-  [[nodiscard]] const std::string & name() const { return _name; }
+  const std::string & name() const { return _name; }
 
   /**
    * A context pointer for helping with load / store.
    */
-  [[nodiscard]] void * context() { return _context; }
+  void * context() { return _context; }
 
   /**
    * Whether or not this data has been declared
    */
-  [[nodiscard]] bool declared() const { return _declared; }
+  bool declared() const { return _declared; }
 
   /**
    * Sets that this restartable value has been declared
@@ -101,17 +101,17 @@ public:
   /**
    * @returns a read-only reference to the parameter value.
    */
-  [[nodiscard]] const T & get() const { return _value; }
+  const T & get() const { return _value; }
 
   /**
    * @returns a writable reference to the parameter value.
    */
-  [[nodiscard]] T & set() { return _value; }
+  T & set() { return _value; }
 
   /**
    * String identifying the type of parameter stored.
    */
-  [[nodiscard]] virtual std::string type() const override final;
+  virtual std::string type() const override final;
 
   /**
    * Store the RestartableData into a binary stream

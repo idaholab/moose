@@ -132,7 +132,7 @@ public:
    * Returns the number of unique items stored in the dependency resolver. lindsayad comment: does
    * it really return the number of *unique* items?
    */
-  [[nodiscard]] std::size_t size() const { return _sorted_vector.size(); }
+  std::size_t size() const { return _sorted_vector.size(); }
 
 protected:
   /**

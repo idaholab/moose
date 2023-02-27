@@ -70,7 +70,7 @@ public:
   appendMeshGenerator(const std::string & type, const std::string & name, InputParameters params);
 
   /**
-   * Get a refernce to a pointer that will be the output of the
+   * Get a reference to a pointer that will be the output of the
    * MeshGenerator named name
    */
   [[nodiscard]] std::unique_ptr<MeshBase> & getMeshGeneratorOutput(const MeshGeneratorName & name);

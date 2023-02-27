@@ -51,10 +51,9 @@ protected:
    * store. This method will throw an error if the property does not exist.
    */
   template <typename T>
-  [[nodiscard]] const T & getMeshProperty(const std::string & data_name,
-                                          const std::string & prefix);
+  const T & getMeshProperty(const std::string & data_name, const std::string & prefix);
   template <typename T>
-  [[nodiscard]] const T & getMeshProperty(const std::string & data_name)
+  const T & getMeshProperty(const std::string & data_name)
   {
     return getMeshProperty<T>(data_name, meshPropertyPrefix(data_name));
   }
@@ -62,21 +61,19 @@ protected:
   /**
    * @returns Whether or not a mesh meta-data exists.
    */
-  [[nodiscard]] bool hasMeshProperty(const std::string & data_name,
-                                     const std::string & prefix) const;
+  bool hasMeshProperty(const std::string & data_name, const std::string & prefix) const;
   /**
    * @returns Whether or not a mesh meta-data exists with the given type.
    */
   template <typename T>
-  [[nodiscard]] bool hasMeshProperty(const std::string & data_name,
-                                     const std::string & prefix) const;
+  bool hasMeshProperty(const std::string & data_name, const std::string & prefix) const;
 
-  [[nodiscard]] bool hasMeshProperty(const std::string & data_name) const
+  bool hasMeshProperty(const std::string & data_name) const
   {
     return hasMeshProperty(data_name, meshPropertyPrefix(data_name));
   }
   template <typename T>
-  [[nodiscard]] bool hasMeshProperty(const std::string & data_name) const
+  bool hasMeshProperty(const std::string & data_name) const
   {
     return hasMeshProperty<T>(data_name, meshPropertyPrefix(data_name));
   }
@@ -84,13 +81,12 @@ protected:
   /**
    * @returns The full name for mesh property data.
    */
-  [[nodiscard]] static std::string meshPropertyName(const std::string & data_name,
-                                                    const std::string & prefix);
+  static std::string meshPropertyName(const std::string & data_name, const std::string & prefix);
 
   /**
    * @returns The default mesh property name for mesh property data
    */
-  [[nodiscard]] std::string meshPropertyName(const std::string & data_name) const
+  std::string meshPropertyName(const std::string & data_name) const
   {
     return meshPropertyName(data_name, meshPropertyPrefix(data_name));
   }
@@ -102,11 +98,11 @@ private:
    * For now, this is not supported except in MeshGenerators. In the future, we will
    * automate looking for mesh properties.
    */
-  [[nodiscard]] virtual std::string meshPropertyPrefix(const std::string & data_name) const;
+  virtual std::string meshPropertyPrefix(const std::string & data_name) const;
 
   /// Helper for getting a mesh property
-  [[nodiscard]] const RestartableDataValue &
-  getMeshPropertyInternal(const std::string & data_name, const std::string & prefix) const;
+  const RestartableDataValue & getMeshPropertyInternal(const std::string & data_name,
+                                                       const std::string & prefix) const;
 
   /// Reference to the application
   MooseApp & _meta_data_app;
