@@ -84,7 +84,7 @@ public:
    */
   class AddParentChildKey
   {
-    friend class MooseApp;
+    friend class MeshGeneratorSystem;
     AddParentChildKey() {}
     AddParentChildKey(const AddParentChildKey &) {}
   };

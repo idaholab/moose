@@ -27,5 +27,5 @@ CreateAddedMeshGenerators::CreateAddedMeshGenerators(const InputParameters & par
 void
 CreateAddedMeshGenerators::act()
 {
-  _app.createAddedMeshGenerators();
+  _app.getMeshGeneratorSystem().createAddedMeshGenerators();
 }

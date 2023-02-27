@@ -1,0 +1,206 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#pragma once
+
+#include "InputParameters.h"
+#include "PerfGraphInterface.h"
+
+#include "libmesh/parallel_object.h"
+#include "libmesh/mesh_base.h"
+
+class MooseApp;
+class MeshGeneratorMesh;
+class MeshGenerator;
+
+/**
+ * System that manages MeshGenerators.
+ *
+ * To be owned by the MooseApp.
+ */
+class MeshGeneratorSystem : public PerfGraphInterface, public libMesh::ParallelObject
+{
+public:
+  MeshGeneratorSystem(MooseApp & app);
+
+  /**
+   * Execute and clear the Mesh Generators data structure
+   */
+  void executeMeshGenerators();
+
+  /**
+   * Add a mesh generator that will act on the meshes in the system
+   *
+   * @param type The type of MeshGenerator
+   * @param name The name of the MeshGenerator
+   * @param params The params used to construct the MeshGenerator
+   *
+   * Internally, this will store the parameters for future construction
+   * during the "add_mesh_generator" task. When called during the
+   * "create_mesh_generator" task (i.e., when creating mesh subgenerators),
+   * it will also construct the generator.
+   *
+   * We don't construct them yet because we want to create them in order
+   * during createMeshGenerators() as much as possible so that we don't
+   * need lazy construction for things like mesh properties.
+   */
+  void addMeshGenerator(const std::string & type,
+                        const std::string & name,
+                        const InputParameters & params);
+
+  /**
+   * Append a mesh generator that will act on the final mesh generator in the system
+   *
+   * @param type The type of MeshGenerator
+   * @param name The name of the MeshGenerator
+   * @param params The params used to construct the MeshGenerator
+   *
+   * This MeshGenerator must have a parameter "input" of type MeshGeneratorName
+   * for this to work, as said parameter is set to the current final generator
+   *
+   * Note: This function must be called during the append_mesh_generator task.
+   */
+  const MeshGenerator &
+  appendMeshGenerator(const std::string & type, const std::string & name, InputParameters params);
+
+  /**
+   * Get a refernce to a pointer that will be the output of the
+   * MeshGenerator named name
+   */
+  [[nodiscard]] std::unique_ptr<MeshBase> & getMeshGeneratorOutput(const MeshGeneratorName & name);
+
+  /**
+   * Creates (constructs) all of the MeshGenerators that been
+   * declared using addMeshGenerator().
+   *
+   * Should only be called by the CreateAddedMeshGenerators during
+   * the create_added_mesh_generators task.
+   */
+  void createAddedMeshGenerators();
+
+  /**
+   * Get names of all mesh generators
+   * Note: This function should be called after all mesh generators are added with the
+   * 'add_mesh_generator' task. The returned value will be undefined and depends on the ordering
+   * that mesh generators are added by MOOSE if the function is called during the
+   * 'add_mesh_generator' task.
+   */
+  std::vector<std::string> getMeshGeneratorNames() const;
+
+  /**
+   * @returns Whether or not a mesh generator exists with the name \p name.
+   */
+  bool hasMeshGenerator(const MeshGeneratorName & name) const;
+
+  /**
+   * @returns The MeshGenerator with the name \p name.
+   */
+  const MeshGenerator & getMeshGenerator(const std::string & name) const;
+
+  /**
+   * Whether or not we know about the parameters for a MeshGenerator with the given name
+   *
+   * This is primarily for error checking. If MeshGenerator dependencies are screwed up,
+   * someone could be looking for a MeshGenerator that hasn't been constructed yet.
+   * With this, at least we can give the user some context that we know the generator
+   * exists, just that the dependencies are hosed.
+   */
+  bool hasMeshGeneratorParams(const MeshGeneratorName & name) const;
+
+  /**
+   * Class that is used as a parameter to setFinalMeshGeneratorName()
+   * that allows only MeshGeneratorMesh methods to call this methods
+   */
+  class SetFinalMeshGeneratorNameKey
+  {
+    friend class MeshGeneratorMesh;
+    SetFinalMeshGeneratorNameKey() {}
+    SetFinalMeshGeneratorNameKey(const SetFinalMeshGeneratorNameKey &) {}
+  };
+
+  /**
+   * Set final mesh generator name
+   *
+   * Guarded by the SetFinalMeshGeneartorNameKey so that it can only be called
+   * by MeshGeneratorMesh. This works because the copy construction of the
+   * key class happens within the caller, where the copy constructor
+   * is private and access given via a friend.
+   */
+  void setFinalMeshGeneratorName(const std::string & generator_name,
+                                 const SetFinalMeshGeneratorNameKey);
+
+  /**
+   * Get the generated mesh generated by executeMeshGenerators();
+   */
+  std::unique_ptr<MeshBase> getMeshGeneratorMesh(const bool check_unique = true);
+
+  /**
+   * Whether or not mesh generators are currently being appended (append_mesh_generator task)
+   */
+  bool appendingMeshGenerators() const;
+
+private:
+  /**
+   * Gets the MeshGeneratorNames that are referenced in an object's parameters.
+   *
+   * The result is returned as a pair of param name -> MeshGeneratorName in order
+   * to provide context.
+   */
+  std::vector<std::pair<std::string, MeshGeneratorName>>
+  getMeshGeneratorParamDependencies(const InputParameters & params) const;
+
+  /**
+   * Order all of the _mesh_generators into _ordered_mesh_generators
+   */
+  void createMeshGeneratorOrder();
+
+  /**
+   * Internal method for actually constructing a mesh generator after it
+   * has been delcared externally in addMeshGenerator (in Actions).
+   */
+  std::shared_ptr<MeshGenerator> createMeshGenerator(const std::string & name);
+
+  /**
+   * Get a MeshGenerator with the name \p name.
+   *
+   * We add the "internal" here so that we allow objects that have non-const access to
+   * MooseApp to call getMeshGenerator without a const_cast. If the name was the same,
+   * you'd get an error about trying to access a private method.
+   */
+  MeshGenerator & getMeshGeneratorInternal(const std::string & name)
+  {
+    return const_cast<MeshGenerator &>(std::as_const(*this).getMeshGenerator(name));
+  }
+
+  /// The MooseApp that owns this system
+  MooseApp & _app;
+
+  /// Whether the mesh generator MeshBase has been popped off its storage container and is no
+  /// longer accessible
+  bool _popped_final_mesh_generator;
+
+  /// The MeshGenerators declared using addMeshGenerator(), cleared after createMeshGenerators()
+  /// Key is the name, pair contains the type and the params
+  std::unordered_map<std::string, std::pair<std::string, InputParameters>> _mesh_generator_params;
+
+  /// Map of MeshGenerator -> name
+  std::map<std::string, std::shared_ptr<MeshGenerator>> _mesh_generators;
+
+  /// Holds the ordered mesh generators from createMeshGeneratorOrder() until they are executed
+  std::vector<std::vector<MeshGenerator *>> _ordered_mesh_generators;
+
+  /// Holds the output for each mesh generator - including duplicates needed downstream
+  std::map<std::string, std::list<std::unique_ptr<MeshBase>>> _mesh_generator_outputs;
+
+  /// The final mesh generator name to use
+  std::string _final_generator_name;
+
+  /// The final Mesh that is generated by the generators
+  std::list<std::unique_ptr<MeshBase> *> _final_generated_meshes;
+};

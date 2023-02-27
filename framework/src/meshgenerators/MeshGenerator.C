@@ -88,13 +88,14 @@ MeshGenerator::checkGetMesh(const MeshGeneratorName & mesh_generator_name,
                             const std::string & param_name) const
 {
   mooseAssert(!mesh_generator_name.empty(), "Empty name");
+  const auto & mg_sys = _app.getMeshGeneratorSystem();
   if (!_app.constructingMeshGenerators())
     mooseError("Cannot get a mesh outside of construction");
-  if (!_app.hasMeshGenerator(mesh_generator_name) && !isNullMeshName(mesh_generator_name))
+  if (!mg_sys.hasMeshGenerator(mesh_generator_name) && !isNullMeshName(mesh_generator_name))
   {
     std::stringstream error;
     error << "The requested MeshGenerator with name '" << mesh_generator_name << "' ";
-    if (_app.hasMeshGeneratorParams(mesh_generator_name))
+    if (mg_sys.hasMeshGeneratorParams(mesh_generator_name))
       error << "was found, but has not been constructed yet.\n\nThis can occur when your "
                "dependencies are not properly defined and we cannot infer the proper construction "
                "order of your MeshGenerators.\n\nThe most likely case is a sub generator whose "
@@ -131,7 +132,7 @@ MeshGenerator::getMeshByName(const MeshGeneratorName & mesh_generator_name)
     return _null_mesh;
 
   _requested_mesh_generators.insert(mesh_generator_name);
-  auto & mesh = _app.getMeshGeneratorOutput(mesh_generator_name);
+  auto & mesh = _app.getMeshGeneratorSystem().getMeshGeneratorOutput(mesh_generator_name);
   _requested_meshes.emplace_back(mesh_generator_name, &mesh);
   return mesh;
 }
