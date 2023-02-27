@@ -8,6 +8,8 @@
     sleep_time = 1
     method='opt'
     recover=false
+    max_threads=1
+    max_parallel = 1
   []
   [test_signal_recover]
     type = RunApp
@@ -22,7 +24,8 @@
     #to verify it is actually resuming from its autosave, we make sure it resumes one step before the last step
     expect_out = 'Time Step 49,'
     method='opt'
-
+    max_threads=1
+    max_parallel = 1
     prereq = 'test_signal'
     requirement = 'The app should be able to recover from the autosaved checkpoint created by a signal.'
   []
