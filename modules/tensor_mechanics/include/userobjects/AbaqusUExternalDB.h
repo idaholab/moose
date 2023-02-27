@@ -11,13 +11,13 @@
 
 #include "ThreadedGeneralUserObject.h"
 #include "DynamicLibraryLoader.h"
-
+#include "StepUOInterface.h"
 class StepUserObject;
 
 /**
  * Coupling user object to use Abaqus UEXTERNALDB subroutines in MOOSE
  */
-class AbaqusUExternalDB : public ThreadedGeneralUserObject
+class AbaqusUExternalDB : public ThreadedGeneralUserObject, StepUOInterface
 {
 public:
   static InputParameters validParams();

@@ -12,13 +12,14 @@
 #include "ComputeStressBase.h"
 #include "DynamicLibraryLoader.h"
 #include "ComputeFiniteStrain.h"
+#include "StepUOInterface.h"
 
 class StepUserObject;
 
 /**
  * Coupling material to use Abaqus UMAT models in MOOSE
  */
-class AbaqusUMATStress : public ComputeStressBase
+class AbaqusUMATStress : public ComputeStressBase, public StepUOInterface
 {
 public:
   static InputParameters validParams();

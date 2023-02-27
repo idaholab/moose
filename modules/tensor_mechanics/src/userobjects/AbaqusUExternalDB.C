@@ -49,29 +49,7 @@ AbaqusUExternalDB::initialSetup()
   // Let's automatically detect uos and identify the one we are interested in.
   // If there is more than one, we assume something is off and error out.
   if (!isParamSetByUser("step_user_object"))
-  {
-    std::vector<const UserObject *> uos;
-    _fe_problem.theWarehouse().query().condition<AttribSystem>("UserObject").queryIntoUnsorted(uos);
-    std::vector<const StepUserObject *> step_uos;
-    for (const auto & uo : uos)
-    {
-      const StepUserObject * possible_step_uo = dynamic_cast<const StepUserObject *>(uo);
-      if (possible_step_uo)
-        step_uos.push_back(possible_step_uo);
-    }
-
-    if (step_uos.size() > 1)
-      mooseError(
-          "Your input file has multiple StepUserObjects. MOOSE currently only support one in "
-          "AbaqusUExternalDB.");
-    else if (step_uos.size() == 1)
-      mooseInfo("A StepUserObject, ",
-                step_uos[0]->name(),
-                ", has been identified and will be used to drive stepping behavior in "
-                "AbaqusUExternalDB.");
-
-    _step_user_object = step_uos.size() == 1 ? step_uos[0] : nullptr;
-  }
+    getStepUserObject(_fe_problem, _step_user_object, name());
   else
     _step_user_object = &getUserObject<StepUserObject>("step_user_object");
 }

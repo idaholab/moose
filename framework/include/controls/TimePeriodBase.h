@@ -28,16 +28,11 @@ public:
 
 protected:
   /**
-   * If enabled, this injects the start/end times into the TimeStepper sync times.
-   */
-  void initialSetup() override;
-
-  /**
    * Helper base method to set start and end times for controls.
    */
   void setupTimes();
 
-  virtual bool conditionMet(const unsigned int & i) override;
+  virtual bool conditionMet(const unsigned int & i) = 0;
 
   /// The time to begin enabling the supplied object tags (defaults to the simulation start time)
   std::vector<Real> _start_time;

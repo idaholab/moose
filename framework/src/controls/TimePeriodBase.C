@@ -52,17 +52,3 @@ TimePeriodBase::setupTimes()
     if (_start_time[i] >= _end_time[i])
       mooseError("The start time(s) must be less than the end time(s).");
 }
-
-void
-TimePeriodBase::initialSetup()
-{
-  mooseError("Internal error: TimePeriodBase::initialSetup() should not be called");
-}
-
-bool
-TimePeriodBase::conditionMet(const unsigned int & /*i*/)
-{
-  mooseError("Internal error: TimePeriodBase::conditionMet() should not be called");
-
-  return false;
-}

@@ -11,13 +11,14 @@
 
 // MOOSE includes
 #include "TimePeriodBase.h"
+#include "StepUOInterface.h"
 
 class StepUserObject;
 
 /**
  * A basic control for disabling objects for a portion of the simulation based on the step concept.
  */
-class StepPeriod : public TimePeriodBase
+class StepPeriod : public TimePeriodBase, public StepUOInterface
 {
 public:
   /**
