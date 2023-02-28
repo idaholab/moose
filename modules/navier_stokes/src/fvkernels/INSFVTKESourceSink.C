@@ -38,6 +38,7 @@ INSFVTKESourceSink::validParams()
       true,
       "Boolean to determine if the kEpsilon mixing length realizability constrints are applied.");
   params.set<unsigned short>("ghost_layers") = 2;
+  params.addParam<Real>("rf", 1.0, "Relaxation factor.");
   return params;
 }
 
@@ -57,7 +58,8 @@ INSFVTKESourceSink::INSFVTKESourceSink(const InputParameters & params)
     _max_mixing_length(getParam<Real>("max_mixing_length")),
     _linearized_model(getParam<bool>("linearized_model")),
     _linear_variable(getFunctor<ADReal>("linear_variable")),
-    _realizable_constraint(getParam<bool>("realizable_constraint"))
+    _realizable_constraint(getParam<bool>("realizable_constraint")),
+    _rf(getParam<Real>("rf"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
@@ -85,7 +87,7 @@ INSFVTKESourceSink::computeQpResidual()
 
   ADReal residual = 0.0;
 
-  constexpr Real offset = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
+  constexpr Real offset = 0.0; // prevents explosion of sqrt(x) derivative to infinity
 
   const auto & grad_u = _u_var->adGradSln(_current_elem);
   auto Sij_00 = 0.5 * (grad_u(0) + grad_u(0));
@@ -112,16 +114,50 @@ INSFVTKESourceSink::computeQpResidual()
     }
   }
 
+  const auto & grad_u_old = _u_var->adGradSln(_current_elem, 1);
+  Sij_00 = 0.5 * (grad_u_old(0) + grad_u_old(0));
+  ADReal symmetric_strain_tensor_norm_old = 2.0 * Utility::pow<2>(Sij_00);
+  if (_dim >= 2)
+  {
+    const auto & grad_v_old = _v_var->adGradSln(_current_elem);
+    auto Sij_01 = 0.5 * (grad_u_old(1) + grad_v_old(0));
+    auto Sij_10 = Sij_01;
+    auto Sij_11 = 0.5 * (grad_v_old(1) + grad_u_old(1));
+    symmetric_strain_tensor_norm_old +=
+        2.0 * (Utility::pow<2>(Sij_01) + Utility::pow<2>(Sij_10) + Utility::pow<2>(Sij_11));
+    if (_dim >= 3)
+    {
+      const auto & grad_w_old = _w_var->adGradSln(_current_elem);
+      auto Sij_02 = 0.5 * (grad_u_old(2) + grad_w_old(0));
+      auto Sij_20 = Sij_02;
+      auto Sij_12 = 0.5 * (grad_v_old(2) + grad_w_old(1));
+      auto Sij_21 = Sij_12;
+      auto Sij_22 = 0.5 * (grad_w_old(2) + grad_w_old(2));
+      symmetric_strain_tensor_norm_old +=
+          (Utility::pow<2>(Sij_02) + Utility::pow<2>(Sij_20) + Utility::pow<2>(Sij_12) +
+           Utility::pow<2>(Sij_21) + Utility::pow<2>(Sij_22));
+    }
+  }
+
   symmetric_strain_tensor_norm = 2.0 * symmetric_strain_tensor_norm + offset;
+  symmetric_strain_tensor_norm_old = 2.0 * symmetric_strain_tensor_norm_old + offset;
 
-  auto production = _mu_t(makeElemArg(_current_elem)) * symmetric_strain_tensor_norm;
+  auto production = _mu_t(makeElemArg(_current_elem)) * symmetric_strain_tensor_norm.value();
+  auto production_old =
+      _mu_t(makeElemArg(_current_elem), 1) * symmetric_strain_tensor_norm_old.value();
 
-  ADReal destruction;
+  ADReal destruction, destruction_old;
   if (_linearized_model)
     destruction = _rho(makeElemArg(_current_elem)) * _linear_variable(makeElemArg(_current_elem)) *
                   _var(makeElemArg(_current_elem));
   else
+  {
     destruction = _rho(makeElemArg(_current_elem)) * _epsilon(makeElemArg(_current_elem));
+    destruction_old = _rho(makeElemArg(_current_elem), 1) * _epsilon(makeElemArg(_current_elem), 1);
+  }
+
+  production = _rf * production + (1.0 - _rf) * production_old;
+  destruction = _rf * destruction + (1.0 - _rf) * destruction_old;
 
   // if (_realizable_constraint)
   // {
@@ -131,7 +167,9 @@ INSFVTKESourceSink::computeQpResidual()
   //   destruction = (destruction < production) ? destruction : production;
   // }
 
-  residual += production - destruction;
+  residual = destruction - production;
 
-  return -residual;
+  // _console << "Production k: " << production << " Destruction k: " << destruction << std::endl;
+
+  return residual;
 }

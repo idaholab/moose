@@ -39,6 +39,7 @@ INSFVTKEDSourceSink::validParams()
       true,
       "Boolean to determine if the kEpsilon mixing length realizability constrints are applied.");
   params.set<unsigned short>("ghost_layers") = 2;
+  params.addParam<Real>("rf", 1.0, "Relaxation factor.");
   return params;
 }
 
@@ -60,7 +61,8 @@ INSFVTKEDSourceSink::INSFVTKEDSourceSink(const InputParameters & params)
     _max_mixing_length(getParam<Real>("max_mixing_length")),
     _linearized_model(getParam<bool>("linearized_model")),
     _linear_variable(getFunctor<ADReal>("linear_variable")),
-    _realizable_constraint(getParam<bool>("realizable_constraint"))
+    _realizable_constraint(getParam<bool>("realizable_constraint")),
+    _rf(getParam<Real>("rf"))
 {
 #ifndef MOOSE_GLOBAL_AD_INDEXING
   mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
@@ -115,12 +117,42 @@ INSFVTKEDSourceSink::computeQpResidual()
     }
   }
 
-  symmetric_strain_tensor_norm = 2.0 * symmetric_strain_tensor_norm + offset;
+  const auto & grad_u_old = _u_var->adGradSln(_current_elem, 1);
+  Sij_00 = 0.5 * (grad_u_old(0) + grad_u_old(0));
+  ADReal symmetric_strain_tensor_norm_old = 2.0 * Utility::pow<2>(Sij_00);
+  if (_dim >= 2)
+  {
+    const auto & grad_v_old = _v_var->adGradSln(_current_elem);
+    auto Sij_01 = 0.5 * (grad_u_old(1) + grad_v_old(0));
+    auto Sij_10 = Sij_01;
+    auto Sij_11 = 0.5 * (grad_v_old(1) + grad_u_old(1));
+    symmetric_strain_tensor_norm_old +=
+        2.0 * (Utility::pow<2>(Sij_01) + Utility::pow<2>(Sij_10) + Utility::pow<2>(Sij_11));
+    if (_dim >= 3)
+    {
+      const auto & grad_w_old = _w_var->adGradSln(_current_elem);
+      auto Sij_02 = 0.5 * (grad_u_old(2) + grad_w_old(0));
+      auto Sij_20 = Sij_02;
+      auto Sij_12 = 0.5 * (grad_v_old(2) + grad_w_old(1));
+      auto Sij_21 = Sij_12;
+      auto Sij_22 = 0.5 * (grad_w_old(2) + grad_w_old(2));
+      symmetric_strain_tensor_norm_old +=
+          (Utility::pow<2>(Sij_02) + Utility::pow<2>(Sij_20) + Utility::pow<2>(Sij_12) +
+           Utility::pow<2>(Sij_21) + Utility::pow<2>(Sij_22));
+    }
+  }
 
-  constexpr Real protection_k = 1e-15;
+  symmetric_strain_tensor_norm = 2.0 * symmetric_strain_tensor_norm + offset;
+  // auto mu_t = _mu_t(makeElemArg(_current_elem)).value();
+  // mu_t = std::max(std::min(mu_t, 1e-3), 1e-6);
+  auto production_k = _mu_t(makeElemArg(_current_elem)) * symmetric_strain_tensor_norm.value();
+  auto production_k_old =
+      _mu_t(makeElemArg(_current_elem), 1) * symmetric_strain_tensor_norm.value();
+
+  constexpr Real protection_k = 0.0;
 
   ADReal production, destruction;
-  auto production_k = _mu_t(makeElemArg(_current_elem)) * symmetric_strain_tensor_norm;
+  ADReal production_old, destruction_old;
   if (_linearized_model)
   {
     production = _C1_eps(makeElemArg(_current_elem)) * production_k *
@@ -131,13 +163,20 @@ INSFVTKEDSourceSink::computeQpResidual()
   }
   else
   {
-    production = _C1_eps(makeElemArg(_current_elem)) * production_k *
-                 _var(makeElemArg(_current_elem)) / (_k(makeElemArg(_current_elem)) + protection_k);
+    auto time_scale = std::abs(_k(makeElemArg(_current_elem)) / _var(makeElemArg(_current_elem)));
+    auto time_scale_old =
+        std::abs(_k(makeElemArg(_current_elem), 1) / _var(makeElemArg(_current_elem), 1));
+
+    production = _C1_eps(makeElemArg(_current_elem)) * production_k / time_scale;
+    production_old = _C1_eps(makeElemArg(_current_elem), 1) * production_k_old / time_scale_old;
 
     destruction = _C2_eps(makeElemArg(_current_elem)) * _rho(makeElemArg(_current_elem)) *
-                  Utility::pow<2>(_var(makeElemArg(_current_elem))) /
-                  (_k(makeElemArg(_current_elem)) + protection_k);
+                  _var(makeElemArg(_current_elem)) / time_scale;
+    destruction_old = _C2_eps(makeElemArg(_current_elem), 1) * _rho(makeElemArg(_current_elem), 1) *
+                      _var(makeElemArg(_current_elem), 1) / time_scale_old;
   }
+
+  // Implicit relaxation
 
   // if (_realizable_constraint)
   // {
@@ -147,7 +186,13 @@ INSFVTKEDSourceSink::computeQpResidual()
   //   destruction = (destruction < production) ? destruction : production;
   // }
 
+  production = _rf * production + (1.0 - _rf) * production_old;
+  destruction = _rf * destruction + (1.0 - _rf) * destruction_old;
+
   residual += production - destruction;
+
+  // _console << "Production eps: " << production << " Destruction eps: " << destruction <<
+  // std::endl;
 
   return -residual;
 }

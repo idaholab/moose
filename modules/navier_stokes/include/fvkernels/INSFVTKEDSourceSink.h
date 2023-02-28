@@ -62,4 +62,7 @@ protected:
 
   /// Apply realizable constraints?
   const bool _realizable_constraint;
+
+  /// Local Relaxation Factor
+  const Real _rf;
 };
