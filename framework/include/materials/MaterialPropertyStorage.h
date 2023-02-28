@@ -325,6 +325,13 @@ private:
                  unsigned int side,
                  unsigned int n_qpoints);
 
+  /// Initializes just one hashmap's entries
+  void initProps(MaterialData & material_data,
+                 PropsType & mat_props_map,
+                 const Elem * elem,
+                 unsigned int side,
+                 unsigned int n_qpoints);
+
   libMesh::Threads::spin_mutex spin_mutex;
 
   // Need to be able to eraseProperty from here
