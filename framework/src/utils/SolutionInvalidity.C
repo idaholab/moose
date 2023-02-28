@@ -184,7 +184,7 @@ SolutionInvalidity::summaryTable() const
         const auto & info = _solution_invalidity_registry.item(id);
         vtable.addRow(info.object_type,      // Object Type
                       entry.counts,          // Converged Iteration Warnings
-                      entry.timestep_counts, // Latest Time Iteration Warnings
+                      entry.timestep_counts, // Latest Time Step Warnings
                       entry.total_counts,    // Total Iteration Warnings
                       info.message           // Message
         );

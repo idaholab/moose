@@ -195,13 +195,13 @@ NonlinearSystem::solve()
 
   if (_time_integrator)
   {
-    // reset solution invalid counter for time iteration
+    // reset solution invalid counter for the time step
     _app.solutionInvalidity().resetSolutionInvalidTimeStep();
     _time_integrator->solve();
     _time_integrator->postSolve();
     _n_iters = _time_integrator->getNumNonlinearIterations();
     _n_linear_iters = _time_integrator->getNumLinearIterations();
-    // Accumulate only the occurence of solution invalid warnings for time iteration counters
+    // Accumulate only the occurence of solution invalid warnings for the current time step counters
     _app.solutionInvalidity().solutionInvalidAccumulationTimeStep();
   }
   else
@@ -214,7 +214,7 @@ NonlinearSystem::solve()
   // store info about the solve
   _final_residual = _nl_implicit_sys.final_nonlinear_residual();
 
-  // determine whether solution invalid occures in the converged solution
+  // determine whether solution invalid occurs in the converged solution
   _solution_is_invalid = _app.solutionInvalidity().solutionInvalid();
 
   // output the solution invalid summary
@@ -227,7 +227,7 @@ NonlinearSystem::solve()
       mooseWarning("The Solution Invalidity warnings are detected but silenced! "
                    "Use Problem/allow_invalid_solution=false to activate ");
     else
-      // output the occurence of solution invalid in a summarry table
+      // output the occurrence of solution invalid in a summary table
       _app.solutionInvalidity().print(_console);
   }
 
