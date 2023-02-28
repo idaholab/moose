@@ -27,5 +27,8 @@ VariableOldValueBoundsAux::VariableOldValueBoundsAux(const InputParameters & par
 Real
 VariableOldValueBoundsAux::getBound()
 {
-  return _fe_var->getNodalValueOld(*_current_node);
+  if (_fe_var && isNodal())
+    return _fe_var->getNodalValueOld(*_current_node);
+  else
+    mooseError("This variable type is not supported yet");
 }
