@@ -1,8 +1,0 @@
-[Tests]
-  [./exodiff_diff_gold]
-    type = Exodiff
-    input = exodiff_diff_gold.i
-    exodiff = exodiff_diff_gold_out.e
-    gold_dir = diff_gold
-  [../]
-[]

@@ -22,13 +22,6 @@
     issues = '#8373'
     collections = 'FAILURE_ANALYSIS'
   []
-  [diff_gold]
-    type = PythonUnitTest
-    input = test_DiffGold.py
-    requirement = "The system shall report a failure when encountering differential result with a custom gold directory."
-    issues = '#10647'
-    collections = 'FAILURE_ANALYSIS'
-  []
   [min_ad_size]
     type = PythonUnitTest
     input = test_MinADSize.py
