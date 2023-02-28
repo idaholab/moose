@@ -41,17 +41,15 @@ MeshGeneratorSystem::appendMeshGenerator(const std::string & type,
                                          InputParameters params)
 {
   if (!appendingMeshGenerators())
-    mooseError("Can only call MeshGeneratorSystem::appendMeshGenerator() during the "
-               "append_mesh_generator task");
+    mooseError("Can only call appendMeshGenerator() during the append_mesh_generator task");
 
   if (!params.have_parameter<MeshGeneratorName>("input"))
     mooseError("While adding ",
                type,
                " '",
                name,
-               "' via MeshGeneratorSystem::appendMeshGenerator():\n\nCannot append a mesh "
-               "generator that does "
-               "not take input mesh generators via an 'input' parameter");
+               "' via appendMeshGenerator():\n\nCannot append a mesh generator that does not take "
+               "input mesh generators via an 'input' parameter");
 
   // If no final generator is set, we need to make sure that we have one
   if (_final_generator_name.empty())

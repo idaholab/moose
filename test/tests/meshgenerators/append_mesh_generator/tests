@@ -29,7 +29,7 @@
       type = 'RunException'
       input = 'append_mesh_generator.i'
       cli_args = 'ModifyMesh/test/type=TestMeshGenerator --mesh-only'
-      expect_err = 'Can only call MooseApp::appendMeshGenerator\(\) during the append_mesh_generator task'
+      expect_err = 'Can only call appendMeshGenerator\(\) during the append_mesh_generator task'
       mesh_mode = 'REPLICATED'
       recover = false
 
