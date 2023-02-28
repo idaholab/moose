@@ -66,14 +66,14 @@ public:
   /**
    * @returns The names of the MeshGenerators that were requested in the getMesh methods
    */
-  [[nodiscard]] const std::set<MeshGeneratorName> & getRequestedMeshGenerators() const
+  const std::set<MeshGeneratorName> & getRequestedMeshGenerators() const
   {
     return _requested_mesh_generators;
   }
   /**
    * @returns The names of the MeshGenerators that were requested in the getMeshForSub methods
    */
-  [[nodiscard]] const std::set<MeshGeneratorName> & getRequestedMeshGeneratorsForSub() const
+  const std::set<MeshGeneratorName> & getRequestedMeshGeneratorsForSub() const
   {
     return _requested_mesh_generators_for_sub;
   }
@@ -107,21 +107,21 @@ public:
   /**
    * Gets the MeshGenerators that are parents to this MeshGenerator.
    */
-  [[nodiscard]] const std::set<const MeshGenerator *, Comparator> & getParentMeshGenerators() const
+  const std::set<const MeshGenerator *, Comparator> & getParentMeshGenerators() const
   {
     return _parent_mesh_generators;
   }
   /**
    * Gets the MeshGenerators that are children to this MeshGenerator.
    */
-  [[nodiscard]] const std::set<const MeshGenerator *, Comparator> & getChildMeshGenerators() const
+  const std::set<const MeshGenerator *, Comparator> & getChildMeshGenerators() const
   {
     return _child_mesh_generators;
   }
   /**
    * Gets the MeshGenerators that are children to this MeshGenerator.
    */
-  [[nodiscard]] const std::set<const MeshGenerator *, Comparator> & getSubMeshGenerators() const
+  const std::set<const MeshGenerator *, Comparator> & getSubMeshGenerators() const
   {
     return _sub_mesh_generators;
   }
@@ -138,10 +138,7 @@ public:
    *
    * See declareNullMeshName().
    */
-  [[nodiscard]] bool isNullMeshName(const MeshGeneratorName & name) const
-  {
-    return _null_mesh_names.count(name);
-  }
+  bool isNullMeshName(const MeshGeneratorName & name) const { return _null_mesh_names.count(name); }
 
 protected:
   /**
@@ -309,7 +306,7 @@ private:
    * Until we support getting mesh properties from other mesh generators (which is coming),
    * we will default to properties returned by this generator.
    */
-  [[nodiscard]] virtual std::string meshPropertyPrefix(const std::string &) const override final
+  virtual std::string meshPropertyPrefix(const std::string &) const override final
   {
     return name();
   }
@@ -323,19 +320,19 @@ private:
   /**
    * Helper for getting a MeshGeneratorName parameter
    */
-  [[nodiscard]] const MeshGeneratorName *
-  getMeshGeneratorNameFromParam(const std::string & param_name, const bool allow_invalid) const;
+  const MeshGeneratorName * getMeshGeneratorNameFromParam(const std::string & param_name,
+                                                          const bool allow_invalid) const;
   /**
    * Helper for getting a std::vector<MeshGeneratorName> parameter
    */
-  [[nodiscard]] const std::vector<MeshGeneratorName> &
+  const std::vector<MeshGeneratorName> &
   getMeshGeneratorNamesFromParam(const std::string & param_name) const;
 
   /**
    * Helper for getting a writable reference to a mesh property, used in
    * declareMeshProperty and setMeshProperty.
    */
-  [[nodiscard]] RestartableDataValue & setMeshPropertyHelper(const std::string & data_name);
+  RestartableDataValue & setMeshPropertyHelper(const std::string & data_name);
 
   /// The names of the MeshGenerators that were requested in the getMesh methods
   std::set<MeshGeneratorName> _requested_mesh_generators;
