@@ -26,13 +26,7 @@ MeshGeneratorMesh::validParams()
   return params;
 }
 
-MeshGeneratorMesh::MeshGeneratorMesh(const InputParameters & parameters) : MooseMesh(parameters)
-{
-  if (isParamValid("final_generator"))
-    _app.getMeshGeneratorSystem().setFinalMeshGeneratorName(
-        getParam<std::string>("final_generator"),
-        MeshGeneratorSystem::SetFinalMeshGeneratorNameKey());
-}
+MeshGeneratorMesh::MeshGeneratorMesh(const InputParameters & parameters) : MooseMesh(parameters) {}
 
 std::unique_ptr<MooseMesh>
 MeshGeneratorMesh::safeClone() const

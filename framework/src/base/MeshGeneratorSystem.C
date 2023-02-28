@@ -43,19 +43,31 @@ MeshGeneratorSystem::appendMeshGenerator(const std::string & type,
   if (!appendingMeshGenerators())
     mooseError("Can only call appendMeshGenerator() during the append_mesh_generator task");
 
-  if (!params.have_parameter<MeshGeneratorName>("input"))
+  // Make sure this mesh generator has one and _only_ one input, as "input"
+  const auto param_name_mg_name_pairs = getMeshGeneratorParamDependencies(params, true);
+  if (param_name_mg_name_pairs.size() != 1 || param_name_mg_name_pairs[0].first != "input")
     mooseError("While adding ",
                type,
                " '",
                name,
-               "' via appendMeshGenerator():\n\nCannot append a mesh generator that does not take "
-               "input mesh generators via an 'input' parameter");
+               "' via appendMeshGenerator():\nCan only append a mesh generator that takes a "
+               "single input mesh generator via the parameter named 'input'");
 
-  // If no final generator is set, we need to make sure that we have one
+  // If no final generator is set, we need to make sure that we have one; we will hit
+  // this the first time we add an appended MeshGenerator and only need to do it once.
+  // We'll then generate the final ordering within the execution phase. We'll also
+  // clear the ordering because it isn't particularly valid anymore once we add this one.
   if (_final_generator_name.empty())
+  {
+    if (_mesh_generators.empty())
+      mooseError("Cannot use appendMeshGenerator() because there is not a generator to append to!");
+
     createMeshGeneratorOrder();
+    _ordered_mesh_generators.clear();
+  }
 
   // Set the final generator as the input
+  mooseAssert(hasMeshGenerator(_final_generator_name), "Missing final generator");
   params.set<MeshGeneratorName>("input") = _final_generator_name;
 
   // Keep track of the new final generator
@@ -70,13 +82,15 @@ MeshGeneratorSystem::appendMeshGenerator(const std::string & type,
 }
 
 std::vector<std::pair<std::string, MeshGeneratorName>>
-MeshGeneratorSystem::getMeshGeneratorParamDependencies(const InputParameters & params) const
+MeshGeneratorSystem::getMeshGeneratorParamDependencies(const InputParameters & params,
+                                                       const bool allow_empty /* = false */) const
 {
   std::vector<std::pair<std::string, MeshGeneratorName>> dependencies;
 
-  auto add_dependency = [&dependencies](const auto & param_name, const auto & dependency)
+  auto add_dependency =
+      [&dependencies, &allow_empty](const auto & param_name, const auto & dependency)
   {
-    if (dependency.size())
+    if (dependency.size() || allow_empty)
       dependencies.emplace_back(param_name, dependency);
   };
 
@@ -87,8 +101,12 @@ MeshGeneratorSystem::getMeshGeneratorParamDependencies(const InputParameters & p
     else if (const auto dependencies =
                  dynamic_cast<const Parameters::Parameter<std::vector<MeshGeneratorName>> *>(
                      param.get()))
+    {
+      if (allow_empty && dependencies->get().empty())
+        add_dependency(name, std::string());
       for (const auto & dependency : dependencies->get())
         add_dependency(name, dependency);
+    }
 
   return dependencies;
 }
@@ -98,6 +116,10 @@ MeshGeneratorSystem::createAddedMeshGenerators()
 {
   mooseAssert(_app.actionWarehouse().getCurrentTaskName() == "create_added_mesh_generators",
               "Should not run now");
+
+  // No generators were added via addMeshGenerator()
+  if (_mesh_generator_params.empty())
+    return;
 
   DependencyResolver<std::string> resolver;
 
@@ -128,6 +150,24 @@ MeshGeneratorSystem::createAddedMeshGenerators()
         createMeshGenerator(generator_name);
 
   mooseAssert(_mesh_generator_params.empty(), "Should be empty");
+  mooseAssert(_final_generator_name.empty(), "Should be unset at this point");
+
+  // Set the final generator if we have one set by the user
+  // and if so make sure it also exists
+  const auto & moose_mesh = _app.actionWarehouse().getMesh();
+  if (moose_mesh->parameters().have_parameter<std::string>("final_generator") &&
+      moose_mesh->isParamValid("final_generator"))
+  {
+    mooseAssert(moose_mesh->type() == "MeshGeneratorMesh",
+                "Assumption for mesh type is now invalid");
+
+    _final_generator_name = moose_mesh->getParam<std::string>("final_generator");
+    if (!hasMeshGenerator(_final_generator_name))
+      moose_mesh->paramError("final_generator",
+                             "The forced final MeshGenerator '",
+                             _final_generator_name,
+                             "' does not exist");
+  }
 }
 
 void
@@ -136,10 +176,10 @@ MeshGeneratorSystem::createMeshGeneratorOrder()
   mooseAssert(_app.constructingMeshGenerators() ||
                   _app.actionWarehouse().getCurrentTaskName() == "execute_mesh_generators",
               "Incorrect call time");
+  mooseAssert(_ordered_mesh_generators.empty(), "Already ordered");
+  mooseAssert(_mesh_generators.size(), "No mesh generators to order");
 
   TIME_SECTION("createMeshGeneratorOrder", 1, "Ordering Mesh Generators");
-
-  _ordered_mesh_generators.clear();
 
   // We dare not sort these based on address!
   DependencyResolver<MeshGenerator *, MeshGenerator::Comparator> resolver;
@@ -177,23 +217,19 @@ MeshGeneratorSystem::createMeshGeneratorOrder()
                MooseUtils::join(names, " <- "));
   }
 
-  if (_final_generator_name.size())
-  {
-    if (!hasMeshGenerator(_final_generator_name))
-      mooseError("The forced final MeshGenerator '", _final_generator_name, "' does not exist");
-  }
-  else if (_ordered_mesh_generators.size())
-  {
-    auto & final_generators = _ordered_mesh_generators.back();
-    _final_generator_name = final_generators.back()->name();
+  const auto & final_generators = _ordered_mesh_generators.back();
 
+  // We haven't forced a final generator yet
+  if (_final_generator_name.empty())
+  {
     // See if we have multiple independent trees of generators
     const auto ancestor_list = resolver.getAncestors(final_generators.back());
-    if (ancestor_list.size() != resolver.size())
+    if (ancestor_list.size() != resolver.size() && _final_generator_name.empty())
     {
       // Need to remove duplicates and possibly perform a difference so we'll import out list
       // into a set for these operations.
-      std::set<MeshGenerator *> ancestors(ancestor_list.begin(), ancestor_list.end());
+      std::set<MeshGenerator *, MeshGenerator::Comparator> ancestors(ancestor_list.begin(),
+                                                                     ancestor_list.end());
       // Get all of the items from the resolver so we can compare against the tree from the
       // final generator we just pulled.
       const auto & allValues = resolver.getSortedValues();
@@ -225,7 +261,11 @@ MeshGeneratorSystem::createMeshGeneratorOrder()
              "parameter or add additional dependencies to remove the ambiguity.";
       mooseError(oss.str());
     }
+
+    _final_generator_name = final_generators.back()->name();
   }
+  else
+    mooseAssert(hasMeshGenerator(_final_generator_name), "Missing the preset final generator");
 }
 
 void
@@ -239,10 +279,6 @@ MeshGeneratorSystem::executeMeshGenerators()
 
   // Order the generators
   createMeshGeneratorOrder();
-
-  const auto & final_generators = _ordered_mesh_generators.back();
-  if (_final_generator_name.empty())
-    _final_generator_name = final_generators.back()->name();
 
   // Grab the outputs from the final generator so MeshGeneratorMesh can pick them up
   _final_generated_meshes.emplace_back(&getMeshGeneratorOutput(_final_generator_name));
@@ -425,14 +461,6 @@ MeshGeneratorSystem::getMeshGeneratorNames() const
   for (auto & pair : _mesh_generators)
     names.push_back(pair.first);
   return names;
-}
-
-void
-MeshGeneratorSystem::setFinalMeshGeneratorName(const std::string & generator_name,
-                                               const SetFinalMeshGeneratorNameKey)
-{
-  mooseAssert(_final_generator_name.empty(), "Already set");
-  _final_generator_name = generator_name;
 }
 
 std::unique_ptr<MeshBase>

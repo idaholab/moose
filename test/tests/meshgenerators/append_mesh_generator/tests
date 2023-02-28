@@ -14,11 +14,22 @@
 
   [errors]
     requirement = 'The system shall only support the ability to add additional mesh generators from a user accessible programmatic interface when'
+    [nothing_to_append_to]
+      type = 'RunException'
+      input = 'append_mesh_generator.i'
+      cli_args = 'Mesh/active= --mesh-only'
+      expect_err = "Cannot use appendMeshGenerator\(\) because there is not a generator to append to!"
+      mesh_mode = 'REPLICATED'
+      recover = false
+
+      detail = 'there exists a generator to append to'
+    []
+
     [no_input]
       type = 'RunException'
       input = 'append_mesh_generator.i'
       cli_args = 'ModifyMesh/gmg/type=GeneratedMeshGenerator ModifyMesh/gmg/dim=1 --mesh-only'
-      expect_err = "Cannot append a mesh generator that does not take input mesh generators via an 'input' parameter"
+      expect_err = "Can only append a mesh generator that takes a single input mesh generator via the parameter named 'input'"
       mesh_mode = 'REPLICATED'
       recover = false
 
