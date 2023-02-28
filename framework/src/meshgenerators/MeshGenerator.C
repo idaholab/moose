@@ -263,12 +263,14 @@ MeshGenerator::setMeshPropertyHelper(const std::string & data_name)
 void
 MeshGenerator::addParentMeshGenerator(const MeshGenerator & mg, const AddParentChildKey)
 {
+  mooseAssert(_app.constructingMeshGenerators(), "Should only be called at construction");
   _parent_mesh_generators.insert(&mg);
 }
 
 void
 MeshGenerator::addChildMeshGenerator(const MeshGenerator & mg, const AddParentChildKey)
 {
+  mooseAssert(_app.constructingMeshGenerators(), "Should only be called at construction");
   _child_mesh_generators.insert(&mg);
 }
 
