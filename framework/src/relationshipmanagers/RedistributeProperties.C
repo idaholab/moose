@@ -117,22 +117,22 @@ RedistributeProperties::redistribute()
           if (elem != mesh.query_elem_ptr(elem->id()))
             continue;
 
-          std::vector<processor_id_type> target_pids;
+          std::set<processor_id_type> target_pids;
 
           if (elem->active())
-            target_pids.push_back(elem->processor_id());
+            target_pids.insert(elem->processor_id());
           else if (elem->subactive())
           {
             libmesh_assert(elem->parent());
             libmesh_assert(elem->parent()->refinement_flag() == Elem::JUST_COARSENED);
-            target_pids.push_back(elem->parent()->processor_id());
+            target_pids.insert(elem->parent()->processor_id());
           }
           else
           {
             libmesh_assert(elem->ancestor());
             libmesh_assert(elem->has_children());
             for (const Elem & child : elem->child_ref_range())
-              target_pids.push_back(child.processor_id());
+              target_pids.insert(child.processor_id());
           }
 
           // If we're being migrated elsewhere and we're not needed
@@ -183,7 +183,12 @@ RedistributeProperties::redistribute()
             {
               // This should be called "initPropsIfNecessary"... which
               // is confusing but convenient.
-              mat_prop_store->initProps(my_mat_data, elem, prop_id, n_q_points);
+              //
+              // We need to *only* initProps for the map we're working
+              // on, otherwise we might see an
+              // initialized-but-not-filled entry in the next map and
+              // foolishly try to send it places.
+              mat_prop_store->initProps(my_mat_data, props_map, elem, prop_id, n_q_points);
 
               libmesh_assert(elem_props.contains(prop_id));
               MaterialProperties & mat_props = elem_props[prop_id];
