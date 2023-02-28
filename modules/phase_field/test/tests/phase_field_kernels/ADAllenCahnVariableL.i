@@ -55,7 +55,7 @@
     variable = eta
     kappa_name = 1
     variable_L = true
-    args = chi
+    coupled_variables = chi
   [../]
 []
 
