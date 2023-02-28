@@ -330,7 +330,17 @@ PolygonMeshGeneratorBase::buildSlice(
               corner_to_corner,
               azimuthal_tangent);
 
-  // See if the central region is the only part of the innermost region
+  // See if the central region is the only part of the innermost part
+  // The central region of the slice is special.
+  // Unlike the outer regions, which are layered quad elements,
+  // the central region is either a layer of tri elements or a specially-patterned quad elements.
+  // If there is at least one `ring` defined in the slice,
+  // the central region must belong to the innermost (first) ring.
+  // Otherwise the central region belongs to the `background`
+  // In either case, if the innermost ring or background has only one radial interval,
+  // the central region is an independent ring or background
+  // Otherwise, the central region and one or several quad element layers together form the
+  // innermost ring or background
   bool is_central_region_independent;
   if (ring_layers.empty())
     is_central_region_independent = background_inner_boundary_layer_params.intervals +

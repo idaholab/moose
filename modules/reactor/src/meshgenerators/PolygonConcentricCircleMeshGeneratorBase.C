@@ -407,13 +407,15 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
       _background_intervals + _background_inner_boundary_layer_params.intervals +
       _background_outer_boundary_layer_params.intervals;
   if ((_has_rings || num_total_background_layers == 1) && _background_block_ids.size() > 1)
-    paramError("background_block_ids",
-               "This parameter must be either unset or have a unity length when ring_radii is "
-               "provided or background intervals (including boundary layers) is unity.");
+    paramError(
+        "background_block_ids",
+        "This parameter must be either unset or have a unity length when ring_radii is "
+        "provided or the number of background intervals (including boundary layers) is unity.");
   if ((_has_rings || num_total_background_layers == 1) && _background_block_names.size() > 1)
-    paramError("background_block_names",
-               "This parameter must be either unset or have a unity length when ring_radii is "
-               "provided or background intervals (including boundary layers) is unity.");
+    paramError(
+        "background_block_names",
+        "This parameter must be either unset or have a unity length when ring_radii is "
+        "provided or the number of background intervals (including boundary layers) is unity.");
   if (!_has_rings && num_total_background_layers > 1 && _quad_center_elements &&
       _background_block_ids.size() == 1)
     _background_block_ids.insert(_background_block_ids.begin(), _background_block_ids.front());
