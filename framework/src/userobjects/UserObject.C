@@ -49,7 +49,7 @@ UserObject::validParams()
       "Execution order groups are executed in increasing order (e.g., the lowest "
       "number is executed first). Note that negative group numbers may be used to execute groups "
       "before the default (0) group. Please refer to the user object documentation "
-      "for ordering of user object within a group.");
+      "for ordering of user object execution within a group.");
 
   params.registerBase("UserObject");
   params.registerSystemAttributeName("UserObject");

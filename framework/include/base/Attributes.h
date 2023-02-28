@@ -265,7 +265,7 @@ public:
   clonefunc(AttribExecutionOrderGroup);
 
 private:
-  THREAD_ID _val = 0;
+  int _val = 0;
 };
 
 /**
