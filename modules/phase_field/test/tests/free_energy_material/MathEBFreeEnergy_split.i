@@ -87,7 +87,7 @@
   []
   [free_energy]
     type = MathEBFreeEnergy
-    f_name = F
+    property_name = F
     c = c
   []
 []

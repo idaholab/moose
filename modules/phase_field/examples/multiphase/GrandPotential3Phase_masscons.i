@@ -229,7 +229,7 @@
   [omegaa]
     type = DerivativeParsedMaterial
     args = 'w'
-    f_name = omegaa
+    property_name = omegaa
     material_property_names = 'Vm ka caeq'
     function = '-0.5*w^2/Vm^2/ka-w/Vm*caeq'
     derivative_order = 2
@@ -237,7 +237,7 @@
   [omegab]
     type = DerivativeParsedMaterial
     args = 'w'
-    f_name = omegab
+    property_name = omegab
     material_property_names = 'Vm kb cbeq'
     function = '-0.5*w^2/Vm^2/kb-w/Vm*cbeq'
     derivative_order = 2
@@ -245,7 +245,7 @@
   [omegad]
     type = DerivativeParsedMaterial
     args = 'w'
-    f_name = omegad
+    property_name = omegad
     material_property_names = 'Vm kd cdeq'
     function = '-0.5*w^2/Vm^2/kd-w/Vm*cdeq'
     derivative_order = 2
@@ -253,7 +253,7 @@
   [rhoa]
     type = DerivativeParsedMaterial
     args = 'w'
-    f_name = rhoa
+    property_name = rhoa
     material_property_names = 'Vm ka caeq'
     function = 'w/Vm^2/ka + caeq/Vm'
     derivative_order = 2
@@ -261,7 +261,7 @@
   [rhob]
     type = DerivativeParsedMaterial
     args = 'w'
-    f_name = rhob
+    property_name = rhob
     material_property_names = 'Vm kb cbeq'
     function = 'w/Vm^2/kb + cbeq/Vm'
     derivative_order = 2
@@ -269,7 +269,7 @@
   [rhod]
     type = DerivativeParsedMaterial
     args = 'w'
-    f_name = rhod
+    property_name = rhod
     material_property_names = 'Vm kd cdeq'
     function = 'w/Vm^2/kd + cdeq/Vm'
     derivative_order = 2
@@ -281,14 +281,14 @@
   []
   [Mobility]
     type = DerivativeParsedMaterial
-    f_name = DchiVm
+    property_name = DchiVm
     material_property_names = 'D chi Vm' #Factor of Vm is needed to evolve c instead of rho
     function = 'D*chi*Vm'
     derivative_order = 2
   []
   [chi]
     type = DerivativeParsedMaterial
-    f_name = chi
+    property_name = chi
     material_property_names = 'Vm ha(etaa0,etab0,etad0) ka hb(etaa0,etab0,etad0) kb hd(etaa0,etab0,etad0) kd'
     function = '(ha/ka + hb/kb + hd/kd) / Vm^2'
     args = 'etaa0 etab0 etad0'
@@ -297,19 +297,19 @@
   [hoverk_a]
     type = DerivativeParsedMaterial
     material_property_names = 'ha(etaa0,etab0,etad0) Vm ka'
-    f_name = hoverk_a
+    property_name = hoverk_a
     function = 'ha / Vm / ka'
   []
   [hoverk_b]
     type = DerivativeParsedMaterial
     material_property_names = 'hb(etaa0,etab0,etad0) Vm kb'
-    f_name = hoverk_b
+    property_name = hoverk_b
     function = 'hb / Vm / kb'
   []
   [hoverk_d]
     type = DerivativeParsedMaterial
     material_property_names = 'hd(etaa0,etab0,etad0) Vm kd'
-    f_name = hoverk_d
+    property_name = hoverk_d
     function = 'hd / Vm / kd'
   []
 []
