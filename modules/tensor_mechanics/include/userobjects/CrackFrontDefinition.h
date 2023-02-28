@@ -23,8 +23,6 @@ namespace libMesh
 class QBase;
 }
 
-void addCrackFrontDefinitionParams(InputParameters & params);
-
 /**
  * Class used in fracture integrals to define geometric characteristics of the crack front
  */
@@ -32,6 +30,7 @@ class CrackFrontDefinition : public GeneralUserObject, public BoundaryRestrictab
 {
 public:
   static InputParameters validParams();
+  static void addCrackFrontDefinitionParams(InputParameters & params);
 
   CrackFrontDefinition(const InputParameters & parameters);
   virtual ~CrackFrontDefinition();
