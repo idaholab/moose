@@ -37,7 +37,6 @@
     type = EBSDMeshGenerator
     # Two Parallel Grains
     filename = 'EBSD_ThreeGrains.txt'
-    uniform_refine = 1
   []
 []
 
