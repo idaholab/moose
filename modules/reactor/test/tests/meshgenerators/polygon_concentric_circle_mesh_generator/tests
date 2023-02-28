@@ -14,7 +14,7 @@
     input = 'poly_2d.i'
     exodiff = 'poly_2d_back_only_sb.e'
     cli_args = 'Mesh/gen/quad_center_elements=true Mesh/gen/background_block_ids="30" Mesh/gen/background_block_names="back" --mesh-only "poly_2d_back_only_sb.e"'
-    requirement ='The system shall generate a hexagon mesh without rings and ducts and with a multilayer QUAD background using a single set of block id and name.'
+    requirement ='The system shall generate a polygon mesh without rings and ducts and with a multilayer QUAD background using a single set of block id and name.'
     recover = false
   []
   [back_only_flat_up]

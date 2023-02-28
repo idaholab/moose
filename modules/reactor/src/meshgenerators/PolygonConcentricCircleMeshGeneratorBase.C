@@ -432,7 +432,7 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
     paramError("background_block_names",
                "This parameter must be either unset or have a length of two when ring_radii is not "
                "provided and background intervals (including boundary layers) is not unity. It can "
-               "optionally to have a unity length if `quad_center_elements` is enabled.");
+               "optionally have a unity length if `quad_center_elements` is enabled.");
   if (_num_sectors_per_side.size() != _num_sides)
     paramError("num_sectors_per_side",
                "This parameter must have a length that is consistent with num_sides.");
