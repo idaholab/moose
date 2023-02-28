@@ -68,10 +68,16 @@ protected:
   template <typename T>
   bool hasMeshProperty(const std::string & data_name, const std::string & prefix) const;
 
+  /**
+   * @returns Whether or not a mesh meta-data exists with the default prefix.
+   */
   bool hasMeshProperty(const std::string & data_name) const
   {
     return hasMeshProperty(data_name, meshPropertyPrefix(data_name));
   }
+  /**
+   * @returns Whether or not a mesh meta-data exists with the default prefix and the given type.
+   */
   template <typename T>
   bool hasMeshProperty(const std::string & data_name) const
   {
