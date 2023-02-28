@@ -32,21 +32,22 @@ BoundsAuxBase::BoundsAuxBase(const InputParameters & parameters)
                                : _nl_sys.getVector("lower_bound")),
     _bounded_var(_nl_sys.getVariable(_tid, getParam<NonlinearVariableName>("bounded_variable"))),
     _bounded_var_name(parameters.get<NonlinearVariableName>("bounded_variable")),
-    _var(_subproblem.getStandardVariable(_tid, _bounded_var_name))
+    _fe_var(_bounded_var.isFV() ? nullptr
+                                : &_subproblem.getStandardVariable(_tid, _bounded_var_name))
 {
   if (!Moose::PetscSupport::isSNESVI(*dynamic_cast<FEProblemBase *>(&_subproblem)))
     mooseDoOnce(mooseWarning(
         "A variational inequalities solver must be used in conjunction with BoundsAux"));
 
   // Check that the bounded variable is of a supported type
-  if (!_var.isNodal() && (_var.feType().order != CONSTANT))
+  if (!_bounded_var.isNodal() && (_bounded_var.feType().order != CONSTANT))
     paramError("bounded_variable", "Bounded variable must be nodal or of a CONSTANT order!");
 
   const auto & dummy =
       _aux_sys.getActualFieldVariable<Real>(_tid, parameters.get<AuxVariableName>("variable"));
 
   // Check that the dummy variable matches the bounded variable
-  if (dummy.feType() != _var.feType())
+  if (dummy.feType() != _bounded_var.feType())
     paramError("variable",
                "Dummy bounds aux variable and bounded variable must use the same finite element "
                "order and family");
