@@ -1218,12 +1218,12 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       auto node = _root->find(full_name);
       if (node && node->type() == hit::NodeType::Field)
       {
+        p.inputLocation(param_name) = node->filename() + ":" + std::to_string(node->line());
+        p.paramFullpath(param_name) = full_name;
         p.set_attributes(param_name, false);
         _extracted_vars.insert(
             full_name); // Keep track of all variables extracted from the input file
         found = true;
-        p.inputLocation(param_name) = node->filename() + ":" + std::to_string(node->line());
-        p.paramFullpath(param_name) = full_name;
       }
       // Wait! Check the GlobalParams section
       else if (global_params_block)
@@ -1232,13 +1232,13 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
         node = _root->find(full_name);
         if (node)
         {
+          p.inputLocation(param_name) = node->filename() + ":" + std::to_string(node->line());
+          p.paramFullpath(param_name) = full_name;
           p.set_attributes(param_name, false);
           _extracted_vars.insert(
               full_name); // Keep track of all variables extracted from the input file
           found = true;
           in_global = true;
-          p.inputLocation(param_name) = node->filename() + ":" + std::to_string(node->line());
-          p.paramFullpath(param_name) = full_name;
         }
       }
 

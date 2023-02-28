@@ -260,7 +260,8 @@ PatternedMeshGenerator::generate()
                                     right_bid,
                                     left_bid,
                                     TOLERANCE,
-                                    /*clear_stitched_boundary_ids=*/true);
+                                    /*clear_stitched_boundary_ids=*/true,
+                                    /*verbose=*/false);
 
       // Undo the translation
       MeshTools::Modification::translate(cell_mesh, -deltax, deltay, 0);
@@ -282,7 +283,8 @@ PatternedMeshGenerator::generate()
                                   bottom_bid,
                                   top_bid,
                                   TOLERANCE,
-                                  /*clear_stitched_boundary_ids=*/true);
+                                  /*clear_stitched_boundary_ids=*/true,
+                                  /*verbose=*/false);
   }
 
   // Change boundary ids back to those of meshes[0] to not surprise user

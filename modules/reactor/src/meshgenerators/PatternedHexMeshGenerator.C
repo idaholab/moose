@@ -583,7 +583,8 @@ PatternedHexMeshGenerator::generate()
                                     OUTER_SIDESET_ID,
                                     OUTER_SIDESET_ID,
                                     TOLERANCE,
-                                    /*clear_stitched_boundary_ids=*/true);
+                                    /*clear_stitched_boundary_ids=*/true,
+                                    /*verbose=*/false);
           }
 
           continue;
@@ -616,7 +617,8 @@ PatternedHexMeshGenerator::generate()
                               OUTER_SIDESET_ID,
                               OUTER_SIDESET_ID,
                               TOLERANCE,
-                              /*clear_stitched_boundary_ids=*/false);
+                              /*clear_stitched_boundary_ids=*/false,
+                              /*verbose=*/false);
 
       // Translate back now that we've stitched so that anyone else that uses this mesh has it at
       // the origin
@@ -865,7 +867,7 @@ PatternedHexMeshGenerator::addPeripheralMesh(
 
       // rotate the peripheral mesh to the desired side of the hexagon.
       MeshTools::Modification::rotate(*meshp0, rotation_angle, 0, 0);
-      mesh.stitch_meshes(*meshp0, OUTER_SIDESET_ID, OUTER_SIDESET_ID, TOLERANCE, true);
+      mesh.stitch_meshes(*meshp0, OUTER_SIDESET_ID, OUTER_SIDESET_ID, TOLERANCE, true, false);
       sub_positions_inner.resize(0);
       sub_d_positions_outer.resize(0);
     }
