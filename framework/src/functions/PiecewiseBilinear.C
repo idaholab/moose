@@ -77,7 +77,7 @@ PiecewiseBilinear::PiecewiseBilinear(const InputParameters & parameters)
         parameters.isParamValid("z"))
       mooseError("In PiecewiseBilinear: Cannot specify 'data_file' and 'x', 'y', or 'z' together.");
     else
-      parse(_data_file_name, x, y, z);
+      parse(_data_file_name, x, y, z, name());
   }
 
   else if (!(parameters.isParamValid("x") && parameters.isParamValid("y") &&
@@ -154,11 +154,12 @@ void
 PiecewiseBilinear::parse(const std::string & data_file_name,
                          std::vector<Real> & x,
                          std::vector<Real> & y,
-                         ColumnMajorMatrix & z)
+                         ColumnMajorMatrix & z,
+                         const std::string & object_name)
 {
   std::ifstream file(data_file_name.c_str());
   if (!file.good())
-    ::mooseError("Error opening file '", data_file_name, "'.");
+    ::mooseError(object_name, " : Error opening file '", data_file_name, "'.");
 
   std::size_t num_lines = 0;
   std::size_t num_cols = libMesh::invalid_uint;
@@ -170,14 +171,15 @@ PiecewiseBilinear::parse(const std::string & data_file_name,
   {
     num_lines++;
     if (!MooseUtils::tokenizeAndConvert<double>(line, line_data, ", "))
-      ::mooseError("Error parsing file '", data_file_name, "' on line ", num_lines);
+      ::mooseError(object_name, " : Error parsing file '", data_file_name, "' on line ", num_lines);
 
     data.insert(data.end(), line_data.begin(), line_data.end());
 
     if (num_cols == libMesh::invalid_uint)
       num_cols = line_data.size();
     else if (line_data.size() != num_cols + 1)
-      ::mooseError("Read ",
+      ::mooseError(object_name,
+                   " : Read ",
                    line_data.size(),
                    " columns of data but expected ",
                    num_cols + 1,
@@ -205,5 +207,5 @@ PiecewiseBilinear::parse(const std::string & data_file_name,
   }
 
   if (data.size() != offset)
-    ::mooseError("Inconsistency in data read from '", data_file_name, "'.");
+    ::mooseError(object_name, " : Inconsistency in data read from '", data_file_name, "'.");
 }
