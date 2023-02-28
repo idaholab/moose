@@ -13,8 +13,6 @@
     fv = true
   []
   [v]
-    order = CONSTANT
-    family = MONOMIAL
     type = MooseVariableFVReal
   []
 []
@@ -108,7 +106,7 @@
 
 [Executioner]
   type = Steady
-  solve_type = 'PJFNK'
+  solve_type = 'NEWTON'
   petsc_options_iname = '-snes_type'
   petsc_options_value = 'vinewtonrsls'
 []
