@@ -31,7 +31,8 @@ template <class... Ts>
 class VariadicTable;
 
 /**
- * The SolutionInvalidity will contain all the information about the occurrence(s) of solution invalidity
+ * The SolutionInvalidity will contain all the information about the occurrence(s) of solution
+ * invalidity
  */
 class SolutionInvalidity : protected ConsoleStreamInterface, public ParallelObject
 {
@@ -43,7 +44,7 @@ public:
    */
   SolutionInvalidity(MooseApp & app);
 
-  /// Count solution invalid occurrences for each solution id
+  /// Increments solution invalid occurrences for each solution id
   void flagInvalidSolutionInternal(InvalidSolutionID _invalid_solution_id);
 
   /// Loop over all the tracked objects and determine whether solution invalid is detected
@@ -53,7 +54,7 @@ public:
   void resetSolutionInvalidTimeStep();
 
   /// Reset the number of solution invalid occurrences back to zero
-  void resetSolutionInvalid();
+  void resetSolutionInvalidCurrentIteration();
 
   /// Pass the number of solution invalid occurrences from current iteration to cumulative counters
   void solutionInvalidAccumulation();
@@ -65,7 +66,7 @@ public:
   struct InvalidCounts
   {
     unsigned int counts;
-    unsigned int timeiter_counts;
+    unsigned int timestep_counts;
     unsigned int total_counts;
   };
 
@@ -84,11 +85,6 @@ public:
   void printDebug(InvalidSolutionID _invalid_solution_id) const;
 
   void sync();
-
-  /**
-   * Updates the solution invalid info for all currently running nodes
-   */
-  void update();
 
   friend void dataStore(std::ostream &, SolutionInvalidity &, void *);
   friend void dataLoad(std::istream &, SolutionInvalidity &, void *);

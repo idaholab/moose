@@ -67,10 +67,10 @@ SolutionInvalidity::resetSolutionInvalidCurrentIteration()
 }
 
 void
-SolutionInvalidity::resetSolutionInvalidTimeIter()
+SolutionInvalidity::resetSolutionInvalidTimeStep()
 {
   for (auto & entry : _counts)
-    entry.timeiter_counts = 0;
+    entry.timestep_counts = 0;
 }
 
 void
@@ -79,16 +79,16 @@ SolutionInvalidity::solutionInvalidAccumulation()
   for (auto & entry : _counts)
   {
     entry.total_counts += entry.counts;
-    entry.timeiter_counts += entry.counts;
+    entry.timestep_counts += entry.counts;
   }
 }
 
 void
-SolutionInvalidity::solutionInvalidAccumulationTimeIter()
+SolutionInvalidity::solutionInvalidAccumulationTimeStep()
 {
   for (auto & entry : _counts)
   {
-    entry.timeiter_counts += entry.counts;
+    entry.timestep_counts += entry.counts;
   }
 }
 
@@ -115,7 +115,7 @@ SolutionInvalidity::sync()
       {
         const auto & info = _solution_invalidity_registry.item(id);
         data_to_send[0].emplace_back(
-            info.object_type, info.message, entry.counts, entry.timeiter_counts);
+            info.object_type, info.message, entry.counts, entry.timestep_counts);
         _counts[id].total_counts = 0;
       }
     }
@@ -125,7 +125,7 @@ SolutionInvalidity::sync()
   {
     mooseAssert(pid != 0, "Should not be used except processor 0");
 
-    for (const auto & [object_type, message, counts, timeiter_counts] : data)
+    for (const auto & [object_type, message, counts, timestep_counts] : data)
     {
       InvalidSolutionID main_id = 0;
       const moose::internal::SolutionInvalidityName name(object_type, message);
@@ -138,24 +138,12 @@ SolutionInvalidity::sync()
         _counts.resize(main_id + 1);
 
       _counts[main_id].counts += counts;
-      _counts[main_id].timeiter_counts += timeiter_counts;
-      _counts[main_id].total_counts += timeiter_counts;
+      _counts[main_id].timestep_counts += timestep_counts;
+      _counts[main_id].total_counts += timestep_counts;
     }
   };
 
   TIMPI::push_parallel_vector_data(comm(), data_to_send, receive_data);
-}
-
-void
-SolutionInvalidity::update()
-{
-  // Zero out the entries
-  for (auto & entry : _counts)
-  {
-    entry.counts = 0;
-    entry.timeiter_counts = 0;
-    entry.total_counts = 0;
-  }
 }
 
 void
@@ -196,7 +184,7 @@ SolutionInvalidity::summaryTable() const
         const auto & info = _solution_invalidity_registry.item(id);
         vtable.addRow(info.object_type,      // Object Type
                       entry.counts,          // Converged Iteration Warnings
-                      entry.timeiter_counts, // Latest Time Iteration Warnings
+                      entry.timestep_counts, // Latest Time Iteration Warnings
                       entry.total_counts,    // Total Iteration Warnings
                       info.message           // Message
         );
@@ -226,7 +214,7 @@ dataStore(std::ostream & stream, SolutionInvalidity & solution_invalidity, void 
     dataStore(stream, type, context);
     dataStore(stream, message, context);
     dataStore(stream, entry.counts, context);
-    dataStore(stream, entry.timeiter_counts, context);
+    dataStore(stream, entry.timestep_counts, context);
     dataStore(stream, entry.total_counts, context);
   }
 }
@@ -262,7 +250,7 @@ dataLoad(std::istream & stream, SolutionInvalidity & solution_invalidity, void *
 
     const auto & entry = solution_invalidity._counts[id];
     dataLoad(stream, entry.counts, context);
-    dataLoad(stream, entry.timeiter_counts, context);
+    dataLoad(stream, entry.timestep_counts, context);
     dataLoad(stream, entry.total_counts, context);
   }
 }

@@ -34,6 +34,10 @@ void to_json(nlohmann::json & json, const SolutionInvalidity * const & solution_
 /**
  * Store and load methods for const SolutionInvalidity *, used in the SolutionInvalidityReporter,
  * which does nothing.
+ *
+ * We need not do anything here because the data store/load capability of the SolutionInvalidity
+ * (non-pointer) object is specialized. The store/load capability of that object will properly
+ * initialize what the reporter value in SolutionInvalidityReporter points to.
  */
 ///@{
 void

@@ -196,13 +196,13 @@ NonlinearSystem::solve()
   if (_time_integrator)
   {
     // reset solution invalid counter for time iteration
-    _app.solutionInvalidity().resetSolutionInvalidTimeIter();
+    _app.solutionInvalidity().resetSolutionInvalidTimeStep();
     _time_integrator->solve();
     _time_integrator->postSolve();
     _n_iters = _time_integrator->getNumNonlinearIterations();
     _n_linear_iters = _time_integrator->getNumLinearIterations();
     // Accumulate only the occurence of solution invalid warnings for time iteration counters
-    _app.solutionInvalidity().solutionInvalidAccumulationTimeIter();
+    _app.solutionInvalidity().solutionInvalidAccumulationTimeStep();
   }
   else
   {
