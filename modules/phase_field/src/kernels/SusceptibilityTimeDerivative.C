@@ -20,10 +20,8 @@ SusceptibilityTimeDerivative::validParams()
       "of a variable by a generalized susceptibility");
   params.addRequiredParam<MaterialPropertyName>(
       "f_name", "Susceptibility function F defined in a FunctionMaterial");
-  params.addDeprecatedCoupledVar("args",
-                                 "Vector of variable arguments of the susceptibility",
-                                 "args is deprecated, use 'coupled_variables' instead");
-  params.addCoupledVar("coupled_variables", "Vector of variable arguments of the susceptibility");
+  params.addCoupledVar("args", "Vector of variable arguments of the susceptibility");
+  params.deprecateCoupledVar("args", "coupled_variables", "02/27/2024");
   return params;
 }
 
