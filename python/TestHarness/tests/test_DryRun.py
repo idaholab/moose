@@ -18,7 +18,6 @@ class TestHarnessTester(TestHarnessTestCase):
         output = self.runTests('-i', 'diffs', '--dry-run')
 
         self.assertRegex(output.decode('utf-8'), 'test_harness\.exodiff.*?DRY RUN')
-        self.assertRegex(output.decode('utf-8'), 'test_harness\.csvdiff.*?DRY RUN')
 
         # Skipped caveat test which returns skipped instead of 'DRY RUN'
         output = self.runTests('--no-color', '-i', 'depend_skip_tests', '--dry-run')

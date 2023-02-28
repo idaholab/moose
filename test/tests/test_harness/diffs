@@ -4,9 +4,4 @@
     input = exodiff.i
     exodiff = exodiff_out.e
   []
-  [csvdiff]
-    type = CSVDiff
-    input = csvdiff.i
-    csvdiff = csvdiff_out.csv
-  []
 []

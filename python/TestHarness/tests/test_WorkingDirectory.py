@@ -53,14 +53,6 @@ class TestHarnessTester(TestHarnessTestCase):
         e = cm.exception
         self.assertRegex(e.output.decode('utf-8'), r'tests/test_harness.exodiff.*? FAILED \(EXODIFF\)')
 
-    def testCSVDiff(self):
-        # csvdiff can access sub directories
-        with self.assertRaises(subprocess.CalledProcessError) as cm:
-            self.runTests('--no-color', '-i', 'working_directory', '--re', 'csvdiff')
-
-        e = cm.exception
-        self.assertRegex(e.output.decode('utf-8'), r'tests/test_harness.csvdiff.*? FAILED \(Override inputs not the same length\)')
-
     def testRunException(self):
         # RunException can access sub directories
         with self.assertRaises(subprocess.CalledProcessError) as cm:

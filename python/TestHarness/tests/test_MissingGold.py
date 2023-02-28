@@ -20,7 +20,6 @@ class TestHarnessTester(TestHarnessTestCase):
 
         e = cm.exception
         self.assertRegex(e.output.decode('utf-8'), 'test_harness\.exodiff.*?FAILED \(MISSING GOLD FILE\)')
-        self.assertRegex(e.output.decode('utf-8'), 'test_harness\.csvdiff.*?FAILED \(MISSING GOLD FILE\)')
 
         # Verify return code is a general failure related (0x80)
         self.assertIs(0x80, e.returncode)

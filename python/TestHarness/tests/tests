@@ -15,13 +15,6 @@
     requirement = "The system shall support the output of the longest running jobs"
     issues = '#16752'
   []
-  [csvdiffs]
-    type = PythonUnitTest
-    input = test_CSVDiffs.py
-    requirement = "The system shall report a failure when encountering a CSV differential result"
-    issues = '#11250 #11251'
-    collections = 'FAILURE_ANALYSIS'
-  []
   [diff]
     type = PythonUnitTest
     input = test_Diff.py

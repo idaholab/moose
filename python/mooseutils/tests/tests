@@ -82,10 +82,4 @@
     requirement = "The system shall contain python utilities for reading PerfGraphReporter data."
     issues = "#16256"
   []
-  [csvdiff]
-    type = PythonUnitTest
-    input = test_csvdiff.py
-    requirement = "The system shall contain python utilities for reading compared csv files."
-    issues = '#20032'
-  []
 []

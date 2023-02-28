@@ -47,8 +47,7 @@ class TestHarnessTester(TestHarnessTestCase):
         with self.assertRaises(subprocess.CalledProcessError):
             self.runTests('--no-color', '-i', 'diffs', '--sep-files-fail', '--output-dir', self.output_dir)
 
-        if not (os.path.exists(os.path.join(self.output_dir, 'test_harness.exodiff.DIFF.txt'))
-            and os.path.exists(os.path.join(self.output_dir, 'test_harness.csvdiff.DIFF.txt'))):
+        if not os.path.exists(os.path.join(self.output_dir, 'test_harness.exodiff.DIFF.txt')):
            self.fail('Failed to create sep-files-fail')
 
         self.runTests('--no-color', '-i', 'always_ok', '--sep-files-fail', '--output-dir', self.output_dir)
@@ -63,6 +62,5 @@ class TestHarnessTester(TestHarnessTestCase):
         self.runTests('--no-color', '-i', 'always_ok', '--sep-files', '--output-dir', self.output_dir)
 
         if not (os.path.exists(os.path.join(self.output_dir, 'test_harness.always_ok.OK.txt'))
-                and os.path.exists(os.path.join(self.output_dir, 'test_harness.csvdiff.DIFF.txt'))
                 and os.path.exists(os.path.join(self.output_dir, 'test_harness.exodiff.DIFF.txt'))):
            self.fail('Failed to create all output files --sep-files')

@@ -17,3 +17,7 @@ class TestHarnessTester(TestHarnessTestCase):
         self.assertRegex(output.decode('utf-8'), r'test_harness\.schema_xmldiff.*?FAILED \(SCHEMADIFF\)')
         self.assertRegex(output.decode('utf-8'), r'test_harness\.schema_invalid_json.*?FAILED \(LOAD FAILED\)')
         self.assertRegex(output.decode('utf-8'), r'test_harness\.schema_invalid_xml.*?FAILED \(LOAD FAILED\)')
+        self.assertRegex(output.decode('utf-8'), r'test_harness\.schema_csvdiff.*?FAILED \(SCHEMADIFF\)')
+        self.assertRegex(output.decode('utf-8'), r'test_harness\.schema_invalid_csv.*?FAILED \(LOAD FAILED\)')
+        self.assertNotRegex(output.decode('utf-8'), r'test_harness\.schema_csvdiff_override_rel.*?FAILED')
+        self.assertNotRegex(output.decode('utf-8'), r'test_harness\.schema_csvdiff_override_abs_multi_col.*?FAILED')

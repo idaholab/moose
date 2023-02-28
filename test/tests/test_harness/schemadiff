@@ -21,4 +21,29 @@
     xmldiff = schema_out.xml
     gold_file = invalid.xml
   []
+  [schema_csvdiff]
+    type = CSVDiff
+    input = csvdiff.i
+    csvdiff = csvdiff_out.csv
+  []
+  [schema_csvdiff_override_rel]
+    type = CSVDiff
+    input = csvdiff.i
+    csvdiff = csvdiff_out.csv
+    override_columns = 'num_dofs'
+    override_rel_err = 0.01
+  []
+  [schema_csvdiff_override_abs_multi_col]
+    type = CSVDiff
+    input = csvdiff.i
+    csvdiff = csvdiff_multi_col_out.csv
+    cli_args = 'Outputs/file_base=csvdiff_multi_col_out'
+    override_columns = 'num_dofs time'
+    override_abs_zero = '0.01 0.01'
+  []
+  [schema_invalid_csv]
+    type = CSVDiff
+    input = csvdiff.i
+    csvdiff = csv_invalid.csv
+  []
 []
