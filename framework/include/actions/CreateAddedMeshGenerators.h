@@ -11,6 +11,13 @@
 
 #include "Action.h"
 
+/**
+ * Action that calls MeshGeneratorSystem::createAddedMeshGenerators()
+ *
+ * This constructs the MeshGenerators that are defined by
+ * MeshGeneratorSystem::addMeshGenerator() in the correct
+ * dependency order.
+ */
 class CreateAddedMeshGenerators : public Action
 {
 public:
