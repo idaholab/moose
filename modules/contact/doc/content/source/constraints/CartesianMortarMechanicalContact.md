@@ -11,7 +11,7 @@ This can be used for both frictional and frictionless contact.
 
 In this example, we solve a cylinder-on-plane plane strain frictional problem with Cartesian Lagrange multipliers.
 Subdomain `10000` and `10001` are lower dimensional blocks (1D here) created from the `2` and `3` sidesets respectively,
-which are on both sides of the contact axis. c
+which are on both sides of the contact axis.
 
 !listing tests/mortar_cartesian_lms/cylinder_friction_cartesian.i block=Constraints
 
