@@ -1,0 +1,106 @@
+[Tests]
+  [solution_invalid]
+    type = 'RunException'
+    input = 'solution_invalid.i'
+    expect_err = 'The solution is not converged due to the solution being invalid.'
+    design = 'SolutionInvalidity.md'
+    issues = '#22814'
+    requirement = 'The system shall not accept a converged solution if the solution has been tagged as invalid.'
+  []
+
+  [allow_solution_invalid]
+    type = 'RunException'
+    input = 'solution_invalid.i'
+    cli_args = 'Problem/allow_invalid_solution=true'
+    expect_err = 'The Solution Invalidity warnings are detected but silenced! Use Problem/allow_invalid_solution=false to activate'
+    design = 'SolutionInvalidity.md'
+    issues = '#22814'
+    requirement = 'The system shall allow overriding the solution validity checks.'
+  []
+
+  [immediately_print_invalid_solution]
+    type = 'RunApp'
+    input = 'solution_invalid.i'
+    allow_warnings = true
+    cli_args = 'Problem/immediately_print_invalid_solution=true'
+    expect_out = 'NonsafeMaterial: The diffusivity is greater than the threshold value!'
+    design = 'SolutionInvalidity.md'
+    issues = '#22814'
+    requirement = 'The system shall be able to output to screen immediately a detailed reason as to why a solution is invalid'
+  []
+
+  [solution_invalid_json]
+    allow_warnings = true
+    recover = false
+    type = JSONDiff
+    input = solution_invalid.i
+    jsondiff = 'solution_invalid.json'
+    design = 'SolutionInvalidity.md'
+    issues = '#22814'
+    requirement = 'The system shall be able to output detailed reasons and occurrences as to why a solution is invalid to file'
+  []
+
+  [solution_invalid_transient]
+    allow_warnings = true
+    recover = false
+    type = JSONDiff
+    input = solution_invalid.i
+    cli_args = "Executioner/type=Transient Executioner/num_steps=1 Executioner/error_on_dtmin=false Outputs/file_base='solution_invalid_transient' "
+    jsondiff = 'solution_invalid_transient.json'
+    design = 'SolutionInvalidity.md'
+    issues = '#22814'
+    requirement = 'The system shall be able to output detailed information about why a solution is invalid to a file in transient simulations'
+  []
+
+  [solution_invalid_parallel]
+    allow_warnings = true
+    recover = false
+    type = JSONDiff
+    input = solution_invalid.i
+    cli_args = "Materials/filter/test_different_procs=true Outputs/file_base='solution_invalid_parallel'"
+    jsondiff = 'solution_invalid_parallel.json'
+    design = 'SolutionInvalidity.md'
+    min_parallel = 3
+    max_parallel = 3
+    issues = '#22814'
+    requirement = 'The system shall be able to handle a solution invalidity happening on just one processor in a parallel run'
+  []
+
+  [solution_valid_again_by_cutting_step]
+    allow_warnings = true
+    recover = false
+    type = RunApp
+    input = solution_invalid.i
+    cli_args = "Materials/filter/test_invalid_recover=true Executioner/type=Transient Executioner/num_steps=2 Outputs/file_base='solution_invalid_again'"
+    expect_out = "Solve Converged!"
+    design = 'SolutionInvalidity.md'
+    issues = '#22814'
+    requirement = 'The system shall be able to handle a solution invalidity occurs in the previous time step and recover in the next time step'
+  []
+
+  [test]
+    requirement = 'The system shall be able to support '
+    design = 'SolutionInvalidity.md'
+    issues = '#22814'
+    [solution_valid_checkpoint]
+      allow_warnings = true
+      recover = false
+      type = RunApp
+      input = solution_invalid_recover.i
+      cli_args = "Outputs/file_base='solution_invalid_checkpoint' Outputs/checkpoint=true"
+      detail = 'outputting of checkpoint files'
+    []
+
+    [solution_valid_recover]
+      allow_warnings = true
+      recover = false
+      delete_output_before_running = false
+      type = JSONDiff
+      input = solution_invalid_recover.i
+      cli_args = "--recover solution_invalid_checkpoint_cp/0003 Outputs/file_base='solution_invalid_recover' Executioner/num_steps=4 Outputs/json=true"
+      jsondiff = 'solution_invalid_recover.json'
+      prereq = 'test/solution_valid_checkpoint'
+      detail = 'restarting from the output data'
+    []
+  []
+[]

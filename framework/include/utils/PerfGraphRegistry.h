@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "GeneralRegistry.h"
 #include "MooseTypes.h"
 
 #include <mutex>
@@ -42,15 +43,7 @@ namespace internal
 class PerfGraphSectionInfo
 {
 public:
-  PerfGraphSectionInfo()
-    : _id(std::numeric_limits<PerfID>::max()),
-      _name(),
-      _level(std::numeric_limits<unsigned int>::max()),
-      _live_message(),
-      _print_dots(false)
-  {
-  }
-
+  PerfGraphSectionInfo() = default;
   PerfGraphSectionInfo(const PerfID id,
                        const std::string & name,
                        const unsigned int level,
@@ -84,7 +77,7 @@ PerfGraphRegistry & getPerfGraphRegistry();
 /**
  * The place where all timed sections will be stored
  */
-class PerfGraphRegistry
+class PerfGraphRegistry : private GeneralRegistry<std::string, PerfGraphSectionInfo>
 {
 public:
   /**
@@ -115,33 +108,36 @@ public:
    * @section_name The name of the section
    * @return the ID
    */
-  PerfID sectionID(const std::string & section_name) const;
+  PerfID sectionID(const std::string & section_name) const { return id(section_name); }
 
   /**
    * Given a PerfID return the PerfGraphSectionInfo
    * @section_id The ID
    * @return The PerfGraphSectionInfo
    */
-  const PerfGraphSectionInfo & sectionInfo(const PerfID section_id) const;
+  const PerfGraphSectionInfo & sectionInfo(const PerfID section_id) const
+  {
+    return item(section_id);
+  }
 
   /**
    * Whether or not a section with that name has been registered
    * @section_name The name of the section
    * @return Whether or not it exists
    */
-  bool sectionExists(const std::string & section_name) const;
+  bool sectionExists(const std::string & section_name) const { return keyExists(section_name); }
 
   /**
    * Whether or not a section with that id has been registered
    * @section_id The ID
    * @return Whether or not it exists
    */
-  bool sectionExists(const PerfID section_id) const;
+  bool sectionExists(const PerfID section_id) const { return idExists(section_id); }
 
   /**
    * @return number of registered sections
    */
-  long unsigned int numSections() const;
+  std::size_t numSections() const { return size(); }
 
 private:
   PerfGraphRegistry();
@@ -166,27 +162,10 @@ private:
    *
    * @return the PerfGraphSectionInfo associated with the section_id
    */
-  const PerfGraphSectionInfo & readSectionInfo(PerfID section_id);
-
-  /// Map of section names to IDs
-  std::unordered_map<std::string, PerfID> _section_name_to_id;
-
-  /// Vector of IDs to section information
-  /// This is a vector to make accesses very fast
-  /// Note that only the main thread is ever modifying
-  /// this vector (because timed sections cannot be in threaded regions
-  /// so there is no need to lock it when reading from the main thread
-  std::vector<PerfGraphSectionInfo> _id_to_section_info;
-
-  /// Mutex for locking access to the section_name_to_id
-  /// NOTE: These can be changed to shared_mutexes once we get C++17
-  mutable std::mutex _section_name_to_id_mutex;
-
-  /// Mutex for locking access to the section_name_to_id
-  /// NOTE: These can be changed to shared_mutexes once we get C++17
-  /// When that occurs the readSectionInfo() function can
-  /// probably go away
-  mutable std::mutex _id_to_section_info_mutex;
+  const PerfGraphSectionInfo & readSectionInfo(PerfID section_id) const
+  {
+    return itemNonLocking(section_id);
+  };
 
   /// So it can be constructed
   friend PerfGraphRegistry & getPerfGraphRegistry();

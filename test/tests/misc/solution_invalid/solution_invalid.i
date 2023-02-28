@@ -17,7 +17,7 @@
   [filter]
     type = NonsafeMaterial
     diffusivity = 0.5
-    threshold = 0.0
+    threshold = 0.3
   []
 []
 
@@ -46,6 +46,8 @@
 
 [Problem]
   type = FEProblem
+  allow_invalid_solution = false
+  immediately_print_invalid_solution = false
 []
 
 [Executioner]
@@ -55,6 +57,15 @@
   petsc_options_value = 'lu superlu_dist'
 []
 
+[Reporters/solution_invalidity]
+  type = SolutionInvalidityReporter
+  execute_on = FINAL
+[]
+
 [Outputs]
-  exodus = false
+  file_base = 'solution_invalid'
+  [out]
+    type = JSON
+    execute_on = 'FINAL'
+  []
 []
