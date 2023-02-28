@@ -122,6 +122,7 @@
                 Mesh/gen/duct_block_ids="1500 1600" Mesh/gen/duct_block_names="inner_duct outer_duct"
                 Mesh/gen/duct_sizes_style="apothem"
                 Mesh/gen/create_inward_interface_boundaries=true
+                Mesh/gen/create_outward_interface_boundaries=false
                 --mesh-only "poly_2d_full_inward_interface.e"'
     requirement ='The system shall generate a hexagon mesh with rings and ducts and with inward interface boundaries defined.'
     recover = false
