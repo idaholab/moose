@@ -189,9 +189,9 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
     _has_block_names = false;
 
   // Initial block id used to define radial regions of pin
-  unsigned int pin_block_id_start = 10000;
+  subdomain_id_type pin_block_id_start = 10000;
   // Use special block id to designate TRI elements
-  unsigned int pin_block_id_tri = pin_block_id_start - 1;
+  subdomain_id_type pin_block_id_tri = pin_block_id_start - 1;
 
   if (_homogenized)
   {
@@ -202,13 +202,13 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
     const auto boundary_name = _is_assembly ? "outer_assembly_" + std::to_string(_pin_type)
                                             : "outer_pin_" + std::to_string(_pin_type);
     params.set<std::string>("external_boundary_name") = boundary_name;
-    params.set<subdomain_id_type>("block_id") =
-        _quad_center ? pin_block_id_start : pin_block_id_tri;
+    params.set<std::vector<subdomain_id_type>>("block_id") = {_quad_center ? pin_block_id_start
+                                                                           : pin_block_id_tri};
     params.set<MooseEnum>("element_type") = _quad_center ? "QUAD" : "TRI";
     auto block_name = "RGMB_PIN" + std::to_string(_pin_type) + "_R0";
     if (_quad_center)
       block_name += "_TRI";
-    params.set<SubdomainName>("block_name") = block_name;
+    params.set<std::vector<SubdomainName>>("block_name") = {block_name};
 
     _build_mesh = &addMeshSubgenerator("SimpleHexagonGenerator", name() + "_2D", params);
   }

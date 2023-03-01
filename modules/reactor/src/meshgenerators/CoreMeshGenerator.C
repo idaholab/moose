@@ -291,7 +291,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
           auto params = _app.getFactory().getValidParams("SimpleHexagonGenerator");
 
           params.set<Real>("hexagon_size") = getReactorParam<Real>("assembly_pitch") / 2.0;
-          params.set<subdomain_id_type>("block_id") = UINT16_MAX - 1;
+          params.set<std::vector<subdomain_id_type>>("block_id") = {UINT16_MAX - 1};
 
           addMeshSubgenerator("SimpleHexagonGenerator", std::string(_empty_key), params);
         }
