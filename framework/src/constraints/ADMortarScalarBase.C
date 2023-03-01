@@ -85,6 +85,6 @@ ADMortarScalarBase::computeJacobian()
                                                      _matrix_tags,
                                                      _kappa_var_ptr->scalingFactor());
 #else
-  mooseError("ADMortarScalarBase only supported for global AD indexing);
+  mooseError("ADMortarScalarBase only supported for global AD indexing");
 #endif
 }
