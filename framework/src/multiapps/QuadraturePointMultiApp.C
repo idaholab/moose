@@ -30,7 +30,8 @@ QuadraturePointMultiApp::validParams()
   params += BlockRestrictable::validParams();
   params.addClassDescription(
       "Automatically generates sub-App positions from the elemental quadrature points, with the "
-      "default quadrature, in the parent mesh.");
+      "default quadrature, in the parent mesh. Quadrature points at the same location between two "
+      "elements are not duplicated.");
   params.suppressParameter<std::vector<Point>>("positions");
   params.suppressParameter<std::vector<FileName>>("positions_file");
   return params;
@@ -70,8 +71,16 @@ QuadraturePointMultiApp::fillPositions()
         _positions.push_back(q);
   }
 
+  // Remove local duplicates from the vector of positions as transfers will not handle them
+  std::sort(_positions.begin(), _positions.end());
+  _positions.erase(std::unique(_positions.begin(), _positions.end()), _positions.end());
+
   // Use the comm from the problem this MultiApp is part of
   libMesh::ParallelObject::comm().allgather(_positions);
+
+  // Remove duplicates occurring at process boundaries
+  std::sort(_positions.begin(), _positions.end());
+  _positions.erase(std::unique(_positions.begin(), _positions.end()), _positions.end());
 
   if (_positions.empty())
     mooseError("No positions found for QuadraturePointMultiApp ", _name);
