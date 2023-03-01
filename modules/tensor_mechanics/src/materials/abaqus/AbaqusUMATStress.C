@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "AbaqusUMATStress.h"
+#include "StepUserObject.h"
 #include "Factory.h"
 #include "MooseMesh.h"
 #include "RankTwoTensor.h"
@@ -44,6 +45,8 @@ AbaqusUMATStress::validParams()
   params.addParam<MooseEnum>("decomposition_method",
                              ComputeFiniteStrain::decompositionType(),
                              "Method to calculate the strain kinematics.");
+  params.addParam<UserObjectName>(
+      "step_user_object", "The StepUserObject that provides times from simulation loading steps.");
   return params;
 }
 
@@ -131,6 +134,13 @@ AbaqusUMATStress::initialSetup()
                "': Incremental strain quantities are not available. You likely are using a total "
                "strain formulation. Specify `incremental = true` in the tensor mechanics action, "
                "or use ComputeIncrementalSmallStrain in your input file.");
+
+  // Let's automatically detect uos and identify the one we are interested in.
+  // If there is more than one, we assume something is off and error out.
+  if (!isParamSetByUser("step_user_object"))
+    getStepUserObject(_fe_problem, _step_user_object, name());
+  else
+    _step_user_object = &getUserObject<StepUserObject>("step_user_object");
 }
 
 void
@@ -153,9 +163,18 @@ AbaqusUMATStress::computeProperties()
   // characteristic element length
   _aqCELENT = std::pow(_current_elem->volume(), 1.0 / _current_elem->dim());
 
-  // For now, total time and step time mean the exact same thing
-  // Value of step time at the beginning of the current increment
-  _aqTIME[0] = _t - _dt;
+  if (!_step_user_object)
+  {
+    // Value of total time at the beginning of the current increment
+    _aqTIME[0] = _t - _dt;
+  }
+  else
+  {
+    const unsigned int start_time_step = _step_user_object->getStep(_t - _dt);
+    const Real step_time = _step_user_object->getStartTime(start_time_step);
+    // Value of step time at the beginning of the current increment
+    _aqTIME[0] = step_time;
+  }
   // Value of total time at the beginning of the current increment
   _aqTIME[1] = _t - _dt;
 
