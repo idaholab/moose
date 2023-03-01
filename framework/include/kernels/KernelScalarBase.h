@@ -51,7 +51,7 @@ public:
 protected:
   /**
    * Precalculate method that is executed prior to scalar coupled variable loop
-   * within computeOffDiagJacobianScalar; analogous to precalculateResidual(), 
+   * within computeOffDiagJacobianScalar; analogous to precalculateResidual(),
    * precalculateJacobian(), and precalculateOffDiagJacobian().
    */
   virtual void precalculateOffDiagJacobianScalar(unsigned int /* svar_num */) {}
