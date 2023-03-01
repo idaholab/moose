@@ -64,8 +64,7 @@ Real
 TestPeriodicSole::computeQpResidual(const Moose::MortarType mortar_type)
 {
 
-  /// Compute penalty parameter times x-jump times average heat flux
-
+  // Compute penalty parameter times x-jump times average heat flux
   RealVectorValue dx(_phys_points_primary[_qp] - _phys_points_secondary[_qp]);
   Real k1, k2;
   // ONLY the component for this constraint will contribute here;
@@ -103,7 +102,7 @@ Real
 TestPeriodicSole::computeScalarQpResidual()
 {
 
-  /// Stability/penalty term for residual of scalar variable
+  // Stability/penalty term for residual of scalar variable
   Real r = (_pen_scale * _tau_s) * _temp_jump_global;
   RealVectorValue dx(_phys_points_primary[_qp] - _phys_points_secondary[_qp]);
 
@@ -133,7 +132,7 @@ Real
 TestPeriodicSole::computeScalarQpJacobian()
 {
 
-  /// Stability/penalty term for Jacobian of scalar variable
+  // Stability/penalty term for Jacobian of scalar variable
   RealVectorValue dx(_phys_points_primary[_qp] - _phys_points_secondary[_qp]);
 
   Real jac = dx(_alpha) * (_pen_scale * _tau_s) * dx(_alpha);
@@ -150,8 +149,7 @@ TestPeriodicSole::computeQpOffDiagJacobianScalar(const Moose::MortarType mortar_
   if (svar_num != _kappa_var)
     return 0;
 
-  /// Stability/penalty term for Jacobian
-
+  // Stability/penalty term for Jacobian
   RealVectorValue dx(_phys_points_primary[_qp] - _phys_points_secondary[_qp]);
   Real jac = (_pen_scale * _tau_s);
 
@@ -190,7 +188,7 @@ TestPeriodicSole::computeScalarQpOffDiagJacobian(const Moose::MortarType mortar_
       return 0;
   }
 
-  /// Stability/penalty term for Jacobian
+  // Stability/penalty term for Jacobian
   RealVectorValue dx(_phys_points_primary[_qp] - _phys_points_secondary[_qp]);
   Real jac = (_pen_scale * _tau_s);
 
@@ -223,7 +221,7 @@ TestPeriodicSole::computeScalarQpOffDiagJacobianScalar(const unsigned int svar_n
       l = 0;
   }
 
-  /// Stability/penalty term for Jacobian of scalar variable
+  // Stability/penalty term for Jacobian of scalar variable
   RealVectorValue dx(_phys_points_primary[_qp] - _phys_points_secondary[_qp]);
 
   Real jac = dx(_alpha) * (_pen_scale * _tau_s) * dx(l);

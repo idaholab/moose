@@ -47,9 +47,14 @@ protected:
    */
   virtual ADReal computeScalarQpResidual() override;
 
-  // Compute concentration jump
+  /**
+   * Compute concentration jump before quadrature loop
+   */
   void precalculateMaterial();
-  // Compute penalty parameter
+
+  /**
+   * Compute penalty parameter
+   */
   void precalculateStability();
 
 protected:

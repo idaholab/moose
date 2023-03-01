@@ -27,8 +27,6 @@ public:
 
   ADKernelScalarBase(const InputParameters & parameters);
 
-  virtual const MooseVariable & variable() const override { return _var; }
-
   /**
    * The scalar variable that this kernel operates on.
    */

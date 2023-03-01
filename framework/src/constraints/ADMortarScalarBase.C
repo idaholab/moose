@@ -35,7 +35,9 @@ ADMortarScalarBase::ADMortarScalarBase(const InputParameters & parameters)
     _k_order(_use_scalar ? _kappa_var_ptr->order() : 0),
     _kappa(_use_scalar ? _kappa_var_ptr->adSln() : _ad_zero)
 {
-  // add some error checks here
+#ifndef MOOSE_GLOBAL_AD_INDEXING
+  mooseError("ADMortarScalarBase only supported for global AD indexing");
+#endif
 }
 
 void
@@ -83,6 +85,6 @@ ADMortarScalarBase::computeJacobian()
                                                      _matrix_tags,
                                                      _kappa_var_ptr->scalingFactor());
 #else
-  mooseError("computeResidualAndJacobian not supported for ", name());
+  mooseError("ADMortarScalarBase only supported for global AD indexing);
 #endif
 }

@@ -118,7 +118,7 @@ PeriodicSegmentalConstraint::computeScalarQpOffDiagJacobian(const Moose::MortarT
       return 0;
   }
 
-  /// Stability/penalty term for Jacobian
+  // Stability/penalty term for Jacobian
   RealVectorValue dx(_phys_points_primary[_qp] - _phys_points_secondary[_qp]);
   Real jac = -dx(_h);
 

@@ -38,6 +38,10 @@ protected:
    * Method for computing the residual at quadrature points
    */
   virtual Real computeQpResidual(Moose::MortarType mortar_type) override;
+
+  /**
+   * No on-diagonal Jacobian terms for field variables on this object
+   */
   Real computeQpJacobian(Moose::ConstraintJacobianType /*jacobian_type*/,
                          unsigned int /*jvar*/) override
   {

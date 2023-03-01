@@ -12,7 +12,7 @@
 #include "ScalarKernel.h"
 
 /**
- *
+ * Scalar kernel that sets a zero residual, to avoid error from system missing this variable.
  */
 class NullScalarKernel : public ScalarKernel
 {

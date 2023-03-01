@@ -34,7 +34,6 @@ MortarScalarBase::MortarScalarBase(const InputParameters & parameters)
     _k_order(_use_scalar ? _kappa_var_ptr->order() : 0),
     _kappa(_use_scalar ? (_is_implicit ? _kappa_var_ptr->sln() : _kappa_var_ptr->slnOld()) : _zero)
 {
-  // add some error checks here
 }
 
 void
