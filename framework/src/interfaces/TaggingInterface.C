@@ -273,7 +273,7 @@ TaggingInterface::assignTaggedLocalResidual()
     *re = _local_re;
   for (auto & ref : _ref_blocks)
     for (const auto i : index_range(_local_re))
-      (*ref)(i) = std::abs(_local_re(i));
+      (*ref)(i) = std::abs(_local_re(i) + std::numeric_limits<Number>::min());
 }
 
 void

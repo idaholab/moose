@@ -6,8 +6,7 @@
 
 [Problem]
   type = ReferenceResidualProblem
-  reference_vector = 'ref'
-  extra_tag_vectors = 'ref'
+  reference_vector = 'reference_residual_tag'
 []
 
 [Variables]
@@ -28,34 +27,29 @@
   [u_dt]
     type = TimeDerivative
     variable = u
-    reference_residual_tags = 'ref'
   []
   [u_coupled_rx]
     type = CoupledForce
     variable = u
     v = v
     coef = 1
-    reference_residual_tags = 'ref'
   []
 
   [v_dt]
     type = TimeDerivative
     variable = v
-    reference_residual_tags = 'ref'
   []
   [v_neg_force]
     type = BodyForce
     variable = v
     value = ${fparse -1 / 2}
     function = ramp
-    reference_residual_tags = 'ref'
   []
   [v_force]
     type = BodyForce
     variable = v
     value = 1
     function = ramp
-    reference_residual_tags = 'ref'
   []
 []
 

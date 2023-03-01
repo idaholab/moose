@@ -68,4 +68,20 @@
                   'individual variables to the sum of the residual value locally normalized by '
                   'the absolute value of the residual contributions of those variables.'
   []
+  [ad_abs_ref]
+    type = 'CSVDiff'
+    input = 'ad_abs_ref.i'
+    csvdiff = 'ad_abs_ref_out.csv'
+    requirement = 'The system shall have the ability to base convergence on the comparison of '
+                  'individual variables to the sum of the absolute value of the residual contributions '
+                  'of those variables using AD.'
+  []
+  [ad_local_normalization]
+    type = 'CSVDiff'
+    input = 'ad_local_normalization.i'
+    csvdiff = 'ad_local_normalization_out.csv'
+    requirement = 'The system shall have the ability to base convergence on the comparison of '
+                  'individual variables to the sum of the residual value locally normalized by '
+                  'the absolute value of the residual contributions of those variables using AD.'
+  []
 []

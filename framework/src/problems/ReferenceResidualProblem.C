@@ -65,8 +65,7 @@ ReferenceResidualProblem::ReferenceResidualProblem(const InputParameters & param
     _local_norm(getParam<bool>("local_residual_normalization"))
 {
   // Create reference residual tag
-  const TagName tagname = "reference_residual_tag";
-  auto tag = addVectorTag(tagname);
+  auto tag = addVectorTag("reference_residual_tag");
   for (unsigned int nl_sys_num = 0; nl_sys_num < _num_nl_sys; ++nl_sys_num)
   {
     auto nl = &getNonlinearSystem(nl_sys_num);
