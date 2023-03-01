@@ -21,10 +21,8 @@ DerivativeMultiPhaseBase::validParams()
       "hi_names", "Switching Function Materials that provide h(eta_i)");
 
   // All arguments of the phase free energies
-  params.addDeprecatedCoupledVar("args",
-                                 "Arguments of the fi free energies  - use vector coupling",
-                                 "args is deprecated, use 'coupled_variables' instead");
-  params.addCoupledVar("coupled_variables", "Vector of variable arguments of the fi free energies");
+  params.addCoupledVar("args", "Vector of variable arguments of the fi free energies");
+  params.deprecateCoupledVar("args", "coupled_variables", "02/27/2024");
   params.addCoupledVar("displacement_gradients",
                        "Vector of displacement gradient variables (see "
                        "Modules/PhaseField/DisplacementGradients "

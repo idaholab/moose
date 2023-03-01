@@ -21,12 +21,8 @@ SwitchingFunctionConstraintEta::validParams()
   params.addParam<MaterialPropertyName>("h_name",
                                         "Switching Function Materials that provides h(eta_i)");
   params.addRequiredCoupledVar("lambda", "Lagrange multiplier");
-  params.addCoupledVar("args", "Further arguments to the switching function");
-  params.addDeprecatedCoupledVar("args",
-                                 "Vector of further variable arguments to the switching function",
-                                 "args is deprecated, use 'coupled_variables' instead");
-  params.addCoupledVar("coupled_variables",
-                       "Vector of further variable arguments to the switching function");
+  params.addCoupledVar("args", "Vector of further variable arguments to the switching function");
+  params.deprecateCoupledVar("args", "coupled_variables", "02/27/2024");
   return params;
 }
 

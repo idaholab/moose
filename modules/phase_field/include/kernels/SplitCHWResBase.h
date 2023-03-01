@@ -107,10 +107,8 @@ SplitCHWResBase<T>::validParams()
   params.addClassDescription(
       "Split formulation Cahn-Hilliard Kernel for the chemical potential variable");
   params.addParam<MaterialPropertyName>("mob_name", "mobtemp", "The mobility used with the kernel");
-  params.addDeprecatedCoupledVar("args",
-                                 "Vector of variable arguments of the mobility",
-                                 "args is deprecated, use 'coupled_variables' instead");
-  params.addCoupledVar("coupled_variables", "Vector of variable arguments of the mobility");
+  params.addCoupledVar("args", "Vector of variable arguments of the mobility");
+  params.deprecateCoupledVar("args", "coupled_variables", "02/27/2024");
   params.addCoupledVar(
       "w", "Coupled chemical potential (if not specified kernel variable will be used)");
   return params;

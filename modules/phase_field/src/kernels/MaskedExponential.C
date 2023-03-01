@@ -23,11 +23,8 @@ MaskedExponential::validParams()
       "mask", "hm", "Mask function that specifies where this kernel is active");
   params.addRequiredParam<MaterialPropertyName>("n_eq", "Equilibrium defect concentration");
   params.addRequiredParam<int>("species_charge", "Charge of species this kernel is being used for");
-  params.addDeprecatedCoupledVar("args",
-                                 "Vector of nonlinear variable arguments this object depends on",
-                                 "args is deprecated, use 'coupled_variables' instead");
-  params.addCoupledVar("coupled_variables",
-                       "Vector of nonlinear variable arguments this object depends on");
+  params.addCoupledVar("args", "Vector of nonlinear variable arguments this object depends on");
+  params.deprecateCoupledVar("args", "coupled_variables", "02/27/2024");
   return params;
 }
 

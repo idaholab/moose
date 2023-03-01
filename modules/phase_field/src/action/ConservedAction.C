@@ -49,11 +49,8 @@ ConservedAction::validParams()
       "use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
   params.addParamNamesToGroup("scaling implicit use_displaced_mesh", "Advanced");
   params.addRequiredParam<MaterialPropertyName>("mobility", "The mobility used with the kernel");
-  params.addDeprecatedCoupledVar("args",
-                                 "Vector of nonlinear variable arguments this kernel depends on",
-                                 "args is deprecated, use 'coupled_variables' instead");
-  params.addCoupledVar("coupled_variables",
-                       "Vector of nonlinear variable arguments this kernel depends on");
+  params.addCoupledVar("args", "Vector of nonlinear variable arguments this kernel depends on");
+  params.deprecateCoupledVar("args", "coupled_variables", "02/27/2024");
 
   params.addRequiredParam<MaterialPropertyName>(
       "free_energy", "Base name of the free energy function F defined in a free energy material");

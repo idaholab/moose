@@ -69,7 +69,7 @@
     # tht force the concentration to go to 0.95, and holds this enforcement for 500
     # time units.
     type = DiscreteNucleation
-    f_name = Fn
+    property_name = Fn
     op_names  = c
     op_values = 0.90
     penalty = 5
