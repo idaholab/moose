@@ -13,7 +13,8 @@
 #include "DiracKernel.h"
 
 /**
- * TOOD
+ * A VectorConstantPointSource DiracKernel is used to add a constant source term
+ * at a point.
  */
 class VectorConstantPointSource : public VectorDiracKernel
 {
