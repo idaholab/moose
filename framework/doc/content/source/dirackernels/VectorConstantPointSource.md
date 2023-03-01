@@ -3,7 +3,7 @@
 !syntax description /DiracKernels/VectorConstantPointSource
 
 This applies a load in a single location in the mesh. The value field is controllable,
-so the [`Control system`](syntax/Controls/index.md) may be leveraged to control the load during the
+so the [Control system](syntax/Controls/index.md) may be leveraged to control the load during the
 simulation.
 
 ## Example input syntax

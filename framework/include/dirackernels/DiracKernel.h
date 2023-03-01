@@ -109,6 +109,4 @@ protected:
   };
   const PointNotFoundBehavior _point_not_found_behavior;
   // @}
-
-private:
 };

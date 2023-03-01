@@ -7,63 +7,57 @@
 []
 
 [Variables]
-  active = 'u'
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE_VEC
-  [../]
-  [./v]
-    order = FIRST
-    family = LAGRANGE_VEC
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = VectorDiffusion
     variable = u
-  [../]
+  []
 []
 
 [DiracKernels]
-  [./point_source1]
+  [point_source1]
     type = VectorConstantPointSource
     variable = u
     values = '0.1 0.1 0.1'
     point = '0.2 0.3 0.0'
-  [../]
-  [./point_source2]
+  []
+  [point_source2]
     type = VectorConstantPointSource
     variable = u
     values = '-0.1 -0.1 -0.1'
     point = '0.2 0.8 0.0'
-  [../]
-  [./point_source3]
+  []
+  [point_source3]
     type = VectorConstantPointSource
     variable = u
     values = '-1.0 -1.0 -1.0'
     point = '0.8 0.5 0.8'
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = VectorDirichletBC
     variable = u
     boundary = left
     values = '0 0 0'
-  [../]
-  [./right]
+  []
+  [right]
     type = VectorDirichletBC
     variable = u
     boundary = right
     values = '1 1 1'
-  [../]
+  []
 []
 
 [Executioner]
   type = Steady
-
   solve_type = 'PJFNK'
 
 []

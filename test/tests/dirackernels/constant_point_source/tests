@@ -33,22 +33,20 @@
       input = '1d_point_source_fv.i'
       exodiff = '1d_fv_out.e'
 
-      detail = 'with finite volume variables,'
+      detail = 'with finite volume variables'
       ad_indexing_type = 'global'
     []
     [vector2D]
       type = 'Exodiff'
       input = 'vector_2d_point_source.i'
       exodiff = 'vector_2d_out.e'
-
-      detail = 'with vector variables in 2D,'
+      detail = 'with vector variables in 2D'
     []
     [vector3D]
       type = 'Exodiff'
       input = 'vector_3d_point_source.i'
       exodiff = 'vector_3d_out.e'
-
-      detail = 'and with vector variables in 3D.'
+      detail = 'with vector variables in 3D'
     []
   []
 []
