@@ -2,9 +2,6 @@
 
 ## Review Guidelines
 
-- Contributors should be regarded as innocent until proven guilty
-  - Contributors probably aren't out to destroy MOOSE
-  - The contributor has probably thought about their contribution a lot
 - Reviews should be thoughtful
 - Reviews should be thorough; we don't want bugs! But
   - Don't let perfect be the enemy of the good
@@ -22,6 +19,8 @@
 - NQA-1 explicitly allows for a change-control board member to push commits to a
   pull request and maintain independent reviewer status as long as the pushed
   commits are not "significant."
+- Reviews should be prompt. We should strive to provide a first quick review within XX business days
+- New features should come under more scrutiny than re-factoring, which benefits from the confidence offered by the existing test suite
 
 ## Addressing Deadlock Between a CCB Author and CCB Reviewer
 
