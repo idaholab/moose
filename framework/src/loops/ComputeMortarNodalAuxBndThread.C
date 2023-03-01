@@ -56,7 +56,7 @@ ComputeMortarNodalAuxBndThread<AuxKernelType>::onNode(ConstBndNodeRange::const_i
   {
     const auto & kernel = _storage.getActiveBoundaryObjects(_bnd_id, _tid)[_object_container_index];
     mooseAssert(dynamic_cast<MortarNodalAuxKernel *>(kernel.get()),
-                "This should be amortar nodal aux kernel");
+                "This should be a mortar nodal aux kernel");
     _fe_problem.reinitNodeFace(node, _bnd_id, _tid);
     if (kernel->variable().isNodalDefined())
     {

@@ -739,25 +739,24 @@ AuxiliarySystem::computeMortarNodalVars(const ExecFlagType type)
 {
   TIME_SECTION("computeMortarNodalVars", 3);
 
-  const MooseObjectWarehouse<AuxKernel> & mortar_nodal = _mortar_nodal_aux_storage[type];
+  const MooseObjectWarehouse<AuxKernel> & mortar_nodal_warehouse = _mortar_nodal_aux_storage[type];
 
-  mooseAssert(!mortar_nodal.hasActiveBlockObjects(),
+  mooseAssert(!mortar_nodal_warehouse.hasActiveBlockObjects(),
               "We don't allow creation of block restricted mortar nodal aux kernels.");
 
-  if (mortar_nodal.hasActiveBoundaryObjects())
+  if (mortar_nodal_warehouse.hasActiveBoundaryObjects())
   {
     ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
-    for (const auto & map_pr : mortar_nodal.getActiveBoundaryObjects())
-    {
-      const auto bnd_id = map_pr.first;
-      for (const auto index : index_range(map_pr.second))
+    for (const auto & [bnd_id, mortar_nodal_auxes] :
+         mortar_nodal_warehouse.getActiveBoundaryObjects())
+      for (const auto index : index_range(mortar_nodal_auxes))
       {
         PARALLEL_TRY
         {
           try
           {
             ComputeMortarNodalAuxBndThread<AuxKernel> mnabt(
-                _fe_problem, mortar_nodal, bnd_id, index);
+                _fe_problem, mortar_nodal_warehouse, bnd_id, index);
             Threads::parallel_reduce(bnd_nodes, mnabt);
           }
           catch (MooseException & e)
@@ -780,7 +779,6 @@ AuxiliarySystem::computeMortarNodalVars(const ExecFlagType type)
         solution().close();
         _sys.update();
       }
-    }
   }
 }
 
