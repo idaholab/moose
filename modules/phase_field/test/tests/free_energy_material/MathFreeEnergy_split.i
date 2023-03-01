@@ -87,7 +87,7 @@ active = 'SMP'
 
   [./free_energy]
     type = MathFreeEnergy
-    f_name = F
+    property_name = F
     c = c
     derivative_order = 2
   [../]

@@ -112,9 +112,15 @@ SideSetsFromBoundingBoxGenerator::generate()
   // Attempt to get the new boundary id from the name
   auto boundary_id_new = MooseMeshUtils::getBoundaryID(_boundary_new, *mesh);
 
-  // If the new boundary id/name is not valid, make it instead
+  // If the new boundary id is not valid, make it instead
   if (boundary_id_new == Moose::INVALID_BOUNDARY_ID)
+  {
     boundary_id_new = MooseMeshUtils::getNextFreeBoundaryID(*mesh);
+
+    // Write the name alias of the boundary id to the mesh boundary info
+    boundary_info.sideset_name(boundary_id_new) = _boundary_new;
+    boundary_info.nodeset_name(boundary_id_new) = _boundary_new;
+  }
 
   if (!_boundary_id_overlap)
   {

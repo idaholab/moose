@@ -24,7 +24,7 @@
 [Materials]
   [./free_energy]
     type =  VanDerWaalsFreeEnergy
-    f_name = Fgas
+    property_name = Fgas
     m = 134 # Xenon
     a = 7.3138
     b = 84.77

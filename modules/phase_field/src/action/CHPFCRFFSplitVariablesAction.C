@@ -67,11 +67,10 @@ CHPFCRFFSplitVariablesAction::act()
   _problem->addMultiApp("TransientMultiApp", "HHEquationSolver", poly_params);
 
   poly_params = _factory.getValidParams("MultiAppNearestNodeTransfer");
-  poly_params.set<MultiMooseEnum>("direction") = "to_multiapp";
   poly_params.set<ExecFlagEnum>("execute_on") = execute_options;
   poly_params.set<std::vector<AuxVariableName>>("variable") = {_n_name};
   poly_params.set<std::vector<VariableName>>("source_variable") = {_n_name};
-  poly_params.set<MultiAppName>("multi_app") = "HHEquationSolver";
+  poly_params.set<MultiAppName>("to_multi_app") = "HHEquationSolver";
   _problem->addTransfer("MultiAppNearestNodeTransfer", _n_name + "_trans", poly_params);
 
   // Loop through the number of L variables
@@ -83,16 +82,22 @@ CHPFCRFFSplitVariablesAction::act()
     // Create real L variable
     std::string real_name = L_name + "_real";
 
-    _problem->addAuxVariable(
-        real_name,
+    // Get string name for specified L variable type
+    std::string var_type = AddVariableAction::variableType(
         FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
-               Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family"))));
+               Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family"))),
+        /* is_fv = */ false,
+        /* is_array = */ false);
+
+    // Get params for specified L variable type
+    InputParameters var_params = _factory.getValidParams(var_type);
+
+    _problem->addAuxVariable(var_type, real_name, var_params);
 
     poly_params = _factory.getValidParams("MultiAppNearestNodeTransfer");
-    poly_params.set<MultiMooseEnum>("direction") = "from_multiapp";
     poly_params.set<std::vector<AuxVariableName>>("variable") = {real_name};
     poly_params.set<std::vector<VariableName>>("source_variable") = {real_name};
-    poly_params.set<MultiAppName>("multi_app") = "HHEquationSolver";
+    poly_params.set<MultiAppName>("from_multi_app") = "HHEquationSolver";
     _problem->addTransfer("MultiAppNearestNodeTransfer", real_name + "_trans", poly_params);
 
     if (l > 0)
@@ -100,16 +105,12 @@ CHPFCRFFSplitVariablesAction::act()
       // Create imaginary L variable IF l > 0
       std::string imag_name = L_name + "_imag";
 
-      _problem->addAuxVariable(
-          imag_name,
-          FEType(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
-                 Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family"))));
+      _problem->addAuxVariable(var_type, imag_name, var_params);
 
       poly_params = _factory.getValidParams("MultiAppNearestNodeTransfer");
-      poly_params.set<MultiMooseEnum>("direction") = "from_multiapp";
       poly_params.set<std::vector<AuxVariableName>>("variable") = {imag_name};
       poly_params.set<std::vector<VariableName>>("source_variable") = {imag_name};
-      poly_params.set<MultiAppName>("multi_app") = "HHEquationSolver";
+      poly_params.set<MultiAppName>("from_multi_app") = "HHEquationSolver";
       _problem->addTransfer("MultiAppNearestNodeTransfer", imag_name + "_trans", poly_params);
     }
   }

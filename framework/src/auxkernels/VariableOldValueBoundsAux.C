@@ -15,8 +15,7 @@ InputParameters
 VariableOldValueBoundsAux::validParams()
 {
   InputParameters params = BoundsAuxBase::validParams();
-  params.addClassDescription("Provides the upper and lower bound of the phase field fracture "
-                             "variable to PETSc's SNES variational inequalities solver.");
+  params.addClassDescription("Uses the old variable values as the bounds for the new solve.");
   return params;
 }
 
@@ -28,5 +27,8 @@ VariableOldValueBoundsAux::VariableOldValueBoundsAux(const InputParameters & par
 Real
 VariableOldValueBoundsAux::getBound()
 {
-  return _var.getNodalValueOld(*_current_node);
+  if (_fe_var && isNodal())
+    return _fe_var->getNodalValueOld(*_current_node);
+  else
+    mooseError("This variable type is not supported yet");
 }

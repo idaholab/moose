@@ -131,7 +131,7 @@
 
   [./free_energy]
     type = DerivativeTwoPhaseMaterial
-    f_name = F
+    property_name = F
     fa_name = Fa
     fb_name = Fb
     coupled_variables = 'c'

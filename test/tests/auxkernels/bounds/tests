@@ -26,6 +26,16 @@
     issues = '#951 #14946'
     requirement = "The system shall include the ability to compute a constant monomial field variable with constant upper and lower bounds."
   []
+  [constant_bounds_fv]
+    type = 'Exodiff'
+    input = 'constant_bounds_fv.i'
+    exodiff = 'constant_bounds_fv_out.e'
+    scale_refine = 3
+    design = 'ConstantBoundsAux.md'
+    issues = '#951 #14946'
+    requirement = "The system shall be able to impose constant upper and lower bounds on a finite volume variable."
+    ad_indexing_type = 'global'
+  []
 
   [exceptions]
     requirement = "The system shall"

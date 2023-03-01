@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/SimpleHexagonGenerator.md'
-  issues = '#18628 #19352'
+  issues = '#18628 #19352 #23369'
   [test]
     requirement = 'The system shall include the ability to create a simple hexagon mesh '
     [tri]
@@ -20,5 +20,52 @@
       recover = false
       detail = 'with QUAD elements'
     []
+    [hybrid]
+      type = 'Exodiff'
+      input = 'sim_hex.i'
+      cli_args = 'Mesh/shg/element_type=HYBRID 
+                  Mesh/shg/block_id="100 200"
+                  Mesh/shg/block_name="hexagon_tri hexagon"
+                  --mesh-only sim_hex_hybrid_in.e'
+      exodiff = 'sim_hex_hybrid_in.e'
+      recover = false
+      detail = 'with hybrid elements'
+    []
+  []
+  [errors]
+    requirement = 'The system shall throw an error '
+    [err_unneeded_radial_intervals]
+      type = 'RunException'
+      input = 'sim_hex.i'
+      cli_args = 'Mesh/shg/radial_intervals=3
+                  --mesh-only err.e'
+      expect_err = 'value is only supported when'
+      detail = "if the radial element layer number is provided but a non-hybrid mesh is to be generated."
+    []
+    [err_wrong_block_id_size_tri]
+      type = 'RunException'
+      input = 'sim_hex.i'
+      cli_args = 'Mesh/shg/block_id="100 200"
+                  --mesh-only err.e'
+      expect_err = 'if provided, the size of this parameter must be one'
+      detail = "if excessive subdomain ids are provided."
+    []
+    [err_wrong_block_id_size_hybrid]
+      type = 'RunException'
+      input = 'sim_hex.i'
+      cli_args = 'Mesh/shg/element_type=HYBRID
+                  --mesh-only err.e'
+      expect_err = 'if provided, the size of this parameter must be two'
+      detail = "if insufficient subdomain ids are provided."
+    [] 
+    [err_wrong_block_name_size]
+      type = 'RunException'
+      input = 'sim_hex.i'
+      cli_args = 'Mesh/shg/element_type=HYBRID
+                  Mesh/shg/block_id="100 200"
+                  --mesh-only err.e'
+      expect_err = 'if provided, this parameter must have the same size as'
+      detail = "if the custom subdomain ids and names provided have inconsistent sizes."
+    [] 
   []
 []
