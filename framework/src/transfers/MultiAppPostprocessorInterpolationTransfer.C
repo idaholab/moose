@@ -28,7 +28,7 @@ MultiAppPostprocessorInterpolationTransfer::validParams()
 {
   InputParameters params = MultiAppTransfer::validParams();
   params.addClassDescription("Transfer postprocessor data from sub-application into field data on "
-                             "the master application.");
+                             "the parent application.");
   params.addRequiredParam<AuxVariableName>(
       "variable", "The auxiliary variable to store the transferred values in.");
   params.addRequiredParam<PostprocessorName>("postprocessor", "The Postprocessor to interpolate.");
@@ -119,7 +119,13 @@ MultiAppPostprocessorInterpolationTransfer::execute()
           {
             // Evaluation of the _from_transform at the origin yields the transformed position of
             // the from multi-app
-            src_pts.push_back(to_coord_transform.mapBack((*_from_transforms[i])(Point(0))));
+            if (!getFromMultiApp()->runningInPosition())
+              src_pts.push_back(to_coord_transform.mapBack((*_from_transforms[i])(Point(0))));
+            else
+              // if running in position, the subapp mesh has been transformed so the translation
+              // is no longer applied by the transform
+              src_pts.push_back(to_coord_transform.mapBack(
+                  (*_from_transforms[i])(getFromMultiApp()->position(i))));
             src_vals.push_back(getFromMultiApp()->appPostprocessorValue(i, _postprocessor));
           }
         }
@@ -128,7 +134,7 @@ MultiAppPostprocessorInterpolationTransfer::execute()
       // We have only set local values - prepare for use by gathering remote gata
       idi->prepare_for_use();
 
-      // Loop over the master nodes and set the value of the variable
+      // Loop over the parent app nodes and set the value of the variable
       {
         System * to_sys = find_sys(getFromMultiApp()->problemBase().es(), _to_var_name);
 
