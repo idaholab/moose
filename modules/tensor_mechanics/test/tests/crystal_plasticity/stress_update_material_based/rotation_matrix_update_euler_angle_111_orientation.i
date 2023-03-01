@@ -21,12 +21,16 @@
     order = CONSTANT
     family = MONOMIAL
   []
+  [pk2_zz]
+    order = CONSTANT
+    family = MONOMIAL
+  []
 []
 
 [Modules/TensorMechanics/Master/all]
   strain = FINITE
+  incremental = true
   add_variables = true
-  generate_output = stress_zz
 []
 
 [AuxKernels]
@@ -51,6 +55,14 @@
     component = 2
     execute_on = timestep_end
   []
+  [pk2_zz]
+    type = RankTwoAux
+    variable = pk2_zz
+    rank_two_tensor = second_piola_kirchhoff_stress
+    index_j = 2
+    index_i = 2
+    execute_on = timestep_end
+   []
 []
 
 [BCs]
@@ -82,7 +94,7 @@
     type = FunctionDirichletBC
     variable = disp_z
     boundary = 'front'
-    function = '0.01*t'
+    function = '0.005*t'
   []
 []
 
@@ -91,11 +103,15 @@
     type = ComputeElasticityTensorCP
     C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
     fill_method = symmetric9
+    rotation_matrix = '0.707106781  0.40824829  0.57735027
+                      -0.707106781  0.40824829  0.57735027
+                       0.          -0.81649658  0.57735027'
   []
   [stress]
     type = ComputeMultipleCrystalPlasticityStress
     crystal_plasticity_models = 'trial_xtalpl'
     tan_mod_type = exact
+    maximum_substep_iteration = 4
   []
   [trial_xtalpl]
     type = CrystalPlasticityKalidindiUpdate
@@ -120,6 +136,10 @@
   [euler_angle_3]
     type = ElementAverageValue
     variable = euler_angle_3
+  []
+  [pk2_zz]
+    type = ElementAverageValue
+    variable = pk2_zz
   []
 []
 
@@ -147,4 +167,5 @@
 
 [Outputs]
   csv = true
+  perf_graph = true
 []
