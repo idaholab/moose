@@ -1,6 +1,6 @@
 [Tests]
   design = 'XFEM/index.md'
-  issues = '#6320'
+  issues = '#6320 #23572'
   [./crack_propagation_ave]
     type = Exodiff
     input = crack_propagation_2d.i
@@ -82,6 +82,27 @@
     unique_id = true
     requirement = 'The XFEM module shall represent a propagating crack in a 3D mechanics model with XFEM, where the crack is defined using a topologically surface cutting mesh by CrackMeshCut3DUserObject'
     design = 'CrackMeshCut3DUserObject.md'
+  [../]
+  [./edge_crack_2d_propagation]
+    type = Exodiff
+    input = edge_crack_2d_propagation.i
+    exodiff = 'edge_crack_2d_propagation_xfemcutter.e-s0002 edge_crack_2d_propagation_out.e-s002'
+    abs_zero = 1e-8
+    map = false
+    # XFEM requires --enable-unique-ids in libmesh
+    unique_id = true
+    requirement = 'The XFEM module shall represent a propagating crack in a 2D mechanics model with XFEM, where the crack is defined using a topologically surface cutting mesh by CrackMeshCut2DUserObject'
+    design = 'CrackMeshCut2DUserObject.md'
+  [../]
+  [./edge_crack_2d_propagation_error]
+    type = RunException
+    input = edge_crack_2d_propagation.i
+    cli_args = "Executioner/dt=1e-7"
+    expect_err = 'timestep size must be greater than 1e-06, for crack to grow. dt=1e-07'
+    # XFEM requires --enable-unique-ids in libmesh
+    unique_id = true
+    requirement = 'The XFEM module CrackMeshCut2DUserObject will error if the crack growth rate timestep falls below 1e-6s'
+    design = 'CrackMeshCut2DUserObject.md'
   [../]
   [./elliptical_crack]
     type = Exodiff

@@ -1,0 +1,66 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+// TODO: remove ignore warnings once std::tuple<> is instantiated as a StandardType
+// Using push_parallel_vector_data with std::tuple<> leads to a -Wextra error
+// https://github.com/libMesh/TIMPI/issues/52
+#include "XFEMCutMeshOutput.h"
+#include "CrackMeshCut2DUserObject.h"
+
+registerMooseObject("XFEMApp", XFEMCutMeshOutput);
+
+InputParameters
+XFEMCutMeshOutput::validParams()
+{
+  InputParameters params = FileOutput::validParams();
+  params.addClassDescription("Outputs XFEM GeometricCutUserObject cutter mesh in Exodus format.");
+  params.addRequiredParam<UserObjectName>("xfem_cutter_uo",
+                                          "The CrackMeshCut2DUserObject to get cutter mesh from");
+  return params;
+}
+
+XFEMCutMeshOutput::XFEMCutMeshOutput(const InputParameters & params)
+  : FileOutput(params),
+    UserObjectInterface(this),
+    _cutter_uo(getUserObject<CrackMeshCut2DUserObject>("xfem_cutter_uo"))
+{
+}
+
+std::string
+XFEMCutMeshOutput::filename()
+{
+  // Append the .e extension on the base file name
+  std::ostringstream output;
+  output << _file_base << ".e";
+
+  // Add the _000x extension to the file
+  if (_file_num > 1)
+    output << "-s" << std::setw(_padding) << std::setprecision(0) << std::setfill('0') << std::right
+           << _file_num;
+
+  // Return the filename
+  return output.str();
+}
+
+void
+XFEMCutMeshOutput::output(const ExecFlagType & /* type */)
+{
+  // exodus_num is always one because we are always assuming the mesh changes between outputs
+  int exodus_num = 1;
+  ++_file_num;
+  _es = std::make_unique<EquationSystems>(_cutter_uo.getCutterMesh());
+  _exodus_io = std::make_unique<ExodusII_IO>(_es->get_mesh());
+  _exodus_io->write_timestep(filename(), *_es, exodus_num, time() + _app.getGlobalTimeOffset());
+
+  // Done with these
+  // We don't necessarily need to create a new mesh every time, but it's easier than
+  // checking if the Rays have changed from last time we built a mesh
+  _es->clear();
+  _es = nullptr;
+}
