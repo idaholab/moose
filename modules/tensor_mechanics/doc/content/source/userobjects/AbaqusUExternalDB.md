@@ -4,7 +4,7 @@
 
 ## Description
 
-The `AbaqusUExternalDB` user object  is used to execute an _Abaqus UEXTERNALDB_
+The `AbaqusUExternalDB` user object is used to execute an _Abaqus UEXTERNALDB_
 user function at various stages of the simulation. The functions can be coded in
 Fortran (`.f` and `.f90` file extensions) or C/C++  (`.c` and `.C` file
 extensions) and must be located in the `plugins` directory of the app.
@@ -16,9 +16,8 @@ A description of the input and output parameters of the UEXTERNALDB user subrout
 can be found in the Abaqus user manual.
 
 !alert note
-MOOSE has no corresponding concept of an Abaqus simulation "step". MOOSE time steps
-correspond to Abaqus "increments". For now the Abaqus step number passed to the
-UEXTERNALDB routine is always zero.
+MOOSE steps need to be defined in a [StepUserObject](/StepUserObject.md) and passed to
+the `AbaqusUExternalDB` user object to correctly inform user routines.
 
 !syntax parameters /UserObjects/AbaqusUExternalDB
 

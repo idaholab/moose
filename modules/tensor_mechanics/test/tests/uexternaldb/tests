@@ -42,17 +42,14 @@
     []
   []
 
-  [step]
+  [steps]
     type = 'RunApp'
-    input = 'utility_functions.i'
+    input = 'utility_functions_steps.i'
     library_mode = 'DYNAMIC'
     valgrind = 'NONE'
-    cli_args = 'UserObjects/uexternaldb/abaqus_step=12345678 '
-               'UserObjects/uexternaldb/execute_on=INITIAL'
-    expect_out = 'UEXTERNALDB           0           0   0.0000000000000000        0.0000000000000000 '
-                 '       0.0000000000000000         12345678           0'
-    requirement = 'The Abaqus UEXTERNALDB interface shall be able to pass in a custom Abaqus step '
-                  'number.'
+    expect_out = 'Loading step is           1'
+    requirement = 'The Abaqus UEXTERNALDB interface shall interface with a general user object to '
+                  'obtain the proper loading step and pass it to the user routine.'
   []
 
   [getoutdir]
@@ -85,7 +82,7 @@
       input = 'utility_functions.i'
       library_mode = 'DYNAMIC'
       valgrind = 'NONE'
-      cli_args = 'UserObjects/uexternaldb/abaqus_step=1 UserObjects/uexternaldb/execute_on=INITIAL'
+      cli_args = 'UserObjects/uexternaldb/execute_on=INITIAL'
       expect_out = '\*\* Abaqus Info \*\*\nInline message 1 2 0.100000 0.200000 0.300000 ONE      '
                    'TWO     !'
       detail = 'info level.'
@@ -95,7 +92,8 @@
       input = 'utility_functions.i'
       library_mode = 'DYNAMIC'
       valgrind = 'NONE'
-      cli_args = 'UserObjects/uexternaldb/abaqus_step=2 UserObjects/uexternaldb/execute_on=INITIAL'
+      cli_args = "UserObjects/step_uo/step_start_times='0.0 0.1 0.2' "
+                 "UserObjects/uexternaldb/execute_on=TIMESTEP_END"
       expect_out = '\*\* Abaqus Warning \*\*\nInline message 1 2 0.100000 0.200000 0.300000 ONE      '
                    'TWO     !'
       detail = 'warning level.'
@@ -105,7 +103,8 @@
       input = 'utility_functions.i'
       library_mode = 'DYNAMIC'
       valgrind = 'NONE'
-      cli_args = 'UserObjects/uexternaldb/abaqus_step=3 UserObjects/uexternaldb/execute_on=INITIAL'
+      cli_args = "UserObjects/step_uo/step_start_times='0.0 0.1 0.2 0.3' "
+                 "UserObjects/uexternaldb/execute_on=TIMESTEP_END"
       expect_out = '\*\* Abaqus Non-fatal Error \*\*\nInline message 1 2 0.100000 0.200000 0.300000 '
                    'ONE      TWO     !'
       detail = 'non-fatal error level.'
@@ -115,7 +114,8 @@
       input = 'utility_functions.i'
       library_mode = 'DYNAMIC'
       valgrind = 'NONE'
-      cli_args = 'UserObjects/uexternaldb/abaqus_step=4 UserObjects/uexternaldb/execute_on=INITIAL'
+      cli_args = "UserObjects/step_uo/step_start_times='0.0 0.1 0.2 0.3 0.4' "
+                 "UserObjects/uexternaldb/execute_on=TIMESTEP_END"
       expect_err = '\*\*\* ERROR \*\*\*\nInline message 1 2 0.100000 0.200000 0.300000 ONE      TWO  '
                    '   !'
       detail = 'fatal error level.'

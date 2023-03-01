@@ -233,7 +233,8 @@ MultiAppShapeEvaluationTransfer::transferVariable(unsigned int i)
   }
 
   // Setup the local mesh functions.
-  std::vector<std::shared_ptr<MeshFunction>> local_meshfuns;
+  std::vector<MeshFunction> local_meshfuns;
+  local_meshfuns.reserve(_from_problems.size());
   for (unsigned int i_from = 0; i_from < _from_problems.size(); ++i_from)
   {
     FEProblemBase & from_problem = *_from_problems[i_from];
@@ -245,14 +246,12 @@ MultiAppShapeEvaluationTransfer::transferVariable(unsigned int i)
     System & from_sys = from_var.sys().system();
     unsigned int from_var_num = from_sys.variable_number(from_var.name());
 
-    std::shared_ptr<MeshFunction> from_func;
-    from_func.reset(new MeshFunction(getEquationSystem(from_problem, _displaced_source_mesh),
-                                     *from_sys.current_local_solution,
-                                     from_sys.get_dof_map(),
-                                     from_var_num));
-    from_func->init();
-    from_func->enable_out_of_mesh_mode(OutOfMeshValue);
-    local_meshfuns.push_back(from_func);
+    local_meshfuns.emplace_back(getEquationSystem(from_problem, _displaced_source_mesh),
+                                *from_sys.current_local_solution,
+                                from_sys.get_dof_map(),
+                                from_var_num);
+    local_meshfuns.back().init();
+    local_meshfuns.back().enable_out_of_mesh_mode(OutOfMeshValue);
   }
 
   /**
@@ -288,7 +287,7 @@ MultiAppShapeEvaluationTransfer::transferVariable(unsigned int i)
               _current_direction == TO_MULTIAPP ? 0 : _from_local2global_map[i_from];
           // Use mesh funciton to compute interpolation values
           vals_ids_for_incoming_points[i_pt].first =
-              (*local_meshfuns[i_from])(_from_transforms[from_global_num]->mapBack(pt));
+              (local_meshfuns[i_from])(_from_transforms[from_global_num]->mapBack(pt));
           // Record problem ID as well
           switch (_current_direction)
           {

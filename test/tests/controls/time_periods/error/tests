@@ -4,7 +4,7 @@
   [./steady_error]
     type = RunException
     input = 'steady_error.i'
-    expect_err = "TimePeriod objects only operate on transient problems"
+    expect_err = "TimePeriodBase objects only operate on transient problems"
     requirement = "The TimePeriod object shall error when used with a steady state problem."
   [../]
   [./start_end_size_mismatch]

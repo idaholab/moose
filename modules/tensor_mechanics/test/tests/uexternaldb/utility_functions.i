@@ -11,6 +11,10 @@
 []
 
 [UserObjects]
+  [step_uo]
+   type = StepUserObject
+   step_start_times = '-1 0 0.2 0.4'
+  []
   [uexternaldb]
     type = AbaqusUExternalDB
     plugin = ../../plugins/utility_functions

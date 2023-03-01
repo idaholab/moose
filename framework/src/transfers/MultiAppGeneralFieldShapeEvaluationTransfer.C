@@ -57,8 +57,10 @@ MultiAppGeneralFieldShapeEvaluationTransfer::prepareEvaluationOfInterpValues(
 
 void
 MultiAppGeneralFieldShapeEvaluationTransfer::buildMeshFunctions(
-    const unsigned int var_index, std::vector<std::shared_ptr<MeshFunction>> & local_meshfuns)
+    const unsigned int var_index, std::vector<MeshFunction> & local_meshfuns)
 {
+  local_meshfuns.reserve(_from_problems.size());
+
   // Construct a local mesh function for each origin problem
   for (unsigned int i_from = 0; i_from < _from_problems.size(); ++i_from)
   {
@@ -72,14 +74,12 @@ MultiAppGeneralFieldShapeEvaluationTransfer::buildMeshFunctions(
     System & from_sys = from_var.sys().system();
     unsigned int from_var_num = from_sys.variable_number(getFromVarName(var_index));
 
-    std::shared_ptr<MeshFunction> from_func;
-    from_func.reset(new MeshFunction(getEquationSystem(from_problem, _displaced_source_mesh),
-                                     *from_sys.current_local_solution,
-                                     from_sys.get_dof_map(),
-                                     from_var_num));
-    from_func->init();
-    from_func->enable_out_of_mesh_mode(GeneralFieldTransfer::BetterOutOfMeshValue);
-    local_meshfuns.push_back(from_func);
+    local_meshfuns.emplace_back(getEquationSystem(from_problem, _displaced_source_mesh),
+                                *from_sys.current_local_solution,
+                                from_sys.get_dof_map(),
+                                from_var_num);
+    local_meshfuns.back().init();
+    local_meshfuns.back().enable_out_of_mesh_mode(GeneralFieldTransfer::BetterOutOfMeshValue);
   }
 }
 
@@ -94,7 +94,7 @@ MultiAppGeneralFieldShapeEvaluationTransfer::evaluateInterpValues(
 void
 MultiAppGeneralFieldShapeEvaluationTransfer::evaluateInterpValuesWithMeshFunctions(
     const std::vector<BoundingBox> & local_bboxes,
-    const std::vector<std::shared_ptr<MeshFunction>> & local_meshfuns,
+    std::vector<MeshFunction> & local_meshfuns,
     const std::vector<Point> & incoming_points,
     std::vector<std::pair<Real, Real>> & outgoing_vals)
 {
@@ -120,7 +120,7 @@ MultiAppGeneralFieldShapeEvaluationTransfer::evaluateInterpValuesWithMeshFunctio
       else
       {
         // Use mesh function to compute interpolation values
-        auto val = (*local_meshfuns[i_from])(pt - _from_positions[i_from]);
+        auto val = (local_meshfuns[i_from])(pt - _from_positions[i_from]);
 
         // Look for overlaps. The check is not active outside of overlap search because in that
         // case we accept the first value from the lowest ranked process
