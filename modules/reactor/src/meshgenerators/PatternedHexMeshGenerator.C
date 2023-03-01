@@ -298,7 +298,7 @@ PatternedHexMeshGenerator::generate()
                  "' is not a replicated mesh. Only replicated meshes are supported");
 
     // throw an error message if the input mesh has a flat side up
-    if (hasMeshProperty("flat_side_up", _input_names[i]))
+    if (hasMeshProperty<bool>("flat_side_up", _input_names[i]))
       if (getMeshProperty<bool>("flat_side_up", _input_names[i]))
         paramError("inputs",
                    "Mesh '",
@@ -322,7 +322,7 @@ PatternedHexMeshGenerator::generate()
     for (MooseIndex(_input_names) i = 0; i < _input_names.size(); ++i)
     {
       // throw an error message if the input mesh does not contain the required meta data
-      if (!hasMeshProperty("pattern_pitch_meta", _input_names[i]))
+      if (!hasMeshProperty<Real>("pattern_pitch_meta", _input_names[i]))
         mooseError("In PatternedHexMeshGenerator ",
                    _name,
                    ": the unit hexagonal input mesh does not contain appropriate meta data "
@@ -373,7 +373,7 @@ PatternedHexMeshGenerator::generate()
     for (MooseIndex(_input_names) i = 0; i < _input_names.size(); ++i)
     {
       // throw an error message if the input mesh does not contain the required meta data
-      if (!hasMeshProperty("pitch_meta", _input_names[i]))
+      if (!hasMeshProperty<Real>("pitch_meta", _input_names[i]))
         mooseError("In PatternedHexMeshGenerator ",
                    _name,
                    ": the unit hexagonal input mesh does not contain appropriate meta data "

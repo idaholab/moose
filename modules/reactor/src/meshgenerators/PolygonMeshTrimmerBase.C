@@ -95,9 +95,9 @@ PolygonMeshTrimmerBase::generate()
   ReplicatedMesh & mesh = *replicated_mesh_ptr;
 
   // Passing metadata
-  if (hasMeshProperty("input_pitch_meta", _input_name))
+  if (hasMeshProperty<Real>("input_pitch_meta", _input_name))
     setMeshProperty("input_pitch_meta", getMeshProperty<Real>("input_pitch_meta", _input_name));
-  if (hasMeshProperty("is_control_drum_meta", _input_name))
+  if (hasMeshProperty<bool>("is_control_drum_meta", _input_name))
     setMeshProperty("is_control_drum_meta",
                     getMeshProperty<bool>("is_control_drum_meta", _input_name));
 
@@ -127,7 +127,7 @@ PolygonMeshTrimmerBase::generate()
     mesh.get_boundary_info().sideset_name(peripheral_trimming_section_boundary_id) =
         _peripheral_trimming_section_boundary;
   }
-  else if (hasMeshProperty("pattern_pitch_meta", _input_name))
+  else if (hasMeshProperty<Real>("pattern_pitch_meta", _input_name))
     setMeshProperty("pattern_pitch_meta", getMeshProperty<Real>("pattern_pitch_meta", _input_name));
 
   if (_center_trim_sector_number < _num_sides * 2)

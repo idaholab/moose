@@ -57,6 +57,7 @@ protected:
    * @param param_name name of ReactorMeshParams parameter
    * @return whether parameter is defined in ReactorMeshParams metadata
    */
+  template <typename T>
   bool hasReactorParam(const std::string param_name);
 
   /**
@@ -89,6 +90,13 @@ private:
   /// The dummy param mesh that we need to clear once we've generated (in freeReactorMeshParams)
   std::unique_ptr<MeshBase> * _reactor_params_mesh;
 };
+
+template <typename T>
+bool
+ReactorGeometryMeshBuilderBase::hasReactorParam(const std::string param_name)
+{
+  return hasMeshProperty<T>(param_name, _reactor_params);
+}
 
 template <typename T>
 const T &

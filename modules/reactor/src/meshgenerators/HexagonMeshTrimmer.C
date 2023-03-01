@@ -70,8 +70,8 @@ std::unique_ptr<MeshBase>
 HexagonMeshTrimmer::generate()
 {
   // Check if input mesh is trimmable
-  if (hasMeshProperty("hexagon_peripheral_trimmability", _input_name) &&
-      hasMeshProperty("hexagon_center_trimmability", _input_name))
+  if (hasMeshProperty<bool>("hexagon_peripheral_trimmability", _input_name) &&
+      hasMeshProperty<bool>("hexagon_center_trimmability", _input_name))
   {
     if (!getMeshProperty<bool>("hexagon_peripheral_trimmability", _input_name) &&
         std::accumulate(_trim_peripheral_region.begin(), _trim_peripheral_region.end(), 0) > 0)

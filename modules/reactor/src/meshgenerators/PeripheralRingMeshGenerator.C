@@ -144,10 +144,10 @@ PeripheralRingMeshGenerator::PeripheralRingMeshGenerator(const InputParameters &
 std::unique_ptr<MeshBase>
 PeripheralRingMeshGenerator::generate()
 {
-  if (hasMeshProperty("hexagon_center_trimmability", _input_name))
+  if (hasMeshProperty<bool>("hexagon_center_trimmability", _input_name))
     setMeshProperty("hexagon_center_trimmability",
                     getMeshProperty<bool>("hexagon_center_trimmability", _input_name));
-  if (hasMeshProperty("square_center_trimmability", _input_name))
+  if (hasMeshProperty<bool>("square_center_trimmability", _input_name))
     setMeshProperty("square_center_trimmability",
                     getMeshProperty<bool>("square_center_trimmability", _input_name));
   // Calculate biasing terms
