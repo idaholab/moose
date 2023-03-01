@@ -69,6 +69,30 @@ protected:
   virtual void computeScalarResidualsForJacobian();
 
   /**
+   * For coupling scalar variables
+   * Added solely for GenericKernelScalar override; should not be used
+   */
+  virtual Real computeQpOffDiagJacobianScalar(unsigned int /*jvar*/) { return 0; }
+
+  /**
+   * Method for computing the scalar variable part of Jacobian at quadrature points
+   * Added solely for GenericKernelScalar override; should not be used
+   */
+  virtual Real computeScalarQpJacobian() { return 0; }
+
+  /**
+   * Method for computing an off-diagonal jacobian component at quadrature points.
+   * Added solely for GenericKernelScalar override; should not be used
+   */
+  virtual Real computeScalarQpOffDiagJacobian(const unsigned int /*jvar_num*/) { return 0; }
+
+  /**
+   * Method for computing an off-diagonal jacobian component at quadrature points.
+   * Added solely for GenericKernelScalar override; should not be used
+   */
+  virtual Real computeScalarQpOffDiagJacobianScalar(const unsigned int /*svar_num*/) { return 0; }
+
+  /**
    * Put necessary evaluations depending on qp but independent of test functions here
    */
   virtual void initScalarQpResidual() {}
