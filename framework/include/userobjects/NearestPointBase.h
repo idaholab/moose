@@ -99,7 +99,7 @@ NearestPointBase<UserObjectType, BaseType>::validParams()
                                       "Computations will be lumped into values at these points.");
   params.addParam<FileName>("points_file",
                             "A filename that should be looked in for points. Each "
-                            "set of 3 values in that file will represent a Point.  "
+                            "set of 3 values in that file will represent a Point. "
                             "This and 'points' cannot be both supplied.");
 
   MooseEnum distnorm("point=0 radius=1", "point");
@@ -107,6 +107,8 @@ NearestPointBase<UserObjectType, BaseType>::validParams()
       "dist_norm", distnorm, "To specify whether the distance is defined based on point or radius");
   MooseEnum axis("x=0 y=1 z=2", "z");
   params.addParam<MooseEnum>("axis", axis, "The axis around which the radius is determined");
+
+  params.addParamNamesToGroup("points points_file dist_norm axis", "Points and distance to points");
 
   // Add in the valid parameters
   params += UserObjectType::validParams();

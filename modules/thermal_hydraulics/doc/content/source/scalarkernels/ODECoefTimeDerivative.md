@@ -1,18 +1,23 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # ODECoefTimeDerivative
 
 !alert construction title=Undocumented Class
-The ODECoefTimeDerivative has not been documented. The content contained on this page includes the
-typical automatic documentation associated with a MooseObject; however, what is contained is
-ultimately determined by what is necessary to make the documentation clear for users.
+The ODECoefTimeDerivative has not been documented. The content listed below should be used as a starting point for
+documenting the class, which includes the typical automatic documentation associated with a
+MooseObject; however, what is contained is ultimately determined by what is necessary to make the
+documentation clear for users.
 
 !syntax description /ScalarKernels/ODECoefTimeDerivative
+
+## Overview
+
+!! Replace these lines with information regarding the ODECoefTimeDerivative object.
+
+## Example Input File Syntax
+
+!! Describe and include an example of how to use the ODECoefTimeDerivative object.
 
 !syntax parameters /ScalarKernels/ODECoefTimeDerivative
 
 !syntax inputs /ScalarKernels/ODECoefTimeDerivative
 
 !syntax children /ScalarKernels/ODECoefTimeDerivative
-
-!bibtex bibliography

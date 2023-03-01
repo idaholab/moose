@@ -126,12 +126,14 @@ Console::validParams()
   params.addParamNamesToGroup("max_rows verbose show_multiapp_name system_info", "Advanced");
 
   // Performance log group
-  params.addParamNamesToGroup("perf_log solve_log perf_header", "Perf Log");
-  params.addParamNamesToGroup("libmesh_log", "Performance Log");
+  params.addParamNamesToGroup("perf_log solve_log perf_header libmesh_log", "Perf Log");
 
   // Variable norms group
   params.addParamNamesToGroup("outlier_variable_norms all_variable_norms outlier_multiplier",
-                              "Norms");
+                              "Variable and Residual Norms");
+
+  // Number formatting
+  params.addParamNamesToGroup("scientific_time time_precision", "Time output formatting");
 
   /*
    * The following modifies the default behavior from base class parameters. Notice the extra flag

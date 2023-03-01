@@ -1,6 +1,6 @@
 [Tests]
   issues = '#1891'
-  design = 'source/auxkernels/SolutionAux.md source/userobject/SolutionUserObject.md'
+  design = 'source/auxkernels/SolutionAux.md source/userobjects/SolutionUserObject.md'
   [aux]
     requirement = "The system shall be capable of initializing an auxiliary variable from an "
                   "existing solution"

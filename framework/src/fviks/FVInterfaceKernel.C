@@ -55,6 +55,7 @@ FVInterfaceKernel::validParams()
                         false,
                         "Whether to use point neighbors, which introduces additional ghosting to "
                         "that used for simple face neighbors.");
+  params.addParamNamesToGroup("ghost_layers use_point_neighbors", "Parallel ghosting");
 
   // FV Interface Kernels always need one layer of ghosting because the elements
   // on each side of the interface may be on different MPI ranks, but we still

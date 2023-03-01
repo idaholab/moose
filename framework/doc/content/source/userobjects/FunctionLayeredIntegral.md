@@ -5,7 +5,7 @@
 ## How to define the layers
 
 The parameters to define layers are explained in the
-[LayeredAverage](/userobject/LayeredAverage.md) documentation.
+[LayeredAverage](/userobjects/LayeredAverage.md) documentation.
 
 ## How to retrieve the result
 

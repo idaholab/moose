@@ -24,7 +24,7 @@ ConeRayStudy::validParams()
 
   params.addRequiredParam<std::vector<Point>>("start_points", "The point(s) of the cone(s).");
   params.addRequiredParam<std::vector<Point>>(
-      "directions", "The direcions(s) of the cone(s) (points down the center of each cone).");
+      "directions", "The direction(s) of the cone(s) (points down the center of each cone).");
   params.addParam<std::vector<Real>>("scaling_factors",
                                      "Scaling factors for each cone (if any). Defaults to 1.");
 

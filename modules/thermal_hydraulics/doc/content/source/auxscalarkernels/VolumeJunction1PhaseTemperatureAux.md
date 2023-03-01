@@ -1,18 +1,23 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
-# VolumeJunction1PhasePressureAux
+# VolumeJunction1PhaseTemperatureAux
 
 !alert construction title=Undocumented Class
-The VolumeJunction1PhasePressureAux has not been documented. The content contained on this page includes the
-typical automatic documentation associated with a MooseObject; however, what is contained is
-ultimately determined by what is necessary to make the documentation clear for users.
+The VolumeJunction1PhaseTemperatureAux has not been documented. The content listed below should be used as a starting point for
+documenting the class, which includes the typical automatic documentation associated with a
+MooseObject; however, what is contained is ultimately determined by what is necessary to make the
+documentation clear for users.
 
-!syntax description /AuxScalarKernels/VolumeJunction1PhasePressureAux
+!syntax description /AuxScalarKernels/VolumeJunction1PhaseTemperatureAux
 
-!syntax parameters /AuxScalarKernels/VolumeJunction1PhasePressureAux
+## Overview
 
-!syntax inputs /AuxScalarKernels/VolumeJunction1PhasePressureAux
+!! Replace these lines with information regarding the VolumeJunction1PhaseTemperatureAux object.
 
-!syntax children /AuxScalarKernels/VolumeJunction1PhasePressureAux
+## Example Input File Syntax
 
-!bibtex bibliography
+!! Describe and include an example of how to use the VolumeJunction1PhaseTemperatureAux object.
+
+!syntax parameters /AuxScalarKernels/VolumeJunction1PhaseTemperatureAux
+
+!syntax inputs /AuxScalarKernels/VolumeJunction1PhaseTemperatureAux
+
+!syntax children /AuxScalarKernels/VolumeJunction1PhaseTemperatureAux

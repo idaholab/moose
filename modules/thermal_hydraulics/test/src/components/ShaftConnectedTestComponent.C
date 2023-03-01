@@ -11,7 +11,7 @@
 #include "FlowModelSinglePhase.h"
 #include "Shaft.h"
 
-registerMooseObject("ThermalHydraulicsApp", ShaftConnectedTestComponent);
+registerMooseObject("ThermalHydraulicsTestApp", ShaftConnectedTestComponent);
 
 InputParameters
 ShaftConnectedTestComponent::validParams()

@@ -1,6 +1,6 @@
 [Tests]
   issues = '#14676'
-  design = '/userobject/UserObject.md'
+  design = '/userobjects/UserObject.md'
   [./test]
     type = 'CSVDiff'
     input = 'parent.i'

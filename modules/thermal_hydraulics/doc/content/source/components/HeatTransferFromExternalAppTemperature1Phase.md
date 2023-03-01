@@ -1,18 +1,23 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # HeatTransferFromExternalAppTemperature1Phase
 
 !alert construction title=Undocumented Class
-The HeatTransferFromExternalAppTemperature1Phase has not been documented. The content contained on this page includes the
-typical automatic documentation associated with a MooseObject; however, what is contained is
-ultimately determined by what is necessary to make the documentation clear for users.
+The HeatTransferFromExternalAppTemperature1Phase has not been documented. The content listed below should be used as a starting point for
+documenting the class, which includes the typical automatic documentation associated with a
+MooseObject; however, what is contained is ultimately determined by what is necessary to make the
+documentation clear for users.
 
 !syntax description /Components/HeatTransferFromExternalAppTemperature1Phase
+
+## Overview
+
+!! Replace these lines with information regarding the HeatTransferFromExternalAppTemperature1Phase object.
+
+## Example Input File Syntax
+
+!! Describe and include an example of how to use the HeatTransferFromExternalAppTemperature1Phase object.
 
 !syntax parameters /Components/HeatTransferFromExternalAppTemperature1Phase
 
 !syntax inputs /Components/HeatTransferFromExternalAppTemperature1Phase
 
 !syntax children /Components/HeatTransferFromExternalAppTemperature1Phase
-
-!bibtex bibliography

@@ -1,18 +1,23 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
-# ADADConvectionHeatTransferBC
+# ADConvectionHeatTransferBC
 
 !alert construction title=Undocumented Class
-The ADConvectionHeatTransferBC has not been documented. The content contained on this page includes the
-typical automatic documentation associated with a MooseObject; however, what is contained is
-ultimately determined by what is necessary to make the documentation clear for users.
+The ADConvectionHeatTransferBC has not been documented. The content listed below should be used as a starting point for
+documenting the class, which includes the typical automatic documentation associated with a
+MooseObject; however, what is contained is ultimately determined by what is necessary to make the
+documentation clear for users.
 
 !syntax description /BCs/ADConvectionHeatTransferBC
+
+## Overview
+
+!! Replace these lines with information regarding the ADConvectionHeatTransferBC object.
+
+## Example Input File Syntax
+
+!! Describe and include an example of how to use the ADConvectionHeatTransferBC object.
 
 !syntax parameters /BCs/ADConvectionHeatTransferBC
 
 !syntax inputs /BCs/ADConvectionHeatTransferBC
 
 !syntax children /BCs/ADConvectionHeatTransferBC
-
-!bibtex bibliography
