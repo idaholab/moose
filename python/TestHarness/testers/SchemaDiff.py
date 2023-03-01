@@ -120,12 +120,12 @@ class SchemaDiff(RunApp):
                         if self.rel_err == 0 or y == 0:
                             if abs(x-y) > self.rel_err:
                                 return False
-                        elif abs(x-y)/y > self.rel_err:
+                        elif abs((x-y)/x) > self.rel_err:
                             return False
                     return True #if the two items are the same, you can stop evaluating them.
 
-                #Often in XML data is not stored correctly as a list/array, and are instead big strings. This should be fixed with "fix_XML_arrays",
-                #but here we do the logic to diff the long string in case it sneaks in, or if for some reason, someone made a JSON like this.
+                #Sometimes, data is not stored correctly as a list/array, and are instead big strings. This should be fixed with "fix_XML_arrays",
+                #but here we do the logic to diff the long string in case it sneaks in
                 except (ValueError, TypeError):
                     try:
                         split1 = level.t1.split(" ")
@@ -143,7 +143,7 @@ class SchemaDiff(RunApp):
                                 if self.rel_err == 0 or y == 0:
                                     if abs(x-y) > self.rel_err:
                                         return False
-                                elif abs(x-y)/y > self.rel_err:
+                                elif abs((x-y)/x) > self.rel_err:
                                     return False
                         return True #if the values in the pseudo-list are different, but all fall within the accepted rel_err, the list is skipped for diffing.
                     except ValueError:
