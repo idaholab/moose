@@ -92,7 +92,7 @@ protected:
 
   MooseMesh & _mesh;
 
-  NodeIdRange * _secondary_node_range;
+  std::unique_ptr<NodeIdRange> _secondary_node_range;
 
 public:
   std::map<dof_id_type, NearestNodeInfo> _nearest_node_info;

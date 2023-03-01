@@ -186,8 +186,9 @@ protected:
 
   /// solution vector from nonlinear solver
   const NumericVector<Number> * _current_solution;
-  /// Serialized version of the solution vector
-  NumericVector<Number> & _serialized_solution;
+  /// Serialized version of the solution vector, or nullptr if a
+  /// serialized solution is not needed
+  std::unique_ptr<NumericVector<Number>> _serialized_solution;
   /// solution vector for u^dot
   NumericVector<Number> * _u_dot;
   /// solution vector for u^dotdot
@@ -200,9 +201,6 @@ protected:
 
   /// The current states of the solution (0 = current, 1 = old, etc)
   std::vector<NumericVector<Number> *> _solution_state;
-
-  /// Whether or not a copy of the residual needs to be made
-  bool _need_serialized_solution;
 
   // Variables
   std::vector<std::vector<MooseVariableFEBase *>> _nodal_vars;

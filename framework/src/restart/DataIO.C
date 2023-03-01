@@ -465,7 +465,7 @@ dataLoad(std::istream & stream, std::stringstream & s, void * /* context */)
   size_t s_size = 0;
   stream.read((char *)&s_size, sizeof(s_size));
 
-  std::unique_ptr<char[]> s_s(new char[s_size]);
+  std::unique_ptr<char[]> s_s = std::make_unique<char[]>(s_size);
   stream.read(s_s.get(), s_size);
 
   // Clear the stringstream before loading new data into it.

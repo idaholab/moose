@@ -110,7 +110,7 @@ HierarchicalGridPartitioner::_do_partition(MeshBase & mesh, const unsigned int /
 
   // Bound the coarse mesh (n_nodes * n_nodes)
   auto nodes_mesh = std::make_unique<ReplicatedMesh>(this->_communicator);
-  nodes_mesh->partitioner().reset(new LinearPartitioner);
+  nodes_mesh->partitioner() = std::make_unique<LinearPartitioner>();
 
   if (mesh.spatial_dimension() == 2)
     MeshTools::Generation::build_cube(*nodes_mesh,
@@ -163,7 +163,7 @@ HierarchicalGridPartitioner::_do_partition(MeshBase & mesh, const unsigned int /
     }
 
     auto procs_mesh = std::make_unique<ReplicatedMesh>(this->_communicator);
-    procs_mesh->partitioner().reset(new LinearPartitioner);
+    procs_mesh->partitioner() = std::make_unique<LinearPartitioner>();
 
     if (mesh.spatial_dimension() == 2)
       MeshTools::Generation::build_cube(*procs_mesh,
