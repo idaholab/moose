@@ -15,11 +15,11 @@
 - Are there things we can do to abate fear of bugs?
   - Request more tests
 - As a reviewer, try to make it clear to the author what conversations are
-  required changes vs. suggestions (perhaps GitHub Requested Change vs Comment?)
+  required changes vs. suggestions
 - NQA-1 explicitly allows for a change-control board member to push commits to a
   pull request and maintain independent reviewer status as long as the pushed
   commits are not "significant."
-- Reviews should be prompt. We should strive to provide a first quick review within XX business days
+- Reviews should be prompt. We should strive to provide a first quick review within a week
 - New features should come under more scrutiny than re-factoring, which benefits from the confidence offered by the existing test suite
 
 ## Addressing Deadlock Between a CCB Author and CCB Reviewer
