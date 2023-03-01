@@ -30,7 +30,7 @@ ComputeElasticityTensorCP::ComputeElasticityTensorCP(const InputParameters & par
                                ? &getUserObject<PropertyReadFile>("read_prop_user_object")
                                : nullptr),
     _Euler_angles_mat_prop(declareProperty<RealVectorValue>("Euler_angles")),
-    _crysrot(declareProperty<RankTwoTensor>("crysrot")),
+    _crysrot(declareProperty<RankTwoTensor>(_base_name + "crysrot")),
     _R(_Euler_angles)
 {
   // the base class guarantees constant in time, but in this derived class the
@@ -39,7 +39,23 @@ ComputeElasticityTensorCP::ComputeElasticityTensorCP(const InputParameters & par
 
   // the base class performs a passive rotation, but the crystal plasticity
   // materials use active rotation: recover unrotated _Cijkl here
-  _Cijkl.rotate(_R.transpose());
+  if (parameters.isParamValid("rotation_matrix"))
+  {
+    _user_provided_rotation_matrix = true;
+    _Cijkl.rotate(_rotation_matrix.transpose());
+  }
+  else
+  {
+    _user_provided_rotation_matrix = false;
+    _Cijkl.rotate(_R.transpose());
+  }
+
+  if (_user_provided_rotation_matrix &&
+      (_read_prop_user_object || (parameters.isParamSetByUser("euler_angle_1")) ||
+       (parameters.isParamSetByUser("euler_angle_2")) ||
+       (parameters.isParamSetByUser("euler_angle_3"))))
+    mooseError("Bunge Euler angle information and the rotation_matrix cannot both be specified. "
+               "Provide only one type of orientation information in the input file.");
 }
 
 void
@@ -53,17 +69,36 @@ ComputeElasticityTensorCP::assignEulerAngles()
   }
   else
     _Euler_angles_mat_prop[_qp] = _Euler_angles;
+
+  _R.update(_Euler_angles_mat_prop[_qp]);
+}
+
+void
+ComputeElasticityTensorCP::initQpStatefulProperties()
+{
+  if (!_user_provided_rotation_matrix)
+  {
+    assignEulerAngles();
+    _crysrot[_qp] = _R.transpose();
+  }
+  else
+    _crysrot[_qp] = _rotation_matrix.transpose();
 }
 
 void
 ComputeElasticityTensorCP::computeQpElasticityTensor()
 {
   // Properties assigned at the beginning of every call to material calculation
-  assignEulerAngles();
+  // is required by the monolithic and user object versions. If those classes
+  // are deprecated, these update can be removed and save time
+  if (!_user_provided_rotation_matrix)
+  {
+    assignEulerAngles();
+    _crysrot[_qp] = _R.transpose();
+  }
+  else
+    _crysrot[_qp] = _rotation_matrix.transpose();
 
-  _R.update(_Euler_angles_mat_prop[_qp]);
-
-  _crysrot[_qp] = _R.transpose();
   _elasticity_tensor[_qp] = _Cijkl;
   _elasticity_tensor[_qp].rotate(_crysrot[_qp]);
 }

@@ -45,6 +45,8 @@ class InputParameterWarehouse;
 class SystemInfo;
 class CommandLine;
 class RelationshipManager;
+class SolutionInvalidity;
+
 namespace libMesh
 {
 class ExodusII_IO;
@@ -135,6 +137,11 @@ public:
    * Get the PerfGraph for this app
    */
   PerfGraph & perfGraph() { return _perf_graph; }
+
+  /**
+   * Get the SolutionInvalidity for this app
+   */
+  SolutionInvalidity & solutionInvalidity() { return _solution_invalidity; }
 
   ///@{
   /**
@@ -1036,6 +1043,9 @@ protected:
   /// The PerfGraph object for this application (recoverable)
   PerfGraph & _perf_graph;
 
+  /// The SolutionInvalidity object for this application
+  SolutionInvalidity & _solution_invalidity;
+
   /// The RankMap is a useful object for determining how the processes are laid out on the physical hardware
   const RankMap _rank_map;
 
@@ -1230,6 +1240,14 @@ private:
    * are required to declare it).
    */
   PerfGraph & createRecoverablePerfGraph();
+
+  /**
+   * Creates a recoverable SolutionInvalidity.
+   *
+   * This is a separate method so that it can be used in the constructor (multiple calls
+   * are required to declare it).
+   */
+  SolutionInvalidity & createRecoverableSolutionInvalidity();
 
   /**
    * Prints a message showing the installable inputs for a given application (if

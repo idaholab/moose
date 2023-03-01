@@ -64,6 +64,6 @@ With a specific data or auxiliary data index, the data are accessed using the `d
 
 ## Getting a Ray
 
-The [RayTracingStudy.md] has a "pool" of `Ray` objects available for use. This pool allows for previously-allocated `Ray` objects that are no longer in use to be reset and re-used without deallocating and allocating memory again. This pool is the _only_ way to construct new `Ray` objects.
+The [RayTracingStudy.md] has a "pool" of `Ray` objects available for use. This pool allows for previously-allocated `Ray` objects that are no longer in use to be reset and re-used without deallocating and allocating memory again. This pool is the *only* way to construct new `Ray` objects.
 
 For more information on the pool, see [RayTracingStudy.md#ray-pool].
