@@ -12,7 +12,6 @@
 // MOOSE includes
 #include "Assembly.h"
 #include "MooseVariable.h"
-#include "MooseVariableScalar.h"
 #include "SystemBase.h"
 
 InputParameters

@@ -114,10 +114,8 @@ KernelScalarBase::computeOffDiagJacobian(const unsigned int jvar_num)
         computeScalarOffDiagJacobian(jvar_num); // d-_kappa-residual / d-_var
     }
     else if (jvar_num == _kappa_var) // column for this kernel's scalar variable
-    {
       // handle these in computeOffDiagJacobianScalar
       return;
-    }
     else // some other column for regular variable
     {
       if (_compute_field_residuals)
@@ -177,7 +175,6 @@ KernelScalarBase::computeScalarOffDiagJacobian(const unsigned int jvar_num)
 void
 KernelScalarBase::computeOffDiagJacobianScalarLocal(const unsigned int svar_num)
 {
-
   // Get dofs and order of this scalar; at least one will be _kappa_var
   const auto & svar = _sys.getScalarVariable(_tid, svar_num);
   const unsigned int s_order = svar.order();
@@ -203,10 +200,8 @@ KernelScalarBase::computeOffDiagJacobianScalar(const unsigned int svar_num)
   if (_use_scalar)
   {
     if (svar_num == variable().number()) // column for this kernel's variable
-    {
       // this kernel's variable is not a scalar
       return;
-    }
     else if (svar_num == _kappa_var) // column for this kernel's scalar variable
     {
       // Perform assembly using method in Kernel; works for simple cases but not general

@@ -62,9 +62,7 @@ PenaltyPeriodicSegmentalConstraint::initScalarQpResidual()
 Real
 PenaltyPeriodicSegmentalConstraint::computeQpResidual(const Moose::MortarType mortar_type)
 {
-
-  /// Compute penalty parameter times x-jump times average heat flux
-
+  // Compute penalty parameter times x-jump times average heat flux
   RealVectorValue dx(_phys_points_primary[_qp] - _phys_points_secondary[_qp]);
   RealVectorValue kappa_vec(_kappa[0], 0, 0);
   if (_k_order == 2)
@@ -95,8 +93,7 @@ PenaltyPeriodicSegmentalConstraint::computeQpResidual(const Moose::MortarType mo
 Real
 PenaltyPeriodicSegmentalConstraint::computeScalarQpResidual()
 {
-
-  /// Stability/penalty term for residual of scalar variable
+  // Stability/penalty term for residual of scalar variable
   Real r = _tau_s * _temp_jump_global;
   RealVectorValue dx(_phys_points_primary[_qp] - _phys_points_secondary[_qp]);
 
@@ -126,8 +123,7 @@ PenaltyPeriodicSegmentalConstraint::computeScalarQpResidual()
 Real
 PenaltyPeriodicSegmentalConstraint::computeScalarQpJacobian()
 {
-
-  /// Stability/penalty term for Jacobian of scalar variable
+  // Stability/penalty term for Jacobian of scalar variable
   RealVectorValue dx(_phys_points_primary[_qp] - _phys_points_secondary[_qp]);
 
   Real jac = dx(_h) * _tau_s * dx(_l);
@@ -182,7 +178,7 @@ PenaltyPeriodicSegmentalConstraint::computeScalarQpOffDiagJacobian(
       return 0;
   }
 
-  /// Stability/penalty term for Jacobian
+  // Stability/penalty term for Jacobian
   RealVectorValue dx(_phys_points_primary[_qp] - _phys_points_secondary[_qp]);
   Real jac = _tau_s;
 
@@ -205,7 +201,6 @@ void
 PenaltyPeriodicSegmentalConstraint::precalculateStability()
 {
   // Example showing how the penalty could be loaded from some function
-
   _tau_s = _pen_scale;
 }
 

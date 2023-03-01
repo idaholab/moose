@@ -57,9 +57,7 @@ ADPenaltyPeriodicSegmentalConstraint::initScalarQpResidual()
 ADReal
 ADPenaltyPeriodicSegmentalConstraint::computeQpResidual(const Moose::MortarType mortar_type)
 {
-
-  /// Compute penalty parameter times x-jump times average heat flux
-
+  // Compute penalty parameter times x-jump times average heat flux
   RealVectorValue dx(_phys_points_primary[_qp] - _phys_points_secondary[_qp]);
   ADRealVectorValue kappa_vec(_kappa[0], 0, 0);
   Moose::derivInsert(kappa_vec(0).derivatives(), _kappa_var_ptr->dofIndices()[0], 1);
@@ -96,8 +94,7 @@ ADPenaltyPeriodicSegmentalConstraint::computeQpResidual(const Moose::MortarType 
 ADReal
 ADPenaltyPeriodicSegmentalConstraint::computeScalarQpResidual()
 {
-
-  /// Stability/penalty term for residual of scalar variable
+  // Stability/penalty term for residual of scalar variable
   ADReal r = _tau_s * _temp_jump_global;
   RealVectorValue dx(_phys_points_primary[_qp] - _phys_points_secondary[_qp]);
 
@@ -132,7 +129,6 @@ void
 ADPenaltyPeriodicSegmentalConstraint::precalculateStability()
 {
   // Example showing how the penalty could be loaded from some function
-
   _tau_s = _pen_scale;
 }
 

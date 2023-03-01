@@ -51,9 +51,7 @@ ADMortarScalarBase::computeResidual()
   {
     initScalarQpResidual();
     for (_h = 0; _h < _k_order; _h++)
-    {
       scalar_residuals[_h] += _JxW_msm[_qp] * _coord[_qp] * raw_value(computeScalarQpResidual());
-    }
   }
   _assembly.processResiduals(scalar_residuals,
                              _kappa_var_ptr->dofIndices(),
@@ -76,9 +74,7 @@ ADMortarScalarBase::computeJacobian()
   {
     initScalarQpResidual();
     for (_h = 0; _h < _k_order; _h++)
-    {
       scalar_residuals[_h] += _JxW_msm[_qp] * _coord[_qp] * computeScalarQpResidual();
-    }
   }
 #ifdef MOOSE_GLOBAL_AD_INDEXING
   _assembly.processUnconstrainedResidualsAndJacobian(scalar_residuals,

@@ -10,7 +10,7 @@ this piece of physics is referred to
 as the "residual" and is evaluated at integration quadrature points along that interface.
 To implement your own physics in MOOSE, you create your own mortar constraint by subclassing the MOOSE `MortarScalarBase` class.
 
-The Mortar scalar augmentation system supports the use of [!ac](AD) for residual calculations, as such
+The mortar scalar augmentation system supports the use of [!ac](AD) for residual calculations, as such
 there are two options for creating field-scalar coupling objects:
 `MortarScalarBase` and `ADMortarScalarBase`. To further understand
 automatic differentiation, please refer to the [automatic_differentiation/index.md] page for more

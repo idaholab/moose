@@ -61,8 +61,7 @@ PeriodicSegmentalConstraint::computeQpResidual(const Moose::MortarType mortar_ty
 Real
 PeriodicSegmentalConstraint::computeScalarQpResidual()
 {
-
-  /// Stability/penalty term for residual of scalar variable
+  // Stability/penalty term for residual of scalar variable
   RealVectorValue dx(_phys_points_primary[_qp] - _phys_points_secondary[_qp]);
   Real r = -dx(_h) * _lambda[_qp];
 
@@ -89,8 +88,7 @@ PeriodicSegmentalConstraint::computeQpOffDiagJacobianScalar(const Moose::MortarT
   if (svar_num != _kappa_var)
     return 0;
 
-  /// Stability/penalty term for Jacobian
-
+  // Stability/penalty term for Jacobian
   RealVectorValue dx(_phys_points_primary[_qp] - _phys_points_secondary[_qp]);
   Real jac = -dx(_h);
 

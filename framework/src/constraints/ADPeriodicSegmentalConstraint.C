@@ -67,8 +67,7 @@ ADPeriodicSegmentalConstraint::computeQpResidual(const Moose::MortarType mortar_
 ADReal
 ADPeriodicSegmentalConstraint::computeScalarQpResidual()
 {
-
-  /// Stability/penalty term for residual of scalar variable
+  // Stability/penalty term for residual of scalar variable
   RealVectorValue dx(_phys_points_primary[_qp] - _phys_points_secondary[_qp]);
   ADReal r = -dx(_h) * _lambda[_qp];
 

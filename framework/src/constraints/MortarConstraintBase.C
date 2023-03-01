@@ -148,7 +148,6 @@ void
 MortarConstraintBase::computeResidual()
 {
   setNormals();
-
   precalculateResidual();
 
   if (_compute_primal_residuals)
@@ -169,7 +168,6 @@ void
 MortarConstraintBase::computeJacobian()
 {
   setNormals();
-
   precalculateJacobian();
 
   if (_compute_primal_residuals)
