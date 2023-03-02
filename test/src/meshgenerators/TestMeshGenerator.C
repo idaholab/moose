@@ -97,6 +97,10 @@ TestMeshGenerator::TestMeshGenerator(const InputParameters & parameters) : MeshG
     if (&should_be_null_by_name != &null_mesh_ptr)
       mooseError("Should be null by name failed");
 
+    const auto & should_be_null_by_vector_param = getMeshes("inputs");
+    if (&*should_be_null_by_vector_param[0] != &null_mesh_ptr)
+      mooseError("Should be null by vector param failed");
+
     getMeshForSubByName(null_mesh_name);
     getMeshesForSubByName({null_mesh_name});
   }

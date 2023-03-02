@@ -150,7 +150,9 @@
   [null_mesh]
     type = RunApp
     input = 'mesh_generator_test.i'
-    cli_args = 'Mesh/test/null_mesh_name=null_thing Mesh/test/input=null_thing'
+    cli_args = 'Mesh/test/null_mesh_name=null_thing
+                Mesh/test/input=null_thing
+                Mesh/test/inputs="null_thing"'
     requirement = 'The system shall support declaration of a name that can be used as an unused name for input meshes when generating meshes'
   []
 []
