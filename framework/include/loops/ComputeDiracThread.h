@@ -15,7 +15,7 @@
 #include "libmesh/stored_range.h"
 
 // Forward declarations
-class DiracKernel;
+class DiracKernelBase;
 template <typename T>
 class MooseObjectTagWarehouse;
 template <typename T>
@@ -49,7 +49,7 @@ protected:
   const std::set<TagID> & _tags;
 
   /// Storage for DiracKernel objects
-  MooseObjectTagWarehouse<DiracKernel> & _dirac_kernels;
+  MooseObjectTagWarehouse<DiracKernelBase> & _dirac_kernels;
 
-  MooseObjectWarehouse<DiracKernel> * _dirac_warehouse;
+  MooseObjectWarehouse<DiracKernelBase> * _dirac_warehouse;
 };
