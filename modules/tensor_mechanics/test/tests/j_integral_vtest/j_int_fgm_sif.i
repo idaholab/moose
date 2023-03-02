@@ -51,9 +51,7 @@
   symmetry_plane = 2
   incremental = true
 
-  functionally_graded_material_crack = true
-  space_dependent_youngs_modulus = elastic_mod_material_derivative
-  youngs_modulus_derivative = elastic_mod_material
+  functionally_graded_youngs_modulus = elastic_mod_material_derivative
 
   youngs_modulus = 20680
   poissons_ratio = 0.3

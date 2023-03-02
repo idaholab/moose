@@ -89,9 +89,18 @@
     issues = '#23313'
     input = 'j_int_fgm_sif.i'
     csvdiff = 'j_int_fgm_sif_out.csv'
+    cli_args = 'DomainIntegral/functionally_graded_youngs_modulus_crack_dir_gradient=elastic_mod_material'
     requirement = 'The Domain Integral Action shall compute stress intensity factors from the '
                   'interaction integral for a crack perpendicular to a bi-material interface, '
                   'treating the interface as a functionally-graded material.'
+  []
+  [j_int_fgm_sif_error]
+    type = 'RunException'
+    input = 'j_int_fgm_sif.i'
+    expect_err = 'You have selected to compute the interaction integral for a crack in FGM'
+    requirement = "The Domain Integral shall error out if the user input does not consistently "
+                  "define the required material properties to consider extra interaction integral "
+                  "terms for functionally graded materials."
   []
   [fgm_5]
     issues = '#23313'

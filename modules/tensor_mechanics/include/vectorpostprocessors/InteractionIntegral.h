@@ -98,15 +98,15 @@ protected:
   /// Whether the temperature variable is coupled
   const bool _has_temp;
   /// Whether the elastic modulus derivative variable for crack in functionally graded material (FGM) is coupled
-  const bool _has_youngs_modulus_derivative;
+  const bool _has_functionally_graded_youngs_modulus_crack_dir_gradient;
   /// Whether the spatial elasticity modulus variable for FGM is coupled
-  const bool _has_space_dependent_youngs_modulus;
+  const bool _has_functionally_graded_youngs_modulus;
   /// Gradient of temperature
   const VariableGradient & _grad_temp;
-  /// Beta material variable that defines the transition of material properties
-  const VariableValue & _youngs_modulus_derivative;
+  /// Spatial derivative of the youngs modulus in the crack direction
+  const VariableValue & _functionally_graded_youngs_modulus_crack_dir_gradient;
   /// Spatial elasticity modulus variable for FGM
-  const VariableValue & _space_dependent_youngs_modulus;
+  const VariableValue & _functionally_graded_youngs_modulus;
   /// Conversion factor applied to convert interaction integral to stress intensity factor K
   Real _K_factor;
   /// Whether the crack plane is also a symmetry plane in the model

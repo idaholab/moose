@@ -66,4 +66,4 @@ refine vertex 2
 
 # volume all scale {1/1000} #this would give you units of m
 block all element type QUAD4
-export mesh "/Users/marta3/projects3/moose/modules/tensor_mechanics/test/tests/domain_integral_thermal/2d_paulino.e" overwrite
+export mesh "2d_paulino.e" overwrite
