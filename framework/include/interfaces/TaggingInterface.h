@@ -131,7 +131,7 @@ protected:
   std::set<TagID> _vector_tags;
 
   /// The reference residual tag ids
-  std::set<TagID> _reference_residual_tags;
+  std::set<TagID> _abs_vector_tags;
 
   /// The matrices this Kernel will contribute to
   std::set<TagID> _matrix_tags;
@@ -149,7 +149,7 @@ protected:
   std::vector<DenseVector<Number> *> _re_blocks;
 
   /// Residual blocks for reference residual tags
-  std::vector<DenseVector<Number> *> _ref_blocks;
+  std::vector<DenseVector<Number> *> _absref_blocks;
 
   /// Kernel blocks Vectors For each Tag
   std::vector<DenseMatrix<Number> *> _ke_blocks;

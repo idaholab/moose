@@ -4,9 +4,14 @@
   nx = 10
 []
 
+[GlobalParams]
+  absolute_value_vector_tags = 'absref'
+[]
+
 [Problem]
   type = ReferenceResidualProblem
-  reference_vector = 'reference_residual_tag'
+  reference_vector = 'absref'
+  extra_tag_vectors = 'absref'
 []
 
 [Variables]

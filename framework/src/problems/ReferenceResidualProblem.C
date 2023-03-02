@@ -64,14 +64,6 @@ ReferenceResidualProblem::ReferenceResidualProblem(const InputParameters & param
     _converge_on(getParam<std::vector<NonlinearVariableName>>("converge_on")),
     _local_norm(getParam<bool>("local_residual_normalization"))
 {
-  // Create reference residual tag
-  auto tag = addVectorTag("reference_residual_tag");
-  for (unsigned int nl_sys_num = 0; nl_sys_num < _num_nl_sys; ++nl_sys_num)
-  {
-    auto nl = &getNonlinearSystem(nl_sys_num);
-    nl[nl_sys_num].addVector(tag, false, GHOSTED);
-  }
-
   if (params.isParamValid("solution_variables"))
   {
     if (params.isParamValid("reference_vector"))
