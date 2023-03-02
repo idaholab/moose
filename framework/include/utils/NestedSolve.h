@@ -444,7 +444,7 @@ void
 NestedSolveTempl<is_ad>::linear(const J & A, V & x, const V & b) const
 {
   // we could make the linear solve method configurable here
-  x = A.colPivHouseholderQr().solve(b);
+  x = A.partialPivLu().solve(b);
 }
 
 template <bool is_ad>
