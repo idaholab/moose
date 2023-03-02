@@ -107,7 +107,7 @@
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
 #include "libmesh/coupling_matrix.h"
-#include "libmesh/nonlinear_solver.h"
+#include "libmesh/petsc_nonlinear_solver.h"
 #include "libmesh/sparse_matrix.h"
 #include "libmesh/string_to_enum.h"
 #include "libmesh/fe_interface.h"
@@ -1237,6 +1237,24 @@ FEProblemBase::initialSetup()
   _reporter_data.check();
 
   setCurrentExecuteOnFlag(EXEC_NONE);
+
+  for (const auto i : make_range(std::size_t(1), numNonlinearSystems()))
+  {
+    NonlinearSystemBase & nl = getNonlinearSystemBase(i);
+    PetscNonlinearSolver<Number> * petsc_solver =
+        dynamic_cast<PetscNonlinearSolver<Number> *>(nl.nonlinearSolver());
+    if (!petsc_solver)
+      continue;
+
+    SNES snes = petsc_solver->snes();
+    KSP ksp;
+    PC pc;
+    SNESGetKSP(snes, &ksp);
+    KSPGetPC(ksp, &pc);
+    SNESSetOptionsPrefix(snes, ("sys" + std::to_string(i) + "_").c_str());
+    KSPSetOptionsPrefix(ksp, ("sys" + std::to_string(i) + "_").c_str());
+    PCSetOptionsPrefix(pc, ("sys" + std::to_string(i) + "_").c_str());
+  }
 }
 
 void
