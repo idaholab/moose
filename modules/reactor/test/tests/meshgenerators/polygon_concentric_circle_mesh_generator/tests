@@ -264,7 +264,7 @@
                   Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2"
                   --mesh-only "poly_2d_err.e"'
       expect_err = 'This parameter must be either unset or have a unity length'
-      detail = "more than one block ids are provided for the background region when the mesh has ring(s)."
+      detail = "multiple background block ids have been specified at the same time as one or more ring(s) for the inner region"
     []
     [err_background_block_names_1]
       type = 'RunException'
@@ -273,7 +273,7 @@
                   Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2"
                   --mesh-only "poly_2d_err.e"'
       expect_err = 'This parameter must be either unset or have a unity length'
-      detail = "background_block_names has more than one element when the mesh has ring(s)."
+      detail = "multiple background block names have been specified at the same time as one or more ring(s) for the inner region."
     []
     [err_background_block_ids_2]
       type = 'RunException'
@@ -281,7 +281,7 @@
       cli_args = 'Mesh/gen/background_block_ids="20"
                   --mesh-only "poly_2d_err.e"'
       expect_err = 'This parameter must be either unset or have a length of two'
-      detail = "background_block_ids has a length other than zero or two when the mesh does not have rings and total background intervals does not equal one."
+      detail = "background_block_ids has a length other than zero or two when the mesh does not have rings and the total number of background intervals does not equal one."
     []
     [err_background_block_names_2]
       type = 'RunException'
@@ -289,7 +289,7 @@
       cli_args = 'Mesh/gen/background_block_names="back1"
                   --mesh-only "poly_2d_err.e"'
       expect_err = 'This parameter must be either unset or have a length of two'
-      detail = "background_block_names has a length other than zero or two when the mesh does not have rings and total background intervals does not equal one."
+      detail = "background_block_names has a length other than zero or two when the mesh does not have rings and the total number of background intervals does not equal one."
     []
     [err_block_ids_with_one_name]
       type = 'RunException'
