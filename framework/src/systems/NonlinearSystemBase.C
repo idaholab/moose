@@ -58,7 +58,7 @@
 #include "MooseUtils.h"
 #include "MooseApp.h"
 #include "NodalKernelBase.h"
-#include "DiracKernel.h"
+#include "DiracKernelBase.h"
 #include "TimeIntegrator.h"
 #include "Predictor.h"
 #include "Assembly.h"
@@ -628,8 +628,8 @@ NonlinearSystemBase::addDiracKernel(const std::string & kernel_name,
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    std::shared_ptr<DiracKernel> kernel =
-        _factory.create<DiracKernel>(kernel_name, name, parameters, tid);
+    std::shared_ptr<DiracKernelBase> kernel =
+        _factory.create<DiracKernelBase>(kernel_name, name, parameters, tid);
     postAddResidualObject(*kernel);
     _dirac_kernels.addObject(kernel, tid);
   }
