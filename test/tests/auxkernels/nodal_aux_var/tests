@@ -39,7 +39,7 @@
                  "NodalUserObjects\. 'all' is neither of those\."
     issues = '#22563'
     allow_deprecated = true
-    requirement = "The writableVariable API shall be limited to use from AuxKernels, "
+    requirement = "Writing to auxiliary variables shall be limited to use from AuxKernels, "
                   "ElementUserObjects, or NodalUserObjects."
   []
 
@@ -49,7 +49,7 @@
     exodiff = 'out_multi_var.e'
     issues = '#2099'
     allow_deprecated = true
-    requirement = "The AuxKernel objects shall be capable of wriyting to to multiple coupled "
+    requirement = "Auxiliary kernel objects shall be capable of writing to to multiple coupled "
                   "variables using the deprecated writeCoupledValue method."
   []
   [multi_update_deprecated_error]
@@ -60,8 +60,8 @@
                  "AuxKernel\."
     issues = '#22563'
     allow_deprecated = true
-    requirement = "The writableCoupledValue API shall be limited to use from AuxKernels, "
-                  "ElementUserObjects, or NodalUserObjects."
+    requirement = "Writing to auxiliary variables shall be limited to use from AuxKernels, "
+                  "ElementUserObjects, or NodalUserObjects using variable values."
   []
   [multi_update_deprecated_error2]
     type = RunException
@@ -70,7 +70,7 @@
     expect_err = "The elemental AuxKernel 'all' cannot obtain a writable reference to the nodal variable 'ten'\."
     issues = '#22563'
     allow_deprecated = true
-    requirement = "The writableCoupledValue API shall enforce nodal/elemental consistency between "
+    requirement = "The writing to auxiliary variables shall enforce nodal/elemental consistency between "
                   "the kernel variable and the writable variables."
   []
   [multi_update_deprecated_error3]
@@ -89,7 +89,7 @@
     expect_err = "Unable to create a writable reference for 'var1', is it a constant expression\?"
     issues = '#22563'
     allow_deprecated = true
-    requirement = "The writableCoupledValue API shall error out if a constant value is passed in as variable name."
+    requirement = "The writing to auxiliary variables shall error out if a constant value is passed in as variable name."
   []
 
   [multi_update_elem_test]

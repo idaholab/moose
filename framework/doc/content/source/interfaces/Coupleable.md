@@ -153,7 +153,7 @@ method that can be used to set the nodal or elemental DOF value(s) of the variab
 requested variable. I.e. nodal user objects and AuxKernels may only obtain references to nodal variables, and
 element user objects and elemental AuxKernels may only obtain references to elemental variables.
 
-The block restrictins of the variables are also checked not to exceed the block restrictions of the calling object.
+The block restrictions of the variables are also checked not to exceed the block restrictions of the calling object.
 MOOSE keeps track of all variables to which a reference was obtained through `Coupleable::writableVariable`. Each
 variable in the system may at most be written to by a single object on any given subdomain.
 

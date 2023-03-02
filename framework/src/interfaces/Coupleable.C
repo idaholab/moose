@@ -936,7 +936,7 @@ Coupleable::checkWritableVar(MooseVariable * var)
     }
 
   // var is unique across threads, so we could forego having a separate set per thread, but we
-  // need qucik access to the list of all variables that need to be inserted into the solution
+  // need quick access to the list of all variables that need to be inserted into the solution
   // vector by a given thread.
   _writable_coupled_variables[_c_tid].insert(var);
 }

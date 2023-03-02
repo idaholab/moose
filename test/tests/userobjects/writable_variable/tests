@@ -84,13 +84,15 @@
     type = Exodiff
     input = boundary.i
     exodiff = boundary_out.e
-    requirement = "The system shall permit writing to variables from boundary restricted nodal user objects."
+    requirement = "The system shall permit writing to variables from boundary restricted nodal user "
+                  "objects."
   []
   [boundary_error]
     type = RunException
     input = boundary2.i
-    expect_err = "'nodal1' of type 'MultiUpdateNodalUO' depends on variable(s) 'v'. However, that "
+    expect_err = "'nodal1' of type 'MultiUpdateNodalUO' depends on variable\(s\) 'v'. However, that "
                  "variable does not appear to be defined on \(all of\) boundary 'bottom'\."
-                 requirement = "The system shall make sure that variables written to by boundary restricted user objects are available along the entire boundary."
+    requirement = "The system shall make sure that variables written to by boundary restricted user "
+                  "objects are available along the entire boundary."
   []
 []
