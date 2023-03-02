@@ -60,6 +60,8 @@ InterfaceKernelBase::validParams()
       "This parameter must exist if diag_save_in variables are specified and must have the same "
       "length as diag_save_in. This vector specifies whether the corresponding aux_var should "
       "save-in jacobian contributions from the primary ('p') or secondary side ('s').");
+  params.addParamNamesToGroup("diag_save_in save_in save_in_var_side diag_save_in_var_side",
+                              "Advanced");
 
   // InterfaceKernels always need one layer of ghosting.
   params.addRelationshipManager("ElementSideNeighborLayers",

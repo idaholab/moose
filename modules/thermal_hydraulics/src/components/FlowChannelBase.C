@@ -77,8 +77,8 @@ FlowChannelBase::validParams()
       "curved flow channels, it is the (tangent) direction at the start position.");
 
   params.addPrivateParam<std::string>("component_type", "pipe");
-
   params.declareControllable("A f");
+  params.addParamNamesToGroup("lump_mass_matrix", "Numerical scheme");
 
   return params;
 }

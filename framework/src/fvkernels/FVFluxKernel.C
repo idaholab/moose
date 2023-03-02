@@ -42,7 +42,7 @@ FVFluxKernel::validParams()
       "conditions.");
 
   params.addParamNamesToGroup("force_boundary_execution boundaries_to_force boundaries_to_avoid",
-                              "Boundary execution modification parameters");
+                              "Boundary execution modification");
   return params;
 }
 

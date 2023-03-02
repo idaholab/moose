@@ -87,6 +87,9 @@ TransientMultiApp::validParams()
                         "when trying to catch back up after a failed "
                         "solve.");
 
+  params.addParamNamesToGroup("catch_up max_catch_up_steps", "Recovering failed solutions");
+  params.addParamNamesToGroup("tolerate_failure", "Accepting failed solutions");
+
   return params;
 }
 

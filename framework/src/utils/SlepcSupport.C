@@ -115,6 +115,11 @@ getSlepcEigenProblemValidParams()
   params.addParam<unsigned int>(
       "extra_power_iterations", 0, "The number of extra free power iterations");
 
+  params.addParamNamesToGroup(
+      "eigen_problem_type which_eigen_pairs n_eigen_pairs n_basis_vectors eigen_tol eigen_max_its "
+      "free_power_iterations extra_power_iterations",
+      "Eigen Solver");
+
   return params;
 }
 

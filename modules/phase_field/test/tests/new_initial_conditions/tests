@@ -14,7 +14,7 @@
     type = RunApp
     input = 'prepare_mesh.i'
     requirement = 'A capability to initialize polycrystal phase field variables from a file mesh shall be provided'
-    design = 'action/PolycrystalVariablesAction.md'
+    design = 'actions/PolycrystalVariablesAction.md'
     issues = '#12294'
   [../]
   # ...and load it in using the initial_from_file capability
@@ -24,7 +24,7 @@
     exodiff = 'PolycrystalVariables_initial_from_file_out.e'
     prereq = prepare_mesh
     requirement = 'A capability to initialize polycrystal phase field variables from a file mesh shall be provided through the PolycrystalVariables action'
-    design = 'action/PolycrystalVariablesAction.md'
+    design = 'actions/PolycrystalVariablesAction.md'
     issues = '#12294'
   [../]
   # ...and load it in using the initial_from_file capability (with the GrainGrowth action)
@@ -34,7 +34,7 @@
     exodiff = 'GrainGrowth_initial_from_file_out.e'
     prereq = prepare_mesh
     requirement = 'A capability to initialize polycrystal phase field variables from a file mesh shall be provided through the GrainGrowth action'
-    design = 'action/GrainGrowthAction.md'
+    design = 'actions/GrainGrowthAction.md'
     issues = '#13624'
   [../]
 []

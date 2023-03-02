@@ -1,5 +1,5 @@
 [Tests]
-  design = 'userobject/LayeredSideIntegral.md userobject/LayeredSideAverage.md'
+  design = 'userobjects/LayeredSideIntegral.md userobjects/LayeredSideAverage.md'
   issues = '#1289 #16099 #19220'
   [./test]
     type = 'Exodiff'
