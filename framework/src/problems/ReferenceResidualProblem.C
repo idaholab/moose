@@ -49,11 +49,27 @@ ReferenceResidualProblem::validParams()
   params.addParam<std::vector<NonlinearVariableName>>(
       "converge_on",
       "If supplied, use only these variables in the individual variable convergence check");
-  params.addParam<bool>(
-      "local_residual_normalization",
-      false,
-      "Flag to optionally perform local normalization of the residual by the reference "
-      "residual dof by dof before the L2 norm is computed");
+  MooseEnum Lnorm("global_L2 local_L2 global_Linf local_Linf", "global_L2");
+  params.addParam<MooseEnum>(
+      "normalization_type",
+      Lnorm,
+      "The normalization type used to compare the reference and actual residuals.");
+  Lnorm.addDocumentation("global_L2",
+                         "Compare the L2 norm of the residual vector to the L2 norm of the "
+                         "absolute reference vector to determine relative convergence");
+  Lnorm.addDocumentation(
+      "local_L2",
+      "Compute the L2 norm of the residual vector divided componentwise by the absolute reference "
+      "vector to the L2 norm of the absolute reference vector to determine relative convergence");
+  Lnorm.addDocumentation(
+      "global_Linf",
+      "Compare the L-infinity norm of the residual vector to the L-infinity norm of the "
+      "absolute reference vector to determine relative convergence");
+  Lnorm.addDocumentation("local_Linf",
+                         "Compute the L-infinity norm of the residual vector divided componentwise "
+                         "by the absolute reference "
+                         "vector to the L-infinity norm of the absolute reference vector to "
+                         "determine relative convergence");
   return params;
 }
 
@@ -61,8 +77,7 @@ ReferenceResidualProblem::ReferenceResidualProblem(const InputParameters & param
   : FEProblem(params),
     _use_group_variables(false),
     _reference_vector(nullptr),
-    _converge_on(getParam<std::vector<NonlinearVariableName>>("converge_on")),
-    _local_norm(getParam<bool>("local_residual_normalization"))
+    _converge_on(getParam<std::vector<NonlinearVariableName>>("converge_on"))
 {
   if (params.isParamValid("solution_variables"))
   {
@@ -79,10 +94,6 @@ ReferenceResidualProblem::ReferenceResidualProblem(const InputParameters & param
         "For `ReferenceResidualProblem` you can specify either the `reference_residual_variables` "
         "or `reference_vector` parameter, not both. `reference_residual_variables` is deprecated "
         "so we recommend using `reference_vector`");
-
-  if (_local_norm && !params.isParamValid("reference_vector"))
-    paramError("local_residual_normalization",
-               "If local_residual_normalization is true, a reference_vector must be provided.");
 
   if (params.isParamValid("reference_residual_variables"))
   {
@@ -124,6 +135,34 @@ ReferenceResidualProblem::ReferenceResidualProblem(const InputParameters & param
 
   _accept_mult = params.get<Real>("acceptable_multiplier");
   _accept_iters = params.get<int>("acceptable_iterations");
+
+  const auto norm_type_enum =
+      params.get<MooseEnum>("normalization_type").getEnum<NormalizationType>();
+  if (norm_type_enum == NormalizationType::LOCAL_L2)
+  {
+    _norm_type = DISCRETE_L2;
+    _local_norm = true;
+  }
+  else if (norm_type_enum == NormalizationType::GLOBAL_L2)
+  {
+    _norm_type = DISCRETE_L2;
+    _local_norm = false;
+  }
+  else if (norm_type_enum == NormalizationType::LOCAL_LINF)
+  {
+    _norm_type = DISCRETE_L_INF;
+    _local_norm = true;
+  }
+  else if (norm_type_enum == NormalizationType::GLOBAL_LINF)
+  {
+    _norm_type = DISCRETE_L_INF;
+    _local_norm = false;
+  }
+  else
+    mooseError("Internal error");
+
+  if (_local_norm && !params.isParamValid("reference_vector"))
+    paramError("reference_vector", "If local norm is used, a reference_vector must be provided.");
 }
 
 void
@@ -365,14 +404,14 @@ ReferenceResidualProblem::updateReferenceResidual()
       mooseAssert((*_reference_vector).size(), "Reference vector must be provided.");
       auto div = nonlinear_sys.RHS().clone();
       *div /= *_reference_vector;
-      resid = Utility::pow<2>(s.calculate_norm(*div, _soln_vars[i], DISCRETE_L2));
+      resid = Utility::pow<2>(s.calculate_norm(*div, _soln_vars[i], _norm_type));
     }
     else
     {
-      resid = Utility::pow<2>(s.calculate_norm(nonlinear_sys.RHS(), _soln_vars[i], DISCRETE_L2));
+      resid = Utility::pow<2>(s.calculate_norm(nonlinear_sys.RHS(), _soln_vars[i], _norm_type));
       if (_reference_vector)
       {
-        const auto ref_resid = s.calculate_norm(*_reference_vector, _soln_vars[i], DISCRETE_L2);
+        const auto ref_resid = s.calculate_norm(*_reference_vector, _soln_vars[i], _norm_type);
         _group_ref_resid[group] += Utility::pow<2>(ref_resid);
       }
     }
@@ -386,7 +425,7 @@ ReferenceResidualProblem::updateReferenceResidual()
     for (unsigned int i = 0; i < _ref_resid_vars.size(); ++i)
     {
       const auto ref_resid =
-          as.calculate_norm(*as.current_local_solution, _ref_resid_vars[i], DISCRETE_L2) *
+          as.calculate_norm(*as.current_local_solution, _ref_resid_vars[i], _norm_type) *
           _scaling_factors[i];
       _group_ref_resid[_variable_group_num_index[i]] += Utility::pow<2>(ref_resid);
     }

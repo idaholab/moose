@@ -56,32 +56,34 @@
     type = 'CSVDiff'
     input = 'abs_ref.i'
     csvdiff = 'abs_ref_out.csv'
-    requirement = 'The system shall have the ability to base convergence on the comparison of '
-                  'individual variables to the sum of the absolute value of the residual contributions '
+    requirement = 'The system shall have the ability to base convergence on the comparison of L2 normalization of the residual for '
+                  'individual variables to the sum of the L2 normalization of the absolute value of the residual contributions '
                   'of those variables.'
   []
   [local_normalization]
     type = 'CSVDiff'
-    input = 'local_normalization.i'
-    csvdiff = 'local_normalization_out.csv'
-    requirement = 'The system shall have the ability to base convergence on the comparison of '
-                  'individual variables to the sum of the residual value locally normalized by '
-                  'the absolute value of the residual contributions of those variables.'
+    input = 'abs_ref.i'
+    csvdiff = 'abs_ref_local_out.csv'
+    cli_args = 'Problem/normalization_type=local_L2 Outputs/file_base=abs_ref_local_out'
+    requirement = 'The system shall have the ability to base convergence on the comparison of L2 normalization of the residual for '
+                  'individual variables locally divided by the absolute value of the residual contributions '
+                  'of those variables.'
+  []
+  [linf_normalization]
+    type = 'CSVDiff'
+    input = 'abs_ref.i'
+    csvdiff = 'abs_ref_Linf_out.csv'
+    cli_args = 'Problem/normalization_type=global_Linf Outputs/file_base=abs_ref_Linf_out'
+    requirement = 'The system shall have the ability to base convergence on the comparison of Linf normalization of the residual for '
+                  'individual variables to the sum of the Linf normalization of the absolute value of the residual contributions '
+                  'of those variables.'
   []
   [ad_abs_ref]
     type = 'CSVDiff'
     input = 'ad_abs_ref.i'
     csvdiff = 'ad_abs_ref_out.csv'
-    requirement = 'The system shall have the ability to base convergence on the comparison of '
-                  'individual variables to the sum of the absolute value of the residual contributions '
+    requirement = 'The system shall have the ability to base convergence on the comparison of L2 normalization of the residual for '
+                  'individual variables to the sum of the L2 normalization of the absolute value of the residual contributions '
                   'of those variables using AD.'
-  []
-  [ad_local_normalization]
-    type = 'CSVDiff'
-    input = 'ad_local_normalization.i'
-    csvdiff = 'ad_local_normalization_out.csv'
-    requirement = 'The system shall have the ability to base convergence on the comparison of '
-                  'individual variables to the sum of the residual value locally normalized by '
-                  'the absolute value of the residual contributions of those variables using AD.'
   []
 []

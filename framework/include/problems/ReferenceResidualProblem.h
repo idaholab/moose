@@ -10,6 +10,7 @@
 #pragma once
 
 #include "FEProblem.h"
+#include "libmesh/enum_norm_type.h"
 
 /**
  * FEProblemBase derived class to enable convergence checking relative to a user-specified
@@ -60,6 +61,14 @@ public:
    */
   template <typename T>
   void addGroupVariables(const std::set<T> & group_vars);
+
+  enum class NormalizationType
+  {
+    GLOBAL_L2,
+    LOCAL_L2,
+    GLOBAL_LINF,
+    LOCAL_LINF
+  };
 
 protected:
   ///@{
@@ -116,7 +125,10 @@ protected:
   std::vector<bool> _converge_on_var;
 
   /// Flag to optionally perform normalization of residual by reference residual before or after L2 norm is computed
-  const bool _local_norm;
+  bool _local_norm;
+
+  /// Container for normalization type
+  FEMNormType _norm_type;
 };
 
 template <typename T>
