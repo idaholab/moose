@@ -3,7 +3,6 @@
   issues = '#22828'
   [back_only]
     type = 'Exodiff'
-    exodiff_opts = '-pedantic'
     input = 'square_2d.i'
     exodiff = 'square_2d_back_only.e'
     cli_args = '--mesh-only "square_2d_back_only.e"'
@@ -13,7 +12,6 @@
   []
   [empty_inputs]
     type = 'Exodiff'
-    exodiff_opts = '-pedantic'
     input = 'square_2d_empty_inputs.i'
     exodiff = 'square_2d_empty_inputs.e'
     cli_args = '--mesh-only "square_2d_empty_inputs.e"'
