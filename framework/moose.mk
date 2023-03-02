@@ -545,7 +545,7 @@ ADRealMonolithic.h: $(MOOSE_DIR)/framework/include/utils/ADReal.h
 	@$(libmesh_CXX) -E $(libmesh_CPPFLAGS) $(CXXFLAGS) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -imacros cmath -x c++-header $< > $@
 
 compile_commands_all_srcfiles := $(moose_srcfiles) $(srcfiles)
-compile_commands.json:
+compile_commands.json: $(moose_revision_header)
 ifeq (4.0,$(firstword $(sort $(MAKE_VERSION) 4.0)))
 	$(file > .compile_commands.json,$(CURDIR))
 	$(file >> .compile_commands.json,$(libmesh_CXX))
@@ -559,6 +559,13 @@ else
 endif
 	@$(FRAMEWORK_DIR)/scripts/compile_commands.py < .compile_commands.json > compile_commands.json
 	@rm .compile_commands.json
+
+clang_tidy:
+  ifeq (, $(shell which clang))
+    $(error "No clang in PATH, cannot find run-clang-tidy helper")
+  endif
+	$(MAKE) MOOSE_UNITY=false MOOSE_HEADER_SYMLINKS=false compile_commands.json
+	@$(shell dirname $(shell which clang))/../share/clang/run-clang-tidy.py $(shell pwd) -j $(if $(MOOSE_JOBS),$(MOOSE_JOBS),1)
 
 # Debugging stuff
 echo_include:
