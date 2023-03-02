@@ -10,6 +10,7 @@
 #include "PiecewiseLinear.h"
 
 registerMooseObject("MooseApp", PiecewiseLinear);
+registerMooseObjectRenamed("MooseApp", ADPiecewiseLinear, "02/03/2024 00:00", PiecewiseLinear);
 
 InputParameters
 PiecewiseLinear::validParams()

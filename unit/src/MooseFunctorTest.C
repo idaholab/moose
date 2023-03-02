@@ -17,7 +17,7 @@
 #include "GeneratedMeshGenerator.h"
 #include "AppFactory.h"
 #include "PiecewiseByBlockLambdaFunctor.h"
-#include "ADifyFunctor.h"
+#include "ADWrapperFunctor.h"
 #include "RawValueFunctor.h"
 #include "libmesh/elem.h"
 #include "libmesh/quadrature_gauss.h"
@@ -190,7 +190,7 @@ TEST(MooseFunctorTest, testArgs)
     EXPECT_EQ(cf.dot(elem_point), 0);
 
     // Test AD up-type
-    ADifyFunctor<ADReal> ad_cf(cf);
+    ADWrapperFunctor<ADReal> ad_cf(cf);
     EXPECT_EQ(cf(elem_arg), MetaPhysicL::raw_value(ad_cf(elem_arg)));
     EXPECT_EQ(cf(face), MetaPhysicL::raw_value(ad_cf(face)));
     EXPECT_EQ(cf(elem_point), MetaPhysicL::raw_value(ad_cf(elem_point)));

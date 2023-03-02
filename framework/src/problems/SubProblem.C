@@ -1077,8 +1077,10 @@ SubProblem::timestepSetup()
   for (auto & map : _functors)
     for (auto & pr : map)
     {
-      std::get<1>(pr.second)->timestepSetup();
-      std::get<2>(pr.second)->timestepSetup();
+      const auto & [true_functor_type, nonad_functor, ad_functor] = pr.second;
+      mooseAssert(true_functor_type != TrueFunctorIs::UNSET, "The functor type should be set");
+      true_functor_type == TrueFunctorIs::NONAD ? nonad_functor->timestepSetup()
+                                                : ad_functor->timestepSetup();
     }
 
   for (auto & map : _pbblf_functors)
@@ -1092,8 +1094,10 @@ SubProblem::customSetup(const ExecFlagType & exec_type)
   for (auto & map : _functors)
     for (auto & pr : map)
     {
-      std::get<1>(pr.second)->customSetup(exec_type);
-      std::get<2>(pr.second)->customSetup(exec_type);
+      const auto & [true_functor_type, nonad_functor, ad_functor] = pr.second;
+      mooseAssert(true_functor_type != TrueFunctorIs::UNSET, "The functor type should be set");
+      true_functor_type == TrueFunctorIs::NONAD ? nonad_functor->customSetup(exec_type)
+                                                : ad_functor->customSetup(exec_type);
     }
 
   for (auto & map : _pbblf_functors)
@@ -1107,8 +1111,10 @@ SubProblem::residualSetup()
   for (auto & map : _functors)
     for (auto & pr : map)
     {
-      std::get<1>(pr.second)->residualSetup();
-      std::get<2>(pr.second)->residualSetup();
+      const auto & [true_functor_type, nonad_functor, ad_functor] = pr.second;
+      mooseAssert(true_functor_type != TrueFunctorIs::UNSET, "The functor type should be set");
+      true_functor_type == TrueFunctorIs::NONAD ? nonad_functor->residualSetup()
+                                                : ad_functor->residualSetup();
     }
 
   for (auto & map : _pbblf_functors)
@@ -1122,8 +1128,10 @@ SubProblem::jacobianSetup()
   for (auto & map : _functors)
     for (auto & pr : map)
     {
-      std::get<1>(pr.second)->jacobianSetup();
-      std::get<2>(pr.second)->jacobianSetup();
+      const auto & [true_functor_type, nonad_functor, ad_functor] = pr.second;
+      mooseAssert(true_functor_type != TrueFunctorIs::UNSET, "The functor type should be set");
+      true_functor_type == TrueFunctorIs::NONAD ? nonad_functor->jacobianSetup()
+                                                : ad_functor->jacobianSetup();
     }
 
   for (auto & map : _pbblf_functors)

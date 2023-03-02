@@ -17,7 +17,7 @@
 #include "MooseError.h"
 #include "FunctorMaterialProperty.h"
 #include "RawValueFunctor.h"
-#include "ADifyFunctor.h"
+#include "ADWrapperFunctor.h"
 
 #include "libmesh/coupling_matrix.h"
 #include "libmesh/parameters.h"
@@ -1002,9 +1002,10 @@ private:
     AD
   };
 
-  /// A container holding pointers to all the functors in our problem. We hold a pair where the
-  /// first member of the apair is a wrapper of a non-AD functor, and the second member of the pair
-  /// is a wrapper of an AD functor
+  /// A container holding pointers to all the functors in our problem. We hold a tuple where the
+  /// zeroth item in the tuple is an enumerator that describes what type of functor the "true"
+  /// functor is (either NONAD or AD), the first item in the tuple is the non-AD version of the
+  /// functor, and the second item in the tuple is the AD version of the functor
   std::vector<std::multimap<std::string,
                             std::tuple<TrueFunctorIs,
                                        std::unique_ptr<Moose::FunctorEnvelopeBase>,
@@ -1024,8 +1025,8 @@ private:
   /// requestors
   std::map<std::string, std::set<std::string>> _functor_to_requestors;
 
-  /// A multimap from unfilled functor requests to whether the requests were for AD functors and
-  /// whether the requestor was an AD object
+  /// A multimap (for each thread) from unfilled functor requests to whether the requests were for
+  ///  AD functors and whether the requestor was an AD object
   std::vector<std::multimap<std::string, std::pair<bool, bool>>> _functor_to_request_info;
 
   /// Whether to output a list of the functors used and requested (currently only at initialSetup)
@@ -1263,6 +1264,9 @@ SubProblem::addFunctor(const std::string & name,
           mooseError("We are requesting a non-AD functor from an AD object, but the true functor "
                      "is AD. This means we could be dropping important derivatives. We will not "
                      "allow this");
+        // We're going to eventually check whether we've fulfilled all functor requests and our
+        // check will be that the multimap is empty. This request is fulfilled, so erase it from the
+        // map now
         request_info_it = functor_to_request_info.erase(request_info_it);
       }
 
@@ -1270,6 +1274,7 @@ SubProblem::addFunctor(const std::string & name,
       std::get<0>(it->second) =
           added_functor_is_ad ? SubProblem::TrueFunctorIs::AD : SubProblem::TrueFunctorIs::NONAD;
       existing_wrapper->assign(functor);
+      // Finally we create the non-AD or AD complement of the just added functor
       if constexpr (added_functor_is_ad)
       {
         typedef typename MetaPhysicL::RawType<T>::value_type NonADType;
@@ -1289,13 +1294,13 @@ SubProblem::addFunctor(const std::string & name,
             dynamic_cast<Moose::Functor<ADType> *>(existing_ad_wrapper_base);
         mooseAssert(existing_ad_wrapper->template wrapsType<Moose::NullFunctor<ADType>>(),
                     "Both members of pair should have been wrapping a NullFunctor");
-        existing_ad_wrapper->assign(std::make_unique<Moose::ADifyFunctor<ADType>>(functor));
+        existing_ad_wrapper->assign(std::make_unique<Moose::ADWrapperFunctor<ADType>>(functor));
       }
       return;
     }
   }
 
-  // We are a new functor
+  // We are a new functor, create the opposite ADType one and store it with other functors
   if constexpr (added_functor_is_ad)
   {
     typedef typename MetaPhysicL::RawType<T>::value_type NonADType;
@@ -1312,7 +1317,7 @@ SubProblem::addFunctor(const std::string & name,
     typedef typename Moose::ADType<T>::type ADType;
     auto new_non_ad_wrapper = std::make_unique<Moose::Functor<T>>((functor));
     auto new_ad_wrapper = std::make_unique<Moose::Functor<ADType>>(
-        std::make_unique<Moose::ADifyFunctor<ADType>>(functor));
+        std::make_unique<Moose::ADWrapperFunctor<ADType>>(functor));
     _functors[tid].emplace("wraps_" + name,
                            std::make_tuple(SubProblem::TrueFunctorIs::NONAD,
                                            std::move(new_non_ad_wrapper),

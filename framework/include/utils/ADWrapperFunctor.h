@@ -13,15 +13,18 @@
 
 namespace Moose
 {
+/**
+ * Wraps non-AD functors such that they can be used in objects that have requested the functor as AD
+ */
 template <typename T>
-class ADifyFunctor : public FunctorBase<T>
+class ADWrapperFunctor : public FunctorBase<T>
 {
 public:
   using typename Moose::FunctorBase<T>::ValueType;
   using typename Moose::FunctorBase<T>::GradientType;
   using typename Moose::FunctorBase<T>::DotType;
 
-  ADifyFunctor(const FunctorBase<typename MetaPhysicL::RawType<T>::value_type> & non_ad_functor)
+  ADWrapperFunctor(const FunctorBase<typename MetaPhysicL::RawType<T>::value_type> & non_ad_functor)
     : FunctorBase<T>(non_ad_functor.functorName() + "_ad_ified", {EXEC_ALWAYS}),
       _non_ad_functor(non_ad_functor)
   {
