@@ -1,7 +1,6 @@
 [Tests]
   issues = '#22490'
   design = 'QuadraturePointMultiApp.md'
-
   [test]
     type = 'Exodiff'
     input = 'quadrature_point_multiapp.i'

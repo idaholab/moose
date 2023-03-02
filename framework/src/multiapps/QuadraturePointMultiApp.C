@@ -14,10 +14,7 @@
 
 // libMesh includes
 #include "libmesh/parallel_algebra.h"
-#include "libmesh/equation_systems.h"
-#include <libmesh/libmesh.h>
-#include <libmesh/mesh.h>
-#include "libmesh/linear_implicit_system.h"
+#include "libmesh/mesh.h"
 #include "libmesh/elem.h"
 #include "libmesh/fe.h"
 
@@ -30,8 +27,7 @@ QuadraturePointMultiApp::validParams()
   params += BlockRestrictable::validParams();
   params.addClassDescription(
       "Automatically generates sub-App positions from the elemental quadrature points, with the "
-      "default quadrature, in the parent mesh. Quadrature points at the same location between two "
-      "elements are not duplicated.");
+      "default quadrature, in the parent mesh.");
   params.suppressParameter<std::vector<Point>>("positions");
   params.suppressParameter<std::vector<FileName>>("positions_file");
   return params;

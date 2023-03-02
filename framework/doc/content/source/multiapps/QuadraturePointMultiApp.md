@@ -10,8 +10,11 @@ doing multiscale solves. This object requires no special parameters, but this is
 be generated on specified subdomains.
 
 !alert note
-Quadrature points that are shared between elements are collapsed into the same sub-application. Please consider the
-effect of this if working with variables that are discontinuous on element sides.
+Boundary quadrature points are not added to the list of quadrature points, only element quadrature points.
+
+!alert warning
+The default mesh quadrature order will be used to locate quadrature points, not the actual quadrature order from the
+[Quadrature](syntax/Executioner/Quadrature/index.md) specified in the Executioner.
 
 ## Example Input Syntax
 

@@ -33,10 +33,6 @@
 
 [Executioner]
   type = Transient
-  num_steps = 1
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
-  solve_type = PJFNK
 []
 
 [Outputs]
