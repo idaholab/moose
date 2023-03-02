@@ -122,8 +122,6 @@ MortarConstraintBase::MortarConstraintBase(const InputParameters & parameters)
     _grad_test_primary(_primary_var.gradPhiFaceNeighbor()),
     _interior_secondary_elem(_assembly.elem()),
     _interior_primary_elem(_assembly.neighbor()),
-    _lower_secondary_elem(_assembly.lowerDElem()),
-    _lower_primary_elem(_assembly.neighborLowerDElem()),
     _displaced(getParam<bool>("use_displaced_mesh"))
 {
   if (_use_dual)
