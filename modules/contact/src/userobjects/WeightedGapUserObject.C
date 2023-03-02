@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MortarNodalUserObject.h"
+#include "WeightedGapUserObject.h"
 #include "MooseVariableField.h"
 #include "MortarUtils.h"
 #include "MooseUtils.h"
@@ -26,7 +26,7 @@ setBoundaryParam(const InputParameters & params_in)
 }
 
 InputParameters
-MortarNodalUserObject::validParams()
+WeightedGapUserObject::validParams()
 {
   InputParameters params = NodalUserObject::validParams();
   params += MortarConsumerInterface::validParams();
@@ -43,7 +43,7 @@ MortarNodalUserObject::validParams()
   return params;
 }
 
-MortarNodalUserObject::MortarNodalUserObject(const InputParameters & parameters)
+WeightedGapUserObject::WeightedGapUserObject(const InputParameters & parameters)
   : NodalUserObject(setBoundaryParam(parameters)),
     MortarConsumerInterface(this),
     TwoMaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, getBoundaryIDs()),
@@ -53,9 +53,9 @@ MortarNodalUserObject::MortarNodalUserObject(const InputParameters & parameters)
 }
 
 void
-MortarNodalUserObject::initialSetup()
+WeightedGapUserObject::initialSetup()
 {
-  std::array<const MortarNodalUserObject *, 1> consumers = {{this}};
+  std::array<const WeightedGapUserObject *, 1> consumers = {{this}};
 
   Moose::Mortar::setupMortarMaterials(consumers,
                                       _fe_problem,
@@ -67,13 +67,13 @@ MortarNodalUserObject::initialSetup()
 }
 
 void
-MortarNodalUserObject::execute()
+WeightedGapUserObject::execute()
 {
   const auto & its = amg().secondariesToMortarSegments(*_current_node);
 
   auto act_functor = [this]() { executeMortarSegment(); };
 
-  std::array<MortarNodalUserObject *, 1> consumers = {{this}};
+  std::array<WeightedGapUserObject *, 1> consumers = {{this}};
 
   Moose::Mortar::loopOverMortarSegments(its,
                                         _assembly,

@@ -17,7 +17,7 @@
 /**
  * Base class for creating new nodally-based mortar user objects
  */
-class MortarNodalUserObject : public NodalUserObject,
+class WeightedGapUserObject : public NodalUserObject,
                               public MortarExecutorInterface,
                               public MortarConsumerInterface,
                               public TwoMaterialPropertyInterface
@@ -25,7 +25,7 @@ class MortarNodalUserObject : public NodalUserObject,
 public:
   static InputParameters validParams();
 
-  MortarNodalUserObject(const InputParameters & parameters);
+  WeightedGapUserObject(const InputParameters & parameters);
 
   virtual void execute() override;
   virtual void initialSetup() override;
