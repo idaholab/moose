@@ -1070,12 +1070,6 @@ findPair(C & container, const M1 & first, const M2 & second)
  */
 BoundingBox buildBoundingBox(const Point & p1, const Point & p2);
 
-template <typename Consumers>
-std::deque<MaterialBase *>
-buildRequiredMaterials(const Consumers & mat_consumers,
-                       const std::vector<std::shared_ptr<MaterialBase>> & mats,
-                       const bool allow_stateful);
-
 /**
  * Utility class template for a semidynamic vector with a maximum size N
  * and a chosen dynamic size. This container avoids heap allocation and

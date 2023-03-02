@@ -11,6 +11,7 @@
 #include "DisplacedProblem.h"
 #include "Assembly.h"
 #include "MortarContactUtils.h"
+#include "WeightedGapUserObject.h"
 #include "metaphysicl/dualsemidynamicsparsenumberarray.h"
 #include "metaphysicl/parallel_dualnumber.h"
 #include "metaphysicl/parallel_dynamic_std_array_wrapper.h"
@@ -58,6 +59,7 @@ ComputeWeightedGapLMMechanicalContact::validParams()
       "Lagrange Multiplier values to integrated gap values (LM nodal value is independent of "
       "element size, where integrated values are dependent on element size).");
   params.set<bool>("use_displaced_mesh") = true;
+  params.addRequiredParam<UserObjectName>("weighted_gap_uo", "The weighted gap user object");
   return params;
 }
 
@@ -76,7 +78,8 @@ ComputeWeightedGapLMMechanicalContact::ComputeWeightedGapLMMechanicalContact(
     _nodal(getVar("disp_x", 0)->feType().family == LAGRANGE),
     _disp_x_var(getVar("disp_x", 0)),
     _disp_y_var(getVar("disp_y", 0)),
-    _disp_z_var(_has_disp_z ? getVar("disp_z", 0) : nullptr)
+    _disp_z_var(_has_disp_z ? getVar("disp_z", 0) : nullptr),
+    _weighted_gap_uo(getUserObject<WeightedGapUserObject>("weighted_gap_uo"))
 {
   if (!getParam<bool>("use_displaced_mesh"))
     paramError(
@@ -208,18 +211,18 @@ ComputeWeightedGapLMMechanicalContact::post()
 {
   parallel_object_only();
 
-  Moose::Mortar::Contact::communicateGaps(
-      _dof_to_weighted_gap, this->processor_id(), _mesh, _nodal, _normalize_c, _communicator);
+  const auto & dof_to_weighted_gap = _weighted_gap_uo.dofToWeightedGap();
 
-  for (const auto & pr : _dof_to_weighted_gap)
+  for (const auto & [dof_object, weighted_gap_pr] : dof_to_weighted_gap)
   {
-    if (pr.first->processor_id() != this->processor_id())
+    if (dof_object->processor_id() != this->processor_id())
       continue;
 
-    _weighted_gap_ptr = &pr.second.first;
-    _normalization_ptr = &pr.second.second;
+    const auto & [weighted_gap, normalization] = weighted_gap_pr;
+    _weighted_gap_ptr = &weighted_gap;
+    _normalization_ptr = &normalization;
 
-    enforceConstraintOnDof(pr.first);
+    enforceConstraintOnDof(dof_object);
   }
 }
 
@@ -227,19 +230,20 @@ void
 ComputeWeightedGapLMMechanicalContact::incorrectEdgeDroppingPost(
     const std::unordered_set<const Node *> & inactive_lm_nodes)
 {
-  Moose::Mortar::Contact::communicateGaps(
-      _dof_to_weighted_gap, this->processor_id(), _mesh, _nodal, _normalize_c, _communicator);
+  const auto & dof_to_weighted_gap = _weighted_gap_uo.dofToWeightedGap();
 
-  for (const auto & pr : _dof_to_weighted_gap)
+  for (const auto & [dof_object, weighted_gap_pr] : dof_to_weighted_gap)
   {
-    if ((inactive_lm_nodes.find(static_cast<const Node *>(pr.first)) != inactive_lm_nodes.end()) ||
-        (pr.first->processor_id() != this->processor_id()))
+    if ((inactive_lm_nodes.find(static_cast<const Node *>(dof_object)) !=
+         inactive_lm_nodes.end()) ||
+        (dof_object->processor_id() != this->processor_id()))
       continue;
 
-    _weighted_gap_ptr = &pr.second.first;
-    _normalization_ptr = &pr.second.second;
+    const auto & [weighted_gap, normalization] = weighted_gap_pr;
+    _weighted_gap_ptr = &weighted_gap;
+    _normalization_ptr = &normalization;
 
-    enforceConstraintOnDof(pr.first);
+    enforceConstraintOnDof(dof_object);
   }
 }
 

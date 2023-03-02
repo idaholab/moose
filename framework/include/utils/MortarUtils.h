@@ -9,7 +9,7 @@
 
 #include "Assembly.h"
 #include "FEProblemBase.h"
-#include "MooseUtils.h"
+#include "MaterialBase.h"
 #include "MaterialWarehouse.h"
 
 #include "libmesh/quadrature.h"
@@ -338,7 +338,7 @@ setupMortarMaterials(const Consumers & consumers,
     if (mat_warehouse[mat_data_type].hasActiveBlockObjects(sub_id, tid))
     {
       auto & sub_mats = mat_warehouse[mat_data_type].getActiveBlockObjects(sub_id, tid);
-      return MooseUtils::buildRequiredMaterials(consumers, sub_mats, /*allow_stateful=*/false);
+      return MaterialBase::buildRequiredMaterials(consumers, sub_mats, /*allow_stateful=*/false);
     }
     else
       return {};
@@ -363,7 +363,7 @@ setupMortarMaterials(const Consumers & consumers,
   {
     auto & boundary_mats = mat_warehouse.getActiveBoundaryObjects(secondary_boundary, tid);
     secondary_boundary_mats =
-        MooseUtils::buildRequiredMaterials(consumers, boundary_mats, /*allow_stateful=*/false);
+        MaterialBase::buildRequiredMaterials(consumers, boundary_mats, /*allow_stateful=*/false);
   }
 }
 }
