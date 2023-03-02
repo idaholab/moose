@@ -71,7 +71,7 @@ TestMeshGenerator::TestMeshGenerator(const InputParameters & parameters) : MeshG
   if (getParam<bool>("request_inputs_by_name"))
     static_cast<void>(getMeshesByName(getParam<std::vector<MeshGeneratorName>>("inputs")));
   if (getParam<bool>("request_sub_input"))
-    getMeshForSub("input");
+    declareMeshForSub("input");
   if (getParam<bool>("mesh_prop_double_declare"))
   {
     static_cast<void>(declareMeshProperty<bool>("foo"));
@@ -101,8 +101,8 @@ TestMeshGenerator::TestMeshGenerator(const InputParameters & parameters) : MeshG
     if (&*should_be_null_by_vector_param[0] != &null_mesh_ptr)
       mooseError("Should be null by vector param failed");
 
-    getMeshForSubByName(null_mesh_name);
-    getMeshesForSubByName({null_mesh_name});
+    declareMeshForSubByName(null_mesh_name);
+    declareMeshesForSubByName({null_mesh_name});
   }
 
   if (getParam<bool>("sub_no_declare_input") || isParamValid("add_sub_input"))

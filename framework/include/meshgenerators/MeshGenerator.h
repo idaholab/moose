@@ -71,7 +71,8 @@ public:
     return _requested_mesh_generators;
   }
   /**
-   * @returns The names of the MeshGenerators that were requested in the getMeshForSub methods
+   * @returns The names of the MeshGenerators that were requested in the declareMeshForSub
+   * methods
    */
   const std::set<MeshGeneratorName> & getRequestedMeshGeneratorsForSub() const
   {
@@ -219,19 +220,19 @@ protected:
    * declare the intention to use an input mesh as a dependency for a sub generator
    * instead of this one.
    */
-  void getMeshForSub(const std::string & param_name);
+  void declareMeshForSub(const std::string & param_name);
   /**
-   * Like getMeshForSub(), but for multiple generators.
+   * Like declareMeshForSub(), but for multiple generators.
    */
-  void getMeshesForSub(const std::string & param_name);
+  void declareMeshesForSub(const std::string & param_name);
   /**
-   * Like getMeshForSub(), but takes the name of another MeshGenerator directly.
+   * Like declareMeshForSub(), but takes the name of another MeshGenerator directly.
    */
-  void getMeshForSubByName(const MeshGeneratorName & mesh_generator_name);
+  void declareMeshForSubByName(const MeshGeneratorName & mesh_generator_name);
   /**
-   * Like getMeshForSubByName(), but for multiple generators.
+   * Like declareMeshForSubByName(), but for multiple generators.
    */
-  void getMeshesForSubByName(const std::vector<MeshGeneratorName> & mesh_generator_names);
+  void declareMeshesForSubByName(const std::vector<MeshGeneratorName> & mesh_generator_names);
 
   /**
    * Build a \p MeshBase object whose underlying type will be determined by the Mesh input file
@@ -336,7 +337,7 @@ private:
 
   /// The names of the MeshGenerators that were requested in the getMesh methods
   std::set<MeshGeneratorName> _requested_mesh_generators;
-  /// The names of the MeshGenerators that were requested in the getMeshForSub methods
+  /// The names of the MeshGenerators that were requested in the declareMeshForSub methods
   std::set<MeshGeneratorName> _requested_mesh_generators_for_sub;
   /// The meshes that were requested by this MeshGenerator; used to verify that
   /// any input meshes that are requested are properly released after generation

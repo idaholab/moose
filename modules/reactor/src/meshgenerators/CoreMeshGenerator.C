@@ -117,7 +117,7 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
 
   // Declare that all of the meshes in the "inputs" parameter are to be used by
   // a sub mesh generator
-  getMeshesForSub("inputs");
+  declareMeshesForSub("inputs");
 
   // periphery meshing input checking
   if (_mesh_periphery)

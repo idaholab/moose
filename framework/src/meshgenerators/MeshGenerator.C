@@ -147,19 +147,19 @@ MeshGenerator::getMeshesByName(const std::vector<MeshGeneratorName> & mesh_gener
 }
 
 void
-MeshGenerator::getMeshForSub(const std::string & param_name)
+MeshGenerator::declareMeshForSub(const std::string & param_name)
 {
-  getMeshForSubByName(*getMeshGeneratorNameFromParam(param_name, false));
+  declareMeshForSubByName(*getMeshGeneratorNameFromParam(param_name, false));
 }
 
 void
-MeshGenerator::getMeshesForSub(const std::string & param_name)
+MeshGenerator::declareMeshesForSub(const std::string & param_name)
 {
-  getMeshesForSubByName(getMeshGeneratorNamesFromParam(param_name));
+  declareMeshesForSubByName(getMeshGeneratorNamesFromParam(param_name));
 }
 
 void
-MeshGenerator::getMeshForSubByName(const MeshGeneratorName & mesh_generator_name)
+MeshGenerator::declareMeshForSubByName(const MeshGeneratorName & mesh_generator_name)
 {
   checkGetMesh(mesh_generator_name, "");
   if (isNullMeshName(mesh_generator_name))
@@ -169,10 +169,11 @@ MeshGenerator::getMeshForSubByName(const MeshGeneratorName & mesh_generator_name
 }
 
 void
-MeshGenerator::getMeshesForSubByName(const std::vector<MeshGeneratorName> & mesh_generator_names)
+MeshGenerator::declareMeshesForSubByName(
+    const std::vector<MeshGeneratorName> & mesh_generator_names)
 {
   for (const auto & name : mesh_generator_names)
-    getMeshForSubByName(name);
+    declareMeshForSubByName(name);
 }
 
 std::unique_ptr<MeshBase>

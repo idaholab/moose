@@ -104,7 +104,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
                          : std::vector<std::vector<subdomain_id_type>>()),
     _extrude(getParam<bool>("extrude"))
 {
-  getMeshesForSub("inputs");
+  declareMeshesForSub("inputs");
 
   MeshGeneratorName reactor_params =
       MeshGeneratorName(getMeshProperty<std::string>("reactor_params_name", _inputs[0]));

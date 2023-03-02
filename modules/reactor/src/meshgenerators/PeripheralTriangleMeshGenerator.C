@@ -89,7 +89,7 @@ PeripheralTriangleMeshGenerator::PeripheralTriangleMeshGenerator(const InputPara
 
   // Generate periphery region
   {
-    getMeshForSub("input");
+    declareMeshForSub("input");
     auto params = _app.getFactory().getValidParams("XYDelaunayGenerator");
     params.set<MeshGeneratorName>("boundary") =
         (MeshGeneratorName)_input_name + "_periphery_polyline";

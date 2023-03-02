@@ -64,7 +64,7 @@ For mesh generators that modify an existing mesh, you should have as an input pa
 
 Your mesh generator can instantiate subgenerators itself, to create existing meshes for the primary generator to combine and/or modify.  The easiest way to do this is to call `MeshGenerator::addMeshSubgenerator()`, which takes as arguments the generator class name and object name to instantiate, followed by an arbitrary number of name/value pairs of subgenerator parameters to set. Sub generators can be chained together by coupling them via input parameters, that is, setting input names as the names of other sub generators. To obtain a mesh from a sub generator, use the same `MeshGenerator::getMeshByName()` API as described above but with the name of the created sub generator.
 
-If you wish to use an input mesh from the primary generator as an input to a sub generator, you must first call `MeshGenerator::getMeshForSub()` or `MeshGenerator::getMeshForSubByName()` to declare said input as a dependency for the sub generator instead of the generator that creates the sub generator.
+If you wish to use an input mesh from the primary generator as an input to a sub generator, you must first call `MeshGenerator::declareMeshForSub()` or `MeshGenerator::declareMeshForSubByName()` to declare said input as a dependency for the sub generator instead of the generator that creates the sub generator.
 
 ### Declaring a Null or Dummy Input
 
