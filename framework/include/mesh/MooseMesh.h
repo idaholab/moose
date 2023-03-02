@@ -1224,9 +1224,6 @@ protected:
   /// Pointer to underlying libMesh mesh object
   std::unique_ptr<libMesh::MeshBase> _mesh;
 
-  /// Pointer to libMesh meshes object requested to save
-  std::map<std::string, unique_ptr<libMesh::MeshBase>> _saved_meshes;
-
   /// The partitioner used on this mesh
   MooseEnum _partitioner_name;
   bool _partitioner_overridden;

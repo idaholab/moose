@@ -57,16 +57,6 @@ public:
    */
   std::vector<std::string> & getDependencies() { return _depends_on; }
 
-  /**
-   * Return whether or not to save the current mesh
-   */
-  bool saveMesh();
-
-  /**
-   * Return the name of the saved mesh
-   */
-  const std::string getSavedMeshName();
-
 protected:
   /**
    * Methods for writing out attributes to the mesh meta-data store, which can be retrieved from
@@ -129,9 +119,6 @@ protected:
   /// References to the mesh and displaced mesh (currently in the ActionWarehouse)
   std::shared_ptr<MooseMesh> & _mesh;
 
-  /// References to the mesh and displaced mesh (currently in the ActionWarehouse)
-  std::map<std::string, std::unique_ptr<MeshBase> *> _save_in_meshes;
-
   /**
    * Build a \p MeshBase object whose underlying type will be determined by the Mesh input file
    * block
@@ -192,9 +179,6 @@ private:
 
   /// A nullptr to use for when inputs aren't specified
   std::unique_ptr<MeshBase> _null_mesh = nullptr;
-
-  /// A user-defined name to save the mesh
-  std::string _save_with_name;
 };
 
 template <typename T>

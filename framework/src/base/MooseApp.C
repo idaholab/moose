@@ -2181,22 +2181,12 @@ MooseApp::executeMeshGenerators()
   if (_final_generator_name.empty())
     _final_generator_name = final_generators.back()->name();
 
-  std::map<std::string, std::unique_ptr<MeshBase> *> to_save_in_meshes;
-
-  // Loop over the MeshGenerators and save all meshes marked to _save_in_meshes
-  for (const auto & generator_set : _ordered_generators)
-    for (const auto & generator : generator_set)
-      if (generator->saveMesh())
-        to_save_in_meshes.emplace(generator->name(), &getMeshGeneratorOutput(generator->name()));
-
   // Grab the outputs from the final generator so MeshGeneratorMesh can pick them up
-  to_save_in_meshes.emplace(mainMeshGeneratorName(),
-                            &getMeshGeneratorOutput(_final_generator_name));
+  _final_generated_meshes.emplace_back(&getMeshGeneratorOutput(_final_generator_name));
 
   // Need to grab two if we're going to be making a displaced mesh
   if (_action_warehouse.displacedMesh())
-    to_save_in_meshes.emplace(mainDisplacedMeshGeneratorName(),
-                              &getMeshGeneratorOutput(_final_generator_name));
+    _final_generated_meshes.emplace_back(&getMeshGeneratorOutput(_final_generator_name));
 
   // Run the MeshGenerators in the proper order
   for (const auto & generator_set : _ordered_generators)
@@ -2230,15 +2220,6 @@ MooseApp::executeMeshGenerators()
       if (_final_generator_name == name)
       {
         _executing_mesh_generators = false;
-
-        for (auto & [name, mesh_ptr] : to_save_in_meshes)
-        {
-          mooseAssert(mesh_ptr, "Invalid pointer");
-          mooseAssert(*mesh_ptr, "Invalid pointer");
-          mooseAssert(!_save_in_meshes.count(name), "Already saved");
-          _save_in_meshes.emplace(name, std::move(*mesh_ptr));
-        }
-
         return;
       }
     }
@@ -2263,45 +2244,24 @@ MooseApp::clearMeshGenerators()
 std::unique_ptr<MeshBase>
 MooseApp::getMeshGeneratorMesh(bool check_unique)
 {
-  return nullptr;
-  // if (_popped_final_mesh_generator == true)
-  //   mooseError("MooseApp::getMeshGeneratorMesh is being called for a second time. You cannot do "
-  //              "this because the final generated mesh was popped from its storage container the "
-  //              "first time this method was called");
+  if (_popped_final_mesh_generator == true)
+    mooseError("MooseApp::getMeshGeneratorMesh is being called for a second time. You cannot do "
+               "this because the final generated mesh was popped from its storage container the "
+               "first time this method was called");
 
-  // if (_final_generated_meshes.empty())
-  //   mooseError("No generated mesh to retrieve. Your input file should contain either a [Mesh] or
-  //   "
-  //              "block.");
+  if (_final_generated_meshes.empty())
+    mooseError("No generated mesh to retrieve. Your input file should contain either a [Mesh] or "
+               "block.");
 
-  // auto mesh_unique_ptr_ptr = _final_generated_meshes.front();
-  // _final_generated_meshes.pop_front();
-  // _popped_final_mesh_generator = true;
+  auto mesh_unique_ptr_ptr = _final_generated_meshes.front();
+  _final_generated_meshes.pop_front();
+  _popped_final_mesh_generator = true;
 
-  // if (check_unique && !_final_generated_meshes.empty())
-  //   mooseError("Multiple generated meshes exist while retrieving the final Mesh. This means that
-  //   "
-  //              "the selection of the final mesh is non-deterministic.");
+  if (check_unique && !_final_generated_meshes.empty())
+    mooseError("Multiple generated meshes exist while retrieving the final Mesh. This means that "
+               "the selection of the final mesh is non-deterministic.");
 
-  // return std::move(*mesh_unique_ptr_ptr);
-}
-
-std::unique_ptr<MeshBase>
-MooseApp::getSavedMeshes(const std::string & name)
-{
-  auto find_mesh = _save_in_meshes.find(name);
-  if (find_mesh == _save_in_meshes.end())
-    mooseError("Failed to find a saved mesh with the name '", name, "'");
-
-  auto & mesh_unique_ptr = find_mesh->second;
-  if (!mesh_unique_ptr)
-    mooseError("While getting the saved mesh generator '",
-               name,
-               "', said mesh has already been retreived");
-
-  if (name == mainMeshGeneratorName())
-
-    return std::move(mesh_unique_ptr);
+  return std::move(*mesh_unique_ptr_ptr);
 }
 
 void

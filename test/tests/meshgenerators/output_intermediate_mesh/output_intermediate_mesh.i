@@ -8,9 +8,8 @@
     xmax = 0
     ymin = -5
     ymax = 5
-    output = false
+    output = true
     nemesis = true
-    save_the_mesh = 'left'
   [../]
   [./right]
     type = GeneratedMeshGenerator
@@ -21,7 +20,6 @@
     xmax = 6
     ymin = -5
     ymax = 5
-    save_the_mesh = 'right'
   [../]
 
   [./left_and_right]
