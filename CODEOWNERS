@@ -6,6 +6,7 @@
 /COPYRIGHT @permcody
 /LICENSE @permcody
 /README.md @permcody
+/CODEOWNERS @lindsayad
 
 /.coverage @loganharbour @permcody
 /.gitmodules @permcody
@@ -16,23 +17,15 @@
 
 /.github @permcody
 
-/framework/*/dgkernels @lindsayad
+/framework/include @lindsayad
+/framework/src @lindsayad
 /framework/*/executioners/*Solve* @GiudGiud
-/framework/*/fv* @lindsayad
-/framework/*/interfacekernels @lindsayad
-/framework/*/linesearches @lindsayad
 /framework/*/materials/Derivative* @dschwen
 /framework/*/materials/Parsed* @dschwen
 /framework/*/multiapps @GiudGiud
-/framework/*/preconditioners @lindsayad
-/framework/*/problems/EigenProblem* @lindsayad
-/framework/*/relationshipmanagers @lindsayad
 /framework/*/reporters @loganharbour @zachmprince
 /framework/*/samplers @zachmprince
-/framework/*/systems/NonlinearEigenSystem* @lindsayad
 /framework/*/transfers @GiudGiud
-/framework/*/utils/PetscSupport* @lindsayad
-/framework/*/utils/SlepcSupport* @lindsayad
 /framework/*/utils/Units* @dschwen
 
 /modules/contact @bwspenc @lindsayad
