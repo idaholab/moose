@@ -76,10 +76,10 @@ public:
   [[nodiscard]] std::unique_ptr<MeshBase> & getMeshGeneratorOutput(const MeshGeneratorName & name);
 
   /**
-   * Creates (constructs) all of the MeshGenerators that been
+   * Creates (constructs) all of the MeshGenerators that have been
    * declared using addMeshGenerator().
    *
-   * Should only be called by the CreateAddedMeshGenerators during
+   * Should only be called by the CreateAddedMeshGenerator action during
    * the create_added_mesh_generators task.
    */
   void createAddedMeshGenerators();
@@ -170,7 +170,7 @@ private:
   /// Key is the name, pair contains the type and the params
   std::unordered_map<std::string, std::pair<std::string, InputParameters>> _mesh_generator_params;
 
-  /// Map of MeshGenerator -> name
+  /// Owning storage for mesh generators, map of name -> MeshGenerator
   std::map<std::string, std::shared_ptr<MeshGenerator>> _mesh_generators;
 
   /// Holds the ordered mesh generators from createMeshGeneratorOrder() until they are executed in executeMeshGenerators()
