@@ -151,10 +151,6 @@ and implemented in [PPSC-non-ad-residual] within the [`PenaltyPeriodicSegmentalC
          re=Real\nPenaltyPeriodicSegmentalConstraint::computeQpResidual.*?}
          caption=The C++ weak-form residual statement of [eq:eq4].
 
-The [`PenaltyPeriodicSegmentalConstraint`](/PenaltyPeriodicSegmentalConstraint.md) class is implemented using the
-[`GenericMortarScalar`](/GenericMortarScalar.md) template class to contain both the AD and non-AD
-versions within the same source files; further examples of these dual implementations are discussed in [GenericKernelScalar](source/kernels/GenericKernelScalar.md)
-
 The `PeriodicSegmentalConstraint` class also overrides the `computeScalarQpOffDiagJacobian` method
 to define the Jacobian term related to [eq:eq1] as shown in [non-ad-PSC-s-v-jacobian].
 
