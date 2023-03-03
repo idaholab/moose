@@ -10,10 +10,9 @@
 #pragma once
 
 #include "ElementVectorPostprocessor.h"
-#include "CrackFrontDefinition.h"
 
 // Forward Declarations
-
+class CrackFrontDefinition;
 /**
  * This vectorpostprocessor computes the J-Integral, which is a measure of
  * the strain energy release rate at a crack tip, which can be used as a

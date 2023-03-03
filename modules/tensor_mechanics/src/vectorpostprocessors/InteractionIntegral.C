@@ -15,6 +15,7 @@
 #include "libmesh/quadrature.h"
 #include "DerivativeMaterialInterface.h"
 #include "libmesh/utility.h"
+#include "CrackFrontDefinition.h"
 
 registerMooseObject("TensorMechanicsApp", InteractionIntegral);
 registerMooseObject("TensorMechanicsApp", ADInteractionIntegral);

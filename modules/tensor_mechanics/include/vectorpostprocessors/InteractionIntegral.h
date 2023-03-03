@@ -10,9 +10,9 @@
 #pragma once
 
 #include "ElementVectorPostprocessor.h"
-#include "CrackFrontDefinition.h"
 
 // Forward Declarations
+class CrackFrontDefinition;
 
 /**
  * This vectorpostprocessor computes the Interaction Integral, which is
