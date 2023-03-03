@@ -149,9 +149,9 @@ MooseMesh::validParams()
 
   params.addParam<std::vector<SubdomainID>>(
       "add_subdomain_ids",
-      "The listed subdoamins will be assumed valid for the mesh. This permits setting up subdomain "
-      "restrictions for subomains containing no elements, for example in simulations, where "
-      "subdomains are dynamically changed.");
+      "The listed subdomains will be assumed valid for the mesh. This permits setting up subdomain "
+      "restrictions for subdomains initially containing no elements, which can occur, for example, "
+      "in additive manufacturing simulations which dynamically add and remove elements.");
 
   params += MooseAppCoordTransform::validParams();
 

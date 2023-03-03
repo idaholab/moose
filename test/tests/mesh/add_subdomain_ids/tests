@@ -5,6 +5,6 @@
     exodiff = add_subdomain_ids_out.e
     issues = '#23557'
     design = MooseMesh.md
-    requirement = 'The system shall allow specifying valid subdomain IDs that do not exist on the initial mesh'
+    requirement = 'The system shall allow specifying valid subdomain IDs that do not exist on the initial mesh.'
   []
 []
