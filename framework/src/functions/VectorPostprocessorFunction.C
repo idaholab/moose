@@ -24,6 +24,10 @@ VectorPostprocessorFunction::validParams()
                                        "VectorPostprocessor column tabulating the "
                                        "ordinate (function values) of the sampled "
                                        "function");
+  params.addParam<bool>(
+      "parallel_sync",
+      true,
+      "Whether or not this Function should be synced to all processors when running in parallel.");
 
   MooseEnum component("x=0 y=1 z=2 time=3", "time");
   params.addParam<MooseEnum>(
@@ -41,9 +45,11 @@ VectorPostprocessorFunction::VectorPostprocessorFunction(const InputParameters &
   : Function(parameters),
     VectorPostprocessorInterface(this),
     _argument_column(getVectorPostprocessorValue("vectorpostprocessor_name",
-                                                 getParam<std::string>("argument_column"))),
+                                                 getParam<std::string>("argument_column"),
+                                                 getParam<bool>("parallel_sync"))),
     _value_column(getVectorPostprocessorValue("vectorpostprocessor_name",
-                                              getParam<std::string>("value_column"))),
+                                              getParam<std::string>("value_column"),
+                                              getParam<bool>("parallel_sync"))),
     _component(getParam<MooseEnum>("component")),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _last_update(
