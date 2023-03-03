@@ -2,7 +2,7 @@
 #processor. The purpose is to have a function take points and a field variable
 #(aux or primary) as arguments.
 #It also uses a ConstantVectorPostprocessor to test that parallel syncing is
-# working for VectorPostprocessorFunction
+# working for VectorPostprocessorFunction.
 [Mesh]
   type = GeneratedMesh
   dim = 2
