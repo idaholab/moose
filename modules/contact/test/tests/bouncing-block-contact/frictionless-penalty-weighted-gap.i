@@ -124,6 +124,7 @@ offset = 1e-2
   line_search = 'none'
   snesmf_reuse_base = true
   abort_on_solve_fail = true
+  nl_rel_tol = 1e-12
 []
 
 [Debug]

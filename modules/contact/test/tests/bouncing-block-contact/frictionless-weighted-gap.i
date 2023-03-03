@@ -140,6 +140,7 @@ offset = 1e-2
   nl_max_its = 20
   line_search = 'none'
   snesmf_reuse_base = true
+  nl_rel_tol = 1e-12
 []
 
 [Debug]
