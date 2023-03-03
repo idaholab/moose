@@ -40,3 +40,9 @@ LMWeightedGapUserObject::isWeightedGapNodal() const
 {
   return _lm_var->isNodal();
 }
+
+const ADVariableValue &
+LMWeightedGapUserObject::contactForce() const
+{
+  return _lm_var->adSlnLower();
+}

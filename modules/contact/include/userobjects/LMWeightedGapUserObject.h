@@ -24,6 +24,8 @@ public:
 
   LMWeightedGapUserObject(const InputParameters & parameters);
 
+  virtual const ADVariableValue & contactForce() const override;
+
 protected:
   virtual const VariableTestValue & test() const override;
   virtual bool isWeightedGapNodal() const override;

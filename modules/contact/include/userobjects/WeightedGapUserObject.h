@@ -38,6 +38,11 @@ public:
    */
   const std::unordered_map<const DofObject *, std::pair<ADReal, Real>> & dofToWeightedGap() const;
 
+  /**
+   * @return The contact force at quadrature points on the mortar segment
+   */
+  virtual const ADVariableValue & contactForce() const = 0;
+
 protected:
   /**
    * Computes properties that are functions only of the current quadrature point (\p _qp), e.g.
