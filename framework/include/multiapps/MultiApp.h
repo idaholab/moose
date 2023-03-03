@@ -344,6 +344,12 @@ public:
   bool usingPositions() const { return _use_positions; }
 
   /**
+   * Whether or not this MultiApp is being run in position,
+   * eg with the coordinate transform already applied
+   */
+  bool runningInPosition() const { return _run_in_position; }
+
+  /**
    * Add a transfer that is associated with this multiapp
    */
   void addAssociatedTransfer(MultiAppTransfer & transfer);
