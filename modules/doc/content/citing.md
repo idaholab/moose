@@ -339,3 +339,19 @@ verification, and validation of the electromagnetics module.
   addendum = {Unpublished thesis}
 }
 ```
+
+### Stochastic Tools Module
+
+The following paper documents functionalities and demonstration of the MOOSE stochastic tools module.
+
+```
+@article{slaughter2023moose,
+  title={MOOSE Stochastic Tools: A module for performing parallel, memory-efficient in situ stochastic simulations},
+  author={Slaughter, Andrew E and Prince, Zachary M and German, Peter and Halvic, Ian and Jiang, Wen and Spencer, Benjamin W and Dhulipala, Somayajulu LN and Gaston, Derek R},
+  journal={SoftwareX},
+  volume={22},
+  pages={101345},
+  year={2023},
+  publisher={Elsevier}
+}
+```
