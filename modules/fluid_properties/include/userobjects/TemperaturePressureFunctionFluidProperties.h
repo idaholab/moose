@@ -13,13 +13,9 @@
 #include "Function.h"
 
 /**
- * Fluid properties provided as multipul-variable functions of temperature, pressure that are
- * parameterized in time, where $t$ is used to indicate temperature and &p& is used to indicate
- * pressure. This source is made so it is allowed to take in both specific volume, internal energy
- * formulations and temperature, pressure formulations. The Density, Viscosity and thermal
- * conductivity time derivative are found by taking the gradient by using pressure and temperature
- * as inputs.
- *
+ * Fluid properties provided as multiple-variable functions of temperature and pressure.
+ * Temperature is passed as the first spatial coordinate, x, to the function, while pressure
+ * is passed as the second spatial coordinate, y.
  */
 class TemperaturePressureFunctionFluidProperties : public SinglePhaseFluidProperties
 {
@@ -43,15 +39,6 @@ public:
    * @return temperature (K)
    */
   virtual Real T_from_v_e(Real v, Real e) const override;
-
-  /**
-   * Pressure from pressure and specific enthalpy
-   *
-   * @param[in] p          pressure (Pa)
-   * @param[out] h       specific enthalpy (J/kg)
-   * @return temperature (Pa)
-   */
-  virtual Real T_from_p_h(Real p, Real h) const override;
 
   /**
    * Pressure from pressure and specific enthalpy
@@ -308,17 +295,14 @@ public:
 protected:
   void initialSetup() override;
 
-  /// function defining thermal conductivity as a function of temperature
+  /// function defining thermal conductivity as a function of temperature and pressure
   const Function * _k_function;
 
-  /// function defining density as a function of temperature
+  /// function defining density as a function of temperature and pressure
   const Function * _rho_function;
 
-  /// function defining dynamic viscosity as a function of temperature
+  /// function defining dynamic viscosity as a function of temperature and pressure
   const Function * _mu_function;
-
-  /// constant isobaric specific heat
-  const Real & _cp;
 
   /// constant isochoric specific heat
   const Real & _cv;
