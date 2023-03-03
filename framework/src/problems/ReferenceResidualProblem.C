@@ -444,9 +444,12 @@ ReferenceResidualProblem::nonlinearConvergenceSetup()
 {
   updateReferenceResidual();
 
+  std::ostringstream out;
+
   if (_group_soln_var_names.size() > 0)
   {
-    _console << "   Solution, reference convergence variable norms:\n";
+    out << std::setprecision(2) << std::scientific
+        << "   Solution, reference convergence variable norms:\n";
     unsigned int maxwsv = 0;
     unsigned int maxwrv = 0;
     for (unsigned int i = 0; i < _group_soln_var_names.size(); ++i)
@@ -462,24 +465,26 @@ ReferenceResidualProblem::nonlinearConvergenceSetup()
 
     for (unsigned int i = 0; i < _group_soln_var_names.size(); ++i)
     {
-      _console << "   " << std::setw(maxwsv + (_local_norm ? 5 : 2)) << std::left
-               << (_local_norm ? "norm " : "") + _group_soln_var_names[i] + ": ";
+      out << "   " << std::setw(maxwsv + (_local_norm ? 5 : 2)) << std::left
+          << (_local_norm ? "norm " : "") + _group_soln_var_names[i] + ": ";
 
       if (_group_output_resid[i] == _group_resid[i])
-        _console << _group_output_resid[i];
+        out << std::setw(8) << _group_output_resid[i];
       else
-        _console << _group_resid[i] << " (" << _group_output_resid[i] << ')';
+        out << std::setw(8) << _group_resid[i] << " (" << _group_output_resid[i] << ')';
 
       if (!_local_norm)
       {
         const auto ref_var_name =
             _reference_vector ? _group_soln_var_names[i] + "_ref" : _group_ref_resid_var_names[i];
-        _console << "  " << std::setw(maxwrv + 2) << ref_var_name + ":" << _group_ref_resid[i];
+        out << "  " << std::setw(maxwrv + 2) << ref_var_name + ":" << std::setw(8)
+            << _group_ref_resid[i] << "  (" << std::setw(8) << _group_resid[i] / _group_ref_resid[i]
+            << ")";
       }
-      _console << '\n';
+      out << '\n';
     }
 
-    _console << std::flush;
+    _console << out.str() << std::flush;
   }
 }
 
