@@ -718,18 +718,29 @@ public:
   FunctorEnvelopeBase() = default;
   virtual ~FunctorEnvelopeBase() = default;
 
-  ///@{
   /**
-   * Virtual methods meant to be used for handling functor evaluation cache clearance
+   * @return Whether this envelope wraps a null functor
    */
-  virtual void timestepSetup() = 0;
-  virtual void residualSetup() = 0;
-  virtual void jacobianSetup() = 0;
-  virtual void customSetup(const ExecFlagType & /*exec_type*/) = 0;
   virtual bool wrapsNull() const = 0;
+
+  /**
+   * @return The return type, as a string, of the functor this envelope wraps
+   */
   virtual std::string returnType() const = 0;
+
+  /**
+   * @return Whether this envelope wraps a constant functor
+   */
   virtual bool isConstant() const = 0;
-  ///@}
+
+  /**
+   * @return Whether this envelope owns its wrapped functor. This envelope may briefly own null
+   * functors during simulation setup or it may own non-AD or AD wrappers of "true" functors, but we
+   * should never own any "true" functors, e.g. we expect memory of "true" functors to be managed by
+   * warehouses (e.g. variable, function, etc.), or by the \p SubProblem itself. With this
+   * expectation, we don't have to worry about performing setup calls
+   */
+  virtual bool ownsWrappedFunctor() const = 0;
 };
 
 /**
@@ -815,6 +826,8 @@ public:
    */
   virtual std::string returnType() const override { return libMesh::demangle(typeid(T).name()); }
 
+  virtual bool ownsWrappedFunctor() const override { return _owned.get(); }
+
   /**
    * @return whether the wrapped object is of the requested type
    */
@@ -822,27 +835,6 @@ public:
   bool wrapsType() const
   {
     return dynamic_cast<const T2 *>(_wrapped);
-  }
-
-  virtual void timestepSetup() override
-  {
-    if (_owned)
-      _owned->timestepSetup();
-  }
-  virtual void customSetup(const ExecFlagType & exec_type) override
-  {
-    if (_owned)
-      _owned->customSetup(exec_type);
-  }
-  virtual void residualSetup() override
-  {
-    if (_owned)
-      _owned->residualSetup();
-  }
-  virtual void jacobianSetup() override
-  {
-    if (_owned)
-      _owned->jacobianSetup();
   }
 
   virtual bool isExtrapolatedBoundaryFace(const FaceInfo & fi,
