@@ -10,7 +10,7 @@
 #pragma once
 
 #include "KernelBase.h"
-
+#include "ADFunctorInterface.h"
 #include "DualRealOps.h"
 
 // forward declarations
@@ -21,7 +21,7 @@ using ADKernel = ADKernelTempl<Real>;
 using ADVectorKernel = ADKernelTempl<RealVectorValue>;
 
 template <typename T>
-class ADKernelTempl : public KernelBase, public MooseVariableInterface<T>
+class ADKernelTempl : public KernelBase, public MooseVariableInterface<T>, public ADFunctorInterface
 {
 public:
   static InputParameters validParams();

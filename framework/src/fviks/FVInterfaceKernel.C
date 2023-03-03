@@ -30,7 +30,7 @@ FVInterfaceKernel::validParams()
   params += TaggingInterface::validParams();
   params += NeighborCoupleableMooseVariableDependencyIntermediateInterface::validParams();
   params += TwoMaterialPropertyInterface::validParams();
-  params += FunctorInterface::validParams();
+  params += ADFunctorInterface::validParams();
 
   params.addRequiredParam<std::vector<SubdomainName>>(
       "subdomain1", "The subdomains on the 1st side of the boundary.");
@@ -95,7 +95,7 @@ FVInterfaceKernel::FVInterfaceKernel(const InputParameters & parameters)
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(
         this, /*nodal=*/false, /*neighbor_nodal=*/false, /*is_fv=*/true),
     TwoMaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, boundaryIDs()),
-    FunctorInterface(this),
+    ADFunctorInterface(this),
     _tid(getParam<THREAD_ID>("_tid")),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),

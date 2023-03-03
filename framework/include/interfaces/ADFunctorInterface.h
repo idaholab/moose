@@ -9,16 +9,20 @@
 
 #pragma once
 
-#include "MooseObject.h"
-#include "SetupInterface.h"
+#include "FunctorInterface.h"
 
-class InputParameters;
-
-class MooseFunctionBase : public MooseObject, public SetupInterface
+/**
+ * \class ADFunctorInterface
+ * \brief An interface for accessing \p Moose::Functors for systems that care about automatic
+ * differentiation, e.g. AD kernels
+ */
+class ADFunctorInterface : public FunctorInterface
 {
 public:
-  MooseFunctionBase(const InputParameters & params);
-  virtual ~MooseFunctionBase() = default;
-
   static InputParameters validParams();
+
+  ADFunctorInterface(const MooseObject * moose_object);
+
+private:
+  virtual bool isADObject() const override { return true; }
 };

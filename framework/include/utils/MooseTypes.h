@@ -425,6 +425,65 @@ struct ADType<VariableSecond>
   typedef ADVariableSecond type;
 };
 
+template <>
+struct ADType<ADReal>
+{
+  typedef ADReal type;
+};
+template <>
+struct ADType<ChainedADReal>
+{
+  typedef ChainedADReal type;
+};
+template <>
+struct ADType<ADRankTwoTensor>
+{
+  typedef ADRankTwoTensor type;
+};
+template <>
+struct ADType<ADRankThreeTensor>
+{
+  typedef ADRankThreeTensor type;
+};
+template <>
+struct ADType<ADRankFourTensor>
+{
+  typedef ADRankFourTensor type;
+};
+
+template <>
+struct ADType<ADSymmetricRankTwoTensor>
+{
+  typedef ADSymmetricRankTwoTensor type;
+};
+template <>
+struct ADType<ADSymmetricRankFourTensor>
+{
+  typedef ADSymmetricRankFourTensor type;
+};
+
+template <template <typename> class W>
+struct ADType<W<ADReal>>
+{
+  typedef W<ADReal> type;
+};
+
+template <>
+struct ADType<ADVariableValue>
+{
+  typedef ADVariableValue type;
+};
+template <>
+struct ADType<ADVariableGradient>
+{
+  typedef ADVariableGradient type;
+};
+template <>
+struct ADType<ADVariableSecond>
+{
+  typedef ADVariableSecond type;
+};
+
 /**
  * This is a helper variable template for cases when we want to use a default compile-time
  * error with constexpr-based if conditions. The templating delays the triggering

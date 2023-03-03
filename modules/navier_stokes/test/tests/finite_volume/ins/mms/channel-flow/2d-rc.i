@@ -157,7 +157,7 @@ velocity_interp_method = 'rc'
     symbol_values = '${rho}'
   []
   [forcing_u]
-    type = ADParsedFunction
+    type = ParsedFunction
     expression = '(1/2)*pi^2*mu*sin((1/2)*y*pi)*cos((1/2)*x*pi) - '
             '1/2*pi*rho*sin((1/4)*x*pi)*sin((1/2)*y*pi)^2*cos((1/2)*x*pi) + '
             '(1/2)*pi*rho*sin((1/4)*x*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi)^2 - '
@@ -177,7 +177,7 @@ velocity_interp_method = 'rc'
     symbol_values = '${rho}'
   []
   [forcing_v]
-    type = ADParsedFunction
+    type = ParsedFunction
     expression = '(5/16)*pi^2*mu*sin((1/4)*x*pi)*cos((1/2)*y*pi) - '
             'pi*rho*sin((1/4)*x*pi)^2*sin((1/2)*y*pi)*cos((1/2)*y*pi) - '
             '1/2*pi*rho*sin((1/4)*x*pi)*sin((1/2)*x*pi)*sin((1/2)*y*pi)*cos((1/2)*y*pi) + '

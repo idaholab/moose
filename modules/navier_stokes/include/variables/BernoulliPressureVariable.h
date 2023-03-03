@@ -10,7 +10,7 @@
 #pragma once
 
 #include "INSFVPressureVariable.h"
-#include "FunctorInterface.h"
+#include "ADFunctorInterface.h"
 
 class InputParameters;
 
@@ -20,7 +20,7 @@ class InputParameters;
  * face while the upwind face is flagged as a Dirichlet face. The upwind Dirichlet value is computed
  * using the downwind extrapolated pressure value and the Bernoulli equation
  */
-class BernoulliPressureVariable : public INSFVPressureVariable, public FunctorInterface
+class BernoulliPressureVariable : public INSFVPressureVariable, public ADFunctorInterface
 {
 public:
   BernoulliPressureVariable(const InputParameters & params);

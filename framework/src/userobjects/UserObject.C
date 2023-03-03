@@ -18,7 +18,6 @@ UserObject::validParams()
 {
   InputParameters params = MooseObject::validParams();
   params += ReporterInterface::validParams();
-  params += FunctorInterface::validParams();
 
   // Add the SetupInterface parameter, 'execute_on', and set it to a default of 'timestep_end'
   params += SetupInterface::validParams();
@@ -69,7 +68,6 @@ UserObject::UserObject(const InputParameters & parameters)
     MeshChangedInterface(parameters),
     ScalarCoupleable(this),
     PerfGraphInterface(this),
-    FunctorInterface(this),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _tid(parameters.get<THREAD_ID>("_tid")),

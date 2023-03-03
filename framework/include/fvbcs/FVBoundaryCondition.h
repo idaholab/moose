@@ -24,7 +24,7 @@
 #include "MeshChangedInterface.h"
 #include "TaggingInterface.h"
 #include "MooseVariableDependencyInterface.h"
-#include "FunctorInterface.h"
+#include "ADFunctorInterface.h"
 #include "FaceArgInterface.h"
 
 // Forward declerations
@@ -55,7 +55,7 @@ class FVBoundaryCondition : public MooseObject,
                             public TaggingInterface,
                             public MooseVariableInterface<Real>,
                             public MooseVariableDependencyInterface,
-                            public FunctorInterface,
+                            public ADFunctorInterface,
                             public FaceArgProducerInterface
 {
 public:

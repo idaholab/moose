@@ -106,7 +106,7 @@ velocity_interp_method = 'average'
     symbol_values = '${rho}'
   []
   [forcing_u]
-    type = ADParsedFunction
+    type = ParsedFunction
     expression = '(1/4)*pi^2*mu*sin((1/2)*x*pi) + pi*rho*sin((1/2)*x*pi)*cos((1/2)*x*pi) - '
             '1/2*pi*sin((1/2)*x*pi)'
     symbol_names = 'mu rho'

@@ -55,7 +55,7 @@ velocity_interp_method = 'rc'
     expression = 'cos((1/2)*x*pi)'
   []
   [forcing_u]
-    type = ADParsedFunction
+    type = ParsedFunction
     expression = '0.25*pi^2*mu*cos((1/2)*x*pi) - 1.25*pi*rho*sin((1/2)*x*pi)*cos((1/2)*x*pi) + 0.8*cos(x)'
     symbol_names = 'mu rho'
     symbol_values = '${mu} ${rho}'

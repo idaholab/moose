@@ -28,7 +28,7 @@ GapFluxModelBase::validParams()
 }
 
 GapFluxModelBase::GapFluxModelBase(const InputParameters & parameters)
-  : InterfaceUserObjectBase(parameters), _qp(0), _gap_width(0.0)
+  : InterfaceUserObjectBase(parameters), ADFunctorInterface(this), _qp(0), _gap_width(0.0)
 {
 }
 

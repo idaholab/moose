@@ -29,6 +29,7 @@ ADKernelTempl<T>::validParams()
     params.registerBase("VectorKernel");
   else
     ::mooseError("unsupported ADKernelTempl specialization");
+  params += ADFunctorInterface::validParams();
   return params;
 }
 
@@ -41,6 +42,7 @@ ADKernelTempl<T>::ADKernelTempl(const InputParameters & parameters)
                               Moose::VarKindType::VAR_NONLINEAR,
                               std::is_same<T, Real>::value ? Moose::VarFieldType::VAR_FIELD_STANDARD
                                                            : Moose::VarFieldType::VAR_FIELD_VECTOR),
+    ADFunctorInterface(this),
     _var(*this->mooseVariable()),
     _test(_var.phi()),
     _grad_test(_var.adGradPhi()),

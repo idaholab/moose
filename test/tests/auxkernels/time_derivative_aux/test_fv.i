@@ -58,7 +58,7 @@
 [AuxKernels]
   # Time derivative of a FV variable using the functor system
   [function_derivative_element]
-    type = ADTimeDerivativeAux
+    type = TimeDerivativeAux
     variable = variable_derivative_fv
     functor = 'u'
     factor = 2
@@ -67,7 +67,7 @@
   # let's output a warning
   inactive = 'function_derivative_element_fv_fe'
   [function_derivative_element_fv_fe]
-    type = ADTimeDerivativeAux
+    type = TimeDerivativeAux
     variable = variable_derivative
     functor = 'u'
     factor = 2

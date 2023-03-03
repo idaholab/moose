@@ -67,3 +67,8 @@ ca1ef9908ae19ffafd84a5d32317b9ad71fd3f17: # 21791
   petsc: 64a9a7e
   libmesh: d53146c
   moose: 2f8ef66
+db176aaa92d1fd79b2d92ad8979633f9b7ce65b7: # 23581
+  mpich: b896b5d
+  petsc: 64a9a7e
+  libmesh: 016f5c8
+  moose: f58bca8

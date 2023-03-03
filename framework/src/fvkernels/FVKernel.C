@@ -27,6 +27,7 @@ FVKernel::validParams()
 {
   InputParameters params = ResidualObject::validParams();
   params += BlockRestrictable::validParams();
+  params += ADFunctorInterface::validParams();
   params.addParam<bool>("use_displaced_mesh",
                         false,
                         "Whether or not this object should use the "
@@ -60,7 +61,8 @@ FVKernel::validParams()
   return params;
 }
 
-FVKernel::FVKernel(const InputParameters & params) : ResidualObject(params), BlockRestrictable(this)
+FVKernel::FVKernel(const InputParameters & params)
+  : ResidualObject(params), BlockRestrictable(this), ADFunctorInterface(this)
 {
   _subproblem.haveADObjects(true);
   if (getParam<bool>("use_displaced_mesh"))

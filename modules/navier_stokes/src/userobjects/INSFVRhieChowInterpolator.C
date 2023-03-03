@@ -90,6 +90,7 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
   : GeneralUserObject(params),
     TaggingInterface(this),
     BlockRestrictable(this),
+    ADFunctorInterface(this),
     _moose_mesh(UserObject::_subproblem.mesh()),
     _mesh(_moose_mesh.getMesh()),
     _dim(_moose_mesh.dimension()),
@@ -239,17 +240,19 @@ INSFVRhieChowInterpolator::fillARead()
     {
       const Moose::FunctorBase<ADReal> *v_comp, *w_comp;
       if (_dim > 1)
-        v_comp = &UserObject::_subproblem.getFunctor<ADReal>(deduceFunctorName("a_v"), tid, name());
+        v_comp = &UserObject::_subproblem.getFunctor<ADReal>(
+            deduceFunctorName("a_v"), tid, name(), true);
       else
         v_comp = &_zero_functor;
       if (_dim > 2)
-        w_comp = &UserObject::_subproblem.getFunctor<ADReal>(deduceFunctorName("a_w"), tid, name());
+        w_comp = &UserObject::_subproblem.getFunctor<ADReal>(
+            deduceFunctorName("a_w"), tid, name(), true);
       else
         w_comp = &_zero_functor;
 
       _a_aux[tid] = std::make_unique<VectorCompositeFunctor<ADReal>>(
           "RC_a_coeffs",
-          UserObject::_subproblem.getFunctor<ADReal>(deduceFunctorName("a_u"), tid, name()),
+          UserObject::_subproblem.getFunctor<ADReal>(deduceFunctorName("a_u"), tid, name(), true),
           *v_comp,
           *w_comp);
       _a_read[tid] = _a_aux[tid].get();

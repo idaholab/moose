@@ -18,6 +18,7 @@
 #include "VectorComponentFunctor.h"
 #include "FaceArgInterface.h"
 #include "INSFVPressureVariable.h"
+#include "ADFunctorInterface.h"
 
 #include "libmesh/vector_value.h"
 #include "libmesh/id_types.h"
@@ -45,7 +46,8 @@ class MeshBase;
 class INSFVRhieChowInterpolator : public GeneralUserObject,
                                   public TaggingInterface,
                                   public BlockRestrictable,
-                                  public FaceArgProducerInterface
+                                  public FaceArgProducerInterface,
+                                  public ADFunctorInterface
 {
 public:
   static InputParameters validParams();
