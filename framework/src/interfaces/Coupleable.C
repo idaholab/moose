@@ -52,6 +52,7 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv)
     _obj(moose_object)
 {
   SubProblem & problem = *_c_parameters.getCheckedPointerParam<SubProblem *>("_subproblem");
+  moose_object->getMooseApp().registerInterfaceObject(*this);
 
   unsigned int optional_var_index_counter = 0;
 
@@ -61,6 +62,8 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv)
     std::string name = *iter;
 
     std::vector<std::string> vars = _c_parameters.getVecMooseType(name);
+    _coupling_counts[name].resize(vars.size());
+
     if (vars.size() > 0)
     {
       for (const auto & coupled_var_name : vars)
@@ -139,6 +142,22 @@ bool
 Coupleable::isCoupledConstant(const std::string & var_name) const
 {
   return _c_parameters.hasDefaultCoupledValue(var_name);
+}
+
+void
+Coupleable::checkCoupledVariableUse() const
+{
+  for (const auto & [param_name, vars] : _coupling_counts)
+  {
+    std::vector<std::string> msg;
+    std::vector<std::string> var_names = _c_parameters.getVecMooseType(param_name);
+    for (const auto i : index_range(vars))
+      if (vars[i] == 0)
+        msg.push_back(var_names[i] + " (" + Moose::stringify(i) + ")");
+    if (!msg.empty())
+      _obj->paramWarning(
+          param_name, "The following coupled variables are unused: ", Moose::stringify(msg));
+  }
 }
 
 unsigned int
@@ -232,8 +251,8 @@ Coupleable::checkVar(const std::string & var_name_in,
         _c_name,
         ": We did all our checks for the existence of a var, yet we still don't have a var!?");
 
-  // Only perform the following checks for objects that feed into residuals/Jacobians, e.g. objects
-  // that inherit from the TaggingInterface
+  // Only perform the following checks for objects that feed into residuals/Jacobians, e.g.
+  // objects that inherit from the TaggingInterface
   if (_c_parameters.have_parameter<MultiMooseEnum>("vector_tags"))
   {
     // Are we attempting to couple to a non-FV var in an FV object?

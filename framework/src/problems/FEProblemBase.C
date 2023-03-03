@@ -7115,6 +7115,10 @@ FEProblemBase::checkProblemIntegrity()
 
   // Check for postprocessor names with same name as a scalar variable
   checkDuplicatePostprocessorVariableNames();
+
+  // Check if all coupled variables are used
+  for (const auto & ci : _app.getInterfaceObjects<Coupleable>())
+    ci->checkCoupledVariableUse();
 }
 
 void

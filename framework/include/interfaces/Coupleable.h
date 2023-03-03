@@ -110,6 +110,9 @@ public:
     return _fe_coupleable_matrix_tags;
   }
 
+  /// make sure every coupled variable is used
+  void checkCoupledVariableUse() const;
+
 protected:
   /**
    * A call-back function provided by the derived object for actions before coupling a variable
@@ -1358,6 +1361,9 @@ protected:
   bool
   checkVar(const std::string & var_name, unsigned int comp = 0, unsigned int comp_bound = 0) const;
 
+  /// usage count of every coupled variable
+  std::map<std::string, std::vector<std::size_t>> _coupling_counts;
+
 private:
   /**
    * Generic helper method to get vector tag values based on tag ID
@@ -1648,6 +1654,7 @@ Coupleable::getVarHelper(const std::string & var_name_in, unsigned int comp)
   }
 
   auto coupled_vars_it = _coupled_vars.find(name_to_use);
+  _coupling_counts[name_to_use][comp]++;
 
   mooseAssert(coupled_vars_it != _coupled_vars.end(),
               "Trying to get a coupled var " << name_to_use << " that doesn't exist");
