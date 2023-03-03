@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#22490'
+  design = 'QuadraturePointMultiApp.md'
+  [test]
+    type = 'Exodiff'
+    input = 'quadrature_point_multiapp.i'
+    exodiff = 'quadrature_point_multiapp_out.e quadrature_point_multiapp_out_sub04.e quadrature_point_multiapp_out_sub15.e'
+    requirement = "The system shall include the ability to execute a sub-application at the quadrature points on every element within the finite element mesh."
+  []
+[]

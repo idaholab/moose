@@ -611,7 +611,9 @@ MultiAppUserObjectTransfer::findSubAppToTransferFrom(const Point & p)
     for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
     {
       // Obtain the possibly transformed app position by querying the transform with the origin
-      const auto app_position = (*_from_transforms[i])(Point(0));
+      const auto app_position = _multi_app->runningInPosition()
+                                    ? (*_from_transforms[i])(_multi_app->position(i))
+                                    : (*_from_transforms[i])(Point(0));
 
       auto distance = (p - app_position).norm();
 

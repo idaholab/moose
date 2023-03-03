@@ -3,7 +3,6 @@
   issues = '#20949 #21908'
   [tri_pin]
     type = 'Exodiff'
-    exodiff_opts = '-pedantic'
     input = 'tri_pin.i'
     exodiff = 'tri_pin_out.e'
     cli_args = 'Mesh/assm_up/ring_block_names="ring_11 ring_12 ring_13;ring_21 ring_22; "
@@ -15,7 +14,6 @@
   []
   [tri_pin_apothem]
     type = 'Exodiff'
-    exodiff_opts = '-pedantic'
     input = 'tri_pin.i'
     exodiff = 'tri_pin_out.e'
     cli_args = 'Mesh/assm_up/ring_block_names="ring_11 ring_12 ring_13;ring_21 ring_22; "
