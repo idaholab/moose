@@ -31,7 +31,7 @@ FVBoundaryCondition::validParams()
   params += TransientInterface::validParams();
   params += BoundaryRestrictableRequired::validParams();
   params += TaggingInterface::validParams();
-  params += FunctorInterface::validParams();
+  params += ADFunctorInterface::validParams();
 
   params.addRequiredParam<NonlinearVariableName>(
       "variable", "The name of the variable that this boundary condition applies to");
@@ -69,7 +69,7 @@ FVBoundaryCondition::FVBoundaryCondition(const InputParameters & parameters)
                                  Moose::VarKindType::VAR_ANY,
                                  Moose::VarFieldType::VAR_FIELD_STANDARD),
     MooseVariableDependencyInterface(this),
-    FunctorInterface(this),
+    ADFunctorInterface(this),
     _var(*mooseVariableFV()),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _fv_problem(*getCheckedPointerParam<FVProblemBase *>("_fe_problem_base")),

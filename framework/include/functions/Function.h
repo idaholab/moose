@@ -9,7 +9,8 @@
 
 #pragma once
 
-#include "MooseFunctionBase.h"
+#include "MooseObject.h"
+#include "SetupInterface.h"
 #include "TransientInterface.h"
 #include "PostprocessorInterface.h"
 #include "UserObjectInterface.h"
@@ -33,15 +34,15 @@ class Point;
  * Base class for function objects.  Functions override value to supply a
  * value at a point.
  */
-template <typename T>
-class FunctionTempl : public MooseFunctionBase,
-                      public TransientInterface,
-                      public PostprocessorInterface,
-                      public UserObjectInterface,
-                      public Restartable,
-                      public MeshChangedInterface,
-                      public ScalarCoupleable,
-                      public Moose::FunctorBase<T>
+class Function : public MooseObject,
+                 public SetupInterface,
+                 public TransientInterface,
+                 public PostprocessorInterface,
+                 public UserObjectInterface,
+                 public Restartable,
+                 public MeshChangedInterface,
+                 public ScalarCoupleable,
+                 public Moose::FunctorBase<Real>
 {
 public:
   /**
@@ -50,12 +51,12 @@ public:
    */
   static InputParameters validParams();
 
-  FunctionTempl(const InputParameters & parameters);
+  Function(const InputParameters & parameters);
 
   /**
    * Function destructor
    */
-  virtual ~FunctionTempl();
+  virtual ~Function();
 
   /**
    * Override this to evaluate the scalar function at point (t,x,y,z), by default
@@ -102,7 +103,7 @@ public:
    */
   virtual RealVectorValue vectorCurl(Real t, const Point & p) const;
 
-  using Moose::FunctorBase<T>::gradient;
+  using Moose::FunctorBase<Real>::gradient;
   /**
    * Function objects can optionally provide a gradient at a point. By default
    * this returns 0, you must override it.
@@ -136,13 +137,14 @@ public:
   void timestepSetup() override;
   void residualSetup() override;
   void jacobianSetup() override;
+  void customSetup(const ExecFlagType & exec_type) override;
 
   bool hasBlocks(SubdomainID) const override { return true; }
 
 private:
-  using typename Moose::FunctorBase<T>::ValueType;
-  using typename Moose::FunctorBase<T>::GradientType;
-  using typename Moose::FunctorBase<T>::DotType;
+  using typename Moose::FunctorBase<Real>::ValueType;
+  using typename Moose::FunctorBase<Real>::GradientType;
+  using typename Moose::FunctorBase<Real>::DotType;
 
   /**
    * @return the time associated with the requested \p state
@@ -205,47 +207,34 @@ private:
   mutable std::vector<Point> _current_elem_side_qp_functor_xyz;
 };
 
-template <typename T>
 template <typename U>
 auto
-FunctionTempl<T>::value(const U & t) const
+Function::value(const U & t) const
 {
   static const MooseADWrapper<Point, MooseIsADType<U>::value> p;
   return value(t, p);
 }
 
-template <typename T>
 template <typename U>
 auto
-FunctionTempl<T>::value(const U & t, const U & x, const U & y, const U & z) const
+Function::value(const U & t, const U & x, const U & y, const U & z) const
 {
   MooseADWrapper<Point, MooseIsADType<U>::value> p(x, y, z);
   return value(t, p);
 }
 
-template <typename T>
 template <typename U>
 auto
-FunctionTempl<T>::timeDerivative(const U & t) const
+Function::timeDerivative(const U & t) const
 {
   static const MooseADWrapper<Point, MooseIsADType<U>::value> p;
   return timeDerivative(t, p);
 }
 
-template <typename T>
 template <typename U>
 auto
-FunctionTempl<T>::timeDerivative(const U & t, const U & x, const U & y, const U & z) const
+Function::timeDerivative(const U & t, const U & x, const U & y, const U & z) const
 {
   MooseADWrapper<Point, MooseIsADType<U>::value> p(x, y, z);
   return timeDerivative(t, p);
 }
-
-class Function : public FunctionTempl<Real>
-{
-public:
-  static InputParameters validParams() { return FunctionTempl<Real>::validParams(); }
-  Function(const InputParameters & params) : FunctionTempl<Real>(params) {}
-};
-
-typedef FunctionTempl<ADReal> ADFunction;

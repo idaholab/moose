@@ -7,17 +7,16 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MooseFunctionBase.h"
+#include "ADFunctorInterface.h"
+#include "MooseFunctor.h"
 
 InputParameters
-MooseFunctionBase::validParams()
+ADFunctorInterface::validParams()
 {
-  auto params = MooseObject::validParams();
-  params += SetupInterface::validParams();
-  return params;
+  return FunctorInterface::validParams();
 }
 
-MooseFunctionBase::MooseFunctionBase(const InputParameters & params)
-  : MooseObject(params), SetupInterface(this)
+ADFunctorInterface::ADFunctorInterface(const MooseObject * const moose_object)
+  : FunctorInterface(moose_object)
 {
 }

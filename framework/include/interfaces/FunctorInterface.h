@@ -96,6 +96,11 @@ protected:
 
 private:
   /**
+   * Whether this interface is for an AD object
+   */
+  virtual bool isADObject() const = 0;
+
+  /**
    * Helper function to parse default functor values. This is implemented
    * as a specialization for supported types and returns NULL in all other cases.
    */
@@ -133,7 +138,7 @@ FunctorInterface::getFunctor(const std::string & name, SubProblem & subproblem)
   if (default_functor)
     return *default_functor;
 
-  return subproblem.getFunctor<T>(functor_name, _fi_tid, _fi_name);
+  return subproblem.getFunctor<T>(functor_name, _fi_tid, _fi_name, isADObject());
 }
 
 template <typename T>

@@ -193,7 +193,7 @@ two_term_boundary_expansion=true
     symbol_values = '${mu} ${rho}'
   []
   [forcing_u]
-    type = ADParsedFunction
+    type = ParsedFunction
     expression = '0'
   []
   [exact_v]
@@ -209,7 +209,7 @@ two_term_boundary_expansion=true
     symbol_values = '${mu} ${rho}'
   []
   [forcing_v]
-    type = ADParsedFunction
+    type = ParsedFunction
     expression = '0'
   []
   [exact_p]

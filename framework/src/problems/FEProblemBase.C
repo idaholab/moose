@@ -2286,8 +2286,7 @@ FEProblemBase::addFunction(const std::string & type,
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    std::shared_ptr<MooseFunctionBase> func =
-        _factory.create<MooseFunctionBase>(type, name, parameters, tid);
+    std::shared_ptr<Function> func = _factory.create<Function>(type, name, parameters, tid);
     _functions.addObject(func, tid);
 
     auto add_functor = [this, &name, tid](const auto & cast_functor)
@@ -7897,31 +7896,6 @@ FEProblemBase::coordTransform()
   return mesh().coordTransform();
 }
 
-template <typename T>
-bool
-FEProblemBase::hasFunction(const std::string & name, THREAD_ID tid) const
-{
-  return _functions.hasActiveObject(name, tid) &&
-         dynamic_cast<FunctionTempl<T> *>(_functions.getActiveObject(name, tid).get());
-}
-
-template <>
-FunctionTempl<Real> &
-FEProblemBase::getFunction<Real>(const std::string & name, THREAD_ID tid)
-{
-  return getFunction(name, tid);
-}
-
-template <typename T>
-FunctionTempl<T> &
-FEProblemBase::getFunction(const std::string & name, THREAD_ID tid)
-{
-  if (!hasFunction<T>(name, tid))
-    mooseError("Unable to find function " + name);
-
-  return static_cast<FunctionTempl<T> &>(*(_functions.getActiveObject(name, tid)));
-}
-
 void
 FEProblemBase::reinitFVFace(const THREAD_ID tid, const FaceInfo & fi)
 {
@@ -7934,8 +7908,3 @@ FEProblemBase::currentNlSysNum() const
 {
   return currentNonlinearSystem().number();
 }
-
-template bool FEProblemBase::hasFunction<Real>(const std::string & name, THREAD_ID tid) const;
-template bool FEProblemBase::hasFunction<ADReal>(const std::string & name, THREAD_ID tid) const;
-template FunctionTempl<ADReal> & FEProblemBase::getFunction<ADReal>(const std::string & name,
-                                                                    THREAD_ID tid);

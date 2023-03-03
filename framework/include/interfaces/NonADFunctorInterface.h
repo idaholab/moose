@@ -9,16 +9,20 @@
 
 #pragma once
 
-#include "PiecewiseLinearBase.h"
+#include "FunctorInterface.h"
 
 /**
- * Function which provides a piecewise continuous linear interpolation
- * of a provided (x,y) point data set.
+ * \class NonADFunctorInterface
+ * \brief An interface for accessing \p Moose::Functors for systems that do not care about automatic
+ * differentiation, e.g. auxiliary kernels
  */
-class PiecewiseLinear : public PiecewiseLinearBase
+class NonADFunctorInterface : public FunctorInterface
 {
 public:
   static InputParameters validParams();
 
-  PiecewiseLinear(const InputParameters & parameters);
+  NonADFunctorInterface(const MooseObject * moose_object);
+
+private:
+  virtual bool isADObject() const override { return false; }
 };

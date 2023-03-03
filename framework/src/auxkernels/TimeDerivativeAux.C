@@ -10,11 +10,9 @@
 #include "TimeDerivativeAux.h"
 
 registerMooseObject("MooseApp", TimeDerivativeAux);
-registerMooseObject("MooseApp", ADTimeDerivativeAux);
 
-template <bool is_ad>
 InputParameters
-TimeDerivativeAuxTempl<is_ad>::validParams()
+TimeDerivativeAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
   params.addClassDescription(
@@ -26,11 +24,10 @@ TimeDerivativeAuxTempl<is_ad>::validParams()
   return params;
 }
 
-template <bool is_ad>
-TimeDerivativeAuxTempl<is_ad>::TimeDerivativeAuxTempl(const InputParameters & parameters)
+TimeDerivativeAux::TimeDerivativeAux(const InputParameters & parameters)
   : AuxKernel(parameters),
-    _functor(getFunctor<GenericReal<is_ad>>("functor")),
-    _factor(getFunctor<GenericReal<is_ad>>("factor")),
+    _functor(getFunctor<Real>("functor")),
+    _factor(getFunctor<Real>("factor")),
     _use_qp_arg(dynamic_cast<MooseVariableFE<Real> *>(&_var))
 {
   const auto functor_name = getParam<MooseFunctorName>("functor");
@@ -48,20 +45,17 @@ TimeDerivativeAuxTempl<is_ad>::TimeDerivativeAuxTempl(const InputParameters & pa
     paramError("variable", "This AuxKernel only supports Elemental fields");
 }
 
-template <bool is_ad>
 Real
-TimeDerivativeAuxTempl<is_ad>::computeValue()
+TimeDerivativeAux::computeValue()
 {
-  using MetaPhysicL::raw_value;
-
   if (_use_qp_arg)
   {
     const auto qp_arg = std::make_tuple(_current_elem, _qp, _qrule);
-    return raw_value(_factor(qp_arg)) * raw_value(_functor.dot(qp_arg));
+    return _factor(qp_arg) * _functor.dot(qp_arg);
   }
   else
   {
     const auto elem_arg = makeElemArg(_current_elem);
-    return raw_value(_factor(elem_arg)) * raw_value(_functor.dot(elem_arg));
+    return _factor(elem_arg) * _functor.dot(elem_arg);
   }
 }

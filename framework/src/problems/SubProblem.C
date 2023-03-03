@@ -70,6 +70,8 @@ SubProblem::SubProblem(const InputParameters & parameters)
   _active_sc_var_coupleable_vector_tags.resize(n_threads);
 
   _functors.resize(n_threads);
+  _pbblf_functors.resize(n_threads);
+  _functor_to_request_info.resize(n_threads);
 }
 
 SubProblem::~SubProblem() {}
@@ -1072,7 +1074,7 @@ SubProblem::clearAllDofIndices()
 void
 SubProblem::timestepSetup()
 {
-  for (auto & map : _functors)
+  for (auto & map : _pbblf_functors)
     for (auto & pr : map)
       pr.second->timestepSetup();
 }
@@ -1080,7 +1082,7 @@ SubProblem::timestepSetup()
 void
 SubProblem::customSetup(const ExecFlagType & exec_type)
 {
-  for (auto & map : _functors)
+  for (auto & map : _pbblf_functors)
     for (auto & pr : map)
       pr.second->customSetup(exec_type);
 }
@@ -1088,7 +1090,7 @@ SubProblem::customSetup(const ExecFlagType & exec_type)
 void
 SubProblem::residualSetup()
 {
-  for (auto & map : _functors)
+  for (auto & map : _pbblf_functors)
     for (auto & pr : map)
       pr.second->residualSetup();
 }
@@ -1096,7 +1098,7 @@ SubProblem::residualSetup()
 void
 SubProblem::jacobianSetup()
 {
-  for (auto & map : _functors)
+  for (auto & map : _pbblf_functors)
     for (auto & pr : map)
       pr.second->jacobianSetup();
 }
@@ -1111,13 +1113,24 @@ SubProblem::initialSetup()
   }
 
   for (const auto & functors : _functors)
-    for (const auto & pr : functors)
-      if (pr.second->wrapsNull())
-        mooseError("No functor ever provided with name '",
-                   removeSubstring(pr.first, "wraps_"),
-                   "', which was requested by '",
-                   MooseUtils::join(libmesh_map_find(_functor_to_requestors, pr.first), ","),
-                   "'.");
+    for (const auto & [functor_wrapper_name, functor_wrapper] : functors)
+    {
+      const auto & [true_functor_type, non_ad_functor, ad_functor] = functor_wrapper;
+      mooseAssert(non_ad_functor->wrapsNull() == ad_functor->wrapsNull(), "These must agree");
+      const auto functor_name = removeSubstring(functor_wrapper_name, "wraps_");
+      if (non_ad_functor->wrapsNull())
+        mooseError(
+            "No functor ever provided with name '",
+            functor_name,
+            "', which was requested by '",
+            MooseUtils::join(libmesh_map_find(_functor_to_requestors, functor_wrapper_name), ","),
+            "'.");
+      if (true_functor_type == TrueFunctorIs::NONAD ? non_ad_functor->ownsWrappedFunctor()
+                                                    : ad_functor->ownsWrappedFunctor())
+        mooseError("Functor envelopes should not own the functors they wrap, but '",
+                   functor_name,
+                   "' is owned by the wrapper. Please open a MOOSE issue for help resolving this.");
+    }
 }
 
 void

@@ -166,7 +166,7 @@ rho=1.1
     expression = 'sin(x*pi)*cos(y*pi)'
   []
   [forcing_u]
-    type = ADParsedFunction
+    type = ParsedFunction
     expression = '2*pi^2*mu*sin(x*pi)*cos(y*pi) - 2*pi*rho*sin(x*pi)*sin(y*pi)*cos(1.3*x)*cos(y*pi) + 2*pi*rho*sin(x*pi)*cos(x*pi)*cos(y*pi)^2 + 1.5*cos(1.5*x)*cos(1.6*y)'
     symbol_names = 'mu rho'
     symbol_values = '${mu} ${rho}'
@@ -176,7 +176,7 @@ rho=1.1
     expression = 'cos(1.3*x)*cos(y*pi)'
   []
   [forcing_v]
-    type = ADParsedFunction
+    type = ParsedFunction
     expression = '1.69*mu*cos(1.3*x)*cos(y*pi) + pi^2*mu*cos(1.3*x)*cos(y*pi) - 1.3*rho*sin(1.3*x)*sin(x*pi)*cos(y*pi)^2 - 2*pi*rho*sin(y*pi)*cos(1.3*x)^2*cos(y*pi) + pi*rho*cos(1.3*x)*cos(x*pi)*cos(y*pi)^2 - 1.6*sin(1.5*x)*sin(1.6*y)'
     symbol_names = 'mu rho'
     symbol_values = '${mu} ${rho}'

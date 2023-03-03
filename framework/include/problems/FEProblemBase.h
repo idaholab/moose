@@ -79,9 +79,7 @@ class LineSearch;
 class UserObject;
 class AutomaticMortarGeneration;
 class VectorPostprocessor;
-class MooseFunctionBase;
-template <typename>
-class FunctionTempl;
+class Function;
 class MooseAppCoordTransform;
 
 // libMesh forward declarations
@@ -568,11 +566,7 @@ public:
   virtual void
   addFunction(const std::string & type, const std::string & name, InputParameters & parameters);
   virtual bool hasFunction(const std::string & name, THREAD_ID tid = 0);
-  template <typename T>
-  bool hasFunction(const std::string & name, THREAD_ID tid = 0) const;
   virtual Function & getFunction(const std::string & name, THREAD_ID tid = 0);
-  template <typename T>
-  FunctionTempl<T> & getFunction(const std::string & name, THREAD_ID tid = 0);
 
   /**
    * add a MOOSE line search
@@ -2089,7 +2083,7 @@ protected:
   std::vector<std::vector<std::unique_ptr<Assembly>>> _assembly;
 
   /// functions
-  MooseObjectWarehouse<MooseFunctionBase> _functions;
+  MooseObjectWarehouse<Function> _functions;
 
   /// nonlocal kernels
   MooseObjectWarehouse<KernelBase> _nonlocal_kernels;
@@ -2549,6 +2543,3 @@ FEProblemBase::setCurrentNonlinearSystem(const unsigned int nl_sys_num)
               "System number greater than the number of nonlinear systems");
   _current_nl_sys = _nl[nl_sys_num].get();
 }
-
-template <>
-FunctionTempl<Real> & FEProblemBase::getFunction<Real>(const std::string & name, THREAD_ID tid);
