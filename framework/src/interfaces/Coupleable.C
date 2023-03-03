@@ -462,13 +462,6 @@ Coupleable::coupledGenericValue<true>(const std::string & var_name, unsigned int
 const VariableValue &
 Coupleable::coupledValue(const std::string & var_name, unsigned int comp) const
 {
-  if (comp == libMesh::invalid_uint)
-  {
-    if (coupledComponents(var_name) > 1)
-      _obj->paramError(var_name, "Supply only one variable.");
-    comp = 0;
-  }
-
   const auto * const var = getVarHelper<MooseVariableField<Real>>(var_name, comp);
   if (!var)
     return *getDefaultValue(var_name, comp);
