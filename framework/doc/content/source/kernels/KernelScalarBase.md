@@ -90,11 +90,15 @@ and AD. As an example, consider the scalar residual weak form term of the
   F^{(\lambda)} \equiv \int_{\Omega} \phi^h \;\text{d}\Omega - V_0 = 0 \label{eq:eq1}
 \end{equation}
 
-The `computeScalarQpResidual` method for the non-AD version of this class is
+The [`ScalarLMKernel`](/ScalarLMKernel.md) class is implemented using the
+[`GenericKernelScalar`](/GenericKernelScalar.md) template class to contain both the AD and non-AD
+versions within the same source files; the test sources files in the Tensor Mechanics module described
+at the bottom of this section appear more simply since they are non-AD only: [HTLSDR-header].
+The `computeScalarQpResidual` method for this class is
 provided in [scalar-kernel-non-ad-residual], where `_value/_pp_value` is equal to $V_0$.
 
 !listing framework/src/kernels/ScalarLMKernel.C id=scalar-kernel-non-ad-residual
-         re=Real\nScalarLMKernel::computeScalarQpResidual.*?}
+         re=template <bool is_ad>\nGenericReal<is_ad>\nScalarLMKernelTempl<is_ad>::computeScalarQpResidual.*?}
          caption=The C++ weak-form residual statement of [eq:eq1].
 
 Meanwhile, the contribution to the spatial variable residual of this object is associated with [eq:eq2]
@@ -106,40 +110,34 @@ $\lambda^h$ in this weak form).
 \end{equation}
 
 !listing framework/src/kernels/ScalarLMKernel.C id=kernel-non-ad-residual
-         re=Real\nScalarLMKernel::computeQpResidual.*?}
+         re=template <bool is_ad>\nGenericReal<is_ad>\nScalarLMKernelTempl<is_ad>::computeQpResidual.*?}
          caption=The C++ weak-form residual statement of [eq:eq2].
 
 This object also overrides the `computeScalarQpOffDiagJacobian` method to define the Jacobian term related
 to [eq:eq1] as shown in [non-ad-s-v-jacobian].
 
 !listing framework/src/kernels/ScalarLMKernel.C id=non-ad-s-v-jacobian
-         re=Real\nScalarLMKernel::computeScalarQpOffDiagJacobian.*?}
+         re=template <bool is_ad>\nReal\nScalarLMKernelTempl<is_ad>::computeScalarQpOffDiagJacobian.*?}
          caption=The C++ weak-form Jacobian for d-`_kappa`-residual / d-`jvar`.
 
-Notice that there is a conditional to confirm that the coupled `jvar` is the focus variable `_var`, otherwise it returns zero.
+Notice that there is a conditional to confirm that the coupled `jvar` is the focus variable `_var`, otherwise it returns zero. Also, this method only returns a "Real" value since this method is only called
+by the non-AD version of the class during Jacobian computation; an assert is used to verify this intention.
 
 Similarly, it also overrides the `computeQpOffDiagJacobianScalar` method to define the Jacobian term related
 to [eq:eq2] as shown in [non-ad-v-s-jacobian].
 
 !listing framework/src/kernels/ScalarLMKernel.C id=non-ad-v-s-jacobian
-         re=Real\nScalarLMKernel::computeQpOffDiagJacobianScalar.*?}
+         re=template <bool is_ad>\nReal\nScalarLMKernelTempl<is_ad>::computeQpOffDiagJacobianScalar.*?}
          caption=The C++ weak-form Jacobian for d-`_var`-residual / d-`svar`.
 
 Also notice the conditional that confirms the coupled `svar` is the focus scalar `_kappa`, otherwise it returns zero.
 
-The AD version of this object, [`ADScalarLMKernel`](/ADScalarLMKernel.md), only requires the residual
-implementation; as such it overrides `computeScalarQpResidual` and `computeQpResidual` as follows.
-
-!listing framework/src/kernels/ADScalarLMKernel.C id=ad-s-residual
-         re=ADScalarLMKernel::computeScalarQpResidual.*?}
-         caption=The C++ AD weak-form residual statement of [eq:eq1].
-
-!listing framework/src/kernels/ADScalarLMKernel.C id=kernel-ad-residual
-         re=ADScalarLMKernel::computeQpResidual.*?}
-         caption=The C++ AD weak-form residual statement of [eq:eq2].
-
 Depending upon the weak form and its coupling terms between spatial and scalar variables, not all of the
 methods listed in [#KSB-coupling] need to be overridden.
+
+The AD version of this object, [`ADScalarLMKernel`](/ADScalarLMKernel.md), only requires the residual
+implementation. A solely AD source file would only need to override `computeScalarQpResidual` and `computeQpResidual` and leave all the Jacobian methods as base definitions, which return zero. See 
+[MortarScalarBase](source/constraints/MortarScalarBase.md) for examples of AD-only and non-AD separate classes.
 
 The scalar augmentation system is designed such that multiple scalar variables can be coupled to
 an instance of the Kernel class, each focusing on one scalar from the list. This approach is similar

@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "KernelScalarBase.h"
+#include "GenericKernelScalar.h"
 
 /**
  * This Kernel implements part of the equation that enforces the constraint
@@ -29,24 +29,24 @@
  * [0]: kernels/scalar_constraints/scalar_constraint_kernel.i
  * [1]: https://github.com/idaholab/large_media/blob/master/framework/scalar_constraint_kernel.pdf
  */
-class ScalarLMKernel : public KernelScalarBase
+template <bool is_ad>
+class ScalarLMKernelTempl : public GenericKernelScalar<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  ScalarLMKernel(const InputParameters & parameters);
-  virtual ~ScalarLMKernel();
+  ScalarLMKernelTempl(const InputParameters & parameters);
 
 protected:
   /**
    * Method for computing the residual at quadrature points
    */
-  virtual Real computeQpResidual() override;
+  virtual GenericReal<is_ad> computeQpResidual() override;
 
   /**
    * Method for computing the scalar part of residual at quadrature points
    */
-  virtual Real computeScalarQpResidual() override;
+  virtual GenericReal<is_ad> computeScalarQpResidual() override;
 
   /**
    * Method for computing the scalar variable part of Jacobian at
@@ -69,4 +69,9 @@ protected:
 
   /// Name of the Postprocessor containing the volume of the domain
   const PostprocessorValue & _pp_value;
+
+  usingGenericKernelScalarMembers;
 };
+
+typedef ScalarLMKernelTempl<false> ScalarLMKernel;
+typedef ScalarLMKernelTempl<true> ADScalarLMKernel;
