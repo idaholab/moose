@@ -43,6 +43,8 @@ public:
    */
   virtual const ADVariableValue & contactForce() const = 0;
 
+  virtual void reinit(const Elem & lower_d_secondary_elem) = 0;
+
 protected:
   /**
    * Computes properties that are functions only of the current quadrature point (\p _qp), e.g.

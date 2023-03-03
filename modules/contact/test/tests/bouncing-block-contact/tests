@@ -231,6 +231,15 @@
       cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Constraints/weighted_gap_lm/correct_edge_dropping=true Executioner/end_time=50 Outputs/exodus=true Outputs/file_base=frictionless-weighted-gap-edge-dropping_out "
                  "Postprocessors/active=''"
     []
+    [penalty]
+      type = 'Exodiff'
+      input = frictionless-penalty-weighted-gap.i
+      exodiff = 'frictionless-penalty-weighted-gap_out.e'
+      detail = 'using a first order basis for displacements and penalty multiplication times the negative gap distance to form the contact force.'
+      cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
+                 "Postprocessors/active=''"
+      ad_indexing_type = 'global'
+    []
   []
   [weighted_vel_pdass]
     requirement = 'The system shall support a variationally consistent mortar frictional constraints '

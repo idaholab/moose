@@ -30,8 +30,23 @@ NormalMortarMechanicalContact::validParams()
 NormalMortarMechanicalContact::NormalMortarMechanicalContact(const InputParameters & parameters)
   : ADMortarLagrangeConstraint(parameters),
     _component(getParam<MooseEnum>("component")),
-    _weighted_gap_uo(getUserObject<WeightedGapUserObject>("weighted_gap_uo"))
+    _weighted_gap_uo(const_cast<WeightedGapUserObject &>(
+        getUserObject<WeightedGapUserObject>("weighted_gap_uo")))
 {
+}
+
+void
+NormalMortarMechanicalContact::computeResidual()
+{
+  _weighted_gap_uo.reinit(*_lower_secondary_elem);
+  ADMortarLagrangeConstraint::computeResidual();
+}
+
+void
+NormalMortarMechanicalContact::computeJacobian()
+{
+  _weighted_gap_uo.reinit(*_lower_secondary_elem);
+  ADMortarLagrangeConstraint::computeJacobian();
 }
 
 ADReal

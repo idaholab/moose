@@ -20,6 +20,11 @@ public:
 
   NormalMortarMechanicalContact(const InputParameters & parameters);
 
+  using ADMortarLagrangeConstraint::computeJacobian;
+  using ADMortarLagrangeConstraint::computeResidual;
+  virtual void computeResidual() override;
+  virtual void computeJacobian() override;
+
 protected:
   ADReal computeQpResidual(Moose::MortarType type) final;
 
@@ -27,5 +32,5 @@ protected:
   const MooseEnum _component;
 
   /// The weighted gap user object which supplies the contact force
-  const WeightedGapUserObject & _weighted_gap_uo;
+  WeightedGapUserObject & _weighted_gap_uo;
 };
