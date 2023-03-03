@@ -43,7 +43,15 @@ public:
    */
   virtual const ADVariableValue & contactForce() const = 0;
 
+  /**
+   * Call back for computing any necessary data during constraint evaluation
+   */
   virtual void reinit(const Elem & lower_d_secondary_elem) = 0;
+
+  /**
+   * @return Whether there is a weighted gap associated with this degree of freedom object
+   */
+  virtual bool hasDof(const DofObject & dof_object) const = 0;
 
 protected:
   /**

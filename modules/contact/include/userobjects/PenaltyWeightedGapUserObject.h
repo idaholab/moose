@@ -26,6 +26,7 @@ public:
 
   virtual const ADVariableValue & contactForce() const override;
   virtual void reinit(const Elem & lower_d_secondary_elem) override;
+  virtual bool hasDof(const DofObject & dof_object) const override;
 
 protected:
   virtual const VariableTestValue & test() const override;

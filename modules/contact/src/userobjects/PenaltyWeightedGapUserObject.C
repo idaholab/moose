@@ -9,6 +9,7 @@
 
 #include "PenaltyWeightedGapUserObject.h"
 #include "MooseVariableFE.h"
+#include "SystemBase.h"
 
 registerMooseObject("ContactApp", PenaltyWeightedGapUserObject);
 
@@ -64,4 +65,10 @@ PenaltyWeightedGapUserObject::reinit(const Elem & lower_d_secondary_elem)
     for (const auto qp : make_range(_qrule_msm->n_points()))
       _contact_force[qp] += (test_i[qp] * _penalty) * weighted_gap_for_calc;
   }
+}
+
+bool
+PenaltyWeightedGapUserObject::hasDof(const DofObject & dof_object) const
+{
+  return dof_object.n_dofs(_disp_x_var->sys().number(), _disp_x_var->number());
 }

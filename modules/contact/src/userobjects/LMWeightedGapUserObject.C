@@ -9,6 +9,7 @@
 
 #include "LMWeightedGapUserObject.h"
 #include "MooseVariableFE.h"
+#include "SystemBase.h"
 
 registerMooseObject("ContactApp", LMWeightedGapUserObject);
 
@@ -45,4 +46,10 @@ const ADVariableValue &
 LMWeightedGapUserObject::contactForce() const
 {
   return _lm_var->adSlnLower();
+}
+
+bool
+LMWeightedGapUserObject::hasDof(const DofObject & dof_object) const
+{
+  return dof_object.n_dofs(_lm_var->sys().number(), _lm_var->number());
 }

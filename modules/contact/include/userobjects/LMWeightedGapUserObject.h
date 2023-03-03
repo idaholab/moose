@@ -25,8 +25,8 @@ public:
   LMWeightedGapUserObject(const InputParameters & parameters);
 
   virtual const ADVariableValue & contactForce() const override;
-
   virtual void reinit(const Elem &) override {}
+  virtual bool hasDof(const DofObject & dof_object) const override;
 
 protected:
   virtual const VariableTestValue & test() const override;

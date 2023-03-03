@@ -209,6 +209,9 @@ WeightedGapUserObject::finalize()
 void
 WeightedGapUserObject::execute()
 {
+  if (!hasDof(*_current_node))
+    return;
+
   const auto & its = amg().secondariesToMortarSegments(*_current_node);
 
   auto act_functor = [this]()

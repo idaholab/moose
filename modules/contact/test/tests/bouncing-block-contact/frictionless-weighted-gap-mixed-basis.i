@@ -27,6 +27,20 @@ offset = 1e-2
   [../]
 []
 
+# [AuxVariables]
+#   [pid]
+#     order = CONSTANT
+#     family = MONOMIAL
+#   []
+# []
+
+# [AuxKernels]
+#   [pid]
+#     type = ProcessorIDAux
+#     variable = pid
+#   []
+# []
+
 [ICs]
   [./disp_y]
     block = 2
