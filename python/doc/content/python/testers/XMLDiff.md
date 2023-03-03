@@ -7,11 +7,10 @@
 
 Test configuration options are added to the `tests` file.
 
-- `xmldiff`: A list of `XML` files to compare
-- `gold_dir`: The directory where the \"gold standard\" files reside relative to the TEST_DIR: (default: ./gold/)
-- `abs_zero`: Absolute zero cutoff used in exodiff comparisons, defaults to 1e-10
-- `rel_err`: Relative error value used in exodiff comparisons, defaults to 5.5e-6
-- `ignored_attributes`: Ignore an attribute. For example, type and version in sample `XML` block below
+All `XMLDiff` files also contain the options for differs found in [SchemaDiff](SchemaDiff.md), such as global changes to `rel_err` and `abs_zero`.
+
+- `xmldiff`: Alias of `schemadiff`. A list of `XML` files to compare
+- `ignored_attributes`: Alias for `ignored_items`. A list of keys, values, or attributes to ignore. For example, type and version in sample `XML` block below
 
 ```
 <VTKFile type=\"Foo\" version=\"0.1\">")

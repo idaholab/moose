@@ -56,16 +56,21 @@ tests/test_harness.testC: 	testA --> testB --> testC <--> testB
 
 ### Missing Objects/Files Failure
 
-When files required for the successful completion of a test are missing or incorrect, failures will also be encountered. In this example, consider the following test specification that compares outputs for [!ac](CSV) and Exodus output-based tests to gold files that do not exist:
-
-!listing test_harness/diff_golds
-
-When this test is executed, an error will be thrown during the file comparison. The missing file
-content is considered empty, so the kind of error experienced will relate to differences between the
-output and an empty file. In the case of the CSVDiff the following failing output is seen:
+When files required for the successful completion of a test are missing or incorrect, failures will also be encountered. In this example, consider the following test specification that compares JSON outputs with gold files that are improperly formatted:
 
 ```
-ERROR: In file csvdiff_diff_gold_out.csv: Columns with header 'time' aren't the same length
+  [schema_invalid_json]
+    type = JSONDiff
+    input = schemadiff.i
+    jsondiff = schemadiff_out.json
+    gold_file = invalid.json
+  []
+```
+
+When this test is executed, an error will be thrown during the file comparison, and the kind of error experienced will relate to differences between the output and an empty file. In the case of the JSONDiff the following failing output is seen:
+
+```
+Gold Schema File Failed To Load: /Users/peatna/moose/test/tests/test_harness/gold/invalid.json
 ```
 !template-end!
 
