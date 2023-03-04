@@ -172,7 +172,8 @@ RedistributeProperties::redistribute()
             elems_being_migrated.insert(elem);
         }
 
-        auto recv_functor = [&](processor_id_type, const std::vector<stored_elem_type> & data)
+        auto recv_functor = [&, mat_prop_store_ptr = mat_prop_store](
+                                processor_id_type, const std::vector<stored_elem_type> & data)
         {
           for (const auto & [elem_hash, elem_id, n_q_points] : data)
           {
@@ -188,7 +189,7 @@ RedistributeProperties::redistribute()
               // on, otherwise we might see an
               // initialized-but-not-filled entry in the next map and
               // foolishly try to send it places.
-              mat_prop_store->initProps(my_mat_data, props_map, elem, prop_id, n_q_points);
+              mat_prop_store_ptr->initProps(my_mat_data, props_map, elem, prop_id, n_q_points);
 
               libmesh_assert(elem_props.contains(prop_id));
               MaterialProperties & mat_props = elem_props[prop_id];
