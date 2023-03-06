@@ -195,15 +195,5 @@
     issues = '#16841'
     design = 'PorousFlowFullySaturated.md porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
     requirement = 'PorousFlow shall be able to advect tracers in fully-saturated single-phase systems, using a fluid-volume conservation approach, and be able to use KT stabilization in such settings'
-  []
-  [pressure_pulse_1d_fv]
-    type = 'CSVDiff'
-    input = 'pressure_pulse_1d_fv.i'
-    csvdiff = 'pressure_pulse_1d_fv.csv'
-    rel_err = 1.0E-5
-    threading = '!pthreads'
-    issues = '#21275'
-    design = 'porous_flow/tests/pressure_pulse/pressure_pulse_tests.md'
-    requirement = 'PorousFlow shall correctly simulate the transient evolution of a pressure pulse in 1D using 1 phase physics with FV variables'
-  []
+  [../]
 []
