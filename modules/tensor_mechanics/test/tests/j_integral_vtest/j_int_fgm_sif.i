@@ -21,12 +21,6 @@
   []
   [resid_z]
   []
-  [beta_material]
-  []
-  [elastic_mod_material]
-  []
-  [elastic_mod_material_derivative]
-  []
 []
 
 [Functions]
@@ -35,6 +29,14 @@
     x = '0. 1.'
     y = '0. 1'
     scale_factor = -68.95 #MPa
+  []
+  [elastic_mod_material_der]
+    type = ParsedFunction
+    expression = 'if(y < 229, 0.0, if(y>279, 0, 20680*0460517019*exp(0.0460517019*(y-229))))'
+  []
+  [elastic_mod_material]
+    type = ParsedFunction
+    expression = 'if(y < 229, 20680, if(y>279, 206800, 20680*exp(0.0460517019*(y-229))))'
   []
 []
 
@@ -51,7 +53,7 @@
   symmetry_plane = 2
   incremental = true
 
-  functionally_graded_youngs_modulus = elastic_mod_material_derivative
+  functionally_graded_youngs_modulus = elastic_mod_material_mat
 
   youngs_modulus = 20680
   poissons_ratio = 0.3
@@ -74,29 +76,6 @@
     variable = SED
     property = strain_energy_density
     execute_on = timestep_end
-  []
-  [beta_material]
-    type = ParsedAux
-    # beta: 1/50 * ln (E2/E1). 50 refers to the area of transition: 279-229
-    use_xyzt = true
-    expression = 'if(y < 229, 0, if(y>279, 0, 0.0460517019))'
-    variable = beta_material
-  []
-  [elastic_mod_material]
-    type = ParsedAux
-    # beta: 1/50 * ln (E2/E1). 50 refers to the area of transition: 279-229
-    use_xyzt = true
-    expression = 'if(y < 229, 20680, if(y>279, 206800, 20680*exp(0.0460517019*(y-229))))'
-    # expression = '20680'
-    variable = elastic_mod_material
-  []
-  [elastic_mod_material_derivative]
-    type = ParsedAux
-    # beta: 1/50 * ln (E2/E1). 50 refers to the area of transition: 279-229
-    use_xyzt = true
-    expression = 'if(y < 229, 0.0, if(y>279, 0, 20680*0460517019*exp(0.0460517019*(y-229))))'
-    # expression = '20680'
-    variable = elastic_mod_material_derivative
   []
 []
 
@@ -128,20 +107,17 @@
 []
 
 [Materials]
-  [youngs_modulus]
-    type = DerivativeParsedMaterial
-    property_name = youngs_modulus
-    coupled_variables = elastic_mod_material
-    expression = 'elastic_mod_material'
+  [generic_materials]
+    type = GenericFunctionMaterial
+    prop_names = 'elastic_mod_material_mat elastic_mod_material_der_mat'
+    prop_values = 'elastic_mod_material elastic_mod_material_der'
   []
-
   [elasticity_tensor]
     type = ComputeVariableIsotropicElasticityTensor
-    youngs_modulus = youngs_modulus
+    youngs_modulus = elastic_mod_material_mat
     poissons_ratio = 0.3
-    args = elastic_mod_material
+    args = ''
   []
-
   [elastic_stress]
     type = ComputeFiniteStrainElasticStress
     block = '1 2'

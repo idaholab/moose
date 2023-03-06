@@ -65,13 +65,13 @@ DomainIntegralAction::validParams()
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
   params.addParam<VariableName>("temperature", "", "The temperature");
-  params.addParam<VariableName>(
+  params.addParam<MaterialPropertyName>(
       "functionally_graded_youngs_modulus_crack_dir_gradient",
       "A grading parameter for cracks in functinonally graded materials (optional). Must be "
       "provided as an auxiliary "
       "variable that captures an exponential function that transitions the modulus of elasticity "
       "from the value of a material to another one.");
-  params.addParam<VariableName>(
+  params.addParam<MaterialPropertyName>(
       "functionally_graded_youngs_modulus",
       "Spatially varying elasticity modulus variable. This input is required when "
       "using the functionally graded material capability.");
@@ -164,9 +164,9 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
   {
     _fgm_crack = true;
     _functionally_graded_youngs_modulus_crack_dir_gradient =
-        getParam<VariableName>("functionally_graded_youngs_modulus_crack_dir_gradient");
+        getParam<MaterialPropertyName>("functionally_graded_youngs_modulus_crack_dir_gradient");
     _functionally_graded_youngs_modulus =
-        getParam<VariableName>("functionally_graded_youngs_modulus");
+        getParam<MaterialPropertyName>("functionally_graded_youngs_modulus");
   }
 
   if (_q_function_type == GEOMETRY)
@@ -700,10 +700,10 @@ DomainIntegralAction::act()
 
       if (_fgm_crack)
       {
-        params.set<std::vector<VariableName>>(
+        params.set<MaterialPropertyName>(
             "functionally_graded_youngs_modulus_crack_dir_gradient") = {
             _functionally_graded_youngs_modulus_crack_dir_gradient};
-        params.set<std::vector<VariableName>>("functionally_graded_youngs_modulus") = {
+        params.set<MaterialPropertyName>("functionally_graded_youngs_modulus") = {
             _functionally_graded_youngs_modulus};
       }
 

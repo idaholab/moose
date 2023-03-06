@@ -148,10 +148,10 @@ protected:
   bool _convert_J_to_K;
   /// Whether the crack lives in a functionally-graded material
   bool _fgm_crack;
-  /// Variable containing the Youngs modulus derivative for functionally graded materials
-  VariableName _functionally_graded_youngs_modulus_crack_dir_gradient;
-  /// Variable containing the spatially-dependent Youngs modulus for functionally graded materials
-  VariableName _functionally_graded_youngs_modulus;
+  /// Material property name for the Youngs modulus derivative for functionally graded materials
+  MaterialPropertyName _functionally_graded_youngs_modulus_crack_dir_gradient;
+  /// Material property name for  spatially-dependent Youngs modulus for functionally graded materials
+  MaterialPropertyName _functionally_graded_youngs_modulus;
   /// Whether to create automatic differentiation objects from the action
   const bool _use_ad;
 };

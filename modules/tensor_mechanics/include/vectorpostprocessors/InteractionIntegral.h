@@ -104,9 +104,9 @@ protected:
   /// Gradient of temperature
   const VariableGradient & _grad_temp;
   /// Spatial derivative of the youngs modulus in the crack direction
-  const VariableValue & _functionally_graded_youngs_modulus_crack_dir_gradient;
+  const MaterialProperty<Real> * _functionally_graded_youngs_modulus_crack_dir_gradient;
   /// Spatial elasticity modulus variable for FGM
-  const VariableValue & _functionally_graded_youngs_modulus;
+  const MaterialProperty<Real> * _functionally_graded_youngs_modulus;
   /// Conversion factor applied to convert interaction integral to stress intensity factor K
   Real _K_factor;
   /// Whether the crack plane is also a symmetry plane in the model

@@ -44,10 +44,11 @@ InteractionIntegralTempl<is_ad>::validParams()
   params.addCoupledVar("temperature",
                        "The temperature (optional). Must be provided to correctly compute "
                        "stress intensity factors in models with thermal strain gradients.");
-  params.addCoupledVar("functionally_graded_youngs_modulus",
-                       "Spatially varying elasticity modulus variable. This input is required when "
-                       "using the functionally graded material capability.");
-  params.addCoupledVar(
+  params.addParam<MaterialPropertyName>(
+      "functionally_graded_youngs_modulus",
+      "Spatially varying elasticity modulus variable. This input is required when "
+      "using the functionally graded material capability.");
+  params.addParam<MaterialPropertyName>(
       "functionally_graded_youngs_modulus_crack_dir_gradient",
       "A grading parameter for cracks in functinonally graded materials (optional). Must be "
       "provided as an auxiliary "
@@ -103,16 +104,17 @@ InteractionIntegralTempl<is_ad>::InteractionIntegralTempl(const InputParameters 
     _grad_disp(3),
     _has_temp(isCoupled("temperature")),
     _has_functionally_graded_youngs_modulus_crack_dir_gradient(
-        isCoupled("functionally_graded_youngs_modulus_crack_dir_gradient")),
-    _has_functionally_graded_youngs_modulus(isCoupled("functionally_graded_youngs_modulus")),
+        isParamSetByUser("functionally_graded_youngs_modulus_crack_dir_gradient")),
+    _has_functionally_graded_youngs_modulus(isParamSetByUser("functionally_graded_youngs_modulus")),
     _grad_temp(_has_temp ? coupledGradient("temperature") : _grad_zero),
     _functionally_graded_youngs_modulus_crack_dir_gradient(
         _has_functionally_graded_youngs_modulus_crack_dir_gradient
-            ? coupledValue("functionally_graded_youngs_modulus_crack_dir_gradient")
-            : _zero),
-    _functionally_graded_youngs_modulus(_has_functionally_graded_youngs_modulus
-                                            ? coupledValue("functionally_graded_youngs_modulus")
-                                            : _zero),
+            ? &getMaterialProperty<Real>("functionally_graded_youngs_modulus_crack_dir_gradient")
+            : nullptr),
+    _functionally_graded_youngs_modulus(
+        _has_functionally_graded_youngs_modulus
+            ? &getMaterialProperty<Real>("functionally_graded_youngs_modulus")
+            : nullptr),
     _K_factor(getParam<Real>("K_factor")),
     _has_symmetry_plane(isParamValid("symmetry_plane")),
     _poissons_ratio(getParam<Real>("poissons_ratio")),
@@ -313,7 +315,7 @@ InteractionIntegralTempl<is_ad>::computeQpIntegral(const std::size_t crack_front
     RankTwoTensor cijklj_epsilonkl_aux; // Temporary second order tensor.
     RankFourTensor cijklj;
     cijklj.fillSymmetricIsotropicEandNu(1.0, _poissons_ratio);
-    cijklj *= _functionally_graded_youngs_modulus_crack_dir_gradient[_qp];
+    cijklj *= (*_functionally_graded_youngs_modulus_crack_dir_gradient)[_qp];
     cijklj_epsilonkl_aux = cijklj * aux_strain;
 
     const Real term6_a = grad_disp_cf(0, 0) * cijklj_epsilonkl_aux(0, 0) +
@@ -484,8 +486,8 @@ InteractionIntegralTempl<is_ad>::computeAuxFields(RankTwoTensor & aux_stress,
   {
     aux_strain.zero();
     RankFourTensor spatial_elasticity_tensor;
-    spatial_elasticity_tensor.fillSymmetricIsotropicEandNu(_functionally_graded_youngs_modulus[_qp],
-                                                           _poissons_ratio);
+    spatial_elasticity_tensor.fillSymmetricIsotropicEandNu(
+        (*_functionally_graded_youngs_modulus)[_qp], _poissons_ratio);
     aux_strain = spatial_elasticity_tensor.invSymm() * aux_stress;
   }
 

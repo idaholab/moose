@@ -13,6 +13,11 @@
   # uniform_refine = 3
 []
 
+[AuxVariables]
+  [react_z]
+  []
+[]
+
 [DomainIntegral]
   integrals = 'JIntegral InteractionIntegralKI'
   boundary = 1001
@@ -25,8 +30,8 @@
   incremental = true
   symmetry_plane = 1
 
-  functionally_graded_youngs_modulus = elastic_mod_material
-  functionally_graded_youngs_modulus_crack_dir_gradient = elastic_mod_material_der
+  functionally_graded_youngs_modulus = elastic_mod_material_mat
+  functionally_graded_youngs_modulus_crack_dir_gradient = elastic_mod_material_der_mat
 
   youngs_modulus = 2e6
   poissons_ratio = 0.3
@@ -44,45 +49,24 @@
   []
 []
 
-[AuxVariables]
-  [resid_y]
-  []
-  [elastic_mod_material_der]
-  []
-  [elastic_mod_material]
-  []
-[]
-
 [Functions]
   [parsed_load]
     type = ParsedFunction
     symbol_names = 'E1 E2 beta'
     symbol_values = '1e3 3e3 5'
-    # expression = 'if(y < 229, 20680, if(y>279, 206800, 20680*exp(0.0460517019*(y-229))))'
     expression = '-1.0*((E1 + E2) / 2 + (E1 - E2)/2 * tanh(beta*(x+0.1)))'
   []
-[]
-
-[AuxKernels]
   [elastic_mod_material_der]
-    type = ParsedAux
-    # beta: 1/50 * ln (E2/E1). 50 refers to the area of transition: 279-229
-    use_xyzt = true
-    constant_names = 'E1 E2 beta'
-    constant_expressions = '1e6 3e6 5'
+    type = ParsedFunction
+    symbol_names = 'E1 E2 beta'
+    symbol_values = '1e6 3e6 5'
     expression = '(E1 - E2) / 2 * beta * (1.0 - tanh(beta*(x+0.1)) * tanh(beta*(x+0.1)))'
-    # expression = '1'
-    variable = elastic_mod_material_der
   []
   [elastic_mod_material]
-    type = ParsedAux
-    # beta: 1/50 * ln (E2/E1). 50 refers to the area of transition: 279-229
-    use_xyzt = true
-    constant_names = 'E1 E2 beta'
-    constant_expressions = '1e6 3e6 5'
-    # expression = 'if(y < 229, 20680, if(y>279, 206800, 20680*exp(0.0460517019*(y-229))))'
+    type = ParsedFunction
+    symbol_names = 'E1 E2 beta'
+    symbol_values = '1e6 3e6 5'
     expression = '(E1 + E2) / 2 + (E1 - E2)/2 * tanh(beta*(x+0.1))'
-    variable = elastic_mod_material
   []
 []
 
@@ -108,17 +92,16 @@
 []
 
 [Materials]
-  [youngs_modulus]
-    type = DerivativeParsedMaterial
-    property_name = youngs_modulus
-    coupled_variables = elastic_mod_material
-    expression = 'elastic_mod_material'
+  [generic_materials]
+    type = GenericFunctionMaterial
+    prop_names = 'elastic_mod_material_mat elastic_mod_material_der_mat'
+    prop_values = 'elastic_mod_material elastic_mod_material_der'
   []
   [elasticity_tensor]
     type = ComputeVariableIsotropicElasticityTensor
-    youngs_modulus = youngs_modulus
+    youngs_modulus = elastic_mod_material_mat
     poissons_ratio = 0.3
-    args = elastic_mod_material
+    args = ''
   []
   [elastic_stress]
     type = ComputeFiniteStrainElasticStress
@@ -157,8 +140,8 @@
   []
   [react_z]
     type = NodalSum
-    variable = resid_y
-    boundary = '10001 10005'
+    variable = react_z
+    boundary = '10005 6 1'
   []
 []
 
