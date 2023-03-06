@@ -231,20 +231,24 @@ public:
   }
   MaterialProperties & setProps(const Elem * elem, unsigned int side)
   {
-    libmesh_assert(_props_elem->contains(elem));
-    libmesh_assert((*_props_elem)[elem].contains(side));
+    // Many problems rely on reinitMaterials also being the first
+    // init, and I'm not sure I can clean that up to reallow these
+    // assertions without also hurting performance on subsequent
+    // iterations.
+    // libmesh_assert(_props_elem->contains(elem));
+    // libmesh_assert((*_props_elem)[elem].contains(side));
     return (*_props_elem)[elem][side];
   }
   MaterialProperties & setPropsOld(const Elem * elem, unsigned int side)
   {
-    libmesh_assert(_props_elem_old->contains(elem));
-    libmesh_assert((*_props_elem_old)[elem].contains(side));
+    // libmesh_assert(_props_elem_old->contains(elem));
+    // libmesh_assert((*_props_elem_old)[elem].contains(side));
     return (*_props_elem_old)[elem][side];
   }
   MaterialProperties & setPropsOlder(const Elem * elem, unsigned int side)
   {
-    libmesh_assert(_props_elem_older->contains(elem));
-    libmesh_assert((*_props_elem_older)[elem].contains(side));
+    // libmesh_assert(_props_elem_older->contains(elem));
+    // libmesh_assert((*_props_elem_older)[elem].contains(side));
     return (*_props_elem_older)[elem][side];
   }
   ///@}
