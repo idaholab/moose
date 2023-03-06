@@ -812,7 +812,7 @@ PatternedCartesianMeshGenerator::generate()
   auto mesh = dynamic_pointer_cast<MeshBase>(out_mesh);
   // before return, add reporting IDs if _use_reporting_id is set true
   if (_use_reporting_id)
-    addReportingIDs(mesh);
+    addReportingIDs(mesh, meshes);
   return mesh;
 }
 
@@ -938,7 +938,9 @@ PatternedCartesianMeshGenerator::positionSetup(
 }
 
 void
-PatternedCartesianMeshGenerator::addReportingIDs(std::unique_ptr<MeshBase> & mesh) const
+PatternedCartesianMeshGenerator::addReportingIDs(
+    std::unique_ptr<MeshBase> & mesh,
+    const std::vector<std::unique_ptr<ReplicatedMesh>> & from_meshes) const
 {
   unsigned int extra_id_index;
   const std::string element_id_name = getParam<std::string>("id_name");
@@ -951,14 +953,6 @@ PatternedCartesianMeshGenerator::addReportingIDs(std::unique_ptr<MeshBase> & mes
         "id_name", "An element integer with the name '", element_id_name, "' already exists");
   }
 
-  std::vector<std::unique_ptr<ReplicatedMesh>> meshes;
-  meshes.reserve(_input_names.size());
-  for (MooseIndex(_input_names) i = 0; i < _input_names.size(); ++i)
-  {
-    std::unique_ptr<ReplicatedMesh> cell_mesh =
-        dynamic_pointer_cast<ReplicatedMesh>(*_mesh_ptrs[i]);
-    meshes.push_back(std::move(cell_mesh));
-  }
   // asssign reporting IDs to individual elements
   std::set<subdomain_id_type> background_block_ids;
   if (isParamValid("background_block_id"))
@@ -970,7 +964,7 @@ PatternedCartesianMeshGenerator::addReportingIDs(std::unique_ptr<MeshBase> & mes
                                                 _exclude_ids,
                                                 _pattern_boundary == "expanded",
                                                 background_block_ids,
-                                                meshes,
+                                                from_meshes,
                                                 _pattern,
                                                 _id_pattern);
 }
