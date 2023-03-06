@@ -1,0 +1,86 @@
+reset
+
+#All dimensions are sacaled up to avoid tolerance issues when dealing with small sizes at crack tip.
+#When the mesh is created, the model is scaled back down.
+#{factor = 1000}
+#{submodel_dim = 5*factor}
+#{crack_depth_major = 0.635*factor}
+#{crack_depth_minor = 0.254*factor}
+#{crack_thick = 0.001*factor}
+#{tip_region_size = crack_thick*2.5}
+#{crack_front_interval = 21}
+#{size_factor = 2}
+#{coarsesize1 = 0.1*factor*size_factor}
+#{coarsesize2 = 0.8*factor*size_factor}
+#{finesize1 = submodel_dim*size_factor/30}
+#{finesize2 = submodel_dim*size_factor/60}
+
+#{tilt_angle_minor = 0}
+#{tilt_angle_major = 0}
+
+create brick x {submodel_dim} y {submodel_dim} z {submodel_dim}
+volume 1 move {submodel_dim/2} {submodel_dim/2} {submodel_dim/2}
+
+create vertex 0 0 0
+create vertex 0 {-crack_depth_minor} 0
+create vertex {crack_depth_major} 0 0
+create curve 10 11 9 ellipse first angle 0 last angle 360
+delete vertex 9 10 11
+
+create vertex 0 0 0
+create vertex 0 {-3*crack_depth_minor} 0
+create vertex {3*crack_depth_major} 0 0
+create curve 13 14 12 ellipse first angle 0 last angle 360
+delete vertex 12 13 14
+
+imprint surface 2 with curve 13 14
+delete curve 13 14
+
+webcut volume all yplane offset {crack_depth_minor} imprint merge
+
+surface 13 17 size {coarsesize1} # Outside
+surface 8 size {0.5*coarsesize1} # Inside
+
+curve 17 size {finesize1} # Crack front line
+
+mesh surface 13 17
+mesh surface 8
+
+volume 1 2 size {coarsesize2}
+
+mesh surface 11 20
+
+#volume 1 scheme sweep source surface 11 12 14 target surface 15
+#volume 2 scheme sweep source surface 18 21 22 target surface 20
+
+mesh volume 1 2
+
+# refine curve 17
+
+## ---- sidesets and nodesets
+
+# crack front nodes
+nodeset 1001 curve 17
+
+sideset 1 surface 15 18
+sideset 2 surface 3
+sideset 3 surface 12 21
+
+sideset 4 surface 5
+sideset 5 surface 14 19
+
+sideset 6 surface 11 13 17 20
+sideset 7 surface 8
+
+nodeset 11 vertex 7
+nodeset 12 curve 4 10 31 38
+
+
+# Introduce another block for multi-material domain integral
+
+block 1 volume 1
+block 2 volume 2
+
+#volume all scale {1/1000} #this would give you units of m
+block all element type HEX8
+export mesh "//Users/marta3/projects3/moose/modules/tensor_mechanics/test/tests/j_integral_vtest/multiple_blocks_bimaterial.e" overwrite

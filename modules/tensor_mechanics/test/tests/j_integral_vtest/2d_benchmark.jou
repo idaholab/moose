@@ -1,0 +1,69 @@
+reset
+
+#All dimensions are scaled up to avoid tolerance issues when dealing with small sizes at crack tip.
+#When the mesh is created, the model is scaled back down.
+
+#{factor = 1000}
+#{submodel_dim = 5*factor}
+#{crack_depth_major = 0.635*factor}
+#{crack_depth = 0.4}
+
+#{tilt_angle_minor = 0}
+#{tilt_angle_major = 0}
+
+# create brick x {submodel_dim} y {submodel_dim} z {submodel_dim}
+# volume 1 move {submodel_dim/2} {submodel_dim/2} {submodel_dim/2}
+
+create vertex 0 0 0
+create vertex {-0.5 + crack_depth} 0 0
+create vertex {-0.1 - crack_depth} 0 0
+create vertex {-0.1 - crack_depth} 1 0
+create vertex 0.5 1 0
+create vertex 0.5 0 0
+
+create curve vertex 1, 2
+create curve vertex 2, 3
+create curve vertex 3, 4
+create curve vertex 4, 5
+create curve vertex 5, 6
+create curve vertex 6, 1
+
+create surface curve all
+
+block 1 surface 1
+sideset 1 curve 1
+sideset 2 curve 2
+sideset 3 curve 3
+sideset 4 curve 4
+sideset 5 curve 5
+sideset 6 curve 6
+
+nodeset 5001 curve 2
+nodeset 1001 vertex 2
+
+nodeset 10001 vertex 1
+nodeset 10005 vertex 6
+
+
+surface 1 interval 20
+mesh surface 1
+
+refine vertex 2
+
+# refine surface 1 numsplit 2
+# mesh volume 1 2
+
+# refine curve 30 42
+
+## ---- sidesets and nodesets
+
+# crack front nodes
+# nodeset 1001 curve 30 42
+# sideset 2 surface 16 19
+# nodeset 11 vertex 7
+# nodeset 12 curve 23 34 10
+
+
+# volume all scale {1/1000} #this would give you units of m
+block all element type QUAD4
+export mesh "2d_paulino.e" overwrite
