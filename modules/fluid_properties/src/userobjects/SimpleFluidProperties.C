@@ -325,7 +325,9 @@ SimpleFluidProperties::T_from_p_h(Real p, Real h) const
   // exponential dependence in rho and linear dependence in e makes it challenging
   auto lambda = [&](Real p, Real current_T, Real & new_rho, Real & dh_dp, Real & dh_dT)
   { h_from_p_T(p, current_T, new_rho, dh_dp, dh_dT); };
-  return FluidPropertiesUtils::NewtonSolve(p, h, T_initial, _tolerance, lambda).first;
+  return FluidPropertiesUtils::NewtonSolve(
+             p, h, T_initial, _tolerance, lambda, name() + "::T_from_p_h")
+      .first;
 }
 
 Real

@@ -20,7 +20,7 @@ isochoric heat capacity, this material should only be used for nearly-incompress
 
 ## Example Input File Syntax
 
-!listing modules/fluid_properties/test/tests/temperture_pressure_function/constant.i block=Modules
+!listing modules/fluid_properties/test/tests/temperature_pressure_function/constant.i block=FluidProperties
 
 !syntax parameters /FluidProperties/TemperaturePressureFunctionFluidProperties
 

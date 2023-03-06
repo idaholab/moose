@@ -63,8 +63,11 @@ TemperaturePressureFunctionFluidProperties::T_from_p_h(Real p, Real h) const
                .first;
   // check for nans
   if (std::isnan(T))
-    mooseError(
-        "Conversion from pressure (p = ", p, ") and enthalpy (h = ", h, ") failed to converge.");
+    mooseError("Conversion from pressure (p = ",
+               p,
+               ") and enthalpy (h = ",
+               h,
+               ") to temperature failed to converge.");
   return T;
 }
 
@@ -78,8 +81,11 @@ TemperaturePressureFunctionFluidProperties::T_from_p_rho(Real p, Real rho) const
                .first;
   // check for nans
   if (std::isnan(T))
-    mooseError(
-        "Conversion from pressure (p = ", p, ") and density (rho = ", rho, ") failed to converge.");
+    mooseError("Conversion from pressure (p = ",
+               p,
+               ") and density (rho = ",
+               rho,
+               ") to temperature failed to converge.");
   return T;
 }
 
@@ -134,7 +140,7 @@ TemperaturePressureFunctionFluidProperties::p_from_v_e(Real v, Real e) const
                v,
                ") and specific energy (e = ",
                e,
-               ") failed to converge.");
+               ") to pressure failed to converge.");
   return p;
 }
 

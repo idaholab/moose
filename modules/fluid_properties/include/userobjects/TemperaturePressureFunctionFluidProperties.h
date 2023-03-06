@@ -318,6 +318,7 @@ public:
   using SinglePhaseFluidProperties::cp_from_v_e;
   using SinglePhaseFluidProperties::cv_from_p_T;
   using SinglePhaseFluidProperties::cv_from_v_e;
+  using SinglePhaseFluidProperties::e_from_p_rho;
   using SinglePhaseFluidProperties::e_from_p_T;
   using SinglePhaseFluidProperties::h_from_p_T;
   using SinglePhaseFluidProperties::k_from_p_T;
@@ -326,6 +327,8 @@ public:
   using SinglePhaseFluidProperties::mu_from_v_e;
   using SinglePhaseFluidProperties::p_from_v_e;
   using SinglePhaseFluidProperties::rho_from_p_T;
+  using SinglePhaseFluidProperties::s_from_p_T;
+  using SinglePhaseFluidProperties::T_from_p_h;
   using SinglePhaseFluidProperties::T_from_v_e;
   using SinglePhaseFluidProperties::v_from_p_T;
 
