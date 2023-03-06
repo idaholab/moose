@@ -459,7 +459,17 @@ EigenExecutionerBase::printEigenvalue()
 }
 
 EigenExecutionerBase::Chebyshev_Parameters::Chebyshev_Parameters()
-  : n_iter(50), fsmooth(2), finit(6), lgac(0), icheb(0), flux_error_norm_old(1), icho(0)
+  : n_iter(50),
+    fsmooth(2),
+    finit(6),
+    lgac(0),
+    icheb(0),
+    iter_begin(0),
+    error_begin(0),
+    flux_error_norm_old(1),
+    ratio(0),
+    ratio_new(0),
+    icho(0)
 {
 }
 
