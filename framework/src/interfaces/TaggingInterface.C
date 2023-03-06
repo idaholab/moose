@@ -33,9 +33,10 @@ TaggingInterface::validParams()
   params.addParam<std::vector<TagName>>("extra_vector_tags",
                                         "The extra tags for the vectors this Kernel should fill");
 
-  params.addParam<std::vector<TagName>>("absolute_value_vector_tags",
-                                        "The tags for the vectors this Kernel should fill with the "
-                                        "absolute value of the residual contribution");
+  params.addParam<std::vector<TagName>>(
+      "absolute_value_vector_tags",
+      "The tags for the vectors this residual object should fill with the "
+      "absolute value of the residual contribution");
 
   params.addParam<std::vector<TagName>>("extra_matrix_tags",
                                         "The extra tags for the matrices this Kernel should fill");
@@ -115,7 +116,7 @@ TaggingInterface::TaggingInterface(const MooseObject * moose_object)
     _matrix_tags.insert(_subproblem.getMatrixTagID(matrix_tag_name));
 
   _re_blocks.resize(_vector_tags.size());
-  _absref_blocks.resize(_abs_vector_tags.size());
+  _absre_blocks.resize(_abs_vector_tags.size());
   _ke_blocks.resize(_matrix_tags.size());
 }
 
@@ -169,12 +170,12 @@ TaggingInterface::prepareVectorTag(Assembly & assembly, unsigned int ivar)
 
   _local_re.resize(_re_blocks[0]->size());
 
-  _absref_blocks.resize(_abs_vector_tags.size());
-  auto ref_vector_tag = _abs_vector_tags.begin();
-  for (MooseIndex(_abs_vector_tags) i = 0; i < _abs_vector_tags.size(); i++, ++ref_vector_tag)
+  _absre_blocks.resize(_abs_vector_tags.size());
+  vector_tag = _abs_vector_tags.begin();
+  for (MooseIndex(_abs_vector_tags) i = 0; i < _abs_vector_tags.size(); i++, ++vector_tag)
   {
-    const VectorTag & tag = _subproblem.getVectorTag(*ref_vector_tag);
-    _absref_blocks[i] = &assembly.residualBlock(ivar, tag._type_id);
+    const VectorTag & tag = _subproblem.getVectorTag(*vector_tag);
+    _absre_blocks[i] = &assembly.residualBlock(ivar, tag._type_id);
   }
 }
 
@@ -191,12 +192,12 @@ TaggingInterface::prepareVectorTagNeighbor(Assembly & assembly, unsigned int iva
   }
   _local_re.resize(_re_blocks[0]->size());
 
-  _absref_blocks.resize(_abs_vector_tags.size());
-  auto ref_vector_tag = _abs_vector_tags.begin();
-  for (MooseIndex(_abs_vector_tags) i = 0; i < _abs_vector_tags.size(); i++, ++ref_vector_tag)
+  _absre_blocks.resize(_abs_vector_tags.size());
+  vector_tag = _abs_vector_tags.begin();
+  for (MooseIndex(_abs_vector_tags) i = 0; i < _abs_vector_tags.size(); i++, ++vector_tag)
   {
-    const VectorTag & tag = _subproblem.getVectorTag(*ref_vector_tag);
-    _absref_blocks[i] = &assembly.residualBlockNeighbor(ivar, tag._type_id);
+    const VectorTag & tag = _subproblem.getVectorTag(*vector_tag);
+    _absre_blocks[i] = &assembly.residualBlockNeighbor(ivar, tag._type_id);
   }
 }
 
@@ -213,12 +214,12 @@ TaggingInterface::prepareVectorTagLower(Assembly & assembly, unsigned int ivar)
   }
   _local_re.resize(_re_blocks[0]->size());
 
-  _absref_blocks.resize(_abs_vector_tags.size());
-  auto ref_vector_tag = _abs_vector_tags.begin();
-  for (MooseIndex(_abs_vector_tags) i = 0; i < _abs_vector_tags.size(); i++, ++ref_vector_tag)
+  _absre_blocks.resize(_abs_vector_tags.size());
+  vector_tag = _abs_vector_tags.begin();
+  for (MooseIndex(_abs_vector_tags) i = 0; i < _abs_vector_tags.size(); i++, ++vector_tag)
   {
-    const VectorTag & tag = _subproblem.getVectorTag(*ref_vector_tag);
-    _absref_blocks[i] = &assembly.residualBlockLower(ivar, tag._type_id);
+    const VectorTag & tag = _subproblem.getVectorTag(*vector_tag);
+    _absre_blocks[i] = &assembly.residualBlockLower(ivar, tag._type_id);
   }
 }
 
@@ -269,9 +270,9 @@ TaggingInterface::accumulateTaggedLocalResidual()
 {
   for (auto & re : _re_blocks)
     *re += _local_re;
-  for (auto & ref : _absref_blocks)
+  for (auto & absre : _absre_blocks)
     for (const auto i : index_range(_local_re))
-      (*ref)(i) += std::abs(_local_re(i) + std::numeric_limits<Number>::min());
+      (*absre)(i) += std::abs(_local_re(i)) + std::numeric_limits<Number>::min();
 }
 
 void
@@ -279,9 +280,9 @@ TaggingInterface::assignTaggedLocalResidual()
 {
   for (auto & re : _re_blocks)
     *re = _local_re;
-  for (auto & ref : _absref_blocks)
+  for (auto & absre : _absre_blocks)
     for (const auto i : index_range(_local_re))
-      (*ref)(i) = std::abs(_local_re(i) + std::numeric_limits<Number>::min());
+      (*absre)(i) = std::abs(_local_re(i)) + std::numeric_limits<Number>::min();
 }
 
 void
