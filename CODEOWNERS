@@ -20,6 +20,7 @@
 /framework/include @lindsayad
 /framework/src @lindsayad
 /framework/*/base @roystgnr
+/framework/*/base/MeshGeneratorSystem* @loganharbour
 /framework/*/executioners/*Solve* @GiudGiud
 /framework/*/materials/Derivative* @dschwen
 /framework/*/materials/Material* @roystgnr
