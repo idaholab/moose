@@ -110,7 +110,7 @@ void
 ReportingIDGeneratorUtils::assignReportingIDs(
     std::unique_ptr<MeshBase> & mesh,
     const unsigned int extra_id_index,
-    const std::string assign_type,
+    const ReportingIDGeneratorUtils::AssignType assign_type,
     const bool use_exclude_id,
     const std::vector<bool> & exclude_ids,
     const bool has_assembly_boundary,
@@ -122,11 +122,11 @@ ReportingIDGeneratorUtils::assignReportingIDs(
   std::vector<dof_id_type> integer_ids;
   // get reporting ID map
   // assumes that the entire mesh has elements of each individual mesh sequentially ordered.
-  if (assign_type == "cell")
+  if (assign_type == AssignType::cell)
     integer_ids = getCellwiseIntegerIDs(input_meshes, pattern, use_exclude_id, exclude_ids);
-  else if (assign_type == "pattern")
+  else if (assign_type == AssignType::pattern)
     integer_ids = getPatternIntegerIDs(input_meshes, pattern);
-  else if (assign_type == "manual")
+  else if (assign_type == AssignType::manual)
     integer_ids = getManualIntegerIDs(input_meshes, pattern, id_pattern);
 
   if (has_assembly_boundary)

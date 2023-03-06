@@ -17,6 +17,19 @@
 namespace ReportingIDGeneratorUtils
 {
 /**
+ * Enum item for reporting id assign types.
+ */
+enum class AssignType
+{
+  /// assign unique IDs for each tile in the lattice in sequential order
+  cell,
+  /// assign the same reporting IDs for all tiles in the pattern with same input
+  pattern,
+  /// assign IDs based on user-defined mapping
+  manual
+};
+
+/**
  * assign IDs for each component in pattern in sequential order
  * @param meshes input meshes of the cartesian or hexagonal patterned mesh generator
  * @param pattern 2D vector of the mesh pattern
@@ -93,7 +106,7 @@ getDuckBlockIDs(const std::unique_ptr<MeshBase> & mesh,
  **/
 void assignReportingIDs(std::unique_ptr<MeshBase> & mesh,
                         const unsigned int extra_id_index,
-                        const std::string assign_type,
+                        const ReportingIDGeneratorUtils::AssignType assign_type,
                         const bool use_exclude_id,
                         const std::vector<bool> & exclude_ids,
                         const bool has_assembly_boundary,
