@@ -49,6 +49,11 @@ protected:
   /// Speed of sound (m/s)
   MaterialProperty<Real> & _c;
 
+  /// Whether to compute entropy
+  const bool _compute_s;
+  /// Whether to compute the speed of sound
+  const bool _compute_c;
+
   /// Fluid properties UserObject
   const SinglePhaseFluidProperties & _fp;
 };
