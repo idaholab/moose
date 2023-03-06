@@ -12,6 +12,8 @@
 [AuxVariables]
   [temperature]
   []
+  [pressure]
+  []
 []
 
 [ICs]
@@ -20,59 +22,66 @@
     variable = temperature
     function = '400 + 200 * t'
   []
+  [pressure_aux]
+    type = FunctionIC
+    variable = pressure
+    function = '1e5 + 20000 * t'
+  []
 []
 
 [Functions]
   [k]
     type = ParsedFunction
-    vars = 'T'
-    vals = 'temperature'
-    value = '124.67 - 0.11381 * T + 5.5226e-5 * T^2 - 1.1842e-8 * T^3'
+    symbol_names = 'T p'
+    symbol_values = 'temperature pressure'
+    expression = '14 + 1e-2 * T + 1e-5 * p'
   []
   [h]
     type = ParsedFunction
-    vars = 'T'
-    vals = 'temperature'
-    value = '1.0e3 * (-365.77 + 1.6582 * T - 4.2395e-4 * T^2 + 1.4847e-7 * T^3 + 2992.6 / T)'
+    symbol_names = 'T p'
+    symbol_values = 'temperature pressure'
+    expression = '2e3 + T - 1e-3 * p'
   []
   [cp]
     type = ParsedFunction
-    vars = 'T'
-    vals = 'temperature'
-    value = '1.0e3 * (1.6582 - 8.4790e-4 * T + 4.4541e-7 * T^2 - 2992.6 / T^2)'
+    symbol_names = 'T p'
+    symbol_values = 'temperature pressure'
+    expression = '(2e3 + 1.2 * T - 1e-3 * p) / 200'
   []
   [rho]
     type = ParsedFunction
-    vars = 'T'
-    vals = 'temperature'
-    value = '219.0 + 275.32 * (1.0 - T / 2503.7) + 511.58 * (1.0 - T / 2503.7)^(0.5)'
+    symbol_names = 'T p'
+    symbol_values = 'temperature pressure'
+    expression = '1.5e3 + 1.3 * T - 15e-4 * p'
   []
-  [drho_dT]
+  [mu]
     type = ParsedFunction
-    vars = 'T'
-    vals = 'temperature'
-    value = '-(2.0 * 275.32 + 511.58 / (1.0 - T / 2503.7)^(0.5)) / 2.0 / 2503.7'
-  []
-  [drho_dh]
-    type = ParsedFunction
-    vars = 'drho_dT_exact cp_exact'
-    vals = 'drho_dT_exact cp_exact'
-    value = 'drho_dT_exact/cp_exact'
+    symbol_names = 'T p'
+    symbol_values = 'temperature pressure'
+    expression = '1e-3 + 2e-6 * T - 3e-9 * p'
   []
 []
 
-[Modules/FluidProperties/TemperaturePressureFunctionFluidProperties]
-  type = TemperaturePressureFunctionFluidProperties
+[FluidProperties]
+  [fp]
+    type = TemperaturePressureFunctionFluidProperties
+    cv = 4000
+    k = k
+    rho = rho
+    mu = mu
+  []
 []
 
 [Materials]
-  [fp_mat]
-    type = TemperaturePressureFunctionFluidProperties
+  [to_vars]
+    type = FluidPropertiesMaterialPT
+    fp = fp
+    outputs = 'all'
+    # output_properties = 'density'
+    pressure = pressure
     temperature = temperature
-    outputs = all
   []
 []
-
 
 [Executioner]
   type = Transient
@@ -84,6 +93,11 @@
   [temperature]
     type = ElementAverageValue
     variable = temperature
+    outputs = none
+  []
+  [pressure]
+    type = ElementAverageValue
+    variable = pressure
     outputs = none
   []
   [k_exact]
@@ -106,92 +120,53 @@
     function = rho
     outputs = none
   []
-  [drho_dT_exact]
-    type = FunctionValuePostprocessor
-    function = drho_dT
-    outputs = none
-  []
-  [drho_dh_exact]
-    type = FunctionValuePostprocessor
-    function = drho_dh
-    outputs = none
-  []
 
   # Postprocessors to get from the fluid property object
-  [k_avg]
-    type = ElementAverageValue
-    variable = k
-    outputs = none
-  []
-  [h_avg]
-    type = ElementAverageValue
-    variable = h
-    outputs = none
-  []
-  [cp_avg]
-    type = ElementAverageValue
-    variable = cp
-    outputs = none
-  []
-  [t_from_h_avg]
-    type = ElementAverageValue
-    variable = temperature
-    outputs = none
-  []
-  [rho_avg]
-    type = ElementAverageValue
-    variable = rho
-    outputs = none
-  []
-  [drho_dT_avg]
-    type = ElementAverageValue
-    variable = drho_dT
-    outputs = none
-  []
-  [drho_dh_avg]
-    type = ElementAverageValue
-    variable = drho_dh
-    outputs = none
-  []
+  # [k_avg]
+  #   type = ElementAverageValue
+  #   variable = k
+  #   outputs = none
+  # []
+  # [h_avg]
+  #   type = ElementAverageValue
+  #   variable = h
+  #   outputs = none
+  # []
+  # [cp_avg]
+  #   type = ElementAverageValue
+  #   variable = cp
+  #   outputs = none
+  # []
+  # [rho_avg]
+  #   type = ElementAverageValue
+  #   variable = density
+  #   outputs = none
+  # []
 
   # Postprocessors to compare the two
-  [k_diff]
-    type = DifferencePostprocessor
-    value1 = k_exact
-    value2 = k_avg
-  []
-  [h_diff]
-    type = DifferencePostprocessor
-    value1 = h_exact
-    value2 = h_avg
-  []
-  [cp_diff]
-    type = DifferencePostprocessor
-    value1 = cp_exact
-    value2 = cp_avg
-  []
-  [t_from_h_diff]
-    type = DifferencePostprocessor
-    value1 = temperature
-    value2 = t_from_h_avg
-  []
-  [rho_avg_diff]
-    type = DifferencePostprocessor
-    value1 = rho_exact
-    value2 = rho_avg
-  []
-  [drho_dT_avg_diff]
-    type = DifferencePostprocessor
-    value1 = drho_dT_exact
-    value2 = drho_dT_avg
-  []
-  [drho_dh_avg_diff]
-    type = DifferencePostprocessor
-    value1 = drho_dh_exact
-    value2 = drho_dh_avg
-  []
+  # [k_diff]
+  #   type = DifferencePostprocessor
+  #   value1 = k_exact
+  #   value2 = k_avg
+  # []
+  # [h_diff]
+  #   type = DifferencePostprocessor
+  #   value1 = h_exact
+  #   value2 = h_avg
+  # []
+  # [cp_diff]
+  #   type = DifferencePostprocessor
+  #   value1 = cp_exact
+  #   value2 = cp_avg
+  # []
+  # [rho_avg_diff]
+  #   type = DifferencePostprocessor
+  #   value1 = rho_exact
+  #   value2 = rho_avg
+  # []
 []
 
 [Outputs]
   csv = true
+  # exodus = true
 []
