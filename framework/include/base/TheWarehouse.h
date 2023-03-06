@@ -492,7 +492,8 @@ public:
     {
       auto obj = objs[i];
       mooseAssert(dynamic_cast<T *>(obj),
-                  "queried object has incompatible c++ type for object named " + obj->name());
+                  "queried object has incompatible c++ type" +
+                      (obj ? (" for object named " + obj->name()) : ""));
       if (show_all || obj->enabled())
         results.push_back(dynamic_cast<T *>(obj));
     }
