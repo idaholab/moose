@@ -88,7 +88,7 @@ protected:
   declareRestartableDataWithContext(const std::string & data_name, void * context, Args &&... args);
 
   /**
-   * Declare a piece of data as "restartable" and initialize it.
+   * Declare a piece of data as "recoverable" and initialize it.
    * This means that in the event of a restart this piece of data
    * will be restored back to its previous value.
    *

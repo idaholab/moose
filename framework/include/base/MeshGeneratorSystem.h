@@ -79,6 +79,17 @@ public:
    * Creates (constructs) all of the MeshGenerators that have been
    * declared using addMeshGenerator().
    *
+   * This parses the input parameters of type <MeshGenerator> and
+   * std::vector<MeshGeneratorName> to build the execution tree for
+   * the generators, and constructs them in dependnecy order
+   *
+   * Sub generators are also generated within this phase, although the
+   * dependency resolution described above is only for the dependencies
+   * that we can parse using InputParamters. However, we require that
+   * sub generators be constructed within _their_ dependency order
+   * (except for the last one, which may be coupled to via the generator
+   * creating said sub generator).
+   *
    * Should only be called by the CreateAddedMeshGenerator action during
    * the create_added_mesh_generators task.
    */
@@ -137,7 +148,8 @@ private:
                                     const bool allow_empty = false) const;
 
   /**
-   * Order all of the _mesh_generators into _ordered_mesh_generators
+   * Order all of the _mesh_generators into _ordered_mesh_generators for later
+   * execution in executeMeshGenerators
    */
   void createMeshGeneratorOrder();
 

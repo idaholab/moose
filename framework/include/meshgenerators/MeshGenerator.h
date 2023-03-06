@@ -288,7 +288,7 @@ protected:
   addMeshSubgenerator(const std::string & type, const std::string & name, InputParameters params);
 
   /**
-   * Registeres the name \p name as a "null" mesh, which is a MeshGenerator used in
+   * Registers the name \p name as a "null" mesh, which is a MeshGenerator used in
    * InputParameters that will not represent an input mesh when requested via getMesh.
    *
    * An example use case for this is when you as a developer want users to represent a hole
