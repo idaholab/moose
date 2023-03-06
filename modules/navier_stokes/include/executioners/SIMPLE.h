@@ -54,4 +54,12 @@ private:
   bool _last_solve_converged;
   const std::string _momentum_tag_name;
   const TagID _momentum_tag_id;
+
+  const Real _momentum_variable_relaxation;
+  const Real _pressure_variable_relaxation;
+
+  const Real _momentum_absolute_tolerance;
+  const Real _pressure_absolute_tolerance;
+
+  const unsigned int _num_iterations;
 };

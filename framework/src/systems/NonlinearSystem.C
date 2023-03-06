@@ -204,9 +204,7 @@ NonlinearSystem::solve()
   }
   else
   {
-    _nl_implicit_sys.rhs->print();
     system().solve();
-    _nl_implicit_sys.matrix->print();
 
     _n_iters = _nl_implicit_sys.n_nonlinear_iterations();
     _n_linear_iters = solver.get_total_linear_iterations();

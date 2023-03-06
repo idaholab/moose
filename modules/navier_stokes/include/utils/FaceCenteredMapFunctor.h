@@ -43,6 +43,8 @@ public:
 
   bool hasBlocks(SubdomainID sub_id) const override;
 
+  ValueType evaluate(const FaceInfo * const fi) const;
+
 private:
   /// The mesh that this functor lives on
   const MooseMesh & _mesh;

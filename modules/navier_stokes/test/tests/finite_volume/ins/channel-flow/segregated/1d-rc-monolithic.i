@@ -3,15 +3,13 @@ rho = 1.0
 advected_interp_method = 'average'
 velocity_interp_method = 'rc'
 
-momentum_tag = "non_pressure"
-
 [Mesh]
   [mesh]
     type = CartesianMeshGenerator
     dim = 1
-    dx = '0.4 0.4 0.4 0.4 0.4'
-    ix = '2 2 2 2 2'
-    subdomain_id = '1 1 1 1 1'
+    dx = '1 1'
+    ix = '2 2'
+    subdomain_id = '1 1'
   []
 []
 
@@ -20,12 +18,11 @@ momentum_tag = "non_pressure"
 []
 
 [Problem]
-  nl_sys_names = 'momentum_system pressure_system'
 []
 
 [UserObjects]
   [rc]
-    type = INSFVRhieChowInterpolatorSegregated
+    type = INSFVRhieChowInterpolator
     u = u
     pressure = pressure
   []
@@ -35,11 +32,9 @@ momentum_tag = "non_pressure"
   [u]
     type = INSFVVelocityVariable
     initial_condition = 0.5
-    nl_sys = momentum_system
   []
   [pressure]
     type = INSFVPressureVariable
-    nl_sys = pressure_system
     initial_condition = 0.2
   []
 []
@@ -52,15 +47,12 @@ momentum_tag = "non_pressure"
     velocity_interp_method = ${velocity_interp_method}
     rho = ${rho}
     momentum_component = 'x'
-    linearize = true
-    extra_vector_tags = ${momentum_tag}
   []
   [u_viscosity]
     type = INSFVMomentumDiffusion
     variable = u
     mu = ${mu}
     momentum_component = 'x'
-    extra_vector_tags = ${momentum_tag}
   []
   [u_pressure]
     type = INSFVMomentumPressure
@@ -68,17 +60,12 @@ momentum_tag = "non_pressure"
     momentum_component = 'x'
     pressure = pressure
   []
-  [p_diffusion]
-    type = FVAnisotropicDiffusion
+  [mass]
+    type = INSFVMassAdvection
     variable = pressure
-    coeff = "Ainv"
-    coeff_interp_method = 'average'
-  []
-  [p_source]
-    type = FVDivergence
-    variable = pressure
-    vector_field = "HbyA"
-    force_boundary_execution = true
+    advected_interp_method = ${advected_interp_method}
+    velocity_interp_method = ${velocity_interp_method}
+    rho = ${rho}
   []
 []
 
@@ -98,39 +85,15 @@ momentum_tag = "non_pressure"
 []
 
 [Executioner]
-  type = SIMPLE
+  type = Steady
   solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type -pc_factor_shift_type -snes_linesearch_damping'
-  petsc_options_value = 'lu NONZERO 0.7'
-  nl_max_its = 1
+  petsc_options_iname = '-pc_type -pc_factor_shift_type'
+  petsc_options_value = 'lu NONZERO'
   line_search = 'none'
-  rhie_chow_user_object = 'rc'
-  momentum_system = 'momentum_system'
-  pressure_system = 'pressure_system'
-  momentum_tag = ${momentum_tag}
-  momentum_variable_relaxation = 0.7
-  pressure_variable_relaxation = 0.4
-  num_iterations = 10
-
-[]
-
-[Postprocessors]
-  [inlet_p]
-    type = SideAverageValue
-    variable = 'pressure'
-    boundary = 'left'
-  []
-  [outlet-u]
-    type = SideIntegralVariablePostprocessor
-    variable = u
-    boundary = 'right'
-  []
 []
 
 [Outputs]
   exodus = true
   csv = true
   perf_graph = false
-  print_nonlinear_residuals = false
-  print_linear_residuals = false
 []

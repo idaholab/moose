@@ -74,7 +74,9 @@ INSFVRhieChowInterpolatorSegregated::INSFVRhieChowInterpolatorSegregated(
         },
         std::set<ExecFlagType>({EXEC_ALWAYS}),
         _moose_mesh,
-        blockIDs()))
+        blockIDs())),
+    _face_velocity(_moose_mesh, _sub_ids, "face_values")
+
 {
   // Register the elemental functors which will be queried in the pressure equation
   for (const auto tid : make_range(libMesh::n_threads()))
@@ -97,6 +99,7 @@ INSFVRhieChowInterpolatorSegregated::meshChanged()
 {
   _HbyA.clear();
   _Ainv.clear();
+  _face_velocity.clear();
 }
 
 void
@@ -107,6 +110,36 @@ INSFVRhieChowInterpolatorSegregated::initialize()
 
   for (const auto & pair : _Ainv)
     _Ainv[pair.first] = 0;
+}
+
+void
+INSFVRhieChowInterpolatorSegregated::initFaceVelocities()
+{
+  for (auto & fi : _fe_problem.mesh().faceInfo())
+  {
+    if (_u->isInternalFace(*fi))
+    {
+      const Moose::FaceArg face{
+          fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr};
+
+      _face_velocity[fi->id()] = raw_value((*_vel)(face));
+      // _console << "Computing initial face velocity " << fi->id() <<
+      // raw_value(_face_velocity(face))
+      //          << std::endl;
+    }
+    else if (Moose::FV::onBoundary(*_u, *fi))
+    {
+      const Elem * const boundary_elem =
+          hasBlocks(fi->elemPtr()->subdomain_id()) ? fi->elemPtr() : fi->neighborPtr();
+
+      const Moose::FaceArg boundary_face{
+          fi, Moose::FV::LimiterType::CentralDifference, true, false, boundary_elem};
+
+      _face_velocity[fi->id()] = raw_value((*_vel)(boundary_face));
+      // _console << "Computing initial face velocity " << fi->id()
+      //          << raw_value(_face_velocity(boundary_face)) << std::endl;
+    }
+  }
 }
 
 void
@@ -121,23 +154,72 @@ INSFVRhieChowInterpolatorSegregated::getVelocity(const FaceInfo & fi,
                                                  THREAD_ID /*tid*/,
                                                  Moose::FV::InterpMethod /*m*/) const
 {
-  if (Moose::FV::onBoundary(*this, fi))
+  // // const bool correct_skewness =
+  // //     (_u->faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
+
+  // // if (Moose::FV::onBoundary(*this, fi))
+  // // {
+  // //   const Elem * const boundary_elem =
+  // //       hasBlocks(fi.elemPtr()->subdomain_id()) ? fi.elemPtr() : fi.neighborPtr();
+
+  // //   const Moose::FaceArg boundary_face{
+  // //       &fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, boundary_elem};
+
+  // //   _console << "returning: " << (*_vel)(boundary_face)(0) << std::endl;
+  // //   return (*_vel)(boundary_face);
+  // // }
+
+  // _console << "returning: " << raw_value(_face_velocity.evaluate(&fi)) << std::endl;
+  return _face_velocity.evaluate(&fi);
+}
+
+void
+INSFVRhieChowInterpolatorSegregated::computeVelocity()
+{
+  for (auto & fi : _fe_problem.mesh().faceInfo())
   {
-    const Elem * const boundary_elem =
-        hasBlocks(fi.elemPtr()->subdomain_id()) ? fi.elemPtr() : fi.neighborPtr();
+    if (_u->isInternalFace(*fi))
+    {
+      const Moose::FaceArg face{
+          fi, Moose::FV::LimiterType::CentralDifference, true, false, nullptr};
 
-    const bool correct_skewness =
-        (_u->faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage);
+      RealVectorValue Ainv = raw_value(_Ainv(face));
+      RealVectorValue HbyA = raw_value(_HbyA(face));
+      RealVectorValue grad_p = raw_value(_p->gradient(face));
+      for (const auto comp_index : make_range(_dim))
+      {
+        _face_velocity[fi->id()](comp_index) =
+            -HbyA(comp_index) - Ainv(comp_index) * grad_p(comp_index);
+      }
+      // _console << "ID " << fi->id() << raw_value(_face_velocity(face)) << std::endl;
+    }
+    else if (Moose::FV::onBoundary(*_u, *fi))
+    {
+      const Elem * const boundary_elem =
+          hasBlocks(fi->elemPtr()->subdomain_id()) ? fi->elemPtr() : fi->neighborPtr();
 
-    const Moose::FaceArg boundary_face{
-        &fi, Moose::FV::LimiterType::CentralDifference, true, correct_skewness, boundary_elem};
+      const Moose::FaceArg boundary_face{
+          fi, Moose::FV::LimiterType::CentralDifference, true, false, boundary_elem};
 
-    _console << "returning: " << (*_vel)(boundary_face)(0) << std::endl;
-    return (*_vel)(boundary_face);
+      if (_u->isDirichletBoundaryFace(*fi, boundary_elem))
+      {
+        _face_velocity[fi->id()] = raw_value((*_vel)(boundary_face));
+        // _console << "ID " << fi->id() << raw_value(_face_velocity(boundary_face)) << std::endl;
+      }
+      else
+      {
+        RealVectorValue Ainv = raw_value(_Ainv(boundary_face));
+        RealVectorValue HbyA = raw_value(_HbyA(boundary_face));
+        RealVectorValue grad_p = raw_value(_p->gradient(boundary_face));
+        for (const auto comp_index : make_range(_dim))
+        {
+          _face_velocity[fi->id()](comp_index) =
+              -HbyA(comp_index) - Ainv(comp_index) * grad_p(comp_index);
+        }
+        // _console << "ID " << fi->id() << raw_value(_face_velocity(boundary_face)) << std::endl;
+      }
+    }
   }
-
-  _console << "returning: " << ADRealVectorValue(0.5)(0) << std::endl;
-  return ADRealVectorValue(0.5);
 }
 
 void
@@ -154,6 +236,7 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA()
 
   std::unique_ptr<NumericVector<Number>> Ainv = solution->zero_clone();
   std::unique_ptr<NumericVector<Number>> HbyA = solution->zero_clone();
+  std::unique_ptr<NumericVector<Number>> dummy = solution->zero_clone();
   std::unique_ptr<NumericVector<Number>> working_vector = solution->zero_clone();
 
   // Wpuld be cool to add asserts here
@@ -169,11 +252,24 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA()
   // We compute the right hand side with a zero vector for starters. This is the right
   // hand side of the linearized system and will be the basis of the HbyA vector.
   _fe_problem.computeResidualTag(*working_vector.get(), *HbyA.get(), _momentum_tag);
+  _fe_problem.computeResidualTag(*working_vector.get(), *dummy.get(), 0);
+  _momentum_sys->associateVectorToTag(
+      momentum_system.system().get_vector(_fe_problem.vectorTagName(0)), 0);
 
+  _momentum_sys->associateVectorToTag(
+      momentum_system.system().get_vector(_fe_problem.vectorTagName(_momentum_tag)), _momentum_tag);
+
+  _momentum_sys->setSolution(*(_momentum_sys->currentSolution()));
+
+  std::cout << "total RHS" << std::endl;
+  dummy->print();
+
+  std::cout << "H RHS" << std::endl;
   HbyA->print();
 
   _momentum_sys->setSolution(*solution);
 
+  std::cout << "Velocity solution" << std::endl;
   solution->print();
 
   // if (pmat->closed())
@@ -207,27 +303,32 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA()
   // Libmesh version
   // **************************************************************************
 
+  std::cout << "Matrix" << std::endl;
   pmat->print();
   pmat->get_diagonal(*Ainv_petsc);
 
+  std::cout << "A" << std::endl;
   Ainv_petsc->print();
   MatDiagonalSet(pmat->mat(), working_vector_petsc->vec(), INSERT_VALUES);
 
+  std::cout << "H" << std::endl;
   pmat->print();
 
   pmat->vector_mult(*working_vector_petsc, *solution);
 
+  std::cout << " H(u)" << std::endl;
   working_vector_petsc->print();
-  HbyA_petsc->print();
 
   HbyA_petsc->add(*working_vector_petsc);
 
+  std::cout << " H(u)-rhs" << std::endl;
   HbyA_petsc->print();
 
   *working_vector_petsc = 1.0;
   VecPointwiseDivide(Ainv_petsc->vec(), working_vector_petsc->vec(), Ainv_petsc->vec());
   HbyA_petsc->pointwise_mult(*HbyA_petsc, *Ainv_petsc);
 
+  std::cout << " (H(u)-rhs)/A" << std::endl;
   HbyA_petsc->print();
 
   // **************************************************************************
@@ -237,16 +338,20 @@ INSFVRhieChowInterpolatorSegregated::computeHbyA()
   auto begin = _mesh.active_local_elements_begin();
   auto end = _mesh.active_local_elements_end();
 
-  for (const auto comp_index : make_range(_dim))
-  {
-    const auto var_num = momentum_system.variable_number(_u->name());
+  const auto var_num = momentum_system.variable_number(_u->name());
 
-    for (auto it = begin; it != end; ++it)
+  for (auto it = begin; it != end; ++it)
+  {
+    const Elem * elem = *it;
+    if (this->hasBlocks(elem->subdomain_id()))
     {
-      const Elem * elem = *it;
-      const auto dof_index = elem->dof_number(momentum_system.number(), var_num, 0);
-      _HbyA[elem->id()](comp_index) = (*HbyA)(dof_index);
-      _Ainv[elem->id()](comp_index) = (*Ainv)(dof_index);
+      for (const auto comp_index : make_range(_dim))
+      {
+        const Real volume = _moose_mesh.elemInfo(elem->id()).volume();
+        const auto dof_index = elem->dof_number(momentum_system.number(), var_num, 0);
+        _HbyA[elem->id()](comp_index) = (*HbyA)(dof_index); // / volume;
+        _Ainv[elem->id()](comp_index) = (*Ainv)(dof_index); // / volume;
+      }
     }
   }
 

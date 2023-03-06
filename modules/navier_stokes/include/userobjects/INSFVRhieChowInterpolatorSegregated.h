@@ -11,6 +11,7 @@
 
 #include "RhieChowInterpolatorBase.h"
 #include "CellCenteredMapFunctor.h"
+#include "FaceCenteredMapFunctor.h"
 #include "VectorComponentFunctor.h"
 #include <unordered_map>
 #include <set>
@@ -38,6 +39,10 @@ public:
                                   const Moose::StateArg & time,
                                   THREAD_ID tid,
                                   Moose::FV::InterpMethod m) const override;
+
+  void initFaceVelocities();
+
+  void computeVelocity();
 
   void addToA(const libMesh::Elem * /*elem*/,
               unsigned int /*component*/,
@@ -81,6 +86,9 @@ protected:
 
   /// A functor for computing the (non-RC corrected) velocity
   std::unique_ptr<PiecewiseByBlockLambdaFunctor<ADRealVectorValue>> _vel;
+
+  FaceCenteredMapFunctor<ADRealVectorValue, std::unordered_map<dof_id_type, RealVectorValue>>
+      _face_velocity;
 
   /// Reference to the nonlinear system corresponding to the momentum equation
   NonlinearSystemBase * _momentum_sys;
