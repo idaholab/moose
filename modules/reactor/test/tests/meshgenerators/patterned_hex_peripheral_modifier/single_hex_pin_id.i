@@ -14,7 +14,7 @@
     preserve_volumes = on
   []
   [pattern]
-    type = HexIDPatternedMeshGenerator
+    type = PatternedHexMeshGenerator
     inputs = 'hex'
     pattern = '0 0;
               0 0 0;

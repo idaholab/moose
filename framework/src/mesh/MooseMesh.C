@@ -147,6 +147,12 @@ MooseMesh::validParams()
                         true,
                         "True to skip uniform refinements when using a pre-split mesh.");
 
+  params.addParam<std::vector<SubdomainID>>(
+      "add_subdomain_ids",
+      "The listed subdomains will be assumed valid for the mesh. This permits setting up subdomain "
+      "restrictions for subdomains initially containing no elements, which can occur, for example, "
+      "in additive manufacturing simulations which dynamically add and remove elements.");
+
   params += MooseAppCoordTransform::validParams();
 
   // This indicates that the derived mesh type accepts a MeshGenerator, and should be set to true in
@@ -355,6 +361,13 @@ MooseMesh::prepare(bool)
   _mesh_subdomains.clear();
   for (const auto & elem : getMesh().element_ptr_range())
     _mesh_subdomains.insert(elem->subdomain_id());
+
+  // add explicitly requested subdomains
+  if (isParamValid("add_subdomain_ids"))
+  {
+    const auto add_subdomain_id = getParam<std::vector<SubdomainID>>("add_subdomain_ids");
+    _mesh_subdomains.insert(add_subdomain_id.begin(), add_subdomain_id.end());
+  }
 
   // Make sure nodesets have been generated
   buildNodeListFromSideList();

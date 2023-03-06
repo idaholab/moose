@@ -9,6 +9,7 @@
 
 #pragma once
 #include "PolygonMeshGeneratorBase.h"
+#include "ReportingIDGeneratorUtils.h"
 #include "MooseEnum.h"
 #include "MeshMetaDataInterface.h"
 
@@ -76,6 +77,16 @@ protected:
   std::vector<subdomain_id_type> _peripheral_block_ids;
   /// Subdomain Names of the peripheral regions
   std::vector<SubdomainName> _peripheral_block_names;
+  /// Whether reporting ID is added to mesh
+  const bool _use_reporting_id;
+  /// reporting ID assignment type
+  const ReportingIDGeneratorUtils::AssignType _assign_type;
+  /// flag to indicate if exclude_id is defined
+  const bool _use_exclude_id;
+  /// vector indicating which ids in the pattern to exclude (true at pattern positions to exclude)
+  std::vector<bool> _exclude_ids;
+  /// hold reporting ID for each input pattern cell
+  std::vector<std::vector<dof_id_type>> _id_pattern;
 
   /**
    * Adds background and duct region mesh to stitched hexagon meshes. Note that the function works
@@ -117,4 +128,9 @@ protected:
                      const Real extra_dist_out,
                      const Real pitch,
                      const unsigned int radial_index) const;
+  /**
+   * Adds the reporting IDs onto the input mesh.
+   * @param  mesh input mesh to add the reporting IDs onto
+   */
+  void addReportingIDs(std::unique_ptr<MeshBase> & mesh) const;
 };

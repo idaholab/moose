@@ -1,6 +1,6 @@
 [Tests]
-  design = 'meshgenerators/CartesianIDPatternedMeshGenerator.md'
-  issues = '#19217'
+  design = 'meshgenerators/CartesianIDPatternedMeshGenerator.md meshgenerators/PatternedCartesianMeshGenerator.md'
+  issues = '#19217 #23224'
   [assembly]
     requirement = 'The system shall support the generation of reporting IDs for Cartesian assemblies assigned'
     [cell]
@@ -42,6 +42,41 @@
       input = 'core_zigzag_reporting_id.i'
       exodiff = 'core_zigzag_reporting_id_out.e'
       detail = 'with zagged core boundary formed by removal of certain assemblies on periphery'
+      recover = false
+    []
+  []
+
+  [PatternedCartesianMeshGenerator]
+    requirement = 'The system shall support the generation of reporting IDs '
+    [assembly_cell]
+      type = 'Exodiff'
+      input = 'patterned_cartesian_assembly_reporting_id.i'
+      exodiff = 'patterned_cartesian_assembly_reporting_id_cell_out.e'
+      detail = 'for Cartesian assemblies assigned in sequential order for each components in the lattice'
+      cli_args = "Outputs/file_base='patterned_cartesian_assembly_reporting_id_cell_out'"
+      recover = false
+    []
+    [assembly_pattern]
+      type = 'Exodiff'
+      input = 'patterned_cartesian_assembly_reporting_id.i'
+      exodiff = 'patterned_cartesian_assembly_reporting_id_pattern_out.e'
+      detail = 'for Cartesian assemblies assigned based on the ID of the input pattern tiles'
+      cli_args = "Mesh/assembly/assign_type='pattern' Outputs/file_base='patterned_cartesian_assembly_reporting_id_pattern_out'"
+      recover = false
+    []
+    [assembly_manual]
+      type = 'Exodiff'
+      input = 'patterned_cartesian_assembly_reporting_id.i'
+      exodiff = 'patterned_cartesian_assembly_reporting_id_manual_out.e'
+      detail = 'for Cartesian assemblies assigned based on user-defined mapping'
+      cli_args = "Mesh/assembly/assign_type='manual' Mesh/assembly/id_pattern='0 0 1 1;0 0 1 1;2 2 3 3;2 2 3 3' Outputs/file_base='patterned_cartesian_assembly_reporting_id_manual_out'"
+      recover = false
+    []
+    [core]
+      type = 'Exodiff'
+      input = 'patterned_cartesian_core_reporting_id.i'
+      exodiff = 'patterned_cartesian_core_reporting_id_out.e'
+      detail = 'for Cartesian cores with regular square core boundary'
       recover = false
     []
   []
