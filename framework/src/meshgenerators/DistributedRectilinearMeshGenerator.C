@@ -1078,7 +1078,7 @@ DistributedRectilinearMeshGenerator::buildCube(UnstructuredMesh & mesh,
   num_local_elems = 0;
   for (dof_id_type e_id = local_elems_begin; e_id < local_elems_end; e_id++)
   {
-    dof_id_type i, j, k = 0;
+    dof_id_type i = 0, j = 0, k = 0;
 
     getIndices<T>(nx, ny, e_id, i, j, k);
 
