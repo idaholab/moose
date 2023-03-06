@@ -22,7 +22,7 @@
 
 PenetrationInfo::PenetrationInfo(const Node * node,
                                  const Elem * elem,
-                                 const Elem * side,
+                                 std::unique_ptr<const Elem> side,
                                  unsigned int side_num,
                                  RealVectorValue norm,
                                  Real norm_distance,
@@ -38,7 +38,7 @@ PenetrationInfo::PenetrationInfo(const Node * node,
                                  const std::vector<RealGradient> & d2xyzdxideta)
   : _node(node),
     _elem(elem),
-    _side(side),
+    _side(std::move(side)),
     _side_num(side_num),
     _normal(norm),
     _distance(norm_distance),
@@ -118,7 +118,6 @@ PenetrationInfo::PenetrationInfo(const PenetrationInfo & p)
 PenetrationInfo::PenetrationInfo()
   : _node(NULL),
     _elem(NULL),
-    _side(NULL),
     _side_num(0),
     _normal(0),
     _distance(0),
@@ -152,8 +151,6 @@ PenetrationInfo::PenetrationInfo()
     _slip_tol(0)
 {
 }
-
-PenetrationInfo::~PenetrationInfo() { delete _side; }
 
 template <>
 void
@@ -226,7 +223,7 @@ dataLoad(std::istream & stream, PenetrationInfo *& pinfo, void * context)
     loadHelper(stream, pinfo->_elem, context);
     loadHelper(stream, pinfo->_side_num, context);
     // Rebuild the side element.
-    pinfo->_side = pinfo->_elem->build_side_ptr(pinfo->_side_num, false).release();
+    pinfo->_side = pinfo->_elem->build_side_ptr(pinfo->_side_num);
 
     loadHelper(stream, pinfo->_normal, context);
     loadHelper(stream, pinfo->_distance, context);

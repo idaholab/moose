@@ -820,7 +820,7 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
 
                 // indices for primary element
                 evindices.clear();
-                const Elem * primary_side = pinfo->_side;
+                const Elem * primary_side = pinfo->_side.get();
                 dofmap.dof_indices(primary_side, evindices, v);
                 process_elem_dof_indices(
                     evindices, indices_to_insert_to, &nonlocal_indices_to_insert_to);

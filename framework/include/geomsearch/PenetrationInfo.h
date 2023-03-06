@@ -31,7 +31,7 @@ class PenetrationInfo
 public:
   PenetrationInfo(const Node * node,
                   const Elem * elem,
-                  const Elem * side,
+                  std::unique_ptr<const Elem> side,
                   unsigned int side_num,
                   RealVectorValue norm,
                   Real norm_distance,
@@ -50,8 +50,6 @@ public:
   //  PenetrationInfo(const PenetrationInfo & p);
 
   PenetrationInfo();
-
-  ~PenetrationInfo();
 
   enum MECH_STATUS_ENUM
   {
@@ -72,7 +70,7 @@ public:
 
   const Node * _node;
   const Elem * _elem;
-  const Elem * _side;
+  std::unique_ptr<const Elem> _side;
   unsigned int _side_num;
   RealVectorValue _normal;
   Real _distance; // Positive distance means the node has penetrated

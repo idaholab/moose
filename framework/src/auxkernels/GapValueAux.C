@@ -100,7 +100,7 @@ GapValueAux::computeValue()
   {
     std::vector<std::vector<Real>> & side_phi = pinfo->_side_phi;
     if (_moose_var.feType().order != CONSTANT)
-      gap_value = _moose_var.getValue(pinfo->_side, side_phi);
+      gap_value = _moose_var.getValue(pinfo->_side.get(), side_phi);
     else
       gap_value = _moose_var.getValue(pinfo->_elem, side_phi);
   }

@@ -55,7 +55,7 @@ findContactPoint(PenetrationInfo & p_info,
 
   unsigned int dim = primary_elem->dim();
 
-  const Elem * side = p_info._side;
+  const Elem * side = p_info._side.get();
 
   const std::vector<Point> & phys_point = fe_side->get_xyz();
 
