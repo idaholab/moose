@@ -40,11 +40,10 @@ class BilinearInterpolation;
  *
  *     z has to be x.size() by y.size()
  *
- * PiecewisBilinear also sends samples to BilinearInterpolation.  These samples are the z-coordinate
- * of the current
- * integration point, and the current value of time.  The name of the file that contains this data
- * has to be included
- * in the function block of the inpute file like this...data_file = example.csv.
+ * PiecewiseBilinear also sends samples to BilinearInterpolation.  These samples are the
+ * z-coordinate of the current integration point, and the current value of time.  The name of the
+ * file that contains this data has to be included in the function block of the input file like
+ * this...data_file = example.csv.
  */
 class PiecewiseBilinear : public Function
 {
@@ -63,6 +62,20 @@ public:
   virtual Real value(Real t, const Point & pt) const override;
   virtual ADReal value(const ADReal & t, const ADPoint & pt) const override;
 
+  /**
+   * Parse a text/CSV file to fill two-dimensional data
+   * @param data_file_name the name of the file to read
+   * @param x vector of the first dimension coordinates
+   * @param y vector of the second dimension coordinates
+   * @param z matrix holding the two-dimensional data
+   * @param object_name the name of the object calling this routine
+   */
+  static void parse(const std::string & data_file_name,
+                    std::vector<Real> & x,
+                    std::vector<Real> & y,
+                    ColumnMajorMatrix & z,
+                    const std::string & object_name);
+
 private:
   std::unique_ptr<BilinearInterpolation> _bilinear_interp;
   const std::string _data_file_name;
@@ -77,6 +90,4 @@ private:
 
   template <typename T, typename P>
   T valueInternal(T t, const P & p) const;
-
-  void parse(std::vector<Real> & x, std::vector<Real> & y, ColumnMajorMatrix & z);
 };
