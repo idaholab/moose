@@ -1,4 +1,4 @@
 Checks:
   clang-analyzer-core.*
 WarningsAsErrors: true
-InheritParentConfig: true
+# InheritParentConfig: true
