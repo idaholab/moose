@@ -91,8 +91,10 @@ DiracKernel::computeResidual()
 {
   prepareVectorTag(_assembly, _var.number());
 
-  const std::vector<unsigned int> * multiplicities =
-      _drop_duplicate_points ? NULL : &_local_dirac_kernel_info.getPoints()[_current_elem].second;
+  static const std::vector<unsigned int> empty_multiplicities;
+  const auto & multiplicities = _drop_duplicate_points
+                                    ? empty_multiplicities
+                                    : _local_dirac_kernel_info.getPoints()[_current_elem].second;
   unsigned int local_qp = 0;
   Real multiplicity = 1.0;
 
@@ -101,8 +103,8 @@ DiracKernel::computeResidual()
     _current_point = _physical_point[_qp];
     if (isActiveAtPoint(_current_elem, _current_point))
     {
-      if (!_drop_duplicate_points)
-        multiplicity = (*multiplicities)[local_qp++];
+      if (multiplicities.size())
+        multiplicity = multiplicities[local_qp++];
 
       for (_i = 0; _i < _test.size(); _i++)
         _local_re(_i) += multiplicity * computeQpResidual();
