@@ -75,14 +75,14 @@ protected:
 
 template <typename RangeType, typename IteratorType>
 ThreadedNodeLoop<RangeType, IteratorType>::ThreadedNodeLoop(FEProblemBase & fe_problem)
-  : _fe_problem(fe_problem)
+  : _fe_problem(fe_problem), _tid(std::numeric_limits<THREAD_ID>::max())
 {
 }
 
 template <typename RangeType, typename IteratorType>
 ThreadedNodeLoop<RangeType, IteratorType>::ThreadedNodeLoop(ThreadedNodeLoop & x,
                                                             Threads::split /*split*/)
-  : _fe_problem(x._fe_problem)
+  : _fe_problem(x._fe_problem), _tid(std::numeric_limits<THREAD_ID>::max())
 {
 }
 
