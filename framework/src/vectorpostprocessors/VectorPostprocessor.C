@@ -65,7 +65,8 @@ VectorPostprocessor::VectorPostprocessor(const MooseObject * moose_object)
 }
 
 VectorPostprocessorValue &
-VectorPostprocessor::declareVector(const std::string & vector_name)
+VectorPostprocessor::declareVector(const std::string & vector_name,
+                                   const std::size_t size /* = 0 */)
 {
   _vector_names.insert(vector_name);
 
@@ -79,10 +80,13 @@ VectorPostprocessor::declareVector(const std::string & vector_name)
   if (_is_distributed)
     mode = REPORTER_MODE_DISTRIBUTED;
 
-  return _vpp_fe_problem.getReporterData(ReporterData::WriteKey())
-      .declareReporterValue<VectorPostprocessorValue,
-                            VectorPostprocessorContext<VectorPostprocessorValue>>(
-          VectorPostprocessorReporterName(_vpp_name, vector_name), mode, _vpp_moose_object);
+  auto & value =
+      _vpp_fe_problem.getReporterData(ReporterData::WriteKey())
+          .declareReporterValue<VectorPostprocessorValue,
+                                VectorPostprocessorContext<VectorPostprocessorValue>>(
+              VectorPostprocessorReporterName(_vpp_name, vector_name), mode, _vpp_moose_object);
+  value.resize(size);
+  return value;
 }
 
 const std::set<std::string> &

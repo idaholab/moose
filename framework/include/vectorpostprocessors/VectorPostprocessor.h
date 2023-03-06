@@ -61,9 +61,10 @@ public:
 
 protected:
   /**
-   * Register a new vector to fill up.
+   * Register a new vector to fill up with the name \p vector_name and the size \p size.
    */
-  VectorPostprocessorValue & declareVector(const std::string & vector_name);
+  VectorPostprocessorValue & declareVector(const std::string & vector_name,
+                                           const std::size_t size = 0);
 
   /// The name of the VectorPostprocessor
   const std::string _vpp_name;
