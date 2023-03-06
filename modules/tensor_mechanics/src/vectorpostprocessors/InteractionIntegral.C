@@ -50,10 +50,8 @@ InteractionIntegralTempl<is_ad>::validParams()
       "using the functionally graded material capability.");
   params.addParam<MaterialPropertyName>(
       "functionally_graded_youngs_modulus_crack_dir_gradient",
-      "A grading parameter for cracks in functinonally graded materials (optional). Must be "
-      "provided as an auxiliary "
-      "variable that captures an exponential function that transitions the modulus of elasticity "
-      "from the value of a material to another one.");
+      "Gradient of the spatially varying Young's modulus provided in "
+      "'functionally_graded_youngs_modulus' in the direction of crack extension.");
   params.addRequiredParam<UserObjectName>("crack_front_definition",
                                           "The CrackFrontDefinition user object name");
   MooseEnum position_type("Angle Distance", "Distance");
@@ -103,24 +101,21 @@ InteractionIntegralTempl<is_ad>::InteractionIntegralTempl(const InputParameters 
     _fe_type(_fe_vars[0]->feType()),
     _grad_disp(3),
     _has_temp(isCoupled("temperature")),
-    _has_functionally_graded_youngs_modulus_crack_dir_gradient(
-        isParamSetByUser("functionally_graded_youngs_modulus_crack_dir_gradient")),
-    _has_functionally_graded_youngs_modulus(isParamSetByUser("functionally_graded_youngs_modulus")),
     _grad_temp(_has_temp ? coupledGradient("temperature") : _grad_zero),
     _functionally_graded_youngs_modulus_crack_dir_gradient(
-        _has_functionally_graded_youngs_modulus_crack_dir_gradient
+        isParamSetByUser("functionally_graded_youngs_modulus_crack_dir_gradient")
             ? &getMaterialProperty<Real>("functionally_graded_youngs_modulus_crack_dir_gradient")
             : nullptr),
     _functionally_graded_youngs_modulus(
-        _has_functionally_graded_youngs_modulus
+        isParamSetByUser("functionally_graded_youngs_modulus")
             ? &getMaterialProperty<Real>("functionally_graded_youngs_modulus")
             : nullptr),
     _K_factor(getParam<Real>("K_factor")),
     _has_symmetry_plane(isParamValid("symmetry_plane")),
     _poissons_ratio(getParam<Real>("poissons_ratio")),
     _youngs_modulus(getParam<Real>("youngs_modulus")),
-    _fgm_crack(_has_functionally_graded_youngs_modulus_crack_dir_gradient &&
-               _has_functionally_graded_youngs_modulus),
+    _fgm_crack(isParamSetByUser("functionally_graded_youngs_modulus_crack_dir_gradient") &&
+               isParamSetByUser("functionally_graded_youngs_modulus")),
     _ring_index(getParam<unsigned int>("ring_index")),
     _total_deigenstrain_dT(
         hasMaterialProperty<RankTwoTensor>("total_deigenstrain_dT")
@@ -143,11 +138,14 @@ InteractionIntegralTempl<is_ad>::InteractionIntegralTempl(const InputParameters 
                "must both couple temperature in DomainIntegral block and compute "
                "total_deigenstrain_dT using ThermalFractureIntegral material model.");
 
-  if (_has_functionally_graded_youngs_modulus_crack_dir_gradient !=
-      _has_functionally_graded_youngs_modulus)
+  if ((!_functionally_graded_youngs_modulus &&
+       _functionally_graded_youngs_modulus_crack_dir_gradient) ||
+      (_functionally_graded_youngs_modulus &&
+       !_functionally_graded_youngs_modulus_crack_dir_gradient))
     paramError("functionally_graded_youngs_modulus_crack_dir_gradient",
                "You have selected to compute the interaction integral for a crack in FGM. That "
-               "selection requires the user to provide a spatially varying elasticity modulus that "
+               "selection requires the user to provide a spatially varying elasticity modulus "
+               "that "
                "defines the transition of material properties (i.e. "
                "'functionally_graded_youngs_modulus') and its "
                "spatial derivative in the crack direction (i.e. "

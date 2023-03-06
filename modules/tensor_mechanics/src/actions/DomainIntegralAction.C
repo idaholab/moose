@@ -67,10 +67,8 @@ DomainIntegralAction::validParams()
   params.addParam<VariableName>("temperature", "", "The temperature");
   params.addParam<MaterialPropertyName>(
       "functionally_graded_youngs_modulus_crack_dir_gradient",
-      "A grading parameter for cracks in functinonally graded materials (optional). Must be "
-      "provided as an auxiliary "
-      "variable that captures an exponential function that transitions the modulus of elasticity "
-      "from the value of a material to another one.");
+      "Gradient of the spatially varying Young's modulus provided in "
+      "'functionally_graded_youngs_modulus' in the direction of crack extension.");
   params.addParam<MaterialPropertyName>(
       "functionally_graded_youngs_modulus",
       "Spatially varying elasticity modulus variable. This input is required when "

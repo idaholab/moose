@@ -97,10 +97,6 @@ protected:
   std::vector<const VariableGradient *> _grad_disp;
   /// Whether the temperature variable is coupled
   const bool _has_temp;
-  /// Whether the elastic modulus derivative variable for crack in functionally graded material (FGM) is coupled
-  const bool _has_functionally_graded_youngs_modulus_crack_dir_gradient;
-  /// Whether the spatial elasticity modulus variable for FGM is coupled
-  const bool _has_functionally_graded_youngs_modulus;
   /// Gradient of temperature
   const VariableGradient & _grad_temp;
   /// Spatial derivative of the youngs modulus in the crack direction
