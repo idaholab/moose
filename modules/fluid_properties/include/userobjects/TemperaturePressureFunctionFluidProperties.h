@@ -41,13 +41,22 @@ public:
   virtual Real T_from_v_e(Real v, Real e) const override;
 
   /**
+   * Pressure from pressure and density
+   *
+   * @param[in] p          pressure (Pa)
+   * @param[in] rho        density (kg/m$^3$)
+   * @return temperature (T)
+   */
+  virtual Real T_from_p_rho(Real p, Real rho) const;
+
+  /**
    * Pressure from pressure and specific enthalpy
    *
    * @param[in] p          pressure (Pa)
-   * @param[out] rho       density (kg/m$^3$)
-   * @return temperature (Pa)
+   * @param[in] h          specific enthalpy (J/kg)
+   * @return temperature (T)
    */
-  virtual Real T_from_p_rho(Real p, Real rho) const;
+  virtual Real T_from_p_h(Real p, Real h) const override;
 
   /**
    * Pressure from specific volume and specific internal energy
@@ -66,6 +75,16 @@ public:
    * @return isobaric specific heat (J/kg.K)
    */
   virtual Real cp_from_v_e(Real v, Real e) const override;
+  /**
+   * Isobaric specific heat capacity and its derivatives from specific volume and energy
+   *
+   * @param[in] v       specific volume
+   * @param[in] e       specific energy
+   * @param[out] cp     isobaric specific heat (J/kg/K)
+   * @param[out] dcp_dv derivative of isobaric specific heat w.r.t. specific volume
+   * @param[out] dcp_de derivative of isobaric specific heat w.r.t. specific energy
+   */
+  virtual void cp_from_v_e(Real v, Real e, Real & cp, Real & dcp_dv, Real & dcp_de) const override;
 
   /**
    * Isochoric specific heat from specific volume and specific internal energy
@@ -75,6 +94,16 @@ public:
    * @return isochoric specific heat (J/kg.K)
    */
   virtual Real cv_from_v_e(Real v, Real e) const override;
+  /**
+   * Isochoric specific heat capacity and its derivatives from pressure and temperature
+   *
+   * @param[in] p       pressure (Pa)
+   * @param[in] T       temperature (K)
+   * @param[out] cv     isochoric specific heat (J/kg/K)
+   * @param[out] dcv_dv derivative of isochoric specific heat w.r.t. specific volume
+   * @param[out] dcv_de derivative of isochoric specific heat w.r.t. specific energy
+   */
+  virtual void cv_from_v_e(Real p, Real T, Real & cv, Real & dcv_dv, Real & dcv_de) const override;
 
   /**
    * Dynamic viscosity from specific volume and specific internal energy
@@ -179,10 +208,10 @@ public:
   virtual void e_from_p_T(Real p, Real T, Real & e, Real & de_dp, Real & de_dT) const override;
 
   /**
-   * Specific internal energy from pressure and spesific density
+   * Specific internal energy from pressure and density
    *
    * @param[in] p        pressure (Pa)
-   * @param[out] rho       density (kg/m$^3$)
+   * @param[in] rho     density (kg/m$^3$)
    * @param[out] e       specific internal energy (J/kg)
    */
   virtual Real e_from_p_rho(Real p, Real rho) const override;
@@ -212,6 +241,7 @@ public:
    * @param[in] T       temperature (K)
    * @param[out] cp     isobaric specific heat (J/kg/K)
    * @param[out] dcp_dp derivative of isobaric specific heat w.r.t. pressure (J/kg/K/Pa)
+   * @param[out] dcp_dT derivative of isobaric specific heat w.r.t. temperature (J/kg/K/K)
    */
   virtual void cp_from_p_T(Real p, Real T, Real & cp, Real & dcp_dp, Real & dcp_dT) const override;
 
@@ -292,9 +322,10 @@ public:
   using SinglePhaseFluidProperties::T_from_v_e;
   using SinglePhaseFluidProperties::v_from_p_T;
 
-protected:
+  /// Functions are constructed after fluid properties, so we delay the getting of the Function
   void initialSetup() override;
 
+protected:
   /// function defining thermal conductivity as a function of temperature and pressure
   const Function * _k_function;
 
