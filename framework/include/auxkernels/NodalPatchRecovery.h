@@ -72,7 +72,7 @@ protected:
    * @param K number of items to pick
    * @return a data structure holding all combinations of N choose K
    */
-  virtual std::vector<std::vector<unsigned int>> nChooseK(unsigned int N, unsigned int K);
+  std::vector<std::vector<unsigned int>> nChooseK(unsigned int N, unsigned int K);
 
   /**
    * generate a complete multi index table for given dimension and order
@@ -91,7 +91,7 @@ protected:
    * @param order generate the multi-index up to certain order
    * @return a data structure holding entries representing the complete multi index
    */
-  virtual std::vector<std::vector<unsigned int>> multiIndex(unsigned int dim, unsigned int order);
+  std::vector<std::vector<unsigned int>> multiIndex(unsigned int dim, unsigned int order);
 
   /**
    * compute the P vector at given point
@@ -105,13 +105,13 @@ protected:
    *
    * @param q_point point at which to evaluate the polynomial basis
    */
-  virtual void computePVector(Point q_point);
+  void computePVector(Point q_point);
 
   /**
    * Calculate the patch stiffness matrix as \sum_1^n P^TP
    * where n is the number of quadrature points in the element patch
    */
-  virtual void accumulateAMatrix();
+  void accumulateAMatrix();
 
   /**
    * calculate the patch load vector as \sum_1^n P^Tval
@@ -119,17 +119,17 @@ protected:
    *
    * @param val The variable value to be recovered at the current quadrature point
    */
-  virtual void accumulateBVector(Real val);
+  void accumulateBVector(Real val);
 
   /// reserve space for A, B, P, and prepare required material properties
-  virtual void reinitPatch();
+  void reinitPatch();
 
   /**
    * solve the equation Ac = B
    * where c is the coefficients vector from least square fitting
    * nodal value is computed as nodal value = P^Tc
    */
-  virtual void compute() override;
+  void compute() override;
 
 private:
   /// polynomial order, default is variable order
