@@ -82,23 +82,15 @@ LeastSquaresFit::LeastSquaresFit(const InputParameters & parameters)
     if (_have_sample_x_max)
       _sample_x_max = getParam<Real>("sample_x_max");
 
-    _sample_x = &declareVector(_x_name);
-    _sample_y = &declareVector(_y_name);
+    _sample_x = &declareVector(_x_name, _num_samples);
+    _sample_y = &declareVector(_y_name, _num_samples);
   }
   else
   {
     if (isParamValid("num_samples"))
       mooseWarning("In LeastSquaresFit num_samples parameter is unused with output=Coefficients");
-    _coeffs = &declareVector("coefficients");
+    _coeffs = &declareVector("coefficients", _order + 1);
   }
-
-  if (_output_type == "Samples")
-  {
-    _sample_x->resize(_num_samples);
-    _sample_y->resize(_num_samples);
-  }
-  else
-    _coeffs->resize(_order + 1);
 }
 
 void
