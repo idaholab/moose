@@ -192,13 +192,10 @@ ConcentricCircleMeshGenerator::generate()
     }
   }
 
-  // for adding the outer layers of the square
-  Real current_radius = total_concentric_circles[0];
-
   // for adding the outer circles of the square.
   for (unsigned layers = 0; layers < total_concentric_circles.size(); ++layers)
   {
-    current_radius = total_concentric_circles[layers];
+    const auto current_radius = total_concentric_circles[layers];
     for (unsigned num_outer_nodes = 0; num_outer_nodes <= _num_sectors; ++num_outer_nodes)
     {
       const Real x = current_radius * std::cos(num_outer_nodes * d_angle);
