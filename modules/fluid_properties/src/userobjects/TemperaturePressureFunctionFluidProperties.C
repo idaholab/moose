@@ -263,6 +263,7 @@ TemperaturePressureFunctionFluidProperties::cp_from_p_T(Real p, Real T) const
   // neglecting dp_dT term due to difficulty in computing it in the general case
   // this is not OK for gases, but should be ok for nearly incompressible fluids
   return _cv + p * dv_dT;
+  // an alternative would be to use finite differencing for the p * v term in its entirety
 }
 
 void

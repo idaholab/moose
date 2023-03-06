@@ -304,6 +304,13 @@ public:
   virtual void
   mu_from_p_T(Real p, Real T, Real & mu, Real & dmu_drho, Real & dmu_dT) const override;
 
+  // Need those to avoid running the infinite loop of s_pT calling s_ve calling s_pT in SinglePhase
+  Real s_from_p_T(Real /*p*/, Real /*T*/) const override { mooseError("Not implemented"); }
+  void s_from_p_T(Real, Real, Real &, Real &, Real &) const override
+  {
+    mooseError("Not implemented");
+  }
+
   // This is done to avoid hiding the AD implementations from the template
   // with the regular implementations defined here
   using SinglePhaseFluidProperties::beta_from_p_T;
