@@ -10,7 +10,8 @@
 #pragma once
 
 #include "PorousFlowFluidPropertiesBase.h"
-#include "SinglePhaseFluidProperties.h"
+
+class SinglePhaseFluidProperties;
 
 /**
  * General single component fluid material. Provides quadpoint density, viscosity,

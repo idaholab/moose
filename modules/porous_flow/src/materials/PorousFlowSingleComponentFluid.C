@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PorousFlowSingleComponentFluid.h"
+#include "SinglePhaseFluidProperties.h"
 
 registerMooseObject("PorousFlowApp", PorousFlowSingleComponentFluid);
 registerMooseObject("PorousFlowApp", ADPorousFlowSingleComponentFluid);
@@ -16,22 +17,8 @@ template <bool is_ad>
 InputParameters
 PorousFlowSingleComponentFluidTempl<is_ad>::validParams()
 {
-  InputParameters params = PorousFlowFluidPropertiesBaseTempl<is_ad>::validParams();
-  params.addParam<bool>(
-      "compute_density_and_viscosity", true, "Compute the fluid density and viscosity");
-  params.addParam<bool>("compute_internal_energy", true, "Compute the fluid internal energy");
-  params.addParam<bool>("compute_enthalpy", true, "Compute the fluid enthalpy");
+  InputParameters params = PorousFlowFluidPropertiesBase::validParams();
   params.addRequiredParam<UserObjectName>("fp", "The name of the user object for fluid properties");
-  MooseEnum p_unit_choice("Pa MPa", "Pa");
-  params.addParam<MooseEnum>("pressure_unit",
-                             p_unit_choice,
-                             "The unit of the pressure variable used everywhere in the input file "
-                             "except for in the FluidProperties-module objects");
-  MooseEnum time_unit_choice("seconds hours days years", "seconds");
-  params.addParam<MooseEnum>("time_unit",
-                             time_unit_choice,
-                             "The unit of time used everywhere in the input file except for in the "
-                             "FluidProperties-module objects");
   params.addClassDescription("This Material calculates fluid properties at the quadpoints or nodes "
                              "for a single component fluid");
   return params;
