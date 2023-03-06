@@ -139,6 +139,12 @@ public:
    */
   void setMeshBase(std::unique_ptr<MeshBase> mesh_base);
 
+  /**
+   * Method to set the saved_mesh object. If this method is NOT called prior to calling init(), a
+   * MeshBase object will be automatically constructed and set.
+   */
+  void setSavedMesh(std::string, std::unique_ptr<MeshBase> mesh);
+
   /// returns MooseMesh partitioning options so other classes can use it
   static MooseEnum partitioning();
 
@@ -615,7 +621,9 @@ public:
    * Accessor for the underlying libMesh Mesh object.
    */
   MeshBase & getMesh();
+  MeshBase & getMesh(const std::string & name);
   const MeshBase & getMesh() const;
+  const MeshBase & getMesh(const std::string & name) const;
   const MeshBase * getMeshPtr() const;
 
   /**

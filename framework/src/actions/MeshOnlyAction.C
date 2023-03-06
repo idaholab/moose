@@ -15,6 +15,7 @@
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/checkpoint_io.h"
+#include <libmesh/nemesis_io.h>
 
 registerMooseAction("MooseApp", MeshOnlyAction, "mesh_only");
 
@@ -30,12 +31,14 @@ void
 MeshOnlyAction::act()
 {
   auto mesh_file = _app.parameters().get<std::string>("mesh_only");
+  auto saved_mesh_file = mesh_file;
   auto & mesh_ptr = _app.actionWarehouse().mesh();
-
+  auto saved_mesh_ptr = _app.actionWarehouse().savedMesh();
   // Print information about the mesh
   _console << mesh_ptr->getMesh().get_info(/* verbosity = */ 2) << std::endl;
 
   bool should_generate = false;
+
   // If no argument specified or if the argument following --mesh-only starts
   // with a dash, try to build an output filename based on the input mesh filename.
   if (mesh_file.empty() || (mesh_file[0] == '-'))
@@ -56,6 +59,7 @@ MeshOnlyAction::act()
 
     // Default to writing out an ExodusII mesh base on the input filename.
     mesh_file = mesh_file.substr(0, pos) + "_in.e";
+    auto saved_mesh_file = mesh_file.substr(0, pos);
   }
 
   /**
@@ -88,5 +92,38 @@ MeshOnlyAction::act()
   {
     // Just write the file using the name requested by the user.
     mesh_ptr->getMesh().write(mesh_file);
+  }
+
+  auto & mesh_generator_system = _app.getMeshGeneratorSystem();
+  auto saved_mesh_names = mesh_generator_system.getSavedMeshesNames();
+  if (saved_mesh_names.size() != 0)
+  {
+    for (auto & name : saved_mesh_names)
+    {
+      if (name != mesh_generator_system.mainMeshGeneratorName() &&
+          name != mesh_generator_system.mainDisplacedMeshGeneratorName())
+      {
+        // We now have ownership of this mesh, it will get destructed out of scope
+        auto mesh = mesh_generator_system.getSavedMeshes(name);
+
+        if (mesh->is_replicated())
+        {
+          ExodusII_IO exio(*mesh);
+
+          if (mesh->mesh_dimension() == 1)
+            exio.write_as_dimension(3);
+
+          // Default to non-HDF5 output for wider compatibility
+          exio.set_hdf5_writing(false);
+
+          exio.write(name + "_in.e");
+        }
+        else
+        {
+          Nemesis_IO nemesis_io(*mesh);
+          nemesis_io.write(name + "_in.e");
+        }
+      }
+    }
   }
 }

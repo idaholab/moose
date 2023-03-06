@@ -26,6 +26,8 @@ MeshGenerator::validParams()
                         false,
                         "Whether or not to show mesh info after generating the mesh "
                         "(bounding box, element types, sidesets, nodesets, subdomains, etc)");
+  params.addParam<std::string>(
+      "save_with_name", "", "Save the current mesh with user-defined name");
 
   params.addParam<bool>(
       "output", false, "Whether or not to output the mesh file after generating the mesh");
@@ -39,7 +41,10 @@ MeshGenerator::validParams()
 }
 
 MeshGenerator::MeshGenerator(const InputParameters & parameters)
-  : MooseObject(parameters), MeshMetaDataInterface(this), _mesh(_app.actionWarehouse().mesh())
+  : MooseObject(parameters),
+    MeshMetaDataInterface(this),
+    _mesh(_app.actionWarehouse().mesh()),
+    _save_with_name(getParam<std::string>("save_with_name"))
 {
 }
 
@@ -327,4 +332,23 @@ MeshGenerator::declareNullMeshName(const MeshGeneratorName & name)
   mooseAssert(_app.constructingMeshGenerators(), "Should only be called at construction");
   mooseAssert(!_null_mesh_names.count(name), "Already declared");
   _null_mesh_names.insert(name);
+}
+
+bool
+MeshGenerator::saveMesh()
+{
+  if (_save_with_name != "")
+    return true;
+  return false;
+}
+
+const std::string
+MeshGenerator::getSavedMeshName()
+{
+  if (_save_with_name == _app.getMeshGeneratorSystem().mainMeshGeneratorName() ||
+      _save_with_name == _app.getMeshGeneratorSystem().mainDisplacedMeshGeneratorName())
+  {
+    return (_app.name() + _save_with_name);
+  }
+  return _save_with_name;
 }

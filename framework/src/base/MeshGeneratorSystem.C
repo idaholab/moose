@@ -14,10 +14,7 @@
 #include "DependencyResolver.h"
 
 MeshGeneratorSystem::MeshGeneratorSystem(MooseApp & app)
-  : PerfGraphInterface(app.perfGraph(), "MeshGeneratorSystem"),
-    ParallelObject(app),
-    _app(app),
-    _popped_final_mesh_generator(false)
+  : PerfGraphInterface(app.perfGraph(), "MeshGeneratorSystem"), ParallelObject(app), _app(app)
 {
 }
 
@@ -283,12 +280,24 @@ MeshGeneratorSystem::executeMeshGenerators()
   // Order the generators
   createMeshGeneratorOrder();
 
+  std::map<std::string, std::unique_ptr<MeshBase> *> to_save_in_meshes;
+
+  // Loop over the MeshGenerators and save all meshes marked to to_save_in_meshes
+  for (const auto & generator_set : _ordered_mesh_generators)
+    for (const auto & generator : generator_set)
+      if (generator->saveMesh())
+      {
+        to_save_in_meshes.emplace(generator->getSavedMeshName(), &getMeshGeneratorOutput(generator->name()));
+      }
+
   // Grab the outputs from the final generator so MeshGeneratorMesh can pick them up
-  _final_generated_meshes.emplace_back(&getMeshGeneratorOutput(_final_generator_name));
+  to_save_in_meshes.emplace(mainMeshGeneratorName(),
+                            &getMeshGeneratorOutput(_final_generator_name));
 
   // Need to grab two if we're going to be making a displaced mesh
   if (_app.actionWarehouse().displacedMesh())
-    _final_generated_meshes.emplace_back(&getMeshGeneratorOutput(_final_generator_name));
+    to_save_in_meshes.emplace(mainDisplacedMeshGeneratorName(),
+                              &getMeshGeneratorOutput(_final_generator_name));
 
   // Run the MeshGenerators in the proper order
   for (const auto & generator_set : _ordered_mesh_generators)
@@ -320,7 +329,17 @@ MeshGeneratorSystem::executeMeshGenerators()
       // Once we hit the generator we want, we'll terminate the loops (this might be the last
       // iteration anyway)
       if (_final_generator_name == name)
+      {
+        // Move all save in meshes from to_save_in_meshes to _save_in_meshes
+        for (auto & [name, mesh_ptr] : to_save_in_meshes)
+        {
+          mooseAssert(mesh_ptr, "Invalid pointer");
+          mooseAssert(*mesh_ptr, "Invalid pointer");
+          mooseAssert(!_save_in_meshes.count(name), "Mesh has already been saved");
+          _save_in_meshes.emplace(name, std::move(*mesh_ptr));
+        }
         return;
+      }
     }
   }
 }
@@ -468,28 +487,29 @@ MeshGeneratorSystem::getMeshGeneratorNames() const
   return names;
 }
 
-std::unique_ptr<MeshBase>
-MeshGeneratorSystem::getMeshGeneratorMesh(const bool check_unique /* = true */)
+std::vector<std::string>
+MeshGeneratorSystem::getSavedMeshesNames() const
 {
-  if (_popped_final_mesh_generator == true)
-    mooseError("MeshGeneratorSystem::getMeshGeneratorMesh is being called for a second time. You "
-               "cannot do "
-               "this because the final generated mesh was popped from its storage container the "
-               "first time this method was called");
+  std::vector<std::string> names;
+  for (auto & pair : _save_in_meshes)
+    names.push_back(pair.first);
+  return names;
+}
 
-  if (_final_generated_meshes.empty())
-    mooseError("While getting the final MeshGenerator mesh in getMeshGeneratorMesh():\n\nNo mesh "
-               "generators were constructed.");
+std::unique_ptr<MeshBase>
+MeshGeneratorSystem::getSavedMeshes(const std::string & name)
+{
+  auto find_mesh = _save_in_meshes.find(name);
+  if (find_mesh == _save_in_meshes.end())
+    mooseError("Failed to find a saved mesh with the name '", name, "'");
 
-  auto mesh_unique_ptr_ptr = _final_generated_meshes.front();
-  _final_generated_meshes.pop_front();
-  _popped_final_mesh_generator = true;
+  auto & mesh_unique_ptr = find_mesh->second;
+  if (!mesh_unique_ptr)
+    mooseError("While getting the saved mesh generator '",
+               name,
+               "', said mesh has already been retreived");
 
-  if (check_unique && !_final_generated_meshes.empty())
-    mooseError("Multiple generated meshes exist while retrieving the final Mesh. This means that "
-               "the selection of the final mesh is non-deterministic.");
-
-  return std::move(*mesh_unique_ptr_ptr);
+  return std::move(mesh_unique_ptr);
 }
 
 bool

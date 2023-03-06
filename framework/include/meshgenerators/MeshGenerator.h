@@ -141,6 +141,16 @@ public:
    */
   bool isNullMeshName(const MeshGeneratorName & name) const { return _null_mesh_names.count(name); }
 
+  /**
+   * Return whether or not to save the current mesh
+   */
+  bool saveMesh();
+
+  /**
+   * Return the name of the saved mesh
+   */
+  const std::string getSavedMeshName();
+
 protected:
   /**
    * Methods for writing out attributes to the mesh meta-data store, which can be retrieved from
@@ -365,6 +375,9 @@ private:
 
   /// The declared "null" mesh names that will not represent a mesh in input; see declareNullMeshName()
   std::set<std::string> _null_mesh_names;
+
+  /// A user-defined name to save the mesh
+  std::string _save_with_name;
 };
 
 template <typename T, typename... Args>

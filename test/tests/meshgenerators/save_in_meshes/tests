@@ -1,0 +1,31 @@
+[Tests]
+  [save_in_meshes]
+  design = 'MeshGenerator.md'
+  issues = '#23618'
+  requirement = 'The system shall save intermediate meshes besides the final mesh file so that other objects can access it'
+
+    [REPLICATED]
+        type = 'Exodiff'
+        input = 'save_in_meshes.i'
+        exodiff = 'left_block_in.e'
+        cli_args = "--mesh-only"
+        recover = false
+        mesh_mode = 'REPLICATED'
+
+        detail = "Output only the left mesh block in a seperate mesh file"
+    []
+    [Distributed]
+      type = 'Exodiff'
+      input = 'save_in_meshes.i'
+      exodiff = 'left_block_in.e.2.0 left_block_in.e.2.1'
+      cli_args = "Mesh/left/parallel_type=distributed --mesh-only"
+      recover = false
+      mesh_mode = 'DISTRIBUTED'
+      min_parallel = 2
+      max_parallel = 2
+
+      detail = "Output only the left mesh block in a seperate mesh file in distributed mesh mode"
+    []
+
+  []
+[]
