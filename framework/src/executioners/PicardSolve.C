@@ -221,8 +221,7 @@ PicardSolve::transformPostprocessors(const bool primary)
     const Real old_value = (*transformed_pps_values)[i][0];
 
     // Compute and set relaxed value
-    Real new_value = current_value;
-    new_value = relaxation_factor * current_value + (1 - relaxation_factor) * old_value;
+    Real new_value = relaxation_factor * current_value + (1 - relaxation_factor) * old_value;
     _problem.setPostprocessorValueByName((*transformed_pps)[i], new_value);
   }
 }
