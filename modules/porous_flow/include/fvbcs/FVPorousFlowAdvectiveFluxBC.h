@@ -13,17 +13,18 @@
 
 class PorousFlowDictator;
 
-class FVPorousFlow1PhaseAdvectiveFluxBC : public FVFluxBC
+class FVPorousFlowAdvectiveFluxBC : public FVFluxBC
 {
 public:
   static InputParameters validParams();
-  FVPorousFlow1PhaseAdvectiveFluxBC(const InputParameters & params);
+  FVPorousFlowAdvectiveFluxBC(const InputParameters & params);
 
 protected:
   virtual ADReal computeQpResidual() override;
 
   const PorousFlowDictator & _dictator;
   const unsigned int _num_phases;
+  const unsigned int _phase;
   const unsigned int _fluid_component;
 
   const ADMaterialProperty<std::vector<Real>> & _density;

@@ -94,12 +94,13 @@
 
 [FVBCs]
   [left]
-    type = FVPorousFlow1PhaseAdvectiveFluxBC
+    type = FVPorousFlowAdvectiveFluxBC
     boundary = left
     porepressure_value = 3E6
     variable = pp
     gravity = '0 0 0'
     fluid_component = 0
+    phase = 0
   []
 []
 
