@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "GeometricCutUserObject.h"
+#include "CrackMeshCut2DUserObjectBase.h"
 
 class Function;
 
@@ -19,7 +19,7 @@ class Function;
  * (3) grows the mesh based on prescribed growth functions.
  */
 
-class CrackMeshCut2DUserObject : public GeometricCutUserObject
+class CrackMeshCut2DUserObject : public CrackMeshCut2DUserObjectBase
 {
 public:
   static InputParameters validParams();
@@ -34,16 +34,6 @@ public:
   virtual const std::vector<RealVectorValue>
   getCrackPlaneNormals(unsigned int num_crack_front_points) const override;
 
-  virtual bool cutElementByGeometry(const Elem * elem,
-                                    std::vector<Xfem::CutEdge> & cut_edges,
-                                    std::vector<Xfem::CutNode> & cut_nodes) const override;
-  virtual bool cutElementByGeometry(const Elem * elem,
-                                    std::vector<Xfem::CutFace> & cut_faces) const override;
-  virtual bool cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_edges,
-                                     std::vector<Xfem::CutEdge> & cut_edges) const override;
-  virtual bool cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_faces,
-                                     std::vector<Xfem::CutFace> & cut_faces) const override;
-
   /**
     Find all active boundary nodes in the cutter mesh
     Find boundary nodes that will grow; nodes outside of the structural mesh are inactive
@@ -51,15 +41,7 @@ public:
    */
   void findActiveBoundaryNodes();
 
-  MeshBase & getCutterMesh() const;
-
 protected:
-  /// The cutter mesh
-  std::unique_ptr<MeshBase> _cutter_mesh;
-
-  /// The structural mesh
-  MooseMesh & _mesh;
-
   /// Enum to for crack growth direction
   enum class GrowthDirectionEnum
   {

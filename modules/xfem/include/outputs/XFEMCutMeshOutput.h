@@ -16,7 +16,7 @@
 #include "libmesh/exodusII_io.h"
 
 // Forward declarations
-class CrackMeshCut2DUserObject;
+class CrackMeshCut2DUserObjectBase;
 
 /**
  * Outputting Exodus cutting mesh used in xfem.  There is no data on the mesh
@@ -34,7 +34,7 @@ public:
 
 private:
   /// The mesh cutting user object
-  const CrackMeshCut2DUserObject & _cutter_uo;
+  const CrackMeshCut2DUserObjectBase & _cutter_uo;
 
   /// The EquationSystems
   std::unique_ptr<EquationSystems> _es;
