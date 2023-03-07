@@ -58,7 +58,9 @@ MeshGeneratorSystem::appendMeshGenerator(const std::string & type,
   // If no final generator is set, we need to make sure that we have one; we will hit
   // this the first time we add an appended MeshGenerator and only need to do it once.
   // We'll then generate the final ordering within the execution phase. We'll also
-  // clear the ordering because it isn't particularly valid anymore once we add this one.
+  // clear the ordering because it could be invalid if we append any more generators,
+  // and we'll be re-ordering within executeMeshgenerators() anyway (where we don't
+  // keep track of any state for the sake of simpler logic)
   if (_final_generator_name.empty())
   {
     if (_mesh_generators.empty())
@@ -203,7 +205,7 @@ MeshGeneratorSystem::createMeshGeneratorOrder()
   // It is _quite_ hard to trigger this to test it. I've tried to no avail.
   // Now that we...
   // - check and sort up front
-  // - know if dependencies exist at the time of requesing them
+  // - know if dependencies exist at the time of requesting them
   // - require that sub generators depend only on other sub generators in an object's
   //   tree + input dependencies that we explicitly declare
   // I don't think it's possible. But we'll leave it here anyway and it
@@ -228,7 +230,7 @@ MeshGeneratorSystem::createMeshGeneratorOrder()
     const auto ancestor_list = resolver.getAncestors(final_generators.back());
     if (ancestor_list.size() != resolver.size() && _final_generator_name.empty())
     {
-      // Need to remove duplicates and possibly perform a difference so we'll import out list
+      // Need to remove duplicates and possibly perform a difference so we'll import our list
       // into a set for these operations.
       std::set<MeshGenerator *, MeshGenerator::Comparator> ancestors(ancestor_list.begin(),
                                                                      ancestor_list.end());
@@ -389,18 +391,20 @@ MeshGeneratorSystem::createMeshGenerator(const std::string & generator_name)
     }
     // This was used by a sub generator but wasn't declared
     else if (is_sub_dependency)
-      mg->mooseError("The MeshGenerator '",
-                     dependency_name,
-                     "' was referenced in the parameter '",
-                     param_name,
-                     "' and used in the sub ",
-                     (*find_sub_dependency)->type(),
-                     " '",
-                     (*find_sub_dependency)->name(),
-                     "', but was not declared as a sub dependency.\n\nTo correct this, declare the "
-                     "mesh in the parameter '",
-                     param_name,
-                     "' as a sub dependency with declareMeshForSub().");
+      mg->mooseError(
+          "The MeshGenerator '",
+          dependency_name,
+          "' was referenced in the parameter '",
+          param_name,
+          "' and used in the sub generator ",
+          (*find_sub_dependency)->type(),
+          " '",
+          (*find_sub_dependency)->name(),
+          "', but was not declared as a sub dependency.\n\nTo correct this, modify the code of ",
+          mg->type(),
+          " to include a call to declareMesh(es)ForSub(\"",
+          param_name,
+          "\") in the constructor.");
     // Isn't used at all
     else
       mg->mooseError(

@@ -270,6 +270,16 @@ protected:
    * @param type The type of MeshGenerator
    * @param name The name of the MeshGenerator
    * @param extra_input_parameters ... Additional InputParameters to pass
+   *
+   * Sub generators must be added in the order that they are executed.
+   *
+   * Any input dependencies for a sub generator that come from inputs for
+   * this generator must first be declared with the declareMesh(es)ForSub()
+   * method.
+   *
+   * You can use the output of a sub generator as a mesh in this generator
+   * by calling getMesh() with the sub generator's name _after_ adding
+   * said sub generator.
    */
   template <typename... Ts>
   void addMeshSubgenerator(const std::string & type,

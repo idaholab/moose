@@ -55,7 +55,7 @@ public:
                         const InputParameters & params);
 
   /**
-   * Append a mesh generator that will act on the final mesh generator in the system
+   * Append a mesh generator that will act on the current final mesh generator in the system
    *
    * @param type The type of MeshGenerator
    * @param name The name of the MeshGenerator
@@ -81,11 +81,11 @@ public:
    *
    * This parses the input parameters of type <MeshGenerator> and
    * std::vector<MeshGeneratorName> to build the execution tree for
-   * the generators, and constructs them in dependnecy order
+   * the generators, and constructs them in dependency order
    *
    * Sub generators are also generated within this phase, although the
    * dependency resolution described above is only for the dependencies
-   * that we can parse using InputParamters. However, we require that
+   * that we can parse using InputParameters. However, we require that
    * sub generators be constructed within _their_ dependency order
    * (except for the last one, which may be coupled to via the generator
    * creating said sub generator).

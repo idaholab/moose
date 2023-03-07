@@ -114,7 +114,7 @@
       cli_args = 'Mesh/active="gmg test"
                   Mesh/test/input=gmg
                   Mesh/test/sub_no_declare_input=true'
-      expect_err = "The MeshGenerator 'gmg' was referenced in the parameter 'input' and used in the sub RenameBlockGenerator 'test_rbg', but was not declared as a sub dependency."
+      expect_err = "The MeshGenerator 'gmg' was referenced in the parameter 'input' and used in the sub generator RenameBlockGenerator 'test_rbg', but was not declared as a sub dependency."
     []
     [unused_param_input]
       type = RunException

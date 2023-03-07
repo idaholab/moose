@@ -220,7 +220,7 @@ MeshGenerator::generateInternal()
           _app.getMeshGenerator(requested_name).name(),
           "' was not moved.\n\nThe MeshGenerator system requires that the memory from all input "
           "meshes\nare managed by the requesting MeshGenerator during the generate phase.\n\nThis "
-          "is achieved with a std::move() operation.");
+          "is achieved with a std::move() operation within the generate() method.");
 
   if (getParam<bool>("show_info"))
   {
