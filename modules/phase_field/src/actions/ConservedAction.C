@@ -55,7 +55,8 @@ ConservedAction::validParams()
   params.addRequiredParam<MaterialPropertyName>(
       "free_energy", "Base name of the free energy function F defined in a free energy material");
   params.addRequiredParam<MaterialPropertyName>("kappa", "The kappa used with the kernel");
-
+  params.addParam<std::vector<SubdomainName>>("block",
+                                              "Block restriction for the variables and kernels");
   return params;
 }
 
@@ -99,6 +100,9 @@ ConservedAction::act()
     var_params.set<MooseEnum>("family") = Moose::stringify(_fe_type.family);
     var_params.set<MooseEnum>("order") = _fe_type.order.get_order();
     var_params.set<std::vector<Real>>("scaling") = {_scaling};
+    if (isParamValid("block"))
+      var_params.set<std::vector<SubdomainName>>("block") =
+          getParam<std::vector<SubdomainName>>("block");
 
     // Create conserved variable _var_name
     _problem->addVariable(type, _var_name, var_params);

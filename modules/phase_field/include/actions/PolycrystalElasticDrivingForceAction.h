@@ -12,8 +12,6 @@
 #include "Action.h"
 #include "DerivativeMaterialPropertyNameInterface.h"
 
-// Forward Declarations
-
 /**
  * Action that adds the elastic driving force for each order parameter
  */

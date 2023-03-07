@@ -55,7 +55,8 @@ NonconservedAction::validParams()
                         "The mobility is a function of any MOOSE variable (if "
                         "this is set to false, L must be constant over the "
                         "entire domain!)");
-
+  params.addParam<std::vector<SubdomainName>>("block",
+                                              "Block restriction for the variables and kernels");
   return params;
 }
 
@@ -80,6 +81,9 @@ NonconservedAction::act()
 
     var_params.applySpecificParameters(_pars, {"family", "order"});
     var_params.set<std::vector<Real>>("scaling") = {getParam<Real>("scaling")};
+    if (isParamValid("block"))
+      var_params.set<std::vector<SubdomainName>>("block") =
+          getParam<std::vector<SubdomainName>>("block");
 
     // Create nonconserved variable
     _problem->addVariable(type, _var_name, var_params);

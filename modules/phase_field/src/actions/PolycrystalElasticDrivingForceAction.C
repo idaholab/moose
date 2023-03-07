@@ -18,8 +18,7 @@ InputParameters
 PolycrystalElasticDrivingForceAction::validParams()
 {
   InputParameters params = Action::validParams();
-  params.addClassDescription(
-      "Action that addes the elastic driving force for each order parameter");
+  params.addClassDescription("Action that adds the elastic driving force for each order parameter");
   params.addRequiredParam<unsigned int>("op_num", "specifies the number of grains to create");
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
   params.addParam<bool>(
