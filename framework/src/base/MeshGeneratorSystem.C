@@ -31,8 +31,7 @@ MeshGeneratorSystem::addMeshGenerator(const std::string & type,
       std::piecewise_construct, std::forward_as_tuple(name), std::forward_as_tuple(type, params));
 
   // This should be a sub mesh generator. We can assume this because if we're in the middle of
-  // constructing mesh generators (not "adding" them, where we simply store their parameters),
-  // that we're constructing a sub generator also in the correct order
+  // constructing mesh generators (not "adding" them, where we simply store their parameters)
   if (_app.constructingMeshGenerators())
     createMeshGenerator(name);
 }
