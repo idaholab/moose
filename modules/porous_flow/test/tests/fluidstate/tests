@@ -108,7 +108,7 @@
     csvdiff = "waterncg_ic_out.csv"
     threading = '!pthreads'
     requirement = 'PorousFlow shall calculate the initial value of total mass fraction corresponding to the specified gas saturation in a water and NCG system'
-    design = 'PorousFlowFluidStateWaterNCGIC.md'
+    design = 'PorousFlowFluidStateIC.md'
     issues = '#9377'
   [../]
   [./brineco2_ic]
@@ -117,7 +117,7 @@
     csvdiff = "brineco2_ic_out.csv"
     threading = '!pthreads'
     requirement = 'PorousFlow shall calculate the initial value of total mass fraction corresponding to the specified gas saturation in a brine and CO2 system'
-    design = 'PorousFlowFluidStateBrineCO2IC.md'
+    design = 'PorousFlowFluidStateIC.md'
     issues = '#9377'
   [../]
   [./water_vapor_2phase]
