@@ -68,7 +68,7 @@
     library_mode = 'DYNAMIC'
     valgrind = 'NONE'
     cli_args = 'UserObjects/uexternaldb/execute_on=INITIAL'
-    expect_out = 'getoutdir           1 \. '
+    expect_out = 'getoutdir           0 '
     requirement = 'The Abaqus UEXTERNALDB interface shall provide the Abaqus API to obtain the '
                   'simulation output directory.'
     # skip test if test is being run out-of-tree. Issue Ref: #25279
