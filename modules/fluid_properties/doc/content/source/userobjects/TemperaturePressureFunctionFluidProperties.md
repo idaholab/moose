@@ -2,6 +2,23 @@
 
 !syntax description /FluidProperties/TemperaturePressureFunctionFluidProperties
 
+The temperature and pressure will be passed as respectively the x and y spatial arguments of the
+functions. The following relations hold true:
+
+\begin{equation}
+\begin{aligned}
+  x = T \\
+  y = P \\
+  \rho = \rho^{user}(time=0, (x=T, y=P, z=0)) \\
+  \mu = \mu^{user}(time=0, (x=T, y=P, z=0)) \\
+  k = k^{user}(time=0, (x=T, y=P, z=0)) \\
+  c_v = c_v^{user} \\
+  e = c_v * T
+\end{aligned}
+\end{equation}
+
+with $T$ the temperature, $P$ the pressure, $\rho$ the density, $\mu$ the dynamic viscosity, $k$ the thermal conductivity, $c_v$ the specific isochoric heat capacity, $e$ the specific energy and the $user$ exponent indicating a user-passed parameter.
+
 The derivatives of the fluid properties are obtained using the `Function`(s) gradient components
 and the appropriate derivative chaining for derived properties.
 
@@ -20,7 +37,11 @@ isochoric heat capacity, this material should only be used for nearly-incompress
 
 ## Example Input File Syntax
 
-!listing modules/fluid_properties/test/tests/temperature_pressure_function/exact.i block=FluidProperties
+In this example, temperature and pressure dependent density, dynamic viscosity and thermal conductivity of a fluid are being set using
+three `ParsedFunctions`. The functions are specified with the `x` and `y` coordinates, and are evaluated with respectively the temperature and
+pressure variables.
+
+!listing modules/fluid_properties/test/tests/temperature_pressure_function/exact.i block=Functions FluidProperties
 
 !syntax parameters /FluidProperties/TemperaturePressureFunctionFluidProperties
 

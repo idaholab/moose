@@ -41,7 +41,7 @@ public:
   virtual Real T_from_v_e(Real v, Real e) const override;
 
   /**
-   * Pressure from pressure and density
+   * Temperature from pressure and density
    *
    * @param[in] p          pressure (Pa)
    * @param[in] rho        density (kg/m$^3$)
@@ -50,7 +50,7 @@ public:
   virtual Real T_from_p_rho(Real p, Real rho) const;
 
   /**
-   * Pressure from pressure and specific enthalpy
+   * Temperature from pressure and specific enthalpy
    *
    * @param[in] p          pressure (Pa)
    * @param[in] h          specific enthalpy (J/kg)
@@ -211,7 +211,7 @@ public:
    * Specific internal energy from pressure and density
    *
    * @param[in] p        pressure (Pa)
-   * @param[in] rho     density (kg/m$^3$)
+   * @param[in] rho      density (kg/m$^3$)
    * @param[out] e       specific internal energy (J/kg)
    */
   virtual Real e_from_p_rho(Real p, Real rho) const override;

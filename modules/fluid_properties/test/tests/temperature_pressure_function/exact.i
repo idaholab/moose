@@ -177,5 +177,4 @@ T_initial = 400
 [Outputs]
   # Note that diffs wont be settled until timestep 2 because of order of execution
   csv = true
-  exodus = true
 []

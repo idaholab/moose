@@ -16,14 +16,18 @@ InputParameters
 TemperaturePressureFunctionFluidProperties::validParams()
 {
   InputParameters params = SinglePhaseFluidProperties::validParams();
-  params.addRequiredParam<FunctionName>("k", "Thermal conductivity function");
-  params.addRequiredParam<FunctionName>("rho", "Density function");
-  params.addRequiredParam<FunctionName>("mu", "Dynamic viscosity function");
+  params.addRequiredParam<FunctionName>(
+      "k", "Thermal conductivity function of temperature and pressure [W/(m-K)]");
+  params.addRequiredParam<FunctionName>("rho",
+                                        "Density function of temperature and pressure [kg/m^3]");
+  params.addRequiredParam<FunctionName>(
+      "mu", "Dynamic viscosity function of temperature and pressure [Pa-s]");
 
-  params.addRequiredRangeCheckedParam<Real>("cv", "cv > 0", "Constant isochoric specific heat");
+  params.addRequiredRangeCheckedParam<Real>(
+      "cv", "cv > 0", "Constant isochoric specific heat [J/(kg-K)]");
   params.addClassDescription(
-      "Single phase fluid properties that allows to provide thermal "
-      "conductivity, density, and viscosity as function of temperature and pressure.");
+      "Single-phase fluid properties that allows to provide thermal "
+      "conductivity, density, and viscosity as functions of temperature and pressure.");
   return params;
 }
 
