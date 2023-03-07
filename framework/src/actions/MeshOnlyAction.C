@@ -100,8 +100,7 @@ MeshOnlyAction::act()
   {
     for (auto & name : saved_mesh_names)
     {
-      if (name != mesh_generator_system.mainMeshGeneratorName() &&
-          name != mesh_generator_system.mainDisplacedMeshGeneratorName())
+      if (name != mesh_generator_system.mainMeshGeneratorName())
       {
         // We now have ownership of this mesh, it will get destructed out of scope
         auto mesh = mesh_generator_system.getSavedMeshes(name);

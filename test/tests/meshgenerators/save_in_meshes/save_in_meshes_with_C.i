@@ -20,10 +20,21 @@
     ymax = 5
   []
 
+  [C]
+    type = GeneratedMeshGenerator
+    dim = 1
+    nx = 3
+    xmin = -3
+    xmax = 0
+    save_with_name = 'C'
+  []
+
   [A_and_B]
     type = MeshCollectionGenerator
     inputs = 'A B'
   []
+
+  final_generator = 'A_and_B'
 []
 
 [Outputs]

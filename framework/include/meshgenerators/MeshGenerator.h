@@ -131,7 +131,9 @@ public:
    * @returns Whether or not the MeshGenerator with the name \p name is a parent of this
    * MeshGenerator.
    */
-  bool isParentMeshGenerator(const MeshGeneratorName & name) const;
+  bool isParentMeshGenerator(const MeshGeneratorName & name, const bool direct = true) const;
+
+  bool isChildMeshGenerator(const MeshGeneratorName & name, const bool direct = true) const;
 
   /**
    * @returns Whether or not the name \p name is registered as a "null" mesh, that is,

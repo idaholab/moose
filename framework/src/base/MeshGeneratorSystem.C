@@ -184,13 +184,30 @@ MeshGeneratorSystem::createMeshGeneratorOrder()
   // We dare not sort these based on address!
   DependencyResolver<MeshGenerator *, MeshGenerator::Comparator> resolver;
 
-  // Add all of the dependencies into the resolver
+  std::vector<std::string> save_in_generators;
+  for (const auto & it : _mesh_generators)
+    if (it.second->saveMesh())
+      save_in_generators.push_back(it.second->name());
+
+  // Conditionally add all of the dependencies into the resolver
   for (const auto & it : _mesh_generators)
   {
     MeshGenerator * mg = it.second.get();
-    resolver.addItem(mg);
-    for (const auto & dep_mg : mg->getParentMeshGenerators())
-      resolver.addEdge(&getMeshGeneratorInternal(dep_mg->name()), mg);
+
+    if (_final_generator_name.empty() ||       // no final generator set
+        mg->name() == _final_generator_name || // final generator
+        mg->saveMesh() ||                      // needs to be saved
+        (_final_generator_name.size() &&
+         mg->isChildMeshGenerator(_final_generator_name, false)) || // final is a child
+        std::find_if(save_in_generators.begin(),
+                     save_in_generators.end(),
+                     [&mg](const auto & name) { return mg->isChildMeshGenerator(name, false); }) !=
+            save_in_generators.end()) // save in is a child
+    {
+      resolver.addItem(mg);
+      for (const auto & dep_mg : mg->getParentMeshGenerators())
+        resolver.addEdge(&getMeshGeneratorInternal(dep_mg->name()), mg);
+    }
   }
 
   // ...and sort them
@@ -217,11 +234,15 @@ MeshGeneratorSystem::createMeshGeneratorOrder()
                MooseUtils::join(names, " <- "));
   }
 
+  mooseAssert(_ordered_mesh_generators.size(), "No mesh generators found");
+
   const auto & final_generators = _ordered_mesh_generators.back();
 
   // We haven't forced a final generator yet
   if (_final_generator_name.empty())
   {
+    mooseAssert(final_generators.size(), "Empty vector");
+
     // See if we have multiple independent trees of generators
     const auto ancestor_list = resolver.getAncestors(final_generators.back());
     if (ancestor_list.size() != resolver.size() && _final_generator_name.empty())
@@ -287,17 +308,16 @@ MeshGeneratorSystem::executeMeshGenerators()
     for (const auto & generator : generator_set)
       if (generator->saveMesh())
       {
-        to_save_in_meshes.emplace(generator->getSavedMeshName(), &getMeshGeneratorOutput(generator->name()));
+        if (_final_generator_name == generator->name())
+          generator->paramError("save_with_name",
+                                "Cannot use the save in capability with the final mesh generator");
+        to_save_in_meshes.emplace(generator->getSavedMeshName(),
+                                  &getMeshGeneratorOutput(generator->name()));
       }
 
   // Grab the outputs from the final generator so MeshGeneratorMesh can pick them up
   to_save_in_meshes.emplace(mainMeshGeneratorName(),
                             &getMeshGeneratorOutput(_final_generator_name));
-
-  // Need to grab two if we're going to be making a displaced mesh
-  if (_app.actionWarehouse().displacedMesh())
-    to_save_in_meshes.emplace(mainDisplacedMeshGeneratorName(),
-                              &getMeshGeneratorOutput(_final_generator_name));
 
   // Run the MeshGenerators in the proper order
   for (const auto & generator_set : _ordered_mesh_generators)
@@ -325,22 +345,16 @@ MeshGeneratorSystem::executeMeshGenerators()
         for (; output_it != outputs.end(); ++output_it)
           (*output_it) = copy_from.clone();
       }
-
-      // Once we hit the generator we want, we'll terminate the loops (this might be the last
-      // iteration anyway)
-      if (_final_generator_name == name)
-      {
-        // Move all save in meshes from to_save_in_meshes to _save_in_meshes
-        for (auto & [name, mesh_ptr] : to_save_in_meshes)
-        {
-          mooseAssert(mesh_ptr, "Invalid pointer");
-          mooseAssert(*mesh_ptr, "Invalid pointer");
-          mooseAssert(!_save_in_meshes.count(name), "Mesh has already been saved");
-          _save_in_meshes.emplace(name, std::move(*mesh_ptr));
-        }
-        return;
-      }
     }
+  }
+
+  for (auto & [name, mesh_ptr] : to_save_in_meshes)
+  {
+    mooseAssert(mesh_ptr, "Invalid pointer");
+    mooseAssert(*mesh_ptr, "Invalid pointer");
+    if (name != mainMeshGeneratorName())
+      mooseAssert(_save_in_meshes.count(name), "Mesh has not been requested for save");
+    _save_in_meshes[name] = std::move(*mesh_ptr);
   }
 }
 
@@ -357,6 +371,16 @@ MeshGeneratorSystem::createMeshGenerator(const std::string & generator_name)
 
   std::shared_ptr<MeshGenerator> mg =
       _app.getFactory().create<MeshGenerator>(type, generator_name, params);
+
+  if (mg->saveMesh())
+  {
+    if (_save_in_meshes.count(mg->getSavedMeshName()))
+      mg->paramError("save_with_name",
+                     "The save with name '",
+                     mg->getSavedMeshName(),
+                     "' has already been used");
+    _save_in_meshes.emplace(mg->getSavedMeshName(), nullptr);
+  }
 
   // Setup the children and parents
   for (const auto & dependency : mg->getRequestedMeshGenerators())

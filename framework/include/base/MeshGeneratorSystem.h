@@ -112,7 +112,7 @@ public:
   /**
    * Get all user-defined saved meshes except main and main_displaced
    */
-   std::vector<std::string> getSavedMeshesNames()const;
+  std::vector<std::string> getSavedMeshesNames() const;
 
   /**
    * @returns Whether or not a mesh generator exists with the name \p name.
@@ -139,8 +139,7 @@ public:
    */
   bool appendingMeshGenerators() const;
 
-  static std::string mainMeshGeneratorName() { return "main"; }
-  static std::string mainDisplacedMeshGeneratorName() { return "main_displaced"; }
+  static std::string mainMeshGeneratorName() { return "main"; };
 
 private:
   /**
@@ -200,5 +199,6 @@ private:
 
   /// Holds the map of save in mesh -> name
   std::map<std::string, std::unique_ptr<MeshBase>> _save_in_meshes;
-
 };
+
+

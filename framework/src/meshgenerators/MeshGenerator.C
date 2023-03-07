@@ -27,7 +27,7 @@ MeshGenerator::validParams()
                         "Whether or not to show mesh info after generating the mesh "
                         "(bounding box, element types, sidesets, nodesets, subdomains, etc)");
   params.addParam<std::string>(
-      "save_with_name", "", "Save the current mesh with user-defined name");
+      "save_with_name", std::string(), "Save the current mesh with user-defined name");
 
   params.addParam<bool>(
       "output", false, "Whether or not to output the mesh file after generating the mesh");
@@ -46,6 +46,11 @@ MeshGenerator::MeshGenerator(const InputParameters & parameters)
     _mesh(_app.actionWarehouse().mesh()),
     _save_with_name(getParam<std::string>("save_with_name"))
 {
+  if (_save_with_name == _app.getMeshGeneratorSystem().mainMeshGeneratorName())
+    paramError("save_with_name",
+               "The user-defined mesh name: '",
+               _save_with_name,
+               "' has already been used by default mesh");
 }
 
 const MeshGeneratorName *
@@ -318,12 +323,29 @@ MeshGenerator::addChildMeshGenerator(const MeshGenerator & mg, const AddParentCh
 }
 
 bool
-MeshGenerator::isParentMeshGenerator(const MeshGeneratorName & name) const
+MeshGenerator::isParentMeshGenerator(const MeshGeneratorName & name,
+                                     const bool direct /* = true */) const
 {
   return std::find_if(getParentMeshGenerators().begin(),
                       getParentMeshGenerators().end(),
-                      [&name](const auto & mg)
-                      { return mg->name() == name; }) != getParentMeshGenerators().end();
+                      [&name, &direct](const auto & mg)
+                      {
+                        return mg->name() == name ||
+                               (!direct && mg->isParentMeshGenerator(name, /* direct = */ false));
+                      }) != getParentMeshGenerators().end();
+}
+
+bool
+MeshGenerator::isChildMeshGenerator(const MeshGeneratorName & name,
+                                    const bool direct /* = true */) const
+{
+  return std::find_if(getChildMeshGenerators().begin(),
+                      getChildMeshGenerators().end(),
+                      [&name, &direct](const auto & mg)
+                      {
+                        return mg->name() == name ||
+                               (!direct && mg->isChildMeshGenerator(name, /* direct = */ false));
+                      }) != getChildMeshGenerators().end();
 }
 
 void
@@ -337,18 +359,14 @@ MeshGenerator::declareNullMeshName(const MeshGeneratorName & name)
 bool
 MeshGenerator::saveMesh()
 {
-  if (_save_with_name != "")
+  if (!_save_with_name.empty())
     return true;
+
   return false;
 }
 
 const std::string
 MeshGenerator::getSavedMeshName()
 {
-  if (_save_with_name == _app.getMeshGeneratorSystem().mainMeshGeneratorName() ||
-      _save_with_name == _app.getMeshGeneratorSystem().mainDisplacedMeshGeneratorName())
-  {
-    return (_app.name() + _save_with_name);
-  }
   return _save_with_name;
 }
