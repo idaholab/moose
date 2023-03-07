@@ -39,7 +39,7 @@ PenaltyPeriodicSegmentalConstraint::PenaltyPeriodicSegmentalConstraint(
     _kappa_aux(coupledScalarValue("sigma")),
     _pen_scale(getParam<Real>("penalty_value"))
 {
-  if(_kappa_aux_ptr->kind() != Moose::VarKindType::VAR_AUXILIARY)
+  if (_kappa_aux_ptr->kind() != Moose::VarKindType::VAR_AUXILIARY)
     mooseError("Must assign auxiliary scalar variable to sigma, rather than nonlinear variable");
 }
 

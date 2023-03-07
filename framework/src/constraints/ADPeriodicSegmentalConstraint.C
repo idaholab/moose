@@ -31,7 +31,7 @@ ADPeriodicSegmentalConstraint::ADPeriodicSegmentalConstraint(const InputParamete
     _ka_order(_kappa_aux_ptr->order()),
     _kappa_aux(coupledScalarValue("sigma"))
 {
-  if(_kappa_aux_ptr->kind() != Moose::VarKindType::VAR_AUXILIARY)
+  if (_kappa_aux_ptr->kind() != Moose::VarKindType::VAR_AUXILIARY)
     mooseError("Must assign auxiliary scalar variable to sigma, rather than nonlinear variable");
 }
 
