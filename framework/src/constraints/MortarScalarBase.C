@@ -232,7 +232,6 @@ MortarScalarBase::computeScalarOffDiagJacobian()
 void
 MortarScalarBase::computeOffDiagJacobianScalar(Moose::MortarType mortar_type, unsigned int svar_num)
 {
-
   unsigned int test_space_size = 0;
   std::vector<dof_id_type> dof_indices;
   Real scaling_factor = 1;
@@ -269,14 +268,12 @@ MortarScalarBase::computeOffDiagJacobianScalar(Moose::MortarType mortar_type, un
     initScalarQpOffDiagJacobian(mortar_type, svar_num);
     const Real dV = _JxW_msm[_qp] * _coord[_qp];
     for (_h = 0; _h < s_order; _h++)
-    {
       for (_i = 0; _i < test_space_size; _i++)
       { // This assumes Galerkin, i.e. the test and trial functions are the
         // same
         _j = _i;
         _local_ke(_i, _h) += computeQpOffDiagJacobianScalar(mortar_type, svar_num) * dV;
       }
-    }
   }
 
   for (const auto & matrix_tag : _matrix_tags)

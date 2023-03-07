@@ -63,7 +63,6 @@ TestPeriodicSole::initScalarQpResidual()
 Real
 TestPeriodicSole::computeQpResidual(const Moose::MortarType mortar_type)
 {
-
   // Compute penalty parameter times x-jump times average heat flux
   RealVectorValue dx(_phys_points_primary[_qp] - _phys_points_secondary[_qp]);
   Real k1, k2;

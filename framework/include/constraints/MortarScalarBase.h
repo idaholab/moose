@@ -40,7 +40,8 @@ public:
    */
   const MooseVariableScalar & scalarVariable() const
   {
-    mooseAssert(_kappa_var_ptr, "kappa pointer should have been set in the constructor");
+    if (!_kappa_var_ptr)
+      mooseError("kappa pointer should have been set in the constructor");
     return *_kappa_var_ptr;
   }
 

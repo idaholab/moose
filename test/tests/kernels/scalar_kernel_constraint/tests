@@ -18,7 +18,7 @@
     csvdiff = 'scalar_constraint_kernel_LU_out.csv'
     # This problem only has 4 elements and therefore does not seem to run on > 4 procs.
     max_parallel = 4
-    requirement = 'The system shall solve the constrained Neumann problem using the Lagrange multiplier approach with LU solver.'
+    requirement = 'The system shall solve the constrained Neumann problem using the Lagrange multiplier approach with an LU solver.'
   [../]
 
   [./bipass]
@@ -34,6 +34,6 @@
     type = RunException
     input = 'diffusion_override_scalar.i'
     expect_err = 'A scalar_variable has been set and compute_scalar_residuals=true, but the computeScalarQpResidual method was not overridden. Accidental call of base class?'
-    requirement = 'User can only assign scalars and compute residuals if the Qp class is overridden.'
+    requirement = 'The system shall error if a derived object uses scalars and computes scalar residuals but does not override the quadrature point residual calculation routine.'
   [../]
 []
