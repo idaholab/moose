@@ -100,7 +100,6 @@ TestPeriodicSole::computeQpResidual(const Moose::MortarType mortar_type)
 Real
 TestPeriodicSole::computeScalarQpResidual()
 {
-
   // Stability/penalty term for residual of scalar variable
   Real r = (_pen_scale * _tau_s) * _temp_jump_global;
   RealVectorValue dx(_phys_points_primary[_qp] - _phys_points_secondary[_qp]);
@@ -130,7 +129,6 @@ TestPeriodicSole::computeScalarQpResidual()
 Real
 TestPeriodicSole::computeScalarQpJacobian()
 {
-
   // Stability/penalty term for Jacobian of scalar variable
   RealVectorValue dx(_phys_points_primary[_qp] - _phys_points_secondary[_qp]);
 
