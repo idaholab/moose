@@ -2,7 +2,7 @@
   [intermediate_mesh_output]
   design = 'MeshGenerator.md'
   issues = '#23486'
-  requirement = 'The system shall be capable of output and check the intermediate mesh object besides the final mesh file'
+  requirement = 'The system shall support the file output of intermediate generated meshes in'
 
     [REPLICATED]
         type = 'Exodiff'
@@ -12,7 +12,7 @@
         recover = false
         mesh_mode = 'REPLICATED'
 
-        detail = "Output only the left mesh block in a seperate mesh file"
+        detail = "Output only the left mesh block in a serialized mesh form"
     []
     [Distributed]
       type = 'Exodiff'
@@ -24,7 +24,7 @@
       min_parallel = 2
       max_parallel = 2
 
-      detail = "Output only the left mesh block in a seperate mesh file in distributed mesh mode"
+      detail = "Output only the left mesh block in a distributed mesh form"
     []
 
   []

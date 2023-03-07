@@ -15,7 +15,7 @@
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/checkpoint_io.h"
-#include <libmesh/nemesis_io.h>
+#include "libmesh/nemesis_io.h"
 
 InputParameters
 MeshGenerator::validParams()
