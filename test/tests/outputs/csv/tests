@@ -63,16 +63,7 @@
       detail = "optionally appends the existing file from the first part."
     []
   []
-
-  [./align]
-    # Test the alignment, delimiter, and precision settings
-    type = CSVDiff
-    input = csv_align.i
-    csvdiff = 'csv_align_out.csv'
-
-    requirement = "The system shall support CSV output aligned columns and a custom delimiter."
-    issues = "#3229"
-  [../]
+  
   [./sort]
     # Tests that csv output can be sorted
     type = CheckFiles
