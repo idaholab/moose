@@ -332,10 +332,13 @@ public:
   using SinglePhaseFluidProperties::T_from_v_e;
   using SinglePhaseFluidProperties::v_from_p_T;
 
+protected:
   /// Functions are constructed after fluid properties, so we delay the getting of the Function
   void initialSetup() override;
 
-protected:
+  /// whether the object is initialized, eg, the functions have been retrieved from the problem
+  bool _initialized;
+
   /// function defining thermal conductivity as a function of temperature and pressure
   const Function * _k_function;
 

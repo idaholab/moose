@@ -23,8 +23,6 @@ TEST_F(TemperaturePressureFunctionFluidPropertiesTest, fluidName)
  */
 TEST_F(TemperaturePressureFunctionFluidPropertiesTest, properties)
 {
-  _fp->initialSetup();
-
   const Real cv = 4186.0;
 
   const Real tol = REL_TOL_CONSISTENCY;
@@ -104,7 +102,6 @@ TEST_F(TemperaturePressureFunctionFluidPropertiesTest, properties)
  */
 TEST_F(TemperaturePressureFunctionFluidPropertiesTest, derivatives)
 {
-  _fp->initialSetup();
   const Real tol = REL_TOL_DERIVATIVE;
   const Real large_tol = 30 * tol;
 
@@ -146,7 +143,6 @@ TEST_F(TemperaturePressureFunctionFluidPropertiesTest, derivatives)
  */
 TEST_F(TemperaturePressureFunctionFluidPropertiesTest, combined)
 {
-  _fp->initialSetup();
   const Real p = 1.0e6;
   const Real T = 300.0;
   const Real tol = REL_TOL_CONSISTENCY;

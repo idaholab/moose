@@ -29,7 +29,7 @@ TemperaturePressureFunctionFluidProperties::validParams()
 
 TemperaturePressureFunctionFluidProperties::TemperaturePressureFunctionFluidProperties(
     const InputParameters & parameters)
-  : SinglePhaseFluidProperties(parameters), _cv(getParam<Real>("cv"))
+  : SinglePhaseFluidProperties(parameters), _initialized(false), _cv(getParam<Real>("cv"))
 {
 }
 
@@ -39,6 +39,7 @@ TemperaturePressureFunctionFluidProperties::initialSetup()
   _k_function = &getFunction("k");
   _rho_function = &getFunction("rho");
   _mu_function = &getFunction("mu");
+  _initialized = true;
 }
 
 std::string
@@ -163,6 +164,8 @@ TemperaturePressureFunctionFluidProperties::k_from_v_e(Real v, Real e) const
 Real
 TemperaturePressureFunctionFluidProperties::rho_from_p_T(Real pressure, Real temperature) const
 {
+  if (!_initialized)
+    const_cast<TemperaturePressureFunctionFluidProperties *>(this)->initialSetup();
   return _rho_function->value(0, Point(temperature, pressure, 0));
 }
 
@@ -315,6 +318,8 @@ TemperaturePressureFunctionFluidProperties::cv_from_p_T(
 Real
 TemperaturePressureFunctionFluidProperties::mu_from_p_T(Real pressure, Real temperature) const
 {
+  if (!_initialized)
+    const_cast<TemperaturePressureFunctionFluidProperties *>(this)->initialSetup();
   return _mu_function->value(0, Point(temperature, pressure, 0));
 }
 
@@ -331,6 +336,8 @@ TemperaturePressureFunctionFluidProperties::mu_from_p_T(
 Real
 TemperaturePressureFunctionFluidProperties::k_from_p_T(Real pressure, Real temperature) const
 {
+  if (!_initialized)
+    const_cast<TemperaturePressureFunctionFluidProperties *>(this)->initialSetup();
   return _k_function->value(0, Point(temperature, pressure, 0));
 }
 
