@@ -27,3 +27,7 @@
   []
 []
 
+[Outputs]
+  exodus = true
+[]
+
