@@ -29,6 +29,6 @@ TEST(SplitFileName, validName)
 
   full = "valid.txt";
   split = MooseUtils::splitFileName(full);
-  EXPECT_EQ(split.first.compare("."), 0);
+  EXPECT_EQ(split.first.compare(""), 0);
   EXPECT_EQ(split.second.compare("valid.txt"), 0);
 }
