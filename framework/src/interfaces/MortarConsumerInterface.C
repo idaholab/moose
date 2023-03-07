@@ -124,7 +124,8 @@ MortarConsumerInterface::MortarConsumerInterface(const MooseObject * moose_objec
     _qrule_face(_mci_assembly.qRuleFace()),
     _lower_secondary_elem(_mci_assembly.lowerDElem()),
     _lower_primary_elem(_mci_assembly.neighborLowerDElem()),
-    _JxW_msm(_mci_assembly.jxWMortar())
+    _JxW_msm(_mci_assembly.jxWMortar()),
+    _msm_elem(_mci_assembly.msmElem())
 {
   const bool displaced = moose_object->isParamValid("use_displaced_mesh")
                              ? moose_object->getParam<bool>("use_displaced_mesh")

@@ -154,6 +154,9 @@ protected:
   /// The element Jacobian times weights
   const std::vector<Real> & _JxW_msm;
 
+  /// The current mortar segment element
+  const Elem * const & _msm_elem;
+
   /// the normals
   std::vector<Point> _normals;
 

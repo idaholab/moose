@@ -163,7 +163,7 @@ WeightedGapUserObject::computeQpIProperties()
 
   // Get the _dof_to_weighted_gap map
   const DofObject * dof = _is_weighted_gap_nodal
-                              ? static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i))
+                              ? static_cast<const DofObject *>(_current_node)
                               : static_cast<const DofObject *>(_lower_secondary_elem);
 
   if (_interpolate_normals)
@@ -184,11 +184,19 @@ WeightedGapUserObject::initialize()
 void
 WeightedGapUserObject::executeMortarSegment()
 {
+  _i = libMesh::invalid_uint;
+  for (const auto i : make_range(_test->size()))
+    if (_lower_secondary_elem->node_ptr(i) == _current_node)
+    {
+      _i = i;
+      break;
+    }
+  mooseAssert(_i != libMesh::invalid_uint, "We should have determined _i");
+
   for (_mortar_qp = 0; _mortar_qp < _qrule_msm->n_points(); _mortar_qp++)
   {
     computeQpProperties();
-    for (_i = 0; _i < _test->size(); ++_i)
-      computeQpIProperties();
+    computeQpIProperties();
   }
 }
 

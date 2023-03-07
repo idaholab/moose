@@ -1832,6 +1832,11 @@ public:
    */
   bool computingResidualAndJacobian() const { return _computing_residual_and_jacobian; }
 
+  /**
+   * @return The current mortar segment element
+   */
+  const Elem * const & msmElem() const { return _msm_elem; }
+
 protected:
   /**
    * Just an internal helper function to reinit the volume FE objects.
@@ -2684,6 +2689,8 @@ protected:
   ElemSideBuilder _current_neighbor_side_elem_builder;
   /// In place side element builder for computeFaceMap()
   ElemSideBuilder _compute_face_map_side_elem_builder;
+
+  const Elem * _msm_elem = nullptr;
 };
 
 template <typename OutputType>
