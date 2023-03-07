@@ -7,6 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#pragma once
+
 #include "Assembly.h"
 #include "FEProblemBase.h"
 #include "MaterialBase.h"
@@ -76,7 +78,8 @@ loopOverMortarSegments(
     const std::map<SubdomainID, std::deque<MaterialBase *>> & secondary_ip_sub_to_mats,
     const std::map<SubdomainID, std::deque<MaterialBase *>> & primary_ip_sub_to_mats,
     const std::deque<MaterialBase *> & secondary_boundary_mats,
-    const ActionFunctor act)
+    const ActionFunctor act,
+    const bool reinit_mortar_user_objects)
 {
   const auto & primary_secondary_boundary_id_pair = amg.primarySecondaryBoundaryIDPair();
 
@@ -294,6 +297,9 @@ loopOverMortarSegments(
                                      &secondary_ip_mats);
       fe_problem.reinitMaterialsBoundary(
           secondary_boundary_id, /*tid=*/tid, /*swap_stateful=*/false, &secondary_boundary_mats);
+
+      if (reinit_mortar_user_objects)
+        fe_problem.reinitMortarUserObjects(primary_boundary_id, secondary_boundary_id, displaced);
 
       act();
 

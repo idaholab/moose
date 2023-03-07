@@ -253,8 +253,13 @@ ComputeWeightedGapCartesianLMMechanicalContact::computeJacobian(const Moose::Mor
 void
 ComputeWeightedGapCartesianLMMechanicalContact::post()
 {
-  Moose::Mortar::Contact::communicateGaps(
-      _dof_to_weighted_gap, this->processor_id(), _mesh, _nodal, _normalize_c, _communicator);
+  Moose::Mortar::Contact::communicateGaps(_dof_to_weighted_gap,
+                                          this->processor_id(),
+                                          _mesh,
+                                          _nodal,
+                                          _normalize_c,
+                                          _communicator,
+                                          false);
 
   for (const auto & pr : _dof_to_weighted_gap)
   {
@@ -272,8 +277,13 @@ void
 ComputeWeightedGapCartesianLMMechanicalContact::incorrectEdgeDroppingPost(
     const std::unordered_set<const Node *> & inactive_lm_nodes)
 {
-  Moose::Mortar::Contact::communicateGaps(
-      _dof_to_weighted_gap, this->processor_id(), _mesh, _nodal, _normalize_c, _communicator);
+  Moose::Mortar::Contact::communicateGaps(_dof_to_weighted_gap,
+                                          this->processor_id(),
+                                          _mesh,
+                                          _nodal,
+                                          _normalize_c,
+                                          _communicator,
+                                          false);
 
   for (const auto & pr : _dof_to_weighted_gap)
   {

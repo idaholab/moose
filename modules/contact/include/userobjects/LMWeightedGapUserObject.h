@@ -25,12 +25,12 @@ public:
   LMWeightedGapUserObject(const InputParameters & parameters);
 
   virtual const ADVariableValue & contactForce() const override;
-  virtual void reinit(const Elem &) override {}
-  virtual bool hasDof(const DofObject & dof_object) const override;
+  virtual void reinit() override {}
 
 protected:
   virtual const VariableTestValue & test() const override;
   virtual bool isWeightedGapNodal() const override;
+  virtual bool constrainedByOwner() const override { return true; }
 
   /// The Lagrange multiplier variable representing the contact pressure
   const MooseVariableFE<Real> * const _lm_var;

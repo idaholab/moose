@@ -61,8 +61,6 @@ WeightedGapVelAux::WeightedGapVelAux(const InputParameters & parameters)
 Real
 WeightedGapVelAux::computeValue()
 {
-  setNormals();
-
   _weighted_gap_velocity = 0;
   for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
   {

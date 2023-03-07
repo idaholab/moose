@@ -87,6 +87,7 @@ MortarNodalAuxKernelTempl<ComputeValueType>::compute()
   auto act_functor = [&value, &total_volume, this]()
   {
     _msm_volume = 0;
+    setNormals();
     value += computeValue();
     total_volume += _msm_volume;
   };
@@ -104,7 +105,8 @@ MortarNodalAuxKernelTempl<ComputeValueType>::compute()
                                         _secondary_ip_sub_to_mats,
                                         _primary_ip_sub_to_mats,
                                         _secondary_boundary_mats,
-                                        act_functor);
+                                        act_functor,
+                                        /*reinit_mortar_user_objects=*/false);
 
   // We have to reinit the node for this variable in order to get the dof index set for the node
   _var.reinitNode();

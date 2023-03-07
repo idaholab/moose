@@ -84,8 +84,6 @@ MortarArchardsLawAux::MortarArchardsLawAux(const InputParameters & parameters)
 Real
 MortarArchardsLawAux::computeValue()
 {
-  setNormals();
-
   _worn_depth = 0;
   for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
   {

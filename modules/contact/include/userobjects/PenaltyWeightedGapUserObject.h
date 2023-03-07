@@ -25,12 +25,12 @@ public:
   PenaltyWeightedGapUserObject(const InputParameters & parameters);
 
   virtual const ADVariableValue & contactForce() const override;
-  virtual void reinit(const Elem & lower_d_secondary_elem) override;
-  virtual bool hasDof(const DofObject & dof_object) const override;
+  virtual void reinit() override;
 
 protected:
   virtual const VariableTestValue & test() const override;
   virtual bool isWeightedGapNodal() const override;
+  virtual bool constrainedByOwner() const override { return false; }
 
   /// The penalty factor
   const Real _penalty;

@@ -53,12 +53,12 @@ public:
   /**
    * Method for computing the residual
    */
-  virtual void computeResidual() override;
+  virtual void computeResidual() override final;
 
   /**
    * Method for computing the Jacobian
    */
-  virtual void computeJacobian() override;
+  virtual void computeJacobian() override final;
 
   /**
    * compute the residual for the specified element type

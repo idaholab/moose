@@ -87,7 +87,10 @@ ComputeMortarFunctor::operator()(const Moose::ComputeType compute_type)
       case Moose::ComputeType::Residual:
       {
         for (auto * const mc : _mortar_constraints)
+        {
+          mc->setNormals();
           mc->computeResidual();
+        }
 
         _assembly.cacheResidual();
         _assembly.cacheResidualNeighbor();
@@ -102,7 +105,10 @@ ComputeMortarFunctor::operator()(const Moose::ComputeType compute_type)
       case Moose::ComputeType::Jacobian:
       {
         for (auto * const mc : _mortar_constraints)
+        {
+          mc->setNormals();
           mc->computeJacobian();
+        }
 
         _assembly.cacheJacobianMortar();
 
@@ -114,7 +120,10 @@ ComputeMortarFunctor::operator()(const Moose::ComputeType compute_type)
       case Moose::ComputeType::ResidualAndJacobian:
       {
         for (auto * const mc : _mortar_constraints)
+        {
+          mc->setNormals();
           mc->computeResidualAndJacobian();
+        }
 
         _assembly.cacheResidual();
         _assembly.cacheResidualNeighbor();
@@ -146,7 +155,8 @@ ComputeMortarFunctor::operator()(const Moose::ComputeType compute_type)
                                             _secondary_ip_sub_to_mats,
                                             _primary_ip_sub_to_mats,
                                             _secondary_boundary_mats,
-                                            act_functor);
+                                            act_functor,
+                                            /*reinit_mortar_user_objects=*/true);
     }
     catch (libMesh::LogicError & e)
     {

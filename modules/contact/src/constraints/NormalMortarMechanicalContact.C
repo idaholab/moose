@@ -35,20 +35,6 @@ NormalMortarMechanicalContact::NormalMortarMechanicalContact(const InputParamete
 {
 }
 
-void
-NormalMortarMechanicalContact::computeResidual()
-{
-  _weighted_gap_uo.reinit(*_lower_secondary_elem);
-  ADMortarLagrangeConstraint::computeResidual();
-}
-
-void
-NormalMortarMechanicalContact::computeJacobian()
-{
-  _weighted_gap_uo.reinit(*_lower_secondary_elem);
-  ADMortarLagrangeConstraint::computeJacobian();
-}
-
 ADReal
 NormalMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
 {

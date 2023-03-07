@@ -20,11 +20,6 @@ public:
 
   NormalMortarMechanicalContact(const InputParameters & parameters);
 
-  using ADMortarLagrangeConstraint::computeJacobian;
-  using ADMortarLagrangeConstraint::computeResidual;
-  virtual void computeResidual() override;
-  virtual void computeJacobian() override;
-
 protected:
   ADReal computeQpResidual(Moose::MortarType type) final;
 

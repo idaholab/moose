@@ -41,14 +41,19 @@ public:
   static InputParameters validParams();
 
   /**
-   * Returns the primary lower dimensional subdomain id
+   * @return The primary lower dimensional subdomain id
    */
   SubdomainID primarySubdomain() const { return _primary_subdomain_id; }
 
   /**
-   * Returns the secondary lower dimensional subdomain id
+   * @return The secondary lower dimensional subdomain id
    */
   SubdomainID secondarySubdomain() const { return _secondary_subdomain_id; }
+
+  /**
+   * @retun Whether this object lies on the given primary-secondary boundary pair
+   */
+  bool onInterface(BoundaryID primary_boundary_id, BoundaryID secondary_boundary_id) const;
 
 protected:
   const std::set<SubdomainID> & getHigherDimSubdomainIDs() const
@@ -68,11 +73,6 @@ protected:
    * the _normals member should be indexed with _i instead of _qp
    */
   bool interpolateNormals() const { return _interpolate_normals; }
-
-  /**
-   * Set the normals vector
-   */
-  void setNormals();
 
   /**
    * Get rid of AD derivative entries by dof index
@@ -161,8 +161,19 @@ protected:
   std::vector<Point> _normals;
 
 private:
+  /**
+   * Set the normals vector
+   */
+  void setNormals();
+
   // Pointer to automatic mortar generation object to give constraints access to mortar geometry
   const AutomaticMortarGeneration * _amg;
+
+  friend class ComputeMortarFunctor;
+  template <typename>
+  friend class MortarNodalAuxKernelTempl;
+  friend class MortarUserObjectThread;
+  friend void FEProblemBase::reinitMortarUserObjects(BoundaryID, BoundaryID, bool);
 };
 
 inline const AutomaticMortarGeneration &
@@ -217,4 +228,11 @@ MortarConsumerInterface::trimInteriorNodeDerivatives(
           trimDerivative(remove_derivative_index, dual_number);
       }
     }
+}
+
+inline bool
+MortarConsumerInterface::onInterface(const BoundaryID primary_boundary_id,
+                                     const BoundaryID secondary_boundary_id) const
+{
+  return (primary_boundary_id == _primary_id) && (secondary_boundary_id == _secondary_id);
 }

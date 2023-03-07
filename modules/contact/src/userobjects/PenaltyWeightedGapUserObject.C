@@ -45,19 +45,15 @@ PenaltyWeightedGapUserObject::contactForce() const
 }
 
 void
-PenaltyWeightedGapUserObject::reinit(const Elem & lower_d_secondary_elem)
+PenaltyWeightedGapUserObject::reinit()
 {
-  mooseAssert(&lower_d_secondary_elem == _lower_secondary_elem,
-              "If these match we can simplify some things");
-  mooseAssert(lower_d_secondary_elem.n_nodes() == _test->size(), "These must match");
-
   _contact_force.resize(_qrule_msm->n_points());
   for (const auto qp : make_range(_qrule_msm->n_points()))
     _contact_force[qp] = 0;
 
-  for (const auto i : lower_d_secondary_elem.node_index_range())
+  for (const auto i : make_range(_test->size()))
   {
-    const Node * const node = lower_d_secondary_elem.node_ptr(i);
+    const Node * const node = _lower_secondary_elem->node_ptr(i);
     const auto & weighted_gap =
         libmesh_map_find(_dof_to_weighted_gap, static_cast<const DofObject *>(node)).first;
     const auto weighted_gap_for_calc = weighted_gap < 0 ? -weighted_gap : ADReal(0);
@@ -65,10 +61,4 @@ PenaltyWeightedGapUserObject::reinit(const Elem & lower_d_secondary_elem)
     for (const auto qp : make_range(_qrule_msm->n_points()))
       _contact_force[qp] += (test_i[qp] * _penalty) * weighted_gap_for_calc;
   }
-}
-
-bool
-PenaltyWeightedGapUserObject::hasDof(const DofObject & dof_object) const
-{
-  return dof_object.n_dofs(_disp_x_var->sys().number(), _disp_x_var->number());
 }

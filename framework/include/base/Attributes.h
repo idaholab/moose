@@ -34,7 +34,8 @@ enum class Interfaces
   BlockRestrictable = 1 << 13,
   BoundaryRestrictable = 1 << 14,
   Reporter = 1 << 15,
-  DomainUserObject = 1 << 16
+  DomainUserObject = 1 << 16,
+  MortarUserObject = 1 << 17
 };
 
 template <>

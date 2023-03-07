@@ -200,8 +200,13 @@ ComputeDynamicWeightedGapLMMechanicalContact::residualSetup()
 void
 ComputeDynamicWeightedGapLMMechanicalContact::post()
 {
-  Moose::Mortar::Contact::communicateGaps(
-      _dof_to_weighted_gap, this->processor_id(), _mesh, _nodal, _normalize_c, _communicator);
+  Moose::Mortar::Contact::communicateGaps(_dof_to_weighted_gap,
+                                          this->processor_id(),
+                                          _mesh,
+                                          _nodal,
+                                          _normalize_c,
+                                          _communicator,
+                                          false);
 
   if (_has_wear)
     communicateWear();
@@ -244,8 +249,13 @@ void
 ComputeDynamicWeightedGapLMMechanicalContact::incorrectEdgeDroppingPost(
     const std::unordered_set<const Node *> & inactive_lm_nodes)
 {
-  Moose::Mortar::Contact::communicateGaps(
-      _dof_to_weighted_gap, this->processor_id(), _mesh, _nodal, _normalize_c, _communicator);
+  Moose::Mortar::Contact::communicateGaps(_dof_to_weighted_gap,
+                                          this->processor_id(),
+                                          _mesh,
+                                          _nodal,
+                                          _normalize_c,
+                                          _communicator,
+                                          false);
 
   if (_has_wear)
     communicateWear();

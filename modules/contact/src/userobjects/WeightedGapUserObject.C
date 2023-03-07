@@ -9,32 +9,18 @@
 
 #include "WeightedGapUserObject.h"
 #include "MooseVariableField.h"
+#include "SubProblem.h"
 #include "MortarUtils.h"
 #include "MooseUtils.h"
 #include "MortarContactUtils.h"
 #include "libmesh/quadrature.h"
 
-namespace
-{
-const InputParameters &
-setBoundaryParam(const InputParameters & params_in)
-{
-  InputParameters & ret = const_cast<InputParameters &>(params_in);
-  ret.set<std::vector<BoundaryName>>("boundary") = {
-      params_in.get<BoundaryName>("secondary_boundary")};
-  return ret;
-}
-}
-
 InputParameters
 WeightedGapUserObject::validParams()
 {
-  InputParameters params = NodalUserObject::validParams();
+  InputParameters params = MortarUserObject::validParams();
   params += MortarConsumerInterface::validParams();
   params += TwoMaterialPropertyInterface::validParams();
-  params.set<bool>("ghost_point_neighbors") = true;
-  params.suppressParameter<std::vector<BoundaryName>>("boundary");
-  params.suppressParameter<std::vector<SubdomainName>>("block");
   params.addRequiredCoupledVar("disp_x", "The x displacement variable");
   params.addRequiredCoupledVar("disp_y", "The y displacement variable");
   params.addCoupledVar("disp_z", "The z displacement variable");
@@ -54,9 +40,7 @@ WeightedGapUserObject::validParams()
 }
 
 WeightedGapUserObject::WeightedGapUserObject(const InputParameters & parameters)
-  : NodalUserObject(setBoundaryParam(parameters)),
-    MortarConsumerInterface(this),
-    TwoMaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, getBoundaryIDs()),
+  : MortarUserObject(parameters),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _c(getParam<Real>("c")),
     _normalize_c(getParam<bool>("normalize_c")),
@@ -86,20 +70,9 @@ WeightedGapUserObject::WeightedGapUserObject(const InputParameters & parameters)
 void
 WeightedGapUserObject::initialSetup()
 {
-  std::array<const WeightedGapUserObject *, 1> consumers = {{this}};
-
-  Moose::Mortar::setupMortarMaterials(consumers,
-                                      _fe_problem,
-                                      amg(),
-                                      _tid,
-                                      _secondary_ip_sub_to_mats,
-                                      _primary_ip_sub_to_mats,
-                                      _secondary_boundary_mats);
-
+  MortarUserObject::initialSetup();
   _test = &test();
   _is_weighted_gap_nodal = isWeightedGapNodal();
-  if (!_is_weighted_gap_nodal)
-    mooseError("Currently inheriting from NodalUserObject so can't do elemental weighted gaps");
 }
 
 void
@@ -113,12 +86,11 @@ WeightedGapUserObject::computeQpProperties()
       amg().getSecondaryIpToLowerElementMap(*_lower_secondary_elem);
 
   std::array<const MooseVariable *, 3> var_array{{_disp_x_var, _disp_y_var, _disp_z_var}};
-  std::array<ADReal, 3> primary_disp{{_primary_disp_x[_mortar_qp],
-                                      _primary_disp_y[_mortar_qp],
-                                      _has_disp_z ? (*_primary_disp_z)[_mortar_qp] : 0}};
-  std::array<ADReal, 3> secondary_disp{{_secondary_disp_x[_mortar_qp],
-                                        _secondary_disp_y[_mortar_qp],
-                                        _has_disp_z ? (*_secondary_disp_z)[_mortar_qp] : 0}};
+  std::array<ADReal, 3> primary_disp{
+      {_primary_disp_x[_qp], _primary_disp_y[_qp], _has_disp_z ? (*_primary_disp_z)[_qp] : 0}};
+  std::array<ADReal, 3> secondary_disp{{_secondary_disp_x[_qp],
+                                        _secondary_disp_y[_qp],
+                                        _has_disp_z ? (*_secondary_disp_z)[_qp] : 0}};
 
   trimInteriorNodeDerivatives(primary_ip_lowerd_map, var_array, primary_disp, false);
   trimInteriorNodeDerivatives(secondary_ip_lowerd_map, var_array, secondary_disp, true);
@@ -136,7 +108,7 @@ WeightedGapUserObject::computeQpProperties()
     sec_z = &secondary_disp[2];
 
   // Compute gap vector
-  ADRealVectorValue gap_vec = _phys_points_primary[_mortar_qp] - _phys_points_secondary[_mortar_qp];
+  ADRealVectorValue gap_vec = _phys_points_primary[_qp] - _phys_points_secondary[_qp];
 
   gap_vec(0).derivatives() = prim_x.derivatives() - sec_x.derivatives();
   gap_vec(1).derivatives() = prim_y.derivatives() - sec_y.derivatives();
@@ -145,12 +117,12 @@ WeightedGapUserObject::computeQpProperties()
 
   // Compute integration point quantities
   if (_interpolate_normals)
-    _qp_gap = gap_vec * (_normals[_mortar_qp] * _JxW_msm[_mortar_qp] * _coord[_mortar_qp]);
+    _qp_gap = gap_vec * (_normals[_qp] * _JxW_msm[_qp] * _coord[_qp]);
   else
-    _qp_gap_nodal = gap_vec * (_JxW_msm[_mortar_qp] * _coord[_mortar_qp]);
+    _qp_gap_nodal = gap_vec * (_JxW_msm[_qp] * _coord[_qp]);
 
   // To do normalization of constraint coefficient (c_n)
-  _qp_factor = _JxW_msm[_mortar_qp] * _coord[_mortar_qp];
+  _qp_factor = _JxW_msm[_qp] * _coord[_qp];
 #endif
 }
 
@@ -163,16 +135,16 @@ WeightedGapUserObject::computeQpIProperties()
 
   // Get the _dof_to_weighted_gap map
   const DofObject * dof = _is_weighted_gap_nodal
-                              ? static_cast<const DofObject *>(_current_node)
+                              ? static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i))
                               : static_cast<const DofObject *>(_lower_secondary_elem);
 
   if (_interpolate_normals)
-    _dof_to_weighted_gap[dof].first += (*_test)[_i][_mortar_qp] * _qp_gap;
+    _dof_to_weighted_gap[dof].first += (*_test)[_i][_qp] * _qp_gap;
   else
-    _dof_to_weighted_gap[dof].first += (*_test)[_i][_mortar_qp] * _qp_gap_nodal * _normals[_i];
+    _dof_to_weighted_gap[dof].first += (*_test)[_i][_qp] * _qp_gap_nodal * _normals[_i];
 
   if (_normalize_c)
-    _dof_to_weighted_gap[dof].second += (*_test)[_i][_mortar_qp] * _qp_factor;
+    _dof_to_weighted_gap[dof].second += (*_test)[_i][_qp] * _qp_factor;
 }
 
 void
@@ -182,64 +154,30 @@ WeightedGapUserObject::initialize()
 }
 
 void
-WeightedGapUserObject::executeMortarSegment()
-{
-  _i = libMesh::invalid_uint;
-  for (const auto i : make_range(_test->size()))
-    if (_lower_secondary_elem->node_ptr(i) == _current_node)
-    {
-      _i = i;
-      break;
-    }
-  mooseAssert(_i != libMesh::invalid_uint, "We should have determined _i");
-
-  for (_mortar_qp = 0; _mortar_qp < _qrule_msm->n_points(); _mortar_qp++)
-  {
-    computeQpProperties();
-    computeQpIProperties();
-  }
-}
-
-void
-WeightedGapUserObject::threadJoin(const UserObject & uo)
-{
-  const auto & weighted_gap_uo = static_cast<const WeightedGapUserObject &>(uo);
-  _dof_to_weighted_gap.insert(weighted_gap_uo._dof_to_weighted_gap.begin(),
-                              weighted_gap_uo._dof_to_weighted_gap.end());
-}
-
-void
 WeightedGapUserObject::finalize()
 {
-  // There should be no need to communicate. We have the results for all local nodes
+#ifdef MOOSE_SPARSE_AD
+  // If the constraint is performed by the owner, then we don't need any data sent back; the owner
+  // will take care of it. But if the constraint is not performed by the owner and we might have to
+  // do some of the constraining ourselves, then we need data sent back to us
+  const bool send_data_back = !constrainedByOwner();
+  Moose::Mortar::Contact::communicateGaps(_dof_to_weighted_gap,
+                                          this->processor_id(),
+                                          _subproblem.mesh(),
+                                          _nodal,
+                                          _normalize_c,
+                                          _communicator,
+                                          send_data_back);
+#endif
 }
 
 void
 WeightedGapUserObject::execute()
 {
-  if (!hasDof(*_current_node))
-    return;
-
-  const auto & its = amg().secondariesToMortarSegments(*_current_node);
-
-  auto act_functor = [this]()
+  for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
   {
-    setNormals();
-    executeMortarSegment();
-  };
-
-  std::array<WeightedGapUserObject *, 1> consumers = {{this}};
-
-  Moose::Mortar::loopOverMortarSegments(its,
-                                        _assembly,
-                                        _subproblem,
-                                        _fe_problem,
-                                        amg(),
-                                        /*displaced=*/true,
-                                        consumers,
-                                        _tid,
-                                        _secondary_ip_sub_to_mats,
-                                        _primary_ip_sub_to_mats,
-                                        _secondary_boundary_mats,
-                                        act_functor);
+    computeQpProperties();
+    for (_i = 0; _i < _test->size(); ++_i)
+      computeQpIProperties();
+  }
 }

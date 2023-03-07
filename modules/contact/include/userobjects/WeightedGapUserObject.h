@@ -9,18 +9,12 @@
 
 #pragma once
 
-#include "NodalUserObject.h"
-#include "MortarConsumerInterface.h"
-#include "MortarExecutorInterface.h"
-#include "TwoMaterialPropertyInterface.h"
+#include "MortarUserObject.h"
 
 /**
- * Base class for creating new nodally-based mortar user objects
+ * Creates dof object to weighted gap map
  */
-class WeightedGapUserObject : public NodalUserObject,
-                              public MortarExecutorInterface,
-                              public MortarConsumerInterface,
-                              public TwoMaterialPropertyInterface
+class WeightedGapUserObject : public MortarUserObject
 {
 public:
   static InputParameters validParams();
@@ -30,7 +24,6 @@ public:
   virtual void initialize() override;
   virtual void execute() override;
   virtual void finalize() override;
-  virtual void threadJoin(const UserObject & uo) override;
   virtual void initialSetup() override;
 
   /**
@@ -42,16 +35,6 @@ public:
    * @return The contact force at quadrature points on the mortar segment
    */
   virtual const ADVariableValue & contactForce() const = 0;
-
-  /**
-   * Call back for computing any necessary data during constraint evaluation
-   */
-  virtual void reinit(const Elem & lower_d_secondary_elem) = 0;
-
-  /**
-   * @return Whether there is a weighted gap associated with this degree of freedom object
-   */
-  virtual bool hasDof(const DofObject & dof_object) const = 0;
 
 protected:
   /**
@@ -66,11 +49,6 @@ protected:
   virtual void computeQpIProperties();
 
   /**
-   * Execute this object on a mortar segment
-   */
-  virtual void executeMortarSegment();
-
-  /**
    * @return The test function associated with the weighted gap
    */
   virtual const VariableTestValue & test() const = 0;
@@ -80,6 +58,12 @@ protected:
    * MONOMIAL Lagrange multiplier)
    */
   virtual bool isWeightedGapNodal() const = 0;
+
+  /**
+   * @return Whether the gap constraint will be enforced solely by the owner of the weighted gap or
+   * will be enforced in a distributed way (like in a penalty method)
+   */
+  virtual bool constrainedByOwner() const = 0;
 
   /// The base finite element problem
   FEProblemBase & _fe_problem;
@@ -146,7 +130,7 @@ protected:
   bool _is_weighted_gap_nodal = true;
 
   /// Quadrature point index for the mortar segments
-  unsigned int _mortar_qp = 0;
+  unsigned int _qp = 0;
 
   /// Test function index
   unsigned int _i = 0;

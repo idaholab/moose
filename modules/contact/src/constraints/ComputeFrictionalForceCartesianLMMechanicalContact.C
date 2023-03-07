@@ -143,8 +143,13 @@ ComputeFrictionalForceCartesianLMMechanicalContact::residualSetup()
 void
 ComputeFrictionalForceCartesianLMMechanicalContact::post()
 {
-  Moose::Mortar::Contact::communicateGaps(
-      _dof_to_weighted_gap, this->processor_id(), _mesh, _nodal, _normalize_c, _communicator);
+  Moose::Mortar::Contact::communicateGaps(_dof_to_weighted_gap,
+                                          this->processor_id(),
+                                          _mesh,
+                                          _nodal,
+                                          _normalize_c,
+                                          _communicator,
+                                          false);
   Moose::Mortar::Contact::communicateVelocities(
       _dof_to_weighted_tangential_velocity, this->processor_id(), _mesh, _nodal, _communicator);
 
@@ -172,8 +177,13 @@ void
 ComputeFrictionalForceCartesianLMMechanicalContact::incorrectEdgeDroppingPost(
     const std::unordered_set<const Node *> & inactive_lm_nodes)
 {
-  Moose::Mortar::Contact::communicateGaps(
-      _dof_to_weighted_gap, this->processor_id(), _mesh, _nodal, _normalize_c, _communicator);
+  Moose::Mortar::Contact::communicateGaps(_dof_to_weighted_gap,
+                                          this->processor_id(),
+                                          _mesh,
+                                          _nodal,
+                                          _normalize_c,
+                                          _communicator,
+                                          false);
   Moose::Mortar::Contact::communicateVelocities(
       _dof_to_weighted_tangential_velocity, this->processor_id(), _mesh, _nodal, _communicator);
 

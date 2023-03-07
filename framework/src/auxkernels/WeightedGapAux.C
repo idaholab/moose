@@ -31,8 +31,6 @@ WeightedGapAux::WeightedGapAux(const InputParameters & parameters)
 Real
 WeightedGapAux::computeValue()
 {
-  setNormals();
-
   _weighted_gap = 0;
   for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
   {
