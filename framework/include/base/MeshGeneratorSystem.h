@@ -200,5 +200,3 @@ private:
   /// Holds the map of save in mesh -> name
   std::map<std::string, std::unique_ptr<MeshBase>> _save_in_meshes;
 };
-
-
