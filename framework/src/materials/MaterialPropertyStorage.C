@@ -57,7 +57,7 @@ shallowSwapDataBack(const std::vector<unsigned int> & stateful_prop_ids,
 }
 
 MaterialPropertyStorage::MaterialPropertyStorage()
-  : _has_stateful_props(false), _has_older_prop(false)
+  : _has_stateful_props(false), _has_older_prop(false), _spin_mtx(libMesh::Threads::spin_mtx)
 {
   _props_elem = std::make_unique<PropsType>();
   _props_elem_old = std::make_unique<PropsType>();
@@ -336,7 +336,7 @@ MaterialPropertyStorage::copy(MaterialData & material_data,
 void
 MaterialPropertyStorage::swap(MaterialData & material_data, const Elem & elem, unsigned int side)
 {
-  Threads::spin_mutex::scoped_lock lock(this->spin_mutex);
+  Threads::spin_mutex::scoped_lock lock(this->_spin_mtx);
 
   shallowSwapData(_stateful_prop_id_to_prop_id, material_data.props(), setProps(&elem, side));
   shallowSwapData(_stateful_prop_id_to_prop_id, material_data.propsOld(), setPropsOld(&elem, side));
@@ -350,7 +350,7 @@ MaterialPropertyStorage::swapBack(MaterialData & material_data,
                                   const Elem & elem,
                                   unsigned int side)
 {
-  Threads::spin_mutex::scoped_lock lock(this->spin_mutex);
+  Threads::spin_mutex::scoped_lock lock(this->_spin_mtx);
 
   shallowSwapDataBack(_stateful_prop_id_to_prop_id, setProps(&elem, side), material_data.props());
   shallowSwapDataBack(

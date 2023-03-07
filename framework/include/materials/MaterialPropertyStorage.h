@@ -336,7 +336,10 @@ private:
                  unsigned int side,
                  unsigned int n_qpoints);
 
-  libMesh::Threads::spin_mutex spin_mutex;
+  // You'd think a private mutex would work here, so I'll leave this
+  // in the namespace for when that happens, but CI thinks that can
+  // make us crash, so I'll just initialize this to Threads::spin_mtx
+  libMesh::Threads::spin_mutex & _spin_mtx;
 
   // Need to be able to eraseProperty from here
   friend class ProjectMaterialProperties;
