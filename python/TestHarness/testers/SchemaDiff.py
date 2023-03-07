@@ -109,21 +109,22 @@ class SchemaDiff(RunApp):
                 self.regex_paths = regex_paths
                 self.types = types
 
+            def check_values(self, x, y):
+                if x != y:
+                    if x < self.abs_zero and y < self.abs_zero:
+                        return True
+                    if self.rel_err == 0:
+                        if abs(x-y) > self.rel_err:
+                            return False
+                    elif x == 0 or y == 0:
+                        return False
+                    elif abs((x-y)/max(abs(x), abs(y))) > self.rel_err:
+                        return False
+                return True #if the two items are the same, you can stop evaluating them.
+
             def give_up_diffing(self,level, diff_instance):
                 try:
-                    if level.t1 != level.t2:
-                        x = float(level.t1)
-                        y = float(level.t2)
-
-                        if x < self.abs_zero and y < self.abs_zero:
-                            return True
-                        if self.rel_err == 0 or y == 0:
-                            if abs(x-y) > self.rel_err:
-                                return False
-                        elif abs((x-y)/x) > self.rel_err:
-                            return False
-                    return True #if the two items are the same, you can stop evaluating them.
-
+                    return self.check_values(float(level.t1), float(level.t2))
                 #Sometimes, data is not stored correctly as a list/array, and are instead big strings. This should be fixed with "fix_XML_arrays",
                 #but here we do the logic to diff the long string in case it sneaks in
                 except (ValueError, TypeError):
@@ -135,17 +136,7 @@ class SchemaDiff(RunApp):
                         for i in range(len(split1)):
                             if not split1[i] and not split2[i]: #if the two values are both just an empty str, continue.
                                 continue
-                            x = float(split1[i])
-                            y = float(split2[i])
-                            if x != y:
-                                if x < self.abs_zero and y < self.abs_zero:
-                                    return True
-                                if self.rel_err == 0 or y == 0:
-                                    if abs(x-y) > self.rel_err:
-                                        return False
-                                elif abs((x-y)/x) > self.rel_err:
-                                    return False
-                        return True #if the values in the pseudo-list are different, but all fall within the accepted rel_err, the list is skipped for diffing.
+                            return self.check_values(float(split1[i]), float(split2[i]))
                     except ValueError:
                         return False
         exclude_paths = []
