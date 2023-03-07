@@ -116,9 +116,7 @@ class SchemaDiff(RunApp):
                     if self.rel_err == 0:
                         if abs(x-y) > self.rel_err:
                             return False
-                    elif x == 0 or y == 0:
-                        return False
-                    elif abs((x-y)/max(abs(x), abs(y))) > self.rel_err:
+                    elif abs(x-y)/max(abs(x), abs(y)) > self.rel_err:
                         return False
                 return True #if the two items are the same, you can stop evaluating them.
 
