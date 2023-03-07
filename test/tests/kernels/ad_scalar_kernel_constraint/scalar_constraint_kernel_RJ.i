@@ -11,29 +11,29 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     family = LAGRANGE
     order = SECOND
-  [../]
-  [./lambda]
+  []
+  [lambda]
     family = SCALAR
     order = FIRST
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = ADDiffusion
     variable = u
-  [../]
+  []
 
-  [./sk_lm]
+  [sk_lm]
     type = ADScalarLMKernel
     variable = u
     kappa = lambda
     pp_name = pp
     value = 2.666666666666666
-  [../]
+  []
 []
 
 [Problem]
@@ -42,40 +42,40 @@
 []
 
 [BCs]
-  [./bottom]
+  [bottom]
     type = ADDirichletBC
     variable = u
     boundary = 'bottom'
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = ADDirichletBC
     variable = u
     boundary = 'right'
     value = 0
-  [../]
-  [./top]
+  []
+  [top]
     type = ADDirichletBC
     variable = u
     boundary = 'top'
     value = 0
-  [../]
-  [./left]
+  []
+  [left]
     type = ADDirichletBC
     variable = u
     boundary = 'left'
     value = 0
-  [../]
+  []
 []
 
 [Postprocessors]
   # integrate the volume of domain since original objects set
   # int(phi)=V0, rather than int(phi-V0)=0
-  [./pp]
+  [pp]
     type = FunctionElementIntegral
     function = 1
     execute_on = initial
-  [../]
+  []
 []
 
 # Force LU decomposition, nonlinear iterations, to check Jacobian terms with single factorization

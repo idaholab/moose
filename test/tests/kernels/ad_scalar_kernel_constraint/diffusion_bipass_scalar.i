@@ -11,126 +11,125 @@
 []
 
 [Functions]
-  [./exact_fn]
+  [exact_fn]
     type = ParsedFunction
     value = 'x*x+y*y'
-  [../]
+  []
 
-  [./ffn]
+  [ffn]
     type = ParsedFunction
     value = -4
-  [../]
+  []
 
-  [./bottom_bc_fn]
+  [bottom_bc_fn]
     type = ParsedFunction
     value = -2*y
-  [../]
+  []
 
-  [./right_bc_fn]
+  [right_bc_fn]
     type = ParsedFunction
     value =  2*x
-  [../]
+  []
 
-  [./top_bc_fn]
+  [top_bc_fn]
     type = ParsedFunction
     value =  2*y
-  [../]
+  []
 
-  [./left_bc_fn]
+  [left_bc_fn]
     type = ParsedFunction
     value = -2*x
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
+  [u]
     family = LAGRANGE
     order = SECOND
-  [../]
-  [./lambda]
+  []
+  [lambda]
     family = SCALAR
     order = FIRST
-  [../]
+  []
 []
 
 [Kernels]
   # Make sure that we can derive from the scalar base class
   # but actually not assign a scalar variable
-  [./diff]
+  [diff]
     type = ADDiffusionNoScalar
     variable = u
-  [../]
+  []
 
-  [./ffnk]
+  [ffnk]
     type = ADBodyForce
     variable = u
     function = ffn
-  [../]
+  []
 
-  [./sk_lm]
+  [sk_lm]
     type = ADScalarLMKernel
     variable = u
     kappa = lambda
     pp_name = pp
     value = 2.666666666666666
-  [../]
+  []
 []
 
-# With above block, not needed, and results in Petsc error messages
 [Problem]
   kernel_coverage_check = false
   error_on_jacobian_nonzero_reallocation = true
 []
 
 [BCs]
-  [./bottom]
+  [bottom]
     type = ADFunctionNeumannBC
     variable = u
     boundary = 'bottom'
     function = bottom_bc_fn
-  [../]
-  [./right]
+  []
+  [right]
     type = ADFunctionNeumannBC
     variable = u
     boundary = 'right'
     function = right_bc_fn
-  [../]
-  [./top]
+  []
+  [top]
     type = ADFunctionNeumannBC
     variable = u
     boundary = 'top'
     function = top_bc_fn
-  [../]
-  [./left]
+  []
+  [left]
     type = ADFunctionNeumannBC
     variable = u
     boundary = 'left'
     function = left_bc_fn
-  [../]
+  []
 []
 
 [Postprocessors]
   # integrate the volume of domain since original objects set
   # int(phi)=V0, rather than int(phi-V0)=0
-  [./pp]
+  [pp]
     type = FunctionElementIntegral
     function = 1
     execute_on = initial
-  [../]
-  [./l2_err]
+  []
+  [l2_err]
     type = ElementL2Error
     variable = u
     function = exact_fn
     execute_on = 'initial timestep_end'
-  [../]
+  []
 []
 
 [Preconditioning]
-  [./pc]
+  [pc]
     type = SMP
     full = true
     solve_type = 'NEWTON'
-  [../]
+  []
 []
 
 [Executioner]

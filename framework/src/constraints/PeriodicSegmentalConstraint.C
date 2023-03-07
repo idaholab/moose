@@ -27,10 +27,12 @@ PeriodicSegmentalConstraint::validParams()
 
 PeriodicSegmentalConstraint::PeriodicSegmentalConstraint(const InputParameters & parameters)
   : DerivativeMaterialInterface<MortarScalarBase>(parameters),
-    _kappa_aux_var(coupledScalar("sigma")),
-    _ka_order(getScalarVar("sigma", 0)->order()),
+    _kappa_aux_ptr(getScalarVar("sigma", 0)),
+    _ka_order(_kappa_aux_ptr->order()),
     _kappa_aux(coupledScalarValue("sigma"))
 {
+  if(_kappa_aux_ptr->kind() != Moose::VarKindType::VAR_AUXILIARY)
+    mooseError("Must assign auxiliary scalar variable to sigma, rather than nonlinear variable");
 }
 
 Real

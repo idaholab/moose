@@ -34,11 +34,13 @@ ADPenaltyPeriodicSegmentalConstraint::ADPenaltyPeriodicSegmentalConstraint(
   : DerivativeMaterialInterface<ADMortarScalarBase>(parameters),
     _temp_jump_global(),
     _tau_s(),
-    _kappa_aux_var(coupledScalar("sigma")),
-    _ka_order(getScalarVar("sigma", 0)->order()),
+    _kappa_aux_ptr(getScalarVar("sigma", 0)),
+    _ka_order(_kappa_aux_ptr->order()),
     _kappa_aux(coupledScalarValue("sigma")),
     _pen_scale(getParam<Real>("penalty_value"))
 {
+  if(_kappa_aux_ptr->kind() != Moose::VarKindType::VAR_AUXILIARY)
+    mooseError("Must assign auxiliary scalar variable to sigma, rather than nonlinear variable");
 }
 
 // Compute the stability parameters to use for all quadrature points

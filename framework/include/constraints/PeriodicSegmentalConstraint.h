@@ -68,8 +68,8 @@ protected:
                                               const unsigned int jvar) override;
 
 protected:
-  /// The controlled scalar variable ID
-  const unsigned int _kappa_aux_var;
+  /// (Pointer to) the controlled scalar variable
+  const MooseVariableScalar * const _kappa_aux_ptr;
 
   /// Order of the homogenization variable, used in several places
   const unsigned int _ka_order;
