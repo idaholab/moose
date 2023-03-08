@@ -21,6 +21,8 @@ InputParameters
 TestSaveInMesh::validParams()
 {
   InputParameters params = GeneralUserObject::validParams();
+  params.addParam<bool>(
+      "nemesis", false, "Whether or not to output the mesh file in distributed form");
 
   return params;
 }
@@ -38,7 +40,7 @@ TestSaveInMesh::TestSaveInMesh(const InputParameters & parameters) : GeneralUser
       {
         auto mesh = mesh_generator_system.getSavedMeshes(name);
 
-        if (mesh->is_replicated())
+        if (!getParam<bool>("nemesis"))
         {
           ExodusII_IO exio(*mesh);
 
