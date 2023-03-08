@@ -84,7 +84,7 @@
     csvdiff = 'abs_ref_local_Linf_out.csv'
     cli_args = 'Problem/normalization_type=local_Linf Outputs/file_base=abs_ref_local_Linf_out'
     requirement = 'The system shall have the ability to base convergence on the comparison of Linf normalization of the residual for '
-                  'individual variables to the sum of the Linf normalization of the absolute value of the residual contributions '
+                  'individual variables locally divided by the absolute value of the residual contributions '
                   'of those variables.'
   []
   [linf_normalization]
