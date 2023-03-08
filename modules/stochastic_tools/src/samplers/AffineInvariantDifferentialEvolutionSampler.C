@@ -9,6 +9,7 @@
 
 #include "AffineInvariantDifferentialEvolutionSampler.h"
 #include "Normal.h"
+#include "Uniform.h"
 
 registerMooseObjectAliased("StochasticToolsApp", AffineInvariantDifferentialEvolutionSampler, "AffineInvariantDES");
 
@@ -16,7 +17,7 @@ registerMooseObjectAliased("StochasticToolsApp", AffineInvariantDifferentialEvol
  Tuning options for the internal parameters
   1. Braak2006_static:
   - the gamma param is set to 2.38 / sqrt(2 * dim)
-  - the b param is set to 1e-4
+  - the b param is set to 1e-6
 */
 
 InputParameters
@@ -39,18 +40,21 @@ AffineInvariantDifferentialEvolutionSampler::AffineInvariantDifferentialEvolutio
 {
   if (_num_parallel_proposals < 5)
     mooseError("At least five parallel proposals should be used for the Differential Evolution Sampler.");
-  
+
   if (_num_parallel_proposals < _priors.size())
     mooseWarning("It is recommended that the parallel proposals be greater than or equal to the inferred parameters.");
 }
 
 void
-AffineInvariantDifferentialEvolutionSampler::computeDifferential(const Real & state1, const Real & state2, const unsigned int & seed, Real & diff)
+AffineInvariantDifferentialEvolutionSampler::computeDifferential(const Real & state1,
+                                                                 const Real & state2,
+                                                                 const Real & rnd,
+                                                                 Real & diff)
 {
   Real gamma;
   Real b;
   tuneParams(gamma, b);
-  diff = gamma * (state1 - state2) + Normal::quantile(getRand(seed), 0.0, b);
+  diff = gamma * (state1 - state2) + Normal::quantile(rnd, 0.0, b);
 }
 
 void
@@ -71,12 +75,11 @@ AffineInvariantDifferentialEvolutionSampler::sampleSetUp(const SampleMode /*mode
   _check_step = _step;
 
   unsigned int seed_value = _step > 0 ? (_step - 1) : 0;
-  
+
   // Filling the new_samples vector of vectors with new proposal samples
   unsigned int j = 0;
   bool indicator;
-  unsigned int index_req1;
-  unsigned int index_req2;
+  unsigned int index_req1, index_req2;
   Real diff;
   while (j < _num_parallel_proposals)
   {
@@ -84,11 +87,23 @@ AffineInvariantDifferentialEvolutionSampler::sampleSetUp(const SampleMode /*mode
     randomIndex2(_num_parallel_proposals, j, seed_value, index_req1, index_req2);
     for (unsigned int i = 0; i < _priors.size(); ++i)
     {
-      computeDifferential(_previous_state[index_req1][i], _previous_state[index_req2][i], seed_value, diff);
-      _new_samples[j][i] = (_step > 2) ? (_previous_state[j][i] + diff) : _priors[i]->quantile(getRand(seed_value));
+      // computeDifferential(_previous_state[index_req1][i],
+      //                     _previous_state[index_req2][i],
+      //                     getRand(seed_value),
+      //                     diff);
+      // _new_samples[j][i] = (_step > decisionStep()) ? (_previous_state[j][i] + diff)
+      //                                               : _priors[i]->quantile(getRand(seed_value));
+      computeDifferential(std::log(_previous_state[index_req1][i]),
+                          std::log(_previous_state[index_req2][i]),
+                          getRand(seed_value),
+                          diff);
+      _new_samples[j][i] = (_step > decisionStep())
+                               ? std::exp(std::log(_previous_state[j][i]) + diff)
+                               : _priors[i]->quantile(getRand(seed_value));
       if (_lb)
         indicator = (_new_samples[j][i] < (*_lb)[i] || _new_samples[j][i] > (*_ub)[i]) ? 1 : indicator;
     }
+    _rnd_vec[j] = getRand(seed_value);
     j = (!indicator) ? ++j : j;
   }
 }

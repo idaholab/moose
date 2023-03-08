@@ -21,8 +21,15 @@ public:
 
   AffineInvariantStretchSampler(const InputParameters & parameters);
 
+  /**
+   * Return the vector of step size for decision making
+   */
+  std::vector<Real> getAffineStepSize() const { return _affine_step; }
+
 protected:
   virtual void sampleSetUp(const Sampler::SampleMode mode) override;
+
+  virtual int decisionStep() const override { return 1; }
 
 private:
   /// The step size for the stretch sampler
@@ -30,4 +37,7 @@ private:
 
   /// Reporter value with the previous state of all the walkers
   const std::vector<std::vector<Real>> & _previous_state;
+
+  /// Vector of affine step sizes
+  std::vector<Real> _affine_step;
 };
