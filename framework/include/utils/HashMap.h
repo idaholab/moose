@@ -32,8 +32,25 @@ public:
     return std::unordered_map<Key, T>::erase(k);
   }
 
+  using typename std::unordered_map<Key, T>::const_iterator;
+  using typename std::unordered_map<Key, T>::iterator;
+
+  inline iterator find(const Key & k)
+  {
+    libMesh::Threads::spin_mutex::scoped_lock lock(spin_mutex);
+
+    return std::unordered_map<Key, T>::find(k);
+  }
+
+  inline const_iterator find(const Key & k) const
+  {
+    libMesh::Threads::spin_mutex::scoped_lock lock(spin_mutex);
+
+    return std::unordered_map<Key, T>::find(k);
+  }
+
   inline bool contains(const Key & key) const { return this->find(key) != this->end(); }
 
 private:
-  libMesh::Threads::spin_mutex spin_mutex;
+  mutable libMesh::Threads::spin_mutex spin_mutex;
 };
