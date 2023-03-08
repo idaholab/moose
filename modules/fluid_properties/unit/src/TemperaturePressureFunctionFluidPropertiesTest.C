@@ -46,6 +46,7 @@ TEST_F(TemperaturePressureFunctionFluidPropertiesTest, properties)
   ABS_TEST(_fp->k_from_p_T(p, T), thermal_cond, tol);
   ABS_TEST(_fp->k_from_p_T(p, T), thermal_cond, tol);
   ABS_TEST(_fp->rho_from_p_T(p, T), density, tol);
+  ABS_TEST(_fp->v_from_p_T(p, T), 1 / density, tol);
   ABS_TEST(_fp->e_from_p_T(p, T), cv * T, tol);
   ABS_TEST(_fp->e_from_p_rho(p, 1. / v),
            cv * T,
@@ -80,6 +81,7 @@ TEST_F(TemperaturePressureFunctionFluidPropertiesTest, properties)
   ABS_TEST(_fp->k_from_p_T(p, T), thermal_cond, tol);
   ABS_TEST(_fp->k_from_p_T(p, T), thermal_cond, tol);
   ABS_TEST(_fp->rho_from_p_T(p, T), density, tol);
+  ABS_TEST(_fp->v_from_p_T(p, T), 1 / density, tol);
   ABS_TEST(_fp->e_from_p_T(p, T), cv * T, tol);
   ABS_TEST(_fp->e_from_p_rho(p, 1. / v),
            cv * T,
@@ -111,7 +113,9 @@ TEST_F(TemperaturePressureFunctionFluidPropertiesTest, derivatives)
   Real e = 8.372E5;
   Real v = 1.25E-3;
 
+  AD_DERIV_TEST(_fp->rho_from_p_T, p, T, tol);
   DERIV_TEST(_fp->rho_from_p_T, p, T, tol);
+  DERIV_TEST(_fp->v_from_p_T, p, T, tol);
   DERIV_TEST(_fp->mu_from_p_T, p, T, tol);
   DERIV_TEST(_fp->e_from_p_T, p, T, tol);
   DERIV_TEST(_fp->h_from_p_T, p, T, tol);
@@ -126,7 +130,9 @@ TEST_F(TemperaturePressureFunctionFluidPropertiesTest, derivatives)
   e = 1.6744E6;
   v = 6.25E-4;
 
+  AD_DERIV_TEST(_fp->rho_from_p_T, p, T, tol);
   DERIV_TEST(_fp->rho_from_p_T, p, T, tol);
+  DERIV_TEST(_fp->v_from_p_T, p, T, tol);
   DERIV_TEST(_fp->mu_from_p_T, p, T, tol);
   DERIV_TEST(_fp->e_from_p_T, p, T, tol);
   DERIV_TEST(_fp->h_from_p_T, p, T, tol);
