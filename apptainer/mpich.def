@@ -1,10 +1,10 @@
 BootStrap: oras
 # Any Rocky-8 image which supplies a development stack with MPI available
-From: mooseharbor.hpc.inl.gov/hpc-base/rocky8-x86_64-infiniband:10-19-2022
+From: harbor.hpc.inl.gov/hpcbase/mpi_03:1.0.0
 
 %environment
     # Set Environment for MPICH
-    export MPICH_DIR=/opt/mpi/mpich-3.4.3
+    export MPICH_DIR=/opt/mpi/openmpi-4.1.4
     export LD_LIBRARY_PATH=${MPICH_DIR}/lib:${LD_LIBRARY_PATH}
     export MANPATH=${MPICH_DIR}/share/man:${MANPATH}
     export PATH=${MPICH_DIR}/bin:${PATH}
