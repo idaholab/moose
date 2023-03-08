@@ -35,24 +35,24 @@ MeshMetaDataDependenceAction::validParams()
 }
 
 MeshMetaDataDependenceAction::MeshMetaDataDependenceAction(const InputParameters & params)
-  : Action(params),
-    _generator_prefix(getParam<MeshGeneratorName>("mesh_generator")),
-    _num_elements_x_prop(getMeshProperty<unsigned int>("num_elements_x", _generator_prefix)),
-    _xmin_prop(getMeshProperty<Real>("xmin", _generator_prefix)),
-    _xmax_prop(getMeshProperty<Real>("xmax", _generator_prefix))
+  : Action(params), _generator_prefix(getParam<MeshGeneratorName>("mesh_generator"))
 {
-  // For testing only
-  if (getParam<bool>("test_request_invalid_property"))
-    getMeshProperty<Real>("nonexistent_property",
-                          _generator_prefix); // No need to catch reference here
 }
 
 void
 MeshMetaDataDependenceAction::act()
 {
+  if (getParam<bool>("test_request_invalid_property"))
+    static_cast<void>(getMeshProperty<Real>("nonexistent_property", _generator_prefix));
+
+  const auto num_elements_x_prop =
+      getMeshProperty<unsigned int>("num_elements_x", _generator_prefix);
+  const auto xmin_prop = getMeshProperty<Real>("xmin", _generator_prefix);
+  const auto xmax_prop = getMeshProperty<Real>("xmax", _generator_prefix);
+
   // First query the data store to get a mesh attributes
-  Point start_point = Point(_xmin_prop, 0, 0);
-  Point end_point = Point(_xmax_prop, 0, 0);
+  Point start_point = Point(xmin_prop, 0, 0);
+  Point end_point = Point(xmax_prop, 0, 0);
 
   // Using that information, let's add a VectorPostprocessor based upon the attribute.
   // Note: This is not the way a user should do this, we have VectorPostprocessors that
@@ -67,7 +67,7 @@ MeshMetaDataDependenceAction::act()
   vpp_params.set<MooseEnum>("sort_by") = "x";
 
   // line up samples along nodes
-  vpp_params.set<unsigned int>("num_points") = _num_elements_x_prop + 1;
+  vpp_params.set<unsigned int>("num_points") = num_elements_x_prop + 1;
 
   _problem->addVectorPostprocessor(type, "line_sampler_between_elems", vpp_params);
 }

@@ -1964,24 +1964,19 @@ FeatureFloodCount::FeatureData::boundingBoxesIntersect(const FeatureData & rhs) 
 bool
 FeatureFloodCount::FeatureData::halosIntersect(const FeatureData & rhs) const
 {
-  return setsIntersect(
-      _halo_ids.begin(), _halo_ids.end(), rhs._halo_ids.begin(), rhs._halo_ids.end());
+  return MooseUtils::setsIntersect(_halo_ids, rhs._halo_ids);
 }
 
 bool
 FeatureFloodCount::FeatureData::periodicBoundariesIntersect(const FeatureData & rhs) const
 {
-  return setsIntersect(_periodic_nodes.begin(),
-                       _periodic_nodes.end(),
-                       rhs._periodic_nodes.begin(),
-                       rhs._periodic_nodes.end());
+  return MooseUtils::setsIntersect(_periodic_nodes, rhs._periodic_nodes);
 }
 
 bool
 FeatureFloodCount::FeatureData::ghostedIntersect(const FeatureData & rhs) const
 {
-  return setsIntersect(
-      _ghosted_ids.begin(), _ghosted_ids.end(), rhs._ghosted_ids.begin(), rhs._ghosted_ids.end());
+  return MooseUtils::setsIntersect(_ghosted_ids, rhs._ghosted_ids);
 }
 
 bool

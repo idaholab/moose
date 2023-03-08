@@ -40,14 +40,14 @@ std::unique_ptr<MeshBase>
 MeshCollectionGenerator::generate()
 {
   // merge all meshes into the first one
-  auto mesh = dynamic_pointer_cast<UnstructuredMesh>(*_meshes[0]);
+  auto mesh = dynamic_pointer_cast<UnstructuredMesh>(std::move(*_meshes[0]));
   if (!mesh)
     paramError("inputs", _input_names[0], " is not a valid unstructured mesh");
 
   // Read in all of the other meshes
   for (MooseIndex(_meshes) i = 1; i < _meshes.size(); ++i)
   {
-    auto other_mesh = dynamic_cast<UnstructuredMesh *>(_meshes[i]->get());
+    auto other_mesh = dynamic_pointer_cast<UnstructuredMesh>(std::move(*_meshes[i]));
     if (!other_mesh)
       paramError("inputs", _input_names[i], " is not a valid unstructured mesh");
 

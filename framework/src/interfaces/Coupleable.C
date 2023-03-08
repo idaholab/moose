@@ -16,6 +16,11 @@
 #include "InputParameters.h"
 #include "MooseObject.h"
 #include "SystemBase.h"
+#include "AuxiliarySystem.h"
+
+#include "AuxKernel.h"
+#include "ElementUserObject.h"
+#include "NodalUserObject.h"
 
 Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv)
   : _c_parameters(moose_object->parameters()),
@@ -49,9 +54,11 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv)
                              : false),
     _coupleable_max_qps(Moose::constMaxQpsPerElem),
     _is_fv(is_fv),
-    _obj(moose_object)
+    _obj(moose_object),
+    _writable_coupled_variables(libMesh::n_threads())
 {
   SubProblem & problem = *_c_parameters.getCheckedPointerParam<SubProblem *>("_subproblem");
+  _obj->getMooseApp().registerInterfaceObject(*this);
 
   unsigned int optional_var_index_counter = 0;
 
@@ -825,10 +832,113 @@ Coupleable::coupledArrayValues(const std::string & var_name) const
   return coupledVectorHelper<const ArrayVariableValue *>(var_name, func);
 }
 
+MooseVariable &
+Coupleable::writableVariable(const std::string & var_name, unsigned int comp)
+{
+  auto * var = dynamic_cast<MooseVariable *>(getVar(var_name, comp));
+
+  const auto * aux = dynamic_cast<const AuxKernel *>(this);
+  const auto * euo = dynamic_cast<const ElementUserObject *>(this);
+  const auto * nuo = dynamic_cast<const NodalUserObject *>(this);
+
+  if (!aux && !euo && !nuo)
+    mooseError("writableVariable() can only be called from AuxKernels, ElementUserObjects, or "
+               "NodalUserObjects. '",
+               _obj->name(),
+               "' is neither of those.");
+
+  if (aux && !aux->isNodal() && var->isNodal())
+    mooseError("The elemental AuxKernel '",
+               _obj->name(),
+               "' cannot obtain a writable reference to the nodal variable '",
+               var->name(),
+               "'.");
+  if (euo && var->isNodal())
+    mooseError("The ElementUserObject '",
+               _obj->name(),
+               "' cannot obtain a writable reference to the nodal variable '",
+               var->name(),
+               "'.");
+
+  // make sure only one object can access a variable
+  checkWritableVar(var);
+
+  return *var;
+}
+
 VariableValue &
 Coupleable::writableCoupledValue(const std::string & var_name, unsigned int comp)
 {
+  mooseDeprecated("Coupleable::writableCoupledValue is deprecated, please use "
+                  "Coupleable::writableVariable instead. ");
+
+  // check if the variable exists
+  auto * const var = getVar(var_name, comp);
+  if (!var)
+    mooseError(
+        "Unable to create a writable reference for '", var_name, "', is it a constant expression?");
+
+  // is the requested variable an AuxiliaryVariable?
+  if (!_c_fe_problem.getAuxiliarySystem().hasVariable(var->name()))
+    mooseError(
+        "'", var->name(), "' must be an auxiliary variable in Coupleable::writableCoupledValue");
+
+  // check that the variable type (elemental/nodal) is compatible with the object type
+  const auto * aux = dynamic_cast<const AuxKernel *>(this);
+
+  if (!aux)
+    mooseError("writableCoupledValue() can only be called from AuxKernels, but '",
+               _obj->name(),
+               "' is not an AuxKernel.");
+
+  if (!aux->isNodal() && var->isNodal())
+    mooseError("The elemental AuxKernel '",
+               _obj->name(),
+               "' cannot obtain a writable reference to the nodal variable '",
+               var->name(),
+               "'.");
+
+  // make sure only one object can access a variable
+  checkWritableVar(var);
+
   return const_cast<VariableValue &>(coupledValue(var_name, comp));
+}
+
+void
+Coupleable::checkWritableVar(MooseVariable * var)
+{
+  // check block restrictions for compatibility
+  const auto * br = dynamic_cast<const BlockRestrictable *>(this);
+  if (!var->hasBlocks(br->blockIDs()))
+    mooseError("The variable '",
+               var->name(),
+               "' must be defined on all blocks '",
+               _obj->name(),
+               "' is defined on");
+
+  // make sure only one object can access a variable
+  for (const auto & ci : _obj->getMooseApp().getInterfaceObjects<Coupleable>())
+    if (ci != this && ci->_writable_coupled_variables[_c_tid].count(var))
+    {
+      // if both this and ci are block restrictable then we check if the block restrictions
+      // are not overlapping. If they don't we permit the call.
+      const auto * br_other = dynamic_cast<const BlockRestrictable *>(ci);
+      if (br && br_other && br->blockRestricted() && br_other->blockRestricted() &&
+          !MooseUtils::setsIntersect(br->blockIDs(), br_other->blockIDs()))
+        continue;
+
+      mooseError("'",
+                 ci->_obj->name(),
+                 "' already obtained a writable reference to '",
+                 var->name(),
+                 "'. Only one object can obtain such a reference per variable and subdomain in a "
+                 "simulation.");
+    }
+
+  // var is unique across threads, so we could forego having a separate set per thread, but we
+  // need quick access to the list of all variables that need to be inserted into the solution
+  // vector by a given thread.
+  _writable_coupled_variables[_c_tid].insert(var);
 }
 
 const VariableValue &

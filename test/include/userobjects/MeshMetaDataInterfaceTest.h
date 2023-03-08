@@ -9,14 +9,19 @@
 
 #pragma once
 
-#include "MeshGenerator.h"
+#include "GeneralUserObject.h"
 
-class TestMeshGeneratorErrors : public MeshGenerator
+/**
+ * A UserObject that tests the UserObjectInterface.
+ */
+class MeshMetaDataInterfaceTest : public GeneralUserObject
 {
 public:
   static InputParameters validParams();
 
-  TestMeshGeneratorErrors(const InputParameters & parameters);
+  MeshMetaDataInterfaceTest(const InputParameters & params);
 
-  std::unique_ptr<MeshBase> generate() override { return nullptr; }
+  virtual void initialize(){};
+  virtual void execute(){};
+  virtual void finalize(){};
 };

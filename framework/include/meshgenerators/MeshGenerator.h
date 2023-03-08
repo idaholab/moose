@@ -33,6 +33,17 @@ class MeshGenerator : public MooseObject, public MeshMetaDataInterface
 {
 public:
   /**
+   * Comparator for MeshGenerators that sorts by name
+   */
+  struct Comparator
+  {
+    bool operator()(const MeshGenerator * const & a, const MeshGenerator * const & b) const
+    {
+      return a->name() < b->name();
+    }
+  };
+
+  /**
    * Constructor
    *
    * @param parameters The parameters object holding data for the class to use.
@@ -50,31 +61,115 @@ public:
    * Internal generation method - this is what is actually called
    * within MooseApp to execute the MeshGenerator.
    */
-  std::unique_ptr<MeshBase> generateInternal();
+  [[nodiscard]] std::unique_ptr<MeshBase> generateInternal();
 
   /**
-   * Return the MeshGenerators that must run before this MeshGenerator
+   * @returns The names of the MeshGenerators that were requested in the getMesh methods
    */
-  std::vector<std::string> & getDependencies() { return _depends_on; }
+  const std::set<MeshGeneratorName> & getRequestedMeshGenerators() const
+  {
+    return _requested_mesh_generators;
+  }
+  /**
+   * @returns The names of the MeshGenerators that were requested in the declareMeshForSub
+   * methods
+   */
+  const std::set<MeshGeneratorName> & getRequestedMeshGeneratorsForSub() const
+  {
+    return _requested_mesh_generators_for_sub;
+  }
+
+  /**
+   * Class that is used as a parameter to add[Parent/Child]() that allows only
+   * MooseApp methods to call said methods
+   */
+  class AddParentChildKey
+  {
+    friend class MeshGeneratorSystem;
+    AddParentChildKey() {}
+    AddParentChildKey(const AddParentChildKey &) {}
+  };
+
+  /**
+   * Adds the MeshGenerator \p mg as a parent.
+   *
+   * Protected by the AddParentChildKey so that parents can only be
+   * added by the MooseApp.
+   */
+  void addParentMeshGenerator(const MeshGenerator & mg, const AddParentChildKey);
+  /**
+   * Adds the MeshGenerator \p mg as a child.
+   *
+   * Protected by the AddParentChildKey so that parents can only be
+   * added by the MooseApp.
+   */
+  void addChildMeshGenerator(const MeshGenerator & mg, const AddParentChildKey);
+
+  /**
+   * Gets the MeshGenerators that are parents to this MeshGenerator.
+   */
+  const std::set<const MeshGenerator *, Comparator> & getParentMeshGenerators() const
+  {
+    return _parent_mesh_generators;
+  }
+  /**
+   * Gets the MeshGenerators that are children to this MeshGenerator.
+   */
+  const std::set<const MeshGenerator *, Comparator> & getChildMeshGenerators() const
+  {
+    return _child_mesh_generators;
+  }
+  /**
+   * Gets the MeshGenerators that are children to this MeshGenerator.
+   */
+  const std::set<const MeshGenerator *, Comparator> & getSubMeshGenerators() const
+  {
+    return _sub_mesh_generators;
+  }
+
+  /**
+   * @returns Whether or not the MeshGenerator with the name \p name is a parent of this
+   * MeshGenerator.
+   */
+  bool isParentMeshGenerator(const MeshGeneratorName & name) const;
+
+  /**
+   * @returns Whether or not the name \p name is registered as a "null" mesh, that is,
+   * a MeshGenerator that will not represent an input mesh when requested via getMesh.
+   *
+   * See declareNullMeshName().
+   */
+  bool isNullMeshName(const MeshGeneratorName & name) const { return _null_mesh_names.count(name); }
 
 protected:
   /**
    * Methods for writing out attributes to the mesh meta-data store, which can be retrieved from
    * most other MOOSE systems and is recoverable.
    */
+  ///@{
+  template <typename T, typename... Args>
+  T & declareMeshProperty(const std::string & data_name, Args &&... args);
   template <typename T>
-  T & declareMeshProperty(const std::string & data_name);
-
-  template <typename T>
-  T & declareMeshProperty(const std::string & data_name, const T & init_value);
+  T & declareMeshProperty(const std::string & data_name, const T & data_value)
+  {
+    return declareMeshProperty<T, const T &>(data_name, data_value);
+  }
+  ///@}
 
   /**
    * Method for updating attributes to the mesh meta-data store, which can only be invoked in
    * the MeshGenerator generate routine only if the mesh generator property has already been
    * declared.
    */
+  ///@{
+  template <typename T, typename... Args>
+  T & setMeshProperty(const std::string & data_name, Args &&... args);
   template <typename T>
-  T & setMeshProperty(const std::string & data_name, const T & data_value);
+  T & setMeshProperty(const std::string & data_name, const T & data_value)
+  {
+    return setMeshProperty<T, const T &>(data_name, data_value);
+  }
+  ///@}
 
   /**
    * Takes the name of a MeshGeneratorName parameter and then gets a pointer to the
@@ -83,22 +178,21 @@ protected:
    * That MeshGenerator is made to be a dependency of this one, so
    * will generate() its mesh first.
    *
+   * @param param_name The name of the parameter that contains the name of the MeshGenerator
    * @param allow_invalid If true, will allow for invalid parameters and will return a nullptr
    * mesh if said parameter does not exist
    * @return The Mesh generated by that MeshGenerator
    *
    * NOTE: You MUST catch this by reference!
    */
-  std::unique_ptr<MeshBase> & getMesh(const std::string & param_name,
-                                      const bool allow_invalid = false);
-
+  [[nodiscard]] std::unique_ptr<MeshBase> & getMesh(const std::string & param_name,
+                                                    const bool allow_invalid = false);
   /**
    * Like getMesh(), but for multiple generators.
    *
    * @returns The generated meshes
    */
-  std::vector<std::unique_ptr<MeshBase> *> getMeshes(const std::string & param_name);
-
+  [[nodiscard]] std::vector<std::unique_ptr<MeshBase> *> getMeshes(const std::string & param_name);
   /**
    * Like \p getMesh(), but takes the name of another MeshGenerator directly.
    *
@@ -106,18 +200,39 @@ protected:
    *
    * @return The Mesh generated by that MeshGenerator
    */
-  std::unique_ptr<MeshBase> & getMeshByName(const MeshGeneratorName & mesh_generator_name);
-
+  [[nodiscard]] std::unique_ptr<MeshBase> &
+  getMeshByName(const MeshGeneratorName & mesh_generator_name);
   /**
    * Like getMeshByName(), but for multiple generators.
    *
    * @returns The generated meshes
    */
-  std::vector<std::unique_ptr<MeshBase> *>
+  [[nodiscard]] std::vector<std::unique_ptr<MeshBase> *>
   getMeshesByName(const std::vector<MeshGeneratorName> & mesh_generator_names);
 
-  /// References to the mesh and displaced mesh (currently in the ActionWarehouse)
-  std::shared_ptr<MooseMesh> & _mesh;
+  /**
+   * Declares that a MeshGenerator referenced in the InputParameters is to be
+   * used as a dependency of a sub MeshGenerator created by this MeshGenerator
+   * (see addSubMeshGenerator)
+   *
+   * You _must_ declare all such MeshGenerators that are passed by parameter to this
+   * MeshGenerator but instead used in a sub MeshGenerator. This is in order to
+   * declare the intention to use an input mesh as a dependency for a sub generator
+   * instead of this one.
+   */
+  void declareMeshForSub(const std::string & param_name);
+  /**
+   * Like declareMeshForSub(), but for multiple generators.
+   */
+  void declareMeshesForSub(const std::string & param_name);
+  /**
+   * Like declareMeshForSub(), but takes the name of another MeshGenerator directly.
+   */
+  void declareMeshForSubByName(const MeshGeneratorName & mesh_generator_name);
+  /**
+   * Like declareMeshForSubByName(), but for multiple generators.
+   */
+  void declareMeshesForSubByName(const std::vector<MeshGeneratorName> & mesh_generator_names);
 
   /**
    * Build a \p MeshBase object whose underlying type will be determined by the Mesh input file
@@ -126,7 +241,8 @@ protected:
    * caller doesn't specify a value for \p dim, then the value in the \p Mesh input file block will
    * be used
    */
-  std::unique_ptr<MeshBase> buildMeshBaseObject(unsigned int dim = libMesh::invalid_uint);
+  [[nodiscard]] std::unique_ptr<MeshBase>
+  buildMeshBaseObject(unsigned int dim = libMesh::invalid_uint);
 
   /**
    * Build a replicated mesh
@@ -134,7 +250,8 @@ protected:
    * caller doesn't specify a value for \p dim, then the value in the \p Mesh input file block will
    * be used
    */
-  std::unique_ptr<ReplicatedMesh> buildReplicatedMesh(unsigned int dim = libMesh::invalid_uint);
+  [[nodiscard]] std::unique_ptr<ReplicatedMesh>
+  buildReplicatedMesh(unsigned int dim = libMesh::invalid_uint);
 
   /**
    * Build a distributed mesh that has correct remote element removal behavior and geometric
@@ -143,106 +260,180 @@ protected:
    * caller doesn't specify a value for \p dim, then the value in the \p Mesh input file block will
    * be used
    */
-  std::unique_ptr<DistributedMesh> buildDistributedMesh(unsigned int dim = libMesh::invalid_uint);
+  [[nodiscard]] std::unique_ptr<DistributedMesh>
+  buildDistributedMesh(unsigned int dim = libMesh::invalid_uint);
 
   /**
    * Construct a "subgenerator", a different MeshGenerator subclass
    * that will be added to the same MooseApp on the fly.
    *
-   * The new MeshGenerator will be a dependency of this one, so will
-   * generate() its mesh first.
+   * @param type The type of MeshGenerator
+   * @param name The name of the MeshGenerator
+   * @param extra_input_parameters ... Additional InputParameters to pass
    *
-   * @return The Mesh generated by the new MeshGenerator subgenerator
+   * Sub generators must be added in the order that they are executed.
    *
-   * NOTE: You MUST catch this by reference!
+   * Any input dependencies for a sub generator that come from inputs for
+   * this generator must first be declared with the declareMesh(es)ForSub()
+   * method.
+   *
+   * You can use the output of a sub generator as a mesh in this generator
+   * by calling getMesh() with the sub generator's name _after_ adding
+   * said sub generator.
    */
   template <typename... Ts>
-  std::unique_ptr<MeshBase> & addMeshSubgenerator(const std::string & generator_name,
-                                                  const std::string & name,
-                                                  Ts... extra_input_parameters);
+  void addMeshSubgenerator(const std::string & type,
+                           const std::string & name,
+                           Ts... extra_input_parameters);
 
   /**
    * Construct a "subgenerator", as above.  User code is responsible
    * for constructing valid InputParameters.
-   * @param generator_name the name of the class, also known as the type, of the subgenerator
-   * @param name the object name of the subgenerator
-   * @param params the input parameters for the subgenerator
-   * @return The Mesh generated by the new MeshGenerator subgenerator
+   *
+   * @param type The type of MeshGenerator
+   * @param name The name of the MeshGenerator
+   * @param params The parameters to use to construct the MeshGenerator
    */
-  std::unique_ptr<MeshBase> & addMeshSubgenerator(const std::string & generator_name,
-                                                  const std::string & name,
-                                                  InputParameters & params);
+  void
+  addMeshSubgenerator(const std::string & type, const std::string & name, InputParameters params);
+
+  /**
+   * Registers the name \p name as a "null" mesh, which is a MeshGenerator used in
+   * InputParameters that will not represent an input mesh when requested via getMesh.
+   *
+   * An example use case for this is when you as a developer want users to represent a hole
+   * in a mesh pattern that is defined in input.
+   *
+   */
+  void declareNullMeshName(const MeshGeneratorName & name);
+
+  /// References to the mesh and displaced mesh (currently in the ActionWarehouse)
+  const std::shared_ptr<MooseMesh> & _mesh;
 
 private:
-  /// A list of generators that are required to run before this generator may run
-  std::vector<std::string> _depends_on;
+  /**
+   * Override of the default prefix to use when getting mesh properties.
+   *
+   * Until we support getting mesh properties from other mesh generators (which is coming),
+   * we will default to properties returned by this generator.
+   */
+  virtual std::string meshPropertyPrefix(const std::string &) const override final
+  {
+    return name();
+  }
+
+  /**
+   * Helper for performing error checking in the getMesh methods.
+   */
+  void checkGetMesh(const MeshGeneratorName & mesh_generator_name,
+                    const std::string & param_name) const;
+
+  /**
+   * Helper for getting a MeshGeneratorName parameter
+   */
+  const MeshGeneratorName * getMeshGeneratorNameFromParam(const std::string & param_name,
+                                                          const bool allow_invalid) const;
+  /**
+   * Helper for getting a std::vector<MeshGeneratorName> parameter
+   */
+  const std::vector<MeshGeneratorName> &
+  getMeshGeneratorNamesFromParam(const std::string & param_name) const;
+
+  /**
+   * Helper for getting a writable reference to a mesh property, used in
+   * declareMeshProperty and setMeshProperty.
+   */
+  RestartableDataValue & setMeshPropertyHelper(const std::string & data_name);
+
+  /// The names of the MeshGenerators that were requested in the getMesh methods
+  std::set<MeshGeneratorName> _requested_mesh_generators;
+  /// The names of the MeshGenerators that were requested in the declareMeshForSub methods
+  std::set<MeshGeneratorName> _requested_mesh_generators_for_sub;
+  /// The meshes that were requested by this MeshGenerator; used to verify that
+  /// any input meshes that are requested are properly released after generation
+  std::vector<std::pair<std::string, std::unique_ptr<MeshBase> *>> _requested_meshes;
 
   /// A nullptr to use for when inputs aren't specified
   std::unique_ptr<MeshBase> _null_mesh = nullptr;
+
+  /// The MeshGenerators that are parents to this MeshGenerator
+  std::set<const MeshGenerator *, Comparator> _parent_mesh_generators;
+  /// The MeshGenerators that are children to this MeshGenerator
+  std::set<const MeshGenerator *, Comparator> _child_mesh_generators;
+  /// The sub MeshGenerators constructed by this MeshGenerator
+  std::set<const MeshGenerator *, Comparator> _sub_mesh_generators;
+
+  /// The declared "null" mesh names that will not represent a mesh in input; see declareNullMeshName()
+  std::set<std::string> _null_mesh_names;
 };
 
-template <typename T>
+template <typename T, typename... Args>
 T &
-MeshGenerator::declareMeshProperty(const std::string & data_name)
+MeshGenerator::declareMeshProperty(const std::string & data_name, Args &&... args)
 {
-  if (_app.executingMeshGenerators())
-    mooseError(
-        "Declaration of mesh meta data can only happen within the constructor of mesh generators");
+  if (!_app.constructingMeshGenerators())
+    mooseError("Can only call declareMeshProperty() during MeshGenerator construction");
 
-  std::string full_name =
-      std::string(MeshMetaDataInterface::SYSTEM) + "/" + name() + "/" + data_name;
+  // We sort construction ordering so that we _must_ declare before retrieving
+  if (hasMeshProperty(data_name))
+    mooseError("While declaring mesh property '",
+               data_name,
+               "' with type '",
+               MooseUtils::prettyCppType<T>(),
+               "',\nsaid property has already been declared with type '",
+               setMeshPropertyHelper(data_name).type(),
+               "'");
 
-  // Here we will create the RestartableData even though we may not use this instance.
-  // If it's already in use, the App will return a reference to the existing instance and we'll
-  // return that one instead. We might refactor this to have the app create the RestartableData
-  // at a later date.
-  auto data_ptr = std::make_unique<RestartableData<T>>(full_name, nullptr);
-  auto & restartable_data_ref = static_cast<RestartableData<T> &>(_app.registerRestartableData(
-      full_name, std::move(data_ptr), 0, false, MooseApp::MESH_META_DATA));
+  const auto full_name = meshPropertyName(data_name);
+  auto new_T_value =
+      std::make_unique<RestartableData<T>>(full_name, nullptr, std::forward<Args>(args)...);
+  auto value = &_app.registerRestartableData(
+      full_name, std::move(new_T_value), 0, false, MooseApp::MESH_META_DATA);
+  mooseAssert(value->declared(), "Should be declared");
 
-  return restartable_data_ref.set();
+  RestartableData<T> * T_value = dynamic_cast<RestartableData<T> *>(value);
+  mooseAssert(T_value, "Bad cast");
+
+  return T_value->set();
 }
 
-template <typename T>
+template <typename T, typename... Args>
 T &
-MeshGenerator::declareMeshProperty(const std::string & data_name, const T & init_value)
+MeshGenerator::setMeshProperty(const std::string & data_name, Args &&... args)
 {
-  T & data = declareMeshProperty<T>(data_name);
-  data = init_value;
+  if (_app.actionWarehouse().getCurrentTaskName() != "execute_mesh_generators")
+    mooseError("Updating mesh meta data with setMeshProperty() can only be called during "
+               "MeshGenerator::generate()");
 
-  return data;
-}
+  if (!hasMeshProperty(data_name))
+    mooseError("Failed to get the mesh property '", data_name, "'");
+  RestartableDataValue * value = &setMeshPropertyHelper(data_name);
+  RestartableData<T> * T_value = dynamic_cast<RestartableData<T> *>(value);
+  if (!T_value)
+    mooseError("While retrieving mesh property '",
+               data_name,
+               "' with type '",
+               MooseUtils::prettyCppType<T>(),
+               "',\nthe property was found with type '",
+               value->type(),
+               "'");
 
-template <typename T>
-T &
-MeshGenerator::setMeshProperty(const std::string & data_name, const T & data_value)
-{
-  if (!_app.executingMeshGenerators())
-    mooseError("Updating mesh meta data cannot occur in the constructor of mesh generators");
+  // Set the value if someone provided arguments to set it to
+  if constexpr (sizeof...(args) > 0)
+    T_value->set() = T(std::forward<Args>(args)...);
 
-  std::string full_name =
-      std::string(MeshMetaDataInterface::SYSTEM) + "/" + name() + "/" + data_name;
-
-  if (_app.getRestartableMetaData(full_name, MooseApp::MESH_META_DATA, 0).type() !=
-      MooseUtils::prettyCppType(&data_value))
-    mooseError("Data type of metadata value must match the original data type of the metadata");
-  auto & restartable_data_ref = dynamic_cast<RestartableData<T> &>(
-      _app.getRestartableMetaData(full_name, MooseApp::MESH_META_DATA, 0));
-  T & data = restartable_data_ref.set();
-  data = data_value;
-
-  return data;
+  return T_value->set();
 }
 
 template <typename... Ts>
-std::unique_ptr<MeshBase> &
-MeshGenerator::addMeshSubgenerator(const std::string & generator_name,
+void
+MeshGenerator::addMeshSubgenerator(const std::string & type,
                                    const std::string & name,
                                    Ts... extra_input_parameters)
 {
-  InputParameters subgenerator_params = _app.getFactory().getValidParams(generator_name);
+  InputParameters subgenerator_params = _app.getFactory().getValidParams(type);
 
   subgenerator_params.setParameters(extra_input_parameters...);
 
-  return this->addMeshSubgenerator(generator_name, name, subgenerator_params);
+  addMeshSubgenerator(type, name, subgenerator_params);
 }

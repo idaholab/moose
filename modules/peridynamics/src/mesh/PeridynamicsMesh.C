@@ -111,7 +111,7 @@ void
 PeridynamicsMesh::buildMesh()
 {
   if (!hasMeshBase())
-    _mesh = _app.getMeshGeneratorMesh();
+    _mesh = _app.getMeshGeneratorSystem().getMeshGeneratorMesh();
 
   _mesh->allow_renumbering(false);
   _mesh->prepare_for_use();

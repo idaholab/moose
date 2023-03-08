@@ -1,0 +1,98 @@
+[Tests]
+  issues = '#22563'
+  design = 'Coupleable.md'
+
+  [nodal]
+    type = Exodiff
+    input = nodal.i
+    exodiff = nodal_out.e
+    requirement = "The system shall allow nodal user objects to obtain writable references to nodal "
+                  "variables."
+  []
+  [elemental]
+    type = Exodiff
+    input = elemental.i
+    exodiff = elemental_out.e
+    requirement = "The system shall allow elemental user objects to obtain writable references to "
+                  "elemental variables."
+  []
+
+  [nodal_error]
+    type = RunException
+    input = nodal.i
+    cli_args = 'AuxVariables/v/family=MONOMIAL AuxVariables/v/order=CONSTANT'
+    expect_err = 'nodal: cannot couple elemental variables into nodal objects'
+    requirement = "The system shall prevent nodal user objects from obtaining writable references to "
+                  "elemental variables."
+  []
+  [elemental_error]
+    type = RunException
+    input = elemental.i
+    cli_args = 'AuxVariables/v/family=LAGRANGE AuxVariables/v/order=FIRST'
+    expect_err = "The ElementUserObject 'elemental' cannot obtain a writable reference to the nodal "
+                 "variable 'v'."
+    requirement = "The system shall prevent elemental user objects from obtaining writable "
+                  "references to nodal variables."
+  []
+
+  [block]
+    type = Exodiff
+    input = block.i
+    exodiff = block_out.e
+    cli_args = 'UserObjects/elemental/block=1'
+    requirement = "The system shall allow block restricted user objects to obtain a writable "
+                  "reference to a variable with a block restriction that includes the user object's "
+                  "blocks"
+  []
+  [block_error]
+    type = RunException
+    input = block.i
+    cli_args = 'AuxVariables/v/block=1'
+    expect_err = "The variable 'v' must be defined on all blocks 'elemental' is defined on"
+    requirement = "The system shall enforce that all variables an object obtains a writable "
+                  "reference to are defined on all of the object's blocks"
+  []
+
+  [block2]
+    type = Exodiff
+    input = block2.i
+    exodiff = block2_out.e
+    cli_args = 'UserObjects/elemental1/block=1 UserObjects/elemental2/block=2'
+    requirement = "The system shall permit multiple objects to access a variable for writing if the "
+                  "objects have non-overlapping block restrictions"
+  []
+  [block2_error]
+    type = RunException
+    input = block2.i
+    expect_err = "'elemental1' already obtained a writable reference to 'v'. Only one object can "
+                 "obtain such a reference per variable and subdomain in a simulation."
+    cli_args = 'UserObjects/elemental1/block=1 UserObjects/elemental2/block="1 2"'
+    requirement = "The system shall error out if multiple objects with overlapping block "
+                  "restrictions try to access a variable for writing"
+  []
+  [block2_error2]
+    type = RunException
+    input = block2.i
+    expect_err = "'elemental1' already obtained a writable reference to 'v'. Only one object can "
+                 "obtain such a reference per variable and subdomain in a simulation."
+    cli_args = 'UserObjects/elemental1/block=1'
+    requirement = "The system shall error out if multiple objects, of which at least one is not "
+                  "block restricted, try to access a variable for writing"
+  []
+
+  [boundary]
+    type = Exodiff
+    input = boundary.i
+    exodiff = boundary_out.e
+    requirement = "The system shall permit writing to variables from boundary restricted nodal user "
+                  "objects."
+  []
+  [boundary_error]
+    type = RunException
+    input = boundary2.i
+    expect_err = "'nodal1' of type 'MultiUpdateNodalUO' depends on variable\(s\) 'v'. However, that "
+                 "variable does not appear to be defined on \(all of\) boundary 'bottom'\."
+    requirement = "The system shall make sure that variables written to by boundary restricted user "
+                  "objects are available along the entire boundary."
+  []
+[]

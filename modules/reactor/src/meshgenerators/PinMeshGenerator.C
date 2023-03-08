@@ -193,6 +193,8 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
   // Use special block id to designate TRI elements
   subdomain_id_type pin_block_id_tri = pin_block_id_start - 1;
 
+  std::string build_mesh_name;
+
   if (_homogenized)
   {
     auto params = _app.getFactory().getValidParams("SimpleHexagonGenerator");
@@ -210,7 +212,8 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       block_name += "_TRI";
     params.set<std::vector<SubdomainName>>("block_name") = {block_name};
 
-    _build_mesh = &addMeshSubgenerator("SimpleHexagonGenerator", name() + "_2D", params);
+    build_mesh_name = name() + "_2D";
+    addMeshSubgenerator("SimpleHexagonGenerator", build_mesh_name, params);
   }
   else
   {
@@ -364,7 +367,8 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
                                     {std::to_string(10001 + i), std::to_string(15001 + i)});
       params.set<std::vector<BoundaryName>>("boundary_names") = boundaries_to_delete;
 
-      _build_mesh = &addMeshSubgenerator("BoundaryDeletionGenerator", name() + "_del_bds", params);
+      build_mesh_name = name() + "_del_bds";
+      addMeshSubgenerator("BoundaryDeletionGenerator", build_mesh_name, params);
     }
   }
 
@@ -465,16 +469,22 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       std::string plane_id_name = "plane_id";
       params.set<std::string>("id_name") = "plane_id";
 
-      _build_mesh = &addMeshSubgenerator("PlaneIDMeshGenerator", name() + "_extrudedIDs", params);
+      build_mesh_name = name() + "_extrudedIDs";
+      addMeshSubgenerator("PlaneIDMeshGenerator", build_mesh_name, params);
     }
   }
   else
     declareMeshProperty("extruded", false);
+
+  _build_mesh = &getMeshByName(build_mesh_name);
 }
 
 std::unique_ptr<MeshBase>
 PinMeshGenerator::generate()
 {
+  // Must be called to free the ReactorMeshParams mesh
+  freeReactorMeshParams();
+
   // Update metadata at this point since values for these metadata only get set by PCCMG
   // at generate() stage
   if (hasMeshProperty("max_radius_meta", name() + "_2D"))

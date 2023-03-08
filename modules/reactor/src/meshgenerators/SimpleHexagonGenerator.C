@@ -94,8 +94,8 @@ SimpleHexagonGenerator::SimpleHexagonGenerator(const InputParameters & parameter
   if (_block_name.size() != 0 && _block_name.size() != _block_id.size())
     paramError("block_name", "if provided, this parameter must have the same size as 'block_id'.");
   declareMeshProperty<unsigned int>("background_intervals_meta", _radial_intervals);
-  declareMeshProperty<unsigned int>("node_id_background_meta",
-                                    _radial_intervals * HEXAGON_NUM_SIDES);
+  declareMeshProperty<dof_id_type>("node_id_background_meta",
+                                   _radial_intervals * HEXAGON_NUM_SIDES);
   declareMeshProperty<Real>("max_radius_meta", 0.0);
   declareMeshProperty<std::vector<unsigned int>>("num_sectors_per_side_meta", {1, 1, 1, 1, 1, 1});
   declareMeshProperty<Real>("pitch_meta", _pitch);

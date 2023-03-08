@@ -241,6 +241,10 @@ public:
   std::string getCurrentActionName() const;
 
   /**
+   * @returns True if a task with the name \p task is registered.
+   */
+  bool hasTask(const std::string & task) const;
+  /**
    * @returns True if the registered task with the name \p task is complete.
    */
   bool isTaskComplete(const std::string & task) const;

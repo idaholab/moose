@@ -32,4 +32,7 @@ public:
 
 private:
   const TheWarehouse::Query _query;
+  AuxiliarySystem & _aux_sys;
+
+  static Threads::spin_mutex writable_variable_mutex;
 };

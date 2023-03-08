@@ -13,19 +13,26 @@
 #include "FEProblem.h"
 #include "MooseMesh.h"
 #include "NodalUserObject.h"
+#include "AuxiliarySystem.h"
 
 #include "libmesh/threads.h"
 
+Threads::spin_mutex ComputeNodalUserObjectsThread::writable_variable_mutex;
+
 ComputeNodalUserObjectsThread::ComputeNodalUserObjectsThread(FEProblemBase & fe_problem,
                                                              const TheWarehouse::Query & query)
-  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem), _query(query)
+  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
+    _query(query),
+    _aux_sys(fe_problem.getAuxiliarySystem())
 {
 }
 
 // Splitting Constructor
 ComputeNodalUserObjectsThread::ComputeNodalUserObjectsThread(ComputeNodalUserObjectsThread & x,
                                                              Threads::split split)
-  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split), _query(x._query)
+  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
+    _query(x._query),
+    _aux_sys(x._aux_sys)
 {
 }
 
@@ -50,7 +57,17 @@ ComputeNodalUserObjectsThread::onNode(ConstNodeRange::const_iterator & node_it)
         .condition<AttribBoundaries>(bnd, true)
         .queryInto(objs);
     for (const auto & uo : objs)
+    {
       uo->execute();
+
+      // update the aux solution vector if writable coupled variables are used
+      if (uo->hasWritableCoupledVariables())
+      {
+        Threads::spin_mutex::scoped_lock lock(writable_variable_mutex);
+        for (auto * var : uo->getWritableCoupledVariables())
+          var->insert(_aux_sys.solution());
+      }
+    }
   }
 
   // Block Restricted
@@ -75,6 +92,15 @@ ComputeNodalUserObjectsThread::onNode(ConstNodeRange::const_iterator & node_it)
       if (!uo->isUniqueNodeExecute() || computed.count(uo) == 0)
       {
         uo->execute();
+
+        // update the aux solution vector if writable coupled variables are used
+        if (uo->hasWritableCoupledVariables())
+        {
+          Threads::spin_mutex::scoped_lock lock(writable_variable_mutex);
+          for (auto * var : uo->getWritableCoupledVariables())
+            var->insert(_aux_sys.solution());
+        }
+
         computed.insert(uo);
       }
   }

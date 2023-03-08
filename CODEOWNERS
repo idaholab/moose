@@ -20,6 +20,7 @@
 /framework/include @lindsayad
 /framework/src @lindsayad
 /framework/*/base @roystgnr
+/framework/*/base/MeshGeneratorSystem* @loganharbour
 /framework/*/executioners/*Solve* @GiudGiud
 /framework/*/materials/Derivative* @dschwen
 /framework/*/materials/Material* @roystgnr
@@ -50,7 +51,7 @@
 /modules/optimization @zachmprince @dschwen
 /modules/ray_tracing @loganharbour
 /modules/rdg @joshuahansel @lindsayad
-/modules/reactor @GiudGiud @roystgnr
+/modules/reactor @GiudGiud @loganharbour @roystgnr
 /modules/scalar_transport @lindsayad
 /modules/solid_properties @joshuahansel
 /modules/stochastic_tools @zachmprince

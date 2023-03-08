@@ -20,7 +20,7 @@
     input = 'mesh_meta_data_store.i'
 
     cli_args = 'AutoLineSamplerTest/test_request_invalid_property=true'
-    expect_err = "The following 'MeshMetaData' meta-data properties were retrieved but never declared: \S+"
+    expect_err = "Failed to get mesh property 'gmg/nonexistent_property'"
 
     requirement = 'The system shall issue an error when mesh meta-data properties are requested but never declared.'
   []

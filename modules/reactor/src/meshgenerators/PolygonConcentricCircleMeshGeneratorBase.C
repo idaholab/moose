@@ -637,9 +637,11 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
     paramError("center_quad_factor",
                "this parameter is only applicable if quad_center_elements is set true.");
   if (_quad_center_elements)
-    declareMeshProperty<subdomain_id_type>("quad_center_block_id",
-                                           _ring_block_ids.empty() ? _background_block_ids.front()
-                                                                   : _ring_block_ids.front());
+    declareMeshProperty<subdomain_id_type>(
+        "quad_center_block_id",
+        _has_rings ? (_ring_block_ids.empty() ? _block_id_shift + 1 : _ring_block_ids.front())
+                   : (_background_block_ids.empty() ? _block_id_shift + 1
+                                                    : _background_block_ids.front()));
   else
     declareMeshProperty<subdomain_id_type>("quad_center_block_id",
                                            libMesh::Elem::invalid_subdomain_id);
@@ -648,14 +650,12 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
 std::unique_ptr<MeshBase>
 PolygonConcentricCircleMeshGeneratorBase::generate()
 {
-  std::vector<ReplicatedMesh *> input;
-  for (const auto & mesh : _input_ptrs)
+  std::vector<std::unique_ptr<ReplicatedMesh>> input(_input_ptrs.size());
+  for (const auto i : index_range(_input_ptrs))
   {
-    mooseAssert(mesh && (*mesh).get(), "nullptr mesh");
-    auto replicated_mesh = dynamic_cast<ReplicatedMesh *>((*mesh).get());
-    if (!replicated_mesh)
+    input[i] = dynamic_pointer_cast<ReplicatedMesh>(std::move(*_input_ptrs[i]));
+    if (!input[i])
       mooseError("A non-replicated mesh input was supplied but replicated meshes are required.");
-    input.push_back(replicated_mesh);
   }
 
   unsigned int mesh_input_counter = 0;

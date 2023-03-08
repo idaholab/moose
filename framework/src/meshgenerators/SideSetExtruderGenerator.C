@@ -36,6 +36,11 @@ SideSetExtruderGenerator::SideSetExtruderGenerator(const InputParameters & param
     _num_layers(getParam<unsigned int>("num_layers")),
     _sideset_name(getParam<BoundaryName>("sideset"))
 {
+  // The input "input" is used by the first sub generator; this allows us to declare
+  // that this dependency is not a dependency of SideSetExtruderGenerator but instead
+  // the LowerDBlockFromSidesetGenerator below
+  declareMeshForSub("input");
+
   const SubdomainName extruded_block_name = "extruded_block_" + name();
   const BoundaryName sideset_to_stitch = "to_be_stitched_" + name();
 
@@ -48,8 +53,7 @@ SideSetExtruderGenerator::SideSetExtruderGenerator(const InputParameters & param
     params.set<std::vector<BoundaryName>>("sidesets") = {_sideset_name};
 
     // generate lower dimensional mesh from the given sideset
-    _build_mesh = &addMeshSubgenerator(
-        "LowerDBlockFromSidesetGenerator", name() + "_lowerDgeneration", params);
+    addMeshSubgenerator("LowerDBlockFromSidesetGenerator", name() + "_lowerDgeneration", params);
   }
 
   {
@@ -59,8 +63,7 @@ SideSetExtruderGenerator::SideSetExtruderGenerator(const InputParameters & param
     params.set<std::vector<SubdomainName>>("target_blocks") = {extruded_block_name};
 
     // convert lower dimensional block to a separate mesh
-    _build_mesh =
-        &addMeshSubgenerator("BlockToMeshConverterGenerator", name() + "_blockToMesh", params);
+    addMeshSubgenerator("BlockToMeshConverterGenerator", name() + "_blockToMesh", params);
   }
 
   {
@@ -72,7 +75,7 @@ SideSetExtruderGenerator::SideSetExtruderGenerator(const InputParameters & param
     params.set<std::vector<BoundaryName>>("bottom_sideset") = {sideset_to_stitch};
 
     // extrude the new, separate mesh into a higher dimension
-    _build_mesh = &addMeshSubgenerator("MeshExtruderGenerator", name() + "_extruder", params);
+    addMeshSubgenerator("MeshExtruderGenerator", name() + "_extruder", params);
   }
 
   {
@@ -86,7 +89,8 @@ SideSetExtruderGenerator::SideSetExtruderGenerator(const InputParameters & param
         {_sideset_name, sideset_to_stitch}};
 
     // stitch the newly made high-dimensional mesh back to the original mesh
-    _build_mesh = &addMeshSubgenerator("StitchedMeshGenerator", name() + "_stitched", params);
+    addMeshSubgenerator("StitchedMeshGenerator", name() + "_stitched", params);
+    _build_mesh = &getMeshByName(name() + "_stitched");
   }
 }
 

@@ -19,16 +19,25 @@ MultipleUpdateAux::validParams()
   params.addRequiredCoupledVar("u", "unknown (nl-variable)");
   params.addRequiredCoupledVar("var1", "an aux variable to update");
   params.addRequiredCoupledVar("var2", "another aux variable to update");
-
+  params.addParam<bool>("use_deprecated_api", false, "Test the deprecated API");
   return params;
 }
 
 MultipleUpdateAux::MultipleUpdateAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _nl_u(coupledValue("u")),
-    _var1(writableCoupledValue("var1")),
-    _var2(writableCoupledValue("var2"))
+    _deprecated(getParam<bool>("use_deprecated_api"))
 {
+  if (_deprecated)
+  {
+    _dvar1 = &writableCoupledValue("var1");
+    _dvar2 = &writableCoupledValue("var2");
+  }
+  else
+  {
+    _var1 = &writableVariable("var1");
+    _var2 = &writableVariable("var2");
+  }
 }
 
 MultipleUpdateAux::~MultipleUpdateAux() {}
@@ -36,7 +45,15 @@ MultipleUpdateAux::~MultipleUpdateAux() {}
 Real
 MultipleUpdateAux::computeValue()
 {
-  _var1[_qp] = _nl_u[_qp] + 10.0;
-  _var2[_qp] = _nl_u[_qp] + 200.0;
+  if (_deprecated)
+  {
+    (*_dvar1)[_qp] = _nl_u[_qp] + 10.0;
+    (*_dvar2)[_qp] = _nl_u[_qp] + 200.0;
+  }
+  else
+  {
+    _var1->setNodalValue(_nl_u[_qp] + 10.0, _qp);
+    _var2->setNodalValue(_nl_u[_qp] + 200.0, _qp);
+  }
   return -3.33;
 }

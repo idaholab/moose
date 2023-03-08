@@ -1165,6 +1165,34 @@ get(const std::shared_ptr<T> & s)
   return s.get();
 }
 
+/**
+ * This method detects whether two sets intersect without building a result set.
+ * It exits as soon as any intersection is detected.
+ */
+template <class InputIterator>
+bool
+setsIntersect(InputIterator first1, InputIterator last1, InputIterator first2, InputIterator last2)
+{
+  while (first1 != last1 && first2 != last2)
+  {
+    if (*first1 == *first2)
+      return true;
+
+    if (*first1 < *first2)
+      ++first1;
+    else if (*first1 > *first2)
+      ++first2;
+  }
+  return false;
+}
+
+template <class T>
+bool
+setsIntersect(const T & s1, const T & s2)
+{
+  return setsIntersect(s1.begin(), s1.end(), s2.begin(), s2.end());
+}
+
 } // MooseUtils namespace
 
 /**
