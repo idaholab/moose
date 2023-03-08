@@ -29,8 +29,10 @@ MeshGenerator::validParams()
 
   params.addParam<bool>(
       "output", false, "Whether or not to output the mesh file after generating the mesh");
-  params.addParam<bool>(
-      "nemesis", false, "Whether or not to output the mesh file in the nemesis format (only if output = true)");
+  params.addParam<bool>("nemesis",
+                        false,
+                        "Whether or not to output the mesh file in the nemesis"
+                        "format (only if output = true)");
   params.registerBase("MeshGenerator");
 
   return params;
