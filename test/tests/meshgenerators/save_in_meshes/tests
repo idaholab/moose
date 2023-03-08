@@ -8,8 +8,9 @@
         type = 'Exodiff'
         input = 'save_in_meshes.i'
         exodiff = 'left_block_in.e'
-        cli_args = "Mesh/A/save_with_name='left_block' --mesh-only"
+        cli_args = "Mesh/A/save_with_name='left_block' "
         recover = false
+        mesh_mode = REPLICATED
 
         detail = 'Output only the A mesh block in a seperate mesh file'
     []
@@ -17,7 +18,7 @@
       type = 'Exodiff'
       input = 'save_in_meshes.i'
       exodiff = 'left_block_in.e.2.0 left_block_in.e.2.1'
-      cli_args = "Mesh/A/save_with_name='left_block' Mesh/parallel_type=distributed Mesh/A/nemesis=true --mesh-only"
+      cli_args = "Mesh/A/save_with_name='left_block' Mesh/parallel_type=distributed Mesh/A/nemesis=true "
       recover = false
       mesh_mode = 'DISTRIBUTED'
       min_parallel = 2
@@ -32,7 +33,7 @@
     [repeat_save_in_name]
       type = 'RunException'
       input = 'save_in_meshes.i'
-      cli_args = "Mesh/A/save_with_name='A' Mesh/B/save_with_name='A' --mesh-only"
+      cli_args = "Mesh/A/save_with_name='A' Mesh/B/save_with_name='A' "
       expect_err = "The save with name 'A' has already been used"
 
       detail = 'Each save in mesh needs to have a unique name'
@@ -41,7 +42,7 @@
     [save_in_name_as_main]
       type = 'RunException'
       input = 'save_in_meshes.i'
-      cli_args = "Mesh/A/save_with_name='main' --mesh-only"
+      cli_args = "Mesh/A/save_with_name='main' "
       expect_err = "The user-defined mesh name: 'main' has already been used by default mesh"
 
       detail = "The save in mesh can not used the MOOSE default mesh name 'main'."
@@ -50,7 +51,7 @@
     [save_in_name_for_final_mesh_generator]
       type = 'RunException'
       input = 'save_in_meshes.i'
-      cli_args = "Mesh/A_and_B/save_with_name='C' --mesh-only"
+      cli_args = "Mesh/A_and_B/save_with_name='C' "
       expect_err = "Cannot use the save in capability with the final mesh generator"
 
       detail = "The save in capability can not be used on final mesh generator which avoids duplicate mesh output."
@@ -63,7 +64,6 @@
       type = 'Exodiff'
       input = 'save_in_meshes_with_C.i'
       exodiff = 'C_in.e'
-      cli_args = "--mesh-only"
       recover = false
     []
 []

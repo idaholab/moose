@@ -26,6 +26,46 @@
   []
 []
 
+[Variables]
+  [u]
+  []
+[]
+
+[Kernels]
+  [test]
+    type = TestSaveInMesh
+    variable = u
+  []
+[]
+
+[BCs]
+  [left]
+    type = DirichletBC
+    variable = u
+    boundary = left
+    value = 1
+  []
+  [right]
+    type = DirichletBC
+    variable = u
+    boundary = right
+    value = 0
+  []
+[]
+
+[Problem]
+  type = FEProblem
+  allow_invalid_solution = false
+  immediately_print_invalid_solution = false
+[]
+
+[Executioner]
+  type = Steady
+  solve_type = 'NEWTON'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type'
+  petsc_options_value = 'lu superlu_dist'
+[]
+
 [Outputs]
-  exodus = true
+ exodus = true
 []

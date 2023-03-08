@@ -15,7 +15,7 @@
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/checkpoint_io.h"
-#include <libmesh/nemesis_io.h>
+#include "libmesh/nemesis_io.h"
 
 registerMooseAction("MooseApp", MeshOnlyAction, "mesh_only");
 
@@ -92,37 +92,5 @@ MeshOnlyAction::act()
   {
     // Just write the file using the name requested by the user.
     mesh_ptr->getMesh().write(mesh_file);
-  }
-
-  auto & mesh_generator_system = _app.getMeshGeneratorSystem();
-  auto saved_mesh_names = mesh_generator_system.getSavedMeshesNames();
-  if (saved_mesh_names.size() != 0)
-  {
-    for (auto & name : saved_mesh_names)
-    {
-      if (name != mesh_generator_system.mainMeshGeneratorName())
-      {
-        // We now have ownership of this mesh, it will get destructed out of scope
-        auto mesh = mesh_generator_system.getSavedMeshes(name);
-
-        if (mesh->is_replicated())
-        {
-          ExodusII_IO exio(*mesh);
-
-          if (mesh->mesh_dimension() == 1)
-            exio.write_as_dimension(3);
-
-          // Default to non-HDF5 output for wider compatibility
-          exio.set_hdf5_writing(false);
-
-          exio.write(name + "_in.e");
-        }
-        else
-        {
-          Nemesis_IO nemesis_io(*mesh);
-          nemesis_io.write(name + "_in.e");
-        }
-      }
-    }
   }
 }
