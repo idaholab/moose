@@ -37,12 +37,6 @@ INSFVMixingLengthTurbulentViscosityAux::INSFVMixingLengthTurbulentViscosityAux(
                : nullptr),
     _mixing_len(coupledValue("mixing_length"))
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
-             "configure script in the root MOOSE directory with the configure option "
-             "'--with-ad-indexing-type=global'");
-#endif
-
   if (!_u_var)
     paramError("u", "the u velocity must be an INSFVVelocityVariable.");
 
@@ -60,7 +54,6 @@ INSFVMixingLengthTurbulentViscosityAux::INSFVMixingLengthTurbulentViscosityAux(
 Real
 INSFVMixingLengthTurbulentViscosityAux::computeValue()
 {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   constexpr Real offset = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
   const Elem & elem = *_current_elem;
 
@@ -87,9 +80,4 @@ INSFVMixingLengthTurbulentViscosityAux::computeValue()
 
   // Return the turbulent stress contribution to the momentum equation
   return eddy_diff.value();
-
-#else
-  return 0;
-
-#endif
 }

@@ -46,8 +46,6 @@ struct FEBaseHelper<RealVectorValue>
 };
 }
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-
 template <typename OutputType>
 template <typename Shapes, typename Solution, typename GradShapes, typename GradSolution>
 void
@@ -281,60 +279,6 @@ MooseVariableField<OutputType>::evaluateDot(const ElemSideQpArg & elem_side_qp,
               "The requested " << qp << " is outside our dot size");
   return _current_elem_side_qp_functor_dot[qp];
 }
-
-#else
-
-template <typename OutputType>
-typename MooseVariableField<OutputType>::ValueType
-MooseVariableField<OutputType>::evaluate(const ElemQpArg &, unsigned int) const
-{
-  mooseError(
-      "MooseVariableField::evaluate(ElemQpArg &, unsigned int) is only supported for global AD "
-      "indexing");
-}
-
-template <typename OutputType>
-typename MooseVariableField<OutputType>::ValueType
-MooseVariableField<OutputType>::evaluate(const ElemSideQpArg &, unsigned int) const
-{
-  mooseError(
-      "MooseVariableField::evaluate(ElemSideQpArg &, unsigned int) is only supported for global AD "
-      "indexing");
-}
-
-template <typename OutputType>
-typename MooseVariableField<OutputType>::GradientType
-MooseVariableField<OutputType>::evaluateGradient(const ElemQpArg &, unsigned int) const
-{
-  mooseError("MooseVariableField::evaluateGradient(ElemQpArg &, unsigned int) is only supported "
-             "for global AD indexing");
-}
-
-template <typename OutputType>
-typename MooseVariableField<OutputType>::GradientType
-MooseVariableField<OutputType>::evaluateGradient(const ElemSideQpArg &, unsigned int) const
-{
-  mooseError("MooseVariableField::evaluateGradient(ElemSideQpArg &, unsigned int) is only "
-             "supported for global AD indexing");
-}
-
-template <typename OutputType>
-typename MooseVariableField<OutputType>::DotType
-MooseVariableField<OutputType>::evaluateDot(const ElemQpArg &, unsigned int) const
-{
-  mooseError("MooseVariableField::evaluateDot(ElemQpArg &, unsigned int) is only supported "
-             "for global AD indexing");
-}
-
-template <typename OutputType>
-typename MooseVariableField<OutputType>::DotType
-MooseVariableField<OutputType>::evaluateDot(const ElemSideQpArg &, unsigned int) const
-{
-  mooseError("MooseVariableField::evaluateDot(ElemSideQpArg &, unsigned int) is only "
-             "supported for global AD indexing");
-}
-
-#endif
 
 template <typename OutputType>
 typename MooseVariableField<OutputType>::ValueType

@@ -9,8 +9,6 @@
 
 #include "FVElementalAdvection.h"
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-
 registerMooseObject("MooseTestApp", FVElementalAdvection);
 
 InputParameters
@@ -63,5 +61,3 @@ FVElementalAdvection::computeQpResidual()
 
   return resid;
 }
-
-#endif

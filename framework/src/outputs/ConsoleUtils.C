@@ -280,14 +280,6 @@ outputNonlinearSystemInformation(FEProblemBase & problem)
   std::stringstream oss;
   oss << std::left;
 
-#ifndef MOOSE_SPARSE_AD
-  if (problem.haveADObjects())
-  {
-    oss << std::setw(console_field_width)
-        << "  AD size required: " << problem.getNonlinearSystemBase().requiredDerivativeSize()
-        << std::endl;
-  }
-#endif
   return outputSystemInformationHelper(oss, problem.getNonlinearSystemBase().system());
 }
 

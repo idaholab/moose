@@ -23,11 +23,6 @@ GradientJumpIndicator::validParams()
 GradientJumpIndicator::GradientJumpIndicator(const InputParameters & parameters)
   : InternalSideIndicator(parameters)
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  if (_var.isFV())
-    mooseError("Use of GradientJumpIndicator with finite volume variables is currently only "
-               "supported with a global AD indexing configuration.");
-#endif
 }
 
 Real

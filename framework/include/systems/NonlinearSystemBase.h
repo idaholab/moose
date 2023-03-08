@@ -678,18 +678,6 @@ public:
     _off_diagonals_in_auto_scaling = off_diagonals_in_auto_scaling;
   }
 
-#ifndef MOOSE_SPARSE_AD
-  /**
-   * Set the required size of the derivative vector
-   */
-  void setRequiredDerivativeSize(std::size_t size) { _required_derivative_size = size; }
-
-  /**
-   * Return the required size of the derivative vector
-   */
-  std::size_t requiredDerivativeSize() const { return _required_derivative_size; }
-#endif
-
   FEProblemBase & _fe_problem;
   System & _sys;
   // FIXME: make these protected and create getters/setters
@@ -758,13 +746,11 @@ protected:
    */
   virtual void computeScalingResidual() = 0;
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   /**
    * Assemble the numeric vector of scaling factors such that it can be used during assembly of the
    * system matrix
    */
   void assembleScalingVector();
-#endif
 
   /**
    * Called after any ResidualObject-derived objects are added
@@ -984,11 +970,6 @@ private:
   /// Functors for computing displaced mortar constraints
   std::unordered_map<std::pair<BoundaryID, BoundaryID>, ComputeMortarFunctor>
       _displaced_mortar_functors;
-
-#ifndef MOOSE_SPARSE_AD
-  /// The required size of the derivative storage array
-  std::size_t _required_derivative_size;
-#endif
 
   /// The current states of the solution (0 = current, 1 = old, etc)
   std::vector<NumericVector<Number> *> _solution_state;

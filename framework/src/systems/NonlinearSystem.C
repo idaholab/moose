@@ -175,11 +175,9 @@ NonlinearSystem::solve()
     else
       computeScaling();
   }
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   // We do not know a priori what variable a global degree of freedom corresponds to, so we need a
   // map from global dof to scaling factor. We just use a ghosted NumericVector for that mapping
   assembleScalingVector();
-#endif
 
   if (_use_finite_differenced_preconditioner)
   {

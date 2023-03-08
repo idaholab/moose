@@ -156,9 +156,6 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _compute_scaling_once(true),
     _resid_vs_jac_scaling_param(0),
     _off_diagonals_in_auto_scaling(false),
-#ifndef MOOSE_SPARSE_AD
-    _required_derivative_size(0),
-#endif
     _auto_scaling_initd(false)
 {
   getResidualNonTimeVector();
@@ -3640,11 +3637,9 @@ NonlinearSystemBase::computeScaling()
 
   TIME_SECTION("computeScaling", 3, "Computing Automatic Scaling");
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   // It's funny but we need to assemble our vector of scaling factors here otherwise we will be
   // applying scaling factors of 0 during Assembly of our scaling Jacobian
   assembleScalingVector();
-#endif
 
   // container for repeated access of element global dof indices
   std::vector<dof_id_type> dof_indices;
@@ -3788,7 +3783,6 @@ NonlinearSystemBase::computeScaling()
   _auto_scaling_initd = true;
 }
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
 void
 NonlinearSystemBase::assembleScalingVector()
 {
@@ -3833,4 +3827,3 @@ NonlinearSystemBase::assembleScalingVector()
     // copy into the corresponding displaced system vector because they should be the exact same
     displaced_problem->systemBaseNonlinear(number()).getVector("scaling_factors") = scaling_vector;
 }
-#endif

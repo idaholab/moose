@@ -11,8 +11,6 @@
 
 #include "FVElementalKernel.h"
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-
 class FVElementalAdvection : public FVElementalKernel
 {
 public:
@@ -26,5 +24,3 @@ protected:
   const ADMaterialProperty<Real> * const _prop;
   const ADMaterialProperty<RealVectorValue> * const _grad_prop;
 };
-
-#endif

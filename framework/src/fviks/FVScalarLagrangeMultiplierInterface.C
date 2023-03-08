@@ -51,7 +51,6 @@ FVScalarLagrangeMultiplierInterface::computeResidual(const FaceInfo & fi)
   _assembly.processResidual(lm_r, _lambda_var.dofIndices()[0], _vector_tags);
 }
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
 void
 FVScalarLagrangeMultiplierInterface::computeJacobian(const FaceInfo & fi)
 {
@@ -74,9 +73,3 @@ FVScalarLagrangeMultiplierInterface::computeJacobian(const FaceInfo & fi)
   _assembly.processResidualAndJacobian(
       lm_r, _lambda_var.dofIndices()[0], _vector_tags, _matrix_tags);
 }
-#else
-void
-FVScalarLagrangeMultiplierInterface::computeJacobian(const FaceInfo &)
-{
-}
-#endif

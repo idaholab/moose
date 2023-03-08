@@ -84,9 +84,6 @@ FVFluxBC::computeResidual(const FaceInfo & fi)
 void
 FVFluxBC::computeResidualAndJacobian(const FaceInfo & fi)
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("computeResidualAndJacobian not supported for ", name());
-#endif
   computeJacobian(fi);
 }
 
@@ -138,10 +135,6 @@ FVFluxBC::computeJacobian(Moose::DGJacobianType type, const ADReal & residual)
                 "The AD derivative indexing below only makes sense for constant monomials, e.g. "
                 "for a number of dof indices equal to  1");
 
-#ifndef MOOSE_SPARSE_AD
-    mooseAssert(ad_offset < MOOSE_AD_MAX_DOFS_PER_ELEM,
-                "Out of bounds access in derivative vector.");
-#endif
     _local_ke(0, 0) = residual.derivatives()[ad_offset];
 
     accumulateTaggedLocalMatrix();
@@ -173,36 +166,7 @@ FVFluxBC::computeJacobian(const FaceInfo & fi)
 
   mooseAssert(dof_indices.size() == 1, "We're currently built to use CONSTANT MONOMIALS");
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   _assembly.processResidualAndJacobian(r, dof_indices[0], _vector_tags, _matrix_tags);
-#else
-
-  auto local_functor = [&](const ADReal & residual, dof_id_type, const std::set<TagID> &)
-  {
-    // Even though the elem element is always the non-null pointer on mesh
-    // external boundary faces, this could be an "internal" boundary - one
-    // created by variable block restriction where the var is only defined on
-    // one side of the face (either elem or neighbor).  We need to make sure
-    // that we add the residual contribution to only the correct side - the one
-    // where the variable is defined.
-    // Also, we don't need to worry about ElementNeighbor or NeighborElement
-    // contributions here because, once again, this is a boundary face with the
-    // variable only defined on one side.
-    if (_face_type == FaceInfo::VarFaceNeighbors::ELEM)
-      computeJacobian(Moose::ElementElement, residual);
-    else if (_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
-      computeJacobian(Moose::NeighborNeighbor, residual);
-    else if (_face_type == FaceInfo::VarFaceNeighbors::BOTH)
-      mooseError("A FVFluxBC is being triggered on an internal face with centroid: ",
-                 fi.faceCentroid());
-    else
-      mooseError("A FVFluxBC is being triggered on a face which does not connect to a block ",
-                 "with the relevant finite volume variable. Its centroid: ",
-                 fi.faceCentroid());
-  };
-
-  _assembly.processJacobian(r, dof_indices[0], _matrix_tags, local_functor);
-#endif
 }
 
 const ADReal &

@@ -94,10 +94,6 @@ ADNodalBCTempl<T>::computeJacobian()
   if (cached_rows.empty())
     return;
 
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  auto ad_offset = Moose::adOffset(_var.number(), _sys.getMaxVarNDofsPerNode());
-#endif
-
   auto residual = computeQpResidual();
 
   mooseAssert(cached_rows.size() <= _set_components.size(),
@@ -109,21 +105,10 @@ ADNodalBCTempl<T>::computeJacobian()
       for (std::size_t i = 0; i < cached_rows.size(); ++i)
         if (_set_components[i])
         {
-#ifndef MOOSE_SPARSE_AD
-          mooseAssert(ad_offset + i < MOOSE_AD_MAX_DOFS_PER_ELEM,
-                      "Out of bounds access in derivative vector.");
-#endif
           _fe_problem.assembly(0, _sys.number())
               .cacheJacobian(cached_rows[i],
                              cached_rows[i],
-                             conversionHelper(residual, i)
-                                 .derivatives()[
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-                                     cached_rows[i]
-#else
-                                     ad_offset + i
-#endif
-          ],
+                             conversionHelper(residual, i).derivatives()[cached_rows[i]],
                              tag);
         }
 }
@@ -169,9 +154,6 @@ ADNodalBCTempl<T>::computeOffDiagJacobian(const unsigned int jvar_num)
     if (cached_rows.empty())
       return;
 
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-    auto ad_offset = Moose::adOffset(jvar_num, _sys.getMaxVarNDofsPerNode());
-#endif
     auto residual = computeQpResidual();
 
     mooseAssert(cached_rows.size() <= _set_components.size(),
@@ -186,21 +168,10 @@ ADNodalBCTempl<T>::computeOffDiagJacobian(const unsigned int jvar_num)
         for (std::size_t i = 0; i < cached_rows.size(); ++i)
           if (_set_components[i])
           {
-#ifndef MOOSE_SPARSE_AD
-            mooseAssert(ad_offset + i < MOOSE_AD_MAX_DOFS_PER_ELEM,
-                        "Out of bounds access in derivative vector.");
-#endif
             _fe_problem.assembly(0, _sys.number())
                 .cacheJacobian(cached_rows[i],
                                cached_col,
-                               conversionHelper(residual, i)
-                                   .derivatives()[
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-                                       cached_col
-#else
-                                       ad_offset + i
-#endif
-            ],
+                               conversionHelper(residual, i).derivatives()[cached_col],
                                tag);
           }
   }
@@ -210,9 +181,6 @@ template <typename T>
 void
 ADNodalBCTempl<T>::computeOffDiagJacobianScalar(unsigned int jvar)
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  auto ad_offset = jvar * _sys.getMaxVarNDofsPerNode();
-#endif
   auto residual = computeQpResidual();
   const std::vector<dof_id_type> & cached_rows = _var.dofIndices();
 
@@ -235,21 +203,10 @@ ADNodalBCTempl<T>::computeOffDiagJacobianScalar(unsigned int jvar)
       for (std::size_t i = 0; i < cached_rows.size(); ++i)
         if (_set_components[i])
         {
-#ifndef MOOSE_SPARSE_AD
-          mooseAssert(ad_offset + i < MOOSE_AD_MAX_DOFS_PER_ELEM,
-                      "Out of bounds access in derivative vector.");
-#endif
           _fe_problem.assembly(0, _sys.number())
               .cacheJacobian(cached_rows[i],
                              scalar_dof_indices[0],
-                             conversionHelper(residual, i)
-                                 .derivatives()[
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-                                     scalar_dof_indices[0]
-#else
-                                     ad_offset + i
-#endif
-          ],
+                             conversionHelper(residual, i).derivatives()[scalar_dof_indices[0]],
                              tag);
         }
 }

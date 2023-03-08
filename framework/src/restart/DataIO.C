@@ -87,12 +87,8 @@ dataStore(std::ostream & stream, DualReal & dn, void * context)
     dataStore(stream, size, context);
     for (MooseIndex(size) i = 0; i < size; ++i)
     {
-#ifdef MOOSE_SPARSE_AD
       dataStore(stream, derivatives.raw_index(i), context);
       dataStore(stream, derivatives.raw_at(i), context);
-#else
-      dataStore(stream, derivatives[i], context);
-#endif
     }
   }
 }
@@ -362,18 +358,12 @@ dataLoad(std::istream & stream, DualReal & dn, void * context)
     auto & derivatives = dn.derivatives();
     std::size_t size = 0;
     stream.read((char *)&size, sizeof(size));
-#ifdef MOOSE_SPARSE_AD
     derivatives.resize(size);
-#endif
 
     for (MooseIndex(derivatives) i = 0; i < derivatives.size(); ++i)
     {
-#ifdef MOOSE_SPARSE_AD
       dataLoad(stream, derivatives.raw_index(i), context);
       dataLoad(stream, derivatives.raw_at(i), context);
-#else
-      dataLoad(stream, derivatives[i], context);
-#endif
     }
   }
 }

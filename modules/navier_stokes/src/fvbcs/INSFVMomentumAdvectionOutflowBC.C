@@ -39,12 +39,6 @@ INSFVMomentumAdvectionOutflowBC::INSFVMomentumAdvectionOutflowBC(const InputPara
     _dim(_subproblem.mesh().dimension()),
     _rho(getFunctor<ADReal>(NS::density))
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
-             "configure script in the root MOOSE directory with the configure option "
-             "'--with-ad-indexing-type=global'");
-#endif
-
   if (_dim >= 2 && !_v)
     mooseError(
         "In two or more dimensions, the v velocity must be supplied using the 'v' parameter");

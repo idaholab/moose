@@ -21,9 +21,6 @@ ADScalarKernel::validParams()
 ADScalarKernel::ADScalarKernel(const InputParameters & parameters)
   : ScalarKernelBase(parameters), _u(_var.adSln()), _jacobian_already_computed(false)
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("ADScalarKernel can only be used with global AD indexing.");
-#endif
 }
 
 void

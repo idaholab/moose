@@ -64,8 +64,6 @@ INSFVVelocityVariable::INSFVVelocityVariable(const InputParameters & params) : I
 {
 }
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-
 ADReal
 INSFVVelocityVariable::getExtrapolatedBoundaryFaceValue(const FaceInfo & fi,
                                                         bool two_term_expansion,
@@ -416,4 +414,3 @@ INSFVVelocityVariable::adGradSln(const Elem * const elem, bool correct_skewness)
     return grad;
   }
 }
-#endif

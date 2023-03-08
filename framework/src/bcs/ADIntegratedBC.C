@@ -142,16 +142,12 @@ template <typename T>
 void
 ADIntegratedBCTempl<T>::computeResidualAndJacobian()
 {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   computeResidualsForJacobian();
   _assembly.processResidualsAndJacobian(_residuals_and_jacobians,
                                         _var.dofIndices(),
                                         _vector_tags,
                                         _matrix_tags,
                                         _var.scalingFactor());
-#else
-  mooseError("residual and jacobian together only supported for global AD indexing");
-#endif
 }
 
 template <typename T>
@@ -166,13 +162,7 @@ ADIntegratedBCTempl<T>::addJacobian(const MooseVariableFieldBase & jvariable)
 
   for (_i = 0; _i < _test.size(); _i++)
     for (_j = 0; _j < jvariable.phiSize(); _j++)
-    {
-#ifndef MOOSE_SPARSE_AD
-      mooseAssert(ad_offset + _j < MOOSE_AD_MAX_DOFS_PER_ELEM,
-                  "Out of bounds access in derivative vector.");
-#endif
       _local_ke(_i, _j) += _residuals_and_jacobians[_i].derivatives()[ad_offset + _j];
-    }
   accumulateTaggedLocalMatrix();
 }
 
@@ -185,21 +175,8 @@ ADIntegratedBCTempl<T>::computeJacobian()
   computeADJacobian(var_var_coupling);
 
   if (_has_diag_save_in && !_sys.computingScalingJacobian())
-  {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
     mooseError("_local_ke not computed for global AD indexing. Save-in is deprecated anyway. Use "
                "the tagging system instead.");
-#else
-    unsigned int rows = _local_ke.m();
-    DenseVector<Number> diag(rows);
-    for (unsigned int i = 0; i < rows; i++)
-      diag(i) = _local_ke(i, i);
-
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for (unsigned int i = 0; i < _diag_save_in.size(); i++)
-      _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
-#endif
-  }
 }
 
 template <typename T>

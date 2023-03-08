@@ -25,10 +25,6 @@ ADNodalKernel::validParams()
 ADNodalKernel::ADNodalKernel(const InputParameters & parameters)
   : NodalKernelBase(parameters), _u(_var.adDofValues())
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("ADNodalKernels are only supported with global AD indexing");
-#endif
-
   if (isParamValid("save_in"))
     paramError("save_in",
                "ADNodalKernels do not support save_in. Please use the tagging system instead.");
@@ -53,7 +49,6 @@ ADNodalKernel::computeResidual()
 void
 ADNodalKernel::computeJacobian()
 {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   if (_var.isNodalDefined())
   {
     const auto dof_idx = _var.nodalDofIndex();
@@ -61,7 +56,6 @@ ADNodalKernel::computeJacobian()
     const auto res = computeQpResidual();
     _assembly.processJacobian(res, dof_idx, _matrix_tags);
   }
-#endif
 }
 
 void

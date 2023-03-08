@@ -26,15 +26,8 @@ INSFVTimeKernel::INSFVTimeKernel(const InputParameters & params)
 {
 }
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
 void
 INSFVTimeKernel::processResidualAndJacobian(const ADReal & residual, const dof_id_type dof_index)
 {
   _assembly.processResidualAndJacobian(residual, dof_index, _vector_tags, _matrix_tags);
 }
-#else
-void
-INSFVTimeKernel::processResidualAndJacobian(const ADReal &, const dof_id_type)
-{
-}
-#endif

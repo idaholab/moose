@@ -104,7 +104,6 @@ getElementalSolutionVector(const Elem * elem,
       U[i] = U_vars[i]->getElementalValue(elem);
     }
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
     std::vector<dof_id_type> dof_indices;
 
     const std::vector<unsigned int> ind = {
@@ -115,9 +114,6 @@ getElementalSolutionVector(const Elem * elem,
       U_vars[i]->dofMap().dof_indices(elem, dof_indices, U_vars[i]->number());
       Moose::derivInsert(U[i].derivatives(), dof_indices[0], 1.0);
     }
-#else
-    mooseError("Only global AD indexing is supported.");
-#endif
   }
   else
   {

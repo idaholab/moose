@@ -127,7 +127,6 @@ GapHeatConductanceTest::computeJacobian(MortarType mortar_type)
     for (_i = 0; _i < test_space_size; _i++)
       residuals[_i] += _JxW_msm[_qp] * _coord[_qp] * computeQpResidual(mortar_type);
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   // Trim interior node variable derivatives
   const auto & primary_ip_lowerd_map = amg().getPrimaryIpToLowerElementMap(
       *_lower_primary_elem, *_lower_primary_elem->interior_parent(), *_lower_secondary_elem);
@@ -143,73 +142,4 @@ GapHeatConductanceTest::computeJacobian(MortarType mortar_type)
     trimInteriorNodeDerivatives(primary_ip_lowerd_map, primary_side_var_array, residuals, false);
   _assembly.processUnconstrainedResidualsAndJacobian(
       residuals, dof_indices, _vector_tags, _matrix_tags, scaling_factor);
-
-#else
-
-  auto local_functor = [&](const std::vector<ADReal> & input_residuals,
-                           const std::vector<dof_id_type> &,
-                           const std::set<TagID> &)
-  {
-    auto & ce = _assembly.couplingEntries();
-    for (const auto & it : ce)
-    {
-      MooseVariableFEBase & ivariable = *(it.first);
-      MooseVariableFEBase & jvariable = *(it.second);
-
-      unsigned int ivar = ivariable.number();
-      unsigned int jvar = jvariable.number();
-
-      switch (mortar_type)
-      {
-        case MType::Secondary:
-          if (ivar != _secondary_var.number())
-            continue;
-          break;
-
-        case MType::Primary:
-          if (ivar != _primary_var.number())
-            continue;
-          break;
-
-        case MType::Lower:
-          if (!_var || _var->number() != ivar)
-            continue;
-          break;
-      }
-
-      // Derivatives are offset by the variable number
-      std::vector<size_t> ad_offsets{
-          adOffset(jvar, _sys.getMaxVarNDofsPerElem(), ElementType::Element),
-          adOffset(
-              jvar, _sys.getMaxVarNDofsPerElem(), ElementType::Neighbor, _sys.system().n_vars()),
-          adOffset(jvar, _sys.getMaxVarNDofsPerElem(), ElementType::Lower, _sys.system().n_vars())};
-      std::vector<size_t> shape_space_sizes{jvariable.dofIndices().size(),
-                                            jvariable.dofIndicesNeighbor().size(),
-                                            jvariable.dofIndicesLower().size()};
-
-      for (MooseIndex(3) type_index = 0; type_index < 3; ++type_index)
-      {
-        const auto jacobian_type = jacobian_types[type_index];
-        // There's no actual coupling between secondary and primary dofs
-        if ((jacobian_type == JType::SecondaryPrimary) ||
-            (jacobian_type == JType::PrimarySecondary))
-          continue;
-
-        prepareMatrixTagLower(_assembly, ivar, jvar, jacobian_type);
-        for (_i = 0; _i < test_space_size; _i++)
-          for (_j = 0; _j < shape_space_sizes[type_index]; _j++)
-          {
-#ifndef MOOSE_SPARSE_AD
-            mooseAssert(ad_offsets[type_index] + _j < MOOSE_AD_MAX_DOFS_PER_ELEM,
-                        "Out of bounds access in derivative vector.");
-#endif
-            _local_ke(_i, _j) += input_residuals[_i].derivatives()[ad_offsets[type_index] + _j];
-          }
-        accumulateTaggedLocalMatrix();
-      }
-    }
-  };
-
-  _assembly.processJacobian(residuals, dof_indices, _matrix_tags, scaling_factor, local_functor);
-#endif
 }

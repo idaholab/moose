@@ -61,14 +61,10 @@ FVElementalKernel::computeResidual()
 void
 FVElementalKernel::computeResidualAndJacobian()
 {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   const auto r = computeQpResidual() * _assembly.elemVolume();
   const auto dof_index = _var.dofIndices()[0];
   _assembly.processJacobian(r, dof_index, _matrix_tags);
   _assembly.processResidual(r.value(), dof_index, _vector_tags);
-#else
-  mooseError("computing residual and Jacobian together only supported for global AD indexing");
-#endif
 }
 
 void
@@ -83,10 +79,6 @@ FVElementalKernel::computeJacobian()
     prepareMatrixTag(_assembly, _var.number(), _var.number());
     auto dofs_per_elem = _sys.getMaxVarNDofsPerElem();
     auto ad_offset = Moose::adOffset(_var.number(), dofs_per_elem);
-#ifndef MOOSE_SPARSE_AD
-    mooseAssert(ad_offset < MOOSE_AD_MAX_DOFS_PER_ELEM,
-                "Out of bounds access in derivative vector.");
-#endif
     _local_ke(0, 0) += residual.derivatives()[ad_offset];
     accumulateTaggedLocalMatrix();
   };
@@ -133,10 +125,6 @@ FVElementalKernel::computeOffDiagJacobian()
                   "The AD derivative indexing below only makes sense for constant monomials, e.g. "
                   "for a number of dof indices equal to  1");
 
-#ifndef MOOSE_SPARSE_AD
-      mooseAssert(ad_offset < MOOSE_AD_MAX_DOFS_PER_ELEM,
-                  "Out of bounds access in derivative vector.");
-#endif
       _local_ke(0, 0) = residual.derivatives()[ad_offset];
 
       accumulateTaggedLocalMatrix();

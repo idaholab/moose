@@ -40,11 +40,6 @@ PINSFVMomentumPressureFlux::PINSFVMomentumPressureFlux(const InputParameters & p
     _p(getFunctor<ADReal>(NS::pressure)),
     _index(getParam<MooseEnum>("momentum_component"))
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("PINSFV is not supported by local AD indexing. In order to use PINSFV, please run "
-             "the configure script in the root MOOSE directory with the configure option "
-             "'--with-ad-indexing-type=global'");
-#endif
   if (!dynamic_cast<PINSFVSuperficialVelocityVariable *>(&_var))
     mooseError("PINSFVMomentumPressureFlux may only be used with a superficial velocity, "
                "of variable type PINSFVSuperficialVelocityVariable.");

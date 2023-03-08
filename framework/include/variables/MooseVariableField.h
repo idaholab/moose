@@ -380,7 +380,6 @@ protected:
   mutable ADReal _ad_real_dummy = 0;
 
 private:
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   /**
    * Compute the solution, gradient, and time derivative with provided shape functions
    */
@@ -403,7 +402,6 @@ private:
    * Evaluate solution and gradient for the \p elem_side_qp argument
    */
   void evaluateOnElementSide(const ElemSideQpArg & elem_side_qp, const unsigned int state) const;
-#endif
 
   /// Keep track of the current elem-qp functor element in order to enable local caching (e.g. if we
   /// call evaluate on the same element, but just with a different quadrature point, we can return
