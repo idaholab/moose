@@ -40,6 +40,16 @@
     requirement ='The system shall generate a hexagon mesh with only one radial layer of elements without rings and ducts.'
     recover = false
   []
+  [back_only_one_layer_quad]
+    type = 'Exodiff'
+    input = 'poly_2d.i'
+    exodiff = 'poly_2d_back_only_one_layer_quad.e'
+    cli_args = 'Mesh/gen/background_intervals=1
+                Mesh/gen/quad_center_elements=true
+                --mesh-only "poly_2d_back_only_one_layer_quad.e"'
+    requirement ='The system shall generate a hexagon mesh with only one radial layer of specially patterned quad elements without rings and ducts.'
+    recover = false
+  []
   [rings]
     type = 'Exodiff'
     input = 'poly_2d.i'
