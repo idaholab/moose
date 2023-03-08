@@ -44,9 +44,20 @@
 []
 
 [AuxKernels]
+  [./do-no-1]
+    variable = ten
+    type = SelfAux
+  [../]
+
+  [./do-no-2]
+    variable = 2k
+    type = SelfAux
+  [../]
+
   [./all]
     variable = tt
     type = MultipleUpdateAux
+    use_deprecated_api = true
     u = u
     var1 = ten
     var2 = 2k
