@@ -402,8 +402,11 @@ ReferenceResidualProblem::updateReferenceResidual()
       mooseAssert(nonlinear_sys.RHS().size() == (*_reference_vector).size(),
                   "Sizes of nonlinear RHS and reference vector should be the same.");
       mooseAssert((*_reference_vector).size(), "Reference vector must be provided.");
+      // Add a tiny number to the reference to prevent a divide by zero.
+      auto ref = _reference_vector->clone();
+      ref->add(std::numeric_limits<Number>::min());
       auto div = nonlinear_sys.RHS().clone();
-      *div /= *_reference_vector;
+      *div /= *ref;
       resid = Utility::pow<2>(s.calculate_norm(*div, _soln_vars[i], _norm_type));
     }
     else
