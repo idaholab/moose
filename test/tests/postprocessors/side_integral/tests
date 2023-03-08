@@ -18,7 +18,6 @@
     design = 'SideIntegralVariablePostprocessor.md'
     requirement = 'The system shall support computing the integral of a finite volume variable '
                   'quantity over a side on the mesh.'
-    ad_indexing_type = 'global'
   []
 
   [side_integral_material_property]
@@ -71,7 +70,6 @@
 
       detail = 'support computing the integral of a functor '
                'over one or more sides on the mesh.'
-      ad_indexing_type = 'global'
     []
     [domain_side]
       type = 'CSVDiff'
@@ -83,7 +81,6 @@
 
       detail = 'support computing the integral of a functor '
                'over a functor domain boundary inside a mesh.'
-      ad_indexing_type = 'global'
     []
     [mesh_side_refined]
       type = 'CSVDiff'
@@ -93,7 +90,6 @@
 
       detail = 'support computing the integral of a functor '
                'over one or more evenly refined sides on the mesh.'
-      ad_indexing_type = 'global'
     []
     [qp_argument]
       type = 'CSVDiff'
@@ -106,7 +102,6 @@
                   Postprocessors/int_s2_v2/functor_argument=qp Postprocessors/int_s2_f1/functor_argument=qp Postprocessors/int_s2_m1/functor_argument=qp Postprocessors/int_s2_m2/functor_argument=qp"
 
       detail = 'support computing the integral of a functor using quadrature points instead of side faces'
-      ad_indexing_type = 'global'
     []
   []
 []

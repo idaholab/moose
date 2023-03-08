@@ -9,7 +9,6 @@
       exodiff = upwind.e
       cli_args = 'GlobalParams/limiter=upwind Outputs/file_base=upwind'
       detail = 'first-order upwind'
-      ad_indexing_type = 'global'
     []
     [central_difference]
       type = Exodiff
@@ -17,7 +16,6 @@
       exodiff = central_difference.e
       cli_args = 'GlobalParams/limiter=central_difference Outputs/file_base=central_difference'
       detail = 'central differencing'
-      ad_indexing_type = 'global'
     []
     [vanLeer]
       type = Exodiff
@@ -25,7 +23,6 @@
       exodiff = vanLeer.e
       cli_args = 'GlobalParams/limiter=vanLeer Outputs/file_base=vanLeer'
       detail = 'vanLeer'
-      ad_indexing_type = 'global'
     []
   []
 []

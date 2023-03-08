@@ -6,7 +6,6 @@
     exodiff = test_out.e
     requirement = 'The system shall provide a material object that can, for a single material property, map subdomain IDs to a possibly discontinuous property value.'
     design = 'PiecewiseConstantByBlockMaterial.md'
-    ad_indexing_type = 'global'
   []
   [functor]
     type = Exodiff
@@ -14,6 +13,5 @@
     exodiff = test_functor_out.e
     requirement = 'The system shall provide a material object that can, for a single functor material property, map subdomain IDs to different functors.'
     design = 'PiecewiseByBlockFunctorMaterial.md'
-    ad_indexing_type = 'global'
   []
 []

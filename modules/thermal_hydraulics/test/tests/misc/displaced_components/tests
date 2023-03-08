@@ -4,7 +4,6 @@
     input = 'displaced_components.i'
     exodiff = 'displaced_components_out.e'
     custom_cmp = 'displaced_components.exodiff'
-    ad_indexing_type = 'global'
     recover = false
   []
 []

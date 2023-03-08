@@ -13,7 +13,6 @@
     recover = false
     max_parallel = 1
     group = '1phase rdg explicit pipe free_boundary'
-    ad_indexing_type = 'global'
   []
   [sod_shock_tube_erk2_light]
     type = 'Exodiff'
@@ -27,7 +26,6 @@
     rel_err = 1e-5
     max_parallel = 1
     group = '1phase rdg explicit pipe free_boundary'
-    ad_indexing_type = 'global'
   []
   [non_x_direction_1phase]
     type = 'Exodiff'
@@ -45,7 +43,6 @@
     rel_err = 1e-5
     max_parallel = 1
     group = '1phase rdg explicit pipe free_boundary'
-    ad_indexing_type = 'global'
   []
   [sod_shock_tube_be]
     type = 'Exodiff'
@@ -62,6 +59,5 @@
     rel_err = 1e-5
     max_parallel = 1
     group = '1phase rdg implicit pipe free_boundary'
-    ad_indexing_type = 'global'
   []
 []

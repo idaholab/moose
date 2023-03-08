@@ -4,7 +4,6 @@
     type = 'RunException'
     input = 'free_boundary.i'
     expect_err = "Deprecated component. Use FreeBoundary1Phase or FreeBoundary2Phase instead."
-    ad_indexing_type = 'global'
     design = 'FreeBoundary.md'
     requirement = 'The system shall report an error if the FreeBoundary component is used.'
   []
@@ -12,7 +11,6 @@
     type = 'RunException'
     input = 'gate_valve.i'
     expect_err = "Deprecated component. Use GateValve1Phase or GateValve2Phase instead."
-    ad_indexing_type = 'global'
     design = 'GateValve.md'
     requirement = 'The system shall report an error if the GateValve component is used.'
   []
@@ -20,7 +18,6 @@
     type = 'RunException'
     input = 'solid_wall.i'
     expect_err = "Deprecated component. Use SolidWall1Phase or SolidWall2Phase instead."
-    ad_indexing_type = 'global'
     design = 'SolidWall.md'
     requirement = 'The system shall report an error if the SolidWall component is used.'
   []
@@ -28,7 +25,6 @@
     type = 'RunException'
     input = 'junction_one_to_one.i'
     expect_err = "Deprecated component. Use JunctionOneToOne1Phase or JunctionOneToOne2Phase instead."
-    ad_indexing_type = 'global'
     design = 'JunctionOneToOne.md'
     requirement = 'The system shall report an error if the JunctionOneToOne component is used.'
   []
@@ -36,7 +32,6 @@
     type = 'RunException'
     input = 'heat_generation.i'
     expect_err = "'HeatGeneration' component is deprecated, use 'HeatSourceFromTotalPower' or 'HeatSourceFromPowerDensity' instead."
-    ad_indexing_type = 'global'
     design = 'HeatGeneration.md'
     requirement = 'The system shall report an error if the HeatGeneration component is used.'
   []
@@ -44,7 +39,6 @@
     type = 'RunException'
     input = 'heat_source_volumetric.i'
     expect_err = "Deprecated component. Use HeatSourceVolumetric1Phase or HeatSourceVolumetric2Phase instead."
-    ad_indexing_type = 'global'
     design = 'HeatSourceVolumetric.md'
     requirement = 'The system shall report an error if the HeatSourceVolumetric component is used.'
   []

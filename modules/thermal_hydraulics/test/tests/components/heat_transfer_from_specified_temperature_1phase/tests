@@ -4,7 +4,6 @@
     input = 'phy.energy_walltemperature_ss_1phase.i'
     csvdiff = 'phy.energy_walltemperature_ss_1phase_out.csv'
     abs_zero = 1e-9
-    ad_indexing_type = 'global'
   []
 
   # controls
@@ -12,14 +11,12 @@
     type = 'CSVDiff'
     input = 'clg.Hw.i'
     csvdiff = 'clg.Hw_out.csv'
-    ad_indexing_type = 'global'
   []
 
   [clg:T_wall]
     type = 'CSVDiff'
     input = 'clg.T_wall.i'
     csvdiff = 'clg.T_wall_out.csv'
-    ad_indexing_type = 'global'
   []
 
   [err:no_phf]

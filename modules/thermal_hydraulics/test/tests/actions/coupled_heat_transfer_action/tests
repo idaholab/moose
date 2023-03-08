@@ -9,7 +9,6 @@
       type = Exodiff
       input = 'master.i'
       exodiff = 'master_out.e master_out_thm0_out.e'
-      ad_indexing_type = 'global'
 
       detail = 'Without sub-app positions provided.'
     []
@@ -19,7 +18,6 @@
       cli_args = "CoupledHeatTransfers/right/positions='0 0 0'"
       prereq = 'test/without_positions'
       exodiff = 'master_out.e master_out_thm0_out.e'
-      ad_indexing_type = 'global'
 
       detail = 'With sub-app positions provided.'
     []
@@ -40,7 +38,6 @@
         Outputs/show='T T_fluid htc T_wall_avg T_fluid_avg htc_avg'"
       prereq = 'test/with_positions'
       exodiff = 'master_out.e master_out_thm0_out.e'
-      ad_indexing_type = 'global'
 
       detail = 'With multiple phases.'
     []

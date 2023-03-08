@@ -17,7 +17,6 @@
       max_parallel = 2 # Restrict this test to 2 cores until I can take the time to understand the failure
       detail = 'together'
       cli_args = 'Executioner/residual_and_jacobian_together=true Outputs/file_base=gap-conductance-together'
-      ad_indexing_type = 'global'
     []
   [../]
   [dynamic_gap_jacobian]
@@ -36,7 +35,6 @@
       difference_tol = 1e-7
       detail = 'together'
       cli_args = 'Executioner/residual_and_jacobian_together=true'
-      ad_indexing_type = 'global'
     []
   []
   [dynamic_gap_conductance_fine]

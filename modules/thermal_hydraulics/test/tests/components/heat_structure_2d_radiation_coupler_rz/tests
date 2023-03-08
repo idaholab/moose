@@ -7,7 +7,6 @@
     input = 'heat_structure_2d_radiation_coupler_rz.i'
     csvdiff = 'heat_structure_2d_radiation_coupler_rz.csv'
     abs_zero = 1e-5
-    ad_indexing_type = 'global'
     mesh_mode = 'replicated'
     requirement = 'The system shall be able to couple two 2D cylindrical heat structures via radiation and conserve energy.'
   []

@@ -4,6 +4,5 @@
     input = 'heat_rate_convection.i'
     csvdiff = 'heat_rate_convection.csv'
     recover = false
-    ad_indexing_type = 'global'
   []
 []

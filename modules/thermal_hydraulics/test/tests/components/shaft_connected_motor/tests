@@ -7,7 +7,6 @@
     input = 'test.i'
     cli_args = 'Components/hs/initial_T=300'
     expect_err = "shaft: The `initial_speed` parameter is missing."
-    ad_indexing_type = 'global'
 
     requirement = 'The system shall throw an error if the initial shaft speed is not provided and the application is not restarting.'
   []
@@ -19,7 +18,6 @@
       Components/shaft/initial_speed=0
       Components/shaft/connected_components=''"
     expect_err = "This component must be connected to a shaft"
-    ad_indexing_type = 'global'
 
     requirement = 'The system shall throw an error if ShaftConnectedMotor is not connected to a shaft component.'
     issues = '#19833 #19998'
@@ -34,7 +32,6 @@
       Outputs/checkpoint=true
       Outputs/file_base=part1_out'
     recover = false
-    ad_indexing_type = 'global'
 
     requirement = 'The system shall be able to model a motor connected to a shaft.'
   []
@@ -50,7 +47,6 @@
       Outputs/file_base=part2_out'
     prereq = 'restart_part1'
     recover = false
-    ad_indexing_type = 'global'
 
     requirement = 'The system shall be able to execute a restart a simulation involving a shaft-connected motor.'
   []
@@ -60,7 +56,6 @@
     csvdiff = clg.test.torque.csv
     input = 'clg.test.i'
     cli_args = 'ControlLogic/motor_ctrl/parameter=torque ControlLogic/motor_ctrl/function=torque_fn Postprocessors/test/parameter=torque Outputs/file_base=clg.test.torque'
-    ad_indexing_type = 'global'
 
     requirement = 'The system shall allow the torque of a shaft-connected motor to be controlled.'
   []
@@ -70,7 +65,6 @@
     csvdiff = clg.test.inertia.csv
     input = 'clg.test.i'
     cli_args = 'ControlLogic/motor_ctrl/parameter=inertia ControlLogic/motor_ctrl/function=inertia_fn Postprocessors/test/parameter=inertia Outputs/file_base=clg.test.inertia'
-    ad_indexing_type = 'global'
 
     requirement = 'The system shall allow the inertia of a shaft-connected motor to be controlled.'
   []

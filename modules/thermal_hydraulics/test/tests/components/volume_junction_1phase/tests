@@ -6,7 +6,6 @@
     # The gold file was actually produced with equal_area_no_junction.i and
     # then renamed to equal_area_with_junction_out.csv.
     csvdiff = 'equal_area_with_junction_out.csv'
-    ad_indexing_type = 'global'
   []
   [equal_area_not_x_direction]
     type = 'CSVDiff'
@@ -23,7 +22,6 @@
       Postprocessors/junction_rhou/variable=junction:rhovV'
     csvdiff = 'equal_area_with_junction_out.csv'
     prereq = 'equal_area_x_direction'
-    ad_indexing_type = 'global'
   []
 
   [phy:unequal_area]
@@ -33,7 +31,6 @@
     abs_zero = 5e-5
     rel_err = 0
     recover = false
-    ad_indexing_type = 'global'
   []
 
   [phy:deadend]
@@ -42,7 +39,6 @@
     csvdiff = 'phy.deadend_out.csv'
     abs_zero = 1e-5
     rel_err = 0
-    ad_indexing_type = 'global'
   []
 
 
@@ -51,7 +47,6 @@
     input = 'phy.shower.i'
     check_input = true
     recover = false
-    ad_indexing_type = 'global'
   []
 
   [phy:shower]
@@ -61,7 +56,6 @@
     abs_zero = 1e-9
     rel_err = 0
     heavy = true
-    ad_indexing_type = 'global'
   []
 
   [calorically_imperfect_gas]
@@ -70,7 +64,6 @@
     csvdiff = 'junction_with_calorifically_imperfect_gas_out.csv'
     abs_zero = 5e-5
     rel_err = 1e-4
-    ad_indexing_type = 'global'
   []
 
   # Tests conservation of mass and energy for 1-phase flow.
@@ -79,7 +72,6 @@
     input = 't_junction_1phase.i'
     csvdiff = 't_junction_1phase_out.csv'
     abs_zero = 1e-10
-    ad_indexing_type = 'global'
   []
 
   [phy.form_loss]
@@ -89,7 +81,6 @@
     cli_args = 'Components/junction/K=1 Outputs/file_base=phy.form_loss'
     rel_err = 2e-4
     recover = false
-    ad_indexing_type = 'global'
   []
 
   [phy.form_loss_Aref]
@@ -99,7 +90,6 @@
     cli_args = 'Components/junction/K=1 Components/junction/A_ref=0.2 Outputs/file_base=phy.form_loss_Aref'
     rel_err = 2e-4
     recover = false
-    ad_indexing_type = 'global'
   []
 
   # error checking

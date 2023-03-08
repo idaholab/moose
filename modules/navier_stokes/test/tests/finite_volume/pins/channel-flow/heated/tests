@@ -10,7 +10,6 @@
       method = "!dbg"
       abs_zero = 1e-9
       detail = 'with a Cartesian geometry, only modeling the fluid phase,'
-      ad_indexing_type = 'global'
       valgrind = HEAVY
       cli_args = "Outputs/file_base='rc-heated'"
     []
@@ -21,7 +20,6 @@
       method = "!dbg"
       abs_zero = 2e-9
       detail = 'in rz geometry,'
-      ad_indexing_type = 'global'
       valgrind = HEAVY
       cli_args = "Problem/coord_type='rz' Problem/rz_coord_axis='x' Outputs/file_base='rc-heated-rz'"
     []
@@ -32,7 +30,6 @@
       method = "!dbg"
       abs_zero = 1e-9
       detail = 'with an effective diffusion coefficient,'
-      ad_indexing_type = 'global'
       valgrind = HEAVY
       cli_args = "Outputs/file_base='rc-heated-effective'"
     []
@@ -43,7 +40,6 @@
       method = "!dbg"
       abs_zero = 1e-9
       detail = 'with an effective diffusion coefficient and NSFVAction syntax,'
-      ad_indexing_type = 'global'
       valgrind = HEAVY
       cli_args = "Outputs/file_base='rc-heated-effective-action'"
     []
@@ -54,7 +50,6 @@
       method = "!dbg"
       abs_zero = 1e-9
       detail = 'with an effective diffusion coefficient and dirichlet inlet boundary condition for fluid temperature,'
-      ad_indexing_type = 'global'
       valgrind = HEAVY
       cli_args = "FVBCs/inactive=inlet-T Outputs/file_base='rc-heated-effective-dirichlet' "
                  "Mesh/gen/nx=6 Mesh/gen/ny=3"
@@ -68,7 +63,6 @@
     abs_zero = 1e-9
     issues = '#16756'
     requirement = 'The system shall be able to solve for fluid energy diffusion, advection and convection with the solid phase in a 2D channel, modeling both fluid and solid temperature.'
-    ad_indexing_type = 'global'
     valgrind = HEAVY
     design = 'PINSFVEnergyAmbientConvection.md'
     cli_args = "Variables/inactive='' AuxVariables/inactive='T_solid' FVKernels/inactive='' "
@@ -83,7 +77,6 @@
     issues = '#19472'
     design = 'NSFVAction.md'
     requirement = 'The system shall be able to solve for fluid energy diffusion, advection and convection with the solid phase in a 2D channel using the NSFV action syntax.'
-    ad_indexing_type = 'global'
     valgrind = HEAVY
     cli_args = "Outputs/file_base='rc-heated-solid-fluid-action'"
   []
@@ -95,7 +88,6 @@
     abs_zero = 1e-9
     issues = '#16756'
     requirement = 'The system shall be able to solve for fluid energy diffusion, advection and block-restricted convection.'
-    ad_indexing_type = 'global'
     valgrind = HEAVY
     design = 'PINSFVEnergyAmbientConvection.md'
     cli_args = "Variables/inactive='' AuxVariables/inactive='T_solid' FVKernels/inactive='' "
@@ -112,7 +104,6 @@
     issues = '#19472'
     design = 'NSFVAction.md'
     requirement = 'The system shall be able to solve for fluid energy diffusion, advection and block-restricted convection with the solid phase in a 2D channel using the NSFV action syntax.'
-    ad_indexing_type = 'global'
     valgrind = HEAVY
     cli_args = "Outputs/file_base='rc-heated-solid-fluid-block-action' "
                "Modules/NavierStokesFV/ambient_convection_blocks='2' "
@@ -127,7 +118,6 @@
     abs_zero = 1e-9
     issues = '#16756'
     requirement = 'The system shall be able to solve transient relaxations with fluid energy diffusion, advection and convection with the solid phase in a 2D channel, modeling both fluid and solid temperature.'
-    ad_indexing_type = 'global'
     valgrind = 'none'
     design = 'PINSFVEnergyTimeDerivative.md INSFVMomentumTimeDerivative.md'
   []
@@ -140,7 +130,6 @@
     issues = '#19472'
     design = 'NSFVAction.md'
     requirement = 'The system shall be able to run transient simulations with fluid energy diffusion, advection and convection with the solid phase in a 2D channel, modeling both fluid and solid temperature using the NSFV action syntax.'
-    ad_indexing_type = 'global'
     valgrind = 'none'
   []
   [boussinesq]
@@ -150,7 +139,6 @@
     method = "!dbg"
     issues = '#16756'
     requirement = 'The system shall be able to solve for fluid energy diffusion, advection and convection with the solid phase in a 2D channel with a Boussinesq approximation for the influence of temperature on density.'
-    ad_indexing_type = 'global'
     valgrind = HEAVY
     design = 'PINSFVMomentumBoussinesq.md'
     cli_args = "Outputs/file_base='rc-heated-boussinesq'"
@@ -163,7 +151,6 @@
     issues = '#19472'
     design = 'NSFVAction.md'
     requirement = 'The system shall be able to solve for fluid energy diffusion, advection and convection with the solid phase in a 2D channel with a Boussinesq approximation using the NSFV action syntax.'
-    ad_indexing_type = 'global'
     valgrind = HEAVY
     cli_args = "Outputs/file_base='rc-heated-boussinesq-action'"
   []

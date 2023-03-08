@@ -7,7 +7,6 @@
     test_case = TestRC
     requirement = 'The system shall be able to solve the incompressible porous flow Navier-Stokes equations in a 1D channel using a Rhie-Chow interpolation scheme and produce second order convergence for all variables.'
     method = '!dbg'
-    ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
   []
   [rc-no-diffusion]
@@ -16,7 +15,6 @@
     test_case = TestRCNoDiffusion
     requirement = 'The system shall be able to solve the incompressible porous flow Euler equations in a 1D channel using a Rhie-Chow interpolation scheme for velocity and upwind interpolation for advected quantities and produce first order convergence for pressure and 1.5 order for velocity.'
     method = '!dbg'
-    ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
   []
   [rc-no-diffusion-strong-bc]
@@ -25,7 +23,6 @@
     test_case = TestRCNoDiffusionStrongBC
     requirement = 'The system shall be able to solve the incompressible porous flow Euler equations in a 1D channel using a Rhie-Chow interpolation scheme for velocity and upwind interpolation for advected quantities and produce first order convergence for pressure and 1.5 order for velocity with using flux boundary conditions for both variables.'
     method = '!dbg'
-    ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
   []
   [rc-2d]
@@ -35,7 +32,6 @@
     requirement = 'The system shall be able to solve the incompressible porous flow Navier-Stokes equations in a 2D channel using a Rhie-Chow interpolation scheme and produce second order convergence for all variables.'
     method = '!dbg'
     min_parallel = 16
-    ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
   []
 []

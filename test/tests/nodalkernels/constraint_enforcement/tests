@@ -52,7 +52,6 @@
       exodiff = ad-upper-and-lower-bound_out.e
       detail = 'work with automatic differentiation, and'
       cli_args = "Postprocessors/active='active_upper_lm upper_violations active_lower_lm lower_violations'"
-      ad_indexing_type = 'global'
     []
     [non_singular]
       input = upper-and-lower-bound.i

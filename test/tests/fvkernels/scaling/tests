@@ -8,7 +8,6 @@
     input = auto-scaling.i
     cli_args = 'Executioner/automatic_scaling=false'
     requirement = 'The system shall be able to identify and show when a matrix is ill conditioned.'
-    ad_indexing_type = 'global'
   []
   [good]
     type = Exodiff
@@ -18,7 +17,6 @@
     input = auto-scaling.i
     requirement = 'The system shall be able to condition a system automatically through variable scaling factors.'
     prereq = 'bad'
-    ad_indexing_type = 'global'
   []
   [good_manual]
     type = Exodiff
@@ -29,7 +27,6 @@
     cli_args = 'Executioner/automatic_scaling=false Variables/u/scaling=1e0 Variables/v/scaling=1e18'
     requirement = 'The system shall be able to condition a system manually through variable scaling factors.'
     prereq = 'good'
-    ad_indexing_type = 'global'
   []
   [combined_manual_automatic]
     type = Exodiff
@@ -40,6 +37,5 @@
     cli_args = 'Variables/v/scaling=1e-20'
     requirement = 'The system shall be able to sequentially apply manual and automatic scaling and in the case of poor manual scaling, restore the condition number automatically.'
     prereq = 'good_manual'
-    ad_indexing_type = 'global'
   []
 []

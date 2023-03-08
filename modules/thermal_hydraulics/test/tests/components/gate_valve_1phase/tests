@@ -6,7 +6,6 @@
     rel_err = 5e-5
     abs_zero = 1e-8
     heavy = true
-    ad_indexing_type = 'global'
   []
 
   [1phase_light]
@@ -18,7 +17,6 @@
     exodiff = 'gate_valve_1phase_light.e'
     rel_err = 1e-5
     abs_zero = 1e-8
-    ad_indexing_type = 'global'
   []
 
   [1phase_light_flipped]
@@ -34,7 +32,6 @@
     exodiff = 'gate_valve_1phase_light_flipped.e'
     rel_err = 1e-5
     abs_zero = 1e-8
-    ad_indexing_type = 'global'
   []
 
   [err:not_2_connections]
@@ -42,7 +39,6 @@
     input = 'gate_valve_1phase.i'
     cli_args = "Components/pipe2_valve/connections='pipe1:in pipe2A:out pipe2B:in'"
     expect_err = "The number of connections \(3\) must equal 2"
-    ad_indexing_type = 'global'
   []
 
   [err:not_parallel]
@@ -50,7 +46,6 @@
     input = 'gate_valve_1phase.i'
     cli_args = "Components/pipe3B/orientation='1 1 1'"
     expect_err = "The connected channels must be parallel at the junction"
-    ad_indexing_type = 'global'
   []
 
   [warn:slope_reconstruction_used]
@@ -58,6 +53,5 @@
     input = 'gate_valve_1phase.i'
     cli_args = 'GlobalParams/rdg_slope_reconstruction=minmod'
     expect_err = "GateValve1Phase cannot perform slope reconstruction"
-    ad_indexing_type = 'global'
   []
 []

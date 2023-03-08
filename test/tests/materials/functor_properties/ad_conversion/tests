@@ -3,7 +3,6 @@
   issues = '#19420'
   [exo]
     type = Exodiff
-    ad_indexing_type = 'global'
     input = 1d_dirichlet.i
     exodiff = 1d_dirichlet_out.e
     requirement = 'The system shall be able to convert functors from AD to regular and vice versa.'

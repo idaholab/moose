@@ -7,7 +7,6 @@
     test_case = Test1DAverage
     method = '!dbg'
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in one dimension with prescribed inlet velocity and outlet pressure and implicit zero gradient boundary conditions elsewhere, and demonstrate second order convergence in both velocity and pressure when using an average interpolation scheme for the velocity.'
-    ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
   []
   [2d-average]
@@ -16,7 +15,6 @@
     test_case = Test2DAverage
     method = '!dbg'
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in two dimensions with prescribed inlet velocity and outlet pressure, free slip along the walls, and implicit zero gradient boundary conditions elsewhere, and demonstrate second order convergence in both velocity and pressure when using an average interpolation scheme for the velocity.'
-    ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
   []
   [2d-rc]
@@ -28,7 +26,6 @@
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in two dimensions with prescribed inlet velocity and outlet pressure, free slip along the walls, and implicit zero gradient boundary conditions elsewhere, and demonstrate second order convergence in both velocity and pressure when using a Rhie-Chow interpolation scheme for the velocity.'
     heavy = 'true'
     valgrind = 'none'
-    ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
     max_time = 600
   []
@@ -38,7 +35,6 @@
     test_case = TestPlanePoiseuilleRC
     method = '!dbg'
     requirement = 'The system shall demonstrate global second order convergence for all variables when using an RC interpolation for the velocity and a two term Taylor series expansion for face values on non-Dirichlet boundaries.'
-    ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
     min_parallel = 16
     heavy = true
@@ -48,7 +44,6 @@
     input = test.py
     test_case = TestPlanePoiseuilleAverageFirst
     method = '!dbg'
-    ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
     min_parallel = 16
     heavy = true
@@ -60,7 +55,6 @@
     test_case = TestPlanePoiseuilleRCFirst
     method = '!dbg'
     requirement = 'The system shall demonstrate global second order convergence for all variables when using an RC interpolation for the velocity and a one term Taylor series expansion for face values on non-Dirichlet boundaries.'
-    ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
     min_parallel = 16
     heavy = true
@@ -73,7 +67,6 @@
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations, including energy, using an average interpolation for the velocity, with a mix of Dirichlet and zero-gradient boundary conditions for each variable, and demonstrate second order convergence for each variable.'
     heavy = 'true'
     valgrind = 'none'
-    ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
   []
   [2d-rc-with-temp]
@@ -85,7 +78,6 @@
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations, including energy, using a Rhie-Chow interpolation for the velocity, with a mix of Dirichlet and zero-gradient boundary conditions for each variable, and demonstrate second order convergence for each variable.'
     heavy = 'true'
     valgrind = 'none'
-    ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
   []
 []

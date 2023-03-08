@@ -6,6 +6,5 @@
     input = 'flow-around-square.i'
     exodiff = 'flow-around-square_out.e'
     requirement = 'The system shall be able to solve a problem with surface heat transfer between a fluid and a solid block using FVConvectionCorrelationInterface.'
-    ad_indexing_type = global
   []
 []

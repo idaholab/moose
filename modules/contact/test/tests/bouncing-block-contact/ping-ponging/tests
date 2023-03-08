@@ -23,7 +23,6 @@
     exodiff = 'mortar-no-ping-pong_weighted_exo.e'
     requirement = 'A variational consistent mortar formulation with dual bases for frictionless mechanical contact shall not show any ping-ponging behavior'
     heavy = True
-    ad_indexing_type = 'global'
     rel_err = 6e-5
     abs_zero = 5e-9
   []

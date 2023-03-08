@@ -10,7 +10,6 @@
                   'primal variable values across the mortar interface shall be the same.'
     map = False
     partial = True
-    ad_indexing_type = global
   []
   [continuity_sphere_hex27]
     type = 'Exodiff'
@@ -24,7 +23,6 @@
                   'primal variable values across the mortar interface shall be the same.'
     map = False
     partial = True
-    ad_indexing_type = global
     min_parallel = 2
   []
   [continuity_sphere_hex27-debug-mesh]
@@ -46,7 +44,6 @@
                   'variable values across the mortar interface shall be the same.'
     map = False
     partial = True
-    ad_indexing_type = global
   []
   [continuity_tet10]
     type = 'Exodiff'
@@ -58,7 +55,6 @@
                   'variable values across the mortar interface shall be the same.'
     map = False
     partial = True
-    ad_indexing_type = global
   []
   [continuity_nonconforming_tet]
     type = 'Exodiff'
@@ -69,7 +65,6 @@
                   'variable values across the mortar interface shall be the same.'
     map = False
     partial = True
-    ad_indexing_type = global
   []
   [continuity_mixed]
     type = 'Exodiff'
@@ -80,7 +75,6 @@
                   'primal variable values across the mortar interface shall be the same.'
     map = False
     partial = True
-    ad_indexing_type = global
   []
   [continuity_sphere_hex20]
     type = 'Exodiff'
@@ -92,7 +86,6 @@
                   'primal variable values across the mortar interface shall be the same.'
     map = False
     partial = True
-    ad_indexing_type = global
     min_parallel = 2
   []
 
@@ -148,7 +141,6 @@
                   'mortar method with and without automatic differentiation.'
     map = False
     partial = True
-    ad_indexing_type = global
     min_parallel = 2
   []
 []

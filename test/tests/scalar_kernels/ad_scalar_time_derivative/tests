@@ -4,7 +4,6 @@
     input = 'ad_scalar_time_derivative.i'
     csvdiff = 'ad_scalar_time_derivative_out.csv'
     # AD scalar kernels only work with global AD indexing
-    ad_indexing_type = 'global'
     design = 'ADScalarTimeDerivative.md'
     issues = '#18535'
     requirement = 'The system shall provide the ability to compute the time derivative of a scalar variable and have its Jacobian computed using automatic differentiation.'

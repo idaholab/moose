@@ -7,7 +7,6 @@
     test_case = Test2DAverage
     method = '!dbg'
     requirement = 'The system shall be able to solve a problem with channel-flow like boundary conditions in the coordinate system with an average interpolation for the velocity and demonstrate second order convergence in the velocity variables and first order convergence in the pressure variable.'
-    ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
   []
   [rc]
@@ -18,7 +17,6 @@
     min_parallel = 8
     requirement = 'The system shall be able to solve a problem with channel-flow like boundary conditions in the coordinate system with a Rhie-Chow interpolation for the velocity and demonstrate second order convergence in the velocity and pressure variables.'
     heavy = true
-    ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
     valgrind = 'none'
   []
@@ -28,7 +26,6 @@
     test_case = Test2DAverageTemp
     method = '!dbg'
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in an RZ coordinate system, including energy, using an average interpolation for the velocity, with a mix of Dirichlet and zero-gradient boundary conditions for each variable, and demonstrate second order convergence for each variable other than the pressure which shall demonstrate first order convergence.'
-    ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
   []
   [rc-with-temp]
@@ -39,7 +36,6 @@
     min_parallel = 8
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in an RZ coordinate system, including energy, using a RC interpolation for the velocity, with a mix of Dirichlet and zero-gradient boundary conditions for each variable, and demonstrate second order convergence for each variable.'
     heavy = true
-    ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
     valgrind = 'none'
     max_time = 600

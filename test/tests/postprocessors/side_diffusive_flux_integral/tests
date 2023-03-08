@@ -25,7 +25,6 @@
       type = 'Exodiff'
       input = 'side_diffusive_flux_integral_fv.i'
       exodiff = 'side_diffusive_flux_integral_fv_out.e'
-      ad_indexing_type = 'global'
       detail = 'with a scalar diffusivity,'
     []
     [vector_diffusivity]
@@ -33,7 +32,6 @@
       input = 'side_diffusive_flux_integral_fv.i'
       exodiff = 'side_diffusive_flux_integral_fv_vector.e'
       cli_args = "Outputs/file_base=side_diffusive_flux_integral_fv_vector Postprocessors/avg_flux_right/type=SideVectorDiffusivityFluxIntegral Postprocessors/avg_flux_right/functor_diffusivity=diffusivity_vec Postprocessors/inactive=''"
-      ad_indexing_type = 'global'
       detail = 'with a vector diffusivity.'
     []
   []
@@ -41,7 +39,6 @@
     type = 'Exodiff'
     input = vector_functor_prop.i
     exodiff = vector_functor_prop_out.e
-    ad_indexing_type = 'global'
     requirement = 'The system shall yield equivalent results when vector material properties are computed with pre-initialized data or computed on-the-fly.'
     design = 'GenericVectorFunctorMaterial.md'
     issues = '#16809'

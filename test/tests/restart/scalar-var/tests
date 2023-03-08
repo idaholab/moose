@@ -8,7 +8,6 @@
       input = part1.i
       exodiff = part1_out.e
       detail = 'run initial input'
-      ad_indexing_type = 'global'
     []
     [part2]
       prereq = 'restarting/part1'
@@ -16,7 +15,6 @@
       input = part2.i
       exodiff = part2_out.e
       detail = 'run restart input'
-      ad_indexing_type = 'global'
     []
   []
 []

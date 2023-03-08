@@ -9,7 +9,6 @@
     abs_zero = 1e-9
     issues = '#16756 #18806'
     requirement = 'The system shall be able to solve transient relaxations within the weakly compressible approximation, with fluid energy diffusion, advection and convection with the solid phase in a 2D channel, modeling both fluid and solid temperature.'
-    ad_indexing_type = 'global'
     valgrind = HEAVY
     design = 'PINSFVEnergyTimeDerivative.md'
     recover = false # see #19126
@@ -22,7 +21,6 @@
     abs_zero = 1e-9
     issues = '#19472'
     requirement = 'The system shall be able to solve weakly compressible transient problems with the NSFV action syntax.'
-    ad_indexing_type = 'global'
     valgrind = HEAVY
     recover = false # see #19126
   []
@@ -32,7 +30,6 @@
     run_sim = True
     difference_tol = 1.83
     requirement = 'The system shall be able to solve transient relaxations within the weakly compressible approximation, with fluid energy diffusion, advection and convection with the solid phase in a 2D channel, modeling both fluid and solid temperature and show a perfect Jacobian.'
-    ad_indexing_type = 'global'
     cli_args = 'Mesh/gen/nx=2 Mesh/gen/ny=2 Executioner/num_steps=1'
   []
 []

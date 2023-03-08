@@ -3,7 +3,6 @@
     type = 'Exodiff'
     input = 'phy.test.i'
     exodiff = 'phy.test_out.e'
-    ad_indexing_type = 'global'
   []
   [enumeration_option]
     type = RunException
@@ -11,6 +10,5 @@
     cli_args = "GlobalParams/closures=none"
     allow_deprecated = False
     expect_err = 'The closures system now uses objects created in the input file'
-    ad_indexing_type = 'global'
   []
 []

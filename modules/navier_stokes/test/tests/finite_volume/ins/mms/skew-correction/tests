@@ -8,7 +8,6 @@
     method = '!dbg'
     min_parallel = 2
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations on triangular meshes, using a Rhie-Chow scheme and skewness-correction, Dirichlet boundary conditions for the velocity, and demonstrate second order convergence for the velocity and first order convergence for pressure.'
-    ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
     heavy = true
   []
@@ -19,14 +18,12 @@
     method = '!dbg'
     min_parallel = 2
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations on triangular meshes using skewness-correction and the NSFV action syntax.'
-    ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
     heavy = true
   []
   [run]
     type = RunApp
     input = skewed-vortex.i
-    ad_indexing_type = 'global'
     requirement = 'The system shall be able to automatically expand its ghosting pattern when skew-corrected face gradients are involved in the simulation.'
   []
 []

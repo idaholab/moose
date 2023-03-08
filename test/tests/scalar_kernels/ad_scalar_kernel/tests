@@ -10,7 +10,6 @@
     # is currently no AD version for gatherSum(), which is needed in its finalize() method.
     max_parallel = 1
     # AD scalar kernels only work with global AD indexing
-    ad_indexing_type = 'global'
     requirement = 'The system shall be able to correctly compute the Jacobian of an ADScalarKernel using automatic differentiation.'
   []
 []

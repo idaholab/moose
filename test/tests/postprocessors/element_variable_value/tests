@@ -18,6 +18,5 @@
     requirement = "The system shall support sampling a specific quantity integrated over a single element with finite volume variables."
     issues = "#9757 #12165 #16099"
     design = "ElementalVariableValue.md"
-    ad_indexing_type = 'global'
   []
 []

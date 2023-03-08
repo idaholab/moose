@@ -6,14 +6,12 @@
     input = cartesian.i
     exodiff = cartesian_out.e
     requirement = "The system shall be able to implement advection through an element based kernel, that leverages the system's ability to reconstruct gradients, and demonstrate second order convergence on a cartesian coordinate system."
-    ad_indexing_type = 'global'
   []
   [mat-cartesian]
     type = Exodiff
     input = mat-cartesian.i
     exodiff = mat-cartesian_out.e
     requirement = "The system shall be able to retrieve and usefinite volume variable gradients in materials using a coupling interface and reproduce element-based advection results based on direct use of the variable gradient in a Cartesian coordinate system."
-    ad_indexing_type = 'global'
     issues = '#16963'
   []
   [rz]
@@ -21,14 +19,12 @@
     input = rz.i
     exodiff = rz_out.e
     requirement = "The system shall be able to implement advection through an element based kernel, that leverages the system's ability to reconstruct gradients, and demonstrate second order convergence in an axisymmetric coordinate system."
-    ad_indexing_type = 'global'
   []
   [mat-rz]
     type = Exodiff
     input = mat-rz.i
     exodiff = mat-rz_out.e
     requirement = "The system shall be able to retrieve and usefinite volume variable gradients in materials using a coupling interface and reproduce element-based advection results based on direct use of the variable gradient in an axisymmetric coordinate system."
-    ad_indexing_type = 'global'
     issues = '#16963'
   []
 []

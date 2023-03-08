@@ -7,7 +7,6 @@
     exodiff = rc-smooth-epsjump.e
     method = "!dbg"
     requirement = 'The system shall be able to model a smooth porosity gradient in a 2D channel.'
-    ad_indexing_type = 'global'
     cli_args = "Outputs/file_base='rc-smooth-epsjump' ICs/inactive='porosity_1 porosity_2' Materials/inactive='jump smooth'"
   []
   [1d-discontinuous-jump-average-average]
@@ -15,7 +14,6 @@
     input = 1d-rc-epsjump.i
     exodiff = rc-discontinuous-1d-epsjump-average-average.e
     requirement = 'The system shall be able to model a discontinuous porosity jump in a 1D channel with average interpolation of velocity and advected quantity.'
-    ad_indexing_type = 'global'
     cli_args = "Outputs/file_base='rc-discontinuous-1d-epsjump-average-average' velocity_interp_method='average' advected_interp_method='average'"
   []
   [1d-discontinuous-jump-average-upwind]
@@ -23,7 +21,6 @@
     input = 1d-rc-epsjump.i
     exodiff = rc-discontinuous-1d-epsjump-average-upwind.e
     requirement = 'The system shall be able to model a discontinuous porosity jump in a 1D channel with average interpolation of velocity and upwinding of the advected quantity.'
-    ad_indexing_type = 'global'
     max_parallel = 1
     cli_args = "Outputs/file_base='rc-discontinuous-1d-epsjump-average-upwind' velocity_interp_method='average' advected_interp_method='upwind' Executioner/nl_abs_tol=1e-13"
   []
@@ -32,7 +29,6 @@
     input = 1d-rc-epsjump.i
     exodiff = rc-discontinuous-1d-epsjump-rc-average.e
     requirement = 'The system shall be able to model a discontinuous porosity jump in a 1D channel with Rhie Chow interpolation of velocity and averaging of the advected quantity.'
-    ad_indexing_type = 'global'
     cli_args = "Outputs/file_base='rc-discontinuous-1d-epsjump-rc-average' velocity_interp_method='rc' advected_interp_method='average' -pc_type lu -pc_factor_shift_type NONZERO"
   []
   [1d-discontinuous-jump-rc-upwind]
@@ -40,7 +36,6 @@
     input = 1d-rc-epsjump.i
     exodiff = rc-discontinuous-1d-epsjump-rc-upwind.e
     requirement = 'The system shall be able to model a discontinuous porosity jump in a 1D channel with Rhie Chow interpolation of velocity and upwinding of the advected quantity.'
-    ad_indexing_type = 'global'
     cli_args = "Outputs/file_base='rc-discontinuous-1d-epsjump-rc-upwind' velocity_interp_method='rc' advected_interp_method='upwind' -pc_type lu -pc_factor_shift_type NONZERO"
   []
   [discontinuous-jump]
@@ -51,7 +46,6 @@
     requirement = 'The system shall be able to model a discontinuous porosity jump in a 2D channel.'
     recover = false
     max_parallel = 1
-    ad_indexing_type = 'global'
     cli_args = "Outputs/file_base='rc-discontinuous-epsjump' Materials/inactive='jump smooth'"
   []
   [reconstruct-porosity]
@@ -59,7 +53,6 @@
     input = 2d-rc-epsjump.i
     exodiff = reconstructed.e
     cli_args = "Outputs/file_base=reconstructed GlobalParams/porosity=smoothed_porosity UserObjects/rc/smoothing_layers=20 AuxVariables/active='' ICs/inactive='porosity_1 porosity_2 porosity_continuous'"
-    ad_indexing_type = 'global'
     requirement = 'The system shall exhibit a monotonic pressure profile when a number of reconstructions (essentially smoothing) are applied to the porosity.'
   []
   [reconstruct-error]
@@ -67,7 +60,6 @@
     input = 2d-rc-epsjump.i
     cli_args = 'UserObjects/rc/smoothing_layers=1'
     expect_err = 'If we are reconstructing porosity, then the input porosity to this user object cannot be a Moose variable'
-    ad_indexing_type = 'global'
     requirement = 'The system shall error if the user attempts to create a reconstructed field from a variable.'
   []
   [automatic-jump-handling]
@@ -77,14 +69,12 @@
       input = 'bernoulli-1d.i'
       csvdiff = 'bernoulli-1d_out.csv'
       detail = 'one dimension, using upwinding for advection and a Rhie-Chow interpolation of velocity'
-      ad_indexing_type = 'global'
     []
     [1d-average]
       type = CSVDiff
       input = 'bernoulli-1d.i'
       csvdiff = 'bernoulli-1d_out.csv'
       detail = 'one dimension, using central differencing for advection and velocity'
-      ad_indexing_type = 'global'
       cli_args = "advected_interp_method='average' velocity_interp_method='average'"
       prereq = 'automatic-jump-handling/1d'
     []
@@ -93,14 +83,12 @@
       input = 'bernoulli-2d.i'
       csvdiff = 'bernoulli-2d_out.csv'
       detail = 'two dimensions, using upwinding for advection and a Rhie-Chow interpolation of velocity'
-      ad_indexing_type = 'global'
     []
     [2d-average]
       type = CSVDiff
       input = 'bernoulli-2d.i'
       csvdiff = 'bernoulli-2d_out.csv'
       detail = 'two dimensions, using central differencing for advection and velocity'
-      ad_indexing_type = 'global'
       cli_args = "advected_interp_method='average' velocity_interp_method='average'"
       prereq = 'automatic-jump-handling/2d'
     []
@@ -109,14 +97,12 @@
       input = 'bernoulli-2d-action.i'
       csvdiff = 'bernoulli-2d-action_out.csv'
       detail = 'two dimensions using compact action syntax, upwinding for advection, and a Rhie-Chow interpolation of velocity'
-      ad_indexing_type = 'global'
     []
   []
   [has-porosity-jump-aux]
     type = Exodiff
     input = bernoulli-1d.i
     exodiff = bernoulli-1d_out.e
-    ad_indexing_type = 'global'
     requirement = 'The system shall be able to mark what elements have porosity jump faces using an auxiliary kernel.'
     prereq = 'automatic-jump-handling/1d-average'
   []
@@ -124,14 +110,12 @@
     type = CSVDiff
     input = bernoulli-1d-parsed-function.i
     csvdiff = bernoulli-1d-parsed-function_out.csv
-    ad_indexing_type = 'global'
     requirement = 'The system shall be able to recognize discontinuities in parsed functions at subdomain changes and produce the correct Bernoulli pressure drop as a consequence.'
   []
   [bernoulli-with-functor-material]
     type = CSVDiff
     input = bernoulli-1d-functor-material.i
     csvdiff = bernoulli-1d-functor-material_out.csv
-    ad_indexing_type = 'global'
     requirement = 'The system shall be able to recognize discontinuities in functor material properties and produce the correct Bernoulli pressure drop as a consequence.'
   []
 []

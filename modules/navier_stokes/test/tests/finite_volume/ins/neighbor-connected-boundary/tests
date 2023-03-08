@@ -5,7 +5,6 @@
     input = 'test.i'
     type = RunApp
     absent_out = '[1-9][0-9]* of 525 singular'
-    ad_indexing_type = 'global'
     requirement = 'The system shall be able to group sidesets logically connected to neighboring subdomains but contacting the fluid subdomains into the fluid flow boundary set, allowing for accurate solution of the fluid flow equations.'
   []
 []

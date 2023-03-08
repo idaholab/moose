@@ -8,6 +8,5 @@
     type = RunApp
     input = 'indenter_rz_fine.i'
     check_input = True
-    ad_indexing_type = 'global'
   []
 []

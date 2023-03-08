@@ -5,7 +5,6 @@
     test_case = BrokenDomain
     requirement = 'The system shall display second order convergence when applying weakly enforced matching Dirichlet and flux conditions.'
     method = '!dbg'
-    ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
     valgrind = none
     design = 'FVInterfaceKernels/index.md FVBCs/index.md'
