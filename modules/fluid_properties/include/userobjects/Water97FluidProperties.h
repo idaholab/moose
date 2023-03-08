@@ -2175,7 +2175,8 @@ Water97FluidProperties::T_drhodT_from_p_rho(const T & p, const T & rho) const
   auto lambda =
       [this](const T & p, const T & temperature, T & rho, T & drho_dp, T & drho_dtemperature)
   { rho_from_p_T_template(p, temperature, rho, drho_dp, drho_dtemperature); };
-  return FluidPropertiesUtils::NewtonSolve(p, rho, _T_initial_guess, _tolerance, lambda);
+  return FluidPropertiesUtils::NewtonSolve(
+      p, rho, _T_initial_guess, _tolerance, lambda, name() + "::T_drhodT_from_p_rho");
 }
 
 template <typename T>
@@ -2423,7 +2424,9 @@ Water97FluidProperties::p_from_v_e_template(const T & v, const T & e) const
   // z = p
   auto lambda = [this](const T & rho, const T & p, T & e, T & de_drho, T & de_dp)
   { e_from_p_rho(p, rho, e, de_dp, de_drho); };
-  return FluidPropertiesUtils::NewtonSolve(rho, e, _p_initial_guess, _tolerance, lambda).first;
+  return FluidPropertiesUtils::NewtonSolve(
+             rho, e, _p_initial_guess, _tolerance, lambda, name() + "::p_from_v_e")
+      .first;
 }
 
 template <typename T>
