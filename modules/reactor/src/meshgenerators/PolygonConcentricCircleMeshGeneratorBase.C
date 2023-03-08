@@ -637,9 +637,11 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
     paramError("center_quad_factor",
                "this parameter is only applicable if quad_center_elements is set true.");
   if (_quad_center_elements)
-    declareMeshProperty<subdomain_id_type>("quad_center_block_id",
-                                           _ring_block_ids.empty() ? _background_block_ids.front()
-                                                                   : _ring_block_ids.front());
+    declareMeshProperty<subdomain_id_type>(
+        "quad_center_block_id",
+        _has_rings ? (_ring_block_ids.empty() ? _block_id_shift + 1 : _ring_block_ids.front())
+                   : (_background_block_ids.empty() ? _block_id_shift + 1
+                                                    : _background_block_ids.front()));
   else
     declareMeshProperty<subdomain_id_type>("quad_center_block_id",
                                            libMesh::Elem::invalid_subdomain_id);
