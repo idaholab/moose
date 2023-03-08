@@ -9,7 +9,7 @@
       type = 'Exodiff'
       input = 'block_weighted_partitioner.i'
       exodiff = 'block_weighted_partitioner_out.e'
-      petsc_version = '>=3.10.0'
+      petsc_version = '>=3.18.0' # PTScotch 7.0.1 changes partitioning for this test as of 3.18.0
       min_parallel = 4
       max_parallel = 4
       # different mode generates different partition
