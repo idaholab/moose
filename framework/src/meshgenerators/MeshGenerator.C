@@ -29,6 +29,8 @@ MeshGenerator::validParams()
 
   params.addParam<bool>(
       "output", false, "Whether or not to output the mesh file after generating the mesh");
+  params.addParam<bool>(
+      "nemesis", false, "Whether or not to output the mesh file in distributed form");
   params.registerBase("MeshGenerator");
 
   return params;
@@ -143,7 +145,7 @@ MeshGenerator::generateInternal()
   // output the current mesh block to file
   if (getParam<bool>("output"))
   {
-    if (mesh->is_replicated())
+    if (!getParam<bool>("nemesis"))
     {
       ExodusII_IO exio(*mesh);
 
