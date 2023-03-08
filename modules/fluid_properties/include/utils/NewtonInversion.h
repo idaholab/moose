@@ -20,9 +20,11 @@ namespace FluidPropertiesUtils
  * @param[in] x constant first argument of the f(x, z) term
  * @param[in] y constant which should be equal to f(x, z) with a converged z
  * @param[in] z_initial_guess initial guess for return variables
- * @param[in] tolerance criterion for relative or absolute (if y is sufficently close to zero)
+ * @param[in] tolerance criterion for relative or absolute (if y is sufficiently close to zero)
  * convergence checking
  * @param[in] function two-variable function returning both values and derivatives as references
+ * @param[in] caller_name name of the fluid properties appended to name of the routine calling the
+ * method
  * @param[in] max_its the maximum number of iterations for Newton's method
  * @return a pair in which the first member is the value z such that f(x, z) = y and the second
  * member is dy/dz
@@ -34,6 +36,7 @@ NewtonSolve(const T & x,
             const Real z_initial_guess,
             const Real tolerance,
             const Functor & func,
+            const std::string & caller_name,
             const unsigned int max_its = 100)
 {
   // R represents residual
@@ -67,14 +70,14 @@ NewtonSolve(const T & x,
     // Check the accuracy of the Jacobian
     auto J_differenced = (perturbed_y - new_y) / (1e-8 * z);
     if (!MooseUtils::relativeFuzzyEqual(J_differenced, dy_dz, 1e-2))
-      mooseDoOnce(mooseWarning("Bad Jacobian in NewtonSolve"));
+      mooseDoOnce(mooseWarning(caller_name + ": Bad Jacobian in NewtonSolve"));
 #endif
 
     z += -(R / dy_dz);
 
     // Check for NaNs
     if (std::isnan(z))
-      mooseException("NaN detected in Newton solve");
+      mooseException(caller_name + ": NaN detected in Newton solve");
 
     if (converged)
       break;
@@ -82,8 +85,10 @@ NewtonSolve(const T & x,
 
   // Check for divergence or slow convergence of Newton's method
   if (iteration >= max_its)
-    mooseException(
-        "Newton solve convergence failed: maximum number of iterations, ", max_its, ", exceeded");
+    mooseException(caller_name +
+                       ": Newton solve convergence failed: maximum number of iterations, ",
+                   max_its,
+                   ", exceeded");
 
   return {z, dy_dz};
 }

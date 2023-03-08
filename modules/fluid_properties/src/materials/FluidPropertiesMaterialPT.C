@@ -19,6 +19,11 @@ FluidPropertiesMaterialPT::validParams()
   params.addRequiredCoupledVar("temperature", "Fluid temperature (K)");
   params.addRequiredParam<UserObjectName>("fp", "The name of the user object for fluid properties");
   params.addClassDescription("Fluid properties using the (pressure, temperature) formulation");
+
+  // Restrict properties created
+  params.addParam<bool>("compute_entropy", true, "Whether to compute the entropy");
+  params.addParam<bool>("compute_sound_speed", true, "Whether to compute the speed of sound");
+
   return params;
 }
 
@@ -34,8 +39,12 @@ FluidPropertiesMaterialPT::FluidPropertiesMaterialPT(const InputParameters & par
     _k(declareProperty<Real>("k")),
     _h(declareProperty<Real>("h")),
     _e(declareProperty<Real>("e")),
-    _s(declareProperty<Real>("s")),
-    _c(declareProperty<Real>("c")),
+
+    _compute_s(getParam<bool>("compute_entropy")),
+    _compute_c(getParam<bool>("compute_sound_speed")),
+
+    _s(_compute_s ? &declareProperty<Real>("s") : nullptr),
+    _c(_compute_c ? &declareProperty<Real>("c") : nullptr),
 
     _fp(getUserObject<SinglePhaseFluidProperties>("fp"))
 {
@@ -53,6 +62,8 @@ FluidPropertiesMaterialPT::computeQpProperties()
   _k[_qp] = _fp.k_from_p_T(_pressure[_qp], _temperature[_qp]);
   _h[_qp] = _fp.h_from_p_T(_pressure[_qp], _temperature[_qp]);
   _e[_qp] = _fp.e_from_p_T(_pressure[_qp], _temperature[_qp]);
-  _s[_qp] = _fp.s_from_p_T(_pressure[_qp], _temperature[_qp]);
-  _c[_qp] = _fp.c_from_p_T(_pressure[_qp], _temperature[_qp]);
+  if (_compute_s)
+    (*_s)[_qp] = _fp.s_from_p_T(_pressure[_qp], _temperature[_qp]);
+  if (_compute_c)
+    (*_c)[_qp] = _fp.c_from_p_T(_pressure[_qp], _temperature[_qp]);
 }

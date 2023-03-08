@@ -44,10 +44,16 @@ protected:
   MaterialProperty<Real> & _h;
   /// Internal energy (J/kg)
   MaterialProperty<Real> & _e;
+
+  /// Whether to compute entropy
+  const bool _compute_s;
+  /// Whether to compute the speed of sound
+  const bool _compute_c;
+
   /// Specific entropy (J/kg/K)
-  MaterialProperty<Real> & _s;
+  MaterialProperty<Real> * const _s;
   /// Speed of sound (m/s)
-  MaterialProperty<Real> & _c;
+  MaterialProperty<Real> * const _c;
 
   /// Fluid properties UserObject
   const SinglePhaseFluidProperties & _fp;
