@@ -17,8 +17,6 @@ highlight some of the codes available through the NCRC.
 
 !include ncrc/applications/ncrc_root_grizzly.md
 
-!include ncrc/applications/ncrc_root_malamute.md
-
 !include ncrc/applications/ncrc_root_marmot.md
 
 !include ncrc/applications/ncrc_root_pronghorn.md
