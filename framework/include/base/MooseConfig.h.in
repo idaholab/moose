@@ -3,11 +3,14 @@
 /* The size of the derivative backing array */
 #undef AD_MAX_DOFS_PER_ELEM
 
-/* Whether to use a global indexing scheme for AD */
-#undef GLOBAL_AD_INDEXING
-
 /* Whether or not libpng was detected on the system */
 #undef HAVE_LIBPNG
+
+/* The directory where libtorch is installed */
+#undef LIBTORCH_DIR
+
+/* Whether to use libtorch-related code or not */
+#undef LIBTORCH_ENABLED
 
 /* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT
@@ -26,12 +29,3 @@
 
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
-
-/* Whether to use a sparse derivative type */
-#undef SPARSE_AD
-
-/* Whether to use libtorch-related code or not */
-#undef LIBTORCH_ENABLED
-
-/* The directory where libtorch is installed in */
-#undef LIBTORCH_DIR
