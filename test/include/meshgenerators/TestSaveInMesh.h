@@ -9,16 +9,16 @@
 
 #pragma once
 
-#include "ADKernelGrad.h"
+#include "GeneralUserObject.h"
 
-class TestSaveInMesh : public ADKernelGrad
+class TestSaveInMesh : public GeneralUserObject
 {
 public:
   static InputParameters validParams();
 
   TestSaveInMesh(const InputParameters & parameters);
 
-protected:
-  /// ADKernel objects must override precomputeQpResidual
-  virtual ADRealVectorValue precomputeQpResidual() override;
+  virtual void initialize(){};
+  virtual void execute(){};
+  virtual void finalize(){};
 };

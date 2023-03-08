@@ -20,12 +20,12 @@ registerMooseObject("MooseTestApp", TestSaveInMesh);
 InputParameters
 TestSaveInMesh::validParams()
 {
-  InputParameters params = ADKernelGrad::validParams();
+  InputParameters params = GeneralUserObject::validParams();
 
   return params;
 }
 
-TestSaveInMesh::TestSaveInMesh(const InputParameters & parameters) : ADKernelGrad(parameters)
+TestSaveInMesh::TestSaveInMesh(const InputParameters & parameters) : GeneralUserObject(parameters)
 {
   auto & mesh_generator_system = _app.getMeshGeneratorSystem();
   auto saved_mesh_names = mesh_generator_system.getSavedMeshesNames();
@@ -58,10 +58,4 @@ TestSaveInMesh::TestSaveInMesh(const InputParameters & parameters) : ADKernelGra
       }
     }
   }
-}
-
-ADRealVectorValue
-TestSaveInMesh::precomputeQpResidual()
-{
-  return _grad_u[_qp];
 }
