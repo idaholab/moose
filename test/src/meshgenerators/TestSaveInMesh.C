@@ -45,7 +45,6 @@ TestSaveInMesh::TestSaveInMesh(const InputParameters & parameters) : GeneralUser
           if (mesh->mesh_dimension() == 1)
             exio.write_as_dimension(3);
 
-          // Default to non-HDF5 output for wider compatibility
           exio.set_hdf5_writing(false);
 
           exio.write(name + "_in.e");
