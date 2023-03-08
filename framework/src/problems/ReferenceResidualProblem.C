@@ -501,26 +501,18 @@ ReferenceResidualProblem::checkRelativeConvergence(const PetscInt it,
 {
   if (checkConvergenceIndividVars(fnorm, abstol, rtol, the_residual))
   {
-    if (_group_resid.size() > 0)
-      oss << "Converged due to function norm " << fnorm << " < relative tolerance (" << rtol
-          << ") or absolute tolerance (" << abstol << ") for all solution variables\n";
-    else
-      oss << "Converged due to function norm " << fnorm << " < relative tolerance (" << rtol
-          << ")\n";
+    oss << "Converged due to function norm " << fnorm << " < relative tolerance (" << rtol
+        << ") or absolute tolerance (" << abstol << ") for all solution variables\n";
     return true;
   }
   else if (it >= _accept_iters &&
            checkConvergenceIndividVars(
                fnorm, abstol * _accept_mult, rtol * _accept_mult, the_residual))
   {
-    if (_group_resid.size() > 0)
-      oss << "Converged due to function norm " << fnorm << " < acceptable relative tolerance ("
-          << rtol * _accept_mult << ") or acceptable absolute tolerance (" << abstol * _accept_mult
-          << ") for all solution variables\n";
-    else
-      oss << "Converged due to function norm " << fnorm << " < acceptable relative tolerance ("
-          << rtol * _accept_mult << ")\n";
-    _console << "ACCEPTABLE" << std::endl;
+    oss << "Converged due to function norm " << fnorm << " < acceptable relative tolerance ("
+        << rtol * _accept_mult << ") or acceptable absolute tolerance (" << abstol * _accept_mult
+        << ") for all solution variables\n";
+    _console << "Converged due to ACCEPTABLE tolerances" << std::endl;
     return true;
   }
 
