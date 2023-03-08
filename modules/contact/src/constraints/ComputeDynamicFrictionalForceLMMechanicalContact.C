@@ -172,11 +172,11 @@ ComputeDynamicFrictionalForceLMMechanicalContact::post()
   ComputeDynamicWeightedGapLMMechanicalContact::post();
 
   Moose::Mortar::Contact::communicateVelocities(
-      _dof_to_weighted_tangential_velocity, this->processor_id(), _mesh, _nodal, _communicator);
+      _dof_to_weighted_tangential_velocity, _mesh, _nodal, _communicator);
 
   if (_has_friction_function)
     Moose::Mortar::Contact::communicateVelocities(
-        _dof_to_real_tangential_velocity, this->processor_id(), _mesh, _nodal, _communicator);
+        _dof_to_real_tangential_velocity, _mesh, _nodal, _communicator);
 
   // Enforce frictional complementarity constraints
   for (const auto & pr : _dof_to_weighted_tangential_velocity)
@@ -211,11 +211,11 @@ ComputeDynamicFrictionalForceLMMechanicalContact::incorrectEdgeDroppingPost(
   ComputeDynamicWeightedGapLMMechanicalContact::incorrectEdgeDroppingPost(inactive_lm_nodes);
 
   Moose::Mortar::Contact::communicateVelocities(
-      _dof_to_weighted_tangential_velocity, this->processor_id(), _mesh, _nodal, _communicator);
+      _dof_to_weighted_tangential_velocity, _mesh, _nodal, _communicator);
 
   if (_has_friction_function)
     Moose::Mortar::Contact::communicateVelocities(
-        _dof_to_real_tangential_velocity, this->processor_id(), _mesh, _nodal, _communicator);
+        _dof_to_real_tangential_velocity, _mesh, _nodal, _communicator);
 
   // Enforce frictional complementarity constraints
   for (const auto & pr : _dof_to_weighted_tangential_velocity)

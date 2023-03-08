@@ -162,7 +162,6 @@ WeightedGapUserObject::finalize()
   // do some of the constraining ourselves, then we need data sent back to us
   const bool send_data_back = !constrainedByOwner();
   Moose::Mortar::Contact::communicateGaps(_dof_to_weighted_gap,
-                                          this->processor_id(),
                                           _subproblem.mesh(),
                                           _nodal,
                                           _normalize_c,

@@ -143,15 +143,10 @@ ComputeFrictionalForceCartesianLMMechanicalContact::residualSetup()
 void
 ComputeFrictionalForceCartesianLMMechanicalContact::post()
 {
-  Moose::Mortar::Contact::communicateGaps(_dof_to_weighted_gap,
-                                          this->processor_id(),
-                                          _mesh,
-                                          _nodal,
-                                          _normalize_c,
-                                          _communicator,
-                                          false);
+  Moose::Mortar::Contact::communicateGaps(
+      _dof_to_weighted_gap, _mesh, _nodal, _normalize_c, _communicator, false);
   Moose::Mortar::Contact::communicateVelocities(
-      _dof_to_weighted_tangential_velocity, this->processor_id(), _mesh, _nodal, _communicator);
+      _dof_to_weighted_tangential_velocity, _mesh, _nodal, _communicator);
 
   // Enforce frictional complementarity constraints
   for (const auto & pr : _dof_to_weighted_tangential_velocity)
@@ -177,15 +172,10 @@ void
 ComputeFrictionalForceCartesianLMMechanicalContact::incorrectEdgeDroppingPost(
     const std::unordered_set<const Node *> & inactive_lm_nodes)
 {
-  Moose::Mortar::Contact::communicateGaps(_dof_to_weighted_gap,
-                                          this->processor_id(),
-                                          _mesh,
-                                          _nodal,
-                                          _normalize_c,
-                                          _communicator,
-                                          false);
+  Moose::Mortar::Contact::communicateGaps(
+      _dof_to_weighted_gap, _mesh, _nodal, _normalize_c, _communicator, false);
   Moose::Mortar::Contact::communicateVelocities(
-      _dof_to_weighted_tangential_velocity, this->processor_id(), _mesh, _nodal, _communicator);
+      _dof_to_weighted_tangential_velocity, _mesh, _nodal, _communicator);
 
   // Enforce frictional complementarity constraints
   for (const auto & pr : _dof_to_weighted_tangential_velocity)
