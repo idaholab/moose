@@ -103,7 +103,8 @@ EBSDMeshGenerator::buildMeshSubgenerator()
     params.set<unsigned int>("nz") = nr[2];
   }
 
-  return addMeshSubgenerator(generator_type, name() + "_base_mesh", params);
+  addMeshSubgenerator(generator_type, name() + "_base_mesh", params);
+  return getMeshByName(name() + "_base_mesh");
 }
 
 void

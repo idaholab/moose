@@ -10,27 +10,42 @@
 // MOOSE includes
 #include "MeshMetaDataInterface.h"
 #include "MooseApp.h"
-#include "MeshGenerator.h"
 
 MeshMetaDataInterface::MeshMetaDataInterface(const MooseObject * moose_object)
-  : _meta_data_app(moose_object->getMooseApp())
+  : _meta_data_app(moose_object->getMooseApp()), _meta_data_object(moose_object)
 {
 }
 
-MeshMetaDataInterface::MeshMetaDataInterface(MooseApp & moose_app) : _meta_data_app(moose_app) {}
-
-RestartableDataValue &
-MeshMetaDataInterface::registerMetaDataOnApp(const std::string & name,
-                                             std::unique_ptr<RestartableDataValue> data)
+MeshMetaDataInterface::MeshMetaDataInterface(MooseApp & moose_app)
+  : _meta_data_app(moose_app), _meta_data_object(nullptr)
 {
-  return _meta_data_app.registerRestartableData(
-      name, std::move(data), 0, true, MooseApp::MESH_META_DATA);
 }
 
 bool
 MeshMetaDataInterface::hasMeshProperty(const std::string & data_name,
                                        const std::string & prefix) const
 {
-  std::string full_name = std::string(SYSTEM) + "/" + prefix + "/" + data_name;
-  return _meta_data_app.hasRestartableMetaData(full_name, MooseApp::MESH_META_DATA);
+  return _meta_data_app.hasRestartableMetaData(meshPropertyName(data_name, prefix),
+                                               MooseApp::MESH_META_DATA);
+}
+
+std::string
+MeshMetaDataInterface::meshPropertyName(const std::string & data_name, const std::string & prefix)
+{
+  return std::string(SYSTEM) + "/" + prefix + "/" + data_name;
+}
+
+std::string
+MeshMetaDataInterface::meshPropertyPrefix(const std::string &) const
+{
+  mooseError("This object does not support obtaining a mesh property without a prefix.\n\nThis "
+             "capability is upcoming.");
+}
+
+const RestartableDataValue &
+MeshMetaDataInterface::getMeshPropertyInternal(const std::string & data_name,
+                                               const std::string & prefix) const
+{
+  return _meta_data_app.getRestartableMetaData(
+      meshPropertyName(data_name, prefix), MooseApp::MESH_META_DATA, 0);
 }

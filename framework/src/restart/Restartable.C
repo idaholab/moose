@@ -60,3 +60,9 @@ Restartable::registerRestartableNameWithFilterOnApp(const std::string & name,
 {
   _restartable_app.registerRestartableNameWithFilter(name, filter);
 }
+
+std::string
+Restartable::restartableName(const std::string & data_name) const
+{
+  return _restartable_system_name + "/" + _restartable_name + "/" + data_name;
+}

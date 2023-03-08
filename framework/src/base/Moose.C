@@ -105,6 +105,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("set_mesh_base",                MooseMesh,              false);
   registerMooseObjectTask("init_mesh",                    MooseMesh,              false);
   registerMooseObjectTask("add_mesh_generator",           MeshGenerator,          false);
+  registerTask("create_added_mesh_generators", true);
   registerMooseObjectTask("append_mesh_generator",        MeshGenerator,          false);
 
   registerMooseObjectTask("add_kernel",                   Kernel,                 false);
@@ -263,6 +264,7 @@ addActionTypes(Syntax & syntax)
                            "(add_geometric_rm)"
                            "(add_partitioner)"
                            "(add_mesh_generator)"
+                           "(create_added_mesh_generators)"
                            "(append_mesh_generator)"
                            "(execute_mesh_generators)"
                            "(recover_meta_data)"

@@ -42,10 +42,11 @@ TestSubgenerators::TestSubgenerators(const InputParameters & parameters)
   for (auto & input_filename : _input_filenames)
     // Test the variadic API for half of our subgenerators
     if (sg_num % 2)
-      _mesh_ptrs.push_back(&this->addMeshSubgenerator("FileMeshGenerator",
-                                                      sg_name_base + std::to_string(sg_num++),
-                                                      "file",
-                                                      MeshFileName(input_filename)));
+    {
+      const auto name = sg_name_base + std::to_string(sg_num++);
+      addMeshSubgenerator("FileMeshGenerator", name, "file", MeshFileName(input_filename));
+      _mesh_ptrs.push_back(&getMeshByName(name));
+    }
     // Test the InputParameters API for the other half
     else
     {
@@ -54,7 +55,8 @@ TestSubgenerators::TestSubgenerators(const InputParameters & parameters)
       InputParameters subgenerator_params = FileMeshGenerator::validParams();
 
       subgenerator_params.set<MeshFileName>("file") = input_filename;
-      _mesh_ptrs.push_back(&this->addMeshSubgenerator(
-          "FileMeshGenerator", sg_name_base + std::to_string(sg_num++), subgenerator_params));
+      const auto name = sg_name_base + std::to_string(sg_num++);
+      addMeshSubgenerator("FileMeshGenerator", name, subgenerator_params);
+      _mesh_ptrs.push_back(&getMeshByName(name));
     }
 }

@@ -104,6 +104,8 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
                          : std::vector<std::vector<subdomain_id_type>>()),
     _extrude(getParam<bool>("extrude"))
 {
+  declareMeshesForSub("inputs");
+
   MeshGeneratorName reactor_params =
       MeshGeneratorName(getMeshProperty<std::string>("reactor_params_name", _inputs[0]));
   // Check that MG name for reactor params is consistent across all assemblies
@@ -257,7 +259,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
       params.set<std::vector<BoundaryName>>("new_boundary") =
           std::vector<BoundaryName>(4, _assembly_boundary_name);
 
-      _build_mesh = &addMeshSubgenerator("RenameBoundaryGenerator", name() + "_pattern", params);
+      addMeshSubgenerator("RenameBoundaryGenerator", name() + "_pattern", params);
     }
     //***Add assembly duct around PatternedMesh
   }
@@ -306,8 +308,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
       params.set<boundary_id_type>("external_boundary_id") = _assembly_boundary_id;
       params.set<std::string>("external_boundary_name") = _assembly_boundary_name;
 
-      _build_mesh =
-          &addMeshSubgenerator("HexIDPatternedMeshGenerator", name() + "_pattern", params);
+      addMeshSubgenerator("HexIDPatternedMeshGenerator", name() + "_pattern", params);
 
       // Pass mesh meta-data defined in subgenerator constructor to this MeshGenerator
       if (hasMeshProperty("pitch_meta", name() + "_pattern"))
@@ -346,6 +347,8 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
     }
   }
 
+  std::string build_mesh_name = name() + "_delbds";
+
   // Remove outer pin sidesets created by PolygonConcentricCircleMeshGenerator
   {
     // Get outer boundaries of all constituent pins based on pin_type
@@ -366,7 +369,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
     params.set<MeshGeneratorName>("input") = name() + "_pattern";
     params.set<std::vector<BoundaryName>>("boundary_names") = boundaries_to_delete;
 
-    _build_mesh = &addMeshSubgenerator("BoundaryDeletionGenerator", name() + "_delbds", params);
+    addMeshSubgenerator("BoundaryDeletionGenerator", build_mesh_name, params);
   }
 
   for (auto pinMG : _inputs)
@@ -435,16 +438,22 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
       std::string plane_id_name = "plane_id";
       params.set<std::string>("id_name") = "plane_id";
 
-      _build_mesh = &addMeshSubgenerator("PlaneIDMeshGenerator", name() + "_extrudedIDs", params);
+      build_mesh_name = name() + "_extrudedIDs";
+      addMeshSubgenerator("PlaneIDMeshGenerator", build_mesh_name, params);
     }
   }
   else
     declareMeshProperty("extruded", false);
+
+  _build_mesh = &getMeshByName(build_mesh_name);
 }
 
 std::unique_ptr<MeshBase>
 AssemblyMeshGenerator::generate()
 {
+  // Must be called to free the ReactorMeshParams mesh
+  freeReactorMeshParams();
+
   // Update metadata at this point since values for these metadata only get set by PCCMG
   // at generate() stage
   if (hasMeshProperty("pattern_pitch_meta", name() + "_pattern"))
