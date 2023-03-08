@@ -127,15 +127,23 @@ ParallelMarkovChainMonteCarloBase::randomIndex2(const unsigned int & ub, const u
 void
 ParallelMarkovChainMonteCarloBase::combineWithConfg()
 {
-  unsigned int index1 = 0;
-  unsigned int index2 = 0;
+  unsigned int index1;
+  int index2 = -1;
+  std::vector<Real> tmp;
   for (unsigned int i = 0; i < _num_parallel_proposals * _confg_values.size(); ++i)
   {
-    _new_samples_confg[i].assign(_new_samples[index1].begin(), _new_samples[index1].end());
-    _new_samples_confg[i][_priors.size()] = _confg_values[index2];
-    index1 = (i % _num_parallel_proposals > 0) ? index1 : ++index1;
-    index2 = (i % _confg_values.size() > 0) ? ++index2 : 0;
+    index1 = i % _num_parallel_proposals;
+    index2 = (index1 == 0) ? ++index2 : index2;
+    tmp = _new_samples[index1];
+    tmp.push_back(_confg_values[index2]);
+    _new_samples_confg[i] = tmp;
   }
+}
+
+const std::vector<Real> &
+ParallelMarkovChainMonteCarloBase::getRandomNumbers() const
+{
+  return _rnd_vec;
 }
 
 Real

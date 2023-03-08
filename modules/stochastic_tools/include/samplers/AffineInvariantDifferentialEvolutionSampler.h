@@ -24,9 +24,11 @@ public:
 protected:
   virtual void sampleSetUp(const Sampler::SampleMode mode) override;
 
+  virtual int decisionStep() const override { return 1; }
+
 private:
   /// Compute the differential evolution from the current state
-  void computeDifferential(const Real & state1, const Real & state2, const unsigned int & seed, Real & diff);
+  void computeDifferential(const Real & state1, const Real & state2, const Real & rnd, Real & diff);
 
   /// Tune the internal parameters
   void tuneParams(Real & gamma, Real & b);

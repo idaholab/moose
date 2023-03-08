@@ -36,7 +36,7 @@ public:
   /**
    * Return the random numbers to facilitate decision making in reporters
    */
-  std::vector<Real> getRandomNumbers() const { return _rnd_vec; }
+  const std::vector<Real> & getRandomNumbers() const;
 
   /**
    * Return the step after which decision making can begin

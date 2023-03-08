@@ -315,10 +315,9 @@
 #include "ParallelMarkovChainMonteCarloDecision.h"
 #include "Sampler.h"
 #include "DenseMatrix.h"
-#include "AdaptiveMonteCarloUtils.h"
-#include "StochasticToolsUtils.h"
-#include "MooseRandom.h"
-#include "Likelihood.h"
+// #include "AdaptiveMonteCarloUtils.h"
+// #include "StochasticToolsUtils.h"
+// #include "MooseRandom.h"
 
 registerMooseObjectAliased("StochasticToolsApp", ParallelMarkovChainMonteCarloDecision, "PMCMCDecision");
 
@@ -331,7 +330,9 @@ ParallelMarkovChainMonteCarloDecision::validParams()
   params.addRequiredParam<ReporterName>("output_value",
                                         "Value of the model output from the SubApp.");
   params.addParam<ReporterValueName>(
-      "outputs", "outputs", "Modified value of the model output from this reporter class.");
+      "outputs_required",
+      "outputs_required",
+      "Modified value of the model output from this reporter class.");
   params.addParam<ReporterValueName>("inputs", "inputs", "Uncertain inputs to the model.");
   params.addParam<ReporterValueName>("tpm", "tpm", "The transition probability matrix.");
   params.addRequiredParam<SamplerName>("sampler", "The sampler object.");
@@ -345,13 +346,16 @@ ParallelMarkovChainMonteCarloDecision::ParallelMarkovChainMonteCarloDecision(
   : GeneralReporter(parameters),
     LikelihoodInterface(this),
     _output_value(getReporterValue<std::vector<Real>>("output_value", REPORTER_MODE_DISTRIBUTED)),
-    _outputs(declareValue<std::vector<Real>>("outputs")),
+    _outputs_required(declareValue<std::vector<Real>>("outputs_required")),
     _inputs(declareValue<std::vector<std::vector<Real>>>("inputs")),
     _tpm(declareValue<std::vector<Real>>("tpm")),
     _sampler(getSampler("sampler")),
     _pmcmc(dynamic_cast<const ParallelMarkovChainMonteCarloBase *>(&_sampler)),
-    _step(getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")->timeStep())
+    _rnd_vec(_pmcmc->getRandomNumbers()),
+    _step(getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")->timeStep()),
+    _check_step(std::numeric_limits<int>::max())
 {
+  // Filling the `likelihoods` vector with the user-provided distributions.
   for (const LikelihoodName & name : getParam<std::vector<LikelihoodName>>("likelihoods"))
     _likelihoods.push_back(&getLikelihoodByName(name));
 
@@ -369,18 +373,19 @@ ParallelMarkovChainMonteCarloDecision::ParallelMarkovChainMonteCarloDecision(
 
   // Fetching the sampler characteristics
   _props = _pmcmc->getNumParallelProposals();
-  _rnd_vec = _pmcmc->getRandomNumbers();
+  _num_confg = _pmcmc->getNumberOfConfigParams();
 
   // Resizing the data arrays to transmit to the output file
   _inputs.resize(_props);
   for (unsigned int i = 0; i < _props; ++i)
     _inputs[i].resize(_sampler.getNumberOfCols() - 1);
-  _outputs.resize(_sampler.getNumberOfRows());
+  _outputs_required.resize(_sampler.getNumberOfRows());
   _tpm.resize(_props);
 }
 
 void
-ParallelMarkovChainMonteCarloDecision::computeTransitionVector(std::vector<Real> & tv)
+ParallelMarkovChainMonteCarloDecision::computeTransitionVector(
+    std::vector<Real> & tv, DenseMatrix<Real> & /*inputs_matrix*/)
 {
   tv.assign(_props, 1.0);
 }
@@ -391,17 +396,33 @@ ParallelMarkovChainMonteCarloDecision::nextSamples(std::vector<Real> & req_input
                                                    const std::vector<Real> & tv,
                                                    const unsigned int & parallel_index)
 {
-  for (unsigned int k = 0; k < _sampler.getNumberOfCols() - 1; ++k)
-    req_inputs[k] = (tv[parallel_index] >= _rnd_vec[parallel_index])
-                        ? inputs_matrix(parallel_index, k)
-                        : _data_prev(parallel_index, k);
-  if (tv[parallel_index] < _rnd_vec[parallel_index])
-    _outputs[parallel_index] = _outputs_prev[parallel_index];
+  if (tv[parallel_index] >= _rnd_vec[parallel_index])
+  {
+    for (unsigned int k = 0; k < _sampler.getNumberOfCols() - 1; ++k)
+      req_inputs[k] = inputs_matrix(parallel_index, k);
+  }
+  else
+  {
+    for (unsigned int k = 0; k < _sampler.getNumberOfCols() - 1; ++k)
+    {
+      req_inputs[k] = _data_prev(parallel_index, k);
+      inputs_matrix(parallel_index, k) = _data_prev(parallel_index, k);
+    }
+    for (unsigned int k = 0; k < _num_confg; ++k)
+      _outputs_required[k * _pmcmc->getNumParallelProposals() + parallel_index] =
+          _outputs_prev[k * _pmcmc->getNumParallelProposals() + parallel_index];
+  }
 }
 
 void
 ParallelMarkovChainMonteCarloDecision::execute()
 {
+  if (_sampler.getNumberOfLocalRows() == 0 || _check_step == _step)
+  {
+    _check_step = _step;
+    return;
+  }
+
   DenseMatrix<Real> data_in(_sampler.getNumberOfRows(), _sampler.getNumberOfCols());
   for (dof_id_type ss = _sampler.getLocalRowBegin(); ss < _sampler.getLocalRowEnd(); ++ss)
   {
@@ -410,20 +431,35 @@ ParallelMarkovChainMonteCarloDecision::execute()
       data_in(ss, j) = data[j];
   }
   _local_comm.sum(data_in.get_values());
-  _outputs = _output_value;
-  _local_comm.allgather(_outputs);
+  _outputs_required = _output_value;
+  _local_comm.allgather(_outputs_required);
+  // _local_comm.gather(0, _outputs_required);
 
+  // if (_step > _pmcmc->decisionStep())
+  // {
+  //   computeTransitionVector(_tpm, data_in);
+  //   std::vector<Real> req_inputs(_sampler.getNumberOfCols() - 1);
+  //   for (unsigned int i = 0; i < _pmcmc->getNumParallelProposals(); ++i)
+  //   {
+  //     nextSamples(req_inputs, data_in, _tpm, i);
+  //     _inputs[i] = req_inputs;
+  //   }
+  // }
   if (_step > _pmcmc->decisionStep())
+    computeTransitionVector(_tpm, data_in);
+  else
+    _tpm.assign(_props, 1.0);
+  std::vector<Real> req_inputs(_sampler.getNumberOfCols() - 1);
+  for (unsigned int i = 0; i < _pmcmc->getNumParallelProposals(); ++i)
   {
-    computeTransitionVector(_tpm);
-    std::vector<Real> req_inputs(_sampler.getNumberOfCols() - 1);
-    for (unsigned int i = 0; i < _pmcmc->getNumParallelProposals(); ++i)
-    {
-      nextSamples(req_inputs, data_in, _tpm, i);
-      _inputs[i] = req_inputs;
-    }
+    nextSamples(req_inputs, data_in, _tpm, i);
+    _inputs[i] = req_inputs;
   }
-  nextSeeds();
+  // Store data from previous step
   _data_prev = data_in;
-  _outputs_prev = _outputs;
+  _outputs_prev = _outputs_required;
+  nextSeeds();
+
+  // Track the current step
+  _check_step = _step;
 }

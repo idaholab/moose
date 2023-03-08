@@ -118,6 +118,7 @@
 
 #include "GeneralReporter.h"
 #include "ParallelMarkovChainMonteCarloBase.h"
+#include "Likelihood.h"
 #include "LikelihoodInterface.h"
 
 /**
@@ -137,7 +138,7 @@ protected:
   /**
    * Compute the transition probability vector
    */
-  virtual void computeTransitionVector(std::vector<Real> & tv);
+  virtual void computeTransitionVector(std::vector<Real> & tv, DenseMatrix<Real> & inputs_matrix);
 
   /**
    * Resample inputs given the transition vector
@@ -156,7 +157,7 @@ protected:
   const std::vector<Real> & _output_value;
 
   /// Transfer the right outputs to the file
-  std::vector<Real> & _outputs;
+  std::vector<Real> & _outputs_required;
 
   /// Model input data that is uncertain
   std::vector<std::vector<Real>> & _inputs;
@@ -173,17 +174,20 @@ protected:
   /// The MCMC sampler
   Sampler & _sampler;
 
-  /// Adaptive Importance Sampler
+  /// MCMC sampler base
   const ParallelMarkovChainMonteCarloBase * const _pmcmc;
 
   /// Storage for the previous likelihood
-  Real _likelihood_prev;
+  // Real _likelihood_prev;
 
   /// Storage for the number of parallel proposals
   dof_id_type _props;
 
   /// Storage for the random numbers for decision making
-  std::vector<Real> _rnd_vec;
+  const std::vector<Real> & _rnd_vec;
+
+  /// Storage for the number of experimental configurations
+  dof_id_type _num_confg;
 
   /// Storage for previous inputs
   DenseMatrix<Real> _data_prev;
@@ -197,4 +201,7 @@ private:
 
   /// Communicator that was split based on samples that have rows
   libMesh::Parallel::Communicator _local_comm;
+
+  /// Ensure that the MCMC algorithm proceeds in a sequential fashion
+  int _check_step;
 };

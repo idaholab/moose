@@ -2,15 +2,25 @@
 []
 
 [Distributions]
+  # [left]
+  #   type = Uniform
+  #   lower_bound = -3.0
+  #   upper_bound = 3.0
+  # []
+  # [right]
+  #   type = Uniform
+  #   lower_bound = -3.0
+  #   upper_bound = 3.0
+  # []
   [left]
-    type = Uniform
-    lower_bound = -3.0
-    upper_bound = 3.0
+    type = Normal
+    mean = 0.0
+    standard_deviation = 1.0
   []
   [right]
-    type = Uniform
-    lower_bound = -3.0
-    upper_bound = 3.0
+    type = Normal
+    mean = 0.0
+    standard_deviation = 1.0
   []
 []
 
@@ -25,18 +35,14 @@
 
 [Samplers]
   [sample]
-    type = AffineInvariantMCMC
+    type = AffineInvariantStretchSampler # AffineInvariantDES #
     prior_distributions = 'left right'
-    seed_inputs = 'mcmc_reporter/seed_inputs'
-    proposal_std = 'mcmc_reporter/proposal_std' # This is just a placeholder for now
-    num_parallel_proposals = 10 # 10
-    #lb = '-3.0 -3.0' # if needed
-    #ub = '3.0 3.0' # if needed
-    initial_values = '0.05 0.05'
-    std_prop = '0.2 0.2'
+    previous_state = 'mcmc_reporter/inputs'
+    num_parallel_proposals = 10
+    # lb = '-3.0 -3.0' # if needed
+    # ub = '3.0 3.0' # if needed
     file_name = 'confg.csv'
     execute_on = PRE_MULTIAPP_SETUP
-    previous_state = 'mcmc_reporter/inputs'
     seed = 2547
   []
 []
@@ -73,10 +79,8 @@
     type = StochasticReporter
   []
   [mcmc_reporter]
-    type = PMCMCDecision
-    seed_inputs = 'seed_inputs'
+    type = AffineInvariantStretchDecision # AffineInvariantDifferentialDecision #
     output_value = constant/reporter_transfer:average:value
-    inputs = 'inputs'
     sampler = sample
     likelihoods = 'gaussian'
     prior_distributions = 'left right'
@@ -85,7 +89,7 @@
 
 [Executioner]
   type = Transient
-  num_steps = 1000 # 500
+  num_steps = 200 # 500
 []
 
 [Outputs]
