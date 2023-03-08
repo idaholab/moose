@@ -126,7 +126,8 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
     paramError("extrude",
                "This is a 2 dimensional mesh, you cannot extrude it. Check you ReactorMeshParams "
                "inputs\n");
-  if (_extrude && (!hasReactorParam("top_boundary_id") || !hasReactorParam("bottom_boundary_id")))
+  if (_extrude && (!hasReactorParam<boundary_id_type>("top_boundary_id") ||
+                   !hasReactorParam<boundary_id_type>("bottom_boundary_id")))
     mooseError("Both top_boundary_id and bottom_boundary_id must be provided in ReactorMeshParams "
                "if using extruded geometry");
 
@@ -311,32 +312,34 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
       addMeshSubgenerator("HexIDPatternedMeshGenerator", name() + "_pattern", params);
 
       // Pass mesh meta-data defined in subgenerator constructor to this MeshGenerator
-      if (hasMeshProperty("pitch_meta", name() + "_pattern"))
+      if (hasMeshProperty<Real>("pitch_meta", name() + "_pattern"))
         declareMeshProperty("pitch_meta", getMeshProperty<Real>("pitch_meta", name() + "_pattern"));
-      if (hasMeshProperty("num_sectors_per_side_meta", name() + "_pattern"))
+      if (hasMeshProperty<std::vector<unsigned int>>("num_sectors_per_side_meta",
+                                                     name() + "_pattern"))
         declareMeshProperty("num_sectors_per_side_meta",
                             getMeshProperty<std::vector<unsigned int>>("num_sectors_per_side_meta",
                                                                        name() + "_pattern"));
-      if (hasMeshProperty("is_control_drum_meta", name() + "_pattern"))
+      if (hasMeshProperty<bool>("is_control_drum_meta", name() + "_pattern"))
         declareMeshProperty("is_control_drum_meta",
                             getMeshProperty<bool>("is_control_drum_meta", name() + "_pattern"));
-      if (hasMeshProperty("control_drum_positions", name() + "_pattern"))
+      if (hasMeshProperty<std::vector<Point>>("control_drum_positions", name() + "_pattern"))
         declareMeshProperty(
             "control_drum_positions",
             getMeshProperty<std::vector<Point>>("control_drum_positions", name() + "_pattern"));
-      if (hasMeshProperty("control_drum_angles", name() + "_pattern"))
+      if (hasMeshProperty<std::vector<Real>>("control_drum_angles", name() + "_pattern"))
         declareMeshProperty(
             "control_drum_angles",
             getMeshProperty<std::vector<Real>>("control_drum_angles", name() + "_pattern"));
-      if (hasMeshProperty("control_drums_azimuthal_meta", name() + "_pattern"))
+      if (hasMeshProperty<std::vector<std::vector<Real>>>("control_drums_azimuthal_meta",
+                                                          name() + "_pattern"))
         declareMeshProperty("control_drums_azimuthal_meta",
                             getMeshProperty<std::vector<std::vector<Real>>>(
                                 "control_drums_azimuthal_meta", name() + "_pattern"));
-      if (hasMeshProperty("position_file_name", name() + "_pattern"))
+      if (hasMeshProperty<std::string>("position_file_name", name() + "_pattern"))
         declareMeshProperty(
             "position_file_name",
             getMeshProperty<std::string>("position_file_name", name() + "_pattern"));
-      if (hasMeshProperty("pattern_pitch_meta", name() + "_pattern"))
+      if (hasMeshProperty<Real>("pattern_pitch_meta", name() + "_pattern"))
         declareMeshProperty("pattern_pitch_meta",
                             getMeshProperty<Real>("pattern_pitch_meta", name() + "_pattern"));
 
@@ -456,7 +459,7 @@ AssemblyMeshGenerator::generate()
 
   // Update metadata at this point since values for these metadata only get set by PCCMG
   // at generate() stage
-  if (hasMeshProperty("pattern_pitch_meta", name() + "_pattern"))
+  if (hasMeshProperty<Real>("pattern_pitch_meta", name() + "_pattern"))
   {
     const auto pattern_pitch_meta =
         getMeshProperty<Real>("pattern_pitch_meta", name() + "_pattern");
