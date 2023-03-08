@@ -5,7 +5,7 @@
 #   libmesh/
 #   template/
 #   moose/
-{% set build = 7 %}
+{% set build = 8 %}
 {% set strbuild = "build_" + build|string %}
 {% set version = "4.0.2" %}
 
