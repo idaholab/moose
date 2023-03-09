@@ -66,9 +66,9 @@ IterationAdaptiveDT::validParams()
                         "from failed solve");
   params.addParam<Real>("cutback_factor",
                         0.5,
-                        "Factor to apply to timestep if difficult "
-                        "convergence (if 'optimal_iterations' is specified) "
-                        "or if solution failed");
+                        "Factor to apply to timestep if difficult convergence "
+                        "occurs (if 'optimal_iterations' is specified). "
+                        "For failed solves, use cutback_factor_at_failure");
 
   params.addParam<bool>("reject_large_step",
                         false,
@@ -322,13 +322,13 @@ IterationAdaptiveDT::computeFailedDT()
   if (_verbose)
   {
     _console << "\nSolve failed with dt: " << std::setw(9) << _dt
-             << "\nRetrying with reduced dt: " << std::setw(9) << _dt * _cutback_factor
+             << "\nRetrying with reduced dt: " << std::setw(9) << _dt * _cutback_factor_at_failure
              << std::endl;
   }
   else
     _console << "\nSolve failed, cutting timestep." << std::endl;
 
-  return _dt * _cutback_factor;
+  return _dt * _cutback_factor_at_failure;
 }
 
 bool
