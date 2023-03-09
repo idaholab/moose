@@ -131,7 +131,8 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
   if (_extrude && _mesh_dimensions != 3)
     mooseError("This is a 2 dimensional mesh, you cannot extrude it. Check your ReactorMeshParams "
                "inputs\n");
-  if (_extrude && (!hasReactorParam("top_boundary_id") || !hasReactorParam("bottom_boundary_id")))
+  if (_extrude && (!hasReactorParam<boundary_id_type>("top_boundary_id") ||
+                   !hasReactorParam<boundary_id_type>("bottom_boundary_id")))
     mooseError("Both top_boundary_id and bottom_boundary_id must be provided in ReactorMeshParams "
                "if using extruded geometry");
 
@@ -373,22 +374,22 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
   }
 
   // Pass mesh meta-data defined in subgenerator constructor to this MeshGenerator
-  if (hasMeshProperty("pitch_meta", name() + "_2D"))
+  if (hasMeshProperty<Real>("pitch_meta", name() + "_2D"))
     declareMeshProperty("pitch_meta", getMeshProperty<Real>("pitch_meta", name() + "_2D"));
-  if (hasMeshProperty("num_sectors_per_side_meta", name() + "_2D"))
+  if (hasMeshProperty<std::vector<unsigned int>>("num_sectors_per_side_meta", name() + "_2D"))
     declareMeshProperty(
         "num_sectors_per_side_meta",
         getMeshProperty<std::vector<unsigned int>>("num_sectors_per_side_meta", name() + "_2D"));
-  if (hasMeshProperty("max_radius_meta", name() + "_2D"))
+  if (hasMeshProperty<Real>("max_radius_meta", name() + "_2D"))
     declareMeshProperty("max_radius_meta",
                         getMeshProperty<Real>("max_radius_meta", name() + "_2D"));
-  if (hasMeshProperty("background_intervals_meta", name() + "_2D"))
+  if (hasMeshProperty<unsigned int>("background_intervals_meta", name() + "_2D"))
     declareMeshProperty("background_intervals_meta",
                         getMeshProperty<unsigned int>("background_intervals_meta", name() + "_2D"));
-  if (hasMeshProperty("node_id_background_meta", name() + "_2D"))
+  if (hasMeshProperty<dof_id_type>("node_id_background_meta", name() + "_2D"))
     declareMeshProperty("node_id_background_meta",
                         getMeshProperty<dof_id_type>("node_id_background_meta", name() + "_2D"));
-  if (hasMeshProperty("pattern_pitch_meta", name() + "_2D"))
+  if (hasMeshProperty<Real>("pattern_pitch_meta", name() + "_2D"))
     declareMeshProperty("pattern_pitch_meta",
                         getMeshProperty<Real>("pattern_pitch_meta", name() + "_2D"));
 
@@ -487,18 +488,18 @@ PinMeshGenerator::generate()
 
   // Update metadata at this point since values for these metadata only get set by PCCMG
   // at generate() stage
-  if (hasMeshProperty("max_radius_meta", name() + "_2D"))
+  if (hasMeshProperty<Real>("max_radius_meta", name() + "_2D"))
   {
     const auto max_radius_meta = getMeshProperty<Real>("max_radius_meta", name() + "_2D");
     setMeshProperty("max_radius_meta", max_radius_meta);
   }
-  if (hasMeshProperty("background_intervals_meta", name() + "_2D"))
+  if (hasMeshProperty<unsigned int>("background_intervals_meta", name() + "_2D"))
   {
     const auto background_intervals_meta =
         getMeshProperty<unsigned int>("background_intervals_meta", name() + "_2D");
     setMeshProperty("background_intervals_meta", background_intervals_meta);
   }
-  if (hasMeshProperty("node_id_background_meta", name() + "_2D"))
+  if (hasMeshProperty<dof_id_type>("node_id_background_meta", name() + "_2D"))
   {
     const auto node_id_background_meta =
         getMeshProperty<dof_id_type>("node_id_background_meta", name() + "_2D");

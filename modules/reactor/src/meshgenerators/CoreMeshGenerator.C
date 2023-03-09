@@ -190,10 +190,11 @@ CoreMeshGenerator::CoreMeshGenerator(const InputParameters & parameters)
   if (_extrude && _mesh_dimensions != 3)
     mooseError("This is a 2 dimensional mesh, you cannot extrude it. Check your ReactorMeshParams "
                "inputs\n");
-  if (_extrude && (!hasReactorParam("top_boundary_id") || !hasReactorParam("bottom_boundary_id")))
+  if (_extrude && (!hasReactorParam<boundary_id_type>("top_boundary_id") ||
+                   !hasReactorParam<boundary_id_type>("bottom_boundary_id")))
     mooseError("Both top_boundary_id and bottom_boundary_id must be provided in ReactorMeshParams "
                "if using extruded geometry");
-  if (!hasReactorParam("radial_boundary_id"))
+  if (!hasReactorParam<boundary_id_type>("radial_boundary_id"))
     mooseError("radial_boundary_id must be provided in ReactorMeshParams for CoreMeshGenerators");
 
   std::size_t empty_pattern_loc = 0;

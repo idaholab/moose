@@ -288,7 +288,7 @@ PatternedCartesianMeshGenerator::generate()
     if (!meshes[i])
       paramError("inputs", "Mesh '", _input_names[i], "' is not a replicated mesh but it must be");
     // throw an error message if the input mesh does not have a flat side up
-    if (hasMeshProperty("flat_side_up", _input_names[i]))
+    if (hasMeshProperty<bool>("flat_side_up", _input_names[i]))
       if (!getMeshProperty<bool>("flat_side_up", _input_names[i]))
         paramError("inputs",
                    "Mesh '",
@@ -313,7 +313,7 @@ PatternedCartesianMeshGenerator::generate()
     for (MooseIndex(_input_names) i = 0; i < _input_names.size(); ++i)
     {
       // throw an error message if the input mesh does not contain the required meta data
-      if (!hasMeshProperty("pattern_pitch_meta", _input_names[i]))
+      if (!hasMeshProperty<Real>("pattern_pitch_meta", _input_names[i]))
         mooseError("In PatternedCartesianMeshGenerator ",
                    _name,
                    ": the unit square input mesh does not contain appropriate meta data "
@@ -365,7 +365,7 @@ PatternedCartesianMeshGenerator::generate()
     for (MooseIndex(_input_names) i = 0; i < _input_names.size(); ++i)
     {
       // throw an error message if the input mesh does not contain the required meta data
-      if (!hasMeshProperty("pitch_meta", _input_names[i]))
+      if (!hasMeshProperty<Real>("pitch_meta", _input_names[i]))
         mooseError("In PatternedCartesianMeshGenerator ",
                    _name,
                    ": the unit square input mesh does not contain appropriate meta data "

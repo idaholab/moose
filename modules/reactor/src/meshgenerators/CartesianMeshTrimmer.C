@@ -69,8 +69,8 @@ std::unique_ptr<MeshBase>
 CartesianMeshTrimmer::generate()
 {
   // Check if input mesh is trimmable
-  if (hasMeshProperty("square_peripheral_trimmability", _input_name) &&
-      hasMeshProperty("square_center_trimmability", _input_name))
+  if (hasMeshProperty<bool>("square_peripheral_trimmability", _input_name) &&
+      hasMeshProperty<bool>("square_center_trimmability", _input_name))
   {
     if (!getMeshProperty<bool>("square_peripheral_trimmability", _input_name) &&
         std::accumulate(_trim_peripheral_region.begin(), _trim_peripheral_region.end(), 0) > 0)

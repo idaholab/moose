@@ -315,7 +315,7 @@ SetupMeshAction::act()
         const auto & mg_names = _app.getMeshGeneratorNames();
         std::vector<bool> use_dm;
         for (const auto & mg_name : mg_names)
-          if (hasMeshProperty("use_distributed_mesh", mg_name))
+          if (hasMeshProperty<bool>("use_distributed_mesh", mg_name))
             use_dm.push_back(getMeshProperty<bool>("use_distributed_mesh", mg_name));
 
         if (!use_dm.empty())
