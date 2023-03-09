@@ -689,40 +689,7 @@ Transient::setupTimeIntegrator()
 
   if (!_problem.hasTimeIntegrator())
   {
-    // backwards compatibility
-    std::string ti_str;
-    using namespace Moose;
-
-    switch (_time_scheme)
-    {
-      case TI_IMPLICIT_EULER:
-        ti_str = "ImplicitEuler";
-        break;
-      case TI_EXPLICIT_EULER:
-        ti_str = "ExplicitEuler";
-        break;
-      case TI_CRANK_NICOLSON:
-        ti_str = "CrankNicolson";
-        break;
-      case TI_BDF2:
-        ti_str = "BDF2";
-        break;
-      case TI_EXPLICIT_MIDPOINT:
-        ti_str = "ExplicitMidpoint";
-        break;
-      case TI_LSTABLE_DIRK2:
-        ti_str = "LStableDirk2";
-        break;
-      case TI_EXPLICIT_TVD_RK_2:
-        ti_str = "ExplicitTVDRK2";
-        break;
-      case TI_NEWMARK_BETA:
-        ti_str = "NewmarkBeta";
-        break;
-      default:
-        mooseError("Unknown scheme: ", _time_scheme);
-        break;
-    }
+    std::string ti_str = getTimeIntegratorName();
 
     InputParameters params = _app.getFactory().getValidParams(ti_str);
     _problem.addTimeIntegrator(ti_str, ti_str, params);
@@ -739,6 +706,33 @@ Transient::getTimeStepperName()
   }
   else
     return std::string();
+}
+
+std::string
+Transient::getTimeIntegratorName()
+{
+  using namespace Moose;
+  switch (_time_scheme)
+  {
+    case TI_IMPLICIT_EULER:
+      return "ImplicitEuler";
+    case TI_EXPLICIT_EULER:
+      return "ExplicitEuler";
+    case TI_CRANK_NICOLSON:
+      return "CrankNicolson";
+    case TI_BDF2:
+      return "BDF2";
+    case TI_EXPLICIT_MIDPOINT:
+      return "ExplicitMidpoint";
+    case TI_LSTABLE_DIRK2:
+      return "LStableDirk2";
+    case TI_EXPLICIT_TVD_RK_2:
+      return "ExplicitTVDRK2";
+    case TI_NEWMARK_BETA:
+      return "NewmarkBeta";
+    default:
+      mooseError("Unknown time integration scheme: ", _time_scheme);
+  }
 }
 
 Real

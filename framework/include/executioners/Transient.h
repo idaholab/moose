@@ -133,6 +133,12 @@ public:
   virtual std::string getTimeStepperName() override;
 
   /**
+   * Get the time name of the time integrator (time integration scheme) used
+   * @return string with the time integration scheme name
+   */
+  virtual std::string getTimeIntegratorName() override;
+
+  /**
    * Get the time scheme used
    * @return MooseEnum with the time scheme
    */

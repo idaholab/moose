@@ -104,6 +104,12 @@ public:
    */
   virtual std::string getTimeStepperName() { return std::string(); }
 
+  /** The name of the TimeIntegrator
+   * This is an empty string for non-Transient executioners
+   * @return A string of giving the TimeIntegrator name
+   */
+  virtual std::string getTimeIntegratorName() { return std::string(); }
+
   /**
    * Can be used by subsclasses to call parentOutputPositionChanged()
    * on the underlying FEProblemBase.
