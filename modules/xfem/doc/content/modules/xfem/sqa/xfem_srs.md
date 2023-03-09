@@ -22,3 +22,9 @@ The purpose of the [!ac](MOOSE) XFEM module is to allow for mesh-independent dis
 The {{module}} module has no constraints on hardware and software beyond those of the [MOOSE framework](framework_srs.md#assumptions-and-dependencies) and the [Tensor Mechanics](tensor_mechanics_srs.md#assumptions-and-dependencies) module.
 The {{module}} module provides access to a number of code objects that perform computations. These objects each make their own physics-based assumptions, such as the units of the inputs and outputs. Those assumptions are described in the documentation for those individual objects.
 !template-end!
+
+!template! item key=reliability
+The regression test suite will cover at least 80% of all lines of code within the {{module}}
+module at all times. Known regressions will be recorded and tracked (see [#maintainability]) to an
+independent and satisfactory resolution.
+!template-end!
