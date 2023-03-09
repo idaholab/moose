@@ -11,7 +11,7 @@
 // Using push_parallel_vector_data with std::tuple<> leads to a -Wextra error
 // https://github.com/libMesh/TIMPI/issues/52
 #include "XFEMCutMeshOutput.h"
-#include "CrackMeshCut2DUserObjectBase.h"
+#include "MeshCut2DUserObjectBase.h"
 
 registerMooseObject("XFEMApp", XFEMCutMeshOutput);
 
@@ -19,17 +19,16 @@ InputParameters
 XFEMCutMeshOutput::validParams()
 {
   InputParameters params = FileOutput::validParams();
-  params.addClassDescription(
-      "Outputs XFEM CrackMeshCut2DUserObjectBase cutter mesh in Exodus format.");
+  params.addClassDescription("Outputs XFEM MeshCut2DUserObjectBase cutter mesh in Exodus format.");
   params.addRequiredParam<UserObjectName>("xfem_cutter_uo",
-                                          "The CrackMeshCut2DUserObject to get cutter mesh from");
+                                          "The MeshCut2DUserObject to get cutter mesh from");
   return params;
 }
 
 XFEMCutMeshOutput::XFEMCutMeshOutput(const InputParameters & params)
   : FileOutput(params),
     UserObjectInterface(this),
-    _cutter_uo(getUserObject<CrackMeshCut2DUserObjectBase>("xfem_cutter_uo"))
+    _cutter_uo(getUserObject<MeshCut2DUserObjectBase>("xfem_cutter_uo"))
 {
 }
 

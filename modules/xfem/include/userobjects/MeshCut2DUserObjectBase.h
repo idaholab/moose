@@ -12,17 +12,17 @@
 #include "GeometricCutUserObject.h"
 
 /**
- * CrackMeshCut2DUserObjectBase: (1) reads in a mesh describing the crack surface,
+ * MeshCut2DUserObjectBase: (1) reads in a mesh describing the crack surface,
  * (2) Fills xfem cut element ojbects.
  * Derived classes modify the class and grow the mesh
  */
 
-class CrackMeshCut2DUserObjectBase : public GeometricCutUserObject
+class MeshCut2DUserObjectBase : public GeometricCutUserObject
 {
 public:
   static InputParameters validParams();
 
-  CrackMeshCut2DUserObjectBase(const InputParameters & parameters);
+  MeshCut2DUserObjectBase(const InputParameters & parameters);
 
   virtual bool cutElementByGeometry(const Elem * elem,
                                     std::vector<Xfem::CutEdge> & cut_edges,

@@ -415,7 +415,7 @@ DomainIntegralAction::act()
       params.set<MooseEnum>("order") = _order;
       params.set<MooseEnum>("family") = _family;
 
-      if (_treat_as_2d)
+      if (_treat_as_2d && _use_crack_front_points_provider == false)
       {
         std::ostringstream av_name_stream;
         av_name_stream << av_base_name << "_" << _ring_vec[ring_index];
@@ -465,7 +465,7 @@ DomainIntegralAction::act()
         params.set<unsigned int>("ring_index") = _ring_first + ring_index;
       }
 
-      if (_treat_as_2d)
+      if (_treat_as_2d && _use_crack_front_points_provider == false)
       {
         std::ostringstream ak_name_stream;
         ak_name_stream << ak_base_name << "_" << _ring_vec[ring_index];
@@ -529,7 +529,7 @@ DomainIntegralAction::act()
       InputParameters params = _factory.getValidParams(pp_type_name);
       for (unsigned int ring_index = 0; ring_index < _ring_vec.size(); ++ring_index)
       {
-        if (_treat_as_2d)
+        if (_treat_as_2d && _use_crack_front_points_provider == false)
         {
           params.set<VectorPostprocessorName>("vectorpostprocessor") =
               pp_base_name + "_2DVPP_" + Moose::stringify(_ring_vec[ring_index]);
@@ -563,7 +563,7 @@ DomainIntegralAction::act()
       InputParameters params = _factory.getValidParams(pp_type_name);
       for (unsigned int ring_index = 0; ring_index < _ring_vec.size(); ++ring_index)
       {
-        if (_treat_as_2d)
+        if (_treat_as_2d && _use_crack_front_points_provider == false)
         {
           params.set<VectorPostprocessorName>("vectorpostprocessor") =
               pp_base_name + "_2DVPP_" + Moose::stringify(_ring_vec[ring_index]);
@@ -597,7 +597,7 @@ DomainIntegralAction::act()
       InputParameters params = _factory.getValidParams(pp_type_name);
       params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
       params.set<UserObjectName>("crack_front_definition") = uo_name;
-      if (_treat_as_2d)
+      if (_treat_as_2d && _use_crack_front_points_provider == false)
       {
         std::ostringstream pp_name_stream;
         pp_name_stream << ov_base_name << "_crack";
@@ -642,7 +642,7 @@ DomainIntegralAction::act()
         jintegral_selection = "CIntegral";
       }
 
-      if (_treat_as_2d)
+      if (_treat_as_2d && _use_crack_front_points_provider == false)
         vpp_base_name += "_2DVPP";
 
       const std::string vpp_type_name("JIntegral");
@@ -759,7 +759,7 @@ DomainIntegralAction::act()
             params.set<MooseEnum>("sif_mode") = "T";
             break;
         }
-        if (_treat_as_2d)
+        if (_treat_as_2d && _use_crack_front_points_provider == false)
           vpp_base_name += "_2DVPP";
         for (unsigned int ring_index = 0; ring_index < _ring_vec.size(); ++ring_index)
         {
@@ -775,7 +775,7 @@ DomainIntegralAction::act()
     if (_get_equivalent_k)
     {
       std::string vpp_base_name("Keq");
-      if (_treat_as_2d)
+      if (_treat_as_2d && _use_crack_front_points_provider == false)
         vpp_base_name += "_2DVPP";
       const std::string vpp_type_name("MixedModeEquivalentK");
       InputParameters params = _factory.getValidParams(vpp_type_name);
@@ -788,7 +788,7 @@ DomainIntegralAction::act()
         std::string kii_name = "II_KII_";
         std::string kiii_name = "II_KIII_";
         params.set<unsigned int>("ring_index") = _ring_vec[ring_index];
-        if (_treat_as_2d)
+        if (_treat_as_2d && _use_crack_front_points_provider == false)
         {
           params.set<VectorPostprocessorName>("KI_vectorpostprocessor") =
               ki_name + "2DVPP_" + Moose::stringify(_ring_vec[ring_index]);
@@ -817,7 +817,7 @@ DomainIntegralAction::act()
       }
     }
 
-    if (!_treat_as_2d)
+    if (!_treat_as_2d || _use_crack_front_points_provider == true)
     {
       for (unsigned int i = 0; i < _output_variables.size(); ++i)
       {

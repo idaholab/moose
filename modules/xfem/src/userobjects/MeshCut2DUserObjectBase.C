@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "CrackMeshCut2DUserObjectBase.h"
+#include "MeshCut2DUserObjectBase.h"
 
 #include "XFEMFuncs.h"
 #include "MooseError.h"
@@ -17,7 +17,7 @@
 #include "libmesh/mesh_tools.h"
 
 InputParameters
-CrackMeshCut2DUserObjectBase::validParams()
+MeshCut2DUserObjectBase::validParams()
 {
   InputParameters params = GeometricCutUserObject::validParams();
   params.addRequiredParam<MeshFileName>(
@@ -27,7 +27,7 @@ CrackMeshCut2DUserObjectBase::validParams()
   return params;
 }
 
-CrackMeshCut2DUserObjectBase::CrackMeshCut2DUserObjectBase(const InputParameters & parameters)
+MeshCut2DUserObjectBase::MeshCut2DUserObjectBase(const InputParameters & parameters)
   : GeometricCutUserObject(parameters), _mesh(_subproblem.mesh())
 {
   // only the Exodus type is currently supported
@@ -45,9 +45,9 @@ CrackMeshCut2DUserObjectBase::CrackMeshCut2DUserObjectBase(const InputParameters
 }
 
 bool
-CrackMeshCut2DUserObjectBase::cutElementByGeometry(const Elem * elem,
-                                                   std::vector<Xfem::CutEdge> & cut_edges,
-                                                   std::vector<Xfem::CutNode> & cut_nodes) const
+MeshCut2DUserObjectBase::cutElementByGeometry(const Elem * elem,
+                                              std::vector<Xfem::CutEdge> & cut_edges,
+                                              std::vector<Xfem::CutNode> & cut_nodes) const
 {
   // With the crack defined by a line, this method cuts a 2D elements by a line
   // Fixme lynn Copy and paste from InterfaceMeshCut2DUserObject::cutElementByGeometry
@@ -98,8 +98,8 @@ CrackMeshCut2DUserObjectBase::cutElementByGeometry(const Elem * elem,
 }
 
 bool
-CrackMeshCut2DUserObjectBase::cutElementByGeometry(const Elem * /*elem*/,
-                                                   std::vector<Xfem::CutFace> & /*cut_faces*/) const
+MeshCut2DUserObjectBase::cutElementByGeometry(const Elem * /*elem*/,
+                                              std::vector<Xfem::CutFace> & /*cut_faces*/) const
 {
   mooseError("Invalid method for 2D mesh cutting, must use "
              "vector of element edges for 2D mesh cutting");
@@ -111,8 +111,8 @@ CrackMeshCut2DUserObjectBase::cutElementByGeometry(const Elem * /*elem*/,
 // I get the exact same results whether this is called or not.  I don't konw what it does
 // but if it is here, it definately returns true and pushback lots of cut_edges.
 bool
-CrackMeshCut2DUserObjectBase::cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_edges,
-                                                    std::vector<Xfem::CutEdge> & cut_edges) const
+MeshCut2DUserObjectBase::cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_edges,
+                                               std::vector<Xfem::CutEdge> & cut_edges) const
 {
   bool cut_frag = false;
 
@@ -140,9 +140,8 @@ CrackMeshCut2DUserObjectBase::cutFragmentByGeometry(std::vector<std::vector<Poin
 }
 
 bool
-CrackMeshCut2DUserObjectBase::cutFragmentByGeometry(
-    std::vector<std::vector<Point>> & /*frag_faces*/,
-    std::vector<Xfem::CutFace> & /*cut_faces*/) const
+MeshCut2DUserObjectBase::cutFragmentByGeometry(std::vector<std::vector<Point>> & /*frag_faces*/,
+                                               std::vector<Xfem::CutFace> & /*cut_faces*/) const
 {
   mooseError("Invalid method for 2D mesh fragment cutting, must use "
              "vector of element edges for 2D mesh fragment cutting");
@@ -150,8 +149,8 @@ CrackMeshCut2DUserObjectBase::cutFragmentByGeometry(
 }
 
 MeshBase &
-CrackMeshCut2DUserObjectBase::getCutterMesh() const
+MeshCut2DUserObjectBase::getCutterMesh() const
 {
-  mooseAssert(_cutter_mesh, "CrackMeshCut2DUserObjectBase::getCutterMesh _cutter_mesh is nullptr");
+  mooseAssert(_cutter_mesh, "MeshCut2DUserObjectBase::getCutterMesh _cutter_mesh is nullptr");
   return *_cutter_mesh;
 }

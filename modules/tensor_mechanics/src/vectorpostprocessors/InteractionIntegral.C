@@ -189,6 +189,7 @@ void
 InteractionIntegralTempl<is_ad>::initialSetup()
 {
   _treat_as_2d = _crack_front_definition->treatAs2D();
+  _using_mesh_cutter = _crack_front_definition->usingMeshCutter();
 }
 
 template <bool is_ad>
@@ -196,7 +197,7 @@ void
 InteractionIntegralTempl<is_ad>::initialize()
 {
   std::size_t num_pts;
-  if (_treat_as_2d)
+  if (_treat_as_2d && _using_mesh_cutter == false)
     num_pts = 1;
   else
     num_pts = _crack_front_definition->getNumCrackFrontPoints();

@@ -91,8 +91,8 @@
     map = false
     # XFEM requires --enable-unique-ids in libmesh
     unique_id = true
-    requirement = 'The XFEM module shall represent a propagating crack in a 2D mechanics model with XFEM, where the crack is defined using a topologically surface cutting mesh by CrackMeshCut2DUserObject'
-    design = 'CrackMeshCut2DUserObject.md'
+    requirement = 'The XFEM module shall represent a propagating crack in a 2D mechanics model with XFEM, where the crack is defined using a topologically surface cutting mesh by MeshCut2DFunctionUserObject and crack growth is defined by a user provided function'
+    design = 'MeshCut2DFunctionUserObject.md'
   [../]
   [./edge_crack_2d_propagation_error]
     type = RunException
@@ -101,8 +101,19 @@
     expect_err = 'timestep size must be greater than 1e-06, for crack to grow. dt=1e-07'
     # XFEM requires --enable-unique-ids in libmesh
     unique_id = true
-    requirement = 'The XFEM module CrackMeshCut2DUserObject will error if the crack growth rate timestep falls below 1e-6s'
-    design = 'CrackMeshCut2DUserObject.md'
+    requirement = 'The XFEM module MeshCut2DFunctionUserObject will error if the crack growth rate timestep falls below 1e-6s'
+    design = 'MeshCut2DFunctionUserObject.md'
+  [../]
+  [./edge_crack_2d_propagation_mhs]
+    type = Exodiff
+    input = edge_crack_2d_propagation_mhs.i
+    exodiff = 'edge_crack_2d_propagation_mhs_xfemcutter.e-s0005'
+    abs_zero = 1e-8
+    map = false
+    # XFEM requires --enable-unique-ids in libmesh
+    unique_id = true
+    requirement = 'The XFEM module shall represent a propagating crack in a 2D mechanics model with XFEM, where the crack is defined using a topologically surface cutting mesh by MeshCut2DFunctionUserObject where crack growth and direction is computed by a fracture integral'
+    design = 'MeshCut2DFractureUserObject.md'
   [../]
   [./elliptical_crack]
     type = Exodiff

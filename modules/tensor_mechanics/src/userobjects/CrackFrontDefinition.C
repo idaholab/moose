@@ -171,8 +171,6 @@ CrackFrontDefinition::CrackFrontDefinition(const InputParameters & parameters)
         paramError("crack_mouth_boundary",
                    "'crack_mouth_boundary' cannot be set when using 'crack_front_points_provider = "
                    "cut_mesh'");
-      if (_treat_as_2d)
-        paramError("2d", "'2d' cannot be set when using 'crack_front_points_provider = cut_mesh'");
     }
   }
   else if (isParamValid("number_points_from_provider"))
@@ -302,6 +300,8 @@ CrackFrontDefinition::initialSetup()
 {
   if (_crack_front_points_provider != nullptr)
   {
+    // should call something to get an number of crack front points from the
+    // _crack_front_points_provider IF its initialSetup has been called
     _crack_front_points =
         _crack_front_points_provider->getCrackFrontPoints(_num_points_from_provider);
     if (_use_mesh_cutter)
@@ -352,9 +352,12 @@ void
 CrackFrontDefinition::initialize()
 {
   // Update the crack front for fracture integral calculations
-  // This is only useful for 3D growing cracks which are currently described by the mesh cutter
+  // This is only useful for 1D and 3D growing cracks which are currently described by the mesh
+  // cutter
   if (_use_mesh_cutter && _is_cutter_modified)
   {
+    // should call something to get an updated number of crack front points from the
+    // _crack_front_points_provider
     _crack_front_points =
         _crack_front_points_provider->getCrackFrontPoints(_num_points_from_provider);
     _crack_plane_normals =
@@ -390,7 +393,7 @@ CrackFrontDefinition::getCrackFrontNodes(std::set<dof_id_type> & nodes)
       nodes.insert(bnode->_node->id());
   }
 
-  if (_treat_as_2d)
+  if (_treat_as_2d && _use_mesh_cutter == false)
   {
     if (nodes.size() > 1)
     {
@@ -455,7 +458,14 @@ CrackFrontDefinition::orderCrackFrontNodes(std::set<dof_id_type> & nodes)
       mooseError("Boundary provided in CrackFrontDefinition contains 1 node, but model is not "
                  "treated as 2d");
   }
-  else // nodes.size() > 1
+  else if (_treat_as_2d && _use_mesh_cutter)
+  {
+    // This is for the 2D case that uses a mesh cutter object so every node is its own crack front
+    // and is not connected to other crack front nodes.  Copying the order here makes it the same
+    // as that given in the MeshCut2DFractureUserObject
+    std::copy(nodes.begin(), nodes.end(), _ordered_crack_front_nodes.begin());
+  }
+  else
   {
     // Loop through the set of crack front nodes, and create a node to element map for just the
     // crack front nodes
@@ -786,31 +796,51 @@ CrackFrontDefinition::updateCrackFrontGeometry()
   _distances_along_front.clear();
   _angles_along_front.clear();
   _tangent_directions.clear();
+  _crack_plane_normals.clear();
   _crack_directions.clear();
   _rot_matrix.clear();
   _strain_along_front.clear();
 
+  // _crack_plane_normal = {0, 0, 0};   //This should be ok to do but it causes
+  // test:j_integral_vtest.j_ellip and test:j_integral_vtest.j_ellip_cfp to fail
+
   if (_treat_as_2d)
   {
-    RealVectorValue tangent_direction;
-    RealVectorValue crack_direction;
-    tangent_direction(_axis_2d) = 1.0;
-    _tangent_directions.push_back(tangent_direction);
-    const Point * crack_front_point = getCrackFrontPoint(0);
-    crack_direction =
-        calculateCrackFrontDirection(*crack_front_point, tangent_direction, MIDDLE_NODE);
-    _crack_directions.push_back(crack_direction);
-    _crack_plane_normal = tangent_direction.cross(crack_direction);
-    RankTwoTensor rot_mat;
-    rot_mat.fillRow(0, crack_direction);
-    rot_mat.fillRow(1, _crack_plane_normal);
-    rot_mat(2, _axis_2d) = 1.0;
-    _rot_matrix.push_back(rot_mat);
-
-    _segment_lengths.push_back(std::make_pair(0.0, 0.0));
-    _distances_along_front.push_back(0.0);
-    _angles_along_front.push_back(0.0);
+    std::size_t num_crack_front_points = getNumCrackFrontPoints();
+    _segment_lengths.reserve(num_crack_front_points);
+    _tangent_directions.reserve(num_crack_front_points);
+    _crack_directions.reserve(num_crack_front_points);
     _overall_length = 0.0;
+
+    for (std::size_t i = 0; i < getNumCrackFrontPoints(); ++i)
+    {
+      RealVectorValue tangent_direction;
+      RealVectorValue crack_direction;
+      tangent_direction(_axis_2d) = 1.0;
+      _tangent_directions.push_back(tangent_direction);
+      const Point * crack_front_point = getCrackFrontPoint(i);
+      crack_direction =
+          calculateCrackFrontDirection(*crack_front_point, tangent_direction, MIDDLE_NODE, i);
+      _crack_directions.push_back(crack_direction);
+
+      RankTwoTensor rot_mat;
+      rot_mat.fillRow(0, crack_direction);
+      rot_mat(2, _axis_2d) = 1.0;
+      if (_use_mesh_cutter)
+      {
+        rot_mat.fillRow(1, _crack_plane_normals[i]);
+      }
+      else
+      {
+        _crack_plane_normal = tangent_direction.cross(crack_direction);
+        rot_mat.fillRow(1, _crack_plane_normal);
+      }
+      _rot_matrix.push_back(rot_mat);
+
+      _segment_lengths.push_back(std::make_pair(0.0, 0.0));
+      _distances_along_front.push_back(0.0);
+      _angles_along_front.push_back(0.0);
+    }
   }
   else
   {
@@ -1577,8 +1607,8 @@ CrackFrontDefinition::createQFunctionRings()
 {
   // In the variable names, "cfn" = crack front node
 
-  if (_treat_as_2d) // 2D: the q-function defines an integral domain that is constant along the
-                    // crack front
+  if (_treat_as_2d && _use_mesh_cutter == false) // 2D: the q-function defines an integral domain
+                                                 // that is constant along the crack front
   {
     std::vector<std::vector<const Elem *>> nodes_to_elem_map;
     MeshTools::build_nodes_to_elem_map(_mesh.getMesh(), nodes_to_elem_map);

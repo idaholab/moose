@@ -10,43 +10,48 @@
 []
 
 [Mesh]
-[block]
+[gen]
   type = GeneratedMeshGenerator
   dim = 2
-  nx = 5
-  ny = 5
-  xmin = 0.0
-  xmax = 1.0
+  nx = 45
+  ny = 15
+  xmin = -1.5
+  xmax = 1.5
   ymin = 0.0
   ymax = 1.0
   elem_type = QUAD4
 []
+[dispBlock]
+  type = BoundingBoxNodeSetGenerator
+  new_boundary = pull_set
+  bottom_left = '-0.1 0.99 0'
+  top_right = '0.1 1.01 0'
+  input = gen
+[]
 []
 
 [UserObjects]
-  [./cut_mesh]
-    type = MeshCut2DFunctionUserObject
-    mesh_file = 2D_edge_crack.e
-    growth_dir_method = FUNCTION
-    function_x = growth_func_x
-    function_y = growth_func_y
-    function_v = growth_func_v
-  [../]
+  [cut_mesh]
+    type = MeshCut2DFractureUserObject
+    mesh_file = make_edge_crack_in.e
+    k_critical=80
+    growth_length_per_timestep = 0.1
+  []
 []
 
-[Functions]
-  [./growth_func_x]
-    type = ParsedFunction
-    expression = 0.4*t
-  [../]
-  [./growth_func_y]
-    type = ParsedFunction
-    expression = 1.8*(t-1)
-  [../]
-  [./growth_func_v]
-    type = ParsedFunction
-    expression = 0.1*t
-  [../]
+[DomainIntegral]
+  integrals = 'Jintegral InteractionIntegralKI InteractionIntegralKII'
+  displacements = 'disp_x disp_y'
+  crack_front_points_provider = cut_mesh
+  2d=true
+  number_points_from_provider = 2
+  crack_direction_method = CurvedCrackFront
+  radius_inner = '0.15'
+  radius_outer = '0.45'
+  poissons_ratio = 0.3
+  youngs_modulus = 207000
+  block = 0
+  incremental = true
 []
 
 [Modules/TensorMechanics/Master]
@@ -58,33 +63,25 @@
   [../]
 []
 
-[Functions]
-  [./top_trac_y]
-    type = ConstantFunction
-    value = 10
-  [../]
-[]
-
-
 [BCs]
-  [./top_y]
-    type = FunctionNeumannBC
-    boundary = top
-    variable = disp_y
-    function = top_trac_y
-  [../]
-  [./bottom_x]
+  [top_y]
+      type = DirichletBC
+      boundary = pull_set
+      variable = disp_y
+      value = 0.001
+  []
+  [bottom_x]
     type = DirichletBC
     boundary = bottom
     variable = disp_x
     value = 0.0
-  [../]
-  [./bottom_y]
+  []
+  [bottom_y]
     type = DirichletBC
     boundary = bottom
     variable = disp_y
     value = 0.0
-  [../]
+  []
 []
 
 [Materials]
@@ -120,13 +117,13 @@
 
 # controls for nonlinear iterations
   nl_max_its = 15
-  nl_rel_tol = 1e-12
-  nl_abs_tol = 1e-10
+  nl_rel_tol = 1e-8
+  nl_abs_tol = 1e-9
 
 # time control
   start_time = 0.0
   dt = 1.0
-  end_time = 2.0
+  end_time = 5
   max_xfem_update = 2
 []
 
@@ -136,10 +133,14 @@
   [xfemcutter]
     type=XFEMCutMeshOutput
     xfem_cutter_uo=cut_mesh
-
   []
+  # console = false
   [./console]
     type = Console
-    output_linear = true
+    output_linear = false
+    output_nonlinear = false
   [../]
 []
+# [Debug]
+#   show_reporters=true
+# []

@@ -9,22 +9,22 @@
 
 #pragma once
 
-#include "CrackMeshCut2DUserObjectBase.h"
+#include "MeshCut2DUserObjectBase.h"
 
 class Function;
 
 /**
- * CrackMeshCut2DUserObject: (1) reads in a mesh describing the crack surface,
+ * MeshCut2DFunctionUserObject: (1) reads in a mesh describing the crack surface,
  * (2) uses the mesh to do initial cutting of 2D elements, and
  * (3) grows the mesh based on prescribed growth functions.
  */
 
-class CrackMeshCut2DUserObject : public CrackMeshCut2DUserObjectBase
+class MeshCut2DFunctionUserObject : public MeshCut2DUserObjectBase
 {
 public:
   static InputParameters validParams();
 
-  CrackMeshCut2DUserObject(const InputParameters & parameters);
+  MeshCut2DFunctionUserObject(const InputParameters & parameters);
 
   virtual void initialSetup() override;
   virtual void initialize() override;

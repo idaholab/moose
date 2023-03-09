@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "CrackMeshCut2DUserObject.h"
+#include "MeshCut2DFunctionUserObject.h"
 
 #include "MooseError.h"
 #include "libmesh/string_to_enum.h"
@@ -18,12 +18,12 @@
 #include "libmesh/mesh_tools.h"
 #include "Function.h"
 
-registerMooseObject("XFEMApp", CrackMeshCut2DUserObject);
+registerMooseObject("XFEMApp", MeshCut2DFunctionUserObject);
 
 InputParameters
-CrackMeshCut2DUserObject::validParams()
+MeshCut2DFunctionUserObject::validParams()
 {
-  InputParameters params = CrackMeshCut2DUserObjectBase::validParams();
+  InputParameters params = MeshCut2DUserObjectBase::validParams();
   MooseEnum growthDirection("FUNCTION", "FUNCTION");
   params.addParam<MooseEnum>("growth_dir_method", growthDirection, "choose from FUNCTION");
 
@@ -39,8 +39,8 @@ CrackMeshCut2DUserObject::validParams()
   return params;
 }
 
-CrackMeshCut2DUserObject::CrackMeshCut2DUserObject(const InputParameters & parameters)
-  : CrackMeshCut2DUserObjectBase(parameters),
+MeshCut2DFunctionUserObject::MeshCut2DFunctionUserObject(const InputParameters & parameters)
+  : MeshCut2DUserObjectBase(parameters),
     _growth_dir_method(getParam<MooseEnum>("growth_dir_method").getEnum<GrowthDirectionEnum>()),
     _growth_speed_method(getParam<MooseEnum>("growth_speed_method").getEnum<GrowthSpeedEnum>()),
     _func_x(&getFunction("function_x")),
@@ -50,14 +50,14 @@ CrackMeshCut2DUserObject::CrackMeshCut2DUserObject(const InputParameters & param
 }
 
 void
-CrackMeshCut2DUserObject::initialSetup()
+MeshCut2DFunctionUserObject::initialSetup()
 {
   // setting _time_of_previous_call_to_UO to current time
   _time_of_previous_call_to_UO = _t;
 }
 
 void
-CrackMeshCut2DUserObject::initialize()
+MeshCut2DFunctionUserObject::initialize()
 {
   // following logic only calls crack growth function if time changed.
   // This deals with max_xfem_update > 1.  Error if the timestep drops below this
@@ -76,7 +76,7 @@ CrackMeshCut2DUserObject::initialize()
 }
 
 void
-CrackMeshCut2DUserObject::findBoundaryNodes()
+MeshCut2DFunctionUserObject::findBoundaryNodes()
 {
   _boundary_node_ids.clear();
   std::unordered_set boundary_nodes = MeshTools::find_boundary_nodes(*_cutter_mesh);
@@ -84,7 +84,7 @@ CrackMeshCut2DUserObject::findBoundaryNodes()
 }
 
 void
-CrackMeshCut2DUserObject::findActiveBoundaryNodes()
+MeshCut2DFunctionUserObject::findActiveBoundaryNodes()
 {
   _active_boundary_node_ids.clear();
   _inactive_boundary_node_ids.clear();
@@ -109,7 +109,7 @@ CrackMeshCut2DUserObject::findActiveBoundaryNodes()
 }
 
 void
-CrackMeshCut2DUserObject::findActiveBoundaryDirection()
+MeshCut2DFunctionUserObject::findActiveBoundaryDirection()
 {
   _active_node_id_direction.clear();
   for (unsigned int i = 0; i < _active_boundary_node_ids.size(); ++i)
@@ -132,7 +132,7 @@ CrackMeshCut2DUserObject::findActiveBoundaryDirection()
 }
 
 void
-CrackMeshCut2DUserObject::growFront()
+MeshCut2DFunctionUserObject::growFront()
 {
   _active_boundary_node_front_ids.clear();
   for (unsigned int i = 0; i < _active_boundary_node_ids.size(); ++i)
@@ -174,13 +174,13 @@ CrackMeshCut2DUserObject::growFront()
 }
 
 const std::vector<Point>
-CrackMeshCut2DUserObject::getCrackFrontPoints(unsigned int /*number_crack_front_points*/) const
+MeshCut2DFunctionUserObject::getCrackFrontPoints(unsigned int /*number_crack_front_points*/) const
 {
-  mooseError("getCrackFrontPoints() is not implemented for CrackMeshCut2DUserObject.");
+  mooseError("getCrackFrontPoints() is not implemented for MeshCut2DFunctionUserObject.");
 }
 
 const std::vector<RealVectorValue>
-CrackMeshCut2DUserObject::getCrackPlaneNormals(unsigned int /*number_crack_front_points*/) const
+MeshCut2DFunctionUserObject::getCrackPlaneNormals(unsigned int /*number_crack_front_points*/) const
 {
-  mooseError("getCrackPlaneNormals() is not implemented for CrackMeshCut2DUserObject.");
+  mooseError("getCrackPlaneNormals() is not implemented for MeshCut2DFunctionUserObject.");
 }
