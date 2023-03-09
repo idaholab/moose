@@ -57,7 +57,6 @@ class Tester(MooseObject):
         params.addParam('vtk_version', ['ALL'], "A list of VTK versions for which this test will run on, supports normal comparison operators ('<', '>', etc...)")
         params.addParam('mesh_mode',     ['ALL'], "A list of mesh modes for which this test will run ('DISTRIBUTED', 'REPLICATED')")
         params.addParam('min_ad_size',   None, "A minimum AD size for which this test will run")
-        params.addParam('ad_mode',       ['ALL'], "A list of AD modes for which this test will run ('SPARSE', 'NONSPARSE')")
         params.addParam('method',        ['ALL'], "A test that runs under certain executable configurations ('ALL', 'OPT', 'DBG', 'DEVEL', 'OPROF', 'PRO')")
         params.addParam('library_mode',  ['ALL'], "A test that only runs when libraries are built under certain configurations ('ALL', 'STATIC', 'DYNAMIC')")
         params.addParam('dtk',           ['ALL'], "A test that runs only if DTK is detected ('ALL', 'TRUE', 'FALSE')")
@@ -555,7 +554,7 @@ class Tester(MooseObject):
             reasons['libtorch_version'] = 'using libtorch ' + str(checks['libtorch_version']) + ' REQ: ' + libtorch_version
 
         # PETSc and SLEPc is being explicitly checked above
-        local_checks = ['platform', 'compiler', 'mesh_mode', 'ad_mode', 'method', 'library_mode', 'dtk', 'unique_ids', 'vtk', 'tecplot',
+        local_checks = ['platform', 'compiler', 'mesh_mode', 'method', 'library_mode', 'dtk', 'unique_ids', 'vtk', 'tecplot',
                         'petsc_debug', 'curl', 'superlu', 'mumps', 'strumpack', 'cxx11', 'asio', 'unique_id', 'slepc', 'petsc_version_release', 'boost', 'fparser_jit',
                         'parmetis', 'chaco', 'party', 'ptscotch', 'threading', 'libpng', 'libtorch', 'installed']
 

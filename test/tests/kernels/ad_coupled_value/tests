@@ -34,16 +34,6 @@
     issues = "#12996"
     max_parallel = 4
   []
-  [test_ad_output]
-    type = 'RunApp'
-    input = 'ad_coupled_value.i'
-    expect_out = 'AD size required:\s+27'
-    requirement = 'The system will output the required number of derivative entries needed for automatic differentiation calculations'
-    design = 'DualReal.md'
-    cli_args = 'Outputs/exodus=false'
-    issues = '#5658'
-    ad_mode = 'NONSPARSE'
-  []
   [no_mallocs_pjfnk]
     type = Exodiff
     prereq = 'test'
