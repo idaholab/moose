@@ -1,7 +1,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 #pragma once
 #include "MeshGenerator.h"
-#include "MooseEnum.h"
+#include "libmesh/mesh_generation.h"
 /*
  * Mesh generator to create a Overlay mesh
  */
@@ -16,9 +16,12 @@ protected:
   /// The dimension of the mesh
   MooseEnum _dim;
 
-  /// Name of the generated mesh
+  /// Hold the generated mesh
   std::unique_ptr<MeshBase> * _build_mesh;
 
-  /// Name of the base mesh
-  std::unique_ptr<MeshBase> & _mesh_input;
+  /// Name of the input mesh
+  const MeshGeneratorName _mesh_name;
+
+  /// Hold the input mesh
+  std::unique_ptr<MeshBase> * _input_mesh;
 };

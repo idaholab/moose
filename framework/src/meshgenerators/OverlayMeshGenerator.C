@@ -70,9 +70,18 @@ OverlayMeshGenerator::validParams()
 }
 
 OverlayMeshGenerator::OverlayMeshGenerator(const InputParameters & parameters)
-  : MeshGenerator(parameters), _dim(getParam<MooseEnum>("dim")), _mesh_input(getMesh("input"))
+  : MeshGenerator(parameters),
+    _dim(getParam<MooseEnum>("dim")),
+    _mesh_name(getParam<MeshGeneratorName>("input"))
 {
+  // Declare that all of the meshes in the "inputs" parameter are to be used by
+  // a sub mesh generator
+  declareMeshForSub("input");
+
+  _input_mesh = &getMeshByName(_mesh_name);
+
   auto params = _app.getFactory().getValidParams("DistributedRectilinearMeshGenerator");
+
   params.set<MooseEnum>("dim") = _dim;
 
   params.set<dof_id_type>("nx") = getParam<dof_id_type>("nx");
@@ -98,27 +107,34 @@ OverlayMeshGenerator::OverlayMeshGenerator(const InputParameters & parameters)
   params.set<MooseEnum>("elem_type") = getParam<MooseEnum>("elem_type");
 
   addMeshSubgenerator("DistributedRectilinearMeshGenerator",
-                      name() + "_distributedrectilinearmeshgenerator",
+                      _mesh_name + "_distributedrectilinearmeshgenerator",
                       params);
-  _build_mesh = &getMeshByName(name() + "_distributedrectilinearmeshgenerator");
+  _build_mesh = &getMeshByName(_mesh_name + "_distributedrectilinearmeshgenerator");
 }
 std::unique_ptr<MeshBase>
 OverlayMeshGenerator::generate()
 {
-  auto bbox_input = MeshTools::create_bounding_box(*_mesh_input);
+  std::unique_ptr<MeshBase> input_mesh = std::move(*_input_mesh);
+  std::unique_ptr<MeshBase> build_mesh = std::move(*_build_mesh);
 
+  // find the boundary of the input mesh box
+  auto bbox_input = MeshTools::create_bounding_box(*input_mesh);
+
+  // Transform the generated DistributedRectilinearMesh to overlay with the input mesh
   RealVectorValue scale_factor;
   scale_factor = bbox_input.max() - bbox_input.min();
 
+  // scale
   if (scale_factor(0) != 1 || scale_factor(1) != 1 || scale_factor(2) != 1)
-    MeshTools::Modification::scale(
-        *(*_build_mesh), scale_factor(0), scale_factor(1), scale_factor(2));
+    MeshTools::Modification::scale(*build_mesh, scale_factor(0), scale_factor(1), scale_factor(2));
 
   RealVectorValue translate_factor;
   translate_factor = bbox_input.min();
+
+  // translate
   if (translate_factor(0) != 0 || translate_factor(1) != 0 || translate_factor(2) != 0)
     MeshTools::Modification::translate(
-        *(*_build_mesh), translate_factor(0), translate_factor(1), translate_factor(2));
+        *build_mesh, translate_factor(0), translate_factor(1), translate_factor(2));
 
-  return std::move(*_build_mesh);
+  return dynamic_pointer_cast<MeshBase>(build_mesh);
 }
