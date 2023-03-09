@@ -162,6 +162,9 @@ MeshGenerator::generateInternal()
     else
     {
       Nemesis_IO nemesis_io(*mesh);
+
+      // Default to non-HDF5 output for wider compatibility
+      // nemesis_io.set_hdf5_writing(false);
       nemesis_io.write(name() + "_in.e");
     }
   }

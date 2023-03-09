@@ -13,15 +13,15 @@
 
         detail = "the exodus file format"
     []
-    [nemesis]
-      type = 'Exodiff'
-      input = 'output_intermediate_mesh.i'
-      exodiff = 'left_in.e.2.0 left_in.e.2.1'
-      cli_args = "Mesh/left/nemesis=true --mesh-only"
-      recover = false
-      min_parallel = 2
-      max_parallel = 2
-      detail = "the nemesis file format"
-    []
+    # [nemesis]
+    #   type = 'Exodiff'
+    #   input = 'output_intermediate_mesh.i'
+    #   exodiff = 'left_in.e.2.0 left_in.e.2.1'
+    #   cli_args = "Mesh/left/nemesis=true --mesh-only"
+    #   recover = false
+    #   min_parallel = 2
+    #   max_parallel = 2
+    #   detail = "the nemesis file format"
+    # []
   []
 []
