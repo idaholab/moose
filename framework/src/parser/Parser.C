@@ -1221,6 +1221,11 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
         p.inputLocation(param_name) = node->filename() + ":" + std::to_string(node->line());
         p.paramFullpath(param_name) = full_name;
         p.set_attributes(param_name, false);
+        // Check if we have already printed the deprecated param message.
+        // If we haven't, add it to the tracker, and print it.
+        if (!_deprec_param_tracker.count(param_name))
+          if (p.attemptPrintDeprecated(param_name))
+            _deprec_param_tracker.insert(param_name);
         _extracted_vars.insert(
             full_name); // Keep track of all variables extracted from the input file
         found = true;
