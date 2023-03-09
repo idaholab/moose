@@ -890,6 +890,7 @@ typedef std::function<void(const InputParameters &, InputParameters &)>
     RelationshipManagerInputParameterCallback;
 
 std::string stringify(const Moose::RelationshipManagerType & t);
+std::string stringify(const Moose::TimeIntegratorType & t);
 } // namespace Moose
 
 namespace libMesh

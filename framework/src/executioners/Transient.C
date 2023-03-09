@@ -697,7 +697,7 @@ Transient::setupTimeIntegrator()
 }
 
 std::string
-Transient::getTimeStepperName()
+Transient::getTimeStepperName() const
 {
   if (_time_stepper)
   {
@@ -709,30 +709,13 @@ Transient::getTimeStepperName()
 }
 
 std::string
-Transient::getTimeIntegratorName()
+Transient::getTimeIntegratorName() const
 {
-  using namespace Moose;
-  switch (_time_scheme)
-  {
-    case TI_IMPLICIT_EULER:
-      return "ImplicitEuler";
-    case TI_EXPLICIT_EULER:
-      return "ExplicitEuler";
-    case TI_CRANK_NICOLSON:
-      return "CrankNicolson";
-    case TI_BDF2:
-      return "BDF2";
-    case TI_EXPLICIT_MIDPOINT:
-      return "ExplicitMidpoint";
-    case TI_LSTABLE_DIRK2:
-      return "LStableDirk2";
-    case TI_EXPLICIT_TVD_RK_2:
-      return "ExplicitTVDRK2";
-    case TI_NEWMARK_BETA:
-      return "NewmarkBeta";
-    default:
-      mooseError("Unknown time integration scheme: ", _time_scheme);
-  }
+  const auto * ti = _nl.getTimeIntegrator();
+  if (ti)
+    return ti->type();
+  else
+    return Executioner::getTimeIntegratorName();
 }
 
 Real

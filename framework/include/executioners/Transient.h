@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Executioner.h"
+#include "TimeIntegrator.h"
 
 // System includes
 #include <string>
@@ -130,13 +131,13 @@ public:
   /**
    * Get the timestepper.
    */
-  virtual std::string getTimeStepperName() override;
+  virtual std::string getTimeStepperName() const override;
 
   /**
-   * Get the time name of the time integrator (time integration scheme) used
+   * Get the name of the time integrator (time integration scheme) used
    * @return string with the time integration scheme name
    */
-  virtual std::string getTimeIntegratorName() override;
+  virtual std::string getTimeIntegratorName() const override;
 
   /**
    * Get the time scheme used
