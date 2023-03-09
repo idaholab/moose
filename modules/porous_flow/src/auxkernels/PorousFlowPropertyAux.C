@@ -10,9 +10,11 @@
 #include "PorousFlowPropertyAux.h"
 
 registerMooseObject("PorousFlowApp", PorousFlowPropertyAux);
+registerMooseObject("PorousFlowApp", ADPorousFlowPropertyAux);
 
+template <bool is_ad>
 InputParameters
-PorousFlowPropertyAux::validParams()
+PorousFlowPropertyAuxTempl<is_ad>::validParams()
 {
   InputParameters params = AuxKernel::validParams();
   params.addRequiredParam<UserObjectName>(
@@ -44,10 +46,11 @@ PorousFlowPropertyAux::validParams()
   return params;
 }
 
-PorousFlowPropertyAux::PorousFlowPropertyAux(const InputParameters & parameters)
+template <bool is_ad>
+PorousFlowPropertyAuxTempl<is_ad>::PorousFlowPropertyAuxTempl(const InputParameters & parameters)
   : AuxKernel(parameters),
     _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
-    _property_enum(getParam<MooseEnum>("property").getEnum<PropertyEnum>()),
+    _property_enum(getParam<MooseEnum>("property").template getEnum<PropertyEnum>()),
     _phase(getParam<unsigned int>("phase")),
     _liquid_phase(getParam<unsigned int>("liquid_phase")),
     _gas_phase(getParam<unsigned int>("gas_phase")),
@@ -110,72 +113,80 @@ PorousFlowPropertyAux::PorousFlowPropertyAux(const InputParameters & parameters)
   switch (_property_enum)
   {
     case PropertyEnum::PRESSURE:
-      _pressure = &getMaterialProperty<std::vector<Real>>("PorousFlow_porepressure_qp");
+      _pressure =
+          &getGenericMaterialProperty<std::vector<Real>, is_ad>("PorousFlow_porepressure_qp");
       break;
 
     case PropertyEnum::SATURATION:
-      _saturation = &getMaterialProperty<std::vector<Real>>("PorousFlow_saturation_qp");
+      _saturation =
+          &getGenericMaterialProperty<std::vector<Real>, is_ad>("PorousFlow_saturation_qp");
       break;
 
     case PropertyEnum::TEMPERATURE:
-      _temperature = &getMaterialProperty<Real>("PorousFlow_temperature_qp");
+      _temperature = &getGenericMaterialProperty<Real, is_ad>("PorousFlow_temperature_qp");
       break;
 
     case PropertyEnum::DENSITY:
-      _fluid_density = &getMaterialProperty<std::vector<Real>>("PorousFlow_fluid_phase_density_qp");
+      _fluid_density = &getGenericMaterialProperty<std::vector<Real>, is_ad>(
+          "PorousFlow_fluid_phase_density_qp");
       break;
 
     case PropertyEnum::VISCOSITY:
-      _fluid_viscosity = &getMaterialProperty<std::vector<Real>>("PorousFlow_viscosity_qp");
+      _fluid_viscosity =
+          &getGenericMaterialProperty<std::vector<Real>, is_ad>("PorousFlow_viscosity_qp");
       break;
 
     case PropertyEnum::MASS_FRACTION:
-      _mass_fractions =
-          &getMaterialProperty<std::vector<std::vector<Real>>>("PorousFlow_mass_frac_qp");
+      _mass_fractions = &getGenericMaterialProperty<std::vector<std::vector<Real>>, is_ad>(
+          "PorousFlow_mass_frac_qp");
       break;
 
     case PropertyEnum::RELPERM:
-      _relative_permeability =
-          &getMaterialProperty<std::vector<Real>>("PorousFlow_relative_permeability_qp");
+      _relative_permeability = &getGenericMaterialProperty<std::vector<Real>, is_ad>(
+          "PorousFlow_relative_permeability_qp");
       break;
 
     case PropertyEnum::CAPILLARY_PRESSURE:
-      _pressure = &getMaterialProperty<std::vector<Real>>("PorousFlow_porepressure_qp");
+      _pressure =
+          &getGenericMaterialProperty<std::vector<Real>, is_ad>("PorousFlow_porepressure_qp");
       break;
 
     case PropertyEnum::ENTHALPY:
-      _enthalpy = &getMaterialProperty<std::vector<Real>>("PorousFlow_fluid_phase_enthalpy_qp");
+      _enthalpy = &getGenericMaterialProperty<std::vector<Real>, is_ad>(
+          "PorousFlow_fluid_phase_enthalpy_qp");
       break;
 
     case PropertyEnum::INTERNAL_ENERGY:
-      _internal_energy =
-          &getMaterialProperty<std::vector<Real>>("PorousFlow_fluid_phase_internal_energy_qp");
+      _internal_energy = &getGenericMaterialProperty<std::vector<Real>, is_ad>(
+          "PorousFlow_fluid_phase_internal_energy_qp");
       break;
 
     case PropertyEnum::SECONDARY_CONCENTRATION:
-      _sec_conc = &getMaterialProperty<std::vector<Real>>("PorousFlow_secondary_concentration_qp");
+      _sec_conc = &getGenericMaterialProperty<std::vector<Real>, is_ad>(
+          "PorousFlow_secondary_concentration_qp");
       break;
 
     case PropertyEnum::MINERAL_CONCENTRATION:
-      _mineral_conc =
-          &getMaterialProperty<std::vector<Real>>("PorousFlow_mineral_concentration_qp");
+      _mineral_conc = &getGenericMaterialProperty<std::vector<Real>, is_ad>(
+          "PorousFlow_mineral_concentration_qp");
       break;
 
     case PropertyEnum::MINERAL_REACTION_RATE:
-      _mineral_reaction_rate =
-          &getMaterialProperty<std::vector<Real>>("PorousFlow_mineral_reaction_rate_qp");
+      _mineral_reaction_rate = &getGenericMaterialProperty<std::vector<Real>, is_ad>(
+          "PorousFlow_mineral_reaction_rate_qp");
       break;
 
     case PropertyEnum::POROSITY:
-      _porosity = &getMaterialProperty<Real>("PorousFlow_porosity_qp");
+      _porosity = &getGenericMaterialProperty<Real, is_ad>("PorousFlow_porosity_qp");
       break;
 
     case PropertyEnum::PERMEABILITY:
-      _permeability = &getMaterialProperty<RealTensorValue>("PorousFlow_permeability_qp");
+      _permeability =
+          &getGenericMaterialProperty<RealTensorValue, is_ad>("PorousFlow_permeability_qp");
       break;
 
     case PropertyEnum::HYSTERESIS_ORDER:
-      _hys_order = &getMaterialProperty<unsigned>("PorousFlow_hysteresis_order_qp");
+      _hys_order = &getMaterialProperty<unsigned int>("PorousFlow_hysteresis_order_qp");
       break;
 
     case PropertyEnum::HYSTERESIS_SATURATION_TURNING_POINT:
@@ -190,71 +201,73 @@ PorousFlowPropertyAux::PorousFlowPropertyAux(const InputParameters & parameters)
   }
 }
 
+template <bool is_ad>
 Real
-PorousFlowPropertyAux::computeValue()
+PorousFlowPropertyAuxTempl<is_ad>::computeValue()
 {
   Real property = 0.0;
 
   switch (_property_enum)
   {
     case PropertyEnum::PRESSURE:
-      property = (*_pressure)[_qp][_phase];
+      property = MetaPhysicL::raw_value((*_pressure)[_qp][_phase]);
       break;
 
     case PropertyEnum::SATURATION:
-      property = (*_saturation)[_qp][_phase];
+      property = MetaPhysicL::raw_value((*_saturation)[_qp][_phase]);
       break;
 
     case PropertyEnum::TEMPERATURE:
-      property = (*_temperature)[_qp];
+      property = MetaPhysicL::raw_value((*_temperature)[_qp]);
       break;
 
     case PropertyEnum::DENSITY:
-      property = (*_fluid_density)[_qp][_phase];
+      property = MetaPhysicL::raw_value((*_fluid_density)[_qp][_phase]);
       break;
 
     case PropertyEnum::VISCOSITY:
-      property = (*_fluid_viscosity)[_qp][_phase];
+      property = MetaPhysicL::raw_value((*_fluid_viscosity)[_qp][_phase]);
       break;
 
     case PropertyEnum::MASS_FRACTION:
-      property = (*_mass_fractions)[_qp][_phase][_fluid_component];
+      property = MetaPhysicL::raw_value((*_mass_fractions)[_qp][_phase][_fluid_component]);
       break;
 
     case PropertyEnum::RELPERM:
-      property = (*_relative_permeability)[_qp][_phase];
+      property = MetaPhysicL::raw_value((*_relative_permeability)[_qp][_phase]);
       break;
 
     case PropertyEnum::CAPILLARY_PRESSURE:
-      property = (*_pressure)[_qp][_gas_phase] - (*_pressure)[_qp][_liquid_phase];
+      property =
+          MetaPhysicL::raw_value((*_pressure)[_qp][_gas_phase] - (*_pressure)[_qp][_liquid_phase]);
       break;
 
     case PropertyEnum::ENTHALPY:
-      property = (*_enthalpy)[_qp][_phase];
+      property = MetaPhysicL::raw_value((*_enthalpy)[_qp][_phase]);
       break;
 
     case PropertyEnum::INTERNAL_ENERGY:
-      property = (*_internal_energy)[_qp][_phase];
+      property = MetaPhysicL::raw_value((*_internal_energy)[_qp][_phase]);
       break;
 
     case PropertyEnum::SECONDARY_CONCENTRATION:
-      property = (*_sec_conc)[_qp][_secondary_species];
+      property = MetaPhysicL::raw_value((*_sec_conc)[_qp][_secondary_species]);
       break;
 
     case PropertyEnum::MINERAL_CONCENTRATION:
-      property = (*_mineral_conc)[_qp][_mineral_species];
+      property = MetaPhysicL::raw_value((*_mineral_conc)[_qp][_mineral_species]);
       break;
 
     case PropertyEnum::MINERAL_REACTION_RATE:
-      property = (*_mineral_reaction_rate)[_qp][_mineral_species];
+      property = MetaPhysicL::raw_value((*_mineral_reaction_rate)[_qp][_mineral_species]);
       break;
 
     case PropertyEnum::POROSITY:
-      property = (*_porosity)[_qp];
+      property = MetaPhysicL::raw_value((*_porosity)[_qp]);
       break;
 
     case PropertyEnum::PERMEABILITY:
-      property = (*_permeability)[_qp](_k_row, _k_col);
+      property = MetaPhysicL::raw_value((*_permeability)[_qp](_k_row, _k_col));
       break;
 
     case PropertyEnum::HYSTERESIS_ORDER:
@@ -272,3 +285,6 @@ PorousFlowPropertyAux::computeValue()
 
   return property;
 }
+
+template class PorousFlowPropertyAuxTempl<false>;
+template class PorousFlowPropertyAuxTempl<true>;

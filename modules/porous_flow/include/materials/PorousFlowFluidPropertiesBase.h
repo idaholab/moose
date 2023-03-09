@@ -16,21 +16,22 @@
  * Base class for fluid properties materials. All PorousFlow fluid
  * materials must override computeQpProperties()
  */
-class PorousFlowFluidPropertiesBase : public PorousFlowMaterialBase
+template <bool is_ad>
+class PorousFlowFluidPropertiesBaseTempl : public PorousFlowMaterialBase
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowFluidPropertiesBase(const InputParameters & parameters);
+  PorousFlowFluidPropertiesBaseTempl(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties() override;
 
   /// Pore pressure at the nodes or quadpoints
-  const MaterialProperty<std::vector<Real>> & _porepressure;
+  const GenericMaterialProperty<std::vector<Real>, is_ad> & _porepressure;
 
   /// Fluid temperature at the nodes or quadpoints
-  const MaterialProperty<Real> & _temperature;
+  const GenericMaterialProperty<Real, is_ad> & _temperature;
 
   /// Conversion from degrees Celsius to degrees Kelvin
   const Real _t_c2k;
@@ -38,3 +39,6 @@ protected:
   /// Universal gas constant
   const Real _R;
 };
+
+typedef PorousFlowFluidPropertiesBaseTempl<false> PorousFlowFluidPropertiesBase;
+typedef PorousFlowFluidPropertiesBaseTempl<true> ADPorousFlowFluidPropertiesBase;

@@ -66,18 +66,18 @@ PorousFlowPorosityHMBiotModulus::computeQpProperties()
                     _biot * ((*_vol_strain_qp)[qp_to_use] - _vol_strain_qp_old[qp_to_use])) /
                    denom;
 
-  _dporosity_dvar[_qp].resize(_num_var);
+  (*_dporosity_dvar)[_qp].resize(_num_var);
   for (unsigned int v = 0; v < _num_var; ++v)
-    _dporosity_dvar[_qp][v] =
+    (*_dporosity_dvar)[_qp][v] =
         (*_dpf_dvar)[_qp][v] *
         (-s_p * std::exp(-((*_pf)[_qp] - _pf_old[_qp]) / _fluid_bulk_modulus) /
              _fluid_bulk_modulus +
          1.0 / _biot_modulus) /
         denom;
 
-  _dporosity_dgradvar[_qp].resize(_num_var);
+  (*_dporosity_dgradvar)[_qp].resize(_num_var);
   for (unsigned int v = 0; v < _num_var; ++v)
-    _dporosity_dgradvar[_qp][v] =
+    (*_dporosity_dgradvar)[_qp][v] =
         _biot * (*_dvol_strain_qp_dvar)[qp_to_use][v] / denom -
         _porosity[_qp] / denom * _dvol_strain_rate_qp_dvar[qp_to_use][v] * _dt;
 }

@@ -10,26 +10,39 @@
 #include "PorousFlowRelativePermeabilityConst.h"
 
 registerMooseObject("PorousFlowApp", PorousFlowRelativePermeabilityConst);
+registerMooseObject("PorousFlowApp", ADPorousFlowRelativePermeabilityConst);
 
+template <bool is_ad>
 InputParameters
-PorousFlowRelativePermeabilityConst::validParams()
+PorousFlowRelativePermeabilityConstTempl<is_ad>::validParams()
 {
-  InputParameters params = PorousFlowRelativePermeabilityBase::validParams();
+  InputParameters params = PorousFlowRelativePermeabilityBaseTempl<is_ad>::validParams();
   params.addParam<Real>("kr", 1.0, "Relative permeability");
   params.addClassDescription(
       "This class sets the relative permeability to a constant value (default = 1)");
   return params;
 }
 
-PorousFlowRelativePermeabilityConst::PorousFlowRelativePermeabilityConst(
+template <bool is_ad>
+PorousFlowRelativePermeabilityConstTempl<is_ad>::PorousFlowRelativePermeabilityConstTempl(
     const InputParameters & parameters)
-  : PorousFlowRelativePermeabilityBase(parameters), _relperm(getParam<Real>("kr"))
+  : PorousFlowRelativePermeabilityBaseTempl<is_ad>(parameters),
+    _relperm(this->template getParam<Real>("kr"))
 {
 }
 
-Real PorousFlowRelativePermeabilityConst::relativePermeability(Real /*seff*/) const
+template <bool is_ad>
+GenericReal<is_ad> PorousFlowRelativePermeabilityConstTempl<is_ad>::relativePermeability(
+    GenericReal<is_ad> /*seff*/) const
 {
   return _relperm;
 }
 
-Real PorousFlowRelativePermeabilityConst::dRelativePermeability(Real /*seff*/) const { return 0.0; }
+template <bool is_ad>
+Real PorousFlowRelativePermeabilityConstTempl<is_ad>::dRelativePermeability(Real /*seff*/) const
+{
+  return 0.0;
+}
+
+template class PorousFlowRelativePermeabilityConstTempl<false>;
+template class PorousFlowRelativePermeabilityConstTempl<true>;

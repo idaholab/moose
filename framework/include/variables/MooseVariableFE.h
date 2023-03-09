@@ -567,6 +567,11 @@ public:
   const MooseArray<ADReal> & adDofValues() const override;
 
   /**
+   * Return the AD neignbor dof values
+   */
+  const MooseArray<ADReal> & adDofValuesNeighbor() const override;
+
+  /**
    * Compute and store incremental change in solution at QPs based on increment_vec
    */
   void computeIncrementAtQps(const NumericVector<Number> & increment_vec);
@@ -699,6 +704,13 @@ inline const MooseArray<ADReal> &
 MooseVariableFE<OutputType>::adDofValues() const
 {
   return _element_data->adDofValues();
+}
+
+template <typename OutputType>
+inline const MooseArray<ADReal> &
+MooseVariableFE<OutputType>::adDofValuesNeighbor() const
+{
+  return _neighbor_data->adDofValues();
 }
 
 template <typename OutputType>
