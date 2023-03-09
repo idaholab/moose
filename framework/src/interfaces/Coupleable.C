@@ -557,6 +557,20 @@ Coupleable::vectorTagValueHelper(const std::string & var_names,
   return vectorTagValueHelper<T>(var_names, tag, index);
 }
 
+template <>
+const GenericVariableValue<false> &
+Coupleable::coupledGenericDofValue<false>(const std::string & var_name, unsigned int comp) const
+{
+  return coupledDofValues(var_name, comp);
+}
+
+template <>
+const GenericVariableValue<true> &
+Coupleable::coupledGenericDofValue<true>(const std::string & var_name, unsigned int comp) const
+{
+  return adCoupledDofValues(var_name, comp);
+}
+
 const VariableValue &
 Coupleable::coupledValueLower(const std::string & var_name, const unsigned int comp) const
 {
@@ -1920,6 +1934,23 @@ Coupleable::coupledArrayDofValues(const std::string & var_name, unsigned int com
   if (!_coupleable_neighbor)
     return (_c_is_implicit) ? var->dofValues() : var->dofValuesOld();
   return (_c_is_implicit) ? var->dofValuesNeighbor() : var->dofValuesOldNeighbor();
+}
+
+const ADVariableValue &
+Coupleable::adCoupledDofValues(const std::string & var_name, unsigned int comp) const
+{
+  const auto * var = getVarHelper<MooseVariableField<Real>>(var_name, comp);
+
+  if (!var)
+    return *getADDefaultValue(var_name);
+  checkFuncType(var_name, VarType::Ignore, FuncAge::Curr);
+
+  if (!_c_is_implicit)
+    mooseError("Not implemented");
+
+  if (!_coupleable_neighbor)
+    return var->adDofValues();
+  return var->adDofValuesNeighbor();
 }
 
 void

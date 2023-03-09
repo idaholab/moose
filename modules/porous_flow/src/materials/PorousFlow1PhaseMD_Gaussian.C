@@ -94,15 +94,16 @@ PorousFlow1PhaseMD_Gaussian::computeQpProperties()
   if (_md_var[_qp] >= _logdens0)
   {
     // fully saturated at the node or quadpoint
-    _dporepressure_dvar[_qp][0][_pvar] = _bulk;
-    _dsaturation_dvar[_qp][0][_pvar] = 0.0;
+    (*_dporepressure_dvar)[_qp][0][_pvar] = _bulk;
+    (*_dsaturation_dvar)[_qp][0][_pvar] = 0.0;
   }
   else
   {
     const Real pp = _porepressure[_qp][0];
-    _dporepressure_dvar[_qp][0][_pvar] = 1.0 / (_recip_bulk - 2.0 * _al * pp) / _al;
+    (*_dporepressure_dvar)[_qp][0][_pvar] = 1.0 / (_recip_bulk - 2.0 * _al * pp) / _al;
     const Real sat = _saturation[_qp][0];
-    _dsaturation_dvar[_qp][0][_pvar] = -2.0 * _al2 * pp * sat * _dporepressure_dvar[_qp][0][_pvar];
+    (*_dsaturation_dvar)[_qp][0][_pvar] =
+        -2.0 * _al2 * pp * sat * (*_dporepressure_dvar)[_qp][0][_pvar];
   }
 
   if (!_nodal_material)
@@ -120,15 +121,15 @@ PorousFlow1PhaseMD_Gaussian::computeQpProperties()
       const Real pp = _porepressure[_qp][0];
       (*_dgradp_qp_dgradv)[_qp][0][_pvar] = 1.0 / (_recip_bulk - 2.0 * _al * pp) / _al;
       (*_dgradp_qp_dv)[_qp][0][_pvar] = _gradmd_qp_var[_qp] * 2.0 * _al *
-                                        _dporepressure_dvar[_qp][0][_pvar] /
+                                        (*_dporepressure_dvar)[_qp][0][_pvar] /
                                         std::pow(_recip_bulk - 2.0 * _al * pp, 2.0) / _al;
       const Real sat = _saturation[_qp][0];
       (*_dgrads_qp_dgradv)[_qp][0][_pvar] =
           -2.0 * _al2 * pp * sat * (*_dgradp_qp_dgradv)[_qp][0][_pvar];
       (*_dgrads_qp_dv)[_qp][0][_pvar] =
-          -2.0 * _al2 * _dporepressure_dvar[_qp][0][_pvar] * sat * (*_gradp_qp)[_qp][0];
+          -2.0 * _al2 * (*_dporepressure_dvar)[_qp][0][_pvar] * sat * (*_gradp_qp)[_qp][0];
       (*_dgrads_qp_dv)[_qp][0][_pvar] +=
-          -2.0 * _al2 * pp * _dsaturation_dvar[_qp][0][_pvar] * (*_gradp_qp)[_qp][0];
+          -2.0 * _al2 * pp * (*_dsaturation_dvar)[_qp][0][_pvar] * (*_gradp_qp)[_qp][0];
       (*_dgrads_qp_dv)[_qp][0][_pvar] += -2.0 * _al2 * pp * sat * (*_dgradp_qp_dv)[_qp][0][_pvar];
     }
   }

@@ -62,7 +62,7 @@ PorousFlow1PhaseFullySaturated::computeQpProperties()
   if (_dictator.isPorousFlowVariable(_porepressure_varnum))
   {
     // _porepressure is a PorousFlow variable
-    _dporepressure_dvar[_qp][0][_p_var_num] = 1.0;
+    (*_dporepressure_dvar)[_qp][0][_p_var_num] = 1.0;
     if (!_nodal_material)
       (*_dgradp_qp_dgradv)[_qp][0][_p_var_num] = 1.0;
   }

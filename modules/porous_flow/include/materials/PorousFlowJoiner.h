@@ -28,12 +28,13 @@
  *
  * Only values at the nodes are used - not at the quadpoints
  */
-class PorousFlowJoiner : public PorousFlowMaterialVectorBase
+template <bool is_ad>
+class PorousFlowJoinerTempl : public PorousFlowMaterialVectorBase
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowJoiner(const InputParameters & parameters);
+  PorousFlowJoinerTempl(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;
@@ -43,22 +44,22 @@ protected:
   const std::string _pf_prop;
 
   /// Derivatives of porepressure variable wrt PorousFlow variables at the qps or nodes
-  const MaterialProperty<std::vector<std::vector<Real>>> & _dporepressure_dvar;
+  const MaterialProperty<std::vector<std::vector<Real>>> * const _dporepressure_dvar;
 
   /// Derivatives of saturation variable wrt PorousFlow variables at the qps or nodes
-  const MaterialProperty<std::vector<std::vector<Real>>> & _dsaturation_dvar;
+  const MaterialProperty<std::vector<std::vector<Real>>> * const _dsaturation_dvar;
 
   /// Derivatives of temperature variable wrt PorousFlow variables at the qps or nodes
-  const MaterialProperty<std::vector<Real>> & _dtemperature_dvar;
+  const MaterialProperty<std::vector<Real>> * const _dtemperature_dvar;
 
   /// Computed property of the phase
-  MaterialProperty<std::vector<Real>> & _property;
+  GenericMaterialProperty<std::vector<Real>, is_ad> & _property;
 
   /// d(property)/d(PorousFlow variable)
-  MaterialProperty<std::vector<std::vector<Real>>> & _dproperty_dvar;
+  MaterialProperty<std::vector<std::vector<Real>>> * const _dproperty_dvar;
 
   /// Property of each phase
-  std::vector<const MaterialProperty<Real> *> _phase_property;
+  std::vector<const GenericMaterialProperty<Real, is_ad> *> _phase_property;
 
   /// d(property of each phase)/d(pressure)
   std::vector<const MaterialProperty<Real> *> _dphase_property_dp;
@@ -69,3 +70,6 @@ protected:
   /// d(property of each phase)/d(temperature)
   std::vector<const MaterialProperty<Real> *> _dphase_property_dt;
 };
+
+typedef PorousFlowJoinerTempl<false> PorousFlowJoiner;
+typedef PorousFlowJoinerTempl<true> ADPorousFlowJoiner;

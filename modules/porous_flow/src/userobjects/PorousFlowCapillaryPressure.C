@@ -98,6 +98,18 @@ PorousFlowCapillaryPressure::saturation(Real pc, unsigned qp) const
   return effectiveSaturation(pc, qp) * (1.0 - _sat_lr) + _sat_lr;
 }
 
+DualReal
+PorousFlowCapillaryPressure::saturation(const DualReal & pc, unsigned qp) const
+{
+  const Real s = effectiveSaturation(pc.value(), qp) * (1.0 - _sat_lr) + _sat_lr;
+  const Real ds_dpc = dEffectiveSaturation(pc.value(), qp) * (1.0 - _sat_lr);
+
+  DualReal result = s;
+  result.derivatives() = pc.derivatives() * ds_dpc;
+
+  return result;
+}
+
 Real
 PorousFlowCapillaryPressure::dSaturation(Real pc, unsigned qp) const
 {
@@ -173,7 +185,7 @@ PorousFlowCapillaryPressure::interceptFunctionDeriv(Real saturation) const
 }
 
 DualReal
-PorousFlowCapillaryPressure::capillaryPressure(DualReal saturation, unsigned qp) const
+PorousFlowCapillaryPressure::capillaryPressure(const DualReal & saturation, unsigned qp) const
 {
   const Real Pc = capillaryPressure(saturation.value(), qp);
   const Real dPc_ds = dCapillaryPressure(saturation.value(), qp);

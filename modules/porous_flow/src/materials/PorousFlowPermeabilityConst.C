@@ -10,9 +10,11 @@
 #include "PorousFlowPermeabilityConst.h"
 
 registerMooseObject("PorousFlowApp", PorousFlowPermeabilityConst);
+registerMooseObject("PorousFlowApp", ADPorousFlowPermeabilityConst);
 
+template <bool is_ad>
 InputParameters
-PorousFlowPermeabilityConst::validParams()
+PorousFlowPermeabilityConstTempl<is_ad>::validParams()
 {
   InputParameters params = PorousFlowPermeabilityBase::validParams();
   params.addRequiredParam<RealTensorValue>(
@@ -23,18 +25,28 @@ PorousFlowPermeabilityConst::validParams()
   return params;
 }
 
-PorousFlowPermeabilityConst::PorousFlowPermeabilityConst(const InputParameters & parameters)
-  : PorousFlowPermeabilityBase(parameters),
-    _input_permeability(getParam<RealTensorValue>("permeability"))
+template <bool is_ad>
+PorousFlowPermeabilityConstTempl<is_ad>::PorousFlowPermeabilityConstTempl(
+    const InputParameters & parameters)
+  : PorousFlowPermeabilityBaseTempl<is_ad>(parameters),
+    _input_permeability(this->template getParam<RealTensorValue>("permeability"))
 {
 }
 
+template <bool is_ad>
 void
-PorousFlowPermeabilityConst::computeQpProperties()
+PorousFlowPermeabilityConstTempl<is_ad>::computeQpProperties()
 {
   _permeability_qp[_qp] = _input_permeability;
-  _dpermeability_qp_dvar[_qp].assign(_num_var, RealTensorValue());
-  _dpermeability_qp_dgradvar[_qp].resize(LIBMESH_DIM);
-  for (unsigned i = 0; i < LIBMESH_DIM; ++i)
-    _dpermeability_qp_dgradvar[_qp][i].assign(_num_var, RealTensorValue());
+
+  if (!is_ad)
+  {
+    (*_dpermeability_qp_dvar)[_qp].assign(_num_var, RealTensorValue());
+    (*_dpermeability_qp_dgradvar)[_qp].resize(LIBMESH_DIM);
+    for (unsigned i = 0; i < LIBMESH_DIM; ++i)
+      (*_dpermeability_qp_dgradvar)[_qp][i].assign(_num_var, RealTensorValue());
+  }
 }
+
+template class PorousFlowPermeabilityConstTempl<false>;
+template class PorousFlowPermeabilityConstTempl<true>;

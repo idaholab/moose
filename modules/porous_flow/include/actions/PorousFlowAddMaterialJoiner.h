@@ -29,11 +29,14 @@ protected:
   /**
    * Adds a PorousFlowJoiner for the given material property
    * @param at_nodes if true: produce a nodal material, otherwise: produce a qp material
+   * @param is_ad if true: join AD materials, otherwise: join normal material
    * @param material_property join this PorousFlow material property
    * @param output_name The unique name given to this PorousFlowJoiner in the input file
    */
-  void
-  addJoiner(bool at_nodes, const std::string & material_property, const std::string & output_name);
+  void addJoiner(bool at_nodes,
+                 bool is_ad,
+                 const std::string & material_property,
+                 const std::string & output_name);
 
   /**
    * Helper method to determine if a PorousFLowJoiner material is already present
