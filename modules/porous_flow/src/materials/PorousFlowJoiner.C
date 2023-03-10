@@ -47,12 +47,14 @@ PorousFlowJoinerTempl<is_ad>::PorousFlowJoinerTempl(const InputParameters & para
             ? &getMaterialProperty<std::vector<Real>>("dPorousFlow_temperature_qp_dvar")
             : &getMaterialProperty<std::vector<Real>>("dPorousFlow_temperature_nodal_dvar")),
 
-    _has_mass_fraction(
-        !_nodal_material
-            ? hasMaterialProperty<std::vector<std::vector<Real>>>("PorousFlow_mass_frac_qp")
-            : hasMaterialProperty<std::vector<std::vector<Real>>>("PorousFlow_mass_frac_nodal")),
+    _has_mass_fraction(!_nodal_material
+                           ? hasGenericMaterialProperty<std::vector<std::vector<Real>>, is_ad>(
+                                 "PorousFlow_mass_frac_qp")
+                           : hasGenericMaterialProperty<std::vector<std::vector<Real>>, is_ad>(
+                                 "PorousFlow_mass_frac_nodal")),
     _dmass_fraction_dvar(
-        _has_mass_fraction
+        is_ad ? nullptr
+        : _has_mass_fraction
             ? (!_nodal_material ? &getMaterialProperty<std::vector<std::vector<std::vector<Real>>>>(
                                       "dPorousFlow_mass_frac_qp_dvar")
                                 : &getMaterialProperty<std::vector<std::vector<std::vector<Real>>>>(
@@ -70,8 +72,8 @@ PorousFlowJoinerTempl<is_ad>::PorousFlowJoinerTempl(const InputParameters & para
     _dphase_property_dp.resize(_num_phases);
     _dphase_property_ds.resize(_num_phases);
     _dphase_property_dt.resize(_num_phases);
+    _dphase_property_dX.resize(_num_phases);
   }
-  _dphase_property_dX.resize(_num_phases);
 
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
   {
@@ -131,13 +133,13 @@ PorousFlowJoinerTempl<is_ad>::computeQpProperties()
         if ((*_dphase_property_dt[ph]).size() > _qp)
           (*_dproperty_dvar)[_qp][ph][v] +=
               (*_dphase_property_dt[ph])[_qp] * (*_dtemperature_dvar)[_qp][v];
-      }
 
-      // Only add derivative wrt mass fraction if they exist
-      if (_has_mass_fraction)
-        if ((*_dphase_property_dX[ph]).size() > _qp)
-          _dproperty_dvar[_qp][ph][v] +=
-              (*_dphase_property_dX[ph])[_qp] * (*_dmass_fraction_dvar)[_qp][ph][0][v];
+        // Only add derivative wrt mass fraction if they exist
+        if (_has_mass_fraction)
+          if ((*_dphase_property_dX[ph]).size() > _qp)
+            (*_dproperty_dvar)[_qp][ph][v] +=
+                (*_dphase_property_dX[ph])[_qp] * (*_dmass_fraction_dvar)[_qp][ph][0][v];
+      }
     }
   }
 }

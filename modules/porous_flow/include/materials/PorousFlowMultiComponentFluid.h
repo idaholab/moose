@@ -10,6 +10,7 @@
 #pragma once
 
 #include "PorousFlowFluidPropertiesBase.h"
+
 class MultiComponentFluidProperties;
 
 /**
@@ -17,12 +18,13 @@ class MultiComponentFluidProperties;
  * internal energy, enthalpy and derivatives wrt pressure, temperature and mass
  * fraction for a multicompnent fluid defined in the FluidProperties module
  */
-class PorousFlowMultiComponentFluid : public PorousFlowFluidPropertiesBase
+template <bool is_ad>
+class PorousFlowMultiComponentFluidTempl : public PorousFlowFluidPropertiesBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowMultiComponentFluid(const InputParameters & parameters);
+  PorousFlowMultiComponentFluidTempl(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;
@@ -44,5 +46,10 @@ protected:
   const MultiComponentFluidProperties & _fp;
 
   /// Mass fraction variable
-  const VariableValue & _X;
+  const GenericVariableValue<is_ad> & _X;
+
+  usingPorousFlowFluidPropertiesMembers;
 };
+
+typedef PorousFlowMultiComponentFluidTempl<false> PorousFlowMultiComponentFluid;
+typedef PorousFlowMultiComponentFluidTempl<true> ADPorousFlowMultiComponentFluid;

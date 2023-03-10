@@ -17,7 +17,7 @@ template <bool is_ad>
 InputParameters
 PorousFlowSingleComponentFluidTempl<is_ad>::validParams()
 {
-  InputParameters params = PorousFlowFluidPropertiesBase::validParams();
+  InputParameters params = PorousFlowFluidPropertiesBaseTempl<is_ad>::validParams();
   params.addRequiredParam<UserObjectName>("fp", "The name of the user object for fluid properties");
   params.addClassDescription("This Material calculates fluid properties at the quadpoints or nodes "
                              "for a single component fluid");
@@ -28,111 +28,6 @@ template <bool is_ad>
 PorousFlowSingleComponentFluidTempl<is_ad>::PorousFlowSingleComponentFluidTempl(
     const InputParameters & parameters)
   : PorousFlowFluidPropertiesBaseTempl<is_ad>(parameters),
-    _p_unit(
-        this->template getParam<MooseEnum>("pressure_unit").template getEnum<PressureUnitEnum>()),
-    _pressure_to_Pascals(_p_unit == PressureUnitEnum::Pa ? 1.0 : 1.0E6),
-    _time_unit(this->template getParam<MooseEnum>("time_unit").template getEnum<TimeUnitEnum>()),
-    _time_to_seconds(_time_unit == TimeUnitEnum::seconds ? 1.0
-                     : _time_unit == TimeUnitEnum::hours ? 3600.0
-                     : _time_unit == TimeUnitEnum::days  ? 3600.0 * 24
-                                                         : 3600 * 24 * 365.25),
-    _compute_rho_mu(this->template getParam<bool>("compute_density_and_viscosity")),
-    _compute_internal_energy(this->template getParam<bool>("compute_internal_energy")),
-    _compute_enthalpy(this->template getParam<bool>("compute_enthalpy")),
-    _density(_compute_rho_mu
-                 ? (_nodal_material ? &this->template declareGenericProperty<Real, is_ad>(
-                                          "PorousFlow_fluid_phase_density_nodal" + _phase)
-                                    : &this->template declareGenericProperty<Real, is_ad>(
-                                          "PorousFlow_fluid_phase_density_qp" + _phase))
-                 : nullptr),
-    _ddensity_dp(
-        (_compute_rho_mu && !is_ad)
-            ? (_nodal_material
-                   ? &this->template declarePropertyDerivative<Real>(
-                         "PorousFlow_fluid_phase_density_nodal" + _phase, _pressure_variable_name)
-                   : &this->template declarePropertyDerivative<Real>(
-                         "PorousFlow_fluid_phase_density_qp" + _phase, _pressure_variable_name))
-            : nullptr),
-    _ddensity_dT((_compute_rho_mu && !is_ad)
-                     ? (_nodal_material ? &this->template declarePropertyDerivative<Real>(
-                                              "PorousFlow_fluid_phase_density_nodal" + _phase,
-                                              _temperature_variable_name)
-                                        : &this->template declarePropertyDerivative<Real>(
-                                              "PorousFlow_fluid_phase_density_qp" + _phase,
-                                              _temperature_variable_name))
-                     : nullptr),
-
-    _viscosity(_compute_rho_mu
-                   ? (_nodal_material ? &this->template declareGenericProperty<Real, is_ad>(
-                                            "PorousFlow_viscosity_nodal" + _phase)
-                                      : &this->template declareGenericProperty<Real, is_ad>(
-                                            "PorousFlow_viscosity_qp" + _phase))
-                   : nullptr),
-    _dviscosity_dp((_compute_rho_mu && !is_ad)
-                       ? (_nodal_material
-                              ? &this->template declarePropertyDerivative<Real>(
-                                    "PorousFlow_viscosity_nodal" + _phase, _pressure_variable_name)
-                              : &this->template declarePropertyDerivative<Real>(
-                                    "PorousFlow_viscosity_qp" + _phase, _pressure_variable_name))
-                       : nullptr),
-    _dviscosity_dT(
-        (_compute_rho_mu && !is_ad)
-            ? (_nodal_material
-                   ? &this->template declarePropertyDerivative<Real>(
-                         "PorousFlow_viscosity_nodal" + _phase, _temperature_variable_name)
-                   : &this->template declarePropertyDerivative<Real>(
-                         "PorousFlow_viscosity_qp" + _phase, _temperature_variable_name))
-            : nullptr),
-
-    _internal_energy(_compute_internal_energy
-                         ? (_nodal_material
-                                ? &this->template declareGenericProperty<Real, is_ad>(
-                                      "PorousFlow_fluid_phase_internal_energy_nodal" + _phase)
-                                : &this->template declareGenericProperty<Real, is_ad>(
-                                      "PorousFlow_fluid_phase_internal_energy_qp" + _phase))
-                         : nullptr),
-    _dinternal_energy_dp((_compute_internal_energy && !is_ad)
-                             ? (_nodal_material
-                                    ? &this->template declarePropertyDerivative<Real>(
-                                          "PorousFlow_fluid_phase_internal_energy_nodal" + _phase,
-                                          _pressure_variable_name)
-                                    : &this->template declarePropertyDerivative<Real>(
-                                          "PorousFlow_fluid_phase_internal_energy_qp" + _phase,
-                                          _pressure_variable_name))
-                             : nullptr),
-    _dinternal_energy_dT((_compute_internal_energy && !is_ad)
-                             ? (_nodal_material
-                                    ? &this->template declarePropertyDerivative<Real>(
-                                          "PorousFlow_fluid_phase_internal_energy_nodal" + _phase,
-                                          _temperature_variable_name)
-                                    : &this->template declarePropertyDerivative<Real>(
-                                          "PorousFlow_fluid_phase_internal_energy_qp" + _phase,
-                                          _temperature_variable_name))
-                             : nullptr),
-
-    _enthalpy(_compute_enthalpy
-                  ? (_nodal_material ? &this->template declareGenericProperty<Real, is_ad>(
-                                           "PorousFlow_fluid_phase_enthalpy_nodal" + _phase)
-                                     : &this->template declareGenericProperty<Real, is_ad>(
-                                           "PorousFlow_fluid_phase_enthalpy_qp" + _phase))
-                  : nullptr),
-    _denthalpy_dp(
-        (_compute_enthalpy && !is_ad)
-            ? (_nodal_material
-                   ? &this->template declarePropertyDerivative<Real>(
-                         "PorousFlow_fluid_phase_enthalpy_nodal" + _phase, _pressure_variable_name)
-                   : &this->template declarePropertyDerivative<Real>(
-                         "PorousFlow_fluid_phase_enthalpy_qp" + _phase, _pressure_variable_name))
-            : nullptr),
-    _denthalpy_dT((_compute_enthalpy && !is_ad)
-                      ? (_nodal_material ? &this->template declarePropertyDerivative<Real>(
-                                               "PorousFlow_fluid_phase_enthalpy_nodal" + _phase,
-                                               _temperature_variable_name)
-                                         : &this->template declarePropertyDerivative<Real>(
-                                               "PorousFlow_fluid_phase_enthalpy_qp" + _phase,
-                                               _temperature_variable_name))
-                      : nullptr),
-
     _fp(this->template getUserObject<SinglePhaseFluidProperties>("fp"))
 {
 }
@@ -154,6 +49,7 @@ PorousFlowSingleComponentFluidTempl<is_ad>::initQpStatefulProperties()
   if (_compute_internal_energy)
     (*_internal_energy)[_qp] = _fp.e_from_p_T(_porepressure[_qp][_phase_num] * _pressure_to_Pascals,
                                               _temperature[_qp] + _t_c2k);
+
   if (_compute_enthalpy)
     (*_enthalpy)[_qp] = _fp.h_from_p_T(_porepressure[_qp][_phase_num] * _pressure_to_Pascals,
                                        _temperature[_qp] + _t_c2k);

@@ -297,6 +297,17 @@
     issues = '#6845'
     design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
   []
+  [fflux14]
+    type = 'PetscJacobianTester'
+    input = 'fflux14.i'
+    ratio_tol = 1E-6 # lots of chain rules here
+    difference_tol = 1E10
+    cli_args = 'Executioner/num_steps=1 -mat_fd_type ds'
+    threading = '!pthreads'
+    requirement = 'PorousFlow shall compute all Jacobian entries of Kernels for the fluid flux, with 1-phase, 2-component multicomponent fluid (brine).'
+    issues = '#6845 #23609'
+    design = 'porous_flow/tutorial_09.md porous_flow/tutorial_02.md porous_flow/solvers.md porous_flow/nonlinear_convergence_problems.md PorousFlowDictator.md'
+  []
   [fflux01_fully_saturated]
     type = 'PetscJacobianTester'
     input = 'fflux01_fully_saturated.i'
