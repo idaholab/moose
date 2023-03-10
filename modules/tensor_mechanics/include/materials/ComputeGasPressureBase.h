@@ -1,18 +1,15 @@
-/****************************************************************/
-/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
-/*                                                              */
-/*          All contents are licensed under LGPL V2.1           */
-/*             See LICENSE for full restrictions                */
-/****************************************************************/
-#ifndef COMPUTEGASPRESSUREBASE_H
-#define COMPUTEGASPRESSUREBASE_H
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#pragma once
 
 #include "ComputeExtraStressBase.h"
-
-class ComputeGasPressureBase;
-
-template <>
-InputParameters validParams<ComputeGasPressureBase>();
 
 /**
  * Sets up an isotropic extra Stress with a trace that equals the pressure of
@@ -22,6 +19,8 @@ InputParameters validParams<ComputeGasPressureBase>();
 class ComputeGasPressureBase : public ComputeExtraStressBase
 {
 public:
+  static InputParameters validParams();
+
   ComputeGasPressureBase(const InputParameters & parameters);
 
 protected:
@@ -40,5 +39,3 @@ protected:
   // Boltzmann constant
   const Real _kB;
 };
-
-#endif // COMPUTEGASPRESSUREBASE_H

@@ -1,17 +1,19 @@
-/****************************************************************/
-/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
-/*                                                              */
-/*          All contents are licensed under LGPL V2.1           */
-/*             See LICENSE for full restrictions                */
-/****************************************************************/
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ComputeIdealGasPressure.h"
 
-template <>
+registerMooseObject("TensorMechanicsApp", ComputeIdealGasPressure);
+
 InputParameters
-validParams<ComputeIdealGasPressure>()
+ComputeIdealGasPressure::validParams()
 {
-  InputParameters params = validParams<ComputeGasPressureBase>();
+  auto params = ComputeGasPressureBase::validParams();
   params.addClassDescription(
       "Computes a isotropic extra Stress with a trace that equals the pressure of an ideal gas");
   return params;

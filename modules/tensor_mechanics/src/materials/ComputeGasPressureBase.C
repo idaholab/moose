@@ -1,17 +1,17 @@
-/****************************************************************/
-/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
-/*                                                              */
-/*          All contents are licensed under LGPL V2.1           */
-/*             See LICENSE for full restrictions                */
-/****************************************************************/
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ComputeGasPressureBase.h"
 
-template <>
 InputParameters
-validParams<ComputeGasPressureBase>()
+ComputeGasPressureBase::validParams()
 {
-  InputParameters params = validParams<ComputeExtraStressBase>();
+  auto params = ComputeExtraStressBase::validParams();
   params.addClassDescription("Computes a constant extra stress that is added to the stress "
                              "calculated by the constitutive model");
   params.addRequiredCoupledVar("c", "Gas concentration");
