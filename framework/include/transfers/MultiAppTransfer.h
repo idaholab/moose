@@ -74,7 +74,7 @@ public:
   {
     if (!_to_multi_app)
       mooseError(
-          "A from_multiapp was requested but is unavailable. Check the from_multi_app parameter");
+          "A to_multiapp was requested but is unavailable. Check the to_multi_app parameter");
     else
       return _to_multi_app;
   }
