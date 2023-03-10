@@ -23,7 +23,7 @@ ParallelSolutionStorage::validParams()
 ParallelSolutionStorage::ParallelSolutionStorage(const InputParameters & parameters)
   : GeneralReporter(parameters),
     _distributed_solutions(declareRestartableData<
-                           std::map<VariableName, std::vector<std::unique_ptr<std::vector<Real>>>>>(
+                           std::map<VariableName, std::vector<std::unique_ptr<DenseVector<Real>>>>>(
         "distributed_solution"))
 {
 }
@@ -36,15 +36,22 @@ ParallelSolutionStorage::initialSetup()
 
 void
 ParallelSolutionStorage::addEntry(const VariableName & vname,
-                                  const std::vector<std::unique_ptr<std::vector<Real>>> & solutions)
+                                  const std::vector<std::unique_ptr<DenseVector<Real>>> & solutions)
 {
-  std::vector<std::unique_ptr<std::vector<Real>>> & variable_container =
-      _distributed_solutions[vname];
+  // std::vector<std::unique_ptr<std::vector<Real>>> & variable_container =
+  //     _distributed_solutions[vname];
 
-  for (const auto & solution : solutions)
-  {
-    std::unique_ptr<std::vector<Real>> copied_solution =
-        std::make_unique<std::vector<Real>>(*solution);
-    variable_container.push_back(std::move(copied_solution));
-  }
+  // for (const auto & solution : solutions)
+  // {
+  //   std::unique_ptr<std::vector<Real>> copied_solution =
+  //       std::make_unique<std::vector<Real>>(*solution);
+  //   variable_container.push_back(std::move(copied_solution));
+  // }
+
+  // std::ostringstream mystream;
+  // mystream << "Processor " << processor_id() << std::endl;
+  // mystream << "Adding to: " << vname << std::endl;
+  // for (const auto & solution : variable_container)
+  //   mystream << Moose::stringify(*solution) << std::endl;
+  // std::cerr << mystream.str() << std::endl;
 }

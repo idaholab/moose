@@ -12,6 +12,7 @@
 // MOOSE includes
 #include "ParallelSolutionStorage.h"
 #include "StochasticToolsTransfer.h"
+#include "SolutionContainer.h"
 #include "UserObjectInterface.h"
 
 // Forward declarations
@@ -44,4 +45,14 @@ protected:
   /// specific pod attributes. Used in batch mode only and checking if the
   /// correct MultiApp type has been provided.
   ParallelSolutionStorage * _parallel_storage;
+
+  std::vector<VariableName> _variable_names;
+
+  std::string _serialized_solution_reporter;
+
+private:
+  unsigned int _local_solutions_begin;
+  unsigned int _local_solution_end;
+  unsigned int _num_global_entries;
+  unsigned int _num_local_entries;
 };

@@ -22,8 +22,19 @@ public:
   virtual void finalize() override {}
 
   void addEntry(const VariableName & vname,
-                const std::vector<std::unique_ptr<std::vector<Real>>> & solutions);
+                const std::vector<std::unique_ptr<DenseVector<Real>>> & solutions);
+
+  unsigned int numLocalEntries() { return _distributed_solutions.size(); }
+
+  bool hasGlobalEntry(unsigned int global_i)
+  {
+    return global_i >= _global_entries_begin && _global_entries_begin <= _global_entries_end;
+  }
 
 protected:
-  std::map<VariableName, std::vector<std::unique_ptr<std::vector<Real>>>> & _distributed_solutions;
+  std::map<VariableName, std::vector<std::unique_ptr<DenseVector<Real>>>> & _distributed_solutions;
+
+  unsigned int _global_entries_begin;
+  unsigned int _global_entries_end;
+  unsigned int _num_global_entries;
 };

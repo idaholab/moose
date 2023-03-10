@@ -12,7 +12,7 @@
 [Samplers]
   [sample]
     type = MonteCarlo
-    num_rows = 4
+    num_rows = 8
     distributions = 'S_dist'
     execute_on = initial
     min_procs_per_row = 2
@@ -39,8 +39,10 @@
   [solution_transfer]
     type = SerializedSolutionTransfer
     parallel_storage_name = parallel_storage
-    to_multi_app = worker
+    from_multi_app = worker
     sampler = sample
+    serialized_solution_reporter = solution_storage
+    variables = 'u'
   []
 []
 

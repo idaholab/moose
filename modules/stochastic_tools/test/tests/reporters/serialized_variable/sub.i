@@ -90,8 +90,7 @@
 
 [Reporters]
   [solution_storage]
-    type = SerializedSolutionReporter
-    variables = 'u v'
-    execute_on = 'FINAL'
+    type = SolutionContainer
+    execute_on = 'TIMESTEP_BEGIN FINAL'
   []
 []
