@@ -99,6 +99,7 @@ InteractionIntegralTempl<is_ad>::InteractionIntegralTempl(const InputParameters 
     _strain(getGenericMaterialPropertyByName<RankTwoTensor, is_ad>("elastic_strain")),
     _fe_vars(getCoupledMooseVars()),
     _fe_type(_fe_vars[0]->feType()),
+    _disp(coupledValues("displacements")),
     _grad_disp(3),
     _has_temp(isCoupled("temperature")),
     _grad_temp(_has_temp ? coupledGradient("temperature") : _grad_zero),
@@ -228,9 +229,10 @@ InteractionIntegralTempl<is_ad>::computeQpIntegral(const std::size_t crack_front
   RankTwoTensor aux_stress;
   RankTwoTensor aux_du;
   RankTwoTensor aux_strain;
+  RankTwoTensor aux_disp;
 
   if (_sif_mode == SifMethod::KI || _sif_mode == SifMethod::KII || _sif_mode == SifMethod::KIII)
-    computeAuxFields(aux_stress, aux_du, aux_strain);
+    computeAuxFields(aux_stress, aux_du, aux_strain, aux_disp);
   else if (_sif_mode == SifMethod::T)
     computeTFields(aux_stress, aux_du);
 
@@ -248,6 +250,9 @@ InteractionIntegralTempl<is_ad>::computeQpIntegral(const std::size_t crack_front
       MetaPhysicL::raw_value((_strain)[_qp]), crack_front_point_index);
   RealVectorValue grad_temp_cf =
       _crack_front_definition->rotateToCrackFrontCoords(_grad_temp[_qp], crack_front_point_index);
+
+  if (getBlockCoordSystem() == Moose::COORD_RZ)
+    strain_cf(2, 2) = 0.0;
 
   RankTwoTensor dq;
   dq(0, 0) = crack_direction(0) * grad_q_cf(0);
@@ -328,6 +333,32 @@ InteractionIntegralTempl<is_ad>::computeQpIntegral(const std::size_t crack_front
     term6 = (term6_a + term6_b) * scalar_q;
   }
 
+  // Add terms for possibly RZ (axisymmetric problem).
+  // See Nahta and Moran, 1993, Domain integrals for axisymmetric interface crack problems, 30(15)
+  // Note: Sign problem in Eq. (26). Also Kolosov constant is wrong in Eq. (13)
+  Real term7 = 0.0;
+  if (getBlockCoordSystem() == Moose::COORD_RZ)
+  {
+    const Real u_r = (*_disp[0])[_qp];
+    const Real radius_qp = _q_point[_qp](0);
+
+    const Real term7a =
+        (u_r / radius_qp * aux_stress(2, 2) + aux_disp(0, 0) / radius_qp * stress_cf(2, 2) -
+         aux_stress.doubleContraction(strain_cf)) /
+        radius_qp;
+
+    // term7b1: sigma_aux_ralpha * u_alpha,r
+    const Real term7b1 = aux_stress(0, 0) * grad_disp_cf(0, 0) +
+                         aux_stress(0, 1) * grad_disp_cf(1, 0) +
+                         aux_stress(0, 2) * grad_disp_cf(2, 0);
+
+    const Real term7b = 1.0 / radius_qp *
+                        (term7b1 - aux_stress(2, 2) * grad_disp_cf(0, 0) +
+                         stress_cf(2, 2) * (aux_du(0, 0) - aux_disp(0, 0) / radius_qp));
+
+    term7 = (term7a + term7b) * scalar_q;
+  }
+
   Real q_avg_seg = 1.0;
   if (!_crack_front_definition->treatAs2D())
   {
@@ -337,7 +368,21 @@ InteractionIntegralTempl<is_ad>::computeQpIntegral(const std::size_t crack_front
         2.0;
   }
 
-  Real eq = term1 + term2 + term3 + term4 + term4a + term5 + term6;
+  Real eq = term1 + term2 + term3 + term4 + term4a + term5 + term6 + term7;
+
+  if (getBlockCoordSystem() == Moose::COORD_RZ)
+  {
+    const Real radius_qp = _q_point[_qp](0);
+    eq *= radius_qp;
+
+    std::size_t num_crack_front_points = _crack_front_definition->getNumCrackFrontPoints();
+    if (num_crack_front_points != 1)
+      mooseError("Crack front has more than one point, but this is a 2D-RZ problem. Please revise "
+                 "your input file.");
+
+    const Point * crack_front_point = _crack_front_definition->getCrackFrontPoint(0);
+    eq = eq / (*crack_front_point)(0);
+  }
 
   return eq / q_avg_seg;
 }
@@ -388,8 +433,12 @@ InteractionIntegralTempl<is_ad>::execute()
           grad_of_scalar_q(j) += (*_dphi_curr_elem)[i][_qp](j) * _q_curr_elem[i];
       }
 
-      _interaction_integral[icfp] +=
-          _JxW[_qp] * _coord[_qp] * computeQpIntegral(icfp, scalar_q, grad_of_scalar_q);
+      if (getBlockCoordSystem() != Moose::COORD_RZ)
+        _interaction_integral[icfp] +=
+            _JxW[_qp] * _coord[_qp] * computeQpIntegral(icfp, scalar_q, grad_of_scalar_q);
+      else
+        _interaction_integral[icfp] +=
+            _JxW[_qp] * computeQpIntegral(icfp, scalar_q, grad_of_scalar_q);
     }
   }
 }
@@ -438,7 +487,8 @@ template <bool is_ad>
 void
 InteractionIntegralTempl<is_ad>::computeAuxFields(RankTwoTensor & aux_stress,
                                                   RankTwoTensor & grad_disp,
-                                                  RankTwoTensor & aux_strain)
+                                                  RankTwoTensor & aux_strain,
+                                                  RankTwoTensor & aux_disp)
 {
   RealVectorValue k(0.0);
   if (_sif_mode == SifMethod::KI)
@@ -458,6 +508,7 @@ InteractionIntegralTempl<is_ad>::computeAuxFields(RankTwoTensor & aux_stress,
   Real stt2 = std::sin(tt2);
   Real ctt2 = std::cos(tt2);
   Real ct2sq = Utility::pow<2>(ct2);
+  Real st2sq = Utility::pow<2>(st2);
   Real ct2cu = Utility::pow<3>(ct2);
   Real sqrt2PiR = std::sqrt(2.0 * libMesh::pi * _r);
 
@@ -506,6 +557,18 @@ InteractionIntegralTempl<is_ad>::computeAuxFields(RankTwoTensor & aux_stress,
                          st * st2 * _kappa + 3.0 * st * st2 - 6.0 * st * st2 * ct2sq);
 
   grad_disp(0, 2) = k(2) / (_shear_modulus * sqrt2PiR) * (st2 * ct - ct2 * st);
+
+  // Calculate aux displacement field (used in RZ calculations) - Warp3D manual
+  aux_disp.zero();
+  if (getBlockCoordSystem() == Moose::COORD_RZ)
+  {
+    const Real prefactor_rz = std::sqrt(_r / 2.0 / libMesh::pi) / 2.0 / _shear_modulus;
+    aux_disp(0, 0) = prefactor_rz * ((k(0) * ct2 * (_kappa - 1.0 + 2.0 * st2sq)) +
+                                     (k(1) * st2 * (_kappa + 1.0 + 2.0 * ct2sq)));
+    aux_disp(0, 1) = prefactor_rz * ((k(0) * st2 * (_kappa + 1.0 - 2.0 * ct2sq)) -
+                                     (k(1) * ct2 * (_kappa - 1.0 - 2.0 * st2sq)));
+    aux_disp(0, 2) = prefactor_rz * k(2) * 4.0 * st2;
+  }
 }
 
 template <bool is_ad>
