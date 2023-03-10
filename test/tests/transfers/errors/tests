@@ -14,4 +14,14 @@
     cli_args = "Transfers/from_sub/from_multi_app='sub' Transfers/from_sub/multi_app='sub'"
     expect_err = "The deprecated 'direction' parameter is not meant to be used in conjunction with the 'from_multi_app' or 'to_multi_app' parameters"
   []
+  [bad_spelling]
+    requirement = 'The system shall error if the user provides nonsensical direction parameters.'
+    type = RunException
+    input = from_sub.i
+    # from_multi_app is mispelled
+    cli_args = "Transfers/from_sub/multi_app=sub
+                Transfers/from_sub_v2/type=MultiAppCopyTransfer Transfers/from_sub_v2/source_variable=aux Transfers/from_sub_v2/variable=x
+                Transfers/from_sub_v2/from_multiapp='sub'"
+    expect_err = "from_multi_app and/or to_multi_app must be specified"
+  []
 []
