@@ -1,4 +1,4 @@
-# This is a verification problem for a circumferencial crack in a solid cylinder.
+# This is a verification problem for a circumferential crack in a solid cylinder.
 # Crack radius to cylinder ratio: 0.2
 # Crack radius to cylinder height: 0.1
 # Tensile load 1MPa

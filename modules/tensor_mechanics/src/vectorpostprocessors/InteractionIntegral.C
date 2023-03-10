@@ -219,6 +219,11 @@ InteractionIntegralTempl<is_ad>::computeQpIntegral(const std::size_t crack_front
                                                    const Real scalar_q,
                                                    const RealVectorValue & grad_of_scalar_q)
 {
+  // If q is zero, then dq is also zero, so all terms in the interaction integral would
+  // return zero. As such, let us avoid unnecessary, frequent computations
+  if (scalar_q < TOLERANCE * TOLERANCE * TOLERANCE)
+    return 0.0;
+
   // In the crack front coordinate system, the crack direction is (1,0,0)
   RealVectorValue crack_direction(1.0, 0.0, 0.0);
 
