@@ -27,7 +27,7 @@ GenericFaceGenerator::validParams()
   params.addRequiredParam<std::vector<Point>>("nodal_positions",
                                               "The x,y,z positions of the nodes");
 
-  params.addRequiredParam<std::vector<std::vector<dof_id_type>>>(
+  params.addRequiredParam<std::vector<std::vector<unsigned int>>>(
       "element_connectivity", "List of nodes to use for each element");
 
   params.addClassDescription("Generates individual elements given a list of nodal positions.");
@@ -39,7 +39,7 @@ GenericFaceGenerator::GenericFaceGenerator(const InputParameters & parameters)
   : MeshGenerator(parameters),
     _input(getMesh("input", /* allow_invalid = */ true)),
     _nodal_positions(getParam<std::vector<Point>>("nodal_positions")),
-    _element_connectivity(getParam<std::vector<std::vector<unsigned int>>>("element_connectivity")),
+    _element_connectivity(getParam<std::vector<std::vector<unsigned int>>>("element_connectivity"))
 {
 }
 
@@ -52,7 +52,7 @@ GenericFaceGenerator::generate()
   if (!mesh)
     mesh = buildMeshBaseObject();
 
-  mesh->set_mesh_dimension(2, mesh->mesh_dimension()));
+  mesh->set_mesh_dimension(std::max(2u, mesh->mesh_dimension()));
 
   std::vector<Node *> nodes;
   nodes.reserve(_nodal_positions.size());
@@ -64,7 +64,7 @@ GenericFaceGenerator::generate()
   for (const auto & element : _element_connectivity)
   {
     auto n = element.size();
-    auto elem = new GenericFace(n);
+    auto elem = new libMesh::GenericFace(n);
     mesh->add_elem(elem);
 
     for (const auto i : make_range(n))
