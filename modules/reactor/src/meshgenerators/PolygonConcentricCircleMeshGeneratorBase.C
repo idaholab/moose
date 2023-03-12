@@ -393,7 +393,7 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
     paramError("create_outward_interface_boundaries",
                "If set false, outward_interface_boundary_names "
                "should not be set as they are not used.");
-  if (!_create_outward_interface_boundaries && !_create_outward_interface_boundaries &&
+  if (!_create_outward_interface_boundaries && !_create_inward_interface_boundaries &&
       _interface_boundary_id_shift != 0)
     paramError("interface_boundary_id_shift",
                "this parameter should not be set if no interface boundaries are created.");

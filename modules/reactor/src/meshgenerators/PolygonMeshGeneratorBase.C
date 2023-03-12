@@ -192,6 +192,7 @@ PolygonMeshGeneratorBase::buildSlice(
 {
   bool has_rings(ring_radii.size());
   bool has_ducts(ducts_center_dist.size());
+  bool has_background(background_intervals);
   auto mesh = buildReplicatedMesh(2);
 
   // Calculate biasing terms
@@ -286,46 +287,50 @@ PolygonMeshGeneratorBase::buildSlice(
               corner_to_corner,
               azimuthal_tangent);
 
-  // add nodes in background region; the background region is defined as the area between the
-  // outermost pin (if there is a pin; if no pin, the center) and the innermost hex/duct; if
-  // _has_ducts is false, the background region is the area between the pin and enclosing hexagon
-  Real background_corner_radial_interval_length;
-  Real background_corner_distance;
-  Real background_in;
-  Real background_out; // background outer frontier
-  if (has_rings)
-    background_in = ring_radii.back();
-  else
-    background_in = 0;
-
-  if (has_ducts)
+  if (has_background)
   {
-    background_out = ducts_center_dist.front();
-    background_corner_distance =
-        ducts_center_dist.front(); // it is the center to duct (innermost duct) corner distance
+    // add nodes in background region; the background region is defined as the area between the
+    // outermost pin (if there is a pin; if no pin, the center) and the innermost hex/duct; if
+    // _has_ducts is false, the background region is the area between the pin and enclosing hexagon
+    Real background_corner_radial_interval_length;
+    Real background_corner_distance;
+    Real background_in;
+    Real background_out; // background outer frontier
+    if (has_rings)
+      background_in = ring_radii.back();
+    else
+      background_in = 0;
+
+    if (has_ducts)
+    {
+      background_out = ducts_center_dist.front();
+      background_corner_distance =
+          ducts_center_dist.front(); // it is the center to duct (innermost duct) corner distance
+    }
+    else
+    {
+      background_out = 0.5 * corner_to_corner;
+      background_corner_distance =
+          0.5 * corner_to_corner; // it is the center to hex corner distance
+    }
+
+    background_corner_radial_interval_length =
+        (background_out - background_in) / background_intervals;
+
+    node_id_background_meta = mesh->n_nodes();
+
+    // create nodes for background region
+    backgroundNodes(*mesh,
+                    num_sectors_per_side,
+                    background_intervals,
+                    main_background_bias_terms,
+                    background_corner_distance,
+                    background_corner_radial_interval_length,
+                    corner_p,
+                    corner_to_corner,
+                    background_in,
+                    azimuthal_tangent);
   }
-  else
-  {
-    background_out = 0.5 * corner_to_corner;
-    background_corner_distance = 0.5 * corner_to_corner; // it is the center to hex corner distance
-  }
-
-  background_corner_radial_interval_length =
-      (background_out - background_in) / background_intervals;
-
-  node_id_background_meta = mesh->n_nodes();
-
-  // create nodes for background region
-  backgroundNodes(*mesh,
-                  num_sectors_per_side,
-                  background_intervals,
-                  main_background_bias_terms,
-                  background_corner_distance,
-                  background_corner_radial_interval_length,
-                  corner_p,
-                  corner_to_corner,
-                  background_in,
-                  azimuthal_tangent);
 
   // create nodes for duct regions
   if (has_ducts)
@@ -405,7 +410,7 @@ PolygonMeshGeneratorBase::buildSlice(
       if (ring_radii.size() == 1)
         subdomain_rings.back() -= 1; // remove the inner TRI mesh subdomain
     }
-    else
+    else if (has_background)
       subdomain_rings.push_back(background_inner_boundary_layer_params.intervals +
                                 background_intervals +
                                 background_outer_boundary_layer_params.intervals);
@@ -805,7 +810,7 @@ PolygonMeshGeneratorBase::cenTriElemDef(ReplicatedMesh & mesh,
     elem->subdomain_id() = 1 + block_id_shift;
     if (i == 1)
       boundary_info.add_side(elem, 2, SLICE_BEGIN);
-    else if (i == angle_number)
+    if (i == angle_number)
       boundary_info.add_side(elem, 0, SLICE_END);
     if (assign_external_boundary)
     {
@@ -852,7 +857,7 @@ PolygonMeshGeneratorBase::quadElemDef(ReplicatedMesh & mesh,
         elem_Quad4->set_node(3) = mesh.node_ptr(nodeid_shift + i + (angle_number + 1) * (j + 1));
         if (i == 1)
           boundary_info.add_side(elem_Quad4, 3, SLICE_BEGIN);
-        else if (i == angle_number)
+        if (i == angle_number)
           boundary_info.add_side(elem_Quad4, 1, SLICE_END);
 
         if (subdomain_rings[0] == 0)
