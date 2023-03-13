@@ -48,8 +48,9 @@
     requirement = "The system shall support the ability to use the Execitioner timestep tolerance to "
                   "determine if a prediction should be peformed."
     type = 'CSVDiff'
-    input = 'predictor_skip_old_test.i'
-    csvdiff = 'predictor_skip_old_test_out.csv'  # use gold file from above
-    cli_args = 'Executioner/Predictor/skip_times_old=0.9999999999 Executioner/timestep_tolerance=1e-9'
+    input = 'predictor_skip_test.i'
+    csvdiff = 'predictor_skip_test_out.csv'  # use gold file from above
+    cli_args = 'Executioner/Predictor/skip_times=0.9999999999 Executioner/timestep_tolerance=1e-9'
+    prereq = 'skip/test_skip'
   []
 []
