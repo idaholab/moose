@@ -5,7 +5,7 @@
 ## Overview
 
 `ADGenericConstantRankTwoTensor` creates a `RankTwoTensor` material property that use
-constant values to fill the tensor.
+constant values to fill the tensor. The input of the constants should be column major-ordered.
 
 ## Example Input File Syntax
 
