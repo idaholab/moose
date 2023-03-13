@@ -26,6 +26,15 @@
     issues = '#19297'
     recover = false
   []
+  [coarse_element_restrict_subdomain]
+    type = Exodiff
+    input = coarse_elem_restrict_subdomain.i
+    exodiff = coarse_elem_restrict_subdomain_out.e
+    requirement = 'The system shall include the ability to assign extra element IDs based on a coarse mesh for subdomain-restricted elements of a fine mesh.'
+    design = 'meshgenerators/CoarseMeshExtraElementIDGenerator.md'
+    issues = '#23708'
+    recover = false
+  []
 
   [errors]
     design = 'meshgenerators/CoarseMeshExtraElementIDGenerator.md'
