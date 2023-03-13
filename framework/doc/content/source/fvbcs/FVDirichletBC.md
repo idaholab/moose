@@ -11,8 +11,6 @@ Note that an upwinding scheme that may be used by flux kernels will affect how t
 obtain the desired boundary value, it is necessary to use a FVNeummannBC to specify
 the flux.
 
-!syntax description /FVBCs/FVDirichletBC
-
 !syntax parameters /FVBCs/FVDirichletBC
 
 !syntax inputs /FVBCs/FVDirichletBC

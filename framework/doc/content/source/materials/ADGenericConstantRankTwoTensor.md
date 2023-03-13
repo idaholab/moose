@@ -11,8 +11,6 @@ constant values to fill the tensor.
 
 !listing test/tests/materials/generic_materials/ad_generic_constant_rank_two_tensor.i block=Materials/tensor
 
-!syntax description /Materials/ADGenericConstantRankTwoTensor
-
 !syntax parameters /Materials/ADGenericConstantRankTwoTensor
 
 !syntax inputs /Materials/ADGenericConstantRankTwoTensor

@@ -15,8 +15,6 @@ domain explored by the simulation.
 
 !listing test/tests/materials/generic_materials/generic_constant_rank_two_tensor.i block=Materials/tensor
 
-!syntax description /Materials/GenericConstantRankTwoTensor
-
 !syntax parameters /Materials/GenericConstantRankTwoTensor
 
 !syntax inputs /Materials/GenericConstantRankTwoTensor

@@ -12,8 +12,6 @@ Used on its own, this user object performs a similar role as the [FunctionElemen
 except that it does not set up the default output to console and CSV. Using the postprocessor is the
 preferred way of performing this spatial function integration.
 
-!syntax description /UserObjects/FunctionElementIntegralUserObject
-
 !syntax parameters /UserObjects/FunctionElementIntegralUserObject
 
 !syntax inputs /UserObjects/FunctionElementIntegralUserObject

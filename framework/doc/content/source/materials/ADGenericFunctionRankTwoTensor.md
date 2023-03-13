@@ -11,8 +11,6 @@ functions to fill the tensor.
 
 !listing test/tests/materials/generic_materials/ad_generic_function_rank_two_tensor.i block=Materials/tensor
 
-!syntax description /Materials/ADGenericFunctionRankTwoTensor
-
 !syntax parameters /Materials/ADGenericFunctionRankTwoTensor
 
 !syntax inputs /Materials/ADGenericFunctionRankTwoTensor
