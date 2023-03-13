@@ -13,6 +13,9 @@
 
         detail = "the exodus file format"
     []
+    # nemesis output without HDF5 is not supported in libmesh@1463349(this part will be available in the next libmesh update).
+    # Therefore, this test is commented out until next libmesh update
+
     # [nemesis]
     #   type = 'Exodiff'
     #   input = 'output_intermediate_mesh.i'
