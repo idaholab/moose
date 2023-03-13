@@ -16,9 +16,10 @@
 #include "DerivativeMaterialInterface.h"
 
 /**
- * ComputeGeneralStressBase is the base class for stress tensors,
- * whether they are computed by MOOSE strain calculators (ComputeStressBase) or external user
- * plug-ins.
+ * ComputeGeneralStressBase is the direct base class for stress calculator materials that may
+ * leverage quantities based on the displaced mesh (like the UMAT plugins) rather than solely using
+ * strain tensors computed by separate MOOSE material objects (those classes should directly derive
+ * from ComputeStressBase, which in turn directly derives from ComputeGeneralStressBase).
  */
 class ComputeGeneralStressBase : public DerivativeMaterialInterface<Material>
 {
