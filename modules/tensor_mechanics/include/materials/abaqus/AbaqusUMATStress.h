@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ComputeStressBase.h"
+#include "ComputeGeneralStressBase.h"
 #include "DynamicLibraryLoader.h"
 #include "ComputeFiniteStrain.h"
 #include "StepUOInterface.h"
@@ -19,7 +19,7 @@ class StepUserObject;
 /**
  * Coupling material to use Abaqus UMAT models in MOOSE
  */
-class AbaqusUMATStress : public ComputeStressBase, public StepUOInterface
+class AbaqusUMATStress : public ComputeGeneralStressBase, public StepUOInterface
 {
 public:
   static InputParameters validParams();

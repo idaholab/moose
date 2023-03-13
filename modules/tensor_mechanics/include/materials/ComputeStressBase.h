@@ -13,45 +13,16 @@
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
 #include "RotationTensor.h"
-#include "DerivativeMaterialInterface.h"
+#include "ComputeGeneralStressBase.h"
 
 /**
  * ComputeStressBase is the base class for stress tensors
+ * computed from MOOSE's strain calculators.
  */
-class ComputeStressBase : public DerivativeMaterialInterface<Material>
+class ComputeStressBase : public ComputeGeneralStressBase
 {
 public:
   static InputParameters validParams();
 
   ComputeStressBase(const InputParameters & parameters);
-
-protected:
-  virtual void initQpStatefulProperties() override;
-  virtual void computeQpProperties() override;
-
-  /**
-   * Compute the stress and store it in the _stress material property
-   * for the current quadrature point
-   **/
-  virtual void computeQpStress() = 0;
-
-  /// Base name prepended to all material property names to allow for
-  /// multi-material systems
-  const std::string _base_name;
-
-  /// Mechanical strain material property
-  const MaterialProperty<RankTwoTensor> & _mechanical_strain;
-  /// Stress material property
-  MaterialProperty<RankTwoTensor> & _stress;
-  /// Elastic strain material property
-  MaterialProperty<RankTwoTensor> & _elastic_strain;
-
-  /// Extra stress tensor
-  const MaterialProperty<RankTwoTensor> & _extra_stress;
-
-  /// initial stress components
-  std::vector<const Function *> _initial_stress_fcn;
-
-  /// derivative of stress w.r.t. strain (_dstress_dstrain)
-  MaterialProperty<RankFourTensor> & _Jacobian_mult;
 };
