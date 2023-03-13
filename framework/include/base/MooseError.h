@@ -141,8 +141,23 @@ inline Threads::spin_mutex moose_stream_lock;
 /// need to report that variable types are incompatible (e.g. with residual save-in).
 std::string incompatVarMsg(MooseVariableFieldBase & var1, MooseVariableFieldBase & var2);
 
+/**
+ * Format a message for output with a title
+ * @param msg The message to print
+ * @param title The title that will go on a line before the message
+ * @param color The color to print the message in
+ * @return The formatted message
+ */
 std::string
 mooseMsgFmt(const std::string & msg, const std::string & title, const std::string & color);
+
+/**
+ * Format a message for output without a title
+ * @param msg The message to print
+ * @param color The color to print the message in
+ * @return The formatted message
+ */
+std::string mooseMsgFmt(const std::string & msg, const std::string & color);
 
 [[noreturn]] void mooseErrorRaw(std::string msg, const std::string prefix = "");
 
@@ -171,7 +186,7 @@ mooseWarningStream(S & oss, Args &&... args)
   std::ostringstream ss;
   mooseStreamAll(ss, args...);
   std::string msg = mooseMsgFmt(ss.str(), "*** Warning ***", COLOR_YELLOW);
-  if (Moose::_throw_on_error)
+  if (Moose::_throw_on_warning)
     throw std::runtime_error(msg);
 
   {
@@ -187,7 +202,7 @@ mooseUnusedStream(S & oss, Args &&... args)
   std::ostringstream ss;
   mooseStreamAll(ss, args...);
   std::string msg = mooseMsgFmt(ss.str(), "*** Warning ***", COLOR_YELLOW);
-  if (Moose::_throw_on_error)
+  if (Moose::_throw_on_warning)
     throw std::runtime_error(msg);
 
   {
@@ -218,23 +233,23 @@ mooseInfoStream(S & oss, Args &&... args)
 
 template <typename S, typename... Args>
 void
-mooseDeprecatedStream(S & oss, bool expired, Args &&... args)
+mooseDeprecatedStream(S & oss, const bool expired, const bool print_title, Args &&... args)
 {
   if (Moose::_deprecated_is_error)
     mooseError("\n\nDeprecated code:\n", std::forward<Args>(args)...);
 
   std::ostringstream ss;
   mooseStreamAll(ss, args...);
-  auto color = expired ? COLOR_RED : COLOR_YELLOW;
-  mooseDoOnce(
-      oss << "\n"
-          << color
-          << "*** Warning, The following code is deprecated and will be removed in future versions:"
-          << COLOR_DEFAULT;);
 
-  oss << "\n" << color << ss.str() << COLOR_DEFAULT << "\n";
+  std::string msg =
+      print_title
+          ? mooseMsgFmt(
+                ss.str(),
+                "*** Warning, This code is deprecated and will be removed in future versions:",
+                expired ? COLOR_RED : COLOR_YELLOW)
+          : mooseMsgFmt(ss.str(), expired ? COLOR_RED : COLOR_YELLOW);
+  oss << msg;
   ss.str("");
-
   if (Moose::show_trace)
   {
     if (libMesh::global_n_processors() == 1)
@@ -296,7 +311,7 @@ template <typename... Args>
 void
 mooseDeprecated(Args &&... args)
 {
-  moose::internal::mooseDeprecatedStream(Moose::out, false, std::forward<Args>(args)...);
+  moose::internal::mooseDeprecatedStream(Moose::out, false, true, std::forward<Args>(args)...);
 }
 
 /// Emit a deprecated code/feature message with the given stringified, concatenated args.
@@ -304,7 +319,7 @@ template <typename... Args>
 void
 mooseDeprecationExpired(Args &&... args)
 {
-  moose::internal::mooseDeprecatedStream(Moose::out, true, std::forward<Args>(args)...);
+  moose::internal::mooseDeprecatedStream(Moose::out, true, true, std::forward<Args>(args)...);
 }
 
 /// Emit an informational message with the given stringified, concatenated args.
