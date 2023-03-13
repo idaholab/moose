@@ -22,31 +22,8 @@ setInterpolationMethods(const MooseObject & obj,
                         Moose::FV::InterpMethod & advected_interp_method,
                         Moose::FV::InterpMethod & velocity_interp_method)
 {
-  bool need_more_ghosting = false;
-
-  const auto & advected_interp_method_in = obj.getParam<MooseEnum>("advected_interp_method");
-  if (advected_interp_method_in == "average")
-    advected_interp_method = InterpMethod::Average;
-  else if (advected_interp_method_in == "skewness-corrected")
-    advected_interp_method = Moose::FV::InterpMethod::SkewCorrectedAverage;
-  else if (advected_interp_method_in == "upwind")
-    advected_interp_method = InterpMethod::Upwind;
-  else
-  {
-    if (advected_interp_method_in == "sou")
-      advected_interp_method = InterpMethod::SOU;
-    else if (advected_interp_method_in == "min_mod")
-      advected_interp_method = InterpMethod::MinMod;
-    else if (advected_interp_method_in == "vanLeer")
-      advected_interp_method = InterpMethod::VanLeer;
-    else if (advected_interp_method_in == "quick")
-      advected_interp_method = InterpMethod::QUICK;
-    else
-      obj.mooseError("Unrecognized interpolation type ",
-                     static_cast<std::string>(advected_interp_method_in));
-
-    need_more_ghosting = true;
-  }
+  bool need_more_ghosting =
+      setInterpolationMethod(obj, advected_interp_method, "advected_interp_method");
 
   const auto & velocity_interp_method_in = obj.getParam<MooseEnum>("velocity_interp_method");
   if (velocity_interp_method_in == "average")
@@ -57,6 +34,39 @@ setInterpolationMethods(const MooseObject & obj,
     obj.mooseError("Unrecognized interpolation type ",
                    static_cast<std::string>(velocity_interp_method_in));
 
+  return need_more_ghosting;
+}
+
+bool
+setInterpolationMethod(const MooseObject & obj,
+                       Moose::FV::InterpMethod & interp_method,
+                       const std::string & param_name)
+{
+  bool need_more_ghosting = false;
+
+  const auto & interp_method_in = obj.getParam<MooseEnum>(param_name);
+  if (interp_method_in == "average")
+    interp_method = InterpMethod::Average;
+  else if (interp_method_in == "skewness-corrected")
+    interp_method = Moose::FV::InterpMethod::SkewCorrectedAverage;
+  else if (interp_method_in == "upwind")
+    interp_method = InterpMethod::Upwind;
+  else
+  {
+    if (interp_method_in == "sou")
+      interp_method = InterpMethod::SOU;
+    else if (interp_method_in == "min_mod")
+      interp_method = InterpMethod::MinMod;
+    else if (interp_method_in == "vanLeer")
+      interp_method = InterpMethod::VanLeer;
+    else if (interp_method_in == "quick")
+      interp_method = InterpMethod::QUICK;
+    else
+      obj.mooseError("Unrecognized interpolation type ",
+                     static_cast<std::string>(interp_method_in));
+
+    need_more_ghosting = true;
+  }
   return need_more_ghosting;
 }
 

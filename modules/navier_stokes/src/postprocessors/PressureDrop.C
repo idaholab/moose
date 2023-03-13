@@ -19,7 +19,7 @@ registerMooseObject("NavierStokesApp", PressureDrop);
 InputParameters
 PressureDrop::validParams()
 {
-  InputParameters params = SideIntegralVariablePostprocessor::validParams();
+  InputParameters params = SideIntegralPostprocessor::validParams();
   params.addClassDescription(
       "Computes the pressure drop between an upstream and a downstream boundary.");
 
@@ -34,21 +34,21 @@ PressureDrop::validParams()
       "downstream_boundary",
       "The downstream surface (must also be specified in 'boundary' parameter");
 
-  // params += Moose::FV::interpolationParameters();
+  MooseEnum interp_method("average upwind sou min_mod vanLeer quick skewness-corrected", "upwind");
+  params.addParam<MooseEnum>("weighting_interp_method",
+                             interp_method,
+                             "The interpolation to use for the weighting functor.");
   return params;
 }
 
 PressureDrop::PressureDrop(const InputParameters & parameters)
-  : SideIntegralVariablePostprocessor(parameters),
+  : SideIntegralPostprocessor(parameters),
     _pressure(getFunctor<Real>("pressure")),
     _weighting_functor(getFunctor<RealVectorValue>("weighting_functor"))
 {
-  _qp_integration = !getFieldVar("pressure", 0)->isFV();
+  _qp_integration = false; //! getFieldVar("pressure", 0)->isFV();
   if (!_qp_integration)
-  {
-    Moose::FV::InterpMethod dummy;
-    Moose::FV::setInterpolationMethods(*this, _weight_interp_method, dummy);
-  }
+    Moose::FV::setInterpolationMethod(*this, _weight_interp_method, "weighting_interp_method");
   else if (isParamValid("weight_interpolation_method"))
     paramError("weight_interpolation_method",
                "Face interpolation only specified for finite volume");
@@ -59,7 +59,7 @@ PressureDrop::PressureDrop(const InputParameters & parameters)
   _upstream_boundaries.resize(upstream_bdies.size());
   _downstream_boundaries.resize(downstream_bdies.size());
   for (auto i : make_range(upstream_bdies.size()))
-    _upstream_boundaries[i] = _mesh.getBoundaryID(downstream_bdies[i]);
+    _upstream_boundaries[i] = _mesh.getBoundaryID(upstream_bdies[i]);
   for (auto i : make_range(downstream_bdies.size()))
     _downstream_boundaries[i] = _mesh.getBoundaryID(downstream_bdies[i]);
 
@@ -67,21 +67,21 @@ PressureDrop::PressureDrop(const InputParameters & parameters)
   for (auto bdy : _upstream_boundaries)
     if (!hasBoundary(bdy))
       paramError("boundary",
-                 "Upstream boundary " + _mesh.getBoundaryName(bdy) +
-                     " is not included in boundary restriction");
+                 "Upstream boundary '" + _mesh.getBoundaryName(bdy) +
+                     "' is not included in boundary restriction");
   for (auto bdy : _downstream_boundaries)
     if (!hasBoundary(bdy))
       paramError("boundary",
-                 "Downstream boundary " + _mesh.getBoundaryName(bdy) +
-                     " is not included in boundary restriction");
+                 "Downstream boundary '" + _mesh.getBoundaryName(bdy) +
+                     "' is not included in boundary restriction");
   for (auto bdy : boundaryIDs())
     if (std::find(_upstream_boundaries.begin(), _upstream_boundaries.end(), bdy) ==
             _upstream_boundaries.end() &&
         std::find(_downstream_boundaries.begin(), _downstream_boundaries.end(), bdy) ==
             _downstream_boundaries.end())
       paramError("boundary",
-                 "Boundary restriction on boundary " + _mesh.getBoundaryName(bdy) +
-                     " is not part of upstream or downstream boundaries");
+                 "Boundary restriction on boundary '" + _mesh.getBoundaryName(bdy) +
+                     "' is not part of upstream or downstream boundaries");
 }
 
 void
@@ -173,9 +173,9 @@ PressureDrop::execute()
     {
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       {
-        _weighted_pressure_upstream +=
+        _weighted_pressure_downstream +=
             _JxW[_qp] * _coord[_qp] * computeQpWeightedPressureIntegral();
-        _weight_upstream += _JxW[_qp] * _coord[_qp] * computeQpWeightIntegral();
+        _weight_downstream += _JxW[_qp] * _coord[_qp] * computeQpWeightIntegral();
       }
     }
     else
@@ -184,9 +184,9 @@ PressureDrop::execute()
 
       for (auto & fi : _face_infos)
       {
-        _weighted_pressure_upstream +=
+        _weighted_pressure_downstream +=
             fi->faceArea() * fi->faceCoord() * computeFaceInfoWeightedPressureIntegral(fi);
-        _weight_upstream += fi->faceArea() * fi->faceCoord() * computeFaceInfoWeightIntegral(fi);
+        _weight_downstream += fi->faceArea() * fi->faceCoord() * computeFaceInfoWeightIntegral(fi);
       }
     }
   }

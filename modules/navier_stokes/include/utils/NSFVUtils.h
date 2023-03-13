@@ -31,6 +31,18 @@ bool setInterpolationMethods(const MooseObject & obj,
                              Moose::FV::InterpMethod & velocity_interp_method);
 
 /**
+ * Sets one interpolation method
+ * @param obj The \p MooseObject with input parameters to query
+ * @param interp_method The interpolation method we will set
+ * @param param_name The name of the parameter setting this interpolation method
+ * @return Whether the interpolation methods have indicated that we will need more than the
+ * default level of ghosting
+ */
+bool setInterpolationMethod(const MooseObject & obj,
+                            Moose::FV::InterpMethod & interp_method,
+                            const std::string & param_name);
+
+/**
  * @return interpolation parameters for use in advection object input parameters
  */
 InputParameters interpolationParameters();

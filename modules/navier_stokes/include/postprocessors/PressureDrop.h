@@ -9,19 +9,21 @@
 
 #pragma once
 
-#include "SideIntegralVariablePostprocessor.h"
+#include "SideIntegralPostprocessor.h"
 
 /**
  * This postprocessor computes the pressure drop between an upstream and a downstream boundary
  * In case multiple boundaries are specified, or the pressure profile is not constant along the
  * boundaries, a vector weighting factor may be used.
  */
-class PressureDrop : public SideIntegralVariablePostprocessor
+class PressureDrop : public SideIntegralPostprocessor
 {
 public:
   static InputParameters validParams();
 
   PressureDrop(const InputParameters & parameters);
+
+  virtual Real computeQpIntegral() override { mooseError("Not implemented"); };
 
   virtual void initialize() override;
   virtual void execute() override;
