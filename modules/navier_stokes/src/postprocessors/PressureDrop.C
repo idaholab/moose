@@ -96,9 +96,53 @@ PressureDrop::initialize()
 void
 PressureDrop::execute()
 {
-  auto bdy = 1;
-  // Check the side to see if it s upstream
-  if (std::find(_upstream_boundaries.begin(), _upstream_boundaries.end(), bdy) != _upstream_boundaries.end())
+  // Determine if upstream or downstream boundary
+  bool upstream = false;
+  bool status_known = false;
+  getFaceInfos();
+  for (auto & fi : _face_infos)
+  {
+    for (const auto bdy : fi->boundaryIDs())
+    {
+      if (std::find(_upstream_boundaries.begin(), _upstream_boundaries.end(), bdy) !=
+          _upstream_boundaries.end())
+      {
+        upstream = true;
+        status_known = true;
+#ifdef NDEBUG
+        break;
+#else
+        if (std::find(_downstream_boundaries.begin(), _downstream_boundaries.end(), bdy) !=
+            _downstream_boundaries.end())
+          mooseError("Boundary ", _mesh.getBoundaryName(bdy), " is both upstream and downstream");
+#endif
+      }
+#ifndef NDEBUG
+      if (upstream &&
+          std::find(_downstream_boundaries.begin(), _downstream_boundaries.end(), bdy) !=
+              _downstream_boundaries.end())
+        mooseError("Face info is part of both upstream and downstream boundaries");
+#endif
+      if (!upstream &&
+          std::find(_downstream_boundaries.begin(), _downstream_boundaries.end(), bdy) !=
+              _downstream_boundaries.end())
+        status_known = true;
+
+        // in debug mode we will check all boundaries the face info is a part of
+        // to make sure they are consistently upstream or downstream
+#ifdef NDEBUG
+      if (status_known)
+        break;
+#endif
+    }
+    // we ll assume all face infos for a given element and side have the same upstream status
+    // it seems very unlikely that upstream and downstream boundaries would be touching
+    // and the delimitation would be within a refined element's face
+    if (status_known)
+      break;
+  }
+
+  if (upstream)
   {
     // Integration loops are different for FE and FV at this point
     if (_qp_integration)
@@ -122,9 +166,8 @@ PressureDrop::execute()
       }
     }
   }
-
   // Downstream contributions
-  if (std::find(_upstream_boundaries.begin(), _upstream_boundaries.end(), bdy) != _upstream_boundaries.end())
+  else
   {
     if (_qp_integration)
     {
@@ -147,13 +190,6 @@ PressureDrop::execute()
       }
     }
   }
-
-#ifndef NDEBUG
-  // Check for overlaps
-  if ((std::find(_upstream_boundaries.begin(), _upstream_boundaries.end(), bdy) != _upstream_boundaries.end()) &&
-      (std::find(_downstream_boundaries.begin(), _downstream_boundaries.end(), bdy) != _downstream_boundaries.end()))
-    mooseError("Boundary ", _mesh.getBoundaryName(bdy), " is both upstream and downstream");
-#endif
 }
 
 Real
