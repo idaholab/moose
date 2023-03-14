@@ -689,7 +689,40 @@ Transient::setupTimeIntegrator()
 
   if (!_problem.hasTimeIntegrator())
   {
-    std::string ti_str = getTimeIntegratorName();
+    // backwards compatibility
+    std::string ti_str;
+    using namespace Moose;
+
+    switch (_time_scheme)
+    {
+      case TI_IMPLICIT_EULER:
+        ti_str = "ImplicitEuler";
+        break;
+      case TI_EXPLICIT_EULER:
+        ti_str = "ExplicitEuler";
+        break;
+      case TI_CRANK_NICOLSON:
+        ti_str = "CrankNicolson";
+        break;
+      case TI_BDF2:
+        ti_str = "BDF2";
+        break;
+      case TI_EXPLICIT_MIDPOINT:
+        ti_str = "ExplicitMidpoint";
+        break;
+      case TI_LSTABLE_DIRK2:
+        ti_str = "LStableDirk2";
+        break;
+      case TI_EXPLICIT_TVD_RK_2:
+        ti_str = "ExplicitTVDRK2";
+        break;
+      case TI_NEWMARK_BETA:
+        ti_str = "NewmarkBeta";
+        break;
+      default:
+        mooseError("Unknown scheme: ", _time_scheme);
+        break;
+    }
 
     InputParameters params = _app.getFactory().getValidParams(ti_str);
     _problem.addTimeIntegrator(ti_str, ti_str, params);
@@ -715,7 +748,7 @@ Transient::getTimeIntegratorName() const
   if (ti)
     return ti->type();
   else
-    return Executioner::getTimeIntegratorName();
+    mooseError("Time integrator has not been built yet so we can't retrieve its name");
 }
 
 Real

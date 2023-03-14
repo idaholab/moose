@@ -129,7 +129,7 @@ public:
   void setTimeStepper(std::shared_ptr<TimeStepper> ts) { _time_stepper = ts; }
 
   /**
-   * Get the timestepper.
+   * Get the name of the timestepper.
    */
   virtual std::string getTimeStepperName() const override;
 
