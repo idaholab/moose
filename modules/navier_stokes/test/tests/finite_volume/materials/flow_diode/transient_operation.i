@@ -187,8 +187,8 @@ ny = 5
   petsc_options_value = 'lu       NONZERO               200'
   line_search = 'none'
 
-  end_time = 1
-  dt = 0.01
+  end_time = 0.2
+  dt = 0.015
   nl_abs_tol = 1e-12
 []
 
@@ -227,7 +227,7 @@ ny = 5
   # Functions are used to parse postprocessors and provide them to a BoolFunctionControl
   [time_function]
     type = ParsedFunction
-    expression = 'if(t<0.5, 0, 1)'
+    expression = 'if(t<0.1, 0, 1)'
   []
   [pdrop_positive]
     type = ParsedFunction
@@ -288,7 +288,7 @@ ny = 5
     type = PressureDrop
     upstream_boundary = 'diode_inlet'
     downstream_boundary = 'top_left'
-    weighting_functor = 'momentum' 
+    weighting_functor = 'momentum'
     boundary = 'diode_inlet top_left'
     pressure = pressure
   []
