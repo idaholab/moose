@@ -11,6 +11,7 @@
 #include "Predictor.h"
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
+#include "Transient.h"
 
 #include "libmesh/numeric_vector.h"
 
@@ -51,7 +52,8 @@ Predictor::Predictor(const InputParameters & parameters)
     _scale(getParam<Real>("scale")),
     _skip_times(getParam<std::vector<Real>>("skip_times")),
     _skip_times_old(getParam<std::vector<Real>>("skip_times_old")),
-    _skip_after_failed_timetep(getParam<bool>("skip_after_failed_timestep"))
+    _skip_after_failed_timetep(getParam<bool>("skip_after_failed_timestep")),
+    _timestep_tolerance(dynamic_cast<Transient *>(_app.getExecutioner())->timestepTol())
 {
   if (_scale < 0.0 || _scale > 1.0)
     mooseError("Input value for scale = ", _scale, " is outside of permissible range (0 to 1)");
@@ -85,12 +87,12 @@ Predictor::shouldApply()
   const Real & old_time = _fe_problem.timeOld();
   for (unsigned int i = 0; i < _skip_times.size() && should_apply; ++i)
   {
-    if (MooseUtils::absoluteFuzzyEqual(current_time, _skip_times[i]))
+    if (MooseUtils::absoluteFuzzyEqual(current_time, _skip_times[i], _timestep_tolerance))
       should_apply = false;
   }
   for (unsigned int i = 0; i < _skip_times_old.size() && should_apply; ++i)
   {
-    if (MooseUtils::absoluteFuzzyEqual(old_time, _skip_times_old[i]))
+    if (MooseUtils::absoluteFuzzyEqual(old_time, _skip_times_old[i], _timestep_tolerance))
       should_apply = false;
   }
   return should_apply;
