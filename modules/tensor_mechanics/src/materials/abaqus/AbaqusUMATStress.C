@@ -24,7 +24,7 @@ registerMooseObject("TensorMechanicsApp", AbaqusUMATStress);
 InputParameters
 AbaqusUMATStress::validParams()
 {
-  InputParameters params = ComputeStressBase::validParams();
+  InputParameters params = ComputeGeneralStressBase::validParams();
   params.addClassDescription("Coupling material to use Abaqus UMAT models in MOOSE");
   params.addRequiredParam<FileName>(
       "plugin", "The path to the compiled dynamic library for the plugin you want to use");
@@ -38,13 +38,17 @@ AbaqusUMATStress::validParams()
   params.addRequiredParam<unsigned int>("num_state_vars",
                                         "The number of state variables this UMAT is going to use");
   params.addCoupledVar("temperature", 0.0, "Coupled temperature");
-
   params.addCoupledVar("external_fields",
                        "The external fields that can be used in the UMAT subroutine");
   params.addParam<std::vector<MaterialPropertyName>>("external_properties", "");
   params.addParam<MooseEnum>("decomposition_method",
                              ComputeFiniteStrain::decompositionType(),
                              "Method to calculate the strain kinematics.");
+  params.addParam<bool>(
+      "use_displaced_mesh",
+      false,
+      "Whether or not this object should use the "
+      "displaced mesh for computing displacements and quantities based on the deformed state.");
   params.addParam<UserObjectName>(
       "step_user_object", "The StepUserObject that provides times from simulation loading steps.");
   return params;
@@ -55,7 +59,7 @@ AbaqusUMATStress::validParams()
 #endif
 
 AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
-  : ComputeStressBase(parameters),
+  : ComputeGeneralStressBase(parameters),
     _plugin(getParam<FileName>("plugin")),
     _library(_plugin + std::string("-") + QUOTE(METHOD) + ".plugin"),
     _umat(_library.getFunction<umat_t>("umat_")),
@@ -146,7 +150,7 @@ AbaqusUMATStress::initialSetup()
 void
 AbaqusUMATStress::initQpStatefulProperties()
 {
-  ComputeStressBase::initQpStatefulProperties();
+  ComputeGeneralStressBase::initQpStatefulProperties();
 
   // Initialize state variable vector
   _state_var[_qp].resize(_aqNSTATV);
@@ -185,7 +189,7 @@ AbaqusUMATStress::computeProperties()
   std::fill(_aqCMNAME, _aqCMNAME + 80, ' ');
   std::memcpy(_aqCMNAME, name().c_str(), name().size());
 
-  ComputeStressBase::computeProperties();
+  ComputeGeneralStressBase::computeProperties();
 }
 
 void

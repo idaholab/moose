@@ -37,10 +37,5 @@ StepUOInterface::getStepUserObject(const FEProblemBase & fe_problem,
         name,
         ".");
 
-  Moose::out << "The size of step uos is: " << step_uos.size() << "\n";
-
-  if (step_uos.size() >= 1)
-    Moose::out << "The name of step uos is: " << step_uos[0]->name() << "\n";
-
   step_user_object = step_uos.size() == 1 ? step_uos[0] : nullptr;
 }

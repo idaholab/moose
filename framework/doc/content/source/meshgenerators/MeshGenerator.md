@@ -152,3 +152,11 @@ GeneratedMeshGenerator 'gmg':    Bounding box maximum: (x,y,z)=(       1,       
 GeneratedMeshGenerator 'gmg':    Bounding box delta: (x,y,z)=(       1,        1,        0)
 GeneratedMeshGenerator 'gmg':   Global mesh volume = 1
 ```
+
+The parameter [!param](/Mesh/GeneratedMeshGenerator/output) enables the output of a mesh file immediately after it is generated. It can be used to view the intermediate meshes block during mesh generation.
+
+Take the simple example:
+
+!listing test/tests/meshgenerators/output_intermediate_mesh/output_intermediate_mesh.i block=Mesh
+
+The above will result in an intermediate mesh file 'left_in.e' in addition to the final mesh file 'output_intermediate_mesh_in.e' when ran in mesh only mode.
