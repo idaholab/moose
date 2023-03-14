@@ -10,13 +10,28 @@
     cli_args = "Mesh/inactive='diverging_mesh' Outputs/file_base='straight_insad'"
   []
   [fe_diverging]
-    type = CSVDiff
-    input = drop_insad.i
-    csvdiff =  diverging_insad.csv
-    abs_zero = 1e-8
-    requirement = 'The system shall be able to compute the pressure drop in a diverging channel with a finite element incompressible Navier Stokes model.'
-    cli_args = "Outputs/file_base='diverging_insad'"
+    requirement = 'The system shall be able to compute the pressure drop in a diverging channel with a finite element incompressible Navier Stokes model'
+    [regular]
+      type = CSVDiff
+      input = drop_insad.i
+      csvdiff =  diverging_insad.csv
+      abs_zero = 1e-8
+      detail = 'with a regular face pressure evaluation'
+      cli_args = "Outputs/file_base='diverging_insad'"
+    []
+    [weighted]
+      type = CSVDiff
+      input = drop_insad.i
+      csvdiff =  diverging_insad_weighted.csv
+      abs_zero = 1e-8
+      cli_args = "Outputs/file_base='diverging_insad_weighted'
+                  Postprocessors/pdrop_total/weighting_functor='velocity' Postprocessors/pdrop_mid1/weighting_functor='velocity'
+                  Postprocessors/pdrop_mid2/weighting_functor='velocity' Postprocessors/pdrop_mid3/weighting_functor='velocity'"
+      detail = 'with a pressure drop face evaluation weighted by the local velocity'
+      ad_indexing_type = 'global'
+    []
   []
+
   [insfv_straight]
     requirement = 'The system shall be able to compute the pressure drop in a frictionless heated straight channel with a finite volume incompressible Navier Stokes model.'
     [regular]

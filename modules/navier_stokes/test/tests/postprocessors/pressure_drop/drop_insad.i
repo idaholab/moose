@@ -63,6 +63,11 @@
     prop_names = 'rho_ad'
     prop_values = '1'
   []
+  [vel_functor]
+    type = ADGenericVectorFunctorMaterial
+    prop_names = 'velocity'
+    prop_values = 'vel_x vel_y 0'
+  []
 []
 
 [Preconditioning]
