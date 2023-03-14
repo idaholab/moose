@@ -24,15 +24,6 @@ WeightedGapUserObject::validParams()
   params.addRequiredCoupledVar("disp_x", "The x displacement variable");
   params.addRequiredCoupledVar("disp_y", "The y displacement variable");
   params.addCoupledVar("disp_z", "The z displacement variable");
-  params.addParam<Real>(
-      "c", 1e6, "Parameter for balancing the size of the gap and contact pressure");
-  params.addParam<bool>(
-      "normalize_c",
-      false,
-      "Whether to normalize c by weighting function norm. When unnormalized "
-      "the value of c effectively depends on element size since in the constraint we compare nodal "
-      "Lagrange Multiplier values to integrated gap values (LM nodal value is independent of "
-      "element size, where integrated values are dependent on element size).");
   params.set<bool>("use_displaced_mesh") = true;
   params.set<ExecFlagEnum>("execute_on") = {EXEC_LINEAR, EXEC_NONLINEAR};
   params.suppressParameter<ExecFlagEnum>("execute_on");
@@ -42,8 +33,7 @@ WeightedGapUserObject::validParams()
 WeightedGapUserObject::WeightedGapUserObject(const InputParameters & parameters)
   : MortarUserObject(parameters),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
-    _c(getParam<Real>("c")),
-    _normalize_c(getParam<bool>("normalize_c")),
+    _normalize_c(true),
     _nodal(getVar("disp_x", 0)->feType().family == LAGRANGE),
     _disp_x_var(getVar("disp_x", 0)),
     _disp_y_var(getVar("disp_y", 0)),

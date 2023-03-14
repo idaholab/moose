@@ -39,7 +39,7 @@ PenaltyWeightedGapUserObject::isWeightedGapNodal() const
 }
 
 const ADVariableValue &
-PenaltyWeightedGapUserObject::contactForce() const
+PenaltyWeightedGapUserObject::contactPressure() const
 {
   return _contact_force;
 }

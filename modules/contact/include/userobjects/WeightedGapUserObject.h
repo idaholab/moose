@@ -34,7 +34,7 @@ public:
   /**
    * @return The contact force at quadrature points on the mortar segment
    */
-  virtual const ADVariableValue & contactForce() const = 0;
+  virtual const ADVariableValue & contactPressure() const = 0;
 
 protected:
   /**
@@ -67,11 +67,6 @@ protected:
 
   /// The base finite element problem
   FEProblemBase & _fe_problem;
-
-  /// This factor multiplies the weighted gap. This member, provided through a user parameter,
-  /// should be of a value such that its product with the gap is on the same scale as the lagrange
-  /// multiplier
-  const Real _c;
 
   /// The value of the gap at the current quadrature point
   ADReal _qp_gap;

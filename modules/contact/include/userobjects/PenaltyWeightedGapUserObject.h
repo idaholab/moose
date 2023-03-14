@@ -24,7 +24,7 @@ public:
 
   PenaltyWeightedGapUserObject(const InputParameters & parameters);
 
-  virtual const ADVariableValue & contactForce() const override;
+  virtual const ADVariableValue & contactPressure() const override;
   virtual void reinit() override;
 
 protected:

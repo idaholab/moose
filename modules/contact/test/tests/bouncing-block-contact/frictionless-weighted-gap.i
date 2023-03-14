@@ -53,7 +53,6 @@ offset = 1e-2
     lm_variable = normal_lm
     disp_x = disp_x
     disp_y = disp_y
-    c = 1
   []
 []
 

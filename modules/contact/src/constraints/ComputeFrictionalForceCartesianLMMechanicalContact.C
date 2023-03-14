@@ -146,7 +146,7 @@ ComputeFrictionalForceCartesianLMMechanicalContact::post()
   Moose::Mortar::Contact::communicateGaps(
       _dof_to_weighted_gap, _mesh, _nodal, _normalize_c, _communicator, false);
   Moose::Mortar::Contact::communicateVelocities(
-      _dof_to_weighted_tangential_velocity, _mesh, _nodal, _communicator);
+      _dof_to_weighted_tangential_velocity, _mesh, _nodal, _communicator, false);
 
   // Enforce frictional complementarity constraints
   for (const auto & pr : _dof_to_weighted_tangential_velocity)
@@ -175,7 +175,7 @@ ComputeFrictionalForceCartesianLMMechanicalContact::incorrectEdgeDroppingPost(
   Moose::Mortar::Contact::communicateGaps(
       _dof_to_weighted_gap, _mesh, _nodal, _normalize_c, _communicator, false);
   Moose::Mortar::Contact::communicateVelocities(
-      _dof_to_weighted_tangential_velocity, _mesh, _nodal, _communicator);
+      _dof_to_weighted_tangential_velocity, _mesh, _nodal, _communicator, false);
 
   // Enforce frictional complementarity constraints
   for (const auto & pr : _dof_to_weighted_tangential_velocity)

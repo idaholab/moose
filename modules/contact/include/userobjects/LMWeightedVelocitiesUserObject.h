@@ -9,22 +9,26 @@
 
 #pragma once
 
-#include "WeightedGapUserObject.h"
+#include "WeightedVelocitiesUserObject.h"
 
 template <typename>
 class MooseVariableFE;
 
 /**
- * Base class for creating new nodally-based mortar user objects
+ * Nodal-based mortar contact user object for frictional problem
  */
-class LMWeightedGapUserObject : public WeightedGapUserObject
+class LMWeightedVelocitiesUserObject : public WeightedVelocitiesUserObject
 {
 public:
   static InputParameters validParams();
 
-  LMWeightedGapUserObject(const InputParameters & parameters);
+  LMWeightedVelocitiesUserObject(const InputParameters & parameters);
+
+  virtual const ADVariableValue & contactTangentialPressureDirOne() const override;
+  virtual const ADVariableValue & contactTangentialPressureDirTwo() const override;
 
   virtual const ADVariableValue & contactPressure() const override;
+
   virtual void reinit() override {}
 
 protected:
@@ -32,6 +36,8 @@ protected:
   virtual bool isWeightedGapNodal() const override;
   virtual bool constrainedByOwner() const override { return true; }
 
-  /// The Lagrange multiplier variable representing the contact pressure
-  const MooseVariableFE<Real> * const _lm_var;
+  /// The Lagrange multiplier variables representing the contact pressure along various directions
+  const MooseVariableFE<Real> * const _lm_normal_var;
+  const MooseVariableFE<Real> * const _lm_variable_tangential_one;
+  const MooseVariableFE<Real> * const _lm_variable_tangential_two;
 };

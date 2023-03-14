@@ -74,6 +74,7 @@ communicateGaps(
         our_normalization += normalization;
     }
   };
+
   TIMPI::push_parallel_vector_data(communicator, push_data, action_functor);
 
   // Now send data back if requested

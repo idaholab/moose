@@ -71,6 +71,23 @@ offset = 1e-2
   []
 []
 
+[UserObjects]
+  [weighted_velocities_uo]
+    type = LMWeightedVelocitiesUserObject
+    primary_boundary = 10
+    secondary_boundary = 20
+    primary_subdomain = 3
+    secondary_subdomain = 4
+    lm_variable_normal = frictional_normal_lm
+    lm_variable_tangential_one = frictional_tangential_lm
+    secondary_variable = disp_x
+    disp_x = disp_x
+    disp_y = disp_y
+    # Issue: Coordination of user object and constraint
+    interpolate_normals = false
+  []
+[]
+
 [Constraints]
   [frictional_normal_lm]
     type = ComputeFrictionalForceLMMechanicalContact
@@ -86,6 +103,8 @@ offset = 1e-2
     normalize_c = true
     c = 1.0e-2
     c_t = 1.0e-1
+    weighted_velocities_uo = weighted_velocities_uo
+    weighted_gap_uo = weighted_velocities_uo
   []
   [normal_x]
     type = NormalMortarMechanicalContact
@@ -98,6 +117,7 @@ offset = 1e-2
     component = x
     use_displaced_mesh = true
     compute_lm_residuals = false
+    weighted_gap_uo = weighted_velocities_uo
   []
   [normal_y]
     type = NormalMortarMechanicalContact
@@ -110,6 +130,7 @@ offset = 1e-2
     component = y
     use_displaced_mesh = true
     compute_lm_residuals = false
+    weighted_gap_uo = weighted_velocities_uo
   []
   [tangential_x]
     type = TangentialMortarMechanicalContact
@@ -122,6 +143,7 @@ offset = 1e-2
     component = x
     use_displaced_mesh = true
     compute_lm_residuals = false
+    weighted_velocities_uo = weighted_velocities_uo
   []
   [tangential_y]
     type = TangentialMortarMechanicalContact
@@ -134,6 +156,7 @@ offset = 1e-2
     component = y
     use_displaced_mesh = true
     compute_lm_residuals = false
+    weighted_velocities_uo = weighted_velocities_uo
   []
 []
 
