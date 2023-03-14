@@ -51,11 +51,12 @@ MultiAppGeneralFieldUserObjectTransfer::MultiAppGeneralFieldUserObjectTransfer(
     paramError("variable", "Only one variable at a time is supported by this transfer");
 
   // Block restriction does not make sense if we're ok with extrapolating
-  // Block restriction does not make sense if we're ok with extrapolating
-  if (isParamValid("from_blocks") && _source_app_must_contain_point)
+  if (isParamValid("from_blocks") && !_source_app_must_contain_point &&
+      !parameters.isParamSetByUser("extrapolation_constant"))
     paramError("from_app_must_contain_point",
                "Source block restriction cannot be used at the same type as allowing extrapolation"
-               " of values for a user object transfer");
+               " of values for a user object transfer (with 'from_app_must_contain_point=false') "
+               " unless an extrapolation constant is provided (with 'extrapolation_constant')");
 }
 
 void
