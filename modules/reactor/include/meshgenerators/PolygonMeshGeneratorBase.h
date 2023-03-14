@@ -131,6 +131,8 @@ protected:
    * @param create_outward_interface_boundaries whether outward interface boundary sidesets are
    * created
    * @param boundary_id_shift shift of the interface boundary ids
+   * @param generate_side_specific_boundaries whether the side-specific external boundaries are
+   * generated or not
    * @return a mesh of a polygon slice
    */
   std::unique_ptr<ReplicatedMesh>
@@ -159,7 +161,8 @@ protected:
                    const Real center_quad_factor = 0.0,
                    const bool create_inward_interface_boundaries = false,
                    const bool create_outward_interface_boundaries = true,
-                   const boundary_id_type boundary_id_shift = 0);
+                   const boundary_id_type boundary_id_shift = 0,
+                   const bool generate_side_specific_boundaries = true);
 
   /**
    * Creates a mesh of a general polygon slice with a triangular shape and circular regions on one
@@ -198,6 +201,8 @@ protected:
    * @param center_quad_factor A fractional radius factor used to determine the radial positions of
    * transition nodes in the center region meshed by quad elements (default is 1.0 - 1.0/div_num)
    * @param rotation_angle azimuthal angle of the primary side
+   * @param generate_side_specific_boundaries whether the side-specific external boundaries are
+   * generated or not
    * @return a mesh of a general slice
    */
   std::unique_ptr<ReplicatedMesh>
@@ -224,7 +229,8 @@ protected:
                     const unsigned int side_index,
                     const bool quad_center_elements,
                     const Real center_quad_factor,
-                    const Real rotation_angle);
+                    const Real rotation_angle,
+                    const bool generate_side_specific_boundaries = true);
 
   /**
    * Generates a mesh of a polygon slice, which is the foundation of both buildGeneralSlice and
@@ -268,6 +274,8 @@ protected:
    * @param boundary_id_shift shift of the interface boundary ids
    * @param pitch_scale_factor the ratio between the secondary side length to the primary side
    * length.
+   * @param generate_side_specific_boundaries whether the side-specific external boundaries are
+   * generated or not
    * @return a mesh of a slice
    */
   std::unique_ptr<ReplicatedMesh>
@@ -297,7 +305,8 @@ protected:
              const bool create_inward_interface_boundaries = false,
              const bool create_outward_interface_boundaries = true,
              const boundary_id_type boundary_id_shift = 0,
-             const Real pitch_scale_factor = 1.0);
+             const Real pitch_scale_factor = 1.0,
+             const bool generate_side_specific_boundaries = true);
 
   /**
    * Creates nodes of the very central mesh layer of the polygon for quad central elements.
@@ -394,6 +403,8 @@ protected:
    * @param id_array pointer to a vector that contains the node_ids with basic geometry information
    * @param assign_external_boundary whether the external boundary ids are assigned
    * @param side_index index of the polygon side (only used if external boundary ids are assigned)
+   * @param generate_side_specific_boundaries whether the side-specific external boundaries are
+   * generated or not
    */
   void cenQuadElemDef(ReplicatedMesh & mesh,
                       const unsigned int div_num,
@@ -402,7 +413,8 @@ protected:
                       const boundary_id_type boundary_id_shift,
                       std::vector<std::vector<Node *>> & nodes,
                       const bool assign_external_boundary = false,
-                      const unsigned int side_index = 0) const;
+                      const unsigned int side_index = 0,
+                      const bool generate_side_specific_boundaries = true) const;
 
   /**
    * Defines triangular elements in the very central region of the polygon.
@@ -416,6 +428,8 @@ protected:
    * @param boundary_id_shift shift of the interface boundary ids
    * @param assign_external_boundary whether the external boundary ids are assigned
    * @param side_index index of the polygon side (only used if external boundary ids are assigned)
+   * @param generate_side_specific_boundaries whether the side-specific external boundaries are
+   * generated or not
    */
   void cenTriElemDef(ReplicatedMesh & mesh,
                      const unsigned int num_sectors_per_side,
@@ -424,7 +438,8 @@ protected:
                      const bool create_outward_interface_boundaries = true,
                      const boundary_id_type boundary_id_shift = 0,
                      const bool assign_external_boundary = false,
-                     const unsigned int side_index = 0) const;
+                     const unsigned int side_index = 0,
+                     const bool generate_side_specific_boundaries = true) const;
 
   /**
    * Defines general quad elements for the polygon.
@@ -441,6 +456,8 @@ protected:
    * @param create_outward_interface_boundaries whether outward interface boundary sidesets are
    * created
    * @param boundary_id_shift shift of the interface boundary ids
+   * @param generate_side_specific_boundaries whether the side-specific external boundaries are
+   * generated or not
    */
   void quadElemDef(ReplicatedMesh & mesh,
                    const unsigned int num_sectors_per_side,
@@ -451,7 +468,8 @@ protected:
                    const dof_id_type nodeid_shift = 0,
                    const bool create_inward_interface_boundaries = false,
                    const bool create_outward_interface_boundaries = true,
-                   const boundary_id_type boundary_id_shift = 0) const;
+                   const boundary_id_type boundary_id_shift = 0,
+                   const bool generate_side_specific_boundaries = true) const;
 
   /**
    * Makes radial correction to preserve ring area.

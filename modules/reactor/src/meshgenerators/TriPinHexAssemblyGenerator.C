@@ -476,7 +476,8 @@ TriPinHexAssemblyGenerator::buildSinglePinSection(
       /* side_index = */ 1,
       false,
       0.0,
-      rotation_angle_0);
+      rotation_angle_0,
+      false);
 
   auto mesh1 = buildGeneralSlice(
       ring_radii_corr,
@@ -508,7 +509,8 @@ TriPinHexAssemblyGenerator::buildSinglePinSection(
       /* side_index = */ 1,
       false,
       0.0,
-      rotation_angle_1);
+      rotation_angle_1,
+      false);
 
   mesh0->stitch_meshes(*mesh1,
                        SLICE_BEGIN,
