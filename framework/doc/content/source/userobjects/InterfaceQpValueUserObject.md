@@ -22,8 +22,6 @@ The stored value can be converted into an AuxVariable by using [InterfaceValueUs
 
 !listing test/tests/userobjects/interface_user_object/interface_value_user_object_QP.i block=UserObjects
 
-!syntax description /UserObjects/InterfaceQpValueUserObject
-
 !syntax parameters /UserObjects/InterfaceQpValueUserObject
 
 !syntax inputs /UserObjects/InterfaceQpValueUserObject

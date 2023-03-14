@@ -12,15 +12,15 @@
     type = ParsedFunction
     expression = '1 + t'
   []
-  [fcn_01]
+  [fcn_10]
     type = ParsedFunction
     expression = '4 + t'
   []
-  [fcn_02]
+  [fcn_20]
     type = ParsedFunction
     expression = '7 + t'
   []
-  [fcn_10]
+  [fcn_01]
     type = ParsedFunction
     expression = '2 + t'
   []
@@ -28,15 +28,15 @@
     type = ParsedFunction
     expression = '5 + t'
   []
-  [fcn_12]
+  [fcn_21]
     type = ParsedFunction
     expression = '8 + t'
   []
-  [fcn_20]
+  [fcn_02]
     type = ParsedFunction
     expression = '3 + t'
   []
-  [fcn_21]
+  [fcn_12]
     type = ParsedFunction
     expression = '6 + t'
   []
@@ -50,7 +50,8 @@
   [./tensor]
     type = ADGenericFunctionRankTwoTensor
     tensor_name = function
-    tensor_functions = 'fcn_00 fcn_01 fcn_02 fcn_10 fcn_11 fcn_12 fcn_20 fcn_21 fcn_22'
+    # tensor values are column major-ordered
+    tensor_functions = 'fcn_00 fcn_10 fcn_20 fcn_01 fcn_11 fcn_21 fcn_02 fcn_12 fcn_22'
     outputs = all
   [../]
 []

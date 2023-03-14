@@ -80,7 +80,6 @@ The `normal_traction` and `tangent_traction` are scalar values compute using [CZ
 
 !listing modules/tensor_mechanics/test/tests/cohesive_zone_model/czm_multiple_action_and_materials.i start=[Modules/TensorMechanics/CohesiveZoneMaster] end=[Modules] include-end=false
 
-!syntax description /Modules/TensorMechanics/CohesiveZoneMaster/CohesiveZoneAction
 !syntax parameters /Modules/TensorMechanics/CohesiveZoneMaster/CohesiveZoneAction
 !syntax inputs /Modules/TensorMechanics/CohesiveZoneMaster/CohesiveZoneAction
 

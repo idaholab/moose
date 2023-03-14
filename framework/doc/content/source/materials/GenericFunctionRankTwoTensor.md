@@ -5,13 +5,11 @@
 ## Overview
 
 `GenericFunctionRankTwoTensor` creates a `RankTwoTensor` material property that uses
-functions to fill the tensor.
+functions to fill the tensor. The input of the functions should be column major-ordered.
 
 ## Example Input File Syntax
 
 !listing test/tests/materials/generic_materials/generic_function_rank_two_tensor.i block=Materials/tensor
-
-!syntax description /Materials/GenericFunctionRankTwoTensor
 
 !syntax parameters /Materials/GenericFunctionRankTwoTensor
 
