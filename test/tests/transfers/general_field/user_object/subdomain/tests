@@ -44,4 +44,14 @@
       detail = "for variables of arbitrary types with higher order on the receiving app"
     []
   []
+  [errors]
+    requirement = 'The system shall error if'
+    [from_block_and_extrapolation]
+      type = RunException
+      input = 'main.i'
+      cli_args = "Transfers/from_sub/from_blocks='0 1' Transfers/from_sub/from_app_must_contain_point=true"
+      expect_err = 'Source block restriction cannot be used at the same type as allowing extrapolation'
+      detail = 'source block restriction is used at the same time as an extrapolation option as both are semantically incompatible.'
+    []
+  []
 []
