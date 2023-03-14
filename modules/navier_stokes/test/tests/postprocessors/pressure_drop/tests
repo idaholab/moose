@@ -6,7 +6,7 @@
     input = drop_insad.i
     csvdiff = straight_insad.csv
     abs_zero = 1e-8
-    requirement = 'The system shall be able to compute mass and momentum flow rates at internal and external boundaries of a straight channel with a finite element incompressible Navier Stokes model.'
+    requirement = 'The system shall be able to compute the pressure drop in a straight channel with a finite element incompressible Navier Stokes model.'
     cli_args = "Mesh/inactive='diverging_mesh' Outputs/file_base='straight_insad'"
   []
   [fe_diverging]
@@ -14,20 +14,36 @@
     input = drop_insad.i
     csvdiff =  diverging_insad.csv
     abs_zero = 1e-8
-    requirement = 'The system shall be able to compute mass and momentum flow rates at internal and external boundaries of a diverging channel with a finite element incompressible Navier Stokes model.'
+    requirement = 'The system shall be able to compute the pressure drop in a diverging channel with a finite element incompressible Navier Stokes model.'
     cli_args = "Outputs/file_base='diverging_insad'"
   []
   [insfv_straight]
-    type = CSVDiff
-    input = drop_insfv.i
-    csvdiff =  straight_insfv.csv
-    abs_zero = 1e-8
-    requirement = 'The system shall be able to compute flow rates and prove mass, momentum and energy conservation at internal and external boundaries of a frictionless heated straight channel with a finite volume incompressible Navier Stokes model.'
-    cli_args = "Mesh/inactive='diverging_mesh' Outputs/file_base='straight_insfv' -pc_type lu -pc_factor_shift_type NONZERO"
-    ad_indexing_type = 'global'
+    requirement = 'The system shall be able to compute the pressure drop in a frictionless heated straight channel with a finite volume incompressible Navier Stokes model.'
+    [regular]
+      type = CSVDiff
+      input = drop_insfv.i
+      csvdiff =  straight_insfv.csv
+      abs_zero = 1e-8
+      cli_args = "Mesh/inactive='diverging_mesh' Outputs/file_base='straight_insfv' -pc_type lu -pc_factor_shift_type NONZERO"
+      detail = 'with a regular face pressure evaluation'
+      ad_indexing_type = 'global'
+    []
+    [weighted]
+      type = CSVDiff
+      input = drop_insfv.i
+      csvdiff =  straight_insfv_weighted.csv
+      abs_zero = 1e-8
+      cli_args = "Mesh/inactive='diverging_mesh' Outputs/file_base='straight_insfv_weighted'
+                  -pc_type lu -pc_factor_shift_type NONZERO
+                  Postprocessors/pdrop_total/weighting_functor='velocity' Postprocessors/pdrop_mid1/weighting_functor='velocity'
+                  Postprocessors/pdrop_mid2/weighting_functor='velocity' Postprocessors/pdrop_mid3/weighting_functor='velocity'"
+      detail = 'with a pressure drop face evaluation weighted by the local velocity'
+      ad_indexing_type = 'global'
+    []
   []
+
   [insfv_diverging]
-    requirement = 'The system shall be able to compute flow rates and prove mass, momentum and energy conservation at internal and external boundaries of a frictionless heated diverging channel with a finite volume incompressible Navier Stokes model,'
+    requirement = 'The system shall be able to compute the pressure drop in a frictionless heated diverging channel with a finite volume incompressible Navier Stokes model,'
     [insfv_quad_xy]
       type = CSVDiff
       input = drop_insfv.i
@@ -43,7 +59,7 @@
       csvdiff = diverging_insfv_quad_rz.csv
       abs_zero = 1e-8
       detail = 'with a quadrilateral mesh in RZ geometry,'
-      cli_args = "Problem/coord_type=RZ Outputs/file_base='diverging_insfv_quad_rz'"
+      cli_args = "Mesh/coord_type=RZ Outputs/file_base='diverging_insfv_quad_rz'"
       ad_indexing_type = 'global'
     []
   []
