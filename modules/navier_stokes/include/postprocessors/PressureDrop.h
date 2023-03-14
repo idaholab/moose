@@ -38,8 +38,10 @@ public:
   Real computeQpWeightIntegral() const;
 
 protected:
+  /// The pressure functor
   const Moose::Functor<Real> & _pressure;
-  const Moose::Functor<RealVectorValue> & _weighting_functor;
+  /// A weighting functor if the pressure profile is not uniform
+  const Moose::Functor<RealVectorValue> * const _weighting_functor;
   /// The interpolation method to use for the weighting functor quantity
   Moose::FV::InterpMethod _weight_interp_method;
   /// Vector of the ids of the upstream boundaries
