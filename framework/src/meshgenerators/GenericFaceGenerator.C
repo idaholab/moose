@@ -13,7 +13,7 @@
 // #include "libmesh/replicated_mesh.h"
 #include "libmesh/int_range.h"
 
-#include "libmesh/face_generic.h"
+#include "face_generic.h"
 
 registerMooseObject("MooseApp", GenericFaceGenerator);
 
@@ -64,7 +64,7 @@ GenericFaceGenerator::generate()
   for (const auto & element : _element_connectivity)
   {
     auto n = element.size();
-    auto elem = new libMesh::GenericFace(n);
+    auto elem = new GenericFace(n);
     mesh->add_elem(elem);
 
     for (const auto i : make_range(n))
