@@ -102,7 +102,13 @@ public:
    * This is an empty string for non-Transient executioners
    * @return A string of giving the TimeStepper name
    */
-  virtual std::string getTimeStepperName() { return std::string(); }
+  virtual std::string getTimeStepperName() const { return std::string(); }
+
+  /** The name of the TimeIntegrator
+   * This is an empty string for non-Transient executioners
+   * @return A string of giving the TimeIntegrator name
+   */
+  virtual std::string getTimeIntegratorName() const { return std::string(); }
 
   /**
    * Can be used by subsclasses to call parentOutputPositionChanged()
