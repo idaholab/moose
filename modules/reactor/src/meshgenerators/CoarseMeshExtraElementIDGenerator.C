@@ -63,10 +63,26 @@ CoarseMeshExtraElementIDGenerator::generate()
   else
     coarse_id = mesh->get_elem_integer_index(_coarse_id_name);
 
+  // Get the requested subdomain IDs
+  std::set<SubdomainID> included_subdomains;
+  std::set<SubdomainName> bad_subdomains;
+  for (const auto & snm : getParam<std::vector<SubdomainName>>("subdomains"))
+  {
+    auto sid = MooseMeshUtils::getSubdomainID(snm, *mesh);
+    if (!MooseMeshUtils::hasSubdomainID(*mesh, sid))
+      bad_subdomains.insert(snm);
+    else
+      included_subdomains.insert(sid);
+  }
+  if (!bad_subdomains.empty())
+    paramError("subdomains",
+               "The requested subdomains do not exist on the fine mesh: ",
+               Moose::stringify(bad_subdomains));
+
   // If we are not going through the entire mesh and the ID already exists, we need to offset the
   // assigned ID so that we don't copy ones that are already there
   dof_id_type id_offset = 0;
-  if (already_has_id && isParamValid("subdomains"))
+  if (already_has_id && !included_subdomains.empty())
   {
     for (auto & elem : mesh->active_element_ptr_range())
     {
@@ -76,12 +92,6 @@ CoarseMeshExtraElementIDGenerator::generate()
     }
     id_offset++;
   }
-
-  // Get the requested subdomain IDs
-  std::set<SubdomainID> include_subdomains;
-  for (const auto & sid :
-       MooseMeshUtils::getSubdomainIDs(*mesh, getParam<std::vector<SubdomainName>>("subdomains")))
-    include_subdomains.insert(sid);
 
   std::unique_ptr<MeshBase> coarse_mesh = std::move(_coarse_mesh);
 
@@ -116,9 +126,9 @@ CoarseMeshExtraElementIDGenerator::generate()
   point_locator->enable_out_of_mesh_mode();
 
   // loop through fine mesh elements and get element's centroid
-  auto elem_range = include_subdomains.empty()
+  auto elem_range = included_subdomains.empty()
                         ? mesh->active_element_ptr_range()
-                        : mesh->active_subdomain_set_elements_ptr_range(include_subdomains);
+                        : mesh->active_subdomain_set_elements_ptr_range(included_subdomains);
   for (auto & elem : elem_range)
   {
     // Get the centroid of the fine elem
