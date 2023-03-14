@@ -43,4 +43,14 @@
     type = 'CSVDiff'
     csvdiff = 'predictor_test_skip_after_failed_tstep_out.csv'
   []
+
+  [timestep_tolerance]
+    requirement = "The system shall support the ability to use the Execitioner timestep tolerance to "
+                  "determine if a prediction should be peformed."
+    type = 'CSVDiff'
+    input = 'predictor_skip_test.i'
+    csvdiff = 'predictor_skip_test_out.csv'  # use gold file from above
+    cli_args = 'Executioner/Predictor/skip_times=0.9999999999 Executioner/timestep_tolerance=1e-9'
+    prereq = 'skip/test_skip'
+  []
 []
