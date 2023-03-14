@@ -10,17 +10,24 @@
 #pragma once
 
 #include "CZMComputeDisplacementJumpBase.h"
+
 /**
  * Compute the interface displacement jump across a cohesive zone under the small strain
  * assumption
  */
-class CZMComputeDisplacementJumpSmallStrain : public CZMComputeDisplacementJumpBase
+template <bool is_ad>
+class CZMComputeDisplacementJumpSmallStrainTempl : public CZMComputeDisplacementJumpBase<is_ad>
 {
 public:
   static InputParameters validParams();
-  CZMComputeDisplacementJumpSmallStrain(const InputParameters & parameters);
+  CZMComputeDisplacementJumpSmallStrainTempl(const InputParameters & parameters);
 
 protected:
   /// compute the total displacement jump in interface coordinates
   void computeLocalDisplacementJump() override;
+
+  usingCZMComputeDisplacementJumpBaseMembers;
 };
+
+typedef CZMComputeDisplacementJumpSmallStrainTempl<false> CZMComputeDisplacementJumpSmallStrain;
+typedef CZMComputeDisplacementJumpSmallStrainTempl<true> ADCZMComputeDisplacementJumpSmallStrain;

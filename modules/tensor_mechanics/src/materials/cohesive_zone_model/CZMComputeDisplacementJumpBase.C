@@ -10,8 +10,9 @@
 #include "CZMComputeDisplacementJumpBase.h"
 #include "CohesiveZoneModelTools.h"
 
+template <bool is_ad>
 InputParameters
-CZMComputeDisplacementJumpBase::validParams()
+CZMComputeDisplacementJumpBase<is_ad>::validParams()
 {
   InputParameters params = InterfaceMaterial::validParams();
   params.addClassDescription("Base class used to compute the displacement jump across a czm "
@@ -24,20 +25,22 @@ CZMComputeDisplacementJumpBase::validParams()
   return params;
 }
 
-CZMComputeDisplacementJumpBase::CZMComputeDisplacementJumpBase(const InputParameters & parameters)
+template <bool is_ad>
+CZMComputeDisplacementJumpBase<is_ad>::CZMComputeDisplacementJumpBase(
+    const InputParameters & parameters)
   : InterfaceMaterial(parameters),
     _base_name(isParamValid("base_name") && !getParam<std::string>("base_name").empty()
                    ? getParam<std::string>("base_name") + "_"
                    : ""),
-    _normals(_assembly.normals()),
     _ndisp(coupledComponents("displacements")),
     _disp(3),
     _disp_neighbor(3),
-    _displacement_jump_global(
-        declarePropertyByName<RealVectorValue>(_base_name + "displacement_jump_global")),
-    _interface_displacement_jump(
-        declarePropertyByName<RealVectorValue>(_base_name + "interface_displacement_jump")),
-    _czm_total_rotation(declarePropertyByName<RankTwoTensor>(_base_name + "czm_total_rotation"))
+    _displacement_jump_global(declareGenericPropertyByName<RealVectorValue, is_ad>(
+        _base_name + "displacement_jump_global")),
+    _interface_displacement_jump(declareGenericPropertyByName<RealVectorValue, is_ad>(
+        _base_name + "interface_displacement_jump")),
+    _czm_total_rotation(
+        declareGenericPropertyByName<RankTwoTensor, is_ad>(_base_name + "czm_total_rotation"))
 {
   // Enforce consistency
   if (_ndisp != _mesh.dimension())
@@ -49,27 +52,37 @@ CZMComputeDisplacementJumpBase::CZMComputeDisplacementJumpBase(const InputParame
   // initializing the displacement vectors
   for (unsigned int i = 0; i < _ndisp; ++i)
   {
-    _disp[i] = &coupledValue("displacements", i);
-    _disp_neighbor[i] = &coupledNeighborValue("displacements", i);
+    _disp[i] = &coupledGenericValue<is_ad>("displacements", i);
+    _disp_neighbor[i] = &coupledGenericNeighborValue<is_ad>("displacements", i);
   }
 
   // All others zero (so this will work naturally for 2D and 1D problems)
   for (unsigned int i = _ndisp; i < 3; i++)
   {
-    _disp[i] = &_zero;
-    _disp_neighbor[i] = &_zero;
+    if constexpr (is_ad)
+    {
+      _disp[i] = &_ad_zero;
+      _disp_neighbor[i] = &_ad_zero;
+    }
+    else
+    {
+      _disp[i] = &_zero;
+      _disp_neighbor[i] = &_zero;
+    }
   }
 }
 
+template <bool is_ad>
 void
-CZMComputeDisplacementJumpBase::initQpStatefulProperties()
+CZMComputeDisplacementJumpBase<is_ad>::initQpStatefulProperties()
 {
   // requried to promote _interface_displacement_jump to stateful in case someone needs it
   _interface_displacement_jump[_qp] = 0;
 }
 
+template <bool is_ad>
 void
-CZMComputeDisplacementJumpBase::computeQpProperties()
+CZMComputeDisplacementJumpBase<is_ad>::computeQpProperties()
 {
 
   // computing the displacement jump
@@ -82,9 +95,13 @@ CZMComputeDisplacementJumpBase::computeQpProperties()
   computeLocalDisplacementJump();
 }
 
+template <bool is_ad>
 void
-CZMComputeDisplacementJumpBase::computeRotationMatrices()
+CZMComputeDisplacementJumpBase<is_ad>::computeRotationMatrices()
 {
   _czm_total_rotation[_qp] =
       CohesiveZoneModelTools::computeReferenceRotation(_normals[_qp], _mesh.dimension());
 }
+
+template class CZMComputeDisplacementJumpBase<false>;
+template class CZMComputeDisplacementJumpBase<true>;

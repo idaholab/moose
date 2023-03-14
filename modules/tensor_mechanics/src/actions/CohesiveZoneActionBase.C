@@ -43,6 +43,9 @@ CohesiveZoneActionBase::validParams()
   params.addParam<MooseEnum>("strain", strainType, "Strain formulation");
 
   // Advanced
+  params.addParam<bool>("use_automatic_differentiation",
+                        false,
+                        "Whether to use automatic differentiation to compute the Jacobian");
   params.addParam<std::string>("base_name", "Material property base name");
   params.addParam<std::vector<AuxVariableName>>("save_in_master",
                                                 "The displacement residuals on the  master side");
@@ -55,6 +58,7 @@ CohesiveZoneActionBase::validParams()
   params.addParamNamesToGroup("save_in_master diag_save_in_master save_in_slave diag_save_in_slave",
                               "Advanced");
   params.addParam<bool>("verbose", false, "Display extra information.");
+
   // Output
   params.addParam<MultiMooseEnum>("generate_output",
                                   CohesiveZoneActionBase::outputPropertiesType(),

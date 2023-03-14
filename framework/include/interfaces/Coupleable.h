@@ -19,7 +19,9 @@
 
 #define usingCoupleableMembers                                                                     \
   using Coupleable::_zero;                                                                         \
-  using Coupleable::_grad_zero
+  using Coupleable::_grad_zero;                                                                    \
+  using Coupleable::_ad_zero;                                                                      \
+  using Coupleable::_ad_grad_zero
 
 // Forward declarations
 class MooseVariableScalar;

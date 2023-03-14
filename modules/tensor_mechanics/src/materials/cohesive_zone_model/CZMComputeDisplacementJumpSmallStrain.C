@@ -10,26 +10,33 @@
 #include "CZMComputeDisplacementJumpSmallStrain.h"
 
 registerMooseObject("TensorMechanicsApp", CZMComputeDisplacementJumpSmallStrain);
+registerMooseObject("TensorMechanicsApp", ADCZMComputeDisplacementJumpSmallStrain);
 
+template <bool is_ad>
 InputParameters
-CZMComputeDisplacementJumpSmallStrain::validParams()
+CZMComputeDisplacementJumpSmallStrainTempl<is_ad>::validParams()
 {
-  InputParameters params = CZMComputeDisplacementJumpBase::validParams();
+  InputParameters params = CZMComputeDisplacementJumpBase<is_ad>::validParams();
   params.addClassDescription("Compute the total displacement jump across a czm interface in local "
                              "coordinates for the Small Strain kinematic formulation");
 
   return params;
 }
 
-CZMComputeDisplacementJumpSmallStrain::CZMComputeDisplacementJumpSmallStrain(
+template <bool is_ad>
+CZMComputeDisplacementJumpSmallStrainTempl<is_ad>::CZMComputeDisplacementJumpSmallStrainTempl(
     const InputParameters & parameters)
-  : CZMComputeDisplacementJumpBase(parameters)
+  : CZMComputeDisplacementJumpBase<is_ad>(parameters)
 {
 }
 
+template <bool is_ad>
 void
-CZMComputeDisplacementJumpSmallStrain::computeLocalDisplacementJump()
+CZMComputeDisplacementJumpSmallStrainTempl<is_ad>::computeLocalDisplacementJump()
 {
   _interface_displacement_jump[_qp] =
       _czm_total_rotation[_qp].transpose() * _displacement_jump_global[_qp];
 }
+
+template class CZMComputeDisplacementJumpSmallStrainTempl<false>;
+template class CZMComputeDisplacementJumpSmallStrainTempl<true>;
