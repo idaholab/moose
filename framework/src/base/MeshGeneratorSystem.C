@@ -259,9 +259,13 @@ MeshGeneratorSystem::createMeshGeneratorOrder()
 
         oss << gen->name();
       }
-      oss << "\"\n\nThis may be due to a missing dependency or may be intentional. Please "
-             "select the final MeshGenerator in\nthe [Mesh] block with the \"final_generator\" "
-             "parameter or add additional dependencies to remove the ambiguity.";
+      oss << "\"\n\nThis may be due to a missing dependency or may be intentional. Please either\n"
+             "- check that all the mesh generators are connected as a tree and culminate in a "
+             "single final mesh. Having one wrong 'input=mg' parameter is the most common error\n"
+             "- add additional dependencies to remove the ambiguity if you are using a user-built "
+             "MeshGenerator\n"
+             "- if you intend to execute a subset of the defined generators (uncommon), select the"
+             " final MeshGenerator in the [Mesh] block with the \"final_generator\" parameter.";
       mooseError(oss.str());
     }
 
