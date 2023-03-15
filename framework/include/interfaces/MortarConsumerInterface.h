@@ -51,7 +51,7 @@ public:
   SubdomainID secondarySubdomain() const { return _secondary_subdomain_id; }
 
   /**
-   * @retun Whether this object lies on the given primary-secondary boundary pair
+   * @return Whether this object lies on the given primary-secondary boundary pair
    */
   bool onInterface(BoundaryID primary_boundary_id, BoundaryID secondary_boundary_id) const;
 
@@ -219,7 +219,7 @@ MortarConsumerInterface::trimInteriorNodeDerivatives(
 
         mooseAssert(moose_var->isNodal(),
                     "Trimming of interior node's derivatives is only supported for Lagrange "
-                    "elements in mortar constraints");
+                    "elements in mortar objects");
 
         const auto remove_derivative_index = is_secondary
                                                  ? moose_var->dofIndices()[dof_index]

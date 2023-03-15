@@ -53,8 +53,9 @@ TangentialMortarMechanicalContact::computeQpResidual(Moose::MortarType type)
   MooseEnum direction("direction_1 direction_2", "direction_1");
 
   const auto tangential_pressure =
-      _direction == direction ? _weighted_velocities_uo.contactTangentialPressureDirOne()[_qp]
-                              : _weighted_velocities_uo.contactTangentialPressureDirTwo()[_qp];
+      _direction.compareCurrent(direction)
+          ? _weighted_velocities_uo.contactTangentialPressureDirOne()[_qp]
+          : _weighted_velocities_uo.contactTangentialPressureDirTwo()[_qp];
 
   switch (type)
   {

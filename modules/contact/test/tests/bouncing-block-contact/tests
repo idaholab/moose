@@ -227,15 +227,19 @@
       type = 'Exodiff'
       input = frictionless-weighted-gap.i
       exodiff = 'frictionless-weighted-gap-edge-dropping_out.e'
-      detail = 'using equal, first order bases for displacements and the lagrange multiplier with correct edge dropping'
-      cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Constraints/weighted_gap_lm/correct_edge_dropping=true Executioner/end_time=50 Outputs/exodus=true Outputs/file_base=frictionless-weighted-gap-edge-dropping_out "
+      detail = 'using equal, first order bases for displacements and the lagrange multiplier with '
+               'correct edge dropping'
+      cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e "
+                 "Constraints/weighted_gap_lm/correct_edge_dropping=true Executioner/end_time=50 "
+                 "Outputs/exodus=true Outputs/file_base=frictionless-weighted-gap-edge-dropping_out "
                  "Postprocessors/active=''"
     []
     [penalty]
       type = 'Exodiff'
       input = frictionless-penalty-weighted-gap.i
       exodiff = 'frictionless-penalty-weighted-gap_out.e'
-      detail = 'using a first order basis for displacements and penalty multiplication times the negative gap distance to form the contact force.'
+      detail = 'using a first order basis for displacements and penalty multiplication times the '
+               'negative gap distance to form the contact force.'
       cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
                  "Postprocessors/active=''"
       ad_indexing_type = 'global'
@@ -267,7 +271,23 @@
     input = 'variational-frictional.i'
     exodiff = 'variational-frictional_out.e'
     cli_args = 'Outputs/hide=procid'
-    requirement = 'The system shall be able to solve a frictional, variationally consistent, mortar mechanical contact problem in which the secondary side of the contact interface is split between processes when run in parallel.'
+    requirement = 'The system shall be able to solve a frictional, variationally consistent, mortar '
+                  'mechanical contact problem in which the secondary side of the contact interface '
+                  'is split between processes when run in parallel.'
+    method = "!dbg"
+    valgrind = 'heavy'
+  []
+  [split_secondary_action]
+    type = 'Exodiff'
+    input = 'variational-frictional-action.i'
+    exodiff = 'variational-frictional-action_exodus.e'
+    ad_indexing_type = 'global'
+    cli_args = 'Outputs/hide=procid'
+    requirement = 'The system shall be able to solve a frictional, variationally consistent, mortar '
+                  'mechanical contact problem in which the secondary side of the contact interface '
+                  'is split between processes when run in parallel while using the contact action to '
+                  'build the set of constraints, user objects, and application of generalized '
+                  'forces.'
     method = "!dbg"
     valgrind = 'heavy'
   []
@@ -275,7 +295,8 @@
     type = 'Exodiff'
     input = 'mixed-weighted-gap-swapped.i'
     exodiff = 'mixed-weighted-gap-swapped_out.e'
-    requirement = 'The system shall not attempt to zero Lagrange multipliers that do not exist on inactive nodes.'
+    requirement = 'The system shall not attempt to zero Lagrange multipliers that do not exist on '
+                  'inactive nodes.'
     method = "!dbg"
     valgrind = 'heavy'
     min_ad_size = '100'
