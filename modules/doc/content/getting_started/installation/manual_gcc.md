@@ -1,6 +1,8 @@
 ## GCC
 
-We need a modern C++17 capable compiler. Our minimum requirements are: GCC [!package!minimum_gcc], Clang [!package!minimum_clang]. This section will focus on building a GCC [!package!gcc] compiler stack.
+We need a modern C++17 capable compiler. Our minimum requirements are: GCC [!package!minimum_gcc],
+Clang [!package!minimum_clang]. This section will focus on building a GCC [!package!gcc] compiler
+stack.
 
 What version of GCC do we have?
 
@@ -13,8 +15,8 @@ This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ```
 
-If your version is less than [!package!minimum_gcc], you will need to build a newer version. If your version is at or
-greater than [!package!minimum_gcc], you have the option of skipping the GCC section.
+If your version is less than [!package!minimum_gcc], you will need to build a newer version. If your
+version is at or greater than [!package!minimum_gcc], you have the option of skipping to MPICH
 
 !package! code
 cd $STACK_SRC
@@ -44,14 +46,14 @@ cd $STACK_SRC/gcc-build
 
 make -j #   (where # is the number of cores available)
 
-make install
+make install -j # (where # is the number of cores available)
 !package-end!
 
 Any errors during configure/make will need to be investigated on your own. Every operating system I
 have come across has its own nuances of getting stuff built. Normally any issues are going to be
 solved by installing the necessary development libraries using your system package manager (apt-get,
-yum, zypper, etc). Hint: I would search the internet for 'how to build GCC [!package!gcc] on (insert the
-name/version of your operating system here)'
+yum, zypper, etc). Hint: I would search the internet for 'how to build GCC [!package!gcc] on (insert
+the name/version of your operating system here)'
 
 !alert! note
 In order to utilize our newly built GCC [!package!gcc] compiler, we need to set some variables:

@@ -54,5 +54,8 @@ make install
 !package-end!
 
 !alert! note
-The above configuration assumes you are using the custom version of GCC built in the previous section (note the several gcc-[!package!gcc] paths). If this is not the case, you will need to provide the correct paths to your current toolchain. It is also possible LLVM may build successfully if you omit the -D lines referencing gcc-[!package!gcc] entirely.
+The above configuration assumes you are using the custom version of GCC built in the previous
+section (note the several gcc-[!package!gcc] paths). If this is not the case, you will need to
+provide the correct paths to your current toolchain. It is also possible LLVM may build successfully
+if you omit the -D lines referencing gcc-[!package!gcc] entirely.
 !alert-end!
