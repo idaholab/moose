@@ -11,7 +11,9 @@
 
 // MOOSE includes
 #include "Moose.h" // using namespace libMesh
+#include "DataIO.h"
 
+#include "json.h"
 #include "libmesh/point.h"
 
 // forward declarations
@@ -74,3 +76,9 @@ private:
 
   Point _p0, _p1;
 };
+
+void dataStore(std::ostream & stream, LineSegment & l, void * context);
+void dataLoad(std::ostream & stream, LineSegment & l, void * context);
+
+void to_json(nlohmann::json & json, const Point * const & p);
+void to_json(nlohmann::json & json, const LineSegment * const & l);
