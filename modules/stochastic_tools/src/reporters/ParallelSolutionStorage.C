@@ -22,9 +22,10 @@ ParallelSolutionStorage::validParams()
 
 ParallelSolutionStorage::ParallelSolutionStorage(const InputParameters & parameters)
   : GeneralReporter(parameters),
-    _distributed_solutions(declareRestartableData<
-                           std::map<VariableName, std::vector<std::unique_ptr<DenseVector<Real>>>>>(
-        "distributed_solution"))
+    _distributed_solutions(
+        declareRestartableData<std::vector<std::vector<std::unique_ptr<DenseVector<Real>>>>>(
+            "distributed_solution")),
+    _variable_names(declareRestartableData<std::vector<VariableName>>("variable_names"))
 {
 }
 
@@ -35,23 +36,38 @@ ParallelSolutionStorage::initialSetup()
 }
 
 void
-ParallelSolutionStorage::addEntry(const VariableName & vname,
-                                  const std::vector<std::unique_ptr<DenseVector<Real>>> & solutions)
+ParallelSolutionStorage::initializeVariableStorage(const VariableName & vname)
 {
-  // std::vector<std::unique_ptr<std::vector<Real>>> & variable_container =
-  //     _distributed_solutions[vname];
+  if (std::find(_variable_names.begin(), _variable_names.end(), vname) == _variable_names.end())
+  {
+    _variable_names.push_back(vname);
+    _distributed_solutions.push_back(std::vector<std::unique_ptr<DenseVector<Real>>>());
+  }
+}
 
-  // for (const auto & solution : solutions)
-  // {
-  //   std::unique_ptr<std::vector<Real>> copied_solution =
-  //       std::make_unique<std::vector<Real>>(*solution);
-  //   variable_container.push_back(std::move(copied_solution));
-  // }
+void
+ParallelSolutionStorage::addEntry(const VariableName & vname,
+                                  std::unique_ptr<DenseVector<Real>> solution)
+{
+  const auto & it = std::find(_variable_names.begin(), _variable_names.end(), vname);
+  if (it == _variable_names.end())
+    mooseError("The sorage has not been initialized yet for ",
+               vname,
+               " call initializeVariableStorage first!");
 
-  // std::ostringstream mystream;
-  // mystream << "Processor " << processor_id() << std::endl;
-  // mystream << "Adding to: " << vname << std::endl;
-  // for (const auto & solution : variable_container)
-  //   mystream << Moose::stringify(*solution) << std::endl;
-  // std::cerr << mystream.str() << std::endl;
+  _distributed_solutions[it - _variable_names.begin()].push_back(std::move(solution));
+}
+
+void
+ParallelSolutionStorage::printEntries()
+{
+  std::ostringstream mystream;
+  mystream << "Processor " << processor_id() << std::endl;
+  for (unsigned int vari : index_range(_variable_names))
+  {
+    mystream << "Variable: " << _variable_names[vari] << std::endl;
+    for (const auto & solution : _distributed_solutions[vari])
+      mystream << Moose::stringify(solution->get_values()) << std::endl;
+  }
+  std::cerr << mystream.str() << std::endl;
 }

@@ -27,6 +27,12 @@ public:
     return _accumulated_solutions;
   }
 
+  const std::unique_ptr<NumericVector<Number>> & getSolution(unsigned int local_i)
+  {
+    mooseAssert(local_i < _accumulated_solutions.size(), "BZZZZ");
+    return _accumulated_solutions[local_i];
+  }
+
   unsigned int numLocalEntries() { return _accumulated_solutions.size(); }
 
 protected:

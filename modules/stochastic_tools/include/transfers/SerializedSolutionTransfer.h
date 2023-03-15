@@ -38,9 +38,23 @@ public:
   virtual void initializeToMultiapp() override;
   virtual void executeToMultiapp() override;
   virtual void finalizeToMultiapp() override;
+
+  void fillTransferMap(std::vector<std::pair<unsigned int, unsigned int>> & incoming_range,
+                       std::vector<std::pair<unsigned int, unsigned int>> & outgoing_range,
+                       std::vector<unsigned int> & app_to_processor,
+                       std::map<unsigned int, processor_id_type> & transfer_map);
+  void
+  createDataPartitioning(std::vector<unsigned int> & new_snapshots_per_app,
+                         std::vector<unsigned int> & local_already_in_container,
+                         std::vector<std::pair<unsigned int, unsigned int>> & incoming_begin_end,
+                         std::vector<std::pair<unsigned int, unsigned int>> & outgoing_begin_end);
   ///@}
 
 protected:
+  // bool hasLocalSolution(const std::vector<unsigned int> & solution_distribution,
+  //                       const unsigned int & app_index,
+  //                       const unsigned int & index);
+
   /// The input multiapp casted into a PODFullSolveMultiapp to get access to the
   /// specific pod attributes. Used in batch mode only and checking if the
   /// correct MultiApp type has been provided.
@@ -49,6 +63,10 @@ protected:
   std::vector<VariableName> _variable_names;
 
   std::string _serialized_solution_reporter;
+
+  std::vector<processor_id_type> _root_processors;
+
+  unsigned int _num_true_global_apps;
 
 private:
   unsigned int _local_solutions_begin;

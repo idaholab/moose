@@ -91,6 +91,6 @@
 [Reporters]
   [solution_storage]
     type = SolutionContainer
-    execute_on = 'TIMESTEP_BEGIN FINAL'
+    execute_on = 'TIMESTEP_BEGIN TIMESTEP_END FINAL'
   []
 []

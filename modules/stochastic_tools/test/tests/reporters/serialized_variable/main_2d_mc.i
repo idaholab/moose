@@ -12,10 +12,10 @@
 [Samplers]
   [sample]
     type = MonteCarlo
-    num_rows = 8
+    num_rows = 3
     distributions = 'S_dist'
     execute_on = initial
-    min_procs_per_row = 2
+    min_procs_per_row = 1
   []
 []
 
@@ -25,7 +25,7 @@
     input_files = sub.i
     sampler = sample
     mode = batch-restore
-    min_procs_per_app = 2
+    min_procs_per_app = 1
   []
 []
 

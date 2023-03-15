@@ -21,18 +21,22 @@ public:
   virtual void execute() override{};
   virtual void finalize() override {}
 
-  void addEntry(const VariableName & vname,
-                const std::vector<std::unique_ptr<DenseVector<Real>>> & solutions);
+  void addEntry(const VariableName & vname, std::unique_ptr<DenseVector<Real>> solution);
 
-  unsigned int numLocalEntries() { return _distributed_solutions.size(); }
+  void initializeVariableStorage(const VariableName & vname);
 
   bool hasGlobalEntry(unsigned int global_i)
   {
     return global_i >= _global_entries_begin && _global_entries_begin <= _global_entries_end;
   }
 
+  std::vector<std::unique_ptr<DenseVector<Real>>> & getStorage(unsigned int v_index) {return _distributed_solutions[v_index];}
+
+  void printEntries();
+
 protected:
-  std::map<VariableName, std::vector<std::unique_ptr<DenseVector<Real>>>> & _distributed_solutions;
+  std::vector<std::vector<std::unique_ptr<DenseVector<Real>>>> & _distributed_solutions;
+  std::vector<VariableName> & _variable_names;
 
   unsigned int _global_entries_begin;
   unsigned int _global_entries_end;

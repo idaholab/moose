@@ -51,5 +51,30 @@ public:
   static std::tuple<unsigned int, unsigned int, std::shared_ptr<DenseVector<Real>>>
   unpack(BufferIter in, Context *);
 };
+
+template <>
+class Packing<std::unique_ptr<DenseVector<Real>>>
+{
+
+public:
+  typedef Real buffer_type;
+
+  /// Getting the sizes of the packed objects using an iterator.
+  static unsigned int packed_size(typename std::vector<Real>::const_iterator in);
+
+  /// Getting the sizes of the packed objects using the object itself.
+  static unsigned int packable_size(const std::unique_ptr<DenseVector<Real>> & object,
+                                    const void *);
+
+  // Pack the objects on the sending process.
+  template <typename Iter, typename Context>
+  static void
+  pack(const std::unique_ptr<DenseVector<Real>> & object, Iter data_out, const Context *);
+
+  // Unpack the object on the receiving process.
+  template <typename BufferIter, typename Context>
+  static std::unique_ptr<DenseVector<Real>> unpack(BufferIter in, Context *);
+};
+
 } // namespace Parallel
 } // namespace libMesh
