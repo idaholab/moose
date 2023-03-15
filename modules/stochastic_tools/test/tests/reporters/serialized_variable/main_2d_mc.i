@@ -12,10 +12,10 @@
 [Samplers]
   [sample]
     type = MonteCarlo
-    num_rows = 3
+    num_rows = 6
     distributions = 'S_dist'
     execute_on = initial
-    min_procs_per_row = 1
+    min_procs_per_row = 2
   []
 []
 
@@ -25,7 +25,13 @@
     input_files = sub.i
     sampler = sample
     mode = batch-restore
-    min_procs_per_app = 1
+    min_procs_per_app = 2
+  []
+[]
+
+[Mappings]
+  [pod_mapping]
+    typ
   []
 []
 

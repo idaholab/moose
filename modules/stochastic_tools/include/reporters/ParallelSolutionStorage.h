@@ -21,24 +21,25 @@ public:
   virtual void execute() override{};
   virtual void finalize() override {}
 
-  void addEntry(const VariableName & vname, std::unique_ptr<DenseVector<Real>> solution);
+  void addEntry(const VariableName & vname,
+                unsigned int global_i,
+                std::unique_ptr<DenseVector<Real>> solution);
 
-  void initializeVariableStorage(const VariableName & vname);
-
-  bool hasGlobalEntry(unsigned int global_i)
+  std::vector<std::unique_ptr<DenseVector<Real>>> & getStorage(unsigned int sample_i,
+                                                               unsigned int variable_i)
   {
-    return global_i >= _global_entries_begin && _global_entries_begin <= _global_entries_end;
+    return _distributed_solutions[variable_i][sample_i];
   }
 
-  std::vector<std::unique_ptr<DenseVector<Real>>> & getStorage(unsigned int v_index) {return _distributed_solutions[v_index];}
+  void updateTimeStepNumbers();
+
+  unsigned int totalNumberOfStoredSolutions(const VariableName & vname);
 
   void printEntries();
 
 protected:
-  std::vector<std::vector<std::unique_ptr<DenseVector<Real>>>> & _distributed_solutions;
+  std::vector<std::vector<std::vector<std::unique_ptr<DenseVector<Real>>>>> &
+      _distributed_solutions;
+  std::vector<std::vector<unsigned int>> & _local_sample_ids;
   std::vector<VariableName> & _variable_names;
-
-  unsigned int _global_entries_begin;
-  unsigned int _global_entries_end;
-  unsigned int _num_global_entries;
 };
