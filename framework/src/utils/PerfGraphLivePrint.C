@@ -38,18 +38,6 @@ PerfGraphLivePrint::printLiveMessage(PerfGraph::SectionIncrement & section_incre
 {
   auto & section_info = _perf_graph_registry.sectionInfo(section_increment._id);
 
-  // If this section is just started - but other stuff has printed before we got to print its
-  // message just mark it as printed and return (i.e. - don't print it)
-  if (_last_num_printed <= _console_num_printed &&
-      section_increment._state == PerfGraph::IncrementState::STARTED &&
-      section_increment._beginning_num_printed != _console_num_printed)
-  {
-    std::cout << "skipping a print << " << section_info._live_message << std::endl;
-    section_increment._state = PerfGraph::IncrementState::PRINTED;
-    _last_printed_increment = &section_increment;
-    return;
-  }
-
   // If we're not printing dots - we shouldn't be printing the message at all
   if (!section_info._print_dots || !_stack_top_print_dots)
   {
@@ -59,8 +47,21 @@ PerfGraphLivePrint::printLiveMessage(PerfGraph::SectionIncrement & section_incre
   }
 
   // If the live_message is empty - just print the name
-  const auto message =
+  auto message =
       !section_info._live_message.empty() ? section_info._live_message : section_info._name;
+
+  // If this section is just started - but other stuff has printed before we got to print its
+  // message, we need to print it anyway because it could be lengthy and print unexplained
+  // dots to the console (until the Finished message). "Currently" conveys the message
+  // that we did not just start it, but we are doing that right now
+  if (_last_num_printed <= _console_num_printed &&
+      section_increment._state == PerfGraph::IncrementState::STARTED &&
+      section_increment._beginning_num_printed != _console_num_printed)
+  {
+    message = "Currently " + message;
+    // The 10 is for "Currently "
+    section_increment._num_dots = 10;
+  }
 
   // This line is different - need to finish the last line
   if (_last_printed_increment && _last_printed_increment != &section_increment &&
@@ -102,7 +103,11 @@ PerfGraphLivePrint::printLiveMessage(PerfGraph::SectionIncrement & section_incre
     if (!section_info._print_dots)
       _console << '\n';
 
-    section_increment._num_dots = 0;
+    // Reset the dots since we're printing, except in the "Currently" case
+    if (section_increment._state != PerfGraph::IncrementState::STARTED ||
+        _last_num_printed > _console_num_printed ||
+        section_increment._beginning_num_printed == _console_num_printed)
+      section_increment._num_dots = 0;
   }
 
   section_increment._state = PerfGraph::IncrementState::PRINTED;
