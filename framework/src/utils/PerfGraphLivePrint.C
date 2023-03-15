@@ -44,6 +44,7 @@ PerfGraphLivePrint::printLiveMessage(PerfGraph::SectionIncrement & section_incre
       section_increment._state == PerfGraph::IncrementState::STARTED &&
       section_increment._beginning_num_printed != _console_num_printed)
   {
+    std::cout << "skipping a print << " << section_info._live_message << std::endl;
     section_increment._state = PerfGraph::IncrementState::PRINTED;
     _last_printed_increment = &section_increment;
     return;

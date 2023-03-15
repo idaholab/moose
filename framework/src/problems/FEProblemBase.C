@@ -5712,7 +5712,7 @@ FEProblemBase::restoreOldSolutions()
 void
 FEProblemBase::outputStep(ExecFlagType type)
 {
-  TIME_SECTION("outputStep", 1, "Outputting on " + type.name());
+  TIME_SECTION("outputStep", 2, "Outputting on " + type.name());
 
   setCurrentExecuteOnFlag(type);
 
