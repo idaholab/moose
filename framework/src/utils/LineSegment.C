@@ -253,6 +253,6 @@ to_json(nlohmann::json & json, const Point & p)
 void
 to_json(nlohmann::json & json, const LineSegment & l)
 {
-  to_json(json, l.start());
-  to_json(json, l.end());
+  to_json(json["start"], l.start());
+  to_json(json["end"], l.end());
 }

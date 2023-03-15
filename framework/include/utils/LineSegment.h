@@ -80,5 +80,5 @@ private:
 void dataStore(std::ostream & stream, LineSegment & l, void * context);
 void dataLoad(std::ostream & stream, LineSegment & l, void * context);
 
-void to_json(nlohmann::json & json, const Point * const & p);
-void to_json(nlohmann::json & json, const LineSegment * const & l);
+void to_json(nlohmann::json & json, const Point & p);
+void to_json(nlohmann::json & json, const LineSegment & l);
