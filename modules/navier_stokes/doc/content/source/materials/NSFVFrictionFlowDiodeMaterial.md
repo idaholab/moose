@@ -25,23 +25,23 @@ The friction coefficients are then combined using a [PiecewiseByBlockVectorFunct
 
 ### Dynamic operation of a diode
 
-In this example, we show three [Control](/syntax/Control/index.md) strategies for the diode.
+In this example, we show three [Control](syntax/Controls/index.md) strategies for the diode.
 The idea of these controls is to detect a condition in which the flow should be blocked, because it's going
 in the way opposite the direction of the diode, or because it meets a criterion that is outlined in the postprocessors
 and functions involved to describe it.
 
 The first strategy is simply to block the flow at a given time.
 
-!listing test/tests/finite_volume/materials/flow_diode/friction.i block=Controls/time_based Functions/time_function
+!listing test/tests/finite_volume/materials/flow_diode/transient_operation.i block=Controls/time_based Functions/time_function
 
 The second strategy is to look at the pressure drop across the diode, and block (add friction to) the flow if it exceeds a certain value.
 If it exceeds a certain value, then it means the flow is flowing through the diode in a certain direction.
 
-!listing test/tests/finite_volume/materials/flow_diode/friction.i block=Controls/pdrop_based Postprocessors/pdrop_diode Functions/pdrop_positive
+!listing test/tests/finite_volume/materials/flow_diode/transient_operation.i block=Controls/pdrop_based Postprocessors/pdrop_diode Functions/pdrop_positive
 
 The final strategy is to compute the mass flow rate through the diode, and block (add friction to) the flow if it exceeds a certain value.
 
-!listing test/tests/finite_volume/materials/flow_diode/friction.i block=Controls/flow_based Postprocessors/flow_diode Functions/velocity_big_enough
+!listing test/tests/finite_volume/materials/flow_diode/transient_operation.i block=Controls/flow_based Postprocessors/flow_diode Functions/velocity_big_enough
 
 !alert note
 All these strategies are workarounds for the fact that looking at the local velocity (in multi-dimensional space)

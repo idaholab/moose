@@ -34,7 +34,7 @@ the vector weighting functor and $\vec{n}$ is the local element side normal.
 In this example, we measure the pressure drop between the inlet and outlet of a flow channel,
 as well as between the inlet and a midsection.
 
-!listing test/tests/postprocessors/pressure_drop/test.i block=Postprocessors
+!listing test/tests/postprocessors/pressure_drop/drop_insfv.i block=Postprocessors
 
 !syntax parameters /Postprocessors/PressureDrop
 
