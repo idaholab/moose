@@ -153,10 +153,9 @@ PerfGraphLivePrint::printStats(PerfGraph::SectionIncrement & section_increment_s
        _console_num_printed)) // This means someone _else_ printed
   {
     // If we had printed some dots - we need to finish the line
-    if ((section_increment_start._beginning_num_printed == _console_num_printed) &&
-        (_last_printed_increment &&
-         _last_printed_increment->_state == PerfGraph::IncrementState::PRINTED &&
-         _perf_graph_registry.sectionInfo(_last_printed_increment->_id)._print_dots))
+    if (_last_printed_increment &&
+        _last_printed_increment->_state == PerfGraph::IncrementState::PRINTED &&
+        _perf_graph_registry.sectionInfo(_last_printed_increment->_id)._print_dots)
       _console << '\n';
 
     _console << std::string(2 * section_increment_start._print_stack_level, ' ') << "Finished "
