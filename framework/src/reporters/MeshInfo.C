@@ -19,7 +19,8 @@ InputParameters
 MeshInfo::validParams()
 {
   InputParameters params = GeneralReporter::validParams();
-  params.addClassDescription("Report the time and iteration information for the simulation.");
+  params.addClassDescription(
+      "Report mesh information, such as the number of elements, nodes, and degrees of freedom.");
 
   MultiMooseEnum items(
       "num_dofs num_dofs_nonlinear num_dofs_auxiliary num_elements num_nodes num_local_dofs "

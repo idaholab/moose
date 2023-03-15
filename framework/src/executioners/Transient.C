@@ -730,7 +730,7 @@ Transient::setupTimeIntegrator()
 }
 
 std::string
-Transient::getTimeStepperName()
+Transient::getTimeStepperName() const
 {
   if (_time_stepper)
   {
@@ -739,6 +739,16 @@ Transient::getTimeStepperName()
   }
   else
     return std::string();
+}
+
+std::string
+Transient::getTimeIntegratorName() const
+{
+  const auto * ti = _nl.getTimeIntegrator();
+  if (ti)
+    return ti->type();
+  else
+    mooseError("Time integrator has not been built yet so we can't retrieve its name");
 }
 
 Real
