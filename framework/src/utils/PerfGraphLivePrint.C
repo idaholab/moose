@@ -371,7 +371,7 @@ PerfGraphLivePrint::start()
     _printed = false;
 
     // Iterate from the last thing printed (begin) to the last thing in the list (end)
-    // If the time or memory of any section is above the threshold, print everything inbetween and
+    // If the time or memory of any section is above the threshold, print everything in between and
     // update begin
 
     // Are we still sitting in the same place as the last iteration?  If so, we need to print
