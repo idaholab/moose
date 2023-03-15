@@ -13,6 +13,7 @@
     polygon_size = 5.0
     preserve_volumes = on
     flat_side_up = true
+    generate_side_specific_boundaries = true
   []
   [square_2]
       type = PolygonConcentricCircleMeshGenerator
@@ -28,6 +29,7 @@
       polygon_size = 5.0
       preserve_volumes = on
       flat_side_up = true
+      generate_side_specific_boundaries = true
   []
   [pattern]
     type = PatternedCartesianMeshGenerator

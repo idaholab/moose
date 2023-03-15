@@ -9,5 +9,6 @@
     preserve_volumes = on
     external_boundary_id = 9999
     external_boundary_name = 'polygon_out'
+    generate_side_specific_boundaries = true
   []
 []

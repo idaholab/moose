@@ -161,7 +161,7 @@ PolygonConcentricCircleMeshGeneratorBase::validParams()
   params.addParam<boundary_id_type>(
       "interface_boundary_id_shift", 0, "Integer used to shift interface boundary IDs.");
   params.addParam<bool>("generate_side_specific_boundaries",
-                        true,
+                        false,
                         "whether the side-specific external boundaries are generated or not");
   params.addRangeCheckedParam<boundary_id_type>("external_boundary_id",
                                                 "external_boundary_id>0",
