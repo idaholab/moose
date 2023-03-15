@@ -222,3 +222,37 @@ LineSegment::intersect(const LineSegment & l, Point & intersect_p) const
   return true;
      */
 }
+
+template <>
+void
+dataStore(std::ostream & stream, LineSegment & l, void * context)
+{
+  dataStore(stream, l.start(), context);
+  dataStore(stream, l.end(), context);
+}
+
+template <>
+void
+dataLoad(std::istream & stream, LineSegment & l, void * context)
+{
+  Point start;
+  dataLoad(stream, start, context);
+  Point end;
+  dataLoad(stream, end, context);
+  l = LineSegment(start, end);
+}
+
+void
+to_json(nlohmann::json & json, const Point & p)
+{
+  json["x"] = p(0);
+  json["y"] = p(1);
+  json["z"] = p(2);
+}
+
+void
+to_json(nlohmann::json & json, const LineSegment & l)
+{
+  to_json(json, l.start());
+  to_json(json, l.end());
+}
