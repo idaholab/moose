@@ -144,7 +144,8 @@ PorousFlowMaterial::sizeNodalProperties()
     props[prop_id]->resize(new_size);
 
   for (const auto prop_id : _supplied_old_prop_ids)
-    props_old[prop_id]->resize(new_size);
+    if (auto * const old_prop = props_old[prop_id])
+      old_prop->resize(new_size);
 
   if (storage.hasOlderProperties())
     for (const auto prop_id : _supplied_old_prop_ids)
