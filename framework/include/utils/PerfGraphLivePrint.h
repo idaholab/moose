@@ -62,6 +62,9 @@ private:
   /// Number of columns before wrapping
   const unsigned int WRAP_LENGTH = 90;
 
+  /// The app performing this print
+  const MooseApp & _app;
+
   /// Reference to the PerfGraph to work with
   PerfGraph & _perf_graph;
 

@@ -9,9 +9,11 @@
 
 #include "PerfGraphLivePrint.h"
 #include "PerfGraphRegistry.h"
+#include "MooseApp.h"
 
 PerfGraphLivePrint::PerfGraphLivePrint(PerfGraph & perf_graph, MooseApp & app)
   : ConsoleStreamInterface(app),
+    _app(app),
     _perf_graph(perf_graph),
     _perf_graph_registry(moose::internal::getPerfGraphRegistry()),
     _execution_list(perf_graph._execution_list),
@@ -138,6 +140,10 @@ PerfGraphLivePrint::printStats(PerfGraph::SectionIncrement & section_increment_s
   auto memory_increment = section_increment_finish._memory - section_increment_start._memory;
 
   auto num_horizontal_chars = message.size() + (2 * section_increment_start._print_stack_level);
+
+  // Add multiapps prefix size
+  if (!_app.isUltimateMaster())
+    num_horizontal_chars += _app.name().size() + 2;
 
   // Do we need to print "Finished"?
   // This happens after something else printed in-between when this increment started and finished
