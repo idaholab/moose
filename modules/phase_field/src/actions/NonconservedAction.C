@@ -79,11 +79,8 @@ NonconservedAction::act()
     auto type = AddVariableAction::variableType(_fe_type);
     auto var_params = _factory.getValidParams(type);
 
-    var_params.applySpecificParameters(_pars, {"family", "order"});
+    var_params.applySpecificParameters(_pars, {"family", "order", "block"});
     var_params.set<std::vector<Real>>("scaling") = {getParam<Real>("scaling")};
-    if (isParamValid("block"))
-      var_params.set<std::vector<SubdomainName>>("block") =
-          getParam<std::vector<SubdomainName>>("block");
 
     // Create nonconserved variable
     _problem->addVariable(type, _var_name, var_params);

@@ -80,9 +80,7 @@ BicrystalCircleGrainICAction::act()
       poly_params.set<Real>("invalue") = 0.0;
       poly_params.set<Real>("outvalue") = 1.0;
     }
-    if (isParamValid("block"))
-      poly_params.set<std::vector<SubdomainName>>("block") =
-          getParam<std::vector<SubdomainName>>("block");
+    poly_params.applySpecificParameters(_pars, {"block"});
 
     // Add initial condition
     _problem->addInitialCondition(

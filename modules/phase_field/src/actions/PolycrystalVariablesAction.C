@@ -75,11 +75,8 @@ PolycrystalVariablesAction::act()
       auto type = AddVariableAction::variableType(fe_type);
       auto var_params = _factory.getValidParams(type);
 
-      var_params.applySpecificParameters(_pars, {"order", "family"});
+      var_params.applySpecificParameters(_pars, {"order", "family", "block"});
       var_params.set<std::vector<Real>>("scaling") = {_pars.get<Real>("scaling")};
-      if (isParamValid("block"))
-        var_params.set<std::vector<SubdomainName>>("block") =
-            getParam<std::vector<SubdomainName>>("block");
       _problem->addVariable(type, var_name, var_params);
     }
 

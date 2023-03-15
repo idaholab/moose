@@ -60,11 +60,8 @@ PFCRFFVariablesAction::act()
   auto type = AddVariableAction::variableType(fe_type);
   auto var_params = _factory.getValidParams(type);
 
-  var_params.applySpecificParameters(_pars, {"family", "order"});
+  var_params.applySpecificParameters(_pars, {"family", "order", "block"});
   var_params.set<std::vector<Real>>("scaling") = {getParam<Real>("scaling")};
-  if (isParamValid("block"))
-    var_params.set<std::vector<SubdomainName>>("block") =
-        getParam<std::vector<SubdomainName>>("block");
 
   // Loop through the number of L variables
   for (unsigned int l = 0; l < _num_L; ++l)

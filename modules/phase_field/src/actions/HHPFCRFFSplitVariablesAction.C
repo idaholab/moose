@@ -67,12 +67,8 @@ HHPFCRFFSplitVariablesAction::act()
 
     const auto type = "MooseVariable";
     auto params = _factory.getValidParams(type);
-    params.set<MooseEnum>("order") = getParam<MooseEnum>("order");
-    params.set<MooseEnum>("family") = getParam<MooseEnum>("family");
+    params.applySpecificParameters(_pars, {"family", "order", "block"});
     params.set<std::vector<Real>>("scaling") = {getParam<Real>("scaling")};
-    if (isParamValid("block"))
-      params.set<std::vector<SubdomainName>>("block") =
-          getParam<std::vector<SubdomainName>>("block");
 
     _problem->addVariable(type, real_name, params);
 

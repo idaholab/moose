@@ -53,12 +53,9 @@ PolycrystalRandomICAction::act()
     // Set parameters for BoundingBoxIC
     InputParameters poly_params = _factory.getValidParams("PolycrystalRandomIC");
     poly_params.set<VariableName>("variable") = _var_name_base + Moose::stringify(op);
-    poly_params.set<unsigned int>("op_num") = _op_num;
     poly_params.set<unsigned int>("op_index") = op;
     poly_params.set<unsigned int>("random_type") = _random_type;
-    if (isParamValid("block"))
-      poly_params.set<std::vector<SubdomainName>>("block") =
-          getParam<std::vector<SubdomainName>>("block");
+    poly_params.applySpecificParameters(parameters(), {"op_num", "block"});
 
     // Add initial condition
     _problem->addInitialCondition("PolycrystalRandomIC",

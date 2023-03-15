@@ -59,9 +59,7 @@ DisplacementGradientsAction::act()
       var_params.set<MooseEnum>("family") = "LAGRANGE";
       var_params.set<MooseEnum>("order") = "FIRST";
       var_params.set<std::vector<Real>>("scaling") = {scaling};
-      if (isParamValid("block"))
-        var_params.set<std::vector<SubdomainName>>("block") =
-            getParam<std::vector<SubdomainName>>("block");
+      var_params.applySpecificParameters(_pars, {"block"});
 
       // Create displacement gradient variables
       _problem->addVariable("MooseVariable", _displacement_gradients[i], var_params);
