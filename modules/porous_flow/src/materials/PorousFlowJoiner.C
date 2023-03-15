@@ -46,7 +46,6 @@ PorousFlowJoinerTempl<is_ad>::PorousFlowJoinerTempl(const InputParameters & para
         : !_nodal_material
             ? &getMaterialProperty<std::vector<Real>>("dPorousFlow_temperature_qp_dvar")
             : &getMaterialProperty<std::vector<Real>>("dPorousFlow_temperature_nodal_dvar")),
-
     _has_mass_fraction(!_nodal_material
                            ? hasGenericMaterialProperty<std::vector<std::vector<Real>>, is_ad>(
                                  "PorousFlow_mass_frac_qp")

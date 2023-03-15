@@ -139,10 +139,8 @@ PorousFlowMultiComponentFluidTempl<is_ad>::computeQpProperties()
   if (_compute_internal_energy)
   {
     if (is_ad)
-    {
       (*_internal_energy)[_qp] =
           _fp.e_from_p_T_X(_porepressure[_qp][_phase_num] * _pressure_to_Pascals, Tk, _X[_qp]);
-    }
     else
     {
       Real e, de_dp, de_dT, de_dx;
@@ -165,10 +163,8 @@ PorousFlowMultiComponentFluidTempl<is_ad>::computeQpProperties()
   if (_compute_enthalpy)
   {
     if (is_ad)
-    {
       (*_enthalpy)[_qp] =
           _fp.h_from_p_T_X(_porepressure[_qp][_phase_num] * _pressure_to_Pascals, Tk, _X[_qp]);
-    }
     else
     {
       Real h, dh_dp, dh_dT, dh_dx;
