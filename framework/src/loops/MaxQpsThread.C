@@ -47,6 +47,9 @@ MaxQpsThread::operator()(const ConstElemRange & range)
     if (!seen_it.insert(std::make_pair(elem->type(), elem->subdomain_id())).second)
       continue;
 
+    if (!elem->has_quadrature_support())
+      continue;
+
     // This ensures we can access the correct qrules if any block-specific
     // qrules have been created.
     assem.setCurrentSubdomainID(elem->subdomain_id());

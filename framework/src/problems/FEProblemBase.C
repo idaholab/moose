@@ -1461,6 +1461,9 @@ FEProblemBase::setVariableAllDoFMap(const std::vector<const MooseVariableFEBase 
 void
 FEProblemBase::prepare(const Elem * elem, THREAD_ID tid)
 {
+  if (!elem->has_quadrature_support())
+    return;
+
   for (const auto i : index_range(_nl))
   {
     _assembly[tid][i]->reinit(elem);
@@ -1491,6 +1494,9 @@ FEProblemBase::prepare(const Elem * elem, THREAD_ID tid)
 void
 FEProblemBase::prepareFace(const Elem * elem, THREAD_ID tid)
 {
+  if (!elem->has_quadrature_support())
+    return;
+
   for (auto & nl : _nl)
     nl->prepareFace(tid, true);
   _aux->prepareFace(tid, false);
@@ -1506,6 +1512,9 @@ FEProblemBase::prepare(const Elem * elem,
                        const std::vector<dof_id_type> & dof_indices,
                        THREAD_ID tid)
 {
+  if (!elem->has_quadrature_support())
+    return;
+
   for (const auto i : index_range(_nl))
   {
     _assembly[tid][i]->reinit(elem);
@@ -1964,6 +1973,9 @@ FEProblemBase::reinitDirac(const Elem * elem, THREAD_ID tid)
 void
 FEProblemBase::reinitElem(const Elem * elem, THREAD_ID tid)
 {
+  if (!elem->has_quadrature_support())
+    return;
+
   for (auto & nl : _nl)
     nl->reinitElem(elem, tid);
   _aux->reinitElem(elem, tid);
@@ -1977,6 +1989,9 @@ FEProblemBase::reinitElemPhys(const Elem * elem,
                               const std::vector<Point> & phys_points_in_elem,
                               THREAD_ID tid)
 {
+  if (!elem->has_quadrature_support())
+    return;
+
   mooseAssert(_mesh.queryElemPtr(elem->id()) == elem,
               "Are you calling this method with a displaced mesh element?");
 
