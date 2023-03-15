@@ -137,7 +137,7 @@ PerfGraphLivePrint::printStats(PerfGraph::SectionIncrement & section_increment_s
       std::chrono::duration<double>(section_increment_finish._time - section_increment_start._time)
           .count();
 
-  auto memory_increment = section_increment_finish._memory - section_increment_start._memory;
+  auto memory_total = section_increment_finish._memory;
 
   auto num_horizontal_chars = message.size() + (2 * section_increment_start._print_stack_level);
 
@@ -176,7 +176,7 @@ PerfGraphLivePrint::printStats(PerfGraph::SectionIncrement & section_increment_s
   _console << COLOR_DEFAULT;
   _console << ']' << " [";
   _console << COLOR_YELLOW << std::setw(5) << std::fixed;
-  _console << memory_increment;
+  _console << memory_total;
   _console << " MB";
   _console << COLOR_DEFAULT;
   _console << ']';
