@@ -406,7 +406,7 @@ MooseMesh::prepare(bool)
 
   update();
 
-// Check if there is subdomain name duplication for the same subdomain ID
+  // Check if there is subdomain name duplication for the same subdomain ID
   checkDuplicateSubdomainNames();
 
   _moose_mesh_prepared = true;
