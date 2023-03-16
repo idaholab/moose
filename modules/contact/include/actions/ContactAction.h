@@ -110,4 +110,8 @@ private:
    * Generate constraints for node to face contact
    */
   void addNodeFaceContact();
+  /**
+   * Add single contact pressure auxiliary kernel for various contact action objects
+   */
+  void addContactPressureAuxKernel();
 };

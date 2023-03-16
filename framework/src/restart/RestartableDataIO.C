@@ -108,7 +108,7 @@ RestartableDataIO::serializeRestartableData(const RestartableDataMap & restartab
     for (const auto & it : restartable_data)
     {
       std::ostringstream data;
-      it.second.value->store(data);
+      it.second->store(data);
 
       // Store the size of the data then the data
       unsigned int data_size = static_cast<unsigned int>(data.tellp());
@@ -170,7 +170,7 @@ RestartableDataIO::deserializeRestartableData(const RestartableDataMap & restart
       if (current_pair == restartable_data.end())
         mooseError("restartable_data missing ", current_name, "\n");
 
-      current_pair->second.value->load(stream);
+      current_pair->second->load(stream);
     }
     else
     {

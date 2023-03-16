@@ -17,7 +17,7 @@ registerMooseObject("NavierStokesApp", PINSFVEnergyTimeDerivative);
 InputParameters
 PINSFVEnergyTimeDerivative::validParams()
 {
-  InputParameters params = FVTimeKernel::validParams();
+  InputParameters params = FVFunctorTimeKernel::validParams();
   params.addClassDescription(
       "Adds the time derivative term to the Navier-Stokes energy equation: "
       "for fluids: d(eps * rho * cp * T)/dt, for solids: (1 - eps) * d(rho * cp * T)/dt"
@@ -37,7 +37,7 @@ PINSFVEnergyTimeDerivative::validParams()
 }
 
 PINSFVEnergyTimeDerivative::PINSFVEnergyTimeDerivative(const InputParameters & params)
-  : FVTimeKernel(params),
+  : FVFunctorTimeKernel(params),
     _rho(getFunctor<ADReal>(NS::density)),
     _rho_dot(isParamValid(NS::time_deriv(NS::density))
                  ? &getFunctor<ADReal>(NS::time_deriv(NS::density))
@@ -58,7 +58,7 @@ PINSFVEnergyTimeDerivative::computeQpResidual()
   else
   {
     auto elem_arg = makeElemArg(_current_elem);
-    auto time_derivative = _rho(elem_arg) * _cp(elem_arg) * FVTimeKernel::computeQpResidual();
+    auto time_derivative = _rho(elem_arg) * _cp(elem_arg) * _var.dot(elem_arg);
     if (_rho_dot)
       time_derivative += (*_rho_dot)(elem_arg)*_cp(elem_arg) * _var(elem_arg);
 

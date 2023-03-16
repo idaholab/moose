@@ -34,6 +34,8 @@ C     TEST FETCHING JOB NAME
       CALL GETJOBNAME(DIR, LEN)
       PRINT *, "getjobname", LEN, DIR
 
+      PRINT *, "Loading step is", KSTEP
+
       IF (KSTEP .GE. 1 .AND. KSTEP .LE. 4) THEN
 C       TEST OUTPUTTING ERROR MESSAGES
         I(1) = 1

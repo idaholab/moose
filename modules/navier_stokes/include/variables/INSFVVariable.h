@@ -20,9 +20,59 @@ public:
 
   static InputParameters validParams();
 
+  // The INSFV system relies on on-the-fly functor evaluation and does not need any pre-init'd data
+  void computeFaceValues(const FaceInfo &) override;
+  void computeElemValues() override;
+  void computeElemValuesFace() override;
+  void computeNeighborValuesFace() override;
+  void computeNeighborValues() override;
+  void requireQpComputations() override { _qp_calculations = true; }
+
 protected:
   /**
    * Returns whether the passed-in \p FaceInfo corresponds to a fully-developed flow face
    */
   bool isFullyDevelopedFlowFace(const FaceInfo & fi) const;
+
+private:
+  /// Whether to pre-initialize variable data for use in traditional MOOSE quadrature point based
+  /// objects
+  bool _qp_calculations;
 };
+
+inline void
+INSFVVariable::computeFaceValues(const FaceInfo & fi)
+{
+  if (_qp_calculations)
+    MooseVariableFVReal::computeFaceValues(fi);
+}
+
+inline void
+INSFVVariable::computeElemValues()
+{
+  if (_qp_calculations)
+    MooseVariableFVReal::computeElemValues();
+  else
+    _element_data->setGeometry(Moose::Volume);
+}
+
+inline void
+INSFVVariable::computeElemValuesFace()
+{
+  if (_qp_calculations)
+    MooseVariableFVReal::computeElemValuesFace();
+}
+
+inline void
+INSFVVariable::computeNeighborValuesFace()
+{
+  if (_qp_calculations)
+    MooseVariableFVReal::computeNeighborValuesFace();
+}
+
+inline void
+INSFVVariable::computeNeighborValues()
+{
+  if (_qp_calculations)
+    MooseVariableFVReal::computeNeighborValues();
+}

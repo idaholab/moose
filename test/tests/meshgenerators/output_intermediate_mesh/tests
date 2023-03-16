@@ -1,0 +1,30 @@
+[Tests]
+  [intermediate_mesh_output]
+  design = 'MeshGenerator.md'
+  issues = '#23486'
+  requirement = 'The system shall support the file output of intermediate generated meshes in'
+
+    [exodus]
+        type = 'Exodiff'
+        input = 'output_intermediate_mesh.i'
+        exodiff = 'left_in.e'
+        cli_args = "--mesh-only"
+        recover = false
+
+        detail = "the exodus file format"
+    []
+    # nemesis output without HDF5 is not supported in libmesh@1463349(this part will be available in the next libmesh update).
+    # Therefore, this test is commented out until next libmesh update
+
+    # [nemesis]
+    #   type = 'Exodiff'
+    #   input = 'output_intermediate_mesh.i'
+    #   exodiff = 'left_in.e.2.0 left_in.e.2.1'
+    #   cli_args = "Mesh/left/nemesis=true --mesh-only"
+    #   recover = false
+    #   min_parallel = 2
+    #   max_parallel = 2
+    #   detail = "the nemesis file format"
+    # []
+  []
+[]

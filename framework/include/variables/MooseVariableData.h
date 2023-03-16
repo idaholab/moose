@@ -17,6 +17,7 @@
 #include "libmesh/vector_value.h"
 #include "libmesh/tensor_value.h"
 #include "libmesh/type_n_tensor.h"
+#include "libmesh/enum_fe_family.h"
 #include "libmesh/fe_type.h"
 #include "ADUtils.h"
 
@@ -228,6 +229,7 @@ public:
 
   bool isNodal() const override { return _is_nodal; }
   bool hasDoFsOnNodes() const override { return _continuity != DISCONTINUOUS; }
+  FEContinuity getContinuity() const override { return _continuity; };
   const Node * const & node() const { return _node; }
   const dof_id_type & nodalDofIndex() const { return _nodal_dof_index; }
   bool isNodalDefined() const { return _has_dof_indices; }

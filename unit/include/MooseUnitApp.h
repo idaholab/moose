@@ -19,4 +19,7 @@ public:
 
   static InputParameters validParams();
   static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
+
+  /// So that we can construct MeshGenerators with metadata in unit apps
+  virtual bool constructingMeshGenerators() const override { return true; }
 };

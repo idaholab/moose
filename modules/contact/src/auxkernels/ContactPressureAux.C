@@ -21,7 +21,10 @@ ContactPressureAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
   params.addRequiredCoupledVar("nodal_area", "The nodal area");
-  params.addRequiredParam<BoundaryName>("paired_boundary", "The boundary to be penetrated");
+  params.addRequiredParam<std::vector<BoundaryName>>(
+      "paired_boundary",
+      "The set of boundaries in contact with those specified in 'boundary'. Ordering must be "
+      "consistent with that in 'boundary'.");
   params.set<ExecFlagEnum>("execute_on") = EXEC_NONLINEAR;
   MooseEnum orders("FIRST SECOND THIRD FOURTH", "FIRST");
   params.addParam<MooseEnum>("order", orders, "The finite element order: " + orders.getRawNames());
@@ -34,11 +37,19 @@ ContactPressureAux::validParams()
 ContactPressureAux::ContactPressureAux(const InputParameters & params)
   : AuxKernel(params),
     _nodal_area(coupledValue("nodal_area")),
-    _penetration_locator(
-        getPenetrationLocator(getParam<BoundaryName>("paired_boundary"),
-                              getParam<std::vector<BoundaryName>>("boundary")[0],
-                              Utility::string_to_enum<Order>(getParam<MooseEnum>("order"))))
+    _number_pairs(getParam<std::vector<BoundaryName>>("paired_boundary").size()),
+    _penetration_locators(_number_pairs)
 {
+  if (_number_pairs != getParam<std::vector<BoundaryName>>("boundary").size())
+    paramError("boundary",
+               "Boundary and paired boundary vectors are not the same size in the contact pressure "
+               "auxiliary kernel. Please check your input");
+
+  for (const auto i : make_range(_number_pairs))
+    _penetration_locators[i] =
+        &getPenetrationLocator(getParam<std::vector<BoundaryName>>("paired_boundary")[i],
+                               getParam<std::vector<BoundaryName>>("boundary")[i],
+                               Utility::string_to_enum<Order>(getParam<MooseEnum>("order")));
 }
 
 ContactPressureAux::~ContactPressureAux() {}
@@ -48,14 +59,19 @@ ContactPressureAux::computeValue()
 {
   Real value(0);
   const Real area = _nodal_area[_qp];
-  const PenetrationInfo * pinfo(NULL);
+  const PenetrationInfo * penetration_info(nullptr);
 
-  const auto it = _penetration_locator._penetration_info.find(_current_node->id());
-  if (it != _penetration_locator._penetration_info.end())
-    pinfo = it->second;
+  for (const auto i : make_range(_number_pairs))
+  {
+    const auto it = _penetration_locators[i]->_penetration_info.find(_current_node->id());
+    if (it != _penetration_locators[i]->_penetration_info.end())
+      penetration_info = it->second;
 
-  if (pinfo && area != 0)
-    value = -(pinfo->_contact_force * pinfo->_normal) / area;
+    if (penetration_info && area != 0)
+      value -= (penetration_info->_contact_force * penetration_info->_normal) / area;
+
+    penetration_info = nullptr;
+  }
 
   return value;
 }

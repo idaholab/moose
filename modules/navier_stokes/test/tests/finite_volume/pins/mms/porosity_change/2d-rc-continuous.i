@@ -182,7 +182,7 @@ velocity_interp_method='rc'
     expression = 'sin((1/2)*y*pi)*cos((1/2)*x*pi)'
   []
   [forcing_u]
-    type = ADParsedFunction
+    type = ParsedFunction
     expression = '15.0*mu*(-1/2*pi*sin((1/2)*x*pi)*sin((1/2)*y*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1)) + 15.0*exp(30 - 30*x)*sin((1/2)*y*pi)*cos((1/2)*x*pi)/((exp(30 - 30*x) + 1)^2*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^2))*exp(30 - 30*x)/(exp(30 - 30*x) + 1)^2 + 0.01*mu*((1/2)*pi*cos((1/2)*x*pi)*cos((1/2)*y*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1)) + 0.01*sin((1/2)*y*pi)*cos((1/2)*x*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^2) - mu*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))*(-1/4*pi^2*sin((1/2)*y*pi)*cos((1/2)*x*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1)) + 0.01*pi*cos((1/2)*x*pi)*cos((1/2)*y*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^2 + 0.0002*sin((1/2)*y*pi)*cos((1/2)*x*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^3) - mu*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))*(-1/4*pi^2*sin((1/2)*y*pi)*cos((1/2)*x*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1)) - 15.0*pi*exp(30 - 30*x)*sin((1/2)*x*pi)*sin((1/2)*y*pi)/((exp(30 - 30*x) + 1)^2*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^2) - 450.0*exp(30 - 30*x)*sin((1/2)*y*pi)*cos((1/2)*x*pi)/((exp(30 - 30*x) + 1)^2*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^2) + 900.0*exp(60 - 60*x)*sin((1/2)*y*pi)*cos((1/2)*x*pi)/((exp(30 - 30*x) + 1)^3*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^2) + 450.0*exp(60 - 60*x)*sin((1/2)*y*pi)*cos((1/2)*x*pi)/((exp(30 - 30*x) + 1)^4*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^3)) - 1/2*pi*rho*sin((1/4)*x*pi)*sin((1/2)*y*pi)^2*cos((1/2)*x*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1)) + (1/2)*pi*rho*sin((1/4)*x*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi)^2/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1)) - pi*rho*sin((1/2)*x*pi)*sin((1/2)*y*pi)^2*cos((1/2)*x*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1)) + 0.01*rho*sin((1/4)*x*pi)*sin((1/2)*y*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^2 + 15.0*rho*exp(30 - 30*x)*sin((1/2)*y*pi)^2*cos((1/2)*x*pi)^2/((exp(30 - 30*x) + 1)^2*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^2) - 1/4*pi*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))*sin((1/4)*x*pi)*sin((3/2)*y*pi)'
     symbol_names = 'mu rho'
     symbol_values = '${mu} ${rho}'
@@ -192,7 +192,7 @@ velocity_interp_method='rc'
     expression = 'sin((1/4)*x*pi)*cos((1/2)*y*pi)'
   []
   [forcing_v]
-    type = ADParsedFunction
+    type = ParsedFunction
     expression = '0.01*mu*(-1/2*pi*sin((1/4)*x*pi)*sin((1/2)*y*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1)) + 0.01*sin((1/4)*x*pi)*cos((1/2)*y*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^2) + 15.0*mu*((1/4)*pi*cos((1/4)*x*pi)*cos((1/2)*y*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1)) + 15.0*exp(30 - 30*x)*sin((1/4)*x*pi)*cos((1/2)*y*pi)/((exp(30 - 30*x) + 1)^2*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^2))*exp(30 - 30*x)/(exp(30 - 30*x) + 1)^2 - mu*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))*(-1/4*pi^2*sin((1/4)*x*pi)*cos((1/2)*y*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1)) - 0.01*pi*sin((1/4)*x*pi)*sin((1/2)*y*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^2 + 0.0002*sin((1/4)*x*pi)*cos((1/2)*y*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^3) - mu*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))*(-1/16*pi^2*sin((1/4)*x*pi)*cos((1/2)*y*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1)) - 450.0*exp(30 - 30*x)*sin((1/4)*x*pi)*cos((1/2)*y*pi)/((exp(30 - 30*x) + 1)^2*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^2) + 7.5*pi*exp(30 - 30*x)*cos((1/4)*x*pi)*cos((1/2)*y*pi)/((exp(30 - 30*x) + 1)^2*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^2) + 900.0*exp(60 - 60*x)*sin((1/4)*x*pi)*cos((1/2)*y*pi)/((exp(30 - 30*x) + 1)^3*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^2) + 450.0*exp(60 - 60*x)*sin((1/4)*x*pi)*cos((1/2)*y*pi)/((exp(30 - 30*x) + 1)^4*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^3)) - pi*rho*sin((1/4)*x*pi)^2*sin((1/2)*y*pi)*cos((1/2)*y*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1)) - 1/2*pi*rho*sin((1/4)*x*pi)*sin((1/2)*x*pi)*sin((1/2)*y*pi)*cos((1/2)*y*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1)) + (1/4)*pi*rho*sin((1/2)*y*pi)*cos((1/4)*x*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi)/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1)) + 0.01*rho*sin((1/4)*x*pi)^2*cos((1/2)*y*pi)^2/(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^2 + 15.0*rho*exp(30 - 30*x)*sin((1/4)*x*pi)*sin((1/2)*y*pi)*cos((1/2)*x*pi)*cos((1/2)*y*pi)/((exp(30 - 30*x) + 1)^2*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))^2) + (3/2)*pi*(-0.01*y + 1 - 0.5/(exp(30 - 30*x) + 1))*cos((1/4)*x*pi)*cos((3/2)*y*pi)'
     symbol_names = 'mu rho'
     symbol_values = '${mu} ${rho}'
@@ -229,23 +229,23 @@ velocity_interp_method='rc'
     execute_on = 'timestep_end'
   []
   [L2u]
-    type = ElementL2Error
-    variable = u
-    function = exact_u
+    type = ElementL2FunctorError
+    approximate = u
+    exact = exact_u
     outputs = 'console csv'
     execute_on = 'timestep_end'
   []
   [L2v]
-    type = ElementL2Error
-    variable = v
-    function = exact_v
+    type = ElementL2FunctorError
+    approximate = v
+    exact = exact_v
     outputs = 'console csv'
     execute_on = 'timestep_end'
   []
   [L2p]
-    type = ElementL2Error
-    variable = pressure
-    function = exact_p
+    type = ElementL2FunctorError
+    approximate = pressure
+    exact = exact_p
     outputs = 'console csv'
     execute_on = 'timestep_end'
   []

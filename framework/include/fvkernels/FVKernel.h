@@ -12,6 +12,7 @@
 #include "ResidualObject.h"
 #include "BlockRestrictable.h"
 #include "Assembly.h"
+#include "ADFunctorInterface.h"
 
 class SubProblem;
 
@@ -27,7 +28,7 @@ class SubProblem;
 /// "[FVKernels]" input file block.  FVKernels can only operate on and work
 /// with finite volume variables (i.e. with the variable's parameter "fv = true" set).
 
-class FVKernel : public ResidualObject, public BlockRestrictable
+class FVKernel : public ResidualObject, public BlockRestrictable, public ADFunctorInterface
 {
 public:
   static InputParameters validParams();

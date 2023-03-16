@@ -54,6 +54,13 @@
   []
   [phi]
   []
+
+  # for the 'displaced' test only
+  inactive = 'disp_x disp_y'
+  [disp_x]
+  []
+  [disp_y]
+  []
 []
 
 [AuxKernels]
@@ -71,6 +78,17 @@
   []
 []
 
+[Postprocessors]
+  # for the 'subdomain_caching' test only
+  active = ''
+  [average]
+    type = SideAverageValue
+    variable = u
+    boundary = bottom
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
+  []
+[]
+
 [Executioner]
   type = Transient
   dt = 0.1
@@ -78,5 +96,7 @@
 []
 
 [Outputs]
-  exodus = true
+  [out]
+    type = Exodus
+  []
 []

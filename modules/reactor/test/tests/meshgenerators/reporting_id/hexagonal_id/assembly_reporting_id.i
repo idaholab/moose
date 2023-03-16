@@ -20,7 +20,7 @@
     polygon_size = 0.5
   []
   [assembly]
-    type = HexIDPatternedMeshGenerator
+    type = PatternedHexMeshGenerator
     inputs = 'pin1 pin2'
     pattern_boundary = hexagon
     pattern = '  1 0 1;

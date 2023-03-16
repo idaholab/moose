@@ -22,12 +22,12 @@ MooseParsedFunctionBase::validParams()
       "vars",
       "Variables (excluding t,x,y,z) that are bound to the values provided by the corresponding "
       "items in the vals vector.",
-      "vars is deprecated, use symbol_names instead");
+      "Use 'symbol_names' instead.");
   params.addDeprecatedParam<std::vector<std::string>>(
       "vals",
       "Constant numeric values, postprocessor names, "
       "function names, and scalar variables for vars.",
-      "vals is deprecated, use symbol_values instead");
+      "Use 'symbol_values' instead.");
   params.addParam<std::vector<std::string>>(
       "symbol_names",
       "Symbols (excluding t,x,y,z) that are bound to the values provided by the corresponding "

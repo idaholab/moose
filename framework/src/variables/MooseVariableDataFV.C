@@ -399,11 +399,7 @@ template <typename OutputType>
 const std::vector<dof_id_type> &
 MooseVariableDataFV<OutputType>::initDofIndices()
 {
-  if (_prev_elem != _elem)
-  {
-    _dof_map.dof_indices(_elem, _dof_indices, _var_num);
-    _prev_elem = _elem;
-  }
+  Moose::initDofIndices(*this, *_elem);
   return _dof_indices;
 }
 

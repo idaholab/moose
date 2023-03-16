@@ -29,7 +29,6 @@ main(int argc, char * argv[])
   // This creates dynamic memory that we're responsible for deleting
   std::shared_ptr<MooseApp> app = AppFactory::createAppShared("PeridynamicsTestApp", argc, argv);
 
-  app->setCheckUnusedFlag(true);
   app->setErrorOverridden();
 
   // Execute the application

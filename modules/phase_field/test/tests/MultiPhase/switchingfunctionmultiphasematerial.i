@@ -9,10 +9,6 @@
   ymax = 30
 []
 
-[GlobalParams]
-  block = 0
-[]
-
 [Variables]
   [./c]
   [../]

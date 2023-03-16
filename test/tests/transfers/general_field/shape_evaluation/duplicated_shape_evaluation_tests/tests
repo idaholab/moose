@@ -1,0 +1,68 @@
+[Tests]
+  issues = '#1836'
+  design = 'MultiAppGeneralFieldShapeEvaluationTransfer.md'
+
+  [transfer]
+    requirement = "The system shall support the transfer of data evaluating the finite element solution function:"
+
+    [tosub]
+      type = 'Exodiff'
+      input = 'tosub.i'
+      exodiff = 'tosub_out_sub0.e tosub_out_sub1.e tosub_out_sub2.e'
+
+      detail = "to a sub-application,"
+    []
+
+    [fromsub]
+      type = 'Exodiff'
+      input = 'fromsub.i'
+      exodiff = 'fromsub_out.e'
+
+      detail = "from a sub-application,"
+    []
+
+    [tosub_source_displaced]
+      type = 'Exodiff'
+      input = 'tosub_source_displaced.i'
+      exodiff = 'tosub_source_displaced_out_sub0.e tosub_source_displaced_out_sub1.e tosub_source_displaced_out_sub2.e'
+
+      detail = "from a deformed mesh to a sub-application,"
+    []
+
+    [tosub_target_displaced]
+      type = 'Exodiff'
+      input = 'tosub_target_displaced.i'
+      exodiff = 'tosub_target_displaced_out_sub0.e tosub_target_displaced_out_sub1.e tosub_target_displaced_out_sub2.e'
+
+      detail = "from to a sub-application with a deformed mesh,"
+    []
+
+    [fromsub_source_displaced]
+      type = 'Exodiff'
+      input = 'fromsub_source_displaced.i'
+      exodiff = 'fromsub_source_displaced_out.e'
+
+      detail = "from a sub-application with deformed mesh, and"
+    []
+
+    [fromsub_target_displaced]
+      type = 'Exodiff'
+      input = 'fromsub_target_displaced.i'
+      exodiff = 'fromsub_target_displaced_out.e'
+
+      detail = "from a sub-application to a deformed mesh."
+    []
+  []
+
+  [errors]
+    requirement = "The system shall error if performing a transfer of data evaluating the finite element solution if:"
+
+    [missed_point]
+      type = 'RunException'
+      input = 'missing_parent.i'
+      expect_err = 'could not be located'
+
+      detail = "the evaluation point does not exist"
+    []
+  []
+[]

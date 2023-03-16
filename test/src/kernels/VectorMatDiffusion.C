@@ -17,6 +17,7 @@ VectorMatDiffusion::validParams()
   InputParameters params = Kernel::validParams();
   params.addParam<MaterialPropertyName>("coef",
                                         "The anisotropic (diagonal) vector diffusion coefficient");
+  params.deprecateParam("coef", "coeff", "01/01/2040");
   params.addClassDescription("Diffusion kernel for a regular variable with anisotropic diffusion "
                              "coefficients as a vector.");
   return params;

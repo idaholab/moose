@@ -77,7 +77,7 @@ PiecewiseBilinear::PiecewiseBilinear(const InputParameters & parameters)
         parameters.isParamValid("z"))
       mooseError("In PiecewiseBilinear: Cannot specify 'data_file' and 'x', 'y', or 'z' together.");
     else
-      parse(x, y, z);
+      parse(_data_file_name, x, y, z, name());
   }
 
   else if (!(parameters.isParamValid("x") && parameters.isParamValid("y") &&
@@ -151,11 +151,15 @@ PiecewiseBilinear::valueInternal(T t, const P & p) const
 }
 
 void
-PiecewiseBilinear::parse(std::vector<Real> & x, std::vector<Real> & y, ColumnMajorMatrix & z)
+PiecewiseBilinear::parse(const std::string & data_file_name,
+                         std::vector<Real> & x,
+                         std::vector<Real> & y,
+                         ColumnMajorMatrix & z,
+                         const std::string & object_name)
 {
-  std::ifstream file(_data_file_name.c_str());
+  std::ifstream file(data_file_name.c_str());
   if (!file.good())
-    paramError("data_file", "Error opening file '", _data_file_name, "'.");
+    ::mooseError(object_name, " : Error opening file '", data_file_name, "'.");
 
   std::size_t num_lines = 0;
   std::size_t num_cols = libMesh::invalid_uint;
@@ -167,20 +171,20 @@ PiecewiseBilinear::parse(std::vector<Real> & x, std::vector<Real> & y, ColumnMaj
   {
     num_lines++;
     if (!MooseUtils::tokenizeAndConvert<double>(line, line_data, ", "))
-      paramError("data_file", "Error parsing file '", _data_file_name, "' on line ", num_lines);
+      ::mooseError(object_name, " : Error parsing file '", data_file_name, "' on line ", num_lines);
 
     data.insert(data.end(), line_data.begin(), line_data.end());
 
     if (num_cols == libMesh::invalid_uint)
       num_cols = line_data.size();
     else if (line_data.size() != num_cols + 1)
-      paramError("data_file",
-                 "Read ",
-                 line_data.size(),
-                 " columns of data but expected ",
-                 num_cols + 1,
-                 " columns in line ",
-                 num_lines);
+      ::mooseError(object_name,
+                   " : Read ",
+                   line_data.size(),
+                   " columns of data but expected ",
+                   num_cols + 1,
+                   " columns in line ",
+                   num_lines);
   }
 
   x.resize(num_cols);
@@ -203,5 +207,5 @@ PiecewiseBilinear::parse(std::vector<Real> & x, std::vector<Real> & y, ColumnMaj
   }
 
   if (data.size() != offset)
-    paramError("data_file", "Inconsistency in data read from '", _data_file_name, "'.");
+    ::mooseError(object_name, " : Inconsistency in data read from '", data_file_name, "'.");
 }

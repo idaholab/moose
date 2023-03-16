@@ -230,7 +230,7 @@
 
 [Materials]
   [elasticity_tensor]
-    type = ComputeElasticityTensorConstantRotationCP
+    type = ComputeElasticityTensorCP
     C_ijkl = '1.622e5 9.18e4 6.88e4 1.622e5 6.88e4 1.805e5 4.67e4 4.67e4 4.67e4' #alpha Ti, Alankar et al. Acta Materialia 59 (2011) 7003-7009
     fill_method = symmetric9
     # orient in approximately [011] to activate the basal slip planes

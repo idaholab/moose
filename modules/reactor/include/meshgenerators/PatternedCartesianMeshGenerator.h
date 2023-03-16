@@ -9,8 +9,10 @@
 
 #pragma once
 #include "PolygonMeshGeneratorBase.h"
+#include "ReportingIDGeneratorUtils.h"
 #include "MooseEnum.h"
 #include "MeshMetaDataInterface.h"
+#include "ReportingIDGeneratorUtils.h"
 
 /**
  * This PatternedCartesianMeshGenerator source code assembles square meshes into a rectangular grid
@@ -62,8 +64,10 @@ protected:
   const boundary_id_type _external_boundary_id;
   /// Boundary name of mesh's external boundary
   const std::string _external_boundary_name;
-  /// Whether interface boundaries are created
-  const bool _create_interface_boundaries;
+  /// Whether inward interface boundaries are created
+  const bool _create_inward_interface_boundaries;
+  /// Whether outward interface boundaries are created
+  const bool _create_outward_interface_boundaries;
   /// Whether the non-circular region (outside the rings) can be deformed
   const bool _deform_non_circular_region;
   /// Pitch size of the input assembly mesh
@@ -72,6 +76,16 @@ protected:
   std::vector<subdomain_id_type> _peripheral_block_ids;
   /// Subdomain Names of the peripheral regions
   std::vector<SubdomainName> _peripheral_block_names;
+  /// Whether reporting ID is added to mesh
+  const bool _use_reporting_id;
+  /// reporting ID assignment type
+  const ReportingIDGeneratorUtils::AssignType _assign_type;
+  /// flag to indicate if exclude_id is defined
+  const bool _use_exclude_id;
+  /// vector indicating which ids in the pattern to exclude (true at pattern positions to exclude)
+  std::vector<bool> _exclude_ids;
+  /// hold reporting ID for each input pattern cell
+  std::vector<std::vector<dof_id_type>> _id_pattern;
 
   /**
    * Adds background and duct region mesh to each part outer part of stitched square meshes. Note
@@ -86,7 +100,6 @@ protected:
    * @param peripheral_duct_intervals numbers of radial intervals of the duct regions
    * @param rotation_angle angle that the generated mesh will be rotated by
    * @param mesh_type whether the peripheral region is for a corner or a side of a patterned mesh
-   * @param create_interface_boundaries whether interface boundary sidesets are created
    * @return a mesh of the cartesian pattern mesh with peripheral region added.
    */
   void addPeripheralMesh(ReplicatedMesh & mesh,
@@ -96,8 +109,7 @@ protected:
                          const std::vector<unsigned int> & num_sectors_per_side_array,
                          const std::vector<unsigned int> & peripheral_duct_intervals,
                          const Real rotation_angle,
-                         const unsigned int mesh_type,
-                         const bool create_interface_boundaries);
+                         const unsigned int mesh_type);
 
   /**
    * Computes the inner and outer node positions of the peripheral region for a single layer.
@@ -114,4 +126,11 @@ protected:
                      const Real extra_dist_in,
                      const Real extra_dist_out,
                      const Real pitch) const;
+  /**
+   * Adds the reporting IDs onto the input mesh.
+   * @param  mesh input mesh to add the reporting IDs onto
+   * @param from_meshes meshes to take reporting IDs from
+   */
+  void addReportingIDs(std::unique_ptr<MeshBase> & mesh,
+                       const std::vector<std::unique_ptr<ReplicatedMesh>> & from_meshes) const;
 };

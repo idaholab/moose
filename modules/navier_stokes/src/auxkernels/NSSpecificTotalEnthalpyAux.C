@@ -23,7 +23,6 @@ NSSpecificTotalEnthalpyAux::validParams()
   params.addRequiredCoupledVar(NS::density, "density");
   params.addRequiredCoupledVar(NS::total_energy_density, "total energy");
   params.addRequiredCoupledVar(NS::pressure, "pressure");
-  params.addDeprecatedCoupledVar("p", NS::pressure, "1/1/2022");
 
   return params;
 }

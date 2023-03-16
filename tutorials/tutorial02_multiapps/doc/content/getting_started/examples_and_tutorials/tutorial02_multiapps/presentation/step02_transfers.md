@@ -4,7 +4,7 @@
 
 ## Transfers Overview
 
-Transfers are how you move information up and down the MultiApp hierachy
+Transfers are how you move information up and down the MultiApp hierarchy
 
 There are three different places Transfers can read information and deposit information:
 
@@ -14,25 +14,26 @@ There are three different places Transfers can read information and deposit info
 
 A few of the most-used Transfers:
 
-- MeshFunction: Interpolate a field from one domain to another
+- ShapeEvaluation: Interpolate a field from one domain to another
 - NearestNode: Move field data by matching nodes/centroids
 - Postprocessor: Move PP data from one app to another
 - UserObject: Evaluate a "spatial" UO in one app at the other app's nodes/centroids and deposit the information in an AuxiliaryVariable field
 
 Most important: by having MOOSE move data and fill fields... apps don't need to know or care where the data came from or how it got there!
 
+'GeneralField' transfers are a more efficient and more general implementation of their corresponding field transfers. They should be preferred over their non-'GeneralField' counterparts.
+
 !---
 
-## MultiAppMeshFunctionTransfer
+## MultiAppGeneralFieldShapeEvaluationTransfer
 
 !row!
 !col! width=80%
-Called "MeshFunction" because it makes a field (Solution or Aux) into a spatial "function" that can be evaluated anywhere within the domain.  This is then used to sample that field at the nodes/centroids of the *receiving* app's mesh in order to populate an Auxiliary Variable field.
+Called "ShapeEvaluation" because it evaluates a field (Solution or Aux) at the desired transferred location: the nodes/centroids of the *receiving* app's mesh in order to populate an Auxiliary Variable field.
 
 Required parameters:
 
-- `direction`: Like all Transfers, this is either `to_multiapp` or `from_multiapp`
-- `multi_app`: Which MultiApp to interact with
+- `from_multi_app` and `to_multi_app`: Which MultiApp to interact with
 - `source_variable`: The variable to read from
 - `variable`: The Auxiliary variable to write to
 
@@ -48,7 +49,7 @@ Can be made to "conserve" a Postprocessor quantity.
 
 !---
 
-## Master Input file
+## Main Input file
 
 !listing step02_transfers/01_parent_meshfunction.i
          caption=01_parent_meshfunction.i
@@ -70,7 +71,7 @@ Can be made to "conserve" a Postprocessor quantity.
 
 !---
 
-## MultiAppNearestNodeTransfer
+## MultiAppGeneralFieldNearestNodeTransfer
 
 Sometimes interpolation is too costly, or doesn't make sense.  For instance, a "2D" calculation in the x,y plane that represents an "infinite" volume in the z direction may need to be coupled to 3D calculations that cover that same space.  In that case, all nodes/elements within the same x,y "column" should receive the same value when transferring from the 2D calculation to the 3D calculation.
 
@@ -114,7 +115,7 @@ To explore the NearestNodeTransfer we will create a situation where a 2D, 1x1 sq
 
 Often it's not "fields" that need to be moved - but spatially homogenized values.  For instance, if a 1D simulation representing fluid flow through a pipe is going through a 3D domain which is generating heat - then it may be advantageous to integrate the heat generated around the pipe within the 3D domain and transfer that to the pipe simulation.
 
-This situation is handled straighforwardly by UserObject Transfers.  Remember that Postprocessors are a specialization of UserObjects: they only compute a single value.  UserObjects themselves can then be thought of as Postprocessors that can compute much more than a single value.  Within MOOSE there is a special designation for UserObjects that hold data with some spatial correlation: they are "Spatial UserObjects"... and they have the ability to be evaluated at any point in space (and sometimes time!).
+This situation is handled straightforwardly by UserObject Transfers.  Remember that Postprocessors are a specialization of UserObjects: they only compute a single value.  UserObjects themselves can then be thought of as Postprocessors that can compute much more than a single value.  Within MOOSE there is a special designation for UserObjects that hold data with some spatial correlation: they are "Spatial UserObjects"... and they have the ability to be evaluated at any point in space (and sometimes time!).
 
 Some Spatial UserObjects that could be useful to Transfer:
 
@@ -130,7 +131,7 @@ Some Spatial UserObjects that could be useful to Transfer:
 !listing step02_transfers/03_parent_uot.i
          caption=03_parent_uot.i
 
-This example is similar to the last one - except we've made the master domain 3D as well.  The idea is to integrate the field from the master in the vicinity of the sub-apps and transfer that to each sub-app.  In the reverse, the sub-app field is averaged in layers going up the column and those average values are transferred back to the Master.
+This example is similar to the last one - except we've made the parent app domain 3D as well.  The idea is to integrate the field from the parent app in the vicinity of the sub-apps and transfer that to each sub-app.  In the reverse, the sub-app field is averaged in layers going up the column and those average values are transferred back to the parent app.
 
 !---
 
@@ -138,9 +139,9 @@ This example is similar to the last one - except we've made the master domain 3D
 
 !row!
 !col! width=80%
-When the sub-app domain represents an infinitesimally small portion of the Master's domain - a different type of Transfer is needed.  For instance, if the Master domain is 1m x 1m and the sub-app domains are 1nm x 1nm, then there is no point in trying to "interpolate" a field from the Master domain.  Effectively, the sub-apps lie at *points* inside the master domain.
+When the sub-app domain represents an infinitesimally small portion of the parent app's domain - a different type of Transfer is needed.  For instance, if the parent app domain is 1m x 1m and the sub-app domains are 1nm x 1nm, then there is no point in trying to "interpolate" a field from the parent app domain.  Effectively, the sub-apps lie at *points* inside the parent app domain.
 
-The final class of Transfers, those moving scalar values, play a role here.  "Sampling" Transfers such as `VariableValueSampleTansfer` will automatically evaluate a single value from the Master domain at the sub-app position and move it to the sub-app.  In the reverse direction, Postprocessor Transfers move homogenized values from the sub-apps to the Master app.
+The final class of Transfers, those moving scalar values, play a role here.  "Sampling" Transfers such as `VariableValueSampleTansfer` will automatically evaluate a single value from the parent app domain at the sub-app position and move it to the sub-app.  In the reverse direction, Postprocessor Transfers move homogenized values from the sub-apps to the parent app.
 
 !col-end!
 
@@ -157,4 +158,4 @@ The final class of Transfers, those moving scalar values, play a role here.  "Sa
 !listing step02_transfers/04_parent_multiscale.i
          caption=04_parent_multiscale.i
 
-Here a `VariableValueSampleTransfer` is used to get values from the Master domain to the sub-apps.  In the reverse a `PostprocessorInterpolationTransfer` works to take values computed in the micro-simulations and then interpolate between them to create a smooth field.
+Here a `VariableValueSampleTransfer` is used to get values from the parent app domain to the sub-apps.  In the reverse a `PostprocessorInterpolationTransfer` works to take values computed in the micro-simulations and then interpolate between them to create a smooth field.

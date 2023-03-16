@@ -121,6 +121,10 @@ MultiApp::validParams()
       "output_in_position",
       false,
       "If true this will cause the output from the MultiApp to be 'moved' by its position vector");
+  params.addParam<bool>(
+      "run_in_position",
+      false,
+      "If true this will cause the mesh from the MultiApp to be 'moved' by its position vector");
 
   params.addParam<Real>("global_time_offset",
                         0,
@@ -206,9 +210,13 @@ MultiApp::validParams()
   params.declareControllable("cli_args", {EXEC_PRE_MULTIAPP_SETUP});
   params.registerBase("MultiApp");
 
+  params.addParamNamesToGroup("positions positions_file run_in_position output_in_position",
+                              "Positions / transformations of the MultiApp frame of reference");
+  params.addParamNamesToGroup("min_procs_per_app max_procs_per_app", "Parallelism");
   params.addParamNamesToGroup("reset_time reset_apps", "Reset MultiApp");
   params.addParamNamesToGroup("move_time move_apps move_positions", "Timed move of MultiApps");
-  params.addParamNamesToGroup("relaxation_factor transformed_variables transformed_postprocessors",
+  params.addParamNamesToGroup("relaxation_factor transformed_variables transformed_postprocessors "
+                              "keep_solution_during_restore",
                               "Fixed point acceleration of MultiApp quantities");
   params.addParamNamesToGroup("library_name library_path", "Dynamic loading");
   params.addParamNamesToGroup("cli_args cli_args_files", "Passing command line argument");
@@ -249,6 +257,7 @@ MultiApp::MultiApp(const InputParameters & parameters)
     _backups(declareRestartableDataWithContext<SubAppBackups>("backups", this)),
     _cli_args(getParam<std::vector<std::string>>("cli_args")),
     _keep_solution_during_restore(getParam<bool>("keep_solution_during_restore")),
+    _run_in_position(getParam<bool>("run_in_position")),
     _solve_step_timer(registerTimedSection("solveStep", 3, "Executing MultiApps", false)),
     _init_timer(registerTimedSection("init", 3, "Initializing MultiApp")),
     _backup_timer(registerTimedSection("backup", 3, "Backing Up MultiApp")),
@@ -545,6 +554,19 @@ MultiApp::preTransfer(Real /*dt*/, Real target_time)
       // in the associated transfer classes
       for (auto * const transfer : _associated_transfers)
         transfer->getAppInfo();
+
+      // Similarly we need to transform the mesh again
+      if (_run_in_position)
+        for (const auto i : make_range(_my_num_apps))
+        {
+          auto app_ptr = _apps[i];
+          if (usingPositions())
+            app_ptr->getExecutioner()->feProblem().coordTransform().transformMesh(
+                app_ptr->getExecutioner()->feProblem().mesh(), _positions[_first_local_app + i]);
+          else
+            app_ptr->getExecutioner()->feProblem().coordTransform().transformMesh(
+                app_ptr->getExecutioner()->feProblem().mesh(), Point(0, 0, 0));
+        }
 
       // If the time step covers multiple reset times, set them all as having 'happened'
       for (unsigned int j = i; j < _reset_times.size(); j++)
@@ -903,6 +925,8 @@ MultiApp::moveApp(unsigned int global_app, Point p)
 
       if (_output_in_position)
         _apps[local_app]->setOutputPosition(p);
+      if (_run_in_position)
+        paramError("run_in_position", "Moving apps and running apps in position is not supported");
     }
   }
 }
@@ -919,16 +943,14 @@ void
 MultiApp::createApp(unsigned int i, Real start_time)
 {
   // Define the app name
-  std::ostringstream multiapp_name;
+  const std::string multiapp_name = getMultiAppName(name(), _first_local_app + i, _total_num_apps);
   std::string full_name;
-  multiapp_name << name() << std::setw(std::ceil(std::log10(_total_num_apps)))
-                << std::setprecision(0) << std::setfill('0') << std::right << _first_local_app + i;
 
-  // Only add parent name if it the parent is not the main app
+  // Only add parent name if the parent is not the main app
   if (_app.multiAppLevel() > 0)
-    full_name = _app.name() + "_" + multiapp_name.str();
+    full_name = _app.name() + "_" + multiapp_name;
   else
-    full_name = multiapp_name.str();
+    full_name = multiapp_name;
 
   InputParameters app_params = AppFactory::instance().getValidParams(_app_type);
   app_params.set<FEProblemBase *>("_parent_fep") = &_fe_problem;
@@ -937,8 +959,6 @@ MultiApp::createApp(unsigned int i, Real start_time)
   // the copy is required so that the addArgument command below doesn't accumulate more and more
   // of the same cli_args, which is important when running in batch mode.
   std::shared_ptr<CommandLine> app_cli = std::make_shared<CommandLine>(*_app.commandLine());
-  app_cli->initForMultiApp(full_name);
-  app_params.set<std::shared_ptr<CommandLine>>("_command_line") = app_cli;
 
   if (cliArgs().size() > 0 || _cli_args_from_file.size() > 0)
   {
@@ -946,9 +966,11 @@ MultiApp::createApp(unsigned int i, Real start_time)
     {
       std::ostringstream oss;
       oss << full_name << ":" << str;
-      app_params.get<std::shared_ptr<CommandLine>>("_command_line")->addArgument(oss.str());
+      app_cli->addArgument(oss.str());
     }
   }
+  app_cli->initForMultiApp(full_name);
+  app_params.set<std::shared_ptr<CommandLine>>("_command_line") = app_cli;
 
   if (_fe_problem.verboseMultiApps())
     _console << COLOR_CYAN << "Creating MultiApp " << name() << " of type " << _app_type
@@ -991,6 +1013,9 @@ MultiApp::createApp(unsigned int i, Real start_time)
 
   if (_use_positions && getParam<bool>("output_in_position"))
     app->setOutputPosition(_app.getOutputPosition() + _positions[_first_local_app + i]);
+  if (_output_in_position && _run_in_position)
+    paramError("run_in_position",
+               "Sub-apps are already displaced, so they are already output in position");
 
   // Update the MultiApp level for the app that was just created
   app->setupOptions();
@@ -1000,7 +1025,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
   // output base of the parent app problem and appending the name of the multiapp plus a number to
   // it
   if (app->getOutputFileBase().empty())
-    app->setOutputFileBase(_app.getOutputFileBase() + "_" + multiapp_name.str());
+    setAppOutputFileBase(i);
   preRunInputFile();
 
   // Transfer coupling relaxation information to the subapps
@@ -1018,6 +1043,17 @@ MultiApp::createApp(unsigned int i, Real start_time)
   auto fixed_point_solve = &(_apps[i]->getExecutioner()->fixedPointSolve());
   if (fixed_point_solve)
     fixed_point_solve->allocateStorage(false);
+
+  // Transform the app mesh if requested
+  if (_run_in_position)
+  {
+    if (usingPositions())
+      app->getExecutioner()->feProblem().coordTransform().transformMesh(
+          app->getExecutioner()->feProblem().mesh(), _positions[_first_local_app + i]);
+    else
+      app->getExecutioner()->feProblem().coordTransform().transformMesh(
+          app->getExecutioner()->feProblem().mesh(), Point(0, 0, 0));
+  }
 }
 
 std::string
@@ -1173,4 +1209,28 @@ void
 MultiApp::addAssociatedTransfer(MultiAppTransfer & transfer)
 {
   _associated_transfers.push_back(&transfer);
+}
+
+void
+MultiApp::setAppOutputFileBase()
+{
+  for (unsigned int i = 0; i < _my_num_apps; ++i)
+    setAppOutputFileBase(i);
+}
+
+void
+MultiApp::setAppOutputFileBase(unsigned int index)
+{
+  const std::string multiapp_name =
+      getMultiAppName(name(), _first_local_app + index, _total_num_apps);
+  _apps[index]->setOutputFileBase(_app.getOutputFileBase() + "_" + multiapp_name);
+}
+
+std::string
+MultiApp::getMultiAppName(const std::string & base_name, dof_id_type index, dof_id_type total)
+{
+  std::ostringstream multiapp_name;
+  multiapp_name << base_name << std::setw(std::ceil(std::log10(total))) << std::setprecision(0)
+                << std::setfill('0') << std::right << index;
+  return multiapp_name.str();
 }

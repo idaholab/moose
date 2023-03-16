@@ -11,11 +11,4 @@
     cli_args = 'Components/blk/file=square.e'
     expect_err = "blk: File '(.+)square\.e' does not contain a 3D mesh\."
   []
-
-  [err:non_existing_file]
-    type = RunException
-    input = 'phy.standalone.i'
-    cli_args = 'Components/blk/file=no-file.e'
-    expect_err = "blk: Could not open '(.+)no-file\.e'\. Check that the file exists and that you have permission to open it\."
-  []
 []

@@ -1,0 +1,11 @@
+[Tests]
+  [test]
+    type = 'CSVDiff'
+    input = 'test.i'
+    csvdiff = 'test_out.csv'
+    requirement = "The system shall be able to compute the convective heat transfer coefficient "
+                  "using the Wolf-McCarthy correlation."
+    issues = '#23709'
+    design = 'ADWallHeatTransferCoefficientWolfMcCarthyMaterial.md'
+  []
+[]

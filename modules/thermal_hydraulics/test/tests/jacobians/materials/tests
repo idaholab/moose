@@ -20,7 +20,7 @@
   [density_3eqn_material]
     type = 'PetscJacobianTester'
     input = 'fluid_properties_3eqn.i'
-    cli_args = "Kernels/test_kernel/material_property=rho Kernels/test_kernel/args='rhoA' JacobianTest1Phase/snes_test_err=1e-8"
+    cli_args = "Kernels/test_kernel/material_property=rho Kernels/test_kernel/coupled_variables='rhoA' JacobianTest1Phase/snes_test_err=1e-8"
     ratio_tol = 5e-9
     difference_tol = 5e-10
     max_threads = 1
@@ -78,7 +78,7 @@
   [velocity_3eqn]
     type = 'PetscJacobianTester'
     input = 'fluid_properties_3eqn.i'
-    cli_args = "Kernels/test_kernel/material_property=v Kernels/test_kernel/args='rhoA rhouA' JacobianTest1Phase/snes_test_err=1e-8"
+    cli_args = "Kernels/test_kernel/material_property=v Kernels/test_kernel/coupled_variables='rhoA rhouA' JacobianTest1Phase/snes_test_err=1e-8"
     ratio_tol = 5e-8
     difference_tol = 5e-8
     max_threads = 1

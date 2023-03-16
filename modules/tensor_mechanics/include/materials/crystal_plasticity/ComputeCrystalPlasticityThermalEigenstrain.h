@@ -39,7 +39,7 @@ protected:
   const VariableValue & _temperature_old;
 
   ///Stores the derivative of the deforamtion gradient w.r.t temperature
-  MaterialProperty<RankTwoTensor> & _ddeformation_gradient_dT;
+  MaterialProperty<RankTwoTensor> * _ddeformation_gradient_dT;
 
   ///The thermal expansion coefficient that is definted in the cartesian coordinate
   const RankTwoTensor _thermal_expansion_coefficients;

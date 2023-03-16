@@ -12,7 +12,7 @@
 #include "Factory.h"
 #include "Component.h"
 #include "ThermalHydraulicsApp.h"
-#include "HeatStructureBase.h"
+#include "HeatStructureInterface.h"
 #include "HeatStructureCylindricalBase.h"
 
 InputParameters
@@ -20,7 +20,7 @@ HeatConductionModel::validParams()
 {
   InputParameters params = MooseObject::validParams();
   params.addPrivateParam<THMProblem *>("_thm_problem");
-  params.addPrivateParam<HeatStructureBase *>("_hs");
+  params.addPrivateParam<HeatStructureInterface *>("_hs");
   params.addRequiredParam<Real>("scaling_factor_temperature",
                                 "Scaling factor for solid temperature variable.");
   params.registerBase("THM:heat_conduction_model");
@@ -40,7 +40,9 @@ HeatConductionModel::HeatConductionModel(const InputParameters & params)
   : MooseObject(params),
     _sim(*params.getCheckedPointerParam<THMProblem *>("_thm_problem")),
     _factory(_app.getFactory()),
-    _hs(*params.getCheckedPointerParam<HeatStructureBase *>("_hs")),
+    _hs_interface(*params.getCheckedPointerParam<HeatStructureInterface *>("_hs")),
+    _geometrical_component(
+        dynamic_cast<GeometricalComponent &>(_hs_interface)), // TODO: do something safer
     _comp_name(name())
 {
 }
@@ -48,7 +50,7 @@ HeatConductionModel::HeatConductionModel(const InputParameters & params)
 void
 HeatConductionModel::addVariables()
 {
-  const auto & subdomain_names = _hs.getSubdomainNames();
+  const auto & subdomain_names = _geometrical_component.getSubdomainNames();
   const Real & scaling_factor = getParam<Real>("scaling_factor_temperature");
 
   _sim.addSimVariable(true, TEMPERATURE, _fe_type, subdomain_names, scaling_factor);
@@ -57,32 +59,32 @@ HeatConductionModel::addVariables()
 void
 HeatConductionModel::addInitialConditions()
 {
-  const auto & subdomain_names = _hs.getSubdomainNames();
-  _sim.addFunctionIC(TEMPERATURE, _hs.getInitialT(), subdomain_names);
+  const auto & subdomain_names = _geometrical_component.getSubdomainNames();
+  _sim.addFunctionIC(TEMPERATURE, _hs_interface.getInitialT(), subdomain_names);
 }
 
 void
 HeatConductionModel::addMaterials()
 {
-  const auto & blocks = _hs.getSubdomainNames();
-  const auto & names = _hs.getNames();
-  const auto & material_names = _hs.getParam<std::vector<std::string>>("materials");
+  const auto & blocks = _geometrical_component.getSubdomainNames();
+  const auto & material_names =
+      _geometrical_component.getParam<std::vector<std::string>>("materials");
 
-  for (std::size_t i = 0; i < names.size(); i++)
+  for (std::size_t i = 0; i < blocks.size(); i++)
   {
     std::string class_name = "ADSolidMaterial";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<std::vector<SubdomainName>>("block") = {blocks[i]};
     params.set<std::vector<VariableName>>("T") = {TEMPERATURE};
     params.set<UserObjectName>("properties") = material_names[i];
-    _sim.addMaterial(class_name, genName(_comp_name, names[i], "mat"), params);
+    _sim.addMaterial(class_name, genName(blocks[i], "mat"), params);
   }
 }
 
 void
 HeatConductionModel::addHeatEquationXYZ()
 {
-  const auto & blocks = _hs.getSubdomainNames();
+  const auto & blocks = _geometrical_component.getSubdomainNames();
 
   // add transient term
   {
@@ -110,7 +112,8 @@ HeatConductionModel::addHeatEquationXYZ()
 void
 HeatConductionModel::addHeatEquationRZ()
 {
-  HeatStructureCylindricalBase & hs_cyl = dynamic_cast<HeatStructureCylindricalBase &>(_hs);
+  HeatStructureCylindricalBase & hs_cyl =
+      dynamic_cast<HeatStructureCylindricalBase &>(_geometrical_component);
 
   const auto & blocks = hs_cyl.getSubdomainNames();
   const auto & position = hs_cyl.getPosition();

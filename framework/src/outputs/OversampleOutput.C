@@ -61,9 +61,6 @@ OversampleOutput::OversampleOutput(const InputParameters & parameters)
     _position(_change_position ? getParam<Point>("position") : Point()),
     _oversample_mesh_changed(true)
 {
-  // ** DEPRECATED SUPPORT **
-  if (getParam<bool>("append_oversample"))
-    _file_base += "_oversample";
 }
 
 void
@@ -291,4 +288,13 @@ OversampleOutput::cloneMesh()
 
   // Make sure that the mesh pointer points to the newly cloned mesh
   _mesh_ptr = _cloned_mesh_ptr.get();
+}
+
+void
+OversampleOutput::setFileBaseInternal(const std::string & file_base)
+{
+  AdvancedOutput::setFileBaseInternal(file_base);
+  // ** DEPRECATED SUPPORT **
+  if (getParam<bool>("append_oversample"))
+    _file_base += "_oversample";
 }

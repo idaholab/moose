@@ -60,7 +60,7 @@ public:
   }
 
   /// Get the MultiApp to transfer data from
-  const std::shared_ptr<MultiApp> getFromMultiApp()
+  const std::shared_ptr<MultiApp> getFromMultiApp() const
   {
     if (!_from_multi_app)
       mooseError(
@@ -70,11 +70,11 @@ public:
   }
 
   /// Get the MultiApp to transfer data to
-  const std::shared_ptr<MultiApp> getToMultiApp()
+  const std::shared_ptr<MultiApp> getToMultiApp() const
   {
     if (!_to_multi_app)
       mooseError(
-          "A from_multiapp was requested but is unavailable. Check the from_multi_app parameter");
+          "A to_multiapp was requested but is unavailable. Check the to_multi_app parameter");
     else
       return _to_multi_app;
   }
@@ -83,7 +83,7 @@ public:
    * Get the name of thing being transferred from
    * @return the name of the multiapp or "Parent"
    */
-  std::string getFromName()
+  std::string getFromName() const
   {
     if (_from_multi_app)
       return _from_multi_app->name();
@@ -95,7 +95,7 @@ public:
    * Get the name of thing being transferred to
    * @return the name of the multiapp or "Parent"
    */
-  std::string getToName()
+  std::string getToName() const
   {
     if (_to_multi_app)
       return _to_multi_app->name();
@@ -118,7 +118,7 @@ public:
    * This method will fill information into the convenience member variables
    * (_to_problems, _from_meshes, etc.)
    */
-  void getAppInfo();
+  virtual void getAppInfo();
 
 protected:
   /**
@@ -207,6 +207,9 @@ protected:
   void checkVariable(const FEProblemBase & fe_problem,
                      const VariableName & var_name,
                      const std::string & param_name = "") const;
+
+  /// Extends bounding boxes to avoid missing points
+  void extendBoundingBoxes(const Real factor, std::vector<BoundingBox> & bboxes) const;
 
 private:
   /**

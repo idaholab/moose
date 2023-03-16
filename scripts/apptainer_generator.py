@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""
+Manipulate Apptainer/Harbor containers based on version/hashes of MOOSE repository
+"""
 import os
 import sys
 import argparse
@@ -75,6 +78,8 @@ class ApptainerGenerator:
                 parser.add_argument('--oras-url', type=str, default=oras_url_default,
                                     help='The ORAS URL to use; ' +
                                         f'defaults to {oras_url_default}')
+                parser.add_argument('--disable-cache', action='store_true',
+                                    help='Disable the apptainer cache')
 
         exists_parser = action_parser.add_parser('exists', parents=[parent],
                                                  help='Checks if a container exists'
@@ -195,6 +200,10 @@ class ApptainerGenerator:
         command = ['apptainer', 'pull']
         if args is not None:
             command += args
+        if (hasattr(self.args, 'disable_cache') and
+            self.args.disable_cache and
+            '--disable-cache' not in command):
+            command += ['--disable-cache']
         command += [file, oras_uri]
         self.run(command)
         return file
@@ -229,6 +238,10 @@ class ApptainerGenerator:
         command = ['apptainer', 'build', '--fakeroot']
         if args is not None:
             command += args
+        if (hasattr(self.args, 'disable_cache') and
+            self.args.disable_cache and
+            '--disable-cache' not in command):
+            command += ['--disable-cache']
         command += [file, def_file]
         self.run(command)
 
@@ -336,6 +349,72 @@ class ApptainerGenerator:
             definition += f'    {name}.job {civet_server}/job/{civet_job_id}\n'
         return definition
 
+    @staticmethod
+    def create_filename(app_root, section_key, actions):
+        """
+        Build and return a list of (sections, file_path) tuples
+        Returns:
+            [('SECTION_METHOD_ACTION','approot/apptainer/section_method_action.sh')]
+        """
+        file_list = []
+        # Support sections that have neither method or action (like environment.sh)
+        if os.path.exists(os.path.join(app_root,
+                                       'apptainer',
+                                       f'{section_key}.sh')):
+            file_list = [(f'SECTION_{section_key.upper()}',
+                         os.path.join(app_root, 'apptainer', f'{section_key}.sh'))]
+
+        for method in ['pre', 'post']:
+            # Support sections that have no action (like post_pre.sh)
+            if os.path.exists(os.path.join(app_root,
+                                           'apptainer',
+                                           f'{section_key}_{method}.sh')):
+                file_list.append((f'SECTION_{section_key.upper()}_{method.upper()}',
+                                  os.path.join(app_root,
+                                               'apptainer',
+                                               f'{section_key}_{method}.sh')))
+
+            for action in actions:
+                file_path = os.path.join(app_root,
+                                        'apptainer',
+                                        f'{section_key}_{method}_{action}.sh')
+                # Support sections that have method and an action (post_pre_configure.sh)
+                if os.path.exists(file_path):
+                    file_list.append((f'SECTION_{section_key.upper()}_'
+                                      f'{method.upper()}_{action.upper()}',
+                                      file_path))
+        return file_list
+
+    def add_application_additions(self, app_root, jinja_data):
+        """
+        Add application specific sections if found to jinja data
+        Example, if found:
+            app_root/apptainer/post_pre_configure.sh
+            app_root/apptainer/post_pre.sh
+            app_root/apptainer/environment.sh
+            etc
+        then the contents therein will be exchanged where appropriate.
+
+        File naming syntax:
+            <section>_<method>_<action>.sh
+        """
+        # Add your sections here (be sure to modify apptainer/app.def to match)
+        section_meta = {'environment': [],
+                        'post': ['configure', 'make', 'makeinstall'],
+                        'test': ['test']}
+        for section_key, actions in section_meta.items():
+            file_list = self.create_filename(app_root, section_key, actions)
+            for (a_section, file_path) in file_list:
+                with open(file_path, 'r') as section_file:
+                    multi_lines = []
+                    for i, a_line in enumerate(section_file.readlines()):
+                        # next line items need indentation
+                        if i != 0:
+                            multi_lines.append(f'    {a_line}')
+                        else:
+                            multi_lines.append(a_line)
+                    jinja_data[a_section] = ''.join(multi_lines)
+
     def add_definition_vars(self, jinja_data):
         """
         Adds conditional apptainer definition vars to jinja data
@@ -346,6 +425,8 @@ class ApptainerGenerator:
             jinja_data['APPLICATION_DIR'] = app_root
             jinja_data['APPLICATION_NAME'] = os.path.basename(app_root)
             jinja_data['BINARY_NAME'] = app_name
+            self.add_application_additions(app_root, jinja_data)
+
         # Set MOOSE_[TOOLS, TEST_TOOLS]_VERSION
         if self.args.library == 'moose':
             for package in ['tools', 'test-tools']:

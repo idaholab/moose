@@ -309,7 +309,7 @@
   # http://mooseframework.org/wiki/PhysicsModules/PhaseField/DevelopingModels/MultiPhaseModels/
   [./free_energy]
     type = DerivativeMultiPhaseMaterial
-    f_name = F
+    property_name = F
     # we use a constant free energy (GeneriConstantmaterial property Fx)
     fi_names = 'F1  F2  F3'
     hi_names = 'h1  h2  h3'

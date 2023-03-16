@@ -21,7 +21,6 @@ INSADMomentumPressure::validParams()
   InputParameters params = ADVectorKernel::validParams();
   params.addClassDescription("Adds the pressure term to the INS momentum equation");
   params.addRequiredCoupledVar(NS::pressure, "The pressure");
-  params.addDeprecatedCoupledVar("p", NS::pressure, "1/1/2022");
   params.addParam<bool>(
       "integrate_p_by_parts", true, "Whether to integrate the pressure term by parts");
   return params;

@@ -118,6 +118,8 @@ extern const ExecFlagType EXEC_LINEAR;
 extern const ExecFlagType EXEC_NONLINEAR;
 extern const ExecFlagType EXEC_TIMESTEP_END;
 extern const ExecFlagType EXEC_TIMESTEP_BEGIN;
+extern const ExecFlagType EXEC_MULTIAPP_FIXED_POINT_BEGIN;
+extern const ExecFlagType EXEC_MULTIAPP_FIXED_POINT_END;
 extern const ExecFlagType EXEC_FINAL;
 extern const ExecFlagType EXEC_FORCED;
 extern const ExecFlagType EXEC_FAILED;
@@ -143,6 +145,12 @@ static_assert(LIBMESH_DIM == 3,
  * Note that lower dimensional simulations embedded in 3D space can always be requested at runtime.
  */
 static constexpr std::size_t dim = LIBMESH_DIM;
+
+/**
+ * Used by the signal handler to determine if we should write a checkpoint file out at any point
+ * during operation.
+ */
+extern int interrupt_signal_number;
 
 /**
  * Set to true (the default) to print the stack trace with error and warning

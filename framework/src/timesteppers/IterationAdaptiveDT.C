@@ -66,9 +66,9 @@ IterationAdaptiveDT::validParams()
                         "from failed solve");
   params.addParam<Real>("cutback_factor",
                         0.5,
-                        "Factor to apply to timestep if difficult "
-                        "convergence (if 'optimal_iterations' is specified) "
-                        "or if solution failed");
+                        "Factor to apply to timestep if difficult convergence "
+                        "occurs (if 'optimal_iterations' is specified). "
+                        "For failed solves, use cutback_factor_at_failure");
 
   params.addParam<bool>("reject_large_step",
                         false,
@@ -322,13 +322,13 @@ IterationAdaptiveDT::computeFailedDT()
   if (_verbose)
   {
     _console << "\nSolve failed with dt: " << std::setw(9) << _dt
-             << "\nRetrying with reduced dt: " << std::setw(9) << _dt * _cutback_factor
+             << "\nRetrying with reduced dt: " << std::setw(9) << _dt * _cutback_factor_at_failure
              << std::endl;
   }
   else
     _console << "\nSolve failed, cutting timestep." << std::endl;
 
-  return _dt * _cutback_factor;
+  return _dt * _cutback_factor_at_failure;
 }
 
 bool
@@ -369,12 +369,21 @@ IterationAdaptiveDT::limitDTToPostprocessorValue(Real & limitedDT) const
   if (_pps_value.size() != 0 && _t_step > 1)
   {
     Real limiting_pps_value = *_pps_value[0];
+    unsigned int i_min = 0;
     for (size_t i = 1; i < _pps_value.size(); ++i)
       if (*_pps_value[i] < limiting_pps_value)
+      {
         limiting_pps_value = *_pps_value[i];
+        i_min = i;
+      }
 
     if (limitedDT > limiting_pps_value)
     {
+      if (limiting_pps_value < 0)
+        mooseWarning(
+            "Negative timestep limiting postprocessor '" +
+            getParam<std::vector<PostprocessorName>>("timestep_limiting_postprocessor")[i_min] +
+            "': " + std::to_string(limiting_pps_value));
       limitedDT = std::max(_dt_min, limiting_pps_value);
 
       if (_verbose)

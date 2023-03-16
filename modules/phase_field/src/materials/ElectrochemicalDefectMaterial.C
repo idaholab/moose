@@ -67,9 +67,9 @@ ElectrochemicalDefectMaterial::ElectrochemicalDefectMaterial(const InputParamete
     _eta(_neta),
     _eta_name(_neta),
     _w(coupledValue("chemical_potential")),
-    _w_name(getVar("chemical_potential", 0)->name()),
+    _w_name(coupledName("chemical_potential", 0)),
     _phi(coupledValue("void_op")),
-    _phi_name(getVar("void_op", 0)->name()),
+    _phi_name(coupledName("void_op", 0)),
     _ns_min_name(getParam<MaterialPropertyName>("min_vacancy_concentration_solid")),
     _ns_min(getMaterialProperty<Real>(_ns_min_name)),
     _dns_min(_neta),
@@ -114,7 +114,7 @@ ElectrochemicalDefectMaterial::ElectrochemicalDefectMaterial(const InputParamete
   for (unsigned int i = 0; i < _neta; ++i)
   {
     _eta[i] = &coupledValue("etas", i);
-    _eta_name[i] = getVar("etas", i)->name();
+    _eta_name[i] = coupledName("etas", i);
     _dns_min[i] = &getMaterialPropertyDerivativeByName<Real>(_ns_min_name, _eta_name[i]);
     _d2ns_min[i].resize(_neta);
     _dns[i] = &declarePropertyDerivative<Real>(_ns_name, _eta_name[i]);

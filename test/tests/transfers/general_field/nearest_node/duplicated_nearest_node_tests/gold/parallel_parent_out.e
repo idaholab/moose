@@ -1,0 +1,1 @@
+../../../../multiapp_nearest_node_transfer/gold/parallel_parent_out.e

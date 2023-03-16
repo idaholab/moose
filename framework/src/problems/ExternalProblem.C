@@ -18,6 +18,14 @@ ExternalProblem::validParams()
   InputParameters params = FEProblemBase::validParams();
   params.set<bool>("skip_nl_system_check") = true;
 
+  // there is no nonlinear system (we set it as empty in the constructor)
+  params.suppressParameter<bool>("ignore_zeros_in_jacobian");
+  params.suppressParameter<bool>("kernel_coverage_check");
+  params.suppressParameter<std::vector<NonlinearSystemName>>("nl_sys_names");
+  params.suppressParameter<bool>("previous_nl_solution_required");
+  params.suppressParameter<bool>("skip_nl_system_check");
+  params.suppressParameter<bool>("use_nonlinear");
+
   params.addClassDescription("Problem extension point for wrapping external applications");
   return params;
 }

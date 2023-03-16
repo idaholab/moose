@@ -1,146 +1,200 @@
 [Tests]
-  [./3D]
+  [3D]
     type = Exodiff
     input = 'gap_heat_transfer_htonly_test.i'
     exodiff = 'gap_heat_transfer_htonly_test_out.e'
     abs_zero = 1e-6
-    requirement = "Thermal contact shall solve plate heat transfer for a constant conductivity gap in 3D"
+    requirement = "Thermal contact shall solve plate heat transfer for a constant conductivity gap "
+                  "in 3D"
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#1609'
-  [../]
-  [./syntax]
+  []
+  [syntax]
     type = Exodiff
     input = 'gap_heat_transfer_htonly_syntax.i'
     exodiff = 'gap_heat_transfer_htonly_syntax_out.e'
     abs_zero = 1e-6
-    requirement = "Thermal contact shall solve plate heat transfer for a constant conductivity gap in 3D using the Modules/HeatConduction/Thermal contact syntax"
+    requirement = "Thermal contact shall solve plate heat transfer for a constant conductivity gap "
+                  "in 3D using the Modules/HeatConduction/Thermal contact syntax"
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#1609'
-  [../]
-  [./3D_Iters]
+  []
+  [3D_Iters]
     type = Exodiff
     input = 'gap_heat_transfer_htonly_it_plot_test.i'
     exodiff = 'out_it_plot.e'
     custom_cmp = 'gap_heat_transfer_htonly_it_plot_test.cmp'
-    requirement = "Thermal contact shall solve plate heat transfer for a constant conductivity gap in 3D at each iteration"
+    requirement = "Thermal contact shall solve plate heat transfer for a constant conductivity gap "
+                  "in 3D at each iteration"
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#1609'
-  [../]
-  [./RZ]
+  []
+  [RZ]
     type = Exodiff
     input = 'gap_heat_transfer_htonly_rz_test.i'
     exodiff = 'gap_heat_transfer_htonly_rz_test_out.e'
     abs_zero = 1e-9
     rel_err = 5e-3
     compiler = 'CLANG GCC'
-    requirement = "Thermal contact shall solve cylindrical and plate heat transfer for a constant conductivity gap in 2D axisymmetric coordinates"
+    requirement = "Thermal contact shall solve cylindrical and plate heat transfer for a constant "
+                  "conductivity gap in 2D axisymmetric coordinates"
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#5104'
-  [../]
-  [./ZR]
+  []
+  [ZR]
     type = Exodiff
     input = 'gap_heat_transfer_htonly_rz_test.i'
     exodiff = 'gap_heat_transfer_htonly_zr_test_out.e'
     abs_zero = 1e-9
     rel_err = 5e-3
     compiler = 'CLANG GCC'
-    requirement = "Thermal contact shall solve cylindrical heat transfer for a constant conductivity gap in 2D axisymmetric coordinates where the axial axis is along the x-direction"
+    requirement = "Thermal contact shall solve cylindrical heat transfer for a constant conductivity "
+                  "gap in 2D axisymmetric coordinates where the axial axis is along the x-direction"
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#12071'
-    cli_args = "Problem/rz_coord_axis=X Mesh/active='file rotate' Outputs/file_base=gap_heat_transfer_htonly_zr_test_out"
-  [../]
-  [./RSpherical]
+    cli_args = "Problem/rz_coord_axis=X Mesh/active='file rotate' "
+               "Outputs/file_base=gap_heat_transfer_htonly_zr_test_out"
+  []
+  [RSpherical]
     type = Exodiff
     input = 'gap_heat_transfer_htonly_rspherical.i'
     exodiff = 'gap_heat_transfer_htonly_rspherical_out.e'
     custom_cmp = 'gap_heat_transfer_htonly_rspherical.exodiff'
     compiler = 'CLANG GCC'
-    requirement = "Thermal contact shall solve spherical heat transfer for a constant conductivity gap in 1D spherically symmetric coordinates"
+    requirement = "Thermal contact shall solve spherical heat transfer for a constant conductivity "
+                  "gap in 1D spherically symmetric coordinates"
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#1609 #5104'
-  [../]
-  [./cyl3D]
+  []
+  [cyl3D]
     type = Exodiff
     input = 'cyl3D.i'
     exodiff = 'cyl3D_out.e'
     superlu = true
-    requirement = "Thermal contact shall solve cylindrical heat transfer for a constant conductivity gap in 3D"
+    requirement = "Thermal contact shall solve cylindrical heat transfer for a constant conductivity "
+                  "gap in 3D"
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#6161'
-  [../]
-  [./cyl2D]
+  []
+  [cyl2D]
     type = Exodiff
     input = 'cyl2D.i'
     exodiff = 'cyl2D_out.e'
     superlu = true
-    requirement = "Thermal contact shall solve cylindrical heat transfer for a constant conductivity gap in the x-y plane"
+    requirement = "Thermal contact shall solve cylindrical heat transfer for a constant conductivity "
+                  "gap in the x-y plane"
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#6161'
-  [../]
-  [./sphere3D]
+  []
+  [sphere3D]
     type = Exodiff
     input = 'sphere3D.i'
     exodiff = 'sphere3D_out.e'
     superlu = true
-    requirement = "Thermal contact shall solve spherical heat transfer for a constant conductivity gap in 3D"
+    requirement = "Thermal contact shall solve spherical heat transfer for a constant conductivity "
+                  "gap in 3D"
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#6161'
-  [../]
-  [./sphere2DRZ]
+  []
+  [sphere2DRZ]
     type = Exodiff
     input = 'sphere2DRZ.i'
     exodiff = 'sphere2DRZ_out.e'
     superlu = true
-    requirement = "Thermal contact shall solve spherical heat transfer for a constant conductivity gap in 2D axisymmetric coordinates"
+    requirement = "Thermal contact shall solve spherical heat transfer for a constant conductivity "
+                  "gap in 2D axisymmetric coordinates"
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#6161'
-  [../]
-  [./cyl2D_xz]
+  []
+  [cyl2D_xz]
     type = Exodiff
     input = 'cyl2D_xz.i'
     exodiff = 'cyl2D_xz_out.e'
     superlu = true
-    requirement = "Thermal contact shall solve cylindrical heat transfer for a constant conductivity gap in the x-z plane"
+    requirement = "Thermal contact shall solve cylindrical heat transfer for a constant conductivity "
+                  "gap in the x-z plane"
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#11913'
-  [../]
-  [./cyl2D_yz]
+  []
+  [cyl2D_yz]
     type = Exodiff
     input = 'cyl2D_yz.i'
     exodiff = 'cyl2D_yz_out.e'
     superlu = true
-    requirement = "Thermal contact shall solve cylindrical heat transfer for a constant conductivity gap in the y-z plane"
+    requirement = "Thermal contact shall solve cylindrical heat transfer for a constant conductivity "
+                  "gap in the y-z plane"
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#11913'
-  [../]
-  [./planar_xy]
+  []
+  [planar_xy]
     type = Exodiff
     input = 'planar_xy.i'
     exodiff = 'planar_xy_out.e'
     custom_cmp = 'planar.cmp'
     superlu = true
-    requirement = "Thermal contact shall solve plate heat transfer for a constant conductivity gap in the x-y plane"
+    requirement = "Thermal contact shall solve plate heat transfer for a constant conductivity gap "
+                  "in the x-y plane"
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#11913'
-  [../]
-  [./planar_xz]
+  []
+  [planar_xz]
     type = Exodiff
     input = 'planar_xz.i'
     exodiff = 'planar_xz_out.e'
     custom_cmp = 'planar.cmp'
     superlu = true
-    requirement = "Thermal contact shall solve plate heat transfer for a constant conductivity gap in the x-z plane"
+    requirement = "Thermal contact shall solve plate heat transfer for a constant conductivity gap "
+                  "in the x-z plane"
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#11913'
-  [../]
-  [./planar_yz]
+  []
+  [planar_yz]
     type = Exodiff
     input = 'planar_yz.i'
     exodiff = 'planar_yz_out.e'
     custom_cmp = 'planar.cmp'
     superlu = true
-    requirement = "Thermal contact shall solve plate heat transfer for a constant conductivity gap in the y-z plane"
+    requirement = "Thermal contact shall solve plate heat transfer for a constant conductivity gap "
+                  "in the y-z plane"
     design = 'source/bcs/GapHeatTransfer.md'
     issues = '#11913'
-  [../]
+  []
+  [corner_wrap]
+    type = Exodiff
+    input = 'corner_wrap.i'
+    exodiff = 'corner_wrap_out.e'
+    requirement = "When the 'check_boundary_restricted' option is set to false, the thermal contact "
+                  "system shall solve problems in which multiple faces of an element are in one of "
+                  "the contact surfaces, but provide an information message that contact variables "
+                  "may have issues in those areas."
+    expect_out = "This parameter is set to 'false'. Although thermal contact will be correctly "
+                 "enforced, the contact-related output may have issues in cases where where more "
+                 "than one face of an element belongs to a contact surface because the values from "
+                 "only one of the faces will be reported."
+    design = 'source/bcs/GapHeatTransfer.md'
+    issues = '#23058'
+  []
+  [corner_wrap_err_check_true]
+    prereq = corner_wrap
+    type = RunException
+    input = 'corner_wrap.i'
+    cli_args = ThermalContact/thermal_contact/check_boundary_restricted=true
+    requirement = "When the 'check_boundary_restricted' option is set to true, the AuxKernels set "
+                  "up by the ThermalContact system shall generate an error when multiple faces of "
+                  "an element are in one of the contact surfaces."
+    expect_err = "Boundary restricted auxiliary kernel 'gap_value_thermal_contact_0' has element "
+    design = 'source/bcs/GapHeatTransfer.md'
+    issues = '#23058'
+  []
+  [corner_wrap_err_quadrature]
+    prereq = corner_wrap_err_check_true
+    type = RunException
+    input = 'corner_wrap.i'
+    cli_args = ThermalContact/thermal_contact/quadrature=false
+    requirement = "If 'quadrature=false' the thermal contact system shall generate an error if "
+                  "the user also sets 'check_boundary_restricted=true'."
+    expect_err = "This parameter cannot be 'false' when 'quadrature=false'"
+    design = 'source/bcs/GapHeatTransfer.md'
+    issues = '#23058'
+  []
 []

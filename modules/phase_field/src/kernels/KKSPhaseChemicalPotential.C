@@ -51,7 +51,7 @@ KKSPhaseChemicalPotential::validParams()
 KKSPhaseChemicalPotential::KKSPhaseChemicalPotential(const InputParameters & parameters)
   : DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>(parameters),
     _cb_var(coupled("cb")),
-    _cb_name(getVar("cb", 0)->name()),
+    _cb_name(coupledName("cb", 0)),
     // first derivatives
     _dfadca(getMaterialPropertyDerivative<Real>("fa_name", _var.name())),
     _dfbdcb(getMaterialPropertyDerivative<Real>("fb_name", _cb_name)),

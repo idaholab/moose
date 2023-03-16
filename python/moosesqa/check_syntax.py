@@ -28,7 +28,7 @@ def check_syntax(app_syntax, app_types, file_cache, object_prefix='', syntax_pre
         # SyntaxNode objects must registered to all the desired app types
         # ActionNode objects and the syntax they belong must be registered to the desired type
         # MooseObjects must be registered to the desired type
-        # Action/MoosdObjects must not be tests, unless allowed
+        # Action/MooseObjects must not be tests, unless allowed
         if ((isinstance(node, moosesyntax.SyntaxNode) and set(app_types) == node.groups()) \
             or (isinstance(node, moosesyntax.ActionNode) and is_app_type(node, app_types)) and is_app_type(node.parent, app_types) \
             or (isinstance(node, moosesyntax.MooseObjectNode) and is_app_type(node, app_types))) \

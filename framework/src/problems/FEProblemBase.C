@@ -247,7 +247,7 @@ FEProblemBase::validParams()
   params.addParam<bool>("previous_nl_solution_required",
                         false,
                         "True to indicate that this calculation requires a solution vector for "
-                        "storing the prvious nonlinear iteration.");
+                        "storing the previous nonlinear iteration.");
 
   params.addParam<std::vector<NonlinearSystemName>>(
       "nl_sys_names", std::vector<NonlinearSystemName>{"nl0"}, "The nonlinear system names");
@@ -265,6 +265,26 @@ FEProblemBase::validParams()
       "allow_invalid_solution",
       false,
       "Set to true to allow convergence even though the solution has been marked as 'invalid'");
+  params.addParam<bool>("immediately_print_invalid_solution",
+                        false,
+                        "Whether or not to report invalid solution warnings at the time the "
+                        "warning is produced instead of after the calculation");
+
+  params.addParamNamesToGroup(
+      "skip_nl_system_check kernel_coverage_check boundary_restricted_node_integrity_check "
+      "boundary_restricted_elem_integrity_check material_coverage_check fv_bcs_integrity_check "
+      "material_dependency_check",
+      "Simulation checks");
+  params.addParamNamesToGroup("restart_file_base force_restart skip_additional_restart_data",
+                              "Restart");
+  params.addParamNamesToGroup("verbose_multiapps parallel_barrier_messaging", "Verbosity");
+  params.addParamNamesToGroup(
+      "null_space_dimension transpose_null_space_dimension near_null_space_dimension",
+      "Null space removal");
+  params.addParamNamesToGroup("extra_tag_vectors extra_tag_matrices extra_tag_solutions",
+                              "Tagging");
+  params.addParamNamesToGroup("allow_invalid_solution immediately_print_invalid_solution",
+                              "Solution validity control");
 
   return params;
 }
@@ -356,6 +376,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _skip_nl_system_check(getParam<bool>("skip_nl_system_check")),
     _fail_next_nonlinear_convergence_check(false),
     _allow_invalid_solution(getParam<bool>("allow_invalid_solution")),
+    _immediately_print_invalid_solution(getParam<bool>("immediately_print_invalid_solution")),
     _started_initial_setup(false),
     _has_internal_edge_residual_objects(false),
     _u_dot_requested(false),
@@ -445,10 +466,19 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   //   _mesh.getMesh().remove_ghosting_functor(_mesh.getMesh().default_ghosting());
 
 #if !PETSC_RELEASE_LESS_THAN(3, 12, 0)
-  // Master app should hold the default database to handle system petsc options
+  // Main app should hold the default database to handle system petsc options
   if (!_app.isUltimateMaster())
     PetscOptionsCreate(&_petsc_option_data_base);
 #endif
+}
+
+const MooseMesh &
+FEProblemBase::mesh(bool use_displaced) const
+{
+  if (use_displaced && !_displaced_problem)
+    mooseWarning("Displaced mesh was requested but the displaced problem does not exist. "
+                 "Regular mesh will be returned");
+  return ((use_displaced && _displaced_problem) ? _displaced_problem->mesh() : mesh());
 }
 
 void
@@ -1440,10 +1470,10 @@ FEProblemBase::prepare(const Elem * elem, THREAD_ID tid)
 
     // This method is called outside of residual/Jacobian callbacks during initial condition
     // evaluation
-    if ((!_has_jacobian || !_const_jacobian) && _currently_computing_jacobian)
+    if ((!_has_jacobian || !_const_jacobian) && currentlyComputingJacobian())
       _assembly[tid][i]->prepareJacobianBlock();
     _assembly[tid][i]->prepareResidual();
-    if (_has_nonlocal_coupling && _currently_computing_jacobian)
+    if (_has_nonlocal_coupling && currentlyComputingJacobian())
       _assembly[tid][i]->prepareNonlocal();
   }
   _aux->prepare(tid);
@@ -2132,7 +2162,7 @@ FEProblemBase::reinitElemNeighborAndLowerD(const Elem * elem, unsigned int side,
       std::vector<Point> reference_points;
       FEInterface::inverse_map(
           lower_d_elem_neighbor->dim(), FEType(), lower_d_elem_neighbor, qps, reference_points);
-      reinitLowerDElem(lower_d_elem_neighbor, tid, &qps);
+      reinitLowerDElem(lower_d_elem_neighbor, tid, &reference_points);
     }
   }
 
@@ -2256,8 +2286,7 @@ FEProblemBase::addFunction(const std::string & type,
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    std::shared_ptr<MooseFunctionBase> func =
-        _factory.create<MooseFunctionBase>(type, name, parameters, tid);
+    std::shared_ptr<Function> func = _factory.create<Function>(type, name, parameters, tid);
     _functions.addObject(func, tid);
 
     auto add_functor = [this, &name, tid](const auto & cast_functor)
@@ -4109,122 +4138,156 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
 void
 FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
                                           const Moose::AuxGroup & group,
-                                          TheWarehouse::Query & query)
+                                          TheWarehouse::Query & primary_query)
 {
   // Add group to query
   if (group == Moose::PRE_IC)
-    query.condition<AttribPreIC>(true);
+    primary_query.condition<AttribPreIC>(true);
   else if (group == Moose::PRE_AUX)
-    query.condition<AttribPreAux>(type);
+    primary_query.condition<AttribPreAux>(type);
   else if (group == Moose::POST_AUX)
-    query.condition<AttribPostAux>(type);
+    primary_query.condition<AttribPostAux>(type);
 
-  std::vector<GeneralUserObject *> genobjs;
-  query.clone().condition<AttribInterfaces>(Interfaces::GeneralUserObject).queryInto(genobjs);
+  // query everything first to obtain a list of execution groups
+  std::vector<UserObject *> uos;
+  primary_query.clone().queryIntoUnsorted(uos);
+  std::set<int> execution_groups;
+  for (const auto & uo : uos)
+    execution_groups.insert(uo->getParam<int>("execution_order_group"));
 
-  std::vector<UserObject *> userobjs;
-  query.clone()
-      .condition<AttribInterfaces>(Interfaces::ElementUserObject | Interfaces::SideUserObject |
-                                   Interfaces::InternalSideUserObject |
-                                   Interfaces::InterfaceUserObject | Interfaces::DomainUserObject)
-      .queryInto(userobjs);
-
-  std::vector<UserObject *> tgobjs;
-  query.clone()
-      .condition<AttribInterfaces>(Interfaces::ThreadedGeneralUserObject)
-      .queryInto(tgobjs);
-
-  std::vector<UserObject *> nodal;
-  query.clone().condition<AttribInterfaces>(Interfaces::NodalUserObject).queryInto(nodal);
-
-  if (userobjs.empty() && genobjs.empty() && tgobjs.empty() && nodal.empty())
-    return;
-
-  TIME_SECTION("computeUserObjects", 1, "Computing User Objects");
-
-  // Start the timer here since we have at least one active user object
-  std::string compute_uo_tag = "computeUserObjects(" + Moose::stringify(type) + ")";
-
-  // Perform Residual/Jacobian setups
-  if (type == EXEC_LINEAR)
+  // iterate over execution order groups
+  for (const auto execution_group : execution_groups)
   {
+    auto query = primary_query.clone().condition<AttribExecutionOrderGroup>(execution_group);
+
+    std::vector<GeneralUserObject *> genobjs;
+    query.clone().condition<AttribInterfaces>(Interfaces::GeneralUserObject).queryInto(genobjs);
+
+    std::vector<UserObject *> userobjs;
+    query.clone()
+        .condition<AttribInterfaces>(Interfaces::ElementUserObject | Interfaces::SideUserObject |
+                                     Interfaces::InternalSideUserObject |
+                                     Interfaces::InterfaceUserObject | Interfaces::DomainUserObject)
+        .queryInto(userobjs);
+
+    std::vector<UserObject *> tgobjs;
+    query.clone()
+        .condition<AttribInterfaces>(Interfaces::ThreadedGeneralUserObject)
+        .queryInto(tgobjs);
+
+    std::vector<UserObject *> nodal;
+    query.clone().condition<AttribInterfaces>(Interfaces::NodalUserObject).queryInto(nodal);
+
+    if (userobjs.empty() && genobjs.empty() && tgobjs.empty() && nodal.empty())
+      continue;
+
+    TIME_SECTION("computeUserObjects", 1, "Computing User Objects");
+
+    // Start the timer here since we have at least one active user object
+    std::string compute_uo_tag = "computeUserObjects(" + Moose::stringify(type) + ")";
+
+    // Perform Residual/Jacobian setups
+    if (type == EXEC_LINEAR)
+    {
+      for (auto obj : userobjs)
+        obj->residualSetup();
+      for (auto obj : nodal)
+        obj->residualSetup();
+      for (auto obj : tgobjs)
+        obj->residualSetup();
+      for (auto obj : genobjs)
+        obj->residualSetup();
+    }
+    else if (type == EXEC_NONLINEAR)
+    {
+      for (auto obj : userobjs)
+        obj->jacobianSetup();
+      for (auto obj : nodal)
+        obj->jacobianSetup();
+      for (auto obj : tgobjs)
+        obj->jacobianSetup();
+      for (auto obj : genobjs)
+        obj->jacobianSetup();
+    }
+
     for (auto obj : userobjs)
-      obj->residualSetup();
+      obj->initialize();
+
+    // Execute Side/InternalSide/Interface/Elemental/DomainUserObjects
+    if (!userobjs.empty())
+    {
+      // non-nodal user objects have to be run separately before the nodal user objects run
+      // because some nodal user objects (NodalNormal related) depend on elemental user objects :-(
+      ComputeUserObjectsThread cppt(*this, getNonlinearSystemBase(), query);
+      Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cppt);
+
+      // There is one instance in rattlesnake where an elemental user object's finalize depends
+      // on a side user object having been finalized first :-(
+      joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::SideUserObject));
+      joinAndFinalize(
+          query.clone().condition<AttribInterfaces>(Interfaces::InternalSideUserObject));
+      joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::InterfaceUserObject));
+      joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::ElementUserObject));
+      joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::DomainUserObject));
+    }
+
+    // if any userobject may have written to variables we need to close the aux solution
+    for (const auto & uo : userobjs)
+      if (auto euo = dynamic_cast<const ElementUserObject *>(uo);
+          euo && euo->hasWritableCoupledVariables())
+      {
+        _aux->solution().close();
+        _aux->system().update();
+        break;
+      }
+
+    // Execute NodalUserObjects
+    // BISON has an axial reloc elemental user object that has a finalize func that depends on a
+    // nodal user object's prev value. So we can't initialize this until after elemental objects
+    // have been finalized :-(
     for (auto obj : nodal)
-      obj->residualSetup();
+      obj->initialize();
+    if (query.clone().condition<AttribInterfaces>(Interfaces::NodalUserObject).count() > 0)
+    {
+      ComputeNodalUserObjectsThread cnppt(*this, query);
+      Threads::parallel_reduce(*_mesh.getLocalNodeRange(), cnppt);
+      joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::NodalUserObject));
+    }
+
+    // if any userobject may have written to variables we need to close the aux solution
+    for (const auto & uo : nodal)
+      if (auto nuo = dynamic_cast<const NodalUserObject *>(uo);
+          nuo && nuo->hasWritableCoupledVariables())
+      {
+        _aux->solution().close();
+        _aux->system().update();
+        break;
+      }
+
+    // Execute threaded general user objects
     for (auto obj : tgobjs)
-      obj->residualSetup();
-    for (auto obj : genobjs)
-      obj->residualSetup();
+      obj->initialize();
+    std::vector<GeneralUserObject *> tguos_zero;
+    query.clone()
+        .condition<AttribThread>(0)
+        .condition<AttribInterfaces>(Interfaces::ThreadedGeneralUserObject)
+        .queryInto(tguos_zero);
+    for (auto obj : tguos_zero)
+    {
+      std::vector<GeneralUserObject *> tguos;
+      auto q = query.clone()
+                   .condition<AttribName>(obj->name())
+                   .condition<AttribInterfaces>(Interfaces::ThreadedGeneralUserObject);
+      q.queryInto(tguos);
+
+      ComputeThreadedGeneralUserObjectsThread ctguot(*this);
+      Threads::parallel_reduce(GeneralUserObjectRange(tguos.begin(), tguos.end()), ctguot);
+      joinAndFinalize(q);
+    }
+
+    // Execute general user objects
+    joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::GeneralUserObject), true);
   }
-  else if (type == EXEC_NONLINEAR)
-  {
-    for (auto obj : userobjs)
-      obj->jacobianSetup();
-    for (auto obj : nodal)
-      obj->jacobianSetup();
-    for (auto obj : tgobjs)
-      obj->jacobianSetup();
-    for (auto obj : genobjs)
-      obj->jacobianSetup();
-  }
-
-  for (auto obj : userobjs)
-    obj->initialize();
-
-  // Execute Side/InternalSide/Interface/Elemental/DomainUserObjects
-  if (!userobjs.empty())
-  {
-    // non-nodal user objects have to be run separately before the nodal user objects run
-    // because some nodal user objects (NodalNormal related) depend on elemental user objects :-(
-    ComputeUserObjectsThread cppt(*this, getNonlinearSystemBase(), query);
-    Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), cppt);
-
-    // There is one instance in rattlesnake where an elemental user object's finalize depends
-    // on a side user object having been finalized first :-(
-    joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::SideUserObject));
-    joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::InternalSideUserObject));
-    joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::InterfaceUserObject));
-    joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::ElementUserObject));
-    joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::DomainUserObject));
-  }
-
-  // Execute NodalUserObjects
-  // BISON has an axial reloc elemental user object that has a finalize func that depends on a
-  // nodal user object's prev value. So we can't initialize this until after elemental objects
-  // have been finalized :-(
-  for (auto obj : nodal)
-    obj->initialize();
-  if (query.clone().condition<AttribInterfaces>(Interfaces::NodalUserObject).count() > 0)
-  {
-    ComputeNodalUserObjectsThread cnppt(*this, query);
-    Threads::parallel_reduce(*_mesh.getLocalNodeRange(), cnppt);
-    joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::NodalUserObject));
-  }
-
-  // Execute threaded general user objects
-  for (auto obj : tgobjs)
-    obj->initialize();
-  std::vector<GeneralUserObject *> tguos_zero;
-  query.clone()
-      .condition<AttribThread>(0)
-      .condition<AttribInterfaces>(Interfaces::ThreadedGeneralUserObject)
-      .queryInto(tguos_zero);
-  for (auto obj : tguos_zero)
-  {
-    std::vector<GeneralUserObject *> tguos;
-    auto q = query.clone()
-                 .condition<AttribName>(obj->name())
-                 .condition<AttribInterfaces>(Interfaces::ThreadedGeneralUserObject);
-    q.queryInto(tguos);
-
-    ComputeThreadedGeneralUserObjectsThread ctguot(*this);
-    Threads::parallel_reduce(GeneralUserObjectRange(tguos.begin(), tguos.end()), ctguot);
-    joinAndFinalize(q);
-  }
-
-  // Execute general user objects
-  joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::GeneralUserObject), true);
 }
 
 void
@@ -5780,12 +5843,19 @@ FEProblemBase::computeResidual(const NumericVector<Number> & soln,
                                const unsigned int nl_sys_num)
 {
   setCurrentNonlinearSystem(nl_sys_num);
+
+  // We associate the residual tag with the given residual vector to make sure we
+  // don't filter it out below
+  _current_nl_sys->associateVectorToTag(residual, _current_nl_sys->residualVectorTag());
   const auto & residual_vector_tags = getVectorTags(Moose::VECTOR_TAG_RESIDUAL);
 
   _fe_vector_tags.clear();
 
   for (const auto & residual_vector_tag : residual_vector_tags)
-    _fe_vector_tags.insert(residual_vector_tag._id);
+    // We filter out tags which do not have associated vectors in the current nonlinear
+    // system. This is essential to be able to use system-dependent residual tags.
+    if (_current_nl_sys->hasVector(residual_vector_tag._id))
+      _fe_vector_tags.insert(residual_vector_tag._id);
 
   computeResidualInternal(soln, residual, _fe_vector_tags);
 }
@@ -5846,9 +5916,15 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
     for (const auto & it : _random_data_objects)
       it.second->updateSeeds(EXEC_LINEAR);
 
-    _currently_computing_residual_and_jacobian = true;
+    setCurrentlyComputingResidual(true);
+    setCurrentlyComputingJacobian(true);
+    setCurrentlyComputingResidualAndJacobian(true);
     if (_displaced_problem)
+    {
+      _displaced_problem->setCurrentlyComputingResidual(true);
+      _displaced_problem->setCurrentlyComputingJacobian(true);
       _displaced_problem->setCurrentlyComputingResidualAndJacobian(true);
+    }
 
     execTransfers(EXEC_LINEAR);
 
@@ -5939,9 +6015,15 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
     _current_nl_sys->disassociateMatrixFromTag(jacobian, _current_nl_sys->systemMatrixTag());
     _current_nl_sys->disassociateVectorFromTag(residual, _current_nl_sys->residualVectorTag());
 
-    _currently_computing_residual_and_jacobian = false;
+    setCurrentlyComputingResidual(false);
+    setCurrentlyComputingJacobian(false);
+    setCurrentlyComputingResidualAndJacobian(false);
     if (_displaced_problem)
+    {
+      _displaced_problem->setCurrentlyComputingResidual(false);
+      _displaced_problem->setCurrentlyComputingJacobian(false);
       _displaced_problem->setCurrentlyComputingResidualAndJacobian(false);
+    }
   }
   catch (MooseException & e)
   {
@@ -7617,24 +7699,6 @@ FEProblemBase::addOutput(const std::string & object_type,
   if (common)
     parameters.applyParameters(*common, exclude);
 
-  // If file_base parameter has not been set with the common parameters, we inquire app to set it
-  // here
-  if (parameters.have_parameter<std::string>("file_base") &&
-      !parameters.isParamSetByUser("file_base"))
-  {
-    if (parameters.get<bool>("_built_by_moose"))
-      // if this is a master app, file_base here will be input file name plus _out
-      // because otherwise this parameter has been set.
-      // if this is a subapp, file_base here will be the one generated by master in the master's
-      // MulitApp.
-      parameters.set<std::string>("file_base") = _app.getOutputFileBase();
-    else
-      // if this is a master app, file_bsse here will be input file name.
-      // if this is a subapp, file_base will be the one generated by master in the master's
-      // MultiApp. file_base for a subapp here is identical with those of _built_by_moose.
-      parameters.set<std::string>("file_base") = _app.getOutputFileBase(true) + "_" + object_name;
-  }
-
   // Set the correct value for the binary flag for XDA/XDR output
   if (object_type == "XDR")
     parameters.set<bool>("_binary") = true;
@@ -7866,31 +7930,6 @@ FEProblemBase::coordTransform()
   return mesh().coordTransform();
 }
 
-template <typename T>
-bool
-FEProblemBase::hasFunction(const std::string & name, THREAD_ID tid) const
-{
-  return _functions.hasActiveObject(name, tid) &&
-         dynamic_cast<FunctionTempl<T> *>(_functions.getActiveObject(name, tid).get());
-}
-
-template <>
-FunctionTempl<Real> &
-FEProblemBase::getFunction<Real>(const std::string & name, THREAD_ID tid)
-{
-  return getFunction(name, tid);
-}
-
-template <typename T>
-FunctionTempl<T> &
-FEProblemBase::getFunction(const std::string & name, THREAD_ID tid)
-{
-  if (!hasFunction<T>(name, tid))
-    mooseError("Unable to find function " + name);
-
-  return static_cast<FunctionTempl<T> &>(*(_functions.getActiveObject(name, tid)));
-}
-
 void
 FEProblemBase::reinitFVFace(const THREAD_ID tid, const FaceInfo & fi)
 {
@@ -7903,8 +7942,3 @@ FEProblemBase::currentNlSysNum() const
 {
   return currentNonlinearSystem().number();
 }
-
-template bool FEProblemBase::hasFunction<Real>(const std::string & name, THREAD_ID tid) const;
-template bool FEProblemBase::hasFunction<ADReal>(const std::string & name, THREAD_ID tid) const;
-template FunctionTempl<ADReal> & FEProblemBase::getFunction<ADReal>(const std::string & name,
-                                                                    THREAD_ID tid);

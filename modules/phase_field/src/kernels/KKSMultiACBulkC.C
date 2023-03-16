@@ -24,8 +24,8 @@ KKSMultiACBulkC::validParams()
 
 KKSMultiACBulkC::KKSMultiACBulkC(const InputParameters & parameters)
   : KKSMultiACBulkBase(parameters),
-    _c1_name(getVar("cj_names", 0)
-                 ->name()), // Can use any dFj/dcj since they are equal so pick first cj in the list
+    // Can use any dFj/dcj since they are equal so pick first cj in the list
+    _c1_name(coupledName("cj_names", 0)),
     _cjs(coupledValues("cj_names")),
     _cjs_var(coupledIndices("cj_names")),
     _prop_dF1dc1(getMaterialPropertyDerivative<Real>(_Fj_names[0],

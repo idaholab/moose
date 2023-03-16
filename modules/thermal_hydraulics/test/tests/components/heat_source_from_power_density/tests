@@ -25,7 +25,7 @@
     type = 'RunException'
     input = 'err.base.i'
     cli_args = "Components/hgen/hs=hgen Components/hgen/regions='fuel'"
-    expect_err = "hgen: The component 'hgen' is not of type 'HeatStructureBase'"
+    expect_err = "hgen: The component 'hgen' is not of type 'HeatStructureInterface'"
   []
   [err:wrong_block_name]
     type = 'RunException'

@@ -27,6 +27,7 @@ FVKernel::validParams()
 {
   InputParameters params = ResidualObject::validParams();
   params += BlockRestrictable::validParams();
+  params += ADFunctorInterface::validParams();
   params.addParam<bool>("use_displaced_mesh",
                         false,
                         "Whether or not this object should use the "
@@ -41,6 +42,7 @@ FVKernel::validParams()
                         false,
                         "Whether to use point neighbors, which introduces additional ghosting to "
                         "that used for simple face neighbors.");
+  params.addParamNamesToGroup("ghost_layers use_point_neighbors", "Parallel ghosting");
 
   // FV Kernels always need one layer of ghosting because when looping over
   // faces to compute fluxes, the elements on each side of the face may be on
@@ -59,7 +61,8 @@ FVKernel::validParams()
   return params;
 }
 
-FVKernel::FVKernel(const InputParameters & params) : ResidualObject(params), BlockRestrictable(this)
+FVKernel::FVKernel(const InputParameters & params)
+  : ResidualObject(params), BlockRestrictable(this), ADFunctorInterface(this)
 {
   _subproblem.haveADObjects(true);
   if (getParam<bool>("use_displaced_mesh"))

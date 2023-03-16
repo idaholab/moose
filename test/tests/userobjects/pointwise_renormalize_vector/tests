@@ -1,0 +1,10 @@
+[Tests]
+  [test]
+    type = Exodiff
+    input = test.i
+    exodiff = test_out.e
+    design = PointwiseRenormalizeVector.md
+    issues = '#21801'
+    requirement = "The system shall be able to pointwise renormalize tuples of solution variables as a vector to a desired L2-norm"
+  []
+[]

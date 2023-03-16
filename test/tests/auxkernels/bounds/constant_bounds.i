@@ -14,102 +14,104 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 
-  [./v]
+  [v]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./bounds_dummy]
+  [bounds_dummy]
     order = FIRST
     family = LAGRANGE
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff_u]
+  [diff_u]
     type = Diffusion
     variable = u
-  [../]
+  []
 
-  [./diff_v]
+  [diff_v]
     type = Diffusion
     variable = v
-  [../]
+  []
 []
 
 [BCs]
-  [./left_u]
+  [left_u]
     type = DirichletBC
     variable = u
     boundary = 3
     value = 0
-  [../]
+  []
 
-  [./right_u]
+  [right_u]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 1
-  [../]
+  []
 
-  [./left_v]
+  [left_v]
     type = DirichletBC
     variable = v
     boundary = 3
     value = 0
-  [../]
+  []
 
-  [./right_v]
+  [right_v]
     type = DirichletBC
     variable = v
     boundary = 1
     value = 1
-  [../]
+  []
 []
 
 [Bounds]
-  [./u_upper_bound]
+  [u_upper_bound]
     type = ConstantBoundsAux
     variable = bounds_dummy
     bounded_variable = u
     bound_type = upper
     bound_value = 1
-  [../]
-  [./u_lower_bound]
+  []
+  [u_lower_bound]
     type = ConstantBoundsAux
     variable = bounds_dummy
     bounded_variable = u
     bound_type = lower
     bound_value = 0
-  [../]
+  []
 
-  [./v_upper_bound]
+  [v_upper_bound]
     type = ConstantBoundsAux
     variable = bounds_dummy
     bounded_variable = v
     bound_type = upper
     bound_value = 3
-  [../]
-  [./v_lower_bound]
+  []
+  [v_lower_bound]
     type = ConstantBoundsAux
     variable = bounds_dummy
     bounded_variable = v
     bound_type = lower
     bound_value = -1
-  [../]
+  []
 []
 
 [Executioner]
   type = Steady
 
   solve_type = 'PJFNK'
+  petsc_options_iname = '-snes_type'
+  petsc_options_value = 'vinewtonrsls'
 []
 
 [Outputs]

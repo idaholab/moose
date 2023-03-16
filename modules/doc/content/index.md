@@ -48,6 +48,40 @@ Multiphysics Object-Oriented Simulation Environment
 !col-end!
 !row-end!
 
-!include upcoming_training.md
+!row! style=display:inline-flex;
+!col! small=12 medium=4 large=2
 
-!media large_media/framework/inl_blue.png dark_src=large_media/framework/inl_white.png style=width:30%;display:block;margin-top:3em;margin-left:auto;margin-right:auto;
+!media large_media/organization_logos/INL-Logo_Left-Black.png dark_src=large_media/organization_logos/INL-Logo_Left-White.png style=width:100%;display:block;
+
+!col-end!
+
+!col! small=12 medium=4 large=2
+
+!style halign=center
+
+!media large_media/organization_logos/Argonne_cmyk_black.png dark_src=large_media/organization_logos/Argonne_cmyk_white.png style=width:100%;display:block;
+
+!col-end!
+
+!col! small=12 medium=4 large=2
+
+!style halign=center
+
+!media large_media/organization_logos/LosAlamosLab_light.png dark_src=large_media/organization_logos/LosAlamosLab_dark.png style=width:100%;display:block;
+
+!col-end!
+
+!col! small=12 medium=4 large=2
+
+!style halign=center
+
+!media large_media/organization_logos/OLCF_official_black_10_26_15.png dark_src=large_media/organization_logos/OLCF_official_white_10_26_15.png style=width:100%;display:block;
+
+!col-end!
+!row-end!
+
+
+
+
+
+

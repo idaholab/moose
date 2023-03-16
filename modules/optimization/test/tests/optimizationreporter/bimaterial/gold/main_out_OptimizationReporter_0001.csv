@@ -1,4 +1,4 @@
-adjoint,diffusivity_values,measurement_time,measurement_values,measurement_xcoord,measurement_ycoord,measurement_zcoord,misfit_values,simulation_values
+grad_diffusivity_values,diffusivity_values,measurement_time,measurement_values,measurement_xcoord,measurement_ycoord,measurement_zcoord,misfit_values,simulation_values
 0.00033670047822245,5.0000000319983,0,1.5499999950466,0,-3.99,0,-4.9661141865442e-09,1.5499999900805
 -6.6497549923379e-06,9.9999994700548,0,122.15999960961,0,-3.192,0,-3.9139322893789e-07,122.15999921822
 0,0,0,230.74999926258,0,-2.394,0,-7.3930323196691e-07,230.74999852328

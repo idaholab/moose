@@ -16,19 +16,15 @@
 #include "FEProblemBase.h"
 
 registerMooseObjectAliased("MooseApp", MooseParsedFunction, "ParsedFunction");
-registerMooseObjectAliased("MooseApp", ADMooseParsedFunction, "ADParsedFunction");
+registerMooseObjectRenamed("MooseApp", ADParsedFunction, "02/03/2024 00:00", MooseParsedFunction);
 
-template <typename T>
 InputParameters
-MooseParsedFunctionTempl<T>::validParams()
+MooseParsedFunction::validParams()
 {
-  InputParameters params = T::validParams();
+  InputParameters params = Function::validParams();
   params += MooseParsedFunctionBase::validParams();
   params.addDeprecatedCustomTypeParam<std::string>(
-      "value",
-      "FunctionExpression",
-      "The user defined function.",
-      "function is deprecated, use expression instead");
+      "value", "FunctionExpression", "The user defined function.", "Use 'expression' instead.");
   // TODO Make required once deprecation is handled, see #19119
   params.addCustomTypeParam<std::string>(
       "expression", "FunctionExpression", "The user defined function.");
@@ -38,48 +34,42 @@ MooseParsedFunctionTempl<T>::validParams()
   return params;
 }
 
-template <typename T>
-MooseParsedFunctionTempl<T>::MooseParsedFunctionTempl(const InputParameters & parameters)
-  : T(parameters),
+MooseParsedFunction::MooseParsedFunction(const InputParameters & parameters)
+  : Function(parameters),
     MooseParsedFunctionBase(parameters),
     _value(verifyFunction(this->template getRenamedParam<std::string>("value", "expression")))
 {
 }
 
-template <typename T>
 Real
-MooseParsedFunctionTempl<T>::value(Real t, const Point & p) const
+MooseParsedFunction::value(Real t, const Point & p) const
 {
   mooseAssert(_function_ptr, "ParsedFunction should have been initialized");
   return _function_ptr->evaluate<Real>(t, p);
 }
 
-template <typename T>
 RealGradient
-MooseParsedFunctionTempl<T>::gradient(Real t, const Point & p) const
+MooseParsedFunction::gradient(Real t, const Point & p) const
 {
   mooseAssert(_function_ptr, "ParsedFunction should have been initialized");
   return _function_ptr->evaluateGradient(t, p);
 }
 
-template <typename T>
 Real
-MooseParsedFunctionTempl<T>::timeDerivative(Real t, const Point & p) const
+MooseParsedFunction::timeDerivative(Real t, const Point & p) const
 {
   mooseAssert(_function_ptr, "ParsedFunction should have been initialized");
   return _function_ptr->evaluateDot(t, p);
 }
 
-template <typename T>
 RealVectorValue
-MooseParsedFunctionTempl<T>::vectorValue(Real /*t*/, const Point & /*p*/) const
+MooseParsedFunction::vectorValue(Real /*t*/, const Point & /*p*/) const
 {
   mooseError("The vectorValue method is not defined in ParsedFunction");
 }
 
-template <typename T>
 void
-MooseParsedFunctionTempl<T>::initialSetup()
+MooseParsedFunction::initialSetup()
 {
   for (const auto i : index_range(_vars))
   {
@@ -106,6 +96,3 @@ MooseParsedFunctionTempl<T>::initialSetup()
         std::make_unique<MooseParsedFunctionWrapper>(_pfb_feproblem, _value, _vars, _vals, tid);
   }
 }
-
-template class MooseParsedFunctionTempl<Function>;
-template class MooseParsedFunctionTempl<FunctionTempl<ADReal>>;

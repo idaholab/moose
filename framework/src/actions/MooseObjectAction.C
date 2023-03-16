@@ -22,6 +22,7 @@ MooseObjectAction::validParams()
   params.addRequiredParam<std::string>(
       "type", "A string representing the Moose Object that will be built by this Action");
   params.addParam<bool>("isObjectAction", true, "Indicates that this is a MooseObjectAction.");
+  params.addParamNamesToGroup("isObjectAction", "Advanced");
   params.addClassDescription("Base class for all the actions creating a MOOSE object");
   return params;
 }

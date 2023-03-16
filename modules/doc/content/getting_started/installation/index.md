@@ -1,10 +1,12 @@
 # Install MOOSE
 
-To install the MOOSE Framework, click the link below that corresponds to your operating system/platform and follow the instructions:
+To install the MOOSE Framework, click the link below that corresponds to your operating
+system, platform, or your desired method and follow the instructions:
 
 - [Linux and MacOS](installation/conda.md)
 - [installation/windows.md]
 - [installation/docker.md]
+- [installation/inl_hpc_prebuilt_moose.md]
 - Advanced Instructions:
 
   - [installation/hpc_install_moose.md]
@@ -18,7 +20,8 @@ To install the MOOSE Framework, click the link below that corresponds to your op
 
   - [installation/install_libtorch.md]
 
-Once installation is complete, please proceed to the [getting_started/new_users.md] page to continue.
+With one of the installation methods above complete, please proceed to the
+[getting_started/new_users.md] page to continue.
 
 !include installation/update_moose.md
 

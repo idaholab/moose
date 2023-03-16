@@ -131,7 +131,8 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
   if (_extrude && _mesh_dimensions != 3)
     mooseError("This is a 2 dimensional mesh, you cannot extrude it. Check your ReactorMeshParams "
                "inputs\n");
-  if (_extrude && (!hasReactorParam("top_boundary_id") || !hasReactorParam("bottom_boundary_id")))
+  if (_extrude && (!hasReactorParam<boundary_id_type>("top_boundary_id") ||
+                   !hasReactorParam<boundary_id_type>("bottom_boundary_id")))
     mooseError("Both top_boundary_id and bottom_boundary_id must be provided in ReactorMeshParams "
                "if using extruded geometry");
 
@@ -189,9 +190,11 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
     _has_block_names = false;
 
   // Initial block id used to define radial regions of pin
-  unsigned int pin_block_id_start = 10000;
+  subdomain_id_type pin_block_id_start = 10000;
   // Use special block id to designate TRI elements
-  unsigned int pin_block_id_tri = pin_block_id_start - 1;
+  subdomain_id_type pin_block_id_tri = pin_block_id_start - 1;
+
+  std::string build_mesh_name;
 
   if (_homogenized)
   {
@@ -202,15 +205,16 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
     const auto boundary_name = _is_assembly ? "outer_assembly_" + std::to_string(_pin_type)
                                             : "outer_pin_" + std::to_string(_pin_type);
     params.set<std::string>("external_boundary_name") = boundary_name;
-    params.set<subdomain_id_type>("block_id") =
-        _quad_center ? pin_block_id_start : pin_block_id_tri;
+    params.set<std::vector<subdomain_id_type>>("block_id") = {_quad_center ? pin_block_id_start
+                                                                           : pin_block_id_tri};
     params.set<MooseEnum>("element_type") = _quad_center ? "QUAD" : "TRI";
     auto block_name = "RGMB_PIN" + std::to_string(_pin_type) + "_R0";
     if (_quad_center)
       block_name += "_TRI";
-    params.set<SubdomainName>("block_name") = block_name;
+    params.set<std::vector<SubdomainName>>("block_name") = {block_name};
 
-    _build_mesh = &addMeshSubgenerator("SimpleHexagonGenerator", name() + "_2D", params);
+    build_mesh_name = name() + "_2D";
+    addMeshSubgenerator("SimpleHexagonGenerator", build_mesh_name, params);
   }
   else
   {
@@ -320,7 +324,7 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       params.set<std::string>("external_boundary_name") = boundary_name;
       bool flat_side_up = (_mesh_geometry == "Square");
       params.set<bool>("flat_side_up") = flat_side_up;
-      params.set<bool>("create_interface_boundaries") = false;
+      params.set<bool>("create_outward_interface_boundaries") = false;
 
       const auto num_sides = (_mesh_geometry == "Square") ? 4 : 6;
       params.set<unsigned int>("num_sides") = num_sides;
@@ -364,27 +368,28 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
                                     {std::to_string(10001 + i), std::to_string(15001 + i)});
       params.set<std::vector<BoundaryName>>("boundary_names") = boundaries_to_delete;
 
-      _build_mesh = &addMeshSubgenerator("BoundaryDeletionGenerator", name() + "_del_bds", params);
+      build_mesh_name = name() + "_del_bds";
+      addMeshSubgenerator("BoundaryDeletionGenerator", build_mesh_name, params);
     }
   }
 
   // Pass mesh meta-data defined in subgenerator constructor to this MeshGenerator
-  if (hasMeshProperty("pitch_meta", name() + "_2D"))
+  if (hasMeshProperty<Real>("pitch_meta", name() + "_2D"))
     declareMeshProperty("pitch_meta", getMeshProperty<Real>("pitch_meta", name() + "_2D"));
-  if (hasMeshProperty("num_sectors_per_side_meta", name() + "_2D"))
+  if (hasMeshProperty<std::vector<unsigned int>>("num_sectors_per_side_meta", name() + "_2D"))
     declareMeshProperty(
         "num_sectors_per_side_meta",
         getMeshProperty<std::vector<unsigned int>>("num_sectors_per_side_meta", name() + "_2D"));
-  if (hasMeshProperty("max_radius_meta", name() + "_2D"))
+  if (hasMeshProperty<Real>("max_radius_meta", name() + "_2D"))
     declareMeshProperty("max_radius_meta",
                         getMeshProperty<Real>("max_radius_meta", name() + "_2D"));
-  if (hasMeshProperty("background_intervals_meta", name() + "_2D"))
+  if (hasMeshProperty<unsigned int>("background_intervals_meta", name() + "_2D"))
     declareMeshProperty("background_intervals_meta",
                         getMeshProperty<unsigned int>("background_intervals_meta", name() + "_2D"));
-  if (hasMeshProperty("node_id_background_meta", name() + "_2D"))
+  if (hasMeshProperty<dof_id_type>("node_id_background_meta", name() + "_2D"))
     declareMeshProperty("node_id_background_meta",
                         getMeshProperty<dof_id_type>("node_id_background_meta", name() + "_2D"));
-  if (hasMeshProperty("pattern_pitch_meta", name() + "_2D"))
+  if (hasMeshProperty<Real>("pattern_pitch_meta", name() + "_2D"))
     declareMeshProperty("pattern_pitch_meta",
                         getMeshProperty<Real>("pattern_pitch_meta", name() + "_2D"));
 
@@ -465,30 +470,36 @@ PinMeshGenerator::PinMeshGenerator(const InputParameters & parameters)
       std::string plane_id_name = "plane_id";
       params.set<std::string>("id_name") = "plane_id";
 
-      _build_mesh = &addMeshSubgenerator("PlaneIDMeshGenerator", name() + "_extrudedIDs", params);
+      build_mesh_name = name() + "_extrudedIDs";
+      addMeshSubgenerator("PlaneIDMeshGenerator", build_mesh_name, params);
     }
   }
   else
     declareMeshProperty("extruded", false);
+
+  _build_mesh = &getMeshByName(build_mesh_name);
 }
 
 std::unique_ptr<MeshBase>
 PinMeshGenerator::generate()
 {
+  // Must be called to free the ReactorMeshParams mesh
+  freeReactorMeshParams();
+
   // Update metadata at this point since values for these metadata only get set by PCCMG
   // at generate() stage
-  if (hasMeshProperty("max_radius_meta", name() + "_2D"))
+  if (hasMeshProperty<Real>("max_radius_meta", name() + "_2D"))
   {
     const auto max_radius_meta = getMeshProperty<Real>("max_radius_meta", name() + "_2D");
     setMeshProperty("max_radius_meta", max_radius_meta);
   }
-  if (hasMeshProperty("background_intervals_meta", name() + "_2D"))
+  if (hasMeshProperty<unsigned int>("background_intervals_meta", name() + "_2D"))
   {
     const auto background_intervals_meta =
         getMeshProperty<unsigned int>("background_intervals_meta", name() + "_2D");
     setMeshProperty("background_intervals_meta", background_intervals_meta);
   }
-  if (hasMeshProperty("node_id_background_meta", name() + "_2D"))
+  if (hasMeshProperty<dof_id_type>("node_id_background_meta", name() + "_2D"))
   {
     const auto node_id_background_meta =
         getMeshProperty<dof_id_type>("node_id_background_meta", name() + "_2D");

@@ -21,8 +21,7 @@
  * Documentation for the Function Parser can be found at:
  * http://warp.povusers.org/FunctionParser/fparser.html
  */
-template <typename T>
-class MooseParsedFunctionTempl : public T, public MooseParsedFunctionBase
+class MooseParsedFunction : public Function, public MooseParsedFunctionBase
 {
 public:
   /**
@@ -31,9 +30,9 @@ public:
    */
   static InputParameters validParams();
 
-  MooseParsedFunctionTempl(const InputParameters & parameters);
+  MooseParsedFunction(const InputParameters & parameters);
 
-  using T::value;
+  using Function::value;
   /**
    * Evaluate the equation at the given location. For 1-D and 2-D equations
    * x and y are optional.
@@ -43,7 +42,7 @@ public:
    */
   virtual Real value(Real t, const Point & pt) const override;
 
-  using T::gradient;
+  using Function::gradient;
   /**
    * Evaluate the gradient of the function. This is computed in libMesh
    * through automatic symbolic differentiation.
@@ -75,15 +74,4 @@ protected:
   std::string _value;
 
   friend class ParsedFunctionTest;
-};
-
-typedef MooseParsedFunctionTempl<FunctionTempl<ADReal>> ADMooseParsedFunction;
-
-class MooseParsedFunction : public MooseParsedFunctionTempl<Function>
-{
-public:
-  static InputParameters validParams() { return MooseParsedFunctionTempl<Function>::validParams(); }
-  MooseParsedFunction(const InputParameters & params) : MooseParsedFunctionTempl<Function>(params)
-  {
-  }
 };

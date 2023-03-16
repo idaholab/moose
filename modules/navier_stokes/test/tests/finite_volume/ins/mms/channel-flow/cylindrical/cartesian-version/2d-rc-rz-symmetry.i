@@ -168,7 +168,7 @@ offset=0e0
     expression = 'sin(x*pi)^2*cos(y*pi)'
   []
   [forcing_u]
-    type = ADParsedFunction
+    type = ParsedFunction
     expression = 'pi^2*mu*sin(x*pi)^2*cos(y*pi) - 2*pi*rho*sin(x*pi)^2*sin(y*pi)*cos(x*pi)*cos(y*pi) - pi*sin(x*pi)*cos(1.6*y) + (4*x*pi*rho*sin(x*pi)^3*cos(x*pi)*cos(y*pi)^2 + rho*sin(x*pi)^4*cos(y*pi)^2)/x - (-2*x*pi^2*mu*sin(x*pi)^2*cos(y*pi) + 2*x*pi^2*mu*cos(x*pi)^2*cos(y*pi) + 2*pi*mu*sin(x*pi)*cos(x*pi)*cos(y*pi))/x'
     symbol_names = 'mu rho'
     symbol_values = '${mu} ${rho}'
@@ -178,7 +178,7 @@ offset=0e0
     expression = 'cos(x*pi)*cos(y*pi)'
   []
   [forcing_v]
-    type = ADParsedFunction
+    type = ParsedFunction
     expression = 'pi^2*mu*cos(x*pi)*cos(y*pi) - 2*pi*rho*sin(y*pi)*cos(x*pi)^2*cos(y*pi) - 1.6*sin(1.6*y)*cos(x*pi) - (-x*pi^2*mu*cos(x*pi)*cos(y*pi) - pi*mu*sin(x*pi)*cos(y*pi))/x + (-x*pi*rho*sin(x*pi)^3*cos(y*pi)^2 + 2*x*pi*rho*sin(x*pi)*cos(x*pi)^2*cos(y*pi)^2 + rho*sin(x*pi)^2*cos(x*pi)*cos(y*pi)^2)/x'
     symbol_names = 'mu rho'
     symbol_values = '${mu} ${rho}'
@@ -217,30 +217,24 @@ offset=0e0
     execute_on = 'timestep_end'
   []
   [./L2u]
-    type = ElementL2Error
-    variable = u
-    function = exact_u
+    type = ElementL2FunctorError
+    approximate = u
+    exact = exact_u
     outputs = 'console csv'
     execute_on = 'timestep_end'
   [../]
   [./L2v]
-    type = ElementL2Error
-    variable = v
-    function = exact_v
+    type = ElementL2FunctorError
+    approximate = v
+    exact = exact_v
     outputs = 'console csv'
     execute_on = 'timestep_end'
   [../]
   [./L2p]
-    variable = pressure
-    function = exact_p
-    type = ElementL2Error
+    approximate = pressure
+    exact = exact_p
+    type = ElementL2FunctorError
     outputs = 'console csv'
     execute_on = 'timestep_end'
   [../]
-  [p_avg]
-    type = ElementAverageValue
-    variable = pressure
-    outputs = 'console csv'
-    execute_on = 'timestep_end'
-  []
 []

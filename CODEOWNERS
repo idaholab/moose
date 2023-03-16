@@ -6,6 +6,7 @@
 /COPYRIGHT @permcody
 /LICENSE @permcody
 /README.md @permcody
+/CODEOWNERS @lindsayad
 
 /.coverage @loganharbour @permcody
 /.gitmodules @permcody
@@ -16,24 +17,25 @@
 
 /.github @permcody
 
-/framework/*/dgkernels @lindsayad
+/framework/include @lindsayad
+/framework/src @lindsayad
+/framework/*/base @roystgnr
+/framework/*/base/MeshGeneratorSystem* @loganharbour
 /framework/*/executioners/*Solve* @GiudGiud
-/framework/*/fv* @lindsayad
-/framework/*/interfacekernels @lindsayad
-/framework/*/linesearches @lindsayad
 /framework/*/materials/Derivative* @dschwen
+/framework/*/materials/Material* @roystgnr
 /framework/*/materials/Parsed* @dschwen
+/framework/*/mesh @roystgnr
+/framework/*/meshgenerators @roystgnr
 /framework/*/multiapps @GiudGiud
-/framework/*/preconditioners @lindsayad
-/framework/*/problems/EigenProblem* @lindsayad
-/framework/*/relationshipmanagers @lindsayad
+/framework/*/outputs @roystgnr
 /framework/*/reporters @loganharbour @zachmprince
 /framework/*/samplers @zachmprince
-/framework/*/systems/NonlinearEigenSystem* @lindsayad
-/framework/*/transfers @GiudGiud
-/framework/*/utils/PetscSupport* @lindsayad
-/framework/*/utils/SlepcSupport* @lindsayad
+/framework/*/systems @roystgnr
+/framework/*/transfers @GiudGiud @roystgnr
 /framework/*/utils/Units* @dschwen
+/framework/*/*/*Jump* @roystgnr
+/framework/*/*/*Side* @roystgnr
 
 /modules/contact @bwspenc @lindsayad
 /modules/doc/content/getting_started/installation @milljm @loganharbour @cticenhour
@@ -49,7 +51,7 @@
 /modules/optimization @zachmprince @dschwen
 /modules/ray_tracing @loganharbour
 /modules/rdg @joshuahansel @lindsayad
-/modules/reactor @GiudGiud
+/modules/reactor @GiudGiud @loganharbour @roystgnr
 /modules/scalar_transport @lindsayad
 /modules/solid_properties @joshuahansel
 /modules/stochastic_tools @zachmprince
@@ -61,5 +63,5 @@
 /scripts/configure_petsc.sh @cticenhour @milljm @loganharbour
 /scripts/update_and_rebuild_petsc.sh @cticenhour @milljm @loganharbour
 /scripts/update_and_rebuild_petsc_alt.sh @cticenhour @milljm @loganharbour
-/scripts/configure_libmesh.sh @cticenhour @milljm @loganharbour
-/scripts/update_and_rebuild_libmesh.sh @cticenhour @milljm @loganharbour
+/scripts/configure_libmesh.sh @cticenhour @milljm @loganharbour @roystgnr
+/scripts/update_and_rebuild_libmesh.sh @cticenhour @milljm @loganharbour @roystgnr

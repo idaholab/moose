@@ -52,7 +52,7 @@ AddVariableAction::validParams()
   params.addParam<std::vector<Real>>("scaling",
                                      "Specifies a scaling factor to apply to this variable");
   params.addParam<std::vector<Real>>("initial_condition",
-                                     "Specifies the initial condition for this variable");
+                                     "Specifies a constant initial condition for this variable");
   return params;
 }
 
@@ -264,7 +264,7 @@ AddVariableAction::addVariable(const std::string & var_name)
   if (scale_factor.size() != _components)
     mooseError("Size of 'scaling' is not consistent");
 
-  _problem_add_var_method(*_problem, _type, _name, _moose_object_pars);
+  _problem_add_var_method(*_problem, _type, var_name, _moose_object_pars);
 
   if (_moose_object_pars.get<bool>("eigen"))
   {

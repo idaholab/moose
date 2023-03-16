@@ -17,17 +17,23 @@
  * Note: this material assumes that the porosity remains constant throughout a
  * simulation, so the coupled aux variable porosity must also remain constant.
  */
-class PorousFlowPorosityConst : public PorousFlowPorosityBase
+template <bool is_ad>
+class PorousFlowPorosityConstTempl : public PorousFlowPorosityBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowPorosityConst(const InputParameters & parameters);
+  PorousFlowPorosityConstTempl(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
 
-  /// Constant porosity
+  /// Constant porosity (Real constant Monomial variable only so no AD version)
   const VariableValue & _input_porosity;
+
+  usingPorousFlowPorosityBaseMembers;
 };
+
+typedef PorousFlowPorosityConstTempl<false> PorousFlowPorosityConst;
+typedef PorousFlowPorosityConstTempl<true> ADPorousFlowPorosityConst;

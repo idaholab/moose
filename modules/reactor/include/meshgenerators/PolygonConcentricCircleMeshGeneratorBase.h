@@ -38,9 +38,9 @@ protected:
   /// Widths, fractions, radial sectors and growth factors of the outer boundary layers of the ring regions
   multiBdryLayerParams _ring_outer_boundary_layer_params;
   /// Subdomain IDs of the ring regions
-  const std::vector<subdomain_id_type> _ring_block_ids;
+  std::vector<subdomain_id_type> _ring_block_ids;
   /// Subdomain Names of the ting regions
-  const std::vector<SubdomainName> _ring_block_names;
+  std::vector<SubdomainName> _ring_block_names;
   /// Thickness of each enclosing duct
   const PolygonSizeStyle _duct_sizes_style;
   /// Size parameters of the duct regions
@@ -76,23 +76,27 @@ protected:
   /// Width, fraction, radiation sectors and growth factor of the outer boundary layer of the background region
   singleBdryLayerParams _background_outer_boundary_layer_params;
   /// Subdomain IDs of the background regions
-  const std::vector<subdomain_id_type> _background_block_ids;
+  std::vector<subdomain_id_type> _background_block_ids;
   /// Subdomain Names of the background regions
-  const std::vector<SubdomainName> _background_block_names;
+  std::vector<SubdomainName> _background_block_names;
   /// Volume preserving function is optional
   const bool _preserve_volumes;
   /// Shift in default subdomain IDs to avert potential conflicts
   const subdomain_id_type _block_id_shift;
-  /// Whether interface boundaries are created
-  const bool _create_interface_boundaries;
+  /// Whether inward interface boundaries are created
+  const bool _create_inward_interface_boundaries;
+  /// Whether outward interface boundaries are created
+  const bool _create_outward_interface_boundaries;
   /// Shift in default boundary IDs of interfaces to avert potential conflicts
   const boundary_id_type _interface_boundary_id_shift;
   /// Boundary ID of the mesh's external boundary
   const boundary_id_type _external_boundary_id;
   /// Boundary Name of the mesh's external boundary
   const std::string _external_boundary_name;
-  /// Boundary Names of the mesh's interface boundaries
-  const std::vector<std::string> _interface_boundary_names;
+  /// Boundary Names of the mesh's inward interface boundaries
+  const std::vector<std::string> _inward_interface_boundary_names;
+  /// Boundary Names of the mesh's outward interface boundaries
+  const std::vector<std::string> _outward_interface_boundary_names;
   /// Whether the nodes on the external boundary needs to be uniformly distributed
   const bool _uniform_mesh_on_sides;
   /// Whether the central elements need to be QUAD4

@@ -20,6 +20,7 @@ PODResidualTransfer::validParams()
   params.addClassDescription("Transfers residual vectors from the sub-application to a "
                              "a container in the Trainer object.");
   params.suppressParameter<MultiMooseEnum>("direction");
+  params.suppressParameter<MultiAppName>("multi_app");
   return params;
 }
 

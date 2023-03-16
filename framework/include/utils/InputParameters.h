@@ -30,6 +30,7 @@ class FunctionParserBase
 
 #include <tuple>
 #include <unordered_map>
+#include <mutex>
 
 // Forward declarations
 class Action;
@@ -850,11 +851,6 @@ public:
   bool isType(const std::string & name) const;
 
   /**
-   * @returns True if these parameters were constructed using the legacy method.
-   **/
-  bool fromLegacyConstruction() const { return _from_legacy_construction; }
-
-  /**
    * Determine the actual variable name from the given variable \emph parameter name
    * @param var_param_name the name of the variable parameter, e.g. 'variable'
    * @param moose_object_with_var_param_name the name of the moose object holding the variable
@@ -862,6 +858,75 @@ public:
    */
   std::string varName(const std::string & var_param_name,
                       const std::string & moose_object_with_var_param_name) const;
+
+  /**
+   * Rename a parameter and provide a new documentation string
+   * @param old_name The old name of the parameter
+   * @param new_name The new name of the parameter
+   * @param new_docstring The new documentation string for the parameter
+   */
+  void renameParam(const std::string & old_name,
+                   const std::string & new_name,
+                   const std::string & new_docstring);
+
+  /**
+   * Rename a coupled variable and provide a new documentation string
+   * @param old_name The old name of the coupled variable
+   * @param new_name The new name of the coupled variable
+   * @param new_docstring The new documentation string for the coupled variable
+   */
+  void renameCoupledVar(const std::string & old_name,
+                        const std::string & new_name,
+                        const std::string & new_docstring);
+
+  void deprecateParam(const std::string & old_name,
+                      const std::string & new_name,
+                      const std::string & removal_date);
+
+  void deprecateCoupledVar(const std::string & old_name,
+                           const std::string & new_name,
+                           const std::string & removal_date);
+
+  /**
+   * Checks whether the provided name is a renamed parameter name. If so we return the 'new' name.
+   * If not we return the incoming name
+   * @param name The name to check for whether it is a renamed name
+   * @return The new name if the incoming \p name is a renamed name, else \p name
+   */
+  std::string checkForRename(const std::string & name) const;
+
+  /**
+   * A wrapper around the \p Parameters base class method. Checks for parameter rename before
+   * calling the base class method
+   * @param name The name to query the parameter values map with
+   * @return The parameter value corresponding to the (possibly renamed) name
+   */
+  template <typename T>
+  const T & get(std::string_view name) const;
+
+  /**
+   * A wrapper around the \p Parameters base class method. Checks for parameter rename before
+   * calling the base class method
+   * @param name The name to query the parameter values map with
+   * @return Whether there is a key in the parameter values map corresponding to the (possibly
+   * renamed) name
+   */
+  template <typename T>
+  bool have_parameter(std::string_view name) const;
+
+  /**
+   * Return all the aliased names associated with \p param_name. The returned container will always
+   * contain \p param_name itself. Other aliases in addition to \p param_name will include the base
+   * class parameter name if \p param_name is the derived class parameter name, or deprecated names
+   * that \p param_name is meant to replace.
+   * @param param_name The name of the parameter that we want to lookup aliases for. This parameter
+   * name must exist in our metadata and parameter names to values map, e.g. this parameter must
+   * represent the derived class parameter name if a base class parameter has been renamed or the
+   * blessed parameter name in situations where associated parameter names have been deprecated
+   * @return All aliases which logically resolve-to/are-associated-with \p param_name, including \p
+   * param_name itself
+   */
+  std::vector<std::string> paramAliases(const std::string & param_name) const;
 
 private:
   // Private constructor so that InputParameters can only be created in certain places.
@@ -892,6 +957,16 @@ private:
    * Private method for setting deprecated coupled variable documentation strings
    */
   void setDeprecatedVarDocString(const std::string & new_name, const std::string & doc_string);
+
+  void renameParamInternal(const std::string & old_name,
+                           const std::string & new_name,
+                           const std::string & docstring,
+                           const std::string & removal_date);
+
+  void renameCoupledVarInternal(const std::string & old_name,
+                                const std::string & new_name,
+                                const std::string & docstring,
+                                const std::string & removal_date);
 
   struct Metadata
   {
@@ -938,14 +1013,16 @@ private:
     bool _ignore = false;
   };
 
-  Metadata & at(const std::string & param)
+  Metadata & at(const std::string & param_name)
   {
+    const auto param = checkForRename(param_name);
     if (_params.count(param) == 0)
       mooseError("param '", param, "' not present in InputParams");
     return _params[param];
   }
-  const Metadata & at(const std::string & param) const
+  const Metadata & at(const std::string & param_name) const
   {
+    const auto param = checkForRename(param_name);
     if (_params.count(param) == 0)
       mooseError("param '", param, "' not present in InputParams");
     return _params.at(param);
@@ -1018,11 +1095,18 @@ private:
   /// A flag for toggling the error message in the copy constructor.
   bool _allow_copy;
 
-  /// Whether or not these parameters were constructed using legacy contruction (remove with #19440)
-  bool _from_legacy_construction;
-
   /// A map from deprecated coupled variable names to the new blessed name
   std::unordered_map<std::string, std::string> _new_to_deprecated_coupled_vars;
+
+  /// A map from base-class/deprecated parameter names to derived-class/blessed parameter names and
+  /// the deprecation messages in the case that the "old" parameter name is a deprecated parameter
+  /// name. The deprecation message will be empty if the "old" parameter name represents a base
+  /// class parameter name
+  std::map<std::string, std::pair<std::string, std::string>> _old_to_new_name_and_dep;
+
+  /// A map from derived-class/blessed parameter names to associated base-class/deprecated parameter
+  /// names
+  std::multimap<std::string, std::string> _new_to_old_names;
 
   // These are the only objects allowed to _create_ InputParameters
   friend InputParameters emptyInputParameters();
@@ -1030,10 +1114,6 @@ private:
   friend class Parser;
   // for the printInputFile function in the action warehouse
   friend class ActionWarehouse;
-
-  // For setting _from_legacy_construction (remove with #19440)
-  template <typename T>
-  friend InputParameters validParams();
 };
 
 template <typename T>
@@ -1045,8 +1125,10 @@ InputParameters::setHelper(const std::string & /*name*/)
 // Template and inline function implementations
 template <typename T>
 T &
-InputParameters::set(const std::string & name, bool quiet_mode)
+InputParameters::set(const std::string & name_in, bool quiet_mode)
 {
+  const auto name = checkForRename(name_in);
+
   checkParamName(name);
   checkConsistentType<T>(name);
 
@@ -1227,9 +1309,11 @@ InputParameters::rangeCheck(const std::string & full_name,
 
 template <typename T>
 T
-InputParameters::getCheckedPointerParam(const std::string & name,
+InputParameters::getCheckedPointerParam(const std::string & name_in,
                                         const std::string & error_string) const
 {
+  const auto name = checkForRename(name_in);
+
   T param = this->get<T>(name);
 
   // Note: You will receive a compile error on this line if you attempt to pass a non-pointer
@@ -1431,8 +1515,10 @@ InputParameters::addCommandLineParam(const std::string & name,
 
 template <typename T>
 void
-InputParameters::checkConsistentType(const std::string & name) const
+InputParameters::checkConsistentType(const std::string & name_in) const
 {
+  const auto name = checkForRename(name_in);
+
   // If we don't currently have the Parameter, can't be any inconsistency
   InputParameters::const_iterator it = _values.find(name);
   if (it == _values.end())
@@ -1452,8 +1538,9 @@ InputParameters::checkConsistentType(const std::string & name) const
 
 template <typename T>
 void
-InputParameters::suppressParameter(const std::string & name)
+InputParameters::suppressParameter(const std::string & name_in)
 {
+  const auto name = checkForRename(name_in);
   if (!this->have_parameter<T>(name))
     mooseError("Unable to suppress nonexistent parameter: ", name);
 
@@ -1464,16 +1551,19 @@ InputParameters::suppressParameter(const std::string & name)
 
 template <typename T>
 void
-InputParameters::ignoreParameter(const std::string & name)
+InputParameters::ignoreParameter(const std::string & name_in)
 {
+  const auto name = checkForRename(name_in);
   suppressParameter<T>(name);
   _params[name]._ignore = true;
 }
 
 template <typename T>
 void
-InputParameters::makeParamRequired(const std::string & name)
+InputParameters::makeParamRequired(const std::string & name_in)
 {
+  const auto name = checkForRename(name_in);
+
   if (!this->have_parameter<T>(name))
     mooseError("Unable to require nonexistent parameter: ", name);
 
@@ -1482,8 +1572,10 @@ InputParameters::makeParamRequired(const std::string & name)
 
 template <typename T>
 void
-InputParameters::makeParamNotRequired(const std::string & name)
+InputParameters::makeParamNotRequired(const std::string & name_in)
 {
+  const auto name = checkForRename(name_in);
+
   if (!this->have_parameter<T>(name))
     mooseError("Unable to un-require nonexistent parameter: ", name);
 
@@ -1611,8 +1703,12 @@ void InputParameters::setParamHelper<MooseFunctorName, int>(const std::string & 
 
 template <typename T>
 const T &
-InputParameters::getParamHelper(const std::string & name, const InputParameters & pars, const T *)
+InputParameters::getParamHelper(const std::string & name_in,
+                                const InputParameters & pars,
+                                const T *)
 {
+  const auto name = pars.checkForRename(name_in);
+
   if (!pars.isParamValid(name))
     mooseError("The parameter \"", name, "\" is being retrieved before being set.\n");
 
@@ -1634,17 +1730,22 @@ const MultiMooseEnum & InputParameters::getParamHelper<MultiMooseEnum>(const std
 
 template <typename T>
 const std::vector<T> &
-InputParameters::getParamHelper(const std::string & name,
+InputParameters::getParamHelper(const std::string & name_in,
                                 const InputParameters & pars,
                                 const std::vector<T> *)
 {
+  const auto name = pars.checkForRename(name_in);
+
   return pars.get<std::vector<T>>(name);
 }
 
 template <typename R1, typename R2, typename V1, typename V2>
 std::vector<std::pair<R1, R2>>
-InputParameters::get(const std::string & param1, const std::string & param2) const
+InputParameters::get(const std::string & param1_in, const std::string & param2_in) const
 {
+  const auto param1 = checkForRename(param1_in);
+  const auto param2 = checkForRename(param2_in);
+
   const auto & v1 = get<V1>(param1);
   const auto & v2 = get<V2>(param2);
 
@@ -1678,29 +1779,31 @@ InputParameters emptyInputParameters();
 
 template <typename T>
 bool
-InputParameters::isType(const std::string & name) const
+InputParameters::isType(const std::string & name_in) const
 {
+  const auto name = checkForRename(name_in);
+
   if (!_params.count(name))
     mooseError("Parameter \"", name, "\" is not valid.");
   return have_parameter<T>(name);
 }
 
-template <class T>
-InputParameters
-validParams()
+template <typename T>
+const T &
+InputParameters::get(std::string_view name_in) const
 {
-  // If users forgot to make their (old) validParams, they screwed up and
-  // should get an error - so it is okay for us to try to call the new
-  // validParams static function - which will error if they didn't implement
-  // the new function
-  auto params = T::validParams();
+  const auto name = checkForRename(std::string(name_in));
 
-  // If calling the static member method worked, we didn't build these parameters
-  // using the legacy method. Therefore, we won't throw an error for this object
-  // in CheckLegacyParamsAction. This should be removed with the closure of #19439.
-  params._from_legacy_construction = false;
+  return Parameters::get<T>(name);
+}
 
-  return params;
+template <typename T>
+bool
+InputParameters::have_parameter(std::string_view name_in) const
+{
+  const auto name = checkForRename(std::string(name_in));
+
+  return Parameters::have_parameter<T>(name);
 }
 
 namespace moose
@@ -1709,18 +1812,12 @@ namespace internal
 {
 /**
  * Calls the valid parameter method for the object of type T.
- *
- * This isn't necessary anymore, but is hanging around until we finally
- * get rid of all mention of the legacy parameter construction. Once
- * #19439 is closed, we can replace
- * moose::internal::callValidParams<T>() -> T::validParams(), and we
- * should return T::validParams() here instead.
  */
 template <typename T>
 InputParameters
 callValidParams()
 {
-  return validParams<T>();
+  return T::validParams();
 }
 }
 }

@@ -45,6 +45,7 @@ TEST_F(SimpleFluidPropertiesTest, properties)
   Real T = 200.0;
   Real e = 8.372E5;
   Real v = 0.001;
+  Real h = cv * T + p / _fp->rho_from_p_T(p, T);
 
   ABS_TEST(_fp->beta_from_p_T(p, T), thermal_exp, tol);
   ABS_TEST(_fp->cp_from_p_T(p, T), cp, tol);
@@ -56,9 +57,9 @@ TEST_F(SimpleFluidPropertiesTest, properties)
   ABS_TEST(_fp->rho_from_p_T(p, T), density0 * std::exp(p / bulk_modulus - thermal_exp * T), tol);
   ABS_TEST(_fp->e_from_p_T(p, T), cv * T, tol);
   ABS_TEST(_fp->e_from_p_rho(p, 1. / v), cv * T, tol);
+  ABS_TEST(_fp->e_from_v_h(v, h), cv * T, large_tol);
   ABS_TEST(_fp->mu_from_p_T(p, T), visc, tol);
-  ABS_TEST(_fp->mu_from_p_T(p, T), visc, tol);
-  ABS_TEST(_fp->h_from_p_T(p, T), cv * T + p / _fp->rho_from_p_T(p, T), tol);
+  ABS_TEST(_fp->h_from_p_T(p, T), h, tol);
   ABS_TEST(_fp2->h_from_p_T(p, T), cv * T + p * pp_coef / _fp2->rho_from_p_T(p, T), tol);
   ABS_TEST(_fp->cp_from_v_e(v, e), cp, tol);
   ABS_TEST(_fp->cv_from_v_e(v, e), cv, tol);
@@ -81,6 +82,7 @@ TEST_F(SimpleFluidPropertiesTest, properties)
   T = 300.0;
   e = 1.2558E6;
   v = 6.249991432791718E-4;
+  h = cv * T + p / _fp->rho_from_p_T(p, T);
 
   ABS_TEST(_fp->beta_from_p_T(p, T), thermal_exp, tol);
   ABS_TEST(_fp->cp_from_p_T(p, T), cp, tol);
@@ -92,9 +94,9 @@ TEST_F(SimpleFluidPropertiesTest, properties)
   ABS_TEST(_fp->rho_from_p_T(p, T), density0 * std::exp(p / bulk_modulus - thermal_exp * T), tol);
   ABS_TEST(_fp->e_from_p_T(p, T), cv * T, tol);
   ABS_TEST(_fp->e_from_p_rho(p, 1. / v), cv * T, large_tol);
+  ABS_TEST(_fp->e_from_v_h(v, h), cv * T, large_tol);
   ABS_TEST(_fp->mu_from_p_T(p, T), visc, tol);
-  ABS_TEST(_fp->mu_from_p_T(p, T), visc, tol);
-  ABS_TEST(_fp->h_from_p_T(p, T), cv * T + p / _fp->rho_from_p_T(p, T), tol);
+  ABS_TEST(_fp->h_from_p_T(p, T), h, tol);
   ABS_TEST(_fp2->h_from_p_T(p, T), cv * T + p * pp_coef / _fp2->rho_from_p_T(p, T), tol);
   ABS_TEST(_fp->cp_from_v_e(v, e), cp, tol);
   ABS_TEST(_fp->cv_from_v_e(v, e), cv, tol);
@@ -131,6 +133,7 @@ TEST_F(SimpleFluidPropertiesTest, derivatives)
   DERIV_TEST(_fp->mu_from_p_T, p, T, tol);
   DERIV_TEST(_fp->e_from_p_T, p, T, tol);
   DERIV_TEST(_fp->e_from_p_rho, p, 1. / v, tol);
+  DERIV_TEST(_fp->e_from_v_h, v, e + p * v, tol);
   DERIV_TEST(_fp->h_from_p_T, p, T, tol);
   DERIV_TEST(_fp->k_from_p_T, p, T, tol);
   DERIV_TEST(_fp->cp_from_p_T, p, T, tol);
@@ -156,6 +159,7 @@ TEST_F(SimpleFluidPropertiesTest, derivatives)
   DERIV_TEST(_fp->mu_from_p_T, p, T, tol);
   DERIV_TEST(_fp->e_from_p_T, p, T, tol);
   DERIV_TEST(_fp->e_from_p_rho, p, 1. / v, tol);
+  DERIV_TEST(_fp->e_from_v_h, v, e + p * v, tol);
   DERIV_TEST(_fp->h_from_p_T, p, T, tol);
   DERIV_TEST(_fp->k_from_p_T, p, T, tol);
   DERIV_TEST(_fp->cp_from_p_T, p, T, tol);

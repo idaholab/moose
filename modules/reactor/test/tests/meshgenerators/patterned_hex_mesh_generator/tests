@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/PatternedHexMeshGenerator.md'
-  issues = '#18628 #20148 #20514'
+  issues = '#18628 #20148 #20514 #23367'
   [hexagon_boundary]
     type = 'Exodiff'
     exodiff_opts = '-pedantic'
@@ -23,7 +23,8 @@
     exodiff_opts = '-pedantic'
     input = 'patterned_2d.i'
     exodiff = 'patterned_hex_no_interface.e'
-    cli_args = 'Mesh/pattern/background_intervals=2 Mesh/pattern/background_block_id=25
+    cli_args = 'Mesh/hex_1/create_outward_interface_boundaries=false
+                Mesh/pattern/background_intervals=2 Mesh/pattern/background_block_id=25
                 Mesh/pattern/background_block_name="assem_block"
                 Mesh/pattern/hexagon_size=18
                 Mesh/pattern/duct_sizes=17
@@ -38,7 +39,6 @@
   []
   [hexagon_boundary_no_deform]
     type = 'Exodiff'
-    exodiff_opts = '-pedantic'
     input = 'patterned_2d.i'
     exodiff = 'patterned_hex_no_deform.e'
     cli_args = 'Mesh/pattern/hexagon_size=15

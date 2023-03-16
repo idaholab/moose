@@ -194,7 +194,7 @@
 
   [./free_energy]
     type = DerivativeMultiPhaseMaterial
-    f_name = F
+    property_name = F
     # we use a constant free energy (GeneriConstantmaterial property Fx)
     fi_names = 'Fx  Fx  Fx'
     hi_names = 'h1  h2  h3'

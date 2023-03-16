@@ -15,6 +15,7 @@
   [diff_u]
     type = FunctorMatDiffusion
     variable = u
+    diffusivity = 'prop'
   []
 []
 
@@ -39,7 +40,7 @@
     retrieved_prop_name = 'prop'
   []
   [declare_regular]
-    type = GenericFunctorMaterial
+    type = ADGenericFunctorMaterial
     prop_names = 'prop'
     prop_values = '1'
   []

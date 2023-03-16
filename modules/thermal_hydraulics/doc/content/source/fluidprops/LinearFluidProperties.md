@@ -1,18 +1,23 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # LinearFluidProperties
 
 !alert construction title=Undocumented Class
-The LinearFluidProperties has not been documented. The content contained on this page includes the
-typical automatic documentation associated with a MooseObject; however, what is contained is
-ultimately determined by what is necessary to make the documentation clear for users.
+The LinearFluidProperties has not been documented. The content listed below should be used as a starting point for
+documenting the class, which includes the typical automatic documentation associated with a
+MooseObject; however, what is contained is ultimately determined by what is necessary to make the
+documentation clear for users.
 
-!syntax description /FluidProperties/LinearFluidProperties
+!syntax description /Modules/FluidProperties/LinearFluidProperties
 
-!syntax parameters /FluidProperties/LinearFluidProperties
+## Overview
 
-!syntax inputs /FluidProperties/LinearFluidProperties
+!! Replace these lines with information regarding the LinearFluidProperties object.
 
-!syntax children /FluidProperties/LinearFluidProperties
+## Example Input File Syntax
 
-!bibtex bibliography
+!! Describe and include an example of how to use the LinearFluidProperties object.
+
+!syntax parameters /Modules/FluidProperties/LinearFluidProperties
+
+!syntax inputs /Modules/FluidProperties/LinearFluidProperties
+
+!syntax children /Modules/FluidProperties/LinearFluidProperties

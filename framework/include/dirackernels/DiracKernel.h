@@ -11,13 +11,15 @@
 
 // MOOSE includes
 #include "DiracKernelInfo.h"
-#include "ResidualObject.h"
-#include "CoupleableMooseVariableDependencyIntermediateInterface.h"
-#include "MaterialPropertyInterface.h"
-#include "GeometricSearchInterface.h"
-#include "MooseVariableField.h"
 #include "MooseVariableInterface.h"
-#include "BlockRestrictable.h"
+#include "DiracKernelBase.h"
+
+// forward declarations
+template <typename>
+class DiracKernelTempl;
+
+using DiracKernel = DiracKernelTempl<Real>;
+using VectorDiracKernel = DiracKernelTempl<RealVectorValue>;
 
 /**
  * A DiracKernel is used when you need to add contributions to the residual by means of
@@ -26,17 +28,13 @@
  *
  * This is common in point sources / sinks and various other algorithms.
  */
-class DiracKernel : public ResidualObject,
-                    public CoupleableMooseVariableDependencyIntermediateInterface,
-                    public MooseVariableInterface<Real>,
-                    public MaterialPropertyInterface,
-                    protected GeometricSearchInterface,
-                    public BlockRestrictable
+template <typename T>
+class DiracKernelTempl : public DiracKernelBase, public MooseVariableInterface<T>
 {
 public:
   static InputParameters validParams();
 
-  DiracKernel(const InputParameters & parameters);
+  DiracKernelTempl(const InputParameters & parameters);
 
   /**
    * Computes the residual for the current element.
@@ -51,42 +49,20 @@ public:
   /**
    * This gets called by computeOffDiagJacobian() at each quadrature point.
    */
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
   /**
    * Computes the off-diagonal Jacobian for variable jvar.
    */
   virtual void computeOffDiagJacobian(unsigned int jvar) override;
 
-  virtual const MooseVariableField<Real> & variable() const override { return _var; }
+  virtual const MooseVariableField<T> & variable() const override { return _var; }
 
   /**
    * This is where the DiracKernel should call addPoint() for each point it needs to have a
    * value distributed at.
    */
-  virtual void addPoints() = 0;
-
-  /**
-   * Whether or not this DiracKernel has something to distribute on this element.
-   */
-  bool hasPointsOnElem(const Elem * elem);
-
-  /**
-   * Whether or not this DiracKernel has something to distribute at this Point.
-   */
-  bool isActiveAtPoint(const Elem * elem, const Point & p);
-
-  /**
-   * Remove all of the current points and elements.
-   */
-  void clearPoints();
-
-  /**
-   * Clear point cache when the mesh changes, so that element
-   * coarsening, element deletion, and distributed mesh repartitioning
-   * don't leave this with an invalid cache.
-   */
-  virtual void meshChanged() override;
+  virtual void addPoints() override = 0;
 
 protected:
   /**
@@ -99,79 +75,27 @@ protected:
    */
   virtual Real computeQpJacobian();
 
-  /**
-   * Add the physical x,y,z point located in the element "elem" to the list of points
-   * this DiracKernel will be asked to evaluate a value at.
-   */
-  void addPoint(const Elem * elem, Point p, unsigned id = libMesh::invalid_uint);
-
-  /**
-   * This is a highly inefficient way to add a point where this DiracKernel needs to be
-   * evaluated.
-   *
-   * This spawns a search for the element containing that point!
-   */
-  const Elem * addPoint(Point p, unsigned id = libMesh::invalid_uint);
-
-  /**
-   * Returns the user-assigned ID of the current Dirac point if it
-   * exits, and libMesh::invalid_uint otherwise.  Can be used e.g. in
-   * the computeQpResidual() function to determine the cached ID of
-   * the current point, in case this information is relevant.
-   */
-  unsigned currentPointCachedID();
-
   /// Variable this kernel acts on
-  MooseVariableField<Real> & _var;
-
-  /// Coordinate system
-  const Moose::CoordinateSystemType & _coord_sys;
-
-  /// Place for storing Point/Elem information shared across all
-  /// DiracKernel objects.
-  DiracKernelInfo & _dirac_kernel_info;
-
-  /// Place for storing Point/Elem information only for this DiracKernel
-  DiracKernelInfo _local_dirac_kernel_info;
-
-  /// The current point
-  Point _current_point;
-
-  ///< Current element
-  const Elem * const & _current_elem;
-
-  /// Quadrature point index
-  unsigned int _qp;
-  /// Quadrature points
-  const MooseArray<Point> & _q_point;
-  /// Physical points
-  const MooseArray<Point> & _physical_point;
-  /// Quadrature rule
-  const QBase * const & _qrule;
-  /// Transformed Jacobian weights
-  const MooseArray<Real> & _JxW;
-
-  /// i-th, j-th index for enumerating shape and test functions
-  unsigned int _i, _j;
+  MooseVariableField<T> & _var;
 
   // shape functions
 
   /// Values of shape functions at QPs
-  const VariablePhiValue & _phi;
+  const typename OutputTools<T>::VariablePhiValue & _phi;
   /// Gradients of shape functions at QPs
-  const VariablePhiGradient & _grad_phi;
+  const typename OutputTools<T>::VariablePhiGradient & _grad_phi;
 
   // test functions
 
   /// Values of test functions at QPs
-  const VariableTestValue & _test;
+  const typename OutputTools<T>::VariableTestValue & _test;
   /// Gradients of test functions at QPs
-  const VariableTestGradient & _grad_test;
+  const typename OutputTools<T>::VariableTestGradient & _grad_test;
 
   /// Holds the solution at current quadrature points
-  const VariableValue & _u;
+  const typename OutputTools<T>::VariableValue & _u;
   /// Holds the solution gradient at the current quadrature points
-  const VariableGradient & _grad_u;
+  const typename OutputTools<T>::VariableGradient & _grad_u;
 
   /// drop duplicate points or consider them in residual and Jacobian
   const bool _drop_duplicate_points;
@@ -185,27 +109,4 @@ protected:
   };
   const PointNotFoundBehavior _point_not_found_behavior;
   // @}
-
-private:
-  /// Data structure for caching user-defined IDs which can be mapped to
-  /// specific std::pair<const Elem*, Point> and avoid the PointLocator Elem lookup.
-  typedef std::map<unsigned, std::pair<const Elem *, Point>> point_cache_t;
-  point_cache_t _point_cache;
-
-  /// Map from Elem* to a list of (Dirac point, id) pairs which can be used
-  /// in a user's computeQpResidual() routine to determine the user-defined ID for
-  /// the current Dirac point, if one exists.
-  typedef std::map<const Elem *, std::vector<std::pair<Point, unsigned>>> reverse_cache_t;
-  reverse_cache_t _reverse_point_cache;
-
-  /// This function is used internally when the Elem for a
-  /// locally-cached point needs to be updated.  You must pass in a
-  /// pointer to the old_elem whose data is to be updated, the
-  /// new_elem to which the Point belongs, and the Point and id
-  /// information.
-  void updateCaches(const Elem * old_elem, const Elem * new_elem, Point p, unsigned id);
-
-  /// A helper function for addPoint(Point, id) for when
-  /// id != invalid_uint.
-  const Elem * addPointWithValidId(Point p, unsigned id);
 };

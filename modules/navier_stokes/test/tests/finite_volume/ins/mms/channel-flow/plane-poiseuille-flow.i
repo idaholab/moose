@@ -163,7 +163,7 @@ two_term_boundary_expansion = true
     symbol_values = '${mu} ${rho}'
   []
   [forcing_u]
-    type = ADParsedFunction
+    type = ParsedFunction
     expression = '0'
     symbol_names = 'mu rho'
     symbol_values = '${mu} ${rho}'
@@ -179,7 +179,7 @@ two_term_boundary_expansion = true
     symbol_values = '${mu} ${rho}'
   []
   [forcing_v]
-    type = ADParsedFunction
+    type = ParsedFunction
     expression = '0'
     symbol_names = 'mu rho'
     symbol_values = '${mu} ${rho}'
@@ -199,8 +199,8 @@ two_term_boundary_expansion = true
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
-  petsc_options_iname = '-pc_type -pc_factor_shift_type'
-  petsc_options_value = 'lu NONZERO'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_mat_solver_type'
+  petsc_options_value = 'lu NONZERO                     superlu_dist'
 []
 
 [Outputs]

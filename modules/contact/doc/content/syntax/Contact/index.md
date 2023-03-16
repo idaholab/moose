@@ -51,7 +51,7 @@ In addition to the Constraint class, several other objects are created, as shown
 |--------------------|--------------------|
 | [ContactPressureAux](/auxkernels/ContactPressureAux.md) | Compute contact pressure and store in an AuxVariable |
 | [Penetration](/auxkernels/PenetrationAux.md) | Compute contact penetration and store in an AuxVariable |
-| [NodalArea](/userobject/NodalArea.md) | Compute nodal area and store in an AuxVariable |
+| [NodalArea](/userobjects/NodalArea.md) | Compute nodal area and store in an AuxVariable |
 
 ## Notes on Node/Face Contact Enforcement
 

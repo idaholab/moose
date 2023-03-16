@@ -22,16 +22,14 @@ CoupledSwitchingTimeDerivative::validParams()
       "Fj_names", "List of functions for each phase. Place in same order as hj_names!");
   params.addRequiredParam<std::vector<MaterialPropertyName>>(
       "hj_names", "Switching Function Materials that provide h. Place in same order as Fj_names!");
-  params.addDeprecatedCoupledVar("args",
-                                 "Vector of variable arguments of Fj and hj",
-                                 "args is deprecated, use 'coupled_variables' instead");
-  params.addCoupledVar("coupled_variables", "Vector of variable arguments of Fj and hj");
+  params.addCoupledVar("args", "Vector of variable arguments of Fj and hj");
+  params.deprecateCoupledVar("args", "coupled_variables", "02/27/2024");
   return params;
 }
 
 CoupledSwitchingTimeDerivative::CoupledSwitchingTimeDerivative(const InputParameters & parameters)
   : DerivativeMaterialInterface<JvarMapKernelInterface<CoupledTimeDerivative>>(parameters),
-    _v_name(getVar("v", 0)->name()),
+    _v_name(coupledName("v", 0)),
     _Fj_names(getParam<std::vector<MaterialPropertyName>>("Fj_names")),
     _num_j(_Fj_names.size()),
     _prop_Fj(_num_j),

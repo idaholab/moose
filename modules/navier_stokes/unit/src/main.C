@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "NavierStokesApp.h"
+#include "NavierStokesUnitApp.h"
 #include "gtest/gtest.h"
 
 // Moose includes
@@ -27,7 +27,7 @@ main(int argc, char ** argv)
   testing::InitGoogleTest(&argc, argv);
 
   MooseInit init(argc, argv);
-  registerApp(NavierStokesApp);
+  registerApp(NavierStokesUnitApp);
   Moose::_throw_on_error = true;
   Moose::_throw_on_warning = true;
 

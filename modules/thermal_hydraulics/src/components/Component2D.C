@@ -13,19 +13,19 @@
 InputParameters
 Component2D::validParams()
 {
-  InputParameters params = GeometricalComponent::validParams();
+  InputParameters params = GeneratedMeshComponent::validParams();
   return params;
 }
 
 Component2D::Component2D(const InputParameters & params)
-  : GeometricalComponent(params), _number_of_hs(0), _total_elem_number(0), _axial_offset(0.0)
+  : GeneratedMeshComponent(params), _number_of_hs(0), _total_elem_number(0), _axial_offset(0.0)
 {
 }
 
 void
 Component2D::check() const
 {
-  GeometricalComponent::check();
+  GeneratedMeshComponent::check();
 
   if (isParamValid("axial_region_names"))
     checkEqualSize<std::string, Real>("axial_region_names", "length");
@@ -413,26 +413,26 @@ Component2D::buildMesh()
 }
 
 bool
+Component2D::isBoundaryInVector(const BoundaryName & boundary_name,
+                                const std::vector<BoundaryName> & boundary_name_vector) const
+{
+  return std::find(boundary_name_vector.begin(), boundary_name_vector.end(), boundary_name) !=
+         boundary_name_vector.end();
+}
+
+bool
 Component2D::hasBoundary(const BoundaryName & boundary_name) const
 {
-  // Put all boundary names in one vector
-  const std::vector<std::vector<BoundaryName>> all_boundary_names_vectors{
-      _boundary_names_inner,
-      _boundary_names_outer,
-      _boundary_names_start,
-      _boundary_names_end,
-      _boundary_names_interior_axial_per_radial_section,
-      _boundary_names_axial_inner,
-      _boundary_names_axial_outer,
-      _boundary_names_radial_start,
-      _boundary_names_radial_end,
-      _boundary_names_inner_radial};
-  std::vector<BoundaryName> all_boundary_names;
-  for (const auto & vec : all_boundary_names_vectors)
-    all_boundary_names.insert(all_boundary_names.end(), vec.begin(), vec.end());
-
-  return std::find(all_boundary_names.begin(), all_boundary_names.end(), boundary_name) !=
-         all_boundary_names.end();
+  return isBoundaryInVector(boundary_name, _boundary_names_inner) ||
+         isBoundaryInVector(boundary_name, _boundary_names_axial_inner) ||
+         isBoundaryInVector(boundary_name, _boundary_names_outer) ||
+         isBoundaryInVector(boundary_name, _boundary_names_axial_outer) ||
+         isBoundaryInVector(boundary_name, _boundary_names_start) ||
+         isBoundaryInVector(boundary_name, _boundary_names_radial_start) ||
+         isBoundaryInVector(boundary_name, _boundary_names_end) ||
+         isBoundaryInVector(boundary_name, _boundary_names_radial_end) ||
+         isBoundaryInVector(boundary_name, _boundary_names_interior_axial_per_radial_section) ||
+         isBoundaryInVector(boundary_name, _boundary_names_inner_radial);
 }
 
 const std::vector<std::tuple<dof_id_type, unsigned short int>> &

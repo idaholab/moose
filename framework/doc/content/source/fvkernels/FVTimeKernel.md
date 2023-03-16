@@ -2,7 +2,11 @@
 
 !syntax description /FVKernels/FVTimeKernel
 
-The time derivative is automatically computed based on the [time integration scheme selected](syntax/Executioner/TimeIntegrator/index.md).
+The time derivative is automatically computed based on the
+[time integration scheme selected](syntax/Executioner/TimeIntegrator/index.md). This
+class should be used in finite volume simulations which leverage the
+quadrature-point pre-initialized paradigm, which includes fully compressible
+Navier-Stokes simulations.
 
 !alert note
 When creating a new time derivative kernel, developers should consider inheriting this class
@@ -11,11 +15,12 @@ routine of the new class.
 
 ## Example input syntax
 
-In this example, the variable `v` is the solution of a simple time-dependent diffusion
-problem. The time derivative term of the equation is added to the numerical system using
+In this example, the
+[Burger's equation](https://en.wikipedia.org/wiki/Burgers%27_equation) is solved
+in one dimension. The time derivative term of the equation is added to the numerical system using
 a `FVTimeKernel`.
 
-!listing test/tests/fvkernels/fv_simple_diffusion/transient.i block=FVKernels
+!listing test/tests/fvkernels/fv_burgers/fv_burgers.i block=FVKernels
 
 !syntax parameters /FVKernels/FVTimeKernel
 

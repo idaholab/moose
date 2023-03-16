@@ -27,7 +27,7 @@ MatReaction::validParams()
 MatReaction::MatReaction(const InputParameters & parameters)
   : DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>(parameters),
     _is_coupled(isCoupled("v")),
-    _v_name(_is_coupled ? getVar("v", 0)->name() : _var.name()),
+    _v_name(_is_coupled ? coupledName("v") : _var.name()),
     _v(_is_coupled ? coupledValue("v") : _u),
     _v_var(_is_coupled ? coupled("v") : _var.number()),
     _L(getMaterialProperty<Real>("mob_name")),

@@ -455,9 +455,15 @@ ActionWarehouse::getMooseAppName()
 }
 
 bool
+ActionWarehouse::hasTask(const std::string & task) const
+{
+  return _action_factory.isRegisteredTask(task);
+}
+
+bool
 ActionWarehouse::isTaskComplete(const std::string & task) const
 {
-  if (!_action_factory.isRegisteredTask(task))
+  if (!hasTask(task))
     mooseError("\"", task, "\" is not a registered task.");
   return _completed_tasks.count(task);
 }

@@ -1,4 +1,4 @@
-## Update MOOSE and Conda id=update
+### Update MOOSE and Conda id=update
 
 MOOSE does not use traditional versioning, is under heavy development, and is being updated
 continuously. Therefore, it is important that you continue to update MOOSE as you use it to develop your
@@ -7,8 +7,8 @@ application(s); weekly updates are recommended.
 If you are using our Conda environment, you should always perform an update to both Conda +and+ your MOOSE repository. If you update one, always update the other:
 
 ```bash
-conda activate moose
-conda update --all
+mamba activate moose
+mamba update --all
 ```
 
 To update your MOOSE repository use the following commands.

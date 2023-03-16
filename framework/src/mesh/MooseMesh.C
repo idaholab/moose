@@ -147,6 +147,12 @@ MooseMesh::validParams()
                         true,
                         "True to skip uniform refinements when using a pre-split mesh.");
 
+  params.addParam<std::vector<SubdomainID>>(
+      "add_subdomain_ids",
+      "The listed subdomains will be assumed valid for the mesh. This permits setting up subdomain "
+      "restrictions for subdomains initially containing no elements, which can occur, for example, "
+      "in additive manufacturing simulations which dynamically add and remove elements.");
+
   params += MooseAppCoordTransform::validParams();
 
   // This indicates that the derived mesh type accepts a MeshGenerator, and should be set to true in
@@ -214,6 +220,10 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
   }
   else if (isParamValid("block"))
     _provided_coord_blocks = getParam<std::vector<SubdomainName>>("block");
+
+  if (getParam<bool>("build_all_side_lowerd_mesh"))
+    // Do not initially allow removal of remote elements
+    allowRemoteElementRemoval(false);
 
   determineUseDistributedMesh();
 }
@@ -352,6 +362,13 @@ MooseMesh::prepare(bool)
   for (const auto & elem : getMesh().element_ptr_range())
     _mesh_subdomains.insert(elem->subdomain_id());
 
+  // add explicitly requested subdomains
+  if (isParamValid("add_subdomain_ids"))
+  {
+    const auto add_subdomain_id = getParam<std::vector<SubdomainID>>("add_subdomain_ids");
+    _mesh_subdomains.insert(add_subdomain_id.begin(), add_subdomain_id.end());
+  }
+
   // Make sure nodesets have been generated
   buildNodeListFromSideList();
 
@@ -466,16 +483,13 @@ MooseMesh::buildLowerDMesh()
       bool build_side = false;
       if (!neig)
         build_side = true;
-      else if (!neig->is_remote())
+      else
       {
-        if (mesh.is_replicated() || elem->processor_id() == comm().rank() ||
-            neig->processor_id() == comm().rank())
-        {
-          if (!neig->active())
-            build_side = true;
-          else if (neig->level() == elem->level() && elem->id() < neig->id())
-            build_side = true;
-        }
+        mooseAssert(!neig->is_remote(), "We error if the mesh is not serial");
+        if (!neig->active())
+          build_side = true;
+        else if (neig->level() == elem->level() && elem->id() < neig->id())
+          build_side = true;
       }
 
       if (build_side)
@@ -2499,10 +2513,10 @@ MooseMesh::init()
     // Re-enable partitioning so the splitter can partition!
     if (_app.isSplitMesh())
       getMesh().skip_partitioning(false);
-  }
 
-  if (getParam<bool>("build_all_side_lowerd_mesh"))
-    buildLowerDMesh();
+    if (getParam<bool>("build_all_side_lowerd_mesh"))
+      buildLowerDMesh();
+  }
 }
 
 unsigned int
@@ -3606,6 +3620,23 @@ MooseMesh::getCoordSystem(SubdomainID sid) const
     return (*it).second;
   else
     mooseError("Requested subdomain ", sid, " does not exist.");
+}
+
+Moose::CoordinateSystemType
+MooseMesh::getUniqueCoordSystem() const
+{
+  const auto unique_system = _coord_sys.find(*meshSubdomains().begin())->second;
+  // Check that it is actually unique
+  bool result = std::all_of(
+      std::next(_coord_sys.begin()),
+      _coord_sys.end(),
+      [unique_system](
+          typename std::unordered_map<SubdomainID, Moose::CoordinateSystemType>::const_reference
+              item) { return (item.second == unique_system); });
+  if (!result)
+    mooseError("The unique coordinate system of the mesh was requested by the mesh contains "
+               "multiple blocks with different coordinate systems");
+  return unique_system;
 }
 
 const std::map<SubdomainID, Moose::CoordinateSystemType> &

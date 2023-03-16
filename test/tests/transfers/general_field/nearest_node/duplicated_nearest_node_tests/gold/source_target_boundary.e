@@ -1,0 +1,1 @@
+../../../../multiapp_nearest_node_transfer/gold/source_target_boundary.e

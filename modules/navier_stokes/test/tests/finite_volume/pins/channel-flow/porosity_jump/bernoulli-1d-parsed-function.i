@@ -40,7 +40,7 @@ velocity_interp_method = 'rc'
 
 [Functions]
   [porosity]
-    type = ADParsedFunction
+    type = ParsedFunction
     expression = 'if(x > 1, 0.5, 1)'
   []
 []

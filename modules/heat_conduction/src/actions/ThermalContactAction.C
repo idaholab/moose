@@ -96,6 +96,14 @@ ThermalContactAction::validParams()
                                 "Offset to gap distance from secondary side");
   params.addParam<VariableName>("mapped_primary_gap_offset",
                                 "Offset to gap distance mapped from primary side");
+  params.addParam<bool>(
+      "check_boundary_restricted",
+      true,
+      "Whether to check for multiple element sides on the boundary for the boundary restricted, "
+      "element aux variable set up for thermal contact enforcement. Setting this to false will "
+      "allow contribution to a single element's elemental value(s) from multiple boundary sides "
+      "on the same element (example: when the restricted boundary exists on two or more sides "
+      "of an element, such as at a corner of a mesh");
 
   params += GapConductance::actionParameters();
   params += GapConductanceConstant::actionParameters();
@@ -112,6 +120,19 @@ ThermalContactAction::ThermalContactAction(const InputParameters & params)
     _gap_conductivity_name("paired_k_" + getParam<NonlinearVariableName>("variable")),
     _boundary_pairs(getParam<BoundaryName, BoundaryName>("primary", "secondary"))
 {
+  if (!params.get<bool>("check_boundary_restricted"))
+  {
+    if (_quadrature)
+      paramInfo(
+          "check_boundary_restricted",
+          "This parameter is set to 'false'. Although thermal contact ",
+          "will be correctly enforced, the contact-related output may have issues ",
+          "in cases where where more than one face of an element belongs to a contact surface ",
+          "because the values from only one of the faces will be reported.");
+    else
+      paramError("check_boundary_restricted",
+                 "This parameter cannot be 'false' when 'quadrature=false'");
+  }
 }
 
 void
@@ -145,7 +166,8 @@ ThermalContactAction::addAuxKernels()
                                       "normal_smoothing_distance",
                                       "normal_smoothing_method",
                                       "order",
-                                      "warnings"});
+                                      "warnings",
+                                      "check_boundary_restricted"});
       params.set<AuxVariableName>("variable") = _gap_value_name;
       params.set<ExecFlagEnum>("execute_on", true) = {EXEC_INITIAL, EXEC_LINEAR};
 
@@ -177,7 +199,8 @@ ThermalContactAction::addAuxKernels()
                                      {"tangential_tolerance",
                                       "normal_smoothing_distance",
                                       "normal_smoothing_method",
-                                      "order"});
+                                      "order",
+                                      "check_boundary_restricted"});
       params.set<AuxVariableName>("variable") = _penetration_var_name;
       if (isParamValid("secondary_gap_offset"))
         params.set<std::vector<VariableName>>("secondary_gap_offset") = {

@@ -11,13 +11,17 @@
 #include "MultiAppCopyTransfer.h"
 #include "FEProblemBase.h"
 #include "MultiApp.h"
+#include "SystemBase.h"
+
+#include "libmesh/id_types.h"
+#include "libmesh/string_to_enum.h"
 
 registerMooseObject("MooseApp", MultiAppCopyTransfer);
 
 InputParameters
 MultiAppCopyTransfer::validParams()
 {
-  InputParameters params = MultiAppFieldTransfer::validParams();
+  InputParameters params = MultiAppDofCopyTransfer::validParams();
   params.addRequiredParam<std::vector<AuxVariableName>>(
       "variable", "The auxiliary variable to store the transferred values in.");
   params.addRequiredParam<std::vector<VariableName>>("source_variable",
@@ -29,13 +33,13 @@ MultiAppCopyTransfer::validParams()
 }
 
 MultiAppCopyTransfer::MultiAppCopyTransfer(const InputParameters & parameters)
-  : MultiAppFieldTransfer(parameters),
+  : MultiAppDofCopyTransfer(parameters),
     _from_var_names(getParam<std::vector<VariableName>>("source_variable")),
     _to_var_names(getParam<std::vector<AuxVariableName>>("variable"))
 {
   /* Right now, most of derived transfers support one variable only */
-  _to_var_name = _to_var_names[0];
-  _from_var_name = _from_var_names[0];
+  _to_var_name = _to_var_names.size() ? _to_var_names[0] : "INVALID";
+  _from_var_name = _from_var_names.size() ? _from_var_names[0] : "INVALID";
 }
 
 void

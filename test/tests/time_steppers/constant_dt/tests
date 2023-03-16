@@ -2,10 +2,18 @@
   design = 'TimeStepper/index.md'
   issues = '#1953'
 
-  [./constant_dt]
+  [constant_dt]
     type = 'Exodiff'
     input = 'constant_dt.i'
     exodiff = 'constant_dt_out.e'
     requirement = 'The system shall include a means for performing simulations with a constant time step.'
-  [../]
+  []
+
+  [error_negative]
+    type = 'RunException'
+    input = 'constant_dt.i'
+    cli_args = 'Executioner/TimeStepper/dt=-1'
+    requirement = 'The system shall error if trying to take a negative time step.'
+    expect_err = 'Negative time step detected'
+  []
 []

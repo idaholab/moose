@@ -25,7 +25,7 @@
 #include "TaggingInterface.h"
 #include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "TwoMaterialPropertyInterface.h"
-#include "FunctorInterface.h"
+#include "ADFunctorInterface.h"
 #include "FVFaceResidualObject.h"
 #include "FaceArgInterface.h"
 
@@ -56,7 +56,7 @@ class FVInterfaceKernel : public MooseObject,
                           public TaggingInterface,
                           public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
                           public TwoMaterialPropertyInterface,
-                          public FunctorInterface,
+                          public ADFunctorInterface,
                           public FVFaceResidualObject,
                           public FaceArgProducerInterface
 {

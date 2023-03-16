@@ -85,26 +85,26 @@ PorousFlow2PhaseHysPP::computeQpProperties()
   // remain fixed (at unity) throughout the simulation
   if (_dictator.isPorousFlowVariable(_phase0_porepressure_varnum))
   {
-    _dporepressure_dvar[_qp][0][_p0var] = 1.0;
+    (*_dporepressure_dvar)[_qp][0][_p0var] = 1.0;
     if (!_nodal_material)
       (*_dgradp_qp_dgradv)[_qp][0][_p0var] = 1.0;
   }
   if (_dictator.isPorousFlowVariable(_phase1_porepressure_varnum))
   {
-    _dporepressure_dvar[_qp][1][_p1var] = 1.0;
+    (*_dporepressure_dvar)[_qp][1][_p1var] = 1.0;
     if (!_nodal_material)
       (*_dgradp_qp_dgradv)[_qp][1][_p1var] = 1.0;
   }
 
   if (_dictator.isPorousFlowVariable(_phase0_porepressure_varnum))
   {
-    _dsaturation_dvar[_qp][0][_p0var] = -ds;
-    _dsaturation_dvar[_qp][1][_p0var] = ds;
+    (*_dsaturation_dvar)[_qp][0][_p0var] = -ds;
+    (*_dsaturation_dvar)[_qp][1][_p0var] = ds;
   }
   if (_dictator.isPorousFlowVariable(_phase1_porepressure_varnum))
   {
-    _dsaturation_dvar[_qp][0][_p1var] = ds;
-    _dsaturation_dvar[_qp][1][_p1var] = -ds;
+    (*_dsaturation_dvar)[_qp][0][_p1var] = ds;
+    (*_dsaturation_dvar)[_qp][1][_p1var] = -ds;
   }
 
   _pc[_qp] = _phase1_porepressure[_qp] - _phase0_porepressure[_qp]; // this is >= 0

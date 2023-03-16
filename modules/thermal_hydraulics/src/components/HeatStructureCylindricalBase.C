@@ -38,14 +38,6 @@ HeatStructureCylindricalBase::setupMesh()
   HeatStructureBase::setupMesh();
 }
 
-void
-HeatStructureCylindricalBase::addMooseObjects()
-{
-  HeatStructureBase::addMooseObjects();
-
-  _hc_model->addHeatEquationRZ();
-}
-
 Real
 HeatStructureCylindricalBase::getUnitPerimeter(const HeatStructureSideType & side) const
 {

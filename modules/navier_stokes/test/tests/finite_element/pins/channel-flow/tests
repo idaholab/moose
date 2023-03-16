@@ -1,0 +1,35 @@
+[Tests]
+  design = 'modules/navier_stokes/index.md'
+  [./pm_friction]
+    type = 'Exodiff'
+    input = 'pm_friction.i'
+    exodiff = 'pm_friction_out.e'
+    abs_zero = 1e-6
+    issues = '#23121'
+    requirement = 'The system shall be able to solve a porous flow with pressure drop due to viscous and inertia frictions.'
+  [../]
+  [./pressure_gradient]
+    type = 'Exodiff'
+    input = 'pressure_gradient.i'
+    exodiff = 'pressure_gradient_out.e'
+    abs_zero = 1e-6
+    issues = '#23121'
+    requirement = 'The system shall be able to solve a pressure gradient driven porous flow.'
+  [../]
+  [./pm_heat_source]
+    type = 'Exodiff'
+    input = 'pm_heat_source.i'
+    exodiff = 'pm_heat_source_out.e'
+    abs_zero = 1e-6
+    issues = '#23121'
+    requirement = 'The system shall be able to solve a porous flow with internal heating source.'
+  [../]
+  [./pm_reverse_flow]
+    type = 'Exodiff'
+    input = 'pm_reverse_flow.i'
+    exodiff = 'pm_reverse_flow_out.e'
+    abs_zero = 1e-6
+    issues = '#23121'
+    requirement = 'The system shall be able to solve a porous flow when reverse flow happens.'
+  [../]
+[]

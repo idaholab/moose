@@ -41,7 +41,7 @@
 [Materials]
   [./free_energy]
     type = RegularSolutionFreeEnergy
-    f_name = F
+    property_name = F
     c = c
     outputs = out
     log_tol = 0.2

@@ -62,7 +62,7 @@
 
 [Functions]
   [f1]
-    type = ADParsedFunction
+    type = ParsedFunction
     expression = 'exp(x - y)'
   []
 []

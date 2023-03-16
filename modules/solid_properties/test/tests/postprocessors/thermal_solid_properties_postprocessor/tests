@@ -1,0 +1,11 @@
+[Tests]
+  [test]
+    type = CSVDiff
+    input = 'thermal_solid_properties_postprocessor.i'
+    csvdiff = 'thermal_solid_properties_postprocessor.csv'
+
+    requirement = "The system shall compute thermal solid properties in a post-processor."
+    design = 'ThermalSolidPropertiesPostprocessor.md'
+    issues = '#23419'
+  []
+[]

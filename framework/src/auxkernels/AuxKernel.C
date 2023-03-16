@@ -109,7 +109,7 @@ AuxKernelTempl<ComputeValueType>::AuxKernelTempl(const InputParameters & paramet
     MeshChangedInterface(parameters),
     VectorPostprocessorInterface(this),
     ElementIDInterface(this),
-    FunctorInterface(this),
+    NonADFunctorInterface(this),
     _check_boundary_restricted(getParam<bool>("check_boundary_restricted")),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),

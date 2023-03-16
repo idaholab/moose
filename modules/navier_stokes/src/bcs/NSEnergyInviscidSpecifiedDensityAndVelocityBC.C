@@ -21,7 +21,6 @@ NSEnergyInviscidSpecifiedDensityAndVelocityBC::validParams()
 
   // Coupled variables
   params.addRequiredCoupledVar(NS::pressure, "pressure");
-  params.addDeprecatedCoupledVar("p", NS::pressure, "1/1/2022");
 
   // Required parameters
   params.addRequiredParam<Real>("specified_density", "The specified density for this boundary");

@@ -11,6 +11,7 @@
 
 #include "OutputInterface.h"
 #include "FEProblemBase.h"
+#include "NonADFunctorInterface.h"
 #include "libmesh/parallel.h"
 
 /**
@@ -18,7 +19,7 @@
  * virtual getValue() interface which must be overridden by derived
  * classes.
  */
-class Postprocessor : public OutputInterface
+class Postprocessor : public OutputInterface, public NonADFunctorInterface
 {
 public:
   static InputParameters validParams();

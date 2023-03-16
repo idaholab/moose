@@ -27,8 +27,4 @@ public:
 
 private:
   const MeshGeneratorName & _generator_prefix;
-
-  const unsigned int & _num_elements_x_prop;
-  const Real & _xmin_prop;
-  const Real & _xmax_prop;
 };

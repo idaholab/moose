@@ -1,5 +1,5 @@
 [Tests]
-  [./fv_burgers]
+  [fv_burgers]
     type = 'Exodiff'
     input = 'fv_burgers.i'
     exodiff = 'fv_burgers_out.e'
@@ -7,5 +7,5 @@
     requirement = 'The system shall be able to solve the Burgers equation in 1D using the FV method'
     design = 'fv_design.md'
     issues = '#14549'
-  [../]
+  []
 []

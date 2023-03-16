@@ -37,7 +37,7 @@ TEST(FaceCenteredMapFunctorTest, testArgs)
   const char * argv[2] = {"foo", "\0"};
 
   // First we create a simple mesh
-  auto app = AppFactory::createAppShared("NavierStokesApp", 1, (char **)argv);
+  auto app = AppFactory::createAppShared("NavierStokesUnitApp", 1, (char **)argv);
   auto * factory = &app->getFactory();
   std::string mesh_type = "MeshGeneratorMesh";
 

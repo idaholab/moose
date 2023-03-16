@@ -26,6 +26,15 @@ protected:
   virtual Real computeValue();
 
   const VariableValue & _nl_u;
-  VariableValue & _var1;
-  VariableValue & _var2;
+
+  /// use deprecated API
+  const bool _deprecated;
+
+  /// current API
+  MooseVariable * _var1;
+  MooseVariable * _var2;
+
+  /// deprectated API
+  VariableValue * _dvar1;
+  VariableValue * _dvar2;
 };

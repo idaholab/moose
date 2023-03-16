@@ -773,6 +773,28 @@ FeatureFloodCount::scatterAndUpdateRanks()
         largest_global_index = global_index;
   }
 
+  // communicate the boundary intersection state
+  std::vector<std::pair<unsigned int, int>> intersection_state;
+  for (auto & feature : _feature_sets)
+    intersection_state.emplace_back(feature._id, static_cast<int>(feature._boundary_intersection));
+
+  // gather on root
+  _communicator.gather(0, intersection_state);
+
+  // consolidate
+  std::map<unsigned int, int> consolidated_intersection_state;
+  if (_is_primary)
+    for (const auto & [id, state] : intersection_state)
+      consolidated_intersection_state[id] |= state;
+
+  // broadcast result
+  _communicator.broadcast(consolidated_intersection_state, 0);
+
+  // apply broadcast changes
+  for (auto & feature : _feature_sets)
+    feature._boundary_intersection |=
+        static_cast<BoundaryIntersection>(consolidated_intersection_state[feature._id]);
+
   buildFeatureIdToLocalIndices(largest_global_index);
 }
 
@@ -879,8 +901,6 @@ FeatureFloodCount::getAdjacentGrainNum(unsigned int feature_id) const // by weip
 bool
 FeatureFloodCount::doesFeatureIntersectBoundary(unsigned int feature_id) const
 {
-  // TODO: This information is not parallel consistent when using FeatureFloodCounter
-
   // Some processors don't contain the largest feature id, in that case we just return invalid_id
   if (feature_id >= _feature_id_to_local_index.size())
     return false;
@@ -901,8 +921,6 @@ FeatureFloodCount::doesFeatureIntersectBoundary(unsigned int feature_id) const
 bool
 FeatureFloodCount::doesFeatureIntersectSpecifiedBoundary(unsigned int feature_id) const
 {
-  // TODO: This information is not parallel consistent when using FeatureFloodCounter
-
   // Some processors don't contain the largest feature id, in that case we just return invalid_id
   if (feature_id >= _feature_id_to_local_index.size())
     return false;
@@ -925,8 +943,6 @@ FeatureFloodCount::doesFeatureIntersectSpecifiedBoundary(unsigned int feature_id
 bool
 FeatureFloodCount::isFeaturePercolated(unsigned int feature_id) const
 {
-  // TODO: This information is not parallel consistent when using FeatureFloodCounter
-
   // Some processors don't contain the largest feature id, in that case we just return invalid_id
   if (feature_id >= _feature_id_to_local_index.size())
     return false;
@@ -1057,6 +1073,14 @@ FeatureFloodCount::getEntityValue(dof_id_type entity_id,
           return 1;
       }
 
+      return 0;
+    }
+
+    case FieldType::INTERSECTS_SPECIFIED_BOUNDARY:
+    {
+      auto ids = getVarToFeatureVector(entity_id);
+      if (ids.size() != 0)
+        return doesFeatureIntersectSpecifiedBoundary(ids[0]);
       return 0;
     }
 
@@ -1999,24 +2023,19 @@ FeatureFloodCount::FeatureData::boundingBoxesIntersect(const FeatureData & rhs) 
 bool
 FeatureFloodCount::FeatureData::halosIntersect(const FeatureData & rhs) const
 {
-  return setsIntersect(
-      _halo_ids.begin(), _halo_ids.end(), rhs._halo_ids.begin(), rhs._halo_ids.end());
+  return MooseUtils::setsIntersect(_halo_ids, rhs._halo_ids);
 }
 
 bool
 FeatureFloodCount::FeatureData::periodicBoundariesIntersect(const FeatureData & rhs) const
 {
-  return setsIntersect(_periodic_nodes.begin(),
-                       _periodic_nodes.end(),
-                       rhs._periodic_nodes.begin(),
-                       rhs._periodic_nodes.end());
+  return MooseUtils::setsIntersect(_periodic_nodes, rhs._periodic_nodes);
 }
 
 bool
 FeatureFloodCount::FeatureData::ghostedIntersect(const FeatureData & rhs) const
 {
-  return setsIntersect(
-      _ghosted_ids.begin(), _ghosted_ids.end(), rhs._ghosted_ids.begin(), rhs._ghosted_ids.end());
+  return MooseUtils::setsIntersect(_ghosted_ids, rhs._ghosted_ids);
 }
 
 bool

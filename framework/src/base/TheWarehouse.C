@@ -103,7 +103,7 @@ private:
   std::vector<std::vector<std::unique_ptr<Attribute>>> _data;
 };
 
-TheWarehouse::TheWarehouse() : _store(new VecStore()) {}
+TheWarehouse::TheWarehouse() : _store(std::make_unique<VecStore>()) {}
 TheWarehouse::~TheWarehouse() {}
 
 void isValid(MooseObject * obj);

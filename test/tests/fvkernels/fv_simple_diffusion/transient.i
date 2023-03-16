@@ -19,7 +19,7 @@
 
 [FVKernels]
   [./time]
-    type = FVTimeKernel
+    type = FVFunctorTimeKernel
     variable = v
   [../]
   [diff]

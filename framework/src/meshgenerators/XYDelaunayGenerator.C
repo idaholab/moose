@@ -115,7 +115,8 @@ std::unique_ptr<MeshBase>
 XYDelaunayGenerator::generate()
 {
   // Put the boundary mesh in a local pointer
-  std::unique_ptr<UnstructuredMesh> mesh = dynamic_pointer_cast<UnstructuredMesh>(_bdy_ptr);
+  std::unique_ptr<UnstructuredMesh> mesh =
+      dynamic_pointer_cast<UnstructuredMesh>(std::move(_bdy_ptr));
 
   // Get ready to triangulate the line segments we extract from it
   Poly2TriTriangulator poly2tri(*mesh);
@@ -182,17 +183,19 @@ XYDelaunayGenerator::generate()
   }
 
   std::vector<TriangulatorInterface::MeshedHole> meshed_holes;
-  std::vector<TriangulatorInterface::Hole *> triangulator_hole_ptrs;
+  std::vector<TriangulatorInterface::Hole *> triangulator_hole_ptrs(_hole_ptrs.size());
+  std::vector<std::unique_ptr<MeshBase>> hole_ptrs(_hole_ptrs.size());
 
   // Make sure pointers here aren't invalidated by a resize
   meshed_holes.reserve(_hole_ptrs.size());
   for (auto hole_i : index_range(_hole_ptrs))
   {
-    meshed_holes.emplace_back(*_hole_ptrs[hole_i]->get());
+    hole_ptrs[hole_i] = std::move(*_hole_ptrs[hole_i]);
+    meshed_holes.emplace_back(*hole_ptrs[hole_i]);
     if (hole_i < _refine_holes.size())
       meshed_holes.back().set_refine_boundary_allowed(_refine_holes[hole_i]);
 
-    triangulator_hole_ptrs.push_back(&meshed_holes.back());
+    triangulator_hole_ptrs[hole_i] = &meshed_holes.back();
   }
 
   if (!triangulator_hole_ptrs.empty())
@@ -211,9 +214,9 @@ XYDelaunayGenerator::generate()
       _output_subdomain_id = MooseMeshUtils::getNextFreeSubdomainID(*mesh);
 
       // But check the hole meshes for our output subdomain name too
-      for (auto hole_ptr : _hole_ptrs)
+      for (auto & hole_ptr : hole_ptrs)
       {
-        auto possible_sbdid = MooseMeshUtils::getSubdomainID(output_subdomain_name, **hole_ptr);
+        auto possible_sbdid = MooseMeshUtils::getSubdomainID(output_subdomain_name, *hole_ptr);
         // Huh, it was in one of them
         if (possible_sbdid != Elem::invalid_subdomain_id)
         {
@@ -221,7 +224,7 @@ XYDelaunayGenerator::generate()
           break;
         }
         _output_subdomain_id =
-            std::max(_output_subdomain_id, MooseMeshUtils::getNextFreeSubdomainID(**hole_ptr));
+            std::max(_output_subdomain_id, MooseMeshUtils::getNextFreeSubdomainID(*hole_ptr));
       }
 
       mesh->subdomain_name(_output_subdomain_id) = output_subdomain_name;
@@ -267,7 +270,7 @@ XYDelaunayGenerator::generate()
   // but we can't even use this for mesh stitching, because we can't
   // be sure it isn't also already in use on the hole's mesh and so we
   // won't be able to safely clear it afterwards.
-  const boundary_id_type end_bcid = _hole_ptrs.size() + 1;
+  const boundary_id_type end_bcid = hole_ptrs.size() + 1;
   boundary_id_type new_hole_bcid = end_bcid;
 
   // We might be overriding the default bcid numbers.  We have to be
@@ -282,13 +285,13 @@ XYDelaunayGenerator::generate()
     auto hole_boundaries = getParam<std::vector<BoundaryName>>("hole_boundaries");
     auto hole_boundary_ids = MooseMeshUtils::getBoundaryIDs(*mesh, hole_boundaries, true);
 
-    if (hole_boundary_ids.size() != _hole_ptrs.size())
+    if (hole_boundary_ids.size() != hole_ptrs.size())
       paramError("hole_boundary_ids", "Need one hole_boundary_ids entry per hole, if specified.");
 
-    for (auto h : index_range(_hole_ptrs))
+    for (auto h : index_range(hole_ptrs))
       libMesh::MeshTools::Modification::change_boundary_id(*mesh, h + 1, h + 1 + end_bcid);
 
-    for (auto h : index_range(_hole_ptrs))
+    for (auto h : index_range(hole_ptrs))
     {
       libMesh::MeshTools::Modification::change_boundary_id(
           *mesh, h + 1 + end_bcid, hole_boundary_ids[h]);
@@ -311,9 +314,9 @@ XYDelaunayGenerator::generate()
 
   bool doing_stitching = false;
 
-  for (auto hole_i : index_range(_hole_ptrs))
+  for (auto hole_i : index_range(hole_ptrs))
   {
-    const MeshBase & hole_mesh = **_hole_ptrs[hole_i];
+    const MeshBase & hole_mesh = *hole_ptrs[hole_i];
     auto & hole_boundary_info = hole_mesh.get_boundary_info();
     const std::set<boundary_id_type> & local_hole_bcids = hole_boundary_info.get_boundary_ids();
 
@@ -331,11 +334,11 @@ XYDelaunayGenerator::generate()
   // cheaper to do that once than to do it once-per-hole
   MeshSerializer serial(*mesh, doing_stitching);
 
-  for (auto hole_i : index_range(_hole_ptrs))
+  for (auto hole_i : index_range(hole_ptrs))
   {
     if (hole_i < _stitch_holes.size() && _stitch_holes[hole_i])
     {
-      UnstructuredMesh & hole_mesh = dynamic_cast<UnstructuredMesh &>(*_hole_ptrs[hole_i]->get());
+      UnstructuredMesh & hole_mesh = dynamic_cast<UnstructuredMesh &>(*hole_ptrs[hole_i]);
       auto & hole_boundary_info = hole_mesh.get_boundary_info();
 
       // Our algorithm here requires a serialized Mesh.  To avoid

@@ -17,12 +17,13 @@
  * primary variables such as porepressure and saturation at the nodes
  * and quadpoints for all phases as required
  */
-class PorousFlowVariableBase : public DerivativeMaterialInterface<PorousFlowMaterial>
+template <bool is_ad>
+class PorousFlowVariableBaseTempl : public DerivativeMaterialInterface<PorousFlowMaterial>
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowVariableBase(const InputParameters & parameters);
+  PorousFlowVariableBaseTempl(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;
@@ -38,10 +39,10 @@ protected:
   const unsigned int _num_pf_vars;
 
   /// Computed nodal or quadpoint values of porepressure of the phases
-  MaterialProperty<std::vector<Real>> & _porepressure;
+  GenericMaterialProperty<std::vector<Real>, is_ad> & _porepressure;
 
   /// d(porepressure)/d(PorousFlow variable)
-  MaterialProperty<std::vector<std::vector<Real>>> & _dporepressure_dvar;
+  MaterialProperty<std::vector<std::vector<Real>>> * const _dporepressure_dvar;
 
   /// Grad(p) at the quadpoints
   MaterialProperty<std::vector<RealGradient>> * const _gradp_qp;
@@ -53,10 +54,10 @@ protected:
   MaterialProperty<std::vector<std::vector<RealGradient>>> * const _dgradp_qp_dv;
 
   /// Computed nodal or qp saturation of the phases
-  MaterialProperty<std::vector<Real>> & _saturation;
+  GenericMaterialProperty<std::vector<Real>, is_ad> & _saturation;
 
   /// d(saturation)/d(PorousFlow variable)
-  MaterialProperty<std::vector<std::vector<Real>>> & _dsaturation_dvar;
+  MaterialProperty<std::vector<std::vector<Real>>> * const _dsaturation_dvar;
 
   /// Grad(s) at the quadpoints
   MaterialProperty<std::vector<RealGradient>> * const _grads_qp;
@@ -67,3 +68,6 @@ protected:
   /// d(grad saturation)/d(PorousFlow variable) at the quadpoints
   MaterialProperty<std::vector<std::vector<RealGradient>>> * const _dgrads_qp_dv;
 };
+
+typedef PorousFlowVariableBaseTempl<false> PorousFlowVariableBase;
+typedef PorousFlowVariableBaseTempl<true> ADPorousFlowVariableBase;

@@ -69,6 +69,13 @@ Eigenvalue::validParams()
                         "If true, we will set an initial eigen vector in moose, otherwise EPS "
                         "solver will initial eigen vector");
 
+  params.addParamNamesToGroup("matrix_free precond_matrix_free constant_matrices "
+                              "precond_matrix_includes_eigen",
+                              "Matrix and Matrix-Free");
+  params.addParamNamesToGroup("initial_eigenvalue auto_initialization",
+                              "Eigenvector and eigenvalue initialization");
+  params.addParamNamesToGroup("normalization normal_factor", "Solution normalization");
+
   // If Newton and Inverse Power is combined in SLEPc side
   params.addPrivateParam<bool>("_newton_inverse_power", false);
 

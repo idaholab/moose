@@ -9,8 +9,7 @@
 
 #include "HeatSourceBase.h"
 #include "HeatStructureBase.h"
-#include "HeatStructureCylindricalBase.h"
-#include "HeatStructurePlate.h"
+#include "HeatStructureInterface.h"
 #include "HeatStructureFromFile3D.h"
 
 InputParameters
@@ -25,9 +24,14 @@ HeatSourceBase::validParams()
 }
 
 HeatSourceBase::HeatSourceBase(const InputParameters & parameters)
-  : Component(parameters), _region_names(getParam<std::vector<std::string>>("regions"))
+  : Component(parameters),
+    _hs_name(getParam<std::string>("hs")),
+    _region_names(getParam<std::vector<std::string>>("regions"))
 {
   checkSizeGreaterThan<std::string>("regions", 0);
+
+  for (auto && region : _region_names)
+    _subdomain_names.push_back(genName(_hs_name, region));
 }
 
 void
@@ -35,34 +39,30 @@ HeatSourceBase::check() const
 {
   Component::check();
 
-  checkComponentOfTypeExists<HeatStructureBase>("hs");
+  checkComponentOfTypeExists<HeatStructureInterface>("hs");
 
   if (hasComponent<HeatStructureBase>("hs"))
   {
-    if (hasComponent<HeatStructurePlate>("hs") || hasComponent<HeatStructureCylindricalBase>("hs"))
-    {
-      const HeatStructureBase & hs = getComponent<HeatStructureBase>("hs");
-      for (auto && region : _region_names)
-        if (!hs.hasBlock(region))
-          logError("Region '",
-                   region,
-                   "' does not exist in heat structure '",
-                   getParam<std::string>("hs"),
-                   "'.");
-    }
-    else if (hasComponent<HeatStructureFromFile3D>("hs"))
-    {
-      const HeatStructureBase & hs = getComponent<HeatStructureBase>("hs");
-      for (auto && region : _region_names)
-        if (!hs.hasBlock(region))
-          logError("Region '",
-                   region,
-                   "' does not exist in heat structure '",
-                   getParam<std::string>("hs"),
-                   "'.");
-    }
-    else
-      logError("Heat structure must be of type 'HeatStructurePlate', "
-               "'HeatStructureCylindricalBase' or 'HeatStructureFromFile3D'.");
+    const HeatStructureBase & hs = getComponent<HeatStructureBase>("hs");
+    for (auto && region : _region_names)
+      if (!hs.hasBlock(region))
+        logError("Region '",
+                 region,
+                 "' does not exist in heat structure '",
+                 getParam<std::string>("hs"),
+                 "'.");
   }
+  else if (hasComponent<HeatStructureFromFile3D>("hs"))
+  {
+    const HeatStructureFromFile3D & hs = getComponent<HeatStructureFromFile3D>("hs");
+    for (auto && region : _region_names)
+      if (!hs.hasRegion(region))
+        logError("Region '",
+                 region,
+                 "' does not exist in heat structure '",
+                 getParam<std::string>("hs"),
+                 "'.");
+  }
+  else
+    logError("Heat structure must be of type 'HeatStructureBase' or 'HeatStructureFromFile3D'.");
 }

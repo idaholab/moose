@@ -28,7 +28,7 @@ MultiAppPostprocessorInterpolationTransfer::validParams()
 {
   InputParameters params = MultiAppTransfer::validParams();
   params.addClassDescription("Transfer postprocessor data from sub-application into field data on "
-                             "the master application.");
+                             "the parent application.");
   params.addRequiredParam<AuxVariableName>(
       "variable", "The auxiliary variable to store the transferred values in.");
   params.addRequiredParam<PostprocessorName>("postprocessor", "The Postprocessor to interpolate.");
@@ -89,15 +89,16 @@ MultiAppPostprocessorInterpolationTransfer::execute()
     }
     case FROM_MULTIAPP:
     {
-      InverseDistanceInterpolation<LIBMESH_DIM> * idi;
+      std::unique_ptr<InverseDistanceInterpolation<LIBMESH_DIM>> idi;
 
       switch (_interp_type)
       {
         case 0:
-          idi = new InverseDistanceInterpolation<LIBMESH_DIM>(_communicator, _num_points, _power);
+          idi = std::make_unique<InverseDistanceInterpolation<LIBMESH_DIM>>(
+              _communicator, _num_points, _power);
           break;
         case 1:
-          idi = new RadialBasisInterpolation<LIBMESH_DIM>(_communicator, _radius);
+          idi = std::make_unique<RadialBasisInterpolation<LIBMESH_DIM>>(_communicator, _radius);
           break;
         default:
           mooseError("Unknown interpolation type!");
@@ -119,7 +120,13 @@ MultiAppPostprocessorInterpolationTransfer::execute()
           {
             // Evaluation of the _from_transform at the origin yields the transformed position of
             // the from multi-app
-            src_pts.push_back(to_coord_transform.mapBack((*_from_transforms[i])(Point(0))));
+            if (!getFromMultiApp()->runningInPosition())
+              src_pts.push_back(to_coord_transform.mapBack((*_from_transforms[i])(Point(0))));
+            else
+              // if running in position, the subapp mesh has been transformed so the translation
+              // is no longer applied by the transform
+              src_pts.push_back(to_coord_transform.mapBack(
+                  (*_from_transforms[i])(getFromMultiApp()->position(i))));
             src_vals.push_back(getFromMultiApp()->appPostprocessorValue(i, _postprocessor));
           }
         }
@@ -128,7 +135,7 @@ MultiAppPostprocessorInterpolationTransfer::execute()
       // We have only set local values - prepare for use by gathering remote gata
       idi->prepare_for_use();
 
-      // Loop over the master nodes and set the value of the variable
+      // Loop over the parent app nodes and set the value of the variable
       {
         System * to_sys = find_sys(getFromMultiApp()->problemBase().es(), _to_var_name);
 
@@ -196,8 +203,6 @@ MultiAppPostprocessorInterpolationTransfer::execute()
       }
 
       getFromMultiApp()->problemBase().es().update();
-
-      delete idi;
 
       break;
     }

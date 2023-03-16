@@ -1,0 +1,5 @@
+time,num_fixed_point_its,parent_fp_its
+1,0,1
+2,3,2
+3,3,3
+4,3,4

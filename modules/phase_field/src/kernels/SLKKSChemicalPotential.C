@@ -25,11 +25,8 @@ SLKKSChemicalPotential::validParams()
   params.addRequiredParam<Real>("a", "sublattice site fraction for the kernel variable");
   params.addRequiredParam<Real>("as", "other sublattice site fraction in the same phase");
   params.addRequiredParam<MaterialPropertyName>("F", "Base name of the free energy function");
-  params.addDeprecatedCoupledVar("args",
-                                 "Vector of variable arguments to the free energy function",
-                                 "args is deprecated, use 'coupled_variables' instead");
-  params.addCoupledVar("coupled_variables",
-                       "Vector of variable arguments to the free energy function");
+  params.addCoupledVar("args", "Vector of variable arguments to the free energy function");
+  params.deprecateCoupledVar("args", "coupled_variables", "02/27/2024");
 
   return params;
 }
@@ -37,7 +34,7 @@ SLKKSChemicalPotential::validParams()
 SLKKSChemicalPotential::SLKKSChemicalPotential(const InputParameters & parameters)
   : DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>(parameters),
     _cs_var(coupled("cs")),
-    _cs_name(getVar("cs", 0)->name()),
+    _cs_name(coupledName("cs", 0)),
     // first derivatives
     _dFdu(getMaterialPropertyDerivative<Real>("F", _var.name())),
     _dFdcs(getMaterialPropertyDerivative<Real>("F", _cs_name)),

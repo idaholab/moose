@@ -38,7 +38,7 @@ DiscreteNucleationInserter::DiscreteNucleationInserter(const InputParameters & p
   : DiscreteNucleationInserterBase(parameters),
     _probability(getMaterialProperty<Real>("probability")),
     _hold_time(getParam<Real>("hold_time")),
-    _local_nucleus_list(declareRestartableData("local_nucleus_list", NucleusList(0))),
+    _local_nucleus_list(declareRestartableData<NucleusList>("local_nucleus_list", 0)),
     _local_radius(getMaterialProperty<Real>("radius")),
     _time_dep_stats(getParam<bool>("time_dependent_statistics"))
 {

@@ -25,10 +25,10 @@ PODReducedBasisTrainer::validParams()
   params.addClassDescription("Computes the reduced subspace plus the reduced operators for "
                              "POD-RB surrogate.");
   params.addRequiredParam<std::vector<std::string>>("var_names",
-                                                    "Names of variables we want to"
+                                                    "Names of variables we want to "
                                                     "extract from solution vectors.");
   params.addRequiredParam<std::vector<Real>>("error_res",
-                                             "The errors allowed in the sanpshot reconstruction.");
+                                             "The errors allowed in the snapshot reconstruction.");
   params.addRequiredParam<std::vector<std::string>>("tag_names",
                                                     "Names of tags for the reduced operators.");
   params.addParam<std::vector<std::string>>(
@@ -37,7 +37,7 @@ PODReducedBasisTrainer::validParams()
   params.addRequiredParam<std::vector<std::string>>(
       "tag_types",
       "List of keywords describing if the tags"
-      " correspond to independent operatos or not. (op/op_dir/src/src_dir)");
+      " correspond to independent operators or not. (op/op_dir/src/src_dir)");
   return params;
 }
 

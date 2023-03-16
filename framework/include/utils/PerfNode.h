@@ -95,7 +95,7 @@ public:
     auto & child_node = _children[id];
 
     if (!child_node)
-      child_node.reset(new PerfNode(id));
+      child_node = std::make_unique<PerfNode>(id);
 
     return child_node.get();
   }

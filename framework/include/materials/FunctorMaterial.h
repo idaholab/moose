@@ -29,7 +29,7 @@ protected:
    * Declare a functor material property
    */
   template <typename T, typename PolymorphicLambda>
-  const Moose::Functor<T> &
+  const Moose::FunctorBase<T> &
   addFunctorProperty(const std::string & name,
                      PolymorphicLambda my_lammy,
                      const std::set<ExecFlagType> & clearance_schedule = {EXEC_ALWAYS});
@@ -38,7 +38,7 @@ protected:
    * Declare a functor material property with specified subdomain ids
    */
   template <typename T, typename PolymorphicLambda>
-  const Moose::Functor<T> &
+  const Moose::FunctorBase<T> &
   addFunctorPropertyByBlocks(const std::string & name,
                              PolymorphicLambda my_lammy,
                              const std::set<SubdomainID> & sub_ids,
@@ -46,7 +46,7 @@ protected:
 };
 
 template <typename T, typename PolymorphicLambda>
-const Moose::Functor<T> &
+const Moose::FunctorBase<T> &
 FunctorMaterial::addFunctorProperty(const std::string & name,
                                     PolymorphicLambda my_lammy,
                                     const std::set<ExecFlagType> & clearance_schedule)
@@ -55,7 +55,7 @@ FunctorMaterial::addFunctorProperty(const std::string & name,
 }
 
 template <typename T, typename PolymorphicLambda>
-const Moose::Functor<T> &
+const Moose::FunctorBase<T> &
 FunctorMaterial::addFunctorPropertyByBlocks(const std::string & name,
                                             PolymorphicLambda my_lammy,
                                             const std::set<SubdomainID> & sub_ids,

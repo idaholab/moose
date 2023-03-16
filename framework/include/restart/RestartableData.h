@@ -11,19 +11,12 @@
 
 // MOOSE includes
 #include "DataIO.h"
-#include "JsonIO.h"
 #include "MooseUtils.h"
 
 // C++ includes
 #include <vector>
 #include <unordered_set>
 #include <unordered_map>
-
-// JSON object
-#include "nlohmann/json.h"
-
-// Forward declarations
-class RestartableDataValue;
 
 /**
  * Abstract definition of a RestartableData value.
@@ -36,7 +29,7 @@ public:
    * @param name The full (unique) name for this piece of data.
    * @param context 'typeless' pointer to user-specific data.
    */
-  RestartableDataValue(std::string name, void * context) : _name(name), _context(context) {}
+  RestartableDataValue(const std::string & name, void * const context);
 
   /**
    * Destructor.
@@ -47,34 +40,42 @@ public:
    * String identifying the type of parameter stored.
    * Must be reimplemented in derived classes.
    */
-  virtual std::string type() = 0;
+  virtual std::string type() const = 0;
 
   /**
    * The full (unique) name of this particular piece of data.
    */
-  std::string name() { return _name; }
+  const std::string & name() const { return _name; }
 
   /**
    * A context pointer for helping with load / store.
    */
   void * context() { return _context; }
 
-  virtual void swap(RestartableDataValue * rhs) = 0;
+  /**
+   * Whether or not this data has been declared
+   */
+  bool declared() const { return _declared; }
+
+  /**
+   * Sets that this restartable value has been declared
+   */
+  void setDeclared();
 
   // save/restore in a file
   virtual void store(std::ostream & stream) = 0;
   virtual void load(std::istream & stream) = 0;
 
-  // save/load to JSON object
-  virtual void toJSON(nlohmann::json & json) const = 0;
-  virtual void fromJSON(const nlohmann::json & json) = 0;
-
 protected:
   /// The full (unique) name of this particular piece of data.
-  std::string _name;
+  const std::string _name;
 
   /// A context pointer for helping with load and store
-  void * _context;
+  void * const _context;
+
+private:
+  /// Whether or not this data has been declared (true) or only retreived (false)
+  bool _declared;
 };
 
 /**
@@ -92,31 +93,25 @@ public:
    * @param arg Forwarded arguments that are passed to the constructor of the data.
    */
   template <typename... Params>
-  RestartableData(std::string name, void * context, Params &&... args)
-    : RestartableDataValue(name, context),
-      _value_ptr(std::make_unique<T>(std::forward<Params>(args)...))
+  RestartableData(const std::string & name, void * const context, Params &&... args)
+    : RestartableDataValue(name, context), _value(std::forward<Params>(args)...)
   {
   }
 
   /**
    * @returns a read-only reference to the parameter value.
    */
-  const T & get() const { return *_value_ptr; }
+  const T & get() const { return _value; }
 
   /**
    * @returns a writable reference to the parameter value.
    */
-  T & set() { return *_value_ptr; }
+  T & set() { return _value; }
 
   /**
    * String identifying the type of parameter stored.
    */
-  virtual std::string type() override;
-
-  /**
-   * Swap
-   */
-  virtual void swap(RestartableDataValue * rhs) override;
+  virtual std::string type() const override final;
 
   /**
    * Store the RestartableData into a binary stream
@@ -128,86 +123,35 @@ public:
    */
   virtual void load(std::istream & stream) override;
 
-  /**
-   * Store the restartable data into a JSON object
-   */
-  virtual void toJSON(nlohmann::json & json) const override;
-
-  /**
-   * Load the restartable data into a JSON object
-   */
-  virtual void fromJSON(const nlohmann::json & json) override;
-
 private:
   /// Stored value.
-  const std::unique_ptr<T> _value_ptr;
+  T _value;
 };
 
 // ------------------------------------------------------------
 // RestartableData<> class inline methods
 template <typename T>
 inline std::string
-RestartableData<T>::type()
+RestartableData<T>::type() const
 {
   return MooseUtils::prettyCppType<T>();
 }
 
 template <typename T>
 inline void
-RestartableData<T>::swap(RestartableDataValue * libmesh_dbg_var(rhs))
-{
-  mooseAssert(rhs, "Assigning NULL?");
-  //  _value.swap(cast_ptr<RestartableData<T>*>(rhs)->_value);
-}
-
-template <typename T>
-inline void
 RestartableData<T>::store(std::ostream & stream)
 {
-  T & tmp = *_value_ptr;
-  storeHelper(stream, tmp, _context);
+  storeHelper(stream, set(), _context);
 }
 
 template <typename T>
 inline void
 RestartableData<T>::load(std::istream & stream)
 {
-  loadHelper(stream, *_value_ptr, _context);
+  loadHelper(stream, set(), _context);
 }
 
-template <typename T>
-inline void
-RestartableData<T>::toJSON(nlohmann::json & /*json*/) const
-{
-  // TODO: see JsonIO.h
-  // T & tmp = *_value_ptr;
-  // storeHelper(json, tmp, _context);
-}
-
-template <typename T>
-inline void
-RestartableData<T>::fromJSON(const nlohmann::json & /*json*/)
-{
-  // TODO: see JsonIO.h
-  // T & tmp = *_value_ptr;
-  // loadHelper(json, tmp, _context);
-}
-
-/**
- * Struct and Aliases for Restartable/Recoverable structures
- */
-struct RestartableDataValuePair
-{
-  RestartableDataValuePair(std::unique_ptr<RestartableDataValue> v, bool d)
-    : value(std::move(v)), declared(d)
-  {
-  }
-
-  std::unique_ptr<RestartableDataValue> value;
-  bool declared;
-};
-
-using RestartableDataMap = std::unordered_map<std::string, RestartableDataValuePair>;
+using RestartableDataMap = std::unordered_map<std::string, std::unique_ptr<RestartableDataValue>>;
 using RestartableDataMaps = std::vector<RestartableDataMap>;
 
 using DataNames = std::unordered_set<std::string>;

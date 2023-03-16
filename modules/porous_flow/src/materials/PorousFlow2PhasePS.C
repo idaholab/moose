@@ -86,7 +86,7 @@ PorousFlow2PhasePS::computeQpProperties()
     // _phase0_porepressure is a PorousFlow variable
     for (unsigned phase = 0; phase < _num_phases; ++phase)
     {
-      _dporepressure_dvar[_qp][phase][_pvar] = 1.0;
+      (*_dporepressure_dvar)[_qp][phase][_pvar] = 1.0;
       if (!_nodal_material)
         (*_dgradp_qp_dgradv)[_qp][phase][_pvar] = 1.0;
     }
@@ -97,9 +97,9 @@ PorousFlow2PhasePS::computeQpProperties()
   {
     // _phase1_saturation is a PorousFlow variable
     // _phase1_porepressure depends on saturation through the capillary pressure function
-    _dsaturation_dvar[_qp][0][_svar] = -1.0;
-    _dsaturation_dvar[_qp][1][_svar] = 1.0;
-    _dporepressure_dvar[_qp][1][_svar] = -dpc;
+    (*_dsaturation_dvar)[_qp][0][_svar] = -1.0;
+    (*_dsaturation_dvar)[_qp][1][_svar] = 1.0;
+    (*_dporepressure_dvar)[_qp][1][_svar] = -dpc;
 
     if (!_nodal_material)
     {

@@ -45,7 +45,7 @@ TEST(NewtonInversion, NewtonSolve)
   { function_f1(x1, x2, z, dzdx1, dzdx2); };
 
   // Solve z = f(x, y) with x constant
-  Real y = FluidPropertiesUtils::NewtonSolve(x, z, initial_guess, 1e-8, func).first;
+  Real y = FluidPropertiesUtils::NewtonSolve(x, z, initial_guess, 1e-8, func, "unit").first;
 
   // Check solution found
   Real tol = 1e-7;
@@ -60,7 +60,7 @@ TEST(NewtonInversion, NewtonSolve)
   z = 0.8749124087762432;
   soln = 0.1;
   initial_guess = 0.1;
-  y = FluidPropertiesUtils::NewtonSolve(x, z, initial_guess, 1e-8, func2).first;
+  y = FluidPropertiesUtils::NewtonSolve(x, z, initial_guess, 1e-8, func2, "unit").first;
   EXPECT_NEAR(y, soln, tol);
 }
 

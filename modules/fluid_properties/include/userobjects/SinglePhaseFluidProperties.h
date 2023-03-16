@@ -590,7 +590,15 @@ SinglePhaseFluidProperties::v_e_from_p_T(const CppType & p,
 {
   const CppType rho = rho_from_p_T(p, T);
   v = 1.0 / rho;
-  e = e_from_p_rho(p, rho);
+  try
+  {
+    // more likely to not involve a Newton search
+    e = e_from_p_T(p, T);
+  }
+  catch (...)
+  {
+    e = e_from_p_rho(p, rho);
+  }
 }
 
 template <typename CppType>

@@ -10,7 +10,7 @@
 #pragma once
 
 #include "RestartableData.h"
-
+#include "JsonIO.h"
 #include "MooseUtils.h"
 #include "ReporterState.h"
 #include "ReporterContext.h"

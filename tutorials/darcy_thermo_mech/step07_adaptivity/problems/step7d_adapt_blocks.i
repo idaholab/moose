@@ -16,6 +16,8 @@
     top_right = '0.304 0.01285 0'
     block_id = 1
   []
+  coord_type = RZ
+  rz_coord_axis = X
 []
 
 [Variables]
@@ -119,8 +121,6 @@
 
 [Problem]
   type = FEProblem
-  coord_type = RZ
-  rz_coord_axis = X
 []
 
 [Executioner]

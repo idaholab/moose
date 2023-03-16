@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "FVTimeKernel.h"
+#include "FVFunctorTimeKernel.h"
 #include "INSFVMomentumResidualObject.h"
 
 /**
  * All navier-stokes momentum time derivative terms should inherit from this class
  */
-class INSFVTimeKernel : public FVTimeKernel, public INSFVMomentumResidualObject
+class INSFVTimeKernel : public FVFunctorTimeKernel, public INSFVMomentumResidualObject
 {
 public:
   static InputParameters validParams();
@@ -28,7 +28,7 @@ public:
 
   void computeResidual() override final {}
   void computeJacobian() override final {}
-  using FVTimeKernel::computeOffDiagJacobian;
+  using FVFunctorTimeKernel::computeOffDiagJacobian;
   void computeOffDiagJacobian() override final {}
   void computeResidualAndJacobian() override final {}
 
@@ -44,5 +44,5 @@ protected:
   void processResidualAndJacobian(const ADReal & residual, dof_id_type dof);
 
 private:
-  using FVTimeKernel::_current_elem;
+  using FVFunctorTimeKernel::_current_elem;
 };

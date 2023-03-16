@@ -117,7 +117,7 @@
 
 [Materials]
   [elasticity_tensor]
-    type = ComputeElasticityTensorConstantRotationCP
+    type = ComputeElasticityTensorCP
     C_ijkl = '1.08e5 6.034e4 6.034e4 1.08e5 6.03e4 1.08e5 2.86e4 2.86e4 2.86e4' #Tallon and Wolfenden. J. Phys. Chem. Solids (1979)
     fill_method = symmetric9
     euler_angle_1 = 54.74

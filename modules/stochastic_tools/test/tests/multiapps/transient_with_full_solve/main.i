@@ -31,7 +31,6 @@
     to_multi_app = runner
     sampler = dynamic
     parameters = 'BCs/right/value'
-    to_control = 'stochastic'
   []
   [results]
     type = SamplerPostprocessorTransfer

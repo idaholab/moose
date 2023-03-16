@@ -27,8 +27,6 @@
 #include "CommandLine.h"
 #include "InfixIterator.h"
 #include "MultiApp.h"
-#include "MeshGenerator.h"
-#include "DependencyResolver.h"
 #include "MooseUtils.h"
 #include "MooseObjectAction.h"
 #include "InputParameterWarehouse.h"
@@ -45,12 +43,14 @@
 #include "Registry.h"
 #include "SerializerGuard.h"
 #include "PerfGraphInterface.h" // For TIME_SECTION
+#include "SolutionInvalidInterface.h"
 #include "Attributes.h"
 #include "MooseApp.h"
 #include "CommonOutputAction.h"
 #include "CastUniquePointer.h"
 #include "NullExecutor.h"
 #include "ExecFlagRegistry.h"
+#include "SolutionInvalidity.h"
 
 // Regular expression includes
 #include "pcrecpp.h"
@@ -345,13 +345,14 @@ MooseApp::MooseApp(InputParameters parameters)
     _start_time_set(false),
     _start_time(0.0),
     _global_time_offset(0.0),
-    _input_parameter_warehouse(new InputParameterWarehouse()),
+    _input_parameter_warehouse(std::make_unique<InputParameterWarehouse>()),
     _action_factory(*this),
     _action_warehouse(*this, _syntax, _action_factory),
     _output_warehouse(*this),
     _parser(*this, _action_warehouse),
     _restartable_data(libMesh::n_threads()),
     _perf_graph(createRecoverablePerfGraph()),
+    _solution_invalidity(createRecoverableSolutionInvalidity()),
     _rank_map(*_comm, _perf_graph),
     _use_executor(parameters.get<bool>("use_executor")),
     _null_executor(NULL),
@@ -384,10 +385,9 @@ MooseApp::MooseApp(InputParameters parameters)
     _master_displaced_mesh(isParamValid("_master_displaced_mesh")
                                ? parameters.get<const MooseMesh *>("_master_displaced_mesh")
                                : nullptr),
+    _mesh_generator_system(*this),
     _execute_flags(moose::internal::getExecFlagRegistry().getFlags()),
-    _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling")),
-    _executing_mesh_generators(false),
-    _popped_final_mesh_generator(false)
+    _automatic_automatic_scaling(getParam<bool>("automatic_automatic_scaling"))
 {
 #ifdef HAVE_GPERFTOOLS
   if (isUltimateMaster())
@@ -482,6 +482,7 @@ MooseApp::MooseApp(InputParameters parameters)
   _the_warehouse->registerAttribute<AttribSubdomains>("subdomains", 0);
   _the_warehouse->registerAttribute<AttribBoundaries>("boundaries", 0);
   _the_warehouse->registerAttribute<AttribThread>("thread", 0);
+  _the_warehouse->registerAttribute<AttribExecutionOrderGroup>("execution_order_group", 0);
   _the_warehouse->registerAttribute<AttribPreIC>("pre_ic", 0);
   _the_warehouse->registerAttribute<AttribPreAux>("pre_aux");
   _the_warehouse->registerAttribute<AttribPostAux>("post_aux");
@@ -603,7 +604,8 @@ MooseApp::~MooseApp()
   _executioner.reset();
   _the_warehouse.reset();
 
-  delete _input_parameter_warehouse;
+  // Don't wait for implicit destruction of input parameter storage
+  _input_parameter_warehouse.reset();
 
 #ifdef LIBMESH_HAVE_DLOPEN
   // Close any open dynamic libraries
@@ -1028,6 +1030,22 @@ MooseApp::getOutputFileBase(bool for_non_moose_build_output) const
     return _output_file_base;
   else
     return _output_file_base + "_out";
+}
+
+void
+MooseApp::setOutputFileBase(const std::string & output_file_base)
+{
+  _output_file_base = output_file_base;
+
+  // Reset the file base in the outputs
+  _output_warehouse.resetFileBase();
+
+  // Reset the file base in multiapps (if they have been constructed yet)
+  if (getExecutioner())
+    for (auto & multi_app : feProblem().getMultiAppWarehouse().getObjects())
+      multi_app->setAppOutputFileBase();
+
+  _file_base_set_by_user = true;
 }
 
 void
@@ -1579,6 +1597,8 @@ MooseApp::getCheckpointDirectories() const
 
   // Add the directories added with Outputs/checkpoint=true input syntax
   checkpoint_dirs.push_back(getOutputFileBase() + "_cp");
+  // Add the directories added with the autosave checkpoint input syntax
+  checkpoint_dirs.push_back("autosave_cp");
 
   // Add the directories from any existing checkpoint output objects
   const auto & actions = _action_warehouse.getActionListByName("add_output");
@@ -1593,7 +1613,6 @@ MooseApp::getCheckpointDirectories() const
     if (moose_object_action->getParam<std::string>("type") == "Checkpoint")
       checkpoint_dirs.push_back(params.get<std::string>("file_base") + "_cp");
   }
-
   return checkpoint_dirs;
 }
 
@@ -1670,29 +1689,19 @@ MooseApp::registerRestartableData(const std::string & name,
   auto & data_ref =
       metaname.empty() ? _restartable_data[tid] : _restartable_meta_data[metaname].first;
 
-  // https://en.cppreference.com/w/cpp/container/unordered_map/emplace
-  // The element may be constructed even if there already is an element with the key in the
-  // container, in which case the newly constructed element will be destroyed immediately.
-  auto insert_pair = data_ref.emplace(name, RestartableDataValuePair(std::move(data), !read_only));
-
-  // Does the storage for this data already exist?
-  if (!insert_pair.second)
+  auto data_it = data_ref.find(name);
+  if (data_it == data_ref.end())
   {
-    auto & data = insert_pair.first->second;
-
-    // Are we really declaring or just trying to get a reference to the data?
-    if (!read_only)
-    {
-      if (data.declared)
-        mooseError("Attempted to declare restartable mesh meta data twice with the same name: ",
-                   name);
-      else
-        // The data wasn't previously declared, but now it is!
-        data.declared = true;
-    }
+    auto insert_pair = data_ref.emplace(name, std::move(data));
+    mooseAssert(insert_pair.second, "Insert didn't happen");
+    data_it = insert_pair.first;
   }
 
-  return *insert_pair.first->second.value;
+  auto & value = *data_it->second;
+  if (!read_only)
+    value.setDeclared();
+
+  return value;
 }
 
 bool
@@ -1725,7 +1734,7 @@ MooseApp::getRestartableMetaData(const std::string & name,
     mooseError("Unable to find RestartableDataValue object with name " + name +
                " in RestartableDataMap");
 
-  return *iter->second.value;
+  return *iter->second;
 }
 
 void
@@ -1978,273 +1987,6 @@ std::string
 MooseApp::header() const
 {
   return std::string("");
-}
-
-void
-MooseApp::addMeshGenerator(const std::string & generator_name,
-                           const std::string & name,
-                           InputParameters parameters)
-{
-  std::shared_ptr<MeshGenerator> mesh_generator =
-      _factory.create<MeshGenerator>(generator_name, name, parameters);
-
-  _mesh_generators.insert(std::make_pair(MooseUtils::shortName(name), mesh_generator));
-}
-
-const MeshGenerator &
-MooseApp::getMeshGenerator(const std::string & name) const
-{
-  return *_mesh_generators.find(MooseUtils::shortName(name))->second.get();
-}
-
-std::vector<std::string>
-MooseApp::getMeshGeneratorNames() const
-{
-  std::vector<std::string> names;
-  for (auto & pair : _mesh_generators)
-    names.push_back(pair.first);
-  return names;
-}
-
-std::unique_ptr<MeshBase> &
-MooseApp::getMeshGeneratorOutput(const std::string & name)
-{
-  auto & outputs = _mesh_generator_outputs[name];
-
-  outputs.push_back(nullptr);
-
-  return outputs.back();
-}
-
-void
-MooseApp::createMeshGeneratorOrder()
-{
-  // we only need to create the order once
-  if (_ordered_generators.size() > 0)
-    return;
-
-  TIME_SECTION("executeMeshGenerators", 1, "Executing Mesh Generators");
-
-  DependencyResolver<std::shared_ptr<MeshGenerator>> resolver;
-
-  // Add all of the dependencies into the resolver and sort them
-  for (const auto & it : _mesh_generators)
-  {
-    // Make sure an item with no dependencies comes out too!
-    resolver.addItem(it.second);
-
-    std::vector<std::string> & generators = it.second->getDependencies();
-    for (const auto & depend_name : generators)
-    {
-      auto depend_it = _mesh_generators.find(depend_name);
-
-      if (depend_it == _mesh_generators.end())
-        mooseError("The MeshGenerator \"",
-                   depend_name,
-                   "\" was not created, did you make a "
-                   "spelling mistake or forget to include it "
-                   "in your input file?");
-
-      resolver.addEdge(depend_it->second, it.second);
-    }
-  }
-
-  try
-  {
-    _ordered_generators = resolver.getSortedValuesSets();
-  }
-  catch (CyclicDependencyException<std::shared_ptr<MeshGenerator>> & e)
-  {
-    const auto & cycle = e.getCyclicDependencies();
-    std::vector<std::string> names;
-    names.reserve(cycle.size());
-    for (const auto & mg : cycle)
-      names.push_back(mg->name());
-
-    mooseError("Cyclic dependencies detected in mesh generation: ",
-               MooseUtils::join(names, " <- "));
-  }
-
-  if (_ordered_generators.size())
-  {
-    auto & final_generators = _ordered_generators.back();
-
-    if (_final_generator_name.empty())
-    {
-      // If the _final_generated_mesh wasn't set from MeshGeneratorMesh, set it now
-      _final_generator_name = final_generators.back()->name();
-
-      // See if we have multiple independent trees of generators
-      const auto ancestor_list = resolver.getAncestors(final_generators.back());
-      if (ancestor_list.size() != resolver.size())
-      {
-        // Need to remove duplicates and possibly perform a difference so we'll import out list
-        // into a set for these operations.
-        std::set<std::shared_ptr<MeshGenerator>> ancestors(ancestor_list.begin(),
-                                                           ancestor_list.end());
-        // Get all of the items from the resolver so we can compare against the tree from the
-        // final generator we just pulled.
-        const auto & allValues = resolver.getSortedValues();
-        decltype(ancestors) all(allValues.begin(), allValues.end());
-
-        decltype(ancestors) ind_tree;
-        std::set_difference(all.begin(),
-                            all.end(),
-                            ancestors.begin(),
-                            ancestors.end(),
-                            std::inserter(ind_tree, ind_tree.end()));
-
-        std::ostringstream oss;
-        oss << "Your MeshGenerator tree contains multiple possible generator outputs :\n\""
-            << _final_generator_name
-            << " and one or more of the following from an independent set: \"";
-        bool first = true;
-        for (const auto & gen : ind_tree)
-        {
-          if (!first)
-            oss << ", ";
-          else
-            first = false;
-
-          oss << gen->name();
-        }
-        oss << "\"\n\nThis may be due to a missing dependency or may be intentional. Please "
-               "select the final MeshGenerator in\nthe [Mesh] block with the \"final_generator\" "
-               "parameter or add additional dependencies to remove the ambiguity.";
-        mooseError(oss.str());
-      }
-    }
-  }
-}
-
-void
-MooseApp::appendMeshGenerator(const std::string & generator_name,
-                              const std::string & name,
-                              InputParameters parameters)
-{
-  if (_mesh_generators.empty())
-    mooseError("Cannot append a mesh generator because no mesh generators exist");
-
-  if (!parameters.have_parameter<MeshGeneratorName>("input"))
-    mooseError("Cannot append a mesh generator that does not take input mesh generators");
-
-  createMeshGeneratorOrder();
-
-  auto & final_generators = _ordered_generators.back();
-
-  // set the final generator as the input
-  if (_final_generator_name.empty())
-    parameters.set<MeshGeneratorName>("input") = final_generators.back()->name();
-  else
-  {
-    parameters.set<MeshGeneratorName>("input") = _final_generator_name;
-    _final_generator_name = name;
-  }
-
-  std::shared_ptr<MeshGenerator> mesh_generator =
-      _factory.create<MeshGenerator>(generator_name, name, parameters);
-
-  final_generators.push_back(mesh_generator);
-  _mesh_generators.insert(std::make_pair(MooseUtils::shortName(name), mesh_generator));
-}
-
-void
-MooseApp::executeMeshGenerators()
-{
-  // we do not need to do this when there are no mesh generators
-  if (_mesh_generators.empty())
-    return;
-
-  _executing_mesh_generators = true;
-
-  createMeshGeneratorOrder();
-
-  // set the final generator name
-  auto & final_generators = _ordered_generators.back();
-  if (_final_generator_name.empty())
-    _final_generator_name = final_generators.back()->name();
-
-  // Grab the outputs from the final generator so MeshGeneratorMesh can pick them up
-  _final_generated_meshes.emplace_back(&getMeshGeneratorOutput(_final_generator_name));
-
-  // Need to grab two if we're going to be making a displaced mesh
-  if (_action_warehouse.displacedMesh())
-    _final_generated_meshes.emplace_back(&getMeshGeneratorOutput(_final_generator_name));
-
-  // Run the MeshGenerators in the proper order
-  for (const auto & generator_set : _ordered_generators)
-  {
-    for (const auto & generator : generator_set)
-    {
-      auto name = generator->name();
-
-      auto current_mesh = generator->generateInternal();
-
-      // Now we need to possibly give this mesh to downstream generators
-      auto & outputs = _mesh_generator_outputs[name];
-
-      if (outputs.size())
-      {
-        auto & first_output = *outputs.begin();
-
-        first_output = std::move(current_mesh);
-
-        const auto & copy_from = *first_output;
-
-        auto output_it = ++outputs.begin();
-
-        // For all of the rest we need to make a copy
-        for (; output_it != outputs.end(); ++output_it)
-          (*output_it) = copy_from.clone();
-      }
-
-      // Once we hit the generator we want, we'll terminate the loops (this might be the last
-      // iteration anyway)
-      if (_final_generator_name == name)
-      {
-        _executing_mesh_generators = false;
-        return;
-      }
-    }
-  }
-
-  _executing_mesh_generators = false;
-}
-
-void
-MooseApp::setFinalMeshGeneratorName(const std::string & generator_name)
-{
-  _final_generator_name = generator_name;
-}
-
-void
-MooseApp::clearMeshGenerators()
-{
-  _ordered_generators.clear();
-  _mesh_generators.clear();
-}
-
-std::unique_ptr<MeshBase>
-MooseApp::getMeshGeneratorMesh(bool check_unique)
-{
-  if (_popped_final_mesh_generator == true)
-    mooseError("MooseApp::getMeshGeneratorMesh is being called for a second time. You cannot do "
-               "this because the final generated mesh was popped from its storage container the "
-               "first time this method was called");
-
-  if (_final_generated_meshes.empty())
-    mooseError("No generated mesh to retrieve. Your input file should contain either a [Mesh] or "
-               "block.");
-
-  auto mesh_unique_ptr_ptr = _final_generated_meshes.front();
-  _final_generated_meshes.pop_front();
-  _popped_final_mesh_generator = true;
-
-  if (check_unique && !_final_generated_meshes.empty())
-    mooseError("Multiple generated meshes exist while retrieving the final Mesh. This means that "
-               "the selection of the final mesh is non-deterministic.");
-
-  return std::move(*mesh_unique_ptr_ptr);
 }
 
 void
@@ -2640,7 +2382,7 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
           // will actually determine the couplings or to pass in the MeshBase object that is
           // inconsistent with the System DofMap that we are adding the coupling functor for! Let's
           // err on the side of *libMesh* consistency and pass properly paired MeshBase-DofMap
-          undisp_nl_dof_map.add_coupling_functor(
+          problem.addCouplingGhostingFunctor(
               createRMFromTemplateAndInit(*rm, undisp_mesh, &undisp_nl_dof_map),
               /*to_mesh = */ false);
 
@@ -2657,7 +2399,7 @@ MooseApp::attachRelationshipManagers(Moose::RelationshipManagerType rm_type,
       else // undisplaced
       {
         if (rm_type == Moose::RelationshipManagerType::COUPLING)
-          undisp_nl_dof_map.add_coupling_functor(
+          problem.addCouplingGhostingFunctor(
               createRMFromTemplateAndInit(*rm, undisp_mesh, &undisp_nl_dof_map),
               /*to_mesh = */ false);
 
@@ -2762,7 +2504,7 @@ MooseApp::checkMetaDataIntegrity() const
     std::vector<std::string> not_declared;
 
     for (const auto & pair : meta_data)
-      if (!pair.second.declared)
+      if (!pair.second->declared())
         not_declared.push_back(pair.first);
 
     if (!not_declared.empty())
@@ -2818,4 +2560,25 @@ MooseApp::createRecoverablePerfGraph()
   return dynamic_cast<RestartableData<PerfGraph> &>(
              registerRestartableData("perf_graph", std::move(perf_graph), 0, false))
       .set();
+}
+
+SolutionInvalidity &
+MooseApp::createRecoverableSolutionInvalidity()
+{
+  registerRestartableNameWithFilter("solution_invalidity", Moose::RESTARTABLE_FILTER::RECOVERABLE);
+
+  auto solution_invalidity =
+      std::make_unique<RestartableData<SolutionInvalidity>>("solution_invalidity", nullptr, *this);
+
+  return dynamic_cast<RestartableData<SolutionInvalidity> &>(
+             registerRestartableData(
+                 "solution_invalidity", std::move(solution_invalidity), 0, false))
+      .set();
+}
+
+bool
+MooseApp::constructingMeshGenerators() const
+{
+  return _action_warehouse.getCurrentTaskName() == "create_added_mesh_generators" ||
+         _mesh_generator_system.appendingMeshGenerators();
 }

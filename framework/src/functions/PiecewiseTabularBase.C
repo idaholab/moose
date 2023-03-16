@@ -11,11 +11,10 @@
 #include "DelimitedFileReader.h"
 #include "libmesh/int_range.h"
 
-template <typename BaseClass>
 InputParameters
-PiecewiseTabularBaseTempl<BaseClass>::validParams()
+PiecewiseTabularBase::validParams()
 {
-  InputParameters params = BaseClass::validParams();
+  InputParameters params = PiecewiseBase::validParams();
 
   MooseEnum axis("x=0 y=1 z=2");
   params.addParam<MooseEnum>(
@@ -42,9 +41,8 @@ PiecewiseTabularBaseTempl<BaseClass>::validParams()
   return params;
 }
 
-template <typename BaseClass>
-PiecewiseTabularBaseTempl<BaseClass>::PiecewiseTabularBaseTempl(const InputParameters & parameters)
-  : BaseClass(parameters),
+PiecewiseTabularBase::PiecewiseTabularBase(const InputParameters & parameters)
+  : PiecewiseBase(parameters),
     _scale_factor(this->template getParam<Real>("scale_factor")),
     _has_axis(isParamValid("axis"))
 {
@@ -68,9 +66,8 @@ PiecewiseTabularBaseTempl<BaseClass>::PiecewiseTabularBaseTempl(const InputParam
                ": Either 'data_file', 'x' and 'y', or 'xy_data' must be specified exclusively.");
 }
 
-template <typename BaseClass>
 void
-PiecewiseTabularBaseTempl<BaseClass>::buildFromFile()
+PiecewiseTabularBase::buildFromFile()
 {
   // Input parameters
   const auto & data_file_name = this->template getParam<FileName>("data_file");
@@ -159,17 +156,15 @@ PiecewiseTabularBaseTempl<BaseClass>::buildFromFile()
     mooseError("In ", _name, ": Lengths of x and y data do not match.");
 }
 
-template <typename BaseClass>
 void
-PiecewiseTabularBaseTempl<BaseClass>::buildFromXandY()
+PiecewiseTabularBase::buildFromXandY()
 {
   _raw_x = this->template getParam<std::vector<Real>>("x");
   _raw_y = this->template getParam<std::vector<Real>>("y");
 }
 
-template <typename BaseClass>
 void
-PiecewiseTabularBaseTempl<BaseClass>::buildFromXY()
+PiecewiseTabularBase::buildFromXY()
 {
   const auto & xy = this->template getParam<std::vector<Real>>("xy_data");
   const auto xy_size = xy.size();
@@ -185,6 +180,3 @@ PiecewiseTabularBaseTempl<BaseClass>::buildFromXY()
     _raw_y[i] = xy[2 * i + 1];
   }
 }
-
-template class PiecewiseTabularBaseTempl<PiecewiseBase>;
-template class PiecewiseTabularBaseTempl<ADPiecewiseBase>;

@@ -17,7 +17,7 @@ InputParameters
 BernoulliPressureVariable::validParams()
 {
   auto params = INSFVPressureVariable::validParams();
-  params += FunctorInterface::validParams();
+  params += ADFunctorInterface::validParams();
   params.addRequiredParam<MooseFunctorName>("u", "The x-component of velocity");
   params.addParam<MooseFunctorName>("v", 0, "The y-component of velocity");
   params.addParam<MooseFunctorName>("w", 0, "The z-component of velocity");
@@ -28,7 +28,7 @@ BernoulliPressureVariable::validParams()
 
 BernoulliPressureVariable::BernoulliPressureVariable(const InputParameters & params)
   : INSFVPressureVariable(params),
-    FunctorInterface(this),
+    ADFunctorInterface(this),
     _u(nullptr),
     _v(nullptr),
     _w(nullptr),
@@ -45,6 +45,8 @@ BernoulliPressureVariable::initialSetup()
   _w = &getFunctor<ADReal>("w", _subproblem);
   _eps = &getFunctor<ADReal>(NS::porosity, _subproblem);
   _rho = &getFunctor<ADReal>(NS::density, _subproblem);
+
+  INSFVPressureVariable::initialSetup();
 }
 
 std::pair<bool, ADRealVectorValue>

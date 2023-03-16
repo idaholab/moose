@@ -7,7 +7,7 @@ to [PODReducedBasisTrainer.md] and back.
 
 This objects type needs to know about the trainer and the multi-app objects.
 This can be achieved by specifying the [!param](/Transfers/PODSamplerSolutionTransfer/trainer_name) and
-[!param](/Transfers/PODSamplerSolutionTransfer/multi_app) parameters in the
+[!param](/Transfers/PODSamplerSolutionTransfer/to_multi_app) parameters in the
 input file.
 
 !listing modules/stochastic_tools/test/tests/surrogates/pod_rb/internal/trainer.i block=Transfers/snapshots

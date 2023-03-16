@@ -46,16 +46,9 @@
 
 [Reporters]
   [results]
-    type = StochasticReporter
-    outputs = none
-  []
-[]
-
-[VectorPostprocessors]
-  [sampler_data]
-    type = SamplerData
+    type = StochasticMatrix
     sampler = grid
-    parallel_type = DISTRIBUTED
+    outputs = none
   []
 []
 
@@ -64,7 +57,7 @@
     type = NearestPointTrainer
     execute_on = timestep_end
     sampler = grid
-    predictors = 'sampler_data/grid_0'
+    predictors = 'results/grid_0'
     predictor_cols = '1 2 3'
     response = results/data:avg:value
   []

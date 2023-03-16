@@ -65,4 +65,7 @@ protected:
 
   /// Option to skip prediction after a failed timestep
   const bool & _skip_after_failed_timetep;
+
+  /// Timestep tolerance from Transient executioner
+  const Real & _timestep_tolerance;
 };

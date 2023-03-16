@@ -65,6 +65,14 @@ DomainIntegralAction::validParams()
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
   params.addParam<VariableName>("temperature", "", "The temperature");
+  params.addParam<MaterialPropertyName>(
+      "functionally_graded_youngs_modulus_crack_dir_gradient",
+      "Gradient of the spatially varying Young's modulus provided in "
+      "'functionally_graded_youngs_modulus' in the direction of crack extension.");
+  params.addParam<MaterialPropertyName>(
+      "functionally_graded_youngs_modulus",
+      "Spatially varying elasticity modulus variable. This input is required when "
+      "using the functionally graded material capability.");
   MooseEnum position_type("Angle Distance", "Distance");
   params.addParam<MooseEnum>(
       "position_type",
@@ -135,8 +143,30 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
     _output_q(getParam<bool>("output_q")),
     _incremental(getParam<bool>("incremental")),
     _convert_J_to_K(isParamValid("convert_J_to_K") ? getParam<bool>("convert_J_to_K") : false),
+    _fgm_crack(false),
     _use_ad(getParam<bool>("use_automatic_differentiation"))
 {
+
+  if (isParamValid("functionally_graded_youngs_modulus_crack_dir_gradient") !=
+      isParamValid("functionally_graded_youngs_modulus"))
+    paramError("functionally_graded_youngs_modulus_crack_dir_gradient",
+               "You have selected to compute the interaction integral for a crack in FGM. That "
+               "selection requires the user to provide a spatially varying elasticity modulus that "
+               "defines the transition of material properties (i.e. "
+               "'functionally_graded_youngs_modulus') and its "
+               "spatial derivative in the crack direction (i.e. "
+               "'functionally_graded_youngs_modulus_crack_dir_gradient').");
+
+  if (isParamValid("functionally_graded_youngs_modulus_crack_dir_gradient") &&
+      isParamValid("functionally_graded_youngs_modulus"))
+  {
+    _fgm_crack = true;
+    _functionally_graded_youngs_modulus_crack_dir_gradient =
+        getParam<MaterialPropertyName>("functionally_graded_youngs_modulus_crack_dir_gradient");
+    _functionally_graded_youngs_modulus =
+        getParam<MaterialPropertyName>("functionally_graded_youngs_modulus");
+  }
+
   if (_q_function_type == GEOMETRY)
   {
     if (isParamValid("radius_inner") && isParamValid("radius_outer"))
@@ -665,6 +695,16 @@ DomainIntegralAction::act()
       params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
       if (_has_symmetry_plane)
         params.set<unsigned int>("symmetry_plane") = _symmetry_plane;
+
+      if (_fgm_crack)
+      {
+        params.set<MaterialPropertyName>(
+            "functionally_graded_youngs_modulus_crack_dir_gradient") = {
+            _functionally_graded_youngs_modulus_crack_dir_gradient};
+        params.set<MaterialPropertyName>("functionally_graded_youngs_modulus") = {
+            _functionally_graded_youngs_modulus};
+      }
+
       params.set<Real>("poissons_ratio") = _poissons_ratio;
       params.set<Real>("youngs_modulus") = _youngs_modulus;
       params.set<std::vector<VariableName>>("displacements") = _displacements;

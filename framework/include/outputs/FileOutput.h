@@ -34,6 +34,13 @@ public:
   virtual std::string filename();
 
   /**
+   * Sets the file base string if the 'file_base' parameter is not set
+   *
+   * @param file_base The new file base string
+   */
+  void setFileBase(const std::string & file_base);
+
+  /**
    * Sets the file number manually.
    *
    * This method was implemented for the MultiApp system, particularly when reseting
@@ -62,8 +69,12 @@ protected:
    */
   bool checkFilename();
 
-  /// The base filename from the input paramaters
-  std::string _file_base;
+  /**
+   * Internal function that sets the file_base
+   *
+   * @param file_base The new file base string
+   */
+  virtual void setFileBaseInternal(const std::string & file_base);
 
   /// A file number counter, initialized to 0 (this must be controlled by the child class, see Exodus)
   unsigned int & _file_num;
@@ -73,6 +84,9 @@ protected:
 
   /// Storage for 'output_if_base_contains'
   std::vector<std::string> _output_if_base_contains;
+
+  /// The base filename from the input paramaters
+  std::string _file_base;
 
 private:
   // OutputWarehouse needs access to _file_num for MultiApp ninja wizardry (see

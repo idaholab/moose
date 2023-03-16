@@ -38,7 +38,6 @@
     type = SamplerParameterTransfer
     to_multi_app = runner
     parameters = 'BCs/left/value BCs/right/value'
-    to_control = receiver
     sampler = mc
   []
   [data]

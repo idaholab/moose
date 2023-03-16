@@ -95,6 +95,9 @@ PorousFlowAddMaterialJoiner::act()
         // Add joiner material for fluid properties materials
         if (pf_material_type == "fluid_properties")
         {
+          // Check if the material defines AD material properties
+          const bool is_ad = params.get<bool>("is_ad");
+
           // Key the addition of the joiner off the phase 0 fluid so it is only added once
           if (params.get<unsigned int>("phase") == 0)
           {
@@ -104,15 +107,22 @@ PorousFlowAddMaterialJoiner::act()
               if (at_nodes)
               {
                 addJoiner(at_nodes,
+                          is_ad,
                           "PorousFlow_fluid_phase_density_nodal",
                           "PorousFlow_density_nodal_all");
-                addJoiner(at_nodes, "PorousFlow_viscosity_nodal", "PorousFlow_viscosity_nodal_all");
+                addJoiner(at_nodes,
+                          is_ad,
+                          "PorousFlow_viscosity_nodal",
+                          "PorousFlow_viscosity_nodal_all");
               }
               else
               {
+                addJoiner(at_nodes,
+                          is_ad,
+                          "PorousFlow_fluid_phase_density_qp",
+                          "PorousFlow_density_qp_all");
                 addJoiner(
-                    at_nodes, "PorousFlow_fluid_phase_density_qp", "PorousFlow_density_qp_all");
-                addJoiner(at_nodes, "PorousFlow_viscosity_qp", "PorousFlow_viscosity_qp_all");
+                    at_nodes, is_ad, "PorousFlow_viscosity_qp", "PorousFlow_viscosity_qp_all");
               }
             }
 
@@ -121,11 +131,14 @@ PorousFlowAddMaterialJoiner::act()
             {
               if (at_nodes)
                 addJoiner(at_nodes,
+                          is_ad,
                           "PorousFlow_fluid_phase_enthalpy_nodal",
                           "PorousFlow_enthalpy_nodal_all");
               else
-                addJoiner(
-                    at_nodes, "PorousFlow_fluid_phase_enthalpy_qp", "PorousFlow_enthalpy_qp_all");
+                addJoiner(at_nodes,
+                          is_ad,
+                          "PorousFlow_fluid_phase_enthalpy_qp",
+                          "PorousFlow_enthalpy_qp_all");
             }
 
             // Join internal energy if it is calculated
@@ -133,10 +146,12 @@ PorousFlowAddMaterialJoiner::act()
             {
               if (at_nodes)
                 addJoiner(at_nodes,
+                          is_ad,
                           "PorousFlow_fluid_phase_internal_energy_nodal",
                           "PorousFlow_internal_energy_nodal_all");
               else
                 addJoiner(at_nodes,
+                          is_ad,
                           "PorousFlow_fluid_phase_internal_energy_qp",
                           "PorousFlow_internal_energy_qp_all");
             }
@@ -146,15 +161,20 @@ PorousFlowAddMaterialJoiner::act()
         // Add joiner materials for relative permeability materials
         if (pf_material_type == "relative_permeability")
         {
+          // Check if the material defines AD material properties
+          const bool is_ad = params.get<bool>("is_ad");
+
           // Key the addition of the joiner off the phase 0 fluid so it is only added once
           if (params.get<unsigned int>("phase") == 0)
           {
             if (at_nodes)
               addJoiner(at_nodes,
+                        is_ad,
                         "PorousFlow_relative_permeability_nodal",
                         "PorousFlow_relative_permeability_nodal_all");
             else
               addJoiner(at_nodes,
+                        is_ad,
                         "PorousFlow_relative_permeability_qp",
                         "PorousFlow_relative_permeability_qp_all");
           }
@@ -166,6 +186,7 @@ PorousFlowAddMaterialJoiner::act()
 
 void
 PorousFlowAddMaterialJoiner::addJoiner(bool at_nodes,
+                                       bool is_ad,
                                        const std::string & material_property,
                                        const std::string & output_name)
 {
@@ -181,7 +202,8 @@ PorousFlowAddMaterialJoiner::addJoiner(bool at_nodes,
 
   if (!is_joined)
   {
-    std::string material_type = "PorousFlowJoiner";
+    std::string material_type;
+    is_ad ? material_type = "ADPorousFlowJoiner" : material_type = "PorousFlowJoiner";
     InputParameters params = _factory.getValidParams(material_type);
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
     params.set<bool>("at_nodes") = at_nodes;
