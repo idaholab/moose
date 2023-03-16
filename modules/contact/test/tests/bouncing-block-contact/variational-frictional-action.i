@@ -85,7 +85,6 @@ offset = 1e-2
     normalize_c = true
     normal_lm_scaling = 1e3
     tangential_lm_scaling = 1e2
-    interpolate_normals = false
     correct_edge_dropping = true
     use_dual = false
   []

@@ -25,6 +25,7 @@ WeightedGapUserObject::validParams()
   params.addRequiredCoupledVar("disp_y", "The y displacement variable");
   params.addCoupledVar("disp_z", "The z displacement variable");
   params.set<bool>("use_displaced_mesh") = true;
+  params.set<bool>("interpolate_normals") = false;
   params.set<ExecFlagEnum>("execute_on") = {EXEC_LINEAR, EXEC_NONLINEAR};
   params.suppressParameter<ExecFlagEnum>("execute_on");
   return params;
@@ -105,11 +106,9 @@ WeightedGapUserObject::computeQpProperties()
   if (_has_disp_z)
     gap_vec(2).derivatives() = prim_z->derivatives() - sec_z->derivatives();
 
-  // Compute integration point quantities
-  if (_interpolate_normals)
-    _qp_gap = gap_vec * (_normals[_qp] * _JxW_msm[_qp] * _coord[_qp]);
-  else
-    _qp_gap_nodal = gap_vec * (_JxW_msm[_qp] * _coord[_qp]);
+  // Compute integration point quantities: Normals (geometry) is averaged at the node, but not
+  // interpolated within the weak integration.
+  _qp_gap_nodal = gap_vec * (_JxW_msm[_qp] * _coord[_qp]);
 
   // To do normalization of constraint coefficient (c_n)
   _qp_factor = _JxW_msm[_qp] * _coord[_qp];
@@ -119,8 +118,7 @@ WeightedGapUserObject::computeQpProperties()
 void
 WeightedGapUserObject::computeQpIProperties()
 {
-  mooseAssert(_normals.size() ==
-                  (_interpolate_normals ? (*_test)[_i].size() : _lower_secondary_elem->n_nodes()),
+  mooseAssert(_normals.size() == _lower_secondary_elem->n_nodes(),
               "Making sure that _normals is the expected size");
 
   // Get the _dof_to_weighted_gap map
@@ -128,10 +126,7 @@ WeightedGapUserObject::computeQpIProperties()
                               ? static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i))
                               : static_cast<const DofObject *>(_lower_secondary_elem);
 
-  if (_interpolate_normals)
-    _dof_to_weighted_gap[dof].first += (*_test)[_i][_qp] * _qp_gap;
-  else
-    _dof_to_weighted_gap[dof].first += (*_test)[_i][_qp] * _qp_gap_nodal * _normals[_i];
+  _dof_to_weighted_gap[dof].first += (*_test)[_i][_qp] * _qp_gap_nodal * _normals[_i];
 
   if (_normalize_c)
     _dof_to_weighted_gap[dof].second += (*_test)[_i][_qp] * _qp_factor;

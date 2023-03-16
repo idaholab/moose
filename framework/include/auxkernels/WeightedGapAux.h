@@ -35,10 +35,6 @@ protected:
   /// The weighted gap
   Real _weighted_gap;
 
-  /// The gap vector at the current quadrature point, used when we are interpolating the normal
-  /// vector, multipled by the normals vector evaluated at the current quadrature point and JxW
-  Real _qp_gap;
-
   /// The gap vector at the current quadrature point, used when we are not interpolating the normal
   /// vector, multipled by JxW
   RealVectorValue _qp_gap_nodal;

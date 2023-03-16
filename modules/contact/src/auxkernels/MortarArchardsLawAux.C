@@ -43,6 +43,8 @@ MortarArchardsLawAux::validParams()
   params.addRequiredParam<Real>(
       "energy_wear_coefficient",
       "Energy wear coefficient is a surface-dependent parameter used in Archard's wear law");
+  params.set<bool>("interpolate_normals") = false;
+
   return params;
 }
 
@@ -66,15 +68,6 @@ MortarArchardsLawAux::MortarArchardsLawAux(const InputParameters & parameters)
     _i(0),
     _qp(0)
 {
-  // Not sure what the relevance of the normal interpolation is with a mortar aux kernel (not much
-  // in general, I'd think). The interpolated normal is probably good here since there is no
-  // "decoupling" of constraints via dual bases, just a postprocessing computation that can
-  // potentially change the contact interface profile.
-  if (!_interpolate_normals)
-    paramError(
-        "interpolate_normals",
-        "The MortarArchardsLawAux auxiliary kernel requires the use of interpolated normals.");
-
   if (!_displaced)
     paramError("use_displaced_mesh",
                "The MortarArchardsLawAux auxiliary kernel requires the use of displaced meshes to "
@@ -106,7 +99,7 @@ MortarArchardsLawAux::computeQpProperties()
     gap_velocity_vec(2) = MetaPhysicL::raw_value((*_secondary_z_dot)[_qp] - (*_primary_z_dot)[_qp]);
 
   // Remove point-wise normal component of the relative velocity
-  gap_velocity_vec -= gap_velocity_vec.contract(_normals[_qp]) * _normals[_qp];
+  gap_velocity_vec -= gap_velocity_vec.contract(_normals[_i]) * _normals[_i];
 
   // Compute norm of the relative tangential velocity (used to compute the weighted quantity)
   const Real norm_tangential_vel = gap_velocity_vec.norm();

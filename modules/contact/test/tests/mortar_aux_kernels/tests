@@ -89,7 +89,7 @@
     exodiff = 'block-dynamics-aux-fretting-wear-test-quick-multiple-projections_out.e'
     input = 'block-dynamics-aux-fretting-wear-test.i'
     rel_err = 1.0e-3
-    abs_zero = 1.0e-4
+    abs_zero = 2.0e-4
     min_parallel = 1
     max_parallel = 4
     min_ad_size = '50'
@@ -120,6 +120,7 @@
     cli_args = 'Mesh/file=long-bottom-block-1elem-blocks-multiple-projections-lowerd.e '
                'Executioner/end_time=0.15 Constraints/weighted_gap_lm/correct_edge_dropping=false '
                'Constraints/weighted_gap_lm/debug_mesh=true '
+               'UserObjects/weighted_vel_uo/correct_edge_dropping=true UserObjects/weighted_vel_uo/debug_mesh=true '
                'Constraints/normal_x/correct_edge_dropping=true Constraints/normal_x/debug_mesh=true '
                'Constraints/normal_y/correct_edge_dropping=true Constraints/normal_y/debug_mesh=true '
                'Constraints/tangential_x/correct_edge_dropping=true '
@@ -146,7 +147,7 @@
     exodiff = 'block-dynamics-aux-fretting-wear-test-action-quick_out.e'
     input = 'block-dynamics-aux-fretting-wear-test-action.i'
     rel_err = 1.0e-3
-    abs_zero = 1.0e-4
+    abs_zero = 5.0e-4
     min_parallel = 1
     max_parallel = 4
     min_ad_size = '50'

@@ -251,6 +251,22 @@
   []
 []
 
+[UserObjects]
+  [weighted_vel_uo]
+    type = LMWeightedVelocitiesUserObject
+    primary_boundary = 20
+    secondary_boundary = 10
+    primary_subdomain = 4
+    secondary_subdomain = 3
+    lm_variable_normal = mortar_normal_lm
+    lm_variable_tangential_one = mortar_tangential_lm
+    lm_variable_tangential_two = mortar_tangential_3d_lm
+    secondary_variable = disp_x
+    disp_x = disp_x
+    disp_y = disp_y
+  []
+[]
+
 [Constraints]
   [friction]
     type = ComputeDynamicFrictionalForceLMMechanicalContact
@@ -287,6 +303,7 @@
     compute_lm_residuals = false
     interpolate_normals = false
     correct_edge_dropping = true
+    weighted_gap_uo = weighted_vel_uo
   []
   [normal_y]
     type = NormalMortarMechanicalContact
@@ -301,6 +318,7 @@
     compute_lm_residuals = false
     interpolate_normals = false
     correct_edge_dropping = true
+    weighted_gap_uo = weighted_vel_uo
   []
   [normal_z]
     type = NormalMortarMechanicalContact
@@ -315,6 +333,7 @@
     compute_lm_residuals = false
     interpolate_normals = false
     correct_edge_dropping = true
+    weighted_gap_uo = weighted_vel_uo
   []
   [tangential_x]
     type = TangentialMortarMechanicalContact
@@ -329,6 +348,7 @@
     compute_lm_residuals = false
     interpolate_normals = false
     correct_edge_dropping = true
+    weighted_velocities_uo = weighted_vel_uo
   []
   [tangential_y]
     type = TangentialMortarMechanicalContact
@@ -343,6 +363,7 @@
     compute_lm_residuals = false
     interpolate_normals = false
     correct_edge_dropping = true
+    weighted_velocities_uo = weighted_vel_uo
   []
   [tangential_z]
     type = TangentialMortarMechanicalContact
@@ -357,6 +378,7 @@
     compute_lm_residuals = false
     interpolate_normals = false
     correct_edge_dropping = true
+    weighted_velocities_uo = weighted_vel_uo
   []
   [tangential_dir_x]
     type = TangentialMortarMechanicalContact
@@ -372,6 +394,7 @@
     compute_lm_residuals = false
     interpolate_normals = false
     correct_edge_dropping = true
+    weighted_velocities_uo = weighted_vel_uo
   []
   [tangential_dir_y]
     type = TangentialMortarMechanicalContact
@@ -387,6 +410,7 @@
     compute_lm_residuals = false
     interpolate_normals = false
     correct_edge_dropping = true
+    weighted_velocities_uo = weighted_vel_uo
   []
   [tangential_dir_z]
     type = TangentialMortarMechanicalContact
@@ -402,6 +426,7 @@
     compute_lm_residuals = false
     interpolate_normals = false
     correct_edge_dropping = true
+    weighted_velocities_uo = weighted_vel_uo
   []
 []
 

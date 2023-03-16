@@ -105,27 +105,9 @@ WeightedVelocitiesUserObject::computeQpProperties()
   else
     relative_velocity = {sec_x_dot - prim_x_dot, sec_y_dot - prim_y_dot, 0.0};
 
-  const auto & nodal_tangents = amg().getNodalTangents(*_lower_secondary_elem);
-
-  // Compute integration point quantity for constraint enforcement
-  if (_interpolate_normals)
-  {
-    _qp_tangential_velocity[0] =
-        relative_velocity * (nodal_tangents[0][_i] * _JxW_msm[_qp] * _coord[_qp]);
-    _qp_real_tangential_velocity[0] = relative_velocity * (nodal_tangents[0][_i]);
-
-    if (_3d)
-    {
-      _qp_tangential_velocity[1] =
-          relative_velocity * (nodal_tangents[1][_i] * _JxW_msm[_qp] * _coord[_qp]);
-      _qp_real_tangential_velocity[1] = relative_velocity * (nodal_tangents[1][_i]);
-    }
-  }
-  else
-  {
-    _qp_real_tangential_velocity_nodal = relative_velocity;
-    _qp_tangential_velocity_nodal = relative_velocity * (_JxW_msm[_qp] * _coord[_qp]);
-  }
+  // Geometry is averaged and used at the nodes for constraint enforcement.
+  _qp_real_tangential_velocity_nodal = relative_velocity;
+  _qp_tangential_velocity_nodal = relative_velocity * (_JxW_msm[_qp] * _coord[_qp]);
 
 #endif
 }
@@ -141,40 +123,19 @@ WeightedVelocitiesUserObject::computeQpIProperties()
       _is_weighted_gap_nodal ? static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i))
                              : static_cast<const DofObject *>(_lower_secondary_elem);
 
-  if (dof == nullptr)
-    mooseError("dof is nullptr");
-
-  if (_interpolate_normals)
-  {
-    _dof_to_weighted_tangential_velocity[dof][0] += (*_test)[_i][_qp] * _qp_tangential_velocity[0];
-    _dof_to_real_tangential_velocity[dof][0] += (*_test)[_i][_qp] * _qp_real_tangential_velocity[0];
-  }
-  else
-  {
-    _dof_to_weighted_tangential_velocity[dof][0] +=
-        (*_test)[_i][_qp] * _qp_tangential_velocity_nodal * nodal_tangents[0][_i];
-    _dof_to_real_tangential_velocity[dof][0] +=
-        (*_test)[_i][_qp] * _qp_real_tangential_velocity_nodal * nodal_tangents[0][_i];
-  }
+  _dof_to_weighted_tangential_velocity[dof][0] +=
+      (*_test)[_i][_qp] * _qp_tangential_velocity_nodal * nodal_tangents[0][_i];
+  _dof_to_real_tangential_velocity[dof][0] +=
+      (*_test)[_i][_qp] * _qp_real_tangential_velocity_nodal * nodal_tangents[0][_i];
 
   // Get the _dof_to_weighted_tangential_velocity map for a second direction
   if (_3d)
   {
-    if (_interpolate_normals)
-    {
-      _dof_to_weighted_tangential_velocity[dof][1] +=
-          (*_test)[_i][_qp] * _qp_tangential_velocity[1];
-      _dof_to_real_tangential_velocity[dof][1] +=
-          (*_test)[_i][_qp] * _qp_real_tangential_velocity[1];
-    }
-    else
-    {
-      _dof_to_weighted_tangential_velocity[dof][1] +=
-          (*_test)[_i][_qp] * _qp_tangential_velocity_nodal * nodal_tangents[1][_i];
+    _dof_to_weighted_tangential_velocity[dof][1] +=
+        (*_test)[_i][_qp] * _qp_tangential_velocity_nodal * nodal_tangents[1][_i];
 
-      _dof_to_real_tangential_velocity[dof][1] +=
-          (*_test)[_i][_qp] * _qp_real_tangential_velocity_nodal * nodal_tangents[1][_i];
-    }
+    _dof_to_real_tangential_velocity[dof][1] +=
+        (*_test)[_i][_qp] * _qp_real_tangential_velocity_nodal * nodal_tangents[1][_i];
   }
 }
 

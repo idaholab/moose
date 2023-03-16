@@ -81,10 +81,6 @@ ComputeDynamicFrictionalForceLMMechanicalContact::ComputeDynamicFrictionalForceL
                "Three-dimensional mortar frictional contact simulations require an additional "
                "frictional Lagrange's multiplier to enforce a second tangential pressure");
 
-  mooseAssert(!_interpolate_normals,
-              "Dynamic mortar mechanical contact constraints require the surface geometry to be "
-              "attached to nodes");
-
   _friction_vars.push_back(getVar("friction_lm", 0));
 
   if (_3d)

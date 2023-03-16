@@ -127,14 +127,6 @@ ContactAction::validParams()
       1.,
       "Scaling factor to apply to the tangential LM variable for a mortar formulation");
   params.addParam<bool>(
-      "interpolate_normals",
-      true,
-      "Whether to interpolate the nodal normals for a mortar contact constraint (e.g. classic "
-      "idea of evaluating field at "
-      "quadrature points). If this is set to false, then non-interpolated nodal normals will be "
-      "used, and then the _normals member should be indexed with _i instead of _qp. This input "
-      "parameter is intended for developers.");
-  params.addParam<bool>(
       "normalize_c",
       false,
       "Whether to normalize c by weighting function norm for mortar contact. When unnormalized "
@@ -595,7 +587,7 @@ ContactAction::addMortarContact()
   if (_current_task == "add_user_object")
   {
 
-    if (_model != ContactModel::COULOMB && !_mortar_dynamics)
+    if (_model != ContactModel::COULOMB)
     {
       auto var_params = _factory.getValidParams("LMWeightedGapUserObject");
 
@@ -603,13 +595,11 @@ ContactAction::addMortarContact()
       var_params.set<BoundaryName>("secondary_boundary") = _boundary_pairs[0].second;
       var_params.set<SubdomainName>("primary_subdomain") = primary_subdomain_name;
       var_params.set<SubdomainName>("secondary_subdomain") = secondary_subdomain_name;
-      var_params.set<NonlinearVariableName>("variable") = normal_lagrange_multiplier_name;
       var_params.set<std::vector<VariableName>>("disp_x") = {displacements[0]};
       var_params.set<bool>("correct_edge_dropping") = getParam<bool>("correct_edge_dropping");
       var_params.set<std::vector<VariableName>>("disp_y") = {displacements[1]};
       if (ndisp > 2)
         var_params.set<std::vector<VariableName>>("disp_z") = {displacements[2]};
-      var_params.set<bool>("interpolate_normals") = getParam<bool>("interpolate_normals");
       var_params.set<bool>("use_displaced_mesh") = true;
       var_params.set<std::vector<VariableName>>("lm_variable") = {normal_lagrange_multiplier_name};
 
@@ -618,7 +608,7 @@ ContactAction::addMortarContact()
                                   Moose::stringify(contact_userobject_counter),
                               var_params);
     }
-    else if (_model == ContactModel::COULOMB && !_mortar_dynamics)
+    else if (_model == ContactModel::COULOMB)
     {
       auto var_params = _factory.getValidParams("LMWeightedVelocitiesUserObject");
       var_params.set<BoundaryName>("primary_boundary") = _boundary_pairs[0].first;
@@ -632,7 +622,6 @@ ContactAction::addMortarContact()
         var_params.set<std::vector<VariableName>>("disp_z") = {displacements[2]};
 
       var_params.set<VariableName>("secondary_variable") = displacements[0];
-      var_params.set<bool>("interpolate_normals") = getParam<bool>("interpolate_normals");
       var_params.set<bool>("use_displaced_mesh") = true;
       var_params.set<std::vector<VariableName>>("lm_variable_normal") = {
           normal_lagrange_multiplier_name};
@@ -684,7 +673,6 @@ ContactAction::addMortarContact()
       params.set<SubdomainName>("secondary_subdomain") = secondary_subdomain_name;
       params.set<NonlinearVariableName>("variable") = normal_lagrange_multiplier_name;
       params.set<std::vector<VariableName>>("disp_x") = {displacements[0]};
-      params.set<bool>("interpolate_normals") = getParam<bool>("interpolate_normals");
       params.set<bool>("normalize_c") = getParam<bool>("normalize_c");
       params.set<Real>("c") = getParam<Real>("c_normal");
 
@@ -739,7 +727,6 @@ ContactAction::addMortarContact()
       params.set<bool>("use_displaced_mesh") = true;
       params.set<Real>("c_t") = getParam<Real>("c_tangential");
       params.set<Real>("c") = getParam<Real>("c_normal");
-      params.set<bool>("interpolate_normals") = getParam<bool>("interpolate_normals");
       params.set<bool>("normalize_c") = getParam<bool>("normalize_c");
       params.set<bool>("compute_primal_residuals") = false;
 
@@ -783,7 +770,6 @@ ContactAction::addMortarContact()
       params.set<NonlinearVariableName>("variable") = variable_name;
       params.set<bool>("use_displaced_mesh") = true;
       params.set<bool>("compute_lm_residuals") = false;
-      params.set<bool>("interpolate_normals") = getParam<bool>("interpolate_normals");
 
       // Additional displacement residual for frictional problem
       // The second frictional LM acts on a perpendicular direction.

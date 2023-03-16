@@ -83,8 +83,6 @@ offset = 1e-2
     secondary_variable = disp_x
     disp_x = disp_x
     disp_y = disp_y
-    # Issue: Coordination of user object and constraint
-    interpolate_normals = false
     correct_edge_dropping = true
   []
 []
@@ -104,7 +102,6 @@ offset = 1e-2
     normalize_c = true
     c = 1.0e-2
     c_t = 1.0e-1
-    interpolate_normals = false
     correct_edge_dropping = true
     weighted_velocities_uo = weighted_velocities_uo
     weighted_gap_uo = weighted_velocities_uo
@@ -121,8 +118,6 @@ offset = 1e-2
     use_displaced_mesh = true
     compute_lm_residuals = false
     weighted_gap_uo = weighted_velocities_uo
-    interpolate_normals = false
-
   []
   [normal_y]
     type = NormalMortarMechanicalContact
@@ -136,8 +131,6 @@ offset = 1e-2
     use_displaced_mesh = true
     compute_lm_residuals = false
     weighted_gap_uo = weighted_velocities_uo
-    interpolate_normals = false
-
   []
   [tangential_x]
     type = TangentialMortarMechanicalContact
@@ -151,8 +144,6 @@ offset = 1e-2
     use_displaced_mesh = true
     compute_lm_residuals = false
     weighted_velocities_uo = weighted_velocities_uo
-    interpolate_normals = false
-
   []
   [tangential_y]
     type = TangentialMortarMechanicalContact
@@ -166,8 +157,6 @@ offset = 1e-2
     use_displaced_mesh = true
     compute_lm_residuals = false
     weighted_velocities_uo = weighted_velocities_uo
-    interpolate_normals = false
-
   []
 []
 

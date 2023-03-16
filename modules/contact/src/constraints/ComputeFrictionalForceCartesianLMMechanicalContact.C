@@ -65,9 +65,6 @@ ComputeFrictionalForceCartesianLMMechanicalContact::
     _mu(getParam<Real>("mu")),
     _epsilon(getParam<Real>("epsilon"))
 {
-  if (_interpolate_normals)
-    mooseError("Frictional forces based on Cartesian Lagrange multipliers require using "
-               "nodal-based geometry");
 }
 
 void

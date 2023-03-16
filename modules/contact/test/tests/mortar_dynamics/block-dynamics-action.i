@@ -153,7 +153,6 @@ offset = -0.19
     formulation = mortar
     model = frictionless
     c_normal = 1e4
-    interpolate_normals = false
     capture_tolerance = 1.0e-5
   []
 []

@@ -50,7 +50,7 @@ offset = 1e-2
     secondary_subdomain = 3
     disp_x = disp_x
     disp_y = disp_y
-    penalty = 3e2
+    penalty = 5e1
   []
 []
 

@@ -59,6 +59,7 @@ ComputeWeightedGapLMMechanicalContact::validParams()
       "Lagrange Multiplier values to integrated gap values (LM nodal value is independent of "
       "element size, where integrated values are dependent on element size).");
   params.set<bool>("use_displaced_mesh") = true;
+  params.set<bool>("interpolate_normals") = false;
   params.addRequiredParam<UserObjectName>("weighted_gap_uo", "The weighted gap user object");
   return params;
 }
@@ -99,99 +100,26 @@ ADReal ComputeWeightedGapLMMechanicalContact::computeQpResidual(Moose::MortarTyp
 void
 ComputeWeightedGapLMMechanicalContact::computeQpProperties()
 {
-  // Trim interior node variable derivatives
-  const auto & primary_ip_lowerd_map = amg().getPrimaryIpToLowerElementMap(
-      *_lower_primary_elem, *_lower_primary_elem->interior_parent(), *_lower_secondary_elem);
-  const auto & secondary_ip_lowerd_map =
-      amg().getSecondaryIpToLowerElementMap(*_lower_secondary_elem);
-
-  std::array<const MooseVariable *, 3> var_array{{_disp_x_var, _disp_y_var, _disp_z_var}};
-  std::array<ADReal, 3> primary_disp{
-      {_primary_disp_x[_qp], _primary_disp_y[_qp], _has_disp_z ? (*_primary_disp_z)[_qp] : 0}};
-  std::array<ADReal, 3> secondary_disp{{_secondary_disp_x[_qp],
-                                        _secondary_disp_y[_qp],
-                                        _has_disp_z ? (*_secondary_disp_z)[_qp] : 0}};
-
-  trimInteriorNodeDerivatives(primary_ip_lowerd_map, var_array, primary_disp, false);
-  trimInteriorNodeDerivatives(secondary_ip_lowerd_map, var_array, secondary_disp, true);
-
-  const ADReal & prim_x = primary_disp[0];
-  const ADReal & prim_y = primary_disp[1];
-  const ADReal * prim_z = nullptr;
-  if (_has_disp_z)
-    prim_z = &primary_disp[2];
-
-  const ADReal & sec_x = secondary_disp[0];
-  const ADReal & sec_y = secondary_disp[1];
-  const ADReal * sec_z = nullptr;
-  if (_has_disp_z)
-    sec_z = &secondary_disp[2];
-
-  // Compute gap vector
-  ADRealVectorValue gap_vec = _phys_points_primary[_qp] - _phys_points_secondary[_qp];
-
-  gap_vec(0).derivatives() = prim_x.derivatives() - sec_x.derivatives();
-  gap_vec(1).derivatives() = prim_y.derivatives() - sec_y.derivatives();
-  if (_has_disp_z)
-    gap_vec(2).derivatives() = prim_z->derivatives() - sec_z->derivatives();
-
-  // Compute integration point quantities
-  if (_interpolate_normals)
-    _qp_gap = gap_vec * (_normals[_qp] * _JxW_msm[_qp] * _coord[_qp]);
-  else
-    _qp_gap_nodal = gap_vec * (_JxW_msm[_qp] * _coord[_qp]);
-
-  // To do normalization of constraint coefficient (c_n)
-  _qp_factor = _JxW_msm[_qp] * _coord[_qp];
 }
 
 void
 ComputeWeightedGapLMMechanicalContact::computeQpIProperties()
 {
-  mooseAssert(_normals.size() ==
-                  (_interpolate_normals ? _test[_i].size() : _lower_secondary_elem->n_nodes()),
-              "Making sure that _normals is the expected size");
-
-  // Get the _dof_to_weighted_gap map
-  const DofObject * dof = _var->isNodal()
-                              ? static_cast<const DofObject *>(_lower_secondary_elem->node_ptr(_i))
-                              : static_cast<const DofObject *>(_lower_secondary_elem);
-
-  if (_interpolate_normals)
-    _dof_to_weighted_gap[dof].first += _test[_i][_qp] * _qp_gap;
-  else
-    _dof_to_weighted_gap[dof].first += _test[_i][_qp] * _qp_gap_nodal * _normals[_i];
-
-  if (_normalize_c)
-    _dof_to_weighted_gap[dof].second += _test[_i][_qp] * _qp_factor;
 }
 
 void
 ComputeWeightedGapLMMechanicalContact::residualSetup()
 {
-  _dof_to_weighted_gap.clear();
 }
 
 void
 ComputeWeightedGapLMMechanicalContact::jacobianSetup()
 {
-  residualSetup();
 }
 
 void
-ComputeWeightedGapLMMechanicalContact::computeResidual(const Moose::MortarType mortar_type)
+ComputeWeightedGapLMMechanicalContact::computeResidual(const Moose::MortarType /*mortar_type*/)
 {
-  if (mortar_type != Moose::MortarType::Lower)
-    return;
-
-  mooseAssert(_var, "LM variable is null");
-
-  for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
-  {
-    computeQpProperties();
-    for (_i = 0; _i < _test.size(); ++_i)
-      computeQpIProperties();
-  }
 }
 
 void
