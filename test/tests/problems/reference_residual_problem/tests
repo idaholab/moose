@@ -108,6 +108,7 @@
     type = 'CSVDiff'
     input = 'no_ref.i'
     csvdiff = 'no_ref_out.csv'
+    cli_args = 'Problem/extra_tag_vectors=absref'
     requirement = 'The system shall have the ability to default to the traditional convergence checks if no '
                   'reference vector is provided in ReferenceResidualProblem.'
   []
@@ -130,9 +131,16 @@
     [no_reference_vector]
       type = RunException
       input = no_ref.i
-      cli_args = "Problem/normalization_type=local_L2"
+      cli_args = "Problem/normalization_type=local_L2 Problem/extra_tag_vectors=absref"
       expect_err = "If local norm is used, a reference_vector must be provided"
       detail = "if the reference vector is not provided when using local normalization."
+    []
+    [not_residual_tag]
+      type = RunException
+      input = no_ref.i
+      cli_args = "Problem/extra_tag_solutions=absref"
+      expect_err = "is not a residual vector tag"
+      detail = "if the reference vector is provided is not a residual vector tag."
     []
   []
 []

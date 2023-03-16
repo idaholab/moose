@@ -11,7 +11,7 @@
 [Problem]
   type = ReferenceResidualProblem
   # reference_vector = 'absref'
-  extra_tag_vectors = 'absref'
+  # extra_tag_vectors = 'absref'
 []
 
 [Variables]
