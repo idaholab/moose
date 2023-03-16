@@ -84,12 +84,12 @@ public:
   virtual unsigned int getFeatureVar(unsigned int feature_id) const;
 
   /// Returns the feature ID representing the passed in feature (Grain ID)
-  virtual unsigned int getFeatureID(unsigned int feature_id) const; // by weipeng 
+  virtual unsigned int getFeatureID(unsigned int feature_id) const;
 
-  virtual std::vector<unsigned int> getAdjacentID(unsigned int feature_id) const; // by weipeng
+  virtual std::vector<unsigned int> getAdjacentID(unsigned int feature_id) const;
 
   /// Returns the number of adjacent grains for grain ID
-  virtual unsigned int getAdjacentGrainNum(unsigned int feature_id) const; // by weipeng
+  virtual unsigned int getAdjacentGrainNum(unsigned int feature_id) const;
 
   /// Returns the number of coupled varaibles
   std::size_t numCoupledVars() const { return _n_vars; }
@@ -169,7 +169,7 @@ public:
 
     FeatureData(std::size_t var_index,
                 Status status,
-                std::vector<unsigned int> adjacent_id = std::vector<unsigned int>(), // weipeng                
+                std::vector<unsigned int> adjacent_id = std::vector<unsigned int>(),
                 unsigned int id = invalid_id,
                 std::vector<BoundingBox> bboxes = {BoundingBox()})
       : _var_index(var_index),
@@ -179,7 +179,7 @@ public:
         _vol_count(0),
         _status(status),
         _boundary_intersection(BoundaryIntersection::NONE),
-        _adjacent_id(adjacent_id) // by pengwei
+        _adjacent_id(adjacent_id)
     {
     }
 
@@ -300,7 +300,7 @@ public:
     /// (multiple used with periodic constraints)
     std::vector<BoundingBox> _bboxes;
 
-    /// The vecor of adjacent feature ID for this feature by weipeng
+    /// The vecor of adjacent feature ID for this feature
     std::vector<unsigned int> _adjacent_id;    
 
     /// Original processor/local ids

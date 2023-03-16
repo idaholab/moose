@@ -42,7 +42,7 @@ dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, void 
   storeHelper(stream, feature._var_index, context);
   storeHelper(stream, feature._id, context);
   storeHelper(stream, feature._bboxes, context);
-  storeHelper(stream, feature._adjacent_id, context); // by weipeng
+  storeHelper(stream, feature._adjacent_id, context);
   storeHelper(stream, feature._orig_ids, context);
   storeHelper(stream, feature._min_entity_id, context);
   storeHelper(stream, feature._vol_count, context);
@@ -74,7 +74,7 @@ dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, void *
   loadHelper(stream, feature._var_index, context);
   loadHelper(stream, feature._id, context);
   loadHelper(stream, feature._bboxes, context);
-  loadHelper(stream, feature._adjacent_id, context); // by weipeng  
+  loadHelper(stream, feature._adjacent_id, context);
   loadHelper(stream, feature._orig_ids, context);
   loadHelper(stream, feature._min_entity_id, context);
   loadHelper(stream, feature._vol_count, context);
@@ -820,7 +820,7 @@ FeatureFloodCount::getFeatureVar(unsigned int feature_id) const
 }
 
 unsigned int
-FeatureFloodCount::getFeatureID(unsigned int feature_id) const // by weipeng
+FeatureFloodCount::getFeatureID(unsigned int feature_id) const
 {   
   if (feature_id >= _feature_id_to_local_index.size())
     return invalid_id;
@@ -839,7 +839,7 @@ FeatureFloodCount::getFeatureID(unsigned int feature_id) const // by weipeng
 }
 
 std::vector<unsigned int>
-FeatureFloodCount::getAdjacentID(unsigned int feature_id) const // by weipeng
+FeatureFloodCount::getAdjacentID(unsigned int feature_id) const
 { 
   std::vector<unsigned int> invalid_id_vector(10,invalid_id);
 
@@ -859,7 +859,7 @@ FeatureFloodCount::getAdjacentID(unsigned int feature_id) const // by weipeng
 }
 
 unsigned int
-FeatureFloodCount::getAdjacentGrainNum(unsigned int feature_id) const // by weipeng
+FeatureFloodCount::getAdjacentGrainNum(unsigned int feature_id) const
 {   
   if (feature_id >= _feature_id_to_local_index.size())
     return invalid_id;
