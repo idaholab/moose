@@ -1,6 +1,6 @@
 [Tests]
   [test]
-    requirement = 'The system shall print out a message to screen from the input file'
+    requirement = 'The system shall be able to print out a message to screen from the input file'
     design = 'MessageFromInput.md'
     issues = '#21736'
 

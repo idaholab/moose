@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MessageFromInput.h"
-#include "Console.h"
+#include "ConsoleStream.h"
 #include "ConsoleUtils.h"
 
 registerMooseObject("MooseApp", MessageFromInput);
@@ -40,14 +40,10 @@ MessageFromInput::~MessageFromInput() {}
 void
 MessageFromInput::execute()
 {
-  // Only print out once
-  if (processor_id() == 0)
-  {
-    auto total_width = std::setw(ConsoleUtils::console_field_width);
-    _console << total_width << "\n";
-    _console << "Message: " << std::endl
-             << ConsoleUtils::indent(2) << COLOR_YELLOW << _input_message << "\n";
-    _console << COLOR_DEFAULT << total_width << "\n" << std::endl;
-    _console << std ::flush;
-  }
+  auto total_width = std::setw(ConsoleUtils::console_field_width);
+  _console << total_width << "\n";
+  _console << "Message: " << std::endl
+           << ConsoleUtils::indent(2) << COLOR_YELLOW << _input_message << "\n";
+  _console << COLOR_DEFAULT << total_width << "\n" << std::endl;
+  _console << std ::flush;
 }

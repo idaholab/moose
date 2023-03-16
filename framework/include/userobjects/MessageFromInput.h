@@ -23,13 +23,13 @@ public:
   MessageFromInput(const InputParameters & parameters);
   virtual ~MessageFromInput();
 
-  // Required pure virtual function(not used)
+  // Required implementation of a pure virtual function (not used)
   virtual void initialize() override{};
 
-  // Required pure virtual function(not used)
+  // Required implementation of a pure virtual function (not used)
   virtual void finalize() override{};
 
-  // Print out the message with specified color
+  // Print out the message
   virtual void execute() override;
 
 private:
