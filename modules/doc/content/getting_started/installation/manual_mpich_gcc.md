@@ -4,28 +4,27 @@ Check and see if you already have an MPI wrapper available on your machine. One 
 so, is to perform a `which` on the three necessary MPI wrapper binaries:
 
 ```bash
-which mpicc mpicxx mpif90 | wc -l
+which mpicc mpicxx mpif90
 ```
 
-If the above command returns '3', then you may skip the MPICH section. +However+, if you ended up
-building your own GCC compiler above, you will want to *NOT* skip this step. With the reason being,
-it is generally best to build an MPI wrapper based on the compiler you plan to use.
+If the above command returns with paths to those respected binaries, you will want to work with your
+system package manager to remove them. -Having two completely different MPI wrappers being made
+available simultaneously is prone to failure.
 
 Download MPICH [!package!mpich]
 
 !package! code
-cd $STACK_SRC
 curl -L -O http://www.mpich.org/static/downloads/__MPICH__/mpich-__MPICH__.tar.gz
 tar -xf mpich-__MPICH__.tar.gz -C .
 !package-end!
 
-Now we create an out-of-tree build location, configure, build, and install it
+Create an out-of-tree build location and configure MPICH using the following arguments:
 
 !package! code max-height=500
-mkdir $STACK_SRC/mpich-__MPICH__/gcc-build
-cd $STACK_SRC/mpich-__MPICH__/gcc-build
+mkdir mpich-__MPICH__/gcc-build
+cd mpich-__MPICH__/gcc-build
 
-../configure --prefix=$PACKAGES_DIR/mpich-__MPICH__ \
+../configure --prefix=/target/installation/path/mpich-__MPICH__ \
 --enable-shared \
 --enable-sharedlibs=gcc \
 --enable-fast=O2 \
@@ -43,27 +42,13 @@ FFLAGS='-fallow-argument-mismatch' \
 FCFLAGS='-fallow-argument-mismatch' \
 F90FLAGS='' \
 F77FLAGS=''
+!package-end!
 
-make -j # (where # is the number of cores available)
+With `configure` complete and error free, build and install MPICH:
 
+```bash
+make -j 6
 make install
-!package-end!
+```
 
-
-!alert! note
-In order to utilize our newly built MPI wrapper, we need to set some variables:
-
-!package! code
-export PATH=$PACKAGES_DIR/mpich-__MPICH__/bin:$PATH
-export CC=mpicc
-export CXX=mpicxx
-export FC=mpif90
-export F90=mpif90
-export C_INCLUDE_PATH=$PACKAGES_DIR/mpich-__MPICH__/include:$C_INCLUDE_PATH
-export CPLUS_INCLUDE_PATH=$PACKAGES_DIR/mpich-__MPICH__/include:$CPLUS_INCLUDE_PATH
-export FPATH=$PACKAGES_DIR/mpich-__MPICH__/include:$FPATH
-export MANPATH=$PACKAGES_DIR/mpich-__MPICH__/share/man:$MANPATH
-export LD_LIBRARY_PATH=$PACKAGES_DIR/mpich-__MPICH__/lib:$LD_LIBRARY_PATH
-!package-end!
-
-!alert-end!
+Follow the onscreen instructions on how to make use of your new MPI wrapper.

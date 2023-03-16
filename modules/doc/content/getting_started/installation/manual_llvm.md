@@ -1,32 +1,11 @@
 ## LLVM/Clang
 
-We will clone all the necessary repositories involved with building LLVM/Clang from source:
+Clone the LLVM-Project:
 
 !package! code max-height=500
-mkdir -p $STACK_SRC/llvm-src
-cd $STACK_SRC/llvm-src
-git clone https://github.com/llvm-mirror/llvm.git
-git clone https://github.com/llvm-mirror/clang.git $STACK_SRC/llvm-src/llvm/tools/clang
-git clone https://github.com/llvm-mirror/compiler-rt.git $STACK_SRC/llvm-src/llvm/projects/compiler-rt
-git clone https://github.com/llvm-mirror/libcxx.git $STACK_SRC/llvm-src/llvm/projects/libcxx
-git clone https://github.com/llvm-mirror/libcxxabi.git $STACK_SRC/llvm-src/llvm/projects/libcxxabi
-git clone https://github.com/llvm-mirror/openmp.git $STACK_SRC/llvm-src/llvm/projects/openmp
-git clone https://github.com/llvm-mirror/clang-tools-extra.git $STACK_SRC/llvm-src/llvm/tools/clang/tools/extra
-
-cd $STACK_SRC/llvm-src/llvm
-git checkout release___LLVM_RELEASE__
-cd $STACK_SRC/llvm-src/llvm/tools/clang
-git checkout release___LLVM_RELEASE__
-cd $STACK_SRC/llvm-src/llvm/projects/compiler-rt
-git checkout release___LLVM_RELEASE__
-cd $STACK_SRC/llvm-src/llvm/projects/libcxx
-git checkout release___LLVM_RELEASE__
-cd $STACK_SRC/llvm-src/llvm/projects/libcxxabi
-git checkout release___LLVM_RELEASE__
-cd $STACK_SRC/llvm-src/llvm/projects/openmp
-git checkout release___LLVM_RELEASE__
-cd $STACK_SRC/llvm-src/llvm/tools/clang/tools/extra
-git checkout release___LLVM_RELEASE__
+git clone https://github.com/llvm/llvm-project
+cd llvm-project
+git checkout llvmorg-__CLANG__
 !package-end!
 
 And now we configure, build, and install Clang:

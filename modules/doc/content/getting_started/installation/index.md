@@ -20,12 +20,9 @@ system, platform, or your desired method and follow the instructions:
 
   - [installation/install_libtorch.md]
 
-With one of the installation methods above complete, please proceed to the
-[getting_started/new_users.md] page to continue.
+!include installation/installation_troubleshooting.md
 
 !include installation/update_moose.md
-
-!include installation/installation_troubleshooting.md
 
 !content pagination use_title=True
                     previous=getting_started/index.md

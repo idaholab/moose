@@ -1,22 +1,19 @@
 # Manual Installation LLVM/MPICH
 
 !alert! note title=Are you sure?
-Getting a proper LLVM/MPICH compiler built is substantially more difficult than our [GCC/MPICH](getting_started/installation/manual_installation_gcc.md) combination. We need to build LLVM using a *modern* GCC compiler (not just a minimal C++17 compliant GCC compiler). Also, the higher the version of GCC, does not always guarantee success.
-
-Furthermore, your millage will vary depending on the operating system. Building LLVM is a finicky process. If you are unsure as to why you are building an LLVM compiler, it might be best to build the [GCC/MPICH](getting_started/installation/manual_installation_gcc.md) compiler stack instead.
+Getting a proper LLVM/MPICH compiler built is substantially more difficult
 !alert-end!
 
-!include sqa/minimum_requirements.md
+We need to build LLVM using a *modern* GCC compiler (not just a minimal C++17 compliant GCC
+compiler). Also, the higher the version of GCC does not always guarantee success.
+
+Furthermore, your millage will vary depending on the operating system. Building LLVM is a finicky
+process. If you are unsure as to why you are building an LLVM compiler, it might be best to build
+the [GCC/MPICH](getting_started/installation/manual_installation_gcc.md) compiler stack instead.
 
 ## Prerequisites
 
-- Cmake 3.4 or greater will be needed for building LLVM and some of the optional packages distributed with PETSc that MOOSE requires. Unless your system is very old, one should be able to use their system's package manager (apt-get, yum, zypper, etc) to install a compatible version of Cmake. For older systems, you will need to obtain cmake source from http://www.cmake.org, and build it appropriately for your system.
-
 !include manual_prereqs.md
-
-!include manual_environment.md
-
-!include manual_gcc.md
 
 !include manual_llvm.md
 

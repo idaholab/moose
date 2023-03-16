@@ -13,15 +13,16 @@ Caveats:
 
 !include installation/wsl.md
 
-## Close the WSL terminal
+### Close the WSL terminal
 
-With the above complete, close the WSL terminal, and re-open it. Then proceed to our [Conda Install Instructions](getting_started/installation/conda.md).
+With the above complete, close the WSL terminal and re-open it. Then proceed to follow our
+[Conda Install Instructions](getting_started/installation/conda.md) (your platform is Linux).
 
 !alert! tip
 Your Download's folder, while using WSL, is located at: `/mnt/c/Users/<Your User Name>/Downloads`
 !alert-end!
 
-## Miscellaneous Tips for WSL
+## Tips
 
 Like WSL installation, the following sections require performing all commands in a PowerShell
 or Command Prompt in *administrator* mode!
