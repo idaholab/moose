@@ -1,0 +1,13 @@
+[Tests]
+  [check_duplicate_subdomain_names]
+  design = 'MooseMesh.md'
+  issues = '#23735'
+  requirement = 'The system shall throw an error if the subdomains with different ID have duplicate names.'
+
+  type = 'RunException'
+  input = 'check_duplicate_subdomain_names.i'
+  expect_err = 'The subdomain name A has already been used for the subdomain with ID=1, Please rename the subdomain with ID=2'
+  cli_args = "--mesh-only"
+  recover = false
+  []
+[]
