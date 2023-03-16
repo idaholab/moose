@@ -33,7 +33,4 @@ public:
 
 private:
   ADReal computeQpResidual() override final;
-
-  /// The value that we want the average of the primal variable to be equal to
-  const Real _phi0;
 };

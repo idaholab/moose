@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#20607'
+  issues = '#20607 #23745'
 
   [integral]
     type = Exodiff
@@ -8,6 +8,15 @@
 
     requirement = 'The system shall be able to impose a constraint on the domain integral of a variable.'
     design = 'FVIntegralValueConstraint.md'
+  []
+  [integral_transient]
+    type = Exodiff
+    input = integral_transient.i
+    exodiff = 'integral_transient_out.e'
+
+    requirement = 'The system shall be able to impose a constraint where the value of the constraint is provided by a postprocessor.'
+    design = 'FVIntegralValueConstraint.md'
+    ad_indexing_type = 'global'
   []
   [point_value]
     type = Exodiff
