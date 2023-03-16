@@ -693,10 +693,13 @@ Console::write(std::string message, bool indent /*=true*/)
   if (_write_file)
     _file_output_stream << message;
 
-  bool this_message_ends_in_newline = message.empty() ? true : message.back() == '\n';
+  // The empty case gets the right behavior, even though the boolean is technically wrong
+  bool this_message_ends_in_newline = message.empty() ? true : (message.back() == '\n');
+  bool this_message_starts_with_newline = message.empty() ? true : (message.front() == '\n');
 
   // Apply MultiApp indenting
-  if (_last_message_ended_in_newline && indent && _app.multiAppLevel() > 0)
+  if ((this_message_starts_with_newline || _last_message_ended_in_newline) && indent &&
+      _app.multiAppLevel() > 0)
     MooseUtils::indentMessage(_app.name(), message);
 
   // Write message to the screen
