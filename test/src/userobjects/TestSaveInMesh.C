@@ -30,7 +30,7 @@ TestSaveInMesh::validParams()
 TestSaveInMesh::TestSaveInMesh(const InputParameters & parameters) : GeneralUserObject(parameters)
 {
   auto & mesh_generator_system = _app.getMeshGeneratorSystem();
-  auto saved_mesh_names = mesh_generator_system.getSavedMeshesNames();
+  auto saved_mesh_names = mesh_generator_system.getSavedMeshNames();
 
   if (saved_mesh_names.size() != 0)
   {
@@ -38,7 +38,7 @@ TestSaveInMesh::TestSaveInMesh(const InputParameters & parameters) : GeneralUser
     {
       if (name != mesh_generator_system.mainMeshGeneratorName())
       {
-        auto mesh = mesh_generator_system.getSavedMeshes(name);
+        auto mesh = mesh_generator_system.getSavedMesh(name);
 
         if (!getParam<bool>("nemesis"))
         {
@@ -50,11 +50,6 @@ TestSaveInMesh::TestSaveInMesh(const InputParameters & parameters) : GeneralUser
           exio.set_hdf5_writing(false);
 
           exio.write(name + "_in.e");
-        }
-        else
-        {
-          Nemesis_IO nemesis_io(*mesh);
-          nemesis_io.write(name + "_in.e");
         }
       }
     }

@@ -307,7 +307,7 @@ SetupMeshAction::act()
       {
         auto & mesh_generator_system = _app.getMeshGeneratorSystem();
         auto mesh_base =
-            mesh_generator_system.getSavedMeshes(mesh_generator_system.mainMeshGeneratorName());
+            mesh_generator_system.getSavedMesh(mesh_generator_system.mainMeshGeneratorName());
         if (_mesh->allowRemoteElementRemoval() != mesh_base->allow_remote_element_removal())
           mooseError("The MooseMesh and libmesh::MeshBase object coming from mesh generators are "
                      "out of sync with respect to whether remote elements can be deleted");

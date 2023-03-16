@@ -15,7 +15,6 @@
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/checkpoint_io.h"
-#include "libmesh/nemesis_io.h"
 
 registerMooseAction("MooseApp", MeshOnlyAction, "mesh_only");
 
@@ -31,9 +30,8 @@ void
 MeshOnlyAction::act()
 {
   auto mesh_file = _app.parameters().get<std::string>("mesh_only");
-  auto saved_mesh_file = mesh_file;
   auto & mesh_ptr = _app.actionWarehouse().mesh();
-  auto saved_mesh_ptr = _app.actionWarehouse().savedMesh();
+
   // Print information about the mesh
   _console << mesh_ptr->getMesh().get_info(/* verbosity = */ 2) << std::endl;
 
@@ -59,7 +57,6 @@ MeshOnlyAction::act()
 
     // Default to writing out an ExodusII mesh base on the input filename.
     mesh_file = mesh_file.substr(0, pos) + "_in.e";
-    auto saved_mesh_file = mesh_file.substr(0, pos);
   }
 
   /**

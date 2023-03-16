@@ -107,12 +107,12 @@ public:
   /**
    * Get the saved mesh by name
    */
-  [[nodiscard]] std::unique_ptr<MeshBase> getSavedMeshes(const std::string & name);
+  [[nodiscard]] std::unique_ptr<MeshBase> getSavedMesh(const std::string & name);
 
   /**
    * Get all user-defined saved meshes except main and main_displaced
    */
-  std::vector<std::string> getSavedMeshesNames() const;
+  std::vector<std::string> getSavedMeshNames() const;
 
   /**
    * @returns Whether or not a mesh generator exists with the name \p name.
@@ -139,6 +139,10 @@ public:
    */
   bool appendingMeshGenerators() const;
 
+  /**
+   * The name reserved for the "main" mesh generator which is the one used for the numerical solver
+   * downstream
+   */
   static std::string mainMeshGeneratorName() { return "main"; };
 
 private:

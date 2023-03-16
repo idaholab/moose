@@ -764,7 +764,7 @@ public:
    */
   std::unique_ptr<MeshBase> getMeshGeneratorMesh()
   {
-    return _mesh_generator_system.getSavedMeshes(_mesh_generator_system.mainMeshGeneratorName());
+    return _mesh_generator_system.getSavedMesh(_mesh_generator_system.mainMeshGeneratorName());
   }
 
   /**

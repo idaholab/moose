@@ -133,6 +133,10 @@ public:
    */
   bool isParentMeshGenerator(const MeshGeneratorName & name, const bool direct = true) const;
 
+  /**
+   * @returns Whether or not the MeshGenerator with the name \p name is a child of this
+   * MeshGenerator.
+   */
   bool isChildMeshGenerator(const MeshGeneratorName & name, const bool direct = true) const;
 
   /**
@@ -146,12 +150,12 @@ public:
   /**
    * Return whether or not to save the current mesh
    */
-  bool saveMesh();
+  bool hasSaveMesh();
 
   /**
    * Return the name of the saved mesh
    */
-  const std::string getSavedMeshName();
+  const std::string & getSavedMeshName() const;
 
 protected:
   /**
@@ -379,7 +383,7 @@ private:
   std::set<std::string> _null_mesh_names;
 
   /// A user-defined name to save the mesh
-  std::string _save_with_name;
+  const std::string & _save_with_name;
 };
 
 template <typename T, typename... Args>

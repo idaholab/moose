@@ -113,7 +113,7 @@ PeridynamicsMesh::buildMesh()
   if (!hasMeshBase())
   {
     auto & entry = _app.getMeshGeneratorSystem();
-    _mesh = entry.getSavedMeshes(entry.mainMeshGeneratorName());
+    _mesh = entry.getSavedMesh(entry.mainMeshGeneratorName());
   }
   _mesh->allow_renumbering(false);
   _mesh->prepare_for_use();

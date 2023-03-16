@@ -27,7 +27,13 @@
     nx = 3
     xmin = -3
     xmax = 0
-    save_with_name = 'C'
+  []
+
+  [D]
+    type = SubdomainIDGenerator
+    input = C
+    subdomain_id = 1
+    save_with_name = 'left_block'
   []
 
   [A_and_B]

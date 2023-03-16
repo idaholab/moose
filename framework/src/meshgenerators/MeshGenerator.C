@@ -47,10 +47,8 @@ MeshGenerator::MeshGenerator(const InputParameters & parameters)
     _save_with_name(getParam<std::string>("save_with_name"))
 {
   if (_save_with_name == _app.getMeshGeneratorSystem().mainMeshGeneratorName())
-    paramError("save_with_name",
-               "The user-defined mesh name: '",
-               _save_with_name,
-               "' has already been used by default mesh");
+    paramError(
+        "save_with_name", "The user-defined mesh name: '", _save_with_name, "' is a reserved name");
 }
 
 const MeshGeneratorName *
@@ -357,16 +355,13 @@ MeshGenerator::declareNullMeshName(const MeshGeneratorName & name)
 }
 
 bool
-MeshGenerator::saveMesh()
+MeshGenerator::hasSaveMesh()
 {
-  if (!_save_with_name.empty())
-    return true;
-
-  return false;
+  return _save_with_name.size();
 }
 
-const std::string
-MeshGenerator::getSavedMeshName()
+const std::string &
+MeshGenerator::getSavedMeshName() const
 {
   return _save_with_name;
 }

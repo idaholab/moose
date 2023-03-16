@@ -40,6 +40,6 @@ MeshGeneratorMesh::buildMesh()
   if (!hasMeshBase())
   {
     auto & mesh_generator_system = _app.getMeshGeneratorSystem();
-    _mesh = mesh_generator_system.getSavedMeshes(mesh_generator_system.mainMeshGeneratorName());
+    _mesh = mesh_generator_system.getSavedMesh(mesh_generator_system.mainMeshGeneratorName());
   }
 }

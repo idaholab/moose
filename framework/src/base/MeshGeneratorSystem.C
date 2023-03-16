@@ -185,24 +185,32 @@ MeshGeneratorSystem::createMeshGeneratorOrder()
   DependencyResolver<MeshGenerator *, MeshGenerator::Comparator> resolver;
 
   std::vector<std::string> save_in_generators;
+
+  // Hold all the mesh generators marked to be saved
   for (const auto & it : _mesh_generators)
-    if (it.second->saveMesh())
+    if (it.second->hasSaveMesh())
       save_in_generators.push_back(it.second->name());
 
-  // Conditionally add all of the dependencies into the resolver
+  // The mesh generator tree should have all the mesh generators that
+  // The final generator depends on and all the mesh generators
+  // with 'save in' flag. Here we loop over all the mesh generators
+  // and conditionally add all of the dependencies into the resolver
   for (const auto & it : _mesh_generators)
   {
     MeshGenerator * mg = it.second.get();
 
-    if (_final_generator_name.empty() ||       // no final generator set
-        mg->name() == _final_generator_name || // final generator
-        mg->saveMesh() ||                      // needs to be saved
-        (_final_generator_name.size() &&
-         mg->isChildMeshGenerator(_final_generator_name, false)) || // final is a child
+    // The mesh generator has to meet one of the following conditions:
+    // 1. the final mesh generator is not set at this point
+    // 2. this mesh generator is the final one
+    // 3. this mesh generator need to be saved
+    // 4. the final mesh generator is set and is a child
+    // 5. this mesh generator need to be saved and is a child
+    if (_final_generator_name.empty() || mg->name() == _final_generator_name || mg->hasSaveMesh() ||
+        (_final_generator_name.size() && mg->isChildMeshGenerator(_final_generator_name, false)) ||
         std::find_if(save_in_generators.begin(),
                      save_in_generators.end(),
-                     [&mg](const auto & name) { return mg->isChildMeshGenerator(name, false); }) !=
-            save_in_generators.end()) // save in is a child
+                     [&mg](const auto & name)
+                     { return mg->isChildMeshGenerator(name, false); }) != save_in_generators.end())
     {
       resolver.addItem(mg);
       for (const auto & dep_mg : mg->getParentMeshGenerators())
@@ -306,7 +314,7 @@ MeshGeneratorSystem::executeMeshGenerators()
   // Loop over the MeshGenerators and save all meshes marked to to_save_in_meshes
   for (const auto & generator_set : _ordered_mesh_generators)
     for (const auto & generator : generator_set)
-      if (generator->saveMesh())
+      if (generator->hasSaveMesh())
       {
         if (_final_generator_name == generator->name())
           generator->paramError("save_with_name",
@@ -348,6 +356,8 @@ MeshGeneratorSystem::executeMeshGenerators()
     }
   }
 
+  // Grab all the valid save in meshes from the temporary map to_save_in_meshes
+  // and store them in _save_in_meshes
   for (auto & [name, mesh_ptr] : to_save_in_meshes)
   {
     mooseAssert(mesh_ptr, "Invalid pointer");
@@ -372,7 +382,7 @@ MeshGeneratorSystem::createMeshGenerator(const std::string & generator_name)
   std::shared_ptr<MeshGenerator> mg =
       _app.getFactory().create<MeshGenerator>(type, generator_name, params);
 
-  if (mg->saveMesh())
+  if (mg->hasSaveMesh())
   {
     if (_save_in_meshes.count(mg->getSavedMeshName()))
       mg->paramError("save_with_name",
@@ -512,7 +522,7 @@ MeshGeneratorSystem::getMeshGeneratorNames() const
 }
 
 std::vector<std::string>
-MeshGeneratorSystem::getSavedMeshesNames() const
+MeshGeneratorSystem::getSavedMeshNames() const
 {
   std::vector<std::string> names;
   for (auto & pair : _save_in_meshes)
@@ -521,7 +531,7 @@ MeshGeneratorSystem::getSavedMeshesNames() const
 }
 
 std::unique_ptr<MeshBase>
-MeshGeneratorSystem::getSavedMeshes(const std::string & name)
+MeshGeneratorSystem::getSavedMesh(const std::string & name)
 {
   auto find_mesh = _save_in_meshes.find(name);
   if (find_mesh == _save_in_meshes.end())
