@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "AbaqusUMATStress.h"
+#include "StepUserObject.h"
 #include "Factory.h"
 #include "MooseMesh.h"
 #include "RankTwoTensor.h"
@@ -23,7 +24,7 @@ registerMooseObject("TensorMechanicsApp", AbaqusUMATStress);
 InputParameters
 AbaqusUMATStress::validParams()
 {
-  InputParameters params = ComputeStressBase::validParams();
+  InputParameters params = ComputeGeneralStressBase::validParams();
   params.addClassDescription("Coupling material to use Abaqus UMAT models in MOOSE");
   params.addRequiredParam<FileName>(
       "plugin", "The path to the compiled dynamic library for the plugin you want to use");
@@ -37,13 +38,19 @@ AbaqusUMATStress::validParams()
   params.addRequiredParam<unsigned int>("num_state_vars",
                                         "The number of state variables this UMAT is going to use");
   params.addCoupledVar("temperature", 0.0, "Coupled temperature");
-
   params.addCoupledVar("external_fields",
                        "The external fields that can be used in the UMAT subroutine");
   params.addParam<std::vector<MaterialPropertyName>>("external_properties", "");
   params.addParam<MooseEnum>("decomposition_method",
                              ComputeFiniteStrain::decompositionType(),
                              "Method to calculate the strain kinematics.");
+  params.addParam<bool>(
+      "use_displaced_mesh",
+      false,
+      "Whether or not this object should use the "
+      "displaced mesh for computing displacements and quantities based on the deformed state.");
+  params.addParam<UserObjectName>(
+      "step_user_object", "The StepUserObject that provides times from simulation loading steps.");
   return params;
 }
 
@@ -52,7 +59,7 @@ AbaqusUMATStress::validParams()
 #endif
 
 AbaqusUMATStress::AbaqusUMATStress(const InputParameters & parameters)
-  : ComputeStressBase(parameters),
+  : ComputeGeneralStressBase(parameters),
     _plugin(getParam<FileName>("plugin")),
     _library(_plugin + std::string("-") + QUOTE(METHOD) + ".plugin"),
     _umat(_library.getFunction<umat_t>("umat_")),
@@ -131,12 +138,19 @@ AbaqusUMATStress::initialSetup()
                "': Incremental strain quantities are not available. You likely are using a total "
                "strain formulation. Specify `incremental = true` in the tensor mechanics action, "
                "or use ComputeIncrementalSmallStrain in your input file.");
+
+  // Let's automatically detect uos and identify the one we are interested in.
+  // If there is more than one, we assume something is off and error out.
+  if (!isParamSetByUser("step_user_object"))
+    getStepUserObject(_fe_problem, _step_user_object, name());
+  else
+    _step_user_object = &getUserObject<StepUserObject>("step_user_object");
 }
 
 void
 AbaqusUMATStress::initQpStatefulProperties()
 {
-  ComputeStressBase::initQpStatefulProperties();
+  ComputeGeneralStressBase::initQpStatefulProperties();
 
   // Initialize state variable vector
   _state_var[_qp].resize(_aqNSTATV);
@@ -153,9 +167,18 @@ AbaqusUMATStress::computeProperties()
   // characteristic element length
   _aqCELENT = std::pow(_current_elem->volume(), 1.0 / _current_elem->dim());
 
-  // For now, total time and step time mean the exact same thing
-  // Value of step time at the beginning of the current increment
-  _aqTIME[0] = _t - _dt;
+  if (!_step_user_object)
+  {
+    // Value of total time at the beginning of the current increment
+    _aqTIME[0] = _t - _dt;
+  }
+  else
+  {
+    const unsigned int start_time_step = _step_user_object->getStep(_t - _dt);
+    const Real step_time = _step_user_object->getStartTime(start_time_step);
+    // Value of step time at the beginning of the current increment
+    _aqTIME[0] = step_time;
+  }
   // Value of total time at the beginning of the current increment
   _aqTIME[1] = _t - _dt;
 
@@ -166,7 +189,7 @@ AbaqusUMATStress::computeProperties()
   std::fill(_aqCMNAME, _aqCMNAME + 80, ' ');
   std::memcpy(_aqCMNAME, name().c_str(), name().size());
 
-  ComputeStressBase::computeProperties();
+  ComputeGeneralStressBase::computeProperties();
 }
 
 void

@@ -32,6 +32,7 @@ public:
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
   virtual void computeOffDiagJacobian(unsigned int jvar) override;
+  virtual void computeResidualAndJacobian() override;
 
 protected:
   MooseVariable & _var;

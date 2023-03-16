@@ -21,6 +21,7 @@
 #include "FEProblem.h"
 #include "MaterialBase.h"
 #include "DomainUserObject.h"
+#include "AuxiliarySystem.h"
 
 #include "libmesh/numeric_vector.h"
 
@@ -31,7 +32,8 @@ ComputeUserObjectsThread::ComputeUserObjectsThread(FEProblemBase & problem,
     _soln(*sys.currentSolution()),
     _query(query),
     _query_subdomain(_query),
-    _query_boundary(_query)
+    _query_boundary(_query),
+    _aux_sys(problem.getAuxiliarySystem())
 {
 }
 
@@ -41,7 +43,8 @@ ComputeUserObjectsThread::ComputeUserObjectsThread(ComputeUserObjectsThread & x,
     _soln(x._soln),
     _query(x._query),
     _query_subdomain(x._query_subdomain),
-    _query_boundary(x._query_boundary)
+    _query_boundary(x._query_boundary),
+    _aux_sys(x._aux_sys)
 {
 }
 
@@ -126,7 +129,17 @@ ComputeUserObjectsThread::onElement(const Elem * elem)
   _fe_problem.reinitMaterials(_subdomain, _tid);
 
   for (const auto & uo : _element_objs)
+  {
     uo->execute();
+
+    // update the aux solution vector if writable coupled variables are used
+    if (uo->hasWritableCoupledVariables())
+    {
+      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+      for (auto * var : uo->getWritableCoupledVariables())
+        var->insert(_aux_sys.solution());
+    }
+  }
 
   for (auto & uo : _domain_objs)
   {

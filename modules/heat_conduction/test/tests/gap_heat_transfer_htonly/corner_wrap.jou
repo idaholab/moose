@@ -1,0 +1,24 @@
+create surface rectangle width 1 height 1
+body 1 move x 0.5 y -0.5
+create surface rectangle width 2 height 2
+
+webcut body all with plane xplane offset -0.1
+webcut body all with plane yplane offset 0.1
+delete body 2
+merge body 3 4 5
+
+split curve 3
+split curve 4
+
+surface all size 0.5
+mesh surface all
+
+block 1 surface 1
+block 2 surface 7 8 6
+
+sideset 1 curve 28 29
+sideset 2 curve 2 1
+sideset 3 curve 23 18
+sideset 4 curve 22 26 13 11
+
+export mesh "corner_wrap.e" overwrite

@@ -11,12 +11,15 @@
 
 #include "IntegratedBCBase.h"
 #include "MooseVariableInterface.h"
+#include "ADFunctorInterface.h"
 
 /**
  * Base class for deriving any boundary condition of a integrated type
  */
 template <typename T>
-class ADIntegratedBCTempl : public IntegratedBCBase, public MooseVariableInterface<T>
+class ADIntegratedBCTempl : public IntegratedBCBase,
+                            public MooseVariableInterface<T>,
+                            public ADFunctorInterface
 {
 public:
   static InputParameters validParams();

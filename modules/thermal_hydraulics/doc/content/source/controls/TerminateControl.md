@@ -1,18 +1,23 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # TerminateControl
 
 !alert construction title=Undocumented Class
-The TerminateControl has not been documented. The content contained on this page includes the
-typical automatic documentation associated with a MooseObject; however, what is contained is
-ultimately determined by what is necessary to make the documentation clear for users.
+The TerminateControl has not been documented. The content listed below should be used as a starting point for
+documenting the class, which includes the typical automatic documentation associated with a
+MooseObject; however, what is contained is ultimately determined by what is necessary to make the
+documentation clear for users.
 
-!syntax description /ControlLogic/TerminateControl
+!syntax description /Controls/TerminateControl
 
-!syntax parameters /ControlLogic/TerminateControl
+## Overview
 
-!syntax inputs /ControlLogic/TerminateControl
+!! Replace these lines with information regarding the TerminateControl object.
 
-!syntax children /ControlLogic/TerminateControl
+## Example Input File Syntax
 
-!bibtex bibliography
+!! Describe and include an example of how to use the TerminateControl object.
+
+!syntax parameters /Controls/TerminateControl
+
+!syntax inputs /Controls/TerminateControl
+
+!syntax children /Controls/TerminateControl

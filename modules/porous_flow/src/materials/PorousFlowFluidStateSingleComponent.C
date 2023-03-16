@@ -202,11 +202,11 @@ PorousFlowFluidStateSingleComponent::computeQpProperties()
   // Derivative of pressure, saturation and fluid properties wrt variables
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
   {
-    _dporepressure_dvar[_qp][ph][_pvar] = _fsp[ph].pressure.derivatives()[_pidx];
-    _dporepressure_dvar[_qp][ph][_hvar] = _fsp[ph].pressure.derivatives()[_hidx];
+    (*_dporepressure_dvar)[_qp][ph][_pvar] = _fsp[ph].pressure.derivatives()[_pidx];
+    (*_dporepressure_dvar)[_qp][ph][_hvar] = _fsp[ph].pressure.derivatives()[_hidx];
 
-    _dsaturation_dvar[_qp][ph][_pvar] = _fsp[ph].saturation.derivatives()[_pidx];
-    _dsaturation_dvar[_qp][ph][_hvar] = _fsp[ph].saturation.derivatives()[_hidx];
+    (*_dsaturation_dvar)[_qp][ph][_pvar] = _fsp[ph].saturation.derivatives()[_pidx];
+    (*_dsaturation_dvar)[_qp][ph][_hvar] = _fsp[ph].saturation.derivatives()[_hidx];
 
     _dfluid_density_dvar[_qp][ph][_pvar] = _fsp[ph].density.derivatives()[_pidx];
     _dfluid_density_dvar[_qp][ph][_hvar] = _fsp[ph].density.derivatives()[_hidx];
@@ -268,17 +268,17 @@ PorousFlowFluidStateSingleComponent::computeQpProperties()
 
     // Gradient of saturation and derivatives
     (*_grads_qp)[_qp][_gas_phase_number] =
-        _dsaturation_dvar[_qp][_gas_phase_number][_pvar] * _liquid_gradp_qp[_qp] +
-        _dsaturation_dvar[_qp][_gas_phase_number][_hvar] * _gradh_qp[_qp];
+        (*_dsaturation_dvar)[_qp][_gas_phase_number][_pvar] * _liquid_gradp_qp[_qp] +
+        (*_dsaturation_dvar)[_qp][_gas_phase_number][_hvar] * _gradh_qp[_qp];
     (*_grads_qp)[_qp][_aqueous_phase_number] = -(*_grads_qp)[_qp][_gas_phase_number];
 
     (*_dgrads_qp_dgradv)[_qp][_gas_phase_number][_pvar] =
-        _dsaturation_dvar[_qp][_gas_phase_number][_pvar];
+        (*_dsaturation_dvar)[_qp][_gas_phase_number][_pvar];
     (*_dgrads_qp_dgradv)[_qp][_aqueous_phase_number][_pvar] =
         -(*_dgrads_qp_dgradv)[_qp][_gas_phase_number][_pvar];
 
     (*_dgrads_qp_dgradv)[_qp][_gas_phase_number][_hvar] =
-        _dsaturation_dvar[_qp][_gas_phase_number][_hvar];
+        (*_dsaturation_dvar)[_qp][_gas_phase_number][_hvar];
     (*_dgrads_qp_dgradv)[_qp][_aqueous_phase_number][_hvar] =
         -(*_dgrads_qp_dgradv)[_qp][_gas_phase_number][_hvar];
 
@@ -326,12 +326,12 @@ PorousFlowFluidStateSingleComponent::computeQpProperties()
 
     (*_dgradp_qp_dv)[_qp][_gas_phase_number][_pvar] =
         d2pc * (*_grads_qp)[_qp][_aqueous_phase_number] *
-            _dsaturation_dvar[_qp][_aqueous_phase_number][_pvar] +
+            (*_dsaturation_dvar)[_qp][_aqueous_phase_number][_pvar] +
         dpc * (*_dgrads_qp_dv)[_qp][_aqueous_phase_number][_pvar];
 
     (*_dgradp_qp_dv)[_qp][_gas_phase_number][_hvar] =
         d2pc * (*_grads_qp)[_qp][_aqueous_phase_number] *
-            _dsaturation_dvar[_qp][_aqueous_phase_number][_hvar] +
+            (*_dsaturation_dvar)[_qp][_aqueous_phase_number][_hvar] +
         dpc * (*_dgrads_qp_dv)[_qp][_aqueous_phase_number][_hvar];
   }
 }

@@ -18,11 +18,8 @@ ADACInterface::validParams()
   params.addClassDescription("Gradient energy Allen-Cahn Kernel");
   params.addParam<MaterialPropertyName>("mob_name", "L", "The mobility used with the kernel");
   params.addParam<MaterialPropertyName>("kappa_name", "kappa_op", "The kappa used with the kernel");
-  params.addDeprecatedCoupledVar("args",
-                                 "Vector of nonlinear variable arguments this object depends on",
-                                 "args is deprecated, use 'coupled_variables' instead");
-  params.addCoupledVar("coupled_variables",
-                       "Vector of nonlinear variable arguments this object depends on");
+  params.addCoupledVar("args", "Vector of nonlinear variable arguments this object depends on");
+  params.deprecateCoupledVar("args", "coupled_variables", "02/27/2024");
 
   params.addParam<bool>("variable_L",
                         true,

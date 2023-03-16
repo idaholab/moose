@@ -95,6 +95,15 @@ CommandLine::initForMultiApp(const std::string & subapp_full_name)
       });
   _argv.erase(new_end, _argv.end());
 
+  // If there is an argument meant for a nested subapp, we will want to remove
+  // the leading app name
+  for (auto & arg : _argv)
+  {
+    auto pos = arg.find(":", 0);
+    if (pos != std::string::npos && arg.find(":", pos + 1) != std::string::npos)
+      arg = subapp_full_name + "_" + arg.substr(pos + 1, arg.length() - pos - 1);
+  }
+
   // Clear hit CLI arguments, these will be populated after the sub-application is created
   _hiti.clear();
   _used_hiti.clear();

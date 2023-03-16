@@ -135,20 +135,36 @@ OptimizeSolve::taoSolve()
   CHKERRQ(ierr);
 
   // Set objective and gradient functions
+#if !PETSC_VERSION_LESS_THAN(3, 17, 0)
+  ierr = TaoSetObjective(_tao, objectiveFunctionWrapper, this);
+#else
   ierr = TaoSetObjectiveRoutine(_tao, objectiveFunctionWrapper, this);
+#endif
   CHKERRQ(ierr);
+#if !PETSC_VERSION_LESS_THAN(3, 17, 0)
+  ierr = TaoSetObjectiveAndGradient(_tao, NULL, objectiveAndGradientFunctionWrapper, this);
+#else
   ierr = TaoSetObjectiveAndGradientRoutine(_tao, objectiveAndGradientFunctionWrapper, this);
+#endif
   CHKERRQ(ierr);
 
   // Set matrix-free version of the Hessian function
   ierr = MatCreateShell(_my_comm.get(), _ndof, _ndof, _ndof, _ndof, this, &_hessian);
   CHKERRQ(ierr);
   // Link matrix-free Hessian to Tao
+#if !PETSC_VERSION_LESS_THAN(3, 17, 0)
+  ierr = TaoSetHessian(_tao, _hessian, _hessian, hessianFunctionWrapper, this);
+#else
   ierr = TaoSetHessianRoutine(_tao, _hessian, _hessian, hessianFunctionWrapper, this);
+#endif
   CHKERRQ(ierr);
 
   // Set initial guess
+#if !PETSC_VERSION_LESS_THAN(3, 17, 0)
+  ierr = TaoSetSolution(_tao, _parameters->vec());
+#else
   ierr = TaoSetInitialVector(_tao, _parameters->vec());
+#endif
   CHKERRQ(ierr);
 
   // Set petsc options

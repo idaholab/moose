@@ -17,11 +17,11 @@
 #include <cctype>
 
 SyntaxTree::SyntaxTree(bool use_long_names)
-  : SyntaxFormatterInterface(), _root(NULL), _use_long_names(use_long_names)
+  : SyntaxFormatterInterface(), _use_long_names(use_long_names)
 {
 }
 
-SyntaxTree::~SyntaxTree() { delete (_root); }
+SyntaxTree::~SyntaxTree() = default;
 
 void
 SyntaxTree::insertNode(std::string syntax,
@@ -29,8 +29,8 @@ SyntaxTree::insertNode(std::string syntax,
                        bool is_action_params,
                        InputParameters * params)
 {
-  if (_root == NULL)
-    _root = new TreeNode("", *this);
+  if (!_root)
+    _root = std::make_unique<TreeNode>("", *this);
 
   _root->insertNode(syntax, action, is_action_params, params);
 }
@@ -73,20 +73,10 @@ SyntaxTree::TreeNode::TreeNode(const std::string & name,
   : _name(name), _parent(parent), _syntax_tree(syntax_tree)
 {
   if (action)
-    _action_params.insert(std::make_pair(*action, new InputParameters(*params)));
+    _action_params.emplace(*action, std::make_unique<InputParameters>(*params));
 }
 
-SyntaxTree::TreeNode::~TreeNode()
-{
-  for (const auto & it : _action_params)
-    delete it.second;
-
-  for (const auto & it : _moose_object_params)
-    delete it.second;
-
-  for (const auto & it : _children)
-    delete it.second;
-}
+SyntaxTree::TreeNode::~TreeNode() = default;
 
 void
 SyntaxTree::TreeNode::insertNode(std::string & syntax,
@@ -108,7 +98,7 @@ SyntaxTree::TreeNode::insertNode(std::string & syntax,
   bool node_created = false;
   if (_children.find(item) == _children.end())
   {
-    _children[item] = new TreeNode(
+    _children[item] = std::make_unique<TreeNode>(
         item, _syntax_tree, is_leaf && is_action_params ? &action : NULL, params, this);
     if (is_leaf && !is_action_params)
       _children[item]->insertParams(action, is_action_params, params);
@@ -127,9 +117,9 @@ SyntaxTree::TreeNode::insertParams(const std::string & action,
                                    InputParameters * params)
 {
   if (is_action_params)
-    _action_params.insert(std::make_pair(action, new InputParameters(*params)));
+    _action_params.emplace(action, std::make_unique<InputParameters>(*params));
   else
-    _moose_object_params.insert(std::make_pair(action, new InputParameters(*params)));
+    _moose_object_params.emplace(action, std::make_unique<InputParameters>(*params));
 }
 
 std::string
@@ -159,7 +149,8 @@ SyntaxTree::TreeNode::print(short depth, const std::string & search_string, bool
 
   std::string indent((depth + 1) * 2, ' ');
 
-  std::multimap<std::string, InputParameters *>::const_iterator it = _moose_object_params.begin();
+  std::multimap<std::string, std::unique_ptr<InputParameters>>::const_iterator it =
+      _moose_object_params.begin();
   do
   {
     bool local_found = false;

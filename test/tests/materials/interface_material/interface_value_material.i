@@ -105,7 +105,7 @@
       nl_var_secondary = v
   [../]
   [./interface_material_jump_primary_minus_secondary]
-      type = InterfaceValueMaterial
+      type = ADInterfaceValueMaterial # To test generic routines
       mat_prop_primary = diffusivity
       mat_prop_secondary = diffusivity
       var_primary = diffusivity_var

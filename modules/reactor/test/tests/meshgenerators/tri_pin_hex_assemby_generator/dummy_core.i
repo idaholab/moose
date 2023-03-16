@@ -15,7 +15,7 @@
     quad_center_elements = true
   []
   [assm1]
-    type = HexIDPatternedMeshGenerator
+    type = PatternedHexMeshGenerator
     inputs = 'pin_1'
     id_name ='test_id1'
     hexagon_size = 20
@@ -46,7 +46,7 @@
     assembly_orientation = pin_up
   []
   [pattern]
-    type = HexIDPatternedMeshGenerator
+    type = PatternedHexMeshGenerator
     inputs = 'assm1 assm_up'
     id_name ='test_id2'
     pattern = '0 0;

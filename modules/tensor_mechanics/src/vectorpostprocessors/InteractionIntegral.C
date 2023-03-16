@@ -44,6 +44,14 @@ InteractionIntegralTempl<is_ad>::validParams()
   params.addCoupledVar("temperature",
                        "The temperature (optional). Must be provided to correctly compute "
                        "stress intensity factors in models with thermal strain gradients.");
+  params.addParam<MaterialPropertyName>(
+      "functionally_graded_youngs_modulus",
+      "Spatially varying elasticity modulus variable. This input is required when "
+      "using the functionally graded material capability.");
+  params.addParam<MaterialPropertyName>(
+      "functionally_graded_youngs_modulus_crack_dir_gradient",
+      "Gradient of the spatially varying Young's modulus provided in "
+      "'functionally_graded_youngs_modulus' in the direction of crack extension.");
   params.addRequiredParam<UserObjectName>("crack_front_definition",
                                           "The CrackFrontDefinition user object name");
   MooseEnum position_type("Angle Distance", "Distance");
@@ -94,10 +102,20 @@ InteractionIntegralTempl<is_ad>::InteractionIntegralTempl(const InputParameters 
     _grad_disp(3),
     _has_temp(isCoupled("temperature")),
     _grad_temp(_has_temp ? coupledGradient("temperature") : _grad_zero),
+    _functionally_graded_youngs_modulus_crack_dir_gradient(
+        isParamSetByUser("functionally_graded_youngs_modulus_crack_dir_gradient")
+            ? &getMaterialProperty<Real>("functionally_graded_youngs_modulus_crack_dir_gradient")
+            : nullptr),
+    _functionally_graded_youngs_modulus(
+        isParamSetByUser("functionally_graded_youngs_modulus")
+            ? &getMaterialProperty<Real>("functionally_graded_youngs_modulus")
+            : nullptr),
     _K_factor(getParam<Real>("K_factor")),
     _has_symmetry_plane(isParamValid("symmetry_plane")),
     _poissons_ratio(getParam<Real>("poissons_ratio")),
     _youngs_modulus(getParam<Real>("youngs_modulus")),
+    _fgm_crack(isParamSetByUser("functionally_graded_youngs_modulus_crack_dir_gradient") &&
+               isParamSetByUser("functionally_graded_youngs_modulus")),
     _ring_index(getParam<unsigned int>("ring_index")),
     _total_deigenstrain_dT(
         hasMaterialProperty<RankTwoTensor>("total_deigenstrain_dT")
@@ -119,6 +137,19 @@ InteractionIntegralTempl<is_ad>::InteractionIntegralTempl(const InputParameters 
     mooseError("InteractionIntegral Error: To include thermal strain term in interaction integral, "
                "must both couple temperature in DomainIntegral block and compute "
                "total_deigenstrain_dT using ThermalFractureIntegral material model.");
+
+  if ((!_functionally_graded_youngs_modulus &&
+       _functionally_graded_youngs_modulus_crack_dir_gradient) ||
+      (_functionally_graded_youngs_modulus &&
+       !_functionally_graded_youngs_modulus_crack_dir_gradient))
+    paramError("functionally_graded_youngs_modulus_crack_dir_gradient",
+               "You have selected to compute the interaction integral for a crack in FGM. That "
+               "selection requires the user to provide a spatially varying elasticity modulus "
+               "that "
+               "defines the transition of material properties (i.e. "
+               "'functionally_graded_youngs_modulus') and its "
+               "spatial derivative in the crack direction (i.e. "
+               "'functionally_graded_youngs_modulus_crack_dir_gradient').");
 
   // plane strain
   _kappa = 3.0 - 4.0 * _poissons_ratio;
@@ -196,9 +227,10 @@ InteractionIntegralTempl<is_ad>::computeQpIntegral(const std::size_t crack_front
 
   RankTwoTensor aux_stress;
   RankTwoTensor aux_du;
+  RankTwoTensor aux_strain;
 
   if (_sif_mode == SifMethod::KI || _sif_mode == SifMethod::KII || _sif_mode == SifMethod::KIII)
-    computeAuxFields(aux_stress, aux_du);
+    computeAuxFields(aux_stress, aux_du, aux_strain);
   else if (_sif_mode == SifMethod::T)
     computeTFields(aux_stress, aux_du);
 
@@ -270,6 +302,32 @@ InteractionIntegralTempl<is_ad>::computeQpIntegral(const std::size_t crack_front
     term5 = -scalar_q * MetaPhysicL::raw_value((*_body_force)[_qp]) * aux_du * crack_dir;
   }
 
+  Real term6 = 0.0;
+  if (_fgm_crack && scalar_q != 0)
+  {
+    // See Equation 49 of J.-H. Kim and G. H. Paulino. Consistent formulations of the interaction
+    // integral method for fracture of functionally graded materials. Journal of Applied Mechanics,
+    // 72(3) 351-364 2004.
+
+    // Term 6_1 = Cijkl,j(x) epsilon_{kl}^{aux} disp_{i,1}
+    RankTwoTensor cijklj_epsilonkl_aux; // Temporary second order tensor.
+    RankFourTensor cijklj;
+    cijklj.fillSymmetricIsotropicEandNu(1.0, _poissons_ratio);
+    cijklj *= (*_functionally_graded_youngs_modulus_crack_dir_gradient)[_qp];
+    cijklj_epsilonkl_aux = cijklj * aux_strain;
+
+    const Real term6_a = grad_disp_cf(0, 0) * cijklj_epsilonkl_aux(0, 0) +
+                         grad_disp_cf(1, 0) * cijklj_epsilonkl_aux(0, 1) +
+                         grad_disp_cf(2, 0) * cijklj_epsilonkl_aux(0, 2);
+
+    // Term 6_2 = -Cijkl,1(x) epsilon_{kl} epsilon_{ij}^{aux}
+    RankTwoTensor cijkl1_epsilonkl;
+    cijkl1_epsilonkl = -cijklj * strain_cf;
+    const Real term6_b = cijkl1_epsilonkl.doubleContraction(aux_strain);
+
+    term6 = (term6_a + term6_b) * scalar_q;
+  }
+
   Real q_avg_seg = 1.0;
   if (!_crack_front_definition->treatAs2D())
   {
@@ -279,7 +337,7 @@ InteractionIntegralTempl<is_ad>::computeQpIntegral(const std::size_t crack_front
         2.0;
   }
 
-  Real eq = term1 + term2 + term3 + term4 + term4a + term5;
+  Real eq = term1 + term2 + term3 + term4 + term4a + term5 + term6;
 
   return eq / q_avg_seg;
 }
@@ -379,7 +437,8 @@ InteractionIntegralTempl<is_ad>::threadJoin(const UserObject & y)
 template <bool is_ad>
 void
 InteractionIntegralTempl<is_ad>::computeAuxFields(RankTwoTensor & aux_stress,
-                                                  RankTwoTensor & grad_disp)
+                                                  RankTwoTensor & grad_disp,
+                                                  RankTwoTensor & aux_strain)
 {
   RealVectorValue k(0.0);
   if (_sif_mode == SifMethod::KI)
@@ -420,9 +479,18 @@ InteractionIntegralTempl<is_ad>::computeAuxFields(RankTwoTensor & aux_stress,
   aux_stress(2, 0) = aux_stress(0, 2);
   aux_stress(2, 1) = aux_stress(1, 2);
 
+  // Calculate auxiliary strain tensor (only needed to FGM)
+  if (_fgm_crack)
+  {
+    aux_strain.zero();
+    RankFourTensor spatial_elasticity_tensor;
+    spatial_elasticity_tensor.fillSymmetricIsotropicEandNu(
+        (*_functionally_graded_youngs_modulus)[_qp], _poissons_ratio);
+    aux_strain = spatial_elasticity_tensor.invSymm() * aux_stress;
+  }
+
   // Calculate x1 derivative of auxiliary displacements
   grad_disp.zero();
-
   grad_disp(0, 0) = k(0) / (4.0 * _shear_modulus * sqrt2PiR) *
                         (ct * ct2 * _kappa + ct * ct2 - 2.0 * ct * ct2cu + st * st2 * _kappa +
                          st * st2 - 6.0 * st * st2 * ct2sq) +

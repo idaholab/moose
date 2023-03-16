@@ -1,0 +1,44 @@
+[Test]
+  issues = '#23470'
+  design = 'UserObjects/index.md'
+
+  [simultaneous]
+    type = RunApp
+    input = test.i
+    cli_args = 'Postprocessors/pp2/depends_on=pp1'
+    expect_out = "I:pp1 I:pp2 I:pp3 F:pp1 F:pp2 F:pp3"
+    requirement = "The system shall execute user objects in the same group in the order given in the design documentation."
+  []
+
+  [two_groups]
+    type = RunApp
+    input = test.i
+    cli_args = 'Postprocessors/pp2/depends_on=pp1  Postprocessors/pp3/execution_order_group=3'
+    expect_out = "I:pp1 I:pp2 F:pp1 F:pp2 I:pp3 F:pp3"
+    requirement = "The system shall permit adding one new execution order group."
+  []
+
+  [inter_group_dependence]
+    type = RunApp
+    input = test.i
+    cli_args = 'Postprocessors/pp1/depends_on=pp2  Postprocessors/pp3/execution_order_group=3'
+    expect_out = "I:pp2 I:pp1 F:pp2 F:pp1 I:pp3 F:pp3"
+    requirement = "The system shall correctly resolve dependencies within an execution order group."
+  []
+
+  [three_groups]
+    type = RunApp
+    input = test.i
+    cli_args = 'Postprocessors/pp2/depends_on=pp1  Postprocessors/pp2/execution_order_group=2 Postprocessors/pp3/execution_order_group=3'
+    expect_out = "I:pp1 F:pp1 I:pp2 F:pp2 I:pp3 F:pp3"
+    requirement = "The system shall permit adding multiple new execution order groups."
+  []
+
+  [negative_group]
+    type = RunApp
+    input = test.i
+    cli_args = 'Postprocessors/pp2/depends_on=pp1  Postprocessors/pp2/execution_order_group=2 Postprocessors/pp3/execution_order_group=-3'
+    expect_out = "I:pp3 F:pp3 I:pp1 F:pp1 I:pp2 F:pp2"
+    requirement = "The system shall permit adding a new execution order group with a negative priority."
+  []
+[]

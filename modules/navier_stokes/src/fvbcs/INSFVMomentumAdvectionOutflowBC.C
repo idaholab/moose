@@ -21,9 +21,9 @@ INSFVMomentumAdvectionOutflowBC::validParams()
 {
   InputParameters params = INSFVFluxBC::validParams();
   params += INSFVFullyDevelopedFlowBC::validParams();
-  params.addRequiredCoupledVar("u", "The velocity in the x direction.");
-  params.addCoupledVar("v", "The velocity in the y direction.");
-  params.addCoupledVar("w", "The velocity in the z direction.");
+  params.addRequiredParam<MooseFunctorName>("u", "The velocity in the x direction.");
+  params.addParam<MooseFunctorName>("v", "The velocity in the y direction.");
+  params.addParam<MooseFunctorName>("w", "The velocity in the z direction.");
   params.addClassDescription("Fully developed outflow boundary condition for advecting momentum. "
                              "This will impose a zero normal gradient on the boundary velocity.");
   params.addRequiredParam<MooseFunctorName>(NS::density, "The density");
@@ -33,9 +33,9 @@ INSFVMomentumAdvectionOutflowBC::validParams()
 INSFVMomentumAdvectionOutflowBC::INSFVMomentumAdvectionOutflowBC(const InputParameters & params)
   : INSFVFluxBC(params),
     INSFVFullyDevelopedFlowBC(params),
-    _u_var(dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("u", 0))),
-    _v_var(dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("v", 0))),
-    _w_var(dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("w", 0))),
+    _u(getFunctor<ADReal>("u")),
+    _v(isParamValid("v") ? &getFunctor<ADReal>("v") : nullptr),
+    _w(isParamValid("w") ? &getFunctor<ADReal>("w") : nullptr),
     _dim(_subproblem.mesh().dimension()),
     _rho(getFunctor<ADReal>(NS::density))
 {
@@ -45,18 +45,11 @@ INSFVMomentumAdvectionOutflowBC::INSFVMomentumAdvectionOutflowBC(const InputPara
              "'--with-ad-indexing-type=global'");
 #endif
 
-  if (!_u_var)
-    paramError("u", "the u velocity must be an INSFVVelocityVariable.");
-
-  if (_dim >= 2 && !_v_var)
-    paramError("v",
-               "In two or more dimensions, the v velocity must be supplied and it must be an "
-               "INSFVVelocityVariable.");
-
-  if (_dim >= 3 && !_w_var)
-    paramError("w",
-               "In three-dimensions, the w velocity must be supplied and it must be an "
-               "INSFVVelocityVariable.");
+  if (_dim >= 2 && !_v)
+    mooseError(
+        "In two or more dimensions, the v velocity must be supplied using the 'v' parameter");
+  if (_dim >= 3 && !_w)
+    mooseError("In threedimensions, the w velocity must be supplied using the 'w' parameter");
 }
 
 void
@@ -71,16 +64,16 @@ INSFVMomentumAdvectionOutflowBC::gatherRCData(const FaceInfo & fi)
   if (_face_type == FaceInfo::VarFaceNeighbors::NEIGHBOR)
     _normal = -_normal;
 
-  ADRealVectorValue v(_u_var->getBoundaryFaceValue(*_face_info));
-  if (_v_var)
-    v(1) = _v_var->getBoundaryFaceValue(*_face_info);
-  if (_w_var)
-    v(2) = _w_var->getBoundaryFaceValue(*_face_info);
+  const auto boundary_face = singleSidedFaceArg();
+
+  ADRealVectorValue v(_u(boundary_face));
+  if (_v)
+    v(1) = (*_v)(boundary_face);
+  if (_w)
+    v(2) = (*_w)(boundary_face);
 
   const auto & elem = (_face_type == FaceInfo::VarFaceNeighbors::ELEM) ? _face_info->elem()
                                                                        : _face_info->neighbor();
-  const auto boundary_face = singleSidedFaceArg();
-
   const auto rho_boundary = _rho(boundary_face);
   const auto eps_boundary = epsFunctor()(boundary_face);
 

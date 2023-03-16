@@ -41,13 +41,13 @@ PolycrystalDiffusivity::validParams()
 PolycrystalDiffusivity::PolycrystalDiffusivity(const InputParameters & parameters)
   : DerivativeMaterialInterface<Material>(parameters),
     _c(coupledValue("c")),
-    _c_name(getVar("c", 0)->name()),
+    _c_name(coupledName("c", 0)),
     _op_num(coupledComponents("v")),
     _vals(_op_num),
     _diff_name(getParam<MaterialPropertyName>("diffusivity")),
     _diff(declareProperty<Real>(_diff_name)),
-    _dDdc(declarePropertyDerivative<Real>(_diff_name, _c_name)),
-    _dDdv(_op_num),
+    _dDdc(isCoupledConstant(_c_name) ? nullptr
+                                     : &declarePropertyDerivative<Real>(_diff_name, _c_name)),
     _hb(getMaterialProperty<Real>("void_switch")),
     _hm(getMaterialProperty<Real>("solid_switch")),
     _dhbdc(getMaterialPropertyDerivative<Real>("void_switch", _c_name)),
@@ -66,11 +66,13 @@ PolycrystalDiffusivity::PolycrystalDiffusivity(const InputParameters & parameter
   if (_op_num == 0)
     paramError("op_num", "Model requires a non zero number of order parameters.");
 
+  _dDdv.resize(_op_num);
   for (MooseIndex(_op_num) op_index = 0; op_index < _op_num; ++op_index)
   {
     _vals[op_index] = &coupledValue("v", op_index);
-    const VariableName op_name = getVar("v", op_index)->name();
-    _dDdv[op_index] = &declarePropertyDerivative<Real>(_diff_name, getVar("v", op_index)->name());
+    const VariableName op_name = coupledName("v", op_index);
+    if (!isCoupledConstant("v"))
+      _dDdv[op_index] = &declarePropertyDerivative<Real>(_diff_name, coupledName("v", op_index));
     _dhbdv[op_index] = &getMaterialPropertyDerivative<Real>("void_switch", op_index);
     _dhmdv[op_index] = &getMaterialPropertyDerivative<Real>("solid_switch", op_index);
   }
@@ -96,10 +98,12 @@ PolycrystalDiffusivity::computeQpProperties()
   _diff[_qp] = _b_weight * _diff_bulk * _hm[_qp] + _v_weight * _diff_void * _hb[_qp] +
                30.0 * _diff_surf * _s_weight * c * c * mc * mc + _diff_gb * SumEtaij * _gb_weight;
 
-  _dDdc[_qp] = _b_weight * _diff_bulk * _dhmdc[_qp] + _v_weight * _diff_void * _dhbdc[_qp] +
-               30.0 * _diff_surf * _s_weight * (2.0 * c * mc * mc - 2.0 * c * c * mc);
+  if (_dDdc)
+    (*_dDdc)[_qp] = _b_weight * _diff_bulk * _dhmdc[_qp] + _v_weight * _diff_void * _dhbdc[_qp] +
+                    30.0 * _diff_surf * _s_weight * (2.0 * c * mc * mc - 2.0 * c * c * mc);
   for (const auto op_index : make_range(_op_num))
-    (*_dDdv[op_index])[_qp] = _b_weight * _diff_bulk * (*_dhmdv[op_index])[_qp] +
-                              _v_weight * _diff_void * (*_dhbdv[op_index])[_qp] +
-                              _diff_gb * SumEtaj * _gb_weight;
+    if (_dDdv[op_index])
+      (*_dDdv[op_index])[_qp] = _b_weight * _diff_bulk * (*_dhmdv[op_index])[_qp] +
+                                _v_weight * _diff_void * (*_dhbdv[op_index])[_qp] +
+                                _diff_gb * SumEtaj * _gb_weight;
 }

@@ -70,8 +70,8 @@ std::unique_ptr<MeshBase>
 HexagonMeshTrimmer::generate()
 {
   // Check if input mesh is trimmable
-  if (hasMeshProperty("hexagon_peripheral_trimmability", _input_name) &&
-      hasMeshProperty("hexagon_center_trimmability", _input_name))
+  if (hasMeshProperty<bool>("hexagon_peripheral_trimmability", _input_name) &&
+      hasMeshProperty<bool>("hexagon_center_trimmability", _input_name))
   {
     if (!getMeshProperty<bool>("hexagon_peripheral_trimmability", _input_name) &&
         std::accumulate(_trim_peripheral_region.begin(), _trim_peripheral_region.end(), 0) > 0)
@@ -81,7 +81,9 @@ HexagonMeshTrimmer::generate()
       paramError("input", "The input mesh cannot be trimmed through its center.");
   }
   else
-    paramError("input", "The input mesh is not compatible with HexagonMeshTrimmer.");
+    paramError("input",
+               "The input mesh is not compatible with HexagonMeshTrimmer because "
+               "the trimmability mesh meta data are absent.");
 
   return PolygonMeshTrimmerBase::generate();
 }

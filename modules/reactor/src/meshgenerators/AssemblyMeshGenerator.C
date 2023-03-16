@@ -104,6 +104,8 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
                          : std::vector<std::vector<subdomain_id_type>>()),
     _extrude(getParam<bool>("extrude"))
 {
+  declareMeshesForSub("inputs");
+
   MeshGeneratorName reactor_params =
       MeshGeneratorName(getMeshProperty<std::string>("reactor_params_name", _inputs[0]));
   // Check that MG name for reactor params is consistent across all assemblies
@@ -124,7 +126,8 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
     paramError("extrude",
                "This is a 2 dimensional mesh, you cannot extrude it. Check you ReactorMeshParams "
                "inputs\n");
-  if (_extrude && (!hasReactorParam("top_boundary_id") || !hasReactorParam("bottom_boundary_id")))
+  if (_extrude && (!hasReactorParam<boundary_id_type>("top_boundary_id") ||
+                   !hasReactorParam<boundary_id_type>("bottom_boundary_id")))
     mooseError("Both top_boundary_id and bottom_boundary_id must be provided in ReactorMeshParams "
                "if using extruded geometry");
 
@@ -257,7 +260,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
       params.set<std::vector<BoundaryName>>("new_boundary") =
           std::vector<BoundaryName>(4, _assembly_boundary_name);
 
-      _build_mesh = &addMeshSubgenerator("RenameBoundaryGenerator", name() + "_pattern", params);
+      addMeshSubgenerator("RenameBoundaryGenerator", name() + "_pattern", params);
     }
     //***Add assembly duct around PatternedMesh
   }
@@ -275,7 +278,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
       params.set<Real>("hexagon_size") = getReactorParam<Real>("assembly_pitch") / 2.0;
       params.set<MooseEnum>("hexagon_size_style") = "apothem";
       params.set<unsigned int>("background_intervals") = _background_intervals;
-      params.set<bool>("create_interface_boundaries") = false;
+      params.set<bool>("create_outward_interface_boundaries") = false;
       // Initial block id used to define peripheral regions of assembly
       unsigned int assembly_block_id_start = 20000;
 
@@ -306,36 +309,37 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
       params.set<boundary_id_type>("external_boundary_id") = _assembly_boundary_id;
       params.set<std::string>("external_boundary_name") = _assembly_boundary_name;
 
-      _build_mesh =
-          &addMeshSubgenerator("HexIDPatternedMeshGenerator", name() + "_pattern", params);
+      addMeshSubgenerator("HexIDPatternedMeshGenerator", name() + "_pattern", params);
 
       // Pass mesh meta-data defined in subgenerator constructor to this MeshGenerator
-      if (hasMeshProperty("pitch_meta", name() + "_pattern"))
+      if (hasMeshProperty<Real>("pitch_meta", name() + "_pattern"))
         declareMeshProperty("pitch_meta", getMeshProperty<Real>("pitch_meta", name() + "_pattern"));
-      if (hasMeshProperty("num_sectors_per_side_meta", name() + "_pattern"))
+      if (hasMeshProperty<std::vector<unsigned int>>("num_sectors_per_side_meta",
+                                                     name() + "_pattern"))
         declareMeshProperty("num_sectors_per_side_meta",
                             getMeshProperty<std::vector<unsigned int>>("num_sectors_per_side_meta",
                                                                        name() + "_pattern"));
-      if (hasMeshProperty("is_control_drum_meta", name() + "_pattern"))
+      if (hasMeshProperty<bool>("is_control_drum_meta", name() + "_pattern"))
         declareMeshProperty("is_control_drum_meta",
                             getMeshProperty<bool>("is_control_drum_meta", name() + "_pattern"));
-      if (hasMeshProperty("control_drum_positions", name() + "_pattern"))
+      if (hasMeshProperty<std::vector<Point>>("control_drum_positions", name() + "_pattern"))
         declareMeshProperty(
             "control_drum_positions",
             getMeshProperty<std::vector<Point>>("control_drum_positions", name() + "_pattern"));
-      if (hasMeshProperty("control_drum_angles", name() + "_pattern"))
+      if (hasMeshProperty<std::vector<Real>>("control_drum_angles", name() + "_pattern"))
         declareMeshProperty(
             "control_drum_angles",
             getMeshProperty<std::vector<Real>>("control_drum_angles", name() + "_pattern"));
-      if (hasMeshProperty("control_drums_azimuthal_meta", name() + "_pattern"))
+      if (hasMeshProperty<std::vector<std::vector<Real>>>("control_drums_azimuthal_meta",
+                                                          name() + "_pattern"))
         declareMeshProperty("control_drums_azimuthal_meta",
                             getMeshProperty<std::vector<std::vector<Real>>>(
                                 "control_drums_azimuthal_meta", name() + "_pattern"));
-      if (hasMeshProperty("position_file_name", name() + "_pattern"))
+      if (hasMeshProperty<std::string>("position_file_name", name() + "_pattern"))
         declareMeshProperty(
             "position_file_name",
             getMeshProperty<std::string>("position_file_name", name() + "_pattern"));
-      if (hasMeshProperty("pattern_pitch_meta", name() + "_pattern"))
+      if (hasMeshProperty<Real>("pattern_pitch_meta", name() + "_pattern"))
         declareMeshProperty("pattern_pitch_meta",
                             getMeshProperty<Real>("pattern_pitch_meta", name() + "_pattern"));
 
@@ -345,6 +349,8 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
       declareMeshProperty("duct_block_names", _duct_block_names);
     }
   }
+
+  std::string build_mesh_name = name() + "_delbds";
 
   // Remove outer pin sidesets created by PolygonConcentricCircleMeshGenerator
   {
@@ -366,7 +372,7 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
     params.set<MeshGeneratorName>("input") = name() + "_pattern";
     params.set<std::vector<BoundaryName>>("boundary_names") = boundaries_to_delete;
 
-    _build_mesh = &addMeshSubgenerator("BoundaryDeletionGenerator", name() + "_delbds", params);
+    addMeshSubgenerator("BoundaryDeletionGenerator", build_mesh_name, params);
   }
 
   for (auto pinMG : _inputs)
@@ -435,19 +441,25 @@ AssemblyMeshGenerator::AssemblyMeshGenerator(const InputParameters & parameters)
       std::string plane_id_name = "plane_id";
       params.set<std::string>("id_name") = "plane_id";
 
-      _build_mesh = &addMeshSubgenerator("PlaneIDMeshGenerator", name() + "_extrudedIDs", params);
+      build_mesh_name = name() + "_extrudedIDs";
+      addMeshSubgenerator("PlaneIDMeshGenerator", build_mesh_name, params);
     }
   }
   else
     declareMeshProperty("extruded", false);
+
+  _build_mesh = &getMeshByName(build_mesh_name);
 }
 
 std::unique_ptr<MeshBase>
 AssemblyMeshGenerator::generate()
 {
+  // Must be called to free the ReactorMeshParams mesh
+  freeReactorMeshParams();
+
   // Update metadata at this point since values for these metadata only get set by PCCMG
   // at generate() stage
-  if (hasMeshProperty("pattern_pitch_meta", name() + "_pattern"))
+  if (hasMeshProperty<Real>("pattern_pitch_meta", name() + "_pattern"))
   {
     const auto pattern_pitch_meta =
         getMeshProperty<Real>("pattern_pitch_meta", name() + "_pattern");

@@ -1,18 +1,23 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # SetComponentRealValueControl
 
 !alert construction title=Undocumented Class
-The SetComponentRealValueControl has not been documented. The content contained on this page includes the
-typical automatic documentation associated with a MooseObject; however, what is contained is
-ultimately determined by what is necessary to make the documentation clear for users.
+The SetComponentRealValueControl has not been documented. The content listed below should be used as a starting point for
+documenting the class, which includes the typical automatic documentation associated with a
+MooseObject; however, what is contained is ultimately determined by what is necessary to make the
+documentation clear for users.
 
-!syntax description /ControlLogic/SetComponentRealValueControl
+!syntax description /Controls/SetComponentRealValueControl
 
-!syntax parameters /ControlLogic/SetComponentRealValueControl
+## Overview
 
-!syntax inputs /ControlLogic/SetComponentRealValueControl
+!! Replace these lines with information regarding the SetComponentRealValueControl object.
 
-!syntax children /ControlLogic/SetComponentRealValueControl
+## Example Input File Syntax
 
-!bibtex bibliography
+!! Describe and include an example of how to use the SetComponentRealValueControl object.
+
+!syntax parameters /Controls/SetComponentRealValueControl
+
+!syntax inputs /Controls/SetComponentRealValueControl
+
+!syntax children /Controls/SetComponentRealValueControl

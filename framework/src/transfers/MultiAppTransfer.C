@@ -96,6 +96,9 @@ MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters)
       _to_multi_app = _fe_problem.getMultiApp(getParam<MultiAppName>("to_multi_app"));
       _multi_app = _to_multi_app;
     }
+    if (!isParamValid("direction") && !isParamValid("from_multi_app") &&
+        !isParamValid("to_multi_app"))
+      mooseError("from_multi_app and/or to_multi_app must be specified");
   }
   else
   {
@@ -449,11 +452,8 @@ MultiAppTransfer::transformBoundingBox(BoundingBox & box, const MultiAppCoordTra
   MultiApp::transformBoundingBox(box, transform);
 }
 
-namespace
-{
-template <typename T>
 void
-extendBoundingBoxes(const Real factor, T & bboxes)
+MultiAppTransfer::extendBoundingBoxes(const Real factor, std::vector<BoundingBox> & bboxes) const
 {
   const auto extension_factor = factor - 1;
 
@@ -480,7 +480,6 @@ extendBoundingBoxes(const Real factor, T & bboxes)
     box.second += width * extension_factor;
     box.first -= width * extension_factor;
   }
-}
 }
 
 std::vector<BoundingBox>

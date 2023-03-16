@@ -19,7 +19,7 @@ class MeshBase;
 }
 
 /**
- * Report the time and iteration information for the simulation.
+ * Report mesh information, such as the number of elements, nodes, and degrees of freedom.
  */
 class MeshInfo : public GeneralReporter
 {

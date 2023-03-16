@@ -14,7 +14,7 @@
 
 !include manual_mpich_gcc.md
 
-!include getting_started/installation/manual_miniconda.md
+!include optional_python_and_peacock.md
 
 ## bash_profile
 
@@ -40,6 +40,7 @@ export CC=mpicc
 export CXX=mpicxx
 export FC=mpif90
 export F90=mpif90
+mamba activate peacock  # if you choose to optionally install Peacock
 !package-end!
 
 Thats it! Now you can either source this file manually each time you need to work on a MOOSE based
@@ -51,7 +52,6 @@ source /path/to/moose-environment.sh
 
 Or you can permanently have it loaded each time you open a terminal by adding the above `source`
 command in your ~/.bash_profile (or ~/.bashrc which ever your system uses).
-
 
 ## Compiler Stack Finished
 

@@ -10,11 +10,13 @@
 #include "PorousFlowPorosityConst.h"
 
 registerMooseObject("PorousFlowApp", PorousFlowPorosityConst);
+registerMooseObject("PorousFlowApp", ADPorousFlowPorosityConst);
 
+template <bool is_ad>
 InputParameters
-PorousFlowPorosityConst::validParams()
+PorousFlowPorosityConstTempl<is_ad>::validParams()
 {
-  InputParameters params = PorousFlowPorosityBase::validParams();
+  InputParameters params = PorousFlowPorosityBaseTempl<is_ad>::validParams();
   params.addRequiredCoupledVar(
       "porosity",
       "The porosity (assumed indepenent of porepressure, temperature, "
@@ -24,24 +26,34 @@ PorousFlowPorosityConst::validParams()
   return params;
 }
 
-PorousFlowPorosityConst::PorousFlowPorosityConst(const InputParameters & parameters)
-  : PorousFlowPorosityBase(parameters), _input_porosity(coupledValue("porosity"))
+template <bool is_ad>
+PorousFlowPorosityConstTempl<is_ad>::PorousFlowPorosityConstTempl(
+    const InputParameters & parameters)
+  : PorousFlowPorosityBaseTempl<is_ad>(parameters), _input_porosity(coupledValue("porosity"))
 {
 }
 
+template <bool is_ad>
 void
-PorousFlowPorosityConst::initQpStatefulProperties()
+PorousFlowPorosityConstTempl<is_ad>::initQpStatefulProperties()
 {
   // note the [0] below: _phi0 is a constant monomial and we use [0] regardless of _nodal_material
   _porosity[_qp] = _input_porosity[0];
 }
 
+template <bool is_ad>
 void
-PorousFlowPorosityConst::computeQpProperties()
+PorousFlowPorosityConstTempl<is_ad>::computeQpProperties()
 {
   initQpStatefulProperties();
 
-  // The derivatives are zero for all time
-  _dporosity_dvar[_qp].assign(_num_var, 0.0);
-  _dporosity_dgradvar[_qp].assign(_num_var, RealGradient());
+  if (!is_ad)
+  {
+    // The derivatives are zero for all time
+    (*_dporosity_dvar)[_qp].assign(_num_var, 0.0);
+    (*_dporosity_dgradvar)[_qp].assign(_num_var, RealGradient());
+  }
 }
+
+template class PorousFlowPorosityConstTempl<false>;
+template class PorousFlowPorosityConstTempl<true>;

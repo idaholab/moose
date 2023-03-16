@@ -34,8 +34,10 @@ ComputeCrystalPlasticityThermalEigenstrain::ComputeCrystalPlasticityThermalEigen
   : DerivativeMaterialInterface<ComputeCrystalPlasticityEigenstrainBase>(parameters),
     _temperature(coupledValue("temperature")),
     _temperature_old(coupledValueOld("temperature")),
-    _ddeformation_gradient_dT(declarePropertyDerivative<RankTwoTensor>(
-        _deformation_gradient_name, getVar("temperature", 0)->name())),
+    _ddeformation_gradient_dT(isCoupledConstant("temperature")
+                                  ? nullptr
+                                  : &declarePropertyDerivative<RankTwoTensor>(
+                                        _deformation_gradient_name, coupledName("temperature", 0))),
     _thermal_expansion_coefficients(getParam<std::vector<Real>>("thermal_expansion_coefficients")),
     _lattice_thermal_expansion_coefficients(declareProperty<RankTwoTensor>(
         _eigenstrain_name +
@@ -65,6 +67,7 @@ ComputeCrystalPlasticityThermalEigenstrain::computeQpDeformationGradient()
       residual_equivalent_thermal_expansion_increment.inverse() * _deformation_gradient_old[_qp];
 
   // compute the derivative of deformation gradient w.r.t temperature
-  _ddeformation_gradient_dT[_qp] =
-      _lattice_thermal_expansion_coefficients[_qp] * _deformation_gradient[_qp];
+  if (_ddeformation_gradient_dT)
+    (*_ddeformation_gradient_dT)[_qp] =
+        _lattice_thermal_expansion_coefficients[_qp] * _deformation_gradient[_qp];
 }

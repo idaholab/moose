@@ -302,3 +302,10 @@ properties can be retrieved in compute objects like `ADKernels` by using the
 `getADMaterialProperty` API. For detailed examples of [!ac](AD) use, the reader is
 encouraged to investigate the tensor mechanics, navier-stokes, and level-set
 modules, all of which heavily leverage MOOSE's [!ac](AD) capabilities.
+
+### Combining AD and non-AD classes
+
+It is possible to support the use of AD and non-AD variables in classes without
+having to duplicate code unnecessarily through the use of templating. Several
+examples can be found in the code base, the details of which are outlined
+[here](templated_objects.md).

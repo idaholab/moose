@@ -205,6 +205,7 @@ typedef unsigned int THREAD_ID;
 typedef unsigned int TagID;
 typedef unsigned int TagTypeID;
 typedef unsigned int PerfID;
+typedef unsigned int InvalidSolutionID;
 using RestartableDataMapName = std::string; // see MooseApp.h
 
 typedef StoredRange<std::vector<dof_id_type>::iterator, dof_id_type> NodeIdRange;
@@ -424,6 +425,65 @@ struct ADType<VariableSecond>
   typedef ADVariableSecond type;
 };
 
+template <>
+struct ADType<ADReal>
+{
+  typedef ADReal type;
+};
+template <>
+struct ADType<ChainedADReal>
+{
+  typedef ChainedADReal type;
+};
+template <>
+struct ADType<ADRankTwoTensor>
+{
+  typedef ADRankTwoTensor type;
+};
+template <>
+struct ADType<ADRankThreeTensor>
+{
+  typedef ADRankThreeTensor type;
+};
+template <>
+struct ADType<ADRankFourTensor>
+{
+  typedef ADRankFourTensor type;
+};
+
+template <>
+struct ADType<ADSymmetricRankTwoTensor>
+{
+  typedef ADSymmetricRankTwoTensor type;
+};
+template <>
+struct ADType<ADSymmetricRankFourTensor>
+{
+  typedef ADSymmetricRankFourTensor type;
+};
+
+template <template <typename> class W>
+struct ADType<W<ADReal>>
+{
+  typedef W<ADReal> type;
+};
+
+template <>
+struct ADType<ADVariableValue>
+{
+  typedef ADVariableValue type;
+};
+template <>
+struct ADType<ADVariableGradient>
+{
+  typedef ADVariableGradient type;
+};
+template <>
+struct ADType<ADVariableSecond>
+{
+  typedef ADVariableSecond type;
+};
+
 /**
  * This is a helper variable template for cases when we want to use a default compile-time
  * error with constexpr-based if conditions. The templating delays the triggering
@@ -509,14 +569,6 @@ using GenericDenseVector =
 template <bool is_ad>
 using GenericDenseMatrix =
     typename std::conditional<is_ad, DenseMatrix<ADReal>, DenseMatrix<Real>>::type;
-
-// Should be removed with #19439
-#define defineLegacyParams(ObjectType)                                                             \
-  static_assert(false,                                                                             \
-                "defineLegacyParams is no longer supported as legacy input parameter "             \
-                "construction is no longer supported; see "                                        \
-                "mooseframework.org/newsletter/2021_11.html#legacy-input-parameter-deprecation "   \
-                "for more information");
 
 namespace Moose
 {
@@ -838,6 +890,7 @@ typedef std::function<void(const InputParameters &, InputParameters &)>
     RelationshipManagerInputParameterCallback;
 
 std::string stringify(const Moose::RelationshipManagerType & t);
+std::string stringify(const Moose::TimeIntegratorType & t);
 } // namespace Moose
 
 namespace libMesh

@@ -19,9 +19,9 @@ INSFVWallFunctionBC::validParams()
   InputParameters params = INSFVNaturalFreeSlipBC::validParams();
   params.addClassDescription("Implements a wall shear BC for the momentum equation based on "
                              "algebraic standard velocity wall functions.");
-  params.addRequiredCoupledVar("u", "The velocity in the x direction.");
-  params.addCoupledVar("v", "The velocity in the y direction.");
-  params.addCoupledVar("w", "The velocity in the z direction.");
+  params.addRequiredParam<MooseFunctorName>("u", "The velocity in the x direction.");
+  params.addParam<MooseFunctorName>("v", "The velocity in the y direction.");
+  params.addParam<MooseFunctorName>("w", "The velocity in the z direction.");
   params.addRequiredParam<MooseFunctorName>(NS::density, "fluid density");
   params.addRequiredParam<MooseFunctorName>("mu", "Dynamic viscosity");
   return params;
@@ -30,13 +30,9 @@ INSFVWallFunctionBC::validParams()
 INSFVWallFunctionBC::INSFVWallFunctionBC(const InputParameters & params)
   : INSFVNaturalFreeSlipBC(params),
     _dim(_subproblem.mesh().dimension()),
-    _u_var(dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("u", 0))),
-    _v_var(params.isParamValid("v")
-               ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("v", 0))
-               : nullptr),
-    _w_var(params.isParamValid("w")
-               ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("w", 0))
-               : nullptr),
+    _u(getFunctor<ADReal>("u")),
+    _v(isParamValid("v") ? &getFunctor<ADReal>("v") : nullptr),
+    _w(isParamValid("w") ? &getFunctor<ADReal>("w") : nullptr),
     _rho(getFunctor<ADReal>(NS::density)),
     _mu(getFunctor<ADReal>("mu"))
 {
@@ -48,11 +44,12 @@ INSFVWallFunctionBC::computeStrongResidual()
   // Get the velocity vector
   const FaceInfo & fi = *_face_info;
   const Elem & elem = fi.elem();
-  ADRealVectorValue velocity(_u_var->getElemValue(&elem));
-  if (_v_var)
-    velocity(1) = _v_var->getElemValue(&elem);
-  if (_w_var)
-    velocity(2) = _w_var->getElemValue(&elem);
+  Moose::ElemArg elem_arg{&elem, false};
+  ADRealVectorValue velocity(_u(elem_arg));
+  if (_v)
+    velocity(1) = (*_v)(elem_arg);
+  if (_w)
+    velocity(2) = (*_w)(elem_arg);
 
   // Compute the velocity magnitude (parallel_speed) and
   // direction of the tangential velocity component (parallel_dir)

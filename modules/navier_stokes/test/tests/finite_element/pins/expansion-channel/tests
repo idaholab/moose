@@ -1,0 +1,12 @@
+[Tests]
+  design = 'modules/navier_stokes/index.md'
+  [slip_wall]
+    type = 'Exodiff'
+    input = 'expansion-channel-slip-wall.i'
+    exodiff = 'expansion-channel-slip-wall_out.e'
+    abs_zero = 1e-6
+    issues = '#23121'
+    requirement = 'The system shall be able to solve a porous flow using slip-wall boundary condition.'
+    allow_warnings = true
+  []
+[]

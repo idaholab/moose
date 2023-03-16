@@ -26,6 +26,7 @@ CartesianIDPatternedMeshGenerator::validParams()
       "User-defined element IDs. A double-indexed array starting with the upper-left corner");
   params.addClassDescription("Generate Certesian lattice meshes with reporting ID assignment that "
                              "indentifies individual components of lattice.");
+
   return params;
 }
 
@@ -33,15 +34,16 @@ CartesianIDPatternedMeshGenerator::CartesianIDPatternedMeshGenerator(
     const InputParameters & parameters)
   : PatternedMeshGenerator(parameters),
     _element_id_name(getParam<std::string>("id_name")),
-    _assign_type(getParam<MooseEnum>("assign_type")),
+    _assign_type(
+        getParam<MooseEnum>("assign_type").getEnum<ReportingIDGeneratorUtils::AssignType>()),
     _use_exclude_id(isParamValid("exclude_id"))
 {
-  if (_use_exclude_id && _assign_type != "cell")
+  if (_use_exclude_id && _assign_type != ReportingIDGeneratorUtils::AssignType::cell)
     paramError("exclude_id", "works only when \"assign_type\" is equal 'cell'");
-  if (!isParamValid("id_pattern") && _assign_type == "manual")
+  if (!isParamValid("id_pattern") && _assign_type == ReportingIDGeneratorUtils::AssignType::manual)
     paramError("id_pattern", "required when \"assign_type\" is equal to 'manual'");
 
-  if (_assign_type == "manual")
+  if (_assign_type == ReportingIDGeneratorUtils::AssignType::manual)
     _id_pattern = getParam<std::vector<std::vector<dof_id_type>>>("id_pattern");
   _exclude_ids.resize(_input_names.size());
   if (_use_exclude_id)

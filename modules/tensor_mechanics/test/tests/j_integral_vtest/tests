@@ -2,7 +2,6 @@
   design = 'syntax/DomainIntegral/index.md'
   issues = '#2717'
   [j_ellip]
-    design = 'syntax/DomainIntegral/index.md'
     type = 'CSVDiff'
     input = 'j_int_surfbreak_ellip_crack_sym_mm.i'
     csvdiff = 'j_int_surfbreak_ellip_crack_sym_mm_out_J_1_0001.csv '
@@ -84,5 +83,33 @@
                   'including the C integral for surface breaking elliptical cracks using automatic '
                   'differentiation.'
     rel_err = 1.0e-4
+  []
+  [j_int_fgm_sif]
+    type = 'CSVDiff'
+    issues = '#23313'
+    input = 'j_int_fgm_sif.i'
+    csvdiff = 'j_int_fgm_sif_out.csv'
+    cli_args = 'DomainIntegral/functionally_graded_youngs_modulus_crack_dir_gradient=elastic_mod_material_der_mat'
+    requirement = 'The Domain Integral Action shall compute stress intensity factors from the '
+                  'interaction integral for a crack perpendicular to a bi-material interface, '
+                  'treating the interface as a functionally-graded material.'
+  []
+  [j_int_fgm_sif_error]
+    type = 'RunException'
+    input = 'j_int_fgm_sif.i'
+    expect_err = 'You have selected to compute the interaction integral for a crack in FGM'
+    requirement = "The Domain Integral shall error out if the user input does not consistently "
+                  "define the required material properties to consider extra interaction integral "
+                  "terms for functionally graded materials."
+  []
+  [fgm_5]
+    issues = '#23313'
+    type = 'CSVDiff'
+    input = 'fgm_5.i'
+    csvdiff = 'fgm_5_out.csv'
+    requirement = 'The Domain Integral Action shall compute stress intensity factors from the '
+                  'interaction integral, with an added term stemming for spatially varying '
+                  'properties, that accounts for the crack perpendicularity to the property grading '
+                  'and yield verified results.'
   []
 []

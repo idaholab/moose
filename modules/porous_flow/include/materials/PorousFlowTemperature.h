@@ -9,18 +9,18 @@
 
 #pragma once
 
-#include "DerivativeMaterialInterface.h"
 #include "PorousFlowMaterial.h"
 
 /**
  * Creates temperature Materials
  */
-class PorousFlowTemperature : public DerivativeMaterialInterface<PorousFlowMaterial>
+template <bool is_ad>
+class PorousFlowTemperatureTempl : public PorousFlowMaterial
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowTemperature(const InputParameters & parameters);
+  PorousFlowTemperatureTempl(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;
@@ -30,7 +30,7 @@ protected:
   const unsigned int _num_pf_vars;
 
   /// Variable value of temperature at quadpoints or nodes
-  const VariableValue & _temperature_var;
+  const GenericVariableValue<is_ad> & _temperature_var;
 
   /// Gradient(_temperature at quadpoints)
   const VariableGradient * const _grad_temperature_var;
@@ -42,10 +42,10 @@ protected:
   const unsigned int _t_var_num;
 
   /// Computed temperature at quadpoints or nodes
-  MaterialProperty<Real> & _temperature;
+  GenericMaterialProperty<Real, is_ad> & _temperature;
 
   /// d(computed temperature)/d(PorousFlow variable)
-  MaterialProperty<std::vector<Real>> & _dtemperature_dvar;
+  MaterialProperty<std::vector<Real>> * const _dtemperature_dvar;
 
   /// Grad(temperature) at the quadpoints (not needed for nodal_materials)
   MaterialProperty<RealGradient> * const _grad_temperature;
@@ -56,3 +56,6 @@ protected:
   /// d(grad temperature)/d(PorousFlow variable) at the quadpoints
   MaterialProperty<std::vector<RealGradient>> * const _dgrad_temperature_dv;
 };
+
+typedef PorousFlowTemperatureTempl<false> PorousFlowTemperature;
+typedef PorousFlowTemperatureTempl<true> ADPorousFlowTemperature;

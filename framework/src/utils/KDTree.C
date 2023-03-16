@@ -58,3 +58,9 @@ KDTree::radiusSearch(const Point & query_point,
   nanoflann::SearchParams sp;
   _kd_tree->radiusSearch(&query_point(0), radius * radius, indices_dist, sp);
 }
+
+std::size_t
+KDTree::numberCandidatePoints()
+{
+  return _point_list_adaptor.kdtree_get_point_count();
+}

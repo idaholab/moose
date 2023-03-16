@@ -89,7 +89,7 @@ DerivativeMaterialInterfaceTHM<T>::declarePropertyDerivativeTHM(const std::strin
                                                                 const std::string & var_name,
                                                                 const unsigned int i)
 {
-  return this->template declarePropertyDerivative<U>(base, this->getVar(var_name, i)->name());
+  return this->template declarePropertyDerivative<U>(base, this->coupledName(var_name, i));
 }
 
 template <class T>
@@ -103,7 +103,7 @@ DerivativeMaterialInterfaceTHM<T>::getMaterialPropertyDerivativeTHM(const std::s
   const std::string prop_name = this->deducePropertyName(base);
 
   // get the name of the variable which derivative is respect to
-  const std::string der_var_name = this->getVar(var_name, i)->name();
+  const std::string der_var_name = this->coupledName(var_name, i);
 
   return this->template getMaterialPropertyByName<U>(
       this->derivativePropertyNameFirst(prop_name, der_var_name));
@@ -126,7 +126,7 @@ DerivativeMaterialInterfaceTHM<T>::getMaterialPropertyDerivativeTHMPhase(
   else
   {
     const std::string prop_name = this->deducePropertyName(base);
-    const std::string der_var_name = this->getVar(var_name, i)->name();
+    const std::string der_var_name = this->coupledName(var_name, i);
     const std::string der_prop_name = this->derivativePropertyNameFirst(prop_name, der_var_name);
     return this->template getZeroMaterialProperty<U>(der_prop_name);
   }

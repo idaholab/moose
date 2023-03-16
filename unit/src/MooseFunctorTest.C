@@ -17,6 +17,8 @@
 #include "GeneratedMeshGenerator.h"
 #include "AppFactory.h"
 #include "PiecewiseByBlockLambdaFunctor.h"
+#include "ADWrapperFunctor.h"
+#include "RawValueFunctor.h"
 #include "libmesh/elem.h"
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/type_tensor.h"
@@ -186,6 +188,43 @@ TEST(MooseFunctorTest, testArgs)
     EXPECT_EQ(cf.dot(elem_qp), 0);
     EXPECT_EQ(cf.dot(elem_side_qp), 0);
     EXPECT_EQ(cf.dot(elem_point), 0);
+
+    // Test AD up-type
+    ADWrapperFunctor<ADReal> ad_cf(cf);
+    EXPECT_EQ(cf(elem_arg), MetaPhysicL::raw_value(ad_cf(elem_arg)));
+    EXPECT_EQ(cf(face), MetaPhysicL::raw_value(ad_cf(face)));
+    EXPECT_EQ(cf(elem_point), MetaPhysicL::raw_value(ad_cf(elem_point)));
+    EXPECT_EQ(cf(elem_qp), MetaPhysicL::raw_value(ad_cf(elem_qp)));
+    EXPECT_EQ(cf(elem_side_qp), MetaPhysicL::raw_value(ad_cf(elem_side_qp)));
+    EXPECT_EQ(cf.gradient(elem_arg)(0), MetaPhysicL::raw_value(ad_cf.gradient(elem_arg)(0)));
+    EXPECT_EQ(cf.gradient(face)(0), MetaPhysicL::raw_value(ad_cf.gradient(face)(0)));
+    EXPECT_EQ(cf.gradient(elem_point)(0), MetaPhysicL::raw_value(ad_cf.gradient(elem_point)(0)));
+    EXPECT_EQ(cf.gradient(elem_qp)(0), MetaPhysicL::raw_value(ad_cf.gradient(elem_qp)(0)));
+    EXPECT_EQ(cf.gradient(elem_side_qp)(0),
+              MetaPhysicL::raw_value(ad_cf.gradient(elem_side_qp)(0)));
+    EXPECT_EQ(cf.dot(elem_arg), MetaPhysicL::raw_value(ad_cf.dot(elem_arg)));
+    EXPECT_EQ(cf.dot(face), MetaPhysicL::raw_value(ad_cf.dot(face)));
+    EXPECT_EQ(cf.dot(elem_point), MetaPhysicL::raw_value(ad_cf.dot(elem_point)));
+    EXPECT_EQ(cf.dot(elem_qp), MetaPhysicL::raw_value(ad_cf.dot(elem_qp)));
+    EXPECT_EQ(cf.dot(elem_side_qp), MetaPhysicL::raw_value(ad_cf.dot(elem_side_qp)));
+
+    // Test AD down-type
+    RawValueFunctor<Real> raw_ad_cf(ad_cf);
+    EXPECT_EQ(cf(elem_arg), raw_ad_cf(elem_arg));
+    EXPECT_EQ(cf(face), raw_ad_cf(face));
+    EXPECT_EQ(cf(elem_point), raw_ad_cf(elem_point));
+    EXPECT_EQ(cf(elem_qp), raw_ad_cf(elem_qp));
+    EXPECT_EQ(cf(elem_side_qp), raw_ad_cf(elem_side_qp));
+    EXPECT_EQ(cf.gradient(elem_arg)(0), raw_ad_cf.gradient(elem_arg)(0));
+    EXPECT_EQ(cf.gradient(face)(0), raw_ad_cf.gradient(face)(0));
+    EXPECT_EQ(cf.gradient(elem_point)(0), raw_ad_cf.gradient(elem_point)(0));
+    EXPECT_EQ(cf.gradient(elem_qp)(0), raw_ad_cf.gradient(elem_qp)(0));
+    EXPECT_EQ(cf.gradient(elem_side_qp)(0), raw_ad_cf.gradient(elem_side_qp)(0));
+    EXPECT_EQ(cf.dot(elem_arg), raw_ad_cf.dot(elem_arg));
+    EXPECT_EQ(cf.dot(face), raw_ad_cf.dot(face));
+    EXPECT_EQ(cf.dot(elem_point), raw_ad_cf.dot(elem_point));
+    EXPECT_EQ(cf.dot(elem_qp), raw_ad_cf.dot(elem_qp));
+    EXPECT_EQ(cf.dot(elem_side_qp), raw_ad_cf.dot(elem_side_qp));
   }
 
   const char * argv[2] = {"foo", "\0"};

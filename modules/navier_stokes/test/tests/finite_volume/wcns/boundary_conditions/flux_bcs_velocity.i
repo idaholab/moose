@@ -167,7 +167,7 @@ inlet_velocity = 0.001
 
   # Scalar concentration equation
   [scalar_time]
-    type = FVTimeKernel
+    type = FVFunctorTimeKernel
     variable = scalar
   []
   [scalar_advection]

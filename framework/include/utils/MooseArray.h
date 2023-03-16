@@ -234,14 +234,14 @@ MooseArray<T>::resize(unsigned int size, const T & default_value)
 {
   if (size > _allocated_size)
   {
-    T * new_pointer = new T[size];
+    auto new_pointer = std::make_unique<T[]>(size);
     mooseAssert(new_pointer, "Failed to allocate MooseArray memory!");
 
     if (_data)
       for (unsigned int i = 0; i < _size; i++)
         new_pointer[i] = _data[i];
 
-    _data_ptr.reset(new_pointer);
+    _data_ptr = std::move(new_pointer);
     _data = _data_ptr.get();
     _allocated_size = size;
   }

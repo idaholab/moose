@@ -48,8 +48,7 @@
     type = SamplerParameterTransfer
     to_multi_app = sub
     sampler = sample
-    parameters = 'BCs/left/value Materials/mat/prop_values BCs/right/value'
-    to_control = 'stochastic'
+    parameters = 'BCs/left/value[0] Materials/mat/prop_values[1,2] BCs/right/value[3]'
     execute_on = 'initial timestep_end'
     check_multiapp_execute_on = false
   []

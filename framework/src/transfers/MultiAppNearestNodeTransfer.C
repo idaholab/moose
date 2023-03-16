@@ -47,6 +47,7 @@ MultiAppNearestNodeTransfer::validParams()
                         "no movement or adaptivity).  This will cache "
                         "nearest node neighbors to greatly speed up the "
                         "transfer.");
+
   MultiAppTransfer::addBBoxFactorParam(params);
   return params;
 }

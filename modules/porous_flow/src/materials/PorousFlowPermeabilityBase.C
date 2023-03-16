@@ -9,8 +9,9 @@
 
 #include "PorousFlowPermeabilityBase.h"
 
+template <bool is_ad>
 InputParameters
-PorousFlowPermeabilityBase::validParams()
+PorousFlowPermeabilityBaseTempl<is_ad>::validParams()
 {
   InputParameters params = PorousFlowMaterialVectorBase::validParams();
   params.addClassDescription("Base class for material permeability");
@@ -19,14 +20,21 @@ PorousFlowPermeabilityBase::validParams()
   return params;
 }
 
-PorousFlowPermeabilityBase::PorousFlowPermeabilityBase(const InputParameters & parameters)
+template <bool is_ad>
+PorousFlowPermeabilityBaseTempl<is_ad>::PorousFlowPermeabilityBaseTempl(
+    const InputParameters & parameters)
   : PorousFlowMaterialVectorBase(parameters),
-    _permeability_qp(declareProperty<RealTensorValue>("PorousFlow_permeability_qp")),
+    _permeability_qp(declareGenericProperty<RealTensorValue, is_ad>("PorousFlow_permeability_qp")),
     _dpermeability_qp_dvar(
-        declareProperty<std::vector<RealTensorValue>>("dPorousFlow_permeability_qp_dvar")),
-    _dpermeability_qp_dgradvar(declareProperty<std::vector<std::vector<RealTensorValue>>>(
-        "dPorousFlow_permeability_qp_dgradvar"))
+        is_ad ? nullptr
+              : &declareProperty<std::vector<RealTensorValue>>("dPorousFlow_permeability_qp_dvar")),
+    _dpermeability_qp_dgradvar(is_ad ? nullptr
+                                     : &declareProperty<std::vector<std::vector<RealTensorValue>>>(
+                                           "dPorousFlow_permeability_qp_dgradvar"))
 {
   if (_nodal_material == true)
     mooseError("PorousFlowPermeability classes are only defined for at_nodes = false");
 }
+
+template class PorousFlowPermeabilityBaseTempl<false>;
+template class PorousFlowPermeabilityBaseTempl<true>;

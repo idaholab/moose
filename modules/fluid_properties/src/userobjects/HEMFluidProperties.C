@@ -14,8 +14,8 @@ InputParameters
 HEMFluidProperties::validParams()
 {
   InputParameters params = FluidProperties::validParams();
-  params.addCustomTypeParam<std::string>(
-      "fp_type", "hem-fp", "FPType", "Type of the fluid property object");
+  params.set<std::string>("fp_type") = "hem-fp";
+
   return params;
 }
 

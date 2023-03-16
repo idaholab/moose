@@ -28,7 +28,7 @@ class FEProblemBase;
  *
  * Originally, MOOSE included a Postprocessor system that allowed for an object to produce a
  * single scalar value for consumption by other objects. Then a companion system was created,
- * the VectorPostprocessor system, that allowed for an object to produced many std::vector<Real>
+ * the VectorPostprocessor system, that allowed for an object to produce many std::vector<Real>
  * values. The Reporter system is the generalization of these two ideas and follows closely the
  * original design of the VectorPostprocessor system.
  *

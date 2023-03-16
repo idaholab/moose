@@ -9,12 +9,12 @@
 
 #include "HeatTransferFromHeatStructure3D1Phase.h"
 #include "FlowChannel1Phase.h"
-#include "HeatStructureBase.h"
 #include "HeatStructureFromFile3D.h"
 #include "FlowModelSinglePhase.h"
 #include "THMMesh.h"
 #include "MooseMesh.h"
 #include "ClosuresBase.h"
+#include "HeatConductionModel.h"
 
 registerMooseObject("ThermalHydraulicsApp", HeatTransferFromHeatStructure3D1Phase);
 
@@ -60,7 +60,7 @@ HeatTransferFromHeatStructure3D1Phase::getFEType()
 void
 HeatTransferFromHeatStructure3D1Phase::setupMesh()
 {
-  if (hasComponentByName<HeatStructureBase>(_hs_name))
+  if (hasComponentByName<HeatStructureFromFile3D>(_hs_name))
   {
     std::vector<dof_id_type> fchs_elem_ids;
     for (unsigned int i = 0; i < _flow_channel_names.size(); i++)
@@ -252,7 +252,7 @@ HeatTransferFromHeatStructure3D1Phase::addVariables()
   // wall temperature initial condition
   if (!getTHMProblem().hasInitialConditionsFromFile() && !_app.isRestarting())
   {
-    const HeatStructureBase & hs = getComponentByName<HeatStructureBase>(_hs_name);
+    const HeatStructureFromFile3D & hs = getComponentByName<HeatStructureFromFile3D>(_hs_name);
     getTHMProblem().addFunctionIC(_T_wall_name, hs.getInitialT(), _flow_channel_subdomains);
   }
 }

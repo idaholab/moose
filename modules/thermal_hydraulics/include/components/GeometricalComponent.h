@@ -10,14 +10,12 @@
 #pragma once
 
 #include "Component.h"
-#include "DiscreteLineSegmentInterface.h"
 #include "libmesh/enum_elem_type.h"
 
 /**
- * Intermediate class for all geometrical components (i.e components that have position, direction,
- * etc. in space - they generate a mesh)
+ * Intermediate class for components that have mesh
  */
-class GeometricalComponent : public Component, public DiscreteLineSegmentInterface
+class GeometricalComponent : public Component
 {
 public:
   GeometricalComponent(const InputParameters & parameters);
@@ -36,8 +34,14 @@ public:
    */
   virtual const std::vector<Moose::CoordinateSystemType> & getCoordSysTypes() const;
 
+  /**
+   * Gets the node IDs corresponding to this component
+   */
   const std::vector<dof_id_type> & getNodeIDs() const;
 
+  /**
+   * Gets the element IDs corresponding to this component
+   */
   const std::vector<dof_id_type> & getElementIDs() const;
 
 protected:
@@ -57,17 +61,6 @@ protected:
                          dof_id_type node6,
                          dof_id_type node7,
                          dof_id_type node8);
-  virtual void check() const override;
-  virtual void setupMesh() override;
-
-  virtual void buildMesh() = 0;
-
-  /**
-   * Check if second order mesh is being used by this geometrical component
-   *
-   * @return true if second order mesh is being used, otherwise false
-   */
-  virtual bool usingSecondOrderMesh() const = 0;
 
   /**
    * Sets the next subdomain ID, name, and coordinate system
@@ -81,16 +74,12 @@ protected:
                    const std::string & subdomain_name,
                    const Moose::CoordinateSystemType & coord_system = Moose::COORD_XYZ);
 
+  /**
+   * Makes a constant function parameter controllable and returns its name
+   *
+   * @param[in] fn_param_name   FunctionName parameter
+   */
   const FunctionName & getVariableFn(const FunctionName & fn_param_name);
-
-  /// Axial region names
-  const std::vector<std::string> & _axial_region_names;
-
-  /// The name of the user object to displace nodes into the physical space
-  UserObjectName _displace_node_user_object_name;
-
-  /// Node locations along the main axis
-  std::vector<Real> _node_locations;
 
   /// List of subdomain IDs this components owns
   std::vector<SubdomainID> _subdomain_ids;
@@ -102,14 +91,6 @@ protected:
   std::vector<dof_id_type> _node_ids;
   /// Elements ids of this flow channel component
   std::vector<dof_id_type> _elem_ids;
-
-private:
-  void generateNodeLocations();
-  unsigned int computeNumberOfNodes(unsigned int n_elems);
-  std::vector<Real> getUniformNodeLocations(Real length, unsigned int n_nodes);
-  void placeLocalNodeLocations(Real start_length,
-                               unsigned int start_node,
-                               std::vector<Real> & local_node_locations);
 
 public:
   static InputParameters validParams();

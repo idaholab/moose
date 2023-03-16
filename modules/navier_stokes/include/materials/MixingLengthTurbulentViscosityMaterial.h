@@ -26,16 +26,16 @@ protected:
   const unsigned int _mesh_dimension;
 
   /// x-component velocity
-  const MooseVariableFVReal & _u_vel;
+  const Moose::Functor<ADReal> & _u_vel;
 
   /// y-component velocity
-  const MooseVariableFVReal * const _v_vel;
+  const Moose::Functor<ADReal> * const _v_vel;
 
   /// z-component velocity
-  const MooseVariableFVReal * const _w_vel;
+  const Moose::Functor<ADReal> * const _w_vel;
 
   /// Turbulent eddy mixing length
-  const MooseVariableFVReal & _mixing_len;
+  const Moose::Functor<ADReal> & _mixing_len;
 
   /// viscosity
   const Moose::Functor<ADReal> & _mu;

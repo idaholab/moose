@@ -56,7 +56,7 @@ KKSMultiPhaseConcentration::KKSMultiPhaseConcentration(const InputParameters & p
 
   // get order parameter names and variable indices
   for (unsigned int i = 0; i < _num_j; ++i)
-    _eta_names[i] = getVar("etas", i)->name();
+    _eta_names[i] = coupledName("etas", i);
 
   // Load concentration variables into the arrays
   for (unsigned int m = 0; m < _num_j; ++m)

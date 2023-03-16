@@ -152,8 +152,8 @@ AddMetaDataGenerator::AddMetaDataGenerator(const InputParameters & parameters)
                _subdomain_id_type_scalar_metadata_values,
                "subdomain_id_type_scalar");
   for (unsigned int i = 0; i < _subdomain_id_type_scalar_metadata_names.size(); i++)
-    declareMeshProperty<dof_id_type>(_subdomain_id_type_scalar_metadata_names[i],
-                                     _subdomain_id_type_scalar_metadata_values[i]);
+    declareMeshProperty<subdomain_id_type>(_subdomain_id_type_scalar_metadata_names[i],
+                                           _subdomain_id_type_scalar_metadata_values[i]);
 
   inputChecker(_boolean_scalar_metadata_names, _boolean_scalar_metadata_values, "boolean_scalar");
   for (unsigned int i = 0; i < _boolean_scalar_metadata_names.size(); i++)

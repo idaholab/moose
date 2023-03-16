@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Executioner.h"
+#include "TimeIntegrator.h"
 
 // System includes
 #include <string>
@@ -128,9 +129,15 @@ public:
   void setTimeStepper(std::shared_ptr<TimeStepper> ts) { _time_stepper = ts; }
 
   /**
-   * Get the timestepper.
+   * Get the name of the timestepper.
    */
-  virtual std::string getTimeStepperName() override;
+  virtual std::string getTimeStepperName() const override;
+
+  /**
+   * Get the name of the time integrator (time integration scheme) used
+   * @return string with the time integration scheme name
+   */
+  virtual std::string getTimeIntegratorName() const override;
 
   /**
    * Get the time scheme used
@@ -288,4 +295,10 @@ protected:
   /// should probably be true. If taking very 'large' timesteps in an attempt to reach a
   /// steady-state, this member should probably be be false.
   const bool _normalize_solution_diff_norm_by_dt;
+
+private:
+  /// Constrain the timestep dt_cur by looking at the timesteps for the MultiApps on execute_on
+  void constrainDTFromMultiApp(Real & dt_cur,
+                               std::ostringstream & diag,
+                               const ExecFlagType & execute_on) const;
 };

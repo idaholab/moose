@@ -13,7 +13,7 @@
 #include "MooseObjectAction.h"
 #include "Transient.h"
 #include "HeatConductionModel.h"
-#include "HeatStructureBase.h"
+#include "HeatStructureInterface.h"
 #include "FlowChannelBase.h"
 #include "FlowJunction.h"
 
@@ -110,8 +110,8 @@ Simulation::setupQuadrature()
     if (flow_channel != nullptr)
       n_flow_channels++;
 
-    auto heat_structure = dynamic_cast<HeatStructureBase *>(comp.get());
-    if (heat_structure != nullptr)
+    auto hs_interface = dynamic_cast<HeatStructureInterface *>(comp.get());
+    if (hs_interface)
       n_heat_structures++;
   }
 

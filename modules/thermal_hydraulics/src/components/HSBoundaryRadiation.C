@@ -9,6 +9,7 @@
 
 #include "HSBoundaryRadiation.h"
 #include "HeatConductionModel.h"
+#include "HeatStructureInterface.h"
 #include "HeatStructureCylindricalBase.h"
 
 registerMooseObject("ThermalHydraulicsApp", HSBoundaryRadiation);
@@ -48,7 +49,7 @@ HSBoundaryRadiation::check() const
 void
 HSBoundaryRadiation::addMooseObjects()
 {
-  const HeatStructureBase & hs = getComponent<HeatStructureBase>("hs");
+  const HeatStructureInterface & hs = getComponent<HeatStructureInterface>("hs");
   const HeatStructureCylindricalBase * hs_cyl =
       dynamic_cast<const HeatStructureCylindricalBase *>(&hs);
   const bool is_cylindrical = hs_cyl != nullptr;
@@ -64,8 +65,8 @@ HSBoundaryRadiation::addMooseObjects()
     pars.set<FunctionName>("view_factor") = getParam<FunctionName>("view_factor");
     if (is_cylindrical)
     {
-      pars.set<Point>("axis_point") = hs.getPosition();
-      pars.set<RealVectorValue>("axis_dir") = hs.getDirection();
+      pars.set<Point>("axis_point") = hs_cyl->getPosition();
+      pars.set<RealVectorValue>("axis_dir") = hs_cyl->getDirection();
       pars.set<Real>("offset") = hs_cyl->getInnerRadius() - hs_cyl->getAxialOffset();
     }
     if (isParamValid("scale_pp"))
@@ -84,8 +85,8 @@ HSBoundaryRadiation::addMooseObjects()
     pars.set<FunctionName>("T_ambient") = getParam<FunctionName>("T_ambient");
     pars.set<Real>("emissivity") = getParam<Real>("emissivity");
     pars.set<FunctionName>("view_factor") = getParam<FunctionName>("view_factor");
-    pars.set<Point>("axis_point") = hs.getPosition();
-    pars.set<RealVectorValue>("axis_dir") = hs.getDirection();
+    pars.set<Point>("axis_point") = hs_cyl->getPosition();
+    pars.set<RealVectorValue>("axis_dir") = hs_cyl->getDirection();
     pars.set<Real>("offset") = hs_cyl->getInnerRadius() - hs_cyl->getAxialOffset();
     pars.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
     getTHMProblem().addPostprocessor(class_name, genSafeName(name(), "integral"), pars);

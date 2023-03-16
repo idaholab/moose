@@ -32,9 +32,10 @@ ConstantMaterial::ConstantMaterial(const InputParameters & parameters)
 {
   // get references to new material property derivatives
   _derivative_properties.resize(_n_derivative_vars);
-  for (unsigned int i = 0; i < _n_derivative_vars; ++i)
-    _derivative_properties[i] =
-        &declarePropertyDerivative<Real>(_property_name, getVar("derivative_vars", i)->name());
+  if (!isCoupledConstant("derivative_vars"))
+    for (unsigned int i = 0; i < _n_derivative_vars; ++i)
+      _derivative_properties[i] =
+          &declarePropertyDerivative<Real>(_property_name, coupledName("derivative_vars", i));
 }
 
 void
@@ -43,5 +44,6 @@ ConstantMaterial::computeQpProperties()
   _property[_qp] = _value;
 
   for (unsigned int i = 0; i < _n_derivative_vars; ++i)
-    (*_derivative_properties[i])[_qp] = 0;
+    if (_derivative_properties[i])
+      (*_derivative_properties[i])[_qp] = 0;
 }

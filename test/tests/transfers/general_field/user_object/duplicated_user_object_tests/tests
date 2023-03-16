@@ -1,0 +1,80 @@
+[Tests]
+  issues = "#10313 #19056"
+  design = "MultiAppGeneralFieldUserObjectTransfer.md"
+
+  [transfer]
+    requirement = "The system shall provide an interface for transferring user-defined spatial data"
+
+    [from_sub]
+      type = 'Exodiff'
+      input = 'parent.i'
+      exodiff = 'parent_out.e parent_out_sub_app0.e parent_out_sub_app1.e'
+
+      detail = "to a parent application from sub-applications,"
+    []
+
+    [to_sub]
+      type = 'Exodiff'
+      input = 'tosub_parent.i'
+      exodiff = 'tosub_parent_out.e tosub_parent_out_sub_app0.e tosub_parent_out_sub_app1.e'
+
+      detail = "from a parent application to sub-applications,"
+    []
+    [to_sub_displaced]
+      type = 'Exodiff'
+      input = 'tosub_displaced_parent.i'
+      exodiff = 'tosub_displaced_parent_out.e tosub_displaced_parent_out_sub_app0.e'
+
+      detail = "from a parent application to sub-applications that have a deformed mesh, and"
+    []
+
+    [3d_1d]
+      type = 'Exodiff'
+      input = '3d_1d_parent.i'
+      exodiff = '3d_1d_parent_out.e 3d_1d_parent_out_sub_app0.e'
+      recover = false
+
+      detail = "between a 3D parent application and 1D sub-applications."
+    []
+  []
+
+  [restricted_node]
+    type = 'Exodiff'
+    input = 'restricted_node_parent.i'
+    exodiff = 'restricted_node_parent_out.e restricted_node_parent_out_ch00.e restricted_node_parent_out_ch10.e'
+
+    requirement = "The system shall be able to transfer user-defined spatial data into block and boundary restricted nodal variables."
+    design = "MultiAppGeneralFieldUserObjectTransfer.md"
+    issues = '#16241'
+  []
+
+  [restricted_elem]
+    type = 'Exodiff'
+    input = 'restricted_elem_parent.i'
+    exodiff = 'restricted_elem_parent_out.e restricted_elem_parent_out_ch00.e restricted_elem_parent_out_ch10.e'
+
+    requirement = "The system shall be able to transfer user-defined spatial data into block and boundary restricted elemental variables."
+    design = "MultiAppGeneralFieldUserObjectTransfer.md"
+    issues = '#16241'
+  []
+
+  [two_pipes]
+    type = 'Exodiff'
+    input = 'two_pipe_parent.i'
+    exodiff = 'two_pipe_parent_out.e'
+    requirement = "The system shall be able to allow skipping the bounding box test."
+    issues = "#13701"
+    recover = false
+  []
+
+  [3d_1d_err]
+    type = 'RunException'
+    input = '3d_1d_parent.i'
+    cli_args = 'Transfers/layered_transfer_from_sub_app/error_on_miss=true Transfers/layered_transfer_from_sub_app/from_app_must_contain_point=true'
+    expect_err = 'could not be located'
+    prereq = transfer/3d_1d
+
+    requirement = "The system shall error if a parent node/element is "
+                  "not contained within any sub application domains/meshes when this condition is explicitly requested by the user."
+  []
+[]

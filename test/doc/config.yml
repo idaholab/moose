@@ -1,6 +1,10 @@
 Content:
     - ${ROOT_DIR}/framework/doc/content
     - ${ROOT_DIR}/test/doc/content
+    - modules:
+        root_dir: ${ROOT_DIR}/modules/doc/content
+        content:
+            - application_usage/restart_recover.md
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
 

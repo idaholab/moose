@@ -60,7 +60,17 @@ You should +only+ use these APIs to create the base mesh in generators that crea
 
 For mesh generators that modify an existing mesh, you should have as an input parameter a `MeshGeneratorName` (or multiple, as a `std::vector<MeshGeneratorName>` if applicable) to obtain the mesh(es) to modify. You can then obtain said meshes via `MeshGenerator::getMesh()` and `MeshGenerator::getMeshByName()`. For examples, see [RenameBoundaryGenerator.md] and [StitchedMeshGenerator.md]. You then act on said meshes by overriding the `generate()` method, and returning the resulting mesh.
 
-Your mesh generator can instantiate subgenerators itself, to create existing meshes for the primary generator to combine and/or modify.  The easiest way to do this is to call `MeshGenerator::addMeshSubgenerator()`, which takes as arguments the generator class name and object name to instantiate, followed by an arbitrary number of name/value pairs of subgenerator parameters to set, and which returns a reference to the mesh which the subgenerator will create before the primary `generate()` is called.
+### Using Sub MeshGenerators
+
+Your mesh generator can instantiate subgenerators itself, to create existing meshes for the primary generator to combine and/or modify.  The easiest way to do this is to call `MeshGenerator::addMeshSubgenerator()`, which takes as arguments the generator class name and object name to instantiate, followed by an arbitrary number of name/value pairs of subgenerator parameters to set. Sub generators can be chained together by coupling them via input parameters, that is, setting input names as the names of other sub generators. To obtain a mesh from a sub generator, use the same `MeshGenerator::getMeshByName()` API as described above but with the name of the created sub generator.
+
+If you wish to use an input mesh from the primary generator as an input to a sub generator, you must first call `MeshGenerator::declareMeshForSub()` or `MeshGenerator::declareMeshForSubByName()` to declare said input as a dependency for the sub generator instead of the generator that creates the sub generator.
+
+### Declaring a Null or Dummy Input
+
+By default, the MeshGenerator system assumes that all parameters of type `MeshGeneratorName` or `std::vector<MeshGeneratorName>` are to be used as mesh inputs. If one of said names is not found, an error will be reported stating that the input mesh cannot be found. There exist cases where you want to allow the user to provide a "null" or dummy value for an input. An example is letting the user define a hole in a mesh pattern.
+
+You may do this by using the `MeshGenerator::declareNullMeshName()` API. This API takes a name that is to be considered unused as an input mesh. Any input with this name will not be searched for as an existing MeshGenerator mesh and will return an uninitialized mesh when using the input mesh getters (`MeshGenerator::getMesh()`, etc).
 
 ## Showing Mesh Information
 
@@ -142,3 +152,11 @@ GeneratedMeshGenerator 'gmg':    Bounding box maximum: (x,y,z)=(       1,       
 GeneratedMeshGenerator 'gmg':    Bounding box delta: (x,y,z)=(       1,        1,        0)
 GeneratedMeshGenerator 'gmg':   Global mesh volume = 1
 ```
+
+The parameter [!param](/Mesh/GeneratedMeshGenerator/output) enables the output of a mesh file immediately after it is generated. It can be used to view the intermediate meshes block during mesh generation.
+
+Take the simple example:
+
+!listing test/tests/meshgenerators/output_intermediate_mesh/output_intermediate_mesh.i block=Mesh
+
+The above will result in an intermediate mesh file 'left_in.e' in addition to the final mesh file 'output_intermediate_mesh_in.e' when ran in mesh only mode.

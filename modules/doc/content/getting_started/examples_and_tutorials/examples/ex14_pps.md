@@ -35,7 +35,7 @@ Postprocessor Values:
 
 ## Comparison to a Fine Grid Solution
 
-Also present in Example 14 are two input files (`ex14_solution_comparison_1.i` and `ex14_solution_comparison_1.i`) that demonstrate how to use a [SolutionUserObject](source/userobject/SolutionUserObject.md) to read in a fine grid solution and then compare a coarse grid solution to that using `ElementL2Error`.
+Also present in Example 14 are two input files (`ex14_solution_comparison_1.i` and `ex14_solution_comparison_1.i`) that demonstrate how to use a [SolutionUserObject](source/userobjects/SolutionUserObject.md) to read in a fine grid solution and then compare a coarse grid solution to that using `ElementL2Error`.
 
 - The first input file computes the fine grid solution and outputs an XDA file.
 - An XDA file contains the full set of sata necessary to perfectly read in a previous solution...even on adapted meshes.

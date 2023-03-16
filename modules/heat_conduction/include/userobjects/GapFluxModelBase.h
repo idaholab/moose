@@ -11,11 +11,12 @@
 
 #include "ModularGapConductanceConstraint.h"
 #include "InterfaceUserObjectBase.h"
+#include "ADFunctorInterface.h"
 
 /**
  * Base class for gap flux models used by ModularGapConductanceConstraint
  */
-class GapFluxModelBase : public InterfaceUserObjectBase
+class GapFluxModelBase : public InterfaceUserObjectBase, public ADFunctorInterface
 {
 public:
   static InputParameters validParams();

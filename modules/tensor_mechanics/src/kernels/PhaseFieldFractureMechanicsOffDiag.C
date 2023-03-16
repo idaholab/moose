@@ -37,7 +37,7 @@ PhaseFieldFractureMechanicsOffDiag::PhaseFieldFractureMechanicsOffDiag(
     _c_coupled(isCoupled("c")),
     _c_var(_c_coupled ? coupled("c") : 0),
     _d_stress_dc(
-        getMaterialPropertyDerivative<RankTwoTensor>(_base_name + "stress", getVar("c", 0)->name()))
+        getMaterialPropertyDerivative<RankTwoTensor>(_base_name + "stress", coupledName("c", 0)))
 {
 }
 

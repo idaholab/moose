@@ -1,0 +1,102 @@
+{
+    "app_name": "main",
+    "current_time": "Thu Feb 23 21:04:51 2023",
+    "executable": "/Users/lim2/Research/MOOSE/mengnan/moose/test/tests/misc/solution_invalid/../../../moose_test-devel",
+    "executable_time": "Thu Feb 23 21:04:40 2023",
+    "libmesh_version": "",
+    "moose_version": "git commit e9e93f6667 on 2023-02-23",
+    "petsc_version": "3.16.6",
+    "reporters": {
+        "solution_invalidity": {
+            "type": "SolutionInvalidityReporter",
+            "values": {
+                "solution_invalidity": {
+                    "type": "SolutionInvalidity const*"
+                }
+            }
+        }
+    },
+    "slepc_version": "3.16.2",
+    "time_steps": [
+        {
+            "solution_invalidity": {
+                "solution_invalidity": []
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "solution_invalidity": {
+                "solution_invalidity": []
+            },
+            "time": 1.0,
+            "time_step": 1
+        },
+        {
+            "solution_invalidity": {
+                "solution_invalidity": [
+                    {
+                        "converged_counts": 16,
+                        "message": "The diffusivity is greater than the threshold value!",
+                        "object_type": "NonsafeMaterial",
+                        "timestep_counts": 64,
+                        "total_counts": 64
+                    },
+                    {
+                        "converged_counts": 16,
+                        "message": "Extra invalid thing!",
+                        "object_type": "NonsafeMaterial",
+                        "timestep_counts": 64,
+                        "total_counts": 64
+                    }
+                ]
+            },
+            "time": 2.0,
+            "time_step": 2
+        },
+        {
+            "solution_invalidity": {
+                "solution_invalidity": [
+                    {
+                        "converged_counts": 16,
+                        "message": "The diffusivity is greater than the threshold value!",
+                        "object_type": "NonsafeMaterial",
+                        "timestep_counts": 32,
+                        "total_counts": 96
+                    },
+                    {
+                        "converged_counts": 16,
+                        "message": "Extra invalid thing!",
+                        "object_type": "NonsafeMaterial",
+                        "timestep_counts": 32,
+                        "total_counts": 96
+                    }
+                ]
+            },
+            "time": 3.0,
+            "time_step": 3
+        },
+        {
+            "solution_invalidity": {
+                "solution_invalidity": [
+                    {
+                        "converged_counts": 16,
+                        "message": "The diffusivity is greater than the threshold value!",
+                        "object_type": "NonsafeMaterial",
+                        "timestep_counts": 32,
+                        "total_counts": 128
+                    },
+                    {
+                        "converged_counts": 16,
+                        "message": "Extra invalid thing!",
+                        "object_type": "NonsafeMaterial",
+                        "timestep_counts": 32,
+                        "total_counts": 128
+                    }
+                ]
+            },
+            "time": 4.0,
+            "time_step": 4
+        }
+    ]
+}

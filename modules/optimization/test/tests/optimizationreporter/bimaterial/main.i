@@ -26,8 +26,8 @@
   parameter_names = diffusivity_values
   num_values = 2 # diffusivity in the bottom material and in the top material of model.i
   initial_condition = '3 4' # the expected result is about '1 10' so this initial condition is not too bad
-  lower_bounds = '1 1'
-  upper_bounds = '20 20'
+  lower_bounds = '1'
+  upper_bounds = '20'
   measurement_file = 'synthetic_data.csv'
   file_value = 'temperature'
 []
@@ -114,7 +114,7 @@
     type = MultiAppReporterTransfer
     from_multi_app = adjoint
     from_reporters = 'gradvec/inner_product'
-    to_reporters = 'OptimizationReporter/adjoint'
+    to_reporters = 'OptimizationReporter/grad_diffusivity_values'
   []
 []
 

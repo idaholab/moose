@@ -27,7 +27,7 @@ ForceDensityMaterial::validParams()
 ForceDensityMaterial::ForceDensityMaterial(const InputParameters & parameters)
   : DerivativeMaterialInterface<Material>(parameters),
     _c(coupledValue("c")),
-    _c_name(getVar("c", 0)->name()),
+    _c_name(coupledName("c", 0)),
     _ceq(getParam<Real>("ceq")),
     _cgb(getParam<Real>("cgb")),
     _k(getParam<Real>("k")),
@@ -44,7 +44,9 @@ ForceDensityMaterial::ForceDensityMaterial(const InputParameters & parameters)
 {
   // Loop through grains and load derivatives
   for (unsigned int i = 0; i < _op_num; ++i)
-    _dFdgradeta[i] = &declarePropertyDerivative<std::vector<Real>>("force_density", _vals_name[i]);
+    if (!isCoupledConstant(_vals_name[i]))
+      _dFdgradeta[i] =
+          &declarePropertyDerivative<std::vector<Real>>("force_density", _vals_name[i]);
 }
 
 void
@@ -68,17 +70,21 @@ ForceDensityMaterial::computeQpProperties()
 
   for (unsigned int i = 0; i < _op_num; ++i)
   {
-    (*_dFdgradeta[i])[_qp].resize(_op_num);
+    if (_dFdgradeta[i])
+      (*_dFdgradeta[i])[_qp].resize(_op_num);
     for (unsigned int j = 0; j < _op_num; ++j)
     {
       for (unsigned int k = 0; k < _op_num; ++k)
         if (k != j)
           _product_etas[j] = (*_vals[j])[_qp] * (*_vals[k])[_qp] >= _cgb ? 1.0 : 0.0;
 
-      if (j == i)
-        (*_dFdgradeta[i])[_qp][j] = _k * _product_etas[j] * (_c[_qp] - _ceq);
-      else
-        (*_dFdgradeta[i])[_qp][j] = -_k * _product_etas[j] * (_c[_qp] - _ceq);
+      if (_dFdgradeta[i])
+      {
+        if (j == i)
+          (*_dFdgradeta[i])[_qp][j] = _k * _product_etas[j] * (_c[_qp] - _ceq);
+        else
+          (*_dFdgradeta[i])[_qp][j] = -_k * _product_etas[j] * (_c[_qp] - _ceq);
+      }
     }
   }
 }

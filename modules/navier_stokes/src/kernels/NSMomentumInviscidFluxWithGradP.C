@@ -20,7 +20,6 @@ NSMomentumInviscidFluxWithGradP::validParams()
   params.addClassDescription(
       "This class computes the inviscid flux with pressure gradient in the momentum equation.");
   params.addRequiredCoupledVar(NS::pressure, "pressure");
-  params.addDeprecatedCoupledVar("p", NS::pressure, "1/1/2022");
   params.addRequiredParam<unsigned int>("component", "");
   return params;
 }

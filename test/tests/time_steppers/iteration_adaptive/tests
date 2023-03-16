@@ -1,15 +1,15 @@
 [Tests]
   issues = '#5535 #21119'
   design = 'source/timesteppers/IterationAdaptiveDT.md'
-  [./hit_knot]
+  [hit_knot]
     type = 'Exodiff'
     input = 'hit_function_knot.i'
     cli_args = 'Executioner/TimeStepper/timestep_limiting_function=knot Executioner/TimeStepper/max_function_change=1e20
     Executioner/TimeStepper/force_step_every_function_point=true'
     exodiff = 'hit_function_knot_out.e'
     requirement = "The system shall support the ability to force time steps consistent with points specified in a function."
-  [../]
-  [./hit_knot_err1]
+  []
+  [hit_knot_err1]
     type = 'RunException'
     input = 'hit_function_knot.i'
     cli_args = 'Executioner/TimeStepper/force_step_every_function_point=true'
@@ -17,132 +17,142 @@
     requirement = "The system shall check that a timestep limiting function has
     been defined when a user specifies the 'force_step_every_function_point'
     parameter as true."
-  [../]
-  [./hit_knot_err2]
+  []
+  [hit_knot_err2]
     type = 'RunException'
     input = 'hit_function_knot.i'
     cli_args = 'Executioner/TimeStepper/max_function_change=1e20'
     expect_err = "'timestep_limiting_function' must be used for 'max_function_change' to be used"
     requirement = "The system shall check that a timestep limiting function has
     been defined when a user specifies a value for the 'max_function_change' parameter."
-  [../]
+  []
 
-  [./grow_init_dt]
+  [grow_init_dt]
     type = 'Exodiff'
     input = 'adapt_tstep_grow_init_dt.i'
     exodiff = 'adapt_tstep_grow_init_dt_out.e'
     requirement = "The system shall support the ability to grow the time step size
     when specifying the initial value of dt in the TimeStepper."
-  [../]
+  []
 
-  [./grow_init_dt_restart]
+  [grow_init_dt_restart]
     type = 'Exodiff'
     input = 'adapt_tstep_grow_init_dt_restart.i'
     exodiff = 'adapt_tstep_grow_init_dt_restart_out.e'
     prereq = 'grow_init_dt'
     requirement = "The system shall support the ability to grow the time step size
     when specifying the initial value of dt in the TimeStepper after a restart."
-  [../]
+  []
 
-  [./adapt_tstep_grow_dtfunc]
+  [adapt_tstep_grow_dtfunc]
     type = 'CSVDiff'
     input = 'adapt_tstep_grow_dtfunc.i'
     csvdiff = 'adapt_tstep_grow_dtfunc_out.csv'
     requirement = "The system shall support the ability to grow the time step size
     when specifying the values of t and dt in the TimeStepper."
-  [../]
+  []
 
-  [./adapt_tstep_grow_dtfunc_restart]
+  [adapt_tstep_grow_dtfunc_restart]
     type = 'CSVDiff'
-    input = 'adapt_tstep_grow_dtfunc.i'
+    input = 'adapt_tstep_grow_dtfunc_restart.i'
     csvdiff = 'adapt_tstep_grow_dtfunc_restart_out.csv'
     prereq = 'adapt_tstep_grow_dtfunc'
-    cli_args = 'Problem/restart_file_base=adapt_tstep_grow_dtfunc_ckp_cp/0003 Outputs/file_base=adapt_tstep_grow_dtfunc_restart_out Outputs/checkpoint=false'
     recover = false
     requirement = "The system shall support the ability to grow the time step size
     when specifying the values of t and dt in the TimeStepper after a restart."
-  [../]
+  []
 
-  [./shrink_init_dt]
+  [shrink_init_dt]
     type = 'Exodiff'
     input = 'adapt_tstep_shrink_init_dt.i'
     exodiff = 'adapt_tstep_shrink_init_dt_out.e'
     requirement = "The system shall support the ability to limit the time step size
     based on the optimal iterations and linear_iteration ratio."
-  [../]
+  []
 
-  [./shrink_init_dt_restart]
+  [shrink_init_dt_restart]
     type = 'Exodiff'
     input = 'adapt_tstep_shrink_init_dt_restart.i'
     exodiff = 'adapt_tstep_shrink_init_dt_restart_out.e'
     prereq = 'shrink_init_dt'
     requirement = "The system shall support the ability to limit the time step size
     based on the optimal iterations and linear_iteration ratio after a restart."
-  [../]
+  []
 
-  [./pps_lim]
+  [pps_lim]
     type = 'Exodiff'
     input = 'adapt_tstep_pps_lim.i'
     exodiff = 'adapt_tstep_pps_lim_out.e'
     requirement = "The system shall support the ability to limit the time step size
     based on a postprocessor value."
-  [../]
+  []
 
-  [./multi_pps_lim]
+  [multi_pps_lim]
     type = 'CSVDiff'
     input = 'adapt_tstep_multi_pps_lim.i'
     csvdiff = 'adapt_tstep_multi_pps_lim_out.csv'
     requirement = "The system shall support the ability to limit the time step size
     based on multiple postprocessor values."
-  [../]
+  []
 
-  [./reject_large_dt]
+  [reject_large_dt]
     type = 'Exodiff'
     input = 'adapt_tstep_reject_large_dt.i'
     exodiff = 'adapt_tstep_reject_large_dt_out.e'
     requirement = "The system shall support the ability to reject a time step based
     on a threshold value for the ratio of the ideal step size to the limit."
-  [../]
-  [./piecewise_linear]
+  []
+  [piecewise_linear]
     type = 'CSVDiff'
     input = 'piecewise_linear.i'
     csvdiff = 'piecewise_linear_out.csv'
     requirement = "The system shall support the ability to force time steps to resolve
     sudden changes in piecewise linear functions."
-  [../]
-  [./piecewise_constant]
+  []
+  [piecewise_constant]
     type = 'CSVDiff'
     input = 'piecewise_constant.i'
     csvdiff = 'piecewise_constant_out.csv'
     requirement = "The system shall support the ability to force time steps to match changes in piecewise constant functions."
-  [../]
+  []
 
-  [./multi_piecewise_linear_function_point]
+  [multi_piecewise_linear_function_point]
     type = 'CSVDiff'
     input = 'multi_piecewise_linear.i'
     csvdiff = 'multi_piecewise_linear_function_point.csv'
     cli_args = "Executioner/TimeStepper/force_step_every_function_point=true Outputs/file_base=multi_piecewise_linear_function_point"
     requirement = "The system shall support the ability to force time steps to hit all nodes in a set of piecewise linear functions."
-  [../]
-  [./multi_piecewise_linear_function_change]
+  []
+  [multi_piecewise_linear_function_change]
     type = 'CSVDiff'
     input = 'multi_piecewise_linear.i'
     csvdiff = 'multi_piecewise_linear_function_change.csv'
     cli_args = "Executioner/TimeStepper/max_function_change=0.5 Outputs/file_base=multi_piecewise_linear_function_change"
     requirement = "The system shall support the ability to force time steps to resolve sudden changes in multiple piecewise linear functions."
-  [../]
+  []
 
-  [./multi_piecewise]
+  [multi_piecewise]
     type = 'CSVDiff'
     input = 'multi_piecewise.i'
     csvdiff = 'multi_piecewise_out.csv'
     requirement = "The system shall support the ability to force time steps to hit all nodes in a set of piecewise linear and constant functions."
-  [../]
+  []
 
-  [./multi_piecewise_sync_dt]
+  [multi_piecewise_sync_dt]
     type = 'CSVDiff'
     input = 'multi_piecewise_sync_dt.i'
     csvdiff = 'multi_piecewise_sync_dt_out.csv'
     requirement = "The system shall support the ability to set a new time step size after syncing the previous time step with piecewise linear and constant functions."
-  [../]
+  []
+
+  [check_positive_limiter]
+    requirement = 'The system shall check that'
+    [pps]
+      type = RunException
+      input = 'adapt_tstep_pps_lim.i'
+      cli_args = "Functions/timestep_fn/y='-1 -1'"
+      detail = 'the postprocessors limiting the timesteps do not become negative'
+      expect_err = 'Negative timestep limiting postprocessor'
+    []
+  []
 []

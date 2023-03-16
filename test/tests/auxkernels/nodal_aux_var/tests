@@ -1,46 +1,130 @@
 [Tests]
-  issues = '16769b212846275cd8b12e5a89b9e98f3ab7ca83'
-  design = 'syntax/AuxKernels/index.md'
-  [./init_test]
+  issues = '16769b212846275cd8b12e5a89b9e98f3ab7ca83 #22563'
+  design = 'syntax/AuxKernels/index.md Coupleable.md'
+  [init_test]
     type = 'Exodiff'
     input = 'nodal_aux_init_test.i'
     exodiff = 'out_init.e'
-    requirement = "The system shall include the ability to limit the execution of an AuxKernel object to initial setup."
-  [../]
+    requirement = "The system shall include the ability to limit the execution of an AuxKernel "
+                  "object to initial setup."
+  []
 
-  [./test]
+  [test]
     type = 'Exodiff'
     input = 'nodal_aux_var_test.i'
     exodiff = 'out.e'
     requirement = "The system shall include the ability to couple auxiliary variables."
-  [../]
+  []
 
-  [./sort_test]
+  [sort_test]
     type = 'Exodiff'
     input = 'nodal_sort_test.i'
     exodiff = 'nodal_sort_test_out.e'
-    requirement = "The system shall be capable of resolving dependencies between AuxKernel objects regardless of input file order."
-  [../]
+    requirement = "The system shall be capable of resolving dependencies between AuxKernel objects "
+                  "regardless of input file order."
+  []
 
-  [./multi_update_test]
+  [multi_update_test]
     type = 'Exodiff'
     input = 'multi_update_var_test.i'
     exodiff = 'out_multi_var.e'
     issues = '#2099'
-    requirement = "The AuxKernel objects shall be capable of coupling to multiple variables."
-  [../]
+    requirement = "The AuxKernel objects shall be capable of wriyting to to multiple coupled "
+                  "variables."
+  []
+  [multi_update_error]
+    type = RunException
+    input = multi_update_var_error.i
+    expect_err = "writableVariable\(\) can only be called from AuxKernels, ElementUserObjects, or "
+                 "NodalUserObjects\. 'all' is neither of those\."
+    issues = '#22563'
+    allow_deprecated = true
+    requirement = "Writing to auxiliary variables shall be limited to use from AuxKernels, "
+                  "ElementUserObjects, or NodalUserObjects."
+  []
 
-  [./multi_update_elem_test]
+  [multi_update_deprecated_test]
+    type = 'Exodiff'
+    input = 'multi_update_var_deprecated_test.i'
+    exodiff = 'out_multi_var.e'
+    issues = '#2099'
+    allow_deprecated = true
+    requirement = "Auxiliary kernel objects shall be capable of writing to to multiple coupled "
+                  "variables using the deprecated writeCoupledValue method."
+  []
+  [multi_update_deprecated_error]
+    type = RunException
+    input = multi_update_var_error.i
+    cli_args = "Kernels/all/use_deprecated_api=true"
+    expect_err = "writableCoupledValue\(\) can only be called from AuxKernels, but 'all' is not an "
+                 "AuxKernel\."
+    issues = '#22563'
+    allow_deprecated = true
+    requirement = "Writing to auxiliary variables shall be limited to use from AuxKernels, "
+                  "ElementUserObjects, or NodalUserObjects using variable values."
+  []
+  [multi_update_deprecated_error2]
+    type = RunException
+    input = multi_update_var_deprecated_test.i
+    cli_args = "AuxVariables/tt/family=MONOMIAL"
+    expect_err = "The elemental AuxKernel 'all' cannot obtain a writable reference to the nodal variable 'ten'\."
+    issues = '#22563'
+    allow_deprecated = true
+    requirement = "The writing to auxiliary variables shall enforce nodal/elemental consistency between "
+                  "the kernel variable and the writable variables."
+  []
+  [multi_update_deprecated_error3]
+    type = RunException
+    input = multi_update_var_deprecated_test.i
+    cli_args = "Variables/ten2/family=LAGRANGE AuxKernels/all/var1=ten2"
+    expect_err = "'ten2' must be an auxiliary variable in Coupleable::writableCoupledValue"
+    issues = '#22563'
+    allow_deprecated = true
+    requirement = "The writableCoupledValue API can only act on AuxVariables."
+  []
+  [multi_update_deprecated_error4]
+    type = RunException
+    input = multi_update_var_deprecated_test.i
+    cli_args = "AuxKernels/all/var1=1"
+    expect_err = "Unable to create a writable reference for 'var1', is it a constant expression\?"
+    issues = '#22563'
+    allow_deprecated = true
+    requirement = "The writing to auxiliary variables shall error out if a constant value is passed in as variable name."
+  []
+
+  [multi_update_elem_test]
     type = 'Exodiff'
     input = 'multi_update_elem_var_test.i'
     exodiff = 'out_multi_elem_var.e'
-    requirement = "The MOOSE auxiliary system shall be capable of updating multiple auxiliary variables within a single AuxKernel object."
-  [../]
+    requirement = "The MOOSE auxiliary system shall be capable of updating multiple elemental "
+                  "auxiliary variables within a single AuxKernel object, including the kernel "
+                  "variable itsef using the setNodalValue method."
+  []
+  [multi_update_elem_test_coupled_value]
+    type = 'Exodiff'
+    input = 'multi_update_elem_var_test.i'
+    cli_args = 'AuxKernels/all/use_compute_value=true'
+    exodiff = 'out_multi_elem_var.e'
+    requirement = "The MOOSE auxiliary system shall be capable of updating multiple elemental "
+                  "auxiliary variables within a single AuxKernel object."
+    issues = '#22563'
+  []
 
-  [./ts_test]
+  [multi_update_elem_family_error]
+    type = 'RunException'
+    input = 'multi_update_elem_var_test.i'
+    cli_args = 'AuxVariables/ten/order=FIRST AuxVariables/ten/family=LAGRANGE'
+    expect_err = "The elemental AuxKernel 'all' cannot obtain a writable reference to the nodal variable 'ten'\."
+    requirement = "The MOOSE auxiliary system shall check compatibility between primary and writable "
+                  "coupled variables."
+    issues = '#22563'
+  []
+
+  [ts_test]
     type = 'Exodiff'
     input = 'nodal_aux_ts_test.i'
     exodiff = 'out_ts.e'
-    requirement = "The MOOSE auxiliary system shall be capable of coupling to nonlinear variables at the end of a timestep."
-  [../]
+    requirement = "The MOOSE auxiliary system shall be capable of coupling to nonlinear variables at "
+                  "the end of a timestep."
+  []
 []

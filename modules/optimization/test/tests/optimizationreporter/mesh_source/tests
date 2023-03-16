@@ -64,7 +64,7 @@
       input = main.i
       cli_args = 'OptimizationReporter/parameter_meshes=\'parameter_mesh_in.e parameter_mesh_in.e\''
       max_threads = 1
-      expect_err = 'There must be a mesh associated with each parameter\.'
+      expect_err = 'There must be a mesh associated with each group of parameters\.'
       detail = 'meshes;'
     []
     [family]
@@ -72,7 +72,7 @@
       input = main.i
       cli_args = 'OptimizationReporter/parameter_families=\'LAGRANGE LAGRANGE\''
       max_threads = 1
-      expect_err = 'There must be a family associated with each parameter\.'
+      expect_err = 'There must be a family associated with each group of parameters\.'
       detail = 'finite-element families;'
     []
     [order]
@@ -80,7 +80,7 @@
       input = main.i
       cli_args = 'OptimizationReporter/parameter_orders=\'FIRST FIRST\''
       max_threads = 1
-      expect_err = 'There must be an order associated with each parameter\.'
+      expect_err = 'There must be an order associated with each group of parameters\.'
       detail = 'finite-element orders;'
     []
     [initial_condition]
@@ -88,7 +88,7 @@
       input = main.i
       cli_args = 'OptimizationReporter/initial_condition=\'0 0\''
       max_threads = 1
-      expect_err = 'There must be an initial condition associated with each parameter\.'
+      expect_err = 'There must be an initial condition associated with each group of parameters\.'
       detail = 'initial conditions;'
     []
     [lower_bound]
@@ -106,6 +106,14 @@
       max_threads = 1
       expect_err = 'There must be an upper bound associated with each parameter\.'
       detail = 'upper bounds;'
+    []
+    [upper_bound_no_lower]
+      type = RunException
+      input = main.i
+      cli_args = 'OptimizationReporter/upper_bounds=\'0\''
+      max_threads = 1
+      expect_err = 'Both upper and lower bounds must be specified if bounds are used\.'
+      detail = 'upper bounds with no lower bound specified;'
     []
   []
 

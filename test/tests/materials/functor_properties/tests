@@ -81,12 +81,12 @@
       method = '!dbg' # stl container checking takes forever
     []
   []
-  [inconsistent_types]
+  [bad-functor-type-mixing]
     type = RunException
     ad_indexing_type = 'global'
     input = wrong-type.i
-    expect_err = 'requested a functor.*returns the type.*returns a different type'
-    requirement = 'The system shall error if a functor material property is declared as returning one type and is retrieved as returning a different type.'
+    expect_err = 'We are requesting a non-AD functor from an AD object, but the true functor is AD. This means we could be dropping important derivatives. We will not allow this'
+    requirement = 'The system shall error if an automatic differentiation (AD) object requests a non-AD functor when the functor is AD. This prevents potential dropping of derivative information.'
     design = 'Materials/index.md'
   []
   [prop_name_issue]

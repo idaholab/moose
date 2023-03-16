@@ -38,7 +38,9 @@ GrandPotentialTensorMaterial::GrandPotentialTensorMaterial(const InputParameters
   : PolycrystalDiffusivityTensorBase(parameters),
     _chiD_name(getParam<std::string>("f_name")),
     _chiD(declareProperty<RealTensorValue>(_chiD_name)),
-    _dchiDdc(declarePropertyDerivative<RealTensorValue>(_chiD_name, _c_name)),
+    _dchiDdc(isCoupledConstant(_c_name)
+                 ? nullptr
+                 : &declarePropertyDerivative<RealTensorValue>(_chiD_name, _c_name)),
     _Ls_name(getParam<std::string>("solid_mobility")),
     _Ls(declareProperty<Real>(_Ls_name)),
     _Lv_name(getParam<std::string>("void_mobility")),
@@ -58,9 +60,10 @@ GrandPotentialTensorMaterial::GrandPotentialTensorMaterial(const InputParameters
 {
   for (unsigned int i = 0; i < _op_num; ++i)
   {
-    _vals_name[i] = getVar("v", i)->name();
+    _vals_name[i] = coupledName("v", i);
     _dchideta[i] = &getMaterialPropertyDerivative<Real>(_chi_name, _vals_name[i]);
-    _dchiDdeta[i] = &declarePropertyDerivative<RealTensorValue>(_chiD_name, _vals_name[i]);
+    if (!isCoupledConstant(_vals_name[i]))
+      _dchiDdeta[i] = &declarePropertyDerivative<RealTensorValue>(_chiD_name, _vals_name[i]);
   }
 }
 
@@ -72,9 +75,11 @@ GrandPotentialTensorMaterial::computeProperties()
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
     _chiD[_qp] = _D[_qp] * _chi[_qp];
-    _dchiDdc[_qp] = _dDdc[_qp] * _chi[_qp] + _D[_qp] * _dchidc[_qp];
+    if (_dchiDdc)
+      (*_dchiDdc)[_qp] = (*_dDdc)[_qp] * _chi[_qp] + _D[_qp] * _dchidc[_qp];
     for (unsigned int i = 0; i < _op_num; ++i)
-      (*_dchiDdeta[i])[_qp] = _D[_qp] * (*_dchideta[i])[_qp];
+      if (_dchiDdeta[i])
+        (*_dchiDdeta[i])[_qp] = _D[_qp] * (*_dchideta[i])[_qp];
 
     _chiDmag[_qp] = _chiD[_qp].norm();
 

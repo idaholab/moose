@@ -64,7 +64,7 @@ WeakPlaneStress::WeakPlaneStress(const InputParameters & parameters)
   {
     for (auto eigenstrain_name : getParam<std::vector<MaterialPropertyName>>("eigenstrain_names"))
       _deigenstrain_dT.push_back(&getMaterialPropertyDerivative<RankTwoTensor>(
-          eigenstrain_name, getVar("temperature", 0)->name()));
+          eigenstrain_name, coupledName("temperature", 0)));
   }
 
   // Checking for consistency between mesh size and length of the provided displacements vector

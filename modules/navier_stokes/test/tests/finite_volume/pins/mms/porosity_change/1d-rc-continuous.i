@@ -67,7 +67,7 @@ velocity_interp_method='rc'
     expression = 'cos((1/2)*x*pi)'
   []
   [forcing_u]
-    type = ADParsedFunction
+    type = ParsedFunction
     expression = '-mu*(1 - 0.5/(exp(30 - 30*x) + 1))*(-1/4*pi^2*cos((1/2)*x*pi)/(1 - 0.5/(exp(30 - 30*x) + 1)) - 15.0*pi*exp(30 - 30*x)*sin((1/2)*x*pi)/((1 - 0.5/(exp(30 - 30*x) + 1))^2*(exp(30 - 30*x) + 1)^2) - 450.0*exp(30 - 30*x)*cos((1/2)*x*pi)/((1 - 0.5/(exp(30 - 30*x) + 1))^2*(exp(30 - 30*x) + 1)^2) + 900.0*exp(60 - 60*x)*cos((1/2)*x*pi)/((1 - 0.5/(exp(30 - 30*x) + 1))^2*(exp(30 - 30*x) + 1)^3) + 450.0*exp(60 - 60*x)*cos((1/2)*x*pi)/((1 - 0.5/(exp(30 - 30*x) + 1))^3*(exp(30 - 30*x) + 1)^4)) + 15.0*mu*(-1/2*pi*sin((1/2)*x*pi)/(1 - 0.5/(exp(30 - 30*x) + 1)) + 15.0*exp(30 - 30*x)*cos((1/2)*x*pi)/((1 - 0.5/(exp(30 - 30*x) + 1))^2*(exp(30 - 30*x) + 1)^2))*exp(30 - 30*x)/(exp(30 - 30*x) + 1)^2 - pi*rho*sin((1/2)*x*pi)*cos((1/2)*x*pi)/(1 - 0.5/(exp(30 - 30*x) + 1)) + 15.0*rho*exp(30 - 30*x)*cos((1/2)*x*pi)^2/((1 - 0.5/(exp(30 - 30*x) + 1))^2*(exp(30 - 30*x) + 1)^2) + (1 - 0.5/(exp(30 - 30*x) + 1))*cos(x)'
     symbol_names = 'mu rho'
     symbol_values = '${mu} ${rho}'
@@ -174,16 +174,16 @@ velocity_interp_method='rc'
     execute_on = 'timestep_end'
   []
   [L2u]
-    type = ElementL2Error
-    variable = u
-    function = exact_u
+    type = ElementL2FunctorError
+    approximate = u
+    exact = exact_u
     outputs = 'console csv'
     execute_on = 'timestep_end'
   []
   [L2p]
-    variable = pressure
-    function = exact_p
-    type = ElementL2Error
+    approximate = pressure
+    exact = exact_p
+    type = ElementL2FunctorError
     outputs = 'console csv'
     execute_on = 'timestep_end'
   []

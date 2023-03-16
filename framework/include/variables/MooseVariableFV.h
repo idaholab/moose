@@ -20,7 +20,7 @@
 #include "libmesh/elem.h"
 #include "libmesh/quadrature.h"
 #include "libmesh/dense_vector.h"
-#include "libmesh/dense_vector.h"
+#include "libmesh/enum_fe_family.h"
 
 template <typename>
 class MooseVariableFV;
@@ -117,11 +117,9 @@ public:
     mooseError("phiLowerSize not supported by MooseVariableFVBase");
   }
 
-  virtual void computeElemValuesFace() override final;
-  virtual void computeNeighborValuesFace() override final;
-
-  virtual void computeNeighborValues() override final;
-
+  virtual void computeElemValuesFace() override;
+  virtual void computeNeighborValuesFace() override;
+  virtual void computeNeighborValues() override;
   virtual void computeLowerDValues() override final
   {
     // mooseError("computeLowerDValues not supported by MooseVariableFVBase");
@@ -146,6 +144,8 @@ public:
   virtual bool isNodal() const override final { return false; }
 
   bool hasDoFsOnNodes() const override final { return false; }
+
+  FEContinuity getContinuity() const override final { return _element_data->getContinuity(); };
 
   virtual bool isNodalDefined() const override final { return false; }
 
@@ -399,6 +399,9 @@ public:
   /// Returns the AD dof values.
   const MooseArray<ADReal> & adDofValues() const override;
 
+  /// Returns the AD neighbor dof values
+  const MooseArray<ADReal> & adDofValuesNeighbor() const override;
+
   /// Note: const monomial is always the case - higher order solns are
   /// reconstructed - so this is simpler func than FE equivalent.
   OutputType getValue(const Elem * elem) const;
@@ -438,6 +441,16 @@ public:
   using typename Moose::FunctorBase<FunctorArg>::GradientType;
 
   void setActiveTags(const std::set<TagID> & vtags) override;
+
+  void meshChanged() override;
+  void initialSetup() override;
+
+  /**
+   * Request that quadrature point data be (pre)computed. Quadrature point data is (pre)computed by
+   * default for this base class but derived variable classes may choose not to unless this API is
+   * called
+   */
+  virtual void requireQpComputations() {}
 
 protected:
   /**
@@ -516,6 +529,11 @@ private:
   GradientType evaluateGradient(const ElemArg & elem_arg, unsigned int) const override final;
   GradientType evaluateGradient(const FaceArg & face, unsigned int) const override final;
   DotType evaluateDot(const ElemArg & elem, unsigned int) const override final;
+
+  /**
+   * Setup the boundary to Dirichlet BC map
+   */
+  void determineBoundaryToDirichletBCMap();
 
 public:
   const MooseArray<OutputType> & nodalValueArray() const override
@@ -608,6 +626,14 @@ private:
   const FieldVariablePhiValue & _phi_neighbor;
   const FieldVariablePhiGradient & _grad_phi_neighbor;
 
+  /// A member used to help determine when we can return cached data as opposed to computing new
+  /// data
+  mutable const Elem * _prev_elem;
+
+  /// Map from boundary ID to Dirichlet boundary conditions. Added to speed up Dirichlet BC lookups
+  /// in \p getDirichletBC
+  std::unordered_map<BoundaryID, const FVDirichletBCBase *> _boundary_id_to_dirichlet_bc;
+
 protected:
   /// A cache for storing gradients on elements
   mutable std::unordered_map<const Elem *, VectorValue<ADReal>> _elem_to_grad;
@@ -626,6 +652,8 @@ protected:
   /// face interpolation. Other options are not taken into account here,
   /// but at higher, kernel-based levels.
   Moose::FV::InterpMethod _face_interp_method;
+
+  friend void Moose::initDofIndices<>(MooseVariableFV<OutputType> &, const Elem &);
 };
 
 template <typename OutputType>
@@ -633,6 +661,13 @@ inline const MooseArray<ADReal> &
 MooseVariableFV<OutputType>::adDofValues() const
 {
   return _element_data->adDofValues();
+}
+
+template <typename OutputType>
+inline const MooseArray<ADReal> &
+MooseVariableFV<OutputType>::adDofValuesNeighbor() const
+{
+  return _neighbor_data->adDofValues();
 }
 
 template <typename OutputType>
@@ -678,6 +713,15 @@ MooseVariableFV<OutputType>::dofIndicesLower() const
 {
   static const std::vector<dof_id_type> empty;
   return empty;
+}
+
+template <typename OutputType>
+void
+MooseVariableFV<OutputType>::meshChanged()
+{
+  _prev_elem = nullptr;
+  determineBoundaryToDirichletBCMap();
+  MooseVariableField<OutputType>::meshChanged();
 }
 
 template <>

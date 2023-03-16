@@ -11,6 +11,7 @@
   []
   [sq_pattern]
     type = 'Exodiff'
+    exodiff_opts = '-pedantic'
     input = 'patterned.i'
     exodiff = 'patterned_in.e'
     cli_args = '--mesh-only'

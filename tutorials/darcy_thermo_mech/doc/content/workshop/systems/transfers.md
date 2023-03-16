@@ -16,9 +16,10 @@ each sub-application should be able to solve on its own
 - An "interpolation" `Transfer` should be used when the domains have some overlapping geometry.
 - The source field is evaluated at the destination points (generally nodes or element centroids).
 - The evaluations are then put into the receiving `AuxVariable` field named `variable`.
-- All `MultiAppTransfers` take a `direction` parameter to specify the flow of information. Options are: `from_multiapp` or `to_multiapp`.
+- The direction of the transfer is specified by giving the `from_multi_app` or `to_multi_app` parameter.
+- `GeneralField` versions of each transfer are implemented using a different algorithm and may be preferred. 
 
-!listing exec_on_mismatch.i block=Transfers
+!listing multiapp_mesh_function_transfer/exec_on_mismatch.i block=Transfers
 
 !---
 
@@ -28,7 +29,7 @@ each sub-application should be able to solve on its own
 - Any `UserObject` can override `Real spatialValue(Point &)` to provide a value given a point in space
 - A `UserObjectTransfer` can sample this spatially-varying data from one app and put the values into an `AuxVariable` in another
 
-!listing 3d_1d_parent.i block=Transfers
+!listing multiapp_userobject_transfer/3d_1d_parent.i block=Transfers
 
 !---
 

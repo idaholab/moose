@@ -9,13 +9,13 @@
 
 #pragma once
 
-#include "GeometricalComponent.h"
+#include "GeneratedMeshComponent.h"
 #include "Component1DConnection.h"
 
 /**
  * Base class for 1D components
  */
-class Component1D : public GeometricalComponent
+class Component1D : public GeneratedMeshComponent
 {
 public:
   Component1D(const InputParameters & parameters);

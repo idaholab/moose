@@ -7,47 +7,47 @@
     [monte_carlo]
       type = CSVDiff
       input = monte_carlo.i
-      csvdiff = 'monte_carlo_csv_study_qoi_0001.csv monte_carlo_csv_study_samples_0001.csv'
+      csvdiff = 'monte_carlo_csv_study_results_0001.csv'
       detail = 'Monte Carlo;'
     []
     [lhs]
       type = CSVDiff
       input = lhs.i
-      csvdiff = 'lhs_csv_study_qoi_0001.csv lhs_csv_study_samples_0001.csv'
+      csvdiff = 'lhs_csv_study_results_0001.csv'
       detail = 'latin hypercube;'
     []
     [cartesian_product]
       type = CSVDiff
       input = cartesian_product.i
-      csvdiff = 'cartesian_product_csv_study_qoi_0001.csv cartesian_product_csv_study_samples_0001.csv'
+      csvdiff = 'cartesian_product_csv_study_results_0001.csv'
       detail = 'cartesian product;'
     []
     [csv]
       type = CSVDiff
       input = csv.i
       cli_args = 'Outputs/file_base=monte_carlo_csv'
-      csvdiff = 'monte_carlo_csv_study_qoi_0001.csv monte_carlo_csv_study_samples_0001.csv'
+      csvdiff = 'monte_carlo_csv_study_results_0001.csv'
       detail = 'CSV;'
     []
     [csv_indices]
       type = CSVDiff
       input = csv.i
       cli_args = 'ParameterStudy/csv_column_indices=\'0 1\' Outputs/file_base=monte_carlo_csv'
-      csvdiff = 'monte_carlo_csv_study_qoi_0001.csv monte_carlo_csv_study_samples_0001.csv'
+      csvdiff = 'monte_carlo_csv_study_results_0001.csv'
       detail = 'CSV when specifiying column indices;'
     []
     [csv_names]
       type = CSVDiff
       input = csv.i
       cli_args = 'ParameterStudy/csv_column_names=\'study_sampler_0 study_sampler_1\' Outputs/file_base=monte_carlo_csv'
-      csvdiff = 'monte_carlo_csv_study_qoi_0001.csv monte_carlo_csv_study_samples_0001.csv'
+      csvdiff = 'monte_carlo_csv_study_results_0001.csv'
       detail = 'CSV when specifiying column names;'
     []
     [input_matrix]
       type = CSVDiff
       input = input_matrix.i
       cli_args = 'Outputs/file_base=monte_carlo_csv'
-      csvdiff = 'monte_carlo_csv_study_qoi_0001.csv monte_carlo_csv_study_samples_0001.csv'
+      csvdiff = 'monte_carlo_csv_study_results_0001.csv'
       detail = 'input matrix;'
     []
   []
@@ -128,7 +128,7 @@
   [distributions]
     type = CSVDiff
     input = distributions.i
-    csvdiff = distributions_csv_study_qoi_0001.csv
+    csvdiff = distributions_csv_study_results_0001.csv
     requirement = 'The system shall be able to setup a Monte Carlo parameter study with uniform, normal, Weibull, lognormal, and truncated normal distributions.'
   []
   
@@ -168,8 +168,7 @@
     [true]
       type = JSONDiff
       input = monte_carlo.i
-      cli_args = 'ParameterStudy/sampler_output_type=json
-                  ParameterStudy/qoi_output_type=json
+      cli_args = 'ParameterStudy/output_type=json
                   ParameterStudy/show_study_objects=true
                   --color off'
       jsondiff = monte_carlo_json.json
@@ -203,8 +202,7 @@
     [none]
       type = RunApp
       input = monte_carlo.i
-      cli_args = 'ParameterStudy/sampler_output_type=none
-                  ParameterStudy/qoi_output_type=none
+      cli_args = 'ParameterStudy/output_type=none
                   ParameterStudy/compute_statistics=false
                   ParameterStudy/show_study_objects=true
                   --color off'
@@ -215,12 +213,11 @@
     [csv]
       type = CSVDiff
       input = monte_carlo.i
-      cli_args = 'ParameterStudy/sampler_output_type=csv
-                  ParameterStudy/qoi_output_type=csv
+      cli_args = 'ParameterStudy/output_type=csv
                   ParameterStudy/compute_statistics=false
                   ParameterStudy/show_study_objects=true
                   --color off'
-      csvdiff = 'monte_carlo_csv_study_qoi_0001.csv monte_carlo_csv_study_samples_0001.csv'
+      csvdiff = 'monte_carlo_csv_study_results_0001.csv'
       expect_out = 'Type:\s+CSV'
       absent_out = 'Type:\s+JSON'
       detail = 'CSV output;'
@@ -228,8 +225,7 @@
     [json]
       type = JSONDiff
       input = monte_carlo.i
-      cli_args = 'ParameterStudy/sampler_output_type=json
-                  ParameterStudy/qoi_output_type=json
+      cli_args = 'ParameterStudy/output_type=json
                   ParameterStudy/show_study_objects=true
                   --color off'
       jsondiff = monte_carlo_json.json
@@ -246,7 +242,7 @@
       type = CSVDiff
       input = monte_carlo.i
       cli_args = 'ParameterStudy/show_study_objects=true ParameterStudy/multiapp_mode=normal --color off'
-      csvdiff = 'monte_carlo_csv_study_qoi_0001.csv monte_carlo_csv_study_samples_0001.csv'
+      csvdiff = 'monte_carlo_csv_study_results_0001.csv'
       expect_out = 'mode : normal'
       detail = 'one sub-app per sample;'
     []
@@ -254,7 +250,7 @@
       type = CSVDiff
       input = monte_carlo.i
       cli_args = 'ParameterStudy/show_study_objects=true ParameterStudy/multiapp_mode=batch-reset --color off'
-      csvdiff = 'monte_carlo_csv_study_qoi_0001.csv monte_carlo_csv_study_samples_0001.csv'
+      csvdiff = 'monte_carlo_csv_study_results_0001.csv'
       expect_out = 'mode : batch-reset'
       detail = 'batches with one sub-app per processor while re-initializing;'
     []
@@ -262,7 +258,7 @@
       type = CSVDiff
       input = monte_carlo.i
       cli_args = 'ParameterStudy/show_study_objects=true ParameterStudy/multiapp_mode=batch-restore --color off'
-      csvdiff = 'monte_carlo_csv_study_qoi_0001.csv monte_carlo_csv_study_samples_0001.csv'
+      csvdiff = 'monte_carlo_csv_study_results_0001.csv'
       expect_out = 'mode : batch-restore'
       detail = 'batches one sub-app per processor while restoring;'
     []
@@ -270,7 +266,7 @@
       type = CSVDiff
       input = monte_carlo.i
       cli_args = 'ParameterStudy/show_study_objects=true ParameterStudy/multiapp_mode=batch-keep-solution --color off'
-      csvdiff = 'monte_carlo_csv_study_qoi_0001.csv monte_carlo_csv_study_samples_0001.csv'
+      csvdiff = 'monte_carlo_csv_study_results_0001.csv'
       expect_out = 'keep_solution_during_restore : 1\n.*\n\s*mode : batch-restore'
       detail = 'batches one sub-app per processor while restoring and keeping solution;'
     []
@@ -278,7 +274,7 @@
       type = CSVDiff
       input = monte_carlo.i
       cli_args = 'ParameterStudy/show_study_objects=true ParameterStudy/multiapp_mode=batch-no-restore --color off'
-      csvdiff = 'monte_carlo_csv_study_qoi_0001.csv monte_carlo_csv_study_samples_0001.csv'
+      csvdiff = 'monte_carlo_csv_study_results_0001.csv'
       expect_out = 'mode : batch-restore\n\s*no_backup_and_restore : 1'
       detail = 'batches one sub-app per processor without restoring;'
     []
@@ -290,15 +286,15 @@
       type = CSVDiff
       input = distributions.i
       cli_args = 'ParameterStudy/show_study_objects=true --color off'
-      csvdiff = distributions_csv_study_qoi_0001.csv
+      csvdiff = distributions_csv_study_results_0001.csv
       expect_out = 'mode : batch-reset'
       detail = 'parameters are parsed;'          
     []
     [not_controllable]
       type = CSVDiff
       input = monte_carlo_not_controllable.i
-      cli_args = 'Outputs/file_base=monte_carlo_csv ParameterStudy/show_study_objects=true --color off'
-      csvdiff = 'monte_carlo_csv_study_qoi_0001.csv monte_carlo_csv_study_samples_0001.csv'
+      cli_args = 'Outputs/file_base=monte_carlo_csv ParameterStudy/sampler_column_names=\'BCs_left_value BCs_right_value\' ParameterStudy/show_study_objects=true --color off'
+      csvdiff = 'monte_carlo_csv_study_results_0001.csv'
       expect_out = 'mode : batch-reset'
       detail = 'parameters are not controllable;'          
     []
@@ -306,7 +302,7 @@
       type = CSVDiff
       input = monte_carlo_transient.i
       cli_args = 'ParameterStudy/show_study_objects=true --color off'
-      csvdiff = 'monte_carlo_transient_csv_study_qoi_0001.csv monte_carlo_transient_csv_study_samples_0001.csv'
+      csvdiff = 'monte_carlo_transient_csv_study_results_0001.csv'
       expect_out = 'mode : batch-restore'
       detail = 'parameters are controllable in a transient problem;'      
     []
@@ -314,7 +310,7 @@
       type = CSVDiff
       input = monte_carlo_pseudo_transient.i
       cli_args = 'ParameterStudy/show_study_objects=true --color off'
-      csvdiff = 'monte_carlo_pseudo_transient_csv_study_qoi_0001.csv monte_carlo_pseudo_transient_csv_study_samples_0001.csv'
+      csvdiff = 'monte_carlo_pseudo_transient_csv_study_results_0001.csv'
       expect_out = 'keep_solution_during_restore : 1\n.*\n\s*mode : batch-restore'
       detail = 'parameters are controllable in a pseudo-transient problem;'      
     []
@@ -322,7 +318,7 @@
       type = CSVDiff
       input = monte_carlo.i
       cli_args = 'ParameterStudy/show_study_objects=true --color off'
-      csvdiff = 'monte_carlo_csv_study_qoi_0001.csv monte_carlo_csv_study_samples_0001.csv'
+      csvdiff = 'monte_carlo_csv_study_results_0001.csv'
       expect_out = 'mode : batch-restore\n\s*no_backup_and_restore : 1'
       detail = 'parameters are controllable in a steady-state problem;'
     []
@@ -330,7 +326,7 @@
       type = CSVDiff
       input = monte_carlo_eigen.i
       cli_args = 'ParameterStudy/show_study_objects=true --color off'
-      csvdiff = 'monte_carlo_eigen_csv_study_qoi_0001.csv monte_carlo_eigen_csv_study_samples_0001.csv'
+      csvdiff = 'monte_carlo_eigen_csv_study_results_0001.csv'
       expect_out = 'mode : batch-restore\n\s*no_backup_and_restore : 1'
       detail = 'parameters are controllable in a eigenvalue problem;'
     []

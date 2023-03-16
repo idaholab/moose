@@ -30,5 +30,5 @@ ExecuteMeshGenerators::act()
   if ((_app.isRecovering() && _app.isUltimateMaster()) || _app.masterMesh() || _app.isUseSplit())
     return;
 
-  _app.executeMeshGenerators();
+  _app.getMeshGeneratorSystem().executeMeshGenerators();
 }

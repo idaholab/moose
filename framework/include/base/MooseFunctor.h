@@ -30,13 +30,25 @@
 namespace Moose
 {
 /**
+ * Abstract base class that can be used to hold collections of functors
+ */
+class FunctorAbstract : public FaceArgInterface
+{
+public:
+  virtual void residualSetup() = 0;
+  virtual void jacobianSetup() = 0;
+  virtual void timestepSetup() = 0;
+  virtual void customSetup(const ExecFlagType & exec_type) = 0;
+};
+
+/**
  * Base class template for functor objects. This class template defines various \p operator()
  * overloads that allow a user to evaluate the functor at arbitrary geometric locations. This
  * template is meant to enable highly flexible on-the-fly variable and material property
  * evaluations
  */
 template <typename T>
-class FunctorBase : public FaceArgInterface
+class FunctorBase : public FunctorAbstract
 {
 public:
   using FunctorType = FunctorBase<T>;
@@ -100,10 +112,10 @@ public:
   DotType dot(const ElemPointArg & elem_point, unsigned int state = 0) const;
   ///@}
 
-  virtual void residualSetup();
-  virtual void jacobianSetup();
-  virtual void timestepSetup();
-  virtual void customSetup(const ExecFlagType & exec_type);
+  virtual void residualSetup() override;
+  virtual void jacobianSetup() override;
+  virtual void timestepSetup() override;
+  virtual void customSetup(const ExecFlagType & exec_type) override;
 
   /**
    * Set how often to clear the functor evaluation cache
@@ -138,7 +150,7 @@ public:
    */
   virtual bool isConstant() const { return false; }
 
-  bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const override;
+  virtual bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const override;
 
   /**
    * Examines the incoming face argument. If the face argument producer (residual object,
@@ -706,18 +718,29 @@ public:
   FunctorEnvelopeBase() = default;
   virtual ~FunctorEnvelopeBase() = default;
 
-  ///@{
   /**
-   * Virtual methods meant to be used for handling functor evaluation cache clearance
+   * @return Whether this envelope wraps a null functor
    */
-  virtual void timestepSetup() = 0;
-  virtual void residualSetup() = 0;
-  virtual void jacobianSetup() = 0;
-  virtual void customSetup(const ExecFlagType & /*exec_type*/) = 0;
   virtual bool wrapsNull() const = 0;
+
+  /**
+   * @return The return type, as a string, of the functor this envelope wraps
+   */
   virtual std::string returnType() const = 0;
+
+  /**
+   * @return Whether this envelope wraps a constant functor
+   */
   virtual bool isConstant() const = 0;
-  ///@}
+
+  /**
+   * @return Whether this envelope owns its wrapped functor. This envelope may briefly own null
+   * functors during simulation setup or it may own non-AD or AD wrappers of "true" functors, but we
+   * should never own any "true" functors, e.g. we expect memory of "true" functors to be managed by
+   * warehouses (e.g. variable, function, etc.), or by the \p SubProblem itself. With this
+   * expectation, we don't have to worry about performing setup calls
+   */
+  virtual bool ownsWrappedFunctor() const = 0;
 };
 
 /**
@@ -796,12 +819,14 @@ public:
   /**
    * @return whether this object wraps a null functor
    */
-  bool wrapsNull() const override { return wrapsType<NullFunctor<T>>(); }
+  virtual bool wrapsNull() const override { return wrapsType<NullFunctor<T>>(); }
 
   /**
    * @return a string representation of the return type of this functor
    */
-  std::string returnType() const override { return libMesh::demangle(typeid(T).name()); }
+  virtual std::string returnType() const override { return libMesh::demangle(typeid(T).name()); }
+
+  virtual bool ownsWrappedFunctor() const override { return _owned.get(); }
 
   /**
    * @return whether the wrapped object is of the requested type
@@ -812,34 +837,14 @@ public:
     return dynamic_cast<const T2 *>(_wrapped);
   }
 
-  void timestepSetup() override
-  {
-    if (_owned)
-      _owned->timestepSetup();
-  }
-  void customSetup(const ExecFlagType & exec_type) override
-  {
-    if (_owned)
-      _owned->customSetup(exec_type);
-  }
-  void residualSetup() override
-  {
-    if (_owned)
-      _owned->residualSetup();
-  }
-  void jacobianSetup() override
-  {
-    if (_owned)
-      _owned->jacobianSetup();
-  }
-
-  bool isExtrapolatedBoundaryFace(const FaceInfo & fi, const Elem * const elem) const override
+  virtual bool isExtrapolatedBoundaryFace(const FaceInfo & fi,
+                                          const Elem * const elem) const override
   {
     return _wrapped->isExtrapolatedBoundaryFace(fi, elem);
   }
-  bool isConstant() const override { return _wrapped->isConstant(); }
-  bool hasBlocks(const SubdomainID id) const override { return _wrapped->hasBlocks(id); }
-  bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const override
+  virtual bool isConstant() const override { return _wrapped->isConstant(); }
+  virtual bool hasBlocks(const SubdomainID id) const override { return _wrapped->hasBlocks(id); }
+  virtual bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const override
   {
     return _wrapped->hasFaceSide(fi, fi_elem_side);
   }
@@ -849,66 +854,68 @@ protected:
   /**
    * Forward calls to wrapped object
    */
-  ValueType evaluate(const ElemArg & elem, unsigned int state = 0) const override
+  virtual ValueType evaluate(const ElemArg & elem, unsigned int state = 0) const override
   {
     return _wrapped->operator()(elem, state);
   }
-  ValueType evaluate(const FaceArg & face, unsigned int state = 0) const override
+  virtual ValueType evaluate(const FaceArg & face, unsigned int state = 0) const override
   {
     return _wrapped->operator()(face, state);
   }
-  ValueType evaluate(const ElemQpArg & qp, unsigned int state = 0) const override
+  virtual ValueType evaluate(const ElemQpArg & qp, unsigned int state = 0) const override
   {
     return _wrapped->operator()(qp, state);
   }
-  ValueType evaluate(const ElemSideQpArg & qp, unsigned int state = 0) const override
+  virtual ValueType evaluate(const ElemSideQpArg & qp, unsigned int state = 0) const override
   {
     return _wrapped->operator()(qp, state);
   }
-  ValueType evaluate(const ElemPointArg & elem_point, unsigned int state = 0) const override
+  virtual ValueType evaluate(const ElemPointArg & elem_point, unsigned int state = 0) const override
   {
     return _wrapped->operator()(elem_point, state);
   }
 
-  GradientType evaluateGradient(const ElemArg & elem, unsigned int state = 0) const override
+  virtual GradientType evaluateGradient(const ElemArg & elem, unsigned int state = 0) const override
   {
     return _wrapped->gradient(elem, state);
   }
-  GradientType evaluateGradient(const FaceArg & face, unsigned int state = 0) const override
+  virtual GradientType evaluateGradient(const FaceArg & face, unsigned int state = 0) const override
   {
     return _wrapped->gradient(face, state);
   }
-  GradientType evaluateGradient(const ElemQpArg & qp, unsigned int state = 0) const override
+  virtual GradientType evaluateGradient(const ElemQpArg & qp, unsigned int state = 0) const override
   {
     return _wrapped->gradient(qp, state);
   }
-  GradientType evaluateGradient(const ElemSideQpArg & qp, unsigned int state = 0) const override
+  virtual GradientType evaluateGradient(const ElemSideQpArg & qp,
+                                        unsigned int state = 0) const override
   {
     return _wrapped->gradient(qp, state);
   }
-  GradientType evaluateGradient(const ElemPointArg & elem_point,
-                                unsigned int state = 0) const override
+  virtual GradientType evaluateGradient(const ElemPointArg & elem_point,
+                                        unsigned int state = 0) const override
   {
     return _wrapped->gradient(elem_point, state);
   }
 
-  DotType evaluateDot(const ElemArg & elem, unsigned int state = 0) const override
+  virtual DotType evaluateDot(const ElemArg & elem, unsigned int state = 0) const override
   {
     return _wrapped->dot(elem, state);
   }
-  DotType evaluateDot(const FaceArg & face, unsigned int state = 0) const override
+  virtual DotType evaluateDot(const FaceArg & face, unsigned int state = 0) const override
   {
     return _wrapped->dot(face, state);
   }
-  DotType evaluateDot(const ElemQpArg & qp, unsigned int state = 0) const override
+  virtual DotType evaluateDot(const ElemQpArg & qp, unsigned int state = 0) const override
   {
     return _wrapped->dot(qp, state);
   }
-  DotType evaluateDot(const ElemSideQpArg & qp, unsigned int state = 0) const override
+  virtual DotType evaluateDot(const ElemSideQpArg & qp, unsigned int state = 0) const override
   {
     return _wrapped->dot(qp, state);
   }
-  DotType evaluateDot(const ElemPointArg & elem_point, unsigned int state = 0) const override
+  virtual DotType evaluateDot(const ElemPointArg & elem_point,
+                              unsigned int state = 0) const override
   {
     return _wrapped->dot(elem_point, state);
   }

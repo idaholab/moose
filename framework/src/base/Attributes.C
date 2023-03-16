@@ -278,6 +278,24 @@ AttribThread::isEqual(const Attribute & other) const
 }
 
 void
+AttribExecutionOrderGroup::initFrom(const MooseObject * obj)
+{
+  const auto * uo = dynamic_cast<const UserObject *>(obj);
+  _val = uo ? uo->getParam<int>("execution_order_group") : 0;
+}
+bool
+AttribExecutionOrderGroup::isMatch(const Attribute & other) const
+{
+  auto a = dynamic_cast<const AttribExecutionOrderGroup *>(&other);
+  return a && (a->_val == _val);
+}
+bool
+AttribExecutionOrderGroup::isEqual(const Attribute & other) const
+{
+  return isMatch(other);
+}
+
+void
 AttribSysNum::initFrom(const MooseObject * obj)
 {
   auto * sys = obj->getParam<SystemBase *>("_sys");

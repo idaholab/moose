@@ -321,7 +321,7 @@ MultiAppProjectionTransfer::execute()
   }
 
   // Setup the local mesh functions.
-  std::vector<MeshFunction *> local_meshfuns(froms_per_proc[processor_id()], NULL);
+  std::vector<MeshFunction> local_meshfuns;
   for (unsigned int i_from = 0; i_from < _from_problems.size(); i_from++)
   {
     FEProblemBase & from_problem = *_from_problems[i_from];
@@ -330,11 +330,10 @@ MultiAppProjectionTransfer::execute()
     System & from_sys = from_var.sys().system();
     unsigned int from_var_num = from_sys.variable_number(from_var.name());
 
-    MeshFunction * from_func = new MeshFunction(
+    local_meshfuns.emplace_back(
         from_problem.es(), *from_sys.current_local_solution, from_sys.get_dof_map(), from_var_num);
-    from_func->init();
-    from_func->enable_out_of_mesh_mode(OutOfMeshValue);
-    local_meshfuns[i_from] = from_func;
+    local_meshfuns.back().init();
+    local_meshfuns.back().enable_out_of_mesh_mode(OutOfMeshValue);
   }
 
   // Recieve quadrature points from other processors, evaluate mesh frunctions
@@ -382,7 +381,7 @@ MultiAppProjectionTransfer::execute()
           const auto from_global_num =
               _current_direction == TO_MULTIAPP ? 0 : _from_local2global_map[i_from];
           outgoing_evals_ids[pid][qp].first =
-              (*local_meshfuns[i_from])(_from_transforms[from_global_num]->mapBack(qpt));
+              (local_meshfuns[i_from])(_from_transforms[from_global_num]->mapBack(qpt));
           if (_current_direction == FROM_MULTIAPP)
             outgoing_evals_ids[pid][qp].second = from_global_num;
         }
@@ -490,9 +489,6 @@ MultiAppProjectionTransfer::execute()
     _to_es[i_to]->parameters.set<std::vector<Real> *>("final_evals") = NULL;
     _to_es[i_to]->parameters.set<std::map<dof_id_type, unsigned int> *>("element_map") = NULL;
   }
-
-  for (unsigned int i = 0; i < _from_problems.size(); i++)
-    delete local_meshfuns[i];
 
   if (_fixed_meshes)
     _qps_cached = true;

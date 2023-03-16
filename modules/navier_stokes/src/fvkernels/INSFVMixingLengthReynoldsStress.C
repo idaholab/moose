@@ -21,9 +21,9 @@ INSFVMixingLengthReynoldsStress::validParams()
   params.addClassDescription(
       "Computes the force due to the Reynolds stress term in the incompressible"
       " Reynolds-averaged Navier-Stokes equations.");
-  params.addRequiredCoupledVar("u", "The velocity in the x direction.");
-  params.addCoupledVar("v", "The velocity in the y direction.");
-  params.addCoupledVar("w", "The velocity in the z direction.");
+  params.addRequiredParam<MooseFunctorName>("u", "The velocity in the x direction.");
+  params.addParam<MooseFunctorName>("v", "The velocity in the y direction.");
+  params.addParam<MooseFunctorName>("w", "The velocity in the z direction.");
   params.addRequiredParam<MooseFunctorName>(NS::density, "fluid density");
   params.addRequiredParam<MooseFunctorName>("mixing_length", "Turbulent eddy mixing length.");
   MooseEnum momentum_component("x=0 y=1 z=2");
@@ -44,13 +44,9 @@ INSFVMixingLengthReynoldsStress::INSFVMixingLengthReynoldsStress(const InputPara
   : INSFVFluxKernel(params),
     _dim(_subproblem.mesh().dimension()),
     _axis_index(getParam<MooseEnum>("momentum_component")),
-    _u_var(dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("u", 0))),
-    _v_var(params.isParamValid("v")
-               ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("v", 0))
-               : nullptr),
-    _w_var(params.isParamValid("w")
-               ? dynamic_cast<const INSFVVelocityVariable *>(getFieldVar("w", 0))
-               : nullptr),
+    _u(getFunctor<ADReal>("u")),
+    _v(params.isParamValid("v") ? &getFunctor<ADReal>("v") : nullptr),
+    _w(params.isParamValid("w") ? &getFunctor<ADReal>("w") : nullptr),
     _rho(getFunctor<ADReal>(NS::density)),
     _mixing_len(getFunctor<ADReal>("mixing_length"))
 {
@@ -60,18 +56,11 @@ INSFVMixingLengthReynoldsStress::INSFVMixingLengthReynoldsStress(const InputPara
              "'--with-ad-indexing-type=global'");
 #endif
 
-  if (!_u_var)
-    paramError("u", "the u velocity must be an INSFVVelocityVariable.");
-
-  if (_dim >= 2 && !_v_var)
-    paramError("v",
-               "In two or more dimensions, the v velocity must be supplied and it must be an "
-               "INSFVVelocityVariable.");
-
-  if (_dim >= 3 && !_w_var)
-    paramError("w",
-               "In three-dimensions, the w velocity must be supplied and it must be an "
-               "INSFVVelocityVariable.");
+  if (_dim >= 2 && !_v)
+    mooseError(
+        "In two or more dimensions, the v velocity must be supplied using the 'v' parameter");
+  if (_dim >= 3 && !_w)
+    mooseError("In threedimensions, the w velocity must be supplied using the 'w' parameter");
 }
 
 ADReal
@@ -82,7 +71,7 @@ INSFVMixingLengthReynoldsStress::computeStrongResidual()
 
   const auto face = makeCDFace(*_face_info);
 
-  const auto grad_u = _u_var->adGradSln(*_face_info);
+  const auto grad_u = _u.gradient(face);
   // Compute the dot product of the strain rate tensor and the normal vector
   // aka (grad_v + grad_v^T) * n_hat
   ADReal norm_strain_rate = grad_u(_axis_index) * _normal(0);
@@ -90,11 +79,11 @@ INSFVMixingLengthReynoldsStress::computeStrongResidual()
   ADRealVectorValue grad_w;
   if (_dim >= 2)
   {
-    grad_v = _v_var->adGradSln(*_face_info);
+    grad_v = _v->gradient(face);
     norm_strain_rate += grad_v(_axis_index) * _normal(1);
     if (_dim >= 3)
     {
-      grad_w = _w_var->adGradSln(*_face_info);
+      grad_w = _w->gradient(face);
       norm_strain_rate += grad_w(_axis_index) * _normal(2);
     }
   }

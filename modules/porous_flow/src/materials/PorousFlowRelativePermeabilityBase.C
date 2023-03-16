@@ -9,8 +9,9 @@
 
 #include "PorousFlowRelativePermeabilityBase.h"
 
+template <bool is_ad>
 InputParameters
-PorousFlowRelativePermeabilityBase::validParams()
+PorousFlowRelativePermeabilityBaseTempl<is_ad>::validParams()
 {
   InputParameters params = PorousFlowMaterialBase::validParams();
   params.addRangeCheckedParam<Real>(
@@ -26,26 +27,31 @@ PorousFlowRelativePermeabilityBase::validParams()
       "sum_s_res >= 0 & sum_s_res < 1",
       "Sum of residual saturations over all phases.  Must be between 0 and 1");
   params.addPrivateParam<std::string>("pf_material_type", "relative_permeability");
+  params.addPrivateParam<bool>("is_ad", is_ad);
   params.addClassDescription("Base class for PorousFlow relative permeability materials");
   return params;
 }
 
-PorousFlowRelativePermeabilityBase::PorousFlowRelativePermeabilityBase(
+template <bool is_ad>
+PorousFlowRelativePermeabilityBaseTempl<is_ad>::PorousFlowRelativePermeabilityBaseTempl(
     const InputParameters & parameters)
   : PorousFlowMaterialBase(parameters),
     _scaling(getParam<Real>("scaling")),
-    _saturation(_nodal_material
-                    ? getMaterialProperty<std::vector<Real>>("PorousFlow_saturation_nodal")
-                    : getMaterialProperty<std::vector<Real>>("PorousFlow_saturation_qp")),
-    _relative_permeability(
-        _nodal_material ? declareProperty<Real>("PorousFlow_relative_permeability_nodal" + _phase)
-                        : declareProperty<Real>("PorousFlow_relative_permeability_qp" + _phase)),
-    _drelative_permeability_ds(
+    _saturation(
         _nodal_material
-            ? declarePropertyDerivative<Real>("PorousFlow_relative_permeability_nodal" + _phase,
-                                              _saturation_variable_name)
-            : declarePropertyDerivative<Real>("PorousFlow_relative_permeability_qp" + _phase,
-                                              _saturation_variable_name)),
+            ? getGenericMaterialProperty<std::vector<Real>, is_ad>("PorousFlow_saturation_nodal")
+            : getGenericMaterialProperty<std::vector<Real>, is_ad>("PorousFlow_saturation_qp")),
+    _relative_permeability(
+        _nodal_material
+            ? declareGenericProperty<Real, is_ad>("PorousFlow_relative_permeability_nodal" + _phase)
+            : declareGenericProperty<Real, is_ad>("PorousFlow_relative_permeability_qp" + _phase)),
+    _drelative_permeability_ds(
+        is_ad ? nullptr
+        : _nodal_material
+            ? &declarePropertyDerivative<Real>("PorousFlow_relative_permeability_nodal" + _phase,
+                                               _saturation_variable_name)
+            : &declarePropertyDerivative<Real>("PorousFlow_relative_permeability_qp" + _phase,
+                                               _saturation_variable_name)),
     _s_res(getParam<Real>("s_res")),
     _sum_s_res(getParam<Real>("sum_s_res")),
     _dseff_ds(1.0 / (1.0 - _sum_s_res))
@@ -54,12 +60,14 @@ PorousFlowRelativePermeabilityBase::PorousFlowRelativePermeabilityBase(
     mooseError("Sum of residual saturations sum_s_res cannot be smaller than s_res in ", name());
 }
 
+template <bool is_ad>
 void
-PorousFlowRelativePermeabilityBase::computeQpProperties()
+PorousFlowRelativePermeabilityBaseTempl<is_ad>::computeQpProperties()
 {
   // Effective saturation
-  Real seff = effectiveSaturation(_saturation[_qp][_phase_num]);
-  Real relperm, drelperm;
+  GenericReal<is_ad> seff = effectiveSaturation(_saturation[_qp][_phase_num]);
+  GenericReal<is_ad> relperm;
+  Real drelperm;
 
   if (seff < 0.0)
   {
@@ -70,7 +78,7 @@ PorousFlowRelativePermeabilityBase::computeQpProperties()
   else if (seff >= 0.0 && seff <= 1)
   {
     relperm = relativePermeability(seff);
-    drelperm = dRelativePermeability(seff);
+    drelperm = dRelativePermeability(MetaPhysicL::raw_value(seff));
   }
   else // seff > 1
   {
@@ -80,11 +88,18 @@ PorousFlowRelativePermeabilityBase::computeQpProperties()
   }
 
   _relative_permeability[_qp] = relperm * _scaling;
-  _drelative_permeability_ds[_qp] = drelperm * _dseff_ds * _scaling;
+
+  if (!is_ad)
+    (*_drelative_permeability_ds)[_qp] = drelperm * _dseff_ds * _scaling;
 }
 
-Real
-PorousFlowRelativePermeabilityBase::effectiveSaturation(Real saturation) const
+template <bool is_ad>
+GenericReal<is_ad>
+PorousFlowRelativePermeabilityBaseTempl<is_ad>::effectiveSaturation(
+    GenericReal<is_ad> saturation) const
 {
   return (saturation - _s_res) / (1.0 - _sum_s_res);
 }
+
+template class PorousFlowRelativePermeabilityBaseTempl<false>;
+template class PorousFlowRelativePermeabilityBaseTempl<true>;

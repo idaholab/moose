@@ -42,9 +42,9 @@ PorousFlowPermeabilityTensorFromVar::computeQpProperties()
 {
   _permeability_qp[_qp] = _k_anisotropy * _perm[_qp];
 
-  _dpermeability_qp_dvar[_qp].resize(_num_var, RealTensorValue());
-  _dpermeability_qp_dgradvar[_qp].resize(LIBMESH_DIM);
+  (*_dpermeability_qp_dvar)[_qp].resize(_num_var, RealTensorValue());
+  (*_dpermeability_qp_dgradvar)[_qp].resize(LIBMESH_DIM);
 
   for (const auto i : make_range(Moose::dim))
-    _dpermeability_qp_dgradvar[_qp][i].resize(_num_var, RealTensorValue());
+    (*_dpermeability_qp_dgradvar)[_qp][i].resize(_num_var, RealTensorValue());
 }

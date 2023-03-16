@@ -1,0 +1,79 @@
+[Tests]
+  issues = '#21233'
+  [cmd_line]
+    design = 'MultiAppSamplerControl.md'
+    requirement = 'The system shall be able to apply command line parameter(s) to nested sub-applications in'
+    [normal]
+      type = CSVDiff
+      input = stm.i
+      csvdiff = stm_out_storage_0001.csv
+      detail = 'normal multiapp mode;'
+    []
+    [batch]
+      type = CSVDiff
+      input = stm.i
+      cli_args = 'MultiApps/main/mode=batch-reset'
+      csvdiff = stm_out_storage_0001.csv
+      detail = 'batch multiapp mode;'
+    []
+  []
+  [parameter_transfer]
+    design = 'SamplerParameterTransfer.md'
+    requirement = 'The system shall be able to transfer parameter(s) to nested sub-applications in'
+    [normal]
+      type = CSVDiff
+      input = stm_batch.i
+      cli_args = 'Outputs/file_base=stm_out'
+      csvdiff = stm_out_storage_0001.csv
+      detail = 'normal multiapp mode;'
+    []
+    [batch_reset]
+      type = CSVDiff
+      input = stm_batch.i
+      cli_args = 'Outputs/file_base=stm_out MultiApps/main/mode=batch-reset'
+      csvdiff = stm_out_storage_0001.csv
+      detail = 'batch-reset multiapp mode;'
+    []
+    [batch_restore]
+      type = CSVDiff
+      input = stm_batch.i
+      cli_args = 'Outputs/file_base=stm_out MultiApps/main/mode=batch-restore'
+      csvdiff = stm_out_storage_0001.csv
+      detail = 'batch-restore multiapp mode;'
+    []
+  []
+  [file_output]
+    design = 'SamplerFullSolveMultiApp.md'
+    requirement = 'The system shall be able to output results from nested sub-applications in stochastic simulations using '
+    [normal]
+      type = CSVDiff
+      input = 'stm_small_batch.i'
+      cli_args = 'MultiApps/main/mode=normal main:Outputs/csv=true main:sub:Outputs/csv=true main:sub:subsub:Outputs/csv=true'
+      csvdiff = 'stm_small_batch_out_main0.csv stm_small_batch_out_main0_sub0.csv stm_small_batch_out_main0_sub0_subsub0.csv stm_small_batch_out_main0_sub0_subsub1.csv
+                 stm_small_batch_out_main1.csv stm_small_batch_out_main1_sub0.csv stm_small_batch_out_main1_sub0_subsub0.csv stm_small_batch_out_main1_sub0_subsub1.csv
+                 stm_small_batch_out_main2.csv stm_small_batch_out_main2_sub0.csv stm_small_batch_out_main2_sub0_subsub0.csv stm_small_batch_out_main2_sub0_subsub1.csv
+                 stm_small_batch_out_main3.csv stm_small_batch_out_main3_sub0.csv stm_small_batch_out_main3_sub0_subsub0.csv stm_small_batch_out_main3_sub0_subsub1.csv'
+      detail = 'normal multiapp mode;'
+    []
+    [batch_reset]
+      type = CSVDiff
+      input = 'stm_small_batch.i'
+      cli_args = 'MultiApps/main/mode=batch-reset main:Outputs/csv=true main:sub:Outputs/csv=true main:sub:subsub:Outputs/csv=true'
+      csvdiff = 'stm_small_batch_out_main0.csv stm_small_batch_out_main0_sub0.csv stm_small_batch_out_main0_sub0_subsub0.csv stm_small_batch_out_main0_sub0_subsub1.csv
+                 stm_small_batch_out_main1.csv stm_small_batch_out_main1_sub0.csv stm_small_batch_out_main1_sub0_subsub0.csv stm_small_batch_out_main1_sub0_subsub1.csv
+                 stm_small_batch_out_main2.csv stm_small_batch_out_main2_sub0.csv stm_small_batch_out_main2_sub0_subsub0.csv stm_small_batch_out_main2_sub0_subsub1.csv
+                 stm_small_batch_out_main3.csv stm_small_batch_out_main3_sub0.csv stm_small_batch_out_main3_sub0_subsub0.csv stm_small_batch_out_main3_sub0_subsub1.csv'
+      detail = 'batch-reset multiapp mode;'
+    []
+    [batch_restore]
+      type = CSVDiff
+      input = 'stm_small_batch.i'
+      cli_args = 'MultiApps/main/mode=batch-restore main:Outputs/csv=true main:sub:Outputs/csv=true main:sub:subsub:Outputs/csv=true'
+      csvdiff = 'stm_small_batch_out_main0.csv stm_small_batch_out_main0_sub0.csv stm_small_batch_out_main0_sub0_subsub0.csv stm_small_batch_out_main0_sub0_subsub1.csv
+                 stm_small_batch_out_main1.csv stm_small_batch_out_main1_sub0.csv stm_small_batch_out_main1_sub0_subsub0.csv stm_small_batch_out_main1_sub0_subsub1.csv
+                 stm_small_batch_out_main2.csv stm_small_batch_out_main2_sub0.csv stm_small_batch_out_main2_sub0_subsub0.csv stm_small_batch_out_main2_sub0_subsub1.csv
+                 stm_small_batch_out_main3.csv stm_small_batch_out_main3_sub0.csv stm_small_batch_out_main3_sub0_subsub0.csv stm_small_batch_out_main3_sub0_subsub1.csv'
+      detail = 'batch-restore multiapp mode;'
+    []
+  []
+[]

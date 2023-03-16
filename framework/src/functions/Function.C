@@ -11,46 +11,41 @@
 
 using namespace Moose;
 
-template <typename T>
 InputParameters
-FunctionTempl<T>::validParams()
+Function::validParams()
 {
-  InputParameters params = MooseFunctionBase::validParams();
+  InputParameters params = MooseObject::validParams();
+  params += SetupInterface::validParams();
 
   params.registerBase("Function");
 
   return params;
 }
 
-template <typename T>
-FunctionTempl<T>::FunctionTempl(const InputParameters & parameters)
-  : MooseFunctionBase(parameters),
+Function::Function(const InputParameters & parameters)
+  : MooseObject(parameters),
+    SetupInterface(this),
     TransientInterface(this),
     PostprocessorInterface(this),
     UserObjectInterface(this),
     Restartable(this, "Functions"),
     MeshChangedInterface(parameters),
     ScalarCoupleable(this),
-    Moose::FunctorBase<T>(name())
+    Moose::FunctorBase<Real>(name())
 {
 }
 
-template <typename T>
-FunctionTempl<T>::~FunctionTempl()
-{
-}
+Function::~Function() {}
 
-template <typename T>
 Real
-FunctionTempl<T>::value(Real /*t*/, const Point & /*p*/) const
+Function::value(Real /*t*/, const Point & /*p*/) const
 {
   mooseError("value method not implemented");
   return 0.0;
 }
 
-template <typename T>
 ADReal
-FunctionTempl<T>::value(const ADReal & t, const ADPoint & p) const
+Function::value(const ADReal & t, const ADPoint & p) const
 {
   const auto rt = MetaPhysicL::raw_value(t);
   const auto rp = MetaPhysicL::raw_value(p);
@@ -67,65 +62,57 @@ FunctionTempl<T>::value(const ADReal & t, const ADPoint & p) const
   return ret;
 }
 
-template <typename T>
 ChainedReal
-FunctionTempl<T>::value(const ChainedReal & t) const
+Function::value(const ChainedReal & t) const
 {
   static const Point p;
   return {value(t.value(), p), timeDerivative(t.value(), p) * t.derivatives()};
 }
 
-template <typename T>
 RealGradient
-FunctionTempl<T>::gradient(Real /*t*/, const Point & /*p*/) const
+Function::gradient(Real /*t*/, const Point & /*p*/) const
 {
   mooseError("gradient method not implemented");
   return RealGradient(0, 0, 0);
 }
 
-template <typename T>
 Real
-FunctionTempl<T>::timeDerivative(Real /*t*/, const Point & /*p*/) const
+Function::timeDerivative(Real /*t*/, const Point & /*p*/) const
 {
   mooseError("timeDerivative method not implemented");
   return 0;
 }
 
-template <typename T>
 RealVectorValue
-FunctionTempl<T>::vectorValue(Real /*t*/, const Point & /*p*/) const
+Function::vectorValue(Real /*t*/, const Point & /*p*/) const
 {
   mooseError("vectorValue method not implemented");
   return RealVectorValue(0, 0, 0);
 }
 
-template <typename T>
 RealVectorValue
-FunctionTempl<T>::vectorCurl(Real /*t*/, const Point & /*p*/) const
+Function::vectorCurl(Real /*t*/, const Point & /*p*/) const
 {
   mooseError("vectorCurl method not implemented");
   return RealVectorValue(0, 0, 0);
 }
 
-template <typename T>
 Real
-FunctionTempl<T>::integral() const
+Function::integral() const
 {
   mooseError("Integral method not implemented for function ", name());
   return 0;
 }
 
-template <typename T>
 Real
-FunctionTempl<T>::average() const
+Function::average() const
 {
   mooseError("Average method not implemented for function ", name());
   return 0;
 }
 
-template <typename T>
 Real
-FunctionTempl<T>::getTime(const unsigned int state) const
+Function::getTime(const unsigned int state) const
 {
   switch (state)
   {
@@ -140,9 +127,8 @@ FunctionTempl<T>::getTime(const unsigned int state) const
   }
 }
 
-template <typename T>
 void
-FunctionTempl<T>::determineElemXYZ(const ElemQpArg & elem_qp) const
+Function::determineElemXYZ(const ElemQpArg & elem_qp) const
 {
   const Elem * const elem = std::get<0>(elem_qp);
   if (elem != _current_elem_qp_functor_elem)
@@ -164,9 +150,8 @@ FunctionTempl<T>::determineElemXYZ(const ElemQpArg & elem_qp) const
   }
 }
 
-template <typename T>
 void
-FunctionTempl<T>::determineElemSideXYZ(const ElemSideQpArg & elem_side_qp) const
+Function::determineElemSideXYZ(const ElemSideQpArg & elem_side_qp) const
 {
   const Elem * const elem = std::get<0>(elem_side_qp);
   const auto side = std::get<1>(elem_side_qp);
@@ -190,16 +175,14 @@ FunctionTempl<T>::determineElemSideXYZ(const ElemSideQpArg & elem_side_qp) const
   }
 }
 
-template <typename T>
-typename FunctionTempl<T>::ValueType
-FunctionTempl<T>::evaluate(const ElemArg & elem_arg, const unsigned int state) const
+typename Function::ValueType
+Function::evaluate(const ElemArg & elem_arg, const unsigned int state) const
 {
   return value(getTime(state), elem_arg.elem->vertex_average());
 }
 
-template <typename T>
-typename FunctionTempl<T>::ValueType
-FunctionTempl<T>::evaluate(const FaceArg & face, const unsigned int state) const
+typename Function::ValueType
+Function::evaluate(const FaceArg & face, const unsigned int state) const
 {
   if (face.face_side && face.fi->neighborPtr() &&
       (face.fi->elem().subdomain_id() != face.fi->neighbor().subdomain_id()))
@@ -222,9 +205,8 @@ FunctionTempl<T>::evaluate(const FaceArg & face, const unsigned int state) const
     return value(getTime(state), face.fi->faceCentroid());
 }
 
-template <typename T>
-typename FunctionTempl<T>::ValueType
-FunctionTempl<T>::evaluate(const ElemQpArg & elem_qp, const unsigned int state) const
+typename Function::ValueType
+Function::evaluate(const ElemQpArg & elem_qp, const unsigned int state) const
 {
   determineElemXYZ(elem_qp);
   const auto qp = std::get<1>(elem_qp);
@@ -233,9 +215,8 @@ FunctionTempl<T>::evaluate(const ElemQpArg & elem_qp, const unsigned int state) 
   return value(getTime(state), _current_elem_qp_functor_xyz[qp]);
 }
 
-template <typename T>
-typename FunctionTempl<T>::ValueType
-FunctionTempl<T>::evaluate(const ElemSideQpArg & elem_side_qp, const unsigned int state) const
+typename Function::ValueType
+Function::evaluate(const ElemSideQpArg & elem_side_qp, const unsigned int state) const
 {
   determineElemSideXYZ(elem_side_qp);
   const auto qp = std::get<2>(elem_side_qp);
@@ -244,30 +225,26 @@ FunctionTempl<T>::evaluate(const ElemSideQpArg & elem_side_qp, const unsigned in
   return value(getTime(state), _current_elem_side_qp_functor_xyz[qp]);
 }
 
-template <typename T>
-typename FunctionTempl<T>::ValueType
-FunctionTempl<T>::evaluate(const ElemPointArg & elem_point_arg, const unsigned int state) const
+typename Function::ValueType
+Function::evaluate(const ElemPointArg & elem_point_arg, const unsigned int state) const
 {
   return value(getTime(state), elem_point_arg.point);
 }
 
-template <typename T>
-typename FunctionTempl<T>::GradientType
-FunctionTempl<T>::evaluateGradient(const ElemArg & elem_arg, const unsigned int state) const
+typename Function::GradientType
+Function::evaluateGradient(const ElemArg & elem_arg, const unsigned int state) const
 {
   return gradient(getTime(state), elem_arg.elem->vertex_average());
 }
 
-template <typename T>
-typename FunctionTempl<T>::GradientType
-FunctionTempl<T>::evaluateGradient(const FaceArg & face, const unsigned int state) const
+typename Function::GradientType
+Function::evaluateGradient(const FaceArg & face, const unsigned int state) const
 {
   return gradient(getTime(state), face.fi->faceCentroid());
 }
 
-template <typename T>
-typename FunctionTempl<T>::GradientType
-FunctionTempl<T>::evaluateGradient(const ElemQpArg & elem_qp, const unsigned int state) const
+typename Function::GradientType
+Function::evaluateGradient(const ElemQpArg & elem_qp, const unsigned int state) const
 {
   determineElemXYZ(elem_qp);
   const auto qp = std::get<1>(elem_qp);
@@ -276,10 +253,8 @@ FunctionTempl<T>::evaluateGradient(const ElemQpArg & elem_qp, const unsigned int
   return gradient(getTime(state), _current_elem_qp_functor_xyz[qp]);
 }
 
-template <typename T>
-typename FunctionTempl<T>::GradientType
-FunctionTempl<T>::evaluateGradient(const ElemSideQpArg & elem_side_qp,
-                                   const unsigned int state) const
+typename Function::GradientType
+Function::evaluateGradient(const ElemSideQpArg & elem_side_qp, const unsigned int state) const
 {
   determineElemSideXYZ(elem_side_qp);
   const auto qp = std::get<2>(elem_side_qp);
@@ -288,31 +263,26 @@ FunctionTempl<T>::evaluateGradient(const ElemSideQpArg & elem_side_qp,
   return gradient(getTime(state), _current_elem_side_qp_functor_xyz[qp]);
 }
 
-template <typename T>
-typename FunctionTempl<T>::GradientType
-FunctionTempl<T>::evaluateGradient(const ElemPointArg & elem_point_arg,
-                                   const unsigned int state) const
+typename Function::GradientType
+Function::evaluateGradient(const ElemPointArg & elem_point_arg, const unsigned int state) const
 {
   return gradient(getTime(state), elem_point_arg.point);
 }
 
-template <typename T>
-typename FunctionTempl<T>::DotType
-FunctionTempl<T>::evaluateDot(const ElemArg & elem_arg, const unsigned int state) const
+typename Function::DotType
+Function::evaluateDot(const ElemArg & elem_arg, const unsigned int state) const
 {
   return timeDerivative(getTime(state), elem_arg.elem->vertex_average());
 }
 
-template <typename T>
-typename FunctionTempl<T>::DotType
-FunctionTempl<T>::evaluateDot(const FaceArg & face, const unsigned int state) const
+typename Function::DotType
+Function::evaluateDot(const FaceArg & face, const unsigned int state) const
 {
   return timeDerivative(getTime(state), face.fi->faceCentroid());
 }
 
-template <typename T>
-typename FunctionTempl<T>::DotType
-FunctionTempl<T>::evaluateDot(const ElemQpArg & elem_qp, const unsigned int state) const
+typename Function::DotType
+Function::evaluateDot(const ElemQpArg & elem_qp, const unsigned int state) const
 {
   determineElemXYZ(elem_qp);
   const auto qp = std::get<1>(elem_qp);
@@ -321,9 +291,8 @@ FunctionTempl<T>::evaluateDot(const ElemQpArg & elem_qp, const unsigned int stat
   return timeDerivative(getTime(state), _current_elem_qp_functor_xyz[qp]);
 }
 
-template <typename T>
-typename FunctionTempl<T>::DotType
-FunctionTempl<T>::evaluateDot(const ElemSideQpArg & elem_side_qp, const unsigned int state) const
+typename Function::DotType
+Function::evaluateDot(const ElemSideQpArg & elem_side_qp, const unsigned int state) const
 {
   determineElemSideXYZ(elem_side_qp);
   const auto qp = std::get<2>(elem_side_qp);
@@ -332,39 +301,40 @@ FunctionTempl<T>::evaluateDot(const ElemSideQpArg & elem_side_qp, const unsigned
   return timeDerivative(getTime(state), _current_elem_side_qp_functor_xyz[qp]);
 }
 
-template <typename T>
-typename FunctionTempl<T>::DotType
-FunctionTempl<T>::evaluateDot(const ElemPointArg & elem_point_arg, const unsigned int state) const
+typename Function::DotType
+Function::evaluateDot(const ElemPointArg & elem_point_arg, const unsigned int state) const
 {
   return timeDerivative(getTime(state), elem_point_arg.point);
 }
 
-template <typename T>
 void
-FunctionTempl<T>::timestepSetup()
+Function::timestepSetup()
 {
   _current_elem_qp_functor_elem = nullptr;
   _current_elem_side_qp_functor_elem_side = std::make_pair(nullptr, libMesh::invalid_uint);
-  FunctorBase<T>::timestepSetup();
+  FunctorBase<Real>::timestepSetup();
 }
 
-template <typename T>
 void
-FunctionTempl<T>::residualSetup()
+Function::residualSetup()
 {
   _current_elem_qp_functor_elem = nullptr;
   _current_elem_side_qp_functor_elem_side = std::make_pair(nullptr, libMesh::invalid_uint);
-  FunctorBase<T>::residualSetup();
+  FunctorBase<Real>::residualSetup();
 }
 
-template <typename T>
 void
-FunctionTempl<T>::jacobianSetup()
+Function::jacobianSetup()
 {
   _current_elem_qp_functor_elem = nullptr;
   _current_elem_side_qp_functor_elem_side = std::make_pair(nullptr, libMesh::invalid_uint);
-  FunctorBase<T>::jacobianSetup();
+  FunctorBase<Real>::jacobianSetup();
 }
 
-template class FunctionTempl<Real>;
-template class FunctionTempl<ADReal>;
+void
+Function::customSetup(const ExecFlagType & exec_type)
+{
+  _current_elem_qp_functor_elem = nullptr;
+  _current_elem_side_qp_functor_elem_side = std::make_pair(nullptr, libMesh::invalid_uint);
+  FunctorBase<Real>::customSetup(exec_type);
+}

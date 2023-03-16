@@ -14,20 +14,24 @@
 /**
  * Base class Material designed to provide the permeability tensor.
  */
-class PorousFlowPermeabilityBase : public PorousFlowMaterialVectorBase
+template <bool is_ad>
+class PorousFlowPermeabilityBaseTempl : public PorousFlowMaterialVectorBase
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowPermeabilityBase(const InputParameters & parameters);
+  PorousFlowPermeabilityBaseTempl(const InputParameters & parameters);
 
 protected:
   /// Quadpoint permeability
-  MaterialProperty<RealTensorValue> & _permeability_qp;
+  GenericMaterialProperty<RealTensorValue, is_ad> & _permeability_qp;
 
   /// d(quadpoint permeability)/d(PorousFlow variable)
-  MaterialProperty<std::vector<RealTensorValue>> & _dpermeability_qp_dvar;
+  MaterialProperty<std::vector<RealTensorValue>> * const _dpermeability_qp_dvar;
 
   /// d(quadpoint permeability)/d(grad(PorousFlow variable))
-  MaterialProperty<std::vector<std::vector<RealTensorValue>>> & _dpermeability_qp_dgradvar;
+  MaterialProperty<std::vector<std::vector<RealTensorValue>>> * const _dpermeability_qp_dgradvar;
 };
+
+typedef PorousFlowPermeabilityBaseTempl<false> PorousFlowPermeabilityBase;
+typedef PorousFlowPermeabilityBaseTempl<true> ADPorousFlowPermeabilityBase;

@@ -42,6 +42,16 @@
     requirement = 'The system shall produce a warning indicating a possible replacement when deprecated code is superseded.'
   [../]
 
+  [deprecate_param]
+    type = 'RunApp'
+    input = 'deprecate-old-for-new-param.i'
+    requirement = 'The system shall be able to deprecate parameter names, while enabling user code to only use the new, blessed name'
+    design = 'InputParameters.md'
+    issues = '#15497'
+    no_error_deprecated = True
+    expect_out = "deprecate-old-for-new-param\.i:[0-9]+:.*coef.*:\n'coef' has been deprecated and will be removed on .+\. Please use 'coeff' instead"
+  []
+
   [deprecated_coupled_var]
     type = 'Exodiff'
     input = 'deprecated_coupled_var.i'
@@ -50,7 +60,7 @@
     design = 'InputParameters.md'
     issues = '#15497'
     no_error_deprecated = True
-    expect_out = "The coupled variable parameter 'stupid_name' has been deprecated and will be removed never because this is a dummy test\. Please use the 'source' coupled variable parameter instead\."
+    expect_out = "deprecated_coupled_var\.i:[0-9]+:.*stupid_name.*:\n'stupid_name' has been deprecated and will be removed on.+\. Please use 'source' instead"
   []
 
   [blessed_coupled_var]

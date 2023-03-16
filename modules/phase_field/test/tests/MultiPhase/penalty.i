@@ -183,7 +183,7 @@
 
   [./free_energy]
     type = DerivativeMultiPhaseMaterial
-    f_name = F
+    property_name = F
     fi_names = 'Fa   Fb'
     hi_names = 'h1   h2'
     etas     = 'eta1 eta2'

@@ -51,7 +51,6 @@
     to_multi_app = sub
     sampler = train_sample
     parameters = 'Materials/k/prop_values Materials/alpha/prop_values Kernels/source/value'
-    to_control = 'stochastic'
     execute_on = 'timestep_begin'
     check_multiapp_execute_on = false
   []

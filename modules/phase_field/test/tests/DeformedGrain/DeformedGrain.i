@@ -12,7 +12,6 @@
 []
 
 [GlobalParams]
-  block = 0
   op_num = 8
   deformed_grain_num = 16
   var_name_base = gr

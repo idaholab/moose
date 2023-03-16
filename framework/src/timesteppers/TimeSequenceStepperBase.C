@@ -23,7 +23,7 @@ TimeSequenceStepperBase::validParams()
 
 TimeSequenceStepperBase::TimeSequenceStepperBase(const InputParameters & parameters)
   : TimeStepper(parameters),
-    _current_step(declareRestartableData("current_step", (unsigned int)0)),
+    _current_step(declareRestartableData<unsigned int>("current_step", 0)),
     _time_sequence(declareRestartableData<std::vector<Real>>("time_sequence"))
 {
 }

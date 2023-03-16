@@ -42,11 +42,15 @@ protected:
   NumericVector<Number> & _bounded_vector;
 
   /// MOOSE variable (base class) we set the bound for
-  MooseVariableFEBase & _bounded_var;
+  MooseVariableFieldBase & _bounded_var;
 
   /// Name of MOOSE variable we set the bound for
   NonlinearVariableName _bounded_var_name;
 
-  /// MOOSE variable we set the bound for
-  MooseVariable & _var;
+  /// Pointer to the finite element variable we set the bound for. Will be null for finite volume
+  MooseVariableFE<Real> * _fe_var;
+
+private:
+  /// Return the current DOF index to apply the bound on
+  dof_id_type getDoFIndex() const;
 };

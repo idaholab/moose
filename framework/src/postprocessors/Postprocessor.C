@@ -18,7 +18,7 @@ Postprocessor::validParams()
 {
   InputParameters params = UserObject::validParams();
   params += OutputInterface::validParams();
-
+  params += NonADFunctorInterface::validParams();
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
   exec_enum.addAvailableFlags(EXEC_TRANSFER);
 
@@ -28,7 +28,9 @@ Postprocessor::validParams()
 }
 
 Postprocessor::Postprocessor(const MooseObject * moose_object)
-  : OutputInterface(moose_object->parameters()), _pp_name(moose_object->name())
+  : OutputInterface(moose_object->parameters()),
+    NonADFunctorInterface(moose_object),
+    _pp_name(moose_object->name())
 {
   auto & fe_problem =
       *moose_object->parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem_base");

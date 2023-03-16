@@ -33,7 +33,7 @@ GLOBAL VARIABLES relative 1.e-6 floor 1e-8
 	total_area  # min:               0 @ t1	max:       1.0000001 @ t3
 
 NODAL VARIABLES relative 2.e-5 floor 1e-6
-	nodal_area_dummy_name        # min:               0 @ t1,n1	max:      0.02777778 @ t3,n702
+	nodal_area        # min:               0 @ t1,n1	max:      0.02777778 @ t3,n702
 	react_x           # min:               0 @ t1,n1	max:      0.27777917 @ t5,n240
 	react_y           # min:               0 @ t1,n1	max:     7.12841e-08 @ t4,n405
 	react_z           # min:               0 @ t1,n1	max:   7.1826697e-08 @ t4,n728

@@ -1,12 +1,20 @@
 [Tests]
   design = 'meshgenerators/PolygonConcentricCircleMeshGenerator.md'
-  issues = '#18628 #20514 #20637 #21420'
+  issues = '#18628 #20514 #20637 #21420 #23367 #23520'
   [back_only]
     type = 'Exodiff'
     input = 'poly_2d.i'
     exodiff = 'poly_2d_back_only.e'
     cli_args = 'Mesh/gen/background_block_ids="30 35" Mesh/gen/background_block_names="back_in back_out" --mesh-only "poly_2d_back_only.e"'
     requirement ='The system shall generate a hexagon mesh without rings and ducts.'
+    recover = false
+  []
+  [back_only_single_block]
+    type = 'Exodiff'
+    input = 'poly_2d.i'
+    exodiff = 'poly_2d_back_only_sb.e'
+    cli_args = 'Mesh/gen/quad_center_elements=true Mesh/gen/background_block_ids="30" Mesh/gen/background_block_names="back" --mesh-only "poly_2d_back_only_sb.e"'
+    requirement ='The system shall generate a polygon mesh without rings and ducts and with a multilayer QUAD background using a single set of block id and name.'
     recover = false
   []
   [back_only_flat_up]
@@ -32,6 +40,16 @@
     requirement ='The system shall generate a hexagon mesh with only one radial layer of elements without rings and ducts.'
     recover = false
   []
+  [back_only_one_layer_quad]
+    type = 'Exodiff'
+    input = 'poly_2d.i'
+    exodiff = 'poly_2d_back_only_one_layer_quad.e'
+    cli_args = 'Mesh/gen/background_intervals=1
+                Mesh/gen/quad_center_elements=true
+                --mesh-only "poly_2d_back_only_one_layer_quad.e"'
+    requirement ='The system shall generate a hexagon mesh with only one radial layer of specially patterned quad elements without rings and ducts.'
+    recover = false
+  []
   [rings]
     type = 'Exodiff'
     input = 'poly_2d.i'
@@ -40,9 +58,23 @@
                 Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2"
                 Mesh/gen/ring_block_ids="10 15 20" Mesh/gen/ring_block_names="center_in center outer_ring"
                 Mesh/gen/uniform_mesh_on_sides=true
-                Mesh/gen/interface_boundary_names="int1 int2"
+                Mesh/gen/outward_interface_boundary_names="int1 int2"
                 --mesh-only "poly_2d_rings.e"'
     requirement ='The system shall generate a hexagon mesh with rings.'
+    recover = false
+  []
+  [rings_single_block]
+    type = 'Exodiff'
+    input = 'poly_2d.i'
+    exodiff = 'poly_2d_rings_sb.e'
+    cli_args = 'Mesh/gen/quad_center_elements=true
+                Mesh/gen/background_block_ids="30" Mesh/gen/background_block_names="back"
+                Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2"
+                Mesh/gen/ring_block_ids="10 20" Mesh/gen/ring_block_names="center outer_ring"
+                Mesh/gen/uniform_mesh_on_sides=true
+                Mesh/gen/outward_interface_boundary_names="int1 int2"
+                --mesh-only "poly_2d_rings_sb.e"'
+    requirement ='The system shall generate a hexagon mesh with rings, with the innermost ring having multilayer QUAD elements and being assigned by a single set of block id and name.'
     recover = false
   []
   [ducts]
@@ -59,6 +91,7 @@
   []
   [full]
     type = 'Exodiff'
+    exodiff_opts = '-pedantic'
     input = 'poly_2d.i'
     exodiff = 'poly_2d_full.e'
     cli_args = 'Mesh/gen/background_block_ids="30" Mesh/gen/background_block_names="back"
@@ -82,9 +115,26 @@
                 Mesh/gen/duct_sizes="3.5 4.0" Mesh/gen/duct_intervals="2 2"
                 Mesh/gen/duct_block_ids="1500 1600" Mesh/gen/duct_block_names="inner_duct outer_duct"
                 Mesh/gen/duct_sizes_style="apothem"
-                Mesh/gen/create_interface_boundaries=false
+                Mesh/gen/create_outward_interface_boundaries=false
                 --mesh-only "poly_2d_full_no_interface.e"'
     requirement ='The system shall generate a hexagon mesh with rings and ducts and without interface boundaries defined.'
+    recover = false
+  []
+  [full_inward_interfaces]
+    type = 'Exodiff'
+    exodiff_opts = '-pedantic'
+    input = 'poly_2d.i'
+    exodiff = 'poly_2d_full_inward_interface.e'
+    cli_args = 'Mesh/gen/background_block_ids="30" Mesh/gen/background_block_names="back"
+                Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2"
+                Mesh/gen/ring_block_ids="10 15 20" Mesh/gen/ring_block_names="center_in center outer_ring"
+                Mesh/gen/duct_sizes="3.5 4.0" Mesh/gen/duct_intervals="2 2"
+                Mesh/gen/duct_block_ids="1500 1600" Mesh/gen/duct_block_names="inner_duct outer_duct"
+                Mesh/gen/duct_sizes_style="apothem"
+                Mesh/gen/create_inward_interface_boundaries=true
+                Mesh/gen/create_outward_interface_boundaries=false
+                --mesh-only "poly_2d_full_inward_interface.e"'
+    requirement ='The system shall generate a hexagon mesh with rings and ducts and with inward interface boundaries defined.'
     recover = false
   []
   [full_biasing]
@@ -212,10 +262,10 @@
     [err_interface_ids_length]
       type = 'RunException'
       input = 'poly_2d.i'
-      cli_args = 'Mesh/gen/interface_boundary_names="int1"
+      cli_args = 'Mesh/gen/outward_interface_boundary_names="int1"
                   --mesh-only "poly_2d_err.e"'
       expect_err = 'If provided, the length of this parameter must be identical to the total number of interfaces.'
-      detail = "interface_boundary_names has an incorrect length."
+      detail = "the number of outward interface boundary names is different from the number of outward interfaces."
     []
     [err_background_block_ids_1]
       type = 'RunException'
@@ -223,8 +273,8 @@
       cli_args = 'Mesh/gen/background_block_ids="20 30"
                   Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2"
                   --mesh-only "poly_2d_err.e"'
-      expect_err = 'This parameter must be either unset or have a unity length when ring_radii is provided or background_intervals is unity.'
-      detail = "background_block_ids has more than one element when the mesh has ring(s)."
+      expect_err = 'This parameter must be either unset or have a unity length'
+      detail = "multiple background block ids have been specified at the same time as one or more ring(s) for the inner region"
     []
     [err_background_block_names_1]
       type = 'RunException'
@@ -232,24 +282,24 @@
       cli_args = 'Mesh/gen/background_block_names="back1 back2"
                   Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2"
                   --mesh-only "poly_2d_err.e"'
-      expect_err = 'This parameter must be either unset or have a unity length when ring_radii is provided or background_intervals is unity.'
-      detail = "background_block_names has more than one element when the mesh has ring(s)."
+      expect_err = 'This parameter must be either unset or have a unity length'
+      detail = "multiple background block names have been specified at the same time as one or more ring(s) for the inner region."
     []
     [err_background_block_ids_2]
       type = 'RunException'
       input = 'poly_2d.i'
       cli_args = 'Mesh/gen/background_block_ids="20"
                   --mesh-only "poly_2d_err.e"'
-      expect_err = 'This parameter must be either unset or have a length of two when ring_radii is not provided and background_intervals is not unity.'
-      detail = "background_block_ids has a length other than zero or two when the mesh does not have rings and background_intervals does not equal one."
+      expect_err = 'This parameter must be either unset or have a length of two'
+      detail = "background_block_ids has a length other than zero or two when the mesh does not have rings and the total number of background intervals does not equal one."
     []
     [err_background_block_names_2]
       type = 'RunException'
       input = 'poly_2d.i'
       cli_args = 'Mesh/gen/background_block_names="back1"
                   --mesh-only "poly_2d_err.e"'
-      expect_err = 'This parameter must be either unset or have a length of two when ring_radii is not provided and background_intervals is not unity.'
-      detail = "background_block_names has a length other than zero or two when the mesh does not have rings and background_intervals does not equal one."
+      expect_err = 'This parameter must be either unset or have a length of two'
+      detail = "background_block_names has a length other than zero or two when the mesh does not have rings and the total number of background intervals does not equal one."
     []
     [err_block_ids_with_one_name]
       type = 'RunException'
@@ -519,6 +569,32 @@
       expect_err = 'this parameter is only applicable if quad_center_elements is set true.'
       detail = 'center_quad_factor is provided for triangular center elements.'
     []
+    [err_unneeded_outward_interface_params]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/background_block_ids="30" Mesh/gen/background_block_names="back"
+                  Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2"
+                  Mesh/gen/ring_block_ids="10 15 20" Mesh/gen/ring_block_names="center_in center outer_ring"
+                  Mesh/gen/uniform_mesh_on_sides=true
+                  Mesh/gen/outward_interface_boundary_names="int1 int2"
+                  Mesh/gen/create_outward_interface_boundaries=false
+                  --mesh-only "poly_2d_err.e"'
+      expect_err = 'If set false, outward_interface_boundary_names should not be set as they are not used.'
+      detail ='outward interface boundaries related parameters are provided while outward interface boundaries are not set to be created.'
+    []
+    [err_unneeded_inward_interface_params]
+      type = 'RunException'
+      input = 'poly_2d.i'
+      cli_args = 'Mesh/gen/background_block_ids="30" Mesh/gen/background_block_names="back"
+                  Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2"
+                  Mesh/gen/ring_block_ids="10 15 20" Mesh/gen/ring_block_names="center_in center outer_ring"
+                  Mesh/gen/uniform_mesh_on_sides=true
+                  Mesh/gen/inward_interface_boundary_names="int1 int2"
+                  Mesh/gen/create_inward_interface_boundaries=false
+                  --mesh-only "poly_2d_err.e"'
+      expect_err = 'If set false, inward_interface_boundary_names should not be set as they are not used.'
+      detail ='inward interface boundaries related parameters are provided but inward interface boundaries are not set to be created.'
+    []
     [err_unneeded_interface_params]
       type = 'RunException'
       input = 'poly_2d.i'
@@ -526,11 +602,11 @@
                   Mesh/gen/ring_radii="2 3" Mesh/gen/ring_intervals="2 2"
                   Mesh/gen/ring_block_ids="10 15 20" Mesh/gen/ring_block_names="center_in center outer_ring"
                   Mesh/gen/uniform_mesh_on_sides=true
-                  Mesh/gen/interface_boundary_names="int1 int2"
-                  Mesh/gen/create_interface_boundaries=false
+                  Mesh/gen/interface_boundary_id_shift=10
+                  Mesh/gen/create_outward_interface_boundaries=false
                   --mesh-only "poly_2d_err.e"'
-      expect_err = 'If set false, neither interface_boundary_names nor interface_boundary_id_shift should be set as they are not used.'
-      detail ='interface boundaries related parameters are provided but create_interface_boundaries is set false.'
+      expect_err = 'this parameter should not be set if no interface boundaries are created.'
+      detail ='interface boundary id shift parameter is provided but neither inward and outward boundaries are set to be created.'
     []
   []
 []

@@ -16,12 +16,13 @@
  * that derive from this class must override relativePermeability() and
  * dRelativePermeability()
  */
-class PorousFlowRelativePermeabilityBase : public PorousFlowMaterialBase
+template <bool is_ad>
+class PorousFlowRelativePermeabilityBaseTempl : public PorousFlowMaterialBase
 {
 public:
   static InputParameters validParams();
 
-  PorousFlowRelativePermeabilityBase(const InputParameters & parameters);
+  PorousFlowRelativePermeabilityBaseTempl(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties() override;
@@ -31,14 +32,14 @@ protected:
    * @param saturation true saturation
    * @return effective saturation
    */
-  virtual Real effectiveSaturation(Real saturation) const;
+  virtual GenericReal<is_ad> effectiveSaturation(GenericReal<is_ad> saturation) const;
 
   /**
    * Relative permeability equation (must be overriden in derived class)
    * @param seff effective saturation
    * @return relative permeability
    */
-  virtual Real relativePermeability(Real seff) const = 0;
+  virtual GenericReal<is_ad> relativePermeability(GenericReal<is_ad> seff) const = 0;
 
   /**
    * Derivative of relative permeability with respect to effective saturation
@@ -51,13 +52,13 @@ protected:
   const Real _scaling;
 
   /// Saturation material property
-  const MaterialProperty<std::vector<Real>> & _saturation;
+  const GenericMaterialProperty<std::vector<Real>, is_ad> & _saturation;
 
   /// Relative permeability material property
-  MaterialProperty<Real> & _relative_permeability;
+  GenericMaterialProperty<Real, is_ad> & _relative_permeability;
 
   /// Derivative of relative permeability wrt phase saturation
-  MaterialProperty<Real> & _drelative_permeability_ds;
+  MaterialProperty<Real> * const _drelative_permeability_ds;
 
   /// Residual saturation of specified phase
   const Real _s_res;
@@ -68,3 +69,6 @@ protected:
   /// Derivative of effective saturation with respect to saturation
   const Real _dseff_ds;
 };
+
+typedef PorousFlowRelativePermeabilityBaseTempl<false> PorousFlowRelativePermeabilityBase;
+typedef PorousFlowRelativePermeabilityBaseTempl<true> ADPorousFlowRelativePermeabilityBase;

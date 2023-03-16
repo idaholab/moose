@@ -6,6 +6,5 @@
   sampling_type = csv
   csv_samples_file = 'gold/monte_carlo_csv_study_samples_0001.csv'
 
-  sampler_output_type = 'csv'
-  qoi_output_type = 'csv'
+  output_type = 'csv'
 []

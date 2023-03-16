@@ -11,9 +11,9 @@ plasticity simulations.  This material builds an orthotropic elasticity tensor u
 Euler angles are provided, and at the start of each timestep.
 
 !alert warning title=Crystal Plasticity Simulations use Active Rotation
-The rotation matrix used in this class,`ComputeElasticityTensorCP`, is the transpose of the rotation matrix created from the Bunge Euler
-angles in the base class, [ComputeElasticityTensor](/ComputeElasticityTensor.md). This difference in the rotation matrix is
-because of the active rotation convention used in crystal plasticity simulations.
+The rotation matrix used in this class,`ComputeElasticityTensorCP`, is the transpose of the rotation
+matrix created from the Bunge Euler angles in the base class, [ComputeElasticityTensor](/ComputeElasticityTensor.md). This difference in the rotation matrix is because of the active rotation convention used in
+crystal plasticity simulations.
 
 The fill method `symmetric9` is appropriate for materials with three orthotropic planes of symmetry
 [!citep](malvern1969introduction), and is used for simulations of anistropic materials such as cubic
@@ -65,9 +65,13 @@ angles are used to describe a passive rotation: rotating the sample coordinate s
 crystal coordinate system. As a result, the rotation tensor applied is the transpose of the rotation
 tensor given in [eq:rotation_tensor] as noted in [eq:cp_elasticity_tensor_rotation].
 
+As in the base class [ComputeElasticityTensor](/ComputeElasticityTensor.md), `ComputeElasticityTensorCP`
+can also accept the rotation matrix, given as a series of nine entries. As with the Euler angle input
+parameter values, note that this crystal plasticity class uses the "passive" rotation convention.
+
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/crystal_plasticity/user_object_based/test.i block=Materials/elasticity_tensor
+!listing modules/tensor_mechanics/test/tests/crystal_plasticity/stress_update_material_based/update_method_test.i block=Materials/elasticity_tensor
 
 !syntax parameters /Materials/ComputeElasticityTensorCP
 

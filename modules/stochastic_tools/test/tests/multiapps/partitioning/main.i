@@ -26,7 +26,6 @@
   [param]
     type = SamplerParameterTransfer
     to_multi_app = sub
-    to_control = receiver
     parameters = 'Postprocessors/pp2/scale_factor'
   []
   [rep]

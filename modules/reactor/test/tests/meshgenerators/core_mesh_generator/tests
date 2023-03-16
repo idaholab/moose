@@ -75,7 +75,7 @@
                 Mesh/amg2/duct_block_names='A2_R52; A2_R152'
                 Mesh/amg2/duct_halfpitch='3.5'
                 Mesh/amg2/duct_intervals='1'
-                Mesh/cmg/inputs='amg1 amg2 empty'                
+                Mesh/cmg/inputs='amg1 amg2 empty'
                 Mesh/cmg/pattern='  2 1; 1 0 2 ; 2 1'
                 Outputs/file_base=core_hex_in"
     exodiff = 'core_hex_in.e'

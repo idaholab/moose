@@ -1,2 +1,2 @@
-signal_variance,noise_variance,length_factor0,length_factor1
-12.515716510554,0.001,1.3498028354806,40.411592279755
+length_factor0,length_factor1,noise_variance,signal_variance
+1.3498856497659,40.408367614045,0.001,12.517342937517

@@ -33,7 +33,7 @@
 #include "MathUtils.h"
 #include "Assembly.h"
 #include "GeometricSearchInterface.h"
-#include "FunctorInterface.h"
+#include "ADFunctorInterface.h"
 #include "SolutionInvalidInterface.h"
 
 #define usingMaterialBaseMembers                                                                   \
@@ -75,7 +75,7 @@ class MaterialBase : public MooseObject,
                      public RandomInterface,
                      public ElementIDInterface,
                      protected GeometricSearchInterface,
-                     protected FunctorInterface,
+                     protected ADFunctorInterface,
                      protected SolutionInvalidInterface
 {
 public:

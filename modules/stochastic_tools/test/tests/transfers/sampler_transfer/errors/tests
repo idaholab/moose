@@ -13,29 +13,24 @@
     type = RunException
     input = parent_missing_control.i
     design = 'SamplerTransientMultiApp.md'
-    expect_err = "The sub-application \(sub\) does not contain a Control object with the name "
-                 "'stochastic'."
+    expect_err = "The sub-application \(sub\) does not contain a SamplerReceiver control object."
     requirement = "The system shall produce an error if the sampler sub-application does not contain a "
                   "Control object with the name 'stochastic'."
-  []
-  [wrong_control]
-    type = RunException
-    input = parent_wrong_control.i
-    expect_err = "The sub-application \(sub\) Control object for the 'to_control' parameter must be "
-                 "of type 'SamplerReceiver'."
-    design = 'SamplerTransientMultiApp.md'
-    requirement = "The system shall produce an error if the sampler sub-application does not have a "
-                  "correct Control object with 'to_control' parameter being 'SamplerReceiver' type."
   []
   [num_parameters_wrong]
     type = RunException
     input = parent_num_parameters_wrong.i
-    expect_err = "The supplied vector of Real values is not sized correctly, the Real parameter "
-                 "'BCs/right/value requires a value but no more values are available in the supplied "
-                 "values which have a size of 2."
+    expect_err = "Number of command line arguments does not match number of sampler columns."
     design = 'SamplerParameterTransfer.md'
     requirement = "The system shall produce an error if supplied vector of real values is not sized "
                   "correctly within the SamplerParameterTransfer object."
+  []
+  [not_vector]
+    type = RunException
+    input = parent_not_vector.i
+    expect_err = "The Real parameter '[a-z,A-Z,/]+' expects a single value, but the vector supplying its values has a size of \d+\."
+    design = 'SamplerParameterTransfer.md'
+    requirement = "The system shall produce an error if a vector of values is supplied to a scalar parameter."
   []
   [sampler_mismatch]
     type = RunException

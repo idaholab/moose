@@ -88,12 +88,9 @@
 
 [Materials]
   [elasticity_tensor]
-    type = ComputeElasticityTensorConstantRotationCP
+    type = ComputeElasticityTensorCP
     C_ijkl = '1.684e5 1.214e5 1.214e5 1.684e5 1.214e5 1.684e5 0.754e5 0.754e5 0.754e5'
     fill_method = symmetric9
-    euler_angle_1 = 90
-    euler_angle_2 = 30
-    euler_angle_3 = 45
   []
   [stress]
     type = ComputeMultipleCrystalPlasticityStress

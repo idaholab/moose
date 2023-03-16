@@ -33,6 +33,7 @@ SideSetsAroundSubdomainGenerator::validParams()
   params.addParam<Point>("normal",
                          "If supplied, only faces with normal equal to this, up to "
                          "normal_tol, will be added to the sidesets specified");
+  params.addParam<bool>("external_only", false, "Only apply the sideset to external boundaries");
   params.addRangeCheckedParam<Real>("normal_tol",
                                     0.1,
                                     "normal_tol>=0 & normal_tol<=2",
@@ -53,6 +54,7 @@ SideSetsAroundSubdomainGenerator::SideSetsAroundSubdomainGenerator(
     _input(getMesh("input")),
     _boundary_names(getParam<std::vector<BoundaryName>>("new_boundary")),
     _using_normal(isParamValid("normal")),
+    _external_only(getParam<bool>("external_only")),
     _normal_tol(getParam<Real>("normal_tol")),
     _normal(_using_normal ? getParam<Point>("normal") : Point())
 {
@@ -119,8 +121,8 @@ SideSetsAroundSubdomainGenerator::generate()
         queries[elem->processor_id()].push_back(std::make_pair(elem->id(), side));
       }
       else if (neighbor == nullptr || // element on boundary OR
-               block_ids.count(neighbor->subdomain_id()) ==
-                   0) // neighboring element is on a different subdomain
+               (!_external_only && block_ids.count(neighbor->subdomain_id()) ==
+                                       0)) // neighboring element is on a different subdomain
       {
         if (_using_normal)
         {

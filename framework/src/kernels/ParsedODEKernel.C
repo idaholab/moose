@@ -25,17 +25,11 @@ ParsedODEKernel::validParams()
   params += FunctionParserUtils<false>::validParams();
   params.addClassDescription("Parsed expression ODE kernel.");
 
-  params.addDeprecatedCustomTypeParam<std::string>(
-      "function",
-      "FunctionExpression",
-      "function expression",
-      "function is deprecated, use expression instead");
-  // TODO Make required once deprecation is handled, see #19119
-  params.addCustomTypeParam<std::string>(
-      "expression", "FunctionExpression", "Function expression for the ODE residual contribution");
-  params.addDeprecatedCoupledVar(
-      "args", "additional coupled variables", "args is deprecated, use coupled_variables");
-  params.addCoupledVar("coupled_variables", "Vector of names of additional coupled variables");
+  params.addRequiredCustomTypeParam<std::string>(
+      "function", "FunctionExpression", "function expression");
+  params.deprecateParam("function", "expression", "02/07/2024");
+  params.addCoupledVar("args", "Scalar variables coupled in the parsed expression.");
+  params.deprecateCoupledVar("args", "coupled_variables", "02/07/2024");
   params.addParam<std::vector<std::string>>("constant_names",
                                             "Vector of constants used in the parsed expression");
   params.addParam<std::vector<std::string>>(
@@ -50,10 +44,8 @@ ParsedODEKernel::validParams()
 ParsedODEKernel::ParsedODEKernel(const InputParameters & parameters)
   : ODEKernel(parameters),
     FunctionParserUtils(parameters),
-    _function(getRenamedParam<std::string>("function", "expression")),
-    _nargs(isCoupledScalar("args")                ? coupledScalarComponents("args")
-           : isCoupledScalar("coupled_variables") ? coupledScalarComponents("coupled_variables")
-                                                  : 0),
+    _function(getParam<std::string>("expression")),
+    _nargs(isCoupledScalar("coupled_variables") ? coupledScalarComponents("coupled_variables") : 0),
     _args(_nargs),
     _arg_names(_nargs),
     _func_dFdarg(_nargs),
@@ -63,20 +55,15 @@ ParsedODEKernel::ParsedODEKernel(const InputParameters & parameters)
   // build variables argument (start with variable the kernel is operating on)
   std::string variables = _var.name();
 
-  // handle the deprecation
-  std::string param_name = "args";
-  if (isCoupledScalar("coupled_variables"))
-    param_name = "coupled_variables";
-
   // add additional coupled variables
   for (unsigned int i = 0; i < _nargs; ++i)
   {
-    _arg_names[i] = getScalarVar(param_name, i)->name();
+    _arg_names[i] = getScalarVar("coupled_variables", i)->name();
     variables += "," + _arg_names[i];
-    _args[i] = &coupledScalarValue(param_name, i);
+    _args[i] = &coupledScalarValue("coupled_variables", i);
 
     // populate number -> arg index lookup table skipping aux variables
-    unsigned int number = coupledScalar(param_name, i);
+    unsigned int number = coupledScalar("coupled_variables", i);
     if (number < _number_of_nl_variables)
       _arg_index[number] = i;
   }

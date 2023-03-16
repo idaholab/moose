@@ -1,3 +1,17 @@
+# When a change to any Apptainer/Conda influential file is detected, it is necessary
+# to append the `library : hash` so unittests remain valid throughout history. You
+# can ignore entering a hash for the literal 'app' (it will match rev-parse HEAD)
+#
+# Influential files are determined by Civet Precheck (informational):
+# `scripts/versioner.py app --yaml`
+#
+# Know what libraries you need to enter a hash for by running:
+# `scripts/versioner.py -h`
+#
+# Modify versioner_hashes.yaml (this file) using format:
+# `git rev-parse HEAD`: # PR_NUMBER
+#   library: `scripts/versioner.py library`
+
 a5b8705d07eadbb30b983afea4aef74fb6a14266: # 20735
   libmesh: 570a4af
   petsc: 2dbe810
@@ -48,3 +62,13 @@ ca1ef9908ae19ffafd84a5d32317b9ad71fd3f17: # 21791
   petsc: 64a9a7e
   libmesh: 7a3c41a
   moose: 244eb80
+7dc8c372a4a3861e7e0050845a6c96c429730258: # 23247
+  mpich: b896b5d
+  petsc: 64a9a7e
+  libmesh: d53146c
+  moose: 2f8ef66
+db176aaa92d1fd79b2d92ad8979633f9b7ce65b7: # 23581
+  mpich: b896b5d
+  petsc: 64a9a7e
+  libmesh: 016f5c8
+  moose: f58bca8

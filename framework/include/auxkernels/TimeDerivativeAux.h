@@ -14,28 +14,24 @@
 /**
  * Time derivative of a functor, which can be a variable, function, functor material property
  */
-template <bool is_ad>
-class TimeDerivativeAuxTempl : public AuxKernel
+class TimeDerivativeAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
 
-  TimeDerivativeAuxTempl(const InputParameters & parameters);
+  TimeDerivativeAux(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue() override;
 
   /// Functor to take the time derivative of
-  const Moose::Functor<GenericReal<is_ad>> & _functor;
+  const Moose::Functor<Real> & _functor;
 
   /// Factor to multiply the time derivative with
-  const Moose::Functor<GenericReal<is_ad>> & _factor;
+  const Moose::Functor<Real> & _factor;
 
   /// Whether to use a quadrature-based functor argument, appropriate for finite element
   /// evaluations. If false, use a cell-center functor argument appropriate for finite volume
   /// calculations
   const bool _use_qp_arg;
 };
-
-typedef TimeDerivativeAuxTempl<false> TimeDerivativeAux;
-typedef TimeDerivativeAuxTempl<true> ADTimeDerivativeAux;

@@ -79,9 +79,7 @@ class LineSearch;
 class UserObject;
 class AutomaticMortarGeneration;
 class VectorPostprocessor;
-class MooseFunctionBase;
-template <typename>
-class FunctionTempl;
+class Function;
 class MooseAppCoordTransform;
 
 // libMesh forward declarations
@@ -150,6 +148,7 @@ public:
   virtual EquationSystems & es() override { return _eq; }
   virtual MooseMesh & mesh() override { return _mesh; }
   virtual const MooseMesh & mesh() const override { return _mesh; }
+  const MooseMesh & mesh(bool use_displaced) const override;
 
   void setCoordSystem(const std::vector<SubdomainName> & blocks, const MultiMooseEnum & coord_sys);
   void setAxisymmetricCoordAxis(const MooseEnum & rz_coord_axis);
@@ -567,11 +566,7 @@ public:
   virtual void
   addFunction(const std::string & type, const std::string & name, InputParameters & parameters);
   virtual bool hasFunction(const std::string & name, THREAD_ID tid = 0);
-  template <typename T>
-  bool hasFunction(const std::string & name, THREAD_ID tid = 0) const;
   virtual Function & getFunction(const std::string & name, THREAD_ID tid = 0);
-  template <typename T>
-  FunctionTempl<T> & getFunction(const std::string & name, THREAD_ID tid = 0);
 
   /**
    * add a MOOSE line search
@@ -1628,9 +1623,14 @@ public:
   }
 
   /**
-   * Whether or not we are allowing invalid solutions
+   * Whether or not the invalid solutions are allowed
    */
-  bool allowInvalidSolution() { return _allow_invalid_solution; }
+  bool allowInvalidSolution() const { return _allow_invalid_solution; }
+
+  /**
+   * Whether or not the solution invalid warnings are printed out immediately
+   */
+  bool immediatelyPrintInvalidSolution() const { return _immediately_print_invalid_solution; }
 
   bool ignoreZerosInJacobian() const { return _ignore_zeros_in_jacobian; }
 
@@ -1921,7 +1921,16 @@ public:
                                      const std::vector<Real> * const weights = nullptr,
                                      THREAD_ID tid = 0) override;
 
+  /**
+   * @return whether to perform a boundary condition integrity check for finite volume
+   */
   bool fvBCsIntegrityCheck() const { return _fv_bcs_integrity_check; }
+
+  /**
+   * @param fv_bcs_integrity_check Whether to perform a boundary condition integrity check for
+   * finite volume
+   */
+  void fvBCsIntegrityCheck(bool fv_bcs_integrity_check);
 
   /**
    * Get the materials and variables potentially needed for FV
@@ -2083,7 +2092,7 @@ protected:
   std::vector<std::vector<std::unique_ptr<Assembly>>> _assembly;
 
   /// functions
-  MooseObjectWarehouse<MooseFunctionBase> _functions;
+  MooseObjectWarehouse<Function> _functions;
 
   /// nonlocal kernels
   MooseObjectWarehouse<KernelBase> _nonlocal_kernels;
@@ -2286,7 +2295,7 @@ protected:
   bool _material_coverage_check;
 
   /// Whether to check overlapping Dirichlet and Flux BCs and/or multiple DirichletBCs per sideset
-  const bool _fv_bcs_integrity_check;
+  bool _fv_bcs_integrity_check;
 
   /// Determines whether a check to verify material dependencies on every subdomain
   const bool _material_dependency_check;
@@ -2359,6 +2368,7 @@ private:
   const bool _skip_nl_system_check;
   bool _fail_next_nonlinear_convergence_check;
   const bool & _allow_invalid_solution;
+  const bool & _immediately_print_invalid_solution;
 
   /// At or beyond initialSteup stage
   bool _started_initial_setup;
@@ -2543,5 +2553,12 @@ FEProblemBase::setCurrentNonlinearSystem(const unsigned int nl_sys_num)
   _current_nl_sys = _nl[nl_sys_num].get();
 }
 
-template <>
-FunctionTempl<Real> & FEProblemBase::getFunction<Real>(const std::string & name, THREAD_ID tid);
+inline void
+FEProblemBase::fvBCsIntegrityCheck(const bool fv_bcs_integrity_check)
+{
+  if (!_fv_bcs_integrity_check)
+    // the user has requested that we don't check integrity so we will honor that
+    return;
+
+  _fv_bcs_integrity_check = fv_bcs_integrity_check;
+}

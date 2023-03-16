@@ -249,13 +249,13 @@ l = 4
     value_type = 'max'
   []
   [T_min]
-    type = ElementExtremeValue
-    variable = 'T'
+    type = ADElementExtremeFunctorValue
+    functor = 'T'
     value_type = 'min'
   []
   [T_max]
-    type = ElementExtremeValue
-    variable = 'T'
+    type = ADElementExtremeFunctorValue
+    functor = 'T'
     value_type = 'max'
   []
 []

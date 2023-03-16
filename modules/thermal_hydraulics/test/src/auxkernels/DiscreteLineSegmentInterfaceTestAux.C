@@ -17,7 +17,7 @@ DiscreteLineSegmentInterfaceTestAux::validParams()
   InputParameters params = AuxKernel::validParams();
   params += DiscreteLineSegmentInterface::validParams();
 
-  MooseEnum test_type("axial_coord radial_coord axial_index");
+  MooseEnum test_type("axial_coord radial_coord axial_section_index axial_element_index");
   params.addRequiredParam<MooseEnum>("test_type", test_type, "Type of test");
 
   params.addClassDescription("Tests DiscreteLineSegmentInterface.");
@@ -39,8 +39,10 @@ DiscreteLineSegmentInterfaceTestAux::computeValue()
     return computeAxialCoordinate(p);
   else if (_test_type == "radial_coord")
     return computeRadialCoordinate(p);
-  else if (_test_type == "axial_index")
+  else if (_test_type == "axial_section_index")
     return getAxialSectionIndex(p);
+  else if (_test_type == "axial_element_index")
+    return getAxialElementIndex(p);
   else
     mooseError("Invalid 'test_type'.");
 }

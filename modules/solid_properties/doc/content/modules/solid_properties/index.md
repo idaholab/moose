@@ -39,7 +39,7 @@ the overall type of property. The overall design of this module is as follows:
 
 Thermal properties (density, specific heat, and thermal conductivity) are computed by
 userobjects inheriting from the [ThermalSolidProperties](/userobjects/ThermalSolidProperties.md) base class. This class
-defines functions to compute these material properties as a function of temperature:
+defines functions to compute these properties as a function of temperature:
 
 - compute isobaric specific heat - `Real cp_from_T(const Real & T)`
 - compute thermal conductivity - `Real k_from_T(const Real & T)`
@@ -62,12 +62,18 @@ Userobjects available in the Solid Properties module that provide thermal proper
 
 An example will be provided later on this page for creating a new solid userobject.
 
-Then, in the [ThermalSolidPropertiesMaterial](/materials/ThermalSolidPropertiesMaterial.md) material,
-the `computeQpProperties` method evaluates the thermal conductivity, isobaric specific heat, and density at
-the quadrature points using the values of a coupled variable representing temperature plus the functions provided by
-the selected userobject.
+On their own, these userobjects do not execute; their functions must be called from other
+objects. The most common use case is to compute material properties with these
+userobjects, which can be accomplished with
+[ThermalSolidPropertiesMaterial](/materials/ThermalSolidPropertiesMaterial.md);
+its `computeQpProperties` method evaluates the thermal conductivity, isobaric specific heat, and density at
+the quadrature points using the values of a coupled variable representing temperature
+plus the functions provided by the selected userobject:
 
 !listing modules/solid_properties/src/materials/ThermalSolidPropertiesMaterial.C start=computeQpProperties
+
+Another use case is to get a single property into a post-processor,
+which is accomplished with [ThermalSolidPropertiesPostprocessor.md].
 
 ## Usage
 

@@ -30,6 +30,10 @@ const ExecFlagType EXEC_LINEAR = registerDefaultExecFlag("LINEAR");
 const ExecFlagType EXEC_NONLINEAR = registerDefaultExecFlag("NONLINEAR");
 const ExecFlagType EXEC_TIMESTEP_END = registerDefaultExecFlag("TIMESTEP_END");
 const ExecFlagType EXEC_TIMESTEP_BEGIN = registerDefaultExecFlag("TIMESTEP_BEGIN");
+const ExecFlagType EXEC_MULTIAPP_FIXED_POINT_END =
+    registerDefaultExecFlag("MULTIAPP_FIXED_POINT_END");
+const ExecFlagType EXEC_MULTIAPP_FIXED_POINT_BEGIN =
+    registerDefaultExecFlag("MULTIAPP_FIXED_POINT_BEGIN");
 const ExecFlagType EXEC_FINAL = registerDefaultExecFlag("FINAL");
 const ExecFlagType EXEC_FORCED = registerExecFlag("FORCED");
 const ExecFlagType EXEC_FAILED = registerExecFlag("FAILED");
@@ -101,6 +105,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("set_mesh_base",                MooseMesh,              false);
   registerMooseObjectTask("init_mesh",                    MooseMesh,              false);
   registerMooseObjectTask("add_mesh_generator",           MeshGenerator,          false);
+  registerTask("create_added_mesh_generators", true);
   registerMooseObjectTask("append_mesh_generator",        MeshGenerator,          false);
 
   registerMooseObjectTask("add_kernel",                   Kernel,                 false);
@@ -128,6 +133,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_scalar_kernel",            ScalarKernel,           false);
   registerMooseObjectTask("add_aux_scalar_kernel",        AuxScalarKernel,        false);
   registerMooseObjectTask("add_dirac_kernel",             DiracKernel,            false);
+  appendMooseObjectTask  ("add_dirac_kernel",             VectorDiracKernel);
   registerMooseObjectTask("add_dg_kernel",                DGKernel,               false);
   registerMooseObjectTask("add_fv_kernel",                FVKernel,               false);
   registerMooseObjectTask("add_fv_bc",                    FVBoundaryCondition,    false);
@@ -167,7 +173,6 @@ addActionTypes(Syntax & syntax)
 
   // clang-format on
 
-  registerTask("check_legacy_params", true);
   registerTask("dynamic_object_registration", false);
   registerTask("common_output", true);
   registerTask("setup_recover_file_base", true);
@@ -233,6 +238,8 @@ addActionTypes(Syntax & syntax)
   registerTask("create_problem_custom", false);
   registerTask("create_problem_complete", false);
 
+  // Action for setting up the signal-based checkpoint
+  registerTask("auto_checkpoint_action", true);
   /**************************/
   /****** Dependencies ******/
   /**************************/
@@ -247,8 +254,7 @@ addActionTypes(Syntax & syntax)
    */
 
   // clang-format off
-  syntax.addDependencySets("(check_legacy_params)"
-                           "(meta_action)"
+  syntax.addDependencySets("(meta_action)"
                            "(dynamic_object_registration)"
                            "(common_output)"
                            "(set_global_params)"
@@ -258,6 +264,7 @@ addActionTypes(Syntax & syntax)
                            "(add_geometric_rm)"
                            "(add_partitioner)"
                            "(add_mesh_generator)"
+                           "(create_added_mesh_generators)"
                            "(append_mesh_generator)"
                            "(execute_mesh_generators)"
                            "(recover_meta_data)"
@@ -309,6 +316,7 @@ addActionTypes(Syntax & syntax)
                            "(add_master_action_material)"
                            "(add_output_aux_variables)"
                            "(add_output)"
+                           "(auto_checkpoint_action)"
                            "(add_postprocessor)"
                            "(add_vector_postprocessor)" // MaterialVectorPostprocessor requires this
                                                         // to be after material objects are created.
@@ -572,6 +580,7 @@ bool _warnings_are_errors = false;
 bool _deprecated_is_error = false;
 bool _throw_on_error = false;
 bool _throw_on_warning = false;
+int interrupt_signal_number = 0;
 bool show_trace = true;
 bool show_multiple = false;
 

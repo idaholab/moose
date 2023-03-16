@@ -21,6 +21,7 @@
 class FaceArgInterface
 {
 public:
+  virtual ~FaceArgInterface() = default;
   virtual bool hasFaceSide(const FaceInfo & fi, const bool fi_elem_side) const = 0;
 };
 

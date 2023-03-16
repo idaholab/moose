@@ -1,0 +1,79 @@
+[Tests]
+  issues = '#13754 #19451'
+  design = 'MultiAppGeneralFieldShapeEvaluationTransfer.md'
+
+  [from_sub_to_sub]
+    requirement = "The system shall be able to transfer variables by evaluating shape functions in the origin mesh between multiapps"
+    [nodal_nodal]
+      type = Exodiff
+      input = main_between_multiapp.i
+      exodiff = 'nodal_nodal_ma10.e nodal_nodal_ma20.e'
+      cli_args = "Outputs/file_base=nodal_nodal
+                  MultiApps/ma1/cli_args='AuxVariables/inactive=received_elem'
+                  MultiApps/ma2/cli_args='AuxVariables/inactive=received_elem'
+                  Transfers/active='app1_to_2_nodal_nodal app2_to_1_nodal_nodal'"
+      detail = 'between nodal variables,'
+    []
+    [elem_elem]
+      type = Exodiff
+      input = main_between_multiapp.i
+      exodiff = 'elem_elem_ma10.e elem_elem_ma20.e'
+      cli_args = "Outputs/file_base=elem_elem
+                  MultiApps/ma1/cli_args='AuxVariables/inactive=received_nodal'
+                  MultiApps/ma2/cli_args='AuxVariables/inactive=received_nodal'
+                  Transfers/active='app1_to_2_elem_elem app2_to_1_elem_elem'"
+      detail = 'between elemental variables,'
+    []
+    [elem_nodal]
+      type = Exodiff
+      input = main_between_multiapp.i
+      exodiff = 'elem_nodal_ma10.e elem_nodal_ma20.e'
+      cli_args = "Outputs/file_base=elem_nodal
+                  MultiApps/ma1/cli_args='AuxVariables/inactive=received_elem'
+                  MultiApps/ma2/cli_args='AuxVariables/inactive=received_elem'
+                  Transfers/active='app1_to_2_elem_nodal app2_to_1_elem_nodal'"
+      detail = 'from elemental to nodal variables,'
+    []
+    [nodal_elem]
+      type = Exodiff
+      input = main_between_multiapp.i
+      exodiff = 'nodal_elem_ma10.e nodal_elem_ma20.e'
+      cli_args = "Outputs/file_base=nodal_elem
+                  MultiApps/ma1/cli_args='AuxVariables/inactive=received_nodal'
+                  MultiApps/ma2/cli_args='AuxVariables/inactive=received_nodal'
+                  Transfers/active='app1_to_2_nodal_elem app2_to_1_nodal_elem'"
+      detail = 'from nodal to elemental variables,'
+    []
+
+    [one_app_serial]
+      type = Exodiff
+      input = main_between_multiapp.i
+      exodiff = 'serial_ma10.e serial_ma20.e'
+      cli_args = "Outputs/file_base=serial
+                  Transfers/active='app1_to_2_nodal_nodal app2_to_1_nodal_nodal app1_to_2_elem_elem app2_to_1_elem_elem'
+                  MultiApps/ma1/max_procs_per_app=1"
+      detail = 'when one multiapp is run in serial,'
+    []
+
+    # Block restriction of the transfer only is tested in ../subdomain
+    # We test here the block restriction of variables. Elemental variables are block restricted
+    [block_restriction_variables_same_type]
+      type = Exodiff
+      input = main_between_multiapp.i
+      exodiff = 'block_restricted_same_ma10.e block_restricted_same_ma20.e'
+      cli_args = "Outputs/file_base=block_restricted_same Transfers/active='app1_to_2_nodal_nodal app2_to_1_nodal_nodal app1_to_2_elem_elem app2_to_1_elem_elem'
+                  MultiApps/ma1/cli_args='AuxVariables/sent_nodal/block=1;AuxVariables/received_nodal/block=1;AuxVariables/sent_elem/block=1;AuxVariables/received_elem/block=1'
+                  MultiApps/ma2/cli_args='AuxVariables/sent_nodal/block=0;AuxVariables/received_nodal/block=0;AuxVariables/sent_elem/block=0;AuxVariables/received_elem/block=0'"
+      detail = 'with block restricted variables of matching types,'
+    []
+    [block_restriction_variables_different_type]
+      type = Exodiff
+      input = main_between_multiapp.i
+      exodiff = 'block_restricted_diff_ma10.e block_restricted_diff_ma20.e'
+      cli_args = "Outputs/file_base=block_restricted_diff Transfers/active='app1_to_2_nodal_elem app2_to_1_nodal_elem app1_to_2_elem_nodal app2_to_1_elem_nodal'
+                  MultiApps/ma1/cli_args='AuxVariables/sent_nodal/block=1;AuxVariables/received_nodal/block=1;AuxVariables/sent_elem/block=1;AuxVariables/received_elem/block=1'
+                  MultiApps/ma2/cli_args='AuxVariables/sent_nodal/block=0;AuxVariables/received_nodal/block=0;AuxVariables/sent_elem/block=0;AuxVariables/received_elem/block=0'"
+      detail = 'with block restricted variables of different types.'
+    []
+  []
+[]

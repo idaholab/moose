@@ -9,14 +9,17 @@
 
 #pragma once
 
-#include "ComputeStressBase.h"
+#include "ComputeGeneralStressBase.h"
 #include "DynamicLibraryLoader.h"
 #include "ComputeFiniteStrain.h"
+#include "StepUOInterface.h"
+
+class StepUserObject;
 
 /**
  * Coupling material to use Abaqus UMAT models in MOOSE
  */
-class AbaqusUMATStress : public ComputeStressBase
+class AbaqusUMATStress : public ComputeGeneralStressBase, public StepUOInterface
 {
 public:
   static InputParameters validParams();
@@ -246,4 +249,7 @@ protected:
 private:
   /// Method being used to compute strain and rotation increments
   const ComputeFiniteStrain::DecompMethod _decomposition_method;
+
+  /// User object that determines step number
+  const StepUserObject * _step_user_object;
 };

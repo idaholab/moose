@@ -224,7 +224,7 @@ public:
   FEProblemBase & problemBase() { return _fe_problem; }
 
   /**
-   * Get the FEProblemBase for the global app is part of.
+   * Get the FEProblemBase for the global app desired.
    * @param app The global app number
    */
   FEProblemBase & appProblemBase(unsigned int app);
@@ -344,6 +344,12 @@ public:
   bool usingPositions() const { return _use_positions; }
 
   /**
+   * Whether or not this MultiApp is being run in position,
+   * eg with the coordinate transform already applied
+   */
+  bool runningInPosition() const { return _run_in_position; }
+
+  /**
    * Add a transfer that is associated with this multiapp
    */
   void addAssociatedTransfer(MultiAppTransfer & transfer);
@@ -353,6 +359,11 @@ public:
    * transformation object
    */
   static void transformBoundingBox(BoundingBox & box, const MultiAppCoordTransform & transform);
+
+  /**
+   * Sets all the app's output file bases. @see MooseApp::setOutputFileBase for usage
+   */
+  void setAppOutputFileBase();
 
 protected:
   /// function that provides cli_args to subapps
@@ -424,6 +435,25 @@ protected:
    *  and it is used as an initial guess for the next run
    */
   void keepSolutionDuringRestore(bool keep_solution_during_restore);
+
+  /**
+   * Set the output file base of the application which corresponds to the index passed to the
+   * function.
+   *
+   * @param index The sub-application index
+   */
+  void setAppOutputFileBase(unsigned int index);
+
+  /**
+   * Helper for constructing the name of the multiapp
+   *
+   * @param base_name The base name of the multiapp, usually name()
+   * @param index The index of the app
+   * @param total The total number of apps, which is used to pad the name with zeros
+   * @return std::string The name of the multiapp
+   */
+  static std::string
+  getMultiAppName(const std::string & base_name, dof_id_type index, dof_id_type total);
 
   /// The FEProblemBase this MultiApp is part of
   FEProblemBase & _fe_problem;
@@ -548,7 +578,10 @@ protected:
   /// Transfers associated with this multiapp
   std::vector<MultiAppTransfer *> _associated_transfers;
 
-  ///Timers
+  /// Whether to run the child apps with their meshes transformed with the coordinate transforms
+  const bool _run_in_position;
+
+  /// Timers
   const PerfID _solve_step_timer;
   const PerfID _init_timer;
   const PerfID _backup_timer;

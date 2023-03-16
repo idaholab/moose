@@ -15,11 +15,11 @@
 
 [Functions]
   [linear_x]
-    type = ADParsedFunction
+    type = ParsedFunction
     expression = 'x'
   []
   [piecewise_linear_x]
-    type = ADPiecewiseLinear
+    type = PiecewiseLinear
     x = '-1 2'
     y = '-1 2'
     axis = 'x'

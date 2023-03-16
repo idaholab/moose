@@ -1,0 +1,11 @@
+[Tests]
+  issues = '#21505'
+  design = 'TemperaturePressureFunctionFluidProperties.md'
+  [exact]
+    type = CSVDiff
+    input = 'exact.i'
+    csvdiff = 'exact_out.csv'
+    abs_zero = 1e-9
+    requirement = 'The system shall be able to compute functionalized fluid properties.'
+  []
+[]

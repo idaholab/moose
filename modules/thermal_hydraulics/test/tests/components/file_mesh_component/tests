@@ -1,0 +1,32 @@
+[Tests]
+  design = 'FileMeshComponent.md'
+  issues = '#22354'
+
+  [mesh]
+    type = RunApp
+    input = 'mesh.i'
+    cli_args = '--mesh-only'
+    # Mesh-only runs should not test recovery
+    recover = False
+
+    requirement = 'The system shall generate a mesh for the FileMeshComponent test.'
+  []
+  [test]
+    type = Exodiff
+    prereq = 'mesh'
+    input = 'file_mesh_component.i'
+    exodiff = 'file_mesh_component.e'
+    # Prereq does not test recover
+    recover = False
+
+    requirement = 'The system shall provide a component that loads a mesh from an ExodusII file.'
+  []
+  [file_not_readable]
+    type = RunException
+    input = 'file_mesh_component.i'
+    cli_args = 'Components/hs_external/file=nonexistent_file.e'
+    expect_err = "The file .* could not be opened."
+
+    requirement = 'The system shall report an error for FileMeshComponent when the file is not readable.'
+  []
+[]

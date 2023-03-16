@@ -38,6 +38,41 @@ In addition, [!param](/Mesh/PatternedHexMeshGenerator/assign_control_drum_id) ca
 
 These `MeshMetaData` as well as `control_drum_id` can be used by other MOOSE objects such as [`MultiControlDrumFunction`](/MultiControlDrumFunction.md) to simulate control drums rotation during power transients.
 
+## Interface Boundaries
+
+The user can also decide whether the interface boundaries are generated or not in the peripheral region.
+
+!include /PolygonConcentricCircleMeshGenerator.md start=There are two types end=The user can set
+
+The user can set [!param](/Mesh/PatternedHexMeshGenerator/create_inward_interface_boundaries) and [!param](/Mesh/PatternedHexMeshGenerator/create_outward_interface_boundaries) to control which interface boundaries will be created. If generated, the outward interface boundaries will be assigned ids using sequential odd numbers (i.e., 1, 3, 5, 7, ...) shifted by `INTRINSIC_SIDESET_ID::SLICE_ALT`=30500 from center to periphery, while the inward interface boundaries will be assigned ids using sequential even numbers (i.e., 0, 2, 4, 6, ...) shifted by `INTRINSIC_SIDESET_ID::SLICE_ALT` similarly. 
+
+## Reporting ID Information
+
+This object can generate a hexagonal lattice mesh with `reporting ID` assignments, and can be used successively on its own output mesh to add IDs on the pin and assembly levels, for example.
+The reporting ID option can be turned on by defining the name of the reporting ID variable is provided through [!param](/Mesh/PatternedHexMeshGenerator/id_name).
+
+A user can select an ID assignment scheme using [!param](/Mesh/PatternedHexMeshGenerator/assign_type), and the following schemes are currently available:
+
+- `cell` (default):  Assign unique IDs for each component/tile in the lattice in sequential order.
+
+- `pattern`:  Assign IDs based on the ID of the input tiles.
+
+- `manual`: Assign IDs based on user-defined mapping defined in [!param](/Mesh/PatternedHexMeshGenerator/id_pattern).
+
+The default numbering scheme starts at 0 in the upper left hand corner of the hexagon grid (not including duct region) and increments by 1 as the grid is traversed left to right, top to bottom.
+In presence of duct regions, separate reporting IDs are automatically generated for the elements in duct regions.
+For the `pattern` scheme, all tiles in the pattern with the same input will bear the same reporting ID.
+The duct regions will be assigned reporting IDs starting from the next integer higher than the highest one used inside of the ducts.
+
+The name of the reporting ID variable is provided through [!param](/Mesh/PatternedHexMeshGenerator/id_name) depending on the hierarchical level of component.
+The ID values themselves are stored as extra element integers on the mesh.
+For example, the reporting IDs for individual pins (`pin_id`) can be assigned when assemblies are built because the IDs for pin level are uniquely determined from the pin arrangement within each assembly type.
+Similarly, the assembly reporting IDs (`assembly_id`) are assigned in the core construction process.
+
+Certain regions can be excluded from being labeled with an ID, for example dummy regions that will later be deleted.
+This can be accommodated by listing mesh objects in the [!param](/Mesh/PatternedHexMeshGenerator/exclude_id) input parameter.
+IDs will not be assigned to these mesh objects.
+Usage of this parameter is helpful to retain sequential numbering when dummy region are later deleted, or to only label areas of interest.
 
 ## Example Syntax
 

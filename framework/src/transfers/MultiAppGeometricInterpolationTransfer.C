@@ -66,6 +66,7 @@ MultiAppGeometricInterpolationTransfer::validParams()
                         1e-10,
                         "If the distance between two points is smaller than distance_tol, two "
                         "points will be considered as identical");
+
   return params;
 }
 
@@ -123,20 +124,8 @@ MultiAppGeometricInterpolationTransfer::fillSourceInterpolationPoints(
     const MultiAppCoordTransform & from_app_transform,
     std::unique_ptr<InverseDistanceInterpolation<LIBMESH_DIM>> & idi)
 {
-  MeshBase * from_mesh = NULL;
-  MooseMesh * from_moose_mesh = NULL;
-
-  // Get libmesh mesh and moose mesh
-  if (_displaced_source_mesh && from_problem.getDisplacedProblem())
-  {
-    from_mesh = &from_problem.getDisplacedProblem()->mesh().getMesh();
-    from_moose_mesh = &from_problem.getDisplacedProblem()->mesh();
-  }
-  else
-  {
-    from_mesh = &from_problem.mesh().getMesh();
-    from_moose_mesh = &from_problem.mesh();
-  }
+  auto & from_moose_mesh = from_problem.mesh(_displaced_source_mesh);
+  const auto & from_mesh = from_moose_mesh.getMesh();
 
   // Moose system
   const SystemBase & from_system_base = from_var.sys();
@@ -166,8 +155,8 @@ MultiAppGeometricInterpolationTransfer::fillSourceInterpolationPoints(
   std::set<subdomain_id_type> exclude_block_ids;
   if (_shrink_gap_width > 0 && _shrink_mesh == "source")
   {
-    computeTransformation(*from_moose_mesh, from_tranforms);
-    auto exclude_subdomainids = from_moose_mesh->getSubdomainIDs(_exclude_gap_blocks);
+    computeTransformation(from_moose_mesh, from_tranforms);
+    auto exclude_subdomainids = from_moose_mesh.getSubdomainIDs(_exclude_gap_blocks);
     exclude_block_ids.insert(exclude_subdomainids.begin(), exclude_subdomainids.end());
   }
 
@@ -178,7 +167,7 @@ MultiAppGeometricInterpolationTransfer::fillSourceInterpolationPoints(
   std::vector<subdomain_id_type> include_block_ids;
   if (from_is_nodal)
   {
-    for (const auto * const from_node : from_mesh->local_node_ptr_range())
+    for (const auto * const from_node : from_mesh.local_node_ptr_range())
     {
       // Assuming LAGRANGE!
       if (from_node->n_comp(from_sys_num, from_var_num) == 0)
@@ -188,7 +177,7 @@ MultiAppGeometricInterpolationTransfer::fillSourceInterpolationPoints(
 
       if (from_tranforms.size() > 0)
       {
-        subdomainIDsNode(*from_moose_mesh, *from_node, subdomainids);
+        subdomainIDsNode(const_cast<MooseMesh &>(from_moose_mesh), *from_node, subdomainids);
         // Check if node is excluded
         // Node will be excluded if it is in the interior of excluded subdomains
         include_block_ids.clear();
@@ -217,7 +206,7 @@ MultiAppGeometricInterpolationTransfer::fillSourceInterpolationPoints(
   {
     std::vector<Point> points;
     for (const auto * const from_elem :
-         as_range(from_mesh->local_elements_begin(), from_mesh->local_elements_end()))
+         as_range(from_mesh.local_elements_begin(), from_mesh.local_elements_end()))
     {
       // Skip this element if the variable has no dofs at it.
       if (from_elem->n_dofs(from_sys_num, from_var_num) < 1)
@@ -284,26 +273,16 @@ MultiAppGeometricInterpolationTransfer::interpolateTargetPoints(
   auto to_sys_num = to_sys.number();
   auto to_var_num = to_sys.variable_number(to_var.name());
 
-  MeshBase * mesh = NULL;
-  MooseMesh * to_moose_mesh = NULL;
-  if (_displaced_target_mesh && to_problem.getDisplacedProblem())
-  {
-    mesh = &to_problem.getDisplacedProblem()->mesh().getMesh();
-    to_moose_mesh = &to_problem.getDisplacedProblem()->mesh();
-  }
-  else
-  {
-    mesh = &to_problem.mesh().getMesh();
-    to_moose_mesh = &to_problem.mesh();
-  }
+  const MooseMesh & to_moose_mesh = to_problem.mesh(_displaced_target_mesh);
+  const MeshBase & to_mesh = to_moose_mesh.getMesh();
 
   // Compute transform info
   std::unordered_map<dof_id_type, Point> to_tranforms;
   std::set<subdomain_id_type> exclude_block_ids;
   if (_shrink_gap_width > 0 && _shrink_mesh == "target")
   {
-    computeTransformation(*to_moose_mesh, to_tranforms);
-    auto exclude_subdomainids = to_moose_mesh->getSubdomainIDs(_exclude_gap_blocks);
+    computeTransformation(to_moose_mesh, to_tranforms);
+    auto exclude_subdomainids = to_moose_mesh.getSubdomainIDs(_exclude_gap_blocks);
     exclude_block_ids.insert(exclude_subdomainids.begin(), exclude_subdomainids.end());
   }
 
@@ -320,7 +299,7 @@ MultiAppGeometricInterpolationTransfer::interpolateTargetPoints(
   std::vector<Number> vals;
   if (to_is_nodal)
   {
-    for (const auto * const node : mesh->local_node_ptr_range())
+    for (const auto * const node : to_mesh.local_node_ptr_range())
     {
       if (node->n_dofs(to_sys_num, to_var_num) <= 0) // If this variable has dofs at this node
         continue;
@@ -328,7 +307,7 @@ MultiAppGeometricInterpolationTransfer::interpolateTargetPoints(
       Point translate(0);
       if (to_tranforms.size() > 0)
       {
-        subdomainIDsNode(*to_moose_mesh, *node, subdomainids);
+        subdomainIDsNode(const_cast<MooseMesh &>(to_moose_mesh), *node, subdomainids);
         // Check if node is excluded
         // Node will be excluded if it is in the interior of excluded subdomains
         include_block_ids.clear();
@@ -358,7 +337,7 @@ MultiAppGeometricInterpolationTransfer::interpolateTargetPoints(
   {
     std::vector<Point> points;
     for (const auto * const elem :
-         as_range(mesh->local_elements_begin(), mesh->local_elements_end()))
+         as_range(to_mesh.local_elements_begin(), to_mesh.local_elements_end()))
     {
       // Skip this element if the variable has no dofs at it.
       if (elem->n_dofs(to_sys_num, to_var_num) < 1)

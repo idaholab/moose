@@ -87,5 +87,5 @@ protected:
    * @param nd1 index of the first node to be swapped
    * @param nd2 index of the second node to be swapped
    */
-  void swapNodesInElem(Elem * elem, const unsigned int nd1, const unsigned int nd2);
+  void swapNodesInElem(Elem & elem, const unsigned int nd1, const unsigned int nd2);
 };

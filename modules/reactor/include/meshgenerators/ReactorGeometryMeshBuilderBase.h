@@ -42,10 +42,22 @@ protected:
   void initializeReactorMeshParams(const std::string reactor_param_name);
 
   /**
+   * Releases the mesh obtained in _reactor_params_mesh.
+   *
+   * This _must_ be called in any object that derives from this one, because
+   * the MeshGenerator system requires that all meshes that are requested from
+   * the system are moved out of the MeshGenerator system and into the MeshGenerator
+   * that requests them. In our case, we move it into this MeshGenerator and then
+   * release (delete) it.
+   */
+  void freeReactorMeshParams();
+
+  /**
    * Checks whether parameter is defined in ReactorMeshParams metadata
    * @param param_name name of ReactorMeshParams parameter
    * @return whether parameter is defined in ReactorMeshParams metadata
    */
+  template <typename T>
   bool hasReactorParam(const std::string param_name);
 
   /**
@@ -73,7 +85,18 @@ protected:
 
   ///The ReactorMeshParams object that is storing the reactor global information for this reactor geometry mesh
   MeshGeneratorName _reactor_params;
+
+private:
+  /// The dummy param mesh that we need to clear once we've generated (in freeReactorMeshParams)
+  std::unique_ptr<MeshBase> * _reactor_params_mesh;
 };
+
+template <typename T>
+bool
+ReactorGeometryMeshBuilderBase::hasReactorParam(const std::string param_name)
+{
+  return hasMeshProperty<T>(param_name, _reactor_params);
+}
 
 template <typename T>
 const T &

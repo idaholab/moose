@@ -37,7 +37,7 @@ NODAL VARIABLES relative 1.e-6 floor 1.e-10
 	status                 # min:               0 @ t1,n1	max:               2 @ t2,n11
 	penetration            # min:               0 @ t1,n1	max:          0.0001 @ t31,n20
 	contact_pressure       floor 1e-6 # min:               0 @ t1,n1	max:        130.2514 @ t11,n16
-	nodal_area_dummy_name  # min:               0 @ t1,n1	max:       0.2500126 @ t12,n14
+	nodal_area             # min:               0 @ t1,n1	max:       0.2500126 @ t12,n14
 
 ELEMENT VARIABLES relative 1.e-6 floor 0.0
 	pid  # min:               0 @ t1,b1,e4	max:               3 @ t1,b1,e1

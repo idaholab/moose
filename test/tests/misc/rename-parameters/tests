@@ -1,0 +1,46 @@
+[Tests]
+  issues = '#23259'
+  design = 'InputParameters.md'
+  [renamed]
+    requirement = 'The system shall allow application developers, in derived classes, to rename'
+    [param]
+      type = CSVDiff
+      input = rename-param.i
+      csvdiff = rename-param_out.csv
+      detail = 'parameters'
+    []
+    [coupled-field]
+      type = CSVDiff
+      input = rename-coupled-field-var.i
+      csvdiff = rename-coupled-field-var_out.csv
+      detail = 'coupled field variables'
+    []
+    [coupled-scalar]
+      type = CSVDiff
+      input = rename-coupled-scalar-var.i
+      csvdiff = rename-coupled-scalar-var_out.csv
+      detail = 'coupled scalar variables'
+      max_parallel = 1
+      ad_indexing_type = 'global'
+    []
+    [coupled-functor]
+      type = CSVDiff
+      input = rename-functor.i
+      csvdiff = rename-functor_out.csv
+      detail = 'functors'
+      ad_indexing_type = 'global'
+    []
+    [coupled-mat-prop]
+      type = CSVDiff
+      input = rename-mat-prop.i
+      csvdiff = rename-mat-prop_out.csv
+      detail = 'material properties'
+    []
+    [coupled-postprocessor]
+      type = CSVDiff
+      input = rename-postprocessor.i
+      csvdiff = rename-postprocessor_out.csv
+      detail = 'postprocessors'
+    []
+  []
+[]

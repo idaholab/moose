@@ -58,8 +58,6 @@ GhostLowerDElems::operator()(const MeshBase::const_element_iterator & range_begi
     {
       const Elem * const neighbor = elem->neighbor_ptr(s);
       const bool elem_owns_lowerd = !neighbor || elem->id() < neighbor->id();
-      if (!elem_owns_lowerd && neighbor->processor_id() != p)
-        coupled_elements.emplace(neighbor, null_mat);
 
       const Elem * const lower_d_elem =
           elem_owns_lowerd

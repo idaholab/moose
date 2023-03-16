@@ -47,7 +47,7 @@ SpatialAverageBase::SpatialAverageBase(const InputParameters & parameters)
 
   // couple variables initialize vectors
   for (MooseIndex(_average) j = 0; j < _nvals; ++j)
-    _average[j] = &declareVector(getVar("variable", j)->name());
+    _average[j] = &declareVector(coupledName("variable", j));
 
   // initialize the bin center value vector
   _bin_center.resize(_nbins);

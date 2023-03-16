@@ -379,7 +379,7 @@ PerfGraph::treeTable(const unsigned int level, const bool heaviest /* = false */
   });
 
   auto act = [this, &vtable](const PerfNode & node,
-                             const PerfGraphSectionInfo & section_info,
+                             const moose::internal::PerfGraphSectionInfo & section_info,
                              const unsigned int depth)
   {
     vtable.addRow(std::string(depth * 2, ' ') + section_info._name,        // Section Name
@@ -487,7 +487,7 @@ dataStore(std::ostream & stream, PerfGraph & perf_graph, void *)
 {
   // We need to store the registry id -> section info map so that we can add
   // registered sections that may not be added yet during recover
-  dataStore(stream, perf_graph._perf_graph_registry._id_to_section_info, nullptr);
+  dataStore(stream, perf_graph._perf_graph_registry._id_to_item, nullptr);
 
   // Update before serializing the nodes so that the time/memory/calls are correct
   perf_graph.update();

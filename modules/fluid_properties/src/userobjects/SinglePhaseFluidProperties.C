@@ -13,8 +13,7 @@ InputParameters
 SinglePhaseFluidProperties::validParams()
 {
   InputParameters params = FluidProperties::validParams();
-  params.addCustomTypeParam<std::string>(
-      "fp_type", "single-phase-fp", "FPType", "Type of the fluid property object");
+  params.set<std::string>("fp_type") = "single-phase-fp";
 
   // Variable set conversion parameters
   params.addRangeCheckedParam<Real>(

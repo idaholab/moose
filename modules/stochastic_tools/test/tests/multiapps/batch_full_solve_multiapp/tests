@@ -11,29 +11,10 @@
   []
 
   [batch]
-    requirement = "The system shall support running sub-applications in a batches on a"
-
-    [exodus_1]
-      type = CheckFiles
-      input = parent_full_solve.i
-      check_files = parent_full_solve_out_runner0.e
-      check_not_exists = parent_full_solve_out_runner1.e
-      max_parallel = 1
-      prereq = normal
-
-      detail = 'on a single processor and'
-    []
-    [exodus_2]
-      type = CheckFiles
-      input = parent_full_solve.i
-      check_files = 'parent_full_solve_out_runner0.e parent_full_solve_out_runner1.e'
-      check_not_exists = parent_full_solve_out_runner2.e
-      max_parallel = 2
-      min_parallel = 2
-      prereq = batch/exodus_1
-
-      detail = 'on a multiple processors.'
-    []
+    type = CheckFiles
+    input = parent_full_solve.i
+    check_files = 'parent_full_solve_out_runner0.e parent_full_solve_out_runner1.e parent_full_solve_out_runner2.e parent_full_solve_out_runner3.e parent_full_solve_out_runner4.e'
+    requirement = "The system shall support running sub-applications in batches."
   []
 
   [batch_csv]
@@ -44,7 +25,6 @@
       type = CSVDiff
       input = parent_full_solve.i
       csvdiff = parent_full_solve_out_storage_0002.csv
-      prereq = batch/exodus_2
       max_parallel = 1
 
       detail = 'on a single processor,'
@@ -55,7 +35,6 @@
       csvdiff = parent_full_solve_out_storage_0002.csv
       max_parallel = 2
       min_parallel = 2
-      prereq = batch_csv/n1
 
       detail = 'on multiple processors, and'
     []
@@ -65,7 +44,6 @@
       csvdiff = parent_full_solve_out_storage_0002.csv
       max_parallel = 2
       min_parallel = 2
-      prereq = batch_csv/n2
       cli_args = "MultiApps/runner/mode=batch-restore"
 
       detail = 'on multiple processors using in-memory backup.'

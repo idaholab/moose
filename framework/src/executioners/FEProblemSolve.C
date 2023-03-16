@@ -141,12 +141,12 @@ FEProblemSolve::validParams()
                                 "until the number of linear iterations "
                                 "exceeds this number");
 
-  params.addParamNamesToGroup("solve_type l_tol l_abs_tol l_max_its nl_max_its nl_max_funcs "
-                              "nl_abs_tol nl_rel_tol nl_abs_step_tol nl_rel_step_tol "
+  params.addParamNamesToGroup("solve_type l_tol l_abs_tol l_max_its nl_max_its nl_forced_its "
+                              "nl_max_funcs nl_abs_tol nl_rel_tol nl_abs_step_tol nl_rel_step_tol "
                               "snesmf_reuse_base compute_initial_residual_before_preset_bcs "
                               "num_grids nl_div_tol nl_abs_div_tol residual_and_jacobian_together "
                               "n_max_nonlinear_pingpong reuse_preconditioner "
-                              "reuse_preconditioner_max_linear_its",
+                              "reuse_preconditioner_max_linear_its splitting",
                               "Solver");
   params.addParamNamesToGroup(
       "automatic_scaling compute_scaling_once off_diagonals_in_auto_scaling "
@@ -155,6 +155,7 @@ FEProblemSolve::validParams()
   params.addParamNamesToGroup("line_search line_search_package contact_line_search_ltol "
                               "contact_line_search_allowed_lambda_cuts",
                               "Solver line search");
+  params.addParamNamesToGroup("skip_exception_check", "Advanced");
 
   return params;
 }

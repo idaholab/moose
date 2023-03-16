@@ -49,6 +49,7 @@ DGKernelBase::validParams()
       "The name of auxiliary variables to save this Kernel's diagonal Jacobian "
       "contributions to. Everything about that variable must match everything "
       "about this variable (the type, what blocks it's on, etc.)");
+  params.addParamNamesToGroup("diag_save_in save_in", "Advanced");
 
   // DG Kernels always need one layer of ghosting.
   params.addRelationshipManager("ElementSideNeighborLayers",

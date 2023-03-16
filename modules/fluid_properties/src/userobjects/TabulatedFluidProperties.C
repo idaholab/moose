@@ -522,15 +522,16 @@ TabulatedFluidProperties::T_from_p_rho(Real pressure, Real rho) const
 {
   auto lambda = [&](Real p, Real current_T, Real & new_rho, Real & drho_dp, Real & drho_dT)
   { rho_from_p_T(p, current_T, new_rho, drho_dp, drho_dT); };
-  Real T =
-      FluidPropertiesUtils::NewtonSolve(pressure, rho, _T_initial_guess, _tolerance, lambda).first;
+  Real T = FluidPropertiesUtils::NewtonSolve(
+               pressure, rho, _T_initial_guess, _tolerance, lambda, name() + "::T_from_p_rho")
+               .first;
   // check for nans
   if (std::isnan(T))
     mooseError("Conversion from pressure (p = ",
                pressure,
                ") and density (rho = ",
                rho,
-               ") failed to converge.");
+               ") to temperature failed to converge.");
   return T;
 }
 
@@ -1033,15 +1034,16 @@ TabulatedFluidProperties::T_from_h_p(Real h, Real pressure) const
 {
   auto lambda = [&](Real pressure, Real current_T, Real & new_h, Real & dh_dp, Real & dh_dT)
   { h_from_p_T(pressure, current_T, new_h, dh_dp, dh_dT); };
-  Real T =
-      FluidPropertiesUtils::NewtonSolve(pressure, h, _T_initial_guess, _tolerance, lambda).first;
+  Real T = FluidPropertiesUtils::NewtonSolve(
+               pressure, h, _T_initial_guess, _tolerance, lambda, name() + "::T_from_h_p")
+               .first;
   // check for nans
   if (std::isnan(T))
     mooseError("Conversion from enthalpy (h = ",
                h,
                ") and pressure (p = ",
                pressure,
-               ") failed to converge.");
+               ") to temperature failed to converge.");
   return T;
 }
 

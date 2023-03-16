@@ -26,6 +26,14 @@ InputParameters
 THMSetupOutputAction::validParams()
 {
   InputParameters params = Action::validParams();
+
+  params.addParam<bool>("disable_scalars_in_console",
+                        true,
+                        "Set to true to force 'execute_scalars_on = NONE' in Console, which "
+                        "disables printing of all scalar variables.");
+
+  params.addClassDescription("Sets up output for THM.");
+
   return params;
 }
 
@@ -57,12 +65,15 @@ THMSetupOutputAction::act()
 
       if (dynamic_cast<Console *>(o) != nullptr)
       {
-        // Do not output scalar variables on the screen.
-        // CAUTION: there is no public API in MOOSE to control what gets outputted by an ouputter,
-        // so we get the input parameters after the object was created and flip the flag there. At
-        // this point it is still early enough, so that MOOSE won't notice.
-        InputParameters & pars = const_cast<InputParameters &>(o->parameters());
-        pars.set<ExecFlagEnum>("execute_scalars_on") = EXEC_NONE;
+        if (getParam<bool>("disable_scalars_in_console"))
+        {
+          // Do not output scalar variables on the screen.
+          // CAUTION: there is no public API in MOOSE to control what gets outputted by an ouputter,
+          // so we get the input parameters after the object was created and flip the flag there. At
+          // this point it is still early enough, so that MOOSE won't notice.
+          InputParameters & pars = const_cast<InputParameters &>(o->parameters());
+          pars.set<ExecFlagEnum>("execute_scalars_on") = EXEC_NONE;
+        }
 
         thm_problem->addScreenOutputter(o->name());
       }

@@ -10,6 +10,7 @@
 #pragma once
 
 #include "PatternedMeshGenerator.h"
+#include "ReportingIDGeneratorUtils.h"
 #include "libmesh/replicated_mesh.h"
 
 /**
@@ -28,7 +29,7 @@ protected:
   /// name of integer ID.
   const std::string _element_id_name;
   /// integer ID assignment type
-  const std::string _assign_type;
+  const ReportingIDGeneratorUtils::AssignType _assign_type;
   /// flag to indicate if exclude_id is defined
   const bool _use_exclude_id;
   /// flag to indicate if exclude_id is used for each input

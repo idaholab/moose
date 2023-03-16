@@ -17,7 +17,7 @@
 #include "ReporterName.h"
 #include "ReporterMode.h"
 #include "ReporterState.h"
-#include "nlohmann/json.h"
+#include "JsonIO.h"
 #include "JsonSyntaxTree.h"
 #include "MooseObject.h"
 

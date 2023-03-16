@@ -47,4 +47,6 @@ protected:
   const std::vector<std::vector<MooseVariableFEBase *>> & _aux_vars;
 
   bool _need_materials;
+
+  static Threads::spin_mutex writable_variable_mutex;
 };

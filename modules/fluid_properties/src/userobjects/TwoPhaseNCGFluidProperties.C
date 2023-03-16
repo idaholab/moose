@@ -13,8 +13,7 @@ InputParameters
 TwoPhaseNCGFluidProperties::validParams()
 {
   InputParameters params = TwoPhaseFluidProperties::validParams();
-  params.addCustomTypeParam<std::string>(
-      "fp_type", "two-phase-ncg-fp", "FPType", "Type of the fluid property object");
+  params.set<std::string>("fp_type") = "two-phase-ncg-fp";
   params.addParam<UserObjectName>("fp_2phase",
                                   "Name of fluid properties user object(s) for two-phase model");
   return params;

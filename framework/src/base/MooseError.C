@@ -38,6 +38,14 @@ mooseMsgFmt(const std::string & msg, const std::string & title, const std::strin
   return oss.str();
 }
 
+std::string
+mooseMsgFmt(const std::string & msg, const std::string & color)
+{
+  std::ostringstream oss;
+  oss << "\n" << color << "\n" << msg << COLOR_DEFAULT << "\n";
+  return oss.str();
+}
+
 [[noreturn]] void
 mooseErrorRaw(std::string msg, const std::string prefix)
 {

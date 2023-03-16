@@ -95,17 +95,17 @@ PorousFlowPermeabilityKozenyCarman::computeQpProperties()
   _permeability_qp[_qp] =
       _k_anisotropy * _A * std::pow(_porosity_qp[_qp], _n) / std::pow(1.0 - _porosity_qp[_qp], _m);
 
-  _dpermeability_qp_dvar[_qp].resize(_num_var, RealTensorValue());
+  (*_dpermeability_qp_dvar)[_qp].resize(_num_var, RealTensorValue());
   for (unsigned int v = 0; v < _num_var; ++v)
-    _dpermeability_qp_dvar[_qp][v] = _dporosity_qp_dvar[_qp][v] * _permeability_qp[_qp] *
-                                     (_n / _porosity_qp[_qp] + _m / (1.0 - _porosity_qp[_qp]));
+    (*_dpermeability_qp_dvar)[_qp][v] = _dporosity_qp_dvar[_qp][v] * _permeability_qp[_qp] *
+                                        (_n / _porosity_qp[_qp] + _m / (1.0 - _porosity_qp[_qp]));
 
-  _dpermeability_qp_dgradvar[_qp].resize(LIBMESH_DIM);
+  (*_dpermeability_qp_dgradvar)[_qp].resize(LIBMESH_DIM);
   for (unsigned i = 0; i < LIBMESH_DIM; ++i)
   {
-    _dpermeability_qp_dgradvar[_qp][i].resize(_num_var, RealTensorValue());
+    (*_dpermeability_qp_dgradvar)[_qp][i].resize(_num_var, RealTensorValue());
     for (unsigned int v = 0; v < _num_var; ++v)
-      _dpermeability_qp_dgradvar[_qp][i][v] =
+      (*_dpermeability_qp_dgradvar)[_qp][i][v] =
           _dporosity_qp_dgradvar[_qp][v](i) * _permeability_qp[_qp] *
           (_n / _porosity_qp[_qp] + _m / (1.0 - _porosity_qp[_qp]));
   }

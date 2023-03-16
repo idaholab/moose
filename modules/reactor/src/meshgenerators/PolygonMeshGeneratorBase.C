@@ -88,6 +88,7 @@ PolygonMeshGeneratorBase::buildGeneralSlice(
                          0,
                          quad_center_elements,
                          center_quad_factor,
+                         false,
                          true,
                          0,
                          pitch_scale_factor);
@@ -120,7 +121,8 @@ PolygonMeshGeneratorBase::buildSimpleSlice(
     const subdomain_id_type block_id_shift,
     const bool quad_center_elements,
     const Real center_quad_factor,
-    const bool create_interface_boundaries,
+    const bool create_inward_interface_boundaries,
+    const bool create_outward_interface_boundaries,
     const boundary_id_type boundary_id_shift)
 {
 
@@ -147,7 +149,8 @@ PolygonMeshGeneratorBase::buildSimpleSlice(
                     block_id_shift,
                     quad_center_elements,
                     center_quad_factor,
-                    create_interface_boundaries,
+                    create_inward_interface_boundaries,
+                    create_outward_interface_boundaries,
                     boundary_id_shift,
                     1.0);
 }
@@ -177,7 +180,8 @@ PolygonMeshGeneratorBase::buildSlice(
     const subdomain_id_type block_id_shift,
     const bool quad_center_elements,
     const Real center_quad_factor,
-    const bool create_interface_boundaries,
+    const bool create_inward_interface_boundaries,
+    const bool create_outward_interface_boundaries,
     const boundary_id_type boundary_id_shift,
     const Real pitch_scale_factor)
 {
@@ -326,24 +330,48 @@ PolygonMeshGeneratorBase::buildSlice(
               corner_to_corner,
               azimuthal_tangent);
 
+  // See if the central region is the only part of the innermost part
+  // The central region of the slice is special.
+  // Unlike the outer regions, which are layered quad elements,
+  // the central region is either a layer of tri elements or a specially-patterned quad elements.
+  // If there is at least one `ring` defined in the slice,
+  // the central region must belong to the innermost (first) ring.
+  // Otherwise the central region belongs to the `background`
+  // In either case, if the innermost ring or background has only one radial interval,
+  // the central region is an independent ring or background
+  // Otherwise, the central region and one or several quad element layers together form the
+  // innermost ring or background
+  bool is_central_region_independent;
+  if (ring_layers.empty())
+    is_central_region_independent = background_inner_boundary_layer_params.intervals +
+                                        background_intervals +
+                                        background_outer_boundary_layer_params.intervals ==
+                                    1;
+  else
+    is_central_region_independent = ring_layers[0] + ring_inner_boundary_layer_params.intervals[0] +
+                                        ring_outer_boundary_layer_params.intervals[0] ==
+                                    1;
+
   // Assign elements, boundaries, and subdomains;
   // Add Tri3 or Quad4 mesh into innermost (central) region
   if (quad_center_elements)
     cenQuadElemDef(*mesh,
                    div_num,
                    block_id_shift,
-                   create_interface_boundaries,
+                   create_outward_interface_boundaries && is_central_region_independent,
                    boundary_id_shift,
                    nodes,
                    (!has_rings) && (!has_ducts) && (background_intervals == 1),
+                   // Note here, has_ring means either there are ring regions or background inner
+                   // boundary layer; has_ducts means either there are duct regions or background
+                   // outer boundary layer. Same in cenTriElemDef()
                    side_index);
   else
     cenTriElemDef(*mesh,
                   num_sectors_per_side,
                   azimuthal_tangent,
                   block_id_shift,
-                  create_interface_boundaries ||
-                      ((!has_rings) && (!has_ducts) && (background_intervals == 1)),
+                  create_outward_interface_boundaries && is_central_region_independent,
                   boundary_id_shift,
                   (!has_rings) && (!has_ducts) && (background_intervals == 1),
                   side_index);
@@ -389,7 +417,8 @@ PolygonMeshGeneratorBase::buildSlice(
               azimuthal_tangent,
               block_id_shift,
               quad_center_elements ? (div_num * div_num - 1) : 0,
-              create_interface_boundaries,
+              create_inward_interface_boundaries,
+              create_outward_interface_boundaries,
               boundary_id_shift);
 
   return mesh;
@@ -675,7 +704,7 @@ void
 PolygonMeshGeneratorBase::cenQuadElemDef(ReplicatedMesh & mesh,
                                          const unsigned int div_num,
                                          const subdomain_id_type block_id_shift,
-                                         const bool create_interface_boundaries,
+                                         const bool create_outward_interface_boundaries,
                                          const boundary_id_type boundary_id_shift,
                                          std::vector<std::vector<Node *>> & nodes,
                                          const bool assign_external_boundary,
@@ -716,17 +745,20 @@ PolygonMeshGeneratorBase::cenQuadElemDef(ReplicatedMesh & mesh,
     elem_Quad4->set_node(2) = mesh.node_ptr(i + 2 * div_num);
     elem_Quad4->set_node(1) = mesh.node_ptr(i + 1);
     elem_Quad4->subdomain_id() = 1 + block_id_shift;
-    if (create_interface_boundaries)
+    if (create_outward_interface_boundaries)
       boundary_info.add_side(elem_Quad4, 2, 1 + boundary_id_shift);
     if (i == (div_num - 1) * (div_num - 1))
       boundary_info.add_side(elem_Quad4, 3, SLICE_BEGIN);
     if (i == div_num * div_num - 2)
       boundary_info.add_side(elem_Quad4, 1, SLICE_END);
     if (assign_external_boundary)
+    {
+      boundary_info.add_side(elem_Quad4, 2, OUTER_SIDESET_ID);
       boundary_info.add_side(
           elem_Quad4,
           2,
           (i < div_num * (div_num - 1) ? OUTER_SIDESET_ID : OUTER_SIDESET_ID_ALT) + side_index);
+    }
   }
 }
 
@@ -735,7 +767,7 @@ PolygonMeshGeneratorBase::cenTriElemDef(ReplicatedMesh & mesh,
                                         const unsigned int num_sectors_per_side,
                                         const std::vector<Real> azimuthal_tangent,
                                         const subdomain_id_type block_id_shift,
-                                        const bool create_interface_boundaries,
+                                        const bool create_outward_interface_boundaries,
                                         const boundary_id_type boundary_id_shift,
                                         const bool assign_external_boundary,
                                         const unsigned int side_index) const
@@ -750,7 +782,7 @@ PolygonMeshGeneratorBase::cenTriElemDef(ReplicatedMesh & mesh,
     elem->set_node(0) = mesh.node_ptr(0);
     elem->set_node(2) = mesh.node_ptr(i);
     elem->set_node(1) = mesh.node_ptr(i + 1);
-    if (create_interface_boundaries)
+    if (create_outward_interface_boundaries)
       boundary_info.add_side(elem, 1, 1 + boundary_id_shift);
     elem->subdomain_id() = 1 + block_id_shift;
     if (i == 1)
@@ -758,8 +790,11 @@ PolygonMeshGeneratorBase::cenTriElemDef(ReplicatedMesh & mesh,
     else if (i == angle_number)
       boundary_info.add_side(elem, 0, SLICE_END);
     if (assign_external_boundary)
+    {
+      boundary_info.add_side(elem, 1, OUTER_SIDESET_ID);
       boundary_info.add_side(
           elem, 1, (i <= angle_number / 2 ? OUTER_SIDESET_ID : OUTER_SIDESET_ID_ALT) + side_index);
+    }
   }
 }
 
@@ -771,7 +806,8 @@ PolygonMeshGeneratorBase::quadElemDef(ReplicatedMesh & mesh,
                                       const std::vector<Real> azimuthal_tangent,
                                       const subdomain_id_type block_id_shift,
                                       const dof_id_type nodeid_shift,
-                                      const bool create_interface_boundaries,
+                                      const bool create_inward_interface_boundaries,
+                                      const bool create_outward_interface_boundaries,
                                       const boundary_id_type boundary_id_shift) const
 {
   unsigned int angle_number =
@@ -802,6 +838,8 @@ PolygonMeshGeneratorBase::quadElemDef(ReplicatedMesh & mesh,
         else
           elem_Quad4->subdomain_id() = k + 2 + block_id_shift;
 
+        if (m == 0 && create_inward_interface_boundaries && k > 0)
+          boundary_info.add_side(elem_Quad4, 0, k * 2 + boundary_id_shift);
         if (m == (subdomain_rings[k] - 1))
         {
           if (k == (subdomain_rings.size() - 1))
@@ -812,13 +850,8 @@ PolygonMeshGeneratorBase::quadElemDef(ReplicatedMesh & mesh,
             else
               boundary_info.add_side(elem_Quad4, 2, OUTER_SIDESET_ID_ALT + side_index);
           }
-          else if (create_interface_boundaries)
-          {
-            if (subdomain_rings[0] == 0)
-              boundary_info.add_side(elem_Quad4, 2, k + 1 + boundary_id_shift);
-            else
-              boundary_info.add_side(elem_Quad4, 2, k + 2 + boundary_id_shift);
-          }
+          else if (create_outward_interface_boundaries)
+            boundary_info.add_side(elem_Quad4, 2, k * 2 + 1 + boundary_id_shift);
         }
       }
       j++;
@@ -848,7 +881,8 @@ PolygonMeshGeneratorBase::buildSimplePeripheral(
     const std::vector<std::pair<Real, Real>> & positions_inner,
     const std::vector<std::pair<Real, Real>> & d_positions_outer,
     const subdomain_id_type id_shift,
-    const bool create_interface_boundaries)
+    const bool create_inward_interface_boundaries,
+    const bool create_outward_interface_boundaries)
 {
   auto mesh = buildReplicatedMesh(2);
   std::pair<Real, Real> positions_p;
@@ -905,14 +939,14 @@ PolygonMeshGeneratorBase::buildSimplePeripheral(
       if (i == 0)
       {
         boundary_info.add_side(elem_Quad4, 0, OUTER_SIDESET_ID);
-        if (create_interface_boundaries)
-          boundary_info.add_side(elem_Quad4, 0, SLICE_ALT + id_shift);
+        if (create_inward_interface_boundaries)
+          boundary_info.add_side(elem_Quad4, 0, SLICE_ALT + id_shift * 2);
       }
       if (i == peripheral_invervals - 1)
       {
         boundary_info.add_side(elem_Quad4, 2, OUTER_SIDESET_ID);
-        if (create_interface_boundaries)
-          boundary_info.add_side(elem_Quad4, 2, SLICE_ALT + id_shift + 1);
+        if (create_outward_interface_boundaries)
+          boundary_info.add_side(elem_Quad4, 2, SLICE_ALT + id_shift * 2 + 1);
       }
       if (j == 0)
         boundary_info.add_side(elem_Quad4, 3, OUTER_SIDESET_ID);

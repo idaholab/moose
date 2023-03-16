@@ -1,0 +1,90 @@
+[Tests]
+  issues = '#12722'
+  design = 'restart_recover.md Checkpoint.md'
+  [test_signal]
+    type = SignalTester
+    input = 'simple_transient_diffusion_scaled.i'
+    requirement = 'The app should write out a checkpoint file at any time by sending a signal to it.'
+    sleep_time = 1
+    method='opt'
+    recover=false
+    max_threads=1
+    max_parallel = 1
+  []
+  [test_signal_recover]
+    type = RunApp
+    input = 'simple_transient_diffusion_scaled.i'
+    cli_args = '--recover'
+
+    #verify that the recovery is actually recovering and not starting from the beginning
+    absent_out = 'Time Step 0,'
+
+    #verify that the checkpoint actually stopped, rather than continuing to go on until completion
+    #the checkpoint should write somewhere after the first step, and before the last step
+    #to verify it is actually resuming from its autosave, we make sure it resumes one step before the last step
+    expect_out = 'Time Step 49,'
+    method='opt'
+    max_threads=1
+    max_parallel = 1
+    prereq = 'test_signal'
+    requirement = 'The app should be able to recover from the autosaved checkpoint created by a signal.'
+  []
+  [test_signal_parallel]
+    type = SignalTester
+    sleep_time = 1
+    input = 'simple_transient_diffusion_scaled.i'
+    requirement = 'The app should write out a parallel checkpoint file at any time by sending a signal to it.'
+    min_parallel = 3
+    max_parallel = 3
+    cli_args = 'Executioner/num_steps=70'
+    method='opt'
+    max_threads=1
+    recover=false
+  []
+  [test_signal_parallel_recover]
+    type = RunApp
+    input = 'simple_transient_diffusion_scaled.i'
+    cli_args = 'Executioner/num_steps=70 --recover'
+
+    #verify that the recovery is actually recovering and not starting from the beginning
+    absent_out = 'Time Step 0,'
+
+    #verify that the checkpoint actually stopped, rather than continuing to go on until completion
+    #the checkpoint should write somewhere after the first step, and before the last step
+    #to verify it is actually resuming from its autosave, we make sure it resumes one step before the last step
+    expect_out = 'Time Step 69,'
+    method='opt'
+
+    min_parallel = 3
+    max_parallel = 3
+    prereq = 'test_signal_parallel'
+    requirement = 'The app should be able to recover from a parallel autosaved checkpoint created by a signal.'
+    max_threads=1
+  []
+  [test_signal_debug]
+    type = SignalTester
+    sleep_time = 4
+    input = 'simple_transient_diffusion_scaled.i'
+    requirement = 'The app should write out a checkpoint file at any time by sending a signal to it, in a debug build.'
+    method = 'dbg'
+    cli_args = 'Mesh/uniform_refine=0'
+    recover=false
+  []
+  [test_signal_recover_debug]
+    type = RunApp
+    input = 'simple_transient_diffusion_scaled.i'
+    cli_args = 'Mesh/uniform_refine=0 --recover'
+    method = 'dbg'
+
+    #verify that the recovery is actually recovering and not starting from the beginning
+    absent_out = 'Time Step 0,'
+
+    #verify that the checkpoint actually stopped, rather than continuing to go on until completion
+    #the checkpoint should write somewhere after the first step, and before the last step
+    #to verify it is actually resuming from its autosave, we make sure it resumes one step before the last step
+    expect_out = 'Time Step 49,'
+
+    prereq = 'test_signal_debug'
+    requirement = 'The app should be able to recover from the autosaved checkpoint created by a signal, in a debug build.'
+  []
+[]

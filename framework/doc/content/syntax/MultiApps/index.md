@@ -88,7 +88,7 @@ multiple sub-apps.  All sub-apps of a given `MultiApp` are run simultaneously in
 `MultiApps` will be executed one after another.
 
 
-## Dynamically Loading Multiapps
+## Dynamically Loading MultiApps
 
 If building with dynamic libraries (the default) other applications can be loaded without adding them
 to your Makefile and registering them. Simply set the proper `type` in your input file
@@ -111,7 +111,7 @@ When running a multiapp simulation you do not need to enable checkpoint output i
 The main app stores the restart data for all sub-apps in its file.
 When restarting or recovering, the main app restores the restart data of all sub-apps into MultiApp's *backups*
 (a data structure holding all the current state including solution vectors, stateful material properties,
-post-processors, restartable quantties declared in objects and etc. of the sub-apps), which are used by
+post-processors, restartable quantities declared in objects and etc. of the sub-apps), which are used by
 sub-apps to restart/recover the calculations in their initial setups.
 The same backups are also used by multiapps for saving/restoring the current state during fixed point iterations.
 

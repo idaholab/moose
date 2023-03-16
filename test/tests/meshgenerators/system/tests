@@ -1,0 +1,158 @@
+[Tests]
+  design = 'MeshGenerator.md'
+  issues = '#19285 #23447'
+
+  [errors]
+    requirement = 'The system shall report a reasonable error generating meshes when'
+
+    [get_mesh_invalid]
+      type = RunException
+      input = 'mesh_generator_test.i'
+      detail = 'requesting an input mesh generator by parameter and the parameter is not valid'
+      cli_args = 'Mesh/test/get_mesh_invalid=true'
+      expect_err = 'Failed to get a parameter with the name "invalid"'
+    []
+    [get_mesh_wrong_type]
+      type = RunException
+      input = 'mesh_generator_test.i'
+      detail = 'requesting an input mesh generator parameter and the parameter is of the wrong type'
+      cli_args = 'Mesh/test/get_mesh_wrong_type=true'
+      expect_err = 'dummy: Parameter of type "bool" is not an expected type for getting a MeshGenerator'
+    []
+    [get_meshes_by_name_invalid]
+      type = RunException
+      input = 'mesh_generator_test.i'
+      detail = 'requesting an input mesh generator by name and the name is not valid'
+      cli_args = 'Mesh/test/get_meshes_by_name_invalid=true'
+      expect_err = 'Failed to get a parameter with the name "invalid"'
+    []
+    [get_meshes_by_name_wrong_type]
+      type = RunException
+      input = 'mesh_generator_test.i'
+      detail = 'requesting input mesh generators by parameter and the parameter is of the wrong type'
+      cli_args = 'Mesh/test/get_meshes_by_name_wrong_type=true'
+      expect_err = 'dummy: Parameter of type "bool" is not an expected type for getting MeshGenerators'
+    []
+    [get_mesh_outside_construct]
+      type = RunException
+      input = 'mesh_generator_test.i'
+      detail = 'requesting an input mesh at an unallowed time'
+      cli_args = 'Mesh/test/get_mesh_outside_construct=true'
+      expect_err = 'Cannot get a mesh outside of construction'
+    []
+    [sub_outside_construct]
+      type = RunException
+      input = 'mesh_generator_test.i'
+      detail = 'building a sub generator at an unallowed time'
+      cli_args = 'Mesh/test/sub_outside_construct=true'
+      expect_err = 'Can only call addMeshSubgenerator\(\) during MeshGenerator construction'
+    []
+    [declare_mesh_prop_outside_construct]
+      type = RunException
+      input = 'mesh_generator_test.i'
+      detail = 'declaring a property on the mesh at an unallowed time'
+      cli_args = 'Mesh/test/declare_mesh_prop_outside_construct=true'
+      expect_err = 'Can only call declareMeshProperty\(\) during MeshGenerator construction'
+    []
+    [get_mesh_not_found]
+      type = RunException
+      input = 'mesh_generator_test.i'
+      detail = 'requesting an input mesh generator by parameter that does not exist'
+      cli_args = 'Mesh/test/input=foo Mesh/test/request_input=true'
+      expect_err = "\(Mesh/test/input\) The requested MeshGenerator with name 'foo' was not found"
+    []
+    [get_meshes_not_found]
+      type = RunException
+      input = 'mesh_generator_test.i'
+      detail = 'requesting input mesh generators by parameter that do not exist'
+      cli_args = 'Mesh/test/inputs=bar Mesh/test/request_inputs=true'
+      expect_err = "\(Mesh/test/inputs\) The requested MeshGenerator with name 'bar' was not found"
+    []
+    [get_mesh_by_name_not_found]
+      type = RunException
+      input = 'mesh_generator_test.i'
+      detail = 'requesting an input mesh generator by name that does not exist'
+      cli_args = 'Mesh/test/input=foo Mesh/test/request_input_by_name=true'
+      expect_err = "The requested MeshGenerator with name 'foo' was not found"
+    []
+    [get_meshes_by_name_not_found]
+      type = RunException
+      input = 'mesh_generator_test.i'
+      detail = 'requesting input mesh generators by name that do not exist'
+      cli_args = 'Mesh/test/inputs=bar Mesh/test/request_inputs_by_name=true'
+      expect_err = "The requested MeshGenerator with name 'bar' was not found"
+    []
+    [input_not_moved]
+      type = RunException
+      input = 'mesh_generator_test.i'
+      detail = 'failing to properly manage the memory of an input mesh generator'
+      cli_args = 'Mesh/active="gmg test"
+                  Mesh/test/request_input=true
+                  Mesh/test/input=gmg'
+      expect_err = "The mesh from input GeneratedMeshGenerator 'gmg' was not moved."
+    []
+    [mesh_prop_double_declare]
+      type = RunException
+      input = 'mesh_generator_test.i'
+      detail = 'declaring a property on the mesh multiple times'
+      cli_args = 'Mesh/test/mesh_prop_double_declare=true'
+      expect_err = "While declaring mesh property 'foo' with type 'bool',\nsaid property has already been declared with type 'bool'"
+    []
+    [unused_sub_input]
+      type = RunException
+      input = 'mesh_generator_test.i'
+      detail = 'coupling an input mesh generator in a parameter for a sub generator but not using said dependency'
+      cli_args = 'Mesh/active="gmg test"
+                  Mesh/test/input=gmg
+                  Mesh/test/request_sub_input=true'
+      expect_err = "The sub generator dependency declared from MeshGenerator 'gmg' from the parameter 'input' was not used."
+    []
+    [sub_no_declare_input]
+      type = RunException
+      input = 'mesh_generator_test.i'
+      detail = 'coupling an input mesh generator in a sub generator but not declaring it as a dependency'
+      cli_args = 'Mesh/active="gmg test"
+                  Mesh/test/input=gmg
+                  Mesh/test/sub_no_declare_input=true'
+      expect_err = "The MeshGenerator 'gmg' was referenced in the parameter 'input' and used in the sub generator RenameBlockGenerator 'test_rbg', but was not declared as a sub dependency."
+    []
+    [unused_param_input]
+      type = RunException
+      input = 'mesh_generator_test.i'
+      detail = 'coupling an input mesh generator in a parameter but not using said mesh generator'
+      cli_args = 'Mesh/test/input=foo'
+      expect_err = "You failed to request the generated mesh\(es\) for the parameter 'input'.\n\nIn specific, the mesh from MeshGenerator 'foo' was not requested"
+    []
+    [missing_get]
+      type = RunException
+      input = 'mesh_generator_test.i'
+      detail = 'getting a mesh generator that does not exist'
+      cli_args = 'Mesh/test/missing_get=true'
+      expect_err = "Failed to find a MeshGenerator with the name 'foo'"
+    []
+    [missing_final]
+      type = RunException
+      input = 'mesh_generator_test.i'
+      detail = 'forcibly setting the final mesh when said mesh does not exist'
+      cli_args = 'Mesh/final_generator=foo'
+      expect_err = "The forced final MeshGenerator 'foo' does not exist"
+    []
+    [not_constructed_yet]
+      type = RunException
+      input = 'mesh_generator_test.i'
+      detail = 'an input mesh is not found because its dependencies are not properly declared'
+      cli_args = 'Mesh/active="gmg test"
+                  Mesh/test/add_sub_input=gmg'
+      expect_err = "The requested MeshGenerator with name 'gmg' was found, but has not been constructed yet"
+    []
+  []
+
+  [null_mesh]
+    type = RunApp
+    input = 'mesh_generator_test.i'
+    cli_args = 'Mesh/test/null_mesh_name=null_thing
+                Mesh/test/input=null_thing
+                Mesh/test/inputs="null_thing"'
+    requirement = 'The system shall support declaration of a name that can be used as an unused name for input meshes when generating meshes'
+  []
+[]

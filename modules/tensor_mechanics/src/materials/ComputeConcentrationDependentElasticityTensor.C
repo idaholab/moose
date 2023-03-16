@@ -37,9 +37,10 @@ ComputeConcentrationDependentElasticityTensor::ComputeConcentrationDependentElas
     _Cijkl1(getParam<std::vector<Real>>("C1_ijkl"),
             (RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method1")),
     _c(coupledValue("c")),
-    _c_name(getVar("c", 0)->name()),
-    _delasticity_tensor_dc(
-        declarePropertyDerivative<RankFourTensor>(_elasticity_tensor_name, _c_name))
+    _c_name(coupledName("c", 0)),
+    _delasticity_tensor_dc(isCoupledConstant("c") ? nullptr
+                                                  : &declarePropertyDerivative<RankFourTensor>(
+                                                        _elasticity_tensor_name, _c_name))
 {
   // Define a rotation according to Euler angle parameters
   RotationTensor R(_Euler_angles); // R type: RealTensorValue
@@ -55,5 +56,6 @@ ComputeConcentrationDependentElasticityTensor::computeQpElasticityTensor()
   // Assign elasticity tensor at a given quad point
   _elasticity_tensor[_qp] = _Cijkl0 + (_Cijkl1 - _Cijkl0) * _c[_qp];
   // Define derivative of elasticity tensor with respect to concentration.
-  _delasticity_tensor_dc[_qp] = (_Cijkl1 - _Cijkl0);
+  if (_delasticity_tensor_dc)
+    (*_delasticity_tensor_dc)[_qp] = (_Cijkl1 - _Cijkl0);
 }

@@ -19,10 +19,10 @@ InputParameters
 TestDeclareReporter::validParams()
 {
   InputParameters params = GeneralReporter::validParams();
-  params.addParam<ReporterValueName>(
-      "int_name", "int", "The name of the interger data"); // MooseDocs:data
-  params.addParam<ReporterValueName>("distributed_vector_name",
-                                     "Distributed vector reporter to produce.");
+  // MooseDocs:param_begin
+  params.addParam<ReporterValueName>("int_name", "int", "The name of the integer data");
+  // MooseDocs:param_end
+  params.addParam<ReporterValueName>("distributed_vector_name", "Distributed vector to produce.");
   return params;
 }
 
@@ -87,10 +87,10 @@ TestGetReporter::validParams()
 
 TestGetReporter::TestGetReporter(const InputParameters & parameters)
   : GeneralReporter(parameters),
-    _int(getReporterValue<int>("int_reporter")),
+    _int(getReporterValue<int>("int_reporter")), // MooseDocs:consumer
     _int_old(getReporterValue<int>("int_reporter", 1)),
     _real(getReporterValue<Real>("real_reporter")),
-    _vector(getReporterValue<std::vector<Real>>("vector_reporter")), // MooseDocs:consumer
+    _vector(getReporterValue<std::vector<Real>>("vector_reporter")),
     _string(getReporterValue<std::string>("string_reporter")),
     _bcast_value(getReporterValue<Real>("broadcast_reporter")),
     _scatter_value(getReporterValue<dof_id_type>("scatter_reporter")),

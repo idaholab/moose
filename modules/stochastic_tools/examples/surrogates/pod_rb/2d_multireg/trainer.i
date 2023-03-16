@@ -86,7 +86,6 @@
                   Kernels/src0/value
                   Kernels/src1/value
                   Kernels/src2/value'
-    to_control = 'stochastic'
     execute_on = 'timestep_begin'
     check_multiapp_execute_on = false
   []
