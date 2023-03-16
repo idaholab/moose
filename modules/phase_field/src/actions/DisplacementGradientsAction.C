@@ -69,9 +69,7 @@ DisplacementGradientsAction::act()
   {
     InputParameters params = _factory.getValidParams("StrainGradDispDerivatives");
     params.set<std::vector<VariableName>>("displacement_gradients") = _displacement_gradients;
-    if (isParamValid("block"))
-      params.set<std::vector<SubdomainName>>("block") =
-          getParam<std::vector<SubdomainName>>("block");
+    params.applySpecificParameters(parameters(), {"block"});
     _problem->addMaterial("StrainGradDispDerivatives", "strain_grad_disp_derivatives", params);
   }
   else if (_current_task == "add_kernel")

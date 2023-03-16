@@ -65,9 +65,8 @@ Tricrystal2CircleGrainsICAction::act()
     // Set parameters for BoundingBoxIC
     InputParameters poly_params = _factory.getValidParams("Tricrystal2CircleGrainsIC");
     poly_params.set<VariableName>("variable") = var_name;
-    poly_params.set<unsigned int>("op_num") = _op_num;
     poly_params.set<unsigned int>("op_index") = op;
-    poly_params.applySpecificParameters(parameters(), {"block"});
+    poly_params.applySpecificParameters(parameters(), {"op_num", "block"});
 
     // Add initial condition
     _problem->addInitialCondition("Tricrystal2CircleGrainsIC",
