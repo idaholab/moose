@@ -9,6 +9,15 @@
     requirement ='The system shall generate a hexagon mesh without rings and ducts.'
     recover = false
   []
+  [back_only_no_side_specific_bdry]
+    type = 'Exodiff'
+    input = 'poly_2d.i'
+    exodiff = 'poly_2d_back_only_nssb.e'
+    exodiff_opts = '-pedantic'
+    cli_args = 'Mesh/gen/background_block_ids="30 35" Mesh/gen/background_block_names="back_in back_out" Mesh/gen/generate_side_specific_boundaries=false --mesh-only "poly_2d_back_only_nssb.e"'
+    requirement ='The system shall generate a hexagon mesh without rings and ducts and without generating side specific boundaries.'
+    recover = false
+  []
   [back_only_single_block]
     type = 'Exodiff'
     input = 'poly_2d.i'
