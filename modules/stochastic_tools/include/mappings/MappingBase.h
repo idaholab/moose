@@ -21,6 +21,11 @@ public:
   static InputParameters validParams();
   MappingBase(const InputParameters & parameters);
 
+  virtual void buildMapping() const = 0;
+
+  virtual void map(const DenseVector<Real> & full_order_vector,
+                   std::vector<Real> & reduced_order_vector) const = 0;
+
   virtual void map(const NumericVector<Number> & full_order_vector,
                    std::vector<Real> & reduced_order_vector) const = 0;
 

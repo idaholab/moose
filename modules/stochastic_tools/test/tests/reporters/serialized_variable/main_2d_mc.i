@@ -31,7 +31,8 @@
 
 [Mappings]
   [pod_mapping]
-    typ
+    type = PODMapping
+    solution_storage = parallel_storage
   []
 []
 
@@ -55,6 +56,13 @@
 [Reporters]
   [parallel_storage]
     type = ParallelSolutionStorage
+  []
+  [reduced_solutions]
+    type = MappingReporter
+    sampler = sample
+    parallel_storage = parallel_storage
+    mapping = pod_mapping
+    variables = "u"
   []
 []
 

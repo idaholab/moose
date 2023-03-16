@@ -10,6 +10,7 @@
 #pragma once
 
 #include "MappingBase.h"
+#include "ParallelSolutionStorage.h"
 
 class PODMapping : public MappingBase
 {
@@ -17,9 +18,17 @@ public:
   static InputParameters validParams();
   PODMapping(const InputParameters & parameters);
 
+  virtual void buildMapping();
+
+  void map(const DenseVector<Real> & full_order_vector,
+           std::vector<Real> & reduced_order_vector) const override;
+
   void map(const NumericVector<Number> & full_order_vector,
            std::vector<Real> & reduced_order_vector) const override;
 
   void inverse_map(const std::vector<Real> & reduced_order_vector,
                    std::vector<Real> & full_order_vector) const override;
+
+protected:
+  ParallelSolutionStorage * _parallel_storage;
 };
