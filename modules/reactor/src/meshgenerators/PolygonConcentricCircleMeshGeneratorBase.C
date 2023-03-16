@@ -160,6 +160,9 @@ PolygonConcentricCircleMeshGeneratorBase::validParams()
                         "Whether the outward interface boundaries are created.");
   params.addParam<boundary_id_type>(
       "interface_boundary_id_shift", 0, "Integer used to shift interface boundary IDs.");
+  params.addParam<bool>("generate_side_specific_boundaries",
+                        false,
+                        "whether the side-specific external boundaries are generated or not");
   params.addRangeCheckedParam<boundary_id_type>("external_boundary_id",
                                                 "external_boundary_id>0",
                                                 "Optional customized external boundary id.");
@@ -194,7 +197,7 @@ PolygonConcentricCircleMeshGeneratorBase::validParams()
       "ring_block_names external_boundary_id external_boundary_name "
       "inward_interface_boundary_names outward_interface_boundary_names "
       "block_id_shift create_inward_interface_boundaries create_outward_interface_boundaries "
-      "interface_boundary_id_shift",
+      "interface_boundary_id_shift generate_side_specific_boundaries",
       "Customized Subdomain/Boundary");
   params.addParamNamesToGroup("num_sectors_per_side background_intervals duct_intervals "
                               "ring_intervals uniform_mesh_on_sides",
@@ -342,6 +345,7 @@ PolygonConcentricCircleMeshGeneratorBase::PolygonConcentricCircleMeshGeneratorBa
     _create_inward_interface_boundaries(getParam<bool>("create_inward_interface_boundaries")),
     _create_outward_interface_boundaries(getParam<bool>("create_outward_interface_boundaries")),
     _interface_boundary_id_shift(getParam<boundary_id_type>("interface_boundary_id_shift")),
+    _generate_side_specific_boundaries(getParam<bool>("generate_side_specific_boundaries")),
     _external_boundary_id(isParamValid("external_boundary_id")
                               ? getParam<boundary_id_type>("external_boundary_id")
                               : 0),
@@ -750,7 +754,8 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
                                 _center_quad_factor,
                                 _create_inward_interface_boundaries,
                                 _create_outward_interface_boundaries,
-                                _interface_boundary_id_shift);
+                                _interface_boundary_id_shift,
+                                _generate_side_specific_boundaries);
   // This loop builds add-on slices and stitches them to the first slice
   for (unsigned int mesh_index = 1; mesh_index < _num_sides; mesh_index++)
   {
@@ -779,7 +784,8 @@ PolygonConcentricCircleMeshGeneratorBase::generate()
                                      _center_quad_factor,
                                      _create_inward_interface_boundaries,
                                      _create_outward_interface_boundaries,
-                                     _interface_boundary_id_shift);
+                                     _interface_boundary_id_shift,
+                                     _generate_side_specific_boundaries);
 
     ReplicatedMesh other_mesh(*mesh_tmp);
     MeshTools::Modification::rotate(other_mesh, 360.0 / _num_sides * mesh_index, 0, 0);

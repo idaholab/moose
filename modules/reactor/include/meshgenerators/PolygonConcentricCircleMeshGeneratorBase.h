@@ -89,6 +89,8 @@ protected:
   const bool _create_outward_interface_boundaries;
   /// Shift in default boundary IDs of interfaces to avert potential conflicts
   const boundary_id_type _interface_boundary_id_shift;
+  /// Whether the side-specific external boundaries are generated or not
+  const bool _generate_side_specific_boundaries;
   /// Boundary ID of the mesh's external boundary
   const boundary_id_type _external_boundary_id;
   /// Boundary Name of the mesh's external boundary
