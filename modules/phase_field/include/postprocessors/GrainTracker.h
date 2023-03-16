@@ -114,6 +114,12 @@ protected:
    */
   virtual void remapGrains();
 
+  // re-merge grains due to misorientation angle from euler angles calculation
+  virtual void mergeGrainsBasedMisorientation();
+
+  // True if two grains are determined to perform a merge operation
+  bool _merge_grains_basedMisorAngle;  
+
   /**
    * Broadcast essential Grain information to all processors. This method is used to get certain
    * attributes like centroids distributed and whether or not a grain intersects a boundary updated.

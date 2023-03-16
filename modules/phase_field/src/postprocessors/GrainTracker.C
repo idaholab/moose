@@ -53,6 +53,7 @@ GrainTracker::validParams()
 
   // FeatureFloodCount adds a relationship manager, but we need to extend that for GrainTracker
   params.clearRelationshipManagers();
+  params.addParam<bool>("merge_grains_basedMisorAngle", false, "Grain merge would be considered if true");
 
   params.addRelationshipManager(
       "ElementSideNeighborLayers",
@@ -96,7 +97,8 @@ GrainTracker::GrainTracker(const InputParameters & parameters)
     _reserve_grain_first_index(0),
     _old_max_grain_id(0),
     _max_curr_grain_id(declareRestartableData<unsigned int>("max_curr_grain_id", invalid_id)),
-    _is_transient(_subproblem.isTransient())
+    _is_transient(_subproblem.isTransient()),
+    _merge_grains_basedMisorAngle(getParam<bool>("merge_grains_basedMisorAngle"))
 {
   if (_tolerate_failure)
     paramInfo("tolerate_failure",
@@ -375,6 +377,12 @@ GrainTracker::finalize()
   // TODO: Release non essential memory
   if (_verbosity_level > 0)
     _console << "Finished inside of GrainTracker\n" << std::endl;
+}
+
+void
+GrainTracker::mergeGrainsBasedMisorientation()
+{
+  _console << "This function needs to be defined in the derived class\n" << std::endl;
 }
 
 void
@@ -817,6 +825,10 @@ GrainTracker::trackGrains()
     }
 
     createAdjacentIDVector();
+
+    // When considering the grain merging function
+    if (_merge_grains_basedMisorAngle && _t_step > 2)
+      mergeGrainsBasedMisorientation();
 
     // Case 2 (inactive grains in _feature_sets_old)
     for (auto & grain : _feature_sets_old)
