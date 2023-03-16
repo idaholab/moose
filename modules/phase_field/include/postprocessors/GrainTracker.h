@@ -12,6 +12,9 @@
 #include "FeatureFloodCount.h"
 #include "GrainTrackerInterface.h"
 
+#include "EulerAngleProvider.h"
+#include "MisorientationAngleCalculator.h"
+
 #include "libmesh/bounding_box.h"
 
 class PolycrystalUserObjectBase;
@@ -117,6 +120,9 @@ protected:
   // re-merge grains due to misorientation angle from euler angles calculation
   virtual void mergeGrainsBasedMisorientation();
 
+  const EulerAngleProvider & _euler;
+  misoriAngle_isTwining _s_misoriTwin;  
+  
   // True if two grains are determined to perform a merge operation
   bool _merge_grains_basedMisorAngle;  
 
