@@ -3710,7 +3710,7 @@ MooseMesh::checkDuplicateSubdomainNames()
   for (const auto & sbd_id : _mesh_subdomains)
   {
     std::string sub_name = getSubdomainName(sbd_id);
-    if (subdomain.count(sub_name) > 0)
+    if (!sub_name.empty() && subdomain.count(sub_name) > 0)
       mooseError("The subdomain name ",
                  sub_name,
                  " has already been used for the subdomain with ID=",
