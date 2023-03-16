@@ -98,7 +98,10 @@ protected:
    * This method updates the _feature_sets data structure.
    * This method should only be called on the root processor
    */
-  void trackGrains();
+  virtual void trackGrains();
+
+  // establish the vector of adjacent grains based on the topological relationship by weipeng
+  virtual void createAdjacentIDVector();
 
   /**
    * This method is called when a new grain is detected. It can be overridden by a derived class to
@@ -109,7 +112,7 @@ protected:
   /**
    * This method is called after trackGrains to remap grains that are too close to each other.
    */
-  void remapGrains();
+  virtual void remapGrains();
 
   /**
    * Broadcast essential Grain information to all processors. This method is used to get certain
