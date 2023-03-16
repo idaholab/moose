@@ -100,6 +100,9 @@ protected:
    */
   void trackGrains();
 
+  // establish the vector of adjacent grains based on the topological relationship by weipeng
+  virtual void createAdjacentIDVector();
+  
   /**
    * This method is called when a new grain is detected. It can be overridden by a derived class to
    * handle setting new properties on the newly created grain.
