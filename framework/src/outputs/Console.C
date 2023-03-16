@@ -54,8 +54,8 @@ Console::validParams()
                              pps_fit_mode,
                              "Specifies the wrapping mode for post-processor tables that are "
                              "printed to the screen (ENVIRONMENT: Read \"MOOSE_PPS_WIDTH\" for "
-                             "desired width, AUTO: Attempt to determine width automatically "
-                             "(serial only), <n>: Desired width");
+                             "desired width (if not set, defaults to AUTO), AUTO: Attempt to "
+                             "determine width automatically (serial only), <n>: Desired width");
 
   // Verbosity
   params.addParam<bool>("verbose", false, "Print detailed diagnostics on timestep calculation");
@@ -123,7 +123,7 @@ Console::validParams()
                                   "'execution', 'output')");
 
   // Advanced group
-  params.addParamNamesToGroup("max_rows verbose show_multiapp_name system_info", "Advanced");
+  params.addParamNamesToGroup("verbose show_multiapp_name system_info", "Advanced");
 
   // Performance log group
   params.addParamNamesToGroup("perf_log solve_log perf_header libmesh_log", "Perf Log");
@@ -134,6 +134,9 @@ Console::validParams()
 
   // Number formatting
   params.addParamNamesToGroup("scientific_time time_precision", "Time output formatting");
+
+  // Table of postprocessor output formatting
+  params.addParamNamesToGroup("max_rows fit_mode", "Table formatting");
 
   /*
    * The following modifies the default behavior from base class parameters. Notice the extra flag

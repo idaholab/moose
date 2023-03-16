@@ -609,7 +609,8 @@ FormattedTable::getTermWidth(bool use_environment) const
       ss >> w.ws_col;
     }
   }
-  else
+  // Default to AUTO if no environment variable was set
+  if (!use_environment || (w.ws_col == std::numeric_limits<unsigned short>::max()))
   {
 #ifndef __WIN32__
     try
@@ -619,10 +620,12 @@ FormattedTable::getTermWidth(bool use_environment) const
     catch (...)
 #endif
     {
-      // Something bad happened, make sure we have a sane value
-      w.ws_col = std::numeric_limits<unsigned short>::max();
     }
   }
+
+  // Something bad happened, make sure we have a sane value
+  if (w.ws_col == std::numeric_limits<unsigned short>::max())
+    w.ws_col = 170;
 
   return w.ws_col;
 }
