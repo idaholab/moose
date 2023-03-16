@@ -545,7 +545,8 @@ SystemBase::augmentSendList(std::vector<dof_id_type> & send_list)
 void
 SystemBase::saveOldSolutions()
 {
-  const auto states = _solution_states.size();
+  const auto states =
+      _solution_states[static_cast<unsigned short>(Moose::SolutionIterationType::Time)].size();
   if (states > 1)
   {
     _saved_solution_states.resize(states);
@@ -576,7 +577,8 @@ SystemBase::saveOldSolutions()
 void
 SystemBase::restoreOldSolutions()
 {
-  const auto states = _solution_states.size();
+  const auto states =
+      _solution_states[static_cast<unsigned short>(Moose::SolutionIterationType::Time)].size();
   if (states > 1)
     for (unsigned int i = 1; i <= states - 1; ++i)
       if (_saved_solution_states[i])
@@ -1266,7 +1268,8 @@ SystemBase::copySolutionsBackwards()
 {
   system().update();
 
-  const auto states = _solution_states.size();
+  const auto states =
+      _solution_states[static_cast<unsigned short>(Moose::SolutionIterationType::Time)].size();
   if (states > 1)
     for (unsigned int i = 1; i <= states - 1; ++i)
       solutionState(i) = solutionState(0);
@@ -1285,7 +1288,8 @@ SystemBase::copySolutionsBackwards()
 void
 SystemBase::copyOldSolutions()
 {
-  const auto states = _solution_states.size();
+  const auto states =
+      _solution_states[static_cast<unsigned short>(Moose::SolutionIterationType::Time)].size();
   if (states > 1)
     for (unsigned int i = states - 1; i > 0; --i)
       solutionState(i) = solutionState(i - 1);
@@ -1378,24 +1382,32 @@ SystemBase::oldSolutionStateVectorName(const unsigned int state) const
 }
 
 const NumericVector<Number> &
-SystemBase::solutionState(const unsigned int state) const
+SystemBase::solutionState(const unsigned int state,
+                          const Moose::SolutionIterationType iteration_type) const
 {
-  if (!hasSolutionState(state))
-    mooseError("Solution state ",
+  if (!hasSolutionState(state, iteration_type))
+    mooseError("For iteration type '",
+               Moose::stringify(iteration_type),
+               "': solution state ",
                state,
                " was requested in ",
                name(),
                " but only up to state ",
-               _solution_states.size() - 1,
+               libmesh_map_find(_solution_states, iteration_type).size() - 1,
                " is available.");
 
-  if (state == 0)
-    mooseAssert(_solution_states[0] == &solutionInternal(), "Inconsistent current solution");
-  else
-    mooseAssert(_solution_states[state] == &getVector(oldSolutionStateVectorName(state)),
-                "Inconsistent solution state");
+  const auto & solution_states = libmesh_map_find(_solution_states, iteration_type);
 
-  return *_solution_states[state];
+  if (iteration_type == Moose::SolutionIterationType::Time)
+  {
+    if (state == 0)
+      mooseAssert(solution_states[0] == &solutionInternal(), "Inconsistent current solution");
+    else
+      mooseAssert(solution_states[state] == &getVector(oldSolutionStateVectorName(state)),
+                  "Inconsistent solution state");
+  }
+
+  return *solution_states[state];
 }
 
 NumericVector<Number> &

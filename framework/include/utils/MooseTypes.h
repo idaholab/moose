@@ -221,7 +221,7 @@ namespace Moose
 /// up with some overkill complex mechanism for dynamically resizing them.
 /// Eventually, we may need or implement that more sophisticated mechanism and
 /// will no longer need this.
-const size_t constMaxQpsPerElem = 216;
+constexpr std::size_t constMaxQpsPerElem = 216;
 
 // These are used by MooseVariableData and MooseVariableDataFV
 enum SolutionState : int
@@ -231,6 +231,13 @@ enum SolutionState : int
   Older = 2,
   PreviousNL = -1
 };
+
+enum class SolutionIterationType
+{
+  Time,
+  Nonlinear
+};
+
 // These are used by MooseVariableData and MooseVariableDataFV
 enum GeometryType
 {

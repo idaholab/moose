@@ -488,6 +488,20 @@ stringify(const VarFieldType & t)
 }
 
 std::string
+stringify(SolutionIterationType t)
+{
+  switch (t)
+  {
+    case Time:
+      return "time";
+    case Nonlinear:
+      return "nonlinear";
+    default:
+      mooseError("Unhandled SolutionIterationType");
+  }
+}
+
+std::string
 stringify(const std::string & s)
 {
   return s;

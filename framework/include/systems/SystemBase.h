@@ -206,22 +206,30 @@ public:
    * If the state does not exist, it will be initialized in addition to any newer
    * states before it that have not been initialized.
    */
-  virtual NumericVector<Number> & solutionState(const unsigned int state);
+  virtual NumericVector<Number> &
+  solutionState(const unsigned int state,
+                Moose::SolutionIterationType iteration_type = Moose::SolutionIterationType::Time);
 
   /**
    * Get a state of the solution (0 = current, 1 = old, 2 = older, etc).
    */
-  virtual const NumericVector<Number> & solutionState(const unsigned int state) const;
+  virtual const NumericVector<Number> & solutionState(
+      const unsigned int state,
+      Moose::SolutionIterationType iteration_type = Moose::SolutionIterationType::Time) const;
 
   /**
    * Registers that the solution state \p state is needed.
    */
-  virtual void needSolutionState(const unsigned int state);
+  virtual void needSolutionState(
+      const unsigned int state,
+      Moose::SolutionIterationType iteration_type = Moose::SolutionIterationType::Time);
 
   /**
    * Whether or not the system has the solution state (0 = current, 1 = old, 2 = older, etc).
    */
-  virtual bool hasSolutionState(const unsigned int state) const;
+  virtual bool hasSolutionState(
+      const unsigned int state,
+      Moose::SolutionIterationType iteration_type = Moose::SolutionIterationType::Time) const;
 
   virtual Number & duDotDu() { return _du_dot_du; }
   virtual Number & duDotDotDu() { return _du_dotdot_du; }
@@ -978,7 +986,8 @@ private:
   TagName oldSolutionStateVectorName(const unsigned int) const;
 
   /// The solution states (0 = current, 1 = old, 2 = older, etc)
-  std::vector<NumericVector<Number> *> _solution_states;
+  std::unordered_map<Moose::SolutionIterationType, std::vector<NumericVector<Number> *>>
+      _solution_states;
   /// The saved solution states (0 = current, 1 = old, 2 = older, etc)
   std::vector<NumericVector<Number> *> _saved_solution_states;
 };
