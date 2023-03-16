@@ -3713,10 +3713,11 @@ MooseMesh::checkDuplicateSubdomainNames()
     if (!sub_name.empty() && subdomain.count(sub_name) > 0)
       mooseError("The subdomain name ",
                  sub_name,
-                 " has already been used for the subdomain with ID=",
+                 " is used for both subdomain with ID=",
                  subdomain[sub_name],
-                 ", Please rename the subdomain with ID=",
-                 sbd_id);
+                 " and ID=",
+                 sbd_id,
+                 ", Please rename one of them!");
     else
       subdomain[sub_name] = sbd_id;
   }

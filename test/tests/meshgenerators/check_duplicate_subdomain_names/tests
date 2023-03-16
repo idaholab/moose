@@ -6,7 +6,7 @@
 
   type = 'RunException'
   input = 'check_duplicate_subdomain_names.i'
-  expect_err = 'The subdomain name A has already been used for the subdomain with ID=1, Please rename the subdomain with ID=2'
+  expect_err = 'The subdomain name A is used for both subdomain with ID=1 and ID=2, Please rename one of them!'
   cli_args = "--mesh-only"
   recover = false
   []
