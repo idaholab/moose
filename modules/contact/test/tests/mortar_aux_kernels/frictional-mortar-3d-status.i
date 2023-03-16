@@ -254,10 +254,12 @@ offset = 0.00
     primary_subdomain = 'primary_lower'
     secondary_subdomain = 'secondary_lower'
     secondary_variable = disp_x
-    lm_variable_normal = mortar_tangential_lm
-    lm_variable_tangential_one = mortar_tangential_3d_lm
+    lm_variable_normal = mortar_normal_lm
+    lm_variable_tangential_one = mortar_tangential_lm
+    lm_variable_tangential_two = mortar_tangential_3d_lm
     disp_x = disp_x
     disp_y = disp_y
+    disp_z = disp_z
   []
 []
 

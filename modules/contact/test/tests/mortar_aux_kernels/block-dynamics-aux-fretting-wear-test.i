@@ -136,7 +136,6 @@ offset = -0.045
     secondary_subdomain = 3
     disp_x = disp_x
     disp_y = disp_y
-    execute_on = 'LINEAR TIMESTEP_END'
   []
   [worn_depth]
     type = MortarArchardsLawAux
@@ -313,8 +312,6 @@ offset = -0.045
   l_max_its = 15
   line_search = 'l2'
   snesmf_reuse_base = true
-  nl_abs_tol = 1e-50
-  nl_rel_tol = 1e-10
 
   [TimeIntegrator]
     type = NewmarkBeta

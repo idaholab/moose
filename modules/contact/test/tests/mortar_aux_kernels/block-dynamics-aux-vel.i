@@ -127,6 +127,8 @@ offset = -0.19
     secondary_subdomain = 3
     disp_x = disp_x
     disp_y = disp_y
+    correct_edge_dropping = true
+    execute_on = 'TIMESTEP_END'
   []
   [accel_x]
     type = NewmarkAccelAux

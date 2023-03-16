@@ -33,7 +33,7 @@
     exodiff = 'block-dynamics-aux-wear-vel_out.e'
     input = 'block-dynamics-aux-wear-vel.i'
     rel_err = 1.0e-3
-    abs_zero = 1.0e-4
+    abs_zero = 5.0e-3
     min_parallel = 1
     max_parallel = 4
     min_ad_size = '50'

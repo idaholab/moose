@@ -283,6 +283,21 @@
   []
 []
 
+[UserObjects]
+  [weighted_vel_uo]
+    type = LMWeightedVelocitiesUserObject
+    primary_boundary = 2
+    secondary_boundary = 3
+    primary_subdomain = 10000
+    secondary_subdomain = 10001
+    lm_variable_normal = frictionless_normal_lm
+    lm_variable_tangential_one = tangential_lm
+    secondary_variable = disp_x
+    disp_x = disp_x
+    disp_y = disp_y
+  []
+[]
+
 [Constraints]
   [weighted_gap_lm]
     type = ComputeFrictionalForceLMMechanicalContact
@@ -298,6 +313,8 @@
     mu = 0.4
     c_t = 1.0e5
     c = 1.0e6
+    weighted_gap_uo = weighted_vel_uo
+    weighted_velocities_uo = weighted_vel_uo
   []
   [x]
     type = NormalMortarMechanicalContact
@@ -310,6 +327,7 @@
     component = x
     use_displaced_mesh = true
     compute_lm_residuals = false
+    weighted_gap_uo = weighted_vel_uo
   []
   [y]
     type = NormalMortarMechanicalContact
@@ -322,6 +340,7 @@
     component = y
     use_displaced_mesh = true
     compute_lm_residuals = false
+    weighted_gap_uo = weighted_vel_uo
   []
   [tangential_x]
     type = TangentialMortarMechanicalContact
@@ -334,6 +353,7 @@
     component = x
     use_displaced_mesh = true
     compute_lm_residuals = false
+    weighted_velocities_uo = weighted_vel_uo
   []
   [tangential_y]
     type = TangentialMortarMechanicalContact
@@ -346,6 +366,7 @@
     component = y
     use_displaced_mesh = true
     compute_lm_residuals = false
+    weighted_velocities_uo = weighted_vel_uo
   []
 
 []

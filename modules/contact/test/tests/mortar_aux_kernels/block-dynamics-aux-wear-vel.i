@@ -308,7 +308,7 @@ offset = -0.05
   nl_max_its = 40
   nl_abs_tol = 1.0e-11
   nl_rel_tol = 1.0e-11
-  line_search = 'l2'
+  line_search = 'none'
   snesmf_reuse_base = true
 
   [TimeIntegrator]
