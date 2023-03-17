@@ -32,6 +32,8 @@ DisplacementGradientsAction::validParams()
                                                      "Vector of displacement gradient variables");
   params.addParam<Real>(
       "scaling", 1.0, "Specifies a scaling factor to apply to the displacement gradient variables");
+  params.addParam<std::vector<SubdomainName>>("block",
+                                              "Block restriction for the variables and kernels");
   return params;
 }
 
@@ -57,6 +59,7 @@ DisplacementGradientsAction::act()
       var_params.set<MooseEnum>("family") = "LAGRANGE";
       var_params.set<MooseEnum>("order") = "FIRST";
       var_params.set<std::vector<Real>>("scaling") = {scaling};
+      var_params.applySpecificParameters(_pars, {"block"});
 
       // Create displacement gradient variables
       _problem->addVariable("MooseVariable", _displacement_gradients[i], var_params);
@@ -66,7 +69,7 @@ DisplacementGradientsAction::act()
   {
     InputParameters params = _factory.getValidParams("StrainGradDispDerivatives");
     params.set<std::vector<VariableName>>("displacement_gradients") = _displacement_gradients;
-    params.set<std::vector<SubdomainName>>("block") = {"0"}; // TODO: add parameter for this
+    params.applySpecificParameters(parameters(), {"block"});
     _problem->addMaterial("StrainGradDispDerivatives", "strain_grad_disp_derivatives", params);
   }
   else if (_current_task == "add_kernel")

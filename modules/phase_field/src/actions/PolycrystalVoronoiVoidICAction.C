@@ -57,9 +57,6 @@ PolycrystalVoronoiVoidICAction::act()
     poly_params.set<MooseEnum>("structure_type") = "grains";
     poly_params.set<UserObjectName>("polycrystal_ic_uo") =
         getParam<UserObjectName>("polycrystal_ic_uo");
-    if (isParamValid("block"))
-      poly_params.set<std::vector<SubdomainName>>("block") =
-          getParam<std::vector<SubdomainName>>("block");
 
     // Add initial condition
     _problem->addInitialCondition(

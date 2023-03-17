@@ -39,6 +39,8 @@ EulerAngle2RGBAction::validParams()
       "no_grain_color",
       Point(0, 0, 0),
       "RGB value of color used to represent area with no grains, defaults to black");
+  params.addParam<std::vector<SubdomainName>>("block",
+                                              "Block restriction for the variables and kernels");
   return params;
 }
 
@@ -64,6 +66,7 @@ EulerAngle2RGBAction::act()
     if (_current_task == "add_aux_variable")
     {
       auto var_params = _factory.getValidParams("MooseVariableConstMonomial");
+      var_params.applySpecificParameters(_pars, {"block"});
       // Create scalar auxvariables for the three components of the RGB vector
       _problem->addAuxVariable("MooseVariableConstMonomial", var_name, var_params);
     }

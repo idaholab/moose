@@ -11,8 +11,6 @@
 
 #include "Action.h"
 
-// Forward Declarations
-
 /**
  * \todo Needs documentation.
  */

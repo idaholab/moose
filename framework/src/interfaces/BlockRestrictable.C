@@ -20,7 +20,6 @@
 InputParameters
 BlockRestrictable::validParams()
 {
-
   // Create InputParameters object that will be appended to the parameters for the inheriting object
   InputParameters params = emptyInputParameters();
 

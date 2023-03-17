@@ -11,10 +11,7 @@
 
 // MOOSE includes
 #include "Action.h"
-
 #include "libmesh/fe_type.h"
-
-// Forward declaration
 
 class ConservedAction : public Action
 {

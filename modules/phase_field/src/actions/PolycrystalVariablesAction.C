@@ -44,6 +44,8 @@ PolycrystalVariablesAction::validParams()
   params.addRequiredParam<unsigned int>("op_num",
                                         "specifies the number of order parameters to create");
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
+  params.addParam<std::vector<SubdomainName>>("block",
+                                              "Block restriction for the variables and kernels");
   return params;
 }
 
@@ -73,7 +75,7 @@ PolycrystalVariablesAction::act()
       auto type = AddVariableAction::variableType(fe_type);
       auto var_params = _factory.getValidParams(type);
 
-      var_params.applySpecificParameters(_pars, {"order", "family"});
+      var_params.applySpecificParameters(_pars, {"order", "family", "block"});
       var_params.set<std::vector<Real>>("scaling") = {_pars.get<Real>("scaling")};
       _problem->addVariable(type, var_name, var_params);
     }

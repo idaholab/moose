@@ -11,8 +11,6 @@
 
 #include "HHPFCRFFSplitKernelAction.h"
 
-// Forward Declarations
-
 class PFCRFFKernelAction : public HHPFCRFFSplitKernelAction
 {
 public:
