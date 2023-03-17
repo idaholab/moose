@@ -16,6 +16,8 @@ material and referenced by this one.
 This is done to maximize the flexibility of the sintering model to include effects
 such as GB vacancy segregation and stoichiometry effects.
 
+Additional option for strict mass conservation formulation can be defined using 'mass_conservation' flag set to "true", which generates the coefficients for void and solid phases.
+
 !syntax parameters /Materials/GrandPotentialSinteringMaterial
 
 !syntax inputs /Materials/GrandPotentialSinteringMaterial

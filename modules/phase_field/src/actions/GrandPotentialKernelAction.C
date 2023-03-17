@@ -65,9 +65,22 @@ GrandPotentialKernelAction::validParams()
   parameters.addParam<bool>(
       "use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
   MultiMooseEnum anisotropy("true=1 false=0", "false");
+  parameters.addParam<bool>(
+      "mass_conservation", false, "Whether strict mass conservation formulation is used or not");
   parameters.addRequiredParam<MultiMooseEnum>(
       "anisotropic", anisotropy, "Whether or not each mobility is anisotropic");
-
+  parameters.addParam<std::vector<NonlinearVariableName>>(
+      "concentrations", "List of concentration variables for strict mass conservation");
+  parameters.addParam<std::vector<MaterialPropertyName>>(
+      "hj_c_min",
+      "List of body forces coefficients for strict mass conservation formulation that indicates "
+      "the minima in concentration free energy."
+      "Place in same order as switching_function_names.");
+  parameters.addParam<std::vector<MaterialPropertyName>>(
+      "hj_over_kVa",
+      "List of MatReaction coefficients for strict mass conservation formulation that relates "
+      "chemical potential with switching functionj between phases"
+      "Place in same order as switching_function_names.");
   return parameters;
 }
 
@@ -99,11 +112,15 @@ GrandPotentialKernelAction::act()
   auto implicity = getParam<bool>("implicit");
   auto displaced_mesh = getParam<bool>("use_displaced_mesh");
   auto aniso = getParam<MultiMooseEnum>("anisotropic");
+  const auto hj_over_kVa = getParam<std::vector<MaterialPropertyName>>("hj_over_kVa");
+  const auto hj_c_min = getParam<std::vector<MaterialPropertyName>>("hj_c_min");
+  auto mass_conservation = getParam<bool>("mass_conservation");
 
   // Size definitions and checks
   unsigned int n_w = w_names.size();
   unsigned int n_hj = hj.size();
   std::vector<NonlinearVariableName> etas;
+  std::vector<NonlinearVariableName> c_names;
   unsigned int n_etas = 0;
   std::string kernel_name;
   if (isParamValid("additional_ops"))
@@ -244,50 +261,135 @@ GrandPotentialKernelAction::act()
     _problem->addKernel("ACGrGrMulti", kernel_name, params);
   } // for (unsigned int i = 0; i < n_etas + n_grs; ++i)
 
-  // Chemical Potentials
-  for (unsigned int i = 0; i < n_w; ++i)
+  if (mass_conservation) // mass conservation kernels with conc and chempot coupling
   {
-    // SusceptibilityTimeDerivative
-    InputParameters params = _factory.getValidParams("SusceptibilityTimeDerivative");
-    params.set<NonlinearVariableName>("variable") = w_names[i];
-    params.set<MaterialPropertyName>("f_name") = chis[i];
-    params.set<std::vector<VariableName>>("coupled_variables") = v0;
-    params.set<bool>("implicit") = implicity;
-    params.set<bool>("use_displaced_mesh") = displaced_mesh;
-    kernel_name = "ChiDt_" + w_names[i];
-    _problem->addKernel("SusceptibilityTimeDerivative", kernel_name, params);
+    c_names = getParam<std::vector<NonlinearVariableName>>("concentrations");
+    std::vector<VariableName> v3;
+    v3.resize(n_w);
+    for (unsigned int i = 0; i < n_w; ++i)
+      v3[i] = w_names[i];
 
-    // MatDiffusion
-    params = _factory.getValidParams("MatDiffusion");
-    params.set<NonlinearVariableName>("variable") = w_names[i];
-    params.set<bool>("implicit") = implicity;
-    params.set<bool>("use_displaced_mesh") = displaced_mesh;
-    params.set<MaterialPropertyName>("diffusivity") = M[i];
-    kernel_name = "MatDif_" + w_names[i];
-    if (aniso.get(i))
-      _problem->addKernel("MatAnisoDiffusion", kernel_name, params);
-    else
-    {
-      params.set<std::vector<VariableName>>("args") = v0;
-      _problem->addKernel("MatDiffusion", kernel_name, params);
-    }
+    std::vector<VariableName> v4;
+    unsigned int n_c = c_names.size();
+    v4.resize(n_c);
+    for (unsigned int i = 0; i < n_c; ++i)
+      v4[i] = c_names[i];
 
-    // CoupledSwitchingTimeDerivative
-    for (unsigned int j = 0; j < n_hj; ++j)
-      fj_temp[j] = Fj_w[i * n_hj + j];
-    for (unsigned int j = 0; j < n_etas + n_grs; ++j)
+    for (unsigned int i = 0; i < n_c; ++i)
     {
-      notarealvector[0] = all_etas[j];
-      params = _factory.getValidParams("CoupledSwitchingTimeDerivative");
-      params.set<NonlinearVariableName>("variable") = w_names[i];
-      params.set<std::vector<VariableName>>("v") = notarealvector;
-      params.set<std::vector<VariableName>>("coupled_variables") = v0;
-      params.set<std::vector<MaterialPropertyName>>("Fj_names") = fj_temp;
-      params.set<std::vector<MaterialPropertyName>>("hj_names") = hj;
+      // TimeDerivative concentration Kernel
+      InputParameters params = _factory.getValidParams("TimeDerivative");
+      params.set<NonlinearVariableName>("variable") = c_names[i];
       params.set<bool>("implicit") = implicity;
       params.set<bool>("use_displaced_mesh") = displaced_mesh;
-      kernel_name = "Coupled_" + w_names[i] + "_" + all_etas[j];
-      _problem->addKernel("CoupledSwitchingTimeDerivative", kernel_name, params);
+      kernel_name = "DT_" + c_names[i];
+      _problem->addKernel("TimeDerivative", kernel_name, params);
+
+      // MatDiffusion concentration (coupled with chempot)
+      params = _factory.getValidParams("MatDiffusion");
+      params.set<NonlinearVariableName>("variable") = c_names[i];
+      params.set<std::vector<VariableName>>("v") = v3;
+      params.set<bool>("implicit") = implicity;
+      params.set<bool>("use_displaced_mesh") = displaced_mesh;
+      params.set<MaterialPropertyName>("diffusivity") = M[i];
+      kernel_name = "MatDif_" + w_names[i];
+      if (aniso.get(i))
+      {
+        params.set<std::vector<VariableName>>("args") = v1;
+        _problem->addKernel("MatAnisoDiffusion", kernel_name, params);
+      }
+      else
+      {
+        params.set<std::vector<VariableName>>("args") = v0;
+        _problem->addKernel("MatDiffusion", kernel_name, params);
+      }
+    }
+
+    // Chemical Potentials
+    for (unsigned int i = 0; i < n_w; ++i)
+    {
+      // coupling of c and w
+      InputParameters params = _factory.getValidParams("MatReaction");
+      params.set<NonlinearVariableName>("variable") = w_names[i];
+      params.set<std::vector<VariableName>>("v") = v4;
+      params.set<MaterialPropertyName>("mob_name") = "-1";
+      kernel_name = "MR_c" + w_names[i];
+      _problem->addKernel("MatReaction", kernel_name, params);
+
+      // contribution between chempot and each grains to concentration
+      // Summations of MatReaction and MaskedBodyForce
+
+      for (unsigned int j = 0; j < n_hj; ++j)
+      {
+        // MatReaction
+        params = _factory.getValidParams("MatReaction");
+        params.set<NonlinearVariableName>("variable") = w_names[i];
+        params.set<std::vector<VariableName>>("args") = v1;
+        params.set<MaterialPropertyName>("mob_name") = hj_over_kVa[j];
+        params.set<bool>("implicit") = implicity;
+        params.set<bool>("use_displaced_mesh") = displaced_mesh;
+        kernel_name = "MR_" + w_names[i] + "_" + all_etas[j];
+        _problem->addKernel("MatReaction", kernel_name, params);
+
+        // MaskedBodyForce
+        InputParameters params = _factory.getValidParams("MaskedBodyForce");
+        params.set<NonlinearVariableName>("variable") = w_names[i];
+        params.set<std::vector<VariableName>>("coupled_variables") = v1;
+        params.set<MaterialPropertyName>("mask") = hj_c_min[j];
+        params.set<bool>("implicit") = implicity;
+        params.set<bool>("use_displaced_mesh") = displaced_mesh;
+        kernel_name = "MBD_" + w_names[i] + "_" + all_etas[j];
+        _problem->addKernel("MaskedBodyForce", kernel_name, params);
+      }
+    }
+  }
+  else
+  {
+    // Chemical Potentials
+    for (unsigned int i = 0; i < n_w; ++i)
+    {
+      // SusceptibilityTimeDerivative
+      InputParameters params = _factory.getValidParams("SusceptibilityTimeDerivative");
+      params.set<NonlinearVariableName>("variable") = w_names[i];
+      params.set<MaterialPropertyName>("f_name") = chis[i];
+      params.set<std::vector<VariableName>>("coupled_variables") = v0;
+      params.set<bool>("implicit") = implicity;
+      params.set<bool>("use_displaced_mesh") = displaced_mesh;
+      kernel_name = "ChiDt_" + w_names[i];
+      _problem->addKernel("SusceptibilityTimeDerivative", kernel_name, params);
+
+      // MatDiffusion
+      params = _factory.getValidParams("MatDiffusion");
+      params.set<NonlinearVariableName>("variable") = w_names[i];
+      params.set<bool>("implicit") = implicity;
+      params.set<bool>("use_displaced_mesh") = displaced_mesh;
+      params.set<MaterialPropertyName>("diffusivity") = M[i];
+      kernel_name = "MatDif_" + w_names[i];
+      if (aniso.get(i))
+        _problem->addKernel("MatAnisoDiffusion", kernel_name, params);
+      else
+      {
+        params.set<std::vector<VariableName>>("args") = v0;
+        _problem->addKernel("MatDiffusion", kernel_name, params);
+      }
+
+      // CoupledSwitchingTimeDerivative
+      for (unsigned int j = 0; j < n_hj; ++j)
+        fj_temp[j] = Fj_w[i * n_hj + j];
+      for (unsigned int j = 0; j < n_etas + n_grs; ++j)
+      {
+        notarealvector[0] = all_etas[j];
+        params = _factory.getValidParams("CoupledSwitchingTimeDerivative");
+        params.set<NonlinearVariableName>("variable") = w_names[i];
+        params.set<std::vector<VariableName>>("v") = notarealvector;
+        params.set<std::vector<VariableName>>("coupled_variables") = v0;
+        params.set<std::vector<MaterialPropertyName>>("Fj_names") = fj_temp;
+        params.set<std::vector<MaterialPropertyName>>("hj_names") = hj;
+        params.set<bool>("implicit") = implicity;
+        params.set<bool>("use_displaced_mesh") = displaced_mesh;
+        kernel_name = "Coupled_" + w_names[i] + "_" + all_etas[j];
+        _problem->addKernel("CoupledSwitchingTimeDerivative", kernel_name, params);
+      }
     }
   }
 } // GrandPotentialKernelAction::act()
