@@ -5,7 +5,16 @@
 #include "EulerAngleProvider.h"
 
 typedef Eigen::Quaternion<Real> QuatReal;
+
+// set twin type
 enum class TwinType {TT1, ST1, NONE};
+
+// set the key orientation type
+enum class QuatType {getTwinning, getSSymm, getCSymm};
+
+// Set the typical crystallographic structure
+enum class CrystalType {FCC, BCC, HCP};
+
 struct MisorientationAngleData{Real _misor; bool _is_twin; TwinType _twin_type = TwinType::NONE;};
 
 /**
@@ -15,10 +24,10 @@ struct MisorientationAngleData{Real _misor; bool _is_twin; TwinType _twin_type =
 namespace MisorientationAngleCalculator
 {
   // function 1: input Euler1 and Euler2, output s
-  MisorientationAngleData calculateMisorientaion(EulerAngles & Euler1, EulerAngles & Euler2, MisorientationAngleData & s, const std::string & CrystalType = "hcp");  
+  MisorientationAngleData calculateMisorientaion(EulerAngles & Euler1, EulerAngles & Euler2, MisorientationAngleData & s, const CrystalType & crystal_type = CrystalType::HCP);  
 
   // function 2: Obtaining the key orientation using quaternion, including twinning, CS, SS
-  std::vector<QuatReal> getKeyQuat(const std::string & QuatType, const std::string & CrystalKype = "hcp");
+  std::vector<QuatReal> getKeyQuat(const QuatType & quat_type, const CrystalType & crystal_type = CrystalType::HCP);
 
   // function 3.1: computer the scalar dot product using quaternion
   Real dotQuaternion(const QuatReal & o1, const QuatReal & o2, 

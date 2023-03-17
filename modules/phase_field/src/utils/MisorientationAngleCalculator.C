@@ -3,7 +3,7 @@
 namespace MisorientationAngleCalculator
 {
 
-  MisorientationAngleData calculateMisorientaion(EulerAngles & Euler1, EulerAngles & Euler2, MisorientationAngleData & s, const std::string & CrystalType)
+  MisorientationAngleData calculateMisorientaion(EulerAngles & Euler1, EulerAngles & Euler2, MisorientationAngleData & s, const CrystalType & crystal_type)
   {
     // a conversion from Radians to degrees
     constexpr Real degree = 1.7453e-02;
@@ -19,9 +19,9 @@ namespace MisorientationAngleCalculator
     const QuatReal & q2 = Euler2.toQuaternion();
     const QuatReal mori_q1q2 = itimesQuaternion(q1, q2); // inv(q1)*q2
 
-    const std::vector<QuatReal> q3_twin = getKeyQuat("getTwinning");
-    std::vector<QuatReal> qcs = getKeyQuat("getCSymm", CrystalType);
-    std::vector<QuatReal> qss = getKeyQuat("getSSymm");
+    const std::vector<QuatReal> q3_twin = getKeyQuat(QuatType::getTwinning);
+    std::vector<QuatReal> qcs = getKeyQuat(QuatType::getCSymm, crystal_type);
+    std::vector<QuatReal> qss = getKeyQuat(QuatType::getSSymm);
 
     // calculate misorientation angle
     value_acos = dotQuaternion(q1, q2, qcs, qss);
@@ -56,20 +56,20 @@ namespace MisorientationAngleCalculator
     return s;
   }
 
-  std::vector<QuatReal> getKeyQuat(const std::string & QuatType, const std::string & CrystalType)
+  std::vector<QuatReal> getKeyQuat(const QuatType & quat_type, const CrystalType & crystal_type)
   {
     std::vector<std::vector<Real>> q_num;
 
-    if ( QuatType == "getTwinning" )
+    if (quat_type == QuatType::getTwinning)
       q_num = {
         {0.73728,  0.58508,  0.3378,  0},
         {0.84339,  0.53730,  0,       0}
       }; // Quaternion for HCP twinning from MTEX (TT1 and CT2);
-    else if ( QuatType == "getSSymm" )
+    else if (quat_type == QuatType::getSSymm)
       q_num = {
         {-1.000e+00,  0.000e+00,  0.000e+00, -2.220e-16}
       }; // from MTEX;  
-    else if ( QuatType == "getCSymm" && CrystalType == "hcp")
+    else if ( quat_type == QuatType::getCSymm && crystal_type == CrystalType::HCP)
       q_num = {
         { 1.000e+00,  0.000e+00,  0.000e+00,  0.000e+00},
         { 0.000e+00,  8.660e-01, -5.000e-01,  0.000e+00},
@@ -84,7 +84,7 @@ namespace MisorientationAngleCalculator
         {-8.660e-01,  0.000e+00,  0.000e+00,  5.000e-01},
         { 0.000e+00, -1.000e+00,  0.000e+00,  0.000e+00}
       }; // 12 symmetric for hcp
-    else if ( QuatType == "getCSymm" && CrystalType == "fcc")
+    else if ( quat_type == QuatType::getCSymm && crystal_type == CrystalType::FCC)
       q_num = {
         { 1.000E+00,	 0.000E+00, 	 0.000E+00, 	 0.000E+00},
         { 5.000E-01,	 5.000E-01, 	 5.000E-01, 	 5.000E-01},
