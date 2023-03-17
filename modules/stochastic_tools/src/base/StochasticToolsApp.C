@@ -72,8 +72,7 @@ StochasticToolsApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax
   // Mapping objects
   registerSyntaxTask("AddMappingAction", "Mappings/*", "add_mapping");
   registerMooseObjectTask("add_mapping", MappingBase, false);
-  addTaskDependency("add_user_object", "add_mapping");
-  addTaskDependency("add_reporter", "add_mapping");
+  addTaskDependency("add_mapping", "add_reporter");
   // Adds action for loading Covariance data in model
   registerTask("load_covariance_data", true);
   addTaskDependency("load_covariance_data", "load_surrogate_data");

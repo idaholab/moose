@@ -31,6 +31,16 @@ public:
     return _distributed_solutions[variable_i][sample_i];
   }
 
+  std::vector<std::vector<std::unique_ptr<DenseVector<Real>>>> & getStorage(unsigned int variable_i)
+  {
+    return _distributed_solutions[variable_i];
+  }
+
+  std::vector<std::vector<std::vector<std::unique_ptr<DenseVector<Real>>>>> & getStorage()
+  {
+    return _distributed_solutions;
+  }
+
   void updateTimeStepNumbers();
 
   unsigned int totalNumberOfStoredSolutions(const VariableName & vname);

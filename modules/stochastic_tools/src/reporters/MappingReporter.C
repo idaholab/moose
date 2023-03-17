@@ -72,7 +72,11 @@ MappingReporter::MappingReporter(const InputParameters & parameters)
       }
     }
   }
+}
 
+void
+MappingReporter::initialSetup()
+{
   std::vector<MappingBase *> mappings;
   _fe_problem.theWarehouse()
       .query()
@@ -82,7 +86,7 @@ MappingReporter::MappingReporter(const InputParameters & parameters)
 
   if (mappings.empty())
     paramError("mapping", "Unable to find mapping with name '", _mapping_name, "'");
-  else if (reporters.size() > 1)
+  else if (mappings.size() > 1)
     paramError("mapping", "We found more than one mapping with the name '", _mapping_name, "'");
 
   _mapping = mappings[0];
@@ -91,7 +95,7 @@ MappingReporter::MappingReporter(const InputParameters & parameters)
 void
 MappingReporter::execute()
 {
-
+  _mapping->buildMapping();
   if (_parallel_storage)
   {
     if (_sampler)

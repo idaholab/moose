@@ -18,7 +18,7 @@ public:
   static InputParameters validParams();
   PODMapping(const InputParameters & parameters);
 
-  virtual void buildMapping();
+  void buildMapping() override;
 
   void map(const DenseVector<Real> & full_order_vector,
            std::vector<Real> & reduced_order_vector) const override;
@@ -30,5 +30,5 @@ public:
                    std::vector<Real> & full_order_vector) const override;
 
 protected:
-  ParallelSolutionStorage * _parallel_storage;
+  // ParallelSolutionStorage * _parallel_storage;
 };
