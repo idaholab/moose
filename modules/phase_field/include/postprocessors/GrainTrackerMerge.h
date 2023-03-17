@@ -18,5 +18,5 @@ protected:
   virtual void mergeGrainsBasedMisorientation() override;
 
   const EulerAngleProvider & _euler;
-  misoriAngle_isTwining _s_misoriTwin;  
+  MisorientationAngleData _s_misorientation_angle;  
 };

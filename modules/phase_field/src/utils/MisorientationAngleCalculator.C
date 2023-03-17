@@ -1,19 +1,19 @@
 #include "MisorientationAngleCalculator.h"
 
-misoriAngle_isTwining
-MisorientationAngleCalculator::calculateMisorientaion(EulerAngles & Euler1, EulerAngles & Euler2, misoriAngle_isTwining & s, const std::string & CrystalType)
+MisorientationAngleData
+MisorientationAngleCalculator::calculateMisorientaion(EulerAngles & Euler1, EulerAngles & Euler2, MisorientationAngleData & s, const std::string & CrystalType)
 {
   const Real degree = 1.7453e-02;
   Real tolerance_mis = 3.90;
   Real misor_twinning = tolerance_mis + 1.0;
   Real value_acos = 0.0;
-  const quatReal & q1 = Euler1.toQuaternion();
-  const quatReal & q2 = Euler2.toQuaternion();
-  const quatReal mori_q1q2 = itimesQuaternion(q1, q2); // inv(q1)*q2
+  const QuatReal & q1 = Euler1.toQuaternion();
+  const QuatReal & q2 = Euler2.toQuaternion();
+  const QuatReal mori_q1q2 = itimesQuaternion(q1, q2); // inv(q1)*q2
 
-  const std::vector<quatReal> q3_twin = getKeyQuat("getTwinning");
-  std::vector<quatReal> qcs = getKeyQuat("getCSymm", CrystalType);
-  std::vector<quatReal> qss = getKeyQuat("getSSymm");
+  const std::vector<QuatReal> q3_twin = getKeyQuat("getTwinning");
+  std::vector<QuatReal> qcs = getKeyQuat("getCSymm", CrystalType);
+  std::vector<QuatReal> qss = getKeyQuat("getSSymm");
 
   // calculate misorientation angle
   value_acos = dotQuaternion(q1, q2, qcs, qss);
@@ -40,7 +40,7 @@ MisorientationAngleCalculator::calculateMisorientaion(EulerAngles & Euler1, Eule
   return s;
 }
 
-std::vector<quatReal>
+std::vector<QuatReal>
 MisorientationAngleCalculator::getKeyQuat(const std::string & QuatType, const std::string & CrystalType)
 {
   std::vector<std::vector<Real>> q_num;
@@ -97,7 +97,7 @@ MisorientationAngleCalculator::getKeyQuat(const std::string & QuatType, const st
       { 5.000E-01,	 5.000E-01, 	 5.000E-01, 	-5.000E-01}
     }; // 24 symmetric for fcc
 
-  std::vector<quatReal> q(q_num.size());
+  std::vector<QuatReal> q(q_num.size());
   for (unsigned int i = 0; i < q_num.size(); ++i)
   {
     q[i].w() = q_num[i][0];
@@ -109,12 +109,12 @@ MisorientationAngleCalculator::getKeyQuat(const std::string & QuatType, const st
 }
 
 Real
-MisorientationAngleCalculator::dotQuaternion(const quatReal & o1, const quatReal & o2, 
-                                            const std::vector<quatReal> & qcs, 
-                                            const std::vector<quatReal> & qss)
+MisorientationAngleCalculator::dotQuaternion(const QuatReal & o1, const QuatReal & o2, 
+                                            const std::vector<QuatReal> & qcs, 
+                                            const std::vector<QuatReal> & qss)
 {
   Real d = 0.0; // used to get misorientation angle
-  quatReal mori = itimesQuaternion(o1, o2);
+  QuatReal mori = itimesQuaternion(o1, o2);
 
   if (qss.size() <= 1)
     d = dotOuterQuaternion(mori, qcs); 
@@ -124,8 +124,8 @@ MisorientationAngleCalculator::dotQuaternion(const quatReal & o1, const quatReal
   return d;
 }
 
-quatReal
-MisorientationAngleCalculator::itimesQuaternion(const quatReal & q1, const quatReal & q2)
+QuatReal
+MisorientationAngleCalculator::itimesQuaternion(const QuatReal & q1, const QuatReal & q2)
 {
   Real a1, b1, c1, d1;
   Real a2, b2, c2, d2;
@@ -134,7 +134,7 @@ MisorientationAngleCalculator::itimesQuaternion(const quatReal & q1, const quatR
   a2 = q2.w(); b2 = q2.x(); c2 = q2.y(); d2 = q2.z();
 
   // standart algorithm
-  quatReal q;
+  QuatReal q;
   q.w() = a1 * a2 - b1 * b2 - c1 * c2 - d1 * d2;
   q.x() = b1 * a2 + a1 * b2 - d1 * c2 + c1 * d2;
   q.y() = c1 * a2 + d1 * b2 + a1 * c2 - b1 * d2;
@@ -144,7 +144,7 @@ MisorientationAngleCalculator::itimesQuaternion(const quatReal & q1, const quatR
 }
 
 Real
-MisorientationAngleCalculator::dotOuterQuaternion(const quatReal & rot1, const std::vector<quatReal> & rot2)
+MisorientationAngleCalculator::dotOuterQuaternion(const QuatReal & rot1, const std::vector<QuatReal> & rot2)
 {
   std::vector<Real> d_vec(rot2.size());
 
@@ -157,10 +157,10 @@ MisorientationAngleCalculator::dotOuterQuaternion(const quatReal & rot1, const s
 }
 
 Real
-MisorientationAngleCalculator::mtimes2Quaternion(const quatReal & q1, const std::vector<quatReal> & q2, const quatReal & qTwin)
+MisorientationAngleCalculator::mtimes2Quaternion(const QuatReal & q1, const std::vector<QuatReal> & q2, const QuatReal & qTwin)
 {
   // step 1 -- q1-o1(1*4), q2'-qcs'(4*12)
-  std::vector<quatReal> q_s1(q2.size());
+  std::vector<QuatReal> q_s1(q2.size());
   for (unsigned int j = 0; j < q2.size(); ++j)
   {
     q_s1[j].w() = q1.w()*q2[j].w() - q1.x()*q2[j].x() - q1.y()*q2[j].y() - q1.z()*q2[j].z();
@@ -170,7 +170,7 @@ MisorientationAngleCalculator::mtimes2Quaternion(const quatReal & q1, const std:
   }
 
   // step 2 -- q1-qcs(12*4), q2'-q_s1'(1*12)
-  std::vector<std::vector<quatReal>> q_s2(q2.size());
+  std::vector<std::vector<QuatReal>> q_s2(q2.size());
   for (unsigned int i = 0; i < q2.size(); ++i)
     q_s2[i].resize(q2.size());
 
