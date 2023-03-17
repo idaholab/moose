@@ -19,7 +19,7 @@
       csvdiff = 'time_based.csv'
       cli_args = 'Controls/active=time_based Outputs/file_base=time_based'
       ad_indexing_type = 'global'
-      detail = 'with a simple time-based turn-on criterion'
+      detail = 'with a simple time-based turn-on criterion,'
       # see #21185
       allow_warnings = true
     []
@@ -29,7 +29,7 @@
       csvdiff = 'pdrop_based.csv'
       cli_args = 'Controls/active=pdrop_based Outputs/file_base=pdrop_based'
       ad_indexing_type = 'global'
-      detail = 'with a simple pressure-based turn-on criterion'
+      detail = 'with a simple pressure-based turn-on criterion, and'
       # see #21185
       allow_warnings = true
     []
@@ -39,7 +39,7 @@
       csvdiff = 'flow_based.csv'
       cli_args = 'Controls/active=flow_based Outputs/file_base=flow_based'
       ad_indexing_type = 'global'
-      detail = 'with a simple flow-based turn-on criterion'
+      detail = 'with a simple flow-based turn-on criterion.'
       # see #21185
       allow_warnings = true
     []

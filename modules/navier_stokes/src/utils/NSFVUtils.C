@@ -17,12 +17,18 @@ namespace Moose
 {
 namespace FV
 {
+MooseEnum
+interpolationMethods()
+{
+  return MooseEnum("average upwind sou min_mod vanLeer quick skewness-corrected", "upwind");
+}
+
 bool
 setInterpolationMethods(const MooseObject & obj,
                         Moose::FV::InterpMethod & advected_interp_method,
                         Moose::FV::InterpMethod & velocity_interp_method)
 {
-  bool need_more_ghosting =
+  const bool need_more_ghosting =
       setInterpolationMethod(obj, advected_interp_method, "advected_interp_method");
 
   const auto & velocity_interp_method_in = obj.getParam<MooseEnum>("velocity_interp_method");
@@ -74,11 +80,9 @@ InputParameters
 interpolationParameters()
 {
   auto params = emptyInputParameters();
-  MooseEnum advected_interp_method("average upwind sou min_mod vanLeer quick skewness-corrected",
-                                   "upwind");
   params.addParam<MooseEnum>(
       "advected_interp_method",
-      advected_interp_method,
+      interpolationMethods(),
       "The interpolation to use for the advected quantity. Options are "
       "'upwind', 'average', 'sou' (for second-order upwind), 'min_mod', 'vanLeer', 'quick', and "
       "'skewness-corrected' with the default being 'upwind'.");

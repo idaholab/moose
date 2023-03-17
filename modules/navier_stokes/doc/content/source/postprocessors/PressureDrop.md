@@ -6,8 +6,8 @@ The convention used is that if the pressure is decreasing from the upstream to d
 then the pressure drop is positive.
 
 !alert note
-If using mesh refinement, upstream or downstream boundaries may not be split between two refined elements,
-children of the same parent element.
+If using mesh refinement, and if the upstream and downstream boundary are touching, the boundary between the
+two may not lie within a refined element, on a node inside a refined side.
 
 ## Using a weighting functor on local pressures
 
@@ -19,8 +19,8 @@ that the effective weighting factor is the local mass flux.
 
 \begin{equation}
 \begin{split}
-P_{upstream} &= \dfrac{\int_{\delta \Omega}} P(x,y,z) \vec{W(x,y,z) \cdot \vec{n}}{\dfrac{\int_{\delta \Omega}} \vec{W(x,y,z) \cdot \vec{n}}} \\
-P_{downstream} &= ... \\
+P_{upstream} &= \dfrac{\int_{\delta \Omega} P(x,y,z) \vec{W}(x,y,z) \cdot \vec{n} }{ \int_{\delta \Omega} \vec{W}(x,y,z) \cdot \vec{n} } \\
+P_{downstream} &= \ ... \\
 P_{drop} &= P_{upstream} - P_{downstream}
 \end{split}
 \end{equation}

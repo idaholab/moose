@@ -23,8 +23,7 @@ PressureDrop::validParams()
   params.addClassDescription(
       "Computes the pressure drop between an upstream and a downstream boundary.");
 
-  // Using the Coupleable interface only to know whether FE or FV
-  params.addRequiredCoupledVar("pressure", "The pressure functor");
+  params.addRequiredParam<MooseFunctorName>("pressure", "The pressure functor");
   params.addParam<MooseFunctorName>("weighting_functor",
                                     "A vector functor to compute a flux to weigh the pressure for "
                                     "the pressure average computations");
@@ -34,9 +33,8 @@ PressureDrop::validParams()
       "downstream_boundary",
       "The downstream surface (must also be specified in 'boundary' parameter");
 
-  MooseEnum interp_method("average upwind sou min_mod vanLeer quick skewness-corrected", "upwind");
   params.addParam<MooseEnum>("weighting_interp_method",
-                             interp_method,
+                             Moose::FV::interpolationMethods(),
                              "The interpolation to use for the weighting functor.");
   return params;
 }
@@ -48,7 +46,12 @@ PressureDrop::PressureDrop(const InputParameters & parameters)
                            ? &getFunctor<RealVectorValue>("weighting_functor")
                            : nullptr)
 {
-  _qp_integration = !getFieldVar("pressure", 0)->isFV();
+  // Examine the variable type of pressure to determine the type of integration
+  const auto pressure_name = getParam<MooseFunctorName>("pressure");
+  if (!_subproblem.hasVariable(pressure_name))
+    paramError("pressure", "Pressure must be a variable");
+  const auto * const pressure_var = &_subproblem.getVariable(_tid, pressure_name);
+  _qp_integration = dynamic_cast<const MooseVariableFE<Real> *>(pressure_var);
   if (!_qp_integration)
     Moose::FV::setInterpolationMethod(*this, _weight_interp_method, "weighting_interp_method");
   else if (parameters.isParamSetByUser("weighting_interp_method"))
@@ -196,7 +199,7 @@ PressureDrop::execute()
 }
 
 Real
-PressureDrop::computeFaceInfoWeightedPressureIntegral([[maybe_unused]] const FaceInfo * fi) const
+PressureDrop::computeFaceInfoWeightedPressureIntegral(const FaceInfo * const fi) const
 {
 #ifdef MOOSE_GLOBAL_AD_INDEXING
   mooseAssert(fi, "We should have a face info in " + name());
@@ -208,28 +211,14 @@ PressureDrop::computeFaceInfoWeightedPressureIntegral([[maybe_unused]] const Fac
 
   if (_weighting_functor)
   {
-    // External faces for the weighting functor
-    if (!fi->neighborPtr() || !_weighting_functor->hasBlocks(fi->neighborPtr()->subdomain_id()))
-    {
-      const auto ssf = Moose::FaceArg(
-          {fi,
-           limiterType(_weight_interp_method),
-           MetaPhysicL::raw_value((*_weighting_functor)(elem_arg)) * fi->normal() > 0,
-           correct_skewness,
-           _current_elem});
-      return fi->normal() * MetaPhysicL::raw_value((*_weighting_functor)(ssf)) * _pressure(ssf);
-    }
-    else
-    {
-      const auto ssf = Moose::FaceArg(
-          {fi,
-           Moose::FV::limiterType(_weight_interp_method),
-           MetaPhysicL::raw_value((*_weighting_functor)(elem_arg)) * fi->normal() > 0,
-           correct_skewness,
-           nullptr});
-      const auto face_weighting = MetaPhysicL::raw_value((*_weighting_functor)(ssf));
-      return fi->normal() * face_weighting * _pressure(ssf);
-    }
+    const auto ssf =
+        Moose::FaceArg({fi,
+                        Moose::FV::limiterType(_weight_interp_method),
+                        MetaPhysicL::raw_value((*_weighting_functor)(elem_arg)) * fi->normal() > 0,
+                        correct_skewness,
+                        nullptr});
+    const auto face_weighting = MetaPhysicL::raw_value((*_weighting_functor)(ssf));
+    return fi->normal() * face_weighting * _pressure(ssf);
   }
   else
   {

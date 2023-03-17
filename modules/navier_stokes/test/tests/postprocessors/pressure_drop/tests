@@ -17,7 +17,7 @@
       input = drop_insad.i
       csvdiff =  diverging_insad.csv
       abs_zero = 1e-8
-      detail = 'with a regular face pressure evaluation'
+      detail = 'with a regular face pressure evaluation, and'
       cli_args = "Outputs/file_base='diverging_insad'"
       ad_indexing_type = 'global'
     []
@@ -29,20 +29,20 @@
       cli_args = "Outputs/file_base='diverging_insad_weighted'
                   Postprocessors/pdrop_total/weighting_functor='velocity' Postprocessors/pdrop_mid1/weighting_functor='velocity'
                   Postprocessors/pdrop_mid2/weighting_functor='velocity' Postprocessors/pdrop_mid3/weighting_functor='velocity'"
-      detail = 'with a pressure drop face evaluation weighted by the local velocity'
+      detail = 'with a pressure drop face evaluation weighted by the local velocity.'
       ad_indexing_type = 'global'
     []
   []
 
   [insfv_straight]
-    requirement = 'The system shall be able to compute the pressure drop in a frictionless heated straight channel with a finite volume incompressible Navier Stokes model.'
+    requirement = 'The system shall be able to compute the pressure drop in a frictionless heated straight channel with a finite volume incompressible Navier Stokes model'
     [regular]
       type = CSVDiff
       input = drop_insfv.i
       csvdiff =  straight_insfv.csv
       abs_zero = 1e-8
       cli_args = "Mesh/inactive='diverging_mesh' Outputs/file_base='straight_insfv' -pc_type lu -pc_factor_shift_type NONZERO"
-      detail = 'with a regular face pressure evaluation'
+      detail = 'with a regular face pressure evaluation, and'
       ad_indexing_type = 'global'
     []
     [weighted]
@@ -66,7 +66,7 @@
       input = drop_insfv.i
       csvdiff = diverging_insfv_quad_xy.csv
       abs_zero = 1e-8
-      detail = 'with a quadrilateral mesh in XY geometry, with mass flow measured using either a variable or material property,'
+      detail = 'with a quadrilateral mesh in XY geometry, with mass flow measured using either a variable or material property, and'
       ad_indexing_type = 'global'
       cli_args = "Outputs/file_base='diverging_insfv_quad_xy'"
     []
@@ -75,7 +75,7 @@
       input = drop_insfv.i
       csvdiff = diverging_insfv_quad_rz.csv
       abs_zero = 1e-8
-      detail = 'with a quadrilateral mesh in RZ geometry,'
+      detail = 'with a quadrilateral mesh in RZ geometry.'
       cli_args = "Mesh/coord_type=RZ Outputs/file_base='diverging_insfv_quad_rz'"
       ad_indexing_type = 'global'
     []
@@ -89,28 +89,28 @@
       input = 'drop_insad.i'
       expect_err = 'Upstream boundary \'bottom\' is not included in boundary restriction'
       cli_args = "Postprocessors/pdrop_total/boundary='top'"
-      detail = 'an upstream boundary for the pressure is not a boundary for the postprocessor'
+      detail = 'an upstream boundary for the pressure is not a boundary for the postprocessor,'
     []
     [downstream_not_in_boundary]
       type = RunException
       input = 'drop_insad.i'
       expect_err = 'Downstream boundary \'top\' is not included in boundary restriction'
       cli_args = "Postprocessors/pdrop_total/boundary='bottom'"
-      detail = 'a downstream boundary for the pressure is not a boundary for the postprocessor'
+      detail = 'a downstream boundary for the pressure is not a boundary for the postprocessor,'
     []
     [boundary_not_drop_calc]
       type = RunException
       input = 'drop_insad.i'
       expect_err = 'Boundary restriction on boundary \'internal_top\' is not part of upstream or downstream boundaries'
       cli_args = "Postprocessors/pdrop_total/boundary='top bottom internal_top'"
-      detail = 'a boundary for the postprocessor is not part of either the upstream or downstream pressure evaluation'
+      detail = 'a boundary for the postprocessor is not part of either the upstream or downstream pressure evaluation,'
     []
     [upstream_and_downstream]
       type = RunException
       input = 'drop_insad.i'
       expect_err = 'Upstream boundary \'top\' is also a downstream boundary'
       cli_args = "Postprocessors/pdrop_total/upstream_boundary='top bottom'"
-      detail = 'a downstream boundary is also an upstream boundary for the pressure drop'
+      detail = 'a downstream boundary is also an upstream boundary for the pressure drop,'
     []
     [weight_not_appropriate]
       type = RunException
@@ -120,7 +120,7 @@
                   Materials/null/prop_names='null'
                   Materials/null/prop_values='0 0 0'
                   Postprocessors/pdrop_total/weighting_functor=null"
-      detail = 'the weighting functor integrates to 0'
+      detail = 'the weighting functor integrates to 0, and'
       ad_indexing_type = 'global'
     []
     [face_interp_scheme_for_fe]
@@ -128,7 +128,7 @@
       input = 'drop_insad.i'
       expect_err = 'Face interpolation only specified for finite volume'
       cli_args = "Postprocessors/pdrop_total/weighting_interp_method='average'"
-      detail = 'a face interpolation rule is specified for a finite element pressure variable'
+      detail = 'a face interpolation rule is specified for a finite element pressure variable.'
     []
   []
 []

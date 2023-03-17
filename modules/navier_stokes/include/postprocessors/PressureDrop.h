@@ -12,7 +12,7 @@
 #include "SideIntegralPostprocessor.h"
 
 /**
- * This postprocessor computes the pressure drop between an upstream and a downstream boundary
+ * This postprocessor computes the pressure drop between an upstream and a downstream boundary.
  * In case multiple boundaries are specified, or the pressure profile is not constant along the
  * boundaries, a vector weighting factor may be used.
  */
@@ -31,13 +31,13 @@ public:
   virtual void finalize() override;
   virtual Real getValue() override;
 
+protected:
   Real computeFaceInfoWeightedPressureIntegral(const FaceInfo * fi) const;
   Real computeFaceInfoWeightIntegral(const FaceInfo * fi) const;
 
   Real computeQpWeightedPressureIntegral() const;
   Real computeQpWeightIntegral() const;
 
-protected:
   /// The pressure functor
   const Moose::Functor<Real> & _pressure;
   /// A weighting functor if the pressure profile is not uniform

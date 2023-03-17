@@ -35,7 +35,7 @@ The first strategy is simply to block the flow at a given time.
 !listing test/tests/finite_volume/materials/flow_diode/transient_operation.i block=Controls/time_based Functions/time_function
 
 The second strategy is to look at the pressure drop across the diode, and block (add friction to) the flow if it exceeds a certain value.
-If it exceeds a certain value, then it means the flow is flowing through the diode in a certain direction.
+If it exceeds a certain value, then in all likelihood means that the flow is flowing through the diode in the direction of decreasing pressure.
 
 !listing test/tests/finite_volume/materials/flow_diode/transient_operation.i block=Controls/pdrop_based Postprocessors/pdrop_diode Functions/pdrop_positive
 
@@ -45,7 +45,7 @@ The final strategy is to compute the mass flow rate through the diode, and block
 
 !alert note
 All these strategies are workarounds for the fact that looking at the local velocity (in multi-dimensional space)
-to apply a friction term based on this local velocity, rather than an average quantity, seems to be numerically instable.
+to apply a friction term based on this local velocity, rather than an average quantity, seems to be numerically unstable.
 
 !syntax parameters /Materials/NSFVFrictionFlowDiodeMaterial
 
