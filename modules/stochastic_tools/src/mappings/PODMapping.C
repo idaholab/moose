@@ -59,6 +59,8 @@ PODMapping::PODMapping(const InputParameters & parameters) : MappingBase(paramet
 void
 PODMapping::buildMapping()
 {
+  mooseAssert(comm().verify(typeAndName()), "Not at same branch");
+
   UserObjectName parallel_storage_name = getParam<UserObjectName>("solution_storage");
   /// Reference to FEProblemBase instance
   FEProblemBase & feproblem = *_pars.get<FEProblemBase *>("_fe_problem_base");
@@ -88,15 +90,8 @@ PODMapping::buildMapping()
                parallel_storage_name,
                "'");
 
-  SVD svd;
-  Mat mat;
 
-  SVDCreate(_communicator.get(), &svd);
-  SVDSetType(svd, SVDTRLANCZOS);
-  SVDSetDimensions(svd, 1, 2, 2);
-  PetscErrorCode ierr = PetscOptionsInsertString(NULL, "-svd_monitor_all");
-  LIBMESH_CHKERR(ierr);
-  SVDSetFromOptions(svd);
+  Mat mat;
 
   unsigned int local_rows = 0;
   unsigned int snapshot_size = 0;
@@ -111,8 +106,17 @@ PODMapping::buildMapping()
   comm().sum(global_rows);
   comm().max(snapshot_size);
 
-  ierr = MatCreateDense(
-      _communicator.get(), local_rows, snapshot_size, global_rows, snapshot_size, NULL, &mat);
+  // PetscErrorCode ierr = MatCreateDense(_communicator.get(), local_rows, snapshot_size, global_rows, snapshot_size, NULL, &mat);
+  // LIBMESH_CHKERR(ierr);
+  // ierr = MatSetUp(mat);
+  // LIBMESH_CHKERR(ierr);
+
+  PetscErrorCode ierr = MatCreateAIJ(_communicator.get(), local_rows, snapshot_size, global_rows, snapshot_size,
+                                     processor_id() == 0 ? snapshot_size : 0, NULL,
+                                     processor_id() == 0 ? 0 : snapshot_size, NULL, &mat);
+
+  // MatSetOption(mat,MAT_NEW_NONZERO_LOCATIONS,PETSC_FALSE);
+
   LIBMESH_CHKERR(ierr);
 
   dof_id_type local_beg;
@@ -120,23 +124,14 @@ PODMapping::buildMapping()
 
   MatGetOwnershipRange(mat, numeric_petsc_cast(&local_beg), numeric_petsc_cast(&local_end));
 
-  std::cerr << local_beg << " " << local_end << std::endl;
-
-  if (parallel_storage->getStorage().size())
+  std::cerr << local_rows << " " << local_beg << " " << local_end << std::endl;
+  std::cerr << snapshot_size << std::endl;
+  for (const auto & col_i : make_range(local_rows))
   {
-    std::cerr << local_rows << std::endl;
-    for (auto col_i : make_range(local_rows))
-    {
-      for (auto row_i :
-           make_range(snapshot_size = parallel_storage->getStorage()[0][col_i][0]->size()))
-      {
-        MatSetValue(mat,
-                    col_i + local_beg,
-                    row_i,
-                    (*parallel_storage->getStorage()[0][col_i][0])(row_i),
-                    INSERT_VALUES);
-      }
-    }
+      std::vector<PetscInt> rows(snapshot_size, col_i+local_beg);
+      std::vector<PetscInt> columns = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+      MatSetValues(mat, 1, rows.data(), snapshot_size,columns.data(),
+                   parallel_storage->getStorage()[0][col_i][0]->get_values().data(), INSERT_VALUES);
   }
 
   MatAssemblyBegin(mat, MAT_FINAL_ASSEMBLY);
@@ -145,15 +140,24 @@ PODMapping::buildMapping()
   ierr = MatView(mat, PETSC_VIEWER_STDOUT_SELF);
   LIBMESH_CHKERR(ierr);
 
+  SVD svd;
+  SVDCreate(_communicator.get(), &svd);
   SVDSetOperators(svd, mat, NULL);
+  SVDSetProblemType(svd, SVD_STANDARD);
+  SVDSetType(svd, SVDTRLANCZOS);
+  ierr = PetscOptionsInsertString(NULL, "-svd_monitor_all");
+  LIBMESH_CHKERR(ierr);
+  SVDSetFromOptions(svd);
+  SVDSetDimensions(svd, 2, 4, 4);
+
   ierr = SVDSolve(svd);
   LIBMESH_CHKERR(ierr);
-  PetscInt nconv;
-  // ierr = SVDGetConverged(svd, &nconv);
-  // LIBMESH_CHKERR(ierr);
+  // PetscInt nconv;
+  // // ierr = SVDGetConverged(svd, &nconv);
+  // // LIBMESH_CHKERR(ierr);
 
   SVDDestroy(&svd);
-  // MatDestroy(&mat);
+  MatDestroy(&mat);
 }
 
 void

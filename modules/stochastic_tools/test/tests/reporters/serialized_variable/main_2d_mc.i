@@ -12,7 +12,7 @@
 [Samplers]
   [sample]
     type = MonteCarlo
-    num_rows = 4
+    num_rows = 100
     distributions = 'S_dist'
     execute_on = initial
     min_procs_per_row = 1
