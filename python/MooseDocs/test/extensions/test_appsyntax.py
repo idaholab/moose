@@ -99,15 +99,15 @@ class TestParameters(AppSyntaxTestCase):
 
         self.assertHTMLTag(res(5), 'h3')
         self.assertEqual(res(5)['data-details-open'], 'close')
-        self.assertEqual(res(5).text(), 'Advanced Parameters')
+        self.assertEqual(res(5).text(), 'Tagging Parameters')
 
-        self.assertHTMLTag(res(6), 'ul', size=7)
+        self.assertHTMLTag(res(6), 'ul', size=5)
 
         self.assertHTMLTag(res(7), 'h3')
         self.assertEqual(res(7)['data-details-open'], 'close')
-        self.assertEqual(res(7).text(), 'Tagging Parameters')
+        self.assertEqual(res(7).text(), 'Advanced Parameters')
 
-        self.assertHTMLTag(res(8), 'ul', size=4)
+        self.assertHTMLTag(res(8), 'ul', size=7)
 
     def testMaterialize(self):
         _, res = self.execute(self.TEXT, renderer=base.MaterializeRenderer())
@@ -140,22 +140,22 @@ class TestParameters(AppSyntaxTestCase):
 
         self.assertHTMLTag(res(5), 'h3')
         self.assertEqual(res(5)['data-details-open'], 'close')
-        self.assertEqual(res(5).text(), 'Advanced Parameters')
+        self.assertEqual(res(5).text(), 'Tagging Parameters')
 
-        self.assertHTMLTag(res(6), 'ul', size=7, class_='collapsible')
+        self.assertHTMLTag(res(6), 'ul', size=5, class_='collapsible')
 
         self.assertHTMLTag(res(7), 'h3')
         self.assertEqual(res(7)['data-details-open'], 'close')
-        self.assertEqual(res(7).text(), 'Tagging Parameters')
+        self.assertEqual(res(7).text(), 'Advanced Parameters')
 
-        self.assertHTMLTag(res(8), 'ul', size=4, class_='collapsible')
+        self.assertHTMLTag(res(8), 'ul', size=7, class_='collapsible')
 
     def testLatex(self):
         _, res = self.execute(self.TEXT, renderer=base.LatexRenderer())
         # This size should correspond to the total number of parameters for
         # Diffusion (Required + Optional + Advanced + Tagging) + 1
         # (corresponding to 'type')
-        self.assertSize(res, 16)
+        self.assertSize(res, 17)
         self.assertLatexCommand(res(0), 'chapter', size=4)
         self.assertLatexCommand(res(0,0), 'label', string=u'input-parameters')
         self.assertLatexString(res(0,1), content=u'Input')

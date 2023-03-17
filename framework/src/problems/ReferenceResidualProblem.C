@@ -49,6 +49,27 @@ ReferenceResidualProblem::validParams()
   params.addParam<std::vector<NonlinearVariableName>>(
       "converge_on",
       "If supplied, use only these variables in the individual variable convergence check");
+  MooseEnum Lnorm("global_L2 local_L2 global_Linf local_Linf", "global_L2");
+  params.addParam<MooseEnum>(
+      "normalization_type",
+      Lnorm,
+      "The normalization type used to compare the reference and actual residuals.");
+  Lnorm.addDocumentation("global_L2",
+                         "Compare the L2 norm of the residual vector to the L2 norm of the "
+                         "absolute reference vector to determine relative convergence");
+  Lnorm.addDocumentation(
+      "local_L2",
+      "Compute the L2 norm of the residual vector divided componentwise by the absolute reference "
+      "vector to the L2 norm of the absolute reference vector to determine relative convergence");
+  Lnorm.addDocumentation(
+      "global_Linf",
+      "Compare the L-infinity norm of the residual vector to the L-infinity norm of the "
+      "absolute reference vector to determine relative convergence");
+  Lnorm.addDocumentation("local_Linf",
+                         "Compute the L-infinity norm of the residual vector divided componentwise "
+                         "by the absolute reference "
+                         "vector to the L-infinity norm of the absolute reference vector to "
+                         "determine relative convergence");
   return params;
 }
 
@@ -114,6 +135,34 @@ ReferenceResidualProblem::ReferenceResidualProblem(const InputParameters & param
 
   _accept_mult = params.get<Real>("acceptable_multiplier");
   _accept_iters = params.get<int>("acceptable_iterations");
+
+  const auto norm_type_enum =
+      params.get<MooseEnum>("normalization_type").getEnum<NormalizationType>();
+  if (norm_type_enum == NormalizationType::LOCAL_L2)
+  {
+    _norm_type = DISCRETE_L2;
+    _local_norm = true;
+  }
+  else if (norm_type_enum == NormalizationType::GLOBAL_L2)
+  {
+    _norm_type = DISCRETE_L2;
+    _local_norm = false;
+  }
+  else if (norm_type_enum == NormalizationType::LOCAL_LINF)
+  {
+    _norm_type = DISCRETE_L_INF;
+    _local_norm = true;
+  }
+  else if (norm_type_enum == NormalizationType::GLOBAL_LINF)
+  {
+    _norm_type = DISCRETE_L_INF;
+    _local_norm = false;
+  }
+  else
+    mooseError("Internal error");
+
+  if (_local_norm && !params.isParamValid("reference_vector"))
+    paramError("reference_vector", "If local norm is used, a reference_vector must be provided.");
 }
 
 void
@@ -337,25 +386,41 @@ ReferenceResidualProblem::updateReferenceResidual()
   System & s = nonlinear_sys.system();
   auto & as = aux_sys.sys();
 
-  for (unsigned int i = 0; i < _group_resid.size(); ++i)
-  {
-    _group_resid[i] = 0.0;
-    _group_output_resid[i] = 0.0;
-    _group_ref_resid[i] = 0.0;
-  }
+  std::fill(_group_resid.begin(), _group_resid.end(), 0.0);
+  std::fill(_group_output_resid.begin(), _group_output_resid.end(), 0.0);
+  if (_local_norm)
+    std::fill(_group_ref_resid.begin(), _group_ref_resid.end(), 1.0);
+  else
+    std::fill(_group_ref_resid.begin(), _group_ref_resid.end(), 0.0);
 
   for (unsigned int i = 0; i < _soln_vars.size(); ++i)
   {
-    const auto resid =
-        Utility::pow<2>(s.calculate_norm(nonlinear_sys.RHS(), _soln_vars[i], DISCRETE_L2));
+    Real resid = 0.0;
     const auto group = _variable_group_num_index[i];
+    if (_local_norm)
+    {
+      mooseAssert(nonlinear_sys.RHS().size() == (*_reference_vector).size(),
+                  "Sizes of nonlinear RHS and reference vector should be the same.");
+      mooseAssert((*_reference_vector).size(), "Reference vector must be provided.");
+      // Add a tiny number to the reference to prevent a divide by zero.
+      auto ref = _reference_vector->clone();
+      ref->add(std::numeric_limits<Number>::min());
+      auto div = nonlinear_sys.RHS().clone();
+      *div /= *ref;
+      resid = Utility::pow<2>(s.calculate_norm(*div, _soln_vars[i], _norm_type));
+    }
+    else
+    {
+      resid = Utility::pow<2>(s.calculate_norm(nonlinear_sys.RHS(), _soln_vars[i], _norm_type));
+      if (_reference_vector)
+      {
+        const auto ref_resid = s.calculate_norm(*_reference_vector, _soln_vars[i], _norm_type);
+        _group_ref_resid[group] += Utility::pow<2>(ref_resid);
+      }
+    }
+
     _group_resid[group] += _converge_on_var[i] ? resid : 0;
     _group_output_resid[group] += resid;
-    if (_reference_vector)
-    {
-      const auto ref_resid = s.calculate_norm(*_reference_vector, _soln_vars[i], DISCRETE_L2);
-      _group_ref_resid[group] += Utility::pow<2>(ref_resid);
-    }
   }
 
   if (!_reference_vector)
@@ -363,7 +428,7 @@ ReferenceResidualProblem::updateReferenceResidual()
     for (unsigned int i = 0; i < _ref_resid_vars.size(); ++i)
     {
       const auto ref_resid =
-          as.calculate_norm(*as.current_local_solution, _ref_resid_vars[i], DISCRETE_L2) *
+          as.calculate_norm(*as.current_local_solution, _ref_resid_vars[i], _norm_type) *
           _scaling_factors[i];
       _group_ref_resid[_variable_group_num_index[i]] += Utility::pow<2>(ref_resid);
     }
@@ -377,26 +442,17 @@ ReferenceResidualProblem::updateReferenceResidual()
   }
 }
 
-MooseNonlinearConvergenceReason
-ReferenceResidualProblem::checkNonlinearConvergence(std::string & msg,
-                                                    const PetscInt it,
-                                                    const Real xnorm,
-                                                    const Real snorm,
-                                                    const Real fnorm,
-                                                    const Real rtol,
-                                                    const Real /*divtol*/,
-                                                    const Real stol,
-                                                    const Real abstol,
-                                                    const PetscInt nfuncs,
-                                                    const PetscInt max_funcs,
-                                                    const Real initial_residual_before_preset_bcs,
-                                                    const Real /*div_threshold*/)
+void
+ReferenceResidualProblem::nonlinearConvergenceSetup()
 {
   updateReferenceResidual();
 
+  std::ostringstream out;
+
   if (_group_soln_var_names.size() > 0)
   {
-    _console << "   Solution, reference convergence variable norms:\n";
+    out << std::setprecision(2) << std::scientific
+        << "   Solution, reference convergence variable norms:\n";
     unsigned int maxwsv = 0;
     unsigned int maxwrv = 0;
     for (unsigned int i = 0; i < _group_soln_var_names.size(); ++i)
@@ -412,87 +468,55 @@ ReferenceResidualProblem::checkNonlinearConvergence(std::string & msg,
 
     for (unsigned int i = 0; i < _group_soln_var_names.size(); ++i)
     {
-      auto ref_var_name =
-          _reference_vector ? _group_soln_var_names[i] + "_ref" : _group_ref_resid_var_names[i];
-      _console << "   " << std::setw(maxwsv + 2) << std::left << _group_soln_var_names[i] + ":";
+      out << "   " << std::setw(maxwsv + (_local_norm ? 5 : 2)) << std::left
+          << (_local_norm ? "norm " : "") + _group_soln_var_names[i] + ": ";
 
       if (_group_output_resid[i] == _group_resid[i])
-        _console << _group_output_resid[i];
+        out << std::setw(8) << _group_output_resid[i];
       else
-        _console << _group_resid[i] << " (" << _group_output_resid[i] << ')';
-      _console << "  " << std::setw(maxwrv + 2) << ref_var_name + ":" << _group_ref_resid[i]
-               << '\n';
+        out << std::setw(8) << _group_resid[i] << " (" << _group_output_resid[i] << ')';
+
+      if (!_local_norm)
+      {
+        const auto ref_var_name =
+            _reference_vector ? _group_soln_var_names[i] + "_ref" : _group_ref_resid_var_names[i];
+        out << "  " << std::setw(maxwrv + 2) << ref_var_name + ":" << std::setw(8)
+            << _group_ref_resid[i] << "  (" << std::setw(8) << _group_resid[i] / _group_ref_resid[i]
+            << ")";
+      }
+      out << '\n';
     }
 
-    _console << std::flush;
+    _console << out.str() << std::flush;
   }
+}
 
-  NonlinearSystemBase & system = getNonlinearSystemBase();
-  MooseNonlinearConvergenceReason reason = MooseNonlinearConvergenceReason::ITERATING;
-  std::stringstream oss;
-
-  if (fnorm != fnorm)
+bool
+ReferenceResidualProblem::checkRelativeConvergence(const PetscInt it,
+                                                   const Real fnorm,
+                                                   const Real the_residual,
+                                                   const Real rtol,
+                                                   const Real abstol,
+                                                   std::ostringstream & oss)
+{
+  if (checkConvergenceIndividVars(fnorm, abstol, rtol, the_residual))
   {
-    oss << "Failed to converge, function norm is NaN\n";
-    reason = MooseNonlinearConvergenceReason::DIVERGED_FNORM_NAN;
+    oss << "Converged due to function norm " << fnorm << " < relative tolerance (" << rtol
+        << ") or absolute tolerance (" << abstol << ") for all solution variables\n";
+    return true;
   }
-  else if (it >= _nl_forced_its && fnorm < abstol)
+  else if (it >= _accept_iters &&
+           checkConvergenceIndividVars(
+               fnorm, abstol * _accept_mult, rtol * _accept_mult, the_residual))
   {
-    oss << "Converged due to function norm " << fnorm << " < " << abstol << std::endl;
-    reason = MooseNonlinearConvergenceReason::CONVERGED_FNORM_ABS;
-  }
-  else if (nfuncs >= max_funcs)
-  {
-    oss << "Exceeded maximum number of function evaluations: " << nfuncs << " > " << max_funcs
-        << std::endl;
-    reason = MooseNonlinearConvergenceReason::DIVERGED_FUNCTION_COUNT;
+    oss << "Converged due to function norm " << fnorm << " < acceptable relative tolerance ("
+        << rtol * _accept_mult << ") or acceptable absolute tolerance (" << abstol * _accept_mult
+        << ") for all solution variables\n";
+    _console << "Converged due to ACCEPTABLE tolerances" << std::endl;
+    return true;
   }
 
-  if (it >= _nl_forced_its && reason == MooseNonlinearConvergenceReason::ITERATING)
-  {
-    if (checkConvergenceIndividVars(fnorm, abstol, rtol, initial_residual_before_preset_bcs))
-    {
-      if (_group_resid.size() > 0)
-        oss << "Converged due to function norm "
-            << " < "
-            << " (relative tolerance) or (absolute tolerance) for all solution variables"
-            << std::endl;
-      else
-        oss << "Converged due to function norm " << fnorm << " < "
-            << " (relative tolerance)" << std::endl;
-      reason = MooseNonlinearConvergenceReason::CONVERGED_FNORM_RELATIVE;
-    }
-    else if (it >= _accept_iters && checkConvergenceIndividVars(fnorm,
-                                                                abstol * _accept_mult,
-                                                                rtol * _accept_mult,
-                                                                initial_residual_before_preset_bcs))
-    {
-      if (_group_resid.size() > 0)
-        oss << "Converged due to function norm "
-            << " < "
-            << " (acceptable relative tolerance) or (acceptable absolute tolerance) for all "
-               "solution variables"
-            << std::endl;
-      else
-        oss << "Converged due to function norm " << fnorm << " < "
-            << " (acceptable relative tolerance)" << std::endl;
-      _console << "ACCEPTABLE" << std::endl;
-      reason = MooseNonlinearConvergenceReason::CONVERGED_FNORM_RELATIVE;
-    }
-
-    else if (snorm < stol * xnorm)
-    {
-      oss << "Converged due to small update length: " << snorm << " < " << stol << " * " << xnorm
-          << std::endl;
-      reason = MooseNonlinearConvergenceReason::CONVERGED_SNORM_RELATIVE;
-    }
-  }
-
-  system._last_nl_rnorm = fnorm;
-  system._current_nl_its = static_cast<unsigned int>(it);
-
-  msg = oss.str();
-  return reason;
+  return false;
 }
 
 bool

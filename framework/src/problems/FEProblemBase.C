@@ -7414,6 +7414,8 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
   TIME_SECTION("checkNonlinearConvergence", 5, "Checking Nonlinear Convergence");
   mooseAssert(_current_nl_sys, "This should be non-null");
 
+  nonlinearConvergenceSetup();
+
   if (_fail_next_nonlinear_convergence_check)
   {
     _fail_next_nonlinear_convergence_check = false;
@@ -7475,12 +7477,8 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
     Real the_residual = system._compute_initial_residual_before_preset_bcs
                             ? initial_residual_before_preset_bcs
                             : system._initial_residual_after_preset_bcs;
-    if (fnorm <= the_residual * rtol)
-    {
-      oss << "Converged due to function norm " << fnorm << " < "
-          << " (relative tolerance)\n";
+    if (checkRelativeConvergence(it, fnorm, the_residual, rtol, abstol, oss))
       reason = MooseNonlinearConvergenceReason::CONVERGED_FNORM_RELATIVE;
-    }
     else if (snorm < stol * xnorm)
     {
       oss << "Converged due to small update length: " << snorm << " < " << stol << " * " << xnorm
@@ -7514,6 +7512,22 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
     MooseUtils::indentMessage(_app.name(), msg);
 
   return reason;
+}
+
+bool
+FEProblemBase::checkRelativeConvergence(const PetscInt /*it*/,
+                                        const Real fnorm,
+                                        const Real the_residual,
+                                        const Real rtol,
+                                        const Real /*abstol*/,
+                                        std::ostringstream & oss)
+{
+  if (fnorm <= the_residual * rtol)
+  {
+    oss << "Converged due to function norm " << fnorm << " < relative tolerance (" << rtol << ")\n";
+    return true;
+  }
+  return false;
 }
 
 SolverParams &

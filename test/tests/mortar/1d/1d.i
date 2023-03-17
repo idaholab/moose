@@ -23,12 +23,17 @@
   [../]
 []
 
+[Problem]
+  extra_tag_vectors = 'ref'
+[]
+
 [ScalarKernels]
   [./ced]
     type = NodalEqualValueConstraint
     variable = lm
     var = u
     boundary = '100 101'
+    absolute_value_vector_tags = 'ref'
   [../]
 []
 
