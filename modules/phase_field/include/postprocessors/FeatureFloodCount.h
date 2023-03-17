@@ -170,17 +170,17 @@ public:
 
     FeatureData(std::size_t var_index,
                 Status status,
-                std::vector<unsigned int> adjacent_id = std::vector<unsigned int>(),
                 unsigned int id = invalid_id,
+                std::vector<unsigned int> adjacent_id = std::vector<unsigned int>(),
                 std::vector<BoundingBox> bboxes = {BoundingBox()})
       : _var_index(var_index),
         _id(id),
+        _adjacent_id(adjacent_id),
         _bboxes(bboxes), // Assume at least one bounding box
         _min_entity_id(DofObject::invalid_id),
         _vol_count(0),
         _status(status),
-        _boundary_intersection(BoundaryIntersection::NONE),
-        _adjacent_id(adjacent_id)
+        _boundary_intersection(BoundaryIntersection::NONE)
     {
     }
 
@@ -297,12 +297,12 @@ public:
     /// An ID for this feature
     unsigned int _id;
 
+    /// The vecor of adjacent feature ID for this feature
+    std::vector<unsigned int> _adjacent_id;    
+
     /// The vector of bounding boxes completely enclosing this feature
     /// (multiple used with periodic constraints)
     std::vector<BoundingBox> _bboxes;
-
-    /// The vecor of adjacent feature ID for this feature
-    std::vector<unsigned int> _adjacent_id;    
 
     /// Original processor/local ids
     std::list<std::pair<processor_id_type, unsigned int>> _orig_ids;

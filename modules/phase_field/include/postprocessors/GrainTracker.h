@@ -69,6 +69,9 @@ public:
   virtual bool isFeaturePercolated(unsigned int feature_id) const override;
   virtual std::vector<unsigned int> getNewGrainIDs() const override;
 
+  // True if two grains are determined to perform a merge operation
+  bool _merge_grains_basedMisorAngle;  
+  
 protected:
   virtual void updateFieldInfo() override;
   virtual Real getThreshold(std::size_t current_index) const override;
@@ -116,9 +119,6 @@ protected:
 
   // re-merge grains due to misorientation angle from euler angles calculation
   virtual void mergeGrainsBasedMisorientation();
-
-  // True if two grains are determined to perform a merge operation
-  bool _merge_grains_basedMisorAngle;  
 
   /**
    * Broadcast essential Grain information to all processors. This method is used to get certain

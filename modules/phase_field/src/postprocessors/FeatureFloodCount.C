@@ -41,8 +41,8 @@ dataStore(std::ostream & stream, FeatureFloodCount::FeatureData & feature, void 
   storeHelper(stream, feature._periodic_nodes, context);
   storeHelper(stream, feature._var_index, context);
   storeHelper(stream, feature._id, context);
-  storeHelper(stream, feature._bboxes, context);
   storeHelper(stream, feature._adjacent_id, context);
+  storeHelper(stream, feature._bboxes, context);
   storeHelper(stream, feature._orig_ids, context);
   storeHelper(stream, feature._min_entity_id, context);
   storeHelper(stream, feature._vol_count, context);
@@ -73,8 +73,8 @@ dataLoad(std::istream & stream, FeatureFloodCount::FeatureData & feature, void *
   loadHelper(stream, feature._periodic_nodes, context);
   loadHelper(stream, feature._var_index, context);
   loadHelper(stream, feature._id, context);
-  loadHelper(stream, feature._bboxes, context);
   loadHelper(stream, feature._adjacent_id, context);
+  loadHelper(stream, feature._bboxes, context);
   loadHelper(stream, feature._orig_ids, context);
   loadHelper(stream, feature._min_entity_id, context);
   loadHelper(stream, feature._vol_count, context);
