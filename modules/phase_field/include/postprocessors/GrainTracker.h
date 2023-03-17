@@ -102,9 +102,6 @@ protected:
    * This method should only be called on the root processor
    */
   void trackGrains();
-
-  // establish the vector of adjacent grains based on the topological relationship by weipeng
-  virtual void createAdjacentIDVector();
   
   /**
    * This method is called when a new grain is detected. It can be overridden by a derived class to
