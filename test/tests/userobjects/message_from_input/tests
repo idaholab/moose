@@ -1,0 +1,16 @@
+[Tests]
+  [test]
+    requirement = 'The system shall be able to print out a message to screen from the input file'
+    design = 'MessageFromInput.md'
+    issues = '#21736'
+
+    [message_from_input]
+      type = 'RunApp'
+      input = 'message_from_input.i'
+      cli_args = "UserObjects/message_out/message='Test Message'"
+      expect_out = 'Test Message'
+
+      detail = "print out the user-defined message"
+    []
+  []
+[]
