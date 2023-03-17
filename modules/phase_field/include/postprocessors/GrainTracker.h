@@ -70,7 +70,7 @@ public:
   virtual std::vector<unsigned int> getNewGrainIDs() const override;
 
   // True if two grains are determined to perform a merge operation
-  bool _merge_grains_basedMisorAngle;  
+  bool _merge_grains_based_misorientaion;  
   
 protected:
   virtual void updateFieldInfo() override;
