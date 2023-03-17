@@ -184,7 +184,7 @@ Output::outputStep(const ExecFlagType & type)
   // Call the output method
   if (shouldOutput(type))
   {
-    TIME_SECTION("outputStep", 2, "Outputting on " + type.name());
+    TIME_SECTION("outputStep", 2, "Outputting Step");
     output(type);
   }
 }

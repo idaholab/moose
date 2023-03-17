@@ -4699,7 +4699,7 @@ FEProblemBase::execMultiApps(ExecFlagType type, bool auto_advance)
   // Execute MultiApps
   if (multi_apps.size())
   {
-    TIME_SECTION("execMultiApps", 1, "Executing MultiApps on " + type.name(), false);
+    TIME_SECTION("execMultiApps", 1, "Executing MultiApps", false);
 
     if (_verbose_multiapps)
       _console << COLOR_CYAN << "\nExecuting MultiApps on " << Moose::stringify(type)
@@ -5712,7 +5712,7 @@ FEProblemBase::restoreOldSolutions()
 void
 FEProblemBase::outputStep(ExecFlagType type)
 {
-  TIME_SECTION("outputStep", 2, "Outputting on " + type.name());
+  TIME_SECTION("outputStep", 1, "Outputting");
 
   setCurrentExecuteOnFlag(type);
 
