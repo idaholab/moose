@@ -492,9 +492,9 @@ stringify(SolutionIterationType t)
 {
   switch (t)
   {
-    case Time:
+    case SolutionIterationType::Time:
       return "time";
-    case Nonlinear:
+    case SolutionIterationType::Nonlinear:
       return "nonlinear";
     default:
       mooseError("Unhandled SolutionIterationType");

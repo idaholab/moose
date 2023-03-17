@@ -983,19 +983,20 @@ private:
   /**
    * Gets the vector name used for an old (not current) solution state.
    */
-  TagName oldSolutionStateVectorName(const unsigned int) const;
+  TagName oldSolutionStateVectorName(const unsigned int,
+                                     Moose::SolutionIterationType iteration_type) const;
 
   /// The solution states (0 = current, 1 = old, 2 = older, etc)
-  std::unordered_map<Moose::SolutionIterationType, std::vector<NumericVector<Number> *>>
-      _solution_states;
+  std::array<std::vector<NumericVector<Number> *>, 2> _solution_states;
   /// The saved solution states (0 = current, 1 = old, 2 = older, etc)
   std::vector<NumericVector<Number> *> _saved_solution_states;
 };
 
 inline bool
-SystemBase::hasSolutionState(const unsigned int state) const
+SystemBase::hasSolutionState(const unsigned int state,
+                             const Moose::SolutionIterationType iteration_type) const
 {
-  return _solution_states.size() > state;
+  return _solution_states[static_cast<unsigned short>(iteration_type)].size() > state;
 }
 
 #define PARALLEL_TRY

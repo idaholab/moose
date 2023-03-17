@@ -232,9 +232,9 @@ enum SolutionState : int
   PreviousNL = -1
 };
 
-enum class SolutionIterationType
+enum class SolutionIterationType : unsigned short
 {
-  Time,
+  Time = 0,
   Nonlinear
 };
 

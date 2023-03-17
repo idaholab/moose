@@ -51,12 +51,14 @@ FVDiffusionInterface::computeQpResidual()
   // Form a finite difference gradient across the interface
   Point one_over_gradient_support = _face_info->elemCentroid() - _face_info->neighborCentroid();
   one_over_gradient_support /= (one_over_gradient_support * one_over_gradient_support);
-  const auto gradient = elemIsOne() ? (var1().getElemValue(&_face_info->elem()) -
-                                       var2().getElemValue(_face_info->neighborPtr())) *
-                                          one_over_gradient_support
-                                    : (var1().getElemValue(_face_info->neighborPtr()) -
-                                       var2().getElemValue(&_face_info->elem())) *
-                                          -one_over_gradient_support;
+  Moose::TimeArg current_time{};
+  const auto gradient = elemIsOne()
+                            ? (var1().getElemValue(&_face_info->elem(), current_time) -
+                               var2().getElemValue(_face_info->neighborPtr(), current_time)) *
+                                  one_over_gradient_support
+                            : (var1().getElemValue(_face_info->neighborPtr(), current_time) -
+                               var2().getElemValue(&_face_info->elem(), current_time)) *
+                                  -one_over_gradient_support;
 
   ADReal diffusivity;
   interpolate(_coeff_interp_method,

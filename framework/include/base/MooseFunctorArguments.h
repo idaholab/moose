@@ -13,6 +13,7 @@
 
 #include "Limiter.h"
 #include "FaceInfo.h"
+#include "MooseTypes.h"
 #include "libmesh/elem.h"
 #include "libmesh/point.h"
 #include "libmesh/quadrature.h"
@@ -136,4 +137,26 @@ using ElemQpArg = std::tuple<const libMesh::Elem *, unsigned int, const QBase *>
  * - The quadrature rule that can be used to initialize the functor on the given element and side
  */
 using ElemSideQpArg = std::tuple<const libMesh::Elem *, unsigned int, unsigned int, const QBase *>;
+
+/**
+ * Temporal argument for evaluating functors
+ */
+struct TimeArg
+{
+  TimeArg() : state(0), iteration_type(SolutionIterationType::Time) {}
+
+  TimeArg(unsigned int state_in) : state(state_in), iteration_type(SolutionIterationType::Time) {}
+
+  TimeArg(unsigned int state_in, SolutionIterationType iteration_type_in)
+    : state(state_in), iteration_type(iteration_type_in)
+  {
+  }
+
+  /// The state. Zero represents the most recent state, so for any kind of iteration type, a zero
+  /// state represents the current state, e.g. current solution
+  unsigned int state;
+
+  /// The solution iteration type, e.g. time or nonlinear
+  SolutionIterationType iteration_type;
+};
 }
