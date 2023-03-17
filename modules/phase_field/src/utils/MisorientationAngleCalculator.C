@@ -26,7 +26,7 @@ namespace MisorientationAngleCalculator
     // calculate misorientation angle
     value_acos = dotQuaternion(q1, q2, qcs, qss);
     if (value_acos <= 1.0 && value_acos >= -1.0)
-      s._misor = (Real)(2.0*std::acos(value_acos))/degree;
+      s._misor = (Real)(2.0*std::acos(value_acos)/degree);
     else
       s._misor =  tolerance_mis + 1;
 
@@ -34,7 +34,7 @@ namespace MisorientationAngleCalculator
     {
       value_acos = dotQuaternion(mori_q1q2, q3_twin[i], qcs, qcs);
       if (value_acos <= 1.0 && value_acos >= -1.0)
-        misor_twinning = (Real)(2.0*std::acos(value_acos))/degree;
+        misor_twinning = (Real)(2.0*std::acos(value_acos)/degree);
 
       s._is_twin = (bool)(misor_twinning < tolerance_mis); // Judging whether it is a twin boundary
 
@@ -113,7 +113,7 @@ namespace MisorientationAngleCalculator
       }; // 24 symmetric for fcc
 
     std::vector<QuatReal> q(q_num.size());
-    for (unsigned int i = 0; i < q_num.size(); ++i)
+    for (const auto i : index_range(q_num))
     {
       q[i].w() = q_num[i][0];
       q[i].x() = q_num[i][1];
@@ -146,7 +146,7 @@ namespace MisorientationAngleCalculator
     a1 = q1.w(); b1 = -q1.x(); c1 = -q1.y(); d1 = -q1.z();
     a2 = q2.w(); b2 = q2.x(); c2 = q2.y(); d2 = q2.z();
 
-    // standart algorithm
+    // standard algorithm
     QuatReal q;
     q.w() = a1 * a2 - b1 * b2 - c1 * c2 - d1 * d2;
     q.x() = b1 * a2 + a1 * b2 - d1 * c2 + c1 * d2;
@@ -160,7 +160,7 @@ namespace MisorientationAngleCalculator
   {
     std::vector<Real> d_vec(rot2.size());
 
-    for (unsigned int i = 0; i < rot2.size(); ++i)
+    for (const auto i : index_range(rot2))
       d_vec[i] = std::abs(rot1.w()*rot2[i].w() + rot1.x()*rot2[i].x() + rot1.y()*rot2[i].y() + rot1.z()*rot2[i].z()); // rot1 * rot2'
 
     Real d = *std::max_element(d_vec.begin(), d_vec.end());
