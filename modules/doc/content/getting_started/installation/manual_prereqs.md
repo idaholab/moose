@@ -1,16 +1,17 @@
 
-- A sane, modern toolchain/make environment
+- A sane, modern toolchain environment (make, Automake, Autoconf, CMake)
 
-In order to build a custom compliler stack, you must operate within a sane up-to-date environment,
-and have all the necessary build tools installed:
+  - Mactinosh: (`xcode-select`) Xcode Command Line Tools
 
-- Mactinosh: (`xcode-select`) Xcode Command Line Tools
+  - Windows: (`WSL`) Windows Subsystem for Linux
 
-- Ubuntu: (`apt`) Build Essentials
+    - In addition to one the following Linux flavors below
 
-- CentOS/Rocky: (`dnf`) Development Tools
+  - Ubuntu: (`apt`) Build Essentials
 
-- OpenSUSE: (`zypper`) pattern devel_basis
+  - CentOS/Rocky: (`dnf`) Development Tools
+
+  - OpenSUSE: (`zypper`) pattern devel_basis
 
 Different operating systems leverage different means for obtaining a developers environment. We
 assume the reader is intricately familiar with their platform of choice, and has already obtained

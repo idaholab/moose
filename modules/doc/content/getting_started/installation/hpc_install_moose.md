@@ -11,9 +11,8 @@ administrative rights).
 
 !include sqa/minimum_requirements.md
 
-- +CMake+. A modern version of CMake (>3.5) is required to build some of the meta packages we need to include in PETSc.
-
-- +Python 3.x Development libraries+.
+- CMake. A modern version of CMake is required to build some of the meta packages we need to include in PETSc
+- Python 3.x Development libraries
 
 Your cluster will most likely have these requirements available via some form of environment
 management software. If you are unfamiliar with how to manage your environment or unsure how to

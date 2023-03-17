@@ -1,13 +1,13 @@
 ## MPICH
 
 Check and see if you already have an MPI wrapper available on your machine. One simple way of doing
-so, is to perform a `which` on the three necessary MPI wrapper binaries:
+so, is to perform a `which` on several MPI wrapper binaries:
 
 ```bash
 which mpicc mpicxx mpif90
 ```
 
-If the above command returns with paths to those respected binaries, you will want to work with your
+If the above command returns with paths to their respected binaries, you will want to work with your
 system package manager to remove them. -Having two completely different MPI wrappers being made
 available simultaneously is prone to failure.
 
@@ -18,7 +18,7 @@ curl -L -O http://www.mpich.org/static/downloads/__MPICH__/mpich-__MPICH__.tar.g
 tar -xf mpich-__MPICH__.tar.gz -C .
 !package-end!
 
-Create an out-of-tree build location and configure MPICH using the following arguments:
+Create an out-of-tree build location and configure MPICH using the recommended arguments:
 
 !package! code max-height=500
 mkdir mpich-__MPICH__/gcc-build

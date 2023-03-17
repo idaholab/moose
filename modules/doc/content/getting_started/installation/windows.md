@@ -1,4 +1,4 @@
-# Windows
+# Windows Subsystem for Linux
 
 !alert! warning
 Using MOOSE on Windows 10 and 11 is experimental and not fully supported.

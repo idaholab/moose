@@ -18,7 +18,7 @@ cd gcc-10.4.0
 ./contrib/download_prerequisites
 !package-end!
 
-To make full use of MOOSE, configure GCC with the following language support:
+Configure GCC using the recommended arguments:
 
 !package! code
 mkdir gcc-build
@@ -38,6 +38,3 @@ With configure complete (and error free), build and install GCC:
 make -j 6
 make install
 ```
-
-Follow the on-screen instructions on how to make use of your new compiler. Any errors during
-configure/make will need to be investigated before continuing.

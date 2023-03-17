@@ -1,10 +1,9 @@
-# Manual Installation GCC/MPICH
+# GCC from Source
 
-The following instructions are for those who wish to build their own custom compiler stack.
+The following instructions are for those who wish to build their own custom GCC compiler stack.
 
-These instructions were created as a reference during a time when MOOSE had no means at which to
-distribute pre-built binaries. Therefor the commands you see here were never meant to be blindly
-'cut and pasted' into your terminal.
+Due to the general nature of the following document, the commands you see here are for reference and
+should not be blindly 'cut and pasted' into your terminal.
 
 ## Prerequisites
 
