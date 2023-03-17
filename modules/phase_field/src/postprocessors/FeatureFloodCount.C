@@ -881,7 +881,7 @@ FeatureFloodCount::getAdjacentID(unsigned int feature_id) const
 }
 
 unsigned int
-FeatureFloodCount::getAdjacentGrainNum(unsigned int feature_id) const
+FeatureFloodCount::getNumAdjacentGrains(unsigned int feature_id) const
 {   
   if (feature_id >= _feature_id_to_local_index.size())
     return invalid_id;

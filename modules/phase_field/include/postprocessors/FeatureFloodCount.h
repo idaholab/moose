@@ -89,7 +89,7 @@ public:
   virtual std::vector<unsigned int> getAdjacentID(unsigned int feature_id) const;
 
   /// Returns the number of adjacent grains for grain ID
-  virtual unsigned int getAdjacentGrainNum(unsigned int feature_id) const;
+  virtual unsigned int getNumAdjacentGrains(unsigned int feature_id) const;
 
   /// Returns the number of coupled varaibles
   std::size_t numCoupledVars() const { return _n_vars; }
