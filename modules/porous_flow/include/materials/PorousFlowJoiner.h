@@ -52,6 +52,12 @@ protected:
   /// Derivatives of temperature variable wrt PorousFlow variables at the qps or nodes
   const MaterialProperty<std::vector<Real>> * const _dtemperature_dvar;
 
+  /// Flag to check whether mass fractions are used
+  const bool _has_mass_fraction;
+
+  /// Derivatives of mass fraction variable wrt PorousFlow variables at the qps or nodes
+  const MaterialProperty<std::vector<std::vector<std::vector<Real>>>> * const _dmass_fraction_dvar;
+
   /// Computed property of the phase
   GenericMaterialProperty<std::vector<Real>, is_ad> & _property;
 
@@ -69,6 +75,9 @@ protected:
 
   /// d(property of each phase)/d(temperature)
   std::vector<const MaterialProperty<Real> *> _dphase_property_dt;
+
+  /// d(property of each phase)/d(mass fraction)
+  std::vector<const MaterialProperty<Real> *> _dphase_property_dX;
 };
 
 typedef PorousFlowJoinerTempl<false> PorousFlowJoiner;
