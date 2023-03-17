@@ -5,7 +5,8 @@
 #include "EulerAngleProvider.h"
 
 typedef Eigen::Quaternion<Real> QuatReal;
-struct MisorientationAngleData{Real misor; bool isTwinning; std::string twinType;};
+enum class TwinType {TT1, ST1, NONE};
+struct MisorientationAngleData{Real _misor; bool _is_twin; TwinType _twin_type = TwinType::NONE;};
 
 /**
  * This is an orientation difference calculator, inspired by MTEX.

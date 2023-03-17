@@ -43,7 +43,7 @@ GrainTrackerMerge::mergeGrainsBasedMisorientation()
 
       EulerAngles angles_j = _euler.getEulerAngles(grain_j._id);
 
-      misor_angle = MisorientationAngleCalculator::calculateMisorientaion(angles_i, angles_j, _s_misorientation_angle).misor;
+      misor_angle = MisorientationAngleCalculator::calculateMisorientaion(angles_i, angles_j, _s_misorientation_angle)._misor;
 
       if (misor_angle < 0.8)
       {

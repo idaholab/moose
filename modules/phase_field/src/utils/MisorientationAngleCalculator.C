@@ -13,7 +13,7 @@ namespace MisorientationAngleCalculator
 
     // Initialize the computed twin tolerance
     Real misor_twinning = tolerance_mis + 1.0;
-    
+
     Real value_acos = 0.0;
     const QuatReal & q1 = Euler1.toQuaternion();
     const QuatReal & q2 = Euler2.toQuaternion();
@@ -26,9 +26,9 @@ namespace MisorientationAngleCalculator
     // calculate misorientation angle
     value_acos = dotQuaternion(q1, q2, qcs, qss);
     if (value_acos <= 1.0 && value_acos >= -1.0)
-      s.misor = (Real)(2.0*std::acos(value_acos))/degree;
+      s._misor = (Real)(2.0*std::acos(value_acos))/degree;
     else
-      s.misor =  tolerance_mis + 1;
+      s._misor =  tolerance_mis + 1;
 
     for (unsigned i = 0; i < q3_twin.size(); ++i)
     {
@@ -36,14 +36,22 @@ namespace MisorientationAngleCalculator
       if (value_acos <= 1.0 && value_acos >= -1.0)
         misor_twinning = (Real)(2.0*std::acos(value_acos))/degree;
 
-      s.isTwinning = (bool)(misor_twinning < tolerance_mis); // Judging whether it is a twin boundary
+      s._is_twin = (bool)(misor_twinning < tolerance_mis); // Judging whether it is a twin boundary
 
       // Determine which type of twin boundary 0 ~ TT1 (tensile twins), 1 ~ CT1 (compression twins)
-      if (s.isTwinning) 
-      {
-        s.twinType = "twin_type" + std::to_string(i); 
-        break;
-      }
+      if (s._is_twin)
+        switch (i)
+        {
+          case 0:
+              s._twin_type = TwinType::TT1;
+              break;
+          case 1:
+              s._twin_type = TwinType::ST1;
+              break;
+          default:
+              s._twin_type = TwinType::NONE;
+              break;
+        }
     }
     return s;
   }
@@ -56,7 +64,7 @@ namespace MisorientationAngleCalculator
       q_num = {
         {0.73728,  0.58508,  0.3378,  0},
         {0.84339,  0.53730,  0,       0}
-      }; // Quaternion for HCP twinning from MTEX;
+      }; // Quaternion for HCP twinning from MTEX (TT1 and CT2);
     else if ( QuatType == "getSSymm" )
       q_num = {
         {-1.000e+00,  0.000e+00,  0.000e+00, -2.220e-16}
