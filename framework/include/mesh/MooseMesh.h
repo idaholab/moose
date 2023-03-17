@@ -1510,6 +1510,12 @@ private:
    */
   void updateCoordTransform();
 
+  /**
+   * Loop through all subdomain IDs and check if there is name duplication used for the subdomains
+   * with same ID. Throw out an error if any name duplication is found.
+   */
+  void checkDuplicateSubdomainNames();
+
   /// Holds mappings for volume to volume and parent side to child side
   std::map<std::pair<int, ElemType>, std::vector<std::vector<QpMap>>> _elem_type_to_refinement_map;
 

@@ -406,6 +406,9 @@ MooseMesh::prepare(bool)
 
   update();
 
+  // Check if there is subdomain name duplication for the same subdomain ID
+  checkDuplicateSubdomainNames();
+
   _moose_mesh_prepared = true;
 }
 
@@ -3698,4 +3701,24 @@ MooseMesh::lengthUnit() const
 {
   mooseAssert(_coord_transform, "This must be non-null");
   return _coord_transform->lengthUnit();
+}
+
+void
+MooseMesh::checkDuplicateSubdomainNames()
+{
+  std::map<SubdomainName, SubdomainID> subdomain;
+  for (const auto & sbd_id : _mesh_subdomains)
+  {
+    std::string sub_name = getSubdomainName(sbd_id);
+    if (!sub_name.empty() && subdomain.count(sub_name) > 0)
+      mooseError("The subdomain name ",
+                 sub_name,
+                 " is used for both subdomain with ID=",
+                 subdomain[sub_name],
+                 " and ID=",
+                 sbd_id,
+                 ", Please rename one of them!");
+    else
+      subdomain[sub_name] = sbd_id;
+  }
 }
