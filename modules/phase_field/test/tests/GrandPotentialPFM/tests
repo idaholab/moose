@@ -24,7 +24,14 @@
     design = '/ACInterface2DMultiPhase1.md /ACInterface2DMultiPhase2.md /InterfaceOrientationMultiphaseMaterial.md'
     requirement = 'The system shall provide a Grand Potential based dendritic solidification capability in 2D'
   [../]
-
+  [./GrandPotentialStrictMassConservation]
+    type = 'Exodiff'
+    input = 'GrandPotentialStrictMassConservation.i'
+    exodiff = 'GrandPotentialStrictMassConservation_out.e'
+    issues = '#23329'
+    design = '/GrandPotentialKernelAction.md'
+    requirement = 'The system shall provide classes to implement a Grand Potential phase field formulation with strict mass conservation'
+  [../]
   [./GrandPotentialInterface]
     type = 'CSVDiff'
     input = 'GrandPotentialInterface.i'

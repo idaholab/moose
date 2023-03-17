@@ -71,6 +71,29 @@ or some other field not associated with the first set of order parameters.
 
 !syntax parameters /Modules/PhaseField/GrandPotential/GrandPotentialKernelAction
 
+### Strict Mass Conservation formulation
+
+This optional formulation is enforcing a strict mass conservation by generating kernels for concentration, 
+and coupled it with chemical potential from the Grand Potential model.
+
+- 'mass_conservation' : set this to "true" to choose strict mass conservation formulation
+- 'concentrations' : Vector of concentration variables used in the model.
+- 'h_c_min' : Vector of coefficients for the BodyForce kernel in concentration-chemical potential coupling which indicates the minima of the parabolic free energy functions
+- 'h_over_kVa' : Vector of coefficients for the MatReaction kernel in concentration-chemical potential coupling which is related to the coefficients of the parabolic free enegy functions
+
+The following kernels are generated for each concentration variables:
+
+- [`TimeDerivative`](/TimeDerivative.md)
+- [`MatDiffusion`](/MatDiffusion.md) or [`MatAnisoDiffusion`](/MatAnisoDiffusion.md)
+
+The coupling between concentration and chemical potential is generated using the following kernel:
+
+- [`MatReaction`](/MatReaction.md) 
+- [`MatReaction`](/MatReaction.md) (multiple kernels: one that corresponds with each order parameter)
+- ['BodyForce'](/BodyForce.md) (multiple kernels: one that corresponds with each order parameter)
+
+The materials associated with strict mass conservation can be created automatically using GrandPotentialSinteringMaterial (/GrandPotentialSinteringMaterial.md)
+
 ## Example Input File Syntax
 
 !listing modules/phase_field/test/tests/actions/gpm_kernel.i

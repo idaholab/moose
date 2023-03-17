@@ -47,6 +47,8 @@ GrandPotentialSinteringMaterial::validParams()
   params.addParam<MooseEnum>("solid_energy_model",
                              solid_energy_model,
                              "Type of energy function to use for the solid phase.");
+  params.addParam<bool>(
+      "mass_conservation", false, "imposing strict mass conservation formulation");
   return params;
 }
 
@@ -102,6 +104,10 @@ GrandPotentialSinteringMaterial::GrandPotentialSinteringMaterial(const InputPara
     _dkappa(declarePropertyDerivative<Real>("kappa", _phi_name)),
     _d2kappa(declarePropertyDerivative<Real>("kappa", _phi_name, _phi_name)),
     _gamma(declareProperty<Real>("gamma")),
+    _hv_c_min(declareProperty<Real>("hv_c_min")),
+    _hs_c_min(declareProperty<Real>("hs_c_min")),
+    _hv_over_kVa(declareProperty<Real>("hv_over_kVa")),
+    _hs_over_kVa(declareProperty<Real>("hs_over_kVa")),
 
     _sigma_s(getParam<Real>("surface_energy")),
     _sigma_gb(getParam<Real>("grainboundary_energy")),
@@ -113,10 +119,15 @@ GrandPotentialSinteringMaterial::GrandPotentialSinteringMaterial(const InputPara
     _mu_gb(6.0 * _sigma_gb / _int_width),
     _kappa_s(0.75 * _sigma_s * _int_width),
     _kappa_gb(0.75 * _sigma_gb * _int_width),
-    _kB(8.617343e-5) // eV/K
+    _kB(8.617343e-5), // eV/K
+    _mass_conservation(getParam<bool>("mass_conservation"))
 {
   if ((_switch > 1.0) || (_switch < 0.0))
     mooseError("GrandPotentialSinteringMaterial: surface_switch_value should be between 0 and 1");
+
+  if (_mass_conservation && _solid_energy > 0)
+    mooseError("GrandPotentialSinteringMaterial: strict mass conservation is currently only "
+               "applicable to parabolic free energy");
 
   for (unsigned int i = 0; i < _neta; ++i)
   {
@@ -208,6 +219,12 @@ GrandPotentialSinteringMaterial::computeQpProperties()
           -0.5 * _w[_qp] * _w[_qp] / (_Va * _Va * _ks[_qp]) - _w[_qp] * _cs_eq[_qp] / _Va;
       _domegasdw[_qp] = -_rhos[_qp];
       _d2omegasdw2[_qp] = -_drhosdw[_qp];
+
+      // bodyforce and matreact coefficients for strict mass conservation case
+      _hv_c_min[_qp] = _hv[_qp] * 1.0;
+      _hs_c_min[_qp] = _hs[_qp] * _cs_eq[_qp];
+      _hv_over_kVa[_qp] = _hv[_qp] / (_Va * _kv[_qp]);
+      _hs_over_kVa[_qp] = _hs[_qp] / (_Va * _ks[_qp]);
 
       for (unsigned int i = 0; i < _neta; ++i)
       {
