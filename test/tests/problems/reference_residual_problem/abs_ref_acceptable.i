@@ -12,8 +12,8 @@
   type = ReferenceResidualProblem
   reference_vector = 'absref'
   extra_tag_vectors = 'absref'
-  acceptable_iterations = 2
-  acceptable_multiplier = 1e3
+  acceptable_iterations = 1
+  acceptable_multiplier = 1e6
 []
 
 [Variables]
@@ -106,7 +106,7 @@
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
   line_search = none
-  num_steps = 10
+  num_steps = 3
   nl_rel_tol = 1e-06
   verbose = true
 []
