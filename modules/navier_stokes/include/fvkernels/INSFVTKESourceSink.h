@@ -42,8 +42,14 @@ protected:
   /// Density
   const Moose::Functor<ADReal> & _rho;
 
+  /// Dynamic viscosity
+  const Moose::Functor<ADReal> & _mu;
+
   /// Turbulent dynamic viscosity
   const Moose::Functor<ADReal> & _mu_t;
+
+  /// Wall boundaries
+  std::vector<BoundaryName> _wall_boundary_names;
 
   /// Maximum mixing length allowed for the domain
   const Real _max_mixing_length;
@@ -59,4 +65,27 @@ protected:
 
   /// Local relaxation factor
   const Real _rf;
+
+  /// No equilibrium treatement
+  const bool _non_equilibrium_treatement;
+
+  /// C_mu constant
+  Real _C_mu;
+
+  /// Stored strain rate
+  std::map<const Elem *, Real> _symmetric_strain_tensor_norm_old;
+  std::map<const Elem *, Real> _old_destruction;
+
+  /// Map for the previous nonlienar iterate
+  std::map<const Elem *, Real> _pevious_nl_sol;
+
+  /// Maps for wall treatement
+  std::map<const Elem *, bool> _wall_bounded;
+  std::map<const Elem *, std::vector<Real>> _dist;
+  std::map<const Elem *, std::vector<Point>> _normal;
+  std::map<const Elem *, Real> _production_NL_old;
+  std::map<const Elem *, Real> _destruction_NL_old;
+
+  /// -- Constants of the method
+  static constexpr Real _von_karman{0.4187};
 };

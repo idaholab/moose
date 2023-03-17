@@ -129,16 +129,18 @@ kEpsilonViscosityAux::findUStarLocalMethod(const ADReal & u, const Real & dist)
       u_tau = new_u_tau;
     }
 
-    mooseException("Could not find the wall friction velocity (mu: ",
-                   mu,
-                   " rho: ",
-                   rho,
-                   " velocity: ",
-                   u,
-                   " wall distance: ",
-                   dist,
-                   ") - Relative residual: ",
-                   rel_err);
+    mooseWarning("Could not find the wall friction velocity (mu: ",
+                 mu,
+                 " rho: ",
+                 rho,
+                 " velocity: ",
+                 u,
+                 " wall distance: ",
+                 dist,
+                 ") - Relative residual: ",
+                 rel_err);
+
+    return u_tau;
   }
 }
 
@@ -186,10 +188,20 @@ kEpsilonViscosityAux::computeValue()
     }
   }
 
-  Real mu_t = _rho(current_argument).value() * _C_mu(current_argument).value() *
-              std::pow(_k(current_argument).value(), 2) / _epsilon(current_argument).value();
+  auto time_scale = _k(current_argument) / _epsilon(current_argument);
 
-  Real mu_t_wall = _mu(current_argument).value();
+  auto min_constraint_time_scale =
+      0.6 * std::sqrt(_mu(current_argument) / _rho(current_argument) / _epsilon(current_argument));
+
+  auto constraint_time_scale = std::max(min_constraint_time_scale.value(), time_scale.value());
+
+  Real mu_t = _rho(current_argument).value() * _C_mu(current_argument).value() *
+              _k(current_argument).value() * constraint_time_scale;
+
+  auto mu_t_old = _var(current_argument).value();
+  mu_t = _rf * mu_t + (1.0 - _rf) * mu_t_old;
+
+  Real mu_t_wall = mu_t;
   if (wall_bounded && _wall_treatement)
   {
 
@@ -237,6 +249,11 @@ kEpsilonViscosityAux::computeValue()
                       (1.0 - blending_function) * _mu(current_argument).value();
       mu_t_wall = wall_val.value();
     }
+
+    // mu_t = std::max(mu_t_wall, mu_t);
+
+    // mu_t = mu_t_wall;
+
     // _console << "y plus: " << y_plus << std::endl;
     // _console << "rho: " << _rho(current_argument) << std::endl;
     // _console << "mu: " << _mu(current_argument) << std::endl;
@@ -247,8 +264,8 @@ kEpsilonViscosityAux::computeValue()
     // _console << "------------------------------ " << std::endl;
 
     // Updating limiter if needed
-    if (mu_t_wall > _max_viscosity_value)
-      _max_viscosity_value = std::max(mu_t_wall, 1e3);
+    // if (mu_t_wall > _max_viscosity_value)
+    //   _max_viscosity_value = std::max(mu_t_wall, 1e3);
   }
   // else
   // {
@@ -274,9 +291,7 @@ kEpsilonViscosityAux::computeValue()
   //          std::pow(_k(current_argument).value(), 2) / _epsilon(current_argument).value();
   // }
 
-  mu_t = std::max(mu_t, mu_t_wall);
-
-  auto mu_t_old = _var(current_argument, 1).value();
+  // mu_t = std::max(mu_t, mu_t_wall);
 
   // if (elem == (*(*_mesh.activeLocalElementsBegin())))
   // {
@@ -288,5 +303,5 @@ kEpsilonViscosityAux::computeValue()
   //   }
   // }
 
-  return _rf * mu_t + (1.0 - _rf) * mu_t_old;
+  return mu_t;
 }

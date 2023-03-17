@@ -29,6 +29,14 @@ public:
 
 protected:
   virtual ADReal computeQpResidual() override final;
+  void computeResidual(const FaceInfo & fi) override;
+  void computeJacobian(const FaceInfo & fi) override;
 
   const Moose::Functor<ADReal> & _scaling_coef;
+
+  /// Wall boundaries
+  std::vector<BoundaryName> _wall_boundary_names;
+
+  /// Maps for wall treatement
+  std::map<const Elem *, bool> _wall_bounded;
 };

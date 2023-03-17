@@ -23,7 +23,15 @@ public:
 
 protected:
   ADReal computeQpResidual() override;
+  void computeResidual(const FaceInfo & fi) override;
+  void computeJacobian(const FaceInfo & fi) override;
 
   // Density
   const Moose::Functor<ADReal> & _rho;
+
+  /// Wall boundaries
+  std::vector<BoundaryName> _wall_boundary_names;
+
+  /// Maps for wall treatement
+  std::map<const Elem *, bool> _wall_bounded;
 };

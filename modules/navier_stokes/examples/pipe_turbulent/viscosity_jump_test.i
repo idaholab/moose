@@ -1,14 +1,14 @@
 # Geometry
-D = 0.1
+D = 1.0
 total_len = '${fparse 40 * D}'
 L = '${fparse 10 * D}'
-nx = 40
-ny = 4
+nx = 50
+ny = 10
 
 # Crafted wall function
-Re = 10000
+Re = 1000000
 rho = 1000.0
-bulk_u = 1e-2
+bulk_u = 1.0
 mu = 1e-3
 # mu = '${fparse bulk_u * rho * D / Re}'
 
@@ -35,12 +35,13 @@ C2_eps = 1.92
 
 diff = 10.0
 advected_interp_method = 'upwind'
-velocity_interp_method = 'rc'
+velocity_interp_method = 'average'
 
 [GlobalParams]
   rhie_chow_user_object = 'rc'
   advected_interp_method = ${advected_interp_method}
   velocity_interp_method = ${velocity_interp_method}
+  two_term_boundary_expansion = true
 []
 
 [UserObjects]
@@ -53,44 +54,44 @@ velocity_interp_method = 'rc'
 []
 
 [Mesh]
-  coord_type = 'RZ'
-  rz_coord_axis = 'X'
+  # coord_type = 'RZ'
+  # rz_coord_axis = 'X'
   [gen]
     type = GeneratedMeshGenerator
     dim = 2
     xmin = 0
     xmax = ${L}
-    ymin = 0
+    ymin = '${fparse -D/2}'
     ymax = '${fparse D/2}'
     nx = ${nx}
     ny = ${ny}
-    bias_y = 0.8
-    bias_x = 1.02
+    bias_y = 1.0
+    bias_x = 1.0
   []
-  [rename1]
-    type = RenameBoundaryGenerator
-    input = gen
-    old_boundary = 'left'
-    new_boundary = 'inlet'
-  []
-  [rename2]
-    type = RenameBoundaryGenerator
-    input = rename1
-    old_boundary = 'right'
-    new_boundary = 'outlet'
-  []
-  [rename3]
-    type = RenameBoundaryGenerator
-    input = rename2
-    old_boundary = 'bottom'
-    new_boundary = 'symmetry'
-  []
-  [rename4]
-    type = RenameBoundaryGenerator
-    input = rename3
-    old_boundary = 'top'
-    new_boundary = 'wall'
-  []
+  # [rename1]
+  #   type = RenameBoundaryGenerator
+  #   input = gen
+  #   old_boundary = 'left'
+  #   new_boundary = 'inlet'
+  # []
+  # [rename2]
+  #   type = RenameBoundaryGenerator
+  #   input = rename1
+  #   old_boundary = 'right'
+  #   new_boundary = 'outlet'
+  # []
+  # [rename3]
+  #   type = RenameBoundaryGenerator
+  #   input = rename2
+  #   old_boundary = 'bottom'
+  #   new_boundary = 'symmetry'
+  # []
+  # [rename4]
+  #   type = RenameBoundaryGenerator
+  #   input = rename3
+  #   old_boundary = 'top'
+  #   new_boundary = 'wall'
+  # []
 []
 
 [Variables]
@@ -108,16 +109,18 @@ velocity_interp_method = 'rc'
   [TKE]
     type = INSFVEnergyVariable
     initial_condition = ${k_bulk}
+    #scaling = '${fparse 1/k_bulk}'
   []
   [TKED]
     type = INSFVEnergyVariable
     initial_condition = ${eps_bulk}
+    #scaling = '${fparse 1/eps_bulk}'
   []
 []
 
 [FVKernels]
 
-  #inactive = 'u_time v_time'
+  inactive = 'u_time v_time TKE_time TKED_time'
 
   [mass]
     type = INSFVMassAdvection
@@ -185,12 +188,14 @@ velocity_interp_method = 'rc'
     type = INSFVTurbulentAdvection
     variable = TKE
     rho = ${rho}
+    walls = 'bottom top'
   []
   [TKE_diffusion]
     type = INSFVTurbulentDiffusion
     variable = TKE
     coeff = 'mu_t'
     scaling_coef = ${sigma_k}
+    walls = 'bottom top'
   []
   [TKE_source_sink]
     type = INSFVTKESourceSink
@@ -199,8 +204,12 @@ velocity_interp_method = 'rc'
     v = vel_y
     epsilon = TKED
     rho = ${rho}
+    mu = ${mu}
     mu_t = 'mu_t'
-    rf = 0.5
+    linearized_model = true
+    rf = 1.0
+    walls = 'bottom top'
+    non_equilibrium_treatement = false
   []
 
   [TKED_time]
@@ -213,12 +222,14 @@ velocity_interp_method = 'rc'
     type = INSFVTurbulentAdvection
     variable = TKED
     rho = ${rho}
+    walls = 'bottom top'
   []
   [TKED_diffusion]
     type = INSFVTurbulentDiffusion
     variable = TKED
     coeff = 'mu_t'
     scaling_coef = ${sigma_eps}
+    walls = 'bottom top'
   []
   [TKED_source_sink]
     type = INSFVTKEDSourceSink
@@ -227,10 +238,13 @@ velocity_interp_method = 'rc'
     v = vel_y
     k = TKE
     rho = ${rho}
+    mu = ${mu}
     mu_t = 'mu_t'
     C1_eps = ${C1_eps}
     C2_eps = ${C2_eps}
-    rf = 0.5
+    rf = 1.0
+    walls = 'bottom top'
+    # non_equilibrium_treatement = false
   []
 []
 
@@ -266,22 +280,33 @@ velocity_interp_method = 'rc'
     rho = ${rho}
     u = vel_x
     v = vel_y
-    wall_treatement = true
-    walls = 'wall'
-    rf = 0.5
+    wall_treatement = false
+    walls = 'top bottom'
+    rf = 1.0
+    execute_on = 'TIMESTEP_END'
   []
-  [populate_mu_t]
+  [populate_mu_t_computed]
     type = ADFunctorElementalAux
     variable = 'mu_t_computed'
     functor = 'mu_t_imposed'
   []
+  [populate_mu_t]
+    type = ADFunctorElementalAux
+    variable = 'mu_t'
+    functor = 'mu_t_imposed'
+    execute_on = 'INITIAL'
+  []
+[]
+
+[Problem]
+  previous_nl_solution_required = true
 []
 
 [Functions]
   # Not working
   [viscous_jump]
     type = ADParsedFunction
-    expression = 'if((y > (0.5 * D)*(ny -1)/ny), mu_wall, mu_bulk)'
+    expression = 'if((abs(y) > (D)*(ny/2 -1)/(ny/2)), mu_wall, mu_bulk)'
     symbol_names = 'D ny mu_wall mu_bulk'
     symbol_values = '${D} ${ny} ${mu_wall} ${mu_bulk}'
   []
@@ -304,40 +329,91 @@ velocity_interp_method = 'rc'
 [FVBCs]
   [inlet-u]
     type = INSFVInletVelocityBC
-    boundary = 'inlet'
+    boundary = 'left'
     variable = vel_x
     function = '${bulk_u}'
   []
   [inlet-v]
     type = INSFVInletVelocityBC
-    boundary = 'inlet'
+    boundary = 'left'
     variable = vel_y
     function = 0
   []
   [walls-u]
-    type = INSFVNoSlipWallBC
-    boundary = 'wall'
+    type = FVDirichletBC
+    boundary = 'top bottom'
     variable = vel_x
-    function = 0
+    value = 0
   []
   [walls-v]
-    type = INSFVNoSlipWallBC
-    boundary = 'wall'
+    type = FVDirichletBC
+    boundary = 'top bottom'
     variable = vel_y
-    function = 0
+    value = 0
   []
   [outlet_p]
     type = INSFVOutletPressureBC
-    boundary = 'outlet'
+    boundary = 'right'
     variable = pressure
     function = 0
   []
-  [inlet_scalar]
+  [inlet_TKE]
     type = FVDirichletBC
-    boundary = 'inlet'
+    boundary = 'left'
     variable = TKE
     value = ${k_bulk}
   []
+  [inlet_TKED]
+    type = FVDirichletBC
+    boundary = 'left'
+    variable = TKED
+    value = ${eps_bulk}
+  []
+  # [wall_TKED]
+  #   type = INSFVTKEDWallFunction
+  #   boundary = 'top bottom'
+  #   variable = TKED
+  #   k = TKE
+  #   rho = ${rho}
+  #   mu = ${mu}
+  #   mu_t = mu_t
+  #   u = vel_x
+  #   v = vel_y
+  # []
+  # [outlet_TKE]
+  #   type = INSFVMassAdvectionOutflowBC
+  #   variable = TKE
+  #   boundary = 'right'
+  #   u = vel_x
+  #   v = vel_y
+  #   rho = ${rho}
+  # []
+  # [outlet_TKED]
+  #   type = INSFVMassAdvectionOutflowBC
+  #   variable = TKED
+  #   boundary = 'right'
+  #   u = vel_x
+  #   v = vel_y
+  #   rho = ${rho}
+  # []
+  # [outlet_u]
+  #   type = INSFVMomentumAdvectionOutflowBC
+  #   variable = u
+  #   boundary = 'top_to_0'
+  #   u = u
+  #   v = v
+  #   momentum_component = 'x'
+  #   rho = ${rho}
+  # []
+  # [outlet_v]
+  #   type = INSFVMomentumAdvectionOutflowBC
+  #   variable = v
+  #   boundary = 'top_to_0'
+  #   u = u
+  #   v = v
+  #   momentum_component = 'y'
+  #   rho = ${rho}
+  # []
 []
 
 [Debug]
@@ -346,23 +422,23 @@ velocity_interp_method = 'rc'
 
 [Executioner]
   type = Transient
-  end_time = 1000.0
-  [TimeStepper]
-    type = IterationAdaptiveDT
-    dt = 0.001
-    iteration_window = 2
-    optimal_iterations = 40
-    growth_factor = 1.2
-    cutback_factor = 0.8
-  []
+  end_time = 100
+  dt = 1
+  # [TimeStepper]
+  #   type = IterationAdaptiveDT
+  #   dt = 0.001
+  #   iteration_window = 2
+  #   optimal_iterations = 10
+  #   growth_factor = 1.2
+  #   cutback_factor = 0.8
+  # []
   steady_state_detection = true
-  steady_state_tolerance = 1e-4
+  steady_state_tolerance = 1e-6
   solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -pc_factor_shift_type -snes_linesearch_damping'
-  petsc_options_value = 'lu NONZERO 0.5'
-  nl_abs_tol = 1e-6
-  # nl_rel_tol = 1e-4
-  nl_max_its = 100
+  petsc_options_value = 'lu        NONZERO               0.9'
+  nl_abs_tol = 1e-8
+  nl_max_its = 2000
   line_search = none
 []
 
