@@ -19,5 +19,12 @@
   []
 []
 
+[Outputs]
+  [out]
+    type = Exodus
+    output_extra_element_ids = false
+  []
+[]
+
 # Since this mesh is rotated into the z-plane, we need to output in 3D
 # This should occur automatically

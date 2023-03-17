@@ -1,15 +1,15 @@
 [Tests]
   issues = '#1927'
   design = 'outputs/Exodus.md'
-  [./basic]
+  [basic]
     type = 'Exodiff'
     input = 'exodus.i'
     exodiff = 'exodus_out.e'
 
     requirement = "The system shall support ExodusII output."
-  [../]
+  []
 
-  [./hdf5]
+  [hdf5]
     type = 'RunCommand'
     prereq = 'basic'
     command = 'if ! type h5dump >/dev/null 2>&1; then echo "Could not run h5dump to test for HDF5"; exit 77; fi;
@@ -17,9 +17,9 @@
                exit 0'
 
     requirement = "The system ExodusII output shall not use HDF5 unless requested."
-  [../]
+  []
 
-  [./input]
+  [input]
     # Moose runs with the output_input = true
     # \TODO Find a method for comparing files with and without information records
     type = 'CheckFiles'
@@ -27,69 +27,90 @@
     check_files = 'exodus_input_out.e'
 
     requirement = "The system shall support including the executed input file within the ExodusII output."
-  [../]
+  []
 
-  [./enable_initial]
+  [enable_initial]
     type = 'Exodiff'
     input = 'exodus_enable_initial.i'
     exodiff = 'exodus_enable_initial_out.e'
 
     requirement = "The system shall support inclusion of initial condition data within the ExodusII output."
-  [../]
+  []
 
-  [./output_all]
+  [output_all]
     type = 'Exodiff'
     input = 'variable_toggles.i'
     exodiff = 'variable_toggles_out.e'
 
     requirement = "The system shall support writing non-linear, auxililary, scalar, and postprocessor variables to ExodusII format."
-  [../]
+  []
 
-  [./hide_output]
+  [hide_output]
     type = 'Exodiff'
     input = 'hide_variables.i'
     exodiff = 'hide_variables_out.e'
 
     requirement = "The system shall support the exclusion of non-linear, scalar, and postprocessor variables from ExodusII output."
-  [../]
+  []
 
-  [./invalid_hide]
+  [invalid_hide]
     type = 'RunException'
     input = 'invalid_hide_variables.i'
     expect_err = 'Output\(s\) do not exist \(must be variable, scalar, postprocessor, or vector postprocessor\):'
 
     requirement = "The system shall error if the supplied names for including or excluding variables is invalid."
-  [../]
+  []
 
-  [./nodal_output]
+  [nodal_output]
     type = 'Exodiff'
     input = 'exodus_nodal.i'
     exodiff = 'exodus_nodal_out.e'
 
     requirement = "The system shall support outputting elemental and scalar variables as nodal variables within ExodusII output."
-  [../]
+  []
 
-  [./discontinuous]
+  [discontinuous]
     type = 'Exodiff'
     input = 'exodus_discontinuous.i'
     exodiff = 'exodus_discontinuous_out.e'
 
     requirement = "The system shall support outputting discontinuous finite element types with the ExodusII format."
-  [../]
+  []
 
-  [./side_discontinuous_edge2]
+  [side_discontinuous_edge2]
     type = 'Exodiff'
     input = 'exodus_side_discontinuous_edge2.i'
     exodiff = 'exodus_side_discontinuous_edge2_out.e'
 
     requirement = "The system shall support outputting side-discontinuous edge element data with the ExodusII format."
-  [../]
+  []
 
-  [./side_discontinuous]
+  [side_discontinuous]
     type = 'Exodiff'
     input = 'exodus_side_discontinuous.i'
     exodiff = 'exodus_side_discontinuous_out.e'
 
     requirement = "The system shall support outputting side-discontinuous quad element data with the ExodusII format."
-  [../]
+  []
+
+  [output_elem_id]
+    type = 'Exodiff'
+    input = 'exodus_elem_id.i'
+    cli_args = 'Mesh/gmg/extra_element_integers=pin_id
+                Mesh/inactive="tempid_1 tempid_2 tempid_3 tempid_4"'
+    exodiff = 'exodus_elem_id_out.e'
+
+    issues = '#23386'
+    requirement = "The system shall support outputting extra element id data defined on the input mesh with the ExodusII format."
+  []
+
+  [output_elem_id_restrict]
+    type = 'Exodiff'
+    input = 'exodus_elem_id.i'
+    cli_args = 'Outputs/out/extra_element_ids_to_output=pin_id'
+    exodiff = 'exodus_elem_id_out.e'
+
+    issues = '#23386'
+    requirement = "The system shall support restricting which extra element id data defined on the input mesh are outputted with the ExodusII format."
+  []
 []

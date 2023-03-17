@@ -50,7 +50,32 @@ with Peacock) or used in other MOOSE input files for further combination/modific
 This can be achieved by using the command line option `--mesh-only`.  By default `--mesh-only` will write a
 mesh file with `_in.e` (the opposite of the `_out.e` that is appended from the output system)
 appended to the input file name.  You can also optionally provide a mesh filename to
-write out using `--mesh-only output_file.e`.
+write out using `--mesh-only output_file.e`. When using the `--mesh-only` option, by default any extra element integers
+defined on the mesh will also be outputted to the output Exodus file. To prevent extra element ids from being
+outputted, the parameter `output_extra_element_ids` should be set to `false` in the `[Ouputs]` block of the
+input file as shown below:
+
+```
+[Outputs]
+  [out]
+    type = Exodus
+    output_extra_element_ids = false
+  []
+[]
+```
+
+Alternatively, if only a subset of extra element ids should be outputted to the Exodus file, the parameter
+`extra_element_ids_to_output` should be set in the `[Outputs]` block of the input file like so:
+
+```
+[Outputs]
+  [out]
+    type = Exodus
+    output_extra_element_ids = true
+    extra_element_ids_to_output = 'id_to_output1 id_to_output2 ...'
+  []
+[]
+```
 
 Here are a couple of examples showing the usage of `--mesh-only`:
 

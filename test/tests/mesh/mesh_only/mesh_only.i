@@ -14,5 +14,12 @@
   [../]
 []
 
+[Outputs]
+  [out]
+    type = Exodus
+    output_extra_element_ids = false
+  []
+[]
+
 # This input file is intended to be run with the "--mesh-only" option so
 # no other sections are required
