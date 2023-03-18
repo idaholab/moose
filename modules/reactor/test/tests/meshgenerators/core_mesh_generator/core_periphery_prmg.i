@@ -151,6 +151,9 @@
 []
 
 [Outputs]
-  exodus = true
+  [out]
+    type = Exodus
+    output_extra_element_ids = false
+  []
   file_base = core_periphery_prmg_in
 []

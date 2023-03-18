@@ -52,3 +52,10 @@
     input = pattern
   []
 []
+
+[Outputs]
+  [out]
+    type = Exodus
+    output_extra_element_ids = false
+  []
+[]

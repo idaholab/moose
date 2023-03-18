@@ -1,7 +1,7 @@
 [Tests]
   design = 'Mesh/index.md'
 
-  [./mesh_only_test]
+  [mesh_only_test]
     type = 'Exodiff'
     input = 'mesh_only.i'
     cli_args = '--mesh-only 3d_chimney.e'
@@ -10,9 +10,9 @@
     method = '!dbg'
     issues = '#1568'
     requirement = 'The system shall allow writing out the mesh without running a simulation.'
-  [../]
+  []
 
-  [./mesh_info]
+  [mesh_info]
     type = 'RunApp'
     input = 'mesh_only.i'
     cli_args = '--mesh-only info_test.e'
@@ -21,9 +21,9 @@
     expect_out = 'Mesh Information'
     issues = '#11917 #11921'
     requirement = 'The system shall print out information about the mesh when writing out the mesh.'
-  [../]
+  []
 
-  [./mesh_only_warning]
+  [mesh_only_warning]
     type = RunApp
     input = 'mesh_only.i'
     # Intentional error (not a mesh filename)
@@ -32,9 +32,9 @@
     expect_out = 'The --mesh-only option should be followed by a file name.'
     issues = '#1568'
     requirement = 'The system shall warn when using --mesh-only and there is no clear filename to use'
-  [../]
+  []
 
-  [./output_dimension_override]
+  [output_dimension_override]
     type = 'Exodiff'
     input = 'output_dimension_override.i'
     cli_args = '--mesh-only output_dimension.e'
@@ -43,9 +43,9 @@
     method = '!dbg'
     issues = '#12757'
     requirement = 'The system shall support overriding output dimension when necessary to store coordinates in higher planes'
-  [../]
+  []
 
-  [./mesh_only_checkpoint]
+  [mesh_only_checkpoint]
     type = 'CheckFiles'
     input = 'mesh_only.i'
     cli_args = 'Mesh/parallel_type=distributed --mesh-only 3d_chimney.cpr'
@@ -56,5 +56,36 @@
     method = '!dbg'
     issues = '#14312'
     requirement = 'The system shall support writing parallel checkpoint files with --mesh-only'
-  [../]
+  []
+
+  [mesh_only_with_extra_elem_ids]
+    type = 'Exodiff'
+    input = 'mesh_only_with_elem_ids.i'
+    cli_args = '--mesh-only'
+    exodiff = 'mesh_only_with_elem_ids_in.e'
+    recover = false
+    method = '!dbg'
+    issues = '#23386'
+    requirement = 'The system shall allow writing out the mesh with extra element ids without running a simulation.'
+  []
+  [mesh_only_with_restricted_elem_ids]
+    type = 'Exodiff'
+    input = 'mesh_only_with_elem_ids.i'
+    cli_args = '--mesh-only mesh_only_with_elem_ids_in.e Outputs/out/output_extra_element_ids=true Outputs/out/extra_element_ids_to_output="pin_id"'
+    exodiff = 'mesh_only_with_elem_ids_in.e'
+    recover = false
+    method = '!dbg'
+    issues = '#23386'
+    requirement = 'The system shall allow writing out the mesh with extra element ids without running a simulation and user-provided id names.'
+  []
+  [mesh_only_with_unrecognized_elem_ids]
+    type = 'RunException'
+    input = 'mesh_only_with_elem_ids.i'
+    cli_args = '--mesh-only mesh_only_without_elem_ids_in.e Outputs/out/output_extra_element_ids=true Outputs/out/extra_element_ids_to_output="assembly_id"'
+    expect_err = "set to true but no extra element ids are being outputted."
+    recover = false
+    method = '!dbg'
+    issues = '#23386'
+    requirement = 'The system shall throw a warning if user-provided extra element id names do not exist on mesh.'
+  []
 []
