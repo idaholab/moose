@@ -42,4 +42,4 @@ namespace MisorientationAngleCalculator
 
   // function 3.4: X*Y is the matrix product of X and Y. ~twice~
   Real mtimes2Quaternion(const QuatReal & q1, const std::vector<QuatReal> & q2, const QuatReal & qTwin);  
-};
+}
