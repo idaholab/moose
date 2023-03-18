@@ -1,18 +1,16 @@
-# This simulation predicts GB migration of a 2D copper polycrystal with 100 grains represented with 18 order parameters
-# Mesh adaptivity and time step adaptivity are used
-# An AuxVariable is used to calculate the grain boundary locations
-# Postprocessors are used to record time step and the number of grains
+# This simulation was used to test the material class GrainTrackerMerge.
+
+my_filename = "case1_GrainTrackerMerge"
 
 [Mesh]
-  # Mesh block.  Meshes can be read in or automatically generated
   type = GeneratedMesh
-  dim = 2 # Problem dimension
+  dim = 2
   nx = 11 # Number of elements in the x-direction
   ny = 11 # Number of elements in the y-direction
   xmin = 0    # minimum x-coordinate of the mesh
-  xmax = 1000 # maximum x-coordinate of the mesh
+  xmax = 600 # maximum x-coordinate of the mesh
   ymin = 0    # minimum y-coordinate of the mesh
-  ymax = 1000 # maximum y-coordinate of the mesh
+  ymax = 600 # maximum y-coordinate of the mesh
   elem_type = QUAD4  # Type of elements used in the mesh
   uniform_refine = 3 # Initial uniform refinement of the mesh
 
@@ -23,6 +21,10 @@
   # Parameters used by several kernels that are defined globally to simplify input file
   op_num = 8 # Number of order parameters used
   var_name_base = gr # Base name of grains
+  grain_num = 10 # Number of grains
+
+  length_scale = 1.0e-9
+  time_scale = 1.0e-9
 []
 
 [Variables]
@@ -32,16 +34,24 @@
 []
 
 [UserObjects]
+  [./euler_angle_file]
+    type = EulerAngleFileReader
+    file_name = grn_10_test_2D.tex
+  [../]
   [./voronoi]
     type = PolycrystalVoronoi
-    grain_num = 100 # Number of grains
-    rand_seed = 10
+    coloring_algorithm = jp
+    rand_seed = 20
   [../]
   [./grain_tracker]
-    type = GrainTracker
+    type = GrainTrackerMerge
     threshold = 0.2
     connecting_threshold = 0.08
     compute_halo_maps = true # Only necessary for displaying HALOS
+    compute_var_to_feature_map = true
+
+    merge_grains_based_misorientaion = true
+    euler_angle_provider = euler_angle_file
   [../]
 []
 
@@ -54,9 +64,7 @@
 []
 
 [AuxVariables]
-  # Dependent variables
   [./bnds]
-    # Variable used to visualize the grain boundaries in the simulation
   [../]
   [./unique_grains]
     order = CONSTANT
@@ -74,19 +82,19 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./phi1]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 [Kernels]
-  # Kernel block, where the kernels defining the residual equations are set up.
   [./PolycrystalKernel]
-    # Custom action creating all necessary kernels for grain growth.  All input parameters are up in GlobalParams
   [../]
 []
 
 [AuxKernels]
-  # AuxKernel block, defining the equations used to calculate the auxvars
   [./bnds_aux]
-    # AuxKernel that calculates the GB term
     type = BndsCalcAux
     variable = bnds
     execute_on = 'initial timestep_end'
@@ -119,6 +127,14 @@
     field_display = HALOS
     execute_on = 'initial timestep_end'
   [../]
+  [./phi1]
+    type = OutputEulerAngles
+    variable = phi1
+    euler_angle_provider = euler_angle_file
+    grain_tracker = grain_tracker
+    output_euler_angle = 'phi1'
+    execute_on = 'initial timestep_end'
+  [../]
 []
 
 [BCs]
@@ -144,11 +160,34 @@
 
 [Postprocessors]
   # Scalar postprocessors
+  [./ngrains]
+    type = FeatureFloodCount
+    variable = bnds
+    threshold = 0.7
+  [../]    
+  [DOFs]
+    type = NumDOFs
+  []
   [./dt]
     # Outputs the current time step
     type = TimestepSize
   [../]
+  [./run_time]
+    type = PerfGraphData
+    section_name = "Root"
+    data_type = total
+  [../]
 []
+
+[VectorPostprocessors]
+  [./grain_volumes] 
+    type = FeatureVolumeVectorPostprocessor
+    flood_counter = grain_tracker # The FeatureFloodCount UserObject to get values from.
+    execute_on = 'initial timestep_end'
+    output_centroids = true
+  [../]
+[]
+
 
 [Executioner]
   type = Transient # Type of executioner, here it is transient with an adaptive time step
@@ -167,11 +206,11 @@
   nl_rel_tol = 1e-10 # Absolute tolerance for nonlienar solves
 
   start_time = 0.0
-  end_time = 3
+  num_steps = 10
 
   [./TimeStepper]
     type = IterationAdaptiveDT
-    dt = 25 # Initial time step.  In this simulation it changes.
+    dt = 1.5 # Initial time step.  In this simulation it changes.
     optimal_iterations = 6 # Time step will adapt to maintain this number of nonlinear iterations
   [../]
 
@@ -185,7 +224,11 @@
 []
 
 [Outputs]
-  exodus = true # Exodus file will be outputted
+  file_base = ./${my_filename}/out_${my_filename}
+  [my_exodus]
+    type = Exodus
+  [../]
+  print_linear_residuals = false
   csv = true
   [./console]
     type = Console

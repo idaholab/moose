@@ -5,7 +5,7 @@ registerMooseObject("PhaseFieldApp", GrainTrackerMerge);
 InputParameters
 GrainTrackerMerge::validParams()
 {
-  InputParameters params = GrainTrackerMerge::validParams();
+  InputParameters params = GrainTracker::validParams();
   params.addClassDescription("Grain Tracker derived object for merging of grains based on misorientation angle.");
   params.addRequiredParam<UserObjectName>("euler_angle_provider",
                                           "Name of Euler angle provider user object");
