@@ -1,14 +1,14 @@
 # Geometry
 D = 1.0
 total_len = '${fparse 40 * D}'
-L = '${fparse 10 * D}'
+L = '${fparse 20 * D}'
 nx = 50
 ny = 10
 
 # Crafted wall function
-Re = 1000000
+Re = 10000000
 rho = 1000.0
-bulk_u = 1.0
+bulk_u = 10.0
 mu = 1e-3
 # mu = '${fparse bulk_u * rho * D / Re}'
 
@@ -21,7 +21,7 @@ y_dist_wall = '${fparse D/ny/2}'
 mu_wall = '${fparse rho * pow(u_tau,2) * y_dist_wall / bulk_u}'
 
 # Crafted bulk viscosity
-turbulent_intensity = '${fparse 0.16 * pow(Re, -1.0/8.0)}'
+turbulent_intensity = 0.01 #'${fparse 0.16 * pow(Re, -1.0/8.0)}'
 C_mu = 0.09
 mixing_length = '${fparse D * 0.07}'
 k_bulk = '${fparse 3/2 * pow(bulk_u*turbulent_intensity, 2)}'
