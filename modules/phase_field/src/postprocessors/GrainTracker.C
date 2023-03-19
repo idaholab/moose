@@ -825,7 +825,7 @@ GrainTracker::trackGrains()
     }
 
     // When considering the grain merging function
-    if (_merge_grains_based_misorientaion && _t_step > 2)
+    if (_merge_grains_based_misorientaion)
       mergeGrainsBasedMisorientation();
 
     // Case 2 (inactive grains in _feature_sets_old)

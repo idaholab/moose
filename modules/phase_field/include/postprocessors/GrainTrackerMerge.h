@@ -22,4 +22,6 @@ protected:
 
   const EulerAngleProvider & _euler;
   MisorientationAngleData _s_misorientation_angle;  
+
+  std::map<unsigned int, unsigned int> _feature_id_to_index_maps;
 };

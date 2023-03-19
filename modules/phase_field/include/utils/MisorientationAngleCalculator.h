@@ -15,7 +15,7 @@ enum class QuatType {getTwinning, getSSymm, getCSymm};
 // Set the typical crystallographic structure
 enum class CrystalType {FCC, BCC, HCP};
 
-struct MisorientationAngleData{Real _misor; bool _is_twin; TwinType _twin_type = TwinType::NONE;};
+struct MisorientationAngleData{Real _misor = -1.0; bool _is_twin = false; TwinType _twin_type = TwinType::NONE;};
 
 /**
  * This is an orientation difference calculator, inspired by MTEX.

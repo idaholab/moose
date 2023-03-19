@@ -36,7 +36,11 @@ GrainTrackerMerge::mergeGrainsBasedMisorientation()
     EulerAngles angles_i = _euler.getEulerAngles(grain_i._id);
     for (const auto grain_num_j : index_range(grain_i._adjacent_id))
     {
-      auto & grain_j = _feature_sets[grain_i._adjacent_id[grain_num_j]];
+
+      // Obtain the feature set index corresponding to the grain ID 
+      auto & grain_j_index  = _feature_id_to_index_maps[grain_i._adjacent_id[grain_num_j]];
+
+      auto & grain_j = _feature_sets[grain_j_index];
 
       if (grain_j._status == Status::INACTIVE || grain_i._id >= grain_j._id)
         continue;
@@ -65,6 +69,8 @@ GrainTrackerMerge::createAdjacentIDVector()
   {
     auto & grain_i = _feature_sets[grain_num_i];
 
+    _feature_id_to_index_maps[grain_i._id] = grain_num_i;
+
     if (grain_i._status == Status::INACTIVE)
       continue;
 
@@ -75,8 +81,8 @@ GrainTrackerMerge::createAdjacentIDVector()
       if (grain_i._id < grain_j._id && grain_j._status != Status::INACTIVE 
           && grain_i.boundingBoxesIntersect(grain_j) && grain_i.halosIntersect(grain_j))
       {
-        grain_i._adjacent_id.push_back(grain_j._id); // It must be noted that the number stored in _adjacent_id is _feature_sets[i],
-        grain_j._adjacent_id.push_back(grain_i._id); // and the ID of the adjacent grain is _feature_sets[i]._id
+        grain_i._adjacent_id.push_back(grain_j._id); // It should be noted here that _adjacent_id ID is stored,
+        grain_j._adjacent_id.push_back(grain_i._id); // not _feature_sets index
       }
     }
 
