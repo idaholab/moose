@@ -1,14 +1,14 @@
 # Geometry
-D = 1.0
+D = 0.02
 total_len = '${fparse 40 * D}'
 L = '${fparse 20 * D}'
 nx = 50
 ny = 10
 
 # Crafted wall function
-Re = 10000000
+Re = 20000
 rho = 1000.0
-bulk_u = 10.0
+bulk_u = 1.0
 mu = 1e-3
 # mu = '${fparse bulk_u * rho * D / Re}'
 
@@ -282,6 +282,7 @@ velocity_interp_method = 'average'
     v = vel_y
     wall_treatement = false
     walls = 'top bottom'
+    non_equilibrium_treatement = false
     rf = 1.0
     execute_on = 'TIMESTEP_END'
   []
@@ -368,6 +369,17 @@ velocity_interp_method = 'average'
     boundary = 'left'
     variable = TKED
     value = ${eps_bulk}
+  []
+  [walls_mu_t]
+    type = INSFVTurbulentViscosityWallFunction
+    boundary = 'top bottom'
+    variable = mu_t
+    u = vel_x
+    v = vel_y
+    rho = ${rho}
+    mu = ${mu}
+    mu_t = mu_t
+    k = TKE
   []
   # [wall_TKED]
   #   type = INSFVTKEDWallFunction
