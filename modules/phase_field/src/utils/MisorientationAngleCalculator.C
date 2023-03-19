@@ -158,12 +158,18 @@ namespace MisorientationAngleCalculator
 
   Real dotOuterQuaternion(const QuatReal & rot1, const std::vector<QuatReal> & rot2)
   {
-    std::vector<Real> d_vec(rot2.size());
+    // std::vector<Real> d_vec(rot2.size());
 
+    Real d = 0;
+    Real temp = 0;
     for (const auto i : index_range(rot2))
-      d_vec[i] = std::abs(rot1.w()*rot2[i].w() + rot1.x()*rot2[i].x() + rot1.y()*rot2[i].y() + rot1.z()*rot2[i].z()); // rot1 * rot2'
+    {
+      temp = std::abs(rot1.w()*rot2[i].w() + rot1.x()*rot2[i].x() + rot1.y()*rot2[i].y() + rot1.z()*rot2[i].z()); // rot1 * rot2'
+      if (temp > d)
+        d = temp;
+    }
 
-    Real d = *std::max_element(d_vec.begin(), d_vec.end());
+    // Real d = *std::max_element(d_vec.begin(), d_vec.end());
 
     return d;
   }
