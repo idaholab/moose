@@ -825,7 +825,8 @@ GrainTracker::trackGrains()
     }
 
     // When considering the grain merging function
-    if (_merge_grains_based_misorientaion)
+    // The reason for _t_step > 2 is to allow reasonable refinement of the mesh at grain boundaries.
+    if (_merge_grains_based_misorientaion && _t_step > 2)
       mergeGrainsBasedMisorientation();
 
     // Case 2 (inactive grains in _feature_sets_old)
