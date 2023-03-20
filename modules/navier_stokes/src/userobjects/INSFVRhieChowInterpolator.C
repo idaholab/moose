@@ -137,9 +137,12 @@ INSFVRhieChowInterpolator::INSFVRhieChowInterpolator(const InputParameters & par
     if (blockIDs() != var.blockIDs())
       mooseError("Block restriction of interpolator user object '",
                  this->name(),
-                 "' doesn't match the block restriction of variable '",
+                 "' (",
+                 std::accumulate(blocks().begin(), blocks().end(), std::string{}),
+                 " ) doesn't match the block restriction of variable '",
                  var.name(),
-                 "'");
+                 "' ",
+                 std::accumulate(var.blocks().begin(), var.blocks().end(), std::string{}));
   };
 
   fill_container(NS::pressure, _ps);
