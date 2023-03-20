@@ -3,7 +3,6 @@
     type = 'CSVDiff'
     input = 'Isp_1ph.i'
     csvdiff = 'Isp_1ph_out.csv'
-    ad_indexing_type = 'global'
 
     issues = '#189'
     design = 'SpecificImpulse1Phase.md'

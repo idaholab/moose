@@ -21,7 +21,6 @@ public:
 
   static InputParameters validParams();
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   using INSFVVariable::adGradSln;
   const VectorValue<ADReal> & adGradSln(const Elem * const elem,
                                         bool correct_skewness = false) const override;
@@ -42,6 +41,4 @@ protected:
   getExtrapolatedBoundaryFaceValue(const FaceInfo & fi,
                                    bool two_term_expansion,
                                    const Elem * elem_side_to_extrapolate_from) const override;
-
-#endif
 };

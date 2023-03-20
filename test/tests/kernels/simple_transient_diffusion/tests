@@ -94,6 +94,5 @@
     requirement = 'The system shall be able to do on the fly time derivative and gradient evaluations of variable functors.'
     design = 'MooseVariableBase.md'
     issues = '#16809'
-    ad_indexing_type = 'global'
   []
 []

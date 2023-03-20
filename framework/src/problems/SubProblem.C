@@ -1053,7 +1053,6 @@ SubProblem::automaticScaling() const
   return systemBaseNonlinear(0).automaticScaling();
 }
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
 void
 SubProblem::hasScalingVector()
 {
@@ -1061,7 +1060,6 @@ SubProblem::hasScalingVector()
     for (const auto nl_sys_num : make_range(numNonlinearSystems()))
       assembly(tid, nl_sys_num).hasScalingVector();
 }
-#endif
 
 void
 SubProblem::clearAllDofIndices()

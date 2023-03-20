@@ -6,6 +6,5 @@
     input = 'natural_convection.i'
     csvdiff = 'natural_convection_out.csv'
     requirement = 'The system shall be able to compute the Rayleigh number in a natural convection flow simulation'
-    ad_indexing_type = 'global'
   []
 []

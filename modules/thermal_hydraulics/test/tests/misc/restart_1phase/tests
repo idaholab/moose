@@ -17,7 +17,6 @@
       Outputs/file_base=part1_out'
     recover = false
     abs_zero = 1e-7
-    ad_indexing_type = 'global'
   []
 
   [part2]

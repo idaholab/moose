@@ -33,11 +33,6 @@ INSFVAdvectionKernel::INSFVAdvectionKernel(const InputParameters & params)
   : FVFluxKernel(params),
     _rc_vel_provider(getUserObject<INSFVRhieChowInterpolator>("rhie_chow_user_object"))
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
-             "configure script in the root MOOSE directory with the configure option "
-             "'--with-ad-indexing-type=global'");
-#endif
   const bool need_more_ghosting =
       Moose::FV::setInterpolationMethods(*this, _advected_interp_method, _velocity_interp_method);
   if (need_more_ghosting && _tid == 0)

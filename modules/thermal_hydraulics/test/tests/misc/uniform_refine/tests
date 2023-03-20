@@ -6,7 +6,6 @@
     cli_args = '-r 1'
     recover = false
     mesh_mode = 'replicated'
-    ad_indexing_type = 'global'
 
     issues = "#226"
     design = "THMCreateMeshAction.md"

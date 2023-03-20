@@ -62,12 +62,6 @@ ComputeDynamicFrictionalForceLMMechanicalContact::ComputeDynamicFrictionalForceL
     _has_friction_function(isParamValid("function_friction")),
     _3d(_has_disp_z)
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError(
-      "ComputeFrictionalForceLMMechanicalContact relies on use of the global indexing container "
-      "in order to make its implementation feasible");
-#endif
-
   if (!_has_friction_function && !isParamValid("mu"))
     mooseError(
         "A coefficient of friction needs to be provided as a constant value of via a function.");
@@ -177,14 +171,12 @@ ComputeDynamicFrictionalForceLMMechanicalContact::post()
 {
   ComputeDynamicWeightedGapLMMechanicalContact::post();
 
-#ifdef MOOSE_SPARSE_AD
   Moose::Mortar::Contact::communicateVelocities(
       _dof_to_weighted_tangential_velocity, this->processor_id(), _mesh, _nodal, _communicator);
 
   if (_has_friction_function)
     Moose::Mortar::Contact::communicateVelocities(
         _dof_to_real_tangential_velocity, this->processor_id(), _mesh, _nodal, _communicator);
-#endif
 
   // Enforce frictional complementarity constraints
   for (const auto & pr : _dof_to_weighted_tangential_velocity)
@@ -218,14 +210,12 @@ ComputeDynamicFrictionalForceLMMechanicalContact::incorrectEdgeDroppingPost(
 {
   ComputeDynamicWeightedGapLMMechanicalContact::incorrectEdgeDroppingPost(inactive_lm_nodes);
 
-#ifdef MOOSE_SPARSE_AD
   Moose::Mortar::Contact::communicateVelocities(
       _dof_to_weighted_tangential_velocity, this->processor_id(), _mesh, _nodal, _communicator);
 
   if (_has_friction_function)
     Moose::Mortar::Contact::communicateVelocities(
         _dof_to_real_tangential_velocity, this->processor_id(), _mesh, _nodal, _communicator);
-#endif
 
   // Enforce frictional complementarity constraints
   for (const auto & pr : _dof_to_weighted_tangential_velocity)
@@ -324,12 +314,10 @@ ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(
     dof_residual_dir = term_1_y - term_2_y;
   }
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   _assembly.processResidualAndJacobian(
       dof_residual, friction_dof_indices[0], _vector_tags, _matrix_tags);
   _assembly.processResidualAndJacobian(
       dof_residual_dir, friction_dof_indices[1], _vector_tags, _matrix_tags);
-#endif
 }
 
 void
@@ -373,10 +361,8 @@ ComputeDynamicFrictionalForceLMMechanicalContact::enforceConstraintOnDof(
     dof_residual = term_1 - term_2;
   }
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   _assembly.processResidualAndJacobian(
       dof_residual, friction_dof_index, _vector_tags, _matrix_tags);
-#endif
 }
 
 ADReal

@@ -14,7 +14,6 @@
       input = test-fv.i
       exodiff = test-fv_out.e
       detail = 'segregating the solves using finite volume discretization; first the independent variable is solved for, and second the dependent variable is solved for using the solution of the first'
-      ad_indexing_type = 'global'
     []
     [monolithic]
       type = Exodiff

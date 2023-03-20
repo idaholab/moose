@@ -7,7 +7,6 @@
     csvdiff = 'flow_over_circle_out.csv'
     requirement = 'The system shall be able to solve transient flow resulting in vortex shedding in 2D using the finite volume method'
     cli_args = 'refinement=2 Executioner/end_time=2e-3 Outputs/file_base=flow_over_circle_out'
-    ad_indexing_type = global
     mesh_mode = replicated
     valgrind = 'none'
   []
@@ -17,7 +16,6 @@
     csvdiff = 'flow_over_circle-action_out.csv'
     requirement = 'The system shall be able to solve transient flow resulting in vortex shedding in 2D using the NSFVAction syntax'
     cli_args = 'refinement=2 Executioner/end_time=2e-3 Outputs/file_base=flow_over_circle-action_out'
-    ad_indexing_type = global
     mesh_mode = replicated
     valgrind = 'none'
   []

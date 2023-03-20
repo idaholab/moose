@@ -13,7 +13,6 @@
     cli_args = "Executioner/tao_solver=taolmvm"
     max_threads = 1
     valgrind = none
-    ad_indexing_type = 'global'
     recover = false
   []
   [Newton]
@@ -25,7 +24,6 @@
     csvdiff = main_out_OptimizationReporter_0001.csv
     cli_args = "Executioner/tao_solver=taonls"
     max_threads = 1
-    ad_indexing_type = 'global'
     recover = false
   []
 []

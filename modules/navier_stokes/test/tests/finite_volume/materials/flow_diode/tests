@@ -6,7 +6,6 @@
     requirement = 'The system shall be able to model a simple friction-based volumetric flow diode'
     input = 'friction.i'
     exodiff = friction_out.e
-    ad_indexing_type = 'global'
     # see #21185
     allow_warnings = true
   []

@@ -1747,7 +1747,6 @@ public:
                         const std::set<TagID> & vector_tags,
                         Real scaling_factor);
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   /**
    * Process the value and \p derivatives() data of a vector of \p ADReals. When using global
    * indexing, this method simply caches the value (residual) for the provided \p vector_tags and
@@ -1760,7 +1759,6 @@ public:
                                    const std::set<TagID> & vector_tags,
                                    const std::set<TagID> & matrix_tags,
                                    Real scaling_factor);
-#endif
 
   /**
    * Process the \p derivatives() data of a vector of \p ADReals. When using global indexing, this
@@ -1780,7 +1778,6 @@ public:
                        Real scaling_factor,
                        LocalFunctor & local_functor);
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   /**
    * Same as \p processResiduals with the exception that constrain_element_vector and
    * constrain_element_matrix will not be applied. This should only be used when the contributions
@@ -1799,7 +1796,6 @@ public:
    * doing residual and matrix assembly
    */
   void hasScalingVector();
-#endif
 
   /**
    * Modify the weights when using the arbitrary quadrature rule. The intention is to use this when
@@ -2669,10 +2665,8 @@ protected:
   mutable std::map<FEType, bool> _need_second_derivative_neighbor;
   mutable std::map<FEType, bool> _need_curl;
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   /// The map from global index to variable scaling factor
   const NumericVector<Real> * _scaling_vector = nullptr;
-#endif
 
   /// In place side element builder for _current_side_elem
   ElemSideBuilder _current_side_elem_builder;
@@ -2815,7 +2809,6 @@ Assembly::adGradPhi<RealVectorValue>(const MooseVariableFE<RealVectorValue> & v)
   return _ad_vector_grad_phi_data.at(v.feType());
 }
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
 inline void
 Assembly::processJacobian(const ADReal & residual,
                           const dof_id_type row_index,
@@ -2833,30 +2826,15 @@ Assembly::processJacobian(const ADReal & residual,
   for (std::size_t i = 0; i < column_indices.size(); ++i)
     cacheJacobian(row_index, column_indices[i], values[i] * scalar, matrix_tags);
 }
-#else
-inline void
-Assembly::processJacobian(const ADReal &, const dof_id_type, const std::set<TagID> &)
-{
-  mooseError("Not implemented for local AD indexing");
-}
-#endif
 
 template <typename LocalFunctor>
 void
 Assembly::processJacobian(const ADReal & residual,
                           const dof_id_type row_index,
                           const std::set<TagID> & matrix_tags,
-                          LocalFunctor &
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-                              local_functor
-#endif
-)
+                          LocalFunctor &)
 {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   processJacobian(residual, row_index, matrix_tags);
-#else
-  local_functor(residual, row_index, matrix_tags);
-#endif
 }
 
 template <typename LocalFunctor>
@@ -2864,22 +2842,10 @@ void
 Assembly::processJacobian(const std::vector<ADReal> & residuals,
                           const std::vector<dof_id_type> & input_row_indices,
                           const std::set<TagID> & matrix_tags,
-                          const Real
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-                              scaling_factor
-#endif
-                          ,
-                          LocalFunctor &
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-                              local_functor
-#endif
-)
+                          const Real scaling_factor,
+                          LocalFunctor &)
 {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   processResidualsAndJacobian(residuals, input_row_indices, {}, matrix_tags, scaling_factor);
-#else
-  local_functor(residuals, input_row_indices, matrix_tags);
-#endif
 }
 
 template <typename T>

@@ -10,7 +10,6 @@
       input = 'pressure_drop.i'
       csvdiff = 'pressure_drop_csv_pressure_vpp_FINAL.csv'
       rel_err = 1e-6
-      ad_indexing_type = 'global'
       cli_args = 'GlobalParams/rdg_slope_reconstruction=minmod Executioner/num_steps=5'
 
       detail = 'without a junction, and'
@@ -20,7 +19,6 @@
       input = 'pressure_drop_with_junction.i'
       csvdiff = 'pressure_drop_with_junction_csv_pressure_vpp_FINAL.csv'
       rel_err = 1e-6
-      ad_indexing_type = 'global'
       cli_args = 'GlobalParams/rdg_slope_reconstruction=minmod Executioner/num_steps=5'
 
       detail = 'with a junction.'

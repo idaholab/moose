@@ -85,12 +85,6 @@ PCNSFVKT::PCNSFVKT(const InputParameters & params)
     paramError("eqn",
                "If 'momentum' is specified for 'eqn', then you must provide a parameter "
                "value for 'momentum_component'");
-
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError(
-      "PCNSFVKT objects require global AD indexing because they require gradient "
-      "reconstruction. Please cd into the root of your MOOSE directory and run './configure'");
-#endif
 }
 
 std::pair<ADReal, ADReal>

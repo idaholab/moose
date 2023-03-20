@@ -3,7 +3,6 @@
     type = 'CSVDiff'
     input = 'phy.q_wall_multiple_3eqn.i'
     csvdiff = 'phy.q_wall_multiple_3eqn_out.csv'
-    ad_indexing_type = 'global'
   []
 
   [phy.energy_heatflux_ss_1phase]
@@ -11,6 +10,5 @@
     input = 'phy.energy_heatflux_ss_1phase.i'
     csvdiff = 'phy.energy_heatflux_ss_1phase_out.csv'
     abs_zero = 1e-8
-    ad_indexing_type = 'global'
   []
 []

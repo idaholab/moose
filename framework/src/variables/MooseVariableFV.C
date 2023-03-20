@@ -39,24 +39,18 @@ MooseVariableFV<OutputType>::validParams()
   params.set<MooseEnum>("order") = "CONSTANT";
   params.template addParam<bool>(
       "two_term_boundary_expansion",
-#ifdef MOOSE_GLOBAL_AD_INDEXING
       true,
-#else
-      false,
-#endif
       "Whether to use a two-term Taylor expansion to calculate boundary face values. "
       "If the two-term expansion is used, then the boundary face value depends on the "
       "adjoining cell center gradient, which itself depends on the boundary face value. "
       "Consequently an implicit solve is used to simultaneously solve for the adjoining cell "
       "center gradient and boundary face value(s).");
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   MooseEnum face_interp_method("average skewness-corrected", "average");
   params.template addParam<MooseEnum>("face_interp_method",
                                       face_interp_method,
                                       "Switch that can select between face interpoaltion methods.");
   params.template addParam<bool>(
       "cache_cell_gradients", true, "Whether to cache cell gradients or re-compute them.");
-#endif
   return params;
 }
 
@@ -78,22 +72,11 @@ MooseVariableFV<OutputType>::MooseVariableFV(const InputParameters & parameters)
     _prev_elem(nullptr),
     _two_term_boundary_expansion(this->isParamValid("two_term_boundary_expansion")
                                      ? this->template getParam<bool>("two_term_boundary_expansion")
-                                     :
-#ifdef MOOSE_GLOBAL_AD_INDEXING
-                                     true),
-#else
-                                     false),
-#endif
+                                     : true),
     _cache_cell_gradients(this->isParamValid("cache_cell_gradients")
                               ? this->template getParam<bool>("cache_cell_gradients")
                               : true)
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  if (_two_term_boundary_expansion)
-    this->paramError(
-        "two_term_boundary_expansion",
-        "Two term boundary expansion only works for global AD indexing configurations.");
-#endif
   _element_data = std::make_unique<MooseVariableDataFV<OutputType>>(
       *this, _sys, _tid, Moose::ElementType::Element, this->_assembly.elem());
   _neighbor_data = std::make_unique<MooseVariableDataFV<OutputType>>(
@@ -461,9 +444,6 @@ template <typename OutputType>
 ADReal
 MooseVariableFV<OutputType>::getElemValue(const Elem * const elem) const
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("MooseVariableFV::getElemValue only supported for global AD indexing");
-#endif
   mooseAssert(elem,
               "The elem shall exist! This typically occurs when the "
               "user wants to evaluate non-existing elements (nullptr) at physical boundaries.");
@@ -506,11 +486,6 @@ ADReal
 MooseVariableFV<OutputType>::getDirichletBoundaryFaceValue(
     const FaceInfo & fi, const Elem * const libmesh_dbg_var(elem)) const
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError(
-      "MooseVariableFV::getDirichletBoundaryFaceValue only supported for global AD indexing");
-#endif
-
   mooseAssert(isDirichletBoundaryFace(fi, elem),
               "This function should only be called on Dirichlet boundary faces.");
 
@@ -540,11 +515,6 @@ ADReal
 MooseVariableFV<OutputType>::getExtrapolatedBoundaryFaceValue(
     const FaceInfo & fi, bool two_term_expansion, const Elem * elem_to_extrapolate_from) const
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError(
-      "MooseVariableFV::getExtrapolatedBoundaryFaceValue only supported for global AD indexing");
-#endif
-
   mooseAssert(isExtrapolatedBoundaryFace(fi, elem_to_extrapolate_from),
               "This function should only be called on extrapolated boundary faces");
 
@@ -588,10 +558,6 @@ template <typename OutputType>
 ADReal
 MooseVariableFV<OutputType>::getBoundaryFaceValue(const FaceInfo & fi) const
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("MooseVariableFV::getBoundaryFaceValue only supported for global AD indexing");
-#endif
-
   mooseAssert(!this->isInternalFace(fi),
               "A boundary face value has been requested on an internal face.");
 
@@ -607,10 +573,6 @@ template <typename OutputType>
 const VectorValue<ADReal> &
 MooseVariableFV<OutputType>::adGradSln(const Elem * const elem, const bool correct_skewness) const
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("MooseVariableFV::adGradSln only supported for global AD indexing");
-#endif
-
   // We ensure that no caching takes place when we compute skewness-corrected
   // quantities.
   if (_cache_cell_gradients && !correct_skewness)
@@ -642,10 +604,6 @@ VectorValue<ADReal>
 MooseVariableFV<OutputType>::uncorrectedAdGradSln(const FaceInfo & fi,
                                                   const bool correct_skewness) const
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("MooseVariableFV::uncorrectedAdGradSln only supported for global AD indexing");
-#endif
-
   const bool var_defined_on_elem = this->hasBlocks(fi.elem().subdomain_id());
   const Elem * const elem_one = var_defined_on_elem ? &fi.elem() : fi.neighborPtr();
   const Elem * const elem_two = var_defined_on_elem ? fi.neighborPtr() : &fi.elem();
@@ -670,10 +628,6 @@ template <typename OutputType>
 VectorValue<ADReal>
 MooseVariableFV<OutputType>::adGradSln(const FaceInfo & fi, const bool correct_skewness) const
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("MooseVariableFV::adGradSln only supported for global AD indexing");
-#endif
-
   const bool var_defined_on_elem = this->hasBlocks(fi.elem().subdomain_id());
   const Elem * const elem = &fi.elem();
   const Elem * const neighbor = fi.neighborPtr();

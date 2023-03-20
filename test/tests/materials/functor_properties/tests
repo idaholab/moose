@@ -3,7 +3,6 @@
   issues = '#16809'
   [exo]
     type = Exodiff
-    ad_indexing_type = 'global'
     input = 1d_dirichlet.i
     exodiff = 1d_dirichlet_out.e
     requirement = 'The system shall be able to create material properties that can be evaluated on-the-fly provided geometric arguments.'
@@ -29,7 +28,6 @@
       type = Exodiff
       input = functor-mat-props.i
       exodiff = functor-mat-props_out.e
-      ad_indexing_type = 'global'
     []
   []
   [vector-functor]
@@ -37,7 +35,6 @@
     input = 'functor-vector-mat-props.i'
     exodiff = 'functor-vector-mat-props_out.e'
     design = 'FunctorVectorElementalAux.md'
-    ad_indexing_type = 'global'
     requirement = 'The system shall be able to transfer vector material properties to an auxiliary variable, on a per-component basis.'
   []
   [prop_caching]
@@ -48,7 +45,6 @@
       exodiff = prop-caching_out.e
       detail = 'at the beginning of timesteps'
       cli_args = "Materials/slow_prop/execute_on='timestep_begin'"
-      ad_indexing_type = 'global'
       method = '!dbg' # stl container checking takes forever
     []
     [always]
@@ -56,7 +52,6 @@
       input = prop-caching.i
       exodiff = prop-caching_out.e
       detail = 'always, so always perform evaluations'
-      ad_indexing_type = 'global'
       prereq = 'prop_caching/on_timestep_begin'
       method = '!dbg' # stl container checking takes forever
     []
@@ -67,7 +62,6 @@
       detail = 'on nonlinear iterations'
       cli_args = "Materials/slow_prop/execute_on='nonlinear'"
       prereq = 'prop_caching/always'
-      ad_indexing_type = 'global'
       method = '!dbg' # stl container checking takes forever
     []
     [on_linear]
@@ -77,13 +71,11 @@
       detail = 'on linear iterations'
       cli_args = "Materials/slow_prop/execute_on='linear'"
       prereq = 'prop_caching/on_nonlinear'
-      ad_indexing_type = 'global'
       method = '!dbg' # stl container checking takes forever
     []
   []
   [bad-functor-type-mixing]
     type = RunException
-    ad_indexing_type = 'global'
     input = wrong-type.i
     expect_err = 'We are requesting a non-AD functor from an AD object, but the true functor is AD. This means we could be dropping important derivatives. We will not allow this'
     requirement = 'The system shall error if an automatic differentiation (AD) object requests a non-AD functor when the functor is AD. This prevents potential dropping of derivative information.'
@@ -91,7 +83,6 @@
   []
   [prop_name_issue]
     type = RunException
-    ad_indexing_type = 'global'
     input = 1d_dirichlet.i
     expect_err = 'prop_names should not be the same as any of the prop_values'
     requirement = 'The system shall error if a functor material property is declared with the same name as another functor.'
@@ -100,7 +91,6 @@
   []
   [vector_prop_name_issue]
     type = RunException
-    ad_indexing_type = 'global'
     input = functor-vector-mat-props.i
     expect_err = 'prop_names should not be the same as any of the prop_values'
     requirement = 'The system shall error if a functor vector material property is declared with the same name as another functor.'
@@ -109,7 +99,6 @@
   []
   [elem_arg_caching]
     type = Exodiff
-    ad_indexing_type = 'global'
     input = 1d_dirichlet.i
     exodiff = elem-arg-caching.e
     cli_args = "Materials/functor/execute_on='linear nonlinear' Outputs/file_base=elem-arg-caching"

@@ -47,11 +47,6 @@ PINSFVMomentumFrictionCorrection::PINSFVMomentumFrictionCorrection(const InputPa
 {
   if (!_use_Darcy_friction_model && !_use_Forchheimer_friction_model)
     mooseError("At least one friction model needs to be specified.");
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("PINSFV is not supported by local AD indexing. In order to use PINSFV, please run "
-             "the configure script in the root MOOSE directory with the configure option "
-             "'--with-ad-indexing-type=global'");
-#endif
 }
 
 void
@@ -64,7 +59,6 @@ PINSFVMomentumFrictionCorrection::gatherRCData(const FaceInfo & fi)
   _normal = fi.normal();
   _face_type = fi.faceType(_var.name());
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   using namespace Moose::FV;
 
   const auto elem_face = elemArg();
@@ -150,5 +144,4 @@ PINSFVMomentumFrictionCorrection::gatherRCData(const FaceInfo & fi)
   const auto strong_resid = -diff_face * dudn;
 
   processResidualAndJacobian(strong_resid * (fi.faceArea() * fi.faceCoord()));
-#endif
 }

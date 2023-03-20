@@ -7,7 +7,6 @@
     test_case = TestSkewnessCorrectedStencil
     requirement = 'The system shall display first order convergence when using a skew-corrected average-based face-interpolation together with extrapolated BCs.'
     method = '!dbg'
-    ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
     valgrind = none
   []

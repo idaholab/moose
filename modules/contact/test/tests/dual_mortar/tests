@@ -12,7 +12,6 @@
                   'contact.'
     allow_warnings = true
     mesh_mode = REPLICATED
-    ad_indexing_type = 'global'
   []
   [std_contact]
     type = 'CSVDiff'
@@ -24,7 +23,6 @@
     requirement = 'The system shall converge and match the solution produced by dual mortar contact.'
     allow_warnings = true
     mesh_mode = REPLICATED
-    ad_indexing_type = 'global'
   []
   [dm_contact_precon]
     type = 'CSVDiff'
@@ -37,7 +35,6 @@
                   'variable condenstation with AMG.'
     allow_warnings = true
     mesh_mode = REPLICATED
-    ad_indexing_type = 'global'
   []
   [dm_contact_precon_no_adaptivity]
     type = 'CSVDiff'
@@ -50,7 +47,6 @@
                   'variable condenstation with AMG, by always condensing out the LMs.'
     allow_warnings = true
     mesh_mode = REPLICATED
-    ad_indexing_type = 'global'
   []
   [dm_contact_precon_full_dinv]
     type = 'CSVDiff'
@@ -64,6 +60,5 @@
                   'assuming diagonal coupling with the primal variable).'
     allow_warnings = true
     mesh_mode = REPLICATED
-    ad_indexing_type = 'global'
   []
 []

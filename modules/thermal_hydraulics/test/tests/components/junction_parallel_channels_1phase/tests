@@ -5,7 +5,6 @@
     # The gold file was actually produced with equal_area_no_junction.i and
     # then renamed to equal_area_with_junction_out.csv.
     csvdiff = 'equal_area_with_junction_out.csv'
-    ad_indexing_type = 'global'
   []
 
   [phy:unequal_area]
@@ -15,7 +14,6 @@
     abs_zero = 5e-5
     rel_err = 0
     recover = false
-    ad_indexing_type = 'global'
   []
 
   [phy:shower_syntax]
@@ -24,7 +22,6 @@
     check_input = true
     recover = false
     max_threads = 1
-    ad_indexing_type = 'global'
   []
 
   [phy:shower]
@@ -34,7 +31,6 @@
     abs_zero = 8e-8
     rel_err = 0
     heavy = true
-    ad_indexing_type = 'global'
   []
 
   [calorically_imperfect_gas]
@@ -43,7 +39,6 @@
     csvdiff = 'junction_with_calorifically_imperfect_gas_out.csv'
     abs_zero = 4e-5
     rel_err = 1e-5
-    ad_indexing_type = 'global'
   []
 
   # Tests conservation of mass and energy for 1-phase flow.
@@ -52,7 +47,6 @@
     input = 'conservation.i'
     csvdiff = 'conservation_out.csv'
     abs_zero = 2e-8
-    ad_indexing_type = 'global'
   []
 
   # error checking
@@ -68,7 +62,6 @@
     cli_args = "--error Components/junction/volume=1.0 Components/pipe2/orientation='0 1 0'"
     expect_err = "junction: Connected flow channels are not parallel, use "
     "VolumeJunction1Phase component instead."
-    ad_indexing_type = 'global'
   []
 
   # jacobian test
@@ -81,6 +74,5 @@
     allow_test_objects = true
     max_threads = 1
     max_parallel = 1
-    ad_indexing_type = 'global'
   []
 []

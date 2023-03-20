@@ -9,8 +9,6 @@
 
 #include "MortarContactUtils.h"
 
-#ifdef MOOSE_SPARSE_AD
-
 #include <tuple>
 
 namespace Moose
@@ -70,4 +68,3 @@ communicateGaps(
 }
 }
 }
-#endif

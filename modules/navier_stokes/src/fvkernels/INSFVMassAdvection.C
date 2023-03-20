@@ -24,11 +24,6 @@ INSFVMassAdvection::validParams()
 INSFVMassAdvection::INSFVMassAdvection(const InputParameters & params)
   : INSFVAdvectionKernel(params), _rho(getFunctor<ADReal>(NS::density))
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
-             "configure script in the root MOOSE directory with the configure option "
-             "'--with-ad-indexing-type=global'");
-#endif
 }
 
 ADReal

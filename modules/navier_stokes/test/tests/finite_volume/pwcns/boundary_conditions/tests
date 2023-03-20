@@ -4,7 +4,6 @@
     type = 'Exodiff'
     input = flux_bcs_mdot-action.i
     exodiff = flux_bcs_mdot-action_out.e
-    ad_indexing_type = 'global'
     abs_zero = 1e-9
     recover = false # see #19126
     issues = '#22038'

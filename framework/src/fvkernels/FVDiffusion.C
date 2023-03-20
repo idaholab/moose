@@ -33,13 +33,6 @@ FVDiffusion::FVDiffusion(const InputParameters & params)
     _coeff_interp_method(
         Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("coeff_interp_method")))
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError(
-      "FVDiffusion is not supported by local AD indexing. In order to use this object, please run "
-      "the configure script in the root MOOSE directory with the configure option "
-      "'--with-ad-indexing-type=global'. Note that global indexing is now the default "
-      "configuration for AD indexing type.");
-#endif
   if ((_var.faceInterpolationMethod() == Moose::FV::InterpMethod::SkewCorrectedAverage) &&
       (_tid == 0))
     adjustRMGhostLayers(std::max((unsigned short)(3), _pars.get<unsigned short>("ghost_layers")));

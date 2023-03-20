@@ -64,12 +64,6 @@ ComputeFrictionalForceLMMechanicalContact::ComputeFrictionalForceLMMechanicalCon
     _3d(_has_disp_z)
 
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError(
-      "ComputeFrictionalForceLMMechanicalContact relies on use of the global indexing container "
-      "in order to make its implementation feasible");
-#endif
-
   if (parameters.isParamSetByUser("mu") && _has_friction_function)
     paramError(
         "mu",
@@ -102,7 +96,6 @@ ComputeFrictionalForceLMMechanicalContact::ComputeFrictionalForceLMMechanicalCon
 void
 ComputeFrictionalForceLMMechanicalContact::computeQpProperties()
 {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   // Compute the value of _qp_gap
   ComputeWeightedGapLMMechanicalContact::computeQpProperties();
 
@@ -160,8 +153,6 @@ ComputeFrictionalForceLMMechanicalContact::computeQpProperties()
     _qp_real_tangential_velocity_nodal = relative_velocity;
     _qp_tangential_velocity_nodal = relative_velocity * (_JxW_msm[_qp] * _coord[_qp]);
   }
-
-#endif
 }
 
 void
@@ -221,15 +212,12 @@ ComputeFrictionalForceLMMechanicalContact::residualSetup()
 void
 ComputeFrictionalForceLMMechanicalContact::post()
 {
-
-#ifdef MOOSE_SPARSE_AD
   Moose::Mortar::Contact::communicateGaps(
       _dof_to_weighted_gap, this->processor_id(), _mesh, _nodal, _normalize_c, _communicator);
   Moose::Mortar::Contact::communicateVelocities(
       _dof_to_weighted_tangential_velocity, this->processor_id(), _mesh, _nodal, _communicator);
   Moose::Mortar::Contact::communicateVelocities(
       _dof_to_real_tangential_velocity, this->processor_id(), _mesh, _nodal, _communicator);
-#endif
 
   // Enforce frictional complementarity constraints
   for (const auto & pr : _dof_to_weighted_tangential_velocity)
@@ -258,14 +246,12 @@ void
 ComputeFrictionalForceLMMechanicalContact::incorrectEdgeDroppingPost(
     const std::unordered_set<const Node *> & inactive_lm_nodes)
 {
-#ifdef MOOSE_SPARSE_AD
   Moose::Mortar::Contact::communicateGaps(
       _dof_to_weighted_gap, this->processor_id(), _mesh, _nodal, _normalize_c, _communicator);
   Moose::Mortar::Contact::communicateVelocities(
       _dof_to_weighted_tangential_velocity, this->processor_id(), _mesh, _nodal, _communicator);
   Moose::Mortar::Contact::communicateVelocities(
       _dof_to_real_tangential_velocity, this->processor_id(), _mesh, _nodal, _communicator);
-#endif
 
   // Enforce frictional complementarity constraints
   for (const auto & pr : _dof_to_weighted_tangential_velocity)
@@ -363,12 +349,10 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof3d(const DofObj
     dof_residual_dir = term_1_y - term_2_y;
   }
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   _assembly.processResidualAndJacobian(
       dof_residual, friction_dof_indices[0], _vector_tags, _matrix_tags);
   _assembly.processResidualAndJacobian(
       dof_residual_dir, friction_dof_indices[1], _vector_tags, _matrix_tags);
-#endif
 }
 
 void
@@ -411,10 +395,8 @@ ComputeFrictionalForceLMMechanicalContact::enforceConstraintOnDof(const DofObjec
     dof_residual = term_1 - term_2;
   }
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   _assembly.processResidualAndJacobian(
       dof_residual, friction_dof_index, _vector_tags, _matrix_tags);
-#endif
 }
 
 ADReal

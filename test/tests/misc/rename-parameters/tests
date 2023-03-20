@@ -21,14 +21,12 @@
       csvdiff = rename-coupled-scalar-var_out.csv
       detail = 'coupled scalar variables'
       max_parallel = 1
-      ad_indexing_type = 'global'
     []
     [coupled-functor]
       type = CSVDiff
       input = rename-functor.i
       csvdiff = rename-functor_out.csv
       detail = 'functors'
-      ad_indexing_type = 'global'
     []
     [coupled-mat-prop]
       type = CSVDiff

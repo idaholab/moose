@@ -78,11 +78,6 @@ ComputeWeightedGapLMMechanicalContact::ComputeWeightedGapLMMechanicalContact(
     _disp_y_var(getVar("disp_y", 0)),
     _disp_z_var(_has_disp_z ? getVar("disp_z", 0) : nullptr)
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("ComputeWeightedGapLMMechanicalContact relies on use of the global indexing container "
-             "in order to make its implementation feasible");
-#endif
-
   if (!getParam<bool>("use_displaced_mesh"))
     paramError(
         "use_displaced_mesh",
@@ -101,7 +96,6 @@ ADReal ComputeWeightedGapLMMechanicalContact::computeQpResidual(Moose::MortarTyp
 void
 ComputeWeightedGapLMMechanicalContact::computeQpProperties()
 {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   // Trim interior node variable derivatives
   const auto & primary_ip_lowerd_map = amg().getPrimaryIpToLowerElementMap(
       *_lower_primary_elem, *_lower_primary_elem->interior_parent(), *_lower_secondary_elem);
@@ -146,7 +140,6 @@ ComputeWeightedGapLMMechanicalContact::computeQpProperties()
 
   // To do normalization of constraint coefficient (c_n)
   _qp_factor = _JxW_msm[_qp] * _coord[_qp];
-#endif
 }
 
 void
@@ -213,10 +206,8 @@ ComputeWeightedGapLMMechanicalContact::computeJacobian(const Moose::MortarType m
 void
 ComputeWeightedGapLMMechanicalContact::post()
 {
-#ifdef MOOSE_SPARSE_AD
   Moose::Mortar::Contact::communicateGaps(
       _dof_to_weighted_gap, this->processor_id(), _mesh, _nodal, _normalize_c, _communicator);
-#endif
 
   for (const auto & pr : _dof_to_weighted_gap)
   {
@@ -234,10 +225,8 @@ void
 ComputeWeightedGapLMMechanicalContact::incorrectEdgeDroppingPost(
     const std::unordered_set<const Node *> & inactive_lm_nodes)
 {
-#ifdef MOOSE_SPARSE_AD
   Moose::Mortar::Contact::communicateGaps(
       _dof_to_weighted_gap, this->processor_id(), _mesh, _nodal, _normalize_c, _communicator);
-#endif
 
   for (const auto & pr : _dof_to_weighted_gap)
   {
@@ -264,7 +253,5 @@ ComputeWeightedGapLMMechanicalContact::enforceConstraintOnDof(const DofObject * 
 
   const ADReal dof_residual = std::min(lm_value, weighted_gap * c);
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   _assembly.processResidualAndJacobian(dof_residual, dof_index, _vector_tags, _matrix_tags);
-#endif
 }

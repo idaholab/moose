@@ -27,7 +27,6 @@
       exodiff = 'pps_old_value_fv_out.e'
 
       detail = 'and FV variables.'
-      ad_indexing_type = 'global'
     []
   []
 []

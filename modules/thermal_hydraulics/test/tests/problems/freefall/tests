@@ -3,6 +3,5 @@
     type = CSVDiff
     input = 'freefall.i'
     csvdiff = 'freefall_out.csv'
-    ad_indexing_type = 'global'
   []
 []

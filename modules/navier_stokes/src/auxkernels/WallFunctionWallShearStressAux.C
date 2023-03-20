@@ -42,12 +42,6 @@ WallFunctionWallShearStressAux::WallFunctionWallShearStressAux(const InputParame
     _mu(getFunctor<ADReal>("mu")),
     _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls"))
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
-             "configure script in the root MOOSE directory with the configure option "
-             "'--with-ad-indexing-type=global'");
-#endif
-
   if (!_u_var)
     paramError("u", "the u velocity must be an INSFVVelocityVariable.");
 

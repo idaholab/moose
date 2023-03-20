@@ -8,6 +8,5 @@
     allow_test_objects = true
     max_threads = 1
     max_parallel = 1
-    ad_indexing_type = 'global'
   []
 []

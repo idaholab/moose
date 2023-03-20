@@ -7,7 +7,6 @@
       type = Exodiff
       input = convection_cavity.i
       exodiff = 'convection_cavity_out.e'
-      ad_indexing_type = 'global'
       detail = 'for a cavity problem'
       max_parallel = 1
     []
@@ -15,7 +14,6 @@
       type = Exodiff
       input = convection_channel.i
       exodiff = 'convection_channel_out.e'
-      ad_indexing_type = 'global'
       detail = 'and for a channel problem.'
     []
   []

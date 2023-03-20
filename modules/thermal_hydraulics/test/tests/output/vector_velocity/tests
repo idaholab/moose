@@ -3,7 +3,6 @@
     type = Exodiff
     input = 'test.i'
     exodiff = 'test_out.e'
-    ad_indexing_type = 'global'
     recover = false
   []
 []

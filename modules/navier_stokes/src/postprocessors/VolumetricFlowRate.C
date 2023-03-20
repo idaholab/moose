@@ -119,7 +119,6 @@ VolumetricFlowRate::meshChanged()
 Real
 VolumetricFlowRate::computeFaceInfoIntegral([[maybe_unused]] const FaceInfo * fi)
 {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   mooseAssert(fi, "We should have a face info in " + name());
   mooseAssert(_adv_quant, "We should have an advected quantity in " + name());
 
@@ -148,10 +147,6 @@ VolumetricFlowRate::computeFaceInfoIntegral([[maybe_unused]] const FaceInfo * fi
                                       nullptr})));
     return fi->normal() * adv_quant_face * vel;
   }
-
-#else
-  mooseError("FaceInfo integration is not defined for local AD indexing");
-#endif
 }
 
 Real

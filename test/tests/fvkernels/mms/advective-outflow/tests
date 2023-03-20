@@ -6,14 +6,12 @@
     input = advection-diffusion.i
     exodiff = advection-diffusion_out.e
     requirement = 'The system shall be able to to solve an advection-diffusion equation with a dirichlet condition on the left boundary and a zero gradient condition on the right boundary and display second order convergence with the finite volume method.'
-    ad_indexing_type = 'global'
   []
   [outflow]
     type = PythonUnitTest
     input = test.py
     test_case = TestOutflow
     requirement = 'The system shall, while using an advective outflow boundary condition, demonstrate second order convergence if a two term Taylor series is used to approximate the face value and first order convergence if a one term Taylor series is used.'
-    ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
     method = '!dbg'
   []
@@ -23,7 +21,6 @@
     test_case = TestExtrapolation
     issues = '#16169'
     requirement = 'The system shall be able to do one-term and two-term Taylor expansions for extrapolating finite volume solutions to boundary faces, and these extrapolations should be usable by flux kernels at inflow/outflow boundaries to produce first and second order accurate solutions respectively as measured by an L2 norm.'
-    ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
     method = '!dbg'
   []
@@ -31,7 +28,6 @@
     type = PythonUnitTest
     input = test.py
     test_case = UpwindLimiter
-    ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
     requirement = 'The system shall display first order convergence with an upwind limiter.'
     method = '!dbg'
@@ -40,7 +36,6 @@
     type = PythonUnitTest
     input = test.py
     test_case = CentralDifferenceLimiter
-    ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
     requirement = 'The system shall display second order convergence with a central-differencing limiter.'
     method = '!dbg'
@@ -49,7 +44,6 @@
     type = PythonUnitTest
     input = test.py
     test_case = VanLeerLimiter
-    ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
     requirement = 'The system shall display second order convergence with a Van-Leer limiter.'
     method = '!dbg'
@@ -58,7 +52,6 @@
     type = PythonUnitTest
     input = test.py
     test_case = MinModLimiter
-    ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
     requirement = 'The system shall display second order convergence with a min-mod limiter.'
     method = '!dbg'
@@ -67,7 +60,6 @@
     type = PythonUnitTest
     input = test.py
     test_case = SOULimiter
-    ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
     requirement = 'The system shall display second order convergence with a second-order-upwind limiter.'
     method = '!dbg'
@@ -76,7 +68,6 @@
     type = PythonUnitTest
     input = test.py
     test_case = QUICKLimiter
-    ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
     requirement = 'The system shall display second order convergence with a QUICK limiter.'
     heavy = true
@@ -87,7 +78,6 @@
       type = PythonUnitTest
       input = test.py
       test_case = KTLimitedCD
-      ad_indexing_type = 'global'
       required_python_packages = 'pandas matplotlib'
       detail = 'with central difference interpolation of face values and resulting second order convergence'
       method = '!dbg'
@@ -96,7 +86,6 @@
       type = PythonUnitTest
       input = test.py
       test_case = KTLimitedUpwind
-      ad_indexing_type = 'global'
       required_python_packages = 'pandas matplotlib'
       detail = 'with upwind interpolation of face values and resulting first order convergence'
       method = '!dbg'
@@ -105,7 +94,6 @@
       type = PythonUnitTest
       input = test.py
       test_case = KTLimitedVanLeer
-      ad_indexing_type = 'global'
       required_python_packages = 'pandas matplotlib'
       detail = 'with central difference interpolation with Van-Leer limiting of face values and resulting two and a half order convergence' # I don't actually know where this additional half order is coming from
       method = '!dbg'

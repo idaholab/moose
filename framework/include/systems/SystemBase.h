@@ -861,12 +861,10 @@ public:
   /// Whether or not there are variables to be restarted from an Exodus mesh file
   bool hasVarCopy() const { return _var_to_copy.size() > 0; }
 
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   /**
    * Add the scaling factor vector to the system
    */
   void addScalingVector();
-#endif
 
   /**
    * Whether or not the solution states have been initialized via initSolutionState()

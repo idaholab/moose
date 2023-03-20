@@ -6,21 +6,18 @@
     input = 'lid-driven.i'
     exodiff = 'lid-driven_out.e'
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a lid-driven cavity using the finite volume method.'
-    ad_indexing_type = 'global'
   []
   [exo-action]
     type = 'Exodiff'
     input = 'lid-driven-action.i'
     exodiff = 'lid-driven-action_out.e'
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a lid-driven cavity using the finite volume Navier-Stokes action.'
-    ad_indexing_type = 'global'
   []
   [point-pressure]
     type = 'Exodiff'
     input = 'lid-driven.i'
     exodiff = 'lid-driven-point-pressure.e'
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a lid-driven cavity by fixing the point value of the pressure at a certain coordinate.'
-    ad_indexing_type = 'global'
     cli_args = "FVKernels/mean_zero_pressure/type='FVPointValueConstraint' FVKernels/mean_zero_pressure/point='0.001 0.099 0.0' Outputs/file_base='lid-driven-point-pressure'"
   []
   [point-pressure-action]
@@ -28,7 +25,6 @@
     input = 'lid-driven-action.i'
     exodiff = 'lid-driven-point-pressure-action.e'
     requirement = 'The system shall be able to solve the incompressible Navier-Stokes equations in a lid-driven cavity by fixing the point value of the pressure at a certain coordinate using the NSFV action syntax.'
-    ad_indexing_type = 'global'
     cli_args = "Modules/NavierStokesFV/pinned_pressure_type=point-value Modules/NavierStokesFV/pinned_pressure_point='0.001 0.099 0.0' Outputs/file_base='lid-driven-point-pressure-action'"
   []
   [point-pressure-action-error]
@@ -36,7 +32,6 @@
     input = 'lid-driven-action.i'
     requirement = 'The system shall throw an error if the user requests integral value pressure pinning while specifying a point for the pin.'
     expect_err = "This parameter should not be given by the user with the corresponding pinned_pressure_type setting!"
-    ad_indexing_type = 'global'
     cli_args = "Modules/NavierStokesFV/pinned_pressure_point='0.001 0.099 0.0'"
   []
   [nonsingular]
@@ -46,7 +41,6 @@
     expect_out = '0 of 49 singular values'
     absent_out = '\s+[1-9]+[0-9]* of 49 singular values'
     requirement = 'The system shall be able to solve an incompressible Navier-Stokes problem with dirichlet boundary conditions for all the normal components of velocity, using the finite volume method, and have a nonsingular system matrix.'
-    ad_indexing_type = 'global'
   []
   [jacobian]
     type = 'PetscJacobianTester'
@@ -54,7 +48,6 @@
     cli_args = 'Mesh/gen/nx=2 Mesh/gen/ny=2 Executioner/num_steps=1'
     requirement = 'The system shall be able to compute a perfect Jacobian when solving a lid-driven incompressible Navier-Stokes problem with the finite volume method.'
     run_sim = True
-    ad_indexing_type = 'global'
     ratio_tol = 1e-7
     difference_tol = 1e-7
   []
@@ -64,7 +57,6 @@
     exodiff = 'lid-driven-with-energy_out.e'
     requirement = 'The system shall be able to transport scalar quantities using the simultaneously calculated velocity field from the incompressible Navier Stokes equations.'
     method = '!dbg'
-    ad_indexing_type = 'global'
     valgrind = HEAVY
     cli_args = '-pc_type lu -pc_factor_shift_type NONZERO'
   []
@@ -74,7 +66,6 @@
     exodiff = 'lid-driven-with-energy-action_out.e'
     requirement = 'The system shall be able to get the same result as the enthalpy transport example using the NSFVAction to set up the run.'
     method = '!dbg'
-    ad_indexing_type = 'global'
     valgrind = HEAVY
     cli_args = '-pc_type lu -pc_factor_shift_type NONZERO'
   []
@@ -84,7 +75,6 @@
     exodiff = 'transient-lid-driven-with-energy_out.e'
     requirement = 'The system shall be able to transport scalar quantities using the simultaneously calculated velocity field from the transient incompressible Navier Stokes equations.'
     method = '!dbg'
-    ad_indexing_type = 'global'
     valgrind = 'none'
     cli_args = '-pc_type lu -pc_factor_shift_type NONZERO'
   []
@@ -92,7 +82,6 @@
     type = 'Exodiff'
     input = 'rz-gravity-quiescent-fluid.i'
     exodiff = 'rz-gravity-quiescent-fluid_out.e'
-    ad_indexing_type = 'global'
     requirement = 'The system shall yield a quiescent fluid in an axisymmetric coordinate system with a gravitational force applied and Rhie-Chow interpolation used for the velocity field.'
   []
   [quiescent_jac]
@@ -101,7 +90,6 @@
     input = rz-gravity-quiescent-fluid.i
     prereq = quiescent
     cli_args = 'Mesh/gen/nx=3 Mesh/gen/ny=3 Executioner/automatic_scaling=true Executioner/off_diagonals_in_auto_scaling=true'
-    ad_indexing_type = 'global'
     requirement = 'The system shall compute an accurate Jacobian when a scaling factor is applied to a scalar variable.'
     difference_tol = 1e-7
   []

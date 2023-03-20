@@ -29,24 +29,16 @@ FVScalarLagrangeMultiplierConstraint::FVScalarLagrangeMultiplierConstraint(
     _lambda_var(*getScalarVar("lambda", 0)),
     _lambda(adCoupledScalarValue("lambda"))
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError(
-      "FVScalarLagrangeMultiplierConstraint is not supported by local AD indexing. In order to use "
-      "FVScalarLagrangeMultiplierConstraint, please run the configure script in the root MOOSE "
-      "directory with the configure option '--with-ad-indexing-type=global'");
-#endif
 }
 
 void
 FVScalarLagrangeMultiplierConstraint::computeResidualAndJacobian()
 {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   const auto volume = _assembly.elemVolume();
   _assembly.processResidualAndJacobian(
       _lambda[0] * volume, _var.dofIndices()[0], _vector_tags, _matrix_tags);
   _assembly.processResidualAndJacobian(
       computeQpResidual() * volume, _lambda_var.dofIndices()[0], _vector_tags, _matrix_tags);
-#endif
 }
 
 void
@@ -75,7 +67,6 @@ FVScalarLagrangeMultiplierConstraint::computeJacobian()
 void
 FVScalarLagrangeMultiplierConstraint::computeOffDiagJacobian()
 {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   // Primal
   mooseAssert(_lambda.size() == 1 && _lambda_var.order() == 1,
               "The lambda variable should be first order");
@@ -87,5 +78,4 @@ FVScalarLagrangeMultiplierConstraint::computeOffDiagJacobian()
   const auto lm_r = computeQpResidual() * _assembly.elemVolume();
   mooseAssert(_lambda_var.dofIndices().size() == 1, "We should only have one dof");
   _assembly.processJacobian(lm_r, _lambda_var.dofIndices()[0], _matrix_tags);
-#endif
 }

@@ -45,11 +45,6 @@ PINSFVEnergyAnisotropicDiffusion::PINSFVEnergyAnisotropicDiffusion(const InputPa
     _k_interp_method(
         Moose::FV::selectInterpolationMethod(getParam<MooseEnum>("kappa_interp_method")))
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("PINSFV is not supported by local AD indexing. In order to use PINSFV, please run the "
-             "configure script in the root MOOSE directory with the configure option "
-             "'--with-ad-indexing-type=global'");
-#endif
   if (!dynamic_cast<INSFVEnergyVariable *>(&_var))
     mooseError(
         "PINSFVEnergyAnisotropicDiffusion may only be used with a fluid temperature variable, "

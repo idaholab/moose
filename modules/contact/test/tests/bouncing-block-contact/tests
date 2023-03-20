@@ -212,7 +212,6 @@
       detail = 'using equal, first order bases for displacements and the lagrange multiplier'
       cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
                  "Postprocessors/active=''"
-      ad_indexing_type = 'global'
     []
     [mixed_order]
       type = 'Exodiff'
@@ -222,7 +221,6 @@
                'lagrange multiplier'
       cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Executioner/end_time=50 "
                  "Postprocessors/active=''"
-      ad_indexing_type = 'global'
       min_ad_size = '73'
     []
     [equal_order_edge_dropping]
@@ -232,7 +230,6 @@
       detail = 'using equal, first order bases for displacements and the lagrange multiplier with correct edge dropping'
       cli_args = "Mesh/file=long-bottom-block-1elem-blocks-coarse.e Constraints/weighted_gap_lm/correct_edge_dropping=true Executioner/end_time=50 Outputs/exodus=true Outputs/file_base=frictionless-weighted-gap-edge-dropping_out "
                  "Postprocessors/active=''"
-      ad_indexing_type = 'global'
     []
   []
   [weighted_vel_pdass]
@@ -245,7 +242,6 @@
       exodiff = 'frictional-nodal-min-normal-lm-mortar-pdass-tangential-lm-mortar-disp_out.e'
       detail = 'using verbose input file'
       cli_args = "Postprocessors/active=''"
-      ad_indexing_type = 'global'
       abs_zero = 5e-9
     []
     [action]
@@ -254,7 +250,6 @@
       exodiff = 'frictional-nodal-min-normal-lm-mortar-pdass-tangential-lm-mortar-action_out.e'
       detail = 'using the contact action'
       cli_args = "Postprocessors/active=''"
-      ad_indexing_type = 'global'
       abs_zero = 5e-9
     []
   []
@@ -262,7 +257,6 @@
     type = 'Exodiff'
     input = 'variational-frictional.i'
     exodiff = 'variational-frictional_out.e'
-    ad_indexing_type = 'global'
     cli_args = 'Outputs/hide=procid'
     requirement = 'The system shall be able to solve a frictional, variationally consistent, mortar mechanical contact problem in which the secondary side of the contact interface is split between processes when run in parallel.'
     method = "!dbg"
@@ -275,7 +269,6 @@
     requirement = 'The system shall not attempt to zero Lagrange multipliers that do not exist on inactive nodes.'
     method = "!dbg"
     valgrind = 'heavy'
-    ad_indexing_type = 'global'
     min_ad_size = '100'
   []
 []

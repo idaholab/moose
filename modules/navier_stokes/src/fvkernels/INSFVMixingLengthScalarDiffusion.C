@@ -39,12 +39,6 @@ INSFVMixingLengthScalarDiffusion::INSFVMixingLengthScalarDiffusion(const InputPa
     _mixing_len(getFunctor<ADReal>("mixing_length")),
     _schmidt_number(getParam<Real>("schmidt_number"))
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("INSFV is not supported by local AD indexing. In order to use INSFV, please run the "
-             "configure script in the root MOOSE directory with the configure option "
-             "'--with-ad-indexing-type=global'");
-#endif
-
   if (_dim >= 2 && !_v)
     mooseError(
         "In two or more dimensions, the v velocity must be supplied using the 'v' parameter");
@@ -55,7 +49,6 @@ INSFVMixingLengthScalarDiffusion::INSFVMixingLengthScalarDiffusion(const InputPa
 ADReal
 INSFVMixingLengthScalarDiffusion::computeQpResidual()
 {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   constexpr Real offset = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
 
   auto face = makeCDFace(*_face_info);
@@ -91,9 +84,4 @@ INSFVMixingLengthScalarDiffusion::computeQpResidual()
   // Compute the diffusive flux of the scalar variable
   auto dudn = gradUDotNormal();
   return -1 * eddy_diff * dudn;
-
-#else
-  return 0;
-
-#endif
 }

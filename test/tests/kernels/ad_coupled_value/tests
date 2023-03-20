@@ -34,16 +34,6 @@
     issues = "#12996"
     max_parallel = 4
   []
-  [test_ad_output]
-    type = 'RunApp'
-    input = 'ad_coupled_value.i'
-    expect_out = 'AD size required:\s+27'
-    requirement = 'The system will output the required number of derivative entries needed for automatic differentiation calculations'
-    design = 'DualReal.md'
-    cli_args = 'Outputs/exodus=false'
-    issues = '#5658'
-    ad_mode = 'NONSPARSE'
-  []
   [no_mallocs_pjfnk]
     type = Exodiff
     prereq = 'test'
@@ -52,7 +42,6 @@
     cli_args = 'Outputs/file_base=pjfnk Executioner/solve_type=PJFNK Executioner/nl_max_its=3 Executioner/l_tol=1e-5'
     issues = '#16396'
     requirement = 'The system shall automatically generate a full coupling matrix when doing global AD indexing such that there are no new matrix memory allocations.'
-    ad_indexing_type = 'global'
   []
   [perfect_jac_pjfnk_global_ad]
     type = PetscJacobianTester
@@ -63,7 +52,6 @@
     difference_tol = 1e-6
     issues = '#16396'
     requirement = 'The system shall automatically generate a full coupling matrix when doing global AD indexing, resulting in a perfect Jacobian even when the user has not requested full coupling.'
-    ad_indexing_type = 'global'
   []
   [trust_user_and_then_error]
     type = RunException
@@ -71,7 +59,6 @@
     cli_args = "Outputs/exodus=false Executioner/solve_type=PJFNK Preconditioning/active='smp' Preconditioning/smp/trust_my_coupling=true"
     issues = '#16396'
     requirement = 'The system shall allow the user to override the automated generation of a full coupling matrix when doing global AD indexing, which for this test results in a new nonzero allocation because there is off-diagonal coupling.'
-    ad_indexing_type = 'global'
     expect_err = 'New nonzero.*caused a malloc'
   []
 []

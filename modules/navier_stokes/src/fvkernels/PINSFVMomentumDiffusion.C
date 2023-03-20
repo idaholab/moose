@@ -29,11 +29,6 @@ PINSFVMomentumDiffusion::validParams()
 PINSFVMomentumDiffusion::PINSFVMomentumDiffusion(const InputParameters & params)
   : INSFVMomentumDiffusion(params), _eps(getFunctor<ADReal>(NS::porosity))
 {
-#ifndef MOOSE_GLOBAL_AD_INDEXING
-  mooseError("PINSFV is not supported by local AD indexing. In order to use PINSFV, please run "
-             "the configure script in the root MOOSE directory with the configure option "
-             "'--with-ad-indexing-type=global'");
-#endif
   if (!dynamic_cast<PINSFVSuperficialVelocityVariable *>(&_var))
     mooseError("PINSFVMomentumDiffusion may only be used with a superficial velocity "
                "variable, of variable type PINSFVSuperficialVelocityVariable.");
@@ -42,7 +37,6 @@ PINSFVMomentumDiffusion::PINSFVMomentumDiffusion(const InputParameters & params)
 ADReal
 PINSFVMomentumDiffusion::computeStrongResidual()
 {
-#ifdef MOOSE_GLOBAL_AD_INDEXING
   using namespace Moose::FV;
 
   const bool has_elem = (_face_type == FaceInfo::VarFaceNeighbors::ELEM ||
@@ -120,7 +114,4 @@ PINSFVMomentumDiffusion::computeStrongResidual()
   residual -= coeff_face * grad_eps_face * _normal;
 
   return -residual;
-#else
-  return 0;
-#endif
 }

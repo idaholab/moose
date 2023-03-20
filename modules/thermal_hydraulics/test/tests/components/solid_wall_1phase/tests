@@ -4,7 +4,6 @@
     type = 'Exodiff'
     input = 'phy.3eqn.i'
     exodiff = 'phy.3eqn_out.e'
-    ad_indexing_type = 'global'
   []
 
   [jacobian]
@@ -14,6 +13,5 @@
     difference_tol = 2100
     cli_args = 'Debug/check_jacobian=true'
     max_parallel = 1
-    ad_indexing_type = 'global'
   []
 []

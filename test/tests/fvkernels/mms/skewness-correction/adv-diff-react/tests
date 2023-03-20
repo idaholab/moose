@@ -7,7 +7,6 @@
     test_case = TestAverageStencil
     requirement = 'The system shall display first order convergence with regular face averaging in an advection diffusion problem.'
     method = '!dbg'
-    ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
     valgrind = none
   []
@@ -17,7 +16,6 @@
     test_case = TestSkewnessCorrectedStencil
     requirement = 'The system shall display second order convergence with skew-corrected face averaging for the diffusion term in an advection diffusion problem.'
     method = '!dbg'
-    ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
     valgrind = none
   []
@@ -27,7 +25,6 @@
     test_case = TestSkewnessCorrectedDiffAdvStencil
     requirement = 'The system shall display second order convergence with skew-corrected face averaging for the diffusion and advection terms in an advection diffusion problem.'
     method = '!dbg'
-    ad_indexing_type = 'global'
     required_python_packages = 'pandas matplotlib'
     valgrind = none
   []

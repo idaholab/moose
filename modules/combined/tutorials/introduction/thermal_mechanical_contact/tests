@@ -3,12 +3,10 @@
     type = RunApp
     input = thermomech_cont_step01.i
     check_input = True
-    ad_indexing_type = 'global'
   []
   [thermomech_cont_step02]
     type = RunApp
     input = thermomech_cont_step02.i
     check_input = True
-    ad_indexing_type = 'global'
   []
 []

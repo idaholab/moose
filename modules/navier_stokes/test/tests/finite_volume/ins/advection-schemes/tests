@@ -8,7 +8,6 @@
       input = 'test.i'
       exodiff = sou.e
       cli_args = 'GlobalParams/advected_interp_method=sou Outputs/file_base=sou'
-      ad_indexing_type = 'global'
       detail = 'second-order upwind'
     []
     [vanLeer]
@@ -16,7 +15,6 @@
       input = 'test.i'
       exodiff = vanLeer.e
       cli_args = 'GlobalParams/advected_interp_method=vanLeer Outputs/file_base=vanLeer'
-      ad_indexing_type = 'global'
       detail = 'van Leer'
     []
     [min_mod]
@@ -24,7 +22,6 @@
       input = 'test.i'
       exodiff = min_mod.e
       cli_args = 'GlobalParams/advected_interp_method=min_mod Outputs/file_base=min_mod'
-      ad_indexing_type = 'global'
       detail = 'min-mod'
     []
     [quick]
@@ -32,7 +29,6 @@
       input = 'test.i'
       exodiff = quick.e
       cli_args = 'GlobalParams/advected_interp_method=quick Outputs/file_base=quick'
-      ad_indexing_type = 'global'
       detail = 'QUICK'
     []
   []
