@@ -61,10 +61,9 @@
                   'of those variables.'
   []
   [abs_ref_acceptable]
-    type = 'CSVDiff'
+    type = 'RunApp'
     input = 'abs_ref_acceptable.i'
-    csvdiff = 'abs_ref_acceptable_out.csv'
-    rel_err = 1e-3
+    expect_out = 'Converged due to ACCEPTABLE tolerances'
     requirement = 'The system shall have the ability to base convergence on the comparison of L2 normalization of the residual for '
                   'individual variables to the sum of the L2 normalization of the absolute value of the residual contributions '
                   'of those variables using an acceptable tolerance past a given number of nonlinear iterations.'
