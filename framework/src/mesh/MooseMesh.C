@@ -3429,6 +3429,15 @@ MooseMesh::partitioning()
   return partitioning;
 }
 
+MooseEnum
+MooseMesh::elemTypes()
+{
+  MooseEnum elemTypes(
+      "EDGE EDGE2 EDGE3 EDGE4 QUAD QUAD4 QUAD8 QUAD9 TRI3 TRI6 HEX HEX8 HEX20 HEX27 TET4 TET10 "
+      "PRISM6 PRISM15 PRISM18 PYRAMID5 PYRAMID13 PYRAMID14");
+  return elemTypes;
+}
+
 void
 MooseMesh::allowRemoteElementRemoval(const bool allow_remote_element_removal)
 {

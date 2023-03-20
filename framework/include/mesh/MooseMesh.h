@@ -142,6 +142,9 @@ public:
   /// returns MooseMesh partitioning options so other classes can use it
   static MooseEnum partitioning();
 
+  /// returns MooseMesh element type options
+  static MooseEnum elemTypes();
+
   /**
    * Initialize the Mesh object.  Most of the time this will turn around
    * and call build_mesh so the child class can build the Mesh object.
