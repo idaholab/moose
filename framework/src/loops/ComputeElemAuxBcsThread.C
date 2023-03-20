@@ -181,7 +181,7 @@ ComputeElemAuxBcsThread<AuxKernelType>::printBoundaryExecutionInformation(
                         kernels[0]->name(),
                         [](const std::string & str_out, std::shared_ptr<AuxKernelType> kernel)
                         { return str_out + " " + kernel->name(); });
-    console << "[DBG] " << list_kernels << std::endl;
+    console << ConsoleUtils::formatString(list_kernels, "[DBG]") << std::endl;
   }
 }
 
