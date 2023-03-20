@@ -98,9 +98,9 @@ PODMapping::buildMapping()
   unsigned int global_rows = 0;
   if (parallel_storage->getStorage().size())
   {
-    local_rows = parallel_storage->getStorage()[0].size();
+    local_rows = parallel_storage->getStorage().begin()->second.size();
     global_rows = local_rows;
-    snapshot_size = parallel_storage->getStorage()[0][0][0]->size();
+    snapshot_size = parallel_storage->getStorage().begin()->second.begin()->second[0]->size();
   }
 
   comm().sum(global_rows);
@@ -126,12 +126,22 @@ PODMapping::buildMapping()
 
   std::cerr << local_rows << " " << local_beg << " " << local_end << std::endl;
   std::cerr << snapshot_size << std::endl;
-  for (const auto & col_i : make_range(local_rows))
+
+  unsigned int counter = 0;
+  if (local_rows)
   {
-      std::vector<PetscInt> rows(snapshot_size, col_i+local_beg);
+    for (const auto & row : parallel_storage->getStorage().begin()->second)
+    {
+      std::vector<PetscInt> rows(snapshot_size, (counter++) + local_beg);
       std::vector<PetscInt> columns = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-      MatSetValues(mat, 1, rows.data(), snapshot_size,columns.data(),
-                   parallel_storage->getStorage()[0][col_i][0]->get_values().data(), INSERT_VALUES);
+      MatSetValues(mat,
+                   1,
+                   rows.data(),
+                   snapshot_size,
+                   columns.data(),
+                   row.second[0]->get_values().data(),
+                   INSERT_VALUES);
+    }
   }
 
   MatAssemblyBegin(mat, MAT_FINAL_ASSEMBLY);
@@ -164,19 +174,19 @@ void
 PODMapping::map(const DenseVector<Real> & full_order_vector,
                 std::vector<Real> & reduced_order_vector) const
 {
-  _console << "Something smart" << std::endl;
+  std::cerr << "Something smart" << std::endl;
 }
 
 void
 PODMapping::map(const NumericVector<Number> & full_order_vector,
                 std::vector<Real> & reduced_order_vector) const
 {
-  _console << "Something smart" << std::endl;
+  std::cerr << "Something smart" << std::endl;
 }
 
 void
 PODMapping::inverse_map(const std::vector<Real> & reduced_order_vector,
                         std::vector<Real> & full_order_vector) const
 {
-  _console << "Something smart" << std::endl;
+  std::cerr << "Something smart" << std::endl;
 }

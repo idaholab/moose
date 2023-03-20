@@ -12,6 +12,7 @@
 #include "NonlinearSystemBase.h"
 #include "Sampler.h"
 #include "VectorPacker.h"
+#include "timpi/communicator.h"
 
 registerMooseObject("StochasticToolsApp", SerializedSolutionTransfer);
 
@@ -23,6 +24,10 @@ SerializedSolutionTransfer::validParams()
   params.addRequiredParam<std::string>("parallel_storage_name", "Something here.");
   params.addRequiredParam<std::string>("serialized_solution_reporter", "Something here.");
   params.addRequiredParam<std::vector<VariableName>>("variables", "Something.");
+  params.addParam<bool>(
+      "serialize_on_root",
+      false,
+      "If we only want to gather the solution fields on the root procesors of the subapps.");
   return params;
 }
 
@@ -30,8 +35,7 @@ SerializedSolutionTransfer::SerializedSolutionTransfer(const InputParameters & p
   : StochasticToolsTransfer(parameters),
     _variable_names(getParam<std::vector<VariableName>>("variables")),
     _serialized_solution_reporter(getParam<std::string>("serialized_solution_reporter")),
-    _num_global_entries(0),
-    _num_local_entries(0)
+    _serialize_on_root(getParam<bool>("serialize_on_root"))
 {
 }
 
@@ -78,9 +82,6 @@ SerializedSolutionTransfer::initializeFromMultiapp()
 void
 SerializedSolutionTransfer::executeFromMultiapp()
 {
-  unsigned int num_incoming_local_entries = 0;
-  unsigned int num_incoming_global_entries = 0;
-
   // Getting the reference to the solution vector in the subapp.
   FEProblemBase & app_problem = getFromMultiApp()->appProblemBase(_app_index);
 
@@ -115,34 +116,101 @@ SerializedSolutionTransfer::executeFromMultiapp()
     FEProblemBase & app_problem = getFromMultiApp()->appProblemBase(_app_index);
     NonlinearSystemBase & nl = app_problem.getNonlinearSystemBase();
 
-    // Looping over the variables to extract the corresponding solution values
-    // and copy them into the container of the trainer.
-    for (unsigned int var_i = 0; var_i < _variable_names.size(); ++var_i)
-    {
-      // Getting the corresponding DoF indices for the variable.
-      nl.setVariableGlobalDoFs(_variable_names[var_i]);
-      const std::vector<dof_id_type> & var_dofs = nl.getVariableGlobalDoFs();
-
-      for (unsigned int solution_i = 0; solution_i < solution_container->getContainer().size();
-           ++solution_i)
-      {
-        std::unique_ptr<DenseVector<Real>> serialized_solution =
-            std::make_unique<DenseVector<Real>>();
-        solution_container->getSolution(solution_i)
-            ->localize(serialized_solution->get_values(),
-                       getFromMultiApp()->isRootProcessor() ? nl.getVariableGlobalDoFs()
-                                                            : std::vector<dof_id_type>());
-
-        if (getFromMultiApp()->isRootProcessor())
-        {
-          _parallel_storage->addEntry(
-              _variable_names[var_i], _global_index, std::move(serialized_solution));
-        }
-      }
-    }
+    if (_serialize_on_root)
+      transferToRoot(nl, *solution_container);
+    else
+      transferInParallel(nl, *solution_container);
   }
 
   _parallel_storage->printEntries();
+}
+
+void
+SerializedSolutionTransfer::transferInParallel(NonlinearSystemBase & app_nl_system,
+                                               SolutionContainer & solution_container)
+{
+  dof_id_type new_local_entries_begin;
+  dof_id_type new_local_entries_end;
+  dof_id_type num_new_local_entries;
+
+  int local_size;
+  int local_rank;
+  const MPI_Comm & app_comm = getFromMultiApp()->comm();
+  MPI_Comm_size(app_comm, &local_size);
+  MPI_Comm_rank(app_comm, &local_rank);
+
+  dof_id_type num_entries = _sampler_ptr->getNumberOfLocalRows();
+  dof_id_type num_app_entries = num_entries;
+
+  if (local_size > 1)
+    MPI_Allreduce(&num_entries,
+                  &num_app_entries,
+                  1,
+                  TIMPI::StandardType<dof_id_type>(&num_entries),
+                  TIMPI::OpFunction<dof_id_type>::sum(),
+                  app_comm);
+
+  MooseUtils::linearPartitionItems(num_app_entries,
+                                   local_size,
+                                   local_rank,
+                                   num_new_local_entries,
+                                   new_local_entries_begin,
+                                   new_local_entries_end);
+
+  unsigned int local_app_index = _global_index - _sampler_ptr->getLocalRowBegin();
+
+  // Looping over the variables to extract the corresponding solution values
+  // and copy them into the container of the trainer.
+  for (unsigned int var_i = 0; var_i < _variable_names.size(); ++var_i)
+  {
+    // Getting the corresponding DoF indices for the variable.
+    app_nl_system.setVariableGlobalDoFs(_variable_names[var_i]);
+
+    for (unsigned int solution_i = 0; solution_i < solution_container.getContainer().size();
+         ++solution_i)
+    {
+      std::unique_ptr<DenseVector<Real>> serialized_solution =
+          std::make_unique<DenseVector<Real>>();
+      solution_container.getSolution(solution_i)
+          ->localize(serialized_solution->get_values(),
+                     (local_app_index >= new_local_entries_begin &&
+                      local_app_index < new_local_entries_end)
+                         ? app_nl_system.getVariableGlobalDoFs()
+                         : std::vector<dof_id_type>());
+
+      if (local_app_index >= new_local_entries_begin && local_app_index < new_local_entries_end)
+        _parallel_storage->addEntry(
+            _variable_names[var_i], _global_index, std::move(serialized_solution));
+    }
+  }
+}
+
+void
+SerializedSolutionTransfer::transferToRoot(NonlinearSystemBase & app_nl_system,
+                                           SolutionContainer & solution_container)
+{
+  // Looping over the variables to extract the corresponding solution values
+  // and copy them into the container of the trainer.
+  for (unsigned int var_i = 0; var_i < _variable_names.size(); ++var_i)
+  {
+    // Getting the corresponding DoF indices for the variable.
+    app_nl_system.setVariableGlobalDoFs(_variable_names[var_i]);
+
+    for (unsigned int solution_i = 0; solution_i < solution_container.getContainer().size();
+         ++solution_i)
+    {
+      std::unique_ptr<DenseVector<Real>> serialized_solution =
+          std::make_unique<DenseVector<Real>>();
+      solution_container.getSolution(solution_i)
+          ->localize(serialized_solution->get_values(),
+                     getFromMultiApp()->isRootProcessor() ? app_nl_system.getVariableGlobalDoFs()
+                                                          : std::vector<dof_id_type>());
+
+      if (getFromMultiApp()->isRootProcessor())
+        _parallel_storage->addEntry(
+            _variable_names[var_i], _global_index, std::move(serialized_solution));
+    }
+  }
 }
 
 void

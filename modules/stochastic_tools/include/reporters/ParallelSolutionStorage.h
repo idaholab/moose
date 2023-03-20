@@ -25,20 +25,41 @@ public:
                 unsigned int global_i,
                 std::unique_ptr<DenseVector<Real>> solution);
 
-  std::vector<std::unique_ptr<DenseVector<Real>>> & getStorage(unsigned int sample_i,
-                                                               unsigned int variable_i)
+  std::map<unsigned int, std::vector<std::unique_ptr<DenseVector<Real>>>> &
+  getStorage(const VariableName & variable)
   {
-    return _distributed_solutions[variable_i][sample_i];
+    mooseAssert(_distributed_solutions.find(variable) != _distributed_solutions.end(),
+                "We don't have the requested variable!");
+
+    return libmesh_map_find(_distributed_solutions, variable);
   }
 
-  std::vector<std::vector<std::unique_ptr<DenseVector<Real>>>> & getStorage(unsigned int variable_i)
-  {
-    return _distributed_solutions[variable_i];
-  }
-
-  std::vector<std::vector<std::vector<std::unique_ptr<DenseVector<Real>>>>> & getStorage()
+  std::map<VariableName, std::map<unsigned int, std::vector<std::unique_ptr<DenseVector<Real>>>>> &
+  getStorage()
   {
     return _distributed_solutions;
+  }
+
+  bool hasGlobalSample(unsigned int global_sample_i, const VariableName & variable)
+  {
+    if (_distributed_solutions.find(variable) == _distributed_solutions.end())
+      return false;
+
+    auto & variable_storage = libmesh_map_find(_distributed_solutions, variable);
+
+    return (variable_storage.find(global_sample_i) != variable_storage.end());
+  }
+
+  const std::vector<std::unique_ptr<DenseVector<Real>>> &
+  getGlobalSample(unsigned int global_sample_i, const VariableName & variable)
+  {
+    mooseAssert(_distributed_solutions.find(variable) != _distributed_solutions.end(),
+                "We don't have the requested variable!");
+    const auto & variable_storage = libmesh_map_find(_distributed_solutions, variable);
+    mooseAssert(variable_storage.find(global_sample_i) != variable_storage.end(),
+                "We don't have the requested global sample index! ");
+
+    return libmesh_map_find(variable_storage, global_sample_i);
   }
 
   void updateTimeStepNumbers();
@@ -48,8 +69,6 @@ public:
   void printEntries();
 
 protected:
-  std::vector<std::vector<std::vector<std::unique_ptr<DenseVector<Real>>>>> &
+  std::map<VariableName, std::map<unsigned int, std::vector<std::unique_ptr<DenseVector<Real>>>>> &
       _distributed_solutions;
-  std::vector<std::vector<unsigned int>> & _local_sample_ids;
-  std::vector<VariableName> & _variable_names;
 };

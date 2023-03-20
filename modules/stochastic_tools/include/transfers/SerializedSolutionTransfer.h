@@ -41,10 +41,6 @@ public:
   ///@}
 
 protected:
-  // bool hasLocalSolution(const std::vector<unsigned int> & solution_distribution,
-  //                       const unsigned int & app_index,
-  //                       const unsigned int & index);
-
   /// The input multiapp casted into a PODFullSolveMultiapp to get access to the
   /// specific pod attributes. Used in batch mode only and checking if the
   /// correct MultiApp type has been provided.
@@ -57,8 +53,9 @@ protected:
   unsigned int _num_true_global_apps;
 
 private:
-  unsigned int _local_solutions_begin;
-  unsigned int _local_solution_end;
-  unsigned int _num_global_entries;
-  unsigned int _num_local_entries;
+  void transferToRoot(NonlinearSystemBase & app_nl_system, SolutionContainer & solution_container);
+  void transferInParallel(NonlinearSystemBase & app_nl_system,
+                          SolutionContainer & solution_container);
+
+  const bool _serialize_on_root;
 };

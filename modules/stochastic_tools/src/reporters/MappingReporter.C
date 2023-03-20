@@ -96,20 +96,29 @@ void
 MappingReporter::execute()
 {
   _mapping->buildMapping();
+
+  const auto rank_config = _sampler->getRankConfig(true);
+
   if (_parallel_storage)
   {
     if (_sampler)
     {
-      for (const auto sample_i : make_range(_sampler->getNumberOfLocalRows()))
+      for (const auto sample_i : make_range(rank_config.num_local_sims))
       {
         std::vector<Real> data = _sampler->getNextLocalRow();
+
+        const unsigned int global_i = sample_i + _sampler->getLocalRowBegin();
         for (const auto var_i : index_range(_variable_names))
         {
-          const auto & full_vector = _parallel_storage->getStorage(sample_i, var_i);
-          if (full_vector.size() != 1)
-            mooseError("MappingReporter is only supported for simulations with one solution field "
-                       "per run!");
-          _mapping->map(*(full_vector[0]), (*_vector_real_values[var_i])[sample_i]);
+          if (_parallel_storage->hasGlobalSample(global_i, _variable_names[var_i]))
+          {
+            const auto & full_vector =
+                _parallel_storage->getGlobalSample(global_i, _variable_names[var_i]);
+            if (full_vector.size() != 1)
+              mooseError("MappingReporter is only supported for simulations with one solution "
+                         "field per run!");
+            _mapping->map(*(full_vector[0]), (*_vector_real_values[var_i])[sample_i]);
+          }
         }
       }
     }

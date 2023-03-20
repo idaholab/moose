@@ -12,10 +12,10 @@
 [Samplers]
   [sample]
     type = MonteCarlo
-    num_rows = 100
+    num_rows = 8
     distributions = 'S_dist'
     execute_on = initial
-    min_procs_per_row = 1
+    min_procs_per_row = 2
   []
 []
 
@@ -25,7 +25,7 @@
     input_files = sub.i
     sampler = sample
     mode = batch-restore
-    min_procs_per_app = 1
+    min_procs_per_app = 2
   []
 []
 
@@ -50,6 +50,7 @@
     sampler = sample
     serialized_solution_reporter = solution_storage
     variables = 'u'
+    serialize_on_root = true
   []
 []
 
@@ -63,6 +64,7 @@
     parallel_storage = parallel_storage
     mapping = pod_mapping
     variables = "u"
+    execute_on = FINAL
   []
 []
 
