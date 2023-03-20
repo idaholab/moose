@@ -208,15 +208,11 @@ ADJunctionOneToOne1PhaseUserObject::finalize()
     _has_neighbor[i] = has_neighbor;
   }
 
-  // Check direction compatibility
-  if (!THM::areParallelVectors(_directions[0], _directions[1]))
-    mooseError(_junction_name, ": The connected channels must be parallel at the junction.");
-
   const auto & W0_avg = _primitive_solutions[0];
   const auto & W1_avg = _primitive_solutions[1];
 
   // Multiplier for possibly different coordinate systems
-  const Real dir_mult = _directions[0] * _directions[1];
+  const Real dir_mult = -_normal[0] * _normal[1];
   auto W0_ref = W0_avg;
   auto W1_ref = W1_avg;
   W0_ref[THM3Eqn::PRIM_VAR_VELOCITY] *= dir_mult;

@@ -44,13 +44,4 @@
     check_input = true
     recover = false
   []
-
-  [err:not_parallel]
-    type = 'RunException'
-    input = 'junction_one_to_one_1phase.i'
-    cli_args = "
-      Components/right_channel/orientation='1 1 1'
-      Outputs/show=''"
-    expect_err = "The connected channels must be parallel at the junction"
-  []
 []
