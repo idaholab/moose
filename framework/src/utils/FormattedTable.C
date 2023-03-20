@@ -624,6 +624,7 @@ FormattedTable::getTermWidth(bool use_environment) const
   }
 
   // Something bad happened, make sure we have a sane value
+  // 132 seems good for medium sized screens, and is available as a GNOME preset
   if (w.ws_col == std::numeric_limits<unsigned short>::max())
     w.ws_col = 132;
 

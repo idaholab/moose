@@ -34,7 +34,7 @@
 
 [Problem]
   type = SlowProblem
-  seconds_to_sleep = 3
+  seconds_to_sleep = 4
   print_during_section = false
   nest_inside_section = false
 []
@@ -51,7 +51,7 @@
   [subapp]
     type = FullSolveMultiApp
     input_files = 'perf_graph_live_print.i'
-    cli_args = "MultiApps/active=''"
+    cli_args = "perf_graph_live_print.i"
   []
 []
 
