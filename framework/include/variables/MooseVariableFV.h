@@ -594,6 +594,8 @@ public:
     mooseError("We don't currently implement second derivatives for FV");
   }
 
+  virtual const FieldVariablePhiValue & phiLower() const override;
+
   unsigned int oldestSolutionStateRequested() const override final;
 
 protected:
@@ -722,6 +724,13 @@ MooseVariableFV<OutputType>::meshChanged()
   _prev_elem = nullptr;
   determineBoundaryToDirichletBCMap();
   MooseVariableField<OutputType>::meshChanged();
+}
+
+template <typename OutputType>
+const typename MooseVariableFV<OutputType>::FieldVariablePhiValue &
+MooseVariableFV<OutputType>::phiLower() const
+{
+  mooseError("Not defined for finite volume variables");
 }
 
 template <>

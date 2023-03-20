@@ -50,13 +50,17 @@ WeightedGapVelAux::WeightedGapVelAux(const InputParameters & parameters)
     _qp_gap_velocity(0),
     _qp_gap_velocity_nodal(0),
     _i(0),
-    _qp(0)
+    _qp(0),
+    _test_lower(_var.phiLower())
 {
   if (!_displaced)
     paramWarning(
         "use_displaced_mesh",
         "This auxiliary kernel typically requires the use of displaced meshes to compute the "
         "weighted gap velocity.");
+
+  if (!_var.isNodal())
+    paramError("variable", "This object only works with Lagrange variables");
 }
 
 Real
@@ -66,7 +70,7 @@ WeightedGapVelAux::computeValue()
   for (_qp = 0; _qp < _qrule_msm->n_points(); _qp++)
   {
     computeQpProperties();
-    for (_i = 0; _i < _test.size(); ++_i)
+    for (_i = 0; _i < _test_lower.size(); ++_i)
       computeQpIProperties();
   }
 
