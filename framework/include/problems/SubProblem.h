@@ -133,6 +133,7 @@ public:
    * Get a VectorTag from a TagID.
    */
   virtual const VectorTag & getVectorTag(const TagID tag_id) const;
+  std::vector<VectorTag> getVectorTags(const std::set<TagID> & tag_ids) const;
 
   /**
    * Get a TagID from a TagName.
@@ -327,9 +328,9 @@ public:
   virtual unsigned int nNonlinearIterations(unsigned int nl_sys_num = 0) const;
   virtual unsigned int nLinearIterations(unsigned int nl_sys_num = 0) const;
 
-  virtual void addResidual(THREAD_ID tid) = 0;
-  virtual void addResidualNeighbor(THREAD_ID tid) = 0;
-  virtual void addResidualLower(THREAD_ID tid) = 0;
+  virtual void addResidual(THREAD_ID tid, const std::vector<VectorTag> & tags) = 0;
+  virtual void addResidualNeighbor(THREAD_ID tid, const std::vector<VectorTag> & tags) = 0;
+  virtual void addResidualLower(THREAD_ID tid, const std::vector<VectorTag> & tags) = 0;
 
   virtual void cacheResidual(THREAD_ID tid) = 0;
   virtual void cacheResidualNeighbor(THREAD_ID tid) = 0;

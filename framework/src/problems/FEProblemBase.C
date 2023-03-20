@@ -1578,39 +1578,36 @@ FEProblemBase::prepareAssembly(THREAD_ID tid)
 }
 
 void
-FEProblemBase::addResidual(THREAD_ID tid)
+FEProblemBase::addResidual(THREAD_ID tid, const std::vector<VectorTag> & tags)
 {
-  _assembly[tid][_current_nl_sys->number()]->addResidual(getVectorTags(Moose::VECTOR_TAG_RESIDUAL));
+  _assembly[tid][_current_nl_sys->number()]->addResidual(tags);
 
   if (_displaced_problem)
-    _displaced_problem->addResidual(tid);
+    _displaced_problem->addResidual(tid, tags);
 }
 
 void
-FEProblemBase::addResidualNeighbor(THREAD_ID tid)
+FEProblemBase::addResidualNeighbor(THREAD_ID tid, const std::vector<VectorTag> & tags)
 {
-  _assembly[tid][_current_nl_sys->number()]->addResidualNeighbor(
-      getVectorTags(Moose::VECTOR_TAG_RESIDUAL));
+  _assembly[tid][_current_nl_sys->number()]->addResidualNeighbor(tags);
 
   if (_displaced_problem)
-    _displaced_problem->addResidualNeighbor(tid);
+    _displaced_problem->addResidualNeighbor(tid, tags);
 }
 
 void
-FEProblemBase::addResidualLower(THREAD_ID tid)
+FEProblemBase::addResidualLower(THREAD_ID tid, const std::vector<VectorTag> & tags)
 {
-  _assembly[tid][_current_nl_sys->number()]->addResidualLower(
-      getVectorTags(Moose::VECTOR_TAG_RESIDUAL));
+  _assembly[tid][_current_nl_sys->number()]->addResidualLower(tags);
 
   if (_displaced_problem)
-    _displaced_problem->addResidualLower(tid);
+    _displaced_problem->addResidualLower(tid, tags);
 }
 
 void
-FEProblemBase::addResidualScalar(THREAD_ID tid /* = 0*/)
+FEProblemBase::addResidualScalar(THREAD_ID tid, const std::vector<VectorTag> & tags)
 {
-  _assembly[tid][_current_nl_sys->number()]->addResidualScalar(
-      getVectorTags(Moose::VECTOR_TAG_RESIDUAL));
+  _assembly[tid][_current_nl_sys->number()]->addResidualScalar(tags);
 }
 
 void

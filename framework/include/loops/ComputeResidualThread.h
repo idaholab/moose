@@ -34,5 +34,5 @@ protected:
   void determineResidualObjects() override;
 
   /// the tags denoting the vectors we want our residual objects to fill
-  const std::set<TagID> & _tags;
+  const std::vector<VectorTag> _tags;
 };

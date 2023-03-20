@@ -26,7 +26,9 @@ ComputeResidualAndJacobianThread::ComputeResidualAndJacobianThread(
     FEProblemBase & fe_problem,
     const std::set<TagID> & vector_tags,
     const std::set<TagID> & matrix_tags)
-  : NonlinearThread(fe_problem), _vector_tags(vector_tags), _matrix_tags(matrix_tags)
+  : NonlinearThread(fe_problem),
+    _vector_tags(fe_problem.getVectorTags(vector_tags)),
+    _matrix_tags(matrix_tags)
 {
 }
 
@@ -48,22 +50,22 @@ ComputeResidualAndJacobianThread::compute(ResidualObject & ro)
 void
 ComputeResidualAndJacobianThread::accumulateLower()
 {
-  _fe_problem.addResidualLower(_tid);
+  _fe_problem.addResidualLower(_tid, _vector_tags);
   _fe_problem.addJacobianLowerD(_tid);
 }
 
 void
 ComputeResidualAndJacobianThread::accumulateNeighborLower()
 {
-  _fe_problem.addResidualNeighbor(_tid);
-  _fe_problem.addResidualLower(_tid);
+  _fe_problem.addResidualNeighbor(_tid, _vector_tags);
+  _fe_problem.addResidualLower(_tid, _vector_tags);
   _fe_problem.addJacobianNeighborLowerD(_tid);
 }
 
 void
 ComputeResidualAndJacobianThread::accumulateNeighbor()
 {
-  _fe_problem.addResidualNeighbor(_tid);
+  _fe_problem.addResidualNeighbor(_tid, _vector_tags);
   _fe_problem.addJacobianNeighbor(_tid);
 }
 

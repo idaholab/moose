@@ -1616,7 +1616,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
         }
       }
       if (have_scalar_contributions)
-        _fe_problem.addResidualScalar();
+        _fe_problem.addResidualScalar(0, _fe_problem.getVectorTags(tags));
     }
   }
   PARALLEL_CATCH;
