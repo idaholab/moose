@@ -710,7 +710,7 @@ public:
   /**
    * Whether or not this app is the ultimate master app. (ie level == 0)
    */
-  bool isUltimateMaster() { return !_multiapp_level; }
+  bool isUltimateMaster() const { return !_multiapp_level; }
 
   /**
    * Returns a pointer to the master mesh

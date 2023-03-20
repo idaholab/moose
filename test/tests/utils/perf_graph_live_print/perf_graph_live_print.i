@@ -34,7 +34,9 @@
 
 [Problem]
   type = SlowProblem
-  seconds_to_sleep = 8
+  seconds_to_sleep = 4
+  print_during_section = false
+  nest_inside_section = false
 []
 
 [Executioner]
@@ -44,6 +46,19 @@
   petsc_options_value = 'hypre boomeramg'
 []
 
+[MultiApps]
+  active = ''
+  [subapp]
+    type = FullSolveMultiApp
+    input_files = 'perf_graph_live_print.i'
+    cli_args = "perf_graph_live_print.i"
+  []
+[]
+
 [Outputs]
   perf_graph_live_time_limit = 1
+  [console]
+    type = Console
+    fit_mode = 80
+  []
 []

@@ -94,7 +94,7 @@ Checkpoint::outputStep(const ExecFlagType & type)
   // Check whether we should output, then do it.
   if (shouldOutput(type))
   {
-    TIME_SECTION("outputStep", 2, "Outputting Step");
+    TIME_SECTION("outputStep", 2, "Outputting Checkpoint");
     output(type);
   }
 }

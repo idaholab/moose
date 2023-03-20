@@ -4126,6 +4126,8 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
                                           const Moose::AuxGroup & group,
                                           TheWarehouse::Query & primary_query)
 {
+  TIME_SECTION("computeUserObjects", 1, "Computing User Objects");
+
   // Add group to query
   if (group == Moose::PRE_IC)
     primary_query.condition<AttribPreIC>(true);
@@ -4166,8 +4168,6 @@ FEProblemBase::computeUserObjectsInternal(const ExecFlagType & type,
 
     if (userobjs.empty() && genobjs.empty() && tgobjs.empty() && nodal.empty())
       continue;
-
-    TIME_SECTION("computeUserObjects", 1, "Computing User Objects");
 
     // Start the timer here since we have at least one active user object
     std::string compute_uo_tag = "computeUserObjects(" + Moose::stringify(type) + ")";
