@@ -66,6 +66,12 @@
                   'tagged and the auxiliary output variables do not match.'
   []
 
+  [call_residual]
+    type = RunApp
+    input = 'tag_residual_call.i'
+    requirement = 'The system shall be able to accumulate tagged vectors individually with multiple residual computations.'
+  []
+
   [systems]
     requirement = 'The system shall support filling in labeled or "tagged" vectors or matrices from:'
 
