@@ -66,7 +66,8 @@ protected:
    * @param aux_stress Auxiliary stress -- computed in this method
    * @param grad_disp Gradient of auxiliary displacement -- computed in this method
    * @param grad_disp Auxiliary strain (FGM) -- computed in this method
-   * @param aux_disp Auxiliary displacement (RZ) -- computed in this method
+   * @param aux_disp Auxiliary displacement -- computed in this method only for axisymmetric (RZ)
+   meshes
 
    */
   void computeAuxFields(RankTwoTensor & aux_stress,

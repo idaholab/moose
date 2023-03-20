@@ -77,7 +77,6 @@ where $\sigma$ is the stress, $u$ is the displacement, and $q$ is identical to t
 The treatment for functionally graded materials is currently limited to cases for which the gradient of the Young's modulus is in the direction of crack extension. For example, this could be used to represent a crack that is perpendicular to an interface between two materials, where the transition between the materials is assumed to be approximated by a smooth function such as $E(X_{1}) = E_{0} \exp{\beta X_{1}}$, where $X_{1}$ is the position in the direction of crack extension, $E_{0}$ is the stiffness of the material behind the crack tip, and $\beta$ is a parameter that governs the rate of the material property change. To specify the spatially varying properties, the user must define the `functionally_graded_youngs_modulus` and `functionally_graded_youngs_modulus_crack_dir_gradient` parameters, which reference scalar material properties that define the spatially varying Young's modulus and its gradient in the crack direction, respectively.  These material properties can be defined arbitrarily by the user, but it is up to the user to ensure that the gradient is indeed in the crack direction. Note that the user must still also specify `youngs_modulus` to define that moduls at the crack tip. See the "non-equilibrium" formulation in [!cite](Jeong2004functionallygraded) for details.
 
 
-!alert note
 The integration integral is automatically adapted to axisymmetric solids if an axisymmetric coordinate system is chosen. For example,
 the interaction integral for homogeneous materials can be defined as follows:
 \begin{equation}
@@ -85,7 +84,8 @@ the interaction integral for homogeneous materials can be defined as follows:
 \end{equation}
 where $R$ is the radial location of the crack, $r$ is a relative location with respect to the crack tip, $u^{(aux)}$ is the auxiliary displacement
 field, and $1$ refers to the local direction of crack advancement, which, in the case of a radial crack, it would coindide with the radial direction.
-See [!cite](NAHTA19932027) for details.
+See [!cite](NAHTA19932027) for details. Note that this form of the interaction integral can be integrated with other features such as its application to functionally graded materials.
+
 
 In the same way as for the $J$-integral, the pointwise value $I(s)$ at location $s$ is obtained from $\bar{I}(s)$ using:
 \begin{equation}
