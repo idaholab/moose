@@ -7,7 +7,6 @@
     exodiff = 'test_out.e'
     cli_args = "AuxVariables/inactive='variable_derivative_fv' AuxKernels/inactive='var_derivative_to_fv'"
     requirement = "The system shall be able to compute the second time derivative of a nonlinear variable."
-    ad_indexing_type = 'global'
   []
 
   [errors]
